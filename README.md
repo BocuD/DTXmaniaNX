@@ -1,3 +1,7 @@
+## What is this repository
+This is a fork of DTXManiaNX, with the goal of modernizing and refactoring the codebase, to eventually have the ability to add various features.
+Main focus right now is redoing the UI rendering code so we can support more advanced skinning.
+
 ## What is DTXManiaNX?
 DTXManiaNX is a program that replicates gameplay from Konami's music video game, Gitadora - Drummania/GuitarFreaks. This project was forked from the DTXManiaXG verK SVN repository. It processes DTX files (including older formats such as BMS/BME or GDA/G2D) and allows playing of custom created charts with a use of a game, keyboard or MIDI controller.
 
