@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
 using SharpDX;
-using SharpDX.Direct3D9;
 
-namespace DTXMania.Code.UI
+namespace DTXUIRenderer
 {
     public class UIGroup : UIDrawable
     {
@@ -34,7 +33,7 @@ namespace DTXMania.Code.UI
             children.Clear();
         }
         
-        public override void Draw(Device device, Matrix parentMatrix)
+        public override void Draw(Matrix parentMatrix)
         {
             if (!isVisible) return;
             
@@ -50,7 +49,7 @@ namespace DTXMania.Code.UI
                 if (element.isVisible)
                 {
                     //draw elements at their position relative to the group
-                    element.Draw(device, combinedMatrix);
+                    element.Draw(combinedMatrix);
                 }
             }
         }

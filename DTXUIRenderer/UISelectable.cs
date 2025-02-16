@@ -1,4 +1,4 @@
-﻿namespace DTXMania.Code.UI
+﻿namespace DTXUIRenderer
 {
     public interface IUISelectable
     {

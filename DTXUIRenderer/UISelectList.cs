@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
-using System.Diagnostics;
 
-namespace DTXMania.Code.UI
+namespace DTXUIRenderer
 {
     public class UISelectList : UIGroup
     {
@@ -36,7 +35,6 @@ namespace DTXMania.Code.UI
         {
             if (i < 0 || i >= selectableChildren.Count)
             {
-                Trace.TraceWarning("UISelectList: Tried to set selected index to invalid value.");
                 return;
             }
             

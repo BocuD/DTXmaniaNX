@@ -1,8 +1,7 @@
 ﻿using System;
 using SharpDX;
-using SharpDX.Direct3D9;
 
-namespace DTXMania.Code.UI
+namespace DTXUIRenderer
 {
     public abstract class UIDrawable : IDisposable
     {
@@ -30,7 +29,7 @@ namespace DTXMania.Code.UI
             localTransformMatrix = scaleMatrix * rotationMatrix * anchorMatrix * translationMatrix;
         }
         
-        public abstract void Draw(Device device, Matrix parentMatrix);
+        public abstract void Draw(Matrix parentMatrix);
         
         public abstract void Dispose();
     }
