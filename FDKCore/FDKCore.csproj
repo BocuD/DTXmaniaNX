@@ -1,0 +1,57 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <Compile Update="Code\01.Framework\Core\GameWindow.cs">
+        <SubType>Form</SubType>
+      </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Update="Code\01.Framework\Properties\Resources.resx">
+        <SubType>Designer</SubType>
+      </EmbeddedResource>
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="SharpDX" Version="4.2.0" />
+      <PackageReference Include="SharpDX.Direct3D9" Version="4.2.0" />
+      <PackageReference Include="SharpDX.DXGI" Version="4.2.0" />
+      <PackageReference Include="System.Drawing.Common" Version="9.0.2" />
+      <PackageReference Include="System.Management" Version="9.0.2" />
+      <PackageReference Include="System.Resources.Extensions" Version="9.0.2" />
+      <PackageReference Include="System.Security.Permissions" Version="9.0.2" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="Bass.Net">
+        <HintPath>..\Runtime\dll\Bass.Net.dll</HintPath>
+      </Reference>
+      <Reference Include="DirectShowLib-2005">
+        <HintPath>..\Runtime\dll\DirectShowLib-2005.dll</HintPath>
+      </Reference>
+      <Reference Include="SharpDX.DirectInput">
+        <HintPath>..\Runtime\dll\SharpDX.DirectInput.dll</HintPath>
+      </Reference>
+      <Reference Include="SharpDX.DirectSound">
+        <HintPath>..\Runtime\dll\SharpDX.DirectSound.dll</HintPath>
+      </Reference>
+      <Reference Include="SharpDX.Mathematics">
+        <HintPath>..\Runtime\dll\SharpDX.Mathematics.dll</HintPath>
+      </Reference>
+      <Reference Include="System.Windows.Forms">
+        <HintPath>..\..\..\..\..\..\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Windows.Forms\v4.0_4.0.0.0__b77a5c561934e089\System.Windows.Forms.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Libraries\libbjxa\libbjxa.csproj" />
+    </ItemGroup>
+
+</Project>
