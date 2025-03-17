@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Diagnostics;
-
-namespace FDK
+﻿namespace FDK
 {
 	/// <summary>
 	/// xa,oggデコード用の基底クラス

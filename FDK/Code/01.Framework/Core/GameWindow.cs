@@ -19,15 +19,13 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-using System;
+
 using System.ComponentModel;
 using System.Drawing;
-using System.IO;
 using System.Reflection;
 using System.Security.Permissions;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
-using System.Diagnostics;
 
 namespace SampleFramework
 {

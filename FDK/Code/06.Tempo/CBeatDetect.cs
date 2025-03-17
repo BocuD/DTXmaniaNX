@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Diagnostics;
-using System.Threading;
-using Un4seen.Bass;
+﻿using Un4seen.Bass;
 //using Un4seen.BassAsio;
 //using Un4seen.BassWasapi;
 //using Un4seen.Bass.AddOn.Mix;

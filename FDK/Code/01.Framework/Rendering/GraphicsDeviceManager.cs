@@ -19,18 +19,13 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-using System;
+
 using System.ComponentModel;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading;
-using System.Windows.Forms;
 using SharpDX;
 using SharpDX.Direct3D9;
-using SharpDX.DXGI;
-using System.Diagnostics;
-
 using Rectangle = System.Drawing.Rectangle;
 
 namespace SampleFramework

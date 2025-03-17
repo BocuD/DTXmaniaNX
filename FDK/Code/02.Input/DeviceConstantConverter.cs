@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-using WindowsKey = System.Windows.Forms.Keys;
+﻿using WindowsKey = System.Windows.Forms.Keys;
 using SlimDXKey = SlimDX.DirectInput.Key;
 using SharpDXKey = SharpDX.DirectInput.Key;
 

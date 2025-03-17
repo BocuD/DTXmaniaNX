@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Drawing.Imaging;
-using System.IO;
 using System.Diagnostics;
 using SharpDX;
 using SharpDX.Direct3D9;
@@ -11,7 +7,6 @@ using SharpDX.Direct3D9;
 using Rectangle = System.Drawing.Rectangle;
 using RectangleF = System.Drawing.RectangleF;
 using System.Runtime.InteropServices;
-using DirectShowLib.DES;
 
 namespace FDK
 {

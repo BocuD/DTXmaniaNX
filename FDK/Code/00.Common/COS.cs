@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Management;
-
-namespace FDK
+﻿namespace FDK
 {
 	public static class COS
 	{

@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Diagnostics;
 using Un4seen.Bass;
 using Un4seen.BassAsio;

@@ -1,12 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.IO;
-using System.Runtime.CompilerServices;
-using System.Threading;
-using SharpDX;
 using SharpDX.DirectSound;
 using SharpDX.Multimedia;
 using Un4seen.Bass;
@@ -14,7 +7,6 @@ using Un4seen.BassAsio;
 using Un4seen.BassWasapi;
 using Un4seen.Bass.AddOn.Mix;
 using Un4seen.Bass.AddOn.Fx;
-using DirectShowLib;
 
 namespace FDK
 {

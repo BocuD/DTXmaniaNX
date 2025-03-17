@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
+﻿
 
 // 注意：
 // SlimDX.DirectInput.Key は、DIK_ とは数値が異なる。

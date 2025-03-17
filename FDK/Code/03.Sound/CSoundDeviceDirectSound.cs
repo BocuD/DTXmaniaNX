@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Diagnostics;
-using System.IO;
-using System.Threading;
+﻿using System.Diagnostics;
 using Un4seen.Bass;
-using SharpDX;
 using SharpDX.DirectSound;
 
 namespace FDK

@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.IO;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.Threading;
 using SharpDX;
 using SharpDX.Direct3D9;
 using SharpDX.Multimedia;
