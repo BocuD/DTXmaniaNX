@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DTXCreator", "DTXCreator.csproj", "{C8F42963-E1F8-4692-BBFD-D065E286688A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FDK", "..\FDK\FDK.csproj", "{D537DA59-1599-4257-AA2C-D0EF4A350079}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C8F42963-E1F8-4692-BBFD-D065E286688A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C8F42963-E1F8-4692-BBFD-D065E286688A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C8F42963-E1F8-4692-BBFD-D065E286688A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C8F42963-E1F8-4692-BBFD-D065E286688A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D537DA59-1599-4257-AA2C-D0EF4A350079}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D537DA59-1599-4257-AA2C-D0EF4A350079}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D537DA59-1599-4257-AA2C-D0EF4A350079}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D537DA59-1599-4257-AA2C-D0EF4A350079}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

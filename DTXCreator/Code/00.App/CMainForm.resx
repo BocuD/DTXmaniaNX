@@ -112,7 +112,11 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=
+      
+      
+      
+      4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
@@ -123,16 +127,22 @@
   </data>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="splitContainerタブと譜面を分割.Location" type="System.Drawing.Point, System.Drawing">
-    <value>0, 49</value>
+    <value>0, 58</value>
+  </data>
+  <data name="splitContainerタブと譜面を分割.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 4, 4, 4</value>
   </data>
   <data name="buttonRESULTIMAGE参照.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Top, Right</value>
   </data>
   <data name="buttonRESULTIMAGE参照.Location" type="System.Drawing.Point, System.Drawing">
-    <value>247, 357</value>
+    <value>331, 467</value>
+  </data>
+  <data name="buttonRESULTIMAGE参照.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 4, 4, 4</value>
   </data>
   <data name="buttonRESULTIMAGE参照.Size" type="System.Drawing.Size, System.Drawing">
-    <value>25, 25</value>
+    <value>33, 33</value>
   </data>
   <assembly alias="mscorlib" name="mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="buttonRESULTIMAGE参照.TabIndex" type="System.Int32, mscorlib">
@@ -163,10 +173,13 @@
     <value>Top, Right</value>
   </data>
   <data name="buttonBACKGROUND参照.Location" type="System.Drawing.Point, System.Drawing">
-    <value>247, 330</value>
+    <value>331, 432</value>
+  </data>
+  <data name="buttonBACKGROUND参照.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 4, 4, 4</value>
   </data>
   <data name="buttonBACKGROUND参照.Size" type="System.Drawing.Size, System.Drawing">
-    <value>25, 25</value>
+    <value>33, 33</value>
   </data>
   <data name="buttonBACKGROUND参照.TabIndex" type="System.Int32, mscorlib">
     <value>23</value>
@@ -193,10 +206,13 @@
     <value>Top, Right</value>
   </data>
   <data name="buttonSTAGEFILE参照.Location" type="System.Drawing.Point, System.Drawing">
-    <value>247, 303</value>
+    <value>331, 396</value>
+  </data>
+  <data name="buttonSTAGEFILE参照.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 4, 4, 4</value>
   </data>
   <data name="buttonSTAGEFILE参照.Size" type="System.Drawing.Size, System.Drawing">
-    <value>25, 25</value>
+    <value>33, 33</value>
   </data>
   <data name="buttonSTAGEFILE参照.TabIndex" type="System.Int32, mscorlib">
     <value>21</value>
@@ -223,10 +239,13 @@
     <value>Top, Right</value>
   </data>
   <data name="buttonPREIMAGE参照.Location" type="System.Drawing.Point, System.Drawing">
-    <value>247, 275</value>
+    <value>331, 360</value>
+  </data>
+  <data name="buttonPREIMAGE参照.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 4, 4, 4</value>
   </data>
   <data name="buttonPREIMAGE参照.Size" type="System.Drawing.Size, System.Drawing">
-    <value>25, 25</value>
+    <value>33, 33</value>
   </data>
   <data name="buttonPREIMAGE参照.TabIndex" type="System.Int32, mscorlib">
     <value>19</value>
@@ -253,10 +272,13 @@
     <value>Top, Right</value>
   </data>
   <data name="buttonPREVIEW参照.Location" type="System.Drawing.Point, System.Drawing">
-    <value>247, 248</value>
+    <value>331, 324</value>
+  </data>
+  <data name="buttonPREVIEW参照.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 4, 4, 4</value>
   </data>
   <data name="buttonPREVIEW参照.Size" type="System.Drawing.Size, System.Drawing">
-    <value>25, 25</value>
+    <value>33, 33</value>
   </data>
   <data name="buttonPREVIEW参照.TabIndex" type="System.Int32, mscorlib">
     <value>17</value>
@@ -284,10 +306,13 @@
     <value>True</value>
   </data>
   <data name="labeRESULTIMAGE.Location" type="System.Drawing.Point, System.Drawing">
-    <value>11, 360</value>
+    <value>15, 471</value>
+  </data>
+  <data name="labeRESULTIMAGE.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 0, 4, 0</value>
   </data>
   <data name="labeRESULTIMAGE.Size" type="System.Drawing.Size, System.Drawing">
-    <value>77, 15</value>
+    <value>90, 18</value>
   </data>
   <data name="labeRESULTIMAGE.TabIndex" type="System.Int32, mscorlib">
     <value>27</value>
@@ -318,10 +343,13 @@ The image size is 204x269.</value>
     <value>True</value>
   </data>
   <data name="labelBACKGROUND.Location" type="System.Drawing.Point, System.Drawing">
-    <value>19, 333</value>
+    <value>25, 435</value>
+  </data>
+  <data name="labelBACKGROUND.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 0, 4, 0</value>
   </data>
   <data name="labelBACKGROUND.Size" type="System.Drawing.Size, System.Drawing">
-    <value>69, 15</value>
+    <value>82, 18</value>
   </data>
   <data name="labelBACKGROUND.TabIndex" type="System.Int32, mscorlib">
     <value>29</value>
@@ -352,10 +380,13 @@ The image size is 640x480.</value>
     <value>True</value>
   </data>
   <data name="labelSTAGEFILE.Location" type="System.Drawing.Point, System.Drawing">
-    <value>18, 306</value>
+    <value>24, 400</value>
+  </data>
+  <data name="labelSTAGEFILE.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 0, 4, 0</value>
   </data>
   <data name="labelSTAGEFILE.Size" type="System.Drawing.Size, System.Drawing">
-    <value>70, 15</value>
+    <value>81, 18</value>
   </data>
   <data name="labelSTAGEFILE.TabIndex" type="System.Int32, mscorlib">
     <value>28</value>
@@ -386,10 +417,13 @@ The image size is 640x480.</value>
     <value>True</value>
   </data>
   <data name="labelPREIMAGE.Location" type="System.Drawing.Point, System.Drawing">
-    <value>27, 278</value>
+    <value>36, 364</value>
+  </data>
+  <data name="labelPREIMAGE.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 0, 4, 0</value>
   </data>
   <data name="labelPREIMAGE.Size" type="System.Drawing.Size, System.Drawing">
-    <value>61, 15</value>
+    <value>71, 18</value>
   </data>
   <data name="labelPREIMAGE.TabIndex" type="System.Int32, mscorlib">
     <value>27</value>
@@ -420,10 +454,13 @@ The image size is 204x269.</value>
     <value>True</value>
   </data>
   <data name="labelPREVIEW.Location" type="System.Drawing.Point, System.Drawing">
-    <value>38, 251</value>
+    <value>51, 328</value>
+  </data>
+  <data name="labelPREVIEW.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 0, 4, 0</value>
   </data>
   <data name="labelPREVIEW.Size" type="System.Drawing.Size, System.Drawing">
-    <value>50, 15</value>
+    <value>60, 18</value>
   </data>
   <data name="labelPREVIEW.TabIndex" type="System.Int32, mscorlib">
     <value>26</value>
@@ -453,10 +490,13 @@ The image size is 204x269.</value>
     <value>Top, Left, Right</value>
   </data>
   <data name="textBoxRESULTIMAGE.Location" type="System.Drawing.Point, System.Drawing">
-    <value>94, 357</value>
+    <value>125, 467</value>
+  </data>
+  <data name="textBoxRESULTIMAGE.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 4, 4, 4</value>
   </data>
   <data name="textBoxRESULTIMAGE.Size" type="System.Drawing.Size, System.Drawing">
-    <value>147, 21</value>
+    <value>197, 24</value>
   </data>
   <data name="textBoxRESULTIMAGE.TabIndex" type="System.Int32, mscorlib">
     <value>24</value>
@@ -481,10 +521,13 @@ The image size is 204x269.</value>
     <value>Top, Left, Right</value>
   </data>
   <data name="textBoxBACKGROUND.Location" type="System.Drawing.Point, System.Drawing">
-    <value>94, 330</value>
+    <value>125, 432</value>
+  </data>
+  <data name="textBoxBACKGROUND.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 4, 4, 4</value>
   </data>
   <data name="textBoxBACKGROUND.Size" type="System.Drawing.Size, System.Drawing">
-    <value>147, 21</value>
+    <value>197, 24</value>
   </data>
   <data name="textBoxBACKGROUND.TabIndex" type="System.Int32, mscorlib">
     <value>22</value>
@@ -509,10 +552,13 @@ The image size is 640x480.</value>
     <value>Top, Left, Right</value>
   </data>
   <data name="textBoxSTAGEFILE.Location" type="System.Drawing.Point, System.Drawing">
-    <value>94, 303</value>
+    <value>125, 396</value>
+  </data>
+  <data name="textBoxSTAGEFILE.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 4, 4, 4</value>
   </data>
   <data name="textBoxSTAGEFILE.Size" type="System.Drawing.Size, System.Drawing">
-    <value>147, 21</value>
+    <value>197, 24</value>
   </data>
   <data name="textBoxSTAGEFILE.TabIndex" type="System.Int32, mscorlib">
     <value>20</value>
@@ -537,10 +583,13 @@ The image size is 204x269.</value>
     <value>Top, Left, Right</value>
   </data>
   <data name="textBoxPREIMAGE.Location" type="System.Drawing.Point, System.Drawing">
-    <value>94, 275</value>
+    <value>125, 360</value>
+  </data>
+  <data name="textBoxPREIMAGE.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 4, 4, 4</value>
   </data>
   <data name="textBoxPREIMAGE.Size" type="System.Drawing.Size, System.Drawing">
-    <value>147, 21</value>
+    <value>197, 24</value>
   </data>
   <data name="textBoxPREIMAGE.TabIndex" type="System.Int32, mscorlib">
     <value>18</value>
@@ -565,10 +614,13 @@ The image size is 204x269.</value>
     <value>Top, Left, Right</value>
   </data>
   <data name="textBoxPREVIEW.Location" type="System.Drawing.Point, System.Drawing">
-    <value>94, 248</value>
+    <value>125, 324</value>
+  </data>
+  <data name="textBoxPREVIEW.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 4, 4, 4</value>
   </data>
   <data name="textBoxPREVIEW.Size" type="System.Drawing.Size, System.Drawing">
-    <value>147, 21</value>
+    <value>197, 24</value>
   </data>
   <data name="textBoxPREVIEW.TabIndex" type="System.Int32, mscorlib">
     <value>16</value>
@@ -592,10 +644,13 @@ The image size is 204x269.</value>
     <value>Top, Left, Right</value>
   </data>
   <data name="textBoxパネル.Location" type="System.Drawing.Point, System.Drawing">
-    <value>94, 220</value>
+    <value>125, 288</value>
+  </data>
+  <data name="textBoxパネル.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 4, 4, 4</value>
   </data>
   <data name="textBoxパネル.Size" type="System.Drawing.Size, System.Drawing">
-    <value>178, 21</value>
+    <value>238, 24</value>
   </data>
   <data name="textBoxパネル.TabIndex" type="System.Int32, mscorlib">
     <value>14</value>
@@ -619,10 +674,13 @@ The image size is 204x269.</value>
     <value>True</value>
   </data>
   <data name="labelパネル.Location" type="System.Drawing.Point, System.Drawing">
-    <value>19, 223</value>
+    <value>25, 292</value>
+  </data>
+  <data name="labelパネル.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 0, 4, 0</value>
   </data>
   <data name="labelパネル.Size" type="System.Drawing.Size, System.Drawing">
-    <value>69, 15</value>
+    <value>82, 18</value>
   </data>
   <data name="labelパネル.TabIndex" type="System.Int32, mscorlib">
     <value>15</value>
@@ -652,10 +710,13 @@ The image size is 204x269.</value>
     <value>True</value>
   </data>
   <data name="labelBLEVEL.Location" type="System.Drawing.Point, System.Drawing">
-    <value>39, 180</value>
+    <value>52, 235</value>
+  </data>
+  <data name="labelBLEVEL.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 0, 4, 0</value>
   </data>
   <data name="labelBLEVEL.Size" type="System.Drawing.Size, System.Drawing">
-    <value>49, 15</value>
+    <value>61, 18</value>
   </data>
   <data name="labelBLEVEL.TabIndex" type="System.Int32, mscorlib">
     <value>13</value>
@@ -683,10 +744,13 @@ The image size is 204x269.</value>
     <value>17</value>
   </data>
   <data name="textBoxBLEVEL.Location" type="System.Drawing.Point, System.Drawing">
-    <value>94, 177</value>
+    <value>125, 231</value>
+  </data>
+  <data name="textBoxBLEVEL.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 4, 4, 4</value>
   </data>
   <data name="textBoxBLEVEL.Size" type="System.Drawing.Size, System.Drawing">
-    <value>36, 21</value>
+    <value>47, 24</value>
   </data>
   <data name="textBoxBLEVEL.TabIndex" type="System.Int32, mscorlib">
     <value>9</value>
@@ -714,10 +778,10 @@ The image size is 204x269.</value>
     <value>Top, Left, Right</value>
   </data>
   <data name="hScrollBarBLEVEL.Location" type="System.Drawing.Point, System.Drawing">
-    <value>133, 177</value>
+    <value>177, 231</value>
   </data>
   <data name="hScrollBarBLEVEL.Size" type="System.Drawing.Size, System.Drawing">
-    <value>139, 18</value>
+    <value>187, 18</value>
   </data>
   <data name="hScrollBarBLEVEL.TabIndex" type="System.Int32, mscorlib">
     <value>10</value>
@@ -742,10 +806,13 @@ The image size is 204x269.</value>
     <value>True</value>
   </data>
   <data name="labelGLEVEL.Location" type="System.Drawing.Point, System.Drawing">
-    <value>33, 157</value>
+    <value>44, 205</value>
+  </data>
+  <data name="labelGLEVEL.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 0, 4, 0</value>
   </data>
   <data name="labelGLEVEL.Size" type="System.Drawing.Size, System.Drawing">
-    <value>55, 15</value>
+    <value>67, 18</value>
   </data>
   <data name="labelGLEVEL.TabIndex" type="System.Int32, mscorlib">
     <value>12</value>
@@ -774,10 +841,13 @@ The image size is 204x269.</value>
     <value>20</value>
   </data>
   <data name="textBoxGLEVEL.Location" type="System.Drawing.Point, System.Drawing">
-    <value>94, 154</value>
+    <value>125, 201</value>
+  </data>
+  <data name="textBoxGLEVEL.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 4, 4, 4</value>
   </data>
   <data name="textBoxGLEVEL.Size" type="System.Drawing.Size, System.Drawing">
-    <value>36, 21</value>
+    <value>47, 24</value>
   </data>
   <data name="textBoxGLEVEL.TabIndex" type="System.Int32, mscorlib">
     <value>7</value>
@@ -805,10 +875,10 @@ The image size is 204x269.</value>
     <value>Top, Left, Right</value>
   </data>
   <data name="hScrollBarGLEVEL.Location" type="System.Drawing.Point, System.Drawing">
-    <value>133, 154</value>
+    <value>177, 201</value>
   </data>
   <data name="hScrollBarGLEVEL.Size" type="System.Drawing.Size, System.Drawing">
-    <value>139, 18</value>
+    <value>187, 18</value>
   </data>
   <data name="hScrollBarGLEVEL.TabIndex" type="System.Int32, mscorlib">
     <value>8</value>
@@ -833,10 +903,13 @@ The image size is 204x269.</value>
     <value>True</value>
   </data>
   <data name="labelDLEVEL.Location" type="System.Drawing.Point, System.Drawing">
-    <value>35, 134</value>
+    <value>47, 175</value>
+  </data>
+  <data name="labelDLEVEL.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 0, 4, 0</value>
   </data>
   <data name="labelDLEVEL.Size" type="System.Drawing.Size, System.Drawing">
-    <value>53, 15</value>
+    <value>64, 18</value>
   </data>
   <data name="labelDLEVEL.TabIndex" type="System.Int32, mscorlib">
     <value>11</value>
@@ -864,10 +937,13 @@ The image size is 204x269.</value>
     <value>23</value>
   </data>
   <data name="textBoxDLEVEL.Location" type="System.Drawing.Point, System.Drawing">
-    <value>94, 131</value>
+    <value>125, 171</value>
+  </data>
+  <data name="textBoxDLEVEL.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 4, 4, 4</value>
   </data>
   <data name="textBoxDLEVEL.Size" type="System.Drawing.Size, System.Drawing">
-    <value>36, 21</value>
+    <value>47, 24</value>
   </data>
   <data name="textBoxDLEVEL.TabIndex" type="System.Int32, mscorlib">
     <value>5</value>
@@ -895,10 +971,10 @@ The image size is 204x269.</value>
     <value>Top, Left, Right</value>
   </data>
   <data name="hScrollBarDLEVEL.Location" type="System.Drawing.Point, System.Drawing">
-    <value>133, 131</value>
+    <value>177, 171</value>
   </data>
   <data name="hScrollBarDLEVEL.Size" type="System.Drawing.Size, System.Drawing">
-    <value>139, 19</value>
+    <value>187, 19</value>
   </data>
   <data name="hScrollBarDLEVEL.TabIndex" type="System.Int32, mscorlib">
     <value>6</value>
@@ -923,10 +999,13 @@ The image size is 204x269.</value>
     <value>True</value>
   </data>
   <data name="labelBPM.Location" type="System.Drawing.Point, System.Drawing">
-    <value>54, 90</value>
+    <value>72, 118</value>
+  </data>
+  <data name="labelBPM.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 0, 4, 0</value>
   </data>
   <data name="labelBPM.Size" type="System.Drawing.Size, System.Drawing">
-    <value>34, 15</value>
+    <value>41, 18</value>
   </data>
   <data name="labelBPM.TabIndex" type="System.Int32, mscorlib">
     <value>8</value>
@@ -956,10 +1035,13 @@ The image size is 204x269.</value>
     <value>True</value>
   </data>
   <data name="labelコメント.Location" type="System.Drawing.Point, System.Drawing">
-    <value>27, 64</value>
+    <value>36, 84</value>
+  </data>
+  <data name="labelコメント.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 0, 4, 0</value>
   </data>
   <data name="labelコメント.Size" type="System.Drawing.Size, System.Drawing">
-    <value>61, 15</value>
+    <value>74, 18</value>
   </data>
   <data name="labelコメント.TabIndex" type="System.Int32, mscorlib">
     <value>7</value>
@@ -989,10 +1071,13 @@ The image size is 204x269.</value>
     <value>True</value>
   </data>
   <data name="label製作者.Location" type="System.Drawing.Point, System.Drawing">
-    <value>55, 37</value>
+    <value>73, 48</value>
+  </data>
+  <data name="label製作者.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 0, 4, 0</value>
   </data>
   <data name="label製作者.Size" type="System.Drawing.Size, System.Drawing">
-    <value>33, 15</value>
+    <value>41, 18</value>
   </data>
   <data name="label製作者.TabIndex" type="System.Int32, mscorlib">
     <value>6</value>
@@ -1022,10 +1107,13 @@ The image size is 204x269.</value>
     <value>True</value>
   </data>
   <data name="label曲名.Location" type="System.Drawing.Point, System.Drawing">
-    <value>58, 10</value>
+    <value>77, 13</value>
+  </data>
+  <data name="label曲名.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 0, 4, 0</value>
   </data>
   <data name="label曲名.Size" type="System.Drawing.Size, System.Drawing">
-    <value>30, 15</value>
+    <value>35, 18</value>
   </data>
   <data name="label曲名.TabIndex" type="System.Int32, mscorlib">
     <value>5</value>
@@ -1052,10 +1140,13 @@ The image size is 204x269.</value>
     <value>29</value>
   </data>
   <data name="numericUpDownBPM.Location" type="System.Drawing.Point, System.Drawing">
-    <value>94, 88</value>
+    <value>125, 115</value>
+  </data>
+  <data name="numericUpDownBPM.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>5, 5, 5, 5</value>
   </data>
   <data name="numericUpDownBPM.Size" type="System.Drawing.Size, System.Drawing">
-    <value>68, 21</value>
+    <value>91, 24</value>
   </data>
   <data name="numericUpDownBPM.TabIndex" type="System.Int32, mscorlib">
     <value>4</value>
@@ -1082,10 +1173,13 @@ The image size is 204x269.</value>
     <value>Top, Left, Right</value>
   </data>
   <data name="textBoxコメント.Location" type="System.Drawing.Point, System.Drawing">
-    <value>94, 61</value>
+    <value>125, 80</value>
+  </data>
+  <data name="textBoxコメント.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 4, 4, 4</value>
   </data>
   <data name="textBoxコメント.Size" type="System.Drawing.Size, System.Drawing">
-    <value>178, 21</value>
+    <value>238, 24</value>
   </data>
   <data name="textBoxコメント.TabIndex" type="System.Int32, mscorlib">
     <value>3</value>
@@ -1109,10 +1203,13 @@ The image size is 204x269.</value>
     <value>Top, Left, Right</value>
   </data>
   <data name="textBox製作者.Location" type="System.Drawing.Point, System.Drawing">
-    <value>94, 34</value>
+    <value>125, 44</value>
+  </data>
+  <data name="textBox製作者.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 4, 4, 4</value>
   </data>
   <data name="textBox製作者.Size" type="System.Drawing.Size, System.Drawing">
-    <value>178, 21</value>
+    <value>238, 24</value>
   </data>
   <data name="textBox製作者.TabIndex" type="System.Int32, mscorlib">
     <value>2</value>
@@ -1136,13 +1233,16 @@ The image size is 204x269.</value>
     <value>Top, Left, Right</value>
   </data>
   <data name="textBox曲名.Location" type="System.Drawing.Point, System.Drawing">
-    <value>94, 7</value>
+    <value>125, 9</value>
+  </data>
+  <data name="textBox曲名.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 4, 4, 4</value>
   </data>
   <data name="textBox曲名.MinimumSize" type="System.Drawing.Size, System.Drawing">
-    <value>10, 19</value>
+    <value>12, 19</value>
   </data>
   <data name="textBox曲名.Size" type="System.Drawing.Size, System.Drawing">
-    <value>178, 21</value>
+    <value>238, 24</value>
   </data>
   <data name="textBox曲名.TabIndex" type="System.Int32, mscorlib">
     <value>1</value>
@@ -1166,13 +1266,16 @@ The image size is 204x269.</value>
     <value>Microsoft Sans Serif, 9pt</value>
   </data>
   <data name="tabPage基本情報.Location" type="System.Drawing.Point, System.Drawing">
-    <value>4, 22</value>
+    <value>4, 26</value>
+  </data>
+  <data name="tabPage基本情報.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 4, 4, 4</value>
   </data>
   <data name="tabPage基本情報.Padding" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>3, 3, 3, 3</value>
+    <value>4, 4, 4, 4</value>
   </data>
   <data name="tabPage基本情報.Size" type="System.Drawing.Size, System.Drawing">
-    <value>278, 461</value>
+    <value>375, 620</value>
   </data>
   <data name="tabPage基本情報.TabIndex" type="System.Int32, mscorlib">
     <value>0</value>
@@ -1235,10 +1338,13 @@ The image size is 204x269.</value>
     <value>Microsoft Sans Serif, 9pt</value>
   </data>
   <data name="listViewWAVリスト.Location" type="System.Drawing.Point, System.Drawing">
-    <value>3, 3</value>
+    <value>4, 4</value>
+  </data>
+  <data name="listViewWAVリスト.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 4, 4, 4</value>
   </data>
   <data name="listViewWAVリスト.Size" type="System.Drawing.Size, System.Drawing">
-    <value>272, 430</value>
+    <value>365, 572</value>
   </data>
   <data name="listViewWAVリスト.TabIndex" type="System.Int32, mscorlib">
     <value>0</value>
@@ -1265,7 +1371,7 @@ The image size is 204x269.</value>
     <value>Magenta</value>
   </data>
   <data name="toolStripButtonWAVリスト上移動.Size" type="System.Drawing.Size, System.Drawing">
-    <value>23, 22</value>
+    <value>29, 24</value>
   </data>
   <data name="toolStripButtonWAVリスト上移動.Text" xml:space="preserve">
     <value>toolStripButton1</value>
@@ -1277,7 +1383,7 @@ The image size is 204x269.</value>
     <value>Magenta</value>
   </data>
   <data name="toolStripButtonWAVリスト下移動.Size" type="System.Drawing.Size, System.Drawing">
-    <value>23, 22</value>
+    <value>29, 24</value>
   </data>
   <data name="toolStripButtonWAVリスト下移動.Text" xml:space="preserve">
     <value>toolStripButton1</value>
@@ -1286,13 +1392,13 @@ The image size is 204x269.</value>
     <value>Move down</value>
   </data>
   <data name="toolStripSeparator13.Size" type="System.Drawing.Size, System.Drawing">
-    <value>6, 25</value>
+    <value>6, 27</value>
   </data>
   <data name="toolStripButtonWAVリストプレビュー再生開始.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
     <value>Magenta</value>
   </data>
   <data name="toolStripButtonWAVリストプレビュー再生開始.Size" type="System.Drawing.Size, System.Drawing">
-    <value>23, 22</value>
+    <value>29, 24</value>
   </data>
   <data name="toolStripButtonWAVリストプレビュー再生開始.Text" xml:space="preserve">
     <value>toolStripButton1</value>
@@ -1304,7 +1410,7 @@ The image size is 204x269.</value>
     <value>Magenta</value>
   </data>
   <data name="toolStripButtonWAVリストプレビュー再生停止.Size" type="System.Drawing.Size, System.Drawing">
-    <value>23, 22</value>
+    <value>29, 24</value>
   </data>
   <data name="toolStripButtonWAVリストプレビュー再生停止.Text" xml:space="preserve">
     <value>toolStripButton1</value>
@@ -1313,13 +1419,13 @@ The image size is 204x269.</value>
     <value>Stop sound</value>
   </data>
   <data name="toolStripSeparator14.Size" type="System.Drawing.Size, System.Drawing">
-    <value>6, 25</value>
+    <value>6, 27</value>
   </data>
   <data name="toolStripButtonWAVリストプレビュースイッチ.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
     <value>Magenta</value>
   </data>
   <data name="toolStripButtonWAVリストプレビュースイッチ.Size" type="System.Drawing.Size, System.Drawing">
-    <value>23, 22</value>
+    <value>29, 24</value>
   </data>
   <data name="toolStripButtonWAVリストプレビュースイッチ.Text" xml:space="preserve">
     <value>toolStripButton1</value>
@@ -1328,10 +1434,10 @@ The image size is 204x269.</value>
     <value>Play sound on click</value>
   </data>
   <data name="toolStripWAVツールバー.Location" type="System.Drawing.Point, System.Drawing">
-    <value>3, 433</value>
+    <value>4, 576</value>
   </data>
   <data name="toolStripWAVツールバー.Size" type="System.Drawing.Size, System.Drawing">
-    <value>272, 25</value>
+    <value>365, 27</value>
   </data>
   <data name="toolStripWAVツールバー.TabIndex" type="System.Int32, mscorlib">
     <value>0</value>
@@ -1353,13 +1459,16 @@ The image size is 204x269.</value>
     <value>1</value>
   </data>
   <data name="tabPageWAV.Location" type="System.Drawing.Point, System.Drawing">
-    <value>4, 22</value>
+    <value>4, 26</value>
+  </data>
+  <data name="tabPageWAV.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 4, 4, 4</value>
   </data>
   <data name="tabPageWAV.Padding" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>3, 3, 3, 3</value>
+    <value>4, 4, 4, 4</value>
   </data>
   <data name="tabPageWAV.Size" type="System.Drawing.Size, System.Drawing">
-    <value>278, 461</value>
+    <value>373, 607</value>
   </data>
   <data name="tabPageWAV.TabIndex" type="System.Int32, mscorlib">
     <value>1</value>
@@ -1410,10 +1519,13 @@ The image size is 204x269.</value>
     <value>Microsoft Sans Serif, 9pt</value>
   </data>
   <data name="listViewBMPリスト.Location" type="System.Drawing.Point, System.Drawing">
-    <value>3, 3</value>
+    <value>4, 4</value>
+  </data>
+  <data name="listViewBMPリスト.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 4, 4, 4</value>
   </data>
   <data name="listViewBMPリスト.Size" type="System.Drawing.Size, System.Drawing">
-    <value>272, 430</value>
+    <value>365, 572</value>
   </data>
   <data name="listViewBMPリスト.TabIndex" type="System.Int32, mscorlib">
     <value>1</value>
@@ -1440,7 +1552,7 @@ The image size is 204x269.</value>
     <value>Magenta</value>
   </data>
   <data name="toolStripButtonBMPリスト上移動.Size" type="System.Drawing.Size, System.Drawing">
-    <value>23, 22</value>
+    <value>29, 24</value>
   </data>
   <data name="toolStripButtonBMPリスト上移動.Text" xml:space="preserve">
     <value>toolStripButton1</value>
@@ -1449,16 +1561,16 @@ The image size is 204x269.</value>
     <value>Magenta</value>
   </data>
   <data name="toolStripButtonBMPリスト下移動.Size" type="System.Drawing.Size, System.Drawing">
-    <value>23, 22</value>
+    <value>29, 24</value>
   </data>
   <data name="toolStripButtonBMPリスト下移動.Text" xml:space="preserve">
     <value>toolStripButton1</value>
   </data>
   <data name="toolStripBMPツールバー.Location" type="System.Drawing.Point, System.Drawing">
-    <value>3, 433</value>
+    <value>4, 576</value>
   </data>
   <data name="toolStripBMPツールバー.Size" type="System.Drawing.Size, System.Drawing">
-    <value>272, 25</value>
+    <value>365, 27</value>
   </data>
   <data name="toolStripBMPツールバー.TabIndex" type="System.Int32, mscorlib">
     <value>2</value>
@@ -1480,13 +1592,16 @@ The image size is 204x269.</value>
     <value>1</value>
   </data>
   <data name="tabPageBMP.Location" type="System.Drawing.Point, System.Drawing">
-    <value>4, 22</value>
+    <value>4, 26</value>
+  </data>
+  <data name="tabPageBMP.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 4, 4, 4</value>
   </data>
   <data name="tabPageBMP.Padding" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>3, 3, 3, 3</value>
+    <value>4, 4, 4, 4</value>
   </data>
   <data name="tabPageBMP.Size" type="System.Drawing.Size, System.Drawing">
-    <value>278, 461</value>
+    <value>373, 607</value>
   </data>
   <data name="tabPageBMP.TabIndex" type="System.Int32, mscorlib">
     <value>2</value>
@@ -1531,10 +1646,13 @@ The image size is 204x269.</value>
     <value>Microsoft Sans Serif, 9pt</value>
   </data>
   <data name="listViewAVIリスト.Location" type="System.Drawing.Point, System.Drawing">
-    <value>3, 3</value>
+    <value>4, 4</value>
+  </data>
+  <data name="listViewAVIリスト.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 4, 4, 4</value>
   </data>
   <data name="listViewAVIリスト.Size" type="System.Drawing.Size, System.Drawing">
-    <value>272, 430</value>
+    <value>365, 572</value>
   </data>
   <data name="listViewAVIリスト.TabIndex" type="System.Int32, mscorlib">
     <value>1</value>
@@ -1561,7 +1679,7 @@ The image size is 204x269.</value>
     <value>Magenta</value>
   </data>
   <data name="toolStripButtonAVIリスト上移動.Size" type="System.Drawing.Size, System.Drawing">
-    <value>23, 22</value>
+    <value>29, 24</value>
   </data>
   <data name="toolStripButtonAVIリスト上移動.Text" xml:space="preserve">
     <value>toolStripButton1</value>
@@ -1573,7 +1691,7 @@ The image size is 204x269.</value>
     <value>Magenta</value>
   </data>
   <data name="toolStripButtonAVIリスト下移動.Size" type="System.Drawing.Size, System.Drawing">
-    <value>23, 22</value>
+    <value>29, 24</value>
   </data>
   <data name="toolStripButtonAVIリスト下移動.Text" xml:space="preserve">
     <value>toolStripButton1</value>
@@ -1582,10 +1700,10 @@ The image size is 204x269.</value>
     <value>Move down</value>
   </data>
   <data name="toolStripAVIツールバー.Location" type="System.Drawing.Point, System.Drawing">
-    <value>3, 433</value>
+    <value>4, 576</value>
   </data>
   <data name="toolStripAVIツールバー.Size" type="System.Drawing.Size, System.Drawing">
-    <value>272, 25</value>
+    <value>365, 27</value>
   </data>
   <data name="toolStripAVIツールバー.TabIndex" type="System.Int32, mscorlib">
     <value>0</value>
@@ -1606,13 +1724,16 @@ The image size is 204x269.</value>
     <value>1</value>
   </data>
   <data name="tabPageAVI.Location" type="System.Drawing.Point, System.Drawing">
-    <value>4, 22</value>
+    <value>4, 26</value>
+  </data>
+  <data name="tabPageAVI.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 4, 4, 4</value>
   </data>
   <data name="tabPageAVI.Padding" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>3, 3, 3, 3</value>
+    <value>4, 4, 4, 4</value>
   </data>
   <data name="tabPageAVI.Size" type="System.Drawing.Size, System.Drawing">
-    <value>278, 461</value>
+    <value>373, 607</value>
   </data>
   <data name="tabPageAVI.TabIndex" type="System.Int32, mscorlib">
     <value>3</value>
@@ -1636,10 +1757,10 @@ The image size is 204x269.</value>
     <value>Fill</value>
   </data>
   <data name="textBox自由入力欄.Location" type="System.Drawing.Point, System.Drawing">
-    <value>3, 3</value>
+    <value>4, 4</value>
   </data>
   <data name="textBox自由入力欄.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>10, 11, 10, 11</value>
+    <value>13, 14, 13, 14</value>
   </data>
   <data name="textBox自由入力欄.Multiline" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -1648,7 +1769,7 @@ The image size is 204x269.</value>
     <value>Both</value>
   </data>
   <data name="textBox自由入力欄.Size" type="System.Drawing.Size, System.Drawing">
-    <value>272, 455</value>
+    <value>365, 599</value>
   </data>
   <data name="textBox自由入力欄.TabIndex" type="System.Int32, mscorlib">
     <value>0</value>
@@ -1666,13 +1787,16 @@ The image size is 204x269.</value>
     <value>0</value>
   </data>
   <data name="tabPage自由入力.Location" type="System.Drawing.Point, System.Drawing">
-    <value>4, 22</value>
+    <value>4, 26</value>
+  </data>
+  <data name="tabPage自由入力.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 4, 4, 4</value>
   </data>
   <data name="tabPage自由入力.Padding" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>3, 3, 3, 3</value>
+    <value>4, 4, 4, 4</value>
   </data>
   <data name="tabPage自由入力.Size" type="System.Drawing.Size, System.Drawing">
-    <value>278, 461</value>
+    <value>373, 607</value>
   </data>
   <data name="tabPage自由入力.TabIndex" type="System.Int32, mscorlib">
     <value>4</value>
@@ -1698,8 +1822,11 @@ The image size is 204x269.</value>
   <data name="tabControl情報パネル.Location" type="System.Drawing.Point, System.Drawing">
     <value>0, 0</value>
   </data>
+  <data name="tabControl情報パネル.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 4, 4, 4</value>
+  </data>
   <data name="tabControl情報パネル.Size" type="System.Drawing.Size, System.Drawing">
-    <value>286, 487</value>
+    <value>383, 650</value>
   </data>
   <data name="tabControl情報パネル.TabIndex" type="System.Int32, mscorlib">
     <value>0</value>
@@ -1738,7 +1865,7 @@ The image size is 204x269.</value>
     <value>0, 0, 0, 0</value>
   </data>
   <data name="pictureBox譜面パネル.Size" type="System.Drawing.Size, System.Drawing">
-    <value>184, 468</value>
+    <value>245, 625</value>
   </data>
   <data name="pictureBox譜面パネル.TabIndex" type="System.Int32, mscorlib">
     <value>1</value>
@@ -1759,10 +1886,10 @@ The image size is 204x269.</value>
     <value>Bottom</value>
   </data>
   <data name="hScrollBar譜面用水平スクロールバー.Location" type="System.Drawing.Point, System.Drawing">
-    <value>0, 470</value>
+    <value>0, 633</value>
   </data>
   <data name="hScrollBar譜面用水平スクロールバー.Size" type="System.Drawing.Size, System.Drawing">
-    <value>424, 17</value>
+    <value>570, 17</value>
   </data>
   <data name="hScrollBar譜面用水平スクロールバー.TabIndex" type="System.Int32, mscorlib">
     <value>0</value>
@@ -1795,10 +1922,13 @@ The image size is 204x269.</value>
     <value>1</value>
   </data>
   <data name="splitContainerタブと譜面を分割.Size" type="System.Drawing.Size, System.Drawing">
-    <value>714, 487</value>
+    <value>958, 650</value>
   </data>
   <data name="splitContainerタブと譜面を分割.SplitterDistance" type="System.Int32, mscorlib">
-    <value>286</value>
+    <value>383</value>
+  </data>
+  <data name="splitContainerタブと譜面を分割.SplitterWidth" type="System.Int32, mscorlib">
+    <value>5</value>
   </data>
   <data name="splitContainerタブと譜面を分割.TabIndex" type="System.Int32, mscorlib">
     <value>4</value>
@@ -1819,10 +1949,13 @@ The image size is 204x269.</value>
     <value>0, 493</value>
   </metadata>
   <data name="statusStripステータスバー.Location" type="System.Drawing.Point, System.Drawing">
-    <value>0, 536</value>
+    <value>0, 708</value>
+  </data>
+  <data name="statusStripステータスバー.Padding" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>1, 0, 19, 0</value>
   </data>
   <data name="statusStripステータスバー.Size" type="System.Drawing.Size, System.Drawing">
-    <value>731, 22</value>
+    <value>975, 22</value>
   </data>
   <data name="statusStripステータスバー.TabIndex" type="System.Int32, mscorlib">
     <value>0</value>
@@ -1849,7 +1982,7 @@ The image size is 204x269.</value>
     <value>Ctrl+N</value>
   </data>
   <data name="toolStripMenuItem新規.Size" type="System.Drawing.Size, System.Drawing">
-    <value>155, 22</value>
+    <value>190, 26</value>
   </data>
   <data name="toolStripMenuItem新規.Text" xml:space="preserve">
     <value>&amp;New</value>
@@ -1858,7 +1991,7 @@ The image size is 204x269.</value>
     <value>Ctrl+O</value>
   </data>
   <data name="toolStripMenuItem開く.Size" type="System.Drawing.Size, System.Drawing">
-    <value>155, 22</value>
+    <value>190, 26</value>
   </data>
   <data name="toolStripMenuItem開く.Text" xml:space="preserve">
     <value>&amp;Open...</value>
@@ -1867,28 +2000,28 @@ The image size is 204x269.</value>
     <value>Ctrl+S</value>
   </data>
   <data name="toolStripMenuItem上書き保存.Size" type="System.Drawing.Size, System.Drawing">
-    <value>155, 22</value>
+    <value>190, 26</value>
   </data>
   <data name="toolStripMenuItem上書き保存.Text" xml:space="preserve">
     <value>&amp;Save</value>
   </data>
   <data name="toolStripMenuItem名前を付けて保存.Size" type="System.Drawing.Size, System.Drawing">
-    <value>155, 22</value>
+    <value>190, 26</value>
   </data>
   <data name="toolStripMenuItem名前を付けて保存.Text" xml:space="preserve">
     <value>Save &amp;As ...</value>
   </data>
   <data name="toolStripSeparator1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>152, 6</value>
+    <value>187, 6</value>
   </data>
   <data name="toolStripMenuItem終了.Size" type="System.Drawing.Size, System.Drawing">
-    <value>155, 22</value>
+    <value>190, 26</value>
   </data>
   <data name="toolStripMenuItem終了.Text" xml:space="preserve">
     <value>E&amp;xit</value>
   </data>
   <data name="toolStripMenuItemファイル.Size" type="System.Drawing.Size, System.Drawing">
-    <value>37, 20</value>
+    <value>46, 24</value>
   </data>
   <data name="toolStripMenuItemファイル.Text" xml:space="preserve">
     <value>&amp;File</value>
@@ -1897,7 +2030,7 @@ The image size is 204x269.</value>
     <value>Ctrl+Z</value>
   </data>
   <data name="toolStripMenuItemアンドゥ.Size" type="System.Drawing.Size, System.Drawing">
-    <value>208, 22</value>
+    <value>260, 26</value>
   </data>
   <data name="toolStripMenuItemアンドゥ.Text" xml:space="preserve">
     <value>&amp;Undo</value>
@@ -1906,13 +2039,13 @@ The image size is 204x269.</value>
     <value>Ctrl+Y</value>
   </data>
   <data name="toolStripMenuItemリドゥ.Size" type="System.Drawing.Size, System.Drawing">
-    <value>208, 22</value>
+    <value>260, 26</value>
   </data>
   <data name="toolStripMenuItemリドゥ.Text" xml:space="preserve">
     <value>&amp;Redo</value>
   </data>
   <data name="toolStripSeparator2.Size" type="System.Drawing.Size, System.Drawing">
-    <value>205, 6</value>
+    <value>257, 6</value>
   </data>
   <data name="toolStripMenuItem切り取り.Enabled" type="System.Boolean, mscorlib">
     <value>False</value>
@@ -1921,7 +2054,7 @@ The image size is 204x269.</value>
     <value>Ctrl+X</value>
   </data>
   <data name="toolStripMenuItem切り取り.Size" type="System.Drawing.Size, System.Drawing">
-    <value>208, 22</value>
+    <value>260, 26</value>
   </data>
   <data name="toolStripMenuItem切り取り.Text" xml:space="preserve">
     <value>Cu&amp;t</value>
@@ -1933,7 +2066,7 @@ The image size is 204x269.</value>
     <value>Ctrl+C</value>
   </data>
   <data name="toolStripMenuItemコピー.Size" type="System.Drawing.Size, System.Drawing">
-    <value>208, 22</value>
+    <value>260, 26</value>
   </data>
   <data name="toolStripMenuItemコピー.Text" xml:space="preserve">
     <value>&amp;Copy</value>
@@ -1945,7 +2078,7 @@ The image size is 204x269.</value>
     <value>Ctrl+V</value>
   </data>
   <data name="toolStripMenuItem貼り付け.Size" type="System.Drawing.Size, System.Drawing">
-    <value>208, 22</value>
+    <value>260, 26</value>
   </data>
   <data name="toolStripMenuItem貼り付け.Text" xml:space="preserve">
     <value>&amp;Paste</value>
@@ -1957,34 +2090,34 @@ The image size is 204x269.</value>
     <value>Del</value>
   </data>
   <data name="toolStripMenuItem削除.Size" type="System.Drawing.Size, System.Drawing">
-    <value>208, 22</value>
+    <value>260, 26</value>
   </data>
   <data name="toolStripMenuItem削除.Text" xml:space="preserve">
     <value>&amp;Delete</value>
   </data>
   <data name="toolStripSeparator3.Size" type="System.Drawing.Size, System.Drawing">
-    <value>205, 6</value>
+    <value>257, 6</value>
   </data>
   <data name="toolStripMenuItemすべて選択.ShortcutKeys" type="System.Windows.Forms.Keys, System.Windows.Forms">
     <value>Ctrl+A</value>
   </data>
   <data name="toolStripMenuItemすべて選択.Size" type="System.Drawing.Size, System.Drawing">
-    <value>208, 22</value>
+    <value>260, 26</value>
   </data>
   <data name="toolStripMenuItemすべて選択.Text" xml:space="preserve">
     <value>Select &amp;All</value>
   </data>
   <data name="toolStripSeparator4.Size" type="System.Drawing.Size, System.Drawing">
-    <value>205, 6</value>
+    <value>257, 6</value>
   </data>
   <data name="toolStripMenuItem選択モード.Size" type="System.Drawing.Size, System.Drawing">
-    <value>208, 22</value>
+    <value>260, 26</value>
   </data>
   <data name="toolStripMenuItem選択モード.Text" xml:space="preserve">
     <value>&amp;Select mode</value>
   </data>
   <data name="toolStripMenuItem編集モード.Size" type="System.Drawing.Size, System.Drawing">
-    <value>208, 22</value>
+    <value>260, 26</value>
   </data>
   <data name="toolStripMenuItem編集モード.Text" xml:space="preserve">
     <value>&amp;Edit mode</value>
@@ -1993,19 +2126,19 @@ The image size is 204x269.</value>
     <value>Ctrl+Space</value>
   </data>
   <data name="toolStripMenuItemモード切替.Size" type="System.Drawing.Size, System.Drawing">
-    <value>208, 22</value>
+    <value>260, 26</value>
   </data>
   <data name="toolStripMenuItemモード切替.Text" xml:space="preserve">
     <value>Switch &amp;Mode</value>
   </data>
   <data name="toolStripSeparator5.Size" type="System.Drawing.Size, System.Drawing">
-    <value>205, 6</value>
+    <value>257, 6</value>
   </data>
   <data name="toolStripMenuItem検索.ShortcutKeys" type="System.Windows.Forms.Keys, System.Windows.Forms">
     <value>Ctrl+F</value>
   </data>
   <data name="toolStripMenuItem検索.Size" type="System.Drawing.Size, System.Drawing">
-    <value>208, 22</value>
+    <value>260, 26</value>
   </data>
   <data name="toolStripMenuItem検索.Text" xml:space="preserve">
     <value>&amp;Find...</value>
@@ -2014,85 +2147,85 @@ The image size is 204x269.</value>
     <value>Ctrl+H</value>
   </data>
   <data name="toolStripMenuItem置換.Size" type="System.Drawing.Size, System.Drawing">
-    <value>208, 22</value>
+    <value>260, 26</value>
   </data>
   <data name="toolStripMenuItem置換.Text" xml:space="preserve">
     <value>Replace(&amp;Q)</value>
   </data>
   <data name="toolStripMenuItem編集.Size" type="System.Drawing.Size, System.Drawing">
-    <value>39, 20</value>
+    <value>49, 24</value>
   </data>
   <data name="toolStripMenuItem編集.Text" xml:space="preserve">
     <value>&amp;Edit</value>
   </data>
   <data name="toolStripMenuItemチップパレット.Size" type="System.Drawing.Size, System.Drawing">
-    <value>146, 22</value>
+    <value>182, 26</value>
   </data>
   <data name="toolStripMenuItemチップパレット.Text" xml:space="preserve">
     <value>Chip &amp;palette</value>
   </data>
   <data name="toolStripMenuItemガイド間隔4分.Size" type="System.Drawing.Size, System.Drawing">
-    <value>132, 22</value>
+    <value>165, 26</value>
   </data>
   <data name="toolStripMenuItemガイド間隔4分.Text" xml:space="preserve">
     <value>1/&amp;4</value>
   </data>
   <data name="toolStripMenuItemガイド間隔8分.Size" type="System.Drawing.Size, System.Drawing">
-    <value>132, 22</value>
+    <value>165, 26</value>
   </data>
   <data name="toolStripMenuItemガイド間隔8分.Text" xml:space="preserve">
     <value>1/&amp;8</value>
   </data>
   <data name="toolStripMenuItemガイド間隔12分.Size" type="System.Drawing.Size, System.Drawing">
-    <value>132, 22</value>
+    <value>165, 26</value>
   </data>
   <data name="toolStripMenuItemガイド間隔12分.Text" xml:space="preserve">
     <value>1/1&amp;2</value>
   </data>
   <data name="toolStripMenuItemガイド間隔16分.Size" type="System.Drawing.Size, System.Drawing">
-    <value>132, 22</value>
+    <value>165, 26</value>
   </data>
   <data name="toolStripMenuItemガイド間隔16分.Text" xml:space="preserve">
     <value>1/1&amp;6</value>
   </data>
   <data name="toolStripMenuItemガイド間隔24分.Size" type="System.Drawing.Size, System.Drawing">
-    <value>132, 22</value>
+    <value>165, 26</value>
   </data>
   <data name="toolStripMenuItemガイド間隔24分.Text" xml:space="preserve">
     <value>1/24</value>
   </data>
   <data name="toolStripMenuItemガイド間隔32分.Size" type="System.Drawing.Size, System.Drawing">
-    <value>132, 22</value>
+    <value>165, 26</value>
   </data>
   <data name="toolStripMenuItemガイド間隔32分.Text" xml:space="preserve">
     <value>1/&amp;32</value>
   </data>
   <data name="toolStripMenuItemガイド間隔48分.Size" type="System.Drawing.Size, System.Drawing">
-    <value>132, 22</value>
+    <value>165, 26</value>
   </data>
   <data name="toolStripMenuItemガイド間隔48分.Text" xml:space="preserve">
     <value>1/48</value>
   </data>
   <data name="toolStripMenuItemガイド間隔64分.Size" type="System.Drawing.Size, System.Drawing">
-    <value>132, 22</value>
+    <value>165, 26</value>
   </data>
   <data name="toolStripMenuItemガイド間隔64分.Text" xml:space="preserve">
     <value>1/64</value>
   </data>
   <data name="toolStripMenuItemガイド間隔フリー.Size" type="System.Drawing.Size, System.Drawing">
-    <value>132, 22</value>
+    <value>165, 26</value>
   </data>
   <data name="toolStripMenuItemガイド間隔フリー.Text" xml:space="preserve">
     <value>&amp;Free</value>
   </data>
   <data name="toolStripSeparator6.Size" type="System.Drawing.Size, System.Drawing">
-    <value>129, 6</value>
+    <value>162, 6</value>
   </data>
   <data name="toolStripMenuItemガイド間隔拡大.ShortcutKeys" type="System.Windows.Forms.Keys, System.Windows.Forms">
     <value>F3</value>
   </data>
   <data name="toolStripMenuItemガイド間隔拡大.Size" type="System.Drawing.Size, System.Drawing">
-    <value>132, 22</value>
+    <value>165, 26</value>
   </data>
   <data name="toolStripMenuItemガイド間隔拡大.Text" xml:space="preserve">
     <value>&amp;Wide</value>
@@ -2101,19 +2234,19 @@ The image size is 204x269.</value>
     <value>F4</value>
   </data>
   <data name="toolStripMenuItemガイド間隔縮小.Size" type="System.Drawing.Size, System.Drawing">
-    <value>132, 22</value>
+    <value>165, 26</value>
   </data>
   <data name="toolStripMenuItemガイド間隔縮小.Text" xml:space="preserve">
     <value>&amp;Narrow</value>
   </data>
   <data name="toolStripMenuItemガイド間隔.Size" type="System.Drawing.Size, System.Drawing">
-    <value>146, 22</value>
+    <value>182, 26</value>
   </data>
   <data name="toolStripMenuItemガイド間隔.Text" xml:space="preserve">
     <value>&amp;Guide margin</value>
   </data>
   <data name="toolStripMenuItem表示.Size" type="System.Drawing.Size, System.Drawing">
-    <value>44, 20</value>
+    <value>55, 24</value>
   </data>
   <data name="toolStripMenuItem表示.Text" xml:space="preserve">
     <value>&amp;View</value>
@@ -2122,7 +2255,7 @@ The image size is 204x269.</value>
     <value>F5</value>
   </data>
   <data name="toolStripMenuItem先頭から再生.Size" type="System.Drawing.Size, System.Drawing">
-    <value>219, 22</value>
+    <value>272, 26</value>
   </data>
   <data name="toolStripMenuItem先頭から再生.Text" xml:space="preserve">
     <value>Play from &amp;top</value>
@@ -2131,13 +2264,13 @@ The image size is 204x269.</value>
     <value>F6</value>
   </data>
   <data name="toolStripMenuItem現在位置から再生.Size" type="System.Drawing.Size, System.Drawing">
-    <value>219, 22</value>
+    <value>272, 26</value>
   </data>
   <data name="toolStripMenuItem現在位置から再生.Text" xml:space="preserve">
     <value>&amp;Play from current part</value>
   </data>
   <data name="toolStripMenuItem現在位置からBGMのみ再生.Size" type="System.Drawing.Size, System.Drawing">
-    <value>219, 22</value>
+    <value>272, 26</value>
   </data>
   <data name="toolStripMenuItem現在位置からBGMのみ再生.Text" xml:space="preserve">
     <value>Play &amp;BGM from current part</value>
@@ -2146,25 +2279,25 @@ The image size is 204x269.</value>
     <value>F7</value>
   </data>
   <data name="toolStripMenuItem再生停止.Size" type="System.Drawing.Size, System.Drawing">
-    <value>219, 22</value>
+    <value>272, 26</value>
   </data>
   <data name="toolStripMenuItem再生停止.Text" xml:space="preserve">
     <value>&amp;Stop</value>
   </data>
   <data name="toolStripMenuItem再生.Size" type="System.Drawing.Size, System.Drawing">
-    <value>41, 20</value>
+    <value>50, 24</value>
   </data>
   <data name="toolStripMenuItem再生.Text" xml:space="preserve">
     <value>&amp;Play</value>
   </data>
   <data name="toolStripMenuItemオプション.Size" type="System.Drawing.Size, System.Drawing">
-    <value>111, 22</value>
+    <value>138, 26</value>
   </data>
   <data name="toolStripMenuItemオプション.Text" xml:space="preserve">
     <value>&amp;Option</value>
   </data>
   <data name="toolStripMenuItemツール.Size" type="System.Drawing.Size, System.Drawing">
-    <value>41, 20</value>
+    <value>52, 24</value>
   </data>
   <data name="toolStripMenuItemツール.Text" xml:space="preserve">
     <value>&amp;Tool</value>
@@ -2173,19 +2306,19 @@ The image size is 204x269.</value>
     <value>F1</value>
   </data>
   <data name="toolStripMenuItemDTXCreaterマニュアル.Size" type="System.Drawing.Size, System.Drawing">
-    <value>195, 22</value>
+    <value>245, 26</value>
   </data>
   <data name="toolStripMenuItemDTXCreaterマニュアル.Text" xml:space="preserve">
     <value>DTXCreator &amp;Manual</value>
   </data>
   <data name="toolStripMenuItemバージョン.Size" type="System.Drawing.Size, System.Drawing">
-    <value>195, 22</value>
+    <value>245, 26</value>
   </data>
   <data name="toolStripMenuItemバージョン.Text" xml:space="preserve">
     <value>&amp;Version</value>
   </data>
   <data name="toolStripMenuItemヘルプ.Size" type="System.Drawing.Size, System.Drawing">
-    <value>44, 20</value>
+    <value>55, 24</value>
   </data>
   <data name="toolStripMenuItemヘルプ.Text" xml:space="preserve">
     <value>&amp;Help</value>
@@ -2193,8 +2326,11 @@ The image size is 204x269.</value>
   <data name="menuStripメニューバー.Location" type="System.Drawing.Point, System.Drawing">
     <value>0, 0</value>
   </data>
+  <data name="menuStripメニューバー.Padding" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>8, 3, 0, 3</value>
+  </data>
   <data name="menuStripメニューバー.Size" type="System.Drawing.Size, System.Drawing">
-    <value>731, 24</value>
+    <value>975, 30</value>
   </data>
   <data name="menuStripメニューバー.TabIndex" type="System.Int32, mscorlib">
     <value>1</value>
@@ -2221,7 +2357,7 @@ The image size is 204x269.</value>
     <value>Magenta</value>
   </data>
   <data name="toolStripButton新規作成.Size" type="System.Drawing.Size, System.Drawing">
-    <value>23, 22</value>
+    <value>29, 25</value>
   </data>
   <data name="toolStripButton新規作成.Text" xml:space="preserve">
     <value>toolStripButton1</value>
@@ -2233,7 +2369,7 @@ The image size is 204x269.</value>
     <value>Magenta</value>
   </data>
   <data name="toolStripButton開く.Size" type="System.Drawing.Size, System.Drawing">
-    <value>23, 22</value>
+    <value>29, 25</value>
   </data>
   <data name="toolStripButton開く.Text" xml:space="preserve">
     <value>toolStripButton1</value>
@@ -2246,7 +2382,7 @@ The image size is 204x269.</value>
     <value>Magenta</value>
   </data>
   <data name="toolStripButton上書き保存.Size" type="System.Drawing.Size, System.Drawing">
-    <value>23, 22</value>
+    <value>29, 25</value>
   </data>
   <data name="toolStripButton上書き保存.Text" xml:space="preserve">
     <value>toolStripButton1</value>
@@ -2255,7 +2391,7 @@ The image size is 204x269.</value>
     <value>Save to file</value>
   </data>
   <data name="toolStripSeparator7.Size" type="System.Drawing.Size, System.Drawing">
-    <value>6, 25</value>
+    <value>6, 28</value>
   </data>
   <data name="toolStripButton切り取り.Enabled" type="System.Boolean, mscorlib">
     <value>False</value>
@@ -2264,7 +2400,7 @@ The image size is 204x269.</value>
     <value>Magenta</value>
   </data>
   <data name="toolStripButton切り取り.Size" type="System.Drawing.Size, System.Drawing">
-    <value>23, 22</value>
+    <value>29, 25</value>
   </data>
   <data name="toolStripButton切り取り.Text" xml:space="preserve">
     <value>toolStripButton1</value>
@@ -2280,7 +2416,7 @@ The image size is 204x269.</value>
     <value>Magenta</value>
   </data>
   <data name="toolStripButtonコピー.Size" type="System.Drawing.Size, System.Drawing">
-    <value>23, 22</value>
+    <value>29, 25</value>
   </data>
   <data name="toolStripButtonコピー.Text" xml:space="preserve">
     <value>toolStripButton1</value>
@@ -2296,7 +2432,7 @@ The image size is 204x269.</value>
     <value>Magenta</value>
   </data>
   <data name="toolStripButton貼り付け.Size" type="System.Drawing.Size, System.Drawing">
-    <value>23, 22</value>
+    <value>29, 25</value>
   </data>
   <data name="toolStripButton貼り付け.Text" xml:space="preserve">
     <value>toolStripButton1</value>
@@ -2312,7 +2448,7 @@ The image size is 204x269.</value>
     <value>Magenta</value>
   </data>
   <data name="toolStripButton削除.Size" type="System.Drawing.Size, System.Drawing">
-    <value>23, 22</value>
+    <value>29, 25</value>
   </data>
   <data name="toolStripButton削除.Text" xml:space="preserve">
     <value>toolStripButton1</value>
@@ -2322,7 +2458,7 @@ The image size is 204x269.</value>
 </value>
   </data>
   <data name="toolStripSeparator8.Size" type="System.Drawing.Size, System.Drawing">
-    <value>6, 25</value>
+    <value>6, 28</value>
   </data>
   <data name="toolStripButtonアンドゥ.Enabled" type="System.Boolean, mscorlib">
     <value>False</value>
@@ -2331,7 +2467,7 @@ The image size is 204x269.</value>
     <value>Magenta</value>
   </data>
   <data name="toolStripButtonアンドゥ.Size" type="System.Drawing.Size, System.Drawing">
-    <value>23, 22</value>
+    <value>29, 25</value>
   </data>
   <data name="toolStripButtonアンドゥ.Text" xml:space="preserve">
     <value>toolStripButton1</value>
@@ -2346,7 +2482,7 @@ The image size is 204x269.</value>
     <value>Magenta</value>
   </data>
   <data name="toolStripButtonリドゥ.Size" type="System.Drawing.Size, System.Drawing">
-    <value>23, 22</value>
+    <value>29, 25</value>
   </data>
   <data name="toolStripButtonリドゥ.Text" xml:space="preserve">
     <value>toolStripButton1</value>
@@ -2356,13 +2492,13 @@ The image size is 204x269.</value>
 </value>
   </data>
   <data name="toolStripSeparator9.Size" type="System.Drawing.Size, System.Drawing">
-    <value>6, 25</value>
+    <value>6, 28</value>
   </data>
   <data name="toolStripButtonチップパレット.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
     <value>Magenta</value>
   </data>
   <data name="toolStripButtonチップパレット.Size" type="System.Drawing.Size, System.Drawing">
-    <value>23, 22</value>
+    <value>29, 25</value>
   </data>
   <data name="toolStripButtonチップパレット.Text" xml:space="preserve">
     <value>toolStripButton1</value>
@@ -2371,7 +2507,7 @@ The image size is 204x269.</value>
     <value>Chip palette</value>
   </data>
   <data name="toolStripSeparator10.Size" type="System.Drawing.Size, System.Drawing">
-    <value>6, 25</value>
+    <value>6, 28</value>
   </data>
   <data name="toolStripComboBox譜面拡大率.IntegralHeight" type="System.Boolean, mscorlib">
     <value>False</value>
@@ -2407,7 +2543,7 @@ The image size is 204x269.</value>
     <value>x10</value>
   </data>
   <data name="toolStripComboBox譜面拡大率.Size" type="System.Drawing.Size, System.Drawing">
-    <value>75, 25</value>
+    <value>99, 28</value>
   </data>
   <data name="toolStripComboBox譜面拡大率.ToolTipText" xml:space="preserve">
     <value>Vertical sizing</value>
@@ -2443,7 +2579,7 @@ The image size is 204x269.</value>
     <value>20</value>
   </data>
   <data name="toolStripComboBoxガイド間隔.Size" type="System.Drawing.Size, System.Drawing">
-    <value>75, 25</value>
+    <value>99, 28</value>
   </data>
   <data name="toolStripComboBoxガイド間隔.ToolTipText" xml:space="preserve">
     <value>Guide margin</value>
@@ -2452,7 +2588,7 @@ The image size is 204x269.</value>
     <value>Magenta</value>
   </data>
   <data name="toolStripButton選択モード.Size" type="System.Drawing.Size, System.Drawing">
-    <value>23, 22</value>
+    <value>29, 25</value>
   </data>
   <data name="toolStripButton選択モード.Text" xml:space="preserve">
     <value>toolStripButton1</value>
@@ -2465,7 +2601,7 @@ The image size is 204x269.</value>
     <value>Magenta</value>
   </data>
   <data name="toolStripButton編集モード.Size" type="System.Drawing.Size, System.Drawing">
-    <value>23, 22</value>
+    <value>29, 25</value>
   </data>
   <data name="toolStripButton編集モード.Text" xml:space="preserve">
     <value>toolStripButton1</value>
@@ -2474,13 +2610,13 @@ The image size is 204x269.</value>
     <value>Edit mode</value>
   </data>
   <data name="toolStripSeparator11.Size" type="System.Drawing.Size, System.Drawing">
-    <value>6, 25</value>
+    <value>6, 28</value>
   </data>
   <data name="toolStripButton先頭から再生.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
     <value>Magenta</value>
   </data>
   <data name="toolStripButton先頭から再生.Size" type="System.Drawing.Size, System.Drawing">
-    <value>23, 22</value>
+    <value>29, 25</value>
   </data>
   <data name="toolStripButton先頭から再生.Text" xml:space="preserve">
     <value>toolStripButton1</value>
@@ -2492,7 +2628,7 @@ The image size is 204x269.</value>
     <value>Magenta</value>
   </data>
   <data name="toolStripButton現在位置から再生.Size" type="System.Drawing.Size, System.Drawing">
-    <value>23, 22</value>
+    <value>29, 25</value>
   </data>
   <data name="toolStripButton現在位置から再生.Text" xml:space="preserve">
     <value>toolStripButton1</value>
@@ -2504,7 +2640,7 @@ The image size is 204x269.</value>
     <value>Magenta</value>
   </data>
   <data name="toolStripButton現在位置からBGMのみ再生.Size" type="System.Drawing.Size, System.Drawing">
-    <value>23, 22</value>
+    <value>29, 25</value>
   </data>
   <data name="toolStripButton現在位置からBGMのみ再生.Text" xml:space="preserve">
     <value>toolStripButton1</value>
@@ -2516,7 +2652,7 @@ The image size is 204x269.</value>
     <value>Magenta</value>
   </data>
   <data name="toolStripButton再生停止.Size" type="System.Drawing.Size, System.Drawing">
-    <value>23, 22</value>
+    <value>29, 25</value>
   </data>
   <data name="toolStripButton再生停止.Text" xml:space="preserve">
     <value>toolStripButton1</value>
@@ -2561,19 +2697,19 @@ The image size is 204x269.</value>
     <value>x0.5</value>
   </data>
   <data name="toolStripComboBox演奏速度.Size" type="System.Drawing.Size, System.Drawing">
-    <value>75, 25</value>
+    <value>75, 28</value>
   </data>
   <data name="toolStripComboBox演奏速度.ToolTipText" xml:space="preserve">
     <value>Play speed (#DTXVPLAYSPEED)</value>
   </data>
   <data name="toolStripSeparator12.Size" type="System.Drawing.Size, System.Drawing">
-    <value>6, 25</value>
+    <value>6, 28</value>
   </data>
   <data name="toolStripツールバー.Location" type="System.Drawing.Point, System.Drawing">
-    <value>0, 24</value>
+    <value>0, 30</value>
   </data>
   <data name="toolStripツールバー.Size" type="System.Drawing.Size, System.Drawing">
-    <value>731, 25</value>
+    <value>975, 28</value>
   </data>
   <data name="toolStripツールバー.TabIndex" type="System.Int32, mscorlib">
     <value>2</value>
@@ -2597,10 +2733,10 @@ The image size is 204x269.</value>
     <value>Right</value>
   </data>
   <data name="vScrollBar譜面用垂直スクロールバー.Location" type="System.Drawing.Point, System.Drawing">
-    <value>714, 49</value>
+    <value>958, 58</value>
   </data>
   <data name="vScrollBar譜面用垂直スクロールバー.Size" type="System.Drawing.Size, System.Drawing">
-    <value>17, 487</value>
+    <value>17, 650</value>
   </data>
   <data name="vScrollBar譜面用垂直スクロールバー.TabIndex" type="System.Int32, mscorlib">
     <value>3</value>
@@ -2621,76 +2757,76 @@ The image size is 204x269.</value>
     <value>203, 39</value>
   </metadata>
   <data name="toolStripMenuItem選択チップの切り取り.Size" type="System.Drawing.Size, System.Drawing">
-    <value>192, 22</value>
+    <value>233, 26</value>
   </data>
   <data name="toolStripMenuItem選択チップの切り取り.Text" xml:space="preserve">
     <value>Cu&amp;t selected chip(s)</value>
   </data>
   <data name="toolStripMenuItem選択チップのコピー.Size" type="System.Drawing.Size, System.Drawing">
-    <value>192, 22</value>
+    <value>233, 26</value>
   </data>
   <data name="toolStripMenuItem選択チップのコピー.Text" xml:space="preserve">
     <value>&amp;Copy selected chip(s)</value>
   </data>
   <data name="toolStripMenuItem選択チップの貼り付け.Size" type="System.Drawing.Size, System.Drawing">
-    <value>192, 22</value>
+    <value>233, 26</value>
   </data>
   <data name="toolStripMenuItem選択チップの貼り付け.Text" xml:space="preserve">
     <value>&amp;Paste chip(s)</value>
   </data>
   <data name="toolStripMenuItem選択チップの削除.Size" type="System.Drawing.Size, System.Drawing">
-    <value>192, 22</value>
+    <value>233, 26</value>
   </data>
   <data name="toolStripMenuItem選択チップの削除.Text" xml:space="preserve">
     <value>&amp;Delete selected chip(s)</value>
   </data>
   <data name="toolStripSeparator15.Size" type="System.Drawing.Size, System.Drawing">
-    <value>189, 6</value>
+    <value>230, 6</value>
   </data>
   <data name="toolStripMenuItemすべてのチップの選択.Size" type="System.Drawing.Size, System.Drawing">
-    <value>192, 22</value>
+    <value>233, 26</value>
   </data>
   <data name="toolStripMenuItemすべてのチップの選択.Text" xml:space="preserve">
     <value>Select &amp;All</value>
   </data>
   <data name="toolStripMenuItemレーン内のすべてのチップの選択.Size" type="System.Drawing.Size, System.Drawing">
-    <value>192, 22</value>
+    <value>233, 26</value>
   </data>
   <data name="toolStripMenuItemレーン内のすべてのチップの選択.Text" xml:space="preserve">
     <value>Select all in the &amp;lane []</value>
   </data>
   <data name="toolStripMenuItem小節内のすべてのチップの選択.Size" type="System.Drawing.Size, System.Drawing">
-    <value>192, 22</value>
+    <value>233, 26</value>
   </data>
   <data name="toolStripMenuItem小節内のすべてのチップの選択.Text" xml:space="preserve">
     <value>Select all in the pa&amp;rt []</value>
   </data>
   <data name="toolStripSeparator16.Size" type="System.Drawing.Size, System.Drawing">
-    <value>189, 6</value>
+    <value>230, 6</value>
   </data>
   <data name="toolStripMenuItem小節長変更.Size" type="System.Drawing.Size, System.Drawing">
-    <value>192, 22</value>
+    <value>233, 26</value>
   </data>
   <data name="toolStripMenuItem小節長変更.Text" xml:space="preserve">
     <value>Change part length(&amp;B)</value>
   </data>
   <data name="toolStripSeparator17.Size" type="System.Drawing.Size, System.Drawing">
-    <value>189, 6</value>
+    <value>230, 6</value>
   </data>
   <data name="toolStripMenuItem小節の挿入.Size" type="System.Drawing.Size, System.Drawing">
-    <value>192, 22</value>
+    <value>233, 26</value>
   </data>
   <data name="toolStripMenuItem小節の挿入.Text" xml:space="preserve">
     <value>&amp;Insert part</value>
   </data>
   <data name="toolStripMenuItem小節の削除.Size" type="System.Drawing.Size, System.Drawing">
-    <value>192, 22</value>
+    <value>233, 26</value>
   </data>
   <data name="toolStripMenuItem小節の削除.Text" xml:space="preserve">
     <value>D&amp;elete part</value>
   </data>
   <data name="contextMenuStrip譜面右メニュー.Size" type="System.Drawing.Size, System.Drawing">
-    <value>193, 242</value>
+    <value>234, 282</value>
   </data>
   <data name="&gt;&gt;contextMenuStrip譜面右メニュー.Name" xml:space="preserve">
     <value>contextMenuStrip譜面右メニュー</value>
@@ -2702,10 +2838,10 @@ The image size is 204x269.</value>
     <value>True</value>
   </metadata>
   <data name="$this.AutoScaleDimensions" type="System.Drawing.SizeF, System.Drawing">
-    <value>6, 13</value>
+    <value>8, 17</value>
   </data>
   <data name="$this.ClientSize" type="System.Drawing.Size, System.Drawing">
-    <value>731, 558</value>
+    <value>975, 730</value>
   </data>
   <data name="$this.Font" type="System.Drawing.Font, System.Drawing">
     <value>Microsoft Sans Serif, 8.5pt</value>
@@ -3135,8 +3271,11 @@ The image size is 204x269.</value>
         AACH/wAAh/8AAI//AAA=
 </value>
   </data>
+  <data name="$this.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 4, 4, 4</value>
+  </data>
   <data name="$this.MinimumSize" type="System.Drawing.Size, System.Drawing">
-    <value>16, 39</value>
+    <value>18, 47</value>
   </data>
   <data name="$this.Text" xml:space="preserve">
     <value>DTXCreator</value>

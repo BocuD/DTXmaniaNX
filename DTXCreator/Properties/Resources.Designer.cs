@@ -71,6 +71,16 @@ namespace DTXCreator.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap chippallete {
+            get {
+                object obj = ResourceManager.GetObject("chippallete", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to NX 1.4.2.
         /// </summary>
         internal static string DTXC_VERSION {
@@ -441,16 +451,6 @@ namespace DTXCreator.Properties {
         internal static System.Drawing.Bitmap スピーカー {
             get {
                 object obj = ResourceManager.GetObject("スピーカー", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap チップパレット {
-            get {
-                object obj = ResourceManager.GetObject("ﾁｯﾌﾟﾊﾟﾚｯﾄ", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

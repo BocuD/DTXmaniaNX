@@ -3099,9 +3099,9 @@ namespace DTXCreator
 				{
 					n値 = 0;
 				}
-				else if( n値 > 100 )
+				else if( n値 > 999 )
 				{
-					n値 = 100;
+					n値 = 999;
 				}
 
 
@@ -3221,9 +3221,9 @@ namespace DTXCreator
 				{
 					n値 = 0;
 				}
-				else if( n値 > 100 )
+				else if( n値 > 999 )
 				{
-					n値 = 100;
+					n値 = 999;
 				}
 
 
@@ -3342,9 +3342,9 @@ namespace DTXCreator
 				{
 					n値 = 0;
 				}
-				else if( n値 > 100 )
+				else if( n値 > 999 )
 				{
-					n値 = 100;
+					n値 = 999;
 				}
 
 
