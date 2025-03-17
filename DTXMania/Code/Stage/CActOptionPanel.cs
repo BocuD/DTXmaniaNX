@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Drawing;
+﻿using System.Drawing;
 using SharpDX.Direct3D9;
 using FDK;
 

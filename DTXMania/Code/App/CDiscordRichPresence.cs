@@ -1,5 +1,4 @@
 ﻿using DiscordRPC;
-using System;
 using System.Diagnostics;
 
 namespace DTXMania

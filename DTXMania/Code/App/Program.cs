@@ -1,12 +1,8 @@
-﻿using System;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Runtime.InteropServices;
-using System.Threading;
 using System.Diagnostics;
 using System.Windows.Forms;
-using FDK;
-
-using System.IO;
+using System.Text;
 
 namespace DTXMania
 {
@@ -69,7 +65,6 @@ namespace DTXMania
 
 				Trace.WriteLine("Current Directory: " + Environment.CurrentDirectory);
 				Trace.WriteLine("EXEのあるフォルダ: " + Path.GetDirectoryName(Application.ExecutablePath));
-				Environment.CurrentDirectory = Path.GetDirectoryName(Application.ExecutablePath);
 
 				#region [DLL Existence check]
 				if (!tDLLの存在チェック("dll\\FDK.dll",
@@ -116,9 +111,7 @@ namespace DTXMania
 					{
 						Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
 					}
-
-					DWM.EnableComposition(false);   // Disable AeroGrass temporally
-
+					
 					string path = Path.GetDirectoryName(Application.ExecutablePath);
 					/* For future 64bit migration
 					SetDllDirectory(null);
@@ -130,6 +123,10 @@ namespace DTXMania
 					{
 						SetDllDirectory(Path.Combine(path, @"dll"));
 					}
+					
+					//set up support for shift-jis
+					Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+					
 #if !DEBUG
 					try
 #endif

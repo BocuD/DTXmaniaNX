@@ -1,16 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
-using System.IO;
+﻿using System.Diagnostics;
 using System.Drawing;
-using System.Threading;
-using System.Globalization;
-using System.Runtime.Serialization.Formatters.Binary;
 using SharpDX;
 using FDK;
-using SampleFramework;
 
 namespace DTXMania
 {

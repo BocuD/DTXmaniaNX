@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace DTXMania
+﻿namespace DTXMania
 {
 	/// <summary>
 	/// 「List」（複数の固定値からの１つを選択可能）を表すアイテム。

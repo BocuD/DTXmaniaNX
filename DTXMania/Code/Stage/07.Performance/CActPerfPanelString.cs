@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Runtime.InteropServices;
-using System.Drawing;
-using System.Diagnostics;
-using System.IO;
-using SharpDX;
+﻿using System.Drawing;
 using FDK;
 
 using Color = System.Drawing.Color;

@@ -1,17 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Runtime.InteropServices;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.IO;
-using System.Diagnostics;
-using System.Threading;
+﻿using System.Diagnostics;
 using SharpDX;
 using FDK;
 
 using Rectangle = System.Drawing.Rectangle;
-using System.Windows.Forms;
 
 namespace DTXMania
 {

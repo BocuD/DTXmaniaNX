@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Diagnostics;
-using System.Threading;
-using System.IO;
-using FDK;
-using System.Runtime.Serialization.Formatters.Binary;
+﻿using System.Diagnostics;
 
 
 namespace DTXMania

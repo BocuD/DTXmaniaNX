@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace DTXMania
+﻿namespace DTXMania
 {
     /// <summary>
     /// A set of hit ranges for each <see cref="EJudgement"/>.

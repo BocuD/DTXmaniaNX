@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Runtime.InteropServices;
-using System.Drawing;
+﻿using System.Runtime.InteropServices;
 using FDK;
-
-using Color = System.Drawing.Color;
 using Rectangle = System.Drawing.Rectangle;
 using SlimDXKey = SlimDX.DirectInput.Key;
 

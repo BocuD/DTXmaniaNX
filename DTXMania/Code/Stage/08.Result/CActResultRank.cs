@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Drawing;
-using SharpDX;
-using FDK;
+﻿using FDK;
 
 using Rectangle = System.Drawing.Rectangle;
 

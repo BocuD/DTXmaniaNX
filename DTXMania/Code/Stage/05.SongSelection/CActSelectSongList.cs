@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Diagnostics;
 using System.Drawing.Text;
-using System.IO;
 using SharpDX;
 using FDK;
 

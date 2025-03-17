@@ -1,6 +1,4 @@
-﻿using System;
-using System.Diagnostics;
-using System.Threading;
+﻿using System.Diagnostics;
 using FDK;
 
 namespace DTXMania

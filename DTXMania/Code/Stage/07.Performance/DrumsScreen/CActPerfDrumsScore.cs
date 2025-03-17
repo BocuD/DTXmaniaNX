@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Drawing;
-using SharpDX;
-using FDK;
-
-using Rectangle = System.Drawing.Rectangle;
+﻿using Rectangle = System.Drawing.Rectangle;
 
 namespace DTXMania
 {

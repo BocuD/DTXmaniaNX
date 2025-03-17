@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Text;
+﻿using System.Text;
 using System.Diagnostics;
-using System.IO;
 using System.Drawing;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace DTXMania
 {

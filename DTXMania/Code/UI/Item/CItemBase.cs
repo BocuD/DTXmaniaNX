@@ -1,10 +1,4 @@
-﻿using System;
-using System.Globalization;
-using System.Collections.Generic;
-using System.Text;
-using System.Diagnostics;
-
-namespace DTXMania
+﻿namespace DTXMania
 {
 	/// <summary>
 	/// すべてのアイテムの基本クラス。

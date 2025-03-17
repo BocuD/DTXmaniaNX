@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
-using System.IO;
-using System.Drawing;
-using SharpDX;
-using SharpDX.Direct3D9;
+﻿using System.Runtime.InteropServices;
 using FDK;
 
 namespace DTXMania

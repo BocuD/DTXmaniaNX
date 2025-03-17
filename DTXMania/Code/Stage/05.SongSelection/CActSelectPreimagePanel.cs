@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Drawing;
-using System.IO;
+﻿using System.Drawing;
 using System.Diagnostics;
 using SharpDX;
 using SharpDX.Direct3D9;

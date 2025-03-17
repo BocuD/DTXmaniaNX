@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.Text;
-using System.Runtime.InteropServices;
-using SharpDX;
-using SharpDX.Direct3D9;
+﻿using SharpDX;
 using FDK;
 
 using Rectangle = System.Drawing.Rectangle;

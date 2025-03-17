@@ -1,14 +1,9 @@
 ﻿using DiscordRPC;
-using System;
-using System.Collections.Generic;
 using System.Text;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Drawing;
-using System.IO;
 using SharpDX;
-using SharpDX.Direct3D9;
-using System.Drawing.Text;
 using FDK;
 
 using Color = System.Drawing.Color;

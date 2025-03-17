@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
+﻿using System.Drawing;
 using FDK;
 
 using Color = System.Drawing.Color;

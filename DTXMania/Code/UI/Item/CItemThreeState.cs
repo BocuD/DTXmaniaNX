@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace DTXMania
+﻿namespace DTXMania
 {
 	/// <summary>
 	/// 「スリーステート」（ON, OFF, 不定 の3状態）を表すアイテム。

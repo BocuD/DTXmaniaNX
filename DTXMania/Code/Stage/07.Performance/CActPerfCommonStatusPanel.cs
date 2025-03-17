@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Text;
 using System.Runtime.InteropServices;
 using System.Drawing;
-using System.Diagnostics;
-using System.IO;
 using FDK;
 
 namespace DTXMania
