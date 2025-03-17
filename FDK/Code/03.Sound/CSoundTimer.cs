@@ -1,4 +1,6 @@
-﻿namespace FDK
+﻿using Timer = System.Threading.Timer;
+
+namespace FDK
 {
 	public class CSoundTimer : CTimerBase
 	{
