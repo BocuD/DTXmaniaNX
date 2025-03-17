@@ -24,14 +24,14 @@ namespace DTXMania
         public CStageConfig()
         {
             CActDFPFont font;
-            base.eStageID = CStage.EStage.Config;
-            base.ePhaseID = CStage.EPhase.Common_DefaultState;
-            this.actFont = font = new CActDFPFont();
-            base.listChildActivities.Add(font);
-            base.listChildActivities.Add(this.actFIFO = new CActFIFOWhite());
-            base.listChildActivities.Add(this.actList = new CActConfigList());
-            base.listChildActivities.Add(this.actKeyAssign = new CActConfigKeyAssign());
-            base.bNotActivated = true;
+            eStageID = EStage.Config;
+            ePhaseID = EPhase.Common_DefaultState;
+            actFont = font = new CActDFPFont();
+            listChildActivities.Add(font);
+            listChildActivities.Add(actFIFO = new CActFIFOWhite());
+            listChildActivities.Add(actList = new CActConfigList());
+            listChildActivities.Add(actKeyAssign = new CActConfigKeyAssign());
+            bNotActivated = true;
 
             uiGroup = new UIGroup();
         }
@@ -41,16 +41,16 @@ namespace DTXMania
 
         public void tNotifyAssignmentComplete()
         {
-            this.eItemPanelMode = EItemPanelMode.PadList;
+            eItemPanelMode = EItemPanelMode.PadList;
         }
         public void tNotifyPadSelection(EKeyConfigPart part, EKeyConfigPad pad)
         {
-            this.actKeyAssign.tStart(part, pad, this.actList.ibCurrentSelection.strItemName);
-            this.eItemPanelMode = EItemPanelMode.KeyCodeList;
+            actKeyAssign.tStart(part, pad, actList.ibCurrentSelection.strItemName);
+            eItemPanelMode = EItemPanelMode.KeyCodeList;
         }
         public void tNotifyItemChange()
         {
-            this.tDrawSelectedItemDescriptionInDescriptionPanel();
+            tDrawSelectedItemDescriptionInDescriptionPanel();
         }
         
         // CStage 実装
@@ -62,14 +62,14 @@ namespace DTXMania
             try
             {
                 configLeftOptionsMenu?.SetSelectedIndex(0);
-                this.ftFont = new Font("MS PGothic", 17f, FontStyle.Regular, GraphicsUnit.Pixel);
+                ftFont = new Font("MS PGothic", 17f, FontStyle.Regular, GraphicsUnit.Pixel);
                 for (int i = 0; i < 4; i++)
                 {
-                    this.ctKeyRepetition[i] = new CCounter(0, 0, 0, CDTXMania.Timer);
+                    ctKeyRepetition[i] = new CCounter(0, 0, 0, CDTXMania.Timer);
                 }
-                this.bFocusIsOnMenu = true;
-                this.eItemPanelMode = EItemPanelMode.PadList;
-                this.ctDisplayWait = new CCounter( 0, 350, 1, CDTXMania.Timer );
+                bFocusIsOnMenu = true;
+                eItemPanelMode = EItemPanelMode.PadList;
+                ctDisplayWait = new CCounter( 0, 350, 1, CDTXMania.Timer );
             }
             finally
             {
@@ -85,16 +85,16 @@ namespace DTXMania
             try
             {
                 CDTXMania.ConfigIni.tWrite(CDTXMania.strEXEのあるフォルダ + "Config.ini");	// CONFIGだけ
-                if (this.ftFont != null)													// 以下OPTIONと共通
+                if (ftFont != null)													// 以下OPTIONと共通
                 {
-                    this.ftFont.Dispose();
-                    this.ftFont = null;
+                    ftFont.Dispose();
+                    ftFont = null;
                 }
                 for (int i = 0; i < 4; i++)
                 {
-                    this.ctKeyRepetition[i] = null;
+                    ctKeyRepetition[i] = null;
                 }
-                this.ctDisplayWait = null;
+                ctDisplayWait = null;
                 base.OnDeactivate();
             }
             catch (UnauthorizedAccessException e)
@@ -117,36 +117,36 @@ namespace DTXMania
         
         public override void OnManagedCreateResources()											// OPTIONと画像以外共通
         {
-            if (!base.bNotActivated)
+            if (!bNotActivated)
             {
                 //create resources for menu elements
-                var bgTex = new DTXTexture(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_background.png")));
-                var bg = uiGroup.AddChild(new UIImage(bgTex));
+                DTXTexture? bgTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_background.png")));
+                UIImage? bg = uiGroup.AddChild(new UIImage(bgTex));
                 bg.renderOrder = -100;
                 bg.position = Vector3.Zero;
                 
-                var itemBarTex = new DTXTexture(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_item bar.png")));
-                var itemBar = uiGroup.AddChild(new UIImage(itemBarTex));
+                DTXTexture? itemBarTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_item bar.png")));
+                UIImage? itemBar = uiGroup.AddChild(new UIImage(itemBarTex));
                 itemBar.position = new Vector3(400, 0, 0);
                 itemBar.renderOrder = 50;
                 
-                var headerPanelTex = new DTXTexture(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_header panel.png")));
-                var headerPanel = uiGroup.AddChild(new UIImage(headerPanelTex));
+                DTXTexture? headerPanelTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_header panel.png")));
+                UIImage? headerPanel = uiGroup.AddChild(new UIImage(headerPanelTex));
                 headerPanel.position = Vector3.Zero;
                 headerPanel.renderOrder = 52;
                 
-                var footerPanelTex = new DTXTexture(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_footer panel.png")));
-                var footerPanel = uiGroup.AddChild(new UIImage(footerPanelTex));
+                DTXTexture? footerPanelTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_footer panel.png")));
+                UIImage? footerPanel = uiGroup.AddChild(new UIImage(footerPanelTex));
                 footerPanel.position = new Vector3(0, 720 - footerPanel.Texture.Height, 0);
                 footerPanel.renderOrder = 53;
                 
                 //left menu
-                var leftMenu = uiGroup.AddChild(new UIGroup());
+                UIGroup? leftMenu = uiGroup.AddChild(new UIGroup());
                 leftMenu.position = new Vector3(245, 140, 0);
                 leftMenu.renderOrder = 50;
                 
-                var menuPanelTex = new DTXTexture(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_menu panel.png")));
-                var menuPanel = leftMenu.AddChild(new UIImage(menuPanelTex));
+                DTXTexture? menuPanelTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_menu panel.png")));
+                UIImage? menuPanel = leftMenu.AddChild(new UIImage(menuPanelTex));
                 menuPanel.position = Vector3.Zero;
                 
                 //menu items
@@ -156,7 +156,7 @@ namespace DTXMania
                 configLeftOptionsMenu.position = new Vector3(95, 4, 0);
 
                 //todo: render menu cursor correctly to match current version of the game. right now its rendered as a stretched image.
-                var menuCursorTex = new DTXTexture(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_menu cursor.png")));
+                DTXTexture? menuCursorTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_menu cursor.png")));
                 menuCursor = configLeftOptionsMenu.AddChild(new UIImage(menuCursorTex));
                 menuCursor.position = new Vector3(-5, 2, 0);
                 menuCursor.size = new Vector2(170, 32);
@@ -164,22 +164,22 @@ namespace DTXMania
                 menuCursor.renderMode = ERenderMode.Sliced;
                 menuCursor.sliceRect = new RectangleF(16, 0, 12, 32);
                 
-                var font = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.str選曲リストフォント), 18);
-                configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(font, "System", () => { this.actList.tSetupItemList_System(); }));
-                configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(font, "Drums", () => { this.actList.tSetupItemList_Drums(); }));
-                configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(font, "Guitar", () => { this.actList.tSetupItemList_Guitar(); }));
-                configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(font, "Bass", () => { this.actList.tSetupItemList_Bass(); }));
-                configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(font, "Exit", () => { this.actList.tSetupItemList_Exit(); }));
+                CPrivateFastFont? font = new(new FontFamily(CDTXMania.ConfigIni.str選曲リストフォント), 18);
+                configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(font, "System", () => { actList.tSetupItemList_System(); }));
+                configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(font, "Drums", () => { actList.tSetupItemList_Drums(); }));
+                configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(font, "Guitar", () => { actList.tSetupItemList_Guitar(); }));
+                configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(font, "Bass", () => { actList.tSetupItemList_Bass(); }));
+                configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(font, "Exit", () => { actList.tSetupItemList_Exit(); }));
                 configLeftOptionsMenu.UpdateLayout();
                 configLeftOptionsMenu.SetSelectedIndex(0);
                 
-                if (this.bFocusIsOnMenu)
+                if (bFocusIsOnMenu)
                 {
-                    this.tDrawSelectedMenuDescriptionInDescriptionPanel();
+                    tDrawSelectedMenuDescriptionInDescriptionPanel();
                 }
                 else
                 {
-                    this.tDrawSelectedItemDescriptionInDescriptionPanel();
+                    tDrawSelectedItemDescriptionInDescriptionPanel();
                 }
 
                 base.OnManagedCreateResources();
@@ -187,9 +187,9 @@ namespace DTXMania
         }
         public override void OnManagedReleaseResources()											// OPTIONと同じ(COnfig.iniの書き出しタイミングのみ異なるが、無視して良い)
         {
-            if (!base.bNotActivated)
+            if (!bNotActivated)
             {
-                CDTXMania.tReleaseTexture(ref this.txDescriptionPanel);
+                CDTXMania.tReleaseTexture(ref txDescriptionPanel);
                 
                 uiGroup.Dispose();
                 
@@ -198,16 +198,16 @@ namespace DTXMania
         }
         public override int OnUpdateAndDraw()
         {
-            if (base.bNotActivated)
+            if (bNotActivated)
                 return 0;
 
-            if (base.bJustStartedUpdate)
+            if (bJustStartedUpdate)
             {
-                base.ePhaseID = CStage.EPhase.Common_FadeIn;
-                this.actFIFO.tStartFadeIn();
-                base.bJustStartedUpdate = false;
+                ePhaseID = EPhase.Common_FadeIn;
+                actFIFO.tStartFadeIn();
+                bJustStartedUpdate = false;
             }
-            this.ctDisplayWait.tUpdate();
+            ctDisplayWait.tUpdate();
             
             //update menu cursor position
             menuCursor.Texture.transparency = bFocusIsOnMenu ? 1.0f : 0.5f;
@@ -217,40 +217,40 @@ namespace DTXMania
             
             #region [ アイテム ]
             //---------------------
-            switch (this.eItemPanelMode)
+            switch (eItemPanelMode)
             {
                 case EItemPanelMode.PadList:
-                    this.actList.tUpdateAndDraw(!this.bFocusIsOnMenu);
+                    actList.tUpdateAndDraw(!bFocusIsOnMenu);
                     break;
 
                 case EItemPanelMode.KeyCodeList:
-                    this.actKeyAssign.OnUpdateAndDraw();
+                    actKeyAssign.OnUpdateAndDraw();
                     break;
             }
             //---------------------
             #endregion
             #region [ Description panel ]
             //---------------------
-            if( this.txDescriptionPanel != null && !this.bFocusIsOnMenu && this.actList.nTargetScrollCounter == 0 && this.ctDisplayWait.bReachedEndValue )
+            if( txDescriptionPanel != null && !bFocusIsOnMenu && actList.nTargetScrollCounter == 0 && ctDisplayWait.bReachedEndValue )
                 // 15SEP20 Increasing x position by 180 pixels (was 620)
-                this.txDescriptionPanel.tDraw2D(CDTXMania.app.Device, 800, 270);
+                txDescriptionPanel.tDraw2D(CDTXMania.app.Device, 800, 270);
             //---------------------
             #endregion
 
             #region [ Fade in and out ]
             //---------------------
-            switch (base.ePhaseID)
+            switch (ePhaseID)
             {
-                case CStage.EPhase.Common_FadeIn:
-                    if (this.actFIFO.OnUpdateAndDraw() != 0)
+                case EPhase.Common_FadeIn:
+                    if (actFIFO.OnUpdateAndDraw() != 0)
                     {
                         CDTXMania.Skin.bgmコンフィグ画面.tPlay();
-                        base.ePhaseID = CStage.EPhase.Common_DefaultState;
+                        ePhaseID = EPhase.Common_DefaultState;
                     }
                     break;
 
-                case CStage.EPhase.Common_FadeOut:
-                    if (this.actFIFO.OnUpdateAndDraw() == 0)
+                case EPhase.Common_FadeOut:
+                    if (actFIFO.OnUpdateAndDraw() == 0)
                     {
                         break;
                     }
@@ -261,7 +261,7 @@ namespace DTXMania
             
             // キー入力
 
-            if ((base.ePhaseID != CStage.EPhase.Common_DefaultState) || this.actKeyAssign.bキー入力待ちの最中である)
+            if ((ePhaseID != EPhase.Common_DefaultState) || actKeyAssign.bキー入力待ちの最中である)
                 return 0;
 
             // 曲データの一覧取得中は、キー入力を無効化する
@@ -270,24 +270,24 @@ namespace DTXMania
                 if (CDTXMania.Input.ActionCancel())
                 {
                     CDTXMania.Skin.soundCancel.tPlay();
-                    if (!this.bFocusIsOnMenu)
+                    if (!bFocusIsOnMenu)
                     {
-                        if (this.eItemPanelMode == EItemPanelMode.KeyCodeList)
+                        if (eItemPanelMode == EItemPanelMode.KeyCodeList)
                         {
                             CDTXMania.stageConfig.tNotifyAssignmentComplete();
                             return 0;
                         }
-                        if (!this.actList.bIsKeyAssignSelected && !this.actList.bIsFocusingParameter)	// #24525 2011.3.15 yyagi, #32059 2013.9.17 yyagi
+                        if (!actList.bIsKeyAssignSelected && !actList.bIsFocusingParameter)	// #24525 2011.3.15 yyagi, #32059 2013.9.17 yyagi
                         {
-                            this.bFocusIsOnMenu = true;
+                            bFocusIsOnMenu = true;
                         }
-                        this.tDrawSelectedMenuDescriptionInDescriptionPanel();
-                        this.actList.tPressEsc();								// #24525 2011.3.15 yyagi ESC押下時の右メニュー描画用
+                        tDrawSelectedMenuDescriptionInDescriptionPanel();
+                        actList.tPressEsc();								// #24525 2011.3.15 yyagi ESC押下時の右メニュー描画用
                     }
                     else
                     {
-                        this.actFIFO.tStartFadeOut();
-                        base.ePhaseID = CStage.EPhase.Common_FadeOut;
+                        actFIFO.tStartFadeOut();
+                        ePhaseID = EPhase.Common_FadeOut;
                     }
                 }
                 else if (CDTXMania.Input.ActionDecide())
@@ -295,51 +295,51 @@ namespace DTXMania
                     if (configLeftOptionsMenu.currentlySelectedIndex == 4)
                     {
                         CDTXMania.Skin.soundDecide.tPlay();
-                        this.actFIFO.tStartFadeOut();
-                        base.ePhaseID = CStage.EPhase.Common_FadeOut;
+                        actFIFO.tStartFadeOut();
+                        ePhaseID = EPhase.Common_FadeOut;
                     }
-                    else if (this.bFocusIsOnMenu)
+                    else if (bFocusIsOnMenu)
                     {
                         CDTXMania.Skin.soundDecide.tPlay();
-                        this.bFocusIsOnMenu = false;
-                        this.tDrawSelectedItemDescriptionInDescriptionPanel();
+                        bFocusIsOnMenu = false;
+                        tDrawSelectedItemDescriptionInDescriptionPanel();
                     }
                     else
                     {
-                        switch (this.eItemPanelMode)
+                        switch (eItemPanelMode)
                         {
                             case EItemPanelMode.PadList:
-                                bool bIsKeyAssignSelectedBeforeHitEnter = this.actList.bIsKeyAssignSelected;	// #24525 2011.3.15 yyagi
-                                this.actList.tPressEnter();
-                                if (this.actList.b現在選択されている項目はReturnToMenuである)
+                                bool bIsKeyAssignSelectedBeforeHitEnter = actList.bIsKeyAssignSelected;	// #24525 2011.3.15 yyagi
+                                actList.tPressEnter();
+                                if (actList.b現在選択されている項目はReturnToMenuである)
                                 {
-                                    this.tDrawSelectedMenuDescriptionInDescriptionPanel();
+                                    tDrawSelectedMenuDescriptionInDescriptionPanel();
                                     if (bIsKeyAssignSelectedBeforeHitEnter == false)							// #24525 2011.3.15 yyagi
                                     {
-                                        this.bFocusIsOnMenu = true;
+                                        bFocusIsOnMenu = true;
                                     }
                                 }
                                 break;
 
                             case EItemPanelMode.KeyCodeList:
-                                this.actKeyAssign.tPressEnter();
+                                actKeyAssign.tPressEnter();
                                 break;
                         }
                     }
                 }
-                this.ctKeyRepetition.Up.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing((int)SlimDXKey.UpArrow), new CCounter.DGキー処理(this.tMoveCursorUp));
-                this.ctKeyRepetition.R.tRepeatKey(CDTXMania.Pad.bPressingGB(EPad.HH), new CCounter.DGキー処理(this.tMoveCursorUp));
+                ctKeyRepetition.Up.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing((int)SlimDXKey.UpArrow), new CCounter.DGキー処理(tMoveCursorUp));
+                ctKeyRepetition.R.tRepeatKey(CDTXMania.Pad.bPressingGB(EPad.HH), new CCounter.DGキー処理(tMoveCursorUp));
                 //Change to HT
                 if (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.HT))
                 {
-                    this.tMoveCursorUp();
+                    tMoveCursorUp();
                 }
-                this.ctKeyRepetition.Down.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing((int)SlimDXKey.DownArrow), new CCounter.DGキー処理(this.tMoveCursorDown));
-                this.ctKeyRepetition.B.tRepeatKey(CDTXMania.Pad.bPressingGB(EPad.SD), new CCounter.DGキー処理(this.tMoveCursorDown));
+                ctKeyRepetition.Down.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing((int)SlimDXKey.DownArrow), new CCounter.DGキー処理(tMoveCursorDown));
+                ctKeyRepetition.B.tRepeatKey(CDTXMania.Pad.bPressingGB(EPad.SD), new CCounter.DGキー処理(tMoveCursorDown));
                 //Change to LT
                 if (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.LT))
                 {
-                    this.tMoveCursorDown();
+                    tMoveCursorDown();
                 }
             }
             
@@ -371,16 +371,16 @@ namespace DTXMania
                     switch (index)
                     {
                         case 0:
-                            return this.Up;
+                            return Up;
 
                         case 1:
-                            return this.Down;
+                            return Down;
 
                         case 2:
-                            return this.R;
+                            return R;
 
                         case 3:
-                            return this.B;
+                            return B;
                     }
                     throw new IndexOutOfRangeException();
                 }
@@ -389,19 +389,19 @@ namespace DTXMania
                     switch (index)
                     {
                         case 0:
-                            this.Up = value;
+                            Up = value;
                             return;
 
                         case 1:
-                            this.Down = value;
+                            Down = value;
                             return;
 
                         case 2:
-                            this.R = value;
+                            R = value;
                             return;
 
                         case 3:
-                            this.B = value;
+                            B = value;
                             return;
                     }
                     throw new IndexOutOfRangeException();
@@ -425,62 +425,62 @@ namespace DTXMania
         
         private void tMoveCursorDown()
         {
-            if (!this.bFocusIsOnMenu)
+            if (!bFocusIsOnMenu)
             {
-                switch (this.eItemPanelMode)
+                switch (eItemPanelMode)
                 {
                     case EItemPanelMode.PadList:
-                        this.actList.tMoveToPrevious();
+                        actList.tMoveToPrevious();
                         return;
 
                     case EItemPanelMode.KeyCodeList:
-                        this.actKeyAssign.tMoveToNext();
+                        actKeyAssign.tMoveToNext();
                         return;
                 }
             }
             else
             {
                 CDTXMania.Skin.soundCursorMovement.tPlay();
-                this.ctDisplayWait.nCurrentValue = 0;
+                ctDisplayWait.nCurrentValue = 0;
                 
                 configLeftOptionsMenu.SelectNext();
                 configLeftOptionsMenu.RunAction();
                 
-                this.tDrawSelectedMenuDescriptionInDescriptionPanel();
+                tDrawSelectedMenuDescriptionInDescriptionPanel();
             }
         }
         private void tMoveCursorUp()
         {
-            if (!this.bFocusIsOnMenu)
+            if (!bFocusIsOnMenu)
             {
-                switch (this.eItemPanelMode)
+                switch (eItemPanelMode)
                 {
                     case EItemPanelMode.PadList:
-                        this.actList.tMoveToNext();
+                        actList.tMoveToNext();
                         return;
 
                     case EItemPanelMode.KeyCodeList:
-                        this.actKeyAssign.tMoveToPrevious();
+                        actKeyAssign.tMoveToPrevious();
                         return;
                 }
             }
             else
             {
                 CDTXMania.Skin.soundCursorMovement.tPlay();
-                this.ctDisplayWait.nCurrentValue = 0;
+                ctDisplayWait.nCurrentValue = 0;
                 
                 configLeftOptionsMenu.SelectPrevious();
                 configLeftOptionsMenu.RunAction();
                 
-                this.tDrawSelectedMenuDescriptionInDescriptionPanel();
+                tDrawSelectedMenuDescriptionInDescriptionPanel();
             }
         }
 		private void tDrawSelectedMenuDescriptionInDescriptionPanel()
 		{
 			try
 			{
-				var image = new Bitmap( (int)(220 * 2 ), (int)(192 * 2 ) );		// 説明文領域サイズの縦横 2 倍。（描画時に 0.5 倍で表示する。）
-				var graphics = Graphics.FromImage( image );
+				Bitmap? image = new( (int)(220 * 2 ), (int)(192 * 2 ) );		// 説明文領域サイズの縦横 2 倍。（描画時に 0.5 倍で表示する。）
+				Graphics? graphics = Graphics.FromImage( image );
 				graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
 				
 				string[,] str = new string[ 2, 2 ];
@@ -524,12 +524,12 @@ namespace DTXMania
 				int c = CDTXMania.isJapanese ? 0 : 1;
 				for (int i = 0; i < 2; i++)
 				{
-					graphics.DrawString( str[ c, i ], this.ftFont, Brushes.Black, new PointF( 4f , ( i * 30 ) ) );
+					graphics.DrawString( str[ c, i ], ftFont, Brushes.Black, new PointF( 4f , ( i * 30 ) ) );
 				}
 				graphics.Dispose();
-				if( this.txDescriptionPanel != null )
+				if( txDescriptionPanel != null )
 				{
-					this.txDescriptionPanel.Dispose();
+					txDescriptionPanel.Dispose();
 				}
 				//this.txDescriptionPanel = new CTexture( CDTXMania.app.Device, image, CDTXMania.TextureFormat );
 				// this.txDescriptionPanel.vcScaleRatio.X = 0.5f;
@@ -539,18 +539,18 @@ namespace DTXMania
 			catch( CTextureCreateFailedException )
 			{
 				Trace.TraceError( "説明文テクスチャの作成に失敗しました。" );
-				this.txDescriptionPanel = null;
+				txDescriptionPanel = null;
 			}
 		}
 		private void tDrawSelectedItemDescriptionInDescriptionPanel()
 		{
 			try
 			{
-				var image = new Bitmap( (int)(400), (int)(192) );		// 説明文領域サイズの縦横 2 倍。（描画時に 0.5 倍で表示する___のは中止。処理速度向上のため。）
-				var graphics = Graphics.FromImage( image );
+				Bitmap? image = new( (int)(400), (int)(192) );		// 説明文領域サイズの縦横 2 倍。（描画時に 0.5 倍で表示する___のは中止。処理速度向上のため。）
+				Graphics? graphics = Graphics.FromImage( image );
 				graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
 
-				CItemBase item = this.actList.ibCurrentSelection;
+				CItemBase item = actList.ibCurrentSelection;
 				if( ( item.str説明文 != null ) && ( item.str説明文.Length > 0 ) )
 				{
 					//int num = 0;
@@ -559,14 +559,14 @@ namespace DTXMania
 					//    graphics.DrawString( str, this.ftFont, Brushes.White, new PointF( 4f * Scale.X, (float) num * Scale.Y ) );
 					//    num += 30;
 					//}
-					graphics.DrawString( item.str説明文, this.ftFont, Brushes.Black, new System.Drawing.RectangleF( 4f, (float) 0, 230, 430 ) );
+					graphics.DrawString( item.str説明文, ftFont, Brushes.Black, new System.Drawing.RectangleF( 4f, (float) 0, 230, 430 ) );
 				}
 				graphics.Dispose();
-				if( this.txDescriptionPanel != null )
+				if( txDescriptionPanel != null )
 				{
-					this.txDescriptionPanel.Dispose();
+					txDescriptionPanel.Dispose();
 				}
-				this.txDescriptionPanel = new CTexture( CDTXMania.app.Device, image, CDTXMania.TextureFormat, false );
+				txDescriptionPanel = new CTexture( CDTXMania.app.Device, image, CDTXMania.TextureFormat, false );
 				//this.txDescriptionPanel.vcScaleRatio.X = 0.58f;
 				//this.txDescriptionPanel.vcScaleRatio.Y = 0.58f;
 				image.Dispose();
@@ -574,7 +574,7 @@ namespace DTXMania
 			catch( CTextureCreateFailedException )
 			{
 				Trace.TraceError( "説明文パネルテクスチャの作成に失敗しました。" );
-				this.txDescriptionPanel = null;
+				txDescriptionPanel = null;
 			}
 		}
         //-----------------
