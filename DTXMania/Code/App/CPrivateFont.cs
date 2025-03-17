@@ -151,7 +151,7 @@ namespace DTXMania
 			// 縁取りの縁のサイズは、とりあえずフォントの大きさの1/4とする
 			// Changed to 1/6 as 1/4 is too thick for new Black-White Style
 			int nEdgePt = bEdgeGradation ? pt / 6 : bEdge ? pt / 4 : 0;
-			const TextFormatFlags flags = TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding | TextFormatFlags.SingleLine;
+			const TextFormatFlags flags = TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding;
 			
 			// 描画サイズを測定する
 			Size stringSize = TextRenderer.MeasureText(drawStr, font, 
