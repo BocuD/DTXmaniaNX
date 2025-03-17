@@ -42,7 +42,7 @@ namespace DTXMania
 				list進行文字列 = null;
 				if ( es != null )
 				{
-					if ( ( es.thDTXFileEnumerate != null ) && es.thDTXFileEnumerate.IsAlive )
+					if ( es.thDTXFileEnumerate is { IsAlive: true } )
 					{
 						Trace.TraceWarning( "リスト構築スレッドを強制停止します。" );
 						es.thDTXFileEnumerate.Abort();
@@ -59,39 +59,60 @@ namespace DTXMania
 		}
 		public override void OnManagedCreateResources()
 		{
-			if( !bNotActivated )
+			if(!bNotActivated)
 			{
-                tx背景 = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\1_background.jpg"), false);
+                txBackground = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\1_background.jpg"), false);
 				base.OnManagedCreateResources();
 			}
 		}
 		public override void OnManagedReleaseResources()
 		{
-			if( !bNotActivated )
+			if(!bNotActivated)
 			{
-				CDTXMania.tReleaseTexture( ref tx背景 );
+				CDTXMania.tReleaseTexture(ref txBackground);
 				base.OnManagedReleaseResources();
 			}
 		}
 		public override int OnUpdateAndDraw()
 		{
-			if( !bNotActivated )
+			if(!bNotActivated)
 			{
-				if( bJustStartedUpdate )
+				if(bJustStartedUpdate)
 				{
-					list進行文字列.Add( "DTXMania powered by YAMAHA Silent Session Drums\n" );
-					list進行文字列.Add( "Release: " + CDTXMania.VERSION + " [" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString() + "]" );
+					list進行文字列.Add("DTXMania powered by YAMAHA Silent Session Drums\n");
+					list進行文字列.Add("Release: " + CDTXMania.VERSION + " [" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version + "]");
 
+					CDTXMania.stageStartup.ePhaseID = EPhase.起動0_システムサウンドを構築;
+
+					Trace.TraceInformation("0) システムサウンドを構築します。");
+					Trace.Indent();
+
+					try
+					{
+						CDTXMania.Skin.bgm起動画面.tPlay();
+                
+						CDTXMania.Skin.ReloadSkin();
+                
+						lock (CDTXMania.stageStartup.list進行文字列)
+						{
+							CDTXMania.stageStartup.list進行文字列.Add("Loading system sounds ... OK ");
+						}
+					}
+					finally
+					{
+						Trace.Unindent();
+					}
+					
 					es = new CEnumSongs();
-					es.StartEnumFromCache();										// 曲リスト取得(別スレッドで実行される)
+					if (!CDTXMania.bCompactMode)
+					{
+						es.StartEnumFromCacheStartup();
+					}
 					bJustStartedUpdate = false;
 					return 0;
 				}
 
-				// CSongManager s管理 = CDTXMania.SongManager;
-
-				if( tx背景 != null )
-					tx背景.tDraw2D( CDTXMania.app.Device, 0, 0 );
+				txBackground?.tDraw2D( CDTXMania.app.Device, 0, 0 );
 
 				#region [ this.str現在進行中 の決定 ]
 				//-----------------
@@ -110,23 +131,23 @@ namespace DTXMania
 						break;
 
 					case EPhase.起動2_曲を検索してリストを作成する:
-						str現在進行中 = string.Format( "{0} ... {1}", "Enumerating songs", es.Songs管理.nNbScoresFound );
+						str現在進行中 = $"Enumerating songs ... {es.Songs管理.nNbScoresFound}";
 						break;
 
 					case EPhase.起動3_スコアキャッシュをリストに反映する:
-						str現在進行中 = string.Format( "{0} ... {1}/{2}", "Loading score properties from songs.db", es.Songs管理.nNbScoresFromScoreCache, es.Songs管理.nNbScoresFound );
+						str現在進行中 = $"Loading score properties from songs.db ... {es.Songs管理.nNbScoresFromScoreCache}/{es.Songs管理.nNbScoresFound}";
 						break;
 
 					case EPhase.起動4_スコアキャッシュになかった曲をファイルから読み込んで反映する:
-						str現在進行中 = string.Format( "{0} ... {1}/{2}", "Loading score properties from files", es.Songs管理.nNbScoresFromFile, es.Songs管理.nNbScoresFound - es.Songs管理.nNbScoresFromScoreCache );
+						str現在進行中 = $"Loading score properties from files ... {es.Songs管理.nNbScoresFromFile}/{es.Songs管理.nNbScoresFound - es.Songs管理.nNbScoresFromScoreCache}";
 						break;
 
 					case EPhase.起動5_曲リストへ後処理を適用する:
-						str現在進行中 = string.Format( "{0} ... ", "Building songlists" );
+						str現在進行中 = "Building songlists ... ";
 						break;
 
 					case EPhase.起動6_スコアキャッシュをSongsDBに出力する:
-						str現在進行中 = string.Format( "{0} ... ", "Saving songs.db" );
+						str現在進行中 = "Saving songs.db ... ";
 						break;
 
 					case EPhase.起動7_完了:
@@ -151,7 +172,7 @@ namespace DTXMania
 				//-----------------
 				#endregion
 
-				if( es != null && es.IsSongListEnumCompletelyDone )							// 曲リスト作成が終わったら
+				if( es is { IsSongListEnumCompletelyDone: true } )							// 曲リスト作成が終わったら
 				{
 					CDTXMania.SongManager = ( es != null ) ? es.Songs管理 : null;		// 最後に、曲リストを拾い上げる
 					return 1;
@@ -166,7 +187,7 @@ namespace DTXMania
 		#region [ private ]
 		//-----------------
 		private string str現在進行中 = "";
-		private CTexture tx背景;
+		private CTexture? txBackground;
 		private CEnumSongs es;
 		
 		#endregion

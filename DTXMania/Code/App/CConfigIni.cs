@@ -619,7 +619,7 @@ namespace DTXMania
         public STDGBVALUE<EAutoGhostData> eAutoGhost;               // #35411 2015.8.18 chnmr0 プレー時使用ゴーストデータ種別
         public STDGBVALUE<ETargetGhostData> eTargetGhost;               // #35411 2015.8.18 chnmr0 ゴーストデータ再生方法
 
-        public bool bConfigIniがないかDTXManiaのバージョンが異なる => ( !bConfigIniが存在している || !CDTXMania.VERSION.Equals( strDTXManiaのバージョン ) );
+        public bool bConfigIniがないかDTXManiaのバージョンが異なる => ( !bConfigIniExists || !CDTXMania.VERSION.Equals( strDTXManiaのバージョン ) );
 
         public bool bDrumsEnabled
 		{
@@ -2333,8 +2333,8 @@ namespace DTXMania
 		public void tReadFromFile( string iniファイル名 )
 		{
 			ConfigIniファイル名 = iniファイル名;
-			bConfigIniが存在している = File.Exists( ConfigIniファイル名 );
-			if( bConfigIniが存在している )
+			bConfigIniExists = File.Exists( ConfigIniファイル名 );
+			if( bConfigIniExists )
 			{
 				string str;
 				StreamReader reader = new StreamReader( ConfigIniファイル名, Encoding.GetEncoding( "Shift_JIS" ) );
@@ -3850,7 +3850,7 @@ namespace DTXMania
 
 		private bool _bDrums有効;
 		private bool _bGuitar有効;
-		private bool bConfigIniが存在している;
+		private bool bConfigIniExists;
 		private string ConfigIniファイル名;
 
 		private void tAcquireJoystickID( string strキー記述 )

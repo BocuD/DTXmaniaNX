@@ -842,9 +842,9 @@ namespace DTXMania
 		public void tSongsDBになかった曲をファイルから読み込んで反映する()
 		{
 			nNbScoresFromFile = 0;
-			tSongsDBになかった曲をファイルから読み込んで反映する( listSongRoot );
+			tSongsDBになかった曲をファイルから読み込んで反映する(listSongRoot);
 		}
-		private void tSongsDBになかった曲をファイルから読み込んで反映する( List<CSongListNode> ノードリスト )
+		private void tSongsDBになかった曲をファイルから読み込んで反映する(List<CSongListNode> ノードリスト)
 		{
             List<Task> taskList = new List<Task>();
             foreach ( CSongListNode c曲リストノード in ノードリスト )

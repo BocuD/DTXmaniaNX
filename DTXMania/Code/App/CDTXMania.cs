@@ -1279,7 +1279,7 @@ namespace DTXMania
 				return null;
 			}
 		}
-		public static void tReleaseTexture( ref CTexture tx )
+		public static void tReleaseTexture( ref CTexture? tx )
 		{
             if (tx != null) {
                 //Trace.WriteLine( "CTextureを解放 Size W:" + tx.szImageSize.Width + " H:" + tx.szImageSize.Height );

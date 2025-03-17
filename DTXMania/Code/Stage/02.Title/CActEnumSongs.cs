@@ -66,7 +66,7 @@ namespace DTXMania
             
             text = ui.AddChild(new UIText(font, "Progress: 0/100"));
             text.position = new Vector3(0, 50, 0);
-            text.anchor = new Vector2(0.0f, 1.0f);
+            text.anchor = new Vector2(0.0f, 0.0f);
 
             base.OnManagedCreateResources();
         }
@@ -92,8 +92,19 @@ namespace DTXMania
             ctNowEnumeratingSongs.tUpdateLoop();
             
             //update ui
-            text.SetText($"Progress: {text.Texture.transparency:F3}/100");
-            
+            CEnumSongs.SongEnumProgress? status = CDTXMania.EnumSongs.EnumProgress;
+            if (status != null)
+            {
+                int stepCount = Enum.GetValues(typeof(CEnumSongs.SongEnumProgress)).Length;
+                
+                text.SetText($"Step {(int)status + 1} / {stepCount}\n{status}");
+                text.isVisible = true;
+            }
+            else
+            {
+                text.isVisible = false;
+            }
+
             double fade = Math.Sin(2 * Math.PI * ctNowEnumeratingSongs.nCurrentValue * 2 / 100.0);
             
             //convert to 0-1 range

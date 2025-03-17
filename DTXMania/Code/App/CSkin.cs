@@ -1154,6 +1154,5 @@ namespace DTXMania
 		private bool bDisposed済み;
 		//-----------------
 		#endregion
-
 	}
 }
