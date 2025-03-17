@@ -1,18 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Text;
 using System.Windows.Forms;
 using System.Drawing;
 using System.Diagnostics;
-using System.IO;
-using System.Threading;
 using System.Runtime;
 using SharpDX;
 using SharpDX.Direct3D9;
 using FDK;
 using SampleFramework;
 using System.Reflection;
-using DTXMania.Code.UI;
 using Point = System.Drawing.Point;
 
 namespace DTXMania
@@ -485,9 +480,6 @@ namespace DTXMania
                 foreach (CActivity activity in this.listTopLevelActivities)
                     activity.OnUnmanagedCreateResources();
             }
-
-            //load fallback texture
-            UITexture.LoadFallbackTexture();
         }
         
         protected override void UnloadContent()
@@ -1042,7 +1034,6 @@ namespace DTXMania
 
                                 DTX.tStopPlayingAllChips();
                                 DTX.OnDeactivate();
-                                rCurrentStage.OnDeactivate();
                                 if (bCompactMode)
                                 {
                                     base.Window.Close();
@@ -1806,7 +1797,7 @@ namespace DTXMania
             base.Window.MaximizeBox = true;							// #23510 2010.11.04 yyagi: to support maximizing window
             base.Window.FormBorderStyle = FormBorderStyle.Sizable;	// #23510 2010.10.27 yyagi: changed from FixedDialog to Sizable, to support window resize
             base.Window.ShowIcon = true;
-            base.Window.Icon = Properties.Resources.dtx;
+            //base.Window.Icon = Properties.Resources.dtx;
             base.Window.KeyDown += new KeyEventHandler(this.Window_KeyDown);
             base.Window.MouseUp += new MouseEventHandler(this.Window_MouseUp);
             base.Window.MouseDoubleClick += new MouseEventHandler(this.Window_MouseDoubleClick);	// #23510 2010.11.13 yyagi: to go fullscreen mode

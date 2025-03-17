@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Text;
 using System.Runtime.InteropServices;
 using System.Drawing;
 using System.Diagnostics;
-using System.IO;
 using System.Security.Cryptography;
 using System.Globalization;
-using System.Threading;
 using FDK;
 
 namespace DTXMania
@@ -1623,10 +1619,6 @@ namespace DTXMania
 			}
 		}
 		#region [ BMP/BMPTEXの並列読み込み_デコード用メソッド ]
-		delegate void BackgroundBMPLoadAll( Dictionary<int, CBMP> listB );
-		static BackgroundBMPLoadAll backgroundBMPLoadAll = new BackgroundBMPLoadAll( BMPLoadAll );
-		delegate void BackgroundBMPTEXLoadAll( Dictionary<int, CBMPTEX> listB );
-		static BackgroundBMPTEXLoadAll backgroundBMPTEXLoadAll = new BackgroundBMPTEXLoadAll( BMPTEXLoadAll );
 		private static void LoadTexture( CBMPbase cbmp )						// バックグラウンドスレッドで動作する、ファイル読み込み部
 		{
 			string filename = cbmp.GetFullPathname;
@@ -1702,7 +1694,7 @@ namespace DTXMania
 					#region [ メインスレッド(テクスチャ定義)とバックグラウンドスレッド(読み出し_デコード)を並列動作させ高速化 ]
 					//Trace.TraceInformation( "Main: ThreadID(Main)=" + Thread.CurrentThread.ManagedThreadId + ", listCount=" + this.listBMP.Count );
 					nLoadDone = 0;
-					backgroundBMPLoadAll.BeginInvoke( listBMP, null, null );
+					Task.Run( () => BMPLoadAll( listBMP ) );
 
 					// t.Priority = ThreadPriority.Lowest;
 					// t.Start( listBMP );
@@ -1749,7 +1741,7 @@ namespace DTXMania
 					#region [ メインスレッド(テクスチャ定義)とバックグラウンドスレッド(読み出し_デコード)を並列動作させ高速化 ]
 					//Trace.TraceInformation( "Main: ThreadID(Main)=" + Thread.CurrentThread.ManagedThreadId + ", listCount=" + this.listBMP.Count );
 					nLoadDone = 0;
-					backgroundBMPTEXLoadAll.BeginInvoke( listBMPTEX, null, null );
+					Task.Run( () => BMPTEXLoadAll( listBMPTEX ) );
 					int c = listBMPTEX.Count;
 					while ( nLoadDone < c )
 					{
