@@ -587,7 +587,7 @@
 
 		#region [ IComparable 実装 ]
 		//-----------------
-		public int CompareTo(CChip other)
+		public int CompareTo(CChip? other)
 		{
 			//チップの重なり順を決める。16進数で16個ずつ並んでいます。
 			byte[] n優先度 = new byte[] {
