@@ -34,54 +34,31 @@ namespace DTXMania
 	/// </remarks>
 	public class CPrivateFont : IDisposable
 	{
-		#region [ コンストラクタ ]
-		public CPrivateFont(FontFamily fontfamily, int pt, FontStyle style)
-		{
-			Initialize(null, fontfamily, pt, style);
-		}
-		public CPrivateFont(FontFamily fontfamily, int pt)
-		{
-			Initialize(null, fontfamily, pt, FontStyle.Regular);
-		}
-		public CPrivateFont(string fontpath, int pt, FontStyle style)
-		{
-			Initialize(fontpath, null, pt, style);
-		}
-		public CPrivateFont(string fontpath, int pt)
-		{
-			Initialize(fontpath, null, pt, FontStyle.Regular);
-		}
-		public CPrivateFont()
-		{
-			//throw new ArgumentException("CPrivateFont: 引数があるコンストラクタを使用してください。");
-		}
-		#endregion
-
-		protected void Initialize(string fontpath, FontFamily fontfamily, int pt, FontStyle style)
+		protected void Initialize(string fontPath, FontFamily fontFamily, int pt, FontStyle style)
 		{
 			_pfc = null;
-			_fontfamily = null;
+			_fontFamily = null;
 			_font = null;
 			_pt = pt;
 			_rectStrings = new Rectangle(0, 0, 0, 0);
 			_ptOrigin = new Point(0, 0);
 			bDispose完了済み = false;
 
-			if (fontfamily != null)
+			if (fontFamily != null)
 			{
-				_fontfamily = fontfamily;
+				_fontFamily = fontFamily;
 			}
 			else
 			{
 				try
 				{
 					_pfc = new System.Drawing.Text.PrivateFontCollection();    //PrivateFontCollectionオブジェクトを作成する
-					_pfc.AddFontFile(fontpath);                                //PrivateFontCollectionにフォントを追加する
+					_pfc.AddFontFile(fontPath);                                //PrivateFontCollectionにフォントを追加する
 				}
 				catch (FileNotFoundException)
 				{
-					Trace.TraceError("プライベートフォントの追加に失敗しました。({0})", fontpath);
-					throw new FileNotFoundException("プライベートフォントの追加に失敗しました。({0})", Path.GetFileName(fontpath));
+					Trace.TraceError("プライベートフォントの追加に失敗しました。({0})", fontPath);
+					throw new FileNotFoundException("プライベートフォントの追加に失敗しました。({0})", Path.GetFileName(fontPath));
 					//return;
 				}
 
@@ -99,34 +76,34 @@ namespace DTXMania
 				//    Trace.TraceError( "プライベートフォントの追加後、検索に失敗しました。({0})", fontpath );
 				//    return;
 				//}
-				_fontfamily = _pfc.Families[0];
+				_fontFamily = _pfc.Families[0];
 			}
 
 			// 指定されたフォントスタイルが適用できない場合は、フォント内で定義されているスタイルから候補を選んで使用する
 			// 何もスタイルが使えないようなフォントなら、例外を出す。
-			if (_fontfamily != null)
+			if (_fontFamily != null)
 			{
-				if (!_fontfamily.IsStyleAvailable(style))
+				if (!_fontFamily.IsStyleAvailable(style))
 				{
-					FontStyle[] FS = { FontStyle.Regular, FontStyle.Bold, FontStyle.Italic, FontStyle.Underline, FontStyle.Strikeout };
+					FontStyle[] fs = { FontStyle.Regular, FontStyle.Bold, FontStyle.Italic, FontStyle.Underline, FontStyle.Strikeout };
 					style = FontStyle.Regular | FontStyle.Bold | FontStyle.Italic | FontStyle.Underline | FontStyle.Strikeout;  // null非許容型なので、代わりに全盛をNGワードに設定
-					foreach (FontStyle ff in FS)
+					foreach (FontStyle ff in fs)
 					{
-						if (_fontfamily.IsStyleAvailable(ff))
+						if (_fontFamily.IsStyleAvailable(ff))
 						{
 							style = ff;
-							Trace.TraceWarning("フォント{0}へのスタイル指定を、{1}に変更しました。", Path.GetFileName(fontpath), style.ToString());
+							Trace.TraceWarning("フォント{0}へのスタイル指定を、{1}に変更しました。", Path.GetFileName(fontPath), style.ToString());
 							break;
 						}
 					}
 					if (style == (FontStyle.Regular | FontStyle.Bold | FontStyle.Italic | FontStyle.Underline | FontStyle.Strikeout))
 					{
-						Trace.TraceWarning("フォント{0}は適切なスタイル{1}を選択できませんでした。", Path.GetFileName(fontpath), style.ToString());
+						Trace.TraceWarning("フォント{0}は適切なスタイル{1}を選択できませんでした。", Path.GetFileName(fontPath), style.ToString());
 					}
 				}
 				//this._font = new Font(this._fontfamily, pt, style);			//PrivateFontCollectionの先頭のフォントのFontオブジェクトを作成する
 				float emSize = pt * 96.0f / 72.0f;
-				_font = new Font(_fontfamily, emSize, style, GraphicsUnit.Pixel); //PrivateFontCollectionの先頭のフォントのFontオブジェクトを作成する
+				_font = new Font(_fontFamily, emSize, style, GraphicsUnit.Pixel); //PrivateFontCollectionの先頭のフォントのFontオブジェクトを作成する
 																							//HighDPI対応のため、pxサイズで指定
 			}
 			else
@@ -141,12 +118,12 @@ namespace DTXMania
 					// Trace.WriteLine( lcid ) );
 					if (ff.GetName(lcid) == "MS PGothic")
 					{
-						_fontfamily = ff;
+						_fontFamily = ff;
 						Trace.TraceInformation("MS PGothicを代わりに指定しました。");
 						return;
 					}
 				}
-				throw new FileNotFoundException("プライベートフォントの追加に失敗し、MS PGothicでの代替処理にも失敗しました。({0})", Path.GetFileName(fontpath));
+				throw new FileNotFoundException("プライベートフォントの追加に失敗し、MS PGothicでの代替処理にも失敗しました。({0})", Path.GetFileName(fontPath));
 			}
 		}
 
@@ -158,130 +135,19 @@ namespace DTXMania
 			Gradation
 		}
 
-		#region [ DrawPrivateFontのオーバーロード群 ]
-		/// <summary>
-		/// 文字列を描画したテクスチャを返す
-		/// </summary>
-		/// <param name="drawstr">描画文字列</param>
-		/// <param name="fontColor">描画色</param>
-		/// <returns>描画済テクスチャ</returns>
-		public Bitmap DrawPrivateFont(string drawstr, Color fontColor)
-		{
-			return DrawPrivateFont(drawstr, DrawMode.Normal, fontColor, Color.White, Color.White, Color.White);
-		}
-
-		/// <summary>
-		/// 文字列を描画したテクスチャを返す
-		/// </summary>
-		/// <param name="drawstr">描画文字列</param>
-		/// <param name="fontColor">描画色</param>
-		/// <param name="edgeColor">縁取色</param>
-		/// <returns>描画済テクスチャ</returns>
-		public Bitmap DrawPrivateFont(string drawstr, Color fontColor, Color edgeColor)
-		{
-			return DrawPrivateFont(drawstr, DrawMode.Edge, fontColor, edgeColor, Color.White, Color.White);
-		}
-
-		/// <summary>
-		/// 文字列を描画したテクスチャを返す
-		/// </summary>
-		/// <param name="drawstr">描画文字列</param>
-		/// <param name="fontColor">描画色</param>
-		/// <param name="gradationTopColor">グラデーション 上側の色</param>
-		/// <param name="gradationBottomColor">グラデーション 下側の色</param>
-		/// <returns>描画済テクスチャ</returns>
-		//public Bitmap DrawPrivateFont( string drawstr, Color fontColor, Color gradationTopColor, Color gradataionBottomColor )
-		//{
-		//    return DrawPrivateFont( drawstr, DrawMode.Gradation, fontColor, Color.White, gradationTopColor, gradataionBottomColor );
-		//}
-
-		/// <summary>
-		/// 文字列を描画したテクスチャを返す
-		/// </summary>
-		/// <param name="drawstr">描画文字列</param>
-		/// <param name="fontColor">描画色</param>
-		/// <param name="edgeColor">縁取色</param>
-		/// <param name="gradationTopColor">グラデーション 上側の色</param>
-		/// <param name="gradationBottomColor">グラデーション 下側の色</param>
-		/// <returns>描画済テクスチャ</returns>
-		public Bitmap DrawPrivateFont(string drawstr, Color fontColor, Color edgeColor, Color gradationTopColor, Color gradataionBottomColor)
-		{
-			return DrawPrivateFont(drawstr, DrawMode.Edge | DrawMode.Gradation, fontColor, edgeColor, gradationTopColor, gradataionBottomColor);
-		}
-
-#if こちらは使わない // (Bitmapではなく、CTextureを返す版)
-		/// <summary>
-		/// 文字列を描画したテクスチャを返す
-		/// </summary>
-		/// <param name="drawstr">描画文字列</param>
-		/// <param name="fontColor">描画色</param>
-		/// <returns>描画済テクスチャ</returns>
-		public CTexture DrawPrivateFont( string drawstr, Color fontColor )
-		{
-			Bitmap bmp = DrawPrivateFont( drawstr, DrawMode.Normal, fontColor, Color.White, Color.White, Color.White );
-			return CDTXMania.tテクスチャの生成( bmp, false );
-		}
-
-		/// <summary>
-		/// 文字列を描画したテクスチャを返す
-		/// </summary>
-		/// <param name="drawstr">描画文字列</param>
-		/// <param name="fontColor">描画色</param>
-		/// <param name="edgeColor">縁取色</param>
-		/// <returns>描画済テクスチャ</returns>
-		public CTexture DrawPrivateFont( string drawstr, Color fontColor, Color edgeColor )
-		{
-			Bitmap bmp = DrawPrivateFont( drawstr, DrawMode.Edge, fontColor, edgeColor, Color.White, Color.White );
-			return CDTXMania.tテクスチャの生成( bmp, false );
-		}
-
-		/// <summary>
-		/// 文字列を描画したテクスチャを返す
-		/// </summary>
-		/// <param name="drawstr">描画文字列</param>
-		/// <param name="fontColor">描画色</param>
-		/// <param name="gradationTopColor">グラデーション 上側の色</param>
-		/// <param name="gradationBottomColor">グラデーション 下側の色</param>
-		/// <returns>描画済テクスチャ</returns>
-		//public CTexture DrawPrivateFont( string drawstr, Color fontColor, Color gradationTopColor, Color gradataionBottomColor )
-		//{
-		//    Bitmap bmp = DrawPrivateFont( drawstr, DrawMode.Gradation, fontColor, Color.White, gradationTopColor, gradataionBottomColor );
-		//	  return CDTXMania.tテクスチャの生成( bmp, false );
-		//}
-
-		/// <summary>
-		/// 文字列を描画したテクスチャを返す
-		/// </summary>
-		/// <param name="drawstr">描画文字列</param>
-		/// <param name="fontColor">描画色</param>
-		/// <param name="edgeColor">縁取色</param>
-		/// <param name="gradationTopColor">グラデーション 上側の色</param>
-		/// <param name="gradationBottomColor">グラデーション 下側の色</param>
-		/// <returns>描画済テクスチャ</returns>
-		public CTexture DrawPrivateFont( string drawstr, Color fontColor, Color edgeColor,  Color gradationTopColor, Color gradataionBottomColor )
-		{
-			Bitmap bmp = DrawPrivateFont( drawstr, DrawMode.Edge | DrawMode.Gradation, fontColor, edgeColor, gradationTopColor, gradataionBottomColor );
-			return CDTXMania.tテクスチャの生成( bmp, false );
-		}
-#endif
-		#endregion
-
-
 		/// <summary>
 		/// 文字列を描画したテクスチャを返す(メイン処理)
 		/// </summary>
-		/// <param name="rectDrawn">描画された領域</param>
-		/// <param name="ptOrigin">描画文字列</param>
-		/// <param name="drawstr">描画文字列</param>
-		/// <param name="drawmode">描画モード</param>
+		/// <param name="drawStr">描画文字列</param>
+		/// <param name="drawMode">描画モード</param>
 		/// <param name="fontColor">描画色</param>
 		/// <param name="edgeColor">縁取色</param>
 		/// <param name="gradationTopColor">グラデーション 上側の色</param>
 		/// <param name="gradationBottomColor">グラデーション 下側の色</param>
 		/// <returns>描画済テクスチャ</returns>
-		public Bitmap DrawPrivateFont(string drawstr, DrawMode drawmode, Color fontColor, Color edgeColor, Color gradationTopColor, Color gradationBottomColor)
+		public Bitmap DrawPrivateFont(string drawStr, DrawMode drawMode, Color fontColor, Color edgeColor, Color gradationTopColor, Color gradationBottomColor, bool bEdgeGradation = false)
 		{
-			if (_fontfamily == null || drawstr == null || drawstr == "")
+			if (_fontFamily == null || drawStr == null || drawStr == "")
 			{
 				// nullを返すと、その後bmp→texture処理や、textureのサイズを見て__の処理で全部例外が発生することになる。
 				// それは非常に面倒なので、最小限のbitmapを返してしまう。
@@ -291,164 +157,88 @@ namespace DTXMania
 				_ptOrigin = new Point(0, 0);
 				return new Bitmap(1, 1);
 			}
-			bool bEdge = ((drawmode & DrawMode.Edge) == DrawMode.Edge);
-			bool bGradation = ((drawmode & DrawMode.Gradation) == DrawMode.Gradation);
-
-			// 縁取りの縁のサイズは、とりあえずフォントの大きさの1/4とする
-			int nEdgePt = (bEdge) ? _pt / 4 : 0;
-
-			var flags = TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding | TextFormatFlags.SingleLine;
-
-			// 描画サイズを測定する
-			Size stringSize = TextRenderer.MeasureText(drawstr, _font, 
-				new Size(int.MaxValue, int.MaxValue), flags);
-
-			//取得した描画サイズを基に、描画先のbitmapを作成する
-			Bitmap bmp = new(stringSize.Width + nEdgePt * 2, stringSize.Height + nEdgePt * 2);
-			bmp.MakeTransparent();
-			Graphics g = Graphics.FromImage(bmp);
-			g.SmoothingMode = SmoothingMode.HighQuality;
-
-			StringFormat sf = new();
-			sf.LineAlignment = StringAlignment.Far; // 画面下部（垂直方向位置）
-			sf.Alignment = StringAlignment.Center;  // 画面中央（水平方向位置) //To fix
-			sf.FormatFlags = StringFormatFlags.NoClip | StringFormatFlags.NoWrap;
-
-			// レイアウト枠
-			//Rectangle r = new Rectangle( 0, 0, stringSize.Width + nEdgePt * 2, stringSize.Height + nEdgePt * 2 );
-			Rectangle r = new(0, 0, stringSize.Width + nEdgePt * 2, stringSize.Height + nEdgePt * 2); //#34638 2014.11.24 kairera0467 とりあえず文字の横サイズを1.5倍に変更。
-
-			if (bEdge)  // 縁取り有りの描画
-			{
-				// DrawPathで、ポイントサイズを使って描画するために、DPIを使って単位変換する
-				// (これをしないと、単位が違うために、小さめに描画されてしまう)
-				float sizeInPixels = _font.SizeInPoints * g.DpiY / 72;  // 1 inch = 72 points
-
-				GraphicsPath gp = new();
-				gp.AddString(drawstr, _fontfamily, (int)_font.Style, sizeInPixels, r, sf);
-
-				// 縁取りを描画する
-				Pen p = new(edgeColor, nEdgePt);
-				p.LineJoin = LineJoin.Round;
-				g.DrawPath(p, gp);
-
-				// 塗りつぶす
-				Brush br;
-				if (bGradation)
-				{
-					br = new LinearGradientBrush(r, gradationTopColor, gradationBottomColor, LinearGradientMode.Vertical);
-				}
-				else
-				{
-					br = new SolidBrush(fontColor);
-				}
-				g.FillPath(br, gp);
-
-				if (br != null) br.Dispose(); br = null;
-				if (p != null) p.Dispose(); p = null;
-				if (gp != null) gp.Dispose(); gp = null;
-			}
-			else
-			{
-				TextRenderer.DrawText(g, drawstr, _font, r, fontColor, flags);
-			}
-#if debug表示
-			g.DrawRectangle( new Pen( Color.White, 1 ), new Rectangle( 1, 1, stringSize.Width-1, stringSize.Height-1 ) );
-			g.DrawRectangle( new Pen( Color.Green, 1 ), new Rectangle( 0, 0, bmp.Width - 1, bmp.Height - 1 ) );
-#endif
-			_rectStrings = new Rectangle(0, 0, stringSize.Width, stringSize.Height);
-			_ptOrigin = new Point(nEdgePt * 2, nEdgePt * 2);
-
-
-			#region [ リソースを解放する ]
-			if (sf != null) sf.Dispose(); sf = null;
-			if (g != null) g.Dispose(); g = null;
-			#endregion
-
-			return bmp;
-		}
-
-		/// <summary>
-		/// 文字列を描画したテクスチャを返す(メイン処理)
-		/// </summary>
-		/// <param name="rectDrawn">描画された領域</param>
-		/// <param name="ptOrigin">描画文字列</param>
-		/// <param name="drawstr">描画文字列</param>
-		/// <param name="drawmode">描画モード</param>
-		/// <param name="fontColor">描画色</param>
-		/// <param name="edgeColor">縁取色</param>
-		/// <param name="gradationTopColor">グラデーション 上側の色</param>
-		/// <param name="gradationBottomColor">グラデーション 下側の色</param>
-		/// <returns>描画済テクスチャ</returns>
-		public Bitmap DrawPrivateFont(string drawstr, DrawMode drawmode, Color fontColor, Color edgeColor, Color gradationTopColor, Color gradationBottomColor, bool bEdgeGradation)
-		{
-			if (_fontfamily == null || drawstr == null || drawstr == "")
-			{
-				// nullを返すと、その後bmp→texture処理や、textureのサイズを見て__の処理で全部例外が発生することになる。
-				// それは非常に面倒なので、最小限のbitmapを返してしまう。
-				// まずはこの仕様で進めますが、問題有れば(上位側からエラー検出が必要であれば)例外を出したりエラー状態であるプロパティを定義するなり検討します。
-				Trace.TraceError("DrawPrivateFont()の入力不正。最小値のbitmapを返します。");
-				_rectStrings = new Rectangle(0, 0, 0, 0);
-				_ptOrigin = new Point(0, 0);
-				return new Bitmap(1, 1);
-			}
-			bool bEdge = ((drawmode & DrawMode.Edge) == DrawMode.Edge);
-			bool bGradation = ((drawmode & DrawMode.Gradation) == DrawMode.Gradation);
-
+			
+			
+			bool bEdge = (drawMode & DrawMode.Edge) == DrawMode.Edge;
+			bool bGradation = (drawMode & DrawMode.Gradation) == DrawMode.Gradation;
+			
 			// 縁取りの縁のサイズは、とりあえずフォントの大きさの1/4とする
 			// Changed to 1/6 as 1/4 is too thick for new Black-White Style
-			int nEdgePt = (bEdge) ? _pt / 6 : 0;
-
+			int nEdgePt = bEdgeGradation ? _pt / 6 : bEdge ? _pt / 4 : 0;
 			var flags = TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding | TextFormatFlags.SingleLine;
+			
 			// 描画サイズを測定する
-			Size stringSize = TextRenderer.MeasureText(drawstr, _font, 
+			Size stringSize = TextRenderer.MeasureText(drawStr, _font, 
 				new Size(int.MaxValue, int.MaxValue), flags);
-
+			
 			//取得した描画サイズを基に、描画先のbitmapを作成する
-			int l_width = (int)(stringSize.Width * 1.05f); //A constant proportion of 5% buffer should avoid the issue of text truncation
-			Bitmap bmp = new(l_width, stringSize.Height + nEdgePt * 2);
+			int l_width = (int)(stringSize.Width * 1.1f); //A constant proportion of 10% buffer should avoid the issue of text truncation
+			Bitmap bmp = new(l_width + nEdgePt * 2, stringSize.Height + nEdgePt * 2);
 			bmp.MakeTransparent();
 			Graphics g = Graphics.FromImage(bmp);
 			g.SmoothingMode = SmoothingMode.HighQuality;
-
 			StringFormat sf = new();
 			sf.LineAlignment = StringAlignment.Far; // 画面下部（垂直方向位置）
 			sf.Alignment = StringAlignment.Near;    // 画面中央（水平方向位置）//Changed to Left (Near) of Texture rect
 			sf.FormatFlags = StringFormatFlags.NoClip | StringFormatFlags.NoWrap;
 			
 			// レイアウト枠
-			Rectangle r = new(0, 0, l_width, stringSize.Height + nEdgePt * 2);
-			//r = new Rectangle( 0, 0, l_width + nEdgePt*2, stringSize.Height + nEdgePt * 2 ); // 2016.06.12 kairera0467 改行防止
-
-			if (bEdge && bEdgeGradation)    // 縁取り有りの描画
+			Rectangle r = new(0, 0, l_width + nEdgePt * 2, stringSize.Height + nEdgePt * 2);
+			
+			if (bEdgeGradation || bEdge)
 			{
 				// DrawPathで、ポイントサイズを使って描画するために、DPIを使って単位変換する
 				// (これをしないと、単位が違うために、小さめに描画されてしまう)
-				float sizeInPixels = _font.SizeInPoints * g.DpiY / 72;  // 1 inch = 72 points
-
+				float sizeInPixels = _font.SizeInPoints * g.DpiY / 72; // 1 inch = 72 points
+				
 				GraphicsPath gp = new();
-				gp.AddString(drawstr, _fontfamily, (int)_font.Style, sizeInPixels, r, sf);
-
-				// 縁取りを描画する
-				Brush br縁;
-				br縁 = new LinearGradientBrush(r, gradationTopColor, gradationBottomColor, LinearGradientMode.Vertical);
-				Pen p = new(br縁, nEdgePt);
-				p.LineJoin = LineJoin.Round;
-				g.DrawPath(p, gp);
-
-				// 塗りつぶす
+				gp.AddString(drawStr, _fontFamily, (int)_font.Style, sizeInPixels, r, sf);
+				
 				Brush br;
-				br = new SolidBrush(fontColor);
-				g.FillPath(br, gp);
 
-				if (br != null) br.Dispose(); br = null;
-				if (p != null) p.Dispose(); p = null;
-				if (gp != null) gp.Dispose(); gp = null;
+				if (!bEdgeGradation)
+				{
+					// 縁取りを描画する
+					Pen p = new(edgeColor, nEdgePt);
+					p.LineJoin = LineJoin.Round;
+					g.DrawPath(p, gp);
+					p.Dispose();
+
+					// 塗りつぶす
+					if (bGradation)
+					{
+						br = new LinearGradientBrush(r, gradationTopColor, gradationBottomColor,
+							LinearGradientMode.Vertical);
+					}
+					else
+					{
+						br = new SolidBrush(fontColor);
+					}
+				}
+				else
+				{
+					// 縁取りを描画する
+					Brush br縁 = new LinearGradientBrush(r, gradationTopColor, gradationBottomColor,
+						LinearGradientMode.Vertical);
+					
+					Pen p = new(br縁, nEdgePt);
+					p.LineJoin = LineJoin.Round;
+					g.DrawPath(p, gp);
+					p.Dispose();
+
+					// 塗りつぶす
+					br = new SolidBrush(fontColor);
+				}
+				
+				g.FillPath(br, gp);
+				br.Dispose();
+				gp.Dispose();
 			}
 			else
 			{
-				TextRenderer.DrawText(g, drawstr, _font, r, fontColor, flags);
+				TextRenderer.DrawText(g, drawStr, _font, r, fontColor, flags);
 			}
+
 #if debug表示
 			g.DrawRectangle( new Pen( Color.White, 1 ), new Rectangle( 1, 1, stringSize.Width-1, stringSize.Height-1 ) );
 			g.DrawRectangle( new Pen( Color.Green, 1 ), new Rectangle( 0, 0, bmp.Width - 1, bmp.Height - 1 ) );
@@ -457,10 +247,8 @@ namespace DTXMania
 			_ptOrigin = new Point(nEdgePt * 2, nEdgePt * 2);
 
 
-			#region [ リソースを解放する ]
-			if (sf != null) sf.Dispose(); sf = null;
-			if (g != null) g.Dispose(); g = null;
-			#endregion
+			sf.Dispose();
+			g.Dispose();
 
 			return bmp;
 		}
@@ -470,25 +258,13 @@ namespace DTXMania
 		/// </summary>
 		public Rectangle RectStrings
 		{
-			get
-			{
-				return _rectStrings;
-			}
-			protected set
-			{
-				_rectStrings = value;
-			}
+			get => _rectStrings;
+			protected set => _rectStrings = value;
 		}
 		public Point PtOrigin
 		{
-			get
-			{
-				return _ptOrigin;
-			}
-			protected set
-			{
-				_ptOrigin = value;
-			}
+			get => _ptOrigin;
+			protected set => _ptOrigin = value;
 		}
 
 		#region [ IDisposable 実装 ]
@@ -520,7 +296,7 @@ namespace DTXMania
 		protected Font _font;
 
 		private System.Drawing.Text.PrivateFontCollection _pfc;
-		private FontFamily _fontfamily;
+		private FontFamily _fontFamily;
 		private int _pt;
 		private Rectangle _rectStrings;
 		private Point _ptOrigin;
