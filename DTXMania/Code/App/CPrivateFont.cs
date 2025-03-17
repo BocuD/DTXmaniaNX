@@ -297,11 +297,11 @@ namespace DTXMania
 			// 縁取りの縁のサイズは、とりあえずフォントの大きさの1/4とする
 			int nEdgePt = (bEdge) ? _pt / 4 : 0;
 
+			var flags = TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding | TextFormatFlags.SingleLine;
+
 			// 描画サイズを測定する
-			Size stringSize = System.Windows.Forms.TextRenderer.MeasureText(drawstr, this._font, new Size(int.MaxValue, int.MaxValue),
-				System.Windows.Forms.TextFormatFlags.NoPrefix |
-				System.Windows.Forms.TextFormatFlags.NoPadding
-				);
+			Size stringSize = TextRenderer.MeasureText(drawstr, _font, 
+				new Size(int.MaxValue, int.MaxValue), flags);
 
 			//取得した描画サイズを基に、描画先のbitmapを作成する
 			Bitmap bmp = new(stringSize.Width + nEdgePt * 2, stringSize.Height + nEdgePt * 2);
@@ -350,8 +350,7 @@ namespace DTXMania
 			}
 			else
 			{
-				// 縁取りなしの描画
-				System.Windows.Forms.TextRenderer.DrawText(g, drawstr, _font, new Point(0, 0), fontColor);
+				TextRenderer.DrawText(g, drawstr, _font, r, fontColor, flags);
 			}
 #if debug表示
 			g.DrawRectangle( new Pen( Color.White, 1 ), new Rectangle( 1, 1, stringSize.Width-1, stringSize.Height-1 ) );
@@ -400,11 +399,10 @@ namespace DTXMania
 			// Changed to 1/6 as 1/4 is too thick for new Black-White Style
 			int nEdgePt = (bEdge) ? _pt / 6 : 0;
 
+			var flags = TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding | TextFormatFlags.SingleLine;
 			// 描画サイズを測定する
-			Size stringSize = System.Windows.Forms.TextRenderer.MeasureText(drawstr, this._font, new Size(int.MaxValue, int.MaxValue),
-				System.Windows.Forms.TextFormatFlags.NoPrefix |
-				System.Windows.Forms.TextFormatFlags.NoPadding
-				);
+			Size stringSize = TextRenderer.MeasureText(drawstr, _font, 
+				new Size(int.MaxValue, int.MaxValue), flags);
 
 			//取得した描画サイズを基に、描画先のbitmapを作成する
 			int l_width = (int)(stringSize.Width * 1.05f); //A constant proportion of 5% buffer should avoid the issue of text truncation
@@ -449,8 +447,7 @@ namespace DTXMania
 			}
 			else
 			{
-				// 縁取りなしの描画
-				System.Windows.Forms.TextRenderer.DrawText(g, drawstr, _font, new Point(0, 0), fontColor);
+				TextRenderer.DrawText(g, drawstr, _font, r, fontColor, flags);
 			}
 #if debug表示
 			g.DrawRectangle( new Pen( Color.White, 1 ), new Rectangle( 1, 1, stringSize.Width-1, stringSize.Height-1 ) );
