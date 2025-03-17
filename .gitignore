@@ -5,6 +5,7 @@
 *.suo
 *.user
 *.sln.docstates
+*.idea
 
 # Build results
 [Dd]ebug/
@@ -201,5 +202,9 @@ Runtime/DTXFiles/*
 !Runtime/System/Sounds
 !Runtime/System/Graphics
 
+Runtime/dll
+Runtime/*.dll
+
 # IDE files
 .idea/*
+/Runtime/runtimes
