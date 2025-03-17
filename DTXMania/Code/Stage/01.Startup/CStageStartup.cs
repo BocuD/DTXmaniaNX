@@ -131,15 +131,15 @@ namespace DTXMania
 						break;
 
 					case EPhase.起動2_曲を検索してリストを作成する:
-						str現在進行中 = $"Enumerating songs ... {es.Songs管理.nNbScoresFound}";
+						str現在進行中 = $"Enumerating songs ... {es.SongManager.nNbScoresFound}";
 						break;
 
 					case EPhase.起動3_スコアキャッシュをリストに反映する:
-						str現在進行中 = $"Loading score properties from songs.db ... {es.Songs管理.nNbScoresFromScoreCache}/{es.Songs管理.nNbScoresFound}";
+						str現在進行中 = $"Loading score properties from songs.db ... {es.SongManager.nNbScoresFromScoreCache}/{es.SongManager.nNbScoresFound}";
 						break;
 
 					case EPhase.起動4_スコアキャッシュになかった曲をファイルから読み込んで反映する:
-						str現在進行中 = $"Loading score properties from files ... {es.Songs管理.nNbScoresFromFile}/{es.Songs管理.nNbScoresFound - es.Songs管理.nNbScoresFromScoreCache}";
+						str現在進行中 = $"Loading score properties from files ... {es.SongManager.nNbScoresFromFile}/{es.SongManager.nNbScoresFound - es.SongManager.nNbScoresFromScoreCache}";
 						break;
 
 					case EPhase.起動5_曲リストへ後処理を適用する:
@@ -174,7 +174,7 @@ namespace DTXMania
 
 				if( es is { IsSongListEnumCompletelyDone: true } )							// 曲リスト作成が終わったら
 				{
-					CDTXMania.SongManager = ( es != null ) ? es.Songs管理 : null;		// 最後に、曲リストを拾い上げる
+					CDTXMania.SongManager = ( es != null ) ? es.SongManager : null;		// 最後に、曲リストを拾い上げる
 					return 1;
 				}
 			}

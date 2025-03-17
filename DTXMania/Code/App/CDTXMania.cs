@@ -666,7 +666,7 @@ namespace DTXMania
                                 stageSongSelection.bIsEnumeratingSongs = false;
 
                                 bool bRemakeSongTitleBar = (rCurrentStage.eStageID == CStage.EStage.SongSelection) ? true : false;
-                                stageSongSelection.Refresh(EnumSongs.Songs管理, bRemakeSongTitleBar);
+                                stageSongSelection.Refresh(EnumSongs.SongManager, bRemakeSongTitleBar);
                                 EnumSongs.SongListEnumCompletelyDone();
                             }
                             #endregion

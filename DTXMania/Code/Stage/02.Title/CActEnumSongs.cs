@@ -62,11 +62,12 @@ namespace DTXMania
             ui = new UIGroup();
             ui.size = new Vector2(1280, 720);
             UIText message = ui.AddChild(new UIText(font, CDTXMania.isJapanese ? strMessage[0] : strMessage[1]));
+            message.position = new Vector3(0, 25, 0);
             message.anchor = new Vector2(0.0f, 0.0f);
             
             text = ui.AddChild(new UIText(font, "Progress: 0/100"));
-            text.position = new Vector3(0, 50, 0);
-            text.anchor = new Vector2(0.0f, 0.0f);
+            text.position = new Vector3(0, 100, 0);
+            text.anchor = new Vector2(0.0f, 1.0f);
 
             base.OnManagedCreateResources();
         }
@@ -96,8 +97,20 @@ namespace DTXMania
             if (status != null)
             {
                 int stepCount = Enum.GetValues(typeof(CEnumSongs.SongEnumProgress)).Length;
+
+                switch (status)
+                {
+                    case CEnumSongs.SongEnumProgress.ReadSongData:
+                        text.SetText($"Step {(int)status + 1} / {stepCount}\n{status}: " +
+                                     $"{CDTXMania.EnumSongs.SongManager.ProcessSongDataProgress} / {CDTXMania.EnumSongs.SongManager.ProcessSongDataTotal}\n" +
+                                     $"{CDTXMania.EnumSongs.SongManager.ProcessSongDataPath}");
+                        break;
+                    
+                    default:
+                        text.SetText($"Step {(int)status + 1} / {stepCount}\n{status}");
+                        break;
+                }
                 
-                text.SetText($"Step {(int)status + 1} / {stepCount}\n{status}");
                 text.isVisible = true;
             }
             else

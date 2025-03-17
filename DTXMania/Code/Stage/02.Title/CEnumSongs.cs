@@ -4,7 +4,7 @@ namespace DTXMania
 {
     internal class CEnumSongs							// #27060 2011.2.7 yyagi 曲リストを取得するクラス
     {													// ファイルキャッシュ(songslist.db)からの取得と、ディスクからの取得を、この一つのクラスに集約。
-        public CSongManager Songs管理						// 曲の探索結果はこのSongs管理に読み込まれる
+        public CSongManager SongManager						// 曲の探索結果はこのSongs管理に読み込まれる
         {
             get;
             private set;
@@ -20,12 +20,12 @@ namespace DTXMania
         public void SongListEnumCompletelyDone()
         {
             state = DTXEnumState.CompletelyDone;
-            Songs管理 = null;						// GCはOSに任せる
+            SongManager = null;						// GCはOSに任せる
         }
         public bool IsSlowdown							// #PREMOVIE再生中は検索負荷を落とす
         {
-            get => Songs管理.bIsSlowdown;
-            set => Songs管理.bIsSlowdown = value;
+            get => SongManager.bIsSlowdown;
+            set => SongManager.bIsSlowdown = value;
         }
 
         public void ChangeEnumeratePriority(ThreadPriority tp)
@@ -58,15 +58,15 @@ namespace DTXMania
         /// </summary>
         public CEnumSongs()
         {
-            Songs管理 = new CSongManager();
+            SongManager = new CSongManager();
         }
 
         public void Init(List<CScore> ls, int n)
         {
             if (state == DTXEnumState.None)
             {
-                Songs管理.listSongsDB = ls;
-                Songs管理.nNbScoresFromSongsDB = n;
+                SongManager.listSongsDB = ls;
+                SongManager.nNbScoresFromSongsDB = n;
             }
         }
 
@@ -96,9 +96,9 @@ namespace DTXMania
                     state = DTXEnumState.Ongoing;
                 }
 
-                if (Songs管理 == null)		// Enumerating Songs完了後、CONFIG画面から再スキャンしたときにこうなる
+                if (SongManager == null)		// Enumerating Songs完了後、CONFIG画面から再スキャンしたときにこうなる
                 {
-                    Songs管理 = new CSongManager();
+                    SongManager = new CSongManager();
                 }
                 
                 thDTXFileEnumerate = new Thread(() => _ = BuildSongListFromDisk(readCache))
@@ -121,7 +121,7 @@ namespace DTXMania
                 ((thDTXFileEnumerate.ThreadState & (System.Threading.ThreadState.Background)) != 0))
             {
                 // this.thDTXFileEnumerate.Suspend();		// obsoleteにつき使用中止
-                Songs管理.bIsSuspending = true;
+                SongManager.bIsSuspending = true;
                 state = DTXEnumState.Suspended;
                 Trace.TraceInformation("★曲データ検索スレッドを中断しました。");
             }
@@ -136,8 +136,8 @@ namespace DTXMania
             {
                 if ((thDTXFileEnumerate.ThreadState & (System.Threading.ThreadState.WaitSleepJoin | System.Threading.ThreadState.StopRequested)) != 0)	//
                 {
-                    Songs管理.bIsSuspending = false;
-                    Songs管理.AutoReset.Set();
+                    SongManager.bIsSuspending = false;
+                    SongManager.AutoReset.Set();
                     state = DTXEnumState.Ongoing;
                     Trace.TraceInformation("★曲データ検索スレッドを再開しました。");
                 }
@@ -175,8 +175,8 @@ namespace DTXMania
                 thDTXFileEnumerate = null;
                 state = DTXEnumState.None;
 
-                Songs管理 = null;					// Songs管理を再初期化する (途中まで作った曲リストの最後に、一から重複して追記することにならないようにする。)
-                Songs管理 = new CSongManager();
+                SongManager = null;					// Songs管理を再初期化する (途中まで作った曲リストの最後に、一から重複して追記することにならないようにする。)
+                SongManager = new CSongManager();
             }
         }
 
@@ -223,10 +223,10 @@ namespace DTXMania
                         s = await Deserialize(strPathSongList);		// 直接this.Songs管理にdeserialize()結果を代入するのは避ける。nullにされてしまうことがあるため。
                         if (s != null)
                         {
-                            Songs管理 = s;
+                            SongManager = s;
                         }
 
-                        int scores = Songs管理.nNbScoresFound;
+                        int scores = SongManager.nNbScoresFound;
                         Trace.TraceInformation("Loading songlist.db complete. [{0} scores]", scores);
                         lock (CDTXMania.stageStartup.list進行文字列)
                         {
@@ -264,14 +264,14 @@ namespace DTXMania
                     {
                         try
                         {
-                            Songs管理.tReadSongsDB(strPathSongsDb);
+                            SongManager.tReadSongsDB(strPathSongsDb);
                         }
                         catch
                         {
                             Trace.TraceError("Fail to load songs.db");
                         }
 
-                        int scores = (Songs管理 == null) ? 0 : Songs管理.nNbScoresFromSongsDB;	// 読み込み途中でアプリ終了した場合など、CDTXMania.SongManager がnullの場合があるので注意
+                        int scores = (SongManager == null) ? 0 : SongManager.nNbScoresFromSongsDB;	// 読み込み途中でアプリ終了した場合など、CDTXMania.SongManager がnullの場合があるので注意
                         Trace.TraceInformation("Loading songs.db complete. [{0} scores]", scores);
                         lock (CDTXMania.stageStartup.list進行文字列)
                         {
@@ -343,10 +343,10 @@ namespace DTXMania
                                 CSongManager s = await Deserialize(strPathSongList); // 直接this.Songs管理にdeserialize()結果を代入するのは避ける。nullにされてしまうことがあるため。
                                 if (s != null)
                                 {
-                                    Songs管理 = s;
+                                    SongManager = s;
                                 }
 
-                                int scores = Songs管理.nNbScoresFound;
+                                int scores = SongManager.nNbScoresFound;
                                 Trace.TraceInformation("Loading songlist.db complete. [{0} scores]", scores);
                             }
                             else
@@ -376,14 +376,14 @@ namespace DTXMania
                             {
                                 try
                                 {
-                                    Songs管理.tReadSongsDB(strPathSongsDb);
+                                    SongManager.tReadSongsDB(strPathSongsDb);
                                 }
                                 catch
                                 {
                                     Trace.TraceError("Fail to load songs.db");
                                 }
 
-                                int scores = (Songs管理 == null) ? 0 : Songs管理.nNbScoresFromSongsDB;    // 読み込み途中でアプリ終了した場合など、CDTXMania.SongManager がnullの場合があるので注意
+                                int scores = (SongManager == null) ? 0 : SongManager.nNbScoresFromSongsDB;    // 読み込み途中でアプリ終了した場合など、CDTXMania.SongManager がnullの場合があるので注意
                                 Trace.TraceInformation("Loading songs.db complete. [{0} scores]", scores);
                             }
                             else
@@ -402,12 +402,12 @@ namespace DTXMania
                     }
                     finally
                     {
-                        CDTXMania.SongManager = Songs管理;
+                        CDTXMania.SongManager = SongManager;
                         //Reset temporary SongManager
-                        Songs管理 = new CSongManager();
+                        SongManager = new CSongManager();
                         //Init temporary SongManager with SongListDB and Count
-                        Songs管理.listSongsDB = CDTXMania.SongManager.listSongsDB;
-                        Songs管理.nNbScoresFromSongsDB = CDTXMania.SongManager.nNbScoresForSongsDB;
+                        SongManager.listSongsDB = CDTXMania.SongManager.listSongsDB;
+                        SongManager.nNbScoresFromSongsDB = CDTXMania.SongManager.nNbScoresForSongsDB;
                     }                    
                 }
 
@@ -442,7 +442,7 @@ namespace DTXMania
 
                                     try
                                     {
-                                        Songs管理.tSearchSongsAndCreateList(path, true);
+                                        SongManager.tSearchSongsAndCreateList(path, true);
                                     }
                                     catch (Exception e)
                                     {
@@ -465,7 +465,7 @@ namespace DTXMania
                 }
                 finally
                 {
-                    Trace.TraceInformation("Song Data search complete. [{0} songs {1} scores]", Songs管理.nNbSongNodesFound, Songs管理.nNbScoresFound);
+                    Trace.TraceInformation("Song Data search complete. [{0} songs {1} scores]", SongManager.nNbSongNodesFound, SongManager.nNbScoresFound);
                     Trace.Unindent();
                     TimeSpan currSpan = DateTime.Now - start;
                     Trace.TraceInformation("Duration of enum2) Searching Song Data : {0}", currSpan.ToString());
@@ -486,9 +486,9 @@ namespace DTXMania
 
                 try
                 {
-                    if (Songs管理.listSongsDB != null)
+                    if (SongManager.listSongsDB != null)
                     {
-                        Songs管理.tReflectScoreCacheInSongList();
+                        SongManager.tReflectScoreCacheInSongList();
                     }
                 }
                 catch (Exception e)
@@ -499,7 +499,7 @@ namespace DTXMania
                 }
                 finally
                 {
-                    Trace.TraceInformation("Score cache loading complete. [{0}/{1}スコア]", Songs管理.nNbScoresFromScoreCache, Songs管理.nNbScoresFound);
+                    Trace.TraceInformation("Score cache loading complete. [{0}/{1}スコア]", SongManager.nNbScoresFromScoreCache, SongManager.nNbScoresFound);
                     Trace.Unindent();
                     TimeSpan currSpan = DateTime.Now - start;
                     Trace.TraceInformation("Duration of enum3) Loading score cache into songs.db. : {0}", currSpan.ToString());
@@ -515,9 +515,9 @@ namespace DTXMania
                 EnumProgress = SongEnumProgress.ReadSongData;
                 //					base.ePhaseID = CStage.EPhase.起動4_スコアキャッシュになかった曲をファイルから読み込んで反映する;
 
-                int num2 = Songs管理.nNbScoresFound - Songs管理.nNbScoresFromScoreCache;
-
-                Trace.TraceInformation("{0}, {1}", Songs管理.nNbScoresFound, Songs管理.nNbScoresFromScoreCache);
+                int num2 = SongManager.nNbScoresFound - SongManager.nNbScoresFromScoreCache;
+                
+                Trace.TraceInformation("{0}, {1}", SongManager.nNbScoresFound, SongManager.nNbScoresFromScoreCache);
                 start = DateTime.Now;
                 Trace.TraceInformation("enum4) Reads and copy song data information from files [{0} scores] that were not in songs.db. ", num2);
                 Trace.Indent();
@@ -525,7 +525,8 @@ namespace DTXMania
                 try
                 {
                     //NOTE: This is the most time consuming step in Song Loading. To be optimized
-                    Songs管理.tSongsDBになかった曲をファイルから読み込んで反映する();
+                    //Songs管理.ProcessNewSongData();
+                    await SongManager.PrepareProcessNewSongData();
                 }
                 catch (Exception e)
                 {
@@ -535,7 +536,7 @@ namespace DTXMania
                 }
                 finally
                 {
-                    Trace.TraceInformation("Copying into song data complete. [{0}/{1} scores]", Songs管理.nNbScoresFromFile, num2);
+                    Trace.TraceInformation("Copying into song data complete. [{0}/{1} scores]", SongManager.nNbScoresFromFile, num2);
                     Trace.Unindent();
                     TimeSpan currSpan = DateTime.Now - start;
                     Trace.TraceInformation("Duration of enum4) Reads and copy song data: {0}", currSpan.ToString());
@@ -556,7 +557,7 @@ namespace DTXMania
 
                 try
                 {
-                    Songs管理.t曲リストへ後処理を適用する();
+                    SongManager.t曲リストへ後処理を適用する();
                 }
                 catch (Exception e)
                 {
@@ -587,7 +588,7 @@ namespace DTXMania
 
                 try
                 {
-                    Songs管理.tスコアキャッシュをSongsDBに出力する(strPathSongsDb);
+                    SongManager.tスコアキャッシュをSongsDBに出力する(strPathSongsDb);
                 }
                 catch (Exception e)
                 {
@@ -597,7 +598,7 @@ namespace DTXMania
                 }
                 finally
                 {
-                    Trace.TraceInformation("Saving into songs.db complete.[{0} scores]", Songs管理.nNbScoresForSongsDB);
+                    Trace.TraceInformation("Saving into songs.db complete.[{0} scores]", SongManager.nNbScoresForSongsDB);
                     Trace.Unindent();
                     TimeSpan currSpan = DateTime.Now - start;
                     Trace.TraceInformation("Duration of enum6) Saving song metadata into songs.db: {0}", currSpan.ToString());
@@ -614,9 +615,9 @@ namespace DTXMania
                 Trace.TraceInformation("enum7) Saving additional song data into songlist.db.");
                 Trace.Indent();
 
-                SerializeSongList(Songs管理, strPathSongList);
+                SerializeSongList(SongManager, strPathSongList);
                 
-                Trace.TraceInformation("Saving into songlist.db complete. [{0} scores]", Songs管理.nNbScoresForSongsDB);
+                Trace.TraceInformation("Saving into songlist.db complete. [{0} scores]", SongManager.nNbScoresForSongsDB);
                 Trace.Unindent();
                 TimeSpan span = DateTime.Now - start;
                 Trace.TraceInformation("Duration of enum7) Saving additional song data into songlist.db: {0}", span.ToString());
