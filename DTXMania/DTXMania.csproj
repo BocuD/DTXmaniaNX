@@ -47,7 +47,7 @@
         <HintPath>..\Runtime\dll\SharpDX.Mathematics.dll</HintPath>
       </Reference>
       <Reference Include="System.Windows.Forms">
-        <HintPath>..\..\..\..\..\..\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Windows.Forms\v4.0_4.0.0.0__b77a5c561934e089\System.Windows.Forms.dll</HintPath>
+        <HintPath>C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Windows.Forms\v4.0_4.0.0.0__b77a5c561934e089\System.Windows.Forms.dll</HintPath>
       </Reference>
     </ItemGroup>
 
