@@ -11,7 +11,7 @@ namespace DTXMania.Code.UI
         public override float transparency
         {
             get => texture.nTransparency / 255.0f;
-            set => texture.nTransparency = (int)(value * 255);
+            set => texture.nTransparency = (int)(value * 255.0f);
         }
 
         public override float Width => texture.szTextureSize.Width;
