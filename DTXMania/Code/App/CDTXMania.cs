@@ -1374,27 +1374,11 @@ namespace DTXMania
 		}
         
         //https://stackoverflow.com/questions/1600962/displaying-the-build-date
-        public static DateTime GetLinkerTime(Assembly assembly, TimeZoneInfo target = null)
+        private static DateTime? GetAssemblyBuildDateTime()
         {
-            string filePath = assembly.Location;
-            const int cPeHeaderOffset = 60;
-            const int cLinkerTimestampOffset = 8;
-
-            byte[] buffer = new byte[2048];
-
-            using (FileStream stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
-                stream.Read(buffer, 0, 2048);
-
-            int offset = BitConverter.ToInt32(buffer, cPeHeaderOffset);
-            int secondsSince1970 = BitConverter.ToInt32(buffer, offset + cLinkerTimestampOffset);
-            DateTime epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-
-            DateTime linkTimeUtc = epoch.AddSeconds(secondsSince1970);
-
-            TimeZoneInfo tz = target ?? TimeZoneInfo.Local;
-            DateTime localTime = TimeZoneInfo.ConvertTimeFromUtc(linkTimeUtc, tz);
-
-            return localTime;
+            var assembly = System.Reflection.Assembly.GetExecutingAssembly();
+            var attr = Attribute.GetCustomAttribute(assembly, typeof(BuildDateTimeAttribute)) as BuildDateTimeAttribute;
+            return attr?.Built;
         }
 		//-----------------
 		#endregion
@@ -1418,7 +1402,7 @@ namespace DTXMania
         {
             //Update version information
             Assembly assembly = Assembly.GetExecutingAssembly();
-            DateTime buildDate = GetLinkerTime(assembly);
+            DateTime? buildDate = GetAssemblyBuildDateTime() ?? DateTime.UnixEpoch;
             VERSION = $"v{assembly.GetName().Version.ToString().Substring(0, 5)} ({buildDate:yyyyMMdd})";
             VERSION_DISPLAY = $"DTX:NX:A:A:{buildDate:yyyyMMdd}00";
             

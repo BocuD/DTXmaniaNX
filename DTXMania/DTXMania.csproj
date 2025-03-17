@@ -51,4 +51,10 @@
       </Reference>
     </ItemGroup>
 
+    <ItemGroup>
+        <AssemblyAttribute Include="DTXMania.BuildDateTime">
+            <_Parameter1>$([System.DateTime]::Now.ToString("s"))</_Parameter1>
+        </AssemblyAttribute>
+    </ItemGroup>
+
 </Project>
