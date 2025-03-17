@@ -501,17 +501,11 @@ namespace FDK
 		{
 			public int length;
 			public int flags;
-			public CWin32.EShowWindow showCmd;
+			public EShowWindow showCmd;
 			public Point ptMinPosition;
 			public Point ptMaxPosition;
-			public CWin32.RECT rcNormalPosition;
-			public static int Length
-			{
-				get
-				{
-					return Marshal.SizeOf(typeof(CWin32.WINDOWPLACEMENT));
-				}
-			}
+			public RECT rcNormalPosition;
+			public static int Length => Marshal.SizeOf(typeof(WINDOWPLACEMENT));
 		}
 		[StructLayout(LayoutKind.Sequential)]
 		public struct SYSTEM_INFO
@@ -659,7 +653,7 @@ namespace FDK
 			{
 				if ((stored.dwFlags & 1L) == 0L)
 				{
-					CWin32.TOGGLEKEYS structure = new CWin32.TOGGLEKEYS();
+					TOGGLEKEYS structure = new TOGGLEKEYS();
 					structure.dwFlags = stored.dwFlags;
 					structure.cbSize = stored.cbSize;
 					structure.dwFlags &= -5;
@@ -667,7 +661,7 @@ namespace FDK
 					int cb = Marshal.SizeOf(structure);
 					IntPtr ptr = Marshal.AllocCoTaskMem(cb);
 					Marshal.StructureToPtr(structure, ptr, false);
-					CWin32.SystemParametersInfo(0x35, (uint)cb, ptr, 0);
+					SystemParametersInfo(0x35, (uint)cb, ptr, 0);
 					Marshal.FreeCoTaskMem(ptr);
 				}
 			}
@@ -676,7 +670,7 @@ namespace FDK
 				int cb = Marshal.SizeOf(stored);
 				IntPtr ptr = Marshal.AllocCoTaskMem(cb);
 				Marshal.StructureToPtr(stored, ptr, false);
-				CWin32.SystemParametersInfo(0x35, (uint)cb, ptr, 0);
+				SystemParametersInfo(0x35, (uint)cb, ptr, 0);
 				Marshal.FreeCoTaskMem(ptr);
 			}
 
@@ -687,14 +681,14 @@ namespace FDK
 				int cb = Marshal.SizeOf(stored);
 				IntPtr ptr = Marshal.AllocCoTaskMem(cb);
 				Marshal.StructureToPtr(stored, ptr, false);
-				CWin32.SystemParametersInfo(0x34, (uint)cb, ptr, 0);
-				stored = (CWin32.TOGGLEKEYS)Marshal.PtrToStructure(ptr, typeof(CWin32.TOGGLEKEYS));
+				SystemParametersInfo(0x34, (uint)cb, ptr, 0);
+				stored = (TOGGLEKEYS)Marshal.PtrToStructure(ptr, typeof(TOGGLEKEYS));
 				Marshal.FreeCoTaskMem(ptr);
 			}
 
 			private const uint SPI_GETTOGGLEKEYS = 0x34;
 			private const uint SPI_SETTOGGLEKEYS = 0x35;
-			private static CWin32.TOGGLEKEYS stored = new CWin32.TOGGLEKEYS();
+			private static TOGGLEKEYS stored = new TOGGLEKEYS();
 			private const uint TKF_CONFIRMHOTKEY = 8;
 			private const uint TKF_HOTKEYACTIVE = 4;
 			private const uint TKF_TOGGLEKEYSON = 1;
@@ -707,7 +701,7 @@ namespace FDK
 			{
 				if ((stored.dwFlags & 1L) == 0L)
 				{
-					CWin32.FILTERKEYS structure = new CWin32.FILTERKEYS();
+					FILTERKEYS structure = new FILTERKEYS();
 					structure.dwFlags = stored.dwFlags;
 					structure.cbSize = stored.cbSize;
 					structure.dwFlags &= -5;
@@ -715,7 +709,7 @@ namespace FDK
 					int cb = Marshal.SizeOf(structure);
 					IntPtr ptr = Marshal.AllocCoTaskMem(cb);
 					Marshal.StructureToPtr(structure, ptr, false);
-					CWin32.SystemParametersInfo(0x3b, (uint)cb, ptr, 0);
+					SystemParametersInfo(0x3b, (uint)cb, ptr, 0);
 					Marshal.FreeCoTaskMem(ptr);
 				}
 			}
@@ -724,7 +718,7 @@ namespace FDK
 				int cb = Marshal.SizeOf(stored);
 				IntPtr ptr = Marshal.AllocCoTaskMem(cb);
 				Marshal.StructureToPtr(stored, ptr, false);
-				CWin32.SystemParametersInfo(0x3b, (uint)cb, ptr, 0);
+				SystemParametersInfo(0x3b, (uint)cb, ptr, 0);
 				Marshal.FreeCoTaskMem(ptr);
 			}
 
@@ -737,8 +731,8 @@ namespace FDK
 				int cb = Marshal.SizeOf(stored);
 				IntPtr ptr = Marshal.AllocCoTaskMem(cb);
 				Marshal.StructureToPtr(stored, ptr, false);
-				CWin32.SystemParametersInfo(50, (uint)cb, ptr, 0);
-				stored = (CWin32.FILTERKEYS)Marshal.PtrToStructure(ptr, typeof(CWin32.FILTERKEYS));
+				SystemParametersInfo(50, (uint)cb, ptr, 0);
+				stored = (FILTERKEYS)Marshal.PtrToStructure(ptr, typeof(FILTERKEYS));
 				Marshal.FreeCoTaskMem(ptr);
 			}
 
@@ -747,7 +741,7 @@ namespace FDK
 			private const uint FKF_HOTKEYACTIVE = 4;
 			private const uint SPI_GETFILTERKEYS = 50;
 			private const uint SPI_SETFILTERKEYS = 0x3b;
-			private static CWin32.FILTERKEYS stored = new CWin32.FILTERKEYS();
+			private static FILTERKEYS stored = new FILTERKEYS();
 			//-----------------
 			#endregion
 		}
@@ -757,7 +751,7 @@ namespace FDK
 			{
 				if ((stored.dwFlags & 1L) == 0L)
 				{
-					CWin32.STICKYKEYS structure = new CWin32.STICKYKEYS();
+					STICKYKEYS structure = new STICKYKEYS();
 					structure.dwFlags = stored.dwFlags;
 					structure.cbSize = stored.cbSize;
 					structure.dwFlags &= -5;
@@ -765,7 +759,7 @@ namespace FDK
 					int cb = Marshal.SizeOf(structure);
 					IntPtr ptr = Marshal.AllocCoTaskMem(cb);
 					Marshal.StructureToPtr(structure, ptr, false);
-					CWin32.SystemParametersInfo(0x3b, (uint)cb, ptr, 0);
+					SystemParametersInfo(0x3b, (uint)cb, ptr, 0);
 					Marshal.FreeCoTaskMem(ptr);
 				}
 			}
@@ -774,7 +768,7 @@ namespace FDK
 				int cb = Marshal.SizeOf(stored);
 				IntPtr ptr = Marshal.AllocCoTaskMem(cb);
 				Marshal.StructureToPtr(stored, ptr, false);
-				CWin32.SystemParametersInfo(0x3b, (uint)cb, ptr, 0);
+				SystemParametersInfo(0x3b, (uint)cb, ptr, 0);
 				Marshal.FreeCoTaskMem(ptr);
 			}
 
@@ -787,8 +781,8 @@ namespace FDK
 				int cb = Marshal.SizeOf(stored);
 				IntPtr ptr = Marshal.AllocCoTaskMem(cb);
 				Marshal.StructureToPtr(stored, ptr, false);
-				CWin32.SystemParametersInfo(0x3a, (uint)cb, ptr, 0);
-				stored = (CWin32.STICKYKEYS)Marshal.PtrToStructure(ptr, typeof(CWin32.STICKYKEYS));
+				SystemParametersInfo(0x3a, (uint)cb, ptr, 0);
+				stored = (STICKYKEYS)Marshal.PtrToStructure(ptr, typeof(STICKYKEYS));
 				Marshal.FreeCoTaskMem(ptr);
 			}
 
@@ -797,7 +791,7 @@ namespace FDK
 			private const uint SKF_STICKYKEYSON = 1;
 			private const uint SPI_GETSTICKYKEYS = 0x3a;
 			private const uint SPI_SETSTICKYKEYS = 0x3b;
-			private static CWin32.STICKYKEYS stored = new CWin32.STICKYKEYS();
+			private static STICKYKEYS stored = new STICKYKEYS();
 			//-----------------
 			#endregion
 		}

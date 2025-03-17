@@ -8,7 +8,7 @@ namespace DTXMania
 
 		public CActPerfCommonDanger()
 		{
-			base.bNotActivated = true;
+			bNotActivated = true;
 		}
 
 
@@ -18,19 +18,19 @@ namespace DTXMania
 		{
 			for ( int i = 0; i < 3; i++ )
 			{
-				this.bDanger中[i] = false;
+				bDanger中[i] = false;
 			}
 //			this.ct移動用 = new CCounter();
 //			this.ct透明度用 = new CCounter();
-			this.ct移動用 = null;
-			this.ct透明度用 = null;
+			ct移動用 = null;
+			ct透明度用 = null;
 
 			base.OnActivate();
 		}
 		public override void OnDeactivate()
 		{
-			this.ct移動用 = null;
-			this.ct透明度用 = null;
+			ct移動用 = null;
+			ct透明度用 = null;
 			base.OnDeactivate();
 		}
 

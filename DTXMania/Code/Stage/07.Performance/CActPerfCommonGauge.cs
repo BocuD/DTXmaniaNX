@@ -59,7 +59,7 @@ namespace DTXMania
             {
 				return ( nRiskyTimes <= 0 );
 			}
-			return this.db現在のゲージ値[ (int) part ] <= GAUGE_MIN;
+			return db現在のゲージ値[ (int) part ] <= GAUGE_MIN;
 		}
 		public bool IsDanger( EInstrumentPart part )	// DANGERかどうか
 		{
@@ -75,21 +75,18 @@ namespace DTXMania
 						return ( nRiskyTimes <= 2 );
 				}
 			}
-			return ( this.db現在のゲージ値[ (int) part ] <= 0.3 );
+			return ( db現在のゲージ値[ (int) part ] <= 0.3 );
 		}
 
 		public double dbゲージ値	// Drums専用
 		{
-			get
-			{
-				return this.db現在のゲージ値.Drums;
-			}
+			get => db現在のゲージ値.Drums;
 			set
 			{
-				this.db現在のゲージ値.Drums = value;
-				if ( this.db現在のゲージ値.Drums > GAUGE_MAX )
+				db現在のゲージ値.Drums = value;
+				if ( db現在のゲージ値.Drums > GAUGE_MAX )
 				{
-					this.db現在のゲージ値.Drums = GAUGE_MAX;
+					db現在のゲージ値.Drums = GAUGE_MAX;
 				}
 			}
 		}
@@ -103,21 +100,21 @@ namespace DTXMania
 		{
 			nRiskyTimes_Initial = nRiskyTimes_InitialVal;
 			nRiskyTimes = nRiskyTimes_InitialVal;
-			bRisky = ( this.nRiskyTimes > 0 );
+			bRisky = ( nRiskyTimes > 0 );
 
 			for ( int i = 0; i < 3; i++ )
 			{
 				if ( !bRisky)
 				{
-                    this.db現在のゲージ値[i] = GAUGE_INITIAL;
+                    db現在のゲージ値[i] = GAUGE_INITIAL;
 				}
 				else if ( nRiskyTimes_InitialVal == 1 )
 				{
-					this.db現在のゲージ値[ i ] = GAUGE_ZERO;
+					db現在のゲージ値[ i ] = GAUGE_ZERO;
 				}
 				else
 				{
-					this.db現在のゲージ値[ i ] = GAUGE_MAX;
+					db現在のゲージ値[ i ] = GAUGE_MAX;
 				}
 			}
 		}
@@ -264,23 +261,23 @@ namespace DTXMania
 			if ( screenmode == EInstrumentPart.DRUMS )		// ドラム演奏画面なら、ギター/ベースのダメージも全部ドラムのゲージに集約する
 			{
 				part = EInstrumentPart.DRUMS;
-				this.db現在のゲージ値[ (int) part ] += fDamage;
+				db現在のゲージ値[ (int) part ] += fDamage;
 			}
 			else
 			{
-				if ( this.bRisky )						// ギター画面且つRISKYなら、ギターとベースのゲージをセットで減少
+				if ( bRisky )						// ギター画面且つRISKYなら、ギターとベースのゲージをセットで減少
 				{
-					this.db現在のゲージ値[ (int) EInstrumentPart.GUITAR ] += fDamage;
-					this.db現在のゲージ値[ (int) EInstrumentPart.BASS   ] += fDamage;
+					db現在のゲージ値[ (int) EInstrumentPart.GUITAR ] += fDamage;
+					db現在のゲージ値[ (int) EInstrumentPart.BASS   ] += fDamage;
 				}
 				else
 				{
-					this.db現在のゲージ値[ (int) part ] += fDamage;
+					db現在のゲージ値[ (int) part ] += fDamage;
 				}
 			}
 
-			if ( this.db現在のゲージ値[ (int) part ] > GAUGE_MAX )		// RISKY時は決してゲージが増加しないので、ギタレボモード時のギター/ベース両チェック(上限チェック)はしなくて良い
-				this.db現在のゲージ値[ (int) part ] = GAUGE_MAX;
+			if ( db現在のゲージ値[ (int) part ] > GAUGE_MAX )		// RISKY時は決してゲージが増加しないので、ギタレボモード時のギター/ベース両チェック(上限チェック)はしなくて良い
+				db現在のゲージ値[ (int) part ] = GAUGE_MAX;
 		}
 		//-----------------
 		#endregion

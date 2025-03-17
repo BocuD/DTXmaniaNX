@@ -55,25 +55,25 @@ namespace DTXMania
 
 		public CBoxDef()
 		{
-			this.Title = "";
-			this.Artist = "";
-			this.Comment = "BOX に移動します。";
-			this.Genre = "";
+			Title = "";
+			Artist = "";
+			Comment = "BOX に移動します。";
+			Genre = "";
 			stDrumHitRanges = new STHitRanges(nDefaultSizeMs: -1);
 			stDrumPedalHitRanges = new STHitRanges(nDefaultSizeMs: -1);
 			stGuitarHitRanges = new STHitRanges(nDefaultSizeMs: -1);
 			stBassHitRanges = new STHitRanges(nDefaultSizeMs: -1);
-			this.Preimage = "";
-			this.Premovie = "";
-			this.Presound = "";
-			this.Color = ColorTranslator.FromHtml( "White" );
-			this.SkinPath = "";
-            this.Difficulty = false;
+			Preimage = "";
+			Premovie = "";
+			Presound = "";
+			Color = ColorTranslator.FromHtml( "White" );
+			SkinPath = "";
+            Difficulty = false;
 		}
 		public CBoxDef( string boxdefファイル名 )
 			: this()
 		{
-			this.t読み込み( boxdefファイル名 );
+			t読み込み( boxdefファイル名 );
 		}
 
 
@@ -103,39 +103,39 @@ namespace DTXMania
 		
 							if ( str.StartsWith( "#TITLE", StringComparison.OrdinalIgnoreCase ) )
 							{
-								this.Title = str.Substring( 6 ).Trim( ignoreChars );
+								Title = str.Substring( 6 ).Trim( ignoreChars );
 							}
 							else if( str.StartsWith( "#ARTIST", StringComparison.OrdinalIgnoreCase ) )
 							{
-								this.Artist = str.Substring( 7 ).Trim( ignoreChars );
+								Artist = str.Substring( 7 ).Trim( ignoreChars );
 							}
 							else if( str.StartsWith( "#COMMENT", StringComparison.OrdinalIgnoreCase ) )
 							{
-								this.Comment = str.Substring( 8 ).Trim( ignoreChars );
+								Comment = str.Substring( 8 ).Trim( ignoreChars );
 							}
 							else if( str.StartsWith( "#GENRE", StringComparison.OrdinalIgnoreCase ) )
 							{
-								this.Genre = str.Substring( 6 ).Trim( ignoreChars );
+								Genre = str.Substring( 6 ).Trim( ignoreChars );
 							}
 							else if( str.StartsWith( "#PREVIEW", StringComparison.OrdinalIgnoreCase ) )
 							{
-								this.Presound = str.Substring( 8 ).Trim( ignoreChars );
+								Presound = str.Substring( 8 ).Trim( ignoreChars );
 							}
 							else if( str.StartsWith( "#PREIMAGE", StringComparison.OrdinalIgnoreCase ) )
 							{
-								this.Preimage = str.Substring( 9 ).Trim( ignoreChars );
+								Preimage = str.Substring( 9 ).Trim( ignoreChars );
 							}
 							else if( str.StartsWith( "#PREMOVIE", StringComparison.OrdinalIgnoreCase ) )
 							{
-								this.Premovie = str.Substring( 9 ).Trim( ignoreChars );
+								Premovie = str.Substring( 9 ).Trim( ignoreChars );
 							}
 							else if ( str.StartsWith( "#SKINPATH", StringComparison.OrdinalIgnoreCase ) )
 							{
-								this.SkinPath = str.Substring( 9 ).Trim( ignoreChars );
+								SkinPath = str.Substring( 9 ).Trim( ignoreChars );
 							}
 							else if ( str.StartsWith( "#FONTCOLOR", StringComparison.OrdinalIgnoreCase ) )
 							{
-								this.Color = ColorTranslator.FromHtml( str.Substring( 10 ).Trim( ignoreChars ) );
+								Color = ColorTranslator.FromHtml( str.Substring( 10 ).Trim( ignoreChars ) );
 							}
                             else if ( str.StartsWith( "#DIFFICULTY", StringComparison.OrdinalIgnoreCase ) )
 							{
@@ -152,7 +152,7 @@ namespace DTXMania
                                         b = true;
                                     }
 
-									this.Difficulty = b;
+									Difficulty = b;
 								}
 							}
 							else

@@ -84,7 +84,7 @@ namespace DTXMania
             st基本位置Array[9] = st基本位置10;
 
             this.st基本位置 = st基本位置Array;
-            base.bNotActivated = true;
+            bNotActivated = true;
         }
 
 
@@ -92,9 +92,9 @@ namespace DTXMania
 
         public void Hit(int nLane)
         {
-            this.stパッド状態[nLane].n明るさ = 6;
-            this.stパッド状態[nLane].nY座標加速度dot = 2;
-            this.stパッド状態[nLane].nY座標加速度dot2 = 2;
+            stパッド状態[nLane].n明るさ = 6;
+            stパッド状態[nLane].nY座標加速度dot = 2;
+            stパッド状態[nLane].nY座標加速度dot2 = 2;
         }
 
         public override void OnDeactivate()
@@ -106,8 +106,8 @@ namespace DTXMania
 
         public override void OnActivate()
         {
-            this.nフラッシュ制御タイマ = -1L;
-            this.nY座標制御タイマ = -1L;
+            nフラッシュ制御タイマ = -1L;
+            nY座標制御タイマ = -1L;
             for (int i = 0; i < 10; i++)
             {
                 STパッド状態 stパッド状態2 = new STパッド状態();
@@ -123,212 +123,212 @@ namespace DTXMania
         }
         public override void OnManagedCreateResources()
         {
-            if (!base.bNotActivated)
+            if (!bNotActivated)
             {
-                this.txパッド = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_pads.png"));
-                this.tx光るパッド = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\ScreenPlayDrums pads flush.png"));
-                this.txボーナス文字 = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_Bonus.png"));
+                txパッド = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_pads.png"));
+                tx光るパッド = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\ScreenPlayDrums pads flush.png"));
+                txボーナス文字 = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_Bonus.png"));
                 base.OnManagedCreateResources();
             }
         }
         public override void OnManagedReleaseResources()
         {
-            if (!base.bNotActivated)
+            if (!bNotActivated)
             {
-                CDTXMania.tReleaseTexture(ref this.txパッド);
-                CDTXMania.tReleaseTexture(ref this.tx光るパッド);
-                CDTXMania.tReleaseTexture(ref this.txボーナス文字);
+                CDTXMania.tReleaseTexture(ref txパッド);
+                CDTXMania.tReleaseTexture(ref tx光るパッド);
+                CDTXMania.tReleaseTexture(ref txボーナス文字);
                 base.OnManagedReleaseResources();
             }
         }
         public override int OnUpdateAndDraw()
         {
-            if (!base.bNotActivated)
+            if (!bNotActivated)
             {
                 int num1 = CDTXMania.stagePerfDrumsScreen.ctBPMBar.nCurrentValue;
 
 
-                if (base.bJustStartedUpdate)
+                if (bJustStartedUpdate)
                 {
-                    this.nフラッシュ制御タイマ = CDTXMania.Timer.nCurrentTime;
-                    this.nY座標制御タイマ = CDTXMania.Timer.nCurrentTime;
-                    base.bJustStartedUpdate = false;
+                    nフラッシュ制御タイマ = CDTXMania.Timer.nCurrentTime;
+                    nY座標制御タイマ = CDTXMania.Timer.nCurrentTime;
+                    bJustStartedUpdate = false;
                 }
                 long num = CDTXMania.Timer.nCurrentTime;
-                if (num < this.nフラッシュ制御タイマ)
+                if (num < nフラッシュ制御タイマ)
                 {
-                    this.nフラッシュ制御タイマ = num;
+                    nフラッシュ制御タイマ = num;
                 }
-                while ((num - this.nフラッシュ制御タイマ) >= 18L)
+                while ((num - nフラッシュ制御タイマ) >= 18L)
                 {
                     for (int j = 0; j < 10; j++)
                     {
-                        if (this.stパッド状態[j].n明るさ > 0)
+                        if (stパッド状態[j].n明るさ > 0)
                         {
-                            this.stパッド状態[j].n明るさ--;
+                            stパッド状態[j].n明るさ--;
                         }
                     }
-                    this.nフラッシュ制御タイマ += 18L;
+                    nフラッシュ制御タイマ += 18L;
                 }
                 long num3 = CDTXMania.Timer.nCurrentTime;
-                if (num3 < this.nY座標制御タイマ)
+                if (num3 < nY座標制御タイマ)
                 {
-                    this.nY座標制御タイマ = num3;
+                    nY座標制御タイマ = num3;
                 }
-                if (num3 < this.nY座標制御タイマ2)
+                if (num3 < nY座標制御タイマ2)
                 {
-                    this.nY座標制御タイマ2 = num3;
+                    nY座標制御タイマ2 = num3;
                 }
-                while ((num3 - this.nY座標制御タイマ) >= 5L)
+                while ((num3 - nY座標制御タイマ) >= 5L)
                 {
                     for (int k = 0; k < 10; k++)
                     {
-                        this.stパッド状態[k].nY座標オフセットdot += this.stパッド状態[k].nY座標加速度dot;
-                        if (this.stパッド状態[k].nY座標オフセットdot > 15)
+                        stパッド状態[k].nY座標オフセットdot += stパッド状態[k].nY座標加速度dot;
+                        if (stパッド状態[k].nY座標オフセットdot > 15)
                         {
-                            this.stパッド状態[k].nY座標オフセットdot = 15;
-                            this.stパッド状態[k].nY座標加速度dot = -1;
+                            stパッド状態[k].nY座標オフセットdot = 15;
+                            stパッド状態[k].nY座標加速度dot = -1;
                         }
-                        else if (this.stパッド状態[k].nY座標オフセットdot < 0)
+                        else if (stパッド状態[k].nY座標オフセットdot < 0)
                         {
-                            this.stパッド状態[k].nY座標オフセットdot = 0;
-                            this.stパッド状態[k].nY座標加速度dot = 0;
-                        }
-
-                        this.stパッド状態[k].nX座標オフセットdot += this.stパッド状態[k].nY座標加速度dot;
-                        if (this.stパッド状態[k].nX座標オフセットdot > 6)
-                        {
-                            this.stパッド状態[k].nX座標オフセットdot = 6;
-                            this.stパッド状態[k].nX座標加速度dot = -2;
-                        }
-                        else if (this.stパッド状態[k].nX座標オフセットdot < 0)
-                        {
-                            this.stパッド状態[k].nX座標オフセットdot = 0;
-                            this.stパッド状態[k].nX座標加速度dot = 0;
+                            stパッド状態[k].nY座標オフセットdot = 0;
+                            stパッド状態[k].nY座標加速度dot = 0;
                         }
 
-                        this.stパッド状態[k].nX座標オフセットdotFLIP += this.stパッド状態[k].nY座標加速度dot;
-                        if (this.stパッド状態[k].nX座標オフセットdotFLIP > 6)
+                        stパッド状態[k].nX座標オフセットdot += stパッド状態[k].nY座標加速度dot;
+                        if (stパッド状態[k].nX座標オフセットdot > 6)
                         {
-                            this.stパッド状態[k].nX座標オフセットdotFLIP = 6;
-                            this.stパッド状態[k].nX座標加速度dot = -2;
+                            stパッド状態[k].nX座標オフセットdot = 6;
+                            stパッド状態[k].nX座標加速度dot = -2;
                         }
-                        else if (this.stパッド状態[k].nX座標オフセットdotFLIP < 0)
+                        else if (stパッド状態[k].nX座標オフセットdot < 0)
                         {
-                            this.stパッド状態[k].nX座標オフセットdotFLIP = 0;
-                            this.stパッド状態[k].nX座標加速度dot = 0;
-                        }
-
-                        this.stパッド状態[k].nX座標オフセットdot2 += this.stパッド状態[k].nY座標加速度dot;
-                        if (this.stパッド状態[k].nX座標オフセットdot2 > 3)
-                        {
-                            this.stパッド状態[k].nX座標オフセットdot2 = 3;
-                            this.stパッド状態[k].nX座標加速度dot = -1;
-                        }
-                        else if (this.stパッド状態[k].nX座標オフセットdot2 < 0)
-                        {
-                            this.stパッド状態[k].nX座標オフセットdot2 = 0;
-                            this.stパッド状態[k].nX座標加速度dot = 0;
+                            stパッド状態[k].nX座標オフセットdot = 0;
+                            stパッド状態[k].nX座標加速度dot = 0;
                         }
 
-                        this.stパッド状態[k].nX座標オフセットdot2FLIP += this.stパッド状態[k].nY座標加速度dot;
-                        if (this.stパッド状態[k].nX座標オフセットdot2FLIP > 3)
+                        stパッド状態[k].nX座標オフセットdotFLIP += stパッド状態[k].nY座標加速度dot;
+                        if (stパッド状態[k].nX座標オフセットdotFLIP > 6)
                         {
-                            this.stパッド状態[k].nX座標オフセットdot2FLIP = 3;
-                            this.stパッド状態[k].nX座標加速度dot = -1;
+                            stパッド状態[k].nX座標オフセットdotFLIP = 6;
+                            stパッド状態[k].nX座標加速度dot = -2;
                         }
-                        else if (this.stパッド状態[k].nX座標オフセットdot2FLIP < 0)
+                        else if (stパッド状態[k].nX座標オフセットdotFLIP < 0)
                         {
-                            this.stパッド状態[k].nX座標オフセットdot2FLIP = 0;
-                            this.stパッド状態[k].nX座標加速度dot = 0;
+                            stパッド状態[k].nX座標オフセットdotFLIP = 0;
+                            stパッド状態[k].nX座標加速度dot = 0;
+                        }
+
+                        stパッド状態[k].nX座標オフセットdot2 += stパッド状態[k].nY座標加速度dot;
+                        if (stパッド状態[k].nX座標オフセットdot2 > 3)
+                        {
+                            stパッド状態[k].nX座標オフセットdot2 = 3;
+                            stパッド状態[k].nX座標加速度dot = -1;
+                        }
+                        else if (stパッド状態[k].nX座標オフセットdot2 < 0)
+                        {
+                            stパッド状態[k].nX座標オフセットdot2 = 0;
+                            stパッド状態[k].nX座標加速度dot = 0;
+                        }
+
+                        stパッド状態[k].nX座標オフセットdot2FLIP += stパッド状態[k].nY座標加速度dot;
+                        if (stパッド状態[k].nX座標オフセットdot2FLIP > 3)
+                        {
+                            stパッド状態[k].nX座標オフセットdot2FLIP = 3;
+                            stパッド状態[k].nX座標加速度dot = -1;
+                        }
+                        else if (stパッド状態[k].nX座標オフセットdot2FLIP < 0)
+                        {
+                            stパッド状態[k].nX座標オフセットdot2FLIP = 0;
+                            stパッド状態[k].nX座標加速度dot = 0;
                         }
                     }
-                    this.nY座標制御タイマ += 6L;
+                    nY座標制御タイマ += 6L;
                 }
-                while ((num3 - this.nY座標制御タイマ2) >= 6L)
+                while ((num3 - nY座標制御タイマ2) >= 6L)
                 {
                     for (int k = 0; k < 10; k++)
                     {
-                        this.stパッド状態[k].nY座標オフセットdot2 += this.stパッド状態[k].nY座標加速度dot2;
-                        if (this.stパッド状態[k].nY座標オフセットdot2 > 11)
+                        stパッド状態[k].nY座標オフセットdot2 += stパッド状態[k].nY座標加速度dot2;
+                        if (stパッド状態[k].nY座標オフセットdot2 > 11)
                         {
-                            this.stパッド状態[k].nY座標オフセットdot2 = 11;
-                            this.stパッド状態[k].nY座標加速度dot2 = -1;
+                            stパッド状態[k].nY座標オフセットdot2 = 11;
+                            stパッド状態[k].nY座標加速度dot2 = -1;
                         }
-                        else if (this.stパッド状態[k].nY座標オフセットdot2 < 0)
+                        else if (stパッド状態[k].nY座標オフセットdot2 < 0)
                         {
-                            this.stパッド状態[k].nY座標オフセットdot2 = 0;
-                            this.stパッド状態[k].nY座標加速度dot2 = 0;
+                            stパッド状態[k].nY座標オフセットdot2 = 0;
+                            stパッド状態[k].nY座標加速度dot2 = 0;
                         }
                     }
-                    this.nY座標制御タイマ2 += 8L;
+                    nY座標制御タイマ2 += 8L;
                 }
                 for (int i = 0; i < 10; i++)
                 {
-                    int index = this.n描画順[i];
+                    int index = n描画順[i];
                     int numOfLanesflagIndex = (int)CDTXMania.ConfigIni.eNumOfLanes.Drums;
                     //26072020: Check DrawFlags array before even compute positions for drawing
-                    if (this.nDrawFlags[numOfLanesflagIndex, index] == 1)
+                    if (nDrawFlags[numOfLanesflagIndex, index] == 1)
                     {
                         #region[レーン切り替え]                    
-                        int x = this.st基本位置[index].x;
-                        int x2 = (this.st基本位置[index].x + (CDTXMania.ConfigIni.bReverse.Drums ? -10 : 32)) + this.stパッド状態[index].nX座標オフセットdot;
-                        int x3 = (this.st基本位置[index].x + (CDTXMania.ConfigIni.bReverse.Drums ? -10 : 79)) - this.stパッド状態[index].nX座標オフセットdotFLIP;
-                        int y = (this.st基本位置[index].y + (CDTXMania.ConfigIni.bReverse.Drums ? 60 : 560)) + this.stパッド状態[index].nY座標オフセットdot2;
-                        int y2 = (this.st基本位置[index].y + (CDTXMania.ConfigIni.bReverse.Drums ? 0 : 482)) + this.stパッド状態[index].nY座標オフセットdot;
-                        int yh = (this.st基本位置[index].y + (CDTXMania.ConfigIni.bReverse.Drums ? 0 : 495)) + this.stパッド状態[index].nY座標オフセットdot;
-                        int yb = (this.st基本位置[index].y + (CDTXMania.ConfigIni.bReverse.Drums ? 0 : 570)) - this.stパッド状態[index].nY座標オフセットdot;
-                        int yl = (this.st基本位置[index].y + (CDTXMania.ConfigIni.bReverse.Drums ? 0 : 486)) + this.stパッド状態[index].nY座標オフセットdot;
-                        int yf = (this.st基本位置[index].y + (CDTXMania.ConfigIni.bReverse.Drums ? 0 : 470)) + this.stパッド状態[index].nY座標オフセットdot;
+                        int x = st基本位置[index].x;
+                        int x2 = (st基本位置[index].x + (CDTXMania.ConfigIni.bReverse.Drums ? -10 : 32)) + stパッド状態[index].nX座標オフセットdot;
+                        int x3 = (st基本位置[index].x + (CDTXMania.ConfigIni.bReverse.Drums ? -10 : 79)) - stパッド状態[index].nX座標オフセットdotFLIP;
+                        int y = (st基本位置[index].y + (CDTXMania.ConfigIni.bReverse.Drums ? 60 : 560)) + stパッド状態[index].nY座標オフセットdot2;
+                        int y2 = (st基本位置[index].y + (CDTXMania.ConfigIni.bReverse.Drums ? 0 : 482)) + stパッド状態[index].nY座標オフセットdot;
+                        int yh = (st基本位置[index].y + (CDTXMania.ConfigIni.bReverse.Drums ? 0 : 495)) + stパッド状態[index].nY座標オフセットdot;
+                        int yb = (st基本位置[index].y + (CDTXMania.ConfigIni.bReverse.Drums ? 0 : 570)) - stパッド状態[index].nY座標オフセットdot;
+                        int yl = (st基本位置[index].y + (CDTXMania.ConfigIni.bReverse.Drums ? 0 : 486)) + stパッド状態[index].nY座標オフセットdot;
+                        int yf = (st基本位置[index].y + (CDTXMania.ConfigIni.bReverse.Drums ? 0 : 470)) + stパッド状態[index].nY座標オフセットdot;
 
                         if ((index == 2) && ((CDTXMania.ConfigIni.eLaneType.Drums == EType.B) || CDTXMania.ConfigIni.eLaneType.Drums == EType.D))
                         {
-                            x = this.st基本位置[9].x - 4;
+                            x = st基本位置[9].x - 4;
                         }
                         if (index == 3)
                         {
                             if ((CDTXMania.ConfigIni.eLaneType.Drums == EType.B) || (CDTXMania.ConfigIni.eLaneType.Drums == EType.C))
                             {
-                                x = this.st基本位置[4].x + 7;
+                                x = st基本位置[4].x + 7;
                             }
                         }
                         if (index == 4)
                         {
                             if ((CDTXMania.ConfigIni.eLaneType.Drums == EType.B) || (CDTXMania.ConfigIni.eLaneType.Drums == EType.C))
                             {
-                                x = this.st基本位置[3].x + 15;
+                                x = st基本位置[3].x + 15;
                             }
                             else if (CDTXMania.ConfigIni.eLaneType.Drums == EType.D)
                             {
-                                x = this.st基本位置[3].x - 108;
+                                x = st基本位置[3].x - 108;
                             }
                         }
                         if (index == 9)
                         {
                             if (CDTXMania.ConfigIni.eLaneType.Drums == EType.B)
                             {
-                                x = this.st基本位置[2].x + 10;
+                                x = st基本位置[2].x + 10;
                             }
                             else if (CDTXMania.ConfigIni.eLaneType.Drums == EType.D)
                             {
-                                x = this.st基本位置[2].x + 50;
+                                x = st基本位置[2].x + 50;
                             }
                         }
                         if ((index == 5) && (CDTXMania.ConfigIni.eLaneType.Drums == EType.B))
                         {
-                            x = this.st基本位置[5].x + 2;
+                            x = st基本位置[5].x + 2;
                         }
                         if ((index == 8) && (CDTXMania.ConfigIni.eRDPosition == ERDPosition.RDRC))
                         {
-                            x = this.st基本位置[7].x - 15;
+                            x = st基本位置[7].x - 15;
                         }
                         if ((index == 7) && (CDTXMania.ConfigIni.eRDPosition == ERDPosition.RDRC))
                         {
-                            x = this.st基本位置[8].x - 15;
+                            x = st基本位置[8].x - 15;
                         }
-                        if (this.txパッド != null)
+                        if (txパッド != null)
                         {
-                            this.txパッド.tDraw2D(CDTXMania.app.Device, x, y, this.st基本位置[index].rc);
+                            txパッド.tDraw2D(CDTXMania.app.Device, x, y, st基本位置[index].rc);
 
                             //if (CDTXMania.ConfigIni.eNumOfLanes.Drums == EType.B && index == 8)
                             //{
@@ -340,10 +340,10 @@ namespace DTXMania
                             //}
 
                         }
-                        if (this.tx光るパッド != null)
+                        if (tx光るパッド != null)
                         {
-                            this.tx光るパッド.nTransparency = (this.stパッド状態[index].n明るさ * 50) + 0;
-                            this.tx光るパッド.tDraw2D(CDTXMania.app.Device, x, y, this.st基本位置[index].rc);
+                            tx光るパッド.nTransparency = (stパッド状態[index].n明るさ * 50) + 0;
+                            tx光るパッド.tDraw2D(CDTXMania.app.Device, x, y, st基本位置[index].rc);
 
                             //if (CDTXMania.ConfigIni.eNumOfLanes.Drums == EType.B && index == 8)
                             //{
@@ -364,18 +364,18 @@ namespace DTXMania
                 for (int i = 0; i < 4; i++)
                 {
                     //アニメーションは仮のもの。後から強化する予定。
-                    if (this.stボーナス[i].b使用中)
+                    if (stボーナス[i].b使用中)
                     {
-                        int numf = this.stボーナス[i].ct進行.nCurrentValue;
-                        this.stボーナス[i].ct進行.tUpdate();
-                        if (this.stボーナス[i].ct進行.bReachedEndValue)
+                        int numf = stボーナス[i].ct進行.nCurrentValue;
+                        stボーナス[i].ct進行.tUpdate();
+                        if (stボーナス[i].ct進行.bReachedEndValue)
                         {
-                            this.stボーナス[i].ct進行.tStop();
-                            this.stボーナス[i].b使用中 = false;
+                            stボーナス[i].ct進行.tStop();
+                            stボーナス[i].b使用中 = false;
                         }
-                        if (this.txボーナス文字 != null && CDTXMania.ConfigIni.bShowScore)
+                        if (txボーナス文字 != null && CDTXMania.ConfigIni.bShowScore)
                         {
-                            this.txボーナス文字.tDraw2D(CDTXMania.app.Device, 160, 80);
+                            txボーナス文字.tDraw2D(CDTXMania.app.Device, 160, 80);
                             //if (this.stボーナス[i].ctUpdate.nCurrentValue >= 765)
                             //{
                             //    int n = this.stボーナス[i].ctUpdate.nCurrentValue - 765;
@@ -393,20 +393,20 @@ namespace DTXMania
         {
             for (int j = 0; j < 3; j++)
             {
-                if (this.stボーナス[j].b使用中)
+                if (stボーナス[j].b使用中)
                 {
-                    this.stボーナス[j].ct進行.tStop();
-                    this.stボーナス[j].b使用中 = false;
+                    stボーナス[j].ct進行.tStop();
+                    stボーナス[j].b使用中 = false;
                 }
             }
             for (int i = 0; i < 3; i++)
             {
                 for (int j = 0; j < 3; j++)
                 {
-                    if (!this.stボーナス[j].b使用中)
+                    if (!stボーナス[j].b使用中)
                     {
-                        this.stボーナス[j].b使用中 = true;
-                        this.stボーナス[j].ct進行 = new CCounter(0, 1020, 1, CDTXMania.Timer);
+                        stボーナス[j].b使用中 = true;
+                        stボーナス[j].ct進行 = new CCounter(0, 1020, 1, CDTXMania.Timer);
                         break;
                     }
                 }
@@ -417,20 +417,20 @@ namespace DTXMania
         {
             for (int j = 0; j < 4; j++)
             {
-                if (this.stボーナス[j].b使用中)
+                if (stボーナス[j].b使用中)
                 {
-                    this.stボーナス[j].ct進行.tStop();
-                    this.stボーナス[j].b使用中 = false;
+                    stボーナス[j].ct進行.tStop();
+                    stボーナス[j].b使用中 = false;
                 }
             }
             for (int i = 0; i < 1; i++)
             {
                 for (int j = 0; j < 4; j++)
                 {
-                    if (!this.stボーナス[j].b使用中)
+                    if (!stボーナス[j].b使用中)
                     {
-                        this.stボーナス[j].b使用中 = true;
-                        this.stボーナス[j].ct進行 = new CCounter(0, 1020, 1, CDTXMania.Timer);
+                        stボーナス[j].b使用中 = true;
+                        stボーナス[j].ct進行 = new CCounter(0, 1020, 1, CDTXMania.Timer);
                     }
 
                 }

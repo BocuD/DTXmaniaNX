@@ -64,22 +64,14 @@ namespace SampleFramework
 			get;
 			private set;
 		}
-		public bool IsWindowed
-		{
-			get { return CurrentSettings.Windowed; }
-		}
-		public int ScreenWidth
-		{
-			get { return CurrentSettings.BackBufferWidth; }
-		}
-		public int ScreenHeight
-		{
-			get { return CurrentSettings.BackBufferHeight; }
-		}
-		public Size ScreenSize
-		{
-			get { return new Size(CurrentSettings.BackBufferWidth, CurrentSettings.BackBufferHeight); }
-		}
+		public bool IsWindowed => CurrentSettings.Windowed;
+
+		public int ScreenWidth => CurrentSettings.BackBufferWidth;
+
+		public int ScreenHeight => CurrentSettings.BackBufferHeight;
+
+		public Size ScreenSize => new(CurrentSettings.BackBufferWidth, CurrentSettings.BackBufferHeight);
+
 		public Direct3D9Manager Direct3D9
 		{
 			get;
@@ -174,9 +166,9 @@ namespace SampleFramework
 
 		protected virtual void Dispose(bool disposing)
 		{
-			if (this.bDisposed)
+			if (bDisposed)
 				return;
-			this.bDisposed = true;
+			bDisposed = true;
 
 			if (disposing)
 				ReleaseDevice();
@@ -252,12 +244,12 @@ namespace SampleFramework
 			}
 
 			// check if the device can be reset, or if we need to completely recreate it
-			Result result = SharpDX.Direct3D9.ResultCode.Success;
+			Result result = ResultCode.Success;
 			bool canReset = CanDeviceBeReset(oldSettings, settings);
 			if (canReset)
 				result = ResetDevice();
 
-			if (result == SharpDX.Direct3D9.ResultCode.DeviceLost)
+			if (result == ResultCode.DeviceLost)
 				deviceLost = true;
 			else if (!canReset || result.Failure)
 			{
@@ -415,7 +407,7 @@ namespace SampleFramework
 
 		void game_FrameEnd(object sender, EventArgs e)
 		{
-			Result result = SharpDX.Direct3D9.ResultCode.Success;
+			Result result = ResultCode.Success;
 
 			try
 			{
@@ -427,7 +419,7 @@ namespace SampleFramework
 				deviceLost = true;
 			}
 
-			if (result == SharpDX.Direct3D9.ResultCode.DeviceLost)
+			if (result == ResultCode.DeviceLost)
 				deviceLost = true;
 		}
 		void game_FrameStart(object sender, CancelEventArgs e)
@@ -441,13 +433,13 @@ namespace SampleFramework
 			//if (!game.IsActive || deviceLost)		// #23568 2010.11.3 yyagi: separate conditions to support valiable sleep value when !IsActive.
 			if (deviceLost)
 				Thread.Sleep(50);
-			else if (!game.IsActive && !this.CurrentSettings.EnableVSync)  // #23568 2010.11.4 yyagi: Don't add sleep() while VSync is enabled.
-				Thread.Sleep(this.game.InactiveSleepTime.Milliseconds);
+			else if (!game.IsActive && !CurrentSettings.EnableVSync)  // #23568 2010.11.4 yyagi: Don't add sleep() while VSync is enabled.
+				Thread.Sleep(game.InactiveSleepTime.Milliseconds);
 
 			if (deviceLost)
 			{
 				Result result = Direct3D9.Device.TestCooperativeLevel();
-				if (result == SharpDX.Direct3D9.ResultCode.DeviceLost)
+				if (result == ResultCode.DeviceLost)
 				{
 					e.Cancel = true;
 					return;
@@ -457,7 +449,7 @@ namespace SampleFramework
 				// changed the desktop format, causing a lost device
 				if (IsWindowed)
 				{
-					DisplayMode displayMode = GraphicsDeviceManager.Direct3D9Object.GetAdapterDisplayMode(CurrentSettings.Direct3D9.AdapterOrdinal);
+					DisplayMode displayMode = Direct3D9Object.GetAdapterDisplayMode(CurrentSettings.Direct3D9.AdapterOrdinal);
 					if (CurrentSettings.Direct3D9.AdapterFormat != displayMode.Format)
 					{
 						DeviceSettings newSettings = CurrentSettings.Clone();
@@ -524,7 +516,7 @@ namespace SampleFramework
 				}
 				Direct3D9.Device.MaximumFrameLatency = 1;
 #else
-				Direct3D9.Device = new SharpDX.Direct3D9.Device(
+				Direct3D9.Device = new Device(
 					Direct3D9Object,
 					CurrentSettings.Direct3D9.AdapterOrdinal,
 					CurrentSettings.Direct3D9.DeviceType,
@@ -532,7 +524,7 @@ namespace SampleFramework
 					CurrentSettings.Direct3D9.CreationFlags,
 					CurrentSettings.Direct3D9.PresentParameters);
 #endif
-				if (Result.GetResultFromWin32Error(Marshal.GetLastWin32Error()) == SharpDX.Direct3D9.ResultCode.DeviceLost)
+				if (Result.GetResultFromWin32Error(Marshal.GetLastWin32Error()) == ResultCode.DeviceLost)
 				{
 					deviceLost = true;
 					return;
@@ -562,7 +554,7 @@ namespace SampleFramework
 
 			var result = Result.GetResultFromWin32Error(Marshal.GetLastWin32Error());
 
-			if (result == SharpDX.Direct3D9.ResultCode.DeviceLost)
+			if (result == ResultCode.DeviceLost)
 				return result;
 
 			PropogateSettings();
@@ -669,13 +661,13 @@ namespace SampleFramework
 			builder.AppendFormat(" ({0}x{1}), ", CurrentSettings.Direct3D9.PresentParameters.BackBufferWidth, CurrentSettings.Direct3D9.PresentParameters.BackBufferHeight);
 
 			if (CurrentSettings.Direct3D9.AdapterFormat == CurrentSettings.Direct3D9.PresentParameters.BackBufferFormat)
-				builder.Append(Enum.GetName(typeof(SharpDX.Direct3D9.Format), CurrentSettings.Direct3D9.AdapterFormat));
+				builder.Append(Enum.GetName(typeof(Format), CurrentSettings.Direct3D9.AdapterFormat));
 			else
 				builder.AppendFormat("backbuf {0}, adapter {1}",
-					Enum.GetName(typeof(SharpDX.Direct3D9.Format), CurrentSettings.Direct3D9.AdapterFormat),
-					Enum.GetName(typeof(SharpDX.Direct3D9.Format), CurrentSettings.Direct3D9.PresentParameters.BackBufferFormat));
+					Enum.GetName(typeof(Format), CurrentSettings.Direct3D9.AdapterFormat),
+					Enum.GetName(typeof(Format), CurrentSettings.Direct3D9.PresentParameters.BackBufferFormat));
 
-			builder.AppendFormat(" ({0})", Enum.GetName(typeof(SharpDX.Direct3D9.Format), CurrentSettings.Direct3D9.PresentParameters.AutoDepthStencilFormat));
+			builder.AppendFormat(" ({0})", Enum.GetName(typeof(Format), CurrentSettings.Direct3D9.PresentParameters.AutoDepthStencilFormat));
 
 			if (CurrentSettings.Direct3D9.PresentParameters.MultiSampleType == MultisampleType.NonMaskable)
 				builder.AppendFormat(" (Nonmaskable Multisample {0}x)", (int)CurrentSettings.Direct3D9.PresentParameters.MultiSampleQuality);

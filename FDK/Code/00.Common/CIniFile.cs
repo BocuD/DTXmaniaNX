@@ -30,13 +30,13 @@ namespace FDK
 
 		public CIniFile()
 		{
-			this.strFilename = "";
-			this.Sections = new List<CSection>();
+			strFilename = "";
+			Sections = new List<CSection>();
 		}
 		public CIniFile( string strファイル名 )
 			:this()
 		{
-			this.tRead( strファイル名 );
+			tRead( strファイル名 );
 		}
 
 
@@ -44,13 +44,13 @@ namespace FDK
 
 		public void tRead( string strファイル名 )
 		{
-			this.strFilename = strファイル名;
+			strFilename = strファイル名;
 
 			StreamReader sr = null;
 			CSection section = null;
 			try
 			{
-				sr = new StreamReader( this.strFilename, Encoding.GetEncoding( "Shift_JIS" ) );	// ファイルが存在しない場合は例外発生。
+				sr = new StreamReader( strFilename, Encoding.GetEncoding( "Shift_JIS" ) );	// ファイルが存在しない場合は例外発生。
 
 				string line;
 				while( ( line = sr.ReadLine() ) != null )
@@ -70,7 +70,7 @@ namespace FDK
 
 						// 変数 section が使用中の場合は、List<CSection> に追加して新しい section を作成する。
 						if( section != null )
-							this.Sections.Add( section );
+							Sections.Add( section );
 
 						section = new CSection();
 						section.strセクション名 = builder.ToString();
@@ -92,7 +92,7 @@ namespace FDK
 				}
 
 				if( section != null )
-					this.Sections.Add( section );
+					Sections.Add( section );
 			}
 			finally
 			{
@@ -102,17 +102,17 @@ namespace FDK
 		}
 		public void tWrite( string strファイル名 )
 		{
-			this.strFilename = strファイル名;
-			this.tWrite();
+			strFilename = strファイル名;
+			tWrite();
 		}
 		public void tWrite()
 		{
 			StreamWriter sw = null;
 			try
 			{
-				sw = new StreamWriter( this.strFilename, false, Encoding.GetEncoding( "Shift_JIS" ) );	// オープン失敗の場合は例外発生。
+				sw = new StreamWriter( strFilename, false, Encoding.GetEncoding( "Shift_JIS" ) );	// オープン失敗の場合は例外発生。
 
-				foreach( CSection section in this.Sections )
+				foreach( CSection section in Sections )
 				{
 					sw.WriteLine( "[{0}]", section.strセクション名 );
 

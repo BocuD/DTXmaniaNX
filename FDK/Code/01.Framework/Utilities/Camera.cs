@@ -45,7 +45,7 @@ namespace SampleFramework
         /// <value>The location of the camera eye point.</value>
         public Vector3 Location
         {
-            get { return location; }
+            get => location;
             set
             {
                 if (location == value)
@@ -62,7 +62,7 @@ namespace SampleFramework
         /// <value>The view target point.</value>
         public Vector3 Target
         {
-            get { return target; }
+            get => target;
             set
             {
                 if (target == value)
@@ -79,7 +79,7 @@ namespace SampleFramework
         /// <value>The field of view.</value>
         public float FieldOfView
         {
-            get { return fieldOfView; }
+            get => fieldOfView;
             set
             {
                 if (fieldOfView == value)
@@ -96,7 +96,7 @@ namespace SampleFramework
         /// <value>The aspect ratio.</value>
         public float AspectRatio
         {
-            get { return aspectRatio; }
+            get => aspectRatio;
             set
             {
                 if (aspectRatio == value)
@@ -113,7 +113,7 @@ namespace SampleFramework
         /// <value>The near plane.</value>
         public float NearPlane
         {
-            get { return nearPlane; }
+            get => nearPlane;
             set
             {
                 if (nearPlane == value)
@@ -130,7 +130,7 @@ namespace SampleFramework
         /// <value>The far plane.</value>
         public float FarPlane
         {
-            get { return farPlane; }
+            get => farPlane;
             set
             {
                 if (farPlane == value)

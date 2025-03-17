@@ -14,40 +14,40 @@ namespace FDK
 
 		public CInputMouse(IntPtr hWnd, DirectInput directInput)
 		{
-			this.eInputDeviceType = EInputDeviceType.Mouse;
-			this.GUID = "";
-			this.ID = 0;
+			eInputDeviceType = EInputDeviceType.Mouse;
+			GUID = "";
+			ID = 0;
 			try
 			{
-				this.devMouse = new Mouse(directInput);
-				this.devMouse.SetCooperativeLevel(hWnd, CooperativeLevel.Foreground | CooperativeLevel.NonExclusive);
-				this.devMouse.Properties.BufferSize = 0x20;
-				Trace.TraceInformation(this.devMouse.Information.ProductName.Trim(new char[] { '\0' }) + " を生成しました。");  // なぜか0x00のゴミが出るので削除
-				this.strDeviceName = this.devMouse.Information.ProductName.Trim(new char[] { '\0' });
+				devMouse = new Mouse(directInput);
+				devMouse.SetCooperativeLevel(hWnd, CooperativeLevel.Foreground | CooperativeLevel.NonExclusive);
+				devMouse.Properties.BufferSize = 0x20;
+				Trace.TraceInformation(devMouse.Information.ProductName.Trim(new char[] { '\0' }) + " を生成しました。");  // なぜか0x00のゴミが出るので削除
+				strDeviceName = devMouse.Information.ProductName.Trim(new char[] { '\0' });
 			}
 			catch
 			{
-				if (this.devMouse != null)
+				if (devMouse != null)
 				{
-					this.devMouse.Dispose();
-					this.devMouse = null;
+					devMouse.Dispose();
+					devMouse = null;
 				}
 				Trace.TraceWarning("Mouse デバイスの生成に失敗しました。");
 				throw;
 			}
 			try
 			{
-				this.devMouse.Acquire();
+				devMouse.Acquire();
 			}
 			catch
 			{
 			}
 
-			for (int i = 0; i < this.bMouseState.Length; i++)
-				this.bMouseState[i] = false;
+			for (int i = 0; i < bMouseState.Length; i++)
+				bMouseState[i] = false;
 
 			//this.timer = new CTimer( CTimer.E種別.MultiMedia );
-			this.listInputEvent = new List<STInputEvent>(32);
+			listInputEvent = new List<STInputEvent>(32);
 		}
 
 
@@ -65,23 +65,23 @@ namespace FDK
 		{
 			for (int i = 0; i < 8; i++)
 			{
-				this.bMousePushDown[i] = false;
-				this.bMousePullUp[i] = false;
+				bMousePushDown[i] = false;
+				bMousePullUp[i] = false;
 			}
 
-			if (bWindowがアクティブ中 && (this.devMouse != null))
+			if (bWindowがアクティブ中 && (devMouse != null))
 			{
-				this.devMouse.Acquire();
-				this.devMouse.Poll();
+				devMouse.Acquire();
+				devMouse.Poll();
 
 				// this.list入力イベント = new List<STInputEvent>( 32 );
-				this.listInputEvent.Clear();            // #xxxxx 2012.6.11 yyagi; To optimize, I removed new();
+				listInputEvent.Clear();            // #xxxxx 2012.6.11 yyagi; To optimize, I removed new();
 
 				if (bバッファ入力を使用する)
 				{
 					#region [ a.バッファ入力 ]
 					//-----------------------------
-					var bufferedData = this.devMouse.GetBufferedData();
+					var bufferedData = devMouse.GetBufferedData();
 					//if( Result.Last.IsSuccess && bufferedData != null )
 					{
 						foreach (MouseUpdate data in bufferedData)
@@ -110,12 +110,12 @@ namespace FDK
 										nTimeStamp = CSoundManager.rcPerformanceTimer.nサウンドタイマーのシステム時刻msへの変換(data.Timestamp),
 										nVelocity = CInputManager.n通常音量
 									};
-									this.listInputEvent.Add(item);
+									listInputEvent.Add(item);
 
-									this.bMouseState[k] = true;
-									this.bMousePushDown[k] = true;
+									bMouseState[k] = true;
+									bMousePushDown[k] = true;
 								}
-								else if (data.Offset == mouseButton[k] && this.bMouseState[k] == true && ((data.Value & 0x80) == 0))
+								else if (data.Offset == mouseButton[k] && bMouseState[k] == true && ((data.Value & 0x80) == 0))
 								//else if( data.IsReleased( k ) )
 								{
 									STInputEvent item = new STInputEvent()
@@ -126,10 +126,10 @@ namespace FDK
 										nTimeStamp = CSoundManager.rcPerformanceTimer.nサウンドタイマーのシステム時刻msへの変換(data.Timestamp),
 										nVelocity = CInputManager.n通常音量
 									};
-									this.listInputEvent.Add(item);
+									listInputEvent.Add(item);
 
-									this.bMouseState[k] = false;
-									this.bMousePullUp[k] = true;
+									bMouseState[k] = false;
+									bMousePullUp[k] = true;
 								}
 							}
 						}
@@ -141,14 +141,14 @@ namespace FDK
 				{
 					#region [ b.状態入力 ]
 					//-----------------------------
-					MouseState currentState = this.devMouse.GetCurrentState();
+					MouseState currentState = devMouse.GetCurrentState();
 					//if( Result.Last.IsSuccess && currentState != null )
 					{
 						bool[] buttons = currentState.Buttons;
 
 						for (int j = 0; (j < buttons.Length) && (j < 8); j++)
 						{
-							if (this.bMouseState[j] == false && buttons[j] == true)
+							if (bMouseState[j] == false && buttons[j] == true)
 							{
 								var ev = new STInputEvent()
 								{
@@ -158,12 +158,12 @@ namespace FDK
 									nTimeStamp = CSoundManager.rcPerformanceTimer.nシステム時刻, // 演奏用タイマと同じタイマを使うことで、BGMと譜面、入力ずれを防ぐ。
 									nVelocity = CInputManager.n通常音量,
 								};
-								this.listInputEvent.Add(ev);
+								listInputEvent.Add(ev);
 
-								this.bMouseState[j] = true;
-								this.bMousePushDown[j] = true;
+								bMouseState[j] = true;
+								bMousePushDown[j] = true;
 							}
-							else if (this.bMouseState[j] == true && buttons[j] == false)
+							else if (bMouseState[j] == true && buttons[j] == false)
 							{
 								var ev = new STInputEvent()
 								{
@@ -173,10 +173,10 @@ namespace FDK
 									nTimeStamp = CSoundManager.rcPerformanceTimer.nシステム時刻, // 演奏用タイマと同じタイマを使うことで、BGMと譜面、入力ずれを防ぐ。
 									nVelocity = CInputManager.n通常音量,
 								};
-								this.listInputEvent.Add(ev);
+								listInputEvent.Add(ev);
 
-								this.bMouseState[j] = false;
-								this.bMousePullUp[j] = true;
+								bMouseState[j] = false;
+								bMousePullUp[j] = true;
 							}
 						}
 					}
@@ -187,19 +187,19 @@ namespace FDK
 		}
 		public bool bKeyPressed(int nButton)  // bキーが押された
 		{
-			return (((0 <= nButton) && (nButton < 8)) && this.bMousePushDown[nButton]);
+			return (((0 <= nButton) && (nButton < 8)) && bMousePushDown[nButton]);
 		}
 		public bool bKeyPressing(int nButton)  // bキーが押されている
 		{
-			return (((0 <= nButton) && (nButton < 8)) && this.bMouseState[nButton]);
+			return (((0 <= nButton) && (nButton < 8)) && bMouseState[nButton]);
 		}
 		public bool bKeyReleased(int nButton)  // bキーが離された
 		{
-			return (((0 <= nButton) && (nButton < 8)) && this.bMousePullUp[nButton]);
+			return (((0 <= nButton) && (nButton < 8)) && bMousePullUp[nButton]);
 		}
 		public bool bKeyReleasing(int nButton)  // bキーが離されている
 		{
-			return (((0 <= nButton) && (nButton < 8)) && !this.bMouseState[nButton]);
+			return (((0 <= nButton) && (nButton < 8)) && !bMouseState[nButton]);
 		}
 		//-----------------
 		#endregion
@@ -208,23 +208,23 @@ namespace FDK
 		//-----------------
 		public void Dispose()
 		{
-			if (!this.bDispose完了済み)
+			if (!bDispose完了済み)
 			{
-				if (this.devMouse != null)
+				if (devMouse != null)
 				{
-					this.devMouse.Dispose();
-					this.devMouse = null;
+					devMouse.Dispose();
+					devMouse = null;
 				}
 				//if( this.timer != null )
 				//{
 				//    this.timer.Dispose();
 				//    this.timer = null;
 				//}
-				if (this.listInputEvent != null)
+				if (listInputEvent != null)
 				{
-					this.listInputEvent = null;
+					listInputEvent = null;
 				}
-				this.bDispose完了済み = true;
+				bDispose完了済み = true;
 			}
 		}
 		//-----------------

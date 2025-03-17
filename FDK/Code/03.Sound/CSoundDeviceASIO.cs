@@ -85,7 +85,7 @@ namespace FDK
 			get
 			{
 				float f音量 = 0.0f;
-				bool b = Bass.BASS_ChannelGetAttribute(this.hMixer, BASSAttribute.BASS_ATTRIB_VOL, ref f音量);
+				bool b = Bass.BASS_ChannelGetAttribute(hMixer, BASSAttribute.BASS_ATTRIB_VOL, ref f音量);
 				if (!b)
 				{
 					BASSError be = Bass.BASS_ErrorGetCode();
@@ -100,7 +100,7 @@ namespace FDK
 			}
 			set
 			{
-				bool b = Bass.BASS_ChannelSetAttribute(this.hMixer, BASSAttribute.BASS_ATTRIB_VOL, (float)(value / 100.0));
+				bool b = Bass.BASS_ChannelSetAttribute(hMixer, BASSAttribute.BASS_ATTRIB_VOL, (float)(value / 100.0));
 				if (!b)
 				{
 					BASSError be = Bass.BASS_ErrorGetCode();
@@ -127,12 +127,12 @@ namespace FDK
 			// 初期化。
 
 			Trace.TraceInformation("BASS (ASIO) の初期化を開始します。");
-			this.e出力デバイス = ESoundDeviceType.Unknown;
-			this.n実出力遅延ms = 0;
-			this.n経過時間ms = 0;
-			this.n経過時間を更新したシステム時刻ms = CTimer.nUnused;
-			this.tmシステムタイマ = new CTimer(CTimer.EType.MultiMedia);
-			this.nASIODevice = _nASIODevice;
+			e出力デバイス = ESoundDeviceType.Unknown;
+			n実出力遅延ms = 0;
+			n経過時間ms = 0;
+			n経過時間を更新したシステム時刻ms = CTimer.nUnused;
+			tmシステムタイマ = new CTimer(CTimer.EType.MultiMedia);
+			nASIODevice = _nASIODevice;
 
 			#region [ BASS registration ]
 			// BASS.NET ユーザ登録（BASSスプラッシュが非表示になる）。
@@ -156,7 +156,7 @@ namespace FDK
 
 			// BASS の設定。
 
-			this.bIsBASSFree = true;
+			bIsBASSFree = true;
 			Debug.Assert(Bass.BASS_SetConfig(BASSConfig.BASS_CONFIG_UPDATEPERIOD, 0),       // 0:BASSストリームの自動更新を行わない。（BASSWASAPIから行うため）
 				string.Format("BASS_SetConfig() に失敗しました。[{0}", Bass.BASS_ErrorGetCode()));
 
@@ -187,22 +187,22 @@ namespace FDK
 			{
 				#region [ ASIO の初期化に成功。]
 				//-----------------
-				this.e出力デバイス = ESoundDeviceType.ASIO;
+				e出力デバイス = ESoundDeviceType.ASIO;
 				asioInfo = BassAsio.BASS_ASIO_GetInfo();
-				this.n出力チャンネル数 = asioInfo.outputs;
-				this.db周波数 = BassAsio.BASS_ASIO_GetRate();
-				this.fmtASIOデバイスフォーマット = BassAsio.BASS_ASIO_ChannelGetFormat(false, 0);
+				n出力チャンネル数 = asioInfo.outputs;
+				db周波数 = BassAsio.BASS_ASIO_GetRate();
+				fmtASIOデバイスフォーマット = BassAsio.BASS_ASIO_ChannelGetFormat(false, 0);
 
 				Trace.TraceInformation("BASS を初期化しました。(ASIO, デバイス:\"{0}\", 入力{1}, 出力{2}, {3}Hz, バッファ{4}～{6}sample ({5:0.###}～{7:0.###}ms), デバイスフォーマット:{8})",
 					asioInfo.name,
 					asioInfo.inputs,
 					asioInfo.outputs,
-					this.db周波数.ToString("0.###"),
-					asioInfo.bufmin, asioInfo.bufmin * 1000 / this.db周波数,
-					asioInfo.bufmax, asioInfo.bufmax * 1000 / this.db周波数,
-					this.fmtASIOデバイスフォーマット.ToString()
+					db周波数.ToString("0.###"),
+					asioInfo.bufmin, asioInfo.bufmin * 1000 / db周波数,
+					asioInfo.bufmax, asioInfo.bufmax * 1000 / db周波数,
+					fmtASIOデバイスフォーマット.ToString()
 					);
-				this.bIsBASSFree = false;
+				bIsBASSFree = false;
 				#region [ debug: channel format ]
 				//BASS_ASIO_CHANNELINFO chinfo = new BASS_ASIO_CHANNELINFO();
 				//int chan = 0;
@@ -228,7 +228,7 @@ namespace FDK
 					errmes = "BASS_OK; The device may be dissconnected";
 				}
 				Bass.BASS_Free();
-				this.bIsBASSFree = true;
+				bIsBASSFree = true;
 				throw new Exception(string.Format("BASS (ASIO) の初期化に失敗しました。(BASS_ASIO_Init)[{0}]", errmes));
 				//-----------------
 				#endregion
@@ -238,19 +238,19 @@ namespace FDK
 
 			// ASIO 出力チャンネルの初期化。
 
-			this.tAsioProc = new ASIOPROC(this.tAsio処理);        // アンマネージに渡す delegate は、フィールドとして保持しておかないとGCでアドレスが変わってしまう。
-			if (!BassAsio.BASS_ASIO_ChannelEnable(false, 0, this.tAsioProc, IntPtr.Zero))       // 出力チャンネル0 の有効化。
+			tAsioProc = new ASIOPROC(tAsio処理);        // アンマネージに渡す delegate は、フィールドとして保持しておかないとGCでアドレスが変わってしまう。
+			if (!BassAsio.BASS_ASIO_ChannelEnable(false, 0, tAsioProc, IntPtr.Zero))       // 出力チャンネル0 の有効化。
 			{
 				#region [ ASIO 出力チャンネルの初期化に失敗。]
 				//-----------------
 				BassAsio.BASS_ASIO_Free();
 				Bass.BASS_Free();
-				this.bIsBASSFree = true;
+				bIsBASSFree = true;
 				throw new Exception(string.Format("Failed BASS_ASIO_ChannelEnable() [{0}]", BassAsio.BASS_ASIO_ErrorGetCode().ToString()));
 				//-----------------
 				#endregion
 			}
-			for (int i = 1; i < this.n出力チャンネル数; i++)        // 出力チャネルを全てチャネル0とグループ化する。
+			for (int i = 1; i < n出力チャンネル数; i++)        // 出力チャネルを全てチャネル0とグループ化する。
 			{                                                       // チャネル1だけを0とグループ化すると、3ch以上の出力をサポートしたカードでの動作がおかしくなる
 				if (!BassAsio.BASS_ASIO_ChannelJoin(false, i, 0))
 				{
@@ -258,19 +258,19 @@ namespace FDK
 					//-----------------
 					BassAsio.BASS_ASIO_Free();
 					Bass.BASS_Free();
-					this.bIsBASSFree = true;
+					bIsBASSFree = true;
 					throw new Exception(string.Format("Failed BASS_ASIO_ChannelJoin({1}) [{0}]", BassAsio.BASS_ASIO_ErrorGetCode().ToString(), i));
 					//-----------------
 					#endregion
 				}
 			}
-			if (!BassAsio.BASS_ASIO_ChannelSetFormat(false, 0, this.fmtASIOチャンネルフォーマット))    // 出力チャンネル0のフォーマット
+			if (!BassAsio.BASS_ASIO_ChannelSetFormat(false, 0, fmtASIOチャンネルフォーマット))    // 出力チャンネル0のフォーマット
 			{
 				#region [ ASIO 出力チャンネルの初期化に失敗。]
 				//-----------------
 				BassAsio.BASS_ASIO_Free();
 				Bass.BASS_Free();
-				this.bIsBASSFree = true;
+				bIsBASSFree = true;
 				throw new Exception(string.Format("Failed BASS_ASIO_ChannelSetFormat() [{0}]", BassAsio.BASS_ASIO_ErrorGetCode().ToString()));
 				//-----------------
 				#endregion
@@ -280,16 +280,16 @@ namespace FDK
 			// 1つのまとめとなるmixer (hMixer) と、そこにつなぐ複数の楽器別mixer (hMixer _forChips)を作成。
 
 			var flag = BASSFlag.BASS_MIXER_NONSTOP | BASSFlag.BASS_STREAM_DECODE;   // デコードのみ＝発声しない。ASIO に出力されるだけ。
-			if (this.fmtASIOデバイスフォーマット == BASSASIOFormat.BASS_ASIO_FORMAT_FLOAT)
+			if (fmtASIOデバイスフォーマット == BASSASIOFormat.BASS_ASIO_FORMAT_FLOAT)
 				flag |= BASSFlag.BASS_SAMPLE_FLOAT;
-			this.hMixer = BassMix.BASS_Mixer_StreamCreate((int)this.db周波数, this.n出力チャンネル数, flag);
+			hMixer = BassMix.BASS_Mixer_StreamCreate((int)db周波数, n出力チャンネル数, flag);
 
-			if (this.hMixer == 0)
+			if (hMixer == 0)
 			{
 				BASSError err = Bass.BASS_ErrorGetCode();
 				BassAsio.BASS_ASIO_Free();
 				Bass.BASS_Free();
-				this.bIsBASSFree = true;
+				bIsBASSFree = true;
 				throw new Exception(string.Format("BASSミキサ(mixing)の作成に失敗しました。[{0}]", err));
 			}
 
@@ -321,9 +321,9 @@ namespace FDK
 
 			// BASS ミキサーの1秒あたりのバイト数を算出。
 
-			var mixerInfo = Bass.BASS_ChannelGetInfo(this.hMixer);
+			var mixerInfo = Bass.BASS_ChannelGetInfo(hMixer);
 			int nサンプルサイズbyte = 0;
-			switch (this.fmtASIOチャンネルフォーマット)
+			switch (fmtASIOチャンネルフォーマット)
 			{
 				case BASSASIOFormat.BASS_ASIO_FORMAT_16BIT: nサンプルサイズbyte = 2; break;
 				case BASSASIOFormat.BASS_ASIO_FORMAT_24BIT: nサンプルサイズbyte = 3; break;
@@ -332,31 +332,31 @@ namespace FDK
 			}
 			//long nミキサーの1サンプルあたりのバイト数 = /*mixerInfo.chans*/ 2 * nサンプルサイズbyte;
 			long nミキサーの1サンプルあたりのバイト数 = mixerInfo.chans * nサンプルサイズbyte;
-			this.nミキサーの1秒あたりのバイト数 = nミキサーの1サンプルあたりのバイト数 * mixerInfo.freq;
+			nミキサーの1秒あたりのバイト数 = nミキサーの1サンプルあたりのバイト数 * mixerInfo.freq;
 
 
 			// 単純に、hMixerの音量をMasterVolumeとして制御しても、
 			// ChannelGetData()の内容には反映されない。
 			// そのため、もう一段mixerを噛ませて、一段先のmixerからChannelGetData()することで、
 			// hMixerの音量制御を反映させる。
-			this.hMixer_DeviceOut = BassMix.BASS_Mixer_StreamCreate(
-				(int)this.db周波数, this.n出力チャンネル数, flag);
-			if (this.hMixer_DeviceOut == 0)
+			hMixer_DeviceOut = BassMix.BASS_Mixer_StreamCreate(
+				(int)db周波数, n出力チャンネル数, flag);
+			if (hMixer_DeviceOut == 0)
 			{
 				BASSError errcode = Bass.BASS_ErrorGetCode();
 				BassAsio.BASS_ASIO_Free();
 				Bass.BASS_Free();
-				this.bIsBASSFree = true;
+				bIsBASSFree = true;
 				throw new Exception(string.Format("BASSミキサ(最終段)の作成に失敗しました。[{0}]", errcode));
 			}
 			{
-				bool b1 = BassMix.BASS_Mixer_StreamAddChannel(this.hMixer_DeviceOut, this.hMixer, BASSFlag.BASS_DEFAULT);
+				bool b1 = BassMix.BASS_Mixer_StreamAddChannel(hMixer_DeviceOut, hMixer, BASSFlag.BASS_DEFAULT);
 				if (!b1)
 				{
 					BASSError errcode = Bass.BASS_ErrorGetCode();
 					BassAsio.BASS_ASIO_Free();
 					Bass.BASS_Free();
-					this.bIsBASSFree = true;
+					bIsBASSFree = true;
 					throw new Exception(string.Format("BASSミキサ(最終段とmixing)の接続に失敗しました。[{0}]", errcode));
 				};
 			}
@@ -364,22 +364,22 @@ namespace FDK
 
 			// 出力を開始。
 
-			this.nバッファサイズsample = (int)(n希望バッファサイズms * this.db周波数 / 1000.0);
+			nバッファサイズsample = (int)(n希望バッファサイズms * db周波数 / 1000.0);
 			//this.nバッファサイズsample = (int)  nバッファサイズbyte;
-			if (!BassAsio.BASS_ASIO_Start(this.nバッファサイズsample))     // 範囲外の値を指定した場合は自動的にデフォルト値に設定される。
+			if (!BassAsio.BASS_ASIO_Start(nバッファサイズsample))     // 範囲外の値を指定した場合は自動的にデフォルト値に設定される。
 			{
 				BASSError err = BassAsio.BASS_ASIO_ErrorGetCode();
 				BassAsio.BASS_ASIO_Free();
 				Bass.BASS_Free();
-				this.bIsBASSFree = true;
+				bIsBASSFree = true;
 				throw new Exception("ASIO デバイス出力開始に失敗しました。" + err.ToString());
 			}
 			else
 			{
 				int n遅延sample = BassAsio.BASS_ASIO_GetLatency(false);   // この関数は BASS_ASIO_Start() 後にしか呼び出せない。
-				int n希望遅延sample = (int)(n希望バッファサイズms * this.db周波数 / 1000.0);
-				this.n実バッファサイズms = this.n実出力遅延ms = (long)(n遅延sample * 1000.0f / this.db周波数);
-				Trace.TraceInformation("ASIO デバイス出力開始：バッファ{0}sample(希望{1}) [{2}ms(希望{3}ms)]", n遅延sample, n希望遅延sample, this.n実出力遅延ms, n希望バッファサイズms);
+				int n希望遅延sample = (int)(n希望バッファサイズms * db周波数 / 1000.0);
+				n実バッファサイズms = n実出力遅延ms = (long)(n遅延sample * 1000.0f / db周波数);
+				Trace.TraceInformation("ASIO デバイス出力開始：バッファ{0}sample(希望{1}) [{2}ms(希望{3}ms)]", n遅延sample, n希望遅延sample, n実出力遅延ms, n希望バッファサイズms);
 			}
 		}
 
@@ -402,7 +402,7 @@ namespace FDK
 		public CSound tサウンドを作成する(string strファイル名, CSound.EInstType eInstType)
 		{
 			var sound = new CSound();
-			sound.tASIOサウンドを作成する(strファイル名, this.hMixer, eInstType);
+			sound.tASIOサウンドを作成する(strファイル名, hMixer, eInstType);
 			return sound;
 		}
 		public CSound tサウンドを作成する(byte[] byArrWAVファイルイメージ)
@@ -412,16 +412,16 @@ namespace FDK
 		public CSound tサウンドを作成する(byte[] byArrWAVファイルイメージ, CSound.EInstType eInstType)
 		{
 			var sound = new CSound();
-			sound.tASIOサウンドを作成する(byArrWAVファイルイメージ, this.hMixer, eInstType);
+			sound.tASIOサウンドを作成する(byArrWAVファイルイメージ, hMixer, eInstType);
 			return sound;
 		}
 		public void tサウンドを作成する(string strファイル名, ref CSound sound, CSound.EInstType eInstType)
 		{
-			sound.tASIOサウンドを作成する(strファイル名, this.hMixer, eInstType);
+			sound.tASIOサウンドを作成する(strファイル名, hMixer, eInstType);
 		}
 		public void tサウンドを作成する(byte[] byArrWAVファイルイメージ, ref CSound sound, CSound.EInstType eInstType)
 		{
-			sound.tASIOサウンドを作成する(byArrWAVファイルイメージ, this.hMixer, eInstType);
+			sound.tASIOサウンドを作成する(byArrWAVファイルイメージ, hMixer, eInstType);
 		}
 		#endregion
 
@@ -430,25 +430,25 @@ namespace FDK
 		//-----------------
 		public void Dispose()
 		{
-			this.Dispose(true);
+			Dispose(true);
 			GC.SuppressFinalize(this);
 		}
 		protected void Dispose(bool bManagedDispose)
 		{
-			this.e出力デバイス = ESoundDeviceType.Unknown;        // まず出力停止する(Dispose中にクラス内にアクセスされることを防ぐ)
+			e出力デバイス = ESoundDeviceType.Unknown;        // まず出力停止する(Dispose中にクラス内にアクセスされることを防ぐ)
 			if (hMixer_DeviceOut != 0)
 			{
-				BassMix.BASS_Mixer_ChannelPause(this.hMixer_DeviceOut);
-				Bass.BASS_StreamFree(this.hMixer_DeviceOut);
-				this.hMixer_DeviceOut = 0;
+				BassMix.BASS_Mixer_ChannelPause(hMixer_DeviceOut);
+				Bass.BASS_StreamFree(hMixer_DeviceOut);
+				hMixer_DeviceOut = 0;
 			}
 			if (hMixer != 0)
 			{
-				BassMix.BASS_Mixer_ChannelPause(this.hMixer);
-				Bass.BASS_StreamFree(this.hMixer);
-				this.hMixer = 0;
+				BassMix.BASS_Mixer_ChannelPause(hMixer);
+				Bass.BASS_StreamFree(hMixer);
+				hMixer = 0;
 			}
-			if (!this.bIsBASSFree)
+			if (!bIsBASSFree)
 			{
 				BassAsio.BASS_ASIO_Free();  // システムタイマより先に呼び出すこと。（tAsio処理() の中でシステムタイマを参照してるため）
 				Bass.BASS_Free();
@@ -456,13 +456,13 @@ namespace FDK
 
 			if (bManagedDispose)
 			{
-				CCommon.tDispose(this.tmシステムタイマ);
-				this.tmシステムタイマ = null;
+				CCommon.tDispose(tmシステムタイマ);
+				tmシステムタイマ = null;
 			}
 		}
 		~CSoundDeviceASIO()
 		{
-			this.Dispose(false);
+			Dispose(false);
 		}
 		//-----------------
 		#endregion
@@ -486,7 +486,7 @@ namespace FDK
 
 			// BASSミキサからの出力データをそのまま ASIO buffer へ丸投げ。
 
-			int num = Bass.BASS_ChannelGetData(this.hMixer_DeviceOut, buffer, length);      // num = 実際に転送した長さ
+			int num = Bass.BASS_ChannelGetData(hMixer_DeviceOut, buffer, length);      // num = 実際に転送した長さ
 
 			if (num == -1) num = 0;
 
@@ -494,13 +494,13 @@ namespace FDK
 			// 経過時間を更新。
 			// データの転送差分ではなく累積転送バイト数から算出する。
 
-			this.n経過時間ms = (this.n累積転送バイト数 * 1000 / this.nミキサーの1秒あたりのバイト数) - this.n実出力遅延ms;
-			this.n経過時間を更新したシステム時刻ms = this.tmシステムタイマ.nSystemTimeMs;
+			n経過時間ms = (n累積転送バイト数 * 1000 / nミキサーの1秒あたりのバイト数) - n実出力遅延ms;
+			n経過時間を更新したシステム時刻ms = tmシステムタイマ.nSystemTimeMs;
 
 
 			// 経過時間を更新後に、今回分の累積転送バイト数を反映。
 
-			this.n累積転送バイト数 += num;
+			n累積転送バイト数 += num;
 			return num;
 		}
 

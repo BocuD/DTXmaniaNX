@@ -22,11 +22,11 @@ namespace DTXMania
 
         public CStageSongLoading()
         {
-            base.eStageID = CStage.EStage.SongLoading;
-            base.ePhaseID = CStage.EPhase.Common_DefaultState;
-            base.bNotActivated = true;
+            eStageID = EStage.SongLoading;
+            ePhaseID = EPhase.Common_DefaultState;
+            bNotActivated = true;
             //			base.listChildActivities.Add( this.actFI = new CActFIFOBlack() );	// #27787 2012.3.10 yyagi 曲読み込み画面のフェードインの省略
-            base.listChildActivities.Add(this.actFO = new CActFIFOBlackStart());
+            listChildActivities.Add(actFO = new CActFIFOBlackStart());
 
             #region[ 難易度数字 ]
             STCharacterPosition[] stCharacterPositionArray2 = new STCharacterPosition[11];
@@ -74,7 +74,7 @@ namespace DTXMania
             st文字位置22.ch = '-';
             st文字位置22.pt = new Point(0, 40);
             stCharacterPositionArray2[10] = st文字位置22;
-            this.st小文字位置 = stCharacterPositionArray2;
+            st小文字位置 = stCharacterPositionArray2;
 
             //大文字
             STCharacterPosition[] st文字位置Array3 = new STCharacterPosition[12];
@@ -126,11 +126,11 @@ namespace DTXMania
             st文字位置34.ch = '-';
             st文字位置34.pt = new Point(0, 0);
             st文字位置Array3[11] = st文字位置34;
-            this.st大文字位置 = st文字位置Array3;
+            st大文字位置 = st文字位置Array3;
             #endregion
 
-            this.stPanelMap = null;
-            this.stPanelMap = new STATUSPANEL[12];		// yyagi: 以下、手抜きの初期化でスマン
+            stPanelMap = null;
+            stPanelMap = new STATUSPANEL[12];		// yyagi: 以下、手抜きの初期化でスマン
             string[] labels = new string[12] {
             "DTXMANIA",     //0
             "DEBUT",        //1
@@ -149,9 +149,9 @@ namespace DTXMania
 
             for (int i = 0; i < 12; i++)
             {
-                this.stPanelMap[i] = default(STATUSPANEL);
-                this.stPanelMap[i].status = status[i];
-                this.stPanelMap[i].label = labels[i];
+                stPanelMap[i] = default(STATUSPANEL);
+                stPanelMap[i].status = status[i];
+                stPanelMap[i].label = labels[i];
             }
         }
 
@@ -161,21 +161,21 @@ namespace DTXMania
         {
             if( string.IsNullOrEmpty( strラベル名 ) )
             {
-                this.nIndex = 0;
+                nIndex = 0;
             }
             else
             {
-                STATUSPANEL[] array = this.stPanelMap;
+                STATUSPANEL[] array = stPanelMap;
                 for( int i = 0; i < array.Length; i++ )
                 {
                     STATUSPANEL sTATUSPANEL = array[ i ];
                     if( strラベル名.Equals( sTATUSPANEL.label, StringComparison.CurrentCultureIgnoreCase ) )
                     {
-                        this.nIndex = sTATUSPANEL.status;
+                        nIndex = sTATUSPANEL.status;
                         CDTXMania.nSongDifficulty = sTATUSPANEL.status;
                         return;
                     }
-                    this.nIndex++;
+                    nIndex++;
                 }
             }
         }
@@ -186,16 +186,16 @@ namespace DTXMania
             Trace.Indent();
             try
             {
-                this.strSongTitle = "";
-                this.strArtistName = "";
-                this.strSTAGEFILE = "";
+                strSongTitle = "";
+                strArtistName = "";
+                strSTAGEFILE = "";
 
-                this.nBGMPlayStartTime = -1L;
-                this.nBGMTotalPlayTimeMs = 0;
-                if( this.sdLoadingSound != null )
+                nBGMPlayStartTime = -1L;
+                nBGMTotalPlayTimeMs = 0;
+                if( sdLoadingSound != null )
                 {
-                    CDTXMania.SoundManager.tDiscard( this.sdLoadingSound );
-                    this.sdLoadingSound = null;
+                    CDTXMania.SoundManager.tDiscard( sdLoadingSound );
+                    sdLoadingSound = null;
                 }
 
                 string strDTXFilePath = ( CDTXMania.bCompactMode ) ?
@@ -204,11 +204,11 @@ namespace DTXMania
                 CDTX cdtx = new CDTX( strDTXFilePath, true );
 
                 if( !CDTXMania.bCompactMode && CDTXMania.ConfigIni.b曲名表示をdefのものにする )
-                    this.strSongTitle = CDTXMania.stageSongSelection.rConfirmedSong.strタイトル;
+                    strSongTitle = CDTXMania.stageSongSelection.rConfirmedSong.strタイトル;
                 else
-                    this.strSongTitle = cdtx.TITLE;
+                    strSongTitle = cdtx.TITLE;
 
-                this.strArtistName = cdtx.ARTIST;
+                strArtistName = cdtx.ARTIST;
                 if( ( ( cdtx.SOUND_NOWLOADING != null ) && ( cdtx.SOUND_NOWLOADING.Length > 0 ) ) && File.Exists( cdtx.strFolderName + cdtx.SOUND_NOWLOADING )
                     && (!CDTXMania.DTXVmode.Enabled)
                     && (!CDTXMania.DTX2WAVmode.Enabled))
@@ -216,7 +216,7 @@ namespace DTXMania
                     string strNowLoadingサウンドファイルパス = cdtx.strFolderName + cdtx.SOUND_NOWLOADING;
                     try
                     {
-                        this.sdLoadingSound = CDTXMania.SoundManager.tGenerateSound( strNowLoadingサウンドファイルパス );
+                        sdLoadingSound = CDTXMania.SoundManager.tGenerateSound( strNowLoadingサウンドファイルパス );
                     }
                     catch
                     {
@@ -245,7 +245,7 @@ namespace DTXMania
                     CDTXMania.listTargetGhsotLag[instIndex] = null;
                     CDTXMania.listAutoGhostLag[instIndex] = null;
                     CDTXMania.listTargetGhostScoreData[instIndex] = null;
-                    this.nCurrentInst = instIndex;
+                    nCurrentInst = instIndex;
 
                     if ( readAutoGhostCond )
                     {
@@ -269,7 +269,7 @@ namespace DTXMania
                         {
                             CDTXMania.listTargetGhsotLag[instIndex] = new List<int>();
                             CDTXMania.listTargetGhostScoreData[ instIndex ] = new CScoreIni.CPerformanceEntry();
-                            this.stGhostLag[instIndex] = new List<STGhostLag>();
+                            stGhostLag[instIndex] = new List<STGhostLag>();
                             ReadGhost(filename, CDTXMania.listTargetGhsotLag[instIndex]);
                         }
                         else if( CDTXMania.ConfigIni.eTargetGhost[instIndex] == ETargetGhostData.PERFECT )
@@ -283,7 +283,7 @@ namespace DTXMania
                 cdtx.OnDeactivate();
                 base.OnActivate();
                 if( !CDTXMania.bCompactMode && !CDTXMania.DTXVmode.Enabled && !CDTXMania.DTX2WAVmode.Enabled)
-                    this.tDetermineStatusLabelFromLabelName( CDTXMania.stageSongSelection.rConfirmedSong.arDifficultyLabel[ CDTXMania.stageSongSelection.nConfirmedSongDifficulty ] );
+                    tDetermineStatusLabelFromLabelName( CDTXMania.stageSongSelection.rConfirmedSong.arDifficultyLabel[ CDTXMania.stageSongSelection.nConfirmedSongDifficulty ] );
             }
             finally
             {
@@ -307,51 +307,51 @@ namespace DTXMania
         }
         public override void OnManagedCreateResources()
         {
-            if (!base.bNotActivated)
+            if (!bNotActivated)
             {
-                this.txBackground = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\6_background.jpg" ) );
-                this.txLevel = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\6_LevelNumber.png" ) );
-                this.txDifficultyPanel = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\6_Difficulty.png" ) );
-                this.txPartPanel = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\6_Part.png"));
+                txBackground = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\6_background.jpg" ) );
+                txLevel = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\6_LevelNumber.png" ) );
+                txDifficultyPanel = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\6_Difficulty.png" ) );
+                txPartPanel = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\6_Part.png"));
 
                 #region[ 曲名、アーティスト名テクスチャの生成 ]
                 try
                 {
                     #region[ 曲名、アーティスト名テクスチャの生成 ]
-                    if ((this.strSongTitle != null) && (this.strSongTitle.Length > 0))
+                    if ((strSongTitle != null) && (strSongTitle.Length > 0))
                     {
-                        this.pfタイトル = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.str選曲リストフォント), 40, FontStyle.Regular);
+                        pfタイトル = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.str選曲リストフォント), 40, FontStyle.Regular);
                         Bitmap bmpSongName = new Bitmap(1, 1);
-                        bmpSongName = this.pfタイトル.DrawPrivateFont(this.strSongTitle, CPrivateFont.DrawMode.Edge, Color.Black, Color.Black, this.clGITADORAgradationTopColor, this.clGITADORAgradationBottomColor, true);
-                        this.txTitle = CDTXMania.tGenerateTexture(bmpSongName, false);
+                        bmpSongName = pfタイトル.DrawPrivateFont(strSongTitle, CPrivateFont.DrawMode.Edge, Color.Black, Color.Black, clGITADORAgradationTopColor, clGITADORAgradationBottomColor, true);
+                        txTitle = CDTXMania.tGenerateTexture(bmpSongName, false);
                         CDTXMania.tDisposeSafely( ref bmpSongName );
-                        CDTXMania.tDisposeSafely( ref this.pfタイトル );
+                        CDTXMania.tDisposeSafely( ref pfタイトル );
                     }
                     else
                     {
-                        this.txTitle = null;
+                        txTitle = null;
                     }
 
-                    if ((this.strArtistName != null) && (this.strArtistName.Length > 0))
+                    if ((strArtistName != null) && (strArtistName.Length > 0))
                     {
                         pfアーティスト = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.str選曲リストフォント), 30, FontStyle.Regular);
                         Bitmap bmpArtistName = new Bitmap(1, 1);
-                        bmpArtistName = pfアーティスト.DrawPrivateFont(this.strArtistName, CPrivateFont.DrawMode.Edge, Color.Black, Color.Black, this.clGITADORAgradationTopColor, this.clGITADORAgradationBottomColor, true);
-                        this.txArtist = CDTXMania.tGenerateTexture(bmpArtistName, false);
+                        bmpArtistName = pfアーティスト.DrawPrivateFont(strArtistName, CPrivateFont.DrawMode.Edge, Color.Black, Color.Black, clGITADORAgradationTopColor, clGITADORAgradationBottomColor, true);
+                        txArtist = CDTXMania.tGenerateTexture(bmpArtistName, false);
                         CDTXMania.tDisposeSafely( ref bmpArtistName );
-                        CDTXMania.tDisposeSafely( ref this.pfアーティスト );
+                        CDTXMania.tDisposeSafely( ref pfアーティスト );
                     }
                     else
                     {
-                        this.txArtist = null;
+                        txArtist = null;
                     }
                     #endregion
                 }
                 catch( CTextureCreateFailedException )
                 {
-                    Trace.TraceError("テクスチャの生成に失敗しました。({0})", new object[] { this.strSTAGEFILE });
-                    this.txTitle = null;
-                    this.txBackground = null;
+                    Trace.TraceError("テクスチャの生成に失敗しました。({0})", new object[] { strSTAGEFILE });
+                    txTitle = null;
+                    txBackground = null;
                 }
                 #endregion
                 base.OnManagedCreateResources();
@@ -359,17 +359,17 @@ namespace DTXMania
         }
         public override void OnManagedReleaseResources()
         {
-            if( !base.bNotActivated )
+            if( !bNotActivated )
             {
                 //テクスチャ11枚
                 //2018.03.15 kairera0467 PrivateFontが抜けていた＆フォント生成直後に解放するようにしてみる
-                CDTXMania.tReleaseTexture( ref this.txBackground );
-                CDTXMania.tReleaseTexture( ref this.txJacket );
-                CDTXMania.tReleaseTexture( ref this.txTitle );
-                CDTXMania.tReleaseTexture( ref this.txArtist );
-                CDTXMania.tReleaseTexture( ref this.txDifficultyPanel );
-                CDTXMania.tReleaseTexture( ref this.txPartPanel );
-                CDTXMania.tReleaseTexture( ref this.txLevel );
+                CDTXMania.tReleaseTexture( ref txBackground );
+                CDTXMania.tReleaseTexture( ref txJacket );
+                CDTXMania.tReleaseTexture( ref txTitle );
+                CDTXMania.tReleaseTexture( ref txArtist );
+                CDTXMania.tReleaseTexture( ref txDifficultyPanel );
+                CDTXMania.tReleaseTexture( ref txPartPanel );
+                CDTXMania.tReleaseTexture( ref txLevel );
                 base.OnManagedReleaseResources();
             }
         }
@@ -377,34 +377,34 @@ namespace DTXMania
         {
             string str;
 
-            if( base.bNotActivated )
+            if( bNotActivated )
                 return 0;
 
             #region [ 初めての進行描画 ]
             //-----------------------------
-            if (base.bJustStartedUpdate)
+            if (bJustStartedUpdate)
             {
                 CScore cScore1 = CDTXMania.stageSongSelection.rChosenScore;
-                if (this.sdLoadingSound != null)
+                if (sdLoadingSound != null)
                 {
                     if (CDTXMania.Skin.soundNowLoading.bExclusive && (CSkin.CSystemSound.rLastPlayedExclusiveSystemSound != null))
                     {
                         CSkin.CSystemSound.rLastPlayedExclusiveSystemSound.t停止する();
                     }
-                    this.sdLoadingSound.tStartPlaying();
-                    this.nBGMPlayStartTime = CSoundManager.rcPerformanceTimer.nCurrentTime;
-                    this.nBGMTotalPlayTimeMs = this.sdLoadingSound.nTotalPlayTimeMs;
+                    sdLoadingSound.tStartPlaying();
+                    nBGMPlayStartTime = CSoundManager.rcPerformanceTimer.nCurrentTime;
+                    nBGMTotalPlayTimeMs = sdLoadingSound.nTotalPlayTimeMs;
                 }
                 else if (!CDTXMania.DTXVmode.Enabled && !CDTXMania.DTX2WAVmode.Enabled)
                 {
                     
                     CDTXMania.Skin.soundNowLoading.tPlay();
-                    this.nBGMPlayStartTime = CSoundManager.rcPerformanceTimer.nCurrentTime;
-                    this.nBGMTotalPlayTimeMs = CDTXMania.Skin.soundNowLoading.nLength_CurrentSound;
+                    nBGMPlayStartTime = CSoundManager.rcPerformanceTimer.nCurrentTime;
+                    nBGMTotalPlayTimeMs = CDTXMania.Skin.soundNowLoading.nLength_CurrentSound;
                 }
                 //				this.actFI.tフェードイン開始();							// #27787 2012.3.10 yyagi 曲読み込み画面のフェードインの省略
-                base.ePhaseID = CStage.EPhase.Common_FadeIn;
-                base.bJustStartedUpdate = false;
+                ePhaseID = EPhase.Common_FadeIn;
+                bJustStartedUpdate = false;
                 // Already done in OnActivate
                 //this.tDetermineStatusLabelFromLabelName( CDTXMania.stageSongSelection.rConfirmedSong.arDifficultyLabel[ CDTXMania.stageSongSelection.nConfirmedSongDifficulty ] );
 
@@ -416,10 +416,10 @@ namespace DTXMania
             #region [ ESC押下時は選曲画面に戻る ]
             if (tHandleKeyInput())
             {
-                if (this.sdLoadingSound != null)
+                if (sdLoadingSound != null)
                 {
-                    this.sdLoadingSound.tStopSound();
-                    this.sdLoadingSound.tRelease();
+                    sdLoadingSound.tStopSound();
+                    sdLoadingSound.tRelease();
                 }
                 return (int)ESongLoadingScreenReturnValue.LoadingStopped;
             }
@@ -427,8 +427,8 @@ namespace DTXMania
 
             #region [ 背景、レベル、タイトル表示 ]
             //-----------------------------
-            if( this.txBackground != null )
-                this.txBackground.tDraw2D( CDTXMania.app.Device, 0, 0 );
+            if( txBackground != null )
+                txBackground.tDraw2D( CDTXMania.app.Device, 0, 0 );
 
             string strDTXFilePath = (CDTXMania.bCompactMode) ?
             CDTXMania.strCompactModeFile : CDTXMania.stageSongSelection.rChosenScore.FileInformation.AbsoluteFilePath;
@@ -437,15 +437,15 @@ namespace DTXMania
             string path = cdtx.strFolderName + cdtx.PREIMAGE;
             try
             {
-                if( this.txJacket == null ) // 2019.04.26 kairera0467
+                if( txJacket == null ) // 2019.04.26 kairera0467
                 {
                     if( !File.Exists( path ) )
                     {
-                        this.txJacket = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\5_preimage default.png" ) );
+                        txJacket = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\5_preimage default.png" ) );
                     }
                     else
                     {
-                        this.txJacket = CDTXMania.tGenerateTexture( path );
+                        txJacket = CDTXMania.tGenerateTexture( path );
                     }
                 }
             }
@@ -457,41 +457,41 @@ namespace DTXMania
 
             int y = 184;
 
-            if( this.txJacket != null )
+            if( txJacket != null )
             {  
                 Matrix mat = Matrix.Identity;
                 float fScalingFactor;
                 float jacketOnScreenSize = 384.0f;
                 //Maintain aspect ratio by scaling only to the smaller scalingFactor
-                if (jacketOnScreenSize / this.txJacket.szImageSize.Width > jacketOnScreenSize / this.txJacket.szImageSize.Height) 
+                if (jacketOnScreenSize / txJacket.szImageSize.Width > jacketOnScreenSize / txJacket.szImageSize.Height) 
                 {
-                    fScalingFactor = jacketOnScreenSize / this.txJacket.szImageSize.Height;
+                    fScalingFactor = jacketOnScreenSize / txJacket.szImageSize.Height;
                 }
                 else
                 {
-                    fScalingFactor = jacketOnScreenSize / this.txJacket.szImageSize.Width;
+                    fScalingFactor = jacketOnScreenSize / txJacket.szImageSize.Width;
                 }
                 mat *= Matrix.Scaling(fScalingFactor, fScalingFactor, 1f);
                 mat *= Matrix.Translation(206f, 66f, 0f);
                 mat *= Matrix.RotationZ(0.28f);
 
-                this.txJacket.tDraw3D(CDTXMania.app.Device, mat);
+                txJacket.tDraw3D(CDTXMania.app.Device, mat);
             }
 
-            if (this.txTitle != null)
+            if (txTitle != null)
             {
-                if (this.txTitle.szImageSize.Width > 625)
-                    this.txTitle.vcScaleRatio.X = 625f / this.txTitle.szImageSize.Width;
+                if (txTitle.szImageSize.Width > 625)
+                    txTitle.vcScaleRatio.X = 625f / txTitle.szImageSize.Width;
 
-                this.txTitle.tDraw2D(CDTXMania.app.Device, 190, 285);
+                txTitle.tDraw2D(CDTXMania.app.Device, 190, 285);
             }
 
-            if (this.txArtist != null)
+            if (txArtist != null)
             {
-                if (this.txArtist.szImageSize.Width > 625)
-                    this.txArtist.vcScaleRatio.X = 625f / this.txArtist.szImageSize.Width;
+                if (txArtist.szImageSize.Width > 625)
+                    txArtist.vcScaleRatio.X = 625f / txArtist.szImageSize.Width;
 
-                this.txArtist.tDraw2D(CDTXMania.app.Device, 190, 360);
+                txArtist.tDraw2D(CDTXMania.app.Device, 190, 360);
             }
 
             int[] iPart = { 0, CDTXMania.ConfigIni.bIsSwappedGuitarBass ? 2 : 1, CDTXMania.ConfigIni.bIsSwappedGuitarBass ? 1 : 2 };
@@ -518,7 +518,7 @@ namespace DTXMania
                             CDTXMania.stageSongSelection.rChosenScore.SongInformation.b完全にCLASSIC譜面である[j] && 
                             !cdtx.b強制的にXG譜面にする))
                         {
-                            this.tDrawStringLarge(187 + k, 152, string.Format("{0:00}", DTXLevel));
+                            tDrawStringLarge(187 + k, 152, string.Format("{0:00}", DTXLevel));
                         }
                         else
                         {
@@ -533,18 +533,18 @@ namespace DTXMania
                                 DTXLevelDeci = ((cdtx.LEVEL[j] - DTXLevel * 10) * 10) + cdtx.LEVELDEC[j];
                             }                            
                             
-                            this.txLevel.tDraw2D(CDTXMania.app.Device, 282 + k, 243, new Rectangle(1000, 92, 30, 38));
-                            this.tDrawStringLarge(187 + k, 152, string.Format("{0:0}", DTXLevel));
-                            this.tDrawStringLarge(307 + k, 152, string.Format("{0:00}", DTXLevelDeci));
+                            txLevel.tDraw2D(CDTXMania.app.Device, 282 + k, 243, new Rectangle(1000, 92, 30, 38));
+                            tDrawStringLarge(187 + k, 152, string.Format("{0:0}", DTXLevel));
+                            tDrawStringLarge(307 + k, 152, string.Format("{0:00}", DTXLevelDeci));
 
                         }
 
-                        if (this.txPartPanel != null)
-                            this.txPartPanel.tDraw2D(CDTXMania.app.Device, 191 + k, 52, new Rectangle(0, j * 50, 262, 50));
+                        if (txPartPanel != null)
+                            txPartPanel.tDraw2D(CDTXMania.app.Device, 191 + k, 52, new Rectangle(0, j * 50, 262, 50));
 
                         //this.txJacket.Dispose();
                         if (!CDTXMania.bCompactMode && !CDTXMania.DTXVmode.Enabled && !CDTXMania.DTX2WAVmode.Enabled)
-                            this.tDrawDifficultyPanel( CDTXMania.stageSongSelection.rConfirmedSong.arDifficultyLabel[ CDTXMania.stageSongSelection.nConfirmedSongDifficulty ], 191 + k, 102 );
+                            tDrawDifficultyPanel( CDTXMania.stageSongSelection.rConfirmedSong.arDifficultyLabel[ CDTXMania.stageSongSelection.nConfirmedSongDifficulty ], 191 + k, 102 );
 
                         k = 700;
                     }
@@ -552,26 +552,26 @@ namespace DTXMania
 
                 if (i == 2 && k == 0)
                 {
-                    if (this.txPartPanel != null && CDTXMania.ConfigIni.bDrumsEnabled)
-                        this.txPartPanel.tDraw2D(CDTXMania.app.Device, 191, 52, new Rectangle(0, 0, 262, 50));
+                    if (txPartPanel != null && CDTXMania.ConfigIni.bDrumsEnabled)
+                        txPartPanel.tDraw2D(CDTXMania.app.Device, 191, 52, new Rectangle(0, 0, 262, 50));
 
-                    if (this.txDifficultyPanel != null)
-                        this.txDifficultyPanel.tDraw2D(CDTXMania.app.Device, 191, 102, new Rectangle(0, this.nIndex * 50, 262, 50));
+                    if (txDifficultyPanel != null)
+                        txDifficultyPanel.tDraw2D(CDTXMania.app.Device, 191, 102, new Rectangle(0, nIndex * 50, 262, 50));
                 }
             }
             //-----------------------------
             #endregion
 
-            switch (base.ePhaseID)
+            switch (ePhaseID)
             {
-                case CStage.EPhase.Common_FadeIn:
+                case EPhase.Common_FadeIn:
                     //if( this.actFI.OnUpdateAndDraw() != 0 )					// #27787 2012.3.10 yyagi 曲読み込み画面のフェードインの省略
                     // 必ず一度「CStaeg.EPhase.Common_FadeIn」フェーズを経由させること。
                     // さもないと、曲読み込みが完了するまで、曲読み込み画面が描画されない。
-                    base.ePhaseID = CStage.EPhase.NOWLOADING_DTX_FILE_READING;
+                    ePhaseID = EPhase.NOWLOADING_DTX_FILE_READING;
                     return (int)ESongLoadingScreenReturnValue.Continue;
 
-                case CStage.EPhase.NOWLOADING_DTX_FILE_READING:
+                case EPhase.NOWLOADING_DTX_FILE_READING:
                     {
                         timeBeginLoad = DateTime.Now;
                         TimeSpan span;
@@ -611,7 +611,7 @@ namespace DTXMania
                                     lag.nJudgeTime = chip.nPlaybackTimeMs + CDTXMania.listTargetGhsotLag[ (int)chip.eInstrumentPart ][ chip.n楽器パートでの出現順 ];
                                     lag.nLagTime = CDTXMania.listTargetGhsotLag[ (int)chip.eInstrumentPart ][ chip.n楽器パートでの出現順 ];
 
-                                    this.stGhostLag[ (int)chip.eInstrumentPart ].Add( lag );
+                                    stGhostLag[ (int)chip.eInstrumentPart ].Add( lag );
                                 }
                             }
                         }
@@ -633,14 +633,14 @@ namespace DTXMania
                             int indPrefix = (int)CDTXMania.ConfigIni.eTargetGhost[ i ];
                             string filename = cdtx.strFolderName + "\\" + cdtx.strファイル名 + "." + prefix[ indPrefix ] + "." + inst[ i ] + ".ghost";
 
-                            if( this.stGhostLag[ i ] == null || File.Exists( filename + ".score" ) )
+                            if( stGhostLag[ i ] == null || File.Exists( filename + ".score" ) )
                                 continue;
                             CDTXMania.listTargetGhostScoreData[ i ] = new CScoreIni.CPerformanceEntry();
 
-                            for( int n = 0; n < this.stGhostLag[ i ].Count; n++ )
+                            for( int n = 0; n < stGhostLag[ i ].Count; n++ )
                             {
                                 int ghostLag = 128;
-                                ghostLag = this.stGhostLag[ i ][ n ].nLagTime;
+                                ghostLag = stGhostLag[ i ][ n ].nLagTime;
                                 // 上位８ビットが１ならコンボが途切れている（ギターBAD空打ちでコンボ数を再現するための措置）
                                 if (ghostLag > 255)
                                 {
@@ -650,7 +650,7 @@ namespace DTXMania
 
                                 if( ghostLag <= 127 )
                                 {
-                                    EJudgement eJudge = this.e指定時刻からChipのJUDGEを返す( ghostLag, 0, (EInstrumentPart)i );
+                                    EJudgement eJudge = e指定時刻からChipのJUDGEを返す( ghostLag, 0, (EInstrumentPart)i );
 
                                     switch( eJudge )
                                     {
@@ -711,12 +711,12 @@ namespace DTXMania
                         else
                             CDTXMania.DTX.MIDIレベル = (CDTXMania.stageSongSelection.rConfirmedSong.eNodeType == CSongListNode.ENodeType.SCORE_MIDI) ? CDTXMania.stageSongSelection.nSelectedSongDifficultyLevel : 0;
 
-                        base.ePhaseID = CStage.EPhase.NOWLOADING_WAV_FILE_READING;
+                        ePhaseID = EPhase.NOWLOADING_WAV_FILE_READING;
                         timeBeginLoadWAV = DateTime.Now;
                         return (int)ESongLoadingScreenReturnValue.Continue;
                     }
 
-                case CStage.EPhase.NOWLOADING_WAV_FILE_READING:
+                case EPhase.NOWLOADING_WAV_FILE_READING:
                     {
                         if (nWAVcount == 1 && CDTXMania.DTX.listWAV.Count > 0)			// #28934 2012.7.7 yyagi (added checking Count)
                         {
@@ -761,12 +761,12 @@ namespace DTXMania
                             span = (TimeSpan)(DateTime.Now - timeBeginLoadWAV);
                             Trace.TraceInformation("WAV/譜面後処理時間({0,4}):  {1}", (CDTXMania.DTX.listBMP.Count + CDTXMania.DTX.listBMPTEX.Count + CDTXMania.DTX.listAVI.Count), span.ToString());
 
-                            base.ePhaseID = CStage.EPhase.NOWLOADING_BMP_FILE_READING;
+                            ePhaseID = EPhase.NOWLOADING_BMP_FILE_READING;
                         }
                         return (int)ESongLoadingScreenReturnValue.Continue;
                     }
 
-                case CStage.EPhase.NOWLOADING_BMP_FILE_READING:
+                case EPhase.NOWLOADING_BMP_FILE_READING:
                     {
                         TimeSpan span;
                         DateTime timeBeginLoadBMPAVI = DateTime.Now;
@@ -781,31 +781,31 @@ namespace DTXMania
                         span = (TimeSpan)(DateTime.Now - timeBeginLoad);
                         Trace.TraceInformation("総読込時間:                {0}", span.ToString());
                         CDTXMania.Timer.tUpdate();
-                        base.ePhaseID = CStage.EPhase.NOWLOADING_WAIT_BGM_SOUND_COMPLETION;
+                        ePhaseID = EPhase.NOWLOADING_WAIT_BGM_SOUND_COMPLETION;
                         return (int)ESongLoadingScreenReturnValue.Continue;
                     }
 
-                case CStage.EPhase.NOWLOADING_WAIT_BGM_SOUND_COMPLETION:
+                case EPhase.NOWLOADING_WAIT_BGM_SOUND_COMPLETION:
                     {
                         long nCurrentTime = CDTXMania.Timer.nCurrentTime;
-                        if (nCurrentTime < this.nBGMPlayStartTime)
-                            this.nBGMPlayStartTime = nCurrentTime;
+                        if (nCurrentTime < nBGMPlayStartTime)
+                            nBGMPlayStartTime = nCurrentTime;
 
                         //						if ( ( nCurrentTime - this.nBGMPlayStartTime ) > ( this.nBGMTotalPlayTimeMs - 1000 ) )
-                        if ((nCurrentTime - this.nBGMPlayStartTime) > (this.nBGMTotalPlayTimeMs))	// #27787 2012.3.10 yyagi 1000ms == フェードイン分の時間
+                        if ((nCurrentTime - nBGMPlayStartTime) > (nBGMTotalPlayTimeMs))	// #27787 2012.3.10 yyagi 1000ms == フェードイン分の時間
                         {
-                            this.actFO.tStartFadeOut();
-                            base.ePhaseID = CStage.EPhase.Common_FadeOut;
+                            actFO.tStartFadeOut();
+                            ePhaseID = EPhase.Common_FadeOut;
                         }
                         return (int)ESongLoadingScreenReturnValue.Continue;
                     }
 
-                case CStage.EPhase.Common_FadeOut:
+                case EPhase.Common_FadeOut:
                     //if (this.actFO.OnUpdateAndDraw() == 0)
                     //return 0;
-                    if (this.sdLoadingSound != null)
+                    if (sdLoadingSound != null)
                     {
-                        this.sdLoadingSound.tRelease();
+                        sdLoadingSound.tRelease();
                     }
                     return (int)ESongLoadingScreenReturnValue.LoadingComplete;
             }
@@ -989,31 +989,31 @@ namespace DTXMania
                                 switch( strA[ 0 ] )
                                 {
                                     case "Score":
-                                        CDTXMania.listTargetGhostScoreData[ (int)this.nCurrentInst ].nスコア = Convert.ToInt32( strA[ 1 ] );
+                                        CDTXMania.listTargetGhostScoreData[ (int)nCurrentInst ].nスコア = Convert.ToInt32( strA[ 1 ] );
                                         continue;
                                     case "PlaySkill":
-                                        CDTXMania.listTargetGhostScoreData[ (int)this.nCurrentInst ].dbPerformanceSkill = Convert.ToDouble( strA[ 1 ] );
+                                        CDTXMania.listTargetGhostScoreData[ (int)nCurrentInst ].dbPerformanceSkill = Convert.ToDouble( strA[ 1 ] );
                                         continue;
                                     case "Skill":
-                                        CDTXMania.listTargetGhostScoreData[ (int)this.nCurrentInst ].dbGameSkill = Convert.ToDouble( strA[ 1 ] );
+                                        CDTXMania.listTargetGhostScoreData[ (int)nCurrentInst ].dbGameSkill = Convert.ToDouble( strA[ 1 ] );
                                         continue;
                                     case "Perfect":
-                                        CDTXMania.listTargetGhostScoreData[ (int)this.nCurrentInst ].nPerfectCount_ExclAuto = Convert.ToInt32( strA[ 1 ] );
+                                        CDTXMania.listTargetGhostScoreData[ (int)nCurrentInst ].nPerfectCount_ExclAuto = Convert.ToInt32( strA[ 1 ] );
                                         continue;
                                     case "Great":
-                                        CDTXMania.listTargetGhostScoreData[ (int)this.nCurrentInst ].nGreatCount_ExclAuto = Convert.ToInt32( strA[ 1 ] );
+                                        CDTXMania.listTargetGhostScoreData[ (int)nCurrentInst ].nGreatCount_ExclAuto = Convert.ToInt32( strA[ 1 ] );
                                         continue;
                                     case "Good":
-                                        CDTXMania.listTargetGhostScoreData[ (int)this.nCurrentInst ].nGoodCount_ExclAuto = Convert.ToInt32( strA[ 1 ] );
+                                        CDTXMania.listTargetGhostScoreData[ (int)nCurrentInst ].nGoodCount_ExclAuto = Convert.ToInt32( strA[ 1 ] );
                                         continue;
                                     case "Poor":
-                                        CDTXMania.listTargetGhostScoreData[ (int)this.nCurrentInst ].nPoorCount_ExclAuto = Convert.ToInt32( strA[ 1 ] );
+                                        CDTXMania.listTargetGhostScoreData[ (int)nCurrentInst ].nPoorCount_ExclAuto = Convert.ToInt32( strA[ 1 ] );
                                         continue;
                                     case "Miss":
-                                        CDTXMania.listTargetGhostScoreData[ (int)this.nCurrentInst ].nMissCount_ExclAuto = Convert.ToInt32( strA[ 1 ] );
+                                        CDTXMania.listTargetGhostScoreData[ (int)nCurrentInst ].nMissCount_ExclAuto = Convert.ToInt32( strA[ 1 ] );
                                         continue;
                                     case "MaxCombo":
-                                        CDTXMania.listTargetGhostScoreData[ (int)this.nCurrentInst ].nMaxCombo = Convert.ToInt32( strA[ 1 ] );
+                                        CDTXMania.listTargetGhostScoreData[ (int)nCurrentInst ].nMaxCombo = Convert.ToInt32( strA[ 1 ] );
                                         continue;
                                     default:
                                         continue;
@@ -1033,25 +1033,25 @@ namespace DTXMania
             }
             else
             {
-                CDTXMania.listTargetGhostScoreData[ (int)this.nCurrentInst ] = null;
+                CDTXMania.listTargetGhostScoreData[ (int)nCurrentInst ] = null;
             }
         }
         private void tDrawStringSmall(int x, int y, string str)
         {
-            this.tDrawStringSmall(x, y, str, false);
+            tDrawStringSmall(x, y, str, false);
         }
         private void tDrawStringSmall(int x, int y, string str, bool b強調)
         {
             foreach (char ch in str)
             {
-                for (int i = 0; i < this.st小文字位置.Length; i++)
+                for (int i = 0; i < st小文字位置.Length; i++)
                 {
-                    if (this.st小文字位置[i].ch == ch)
+                    if (st小文字位置[i].ch == ch)
                     {
-                        Rectangle rectangle = new Rectangle(this.st小文字位置[i].pt.X, this.st小文字位置[i].pt.Y, 13, 22);
-                        if (this.txLevel != null)
+                        Rectangle rectangle = new Rectangle(st小文字位置[i].pt.X, st小文字位置[i].pt.Y, 13, 22);
+                        if (txLevel != null)
                         {
-                            this.txLevel.tDraw2D(CDTXMania.app.Device, x, y, rectangle);
+                            txLevel.tDraw2D(CDTXMania.app.Device, x, y, rectangle);
                         }
                         break;
                     }
@@ -1061,25 +1061,25 @@ namespace DTXMania
         }
         private void tDrawStringLarge(int x, int y, string str)
         {
-            this.tDrawStringLarge(x, y, str, false);
+            tDrawStringLarge(x, y, str, false);
         }
         private void tDrawStringLarge(int x, int y, string str, bool bExtraLarge)
         {
             for (int i = 0; i < str.Length; i++)
             {
                 char c = str[i];
-                for (int j = 0; j < this.st大文字位置.Length; j++)
+                for (int j = 0; j < st大文字位置.Length; j++)
                 {
-                    if (this.st大文字位置[j].ch == c)
+                    if (st大文字位置[j].ch == c)
                     {
                         int num;
                         int num2;
                         num = 0;
                         num2 = 0;
-                        Rectangle rc画像内の描画領域 = new Rectangle(this.st大文字位置[j].pt.X, this.st大文字位置[j].pt.Y, 100, 130);
-                        if (this.txLevel != null)
+                        Rectangle rc画像内の描画領域 = new Rectangle(st大文字位置[j].pt.X, st大文字位置[j].pt.Y, 100, 130);
+                        if (txLevel != null)
                         {
-                            this.txLevel.tDraw2D(CDTXMania.app.Device, x, y, rc画像内の描画領域);
+                            txLevel.tDraw2D(CDTXMania.app.Device, x, y, rc画像内の描画領域);
                         }
                         break;
                     }
@@ -1150,8 +1150,8 @@ namespace DTXMania
                 }
             }
 
-            if( this.txDifficultyPanel != null )
-                this.txDifficultyPanel.tDraw2D( CDTXMania.app.Device, nX, nY, rect );
+            if( txDifficultyPanel != null )
+                txDifficultyPanel.tDraw2D( CDTXMania.app.Device, nX, nY, rect );
         }
         #endregion
     }

@@ -8,7 +8,7 @@ namespace DTXMania
 
 		public CActPerfGuitarChipFire()
 		{
-			base.bNotActivated = true;
+			bNotActivated = true;
 		}
 		
 		
@@ -28,7 +28,7 @@ namespace DTXMania
 			{
 				index = ( ( index / 5 ) * 5 ) + ( 4 - ( index % 5 ) );
 			}
-			int x = this.pt中央[ index ].X;
+			int x = pt中央[ index ].X;
             int y = (CDTXMania.ConfigIni.bReverse[(int)e楽器パート] ? 611 - CDTXMania.ConfigIni.nJudgeLine[(int)e楽器パート] : 155 + CDTXMania.ConfigIni.nJudgeLine[(int)e楽器パート]);
 
             if ( CDTXMania.ConfigIni.eAttackEffect[ (int) e楽器パート ] != EType.B )

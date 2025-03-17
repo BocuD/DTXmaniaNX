@@ -9,9 +9,9 @@ namespace DTXMania
 
 		public CStageEnd()
 		{
-			base.eStageID = CStage.EStage.End;
-			base.ePhaseID = CStage.EPhase.Common_DefaultState;
-			base.bNotActivated = true;
+			eStageID = EStage.End;
+			ePhaseID = EPhase.Common_DefaultState;
+			bNotActivated = true;
 		}
 
 
@@ -23,7 +23,7 @@ namespace DTXMania
 			Trace.Indent();
 			try
 			{
-				this.ct時間稼ぎ = new CCounter();
+				ct時間稼ぎ = new CCounter();
 				base.OnActivate();
 			}
 			finally
@@ -48,38 +48,38 @@ namespace DTXMania
 		}
 		public override void OnManagedCreateResources()
 		{
-			if( !base.bNotActivated )
+			if( !bNotActivated )
 			{
-				this.txBackground = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\9_background.jpg" ), false );
+				txBackground = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\9_background.jpg" ), false );
 				base.OnManagedCreateResources();
 			}
 		}
 		public override void OnManagedReleaseResources()
 		{
-			if( !base.bNotActivated )
+			if( !bNotActivated )
 			{
-				CDTXMania.tReleaseTexture( ref this.txBackground );
+				CDTXMania.tReleaseTexture( ref txBackground );
 				base.OnManagedReleaseResources();
 			}
 		}
 		public override int OnUpdateAndDraw()
 		{
-			if( !base.bNotActivated )
+			if( !bNotActivated )
 			{
-				if( base.bJustStartedUpdate )
+				if( bJustStartedUpdate )
 				{
 					CDTXMania.Skin.soundGameEnd.tPlay();
-					this.ct時間稼ぎ.tStart( 0, 1, 0x3e8, CDTXMania.Timer );
-                    base.bJustStartedUpdate = false;
+					ct時間稼ぎ.tStart( 0, 1, 0x3e8, CDTXMania.Timer );
+                    bJustStartedUpdate = false;
 				}
-				this.ct時間稼ぎ.tUpdate();
-				if( this.ct時間稼ぎ.bReachedEndValue && !CDTXMania.Skin.soundGameEnd.b再生中 )
+				ct時間稼ぎ.tUpdate();
+				if( ct時間稼ぎ.bReachedEndValue && !CDTXMania.Skin.soundGameEnd.b再生中 )
 				{
 					return 1;
 				}
-				if( this.txBackground != null )
+				if( txBackground != null )
 				{
-					this.txBackground.tDraw2D( CDTXMania.app.Device, 0, 0 );
+					txBackground.tDraw2D( CDTXMania.app.Device, 0, 0 );
 				}
 			}
 			return 0;

@@ -7,18 +7,18 @@ namespace DTXMania
 
         public CActPerfDrumsFillingEffect()
 		{
-			base.bNotActivated = true;
+			bNotActivated = true;
 		}
 
         public override void OnManagedCreateResources()
         {
-            if (!base.bNotActivated)
+            if (!bNotActivated)
             {
             }
         }
         public override void OnManagedReleaseResources()
         {
-            if (!base.bNotActivated)
+            if (!bNotActivated)
             {
                 base.OnManagedReleaseResources();
             }

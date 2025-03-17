@@ -13,7 +13,7 @@ namespace DTXMania
 
 		public CActPerfScrollSpeed()
 		{
-			base.bNotActivated = true;
+			bNotActivated = true;
 		}
 
 
@@ -23,52 +23,52 @@ namespace DTXMania
 		{
 			for( int i = 0; i < 3; i++ )
 			{
-				this.db譜面スクロール速度[ i ] = this.db現在の譜面スクロール速度[ i ] = (double) CDTXMania.ConfigIni.nScrollSpeed[ i ];
-				this.n速度変更制御タイマ[ i ] = -1;
+				db譜面スクロール速度[ i ] = db現在の譜面スクロール速度[ i ] = (double) CDTXMania.ConfigIni.nScrollSpeed[ i ];
+				n速度変更制御タイマ[ i ] = -1;
 			}
 			base.OnActivate();
 		}
 		public override unsafe int OnUpdateAndDraw()
 		{
-			if( !base.bNotActivated )
+			if( !bNotActivated )
 			{
-				if( base.bJustStartedUpdate )
+				if( bJustStartedUpdate )
 				{
-					this.n速度変更制御タイマ.Drums = this.n速度変更制御タイマ.Guitar = this.n速度変更制御タイマ.Bass = CSoundManager.rcPerformanceTimer.nシステム時刻;
-					base.bJustStartedUpdate = false;
+					n速度変更制御タイマ.Drums = n速度変更制御タイマ.Guitar = n速度変更制御タイマ.Bass = CSoundManager.rcPerformanceTimer.nシステム時刻;
+					bJustStartedUpdate = false;
 				}
 				long num = CSoundManager.rcPerformanceTimer.nCurrentTime;
 				for( int i = 0; i < 3; i++ )
 				{
 					double num3 = (double) CDTXMania.ConfigIni.nScrollSpeed[ i ];
-					if( num < this.n速度変更制御タイマ[ i ] )
+					if( num < n速度変更制御タイマ[ i ] )
 					{
-						this.n速度変更制御タイマ[ i ] = num;
+						n速度変更制御タイマ[ i ] = num;
 					}
-					while( ( num - this.n速度変更制御タイマ[ i ] ) >= 2 )
+					while( ( num - n速度変更制御タイマ[ i ] ) >= 2 )
 					{
-						if( this.db譜面スクロール速度[ i ] < num3 )
+						if( db譜面スクロール速度[ i ] < num3 )
 						{
-							this.db現在の譜面スクロール速度[ i ] += 0.012;
+							db現在の譜面スクロール速度[ i ] += 0.012;
 
-							if( this.db現在の譜面スクロール速度[ i ] > num3 )
+							if( db現在の譜面スクロール速度[ i ] > num3 )
 							{
-								this.db現在の譜面スクロール速度[ i ] = num3;
-								this.db譜面スクロール速度[ i ] = num3;
+								db現在の譜面スクロール速度[ i ] = num3;
+								db譜面スクロール速度[ i ] = num3;
 							}
 						}
-						else if( this.db譜面スクロール速度[ i ] > num3 )
+						else if( db譜面スクロール速度[ i ] > num3 )
 						{
-							this.db現在の譜面スクロール速度[ i ] -= 0.012;
+							db現在の譜面スクロール速度[ i ] -= 0.012;
 
-							if( this.db現在の譜面スクロール速度[ i ] < num3 )
+							if( db現在の譜面スクロール速度[ i ] < num3 )
 							{
-								this.db現在の譜面スクロール速度[ i ] = num3;
-								this.db譜面スクロール速度[ i ] = num3;
+								db現在の譜面スクロール速度[ i ] = num3;
+								db譜面スクロール速度[ i ] = num3;
 							}
 						}
 						//this.db現在の譜面スクロール速度[ i ] = this.db譜面スクロール速度[ i ];
-						this.n速度変更制御タイマ[ i ] += 2;
+						n速度変更制御タイマ[ i ] += 2;
 					}
 				}
 			}

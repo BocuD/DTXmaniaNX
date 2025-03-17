@@ -22,16 +22,16 @@ namespace FDK
 		{
 			get
 			{
-				switch (this.eタイマ種別)
+				switch (eタイマ種別)
 				{
 					case EType.PerformanceCounter:
 						{
 							double num = 0.0;
-							if (this.n現在の周波数 != 0L)
+							if (n現在の周波数 != 0L)
 							{
 								long x = 0L;
 								QueryPerformanceCounter(ref x);
-								num = ((double)x) / (((double)this.n現在の周波数) / 1000.0);
+								num = ((double)x) / (((double)n現在の周波数) / 1000.0);
 							}
 							return (long)num;
 						}
@@ -55,17 +55,17 @@ namespace FDK
 				switch (this.eタイマ種別)
 				{
 					case EType.PerformanceCounter:
-						if (!this.b確認と設定_PerformanceCounter() && !this.b確認と設定_MultiMedia())
-							this.b確認と設定_GetTickCount();
+						if (!b確認と設定_PerformanceCounter() && !b確認と設定_MultiMedia())
+							b確認と設定_GetTickCount();
 						break;
 
 					case EType.MultiMedia:
-						if (!this.b確認と設定_MultiMedia() && !this.b確認と設定_PerformanceCounter())
-							this.b確認と設定_GetTickCount();
+						if (!b確認と設定_MultiMedia() && !b確認と設定_PerformanceCounter())
+							b確認と設定_GetTickCount();
 						break;
 
 					case EType.GetTickCount:
-						this.b確認と設定_GetTickCount();
+						b確認と設定_GetTickCount();
 						break;
 
 					default:
@@ -73,27 +73,27 @@ namespace FDK
 				}
 			}
 
-			base.tReset();
+			tReset();
 
 			n参照カウント[(int)this.eタイマ種別]++;
 		}
 
 		public override void Dispose()
 		{
-			if (this.eタイマ種別 == EType.Unknown)
+			if (eタイマ種別 == EType.Unknown)
 				return;
 
-			int type = (int)this.eタイマ種別;
+			int type = (int)eタイマ種別;
 
 			n参照カウント[type] = Math.Max(n参照カウント[type] - 1, 0);
 
 			if (n参照カウント[type] == 0)
 			{
-				if (this.eタイマ種別 == EType.MultiMedia)
-					timeEndPeriod(this.timeCaps.wPeriodMin);
+				if (eタイマ種別 == EType.MultiMedia)
+					timeEndPeriod(timeCaps.wPeriodMin);
 			}
 
-			this.eタイマ種別 = EType.Unknown;
+			eタイマ種別 = EType.Unknown;
 		}
 
 		#region [ protected ]
@@ -104,25 +104,25 @@ namespace FDK
 
 		protected bool b確認と設定_GetTickCount()
 		{
-			this.eタイマ種別 = EType.GetTickCount;
+			eタイマ種別 = EType.GetTickCount;
 			return true;
 		}
 		protected bool b確認と設定_MultiMedia()
 		{
-			this.timeCaps = new TimeCaps();
-			if ((timeGetDevCaps(out this.timeCaps, (uint)Marshal.SizeOf(typeof(TimeCaps))) == 0) && (this.timeCaps.wPeriodMin < 10))
+			timeCaps = new TimeCaps();
+			if ((timeGetDevCaps(out timeCaps, (uint)Marshal.SizeOf(typeof(TimeCaps))) == 0) && (timeCaps.wPeriodMin < 10))
 			{
-				this.eタイマ種別 = EType.MultiMedia;
-				timeBeginPeriod(this.timeCaps.wPeriodMin);
+				eタイマ種別 = EType.MultiMedia;
+				timeBeginPeriod(timeCaps.wPeriodMin);
 				return true;
 			}
 			return false;
 		}
 		protected bool b確認と設定_PerformanceCounter()
 		{
-			if (QueryPerformanceFrequency(ref this.n現在の周波数) != 0)
+			if (QueryPerformanceFrequency(ref n現在の周波数) != 0)
 			{
-				this.eタイマ種別 = EType.PerformanceCounter;
+				eタイマ種別 = EType.PerformanceCounter;
 				return true;
 			}
 			return false;

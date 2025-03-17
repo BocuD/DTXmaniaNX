@@ -35,14 +35,14 @@ namespace DTXMania
         }
         public virtual void tActivatePopupMenu(EInstrumentPart einst)
         {
-            this.eInst = einst;
-            this.bIsActivePopupMenu = true;
-            this.bIsSelectingIntItem = false;
-            this.bGotoDetailConfig = false;
+            eInst = einst;
+            bIsActivePopupMenu = true;
+            bIsSelectingIntItem = false;
+            bGotoDetailConfig = false;
         }
         public virtual void tDeativatePopupMenu()
         {
-            this.bIsActivePopupMenu = false;
+            bIsActivePopupMenu = false;
         }
 
 
@@ -91,11 +91,11 @@ namespace DTXMania
 
         public void tPressEnter()
         {
-            if (this.bキー入力待ち)
+            if (bキー入力待ち)
             {
                 CDTXMania.Skin.soundDecide.tPlay();
 
-                if (this.nCurrentSelection != lciMenuItems.Count - 1)
+                if (nCurrentSelection != lciMenuItems.Count - 1)
                 {
                     lciMenuItems[nCurrentSelection].RunAction();
                     
@@ -106,7 +106,7 @@ namespace DTXMania
                 }
                 tPressEnterMain(lciMenuItems[nCurrentSelection].GetIndex());
 
-                this.bキー入力待ち = true;
+                bキー入力待ち = true;
             }
         }
 
@@ -139,7 +139,7 @@ namespace DTXMania
 
         public void tMoveToNext()
         {
-            if (this.bキー入力待ち)
+            if (bキー入力待ち)
             {
                 CDTXMania.Skin.soundCursorMovement.tPlay();
                 if (bIsSelectingIntItem)
@@ -148,16 +148,16 @@ namespace DTXMania
                 }
                 else
                 {
-                    if (++this.nCurrentSelection >= this.lciMenuItems.Count)
+                    if (++nCurrentSelection >= lciMenuItems.Count)
                     {
-                        this.nCurrentSelection = 0;
+                        nCurrentSelection = 0;
                     }
                 }
             }
         }
         public void tMoveToPrevious()
         {
-            if (this.bキー入力待ち)
+            if (bキー入力待ち)
             {
                 CDTXMania.Skin.soundCursorMovement.tPlay();
                 if (bIsSelectingIntItem)
@@ -166,9 +166,9 @@ namespace DTXMania
                 }
                 else
                 {
-                    if (--this.nCurrentSelection < 0)
+                    if (--nCurrentSelection < 0)
                     {
-                        this.nCurrentSelection = this.lciMenuItems.Count - 1;
+                        nCurrentSelection = lciMenuItems.Count - 1;
                     }
                 }
             }
@@ -179,40 +179,40 @@ namespace DTXMania
         public override void OnActivate()
         {
             //		this.nSelectedRow = 0;
-            this.bキー入力待ち = true;
+            bキー入力待ち = true;
             for (int i = 0; i < 4; i++)
             {
-                this.ctキー反復用[i] = new CCounter(0, 0, 0, CDTXMania.Timer);
+                ctキー反復用[i] = new CCounter(0, 0, 0, CDTXMania.Timer);
             }
-            base.bNotActivated = true;
+            bNotActivated = true;
 
-            this.bIsActivePopupMenu = false;
-            this.font = new CActDFPFont();
-            base.listChildActivities.Add(this.font);
+            bIsActivePopupMenu = false;
+            font = new CActDFPFont();
+            listChildActivities.Add(font);
 
-            this.CommandHistory = new DTXMania.CStageSongSelection.CCommandHistory();
+            CommandHistory = new CStageSongSelection.CCommandHistory();
             base.OnActivate();
         }
         public override void OnDeactivate()
         {
-            if (!base.bNotActivated)
+            if (!bNotActivated)
             {
-                base.listChildActivities.Remove(this.font);
-                this.font.OnDeactivate();
-                this.font = null;
+                listChildActivities.Remove(font);
+                font.OnDeactivate();
+                font = null;
 
                 ui.Dispose();
                 
                 for (int i = 0; i < 4; i++)
                 {
-                    this.ctキー反復用[i] = null;
+                    ctキー反復用[i] = null;
                 }
                 base.OnDeactivate();
             }
         }
         public override void OnManagedCreateResources()
         {
-            if (!base.bNotActivated)
+            if (!bNotActivated)
             {
                 ui = new UIGroup();
                 ui.position = new Vector3(1280.0f/2.0f, 720.0f/2.0f + 20.0f, 0); 
@@ -239,7 +239,7 @@ namespace DTXMania
         }
         public override void OnManagedReleaseResources()
         {
-            if (!base.bNotActivated)
+            if (!bNotActivated)
             {
                 ui.Dispose();
             }
@@ -253,16 +253,16 @@ namespace DTXMania
 
         public int tUpdateAndDraw()  // t進行描画
         {
-            if (!base.bNotActivated && this.bIsActivePopupMenu)
+            if (!bNotActivated && bIsActivePopupMenu)
             {
-                if (this.bキー入力待ち)
+                if (bキー入力待ち)
                 {
                     #region [ CONFIG画面 ]
                     if (CDTXMania.Pad.bPressed(EInstrumentPart.GUITAR, EPad.Help))
                     {	// [SHIFT] + [F1] CONFIG
                         CDTXMania.Skin.soundCancel.tPlay();
                         tCancel();
-                        this.bGotoDetailConfig = true;
+                        bGotoDetailConfig = true;
                     }
                     #endregion
                     #region [ キー入力: キャンセル ]
@@ -270,19 +270,19 @@ namespace DTXMania
                     {	// キャンセル
                         CDTXMania.Skin.soundCancel.tPlay();
                         tCancel();
-                        this.bIsActivePopupMenu = false;
+                        bIsActivePopupMenu = false;
                     }
                     #endregion
                     #region [ BD二回: キャンセル ]
                     else if (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.BD))
                     {	// キャンセル
-                        this.CommandHistory.Add(EInstrumentPart.DRUMS, EPadFlag.BD);
+                        CommandHistory.Add(EInstrumentPart.DRUMS, EPadFlag.BD);
                         EPadFlag[] comChangeScrollSpeed = new EPadFlag[] { EPadFlag.BD, EPadFlag.BD };
-                        if (this.CommandHistory.CheckCommand(comChangeScrollSpeed, EInstrumentPart.DRUMS))
+                        if (CommandHistory.CheckCommand(comChangeScrollSpeed, EInstrumentPart.DRUMS))
                         {
                             CDTXMania.Skin.soundChange.tPlay();
                             tBDContinuity();
-                            this.bIsActivePopupMenu = false;
+                            bIsActivePopupMenu = false;
                         }
                     }
                     #endregion
@@ -295,7 +295,7 @@ namespace DTXMania
                         {
                             CDTXMania.Skin.soundChange.tPlay();
                             tBDContinuity();
-                            this.bIsActivePopupMenu = false;
+                            bIsActivePopupMenu = false;
                         }
                     }
                     #endregion
@@ -308,7 +308,7 @@ namespace DTXMania
                         {
                             CDTXMania.Skin.soundChange.tPlay();
                             tBDContinuity();
-                            this.bIsActivePopupMenu = false;
+                            bIsActivePopupMenu = false;
                         }
                     }
                     #endregion
@@ -323,30 +323,30 @@ namespace DTXMania
                     
                     if (eAction == ESortAction.Decide)	// 決定
                     {
-                        this.tPressEnter();
+                        tPressEnter();
                     }
                     #endregion
                     #region [ キー入力: 前に移動 ]
-                    this.ctキー反復用.Up.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing((int)SlimDXKey.UpArrow), new CCounter.DGキー処理(this.tMoveToPrevious));
-                    this.ctキー反復用.R.tRepeatKey(CDTXMania.Pad.bPressingGB(EPad.R), new CCounter.DGキー処理(this.tMoveToPrevious));
+                    ctキー反復用.Up.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing((int)SlimDXKey.UpArrow), new CCounter.DGキー処理(tMoveToPrevious));
+                    ctキー反復用.R.tRepeatKey(CDTXMania.Pad.bPressingGB(EPad.R), new CCounter.DGキー処理(tMoveToPrevious));
                     //Change to HT
                     if (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.HT))
                     {
-                        this.tMoveToPrevious();
+                        tMoveToPrevious();
                     }
                     #endregion
                     #region [ キー入力: 次に移動 ]
-                    this.ctキー反復用.Down.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing((int)SlimDXKey.DownArrow), new CCounter.DGキー処理(this.tMoveToNext));
-                    this.ctキー反復用.B.tRepeatKey(CDTXMania.Pad.bPressingGB(EPad.G), new CCounter.DGキー処理(this.tMoveToNext));
+                    ctキー反復用.Down.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing((int)SlimDXKey.DownArrow), new CCounter.DGキー処理(tMoveToNext));
+                    ctキー反復用.B.tRepeatKey(CDTXMania.Pad.bPressingGB(EPad.G), new CCounter.DGキー処理(tMoveToNext));
                     //Change to LT
                     if (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.LT))
                     {
-                        this.tMoveToNext();
+                        tMoveToNext();
                     }
                     #endregion
                 }
                 
-                cursor.position.Y = 6 + (32 * (this.nCurrentSelection + 1));
+                cursor.position.Y = 6 + (32 * (nCurrentSelection + 1));
                 
                 //draw value items
                 for (int i = 0; i < lciMenuItems.Count; i++)
@@ -404,7 +404,7 @@ namespace DTXMania
         private string strMenuTitle;
         private List<CItemBase> lciMenuItems;
         private bool bIsSelectingIntItem;
-        public DTXMania.CStageSongSelection.CCommandHistory CommandHistory;
+        public CStageSongSelection.CCommandHistory CommandHistory;
 
         [StructLayout(LayoutKind.Sequential)]
         private struct STキー反復用カウンタ
@@ -420,16 +420,16 @@ namespace DTXMania
                     switch (index)
                     {
                         case 0:
-                            return this.Up;
+                            return Up;
 
                         case 1:
-                            return this.Down;
+                            return Down;
 
                         case 2:
-                            return this.R;
+                            return R;
 
                         case 3:
-                            return this.B;
+                            return B;
                     }
                     throw new IndexOutOfRangeException();
                 }
@@ -438,19 +438,19 @@ namespace DTXMania
                     switch (index)
                     {
                         case 0:
-                            this.Up = value;
+                            Up = value;
                             return;
 
                         case 1:
-                            this.Down = value;
+                            Down = value;
                             return;
 
                         case 2:
-                            this.R = value;
+                            R = value;
                             return;
 
                         case 3:
-                            this.B = value;
+                            B = value;
                             return;
                     }
                     throw new IndexOutOfRangeException();

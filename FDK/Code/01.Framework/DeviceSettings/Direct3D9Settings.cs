@@ -63,7 +63,7 @@ namespace SampleFramework
 			AdapterFormat = Format.Unknown;
 			CreationFlags = CreateFlags.HardwareVertexProcessing;
 
-			var pp = this.PresentParameters;
+			var pp = PresentParameters;
 			pp.Windowed = true;
 			pp.BackBufferFormat = Format.Unknown;
 			pp.BackBufferCount = 1;
@@ -73,7 +73,7 @@ namespace SampleFramework
 			pp.AutoDepthStencilFormat = Format.Unknown;
 			pp.PresentFlags = PresentFlags.DiscardDepthStencil;
 			pp.PresentationInterval = PresentInterval.Default;
-			this.PresentParameters = pp;
+			PresentParameters = pp;
 		}
 
 		public Direct3D9Settings Clone()

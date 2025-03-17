@@ -9,52 +9,52 @@ namespace FDK
 
 		public CInputJoystick(IntPtr hWnd, DeviceInstance di, DirectInput directInput)
 		{
-			this.eInputDeviceType = EInputDeviceType.Joystick;
-			this.GUID = di.InstanceGuid.ToString();
-			this.ID = 0;
+			eInputDeviceType = EInputDeviceType.Joystick;
+			GUID = di.InstanceGuid.ToString();
+			ID = 0;
 			try
 			{
-				this.devJoystick = new Joystick(directInput, di.InstanceGuid);
-				this.devJoystick.SetCooperativeLevel(hWnd, CooperativeLevel.Foreground | CooperativeLevel.Exclusive);
-				this.devJoystick.Properties.BufferSize = 32;
-				Trace.TraceInformation(this.devJoystick.Information.InstanceName + "を生成しました。");
-				this.strDeviceName = this.devJoystick.Information.InstanceName;
+				devJoystick = new Joystick(directInput, di.InstanceGuid);
+				devJoystick.SetCooperativeLevel(hWnd, CooperativeLevel.Foreground | CooperativeLevel.Exclusive);
+				devJoystick.Properties.BufferSize = 32;
+				Trace.TraceInformation(devJoystick.Information.InstanceName + "を生成しました。");
+				strDeviceName = devJoystick.Information.InstanceName;
 			}
 			catch
 			{
-				if (this.devJoystick != null)
+				if (devJoystick != null)
 				{
-					this.devJoystick.Dispose();
-					this.devJoystick = null;
+					devJoystick.Dispose();
+					devJoystick = null;
 				}
-				Trace.TraceError(this.devJoystick.Information.InstanceName, new object[] { " の生成に失敗しました。" });
+				Trace.TraceError(devJoystick.Information.InstanceName, new object[] { " の生成に失敗しました。" });
 				throw;
 			}
-			foreach (DeviceObjectInstance instance in this.devJoystick.GetObjects())
+			foreach (DeviceObjectInstance instance in devJoystick.GetObjects())
 			{
 				if ((instance.ObjectId.Flags & DeviceObjectTypeFlags.Axis) != DeviceObjectTypeFlags.All)
 				{
-					this.devJoystick.GetObjectPropertiesById(instance.ObjectId).Range = new InputRange(-1000, 1000);
-					this.devJoystick.GetObjectPropertiesById(instance.ObjectId).DeadZone = 5000;        // 50%をデッドゾーンに設定
+					devJoystick.GetObjectPropertiesById(instance.ObjectId).Range = new InputRange(-1000, 1000);
+					devJoystick.GetObjectPropertiesById(instance.ObjectId).DeadZone = 5000;        // 50%をデッドゾーンに設定
 																										// 軸をON/OFFの2値で使うならこれで十分
 				}
 			}
 			try
 			{
-				this.devJoystick.Acquire();
+				devJoystick.Acquire();
 			}
 			catch
 			{
 			}
 
-			for (int i = 0; i < this.bButtonState.Length; i++)
-				this.bButtonState[i] = false;
-			for (int i = 0; i < this.nPovState.Length; i++)
-				this.nPovState[i] = -1;
+			for (int i = 0; i < bButtonState.Length; i++)
+				bButtonState[i] = false;
+			for (int i = 0; i < nPovState.Length; i++)
+				nPovState[i] = -1;
 
 			//this.timer = new CTimer( CTimer.E種別.MultiMedia );
 
-			this.listInputEvent = new List<STInputEvent>(32);
+			listInputEvent = new List<STInputEvent>(32);
 		}
 
 
@@ -62,7 +62,7 @@ namespace FDK
 
 		public void SetID(int nID)
 		{
-			this.ID = nID;
+			ID = nID;
 		}
 
 		#region [ IInputDevice 実装 ]
@@ -98,25 +98,25 @@ namespace FDK
 			#region [ bButtonフラグ初期化 ]
 			for (int i = 0; i < 256; i++)
 			{
-				this.bButtonPushDown[i] = false;
-				this.bButtonPullUp[i] = false;
+				bButtonPushDown[i] = false;
+				bButtonPullUp[i] = false;
 			}
 			#endregion
 
 			if (bWindowがアクティブ中)
 			{
-				this.devJoystick.Acquire();
-				this.devJoystick.Poll();
+				devJoystick.Acquire();
+				devJoystick.Poll();
 
 				// this.list入力イベント = new List<STInputEvent>( 32 );
-				this.listInputEvent.Clear();                        // #xxxxx 2012.6.11 yyagi; To optimize, I removed new();
+				listInputEvent.Clear();                        // #xxxxx 2012.6.11 yyagi; To optimize, I removed new();
 
 
 				if (bバッファ入力を使用する)
 				{
 					#region [ a.バッファ入力 ]
 					//-----------------------------
-					var bufferedData = this.devJoystick.GetBufferedData();
+					var bufferedData = devJoystick.GetBufferedData();
 					//if( Result.Last.IsSuccess && bufferedData != null )
 					{
 						foreach (JoystickUpdate data in bufferedData)
@@ -230,10 +230,10 @@ Trace.TraceInformation( "TS={0}: IsPressed={1}, IsReleased={2}", data.TimeStamp,
 												nTimeStamp = CSoundManager.rcPerformanceTimer.nサウンドタイマーのシステム時刻msへの変換(data.Timestamp),
 												nVelocity = CInputManager.n通常音量
 											};
-											this.listInputEvent.Add(e);
+											listInputEvent.Add(e);
 
-											this.bButtonState[6 + i] = true;
-											this.bButtonPushDown[6 + i] = true;
+											bButtonState[6 + i] = true;
+											bButtonPushDown[6 + i] = true;
 										}
 										else //if ( ( data.Value & 0x80 ) == 0 )
 										{
@@ -245,10 +245,10 @@ Trace.TraceInformation( "TS={0}: IsPressed={1}, IsReleased={2}", data.TimeStamp,
 												nTimeStamp = CSoundManager.rcPerformanceTimer.nサウンドタイマーのシステム時刻msへの変換(data.Timestamp),
 												nVelocity = CInputManager.n通常音量,
 											};
-											this.listInputEvent.Add(ev);
+											listInputEvent.Add(ev);
 
-											this.bButtonState[6 + i] = false;
-											this.bButtonPullUp[6 + i] = true;
+											bButtonState[6 + i] = false;
+											bButtonPullUp[6 + i] = true;
 										}
 									}
 									//-----------------------------
@@ -266,27 +266,27 @@ Trace.TraceInformation( "TS={0}: IsPressed={1}, IsReleased={2}", data.TimeStamp,
 								//Debug.WriteLine( "nPovDegree=" + nPovDegree );
 								if (nPovDegree == -1)
 								{
-									e.nKey = 6 + 128 + this.nPovState[p];
-									this.nPovState[p] = -1;
+									e.nKey = 6 + 128 + nPovState[p];
+									nPovState[p] = -1;
 									//Debug.WriteLine( "POVS離された" + data.TimeStamp + " " + e.nKey );
 									e.b押された = false;
 									e.nVelocity = 0;
-									this.bButtonState[e.nKey] = false;
-									this.bButtonPullUp[e.nKey] = true;
+									bButtonState[e.nKey] = false;
+									bButtonPullUp[e.nKey] = true;
 								}
 								else
 								{
-									this.nPovState[p] = nWay;
+									nPovState[p] = nWay;
 									e.nKey = 6 + 128 + nWay;
 									e.b押された = true;
 									e.nVelocity = CInputManager.n通常音量;
-									this.bButtonState[e.nKey] = true;
-									this.bButtonPushDown[e.nKey] = true;
+									bButtonState[e.nKey] = true;
+									bButtonPushDown[e.nKey] = true;
 									//Debug.WriteLine( "POVS押された" + data.TimeStamp + " " + e.nKey );
 								}
 								//e.nTimeStamp = data.TimeStamp;
 								e.nTimeStamp = CSoundManager.rcPerformanceTimer.nサウンドタイマーのシステム時刻msへの変換(data.Timestamp);
-								this.listInputEvent.Add(e);
+								listInputEvent.Add(e);
 							}
 							#endregion
 						}
@@ -298,14 +298,14 @@ Trace.TraceInformation( "TS={0}: IsPressed={1}, IsReleased={2}", data.TimeStamp,
 				{
 					#region [ b.状態入力 ]
 					//-----------------------------
-					JoystickState currentState = this.devJoystick.GetCurrentState();
+					JoystickState currentState = devJoystick.GetCurrentState();
 					//if( Result.Last.IsSuccess && currentState != null )
 					{
 						#region [ X軸－ ]
 						//-----------------------------
 						if (currentState.X < -500)
 						{
-							if (this.bButtonState[0] == false)
+							if (bButtonState[0] == false)
 							{
 								STInputEvent ev = new STInputEvent()
 								{
@@ -314,15 +314,15 @@ Trace.TraceInformation( "TS={0}: IsPressed={1}, IsReleased={2}", data.TimeStamp,
 									nTimeStamp = CSoundManager.rcPerformanceTimer.nシステム時刻, // 演奏用タイマと同じタイマを使うことで、BGMと譜面、入力ずれを防ぐ。
 									nVelocity = CInputManager.n通常音量
 								};
-								this.listInputEvent.Add(ev);
+								listInputEvent.Add(ev);
 
-								this.bButtonState[0] = true;
-								this.bButtonPushDown[0] = true;
+								bButtonState[0] = true;
+								bButtonPushDown[0] = true;
 							}
 						}
 						else
 						{
-							if (this.bButtonState[0] == true)
+							if (bButtonState[0] == true)
 							{
 								STInputEvent ev = new STInputEvent()
 								{
@@ -331,10 +331,10 @@ Trace.TraceInformation( "TS={0}: IsPressed={1}, IsReleased={2}", data.TimeStamp,
 									nTimeStamp = CSoundManager.rcPerformanceTimer.nシステム時刻, // 演奏用タイマと同じタイマを使うことで、BGMと譜面、入力ずれを防ぐ。
 									nVelocity = CInputManager.n通常音量
 								};
-								this.listInputEvent.Add(ev);
+								listInputEvent.Add(ev);
 
-								this.bButtonState[0] = false;
-								this.bButtonPullUp[0] = true;
+								bButtonState[0] = false;
+								bButtonPullUp[0] = true;
 							}
 						}
 						//-----------------------------
@@ -343,7 +343,7 @@ Trace.TraceInformation( "TS={0}: IsPressed={1}, IsReleased={2}", data.TimeStamp,
 						//-----------------------------
 						if (currentState.X > 500)
 						{
-							if (this.bButtonState[1] == false)
+							if (bButtonState[1] == false)
 							{
 								STInputEvent ev = new STInputEvent()
 								{
@@ -352,15 +352,15 @@ Trace.TraceInformation( "TS={0}: IsPressed={1}, IsReleased={2}", data.TimeStamp,
 									nTimeStamp = CSoundManager.rcPerformanceTimer.nシステム時刻, // 演奏用タイマと同じタイマを使うことで、BGMと譜面、入力ずれを防ぐ。
 									nVelocity = CInputManager.n通常音量
 								};
-								this.listInputEvent.Add(ev);
+								listInputEvent.Add(ev);
 
-								this.bButtonState[1] = true;
-								this.bButtonPushDown[1] = true;
+								bButtonState[1] = true;
+								bButtonPushDown[1] = true;
 							}
 						}
 						else
 						{
-							if (this.bButtonState[1] == true)
+							if (bButtonState[1] == true)
 							{
 								STInputEvent event7 = new STInputEvent()
 								{
@@ -369,10 +369,10 @@ Trace.TraceInformation( "TS={0}: IsPressed={1}, IsReleased={2}", data.TimeStamp,
 									nTimeStamp = CSoundManager.rcPerformanceTimer.nシステム時刻, // 演奏用タイマと同じタイマを使うことで、BGMと譜面、入力ずれを防ぐ。
 									nVelocity = CInputManager.n通常音量
 								};
-								this.listInputEvent.Add(event7);
+								listInputEvent.Add(event7);
 
-								this.bButtonState[1] = false;
-								this.bButtonPullUp[1] = true;
+								bButtonState[1] = false;
+								bButtonPullUp[1] = true;
 							}
 						}
 						//-----------------------------
@@ -381,7 +381,7 @@ Trace.TraceInformation( "TS={0}: IsPressed={1}, IsReleased={2}", data.TimeStamp,
 						//-----------------------------
 						if (currentState.Y < -500)
 						{
-							if (this.bButtonState[2] == false)
+							if (bButtonState[2] == false)
 							{
 								STInputEvent ev = new STInputEvent()
 								{
@@ -390,15 +390,15 @@ Trace.TraceInformation( "TS={0}: IsPressed={1}, IsReleased={2}", data.TimeStamp,
 									nTimeStamp = CSoundManager.rcPerformanceTimer.nシステム時刻, // 演奏用タイマと同じタイマを使うことで、BGMと譜面、入力ずれを防ぐ。
 									nVelocity = CInputManager.n通常音量
 								};
-								this.listInputEvent.Add(ev);
+								listInputEvent.Add(ev);
 
-								this.bButtonState[2] = true;
-								this.bButtonPushDown[2] = true;
+								bButtonState[2] = true;
+								bButtonPushDown[2] = true;
 							}
 						}
 						else
 						{
-							if (this.bButtonState[2] == true)
+							if (bButtonState[2] == true)
 							{
 								STInputEvent ev = new STInputEvent()
 								{
@@ -407,10 +407,10 @@ Trace.TraceInformation( "TS={0}: IsPressed={1}, IsReleased={2}", data.TimeStamp,
 									nTimeStamp = CSoundManager.rcPerformanceTimer.nシステム時刻, // 演奏用タイマと同じタイマを使うことで、BGMと譜面、入力ずれを防ぐ。
 									nVelocity = CInputManager.n通常音量
 								};
-								this.listInputEvent.Add(ev);
+								listInputEvent.Add(ev);
 
-								this.bButtonState[2] = false;
-								this.bButtonPullUp[2] = true;
+								bButtonState[2] = false;
+								bButtonPullUp[2] = true;
 							}
 						}
 						//-----------------------------
@@ -419,7 +419,7 @@ Trace.TraceInformation( "TS={0}: IsPressed={1}, IsReleased={2}", data.TimeStamp,
 						//-----------------------------
 						if (currentState.Y > 500)
 						{
-							if (this.bButtonState[3] == false)
+							if (bButtonState[3] == false)
 							{
 								STInputEvent ev = new STInputEvent()
 								{
@@ -428,15 +428,15 @@ Trace.TraceInformation( "TS={0}: IsPressed={1}, IsReleased={2}", data.TimeStamp,
 									nTimeStamp = CSoundManager.rcPerformanceTimer.nシステム時刻, // 演奏用タイマと同じタイマを使うことで、BGMと譜面、入力ずれを防ぐ。
 									nVelocity = CInputManager.n通常音量
 								};
-								this.listInputEvent.Add(ev);
+								listInputEvent.Add(ev);
 
-								this.bButtonState[3] = true;
-								this.bButtonPushDown[3] = true;
+								bButtonState[3] = true;
+								bButtonPushDown[3] = true;
 							}
 						}
 						else
 						{
-							if (this.bButtonState[3] == true)
+							if (bButtonState[3] == true)
 							{
 								STInputEvent ev = new STInputEvent()
 								{
@@ -445,10 +445,10 @@ Trace.TraceInformation( "TS={0}: IsPressed={1}, IsReleased={2}", data.TimeStamp,
 									nTimeStamp = CSoundManager.rcPerformanceTimer.nシステム時刻, // 演奏用タイマと同じタイマを使うことで、BGMと譜面、入力ずれを防ぐ。
 									nVelocity = CInputManager.n通常音量
 								};
-								this.listInputEvent.Add(ev);
+								listInputEvent.Add(ev);
 
-								this.bButtonState[3] = false;
-								this.bButtonPullUp[3] = true;
+								bButtonState[3] = false;
+								bButtonPullUp[3] = true;
 							}
 						}
 						//-----------------------------
@@ -457,7 +457,7 @@ Trace.TraceInformation( "TS={0}: IsPressed={1}, IsReleased={2}", data.TimeStamp,
 						//-----------------------------
 						if (currentState.Z < -500)
 						{
-							if (this.bButtonState[4] == false)
+							if (bButtonState[4] == false)
 							{
 								STInputEvent ev = new STInputEvent()
 								{
@@ -466,15 +466,15 @@ Trace.TraceInformation( "TS={0}: IsPressed={1}, IsReleased={2}", data.TimeStamp,
 									nTimeStamp = CSoundManager.rcPerformanceTimer.nシステム時刻, // 演奏用タイマと同じタイマを使うことで、BGMと譜面、入力ずれを防ぐ。
 									nVelocity = CInputManager.n通常音量
 								};
-								this.listInputEvent.Add(ev);
+								listInputEvent.Add(ev);
 
-								this.bButtonState[4] = true;
-								this.bButtonPushDown[4] = true;
+								bButtonState[4] = true;
+								bButtonPushDown[4] = true;
 							}
 						}
 						else
 						{
-							if (this.bButtonState[4] == true)
+							if (bButtonState[4] == true)
 							{
 								STInputEvent ev = new STInputEvent()
 								{
@@ -483,10 +483,10 @@ Trace.TraceInformation( "TS={0}: IsPressed={1}, IsReleased={2}", data.TimeStamp,
 									nTimeStamp = CSoundManager.rcPerformanceTimer.nシステム時刻, // 演奏用タイマと同じタイマを使うことで、BGMと譜面、入力ずれを防ぐ。
 									nVelocity = CInputManager.n通常音量
 								};
-								this.listInputEvent.Add(ev);
+								listInputEvent.Add(ev);
 
-								this.bButtonState[4] = false;
-								this.bButtonPullUp[4] = true;
+								bButtonState[4] = false;
+								bButtonPullUp[4] = true;
 							}
 						}
 						//-----------------------------
@@ -495,7 +495,7 @@ Trace.TraceInformation( "TS={0}: IsPressed={1}, IsReleased={2}", data.TimeStamp,
 						//-----------------------------
 						if (currentState.Z > 500)
 						{
-							if (this.bButtonState[5] == false)
+							if (bButtonState[5] == false)
 							{
 								STInputEvent ev = new STInputEvent()
 								{
@@ -504,15 +504,15 @@ Trace.TraceInformation( "TS={0}: IsPressed={1}, IsReleased={2}", data.TimeStamp,
 									nTimeStamp = CSoundManager.rcPerformanceTimer.nシステム時刻, // 演奏用タイマと同じタイマを使うことで、BGMと譜面、入力ずれを防ぐ。
 									nVelocity = CInputManager.n通常音量
 								};
-								this.listInputEvent.Add(ev);
+								listInputEvent.Add(ev);
 
-								this.bButtonState[5] = true;
-								this.bButtonPushDown[5] = true;
+								bButtonState[5] = true;
+								bButtonPushDown[5] = true;
 							}
 						}
 						else
 						{
-							if (this.bButtonState[5] == true)
+							if (bButtonState[5] == true)
 							{
 								STInputEvent event15 = new STInputEvent()
 								{
@@ -521,10 +521,10 @@ Trace.TraceInformation( "TS={0}: IsPressed={1}, IsReleased={2}", data.TimeStamp,
 									nTimeStamp = CSoundManager.rcPerformanceTimer.nシステム時刻, // 演奏用タイマと同じタイマを使うことで、BGMと譜面、入力ずれを防ぐ。
 									nVelocity = CInputManager.n通常音量
 								};
-								this.listInputEvent.Add(event15);
+								listInputEvent.Add(event15);
 
-								this.bButtonState[5] = false;
-								this.bButtonPullUp[5] = true;
+								bButtonState[5] = false;
+								bButtonPullUp[5] = true;
 							}
 						}
 						//-----------------------------
@@ -535,7 +535,7 @@ Trace.TraceInformation( "TS={0}: IsPressed={1}, IsReleased={2}", data.TimeStamp,
 						bool[] buttons = currentState.Buttons;
 						for (int j = 0; (j < buttons.Length) && (j < 128); j++)
 						{
-							if (this.bButtonState[6 + j] == false && buttons[j])
+							if (bButtonState[6 + j] == false && buttons[j])
 							{
 								STInputEvent item = new STInputEvent()
 								{
@@ -544,13 +544,13 @@ Trace.TraceInformation( "TS={0}: IsPressed={1}, IsReleased={2}", data.TimeStamp,
 									nTimeStamp = CSoundManager.rcPerformanceTimer.nシステム時刻, // 演奏用タイマと同じタイマを使うことで、BGMと譜面、入力ずれを防ぐ。
 									nVelocity = CInputManager.n通常音量
 								};
-								this.listInputEvent.Add(item);
+								listInputEvent.Add(item);
 
-								this.bButtonState[6 + j] = true;
-								this.bButtonPushDown[6 + j] = true;
+								bButtonState[6 + j] = true;
+								bButtonPushDown[6 + j] = true;
 								bIsButtonPressedReleased = true;
 							}
-							else if (this.bButtonState[6 + j] == true && !buttons[j])
+							else if (bButtonState[6 + j] == true && !buttons[j])
 							{
 								STInputEvent item = new STInputEvent()
 								{
@@ -559,10 +559,10 @@ Trace.TraceInformation( "TS={0}: IsPressed={1}, IsReleased={2}", data.TimeStamp,
 									nTimeStamp = CSoundManager.rcPerformanceTimer.nシステム時刻, // 演奏用タイマと同じタイマを使うことで、BGMと譜面、入力ずれを防ぐ。
 									nVelocity = CInputManager.n通常音量
 								};
-								this.listInputEvent.Add(item);
+								listInputEvent.Add(item);
 
-								this.bButtonState[6 + j] = false;
-								this.bButtonPullUp[6 + j] = true;
+								bButtonState[6 + j] = false;
+								bButtonPullUp[6 + j] = true;
 								bIsButtonPressedReleased = true;
 							}
 						}
@@ -579,7 +579,7 @@ Trace.TraceInformation( "TS={0}: IsPressed={1}, IsReleased={2}", data.TimeStamp,
 								int nWay = (nPovDegree + 2250) / 4500;
 								if (nWay == 8) nWay = 0;
 
-								if (this.bButtonState[6 + 128 + nWay] == false)
+								if (bButtonState[6 + 128 + nWay] == false)
 								{
 									STInputEvent stevent = new STInputEvent()
 									{
@@ -589,10 +589,10 @@ Trace.TraceInformation( "TS={0}: IsPressed={1}, IsReleased={2}", data.TimeStamp,
 										nTimeStamp = CSoundManager.rcPerformanceTimer.nシステム時刻, // 演奏用タイマと同じタイマを使うことで、BGMと譜面、入力ずれを防ぐ。
 										nVelocity = CInputManager.n通常音量
 									};
-									this.listInputEvent.Add(stevent);
+									listInputEvent.Add(stevent);
 
-									this.bButtonState[stevent.nKey] = true;
-									this.bButtonPushDown[stevent.nKey] = true;
+									bButtonState[stevent.nKey] = true;
+									bButtonPushDown[stevent.nKey] = true;
 								}
 							}
 							else if (bIsButtonPressedReleased == false) // #xxxxx 2011.12.3 yyagi 他のボタンが何も押され/離されてない＝POVが離された
@@ -600,7 +600,7 @@ Trace.TraceInformation( "TS={0}: IsPressed={1}, IsReleased={2}", data.TimeStamp,
 								int nWay = 0;
 								for (int i = 6 + 0x80; i < 6 + 0x80 + 8; i++)
 								{                                           // 離されたボタンを調べるために、元々押されていたボタンを探す。
-									if (this.bButtonState[i] == true)   // DirectInputを直接いじるならこんなことしなくて良いのに、あぁ面倒。
+									if (bButtonState[i] == true)   // DirectInputを直接いじるならこんなことしなくて良いのに、あぁ面倒。
 									{                                       // この処理が必要なために、POVを1個しかサポートできない。無念。
 										nWay = i;
 										break;
@@ -615,10 +615,10 @@ Trace.TraceInformation( "TS={0}: IsPressed={1}, IsReleased={2}", data.TimeStamp,
 										nTimeStamp = CSoundManager.rcPerformanceTimer.nシステム時刻, // 演奏用タイマと同じタイマを使うことで、BGMと譜面、入力ずれを防ぐ。
 										nVelocity = 0
 									};
-									this.listInputEvent.Add(stevent);
+									listInputEvent.Add(stevent);
 
-									this.bButtonState[nWay] = false;
-									this.bButtonPullUp[nWay] = true;
+									bButtonState[nWay] = false;
+									bButtonPullUp[nWay] = true;
 								}
 							}
 						}
@@ -632,19 +632,19 @@ Trace.TraceInformation( "TS={0}: IsPressed={1}, IsReleased={2}", data.TimeStamp,
 
 		public bool bKeyPressed(int nButton)
 		{
-			return this.bButtonPushDown[nButton];
+			return bButtonPushDown[nButton];
 		}
 		public bool bKeyPressing(int nButton)
 		{
-			return this.bButtonState[nButton];
+			return bButtonState[nButton];
 		}
 		public bool bKeyReleased(int nButton)
 		{
-			return this.bButtonPullUp[nButton];
+			return bButtonPullUp[nButton];
 		}
 		public bool bKeyReleasing(int nButton)
 		{
-			return !this.bButtonState[nButton];
+			return !bButtonState[nButton];
 		}
 		//-----------------
 		#endregion
@@ -653,23 +653,23 @@ Trace.TraceInformation( "TS={0}: IsPressed={1}, IsReleased={2}", data.TimeStamp,
 		//-----------------
 		public void Dispose()
 		{
-			if (!this.bDispose完了済み)
+			if (!bDispose完了済み)
 			{
-				if (this.devJoystick != null)
+				if (devJoystick != null)
 				{
-					this.devJoystick.Dispose();
-					this.devJoystick = null;
+					devJoystick.Dispose();
+					devJoystick = null;
 				}
 				//if( this.timer != null )
 				//{
 				//    this.timer.Dispose();
 				//    this.timer = null;
 				//}
-				if (this.listInputEvent != null)
+				if (listInputEvent != null)
 				{
-					this.listInputEvent = null;
+					listInputEvent = null;
 				}
-				this.bDispose完了済み = true;
+				bDispose完了済み = true;
 			}
 		}
 		//-----------------
@@ -726,7 +726,7 @@ Trace.TraceInformation( "TS={0}: IsPressed={1}, IsReleased={2}", data.TimeStamp,
 		/// <returns>上げ下げイベント発生時true</returns>
 		private bool bDoUpDownCore(int target, JoystickUpdate data, bool lastMode)
 		{
-			if (this.bButtonState[target] == lastMode)
+			if (bButtonState[target] == lastMode)
 			{
 				STInputEvent e = new STInputEvent()
 				{
@@ -735,16 +735,16 @@ Trace.TraceInformation( "TS={0}: IsPressed={1}, IsReleased={2}", data.TimeStamp,
 					nTimeStamp = CSoundManager.rcPerformanceTimer.nサウンドタイマーのシステム時刻msへの変換(data.Timestamp),
 					nVelocity = (lastMode) ? 0 : CInputManager.n通常音量
 				};
-				this.listInputEvent.Add(e);
+				listInputEvent.Add(e);
 
-				this.bButtonState[target] = !lastMode;
+				bButtonState[target] = !lastMode;
 				if (lastMode)
 				{
-					this.bButtonPullUp[target] = true;
+					bButtonPullUp[target] = true;
 				}
 				else
 				{
-					this.bButtonPushDown[target] = true;
+					bButtonPushDown[target] = true;
 				}
 				return true;
 			}

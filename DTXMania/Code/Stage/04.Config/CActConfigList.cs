@@ -27,14 +27,8 @@ namespace DTXMania
                 }
             }
         }
-        public bool bIsFocusingParameter		// #32059 2013.9.17 yyagi
-        {
-            get
-            {
-                return bFocusIsOnElementValue;
-            }
-        }
-        
+        public bool bIsFocusingParameter => bFocusIsOnElementValue; // #32059 2013.9.17 yyagi
+
         //Keep these temporarily
         private CItemBase iSystemReturnToMenu;
         private CItemBase iDrumsReturnToMenu;

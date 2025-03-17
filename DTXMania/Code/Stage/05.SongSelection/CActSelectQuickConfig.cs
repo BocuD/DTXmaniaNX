@@ -41,7 +41,7 @@ namespace DTXMania
             lci[(int)EInstrumentPart.GUITAR] = MakeListCItemBase((int)EInstrumentPart.GUITAR);
             lci[(int)EInstrumentPart.BASS] = MakeListCItemBase((int)EInstrumentPart.BASS);
             
-            base.Initialize(lci[(int)inst], QuickCfgTitle, 2);	// ConfSet=0, nInst=Drums
+            Initialize(lci[(int)inst], QuickCfgTitle, 2);	// ConfSet=0, nInst=Drums
         }
 
         private List<CItemBase> MakeListCItemBase(int nInstrument)
@@ -267,8 +267,8 @@ namespace DTXMania
                 action = () =>
                 {
                     SetAutoParameters(); // 簡易CONFIGメニュー脱出に伴い、簡易CONFIG内のAUTOの設定をConfigIniクラスに反映する
-                    this.bGotoDetailConfig = true;
-                    this.tDeativatePopupMenu();
+                    bGotoDetailConfig = true;
+                    tDeativatePopupMenu();
                 }
             };
             itemList.Add(more);
@@ -278,7 +278,7 @@ namespace DTXMania
                 action = () =>
                 {
                     SetAutoParameters(); // 簡易CONFIGメニュー脱出に伴い、簡易CONFIG内のAUTOの設定をConfigIniクラスに反映する
-                    this.tDeativatePopupMenu();
+                    tDeativatePopupMenu();
                 }
             };
             itemList.Add(returnBtn);
@@ -412,9 +412,9 @@ namespace DTXMania
         public override void tActivatePopupMenu(EInstrumentPart einst)
         {
             //2024.2.23 fisyher: Add in update to nCurrentTarget and AutoPlay config panel here to fix state de-sync
-            this.nCurrentTarget = (int)einst;
-            this.MakeAutoPanel();
-            this.CActSelectQuickConfigMain(einst);
+            nCurrentTarget = (int)einst;
+            MakeAutoPanel();
+            CActSelectQuickConfigMain(einst);
             base.tActivatePopupMenu(einst);
         }
         
@@ -424,7 +424,7 @@ namespace DTXMania
         /// </summary>
         public override void tDrawSub()
         {
-            if (base.nCurrentSelection == (int)EOrder.AutoMode)
+            if (nCurrentSelection == (int)EOrder.AutoMode)
             {
                 if (txAutoStatus == null) // TagetとAuto Modeを全く変更せずにAuto Modeまで動かした場合限り、ここに来る
                 {
@@ -467,25 +467,25 @@ namespace DTXMania
             s = GetAutoParameters(nCurrentTarget);
             for (int i = 0; i < header.Length; i++)
             {
-                graphics.DrawString(header[i].ToString(), this.ft表示用フォント, Brushes.White, (float)i * 24, (float)0f);
-                graphics.DrawString(s[i].ToString(), this.ft表示用フォント, Brushes.White, (float)i * 24, (float)24f);
+                graphics.DrawString(header[i].ToString(), ft表示用フォント, Brushes.White, (float)i * 24, (float)0f);
+                graphics.DrawString(s[i].ToString(), ft表示用フォント, Brushes.White, (float)i * 24, (float)24f);
             }
             graphics.Dispose();
 
             try
             {
-                if (this.txAutoStatus != null)
+                if (txAutoStatus != null)
                 {
-                    this.txAutoStatus.Dispose();
+                    txAutoStatus.Dispose();
                 }
-                this.txAutoStatus = new CTexture(CDTXMania.app.Device, image, CDTXMania.TextureFormat);
-                this.txAutoStatus.vcScaleRatio = new Vector3(1f, 1f, 1f);
+                txAutoStatus = new CTexture(CDTXMania.app.Device, image, CDTXMania.TextureFormat);
+                txAutoStatus.vcScaleRatio = new Vector3(1f, 1f, 1f);
                 image.Dispose();
             }
             catch (CTextureCreateFailedException)
             {
                 Trace.TraceError("演奏履歴文字列テクスチャの作成に失敗しました。");
-                this.txAutoStatus = null;
+                txAutoStatus = null;
             }
             
             autoStatus.SetTexture(new DTXTexture(txAutoStatus));
@@ -627,22 +627,22 @@ namespace DTXMania
 
         public override void OnActivate()
         {
-            this.ft表示用フォント = new Font("Arial", 26f, FontStyle.Bold, GraphicsUnit.Pixel);
+            ft表示用フォント = new Font("Arial", 26f, FontStyle.Bold, GraphicsUnit.Pixel);
             base.OnActivate();
-            this.bGotoDetailConfig = false;
+            bGotoDetailConfig = false;
         }
         public override void OnDeactivate()
         {
-            if (this.ft表示用フォント != null)
+            if (ft表示用フォント != null)
             {
-                this.ft表示用フォント.Dispose();
-                this.ft表示用フォント = null;
+                ft表示用フォント.Dispose();
+                ft表示用フォント = null;
             }
             base.OnDeactivate();
         }
         public override void OnManagedCreateResources()
         {
-            if (!base.bNotActivated)
+            if (!bNotActivated)
             {
                 subMenu = new UIGroup();
                 subMenu.renderOrder = 100;
@@ -668,9 +668,9 @@ namespace DTXMania
         }
         public override void OnManagedReleaseResources()
         {
-            if (!base.bNotActivated)
+            if (!bNotActivated)
             {
-                CDTXMania.tReleaseTexture(ref this.txAutoStatus);
+                CDTXMania.tReleaseTexture(ref txAutoStatus);
                 
                 base.OnManagedReleaseResources();
             }

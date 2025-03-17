@@ -16,11 +16,11 @@ namespace DTXMania
 
 		public override void OnManagedCreateResources()
 		{
-			if ( !base.bNotActivated )
+			if ( !bNotActivated )
 			{
 				try			// #xxxxx 2012.12.31 yyagi: to prepare flush, first of all, I create q queue to the GPU.
 				{
-					IDirect3DQuery9 = new SharpDX.Direct3D9.Query( CDTXMania.app.Device, QueryType.Occlusion );
+					IDirect3DQuery9 = new Query( CDTXMania.app.Device, QueryType.Occlusion );
 				}
 				catch ( Exception e )
 				{
@@ -37,7 +37,7 @@ namespace DTXMania
 		}
 		public override int OnUpdateAndDraw()
 		{
-			if ( !base.bNotActivated )
+			if ( !bNotActivated )
 			{
 				IDirect3DQuery9.Issue( Issue.End );
 				DWM.Flush();
@@ -50,7 +50,7 @@ namespace DTXMania
 
 		#region [ private ]
 		//-----------------
-		private SharpDX.Direct3D9.Query IDirect3DQuery9;
+		private Query IDirect3DQuery9;
 		//-----------------
 		#endregion
 	}

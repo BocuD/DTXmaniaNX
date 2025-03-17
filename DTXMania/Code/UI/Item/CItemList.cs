@@ -16,13 +16,13 @@
 
 		public CItemList()
 		{
-			base.eType = CItemBase.EType.List;
-			this.n現在選択されている項目番号 = 0;
-			this.list項目値 = new List<string>();
+			eType = EType.List;
+			n現在選択されている項目番号 = 0;
+			list項目値 = new List<string>();
 		}
-		public CItemList(string str項目名, CItemBase.EPanelType eパネル種別, int n初期インデックス値, string str説明文jp, string str説明文en, params string[] arg項目リスト)
+		public CItemList(string str項目名, EPanelType eパネル種別, int n初期インデックス値, string str説明文jp, string str説明文en, params string[] arg項目リスト)
 			: this() {
-			this.tInitialize(str項目名, eパネル種別, n初期インデックス値, str説明文jp, str説明文en, arg項目リスト);
+			tInitialize(str項目名, eパネル種別, n初期インデックス値, str説明文jp, str説明文en, arg項目リスト);
 		}
 
 
@@ -30,33 +30,33 @@
 
 		protected override void tEnter押下()
 		{
-			this.tMoveItemValueToNext();
+			tMoveItemValueToNext();
 		}
 		public override void tMoveItemValueToNext()
 		{
-			if( ++this.n現在選択されている項目番号 >= this.list項目値.Count )
+			if( ++n現在選択されている項目番号 >= list項目値.Count )
 			{
-				this.n現在選択されている項目番号 = 0;
+				n現在選択されている項目番号 = 0;
 			}
 		}
 		public override void tMoveItemValueToPrevious()
 		{
-			if( --this.n現在選択されている項目番号 < 0 )
+			if( --n現在選択されている項目番号 < 0 )
 			{
-				this.n現在選択されている項目番号 = this.list項目値.Count - 1;
+				n現在選択されている項目番号 = list項目値.Count - 1;
 			}
 		}
 
-		public void tInitialize(string str項目名, CItemBase.EPanelType eパネル種別, int n初期インデックス値, string str説明文jp, string str説明文en, params string[] arg項目リスト) {
+		public void tInitialize(string str項目名, EPanelType eパネル種別, int n初期インデックス値, string str説明文jp, string str説明文en, params string[] arg項目リスト) {
 			base.tInitialize(str項目名, eパネル種別, str説明文jp, str説明文en);
-			this.n現在選択されている項目番号 = n初期インデックス値;
+			n現在選択されている項目番号 = n初期インデックス値;
 			foreach (string str in arg項目リスト) {
-				this.list項目値.Add(str);
+				list項目値.Add(str);
 			}
 		}
 		public override object obj現在値()
 		{
-			return this.list項目値[ n現在選択されている項目番号 ];
+			return list項目値[ n現在選択されている項目番号 ];
 		}
 		public override int GetIndex()
 		{
@@ -81,14 +81,14 @@
 
 		public CSwitchItemList()
 		{
-			base.eType = CItemBase.EType.切替リスト;
-			this.n現在選択されている項目番号 = 0;
-			this.list項目値 = new List<string>();
+			eType = EType.切替リスト;
+			n現在選択されている項目番号 = 0;
+			list項目値 = new List<string>();
 		}
-		public CSwitchItemList( string str項目名, CItemBase.EPanelType eパネル種別, int n初期インデックス値, string str説明文jp, string str説明文en, params string[] arg項目リスト )
+		public CSwitchItemList( string str項目名, EPanelType eパネル種別, int n初期インデックス値, string str説明文jp, string str説明文en, params string[] arg項目リスト )
 			: this()
 		{
-			this.tInitialize( str項目名, eパネル種別, n初期インデックス値, str説明文jp, str説明文en, arg項目リスト );
+			tInitialize( str項目名, eパネル種別, n初期インデックス値, str説明文jp, str説明文en, arg項目リスト );
 		}
 
 		protected override void tEnter押下()

@@ -34,8 +34,8 @@ namespace SampleFramework
         /// <value>The current frames-per-second measure.</value>
         public float FramesPerSecond
         {
-			get { return m_FramesPerSecond; }
-			internal set { m_FramesPerSecond = value; }
+			get => m_FramesPerSecond;
+            internal set => m_FramesPerSecond = value;
         }
 
 		private float m_ElapsedGameTime;
@@ -45,8 +45,8 @@ namespace SampleFramework
         /// <value>The elapsed game time.</value>
         public float ElapsedGameTime
         {
-			get { return m_ElapsedGameTime; }
-			internal set { m_ElapsedGameTime = value; }
+			get => m_ElapsedGameTime;
+            internal set => m_ElapsedGameTime = value;
         }
 
 		private float m_ElapsedRealTime;
@@ -56,8 +56,8 @@ namespace SampleFramework
         /// <value>The elapsed real time.</value>
         public float ElapsedRealTime
         {
-			get { return m_ElapsedRealTime; }
-			internal set { m_ElapsedRealTime = value; }
+			get => m_ElapsedRealTime;
+            internal set => m_ElapsedRealTime = value;
         }
 
 		private float m_TotalGameTime;
@@ -67,8 +67,8 @@ namespace SampleFramework
         /// <value>The total game time.</value>
         public float TotalGameTime
         {
-            get { return m_TotalGameTime; }
-            internal set { m_TotalGameTime = value; }
+            get => m_TotalGameTime;
+            internal set => m_TotalGameTime = value;
         }
 
         private float m_TotalRealTime;
@@ -78,8 +78,8 @@ namespace SampleFramework
         /// <value>The total real time.</value>
         public float TotalRealTime
         {
-            get { return m_TotalRealTime; }
-            internal set { m_TotalRealTime = value; }
+            get => m_TotalRealTime;
+            internal set => m_TotalRealTime = value;
         }
 
         private bool m_IsRunningSlowly;
@@ -91,8 +91,8 @@ namespace SampleFramework
         /// </value>
         public bool IsRunningSlowly
         {
-            get { return m_IsRunningSlowly; }
-            internal set { m_IsRunningSlowly = value; }
+            get => m_IsRunningSlowly;
+            internal set => m_IsRunningSlowly = value;
         }
 
         /// <summary>

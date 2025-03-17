@@ -12,40 +12,40 @@ namespace FDK
 
 		public CInputKeyboard(IntPtr hWnd, DirectInput directInput)
 		{
-			this.eInputDeviceType = EInputDeviceType.Keyboard;
-			this.GUID = "";
-			this.ID = 0;
+			eInputDeviceType = EInputDeviceType.Keyboard;
+			GUID = "";
+			ID = 0;
 			try
 			{
-				this.devKeyboard = new Keyboard(directInput);
-				this.devKeyboard.SetCooperativeLevel(hWnd, CooperativeLevel.NoWinKey | CooperativeLevel.Foreground | CooperativeLevel.NonExclusive);
-				this.devKeyboard.Properties.BufferSize = 32;
-				Trace.TraceInformation(this.devKeyboard.Information.ProductName.Trim(new char[] { '\0' }) + " を生成しました。");    // なぜか0x00のゴミが出るので削除
-				this.strDeviceName = this.devKeyboard.Information.ProductName.Trim(new char[] { '\0' });
+				devKeyboard = new Keyboard(directInput);
+				devKeyboard.SetCooperativeLevel(hWnd, CooperativeLevel.NoWinKey | CooperativeLevel.Foreground | CooperativeLevel.NonExclusive);
+				devKeyboard.Properties.BufferSize = 32;
+				Trace.TraceInformation(devKeyboard.Information.ProductName.Trim(new char[] { '\0' }) + " を生成しました。");    // なぜか0x00のゴミが出るので削除
+				strDeviceName = devKeyboard.Information.ProductName.Trim(new char[] { '\0' });
 			}
 			catch
 			{
-				if (this.devKeyboard != null)
+				if (devKeyboard != null)
 				{
-					this.devKeyboard.Dispose();
-					this.devKeyboard = null;
+					devKeyboard.Dispose();
+					devKeyboard = null;
 				}
 				Trace.TraceWarning("Keyboard デバイスの生成に失敗しました。");
 				throw;
 			}
 			try
 			{
-				this.devKeyboard.Acquire();
+				devKeyboard.Acquire();
 			}
 			catch
 			{
 			}
 
-			for (int i = 0; i < this.bKeyState.Length; i++)
-				this.bKeyState[i] = false;
+			for (int i = 0; i < bKeyState.Length; i++)
+				bKeyState[i] = false;
 
 			//this.timer = new CTimer( CTimer.E種別.MultiMedia );
-			this.listInputEvent = new List<STInputEvent>(32);
+			listInputEvent = new List<STInputEvent>(32);
 			// this.ct = new CTimer( CTimer.E種別.PerformanceCounter );
 		}
 
@@ -64,17 +64,17 @@ namespace FDK
 		{
 			for (int i = 0; i < 256; i++)
 			{
-				this.bKeyPushDown[i] = false;
-				this.bKeyPullUp[i] = false;
+				bKeyPushDown[i] = false;
+				bKeyPullUp[i] = false;
 			}
 
-			if (bWindowがアクティブ中 && (this.devKeyboard != null))
+			if (bWindowがアクティブ中 && (devKeyboard != null))
 			{
-				this.devKeyboard.Acquire();
-				this.devKeyboard.Poll();
+				devKeyboard.Acquire();
+				devKeyboard.Poll();
 
 				//this.list入力イベント = new List<STInputEvent>( 32 );
-				this.listInputEvent.Clear();            // #xxxxx 2012.6.11 yyagi; To optimize, I removed new();
+				listInputEvent.Clear();            // #xxxxx 2012.6.11 yyagi; To optimize, I removed new();
 				int posEnter = -1;
 				//string d = DateTime.Now.ToString( "yyyy/MM/dd HH:mm:ss.ffff" );
 
@@ -82,7 +82,7 @@ namespace FDK
 				{
 					#region [ a.バッファ入力 ]
 					//-----------------------------
-					var bufferedData = this.devKeyboard.GetBufferedData();
+					var bufferedData = devKeyboard.GetBufferedData();
 					//if ( Result.Last.IsSuccess && bufferedData != null )
 					{
 						foreach (KeyboardUpdate data in bufferedData)
@@ -109,10 +109,10 @@ namespace FDK
 										nTimeStamp = CSoundManager.rcPerformanceTimer.nサウンドタイマーのシステム時刻msへの変換(data.Timestamp),
 										nVelocity = CInputManager.n通常音量
 									};
-									this.listInputEvent.Add(item);
+									listInputEvent.Add(item);
 
-									this.bKeyState[(int)key] = true;
-									this.bKeyPushDown[(int)key] = true;
+									bKeyState[(int)key] = true;
+									bKeyPushDown[(int)key] = true;
 								}
 								//if ( item.nKey == (int) SlimDXKey.Space )
 								//{
@@ -130,10 +130,10 @@ namespace FDK
 									nTimeStamp = CSoundManager.rcPerformanceTimer.nサウンドタイマーのシステム時刻msへの変換(data.Timestamp),
 									nVelocity = CInputManager.n通常音量
 								};
-								this.listInputEvent.Add(item);
+								listInputEvent.Add(item);
 
-								this.bKeyState[(int)key] = false;
-								this.bKeyPullUp[(int)key] = true;
+								bKeyState[(int)key] = false;
+								bKeyPullUp[(int)key] = true;
 							}
 						}
 					}
@@ -144,7 +144,7 @@ namespace FDK
 				{
 					#region [ b.状態入力 ]
 					//-----------------------------
-					KeyboardState currentState = this.devKeyboard.GetCurrentState();
+					KeyboardState currentState = devKeyboard.GetCurrentState();
 					//if ( Result.Last.IsSuccess && currentState != null )
 					{
 						foreach (SharpDXKey dik in currentState.PressedKeys)
@@ -154,7 +154,7 @@ namespace FDK
 							if (SlimDXKey.Unknown == key)
 								continue;   // 未対応キーは無視。
 
-							if (this.bKeyState[(int)key] == false)
+							if (bKeyState[(int)key] == false)
 							{
 								if (key != SlimDXKey.Return || (bKeyState[(int)SlimDXKey.LeftAlt] == false && bKeyState[(int)SlimDXKey.RightAlt] == false))    // #23708 2016.3.19 yyagi
 								{
@@ -166,10 +166,10 @@ namespace FDK
 										nTimeStamp = CSoundManager.rcPerformanceTimer.nシステム時刻, // 演奏用タイマと同じタイマを使うことで、BGMと譜面、入力ずれを防ぐ。
 										nVelocity = CInputManager.n通常音量,
 									};
-									this.listInputEvent.Add(ev);
+									listInputEvent.Add(ev);
 
-									this.bKeyState[(int)key] = true;
-									this.bKeyPushDown[(int)key] = true;
+									bKeyState[(int)key] = true;
+									bKeyPushDown[(int)key] = true;
 								}
 
 								//if ( (int) key == (int) SlimDXKey.Space )
@@ -186,7 +186,7 @@ namespace FDK
 							if (SlimDXKey.Unknown == key)
 								continue;   // 未対応キーは無視。
 
-							if (this.bKeyState[(int)key] == true && !currentState.IsPressed(dik)) // 前回は押されているのに今回は押されていない → 離された
+							if (bKeyState[(int)key] == true && !currentState.IsPressed(dik)) // 前回は押されているのに今回は押されていない → 離された
 							{
 								var ev = new STInputEvent()
 								{
@@ -196,10 +196,10 @@ namespace FDK
 									nTimeStamp = CSoundManager.rcPerformanceTimer.nシステム時刻, // 演奏用タイマと同じタイマを使うことで、BGMと譜面、入力ずれを防ぐ。
 									nVelocity = CInputManager.n通常音量,
 								};
-								this.listInputEvent.Add(ev);
+								listInputEvent.Add(ev);
 
-								this.bKeyState[(int)key] = false;
-								this.bKeyPullUp[(int)key] = true;
+								bKeyState[(int)key] = false;
+								bKeyPullUp[(int)key] = true;
 							}
 						}
 					}
@@ -224,7 +224,7 @@ namespace FDK
 		/// </param>
 		public bool bKeyPressed(int nKey)  // bキーが押された
 		{
-			return this.bKeyPushDown[nKey];
+			return bKeyPushDown[nKey];
 		}
 
 		/// <param name="nKey">
@@ -232,7 +232,7 @@ namespace FDK
 		/// </param>
 		public bool bKeyPressing(int nKey)  // bキーが押されている
 		{
-			return this.bKeyState[nKey];
+			return bKeyState[nKey];
 		}
 
 		/// <param name="nKey">
@@ -240,7 +240,7 @@ namespace FDK
 		/// </param>
 		public bool bKeyReleased(int nKey)  // bキーが離された
 		{
-			return this.bKeyPullUp[nKey];
+			return bKeyPullUp[nKey];
 		}
 
 		/// <param name="nKey">
@@ -248,7 +248,7 @@ namespace FDK
 		/// </param>
 		public bool bKeyReleasing(int nKey)  // bキーが離されている
 		{
-			return !this.bKeyState[nKey];
+			return !bKeyState[nKey];
 		}
 		//-----------------
 		#endregion
@@ -257,23 +257,23 @@ namespace FDK
 		//-----------------
 		public void Dispose()
 		{
-			if (!this.bDispose完了済み)
+			if (!bDispose完了済み)
 			{
-				if (this.devKeyboard != null)
+				if (devKeyboard != null)
 				{
-					this.devKeyboard.Dispose();
-					this.devKeyboard = null;
+					devKeyboard.Dispose();
+					devKeyboard = null;
 				}
 				//if( this.timer != null )
 				//{
 				//    this.timer.Dispose();
 				//    this.timer = null;
 				//}
-				if (this.listInputEvent != null)
+				if (listInputEvent != null)
 				{
-					this.listInputEvent = null;
+					listInputEvent = null;
 				}
-				this.bDispose完了済み = true;
+				bDispose完了済み = true;
 			}
 		}
 		//-----------------

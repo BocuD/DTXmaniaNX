@@ -16,46 +16,42 @@
 		public abstract void Dispose();
 
 		#region [ DTXMania用に、語尾にmsのつかない宣言を追加 ]
-		public long nシステム時刻
-		{
-			get { return nSystemTimeMs; }
-		}
+		public long nシステム時刻 => nSystemTimeMs;
+
 		public long nCurrentTime  // n現在時刻
 		{
-			get { return n現在時刻ms; }
-			set { n現在時刻ms = value; }
+			get => n現在時刻ms;
+			set => n現在時刻ms = value;
 		}
-		public long n前回リセットした時のシステム時刻
-		{
-			get { return n前回リセットした時のシステム時刻ms; }
-		}
+		public long n前回リセットした時のシステム時刻 => n前回リセットした時のシステム時刻ms;
+
 		#endregion
 
 		public long n現在時刻ms
 		{
 			get
 			{
-				if (this.n停止数 > 0)
-					return (this.n一時停止システム時刻ms - this.n前回リセットした時のシステム時刻ms);
+				if (n停止数 > 0)
+					return (n一時停止システム時刻ms - n前回リセットした時のシステム時刻ms);
 
-				return (this.n更新システム時刻ms - this.n前回リセットした時のシステム時刻ms);
+				return (n更新システム時刻ms - n前回リセットした時のシステム時刻ms);
 			}
 			set
 			{
-				if (this.n停止数 > 0)
-					this.n前回リセットした時のシステム時刻ms = this.n一時停止システム時刻ms - value;
+				if (n停止数 > 0)
+					n前回リセットした時のシステム時刻ms = n一時停止システム時刻ms - value;
 				else
-					this.n前回リセットした時のシステム時刻ms = this.n更新システム時刻ms - value;
+					n前回リセットした時のシステム時刻ms = n更新システム時刻ms - value;
 			}
 		}
 		public long nリアルタイム現在時刻ms
 		{
 			get
 			{
-				if (this.n停止数 > 0)
-					return (this.n一時停止システム時刻ms - this.n前回リセットした時のシステム時刻ms);
+				if (n停止数 > 0)
+					return (n一時停止システム時刻ms - n前回リセットした時のシステム時刻ms);
 
-				return (this.nSystemTimeMs - this.n前回リセットした時のシステム時刻ms);
+				return (nSystemTimeMs - n前回リセットした時のシステム時刻ms);
 			}
 		}
 		public long n前回リセットした時のシステム時刻ms
@@ -64,40 +60,35 @@
 			protected set;
 		}
 
-		public bool b停止していない
-		{
-			get
-			{
-				return (this.n停止数 == 0);
-			}
-		}
+		public bool b停止していない => (n停止数 == 0);
+
 		public void tReset()  // tリセット
 		{
-			this.tUpdate();
-			this.n前回リセットした時のシステム時刻ms = this.n更新システム時刻ms;
-			this.n一時停止システム時刻ms = this.n更新システム時刻ms;
-			this.n停止数 = 0;
+			tUpdate();
+			n前回リセットした時のシステム時刻ms = n更新システム時刻ms;
+			n一時停止システム時刻ms = n更新システム時刻ms;
+			n停止数 = 0;
 		}
 		public void tPause()  // t一時停止
 		{
-			if (this.n停止数 == 0)
-				this.n一時停止システム時刻ms = this.n更新システム時刻ms;
+			if (n停止数 == 0)
+				n一時停止システム時刻ms = n更新システム時刻ms;
 
-			this.n停止数++;
+			n停止数++;
 		}
 		public void tUpdate()  // t更新
 		{
-			this.n更新システム時刻ms = this.nSystemTimeMs;
+			n更新システム時刻ms = nSystemTimeMs;
 		}
 		public void tResume()  // t再開
 		{
-			if (this.n停止数 > 0)
+			if (n停止数 > 0)
 			{
-				this.n停止数--;
-				if (this.n停止数 == 0)
+				n停止数--;
+				if (n停止数 == 0)
 				{
-					this.tUpdate();
-					this.n前回リセットした時のシステム時刻ms += this.n更新システム時刻ms - this.n一時停止システム時刻ms;
+					tUpdate();
+					n前回リセットした時のシステム時刻ms += n更新システム時刻ms - n一時停止システム時刻ms;
 				}
 			}
 		}

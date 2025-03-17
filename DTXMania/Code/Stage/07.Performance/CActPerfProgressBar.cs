@@ -9,8 +9,8 @@ namespace DTXMania
 		
 		public CActPerfProgressBar(bool bIsCalledFromOutsidePerformance = false)
 		{
-			this.b演奏画面以外からの呼び出し = bIsCalledFromOutsidePerformance;
-			base.bNotActivated = true;
+			b演奏画面以外からの呼び出し = bIsCalledFromOutsidePerformance;
+			bNotActivated = true;
 		}
 
 
@@ -18,24 +18,24 @@ namespace DTXMania
 
 		public override void OnActivate()
 		{
-			if (this.bActivated)
+			if (bActivated)
 				return;
 
-			this.ct登場用 = null;
-			this.epartプレイ楽器 = EInstrumentPart.DRUMS;
-			this.nWidth = 20;
-			this.nHeight = 540; //1080;
+			ct登場用 = null;
+			epartプレイ楽器 = EInstrumentPart.DRUMS;
+			nWidth = 20;
+			nHeight = 540; //1080;
 
 			//
-			this.pBarPosition[(int)EInstrumentPart.DRUMS] = new Point(855, 15);
-			this.pBarPosition[(int)EInstrumentPart.GUITAR] = new Point(334, 85);
-			this.pBarPosition[(int)EInstrumentPart.BASS] = new Point(1204, 85);
+			pBarPosition[(int)EInstrumentPart.DRUMS] = new Point(855, 15);
+			pBarPosition[(int)EInstrumentPart.GUITAR] = new Point(334, 85);
+			pBarPosition[(int)EInstrumentPart.BASS] = new Point(1204, 85);
 		
 			//n区間分割数 = 54;
-			this.nブロック最大数 = 10;
-			this.n楽器毎のチップ数基準値.Drums = 1600;
-			this.n楽器毎のチップ数基準値.Guitar = 800;
-			this.n楽器毎のチップ数基準値.Bass = 800;
+			nブロック最大数 = 10;
+			n楽器毎のチップ数基準値.Drums = 1600;
+			n楽器毎のチップ数基準値.Guitar = 800;
+			n楽器毎のチップ数基準値.Bass = 800;
 
 			try
 			{
@@ -48,7 +48,7 @@ namespace DTXMania
 					}
 					if (!b演奏画面以外からの呼び出し && CDTXMania.ConfigIni.bInstrumentAvailable(ePart) && CDTXMania.DTX.bチップがある[(int)ePart])
 					{
-						int x = this.pBarPosition[(int)ePart].X;//(int)CDTXMania.Instance.ConfigIni.cdInstX[ePart][CDTXMania.Instance.ConfigIni.eActiveInst] + CDTXMania.Instance.ConfigIni.n楽器W_チップ倍率反映済(ePart);
+						int x = pBarPosition[(int)ePart].X;//(int)CDTXMania.Instance.ConfigIni.cdInstX[ePart][CDTXMania.Instance.ConfigIni.eActiveInst] + CDTXMania.Instance.ConfigIni.n楽器W_チップ倍率反映済(ePart);
 						int y = 0;
 						p表示位置[(int)ePart] = new Point(x, y);
 					}
@@ -101,7 +101,7 @@ namespace DTXMania
 
         public override void OnDeactivate()
         {
-            if (!this.bNotActivated)
+            if (!bNotActivated)
             {
 				ct登場用 = null;
 			}
@@ -111,7 +111,7 @@ namespace DTXMania
 
         public override void OnManagedCreateResources()
         {
-			if (!base.bNotActivated)
+			if (!bNotActivated)
 			{
 				tCreateBestProgressBarRecordTexture(CDTXMania.stageSongSelection.rChosenScore);
 				tサイズが絡むテクスチャの生成();
@@ -150,7 +150,7 @@ namespace DTXMania
 
         public override void OnManagedReleaseResources()
         {
-			if (!base.bNotActivated)
+			if (!bNotActivated)
 			{
 				CDTXMania.tDisposeSafely(ref txパネル用);
 				CDTXMania.tDisposeSafely(ref tx背景);
@@ -160,12 +160,12 @@ namespace DTXMania
 				CDTXMania.tDisposeSafely(ref tx黄);
 				CDTXMania.tDisposeSafely(ref tx青);
 
-				CDTXMania.tDisposeSafely(ref this.txBestProgressBarRecord.Drums);
-				CDTXMania.tDisposeSafely(ref this.txBestProgressBarRecord.Guitar);
-				CDTXMania.tDisposeSafely(ref this.txBestProgressBarRecord.Bass);
+				CDTXMania.tDisposeSafely(ref txBestProgressBarRecord.Drums);
+				CDTXMania.tDisposeSafely(ref txBestProgressBarRecord.Guitar);
+				CDTXMania.tDisposeSafely(ref txBestProgressBarRecord.Bass);
 
-				CDTXMania.tDisposeSafely(ref this.txProgressBarBackgroundDrums);
-				CDTXMania.tDisposeSafely(ref this.txProgressBarBackgroundGuitar);
+				CDTXMania.tDisposeSafely(ref txProgressBarBackgroundDrums);
+				CDTXMania.tDisposeSafely(ref txProgressBarBackgroundGuitar);
 
 				base.OnManagedReleaseResources();
 			}				
@@ -173,7 +173,7 @@ namespace DTXMania
 
         public override int OnUpdateAndDraw()
 		{
-			if (!base.bNotActivated)
+			if (!bNotActivated)
 			{
 				//if (base.bJustStartedUpdate)
 				//{
@@ -184,10 +184,10 @@ namespace DTXMania
 				//Put drawing code here
 				if (b演奏画面以外からの呼び出し)
 				{
-					if (base.bJustStartedUpdate)
+					if (bJustStartedUpdate)
 					{
 						ct登場用 = new CCounter(0, 100, 3, CDTXMania.Timer);
-						base.bJustStartedUpdate = false;
+						bJustStartedUpdate = false;
 					}
 					CCounter obj = ct登場用;
 					if (obj != null)
@@ -206,7 +206,7 @@ namespace DTXMania
 						continue;
 					}
 					int num = p表示位置[(int)ePart].X + (b演奏画面以外からの呼び出し ? 20 : 0);
-					int num2 = p表示位置[(int)ePart].Y + (b演奏画面以外からの呼び出し ? 20 : 0) + this.pBarPosition[(int)ePart].Y;
+					int num2 = p表示位置[(int)ePart].Y + (b演奏画面以外からの呼び出し ? 20 : 0) + pBarPosition[(int)ePart].Y;
 					if (b演奏画面以外からの呼び出し)
 					{
 						num += (int)((double)(-60 - p表示位置[(int)ePart].X) * Math.Cos(Math.PI / 200.0 * (double)ct登場用.nCurrentValue));
@@ -245,13 +245,13 @@ namespace DTXMania
 							num3 = nHeight;
 						}
 						Rectangle rectangle = new Rectangle(0, 0, tx進捗.szTextureSize.Width, num3);
-						num2 = nHeight - num3 + this.pBarPosition[(int)ePart].Y;
+						num2 = nHeight - num3 + pBarPosition[(int)ePart].Y;
 						tx進捗.tDraw2D(CDTXMania.app.Device, num, num2, rectangle);
 					}
 					for (int i = 0; i < nSectionIntervalCount; i++)
 					{
 						CProgressSection c区間 = listProgressSection[(int)ePart][i];
-						num2 = p表示位置[(int)ePart].Y + (b演奏画面以外からの呼び出し ? 20 : 0) + c区間.rectDrawingFrame.Y + this.pBarPosition[(int)ePart].Y;
+						num2 = p表示位置[(int)ePart].Y + (b演奏画面以外からの呼び出し ? 20 : 0) + c区間.rectDrawingFrame.Y + pBarPosition[(int)ePart].Y;
 						//if (c区間.nChipCount <= 0)
 						//{
 						//	continue;
@@ -319,7 +319,7 @@ namespace DTXMania
 		private void txGenerateProgressBarLine(ref CTexture txProgressBarTexture, string strProgressBar)
 		{
 			int nBarWidth = 8;
-			int nBarHeight = this.nHeight; //294;
+			int nBarHeight = nHeight; //294;
 
 			char[] arrProgress = strProgressBar.ToCharArray();
 			if (arrProgress.Length == nSectionIntervalCount)
@@ -331,7 +331,7 @@ namespace DTXMania
 						int nOffsetY = nBarHeight;
 						for (int i = 0; i < nSectionIntervalCount; i++)
 						{
-							int nCurrentPosY = (int)Math.Round((double)nBarHeight - ((double)i + 1.0) * (double)nBarHeight / (double)CActPerfProgressBar.nSectionIntervalCount);
+							int nCurrentPosY = (int)Math.Round((double)nBarHeight - ((double)i + 1.0) * (double)nBarHeight / (double)nSectionIntervalCount);
 							int nCurrentSectionHeight = nOffsetY - nCurrentPosY;
 							nOffsetY = nCurrentPosY;
 
@@ -342,7 +342,7 @@ namespace DTXMania
 								nColorIndex = 0;
 							}
 							//Draw current section
-							barGraphics.FillRectangle(new SolidBrush(this.clProgressBarColors[nColorIndex]), 2, nCurrentPosY, tempBarBitmap.Width - 4, nCurrentSectionHeight);
+							barGraphics.FillRectangle(new SolidBrush(clProgressBarColors[nColorIndex]), 2, nCurrentPosY, tempBarBitmap.Width - 4, nCurrentSectionHeight);
 						}
 						barGraphics.FillRectangle(new SolidBrush(Color.Gray), 0, 0, 2, tempBarBitmap.Height);
 						barGraphics.FillRectangle(new SolidBrush(Color.Gray), 6, 0, 1, tempBarBitmap.Height);
@@ -356,7 +356,7 @@ namespace DTXMania
 				{
 					using (Graphics barGraphics = Graphics.FromImage(tempBarBitmap))
 					{
-						barGraphics.FillRectangle(new SolidBrush(this.clProgressBarColors[0]), 2, 0, tempBarBitmap.Width - 4, tempBarBitmap.Height);
+						barGraphics.FillRectangle(new SolidBrush(clProgressBarColors[0]), 2, 0, tempBarBitmap.Width - 4, tempBarBitmap.Height);
 						barGraphics.FillRectangle(new SolidBrush(Color.Gray), 0, 0, 2, tempBarBitmap.Height);
 						barGraphics.FillRectangle(new SolidBrush(Color.Gray), 6, 0, 2, tempBarBitmap.Height);
 					}
@@ -537,7 +537,7 @@ namespace DTXMania
 
 		public void t選択曲が変更された()
 		{
-			if (base.bNotActivated)
+			if (bNotActivated)
 			{
 				return;
 			}

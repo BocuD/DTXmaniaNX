@@ -10,7 +10,7 @@ namespace DTXMania
 
         public CActResultRank()
         {
-            base.bNotActivated = true;
+            bNotActivated = true;
         }
 
 
@@ -18,7 +18,7 @@ namespace DTXMania
 
         public void tアニメを完了させる()
         {
-            this.ctランク表示.nCurrentValue = this.ctランク表示.nEndValue;
+            ctランク表示.nCurrentValue = ctランク表示.nEndValue;
         }
 
 
@@ -37,109 +37,109 @@ namespace DTXMania
             int n右X = 720;
             int n右Y = -15;
 
-            this.n本体X[0] = 0;
-            this.n本体Y[0] = 0;
+            n本体X[0] = 0;
+            n本体Y[0] = 0;
 
-            this.n本体X[1] = 0;
-            this.n本体Y[1] = 0;
+            n本体X[1] = 0;
+            n本体Y[1] = 0;
 
-            this.n本体X[2] = 0;
-            this.n本体Y[2] = 0;
+            n本体X[2] = 0;
+            n本体Y[2] = 0;
 
             if (CDTXMania.ConfigIni.bDrumsEnabled)
             {
-                this.n本体X[0] = n中X;
-                this.n本体Y[0] = n中Y;
+                n本体X[0] = n中X;
+                n本体Y[0] = n中Y;
             }
             else if (CDTXMania.ConfigIni.bGuitarEnabled)
             {
                 if (!CDTXMania.DTX.bチップがある.Bass)
                 {
-                    this.n本体X[1] = n中X;
-                    this.n本体Y[1] = n中Y;
+                    n本体X[1] = n中X;
+                    n本体Y[1] = n中Y;
                 }
                 else if (!CDTXMania.DTX.bチップがある.Guitar)
                 {
-                    this.n本体X[2] = n中X;
-                    this.n本体Y[2] = n中Y;
+                    n本体X[2] = n中X;
+                    n本体Y[2] = n中Y;
                 }
                 else if (CDTXMania.ConfigIni.bIsSwappedGuitarBass)
                 {
-                    this.n本体X[1] = n右X;
-                    this.n本体Y[1] = n右Y;
-                    this.n本体X[2] = n左X;
-                    this.n本体Y[2] = n左Y;
+                    n本体X[1] = n右X;
+                    n本体Y[1] = n右Y;
+                    n本体X[2] = n左X;
+                    n本体Y[2] = n左Y;
                 }
                 else
                 {
-                    this.n本体X[1] = n左X;
-                    this.n本体Y[1] = n左Y;
-                    this.n本体X[2] = n右X;
-                    this.n本体Y[2] = n右Y;
+                    n本体X[1] = n左X;
+                    n本体Y[1] = n左Y;
+                    n本体X[2] = n右X;
+                    n本体Y[2] = n右Y;
                 }
             }
             #endregion
 
-            this.b全オート.Drums = CDTXMania.ConfigIni.bAllDrumsAreAutoPlay;
-            this.b全オート.Guitar = CDTXMania.ConfigIni.bAllGuitarsAreAutoPlay;
-            this.b全オート.Bass = CDTXMania.ConfigIni.bAllBassAreAutoPlay;
+            b全オート.Drums = CDTXMania.ConfigIni.bAllDrumsAreAutoPlay;
+            b全オート.Guitar = CDTXMania.ConfigIni.bAllGuitarsAreAutoPlay;
+            b全オート.Bass = CDTXMania.ConfigIni.bAllBassAreAutoPlay;
 
             base.OnActivate();
         }
         public override void OnDeactivate()
         {
-            if (this.ctランク表示 != null)
+            if (ctランク表示 != null)
             {
-                this.ctランク表示 = null;
+                ctランク表示 = null;
             }
             base.OnDeactivate();
         }
         public override void OnManagedCreateResources()
         {
-            if (!base.bNotActivated)
+            if (!bNotActivated)
             {
 
-                this.txStageCleared = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\ScreenResult StageCleared.png"));
-                this.txFullCombo = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\ScreenResult fullcombo.png"));
-                this.txExcellent = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\ScreenResult Excellent.png"));
+                txStageCleared = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\ScreenResult StageCleared.png"));
+                txFullCombo = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\ScreenResult fullcombo.png"));
+                txExcellent = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\ScreenResult Excellent.png"));
 
                 for (int j = 0; j < 3; j++)
                 {
                     switch (CDTXMania.stageResult.nRankValue[j])
                     {
                         case 0:
-                            this.txランク文字[j] = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_rankSS.png"));
+                            txランク文字[j] = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_rankSS.png"));
                             break;
 
                         case 1:
-                            this.txランク文字[j] = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_rankS.png"));
+                            txランク文字[j] = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_rankS.png"));
                             break;
 
                         case 2:
-                            this.txランク文字[j] = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_rankA.png"));
+                            txランク文字[j] = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_rankA.png"));
                             break;
 
                         case 3:
-                            this.txランク文字[j] = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_rankB.png"));
+                            txランク文字[j] = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_rankB.png"));
                             break;
 
                         case 4:
-                            this.txランク文字[j] = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_rankC.png"));
+                            txランク文字[j] = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_rankC.png"));
                             break;
 
                         case 5:
-                            this.txランク文字[j] = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_rankD.png"));
+                            txランク文字[j] = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_rankD.png"));
                             break;
 
                         case 6:
                         case 99:	// #23534 2010.10.28 yyagi: 演奏チップが0個のときは、rankEと見なす
-                            this.txランク文字[j] = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_rankE.png"));
-                            if (this.b全オート[j])
-                                this.txランク文字[j] = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_rankSS.png"));
+                            txランク文字[j] = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_rankE.png"));
+                            if (b全オート[j])
+                                txランク文字[j] = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_rankSS.png"));
                             break;
 
                         default:
-                            this.txランク文字[j] = null;
+                            txランク文字[j] = null;
                             break;
                     }
                 }
@@ -148,66 +148,66 @@ namespace DTXMania
         }
         public override void OnManagedReleaseResources()
         {
-            if (!base.bNotActivated)
+            if (!bNotActivated)
             {
-                CDTXMania.tReleaseTexture(ref this.txStageCleared);
-                CDTXMania.tReleaseTexture(ref this.txFullCombo);
-                CDTXMania.tReleaseTexture(ref this.txExcellent);
-                CDTXMania.tDisposeSafely(ref this.txランク文字);
+                CDTXMania.tReleaseTexture(ref txStageCleared);
+                CDTXMania.tReleaseTexture(ref txFullCombo);
+                CDTXMania.tReleaseTexture(ref txExcellent);
+                CDTXMania.tDisposeSafely(ref txランク文字);
                 base.OnManagedReleaseResources();
             }
         }
         public override int OnUpdateAndDraw()
         {
-            if (base.bNotActivated)
+            if (bNotActivated)
             {
                 return 0;
             }
-            if (base.bJustStartedUpdate)
+            if (bJustStartedUpdate)
             {
-                this.ctランク表示 = new CCounter(0, 500, 1, CDTXMania.Timer);
-                base.bJustStartedUpdate = false;
+                ctランク表示 = new CCounter(0, 500, 1, CDTXMania.Timer);
+                bJustStartedUpdate = false;
             }
-            this.ctランク表示.tUpdate();
+            ctランク表示.tUpdate();
 
             for (int j = 0; j < 3; j++)
             {
-                if (this.n本体X[j] != 0)
+                if (n本体X[j] != 0)
                 {
                     #region [ ランク文字 ]
-                    if (this.txランク文字[j] != null)
+                    if (txランク文字[j] != null)
                     {
-                        double num2 = ((double)this.ctランク表示.nCurrentValue - 200.0) / 300.0;
+                        double num2 = ((double)ctランク表示.nCurrentValue - 200.0) / 300.0;
 
-                        if (this.ctランク表示.nCurrentValue >= 200.0)
-                            this.txランク文字[j].tDraw2D(CDTXMania.app.Device, this.n本体X[j], this.n本体Y[j] + ((int)((double)this.txランク文字[j].szImageSize.Height * (1.0 - num2))), new Rectangle(0, 0, txランク文字[j].szImageSize.Width, (int)((double)this.txランク文字[j].szImageSize.Height * num2)));
+                        if (ctランク表示.nCurrentValue >= 200.0)
+                            txランク文字[j].tDraw2D(CDTXMania.app.Device, n本体X[j], n本体Y[j] + ((int)((double)txランク文字[j].szImageSize.Height * (1.0 - num2))), new Rectangle(0, 0, txランク文字[j].szImageSize.Width, (int)((double)txランク文字[j].szImageSize.Height * num2)));
                     }
                     #endregion
 
                     #region [ フルコンボ ]
-                    int num14 = -165 + this.n本体X[j];
-                    int num15 = 100 + this.n本体Y[j];
+                    int num14 = -165 + n本体X[j];
+                    int num15 = 100 + n本体Y[j];
 
                     if (CDTXMania.stageResult.stPerformanceEntry[j].nPerfectCount == CDTXMania.stageResult.stPerformanceEntry[j].nTotalChipsCount)
                     {
-                        if (this.txExcellent != null)
-                            this.txExcellent.tDraw2D(CDTXMania.app.Device, num14, num15);
+                        if (txExcellent != null)
+                            txExcellent.tDraw2D(CDTXMania.app.Device, num14, num15);
                     }
                     else if (CDTXMania.stageResult.stPerformanceEntry[j].bIsFullCombo)
                     {
-                        if (this.txFullCombo != null)
-                            this.txFullCombo.tDraw2D(CDTXMania.app.Device, num14, num15);
+                        if (txFullCombo != null)
+                            txFullCombo.tDraw2D(CDTXMania.app.Device, num14, num15);
                     }
                     else
                     {
-                        if (this.txStageCleared != null)
-                            this.txStageCleared.tDraw2D(CDTXMania.app.Device, num14, num15);
+                        if (txStageCleared != null)
+                            txStageCleared.tDraw2D(CDTXMania.app.Device, num14, num15);
                     }
                     #endregion
                 }
             }
 
-            if (!this.ctランク表示.bReachedEndValue)
+            if (!ctランク表示.bReachedEndValue)
             {
                 return 0;
             }

@@ -12,26 +12,16 @@ namespace FDK
 		public int		Color;
 		public Vector2	TextureCoordinates;
 
-		public static int SizeInBytes
-		{
-			get
-			{
-				return Marshal.SizeOf( typeof( PositionColoredTexturedVertex ) );
-			}
-		}
-		public static VertexFormat Format
-		{
-			get
-			{
-				return ( VertexFormat.Texture1 | VertexFormat.Diffuse | VertexFormat.Position );
-			}
-		}
+		public static int SizeInBytes => Marshal.SizeOf( typeof( PositionColoredTexturedVertex ) );
+
+		public static VertexFormat Format => ( VertexFormat.Texture1 | VertexFormat.Diffuse | VertexFormat.Position );
+
 		public PositionColoredTexturedVertex( Vector3 position, int color, Vector2 textureCoordinates )
 		{
 			this = new PositionColoredTexturedVertex();
-			this.Position = position;
-			this.Color = color;
-			this.TextureCoordinates = textureCoordinates;
+			Position = position;
+			Color = color;
+			TextureCoordinates = textureCoordinates;
 		}
 
 		public static bool operator ==( PositionColoredTexturedVertex left, PositionColoredTexturedVertex right )
@@ -44,7 +34,7 @@ namespace FDK
 		}
 		public override int GetHashCode()
 		{
-			return ( ( this.Position.GetHashCode() + this.Color.GetHashCode() ) + this.TextureCoordinates.GetHashCode() );
+			return ( ( Position.GetHashCode() + Color.GetHashCode() ) + TextureCoordinates.GetHashCode() );
 		}
 		public override bool Equals( object obj )
 		{
@@ -52,19 +42,19 @@ namespace FDK
 			{
 				return false;
 			}
-			if( base.GetType() != obj.GetType() )
+			if( GetType() != obj.GetType() )
 			{
 				return false;
 			}
-			return this.Equals( (PositionColoredTexturedVertex) obj );
+			return Equals( (PositionColoredTexturedVertex) obj );
 		}
 		public bool Equals( PositionColoredTexturedVertex other )
 		{
-			return ( ( ( this.Position == other.Position ) && ( this.Color == other.Color ) ) && ( this.TextureCoordinates == other.TextureCoordinates ) );
+			return ( ( ( Position == other.Position ) && ( Color == other.Color ) ) && ( TextureCoordinates == other.TextureCoordinates ) );
 		}
 		public override string ToString()
 		{
-			return string.Format( CultureInfo.CurrentCulture, "{0} ({1}, {2})", new object[] { this.Position.ToString(), System.Drawing.Color.FromArgb( this.Color ).ToString(), this.TextureCoordinates.ToString() } );
+			return string.Format( CultureInfo.CurrentCulture, "{0} ({1}, {2})", new object[] { Position.ToString(), System.Drawing.Color.FromArgb( Color ).ToString(), TextureCoordinates.ToString() } );
 		}
 	}
 }

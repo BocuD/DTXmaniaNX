@@ -55,10 +55,7 @@ namespace SampleFramework
         public Point ptMaxPosition;
         public NativeRectangle rcNormalPosition;
 
-        public static int Length
-        {
-            get { return Marshal.SizeOf(typeof(WINDOWPLACEMENT)); }
-        }
+        public static int Length => Marshal.SizeOf(typeof(WINDOWPLACEMENT));
     }
     #region #28821 2014.1.23 yyagi add: 外部からの文字列メッセージ送受信 定数定義
     [StructLayout(LayoutKind.Sequential)]

@@ -34,18 +34,18 @@
 
 		public CItemBase()
 		{
-			this.strItemName = "";
-			this.str説明文 = "";
+			strItemName = "";
+			str説明文 = "";
 		}
 		
 		public CItemBase(string str項目名,  string str説明文jp, string str説明文en)
 			: this() {
-			this.tInitialize(str項目名, str説明文jp, str説明文en);
+			tInitialize(str項目名, str説明文jp, str説明文en);
 		}
 
 		public CItemBase(string str項目名, EPanelType eパネル種別, string str説明文jp, string str説明文en)
 			: this() {
-			this.tInitialize(str項目名, eパネル種別, str説明文jp, str説明文en);
+			tInitialize(str項目名, eパネル種別, str説明文jp, str説明文en);
 		}
 		
 		// メソッド；子クラスで実装する
@@ -72,13 +72,13 @@
 		}
 
 		public virtual void tInitialize(string str項目名, string str説明文jp, string str説明文en) {
-			this.tInitialize(str項目名, EPanelType.Normal, str説明文jp, str説明文en);
+			tInitialize(str項目名, EPanelType.Normal, str説明文jp, str説明文en);
 		}
 		
 		public virtual void tInitialize(string str項目名, EPanelType eパネル種別, string str説明文jp, string str説明文en) {
-			this.strItemName = str項目名;
-			this.ePanelType = eパネル種別;
-			this.str説明文 = CDTXMania.isJapanese ? str説明文jp : str説明文en;
+			strItemName = str項目名;
+			ePanelType = eパネル種別;
+			str説明文 = CDTXMania.isJapanese ? str説明文jp : str説明文en;
 		}
 		public virtual object obj現在値()
 		{
@@ -106,8 +106,8 @@
 		
 		public void BindConfig(Action readFromConfig, Action writeToConfig)
 		{
-			this._readFromConfig = readFromConfig;
-			this._writeToConfig = writeToConfig;
+			_readFromConfig = readFromConfig;
+			_writeToConfig = writeToConfig;
 		}
 	}
 }

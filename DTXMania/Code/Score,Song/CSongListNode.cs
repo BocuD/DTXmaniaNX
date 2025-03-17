@@ -23,14 +23,8 @@ namespace DTXMania
 		public bool bDTXFilesで始まるフォルダ名のBOXである;
 		public bool bBoxDefで作成されたBOXである
 		{
-			get
-			{
-				return !this.bDTXFilesで始まるフォルダ名のBOXである;
-			}
-			set
-			{
-				this.bDTXFilesで始まるフォルダ名のBOXである = !value;
-			}
+			get => !bDTXFilesで始まるフォルダ名のBOXである;
+			set => bDTXFilesで始まるフォルダ名のBOXである = !value;
 		}
 		public Color col文字色 = Color.White;
 		public List<CSongListNode> listランダム用ノードリスト;
@@ -54,36 +48,36 @@ namespace DTXMania
 
 		public CSongListNode()
 		{
-			this.nID = id++;
+			nID = id++;
 		}
 
 		//
 		public CSongListNode ShallowCopyOfSelf()
         {
 			CSongListNode newNode = new CSongListNode();
-			newNode.eNodeType = this.eNodeType;
-			newNode.nID = this.nID;
-			newNode.arDifficultyLabel = this.arDifficultyLabel;
-			newNode.arScore = this.arScore;
-			newNode.bDTXFilesで始まるフォルダ名のBOXである = this.bDTXFilesで始まるフォルダ名のBOXである;
-			newNode.bBoxDefで作成されたBOXである = this.bBoxDefで作成されたBOXである;
-			newNode.col文字色 = this.col文字色;
-			newNode.listランダム用ノードリスト = this.listランダム用ノードリスト;
-			newNode.list子リスト = this.list子リスト;
+			newNode.eNodeType = eNodeType;
+			newNode.nID = nID;
+			newNode.arDifficultyLabel = arDifficultyLabel;
+			newNode.arScore = arScore;
+			newNode.bDTXFilesで始まるフォルダ名のBOXである = bDTXFilesで始まるフォルダ名のBOXである;
+			newNode.bBoxDefで作成されたBOXである = bBoxDefで作成されたBOXである;
+			newNode.col文字色 = col文字色;
+			newNode.listランダム用ノードリスト = listランダム用ノードリスト;
+			newNode.list子リスト = list子リスト;
 			newNode.stDrumHitRanges = stDrumHitRanges;
 			newNode.stDrumPedalHitRanges = stDrumPedalHitRanges;
 			newNode.stGuitarHitRanges = stGuitarHitRanges;
 			newNode.stBassHitRanges = stBassHitRanges;
-			newNode.nスコア数 = this.nスコア数;
-			newNode.pathSetDefの絶対パス = this.pathSetDefの絶対パス;
-			newNode.r親ノード = this.r親ノード;
-			newNode.SetDefのブロック番号 = this.SetDefのブロック番号;
-			newNode.stackRandomPerformanceNumber = this.stackRandomPerformanceNumber;
-			newNode.strジャンル = this.strジャンル;
-			newNode.strタイトル = this.strタイトル;
-			newNode.strバージョン = this.strバージョン;
-			newNode.strBreadcrumbs = this.strBreadcrumbs;
-			newNode.strSkinPath = this.strSkinPath;
+			newNode.nスコア数 = nスコア数;
+			newNode.pathSetDefの絶対パス = pathSetDefの絶対パス;
+			newNode.r親ノード = r親ノード;
+			newNode.SetDefのブロック番号 = SetDefのブロック番号;
+			newNode.stackRandomPerformanceNumber = stackRandomPerformanceNumber;
+			newNode.strジャンル = strジャンル;
+			newNode.strタイトル = strタイトル;
+			newNode.strバージョン = strバージョン;
+			newNode.strBreadcrumbs = strBreadcrumbs;
+			newNode.strSkinPath = strSkinPath;
 
 			return newNode;
 		}

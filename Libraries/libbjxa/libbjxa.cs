@@ -110,39 +110,19 @@ namespace bjxa
 		public uint SampleBits;
 		public uint Channels;
 
-		public uint BlockSamples
-		{
-			get { return (BLOCK_SAMPLES * Channels); }
-		}
+		public uint BlockSamples => (BLOCK_SAMPLES * Channels);
 
-		public long RiffHeaderLength
-		{
-			get { return (HEADER_SIZE_RIFF - 8 + DataLengthPcm); }
-		}
+		public long RiffHeaderLength => (HEADER_SIZE_RIFF - 8 + DataLengthPcm);
 
-		public uint WaveHeaderLength
-		{
-			get { return (WAVE_HEADER_LEN); }
-		}
+		public uint WaveHeaderLength => (WAVE_HEADER_LEN);
 
-		public uint WaveFormatPcm
-		{
-			get { return (WAVE_FORMAT_PCM); }
-		}
+		public uint WaveFormatPcm => (WAVE_FORMAT_PCM);
 
-		public uint WaveByteRate
-		{
-			get
-			{
-				return (SamplesRate * BlockSizePcm /
-					BLOCK_SAMPLES);
-			}
-		}
+		public uint WaveByteRate =>
+			(SamplesRate * BlockSizePcm /
+			 BLOCK_SAMPLES);
 
-		public uint WaveBlockAlign
-		{
-			get { return (Channels * SampleBits / 8); }
-		}
+		public uint WaveBlockAlign => (Channels * SampleBits / 8);
 
 		internal Format() { }
 

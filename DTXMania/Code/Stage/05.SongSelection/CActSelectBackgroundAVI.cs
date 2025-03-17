@@ -8,10 +8,10 @@ namespace DTXMania
     {
         public CActSelectBackgroundAVI()
         {
-            this.bLoop = true;
-            this.position = 0;
+            bLoop = true;
+            position = 0;
 
-            base.bNotActivated = true;
+            bNotActivated = true;
         }
 
         public void Start(EChannel nチャンネル番号, CDTX.CAVI rAVI, int n総移動時間ms, int n移動開始時刻ms)
@@ -24,7 +24,7 @@ namespace DTXMania
             // 旧DShowモードを使っていて、旧規格クリップだったら新DShowモードを使う。
             //if( CDTXMania.ConfigIni.bDirectShowMode == false )
             {
-                this.fClipアスペクト比 = ((float)rAVI.avi.nフレーム幅 / (float)rAVI.avi.nフレーム高さ);
+                fClipアスペクト比 = ((float)rAVI.avi.nフレーム幅 / (float)rAVI.avi.nフレーム高さ);
                 
             }
             //else
@@ -48,38 +48,38 @@ namespace DTXMania
                 {
                     //float f拡大率x;
                     //float f拡大率y;
-                    this.framewidth = (uint)this.rAVI.avi.nフレーム幅;
-                    this.frameheight = (uint)this.rAVI.avi.nフレーム高さ;
-                    if (this.tx描画用 == null)
+                    framewidth = (uint)this.rAVI.avi.nフレーム幅;
+                    frameheight = (uint)this.rAVI.avi.nフレーム高さ;
+                    if (tx描画用 == null)
                     {
-                        this.tx描画用 = new CTexture(CDTXMania.app.Device, (int)this.framewidth, (int)this.frameheight, CDTXMania.app.GraphicsDeviceManager.CurrentSettings.BackBufferFormat, Pool.Managed);
+                        tx描画用 = new CTexture(CDTXMania.app.Device, (int)framewidth, (int)frameheight, CDTXMania.app.GraphicsDeviceManager.CurrentSettings.BackBufferFormat, Pool.Managed);
                     }
 
                     if (fClipアスペクト比 < 1.77f)
                     {
                         //旧規格クリップだった場合
-                        float ratio1 = this.fullScreenWidthPx / ((float)this.frameheight);
-                        this.position = (int)((this.fullScreenHeightPx - (this.framewidth * ratio1)) / 2f);
-                        int num = (int)(this.framewidth * ratio1);
+                        float ratio1 = fullScreenWidthPx / ((float)frameheight);
+                        position = (int)((fullScreenHeightPx - (framewidth * ratio1)) / 2f);
+                        int num = (int)(framewidth * ratio1);
                         if (num <= 565)
                         {
-                            this.position = 295 + ((int)((565f - (this.framewidth * ratio1)) / 2f));
+                            position = 295 + ((int)((565f - (framewidth * ratio1)) / 2f));
                             
                         }
                         else
                         {
-                            this.position = 295 - ((int)(((this.framewidth * ratio1) - 565f) / 2f));
+                            position = 295 - ((int)(((framewidth * ratio1) - 565f) / 2f));
                         }
-                        this.tx描画用.vcScaleRatio.X = ratio1;
-                        this.tx描画用.vcScaleRatio.Y = ratio1;
+                        tx描画用.vcScaleRatio.X = ratio1;
+                        tx描画用.vcScaleRatio.Y = ratio1;
                     }
                     else
                     {
                         //ワイドクリップの処理
-                        float ratio1 = this.fullScreenHeightPx / ((float)this.framewidth);
-                        this.position = (int)((this.fullScreenWidthPx - (this.frameheight * ratio1)) / 2f);
-                        this.tx描画用.vcScaleRatio.X = ratio1;
-                        this.tx描画用.vcScaleRatio.Y = ratio1;
+                        float ratio1 = fullScreenHeightPx / ((float)framewidth);
+                        position = (int)((fullScreenWidthPx - (frameheight * ratio1)) / 2f);
+                        tx描画用.vcScaleRatio.X = ratio1;
+                        tx描画用.vcScaleRatio.Y = ratio1;
                     }                    
                     this.rAVI.avi.Run();
                 }
@@ -90,39 +90,39 @@ namespace DTXMania
         public void Stop()
         {
             Trace.TraceInformation("CActSelectBackgroundAVI: Stop()");
-            if ((this.rAVI != null) && (this.rAVI.avi != null))
+            if ((rAVI != null) && (rAVI.avi != null))
             {
-                this.n移動開始時刻ms = -1;
+                n移動開始時刻ms = -1;
             }
         }
 
         public void Cont(int n再開時刻ms)
         {
-            if ((this.rAVI != null) && (this.rAVI.avi != null))
+            if ((rAVI != null) && (rAVI.avi != null))
             {
-                this.n移動開始時刻ms = n再開時刻ms;
+                n移動開始時刻ms = n再開時刻ms;
             }
         }
 
         public int tUpdateAndDraw() 
         {
-            if ((!base.bNotActivated))
+            if ((!bNotActivated))
             {
                 #region[ムービーのフレーム作成処理]
-                if (((this.tx描画用 != null)) && (this.rAVI != null)) //クリップ無し曲での進入防止。
+                if (((tx描画用 != null)) && (rAVI != null)) //クリップ無し曲での進入防止。
                 {
                     //Rectangle rectangle;
                     //Rectangle rectangle2;
 
                     #region[ frameNoFromTime ]
-                    int time = (int)((CSoundManager.rcPerformanceTimer.nCurrentTime - this.n移動開始時刻ms) * (((double)CDTXMania.ConfigIni.nPlaySpeed) / 20.0));
+                    int time = (int)((CSoundManager.rcPerformanceTimer.nCurrentTime - n移動開始時刻ms) * (((double)CDTXMania.ConfigIni.nPlaySpeed) / 20.0));
                     int frameNoFromTime = time;
                     #endregion
 
-                    if ((this.n総移動時間ms != 0) && (this.n総移動時間ms < time))
+                    if ((n総移動時間ms != 0) && (n総移動時間ms < time))
                     {
-                        this.n総移動時間ms = 0;
-                        this.n移動開始時刻ms = -1L;
+                        n総移動時間ms = 0;
+                        n移動開始時刻ms = -1L;
                         //return 0;
                     }
 
@@ -137,21 +137,21 @@ namespace DTXMania
                         else
                         {
                             n移動開始時刻ms = CSoundManager.rcPerformanceTimer.nCurrentTime;
-                            time = (int)((CSoundManager.rcPerformanceTimer.nCurrentTime - this.n移動開始時刻ms) * (((double)CDTXMania.ConfigIni.nPlaySpeed) / 20.0));
+                            time = (int)((CSoundManager.rcPerformanceTimer.nCurrentTime - n移動開始時刻ms) * (((double)CDTXMania.ConfigIni.nPlaySpeed) / 20.0));
                             rAVI.avi.Seek(0);
                         }
 
                     }
 
-                    if ((this.tx描画用 != null) && (this.n総移動時間ms != -1))
+                    if ((tx描画用 != null) && (n総移動時間ms != -1))
                     {
                         #region[ フレームの生成 ]
-                        this.rAVI.avi.tGetBitmap(CDTXMania.app.Device, this.tx描画用, time);
+                        rAVI.avi.tGetBitmap(CDTXMania.app.Device, tx描画用, time);
                         #endregion
 
                         #region[ 動画の描画 ]
                         //Background video is always full screen (1280 x 720)
-                        this.tx描画用.tDraw2DUpsideDown(CDTXMania.app.Device, this.position, 0);                        
+                        tx描画用.tDraw2DUpsideDown(CDTXMania.app.Device, position, 0);                        
                         #endregion
                         
                     }
@@ -163,9 +163,9 @@ namespace DTXMania
                     //    this.bフレームを作成した = true;
                     //}
                     
-                    if (CSoundManager.rcPerformanceTimer.nCurrentTime < this.n移動開始時刻ms)
+                    if (CSoundManager.rcPerformanceTimer.nCurrentTime < n移動開始時刻ms)
                     {
-                        this.n移動開始時刻ms = CSoundManager.rcPerformanceTimer.nCurrentTime;
+                        n移動開始時刻ms = CSoundManager.rcPerformanceTimer.nCurrentTime;
                     }
                 }
                 #endregion
@@ -179,7 +179,7 @@ namespace DTXMania
         #region[CActivity 実装]
         public override void OnActivate()
         {
-            this.n移動開始時刻ms = -1;
+            n移動開始時刻ms = -1;
             base.OnActivate();
         }
 
@@ -192,7 +192,7 @@ namespace DTXMania
 
         public override void OnManagedCreateResources()
         {
-            if (!base.bNotActivated)
+            if (!bNotActivated)
             {
                 base.OnManagedCreateResources();
             }
@@ -200,12 +200,12 @@ namespace DTXMania
 
         public override void OnManagedReleaseResources()
         {
-            if (!base.bNotActivated)
+            if (!bNotActivated)
             {
-                if (this.tx描画用 != null)
+                if (tx描画用 != null)
                 {
-                    this.tx描画用.Dispose();
-                    this.tx描画用 = null;
+                    tx描画用.Dispose();
+                    tx描画用 = null;
                 }
                 base.OnManagedReleaseResources();
             }

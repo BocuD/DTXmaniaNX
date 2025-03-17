@@ -87,13 +87,7 @@ namespace DTXMania
 			set;
 		}
 
-		public string filename
-		{
-			get
-			{
-				return last_path;
-			}
-		}
+		public string filename => last_path;
 
 		public string previewFilename
 		{
@@ -159,21 +153,21 @@ namespace DTXMania
         /// </summary>
         public CDTXVmode()
 		{
-			this.last_path = "";
-			this.last_timestamp = DateTime.MinValue;
-			this.Enabled = false;
-			this.nStartBar = 0;
-			this.Refreshed = false;
-			this.NeedReload = false;
-			this.previewFilename = "";
-			this.GRmode = false;
-			this.lastGRmode = false;
-			this.TimeStretch = false;
-			this.lastTimeStretch = false;
-			this.VSyncWait = true;
-			this.lastVSyncWait = true;
-			this.heightResolution = 360;
-			this.widthResolution = 640;
+			last_path = "";
+			last_timestamp = DateTime.MinValue;
+			Enabled = false;
+			nStartBar = 0;
+			Refreshed = false;
+			NeedReload = false;
+			previewFilename = "";
+			GRmode = false;
+			lastGRmode = false;
+			TimeStretch = false;
+			lastTimeStretch = false;
+			VSyncWait = true;
+			lastVSyncWait = true;
+			heightResolution = 360;
+			widthResolution = 640;
 		}
 
 		/// <summary>
@@ -189,29 +183,29 @@ namespace DTXMania
 			if (!File.Exists(filename))     // 指定したファイルが存在しないなら例外終了
 			{
 				Trace.TraceError("ファイルが見つかりません。({0})", filename);
-				this.last_path = filename;
+				last_path = filename;
 				throw new FileNotFoundException();
 				//return false;
 			}
 
-			this.Refreshed = true;
+			Refreshed = true;
 
 			// 前回とファイル名が異なるか、タイムスタンプが更新されているか、
 			// GRmode等の設定を変更したなら、DTX要更新
 			DateTime current_timestamp = File.GetLastWriteTime(filename);
 			if (last_path != filename || current_timestamp > last_timestamp ||
-				this.lastGRmode != this.GRmode || this.lastTimeStretch != this.TimeStretch || this.lastVSyncWait != this.VSyncWait)
+				lastGRmode != GRmode || lastTimeStretch != TimeStretch || lastVSyncWait != VSyncWait)
 			{
-				this.last_path = filename;
-				this.last_timestamp = current_timestamp;
-				this.lastGRmode = this.GRmode;
-				this.lastTimeStretch = this.TimeStretch;
-				this.lastVSyncWait = this.VSyncWait;
+				last_path = filename;
+				last_timestamp = current_timestamp;
+				lastGRmode = GRmode;
+				lastTimeStretch = TimeStretch;
+				lastVSyncWait = VSyncWait;
 
-				this.NeedReload = true;
+				NeedReload = true;
 				return true;
 			}
-			this.NeedReload = false;
+			NeedReload = false;
 			return false;
 		}
 

@@ -7,14 +7,8 @@
 		public bool bActivated { get; private set; }
 		public bool bNotActivated
 		{
-			get
-			{
-				return !this.bActivated;
-			}
-			set
-			{
-				this.bActivated = !value;
-			}
+			get => !bActivated;
+			set => bActivated = !value;
 		}
 		public List<CActivity> listChildActivities;
 
@@ -30,8 +24,8 @@
 
 		public CActivity()
 		{
-			this.bNotActivated = true;
-			this.listChildActivities = new List<CActivity>();
+			bNotActivated = true;
+			listChildActivities = new List<CActivity>();
 		}
 
 
@@ -43,37 +37,37 @@
 		public virtual void OnActivate()
 		{
 			// すでに活性化してるなら何もしない。
-			if( this.bActivated )
+			if( bActivated )
 				return;
 
-			this.bActivated = true;		// このフラグは、以下の処理をする前にセットする。
+			bActivated = true;		// このフラグは、以下の処理をする前にセットする。
 
 			// 自身のリソースを作成する。
-			this.OnManagedCreateResources();
-			this.OnUnmanagedCreateResources();
+			OnManagedCreateResources();
+			OnUnmanagedCreateResources();
 
 			// すべての子 Activity を活性化する。
-			foreach( CActivity activity in this.listChildActivities )
+			foreach( CActivity activity in listChildActivities )
 				activity.OnActivate();
 
 			// その他の初期化
-			this.bJustStartedUpdate = true;
+			bJustStartedUpdate = true;
 		}
 		public virtual void OnDeactivate()
 		{
 			// 活性化してないなら何もしない。
-			if( this.bNotActivated )
+			if( bNotActivated )
 				return;
 
 			// 自身のリソースを解放する。
-			this.OnUnmanagedReleaseResources();
-			this.OnManagedReleaseResources();
+			OnUnmanagedReleaseResources();
+			OnManagedReleaseResources();
 
 			// すべての 子Activity を非活性化する。
-			foreach( CActivity activity in this.listChildActivities )
+			foreach( CActivity activity in listChildActivities )
 				activity.OnDeactivate();
 
-			this.bNotActivated = true;	// このフラグは、以上のメソッドを呼び出した後にセットする。
+			bNotActivated = true;	// このフラグは、以上のメソッドを呼び出した後にセットする。
 		}
 
 		/// <summary>
@@ -86,11 +80,11 @@
 		public virtual void OnManagedCreateResources()
 		{
 			// 活性化してないなら何もしない。
-			if( this.bNotActivated )
+			if( bNotActivated )
 				return;
 
 			// すべての 子Activity の Managed リソースを作成する。
-			foreach( CActivity activity in this.listChildActivities )
+			foreach( CActivity activity in listChildActivities )
 				activity.OnManagedCreateResources();
 		}
 
@@ -104,11 +98,11 @@
 		public virtual void OnUnmanagedCreateResources()
 		{
 			// 活性化してないなら何もしない。
-			if( this.bNotActivated )
+			if( bNotActivated )
 				return;
 
 			// すべての 子Activity の Unmanaged リソースを作成する。
-			foreach( CActivity activity in this.listChildActivities )
+			foreach( CActivity activity in listChildActivities )
 				activity.OnUnmanagedCreateResources();
 		}
 		
@@ -121,11 +115,11 @@
 		public virtual void OnUnmanagedReleaseResources()
 		{
 			// 活性化してないなら何もしない。
-			if( this.bNotActivated )
+			if( bNotActivated )
 				return;
 
 			// すべての 子Activity の Unmanaged リソースを解放する。
-			foreach( CActivity activity in this.listChildActivities )
+			foreach( CActivity activity in listChildActivities )
 				activity.OnUnmanagedReleaseResources();
 		}
 
@@ -139,11 +133,11 @@
 		public virtual void OnManagedReleaseResources()
 		{
 			// 活性化してないなら何もしない。
-			if( this.bNotActivated )
+			if( bNotActivated )
 				return;
 
 			// すべての 子Activity の Managed リソースを解放する。
-			foreach( CActivity activity in this.listChildActivities )
+			foreach( CActivity activity in listChildActivities )
 				activity.OnManagedReleaseResources();
 		}
 
@@ -155,7 +149,7 @@
 		public virtual int OnUpdateAndDraw()
 		{
 			// 活性化してないなら何もしない。
-			if( this.bNotActivated )
+			if( bNotActivated )
 				return 0;
 
 
@@ -174,7 +168,7 @@
         public virtual int OnUpdateAndDraw(SharpDX.Direct3D9.Device D3D9Device)
         {
             // 活性化してないなら何もしない。
-            if (this.bNotActivated)
+            if (bNotActivated)
                 return 0;
 
 
@@ -190,27 +184,27 @@
         /// </summary>
         public virtual void OnActivate(SharpDX.Direct3D9.Device D3D9Device)
         {
-            if (this.bActivated)
+            if (bActivated)
                 return;
 
-            this.bActivated = true;		// このフラグは、以下の処理をする前にセットする。
+            bActivated = true;		// このフラグは、以下の処理をする前にセットする。
 
 
             // 自身のリソースを作成する。
 
-            this.OnManagedCreateResource(D3D9Device);
-            this.OnUnmanagedCreateResources(D3D9Device);
+            OnManagedCreateResource(D3D9Device);
+            OnUnmanagedCreateResources(D3D9Device);
 
 
             // すべての子Activityを活性化する。
 
-            foreach (CActivity activity in this.listChildActivities)
+            foreach (CActivity activity in listChildActivities)
                 activity.OnActivate(D3D9Device);
 
 
             // その他
 
-            this.bJustStartedUpdate = true;
+            bJustStartedUpdate = true;
         }
 
 		/// <summary>
@@ -220,13 +214,13 @@
 		/// </summary>
 		public virtual void OnManagedCreateResource( SharpDX.Direct3D9.Device D3D9Device )
 		{
-			if( this.bNotActivated )
+			if( bNotActivated )
 				return;
 
 
 			// すべての 子Activity の Managed リソースを作成する。
 			
-			foreach( CActivity activity in this.listChildActivities )
+			foreach( CActivity activity in listChildActivities )
 				activity.OnManagedCreateResource( D3D9Device );
 		}
 
@@ -237,13 +231,13 @@
 		/// </summary>
 		public virtual void OnUnmanagedCreateResources( SharpDX.Direct3D9.Device D3D9Device )
 		{
-			if( this.bNotActivated )
+			if( bNotActivated )
 				return;
 
 
 			// すべての 子Activity の Unmanaged リソースを作成する。
 
-			foreach( CActivity activity in this.listChildActivities )
+			foreach( CActivity activity in listChildActivities )
 				activity.OnUnmanagedCreateResources( D3D9Device );
 		}
 
@@ -253,10 +247,10 @@
         /// </summary>
         public virtual int OnUpdate()
         {
-            if (this.bNotActivated)
+            if (bNotActivated)
                 return 0;
 
-            this.bJustStartedUpdate = true;
+            bJustStartedUpdate = true;
 
 
             /* ここで進行を行う。*/
@@ -273,7 +267,7 @@
         /// </summary>
         public virtual void OnDraw(SharpDX.Direct3D9.Device D3D9Device)
         {
-            if (this.bNotActivated)
+            if (bNotActivated)
                 return;
 
             /* ここで描画を行う。*/

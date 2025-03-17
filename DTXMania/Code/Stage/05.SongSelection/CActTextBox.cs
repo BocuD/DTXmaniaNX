@@ -75,7 +75,7 @@ namespace DTXMania
 
 		public CActTextBox()
 		{
-			base.bNotActivated = true;
+			bNotActivated = true;
 		}
 
 		public override void OnActivate()
@@ -109,7 +109,7 @@ namespace DTXMania
 
 		public override void OnManagedCreateResources()
 		{
-			if (base.bNotActivated)
+			if (bNotActivated)
 			{
 				return;
 			}
@@ -162,7 +162,7 @@ namespace DTXMania
 
 		public override void OnManagedReleaseResources()
 		{
-			if (!base.bNotActivated)
+			if (!bNotActivated)
 			{
 				CDTXMania.tDisposeSafely(ref prvf入力文字列);
 				CDTXMania.tDisposeSafely(ref prvf説明);
@@ -176,7 +176,7 @@ namespace DTXMania
 
 		public override int OnUpdateAndDraw()
 		{
-			if (base.bNotActivated)
+			if (bNotActivated)
 			{
 				return 0;
 			}

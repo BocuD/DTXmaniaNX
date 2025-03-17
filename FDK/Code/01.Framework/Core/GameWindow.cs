@@ -94,10 +94,7 @@ namespace SampleFramework
 		/// <value>
 		/// 	<c>true</c> if this instance is minimized; otherwise, <c>false</c>.
 		/// </value>
-		public bool IsMinimized
-		{
-			get { return minimized; }
-		}
+		public bool IsMinimized => minimized;
 
 		/// <summary>
 		/// Gets a value indicating whether this instance is maximized.
@@ -105,10 +102,7 @@ namespace SampleFramework
 		/// <value>
 		/// 	<c>true</c> if this instance is maximized; otherwise, <c>false</c>.
 		/// </value>
-		public bool IsMaximized
-		{
-			get { return maximized; }
-		}
+		public bool IsMaximized => maximized;
 
 		/// <summary>
 		/// Gets or sets a value indicating whether System Menu is enabled.
@@ -137,8 +131,8 @@ namespace SampleFramework
 		/// <value>The screen.</value>
 		public Screen Screen
 		{
-			get { return m_Screen; }
-			private set { m_Screen = value; }
+			get => m_Screen;
+			private set => m_Screen = value;
 		}
 
 		/// <summary>
@@ -290,8 +284,8 @@ namespace SampleFramework
 
 		#region #23510 2010.11.14 yyagi add: 縦横比固定でのウインドウサイズ変更 定数定義 from http://www.vcskicks.com/maintain-aspect-ratio.php
 		//double so division keeps decimal points
-		const double widthRatio = SampleFramework.GameWindowSize.Width;
-		const double heightRatio = SampleFramework.GameWindowSize.Height;
+		const double widthRatio = GameWindowSize.Width;
+		const double heightRatio = GameWindowSize.Height;
 		const int WM_SIZING = 0x214;
 		const int WMSZ_LEFT = 1;
 		const int WMSZ_RIGHT = 2;
@@ -412,26 +406,26 @@ namespace SampleFramework
 				#region #23510 2010.11.13 yyagi: reset to 640x480
 				if ((m.WParam.ToInt32() & 0xFFFF) == MENU_VIEW)
 				{
-					base.ClientSize = new Size(SampleFramework.GameWindowSize.Width, SampleFramework.GameWindowSize.Height);
-					this.OnResizeEnd(new EventArgs());      // #23510 2010.11.20 yyagi: to set window size to Config.ini
+					ClientSize = new Size(GameWindowSize.Width, GameWindowSize.Height);
+					OnResizeEnd(new EventArgs());      // #23510 2010.11.20 yyagi: to set window size to Config.ini
 				}
 				else
 					if ((m.WParam.ToInt32() & 0xFFFF) == MENU_VIEW - 1)
 				{
-					base.ClientSize = new Size(1280, 720);
-					this.OnResizeEnd(new EventArgs());      // #23510 2010.11.20 yyagi: to set window size to Config.ini
+					ClientSize = new Size(1280, 720);
+					OnResizeEnd(new EventArgs());      // #23510 2010.11.20 yyagi: to set window size to Config.ini
 				}
 				else
 						if ((m.WParam.ToInt32() & 0xFFFF) == MENU_VIEW - 2)
 				{
-					base.ClientSize = new Size(896, 504);
-					this.OnResizeEnd(new EventArgs());      // #23510 2010.11.20 yyagi: to set window size to Config.ini
+					ClientSize = new Size(896, 504);
+					OnResizeEnd(new EventArgs());      // #23510 2010.11.20 yyagi: to set window size to Config.ini
 				}
 				else
 							if ((m.WParam.ToInt32() & 0xFFFF) == MENU_VIEW - 3)
 				{
-					base.ClientSize = new Size(640, 480);
-					this.OnResizeEnd(new EventArgs());      // #23510 2010.11.20 yyagi: to set window size to Config.ini
+					ClientSize = new Size(640, 480);
+					OnResizeEnd(new EventArgs());      // #23510 2010.11.20 yyagi: to set window size to Config.ini
 				}
 				#endregion
 			}
@@ -620,7 +614,7 @@ namespace SampleFramework
 			base.OnCreateControl();
 
 			//システムメニューのハンドル取得   
-			IntPtr hSysMenu = GetSystemMenu(this.Handle, false);
+			IntPtr hSysMenu = GetSystemMenu(Handle, false);
 
 			//セパレーターの挿入   
 			MENUITEMINFO item1 = new MENUITEMINFO();
@@ -634,7 +628,7 @@ namespace SampleFramework
 			item2.cbSize = (uint)Marshal.SizeOf(item2);
 			item2.fMask = MIIM_STRING | MIIM_ID;
 			item2.wID = MENU_VIEW;
-			item2.dwTypeData = "&" + SampleFramework.GameWindowSize.Width.ToString() + "x" + SampleFramework.GameWindowSize.Height.ToString();
+			item2.dwTypeData = "&" + GameWindowSize.Width.ToString() + "x" + GameWindowSize.Height.ToString();
 			InsertMenuItem(hSysMenu, 6, true, ref item2);
 
 			//メニュー項目(1280x720)の挿入   
@@ -666,13 +660,13 @@ namespace SampleFramework
 		private void InitializeComponent()
 		{
 			//System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(GameWindow));
-			this.SuspendLayout();
+			SuspendLayout();
 			// 
 			// GameWindow
 			// 
 			//resources.ApplyResources(this, "$this");
-			this.Name = "GameWindow";
-			this.ResumeLayout(false);
+			Name = "GameWindow";
+			ResumeLayout(false);
 		}
 	}
 }

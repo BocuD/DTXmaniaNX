@@ -70,7 +70,7 @@ namespace FDK
 				//-----------------
 				#endregion
 
-				var e = new DirectShowLib.DsROTEntry( graphBuilder );
+				var e = new DsROTEntry( graphBuilder );
 
 				// fileName からグラフを自動生成。
 
@@ -173,7 +173,7 @@ namespace FDK
 			{
 				var bytes = new byte[ BufferLen ];
 				Marshal.Copy( pBuffer, bytes, 0, BufferLen );		// unmanage → manage
-				this.MemoryStream.Write( bytes, 0, BufferLen );		// byte[] → Stream
+				MemoryStream.Write( bytes, 0, BufferLen );		// byte[] → Stream
 				return CWin32.S_OK;
 			}
 			public int SampleCB( double SampleTime, IMediaSample pSample )
@@ -183,7 +183,7 @@ namespace FDK
 
 			public void Dispose()
 			{
-				this.MemoryStream.Close();
+				MemoryStream.Close();
 			}
 		}
 		private static CSampleGrabberCallBack sampleGrabberProc = null;

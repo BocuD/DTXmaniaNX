@@ -41,8 +41,8 @@ namespace SampleFramework
         [VertexElement(DeclarationType.Float4, DeclarationUsage.PositionTransformed)]
         public Vector4 Position
         {
-			get { return m_Position; }
-			set { m_Position = value; }
+			get => m_Position;
+            set => m_Position = value;
         }
 
 		private int m_Color;
@@ -53,8 +53,8 @@ namespace SampleFramework
         [VertexElement(DeclarationType.Color, DeclarationUsage.Color)]
         public int Color
         {
-			get { return m_Color; }
-			set { m_Color = value; }
+			get => m_Color;
+            set => m_Color = value;
         }
 
 		private Vector2 m_TextureCoordinates;
@@ -65,27 +65,21 @@ namespace SampleFramework
         [VertexElement(DeclarationType.Float2, DeclarationUsage.TextureCoordinate)]
         public Vector2 TextureCoordinates
         {
-			get { return m_TextureCoordinates; }
-			set { m_TextureCoordinates = value; }
+			get => m_TextureCoordinates;
+            set => m_TextureCoordinates = value;
         }
 
         /// <summary>
         /// Gets the size in bytes.
         /// </summary>
         /// <value>The size in bytes.</value>
-        public static int SizeInBytes
-        {
-            get { return Marshal.SizeOf(typeof(TransformedColoredTexturedVertex)); }
-        }
+        public static int SizeInBytes => Marshal.SizeOf(typeof(TransformedColoredTexturedVertex));
 
         /// <summary>
         /// Gets the format.
         /// </summary>
         /// <value>The format.</value>
-        public static VertexFormat Format
-        {
-            get { return VertexFormat.PositionRhw | VertexFormat.Diffuse | VertexFormat.Texture1; }
-        }
+        public static VertexFormat Format => VertexFormat.PositionRhw | VertexFormat.Diffuse | VertexFormat.Texture1;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TransformedColoredTexturedVertex"/> struct.

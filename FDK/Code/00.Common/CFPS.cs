@@ -20,11 +20,11 @@
 
 		public CFPS()
 		{
-			this.n現在のFPS = 0;
-			this.timer = new CTimer( CTimer.EType.MultiMedia );
-			this.基点時刻ms = this.timer.nCurrentTime;
-			this.内部FPS = 0;
-			this.bFPSの値が変化した = false;
+			n現在のFPS = 0;
+			timer = new CTimer( CTimer.EType.MultiMedia );
+			基点時刻ms = timer.nCurrentTime;
+			内部FPS = 0;
+			bFPSの値が変化した = false;
 		}
 
 
@@ -32,18 +32,18 @@
 
 		public void tカウンタ更新()
 		{
-			this.timer.tUpdate();
-			this.bFPSの値が変化した = false;
+			timer.tUpdate();
+			bFPSの値が変化した = false;
 
 			const long INTERVAL = 1000;
-			while( ( this.timer.nCurrentTime - this.基点時刻ms ) >= INTERVAL )
+			while( ( timer.nCurrentTime - 基点時刻ms ) >= INTERVAL )
 			{
-				this.n現在のFPS = this.内部FPS;
-				this.内部FPS = 0;
-				this.bFPSの値が変化した = true;
-				this.基点時刻ms += INTERVAL;
+				n現在のFPS = 内部FPS;
+				内部FPS = 0;
+				bFPSの値が変化した = true;
+				基点時刻ms += INTERVAL;
 			}
-			this.内部FPS++;
+			内部FPS++;
 		}
 
 

@@ -12,13 +12,13 @@
 
 		public CInputMIDI( uint nID )
 		{
-			this.hMidiIn = IntPtr.Zero;
-			this.listEventBuffer = new List<STInputEvent>( 32 );
-			this.listInputEvent = new List<STInputEvent>( 32 );
-			this.eInputDeviceType = EInputDeviceType.MidiIn;
-			this.GUID = "";
-			this.ID = (int) nID;
-			this.strDeviceName = "";    // CInput管理で初期化する
+			hMidiIn = IntPtr.Zero;
+			listEventBuffer = new List<STInputEvent>( 32 );
+			listInputEvent = new List<STInputEvent>( 32 );
+			eInputDeviceType = EInputDeviceType.MidiIn;
+			GUID = "";
+			ID = (int) nID;
+			strDeviceName = "";    // CInput管理で初期化する
 		}
 
 
@@ -41,7 +41,7 @@
 					item.b押された = true;
 					item.nTimeStamp = n受信システム時刻;
 					item.nVelocity = nPara2;
-					this.listEventBuffer.Add( item );
+					listEventBuffer.Add( item );
 				}
 			}
 		}
@@ -57,16 +57,16 @@
 		public void tPolling( bool bWindowがアクティブ中, bool bバッファ入力を使用する )
 		{
 			// this.listInputEvent = new List<STInputEvent>( 32 );
-			this.listInputEvent.Clear();								// #xxxxx 2012.6.11 yyagi; To optimize, I removed new();
+			listInputEvent.Clear();								// #xxxxx 2012.6.11 yyagi; To optimize, I removed new();
 
-			for( int i = 0; i < this.listEventBuffer.Count; i++ )
-				this.listInputEvent.Add( this.listEventBuffer[ i ] );
+			for( int i = 0; i < listEventBuffer.Count; i++ )
+				listInputEvent.Add( listEventBuffer[ i ] );
 
-			this.listEventBuffer.Clear();
+			listEventBuffer.Clear();
 		}
 		public bool bKeyPressed( int nKey )
 		{
-			foreach( STInputEvent event2 in this.listInputEvent )
+			foreach( STInputEvent event2 in listInputEvent )
 			{
 				if( ( event2.nKey == nKey ) && event2.b押された )
 				{
@@ -94,13 +94,13 @@
 		//-----------------
 		public void Dispose()
 		{
-			if ( this.listEventBuffer != null )
+			if ( listEventBuffer != null )
 			{
-				this.listEventBuffer = null;
+				listEventBuffer = null;
 			}
-			if ( this.listInputEvent != null )
+			if ( listInputEvent != null )
 			{
-				this.listInputEvent = null;
+				listInputEvent = null;
 			}
 		}
 		//-----------------

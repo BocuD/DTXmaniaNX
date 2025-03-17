@@ -11,30 +11,30 @@
 		{
 			// タイマ更新
 
-			if( this.timer == null )
+			if( timer == null )
 				return;
-			this.timer.tUpdate();
+			timer.tUpdate();
 
 
 			// 初めての進行処理
 
-			if( this.n前回の時刻 == CTimer.nUnused )
-				this.n前回の時刻 = this.timer.n現在時刻ms;
+			if( n前回の時刻 == CTimer.nUnused )
+				n前回の時刻 = timer.n現在時刻ms;
 
 
 			// タイマが一回りしてしまった時のため……
 
-			if( this.timer.n現在時刻ms < this.n前回の時刻 )
-				this.n前回の時刻 = this.timer.n現在時刻ms;
+			if( timer.n現在時刻ms < n前回の時刻 )
+				n前回の時刻 = timer.n現在時刻ms;
 
 	
 			// 時間内の処理を実行。
 
-			while( ( this.timer.n現在時刻ms - this.n前回の時刻 ) >= n間隔ms )
+			while( ( timer.n現在時刻ms - n前回の時刻 ) >= n間隔ms )
 			{
 				dg処理();
 
-				this.n前回の時刻 += n間隔ms;
+				n前回の時刻 += n間隔ms;
 			}
 		}
 
@@ -42,7 +42,7 @@
 		//-----------------
 		public void Dispose()
 		{
-			CCommon.tDispose( ref this.timer );
+			CCommon.tDispose( ref timer );
 		}
 		//-----------------
 		#endregion

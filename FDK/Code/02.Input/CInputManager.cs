@@ -22,15 +22,15 @@ namespace FDK
 		{
 			get
 			{
-				if (this._Keyboard != null)
+				if (_Keyboard != null)
 				{
-					return this._Keyboard;
+					return _Keyboard;
 				}
-				foreach (IInputDevice device in this.listInputDevices)
+				foreach (IInputDevice device in listInputDevices)
 				{
 					if (device.eInputDeviceType == EInputDeviceType.Keyboard)
 					{
-						this._Keyboard = device;
+						_Keyboard = device;
 						return device;
 					}
 				}
@@ -41,15 +41,15 @@ namespace FDK
 		{
 			get
 			{
-				if (this._Mouse != null)
+				if (_Mouse != null)
 				{
-					return this._Mouse;
+					return _Mouse;
 				}
-				foreach (IInputDevice device in this.listInputDevices)
+				foreach (IInputDevice device in listInputDevices)
 				{
 					if (device.eInputDeviceType == EInputDeviceType.Mouse)
 					{
-						this._Mouse = device;
+						_Mouse = device;
 						return device;
 					}
 				}
@@ -66,10 +66,10 @@ namespace FDK
 
 		public void CInput管理初期化(IntPtr hWnd, bool bUseMidiIn)
 		{
-			this.directInput = new DirectInput();
+			directInput = new DirectInput();
 			// this.timer = new CTimer( CTimer.E種別.MultiMedia );
 
-			this.listInputDevices = new List<IInputDevice>(10);
+			listInputDevices = new List<IInputDevice>(10);
 			#region [ Enumerate keyboard/mouse: exception is masked if keyboard/mouse is not connected ]
 			CInputKeyboard cinputkeyboard = null;
 			CInputMouse cinputmouse = null;
@@ -83,22 +83,22 @@ namespace FDK
 			}
 			if (cinputkeyboard != null)
 			{
-				this.listInputDevices.Add(cinputkeyboard);
+				listInputDevices.Add(cinputkeyboard);
 			}
 			if (cinputmouse != null)
 			{
-				this.listInputDevices.Add(cinputmouse);
+				listInputDevices.Add(cinputmouse);
 			}
 			#endregion
 			#region [ Enumerate joypad ]
-			foreach (DeviceInstance instance in this.directInput.GetDevices(DeviceClass.GameControl, DeviceEnumerationFlags.AttachedOnly))
+			foreach (DeviceInstance instance in directInput.GetDevices(DeviceClass.GameControl, DeviceEnumerationFlags.AttachedOnly))
 			{
-				this.listInputDevices.Add(new CInputJoystick(hWnd, instance, directInput));
+				listInputDevices.Add(new CInputJoystick(hWnd, instance, directInput));
 			}
 			#endregion
 			if (bUseMidiIn)
 			{
-				this.proc = new CWin32.MidiInProc(this.MidiInCallback);
+				proc = new CWin32.MidiInProc(MidiInCallback);
 				uint nMidiDevices = CWin32.midiInGetNumDevs();
 				Trace.TraceInformation("MIDI入力デバイス数: {0}", nMidiDevices);
 				for (uint i = 0; i < nMidiDevices; i++)
@@ -110,7 +110,7 @@ namespace FDK
 					{
 						Trace.TraceError("MIDI In: Device{0}: midiInDevCaps(): {1:X2}: ", i, num3);
 					}
-					else if ((CWin32.midiInOpen(ref item.hMidiIn, i, this.proc, IntPtr.Zero, 0x30000) == 0) && (item.hMidiIn != IntPtr.Zero))
+					else if ((CWin32.midiInOpen(ref item.hMidiIn, i, proc, IntPtr.Zero, 0x30000) == 0) && (item.hMidiIn != IntPtr.Zero))
 					{
 						CWin32.midiInStart(item.hMidiIn);
 						Trace.TraceInformation("MIDI In: [{0}] \"{1}\" の入力受付を開始しました。", i, lpMidiInCaps.szPname);
@@ -120,7 +120,7 @@ namespace FDK
 						Trace.TraceError("MIDI In: [{0}] \"{1}\" の入力受付の開始に失敗しました。", i, lpMidiInCaps.szPname);
 					}
 					item.strDeviceName = lpMidiInCaps.szPname;
-					this.listInputDevices.Add(item);
+					listInputDevices.Add(item);
 				}
 			}
 			else
@@ -134,7 +134,7 @@ namespace FDK
 
 		public IInputDevice Joystick(int ID)
 		{
-			foreach (IInputDevice device in this.listInputDevices)
+			foreach (IInputDevice device in listInputDevices)
 			{
 				if ((device.eInputDeviceType == EInputDeviceType.Joystick) && (device.ID == ID))
 				{
@@ -145,7 +145,7 @@ namespace FDK
 		}
 		public IInputDevice Joystick(string GUID)
 		{
-			foreach (IInputDevice device in this.listInputDevices)
+			foreach (IInputDevice device in listInputDevices)
 			{
 				if ((device.eInputDeviceType == EInputDeviceType.Joystick) && device.GUID.Equals(GUID))
 				{
@@ -156,7 +156,7 @@ namespace FDK
 		}
 		public IInputDevice MidiIn(int ID)
 		{
-			foreach (IInputDevice device in this.listInputDevices)
+			foreach (IInputDevice device in listInputDevices)
 			{
 				if ((device.eInputDeviceType == EInputDeviceType.MidiIn) && (device.ID == ID))
 				{
@@ -167,12 +167,12 @@ namespace FDK
 		}
 		public void tPolling(bool bWindowがアクティブ中, bool bバッファ入力を使用する)  // tポーリング
 		{
-			lock (this.objMidiIn排他用)
+			lock (objMidiIn排他用)
 			{
 				//				foreach( IInputDevice device in this.list入力デバイス )
-				for (int i = this.listInputDevices.Count - 1; i >= 0; i--)    // #24016 2011.1.6 yyagi: change not to use "foreach" to avoid InvalidOperation exception by Remove().
+				for (int i = listInputDevices.Count - 1; i >= 0; i--)    // #24016 2011.1.6 yyagi: change not to use "foreach" to avoid InvalidOperation exception by Remove().
 				{
-					IInputDevice device = this.listInputDevices[i];
+					IInputDevice device = listInputDevices[i];
 					try
 					{
 						device.tPolling(bWindowがアクティブ中, bバッファ入力を使用する);
@@ -186,7 +186,7 @@ namespace FDK
 						else
 						{
 							// #xxxxx: 2017.5.9: from: その他のエラーの場合は、デバイスが外されたと想定してRemoveする。
-							this.listInputDevices.Remove(device);
+							listInputDevices.Remove(device);
 							device.Dispose();
 							Trace.TraceError("tポーリング時に対象deviceが抜かれており例外発生。同deviceをポーリング対象からRemoveしました。");
 						}
@@ -199,15 +199,15 @@ namespace FDK
 		//-----------------
 		public void Dispose()
 		{
-			this.Dispose(true);
+			Dispose(true);
 		}
 		public void Dispose(bool disposeManagedObjects)
 		{
-			if (!this.bDisposed済み)
+			if (!bDisposed済み)
 			{
 				if (disposeManagedObjects)
 				{
-					foreach (IInputDevice device in this.listInputDevices)
+					foreach (IInputDevice device in listInputDevices)
 					{
 						CInputMIDI tmidi = device as CInputMIDI;
 						if (tmidi != null)
@@ -218,16 +218,16 @@ namespace FDK
 							Trace.TraceInformation("MIDI In: [{0}] を停止しました。", new object[] { tmidi.ID });
 						}
 					}
-					foreach (IInputDevice device2 in this.listInputDevices)
+					foreach (IInputDevice device2 in listInputDevices)
 					{
 						device2.Dispose();
 					}
-					lock (this.objMidiIn排他用)
+					lock (objMidiIn排他用)
 					{
-						this.listInputDevices.Clear();
+						listInputDevices.Clear();
 					}
 
-					this.directInput.Dispose();
+					directInput.Dispose();
 
 					//if( this.timer != null )
 					//{
@@ -235,12 +235,12 @@ namespace FDK
 					//    this.timer = null;
 					//}
 				}
-				this.bDisposed済み = true;
+				bDisposed済み = true;
 			}
 		}
 		~CInputManager()
 		{
-			this.Dispose(false);
+			Dispose(false);
 			GC.KeepAlive(this);
 		}
 		//-----------------
@@ -268,11 +268,11 @@ namespace FDK
 
 			long time = CSoundManager.rcPerformanceTimer.nシステム時刻;  // lock前に取得。演奏用タイマと同じタイマを使うことで、BGMと譜面、入力ずれを防ぐ。
 
-			lock (this.objMidiIn排他用)
+			lock (objMidiIn排他用)
 			{
-				if ((this.listInputDevices != null) && (this.listInputDevices.Count != 0))
+				if ((listInputDevices != null) && (listInputDevices.Count != 0))
 				{
-					foreach (IInputDevice device in this.listInputDevices)
+					foreach (IInputDevice device in listInputDevices)
 					{
 						CInputMIDI tmidi = device as CInputMIDI;
 						if ((tmidi != null) && (tmidi.hMidiIn == hMidiIn))

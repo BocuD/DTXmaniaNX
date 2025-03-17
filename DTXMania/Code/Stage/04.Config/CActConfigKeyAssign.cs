@@ -9,13 +9,7 @@ namespace DTXMania
 	{
 		// プロパティ
 
-		public bool bキー入力待ちの最中である
-		{
-			get
-			{
-				return bWaitingForKeyInput;
-			}
-		}
+		public bool bキー入力待ちの最中である => bWaitingForKeyInput;
 
 
 		// メソッド

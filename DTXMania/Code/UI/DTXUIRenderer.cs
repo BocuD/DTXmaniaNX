@@ -32,7 +32,7 @@ namespace DTXMania.Code.UI
             texture.tDraw2DMatrix(CDTXMania.app.Device, transformMatrix, size, clipRect);
         }
 
-        public override void tDraw2DMatrixSliced(Matrix transformMatrix, Vector2 size, RectangleF clipRect, SharpDX.RectangleF sliceRect)
+        public override void tDraw2DMatrixSliced(Matrix transformMatrix, Vector2 size, RectangleF clipRect, RectangleF sliceRect)
         {
             texture.tDraw2DMatrixSliced(CDTXMania.app.Device, transformMatrix, size, clipRect, sliceRect);
         }

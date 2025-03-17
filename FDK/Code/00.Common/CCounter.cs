@@ -31,34 +31,25 @@
 
 		// 状態プロパティ
 
-		public bool bInProgress //b進行中
-		{
-			get { return (this.nCurrentElapsedTimeMs != -1); }
-		}
-		public bool bStopped //b停止中
-		{
-			get { return !this.bInProgress; }
-		}
-		public bool bReachedEndValue  // n現在の経過時間ms
-		{
-			get { return (this.nCurrentValue >= this.nEndValue); }
-		}
-		public bool b終了値に達してない
-		{
-			get { return !this.bReachedEndValue; }
-		}
+		public bool bInProgress => (nCurrentElapsedTimeMs != -1); //b進行中
+
+		public bool bStopped => !bInProgress; //b停止中
+
+		public bool bReachedEndValue => (nCurrentValue >= nEndValue); // n現在の経過時間ms
+
+		public bool b終了値に達してない => !bReachedEndValue;
 
 
 		// コンストラクタ
 		
 		public CCounter()
 		{
-			this.timer = null;
-			this.nStartValue = 0;
-			this.nEndValue = 0;
-			this.nInterval = 0;
-			this.nCurrentValue = 0;
-			this.nCurrentElapsedTimeMs = CTimer.nUnused;
+			timer = null;
+			nStartValue = 0;
+			nEndValue = 0;
+			nInterval = 0;
+			nCurrentValue = 0;
+			nCurrentElapsedTimeMs = CTimer.nUnused;
 		}
 
 		/// <summary>
@@ -68,7 +59,7 @@
 		public CCounter(int n開始値, int n終了値, int n間隔ms, CTimer timer)
 			: this()
 		{
-			this.tStart(n開始値, n終了値, n間隔ms, timer);
+			tStart(n開始値, n終了値, n間隔ms, timer);
 		}
 
 
@@ -87,8 +78,8 @@
 			this.nEndValue = nEndValue;
 			this.nInterval = nInterval;
 			this.timer = timer;
-			this.nCurrentElapsedTimeMs = this.timer.nCurrentTime;
-			this.nCurrentValue = nStartValue;
+			nCurrentElapsedTimeMs = this.timer.nCurrentTime;
+			nCurrentValue = nStartValue;
 		}
 
 		/// <summary>
@@ -99,18 +90,18 @@
 		/// </summary>
 		public void tUpdate()  // t進行
 		{
-			if ((this.timer != null) && (this.nCurrentElapsedTimeMs != CTimer.nUnused))
+			if ((timer != null) && (nCurrentElapsedTimeMs != CTimer.nUnused))
 			{
-				long num = this.timer.nCurrentTime;
-				if (num < this.nCurrentElapsedTimeMs)
-					this.nCurrentElapsedTimeMs = num;
+				long num = timer.nCurrentTime;
+				if (num < nCurrentElapsedTimeMs)
+					nCurrentElapsedTimeMs = num;
 
-				while ((num - this.nCurrentElapsedTimeMs) >= this.nInterval)
+				while ((num - nCurrentElapsedTimeMs) >= nInterval)
 				{
-					if (++this.nCurrentValue > this.nEndValue)
-						this.nCurrentValue = this.nEndValue;
+					if (++nCurrentValue > nEndValue)
+						nCurrentValue = nEndValue;
 
-					this.nCurrentElapsedTimeMs += this.nInterval;
+					nCurrentElapsedTimeMs += nInterval;
 				}
 			}
 		}
@@ -123,18 +114,18 @@
 		/// </summary>
 		public void tUpdateLoop()  // t進行Loop
 		{
-			if ((this.timer != null) && (this.nCurrentElapsedTimeMs != CTimer.nUnused))
+			if ((timer != null) && (nCurrentElapsedTimeMs != CTimer.nUnused))
 			{
-				long num = this.timer.nCurrentTime;
-				if (num < this.nCurrentElapsedTimeMs)
-					this.nCurrentElapsedTimeMs = num;
+				long num = timer.nCurrentTime;
+				if (num < nCurrentElapsedTimeMs)
+					nCurrentElapsedTimeMs = num;
 
-				while ((num - this.nCurrentElapsedTimeMs) >= this.nInterval)
+				while ((num - nCurrentElapsedTimeMs) >= nInterval)
 				{
-					if (++this.nCurrentValue > this.nEndValue)
-						this.nCurrentValue = this.nStartValue;
+					if (++nCurrentValue > nEndValue)
+						nCurrentValue = nStartValue;
 
-					this.nCurrentElapsedTimeMs += this.nInterval;
+					nCurrentElapsedTimeMs += nInterval;
 				}
 			}
 		}
@@ -146,7 +137,7 @@
 		/// </summary>
 		public void tStop()  // t停止
 		{
-			this.nCurrentElapsedTimeMs = CTimer.nUnused;
+			nCurrentElapsedTimeMs = CTimer.nUnused;
 		}
 
 
@@ -170,38 +161,38 @@
 
 			if (bキー押下)
 			{
-				switch (this.nCurrentValue)
+				switch (nCurrentValue)
 				{
 					case n1回目:
 
 						tキー処理();
-						this.nCurrentValue = n2回目;
-						this.nCurrentElapsedTimeMs = this.timer.nCurrentTime;
+						nCurrentValue = n2回目;
+						nCurrentElapsedTimeMs = timer.nCurrentTime;
 						return;
 
 					case n2回目:
 
-						if ((this.timer.nCurrentTime - this.nCurrentElapsedTimeMs) > 200)
+						if ((timer.nCurrentTime - nCurrentElapsedTimeMs) > 200)
 						{
 							tキー処理();
-							this.nCurrentElapsedTimeMs = this.timer.nCurrentTime;
-							this.nCurrentValue = n3回目以降;
+							nCurrentElapsedTimeMs = timer.nCurrentTime;
+							nCurrentValue = n3回目以降;
 						}
 						return;
 
 					case n3回目以降:
 
-						if ((this.timer.nCurrentTime - this.nCurrentElapsedTimeMs) > 30)
+						if ((timer.nCurrentTime - nCurrentElapsedTimeMs) > 30)
 						{
 							tキー処理();
-							this.nCurrentElapsedTimeMs = this.timer.nCurrentTime;
+							nCurrentElapsedTimeMs = timer.nCurrentTime;
 						}
 						return;
 				}
 			}
 			else
 			{
-				this.nCurrentValue = n1回目;
+				nCurrentValue = n1回目;
 			}
 		}
 		public delegate void DGキー処理();

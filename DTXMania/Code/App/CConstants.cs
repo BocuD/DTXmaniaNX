@@ -344,16 +344,16 @@ namespace DTXMania
 				switch( index )
 				{
 					case (int) EInstrumentPart.DRUMS:
-						return this.Drums;
+						return Drums;
 
 					case (int) EInstrumentPart.GUITAR:
-						return this.Guitar;
+						return Guitar;
 
 					case (int) EInstrumentPart.BASS:
-						return this.Bass;
+						return Bass;
 
 					case (int) EInstrumentPart.UNKNOWN:
-						return this.Unknown;
+						return Unknown;
 				}
 				throw new IndexOutOfRangeException();
 			}
@@ -362,19 +362,19 @@ namespace DTXMania
 				switch( index )
 				{
 					case (int) EInstrumentPart.DRUMS:
-						this.Drums = value;
+						Drums = value;
 						return;
 
 					case (int) EInstrumentPart.GUITAR:
-						this.Guitar = value;
+						Guitar = value;
 						return;
 
 					case (int) EInstrumentPart.BASS:
-						this.Bass = value;
+						Bass = value;
 						return;
 
 					case (int) EInstrumentPart.UNKNOWN:
-						this.Unknown = value;
+						Unknown = value;
 						return;
 				}
 				throw new IndexOutOfRangeException();
@@ -425,59 +425,59 @@ namespace DTXMania
 				switch ( index )
 				{
 					case (int) ELane.LC:
-						return this.LC;
+						return LC;
 					case (int) ELane.HH:
-						return this.HH;
+						return HH;
 					case (int) ELane.SD:
-						return this.SD;
+						return SD;
 					case (int) ELane.BD:
-						return this.BD;
+						return BD;
 					case (int) ELane.HT:
-						return this.HT;
+						return HT;
 					case (int) ELane.LT:
-						return this.LT;
+						return LT;
 					case (int) ELane.FT:
-						return this.FT;
+						return FT;
 					case (int) ELane.CY:
-						return this.CY;
+						return CY;
                     case (int) ELane.LP:
-                        return this.LP;
+                        return LP;
 					case (int) ELane.RD:
-						return this.RD;
+						return RD;
                     case (int) ELane.LBD:
-                        return this.LBD;
+                        return LBD;
 					case (int) ELane.Guitar:
-						return this.Guitar;
+						return Guitar;
 					case (int) ELane.Bass:
-						return this.Bass;
+						return Bass;
 					case (int) ELane.GtR:
-						return this.GtR;
+						return GtR;
 					case (int) ELane.GtG:
-						return this.GtG;
+						return GtG;
 					case (int) ELane.GtB:
-						return this.GtB;
+						return GtB;
                     case (int) ELane.GtY:
-                        return this.GtY;
+                        return GtY;
                     case (int) ELane.GtP:
-                        return this.GtP;
+                        return GtP;
 					case (int) ELane.GtPick:
-						return this.GtPick;
+						return GtPick;
 					case (int) ELane.GtW:
-						return this.GtW;
+						return GtW;
 					case (int) ELane.BsR:
-						return this.BsR;
+						return BsR;
 					case (int) ELane.BsG:
-						return this.BsG;
+						return BsG;
 					case (int) ELane.BsB:
-						return this.BsB;
+						return BsB;
                     case (int) ELane.BsY:
-                        return this.BsY;
+                        return BsY;
                     case (int) ELane.BsP:
-                        return this.BsP;
+                        return BsP;
 					case (int) ELane.BsPick:
-						return this.BsPick;
+						return BsPick;
 					case (int) ELane.BsW:
-						return this.BsW;
+						return BsW;
 				}
 				throw new IndexOutOfRangeException();
 			}
@@ -486,85 +486,85 @@ namespace DTXMania
 				switch ( index )
 				{
 					case (int) ELane.LC:
-						this.LC = value;
+						LC = value;
 						return;
 					case (int) ELane.HH:
-						this.HH = value;
+						HH = value;
 						return;
 					case (int) ELane.SD:
-						this.SD = value;
+						SD = value;
 						return;
 					case (int) ELane.BD:
-						this.BD = value;
+						BD = value;
 						return;
 					case (int) ELane.HT:
-						this.HT = value;
+						HT = value;
 						return;
 					case (int) ELane.LT:
-						this.LT = value;
+						LT = value;
 						return;
 					case (int) ELane.FT:
-						this.FT = value;
+						FT = value;
 						return;
 					case (int) ELane.CY:
-						this.CY = value;
+						CY = value;
 						return;
                     case (int) ELane.LP:
-                        this.LP = value;
+                        LP = value;
                         return;
 					case (int) ELane.RD:
-						this.RD = value;
+						RD = value;
 						return;
                     case (int) ELane.LBD:
-                        this.LBD = value;
+                        LBD = value;
                         return;
 					case (int) ELane.Guitar:
-						this.Guitar = value;
+						Guitar = value;
 						return;
 					case (int) ELane.Bass:
-						this.Bass = value;
+						Bass = value;
 						return;
 					case (int) ELane.GtR:
-						this.GtR = value;
+						GtR = value;
 						return;
 					case (int) ELane.GtG:
-						this.GtG = value;
+						GtG = value;
 						return;
 					case (int) ELane.GtB:
-						this.GtB = value;
+						GtB = value;
 						return;
                     case (int) ELane.GtY:
-                        this.GtY = value;
+                        GtY = value;
                         return;
                     case (int) ELane.GtP:
-                        this.GtP = value;
+                        GtP = value;
                         return;
 					case (int) ELane.GtPick:
-						this.GtPick = value;
+						GtPick = value;
 						return;
 					case (int) ELane.GtW:
-						this.GtW = value;
+						GtW = value;
 						return;
 					case (int) ELane.BsR:
-						this.BsR = value;
+						BsR = value;
 						return;
 					case (int) ELane.BsG:
-						this.BsG = value;
+						BsG = value;
 						return;
 					case (int) ELane.BsB:
-						this.BsB = value;
+						BsB = value;
 						return;
                     case (int) ELane.BsY:
-                        this.BsY = value;
+                        BsY = value;
                         return;
                     case (int) ELane.BsP:
-                        this.BsP = value;
+                        BsP = value;
                         return;
 					case (int) ELane.BsPick:
-						this.BsPick = value;
+						BsPick = value;
 						return;
 					case (int) ELane.BsW:
-						this.BsW = value;
+						BsW = value;
 						return;
 				}
 				throw new IndexOutOfRangeException();
@@ -610,73 +610,73 @@ namespace DTXMania
 				switch ( index )
 				{
 					case (int) ELane.LC:
-						return this.LC;
+						return LC;
 					case (int) ELane.HH:
-						return this.HH;
+						return HH;
 					case (int) ELane.SD:
-						return this.SD;
+						return SD;
 					case (int) ELane.BD:
-						return this.BD;
+						return BD;
 					case (int) ELane.HT:
-						return this.HT;
+						return HT;
 					case (int) ELane.LT:
-						return this.LT;
+						return LT;
 					case (int) ELane.FT:
-						return this.FT;
+						return FT;
 					case (int) ELane.CY:
-						return this.CY;
+						return CY;
                     case (int) ELane.LP:
-                        return this.LP;
+                        return LP;
 					case (int) ELane.RD:
-						return this.RD;
+						return RD;
                     case (int) ELane.LBD:
-                        return this.LBD;
+                        return LBD;
                     case (int)ELane.Guitar:
-                        if (!this.GtR) return false;
-                        if (!this.GtG) return false;
-                        if (!this.GtB) return false;
-                        if (!this.GtY) return false;
-                        if (!this.GtP) return false;
-                        if (!this.GtPick) return false;
-                        if (!this.GtW) return false;
+                        if (!GtR) return false;
+                        if (!GtG) return false;
+                        if (!GtB) return false;
+                        if (!GtY) return false;
+                        if (!GtP) return false;
+                        if (!GtPick) return false;
+                        if (!GtW) return false;
                         return true;
                     case (int)ELane.Bass:
-                        if (!this.BsR) return false;
-                        if (!this.BsG) return false;
-                        if (!this.BsB) return false;
-                        if (!this.BsY) return false;
-                        if (!this.BsP) return false;
-                        if (!this.BsPick) return false;
-                        if (!this.BsW) return false;
+                        if (!BsR) return false;
+                        if (!BsG) return false;
+                        if (!BsB) return false;
+                        if (!BsY) return false;
+                        if (!BsP) return false;
+                        if (!BsPick) return false;
+                        if (!BsW) return false;
                         return true;
 					case (int) ELane.GtR:
-						return this.GtR;
+						return GtR;
 					case (int) ELane.GtG:
-						return this.GtG;
+						return GtG;
 					case (int) ELane.GtB:
-						return this.GtB;
+						return GtB;
                     case (int) ELane.GtY:
-                        return this.GtY;
+                        return GtY;
                     case (int) ELane.GtP:
-                        return this.GtP;
+                        return GtP;
 					case (int) ELane.GtPick:
-						return this.GtPick;
+						return GtPick;
 					case (int) ELane.GtW:
-						return this.GtW;
+						return GtW;
 					case (int) ELane.BsR:
-						return this.BsR;
+						return BsR;
 					case (int) ELane.BsG:
-						return this.BsG;
+						return BsG;
 					case (int) ELane.BsB:
-						return this.BsB;
+						return BsB;
                     case (int) ELane.BsY:
-                        return this.BsY;
+                        return BsY;
                     case (int) ELane.BsP:
-                        return this.BsP;
+                        return BsP;
 					case (int) ELane.BsPick:
-						return this.BsPick;
+						return BsPick;
 					case (int) ELane.BsW:
-						return this.BsW;
+						return BsW;
 				}
 				throw new IndexOutOfRangeException();
 			}
@@ -685,87 +685,87 @@ namespace DTXMania
 				switch ( index )
 				{
 					case (int) ELane.LC:
-						this.LC = value;
+						LC = value;
 						return;
 					case (int) ELane.HH:
-						this.HH = value;
+						HH = value;
 						return;
 					case (int) ELane.SD:
-						this.SD = value;
+						SD = value;
 						return;
 					case (int) ELane.BD:
-						this.BD = value;
+						BD = value;
 						return;
 					case (int) ELane.HT:
-						this.HT = value;
+						HT = value;
 						return;
 					case (int) ELane.LT:
-						this.LT = value;
+						LT = value;
 						return;
 					case (int) ELane.FT:
-						this.FT = value;
+						FT = value;
 						return;
 					case (int) ELane.CY:
-						this.CY = value;
+						CY = value;
 						return;
                     case (int) ELane.LP:
-                        this.LP = value;
+                        LP = value;
                         return;
 					case (int) ELane.RD:
-						this.RD = value;
+						RD = value;
 						return;
                     case (int) ELane.LBD:
-                        this.LBD = value;
+                        LBD = value;
                         return;
                     case (int)ELane.Guitar:
-                        this.GtR = this.GtG = this.GtB = this.GtY = this.GtP = this.GtPick = this.GtW = value;
+                        GtR = GtG = GtB = GtY = GtP = GtPick = GtW = value;
                         //this.GtR = this.GtG = this.GtB = this.GtPick = this.GtW = value;
                         return;
                     case (int)ELane.Bass:
-                        this.BsR = this.BsG = this.BsB = this.BsY = this.BsP = this.BsPick = this.BsW = value;
+                        BsR = BsG = BsB = BsY = BsP = BsPick = BsW = value;
                         //this.BsR = this.BsG = this.BsB = this.BsPick = this.BsW = value;
                         return;
 					case (int) ELane.GtR:
-						this.GtR = value;
+						GtR = value;
 						return;
 					case (int) ELane.GtG:
-						this.GtG = value;
+						GtG = value;
 						return;
 					case (int) ELane.GtB:
-						this.GtB = value;
+						GtB = value;
 						return;
                     case (int) ELane.GtY:
-                        this.GtY = value;
+                        GtY = value;
                         return;
                     case (int) ELane.GtP:
-                        this.GtP = value;
+                        GtP = value;
                         return;
 					case (int) ELane.GtPick:
-						this.GtPick = value;
+						GtPick = value;
 						return;
 					case (int) ELane.GtW:
-						this.GtW = value;
+						GtW = value;
 						return;
 					case (int) ELane.BsR:
-						this.BsR = value;
+						BsR = value;
 						return;
 					case (int) ELane.BsG:
-						this.BsG = value;
+						BsG = value;
 						return;
 					case (int) ELane.BsB:
-						this.BsB = value;
+						BsB = value;
 						return;
                     case (int) ELane.BsY:
-                        this.BsY = value;
+                        BsY = value;
                         return;
                     case (int) ELane.BsP:
-                        this.BsP = value;
+                        BsP = value;
                         return;
 					case (int) ELane.BsPick:
-						this.BsPick = value;
+						BsPick = value;
 						return;
 					case (int) ELane.BsW:
-						this.BsW = value;
+						BsW = value;
 						return;
 				}
 				throw new IndexOutOfRangeException();

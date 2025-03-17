@@ -7,17 +7,17 @@ namespace DTXMania
 	{
 		public override void OnManagedCreateResources()
 		{
-			if( !base.bNotActivated )
+			if( !bNotActivated )
 			{
-                this.tx黒 = CDTXMania.tGenerateTexture(CSkin.Path( @"Graphics\7_Danger.png" ) );
+                tx黒 = CDTXMania.tGenerateTexture(CSkin.Path( @"Graphics\7_Danger.png" ) );
 				base.OnManagedCreateResources();
 			}
 		}
 		public override void OnManagedReleaseResources()
 		{
-			if( !base.bNotActivated )
+			if( !bNotActivated )
 			{
-                CDTXMania.tReleaseTexture(ref this.tx黒);
+                CDTXMania.tReleaseTexture(ref tx黒);
 				base.OnManagedReleaseResources();
 			}
 		}
@@ -34,32 +34,32 @@ namespace DTXMania
 		/// <returns></returns>
 		public override int tUpdateAndDraw( bool bIsDangerDrums, bool bIsDangerGuitar, bool bIsDangerBass )
 		{
-			if( !base.bNotActivated )
+			if( !bNotActivated )
 			{
 				if( !bIsDangerDrums )
 				{
-					this.bDanger中[(int)EInstrumentPart.DRUMS] = false;
+					bDanger中[(int)EInstrumentPart.DRUMS] = false;
 					return 0;
 				}
-                if (!this.bDanger中[(int)EInstrumentPart.DRUMS])
+                if (!bDanger中[(int)EInstrumentPart.DRUMS])
                 {
-                    this.ct移動用 = new CCounter(0, 0x7f, 7, CDTXMania.Timer);
-                    this.ct透明度用 = new CCounter(0, 250, 4, CDTXMania.Timer);
+                    ct移動用 = new CCounter(0, 0x7f, 7, CDTXMania.Timer);
+                    ct透明度用 = new CCounter(0, 250, 4, CDTXMania.Timer);
                 }
-                    this.bDanger中[(int)EInstrumentPart.DRUMS] = bIsDangerDrums;
-                    this.ct移動用.tUpdateLoop();
-                    this.ct透明度用.tUpdateLoop();
-                    if (!this.bDanger中[(int)EInstrumentPart.DRUMS])
+                    bDanger中[(int)EInstrumentPart.DRUMS] = bIsDangerDrums;
+                    ct移動用.tUpdateLoop();
+                    ct透明度用.tUpdateLoop();
+                    if (!bDanger中[(int)EInstrumentPart.DRUMS])
                     {
                         return 0;
                     }
-                    int num = this.ct透明度用.nCurrentValue;
-                    this.tx黒.nTransparency = num;　　//
-                    num = this.ct移動用.nCurrentValue;
+                    int num = ct透明度用.nCurrentValue;
+                    tx黒.nTransparency = num;　　//
+                    num = ct移動用.nCurrentValue;
                     int num2 = num;
                     for (int i = 0; i < 2; i++)
                     {
-                        this.tx黒.tDraw2D(CDTXMania.app.Device, 0, 0);
+                        tx黒.tDraw2D(CDTXMania.app.Device, 0, 0);
                     }
                 
 			}

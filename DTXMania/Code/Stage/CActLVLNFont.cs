@@ -19,8 +19,8 @@ namespace DTXMania
 			{
 				for (int i = 0; i < 12; i++)
 				{
-					this.st数字[i, j].ch = numChars[i];
-					this.st数字[i, j].rc = new Rectangle(
+					st数字[i, j].ch = numChars[i];
+					st数字[i, j].rc = new Rectangle(
 												(i % 4) * numWidth + (j % 2) * 64,
 												(i / 4) * numHeight + (j / 2) * 64,
 												numWidth,
@@ -34,13 +34,13 @@ namespace DTXMania
 		// メソッド
 		public void tDrawString(int x, int y, string str)
 		{
-			this.tDrawString(x, y, str, EFontColor.White, EFontAlign.Right);
+			tDrawString(x, y, str, EFontColor.White, EFontAlign.Right);
 		}
 		public void tDrawString(int x, int y, string str, EFontColor efc, EFontAlign efa)
 		{
-			if (!base.bNotActivated && !string.IsNullOrEmpty(str))
+			if (!bNotActivated && !string.IsNullOrEmpty(str))
 			{
-				if (this.tx数値 != null)
+				if (tx数値 != null)
 				{
 					bool bRightAlign = (efa == EFontAlign.Right);
 
@@ -57,7 +57,7 @@ namespace DTXMania
 						ST数字 s = st数字[p, (int)efc];
 						int sw = s.rc.Width;
 						int delta = bRightAlign ? 0 : -sw;
-						this.tx数値.tDraw2D(CDTXMania.app.Device, x + delta, y, s.rc);
+						tx数値.tDraw2D(CDTXMania.app.Device, x + delta, y, s.rc);
 						x += bRightAlign ? -sw : sw;
 					}
 				}
@@ -69,20 +69,20 @@ namespace DTXMania
 
 		public override void OnManagedCreateResources()
 		{
-			if (!base.bNotActivated)
+			if (!bNotActivated)
 			{
-				this.tx数値 = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\ScreenSelect level numbers.png"));
+				tx数値 = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\ScreenSelect level numbers.png"));
 				base.OnManagedCreateResources();
 			}
 		}
 		public override void OnManagedReleaseResources()
 		{
-			if (!base.bNotActivated)
+			if (!bNotActivated)
 			{
-				if ( this.tx数値 != null )
+				if ( tx数値 != null )
 				{
-					this.tx数値.Dispose();
-					this.tx数値 = null;
+					tx数値.Dispose();
+					tx数値 = null;
 				}
 				base.OnManagedReleaseResources();
 			}

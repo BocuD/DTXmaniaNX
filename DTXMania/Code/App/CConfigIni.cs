@@ -15,422 +15,236 @@ namespace DTXMania
 		{
 			public class CKeyAssignPad
 			{
-				public CConfigIni.CKeyAssign.STKEYASSIGN[] HH
+				public STKEYASSIGN[] HH
 				{
-					get
-					{
-						return this.padHH_R;
-					}
-					set
-					{
-						this.padHH_R = value;
-					}
+					get => padHH_R;
+					set => padHH_R = value;
 				}
-				public CConfigIni.CKeyAssign.STKEYASSIGN[] R
+				public STKEYASSIGN[] R
 				{
-					get
-					{
-						return this.padHH_R;
-					}
-					set
-					{
-						this.padHH_R = value;
-					}
+					get => padHH_R;
+					set => padHH_R = value;
 				}
-				public CConfigIni.CKeyAssign.STKEYASSIGN[] SD
+				public STKEYASSIGN[] SD
 				{
-					get
-					{
-						return this.padSD_G;
-					}
-					set
-					{
-						this.padSD_G = value;
-					}
+					get => padSD_G;
+					set => padSD_G = value;
 				}
-				public CConfigIni.CKeyAssign.STKEYASSIGN[] G
+				public STKEYASSIGN[] G
 				{
-					get
-					{
-						return this.padSD_G;
-					}
-					set
-					{
-						this.padSD_G = value;
-					}
+					get => padSD_G;
+					set => padSD_G = value;
 				}
-				public CConfigIni.CKeyAssign.STKEYASSIGN[] BD
+				public STKEYASSIGN[] BD
 				{
-					get
-					{
-						return this.padBD_B;
-					}
-					set
-					{
-						this.padBD_B = value;
-					}
+					get => padBD_B;
+					set => padBD_B = value;
 				}
-				public CConfigIni.CKeyAssign.STKEYASSIGN[] B
+				public STKEYASSIGN[] B
 				{
-					get
-					{
-						return this.padBD_B;
-					}
-					set
-					{
-						this.padBD_B = value;
-					}
+					get => padBD_B;
+					set => padBD_B = value;
 				}
-				public CConfigIni.CKeyAssign.STKEYASSIGN[] HT
+				public STKEYASSIGN[] HT
 				{
-					get
-					{
-						return this.padHT_Pick;
-					}
-					set
-					{
-						this.padHT_Pick = value;
-					}
+					get => padHT_Pick;
+					set => padHT_Pick = value;
 				}
-				public CConfigIni.CKeyAssign.STKEYASSIGN[] Pick
+				public STKEYASSIGN[] Pick
 				{
-					get
-					{
-						return this.padHT_Pick;
-					}
-					set
-					{
-						this.padHT_Pick = value;
-					}
+					get => padHT_Pick;
+					set => padHT_Pick = value;
 				}
-				public CConfigIni.CKeyAssign.STKEYASSIGN[] LT
+				public STKEYASSIGN[] LT
 				{
-					get
-					{
-						return this.padLT_Wail;
-					}
-					set
-					{
-						this.padLT_Wail = value;
-					}
+					get => padLT_Wail;
+					set => padLT_Wail = value;
 				}
-				public CConfigIni.CKeyAssign.STKEYASSIGN[] Wail
+				public STKEYASSIGN[] Wail
 				{
-					get
-					{
-						return this.padLT_Wail;
-					}
-					set
-					{
-						this.padLT_Wail = value;
-					}
+					get => padLT_Wail;
+					set => padLT_Wail = value;
 				}
-				public CConfigIni.CKeyAssign.STKEYASSIGN[] FT
+				public STKEYASSIGN[] FT
 				{
-					get
-					{
-                        return this.padFT_Help;
-					}
-					set
-					{
-                        this.padFT_Help = value;
-					}
+					get => padFT_Help;
+					set => padFT_Help = value;
 				}
-                public CConfigIni.CKeyAssign.STKEYASSIGN[] Help
+                public STKEYASSIGN[] Help
 				{
-					get
-					{
-                        return this.padFT_Help;
-					}
-					set
-					{
-                        this.padFT_Help = value;
-					}
+					get => padFT_Help;
+					set => padFT_Help = value;
 				}
-				public CConfigIni.CKeyAssign.STKEYASSIGN[] CY
+				public STKEYASSIGN[] CY
 				{
-					get
-					{
-						return this.padCY_Decide;
-					}
-					set
-					{
-						this.padCY_Decide = value;
-					}
+					get => padCY_Decide;
+					set => padCY_Decide = value;
 				}
-				public CConfigIni.CKeyAssign.STKEYASSIGN[] Decide
+				public STKEYASSIGN[] Decide
 				{
-					get
-					{
-						return this.padCY_Decide;
-					}
-					set
-					{
-						this.padCY_Decide = value;
-					}
+					get => padCY_Decide;
+					set => padCY_Decide = value;
 				}
-				public CConfigIni.CKeyAssign.STKEYASSIGN[] HHO
+				public STKEYASSIGN[] HHO
 				{
-					get
-					{
-						return this.padHHO_Y;
-					}
-					set
-					{
-						this.padHHO_Y = value;
-					}
+					get => padHHO_Y;
+					set => padHHO_Y = value;
 				}
-                public CConfigIni.CKeyAssign.STKEYASSIGN[] Y
+                public STKEYASSIGN[] Y
 				{
-					get
-					{
-						return this.padHHO_Y;
-					}
-					set
-					{
-						this.padHHO_Y = value;
-					}
+					get => padHHO_Y;
+					set => padHHO_Y = value;
 				}
-				public CConfigIni.CKeyAssign.STKEYASSIGN[] RD
+				public STKEYASSIGN[] RD
 				{
-					get
-					{
-						return this.padRD;
-					}
-					set
-					{
-						this.padRD = value;
-					}
+					get => padRD;
+					set => padRD = value;
 				}
-                public CConfigIni.CKeyAssign.STKEYASSIGN[] P
+                public STKEYASSIGN[] P
 				{
-					get
-					{
-						return this.padLC_P;
-					}
-					set
-					{
-						this.padLC_P = value;
-					}
+					get => padLC_P;
+					set => padLC_P = value;
 				}
-				public CConfigIni.CKeyAssign.STKEYASSIGN[] LC
+				public STKEYASSIGN[] LC
 				{
-					get
-					{
-						return this.padLC_P;
-					}
-					set
-					{
-						this.padLC_P = value;
-					}
+					get => padLC_P;
+					set => padLC_P = value;
 				}
-				public CConfigIni.CKeyAssign.STKEYASSIGN[] LP
+				public STKEYASSIGN[] LP
 				{
-					get
-					{
-						return this.padLP;
-					}
-					set
-					{
-						this.padLP = value;
-					}
+					get => padLP;
+					set => padLP = value;
 				}
 
-                public CConfigIni.CKeyAssign.STKEYASSIGN[] LBD
+                public STKEYASSIGN[] LBD
                 {
-                    get
-                    {
-                        return this.padLBD;
-                    }
-                    set
-                    {
-                        this.padLBD = value;
-                    }
+                    get => padLBD;
+                    set => padLBD = value;
                 }
 
-				public CConfigIni.CKeyAssign.STKEYASSIGN[] Cancel
+				public STKEYASSIGN[] Cancel
 				{
-					get
-					{
-						return this.padCancel;
-					}
-					set
-					{
-						this.padCancel = value;
-					}
+					get => padCancel;
+					set => padCancel = value;
 				}
 
-				public CConfigIni.CKeyAssign.STKEYASSIGN[] Capture
+				public STKEYASSIGN[] Capture
 				{
-					get
-					{
-						return this.padCapture;
-					}
-					set
-					{
-						this.padCapture = value;
-					}
+					get => padCapture;
+					set => padCapture = value;
 				}
 
-				public CConfigIni.CKeyAssign.STKEYASSIGN[] Search
+				public STKEYASSIGN[] Search
 				{
-					get
-					{
-						return this.padSearch;
-					}
-					set
-					{
-						this.padSearch = value;
-					}
+					get => padSearch;
+					set => padSearch = value;
 				}
-				public CConfigIni.CKeyAssign.STKEYASSIGN[] LoopCreate
+				public STKEYASSIGN[] LoopCreate
 				{
-					get
-					{
-						return this.padLoopCreate;
-					}
-					set
-					{
-						this.padLoopCreate = value;
-					}
+					get => padLoopCreate;
+					set => padLoopCreate = value;
 				}
-				public CConfigIni.CKeyAssign.STKEYASSIGN[] LoopDelete
+				public STKEYASSIGN[] LoopDelete
 				{
-					get
-					{
-						return this.padLoopDelete;
-					}
-					set
-					{
-						this.padLoopDelete = value;
-					}
+					get => padLoopDelete;
+					set => padLoopDelete = value;
 				}
-				public CConfigIni.CKeyAssign.STKEYASSIGN[] SkipForward
+				public STKEYASSIGN[] SkipForward
 				{
-					get
-					{
-						return this.padSkipForward;
-					}
-					set
-					{
-						this.padSkipForward = value;
-					}
+					get => padSkipForward;
+					set => padSkipForward = value;
 				}
-				public CConfigIni.CKeyAssign.STKEYASSIGN[] SkipBackward
+				public STKEYASSIGN[] SkipBackward
 				{
-					get
-					{
-						return this.padSkipBackward;
-					}
-					set
-					{
-						this.padSkipBackward = value;
-					}
+					get => padSkipBackward;
+					set => padSkipBackward = value;
 				}
-				public CConfigIni.CKeyAssign.STKEYASSIGN[] IncreasePlaySpeed
+				public STKEYASSIGN[] IncreasePlaySpeed
 				{
-					get
-					{
-						return this.padIncreasePlaySpeed;
-					}
-					set
-					{
-						this.padIncreasePlaySpeed = value;
-					}
+					get => padIncreasePlaySpeed;
+					set => padIncreasePlaySpeed = value;
 				}
-				public CConfigIni.CKeyAssign.STKEYASSIGN[] DecreasePlaySpeed
+				public STKEYASSIGN[] DecreasePlaySpeed
 				{
-					get
-					{
-						return this.padDecreasePlaySpeed;
-					}
-					set
-					{
-						this.padDecreasePlaySpeed = value;
-					}
+					get => padDecreasePlaySpeed;
+					set => padDecreasePlaySpeed = value;
 				}
-				public CConfigIni.CKeyAssign.STKEYASSIGN[] Restart
+				public STKEYASSIGN[] Restart
 				{
-					get
-					{
-						return this.padRestart;
-					}
-					set
-					{
-						this.padRestart = value;
-					}
+					get => padRestart;
+					set => padRestart = value;
 				}
-				public CConfigIni.CKeyAssign.STKEYASSIGN[] this[ int index ]
+				public STKEYASSIGN[] this[ int index ]
 				{
 					get
 					{
 						switch ( index )
 						{
 							case (int) EKeyConfigPad.HH:
-								return this.padHH_R;
+								return padHH_R;
 
 							case (int) EKeyConfigPad.SD:
-								return this.padSD_G;
+								return padSD_G;
 
 							case (int) EKeyConfigPad.BD:
-								return this.padBD_B;
+								return padBD_B;
 
 							case (int) EKeyConfigPad.HT:
-								return this.padHT_Pick;
+								return padHT_Pick;
 
 							case (int) EKeyConfigPad.LT:
-								return this.padLT_Wail;
+								return padLT_Wail;
 
 							case (int) EKeyConfigPad.FT:
-                                return this.padFT_Help;
+                                return padFT_Help;
 
 							case (int) EKeyConfigPad.CY:
-								return this.padCY_Decide;
+								return padCY_Decide;
 
 							case (int) EKeyConfigPad.HHO:
-								return this.padHHO_Y;
+								return padHHO_Y;
 
 							case (int) EKeyConfigPad.RD:
-								return this.padRD;
+								return padRD;
 
 							case (int) EKeyConfigPad.LC:
-								return this.padLC_P;
+								return padLC_P;
 
 							case (int) EKeyConfigPad.LP:	// #27029 2012.1.4 from
-								return this.padLP;			//(HPからLPに。)
+								return padLP;			//(HPからLPに。)
 
                             case (int) EKeyConfigPad.LBD:
-                                return this.padLBD;
+                                return padLBD;
 
 							case (int) EKeyConfigPad.Cancel:
-								return this.padCancel;
+								return padCancel;
 
 							case (int) EKeyConfigPad.Capture:
-								return this.padCapture;
+								return padCapture;
 
 							case (int)EKeyConfigPad.Search:
-								return this.padSearch;
+								return padSearch;
 
 							case (int)EKeyConfigPad.LoopCreate:
-								return this.padLoopCreate;
+								return padLoopCreate;
 
 							case (int)EKeyConfigPad.LoopDelete:
-								return this.padLoopDelete;
+								return padLoopDelete;
 
 							case (int)EKeyConfigPad.SkipForward:
-								return this.padSkipForward;
+								return padSkipForward;
 
 							case (int)EKeyConfigPad.SkipBackward:
-								return this.padSkipBackward;
+								return padSkipBackward;
 
 							case (int)EKeyConfigPad.IncreasePlaySpeed:
-								return this.padIncreasePlaySpeed;
+								return padIncreasePlaySpeed;
 
 							case (int)EKeyConfigPad.DecreasePlaySpeed:
-								return this.padDecreasePlaySpeed;
+								return padDecreasePlaySpeed;
 
 							case (int)EKeyConfigPad.Restart:
-								return this.padRestart;
+								return padRestart;
 						}
 						throw new IndexOutOfRangeException();
 					}
@@ -439,91 +253,91 @@ namespace DTXMania
 						switch ( index )
 						{
 							case (int) EKeyConfigPad.HH:
-								this.padHH_R = value;
+								padHH_R = value;
 								return;
 
 							case (int) EKeyConfigPad.SD:
-								this.padSD_G = value;
+								padSD_G = value;
 								return;
 
 							case (int) EKeyConfigPad.BD:
-								this.padBD_B = value;
+								padBD_B = value;
 								return;
 
 							case (int) EKeyConfigPad.Pick:
-								this.padHT_Pick = value;
+								padHT_Pick = value;
 								return;
 
 							case (int) EKeyConfigPad.LT:
-								this.padLT_Wail = value;
+								padLT_Wail = value;
 								return;
 
 							case (int) EKeyConfigPad.FT:
-                                this.padFT_Help = value;
+                                padFT_Help = value;
 								return;
 
 							case (int) EKeyConfigPad.CY:
-								this.padCY_Decide = value;
+								padCY_Decide = value;
 								return;
 
 							case (int) EKeyConfigPad.HHO:
-								this.padHHO_Y = value;
+								padHHO_Y = value;
 								return;
                             
                             case (int) EKeyConfigPad.RD:
-								this.padRD = value;
+								padRD = value;
 								return;
                             
                             case (int) EKeyConfigPad.LC:
-								this.padLC_P = value;
+								padLC_P = value;
 								return;
                             
                             case (int) EKeyConfigPad.LP:
-                                this.padLP = value;
+                                padLP = value;
                                 return;
                             
                             case (int) EKeyConfigPad.LBD:
-								this.padLBD = value;
+								padLBD = value;
 								return;
 
 							case (int) EKeyConfigPad.Cancel:
-								this.padCancel = value;
+								padCancel = value;
 								return;
 
 							case (int) EKeyConfigPad.Capture:
-								this.padCapture = value;
+								padCapture = value;
 								return;
 
 							case (int)EKeyConfigPad.Search:
-								this.padSearch = value;
+								padSearch = value;
 								return;
 
 							case (int)EKeyConfigPad.LoopCreate:
-								this.padLoopCreate = value;
+								padLoopCreate = value;
 								return;
 
 							case (int)EKeyConfigPad.LoopDelete:
-								this.padLoopDelete = value;
+								padLoopDelete = value;
 								return;
 
 							case (int)EKeyConfigPad.SkipForward:
-								this.padSkipForward = value;
+								padSkipForward = value;
 								return;
 
 							case (int)EKeyConfigPad.SkipBackward:
-								this.padSkipBackward = value;
+								padSkipBackward = value;
 								return;
 
 							case (int)EKeyConfigPad.IncreasePlaySpeed:
-								this.padIncreasePlaySpeed = value;
+								padIncreasePlaySpeed = value;
 								return;
 
 							case (int)EKeyConfigPad.DecreasePlaySpeed:
-								this.padDecreasePlaySpeed = value;
+								padDecreasePlaySpeed = value;
 								return;
 
 							case (int)EKeyConfigPad.Restart:
-								this.padRestart = value;
+								padRestart = value;
 								return;
 						}
 						throw new IndexOutOfRangeException();
@@ -532,28 +346,28 @@ namespace DTXMania
 
 				#region [ private ]
 				//-----------------
-				private CConfigIni.CKeyAssign.STKEYASSIGN[] padBD_B;
-				private CConfigIni.CKeyAssign.STKEYASSIGN[] padCY_Decide;
-                private CConfigIni.CKeyAssign.STKEYASSIGN[] padFT_Help;
-				private CConfigIni.CKeyAssign.STKEYASSIGN[] padHH_R;
-				private CConfigIni.CKeyAssign.STKEYASSIGN[] padHHO_Y;
-				private CConfigIni.CKeyAssign.STKEYASSIGN[] padHT_Pick;
-				private CConfigIni.CKeyAssign.STKEYASSIGN[] padLC_P;
-				private CConfigIni.CKeyAssign.STKEYASSIGN[] padLT_Wail;
-				private CConfigIni.CKeyAssign.STKEYASSIGN[] padRD;
-				private CConfigIni.CKeyAssign.STKEYASSIGN[] padSD_G;
-				private CConfigIni.CKeyAssign.STKEYASSIGN[] padLP;
-                private CConfigIni.CKeyAssign.STKEYASSIGN[] padLBD;
-				private CConfigIni.CKeyAssign.STKEYASSIGN[] padCancel; 
-				private CConfigIni.CKeyAssign.STKEYASSIGN[] padCapture;
-				private CConfigIni.CKeyAssign.STKEYASSIGN[] padSearch;
-				private CConfigIni.CKeyAssign.STKEYASSIGN[] padLoopCreate;
-				private CConfigIni.CKeyAssign.STKEYASSIGN[] padLoopDelete;
-				private CConfigIni.CKeyAssign.STKEYASSIGN[] padSkipForward;
-				private CConfigIni.CKeyAssign.STKEYASSIGN[] padSkipBackward;
-				private CConfigIni.CKeyAssign.STKEYASSIGN[] padIncreasePlaySpeed;
-				private CConfigIni.CKeyAssign.STKEYASSIGN[] padDecreasePlaySpeed;
-				private CConfigIni.CKeyAssign.STKEYASSIGN[] padRestart;
+				private STKEYASSIGN[] padBD_B;
+				private STKEYASSIGN[] padCY_Decide;
+                private STKEYASSIGN[] padFT_Help;
+				private STKEYASSIGN[] padHH_R;
+				private STKEYASSIGN[] padHHO_Y;
+				private STKEYASSIGN[] padHT_Pick;
+				private STKEYASSIGN[] padLC_P;
+				private STKEYASSIGN[] padLT_Wail;
+				private STKEYASSIGN[] padRD;
+				private STKEYASSIGN[] padSD_G;
+				private STKEYASSIGN[] padLP;
+                private STKEYASSIGN[] padLBD;
+				private STKEYASSIGN[] padCancel; 
+				private STKEYASSIGN[] padCapture;
+				private STKEYASSIGN[] padSearch;
+				private STKEYASSIGN[] padLoopCreate;
+				private STKEYASSIGN[] padLoopDelete;
+				private STKEYASSIGN[] padSkipForward;
+				private STKEYASSIGN[] padSkipBackward;
+				private STKEYASSIGN[] padIncreasePlaySpeed;
+				private STKEYASSIGN[] padDecreasePlaySpeed;
+				private STKEYASSIGN[] padRestart;
 				//-----------------
 				#endregion
 			}
@@ -566,9 +380,9 @@ namespace DTXMania
 				public int Code;
 				public STKEYASSIGN( EInputDevice DeviceType, int nID, int nCode )
 				{
-					this.InputDevice = DeviceType;
-					this.ID = nID;
-					this.Code = nCode;
+					InputDevice = DeviceType;
+					ID = nID;
+					Code = nCode;
 				}
 			}
 
@@ -583,16 +397,16 @@ namespace DTXMania
 					switch( index )
 					{
 						case (int) EKeyConfigPart.DRUMS:
-							return this.Drums;
+							return Drums;
 
 						case (int) EKeyConfigPart.GUITAR:
-							return this.Guitar;
+							return Guitar;
 
 						case (int) EKeyConfigPart.BASS:
-							return this.Bass;
+							return Bass;
 
 						case (int) EKeyConfigPart.SYSTEM:
-							return this.System;
+							return System;
 					}
 					throw new IndexOutOfRangeException();
 				}
@@ -601,19 +415,19 @@ namespace DTXMania
 					switch( index )
 					{
 						case (int) EKeyConfigPart.DRUMS:
-							this.Drums = value;
+							Drums = value;
 							return;
 
 						case (int) EKeyConfigPart.GUITAR:
-							this.Guitar = value;
+							Guitar = value;
 							return;
 
 						case (int) EKeyConfigPart.BASS:
-							this.Bass = value;
+							Bass = value;
 							return;
 
 						case (int) EKeyConfigPart.SYSTEM:
-							this.System = value;
+							System = value;
 							return;
 					}
 					throw new IndexOutOfRangeException();
@@ -664,7 +478,7 @@ namespace DTXMania
 		public bool bランダムセレクトで子BOXを検索対象とする;
 		public bool bOutputLogs;
 		public STDGBVALUE<bool> b演奏音を強調する;
-		public bool b演奏情報を表示する;
+		public bool bShowPerformanceInformation;
         public bool bAutoAddGage; //2012.9.18
 		public bool b歓声を発声する;
 		public bool bVerticalSyncWait;
@@ -805,25 +619,17 @@ namespace DTXMania
         public STDGBVALUE<EAutoGhostData> eAutoGhost;               // #35411 2015.8.18 chnmr0 プレー時使用ゴーストデータ種別
         public STDGBVALUE<ETargetGhostData> eTargetGhost;               // #35411 2015.8.18 chnmr0 ゴーストデータ再生方法
 
-        public bool bConfigIniがないかDTXManiaのバージョンが異なる
+        public bool bConfigIniがないかDTXManiaのバージョンが異なる => ( !bConfigIniが存在している || !CDTXMania.VERSION.Equals( strDTXManiaのバージョン ) );
+
+        public bool bDrumsEnabled
 		{
-			get
-			{
-				return ( !this.bConfigIniが存在している || !CDTXMania.VERSION.Equals( this.strDTXManiaのバージョン ) );
-			}
-		}
-		public bool bDrumsEnabled
-		{
-			get
-			{
-				return this._bDrums有効;
-			}
+			get => _bDrums有効;
 			set
 			{
-				this._bDrums有効 = value;
-				if( !this._bGuitar有効 && !this._bDrums有効 )
+				_bDrums有効 = value;
+				if( !_bGuitar有効 && !_bDrums有効 )
 				{
-					this._bGuitar有効 = true;
+					_bGuitar有効 = true;
 				}
 			}
 		}
@@ -833,10 +639,10 @@ namespace DTXMania
 			switch (inst)
 			{
 				case EInstrumentPart.DRUMS:
-					return this._bDrums有効;
+					return _bDrums有効;
 				case EInstrumentPart.GUITAR:
 				case EInstrumentPart.BASS:
-					return this._bGuitar有効;
+					return _bGuitar有効;
 				default:
 					return false;
 			}
@@ -852,7 +658,7 @@ namespace DTXMania
 					{
 						for( int k = 0; k < 0x10; k++ )
 						{
-							if( ( this.KeyAssign[ i ][ j ][ k ].InputDevice == EInputDevice.Keyboard ) && ( this.KeyAssign[ i ][ j ][ k ].Code == (int) SlimDXKey.Return ) )
+							if( ( KeyAssign[ i ][ j ][ k ].InputDevice == EInputDevice.Keyboard ) && ( KeyAssign[ i ][ j ][ k ].Code == (int) SlimDXKey.Return ) )
 							{
 								return false;
 							}
@@ -864,44 +670,30 @@ namespace DTXMania
 		}
 		public bool bGuitarEnabled
 		{
-			get
-			{
-				return this._bGuitar有効;
-			}
+			get => _bGuitar有効;
 			set
 			{
-				this._bGuitar有効 = value;
-				if( !this._bGuitar有効 && !this._bDrums有効 )
+				_bGuitar有効 = value;
+				if( !_bGuitar有効 && !_bDrums有効 )
 				{
-					this._bDrums有効 = true;
+					_bDrums有効 = true;
 				}
 			}
 		}
 		public bool bWindowMode
 		{
-			get
-			{
-				return !this.bFullScreenMode;
-			}
-			set
-			{
-				this.bFullScreenMode = !value;
-			}
+			get => !bFullScreenMode;
+			set => bFullScreenMode = !value;
 		}
-		public bool bGuitarRevolutionMode
-		{
-			get
-			{
-				return ( !this.bDrumsEnabled && this.bGuitarEnabled );
-			}
-		}
+		public bool bGuitarRevolutionMode => ( !bDrumsEnabled && bGuitarEnabled );
+
 		public bool bAllDrumsAreAutoPlay
 		{
 			get
 			{
                 for (int i = (int) ELane.LC; i < (int) ELane.LBD; i++)
 				{
-					if( !this.bAutoPlay[ i ] )
+					if( !bAutoPlay[ i ] )
 					{
 						return false;
 					}
@@ -915,7 +707,7 @@ namespace DTXMania
 			{
 				for ( int i = (int) ELane.GtR; i <= (int) ELane.GtPick; i++ )
 				{
-					if ( !this.bAutoPlay[ i ] )
+					if ( !bAutoPlay[ i ] )
 					{
 						return false;
 					}
@@ -929,7 +721,7 @@ namespace DTXMania
 			{
 				for ( int i = (int) ELane.BsR; i <= (int) ELane.BsPick; i++ )
 				{
-					if ( !this.bAutoPlay[ i ] )
+					if ( !bAutoPlay[ i ] )
 					{
 						return false;
 					}
@@ -956,36 +748,27 @@ namespace DTXMania
 			return result;
 		}
 
-		public bool b演奏情報を表示しない
+		public bool bHidePerformanceInformation
 		{
-			get
-			{
-				return !this.b演奏情報を表示する;
-			}
-			set
-			{
-				this.b演奏情報を表示する = !value;
-			}
+			get => !bShowPerformanceInformation;
+			set => bShowPerformanceInformation = !value;
 		}
 		public int nBackgroundTransparency
 		{
-			get
-			{
-				return this.nBGAlpha;
-			}
+			get => nBGAlpha;
 			set
 			{
 				if( value < 0 )
 				{
-					this.nBGAlpha = 0;
+					nBGAlpha = 0;
 				}
 				else if( value > 0xff )
 				{
-					this.nBGAlpha = 0xff;
+					nBGAlpha = 0xff;
 				}
 				else
 				{
-					this.nBGAlpha = value;
+					nBGAlpha = value;
 				}
 			}
 		}
@@ -1073,43 +856,43 @@ namespace DTXMania
 					switch( index )
 					{
 						case 0:
-							return this.LC;
+							return LC;
 
 						case 1:
-							return this.HH;
+							return HH;
 
 						case 2:
-							return this.SD;
+							return SD;
 
 						case 3:
-							return this.BD;
+							return BD;
 
 						case 4:
-							return this.HT;
+							return HT;
 
 						case 5:
-							return this.LT;
+							return LT;
 
 						case 6:
-							return this.FT;
+							return FT;
 
 						case 7:
-							return this.CY;
+							return CY;
 
 						case 8:
-							return this.RD;
+							return RD;
 
                         case 9:
-                            return this.LP;
+                            return LP;
 
                         case 10:
-                            return this.LBD;
+                            return LBD;
 
 						case 11:
-							return this.Guitar;
+							return Guitar;
 
 						case 12:
-							return this.Bass;
+							return Bass;
 					}
 					throw new IndexOutOfRangeException();
 				}
@@ -1118,55 +901,55 @@ namespace DTXMania
 					switch( index )
 					{
 						case 0:
-							this.LC = value;
+							LC = value;
 							return;
 
 						case 1:
-							this.HH = value;
+							HH = value;
 							return;
 
 						case 2:
-							this.SD = value;
+							SD = value;
 							return;
 
 						case 3:
-							this.BD = value;
+							BD = value;
 							return;
 
 						case 4:
-							this.HT = value;
+							HT = value;
 							return;
 
 						case 5:
-							this.LT = value;
+							LT = value;
 							return;
 
 						case 6:
-							this.FT = value;
+							FT = value;
 							return;
 
 						case 7:
-							this.CY = value;
+							CY = value;
 							return;
 
 						case 8:
-							this.RD = value;
+							RD = value;
 							return;
 
                         case 9:
-                            this.LP = value;
+                            LP = value;
                             return;
 
                         case 10:
-                            this.LBD = value;
+                            LBD = value;
                             return;
 
 						case 11:
-							this.Guitar = value;
+							Guitar = value;
 							return;
 
 						case 12:
-							this.Bass = value;
+							Bass = value;
 							return;
 					}
 					throw new IndexOutOfRangeException();
@@ -1242,191 +1025,191 @@ namespace DTXMania
 			this.fDamageLevelFactor[2] = 1.5f;
 			//----------------------------------------
 #endif
-			this.strDTXManiaのバージョン = "Unknown";
-			this.str曲データ検索パス = @".\";
-			this.bFullScreenMode = false;
-			this.bFullScreenExclusive = true;
-			this.bVerticalSyncWait = true;
-            this.n初期ウィンドウ開始位置X = 0; // #30675 2013.02.04 ikanick add
-            this.n初期ウィンドウ開始位置Y = 0;
+			strDTXManiaのバージョン = "Unknown";
+			str曲データ検索パス = @".\";
+			bFullScreenMode = false;
+			bFullScreenExclusive = true;
+			bVerticalSyncWait = true;
+            n初期ウィンドウ開始位置X = 0; // #30675 2013.02.04 ikanick add
+            n初期ウィンドウ開始位置Y = 0;
             //this.bDirectShowMode = true;
-			this.nウインドウwidth = SampleFramework.GameWindowSize.Width;			// #23510 2010.10.31 yyagi add
-			this.nウインドウheight = SampleFramework.GameWindowSize.Height;			// 
-            this.nMovieMode = 1;
-            this.nMovieAlpha = 0;
-            this.nJudgeLine.Drums = 0;
-            this.nJudgeLine.Guitar = 0;
-            this.nJudgeLine.Bass = 0;
-            this.nShutterInSide = new STDGBVALUE<int>();
-            this.nShutterInSide.Drums = 0;
-            this.nShutterOutSide = new STDGBVALUE<int>();
-            this.nShutterOutSide.Drums = 0;
-			this.nフレーム毎スリープms = -1;			// #xxxxx 2011.11.27 yyagi add
-			this.n非フォーカス時スリープms = 1;			// #23568 2010.11.04 ikanick add
-			this._bGuitar有効 = false;
-			this._bDrums有効 = true;
-			this.nBGAlpha = 255;
-			this.eDamageLevel = EDamageLevel.Normal;
-			this.bSTAGEFAILEDEnabled = true;
-			this.bAVIEnabled = true;
-			this.bBGAEnabled = true;
-			this.bFillInEnabled = true;
-            this.DisplayBonusEffects = true;
-            this.eRDPosition = ERDPosition.RCRD;
-            this.nInfoType = 1;
-            this.nSkillMode = 1;
-            this.eAttackEffect.Drums = EType.A;
-            this.eAttackEffect.Guitar = EType.A;
-            this.eAttackEffect.Bass = EType.A;
-            this.eLaneType = new STDGBVALUE<EType>();
-            this.eLaneType.Drums = EType.A;
-            this.eHHOGraphics = new STDGBVALUE<EType>();
-            this.eHHOGraphics.Drums = EType.A;
-            this.eLBDGraphics = new STDGBVALUE<EType>();
-            this.eLBDGraphics.Drums = EType.A;
-            this.eDkdkType = new STDGBVALUE<EType>();
-            this.eDkdkType.Drums = EType.A;
-            this.eNumOfLanes = new STDGBVALUE<EType>();
-            this.eNumOfLanes.Drums = EType.A;
-            this.eNumOfLanes.Guitar = EType.A;
-            this.eNumOfLanes.Bass = EType.A;
-            this.bAssignToLBD = default(STDGBVALUE<bool>);
-            this.bAssignToLBD.Drums = false;
-            this.eRandom = default(STDGBVALUE<ERandomMode>);
-            this.eRandom.Drums = ERandomMode.OFF;
-            this.eRandom.Guitar = ERandomMode.OFF;
-            this.eRandom.Bass = ERandomMode.OFF;
-            this.eRandomPedal = default(STDGBVALUE<ERandomMode>);
-            this.eRandomPedal.Drums = ERandomMode.OFF;
-            this.eRandomPedal.Guitar = ERandomMode.OFF;
-            this.eRandomPedal.Bass = ERandomMode.OFF;
-            this.nLaneDisp = new STDGBVALUE<int>();
-            this.nLaneDisp.Drums = 0;
-            this.nLaneDisp.Guitar = 0;
-            this.nLaneDisp.Bass = 0;
-			this.bDisplayJudge = new STDGBVALUE<bool>();
-			this.bDisplayJudge.Drums = true;
-			this.bDisplayJudge.Guitar = true;
-			this.bDisplayJudge.Bass = true;
-			this.bJudgeLineDisp = new STDGBVALUE<bool>();
-            this.bJudgeLineDisp.Drums = true;
-            this.bJudgeLineDisp.Guitar = true;
-            this.bJudgeLineDisp.Bass = true;
-            this.bLaneFlush = new STDGBVALUE<bool>();
-            this.bLaneFlush.Drums = true;
-            this.bLaneFlush.Guitar = true;
-            this.bLaneFlush.Bass = true;
+			nウインドウwidth = SampleFramework.GameWindowSize.Width;			// #23510 2010.10.31 yyagi add
+			nウインドウheight = SampleFramework.GameWindowSize.Height;			// 
+            nMovieMode = 1;
+            nMovieAlpha = 0;
+            nJudgeLine.Drums = 0;
+            nJudgeLine.Guitar = 0;
+            nJudgeLine.Bass = 0;
+            nShutterInSide = new STDGBVALUE<int>();
+            nShutterInSide.Drums = 0;
+            nShutterOutSide = new STDGBVALUE<int>();
+            nShutterOutSide.Drums = 0;
+			nフレーム毎スリープms = -1;			// #xxxxx 2011.11.27 yyagi add
+			n非フォーカス時スリープms = 1;			// #23568 2010.11.04 ikanick add
+			_bGuitar有効 = false;
+			_bDrums有効 = true;
+			nBGAlpha = 255;
+			eDamageLevel = EDamageLevel.Normal;
+			bSTAGEFAILEDEnabled = true;
+			bAVIEnabled = true;
+			bBGAEnabled = true;
+			bFillInEnabled = true;
+            DisplayBonusEffects = true;
+            eRDPosition = ERDPosition.RCRD;
+            nInfoType = 1;
+            nSkillMode = 1;
+            eAttackEffect.Drums = EType.A;
+            eAttackEffect.Guitar = EType.A;
+            eAttackEffect.Bass = EType.A;
+            eLaneType = new STDGBVALUE<EType>();
+            eLaneType.Drums = EType.A;
+            eHHOGraphics = new STDGBVALUE<EType>();
+            eHHOGraphics.Drums = EType.A;
+            eLBDGraphics = new STDGBVALUE<EType>();
+            eLBDGraphics.Drums = EType.A;
+            eDkdkType = new STDGBVALUE<EType>();
+            eDkdkType.Drums = EType.A;
+            eNumOfLanes = new STDGBVALUE<EType>();
+            eNumOfLanes.Drums = EType.A;
+            eNumOfLanes.Guitar = EType.A;
+            eNumOfLanes.Bass = EType.A;
+            bAssignToLBD = default(STDGBVALUE<bool>);
+            bAssignToLBD.Drums = false;
+            eRandom = default(STDGBVALUE<ERandomMode>);
+            eRandom.Drums = ERandomMode.OFF;
+            eRandom.Guitar = ERandomMode.OFF;
+            eRandom.Bass = ERandomMode.OFF;
+            eRandomPedal = default(STDGBVALUE<ERandomMode>);
+            eRandomPedal.Drums = ERandomMode.OFF;
+            eRandomPedal.Guitar = ERandomMode.OFF;
+            eRandomPedal.Bass = ERandomMode.OFF;
+            nLaneDisp = new STDGBVALUE<int>();
+            nLaneDisp.Drums = 0;
+            nLaneDisp.Guitar = 0;
+            nLaneDisp.Bass = 0;
+			bDisplayJudge = new STDGBVALUE<bool>();
+			bDisplayJudge.Drums = true;
+			bDisplayJudge.Guitar = true;
+			bDisplayJudge.Bass = true;
+			bJudgeLineDisp = new STDGBVALUE<bool>();
+            bJudgeLineDisp.Drums = true;
+            bJudgeLineDisp.Guitar = true;
+            bJudgeLineDisp.Bass = true;
+            bLaneFlush = new STDGBVALUE<bool>();
+            bLaneFlush.Drums = true;
+            bLaneFlush.Guitar = true;
+            bLaneFlush.Bass = true;
 
-            this.strCardName = new string[ 3 ];
-            this.strGroupName = new string[ 3 ];
-            this.nNameColor = new int[ 3 ];
+            strCardName = new string[ 3 ];
+            strGroupName = new string[ 3 ];
+            nNameColor = new int[ 3 ];
 
             #region[ 画像関連 ]
-            this.nJudgeAnimeType = 1;
-            this.nJudgeFrames = 24;
-            this.nJudgeInterval = 14;
-            this.nJudgeWidgh = 250;
-            this.nJudgeHeight = 170;
+            nJudgeAnimeType = 1;
+            nJudgeFrames = 24;
+            nJudgeInterval = 14;
+            nJudgeWidgh = 250;
+            nJudgeHeight = 170;
 
-            this.nExplosionFrames = 1;
-            this.nExplosionInterval = 50;
-            this.nExplosionWidgh = 0;
-            this.nExplosionHeight = 0;
+            nExplosionFrames = 1;
+            nExplosionInterval = 50;
+            nExplosionWidgh = 0;
+            nExplosionHeight = 0;
 
-            this.nWailingFireFrames = 0;
-            this.nWailingFireInterval = 0;
-            this.nWailingFireWidgh = 0;
-            this.nWailingFireHeight = 0;
-            this.nWailingFireY = 0;
+            nWailingFireFrames = 0;
+            nWailingFireInterval = 0;
+            nWailingFireWidgh = 0;
+            nWailingFireHeight = 0;
+            nWailingFireY = 0;
             #endregion
 
-            this.nPedalLagTime = 0;
+            nPedalLagTime = 0;
 
-            this.bAutoAddGage = false;
-			this.n曲が選択されてからプレビュー音が鳴るまでのウェイトms = 1000;
-			this.n曲が選択されてからプレビュー画像が表示開始されるまでのウェイトms = 100;
-			this.bWave再生位置自動調整機能有効 = true;
-			this.bBGM音を発声する = true;
-			this.bドラム打音を発声する = true;
-			this.b歓声を発声する = true;
-			this.bScoreIniを出力する = true;
-			this.bランダムセレクトで子BOXを検索対象とする = true;
-			this.n表示可能な最小コンボ数 = new STDGBVALUE<int>();
-			this.n表示可能な最小コンボ数.Drums = 10;
-			this.n表示可能な最小コンボ数.Guitar = 2;
-			this.n表示可能な最小コンボ数.Bass = 2;
-			this.str選曲リストフォント = "MS PGothic";
-			this.n選曲リストフォントのサイズdot = 20;
-			this.b選曲リストフォントを太字にする = true;
-			this.n自動再生音量 = 80;
-			this.n手動再生音量 = 100;
-			this.bOutputLogs = true;
-            this.b曲名表示をdefのものにする = true;
-			this.b演奏音を強調する = new STDGBVALUE<bool>();
-			this.bSudden = new STDGBVALUE<bool>();
-			this.bHidden = new STDGBVALUE<bool>();
-			this.bReverse = new STDGBVALUE<bool>();
-			this.eRandom = new STDGBVALUE<ERandomMode>();
-			this.bLight = new STDGBVALUE<bool>();
-			this.bSpecialist = new STDGBVALUE<bool>();
-			this.bLeft = new STDGBVALUE<bool>();
-            this.JudgementStringPosition = new STDGBVALUE<EType>();
-			this.nScrollSpeed = new STDGBVALUE<int>();
-			this.nInputAdjustTimeMs = new STDGBVALUE<int>();	// #23580 2011.1.3 yyagi
-            this.nCommonBGMAdjustMs = 0; // #36372 2016.06.19 kairera0467
-            this.nJudgeLinePosOffset = new STDGBVALUE<int>(); // #31602 2013.6.23 yyagi
+            bAutoAddGage = false;
+			n曲が選択されてからプレビュー音が鳴るまでのウェイトms = 1000;
+			n曲が選択されてからプレビュー画像が表示開始されるまでのウェイトms = 100;
+			bWave再生位置自動調整機能有効 = true;
+			bBGM音を発声する = true;
+			bドラム打音を発声する = true;
+			b歓声を発声する = true;
+			bScoreIniを出力する = true;
+			bランダムセレクトで子BOXを検索対象とする = true;
+			n表示可能な最小コンボ数 = new STDGBVALUE<int>();
+			n表示可能な最小コンボ数.Drums = 10;
+			n表示可能な最小コンボ数.Guitar = 2;
+			n表示可能な最小コンボ数.Bass = 2;
+			str選曲リストフォント = "MS PGothic";
+			n選曲リストフォントのサイズdot = 20;
+			b選曲リストフォントを太字にする = true;
+			n自動再生音量 = 80;
+			n手動再生音量 = 100;
+			bOutputLogs = true;
+            b曲名表示をdefのものにする = true;
+			b演奏音を強調する = new STDGBVALUE<bool>();
+			bSudden = new STDGBVALUE<bool>();
+			bHidden = new STDGBVALUE<bool>();
+			bReverse = new STDGBVALUE<bool>();
+			eRandom = new STDGBVALUE<ERandomMode>();
+			bLight = new STDGBVALUE<bool>();
+			bSpecialist = new STDGBVALUE<bool>();
+			bLeft = new STDGBVALUE<bool>();
+            JudgementStringPosition = new STDGBVALUE<EType>();
+			nScrollSpeed = new STDGBVALUE<int>();
+			nInputAdjustTimeMs = new STDGBVALUE<int>();	// #23580 2011.1.3 yyagi
+            nCommonBGMAdjustMs = 0; // #36372 2016.06.19 kairera0467
+            nJudgeLinePosOffset = new STDGBVALUE<int>(); // #31602 2013.6.23 yyagi
 			for ( int i = 0; i < 3; i++ )
 			{
-				this.b演奏音を強調する[ i ] = true;
-				this.bSudden[ i ] = false;
-				this.bHidden[ i ] = false;
-				this.bReverse[ i ] = false;
-				this.eRandom[ i ] = ERandomMode.OFF;
-				this.bLight[ i ] = true; //fisyher: Change to default true, following actual game
-				this.bSpecialist[ i ] = false;
-				this.bLeft[ i ] = false;
-				this.JudgementStringPosition[ i ] = EType.A;
-				this.nScrollSpeed[ i ] = 1;
-				this.nInputAdjustTimeMs[ i ] = 0;
-                this.nJudgeLinePosOffset[i] = 0;
+				b演奏音を強調する[ i ] = true;
+				bSudden[ i ] = false;
+				bHidden[ i ] = false;
+				bReverse[ i ] = false;
+				eRandom[ i ] = ERandomMode.OFF;
+				bLight[ i ] = true; //fisyher: Change to default true, following actual game
+				bSpecialist[ i ] = false;
+				bLeft[ i ] = false;
+				JudgementStringPosition[ i ] = EType.A;
+				nScrollSpeed[ i ] = 1;
+				nInputAdjustTimeMs[ i ] = 0;
+                nJudgeLinePosOffset[i] = 0;
 			}
-			this.nPlaySpeed = 20;
-			this.bSaveScoreIfModifiedPlaySpeed = false;
-			this.bSmallGraph = true;
-            this.ドラムコンボ文字の表示位置 = EDrumComboTextDisplayPosition.RIGHT;
-            this.bドラムコンボ文字の表示 = true;
-            this.bCLASSIC譜面判別を有効にする = false;
-            this.bSkillModeを自動切換えする = false;
-            this.bMutingLP = true;
+			nPlaySpeed = 20;
+			bSaveScoreIfModifiedPlaySpeed = false;
+			bSmallGraph = true;
+            ドラムコンボ文字の表示位置 = EDrumComboTextDisplayPosition.RIGHT;
+            bドラムコンボ文字の表示 = true;
+            bCLASSIC譜面判別を有効にする = false;
+            bSkillModeを自動切換えする = false;
+            bMutingLP = true;
             #region [ AutoPlay ]
-            this.bAutoPlay = new STAUTOPLAY();
-			this.bAutoPlay.HH = false;
-			this.bAutoPlay.SD = false;
-			this.bAutoPlay.BD = false;
-			this.bAutoPlay.HT = false;
-			this.bAutoPlay.LT = false;
-			this.bAutoPlay.FT = false;
-			this.bAutoPlay.CY = false;
-            this.bAutoPlay.RD = false;
-			this.bAutoPlay.LC = false;
-            this.bAutoPlay.LP = false;
-            this.bAutoPlay.LBD = false;
+            bAutoPlay = new STAUTOPLAY();
+			bAutoPlay.HH = false;
+			bAutoPlay.SD = false;
+			bAutoPlay.BD = false;
+			bAutoPlay.HT = false;
+			bAutoPlay.LT = false;
+			bAutoPlay.FT = false;
+			bAutoPlay.CY = false;
+            bAutoPlay.RD = false;
+			bAutoPlay.LC = false;
+            bAutoPlay.LP = false;
+            bAutoPlay.LBD = false;
 			//this.bAutoPlay.Guitar = true;
 			//this.bAutoPlay.Bass = true;
-			this.bAutoPlay.GtR = false;
-			this.bAutoPlay.GtG = false;
-			this.bAutoPlay.GtB = false;
-            this.bAutoPlay.GtY = false;
-            this.bAutoPlay.GtP = false;
-			this.bAutoPlay.GtPick = false;
-			this.bAutoPlay.GtW = false;
-			this.bAutoPlay.BsR = false;
-			this.bAutoPlay.BsG = false;
-			this.bAutoPlay.BsB = false;
-            this.bAutoPlay.BsY = false;
-            this.bAutoPlay.BsP = false;
-			this.bAutoPlay.BsPick = false;
-			this.bAutoPlay.BsW = false;
+			bAutoPlay.GtR = false;
+			bAutoPlay.GtG = false;
+			bAutoPlay.GtB = false;
+            bAutoPlay.GtY = false;
+            bAutoPlay.GtP = false;
+			bAutoPlay.GtPick = false;
+			bAutoPlay.GtW = false;
+			bAutoPlay.BsR = false;
+			bAutoPlay.BsG = false;
+			bAutoPlay.BsB = false;
+            bAutoPlay.BsY = false;
+            bAutoPlay.BsP = false;
+			bAutoPlay.BsPick = false;
+			bAutoPlay.BsW = false;
 			#endregion
 
 			#region [ HitRange ]
@@ -1439,79 +1222,79 @@ namespace DTXMania
 			#endregion
 
 			#region [ DiscordRichPresence ]
-			this.bDiscordRichPresenceEnabled = false;
-			this.strDiscordRichPresenceApplicationID = @"802329379979657257";
-			this.strDiscordRichPresenceLargeImageKey = @"dtxmania";
-			this.strDiscordRichPresenceSmallImageKeyDrums = @"drums";
-			this.strDiscordRichPresenceSmallImageKeyGuitar = @"guitar";
+			bDiscordRichPresenceEnabled = false;
+			strDiscordRichPresenceApplicationID = @"802329379979657257";
+			strDiscordRichPresenceLargeImageKey = @"dtxmania";
+			strDiscordRichPresenceSmallImageKeyDrums = @"drums";
+			strDiscordRichPresenceSmallImageKeyGuitar = @"guitar";
 			#endregion
 
-			this.ConfigIniファイル名 = "";
-			this.dicJoystick = new Dictionary<int, string>( 10 );
-			this.tSetDefaultKeyAssignments();
+			ConfigIniファイル名 = "";
+			dicJoystick = new Dictionary<int, string>( 10 );
+			tSetDefaultKeyAssignments();
             #region [ velocityMin ]
-            this.nVelocityMin.LC = 0;					// #23857 2011.1.31 yyagi VelocityMin
-			this.nVelocityMin.HH = 20;
-			this.nVelocityMin.SD = 0;
-			this.nVelocityMin.BD = 0;
-			this.nVelocityMin.HT = 0;
-			this.nVelocityMin.LT = 0;
-			this.nVelocityMin.FT = 0;
-			this.nVelocityMin.CY = 0;
-			this.nVelocityMin.RD = 0;
-            this.nVelocityMin.LP = 0;
-            this.nVelocityMin.LBD = 0;
+            nVelocityMin.LC = 0;					// #23857 2011.1.31 yyagi VelocityMin
+			nVelocityMin.HH = 20;
+			nVelocityMin.SD = 0;
+			nVelocityMin.BD = 0;
+			nVelocityMin.HT = 0;
+			nVelocityMin.LT = 0;
+			nVelocityMin.FT = 0;
+			nVelocityMin.CY = 0;
+			nVelocityMin.RD = 0;
+            nVelocityMin.LP = 0;
+            nVelocityMin.LBD = 0;
             #endregion
 
-            this.bHAZARD = false;
-			this.nRisky = 0;							// #23539 2011.7.26 yyagi RISKYモード
-			this.nShowLagType = (int) EShowLagType.OFF;	// #25370 2011.6.3 yyagi ズレ時間表示
-            this.nShowLagTypeColor = 0;
-			this.bShowLagHitCount = false;
-			this.nShowPlaySpeed = (int)EShowPlaySpeed.IF_CHANGED_IN_GAME;
-			this.bIsAutoResultCapture = true;			// #25399 2011.6.9 yyagi リザルト画像自動保存機能ON/OFF
+            bHAZARD = false;
+			nRisky = 0;							// #23539 2011.7.26 yyagi RISKYモード
+			nShowLagType = (int) EShowLagType.OFF;	// #25370 2011.6.3 yyagi ズレ時間表示
+            nShowLagTypeColor = 0;
+			bShowLagHitCount = false;
+			nShowPlaySpeed = (int)EShowPlaySpeed.IF_CHANGED_IN_GAME;
+			bIsAutoResultCapture = true;			// #25399 2011.6.9 yyagi リザルト画像自動保存機能ON/OFF
 
             #region [ XGオプション ]
-            this.bLivePoint = true;
-            this.bSpeaker = true;
-            this.eNamePlate = EType.A;
+            bLivePoint = true;
+            bSpeaker = true;
+            eNamePlate = EType.A;
             #endregion
 
             #region [ GDオプション ]
-            this.b難易度表示をXG表示にする = true;
-            this.bShowScore = true;
-            this.bShowMusicInfo = true;
-            this.str曲名表示フォント = "MS PGothic";
+            b難易度表示をXG表示にする = true;
+            bShowScore = true;
+            bShowMusicInfo = true;
+            str曲名表示フォント = "MS PGothic";
             #endregion
 
-			this.bバッファ入力を行う = true;
-			this.bIsSwappedGuitarBass = false;			// #24063 2011.1.16 yyagi ギターとベースの切り替え
-			this.bIsAllowedDoubleClickFullscreen = true;	// #26752 2011.11.26 ダブルクリックでのフルスクリーンモード移行を許可
-			this.eBDGroup = EBDGroup.打ち分ける;		// #27029 2012.1.4 from HHPedalとBassPedalのグルーピング
-            this.nPoliphonicSounds = 4;                 // #28228 2012.5.1 yyagi レーン毎の最大同時発音数
+			bバッファ入力を行う = true;
+			bIsSwappedGuitarBass = false;			// #24063 2011.1.16 yyagi ギターとベースの切り替え
+			bIsAllowedDoubleClickFullscreen = true;	// #26752 2011.11.26 ダブルクリックでのフルスクリーンモード移行を許可
+			eBDGroup = EBDGroup.打ち分ける;		// #27029 2012.1.4 from HHPedalとBassPedalのグルーピング
+            nPoliphonicSounds = 4;                 // #28228 2012.5.1 yyagi レーン毎の最大同時発音数
                                                         // #24820 2013.1.15 yyagi 初期値を4から2に変更。BASS.net使用時の負荷軽減のため。
                                                         // #24820 2013.1.17 yyagi 初期値を4に戻した。動的なミキサー制御がうまく動作しているため。
-			this.bIsEnabledSystemMenu = true;			// #28200 2012.5.1 yyagi System Menuの利用可否切替(使用可)
-			this.strSystemSkinSubfolderFullName = "";	// #28195 2012.5.2 yyagi 使用中のSkinサブフォルダ名
-			this.bUseBoxDefSkin = true;					// #28195 2012.5.6 yyagi box.defによるスキン切替機能を使用するか否か
-            this.bTight = false;                        // #29500 2012.9.11 kairera0467
-            this.nSoundDeviceType = (int)ESoundDeviceTypeForConfig.ACM; // #24820 2012.12.23 yyagi 初期値はACM
-            this.nWASAPIBufferSizeMs = 0;               // #24820 2013.1.15 yyagi 初期値は0(自動設定)
-            this.nASIODevice = 0;                       // #24820 2013.1.17 yyagi
+			bIsEnabledSystemMenu = true;			// #28200 2012.5.1 yyagi System Menuの利用可否切替(使用可)
+			strSystemSkinSubfolderFullName = "";	// #28195 2012.5.2 yyagi 使用中のSkinサブフォルダ名
+			bUseBoxDefSkin = true;					// #28195 2012.5.6 yyagi box.defによるスキン切替機能を使用するか否か
+            bTight = false;                        // #29500 2012.9.11 kairera0467
+            nSoundDeviceType = (int)ESoundDeviceTypeForConfig.ACM; // #24820 2012.12.23 yyagi 初期値はACM
+            nWASAPIBufferSizeMs = 0;               // #24820 2013.1.15 yyagi 初期値は0(自動設定)
+            nASIODevice = 0;                       // #24820 2013.1.17 yyagi
 //          this.nASIOBufferSizeMs = 0;                 // #24820 2012.12.25 yyagi 初期値は0(自動設定)
-			this.bEventDrivenWASAPI = false;
-			this.bUseOSTimer = false; ;                 // #33689 2014.6.6 yyagi 初期値はfalse (FDKのタイマー。ＦＲＯＭ氏考案の独自タイマー)
-			this.bDynamicBassMixerManagement = true;    //
-			this.nMasterVolume = 100;
-            this.bTimeStretch = false;                  // #23664 2013.2.24 yyagi 初期値はfalse (再生速度変更を、ピッチ変更にて行う)
-			this.nSkipTimeMs = 5000;
-			this.nChipPlayTimeComputeMode = 1;			// 2024.2.17 fisyher Set to Accurate by default
+			bEventDrivenWASAPI = false;
+			bUseOSTimer = false; ;                 // #33689 2014.6.6 yyagi 初期値はfalse (FDKのタイマー。ＦＲＯＭ氏考案の独自タイマー)
+			bDynamicBassMixerManagement = true;    //
+			nMasterVolume = 100;
+            bTimeStretch = false;                  // #23664 2013.2.24 yyagi 初期値はfalse (再生速度変更を、ピッチ変更にて行う)
+			nSkipTimeMs = 5000;
+			nChipPlayTimeComputeMode = 1;			// 2024.2.17 fisyher Set to Accurate by default
 
 		}
 		public CConfigIni( string iniファイル名 )
 			: this()
 		{
-			this.tReadFromFile( iniファイル名 );
+			tReadFromFile( iniファイル名 );
 		}
 
 
@@ -1525,15 +1308,15 @@ namespace DTXMania
 				{
 					for( int k = 0; k < 0x10; k++ )
 					{
-						if( ( ( this.KeyAssign[ i ][ j ][ k ].InputDevice == DeviceType ) && ( this.KeyAssign[ i ][ j ][ k ].ID == nID ) ) && ( this.KeyAssign[ i ][ j ][ k ].Code == nCode ) )
+						if( ( ( KeyAssign[ i ][ j ][ k ].InputDevice == DeviceType ) && ( KeyAssign[ i ][ j ][ k ].ID == nID ) ) && ( KeyAssign[ i ][ j ][ k ].Code == nCode ) )
 						{
 							for( int m = k; m < 15; m++ )
 							{
-								this.KeyAssign[ i ][ j ][ m ] = this.KeyAssign[ i ][ j ][ m + 1 ];
+								KeyAssign[ i ][ j ][ m ] = KeyAssign[ i ][ j ][ m + 1 ];
 							}
-							this.KeyAssign[ i ][ j ][ 15 ].InputDevice = EInputDevice.Unknown;
-							this.KeyAssign[ i ][ j ][ 15 ].ID = 0;
-							this.KeyAssign[ i ][ j ][ 15 ].Code = 0;
+							KeyAssign[ i ][ j ][ 15 ].InputDevice = EInputDevice.Unknown;
+							KeyAssign[ i ][ j ][ 15 ].ID = 0;
+							KeyAssign[ i ][ j ][ 15 ].Code = 0;
 							k--;
 						}
 					}
@@ -1572,51 +1355,51 @@ namespace DTXMania
 			sw.WriteLine( @"; セミコロン(;)で区切ることにより複数のパスを指定できます。（例: d:\DTXFiles1\;e:\DTXFiles2\）" );
 			sw.WriteLine( "; Pathes for DTX data." );
 			sw.WriteLine( @"; You can specify many pathes separated with semicolon(;). (e.g. d:\DTXFiles1\;e:\DTXFiles2\)" );
-			sw.WriteLine( "DTXPath={0}", this.str曲データ検索パス );
+			sw.WriteLine( "DTXPath={0}", str曲データ検索パス );
 			sw.WriteLine();
             #endregion
             sw.WriteLine("; プレイヤーネーム。");
             sw.WriteLine(@"; 演奏中のネームプレートに表示される名前を設定できます。");
             sw.WriteLine("; 英字、数字の他、ひらがな、カタカナ、半角カナ、漢字なども入力できます。");
             sw.WriteLine("; 入力されていない場合は「GUEST」と表示されます。");
-            sw.WriteLine("CardNameDrums={0}", this.strCardName[ 0 ] );
-            sw.WriteLine("CardNameGuitar={0}", this.strCardName[ 1 ] );
-            sw.WriteLine("CardNameBass={0}", this.strCardName[ 2 ] );
+            sw.WriteLine("CardNameDrums={0}", strCardName[ 0 ] );
+            sw.WriteLine("CardNameGuitar={0}", strCardName[ 1 ] );
+            sw.WriteLine("CardNameBass={0}", strCardName[ 2 ] );
             sw.WriteLine();
             sw.WriteLine("; グループ名っぽいあれ。");
             sw.WriteLine(@"; 演奏中のネームプレートに表示されるXG2でいうグループ名を設定できます。");
             sw.WriteLine("; 英字、数字の他、ひらがな、カタカナ、半角カナ、漢字なども入力できます。");
             sw.WriteLine("; 入力されていない場合は何も表示されません。");
-            sw.WriteLine("GroupNameDrums={0}", this.strGroupName[ 0 ]);
-            sw.WriteLine("GroupNameGuitar={0}", this.strGroupName[ 1 ]);
-            sw.WriteLine("GroupNameBass={0}", this.strGroupName[ 2 ]);
+            sw.WriteLine("GroupNameDrums={0}", strGroupName[ 0 ]);
+            sw.WriteLine("GroupNameGuitar={0}", strGroupName[ 1 ]);
+            sw.WriteLine("GroupNameBass={0}", strGroupName[ 2 ]);
             sw.WriteLine();
             sw.WriteLine("; ネームカラー");
             sw.WriteLine("; 0=白, 1=薄黄色, 2=黄色, 3=緑, 4=青, 5=紫 以下略。");
-            sw.WriteLine("NameColorDrums={0}", this.nNameColor[ 0 ]);
-            sw.WriteLine("NameColorGuitar={0}", this.nNameColor[ 1 ]);
-            sw.WriteLine("NameColorBass={0}", this.nNameColor[ 2 ]);
+            sw.WriteLine("NameColorDrums={0}", nNameColor[ 0 ]);
+            sw.WriteLine("NameColorGuitar={0}", nNameColor[ 1 ]);
+            sw.WriteLine("NameColorBass={0}", nNameColor[ 2 ]);
             sw.WriteLine();
             sw.WriteLine("; クリップの表示位置");
             sw.WriteLine("; 0=表示しない, 1=全画面, 2=ウインドウ, 3=全画面&ウインドウ");
-            sw.WriteLine("MovieMode={0}", this.nMovieMode);
+            sw.WriteLine("MovieMode={0}", nMovieMode);
             sw.WriteLine();
             sw.WriteLine("; レーンの透明度(名前に突っ込まないでください。)");
             sw.WriteLine("; 数値が高いほどレーンが薄くなります。");
             sw.WriteLine("; 0=0% 10=100%");
-            sw.WriteLine("MovieAlpha={0}", this.nMovieAlpha);
+            sw.WriteLine("MovieAlpha={0}", nMovieAlpha);
             sw.WriteLine();
             sw.WriteLine("; プレイ中にHelpボタンを押したときに出てくる演奏情報の種類。");
             sw.WriteLine("; 0=デバッグ情報 1=判定情報");
-            sw.WriteLine("InfoType={0}", this.nInfoType);
+            sw.WriteLine("InfoType={0}", nInfoType);
             sw.WriteLine();
 			#region [ スキン関連 ]
 			#region [ Skinパスの絶対パス→相対パス変換 ]
-			Uri uriRoot = new Uri( System.IO.Path.Combine( CDTXMania.strEXEのあるフォルダ, "System" + System.IO.Path.DirectorySeparatorChar ) );
-			Uri uriPath = new Uri( System.IO.Path.Combine( this.strSystemSkinSubfolderFullName, "." + System.IO.Path.DirectorySeparatorChar ) );
+			Uri uriRoot = new Uri( Path.Combine( CDTXMania.strEXEのあるフォルダ, "System" + Path.DirectorySeparatorChar ) );
+			Uri uriPath = new Uri( Path.Combine( strSystemSkinSubfolderFullName, "." + Path.DirectorySeparatorChar ) );
 			string relPath = uriRoot.MakeRelativeUri( uriPath ).ToString();				// 相対パスを取得
 			relPath = System.Web.HttpUtility.UrlDecode( relPath );						// デコードする
-			relPath = relPath.Replace( '/', System.IO.Path.DirectorySeparatorChar );	// 区切り文字が\ではなく/なので置換する
+			relPath = relPath.Replace( '/', Path.DirectorySeparatorChar );	// 区切り文字が\ではなく/なので置換する
 			#endregion
 			sw.WriteLine( "; 使用するSkinのフォルダ名。" );
 			sw.WriteLine( "; 例えば System\\Default\\Graphics\\... などの場合は、SkinPath=.\\Default\\ を指定します。" );
@@ -1626,54 +1409,54 @@ namespace DTXMania
 			sw.WriteLine();
 			sw.WriteLine( "; box.defが指定するSkinに自動で切り替えるかどうか (0=切り替えない、1=切り替える)" );
 			sw.WriteLine( "; Automatically change skin specified in box.def. (0=No 1=Yes)" );
-			sw.WriteLine( "SkinChangeByBoxDef={0}", this.bUseBoxDefSkin? 1 : 0 );
+			sw.WriteLine( "SkinChangeByBoxDef={0}", bUseBoxDefSkin? 1 : 0 );
 			sw.WriteLine();
 			#endregion
             #region [ Window関連 ]
             sw.WriteLine( "; 画面モード(0:ウィンドウ, 1:全画面)" );
 			sw.WriteLine( "; Screen mode. (0:Window, 1:Fullscreen)" );
-			sw.WriteLine( "FullScreen={0}", this.bFullScreenMode ? 1 : 0 );
+			sw.WriteLine( "FullScreen={0}", bFullScreenMode ? 1 : 0 );
             sw.WriteLine();
 			sw.WriteLine("; Fullscreen mode uses DirectX exclusive mode instead of maximized window. (0:Maximized window, 1:Exclusive)");
-			sw.WriteLine("FullScreenExclusive={0}", this.bFullScreenExclusive ? 1 : 0);
+			sw.WriteLine("FullScreenExclusive={0}", bFullScreenExclusive ? 1 : 0);
 			sw.WriteLine();
 			sw.WriteLine("; ウインドウモード時の画面幅");				// #23510 2010.10.31 yyagi add
 			sw.WriteLine("; A width size in the window mode.");			//
-			sw.WriteLine("WindowWidth={0}", this.nウインドウwidth);		//
+			sw.WriteLine("WindowWidth={0}", nウインドウwidth);		//
 			sw.WriteLine();												//
 			sw.WriteLine("; ウインドウモード時の画面高さ");				//
 			sw.WriteLine("; A height size in the window mode.");		//
-			sw.WriteLine("WindowHeight={0}", this.nウインドウheight);	//
+			sw.WriteLine("WindowHeight={0}", nウインドウheight);	//
 			sw.WriteLine();												//
             sw.WriteLine("; ウィンドウモード時の位置X");				            // #30675 2013.02.04 ikanick add
             sw.WriteLine("; X position in the window mode.");			            //
-            sw.WriteLine("WindowX={0}", this.n初期ウィンドウ開始位置X);			//
+            sw.WriteLine("WindowX={0}", n初期ウィンドウ開始位置X);			//
             sw.WriteLine();											            	//
             sw.WriteLine("; ウィンドウモード時の位置Y");			            	//
             sw.WriteLine("; Y position in the window mode.");	            	    //
-            sw.WriteLine("WindowY={0}", this.n初期ウィンドウ開始位置Y);   		//
+            sw.WriteLine("WindowY={0}", n初期ウィンドウ開始位置Y);   		//
             sw.WriteLine();												            //
 
 			sw.WriteLine( "; ウインドウをダブルクリックした時にフルスクリーンに移行するか(0:移行しない,1:移行する)" );	// #26752 2011.11.27 yyagi
 			sw.WriteLine( "; Whether double click to go full screen mode or not." );					//
-			sw.WriteLine( "DoubleClickFullScreen={0}", this.bIsAllowedDoubleClickFullscreen? 1 : 0);	//
+			sw.WriteLine( "DoubleClickFullScreen={0}", bIsAllowedDoubleClickFullscreen? 1 : 0);	//
 			sw.WriteLine();																				//
 			sw.WriteLine( "; ALT+SPACEのメニュー表示を抑制するかどうか(0:抑制する 1:抑制しない)" );		// #28200 2012.5.1 yyagi
 			sw.WriteLine( "; Whether ALT+SPACE menu would be masked or not.(0=masked 1=not masked)" );	//
-			sw.WriteLine( "EnableSystemMenu={0}", this.bIsEnabledSystemMenu? 1 : 0 );					//
+			sw.WriteLine( "EnableSystemMenu={0}", bIsEnabledSystemMenu? 1 : 0 );					//
 			sw.WriteLine();																				//
             sw.WriteLine("; 非フォーカス時のsleep値[ms]");	    			    // #23568 2011.11.04 ikanick add
 			sw.WriteLine("; A sleep time[ms] while the window is inactive.");	//
-			sw.WriteLine("BackSleep={0}", this.n非フォーカス時スリープms);		// そのまま引用（苦笑）
+			sw.WriteLine("BackSleep={0}", n非フォーカス時スリープms);		// そのまま引用（苦笑）
             sw.WriteLine();											        			//
             #endregion
             #region [ フレーム処理関連(VSync, フレーム毎のsleep) ]
             sw.WriteLine("; 垂直帰線同期(0:OFF,1:ON)");
-			sw.WriteLine( "VSyncWait={0}", this.bVerticalSyncWait ? 1 : 0 );
+			sw.WriteLine( "VSyncWait={0}", bVerticalSyncWait ? 1 : 0 );
             sw.WriteLine();
             sw.WriteLine("; フレーム毎のsleep値[ms] (-1でスリープ無し, 0以上で毎フレームスリープ。動画キャプチャ等で活用下さい)");	// #xxxxx 2011.11.27 yyagi add
             sw.WriteLine("; A sleep time[ms] per frame.");							//
-            sw.WriteLine("SleepTimePerFrame={0}", this.nフレーム毎スリープms); //
+            sw.WriteLine("SleepTimePerFrame={0}", nフレーム毎スリープms); //
             sw.WriteLine();											        			//
             #endregion
             #region [ WASAPI/ASIO関連 ]
@@ -1683,14 +1466,14 @@ namespace DTXMania
             sw.WriteLine("; Sound device type(0=ACM, 1=ASIO, 2=WASAPI Exclusive, 3=WASAPI Shared)");
             sw.WriteLine("; WASAPI can use on Vista or later OSs.");
             sw.WriteLine("; If WASAPI is not available, DTXMania try to use ASIO. If ASIO can't be used, ACM is used.");
-            sw.WriteLine("SoundDeviceType={0}", (int)this.nSoundDeviceType);
+            sw.WriteLine("SoundDeviceType={0}", (int)nSoundDeviceType);
             sw.WriteLine();
 
             sw.WriteLine("; WASAPI使用時のサウンドバッファサイズ");
             sw.WriteLine("; (0=デバイスに設定されている値を使用, 1～9999=バッファサイズ(単位:ms)の手動指定");
             sw.WriteLine("; WASAPI Sound Buffer Size.");
             sw.WriteLine("; (0=Use system default buffer size, 1-9999=specify the buffer size(ms) by yourself)");
-            sw.WriteLine("WASAPIBufferSizeMs={0}", (int)this.nWASAPIBufferSizeMs);
+            sw.WriteLine("WASAPIBufferSizeMs={0}", (int)nWASAPIBufferSizeMs);
             sw.WriteLine();
 
             sw.WriteLine("; ASIO使用時のサウンドデバイス");
@@ -1702,7 +1485,7 @@ namespace DTXMania
             {
                 sw.WriteLine("; {0}: {1}", i, asiodev[i]);
             }
-            sw.WriteLine("ASIODevice={0}", (int)this.nASIODevice);
+            sw.WriteLine("ASIODevice={0}", (int)nASIODevice);
             sw.WriteLine();
 
 			//sw.WriteLine( "; ASIO使用時のサウンドバッファサイズ" );
@@ -1721,17 +1504,17 @@ namespace DTXMania
 			sw.WriteLine("; WASAPI/ASIO時に使用する演奏タイマーの種類");
 			sw.WriteLine("; Playback timer used for WASAPI/ASIO");
 			sw.WriteLine("; (0=FDK Timer, 1=System Timer)");
-			sw.WriteLine("SoundTimerType={0}", this.bUseOSTimer ? 1 : 0);
+			sw.WriteLine("SoundTimerType={0}", bUseOSTimer ? 1 : 0);
 			sw.WriteLine();
 
 			sw.WriteLine("; WASAPI使用時にEventDrivenモードを使う");
-			sw.WriteLine("EventDrivenWASAPI={0}", this.bEventDrivenWASAPI ? 1 : 0);
+			sw.WriteLine("EventDrivenWASAPI={0}", bEventDrivenWASAPI ? 1 : 0);
 			sw.WriteLine();
 
 			sw.WriteLine("; Enable Embedded Metronome");
 			sw.WriteLine("; Please make sure Metronome.ogg exists in Your current skin sounds folder");
             sw.WriteLine("; e.g. ./System/{Skin}/Sounds/Metronome.ogg");
-            sw.WriteLine("Metronome={0}", this.bMetronome ? 1 : 0);
+            sw.WriteLine("Metronome={0}", bMetronome ? 1 : 0);
 			sw.WriteLine();
 
             sw.WriteLine("; Chip PlayTime Compute Mode");
@@ -1746,257 +1529,257 @@ namespace DTXMania
 			sw.WriteLine("; (0=無音 ～ 100=最大。WASAPI/ASIO時のみ有効)");
 			sw.WriteLine("; Master volume settings");
 			sw.WriteLine("; (0=Silent - 100=Max)");
-			sw.WriteLine("MasterVolume={0}", this.nMasterVolume);
+			sw.WriteLine("MasterVolume={0}", nMasterVolume);
 			sw.WriteLine();
 
 			#endregion
 			#region [ ギター/ベース/ドラム 有効/無効 ]
 			sw.WriteLine( "; ギター/ベース有効(0:OFF,1:ON)" );
 			sw.WriteLine( "; Enable Guitar/Bass or not.(0:OFF,1:ON)" );
-			sw.WriteLine( "Guitar={0}", this.bGuitarEnabled ? 1 : 0 );
+			sw.WriteLine( "Guitar={0}", bGuitarEnabled ? 1 : 0 );
 			sw.WriteLine();
 			sw.WriteLine( "; ドラム有効(0:OFF,1:ON)" );
 			sw.WriteLine( "; Enable Drums or not.(0:OFF,1:ON)" );
-			sw.WriteLine( "Drums={0}", this.bDrumsEnabled ? 1 : 0 );
+			sw.WriteLine( "Drums={0}", bDrumsEnabled ? 1 : 0 );
 			sw.WriteLine();
             #endregion
 			sw.WriteLine( "; 背景画像の半透明割合(0:透明～255:不透明)" );
 			sw.WriteLine( "; Transparency for background image in playing screen.(0:tranaparent - 255:no transparent)" );
-			sw.WriteLine( "BGAlpha={0}", this.nBGAlpha );
+			sw.WriteLine( "BGAlpha={0}", nBGAlpha );
 			sw.WriteLine();
 			sw.WriteLine( "; Missヒット時のゲージ減少割合(0:少, 1:Normal, 2:大)" );
-			sw.WriteLine( "DamageLevel={0}", (int) this.eDamageLevel );
+			sw.WriteLine( "DamageLevel={0}", (int) eDamageLevel );
 			sw.WriteLine();
             sw.WriteLine("; ゲージゼロでSTAGE FAILED (0:OFF, 1:ON)");
-            sw.WriteLine("StageFailed={0}", this.bSTAGEFAILEDEnabled ? 1 : 0);
+            sw.WriteLine("StageFailed={0}", bSTAGEFAILEDEnabled ? 1 : 0);
             sw.WriteLine();
             #region [ 打ち分け関連 ]
             sw.WriteLine("; LC/HHC/HHO 打ち分けモード (0:LC|HHC|HHO, 1:LC&(HHC|HHO), 2:LC|(HHC&HHO), 3:LC&HHC&HHO)");
             sw.WriteLine("; LC/HHC/HHO Grouping       (0:LC|HHC|HHO, 1:LC&(HHC|HHO), 2:LC|(HHC&HHO), 3:LC&HHC&HHO)");
-            sw.WriteLine("HHGroup={0}", (int)this.eHHGroup);
+            sw.WriteLine("HHGroup={0}", (int)eHHGroup);
             sw.WriteLine();
             sw.WriteLine("; LT/FT 打ち分けモード (0:LT|FT, 1:LT&FT)");
             sw.WriteLine("; LT/FT Grouping       (0:LT|FT, 1:LT&FT)");
-            sw.WriteLine("FTGroup={0}", (int)this.eFTGroup);
+            sw.WriteLine("FTGroup={0}", (int)eFTGroup);
             sw.WriteLine();
             sw.WriteLine("; CY/RD 打ち分けモード (0:CY|RD, 1:CY&RD)");
             sw.WriteLine("; CY/RD Grouping       (0:CY|RD, 1:CY&RD)");
-            sw.WriteLine("CYGroup={0}", (int)this.eCYGroup);
+            sw.WriteLine("CYGroup={0}", (int)eCYGroup);
             sw.WriteLine();
 			sw.WriteLine( "; LP/LBD/BD 打ち分けモード(0:LP|LBD|BD, 1:LP|(LBD&BD), 2:LP&(LBD|BD), 3:LP&LBD&BD)" );		// #27029 2012.1.4 from
             sw.WriteLine( "; LP/LBD/BD Grouping     (0:LP|LBD|BD, 1:LP(LBD&BD), 2:LP&(LBD|BD), 3:LP&LBD&BD)");
-			sw.WriteLine( "BDGroup={0}", (int) this.eBDGroup );				// 
+			sw.WriteLine( "BDGroup={0}", (int) eBDGroup );				// 
 			sw.WriteLine();													//
 			sw.WriteLine( "; 打ち分け時の再生音の優先順位(HHGroup)(0:Chip>Pad, 1:Pad>Chip)" );
-			sw.WriteLine( "HitSoundPriorityHH={0}", (int) this.eHitSoundPriorityHH );
+			sw.WriteLine( "HitSoundPriorityHH={0}", (int) eHitSoundPriorityHH );
 			sw.WriteLine();
 			sw.WriteLine( "; 打ち分け時の再生音の優先順位(FTGroup)(0:Chip>Pad, 1:Pad>Chip)" );
-			sw.WriteLine( "HitSoundPriorityFT={0}", (int) this.eHitSoundPriorityFT );
+			sw.WriteLine( "HitSoundPriorityFT={0}", (int) eHitSoundPriorityFT );
 			sw.WriteLine();
 			sw.WriteLine( "; 打ち分け時の再生音の優先順位(CYGroup)(0:Chip>Pad, 1:Pad>Chip)" );
-			sw.WriteLine( "HitSoundPriorityCY={0}", (int) this.eHitSoundPriorityCY );
+			sw.WriteLine( "HitSoundPriorityCY={0}", (int) eHitSoundPriorityCY );
 			sw.WriteLine();
             sw.WriteLine( "; 打ち分け時の再生音の優先順位(LPGroup)(0:Chip>Pad, 1:Pad>Chip)");
-            sw.WriteLine( "HitSoundPriorityLP={0}", (int) this.eHitSoundPriorityLP);
+            sw.WriteLine( "HitSoundPriorityLP={0}", (int) eHitSoundPriorityLP);
             sw.WriteLine();
             sw.WriteLine("; シンバルフリーモード(0:OFF, 1:ON)");
-            sw.WriteLine("CymbalFree={0}", this.bシンバルフリー ? 1 : 0);
+            sw.WriteLine("CymbalFree={0}", bシンバルフリー ? 1 : 0);
             sw.WriteLine();
             #endregion
             #region [ AVI/BGA ]
 			sw.WriteLine( "; AVIの表示(0:OFF, 1:ON)" );
-			sw.WriteLine( "AVI={0}", this.bAVIEnabled ? 1 : 0 );
+			sw.WriteLine( "AVI={0}", bAVIEnabled ? 1 : 0 );
 			sw.WriteLine();
 			sw.WriteLine( "; BGAの表示(0:OFF, 1:ON)" );
-			sw.WriteLine( "BGA={0}", this.bBGAEnabled ? 1 : 0 );
+			sw.WriteLine( "BGA={0}", bBGAEnabled ? 1 : 0 );
 			sw.WriteLine();
             #endregion
             #region [ フィルイン ]
             sw.WriteLine( "; フィルイン効果(0:OFF, 1:ON)" );
-			sw.WriteLine( "FillInEffect={0}", this.bFillInEnabled ? 1 : 0 );
+			sw.WriteLine( "FillInEffect={0}", bFillInEnabled ? 1 : 0 );
 			sw.WriteLine();
             sw.WriteLine("; フィルイン達成時の歓声の再生(0:OFF, 1:ON)");
-            sw.WriteLine("AudienceSound={0}", this.b歓声を発声する ? 1 : 0);
+            sw.WriteLine("AudienceSound={0}", b歓声を発声する ? 1 : 0);
             sw.WriteLine();
             #endregion     
             #region [ プレビュー音 ]
             sw.WriteLine( "; 曲選択からプレビュー音の再生までのウェイト[ms]" );
-			sw.WriteLine( "PreviewSoundWait={0}", this.n曲が選択されてからプレビュー音が鳴るまでのウェイトms );
+			sw.WriteLine( "PreviewSoundWait={0}", n曲が選択されてからプレビュー音が鳴るまでのウェイトms );
 			sw.WriteLine();
 			sw.WriteLine( "; 曲選択からプレビュー画像表示までのウェイト[ms]" );
-			sw.WriteLine( "PreviewImageWait={0}", this.n曲が選択されてからプレビュー画像が表示開始されるまでのウェイトms );
+			sw.WriteLine( "PreviewImageWait={0}", n曲が選択されてからプレビュー画像が表示開始されるまでのウェイトms );
 			sw.WriteLine();
             #endregion
             sw.WriteLine( "; Waveの再生位置自動補正(0:OFF, 1:ON)" );
-			sw.WriteLine( "AdjustWaves={0}", this.bWave再生位置自動調整機能有効 ? 1 : 0 );
+			sw.WriteLine( "AdjustWaves={0}", bWave再生位置自動調整機能有効 ? 1 : 0 );
 			sw.WriteLine();
             #region [ BGM/ドラムヒット音の再生 ]
             sw.WriteLine( "; BGM の再生(0:OFF, 1:ON)" );
-			sw.WriteLine( "BGMSound={0}", this.bBGM音を発声する ? 1 : 0 );
+			sw.WriteLine( "BGMSound={0}", bBGM音を発声する ? 1 : 0 );
 			sw.WriteLine();
 			sw.WriteLine( "; ドラム打音の再生(0:OFF, 1:ON)" );
-			sw.WriteLine( "HitSound={0}", this.bドラム打音を発声する ? 1 : 0 );
+			sw.WriteLine( "HitSound={0}", bドラム打音を発声する ? 1 : 0 );
 			sw.WriteLine();
             #endregion
 			sw.WriteLine( "; 演奏記録（～.score.ini）の出力 (0:OFF, 1:ON)" );
-			sw.WriteLine( "SaveScoreIni={0}", this.bScoreIniを出力する ? 1 : 0 );
+			sw.WriteLine( "SaveScoreIni={0}", bScoreIniを出力する ? 1 : 0 );
 			sw.WriteLine();
 			sw.WriteLine( "; RANDOM SELECT で子BOXを検索対象に含める (0:OFF, 1:ON)" );
-			sw.WriteLine( "RandomFromSubBox={0}", this.bランダムセレクトで子BOXを検索対象とする ? 1 : 0 );
+			sw.WriteLine( "RandomFromSubBox={0}", bランダムセレクトで子BOXを検索対象とする ? 1 : 0 );
 			sw.WriteLine();
             #region [ モニターサウンド(ヒット音の再生音量アップ) ]
             sw.WriteLine( "; ドラム演奏時にドラム音を強調する (0:OFF, 1:ON)" );
-			sw.WriteLine( "SoundMonitorDrums={0}", this.b演奏音を強調する.Drums ? 1 : 0 );
+			sw.WriteLine( "SoundMonitorDrums={0}", b演奏音を強調する.Drums ? 1 : 0 );
 			sw.WriteLine();
 			sw.WriteLine( "; ギター演奏時にギター音を強調する (0:OFF, 1:ON)" );
-			sw.WriteLine( "SoundMonitorGuitar={0}", this.b演奏音を強調する.Guitar ? 1 : 0 );
+			sw.WriteLine( "SoundMonitorGuitar={0}", b演奏音を強調する.Guitar ? 1 : 0 );
 			sw.WriteLine();
 			sw.WriteLine( "; ベース演奏時にベース音を強調する (0:OFF, 1:ON)" );
-			sw.WriteLine( "SoundMonitorBass={0}", this.b演奏音を強調する.Bass ? 1 : 0 );
+			sw.WriteLine( "SoundMonitorBass={0}", b演奏音を強調する.Bass ? 1 : 0 );
 			sw.WriteLine();
             #endregion
             sw.WriteLine( "; 表示可能な最小コンボ数(1～99999)" );
             sw.WriteLine( "; ギターとベースでは0にするとコンボを表示しません。" );
-			sw.WriteLine( "MinComboDrums={0}", this.n表示可能な最小コンボ数.Drums );
-			sw.WriteLine( "MinComboGuitar={0}", this.n表示可能な最小コンボ数.Guitar );
-			sw.WriteLine( "MinComboBass={0}", this.n表示可能な最小コンボ数.Bass );
+			sw.WriteLine( "MinComboDrums={0}", n表示可能な最小コンボ数.Drums );
+			sw.WriteLine( "MinComboGuitar={0}", n表示可能な最小コンボ数.Guitar );
+			sw.WriteLine( "MinComboBass={0}", n表示可能な最小コンボ数.Bass );
 			sw.WriteLine();
             sw.WriteLine( "; 曲名表示をdefファイルの曲名にする (0:OFF, 1:ON)" );
-			sw.WriteLine( "MusicNameDispDef={0}", this.b曲名表示をdefのものにする ? 1 : 0 );
+			sw.WriteLine( "MusicNameDispDef={0}", b曲名表示をdefのものにする ? 1 : 0 );
 			sw.WriteLine();
 			sw.WriteLine( "; 演奏情報を表示する (0:OFF, 1:ON)" );
             sw.WriteLine( "; Showing playing info on the playing screen. (0:OFF, 1:ON)" );
-			sw.WriteLine( "ShowDebugStatus={0}", this.b演奏情報を表示する ? 1 : 0 );
+			sw.WriteLine( "ShowDebugStatus={0}", bShowPerformanceInformation ? 1 : 0 );
 			sw.WriteLine();
             #region [ GDオプション ]
             sw.WriteLine( "; 選曲画面の難易度表示をXG表示にする (0:OFF, 1:ON)");
-            sw.WriteLine( "Difficulty={0}", this.b難易度表示をXG表示にする ? 1 : 0);
+            sw.WriteLine( "Difficulty={0}", b難易度表示をXG表示にする ? 1 : 0);
             sw.WriteLine();
             sw.WriteLine("; スコアの表示(0:OFF, 1:ON)");
-            sw.WriteLine("ShowScore={0}", this.bShowScore ? 1 : 0);
+            sw.WriteLine("ShowScore={0}", bShowScore ? 1 : 0);
             sw.WriteLine();
             sw.WriteLine("; 演奏中の曲情報の表示(0:OFF, 1:ON)");
-            sw.WriteLine("ShowMusicInfo={0}", this.bShowMusicInfo ? 1 : 0);
+            sw.WriteLine("ShowMusicInfo={0}", bShowMusicInfo ? 1 : 0);
             sw.WriteLine();
 			sw.WriteLine("; Show custom play speed (0:OFF, 1:ON, 2:If changed in game)");    //
-			sw.WriteLine("ShowPlaySpeed={0}", this.nShowPlaySpeed);                         //
+			sw.WriteLine("ShowPlaySpeed={0}", nShowPlaySpeed);                         //
 			sw.WriteLine();
 			sw.WriteLine("; 読み込み画面、演奏画面、ネームプレート、リザルト画面の曲名で使用するフォント名");
-            sw.WriteLine("DisplayFontName={0}", this.str曲名表示フォント);
+            sw.WriteLine("DisplayFontName={0}", str曲名表示フォント);
             sw.WriteLine();
             #endregion
             #region [ 選曲リストのフォント ]
             sw.WriteLine( "; 選曲リストのフォント名" );
             sw.WriteLine( "; Font name for select song item." );
-			sw.WriteLine( "SelectListFontName={0}", this.str選曲リストフォント );
+			sw.WriteLine( "SelectListFontName={0}", str選曲リストフォント );
 			sw.WriteLine();
 			sw.WriteLine( "; 選曲リストのフォントのサイズ[dot]" );
             sw.WriteLine( "; Font size[dot] for select song item." );
-			sw.WriteLine( "SelectListFontSize={0}", this.n選曲リストフォントのサイズdot );
+			sw.WriteLine( "SelectListFontSize={0}", n選曲リストフォントのサイズdot );
 			sw.WriteLine();
 			sw.WriteLine( "; 選曲リストのフォントを斜体にする (0:OFF, 1:ON)" );
             sw.WriteLine( "; Using italic font style select song list. (0:OFF, 1:ON)" );
-			sw.WriteLine( "SelectListFontItalic={0}", this.b選曲リストフォントを斜体にする ? 1 : 0 );
+			sw.WriteLine( "SelectListFontItalic={0}", b選曲リストフォントを斜体にする ? 1 : 0 );
 			sw.WriteLine();
 			sw.WriteLine( "; 選曲リストのフォントを太字にする (0:OFF, 1:ON)" );
             sw.WriteLine( "; Using bold font style select song list. (0:OFF, 1:ON)" );
-			sw.WriteLine( "SelectListFontBold={0}", this.b選曲リストフォントを太字にする ? 1 : 0 );
+			sw.WriteLine( "SelectListFontBold={0}", b選曲リストフォントを太字にする ? 1 : 0 );
 			sw.WriteLine();
             #endregion
             sw.WriteLine( "; 打音の音量(0～100%)" );
             sw.WriteLine( "; Sound volume (you're playing) (0-100%)" );
-			sw.WriteLine( "ChipVolume={0}", this.n手動再生音量 );
+			sw.WriteLine( "ChipVolume={0}", n手動再生音量 );
 			sw.WriteLine();
 			sw.WriteLine( "; 自動再生音の音量(0～100%)" );
             sw.WriteLine( "; Sound volume (auto playing) (0-100%)" );
-			sw.WriteLine( "AutoChipVolume={0}", this.n自動再生音量 );
+			sw.WriteLine( "AutoChipVolume={0}", n自動再生音量 );
 			sw.WriteLine();
 			sw.WriteLine( "; ストイックモード(0:OFF, 1:ON)" );
             sw.WriteLine( "; Stoic mode. (0:OFF, 1:ON)" );
-			sw.WriteLine( "StoicMode={0}", this.bストイックモード ? 1 : 0 );
+			sw.WriteLine( "StoicMode={0}", bストイックモード ? 1 : 0 );
 			sw.WriteLine();
 			sw.WriteLine( "; バッファ入力モード(0:OFF, 1:ON)" );
             sw.WriteLine( "; Using Buffered input (0:OFF, 1:ON)" );
-			sw.WriteLine( "BufferedInput={0}", this.bバッファ入力を行う ? 1 : 0 );
+			sw.WriteLine( "BufferedInput={0}", bバッファ入力を行う ? 1 : 0 );
 			sw.WriteLine();
             sw.WriteLine("; オープンハイハットの表示画像(0:DTXMania仕様, 1:○なし, 2:クローズハットと同じ)");
-            sw.WriteLine("HHOGraphics={0}", (int)this.eHHOGraphics.Drums);
+            sw.WriteLine("HHOGraphics={0}", (int)eHHOGraphics.Drums);
             sw.WriteLine();
             sw.WriteLine("; 左バスペダルの表示画像(0:バス寄り, 1:LPと同じ)");
-            sw.WriteLine("LBDGraphics={0}", (int)this.eLBDGraphics.Drums);
+            sw.WriteLine("LBDGraphics={0}", (int)eLBDGraphics.Drums);
             sw.WriteLine();
             sw.WriteLine("; ライドシンバルレーンの表示位置(0:...RD RC, 1:...RC RD)");
-            sw.WriteLine("RDPosition={0}", (int)this.eRDPosition);
+            sw.WriteLine("RDPosition={0}", (int)eRDPosition);
             sw.WriteLine();
 			sw.WriteLine( "; レーン毎の最大同時発音数(1～8)" );
 			sw.WriteLine( "; Number of polyphonic sounds per lane. (1-8)" );
-			sw.WriteLine( "PolyphonicSounds={0}", this.nPoliphonicSounds );
+			sw.WriteLine( "PolyphonicSounds={0}", nPoliphonicSounds );
 			sw.WriteLine();
 			sw.WriteLine( "; 判定ズレ時間表示(0:OFF, 1:ON, 2=GREAT-POOR)" );				// #25370 2011.6.3 yyagi
 			sw.WriteLine( "; Whether displaying the lag times from the just timing or not." );	//
-			sw.WriteLine( "ShowLagTime={0}", this.nShowLagType );							//
+			sw.WriteLine( "ShowLagTime={0}", nShowLagType );							//
 			sw.WriteLine();
 			sw.WriteLine("; 判定ズレ時間表示の色(0:Slow赤、Fast青, 1:Slow青、Fast赤)");
-			sw.WriteLine( "ShowLagTimeColor={0}", this.nShowLagTypeColor );                         //
+			sw.WriteLine( "ShowLagTimeColor={0}", nShowLagTypeColor );                         //
 			sw.WriteLine();
 			sw.WriteLine("; 判定ズレヒット数表示(0:OFF, 1:ON)");
-			sw.WriteLine("ShowLagHitCount={0}", this.bShowLagHitCount ? 1 : 0);                         //
+			sw.WriteLine("ShowLagHitCount={0}", bShowLagHitCount ? 1 : 0);                         //
 			sw.WriteLine();
 			sw.WriteLine( "; リザルト画像自動保存機能(0:OFF, 1:ON)" );						// #25399 2011.6.9 yyagi
 			sw.WriteLine( "; Set ON if you'd like to save result screen image automatically");	//
 			sw.WriteLine( "; when you get hiscore/hiskill.");								//
-			sw.WriteLine( "AutoResultCapture={0}", this.bIsAutoResultCapture? 1 : 0 );		//
+			sw.WriteLine( "AutoResultCapture={0}", bIsAutoResultCapture? 1 : 0 );		//
             sw.WriteLine();
             sw.WriteLine("; 再生速度変更を、ピッチ変更で行うかどうか(0:ピッチ変更, 1:タイムストレッチ");	// #23664 2013.2.24 yyagi
             sw.WriteLine("; (WASAPI/ASIO使用時のみ有効) ");
             sw.WriteLine("; Set \"0\" if you'd like to use pitch shift with PlaySpeed.");	//
             sw.WriteLine("; Set \"1\" for time stretch.");								//
             sw.WriteLine("; (Only available when you're using using WASAPI or ASIO)");	//
-            sw.WriteLine("TimeStretch={0}", this.bTimeStretch ? 1 : 0);					//
+            sw.WriteLine("TimeStretch={0}", bTimeStretch ? 1 : 0);					//
             sw.WriteLine();
             #region [ Adjust ]
             sw.WriteLine("; 判定タイミング調整(ドラム, ギター, ベース)(-99～99)[ms]");		// #23580 2011.1.3 yyagi
             sw.WriteLine("; Revision value to adjust judgement timing for the drums, guitar and bass.");	//
-            sw.WriteLine("InputAdjustTimeDrums={0}", this.nInputAdjustTimeMs.Drums);		//
-            sw.WriteLine("InputAdjustTimeGuitar={0}", this.nInputAdjustTimeMs.Guitar);		//
-            sw.WriteLine("InputAdjustTimeBass={0}", this.nInputAdjustTimeMs.Bass);			//
+            sw.WriteLine("InputAdjustTimeDrums={0}", nInputAdjustTimeMs.Drums);		//
+            sw.WriteLine("InputAdjustTimeGuitar={0}", nInputAdjustTimeMs.Guitar);		//
+            sw.WriteLine("InputAdjustTimeBass={0}", nInputAdjustTimeMs.Bass);			//
             sw.WriteLine();
 
             sw.WriteLine( "; BGMタイミング調整(-99～99)[ms]" );                              // #36372 2016.06.19 kairera0467
             sw.WriteLine( "; Revision value to adjust judgement timing for BGM." );	        //
-            sw.WriteLine( "BGMAdjustTime={0}", this.nCommonBGMAdjustMs );		            //
+            sw.WriteLine( "BGMAdjustTime={0}", nCommonBGMAdjustMs );		            //
             sw.WriteLine();
 
             sw.WriteLine("; 判定ラインの表示位置調整(ドラム, ギター, ベース)(-99～99)[px]"); // #31602 2013.6.23 yyagi 判定ラインの表示位置オフセット
             sw.WriteLine("; Offset value to adjust displaying judgement line for the drums, guitar and bass."); //
-            sw.WriteLine("JudgeLinePosOffsetDrums={0}", this.nJudgeLinePosOffset.Drums); //
-            sw.WriteLine("JudgeLinePosOffsetGuitar={0}", this.nJudgeLinePosOffset.Guitar); //
-            sw.WriteLine("JudgeLinePosOffsetBass={0}", this.nJudgeLinePosOffset.Bass); //
+            sw.WriteLine("JudgeLinePosOffsetDrums={0}", nJudgeLinePosOffset.Drums); //
+            sw.WriteLine("JudgeLinePosOffsetGuitar={0}", nJudgeLinePosOffset.Guitar); //
+            sw.WriteLine("JudgeLinePosOffsetBass={0}", nJudgeLinePosOffset.Bass); //
             sw.WriteLine();
             #endregion
             sw.WriteLine( "; LC, HH, SD,...の入力切り捨て下限Velocity値(0～127)" );			// #23857 2011.1.31 yyagi
 			sw.WriteLine( "; Minimum velocity value for LC, HH, SD, ... to accept." );		//
-			sw.WriteLine( "LCVelocityMin={0}", this.nVelocityMin.LC );						//
-			sw.WriteLine("HHVelocityMin={0}", this.nVelocityMin.HH );						//
+			sw.WriteLine( "LCVelocityMin={0}", nVelocityMin.LC );						//
+			sw.WriteLine("HHVelocityMin={0}", nVelocityMin.HH );						//
 //			sw.WriteLine("; ハイハット以外の入力切り捨て下限Velocity値(0～127)");			// #23857 2010.12.12 yyagi
 //			sw.WriteLine("; Minimum velocity value to accept. (except HiHat)");				//
 //			sw.WriteLine("VelocityMin={0}", this.n切り捨て下限Velocity);					//
 //			sw.WriteLine();																	//
-			sw.WriteLine( "SDVelocityMin={0}", this.nVelocityMin.SD );						//
-			sw.WriteLine( "BDVelocityMin={0}", this.nVelocityMin.BD );						//
-			sw.WriteLine( "HTVelocityMin={0}", this.nVelocityMin.HT );						//
-			sw.WriteLine( "LTVelocityMin={0}", this.nVelocityMin.LT );						//
-			sw.WriteLine( "FTVelocityMin={0}", this.nVelocityMin.FT );						//
-			sw.WriteLine( "CYVelocityMin={0}", this.nVelocityMin.CY );						//
-			sw.WriteLine( "RDVelocityMin={0}", this.nVelocityMin.RD );						//
-            sw.WriteLine( "LPVelocityMin={0}", this.nVelocityMin.LP );
-            sw.WriteLine( "LBDVelocityMin={0}",this.nVelocityMin.LBD ); 
+			sw.WriteLine( "SDVelocityMin={0}", nVelocityMin.SD );						//
+			sw.WriteLine( "BDVelocityMin={0}", nVelocityMin.BD );						//
+			sw.WriteLine( "HTVelocityMin={0}", nVelocityMin.HT );						//
+			sw.WriteLine( "LTVelocityMin={0}", nVelocityMin.LT );						//
+			sw.WriteLine( "FTVelocityMin={0}", nVelocityMin.FT );						//
+			sw.WriteLine( "CYVelocityMin={0}", nVelocityMin.CY );						//
+			sw.WriteLine( "RDVelocityMin={0}", nVelocityMin.RD );						//
+            sw.WriteLine( "LPVelocityMin={0}", nVelocityMin.LP );
+            sw.WriteLine( "LBDVelocityMin={0}",nVelocityMin.LBD ); 
 			sw.WriteLine();																	//
             sw.WriteLine( "; オート時のゲージ加算(0:OFF, 1:ON )");
-            sw.WriteLine( "AutoAddGage={0}", this.bAutoAddGage ? 1 : 0);
+            sw.WriteLine( "AutoAddGage={0}", bAutoAddGage ? 1 : 0);
             sw.WriteLine();
 			sw.WriteLine("; Number of milliseconds to skip forward/backward (100-10000)");
-			sw.WriteLine("SkipTimeMs={0}", this.nSkipTimeMs);
+			sw.WriteLine("SkipTimeMs={0}", nSkipTimeMs);
 			sw.WriteLine();
 
 			sw.WriteLine( ";-------------------" );
@@ -2006,16 +1789,16 @@ namespace DTXMania
 			sw.WriteLine( "[Log]" );
 			sw.WriteLine();
 			sw.WriteLine( "; Log出力(0:OFF, 1:ON)" );
-			sw.WriteLine( "OutputLog={0}", this.bOutputLogs ? 1 : 0 );
+			sw.WriteLine( "OutputLog={0}", bOutputLogs ? 1 : 0 );
 			sw.WriteLine();
 			sw.WriteLine( "; 曲データ検索に関するLog出力(0:OFF, 1:ON)" );
-			sw.WriteLine( "TraceSongSearch={0}", this.bLogSongSearch ? 1 : 0 );
+			sw.WriteLine( "TraceSongSearch={0}", bLogSongSearch ? 1 : 0 );
 			sw.WriteLine();
 			sw.WriteLine( "; 画像やサウンドの作成_解放に関するLog出力(0:OFF, 1:ON)" );
-			sw.WriteLine( "TraceCreatedDisposed={0}", this.bLog作成解放ログ出力 ? 1 : 0 );
+			sw.WriteLine( "TraceCreatedDisposed={0}", bLog作成解放ログ出力 ? 1 : 0 );
 			sw.WriteLine();
 			sw.WriteLine( "; DTX読み込み詳細に関するLog出力(0:OFF, 1:ON)" );
-			sw.WriteLine( "TraceDTXDetails={0}", this.bLogDTX詳細ログ出力 ? 1 : 0 );
+			sw.WriteLine( "TraceDTXDetails={0}", bLogDTX詳細ログ出力 ? 1 : 0 );
 			sw.WriteLine();
 			sw.WriteLine( ";-------------------" );
 			#endregion
@@ -2024,77 +1807,77 @@ namespace DTXMania
 			sw.WriteLine( "[PlayOption]" );
 			sw.WriteLine();
 			sw.WriteLine( "; REVERSEモード(0:OFF, 1:ON)" );
-			sw.WriteLine( "DrumsReverse={0}", this.bReverse.Drums ? 1 : 0 );
-			sw.WriteLine( "GuitarReverse={0}", this.bReverse.Guitar ? 1 : 0 );
-			sw.WriteLine( "BassReverse={0}", this.bReverse.Bass ? 1 : 0 );
+			sw.WriteLine( "DrumsReverse={0}", bReverse.Drums ? 1 : 0 );
+			sw.WriteLine( "GuitarReverse={0}", bReverse.Guitar ? 1 : 0 );
+			sw.WriteLine( "BassReverse={0}", bReverse.Bass ? 1 : 0 );
 			sw.WriteLine();
 			sw.WriteLine( "; ギター/ベースRANDOMモード(0:OFF, 1:Mirror, 2:Random, 3:SuperRandom, 4:HyperRandom)" );
-			sw.WriteLine( "GuitarRandom={0}", (int) this.eRandom.Guitar );
-			sw.WriteLine( "BassRandom={0}", (int) this.eRandom.Bass );
+			sw.WriteLine( "GuitarRandom={0}", (int) eRandom.Guitar );
+			sw.WriteLine( "BassRandom={0}", (int) eRandom.Bass );
 			sw.WriteLine();
 			sw.WriteLine( "; ギター/ベースLIGHTモード(0:OFF, 1:ON)" );
-			sw.WriteLine( "GuitarLight={0}", this.bLight.Guitar ? 1 : 0 );
-			sw.WriteLine( "BassLight={0}", this.bLight.Bass ? 1 : 0 );
+			sw.WriteLine( "GuitarLight={0}", bLight.Guitar ? 1 : 0 );
+			sw.WriteLine( "BassLight={0}", bLight.Bass ? 1 : 0 );
 			sw.WriteLine();
             sw.WriteLine("; ギター/ベース演奏モード(0:Normal, 1:Specialist)");
-            sw.WriteLine("GuitarSpecialist={0}", this.bSpecialist.Guitar ? 1 : 0);
-            sw.WriteLine("BassSpecialist={0}", this.bSpecialist.Bass ? 1 : 0);
+            sw.WriteLine("GuitarSpecialist={0}", bSpecialist.Guitar ? 1 : 0);
+            sw.WriteLine("BassSpecialist={0}", bSpecialist.Bass ? 1 : 0);
             sw.WriteLine();
             sw.WriteLine( "; ギター/ベースLEFTモード(0:OFF, 1:ON)" );
-			sw.WriteLine( "GuitarLeft={0}", this.bLeft.Guitar ? 1 : 0 );
-			sw.WriteLine( "BassLeft={0}", this.bLeft.Bass ? 1 : 0 );
+			sw.WriteLine( "GuitarLeft={0}", bLeft.Guitar ? 1 : 0 );
+			sw.WriteLine( "BassLeft={0}", bLeft.Bass ? 1 : 0 );
 			sw.WriteLine();
 			sw.WriteLine( "; RISKYモード(0:OFF, 1-10)" );									// #23559 2011.6.23 yyagi
 			sw.WriteLine( "; RISKY mode. 0=OFF, 1-10 is the times of misses to be Failed." );	//
-			sw.WriteLine( "Risky={0}", this.nRisky );			//
+			sw.WriteLine( "Risky={0}", nRisky );			//
             sw.WriteLine();
             sw.WriteLine("; HAZARDモード(0:OFF, 1:ON)");									// #23559 2011.6.23 yyagi
             sw.WriteLine("; HAZARD mode. 0=OFF, 1=ON is the times of misses to be Failed.");	//
-            sw.WriteLine("HAZARD={0}", this.bHAZARD ? 1 : 0);			//
+            sw.WriteLine("HAZARD={0}", bHAZARD ? 1 : 0);			//
             sw.WriteLine();
             sw.WriteLine("; TIGHTモード(0:OFF, 1:ON)");									// #29500 2012.9.11 kairera0467
             sw.WriteLine(": TIGHT mode. 0=OFF, 1=ON ");
-            sw.WriteLine("DrumsTight={0}", this.bTight ? 1 : 0 );									//
+            sw.WriteLine("DrumsTight={0}", bTight ? 1 : 0 );									//
             sw.WriteLine();
             sw.WriteLine("; Hidden/Suddenモード(0:OFF, 1:HIDDEN, 2:SUDDEN, 3:HID/SUD, 4:STEALTH)");
             sw.WriteLine("; Hidden/Sudden mode. 0=OFF, 1=HIDDEN, 2=SUDDEN, 3=HID/SUD, 4=STEALTH ");
-            sw.WriteLine("DrumsHiddenSudden={0}", (int)this.nHidSud.Drums);
-            sw.WriteLine("GuitarHiddenSudden={0}", (int)this.nHidSud.Guitar);
-            sw.WriteLine("BassHiddenSudden={0}", (int)this.nHidSud.Bass);
+            sw.WriteLine("DrumsHiddenSudden={0}", (int)nHidSud.Drums);
+            sw.WriteLine("GuitarHiddenSudden={0}", (int)nHidSud.Guitar);
+            sw.WriteLine("BassHiddenSudden={0}", (int)nHidSud.Bass);
             sw.WriteLine();
 			sw.WriteLine( "; ドラム判定文字表示位置(0:OnTheLane,1:判定ライン上,2:表示OFF)" );
-			sw.WriteLine( "DrumsPosition={0}", (int) this.JudgementStringPosition.Drums );
+			sw.WriteLine( "DrumsPosition={0}", (int) JudgementStringPosition.Drums );
 			sw.WriteLine();
 			sw.WriteLine( "; ギター/ベース判定文字表示位置(0:OnTheLane, 1:レーン横, 2:判定ライン上, 3:表示OFF)" );
-			sw.WriteLine( "GuitarPosition={0}", (int) this.JudgementStringPosition.Guitar );
-			sw.WriteLine( "BassPosition={0}", (int) this.JudgementStringPosition.Bass );
+			sw.WriteLine( "GuitarPosition={0}", (int) JudgementStringPosition.Guitar );
+			sw.WriteLine( "BassPosition={0}", (int) JudgementStringPosition.Bass );
 			sw.WriteLine();
 			sw.WriteLine( "; 譜面スクロール速度(0:x0.5, 1:x1.0, 2:x1.5,…,1999:x1000.0)" );
-			sw.WriteLine( "DrumsScrollSpeed={0}", this.nScrollSpeed.Drums );
-			sw.WriteLine( "GuitarScrollSpeed={0}", this.nScrollSpeed.Guitar );
-			sw.WriteLine( "BassScrollSpeed={0}", this.nScrollSpeed.Bass );
+			sw.WriteLine( "DrumsScrollSpeed={0}", nScrollSpeed.Drums );
+			sw.WriteLine( "GuitarScrollSpeed={0}", nScrollSpeed.Guitar );
+			sw.WriteLine( "BassScrollSpeed={0}", nScrollSpeed.Bass );
 			sw.WriteLine();
 			sw.WriteLine( "; 演奏速度(5～40)(→x5/20～x40/20)" );
-			sw.WriteLine( "PlaySpeed={0}", this.nPlaySpeed );
+			sw.WriteLine( "PlaySpeed={0}", nPlaySpeed );
 			sw.WriteLine();
 			sw.WriteLine("; Save score when PlaySpeed is not 100% (0:OFF, 1:ON)");
-			sw.WriteLine("SaveScoreIfModifiedPlaySpeed={0}", this.bSaveScoreIfModifiedPlaySpeed ? 1 : 0);
+			sw.WriteLine("SaveScoreIfModifiedPlaySpeed={0}", bSaveScoreIfModifiedPlaySpeed ? 1 : 0);
 			sw.WriteLine();
 
 			// #24074 2011.01.23 add ikanick
 			sw.WriteLine( "; グラフ表示(0:OFF, 1:ON)" );
-			sw.WriteLine( "DrumGraph={0}", this.bGraph有効.Drums ? 1 : 0 );
-			sw.WriteLine( "GuitarGraph={0}", this.bGraph有効.Guitar ? 1 : 0 );
-			sw.WriteLine( "BassGraph={0}", this.bGraph有効.Bass ? 1 : 0 );
+			sw.WriteLine( "DrumGraph={0}", bGraph有効.Drums ? 1 : 0 );
+			sw.WriteLine( "GuitarGraph={0}", bGraph有効.Guitar ? 1 : 0 );
+			sw.WriteLine( "BassGraph={0}", bGraph有効.Bass ? 1 : 0 );
 			sw.WriteLine();
 
 			sw.WriteLine("; Small Graph (0:OFF, 1:ON)");
-			sw.WriteLine("SmallGraph={0}", this.bSmallGraph ? 1 : 0);
+			sw.WriteLine("SmallGraph={0}", bSmallGraph ? 1 : 0);
 			sw.WriteLine();
 
 			sw.WriteLine( "; ドラムコンボの表示(0:OFF, 1:ON)" );									// #29500 2012.9.11 kairera0467
             sw.WriteLine( ": DrumPart Display Combo. 0=OFF, 1=ON " );
-            sw.WriteLine( "DrumComboDisp={0}", this.bドラムコンボ文字の表示 ? 1 : 0 );				//
+            sw.WriteLine( "DrumComboDisp={0}", bドラムコンボ文字の表示 ? 1 : 0 );				//
             sw.WriteLine();
 
             //fork
@@ -2112,29 +1895,29 @@ namespace DTXMania
 
             #region[DTXManiaXG追加オプション]
             sw.WriteLine("; 譜面仕様変更(0:デフォルト10レーン, 1:XG9レーン, 2:CLASSIC6レーン)");
-            sw.WriteLine("NumOfLanes={0}", (int)this.eNumOfLanes.Drums);
+            sw.WriteLine("NumOfLanes={0}", (int)eNumOfLanes.Drums);
             sw.WriteLine();
             sw.WriteLine("; dkdk仕様変更(0:デフォルト, 1:始動足変更, 2:dkdk1レーン化)");
-            sw.WriteLine("DkdkType={0}", (int)this.eDkdkType.Drums);
+            sw.WriteLine("DkdkType={0}", (int)eDkdkType.Drums);
             sw.WriteLine();
             sw.WriteLine("; バスをLBDに振り分け(0:OFF, 1:ON)");
-            sw.WriteLine("AssignToLBD={0}", this.bAssignToLBD.Drums ? 1 : 0);
+            sw.WriteLine("AssignToLBD={0}", bAssignToLBD.Drums ? 1 : 0);
             sw.WriteLine();
             sw.WriteLine("; ドラムパッドRANDOMモード(0:OFF, 1:Mirror, 2:Random, 3:SuperRandom, 4:HyperRandom, 5:MasterRandom, 6:AnotherRandom)");
-            sw.WriteLine("DrumsRandomPad={0}", (int)this.eRandom.Drums);
+            sw.WriteLine("DrumsRandomPad={0}", (int)eRandom.Drums);
             sw.WriteLine();
             sw.WriteLine("; ドラム足RANDOMモード(0:OFF, 1:Mirror, 2:Random, 3:SuperRandom, 4:HyperRandom, 5:MasterRandom, 6:AnotherRandom)");
-            sw.WriteLine("DrumsRandomPedal={0}", (int)this.eRandomPedal.Drums);
+            sw.WriteLine("DrumsRandomPedal={0}", (int)eRandomPedal.Drums);
             sw.WriteLine();
             sw.WriteLine("; LP消音機能(0:OFF, 1:ON)");
-            sw.WriteLine("MutingLP={0}", this.bMutingLP ? 1 : 0);
+            sw.WriteLine("MutingLP={0}", bMutingLP ? 1 : 0);
             sw.WriteLine();
             #endregion
             #region[ DTXHD追加オプション ]
             sw.WriteLine("; 判定ライン(0～100)" );
-            sw.WriteLine("DrumsJudgeLine={0}", (int)this.nJudgeLine.Drums);
-            sw.WriteLine("GuitarJudgeLine={0}", (int)this.nJudgeLine.Guitar);
-            sw.WriteLine("BassJudgeLine={0}", (int)this.nJudgeLine.Bass);
+            sw.WriteLine("DrumsJudgeLine={0}", (int)nJudgeLine.Drums);
+            sw.WriteLine("GuitarJudgeLine={0}", (int)nJudgeLine.Guitar);
+            sw.WriteLine("BassJudgeLine={0}", (int)nJudgeLine.Bass);
             sw.WriteLine();
             #endregion
             #region[ ver.K追加オプション ]
@@ -2142,84 +1925,84 @@ namespace DTXMania
             sw.WriteLine("; ネームプレートタイプ");
             sw.WriteLine("; 0:タイプA XG2風の表示がされます。 ");
             sw.WriteLine("; 1:タイプB XG風の表示がされます。このタイプでは7_NamePlate_XG.png、7_Difficulty_XG.pngが読み込まれます。");
-            sw.WriteLine("NamePlateType={0}", (int)this.eNamePlate);
+            sw.WriteLine("NamePlateType={0}", (int)eNamePlate);
             sw.WriteLine();
             sw.WriteLine("; 動くドラムセット(0:ON, 1:OFF, 2:NONE)");
-            sw.WriteLine("DrumSetMoves={0}", (int)this.eドラムセットを動かす);
+            sw.WriteLine("DrumSetMoves={0}", (int)eドラムセットを動かす);
             sw.WriteLine();
             sw.WriteLine("; BPMバーの表示(0:表示する, 1:左のみ表示, 2:動くバーを表示しない, 3:表示しない)");
-            sw.WriteLine("BPMBar={0}", (int)this.eBPMbar); ;
+            sw.WriteLine("BPMBar={0}", (int)eBPMbar); ;
             sw.WriteLine();
             sw.WriteLine("; LivePointの表示(0:OFF, 1:ON)");
-            sw.WriteLine("LivePoint={0}", this.bLivePoint ? 1 : 0);
+            sw.WriteLine("LivePoint={0}", bLivePoint ? 1 : 0);
             sw.WriteLine();
             sw.WriteLine("; スピーカーの表示(0:OFF, 1:ON)");
-            sw.WriteLine("Speaker={0}", this.bSpeaker ? 1 : 0);
+            sw.WriteLine("Speaker={0}", bSpeaker ? 1 : 0);
             sw.WriteLine();
             #endregion
             sw.WriteLine("; シャッターINSIDE(0～100)");
-            sw.WriteLine("DrumsShutterIn={0}", (int)this.nShutterInSide.Drums);
-            sw.WriteLine("GuitarShutterIn={0}", (int)this.nShutterInSide.Guitar);
-            sw.WriteLine("BassShutterIn={0}", (int)this.nShutterInSide.Bass);
+            sw.WriteLine("DrumsShutterIn={0}", (int)nShutterInSide.Drums);
+            sw.WriteLine("GuitarShutterIn={0}", (int)nShutterInSide.Guitar);
+            sw.WriteLine("BassShutterIn={0}", (int)nShutterInSide.Bass);
             sw.WriteLine();
             sw.WriteLine("; シャッターOUTSIDE(0～100)");
-            sw.WriteLine("DrumsShutterOut={0}", (int)this.nShutterOutSide.Drums);
-            sw.WriteLine("GuitarShutterOut={0}", (int)this.nShutterOutSide.Guitar);
-            sw.WriteLine("BassShutterOut={0}", (int)this.nShutterOutSide.Bass);
+            sw.WriteLine("DrumsShutterOut={0}", (int)nShutterOutSide.Drums);
+            sw.WriteLine("GuitarShutterOut={0}", (int)nShutterOutSide.Guitar);
+            sw.WriteLine("BassShutterOut={0}", (int)nShutterOutSide.Bass);
             sw.WriteLine();
             sw.WriteLine( "; ボーナス演出の表示(0:表示しない, 1:表示する)");
-            sw.WriteLine("DrumsStageEffect={0}", this.DisplayBonusEffects ? 1 : 0);
+            sw.WriteLine("DrumsStageEffect={0}", DisplayBonusEffects ? 1 : 0);
             sw.WriteLine();
             sw.WriteLine("; ドラムレーンタイプ(0:A, 1:B, 2:C 3:D )");
-            sw.WriteLine("DrumsLaneType={0}", (int)this.eLaneType.Drums);
+            sw.WriteLine("DrumsLaneType={0}", (int)eLaneType.Drums);
             sw.WriteLine();
             sw.WriteLine("; CLASSIC譜面判別");
-            sw.WriteLine("CLASSIC={0}", this.bCLASSIC譜面判別を有効にする ? 1 : 0);
+            sw.WriteLine("CLASSIC={0}", bCLASSIC譜面判別を有効にする ? 1 : 0);
             sw.WriteLine();
             sw.WriteLine("; スキルモード(0:旧仕様, 1:XG仕様)");
-            sw.WriteLine("SkillMode={0}", (int)this.nSkillMode);
+            sw.WriteLine("SkillMode={0}", (int)nSkillMode);
             sw.WriteLine();
             sw.WriteLine("; スキルモードの自動切換え(0:OFF, 1:ON)");
-            sw.WriteLine("SwitchSkillMode={0}", this.bSkillModeを自動切換えする ? 1 : 0);
+            sw.WriteLine("SwitchSkillMode={0}", bSkillModeを自動切換えする ? 1 : 0);
             sw.WriteLine();
             sw.WriteLine("; ドラム アタックエフェクトタイプ");
             sw.WriteLine("; 0:ALL 粉と爆発エフェクトを表示します。");
             sw.WriteLine("; 1:ChipOFF チップのエフェクトを消します。");
             sw.WriteLine("; 2:EffectOnly 粉を消します。");
             sw.WriteLine("; 3:ALLOFF すべて消します。");
-            sw.WriteLine("DrumsAttackEffect={0}", (int)this.eAttackEffect.Drums);
+            sw.WriteLine("DrumsAttackEffect={0}", (int)eAttackEffect.Drums);
             sw.WriteLine();
             sw.WriteLine("; ギター / ベース アタックエフェクトタイプ (0:OFF, 1:ON)");
-            sw.WriteLine("GuitarAttackEffect={0}", (int)this.eAttackEffect.Guitar);
-            sw.WriteLine("BassAttackEffect={0}", (int)this.eAttackEffect.Bass);
+            sw.WriteLine("GuitarAttackEffect={0}", (int)eAttackEffect.Guitar);
+            sw.WriteLine("BassAttackEffect={0}", (int)eAttackEffect.Bass);
             sw.WriteLine();
             sw.WriteLine("; レーン表示");
             sw.WriteLine("; 0:ALL ON レーン背景、小節線を表示します。");
             sw.WriteLine("; 1:LANE FF レーン背景を消します。");
             sw.WriteLine("; 2:LINE OFF 小節線を消します。");
             sw.WriteLine("; 3:ALL OFF すべて消します。");
-            sw.WriteLine("DrumsLaneDisp={0}", (int)this.nLaneDisp.Drums);
-            sw.WriteLine("GuitarLaneDisp={0}", (int)this.nLaneDisp.Guitar);
-            sw.WriteLine("BassLaneDisp={0}", (int)this.nLaneDisp.Bass);
+            sw.WriteLine("DrumsLaneDisp={0}", (int)nLaneDisp.Drums);
+            sw.WriteLine("GuitarLaneDisp={0}", (int)nLaneDisp.Guitar);
+            sw.WriteLine("BassLaneDisp={0}", (int)nLaneDisp.Bass);
             sw.WriteLine();
             sw.WriteLine("; Display Judgement");
-            sw.WriteLine("DrumsDisplayJudge={0}", this.bDisplayJudge.Drums ? 1 : 0);
-            sw.WriteLine("GuitarDisplayJudge={0}", this.bDisplayJudge.Guitar ? 1 : 0);
-            sw.WriteLine("BassDisplayJudge={0}", this.bDisplayJudge.Bass ? 1 : 0);
+            sw.WriteLine("DrumsDisplayJudge={0}", bDisplayJudge.Drums ? 1 : 0);
+            sw.WriteLine("GuitarDisplayJudge={0}", bDisplayJudge.Guitar ? 1 : 0);
+            sw.WriteLine("BassDisplayJudge={0}", bDisplayJudge.Bass ? 1 : 0);
 			sw.WriteLine();
 			sw.WriteLine("; 判定ライン表示");
-			sw.WriteLine("DrumsJudgeLineDisp={0}", this.bJudgeLineDisp.Drums ? 1 : 0);
-			sw.WriteLine("GuitarJudgeLineDisp={0}", this.bJudgeLineDisp.Guitar ? 1 : 0);
-			sw.WriteLine("BassJudgeLineDisp={0}", this.bJudgeLineDisp.Bass ? 1 : 0);
+			sw.WriteLine("DrumsJudgeLineDisp={0}", bJudgeLineDisp.Drums ? 1 : 0);
+			sw.WriteLine("GuitarJudgeLineDisp={0}", bJudgeLineDisp.Guitar ? 1 : 0);
+			sw.WriteLine("BassJudgeLineDisp={0}", bJudgeLineDisp.Bass ? 1 : 0);
 			sw.WriteLine();
             sw.WriteLine("; レーンフラッシュ表示");
-            sw.WriteLine("DrumsLaneFlush={0}", this.bLaneFlush.Drums ? 1 : 0);
-            sw.WriteLine("GuitarLaneFlush={0}", this.bLaneFlush.Guitar ? 1 : 0);
-            sw.WriteLine("BassLaneFlush={0}", this.bLaneFlush.Bass ? 1 : 0);
+            sw.WriteLine("DrumsLaneFlush={0}", bLaneFlush.Drums ? 1 : 0);
+            sw.WriteLine("GuitarLaneFlush={0}", bLaneFlush.Guitar ? 1 : 0);
+            sw.WriteLine("BassLaneFlush={0}", bLaneFlush.Bass ? 1 : 0);
             sw.WriteLine();
             sw.WriteLine("; ペダル部分のラグ時間調整");
             sw.WriteLine("; 入力が遅い場合、マイナス方向に調節してください。");
-            sw.WriteLine("PedalLagTime={0}", this.nPedalLagTime );
+            sw.WriteLine("PedalLagTime={0}", nPedalLagTime );
             sw.WriteLine();
             #endregion
 
@@ -2228,50 +2011,50 @@ namespace DTXMania
             #region[ 画像周り ]
             sw.WriteLine( ";判定画像のアニメーション方式" );
             sw.WriteLine( ";(0:旧DTXMania方式 1:コマ方式 2:擬似XG方式)");
-            sw.WriteLine( "JudgeAnimeType={0}", this.nJudgeAnimeType );
+            sw.WriteLine( "JudgeAnimeType={0}", nJudgeAnimeType );
             sw.WriteLine();
             sw.WriteLine( ";判定画像のコマ数" );
-            sw.WriteLine( "JudgeFrames={0}", this.nJudgeFrames );
+            sw.WriteLine( "JudgeFrames={0}", nJudgeFrames );
             sw.WriteLine();
             sw.WriteLine( ";判定画像の1コマのフレーム数" );
-            sw.WriteLine( "JudgeInterval={0}", this.nJudgeInterval );
+            sw.WriteLine( "JudgeInterval={0}", nJudgeInterval );
             sw.WriteLine();
             sw.WriteLine( ";判定画像の1コマの幅" );
-            sw.WriteLine( "JudgeWidgh={0}", this.nJudgeWidgh );
+            sw.WriteLine( "JudgeWidgh={0}", nJudgeWidgh );
             sw.WriteLine();
             sw.WriteLine( ";判定画像の1コマの高さ" );
-            sw.WriteLine( "JudgeHeight={0}", this.nJudgeHeight );
+            sw.WriteLine( "JudgeHeight={0}", nJudgeHeight );
             sw.WriteLine();
             sw.WriteLine( ";アタックエフェクトのコマ数" );
-            sw.WriteLine( "ExplosionFrames={0}", (int)this.nExplosionFrames );
+            sw.WriteLine( "ExplosionFrames={0}", (int)nExplosionFrames );
             sw.WriteLine();
             sw.WriteLine( ";アタックエフェクトの1コマのフレーム数" );
-            sw.WriteLine( "ExplosionInterval={0}", (int)this.nExplosionInterval );
+            sw.WriteLine( "ExplosionInterval={0}", (int)nExplosionInterval );
             sw.WriteLine();
             sw.WriteLine( ";アタックエフェクトの1コマの幅" );
-            sw.WriteLine( "ExplosionWidgh={0}", this.nExplosionWidgh );
+            sw.WriteLine( "ExplosionWidgh={0}", nExplosionWidgh );
             sw.WriteLine();
             sw.WriteLine( ";アタックエフェクトの1コマの高さ" );
-            sw.WriteLine( "ExplosionHeight={0}", this.nExplosionHeight );
+            sw.WriteLine( "ExplosionHeight={0}", nExplosionHeight );
             sw.WriteLine();
             sw.WriteLine( "ワイリングエフェクトのコマ数;" );
-            sw.WriteLine( "WailingFireFrames={0}", (int)this.nWailingFireFrames );
+            sw.WriteLine( "WailingFireFrames={0}", (int)nWailingFireFrames );
             sw.WriteLine();
             sw.WriteLine( ";ワイリングエフェクトの1コマのフレーム数" );
-            sw.WriteLine( "WailingFireInterval={0}", (int)this.nWailingFireInterval );
+            sw.WriteLine( "WailingFireInterval={0}", (int)nWailingFireInterval );
             sw.WriteLine();
             sw.WriteLine( ";ワイリングエフェクトの1コマの幅" );
-            sw.WriteLine( "WailingFireWidgh={0}", this.nWailingFireWidgh );
+            sw.WriteLine( "WailingFireWidgh={0}", nWailingFireWidgh );
             sw.WriteLine();
             sw.WriteLine( ";ワイリングエフェクトの1コマの高さ" );
-            sw.WriteLine( "WailingFireHeight={0}", this.nWailingFireHeight );
+            sw.WriteLine( "WailingFireHeight={0}", nWailingFireHeight );
             sw.WriteLine();
             sw.WriteLine( ";ワイリングエフェクトのX座標" );
-            sw.WriteLine( "WailingFirePosXGuitar={0}", this.nWailingFireX.Guitar );
-            sw.WriteLine( "WailingFirePosXBass={0}", this.nWailingFireX.Bass );
+            sw.WriteLine( "WailingFirePosXGuitar={0}", nWailingFireX.Guitar );
+            sw.WriteLine( "WailingFirePosXBass={0}", nWailingFireX.Bass );
             sw.WriteLine();
             sw.WriteLine( ";ワイリングエフェクトのY座標(Guitar、Bass共通)" );
-            sw.WriteLine( "WailingFirePosY={0}", this.nWailingFireY );
+            sw.WriteLine( "WailingFirePosY={0}", nWailingFireY );
             sw.WriteLine();
             sw.WriteLine(";-------------------");
             #endregion
@@ -2281,37 +2064,37 @@ namespace DTXMania
 			sw.WriteLine( "; 自動演奏(0:OFF, 1:ON)" );
 			sw.WriteLine();
 			sw.WriteLine( "; Drums" );
-            sw.WriteLine("LC={0}", this.bAutoPlay.LC ? 1 : 0);
-            sw.WriteLine("HH={0}", this.bAutoPlay.HH ? 1 : 0);
-            sw.WriteLine("SD={0}", this.bAutoPlay.SD ? 1 : 0);
-            sw.WriteLine("BD={0}", this.bAutoPlay.BD ? 1 : 0);
-            sw.WriteLine("HT={0}", this.bAutoPlay.HT ? 1 : 0);
-            sw.WriteLine("LT={0}", this.bAutoPlay.LT ? 1 : 0);
-            sw.WriteLine("FT={0}", this.bAutoPlay.FT ? 1 : 0);
-            sw.WriteLine("CY={0}", this.bAutoPlay.CY ? 1 : 0);
-            sw.WriteLine("RD={0}", this.bAutoPlay.RD ? 1 : 0);
-            sw.WriteLine("LP={0}", this.bAutoPlay.LP ? 1 : 0);
-            sw.WriteLine("LBD={0}", this.bAutoPlay.LBD ? 1 : 0);
+            sw.WriteLine("LC={0}", bAutoPlay.LC ? 1 : 0);
+            sw.WriteLine("HH={0}", bAutoPlay.HH ? 1 : 0);
+            sw.WriteLine("SD={0}", bAutoPlay.SD ? 1 : 0);
+            sw.WriteLine("BD={0}", bAutoPlay.BD ? 1 : 0);
+            sw.WriteLine("HT={0}", bAutoPlay.HT ? 1 : 0);
+            sw.WriteLine("LT={0}", bAutoPlay.LT ? 1 : 0);
+            sw.WriteLine("FT={0}", bAutoPlay.FT ? 1 : 0);
+            sw.WriteLine("CY={0}", bAutoPlay.CY ? 1 : 0);
+            sw.WriteLine("RD={0}", bAutoPlay.RD ? 1 : 0);
+            sw.WriteLine("LP={0}", bAutoPlay.LP ? 1 : 0);
+            sw.WriteLine("LBD={0}", bAutoPlay.LBD ? 1 : 0);
 			sw.WriteLine();
 			sw.WriteLine( "; Guitar" );
 			//sw.WriteLine( "Guitar={0}", this.bAutoPlay.Guitar ? 1 : 0 );
-			sw.WriteLine( "GuitarR={0}", this.bAutoPlay.GtR ? 1 : 0 );
-			sw.WriteLine( "GuitarG={0}", this.bAutoPlay.GtG ? 1 : 0 );
-			sw.WriteLine( "GuitarB={0}", this.bAutoPlay.GtB ? 1 : 0 );
-            sw.WriteLine( "GuitarY={0}", this.bAutoPlay.GtY ? 1 : 0 );
-            sw.WriteLine( "GuitarP={0}", this.bAutoPlay.GtP ? 1 : 0 );
-			sw.WriteLine( "GuitarPick={0}", this.bAutoPlay.GtPick ? 1 : 0 );
-			sw.WriteLine( "GuitarWailing={0}", this.bAutoPlay.GtW ? 1 : 0 );
+			sw.WriteLine( "GuitarR={0}", bAutoPlay.GtR ? 1 : 0 );
+			sw.WriteLine( "GuitarG={0}", bAutoPlay.GtG ? 1 : 0 );
+			sw.WriteLine( "GuitarB={0}", bAutoPlay.GtB ? 1 : 0 );
+            sw.WriteLine( "GuitarY={0}", bAutoPlay.GtY ? 1 : 0 );
+            sw.WriteLine( "GuitarP={0}", bAutoPlay.GtP ? 1 : 0 );
+			sw.WriteLine( "GuitarPick={0}", bAutoPlay.GtPick ? 1 : 0 );
+			sw.WriteLine( "GuitarWailing={0}", bAutoPlay.GtW ? 1 : 0 );
 			sw.WriteLine();
 			sw.WriteLine( "; Bass" );
 			// sw.WriteLine( "Bass={0}", this.bAutoPlay.Bass ? 1 : 0 );
-			sw.WriteLine( "BassR={0}", this.bAutoPlay.BsR ? 1 : 0 );
-			sw.WriteLine( "BassG={0}", this.bAutoPlay.BsG ? 1 : 0 );
-			sw.WriteLine( "BassB={0}", this.bAutoPlay.BsB ? 1 : 0 );
-            sw.WriteLine( "BassY={0}", this.bAutoPlay.BsY ? 1 : 0);
-            sw.WriteLine( "BassP={0}", this.bAutoPlay.BsP ? 1 : 0);
-			sw.WriteLine( "BassPick={0}", this.bAutoPlay.BsPick ? 1 : 0 );
-			sw.WriteLine( "BassWailing={0}", this.bAutoPlay.BsW ? 1 : 0 );
+			sw.WriteLine( "BassR={0}", bAutoPlay.BsR ? 1 : 0 );
+			sw.WriteLine( "BassG={0}", bAutoPlay.BsG ? 1 : 0 );
+			sw.WriteLine( "BassB={0}", bAutoPlay.BsB ? 1 : 0 );
+            sw.WriteLine( "BassY={0}", bAutoPlay.BsY ? 1 : 0);
+            sw.WriteLine( "BassP={0}", bAutoPlay.BsP ? 1 : 0);
+			sw.WriteLine( "BassPick={0}", bAutoPlay.BsPick ? 1 : 0 );
+			sw.WriteLine( "BassWailing={0}", bAutoPlay.BsW ? 1 : 0 );
 			sw.WriteLine();
 			sw.WriteLine( ";-------------------" );
 			#endregion
@@ -2360,7 +2143,7 @@ namespace DTXMania
 			#region [ GUID ]
 			sw.WriteLine( "[GUID]" );
 			sw.WriteLine();
-			foreach( KeyValuePair<int, string> pair in this.dicJoystick )
+			foreach( KeyValuePair<int, string> pair in dicJoystick )
 			{
 				sw.WriteLine( "JoystickID={0},{1}", pair.Key, pair.Value );
 			}
@@ -2390,40 +2173,40 @@ namespace DTXMania
 			sw.WriteLine( "[DrumsKeyAssign]" );
 			sw.WriteLine();
 			sw.Write( "HH=" );
-			this.tWriteKey( sw, this.KeyAssign.Drums.HH );
+			tWriteKey( sw, KeyAssign.Drums.HH );
 			sw.WriteLine();
 			sw.Write( "SD=" );
-			this.tWriteKey( sw, this.KeyAssign.Drums.SD );
+			tWriteKey( sw, KeyAssign.Drums.SD );
 			sw.WriteLine();
 			sw.Write( "BD=" );
-			this.tWriteKey( sw, this.KeyAssign.Drums.BD );
+			tWriteKey( sw, KeyAssign.Drums.BD );
 			sw.WriteLine();
 			sw.Write( "HT=" );
-			this.tWriteKey( sw, this.KeyAssign.Drums.HT );
+			tWriteKey( sw, KeyAssign.Drums.HT );
 			sw.WriteLine();
 			sw.Write( "LT=" );
-			this.tWriteKey( sw, this.KeyAssign.Drums.LT );
+			tWriteKey( sw, KeyAssign.Drums.LT );
 			sw.WriteLine();
 			sw.Write( "FT=" );
-			this.tWriteKey( sw, this.KeyAssign.Drums.FT );
+			tWriteKey( sw, KeyAssign.Drums.FT );
 			sw.WriteLine();
 			sw.Write( "CY=" );
-			this.tWriteKey( sw, this.KeyAssign.Drums.CY );
+			tWriteKey( sw, KeyAssign.Drums.CY );
 			sw.WriteLine();
 			sw.Write( "HO=" );
-			this.tWriteKey( sw, this.KeyAssign.Drums.HHO );
+			tWriteKey( sw, KeyAssign.Drums.HHO );
 			sw.WriteLine();
 			sw.Write( "RD=" );
-			this.tWriteKey( sw, this.KeyAssign.Drums.RD );
+			tWriteKey( sw, KeyAssign.Drums.RD );
 			sw.WriteLine();
 			sw.Write( "LC=" );
-			this.tWriteKey( sw, this.KeyAssign.Drums.LC );
+			tWriteKey( sw, KeyAssign.Drums.LC );
 			sw.WriteLine();
 			sw.Write( "LP=" );										// #27029 2012.1.4 from
-			this.tWriteKey( sw, this.KeyAssign.Drums.LP );	//
+			tWriteKey( sw, KeyAssign.Drums.LP );	//
 			sw.WriteLine();											//
             sw.Write( "LBD=" );
-            this.tWriteKey( sw, this.KeyAssign.Drums.LBD );
+            tWriteKey( sw, KeyAssign.Drums.LBD );
 			sw.WriteLine();
             sw.WriteLine();
             #endregion
@@ -2431,31 +2214,31 @@ namespace DTXMania
 			sw.WriteLine( "[GuitarKeyAssign]" );
 			sw.WriteLine();
 			sw.Write( "R=" );
-			this.tWriteKey( sw, this.KeyAssign.Guitar.R );
+			tWriteKey( sw, KeyAssign.Guitar.R );
 			sw.WriteLine();
 			sw.Write( "G=" );
-			this.tWriteKey( sw, this.KeyAssign.Guitar.G );
+			tWriteKey( sw, KeyAssign.Guitar.G );
 			sw.WriteLine();
 			sw.Write( "B=" );
-			this.tWriteKey( sw, this.KeyAssign.Guitar.B );
+			tWriteKey( sw, KeyAssign.Guitar.B );
             sw.WriteLine();
             sw.Write( "Y=" );
-            this.tWriteKey( sw, this.KeyAssign.Guitar.Y );
+            tWriteKey( sw, KeyAssign.Guitar.Y );
             sw.WriteLine();
             sw.Write( "P=" );
-            this.tWriteKey( sw, this.KeyAssign.Guitar.P );
+            tWriteKey( sw, KeyAssign.Guitar.P );
 			sw.WriteLine();
 			sw.Write( "Pick=" );
-			this.tWriteKey( sw, this.KeyAssign.Guitar.Pick );
+			tWriteKey( sw, KeyAssign.Guitar.Pick );
 			sw.WriteLine();
 			sw.Write( "Wail=" );
-			this.tWriteKey( sw, this.KeyAssign.Guitar.Wail );
+			tWriteKey( sw, KeyAssign.Guitar.Wail );
 			sw.WriteLine();
 			sw.Write( "Decide=" );
-			this.tWriteKey( sw, this.KeyAssign.Guitar.Decide );
+			tWriteKey( sw, KeyAssign.Guitar.Decide );
 			sw.WriteLine();
 			sw.Write("Cancel=");
-			this.tWriteKey(sw, this.KeyAssign.Guitar.Cancel);
+			tWriteKey(sw, KeyAssign.Guitar.Cancel);
 			sw.WriteLine();
 			sw.WriteLine();
 			#endregion
@@ -2463,31 +2246,31 @@ namespace DTXMania
 			sw.WriteLine( "[BassKeyAssign]" );
 			sw.WriteLine();
 			sw.Write( "R=" );
-			this.tWriteKey( sw, this.KeyAssign.Bass.R );
+			tWriteKey( sw, KeyAssign.Bass.R );
 			sw.WriteLine();
 			sw.Write( "G=" );
-			this.tWriteKey( sw, this.KeyAssign.Bass.G );
+			tWriteKey( sw, KeyAssign.Bass.G );
 			sw.WriteLine();
 			sw.Write( "B=" );
-			this.tWriteKey( sw, this.KeyAssign.Bass.B );
+			tWriteKey( sw, KeyAssign.Bass.B );
             sw.WriteLine();
             sw.Write( "Y=" );
-            this.tWriteKey( sw, this.KeyAssign.Bass.Y );
+            tWriteKey( sw, KeyAssign.Bass.Y );
             sw.WriteLine();
             sw.Write( "P=" );
-            this.tWriteKey( sw, this.KeyAssign.Bass.P );
+            tWriteKey( sw, KeyAssign.Bass.P );
 			sw.WriteLine();
 			sw.Write( "Pick=" );
-			this.tWriteKey( sw, this.KeyAssign.Bass.Pick );
+			tWriteKey( sw, KeyAssign.Bass.Pick );
 			sw.WriteLine();
 			sw.Write( "Wail=" );
-			this.tWriteKey( sw, this.KeyAssign.Bass.Wail );
+			tWriteKey( sw, KeyAssign.Bass.Wail );
 			sw.WriteLine();
 			sw.Write( "Decide=" );
-			this.tWriteKey( sw, this.KeyAssign.Bass.Decide );
+			tWriteKey( sw, KeyAssign.Bass.Decide );
 			sw.WriteLine();
 			sw.Write("Cancel=");
-			this.tWriteKey(sw, this.KeyAssign.Bass.Cancel);
+			tWriteKey(sw, KeyAssign.Bass.Cancel);
 			sw.WriteLine();
 			sw.WriteLine();
 			#endregion
@@ -2495,37 +2278,37 @@ namespace DTXMania
 			sw.WriteLine( "[SystemKeyAssign]" );
 			sw.WriteLine();
 			sw.Write( "Capture=" );
-			this.tWriteKey( sw, this.KeyAssign.System.Capture );
+			tWriteKey( sw, KeyAssign.System.Capture );
 			sw.WriteLine();
 			sw.Write("Search=");
-			this.tWriteKey(sw, this.KeyAssign.System.Search);
+			tWriteKey(sw, KeyAssign.System.Search);
 			sw.WriteLine();
 			sw.Write( "Help=" );
-			this.tWriteKey( sw, this.KeyAssign.Guitar.Help );
+			tWriteKey( sw, KeyAssign.Guitar.Help );
 			sw.WriteLine();
 			sw.Write( "Pause=" );
-			this.tWriteKey( sw, this.KeyAssign.Bass.Help );
+			tWriteKey( sw, KeyAssign.Bass.Help );
 			sw.WriteLine();
 			sw.Write("LoopCreate=");
-			this.tWriteKey(sw, this.KeyAssign.System.LoopCreate);
+			tWriteKey(sw, KeyAssign.System.LoopCreate);
 			sw.WriteLine();
 			sw.Write("LoopDelete=");
-			this.tWriteKey(sw, this.KeyAssign.System.LoopDelete);
+			tWriteKey(sw, KeyAssign.System.LoopDelete);
 			sw.WriteLine();
 			sw.Write("SkipForward=");
-			this.tWriteKey(sw, this.KeyAssign.System.SkipForward);
+			tWriteKey(sw, KeyAssign.System.SkipForward);
 			sw.WriteLine();
 			sw.Write("SkipBackward=");
-			this.tWriteKey(sw, this.KeyAssign.System.SkipBackward);
+			tWriteKey(sw, KeyAssign.System.SkipBackward);
 			sw.WriteLine();
 			sw.Write("IncreasePlaySpeed=");
-			this.tWriteKey(sw, this.KeyAssign.System.IncreasePlaySpeed);
+			tWriteKey(sw, KeyAssign.System.IncreasePlaySpeed);
 			sw.WriteLine();
 			sw.Write("DecreasePlaySpeed=");
-			this.tWriteKey(sw, this.KeyAssign.System.DecreasePlaySpeed);
+			tWriteKey(sw, KeyAssign.System.DecreasePlaySpeed);
 			sw.WriteLine();
 			sw.Write("Restart=");
-			this.tWriteKey(sw, this.KeyAssign.System.Restart);
+			tWriteKey(sw, KeyAssign.System.Restart);
 			sw.WriteLine();
 			sw.WriteLine();
 			#endregion
@@ -2549,12 +2332,12 @@ namespace DTXMania
 
 		public void tReadFromFile( string iniファイル名 )
 		{
-			this.ConfigIniファイル名 = iniファイル名;
-			this.bConfigIniが存在している = File.Exists( this.ConfigIniファイル名 );
-			if( this.bConfigIniが存在している )
+			ConfigIniファイル名 = iniファイル名;
+			bConfigIniが存在している = File.Exists( ConfigIniファイル名 );
+			if( bConfigIniが存在している )
 			{
 				string str;
-				StreamReader reader = new StreamReader( this.ConfigIniファイル名, Encoding.GetEncoding( "Shift_JIS" ) );
+				StreamReader reader = new StreamReader( ConfigIniファイル名, Encoding.GetEncoding( "Shift_JIS" ) );
 				str = reader.ReadToEnd();
 				tReadFromString( str );
 			}
@@ -2683,144 +2466,144 @@ namespace DTXMania
 #endif
 											if( str3.Equals( "Version" ) )
 											{
-												this.strDTXManiaのバージョン = str4;
+												strDTXManiaのバージョン = str4;
 											}
 											else if( str3.Equals( "DTXPath" ) )
 											{
-												this.str曲データ検索パス = str4;
+												str曲データ検索パス = str4;
 											}
 											else if ( str3.Equals( "SkinPath" ) )
 											{
 												string absSkinPath = str4;
-												if ( !System.IO.Path.IsPathRooted( str4 ) )
+												if ( !Path.IsPathRooted( str4 ) )
 												{
-													absSkinPath = System.IO.Path.Combine( CDTXMania.strEXEのあるフォルダ, "System" );
-													absSkinPath = System.IO.Path.Combine( absSkinPath, str4 );
+													absSkinPath = Path.Combine( CDTXMania.strEXEのあるフォルダ, "System" );
+													absSkinPath = Path.Combine( absSkinPath, str4 );
 													Uri u = new Uri( absSkinPath );
 													absSkinPath = u.AbsolutePath.ToString();	// str4内に相対パスがある場合に備える
 													absSkinPath = System.Web.HttpUtility.UrlDecode( absSkinPath );						// デコードする
-													absSkinPath = absSkinPath.Replace( '/', System.IO.Path.DirectorySeparatorChar );	// 区切り文字が\ではなく/なので置換する
+													absSkinPath = absSkinPath.Replace( '/', Path.DirectorySeparatorChar );	// 区切り文字が\ではなく/なので置換する
 												}
-												if ( absSkinPath[ absSkinPath.Length - 1 ] != System.IO.Path.DirectorySeparatorChar )	// フォルダ名末尾に\を必ずつけて、CSkin側と表記を統一する
+												if ( absSkinPath[ absSkinPath.Length - 1 ] != Path.DirectorySeparatorChar )	// フォルダ名末尾に\を必ずつけて、CSkin側と表記を統一する
 												{
-													absSkinPath += System.IO.Path.DirectorySeparatorChar;
+													absSkinPath += Path.DirectorySeparatorChar;
 												}
-												this.strSystemSkinSubfolderFullName = absSkinPath;
+												strSystemSkinSubfolderFullName = absSkinPath;
 											}
                                             else if( str3.Equals( "CardNameDrums" ) )
                                             {
-                                                this.strCardName[0] = str4;
+                                                strCardName[0] = str4;
                                             }
                                             else if( str3.Equals( "CardNameGuitar" ) )
                                             {
-                                                this.strCardName[1] = str4;
+                                                strCardName[1] = str4;
                                             }
                                             else if( str3.Equals( "CardNameBass" ) )
                                             {
-                                                this.strCardName[2] = str4;
+                                                strCardName[2] = str4;
                                             }
                                             else if( str3.Equals( "GroupNameDrums" ) )
                                             {
-                                                this.strGroupName[0] = str4;
+                                                strGroupName[0] = str4;
                                             }
                                             else if( str3.Equals( "GroupNameGuitar" ) )
                                             {
-                                                this.strGroupName[1] = str4;
+                                                strGroupName[1] = str4;
                                             }
                                             else if( str3.Equals( "GroupNameBass" ) )
                                             {
-                                                this.strGroupName[2] = str4;
+                                                strGroupName[2] = str4;
                                             }
                                             else if( str3.Equals( "NameColorDrums" ) )
                                             {
-                                                this.nNameColor[ 0 ] = CConversion.nGetNumberIfInRange(str4, 0, 19, 0);
+                                                nNameColor[ 0 ] = CConversion.nGetNumberIfInRange(str4, 0, 19, 0);
                                             }
                                             else if( str3.Equals( "NameColorGuitar" ) )
                                             {
-                                                this.nNameColor[ 1 ] = CConversion.nGetNumberIfInRange(str4, 0, 19, 0);
+                                                nNameColor[ 1 ] = CConversion.nGetNumberIfInRange(str4, 0, 19, 0);
                                             }
                                             else if( str3.Equals( "NameColorBass" ) )
                                             {
-                                                this.nNameColor[ 2 ] = CConversion.nGetNumberIfInRange(str4, 0, 19, 0);
+                                                nNameColor[ 2 ] = CConversion.nGetNumberIfInRange(str4, 0, 19, 0);
                                             }
                                             else if (str3.Equals("SkinChangeByBoxDef"))
                                             {
-                                                this.bUseBoxDefSkin = CConversion.bONorOFF(str4[0]);
+                                                bUseBoxDefSkin = CConversion.bONorOFF(str4[0]);
                                             }
                                             else if (str3.Equals("FullScreen"))
                                             {
-                                                this.bFullScreenMode = CConversion.bONorOFF(str4[0]);
+                                                bFullScreenMode = CConversion.bONorOFF(str4[0]);
                                             }
 											else if (str3.Equals("FullScreenExclusive"))
 											{
-												this.bFullScreenExclusive = CConversion.bONorOFF(str4[0]);
+												bFullScreenExclusive = CConversion.bONorOFF(str4[0]);
 											}
 											else if (str3.Equals("WindowWidth"))		// #23510 2010.10.31 yyagi add
                                             {
-                                                this.nウインドウwidth = CConversion.nGetNumberIfInRange(str4, 1, 65535, this.nウインドウwidth);
-                                                if (this.nウインドウwidth <= 0)
+                                                nウインドウwidth = CConversion.nGetNumberIfInRange(str4, 1, 65535, nウインドウwidth);
+                                                if (nウインドウwidth <= 0)
                                                 {
-                                                    this.nウインドウwidth = SampleFramework.GameWindowSize.Width;
+                                                    nウインドウwidth = SampleFramework.GameWindowSize.Width;
                                                 }
                                             }
                                             else if (str3.Equals("WindowHeight"))		// #23510 2010.10.31 yyagi add
                                             {
-                                                this.nウインドウheight = CConversion.nGetNumberIfInRange(str4, 1, 65535, this.nウインドウheight);
-                                                if (this.nウインドウheight <= 0)
+                                                nウインドウheight = CConversion.nGetNumberIfInRange(str4, 1, 65535, nウインドウheight);
+                                                if (nウインドウheight <= 0)
                                                 {
-                                                    this.nウインドウheight = SampleFramework.GameWindowSize.Height;
+                                                    nウインドウheight = SampleFramework.GameWindowSize.Height;
                                                 }
                                             }
                                             else if (str3.Equals("WindowX"))		// #30675 2013.02.04 ikanick add
                                             {
-                                                this.n初期ウィンドウ開始位置X = CConversion.nGetNumberIfInRange(
-                                                    str4, 0, System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width - 1, this.n初期ウィンドウ開始位置X);
+                                                n初期ウィンドウ開始位置X = CConversion.nGetNumberIfInRange(
+                                                    str4, 0, System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width - 1, n初期ウィンドウ開始位置X);
                                             }
                                             else if (str3.Equals("WindowY"))		// #30675 2013.02.04 ikanick add
                                             {
-                                                this.n初期ウィンドウ開始位置Y = CConversion.nGetNumberIfInRange(
-                                                    str4, 0, System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height - 1, this.n初期ウィンドウ開始位置Y);
+                                                n初期ウィンドウ開始位置Y = CConversion.nGetNumberIfInRange(
+                                                    str4, 0, System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height - 1, n初期ウィンドウ開始位置Y);
                                             }
                                             else if (str3.Equals("MovieMode"))
                                             {
-                                                this.nMovieMode = CConversion.nGetNumberIfInRange(str4, 0, 0xffff, this.nMovieMode);
-                                                if (this.nMovieMode > 3)
+                                                nMovieMode = CConversion.nGetNumberIfInRange(str4, 0, 0xffff, nMovieMode);
+                                                if (nMovieMode > 3)
                                                 {
-                                                    this.nMovieMode = 0;
+                                                    nMovieMode = 0;
                                                 }
                                             }
                                             else if (str3.Equals("MovieAlpha"))
                                             {
-                                                this.nMovieAlpha = CConversion.nGetNumberIfInRange(str4, 0, 10, this.nMovieAlpha);
-                                                if (this.nMovieAlpha > 10)
+                                                nMovieAlpha = CConversion.nGetNumberIfInRange(str4, 0, 10, nMovieAlpha);
+                                                if (nMovieAlpha > 10)
                                                 {
-                                                    this.nMovieAlpha = 10;
+                                                    nMovieAlpha = 10;
                                                 }
                                             }
                                             else if (str3.Equals("InfoType"))
                                             {
-                                                this.nInfoType = CConversion.nGetNumberIfInRange(str4, 0, 1, (int)this.nInfoType);
+                                                nInfoType = CConversion.nGetNumberIfInRange(str4, 0, 1, (int)nInfoType);
                                             }
                                             else if (str3.Equals("DoubleClickFullScreen"))	// #26752 2011.11.27 yyagi
                                             {
-                                                this.bIsAllowedDoubleClickFullscreen = CConversion.bONorOFF(str4[0]);
+                                                bIsAllowedDoubleClickFullscreen = CConversion.bONorOFF(str4[0]);
                                             }
                                             else if (str3.Equals("EnableSystemMenu"))		// #28200 2012.5.1 yyagi
                                             {
-                                                this.bIsEnabledSystemMenu = CConversion.bONorOFF(str4[0]);
+                                                bIsEnabledSystemMenu = CConversion.bONorOFF(str4[0]);
                                             }
                                             else if (str3.Equals("SoundDeviceType"))
                                             {
-                                                this.nSoundDeviceType = CConversion.nGetNumberIfInRange(str4, 0, 3, this.nSoundDeviceType);
+                                                nSoundDeviceType = CConversion.nGetNumberIfInRange(str4, 0, 3, nSoundDeviceType);
                                             }
                                             else if (str3.Equals("WASAPIBufferSizeMs"))
                                             {
-                                                this.nWASAPIBufferSizeMs = CConversion.nGetNumberIfInRange(str4, 0, 9999, this.nWASAPIBufferSizeMs);
+                                                nWASAPIBufferSizeMs = CConversion.nGetNumberIfInRange(str4, 0, 9999, nWASAPIBufferSizeMs);
                                             }
                                             else if (str3.Equals("ASIODevice"))
                                             {
                                                 string[] asiodev = CEnumerateAllAsioDevices.GetAllASIODevices();
-                                                this.nASIODevice = CConversion.nGetNumberIfInRange(str4, 0, asiodev.Length - 1, this.nASIODevice);
+                                                nASIODevice = CConversion.nGetNumberIfInRange(str4, 0, asiodev.Length - 1, nASIODevice);
                                             }
 											//else if (str3.Equals("ASIOBufferSizeMs"))
 											//{
@@ -2832,339 +2615,339 @@ namespace DTXMania
 											//}
 											else if (str3.Equals("SoundTimerType"))         // #33689 2014.6.6 yyagi
 											{
-												this.bUseOSTimer = CConversion.bONorOFF(str4[0]);
+												bUseOSTimer = CConversion.bONorOFF(str4[0]);
 											}
 											else if (str3.Equals("EventDrivenWASAPI"))
 											{
-												this.bEventDrivenWASAPI = CConversion.bONorOFF(str4[0]);
+												bEventDrivenWASAPI = CConversion.bONorOFF(str4[0]);
 											}
 											else if (str3.Equals("Metronome"))
 											{
-												this.bMetronome = CConversion.bONorOFF(str4[0]);
+												bMetronome = CConversion.bONorOFF(str4[0]);
 											}
                                             else if (str3.Equals("ChipPlayTimeComputeMode"))
                                             {
-                                                this.nChipPlayTimeComputeMode = CConversion.nGetNumberIfInRange(str4, 0, 1, this.nChipPlayTimeComputeMode);
+                                                nChipPlayTimeComputeMode = CConversion.nGetNumberIfInRange(str4, 0, 1, nChipPlayTimeComputeMode);
                                             }
                                             else if (str3.Equals("MasterVolume"))
 											{
-												this.nMasterVolume = CConversion.nGetNumberIfInRange(str4, 0, 100, this.nMasterVolume);
+												nMasterVolume = CConversion.nGetNumberIfInRange(str4, 0, 100, nMasterVolume);
 											}
 											else if (str3.Equals("VSyncWait"))
                                             {
-                                                this.bVerticalSyncWait = CConversion.bONorOFF(str4[0]);
+                                                bVerticalSyncWait = CConversion.bONorOFF(str4[0]);
                                             }
                                             else if (str3.Equals("BackSleep"))				// #23568 2010.11.04 ikanick add
                                             {
-                                                this.n非フォーカス時スリープms = CConversion.nRoundToRange(str4, 0, 50, this.n非フォーカス時スリープms);
+                                                n非フォーカス時スリープms = CConversion.nRoundToRange(str4, 0, 50, n非フォーカス時スリープms);
                                             }
                                             else if (str3.Equals("SleepTimePerFrame"))		// #23568 2011.11.27 yyagi
                                             {
-                                                this.nフレーム毎スリープms = CConversion.nRoundToRange(str4, -1, 50, this.nフレーム毎スリープms);
+                                                nフレーム毎スリープms = CConversion.nRoundToRange(str4, -1, 50, nフレーム毎スリープms);
                                             }
                                             else if (str3.Equals("Guitar"))
                                             {
-                                                this.bGuitarEnabled = CConversion.bONorOFF(str4[0]);
+                                                bGuitarEnabled = CConversion.bONorOFF(str4[0]);
                                             }
                                             else if (str3.Equals("Drums"))
                                             {
-                                                this.bDrumsEnabled = CConversion.bONorOFF(str4[0]);
+                                                bDrumsEnabled = CConversion.bONorOFF(str4[0]);
                                             }                                            
                                             else if (str3.Equals("BGAlpha"))
                                             {
-                                                this.nBackgroundTransparency = CConversion.nGetNumberIfInRange(str4, 0, 0xff, this.nBackgroundTransparency);
+                                                nBackgroundTransparency = CConversion.nGetNumberIfInRange(str4, 0, 0xff, nBackgroundTransparency);
                                             }
                                             else if (str3.Equals("DamageLevel"))
                                             {
-                                                this.eDamageLevel = (EDamageLevel)CConversion.nGetNumberIfInRange(str4, 0, 2, (int)this.eDamageLevel);
+                                                eDamageLevel = (EDamageLevel)CConversion.nGetNumberIfInRange(str4, 0, 2, (int)eDamageLevel);
                                             }
                                             else if (str3.Equals("HHGroup"))
                                             {
-                                                this.eHHGroup = (EHHGroup)CConversion.nGetNumberIfInRange(str4, 0, 3, (int)this.eHHGroup);
+                                                eHHGroup = (EHHGroup)CConversion.nGetNumberIfInRange(str4, 0, 3, (int)eHHGroup);
                                             }
                                             else if (str3.Equals("FTGroup"))
                                             {
-                                                this.eFTGroup = (EFTGroup)CConversion.nGetNumberIfInRange(str4, 0, 2, (int)this.eFTGroup);
+                                                eFTGroup = (EFTGroup)CConversion.nGetNumberIfInRange(str4, 0, 2, (int)eFTGroup);
                                             }
                                             else if (str3.Equals("CYGroup"))
                                             {
-                                                this.eCYGroup = (ECYGroup)CConversion.nGetNumberIfInRange(str4, 0, 2, (int)this.eCYGroup);
+                                                eCYGroup = (ECYGroup)CConversion.nGetNumberIfInRange(str4, 0, 2, (int)eCYGroup);
                                             }
                                             else if (str3.Equals("BDGroup"))		// #27029 2012.1.4 from
                                             {
-                                                this.eBDGroup = (EBDGroup)CConversion.nGetNumberIfInRange(str4, 0, 3, (int)this.eBDGroup);
+                                                eBDGroup = (EBDGroup)CConversion.nGetNumberIfInRange(str4, 0, 3, (int)eBDGroup);
                                             }
                                             else if (str3.Equals("HitSoundPriorityHH"))
                                             {
-                                                this.eHitSoundPriorityHH = (EPlaybackPriority)CConversion.nGetNumberIfInRange(str4, 0, 1, (int)this.eHitSoundPriorityHH);
+                                                eHitSoundPriorityHH = (EPlaybackPriority)CConversion.nGetNumberIfInRange(str4, 0, 1, (int)eHitSoundPriorityHH);
                                             }
                                             else if (str3.Equals("HitSoundPriorityFT"))
                                             {
-                                                this.eHitSoundPriorityFT = (EPlaybackPriority)CConversion.nGetNumberIfInRange(str4, 0, 1, (int)this.eHitSoundPriorityFT);
+                                                eHitSoundPriorityFT = (EPlaybackPriority)CConversion.nGetNumberIfInRange(str4, 0, 1, (int)eHitSoundPriorityFT);
                                             }
                                             else if (str3.Equals("HitSoundPriorityCY"))
                                             {
-                                                this.eHitSoundPriorityCY = (EPlaybackPriority)CConversion.nGetNumberIfInRange(str4, 0, 1, (int)this.eHitSoundPriorityCY);
+                                                eHitSoundPriorityCY = (EPlaybackPriority)CConversion.nGetNumberIfInRange(str4, 0, 1, (int)eHitSoundPriorityCY);
                                             }
                                             else if (str3.Equals("HitSoundPriorityLP"))
                                             {
-                                                this.eHitSoundPriorityLP = (EPlaybackPriority)CConversion.nGetNumberIfInRange(str4, 0, 1, (int)this.eHitSoundPriorityLP);
+                                                eHitSoundPriorityLP = (EPlaybackPriority)CConversion.nGetNumberIfInRange(str4, 0, 1, (int)eHitSoundPriorityLP);
                                             }
                                             else if (str3.Equals("StageFailed"))
                                             {
-                                                this.bSTAGEFAILEDEnabled = CConversion.bONorOFF(str4[0]);
+                                                bSTAGEFAILEDEnabled = CConversion.bONorOFF(str4[0]);
                                             }
                                             else if (str3.Equals("AVI"))
                                             {
-                                                this.bAVIEnabled = CConversion.bONorOFF(str4[0]);
+                                                bAVIEnabled = CConversion.bONorOFF(str4[0]);
                                             }
                                             else if (str3.Equals("BGA"))
                                             {
-                                                this.bBGAEnabled = CConversion.bONorOFF(str4[0]);
+                                                bBGAEnabled = CConversion.bONorOFF(str4[0]);
                                             }
                                             else if (str3.Equals("FillInEffect"))
                                             {
-                                                this.bFillInEnabled = CConversion.bONorOFF(str4[0]);
+                                                bFillInEnabled = CConversion.bONorOFF(str4[0]);
                                             }
                                             else if (str3.Equals("PreviewSoundWait"))
                                             {
-                                                this.n曲が選択されてからプレビュー音が鳴るまでのウェイトms = CConversion.nGetNumberIfInRange(str4, 0, 0x5f5e0ff, this.n曲が選択されてからプレビュー音が鳴るまでのウェイトms);
+                                                n曲が選択されてからプレビュー音が鳴るまでのウェイトms = CConversion.nGetNumberIfInRange(str4, 0, 0x5f5e0ff, n曲が選択されてからプレビュー音が鳴るまでのウェイトms);
                                             }
                                             else if (str3.Equals("PreviewImageWait"))
                                             {
-                                                this.n曲が選択されてからプレビュー画像が表示開始されるまでのウェイトms = CConversion.nGetNumberIfInRange(str4, 0, 0x5f5e0ff, this.n曲が選択されてからプレビュー画像が表示開始されるまでのウェイトms);
+                                                n曲が選択されてからプレビュー画像が表示開始されるまでのウェイトms = CConversion.nGetNumberIfInRange(str4, 0, 0x5f5e0ff, n曲が選択されてからプレビュー画像が表示開始されるまでのウェイトms);
                                             }
                                             else if (str3.Equals("AdjustWaves"))
                                             {
-                                                this.bWave再生位置自動調整機能有効 = CConversion.bONorOFF(str4[0]);
+                                                bWave再生位置自動調整機能有効 = CConversion.bONorOFF(str4[0]);
                                             }
                                             else if (str3.Equals("BGMSound"))
                                             {
-                                                this.bBGM音を発声する = CConversion.bONorOFF(str4[0]);
+                                                bBGM音を発声する = CConversion.bONorOFF(str4[0]);
                                             }
                                             else if (str3.Equals("HitSound"))
                                             {
-                                                this.bドラム打音を発声する = CConversion.bONorOFF(str4[0]);
+                                                bドラム打音を発声する = CConversion.bONorOFF(str4[0]);
                                             }
                                             else if (str3.Equals("AudienceSound"))
                                             {
-                                                this.b歓声を発声する = CConversion.bONorOFF(str4[0]);
+                                                b歓声を発声する = CConversion.bONorOFF(str4[0]);
                                             }
                                             else if (str3.Equals("SaveScoreIni"))
                                             {
-                                                this.bScoreIniを出力する = CConversion.bONorOFF(str4[0]);
+                                                bScoreIniを出力する = CConversion.bONorOFF(str4[0]);
                                             }
                                             else if (str3.Equals("RandomFromSubBox"))
                                             {
-                                                this.bランダムセレクトで子BOXを検索対象とする = CConversion.bONorOFF(str4[0]);
+                                                bランダムセレクトで子BOXを検索対象とする = CConversion.bONorOFF(str4[0]);
                                             }
                                             else if (str3.Equals("SoundMonitorDrums"))
                                             {
-                                                this.b演奏音を強調する.Drums = CConversion.bONorOFF(str4[0]);
+                                                b演奏音を強調する.Drums = CConversion.bONorOFF(str4[0]);
                                             }
                                             else if (str3.Equals("SoundMonitorGuitar"))
                                             {
-                                                this.b演奏音を強調する.Guitar = CConversion.bONorOFF(str4[0]);
+                                                b演奏音を強調する.Guitar = CConversion.bONorOFF(str4[0]);
                                             }
                                             else if (str3.Equals("SoundMonitorBass"))
                                             {
-                                                this.b演奏音を強調する.Bass = CConversion.bONorOFF(str4[0]);
+                                                b演奏音を強調する.Bass = CConversion.bONorOFF(str4[0]);
                                             }
                                             else if (str3.Equals("MinComboDrums"))
                                             {
-                                                this.n表示可能な最小コンボ数.Drums = CConversion.nGetNumberIfInRange(str4, 1, 0x1869f, this.n表示可能な最小コンボ数.Drums);
+                                                n表示可能な最小コンボ数.Drums = CConversion.nGetNumberIfInRange(str4, 1, 0x1869f, n表示可能な最小コンボ数.Drums);
                                             }
                                             else if (str3.Equals("MinComboGuitar"))
                                             {
-                                                this.n表示可能な最小コンボ数.Guitar = CConversion.nGetNumberIfInRange(str4, 0, 0x1869f, this.n表示可能な最小コンボ数.Guitar);
+                                                n表示可能な最小コンボ数.Guitar = CConversion.nGetNumberIfInRange(str4, 0, 0x1869f, n表示可能な最小コンボ数.Guitar);
                                             }
                                             else if (str3.Equals("MinComboBass"))
                                             {
-                                                this.n表示可能な最小コンボ数.Bass = CConversion.nGetNumberIfInRange(str4, 0, 0x1869f, this.n表示可能な最小コンボ数.Bass);
+                                                n表示可能な最小コンボ数.Bass = CConversion.nGetNumberIfInRange(str4, 0, 0x1869f, n表示可能な最小コンボ数.Bass);
                                             }
                                             else if( str3.Equals( "MusicNameDispDef" ) )
                                             {
-                                                this.b曲名表示をdefのものにする = CConversion.bONorOFF(str4[0]);
+                                                b曲名表示をdefのものにする = CConversion.bONorOFF(str4[0]);
                                             }
                                             else if (str3.Equals("ShowDebugStatus"))
                                             {
-                                                this.b演奏情報を表示する = CConversion.bONorOFF(str4[0]);
+                                                bShowPerformanceInformation = CConversion.bONorOFF(str4[0]);
                                             }
                                             #region [ GDオプション ]
                                             else if (str3.Equals("Difficulty"))
                                             {
-                                                this.b難易度表示をXG表示にする = CConversion.bONorOFF(str4[0]);
+                                                b難易度表示をXG表示にする = CConversion.bONorOFF(str4[0]);
                                             }
                                             else if (str3.Equals("ShowScore"))
                                             {
-                                                this.bShowScore = CConversion.bONorOFF(str4[0]);
+                                                bShowScore = CConversion.bONorOFF(str4[0]);
                                             }
                                             else if (str3.Equals("ShowMusicInfo"))
                                             {
-                                                this.bShowMusicInfo = CConversion.bONorOFF(str4[0]);
+                                                bShowMusicInfo = CConversion.bONorOFF(str4[0]);
                                             }
 											else if (str3.Equals("ShowPlaySpeed"))
 											{
-												this.nShowPlaySpeed = CConversion.nGetNumberIfInRange(str4, 0, 2, this.nShowPlaySpeed);
+												nShowPlaySpeed = CConversion.nGetNumberIfInRange(str4, 0, 2, nShowPlaySpeed);
 											}
 											else if (str3.Equals("DisplayFontName"))
                                             {
-                                                this.str曲名表示フォント = str4;
+                                                str曲名表示フォント = str4;
                                             }
                                             #endregion
                                             else if (str3.Equals("SelectListFontName"))
                                             {
-                                                this.str選曲リストフォント = str4;
+                                                str選曲リストフォント = str4;
                                             }
                                             else if (str3.Equals("SelectListFontSize"))
                                             {
-                                                this.n選曲リストフォントのサイズdot = CConversion.nGetNumberIfInRange(str4, 1, 0x3e7, this.n選曲リストフォントのサイズdot);
+                                                n選曲リストフォントのサイズdot = CConversion.nGetNumberIfInRange(str4, 1, 0x3e7, n選曲リストフォントのサイズdot);
                                             }
                                             else if (str3.Equals("SelectListFontItalic"))
                                             {
-                                                this.b選曲リストフォントを斜体にする = CConversion.bONorOFF(str4[0]);
+                                                b選曲リストフォントを斜体にする = CConversion.bONorOFF(str4[0]);
                                             }
                                             else if (str3.Equals("SelectListFontBold"))
                                             {
-                                                this.b選曲リストフォントを太字にする = CConversion.bONorOFF(str4[0]);
+                                                b選曲リストフォントを太字にする = CConversion.bONorOFF(str4[0]);
                                             }
                                             else if (str3.Equals("ChipVolume"))
                                             {
-                                                this.n手動再生音量 = CConversion.nGetNumberIfInRange(str4, 0, 100, this.n手動再生音量);
+                                                n手動再生音量 = CConversion.nGetNumberIfInRange(str4, 0, 100, n手動再生音量);
                                             }
                                             else if (str3.Equals("AutoChipVolume"))
                                             {
-                                                this.n自動再生音量 = CConversion.nGetNumberIfInRange(str4, 0, 100, this.n自動再生音量);
+                                                n自動再生音量 = CConversion.nGetNumberIfInRange(str4, 0, 100, n自動再生音量);
                                             }
                                             else if (str3.Equals("StoicMode"))
                                             {
-                                                this.bストイックモード = CConversion.bONorOFF(str4[0]);
+                                                bストイックモード = CConversion.bONorOFF(str4[0]);
                                             }
                                             else if (str3.Equals("CymbalFree"))
                                             {
-                                                this.bシンバルフリー = CConversion.bONorOFF(str4[0]);
+                                                bシンバルフリー = CConversion.bONorOFF(str4[0]);
                                             }
                                             else if (str3.Equals("HHOGraphics"))
                                             {
-                                                this.eHHOGraphics.Drums = (EType)CConversion.nGetNumberIfInRange(str4, 0, 2, (int)this.eHHOGraphics.Drums);
+                                                eHHOGraphics.Drums = (EType)CConversion.nGetNumberIfInRange(str4, 0, 2, (int)eHHOGraphics.Drums);
                                             }
                                             else if (str3.Equals("LBDGraphics"))
                                             {
-                                                this.eLBDGraphics.Drums = (EType)CConversion.nGetNumberIfInRange(str4, 0, 1, (int)this.eLBDGraphics.Drums);
+                                                eLBDGraphics.Drums = (EType)CConversion.nGetNumberIfInRange(str4, 0, 1, (int)eLBDGraphics.Drums);
                                             }
                                             else if (str3.Equals("RDPosition"))
                                             {
-                                                this.eRDPosition = (ERDPosition)CConversion.nGetNumberIfInRange(str4, 0, 1, (int)this.eRDPosition);
+                                                eRDPosition = (ERDPosition)CConversion.nGetNumberIfInRange(str4, 0, 1, (int)eRDPosition);
                                             }
                                             else if (str3.Equals("ShowLagTime"))				// #25370 2011.6.3 yyagi
                                             {
-                                                this.nShowLagType = CConversion.nGetNumberIfInRange(str4, 0, 2, this.nShowLagType);
+                                                nShowLagType = CConversion.nGetNumberIfInRange(str4, 0, 2, nShowLagType);
                                             }
                                             else if (str3.Equals("ShowLagTimeColor"))				// #25370 2011.6.3 yyagi
                                             {
-                                                this.nShowLagTypeColor = CConversion.nGetNumberIfInRange( str4, 0, 1, this.nShowLagTypeColor );
+                                                nShowLagTypeColor = CConversion.nGetNumberIfInRange( str4, 0, 1, nShowLagTypeColor );
                                             }
 											else if (str3.Equals("ShowLagHitCount"))          //fisyher: New field
 											{
-												this.bShowLagHitCount = CConversion.bONorOFF(str4[0]);
+												bShowLagHitCount = CConversion.bONorOFF(str4[0]);
 											}
 											else if (str3.Equals("TimeStretch"))				// #23664 2013.2.24 yyagi
                                             {
-                                                this.bTimeStretch = CConversion.bONorOFF(str4[0]);
+                                                bTimeStretch = CConversion.bONorOFF(str4[0]);
                                             }
                                             else if (str3.Equals("AutoResultCapture"))			// #25399 2011.6.9 yyagi
                                             {
-                                                this.bIsAutoResultCapture = CConversion.bONorOFF(str4[0]);
+                                                bIsAutoResultCapture = CConversion.bONorOFF(str4[0]);
                                             }
                                             #region [ AdjustTime ]
                                             else if ( str3.Equals( "InputAdjustTimeDrums" ) )		// #23580 2011.1.3 yyagi
                                             {
-                                                this.nInputAdjustTimeMs.Drums = CConversion.nGetNumberIfInRange(str4, -99, 99, this.nInputAdjustTimeMs.Drums);
+                                                nInputAdjustTimeMs.Drums = CConversion.nGetNumberIfInRange(str4, -99, 99, nInputAdjustTimeMs.Drums);
                                             }
                                             else if ( str3.Equals( "InputAdjustTimeGuitar" ) )	// #23580 2011.1.3 yyagi
                                             {
-                                                this.nInputAdjustTimeMs.Guitar = CConversion.nGetNumberIfInRange(str4, -99, 99, this.nInputAdjustTimeMs.Guitar);
+                                                nInputAdjustTimeMs.Guitar = CConversion.nGetNumberIfInRange(str4, -99, 99, nInputAdjustTimeMs.Guitar);
                                             }
                                             else if ( str3.Equals( "InputAdjustTimeBass" ) )		// #23580 2011.1.3 yyagi
                                             {
-                                                this.nInputAdjustTimeMs.Bass = CConversion.nGetNumberIfInRange(str4, -99, 99, this.nInputAdjustTimeMs.Bass);
+                                                nInputAdjustTimeMs.Bass = CConversion.nGetNumberIfInRange(str4, -99, 99, nInputAdjustTimeMs.Bass);
                                             }
                                             else if ( str3.Equals( "BGMAdjustTime" ) )              // #36372 2016.06.19 kairera0467
                                             {
-                                                this.nCommonBGMAdjustMs = CConversion.nGetNumberIfInRange( str4, -99, 99, this.nCommonBGMAdjustMs );
+                                                nCommonBGMAdjustMs = CConversion.nGetNumberIfInRange( str4, -99, 99, nCommonBGMAdjustMs );
                                             }
                                             else if ( str3.Equals( "JudgeLinePosOffsetDrums" ) ) // #31602 2013.6.23 yyagi
                                             {
-                                                this.nJudgeLinePosOffset.Drums = CConversion.nGetNumberIfInRange( str4, -99, 99, this.nJudgeLinePosOffset.Drums );
+                                                nJudgeLinePosOffset.Drums = CConversion.nGetNumberIfInRange( str4, -99, 99, nJudgeLinePosOffset.Drums );
                                             }
                                             else if ( str3.Equals( "JudgeLinePosOffsetGuitar" ) ) // #31602 2013.6.23 yyagi
                                             {
-                                                this.nJudgeLinePosOffset.Guitar = CConversion.nGetNumberIfInRange( str4, -99, 99, this.nJudgeLinePosOffset.Guitar );
+                                                nJudgeLinePosOffset.Guitar = CConversion.nGetNumberIfInRange( str4, -99, 99, nJudgeLinePosOffset.Guitar );
                                             }
                                             else if ( str3.Equals( "JudgeLinePosOffsetBass" ) ) // #31602 2013.6.23 yyagi
                                             {
-                                                this.nJudgeLinePosOffset.Bass = CConversion.nGetNumberIfInRange( str4, -99, 99, this.nJudgeLinePosOffset.Bass );
+                                                nJudgeLinePosOffset.Bass = CConversion.nGetNumberIfInRange( str4, -99, 99, nJudgeLinePosOffset.Bass );
                                             }
                                             #endregion
                                             else if (str3.Equals("BufferedInput"))
                                             {
-                                                this.bバッファ入力を行う = CConversion.bONorOFF(str4[0]);
+                                                bバッファ入力を行う = CConversion.bONorOFF(str4[0]);
                                             }
                                             else if (str3.Equals("PolyphonicSounds"))		// #28228 2012.5.1 yyagi
                                             {
-                                                this.nPoliphonicSounds = CConversion.nGetNumberIfInRange(str4, 1, 8, this.nPoliphonicSounds);
+                                                nPoliphonicSounds = CConversion.nGetNumberIfInRange(str4, 1, 8, nPoliphonicSounds);
                                             }
                                             else if (str3.Equals("LCVelocityMin"))			// #23857 2010.12.12 yyagi
                                             {
-                                                this.nVelocityMin.LC = CConversion.nGetNumberIfInRange(str4, 0, 127, this.nVelocityMin.LC);
+                                                nVelocityMin.LC = CConversion.nGetNumberIfInRange(str4, 0, 127, nVelocityMin.LC);
                                             }
                                             else if (str3.Equals("HHVelocityMin"))
                                             {
-                                                this.nVelocityMin.HH = CConversion.nGetNumberIfInRange(str4, 0, 127, this.nVelocityMin.HH);
+                                                nVelocityMin.HH = CConversion.nGetNumberIfInRange(str4, 0, 127, nVelocityMin.HH);
                                             }
                                             else if (str3.Equals("SDVelocityMin"))			// #23857 2011.1.31 yyagi
                                             {
-                                                this.nVelocityMin.SD = CConversion.nGetNumberIfInRange(str4, 0, 127, this.nVelocityMin.SD);
+                                                nVelocityMin.SD = CConversion.nGetNumberIfInRange(str4, 0, 127, nVelocityMin.SD);
                                             }
                                             else if (str3.Equals("BDVelocityMin"))			// #23857 2011.1.31 yyagi
                                             {
-                                                this.nVelocityMin.BD = CConversion.nGetNumberIfInRange(str4, 0, 127, this.nVelocityMin.BD);
+                                                nVelocityMin.BD = CConversion.nGetNumberIfInRange(str4, 0, 127, nVelocityMin.BD);
                                             }
                                             else if (str3.Equals("HTVelocityMin"))			// #23857 2011.1.31 yyagi
                                             {
-                                                this.nVelocityMin.HT = CConversion.nGetNumberIfInRange(str4, 0, 127, this.nVelocityMin.HT);
+                                                nVelocityMin.HT = CConversion.nGetNumberIfInRange(str4, 0, 127, nVelocityMin.HT);
                                             }
                                             else if (str3.Equals("LTVelocityMin"))			// #23857 2011.1.31 yyagi
                                             {
-                                                this.nVelocityMin.LT = CConversion.nGetNumberIfInRange(str4, 0, 127, this.nVelocityMin.LT);
+                                                nVelocityMin.LT = CConversion.nGetNumberIfInRange(str4, 0, 127, nVelocityMin.LT);
                                             }
                                             else if (str3.Equals("FTVelocityMin"))			// #23857 2011.1.31 yyagi
                                             {
-                                                this.nVelocityMin.FT = CConversion.nGetNumberIfInRange(str4, 0, 127, this.nVelocityMin.FT);
+                                                nVelocityMin.FT = CConversion.nGetNumberIfInRange(str4, 0, 127, nVelocityMin.FT);
                                             }
                                             else if (str3.Equals("CYVelocityMin"))			// #23857 2011.1.31 yyagi
                                             {
-                                                this.nVelocityMin.CY = CConversion.nGetNumberIfInRange(str4, 0, 127, this.nVelocityMin.CY);
+                                                nVelocityMin.CY = CConversion.nGetNumberIfInRange(str4, 0, 127, nVelocityMin.CY);
                                             }
                                             else if (str3.Equals("RDVelocityMin"))			// #23857 2011.1.31 yyagi
                                             {
-                                                this.nVelocityMin.RD = CConversion.nGetNumberIfInRange(str4, 0, 127, this.nVelocityMin.RD);
+                                                nVelocityMin.RD = CConversion.nGetNumberIfInRange(str4, 0, 127, nVelocityMin.RD);
                                             }
                                             else if (str3.Equals("LPVelocityMin"))			// #23857 2011.1.31 yyagi
                                             {
-                                                this.nVelocityMin.LP = CConversion.nGetNumberIfInRange(str4, 0, 127, this.nVelocityMin.LP);
+                                                nVelocityMin.LP = CConversion.nGetNumberIfInRange(str4, 0, 127, nVelocityMin.LP);
                                             }
                                             else if (str3.Equals("LBDVelocityMin"))			// #23857 2011.1.31 yyagi
                                             {
-                                                this.nVelocityMin.LBD = CConversion.nGetNumberIfInRange(str4, 0, 127, this.nVelocityMin.LBD);
+                                                nVelocityMin.LBD = CConversion.nGetNumberIfInRange(str4, 0, 127, nVelocityMin.LBD);
                                             }
                                             else if (str3.Equals("AutoAddGage"))
                                             {
-                                                this.bAutoAddGage = CConversion.bONorOFF(str4[0]);
+                                                bAutoAddGage = CConversion.bONorOFF(str4[0]);
                                             }
 											else if (str3.Equals("SkipTimeMs"))
 											{
-												this.nSkipTimeMs = CConversion.nGetNumberIfInRange(str4, 100, 20000, this.nSkipTimeMs);
+												nSkipTimeMs = CConversion.nGetNumberIfInRange(str4, 100, 20000, nSkipTimeMs);
 											}
 											continue;
 										}
@@ -3177,19 +2960,19 @@ namespace DTXMania
 										{
 											if( str3.Equals( "OutputLog" ) )
 											{
-												this.bOutputLogs = CConversion.bONorOFF( str4[ 0 ] );
+												bOutputLogs = CConversion.bONorOFF( str4[ 0 ] );
 											}
 											else if( str3.Equals( "TraceCreatedDisposed" ) )
 											{
-												this.bLog作成解放ログ出力 = CConversion.bONorOFF( str4[ 0 ] );
+												bLog作成解放ログ出力 = CConversion.bONorOFF( str4[ 0 ] );
 											}
 											else if( str3.Equals( "TraceDTXDetails" ) )
 											{
-												this.bLogDTX詳細ログ出力 = CConversion.bONorOFF( str4[ 0 ] );
+												bLogDTX詳細ログ出力 = CConversion.bONorOFF( str4[ 0 ] );
 											}
 											else if( str3.Equals( "TraceSongSearch" ) )
 											{
-												this.bLogSongSearch = CConversion.bONorOFF( str4[ 0 ] );
+												bLogSongSearch = CConversion.bONorOFF( str4[ 0 ] );
 											}
 											continue;
 										}
@@ -3202,391 +2985,391 @@ namespace DTXMania
 										{
                                             if( str3.Equals( "DrumGraph" ) )  // #24074 2011.01.23 addikanick
 											{
-												this.bGraph有効.Drums = CConversion.bONorOFF( str4[ 0 ] );
+												bGraph有効.Drums = CConversion.bONorOFF( str4[ 0 ] );
 											}
 											else if( str3.Equals( "GuitarGraph" ) )  // #24074 2011.01.23 addikanick
 											{
-												this.bGraph有効.Guitar = CConversion.bONorOFF( str4[ 0 ] );
+												bGraph有効.Guitar = CConversion.bONorOFF( str4[ 0 ] );
 											}
 											else if( str3.Equals( "BassGraph" ) )  // #24074 2011.01.23 addikanick
 											{
-												this.bGraph有効.Bass = CConversion.bONorOFF( str4[ 0 ] );
+												bGraph有効.Bass = CConversion.bONorOFF( str4[ 0 ] );
 											}
 											else if (str3.Equals("SmallGraph"))
 											{
-												this.bSmallGraph = CConversion.bONorOFF(str4[0]);
+												bSmallGraph = CConversion.bONorOFF(str4[0]);
 											}
 											else if ( str3.Equals( "DrumsReverse" ) )
 											{
-												this.bReverse.Drums = CConversion.bONorOFF( str4[ 0 ] );
+												bReverse.Drums = CConversion.bONorOFF( str4[ 0 ] );
 											}
 											else if( str3.Equals( "GuitarReverse" ) )
 											{
-												this.bReverse.Guitar = CConversion.bONorOFF( str4[ 0 ] );
+												bReverse.Guitar = CConversion.bONorOFF( str4[ 0 ] );
 											}
 											else if( str3.Equals( "BassReverse" ) )
 											{
-												this.bReverse.Bass = CConversion.bONorOFF( str4[ 0 ] );
+												bReverse.Bass = CConversion.bONorOFF( str4[ 0 ] );
 											}
 											else if( str3.Equals( "GuitarRandom" ) )
 											{
-												this.eRandom.Guitar = (ERandomMode) CConversion.nGetNumberIfInRange( str4, 0, 4, (int) this.eRandom.Guitar );
+												eRandom.Guitar = (ERandomMode) CConversion.nGetNumberIfInRange( str4, 0, 4, (int) eRandom.Guitar );
 											}
 											else if( str3.Equals( "BassRandom" ) )
 											{
-												this.eRandom.Bass = (ERandomMode) CConversion.nGetNumberIfInRange( str4, 0, 4, (int) this.eRandom.Bass );
+												eRandom.Bass = (ERandomMode) CConversion.nGetNumberIfInRange( str4, 0, 4, (int) eRandom.Bass );
 											}
 											else if( str3.Equals( "DrumsTight" ) )
 											{
-												this.bTight = CConversion.bONorOFF( str4[ 0 ] );
+												bTight = CConversion.bONorOFF( str4[ 0 ] );
 											}
 											else if( str3.Equals( "GuitarLight" ) )
 											{
-												this.bLight.Guitar = CConversion.bONorOFF( str4[ 0 ] );
+												bLight.Guitar = CConversion.bONorOFF( str4[ 0 ] );
 											}
 											else if( str3.Equals( "BassLight" ) )
 											{
-												this.bLight.Bass = CConversion.bONorOFF( str4[ 0 ] );
+												bLight.Bass = CConversion.bONorOFF( str4[ 0 ] );
 											}
                                             else if (str3.Equals("GuitarSpecialist"))
                                             {
-                                                this.bSpecialist.Guitar = CConversion.bONorOFF(str4[0]);
+                                                bSpecialist.Guitar = CConversion.bONorOFF(str4[0]);
                                             }
                                             else if (str3.Equals("BassSpecialist"))
                                             {
-                                                this.bSpecialist.Bass = CConversion.bONorOFF(str4[0]);
+                                                bSpecialist.Bass = CConversion.bONorOFF(str4[0]);
                                             }
                                             else if( str3.Equals( "GuitarLeft" ) )
 											{
-												this.bLeft.Guitar = CConversion.bONorOFF( str4[ 0 ] );
+												bLeft.Guitar = CConversion.bONorOFF( str4[ 0 ] );
 											}
 											else if( str3.Equals( "BassLeft" ) )
 											{
-												this.bLeft.Bass = CConversion.bONorOFF( str4[ 0 ] );
+												bLeft.Bass = CConversion.bONorOFF( str4[ 0 ] );
 											}
                                             else if (str3.Equals( "DrumsHiddenSudden") )
                                             {
-                                                this.nHidSud.Drums = CConversion.nGetNumberIfInRange(str4, 0, 5, this.nHidSud.Drums);
+                                                nHidSud.Drums = CConversion.nGetNumberIfInRange(str4, 0, 5, nHidSud.Drums);
                                             }
                                             else if (str3.Equals( "GuitarHiddenSudden") )
                                             {
-                                                this.nHidSud.Guitar = CConversion.nGetNumberIfInRange(str4, 0, 5, this.nHidSud.Guitar);
+                                                nHidSud.Guitar = CConversion.nGetNumberIfInRange(str4, 0, 5, nHidSud.Guitar);
                                             }
                                             else if (str3.Equals( "BassHiddenSudden") )
                                             {
-                                                this.nHidSud.Bass = CConversion.nGetNumberIfInRange(str4, 0, 5, this.nHidSud.Bass);
+                                                nHidSud.Bass = CConversion.nGetNumberIfInRange(str4, 0, 5, nHidSud.Bass);
                                             }
 											else if( str3.Equals( "DrumsPosition" ) )
 											{
-                                                this.JudgementStringPosition.Drums = (EType)CConversion.nGetNumberIfInRange(str4, 0, 2, (int)this.JudgementStringPosition.Drums);
+                                                JudgementStringPosition.Drums = (EType)CConversion.nGetNumberIfInRange(str4, 0, 2, (int)JudgementStringPosition.Drums);
 											}
 											else if( str3.Equals( "GuitarPosition" ) )
 											{
-                                                this.JudgementStringPosition.Guitar = (EType)CConversion.nGetNumberIfInRange(str4, 0, 3, (int)this.JudgementStringPosition.Guitar);
+                                                JudgementStringPosition.Guitar = (EType)CConversion.nGetNumberIfInRange(str4, 0, 3, (int)JudgementStringPosition.Guitar);
 											}
 											else if( str3.Equals( "BassPosition" ) )
 											{
-                                                this.JudgementStringPosition.Bass = (EType)CConversion.nGetNumberIfInRange(str4, 0, 3, (int)this.JudgementStringPosition.Bass);
+                                                JudgementStringPosition.Bass = (EType)CConversion.nGetNumberIfInRange(str4, 0, 3, (int)JudgementStringPosition.Bass);
 											}
 											else if( str3.Equals( "DrumsScrollSpeed" ) )
 											{
-												this.nScrollSpeed.Drums = CConversion.nGetNumberIfInRange( str4, 0, 0x7cf, this.nScrollSpeed.Drums );
+												nScrollSpeed.Drums = CConversion.nGetNumberIfInRange( str4, 0, 0x7cf, nScrollSpeed.Drums );
 											}
 											else if( str3.Equals( "GuitarScrollSpeed" ) )
 											{
-												this.nScrollSpeed.Guitar = CConversion.nGetNumberIfInRange( str4, 0, 0x7cf, this.nScrollSpeed.Guitar );
+												nScrollSpeed.Guitar = CConversion.nGetNumberIfInRange( str4, 0, 0x7cf, nScrollSpeed.Guitar );
 											}
 											else if( str3.Equals( "BassScrollSpeed" ) )
 											{
-												this.nScrollSpeed.Bass = CConversion.nGetNumberIfInRange( str4, 0, 0x7cf, this.nScrollSpeed.Bass );
+												nScrollSpeed.Bass = CConversion.nGetNumberIfInRange( str4, 0, 0x7cf, nScrollSpeed.Bass );
 											}
 											else if( str3.Equals( "PlaySpeed" ) )
 											{
-												this.nPlaySpeed = CConversion.nGetNumberIfInRange( str4, CConstants.PLAYSPEED_MIN, CConstants.PLAYSPEED_MAX, this.nPlaySpeed );
+												nPlaySpeed = CConversion.nGetNumberIfInRange( str4, CConstants.PLAYSPEED_MIN, CConstants.PLAYSPEED_MAX, nPlaySpeed );
 											}
 											else if (str3.Equals("SaveScoreIfModifiedPlaySpeed"))
 											{
-												this.bSaveScoreIfModifiedPlaySpeed = CConversion.bONorOFF(str4[0]);
+												bSaveScoreIfModifiedPlaySpeed = CConversion.bONorOFF(str4[0]);
 											}
 											else if ( str3.Equals( "ComboPosition" ) )
 											{
-												this.ドラムコンボ文字の表示位置 = (EDrumComboTextDisplayPosition) CConversion.nGetNumberIfInRange( str4, 0, 3, (int) this.ドラムコンボ文字の表示位置 );
+												ドラムコンボ文字の表示位置 = (EDrumComboTextDisplayPosition) CConversion.nGetNumberIfInRange( str4, 0, 3, (int) ドラムコンボ文字の表示位置 );
 											}
 											else if( str3.Equals( "Risky" ) )					// #2359 2011.6.23  yyagi
 											{
-												this.nRisky = CConversion.nGetNumberIfInRange( str4, 0, 10, this.nRisky );
+												nRisky = CConversion.nGetNumberIfInRange( str4, 0, 10, nRisky );
 											}
                                             else if( str3.Equals( "HAZARD" ) )				// #29500 2012.9.11 kairera0467
                                             {
-                                                this.bHAZARD = CConversion.bONorOFF( str4[ 0 ] );
+                                                bHAZARD = CConversion.bONorOFF( str4[ 0 ] );
                                             }
                                             else if( str3.Equals( "AssignToLBD" ) )
                                             {
-                                                this.bAssignToLBD.Drums = CConversion.bONorOFF( str4[ 0 ] );
+                                                bAssignToLBD.Drums = CConversion.bONorOFF( str4[ 0 ] );
                                             }
                                             else if (str3.Equals("DrumsJudgeLine"))
                                             {
-                                                this.nJudgeLine.Drums = CConversion.nRoundToRange(str4, 0, 100, this.nJudgeLine.Drums);
+                                                nJudgeLine.Drums = CConversion.nRoundToRange(str4, 0, 100, nJudgeLine.Drums);
                                             }
                                             else if ( str3.Equals( "DrumsShutterIn" ) )
                                             {
-                                                this.nShutterInSide.Drums = CConversion.nGetNumberIfInRange( str4, 0, 100, this.nShutterInSide.Drums );
+                                                nShutterInSide.Drums = CConversion.nGetNumberIfInRange( str4, 0, 100, nShutterInSide.Drums );
                                             }
                                             else if ( str3.Equals( "DrumsShutterOut" ) )
                                             {
-                                                this.nShutterOutSide.Drums = CConversion.nGetNumberIfInRange( str4, -100, 100, this.nShutterOutSide.Drums );
+                                                nShutterOutSide.Drums = CConversion.nGetNumberIfInRange( str4, -100, 100, nShutterOutSide.Drums );
                                             }
                                             else if ( str3.Equals( "GuitarJudgeLine" ) )
                                             {
-                                                this.nJudgeLine.Guitar = CConversion.nRoundToRange(str4, 0, 100, this.nJudgeLine.Guitar);
+                                                nJudgeLine.Guitar = CConversion.nRoundToRange(str4, 0, 100, nJudgeLine.Guitar);
                                             }
                                             else if ( str3.Equals( "GuitarShutterIn" ) )
                                             {
-                                                this.nShutterInSide.Guitar = CConversion.nGetNumberIfInRange( str4, 0, 100, this.nShutterInSide.Guitar );
+                                                nShutterInSide.Guitar = CConversion.nGetNumberIfInRange( str4, 0, 100, nShutterInSide.Guitar );
                                             }
                                             else if ( str3.Equals( "GuitarShutterOut" ) )
                                             {
-                                                this.nShutterOutSide.Guitar = CConversion.nGetNumberIfInRange( str4, -100, 100, this.nShutterOutSide.Guitar );
+                                                nShutterOutSide.Guitar = CConversion.nGetNumberIfInRange( str4, -100, 100, nShutterOutSide.Guitar );
                                             }
                                             else if ( str3.Equals( "BassJudgeLine" ) )
                                             {
-                                                this.nJudgeLine.Bass = CConversion.nRoundToRange(str4, 0, 100, this.nJudgeLine.Bass);
+                                                nJudgeLine.Bass = CConversion.nRoundToRange(str4, 0, 100, nJudgeLine.Bass);
                                             }
                                             else if ( str3.Equals( "BassShutterIn" ) )
                                             {
-                                                this.nShutterInSide.Bass = CConversion.nGetNumberIfInRange( str4, 0, 100, this.nShutterInSide.Bass );
+                                                nShutterInSide.Bass = CConversion.nGetNumberIfInRange( str4, 0, 100, nShutterInSide.Bass );
                                             }
                                             else if ( str3.Equals( "BassShutterOut" ) )
                                             {
-                                                this.nShutterOutSide.Bass = CConversion.nGetNumberIfInRange( str4, -100, 100, this.nShutterOutSide.Guitar );
+                                                nShutterOutSide.Bass = CConversion.nGetNumberIfInRange( str4, -100, 100, nShutterOutSide.Guitar );
                                             }
                                             else if (str3.Equals("DrumsLaneType"))
                                             {
-                                                this.eLaneType.Drums = (EType) CConversion.nGetNumberIfInRange(str4, 0, 3, (int) this.eLaneType.Drums);
+                                                eLaneType.Drums = (EType) CConversion.nGetNumberIfInRange(str4, 0, 3, (int) eLaneType.Drums);
                                             }
                                             else if (str3.Equals("RDPosition"))
                                             {
-                                                this.eRDPosition = (ERDPosition)CConversion.nGetNumberIfInRange(str4, 0, 2, (int)this.eRDPosition);
+                                                eRDPosition = (ERDPosition)CConversion.nGetNumberIfInRange(str4, 0, 2, (int)eRDPosition);
                                             }
                                             else if (str3.Equals("DrumsTight"))				// #29500 2012.9.11 kairera0467
                                             {
-                                                this.bTight = CConversion.bONorOFF(str4[0]);
+                                                bTight = CConversion.bONorOFF(str4[0]);
                                             }
                                             #region [ XGオプション ]
                                             else if (str3.Equals("NamePlateType"))
                                             {
-                                                this.eNamePlate = (EType)CConversion.nGetNumberIfInRange(str4, 0, 3, (int)this.eNamePlate);
+                                                eNamePlate = (EType)CConversion.nGetNumberIfInRange(str4, 0, 3, (int)eNamePlate);
                                             }
                                             else if (str3.Equals("DrumSetMoves"))
                                             {
-                                                this.eドラムセットを動かす = (EType)CConversion.nGetNumberIfInRange(str4, 0, 2, (int)this.eドラムセットを動かす);
+                                                eドラムセットを動かす = (EType)CConversion.nGetNumberIfInRange(str4, 0, 2, (int)eドラムセットを動かす);
                                             }
                                             else if (str3.Equals("BPMBar"))
                                             {
-                                                this.eBPMbar = ( EType )CConversion.nGetNumberIfInRange(str4, 0, 3, (int)this.eBPMbar);
+                                                eBPMbar = ( EType )CConversion.nGetNumberIfInRange(str4, 0, 3, (int)eBPMbar);
                                             }
                                             else if (str3.Equals("LivePoint"))
                                             {
-                                                this.bLivePoint = CConversion.bONorOFF(str4[0]);
+                                                bLivePoint = CConversion.bONorOFF(str4[0]);
                                             }
                                             else if (str3.Equals("Speaker"))
                                             {
-                                                this.bSpeaker = CConversion.bONorOFF(str4[0]);
+                                                bSpeaker = CConversion.bONorOFF(str4[0]);
                                             }
                                             #endregion
                                             else if (str3.Equals("DrumsStageEffect"))
                                             {
-                                                this.DisplayBonusEffects = CConversion.bONorOFF(str4[0]);
+                                                DisplayBonusEffects = CConversion.bONorOFF(str4[0]);
                                             }
                                             else if (str3.Equals("CLASSIC"))
                                             {
-                                                this.bCLASSIC譜面判別を有効にする = CConversion.bONorOFF(str4[0]);
+                                                bCLASSIC譜面判別を有効にする = CConversion.bONorOFF(str4[0]);
                                             }
                                             else if (str3.Equals("MutingLP"))
                                             {
-                                                this.bMutingLP = CConversion.bONorOFF(str4[0]);
+                                                bMutingLP = CConversion.bONorOFF(str4[0]);
                                             }
                                             else if (str3.Equals("SkillMode"))
                                             {
-                                                this.nSkillMode = CConversion.nGetNumberIfInRange(str4, 0, 1, (int)this.nSkillMode);
+                                                nSkillMode = CConversion.nGetNumberIfInRange(str4, 0, 1, (int)nSkillMode);
                                             }
                                             else if (str3.Equals("SwitchSkillMode"))
                                             {
-                                                this.bSkillModeを自動切換えする = CConversion.bONorOFF(str4[0]);
+                                                bSkillModeを自動切換えする = CConversion.bONorOFF(str4[0]);
                                             }
                                             else if (str3.Equals("NumOfLanes"))
                                             {
-                                                this.eNumOfLanes.Drums = (EType)CConversion.nGetNumberIfInRange(str4, 0, 2, (int)this.eNumOfLanes.Drums);
+                                                eNumOfLanes.Drums = (EType)CConversion.nGetNumberIfInRange(str4, 0, 2, (int)eNumOfLanes.Drums);
                                             }
                                             else if (str3.Equals("DkdkType"))
                                             {
-                                                this.eDkdkType.Drums = (EType)CConversion.nGetNumberIfInRange(str4, 0, 2, (int)this.eDkdkType.Drums);
+                                                eDkdkType.Drums = (EType)CConversion.nGetNumberIfInRange(str4, 0, 2, (int)eDkdkType.Drums);
                                             }
                                             else if (str3.Equals("DrumsRandomPad"))
                                             {
-                                                this.eRandom.Drums = (ERandomMode)CConversion.nGetNumberIfInRange(str4, 0, 6, (int)this.eRandom.Drums);
+                                                eRandom.Drums = (ERandomMode)CConversion.nGetNumberIfInRange(str4, 0, 6, (int)eRandom.Drums);
                                             }
                                             else if (str3.Equals("DrumsRandomPedal"))
                                             {
-                                                this.eRandomPedal.Drums = (ERandomMode)CConversion.nGetNumberIfInRange(str4, 0, 6, (int)this.eRandomPedal.Drums);
+                                                eRandomPedal.Drums = (ERandomMode)CConversion.nGetNumberIfInRange(str4, 0, 6, (int)eRandomPedal.Drums);
                                             }
                                             else if (str3.Equals("DrumsAttackEffect"))
                                             {
-                                                this.eAttackEffect.Drums = (EType)CConversion.nGetNumberIfInRange(str4, 0, 3, (int)this.eAttackEffect.Drums);
+                                                eAttackEffect.Drums = (EType)CConversion.nGetNumberIfInRange(str4, 0, 3, (int)eAttackEffect.Drums);
                                             }
                                             else if (str3.Equals("GuitarAttackEffect"))
                                             {
-                                                this.eAttackEffect.Guitar = (EType)CConversion.nGetNumberIfInRange(str4, 0, 1, (int)this.eAttackEffect.Guitar);
+                                                eAttackEffect.Guitar = (EType)CConversion.nGetNumberIfInRange(str4, 0, 1, (int)eAttackEffect.Guitar);
                                             }
                                             else if (str3.Equals("BassAttackEffect"))
                                             {
-                                                this.eAttackEffect.Bass = (EType)CConversion.nGetNumberIfInRange(str4, 0, 1, (int)this.eAttackEffect.Bass);
+                                                eAttackEffect.Bass = (EType)CConversion.nGetNumberIfInRange(str4, 0, 1, (int)eAttackEffect.Bass);
                                             }
                                             else if (str3.Equals("DrumsLaneDisp"))
                                             {
-                                                this.nLaneDisp.Drums = CConversion.nGetNumberIfInRange(str4, 0, 4, (int)this.nLaneDisp.Drums);
+                                                nLaneDisp.Drums = CConversion.nGetNumberIfInRange(str4, 0, 4, (int)nLaneDisp.Drums);
                                             }
                                             else if (str3.Equals("GuitarLaneDisp"))
                                             {
-                                                this.nLaneDisp.Guitar = CConversion.nGetNumberIfInRange(str4, 0, 4, (int)this.nLaneDisp.Guitar);
+                                                nLaneDisp.Guitar = CConversion.nGetNumberIfInRange(str4, 0, 4, (int)nLaneDisp.Guitar);
                                             }
                                             else if (str3.Equals("BassLaneDisp"))
                                             {
-                                                this.nLaneDisp.Bass = CConversion.nGetNumberIfInRange(str4, 0, 4, (int)this.nLaneDisp.Bass);
+                                                nLaneDisp.Bass = CConversion.nGetNumberIfInRange(str4, 0, 4, (int)nLaneDisp.Bass);
                                             }
                                             else if (str3.Equals("DrumsDisplayJudge"))
                                             {
-                                                this.bDisplayJudge.Drums = CConversion.bONorOFF(str4[0]);
+                                                bDisplayJudge.Drums = CConversion.bONorOFF(str4[0]);
                                             }
                                             else if( str3.Equals("GuitarDisplayJudge") )
                                             {
-                                                this.bDisplayJudge.Guitar = CConversion.bONorOFF(str4[0]);
+                                                bDisplayJudge.Guitar = CConversion.bONorOFF(str4[0]);
                                             }
                                             else if( str3.Equals("BassDisplayJudge") )
                                             {
-                                                this.bDisplayJudge.Bass = CConversion.bONorOFF(str4[0]);
+                                                bDisplayJudge.Bass = CConversion.bONorOFF(str4[0]);
                                             }
 											else if (str3.Equals("DrumsJudgeLineDisp"))
 											{
-												this.bJudgeLineDisp.Drums = CConversion.bONorOFF(str4[0]);
+												bJudgeLineDisp.Drums = CConversion.bONorOFF(str4[0]);
 											}
 											else if (str3.Equals("GuitarJudgeLineDisp"))
 											{
-												this.bJudgeLineDisp.Guitar = CConversion.bONorOFF(str4[0]);
+												bJudgeLineDisp.Guitar = CConversion.bONorOFF(str4[0]);
 											}
 											else if (str3.Equals("BassJudgeLineDisp"))
 											{
-												this.bJudgeLineDisp.Bass = CConversion.bONorOFF(str4[0]);
+												bJudgeLineDisp.Bass = CConversion.bONorOFF(str4[0]);
 											}
 											else if (str3.Equals("DrumsLaneFlush"))
                                             {
-                                                this.bLaneFlush.Drums = CConversion.bONorOFF(str4[0]);
+                                                bLaneFlush.Drums = CConversion.bONorOFF(str4[0]);
                                             }
                                             else if (str3.Equals("GuitarLaneFlush"))
                                             {
-                                                this.bLaneFlush.Guitar = CConversion.bONorOFF(str4[0]);
+                                                bLaneFlush.Guitar = CConversion.bONorOFF(str4[0]);
                                             }
                                             else if (str3.Equals("BassLaneFlush"))
                                             {
-                                                this.bLaneFlush.Bass = CConversion.bONorOFF(str4[0]);
+                                                bLaneFlush.Bass = CConversion.bONorOFF(str4[0]);
                                             }
                                             else if( str3.Equals( "JudgeAnimeType" ) )
                                             {
-                                                this.nJudgeAnimeType = CConversion.nGetNumberIfInRange( str4, 0, 2, this.nJudgeAnimeType );
+                                                nJudgeAnimeType = CConversion.nGetNumberIfInRange( str4, 0, 2, nJudgeAnimeType );
                                             }
                                             else if (str3.Equals( "JudgeFrames"))
                                             {
-                                                this.nJudgeFrames = CConversion.nStringToInt( str4, this.nJudgeFrames );
+                                                nJudgeFrames = CConversion.nStringToInt( str4, nJudgeFrames );
                                             }
                                             else if ( str3.Equals( "JudgeInterval" ))
                                             {
-                                                this.nJudgeInterval = CConversion.nStringToInt( str4, this.nJudgeInterval );
+                                                nJudgeInterval = CConversion.nStringToInt( str4, nJudgeInterval );
                                             }
                                             else if ( str3.Equals( "JudgeWidgh" ))
                                             {
-                                                this.nJudgeWidgh = CConversion.nStringToInt( str4, this.nJudgeWidgh );
+                                                nJudgeWidgh = CConversion.nStringToInt( str4, nJudgeWidgh );
                                             }
                                             else if ( str3.Equals( "JudgeHeight" ))
                                             {
-                                                this.nJudgeHeight = CConversion.nStringToInt( str4, this.nJudgeHeight );
+                                                nJudgeHeight = CConversion.nStringToInt( str4, nJudgeHeight );
                                             }
                                             else if ( str3.Equals( "ExplosionFrames" ))
                                             {
-                                                this.nExplosionFrames = CConversion.nGetNumberIfInRange( str4, 0, int.MaxValue, (int)this.nExplosionFrames );
+                                                nExplosionFrames = CConversion.nGetNumberIfInRange( str4, 0, int.MaxValue, (int)nExplosionFrames );
                                             }
                                             else if ( str3.Equals( "ExplosionInterval" ))
                                             {
-                                                this.nExplosionInterval = CConversion.nGetNumberIfInRange( str4, 0, int.MaxValue, (int)this.nExplosionInterval );
+                                                nExplosionInterval = CConversion.nGetNumberIfInRange( str4, 0, int.MaxValue, (int)nExplosionInterval );
                                             }
                                             else if ( str3.Equals( "ExplosionWidgh" ))
                                             {
-                                                this.nExplosionWidgh = CConversion.nGetNumberIfInRange(str4, 0, int.MaxValue, (int)this.nExplosionWidgh);
+                                                nExplosionWidgh = CConversion.nGetNumberIfInRange(str4, 0, int.MaxValue, (int)nExplosionWidgh);
                                             }
                                             else if ( str3.Equals( "ExplosionHeight" ))
                                             {
-                                                this.nExplosionHeight = CConversion.nGetNumberIfInRange(str4, 0, int.MaxValue, (int)this.nExplosionHeight);
+                                                nExplosionHeight = CConversion.nGetNumberIfInRange(str4, 0, int.MaxValue, (int)nExplosionHeight);
                                             }
                                             else if ( str3.Equals( "PedalLagTime" ) )
                                             {
-                                                this.nPedalLagTime = CConversion.nGetNumberIfInRange( str4, -100, 100, this.nPedalLagTime );
+                                                nPedalLagTime = CConversion.nGetNumberIfInRange( str4, -100, 100, nPedalLagTime );
                                             }
                                             else if ( str3.Equals( "WailingFireFrames" ))
                                             {
-                                                this.nWailingFireFrames = CConversion.nGetNumberIfInRange( str4, 0, int.MaxValue, (int)this.nWailingFireFrames );
+                                                nWailingFireFrames = CConversion.nGetNumberIfInRange( str4, 0, int.MaxValue, (int)nWailingFireFrames );
                                             }
                                             else if (str3.Equals("WailingFireInterval"))
                                             {
-                                                this.nWailingFireInterval = CConversion.nGetNumberIfInRange( str4, 0, int.MaxValue, (int)this.nWailingFireInterval );
+                                                nWailingFireInterval = CConversion.nGetNumberIfInRange( str4, 0, int.MaxValue, (int)nWailingFireInterval );
                                             }
                                             else if (str3.Equals("WailingFireWidgh"))
                                             {
-                                                this.nWailingFireWidgh = CConversion.nGetNumberIfInRange(str4, 0, int.MaxValue, (int)this.nWailingFireWidgh);
+                                                nWailingFireWidgh = CConversion.nGetNumberIfInRange(str4, 0, int.MaxValue, (int)nWailingFireWidgh);
                                             }
                                             else if (str3.Equals("WailingFireHeight"))
                                             {
-                                                this.nWailingFireHeight = CConversion.nGetNumberIfInRange(str4, 0, int.MaxValue, (int)this.nWailingFireHeight);
+                                                nWailingFireHeight = CConversion.nGetNumberIfInRange(str4, 0, int.MaxValue, (int)nWailingFireHeight);
                                             }
                                             else if (str3.Equals("WailingFirePosXGuitar"))
                                             {
-                                                this.nWailingFireX.Guitar = CConversion.nStringToInt( str4, this.nWailingFireX.Guitar );
+                                                nWailingFireX.Guitar = CConversion.nStringToInt( str4, nWailingFireX.Guitar );
                                             }
                                             else if (str3.Equals("WailingFirePosXBass"))
                                             {
-                                                this.nWailingFireX.Bass = CConversion.nStringToInt( str4, this.nWailingFireX.Bass );
+                                                nWailingFireX.Bass = CConversion.nStringToInt( str4, nWailingFireX.Bass );
                                             }
                                             else if (str3.Equals("WailingFirePosY"))
                                             {
-                                                this.nWailingFireY = CConversion.nStringToInt( str4, this.nWailingFireY );
+                                                nWailingFireY = CConversion.nStringToInt( str4, nWailingFireY );
                                             }
                                             else if ( str3.Equals( "DrumComboDisp" ) )				// #29500 2012.9.11 kairera0467
                                             {
-                                                this.bドラムコンボ文字の表示 = CConversion.bONorOFF(str4[0]);
+                                                bドラムコンボ文字の表示 = CConversion.bONorOFF(str4[0]);
                                             }
 
                                             //fork
                                             else if (str3.Equals("DrumAutoGhost")) // #35411 2015.08.18 chnmr0 add
                                             {
-                                                this.eAutoGhost.Drums = (EAutoGhostData)CConversion.nGetNumberIfInRange(str4, 0, 3, 0);
+                                                eAutoGhost.Drums = (EAutoGhostData)CConversion.nGetNumberIfInRange(str4, 0, 3, 0);
                                             }
                                             else if (str3.Equals("GuitarAutoGhost")) // #35411 2015.08.18 chnmr0 add
                                             {
-                                                this.eAutoGhost.Guitar = (EAutoGhostData)CConversion.nGetNumberIfInRange(str4, 0, 3, 0);
+                                                eAutoGhost.Guitar = (EAutoGhostData)CConversion.nGetNumberIfInRange(str4, 0, 3, 0);
                                             }
                                             else if (str3.Equals("BassAutoGhost")) // #35411 2015.08.18 chnmr0 add
                                             {
-                                                this.eAutoGhost.Bass = (EAutoGhostData)CConversion.nGetNumberIfInRange(str4, 0, 3, 0);
+                                                eAutoGhost.Bass = (EAutoGhostData)CConversion.nGetNumberIfInRange(str4, 0, 3, 0);
                                             }
                                             else if (str3.Equals("DrumTargetGhost")) // #35411 2015.08.18 chnmr0 add
                                             {
-                                                this.eTargetGhost.Drums = (ETargetGhostData)CConversion.nGetNumberIfInRange(str4, 0, 4, 0);
+                                                eTargetGhost.Drums = (ETargetGhostData)CConversion.nGetNumberIfInRange(str4, 0, 4, 0);
                                             }
                                             else if (str3.Equals("GuitarTargetGhost")) // #35411 2015.08.18 chnmr0 add
                                             {
-                                                this.eTargetGhost.Guitar = (ETargetGhostData)CConversion.nGetNumberIfInRange(str4, 0, 4, 0);
+                                                eTargetGhost.Guitar = (ETargetGhostData)CConversion.nGetNumberIfInRange(str4, 0, 4, 0);
                                             }
                                             else if (str3.Equals("BassTargetGhost")) // #35411 2015.08.18 chnmr0 add
                                             {
-                                                this.eTargetGhost.Bass = (ETargetGhostData)CConversion.nGetNumberIfInRange(str4, 0, 4, 0);
+                                                eTargetGhost.Bass = (ETargetGhostData)CConversion.nGetNumberIfInRange(str4, 0, 4, 0);
                                             }
 											continue;
 										}
@@ -3598,47 +3381,47 @@ namespace DTXMania
 									case ESectionType.AutoPlay:
 										if( str3.Equals( "LC" ) )
 										{
-											this.bAutoPlay.LC = CConversion.bONorOFF( str4[ 0 ] );
+											bAutoPlay.LC = CConversion.bONorOFF( str4[ 0 ] );
 										}
 										if( str3.Equals( "HH" ) )
 										{
-										this.bAutoPlay.HH = CConversion.bONorOFF( str4[ 0 ] );
+										bAutoPlay.HH = CConversion.bONorOFF( str4[ 0 ] );
 										}
 										else if( str3.Equals( "SD" ) )
 										{
-											this.bAutoPlay.SD = CConversion.bONorOFF( str4[ 0 ] );
+											bAutoPlay.SD = CConversion.bONorOFF( str4[ 0 ] );
 										}
 										else if( str3.Equals( "BD" ) )
 										{
-											this.bAutoPlay.BD = CConversion.bONorOFF( str4[ 0 ] );
+											bAutoPlay.BD = CConversion.bONorOFF( str4[ 0 ] );
 										}
 										else if( str3.Equals( "HT" ) )
 										{
-											this.bAutoPlay.HT = CConversion.bONorOFF( str4[ 0 ] );
+											bAutoPlay.HT = CConversion.bONorOFF( str4[ 0 ] );
 										}
 										else if( str3.Equals( "LT" ) )
 										{
-											this.bAutoPlay.LT = CConversion.bONorOFF( str4[ 0 ] );
+											bAutoPlay.LT = CConversion.bONorOFF( str4[ 0 ] );
 										}
 										else if( str3.Equals( "FT" ) )
 										{
-										    this.bAutoPlay.FT = CConversion.bONorOFF( str4[ 0 ] );
+										    bAutoPlay.FT = CConversion.bONorOFF( str4[ 0 ] );
 										}
 										else if( str3.Equals( "CY" ) )
 										{
-											this.bAutoPlay.CY = CConversion.bONorOFF( str4[ 0 ] );
+											bAutoPlay.CY = CConversion.bONorOFF( str4[ 0 ] );
                                         }
                                         else if (str3.Equals("RD"))
                                         {
-                                            this.bAutoPlay.RD= CConversion.bONorOFF(str4[0]);
+                                            bAutoPlay.RD= CConversion.bONorOFF(str4[0]);
                                         }
                                         else if( str3.Equals( "LP" ) )
                                         {
-                                            this.bAutoPlay.LP = CConversion.bONorOFF(str4[0]);
+                                            bAutoPlay.LP = CConversion.bONorOFF(str4[0]);
 										}
                                         else if (str3.Equals("LBD"))
                                         {
-                                            this.bAutoPlay.LBD = CConversion.bONorOFF(str4[0]);
+                                            bAutoPlay.LBD = CConversion.bONorOFF(str4[0]);
                                         }
 										//else if( str3.Equals( "Guitar" ) )
 										//{
@@ -3646,31 +3429,31 @@ namespace DTXMania
 										//}
 										else if ( str3.Equals( "GuitarR" ) )
 										{
-											this.bAutoPlay.GtR = CConversion.bONorOFF( str4[ 0 ] );
+											bAutoPlay.GtR = CConversion.bONorOFF( str4[ 0 ] );
 										}
 										else if ( str3.Equals( "GuitarG" ) )
 										{
-											this.bAutoPlay.GtG = CConversion.bONorOFF( str4[ 0 ] );
+											bAutoPlay.GtG = CConversion.bONorOFF( str4[ 0 ] );
 										}
 										else if ( str3.Equals( "GuitarB" ) )
 										{
-											this.bAutoPlay.GtB = CConversion.bONorOFF( str4[ 0 ] );
+											bAutoPlay.GtB = CConversion.bONorOFF( str4[ 0 ] );
 										}
                                         else if ( str3.Equals( "GuitarY" ) )
                                         {
-                                            this.bAutoPlay.GtY = CConversion.bONorOFF(str4[0]);
+                                            bAutoPlay.GtY = CConversion.bONorOFF(str4[0]);
                                         }
                                         else if ( str3.Equals( "GuitarP" ) )
                                         {
-                                            this.bAutoPlay.GtP = CConversion.bONorOFF(str4[0]);
+                                            bAutoPlay.GtP = CConversion.bONorOFF(str4[0]);
                                         }
 										else if ( str3.Equals( "GuitarPick" ) )
 										{
-											this.bAutoPlay.GtPick = CConversion.bONorOFF( str4[ 0 ] );
+											bAutoPlay.GtPick = CConversion.bONorOFF( str4[ 0 ] );
 										}
 										else if ( str3.Equals( "GuitarWailing" ) )
 										{
-											this.bAutoPlay.GtW = CConversion.bONorOFF( str4[ 0 ] );
+											bAutoPlay.GtW = CConversion.bONorOFF( str4[ 0 ] );
 										}
 										//else if ( str3.Equals( "Bass" ) )
 										//{
@@ -3678,31 +3461,31 @@ namespace DTXMania
 										//}
 										else if ( str3.Equals( "BassR" ) )
 										{
-											this.bAutoPlay.BsR = CConversion.bONorOFF( str4[ 0 ] );
+											bAutoPlay.BsR = CConversion.bONorOFF( str4[ 0 ] );
 										}
 										else if ( str3.Equals( "BassG" ) )
 										{
-											this.bAutoPlay.BsG = CConversion.bONorOFF( str4[ 0 ] );
+											bAutoPlay.BsG = CConversion.bONorOFF( str4[ 0 ] );
 										}
 										else if ( str3.Equals( "BassB" ) )
 										{
-											this.bAutoPlay.BsB = CConversion.bONorOFF( str4[ 0 ] );
+											bAutoPlay.BsB = CConversion.bONorOFF( str4[ 0 ] );
 										}
                                         else if ( str3.Equals( "BassY" ) )
 										{
-											this.bAutoPlay.BsY = CConversion.bONorOFF( str4[ 0 ] );
+											bAutoPlay.BsY = CConversion.bONorOFF( str4[ 0 ] );
 										}
 										else if ( str3.Equals( "BassP" ) )
 										{
-											this.bAutoPlay.BsP = CConversion.bONorOFF( str4[ 0 ] );
+											bAutoPlay.BsP = CConversion.bONorOFF( str4[ 0 ] );
 										}
 										else if ( str3.Equals( "BassPick" ) )
 										{
-											this.bAutoPlay.BsPick = CConversion.bONorOFF( str4[ 0 ] );
+											bAutoPlay.BsPick = CConversion.bONorOFF( str4[ 0 ] );
 										}
 										else if ( str3.Equals( "BassWailing" ) )
 										{
-											this.bAutoPlay.BsW = CConversion.bONorOFF( str4[ 0 ] );
+											bAutoPlay.BsW = CConversion.bONorOFF( str4[ 0 ] );
 										}
 										continue;
 									//-----------------------------
@@ -3768,7 +3551,7 @@ namespace DTXMania
 									case ESectionType.GUID:
 										if( str3.Equals( "JoystickID" ) )
 										{
-											this.tAcquireJoystickID( str4 );
+											tAcquireJoystickID( str4 );
 										}
 										continue;
 									//-----------------------------
@@ -3780,51 +3563,51 @@ namespace DTXMania
 										{
 											if( str3.Equals( "HH" ) )
 											{
-												this.tReadAndSetSkey( str4, this.KeyAssign.Drums.HH );
+												tReadAndSetSkey( str4, KeyAssign.Drums.HH );
 											}
 											else if( str3.Equals( "SD" ) )
 											{
-												this.tReadAndSetSkey( str4, this.KeyAssign.Drums.SD );
+												tReadAndSetSkey( str4, KeyAssign.Drums.SD );
 											}
 											else if( str3.Equals( "BD" ) )
 											{
-												this.tReadAndSetSkey( str4, this.KeyAssign.Drums.BD );
+												tReadAndSetSkey( str4, KeyAssign.Drums.BD );
 											}
 											else if( str3.Equals( "HT" ) )
 											{
-												this.tReadAndSetSkey( str4, this.KeyAssign.Drums.HT );
+												tReadAndSetSkey( str4, KeyAssign.Drums.HT );
 											}
 											else if( str3.Equals( "LT" ) )
 											{
-												this.tReadAndSetSkey( str4, this.KeyAssign.Drums.LT );
+												tReadAndSetSkey( str4, KeyAssign.Drums.LT );
 											}
 											else if( str3.Equals( "FT" ) )
 											{
-												this.tReadAndSetSkey( str4, this.KeyAssign.Drums.FT );
+												tReadAndSetSkey( str4, KeyAssign.Drums.FT );
 											}
 											else if( str3.Equals( "CY" ) )
 											{
-												this.tReadAndSetSkey( str4, this.KeyAssign.Drums.CY );
+												tReadAndSetSkey( str4, KeyAssign.Drums.CY );
 											}
 											else if( str3.Equals( "HO" ) )
 											{
-												this.tReadAndSetSkey( str4, this.KeyAssign.Drums.HHO );
+												tReadAndSetSkey( str4, KeyAssign.Drums.HHO );
 											}
 											else if( str3.Equals( "RD" ) )
 											{
-												this.tReadAndSetSkey( str4, this.KeyAssign.Drums.RD );
+												tReadAndSetSkey( str4, KeyAssign.Drums.RD );
 											}
 											else if( str3.Equals( "LC" ) )
 											{
-												this.tReadAndSetSkey( str4, this.KeyAssign.Drums.LC );
+												tReadAndSetSkey( str4, KeyAssign.Drums.LC );
 											}
 											else if( str3.Equals( "LP" ) )										// #27029 2012.1.4 from
 											{																	//
-												this.tReadAndSetSkey( str4, this.KeyAssign.Drums.LP );	//
+												tReadAndSetSkey( str4, KeyAssign.Drums.LP );	//
 											}																	//
                                             else if (str3.Equals( "LBD" ))										
                                             {																	
-                                                this.tReadAndSetSkey( str4, this.KeyAssign.Drums.LBD );	
+                                                tReadAndSetSkey( str4, KeyAssign.Drums.LBD );	
                                             }	
 											continue;
 										}
@@ -3837,39 +3620,39 @@ namespace DTXMania
 										{
 											if( str3.Equals( "R" ) )
 											{
-												this.tReadAndSetSkey( str4, this.KeyAssign.Guitar.R );
+												tReadAndSetSkey( str4, KeyAssign.Guitar.R );
 											}
 											else if( str3.Equals( "G" ) )
 											{
-												this.tReadAndSetSkey( str4, this.KeyAssign.Guitar.G );
+												tReadAndSetSkey( str4, KeyAssign.Guitar.G );
 											}
 											else if( str3.Equals( "B" ) )
 											{
-												this.tReadAndSetSkey( str4, this.KeyAssign.Guitar.B );
+												tReadAndSetSkey( str4, KeyAssign.Guitar.B );
 											}
                                             else if( str3.Equals( "Y" ) )
 											{
-												this.tReadAndSetSkey( str4, this.KeyAssign.Guitar.Y );
+												tReadAndSetSkey( str4, KeyAssign.Guitar.Y );
 											}
                                             else if( str3.Equals( "P" ) )
 											{
-												this.tReadAndSetSkey( str4, this.KeyAssign.Guitar.P );
+												tReadAndSetSkey( str4, KeyAssign.Guitar.P );
 											}
 											else if( str3.Equals( "Pick" ) )
 											{
-												this.tReadAndSetSkey( str4, this.KeyAssign.Guitar.Pick );
+												tReadAndSetSkey( str4, KeyAssign.Guitar.Pick );
 											}
 											else if( str3.Equals( "Wail" ) )
 											{
-												this.tReadAndSetSkey( str4, this.KeyAssign.Guitar.Wail );
+												tReadAndSetSkey( str4, KeyAssign.Guitar.Wail );
 											}
 											else if( str3.Equals( "Decide" ) )
 											{
-												this.tReadAndSetSkey( str4, this.KeyAssign.Guitar.Decide );
+												tReadAndSetSkey( str4, KeyAssign.Guitar.Decide );
 											}
 											else if (str3.Equals("Cancel"))
 											{
-												this.tReadAndSetSkey(str4, this.KeyAssign.Guitar.Cancel);
+												tReadAndSetSkey(str4, KeyAssign.Guitar.Cancel);
 											}
 											continue;
 										}
@@ -3881,39 +3664,39 @@ namespace DTXMania
 									case ESectionType.BassKeyAssign:
 										if( str3.Equals( "R" ) )
 										{
-											this.tReadAndSetSkey( str4, this.KeyAssign.Bass.R );
+											tReadAndSetSkey( str4, KeyAssign.Bass.R );
 										}
 										else if( str3.Equals( "G" ) )
 										{
-										    this.tReadAndSetSkey( str4, this.KeyAssign.Bass.G );
+										    tReadAndSetSkey( str4, KeyAssign.Bass.G );
 										}
 										else if( str3.Equals( "B" ) )
 										{
-											this.tReadAndSetSkey( str4, this.KeyAssign.Bass.B );
+											tReadAndSetSkey( str4, KeyAssign.Bass.B );
 										}
                                         else if( str3.Equals( "Y" ) )
                                         {
-                                            this.tReadAndSetSkey( str4, this.KeyAssign.Bass.Y );
+                                            tReadAndSetSkey( str4, KeyAssign.Bass.Y );
                                         }
                                         else if( str3.Equals( "P" ) ) 
                                         {
-                                            this.tReadAndSetSkey( str4, this.KeyAssign.Bass.P );
+                                            tReadAndSetSkey( str4, KeyAssign.Bass.P );
                                         }
 										else if( str3.Equals( "Pick" ) )
 										{
-											this.tReadAndSetSkey( str4, this.KeyAssign.Bass.Pick );
+											tReadAndSetSkey( str4, KeyAssign.Bass.Pick );
 										}
 										else if( str3.Equals( "Wail" ) )
 										{
-											this.tReadAndSetSkey( str4, this.KeyAssign.Bass.Wail );
+											tReadAndSetSkey( str4, KeyAssign.Bass.Wail );
 										}
 										else if( str3.Equals( "Decide" ) )
 										{
-											this.tReadAndSetSkey( str4, this.KeyAssign.Bass.Decide );
+											tReadAndSetSkey( str4, KeyAssign.Bass.Decide );
 										}
 										else if (str3.Equals("Cancel"))
 										{
-											this.tReadAndSetSkey(str4, this.KeyAssign.Bass.Cancel);
+											tReadAndSetSkey(str4, KeyAssign.Bass.Cancel);
 										}
 										continue;
 									//-----------------------------
@@ -3924,47 +3707,47 @@ namespace DTXMania
 									case ESectionType.SystemKeyAssign:
 										if( str3.Equals( "Capture" ) )
 										{
-											this.tReadAndSetSkey( str4, this.KeyAssign.System.Capture );
+											tReadAndSetSkey( str4, KeyAssign.System.Capture );
 										}
 										else if (str3.Equals("Search"))
 										{
-											this.tReadAndSetSkey(str4, this.KeyAssign.System.Search);
+											tReadAndSetSkey(str4, KeyAssign.System.Search);
 										}
 										else if (str3.Equals("Help"))
                                         {
-                                            this.tReadAndSetSkey(str4, this.KeyAssign.Guitar.Help);
+                                            tReadAndSetSkey(str4, KeyAssign.Guitar.Help);
                                         }
                                         else if (str3.Equals("Pause"))
                                         {
-                                            this.tReadAndSetSkey(str4, this.KeyAssign.Bass.Help);
+                                            tReadAndSetSkey(str4, KeyAssign.Bass.Help);
                                         }
 										else if (str3.Equals("LoopCreate"))
 										{
-											this.tReadAndSetSkey(str4, this.KeyAssign.System.LoopCreate);
+											tReadAndSetSkey(str4, KeyAssign.System.LoopCreate);
 										}
 										else if (str3.Equals("LoopDelete"))
 										{
-											this.tReadAndSetSkey(str4, this.KeyAssign.System.LoopDelete);
+											tReadAndSetSkey(str4, KeyAssign.System.LoopDelete);
 										}
 										else if (str3.Equals("SkipForward"))
 										{
-											this.tReadAndSetSkey(str4, this.KeyAssign.System.SkipForward);
+											tReadAndSetSkey(str4, KeyAssign.System.SkipForward);
 										}
 										else if (str3.Equals("SkipBackward"))
 										{
-											this.tReadAndSetSkey(str4, this.KeyAssign.System.SkipBackward);
+											tReadAndSetSkey(str4, KeyAssign.System.SkipBackward);
 										}
 										else if (str3.Equals("IncreasePlaySpeed"))
 										{
-											this.tReadAndSetSkey(str4, this.KeyAssign.System.IncreasePlaySpeed);
+											tReadAndSetSkey(str4, KeyAssign.System.IncreasePlaySpeed);
 										}
 										else if (str3.Equals("DecreasePlaySpeed"))
 										{
-											this.tReadAndSetSkey(str4, this.KeyAssign.System.DecreasePlaySpeed);
+											tReadAndSetSkey(str4, KeyAssign.System.DecreasePlaySpeed);
 										}
 										else if (str3.Equals("Restart"))
 										{
-											this.tReadAndSetSkey(str4, this.KeyAssign.System.Restart);
+											tReadAndSetSkey(str4, KeyAssign.System.Restart);
 										}
 										continue;
 									//-----------------------------
@@ -4078,25 +3861,25 @@ namespace DTXMania
 				int result = 0;
 				if( ( int.TryParse( strArray[ 0 ], out result ) && ( result >= 0 ) ) && ( result <= 9 ) )
 				{
-					if( this.dicJoystick.ContainsKey( result ) )
+					if( dicJoystick.ContainsKey( result ) )
 					{
-						this.dicJoystick.Remove( result );
+						dicJoystick.Remove( result );
 					}
-					this.dicJoystick.Add( result, strArray[ 1 ] );
+					dicJoystick.Add( result, strArray[ 1 ] );
 				}
 			}
 		}
 		private void tClearAllKeyAssignments()
 		{
-			this.KeyAssign = new CKeyAssign();
+			KeyAssign = new CKeyAssign();
 			for( int i = 0; i <= (int)EKeyConfigPart.SYSTEM; i++ )
 			{
 				for( int j = 0; j < (int)EKeyConfigPad.MAX; j++ )
 				{
-					this.KeyAssign[ i ][ j ] = new CKeyAssign.STKEYASSIGN[ 16 ];
+					KeyAssign[ i ][ j ] = new CKeyAssign.STKEYASSIGN[ 16 ];
 					for( int k = 0; k < 16; k++ )
 					{
-						this.KeyAssign[ i ][ j ][ k ] = new CKeyAssign.STKEYASSIGN( EInputDevice.Unknown, 0, 0 );
+						KeyAssign[ i ][ j ][ k ] = new CKeyAssign.STKEYASSIGN( EInputDevice.Unknown, 0, 0 );
 					}
 				}
 			}
@@ -4177,7 +3960,7 @@ namespace DTXMania
                 id = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ".IndexOf(str[1]);	// #24166 2011.1.15 yyagi: to support ID > 10, change 2nd character from Decimal to 36-numeral system. (e.g. J1023 -> JA23)
                 if (((id >= 0) && int.TryParse(str.Substring(2), out code)) && ((code >= 0) && (code <= 0xff)))
                 {
-                    this.tDeleteAlreadyAssignedInputs(eInputDevice, id, code);
+                    tDeleteAlreadyAssignedInputs(eInputDevice, id, code);
                     assign[i].InputDevice = eInputDevice;
                     assign[i].ID = id;
                     assign[i].Code = code;
@@ -4186,7 +3969,7 @@ namespace DTXMania
         }
 		private void tSetDefaultKeyAssignments()
 		{
-			this.tClearAllKeyAssignments();
+			tClearAllKeyAssignments();
 
 			string strDefaultKeyAssign = @"
 [DrumsKeyAssign]

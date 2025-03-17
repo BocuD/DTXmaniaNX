@@ -28,7 +28,7 @@ namespace DTXMania
 			}
 			else
 			{                         // 単純にファイルの存在有無をチェックするだけ (プロジェクトで「参照」していたり、アンマネージドなDLLが暗黙リンクされるものはこちら)
-				string path = Path.Combine(System.IO.Directory.GetCurrentDirectory(), strDll名);
+				string path = Path.Combine(Directory.GetCurrentDirectory(), strDll名);
 				if (!File.Exists(path))
 				{
 					MessageBox.Show(str存在しないときに表示するエラー文字列, "DTXMania runtime error", MessageBoxButtons.OK, MessageBoxIcon.Hand);

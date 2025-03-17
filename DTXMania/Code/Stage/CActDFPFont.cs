@@ -485,7 +485,7 @@ namespace DTXMania
 			st文字領域Array[ 0x5e ].rc = new RectangleF( 69, 226, 14, 29 );
 
 	
-			this.stCharacterRects = st文字領域Array;
+			stCharacterRects = st文字領域Array;
 		}
 
 
@@ -493,7 +493,7 @@ namespace DTXMania
 
 		public int n文字列長dot( string str )
 		{
-			return this.n文字列長dot( str, 1f );
+			return n文字列長dot( str, 1f );
 		}
 		public int n文字列長dot( string str, float fScale )
 		{
@@ -504,7 +504,7 @@ namespace DTXMania
 			int num = 0;
 			foreach( char ch in str )
 			{
-				foreach( STCharacterMap st文字領域 in this.stCharacterRects )
+				foreach( STCharacterMap st文字領域 in stCharacterRects )
 				{
 					if( st文字領域.ch == ch )
 					{
@@ -517,23 +517,23 @@ namespace DTXMania
 		}
 		public void t文字列描画( int x, int y, string str )
 		{
-			this.t文字列描画( x, y, str, false, 1f );
+			t文字列描画( x, y, str, false, 1f );
 		}
 		public void t文字列描画( int x, int y, string str, bool b強調 )
 		{
-			this.t文字列描画( x, y, str, b強調, 1f );
+			t文字列描画( x, y, str, b強調, 1f );
 		}
 		public void t文字列描画( int x, int y, string str, bool b強調, float fScale )
 		{
-			if( !base.bNotActivated && !string.IsNullOrEmpty( str ) )
+			if( !bNotActivated && !string.IsNullOrEmpty( str ) )
 			{
-				CTexture texture = b強調 ? this.txHighlightCharacterMap : this.txCharacterMap;
+				CTexture texture = b強調 ? txHighlightCharacterMap : txCharacterMap;
 				if( texture != null )
 				{
 					texture.vcScaleRatio = new Vector3( fScale, fScale, 1f );
 					foreach( char ch in str )
 					{
-						foreach( STCharacterMap st文字領域 in this.stCharacterRects )
+						foreach( STCharacterMap st文字領域 in stCharacterRects )
 						{
 							if( st文字領域.ch == ch )
 							{
@@ -557,26 +557,26 @@ namespace DTXMania
 
 		public override void OnManagedCreateResources()
 		{
-			if( !base.bNotActivated )
+			if( !bNotActivated )
 			{
-				this.txCharacterMap = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\Screen font dfp.png" ), false );
-				this.txHighlightCharacterMap = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\Screen font dfp em.png" ), false );
+				txCharacterMap = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\Screen font dfp.png" ), false );
+				txHighlightCharacterMap = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\Screen font dfp em.png" ), false );
 				base.OnManagedCreateResources();
 			}
 		}
 		public override void OnManagedReleaseResources()
 		{
-			if( !base.bNotActivated )
+			if( !bNotActivated )
 			{
-				if( this.txHighlightCharacterMap != null )
+				if( txHighlightCharacterMap != null )
 				{
-					this.txHighlightCharacterMap.Dispose();
-					this.txHighlightCharacterMap = null;
+					txHighlightCharacterMap.Dispose();
+					txHighlightCharacterMap = null;
 				}
-				if( this.txCharacterMap != null )
+				if( txCharacterMap != null )
 				{
-					this.txCharacterMap.Dispose();
-					this.txCharacterMap = null;
+					txCharacterMap.Dispose();
+					txCharacterMap = null;
 				}
 				base.OnManagedReleaseResources();
 			}

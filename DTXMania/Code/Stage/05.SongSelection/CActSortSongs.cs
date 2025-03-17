@@ -20,14 +20,14 @@
 			lci.Add( new CItemList( "Date",			CItemBase.EPanelType.Normal, 0, "", "", new string[] { "Dec.31,30,...",	"Jan.1,2,..." } ) );
 			lci.Add( new CItemList( "Return",		CItemBase.EPanelType.Normal, 0, "", "", new string[] { "", 				"" } ) );
 			
-			base.Initialize( lci, "SORT MENU" );
+			Initialize( lci, "SORT MENU" );
 		}
 
 
 		// メソッド
 		public void tActivatePopupMenu( EInstrumentPart einst, ref CActSelectSongList ca )
 		{
-		    this.actSongList = ca;
+		    actSongList = ca;
 			base.tActivatePopupMenu( einst );
 		}
 		//public void tDeativatePopupMenu()
@@ -43,45 +43,45 @@
 			switch ( nCurrentSelection )
 			{
 				case (int) EOrder.Title:
-					this.actSongList.tSortSongList(
+					actSongList.tSortSongList(
 						CDTXMania.SongManager.t曲リストのソート2_タイトル順, eInst, nSortOrder
 					);
-					this.actSongList.t選択曲が変更された(true);
+					actSongList.t選択曲が変更された(true);
 					break;
 				case (int) EOrder.Level:
-					this.actSongList.tSortSongList(
+					actSongList.tSortSongList(
 						CDTXMania.SongManager.t曲リストのソート4_LEVEL順, eInst, nSortOrder,
-						this.actSongList.n現在のアンカ難易度レベル
+						actSongList.n現在のアンカ難易度レベル
 					);
-					this.actSongList.t選択曲が変更された( true );
+					actSongList.t選択曲が変更された( true );
 					break;
 				case (int) EOrder.BestRank:
-					this.actSongList.tSortSongList(
+					actSongList.tSortSongList(
 						CDTXMania.SongManager.t曲リストのソート5_BestRank順, eInst, nSortOrder,
-						this.actSongList.n現在のアンカ難易度レベル
+						actSongList.n現在のアンカ難易度レベル
 					);
 					break;
 				case (int) EOrder.PlayCount:
 					// this.actSongList.t曲リストのソート3_演奏回数の多い順( eInst, nSortOrder );
-					this.actSongList.tSortSongList(
+					actSongList.tSortSongList(
 						CDTXMania.SongManager.t曲リストのソート3_演奏回数の多い順, eInst, nSortOrder,
-						this.actSongList.n現在のアンカ難易度レベル
+						actSongList.n現在のアンカ難易度レベル
 					);
-					this.actSongList.t選択曲が変更された( true );
+					actSongList.t選択曲が変更された( true );
 					break;
 				case (int) EOrder.Author:
-					this.actSongList.tSortSongList(
+					actSongList.tSortSongList(
 						CDTXMania.SongManager.t曲リストのソート8_アーティスト名順, eInst, nSortOrder,
-						this.actSongList.n現在のアンカ難易度レベル
+						actSongList.n現在のアンカ難易度レベル
 					);
-					this.actSongList.t選択曲が変更された( true );
+					actSongList.t選択曲が変更された( true );
 					break;
 				case (int) EOrder.SkillPoint:
-					this.actSongList.tSortSongList(
+					actSongList.tSortSongList(
 						CDTXMania.SongManager.t曲リストのソート6_SkillPoint順, eInst, nSortOrder,
-						this.actSongList.n現在のアンカ難易度レベル
+						actSongList.n現在のアンカ難易度レベル
 					);
-					this.actSongList.t選択曲が変更された( true );
+					actSongList.t選択曲が変更された( true );
 					break;
 #if TEST_SORTBGM
 						case (int) ESortItem.BPM:
@@ -93,14 +93,14 @@
 						break;
 #endif
 				case (int) EOrder.Date:
-					this.actSongList.tSortSongList(
+					actSongList.tSortSongList(
 						CDTXMania.SongManager.t曲リストのソート7_更新日時順, eInst, nSortOrder,
-						this.actSongList.n現在のアンカ難易度レベル
+						actSongList.n現在のアンカ難易度レベル
 					);
-					this.actSongList.t選択曲が変更された( true );
+					actSongList.t選択曲が変更された( true );
 					break;
 				case (int) EOrder.Return:
-					this.tDeativatePopupMenu();
+					tDeativatePopupMenu();
 					break;
 				default:
 					break;
@@ -115,14 +115,14 @@
 		}
 		public override void OnDeactivate()
 		{
-			if( !base.bNotActivated )
+			if( !bNotActivated )
 			{
 				base.OnDeactivate();
 			}
 		}
 		public override void OnManagedCreateResources()
 		{
-			if( !base.bNotActivated )
+			if( !bNotActivated )
 			{
 				base.OnManagedCreateResources();
 			}

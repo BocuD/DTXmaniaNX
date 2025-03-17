@@ -39,7 +39,7 @@ namespace DTXMania
 			pfc = null;
 			this.fontFamily = null;
 			font = null;
-			this.pt = fontSize;
+			pt = fontSize;
 			RectStrings = new Rectangle(0, 0, 0, 0);
 			PtOrigin = new Point(0, 0);
 			bDisposed = false;

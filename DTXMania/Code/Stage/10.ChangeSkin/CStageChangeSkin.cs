@@ -12,8 +12,8 @@ namespace DTXMania
 
 		public CStageChangeSkin()
 		{
-			base.eStageID = CStage.EStage.ChangeSkin;
-			base.bNotActivated = true;
+			eStageID = EStage.ChangeSkin;
+			bNotActivated = true;
 		}
 
 
@@ -49,25 +49,25 @@ namespace DTXMania
 		}
 		public override void OnManagedCreateResources()
 		{
-			if( !base.bNotActivated )
+			if( !bNotActivated )
 			{
 				base.OnManagedCreateResources();
 			}
 		}
 		public override void OnManagedReleaseResources()
 		{
-			if( !base.bNotActivated )
+			if( !bNotActivated )
 			{
 				base.OnManagedReleaseResources();
 			}
 		}
 		public override int OnUpdateAndDraw()
 		{
-			if( !base.bNotActivated )
+			if( !bNotActivated )
 			{
-				if ( base.bJustStartedUpdate )
+				if ( bJustStartedUpdate )
 				{
-					base.bJustStartedUpdate = false;
+					bJustStartedUpdate = false;
 					return 0;
 				}
 

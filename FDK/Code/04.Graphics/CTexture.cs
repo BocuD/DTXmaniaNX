@@ -28,20 +28,20 @@ namespace FDK
 
 		public int nTransparency
 		{
-			get { return this._Transparency; }
+			get => _Transparency;
 			set
 			{
 				if (value < 0)
 				{
-					this._Transparency = 0;
+					_Transparency = 0;
 				}
 				else if (value > 0xff)
 				{
-					this._Transparency = 0xff;
+					_Transparency = 0xff;
 				}
 				else
 				{
-					this._Transparency = value;
+					_Transparency = value;
 				}
 			}
 		}
@@ -69,16 +69,16 @@ namespace FDK
 
 		public CTexture()
 		{
-			this.szImageSize = new Size(0, 0);
-			this.szTextureSize = new Size(0, 0);
-			this._Transparency = 0xff;
-			this.texture = null;
-			this.bSharpDXTextureDispose完了済み = true;
-			this.cvPositionColoredVertexies = null;
-			this.bAdditiveBlending = false;
-			this.fZAxisRotation = 0f;
-			this.vcScaleRatio = new Vector3(1f, 1f, 1f);
-			this.filename = ""; // DTXMania rev:693bf14b0d83efc770235c788117190d08a4e531
+			szImageSize = new Size(0, 0);
+			szTextureSize = new Size(0, 0);
+			_Transparency = 0xff;
+			texture = null;
+			bSharpDXTextureDispose完了済み = true;
+			cvPositionColoredVertexies = null;
+			bAdditiveBlending = false;
+			fZAxisRotation = 0f;
+			vcScaleRatio = new Vector3(1f, 1f, 1f);
+			filename = ""; // DTXMania rev:693bf14b0d83efc770235c788117190d08a4e531
 //			this._txData = null;
 		}
 
@@ -98,24 +98,24 @@ namespace FDK
 		{
 			try
 			{
-				this.Format = format;
-				this.szImageSize = new Size(bitmap.Width, bitmap.Height);
-				this.szTextureSize = this.tGetOptimalTextureSizeNotExceedingSpecifiedSize(device, this.szImageSize);
-				this.rcFullImage = new Rectangle(0, 0, this.szImageSize.Width, this.szImageSize.Height);
+				Format = format;
+				szImageSize = new Size(bitmap.Width, bitmap.Height);
+				szTextureSize = tGetOptimalTextureSizeNotExceedingSpecifiedSize(device, szImageSize);
+				rcFullImage = new Rectangle(0, 0, szImageSize.Width, szImageSize.Height);
 
 				using (var stream = new MemoryStream())
 				{
 					bitmap.Save(stream, ImageFormat.Bmp);
 					stream.Seek(0L, SeekOrigin.Begin);
 					int colorKey = unchecked((int)0xFF000000);
-					this.texture = Texture.FromStream(device, stream, this.szTextureSize.Width,
-						this.szTextureSize.Height, 1, Usage.None, format, poolvar, Filter.Point, Filter.None, colorKey);
-					this.bSharpDXTextureDispose完了済み = false;
+					texture = Texture.FromStream(device, stream, szTextureSize.Width,
+						szTextureSize.Height, 1, Usage.None, format, poolvar, Filter.Point, Filter.None, colorKey);
+					bSharpDXTextureDispose完了済み = false;
 				}
 			}
 			catch (Exception e)
 			{
-				this.Dispose();
+				Dispose();
 				throw new CTextureCreateFailedException("ビットマップからのテクスチャの生成に失敗しました。(" + e.Message + ")");
 			}
 		}
@@ -186,10 +186,10 @@ namespace FDK
 		{
 			try
 			{
-				this.Format = format;
-				this.szImageSize = new Size(n幅, n高さ);
-				this.szTextureSize = this.tGetOptimalTextureSizeNotExceedingSpecifiedSize(device, this.szImageSize);
-				this.rcFullImage = new Rectangle(0, 0, this.szImageSize.Width, this.szImageSize.Height);
+				Format = format;
+				szImageSize = new Size(n幅, n高さ);
+				szTextureSize = tGetOptimalTextureSizeNotExceedingSpecifiedSize(device, szImageSize);
+				rcFullImage = new Rectangle(0, 0, szImageSize.Width, szImageSize.Height);
 
 				using (var bitmap = new Bitmap(1, 1))
 				{
@@ -206,15 +206,15 @@ namespace FDK
 						pool = poolvar;
 #endif
 						// 中で更にメモリ読み込みし直していて無駄なので、Streamを使うのは止めたいところ
-						this.texture = Texture.FromStream(device, stream, n幅, n高さ, 1, usage, format, pool, Filter.Point,
+						texture = Texture.FromStream(device, stream, n幅, n高さ, 1, usage, format, pool, Filter.Point,
 							Filter.None, 0);
-						this.bSharpDXTextureDispose完了済み = false;
+						bSharpDXTextureDispose完了済み = false;
 					}
 				}
 			}
 			catch
 			{
-				this.Dispose();
+				Dispose();
 				throw new CTextureCreateFailedException(string.Format("テクスチャの生成に失敗しました。\n({0}x{1}, {2})", n幅, n高さ,
 					format));
 			}
@@ -246,7 +246,7 @@ namespace FDK
 				throw new FileNotFoundException(string.Format("ファイルが存在しません。\n[{0}]", strファイル名));
 
 			Byte[] _txData = File.ReadAllBytes(strファイル名);
-			this.filename = Path.GetFileName(strファイル名);
+			filename = Path.GetFileName(strファイル名);
 			MakeTexture(device, _txData, format, b黒を透過する, pool);
 		}
 
@@ -261,26 +261,26 @@ namespace FDK
 			try
 			{
 				var information = ImageInformation.FromMemory(txData);
-				this.Format = format;
-				this.szImageSize = new Size(information.Width, information.Height);
-				this.rcFullImage = new Rectangle(0, 0, this.szImageSize.Width, this.szImageSize.Height);
+				Format = format;
+				szImageSize = new Size(information.Width, information.Height);
+				rcFullImage = new Rectangle(0, 0, szImageSize.Width, szImageSize.Height);
 				int colorKey = (b黒を透過する) ? unchecked((int)0xFF000000) : 0;
-				this.szTextureSize = this.tGetOptimalTextureSizeNotExceedingSpecifiedSize(device, this.szImageSize);
+				szTextureSize = tGetOptimalTextureSizeNotExceedingSpecifiedSize(device, szImageSize);
 #if TEST_Direct3D9Ex
 				pool = poolvar;
 #endif
 				//				lock ( lockobj )
 				//				{
 				//Trace.TraceInformation( "CTexture() start: " );
-				this.texture = Texture.FromMemory(device, txData, this.szImageSize.Width, this.szImageSize.Height, 1,
+				texture = Texture.FromMemory(device, txData, szImageSize.Width, szImageSize.Height, 1,
 					Usage.None, format, pool, Filter.Point, Filter.None, colorKey);
-				this.bSharpDXTextureDispose完了済み = false;
+				bSharpDXTextureDispose完了済み = false;
 				//Trace.TraceInformation( "CTexture() end:   " );
 				//				}
 			}
 			catch
 			{
-				this.Dispose();
+				Dispose();
 				// throw new CTextureCreateFailedException( string.Format( "テクスチャの生成に失敗しました。\n{0}", strファイル名 ) );
 				throw new CTextureCreateFailedException(string.Format("テクスチャの生成に失敗しました。\n"));
 			}
@@ -296,11 +296,11 @@ namespace FDK
 		{
 			try
 			{
-				this.Format = format;
-				this.szImageSize = new Size(bitmap.Width, bitmap.Height);
-				this.rcFullImage = new Rectangle(0, 0, this.szImageSize.Width, this.szImageSize.Height);
+				Format = format;
+				szImageSize = new Size(bitmap.Width, bitmap.Height);
+				rcFullImage = new Rectangle(0, 0, szImageSize.Width, szImageSize.Height);
 				int colorKey = (b黒を透過する) ? unchecked((int)0xFF000000) : 0;
-				this.szTextureSize = this.tGetOptimalTextureSizeNotExceedingSpecifiedSize(device, this.szImageSize);
+				szTextureSize = tGetOptimalTextureSizeNotExceedingSpecifiedSize(device, szImageSize);
 #if TEST_Direct3D9Ex
 				pool = poolvar;
 #endif
@@ -311,17 +311,17 @@ namespace FDK
 #if TEST_Direct3D9Ex
 					288;		// 32の倍数にする(グラフによっては2のべき乗にしないとダメかも)
 #else
-						this.szImageSize.Width;
+						szImageSize.Width;
 #endif
 #if TEST_Direct3D9Ex
 					this.texture =
  new Texture( device, tw, this.sz画像サイズ.Height, 1, Usage.Dynamic, format, Pool.Default );
 #else
-					this.texture = new Texture(device, this.szImageSize.Width, this.szImageSize.Height, 1, Usage.None,
+					texture = new Texture(device, szImageSize.Width, szImageSize.Height, 1, Usage.None,
 						format, pool);
 #endif
 					BitmapData srcBufData =
-						bitmap.LockBits(new Rectangle(0, 0, this.szImageSize.Width, this.szImageSize.Height),
+						bitmap.LockBits(new Rectangle(0, 0, szImageSize.Width, szImageSize.Height),
 							ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
 					DataRectangle destDataRectangle = texture.LockRectangle(0, LockFlags.Discard); // None
 #if TEST_Direct3D9Ex
@@ -343,17 +343,17 @@ namespace FDK
 					IntPtr src_scan0 = (IntPtr)((Int64)srcBufData.Scan0);
 					//destDataRectangle.Data.WriteRange( src_scan0, this.szImageSize.Width * 4 * this.szImageSize.Height );
 					CopyMemory(destDataRectangle.DataPointer.ToPointer(), src_scan0.ToPointer(),
-						this.szImageSize.Width * 4 * this.szImageSize.Height);
+						szImageSize.Width * 4 * szImageSize.Height);
 #endif
 					texture.UnlockRectangle(0);
 					bitmap.UnlockBits(srcBufData);
-					this.bSharpDXTextureDispose完了済み = false;
+					bSharpDXTextureDispose完了済み = false;
 				}
 				//Trace.TraceInformation( "CTExture() End: " );
 			}
 			catch
 			{
-				this.Dispose();
+				Dispose();
 				// throw new CTextureCreateFailedException( string.Format( "テクスチャの生成に失敗しました。\n{0}", strファイル名 ) );
 				throw new CTextureCreateFailedException(string.Format("テクスチャの生成に失敗しました。\n"));
 			}
@@ -368,32 +368,32 @@ namespace FDK
 		/// <param name="y">描画位置（テクスチャの左上位置の Y 座標[dot]）。</param>
 		public void tDraw2D(Device device, int x, int y)
 		{
-			this.tDraw2D(device, x, y, 1f, this.rcFullImage);
+			tDraw2D(device, x, y, 1f, rcFullImage);
 		}
 
 		public void tDraw2D(Device device, int x, int y, RectangleF rcClipRect)
 		{
-			this.tDraw2D(device, x, y, 1f, rcClipRect);
+			tDraw2D(device, x, y, 1f, rcClipRect);
 		}
 
 		public void tDraw2DFloat(Device device, float x, float y)
 		{
-			this.tDraw2D(device, x, y, 1f, this.rcFullImage);
+			tDraw2D(device, x, y, 1f, rcFullImage);
 		}
 
 		public void tDraw2DFloat(Device device, float x, float y, RectangleF rcClipRect)
 		{
-			this.tDraw2D(device, x, y, 1f, rcClipRect);
+			tDraw2D(device, x, y, 1f, rcClipRect);
 		}
 
 		public void tDraw2D(Device device, float x, float y, float depth, RectangleF rcClipRect)
 		{
-			if (this.texture == null)
+			if (texture == null)
 				return;
 
-			this.tRenderStateSettings(device);
+			tRenderStateSettings(device);
 
-			if (this.fZAxisRotation == 0f)
+			if (fZAxisRotation == 0f)
 			{
 				#region [ (A) 回転なし ]
 
@@ -402,53 +402,53 @@ namespace FDK
 				float f補正値Y = -0.5f; //
 				float w = rcClipRect.Width;
 				float h = rcClipRect.Height;
-				float fULeft = ((float)rcClipRect.Left) / ((float)this.szTextureSize.Width);
-				float fURight = ((float)rcClipRect.Right) / ((float)this.szTextureSize.Width);
-				float fVTop = ((float)rcClipRect.Top) / ((float)this.szTextureSize.Height);
-				float fVBottom = ((float)rcClipRect.Bottom) / ((float)this.szTextureSize.Height);
-				this.color4.Alpha = ((float)this._Transparency) / 255f;
-				int color = this.color4.ToRgba();
+				float fULeft = ((float)rcClipRect.Left) / ((float)szTextureSize.Width);
+				float fURight = ((float)rcClipRect.Right) / ((float)szTextureSize.Width);
+				float fVTop = ((float)rcClipRect.Top) / ((float)szTextureSize.Height);
+				float fVBottom = ((float)rcClipRect.Bottom) / ((float)szTextureSize.Height);
+				color4.Alpha = ((float)_Transparency) / 255f;
+				int color = color4.ToRgba();
 
-				if (this.cvTransformedColoredVertexies == null)
-					this.cvTransformedColoredVertexies = new TransformedColoredTexturedVertex[4];
+				if (cvTransformedColoredVertexies == null)
+					cvTransformedColoredVertexies = new TransformedColoredTexturedVertex[4];
 
 				// #27122 2012.1.13 from: 以下、マネージドオブジェクト（＝ガベージ）の量産を抑えるため、new は使わず、メンバに値を１つずつ直接上書きする。
 
-				this.cvTransformedColoredVertexies[0].Position.X = x + f補正値X;
-				this.cvTransformedColoredVertexies[0].Position.Y = y + f補正値Y;
-				this.cvTransformedColoredVertexies[0].Position.Z = depth;
-				this.cvTransformedColoredVertexies[0].Position.W = 1.0f;
-				this.cvTransformedColoredVertexies[0].Color = color;
-				this.cvTransformedColoredVertexies[0].TextureCoordinates.X = fULeft;
-				this.cvTransformedColoredVertexies[0].TextureCoordinates.Y = fVTop;
+				cvTransformedColoredVertexies[0].Position.X = x + f補正値X;
+				cvTransformedColoredVertexies[0].Position.Y = y + f補正値Y;
+				cvTransformedColoredVertexies[0].Position.Z = depth;
+				cvTransformedColoredVertexies[0].Position.W = 1.0f;
+				cvTransformedColoredVertexies[0].Color = color;
+				cvTransformedColoredVertexies[0].TextureCoordinates.X = fULeft;
+				cvTransformedColoredVertexies[0].TextureCoordinates.Y = fVTop;
 
-				this.cvTransformedColoredVertexies[1].Position.X = (x + (w * this.vcScaleRatio.X)) + f補正値X;
-				this.cvTransformedColoredVertexies[1].Position.Y = y + f補正値Y;
-				this.cvTransformedColoredVertexies[1].Position.Z = depth;
-				this.cvTransformedColoredVertexies[1].Position.W = 1.0f;
-				this.cvTransformedColoredVertexies[1].Color = color;
-				this.cvTransformedColoredVertexies[1].TextureCoordinates.X = fURight;
-				this.cvTransformedColoredVertexies[1].TextureCoordinates.Y = fVTop;
+				cvTransformedColoredVertexies[1].Position.X = (x + (w * vcScaleRatio.X)) + f補正値X;
+				cvTransformedColoredVertexies[1].Position.Y = y + f補正値Y;
+				cvTransformedColoredVertexies[1].Position.Z = depth;
+				cvTransformedColoredVertexies[1].Position.W = 1.0f;
+				cvTransformedColoredVertexies[1].Color = color;
+				cvTransformedColoredVertexies[1].TextureCoordinates.X = fURight;
+				cvTransformedColoredVertexies[1].TextureCoordinates.Y = fVTop;
 
-				this.cvTransformedColoredVertexies[2].Position.X = x + f補正値X;
-				this.cvTransformedColoredVertexies[2].Position.Y = (y + (h * this.vcScaleRatio.Y)) + f補正値Y;
-				this.cvTransformedColoredVertexies[2].Position.Z = depth;
-				this.cvTransformedColoredVertexies[2].Position.W = 1.0f;
-				this.cvTransformedColoredVertexies[2].Color = color;
-				this.cvTransformedColoredVertexies[2].TextureCoordinates.X = fULeft;
-				this.cvTransformedColoredVertexies[2].TextureCoordinates.Y = fVBottom;
+				cvTransformedColoredVertexies[2].Position.X = x + f補正値X;
+				cvTransformedColoredVertexies[2].Position.Y = (y + (h * vcScaleRatio.Y)) + f補正値Y;
+				cvTransformedColoredVertexies[2].Position.Z = depth;
+				cvTransformedColoredVertexies[2].Position.W = 1.0f;
+				cvTransformedColoredVertexies[2].Color = color;
+				cvTransformedColoredVertexies[2].TextureCoordinates.X = fULeft;
+				cvTransformedColoredVertexies[2].TextureCoordinates.Y = fVBottom;
 
-				this.cvTransformedColoredVertexies[3].Position.X = (x + (w * this.vcScaleRatio.X)) + f補正値X;
-				this.cvTransformedColoredVertexies[3].Position.Y = (y + (h * this.vcScaleRatio.Y)) + f補正値Y;
-				this.cvTransformedColoredVertexies[3].Position.Z = depth;
-				this.cvTransformedColoredVertexies[3].Position.W = 1.0f;
-				this.cvTransformedColoredVertexies[3].Color = color;
-				this.cvTransformedColoredVertexies[3].TextureCoordinates.X = fURight;
-				this.cvTransformedColoredVertexies[3].TextureCoordinates.Y = fVBottom;
+				cvTransformedColoredVertexies[3].Position.X = (x + (w * vcScaleRatio.X)) + f補正値X;
+				cvTransformedColoredVertexies[3].Position.Y = (y + (h * vcScaleRatio.Y)) + f補正値Y;
+				cvTransformedColoredVertexies[3].Position.Z = depth;
+				cvTransformedColoredVertexies[3].Position.W = 1.0f;
+				cvTransformedColoredVertexies[3].Color = color;
+				cvTransformedColoredVertexies[3].TextureCoordinates.X = fURight;
+				cvTransformedColoredVertexies[3].TextureCoordinates.Y = fVBottom;
 
-				device.SetTexture(0, this.texture);
+				device.SetTexture(0, texture);
 				device.VertexFormat = TransformedColoredTexturedVertex.Format;
-				device.DrawUserPrimitives(PrimitiveType.TriangleStrip, 0, 2, this.cvTransformedColoredVertexies);
+				device.DrawUserPrimitives(PrimitiveType.TriangleStrip, 0, 2, cvTransformedColoredVertexies);
 				//-----------------
 
 				#endregion
@@ -462,59 +462,59 @@ namespace FDK
 				float f補正値Y = ((rcClipRect.Height % 2) == 0) ? -0.5f : 0f; // 3D（回転する）なら補正はいらない。
 				float f中央X = ((float)rcClipRect.Width) / 2f;
 				float f中央Y = ((float)rcClipRect.Height) / 2f;
-				float fULeft = ((float)rcClipRect.Left) / ((float)this.szTextureSize.Width);
-				float fURight = ((float)rcClipRect.Right) / ((float)this.szTextureSize.Width);
-				float fVTop = ((float)rcClipRect.Top) / ((float)this.szTextureSize.Height);
-				float fVBottom = ((float)rcClipRect.Bottom) / ((float)this.szTextureSize.Height);
-				this.color4.Alpha = ((float)this._Transparency) / 255f;
-				int color = this.color4.ToRgba();
+				float fULeft = ((float)rcClipRect.Left) / ((float)szTextureSize.Width);
+				float fURight = ((float)rcClipRect.Right) / ((float)szTextureSize.Width);
+				float fVTop = ((float)rcClipRect.Top) / ((float)szTextureSize.Height);
+				float fVBottom = ((float)rcClipRect.Bottom) / ((float)szTextureSize.Height);
+				color4.Alpha = ((float)_Transparency) / 255f;
+				int color = color4.ToRgba();
 
-				if (this.cvPositionColoredVertexies == null)
-					this.cvPositionColoredVertexies = new PositionColoredTexturedVertex[4];
+				if (cvPositionColoredVertexies == null)
+					cvPositionColoredVertexies = new PositionColoredTexturedVertex[4];
 
 				// #27122 2012.1.13 from: 以下、マネージドオブジェクト（＝ガベージ）の量産を抑えるため、new は使わず、メンバに値を１つずつ直接上書きする。
 
-				this.cvPositionColoredVertexies[0].Position.X = -f中央X + f補正値X;
-				this.cvPositionColoredVertexies[0].Position.Y = f中央Y + f補正値Y;
-				this.cvPositionColoredVertexies[0].Position.Z = depth;
-				this.cvPositionColoredVertexies[0].Color = color;
-				this.cvPositionColoredVertexies[0].TextureCoordinates.X = fULeft;
-				this.cvPositionColoredVertexies[0].TextureCoordinates.Y = fVTop;
+				cvPositionColoredVertexies[0].Position.X = -f中央X + f補正値X;
+				cvPositionColoredVertexies[0].Position.Y = f中央Y + f補正値Y;
+				cvPositionColoredVertexies[0].Position.Z = depth;
+				cvPositionColoredVertexies[0].Color = color;
+				cvPositionColoredVertexies[0].TextureCoordinates.X = fULeft;
+				cvPositionColoredVertexies[0].TextureCoordinates.Y = fVTop;
 
-				this.cvPositionColoredVertexies[1].Position.X = f中央X + f補正値X;
-				this.cvPositionColoredVertexies[1].Position.Y = f中央Y + f補正値Y;
-				this.cvPositionColoredVertexies[1].Position.Z = depth;
-				this.cvPositionColoredVertexies[1].Color = color;
-				this.cvPositionColoredVertexies[1].TextureCoordinates.X = fURight;
-				this.cvPositionColoredVertexies[1].TextureCoordinates.Y = fVTop;
+				cvPositionColoredVertexies[1].Position.X = f中央X + f補正値X;
+				cvPositionColoredVertexies[1].Position.Y = f中央Y + f補正値Y;
+				cvPositionColoredVertexies[1].Position.Z = depth;
+				cvPositionColoredVertexies[1].Color = color;
+				cvPositionColoredVertexies[1].TextureCoordinates.X = fURight;
+				cvPositionColoredVertexies[1].TextureCoordinates.Y = fVTop;
 
-				this.cvPositionColoredVertexies[2].Position.X = -f中央X + f補正値X;
-				this.cvPositionColoredVertexies[2].Position.Y = -f中央Y + f補正値Y;
-				this.cvPositionColoredVertexies[2].Position.Z = depth;
-				this.cvPositionColoredVertexies[2].Color = color;
-				this.cvPositionColoredVertexies[2].TextureCoordinates.X = fULeft;
-				this.cvPositionColoredVertexies[2].TextureCoordinates.Y = fVBottom;
+				cvPositionColoredVertexies[2].Position.X = -f中央X + f補正値X;
+				cvPositionColoredVertexies[2].Position.Y = -f中央Y + f補正値Y;
+				cvPositionColoredVertexies[2].Position.Z = depth;
+				cvPositionColoredVertexies[2].Color = color;
+				cvPositionColoredVertexies[2].TextureCoordinates.X = fULeft;
+				cvPositionColoredVertexies[2].TextureCoordinates.Y = fVBottom;
 
-				this.cvPositionColoredVertexies[3].Position.X = f中央X + f補正値X;
-				this.cvPositionColoredVertexies[3].Position.Y = -f中央Y + f補正値Y;
-				this.cvPositionColoredVertexies[3].Position.Z = depth;
-				this.cvPositionColoredVertexies[3].Color = color;
-				this.cvPositionColoredVertexies[3].TextureCoordinates.X = fURight;
-				this.cvPositionColoredVertexies[3].TextureCoordinates.Y = fVBottom;
+				cvPositionColoredVertexies[3].Position.X = f中央X + f補正値X;
+				cvPositionColoredVertexies[3].Position.Y = -f中央Y + f補正値Y;
+				cvPositionColoredVertexies[3].Position.Z = depth;
+				cvPositionColoredVertexies[3].Color = color;
+				cvPositionColoredVertexies[3].TextureCoordinates.X = fURight;
+				cvPositionColoredVertexies[3].TextureCoordinates.Y = fVBottom;
 
 				float n描画領域内X = x + (rcClipRect.Width / 2.0f);
 				float n描画領域内Y = y + (rcClipRect.Height / 2.0f);
 				var vc3移動量 = new Vector3(n描画領域内X - (((float)device.Viewport.Width) / 2f),
 					-(n描画領域内Y - (((float)device.Viewport.Height) / 2f)), 0f);
 
-				var matrix = Matrix.Identity * Matrix.Scaling(this.vcScaleRatio);
-				matrix *= Matrix.RotationZ(this.fZAxisRotation);
+				var matrix = Matrix.Identity * Matrix.Scaling(vcScaleRatio);
+				matrix *= Matrix.RotationZ(fZAxisRotation);
 				matrix *= Matrix.Translation(vc3移動量);
 				device.SetTransform(TransformState.World, matrix);
 
-				device.SetTexture(0, this.texture);
+				device.SetTexture(0, texture);
 				device.VertexFormat = TransformedColoredTexturedVertex.Format;
-				device.DrawUserPrimitives(PrimitiveType.TriangleStrip, 2, this.cvPositionColoredVertexies);
+				device.DrawUserPrimitives(PrimitiveType.TriangleStrip, 2, cvPositionColoredVertexies);
 				//-----------------
 
 				#endregion
@@ -523,81 +523,81 @@ namespace FDK
 
 		public void tDraw2DUpsideDown(Device device, int x, int y)
 		{
-			this.tDraw2DUpsideDown(device, x, y, 1f, this.rcFullImage);
+			tDraw2DUpsideDown(device, x, y, 1f, rcFullImage);
 		}
 
 		public void tDraw2DUpsideDown(Device device, int x, int y, Rectangle rcClipRect)
 		{
-			this.tDraw2DUpsideDown(device, x, y, 1f, rcClipRect);
+			tDraw2DUpsideDown(device, x, y, 1f, rcClipRect);
 		}
 
 		public void tDraw2DUpsideDown(Device device, int x, int y, float depth, Rectangle rcClipRect)
 		{
-			if (this.texture == null)
+			if (texture == null)
 				throw new InvalidOperationException("テクスチャは生成されていません。");
 
-			this.tRenderStateSettings(device);
+			tRenderStateSettings(device);
 
-			float fx = x * CTexture.fScreenRatio + CTexture.rcPhysicalScreenDrawingArea.X - 0.5f; // -0.5 は座標とピクセルの誤差を吸収するための座標補正値。(MSDN参照)
-			float fy = y * CTexture.fScreenRatio + CTexture.rcPhysicalScreenDrawingArea.Y - 0.5f; //
-			float w = rcClipRect.Width * this.vcScaleRatio.X * CTexture.fScreenRatio;
-			float h = rcClipRect.Height * this.vcScaleRatio.Y * CTexture.fScreenRatio;
-			float fULeft = ((float)rcClipRect.Left) / ((float)this.szTextureSize.Width);
-			float fURight = ((float)rcClipRect.Right) / ((float)this.szTextureSize.Width);
-			float fVTop = ((float)rcClipRect.Top) / ((float)this.szTextureSize.Height);
-			float fVBottom = ((float)rcClipRect.Bottom) / ((float)this.szTextureSize.Height);
-			this.color4.Alpha = ((float)this._Transparency) / 255f;
-			int color = this.color4.ToRgba();
+			float fx = x * fScreenRatio + rcPhysicalScreenDrawingArea.X - 0.5f; // -0.5 は座標とピクセルの誤差を吸収するための座標補正値。(MSDN参照)
+			float fy = y * fScreenRatio + rcPhysicalScreenDrawingArea.Y - 0.5f; //
+			float w = rcClipRect.Width * vcScaleRatio.X * fScreenRatio;
+			float h = rcClipRect.Height * vcScaleRatio.Y * fScreenRatio;
+			float fULeft = ((float)rcClipRect.Left) / ((float)szTextureSize.Width);
+			float fURight = ((float)rcClipRect.Right) / ((float)szTextureSize.Width);
+			float fVTop = ((float)rcClipRect.Top) / ((float)szTextureSize.Height);
+			float fVBottom = ((float)rcClipRect.Bottom) / ((float)szTextureSize.Height);
+			color4.Alpha = ((float)_Transparency) / 255f;
+			int color = color4.ToRgba();
 
-			if (this.cvTransformedColoredVertexies == null)
-				this.cvTransformedColoredVertexies = new TransformedColoredTexturedVertex[4];
+			if (cvTransformedColoredVertexies == null)
+				cvTransformedColoredVertexies = new TransformedColoredTexturedVertex[4];
 
 			// 以下、マネージドオブジェクトの量産を抑えるため new は使わない。
 
-			this.cvTransformedColoredVertexies[0].TextureCoordinates.X = fULeft; // 左上	→ 左下
-			this.cvTransformedColoredVertexies[0].TextureCoordinates.Y = fVBottom;
-			this.cvTransformedColoredVertexies[0].Position.X = fx;
-			this.cvTransformedColoredVertexies[0].Position.Y = fy;
-			this.cvTransformedColoredVertexies[0].Position.Z = depth;
-			this.cvTransformedColoredVertexies[0].Position.W = 1.0f;
-			this.cvTransformedColoredVertexies[0].Color = color;
+			cvTransformedColoredVertexies[0].TextureCoordinates.X = fULeft; // 左上	→ 左下
+			cvTransformedColoredVertexies[0].TextureCoordinates.Y = fVBottom;
+			cvTransformedColoredVertexies[0].Position.X = fx;
+			cvTransformedColoredVertexies[0].Position.Y = fy;
+			cvTransformedColoredVertexies[0].Position.Z = depth;
+			cvTransformedColoredVertexies[0].Position.W = 1.0f;
+			cvTransformedColoredVertexies[0].Color = color;
 
-			this.cvTransformedColoredVertexies[1].TextureCoordinates.X = fURight; // 右上 → 右下
-			this.cvTransformedColoredVertexies[1].TextureCoordinates.Y = fVBottom;
-			this.cvTransformedColoredVertexies[1].Position.X = fx + w;
-			this.cvTransformedColoredVertexies[1].Position.Y = fy;
-			this.cvTransformedColoredVertexies[1].Position.Z = depth;
-			this.cvTransformedColoredVertexies[1].Position.W = 1.0f;
-			this.cvTransformedColoredVertexies[1].Color = color;
+			cvTransformedColoredVertexies[1].TextureCoordinates.X = fURight; // 右上 → 右下
+			cvTransformedColoredVertexies[1].TextureCoordinates.Y = fVBottom;
+			cvTransformedColoredVertexies[1].Position.X = fx + w;
+			cvTransformedColoredVertexies[1].Position.Y = fy;
+			cvTransformedColoredVertexies[1].Position.Z = depth;
+			cvTransformedColoredVertexies[1].Position.W = 1.0f;
+			cvTransformedColoredVertexies[1].Color = color;
 
-			this.cvTransformedColoredVertexies[2].TextureCoordinates.X = fULeft; // 左下 → 左上
-			this.cvTransformedColoredVertexies[2].TextureCoordinates.Y = fVTop;
-			this.cvTransformedColoredVertexies[2].Position.X = fx;
-			this.cvTransformedColoredVertexies[2].Position.Y = fy + h;
-			this.cvTransformedColoredVertexies[2].Position.Z = depth;
-			this.cvTransformedColoredVertexies[2].Position.W = 1.0f;
-			this.cvTransformedColoredVertexies[2].Color = color;
+			cvTransformedColoredVertexies[2].TextureCoordinates.X = fULeft; // 左下 → 左上
+			cvTransformedColoredVertexies[2].TextureCoordinates.Y = fVTop;
+			cvTransformedColoredVertexies[2].Position.X = fx;
+			cvTransformedColoredVertexies[2].Position.Y = fy + h;
+			cvTransformedColoredVertexies[2].Position.Z = depth;
+			cvTransformedColoredVertexies[2].Position.W = 1.0f;
+			cvTransformedColoredVertexies[2].Color = color;
 
-			this.cvTransformedColoredVertexies[3].TextureCoordinates.X = fURight; // 右下 → 右上
-			this.cvTransformedColoredVertexies[3].TextureCoordinates.Y = fVTop;
-			this.cvTransformedColoredVertexies[3].Position.X = fx + w;
-			this.cvTransformedColoredVertexies[3].Position.Y = fy + h;
-			this.cvTransformedColoredVertexies[3].Position.Z = depth;
-			this.cvTransformedColoredVertexies[3].Position.W = 1.0f;
-			this.cvTransformedColoredVertexies[3].Color = color;
+			cvTransformedColoredVertexies[3].TextureCoordinates.X = fURight; // 右下 → 右上
+			cvTransformedColoredVertexies[3].TextureCoordinates.Y = fVTop;
+			cvTransformedColoredVertexies[3].Position.X = fx + w;
+			cvTransformedColoredVertexies[3].Position.Y = fy + h;
+			cvTransformedColoredVertexies[3].Position.Z = depth;
+			cvTransformedColoredVertexies[3].Position.W = 1.0f;
+			cvTransformedColoredVertexies[3].Color = color;
 
-			device.SetTexture(0, this.texture);
+			device.SetTexture(0, texture);
 			device.VertexFormat = TransformedColoredTexturedVertex.Format;
-			device.DrawUserPrimitives(PrimitiveType.TriangleStrip, 2, this.cvTransformedColoredVertexies);
+			device.DrawUserPrimitives(PrimitiveType.TriangleStrip, 2, cvTransformedColoredVertexies);
 		}
 
 		public void tDraw2DMatrix(Device device, Matrix transformMatrix, Vector2 size, SharpDX.RectangleF clipRect)
 		{
-			if (this.texture == null) return;
+			if (texture == null) return;
 
 			//texture dimensions
-			float texWidth = this.szTextureSize.Width;
-			float texHeight = this.szTextureSize.Height;
+			float texWidth = szTextureSize.Width;
+			float texHeight = szTextureSize.Height;
 
 			//calculate UV coordinates
 			float uLeft = clipRect.Left / texWidth;
@@ -632,7 +632,7 @@ namespace FDK
 			}
 
 			//render texture
-			device.SetTexture(0, this.texture);
+			device.SetTexture(0, texture);
 			device.VertexFormat = TransformedColoredTexturedVertex.Format;
 			device.DrawUserPrimitives(PrimitiveType.TriangleStrip, 2, vertices);
 		}
@@ -641,10 +641,10 @@ namespace FDK
 		//todo: render 9 slices in one draw call
 		public void tDraw2DMatrixSliced(Device device, Matrix transformMatrix, Vector2 size, SharpDX.RectangleF clipRect, SharpDX.RectangleF sliceRect)
 		{
-			if (this.texture == null) return;
+			if (texture == null) return;
 			
-			float texWidth = this.szTextureSize.Width;
-			float texHeight = this.szTextureSize.Height;
+			float texWidth = szTextureSize.Width;
+			float texHeight = szTextureSize.Height;
 
 			//calculate general UV coordinates (defined by cliprect)
 			float uLeft = clipRect.Left / texWidth;
@@ -736,7 +736,7 @@ namespace FDK
 				}
 
 				//render the section
-				device.SetTexture(0, this.texture);
+				device.SetTexture(0, texture);
 				device.VertexFormat = TransformedColoredTexturedVertex.Format;
 				device.DrawUserPrimitives(PrimitiveType.TriangleStrip, 2, vertices);
 			}
@@ -748,68 +748,68 @@ namespace FDK
 		/// </summary>
 		public void tDraw3D(Device device, Matrix mat)
 		{
-			this.tDraw3D(device, mat, this.rcFullImage);
+			tDraw3D(device, mat, rcFullImage);
 		}
 
 		public void tDraw3D(Device device, Matrix mat, Rectangle rcClipRect)
 		{
-			if (this.texture == null)
+			if (texture == null)
 				return;
 
 			float x = ((float)rcClipRect.Width) / 2f;
 			float y = ((float)rcClipRect.Height) / 2f;
 			float z = 0.0f;
-			float fULeft = ((float)rcClipRect.Left) / ((float)this.szTextureSize.Width);
-			float fURight = ((float)rcClipRect.Right) / ((float)this.szTextureSize.Width);
-			float fVTop = ((float)rcClipRect.Top) / ((float)this.szTextureSize.Height);
-			float fVBottom = ((float)rcClipRect.Bottom) / ((float)this.szTextureSize.Height);
-			this.color4.Alpha = ((float)this._Transparency) / 255f;
-			int color = this.color4.ToRgba();
+			float fULeft = ((float)rcClipRect.Left) / ((float)szTextureSize.Width);
+			float fURight = ((float)rcClipRect.Right) / ((float)szTextureSize.Width);
+			float fVTop = ((float)rcClipRect.Top) / ((float)szTextureSize.Height);
+			float fVBottom = ((float)rcClipRect.Bottom) / ((float)szTextureSize.Height);
+			color4.Alpha = ((float)_Transparency) / 255f;
+			int color = color4.ToRgba();
 
-			if (this.cvPositionColoredVertexies == null)
-				this.cvPositionColoredVertexies = new PositionColoredTexturedVertex[4];
+			if (cvPositionColoredVertexies == null)
+				cvPositionColoredVertexies = new PositionColoredTexturedVertex[4];
 
 			// #27122 2012.1.13 from: 以下、マネージドオブジェクト（＝ガベージ）の量産を抑えるため、new は使わず、メンバに値を１つずつ直接上書きする。
 
-			this.cvPositionColoredVertexies[0].Position.X = -x;
-			this.cvPositionColoredVertexies[0].Position.Y = y;
-			this.cvPositionColoredVertexies[0].Position.Z = z;
-			this.cvPositionColoredVertexies[0].Color = color;
-			this.cvPositionColoredVertexies[0].TextureCoordinates.X = fULeft;
-			this.cvPositionColoredVertexies[0].TextureCoordinates.Y = fVTop;
+			cvPositionColoredVertexies[0].Position.X = -x;
+			cvPositionColoredVertexies[0].Position.Y = y;
+			cvPositionColoredVertexies[0].Position.Z = z;
+			cvPositionColoredVertexies[0].Color = color;
+			cvPositionColoredVertexies[0].TextureCoordinates.X = fULeft;
+			cvPositionColoredVertexies[0].TextureCoordinates.Y = fVTop;
 
-			this.cvPositionColoredVertexies[1].Position.X = x;
-			this.cvPositionColoredVertexies[1].Position.Y = y;
-			this.cvPositionColoredVertexies[1].Position.Z = z;
-			this.cvPositionColoredVertexies[1].Color = color;
-			this.cvPositionColoredVertexies[1].TextureCoordinates.X = fURight;
-			this.cvPositionColoredVertexies[1].TextureCoordinates.Y = fVTop;
+			cvPositionColoredVertexies[1].Position.X = x;
+			cvPositionColoredVertexies[1].Position.Y = y;
+			cvPositionColoredVertexies[1].Position.Z = z;
+			cvPositionColoredVertexies[1].Color = color;
+			cvPositionColoredVertexies[1].TextureCoordinates.X = fURight;
+			cvPositionColoredVertexies[1].TextureCoordinates.Y = fVTop;
 
-			this.cvPositionColoredVertexies[2].Position.X = -x;
-			this.cvPositionColoredVertexies[2].Position.Y = -y;
-			this.cvPositionColoredVertexies[2].Position.Z = z;
-			this.cvPositionColoredVertexies[2].Color = color;
-			this.cvPositionColoredVertexies[2].TextureCoordinates.X = fULeft;
-			this.cvPositionColoredVertexies[2].TextureCoordinates.Y = fVBottom;
+			cvPositionColoredVertexies[2].Position.X = -x;
+			cvPositionColoredVertexies[2].Position.Y = -y;
+			cvPositionColoredVertexies[2].Position.Z = z;
+			cvPositionColoredVertexies[2].Color = color;
+			cvPositionColoredVertexies[2].TextureCoordinates.X = fULeft;
+			cvPositionColoredVertexies[2].TextureCoordinates.Y = fVBottom;
 
-			this.cvPositionColoredVertexies[3].Position.X = x;
-			this.cvPositionColoredVertexies[3].Position.Y = -y;
-			this.cvPositionColoredVertexies[3].Position.Z = z;
-			this.cvPositionColoredVertexies[3].Color = color;
-			this.cvPositionColoredVertexies[3].TextureCoordinates.X = fURight;
-			this.cvPositionColoredVertexies[3].TextureCoordinates.Y = fVBottom;
+			cvPositionColoredVertexies[3].Position.X = x;
+			cvPositionColoredVertexies[3].Position.Y = -y;
+			cvPositionColoredVertexies[3].Position.Z = z;
+			cvPositionColoredVertexies[3].Color = color;
+			cvPositionColoredVertexies[3].TextureCoordinates.X = fURight;
+			cvPositionColoredVertexies[3].TextureCoordinates.Y = fVBottom;
 
-			this.tRenderStateSettings(device);
+			tRenderStateSettings(device);
 
 			device.SetTransform(TransformState.World, mat);
-			device.SetTexture(0, this.texture);
+			device.SetTexture(0, texture);
 			device.VertexFormat = PositionColoredTexturedVertex.Format;
-			device.DrawUserPrimitives(PrimitiveType.TriangleStrip, 2, this.cvPositionColoredVertexies);
+			device.DrawUserPrimitives(PrimitiveType.TriangleStrip, 2, cvPositionColoredVertexies);
 		}
 
 		public void tDraw3DTopLeftReference(Device device, Matrix mat)
 		{
-			this.tDraw3DTopLeftReference(device, mat, this.rcFullImage);
+			tDraw3DTopLeftReference(device, mat, rcFullImage);
 		}
 
 		/// <summary>
@@ -821,58 +821,58 @@ namespace FDK
 		public void tDraw3DTopLeftReference(Device device, Matrix mat, Rectangle rcClipRect)
 		{
 			//とりあえず補正値などは無し。にしても使う機会少なさそうだなー____
-			if (this.texture == null)
+			if (texture == null)
 				return;
 
 			float x = 0.0f;
 			float y = 0.0f;
 			float z = 0.0f;
-			float fULeft = ((float)rcClipRect.Left) / ((float)this.szTextureSize.Width);
-			float fURight = ((float)rcClipRect.Right) / ((float)this.szTextureSize.Width);
-			float fVTop = ((float)rcClipRect.Top) / ((float)this.szTextureSize.Height);
-			float fVBottom = ((float)rcClipRect.Bottom) / ((float)this.szTextureSize.Height);
-			this.color4.Alpha = ((float)this._Transparency) / 255f;
-			int color = this.color4.ToRgba();
+			float fULeft = ((float)rcClipRect.Left) / ((float)szTextureSize.Width);
+			float fURight = ((float)rcClipRect.Right) / ((float)szTextureSize.Width);
+			float fVTop = ((float)rcClipRect.Top) / ((float)szTextureSize.Height);
+			float fVBottom = ((float)rcClipRect.Bottom) / ((float)szTextureSize.Height);
+			color4.Alpha = ((float)_Transparency) / 255f;
+			int color = color4.ToRgba();
 
-			if (this.cvPositionColoredVertexies == null)
-				this.cvPositionColoredVertexies = new PositionColoredTexturedVertex[4];
+			if (cvPositionColoredVertexies == null)
+				cvPositionColoredVertexies = new PositionColoredTexturedVertex[4];
 
 			// #27122 2012.1.13 from: 以下、マネージドオブジェクト（＝ガベージ）の量産を抑えるため、new は使わず、メンバに値を１つずつ直接上書きする。
 
-			this.cvPositionColoredVertexies[0].Position.X = -x;
-			this.cvPositionColoredVertexies[0].Position.Y = y;
-			this.cvPositionColoredVertexies[0].Position.Z = z;
-			this.cvPositionColoredVertexies[0].Color = color;
-			this.cvPositionColoredVertexies[0].TextureCoordinates.X = fULeft;
-			this.cvPositionColoredVertexies[0].TextureCoordinates.Y = fVTop;
+			cvPositionColoredVertexies[0].Position.X = -x;
+			cvPositionColoredVertexies[0].Position.Y = y;
+			cvPositionColoredVertexies[0].Position.Z = z;
+			cvPositionColoredVertexies[0].Color = color;
+			cvPositionColoredVertexies[0].TextureCoordinates.X = fULeft;
+			cvPositionColoredVertexies[0].TextureCoordinates.Y = fVTop;
 
-			this.cvPositionColoredVertexies[1].Position.X = x;
-			this.cvPositionColoredVertexies[1].Position.Y = y;
-			this.cvPositionColoredVertexies[1].Position.Z = z;
-			this.cvPositionColoredVertexies[1].Color = color;
-			this.cvPositionColoredVertexies[1].TextureCoordinates.X = fURight;
-			this.cvPositionColoredVertexies[1].TextureCoordinates.Y = fVTop;
+			cvPositionColoredVertexies[1].Position.X = x;
+			cvPositionColoredVertexies[1].Position.Y = y;
+			cvPositionColoredVertexies[1].Position.Z = z;
+			cvPositionColoredVertexies[1].Color = color;
+			cvPositionColoredVertexies[1].TextureCoordinates.X = fURight;
+			cvPositionColoredVertexies[1].TextureCoordinates.Y = fVTop;
 
-			this.cvPositionColoredVertexies[2].Position.X = -x;
-			this.cvPositionColoredVertexies[2].Position.Y = -y;
-			this.cvPositionColoredVertexies[2].Position.Z = z;
-			this.cvPositionColoredVertexies[2].Color = color;
-			this.cvPositionColoredVertexies[2].TextureCoordinates.X = fULeft;
-			this.cvPositionColoredVertexies[2].TextureCoordinates.Y = fVBottom;
+			cvPositionColoredVertexies[2].Position.X = -x;
+			cvPositionColoredVertexies[2].Position.Y = -y;
+			cvPositionColoredVertexies[2].Position.Z = z;
+			cvPositionColoredVertexies[2].Color = color;
+			cvPositionColoredVertexies[2].TextureCoordinates.X = fULeft;
+			cvPositionColoredVertexies[2].TextureCoordinates.Y = fVBottom;
 
-			this.cvPositionColoredVertexies[3].Position.X = x;
-			this.cvPositionColoredVertexies[3].Position.Y = -y;
-			this.cvPositionColoredVertexies[3].Position.Z = z;
-			this.cvPositionColoredVertexies[3].Color = color;
-			this.cvPositionColoredVertexies[3].TextureCoordinates.X = fURight;
-			this.cvPositionColoredVertexies[3].TextureCoordinates.Y = fVBottom;
+			cvPositionColoredVertexies[3].Position.X = x;
+			cvPositionColoredVertexies[3].Position.Y = -y;
+			cvPositionColoredVertexies[3].Position.Z = z;
+			cvPositionColoredVertexies[3].Color = color;
+			cvPositionColoredVertexies[3].TextureCoordinates.X = fURight;
+			cvPositionColoredVertexies[3].TextureCoordinates.Y = fVBottom;
 
-			this.tRenderStateSettings(device);
+			tRenderStateSettings(device);
 
 			device.SetTransform(TransformState.World, mat);
-			device.SetTexture(0, this.texture);
+			device.SetTexture(0, texture);
 			device.VertexFormat = PositionColoredTexturedVertex.Format;
-			device.DrawUserPrimitives(PrimitiveType.TriangleStrip, 2, this.cvPositionColoredVertexies);
+			device.DrawUserPrimitives(PrimitiveType.TriangleStrip, 2, cvPositionColoredVertexies);
 		}
 
 		#region [ IDisposable 実装 ]
@@ -880,44 +880,44 @@ namespace FDK
 		//-----------------
 		public void Dispose()
 		{
-			this.Dispose(true);
+			Dispose(true);
 			GC.SuppressFinalize(this);
 		}
 
 		protected void Dispose(bool disposeManagedObjects)
 		{
-			if (this.bDispose完了済み)
+			if (bDispose完了済み)
 				return;
 
 			if (disposeManagedObjects)
 			{
 				// (A) Managed リソースの解放
 				// テクスチャの破棄 (SharpDXのテクスチャは、SharpDX側で管理されるため、FDKからはmanagedリソースと見做す)
-				if (this.texture != null)
+				if (texture != null)
 				{
-					this.texture.Dispose();
-					this.texture = null;
-					this.bSharpDXTextureDispose完了済み = true;
+					texture.Dispose();
+					texture = null;
+					bSharpDXTextureDispose完了済み = true;
 				}
 			}
 
 			// (B) Unamanaged リソースの解放
 
 
-			this.bDispose完了済み = true;
+			bDispose完了済み = true;
 		}
 
 		~CTexture()
 		{
 			// ファイナライザの動作時にtextureのDisposeがされていない場合は、
 			// CTextureのDispose漏れと見做して警告をログ出力する
-			if (!this.bSharpDXTextureDispose完了済み)
+			if (!bSharpDXTextureDispose完了済み)
 			{
 				Trace.TraceWarning("CTexture: Dispose漏れを検出しました。(Size=({0}, {1}), filename={2})", szImageSize.Width,
 					szImageSize.Height, filename);
 			}
 
-			this.Dispose(false);
+			Dispose(false);
 		}
 
 		//-----------------
@@ -945,17 +945,17 @@ namespace FDK
 
 		private void tRenderStateSettings(Device device)
 		{
-			if (this.bAdditiveBlending)
+			if (bAdditiveBlending)
 			{
 				device.SetRenderState(RenderState.AlphaBlendEnable, true);
-				device.SetRenderState(RenderState.SourceBlend, SharpDX.Direct3D9.Blend.SourceAlpha); // 5
-				device.SetRenderState(RenderState.DestinationBlend, SharpDX.Direct3D9.Blend.One); // 2
+				device.SetRenderState(RenderState.SourceBlend, Blend.SourceAlpha); // 5
+				device.SetRenderState(RenderState.DestinationBlend, Blend.One); // 2
 			}
 			else
 			{
 				device.SetRenderState(RenderState.AlphaBlendEnable, true);
-				device.SetRenderState(RenderState.SourceBlend, SharpDX.Direct3D9.Blend.SourceAlpha); // 5
-				device.SetRenderState(RenderState.DestinationBlend, SharpDX.Direct3D9.Blend.InverseSourceAlpha); // 6
+				device.SetRenderState(RenderState.SourceBlend, Blend.SourceAlpha); // 5
+				device.SetRenderState(RenderState.DestinationBlend, Blend.InverseSourceAlpha); // 6
 			}
 		}
 

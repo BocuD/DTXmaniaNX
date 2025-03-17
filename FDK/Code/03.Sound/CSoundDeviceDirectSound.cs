@@ -34,53 +34,51 @@ namespace FDK
 			{
 				if (ctimer != null)
 				{
-					this.sd経過時間計測用サウンドバッファ.DirectSoundBuffer.GetCurrentPosition(out int n現在位置, out _);
-					long n現在のシステム時刻ms = this.tmシステムタイマ.nSystemTimeMs;
+					sd経過時間計測用サウンドバッファ.DirectSoundBuffer.GetCurrentPosition(out int n現在位置, out _);
+					long n現在のシステム時刻ms = tmシステムタイマ.nSystemTimeMs;
 
 
 					// ループ回数を調整。
 
-					long nシステム時刻での間隔ms = n現在のシステム時刻ms - this.n前に経過時間を測定したシステム時刻ms;
+					long nシステム時刻での間隔ms = n現在のシステム時刻ms - n前に経過時間を測定したシステム時刻ms;
 
 					while (nシステム時刻での間隔ms >= n単位繰り上げ間隔ms)        // 前回から単位繰り上げ間隔以上経過してるなら確実にループしている。誤差は大きくないだろうから無視。
 					{
-						this.nループ回数++;
+						nループ回数++;
 						nシステム時刻での間隔ms -= n単位繰り上げ間隔ms;
 					}
 
-					if (n現在位置 < this.n前回の位置)                            // 単位繰り上げ間隔以内であっても、現在位置が前回より手前にあるなら1回ループしている。
-						this.nループ回数++;
+					if (n現在位置 < n前回の位置)                            // 単位繰り上げ間隔以内であっても、現在位置が前回より手前にあるなら1回ループしている。
+						nループ回数++;
 
 
 					// 経過時間を算出。
 
-					long n経過時間ms = (long)((this.nループ回数 * n単位繰り上げ間隔ms) + (n現在位置 * 1000.0 / (44100.0 * 2 * 2)));
+					long n経過時間ms = (long)((nループ回数 * n単位繰り上げ間隔ms) + (n現在位置 * 1000.0 / (44100.0 * 2 * 2)));
 
 
 					// 今回の値を次回に向けて保存。
 
-					this.n前に経過時間を測定したシステム時刻ms = n現在のシステム時刻ms;
-					this.n前回の位置 = n現在位置;
+					n前に経過時間を測定したシステム時刻ms = n現在のシステム時刻ms;
+					n前回の位置 = n現在位置;
 
 					return n経過時間ms;
 				}
 				else
 				{
-					long nRet = ctimer.nSystemTimeMs - this.n前に経過時間を測定したシステム時刻ms;
+					long nRet = ctimer.nSystemTimeMs - n前に経過時間を測定したシステム時刻ms;
 					if (nRet < 0)   // カウンタがループしたときは
 					{
-						nRet = (ctimer.nシステム時刻 - long.MinValue) + (long.MaxValue - this.n前に経過時間を測定したシステム時刻ms) + 1;
+						nRet = (ctimer.nシステム時刻 - long.MinValue) + (long.MaxValue - n前に経過時間を測定したシステム時刻ms) + 1;
 					}
-					this.n前に経過時間を測定したシステム時刻ms = ctimer.nSystemTimeMs;
+					n前に経過時間を測定したシステム時刻ms = ctimer.nSystemTimeMs;
 
 					return nRet;
 				}
 			}
 		}
-		public long n経過時間を更新したシステム時刻ms
-		{
-			get { throw new NotImplementedException(); }
-		}
+		public long n経過時間を更新したシステム時刻ms => throw new NotImplementedException();
+
 		public CTimer tmシステムタイマ
 		{
 			get;
@@ -89,10 +87,7 @@ namespace FDK
 
 		public int nMasterVolume
 		{
-			get
-			{
-				return (int)100;
-			}
+			get => (int)100;
 			set
 			{
 				// 特に何もしない
@@ -120,9 +115,9 @@ namespace FDK
 		{
 			Trace.TraceInformation("DirectSound の初期化を開始します。");
 
-			this.e出力デバイス = ESoundDeviceType.Unknown;
-			this.n実バッファサイズms = this.n実出力遅延ms = n遅延時間ms;
-			this.tmシステムタイマ = new CTimer(CTimer.EType.MultiMedia);
+			e出力デバイス = ESoundDeviceType.Unknown;
+			n実バッファサイズms = n実出力遅延ms = n遅延時間ms;
+			tmシステムタイマ = new CTimer(CTimer.EType.MultiMedia);
 
 			#region [ BASS registration ]
 			// BASS.NET ユーザ登録（BASSスプラッシュが非表示になる）。
@@ -132,24 +127,24 @@ namespace FDK
 
 			#region [ DirectSound デバイスを作成する。]
 			//-----------------
-			this.DirectSound = new DirectSound();   // 失敗したら例外をそのまま発出。
+			DirectSound = new DirectSound();   // 失敗したら例外をそのまま発出。
 
 			// デバイスの協調レベルを設定する。
 
 			bool priority = true;
 			try
 			{
-				this.DirectSound.SetCooperativeLevel(hWnd, CooperativeLevel.Priority);
+				DirectSound.SetCooperativeLevel(hWnd, CooperativeLevel.Priority);
 			}
 			catch
 			{
-				this.DirectSound.SetCooperativeLevel(hWnd, CooperativeLevel.Normal);    // これでも失敗したら例外をそのまま発出。
+				DirectSound.SetCooperativeLevel(hWnd, CooperativeLevel.Normal);    // これでも失敗したら例外をそのまま発出。
 				priority = false;
 			}
 
 			// デバイス作成完了。
 
-			this.e出力デバイス = ESoundDeviceType.DirectSound;
+			e出力デバイス = ESoundDeviceType.DirectSound;
 			//-----------------
 			#endregion
 
@@ -182,15 +177,15 @@ namespace FDK
 				bw.Close();
 				ms = null;
 				bw = null;
-				this.sd経過時間計測用サウンドバッファ = this.tサウンドを作成する(byArrWaveFleImage);
-				CSound.listインスタンス.Remove(this.sd経過時間計測用サウンドバッファ);   // 特殊用途なのでインスタンスリストからは除外する。
+				sd経過時間計測用サウンドバッファ = tサウンドを作成する(byArrWaveFleImage);
+				CSound.listインスタンス.Remove(sd経過時間計測用サウンドバッファ);   // 特殊用途なのでインスタンスリストからは除外する。
 
 				// サウンドのループ再生開始。
 
-				this.nループ回数 = 0;
-				this.n前回の位置 = 0;
-				this.sd経過時間計測用サウンドバッファ.DirectSoundBuffer.Play(0, PlayFlags.Looping);
-				this.n前に経過時間を測定したシステム時刻ms = this.tmシステムタイマ.nSystemTimeMs;
+				nループ回数 = 0;
+				n前回の位置 = 0;
+				sd経過時間計測用サウンドバッファ.DirectSoundBuffer.Play(0, PlayFlags.Looping);
+				n前に経過時間を測定したシステム時刻ms = tmシステムタイマ.nSystemTimeMs;
 				//-----------------
 				#endregion
 			}
@@ -223,7 +218,7 @@ namespace FDK
 		public CSound tサウンドを作成する(string strファイル名, CSound.EInstType eInstType)
 		{
 			var sound = new CSound();
-			sound.tDirectSoundサウンドを作成する(strファイル名, this.DirectSound, eInstType);
+			sound.tDirectSoundサウンドを作成する(strファイル名, DirectSound, eInstType);
 			return sound;
 		}
 		public CSound tサウンドを作成する(byte[] byArrWAVファイルイメージ)
@@ -233,28 +228,28 @@ namespace FDK
 		public CSound tサウンドを作成する(byte[] byArrWAVファイルイメージ, CSound.EInstType eInstType)
 		{
 			var sound = new CSound();
-			sound.tDirectSoundサウンドを作成する(byArrWAVファイルイメージ, this.DirectSound, eInstType);
+			sound.tDirectSoundサウンドを作成する(byArrWAVファイルイメージ, DirectSound, eInstType);
 			return sound;
 		}
 		public CSound tサウンドを作成する(byte[] byArrWAVファイルイメージ, BufferFlags flags, CSound.EInstType eInstType)
 		{
 			var sound = new CSound();
-			sound.tDirectSoundサウンドを作成する(byArrWAVファイルイメージ, this.DirectSound, flags, eInstType);
+			sound.tDirectSoundサウンドを作成する(byArrWAVファイルイメージ, DirectSound, flags, eInstType);
 			return sound;
 		}
 
 		// 既存のインスタンス（生成直後 or Dispose済み）に対してサウンドを生成する。
 		public void tサウンドを作成する(string strファイル名, ref CSound sound, CSound.EInstType eInstType)
 		{
-			sound.tDirectSoundサウンドを作成する(strファイル名, this.DirectSound, eInstType);
+			sound.tDirectSoundサウンドを作成する(strファイル名, DirectSound, eInstType);
 		}
 		public void tサウンドを作成する(byte[] byArrWAVファイルイメージ, ref CSound sound, CSound.EInstType eInstType)
 		{
-			sound.tDirectSoundサウンドを作成する(byArrWAVファイルイメージ, this.DirectSound, eInstType);
+			sound.tDirectSoundサウンドを作成する(byArrWAVファイルイメージ, DirectSound, eInstType);
 		}
 		public void tサウンドを作成する(byte[] byArrWAVファイルイメージ, BufferFlags flags, ref CSound sound, CSound.EInstType eInstType)
 		{
-			sound.tDirectSoundサウンドを作成する(byArrWAVファイルイメージ, this.DirectSound, flags, eInstType);
+			sound.tDirectSoundサウンドを作成する(byArrWAVファイルイメージ, DirectSound, flags, eInstType);
 		}
 		#endregion
 
@@ -262,45 +257,45 @@ namespace FDK
 		//-----------------
 		public void Dispose()
 		{
-			this.Dispose(true);
+			Dispose(true);
 			GC.SuppressFinalize(this);
 		}
 		protected void Dispose(bool bManagedDispose)
 		{
-			this.e出力デバイス = ESoundDeviceType.Unknown;        // まず出力停止する(Dispose中にクラス内にアクセスされることを防ぐ)
+			e出力デバイス = ESoundDeviceType.Unknown;        // まず出力停止する(Dispose中にクラス内にアクセスされることを防ぐ)
 			if (bManagedDispose)
 			{
 				#region [ 経緯時間計測用サウンドバッファを解放。]
 				//-----------------
-				if (this.sd経過時間計測用サウンドバッファ != null)
+				if (sd経過時間計測用サウンドバッファ != null)
 				{
-					this.sd経過時間計測用サウンドバッファ.tStopSound();
-					CCommon.tDispose(ref this.sd経過時間計測用サウンドバッファ);
+					sd経過時間計測用サウンドバッファ.tStopSound();
+					CCommon.tDispose(ref sd経過時間計測用サウンドバッファ);
 				}
 				//-----------------
 				#endregion
 				#region [ 単位繰り上げ用スレッド停止。]
 				//-----------------
-				if (this.th経過時間測定用スレッド != null)
+				if (th経過時間測定用スレッド != null)
 				{
-					this.th経過時間測定用スレッド.Abort();
-					this.th経過時間測定用スレッド = null;
+					th経過時間測定用スレッド.Abort();
+					th経過時間測定用スレッド = null;
 
 				}
 				//-----------------
 				#endregion
 
-				CCommon.tDispose(ref this.DirectSound);
-				CCommon.tDispose(this.tmシステムタイマ);
+				CCommon.tDispose(ref DirectSound);
+				CCommon.tDispose(tmシステムタイマ);
 			}
 			if (ctimer != null)
 			{
-				CCommon.tDispose(ref this.ctimer);
+				CCommon.tDispose(ref ctimer);
 			}
 		}
 		~CSoundDeviceDirectSound()
 		{
-			this.Dispose(false);
+			Dispose(false);
 		}
 		//-----------------
 		#endregion

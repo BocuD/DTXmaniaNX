@@ -51,9 +51,9 @@ namespace DTXMania
 
 		public CIMEHook()
 		{
-			base.TabStop = false;
+			TabStop = false;
 			SetStyle(ControlStyles.Selectable, value: false);
-			base.KeyPress += delegate(object sender, KeyPressEventArgs e)
+			KeyPress += delegate(object sender, KeyPressEventArgs e)
 			{
                 if (CDTXMania.app.textboxテキスト入力中 != null)
                 {
@@ -61,7 +61,7 @@ namespace DTXMania
                     e.Handled = true;
                 }
             };
-			hIMC = ImmGetContext(base.Handle);
+			hIMC = ImmGetContext(Handle);
 			bAccessible = (hIMC != 0);
 		}
 
@@ -71,7 +71,7 @@ namespace DTXMania
 			{
 				if (bAccessible)
 				{
-					ImmReleaseContext(base.Handle, hIMC);
+					ImmReleaseContext(Handle, hIMC);
 				}
 				bDisposed = true;
 			}

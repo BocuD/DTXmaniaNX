@@ -23,8 +23,8 @@ namespace DTXMania
 
 		public CActPerfCommonRGB()
 		{
-            base.listChildActivities.Add(this.actLVFont = new CActLVLNFont());
-            base.bNotActivated = true;
+            listChildActivities.Add(actLVFont = new CActLVLNFont());
+            bNotActivated = true;
 		}
 		
 		
@@ -32,7 +32,7 @@ namespace DTXMania
 
 		public void Push( int nLane )
 		{
-			this.bPressedState[ nLane ] = true;
+			bPressedState[ nLane ] = true;
 		}
 
 
@@ -42,25 +42,25 @@ namespace DTXMania
 		{
 			for( int i = 0; i < 10; i++ )
 			{
-				this.bPressedState[ i ] = false;
+				bPressedState[ i ] = false;
 			}
 			base.OnActivate();
 		}
 		public override void OnManagedCreateResources()
 		{
-			if( !base.bNotActivated )
+			if( !bNotActivated )
 			{
-                this.txRGB = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_RGB buttons.png"));
-                this.txShutter = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_shutter_GB.png"));
+                txRGB = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_RGB buttons.png"));
+                txShutter = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_shutter_GB.png"));
                 base.OnManagedCreateResources();
 			}
 		}
 		public override void OnManagedReleaseResources()
 		{
-			if( !base.bNotActivated )
+			if( !bNotActivated )
 			{
-				CDTXMania.tReleaseTexture( ref this.txRGB );
-                CDTXMania.tReleaseTexture(ref this.txShutter);
+				CDTXMania.tReleaseTexture( ref txRGB );
+                CDTXMania.tReleaseTexture(ref txShutter);
                 base.OnManagedReleaseResources();
 			}
 		}

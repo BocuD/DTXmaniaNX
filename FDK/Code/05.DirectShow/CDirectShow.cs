@@ -25,10 +25,10 @@ namespace FDK
 			{
 				var status = Eグラフの状態.未定;
 
-				if( this.MediaCtrl != null )
+				if( MediaCtrl != null )
 				{
 					FilterState fs;
-					int hr = this.MediaCtrl.GetState( 0, out fs );		// それなりに重たいので注意。
+					int hr = MediaCtrl.GetState( 0, out fs );		// それなりに重たいので注意。
 
 					if( hr == CWin32.E_FAIL )
 					{
@@ -131,11 +131,11 @@ namespace FDK
 		{
 			get
 			{
-				if( this.MediaSeeking == null )
+				if( MediaSeeking == null )
 					return 0;
 
 				long current;
-				int hr = this.MediaSeeking.GetCurrentPosition( out current );
+				int hr = MediaSeeking.GetCurrentPosition( out current );
 				DsError.ThrowExceptionForHR( hr );
 				return (long) ( current / ( 1000.0 * 10.0 ) );
 			}
@@ -145,19 +145,16 @@ namespace FDK
 		/// </summary>
 		public int n音量
 		{
-			get
-			{
-				return this._n音量;
-			}
+			get => _n音量;
 			set
 			{
-				if( this.BasicAudio == null )
+				if( BasicAudio == null )
 					return;
 
 
 				// 値を保存。
 
-				this._n音量 = value;
+				_n音量 = value;
 
 
 				// リニア音量をデシベル音量に変換。
@@ -176,7 +173,7 @@ namespace FDK
 
 				// デシベル音量でグラフの音量を変更。
 
-				this.BasicAudio.put_Volume( n音量db );
+				BasicAudio.put_Volume( n音量db );
 			}
 		}
 		/// <summary>
@@ -186,7 +183,7 @@ namespace FDK
 		{
 			set
 			{
-				if( this.BasicAudio == null )
+				if( BasicAudio == null )
 					return;
 
 				// リニア位置をデシベル位置に変換。
@@ -217,7 +214,7 @@ namespace FDK
 
 				// デシベル位置でグラフの位置を変更。
 
-				this.BasicAudio.put_Balance( n位置db );
+				BasicAudio.put_Balance( n位置db );
 			}
 		}
 		public IMediaControl MediaCtrl;
@@ -242,8 +239,8 @@ namespace FDK
 			// 2019.03.30 kairera0467
 			long currentPos = 0;
 			long duration = 0;
-			this.MediaSeeking.GetCurrentPosition(out currentPos);
-			this.MediaSeeking.GetDuration(out duration);
+			MediaSeeking.GetCurrentPosition(out currentPos);
+			MediaSeeking.GetDuration(out duration);
 			return currentPos >= duration;
 		}
 
@@ -257,37 +254,37 @@ namespace FDK
 		{
 			// 初期化。
 
-			this.n幅px = 0;
-			this.n高さpx = 0;
-			this.b上下反転 = false;
-			this.nスキャンライン幅byte = 0;
-			this.nデータサイズbyte = 0;
-			this.b音声のみ = false;
-			this.graphBuilder = null;
-			this.MediaCtrl = null;
-			this.b再生中 = false;
-			this.bループ再生 = false;
+			n幅px = 0;
+			n高さpx = 0;
+			b上下反転 = false;
+			nスキャンライン幅byte = 0;
+			nデータサイズbyte = 0;
+			b音声のみ = false;
+			graphBuilder = null;
+			MediaCtrl = null;
+			b再生中 = false;
+			bループ再生 = false;
 
 
 			// 静的リストに登録し、インスタンスIDを得る。
 
-			CDirectShow.tインスタンスを登録する( this );
+			tインスタンスを登録する( this );
 
 
 			// 並列処理準備。
 
-			if( CDirectShow.n並列度 == 0 )	// 算出がまだなら算出する。
-				CDirectShow.n並列度 = Environment.ProcessorCount;	// 並列度＝CPU数とする。
+			if( n並列度 == 0 )	// 算出がまだなら算出する。
+				n並列度 = Environment.ProcessorCount;	// 並列度＝CPU数とする。
 
 			unsafe
 			{
-				this.dgライン描画ARGB32 = new DGライン描画[ CDirectShow.n並列度 ];
-				this.dgライン描画XRGB32 = new DGライン描画[ CDirectShow.n並列度 ];
+				dgライン描画ARGB32 = new DGライン描画[ n並列度 ];
+				dgライン描画XRGB32 = new DGライン描画[ n並列度 ];
 
-				for( int i = 0; i < CDirectShow.n並列度; i++ )
+				for( int i = 0; i < n並列度; i++ )
 				{
-					this.dgライン描画ARGB32[ i ] = new DGライン描画( this.tライン描画ARGB32 );
-					this.dgライン描画XRGB32[ i ] = new DGライン描画( this.tライン描画XRGB32 );
+					dgライン描画ARGB32[ i ] = new DGライン描画( tライン描画ARGB32 );
+					dgライン描画XRGB32[ i ] = new DGライン描画( tライン描画XRGB32 );
 				}
 			}
 
@@ -298,7 +295,7 @@ namespace FDK
 
 				// グラフビルダを生成。
 
-				this.graphBuilder = (IGraphBuilder) new FilterGraph();
+				graphBuilder = (IGraphBuilder) new FilterGraph();
 #if DEBUG
 				// ROT への登録。
 				this.rot = new DsROTEntry( graphBuilder );
@@ -307,27 +304,27 @@ namespace FDK
 
 				// QueryInterface。存在しなければ null。
 
-				this.MediaCtrl = this.graphBuilder as IMediaControl;
-				this.MediaEventEx = this.graphBuilder as IMediaEventEx;
-				this.MediaSeeking = this.graphBuilder as IMediaSeeking;
-				this.BasicAudio = this.graphBuilder as IBasicAudio;
+				MediaCtrl = graphBuilder as IMediaControl;
+				MediaEventEx = graphBuilder as IMediaEventEx;
+				MediaSeeking = graphBuilder as IMediaSeeking;
+				BasicAudio = graphBuilder as IBasicAudio;
 
 
 				// IMemoryRenderer をグラフに挿入。
 
 				AMMediaType mediaType = null;
 
-				this.memoryRendererObject = new MemoryRenderer();
-				this.memoryRenderer = (IMemoryRenderer) this.memoryRendererObject;
-				var baseFilter = (IBaseFilter) this.memoryRendererObject;
+				memoryRendererObject = new MemoryRenderer();
+				memoryRenderer = (IMemoryRenderer) memoryRendererObject;
+				var baseFilter = (IBaseFilter) memoryRendererObject;
 
-				hr = this.graphBuilder.AddFilter( baseFilter, "MemoryRenderer" );
+				hr = graphBuilder.AddFilter( baseFilter, "MemoryRenderer" );
 				DsError.ThrowExceptionForHR( hr );
 
 
 				// fileName からグラフを自動生成。
 
-				hr = this.graphBuilder.RenderFile( fileName, null );	// IMediaControl.RenderFile() は推奨されない
+				hr = graphBuilder.RenderFile( fileName, null );	// IMediaControl.RenderFile() は推奨されない
 				DsError.ThrowExceptionForHR( hr );
 
 
@@ -336,9 +333,9 @@ namespace FDK
 				{
 					IBaseFilter videoRenderer;
 					IPin videoInputPin;
-					CDirectShow.tビデオレンダラとその入力ピンを探して返す( this.graphBuilder, out videoRenderer, out videoInputPin );
+					tビデオレンダラとその入力ピンを探して返す( graphBuilder, out videoRenderer, out videoInputPin );
 					if( videoRenderer == null )
-						this.b音声のみ = true;
+						b音声のみ = true;
 					else
 					{
 						CCommon.tReleaseComObject( ref videoInputPin );
@@ -349,19 +346,19 @@ namespace FDK
 
 				// イメージ情報を取得。
 
-				if( !this.b音声のみ )
+				if( !b音声のみ )
 				{
 					long n;
 					int m;
-					this.memoryRenderer.GetWidth( out n );
-					this.n幅px = (int) n;
-					this.memoryRenderer.GetHeight( out n );
-					this.n高さpx = (int) n;
-					this.memoryRenderer.IsBottomUp( out m );
-					this.b上下反転 = ( m != 0 );
-					this.memoryRenderer.GetBufferSize( out n );
-					this.nデータサイズbyte = (int) n;
-					this.nスキャンライン幅byte = (int) this.nデータサイズbyte / this.n高さpx;
+					memoryRenderer.GetWidth( out n );
+					n幅px = (int) n;
+					memoryRenderer.GetHeight( out n );
+					n高さpx = (int) n;
+					memoryRenderer.IsBottomUp( out m );
+					b上下反転 = ( m != 0 );
+					memoryRenderer.GetBufferSize( out n );
+					nデータサイズbyte = (int) n;
+					nスキャンライン幅byte = (int) nデータサイズbyte / n高さpx;
 					// CCommon.tReleaseComObject( ref baseFilter );		なんかキャスト元のオブジェクトまで解放されるので解放禁止。
 				}
 
@@ -372,25 +369,25 @@ namespace FDK
 				{
 					WaveFormat dummy1;
 					byte[] dummy2;
-					CDirectShow.tオーディオレンダラをNullレンダラに変えてフォーマットを取得する( this.graphBuilder, out dummy1, out dummy2 );
+					tオーディオレンダラをNullレンダラに変えてフォーマットを取得する( graphBuilder, out dummy1, out dummy2 );
 				}
 
 
 				// その他の処理。
 
-				this.t再生準備開始();	// 1回以上 IMediaControl を呼び出してないと、IReferenceClock は取得できない。
-				this.t遷移完了まで待って状態を取得する();	// 完全に Pause へ遷移するのを待つ。（環境依存）
+				t再生準備開始();	// 1回以上 IMediaControl を呼び出してないと、IReferenceClock は取得できない。
+				t遷移完了まで待って状態を取得する();	// 完全に Pause へ遷移するのを待つ。（環境依存）
 
 
 				// イベント用ウィンドウハンドルを設定。
 
-				this.MediaEventEx.SetNotifyWindow( hWnd, (int) WM_DSGRAPHNOTIFY, new IntPtr( this.nインスタンスID ) );
+				MediaEventEx.SetNotifyWindow( hWnd, (int) WM_DSGRAPHNOTIFY, new IntPtr( nインスタンスID ) );
 			}
 #if !DEBUG
 			catch( Exception e )
 			{
 				CCommon.t例外の詳細をログに出力する( e );
-				this.Dispose();
+				Dispose();
 				throw;	// 例外発出。
 			}
 #endif
@@ -401,40 +398,40 @@ namespace FDK
 
 		public void t再生準備開始()
 		{
-			if( this.MediaCtrl != null )
+			if( MediaCtrl != null )
 			{
-				int hr = this.MediaCtrl.Pause();		// 再生準備を開始する。ここでは準備が完了するまで待たない。
+				int hr = MediaCtrl.Pause();		// 再生準備を開始する。ここでは準備が完了するまで待たない。
 				DsError.ThrowExceptionForHR( hr );
 			}
 		}
 		public void t再生開始()
 		{
-			if( this.MediaCtrl != null && --this.n再生一時停止呼び出しの累積回数 <= 0 )
+			if( MediaCtrl != null && --n再生一時停止呼び出しの累積回数 <= 0 )
 			{
 				//this.t遷移完了まで待って状態を取得する();		// 再生準備（だろう）がまだ完了してなければ、待つ。	→ 意外と重い処理なので外部で判断して実行するよう変更する。(2011.8.7)
 
-				int hr = this.MediaCtrl.Run();					// 再生開始。
+				int hr = MediaCtrl.Run();					// 再生開始。
 				DsError.ThrowExceptionForHR( hr );
 
-				this.n再生一時停止呼び出しの累積回数 = 0;		// 一時停止回数はここでリセットされる。
-				this.b再生中 = true;
+				n再生一時停止呼び出しの累積回数 = 0;		// 一時停止回数はここでリセットされる。
+				b再生中 = true;
 			}
 		}
 		public void t再生一時停止()
 		{
-			if( this.MediaCtrl != null && this.n再生一時停止呼び出しの累積回数 == 0 )
+			if( MediaCtrl != null && n再生一時停止呼び出しの累積回数 == 0 )
 			{
-				int hr = this.MediaCtrl.Pause();
+				int hr = MediaCtrl.Pause();
 				DsError.ThrowExceptionForHR( hr );
 			}
-			this.n再生一時停止呼び出しの累積回数++;
-			this.b再生中 = false;
+			n再生一時停止呼び出しの累積回数++;
+			b再生中 = false;
 		}
 		public void t再生停止()
 		{
-			if( this.MediaCtrl != null )
+			if( MediaCtrl != null )
 			{
-				int hr = this.MediaCtrl.Stop();
+				int hr = MediaCtrl.Stop();
 				DsError.ThrowExceptionForHR( hr );
 			}
 
@@ -442,15 +439,15 @@ namespace FDK
 			//this.tChangePlaybackPosition( 0.0 );		→ より細かく制御するために、FDK外部で制御するように変更。(2011.8.7)
 			//this.t再生準備開始();
 
-			this.n再生一時停止呼び出しの累積回数 = 0;	// 停止すると、一時停止呼び出し累積回数はリセットされる。
-			this.b再生中 = false;
+			n再生一時停止呼び出しの累積回数 = 0;	// 停止すると、一時停止呼び出し累積回数はリセットされる。
+			b再生中 = false;
 		}
 		public void t再生位置を変更( double db再生位置ms )
 		{
-			if( this.MediaSeeking == null )
+			if( MediaSeeking == null )
 				return;
 
-			int hr = this.MediaSeeking.SetPositions(
+			int hr = MediaSeeking.SetPositions(
 				DsLong.FromInt64( (long) ( db再生位置ms * 1000.0 * 10.0 ) ),
 				AMSeekingSeekingFlags.AbsolutePositioning,
 				null,
@@ -460,19 +457,19 @@ namespace FDK
 		}
 		public void t最初から再生開始()
 		{
-			this.t再生位置を変更( 0.0 );
-			this.t再生開始();
+			t再生位置を変更( 0.0 );
+			t再生開始();
 		}
 		public Eグラフの状態 t遷移完了まで待って状態を取得する()
 		{
 			var status = Eグラフの状態.未定;
 
-			if( this.MediaCtrl != null )
+			if( MediaCtrl != null )
 			{
 				FilterState fs;
-				int hr = this.MediaCtrl.GetState( 1000, out fs );	// 遷移完了まで最大1000ms待つ。
+				int hr = MediaCtrl.GetState( 1000, out fs );	// 遷移完了まで最大1000ms待つ。
 			}
-			return this.eグラフの状態;
+			return eグラフの状態;
 		}
 		public unsafe void t現時点における最新のスナップイメージをTextureに転写する( CTexture texture )
 		{
@@ -480,13 +477,13 @@ namespace FDK
 
 			#region [ 再生してないなら何もせず帰還。（一時停止中はOK。）]
 			//-----------------
-			if( !this.b再生中 )
+			if( !b再生中 )
 				return;
 			//-----------------
 			#endregion
 			#region [ 音声のみなら何もしない。]
 			//-----------------
-			if( this.b音声のみ )
+			if( b音声のみ )
 				return;
 			//-----------------
 			#endregion
@@ -494,28 +491,28 @@ namespace FDK
 			DataRectangle dr = texture.texture.LockRectangle( 0, LockFlags.Discard );
 			try
 			{
-				if( this.nスキャンライン幅byte == dr.Pitch )
+				if( nスキャンライン幅byte == dr.Pitch )
 				{
 					#region [ (A) ピッチが合うので、テクスチャに直接転送する。]
 					//-----------------
-					hr = this.memoryRenderer.GetCurrentBuffer( dr.DataPointer, this.nデータサイズbyte );
+					hr = memoryRenderer.GetCurrentBuffer( dr.DataPointer, nデータサイズbyte );
 					DsError.ThrowExceptionForHR( hr );
 					//-----------------
 					#endregion
 				}
 				else
 				{
-					this.b上下反転 = false;		// こちらの方法では常に正常
+					b上下反転 = false;		// こちらの方法では常に正常
 
 					#region [ (B) ピッチが合わないので、メモリに転送してからテクスチャに転送する。]
 					//-----------------
 
 					#region [ IMemoryRenderer からバッファにイメージデータを読み込む。]
 					//-----------------
-					if( this.ip == IntPtr.Zero )
-						this.ip = Marshal.AllocCoTaskMem( this.nデータサイズbyte );
+					if( ip == IntPtr.Zero )
+						ip = Marshal.AllocCoTaskMem( nデータサイズbyte );
 
-					hr = this.memoryRenderer.GetCurrentBuffer( this.ip, this.nデータサイズbyte );
+					hr = memoryRenderer.GetCurrentBuffer( ip, nデータサイズbyte );
 					DsError.ThrowExceptionForHR( hr );
 					//-----------------
 					#endregion
@@ -540,50 +537,50 @@ namespace FDK
 
 					// スレッドプールを使って並列転送する準備。
 
-					this.ptrSnap = (byte*) this.ip.ToPointer();
-					var ptr = stackalloc UInt32*[ CDirectShow.n並列度 ];	// stackalloc（GC対象外、メソッド終了時に自動開放）は、スタック変数相手にしか使えない。
+					ptrSnap = (byte*) ip.ToPointer();
+					var ptr = stackalloc UInt32*[ n並列度 ];	// stackalloc（GC対象外、メソッド終了時に自動開放）は、スタック変数相手にしか使えない。
 					ptr[ 0 ] = (UInt32*) dr.DataPointer.ToPointer();	//		↓
-					for( int i = 1; i < CDirectShow.n並列度; i++ )			// スタック変数で確保、初期化して…
-						ptr[ i ] = ptr[ i - 1 ] + this.n幅px;				//		↓
-					this.ptrTexture = ptr;									// スタック変数をクラスメンバに渡す（これならOK）。
+					for( int i = 1; i < n並列度; i++ )			// スタック変数で確保、初期化して…
+						ptr[ i ] = ptr[ i - 1 ] + n幅px;				//		↓
+					ptrTexture = ptr;									// スタック変数をクラスメンバに渡す（これならOK）。
 
 
 					// 並列度が１ならシングルスレッド、２以上ならマルチスレッドで転送する。
 					// → CPUが１つの場合、わざわざスレッドプールのスレッドで処理するのは無駄。
 
-					if( CDirectShow.n並列度 == 1 )
+					if( n並列度 == 1 )
 					{
 						if( bARGB32 )
-							this.tライン描画ARGB32( 0 );
+							tライン描画ARGB32( 0 );
 						else
-							this.tライン描画XRGB32( 0 );
+							tライン描画XRGB32( 0 );
 					}
 					else
 					{
 						// 転送開始。
 
-						var ar = new IAsyncResult[ CDirectShow.n並列度 ];
-						for( int i = 0; i < CDirectShow.n並列度; i++ )
+						var ar = new IAsyncResult[ n並列度 ];
+						for( int i = 0; i < n並列度; i++ )
 						{
 							ar[ i ] = ( bARGB32 ) ?
-								this.dgライン描画ARGB32[ i ].BeginInvoke( i, null, null ) :
-								this.dgライン描画XRGB32[ i ].BeginInvoke( i, null, null );
+								dgライン描画ARGB32[ i ].BeginInvoke( i, null, null ) :
+								dgライン描画XRGB32[ i ].BeginInvoke( i, null, null );
 						}
 
 
 						// 転送完了待ち。
 
-						for( int i = 0; i < CDirectShow.n並列度; i++ )
+						for( int i = 0; i < n並列度; i++ )
 						{
 							if( bARGB32 )
-								this.dgライン描画ARGB32[ i ].EndInvoke( ar[ i ] );
+								dgライン描画ARGB32[ i ].EndInvoke( ar[ i ] );
 							else
-								this.dgライン描画XRGB32[ i ].EndInvoke( ar[ i ] );
+								dgライン描画XRGB32[ i ].EndInvoke( ar[ i ] );
 						}
 					}
 
-					this.ptrSnap = null;
-					this.ptrTexture = null;
+					ptrSnap = null;
+					ptrTexture = null;
 					//-----------------
 					#endregion
 
@@ -700,7 +697,7 @@ namespace FDK
 			{
 				// audioRenderer を探す。
 
-				audioRenderer = CDirectShow.tオーディオレンダラを探して返す( graphBuilder );
+				audioRenderer = tオーディオレンダラを探して返す( graphBuilder );
 				if( audioRenderer == null )
 					return;		// なかった
 
@@ -907,7 +904,7 @@ namespace FDK
 			{
 				// videoRenderer を探す。
 				
-				CDirectShow.tビデオレンダラとその入力ピンを探して返す( graphBuilder, out videoRenderer, out renderInputPin );
+				tビデオレンダラとその入力ピンを探して返す( graphBuilder, out videoRenderer, out renderInputPin );
 				if( videoRenderer == null || renderInputPin == null )
 					return;		// なかった
 
@@ -1310,27 +1307,27 @@ namespace FDK
 
 		public static CDirectShow tインスタンスを返す( int nインスタンスID )
 		{
-			if( CDirectShow.dicインスタンス.ContainsKey( nインスタンスID ) )
-				return CDirectShow.dicインスタンス[ nインスタンスID ];
+			if( dicインスタンス.ContainsKey( nインスタンスID ) )
+				return dicインスタンス[ nインスタンスID ];
 
 			return null;
 		}
 		protected static void tインスタンスを登録する( CDirectShow ds )
 		{
-			for( int i = 1; i < CDirectShow.nインスタンスIDの最大数; i++ )
+			for( int i = 1; i < nインスタンスIDの最大数; i++ )
 			{
-				if( !CDirectShow.dicインスタンス.ContainsKey( i ) )		// 空いている番号を使う。
+				if( !dicインスタンス.ContainsKey( i ) )		// 空いている番号を使う。
 				{
 					ds.nインスタンスID = i;
-					CDirectShow.dicインスタンス.Add( i, ds );
+					dicインスタンス.Add( i, ds );
 					break;
 				}
 			}
 		}
 		protected static void tインスタンスを解放する( int nインスタンスID )
 		{
-			if( CDirectShow.dicインスタンス.ContainsKey( nインスタンスID ) )
-				CDirectShow.dicインスタンス.Remove( nインスタンスID );
+			if( dicインスタンス.ContainsKey( nインスタンスID ) )
+				dicインスタンス.Remove( nインスタンスID );
 		}
 		//-----------------
 		#endregion
@@ -1339,7 +1336,7 @@ namespace FDK
 		//-----------------
 		public virtual void Dispose()
 		{
-			this.Dispose( true );
+			Dispose( true );
 			GC.SuppressFinalize( this );	// ちゃんと Dispose されたので、ファイナライズ不要であることを CLR に伝える。
 		}
 		protected virtual void Dispose( bool bManagedリソースも解放する )
@@ -1354,39 +1351,39 @@ namespace FDK
 				//-----------------
 				#endregion
 				
-				CDirectShow.tインスタンスを解放する( this.nインスタンスID );
+				tインスタンスを解放する( nインスタンスID );
 			}
 
 			#region [ インターフェース参照をなくし、COMオブジェクトを解放する。 ]
 			//-----------------
-			if( this.ip != IntPtr.Zero )
+			if( ip != IntPtr.Zero )
 			{
-				Marshal.FreeCoTaskMem( this.ip );
-				this.ip = IntPtr.Zero;
+				Marshal.FreeCoTaskMem( ip );
+				ip = IntPtr.Zero;
 			}
 
-			if( this.MediaCtrl != null )
+			if( MediaCtrl != null )
 			{
-				this.MediaCtrl.Stop();
-				this.MediaCtrl = null;
+				MediaCtrl.Stop();
+				MediaCtrl = null;
 			}
 
-			if( this.MediaEventEx != null )
+			if( MediaEventEx != null )
 			{
-				this.MediaEventEx.SetNotifyWindow( IntPtr.Zero, 0, IntPtr.Zero );
-				this.MediaEventEx = null;
+				MediaEventEx.SetNotifyWindow( IntPtr.Zero, 0, IntPtr.Zero );
+				MediaEventEx = null;
 			}
 
-			if( this.MediaSeeking != null )
-				this.MediaSeeking = null;
+			if( MediaSeeking != null )
+				MediaSeeking = null;
 
-			if( this.BasicAudio != null )
-				this.BasicAudio = null;
+			if( BasicAudio != null )
+				BasicAudio = null;
 
-			CCommon.tReleaseComObject( ref this.nullRenderer );
-			CCommon.tReleaseComObject( ref this.memoryRenderer );
-			CCommon.tReleaseComObject( ref this.memoryRendererObject );
-			CCommon.tReleaseComObject( ref this.graphBuilder );
+			CCommon.tReleaseComObject( ref nullRenderer );
+			CCommon.tReleaseComObject( ref memoryRenderer );
+			CCommon.tReleaseComObject( ref memoryRendererObject );
+			CCommon.tReleaseComObject( ref graphBuilder );
 			//-----------------
 			#endregion
 
@@ -1397,7 +1394,7 @@ namespace FDK
 			// ファイナライザが呼ばれたということは、Dispose() されなかったということ。
 			// この場合、Managed リソースは先にファイナライズされている可能性があるので、Unmamaed リソースのみを解放する。
 			
-			this.Dispose( false );
+			Dispose( false );
         }
 		//-----------------
 		#endregion
@@ -1432,14 +1429,14 @@ namespace FDK
 			// Snap は RGB32、Textureは X8R8G8B8
 
 			UInt32* ptrTexture = this.ptrTexture[ n ];
-			for( int y = n; y < this.n高さpx; y += CDirectShow.n並列度 )
+			for( int y = n; y < n高さpx; y += n並列度 )
 			{
-				byte* ptrPixel = ptrSnap + ( ( ( this.n高さpx - y ) - 1 ) * this.nスキャンライン幅byte );
+				byte* ptrPixel = ptrSnap + ( ( ( n高さpx - y ) - 1 ) * nスキャンライン幅byte );
 
 				// アルファ無視なので一括コピー。CopyMemory() は自前でループ展開するよりも速い。
-				CWin32.CopyMemory( (void*) ptrTexture, (void*) ptrPixel, (uint) ( this.n幅px * 4 ) );
+				CWin32.CopyMemory( (void*) ptrTexture, (void*) ptrPixel, (uint) ( n幅px * 4 ) );
 
-				ptrTexture += this.n幅px * CDirectShow.n並列度;
+				ptrTexture += n幅px * n並列度;
 			}
 		}
 		private unsafe void tライン描画ARGB32( int n )
@@ -1447,18 +1444,18 @@ namespace FDK
 			// Snap は RGB32、Textureは A8R8G8B8
 
 			UInt32* ptrTexture = this.ptrTexture[ n ];
-			for( int y = n; y < this.n高さpx; y += CDirectShow.n並列度 )
+			for( int y = n; y < n高さpx; y += n並列度 )
 			{
-				UInt32* ptrPixel = (UInt32*) ( ptrSnap + ( ( ( this.n高さpx - y ) - 1 ) * this.nスキャンライン幅byte ) );
+				UInt32* ptrPixel = (UInt32*) ( ptrSnap + ( ( ( n高さpx - y ) - 1 ) * nスキャンライン幅byte ) );
 
 				//for( int x = 0; x < this.n幅px; x++ )
 				//	*( ptrTexture + x ) = 0xFF000000 | *ptrPixel++;
 				//			↓ループ展開により高速化。160fps の曲が 200fps まで上がった。
 
-				if( this.n幅px == 0 ) goto LEXIT;
+				if( n幅px == 0 ) goto LEXIT;
 				UInt32* pt = ptrTexture;
 				UInt32 nAlpha = 0xFF000000;
-				int d = ( this.n幅px % 32 );
+				int d = ( n幅px % 32 );
 
 				switch( d )
 				{
@@ -1527,10 +1524,10 @@ namespace FDK
 			L029: *pt++ = nAlpha | *ptrPixel++;
 			L030: *pt++ = nAlpha | *ptrPixel++;
 			L031: *pt++ = nAlpha | *ptrPixel++;
-				if( ( pt - ptrTexture ) < this.n幅px ) goto L000;
+				if( ( pt - ptrTexture ) < n幅px ) goto L000;
 
 			LEXIT:
-				ptrTexture += this.n幅px * CDirectShow.n並列度;
+				ptrTexture += n幅px * n並列度;
 			}
 		}
 		//-----------------

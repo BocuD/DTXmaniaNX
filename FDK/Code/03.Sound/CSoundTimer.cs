@@ -8,9 +8,9 @@ namespace FDK
 		{
 			get
 			{
-				if( this.Device.e出力デバイス == ESoundDeviceType.ExclusiveWASAPI || 
-					this.Device.e出力デバイス == ESoundDeviceType.SharedWASAPI ||
-					this.Device.e出力デバイス == ESoundDeviceType.ASIO )
+				if( Device.e出力デバイス == ESoundDeviceType.ExclusiveWASAPI || 
+					Device.e出力デバイス == ESoundDeviceType.SharedWASAPI ||
+					Device.e出力デバイス == ESoundDeviceType.ASIO )
 				{
 					// BASS 系の ISoundDevice.n経過時間ms はオーディオバッファの更新間隔ずつでしか更新されないため、単にこれを返すだけではとびとびの値になる。
 					// そこで、更新間隔の最中に呼ばれた場合は、システムタイマを使って補間する。
@@ -19,23 +19,23 @@ namespace FDK
 					// 動作がおかしくなる。(具体的には、ここで返すタイマー値の逆行が発生し、スクロールが巻き戻る)
 					// この場合の対策は、ASIOのバッファ量を増やして、ASIOの音声合成処理の負荷を下げること。
 
-					return this.Device.n経過時間ms
-						+ ( this.Device.tmシステムタイマ.nSystemTimeMs - this.Device.n経過時間を更新したシステム時刻ms );
+					return Device.n経過時間ms
+						+ ( Device.tmシステムタイマ.nSystemTimeMs - Device.n経過時間を更新したシステム時刻ms );
 				}
-				else if( this.Device.e出力デバイス == ESoundDeviceType.DirectSound )
+				else if( Device.e出力デバイス == ESoundDeviceType.DirectSound )
 				{
 					//return this.Device.n経過時間ms;		// #24820 2013.2.3 yyagi TESTCODE DirectSoundでスクロールが滑らかにならないため、
 					return ct.nSystemTimeMs;				// 仮にCSoundTimerをCTimer相当の動作にしてみた
 				}
-				return CTimerBase.nUnused;
+				return nUnused;
 			}
 		}
 
 		public CSoundTimer( ISoundDevice device )
 		{
-			this.Device = device;
+			Device = device;
 
-			if ( this.Device.e出力デバイス != ESoundDeviceType.DirectSound )
+			if ( Device.e出力デバイス != ESoundDeviceType.DirectSound )
 			{
 				TimerCallback timerDelegate = new TimerCallback( SnapTimers );	// CSoundTimerをシステム時刻に変換するために、
 				timer = new Timer( timerDelegate, null, 0, 1000 );				// CSoundTimerとCTimerを両方とも走らせておき、
@@ -49,16 +49,16 @@ namespace FDK
 	
 		private void SnapTimers(object o)	// 1秒に1回呼び出され、2つのタイマー間の現在値をそれぞれ保持する。
 		{
-			if ( this.Device.e出力デバイス != ESoundDeviceType.DirectSound )
+			if ( Device.e出力デバイス != ESoundDeviceType.DirectSound )
 			{
-				this.nDInputTimerCounter = this.ctDInputTimer.nSystemTimeMs;
-				this.nSoundTimerCounter = this.nSystemTimeMs;
+				nDInputTimerCounter = ctDInputTimer.nSystemTimeMs;
+				nSoundTimerCounter = nSystemTimeMs;
 				//Debug.WriteLine( "BaseCounter: " + nDInputTimerCounter + ", " + nSoundTimerCounter );
 			}
 		}
 		public long nサウンドタイマーのシステム時刻msへの変換( long nDInputのタイムスタンプ )
 		{
-			return nDInputのタイムスタンプ - this.nDInputTimerCounter + this.nSoundTimerCounter;	// Timer違いによる時差を補正する
+			return nDInputのタイムスタンプ - nDInputTimerCounter + nSoundTimerCounter;	// Timer違いによる時差を補正する
 		}
 
 #if false
@@ -144,7 +144,7 @@ Debug.WriteLine( "B" );
 			//sendinputスレッド削除
 			if ( timer != null )
 			{
-				timer.Change( System.Threading.Timeout.Infinite, System.Threading.Timeout.Infinite );
+				timer.Change( Timeout.Infinite, Timeout.Infinite );
 				timer.Dispose();
 				timer = null;
 			}

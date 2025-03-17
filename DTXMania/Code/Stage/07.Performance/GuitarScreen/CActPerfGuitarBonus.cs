@@ -9,7 +9,7 @@ namespace DTXMania
 
         public CActPerfGuitarBonus()
         {
-            base.bNotActivated = true;
+            bNotActivated = true;
         }
 
         public override void OnActivate()
@@ -28,30 +28,30 @@ namespace DTXMania
 
         public override void OnManagedCreateResources()
         {
-            if (!base.bNotActivated)
+            if (!bNotActivated)
             {
-                this.txBonus100 = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_Bonus_100.png"));
+                txBonus100 = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_Bonus_100.png"));
                 base.OnManagedCreateResources();
             }
         }
 
         public override void OnManagedReleaseResources()
         {
-            if (!base.bNotActivated)
+            if (!bNotActivated)
             {
-                CDTXMania.tReleaseTexture(ref this.txBonus100);
+                CDTXMania.tReleaseTexture(ref txBonus100);
                 base.OnManagedReleaseResources();
             }
         }
 
         public override unsafe int OnUpdateAndDraw()
         {
-            if (!base.bNotActivated)
+            if (!bNotActivated)
             {
-                if (base.bJustStartedUpdate)
+                if (bJustStartedUpdate)
                 {
                     //base.n進行用タイマ = CDTXMania.Timer.nCurrentTime;                    
-                    base.bJustStartedUpdate = false;
+                    bJustStartedUpdate = false;
                 }
 
                 ctBonusScoreAnimationCounter[(int)EInstrumentPart.GUITAR].tUpdate();
@@ -76,10 +76,10 @@ namespace DTXMania
         private void drawBonusScoreAnimation(EInstrumentPart eInstrumentPart, Point pt)
         {
             if (!ctBonusScoreAnimationCounter[(int)eInstrumentPart].bReachedEndValue 
-                && this.txBonus100 != null)
+                && txBonus100 != null)
             {
                 int nCounterValue = ctBonusScoreAnimationCounter[(int)eInstrumentPart].nCurrentValue;                
-                this.txBonus100.tDraw2D(CDTXMania.app.Device, pt.X, pt.Y - nCounterValue / 25);
+                txBonus100.tDraw2D(CDTXMania.app.Device, pt.X, pt.Y - nCounterValue / 25);
             }
         }
 

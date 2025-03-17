@@ -54,8 +54,8 @@ namespace DTXMania
 		#region [ コンストラクタから呼ばれる初期化処理 ]
 		protected new void Initialize(string fontpath, FontFamily fontfamily, int pt, FontStyle style)
 		{
-			this.bDispose完了済み_CPrivateFastFont = false;
-			this.listFontCache = new List<FontCache>();
+			bDispose完了済み_CPrivateFastFont = false;
+			listFontCache = new List<FontCache>();
 			base.Initialize(fontpath, fontfamily, pt, style);
 		}
 		#endregion
@@ -235,7 +235,7 @@ namespace DTXMania
 		//-----------------
 		public new void Dispose()
 		{
-			if (!this.bDispose完了済み_CPrivateFastFont)
+			if (!bDispose完了済み_CPrivateFastFont)
 			{
 				if (listFontCache != null)
 				{
@@ -253,7 +253,7 @@ namespace DTXMania
 					listFontCache.Clear();
 					listFontCache = null;
 				}
-				this.bDispose完了済み_CPrivateFastFont = true;
+				bDispose完了済み_CPrivateFastFont = true;
 			}
 			base.Dispose();
 		}

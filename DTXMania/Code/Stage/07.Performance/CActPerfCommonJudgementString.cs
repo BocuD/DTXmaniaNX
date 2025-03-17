@@ -78,7 +78,7 @@ namespace DTXMania
 		{
             int iP_A = 390;
             int iP_B = 0x248;
-			this.st判定文字列 = new ST判定文字列[ 7 ];
+			st判定文字列 = new ST判定文字列[ 7 ];
 			Rectangle[] r = new Rectangle[] {
 				new Rectangle( 0, 0,    0x80, 0x2a ),		// Perfect
 				new Rectangle( 0, 0x2b, 0x80, 0x2a ),		// Great
@@ -91,13 +91,13 @@ namespace DTXMania
 
 			for ( int i = 0; i < 7; i++ )
 			{
-				this.st判定文字列[ i ] = new ST判定文字列();
-				this.st判定文字列[ i ].n画像番号 = i / 3;
-				this.st判定文字列[ i ].rc = r[i];
+				st判定文字列[ i ] = new ST判定文字列();
+				st判定文字列[ i ].n画像番号 = i / 3;
+				st判定文字列[ i ].rc = r[i];
 			}
 
-			this.stLag数値 = new STlag数値[ 12 * 2 ];		// #25370 2011.2.1 yyagi
-			base.bNotActivated = true;
+			stLag数値 = new STlag数値[ 12 * 2 ];		// #25370 2011.2.1 yyagi
+			bNotActivated = true;
 		}
 
 
@@ -113,33 +113,33 @@ namespace DTXMania
 			{
                 if (CDTXMania.ConfigIni.nJudgeAnimeType != 0)
                 {
-                    this.st状態[nLane].ct進行 = new CCounter(0, CDTXMania.ConfigIni.nJudgeFrames - 1, CDTXMania.ConfigIni.nJudgeInterval, CDTXMania.Timer);
+                    st状態[nLane].ct進行 = new CCounter(0, CDTXMania.ConfigIni.nJudgeFrames - 1, CDTXMania.ConfigIni.nJudgeInterval, CDTXMania.Timer);
                 }
                 else
                 {
-                    this.st状態[nLane].ct進行 = new CCounter(0, 300, 1, CDTXMania.Timer);
+                    st状態[nLane].ct進行 = new CCounter(0, 300, 1, CDTXMania.Timer);
                 }
-				this.st状態[ nLane ].judge = judge;
-				this.st状態[ nLane ].fX方向拡大率 = 1f;
-				this.st状態[ nLane ].fY方向拡大率 = 1f;
-                this.st状態[ nLane ].fZ軸回転度 = 0f;
-				this.st状態[ nLane ].n相対X座標 = 0;
-				this.st状態[ nLane ].n相対Y座標 = 0;
-                this.st状態[ nLane ].n透明度 = 0xff;
+				st状態[ nLane ].judge = judge;
+				st状態[ nLane ].fX方向拡大率 = 1f;
+				st状態[ nLane ].fY方向拡大率 = 1f;
+                st状態[ nLane ].fZ軸回転度 = 0f;
+				st状態[ nLane ].n相対X座標 = 0;
+				st状態[ nLane ].n相対Y座標 = 0;
+                st状態[ nLane ].n透明度 = 0xff;
 
-				this.st状態[ nLane ].fX方向拡大率B = 1f;
-				this.st状態[ nLane ].fY方向拡大率B = 1f;
-				this.st状態[ nLane ].n相対X座標B = 0;
-				this.st状態[ nLane ].n相対Y座標B = 0;
-                this.st状態[ nLane ].n透明度B = 0xff;
+				st状態[ nLane ].fX方向拡大率B = 1f;
+				st状態[ nLane ].fY方向拡大率B = 1f;
+				st状態[ nLane ].n相対X座標B = 0;
+				st状態[ nLane ].n相対Y座標B = 0;
+                st状態[ nLane ].n透明度B = 0xff;
                 
-                this.st状態[ nLane ].fZ軸回転度_棒 = 0f;
-                this.st状態[ nLane ].fX方向拡大率_棒 = 0;
-				this.st状態[ nLane ].fY方向拡大率_棒 = 0;
-				this.st状態[ nLane ].n相対X座標_棒 = 0;
-				this.st状態[ nLane ].n相対Y座標_棒 = 0;                
+                st状態[ nLane ].fZ軸回転度_棒 = 0f;
+                st状態[ nLane ].fX方向拡大率_棒 = 0;
+				st状態[ nLane ].fY方向拡大率_棒 = 0;
+				st状態[ nLane ].n相対X座標_棒 = 0;
+				st状態[ nLane ].n相対Y座標_棒 = 0;                
 
-				this.st状態[ nLane ].nLag = lag;
+				st状態[ nLane ].nLag = lag;
 			}
 		}
 
@@ -150,20 +150,20 @@ namespace DTXMania
 		{
 			for( int i = 0; i < 15; i++ )
 			{
-				this.st状態[ i ].ct進行 = new CCounter();
+				st状態[ i ].ct進行 = new CCounter();
 			}
 
 			for ( int i = 0; i < 12; i++ )
 			{
                 if( CDTXMania.ConfigIni.nShowLagTypeColor == 0 )
                 {
-				    this.stLag数値[ i      ].rc = new Rectangle( ( i % 4 ) * 15     , ( i / 4 ) * 19     , 15, 19 );	// plus numbers
-				    this.stLag数値[ i + 12 ].rc = new Rectangle( ( i % 4 ) * 15 + 64, ( i / 4 ) * 19 + 64, 15, 19 );	// minus numbers
+				    stLag数値[ i      ].rc = new Rectangle( ( i % 4 ) * 15     , ( i / 4 ) * 19     , 15, 19 );	// plus numbers
+				    stLag数値[ i + 12 ].rc = new Rectangle( ( i % 4 ) * 15 + 64, ( i / 4 ) * 19 + 64, 15, 19 );	// minus numbers
                 }
                 else
                 {
-				    this.stLag数値[ i      ].rc = new Rectangle( ( i % 4 ) * 15 + 64, ( i / 4 ) * 19 + 64, 15, 19 );	// minus numbers
-				    this.stLag数値[ i + 12 ].rc = new Rectangle( ( i % 4 ) * 15     , ( i / 4 ) * 19     , 15, 19 );	// plus numbers
+				    stLag数値[ i      ].rc = new Rectangle( ( i % 4 ) * 15 + 64, ( i / 4 ) * 19 + 64, 15, 19 );	// minus numbers
+				    stLag数値[ i + 12 ].rc = new Rectangle( ( i % 4 ) * 15     , ( i / 4 ) * 19     , 15, 19 );	// plus numbers
                 }
 			}
 
@@ -180,7 +180,7 @@ namespace DTXMania
                     this.stレーンサイズ[i] = new STレーンサイズ();
                     if( CDTXMania.ConfigIni.bDrumsEnabled )
                     {
-                        this.stレーンサイズ[i] = default(CActPerfDrumsJudgementString.STレーンサイズ);
+                        this.stレーンサイズ[i] = default(STレーンサイズ);
                         switch ( CDTXMania.ConfigIni.eLaneType.Drums )
                         {
                             case EType.A:
@@ -212,19 +212,19 @@ namespace DTXMania
                     }
                 }
 			base.OnActivate();
-			this.nShowLagType = CDTXMania.ConfigIni.nShowLagType;
+			nShowLagType = CDTXMania.ConfigIni.nShowLagType;
 		}
 		public override void OnDeactivate()
 		{
 			for( int i = 0; i < 15; i++ )
 			{
-				this.st状態[ i ].ct進行 = null;
+				st状態[ i ].ct進行 = null;
 			}
 			base.OnDeactivate();
 		}
 		public override void OnManagedCreateResources()
 		{
-			if( !base.bNotActivated )
+			if( !bNotActivated )
 			{
                 if(CDTXMania.ConfigIni.nJudgeAnimeType == 1)
                 {
@@ -239,23 +239,23 @@ namespace DTXMania
                 }
                 else
                 {
-                    this.tx判定文字列[0] = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\ScreenPlay judge strings 1.png"));
-                    this.tx判定文字列[1] = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\ScreenPlay judge strings 2.png"));
-                    this.tx判定文字列[2] = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\ScreenPlay judge strings 3.png"));
+                    tx判定文字列[0] = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\ScreenPlay judge strings 1.png"));
+                    tx判定文字列[1] = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\ScreenPlay judge strings 2.png"));
+                    tx判定文字列[2] = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\ScreenPlay judge strings 3.png"));
                 }
 
-                this.txlag数値 = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_lag numbers.png"));
+                txlag数値 = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_lag numbers.png"));
 				base.OnManagedCreateResources();
 			}
 		}
 		public override void OnManagedReleaseResources()
 		{
-			if( !base.bNotActivated )
+			if( !bNotActivated )
 			{
-				CDTXMania.tReleaseTexture( ref this.tx判定文字列[ 0 ] );
-				CDTXMania.tReleaseTexture( ref this.tx判定文字列[ 1 ] );
-				CDTXMania.tReleaseTexture( ref this.tx判定文字列[ 2 ] );
-				CDTXMania.tReleaseTexture( ref this.txlag数値 );
+				CDTXMania.tReleaseTexture( ref tx判定文字列[ 0 ] );
+				CDTXMania.tReleaseTexture( ref tx判定文字列[ 1 ] );
+				CDTXMania.tReleaseTexture( ref tx判定文字列[ 2 ] );
+				CDTXMania.tReleaseTexture( ref txlag数値 );
 				base.OnManagedReleaseResources();
 			}
 		}

@@ -20,14 +20,11 @@ namespace DTXMania
 			/// </summary>
 			public string[] File
 			{
-				get
+				get => _file;
+				set // ここには来ない( Label[xx] にsetすると、結局Labelのgetが呼ばれるだけで、Labelのsetは呼ばれない)
 				{
-					return this._file;
-				}
-                set // ここには来ない( Label[xx] にsetすると、結局Labelのgetが呼ばれるだけで、Labelのsetは呼ばれない)
-				{
-					this._file = value;
-					this.b使用中 = true;
+					_file = value;
+					b使用中 = true;
 				}
 			}
 
@@ -36,14 +33,11 @@ namespace DTXMania
 			/// </summary>
 			public Color FontColor
 			{
-				get
-				{
-					return this._fontcolor;
-				}
+				get => _fontcolor;
 				set
 				{
-					this._fontcolor = value;
-					this.b使用中 = true;
+					_fontcolor = value;
+					b使用中 = true;
 				}
 			}
 
@@ -52,14 +46,11 @@ namespace DTXMania
 			/// </summary>
 			public string Genre
 			{
-				get
-				{
-					return this._genre;
-				}
+				get => _genre;
 				set
 				{
-					this._genre = value;
-					this.b使用中 = true;
+					_genre = value;
+					b使用中 = true;
 				}
 			}
 
@@ -68,14 +59,11 @@ namespace DTXMania
 			/// </summary>
 			public string[] Label
 			{
-				get
+				get => _label;
+				set // ここには来ない( Label[xx] にsetすると、結局Labelのgetが呼ばれるだけで、Labelのsetは呼ばれない)
 				{
-					return this._label;
-				}
-                set // ここには来ない( Label[xx] にsetすると、結局Labelのgetが呼ばれるだけで、Labelのsetは呼ばれない)
-				{
-					this._label = value;
-					this.b使用中 = true;
+					_label = value;
+					b使用中 = true;
 				}
 			}
 
@@ -84,14 +72,11 @@ namespace DTXMania
 			/// </summary>
 			public string Title
 			{
-				get
-				{
-					return this._title;
-				}
+				get => _title;
 				set
 				{
-					this._title = value;
-					this.b使用中 = true;
+					_title = value;
+					b使用中 = true;
 				}
 			}
 
@@ -111,12 +96,12 @@ namespace DTXMania
 
 		public CSetDef()
 		{
-			this.blocks = new List<CBlock>();
+			blocks = new List<CBlock>();
 		}
 		public CSetDef( string setdefファイル名 )
 			: this()
 		{
-			this.t読み込み( setdefファイル名 );
+			t読み込み( setdefファイル名 );
 		}
 
 
@@ -144,9 +129,9 @@ namespace DTXMania
 							{
 								if( block.b使用中 )
 								{
-									this.tFILEの指定があるのにLxLABELが省略されているときはデフォルトの名前をセットする( block );
-									this.tLxLABELの指定があるのにFILEが省略されているときはなかったものとする( block );
-									this.blocks.Add( block );
+									tFILEの指定があるのにLxLABELが省略されているときはデフォルトの名前をセットする( block );
+									tLxLABELの指定があるのにFILEが省略されているときはなかったものとする( block );
+									blocks.Add( block );
 									block = new CBlock();
 								}
 								block.Title = str.Substring( 6 ).TrimStart( new char[] { ':', ' ', '\t' } );
@@ -217,9 +202,9 @@ namespace DTXMania
 			reader.Close();
 			if( block.b使用中 )
 			{
-				this.tFILEの指定があるのにLxLABELが省略されているときはデフォルトの名前をセットする( block );
-				this.tLxLABELの指定があるのにFILEが省略されているときはなかったものとする( block );
-				this.blocks.Add( block );
+				tFILEの指定があるのにLxLABELが省略されているときはデフォルトの名前をセットする( block );
+				tLxLABELの指定があるのにFILEが省略されているときはなかったものとする( block );
+				blocks.Add( block );
 			}
 		}
 

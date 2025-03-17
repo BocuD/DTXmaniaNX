@@ -35,16 +35,16 @@ namespace FDK
 		}
 		public CBeatDetect( string _filename )
 		{
-			this.filename = _filename;
+			filename = _filename;
 			Initialize();
 		}
 		#endregion
 		#region [ 初期化(コンストラクタから呼び出される) ]
 		private void Initialize()
 		{
-			if ( this.listBeatPositions == null )
+			if ( listBeatPositions == null )
 			{
-				this.listBeatPositions = new List<stBeatPos>();
+				listBeatPositions = new List<stBeatPos>();
 			}
 
 			#region [ BASS registration ]
@@ -77,14 +77,14 @@ namespace FDK
 
 			#region [ 指定されたサウンドファイルをBASSでオープンし、必要最小限の情報を取得する。]
 			//this.hBassStream = Bass.BASS_StreamCreateFile( this.filename, 0, 0, BASSFlag.BASS_STREAM_PRESCAN | BASSFlag.BASS_STREAM_DECODE );
-			this.hBassStream = Bass.BASS_StreamCreateFile( this.filename, 0, 0, BASSFlag.BASS_STREAM_DECODE );
-			if ( this.hBassStream == 0 )
+			hBassStream = Bass.BASS_StreamCreateFile( filename, 0, 0, BASSFlag.BASS_STREAM_DECODE );
+			if ( hBassStream == 0 )
 				throw new Exception( string.Format( "{0}: サウンドストリームの生成に失敗しました。(BASS_StreamCreateFile)[{1}]", filename, Bass.BASS_ErrorGetCode().ToString() ) );
 
-			this.nTotalBytes = Bass.BASS_ChannelGetLength( this.hBassStream );
+			nTotalBytes = Bass.BASS_ChannelGetLength( hBassStream );
 
-			this.nTotalSeconds = Bass.BASS_ChannelBytes2Seconds( this.hBassStream, nTotalBytes );
-			if ( !Bass.BASS_ChannelGetAttribute( this.hBassStream, BASSAttribute.BASS_ATTRIB_FREQ, ref fFreq ) )
+			nTotalSeconds = Bass.BASS_ChannelBytes2Seconds( hBassStream, nTotalBytes );
+			if ( !Bass.BASS_ChannelGetAttribute( hBassStream, BASSAttribute.BASS_ATTRIB_FREQ, ref fFreq ) )
 			{
 				string errmes = string.Format( "サウンドストリームの周波数取得に失敗しました。(BASS_ChannelGetAttribute)[{0}]", Bass.BASS_ErrorGetCode().ToString() );
 				Bass.BASS_Free();
@@ -102,7 +102,7 @@ namespace FDK
 		public float GetTempo()
 		{
 			fTempo = BassFx.BASS_FX_BPM_DecodeGet(
-				this.hBassStream,
+				hBassStream,
 				0,
 				nTotalSeconds,
 				( 300 << 16 ) + 70,		// MAX BPM=320, MIN BPM=70
@@ -122,7 +122,7 @@ namespace FDK
 		public float GetTempo( double startSec, double endSec )
 		{
 			fTempo = BassFx.BASS_FX_BPM_DecodeGet(
-				this.hBassStream,
+				hBassStream,
 				startSec,
 				endSec,
 				( 300 << 16 ) + 70,		// MAX BPM=320, MIN BPM=70
@@ -141,20 +141,20 @@ namespace FDK
 		public List<stBeatPos> GetBeatPositions()
 		{
 			#region [  BeatPosition格納リストの初期化 ]
-			if ( this.listBeatPositions != null )
+			if ( listBeatPositions != null )
 			{
-				this.listBeatPositions.Clear();
+				listBeatPositions.Clear();
 			}
 			else
 			{
-				this.listBeatPositions = new List<stBeatPos>();
+				listBeatPositions = new List<stBeatPos>();
 			}
 			#endregion
 
 			BPMBEATPROC _beatProc = new BPMBEATPROC( GetBeat_ProgressCallback );
 
 			bool ret = BassFx.BASS_FX_BPM_BeatDecodeGet(
-				this.hBassStream,
+				hBassStream,
 				0,
 				nTotalSeconds,
 				//0,
@@ -162,7 +162,7 @@ namespace FDK
 				_beatProc,
 				IntPtr.Zero );
 
-			return this.listBeatPositions;
+			return listBeatPositions;
 		}
 
 		private void GetBeat_ProgressCallback( int channel, double beatpos, IntPtr user )
@@ -186,9 +186,9 @@ namespace FDK
 		
 		public void Dispose()	// 使い終わったら必ずDispose()すること。BASSのリソースを握りっぱなしにすると、他の再生に不都合が生じるため。
 		{
-			BassFx.BASS_FX_BPM_Free( this.hBassStream );
-			Bass.BASS_StreamFree( this.hBassStream );
-			this.hBassStream = -1;
+			BassFx.BASS_FX_BPM_Free( hBassStream );
+			Bass.BASS_StreamFree( hBassStream );
+			hBassStream = -1;
 			Bass.BASS_Free();
 		}
 	

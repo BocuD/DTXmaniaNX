@@ -172,10 +172,7 @@ namespace SampleFramework
     {
         static DisplayModeComparer9 comparer = new DisplayModeComparer9();
 
-        public static DisplayModeComparer9 Comparer
-        {
-            get { return comparer; }
-        }
+        public static DisplayModeComparer9 Comparer => comparer;
 
         public DisplayModeComparer9()
         {

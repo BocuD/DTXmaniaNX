@@ -83,7 +83,7 @@ namespace SampleFramework
         /// <value>The inactive sleep time.</value>
         public TimeSpan InactiveSleepTime
         {
-            get { return inactiveSleepTime; }
+            get => inactiveSleepTime;
             set
             {
                 // error checking
@@ -99,7 +99,7 @@ namespace SampleFramework
         /// <value>The target elapsed time.</value>
         public TimeSpan TargetElapsedTime
         {
-            get { return targetElapsedTime; }
+            get => targetElapsedTime;
             set
             {
                 // error checking

@@ -59,19 +59,13 @@ namespace SampleFramework
         /// Gets the size in bytes.
         /// </summary>
         /// <value>The size in bytes.</value>
-        public static int SizeInBytes
-        {
-            get { return Marshal.SizeOf(typeof(TransformedColoredVertex)); }
-        }
+        public static int SizeInBytes => Marshal.SizeOf(typeof(TransformedColoredVertex));
 
         /// <summary>
         /// Gets the format.
         /// </summary>
         /// <value>The format.</value>
-        public static VertexFormat Format
-        {
-            get { return VertexFormat.PositionRhw | VertexFormat.Diffuse; }
-        }
+        public static VertexFormat Format => VertexFormat.PositionRhw | VertexFormat.Diffuse;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TransformedColoredVertex"/> struct.

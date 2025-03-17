@@ -62,12 +62,12 @@ namespace DTXMania
         /// </summary>
         public CDTX2WAVmode()
         {
-            this.Enabled = false;
-            this.Command = ECommand.Other;
-            this.Format = FormatType.WAV;
-            this.VSyncWait = false;         // とりあえず VSyncWait=OFF固定で考える
-            this.outfilename = "";
-            this.dtxfilename = "";
+            Enabled = false;
+            Command = ECommand.Other;
+            Format = FormatType.WAV;
+            VSyncWait = false;         // とりあえず VSyncWait=OFF固定で考える
+            outfilename = "";
+            dtxfilename = "";
         }
 
         /// <summary>
@@ -95,8 +95,8 @@ namespace DTXMania
         }*/
 
 
-        private System.IntPtr hTargetMainWindowHandle = IntPtr.Zero;
-        private System.IntPtr hCurrentMainWindowHandle;
+        private IntPtr hTargetMainWindowHandle = IntPtr.Zero;
+        private IntPtr hCurrentMainWindowHandle;
 
         /// <summary>
         /// DTX2WAVにメッセージを送信する

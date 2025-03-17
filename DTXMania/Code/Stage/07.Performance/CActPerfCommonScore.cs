@@ -20,7 +20,7 @@ namespace DTXMania
 
 		public CActPerfCommonScore()
 		{
-			base.bNotActivated = true;
+			bNotActivated = true;
 		}
 
 
@@ -28,18 +28,18 @@ namespace DTXMania
 
 		public double Get( EInstrumentPart part )
 		{
-			return this.nCurrentTrueScore[ (int) part ];
+			return nCurrentTrueScore[ (int) part ];
 		}
 		public void Set( EInstrumentPart part, double nScore )
 		{
 			int nPart = (int) part;
-			if( this.nCurrentTrueScore[ nPart ] != nScore )
+			if( nCurrentTrueScore[ nPart ] != nScore )
 			{
-				this.nCurrentTrueScore[ nPart ] = nScore;
-				this.nスコアの増分[ nPart ] = (long) ( ( (double) ( this.nCurrentTrueScore[ nPart ] - this.n現在表示中のスコア[ nPart ] ) ) / 20.0 );
-				if( this.nスコアの増分[ nPart ] < 1L )
+				nCurrentTrueScore[ nPart ] = nScore;
+				nスコアの増分[ nPart ] = (long) ( ( (double) ( nCurrentTrueScore[ nPart ] - n現在表示中のスコア[ nPart ] ) ) / 20.0 );
+				if( nスコアの増分[ nPart ] < 1L )
 				{
-					this.nスコアの増分[ nPart ] = 1L;
+					nスコアの増分[ nPart ] = 1L;
 				}
 			}
 		}
@@ -113,7 +113,7 @@ namespace DTXMania
 					break;
 				#endregion
 			}
-			this.Set( part, this.Get( part ) + delta * rev );
+			Set( part, Get( part ) + delta * rev );
 		}
 
 
@@ -121,28 +121,28 @@ namespace DTXMania
 
 		public override void OnActivate()
 		{
-			this.n進行用タイマ = -1;
+			n進行用タイマ = -1;
 			for( int i = 0; i < 3; i++ )
 			{
-				this.n現在表示中のスコア[ i ] = 0L;
-				this.nCurrentTrueScore[ i ] = 0L;
-				this.nスコアの増分[ i ] = 0L;
+				n現在表示中のスコア[ i ] = 0L;
+				nCurrentTrueScore[ i ] = 0L;
+				nスコアの増分[ i ] = 0L;
 			}
 			base.OnActivate();
 		}
 		public override void OnManagedCreateResources()
 		{
-			if( !base.bNotActivated && !CDTXMania.DTXVmode.Enabled && !CDTXMania.DTX2WAVmode.Enabled)
+			if( !bNotActivated && !CDTXMania.DTXVmode.Enabled && !CDTXMania.DTX2WAVmode.Enabled)
 			{
-                this.txScore = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_score numbersGD.png"));
+                txScore = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_score numbersGD.png"));
 				base.OnManagedCreateResources();
 			}
 		}
 		public override void OnManagedReleaseResources()
 		{
-			if( !base.bNotActivated && !CDTXMania.DTXVmode.Enabled && !CDTXMania.DTX2WAVmode.Enabled)
+			if( !bNotActivated && !CDTXMania.DTXVmode.Enabled && !CDTXMania.DTX2WAVmode.Enabled)
 			{
-				CDTXMania.tReleaseTexture( ref this.txScore );
+				CDTXMania.tReleaseTexture( ref txScore );
 				base.OnManagedReleaseResources();
 			}
 		}

@@ -33,23 +33,23 @@ namespace DTXMania
 
 		public CStageResult()
 		{
-			this.stPerformanceEntry.Drums = new CScoreIni.CPerformanceEntry();
-			this.stPerformanceEntry.Guitar = new CScoreIni.CPerformanceEntry();
-			this.stPerformanceEntry.Bass = new CScoreIni.CPerformanceEntry();
-			this.rEmptyDrumChip = new CChip[ 10 ];
-			this.n総合ランク値 = -1;
-            this.nチャンネル0Atoレーン07 = new int[] { 1, 2, 3, 4, 5, 7, 6, 1, 8, 0, 9 };
-			base.eStageID = CStage.EStage.Result;
-			base.ePhaseID = CStage.EPhase.Common_DefaultState;
-			base.bNotActivated = true;
-			base.listChildActivities.Add( this.actResultImage = new CActResultImage() );
-			base.listChildActivities.Add( this.actParameterPanel = new CActResultParameterPanel() );
-			base.listChildActivities.Add( this.actRank = new CActResultRank() );
-			base.listChildActivities.Add( this.actSongBar = new CActResultSongBar() );
+			stPerformanceEntry.Drums = new CScoreIni.CPerformanceEntry();
+			stPerformanceEntry.Guitar = new CScoreIni.CPerformanceEntry();
+			stPerformanceEntry.Bass = new CScoreIni.CPerformanceEntry();
+			rEmptyDrumChip = new CChip[ 10 ];
+			n総合ランク値 = -1;
+            nチャンネル0Atoレーン07 = new int[] { 1, 2, 3, 4, 5, 7, 6, 1, 8, 0, 9 };
+			eStageID = EStage.Result;
+			ePhaseID = EPhase.Common_DefaultState;
+			bNotActivated = true;
+			listChildActivities.Add( actResultImage = new CActResultImage() );
+			listChildActivities.Add( actParameterPanel = new CActResultParameterPanel() );
+			listChildActivities.Add( actRank = new CActResultRank() );
+			listChildActivities.Add( actSongBar = new CActResultSongBar() );
 			//base.listChildActivities.Add( this.actProgressBar = new CActPerfProgressBar(true) );
-			base.listChildActivities.Add( this.actFI = new CActFIFOWhite() );
-			base.listChildActivities.Add( this.actFO = new CActFIFOBlack() );
-			base.listChildActivities.Add(this.actBackgroundVideoAVI = new CActSelectBackgroundAVI());
+			listChildActivities.Add( actFI = new CActFIFOWhite() );
+			listChildActivities.Add( actFO = new CActFIFOBlack() );
+			listChildActivities.Add(actBackgroundVideoAVI = new CActSelectBackgroundAVI());
 		}
 
 		
@@ -63,19 +63,19 @@ namespace DTXMania
 			{
 				#region [ Initialize ]
 				//---------------------
-				this.eReturnValueWhenFadeOutCompleted = EReturnValue.Continue;
-				this.bAnimationComplete = false;
-				this.bIsCheckedWhetherResultScreenShouldSaveOrNot = false;				// #24609 2011.3.14 yyagi
-				this.n最後に再生したHHのWAV番号 = -1;
-				this.n最後に再生したHHのチャンネル番号 = 0;
+				eReturnValueWhenFadeOutCompleted = EReturnValue.Continue;
+				bAnimationComplete = false;
+				bIsCheckedWhetherResultScreenShouldSaveOrNot = false;				// #24609 2011.3.14 yyagi
+				n最後に再生したHHのWAV番号 = -1;
+				n最後に再生したHHのチャンネル番号 = 0;
 				for( int i = 0; i < 3; i++ )
 				{
-					this.bNewRecordSkill[ i ] = false;
-                    this.bNewRecordScore[ i ] = false;
-                    this.bNewRecordRank[ i ] = false;
+					bNewRecordSkill[ i ] = false;
+                    bNewRecordScore[ i ] = false;
+                    bNewRecordRank[ i ] = false;
 					//Initialize to empty string so that the Progress Bar texture can be drawn correctly
-					this.strBestProgressBarRecord[i] = "";
-					this.strCurrProgressBarRecord[i] = "";
+					strBestProgressBarRecord[i] = "";
+					strCurrProgressBarRecord[i] = "";
 				}
 				//---------------------
 				#endregion
@@ -86,13 +86,13 @@ namespace DTXMania
 					//---------------------
 					for (int i = 0; i < 3; i++)
 					{
-						this.nRankValue[i] = -1;
-						this.fPerfect率[i] = this.fGreat率[i] = this.fGood率[i] = this.fPoor率[i] = this.fMiss率[i] = 0.0f;  // #28500 2011.5.24 yyagi
+						nRankValue[i] = -1;
+						fPerfect率[i] = fGreat率[i] = fGood率[i] = fPoor率[i] = fMiss率[i] = 0.0f;  // #28500 2011.5.24 yyagi
 						if ((((i != 0) || (CDTXMania.DTX.bチップがある.Drums && !CDTXMania.ConfigIni.bGuitarRevolutionMode)) &&
 							((i != 1) || (CDTXMania.DTX.bチップがある.Guitar && CDTXMania.ConfigIni.bGuitarRevolutionMode))) &&
 							((i != 2) || (CDTXMania.DTX.bチップがある.Bass && CDTXMania.ConfigIni.bGuitarRevolutionMode)))
 						{
-							CScoreIni.CPerformanceEntry part = this.stPerformanceEntry[i];
+							CScoreIni.CPerformanceEntry part = stPerformanceEntry[i];
 							bool bIsAutoPlay = true;
 							switch (i)
 							{
@@ -109,31 +109,31 @@ namespace DTXMania
 									break;
 							}
 
-							this.fPerfect率[i] = bIsAutoPlay ? 0f : ((100f * part.nPerfectCount) / ((float)part.nTotalChipsCount));
-							this.fGreat率[i] = bIsAutoPlay ? 0f : ((100f * part.nGreatCount) / ((float)part.nTotalChipsCount));
-							this.fGood率[i] = bIsAutoPlay ? 0f : ((100f * part.nGoodCount) / ((float)part.nTotalChipsCount));
-							this.fPoor率[i] = bIsAutoPlay ? 0f : ((100f * part.nPoorCount) / ((float)part.nTotalChipsCount));
-							this.fMiss率[i] = bIsAutoPlay ? 0f : ((100f * part.nMissCount) / ((float)part.nTotalChipsCount));
-							this.bAuto[i] = bIsAutoPlay; // #23596 10.11.16 add ikanick そのパートがオートなら1
+							fPerfect率[i] = bIsAutoPlay ? 0f : ((100f * part.nPerfectCount) / ((float)part.nTotalChipsCount));
+							fGreat率[i] = bIsAutoPlay ? 0f : ((100f * part.nGreatCount) / ((float)part.nTotalChipsCount));
+							fGood率[i] = bIsAutoPlay ? 0f : ((100f * part.nGoodCount) / ((float)part.nTotalChipsCount));
+							fPoor率[i] = bIsAutoPlay ? 0f : ((100f * part.nPoorCount) / ((float)part.nTotalChipsCount));
+							fMiss率[i] = bIsAutoPlay ? 0f : ((100f * part.nMissCount) / ((float)part.nTotalChipsCount));
+							bAuto[i] = bIsAutoPlay; // #23596 10.11.16 add ikanick そのパートがオートなら1
 														 //        10.11.17 change (int to bool) ikanick
 														 //18072020: Change first condition check to 1, XG mode is 1, not 0. Fisyher
 							if (CDTXMania.ConfigIni.nSkillMode == 1)
 							{
-								this.nRankValue[i] = CScoreIni.tCalculateRank(part);
+								nRankValue[i] = CScoreIni.tCalculateRank(part);
 							}
 							else if (CDTXMania.ConfigIni.nSkillMode == 0)
 							{
-								this.nRankValue[i] = CScoreIni.tCalculateRankOld(part);
+								nRankValue[i] = CScoreIni.tCalculateRankOld(part);
 							}
 
 							//Save progress bar records
 							CScore cScore = CDTXMania.stageSongSelection.rChosenScore;
-							this.strBestProgressBarRecord[i] = cScore.SongInformation.progress[i];
+							strBestProgressBarRecord[i] = cScore.SongInformation.progress[i];
 							//May not need to save this...
-							this.strCurrProgressBarRecord[i] = this.stPerformanceEntry[i].strProgress;
+							strCurrProgressBarRecord[i] = stPerformanceEntry[i].strProgress;
 						}
 					}
-					this.n総合ランク値 = CScoreIni.tCalculateOverallRankValue(this.stPerformanceEntry.Drums, this.stPerformanceEntry.Guitar, this.stPerformanceEntry.Bass);
+					n総合ランク値 = CScoreIni.tCalculateOverallRankValue(stPerformanceEntry.Drums, stPerformanceEntry.Guitar, stPerformanceEntry.Bass);
 					//---------------------
 					#endregion
 
@@ -159,34 +159,34 @@ namespace DTXMania
 							//		}
 							#endregion
 							// #24459 上記の条件だと[HiSkill.***]でのランクしかチェックしていないので、BestRankと比較するよう変更。
-							if (this.nRankValue[i] >= 0 && ini.stFile.BestRank[i] > this.nRankValue[i])     // #24459 2011.3.1 yyagi update BestRank
+							if (nRankValue[i] >= 0 && ini.stFile.BestRank[i] > nRankValue[i])     // #24459 2011.3.1 yyagi update BestRank
 							{
-								this.bNewRecordRank[i] = true;
-								ini.stFile.BestRank[i] = this.nRankValue[i];
+								bNewRecordRank[i] = true;
+								ini.stFile.BestRank[i] = nRankValue[i];
 							}
 
 							// 新記録スコアチェック
-							if (this.stPerformanceEntry[i].nスコア > ini.stSection[i * 2].nスコア)
+							if (stPerformanceEntry[i].nスコア > ini.stSection[i * 2].nスコア)
 							{
-								this.bNewRecordScore[i] = true;
-								ini.stSection[i * 2] = this.stPerformanceEntry[i];
-								this.SaveGhost(i * 2); // #35411 chnmr0 add
+								bNewRecordScore[i] = true;
+								ini.stSection[i * 2] = stPerformanceEntry[i];
+								SaveGhost(i * 2); // #35411 chnmr0 add
 							}
 
 							// 新記録スキルチェック
-							if ((this.stPerformanceEntry[i].dbPerformanceSkill > ini.stSection[(i * 2) + 1].dbPerformanceSkill) && !this.bAuto[i])
+							if ((stPerformanceEntry[i].dbPerformanceSkill > ini.stSection[(i * 2) + 1].dbPerformanceSkill) && !bAuto[i])
 							{
-								this.bNewRecordSkill[i] = true;
-								ini.stSection[(i * 2) + 1] = this.stPerformanceEntry[i];
-								this.SaveGhost((i * 2) + 1); // #35411 chnmr0 add
+								bNewRecordSkill[i] = true;
+								ini.stSection[(i * 2) + 1] = stPerformanceEntry[i];
+								SaveGhost((i * 2) + 1); // #35411 chnmr0 add
 							}
 
 							// ラストプレイ #23595 2011.1.9 ikanick
 							// オートじゃなければプレイ結果を書き込む
-							if (this.bAuto[i] == false)
+							if (bAuto[i] == false)
 							{
-								ini.stSection[i + 6] = this.stPerformanceEntry[i];
-								this.SaveGhost(i + 6); // #35411 chnmr0 add
+								ini.stSection[i + 6] = stPerformanceEntry[i];
+								SaveGhost(i + 6); // #35411 chnmr0 add
 							}
 
 							// #23596 10.11.16 add ikanick オートじゃないならクリア回数を1増やす
@@ -224,9 +224,9 @@ namespace DTXMania
 					#endregion
 
 					#region [ Update nb of performance #24281 2011.1.30 yyagi]
-					this.nNbPerformances.Drums = ini.stFile.PlayCountDrums;
-					this.nNbPerformances.Guitar = ini.stFile.PlayCountGuitar;
-					this.nNbPerformances.Bass = ini.stFile.PlayCountBass;
+					nNbPerformances.Drums = ini.stFile.PlayCountDrums;
+					nNbPerformances.Guitar = ini.stFile.PlayCountGuitar;
+					nNbPerformances.Bass = ini.stFile.PlayCountBass;
 					#endregion
 					#region [ Update score information on Song Selection screen ]
 					//---------------------
@@ -241,24 +241,24 @@ namespace DTXMania
 							{
 								// FullCombo した記録を FullCombo なしで超えた場合、FullCombo マークが消えてしまう。
 								// → FullCombo は、最新記録と関係なく、一度達成したらずっとつくようにする。(2010.9.11)
-								cScore.SongInformation.FullCombo[m] = this.stPerformanceEntry[m].bIsFullCombo | b今までにフルコンボしたことがある[m];
+								cScore.SongInformation.FullCombo[m] = stPerformanceEntry[m].bIsFullCombo | b今までにフルコンボしたことがある[m];
 
-								if (this.bNewRecordSkill[m])
+								if (bNewRecordSkill[m])
 								{
-									cScore.SongInformation.HighSkill[m] = this.stPerformanceEntry[m].dbPerformanceSkill;
+									cScore.SongInformation.HighSkill[m] = stPerformanceEntry[m].dbPerformanceSkill;
 									// New Song Progress for new skill record
-									cScore.SongInformation.progress[m] = this.stPerformanceEntry[m].strProgress;
+									cScore.SongInformation.progress[m] = stPerformanceEntry[m].strProgress;
 								}
 
-								if (this.bNewRecordRank[m])
+								if (bNewRecordRank[m])
 								{
-									cScore.SongInformation.BestRank[m] = this.nRankValue[m];
+									cScore.SongInformation.BestRank[m] = nRankValue[m];
 								}
 
 								//Check if Progress record existed or not; if not, update anyway
 								if(CScoreIni.tProgressBarLength(cScore.SongInformation.progress[m]) == 0)
                                 {
-									cScore.SongInformation.progress[m] = this.stPerformanceEntry[m].strProgress;
+									cScore.SongInformation.progress[m] = stPerformanceEntry[m].strProgress;
 								}
 							}
 						}
@@ -359,7 +359,7 @@ namespace DTXMania
             }
 
             int cnt = 0;
-            foreach (DTXMania.CChip chip in CDTXMania.DTX.listChip)
+            foreach (CChip chip in CDTXMania.DTX.listChip)
             {
                 if (chip.eInstrumentPart == inst)
                 {
@@ -375,7 +375,7 @@ namespace DTXMania
                     using (BinaryWriter bw = new BinaryWriter(fs))
                     {
                         bw.Write((Int32)cnt);
-                        foreach (DTXMania.CChip chip in CDTXMania.DTX.listChip)
+                        foreach (CChip chip in CDTXMania.DTX.listChip)
                         {
                             if (chip.eInstrumentPart == inst)
                             {
@@ -421,118 +421,118 @@ namespace DTXMania
         }
 		public override void OnDeactivate()
 		{
-			if( this.rResultSound != null )
+			if( rResultSound != null )
 			{
-				CDTXMania.SoundManager.tDiscard( this.rResultSound );
-				this.rResultSound = null;
+				CDTXMania.SoundManager.tDiscard( rResultSound );
+				rResultSound = null;
 			}
 
-			if (this.rBackgroundVideoAVI != null)
+			if (rBackgroundVideoAVI != null)
 			{
-				this.rBackgroundVideoAVI.Dispose();
-				this.rBackgroundVideoAVI = null;
+				rBackgroundVideoAVI.Dispose();
+				rBackgroundVideoAVI = null;
 			}
 
 			base.OnDeactivate();
 		}
 		public override void OnManagedCreateResources()
 		{
-			if( !base.bNotActivated )
+			if( !bNotActivated )
 			{
 				//
-				this.rBackgroundVideoAVI = new CDTX.CAVI(1290, CSkin.Path(@"Graphics\8_background.mp4"), "", 20.0);
-				this.rBackgroundVideoAVI.OnDeviceCreated();
+				rBackgroundVideoAVI = new CDTX.CAVI(1290, CSkin.Path(@"Graphics\8_background.mp4"), "", 20.0);
+				rBackgroundVideoAVI.OnDeviceCreated();
 				if (rBackgroundVideoAVI.avi != null)
 				{					
-					this.actBackgroundVideoAVI.bLoop = true;
-					this.actBackgroundVideoAVI.Start(EChannel.MovieFull, rBackgroundVideoAVI, 0, -1);
+					actBackgroundVideoAVI.bLoop = true;
+					actBackgroundVideoAVI.Start(EChannel.MovieFull, rBackgroundVideoAVI, 0, -1);
 					Trace.TraceInformation("Playing Background video for Result Screen");
 				}
 
 				//this.ds背景動画 = CDTXMania.t失敗してもスキップ可能なDirectShowを生成する(CSkin.Path(@"Graphics\8_background.mp4"), CDTXMania.app.WindowHandle, true);
-				this.txBackground = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\8_background.jpg" ) );
+				txBackground = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\8_background.jpg" ) );
                 switch (CDTXMania.stageResult.n総合ランク値)
                 {
                     case 0:
                         if (File.Exists(CSkin.Path(@"Graphics\8_background rankSS.png")))
                         {
-                            this.txBackground = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_background rankSS.png"));
+                            txBackground = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_background rankSS.png"));
                         }
                         break;
                     case 1:
                         if (File.Exists(CSkin.Path(@"Graphics\8_background rankS.png")))
                         {
-                            this.txBackground = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_background rankS.png"));
+                            txBackground = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_background rankS.png"));
                         }
                         break;
                     case 2:
                         if (File.Exists(CSkin.Path(@"Graphics\8_background rankA.png")))
                         {
-                            this.txBackground = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_background rankA.png"));
+                            txBackground = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_background rankA.png"));
                         }
                         break;
                     case 3:
                         if (File.Exists(CSkin.Path(@"Graphics\8_background rankB.png")))
                         {
-                            this.txBackground = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_background rankB.png"));
+                            txBackground = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_background rankB.png"));
                         }
                         break;
                     case 4:
                         if (File.Exists(CSkin.Path(@"Graphics\8_background rankC.png")))
                         {
-                            this.txBackground = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_background rankC.png"));
+                            txBackground = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_background rankC.png"));
                         }
                         break;
                     case 5:
                         if (File.Exists(CSkin.Path(@"Graphics\8_background rankD.png")))
                         {
-                            this.txBackground = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_background rankD.png"));
+                            txBackground = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_background rankD.png"));
                         }
                         break;
                     case 6:
                     case 99:
                         if (File.Exists(CSkin.Path(@"Graphics\8_background rankE.png")))
                         {
-                            this.txBackground = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_background rankE.png"));
+                            txBackground = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_background rankE.png"));
                         }
                         break;
                 }
-				this.txTopPanel = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\8_header panel.png" ), true );
-				this.txBottomPanel = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\8_footer panel.png" ), true );
+				txTopPanel = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\8_header panel.png" ), true );
+				txBottomPanel = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\8_footer panel.png" ), true );
 				base.OnManagedCreateResources();
 			}
 		}
 		public override void OnManagedReleaseResources()
 		{
-			if( !base.bNotActivated )
+			if( !bNotActivated )
 			{
-				if( this.ct登場用 != null )
+				if( ct登場用 != null )
 				{
-					this.ct登場用 = null;
+					ct登場用 = null;
 				}
 				//
-				if(this.ctPlayNewRecord != null)
+				if(ctPlayNewRecord != null)
                 {
-					this.ctPlayNewRecord = null;
+					ctPlayNewRecord = null;
                 }
 
 				actBackgroundVideoAVI.Stop();
 
 				//CDTXMania.t安全にDisposeする( ref this.ds背景動画 );
-				CDTXMania.tReleaseTexture( ref this.txBackground );
-				CDTXMania.tReleaseTexture( ref this.txTopPanel );
-				CDTXMania.tReleaseTexture( ref this.txBottomPanel );
+				CDTXMania.tReleaseTexture( ref txBackground );
+				CDTXMania.tReleaseTexture( ref txTopPanel );
+				CDTXMania.tReleaseTexture( ref txBottomPanel );
 				base.OnManagedReleaseResources();
 			}
 		}
 		public override int OnUpdateAndDraw()
 		{
-			if( !base.bNotActivated )
+			if( !bNotActivated )
 			{
 				int num;
-				if( base.bJustStartedUpdate )
+				if( bJustStartedUpdate )
 				{
-					this.ct登場用 = new CCounter( 0, 100, 5, CDTXMania.Timer );
+					ct登場用 = new CCounter( 0, 100, 5, CDTXMania.Timer );
 
 					//Check result to select the correct sound to play
 					int l_outputSoundEnum = 0; //0: Stage Clear 1: FC 2: EXC
@@ -555,7 +555,7 @@ namespace DTXMania
 								}
                             }
 
-							if(this.bNewRecordSkill[i] == true)
+							if(bNewRecordSkill[i] == true)
                             {
 								l_newRecord = true;
 							}
@@ -579,17 +579,17 @@ namespace DTXMania
 					//Create the delay timer of 150 x 10 = 1500 ms to play New Record
 					if(l_newRecord)
                     {
-						this.ctPlayNewRecord = new CCounter(0, 150, 10, CDTXMania.Timer);
+						ctPlayNewRecord = new CCounter(0, 150, 10, CDTXMania.Timer);
 					}
 						
-                    this.actFI.tStartFadeIn(false);
-					base.ePhaseID = CStage.EPhase.Common_FadeIn;
-					base.bJustStartedUpdate = false;
+                    actFI.tStartFadeIn(false);
+					ePhaseID = EPhase.Common_FadeIn;
+					bJustStartedUpdate = false;
 				}
 
 				
 				//Draw Background video  via CActPerfAVI methods
-				this.actBackgroundVideoAVI.tUpdateAndDraw();
+				actBackgroundVideoAVI.tUpdateAndDraw();
 
 				//if ( this.ds背景動画 != null )
     //            {
@@ -609,86 +609,86 @@ namespace DTXMania
     //                this.ds背景動画.t現時点における最新のスナップイメージをTextureに転写する( this.txBackground );
     //            }
 
-				this.bAnimationComplete = true;
-				if( this.ct登場用.bInProgress )
+				bAnimationComplete = true;
+				if( ct登場用.bInProgress )
 				{
-					this.ct登場用.tUpdate();
-					if( this.ct登場用.bReachedEndValue )
+					ct登場用.tUpdate();
+					if( ct登場用.bReachedEndValue )
 					{
-						this.ct登場用.tStop();
+						ct登場用.tStop();
 					}
 					else
 					{
-						this.bAnimationComplete = false;
+						bAnimationComplete = false;
 					}
 				}
 
 				//Play new record if available
-				if(this.ctPlayNewRecord != null && this.ctPlayNewRecord.bInProgress)
+				if(ctPlayNewRecord != null && ctPlayNewRecord.bInProgress)
                 {
-					this.ctPlayNewRecord.tUpdate();
-					if (this.ctPlayNewRecord.bReachedEndValue)
+					ctPlayNewRecord.tUpdate();
+					if (ctPlayNewRecord.bReachedEndValue)
 					{
 						CDTXMania.Skin.soundNewRecord.tPlay();
-						this.ctPlayNewRecord.tStop();
+						ctPlayNewRecord.tStop();
 					}
 				}
 
 				// 描画
 
-				if( this.txBackground != null && this.rBackgroundVideoAVI.avi == null)
+				if( txBackground != null && rBackgroundVideoAVI.avi == null)
 				{
-                    this.txBackground.tDraw2D( CDTXMania.app.Device, 0, 0 );
+                    txBackground.tDraw2D( CDTXMania.app.Device, 0, 0 );
 				}
 
-				if( this.ct登場用.bInProgress && ( this.txTopPanel != null ) )
+				if( ct登場用.bInProgress && ( txTopPanel != null ) )
 				{
-					double num2 = ( (double) this.ct登場用.nCurrentValue ) / 100.0;
+					double num2 = ( (double) ct登場用.nCurrentValue ) / 100.0;
 					double num3 = Math.Sin( Math.PI / 2 * num2 );
-					num = ( (int) ( this.txTopPanel.szImageSize.Height * num3 ) ) - this.txTopPanel.szImageSize.Height;
+					num = ( (int) ( txTopPanel.szImageSize.Height * num3 ) ) - txTopPanel.szImageSize.Height;
 				}
 				else
 				{
 					num = 0;
 				}
-				if( this.txTopPanel != null )
+				if( txTopPanel != null )
 				{
-					this.txTopPanel.tDraw2D( CDTXMania.app.Device, 0, num );
+					txTopPanel.tDraw2D( CDTXMania.app.Device, 0, num );
 				}
-				if( this.txBottomPanel != null )
+				if( txBottomPanel != null )
 				{
-					this.txBottomPanel.tDraw2D( CDTXMania.app.Device, 0, 720 - this.txBottomPanel.szImageSize.Height );
+					txBottomPanel.tDraw2D( CDTXMania.app.Device, 0, 720 - txBottomPanel.szImageSize.Height );
 				}
-                if( this.actResultImage.OnUpdateAndDraw() == 0 )
+                if( actResultImage.OnUpdateAndDraw() == 0 )
 				{
-					this.bAnimationComplete = false;
+					bAnimationComplete = false;
 				}
-				if ( this.actParameterPanel.OnUpdateAndDraw() == 0 )
+				if ( actParameterPanel.OnUpdateAndDraw() == 0 )
 				{
-					this.bAnimationComplete = false;
+					bAnimationComplete = false;
 				}
-                if (this.actRank.OnUpdateAndDraw() == 0)
+                if (actRank.OnUpdateAndDraw() == 0)
                 {
-                    this.bAnimationComplete = false;
+                    bAnimationComplete = false;
                 }
-				if( base.ePhaseID == CStage.EPhase.Common_FadeIn )
+				if( ePhaseID == EPhase.Common_FadeIn )
 				{
-					if( this.actFI.OnUpdateAndDraw() != 0 )
+					if( actFI.OnUpdateAndDraw() != 0 )
 					{
-						base.ePhaseID = CStage.EPhase.Common_DefaultState;
+						ePhaseID = EPhase.Common_DefaultState;
 					}
 				}
-				else if( ( base.ePhaseID == CStage.EPhase.Common_FadeOut ) )			//&& ( this.actFO.OnUpdateAndDraw() != 0 ) )
+				else if( ( ePhaseID == EPhase.Common_FadeOut ) )			//&& ( this.actFO.OnUpdateAndDraw() != 0 ) )
 				{
-					return (int) this.eReturnValueWhenFadeOutCompleted;
+					return (int) eReturnValueWhenFadeOutCompleted;
 				}
 				#region [ #24609 2011.3.14 yyagi ランク更新or演奏型スキル更新時、リザルト画像をpngで保存する ]
-				if ( this.bAnimationComplete == true && this.bIsCheckedWhetherResultScreenShouldSaveOrNot == false	// #24609 2011.3.14 yyagi; to save result screen in case BestRank or HiSkill.
+				if ( bAnimationComplete == true && bIsCheckedWhetherResultScreenShouldSaveOrNot == false	// #24609 2011.3.14 yyagi; to save result screen in case BestRank or HiSkill.
 					&& CDTXMania.ConfigIni.bScoreIniを出力する
 					&& CDTXMania.ConfigIni.bIsAutoResultCapture)												// #25399 2011.6.9 yyagi
 				{
 					CheckAndSaveResultScreen(true);
-					this.bIsCheckedWhetherResultScreenShouldSaveOrNot = true;
+					bIsCheckedWhetherResultScreenShouldSaveOrNot = true;
 				}
 				#endregion
 
@@ -706,56 +706,56 @@ namespace DTXMania
 								{
 									continue;
 								}
-								CChip rChip = this.rEmptyDrumChip[ i ];
+								CChip rChip = rEmptyDrumChip[ i ];
 								if( rChip == null )
 								{
 									switch( ( (EPad) i ) )
 									{
 										case EPad.HH:
-											rChip = this.rEmptyDrumChip[ 7 ];
+											rChip = rEmptyDrumChip[ 7 ];
 											if( rChip == null )
 											{
-												rChip = this.rEmptyDrumChip[ 9 ];
+												rChip = rEmptyDrumChip[ 9 ];
 											}
 											break;
 
 										case EPad.FT:
-											rChip = this.rEmptyDrumChip[ 4 ];
+											rChip = rEmptyDrumChip[ 4 ];
 											break;
 
 										case EPad.CY:
-											rChip = this.rEmptyDrumChip[ 8 ];
+											rChip = rEmptyDrumChip[ 8 ];
 											break;
 
 										case EPad.HHO:
-											rChip = this.rEmptyDrumChip[ 0 ];
+											rChip = rEmptyDrumChip[ 0 ];
 											if( rChip == null )
 											{
-												rChip = this.rEmptyDrumChip[ 9 ];
+												rChip = rEmptyDrumChip[ 9 ];
 											}
 											break;
 
 										case EPad.RD:
-											rChip = this.rEmptyDrumChip[ 6 ];
+											rChip = rEmptyDrumChip[ 6 ];
 											break;
 
 										case EPad.LC:
-											rChip = this.rEmptyDrumChip[ 0 ];
+											rChip = rEmptyDrumChip[ 0 ];
 											if( rChip == null )
 											{
-												rChip = this.rEmptyDrumChip[ 7 ];
+												rChip = rEmptyDrumChip[ 7 ];
 											}
 											break;
 									}
 								}
 								if( ( ( rChip != null ) && ( rChip.nChannelNumber >= EChannel.HiHatClose ) ) && ( rChip.nChannelNumber <= EChannel.LeftPedal ) )
 								{
-									int nLane = this.nチャンネル0Atoレーン07[ rChip.nChannelNumber - EChannel.HiHatClose ];
-									if( ( nLane == 1 ) && ( ( rChip.nChannelNumber == EChannel.HiHatClose ) || ( ( rChip.nChannelNumber == EChannel.HiHatOpen ) && ( this.n最後に再生したHHのチャンネル番号 != EChannel.HiHatOpen ) ) ) )
+									int nLane = nチャンネル0Atoレーン07[ rChip.nChannelNumber - EChannel.HiHatClose ];
+									if( ( nLane == 1 ) && ( ( rChip.nChannelNumber == EChannel.HiHatClose ) || ( ( rChip.nChannelNumber == EChannel.HiHatOpen ) && ( n最後に再生したHHのチャンネル番号 != EChannel.HiHatOpen ) ) ) )
 									{
-										CDTXMania.DTX.tStopPlayingWav( this.n最後に再生したHHのWAV番号 );
-										this.n最後に再生したHHのWAV番号 = rChip.nIntegerValue_InternalNumber;
-										this.n最後に再生したHHのチャンネル番号 = rChip.nChannelNumber;
+										CDTXMania.DTX.tStopPlayingWav( n最後に再生したHHのWAV番号 );
+										n最後に再生したHHのWAV番号 = rChip.nIntegerValue_InternalNumber;
+										n最後に再生したHHのチャンネル番号 = rChip.nChannelNumber;
 									}
 									CDTXMania.DTX.tPlayChip( rChip, CDTXMania.Timer.nシステム時刻, nLane, CDTXMania.ConfigIni.n手動再生音量, CDTXMania.ConfigIni.b演奏音を強調する.Drums );
 								}
@@ -765,11 +765,11 @@ namespace DTXMania
 				}
 				if (CDTXMania.Input.ActionDecide())
 				{
-					this.actFI.tフェードイン完了();					// #25406 2011.6.9 yyagi
-					this.actResultImage.tアニメを完了させる();
-					this.actParameterPanel.tアニメを完了させる();
-					this.actRank.tアニメを完了させる();
-					this.ct登場用.tStop();
+					actFI.tフェードイン完了();					// #25406 2011.6.9 yyagi
+					actResultImage.tアニメを完了させる();
+					actParameterPanel.tアニメを完了させる();
+					actRank.tアニメを完了させる();
+					ct登場用.tStop();
 				}
 				#region [ #24609 2011.4.7 yyagi リザルト画面で[F12]を押下すると、リザルト画像をpngで保存する機能は、CDTXManiaに移管。 ]
 //					if ( CDTXMania.InputManager.Keyboard.bKeyPressed( (int) SlimDXKey.F12 ) &&
@@ -779,20 +779,20 @@ namespace DTXMania
 //						this.bIsCheckedWhetherResultScreenShouldSaveOrNot = true;
 //					}
 				#endregion
-				if ( base.ePhaseID == CStage.EPhase.Common_DefaultState )
+				if ( ePhaseID == EPhase.Common_DefaultState )
 				{
 					if ( CDTXMania.InputManager.Keyboard.bKeyPressed( (int)SlimDXKey.Escape ) )
 					{
 						CDTXMania.Skin.soundCancel.tPlay();
-						this.actFO.tStartFadeOut();
-						base.ePhaseID = CStage.EPhase.Common_FadeOut;
-						this.eReturnValueWhenFadeOutCompleted = EReturnValue.Complete;
+						actFO.tStartFadeOut();
+						ePhaseID = EPhase.Common_FadeOut;
+						eReturnValueWhenFadeOutCompleted = EReturnValue.Complete;
 					}
-					if (CDTXMania.Input.ActionDecide() && this.bAnimationComplete)
+					if (CDTXMania.Input.ActionDecide() && bAnimationComplete)
 					{
 						CDTXMania.Skin.soundCancel.tPlay();
-						base.ePhaseID = CStage.EPhase.Common_FadeOut;
-						this.eReturnValueWhenFadeOutCompleted = EReturnValue.Complete;
+						ePhaseID = EPhase.Common_FadeOut;
+						eReturnValueWhenFadeOutCompleted = EReturnValue.Complete;
 					}
 				}
 			}
@@ -856,10 +856,10 @@ namespace DTXMania
 				// リザルト画像を自動保存するときは、dtxファイル名.yyMMddHHmmss_DRUMS_SS.png という形式で保存。
 				for ( int i = 0; i < 3; i++ )
 				{
-					if ( this.bNewRecordRank[ i ] == true || this.bNewRecordSkill[ i ] == true )
+					if ( bNewRecordRank[ i ] == true || bNewRecordSkill[ i ] == true )
 					{
 						string strPart = ( (EInstrumentPart) ( i ) ).ToString();
-						string strRank = ( (CScoreIni.ERANK) ( this.nRankValue[ i ] ) ).ToString();
+						string strRank = ( (CScoreIni.ERANK) ( nRankValue[ i ] ) ).ToString();
 						string strFullPath = CDTXMania.DTX.strファイル名の絶対パス + "." + datetime + "_" + strPart + "_" + strRank + ".png";
 						//Surface.ToFile( pSurface, strFullPath, ImageFileFormat.Png );
 						CDTXMania.app.SaveResultScreen( strFullPath );

@@ -35,10 +35,7 @@ namespace SampleFramework
         TimeSpan currentTimeBase;
         TimeSpan currentTimeOffset;
 
-        public TimeSpan CurrentTime
-        {
-            get { return currentTimeBase + currentTimeOffset; }
-        }
+        public TimeSpan CurrentTime => currentTimeBase + currentTimeOffset;
 
         public TimeSpan ElapsedTime
         {
@@ -52,10 +49,7 @@ namespace SampleFramework
             private set;
         }
 
-        public static long Frequency
-        {
-            get { return Stopwatch.Frequency; }
-        }
+        public static long Frequency => Stopwatch.Frequency;
 
         public GameClock()
         {

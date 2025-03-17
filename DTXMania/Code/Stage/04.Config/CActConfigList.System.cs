@@ -451,7 +451,7 @@ namespace DTXMania
                 () => CDTXMania.ConfigIni.n曲が選択されてからプレビュー画像が表示開始されるまでのウェイトms = iSystemPreviewImageWait.nCurrentValue);
             listItems.Add(iSystemPreviewImageWait);
             
-            CItemToggle iSystemDebugInfo = new("Debug Info", CDTXMania.ConfigIni.b演奏情報を表示する,
+            CItemToggle iSystemDebugInfo = new("Debug Info", CDTXMania.ConfigIni.bShowPerformanceInformation,
                 "演奏情報の表示：\n" +
                 "演奏中、BGA領域の下部に\n" +
                 "演奏情報を表示します。\n" +
@@ -460,8 +460,8 @@ namespace DTXMania
                 "なります。",
                 "Show song information on playing BGA area (FPS, BPM, total time etc)\nYou can turn ON/OFF the indications by pushing [Del] while playing drums, guitar or bass.");
             iSystemDebugInfo.BindConfig(
-                () => iSystemDebugInfo.bON = CDTXMania.ConfigIni.b演奏情報を表示する,
-                () => CDTXMania.ConfigIni.b演奏情報を表示する = iSystemDebugInfo.bON);
+                () => iSystemDebugInfo.bON = CDTXMania.ConfigIni.bShowPerformanceInformation,
+                () => CDTXMania.ConfigIni.bShowPerformanceInformation = iSystemDebugInfo.bON);
             listItems.Add(iSystemDebugInfo);
             
             CItemInteger iSystemBGAlpha = new("BG Alpha", 0, 0xff, CDTXMania.ConfigIni.nBackgroundTransparency,

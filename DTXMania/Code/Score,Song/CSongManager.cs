@@ -57,14 +57,8 @@ namespace DTXMania
 		private AutoResetEvent autoReset;
 		public AutoResetEvent AutoReset
 		{
-			get
-			{
-				return autoReset;
-			}
-			private set
-			{
-				autoReset = value;
-			}
+			get => autoReset;
+			private set => autoReset = value;
 		}
 
 		private int searchCount;							// #PREMOVIE中は検索n回実行したら少しスリープする
@@ -73,13 +67,13 @@ namespace DTXMania
 
 		public CSongManager()
 		{
-			this.listSongsDB = new List<CScore>();
-			this.listSongRoot = new List<CSongListNode>();
-			this.nNbSongNodesFound = 0;
-			this.nNbScoresFound = 0;
-			this.bIsSuspending = false;						// #27060
-			this.autoReset = new AutoResetEvent( true );	// #27060
-			this.searchCount = 0;
+			listSongsDB = new List<CScore>();
+			listSongRoot = new List<CSongListNode>();
+			nNbSongNodesFound = 0;
+			nNbScoresFound = 0;
+			bIsSuspending = false;						// #27060
+			autoReset = new AutoResetEvent( true );	// #27060
+			searchCount = 0;
 		}
 
 
@@ -89,7 +83,7 @@ namespace DTXMania
 		//-----------------
 		public void tReadSongsDB( string SongsDBFilename )
 		{
-			this.nNbScoresFromSongsDB = 0;
+			nNbScoresFromSongsDB = 0;
 			if( File.Exists( SongsDBFilename ) )
 			{
 				BinaryReader br = null;
@@ -100,15 +94,15 @@ namespace DTXMania
 					{
 						throw new InvalidDataException( "ヘッダが異なります。" );
 					}
-					this.listSongsDB = new List<CScore>();
+					listSongsDB = new List<CScore>();
 
 					while( true )
 					{
 						try
 						{
-							CScore item = this.tReadOneScoreFromSongsDB( br );
-							this.listSongsDB.Add( item );
-							this.nNbScoresFromSongsDB++;
+							CScore item = tReadOneScoreFromSongsDB( br );
+							listSongsDB.Add( item );
+							nNbScoresFromSongsDB++;
 						}
 						catch( EndOfStreamException )
 						{
@@ -130,7 +124,7 @@ namespace DTXMania
 		//-----------------
 		public void tSearchSongsAndCreateList( string str基点フォルダ, bool b子BOXへ再帰する )
 		{
-			this.tSearchSongsAndCreateList( str基点フォルダ, b子BOXへ再帰する, this.listSongRoot, null );
+			tSearchSongsAndCreateList( str基点フォルダ, b子BOXへ再帰する, listSongRoot, null );
 		}
 		private void tSearchSongsAndCreateList( string str基点フォルダ, bool b子BOXへ再帰する, List<CSongListNode> listノードリスト, CSongListNode node親 )
 		{
@@ -195,7 +189,7 @@ namespace DTXMania
 										item.arScore[ j ].ScoreIniInformation.LastModified = info3.LastWriteTime;
 									}
 									item.nスコア数++;
-									this.nNbScoresFound++;
+									nNbScoresFound++;
 								}
 								else
 								{
@@ -206,7 +200,7 @@ namespace DTXMania
 						if( item.nスコア数 > 0 )
 						{
 							listノードリスト.Add( item );
-							this.nNbSongNodesFound++;
+							nNbSongNodesFound++;
 							if( CDTXMania.ConfigIni.bLogSongSearch )
 							{
 								StringBuilder builder = new StringBuilder( 0x200 );
@@ -299,9 +293,9 @@ namespace DTXMania
 							c曲リストノード.arScore[ 0 ].ScoreIniInformation.FileSize = infoScoreIni.Length;
 							c曲リストノード.arScore[ 0 ].ScoreIniInformation.LastModified = infoScoreIni.LastWriteTime;
 						}
-						this.nNbScoresFound++;
+						nNbScoresFound++;
 						listノードリスト.Add( c曲リストノード );
-						this.nNbSongNodesFound++;
+						nNbSongNodesFound++;
 						if( CDTXMania.ConfigIni.bLogSongSearch )
 						{
 							Trace.Indent();
@@ -415,10 +409,10 @@ namespace DTXMania
 							else
 							{
 								// box.defに記載されているスキン情報をコピー。末尾に必ず\をつけておくこと。
-								string s = System.IO.Path.Combine( infoDir.FullName, boxdef.SkinPath );
-								if ( s[ s.Length - 1 ] != System.IO.Path.DirectorySeparatorChar )	// フォルダ名末尾に\を必ずつけて、CSkin側と表記を統一する
+								string s = Path.Combine( infoDir.FullName, boxdef.SkinPath );
+								if ( s[ s.Length - 1 ] != Path.DirectorySeparatorChar )	// フォルダ名末尾に\を必ずつけて、CSkin側と表記を統一する
 								{
-									s += System.IO.Path.DirectorySeparatorChar;
+									s += Path.DirectorySeparatorChar;
 								}
 								if ( CDTXMania.Skin.bIsValid( s ) )
 								{
@@ -468,7 +462,7 @@ namespace DTXMania
 					}
 					if( b子BOXへ再帰する )
 					{
-						this.tSearchSongsAndCreateList( infoDir.FullName + @"\", b子BOXへ再帰する, c曲リストノード.list子リスト, c曲リストノード );
+						tSearchSongsAndCreateList( infoDir.FullName + @"\", b子BOXへ再帰する, c曲リストノード.list子リスト, c曲リストノード );
 					}
 				}
 				//-----------------------------
@@ -506,10 +500,10 @@ namespace DTXMania
 					else
 					{
 						// box.defに記載されているスキン情報をコピー。末尾に必ず\をつけておくこと。
-						string s = System.IO.Path.Combine( infoDir.FullName, boxdef.SkinPath );
-						if ( s[ s.Length - 1 ] != System.IO.Path.DirectorySeparatorChar )	// フォルダ名末尾に\を必ずつけて、CSkin側と表記を統一する
+						string s = Path.Combine( infoDir.FullName, boxdef.SkinPath );
+						if ( s[ s.Length - 1 ] != Path.DirectorySeparatorChar )	// フォルダ名末尾に\を必ずつけて、CSkin側と表記を統一する
 						{
-							s += System.IO.Path.DirectorySeparatorChar;
+							s += Path.DirectorySeparatorChar;
 						}
 						if ( CDTXMania.Skin.bIsValid( s ) )
 						{
@@ -597,7 +591,7 @@ namespace DTXMania
 					}
 					if( b子BOXへ再帰する )
 					{
-						this.tSearchSongsAndCreateList( infoDir.FullName + @"\", b子BOXへ再帰する, c曲リストノード.list子リスト, c曲リストノード );
+						tSearchSongsAndCreateList( infoDir.FullName + @"\", b子BOXへ再帰する, c曲リストノード.list子リスト, c曲リストノード );
 					}
 				}
 				//-----------------------------
@@ -607,7 +601,7 @@ namespace DTXMania
 				//-----------------------------
 				else
 				{
-					this.tSearchSongsAndCreateList( infoDir.FullName + @"\", b子BOXへ再帰する, listノードリスト, node親 );
+					tSearchSongsAndCreateList( infoDir.FullName + @"\", b子BOXへ再帰する, listノードリスト, node親 );
 				}
 				//-----------------------------
 				#endregion
@@ -641,8 +635,8 @@ namespace DTXMania
 		//-----------------
 		public void tReflectScoreCacheInSongList()
 		{
-			this.nNbScoresFromScoreCache = 0;
-			this.tReflectScoreCacheInSongList( this.listSongRoot );
+			nNbScoresFromScoreCache = 0;
+			tReflectScoreCacheInSongList( listSongRoot );
 		}
 		private void tReflectScoreCacheInSongList( List<CSongListNode> ノードリスト )
 		{
@@ -655,7 +649,7 @@ namespace DTXMania
 					CSongListNode node = enumerator.Current;
 					if( node.eNodeType == CSongListNode.ENodeType.BOX )
 					{
-						this.tReflectScoreCacheInSongList( node.list子リスト );
+						tReflectScoreCacheInSongList( node.list子リスト );
 					}
 					else if( ( node.eNodeType == CSongListNode.ENodeType.SCORE ) || ( node.eNodeType == CSongListNode.ENodeType.SCORE_MIDI ) )
 					{
@@ -677,7 +671,7 @@ namespace DTXMania
 											&& sc.ScoreIniInformation.LastModified.Equals( node.arScore[ lv ].ScoreIniInformation.LastModified );
 									};
 								}
-								int nMatched = this.listSongsDB.FindIndex( match );
+								int nMatched = listSongsDB.FindIndex( match );
 								if( nMatched == -1 )
 								{
 //Trace.TraceInformation( "songs.db に存在しません。({0})", node.arScore[ lv ].FileInformation.AbsoluteFilePath );
@@ -688,14 +682,14 @@ namespace DTXMania
 								}
 								else
 								{
-									node.arScore[ lv ].SongInformation = this.listSongsDB[ nMatched ].SongInformation;
+									node.arScore[ lv ].SongInformation = listSongsDB[ nMatched ].SongInformation;
 									node.arScore[ lv ].bHadACacheInSongDB = true;
 									if( CDTXMania.ConfigIni.bLogSongSearch )
 									{
 										Trace.TraceInformation( "Transcribing data from songs.db. ({0})", node.arScore[ lv ].FileInformation.AbsoluteFilePath );
 									}
-									this.nNbScoresFromScoreCache++;
-									if( node.arScore[ lv ].ScoreIniInformation.LastModified != this.listSongsDB[ nMatched ].ScoreIniInformation.LastModified )
+									nNbScoresFromScoreCache++;
+									if( node.arScore[ lv ].ScoreIniInformation.LastModified != listSongsDB[ nMatched ].ScoreIniInformation.LastModified )
 									{
 										string strFileNameScoreIni = node.arScore[ lv ].FileInformation.AbsoluteFilePath + ".score.ini";
 										try
@@ -847,8 +841,8 @@ namespace DTXMania
 		//-----------------
 		public void tSongsDBになかった曲をファイルから読み込んで反映する()
 		{
-			this.nNbScoresFromFile = 0;
-			this.tSongsDBになかった曲をファイルから読み込んで反映する( this.listSongRoot );
+			nNbScoresFromFile = 0;
+			tSongsDBになかった曲をファイルから読み込んで反映する( listSongRoot );
 		}
 		private void tSongsDBになかった曲をファイルから読み込んで反映する( List<CSongListNode> ノードリスト )
 		{
@@ -859,7 +853,7 @@ namespace DTXMania
 
 				if( c曲リストノード.eNodeType == CSongListNode.ENodeType.BOX )
 				{
-					this.tSongsDBになかった曲をファイルから読み込んで反映する( c曲リストノード.list子リスト );
+					tSongsDBになかった曲をファイルから読み込んで反映する( c曲リストノード.list子リスト );
 				}
 				else if( ( c曲リストノード.eNodeType == CSongListNode.ENodeType.SCORE )
 					  || ( c曲リストノード.eNodeType == CSongListNode.ENodeType.SCORE_MIDI ) )
@@ -937,7 +931,7 @@ namespace DTXMania
                                             c曲リストノード.arScore[i].SongInformation.chipCountByLane[ELane.BsPick] = cdtx.nVisibleChipsCount.chipCountInLane(ELane.BsPick);
                                         }
 
-                                        this.nNbScoresFromFile++;
+                                        nNbScoresFromFile++;
                                         cdtx.OnDeactivate();
                                         //Debug.WriteLine( "★" + this.nNbScoresFromFile + " " + c曲リストノード.arScore[ i ].SongInformation.Title );
                                         #region [ 曲検索ログ出力 ]
@@ -972,7 +966,7 @@ namespace DTXMania
                                         Trace.TraceError(exception.Message);
                                         c曲リストノード.arScore[i] = null;
                                         c曲リストノード.nスコア数--;
-                                        this.nNbScoresFound--;
+                                        nNbScoresFound--;
                                         Trace.TraceError("曲データファイルの読み込みに失敗しました。({0})", path);
                                     }
                                 }
@@ -981,7 +975,7 @@ namespace DTXMania
 
                                 #region [ 対応する .score.ini が存在していれば読み込み、Cスコア.譜面情報 に追加設定する ]
                                 //-----------------
-                                this.tReadScoreIniAndSetScoreInformation(c曲リストノード.arScore[i].FileInformation.AbsoluteFilePath + ".score.ini", ref c曲リストノード.arScore[i]);
+                                tReadScoreIniAndSetScoreInformation(c曲リストノード.arScore[i].FileInformation.AbsoluteFilePath + ".score.ini", ref c曲リストノード.arScore[i]);
                                 //-----------------
                                 #endregion
                             }
@@ -1009,7 +1003,7 @@ namespace DTXMania
 				}
 			}
 
-			this.t曲リストへ後処理を適用する( this.listSongRoot );
+			t曲リストへ後処理を適用する( listSongRoot );
 
 			#region [ skin名で比較して、systemスキンとboxdefスキンに重複があれば、boxdefスキン側を削除する ]
 			string[] systemSkinNames = CSkin.GetSkinName( CDTXMania.Skin.strSystemSkinSubfolders );
@@ -1135,7 +1129,7 @@ namespace DTXMania
 					//-----------------------------
 					#endregion
 
-					this.t曲リストへ後処理を適用する( c曲リストノード.list子リスト );
+					t曲リストへ後処理を適用する( c曲リストノード.list子リスト );
 					continue;
 				}
 				//-----------------------------
@@ -1164,7 +1158,7 @@ namespace DTXMania
 
 			#region [ ノードをソートする ]
 			//-----------------------------
-			this.t曲リストのソート1_絶対パス順( ノードリスト );
+			t曲リストのソート1_絶対パス順( ノードリスト );
 			//-----------------------------
 			#endregion
 		}
@@ -1174,12 +1168,12 @@ namespace DTXMania
 		//-----------------
 		public void tスコアキャッシュをSongsDBに出力する( string SongsDBファイル名 )
 		{
-			this.nNbScoresForSongsDB = 0;
+			nNbScoresForSongsDB = 0;
 			try
 			{
 				BinaryWriter bw = new BinaryWriter( new FileStream( SongsDBファイル名, FileMode.Create, FileAccess.Write ) );
 				bw.Write( SONGSDB_VERSION );
-				this.tSongsDBにリストを１つ出力する( bw, this.listSongRoot );
+				tSongsDBにリストを１つ出力する( bw, listSongRoot );
 				bw.Close();
 			}
 			catch
@@ -1279,7 +1273,7 @@ namespace DTXMania
 					bw.Write(node.arScore[i].SongInformation.chipCountByLane[ELane.BsP]);
 					bw.Write(node.arScore[i].SongInformation.chipCountByLane[ELane.BsPick]);
 
-					this.nNbScoresForSongsDB++;
+					nNbScoresForSongsDB++;
 				}
 			}
 		}
@@ -1290,11 +1284,11 @@ namespace DTXMania
 				if(    ( c曲リストノード.eNodeType == CSongListNode.ENodeType.SCORE )
 					|| ( c曲リストノード.eNodeType == CSongListNode.ENodeType.SCORE_MIDI ) )
 				{
-					this.tSongsDBにノードを１つ出力する( bw, c曲リストノード );
+					tSongsDBにノードを１つ出力する( bw, c曲リストノード );
 				}
 				if( c曲リストノード.list子リスト != null )
 				{
-					this.tSongsDBにリストを１つ出力する( bw, c曲リストノード.list子リスト );
+					tSongsDBにリストを１つ出力する( bw, c曲リストノード.list子リスト );
 				}
 			}
 		}
@@ -1312,7 +1306,7 @@ namespace DTXMania
 				{
 					return 0;
 				}
-				int num = this.t比較0_共通( n1, n2 );
+				int num = t比較0_共通( n1, n2 );
 				if( num != 0 )
 				{
 					return num;
@@ -1368,7 +1362,7 @@ namespace DTXMania
 			{
 				if( ( c曲リストノード.list子リスト != null ) && ( c曲リストノード.list子リスト.Count > 1 ) )
 				{
-					this.t曲リストのソート1_絶対パス順( c曲リストノード.list子リスト );
+					t曲リストのソート1_絶対パス順( c曲リストノード.list子リスト );
 				}
 			}
 		}
@@ -1380,7 +1374,7 @@ namespace DTXMania
 				{
 					return 0;
 				}
-				int num = this.t比較0_共通( n1, n2 );
+				int num = t比較0_共通( n1, n2 );
 				if( num != 0 )
 				{
 					return order * num;
@@ -1414,7 +1408,7 @@ namespace DTXMania
 					{
 						return 0;
 					}
-					int num = this.t比較0_共通( n1, n2 );
+					int num = t比較0_共通( n1, n2 );
 					if( num != 0 )
 					{
 						return order * num;
@@ -1479,7 +1473,7 @@ namespace DTXMania
 					{
 						return 0;
 					}
-					float num = this.t比較0_共通( n1, n2 ); //2016.06.17 kairera0467 ソートが正確に行われるよう修正。(int→float)
+					float num = t比較0_共通( n1, n2 ); //2016.06.17 kairera0467 ソートが正確に行われるよう修正。(int→float)
 					if ( num != 0 )
 					{
 						return (int)(order * num);
@@ -1529,7 +1523,7 @@ namespace DTXMania
 					{
 						return 0;
 					}
-					int num = this.t比較0_共通( n1, n2 );
+					int num = t比較0_共通( n1, n2 );
 					if ( num != 0 )
 					{
 						return order * num;
@@ -1586,7 +1580,7 @@ namespace DTXMania
 					{
 						return 0;
 					}
-					int num = this.t比較0_共通( n1, n2 );
+					int num = t比較0_共通( n1, n2 );
 					if ( num != 0 )
 					{
 						return order * num;
@@ -1608,7 +1602,7 @@ namespace DTXMania
 					double d = nSumPlayCountN2 - nSumPlayCountN1;
 					if ( d != 0 )
 					{
-						return order * System.Math.Sign(d);
+						return order * Math.Sign(d);
 					}
 					return order * n1.strタイトル.CompareTo( n2.strタイトル );
 				} );
@@ -1635,7 +1629,7 @@ namespace DTXMania
 					{
 						return 0;
 					}
-					int num = this.t比較0_共通( n1, n2 );
+					int num = t比較0_共通( n1, n2 );
 					if ( num != 0 )
 					{
 						return order * num;
@@ -1658,7 +1652,7 @@ namespace DTXMania
 					int d = nSumPlayCountN1.CompareTo(nSumPlayCountN2);
 					if ( d != 0 )
 					{
-						return order * System.Math.Sign( d );
+						return order * Math.Sign( d );
 					}
 					return order * n1.strタイトル.CompareTo( n2.strタイトル );
 				} );
@@ -1682,10 +1676,10 @@ namespace DTXMania
 				{
 					return 0;
 				}
-				int num = this.t比較0_共通( n1, n2 );
+				int num = t比較0_共通( n1, n2 );
 				if ( num != 0 )
 				{
-					return order * System.Math.Sign( num );
+					return order * Math.Sign( num );
 				}
 				string strAuthorN1 = "";
 				string strAuthorN2 = "";
@@ -1889,14 +1883,14 @@ Debug.WriteLine( dBPM + ":" + c曲リストノード.strタイトル );
 		/// </summary>
 		private void SlowOrSuspendSearchTask()
 		{
-			if ( this.bIsSuspending )		// #27060 中断要求があったら、解除要求が来るまで待機
+			if ( bIsSuspending )		// #27060 中断要求があったら、解除要求が来るまで待機
 			{
 				autoReset.WaitOne();
 			}
-			if ( this.bIsSlowdown && ++this.searchCount > 10 )			// #27060 #PREMOVIE再生中は検索負荷を下げる
+			if ( bIsSlowdown && ++searchCount > 10 )			// #27060 #PREMOVIE再生中は検索負荷を下げる
 			{
 				Thread.Sleep( 100 );
-				this.searchCount = 0;
+				searchCount = 0;
 			}
 		}
 

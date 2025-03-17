@@ -8,69 +8,69 @@ namespace DTXMania
 
 		public void tStartFadeOut()
 		{
-			this.mode = EFIFOMode.FadeOut;
-            this.bテクスチャを描画する = true;
-			this.counter = new CCounter( 0, 100, 5, CDTXMania.Timer );
+			mode = EFIFOMode.FadeOut;
+            bテクスチャを描画する = true;
+			counter = new CCounter( 0, 100, 5, CDTXMania.Timer );
 		}
 		public void tStartFadeIn()
 		{
-			this.mode = EFIFOMode.FadeIn;
-            this.bテクスチャを描画する = true;
-			this.counter = new CCounter( 0, 100, 5, CDTXMania.Timer );
+			mode = EFIFOMode.FadeIn;
+            bテクスチャを描画する = true;
+			counter = new CCounter( 0, 100, 5, CDTXMania.Timer );
 		}
         public void tStartFadeIn(bool bテクスチャの描画)
         {
-            this.mode = EFIFOMode.FadeIn;
-            this.bテクスチャを描画する = bテクスチャの描画;
-            this.counter = new CCounter(0, 100, 5, CDTXMania.Timer);
+            mode = EFIFOMode.FadeIn;
+            bテクスチャを描画する = bテクスチャの描画;
+            counter = new CCounter(0, 100, 5, CDTXMania.Timer);
         }
 		public void tフェードイン完了()		// #25406 2011.6.9 yyagi
 		{
-			this.counter.nCurrentValue = this.counter.nEndValue;
+			counter.nCurrentValue = counter.nEndValue;
 		}
 
 		// CActivity 実装
 
 		public override void OnDeactivate()
 		{
-			if( !base.bNotActivated )
+			if( !bNotActivated )
 			{
-				CDTXMania.tReleaseTexture( ref this.tx白タイル64x64 );
+				CDTXMania.tReleaseTexture( ref tx白タイル64x64 );
 				base.OnDeactivate();
 			}
 		}
 		public override void OnManagedCreateResources()
 		{
-			if( !base.bNotActivated )
+			if( !bNotActivated )
 			{
-				this.tx白タイル64x64 = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\Tile white 64x64.png" ), false );
+				tx白タイル64x64 = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\Tile white 64x64.png" ), false );
 				base.OnManagedCreateResources();
 			}
 		}
 		public override int OnUpdateAndDraw()
 		{
-			if( base.bNotActivated || ( this.counter == null ) )
+			if( bNotActivated || ( counter == null ) )
 			{
 				return 0;
 			}
-			this.counter.tUpdate();
+			counter.tUpdate();
 
 			// Size clientSize = CDTXMania.app.Window.ClientSize;	// #23510 2010.10.31 yyagi: delete as of no one use this any longer.
-			if (this.tx白タイル64x64 != null)
+			if (tx白タイル64x64 != null)
 			{
-				this.tx白タイル64x64.nTransparency = ( this.mode == EFIFOMode.FadeIn ) ? ( ( ( 100 - this.counter.nCurrentValue ) * 0xff ) / 100 ) : ( ( this.counter.nCurrentValue * 0xff ) / 100 );
+				tx白タイル64x64.nTransparency = ( mode == EFIFOMode.FadeIn ) ? ( ( ( 100 - counter.nCurrentValue ) * 0xff ) / 100 ) : ( ( counter.nCurrentValue * 0xff ) / 100 );
 				for (int i = 0; i <= (SampleFramework.GameWindowSize.Width / 64); i++)		// #23510 2010.10.31 yyagi: change "clientSize.Width" to "640" to fix FIFO drawing size
 				{
 					for (int j = 0; j <= (SampleFramework.GameWindowSize.Height / 64); j++)	// #23510 2010.10.31 yyagi: change "clientSize.Height" to "480" to fix FIFO drawing size
 					{
-                        if (this.bテクスチャを描画する)
+                        if (bテクスチャを描画する)
                         {
-                            this.tx白タイル64x64.tDraw2D(CDTXMania.app.Device, i * 64, j * 64);
+                            tx白タイル64x64.tDraw2D(CDTXMania.app.Device, i * 64, j * 64);
                         }
 					}
 				}
 			}
-			if( this.counter.nCurrentValue != 100 )
+			if( counter.nCurrentValue != 100 )
 			{
 				return 0;
 			}

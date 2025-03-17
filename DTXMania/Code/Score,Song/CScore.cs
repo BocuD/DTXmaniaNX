@@ -17,8 +17,8 @@ namespace DTXMania
 
             public STScoreIniInformation(DateTime 最終更新日時, long ファイルサイズ)
             {
-                this.LastModified = 最終更新日時;
-                this.FileSize = ファイルサイズ;
+                LastModified = 最終更新日時;
+                FileSize = ファイルサイズ;
             }
         }
 
@@ -90,19 +90,19 @@ namespace DTXMania
                         switch (index)
                         {
                             case 0:
-                                return this.行1;
+                                return 行1;
 
                             case 1:
-                                return this.行2;
+                                return 行2;
 
                             case 2:
-                                return this.行3;
+                                return 行3;
 
                             case 3:
-                                return this.行4;
+                                return 行4;
 
                             case 4:
-                                return this.行5;
+                                return 行5;
                         }
                         throw new IndexOutOfRangeException();
                     }
@@ -111,23 +111,23 @@ namespace DTXMania
                         switch (index)
                         {
                             case 0:
-                                this.行1 = value;
+                                行1 = value;
                                 return;
 
                             case 1:
-                                this.行2 = value;
+                                行2 = value;
                                 return;
 
                             case 2:
-                                this.行3 = value;
+                                行3 = value;
                                 return;
 
                             case 3:
-                                this.行4 = value;
+                                行4 = value;
                                 return;
 
                             case 4:
-                                this.行5 = value;
+                                行5 = value;
                                 return;
                         }
                         throw new IndexOutOfRangeException();
@@ -149,13 +149,13 @@ namespace DTXMania
                         switch (index)
                         {
                             case 0:
-                                return this.Drums;
+                                return Drums;
 
                             case 1:
-                                return this.Guitar;
+                                return Guitar;
 
                             case 2:
-                                return this.Bass;
+                                return Bass;
                         }
                         throw new IndexOutOfRangeException();
                     }
@@ -168,15 +168,15 @@ namespace DTXMania
                         switch (index)
                         {
                             case 0:
-                                this.Drums = value;
+                                Drums = value;
                                 return;
 
                             case 1:
-                                this.Guitar = value;
+                                Guitar = value;
                                 return;
 
                             case 2:
-                                this.Bass = value;
+                                Bass = value;
                                 return;
                         }
                         throw new IndexOutOfRangeException();
@@ -198,13 +198,13 @@ namespace DTXMania
                         switch (index)
                         {
                             case 0:
-                                return this.Drums;
+                                return Drums;
 
                             case 1:
-                                return this.Guitar;
+                                return Guitar;
 
                             case 2:
-                                return this.Bass;
+                                return Bass;
                         }
                         throw new IndexOutOfRangeException();
                     }
@@ -217,15 +217,15 @@ namespace DTXMania
                         switch (index)
                         {
                             case 0:
-                                this.Drums = value;
+                                Drums = value;
                                 return;
 
                             case 1:
-                                this.Guitar = value;
+                                Guitar = value;
                                 return;
 
                             case 2:
-                                this.Bass = value;
+                                Bass = value;
                                 return;
                         }
                         throw new IndexOutOfRangeException();
@@ -235,61 +235,55 @@ namespace DTXMania
         }
 
         public bool bHadACacheInSongDB;
-        public bool bIsScoreValid
-        {
-            get
-            {
-                return (((this.SongInformation.Level[0] + this.SongInformation.Level[1]) + this.SongInformation.Level[2]) != 0);
-            }
-        }
+        public bool bIsScoreValid => (((SongInformation.Level[0] + SongInformation.Level[1]) + SongInformation.Level[2]) != 0);
 
 
         // Constructor
 
         public CScore()
         {
-            this.ScoreIniInformation = new STScoreIniInformation(DateTime.MinValue, 0L);
-            this.bHadACacheInSongDB = false;
-            this.FileInformation = new STFileInformation("", "", DateTime.MinValue, 0L);
-            this.SongInformation = new STMusicInformation();
-            this.SongInformation.Title = "";
-            this.SongInformation.ArtistName = "";
-            this.SongInformation.Comment = "";
-            this.SongInformation.Genre = "";
-            this.SongInformation.Preimage = "";
-            this.SongInformation.Premovie = "";
-            this.SongInformation.Presound = "";
-            this.SongInformation.Backgound = "";
-            this.SongInformation.Level = new STDGBVALUE<int>();
-            this.SongInformation.LevelDec = new STDGBVALUE<int>();
-            this.SongInformation.BestRank = new STMusicInformation.STRANK();
-            this.SongInformation.BestRank.Drums = (int)CScoreIni.ERANK.UNKNOWN;
-            this.SongInformation.BestRank.Guitar = (int)CScoreIni.ERANK.UNKNOWN;
-            this.SongInformation.BestRank.Bass = (int)CScoreIni.ERANK.UNKNOWN;
-            this.SongInformation.FullCombo = new STDGBVALUE<bool>();
-            this.SongInformation.NbPerformances = new STDGBVALUE<int>();
-            this.SongInformation.PerformanceHistory = new STMusicInformation.STHISTORY();
-            this.SongInformation.PerformanceHistory.行1 = "";
-            this.SongInformation.PerformanceHistory.行2 = "";
-            this.SongInformation.PerformanceHistory.行3 = "";
-            this.SongInformation.PerformanceHistory.行4 = "";
-            this.SongInformation.PerformanceHistory.行5 = "";
-            this.SongInformation.bHiddenLevel = false;
-            this.SongInformation.HighSkill = new STMusicInformation.STSKILL();
-            this.SongInformation.HighSongSkill = new STMusicInformation.STSKILL();
-            this.SongInformation.SongType = CDTX.EType.DTX;
-            this.SongInformation.Bpm = 120.0;
-            this.SongInformation.Duration = 0;
-            this.SongInformation.b完全にCLASSIC譜面である.Drums = false;
-            this.SongInformation.b完全にCLASSIC譜面である.Guitar = false;
-            this.SongInformation.b完全にCLASSIC譜面である.Bass = false;
-            this.SongInformation.bScoreExists.Drums = false;
-            this.SongInformation.bScoreExists.Guitar = false;
-            this.SongInformation.bScoreExists.Bass = false;
+            ScoreIniInformation = new STScoreIniInformation(DateTime.MinValue, 0L);
+            bHadACacheInSongDB = false;
+            FileInformation = new STFileInformation("", "", DateTime.MinValue, 0L);
+            SongInformation = new STMusicInformation();
+            SongInformation.Title = "";
+            SongInformation.ArtistName = "";
+            SongInformation.Comment = "";
+            SongInformation.Genre = "";
+            SongInformation.Preimage = "";
+            SongInformation.Premovie = "";
+            SongInformation.Presound = "";
+            SongInformation.Backgound = "";
+            SongInformation.Level = new STDGBVALUE<int>();
+            SongInformation.LevelDec = new STDGBVALUE<int>();
+            SongInformation.BestRank = new STMusicInformation.STRANK();
+            SongInformation.BestRank.Drums = (int)CScoreIni.ERANK.UNKNOWN;
+            SongInformation.BestRank.Guitar = (int)CScoreIni.ERANK.UNKNOWN;
+            SongInformation.BestRank.Bass = (int)CScoreIni.ERANK.UNKNOWN;
+            SongInformation.FullCombo = new STDGBVALUE<bool>();
+            SongInformation.NbPerformances = new STDGBVALUE<int>();
+            SongInformation.PerformanceHistory = new STMusicInformation.STHISTORY();
+            SongInformation.PerformanceHistory.行1 = "";
+            SongInformation.PerformanceHistory.行2 = "";
+            SongInformation.PerformanceHistory.行3 = "";
+            SongInformation.PerformanceHistory.行4 = "";
+            SongInformation.PerformanceHistory.行5 = "";
+            SongInformation.bHiddenLevel = false;
+            SongInformation.HighSkill = new STMusicInformation.STSKILL();
+            SongInformation.HighSongSkill = new STMusicInformation.STSKILL();
+            SongInformation.SongType = CDTX.EType.DTX;
+            SongInformation.Bpm = 120.0;
+            SongInformation.Duration = 0;
+            SongInformation.b完全にCLASSIC譜面である.Drums = false;
+            SongInformation.b完全にCLASSIC譜面である.Guitar = false;
+            SongInformation.b完全にCLASSIC譜面である.Bass = false;
+            SongInformation.bScoreExists.Drums = false;
+            SongInformation.bScoreExists.Guitar = false;
+            SongInformation.bScoreExists.Bass = false;
             //
-            this.SongInformation.chipCountByInstrument = default(STDGBVALUE<int>);
-            this.SongInformation.chipCountByLane = new Dictionary<ELane, int>();
-            this.SongInformation.progress = new STDGBVALUE<string>()
+            SongInformation.chipCountByInstrument = default(STDGBVALUE<int>);
+            SongInformation.chipCountByLane = new Dictionary<ELane, int>();
+            SongInformation.progress = new STDGBVALUE<string>()
             {
                 Drums = "",
                 Guitar = "",
@@ -298,7 +292,7 @@ namespace DTXMania
 
             for (ELane eLane = ELane.LC; eLane < ELane.BGM; eLane++)
             {
-                this.SongInformation.chipCountByLane[eLane] = 0;
+                SongInformation.chipCountByLane[eLane] = 0;
             }
 
 

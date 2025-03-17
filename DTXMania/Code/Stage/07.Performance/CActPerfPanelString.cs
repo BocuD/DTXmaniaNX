@@ -51,59 +51,59 @@ namespace DTXMania
 
             if (CDTXMania.ConfigIni.bDrumsEnabled)
             {
-                this.n曲名X = 950;
-                this.n曲名Y = 630;
+                n曲名X = 950;
+                n曲名Y = 630;
             }
             else if (CDTXMania.ConfigIni.bGuitarEnabled)
             {
-                this.n曲名X = 500;
-                this.n曲名Y = 630;
+                n曲名X = 500;
+                n曲名Y = 630;
             }
 
 //          this.n文字列の長さdot = 0;
 //          this.txPanel = null;
-            this.ct進行用 = new CCounter();
+            ct進行用 = new CCounter();
             base.OnActivate();
         }
         public override void OnDeactivate()
         {
 //          CDTXMania.tReleaseTexture(ref this.txPanel);
-            this.ct進行用 = null;
+            ct進行用 = null;
             base.OnDeactivate();
         }
         public override void OnManagedCreateResources()
         {
-            if (!base.bNotActivated)
+            if (!bNotActivated)
             {
-                this.txジャケットパネル = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_JacketPanel.png"));
+                txジャケットパネル = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_JacketPanel.png"));
                 string path = CDTXMania.DTX.strFolderName + CDTXMania.DTX.PREIMAGE;
                 if (!File.Exists(path))
                 {
-                    this.txジャケット画像 = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\5_preimage default.png"));
+                    txジャケット画像 = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\5_preimage default.png"));
                 }
                 else
                 {
-                    this.txジャケット画像 = CDTXMania.tGenerateTexture(path);
+                    txジャケット画像 = CDTXMania.tGenerateTexture(path);
                 }
 
 //              this.SetPanelString(this.strパネル文字列);
 
                 #region[ 曲名、アーティスト名テクスチャの生成 ]
                 if (string.IsNullOrEmpty(CDTXMania.DTX.TITLE) || (!CDTXMania.bCompactMode && CDTXMania.ConfigIni.b曲名表示をdefのものにする))
-                    this.strSongName = CDTXMania.stageSongSelection.r現在選択中の曲.strタイトル;
+                    strSongName = CDTXMania.stageSongSelection.r現在選択中の曲.strタイトル;
                 else
-                    this.strSongName = CDTXMania.DTX.TITLE;
+                    strSongName = CDTXMania.DTX.TITLE;
 
-                this.pfタイトル = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.str選曲リストフォント), 20, FontStyle.Regular);
+                pfタイトル = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.str選曲リストフォント), 20, FontStyle.Regular);
                 Bitmap bmpSongName = new Bitmap(1, 1);
-                bmpSongName = this.pfタイトル.DrawPrivateFont(this.strSongName, CPrivateFont.DrawMode.Edge, Color.Black, Color.Black, this.clGITADORAgradationTopColor, this.clGITADORAgradationBottomColor, true);
-                this.txSongName = CDTXMania.tGenerateTexture(bmpSongName, false);
+                bmpSongName = pfタイトル.DrawPrivateFont(strSongName, CPrivateFont.DrawMode.Edge, Color.Black, Color.Black, clGITADORAgradationTopColor, clGITADORAgradationBottomColor, true);
+                txSongName = CDTXMania.tGenerateTexture(bmpSongName, false);
                 bmpSongName.Dispose();
 
-                this.pfアーティスト = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.str選曲リストフォント), 15, FontStyle.Regular);
+                pfアーティスト = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.str選曲リストフォント), 15, FontStyle.Regular);
                 Bitmap bmpArtistName = new Bitmap(1, 1);
-                bmpArtistName = this.pfアーティスト.DrawPrivateFont(CDTXMania.DTX.ARTIST, CPrivateFont.DrawMode.Edge, Color.Black, Color.Black, this.clGITADORAgradationTopColor, this.clGITADORAgradationBottomColor, true);
-                this.txArtistName = CDTXMania.tGenerateTexture(bmpArtistName, false);
+                bmpArtistName = pfアーティスト.DrawPrivateFont(CDTXMania.DTX.ARTIST, CPrivateFont.DrawMode.Edge, Color.Black, Color.Black, clGITADORAgradationTopColor, clGITADORAgradationBottomColor, true);
+                txArtistName = CDTXMania.tGenerateTexture(bmpArtistName, false);
                 bmpArtistName.Dispose();
                 #endregion
 
@@ -112,15 +112,15 @@ namespace DTXMania
         }
         public override void OnManagedReleaseResources()
         {
-            if ( !base.bNotActivated )
+            if ( !bNotActivated )
             {
 //              CDTXMania.tReleaseTexture( ref this.txPanel );
-                CDTXMania.tReleaseTexture( ref this.txSongName );
-                CDTXMania.tReleaseTexture( ref this.txArtistName );
-                CDTXMania.tReleaseTexture( ref this.txジャケットパネル );
-                CDTXMania.tReleaseTexture( ref this.txジャケット画像 );
-                CDTXMania.tDisposeSafely( ref this.pfタイトル );
-                CDTXMania.tDisposeSafely( ref this.pfアーティスト );
+                CDTXMania.tReleaseTexture( ref txSongName );
+                CDTXMania.tReleaseTexture( ref txArtistName );
+                CDTXMania.tReleaseTexture( ref txジャケットパネル );
+                CDTXMania.tReleaseTexture( ref txジャケット画像 );
+                CDTXMania.tDisposeSafely( ref pfタイトル );
+                CDTXMania.tDisposeSafely( ref pfアーティスト );
                 base.OnManagedReleaseResources();
             }
         }
@@ -130,7 +130,7 @@ namespace DTXMania
         }
         public int tUpdateAndDraw()  // t進行描画
         {
-            if (!base.bNotActivated)
+            if (!bNotActivated)
             {
                 /*
                 //this.ct進行用.tUpdateLoop();
@@ -158,19 +158,19 @@ namespace DTXMania
                 float fScalingFactor;
                 float jacketOnScreenSize = 245.0f;
                 //Maintain aspect ratio by scaling only to the smaller scalingFactor
-                if (jacketOnScreenSize / this.txジャケット画像.szImageSize.Width > jacketOnScreenSize / this.txジャケット画像.szImageSize.Height)
+                if (jacketOnScreenSize / txジャケット画像.szImageSize.Width > jacketOnScreenSize / txジャケット画像.szImageSize.Height)
                 {
-                    fScalingFactor = jacketOnScreenSize / this.txジャケット画像.szImageSize.Height;
+                    fScalingFactor = jacketOnScreenSize / txジャケット画像.szImageSize.Height;
                 }
                 else
                 {
-                    fScalingFactor = jacketOnScreenSize / this.txジャケット画像.szImageSize.Width;
+                    fScalingFactor = jacketOnScreenSize / txジャケット画像.szImageSize.Width;
                 }
 
                 if (CDTXMania.ConfigIni.bDrumsEnabled)
                 {
-                    this.nジャケットX = 915;
-                    this.nジャケットY = 287;
+                    nジャケットX = 915;
+                    nジャケットY = 287;
                    
                     mat *= SharpDX.Matrix.Scaling(fScalingFactor, fScalingFactor, 1f);
                     mat *= SharpDX.Matrix.Translation(400f, -227f, 0f);
@@ -179,28 +179,28 @@ namespace DTXMania
 
                 if (CDTXMania.ConfigIni.bGuitarEnabled)
                 {
-                    this.nジャケットX = 467;
-                    this.nジャケットY = 287;
+                    nジャケットX = 467;
+                    nジャケットY = 287;
 
                     mat *= SharpDX.Matrix.Scaling(fScalingFactor, fScalingFactor, 1f);
                     mat *= SharpDX.Matrix.Translation(-28f, -94.5f, 0f);
                     mat *= SharpDX.Matrix.RotationZ(0.3f);
                 }
 
-                if (this.txジャケットパネル != null)
-                    this.txジャケットパネル.tDraw2D(CDTXMania.app.Device, this.nジャケットX, this.nジャケットY);
+                if (txジャケットパネル != null)
+                    txジャケットパネル.tDraw2D(CDTXMania.app.Device, nジャケットX, nジャケットY);
 
-                if (this.txジャケット画像 != null)
-                    this.txジャケット画像.tDraw3D(CDTXMania.app.Device, mat);
+                if (txジャケット画像 != null)
+                    txジャケット画像.tDraw3D(CDTXMania.app.Device, mat);
 
-                if (this.txSongName.szImageSize.Width > 320)
-                    this.txSongName.vcScaleRatio.X = 320f / this.txSongName.szImageSize.Width;
+                if (txSongName.szImageSize.Width > 320)
+                    txSongName.vcScaleRatio.X = 320f / txSongName.szImageSize.Width;
 
-                if (this.txArtistName.szImageSize.Width > 320)
-                    this.txArtistName.vcScaleRatio.X = 320f / this.txArtistName.szImageSize.Width;
+                if (txArtistName.szImageSize.Width > 320)
+                    txArtistName.vcScaleRatio.X = 320f / txArtistName.szImageSize.Width;
 
-                this.txSongName.tDraw2D(CDTXMania.app.Device, this.n曲名X, this.n曲名Y);
-                this.txArtistName.tDraw2D(CDTXMania.app.Device, this.n曲名X, this.n曲名Y + 35);
+                txSongName.tDraw2D(CDTXMania.app.Device, n曲名X, n曲名Y);
+                txArtistName.tDraw2D(CDTXMania.app.Device, n曲名X, n曲名Y + 35);
             }
             return 0;
         }

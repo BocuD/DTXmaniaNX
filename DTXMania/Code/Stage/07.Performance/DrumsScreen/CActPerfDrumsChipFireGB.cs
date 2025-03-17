@@ -18,8 +18,8 @@ namespace DTXMania
 			{
 				index = ( ( index / 3 ) * 3 ) + ( 2 - ( index % 3 ) );
 			}
-			int x = this.pt中央[ index ].X;
-			int y = this.pt中央[ index ].Y;
+			int x = pt中央[ index ].X;
+			int y = pt中央[ index ].Y;
 			if( CDTXMania.ConfigIni.bReverse[ (int) e楽器パート ] )
 			{
 				y = ( nLane < 3 ) ? 0x176 : 0x176;

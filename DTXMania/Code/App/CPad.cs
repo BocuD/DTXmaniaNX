@@ -17,10 +17,10 @@ namespace DTXMania
 			public bool Mouse;
 			public void Clear()
 			{
-				this.Keyboard = false;
-				this.MIDIIN = false;
-				this.Joypad = false;
-				this.Mouse = false;
+				Keyboard = false;
+				MIDIIN = false;
+				Joypad = false;
+				Mouse = false;
 			}
 		}
 
@@ -29,9 +29,9 @@ namespace DTXMania
 
 		internal CPad( CConfigIni configIni, CInputManager mgrInput )
 		{
-			this.rConfigIni = configIni;
-			this.rInput管理 = mgrInput;
-			this.stDetectedDevice.Clear();
+			rConfigIni = configIni;
+			rInput管理 = mgrInput;
+			stDetectedDevice.Clear();
 		}
 
 
@@ -39,11 +39,11 @@ namespace DTXMania
 
 		public List<STInputEvent> GetEvents( EInstrumentPart part, EPad pad )
 		{
-			CConfigIni.CKeyAssign.STKEYASSIGN[] stkeyassignArray = this.rConfigIni.KeyAssign[ (int) part ][ (int) pad ];
+			CConfigIni.CKeyAssign.STKEYASSIGN[] stkeyassignArray = rConfigIni.KeyAssign[ (int) part ][ (int) pad ];
 			List<STInputEvent> list = new List<STInputEvent>();
 
 			// すべての入力デバイスについて…
-			foreach( IInputDevice device in this.rInput管理.listInputDevices )
+			foreach( IInputDevice device in rInput管理.listInputDevices )
 			{
 				if( ( device.listInputEvent != null ) && ( device.listInputEvent.Count != 0 ) )
 				{
@@ -57,7 +57,7 @@ namespace DTXMania
 									if( ( device.eInputDeviceType == EInputDeviceType.Keyboard ) && ( event2.nKey == stkeyassignArray[ i ].Code ) )
 									{
 										list.Add( event2 );
-										this.stDetectedDevice.Keyboard = true;
+										stDetectedDevice.Keyboard = true;
 									}
 									break;
 
@@ -65,7 +65,7 @@ namespace DTXMania
 									if( ( ( device.eInputDeviceType == EInputDeviceType.MidiIn ) && ( device.ID == stkeyassignArray[ i ].ID ) ) && ( event2.nKey == stkeyassignArray[ i ].Code ) )
 									{
 										list.Add( event2 );
-										this.stDetectedDevice.MIDIIN = true;
+										stDetectedDevice.MIDIIN = true;
 									}
 									break;
 
@@ -73,7 +73,7 @@ namespace DTXMania
 									if( ( ( device.eInputDeviceType == EInputDeviceType.Joystick ) && ( device.ID == stkeyassignArray[ i ].ID ) ) && ( event2.nKey == stkeyassignArray[ i ].Code ) )
 									{
 										list.Add( event2 );
-										this.stDetectedDevice.Joypad = true;
+										stDetectedDevice.Joypad = true;
 									}
 									break;
 
@@ -81,7 +81,7 @@ namespace DTXMania
 									if( ( device.eInputDeviceType == EInputDeviceType.Mouse ) && ( event2.nKey == stkeyassignArray[ i ].Code ) )
 									{
 										list.Add( event2 );
-										this.stDetectedDevice.Mouse = true;
+										stDetectedDevice.Mouse = true;
 									}
 									break;
 							}
@@ -97,44 +97,44 @@ namespace DTXMania
 			if( part != EInstrumentPart.UNKNOWN )
 			{
 				
-				CConfigIni.CKeyAssign.STKEYASSIGN[] stkeyassignArray = this.rConfigIni.KeyAssign[ (int) part ][ (int) pad ];
+				CConfigIni.CKeyAssign.STKEYASSIGN[] stkeyassignArray = rConfigIni.KeyAssign[ (int) part ][ (int) pad ];
 				for( int i = 0; i < stkeyassignArray.Length; i++ )
 				{
 					switch( stkeyassignArray[ i ].InputDevice )
 					{
 						case EInputDevice.Keyboard:
-							if( !this.rInput管理.Keyboard.bKeyPressed( stkeyassignArray[ i ].Code ) )
+							if( !rInput管理.Keyboard.bKeyPressed( stkeyassignArray[ i ].Code ) )
 								break;
 
-							this.stDetectedDevice.Keyboard = true;
+							stDetectedDevice.Keyboard = true;
 							return true;
 
 						case EInputDevice.MIDI入力:
 							{
-								IInputDevice device2 = this.rInput管理.MidiIn( stkeyassignArray[ i ].ID );
+								IInputDevice device2 = rInput管理.MidiIn( stkeyassignArray[ i ].ID );
 								if( ( device2 == null ) || !device2.bKeyPressed( stkeyassignArray[ i ].Code ) )
 									break;
 
-								this.stDetectedDevice.MIDIIN = true;
+								stDetectedDevice.MIDIIN = true;
 								return true;
 							}
 						case EInputDevice.Joypad:
 							{
-								if( !this.rConfigIni.dicJoystick.ContainsKey( stkeyassignArray[ i ].ID ) )
+								if( !rConfigIni.dicJoystick.ContainsKey( stkeyassignArray[ i ].ID ) )
 									break;
 
-								IInputDevice device = this.rInput管理.Joystick( stkeyassignArray[ i ].ID );
+								IInputDevice device = rInput管理.Joystick( stkeyassignArray[ i ].ID );
 								if( ( device == null ) || !device.bKeyPressed( stkeyassignArray[ i ].Code ) )
 									break;
 
-								this.stDetectedDevice.Joypad = true;
+								stDetectedDevice.Joypad = true;
 								return true;
 							}
 						case EInputDevice.Mouse:
-							if( !this.rInput管理.Mouse.bKeyPressed( stkeyassignArray[ i ].Code ) )
+							if( !rInput管理.Mouse.bKeyPressed( stkeyassignArray[ i ].Code ) )
 								break;
 
-							this.stDetectedDevice.Mouse = true;
+							stDetectedDevice.Mouse = true;
 							return true;
 					}
 				}
@@ -146,44 +146,44 @@ namespace DTXMania
 			if (part != EKeyConfigPart.UNKNOWN)
 			{
 
-				CConfigIni.CKeyAssign.STKEYASSIGN[] stkeyassignArray = this.rConfigIni.KeyAssign[(int)part][(int)pad];
+				CConfigIni.CKeyAssign.STKEYASSIGN[] stkeyassignArray = rConfigIni.KeyAssign[(int)part][(int)pad];
 				for (int i = 0; i < stkeyassignArray.Length; i++)
 				{
 					switch (stkeyassignArray[i].InputDevice)
 					{
 						case EInputDevice.Keyboard:
-							if (!this.rInput管理.Keyboard.bKeyPressed(stkeyassignArray[i].Code))
+							if (!rInput管理.Keyboard.bKeyPressed(stkeyassignArray[i].Code))
 								break;
 
-							this.stDetectedDevice.Keyboard = true;
+							stDetectedDevice.Keyboard = true;
 							return true;
 
 						case EInputDevice.MIDI入力:
 							{
-								IInputDevice device2 = this.rInput管理.MidiIn(stkeyassignArray[i].ID);
+								IInputDevice device2 = rInput管理.MidiIn(stkeyassignArray[i].ID);
 								if ((device2 == null) || !device2.bKeyPressed(stkeyassignArray[i].Code))
 									break;
 
-								this.stDetectedDevice.MIDIIN = true;
+								stDetectedDevice.MIDIIN = true;
 								return true;
 							}
 						case EInputDevice.Joypad:
 							{
-								if (!this.rConfigIni.dicJoystick.ContainsKey(stkeyassignArray[i].ID))
+								if (!rConfigIni.dicJoystick.ContainsKey(stkeyassignArray[i].ID))
 									break;
 
-								IInputDevice device = this.rInput管理.Joystick(stkeyassignArray[i].ID);
+								IInputDevice device = rInput管理.Joystick(stkeyassignArray[i].ID);
 								if ((device == null) || !device.bKeyPressed(stkeyassignArray[i].Code))
 									break;
 
-								this.stDetectedDevice.Joypad = true;
+								stDetectedDevice.Joypad = true;
 								return true;
 							}
 						case EInputDevice.Mouse:
-							if (!this.rInput管理.Mouse.bKeyPressed(stkeyassignArray[i].Code))
+							if (!rInput管理.Mouse.bKeyPressed(stkeyassignArray[i].Code))
 								break;
 
-							this.stDetectedDevice.Mouse = true;
+							stDetectedDevice.Mouse = true;
 							return true;
 					}
 				}
@@ -192,17 +192,17 @@ namespace DTXMania
 		}
 		public bool bPressedDGB( EPad pad )
 		{
-			if( !this.bPressed( EInstrumentPart.DRUMS, pad ) && !this.bPressed( EInstrumentPart.GUITAR, pad ) )
+			if( !bPressed( EInstrumentPart.DRUMS, pad ) && !bPressed( EInstrumentPart.GUITAR, pad ) )
 			{
-				return this.bPressed( EInstrumentPart.BASS, pad );
+				return bPressed( EInstrumentPart.BASS, pad );
 			}
 			return true;
 		}
 		public bool bPressedGB( EPad pad )
 		{
-			if( !this.bPressed( EInstrumentPart.GUITAR, pad ) )
+			if( !bPressed( EInstrumentPart.GUITAR, pad ) )
 			{
-				return this.bPressed( EInstrumentPart.BASS, pad );
+				return bPressed( EInstrumentPart.BASS, pad );
 			}
 			return true;
 		}
@@ -210,39 +210,39 @@ namespace DTXMania
 		{
 			if( part != EInstrumentPart.UNKNOWN )
 			{
-				CConfigIni.CKeyAssign.STKEYASSIGN[] stkeyassignArray = this.rConfigIni.KeyAssign[ (int) part ][ (int) pad ];
+				CConfigIni.CKeyAssign.STKEYASSIGN[] stkeyassignArray = rConfigIni.KeyAssign[ (int) part ][ (int) pad ];
 				for( int i = 0; i < stkeyassignArray.Length; i++ )
 				{
 					switch( stkeyassignArray[ i ].InputDevice )
 					{
 						case EInputDevice.Keyboard:
-							if( !this.rInput管理.Keyboard.bKeyPressing( stkeyassignArray[ i ].Code ) )
+							if( !rInput管理.Keyboard.bKeyPressing( stkeyassignArray[ i ].Code ) )
 							{
 								break;
 							}
-							this.stDetectedDevice.Keyboard = true;
+							stDetectedDevice.Keyboard = true;
 							return true;
 
 						case EInputDevice.Joypad:
 							{
-								if( !this.rConfigIni.dicJoystick.ContainsKey( stkeyassignArray[ i ].ID ) )
+								if( !rConfigIni.dicJoystick.ContainsKey( stkeyassignArray[ i ].ID ) )
 								{
 									break;
 								}
-								IInputDevice device = this.rInput管理.Joystick( stkeyassignArray[ i ].ID );
+								IInputDevice device = rInput管理.Joystick( stkeyassignArray[ i ].ID );
 								if( ( device == null ) || !device.bKeyPressing( stkeyassignArray[ i ].Code ) )
 								{
 									break;
 								}
-								this.stDetectedDevice.Joypad = true;
+								stDetectedDevice.Joypad = true;
 								return true;
 							}
 						case EInputDevice.Mouse:
-							if( !this.rInput管理.Mouse.bKeyPressing( stkeyassignArray[ i ].Code ) )
+							if( !rInput管理.Mouse.bKeyPressing( stkeyassignArray[ i ].Code ) )
 							{
 								break;
 							}
-							this.stDetectedDevice.Mouse = true;
+							stDetectedDevice.Mouse = true;
 							return true;
 					}
 				}
@@ -251,9 +251,9 @@ namespace DTXMania
 		}
 		public bool bPressingGB( EPad pad )
 		{
-			if( !this.bPressing( EInstrumentPart.GUITAR, pad ) )
+			if( !bPressing( EInstrumentPart.GUITAR, pad ) )
 			{
-				return this.bPressing( EInstrumentPart.BASS, pad );
+				return bPressing( EInstrumentPart.BASS, pad );
 			}
 			return true;
 		}

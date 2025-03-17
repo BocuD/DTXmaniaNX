@@ -10,8 +10,8 @@ namespace DTXMania
         // コンストラクタ
         public CActPerfCommonStatusPanel()
         {
-            this.stパネルマップ = null;
-            this.stパネルマップ = new STATUSPANEL[12];		// yyagi: 以下、手抜きの初期化でスマン
+            stパネルマップ = null;
+            stパネルマップ = new STATUSPANEL[12];		// yyagi: 以下、手抜きの初期化でスマン
             // { "DTXMANIA", 0 }, { "EXTREME", 1 }, ... みたいに書きたいが___
 
             //2013.09.07.kairera0467 画像の順番もこの並びになるので、難易度ラベルを追加する時は12以降に追加した方が画像編集でも助かります。
@@ -33,10 +33,10 @@ namespace DTXMania
 
             for (int i = 0; i < 12; i++)
             {
-                this.stパネルマップ[i] = default(CActPerfCommonStatusPanel.STATUSPANEL);
+                stパネルマップ[i] = default(STATUSPANEL);
                 //this.stPanelMap[i] = new STATUSPANEL();
-                this.stパネルマップ[i].status = status[i];
-                this.stパネルマップ[i].label = labels[i];
+                stパネルマップ[i].status = status[i];
+                stパネルマップ[i].label = labels[i];
             }
 
             //Initialize positions of character in lag text sprite
@@ -61,10 +61,10 @@ namespace DTXMania
                 LagCountRedTextList.Add(stNextCurrText);
             }
 
-            this.stLagCountBlueText = LagCountBlueTextList.ToArray();
-            this.stLagCountRedText = LagCountRedTextList.ToArray();
+            stLagCountBlueText = LagCountBlueTextList.ToArray();
+            stLagCountRedText = LagCountRedTextList.ToArray();
 
-            base.bNotActivated = true;
+            bNotActivated = true;
         }
         
         
@@ -72,15 +72,15 @@ namespace DTXMania
 
         public override void OnActivate()
         {
-            this.nCurrentScore = 0L;
-            this.n現在のスコアGuitar = 0L;
-            this.n現在のスコアBass = 0L;
-            this.nStatus = 0;
-            this.nIndex = 0;
+            nCurrentScore = 0L;
+            n現在のスコアGuitar = 0L;
+            n現在のスコアBass = 0L;
+            nStatus = 0;
+            nIndex = 0;
 
             for( int i = 0; i < 3; i++ )
             {
-                this.db現在の達成率[ i ] = 0.0;
+                db現在の達成率[ i ] = 0.0;
             }
 
             base.OnActivate();
@@ -133,8 +133,8 @@ namespace DTXMania
                                 continue; //ラベル名が違うなら無視。大文字小文字区別しない
                         }
                     }
-                    this.rectDiffPanelPoint.X = Convert.ToInt32( arScriptLine[ 2 ] );
-                    this.rectDiffPanelPoint.Y = Convert.ToInt32( arScriptLine[ 3 ] );
+                    rectDiffPanelPoint.X = Convert.ToInt32( arScriptLine[ 2 ] );
+                    rectDiffPanelPoint.Y = Convert.ToInt32( arScriptLine[ 3 ] );
 
                     reader.Close();
                     break;

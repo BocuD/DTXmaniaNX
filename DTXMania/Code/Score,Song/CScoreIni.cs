@@ -38,48 +38,48 @@ namespace DTXMania
 		[StructLayout( LayoutKind.Sequential )]
 		public struct STSection
 		{
-            public CScoreIni.CPerformanceEntry HiScoreDrums;
-            public CScoreIni.CPerformanceEntry HiSkillDrums;
-			public CScoreIni.CPerformanceEntry HiScoreGuitar;
-            public CScoreIni.CPerformanceEntry HiSkillGuitar;
-			public CScoreIni.CPerformanceEntry HiScoreBass;
-            public CScoreIni.CPerformanceEntry HiSkillBass;
-            public CScoreIni.CPerformanceEntry LastPlayDrums;   // #23595 2011.1.9 ikanick
-            public CScoreIni.CPerformanceEntry LastPlayGuitar;  //
-            public CScoreIni.CPerformanceEntry LastPlayBass;    //
-			public CScoreIni.CPerformanceEntry this[ int index ]
+            public CPerformanceEntry HiScoreDrums;
+            public CPerformanceEntry HiSkillDrums;
+			public CPerformanceEntry HiScoreGuitar;
+            public CPerformanceEntry HiSkillGuitar;
+			public CPerformanceEntry HiScoreBass;
+            public CPerformanceEntry HiSkillBass;
+            public CPerformanceEntry LastPlayDrums;   // #23595 2011.1.9 ikanick
+            public CPerformanceEntry LastPlayGuitar;  //
+            public CPerformanceEntry LastPlayBass;    //
+			public CPerformanceEntry this[ int index ]
 			{
 				get
 				{
 					switch( index )
 					{
 						case 0:
-							return this.HiScoreDrums;
+							return HiScoreDrums;
 
 						case 1:
-							return this.HiSkillDrums;
+							return HiSkillDrums;
 
 						case 2:
-							return this.HiScoreGuitar;
+							return HiScoreGuitar;
 
 						case 3:
-							return this.HiSkillGuitar;
+							return HiSkillGuitar;
 
 						case 4:
-							return this.HiScoreBass;
+							return HiScoreBass;
 
                         case 5:
-                            return this.HiSkillBass;
+                            return HiSkillBass;
 
                         // #23595 2011.1.9 ikanick
                         case 6:
-                            return this.LastPlayDrums;
+                            return LastPlayDrums;
 
                         case 7:
-                            return this.LastPlayGuitar;
+                            return LastPlayGuitar;
 
                         case 8:
-                            return this.LastPlayBass;
+                            return LastPlayBass;
                         //------------
 					}
 					throw new IndexOutOfRangeException();
@@ -89,39 +89,39 @@ namespace DTXMania
 					switch( index )
 					{
 						case 0:
-							this.HiScoreDrums = value;
+							HiScoreDrums = value;
 							return;
 
 						case 1:
-							this.HiSkillDrums = value;
+							HiSkillDrums = value;
 							return;
 
 						case 2:
-							this.HiScoreGuitar = value;
+							HiScoreGuitar = value;
 							return;
 
 						case 3:
-							this.HiSkillGuitar = value;
+							HiSkillGuitar = value;
 							return;
 
 						case 4:
-							this.HiScoreBass = value;
+							HiScoreBass = value;
                             return;
 
                         case 5:
-                            this.HiSkillBass = value;
+                            HiSkillBass = value;
                             return;
                         // #23595 2011.1.9 ikanick
                         case 6:
-                            this.LastPlayDrums = value;
+                            LastPlayDrums = value;
                             return;
 
                         case 7:
-                            this.LastPlayGuitar = value;
+                            LastPlayGuitar = value;
                             return;
 
                         case 8:
-                            this.LastPlayBass = value;
+                            LastPlayBass = value;
                             return;
                         //------------------
 					}
@@ -229,107 +229,84 @@ namespace DTXMania
 
 			public CPerformanceEntry()
 			{
-				this.bAutoPlay = new STAUTOPLAY();
-				this.bAutoPlay.LC = false;
-				this.bAutoPlay.HH = false;
-				this.bAutoPlay.SD = false;
-				this.bAutoPlay.BD = false;
-				this.bAutoPlay.HT = false;
-				this.bAutoPlay.LT = false;
-				this.bAutoPlay.FT = false;
-				this.bAutoPlay.CY = false;
-                this.bAutoPlay.LP = false;
-                this.bAutoPlay.LBD = false;
-				this.bAutoPlay.Guitar = false;
-				this.bAutoPlay.Bass = false;
-				this.bAutoPlay.GtR = false;
-				this.bAutoPlay.GtG = false;
-				this.bAutoPlay.GtB = false;
-                this.bAutoPlay.GtY = false;
-                this.bAutoPlay.GtP = false;
-				this.bAutoPlay.GtPick = false;
-				this.bAutoPlay.GtW = false;
-				this.bAutoPlay.BsR = false;
-				this.bAutoPlay.BsG = false;
-				this.bAutoPlay.BsB = false;
-                this.bAutoPlay.BsY = false;
-                this.bAutoPlay.BsP = false;
-				this.bAutoPlay.BsPick = false;
-				this.bAutoPlay.BsW = false;
+				bAutoPlay = new STAUTOPLAY();
+				bAutoPlay.LC = false;
+				bAutoPlay.HH = false;
+				bAutoPlay.SD = false;
+				bAutoPlay.BD = false;
+				bAutoPlay.HT = false;
+				bAutoPlay.LT = false;
+				bAutoPlay.FT = false;
+				bAutoPlay.CY = false;
+                bAutoPlay.LP = false;
+                bAutoPlay.LBD = false;
+				bAutoPlay.Guitar = false;
+				bAutoPlay.Bass = false;
+				bAutoPlay.GtR = false;
+				bAutoPlay.GtG = false;
+				bAutoPlay.GtB = false;
+                bAutoPlay.GtY = false;
+                bAutoPlay.GtP = false;
+				bAutoPlay.GtPick = false;
+				bAutoPlay.GtW = false;
+				bAutoPlay.BsR = false;
+				bAutoPlay.BsG = false;
+				bAutoPlay.BsB = false;
+                bAutoPlay.BsY = false;
+                bAutoPlay.BsP = false;
+				bAutoPlay.BsPick = false;
+				bAutoPlay.BsW = false;
 
-				this.bSudden = new STDGBVALUE<bool>();
-				this.bSudden.Drums = false;
-				this.bSudden.Guitar = false;
-				this.bSudden.Bass = false;
-				this.bHidden = new STDGBVALUE<bool>();
-				this.bHidden.Drums = false;
-				this.bHidden.Guitar = false;
-				this.bHidden.Bass = false;
-				this.bReverse = new STDGBVALUE<bool>();
-				this.bReverse.Drums = false;
-				this.bReverse.Guitar = false;
-				this.bReverse.Bass = false;
-				this.eRandom = new STDGBVALUE<ERandomMode>();
-				this.eRandom.Drums = ERandomMode.OFF;
-				this.eRandom.Guitar = ERandomMode.OFF;
-				this.eRandom.Bass = ERandomMode.OFF;
-				this.bLight = new STDGBVALUE<bool>();
-				this.bLight.Drums = false;
-				this.bLight.Guitar = false;
-				this.bLight.Bass = false;
-				this.bLeft = new STDGBVALUE<bool>();
-				this.bLeft.Drums = false;
-				this.bLeft.Guitar = false;
-				this.bLeft.Bass = false;
-				this.fScrollSpeed = new STDGBVALUE<float>();
-				this.fScrollSpeed.Drums = 1f;
-				this.fScrollSpeed.Guitar = 1f;
-				this.fScrollSpeed.Bass = 1f;
-				this.nPlaySpeedNumerator = 20;
-				this.nPlaySpeedDenominator = 20;
-				this.bGuitarEnabled = true;
-				this.bDrumsEnabled = true;
-				this.bSTAGEFAILEDEnabled = true;
-				this.eDamageLevel = EDamageLevel.Normal;
+				bSudden = new STDGBVALUE<bool>();
+				bSudden.Drums = false;
+				bSudden.Guitar = false;
+				bSudden.Bass = false;
+				bHidden = new STDGBVALUE<bool>();
+				bHidden.Drums = false;
+				bHidden.Guitar = false;
+				bHidden.Bass = false;
+				bReverse = new STDGBVALUE<bool>();
+				bReverse.Drums = false;
+				bReverse.Guitar = false;
+				bReverse.Bass = false;
+				eRandom = new STDGBVALUE<ERandomMode>();
+				eRandom.Drums = ERandomMode.OFF;
+				eRandom.Guitar = ERandomMode.OFF;
+				eRandom.Bass = ERandomMode.OFF;
+				bLight = new STDGBVALUE<bool>();
+				bLight.Drums = false;
+				bLight.Guitar = false;
+				bLight.Bass = false;
+				bLeft = new STDGBVALUE<bool>();
+				bLeft.Drums = false;
+				bLeft.Guitar = false;
+				bLeft.Bass = false;
+				fScrollSpeed = new STDGBVALUE<float>();
+				fScrollSpeed.Drums = 1f;
+				fScrollSpeed.Guitar = 1f;
+				fScrollSpeed.Bass = 1f;
+				nPlaySpeedNumerator = 20;
+				nPlaySpeedDenominator = 20;
+				bGuitarEnabled = true;
+				bDrumsEnabled = true;
+				bSTAGEFAILEDEnabled = true;
+				eDamageLevel = EDamageLevel.Normal;
 				stPrimaryHitRanges = STHitRanges.tCreateDefaultDTXHitRanges();
 				stSecondaryHitRanges = STHitRanges.tCreateDefaultDTXHitRanges();
-				this.strDTXManiaVersion = "Unknown";
-				this.strDateTime = "";
-				this.Hash = "00000000000000000000000000000000";
-				this.strProgress = "";
-				this.レーン9モード = true;
-				this.nRisky = 0;									// #23559 2011.6.20 yyagi
+				strDTXManiaVersion = "Unknown";
+				strDateTime = "";
+				Hash = "00000000000000000000000000000000";
+				strProgress = "";
+				レーン9モード = true;
+				nRisky = 0;									// #23559 2011.6.20 yyagi
 			}
 
-			public bool bフルコンボじゃない
-			{
-				get
-				{
-					return !this.bIsFullCombo;
-				}
-			}
-			public bool bIsFullCombo
-			{
-				get
-				{
-					return ( ( this.nMaxCombo > 0 ) && ( this.nMaxCombo == ( this.nPerfectCount + this.nGreatCount + this.nGoodCount + this.nPoorCount + this.nMissCount ) ) );
-				}
-			}
+			public bool bフルコンボじゃない => !bIsFullCombo;
 
-			public bool b全AUTOじゃない
-			{
-				get
-				{
-					return !b全AUTOである;
-				}
-			}
-			public bool b全AUTOである
-			{
-				get
-				{
-					return (this.nTotalChipsCount - this.nPerfectCount_ExclAuto - this.nGreatCount_ExclAuto - this.nGoodCount_ExclAuto - this.nPoorCount_ExclAuto - this.nMissCount_ExclAuto) == this.nTotalChipsCount;
-				}
-			}
+			public bool bIsFullCombo => ( ( nMaxCombo > 0 ) && ( nMaxCombo == ( nPerfectCount + nGreatCount + nGoodCount + nPoorCount + nMissCount ) ) );
+
+			public bool b全AUTOじゃない => !b全AUTOである;
+			public bool b全AUTOである => (nTotalChipsCount - nPerfectCount_ExclAuto - nGreatCount_ExclAuto - nGoodCount_ExclAuto - nPoorCount_ExclAuto - nMissCount_ExclAuto) == nTotalChipsCount;
 #if false
 			[StructLayout( LayoutKind.Sequential )]
 			public struct STAUTOPLAY
@@ -506,9 +483,9 @@ namespace DTXMania
 
 		public CScoreIni()
 		{
-			this.iniFileDirectoryName = null;
-			this.iniFilename = null;
-			this.stFile = new STFile();
+			iniFileDirectoryName = null;
+			iniFilename = null;
+			stFile = new STFile();
 			stFile.Title = "";
 			stFile.Name = "";
 			stFile.Hash = "";
@@ -517,7 +494,7 @@ namespace DTXMania
 			stFile.BestRank.Guitar = (int)ERANK.UNKNOWN;		//
 			stFile.BestRank.Bass =   (int)ERANK.UNKNOWN;		//
 	
-			this.stSection = new STSection();
+			stSection = new STSection();
 			stSection.HiScoreDrums = new CPerformanceEntry();
 			stSection.HiSkillDrums = new CPerformanceEntry();
 			stSection.HiScoreGuitar = new CPerformanceEntry();
@@ -536,8 +513,8 @@ namespace DTXMania
 		public CScoreIni( string str読み込むiniファイル )
 			: this()
 		{
-			this.tRead( str読み込むiniファイル );
-			this.tCheckIntegrity();
+			tRead( str読み込むiniファイル );
+			tCheckIntegrity();
 		}
 
 
@@ -582,8 +559,8 @@ namespace DTXMania
 		/// <param name="iniファイル名">読み込む .score.ini ファイルを指定します（絶対パスが安全）。</param>
 		public void tRead( string iniファイル名 )
 		{
-			this.iniFileDirectoryName = Path.GetDirectoryName( iniファイル名 );
-			this.iniFilename = Path.GetFileName( iniファイル名 );
+			iniFileDirectoryName = Path.GetDirectoryName( iniファイル名 );
+			iniFilename = Path.GetFileName( iniファイル名 );
 
 			ESectionType section = ESectionType.Unknown;
 			if( File.Exists( iniファイル名 ) )
@@ -673,7 +650,7 @@ namespace DTXMania
 												{
 													goto Label_01C7;
 												}
-												this.stFile.Title = para;
+												stFile.Title = para;
 												continue;
 											}
 										case ESectionType.HiScoreDrums:
@@ -686,7 +663,7 @@ namespace DTXMania
                                         case ESectionType.LastPlayGuitar:
                                         case ESectionType.LastPlayBass:
 											{
-												cPerformanceEntry = this.stSection[ (int) section ];
+												cPerformanceEntry = stSection[ (int) section ];
 												if( !item.Equals( "Score" ) )
 												{
 													goto Label_03B9;
@@ -702,78 +679,78 @@ namespace DTXMania
 						Label_01C7:
 							if( item.Equals( "Name" ) )
 							{
-								this.stFile.Name = para;
+								stFile.Name = para;
 							}
 							else if( item.Equals( "Hash" ) )
 							{
-								this.stFile.Hash = para;
+								stFile.Hash = para;
 							}
 							else if( item.Equals( "PlayCountDrums" ) )
 							{
-								this.stFile.PlayCountDrums = CConversion.nGetNumberIfInRange( para, 0, 99999999, 0 );
+								stFile.PlayCountDrums = CConversion.nGetNumberIfInRange( para, 0, 99999999, 0 );
 							}
 							else if( item.Equals( "PlayCountGuitars" ) )// #23596 11.2.5 changed ikanick
 							{
-								this.stFile.PlayCountGuitar = CConversion.nGetNumberIfInRange( para, 0, 99999999, 0 );
+								stFile.PlayCountGuitar = CConversion.nGetNumberIfInRange( para, 0, 99999999, 0 );
 							}
 							else if( item.Equals( "PlayCountBass" ) )
 							{
-								this.stFile.PlayCountBass = CConversion.nGetNumberIfInRange( para, 0, 99999999, 0 );
+								stFile.PlayCountBass = CConversion.nGetNumberIfInRange( para, 0, 99999999, 0 );
                             }
                             // #23596 10.11.16 add ikanick------------------------------------/
                             else if (item.Equals("ClearCountDrums"))
                             {
-                                this.stFile.ClearCountDrums = CConversion.nGetNumberIfInRange(para, 0, 99999999, 0);
+                                stFile.ClearCountDrums = CConversion.nGetNumberIfInRange(para, 0, 99999999, 0);
                             }
                             else if (item.Equals("ClearCountGuitars"))// #23596 11.2.5 changed ikanick
                             {
-                                this.stFile.ClearCountGuitar = CConversion.nGetNumberIfInRange(para, 0, 99999999, 0);
+                                stFile.ClearCountGuitar = CConversion.nGetNumberIfInRange(para, 0, 99999999, 0);
                             }
                             else if (item.Equals("ClearCountBass"))
                             {
-                                this.stFile.ClearCountBass = CConversion.nGetNumberIfInRange(para, 0, 99999999, 0);
+                                stFile.ClearCountBass = CConversion.nGetNumberIfInRange(para, 0, 99999999, 0);
                             }
                             // #24459 2011.2.24 yyagi-----------------------------------------/
 							else if ( item.Equals( "BestRankDrums" ) )
 							{
-								this.stFile.BestRank.Drums = CConversion.nGetNumberIfInRange( para, (int) ERANK.SS, (int) ERANK.E, (int) ERANK.UNKNOWN );
+								stFile.BestRank.Drums = CConversion.nGetNumberIfInRange( para, (int) ERANK.SS, (int) ERANK.E, (int) ERANK.UNKNOWN );
 							}
 							else if ( item.Equals( "BestRankGuitar" ) )
 							{
-								this.stFile.BestRank.Guitar = CConversion.nGetNumberIfInRange( para, (int) ERANK.SS, (int) ERANK.E, (int) ERANK.UNKNOWN );
+								stFile.BestRank.Guitar = CConversion.nGetNumberIfInRange( para, (int) ERANK.SS, (int) ERANK.E, (int) ERANK.UNKNOWN );
 							}
 							else if ( item.Equals( "BestRankBass" ) )
 							{
-								this.stFile.BestRank.Bass = CConversion.nGetNumberIfInRange( para, (int) ERANK.SS, (int) ERANK.E, (int) ERANK.UNKNOWN );
+								stFile.BestRank.Bass = CConversion.nGetNumberIfInRange( para, (int) ERANK.SS, (int) ERANK.E, (int) ERANK.UNKNOWN );
 							}
 							//----------------------------------------------------------------/
 							else if ( item.Equals( "History0" ) )
 							{
-								this.stFile.History[ 0 ] = para;
+								stFile.History[ 0 ] = para;
 							}
 							else if( item.Equals( "History1" ) )
 							{
-								this.stFile.History[ 1 ] = para;
+								stFile.History[ 1 ] = para;
 							}
 							else if( item.Equals( "History2" ) )
 							{
-								this.stFile.History[ 2 ] = para;
+								stFile.History[ 2 ] = para;
 							}
 							else if( item.Equals( "History3" ) )
 							{
-								this.stFile.History[ 3 ] = para;
+								stFile.History[ 3 ] = para;
 							}
 							else if( item.Equals( "History4" ) )
 							{
-								this.stFile.History[ 4 ] = para;
+								stFile.History[ 4 ] = para;
 							}
 							else if( item.Equals( "HistoryCount" ) )
 							{
-								this.stFile.HistoryCount = CConversion.nGetNumberIfInRange( para, 0, 99999999, 0 );
+								stFile.HistoryCount = CConversion.nGetNumberIfInRange( para, 0, 99999999, 0 );
 							}
 							else if( item.Equals( "BGMAdjust" ) )
 							{
-								this.stFile.BGMAdjust = CConversion.nStringToInt( para, 0 );
+								stFile.BGMAdjust = CConversion.nStringToInt( para, 0 );
 							}
 							continue;
 							#endregion
@@ -822,7 +799,7 @@ namespace DTXMania
 								{
 									for( int i = 0; i < para.Length; i++ )
 									{
-										cPerformanceEntry.bAutoPlay[ i ] = this.ONorOFF( para[ i ] );
+										cPerformanceEntry.bAutoPlay[ i ] = ONorOFF( para[ i ] );
 									}
 								}
 							}
@@ -1341,96 +1318,96 @@ namespace DTXMania
 
 		internal void tAddHistory( string str追加文字列 )
 		{
-			this.stFile.HistoryCount++;
+			stFile.HistoryCount++;
 			for( int i = 3; i >= 0; i-- )
-				this.stFile.History[ i + 1 ] = this.stFile.History[ i ];
+				stFile.History[ i + 1 ] = stFile.History[ i ];
 			DateTime now = DateTime.Now;
-			this.stFile.History[ 0 ] = string.Format( "{0:0}.{1:D2}/{2}/{3} {4}", this.stFile.HistoryCount, now.Year % 100, now.Month, now.Day, str追加文字列 );
+			stFile.History[ 0 ] = string.Format( "{0:0}.{1:D2}/{2}/{3} {4}", stFile.HistoryCount, now.Year % 100, now.Month, now.Day, str追加文字列 );
 		}
 		internal void tExport( string iniファイル名 )
 		{
-			this.iniFileDirectoryName = Path.GetDirectoryName( iniファイル名 );
-			this.iniFilename = Path.GetFileName( iniファイル名 );
+			iniFileDirectoryName = Path.GetDirectoryName( iniファイル名 );
+			iniFilename = Path.GetFileName( iniファイル名 );
 
 			StreamWriter writer = new StreamWriter( iniファイル名, false, Encoding.GetEncoding( "shift-jis" ) );
 			writer.WriteLine( "[File]" );
-			writer.WriteLine( "Title={0}", this.stFile.Title );
-			writer.WriteLine( "Name={0}", this.stFile.Name );
-			writer.WriteLine( "Hash={0}", this.stFile.Hash );
-			writer.WriteLine( "PlayCountDrums={0}", this.stFile.PlayCountDrums );
-			writer.WriteLine( "PlayCountGuitars={0}", this.stFile.PlayCountGuitar );
-            writer.WriteLine( "PlayCountBass={0}", this.stFile.PlayCountBass );
-            writer.WriteLine( "ClearCountDrums={0}", this.stFile.ClearCountDrums );       // #23596 10.11.16 add ikanick
-            writer.WriteLine( "ClearCountGuitars={0}", this.stFile.ClearCountGuitar );    //
-            writer.WriteLine( "ClearCountBass={0}", this.stFile.ClearCountBass );         //
-			writer.WriteLine( "BestRankDrums={0}", this.stFile.BestRank.Drums );		// #24459 2011.2.24 yyagi
-			writer.WriteLine( "BestRankGuitar={0}", this.stFile.BestRank.Guitar );		//
-			writer.WriteLine( "BestRankBass={0}", this.stFile.BestRank.Bass );			//
-			writer.WriteLine( "HistoryCount={0}", this.stFile.HistoryCount );
-			writer.WriteLine( "History0={0}", this.stFile.History[ 0 ] );
-			writer.WriteLine( "History1={0}", this.stFile.History[ 1 ] );
-			writer.WriteLine( "History2={0}", this.stFile.History[ 2 ] );
-			writer.WriteLine( "History3={0}", this.stFile.History[ 3 ] );
-			writer.WriteLine( "History4={0}", this.stFile.History[ 4 ] );
-			writer.WriteLine( "BGMAdjust={0}", this.stFile.BGMAdjust );
+			writer.WriteLine( "Title={0}", stFile.Title );
+			writer.WriteLine( "Name={0}", stFile.Name );
+			writer.WriteLine( "Hash={0}", stFile.Hash );
+			writer.WriteLine( "PlayCountDrums={0}", stFile.PlayCountDrums );
+			writer.WriteLine( "PlayCountGuitars={0}", stFile.PlayCountGuitar );
+            writer.WriteLine( "PlayCountBass={0}", stFile.PlayCountBass );
+            writer.WriteLine( "ClearCountDrums={0}", stFile.ClearCountDrums );       // #23596 10.11.16 add ikanick
+            writer.WriteLine( "ClearCountGuitars={0}", stFile.ClearCountGuitar );    //
+            writer.WriteLine( "ClearCountBass={0}", stFile.ClearCountBass );         //
+			writer.WriteLine( "BestRankDrums={0}", stFile.BestRank.Drums );		// #24459 2011.2.24 yyagi
+			writer.WriteLine( "BestRankGuitar={0}", stFile.BestRank.Guitar );		//
+			writer.WriteLine( "BestRankBass={0}", stFile.BestRank.Bass );			//
+			writer.WriteLine( "HistoryCount={0}", stFile.HistoryCount );
+			writer.WriteLine( "History0={0}", stFile.History[ 0 ] );
+			writer.WriteLine( "History1={0}", stFile.History[ 1 ] );
+			writer.WriteLine( "History2={0}", stFile.History[ 2 ] );
+			writer.WriteLine( "History3={0}", stFile.History[ 3 ] );
+			writer.WriteLine( "History4={0}", stFile.History[ 4 ] );
+			writer.WriteLine( "BGMAdjust={0}", stFile.BGMAdjust );
 			writer.WriteLine();
 			for( int i = 0; i < 9; i++ )
 			{
                 string[] strArray = { "HiScore.Drums", "HiSkill.Drums", "HiScore.Guitar", "HiSkill.Guitar", "HiScore.Bass", "HiSkill.Bass", "LastPlay.Drums", "LastPlay.Guitar", "LastPlay.Bass" };
 				writer.WriteLine( "[{0}]", strArray[ i ] );
-				writer.WriteLine( "Score={0}", this.stSection[ i ].nスコア );
-				writer.WriteLine( "PlaySkill={0}", this.stSection[ i ].dbPerformanceSkill );
-				writer.WriteLine( "Skill={0}", this.stSection[ i ].dbGameSkill );
-				writer.WriteLine( "Perfect={0}", this.stSection[ i ].nPerfectCount );
-				writer.WriteLine( "Great={0}", this.stSection[ i ].nGreatCount );
-				writer.WriteLine( "Good={0}", this.stSection[ i ].nGoodCount );
-				writer.WriteLine( "Poor={0}", this.stSection[ i ].nPoorCount );
-				writer.WriteLine( "Miss={0}", this.stSection[ i ].nMissCount );
-				writer.WriteLine( "MaxCombo={0}", this.stSection[ i ].nMaxCombo );
-				writer.WriteLine( "TotalChips={0}", this.stSection[ i ].nTotalChipsCount );
+				writer.WriteLine( "Score={0}", stSection[ i ].nスコア );
+				writer.WriteLine( "PlaySkill={0}", stSection[ i ].dbPerformanceSkill );
+				writer.WriteLine( "Skill={0}", stSection[ i ].dbGameSkill );
+				writer.WriteLine( "Perfect={0}", stSection[ i ].nPerfectCount );
+				writer.WriteLine( "Great={0}", stSection[ i ].nGreatCount );
+				writer.WriteLine( "Good={0}", stSection[ i ].nGoodCount );
+				writer.WriteLine( "Poor={0}", stSection[ i ].nPoorCount );
+				writer.WriteLine( "Miss={0}", stSection[ i ].nMissCount );
+				writer.WriteLine( "MaxCombo={0}", stSection[ i ].nMaxCombo );
+				writer.WriteLine( "TotalChips={0}", stSection[ i ].nTotalChipsCount );
 				writer.Write( "AutoPlay=" );
 				for ( int j = 0; j < (int) ELane.MAX; j++ )
 				{
-					writer.Write( this.stSection[ i ].bAutoPlay[ j ] ? 1 : 0 );
+					writer.Write( stSection[ i ].bAutoPlay[ j ] ? 1 : 0 );
 				}
 				writer.WriteLine();
-				writer.WriteLine( "Risky={0}", this.stSection[ i ].nRisky );
-				writer.WriteLine( "SuddenDrums={0}", this.stSection[ i ].bSudden.Drums ? 1 : 0 );
-				writer.WriteLine( "SuddenGuitar={0}", this.stSection[ i ].bSudden.Guitar ? 1 : 0 );
-				writer.WriteLine( "SuddenBass={0}", this.stSection[ i ].bSudden.Bass ? 1 : 0 );
-				writer.WriteLine( "HiddenDrums={0}", this.stSection[ i ].bHidden.Drums ? 1 : 0 );
-				writer.WriteLine( "HiddenGuitar={0}", this.stSection[ i ].bHidden.Guitar ? 1 : 0 );
-				writer.WriteLine( "HiddenBass={0}", this.stSection[ i ].bHidden.Bass ? 1 : 0 );
-				writer.WriteLine( "ReverseDrums={0}", this.stSection[ i ].bReverse.Drums ? 1 : 0 );
-				writer.WriteLine( "ReverseGuitar={0}", this.stSection[ i ].bReverse.Guitar ? 1 : 0 );
-				writer.WriteLine( "ReverseBass={0}", this.stSection[ i ].bReverse.Bass ? 1 : 0 );
-				writer.WriteLine( "TightDrums={0}", this.stSection[ i ].bTight ? 1 : 0 );
-				writer.WriteLine( "RandomGuitar={0}", (int) this.stSection[ i ].eRandom.Guitar );
-				writer.WriteLine( "RandomBass={0}", (int) this.stSection[ i ].eRandom.Bass );
-				writer.WriteLine( "LightGuitar={0}", this.stSection[ i ].bLight.Guitar ? 1 : 0 );
-				writer.WriteLine( "LightBass={0}", this.stSection[ i ].bLight.Bass ? 1 : 0 );
-				writer.WriteLine( "LeftGuitar={0}", this.stSection[ i ].bLeft.Guitar ? 1 : 0 );
-				writer.WriteLine( "LeftBass={0}", this.stSection[ i ].bLeft.Bass ? 1 : 0 );
-				writer.WriteLine( "Dark={0}", (int) this.stSection[ i ].eDark );
-				writer.WriteLine( "ScrollSpeedDrums={0}", this.stSection[ i ].fScrollSpeed.Drums );
-				writer.WriteLine( "ScrollSpeedGuitar={0}", this.stSection[ i ].fScrollSpeed.Guitar );
-				writer.WriteLine( "ScrollSpeedBass={0}", this.stSection[ i ].fScrollSpeed.Bass );
-				writer.WriteLine( "PlaySpeed={0}/{1}", this.stSection[ i ].nPlaySpeedNumerator, this.stSection[ i ].nPlaySpeedDenominator );
-				writer.WriteLine( "HHGroup={0}", (int) this.stSection[ i ].eHHGroup );
-				writer.WriteLine( "FTGroup={0}", (int) this.stSection[ i ].eFTGroup );
-				writer.WriteLine( "CYGroup={0}", (int) this.stSection[ i ].eCYGroup );
-                writer.WriteLine( "BDGroup={0}", (int) this.stSection[ i ].eBDGroup);
-				writer.WriteLine( "HitSoundPriorityHH={0}", (int) this.stSection[ i ].eHitSoundPriorityHH );
-				writer.WriteLine( "HitSoundPriorityFT={0}", (int) this.stSection[ i ].eHitSoundPriorityFT );
-				writer.WriteLine( "HitSoundPriorityCY={0}", (int) this.stSection[ i ].eHitSoundPriorityCY );
-				writer.WriteLine( "Guitar={0}", this.stSection[ i ].bGuitarEnabled ? 1 : 0 );
-				writer.WriteLine( "Drums={0}", this.stSection[ i ].bDrumsEnabled ? 1 : 0 );
-				writer.WriteLine( "StageFailed={0}", this.stSection[ i ].bSTAGEFAILEDEnabled ? 1 : 0 );
-				writer.WriteLine( "DamageLevel={0}", (int) this.stSection[ i ].eDamageLevel );
-				writer.WriteLine( "UseKeyboard={0}", this.stSection[ i ].bKeyboardUsed ? 1 : 0 );
-				writer.WriteLine( "UseMIDIIN={0}", this.stSection[ i ].bMIDIUsed ? 1 : 0 );
-				writer.WriteLine( "UseJoypad={0}", this.stSection[ i ].bJoypadUsed ? 1 : 0 );
-				writer.WriteLine( "UseMouse={0}", this.stSection[ i ].bMouseUsed ? 1 : 0 );
+				writer.WriteLine( "Risky={0}", stSection[ i ].nRisky );
+				writer.WriteLine( "SuddenDrums={0}", stSection[ i ].bSudden.Drums ? 1 : 0 );
+				writer.WriteLine( "SuddenGuitar={0}", stSection[ i ].bSudden.Guitar ? 1 : 0 );
+				writer.WriteLine( "SuddenBass={0}", stSection[ i ].bSudden.Bass ? 1 : 0 );
+				writer.WriteLine( "HiddenDrums={0}", stSection[ i ].bHidden.Drums ? 1 : 0 );
+				writer.WriteLine( "HiddenGuitar={0}", stSection[ i ].bHidden.Guitar ? 1 : 0 );
+				writer.WriteLine( "HiddenBass={0}", stSection[ i ].bHidden.Bass ? 1 : 0 );
+				writer.WriteLine( "ReverseDrums={0}", stSection[ i ].bReverse.Drums ? 1 : 0 );
+				writer.WriteLine( "ReverseGuitar={0}", stSection[ i ].bReverse.Guitar ? 1 : 0 );
+				writer.WriteLine( "ReverseBass={0}", stSection[ i ].bReverse.Bass ? 1 : 0 );
+				writer.WriteLine( "TightDrums={0}", stSection[ i ].bTight ? 1 : 0 );
+				writer.WriteLine( "RandomGuitar={0}", (int) stSection[ i ].eRandom.Guitar );
+				writer.WriteLine( "RandomBass={0}", (int) stSection[ i ].eRandom.Bass );
+				writer.WriteLine( "LightGuitar={0}", stSection[ i ].bLight.Guitar ? 1 : 0 );
+				writer.WriteLine( "LightBass={0}", stSection[ i ].bLight.Bass ? 1 : 0 );
+				writer.WriteLine( "LeftGuitar={0}", stSection[ i ].bLeft.Guitar ? 1 : 0 );
+				writer.WriteLine( "LeftBass={0}", stSection[ i ].bLeft.Bass ? 1 : 0 );
+				writer.WriteLine( "Dark={0}", (int) stSection[ i ].eDark );
+				writer.WriteLine( "ScrollSpeedDrums={0}", stSection[ i ].fScrollSpeed.Drums );
+				writer.WriteLine( "ScrollSpeedGuitar={0}", stSection[ i ].fScrollSpeed.Guitar );
+				writer.WriteLine( "ScrollSpeedBass={0}", stSection[ i ].fScrollSpeed.Bass );
+				writer.WriteLine( "PlaySpeed={0}/{1}", stSection[ i ].nPlaySpeedNumerator, stSection[ i ].nPlaySpeedDenominator );
+				writer.WriteLine( "HHGroup={0}", (int) stSection[ i ].eHHGroup );
+				writer.WriteLine( "FTGroup={0}", (int) stSection[ i ].eFTGroup );
+				writer.WriteLine( "CYGroup={0}", (int) stSection[ i ].eCYGroup );
+                writer.WriteLine( "BDGroup={0}", (int) stSection[ i ].eBDGroup);
+				writer.WriteLine( "HitSoundPriorityHH={0}", (int) stSection[ i ].eHitSoundPriorityHH );
+				writer.WriteLine( "HitSoundPriorityFT={0}", (int) stSection[ i ].eHitSoundPriorityFT );
+				writer.WriteLine( "HitSoundPriorityCY={0}", (int) stSection[ i ].eHitSoundPriorityCY );
+				writer.WriteLine( "Guitar={0}", stSection[ i ].bGuitarEnabled ? 1 : 0 );
+				writer.WriteLine( "Drums={0}", stSection[ i ].bDrumsEnabled ? 1 : 0 );
+				writer.WriteLine( "StageFailed={0}", stSection[ i ].bSTAGEFAILEDEnabled ? 1 : 0 );
+				writer.WriteLine( "DamageLevel={0}", (int) stSection[ i ].eDamageLevel );
+				writer.WriteLine( "UseKeyboard={0}", stSection[ i ].bKeyboardUsed ? 1 : 0 );
+				writer.WriteLine( "UseMIDIIN={0}", stSection[ i ].bMIDIUsed ? 1 : 0 );
+				writer.WriteLine( "UseJoypad={0}", stSection[ i ].bJoypadUsed ? 1 : 0 );
+				writer.WriteLine( "UseMouse={0}", stSection[ i ].bMouseUsed ? 1 : 0 );
 				writer.WriteLine($@"PrimaryPerfectRange={stSection[i].stPrimaryHitRanges.nPerfectSizeMs}");
 				writer.WriteLine($@"PrimaryGreatRange={stSection[i].stPrimaryHitRanges.nGreatSizeMs}");
 				writer.WriteLine($@"PrimaryGoodRange={stSection[i].stPrimaryHitRanges.nGoodSizeMs}");
@@ -1439,10 +1416,10 @@ namespace DTXMania
 				writer.WriteLine($@"SecondaryGreatRange={stSection[i].stSecondaryHitRanges.nGreatSizeMs}");
 				writer.WriteLine($@"SecondaryGoodRange={stSection[i].stSecondaryHitRanges.nGoodSizeMs}");
 				writer.WriteLine($@"SecondaryPoorRange={stSection[i].stSecondaryHitRanges.nPoorSizeMs}");
-				writer.WriteLine("DTXManiaVersion={0}", this.stSection[ i ].strDTXManiaVersion );
-				writer.WriteLine("DateTime={0}", this.stSection[ i ].strDateTime );
-				writer.WriteLine("Progress={0}", this.stSection[i].strProgress);
-				writer.WriteLine("Hash={0}", this.stSection[ i ].Hash );
+				writer.WriteLine("DTXManiaVersion={0}", stSection[ i ].strDTXManiaVersion );
+				writer.WriteLine("DateTime={0}", stSection[ i ].strDateTime );
+				writer.WriteLine("Progress={0}", stSection[i].strProgress);
+				writer.WriteLine("Hash={0}", stSection[ i ].Hash );
 			}
 			writer.Close();
 		}
@@ -1450,8 +1427,8 @@ namespace DTXMania
 		{
 			for( int i = 0; i < 9; i++ )
 			{
-				if( !this.bCheckConsistency( (ESectionType) i ) )
-					this.stSection[ i ] = new CPerformanceEntry();
+				if( !bCheckConsistency( (ESectionType) i ) )
+					stSection[ i ] = new CPerformanceEntry();
 			}
         }
         internal static int tCalculateRank(CPerformanceEntry part)

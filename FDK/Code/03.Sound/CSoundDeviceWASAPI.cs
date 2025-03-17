@@ -56,7 +56,7 @@ namespace FDK
 				//if ( BassMix.BASS_Mixer_ChannelGetEnvelopePos( this.hMixer, BASSMIXEnvelope.BASS_MIXER_ENV_VOL, ref f音量 ) == -1 )
 				//    return 100;
 				//bool b = Bass.BASS_ChannelGetAttribute( this.hMixer, BASSAttribute.BASS_ATTRIB_VOL, ref f音量 );
-				bool b = Bass.BASS_ChannelGetAttribute(this.hMixer, BASSAttribute.BASS_ATTRIB_VOL, ref f音量);
+				bool b = Bass.BASS_ChannelGetAttribute(hMixer, BASSAttribute.BASS_ATTRIB_VOL, ref f音量);
 				if (!b)
 				{
 					BASSError be = Bass.BASS_ErrorGetCode();
@@ -76,7 +76,7 @@ namespace FDK
 
 				//				bool b = BassWasapi.BASS_WASAPI_SetVolume( BASSWASAPIVolume.BASS_WASAPI_VOL_SESSION, (float) ( value / 100 ) );
 				//				bool b = BassWasapi.BASS_WASAPI_SetVolume( BASSWASAPIVolume.BASS_WASAPI_CURVE_WINDOWS, (float) ( value / 100 ) );
-				bool b = Bass.BASS_ChannelSetAttribute(this.hMixer, BASSAttribute.BASS_ATTRIB_VOL, (float)(value / 100.0));
+				bool b = Bass.BASS_ChannelSetAttribute(hMixer, BASSAttribute.BASS_ATTRIB_VOL, (float)(value / 100.0));
 				// If you would like to have a volume control in exclusive mode too, and you're using the BASSmix add-on,
 				// you can adjust the source's BASS_ATTRIB_VOL setting via BASS_ChannelSetAttribute.
 				// しかし、hMixerに対するBASS_ChannelSetAttribute()でBASS_ATTRIB_VOLを変更: なぜか出力音量に反映されず
@@ -123,12 +123,12 @@ namespace FDK
 
 			Trace.TraceInformation("BASS (WASAPI{0}) の初期化を開始します。", mode.ToString());
 
-			this.e出力デバイス = ESoundDeviceType.Unknown;
-			this.n実出力遅延ms = 0;
-			this.n経過時間ms = 0;
-			this.n経過時間を更新したシステム時刻ms = CTimer.nUnused;
-			this.tmシステムタイマ = new CTimer(CTimer.EType.MultiMedia);
-			this.b最初の実出力遅延算出 = true;
+			e出力デバイス = ESoundDeviceType.Unknown;
+			n実出力遅延ms = 0;
+			n経過時間ms = 0;
+			n経過時間を更新したシステム時刻ms = CTimer.nUnused;
+			tmシステムタイマ = new CTimer(CTimer.EType.MultiMedia);
+			b最初の実出力遅延算出 = true;
 
 			#region [ BASS registration ]
 			// BASS.NET ユーザ登録（BASSスプラッシュが非表示になる）。
@@ -153,7 +153,7 @@ namespace FDK
 
 			// BASS の設定。
 
-			this.bIsBASSFree = true;
+			bIsBASSFree = true;
 			Debug.Assert(Bass.BASS_SetConfig(BASSConfig.BASS_CONFIG_UPDATEPERIOD, 0),       // 0:BASSストリームの自動更新を行わない。（BASSWASAPIから行うため）
 				string.Format("BASS_SetConfig() に失敗しました。[{0}", Bass.BASS_ErrorGetCode()));
 
@@ -222,7 +222,7 @@ namespace FDK
 
 			n周波数 = 0;           // デフォルトデバイスの周波数 (0="mix format" sample rate)
 			int nチャンネル数 = 0;    // デフォルトデバイスのチャンネル数 (0="mix format" channels)
-			this.tWasapiProc = new WASAPIPROC(this.tWASAPI処理);      // アンマネージに渡す delegate は、フィールドとして保持しておかないとGCでアドレスが変わってしまう。
+			tWasapiProc = new WASAPIPROC(tWASAPI処理);      // アンマネージに渡す delegate は、フィールドとして保持しておかないとGCでアドレスが変わってしまう。
 
 			// WASAPIの更新間隔(period)は、バッファサイズにも影響を与える。
 			// 更新間隔を最小にするには、BassWasapi.BASS_WASAPI_GetDeviceInfo( ndevNo ).minperiod の値を使えばよい。
@@ -359,13 +359,13 @@ namespace FDK
 
 			Trace.TraceInformation("Start Bass_Wasapi_Init(device=" + nDevNo + ", freq=" + n周波数 + ", nchans=" + nチャンネル数 + ", flags=" + flags + "," +
 				" buffer=" + f希望バッファサイズsec + ", period=" + f更新間隔sec + ")");
-			if (BassWasapi.BASS_WASAPI_Init(nDevNo, n周波数, nチャンネル数, flags, f希望バッファサイズsec, f更新間隔sec, this.tWasapiProc, IntPtr.Zero))
+			if (BassWasapi.BASS_WASAPI_Init(nDevNo, n周波数, nチャンネル数, flags, f希望バッファサイズsec, f更新間隔sec, tWasapiProc, IntPtr.Zero))
 			{
 				if (mode == Eデバイスモード.排他)
 				{
 					#region [ 排他モードで作成成功。]
 					//-----------------
-					this.e出力デバイス = ESoundDeviceType.ExclusiveWASAPI;
+					e出力デバイス = ESoundDeviceType.ExclusiveWASAPI;
 
 					nDevNo = BassWasapi.BASS_WASAPI_GetDevice();
 					deviceInfo = BassWasapi.BASS_WASAPI_GetDeviceInfo(nDevNo);
@@ -380,8 +380,8 @@ namespace FDK
 						case BASSWASAPIFormat.BASS_WASAPI_FORMAT_FLOAT: n1サンプルのバイト数 = 4 * wasapiInfo.chans; break;
 					}
 					int n1秒のバイト数 = n1サンプルのバイト数 * wasapiInfo.freq;
-					this.n実バッファサイズms = (long)(wasapiInfo.buflen * 1000.0f / n1秒のバイト数);
-					this.n実出力遅延ms = 0;  // 初期値はゼロ
+					n実バッファサイズms = (long)(wasapiInfo.buflen * 1000.0f / n1秒のバイト数);
+					n実出力遅延ms = 0;  // 初期値はゼロ
 					Trace.TraceInformation("使用デバイス: #" + nDevNo + " : " + deviceInfo.name + ", flags=" + deviceInfo.flags);
 					Trace.TraceInformation("BASS を初期化しました。(WASAPI排他モード, {0}Hz, {1}ch, フォーマット:{2}, バッファ{3}bytes [{4}ms(希望{5}ms)], 更新間隔{6}ms)",
 						wasapiInfo.freq,
@@ -393,7 +393,7 @@ namespace FDK
 						(f更新間隔sec * 1000).ToString()            //n更新間隔ms.ToString()
 					);
 					Trace.TraceInformation("デバイスの最小更新時間={0}ms, 既定の更新時間={1}ms", deviceInfo.minperiod * 1000, deviceInfo.defperiod * 1000);
-					this.bIsBASSFree = false;
+					bIsBASSFree = false;
 					//-----------------
 					#endregion
 				}
@@ -401,13 +401,13 @@ namespace FDK
 				{
 					#region [ 共有モードで作成成功。]
 					//-----------------
-					this.e出力デバイス = ESoundDeviceType.SharedWASAPI;
+					e出力デバイス = ESoundDeviceType.SharedWASAPI;
 
 					var wasapiInfo = BassWasapi.BASS_WASAPI_GetInfo();
 					int n1サンプルのバイト数 = 2 * wasapiInfo.chans; // default;
 					int n1秒のバイト数 = n1サンプルのバイト数 * wasapiInfo.freq;
-					this.n実バッファサイズms = (long)(wasapiInfo.buflen * 1000.0f / n1秒のバイト数);
-					this.n実出力遅延ms = 0;  // 初期値はゼロ
+					n実バッファサイズms = (long)(wasapiInfo.buflen * 1000.0f / n1秒のバイト数);
+					n実出力遅延ms = 0;  // 初期値はゼロ
 					var devInfo = BassWasapi.BASS_WASAPI_GetDeviceInfo(BassWasapi.BASS_WASAPI_GetDevice()); // 共有モードの場合、更新間隔はデバイスのデフォルト値に固定される。
 																											//Trace.TraceInformation( "BASS を初期化しました。(WASAPI共有モード, 希望バッファサイズ={0}ms, 更新間隔{1}ms)", n希望バッファサイズms, devInfo.defperiod * 1000.0f );
 					Trace.TraceInformation("使用デバイス: #" + nDevNo + " : " + deviceInfo.name + ", flags=" + deviceInfo.flags);
@@ -421,7 +421,7 @@ namespace FDK
 						(f更新間隔sec * 1000).ToString()            //n更新間隔ms.ToString()
 					);
 					Trace.TraceInformation("デバイスの最小更新時間={0}ms, 既定の更新時間={1}ms", deviceInfo.minperiod * 1000, deviceInfo.defperiod * 1000);
-					this.bIsBASSFree = false;
+					bIsBASSFree = false;
 					//-----------------
 					#endregion
 				}
@@ -437,7 +437,7 @@ namespace FDK
 				//	goto Retry;
 				//-----------------
 				Bass.BASS_Free();
-				this.bIsBASSFree = true;
+				bIsBASSFree = true;
 				throw new Exception(string.Format("BASS (WASAPI{0}) の初期化に失敗しました。(BASS_WASAPI_Init)[{1}]", mode.ToString(), errcode));
 				#endregion
 			}
@@ -448,7 +448,7 @@ namespace FDK
 				//-----------------
 				BASSError errcode = Bass.BASS_ErrorGetCode();
 				Bass.BASS_Free();
-				this.bIsBASSFree = true;
+				bIsBASSFree = true;
 				throw new Exception(string.Format("BASS (WASAPI{0}) の初期化に失敗しました。(BASS_WASAPI_Init)[{1}]", mode.ToString(), errcode));
 				//-----------------
 				#endregion
@@ -474,17 +474,17 @@ namespace FDK
 				out hMixerThreaded
 			);
 #else
-			this.hMixer = BassMix.BASS_Mixer_StreamCreate(
+			hMixer = BassMix.BASS_Mixer_StreamCreate(
 				info.freq,
 				info.chans,
 				BASSFlag.BASS_MIXER_NONSTOP | BASSFlag.BASS_SAMPLE_FLOAT | BASSFlag.BASS_STREAM_DECODE | BASSFlag.BASS_MIXER_POSEX);    // デコードのみ＝発声しない。WASAPIに出力されるだけ。
 #endif
-			if (this.hMixer == 0)
+			if (hMixer == 0)
 			{
 				BASSError errcode = Bass.BASS_ErrorGetCode();
 				BassWasapi.BASS_WASAPI_Free();
 				Bass.BASS_Free();
-				this.bIsBASSFree = true;
+				bIsBASSFree = true;
 				throw new Exception(string.Format("BASSミキサ(mixing)の作成に失敗しました。[{0}]", errcode));
 			}
 
@@ -499,35 +499,35 @@ namespace FDK
 					out this.hMixerThreaded_Chips[i]
 				);    // デコードのみ＝発声しない。WASAPIに出力されるだけ。
 #else
-				this.hMixer_Chips[i] = BassMix.BASS_Mixer_StreamCreate(
+				hMixer_Chips[i] = BassMix.BASS_Mixer_StreamCreate(
 					info.freq,
 					info.chans,
 					BASSFlag.BASS_MIXER_NONSTOP | BASSFlag.BASS_SAMPLE_FLOAT | BASSFlag.BASS_STREAM_DECODE | BASSFlag.BASS_MIXER_POSEX);    // デコードのみ＝発声しない。WASAPIに出力されるだけ。
 #endif
-				if (this.hMixer_Chips[i] == 0)
+				if (hMixer_Chips[i] == 0)
 				{
 					BASSError errcode = Bass.BASS_ErrorGetCode();
 					BassWasapi.BASS_WASAPI_Free();
 					Bass.BASS_Free();
-					this.bIsBASSFree = true;
+					bIsBASSFree = true;
 					throw new Exception(string.Format("BASSミキサ(楽器[{1}]ごとのmixing)の作成に失敗しました。[{0}]", errcode, i));
 				}
 
 				// Mixerのボリューム設定
-				Bass.BASS_ChannelSetAttribute(this.hMixer_Chips[i], BASSAttribute.BASS_ATTRIB_VOL, CSoundManager.nMixerVolume[i] / 100.0f);
+				Bass.BASS_ChannelSetAttribute(hMixer_Chips[i], BASSAttribute.BASS_ATTRIB_VOL, CSoundManager.nMixerVolume[i] / 100.0f);
 				//Trace.TraceInformation("Vol{0}: {1}", i, CSound管理.nMixerVolume[i]);
 
 #if TEST_MultiThreadedMixer
 				bool b1 = BASSThreadedMixerLibraryWrapper.BASS_ThreadedMixer_AddSource(this.hMixerThreaded, this.hMixer_Chips[i], IntPtr.Zero);
 #else
-				bool b1 = BassMix.BASS_Mixer_StreamAddChannel(this.hMixer, this.hMixer_Chips[i], BASSFlag.BASS_DEFAULT);
+				bool b1 = BassMix.BASS_Mixer_StreamAddChannel(hMixer, hMixer_Chips[i], BASSFlag.BASS_DEFAULT);
 #endif
 				if (!b1)
 				{
 					BASSError errcode = Bass.BASS_ErrorGetCode();
 					BassWasapi.BASS_WASAPI_Free();
 					Bass.BASS_Free();
-					this.bIsBASSFree = true;
+					bIsBASSFree = true;
 					throw new Exception(string.Format("個別BASSミキサ({1}}から(mixing)への接続に失敗しました。[{0}]", errcode, i));
 				};
 
@@ -535,9 +535,9 @@ namespace FDK
 
 			// BASS ミキサーの1秒あたりのバイト数を算出。
 
-			var mixerInfo = Bass.BASS_ChannelGetInfo(this.hMixer);
+			var mixerInfo = Bass.BASS_ChannelGetInfo(hMixer);
 			long nミキサーの1サンプルあたりのバイト数 = mixerInfo.chans * 4; // 4 = sizeof(FLOAT)
-			this.nミキサーの1秒あたりのバイト数 = nミキサーの1サンプルあたりのバイト数 * mixerInfo.freq;
+			nミキサーの1秒あたりのバイト数 = nミキサーの1サンプルあたりのバイト数 * mixerInfo.freq;
 
 
 
@@ -545,27 +545,27 @@ namespace FDK
 			// ChannelGetData()の内容には反映されない。
 			// そのため、もう一段mixerを噛ませて、一段先のmixerからChannelGetData()することで、
 			// hMixerの音量制御を反映させる。
-			this.hMixer_DeviceOut = BassMix.BASS_Mixer_StreamCreate(
+			hMixer_DeviceOut = BassMix.BASS_Mixer_StreamCreate(
 				info.freq,
 				info.chans,
 				BASSFlag.BASS_MIXER_NONSTOP | BASSFlag.BASS_SAMPLE_FLOAT | BASSFlag.BASS_STREAM_DECODE | BASSFlag.BASS_MIXER_POSEX);    // デコードのみ＝発声しない。WASAPIに出力されるだけ。
-			if (this.hMixer_DeviceOut == 0)
+			if (hMixer_DeviceOut == 0)
 			{
 				BASSError errcode = Bass.BASS_ErrorGetCode();
 				BassWasapi.BASS_WASAPI_Free();
 				Bass.BASS_Free();
-				this.bIsBASSFree = true;
+				bIsBASSFree = true;
 				throw new Exception(string.Format("BASSミキサ(最終段)の作成に失敗しました。[{0}]", errcode));
 			}
 
 			{
-				bool b1 = BassMix.BASS_Mixer_StreamAddChannel(this.hMixer_DeviceOut, this.hMixer, BASSFlag.BASS_DEFAULT);
+				bool b1 = BassMix.BASS_Mixer_StreamAddChannel(hMixer_DeviceOut, hMixer, BASSFlag.BASS_DEFAULT);
 				if (!b1)
 				{
 					BASSError errcode = Bass.BASS_ErrorGetCode();
 					BassWasapi.BASS_WASAPI_Free();
 					Bass.BASS_Free();
-					this.bIsBASSFree = true;
+					bIsBASSFree = true;
 					throw new Exception(string.Format("BASSミキサ(最終段とmixing)の接続に失敗しました。[{0}]", errcode));
 				};
 			}
@@ -578,14 +578,14 @@ namespace FDK
 				{
 					case "WAV":
 						{
-							var e = new EncoderWAV(this.hMixer_DeviceOut);
+							var e = new EncoderWAV(hMixer_DeviceOut);
 							//e.WAV_EncoderType = BASSChannelType.BASS_CTYPE_STREAM_WAV_PCM;
 							encoder = e;
 						}
 						break;
 					case "OGG":
 						{
-							var e = new EncoderOGG(this.hMixer_DeviceOut);
+							var e = new EncoderOGG(hMixer_DeviceOut);
 							e.EncoderDirectory = strEncoderPath;
 							e.OGG_UseQualityMode = true;
 							e.OGG_Quality = (float)CSoundManager.nBitrate;
@@ -598,7 +598,7 @@ namespace FDK
 						break;
 					case "MP3":
 						{
-							var e = new EncoderLAME(this.hMixer_DeviceOut);
+							var e = new EncoderLAME(hMixer_DeviceOut);
 							e.EncoderDirectory = strEncoderPath;
 							e.LAME_UseVBR = false;
 							e.LAME_Bitrate = CSoundManager.nBitrate;
@@ -606,7 +606,7 @@ namespace FDK
 						}
 						break;
 					default:
-						encoder = new EncoderWAV(this.hMixer_DeviceOut);
+						encoder = new EncoderWAV(hMixer_DeviceOut);
 						break;
 				}
 				encoder.InputFile = null;    //STDIN
@@ -648,7 +648,7 @@ namespace FDK
 #else
 			int hmixer = hMixer_Chips[(int)eInstType];
 #endif
-			sound.tWASAPIサウンドを作成する(strファイル名, hmixer, this.e出力デバイス, eInstType);
+			sound.tWASAPIサウンドを作成する(strファイル名, hmixer, e出力デバイス, eInstType);
 			return sound;
 		}
 		public CSound tサウンドを作成する(byte[] byArrWAVファイルイメージ)
@@ -663,7 +663,7 @@ namespace FDK
 #else
 			int hmixer = hMixer_Chips[(int)eInstType];
 #endif
-			sound.tWASAPIサウンドを作成する(byArrWAVファイルイメージ, hmixer, this.e出力デバイス, eInstType);
+			sound.tWASAPIサウンドを作成する(byArrWAVファイルイメージ, hmixer, e出力デバイス, eInstType);
 			return sound;
 		}
 		public void tサウンドを作成する(string strファイル名, ref CSound sound, CSound.EInstType eInstType)
@@ -673,7 +673,7 @@ namespace FDK
 #else
 			int hmixer = hMixer_Chips[(int)eInstType];
 #endif
-			sound.tWASAPIサウンドを作成する(strファイル名, hmixer, this.e出力デバイス, eInstType);
+			sound.tWASAPIサウンドを作成する(strファイル名, hmixer, e出力デバイス, eInstType);
 		}
 		public void tサウンドを作成する(byte[] byArrWAVファイルイメージ, ref CSound sound, CSound.EInstType eInstType)
 		{
@@ -682,7 +682,7 @@ namespace FDK
 #else
 			int hmixer = hMixer_Chips[(int)eInstType];
 #endif
-			sound.tWASAPIサウンドを作成する(byArrWAVファイルイメージ, hmixer, this.e出力デバイス, eInstType);
+			sound.tWASAPIサウンドを作成する(byArrWAVファイルイメージ, hmixer, e出力デバイス, eInstType);
 		}
 		#endregion
 
@@ -690,7 +690,7 @@ namespace FDK
 		//-----------------
 		public void Dispose()
 		{
-			this.Dispose(true);
+			Dispose(true);
 			GC.SuppressFinalize(this);
 		}
 		protected void Dispose(bool bManagedDispose)
@@ -701,37 +701,37 @@ namespace FDK
 				encoder.Dispose();
 				encoder = null;
 			}
-			this.e出力デバイス = ESoundDeviceType.Unknown;        // まず出力停止する(Dispose中にクラス内にアクセスされることを防ぐ)
+			e出力デバイス = ESoundDeviceType.Unknown;        // まず出力停止する(Dispose中にクラス内にアクセスされることを防ぐ)
 
-			if (this.hMixer_DeviceOut != 0)
+			if (hMixer_DeviceOut != 0)
 			{
-				BassMix.BASS_Mixer_ChannelPause(this.hMixer_DeviceOut);
-				Bass.BASS_StreamFree(this.hMixer_DeviceOut);
-				this.hMixer_DeviceOut = 0;
+				BassMix.BASS_Mixer_ChannelPause(hMixer_DeviceOut);
+				Bass.BASS_StreamFree(hMixer_DeviceOut);
+				hMixer_DeviceOut = 0;
 			}
-			if (this.hMixer_Record != 0)
+			if (hMixer_Record != 0)
 			{
-				BassMix.BASS_Mixer_ChannelPause(this.hMixer_Record);
-				Bass.BASS_StreamFree(this.hMixer_Record);
-				this.hMixer_Record = 0;
+				BassMix.BASS_Mixer_ChannelPause(hMixer_Record);
+				Bass.BASS_StreamFree(hMixer_Record);
+				hMixer_Record = 0;
 			}
 
 			if (hMixer != 0)
 			{
-				BassMix.BASS_Mixer_ChannelPause(this.hMixer_Record);
-				Bass.BASS_StreamFree(this.hMixer);
+				BassMix.BASS_Mixer_ChannelPause(hMixer_Record);
+				Bass.BASS_StreamFree(hMixer);
 			}
-			if (this.hMixer_Chips != null)
+			if (hMixer_Chips != null)
 			{
 				for (int i = 0; i <= (int)CSound.EInstType.Unknown; i++)
 				{
-					if (this.hMixer_Chips[i] != 0)
+					if (hMixer_Chips[i] != 0)
 					{
 						// Mixerにinputされるchannelsがfreeされると、Mixerへのinputも自動でremoveされる。
 						// 従い、ここでは、mixer本体をfreeするだけでよい
-						BassMix.BASS_Mixer_ChannelPause(this.hMixer_Chips[i]);
-						Bass.BASS_StreamFree(this.hMixer_Chips[i]);
-						this.hMixer_Chips[i] = 0;
+						BassMix.BASS_Mixer_ChannelPause(hMixer_Chips[i]);
+						Bass.BASS_StreamFree(hMixer_Chips[i]);
+						hMixer_Chips[i] = 0;
 					}
 				}
 			}
@@ -739,20 +739,20 @@ namespace FDK
 			//BASSThreadedMixerLibraryWrapper.FreeBASSThreadedMixerLibrary();		
 #endif
 
-			if (!this.bIsBASSFree)
+			if (!bIsBASSFree)
 			{
 				BassWasapi.BASS_WASAPI_Free();  // システムタイマより先に呼び出すこと。（tWasapi処理() の中でシステムタイマを参照してるため）
 				Bass.BASS_Free();
 			}
 			if (bManagedDispose)
 			{
-				CCommon.tDispose(this.tmシステムタイマ);
-				this.tmシステムタイマ = null;
+				CCommon.tDispose(tmシステムタイマ);
+				tmシステムタイマ = null;
 			}
 		}
 		~CSoundDeviceWASAPI()
 		{
-			this.Dispose(false);
+			Dispose(false);
 		}
 		//-----------------
 		#endregion
@@ -774,7 +774,7 @@ namespace FDK
 		{
 			// BASSミキサからの出力データをそのまま WASAPI buffer へ丸投げ。
 
-			int num = Bass.BASS_ChannelGetData(this.hMixer_DeviceOut, buffer, length);        // num = 実際に転送した長さ
+			int num = Bass.BASS_ChannelGetData(hMixer_DeviceOut, buffer, length);        // num = 実際に転送した長さ
 																							  //int num = BassMix.BASS_Mixer_ChannelGetData(this.hMixer_DeviceOut, buffer, length);      // これだと動作がめちゃくちゃ重くなる
 			if (num == -1) num = 0;
 
@@ -783,20 +783,20 @@ namespace FDK
 			// データの転送差分ではなく累積転送バイト数から算出する。
 
 			int n未再生バイト数 = BassWasapi.BASS_WASAPI_GetData(null, (int)BASSData.BASS_DATA_AVAILABLE); // 誤差削減のため、必要となるギリギリ直前に取得する。
-			this.n経過時間ms = (this.n累積転送バイト数 - n未再生バイト数) * 1000 / this.nミキサーの1秒あたりのバイト数;
-			this.n経過時間を更新したシステム時刻ms = this.tmシステムタイマ.nSystemTimeMs;
+			n経過時間ms = (n累積転送バイト数 - n未再生バイト数) * 1000 / nミキサーの1秒あたりのバイト数;
+			n経過時間を更新したシステム時刻ms = tmシステムタイマ.nSystemTimeMs;
 
 			// 実出力遅延を更新。
 			// 未再生バイト数の平均値。
 
-			long n今回の遅延ms = n未再生バイト数 * 1000 / this.nミキサーの1秒あたりのバイト数;
-			this.n実出力遅延ms = (this.b最初の実出力遅延算出) ? n今回の遅延ms : (this.n実出力遅延ms + n今回の遅延ms) / 2;
-			this.b最初の実出力遅延算出 = false;
+			long n今回の遅延ms = n未再生バイト数 * 1000 / nミキサーの1秒あたりのバイト数;
+			n実出力遅延ms = (b最初の実出力遅延算出) ? n今回の遅延ms : (n実出力遅延ms + n今回の遅延ms) / 2;
+			b最初の実出力遅延算出 = false;
 
 
 			// 経過時間を更新後に、今回分の累積転送バイト数を反映。
 
-			this.n累積転送バイト数 += num;
+			n累積転送バイト数 += num;
 			return num;
 		}
 

@@ -11,7 +11,7 @@ namespace DTXMania
 
 		public CActPerfBGA()
 		{
-			base.bNotActivated = true;
+			bNotActivated = true;
 		}
 		
 		
@@ -21,40 +21,40 @@ namespace DTXMania
 		{
 			for( int i = 0; i < 8; i++ )
 			{
-				if( nチャンネル == this.nChannel[ i ] )
+				if( nチャンネル == nChannel[ i ] )
 				{
-					this.stLayer[ i ].rBMP = bmp;
-					this.stLayer[ i ].rBMPTEX = bmptex;
+					stLayer[ i ].rBMP = bmp;
+					stLayer[ i ].rBMPTEX = bmptex;
 					return;
 				}
 			}
 		}
 		public void Start( EChannel nチャンネル, CDTX.CBMP bmp, CDTX.CBMPTEX bmptex, int n開始サイズW, int n開始サイズH, int n終了サイズW, int n終了サイズH, int n画像側開始位置X, int n画像側開始位置Y, int n画像側終了位置X, int n画像側終了位置Y, int n表示側開始位置X, int n表示側開始位置Y, int n表示側終了位置X, int n表示側終了位置Y, int n総移動時間ms )
 		{
-			this.Start( nチャンネル, bmp, bmptex, n開始サイズW, n開始サイズH, n終了サイズW, n終了サイズH, n画像側開始位置X, n画像側開始位置Y, n画像側終了位置X, n画像側終了位置Y, n表示側開始位置X, n表示側開始位置Y, n表示側終了位置X, n表示側終了位置Y, n総移動時間ms, -1 );
+			Start( nチャンネル, bmp, bmptex, n開始サイズW, n開始サイズH, n終了サイズW, n終了サイズH, n画像側開始位置X, n画像側開始位置Y, n画像側終了位置X, n画像側終了位置Y, n表示側開始位置X, n表示側開始位置Y, n表示側終了位置X, n表示側終了位置Y, n総移動時間ms, -1 );
 		}
 		public void Start(EChannel nチャンネル, CDTX.CBMP bmp, CDTX.CBMPTEX bmptex, int n開始サイズW, int n開始サイズH, int n終了サイズW, int n終了サイズH, int n画像側開始位置X, int n画像側開始位置Y, int n画像側終了位置X, int n画像側終了位置Y, int n表示側開始位置X, int n表示側開始位置Y, int n表示側終了位置X, int n表示側終了位置Y, int n総移動時間ms, int n移動開始時刻ms )
 		{
 			for( int i = 0; i < 8; i++ )
 			{
-				if( nチャンネル == this.nChannel[ i ] )
+				if( nチャンネル == nChannel[ i ] )
 				{
-					this.stLayer[ i ].rBMP = bmp;
-					this.stLayer[ i ].rBMPTEX = bmptex;
-					this.stLayer[ i ].sz開始サイズ.Width = n開始サイズW;
-					this.stLayer[ i ].sz開始サイズ.Height = n開始サイズH;
-					this.stLayer[ i ].sz終了サイズ.Width = n終了サイズW;
-					this.stLayer[ i ].sz終了サイズ.Height = n終了サイズH;
-					this.stLayer[ i ].pt画像側開始位置.X = n画像側開始位置X;
-					this.stLayer[ i ].pt画像側開始位置.Y = n画像側開始位置Y;
-					this.stLayer[ i ].pt画像側終了位置.X = n画像側終了位置X;
-					this.stLayer[ i ].pt画像側終了位置.Y = n画像側終了位置Y;
-					this.stLayer[ i ].pt表示側開始位置.X = n表示側開始位置X;
-					this.stLayer[ i ].pt表示側開始位置.Y = n表示側開始位置Y;
-					this.stLayer[ i ].pt表示側終了位置.X = n表示側終了位置X;
-					this.stLayer[ i ].pt表示側終了位置.Y = n表示側終了位置Y;
-					this.stLayer[ i ].n総移動時間ms = n総移動時間ms;
-					this.stLayer[ i ].n移動開始時刻ms = ( n移動開始時刻ms != -1 ) ? n移動開始時刻ms : CDTXMania.Timer.nCurrentTime;
+					stLayer[ i ].rBMP = bmp;
+					stLayer[ i ].rBMPTEX = bmptex;
+					stLayer[ i ].sz開始サイズ.Width = n開始サイズW;
+					stLayer[ i ].sz開始サイズ.Height = n開始サイズH;
+					stLayer[ i ].sz終了サイズ.Width = n終了サイズW;
+					stLayer[ i ].sz終了サイズ.Height = n終了サイズH;
+					stLayer[ i ].pt画像側開始位置.X = n画像側開始位置X;
+					stLayer[ i ].pt画像側開始位置.Y = n画像側開始位置Y;
+					stLayer[ i ].pt画像側終了位置.X = n画像側終了位置X;
+					stLayer[ i ].pt画像側終了位置.Y = n画像側終了位置Y;
+					stLayer[ i ].pt表示側開始位置.X = n表示側開始位置X;
+					stLayer[ i ].pt表示側開始位置.Y = n表示側開始位置Y;
+					stLayer[ i ].pt表示側終了位置.X = n表示側終了位置X;
+					stLayer[ i ].pt表示側終了位置.Y = n表示側終了位置Y;
+					stLayer[ i ].n総移動時間ms = n総移動時間ms;
+					stLayer[ i ].n移動開始時刻ms = ( n移動開始時刻ms != -1 ) ? n移動開始時刻ms : CDTXMania.Timer.nCurrentTime;
 				}
 			}
 		}
@@ -72,28 +72,28 @@ namespace DTXMania
 					case EBGAType.BMP:
 						if( ( chip.rBMP != null ) && ( chip.rBMP.tx画像 != null ) )
 						{
-							this.Start( chip.nChannelNumber, chip.rBMP, null, chip.rBMP.n幅, chip.rBMP.n高さ, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, chip.nPlaybackTimeMs );
+							Start( chip.nChannelNumber, chip.rBMP, null, chip.rBMP.n幅, chip.rBMP.n高さ, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, chip.nPlaybackTimeMs );
 						}
 						break;
 
 					case EBGAType.BMPTEX:
 						if( ( chip.rBMPTEX != null ) && ( chip.rBMPTEX.tx画像 != null ) )
 						{
-							this.Start( chip.nChannelNumber, null, chip.rBMPTEX, chip.rBMPTEX.tx画像.szImageSize.Width, chip.rBMPTEX.tx画像.szImageSize.Height, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, chip.nPlaybackTimeMs );
+							Start( chip.nChannelNumber, null, chip.rBMPTEX, chip.rBMPTEX.tx画像.szImageSize.Width, chip.rBMPTEX.tx画像.szImageSize.Height, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, chip.nPlaybackTimeMs );
 						}
 						break;
 
 					case EBGAType.BGA:
 						if( chip.rBGA != null )
 						{
-							this.Start( chip.nChannelNumber, chip.rBMP, chip.rBMPTEX, chip.rBGA.pt画像側右下座標.X - chip.rBGA.pt画像側左上座標.X, chip.rBGA.pt画像側右下座標.Y - chip.rBGA.pt画像側左上座標.Y, 0, 0, chip.rBGA.pt画像側左上座標.X, chip.rBGA.pt画像側左上座標.Y, 0, 0, chip.rBGA.pt表示座標.X, chip.rBGA.pt表示座標.Y, 0, 0, 0, chip.nPlaybackTimeMs );
+							Start( chip.nChannelNumber, chip.rBMP, chip.rBMPTEX, chip.rBGA.pt画像側右下座標.X - chip.rBGA.pt画像側左上座標.X, chip.rBGA.pt画像側右下座標.Y - chip.rBGA.pt画像側左上座標.Y, 0, 0, chip.rBGA.pt画像側左上座標.X, chip.rBGA.pt画像側左上座標.Y, 0, 0, chip.rBGA.pt表示座標.X, chip.rBGA.pt表示座標.Y, 0, 0, 0, chip.nPlaybackTimeMs );
 						}
 						break;
 
 					case EBGAType.BGAPAN:
 						if( chip.rBGAPan != null )
 						{
-							this.Start( chip.nChannelNumber, chip.rBMP, chip.rBMPTEX, chip.rBGAPan.sz開始サイズ.Width, chip.rBGAPan.sz開始サイズ.Height, chip.rBGAPan.sz終了サイズ.Width, chip.rBGAPan.sz終了サイズ.Height, chip.rBGAPan.pt画像側開始位置.X, chip.rBGAPan.pt画像側開始位置.Y, chip.rBGAPan.pt画像側終了位置.X, chip.rBGAPan.pt画像側終了位置.Y, chip.rBGAPan.pt表示側開始位置.X, chip.rBGAPan.pt表示側開始位置.Y, chip.rBGAPan.pt表示側終了位置.X, chip.rBGAPan.pt表示側終了位置.Y, chip.n総移動時間, chip.nPlaybackTimeMs );
+							Start( chip.nChannelNumber, chip.rBMP, chip.rBMPTEX, chip.rBGAPan.sz開始サイズ.Width, chip.rBGAPan.sz開始サイズ.Height, chip.rBGAPan.sz終了サイズ.Width, chip.rBGAPan.sz終了サイズ.Height, chip.rBGAPan.pt画像側開始位置.X, chip.rBGAPan.pt画像側開始位置.Y, chip.rBGAPan.pt画像側終了位置.X, chip.rBGAPan.pt画像側終了位置.Y, chip.rBGAPan.pt表示側開始位置.X, chip.rBGAPan.pt表示側開始位置.Y, chip.rBGAPan.pt表示側終了位置.X, chip.rBGAPan.pt表示側終了位置.Y, chip.n総移動時間, chip.nPlaybackTimeMs );
 						}
 						break;
 				}
@@ -103,7 +103,7 @@ namespace DTXMania
 		{
 			for( int i = 0; i < 8; i++ )
 			{
-				this.stLayer[ i ].n移動開始時刻ms = -1;
+				stLayer[ i ].n移動開始時刻ms = -1;
 			}
 		}
 
@@ -119,31 +119,31 @@ namespace DTXMania
 				stlayer.rBMP = null;
 				stlayer.rBMPTEX = null;
 				stlayer.n移動開始時刻ms = -1;
-				this.stLayer[ i ] = stlayer;
+				stLayer[ i ] = stlayer;
 			}
 			base.OnActivate();
 		}
 		public override void OnManagedCreateResources()
 		{
-			if( !base.bNotActivated )
+			if( !bNotActivated )
 			{
-                this.txBGAバックパネル = new CTexture(CDTXMania.app.Device, 278, 355, CDTXMania.app.GraphicsDeviceManager.CurrentSettings.BackBufferFormat, Pool.Managed);
+                txBGAバックパネル = new CTexture(CDTXMania.app.Device, 278, 355, CDTXMania.app.GraphicsDeviceManager.CurrentSettings.BackBufferFormat, Pool.Managed);
 				using( Surface surface = CDTXMania.app.Device.GetBackBuffer( 0, 0 ) )
 				{
-					this.sfBackBuffer = Surface.CreateOffscreenPlain( CDTXMania.app.Device, surface.Description.Width, surface.Description.Height, surface.Description.Format, Pool.SystemMemory );
+					sfBackBuffer = Surface.CreateOffscreenPlain( CDTXMania.app.Device, surface.Description.Width, surface.Description.Height, surface.Description.Format, Pool.SystemMemory );
 				}
 				base.OnManagedCreateResources();
 			}
 		}
 		public override void OnManagedReleaseResources()
 		{
-			if( !base.bNotActivated )
+			if( !bNotActivated )
 			{
-                CDTXMania.tReleaseTexture( ref this.txBGAバックパネル );
-				if( this.sfBackBuffer != null )
+                CDTXMania.tReleaseTexture( ref txBGAバックパネル );
+				if( sfBackBuffer != null )
 				{
-					this.sfBackBuffer.Dispose();
-					this.sfBackBuffer = null;
+					sfBackBuffer.Dispose();
+					sfBackBuffer = null;
 				}
 				base.OnManagedReleaseResources();
 			}
@@ -154,34 +154,34 @@ namespace DTXMania
 		}
 		public int tUpdateAndDraw( int x, int y )
 		{
-			if( !base.bNotActivated )
+			if( !bNotActivated )
 			{
-                this.txBGAバックパネル.tDraw2D(CDTXMania.app.Device, 980, 0);
+                txBGAバックパネル.tDraw2D(CDTXMania.app.Device, 980, 0);
 				for( int i = 0; i < 8; i++ )
 				{
-					if( ( ( this.stLayer[ i ].n移動開始時刻ms != -1 ) && ( ( this.stLayer[ i ].rBMP != null ) || ( this.stLayer[ i ].rBMPTEX != null ) ) ) && ( ( ( this.stLayer[ i ].rBMP == null ) || ( this.stLayer[ i ].rBMP.bUse && ( this.stLayer[ i ].rBMP.tx画像 != null ) ) ) && ( ( this.stLayer[ i ].rBMPTEX == null ) || ( this.stLayer[ i ].rBMPTEX.bUse && ( this.stLayer[ i ].rBMPTEX.tx画像 != null ) ) ) ) )
+					if( ( ( stLayer[ i ].n移動開始時刻ms != -1 ) && ( ( stLayer[ i ].rBMP != null ) || ( stLayer[ i ].rBMPTEX != null ) ) ) && ( ( ( stLayer[ i ].rBMP == null ) || ( stLayer[ i ].rBMP.bUse && ( stLayer[ i ].rBMP.tx画像 != null ) ) ) && ( ( stLayer[ i ].rBMPTEX == null ) || ( stLayer[ i ].rBMPTEX.bUse && ( stLayer[ i ].rBMPTEX.tx画像 != null ) ) ) ) )
 					{
-						Size size = this.stLayer[ i ].sz開始サイズ;
-						Size size2 = this.stLayer[ i ].sz終了サイズ;
-						Point point = this.stLayer[ i ].pt画像側開始位置;
-						Point point2 = this.stLayer[ i ].pt画像側終了位置;
-						Point point3 = this.stLayer[ i ].pt表示側開始位置;
-						Point point4 = this.stLayer[ i ].pt表示側終了位置;
-						long num2 = this.stLayer[ i ].n総移動時間ms;
-						long num3 = this.stLayer[ i ].n移動開始時刻ms;
+						Size size = stLayer[ i ].sz開始サイズ;
+						Size size2 = stLayer[ i ].sz終了サイズ;
+						Point point = stLayer[ i ].pt画像側開始位置;
+						Point point2 = stLayer[ i ].pt画像側終了位置;
+						Point point3 = stLayer[ i ].pt表示側開始位置;
+						Point point4 = stLayer[ i ].pt表示側終了位置;
+						long num2 = stLayer[ i ].n総移動時間ms;
+						long num3 = stLayer[ i ].n移動開始時刻ms;
 						if( CDTXMania.Timer.nCurrentTime < num3 )
 						{
 							num3 = CDTXMania.Timer.nCurrentTime;
 						}
 						Size size3 = new Size( 0x116, 0x163 );
-						Size size4 = new Size( ( this.stLayer[ i ].rBMP != null ) ? this.stLayer[ i ].rBMP.n幅 : this.stLayer[ i ].rBMPTEX.tx画像.szImageSize.Width, ( this.stLayer[ i ].rBMP != null ) ? this.stLayer[ i ].rBMP.n高さ : this.stLayer[ i ].rBMPTEX.tx画像.szImageSize.Height );
+						Size size4 = new Size( ( stLayer[ i ].rBMP != null ) ? stLayer[ i ].rBMP.n幅 : stLayer[ i ].rBMPTEX.tx画像.szImageSize.Width, ( stLayer[ i ].rBMP != null ) ? stLayer[ i ].rBMP.n高さ : stLayer[ i ].rBMPTEX.tx画像.szImageSize.Height );
 						int num4 = (int) ( ( CDTXMania.Timer.nCurrentTime - num3 ) * ( ( (double) CDTXMania.ConfigIni.nPlaySpeed ) / 20.0 ) );
 						if( ( num2 != 0 ) && ( num2 < num4 ) )
 						{
-							this.stLayer[ i ].pt画像側開始位置 = point = point2;
-							this.stLayer[ i ].pt表示側開始位置 = point3 = point4;
-							this.stLayer[ i ].sz開始サイズ = size = size2;
-							this.stLayer[ i ].n総移動時間ms = num2 = 0;
+							stLayer[ i ].pt画像側開始位置 = point = point2;
+							stLayer[ i ].pt表示側開始位置 = point3 = point4;
+							stLayer[ i ].sz開始サイズ = size = size2;
+							stLayer[ i ].n総移動時間ms = num2 = 0;
 						}
 						Rectangle rectangle = new Rectangle();
 						Rectangle rectangle2 = new Rectangle();
@@ -261,13 +261,13 @@ namespace DTXMania
 							}
 							if( ( ( ( ( rectangle.Left < rectangle.Right ) && ( rectangle.Top < rectangle.Bottom ) ) && ( ( rectangle2.Left < rectangle2.Right ) && ( rectangle2.Top < rectangle2.Bottom ) ) ) && ( ( ( rectangle.Right >= 0 ) && ( rectangle.Bottom >= 0 ) ) && ( ( rectangle.Left <= size4.Width ) && ( rectangle.Top <= size4.Height ) ) ) ) && ( ( ( rectangle2.Right >= 0 ) && ( rectangle2.Bottom >= 0 ) ) && ( ( rectangle2.Left <= size3.Width ) && ( rectangle2.Top <= size3.Height ) ) ) )
 							{
-								if( ( this.stLayer[ i ].rBMP != null ) && ( this.stLayer[ i ].rBMP.tx画像 != null ) )
+								if( ( stLayer[ i ].rBMP != null ) && ( stLayer[ i ].rBMP.tx画像 != null ) )
 								{
-									this.stLayer[ i ].rBMP.tx画像.tDraw2D( CDTXMania.app.Device, x + rectangle2.X, y + rectangle2.Y, rectangle );
+									stLayer[ i ].rBMP.tx画像.tDraw2D( CDTXMania.app.Device, x + rectangle2.X, y + rectangle2.Y, rectangle );
 								}
-								else if( ( this.stLayer[ i ].rBMPTEX != null ) && ( this.stLayer[ i ].rBMPTEX.tx画像 != null ) )
+								else if( ( stLayer[ i ].rBMPTEX != null ) && ( stLayer[ i ].rBMPTEX.tx画像 != null ) )
 								{
-									this.stLayer[ i ].rBMPTEX.tx画像.tDraw2D( CDTXMania.app.Device, x + rectangle2.X, y + rectangle2.Y, rectangle );
+									stLayer[ i ].rBMPTEX.tx画像.tDraw2D( CDTXMania.app.Device, x + rectangle2.X, y + rectangle2.Y, rectangle );
 								}
 							}
 						}

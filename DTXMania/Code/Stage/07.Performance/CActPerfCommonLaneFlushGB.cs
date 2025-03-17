@@ -14,7 +14,7 @@ namespace DTXMania
 
 		public CActPerfCommonLaneFlushGB()
 		{
-			base.bNotActivated = true;
+			bNotActivated = true;
 		}
 
 
@@ -26,7 +26,7 @@ namespace DTXMania
 			{
 				throw new IndexOutOfRangeException( "有効範囲は 0～10 です。" );
 			}
-			this.ctUpdate[ nLane ] = new CCounter( 0, 70, 1, CDTXMania.Timer );
+			ctUpdate[ nLane ] = new CCounter( 0, 70, 1, CDTXMania.Timer );
 		}
 
 
@@ -36,7 +36,7 @@ namespace DTXMania
 		{
 			for( int i = 0; i < 10; i++ )
 			{
-				this.ctUpdate[ i ] = new CCounter();
+				ctUpdate[ i ] = new CCounter();
 			}
 			base.OnActivate();
 		}
@@ -44,35 +44,35 @@ namespace DTXMania
 		{
 			for( int i = 0; i < 10; i++ )
 			{
-				this.ctUpdate[ i ] = null;
+				ctUpdate[ i ] = null;
 			}
 			base.OnDeactivate();
 		}
 		public override void OnManagedCreateResources()
 		{
-			if( !base.bNotActivated )
+			if( !bNotActivated )
 			{
-				this.txFlush[ 0 ] = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlay lane flush red.png" ) );
-				this.txFlush[ 1 ] = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlay lane flush green.png" ) );
-				this.txFlush[ 2 ] = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlay lane flush blue.png" ) );
-                this.txFlush[ 3 ] = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlay lane flush yellow.png" ) );
-				this.txFlush[ 4 ] = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlay lane flush purple.png" ) );
+				txFlush[ 0 ] = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlay lane flush red.png" ) );
+				txFlush[ 1 ] = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlay lane flush green.png" ) );
+				txFlush[ 2 ] = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlay lane flush blue.png" ) );
+                txFlush[ 3 ] = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlay lane flush yellow.png" ) );
+				txFlush[ 4 ] = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlay lane flush purple.png" ) );
 
-				this.txFlush[ 5 ] = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlay lane flush red reverse.png" ) );
-				this.txFlush[ 6 ] = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlay lane flush green reverse.png" ) );
-				this.txFlush[ 7 ] = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlay lane flush blue reverse.png" ) );
-                this.txFlush[ 8 ] = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlay lane flush yellow reverse.png" ) );
-				this.txFlush[ 9 ] = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlay lane flush purple reverse.png" ) );
+				txFlush[ 5 ] = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlay lane flush red reverse.png" ) );
+				txFlush[ 6 ] = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlay lane flush green reverse.png" ) );
+				txFlush[ 7 ] = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlay lane flush blue reverse.png" ) );
+                txFlush[ 8 ] = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlay lane flush yellow reverse.png" ) );
+				txFlush[ 9 ] = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlay lane flush purple reverse.png" ) );
 				base.OnManagedCreateResources();
 			}
 		}
 		public override void OnManagedReleaseResources()
 		{
-			if( !base.bNotActivated )
+			if( !bNotActivated )
 			{
 				for( int i = 0; i < 10; i++ )
 				{
-					CDTXMania.tReleaseTexture( ref this.txFlush[ i ] );
+					CDTXMania.tReleaseTexture( ref txFlush[ i ] );
 				}
 				base.OnManagedReleaseResources();
 			}

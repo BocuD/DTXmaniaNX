@@ -32,7 +32,7 @@
 		{
 			get
 			{
-				if (this.nChannelNumber == EChannel.BPM || this.nChannelNumber == EChannel.BPMEx)
+				if (nChannelNumber == EChannel.BPM || nChannelNumber == EChannel.BPMEx)
 				{
 					return true;
 				}
@@ -47,7 +47,7 @@
         {
             get
             {
-				switch (this.nChannelNumber)
+				switch (nChannelNumber)
 				{
 					case EChannel.Guitar_Open:
 					case EChannel.Bass_Open:
@@ -60,7 +60,7 @@
 		public bool bChipIsWailingNote {
             get
             {
-                switch (this.nChannelNumber)
+                switch (nChannelNumber)
                 {
                     case EChannel.Guitar_Wailing:
                     case EChannel.Bass_Wailing:
@@ -74,7 +74,7 @@
         {
             get
             {
-				switch (this.nChannelNumber)
+				switch (nChannelNumber)
 				{					
 					case EChannel.HiHatClose:
 					case EChannel.Snare:
@@ -238,7 +238,7 @@
 		{
 			get
 			{
-				switch (this.nChannelNumber)
+				switch (nChannelNumber)
 				{
 					case EChannel.BGM:
 					case EChannel.HiHatClose:
@@ -390,7 +390,7 @@
 		{
 			get
 			{
-				EChannel num = this.nChannelNumber;
+				EChannel num = nChannelNumber;
 				if (num == EChannel.BGM ||
 					(EChannel.SE01 <= num && num <= EChannel.SE09) ||
 					(EChannel.SE10 <= num && num <= EChannel.SE19) ||
@@ -451,7 +451,7 @@
 
         public CChip()
 		{
-			this.nDistanceFromBar = new STDGBVALUE<int>()
+			nDistanceFromBar = new STDGBVALUE<int>()
 			{
 				Drums = 0,
 				Guitar = 0,
@@ -461,27 +461,27 @@
 		}
 		public void t初期化()
 		{
-			this.nChannelNumber = 0;
-			this.nIntegerValue = 0;
-			this.nIntegerValue_InternalNumber = 0;
-			this.db実数値 = 0.0;
-			this.nPlaybackPosition = 0;
-			this.nPlaybackTimeMs = 0;
-			this.bBonusChip = false;
-			this.nLag = -999;
-			this.n楽器パートでの出現順 = -1;
-			this.bTargetGhost判定済み = false;
-			this.bIsAutoPlayed = false;
-			this.bChipKeepsPlayingAfterPerfEnds = false;
-			this.dbChipSizeRatio = 1.0;
-			this.bHit = false;
-			this.bVisible = true;
-			this.eInstrumentPart = EInstrumentPart.UNKNOWN;
-			this.nTransparency = 0xff;
-			this.nDistanceFromBar.Drums = 0;
-			this.nDistanceFromBar.Guitar = 0;
-			this.nDistanceFromBar.Bass = 0;
-			this.n総移動時間 = 0;
+			nChannelNumber = 0;
+			nIntegerValue = 0;
+			nIntegerValue_InternalNumber = 0;
+			db実数値 = 0.0;
+			nPlaybackPosition = 0;
+			nPlaybackTimeMs = 0;
+			bBonusChip = false;
+			nLag = -999;
+			n楽器パートでの出現順 = -1;
+			bTargetGhost判定済み = false;
+			bIsAutoPlayed = false;
+			bChipKeepsPlayingAfterPerfEnds = false;
+			dbChipSizeRatio = 1.0;
+			bHit = false;
+			bVisible = true;
+			eInstrumentPart = EInstrumentPart.UNKNOWN;
+			nTransparency = 0xff;
+			nDistanceFromBar.Drums = 0;
+			nDistanceFromBar.Guitar = 0;
+			nDistanceFromBar.Bass = 0;
+			n総移動時間 = 0;
 		}
 		public override string ToString()
 		{
@@ -518,15 +518,15 @@
 					"BGAスコープ画像切替8"
 				};
 			return string.Format("CChip: 位置:{0:D4}.{1:D3}, 時刻{2:D6}, Ch:{3:X2}({4}), Pn:{5}({11})(内部{6}), Pd:{7}, Sz:{8}, UseWav:{9}, Auto:{10}",
-				this.nPlaybackPosition / 384, this.nPlaybackPosition % 384,
-				this.nPlaybackTimeMs,
-				this.nChannelNumber, chToStr[(int)this.nChannelNumber],
-				this.nIntegerValue, this.nIntegerValue_InternalNumber,
-				this.db実数値,
-				this.dbChipSizeRatio,
-				this.bWAVを使うチャンネルである,
-				this.b自動再生音チャンネルである,
-				CDTX.tZZ(this.nIntegerValue));
+				nPlaybackPosition / 384, nPlaybackPosition % 384,
+				nPlaybackTimeMs,
+				nChannelNumber, chToStr[(int)nChannelNumber],
+				nIntegerValue, nIntegerValue_InternalNumber,
+				db実数値,
+				dbChipSizeRatio,
+				bWAVを使うチャンネルである,
+				b自動再生音チャンネルである,
+				CDTX.tZZ(nIntegerValue));
 		}
 		/// <summary>
 		/// チップの再生長を取得する。現状、WAVチップとBGAチップでのみ使用可能。
@@ -536,10 +536,10 @@
 		{
 			int nDuration = 0;
 
-			if (this.bWAVを使うチャンネルである)       // WAV
+			if (bWAVを使うチャンネルである)       // WAV
 			{
 				CDTX.CWAV wc;
-				CDTXMania.DTX.listWAV.TryGetValue(this.nIntegerValue_InternalNumber, out wc);
+				CDTXMania.DTX.listWAV.TryGetValue(nIntegerValue_InternalNumber, out wc);
 				if (wc == null)
 				{
 					nDuration = 0;
@@ -549,11 +549,11 @@
 					nDuration = (wc.rSound[0] == null) ? 0 : wc.rSound[0].nTotalPlayTimeMs;
 				}
 			}
-			else if (this.nChannelNumber == EChannel.Movie || this.nChannelNumber == EChannel.MovieFull)    // AVI
+			else if (nChannelNumber == EChannel.Movie || nChannelNumber == EChannel.MovieFull)    // AVI
 			{
-				if (this.rAVI != null && this.rAVI.avi != null)
+				if (rAVI != null && rAVI.avi != null)
 				{
-					nDuration = this.rAVI.avi.GetDuration();
+					nDuration = rAVI.avi.GetDuration();
 					//int dwRate = (int)this.rAVI.avi.dwレート;
 					//int dwScale = (int)this.rAVI.avi.dwスケール;
 					//nDuration = (int)(1000.0f * dwScale / dwRate * this.rAVI.avi.GetMaxFrameCount());
@@ -574,14 +574,14 @@
 			double ScrollSpeedGuitar = (dbPerformanceScrollSpeed.Guitar + 1.0) * 0.5 * 0.5 * 37.5 * speed / 60000.0;
 			double ScrollSpeedBass = (dbPerformanceScrollSpeed.Bass + 1.0) * 0.5 * 0.5 * 37.5 * speed / 60000.0;
 
-			this.nDistanceFromBar.Drums = (int)((this.nPlaybackTimeMs - nCurrentTime) * ScrollSpeedDrums);
-			this.nDistanceFromBar.Guitar = (int)((this.nPlaybackTimeMs - nCurrentTime) * ScrollSpeedGuitar);
-			this.nDistanceFromBar.Bass = (int)((this.nPlaybackTimeMs - nCurrentTime) * ScrollSpeedBass);
+			nDistanceFromBar.Drums = (int)((nPlaybackTimeMs - nCurrentTime) * ScrollSpeedDrums);
+			nDistanceFromBar.Guitar = (int)((nPlaybackTimeMs - nCurrentTime) * ScrollSpeedGuitar);
+			nDistanceFromBar.Bass = (int)((nPlaybackTimeMs - nCurrentTime) * ScrollSpeedBass);
 
 			//New: Compute Distance for End of Long Note chip
-			if(this.bロングノートである)
+			if(bロングノートである)
             {
-				this.chipロングノート終端.ComputeDistanceFromBar(nCurrentTime, dbPerformanceScrollSpeed);
+				chipロングノート終端.ComputeDistanceFromBar(nCurrentTime, dbPerformanceScrollSpeed);
             }
 		}
 
@@ -612,19 +612,19 @@
 
 			// まずは位置で比較。
 
-			if (this.nPlaybackPosition < other.nPlaybackPosition)
+			if (nPlaybackPosition < other.nPlaybackPosition)
 				return -1;
 
-			if (this.nPlaybackPosition > other.nPlaybackPosition)
+			if (nPlaybackPosition > other.nPlaybackPosition)
 				return 1;
 
 
 			// 位置が同じなら優先度で比較。
 
-			if (n優先度[(int)this.nChannelNumber] < n優先度[(int)other.nChannelNumber])
+			if (n優先度[(int)nChannelNumber] < n優先度[(int)other.nChannelNumber])
 				return -1;
 
-			if (n優先度[(int)this.nChannelNumber] > n優先度[(int)other.nChannelNumber])
+			if (n優先度[(int)nChannelNumber] > n優先度[(int)other.nChannelNumber])
 				return 1;
 
 

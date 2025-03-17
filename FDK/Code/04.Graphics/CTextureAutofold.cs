@@ -73,7 +73,7 @@ namespace FDK
 			#region [ 折りたたみありで最適なテクスチャサイズがどうなるかを確認する(正方形にするかは考慮せず) ]
 			if ( orgWidth >= orgHeight )		// 横長画像なら
 			{
-				this.b横長のテクスチャである = true;
+				b横長のテクスチャである = true;
 				if ( !GetFoldedTextureSize( ref w, ref h, out foldtimes ) )
 				{
 //Debug.WriteLine( Path.GetFileName( strファイル名 ) + ": 最適化を断念。" );
@@ -83,7 +83,7 @@ namespace FDK
 			}
 			else								// 縦長画像なら
 			{
-				this.b横長のテクスチャである = false;
+				b横長のテクスチャである = false;
 				if ( !GetFoldedTextureSize( ref h, ref w, out foldtimes ) )	// 縦横入れ替えて呼び出し
 				{
 //Debug.WriteLine( Path.GetFileName( strファイル名 ) + ": 最適化を断念。" );
@@ -142,7 +142,7 @@ namespace FDK
 			_orgWidth = orgWidth;
 			_orgHeight = orgHeight;
 			_foldtimes = foldtimes;
-			this.szImageSize = new Size( orgWidth, orgHeight );
+			szImageSize = new Size( orgWidth, orgHeight );
 		}
 
 		/// <summary>
@@ -214,14 +214,14 @@ namespace FDK
 				if ( b横長のテクスチャである )
 				{
 					int currentHeight = n * _orgHeight;
-					r = new Rectangle( 0, currentHeight, this.rcFullImage.Width, _orgHeight );
-					base.tDraw2D( device, x + n * this.rcFullImage.Width, y, 1f, r );
+					r = new Rectangle( 0, currentHeight, rcFullImage.Width, _orgHeight );
+					tDraw2D( device, x + n * rcFullImage.Width, y, 1f, r );
 				}
 				else
 				{
 					int currentWidth = n * _orgWidth;
-					r = new Rectangle( currentWidth, 0, _orgWidth, this.rcFullImage.Height );
-					base.tDraw2D( device, x, y + n * this.rcFullImage.Height, 1f, r );
+					r = new Rectangle( currentWidth, 0, _orgWidth, rcFullImage.Height );
+					tDraw2D( device, x, y + n * rcFullImage.Height, 1f, r );
 				}
 			}
 #endif
@@ -231,18 +231,18 @@ namespace FDK
 			Rectangle r;
 			if ( b横長のテクスチャである )
 			{
-				int beginFold = rc.X / this.rcFullImage.Width;
+				int beginFold = rc.X / rcFullImage.Width;
 				int endFold = ( rc.X + rc.Width ) / rcFullImage.Width;
 				for ( int i = beginFold; i <= endFold; i++ )
 				{
 					if ( i > _foldtimes ) break;
 
 					int newRcY = i * _orgHeight + rc.Y;
-					int newRcX = ( i == beginFold ) ? ( rc.X % this.rcFullImage.Width ) : 0;
+					int newRcX = ( i == beginFold ) ? ( rc.X % rcFullImage.Width ) : 0;
 					int newRcWidth = ( newRcX + rc.Width > rcFullImage.Width ) ? rcFullImage.Width - newRcX : rc.Width;
 
 					r = new Rectangle( newRcX, newRcY, newRcWidth, rc.Height );
-					base.tDraw2D( device, x, y, 1f, r );
+					tDraw2D( device, x, y, 1f, r );
 
 					int deltaX = ( i == beginFold ) ? ( i + 1 ) * rcFullImage.Width - rc.X : rcFullImage.Width;
 					int newWidth = rc.Width - deltaX;
@@ -252,18 +252,18 @@ namespace FDK
 			}
 			else
 			{
-				int beginFold = rc.Y / this.rcFullImage.Height;
+				int beginFold = rc.Y / rcFullImage.Height;
 				int endFold = ( rc.Y + rc.Height ) / rcFullImage.Height;
 				for ( int i = beginFold; i <= endFold; i++ )
 				{
 					if ( i > _foldtimes ) break;
 
 					int newRcX = i * _orgWidth + rc.X;
-					int newRcY = ( i == beginFold ) ? ( rc.Y % this.rcFullImage.Height ) : 0;
+					int newRcY = ( i == beginFold ) ? ( rc.Y % rcFullImage.Height ) : 0;
 					int newRcHeight = ( newRcY + rc.Height > rcFullImage.Height ) ? rcFullImage.Height - newRcY : rc.Height;
 
 					r = new Rectangle( newRcX, newRcY, rc.Width, newRcHeight );
-					base.tDraw2D( device, x, y, 1f, r );
+					tDraw2D( device, x, y, 1f, r );
 
 					int deltaY = ( i == beginFold ) ? ( i + 1 ) * rcFullImage.Height - rc.Y : rcFullImage.Height;
 					int newHeight = rc.Height - deltaY;

@@ -15,7 +15,7 @@ namespace FDK
 
 		public override int Open(string filename)
 		{
-			this._filename = filename;
+			_filename = filename;
 			bjxa = new bjxa.Decoder();
 
 			#region [ Reading XA headers, then store it ]
@@ -174,7 +174,7 @@ namespace FDK
 		// Protected implementation of Dispose pattern.
 		protected virtual void Dispose(bool disposing)
 		{
-			if (this.bDisposed)
+			if (bDisposed)
 				return;
 
 			if (srcBuf != null) srcBuf = null;
@@ -185,7 +185,7 @@ namespace FDK
 				fs.Dispose();
 			}
 
-			this.bDisposed = true;
+			bDisposed = true;
 		}
 
 		//-----------------

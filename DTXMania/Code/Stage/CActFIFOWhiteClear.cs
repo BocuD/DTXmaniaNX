@@ -9,53 +9,53 @@ namespace DTXMania
 
 		public void tStartFadeOut()
 		{
-			this.mode = EFIFOMode.FadeOut;
-			this.counter = new CCounter( 0, 400, 5, CDTXMania.Timer );
+			mode = EFIFOMode.FadeOut;
+			counter = new CCounter( 0, 400, 5, CDTXMania.Timer );
 		}
 		public void tフェードイン開始()
 		{
-			this.mode = EFIFOMode.FadeIn;
-			this.counter = new CCounter( 0, 400, 5, CDTXMania.Timer );
+			mode = EFIFOMode.FadeIn;
+			counter = new CCounter( 0, 400, 5, CDTXMania.Timer );
 		}
 		public void tフェードイン完了()		// #25406 2011.6.9 yyagi
 		{
-			this.counter.nCurrentValue = this.counter.nEndValue;
+			counter.nCurrentValue = counter.nEndValue;
 		}
 
 		// CActivity 実装
 		public override void OnDeactivate()
 		{
-			if( !base.bNotActivated )
+			if( !bNotActivated )
 			{
                 for (int i = 0; i < 16; i++)
                 {
-                    this.st青い星[i].ct進行 = null;
+                    st青い星[i].ct進行 = null;
                 }
 				base.OnDeactivate();
 			}
 		}
 		public override void OnManagedCreateResources()
 		{
-			if( !base.bNotActivated )
+			if( !bNotActivated )
 			{
                 
-				this.tx白タイル64x64 = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\Tile white 64x64.png" ), false );
-                this.txリザルト画像 = CDTXMania.tGenerateTexture( CSkin.Path(@"Graphics\8_background.jpg"), false );
-                this.txFullCombo = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\\7_FullCombo.png"));
-                this.txExcellent = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\\7_Excellent.png"));
-                this.tx黒幕 = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\\7_Drums_black.png"));
+				tx白タイル64x64 = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\Tile white 64x64.png" ), false );
+                txリザルト画像 = CDTXMania.tGenerateTexture( CSkin.Path(@"Graphics\8_background.jpg"), false );
+                txFullCombo = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\\7_FullCombo.png"));
+                txExcellent = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\\7_Excellent.png"));
+                tx黒幕 = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\\7_Drums_black.png"));
 
-                this.txボーナス花火 = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\ScreenPlayDrums chip star.png"));
-                if (this.txボーナス花火 != null)
+                txボーナス花火 = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\ScreenPlayDrums chip star.png"));
+                if (txボーナス花火 != null)
                 {
-                    this.txボーナス花火.bAdditiveBlending = true;
+                    txボーナス花火.bAdditiveBlending = true;
                 }
 
                 for (int i = 0; i < 16; i++)
                 {
-                    this.st青い星[i] = new ST青い星();
-                    this.st青い星[i].b使用中 = false;
-                    this.st青い星[i].ct進行 = new CCounter();
+                    st青い星[i] = new ST青い星();
+                    st青い星[i].b使用中 = false;
+                    st青い星[i].ct進行 = new CCounter();
                 }
 
 				base.OnManagedCreateResources();
@@ -65,15 +65,15 @@ namespace DTXMania
         
         public override void OnManagedReleaseResources()
         {
-            if (this.bNotActivated)
+            if (bNotActivated)
                 return;
 
-            CDTXMania.tReleaseTexture( ref this.txボーナス花火 );
-            CDTXMania.tReleaseTexture( ref this.tx白タイル64x64 );
-            CDTXMania.tReleaseTexture( ref this.txリザルト画像 );
-            CDTXMania.tReleaseTexture( ref this.txFullCombo );
-            CDTXMania.tReleaseTexture( ref this.txExcellent );
-            CDTXMania.tReleaseTexture( ref this.tx黒幕 );
+            CDTXMania.tReleaseTexture( ref txボーナス花火 );
+            CDTXMania.tReleaseTexture( ref tx白タイル64x64 );
+            CDTXMania.tReleaseTexture( ref txリザルト画像 );
+            CDTXMania.tReleaseTexture( ref txFullCombo );
+            CDTXMania.tReleaseTexture( ref txExcellent );
+            CDTXMania.tReleaseTexture( ref tx黒幕 );
 
             base.OnManagedReleaseResources();
         }
@@ -129,12 +129,12 @@ namespace DTXMania
         */
 		public override unsafe int OnUpdateAndDraw()
         {
-            if (base.bNotActivated || (this.counter == null))
+            if (bNotActivated || (counter == null))
             {
                 return 0;
             }
-            this.counter.tUpdate();
-            if (this.counter.nCurrentValue != 400)
+            counter.tUpdate();
+            if (counter.nCurrentValue != 400)
             {
                 return 0;
             }
