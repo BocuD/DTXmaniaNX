@@ -1,16 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
-using System.IO;
-using System.Threading;
-using System.Runtime.Serialization.Formatters.Binary;
-using SharpDX;
-using SharpDX.Direct3D9;
-using FDK;
-using SampleFramework;
-using System.Threading.Tasks;
+﻿using System.Diagnostics;
 
 namespace DTXMania
 {
@@ -745,9 +733,12 @@ namespace DTXMania
             Stream output = null;
             try
             {
-                output = File.Create(strPathSongList);
-                BinaryFormatter formatter = new BinaryFormatter();
-                formatter.Serialize(output, cs);
+                Console.WriteLine("BinaryFormatter is no longer supported apparently, so we can't load songlist.db");
+
+                // output = File.Create(strPathSongList);
+                // BinaryFormatter formatter = new BinaryFormatter();
+                // formatter.Serialize(output, cs);
+                bSucceededSerialize = false;
             }
             catch (Exception e)
             {
@@ -758,7 +749,7 @@ namespace DTXMania
             }
             finally
             {
-                output.Close();
+                //output.Close();
                 if (!bSucceededSerialize)
                 {
                     try
@@ -794,8 +785,9 @@ namespace DTXMania
                         {
                             try
                             {
-                                BinaryFormatter formatter = new BinaryFormatter();
-                                songs管理 = (CSongManager)formatter.Deserialize(input);
+                                Console.WriteLine("BinaryFormatter is no longer supported apparently, so we can't load songlist.db");
+                                //BinaryFormatter formatter = new BinaryFormatter();
+                                //songs管理 = (CSongManager)formatter.Deserialize(input);
                             }
                             catch (Exception)
                             {
