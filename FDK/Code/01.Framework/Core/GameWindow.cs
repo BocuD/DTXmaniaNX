@@ -28,7 +28,6 @@ using System.Security.Permissions;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
-using SampleFramework.Properties;
 
 namespace SampleFramework
 {
@@ -587,11 +586,6 @@ namespace SampleFramework
 			}
 
 			return DefaultTitle;
-		}
-
-		static Icon GetDefaultIcon()
-		{
-			return (Icon)Resources.sdx_icon_black.Clone();
 		}
 
 		#region システムメニューに"1920x1080", "1280x720", "640x480" を追加 #23510 2010.11.13 yyagi add: to set "1920x1020","1280x720","640x480" menu in systemmenu. See also http://cs2ch.blog123.fc2.com/blog-entry-80.html

@@ -5,6 +5,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <RootNamespace>FDKCore</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
@@ -14,18 +15,11 @@
     </ItemGroup>
 
     <ItemGroup>
-      <EmbeddedResource Update="Code\01.Framework\Properties\Resources.resx">
-        <SubType>Designer</SubType>
-      </EmbeddedResource>
-    </ItemGroup>
-
-    <ItemGroup>
       <PackageReference Include="SharpDX" Version="4.2.0" />
       <PackageReference Include="SharpDX.Direct3D9" Version="4.2.0" />
       <PackageReference Include="SharpDX.DXGI" Version="4.2.0" />
       <PackageReference Include="System.Drawing.Common" Version="9.0.2" />
       <PackageReference Include="System.Management" Version="9.0.2" />
-      <PackageReference Include="System.Resources.Extensions" Version="9.0.2" />
       <PackageReference Include="System.Security.Permissions" Version="9.0.2" />
     </ItemGroup>
 
