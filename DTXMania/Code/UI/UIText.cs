@@ -1,8 +1,9 @@
-﻿using SharpDX;
-using SharpDX.Direct3D9;
+﻿using DTXMania;
+using DTXMania.Code.UI;
+using SharpDX;
 using Color = System.Drawing.Color;
 
-namespace DTXMania.Code.UI
+namespace DTXUIRenderer
 {
     public class UIText : UITexture
     {
@@ -35,21 +36,21 @@ namespace DTXMania.Code.UI
             dirty = true;
         }
         
-        public override void Draw(Device device, Matrix parentMatrix)
+        public override void Draw(Matrix parentMatrix)
         {
             if (dirty)
             {
                 RenderTexture();
             }
             
-            base.Draw(device, parentMatrix);
+            base.Draw(parentMatrix);
         }
 
         public void RenderTexture()
         {
             var bmp = font.DrawPrivateFont(text, drawMode, fontColor, edgeColor, gradationTopColor, gradationBottomColor);
-            texture = CDTXMania.tGenerateTexture(bmp, false);
-            size = new Vector2(texture.szImageSize.Width, texture.szImageSize.Height);
+            texture = new DTXTexture(CDTXMania.tGenerateTexture(bmp, false));
+            size = new Vector2(texture.Width, texture.Height);
             bmp.Dispose();
             dirty = false;
         }

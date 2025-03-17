@@ -1,12 +1,11 @@
-﻿using System;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using System.Drawing;
 using System.Diagnostics;
 using DTXMania.Code.UI;
+using DTXUIRenderer;
 using FDK;
 using SharpDX;
-using Rectangle = System.Drawing.Rectangle;
-using RectangleF = System.Drawing.RectangleF;
+using RectangleF = SharpDX.RectangleF;
 using SlimDXKey = SlimDX.DirectInput.Key;
 
 namespace DTXMania
@@ -121,20 +120,24 @@ namespace DTXMania
             if (!base.bNotActivated)
             {
                 //create resources for menu elements
-                var bg = uiGroup.AddChild(new UIImage(CSkin.Path(@"Graphics\4_background.png")));
+                var bgTex = new DTXTexture(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_background.png")));
+                var bg = uiGroup.AddChild(new UIImage(bgTex));
                 bg.renderOrder = -100;
                 bg.position = Vector3.Zero;
                 
-                var itemBar = uiGroup.AddChild(new UIImage(CSkin.Path(@"Graphics\4_item bar.png")));
+                var itemBarTex = new DTXTexture(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_item bar.png")));
+                var itemBar = uiGroup.AddChild(new UIImage(itemBarTex));
                 itemBar.position = new Vector3(400, 0, 0);
                 itemBar.renderOrder = 50;
                 
-                var headerPanel = uiGroup.AddChild(new UIImage(CSkin.Path(@"Graphics\4_header panel.png")));
+                var headerPanelTex = new DTXTexture(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_header panel.png")));
+                var headerPanel = uiGroup.AddChild(new UIImage(headerPanelTex));
                 headerPanel.position = Vector3.Zero;
                 headerPanel.renderOrder = 52;
                 
-                var footerPanel = uiGroup.AddChild(new UIImage(CSkin.Path(@"Graphics\4_footer panel.png")));
-                footerPanel.position = new Vector3(0, 720 - footerPanel.Texture.szTextureSize.Height, 0);
+                var footerPanelTex = new DTXTexture(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_footer panel.png")));
+                var footerPanel = uiGroup.AddChild(new UIImage(footerPanelTex));
+                footerPanel.position = new Vector3(0, 720 - footerPanel.Texture.Height, 0);
                 footerPanel.renderOrder = 53;
                 
                 //left menu
@@ -142,7 +145,8 @@ namespace DTXMania
                 leftMenu.position = new Vector3(245, 140, 0);
                 leftMenu.renderOrder = 50;
                 
-                var menuPanel = leftMenu.AddChild(new UIImage(CSkin.Path(@"Graphics\4_menu panel.png")));
+                var menuPanelTex = new DTXTexture(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_menu panel.png")));
+                var menuPanel = leftMenu.AddChild(new UIImage(menuPanelTex));
                 menuPanel.position = Vector3.Zero;
                 
                 //menu items
@@ -152,7 +156,8 @@ namespace DTXMania
                 configLeftOptionsMenu.position = new Vector3(95, 4, 0);
 
                 //todo: render menu cursor correctly to match current version of the game. right now its rendered as a stretched image.
-                menuCursor = configLeftOptionsMenu.AddChild(new UIImage(CSkin.Path(@"Graphics\4_menu cursor.png")));
+                var menuCursorTex = new DTXTexture(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_menu cursor.png")));
+                menuCursor = configLeftOptionsMenu.AddChild(new UIImage(menuCursorTex));
                 menuCursor.position = new Vector3(-5, 2, 0);
                 menuCursor.size = new Vector2(170, 32);
                 menuCursor.anchor = new Vector2(0.5f, 0f);
@@ -205,10 +210,10 @@ namespace DTXMania
             this.ctDisplayWait.tUpdate();
             
             //update menu cursor position
-            menuCursor.Texture.nTransparency = bFocusIsOnMenu ? 255 : 128;
+            menuCursor.Texture.transparency = bFocusIsOnMenu ? 1.0f : 0.5f;
             menuCursor.position.Y = 2 + configLeftOptionsMenu.currentlySelectedIndex * 32;
             
-            uiGroup.Draw(CDTXMania.app.Device, Matrix.Identity);
+            uiGroup.Draw(Matrix.Identity);
             
             #region [ アイテム ]
             //---------------------
@@ -554,7 +559,7 @@ namespace DTXMania
 					//    graphics.DrawString( str, this.ftFont, Brushes.White, new PointF( 4f * Scale.X, (float) num * Scale.Y ) );
 					//    num += 30;
 					//}
-					graphics.DrawString( item.str説明文, this.ftFont, Brushes.Black, new RectangleF( 4f, (float) 0, 230, 430 ) );
+					graphics.DrawString( item.str説明文, this.ftFont, Brushes.Black, new System.Drawing.RectangleF( 4f, (float) 0, 230, 430 ) );
 				}
 				graphics.Dispose();
 				if( this.txDescriptionPanel != null )

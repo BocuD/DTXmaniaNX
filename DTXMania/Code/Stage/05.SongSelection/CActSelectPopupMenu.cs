@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using System.IO;
+﻿using System.Runtime.InteropServices;
 using DTXMania.Code.UI;
+using DTXUIRenderer;
 using FDK;
 using SharpDX;
-using Rectangle = System.Drawing.Rectangle;
 using SlimDXKey = SlimDX.DirectInput.Key;
 
 namespace DTXMania
@@ -221,14 +218,16 @@ namespace DTXMania
                 ui.position = new Vector3(1280.0f/2.0f, 720.0f/2.0f + 20.0f, 0); 
                 ui.anchor = new Vector2(0.5f, 0.5f);
                 
-                var bg = ui.AddChild(new UIImage(CSkin.Path(@"Graphics\ScreenSelect sort menu background.png")));
+                var bgTex = new DTXTexture(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\ScreenSelect sort menu background.png"), false));
+                var bg = ui.AddChild(new UIImage(bgTex));
                 ui.size = bg.size;
                 
-                cursor = ui.AddChild(new UIImage(CSkin.Path(@"Graphics\ScreenConfig menu cursor.png")));
+                var cursorTex = new DTXTexture(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\ScreenConfig menu cursor.png"), false));
+                cursor = ui.AddChild(new UIImage(cursorTex));
                 cursor.position = new Vector3(12, 32 + 6, 0);
                 cursor.size = new Vector2(336, 32);
                 cursor.renderMode = ERenderMode.Sliced;
-                cursor.sliceRect = new System.Drawing.RectangleF(8, 0, 16, 32);
+                cursor.sliceRect = new RectangleF(8, 0, 16, 32);
                 
                 menuItems = ui.AddChild(new UIGroup());
                 
@@ -397,7 +396,7 @@ namespace DTXMania
                 
                 tDrawSub();
                 
-                ui.Draw(CDTXMania.app.Device, Matrix.Identity);
+                ui.Draw(Matrix.Identity);
             }
             return 0;
         }

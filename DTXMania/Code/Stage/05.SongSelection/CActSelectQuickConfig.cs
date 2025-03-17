@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Text;
+﻿using System.Diagnostics;
 using System.Drawing;
-using System.IO;
 using DTXMania.Code.UI;
+using DTXUIRenderer;
 using SharpDX;
 using FDK;
 
@@ -491,7 +488,7 @@ namespace DTXMania
                 this.txAutoStatus = null;
             }
             
-            autoStatus.SetTexture(txAutoStatus);
+            autoStatus.SetTexture(new DTXTexture(txAutoStatus));
         }
 
         public override void tPressEnterMain(int nSortOrder)
@@ -651,11 +648,13 @@ namespace DTXMania
                 subMenu.renderOrder = 100;
                 subMenu.anchor = new Vector2(0.5f, 0.5f);
 
-                var popup = new UIImage(CSkin.Path(@"Graphics\ScreenSelect popup auto settings.png"));
+                var popupTex = new DTXTexture(CSkin.Path(@"Graphics\ScreenSelect popup auto settings.png"));
+                var popup = new UIImage(popupTex);
                 subMenu.AddChild(popup);
                 subMenu.size = popup.size;
                 
-                autoStatus = subMenu.AddChild(new UIImage(txAutoStatus));
+                var autoStatusTex = new DTXTexture(txAutoStatus);
+                autoStatus = subMenu.AddChild(new UIImage(autoStatusTex));
                 MakeAutoPanel();
                 
                 //ui gets created here, we can add the subMenu to the ui afterwards
