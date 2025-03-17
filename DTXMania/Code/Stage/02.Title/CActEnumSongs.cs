@@ -1,5 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Drawing;
+using System.Windows.Forms.VisualStyles;
+using DTXUIRenderer;
 using SharpDX;
 using FDK;
 
@@ -112,6 +114,16 @@ namespace DTXMania
                 Trace.TraceError("テクスチャの生成に失敗しました。(txMessage)");
                 this.txMessage = null;
             }
+            
+            //create font
+            var font = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.str選曲リストフォント), 18);
+            
+            //create ui
+            ui = new UIGroup();
+            ui.size = new Vector2(1280, 720);
+            text = ui.AddChild(new UIText(font, "Progress: 0/0"));
+            text.position = new Vector3(640, 360, 0);
+            text.anchor = new Vector2(0.0f, 1.0f);
 
             base.OnManagedCreateResources();
         }
@@ -125,6 +137,9 @@ namespace DTXMania
             CDTXMania.tDisposeSafely(ref this.txMessage);
             base.OnManagedReleaseResources();
         }
+        
+        protected UIGroup ui;
+        private UIText text;
 
         public override int OnUpdateAndDraw()
         {
@@ -137,6 +152,11 @@ namespace DTXMania
             {
                 this.txNowEnumeratingSongs.nTransparency = (int)(176.0 + 80.0 * Math.Sin((double)(2 * Math.PI * this.ctNowEnumeratingSongs.nCurrentValue * 2 / 100.0)));
                 this.txNowEnumeratingSongs.tDraw2D(CDTXMania.app.Device, 18, 7);
+                
+                //update ui
+                text.SetText("Progress: " + this.ctNowEnumeratingSongs.nCurrentValue + "/100");
+                
+                ui.Draw(Matrix.Identity);
             }
             if (bコマンドでの曲データ取得 && this.txDialogNowEnumeratingSongs != null)
             {
