@@ -763,7 +763,7 @@ namespace DTXMania
 						}
 					}
 				}
-				if( ( ( CDTXMania.Pad.bPressedDGB( EPad.CY ) || CDTXMania.Pad.bPressed( EInstrumentPart.DRUMS, EPad.RD ) ) || ( CDTXMania.Pad.bPressed( EInstrumentPart.DRUMS, EPad.LC ) || CDTXMania.InputManager.Keyboard.bKeyPressed( (int)SlimDXKey.Return ) ) ) && !this.bAnimationComplete )
+				if (CDTXMania.Input.ActionDecide())
 				{
 					this.actFI.tフェードイン完了();					// #25406 2011.6.9 yyagi
 					this.actResultImage.tアニメを完了させる();
@@ -788,7 +788,7 @@ namespace DTXMania
 						base.ePhaseID = CStage.EPhase.Common_FadeOut;
 						this.eReturnValueWhenFadeOutCompleted = EReturnValue.Complete;
 					}
-					if ( ( ( CDTXMania.Pad.bPressedDGB( EPad.CY ) || CDTXMania.Pad.bPressed( EInstrumentPart.DRUMS, EPad.RD ) ) || ( CDTXMania.Pad.bPressed( EInstrumentPart.DRUMS, EPad.LC ) || CDTXMania.InputManager.Keyboard.bKeyPressed( (int) SlimDXKey.Return ) ) ) && this.bAnimationComplete )
+					if (CDTXMania.Input.ActionDecide() && this.bAnimationComplete)
 					{
 						CDTXMania.Skin.soundCancel.tPlay();
 						base.ePhaseID = CStage.EPhase.Common_FadeOut;

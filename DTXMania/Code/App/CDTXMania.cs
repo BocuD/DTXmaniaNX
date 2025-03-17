@@ -163,6 +163,12 @@ namespace DTXMania
             get;
             private set;
         }
+
+        public static Input Input
+        {
+            get;
+            private set;
+        }
         public static Random Random
         {
             get;
@@ -2099,6 +2105,8 @@ namespace DTXMania
             this.listTopLevelActivities.Add(actFlushGPU);
             //---------------------
             #endregion
+
+            Input = new Input();
 
             #region [ Discord Rich Presence ]
             if (ConfigIni.bDiscordRichPresenceEnabled && !bCompactMode)

@@ -159,7 +159,7 @@ namespace DTXMania
 					if ( CDTXMania.Pad.bPressed( EInstrumentPart.DRUMS, EPad.LT ) )
 						this.tMoveCursorDown();
 
-					if( ( CDTXMania.Pad.bPressedDGB( EPad.CY ) || CDTXMania.Pad.bPressed( EInstrumentPart.DRUMS, EPad.RD ) ) || ( CDTXMania.ConfigIni.bEnterがキー割り当てのどこにも使用されていない && CDTXMania.InputManager.Keyboard.bKeyPressed( (int)SlimDXKey.Return ) ) ) 
+					if (CDTXMania.Input.ActionDecide())
 					{
 						if ( ( this.n現在のカーソル行 == (int) E戻り値.GAMESTART - 1 ) && CDTXMania.Skin.soundGameStart.b読み込み成功 )
 						{

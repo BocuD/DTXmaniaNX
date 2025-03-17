@@ -450,7 +450,7 @@ namespace DTXMania
 					if ( !this.actSortSongs.bIsActivePopupMenu && !this.actQuickConfig.bIsActivePopupMenu && !CDTXMania.app.bテキスト入力中)
 					{
                         #region [ ESC ]
-                        if (CDTXMania.InputManager.Keyboard.bKeyPressed((int)SlimDXKey.Escape) || ((CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.LC) || CDTXMania.Pad.bPressedGB(EPad.Cancel)) && ((this.actSongList.rSelectedSong != null) && (this.actSongList.rSelectedSong.r親ノード == null))))
+                        if (CDTXMania.Input.ActionCancel())
                         {	// [ESC]
                             CDTXMania.Skin.soundCancel.tPlay();
                             this.eReturnValueWhenFadeOutCompleted = EReturnValue.ReturnToTitle;
@@ -488,8 +488,7 @@ namespace DTXMania
 						if (this.actSongList.rSelectedSong != null)
                         {
                             #region [ Decide ]
-                            if ((CDTXMania.Pad.bPressedDGB(EPad.Decide) || CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.CY) || CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.RD)) ||
-                                (CDTXMania.ConfigIni.bEnterがキー割り当てのどこにも使用されていない && CDTXMania.InputManager.Keyboard.bKeyPressed((int)SlimDXKey.Return)))
+                            if (CDTXMania.Input.ActionDecide())
                             {
                                 if (this.actSongList.rSelectedSong != null)
                                 {

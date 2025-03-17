@@ -267,7 +267,7 @@ namespace DTXMania
             // 曲データの一覧取得中は、キー入力を無効化する
             if (!CDTXMania.EnumSongs.IsEnumerating || CDTXMania.actEnumSongs.bコマンドでの曲データ取得 != true)
             {
-                if ((CDTXMania.InputManager.Keyboard.bKeyPressed((int)SlimDXKey.Escape) || CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.LC)) || CDTXMania.Pad.bPressedGB(EPad.Cancel))
+                if (CDTXMania.Input.ActionCancel())
                 {
                     CDTXMania.Skin.soundCancel.tPlay();
                     if (!this.bFocusIsOnMenu)
@@ -290,7 +290,7 @@ namespace DTXMania
                         base.ePhaseID = CStage.EPhase.Common_FadeOut;
                     }
                 }
-                else if ((CDTXMania.Pad.bPressedDGB(EPad.CY) || CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.RD) || (CDTXMania.ConfigIni.bEnterがキー割り当てのどこにも使用されていない && CDTXMania.InputManager.Keyboard.bKeyPressed((int)SlimDXKey.Return))))
+                else if (CDTXMania.Input.ActionDecide())
                 {
                     if (configLeftOptionsMenu.currentlySelectedIndex == 4)
                     {

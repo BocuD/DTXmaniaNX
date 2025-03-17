@@ -266,9 +266,7 @@ namespace DTXMania
                     }
                     #endregion
                     #region [ キー入力: キャンセル ]
-                    else if (CDTXMania.InputManager.Keyboard.bKeyPressed((int)SlimDXKey.Escape)
-                        || CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.LC)
-                        || CDTXMania.Pad.bPressedGB(EPad.Cancel))
+                    else if (CDTXMania.Input.ActionCancel())
                     {	// キャンセル
                         CDTXMania.Skin.soundCancel.tPlay();
                         tCancel();
@@ -318,22 +316,8 @@ namespace DTXMania
                     #region [ キー入力: 決定 ]
                     // EInstrumentPart eInst = EInstrumentPart.UNKNOWN;
                     ESortAction eAction = ESortAction.END;
-                    if (CDTXMania.Pad.bPressed(EInstrumentPart.GUITAR, EPad.Decide))
+                    if (CDTXMania.Input.ActionDecide())
                     {
-                        eInst = EInstrumentPart.GUITAR;
-                        eAction = ESortAction.Decide;
-                    }
-                    else if (CDTXMania.Pad.bPressed(EInstrumentPart.BASS, EPad.Decide))
-                    {
-                        eInst = EInstrumentPart.BASS;
-                        eAction = ESortAction.Decide;
-                    }
-                    else if (
-                        CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.Decide)	// #24756 2011.4.1 yyagi: Add condition "Drum-Decide" to enable CY in Sort Menu.
-                        || CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.RD)
-                        || (CDTXMania.ConfigIni.bEnterがキー割り当てのどこにも使用されていない && CDTXMania.InputManager.Keyboard.bKeyPressed((int)SlimDXKey.Return)))
-                    {
-                        eInst = EInstrumentPart.DRUMS;
                         eAction = ESortAction.Decide;
                     }
                     
