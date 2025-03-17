@@ -1,6 +1,8 @@
 ﻿using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Diagnostics;
+using System.Management;
+using System.Windows.Forms;
 
 namespace DTXMania
 {
@@ -57,26 +59,26 @@ namespace DTXMania
 
 		protected void Initialize(string fontpath, FontFamily fontfamily, int pt, FontStyle style)
 		{
-			this._pfc = null;
-			this._fontfamily = null;
-			this._font = null;
-			this._pt = pt;
-			this._rectStrings = new Rectangle(0, 0, 0, 0);
-			this._ptOrigin = new Point(0, 0);
-			this.bDispose完了済み = false;
+			_pfc = null;
+			_fontfamily = null;
+			_font = null;
+			_pt = pt;
+			_rectStrings = new Rectangle(0, 0, 0, 0);
+			_ptOrigin = new Point(0, 0);
+			bDispose完了済み = false;
 
 			if (fontfamily != null)
 			{
-				this._fontfamily = fontfamily;
+				_fontfamily = fontfamily;
 			}
 			else
 			{
 				try
 				{
-					this._pfc = new System.Drawing.Text.PrivateFontCollection();    //PrivateFontCollectionオブジェクトを作成する
-					this._pfc.AddFontFile(fontpath);                                //PrivateFontCollectionにフォントを追加する
+					_pfc = new System.Drawing.Text.PrivateFontCollection();    //PrivateFontCollectionオブジェクトを作成する
+					_pfc.AddFontFile(fontpath);                                //PrivateFontCollectionにフォントを追加する
 				}
-				catch (System.IO.FileNotFoundException)
+				catch (FileNotFoundException)
 				{
 					Trace.TraceError("プライベートフォントの追加に失敗しました。({0})", fontpath);
 					throw new FileNotFoundException("プライベートフォントの追加に失敗しました。({0})", Path.GetFileName(fontpath));
@@ -110,7 +112,7 @@ namespace DTXMania
 					style = FontStyle.Regular | FontStyle.Bold | FontStyle.Italic | FontStyle.Underline | FontStyle.Strikeout;  // null非許容型なので、代わりに全盛をNGワードに設定
 					foreach (FontStyle ff in FS)
 					{
-						if (this._fontfamily.IsStyleAvailable(ff))
+						if (_fontfamily.IsStyleAvailable(ff))
 						{
 							style = ff;
 							Trace.TraceWarning("フォント{0}へのスタイル指定を、{1}に変更しました。", Path.GetFileName(fontpath), style.ToString());
@@ -124,14 +126,14 @@ namespace DTXMania
 				}
 				//this._font = new Font(this._fontfamily, pt, style);			//PrivateFontCollectionの先頭のフォントのFontオブジェクトを作成する
 				float emSize = pt * 96.0f / 72.0f;
-				this._font = new Font(this._fontfamily, emSize, style, GraphicsUnit.Pixel); //PrivateFontCollectionの先頭のフォントのFontオブジェクトを作成する
+				_font = new Font(_fontfamily, emSize, style, GraphicsUnit.Pixel); //PrivateFontCollectionの先頭のフォントのFontオブジェクトを作成する
 																							//HighDPI対応のため、pxサイズで指定
 			}
 			else
 			// フォントファイルが見つからなかった場合 (MS PGothicを代わりに指定する)
 			{
 				float emSize = pt * 96.0f / 72.0f;
-				this._font = new Font("MS PGothic", emSize, style, GraphicsUnit.Pixel); //MS PGothicのFontオブジェクトを作成する
+				_font = new Font("MS PGothic", emSize, style, GraphicsUnit.Pixel); //MS PGothicのFontオブジェクトを作成する
 				FontFamily[] ffs = new System.Drawing.Text.InstalledFontCollection().Families;
 				int lcid = System.Globalization.CultureInfo.GetCultureInfo("en-us").LCID;
 				foreach (FontFamily ff in ffs)
@@ -139,7 +141,7 @@ namespace DTXMania
 					// Trace.WriteLine( lcid ) );
 					if (ff.GetName(lcid) == "MS PGothic")
 					{
-						this._fontfamily = ff;
+						_fontfamily = ff;
 						Trace.TraceInformation("MS PGothicを代わりに指定しました。");
 						return;
 					}
@@ -279,7 +281,7 @@ namespace DTXMania
 		/// <returns>描画済テクスチャ</returns>
 		public Bitmap DrawPrivateFont(string drawstr, DrawMode drawmode, Color fontColor, Color edgeColor, Color gradationTopColor, Color gradationBottomColor)
 		{
-			if (this._fontfamily == null || drawstr == null || drawstr == "")
+			if (_fontfamily == null || drawstr == null || drawstr == "")
 			{
 				// nullを返すと、その後bmp→texture処理や、textureのサイズを見て__の処理で全部例外が発生することになる。
 				// それは非常に面倒なので、最小限のbitmapを返してしまう。
@@ -302,18 +304,19 @@ namespace DTXMania
 				);
 
 			//取得した描画サイズを基に、描画先のbitmapを作成する
-			Bitmap bmp = new Bitmap(stringSize.Width + nEdgePt * 2, stringSize.Height + nEdgePt * 2);
+			Bitmap bmp = new(stringSize.Width + nEdgePt * 2, stringSize.Height + nEdgePt * 2);
 			bmp.MakeTransparent();
 			Graphics g = Graphics.FromImage(bmp);
-			g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+			g.SmoothingMode = SmoothingMode.HighQuality;
 
-			StringFormat sf = new StringFormat();
+			StringFormat sf = new();
 			sf.LineAlignment = StringAlignment.Far; // 画面下部（垂直方向位置）
 			sf.Alignment = StringAlignment.Center;  // 画面中央（水平方向位置) //To fix
+			sf.FormatFlags = StringFormatFlags.NoClip | StringFormatFlags.NoWrap;
 
 			// レイアウト枠
 			//Rectangle r = new Rectangle( 0, 0, stringSize.Width + nEdgePt * 2, stringSize.Height + nEdgePt * 2 );
-			Rectangle r = new Rectangle(0, 0, stringSize.Width + nEdgePt * 2, stringSize.Height + nEdgePt * 2); //#34638 2014.11.24 kairera0467 とりあえず文字の横サイズを1.5倍に変更。
+			Rectangle r = new(0, 0, stringSize.Width + nEdgePt * 2, stringSize.Height + nEdgePt * 2); //#34638 2014.11.24 kairera0467 とりあえず文字の横サイズを1.5倍に変更。
 
 			if (bEdge)  // 縁取り有りの描画
 			{
@@ -321,12 +324,12 @@ namespace DTXMania
 				// (これをしないと、単位が違うために、小さめに描画されてしまう)
 				float sizeInPixels = _font.SizeInPoints * g.DpiY / 72;  // 1 inch = 72 points
 
-				System.Drawing.Drawing2D.GraphicsPath gp = new System.Drawing.Drawing2D.GraphicsPath();
-				gp.AddString(drawstr, this._fontfamily, (int)this._font.Style, sizeInPixels, r, sf);
+				GraphicsPath gp = new();
+				gp.AddString(drawstr, _fontfamily, (int)_font.Style, sizeInPixels, r, sf);
 
 				// 縁取りを描画する
-				Pen p = new Pen(edgeColor, nEdgePt);
-				p.LineJoin = System.Drawing.Drawing2D.LineJoin.Round;
+				Pen p = new(edgeColor, nEdgePt);
+				p.LineJoin = LineJoin.Round;
 				g.DrawPath(p, gp);
 
 				// 塗りつぶす
@@ -380,7 +383,7 @@ namespace DTXMania
 		/// <returns>描画済テクスチャ</returns>
 		public Bitmap DrawPrivateFont(string drawstr, DrawMode drawmode, Color fontColor, Color edgeColor, Color gradationTopColor, Color gradationBottomColor, bool bEdgeGradation)
 		{
-			if (this._fontfamily == null || drawstr == null || drawstr == "")
+			if (_fontfamily == null || drawstr == null || drawstr == "")
 			{
 				// nullを返すと、その後bmp→texture処理や、textureのサイズを見て__の処理で全部例外が発生することになる。
 				// それは非常に面倒なので、最小限のbitmapを返してしまう。
@@ -405,17 +408,18 @@ namespace DTXMania
 
 			//取得した描画サイズを基に、描画先のbitmapを作成する
 			int l_width = (int)(stringSize.Width * 1.05f); //A constant proportion of 5% buffer should avoid the issue of text truncation
-			Bitmap bmp = new Bitmap(l_width, stringSize.Height + nEdgePt * 2);
+			Bitmap bmp = new(l_width, stringSize.Height + nEdgePt * 2);
 			bmp.MakeTransparent();
 			Graphics g = Graphics.FromImage(bmp);
-			g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+			g.SmoothingMode = SmoothingMode.HighQuality;
 
-			StringFormat sf = new StringFormat();
+			StringFormat sf = new();
 			sf.LineAlignment = StringAlignment.Far; // 画面下部（垂直方向位置）
 			sf.Alignment = StringAlignment.Near;    // 画面中央（水平方向位置）//Changed to Left (Near) of Texture rect
-
+			sf.FormatFlags = StringFormatFlags.NoClip | StringFormatFlags.NoWrap;
+			
 			// レイアウト枠
-			Rectangle r = new Rectangle(0, 0, l_width, stringSize.Height + nEdgePt * 2);
+			Rectangle r = new(0, 0, l_width, stringSize.Height + nEdgePt * 2);
 			//r = new Rectangle( 0, 0, l_width + nEdgePt*2, stringSize.Height + nEdgePt * 2 ); // 2016.06.12 kairera0467 改行防止
 
 			if (bEdge && bEdgeGradation)    // 縁取り有りの描画
@@ -424,14 +428,14 @@ namespace DTXMania
 				// (これをしないと、単位が違うために、小さめに描画されてしまう)
 				float sizeInPixels = _font.SizeInPoints * g.DpiY / 72;  // 1 inch = 72 points
 
-				System.Drawing.Drawing2D.GraphicsPath gp = new System.Drawing.Drawing2D.GraphicsPath();
-				gp.AddString(drawstr, this._fontfamily, (int)this._font.Style, sizeInPixels, r, sf);
+				GraphicsPath gp = new();
+				gp.AddString(drawstr, _fontfamily, (int)_font.Style, sizeInPixels, r, sf);
 
 				// 縁取りを描画する
 				Brush br縁;
 				br縁 = new LinearGradientBrush(r, gradationTopColor, gradationBottomColor, LinearGradientMode.Vertical);
-				Pen p = new Pen(br縁, nEdgePt);
-				p.LineJoin = System.Drawing.Drawing2D.LineJoin.Round;
+				Pen p = new(br縁, nEdgePt);
+				p.LineJoin = LineJoin.Round;
 				g.DrawPath(p, gp);
 
 				// 塗りつぶす
@@ -494,20 +498,20 @@ namespace DTXMania
 		//-----------------
 		public void Dispose()
 		{
-			if (!this.bDispose完了済み)
+			if (!bDispose完了済み)
 			{
-				if (this._font != null)
+				if (_font != null)
 				{
-					this._font.Dispose();
-					this._font = null;
+					_font.Dispose();
+					_font = null;
 				}
-				if (this._pfc != null)
+				if (_pfc != null)
 				{
-					this._pfc.Dispose();
-					this._pfc = null;
+					_pfc.Dispose();
+					_pfc = null;
 				}
 
-				this.bDispose完了済み = true;
+				bDispose完了済み = true;
 			}
 		}
 		//-----------------
