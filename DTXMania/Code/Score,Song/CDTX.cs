@@ -3911,15 +3911,17 @@ namespace DTXMania
             {
                 string? line = reader.ReadLine();
                 if (string.IsNullOrWhiteSpace(line)) continue;
-                
+
+                //we use offset to index the current position in the line to avoid string allocations
+                int offset = 1;
                 if (line[0] != '#') continue;
-                string cmd = SplitLineString(ref line, [':', ';', ' ', '\n'], 1);
+                string cmd = SplitLineString(ref line, [':', ';', ' ', '\n'], ref offset);
                 
                 string param;
-                if (line.Length != 0)
+                if (offset < line.Length)
                 {
-                    int offset = char.IsWhiteSpace(line[0]) ? 1 : 0;
-                    param = SplitLineString(ref line, [';', '\n'], offset);
+                    offset += char.IsWhiteSpace(line[offset]) ? 1 : 0;
+                    param = SplitLineString(ref line, [';', '\n'], ref offset);
                 }
                 else
                 {
@@ -3927,10 +3929,10 @@ namespace DTXMania
                 }
                 
                 string comment;
-                if (line.Length != 0)
+                if (offset < line.Length)
                 {
-                    int offset = char.IsWhiteSpace(line[0]) ? 1 : 0;
-                    comment = SplitLineString(ref line, ['\n'], offset);
+                    offset += char.IsWhiteSpace(line[offset]) ? 1 : 0;
+                    comment = SplitLineString(ref line, ['\n'], ref offset);
                 }
                 else
                 {
@@ -3943,7 +3945,7 @@ namespace DTXMania
             }
         }
 
-        private static string SplitLineString(ref string input, char[] splitCharacters, int offset = 0)
+        private static string SplitLineString(ref string input, char[] splitCharacters, ref int offset)
         {
             int length = input.Length;
             int startOffset = offset;
@@ -3961,12 +3963,11 @@ namespace DTXMania
             
             if (offset == length)
             {
-                input = string.Empty;
                 return result;
             }
 
-            //when we trim the input string, we need to remove the split character
-            input = input.Substring(offset + 1);
+            //update the offset to skip the split character
+            offset += 1;
             return result;
         }
 
