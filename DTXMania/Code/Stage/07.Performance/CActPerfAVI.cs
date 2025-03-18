@@ -742,9 +742,9 @@ namespace DTXMania
                         n本体Y = 50;
                         int nグラフX = 267;
 
-                        if( CDTXMania.ConfigIni.bGraph有効.Bass && CDTXMania.DTX != null && !CDTXMania.DTX.bチップがある.Bass )
+                        if( CDTXMania.ConfigIni.bGraph有効.Bass && CDTXMania.DTX != null && !CDTXMania.DTX.bHasChips.Bass )
                             n本体X = n本体X + nグラフX;
-                        if( CDTXMania.ConfigIni.bGraph有効.Guitar && CDTXMania.DTX != null && !CDTXMania.DTX.bチップがある.Guitar )
+                        if( CDTXMania.ConfigIni.bGraph有効.Guitar && CDTXMania.DTX != null && !CDTXMania.DTX.bHasChips.Guitar )
                             n本体X = n本体X - nグラフX;
                         #endregion
 

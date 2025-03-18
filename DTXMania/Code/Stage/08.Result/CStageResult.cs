@@ -88,9 +88,9 @@ namespace DTXMania
 					{
 						nRankValue[i] = -1;
 						fPerfect率[i] = fGreat率[i] = fGood率[i] = fPoor率[i] = fMiss率[i] = 0.0f;  // #28500 2011.5.24 yyagi
-						if ((((i != 0) || (CDTXMania.DTX.bチップがある.Drums && !CDTXMania.ConfigIni.bGuitarRevolutionMode)) &&
-							((i != 1) || (CDTXMania.DTX.bチップがある.Guitar && CDTXMania.ConfigIni.bGuitarRevolutionMode))) &&
-							((i != 2) || (CDTXMania.DTX.bチップがある.Bass && CDTXMania.ConfigIni.bGuitarRevolutionMode)))
+						if ((((i != 0) || (CDTXMania.DTX.bHasChips.Drums && !CDTXMania.ConfigIni.bGuitarRevolutionMode)) &&
+							((i != 1) || (CDTXMania.DTX.bHasChips.Guitar && CDTXMania.ConfigIni.bGuitarRevolutionMode))) &&
+							((i != 2) || (CDTXMania.DTX.bHasChips.Bass && CDTXMania.ConfigIni.bGuitarRevolutionMode)))
 						{
 							CScoreIni.CPerformanceEntry part = stPerformanceEntry[i];
 							bool bIsAutoPlay = true;
@@ -539,9 +539,9 @@ namespace DTXMania
 					bool l_newRecord = false;
 					for (int i = 0; i < 3; i++)
 					{
-						if ((((i != 0) || (CDTXMania.DTX.bチップがある.Drums && !CDTXMania.ConfigIni.bGuitarRevolutionMode)) &&
-							((i != 1) || (CDTXMania.DTX.bチップがある.Guitar && CDTXMania.ConfigIni.bGuitarRevolutionMode))) &&
-							((i != 2) || (CDTXMania.DTX.bチップがある.Bass && CDTXMania.ConfigIni.bGuitarRevolutionMode)))
+						if ((((i != 0) || (CDTXMania.DTX.bHasChips.Drums && !CDTXMania.ConfigIni.bGuitarRevolutionMode)) &&
+							((i != 1) || (CDTXMania.DTX.bHasChips.Guitar && CDTXMania.ConfigIni.bGuitarRevolutionMode))) &&
+							((i != 2) || (CDTXMania.DTX.bHasChips.Bass && CDTXMania.ConfigIni.bGuitarRevolutionMode)))
 						{ 
 							if(bAuto[i] == false)
                             {

@@ -1399,10 +1399,10 @@ namespace DTXMania
         public double BASEBPM;
         public bool BLACKCOLORKEY;
         public double BPM;
-        public STチップがある bチップがある;
+        public STチップがある bHasChips;
         public string COMMENT;
         public double db再生速度;
-        public EType e種別;
+        public EType eFileType;
         public string GENRE;
         public bool HIDDENLEVEL;
         public STDGBVALUE<int> LEVEL;
@@ -1495,7 +1495,7 @@ namespace DTXMania
 
             db再生速度 = 1.0;
             strDTXFileHash = "";
-            bチップがある = new STチップがある
+            bHasChips = new STチップがある
             {
                 Drums = false,
                 Guitar = false,
@@ -3446,9 +3446,9 @@ namespace DTXMania
                         case ERandomMode.HYPERRANDOM: // レーンの本数も変わる
                             nRGBレーンビットパターン = (int)nランダム化前チャンネル番号 & 7;
                             // n新RGBレーンビットパターン = (int)Eレーンビットパターン.OPEN;	// この値は結局未使用なので削除
-                            flag = ((part == EInstrumentPart.GUITAR) && bチップがある.OpenGuitar) ||
+                            flag = ((part == EInstrumentPart.GUITAR) && bHasChips.OpenGuitar) ||
                                    ((part == EInstrumentPart.BASS) &&
-                                    bチップがある.OpenBass); // #23546 2010.10.28 yyagi fixed (bチップがある.Bass→bチップがある.OpenBass)
+                                    bHasChips.OpenBass); // #23546 2010.10.28 yyagi fixed (bチップがある.Bass→bチップがある.OpenBass)
                             //New: Set flag to false (disable Open) when chip has long note
                             if (chip.bロングノートである)
                             {
@@ -3734,23 +3734,23 @@ namespace DTXMania
             {
                 if (ext != ".dtx")
                 {
-                    e種別 = ext switch
+                    eFileType = ext switch
                     {
                         ".gda" => EType.GDA,
                         ".g2d" => EType.G2D,
                         ".bms" => EType.BMS,
                         ".bme" => EType.BME,
                         ".mid" => EType.SMF,
-                        _ => e種別
+                        _ => eFileType
                     };
                 }
                 else
                 {
-                    e種別 = EType.DTX;
+                    eFileType = EType.DTX;
                 }
             }
 
-            if (e種別 != EType.SMF)
+            if (eFileType != EType.SMF)
             {
                 try
                 {
@@ -4118,7 +4118,7 @@ namespace DTXMania
                             nChipNo_C1++;
                         }
 
-                        if ((e種別 == EType.BMS) || (e種別 == EType.BME))
+                        if ((eFileType == EType.BMS) || (eFileType == EType.BME))
                         {
                             barLength = 1.0;
                         }
@@ -4223,7 +4223,7 @@ namespace DTXMania
                         tComputeChipPlayTimeMs(currTimeMs, chip.nPlaybackPosition - n発声位置, dbBarLength, bpm);
                     chip.nPlaybackTimeMs = tConvertFromDoubleToIntBasedOnComputeMode(currChipPlaybackTimeMs);
 
-                    if (((e種別 == EType.BMS) || (e種別 == EType.BME)) &&
+                    if (((eFileType == EType.BMS) || (eFileType == EType.BME)) &&
                         ((dbBarLength != 1.0) && ((chip.nPlaybackPosition / 384) != nBar)))
                     {
                         n発声位置 = chip.nPlaybackPosition;
@@ -5070,9 +5070,9 @@ namespace DTXMania
             //Swap Guitar Bass Lane chip info
             nVisibleChipsCount.swapGuitarBassLaneChipCounters();
 
-            bool ts = bチップがある.Bass;
-            bチップがある.Bass = bチップがある.Guitar;
-            bチップがある.Guitar = ts;
+            bool ts = bHasChips.Bass;
+            bHasChips.Bass = bHasChips.Guitar;
+            bHasChips.Guitar = ts;
 
 //			SwapGuitarBassInfos_AutoFlags();
         }
@@ -7460,127 +7460,103 @@ namespace DTXMania
 
         private bool tInput_LineAnalysis_ChipLocation(ref string strCommand, ref string strParameter)
         {
-            // (1) コマンドを処理。
-
-            if (strCommand.Length != 5) // コマンドは必ず5文字であること。
+            // (1) Process command
+            if (strCommand.Length != 5)
                 return false;
 
-            #region [ n小節番号 を取得する。]
-
-            //-----------------
-            int n小節番号 = CConversion.nConvert3DigitMeasureNumberToNumber(strCommand.Substring(0, 3));
-            if (n小節番号 < 0)
+            //Extract measure number (first three characters)
+            int measureNumber = CConversion.nConvert3DigitMeasureNumberToNumber(strCommand);
+            if (measureNumber < 0)
                 return false;
 
-            n小節番号++; // 先頭に空の1小節を設ける。
-            //-----------------
-
-            #endregion
-
-            #region [ nチャンネル番号 を取得する。]
-
-            //-----------------
+            measureNumber++; // 先頭に空の1小節を設ける。
+            
+            #region [ Determine channel number ]
             EChannel nChannelNumber = EChannel.Invalid;
 
-            // ファイルフォーマットによって処理が異なる。
-
-            if (e種別 == EType.GDA || e種別 == EType.G2D)
+            //Process depends on file format
+            if (eFileType is EType.GDA or EType.G2D)
             {
-                #region [ (A) GDA, G2D の場合：チャンネル文字列をDTXのチャンネル番号へ置き換える。]
-
-                //-----------------
-                string strチャンネル文字列 = strCommand.Substring(3, 2);
+                //(A) GDA, G2D files: Replace channel strings with DTX channel numbers (conversion)
+                string strChannelString = strCommand.Substring(3, 2);
 
                 foreach (STGDAPARAM param in stGDAParam)
                 {
-                    if (strチャンネル文字列.Equals(param.strGDAのチャンネル文字列, StringComparison.OrdinalIgnoreCase))
+                    if (strChannelString.Equals(param.strGDAのチャンネル文字列, StringComparison.OrdinalIgnoreCase))
                     {
                         nChannelNumber = param.nDTXのチャンネル番号;
-                        break; // 置き換え成功
+                        break;
                     }
                 }
-
-                if (nChannelNumber < 0)
-                    return false; // 置き換え失敗
-                //-----------------
-
-                #endregion
             }
             else
             {
-                #region [ (B) その他の場合：チャンネル番号は16進数2桁。]
-
-                //-----------------
-                nChannelNumber =
-                    (EChannel)(CConversion.nConvert2DigitHexadecimalStringToNumber(strCommand.Substring(3, 2)));
-
-                if (nChannelNumber < 0)
-                    return false;
-                //-----------------
-
-                #endregion
+                //(B) In other cases: Channel is two hexadecimal digits
+                nChannelNumber = (EChannel) CConversion.nConvert2DigitHexadecimalStringToNumber(strCommand, 3);
             }
-
-            //-----------------
-
             #endregion
-
-            #region [ 取得したチャンネル番号で、this.bチップがある に該当があれば設定する。]
-
-            //-----------------
-            if ((nChannelNumber >= EChannel.HiHatClose) && (nChannelNumber <= EChannel.LeftBassDrum))
+            
+            #region [ bHasChips ]
+            switch (nChannelNumber) //determine if we have chips per instrument
             {
-                bチップがある.Drums = true;
+                case < 0:
+                    return false; //channel number is invalid
+                
+                case >= EChannel.HiHatClose and <= EChannel.LeftBassDrum:
+                    bHasChips.Drums = true;
+                    break;
+                
+                case >= EChannel.Guitar_Open and <= EChannel.Guitar_RGBxx:
+                case >= EChannel.Guitar_xxxYx and <= EChannel.Guitar_RxxxP:
+                case >= EChannel.Guitar_RGxxP and <= EChannel.Guitar_xGBYP:
+                case >= EChannel.Guitar_RxxYP and <= EChannel.Guitar_RGBYP:
+                    bHasChips.Guitar = true;
+                    break;
+                
+                case >= EChannel.Bass_Open and <= EChannel.Bass_RGBxx:
+                case EChannel.Bass_xxxYx:
+                case EChannel.Bass_xxBYx:
+                case >= EChannel.Bass_xGxYx and <= EChannel.Bass_xxBxP:
+                case >= EChannel.Bass_xGxxP and <= EChannel.Bass_RGBxP:
+                case >= EChannel.Bass_xxxYP and <= EChannel.Bass_RGBYP:
+                    bHasChips.Bass = true;
+                    break;
             }
-            else if ((nChannelNumber >= EChannel.Guitar_Open) && (nChannelNumber <= EChannel.Guitar_RGBxx) ||
-                     (nChannelNumber >= EChannel.Guitar_xxxYx) && (nChannelNumber <= EChannel.Guitar_RxxxP) ||
-                     (nChannelNumber >= EChannel.Guitar_RGxxP) && (nChannelNumber <= EChannel.Guitar_xGBYP) ||
-                     (nChannelNumber >= EChannel.Guitar_RxxYP) && (nChannelNumber <= EChannel.Guitar_RGBYP))
-            {
-                bチップがある.Guitar = true;
-            }
-            else if ((nChannelNumber >= EChannel.Bass_Open) && (nChannelNumber <= EChannel.Bass_RGBxx) ||
-                     (nChannelNumber == EChannel.Bass_xxxYx) || (nChannelNumber == EChannel.Bass_xxBYx) ||
-                     (nChannelNumber >= EChannel.Bass_xGxYx) && (nChannelNumber <= EChannel.Bass_xxBxP) ||
-                     (nChannelNumber >= EChannel.Bass_xGxxP) && (nChannelNumber <= EChannel.Bass_RGBxP) ||
-                     (nChannelNumber >= EChannel.Bass_xxxYP) && (nChannelNumber <= EChannel.Bass_RGBYP))
-            {
-                bチップがある.Bass = true;
-            }
-
+            
+            //determine if we have chips per instrument input
             switch (nChannelNumber)
             {
                 case EChannel.FloorTom:
-                    bチップがある.FT = true;
+                    bHasChips.FT = true;
                     break;
 
                 case EChannel.HiHatOpen:
-                    bチップがある.HHOpen = true;
+                    bHasChips.HHOpen = true;
                     break;
 
                 case EChannel.RideCymbal:
-                    bチップがある.Ride = true;
+                    bHasChips.Ride = true;
                     break;
 
                 case EChannel.LeftCymbal:
-                    bチップがある.LeftCymbal = true;
+                    bHasChips.LeftCymbal = true;
                     break;
 
                 case EChannel.LeftPedal:
-                    bチップがある.LP = true;
+                    bHasChips.LP = true;
                     break;
 
                 case EChannel.LeftBassDrum:
-                    bチップがある.LBD = true;
+                    bHasChips.LBD = true;
                     break;
 
                 case EChannel.Guitar_Open:
-                    bチップがある.OpenGuitar = true;
+                    bHasChips.OpenGuitar = true;
                     break;
 
                 case EChannel.Movie:
                 case EChannel.MovieFull:
-                    bチップがある.AVI = true;
+                    bHasChips.AVI = true;
                     break;
 
                 case EChannel.Guitar_xxxYx:
@@ -7607,7 +7583,7 @@ namespace DTXMania
                 case EChannel.Guitar_RxBYP:
                 case EChannel.Guitar_RGxYP:
                 case EChannel.Guitar_RGBYP:
-                    bチップがある.YPGuitar = true;
+                    bHasChips.YPGuitar = true;
                     break;
 
                 case EChannel.Bass_xxxYx:
@@ -7634,21 +7610,16 @@ namespace DTXMania
                 case EChannel.Bass_RxBYP:
                 case EChannel.Bass_RGxYP:
                 case EChannel.Bass_RGBYP:
-                    bチップがある.YPBass = true;
+                    bHasChips.YPBass = true;
                     break;
 
                 case EChannel.Bass_Open:
-                    bチップがある.OpenBass = true;
+                    bHasChips.OpenBass = true;
                     break;
             }
-
-            //-----------------
-
             #endregion
-
-
-            // (2) Ch.02を処理。
-
+            
+            // (2) Process Ch. 02
             #region [ 小節長変更(Ch.02)は他のチャンネルとはパラメータが特殊なので、先にとっとと終わらせる。 ]
 
             //-----------------
@@ -7656,10 +7627,8 @@ namespace DTXMania
             {
                 // 小節長倍率を取得する。
 
-                double db小節長倍率 = 1.0;
                 //if( !double.TryParse( strパラメータ, out result ) )
-                if (!TryParse(strParameter,
-                        out db小節長倍率)) // #23880 2010.12.30 yyagi: alternative TryParse to permit both '.' and ',' for decimal point
+                if (!TryParse(strParameter, out double db小節長倍率)) // #23880 2010.12.30 yyagi: alternative TryParse to permit both '.' and ',' for decimal point
                 {
                     Trace.TraceError("小節長倍率に不正な値を指定しました。[{0}: {1}行]", strFileNameFullPath, lineNumber);
                     return false;
@@ -7667,13 +7636,12 @@ namespace DTXMania
 
                 // 小節長倍率チップを配置する。
 
-                listChip.Insert(
-                    0,
-                    new CChip()
+                listChip.Insert(0,
+                    new CChip
                     {
                         nChannelNumber = nChannelNumber,
                         db実数値 = db小節長倍率,
-                        nPlaybackPosition = n小節番号 * 384,
+                        nPlaybackPosition = measureNumber * 384,
                     });
 
                 return true; // 配置終了。
@@ -7684,7 +7652,7 @@ namespace DTXMania
             #endregion
 
 
-            // (3) パラメータを処理。
+            // (3) Process Parameter
 
             if (string.IsNullOrEmpty(strParameter)) // パラメータはnullまたは空文字列ではないこと。
                 return false;
@@ -7694,7 +7662,7 @@ namespace DTXMania
             //-----------------
             int n文字数 = 0;
 
-            var sb = new StringBuilder(strParameter.Length);
+            StringBuilder sb = new(strParameter.Length);
 
             // strパラメータを先頭から1文字ずつ見ながら正規化（無効文字('_')を飛ばしたり不正な文字でエラーを出したり）し、sb へ格納する。
 
@@ -7715,6 +7683,7 @@ namespace DTXMania
             }
 
             strParameter = sb.ToString(); // 正規化された文字列になりました。
+            ce.Dispose();
 
             if ((n文字数 % 2) != 0) // パラメータの文字数が奇数の場合、最後の1文字を無視する。
                 n文字数--;
@@ -7754,38 +7723,32 @@ namespace DTXMania
                 var chip = new CChip
                 {
                     nChannelNumber = nChannelNumber,
-                    nPlaybackPosition = (n小節番号 * 384) + ((384 * i) / (n文字数 / 2)),
+                    nPlaybackPosition = (measureNumber * 384) + ((384 * i) / (n文字数 / 2)),
                     nIntegerValue = nオブジェクト数値,
                     nIntegerValue_InternalNumber = nオブジェクト数値
                 };
 
-                #region [ chip.e楽器パート = ... ]
-
-                //-----------------
-                if ((nChannelNumber >= EChannel.HiHatClose) && (nChannelNumber <= EChannel.LeftBassDrum))
+                #region [ Assign instrument part based on channel number ]
+                switch (nChannelNumber)
                 {
-                    chip.eInstrumentPart = EInstrumentPart.DRUMS;
+                    case >= EChannel.HiHatClose and <= EChannel.LeftBassDrum:
+                        chip.eInstrumentPart = EInstrumentPart.DRUMS;
+                        break;
+                    case >= EChannel.Guitar_Open and <= EChannel.Guitar_RGBxx:
+                    case >= EChannel.Guitar_xxxYx and <= EChannel.Guitar_RxxxP:
+                    case >= EChannel.Guitar_RxBxP and <= EChannel.Guitar_xGBYP:
+                    case >= EChannel.Guitar_RxxYP and <= EChannel.Guitar_RGBYP:
+                        chip.eInstrumentPart = EInstrumentPart.GUITAR;
+                        break;
+                    case >= EChannel.Bass_Open and <= EChannel.Bass_RGBxx:
+                    case EChannel.Bass_xxxYx:
+                    case EChannel.Bass_xxBYx:
+                    case >= EChannel.Bass_xGxYx and <= EChannel.Bass_xxBxP:
+                    case >= EChannel.Bass_xGxxP and <= EChannel.Bass_RGBxP:
+                    case >= EChannel.Bass_xxxYP and <= EChannel.Bass_RGBYP:
+                        chip.eInstrumentPart = EInstrumentPart.BASS;
+                        break;
                 }
-
-                if ((nChannelNumber >= EChannel.Guitar_Open && nChannelNumber <= EChannel.Guitar_RGBxx) ||
-                    (nChannelNumber >= EChannel.Guitar_xxxYx && nChannelNumber <= EChannel.Guitar_RxxxP) ||
-                    (nChannelNumber >= EChannel.Guitar_RxBxP && nChannelNumber <= EChannel.Guitar_xGBYP) ||
-                    (nChannelNumber >= EChannel.Guitar_RxxYP && nChannelNumber <= EChannel.Guitar_RGBYP))
-                {
-                    chip.eInstrumentPart = EInstrumentPart.GUITAR;
-                }
-
-                if ((nChannelNumber >= EChannel.Bass_Open && nChannelNumber <= EChannel.Bass_RGBxx) ||
-                    (nChannelNumber == EChannel.Bass_xxxYx) || (nChannelNumber == EChannel.Bass_xxBYx) ||
-                    (nChannelNumber >= EChannel.Bass_xGxYx && nChannelNumber <= EChannel.Bass_xxBxP) ||
-                    (nChannelNumber >= EChannel.Bass_xGxxP && nChannelNumber <= EChannel.Bass_RGBxP) ||
-                    (nChannelNumber >= EChannel.Bass_xxxYP && nChannelNumber <= EChannel.Bass_RGBYP))
-                {
-                    chip.eInstrumentPart = EInstrumentPart.BASS;
-                }
-
-                //-----------------
-
                 #endregion
 
                 #region [ 無限定義への対応 → 内部番号の取得。]

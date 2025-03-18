@@ -46,7 +46,7 @@ namespace DTXMania
 					{
 						listProgressSection[(int)ePart].Add(new CProgressSection());
 					}
-					if (!b演奏画面以外からの呼び出し && CDTXMania.ConfigIni.bInstrumentAvailable(ePart) && CDTXMania.DTX.bチップがある[(int)ePart])
+					if (!b演奏画面以外からの呼び出し && CDTXMania.ConfigIni.bInstrumentAvailable(ePart) && CDTXMania.DTX.bHasChips[(int)ePart])
 					{
 						int x = pBarPosition[(int)ePart].X;//(int)CDTXMania.Instance.ConfigIni.cdInstX[ePart][CDTXMania.Instance.ConfigIni.eActiveInst] + CDTXMania.Instance.ConfigIni.n楽器W_チップ倍率反映済(ePart);
 						int y = 0;
@@ -199,7 +199,7 @@ namespace DTXMania
 				{
 					if ((!b演奏画面以外からの呼び出し && (b演奏画面以外からの呼び出し || 
 						!CDTXMania.ConfigIni.bInstrumentAvailable(ePart) || 
-						!CDTXMania.DTX.bチップがある[(int)ePart] || 
+						!CDTXMania.DTX.bHasChips[(int)ePart] || 
 						(EDarkMode)CDTXMania.ConfigIni.eDark == EDarkMode.FULL)) || 
 						(b演奏画面以外からの呼び出し && epartプレイ楽器 != ePart && (epartプレイ楽器 != EInstrumentPart.UNKNOWN || ePart != 0)))
 					{

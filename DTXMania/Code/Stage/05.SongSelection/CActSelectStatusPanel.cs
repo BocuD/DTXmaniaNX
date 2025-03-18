@@ -549,11 +549,11 @@ namespace DTXMania
                                     if(CDTXMania.DTX != null)
                                     {
                                         bClassChartModeSet = bClassChartModeSet && (
-                                            !CDTXMania.DTX.bチップがある.LeftCymbal &&
-                                            !CDTXMania.DTX.bチップがある.LP &&
-                                            !CDTXMania.DTX.bチップがある.LBD &&
-                                            !CDTXMania.DTX.bチップがある.FT &&
-                                            !CDTXMania.DTX.bチップがある.Ride &&
+                                            !CDTXMania.DTX.bHasChips.LeftCymbal &&
+                                            !CDTXMania.DTX.bHasChips.LP &&
+                                            !CDTXMania.DTX.bHasChips.LBD &&
+                                            !CDTXMania.DTX.bHasChips.FT &&
+                                            !CDTXMania.DTX.bHasChips.Ride &&
                                             !CDTXMania.DTX.bForceXGChart
                                             );
                                     }

@@ -123,15 +123,15 @@ namespace DTXMania
                     else if( CDTXMania.ConfigIni.bGuitarEnabled )
                     {
                         nGraphUsePart = ( CDTXMania.ConfigIni.bGraph有効.Guitar == true ) ? 1 : 2;
-                        if( CDTXMania.DTX.bチップがある.Guitar )
+                        if( CDTXMania.DTX.bHasChips.Guitar )
                             nPart = CDTXMania.ConfigIni.bGraph有効.Guitar ? 0 : 1;
-                        else if( !CDTXMania.DTX.bチップがある.Guitar && CDTXMania.ConfigIni.bGraph有効.Guitar )
+                        else if( !CDTXMania.DTX.bHasChips.Guitar && CDTXMania.ConfigIni.bGraph有効.Guitar )
                         {
                             nPart = 1;
                             nGraphUsePart = 2;
                         }
 
-                        if( !CDTXMania.DTX.bチップがある.Bass && CDTXMania.ConfigIni.bGraph有効.Bass )
+                        if( !CDTXMania.DTX.bHasChips.Bass && CDTXMania.ConfigIni.bGraph有効.Bass )
                             nPart = 0;
                     }
 

@@ -858,6 +858,9 @@ namespace DTXMania
 
 			workerThreads = Math.Max(2, workerThreads - 4); //leave some cpu for the game
 			
+			//Console.WriteLine("WARNING: Worker threads limited to 1 to debug!!!");
+			//workerThreads = 1;
+			
 			Console.WriteLine("Song processing worker threads: " + workerThreads);
 
 			int totalTasks = taskList.Count;
@@ -969,13 +972,13 @@ namespace DTXMania
 					score.SongInformation.LevelDec.Guitar = cdtx.LEVELDEC.Guitar;
 					score.SongInformation.LevelDec.Bass = cdtx.LEVELDEC.Bass;
 					score.SongInformation.bHiddenLevel = cdtx.HIDDENLEVEL;
-					score.SongInformation.b完全にCLASSIC譜面である.Drums = cdtx.bチップがある is { LeftCymbal: false, LP: false, LBD: false, FT: false, Ride: false };
-					score.SongInformation.b完全にCLASSIC譜面である.Guitar = !cdtx.bチップがある.YPGuitar;
-					score.SongInformation.b完全にCLASSIC譜面である.Bass = !cdtx.bチップがある.YPBass;
-					score.SongInformation.bScoreExists.Drums = cdtx.bチップがある.Drums;
-					score.SongInformation.bScoreExists.Guitar = cdtx.bチップがある.Guitar;
-					score.SongInformation.bScoreExists.Bass = cdtx.bチップがある.Bass;
-					score.SongInformation.SongType = cdtx.e種別;
+					score.SongInformation.b完全にCLASSIC譜面である.Drums = cdtx.bHasChips is { LeftCymbal: false, LP: false, LBD: false, FT: false, Ride: false };
+					score.SongInformation.b完全にCLASSIC譜面である.Guitar = !cdtx.bHasChips.YPGuitar;
+					score.SongInformation.b完全にCLASSIC譜面である.Bass = !cdtx.bHasChips.YPBass;
+					score.SongInformation.bScoreExists.Drums = cdtx.bHasChips.Drums;
+					score.SongInformation.bScoreExists.Guitar = cdtx.bHasChips.Guitar;
+					score.SongInformation.bScoreExists.Bass = cdtx.bHasChips.Bass;
+					score.SongInformation.SongType = cdtx.eFileType;
 					score.SongInformation.Bpm = cdtx.BPM;
 					score.SongInformation.Duration = (cdtx.listChip == null) ? 0 : cdtx.listChip[cdtx.listChip.Count - 1].nPlaybackTimeMs;
 					

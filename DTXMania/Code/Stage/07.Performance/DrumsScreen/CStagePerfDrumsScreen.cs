@@ -212,11 +212,11 @@ namespace DTXMania
                 //シャッターを使うのはLC、LP、FT、RDレーンのみ。その他のレーンでは一切使用しない。
                 //If Skill Mode is CLASSIC, always display lvl as Classic Style
                 if (CDTXMania.ConfigIni.nSkillMode == 0 || ((CDTXMania.ConfigIni.bCLASSIC譜面判別を有効にする == true ) && 
-                    ((CDTXMania.DTX.bチップがある.LeftCymbal == false) && 
-                    ( CDTXMania.DTX.bチップがある.FT == false ) && 
-                    ( CDTXMania.DTX.bチップがある.Ride == false ) && 
-                    ( CDTXMania.DTX.bチップがある.LP == false ) &&
-                    ( CDTXMania.DTX.bチップがある.LBD == false) &&
+                    ((CDTXMania.DTX.bHasChips.LeftCymbal == false) && 
+                    ( CDTXMania.DTX.bHasChips.FT == false ) && 
+                    ( CDTXMania.DTX.bHasChips.Ride == false ) && 
+                    ( CDTXMania.DTX.bHasChips.LP == false ) &&
+                    ( CDTXMania.DTX.bHasChips.LBD == false) &&
                     ( CDTXMania.DTX.bForceXGChart == false))) )
                 {
                     if ( txLaneCover != null )
@@ -649,15 +649,15 @@ namespace DTXMania
 				else
 				{
 					EPad hH = type;
-					if( !CDTXMania.DTX.bチップがある.HHOpen && ( type == EPad.HHO ) )
+					if( !CDTXMania.DTX.bHasChips.HHOpen && ( type == EPad.HHO ) )
 					{
 						hH = EPad.HH;
 					}
-					if( !CDTXMania.DTX.bチップがある.Ride && ( type == EPad.RD ) )
+					if( !CDTXMania.DTX.bHasChips.Ride && ( type == EPad.RD ) )
 					{
 						hH = EPad.CY;
 					}
-					if( !CDTXMania.DTX.bチップがある.LeftCymbal && ( type == EPad.LC ) )
+					if( !CDTXMania.DTX.bHasChips.LeftCymbal && ( type == EPad.LC ) )
 					{
 						hH = EPad.HH;
 					}
@@ -831,23 +831,23 @@ namespace DTXMania
                 ECYGroup eCYGroup = CDTXMania.ConfigIni.eCYGroup;
                 EBDGroup eBDGroup = CDTXMania.ConfigIni.eBDGroup;
 
-                if (!CDTXMania.DTX.bチップがある.Ride && (eCYGroup == ECYGroup.打ち分ける))
+                if (!CDTXMania.DTX.bHasChips.Ride && (eCYGroup == ECYGroup.打ち分ける))
                 {
                     eCYGroup = ECYGroup.共通;
                 }
-                if (!CDTXMania.DTX.bチップがある.HHOpen && (eHHGroup == EHHGroup.全部打ち分ける))
+                if (!CDTXMania.DTX.bHasChips.HHOpen && (eHHGroup == EHHGroup.全部打ち分ける))
                 {
                     eHHGroup = EHHGroup.左シンバルのみ打ち分ける;
                 }
-                if (!CDTXMania.DTX.bチップがある.HHOpen && (eHHGroup == EHHGroup.ハイハットのみ打ち分ける))
+                if (!CDTXMania.DTX.bHasChips.HHOpen && (eHHGroup == EHHGroup.ハイハットのみ打ち分ける))
                 {
                     eHHGroup = EHHGroup.全部共通;
                 }
-                if (!CDTXMania.DTX.bチップがある.LeftCymbal && (eHHGroup == EHHGroup.全部打ち分ける))
+                if (!CDTXMania.DTX.bHasChips.LeftCymbal && (eHHGroup == EHHGroup.全部打ち分ける))
                 {
                     eHHGroup = EHHGroup.ハイハットのみ打ち分ける;
                 }
-                if (!CDTXMania.DTX.bチップがある.LeftCymbal && (eHHGroup == EHHGroup.左シンバルのみ打ち分ける))
+                if (!CDTXMania.DTX.bHasChips.LeftCymbal && (eHHGroup == EHHGroup.左シンバルのみ打ち分ける))
                 {
                     eHHGroup = EHHGroup.全部共通;
                 }

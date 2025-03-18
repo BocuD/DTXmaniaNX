@@ -73,7 +73,7 @@ namespace DTXMania
         {
             Drums = new CScoreIni.CPerformanceEntry();
 
-            if (CDTXMania.DTX.bチップがある.Drums && !CDTXMania.ConfigIni.bGuitarRevolutionMode)
+            if (CDTXMania.DTX.bHasChips.Drums && !CDTXMania.ConfigIni.bGuitarRevolutionMode)
             {
                 Drums.nスコア = (long)actScore.Get(EInstrumentPart.DRUMS);
                 if (CDTXMania.ConfigIni.nSkillMode == 0)
@@ -144,7 +144,7 @@ namespace DTXMania
         {
             Guitar = new CScoreIni.CPerformanceEntry();
 
-            if (CDTXMania.DTX.bチップがある.Guitar)
+            if (CDTXMania.DTX.bHasChips.Guitar)
             {
                 Guitar.nスコア = (long)actScore.Get(EInstrumentPart.GUITAR);
                 if (CDTXMania.ConfigIni.nSkillMode == 0)
@@ -215,7 +215,7 @@ namespace DTXMania
         {
             Bass = new CScoreIni.CPerformanceEntry();
 
-            if (CDTXMania.DTX.bチップがある.Bass)
+            if (CDTXMania.DTX.bHasChips.Bass)
             {
                 Bass.nスコア = (long)actScore.Get(EInstrumentPart.BASS);
                 if (CDTXMania.ConfigIni.nSkillMode == 0)
@@ -2771,11 +2771,11 @@ namespace DTXMania
         {
             if (txWailingFrame != null && CDTXMania.ConfigIni.bGuitarEnabled)
             {
-                if (CDTXMania.DTX.bチップがある.Guitar)
+                if (CDTXMania.DTX.bHasChips.Guitar)
                 {
                     txWailingFrame.tDraw2D(CDTXMania.app.Device, GtWailingFrameX, GtWailingFrameY);
                 }
-                if (CDTXMania.DTX.bチップがある.Bass)
+                if (CDTXMania.DTX.bHasChips.Bass)
                 {
                     txWailingFrame.tDraw2D(CDTXMania.app.Device, BsWailingFrameX, BsWailingFrameY);
                 }
@@ -4867,7 +4867,7 @@ namespace DTXMania
             }
             #endregion
 
-            if (!CDTXMania.ConfigIni.bGuitarEnabled || !CDTXMania.DTX.bチップがある[indexInst])
+            if (!CDTXMania.ConfigIni.bGuitarEnabled || !CDTXMania.DTX.bHasChips[indexInst])
             {
                 return;
             }

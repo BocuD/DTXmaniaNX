@@ -161,7 +161,7 @@ namespace DTXMania
 				{
 					bool bFailedGuitar = actGauge.IsFailed( EInstrumentPart.GUITAR );		// #23630 2011.11.12 yyagi: deleted AutoPlay condition: not to be failed at once
 					bool bFailedBass   = actGauge.IsFailed( EInstrumentPart.BASS );		// #23630
-					bool bFailedNoChips = (!CDTXMania.DTX.bチップがある.Guitar && !CDTXMania.DTX.bチップがある.Bass);	// #25216 2011.5.21 yyagi add condition
+					bool bFailedNoChips = (!CDTXMania.DTX.bHasChips.Guitar && !CDTXMania.DTX.bHasChips.Bass);	// #25216 2011.5.21 yyagi add condition
 					if ( bFailedGuitar || bFailedBass || bFailedNoChips )						// #25216 2011.5.21 yyagi: changed codition: && -> ||
 					{
 						actStageFailed.Start();
@@ -440,7 +440,7 @@ namespace DTXMania
 		{
 			if ( CDTXMania.ConfigIni.bGuitarEnabled )
 			{
-				if ( CDTXMania.DTX.bチップがある.Guitar )
+				if ( CDTXMania.DTX.bHasChips.Guitar )
 				{
                     int y = CDTXMania.ConfigIni.bReverse.Guitar ? nJudgeLinePosY.Guitar : nJudgeLinePosY.Guitar - 1;
 
@@ -450,7 +450,7 @@ namespace DTXMania
                     if (CDTXMania.ConfigIni.bShowPerformanceInformation)
                         actLVFont.tDrawString(310, (CDTXMania.ConfigIni.bReverse.Guitar ? y + 8 : y - 20), CDTXMania.ConfigIni.nJudgeLine.Guitar.ToString());
 				}
-				if ( CDTXMania.DTX.bチップがある.Bass )
+				if ( CDTXMania.DTX.bHasChips.Bass )
 				{
                     int y = CDTXMania.ConfigIni.bReverse.Bass ? nJudgeLinePosY.Bass : nJudgeLinePosY.Bass - 1;
 
@@ -943,7 +943,7 @@ namespace DTXMania
 			if ( ( pChip.bVisible && configIni.bGuitarEnabled ))
 			{
                 int y = CDTXMania.ConfigIni.bReverse.Guitar ? ((nJudgeLinePosY.Guitar - pChip.nDistanceFromBar.Guitar) + 0) : ((nJudgeLinePosY.Guitar + pChip.nDistanceFromBar.Guitar) + 9);
-                if ( ( dTX.bチップがある.Guitar && ( y > 104 ) ) && ( ( y < 670 ) && ( txChip != null ) ) )
+                if ( ( dTX.bHasChips.Guitar && ( y > 104 ) ) && ( ( y < 670 ) && ( txChip != null ) ) )
                 {
 					if (CDTXMania.ConfigIni.nLaneDisp.Guitar == 0 || CDTXMania.ConfigIni.nLaneDisp.Guitar == 1)
 					{
@@ -957,7 +957,7 @@ namespace DTXMania
                     }
 				}
                 y = CDTXMania.ConfigIni.bReverse.Bass ? ((nJudgeLinePosY.Bass - pChip.nDistanceFromBar.Bass) + 0) : ((nJudgeLinePosY.Bass + pChip.nDistanceFromBar.Bass) + 9);
-                if ( ( dTX.bチップがある.Bass && ( y > 104 ) ) && ( ( y < 670 ) && ( txChip != null ) ) )
+                if ( ( dTX.bHasChips.Bass && ( y > 104 ) ) && ( ( y < 670 ) && ( txChip != null ) ) )
                 {
                     if( CDTXMania.ConfigIni.nLaneDisp.Bass == 0 || CDTXMania.ConfigIni.nLaneDisp.Bass == 1 )
                     {
@@ -988,7 +988,7 @@ namespace DTXMania
 			if (configIni.bGuitarEnabled)
 			{
 				int y = CDTXMania.ConfigIni.bReverse.Guitar ? ((nJudgeLinePosY.Guitar - nDistanceFromBarGuitar) + 0) : ((nJudgeLinePosY.Guitar + nDistanceFromBarGuitar) + 9);
-				if ((CDTXMania.DTX.bチップがある.Guitar && (y > 104)) && ((y < 670) && (txChip != null)))
+				if ((CDTXMania.DTX.bHasChips.Guitar && (y > 104)) && ((y < 670) && (txChip != null)))
 				{
 					//Display Loop Begin/Loop End text
 					CDTXMania.actDisplayString.tPrint(60, y - 16, CCharacterConsole.EFontType.White, (bIsEnd ? "End loop" : "Begin loop"));
@@ -1001,7 +1001,7 @@ namespace DTXMania
 					}
 				}
 				y = CDTXMania.ConfigIni.bReverse.Bass ? ((nJudgeLinePosY.Bass - nDistanceFromBarBass) + 0) : ((nJudgeLinePosY.Bass + nDistanceFromBarBass) + 9);
-				if ((CDTXMania.DTX.bチップがある.Bass && (y > 104)) && ((y < 670) && (txChip != null)))
+				if ((CDTXMania.DTX.bHasChips.Bass && (y > 104)) && ((y < 670) && (txChip != null)))
 				{
 					//Display Loop Begin/Loop End text
 					CDTXMania.actDisplayString.tPrint(930, y - 16, CCharacterConsole.EFontType.White, (bIsEnd ? "End loop" : "Begin loop"));

@@ -14,7 +14,7 @@ namespace DTXMania
 				{
 					return 0;
 				}
-				if( CDTXMania.DTX.bチップがある.Guitar )
+				if( CDTXMania.DTX.bHasChips.Guitar )
 				{
 					for( int j = 0; j < 3; j++ )
 					{
@@ -30,7 +30,7 @@ namespace DTXMania
 						}
 					}
 				}
-				if( CDTXMania.DTX.bチップがある.Bass )
+				if( CDTXMania.DTX.bHasChips.Bass )
 				{
 					for( int k = 0; k < 3; k++ )
 					{

@@ -99,7 +99,7 @@ namespace DTXMania
                 #endregion
 
                 #region [ Guitar ]
-                if (CDTXMania.DTX.bチップがある.Guitar)
+                if (CDTXMania.DTX.bHasChips.Guitar)
                 {
                     /*
 					for( int j = 0; j < 5; j++ )
@@ -146,7 +146,7 @@ namespace DTXMania
                 }
                 #endregion
                 #region [ Bass ]
-                if (CDTXMania.DTX.bチップがある.Bass)
+                if (CDTXMania.DTX.bHasChips.Bass)
                 {
                     /*
 					for( int j = 0; j < 5; j++ )

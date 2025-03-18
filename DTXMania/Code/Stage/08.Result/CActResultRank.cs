@@ -53,12 +53,12 @@ namespace DTXMania
             }
             else if (CDTXMania.ConfigIni.bGuitarEnabled)
             {
-                if (!CDTXMania.DTX.bチップがある.Bass)
+                if (!CDTXMania.DTX.bHasChips.Bass)
                 {
                     n本体X[1] = n中X;
                     n本体Y[1] = n中Y;
                 }
-                else if (!CDTXMania.DTX.bチップがある.Guitar)
+                else if (!CDTXMania.DTX.bHasChips.Guitar)
                 {
                     n本体X[2] = n中X;
                     n本体Y[2] = n中Y;

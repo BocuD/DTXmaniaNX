@@ -170,13 +170,13 @@ namespace DTXMania
             n本体X[2] = 665;
             n本体Y = 254;
 
-            if (!CDTXMania.DTX.bチップがある.Bass)
+            if (!CDTXMania.DTX.bHasChips.Bass)
             {
                 //fisyher: No need to check bIsSwappedGuitarBass because guitar-bass info are already swapped at this point
                 n本体X[2] = 0;
                 
             }
-            else if (!CDTXMania.DTX.bチップがある.Guitar)
+            else if (!CDTXMania.DTX.bHasChips.Guitar)
             {
                 //fisyher: No need to check bIsSwappedGuitarBass because guitar-bass info are already swapped at this point
                 n本体X[1] = 0;                
@@ -369,7 +369,7 @@ namespace DTXMania
                         bool bCLASSIC = false;
                         //If Skill Mode is CLASSIC, always display lvl as Classic Style
                         if( CDTXMania.ConfigIni.nSkillMode == 0 || (CDTXMania.ConfigIni.bCLASSIC譜面判別を有効にする &&
-                            ( i == 1 ? !CDTXMania.DTX.bチップがある.YPGuitar : !CDTXMania.DTX.bチップがある.YPBass ) &&
+                            ( i == 1 ? !CDTXMania.DTX.bHasChips.YPGuitar : !CDTXMania.DTX.bHasChips.YPBass ) &&
                             ( CDTXMania.DTX.bForceXGChart == false )) )
                         {
                             str = string.Format( "{0:00}", CDTXMania.DTX.LEVEL[ i ] );

@@ -76,7 +76,7 @@ namespace DTXMania
                 }
 				for( int j = 1; j < 3; j++ )
                 {
-                    if ( CDTXMania.DTX.bチップがある[j] && n本体X[j] != 0 )
+                    if ( CDTXMania.DTX.bHasChips[j] && n本体X[j] != 0 )
                     {
                         string str = string.Format("{0,7:######0}", n現在表示中のスコア[j]);
                         for (int i = 0; i < 7; i++)

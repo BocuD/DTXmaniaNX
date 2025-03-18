@@ -39,14 +39,14 @@ namespace DTXMania
                 #region[ レーンの描画 ]
                 //---------------
                 //レ－ンのみ先に描画しておく。
-                if (CDTXMania.DTX.bチップがある.Guitar)
+                if (CDTXMania.DTX.bHasChips.Guitar)
                 {
                     if ( CDTXMania.ConfigIni.nLaneDisp.Guitar == 0 || CDTXMania.ConfigIni.nLaneDisp.Guitar == 2 )
                         txLane.tDraw2D(CDTXMania.app.Device, 67, 42);
                     else
                         txLaneDark.tDraw2D(CDTXMania.app.Device, 67, 42);
                 }
-                if (CDTXMania.DTX.bチップがある.Bass)
+                if (CDTXMania.DTX.bHasChips.Bass)
                 {
                     if ( CDTXMania.ConfigIni.nLaneDisp.Bass == 0 || CDTXMania.ConfigIni.nLaneDisp.Bass == 2 )
                         txLane.tDraw2D(CDTXMania.app.Device, 937, 42);

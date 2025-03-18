@@ -75,7 +75,7 @@ namespace DTXMania
             ct本体振動.tUpdateLoop();
             
             #region [ ギターのゲージ ]
-            if (txフレーム.Guitar != null && CDTXMania.DTX.bチップがある.Guitar)
+            if (txフレーム.Guitar != null && CDTXMania.DTX.bHasChips.Guitar)
             {
                 txフレーム.Guitar.tDraw2D(CDTXMania.app.Device, n本体X.Guitar, 0, new Rectangle(0, 0, txフレーム.Guitar.szImageSize.Width, 68));
                 txハイスピ.vcScaleRatio = new Vector3(0.76190476190476190476190476190476f, 0.66666666666666666666666666666667f, 1.0f);
@@ -105,7 +105,7 @@ namespace DTXMania
             #endregion
 
             #region [ ベースのゲージ ]
-            if (txフレーム.Bass != null && CDTXMania.DTX.bチップがある.Bass)
+            if (txフレーム.Bass != null && CDTXMania.DTX.bHasChips.Bass)
             {
                 txフレーム.Bass.tDraw2D(CDTXMania.app.Device, n本体X.Bass - txフレーム.Bass.szImageSize.Width, 0, new Rectangle(0, 0, txフレーム.Bass.szImageSize.Width, 68));
                 txハイスピ.vcScaleRatio = new Vector3(0.76190476190476190476190476190476f, 0.66666666666666666666666666666667f, 1.0f);

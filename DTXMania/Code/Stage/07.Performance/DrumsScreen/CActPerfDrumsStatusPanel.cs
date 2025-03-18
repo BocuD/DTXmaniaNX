@@ -340,11 +340,11 @@ namespace DTXMania
                 bool bCLASSIC = false;
                 //If Skill Mode is CLASSIC, always display lvl as Classic Style
                 if (CDTXMania.ConfigIni.nSkillMode == 0 || (CDTXMania.ConfigIni.bCLASSIC譜面判別を有効にする &&
-                    (CDTXMania.DTX.bチップがある.LeftCymbal == false) &&
-                    (CDTXMania.DTX.bチップがある.LP == false) &&
-                    (CDTXMania.DTX.bチップがある.LBD == false) &&
-                    (CDTXMania.DTX.bチップがある.FT == false) &&
-                    (CDTXMania.DTX.bチップがある.Ride == false) &&
+                    (CDTXMania.DTX.bHasChips.LeftCymbal == false) &&
+                    (CDTXMania.DTX.bHasChips.LP == false) &&
+                    (CDTXMania.DTX.bHasChips.LBD == false) &&
+                    (CDTXMania.DTX.bHasChips.FT == false) &&
+                    (CDTXMania.DTX.bHasChips.Ride == false) &&
                     (CDTXMania.DTX.bForceXGChart == false)))
                 {
                     str = string.Format("{0:00}", CDTXMania.DTX.LEVEL[i]);
