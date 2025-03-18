@@ -908,8 +908,7 @@ namespace DTXMania
 			{
 				//get total progress
 				ProcessSongDataProgress = progress.Sum();
-				Console.WriteLine($"Processed {ProcessSongDataProgress} songs out of {ProcessSongDataTotal}");
-				await Task.Delay(8);
+				await Task.Delay(100);
 			}
 			
 			Console.WriteLine($"Processed {progress.Sum()} songs in {DateTime.Now - startTime}");
