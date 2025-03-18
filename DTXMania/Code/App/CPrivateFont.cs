@@ -158,7 +158,7 @@ namespace DTXMania
 				new Size(int.MaxValue, int.MaxValue), flags);
 			
 			//取得した描画サイズを基に、描画先のbitmapを作成する
-			int lWidth = (int)(stringSize.Width * 1.1f); //A constant proportion of 10% buffer should avoid the issue of text truncation
+			int lWidth = (int)(stringSize.Width * 1.1f + 10.0f); //Add 10% and 10 pixels so we avoid text truncation
 			Bitmap bmp = new(lWidth + nEdgePt * 2, stringSize.Height + nEdgePt * 2);
 			bmp.MakeTransparent();
 			Graphics g = Graphics.FromImage(bmp);
