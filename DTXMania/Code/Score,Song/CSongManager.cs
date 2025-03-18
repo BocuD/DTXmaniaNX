@@ -944,50 +944,6 @@ namespace DTXMania
 				}
 			}
 		}
-		
-		
-		public void ProcessNewSongData()
-		{
-			nNbScoresFromFile = 0;
-			ProcessNewSongData(listSongRoot);
-		}
-		private void ProcessNewSongData(List<CSongListNode> nodeList)
-		{
-            List<Task> taskList = [];
-            
-            Console.WriteLine("ProcessNewSongData nodeList size: " + nodeList.Count);
-            
-            foreach ( CSongListNode songListNode in nodeList )
-            {
-	            switch (songListNode.eNodeType)
-	            {
-		            case CSongListNode.ENodeType.BOX:
-			            ProcessNewSongData(songListNode.list子リスト);
-			            break;
-		            
-		            case CSongListNode.ENodeType.SCORE or CSongListNode.ENodeType.SCORE_MIDI:
-		            {
-			            Task task = new(() =>
-			            {
-				            for (int i = 0; i < 5; i++)
-				            {
-					            if (songListNode.arScore[i] != null && !songListNode.arScore[i].bHadACacheInSongDB)
-					            {
-						            ProcessListNode(songListNode, ref songListNode.arScore[i]);
-					            }
-				            }
-			            });
-			            taskList.Add(task);
-			            break;
-		            }
-	            }
-            }
-            
-            //run the task across 8 threads
-            taskList.ForEach(task => task.Start());
-            
-            Task.WaitAll(taskList.ToArray());
-        }
 
 		private void ProcessListNode(CSongListNode node, ref CScore score)
 		{

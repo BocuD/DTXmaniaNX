@@ -219,7 +219,7 @@ namespace DTXMania
                 {
                     if (!CDTXMania.ConfigIni.bConfigIniがないかDTXManiaのバージョンが異なる)
                     {
-                        CSongManager s = new CSongManager();
+                        CSongManager s = new();
                         s = await Deserialize(strPathSongList);		// 直接this.Songs管理にdeserialize()結果を代入するのは避ける。nullにされてしまうことがあるため。
                         if (s != null)
                         {
@@ -331,6 +331,7 @@ namespace DTXMania
                         #region [ 00) songlist.dbの読み込みによる曲リストの構築  ]
                         //-----------------------------
                         EnumProgress = SongEnumProgress.ReadSongListDB;
+
                         //CDTXMania.stageStartup.ePhaseID = CStage.EPhase.起動00_songlistから曲リストを作成する;
                         DateTime start1 = DateTime.Now;
                         Trace.TraceInformation("1) Loading songlist.db ...");
@@ -365,6 +366,7 @@ namespace DTXMania
                         #region [ 1) songs.db の読み込み ]
                         //-----------------------------
                         EnumProgress = SongEnumProgress.ReadSongsDB;
+        
                         //CDTXMania.stageStartup.ePhaseID = CStage.EPhase.起動1_SongsDBからスコアキャッシュを構築;
                         start1 = DateTime.Now;
                         Trace.TraceInformation("2) Loading songs.db ...");
@@ -414,6 +416,7 @@ namespace DTXMania
                 #region [ 2) 曲データの検索 ]
                 //-----------------------------
                 EnumProgress = SongEnumProgress.ScanSongs;
+
                 //	base.ePhaseID = CStage.EPhase.起動2_曲を検索してリストを作成する;
                 DateTime start = DateTime.Now;
                 Trace.TraceInformation("enum2) Searching Song Data ...");                
@@ -479,6 +482,7 @@ namespace DTXMania
                 #region [ 3) songs.db 情報の曲リストへの反映 ]
                 //-----------------------------
                 EnumProgress = SongEnumProgress.UpdateScoreCache;
+
                 //					base.ePhaseID = CStage.EPhase.起動3_スコアキャッシュをリストに反映する;
                 start = DateTime.Now;
                 Trace.TraceInformation("enum3) Loading score cache into songs.db. ");
@@ -513,6 +517,7 @@ namespace DTXMania
                 #region [ 4) songs.db になかった曲データをファイルから読み込んで反映 ]
                 //-----------------------------
                 EnumProgress = SongEnumProgress.ReadSongData;
+                
                 //					base.ePhaseID = CStage.EPhase.起動4_スコアキャッシュになかった曲をファイルから読み込んで反映する;
 
                 int num2 = SongManager.nNbScoresFound - SongManager.nNbScoresFromScoreCache;
@@ -550,6 +555,7 @@ namespace DTXMania
                 #region [ 5) 曲リストへの後処理の適用 ]
                 //-----------------------------
                 EnumProgress = SongEnumProgress.ApplyPostProcessing;
+
                 //					base.ePhaseID = CStage.EPhase.起動5_曲リストへ後処理を適用する;
                 start = DateTime.Now;
                 Trace.TraceInformation("enum5) Apply post-processing to song list.");

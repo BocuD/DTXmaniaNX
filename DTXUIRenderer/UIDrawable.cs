@@ -18,7 +18,7 @@ namespace DTXUIRenderer
 
         public void UpdateLocalTransformMatrix()
         {
-            Vector3 anchorOffset = new Vector3(-anchor.X * size.X, -anchor.Y * size.Y, 0);
+            Vector3 anchorOffset = new(-anchor.X * size.X, -anchor.Y * size.Y, 0);
             
             Matrix translationMatrix = Matrix.Translation(position);
             Matrix rotationMatrix = Matrix.RotationYawPitchRoll(rotation.Y, rotation.X, rotation.Z);

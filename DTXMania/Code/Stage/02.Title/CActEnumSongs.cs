@@ -65,9 +65,9 @@ namespace DTXMania
             message.position = new Vector3(0, 25, 0);
             message.anchor = new Vector2(0.0f, 0.0f);
             
-            text = ui.AddChild(new UIText(font, "Progress: 0/100"));
-            text.position = new Vector3(0, 100, 0);
-            text.anchor = new Vector2(0.0f, 1.0f);
+            text = ui.AddChild(new UIText(font, "Step 0/0"));
+            text.position = new Vector3(0, 60, 0);
+            text.anchor = new Vector2(0.0f, 0.0f);
 
             base.OnManagedCreateResources();
         }

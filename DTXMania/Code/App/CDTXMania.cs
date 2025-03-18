@@ -1003,7 +1003,7 @@ namespace DTXMania
                                             }
                                         }
 
-                                        scoreIni.tExport(DTX.strファイル名の絶対パス + ".score.ini");
+                                        scoreIni.tExport(DTX.strFileNameFullPath + ".score.ini");
 
                                         if (!bCompactMode)
                                         {                                            
@@ -2428,13 +2428,13 @@ namespace DTXMania
         private CScoreIni tScoreIniへBGMAdjustとHistoryとPlayCountを更新(string str新ヒストリ行)
         {
             bool bIsUpdatedDrums, bIsUpdatedGuitar, bIsUpdatedBass;
-            string strFilename = DTX.strファイル名の絶対パス + ".score.ini";
+            string strFilename = DTX.strFileNameFullPath + ".score.ini";
             CScoreIni ini = new CScoreIni(strFilename);
             if (!File.Exists(strFilename))
             {
                 ini.stFile.Title = DTX.TITLE;
-                ini.stFile.Name = DTX.strファイル名;
-                ini.stFile.Hash = CScoreIni.tComputeFileMD5(DTX.strファイル名の絶対パス);
+                ini.stFile.Name = DTX.strFileName;
+                ini.stFile.Hash = CScoreIni.tComputeFileMD5(DTX.strFileNameFullPath);
 
                 // 0: hiscore drums
                 // 1: hiskill drums

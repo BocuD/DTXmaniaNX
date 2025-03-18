@@ -251,7 +251,7 @@ namespace DTXMania
                     {
                         string[] prefix = { "perfect", "lastplay", "hiskill", "hiscore", "online" };
                         int indPrefix = (int)CDTXMania.ConfigIni.eAutoGhost[ instIndex ];
-                        string filename = cdtx.strFolderName + "\\" + cdtx.strファイル名 + "." + prefix[ indPrefix ] + "." + inst[ instIndex ] + ".ghost";
+                        string filename = cdtx.strFolderName + "\\" + cdtx.strFileName + "." + prefix[ indPrefix ] + "." + inst[ instIndex ] + ".ghost";
                         if( File.Exists( filename ) )
                         {
                             CDTXMania.listAutoGhostLag[ instIndex ] = new List<int>();
@@ -264,7 +264,7 @@ namespace DTXMania
                     {
                         string[] prefix = { "none", "perfect", "lastplay", "hiskill", "hiscore", "online" };
                         int indPrefix = (int)CDTXMania.ConfigIni.eTargetGhost[ instIndex ];
-                        string filename = cdtx.strFolderName + "\\" + cdtx.strファイル名 + "." + prefix[ indPrefix ] + "." + inst[ instIndex ] + ".ghost";
+                        string filename = cdtx.strFolderName + "\\" + cdtx.strFileName + "." + prefix[ indPrefix ] + "." + inst[ instIndex ] + ".ghost";
                         if( File.Exists( filename ) )
                         {
                             CDTXMania.listTargetGhsotLag[instIndex] = new List<int>();
@@ -590,7 +590,7 @@ namespace DTXMania
                         CDTXMania.DTX = new CDTX(str, false, ((double)CDTXMania.ConfigIni.nPlaySpeed) / 20.0, ini.stFile.BGMAdjust);
                         Trace.TraceInformation("----曲情報-----------------");
                         Trace.TraceInformation("TITLE: {0}", CDTXMania.DTX.TITLE);
-                        Trace.TraceInformation("FILE: {0}", CDTXMania.DTX.strファイル名の絶対パス);
+                        Trace.TraceInformation("FILE: {0}", CDTXMania.DTX.strFileNameFullPath);
                         Trace.TraceInformation("---------------------------");
 
                        // #35411 2015.08.19 chnmr0 add ゴースト機能のためList chip 読み込み後楽器パート出現順インデックスを割り振る
@@ -631,7 +631,7 @@ namespace DTXMania
                             //2016.06.18 kairera0467 「.ghost.score」ファイルが無かった場合ghostファイルから逆算を行う形に変更。
                             string[] prefix = { "none", "perfect", "lastplay", "hiskill", "hiscore", "online" };
                             int indPrefix = (int)CDTXMania.ConfigIni.eTargetGhost[ i ];
-                            string filename = cdtx.strFolderName + "\\" + cdtx.strファイル名 + "." + prefix[ indPrefix ] + "." + inst[ i ] + ".ghost";
+                            string filename = cdtx.strFolderName + "\\" + cdtx.strFileName + "." + prefix[ indPrefix ] + "." + inst[ i ] + ".ghost";
 
                             if( stGhostLag[ i ] == null || File.Exists( filename + ".score" ) )
                                 continue;

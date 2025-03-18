@@ -139,7 +139,7 @@ namespace DTXMania
 
 					#region [ Write .score.ini ]
 					//---------------------
-					string str = CDTXMania.DTX.strファイル名の絶対パス + ".score.ini";
+					string str = CDTXMania.DTX.strFileNameFullPath + ".score.ini";
 					CScoreIni ini = new CScoreIni(str);
 
 					bool[] b今までにフルコンボしたことがある = new bool[] { false, false, false };
@@ -304,7 +304,7 @@ namespace DTXMania
             }
 
             string directory = CDTXMania.DTX.strFolderName;
-            string filename = CDTXMania.DTX.strファイル名 + ".";
+            string filename = CDTXMania.DTX.strFileName + ".";
             EInstrumentPart inst = EInstrumentPart.UNKNOWN;
 
             if ( sectionIndex == 0 )
@@ -849,7 +849,7 @@ namespace DTXMania
 		/// <param name="bIsAutoSave">true=自動保存モード, false=手動保存モード</param>
 		private void CheckAndSaveResultScreen(bool bIsAutoSave)
 		{
-			string path = Path.GetDirectoryName( CDTXMania.DTX.strファイル名の絶対パス );
+			string path = Path.GetDirectoryName( CDTXMania.DTX.strFileNameFullPath );
 			string datetime = DateTime.Now.ToString( "yyyyMMddHHmmss" );
 			if ( bIsAutoSave )
 			{
@@ -860,7 +860,7 @@ namespace DTXMania
 					{
 						string strPart = ( (EInstrumentPart) ( i ) ).ToString();
 						string strRank = ( (CScoreIni.ERANK) ( nRankValue[ i ] ) ).ToString();
-						string strFullPath = CDTXMania.DTX.strファイル名の絶対パス + "." + datetime + "_" + strPart + "_" + strRank + ".png";
+						string strFullPath = CDTXMania.DTX.strFileNameFullPath + "." + datetime + "_" + strPart + "_" + strRank + ".png";
 						//Surface.ToFile( pSurface, strFullPath, ImageFileFormat.Png );
 						CDTXMania.app.SaveResultScreen( strFullPath );
 					}
