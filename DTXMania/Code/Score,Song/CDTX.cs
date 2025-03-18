@@ -3757,14 +3757,19 @@ namespace DTXMania
                     //DateTime timeBeginLoad = DateTime.Now;
                     //TimeSpan span;
 
+                    this.db再生速度 = dbReplaySpeed;
+
                     StreamReader reader = new(strFileName, Encoding.GetEncoding("shift-jis"));
-                    string str2 = reader.ReadToEnd();
+                    //string str2 = reader.ReadToEnd();
+                    tRead_FromStream(reader);
                     reader.Close();
 
                     //span = (TimeSpan) ( DateTime.Now - timeBeginLoad );
                     //Trace.TraceInformation( "DTXfileload時間:          {0}", span.ToString() );
 
-                    tRead_FromString(str2, dbReplaySpeed, nBgmAdjust);
+                    //tRead_FromString(str2, dbReplaySpeed, nBgmAdjust);
+                    
+                    tProcessChartData(nBgmAdjust);
                 }
                 catch
                 {
@@ -3775,9 +3780,9 @@ namespace DTXMania
                 Trace.TraceWarning("SMF の演奏は未対応です。（検討中）");
             }
         }
-        
 
-private bool t入力_コメントをスキップする( ref CharEnumerator ce )
+
+        private bool t入力_コメントをスキップする( ref CharEnumerator ce )
 		{
 			// 改行が現れるまでをコメントと見なしてスキップする。
 
@@ -3793,44 +3798,19 @@ private bool t入力_コメントをスキップする( ref CharEnumerator ce )
 		}
 
 
-        private bool t入力_空白と改行をスキップする( ref CharEnumerator ce )
-		{
-			// 空白と改行が続く間はこれらをスキップする。
-
-			while( ce.Current == ' ' || ce.Current == '\n' )
-			{
-				if( ce.Current == '\n' )
-                    lineNumber++;		// 改行文字では行番号が増える。
-
-				if( !ce.MoveNext() )
-					return false;	// 文字が尽きた
-			}
-
-			return true;
-		}
-        
-        
-        private void tRead_FromString(string inputString, double db再生速度, int nBGMAdjust)
-        {
-            //DateTime timeBeginLoad = DateTime.Now;
-            //TimeSpan span;
-
+        private void tRead_FromString(string inputString)
+        { 
             if (string.IsNullOrEmpty(inputString)) return;
 
             #region [ 改行カット ]
 
-            this.db再生速度 = db再生速度;
             inputString = inputString.Replace(Environment.NewLine, "\n");
             inputString = inputString.Replace('\t', ' ');
             inputString += "\n";
 
             #endregion
 
-            //span = (TimeSpan) ( DateTime.Now - timeBeginLoad );
-            //Trace.TraceInformation( "改行カット時間:           {0}", span.ToString() );
-            //timeBeginLoad = DateTime.Now;
-
-            #region [ 初期化 ]
+            #region [ Initialization ]
 
             for (int j = 0; j < 36 * 36; j++)
             {
@@ -3859,55 +3839,118 @@ private bool t入力_コメントをスキップする( ref CharEnumerator ce )
 
             CharEnumerator ce = inputString.GetEnumerator();
             if (!ce.MoveNext()) return;
-
-            // lineNumber = 1;
-            // while (tSkipWhiteSpaceAndNewLines(ref ce))
-            // {
-            //     if (ce.Current != '#')
-            //     {
-            //         tSkipComment(ref ce);
-            //         continue;
-            //     }
-            //
-            //     if (!ce.MoveNext()) break;
-            //
-            //     StringBuilder command = new(0x20);
-            //     if (!ExtractCommand(ref ce, ref command)) break;
-            //
-            //     StringBuilder parameter = new(0x400);
-            //     if (!ExtractParameter(ref ce, ref parameter)) break;
-            //
-            //     tParseInputLine(ref command, ref parameter, ref ce);
-            //     lineNumber++;
-            // }
             
             lineNumber = 1;
             do
             {
-                if (!t入力_空白と改行をスキップする(ref ce))
+                if (!tSkipWhiteSpaceAndNewLines(ref ce))
                 {
                     break;
                 }
 
                 if (ce.Current != '#') continue;
                 if (!ce.MoveNext()) break;
-                
+
                 StringBuilder builder = new(0x20);
                 if (!ExtractCommand(ref ce, ref builder)) break;
-                
+
                 StringBuilder builder2 = new(0x400);
                 if (!ExtractParameter(ref ce, ref builder2)) break;
-                
+
                 StringBuilder builder3 = new(0x400);
                 if (!ExtractComment(ref ce, ref builder3)) break;
-                
+
                 tParseInputLine(ref builder, ref builder2, ref builder3);
                 lineNumber++;
             } 
             while (t入力_コメントをスキップする(ref ce));
 
             #endregion
+        }
+        
+        
+        private void tRead_FromStream(StreamReader reader)
+        {
+            reader.BaseStream.Seek(0, SeekOrigin.Begin);
 
+            #region [ Initialization ]
+
+            for (int j = 0; j < 36 * 36; j++)
+            {
+                n無限管理WAV[j] = -j;
+                n無限管理BPM[j] = -j;
+                n無限管理VOL[j] = -j;
+                n無限管理PAN[j] = -10000 - j;
+                n無限管理SIZE[j] = -j;
+            }
+
+            n内部番号WAV1to = 1;
+            n内部番号BPM1to = 1;
+            bstackIFからENDIFをスキップする = new Stack<bool>();
+            bstackIFからENDIFをスキップする.Push(false);
+            n現在の乱数 = 0;
+            for (int k = 0; k < 7; k++)
+            {
+                nRESULTIMAGE用優先順位[k] = 0;
+                nRESULTMOVIE用優先順位[k] = 0;
+                nRESULTSOUND用優先順位[k] = 0;
+            }
+
+            #endregion
+            
+            lineNumber = 1;
+            
+            //iterate
+            while (!reader.EndOfStream)
+            {
+                string? line = reader.ReadLine();
+                if (string.IsNullOrWhiteSpace(line)) continue;
+                
+                StringBuilder command = new(0x20);
+                StringBuilder parameter = new(0x400);
+                StringBuilder comment = new(0x400);
+                
+                //Command
+                //Treat the characters until the command terminator (':'), space, comment start (';'), or newline appears as the command string, and copy it to the sb string.
+                CharEnumerator ce = line.GetEnumerator();
+                if (!ce.MoveNext()) continue;
+                
+                //skip # character
+                if (ce.Current != '#')
+                {
+                    continue;
+                }
+
+                ce.MoveNext();
+
+                while (ce.Current != ':' && ce.Current != ' ' && ce.Current != ';' && ce.Current != '\n')
+                {
+                    command.Append(ce.Current);
+                    if (!ce.MoveNext()) break;
+                }
+                
+                
+                //Parameter
+                //Treat the characters until the comment start (';') or newline appears as the parameter string, and copy it to the sb string.
+                if (!ce.MoveNext()) continue;
+                
+                while (ce.Current != ';' && ce.Current != '\n')
+                {
+                    parameter.Append(ce.Current);
+                    if (!ce.MoveNext()) break;
+                }
+                
+                ce.Dispose();
+                
+                //Comment
+                //Treat the characters until the newline appears as the comment string, and copy it to the sb string.
+                tParseInputLine(ref command, ref parameter, ref comment);
+                lineNumber++;
+            }
+        }
+
+        private void tProcessChartData(int nBGMAdjust)
+        {
             //For DTXVMode, always overwrite Config PlaySpeed with DTXVPlaySpeed
             if (CDTXMania.DTXVmode.Enabled)
             {
@@ -4587,7 +4630,7 @@ private bool t入力_コメントをスキップする( ref CharEnumerator ce )
                 #endregion
             }
         }
-
+        
         /// <summary>
         /// サウンドミキサーにサウンドを登録_削除する時刻を事前に算出する
         /// </summary>
@@ -5362,9 +5405,7 @@ private bool t入力_コメントをスキップする( ref CharEnumerator ce )
 
         private bool tSkipWhiteSpaceAndNewLines(ref CharEnumerator ce)
         {
-            // 空白と改行が続く間はこれらをスキップする。
-
-            while (ce.Current == ' ' || ce.Current == '\n')
+            while (ce.Current is ' ' or '\n')
             {
                 if (ce.Current == '\n')
                     lineNumber++; // 改行文字では行番号が増える。
@@ -5412,6 +5453,8 @@ private bool t入力_コメントをスキップする( ref CharEnumerator ce )
                 countFast++;
                 return;
             }
+            
+            Console.WriteLine(strCommand + " " + strParameter);
 
             // //don't even attempt to parse comments for chips
             // StringBuilder comment = new(0x400);
@@ -5944,7 +5987,6 @@ private bool t入力_コメントをスキップする( ref CharEnumerator ce )
                     #endregion
 
                     // オブジェクト記述コマンドの処理。
-
                     else if (!t入力_行解析_WAVVOL_VOLUME(strCommand, strParameter) &&
                              !t入力_行解析_WAVPAN_PAN(strCommand, strParameter) &&
                              !t入力_行解析_WAV(strCommand, strParameter, strComment) &&
