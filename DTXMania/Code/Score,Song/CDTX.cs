@@ -3867,21 +3867,13 @@ namespace DTXMania
                 string parameter = builder2.ToString();
                 string comment = builder3.ToString();
                 
-                tParseInputLine(command, parameter, comment);
+                ParseLine(ref command, ref parameter, ref comment);
                 lineNumber++;
             } 
             while (t入力_コメントをスキップする(ref ce));
 
             #endregion
         }
-        
-        struct Command
-        {
-            public string command;
-            public string parameter;
-        }
-
-        private List<Command> commands;
         
         private void tRead_FromStream(StreamReader reader)
         {
@@ -3913,7 +3905,6 @@ namespace DTXMania
             #endregion
             
             lineNumber = 1;
-            commands = [];
             
             //iterate
             while (!reader.EndOfStream)
@@ -3923,8 +3914,7 @@ namespace DTXMania
                 
                 if (line[0] != '#') continue;
                 string cmd = SplitLineString(ref line, [':', ';', ' ', '\n'], 1);
-
-
+                
                 string param;
                 if (line.Length != 0)
                 {
@@ -3933,17 +3923,23 @@ namespace DTXMania
                 }
                 else
                 {
-                    param = "";
+                    param = string.Empty;
+                }
+                
+                string comment;
+                if (line.Length != 0)
+                {
+                    int offset = char.IsWhiteSpace(line[0]) ? 1 : 0;
+                    comment = SplitLineString(ref line, ['\n'], offset);
+                }
+                else
+                {
+                    comment = string.Empty;
                 }
 
-                commands.Add(new Command { command = cmd, parameter = param });
-
+                ParseLine(ref cmd, ref param, ref comment);
+                
                 lineNumber++;
-            }
-            
-            foreach (Command command in commands)
-            {
-                tParseInputLine(command.command, command.parameter, string.Empty);
             }
         }
 
@@ -5475,13 +5471,13 @@ namespace DTXMania
             }
         }
         
-        private void tParseInputLine(string strCommand, string strParameter, string comment)
+        private void ParseLine(ref string strCommand, ref string strParameter, ref string comment)
         {
             //early out in case this is a chip location line
             if (lastLineWasChipLocation && strCommand.Length == 5 && IsChipLocation(strCommand))
             {
                 //parse chip location
-                if (tInput_LineAnalysis_ChipLocation(strCommand, strParameter))
+                if (tInput_LineAnalysis_ChipLocation(ref strCommand, ref strParameter))
                 {
                     return;
                 }
@@ -5508,9 +5504,7 @@ namespace DTXMania
                 }
                 else // 親が false なら入れ子はパラメータと乱数を比較して結果を判断する。
                 {
-                    int n数値 = 0;
-
-                    if (!int.TryParse(strParameter, out n数値))
+                    if (!int.TryParse(strParameter, out int n数値))
                         n数値 = 1;
 
                     bstackIFからENDIFをスキップする.Push(n数値 != nCurrentRandomNumber); // 乱数と数値が一致したら true 。
@@ -5674,7 +5668,7 @@ namespace DTXMania
                          !t入力_行解析_RESULTSOUND(strCommand, strParameter) &&
                          !t入力_行解析_SIZE(strCommand, strParameter))
                 {
-                    tInput_LineAnalysis_ChipLocation(strCommand, strParameter);
+                    tInput_LineAnalysis_ChipLocation(ref strCommand, ref strParameter);
                     lastLineWasChipLocation = true;
                 }
             }
@@ -5707,7 +5701,7 @@ namespace DTXMania
             #region [ AVI番号 zz を取得する。]
 
             //-----------------
-            int zz = CConversion.nConvert2DigitBase36StringToNumber(strCommand.Substring(0, 2));
+            int zz = CConversion.nConvert2DigitBase36StringToNumber(strCommand);
             if (zz < 0 || zz >= 36 * 36)
             {
                 Trace.TraceError("AVI(VIDEO)番号に 00～ZZ 以外の値または不正な文字列が指定されました。[{0}: {1}行]", strFileNameFullPath,
@@ -5775,7 +5769,7 @@ namespace DTXMania
             #region [ AVIPAN番号 zz を取得する。]
 
             //-----------------
-            int zz = CConversion.nConvert2DigitBase36StringToNumber(strCommand.Substring(0, 2));
+            int zz = CConversion.nConvert2DigitBase36StringToNumber(strCommand);
             if (zz < 0 || zz >= 36 * 36)
             {
                 Trace.TraceError("AVIPAN番号に 00～ZZ 以外の値または不正な文字列が指定されました。[{0}: {1}行]", strFileNameFullPath, lineNumber);
@@ -6093,7 +6087,7 @@ namespace DTXMania
             #region [ BGA番号 zz を取得する。]
 
             //-----------------
-            int zz = CConversion.nConvert2DigitBase36StringToNumber(strCommand.Substring(0, 2));
+            int zz = CConversion.nConvert2DigitBase36StringToNumber(strCommand);
             if (zz < 0 || zz >= 36 * 36)
             {
                 Trace.TraceError("BGA番号に 00～ZZ 以外の値または不正な文字列が指定されました。[{0}: {1}行]", strFileNameFullPath, lineNumber);
@@ -6305,7 +6299,7 @@ namespace DTXMania
             #region [ BGAPAN番号 zz を取得する。]
 
             //-----------------
-            int zz = CConversion.nConvert2DigitBase36StringToNumber(strCommand.Substring(0, 2));
+            int zz = CConversion.nConvert2DigitBase36StringToNumber(strCommand);
             if (zz < 0 || zz >= 36 * 36)
             {
                 Trace.TraceError("BGAPAN番号に 00～ZZ 以外の値または不正な文字列が指定されました。[{0}: {1}行]", strFileNameFullPath, lineNumber);
@@ -6637,7 +6631,7 @@ namespace DTXMania
                 #region [ (B) "#BMPzz:" の場合 → zz = 00 ～ ZZ ]
 
                 //-----------------
-                zz = CConversion.nConvert2DigitBase36StringToNumber(strCommand.Substring(0, 2));
+                zz = CConversion.nConvert2DigitBase36StringToNumber(strCommand);
                 if (zz < 0 || zz >= 36 * 36)
                 {
                     Trace.TraceError("BMP番号に 00～ZZ 以外の値または不正な文字列が指定されました。[{0}: {1}行]", strFileNameFullPath, lineNumber);
@@ -6698,7 +6692,7 @@ namespace DTXMania
             #region [ BMPTEX番号 zz を取得する。]
 
             //-----------------
-            int zz = CConversion.nConvert2DigitBase36StringToNumber(strCommand.Substring(0, 2));
+            int zz = CConversion.nConvert2DigitBase36StringToNumber(strCommand);
             if (zz < 0 || zz >= 36 * 36)
             {
                 Trace.TraceError("BMPTEX番号に 00～ZZ 以外の値または不正な文字列が指定されました。[{0}: {1}]", strFileNameFullPath, lineNumber);
@@ -6767,7 +6761,7 @@ namespace DTXMania
                 #region [ (B) "#BPMzz:" の場合 → zz = 00 ～ ZZ ]
 
                 //-----------------
-                zz = CConversion.nConvert2DigitBase36StringToNumber(strCommand.Substring(0, 2));
+                zz = CConversion.nConvert2DigitBase36StringToNumber(strCommand);
                 if (zz < 0 || zz >= 36 * 36)
                 {
                     Trace.TraceError("BPM番号に 00～ZZ 以外の値または不正な文字列が指定されました。[{0}: {1}行]", strFileNameFullPath, lineNumber);
@@ -7141,19 +7135,19 @@ namespace DTXMania
             }
         }
 
-        private bool t入力_行解析_SIZE(string strコマンド, string strParameter)
+        private bool t入力_行解析_SIZE(string strCommand, string strParameter)
         {
             // (1) コマンドを処理。
 
             #region [ "SIZE" で始まらないコマンドや、その後ろに2文字（番号）が付随してないコマンドは無効。]
 
             //-----------------
-            if (!strコマンド.StartsWith("SIZE", StringComparison.OrdinalIgnoreCase))
+            if (!strCommand.StartsWith("SIZE", StringComparison.OrdinalIgnoreCase))
                 return false;
 
-            strコマンド = strコマンド.Substring(4); // strコマンド から先頭の"SIZE"文字を除去。
+            strCommand = strCommand.Substring(4); // strコマンド から先頭の"SIZE"文字を除去。
 
-            if (strコマンド.Length < 2) // サイズ番号の指定がない場合は無効。
+            if (strCommand.Length < 2) // サイズ番号の指定がない場合は無効。
                 return false;
             //-----------------
 
@@ -7162,7 +7156,7 @@ namespace DTXMania
             #region [ nWAV番号（36進数2桁）を取得。]
 
             //-----------------
-            int nWAV番号 = CConversion.nConvert2DigitBase36StringToNumber(strコマンド.Substring(0, 2));
+            int nWAV番号 = CConversion.nConvert2DigitBase36StringToNumber(strCommand);
 
             if (nWAV番号 < 0 || nWAV番号 >= 36 * 36)
             {
@@ -7234,7 +7228,7 @@ namespace DTXMania
             #region [ WAV番号 zz を取得する。]
 
             //-----------------
-            int zz = CConversion.nConvert2DigitBase36StringToNumber(strCommand.Substring(0, 2));
+            int zz = CConversion.nConvert2DigitBase36StringToNumber(strCommand);
             if (zz < 0 || zz >= 36 * 36)
             {
                 Trace.TraceError("WAV番号に 00～ZZ 以外の値または不正な文字列が指定されました。[{0}: {1}行]", strFileNameFullPath, lineNumber);
@@ -7318,7 +7312,7 @@ namespace DTXMania
             #region [ WAV番号 zz を取得する。]
 
             //-----------------
-            int zz = CConversion.nConvert2DigitBase36StringToNumber(strCommand.Substring(0, 2));
+            int zz = CConversion.nConvert2DigitBase36StringToNumber(strCommand);
             if (zz is < 0 or >= 36 * 36)
             {
                 Trace.TraceError("WAVPAN(PAN)のWAV番号に 00～ZZ 以外の値または不正な文字列が指定されました。[{0}: {1}行]", strFileNameFullPath,
@@ -7386,7 +7380,7 @@ namespace DTXMania
             #region [ WAV番号 zz を取得する。]
 
             //-----------------
-            int zz = CConversion.nConvert2DigitBase36StringToNumber(strCommand.Substring(0, 2));
+            int zz = CConversion.nConvert2DigitBase36StringToNumber(strCommand);
             if (zz < 0 || zz >= 36 * 36)
             {
                 Trace.TraceError("WAV番号に 00～ZZ 以外の値または不正な文字列が指定されました。[{0}: {1}行]", strFileNameFullPath, lineNumber);
@@ -7463,7 +7457,7 @@ namespace DTXMania
             }
         }
 
-        private bool tInput_LineAnalysis_ChipLocation(string strCommand, string strParameter)
+        private bool tInput_LineAnalysis_ChipLocation(ref string strCommand, ref string strParameter)
         {
             // (1) コマンドを処理。
 
@@ -7740,12 +7734,12 @@ namespace DTXMania
                 if (nChannelNumber == EChannel.BPM)
                 {
                     // Ch.03 のみ 16進数2桁。
-                    nオブジェクト数値 = CConversion.nConvert2DigitHexadecimalStringToNumber(strParameter.Substring(i * 2, 2));
+                    nオブジェクト数値 = CConversion.nConvert2DigitHexadecimalStringToNumber(strParameter, i * 2);
                 }
                 else
                 {
                     // その他のチャンネルは36進数2桁。
-                    nオブジェクト数値 = CConversion.nConvert2DigitBase36StringToNumber(strParameter.Substring(i * 2, 2));
+                    nオブジェクト数値 = CConversion.nConvert2DigitBase36StringToNumber(strParameter, i * 2);
                 }
 
                 if (nオブジェクト数値 == 0x00)

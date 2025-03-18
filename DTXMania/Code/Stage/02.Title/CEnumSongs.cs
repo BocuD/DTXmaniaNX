@@ -634,6 +634,8 @@ namespace DTXMania
             {
                 TimeSpan span = DateTime.Now - startTime;
                 Trace.TraceInformation("Duration of full Song Enumerating: {0}", span.ToString());
+                Console.WriteLine("Duration of full Song Enumerating: {0}", span.ToString());
+                
                 EnumProgress = null;
             }
             lock (this)
