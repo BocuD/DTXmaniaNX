@@ -3404,644 +3404,633 @@ namespace DTXMania
 			}
 		}
 
-		public unsafe void tRead_FromString( string inputString, double db再生速度, int nBGMAdjust )
+		public void tRead_FromString( string inputString, double db再生速度, int nBGMAdjust )
 		{
 			//DateTime timeBeginLoad = DateTime.Now;
 			//TimeSpan span;
 
-			if ( !string.IsNullOrEmpty( inputString ) )
+			if (string.IsNullOrEmpty(inputString)) return;
+
+			#region [ 改行カット ]
+			this.db再生速度 = db再生速度;
+			inputString = inputString.Replace( Environment.NewLine, "\n" );
+			inputString = inputString.Replace( '\t', ' ' );
+			inputString += "\n";
+			#endregion
+			//span = (TimeSpan) ( DateTime.Now - timeBeginLoad );
+			//Trace.TraceInformation( "改行カット時間:           {0}", span.ToString() );
+			//timeBeginLoad = DateTime.Now;
+			#region [ 初期化 ]
+			for ( int j = 0; j < 36 * 36; j++ )
 			{
-				#region [ 改行カット ]
-				this.db再生速度 = db再生速度;
-				inputString = inputString.Replace( Environment.NewLine, "\n" );
-				inputString = inputString.Replace( '\t', ' ' );
-				inputString += "\n";
-				#endregion
-				//span = (TimeSpan) ( DateTime.Now - timeBeginLoad );
-				//Trace.TraceInformation( "改行カット時間:           {0}", span.ToString() );
-				//timeBeginLoad = DateTime.Now;
-				#region [ 初期化 ]
-				for ( int j = 0; j < 36 * 36; j++ )
+				n無限管理WAV[ j ] = -j;
+				n無限管理BPM[ j ] = -j;
+				n無限管理VOL[ j ] = -j;
+				n無限管理PAN[ j ] = -10000 - j;
+				n無限管理SIZE[ j ] = -j;
+			}
+			n内部番号WAV1to = 1;
+			n内部番号BPM1to = 1;
+			bstackIFからENDIFをスキップする = new Stack<bool>();
+			bstackIFからENDIFをスキップする.Push( false );
+			n現在の乱数 = 0;
+			for ( int k = 0; k < 7; k++ )
+			{
+				nRESULTIMAGE用優先順位[ k ] = 0;
+				nRESULTMOVIE用優先順位[ k ] = 0;
+				nRESULTSOUND用優先順位[ k ] = 0;
+			}
+			#endregion
+			#region [ 入力/行解析 ]
+			CharEnumerator ce = inputString.GetEnumerator();
+			if (ce.MoveNext())
+			{
+				lineNumber = 1;
+				while (tSkipWhiteSpaceAndNewLines(ref ce))
 				{
-					n無限管理WAV[ j ] = -j;
-					n無限管理BPM[ j ] = -j;
-					n無限管理VOL[ j ] = -j;
-					n無限管理PAN[ j ] = -10000 - j;
-					n無限管理SIZE[ j ] = -j;
-				}
-				n内部番号WAV1to = 1;
-				n内部番号BPM1to = 1;
-				bstackIFからENDIFをスキップする = new Stack<bool>();
-				bstackIFからENDIFをスキップする.Push( false );
-				n現在の乱数 = 0;
-				for ( int k = 0; k < 7; k++ )
-				{
-					nRESULTIMAGE用優先順位[ k ] = 0;
-					nRESULTMOVIE用優先順位[ k ] = 0;
-					nRESULTSOUND用優先順位[ k ] = 0;
-				}
-				#endregion
-				#region [ 入力/行解析 ]
-				CharEnumerator ce = inputString.GetEnumerator();
-				if ( ce.MoveNext() )
-				{
-					n現在の行数 = 1;
-					do
+					if (ce.Current != '#')
 					{
-						if ( !t入力_空白と改行をスキップする( ref ce ) )
-						{
-							break;
-						}
-						if ( ce.Current == '#' )
-						{
-							if ( ce.MoveNext() )
-							{
-								StringBuilder builder = new( 0x20 );
-								if ( t入力_コマンド文字列を抜き出す( ref ce, ref builder ) )
-								{
-									StringBuilder builder2 = new( 0x400 );
-									if ( t入力_パラメータ文字列を抜き出す( ref ce, ref builder2 ) )
-									{
-										StringBuilder builder3 = new( 0x400 );
-										if ( t入力_コメント文字列を抜き出す( ref ce, ref builder3 ) )
-										{
-											tParseInputLine( ref builder, ref builder2, ref builder3 );
-											n現在の行数++;
-											continue;
-										}
-									}
-								}
-							}
-							break;
-						}
+						tSkipComment(ref ce);
+						continue;
 					}
-					while ( t入力_コメントをスキップする( ref ce ) );
-					#endregion
 
-					//For DTXVMode, always overwrite Config PlaySpeed with DTXVPlaySpeed
-					if (CDTXMania.DTXVmode.Enabled)
-					{
-						Trace.TraceInformation("DTXVMode Enabled. Set PlaySpeed to {0}", dbDTXVPlaySpeed);
-						CDTXMania.ConfigIni.nPlaySpeed = (int)(dbDTXVPlaySpeed * 20.0);
-					}
-					//span = (TimeSpan) ( DateTime.Now - timeBeginLoad );
-					//Trace.TraceInformation( "抜き出し時間:             {0}", span.ToString() );
-					//timeBeginLoad = DateTime.Now;
-					n無限管理WAV = null;
-					n無限管理BPM = null;
-					n無限管理VOL = null;
-					n無限管理PAN = null;
-					n無限管理SIZE = null;
+					if (!ce.MoveNext()) break;
+
+					StringBuilder command = new(0x20);
+					if (!ExtractCommand(ref ce, ref command)) break;
+
+					StringBuilder parameter = new(0x400);
+					if (!ExtractParameter(ref ce, ref parameter)) break;
 					
-					if ( !bHeaderOnly )
+					tParseInputLine(ref command, ref parameter, ref ce);
+					lineNumber++;
+				}
+
+				#endregion
+
+				//For DTXVMode, always overwrite Config PlaySpeed with DTXVPlaySpeed
+				if (CDTXMania.DTXVmode.Enabled)
+				{
+					Trace.TraceInformation("DTXVMode Enabled. Set PlaySpeed to {0}", dbDTXVPlaySpeed);
+					CDTXMania.ConfigIni.nPlaySpeed = (int)(dbDTXVPlaySpeed * 20.0);
+				}
+				//span = (TimeSpan) ( DateTime.Now - timeBeginLoad );
+				//Trace.TraceInformation( "抜き出し時間:             {0}", span.ToString() );
+				//timeBeginLoad = DateTime.Now;
+				n無限管理WAV = null;
+				n無限管理BPM = null;
+				n無限管理VOL = null;
+				n無限管理PAN = null;
+				n無限管理SIZE = null;
+					
+				if ( !bHeaderOnly )
+				{
+					#region [ BPM/BMP初期化 ]
+
+					CBPM cbpm = null;
+					foreach ( CBPM cbpm2 in listBPM.Values )
 					{
-						#region [ BPM/BMP初期化 ]
-
-						CBPM cbpm = null;
-						foreach ( CBPM cbpm2 in listBPM.Values )
+						if ( cbpm2.n表記上の番号 == 0 )
 						{
-							if ( cbpm2.n表記上の番号 == 0 )
-							{
-								cbpm = cbpm2;
-								break;
-							}
+							cbpm = cbpm2;
+							break;
 						}
-						if ( cbpm == null )
+					}
+					if ( cbpm == null )
+					{
+						cbpm = new CBPM
 						{
-							cbpm = new CBPM
-							{
-								n内部番号 = n内部番号BPM1to++,
-								n表記上の番号 = 0,
-								dbBPM値 = 120.0
-							};
+							n内部番号 = n内部番号BPM1to++,
+							n表記上の番号 = 0,
+							dbBPM値 = 120.0
+						};
 							
-							listBPM.Add( cbpm.n内部番号, cbpm );
-							CChip chip = new()
-							{
-								nPlaybackPosition = 0,
-								nChannelNumber = EChannel.BPMEx, // 拡張BPM
-								nIntegerValue = 0,
-								nIntegerValue_InternalNumber = cbpm.n内部番号
-							};
-							listChip.Insert( 0, chip );
+						listBPM.Add( cbpm.n内部番号, cbpm );
+						CChip chip = new()
+						{
+							nPlaybackPosition = 0,
+							nChannelNumber = EChannel.BPMEx, // 拡張BPM
+							nIntegerValue = 0,
+							nIntegerValue_InternalNumber = cbpm.n内部番号
+						};
+						listChip.Insert( 0, chip );
+					}
+					else
+					{
+						CChip chip = new()
+						{
+							nPlaybackPosition = 0,
+							nChannelNumber = EChannel.BPMEx, // 拡張BPM
+							nIntegerValue = 0,
+							nIntegerValue_InternalNumber = cbpm.n内部番号
+						};
+						listChip.Insert( 0, chip );
+					}
+					if ( listBMP.ContainsKey( 0 ) )
+					{
+						CChip chip = new()
+						{
+							nPlaybackPosition = 0,
+							nChannelNumber = EChannel.BGALayer1, // BGA (レイヤBGA1)
+							nIntegerValue = 0,
+							nIntegerValue_InternalNumber = 0
+						};
+						listChip.Insert( 0, chip );
+					}
+					#endregion
+					//span = (TimeSpan) ( DateTime.Now - timeBeginLoad );
+					//Trace.TraceInformation( "前準備完了時間:           {0}", span.ToString() );
+					//timeBeginLoad = DateTime.Now;
+					#region [ CWAV初期化 ]
+					foreach ( CWAV cwav in listWAV.Values )
+					{
+						if ( cwav.nチップサイズ < 0 )
+						{
+							cwav.nチップサイズ = 100;
 						}
-						else
+						if ( cwav.n位置 <= -10000 )
+						{
+							cwav.n位置 = 0;
+						}
+						if ( cwav.n音量 < 0 )
+						{
+							cwav.n音量 = 100;
+						}
+					}
+					#endregion
+					//span = (TimeSpan) ( DateTime.Now - timeBeginLoad );
+					//Trace.TraceInformation( "CWAV前準備時間:           {0}", span.ToString() );
+					//timeBeginLoad = DateTime.Now;
+					#region [ チップ倍率設定 ]						// #28145 2012.4.22 yyagi 二重ループを1重ループに変更して高速化)
+					foreach ( CChip chip in listChip )
+					{
+						if ( listWAV.TryGetValue(chip.nIntegerValue_InternalNumber, out CWAV? cwav) )
+						{
+							chip.dbChipSizeRatio = cwav.nチップサイズ / 100.0;
+						}
+					}
+					#endregion
+					#region [ 必要に応じて空打ち音を0小節に定義する ]
+					//for ( int m = 0xb1; m <= 0xbe; m++ )			// #28146 2012.4.21 yyagi; bb -> bc
+					//{
+					//foreach ( CChip chip in this.listChip )
+					//{
+					//if ( chip.nChannelNumber == m )
+					//{
+					//CChip c = new CChip();
+					//c.nPlaybackPosition = 0;
+					//c.nChannelNumber = chip.nChannelNumber;
+					//c.nIntegerValue = chip.nIntegerValue;
+					//c.nIntegerValue_InternalNumber = chip.nIntegerValue_InternalNumber;
+					//this.listChip.Insert( 0, c );
+					//break;
+					//}
+					//}
+					//}
+					#endregion
+					//span = (TimeSpan) ( DateTime.Now - timeBeginLoad );
+					//Trace.TraceInformation( "空打確認時間:             {0}", span.ToString() );
+					//timeBeginLoad = DateTime.Now;
+					#region [ 拍子_拍線の挿入 ]
+					if ( listChip.Count > 0 )
+					{
+						listChip.Sort();		// 高速化のためにはこれを削りたいが、listChipの最後がn発声位置の終端である必要があるので、
+						// 保守性確保を優先してここでのソートは残しておく
+						// なお、093時点では、このソートを削除しても動作するようにはしてある。
+						// (ここまでの一部チップ登録を、listChip.Add(c)から同Insert(0,c)に変更してある)
+						// これにより、数ms程度ながらここでのソートも高速化されている。
+						double barLength = 1.0;
+						int nEndOfSong = ( listChip[ listChip.Count - 1 ].nPlaybackPosition + 384 ) - ( listChip[ listChip.Count - 1 ].nPlaybackPosition % 384 );
+						for ( int tick384 = 0; tick384 <= nEndOfSong; tick384 += 384 )	// 小節線の挿入　(後に出てくる拍子線とループをまとめようとするなら、forループの終了条件の微妙な違いに注意が必要)
 						{
 							CChip chip = new()
 							{
-								nPlaybackPosition = 0,
-								nChannelNumber = EChannel.BPMEx, // 拡張BPM
-								nIntegerValue = 0,
-								nIntegerValue_InternalNumber = cbpm.n内部番号
+								nPlaybackPosition = tick384,
+								nChannelNumber = EChannel.BarLine, // 小節線
+								nIntegerValue = 36 * 36 - 1
 							};
-							listChip.Insert( 0, chip );
+							listChip.Add( chip );
 						}
-						if ( listBMP.ContainsKey( 0 ) )
+						//this.listChip.Sort();				// ここでのソートは不要。ただし最後にソートすること
+						int nChipNo_BarLength = 0;
+						int nChipNo_C1 = 0;
+						for ( int tick384 = 0; tick384 < nEndOfSong; tick384 += 384 )
 						{
-							CChip chip = new()
+							int n発声位置_C1_同一小節内 = 0;
+							while ( ( nChipNo_C1 < listChip.Count ) && ( listChip[ nChipNo_C1 ].nPlaybackPosition < ( tick384 + 384 ) ) )
 							{
-								nPlaybackPosition = 0,
-								nChannelNumber = EChannel.BGALayer1, // BGA (レイヤBGA1)
-								nIntegerValue = 0,
-								nIntegerValue_InternalNumber = 0
-							};
-							listChip.Insert( 0, chip );
-						}
-						#endregion
-						//span = (TimeSpan) ( DateTime.Now - timeBeginLoad );
-						//Trace.TraceInformation( "前準備完了時間:           {0}", span.ToString() );
-						//timeBeginLoad = DateTime.Now;
-						#region [ CWAV初期化 ]
-						foreach ( CWAV cwav in listWAV.Values )
-						{
-							if ( cwav.nチップサイズ < 0 )
-							{
-								cwav.nチップサイズ = 100;
-							}
-							if ( cwav.n位置 <= -10000 )
-							{
-								cwav.n位置 = 0;
-							}
-							if ( cwav.n音量 < 0 )
-							{
-								cwav.n音量 = 100;
-							}
-						}
-						#endregion
-						//span = (TimeSpan) ( DateTime.Now - timeBeginLoad );
-						//Trace.TraceInformation( "CWAV前準備時間:           {0}", span.ToString() );
-						//timeBeginLoad = DateTime.Now;
-						#region [ チップ倍率設定 ]						// #28145 2012.4.22 yyagi 二重ループを1重ループに変更して高速化)
-						foreach ( CChip chip in listChip )
-						{
-							if ( listWAV.TryGetValue(chip.nIntegerValue_InternalNumber, out CWAV? cwav) )
-							{
-								chip.dbChipSizeRatio = cwav.nチップサイズ / 100.0;
-							}
-						}
-						#endregion
-						#region [ 必要に応じて空打ち音を0小節に定義する ]
-						//for ( int m = 0xb1; m <= 0xbe; m++ )			// #28146 2012.4.21 yyagi; bb -> bc
-						//{
-							//foreach ( CChip chip in this.listChip )
-							//{
-								//if ( chip.nChannelNumber == m )
-								//{
-									//CChip c = new CChip();
-									//c.nPlaybackPosition = 0;
-									//c.nChannelNumber = chip.nChannelNumber;
-									//c.nIntegerValue = chip.nIntegerValue;
-									//c.nIntegerValue_InternalNumber = chip.nIntegerValue_InternalNumber;
-									//this.listChip.Insert( 0, c );
-									//break;
-								//}
-							//}
-						//}
-						#endregion
-						//span = (TimeSpan) ( DateTime.Now - timeBeginLoad );
-						//Trace.TraceInformation( "空打確認時間:             {0}", span.ToString() );
-						//timeBeginLoad = DateTime.Now;
-						#region [ 拍子_拍線の挿入 ]
-						if ( listChip.Count > 0 )
-						{
-							listChip.Sort();		// 高速化のためにはこれを削りたいが、listChipの最後がn発声位置の終端である必要があるので、
-							// 保守性確保を優先してここでのソートは残しておく
-							// なお、093時点では、このソートを削除しても動作するようにはしてある。
-							// (ここまでの一部チップ登録を、listChip.Add(c)から同Insert(0,c)に変更してある)
-							// これにより、数ms程度ながらここでのソートも高速化されている。
-							double barLength = 1.0;
-							int nEndOfSong = ( listChip[ listChip.Count - 1 ].nPlaybackPosition + 384 ) - ( listChip[ listChip.Count - 1 ].nPlaybackPosition % 384 );
-							for ( int tick384 = 0; tick384 <= nEndOfSong; tick384 += 384 )	// 小節線の挿入　(後に出てくる拍子線とループをまとめようとするなら、forループの終了条件の微妙な違いに注意が必要)
-							{
-								CChip chip = new()
+								if ( listChip[ nChipNo_C1 ].nChannelNumber == EChannel.BeatLineShift )				// 拍線シフトの検出
 								{
-									nPlaybackPosition = tick384,
-									nChannelNumber = EChannel.BarLine, // 小節線
-									nIntegerValue = 36 * 36 - 1
-								};
-								listChip.Add( chip );
+									n発声位置_C1_同一小節内 = listChip[ nChipNo_C1 ].nPlaybackPosition - tick384;
+								}
+								nChipNo_C1++;
 							}
-							//this.listChip.Sort();				// ここでのソートは不要。ただし最後にソートすること
-							int nChipNo_BarLength = 0;
-							int nChipNo_C1 = 0;
-							for ( int tick384 = 0; tick384 < nEndOfSong; tick384 += 384 )
+							if ( ( e種別 == EType.BMS ) || ( e種別 == EType.BME ) )
 							{
-								int n発声位置_C1_同一小節内 = 0;
-								while ( ( nChipNo_C1 < listChip.Count ) && ( listChip[ nChipNo_C1 ].nPlaybackPosition < ( tick384 + 384 ) ) )
+								barLength = 1.0;
+							}
+							while ( ( nChipNo_BarLength < listChip.Count ) && ( listChip[ nChipNo_BarLength ].nPlaybackPosition <= tick384 ) )
+							{
+								if ( listChip[ nChipNo_BarLength ].nChannelNumber == EChannel.BarLength)		// bar lengthの検出
 								{
-									if ( listChip[ nChipNo_C1 ].nChannelNumber == EChannel.BeatLineShift )				// 拍線シフトの検出
+									barLength = listChip[ nChipNo_BarLength ].db実数値;
+								}
+								nChipNo_BarLength++;
+							}
+							for ( int i = 0; i < 100; i++ )								// 拍線の挿入
+							{
+								int tickBeat = (int) ( 384 * i / ( 4.0 * barLength ) );
+								if ( ( tickBeat + n発声位置_C1_同一小節内 ) >= 384 )
+								{
+									break;
+								}
+								if ( ( ( tickBeat + n発声位置_C1_同一小節内 ) % 384 ) != 0 )
+								{
+									CChip chip = new()
 									{
-										n発声位置_C1_同一小節内 = listChip[ nChipNo_C1 ].nPlaybackPosition - tick384;
-									}
-									nChipNo_C1++;
-								}
-								if ( ( e種別 == EType.BMS ) || ( e種別 == EType.BME ) )
-								{
-									barLength = 1.0;
-								}
-								while ( ( nChipNo_BarLength < listChip.Count ) && ( listChip[ nChipNo_BarLength ].nPlaybackPosition <= tick384 ) )
-								{
-									if ( listChip[ nChipNo_BarLength ].nChannelNumber == EChannel.BarLength)		// bar lengthの検出
-									{
-										barLength = listChip[ nChipNo_BarLength ].db実数値;
-									}
-									nChipNo_BarLength++;
-								}
-								for ( int i = 0; i < 100; i++ )								// 拍線の挿入
-								{
-									int tickBeat = (int) ( 384 * i / ( 4.0 * barLength ) );
-									if ( ( tickBeat + n発声位置_C1_同一小節内 ) >= 384 )
-									{
-										break;
-									}
-									if ( ( ( tickBeat + n発声位置_C1_同一小節内 ) % 384 ) != 0 )
-									{
-										CChip chip = new()
-										{
-											nPlaybackPosition = tick384 + ( tickBeat + n発声位置_C1_同一小節内 ),
-											nChannelNumber = EChannel.BeatLine, // beat line 拍線
-											nIntegerValue = 36 * 36 - 1
-										};
-										listChip.Add( chip );
-									}
+										nPlaybackPosition = tick384 + ( tickBeat + n発声位置_C1_同一小節内 ),
+										nChannelNumber = EChannel.BeatLine, // beat line 拍線
+										nIntegerValue = 36 * 36 - 1
+									};
+									listChip.Add( chip );
 								}
 							}
-							listChip.Sort();
 						}
-						#endregion
-						//span = (TimeSpan) ( DateTime.Now - timeBeginLoad );
-						//Trace.TraceInformation( "拍子_拍線挿入時間:       {0}", span.ToString() );
-						//timeBeginLoad = DateTime.Now;
-						#region [ C2 [拍線_小節線表示指定] の処理 ]		// #28145 2012.4.21 yyagi; 2重ループをほぼ1重にして高速化
-						bool bShowBeatBarLine = true;
-						for ( int i = 0; i < listChip.Count; i++ )
+						listChip.Sort();
+					}
+					#endregion
+					//span = (TimeSpan) ( DateTime.Now - timeBeginLoad );
+					//Trace.TraceInformation( "拍子_拍線挿入時間:       {0}", span.ToString() );
+					//timeBeginLoad = DateTime.Now;
+					#region [ C2 [拍線_小節線表示指定] の処理 ]		// #28145 2012.4.21 yyagi; 2重ループをほぼ1重にして高速化
+					bool bShowBeatBarLine = true;
+					for ( int i = 0; i < listChip.Count; i++ )
+					{
+						bool bChangedBeatBarStatus = false;
+						if ( ( listChip[ i ].nChannelNumber == EChannel.BeatLineDisplay ) )
 						{
-							bool bChangedBeatBarStatus = false;
-							if ( ( listChip[ i ].nChannelNumber == EChannel.BeatLineDisplay ) )
+							if ( listChip[ i ].nIntegerValue == 1 )				// BAR/BEAT LINE = ON
 							{
-								if ( listChip[ i ].nIntegerValue == 1 )				// BAR/BEAT LINE = ON
-								{
-									bShowBeatBarLine = true;
-									bChangedBeatBarStatus = true;
-								}
-								else if ( listChip[ i ].nIntegerValue == 2 )			// BAR/BEAT LINE = OFF
-								{
-									bShowBeatBarLine = false;
-									bChangedBeatBarStatus = true;
-								}
+								bShowBeatBarLine = true;
+								bChangedBeatBarStatus = true;
 							}
-							int startIndex = i;
-							if ( bChangedBeatBarStatus )							// C2チップの前に50/51チップが来ている可能性に配慮
+							else if ( listChip[ i ].nIntegerValue == 2 )			// BAR/BEAT LINE = OFF
 							{
-								while ( startIndex > 0 && listChip[ startIndex ].nPlaybackPosition == listChip[ i ].nPlaybackPosition )
-								{
-									startIndex--;
-								}
-								startIndex++;	// 1つ小さく過ぎているので、戻す
-							}
-							for ( int j = startIndex; j <= i; j++ )
-							{
-								if ( ( ( listChip[ j ].nChannelNumber == EChannel.BarLine ) || ( listChip[ j ].nChannelNumber == EChannel.BeatLine ) ) &&
-									( listChip[ j ].nIntegerValue == ( 36 * 36 - 1 ) ) )
-								{
-									listChip[ j ].bVisible = bShowBeatBarLine;
-								}
+								bShowBeatBarLine = false;
+								bChangedBeatBarStatus = true;
 							}
 						}
-						#endregion
-						//span = (TimeSpan) ( DateTime.Now - timeBeginLoad );
-						//Trace.TraceInformation( "C2 [拍線_小節線表示指定]:  {0}", span.ToString() );
-						//timeBeginLoad = DateTime.Now;
-						#region [ 発声時刻の計算 ]
-						double bpm = 120.0;
-						double dbBarLength = 1.0;
-						int n発声位置 = 0;
-						//int ms = 0;
-						double currTimeMs = 0.0; // 2024.2.18 fisyher Fix Time Drift issue due to int truncation
-						int nBar = 0;
-						//
-						STDGBVALUE<CChip> cCandidateStartHold = default;
+						int startIndex = i;
+						if ( bChangedBeatBarStatus )							// C2チップの前に50/51チップが来ている可能性に配慮
+						{
+							while ( startIndex > 0 && listChip[ startIndex ].nPlaybackPosition == listChip[ i ].nPlaybackPosition )
+							{
+								startIndex--;
+							}
+							startIndex++;	// 1つ小さく過ぎているので、戻す
+						}
+						for ( int j = startIndex; j <= i; j++ )
+						{
+							if ( ( ( listChip[ j ].nChannelNumber == EChannel.BarLine ) || ( listChip[ j ].nChannelNumber == EChannel.BeatLine ) ) &&
+							     ( listChip[ j ].nIntegerValue == ( 36 * 36 - 1 ) ) )
+							{
+								listChip[ j ].bVisible = bShowBeatBarLine;
+							}
+						}
+					}
+					#endregion
+					//span = (TimeSpan) ( DateTime.Now - timeBeginLoad );
+					//Trace.TraceInformation( "C2 [拍線_小節線表示指定]:  {0}", span.ToString() );
+					//timeBeginLoad = DateTime.Now;
+					#region [ 発声時刻の計算 ]
+					double bpm = 120.0;
+					double dbBarLength = 1.0;
+					int n発声位置 = 0;
+					//int ms = 0;
+					double currTimeMs = 0.0; // 2024.2.18 fisyher Fix Time Drift issue due to int truncation
+					int nBar = 0;
+					//
+					STDGBVALUE<CChip> cCandidateStartHold = default;
 						
-						cCandidateStartHold.Drums = null;
-						cCandidateStartHold.Guitar = null;
-						cCandidateStartHold.Bass = null;
-						foreach ( CChip chip in listChip )
-						{
-							double currChipPlaybackTimeMs = tComputeChipPlayTimeMs(currTimeMs, chip.nPlaybackPosition - n発声位置, dbBarLength, bpm);
-							chip.nPlaybackTimeMs = tConvertFromDoubleToIntBasedOnComputeMode(currChipPlaybackTimeMs);
+					cCandidateStartHold.Drums = null;
+					cCandidateStartHold.Guitar = null;
+					cCandidateStartHold.Bass = null;
+					foreach ( CChip chip in listChip )
+					{
+						double currChipPlaybackTimeMs = tComputeChipPlayTimeMs(currTimeMs, chip.nPlaybackPosition - n発声位置, dbBarLength, bpm);
+						chip.nPlaybackTimeMs = tConvertFromDoubleToIntBasedOnComputeMode(currChipPlaybackTimeMs);
 
-                            if ( ( ( e種別 == EType.BMS ) || ( e種別 == EType.BME ) ) && ( ( dbBarLength != 1.0 ) && ( ( chip.nPlaybackPosition / 384 ) != nBar ) ) )
+						if ( ( ( e種別 == EType.BMS ) || ( e種別 == EType.BME ) ) && ( ( dbBarLength != 1.0 ) && ( ( chip.nPlaybackPosition / 384 ) != nBar ) ) )
+						{
+							n発声位置 = chip.nPlaybackPosition;
+							currTimeMs = currChipPlaybackTimeMs;
+							//ms = chip.nPlaybackTimeMs;
+							dbBarLength = 1.0;
+						}
+						nBar = chip.nPlaybackPosition / 384;
+						EChannel ch = chip.nChannelNumber;
+						switch ( ch )
+						{
+							case EChannel.BarLength:	// BarLength
 							{
 								n発声位置 = chip.nPlaybackPosition;
 								currTimeMs = currChipPlaybackTimeMs;
-                                //ms = chip.nPlaybackTimeMs;
-								dbBarLength = 1.0;
+								//ms = chip.nPlaybackTimeMs;
+								dbBarLength = chip.db実数値;
+								continue;
 							}
-							nBar = chip.nPlaybackPosition / 384;
-							EChannel ch = chip.nChannelNumber;
-							switch ( ch )
+							case EChannel.BPM:	// BPM
 							{
-								case EChannel.BarLength:	// BarLength
-									{
-										n発声位置 = chip.nPlaybackPosition;
-                                        currTimeMs = currChipPlaybackTimeMs;
-                                        //ms = chip.nPlaybackTimeMs;
-										dbBarLength = chip.db実数値;
-										continue;
-									}
-								case EChannel.BPM:	// BPM
-									{
-										n発声位置 = chip.nPlaybackPosition;
-                                        currTimeMs = currChipPlaybackTimeMs;
-                                        //ms = chip.nPlaybackTimeMs;
-										bpm = BASEBPM + chip.nIntegerValue;
-										continue;
-									}
-								case EChannel.BGALayer1:	// BGA (レイヤBGA1)
-								case EChannel.BGALayer2:	// レイヤBGA2
-								case EChannel.BGALayer3:	// レイヤBGA3
-								case EChannel.BGALayer4:	// レイヤBGA4
-								case EChannel.BGALayer5:	// レイヤBGA5
-								case EChannel.BGALayer6:	// レイヤBGA6
-								case EChannel.BGALayer7:	// レイヤBGA7
-								case EChannel.BGALayer8:	// レイヤBGA8
-									break;
+								n発声位置 = chip.nPlaybackPosition;
+								currTimeMs = currChipPlaybackTimeMs;
+								//ms = chip.nPlaybackTimeMs;
+								bpm = BASEBPM + chip.nIntegerValue;
+								continue;
+							}
+							case EChannel.BGALayer1:	// BGA (レイヤBGA1)
+							case EChannel.BGALayer2:	// レイヤBGA2
+							case EChannel.BGALayer3:	// レイヤBGA3
+							case EChannel.BGALayer4:	// レイヤBGA4
+							case EChannel.BGALayer5:	// レイヤBGA5
+							case EChannel.BGALayer6:	// レイヤBGA6
+							case EChannel.BGALayer7:	// レイヤBGA7
+							case EChannel.BGALayer8:	// レイヤBGA8
+								break;
 
-								case EChannel.ExObj_nouse:	// Extended Object (非対応)
-								case EChannel.MissAnimation_nouse:	// Missアニメ (非対応)
-								//case 0x5A:	// 未定義
-								case EChannel.nouse_5b:	// 未定義
-								case EChannel.nouse_5c:	// 未定義
-								case EChannel.nouse_5d:	// 未定義
-								case EChannel.nouse_5e:	// 未定義
-								case EChannel.nouse_5f:	// 未定義
-									{
-										continue;
-									}
-								case EChannel.BPMEx:	// 拡張BPM
-									{
-										n発声位置 = chip.nPlaybackPosition;
-                                        currTimeMs = currChipPlaybackTimeMs;
-                                        //ms = chip.nPlaybackTimeMs;
-										if ( listBPM.ContainsKey( chip.nIntegerValue_InternalNumber ) )
-										{
-											bpm = ( ( listBPM[ chip.nIntegerValue_InternalNumber ].n表記上の番号 == 0 ) ? 0.0 : BASEBPM ) + listBPM[ chip.nIntegerValue_InternalNumber ].dbBPM値;
-										}
-										continue;
-									}
-								case EChannel.Movie:	// 動画再生
-									{
-										if ( listAVIPAN.ContainsKey( chip.nIntegerValue ) )
-										{
-											//int num21 = ms + ( (int) ( ( ( 0x271 * ( chip.nPlaybackPosition - n発声位置 ) ) * dbBarLength ) / bpm ) );
-											//int num22 = ms + ( (int) ( ( ( 0x271 * ( ( chip.nPlaybackPosition + this.listAVIPAN[ chip.nIntegerValue ].n移動時間ct ) - n発声位置 ) ) * dbBarLength ) / bpm ) );
-											double num21 = tComputeChipPlayTimeMs(currTimeMs, chip.nPlaybackPosition - n発声位置, dbBarLength, bpm);
-                                            double num22 = tComputeChipPlayTimeMs(currTimeMs, (chip.nPlaybackPosition + listAVIPAN[chip.nIntegerValue].n移動時間ct) - n発声位置, dbBarLength, bpm);
-                                            chip.n総移動時間 = (int)Math.Round(num22 - num21);
-										}
-										continue;
-									}
-                                case EChannel.MovieFull:	// 動画再生 (Full)
-                                    {
-                                        if (listAVIPAN.ContainsKey(chip.nIntegerValue))
-                                        {
-                                            //int num21 = ms + ((int)(((0x271 * (chip.nPlaybackPosition - n発声位置)) * dbBarLength) / bpm));
-                                            //int num22 = ms + ((int)(((0x271 * ((chip.nPlaybackPosition + this.listAVIPAN[chip.nIntegerValue].n移動時間ct) - n発声位置)) * dbBarLength) / bpm));
-                                            double num21 = tComputeChipPlayTimeMs(currTimeMs, chip.nPlaybackPosition - n発声位置, dbBarLength, bpm);
-                                            double num22 = tComputeChipPlayTimeMs(currTimeMs, (chip.nPlaybackPosition + listAVIPAN[chip.nIntegerValue].n移動時間ct) - n発声位置, dbBarLength, bpm);
-                                            chip.n総移動時間 = (int)Math.Round(num22 - num21);
-                                        }
-                                        continue;
-                                    }
-								default:
-									{
-                                        if( chip.nChannelNumber >= EChannel.BonusEffect_Min && chip.nChannelNumber <= EChannel.BonusEffect )
-                                        {
-                                            #region [ TEST ]
-                                            t指定された発声位置と同じ位置の指定したチップにボーナスフラグを立てる( chip.nPlaybackPosition, chip.nIntegerValue );
-                                            #endregion
-                                        }
-                                        //Process Long Notes for Guitar and Bass
-                                        else if(chip.nChannelNumber == EChannel.Guitar_LongNote || chip.nChannelNumber == EChannel.Bass_LongNote)
-                                        {
-											#region [Long Note Processing]
+							case EChannel.ExObj_nouse:	// Extended Object (非対応)
+							case EChannel.MissAnimation_nouse:	// Missアニメ (非対応)
+							//case 0x5A:	// 未定義
+							case EChannel.nouse_5b:	// 未定義
+							case EChannel.nouse_5c:	// 未定義
+							case EChannel.nouse_5d:	// 未定義
+							case EChannel.nouse_5e:	// 未定義
+							case EChannel.nouse_5f:	// 未定義
+							{
+								continue;
+							}
+							case EChannel.BPMEx:	// 拡張BPM
+							{
+								n発声位置 = chip.nPlaybackPosition;
+								currTimeMs = currChipPlaybackTimeMs;
+								//ms = chip.nPlaybackTimeMs;
+								if ( listBPM.ContainsKey( chip.nIntegerValue_InternalNumber ) )
+								{
+									bpm = ( ( listBPM[ chip.nIntegerValue_InternalNumber ].n表記上の番号 == 0 ) ? 0.0 : BASEBPM ) + listBPM[ chip.nIntegerValue_InternalNumber ].dbBPM値;
+								}
+								continue;
+							}
+							case EChannel.Movie:	// 動画再生
+							{
+								if ( listAVIPAN.ContainsKey( chip.nIntegerValue ) )
+								{
+									//int num21 = ms + ( (int) ( ( ( 0x271 * ( chip.nPlaybackPosition - n発声位置 ) ) * dbBarLength ) / bpm ) );
+									//int num22 = ms + ( (int) ( ( ( 0x271 * ( ( chip.nPlaybackPosition + this.listAVIPAN[ chip.nIntegerValue ].n移動時間ct ) - n発声位置 ) ) * dbBarLength ) / bpm ) );
+									double num21 = tComputeChipPlayTimeMs(currTimeMs, chip.nPlaybackPosition - n発声位置, dbBarLength, bpm);
+									double num22 = tComputeChipPlayTimeMs(currTimeMs, (chip.nPlaybackPosition + listAVIPAN[chip.nIntegerValue].n移動時間ct) - n発声位置, dbBarLength, bpm);
+									chip.n総移動時間 = (int)Math.Round(num22 - num21);
+								}
+								continue;
+							}
+							case EChannel.MovieFull:	// 動画再生 (Full)
+							{
+								if (listAVIPAN.ContainsKey(chip.nIntegerValue))
+								{
+									//int num21 = ms + ((int)(((0x271 * (chip.nPlaybackPosition - n発声位置)) * dbBarLength) / bpm));
+									//int num22 = ms + ((int)(((0x271 * ((chip.nPlaybackPosition + this.listAVIPAN[chip.nIntegerValue].n移動時間ct) - n発声位置)) * dbBarLength) / bpm));
+									double num21 = tComputeChipPlayTimeMs(currTimeMs, chip.nPlaybackPosition - n発声位置, dbBarLength, bpm);
+									double num22 = tComputeChipPlayTimeMs(currTimeMs, (chip.nPlaybackPosition + listAVIPAN[chip.nIntegerValue].n移動時間ct) - n発声位置, dbBarLength, bpm);
+									chip.n総移動時間 = (int)Math.Round(num22 - num21);
+								}
+								continue;
+							}
+							default:
+							{
+								if( chip.nChannelNumber >= EChannel.BonusEffect_Min && chip.nChannelNumber <= EChannel.BonusEffect )
+								{
+									#region [ TEST ]
+									t指定された発声位置と同じ位置の指定したチップにボーナスフラグを立てる( chip.nPlaybackPosition, chip.nIntegerValue );
+									#endregion
+								}
+								//Process Long Notes for Guitar and Bass
+								else if(chip.nChannelNumber == EChannel.Guitar_LongNote || chip.nChannelNumber == EChannel.Bass_LongNote)
+								{
+									#region [Long Note Processing]
 											
-											EInstrumentPart eChipPart = (chip.nChannelNumber == EChannel.Guitar_LongNote) ? EInstrumentPart.GUITAR : EInstrumentPart.BASS;
-											//Check if this chip coincide with a KeyPress if currently no candidate start hold 
-											if (cCandidateStartHold[(int)eChipPart] == null)
+									EInstrumentPart eChipPart = (chip.nChannelNumber == EChannel.Guitar_LongNote) ? EInstrumentPart.GUITAR : EInstrumentPart.BASS;
+									//Check if this chip coincide with a KeyPress if currently no candidate start hold 
+									if (cCandidateStartHold[(int)eChipPart] == null)
+									{
+										foreach (CChip chip2 in listChip)
+										{
+											if(chip2.nPlaybackPosition == chip.nPlaybackPosition &&
+											   (eChipPart == chip2.eInstrumentPart && chip2.bChannelWithVisibleChip) &&
+											   !chip2.bChipIsOpenNote)
 											{
-												foreach (CChip chip2 in listChip)
-												{
-													if(chip2.nPlaybackPosition == chip.nPlaybackPosition &&
-														(eChipPart == chip2.eInstrumentPart && chip2.bChannelWithVisibleChip) &&
-														!chip2.bChipIsOpenNote)
-                                                    {
-														cCandidateStartHold[(int)eChipPart] = chip2;
-														break;
-                                                    }
-												}
+												cCandidateStartHold[(int)eChipPart] = chip2;
+												break;
 											}
-											//Check for EndHold note rule violation
-                                            else
-                                            {
-												foreach (CChip chip2 in listChip)
-                                                {
-													if(chip2.eInstrumentPart == eChipPart && chip2.bChannelWithVisibleChip &&
-														chip2.nPlaybackPosition > cCandidateStartHold[(int)eChipPart].nPlaybackPosition &&
-														chip2.nPlaybackPosition <= chip.nPlaybackPosition
-														)
-                                                    {
-														cCandidateStartHold[(int)eChipPart] = null;
-														break;
-													}
-                                                }
-
-												//If candidate start hold survives
-												if(cCandidateStartHold[(int)eChipPart] != null)
-                                                {
-													
-													cCandidateStartHold[(int)eChipPart].chipロングノート終端 = chip;
-													//Reset
-													cCandidateStartHold[(int)eChipPart] = null;
-												}
-											}
-											
-											#endregion
 										}
-                                        continue;
 									}
-							}
-							if ( listBGAPAN.ContainsKey( chip.nIntegerValue ) )
-							{
-                                //int num19 = ms + ( (int) ( ( ( 0x271 * ( chip.nPlaybackPosition - n発声位置 ) ) * dbBarLength ) / bpm ) );
-                                //int num20 = ms + ( (int) ( ( ( 0x271 * ( ( chip.nPlaybackPosition + this.listBGAPAN[ chip.nIntegerValue ].n移動時間ct ) - n発声位置 ) ) * dbBarLength ) / bpm ) );
-                                double num19 = tComputeChipPlayTimeMs(currTimeMs, chip.nPlaybackPosition - n発声位置, dbBarLength, bpm);
-                                double num20 = tComputeChipPlayTimeMs(currTimeMs, (chip.nPlaybackPosition + listBGAPAN[chip.nIntegerValue].n移動時間ct) - n発声位置, dbBarLength, bpm);
-                                chip.n総移動時間 = (int)Math.Round(num20 - num19);
+									//Check for EndHold note rule violation
+									else
+									{
+										foreach (CChip chip2 in listChip)
+										{
+											if(chip2.eInstrumentPart == eChipPart && chip2.bChannelWithVisibleChip &&
+											   chip2.nPlaybackPosition > cCandidateStartHold[(int)eChipPart].nPlaybackPosition &&
+											   chip2.nPlaybackPosition <= chip.nPlaybackPosition
+											  )
+											{
+												cCandidateStartHold[(int)eChipPart] = null;
+												break;
+											}
+										}
+
+										//If candidate start hold survives
+										if(cCandidateStartHold[(int)eChipPart] != null)
+										{
+													
+											cCandidateStartHold[(int)eChipPart].chipロングノート終端 = chip;
+											//Reset
+											cCandidateStartHold[(int)eChipPart] = null;
+										}
+									}
+											
+									#endregion
+								}
+								continue;
 							}
 						}
-						if ( this.db再生速度 > 0.0 )
+						if ( listBGAPAN.ContainsKey( chip.nIntegerValue ) )
 						{
-							foreach ( CChip chip in listChip )
-							{
-								//chip.nPlaybackTimeMs = (int) ( ( (double) chip.nPlaybackTimeMs ) / this.db再生速度 );
-								chip.nPlaybackTimeMs = tConvertFromDoubleToIntBasedOnComputeMode(chip.nPlaybackTimeMs / this.db再生速度);
-                            }
+							//int num19 = ms + ( (int) ( ( ( 0x271 * ( chip.nPlaybackPosition - n発声位置 ) ) * dbBarLength ) / bpm ) );
+							//int num20 = ms + ( (int) ( ( ( 0x271 * ( ( chip.nPlaybackPosition + this.listBGAPAN[ chip.nIntegerValue ].n移動時間ct ) - n発声位置 ) ) * dbBarLength ) / bpm ) );
+							double num19 = tComputeChipPlayTimeMs(currTimeMs, chip.nPlaybackPosition - n発声位置, dbBarLength, bpm);
+							double num20 = tComputeChipPlayTimeMs(currTimeMs, (chip.nPlaybackPosition + listBGAPAN[chip.nIntegerValue].n移動時間ct) - n発声位置, dbBarLength, bpm);
+							chip.n総移動時間 = (int)Math.Round(num20 - num19);
 						}
-						#endregion
-						//span = (TimeSpan) ( DateTime.Now - timeBeginLoad );
-						//Trace.TraceInformation( "発声時刻計算:             {0}", span.ToString() );
-						//timeBeginLoad = DateTime.Now;
-						this.nBGMAdjust = 0;
-                        t各自動再生音チップの再生時刻を変更する( nBGMAdjust );
-                        if( CDTXMania.ConfigIni.nCommonBGMAdjustMs != 0 )
-                            t各自動再生音チップの再生時刻を変更する( CDTXMania.ConfigIni.nCommonBGMAdjustMs, false, true );
-						//span = (TimeSpan) ( DateTime.Now - timeBeginLoad );
-						//Trace.TraceInformation( "再生時刻変更:             {0}", span.ToString() );
-						//timeBeginLoad = DateTime.Now;
-						#region [ 可視チップ数カウント ]
-						for ( int n = 0; n < 14; n++ )
+					}
+					if ( this.db再生速度 > 0.0 )
+					{
+						foreach ( CChip chip in listChip )
 						{
-							nVisibleChipsCount[ n ] = 0;
+							//chip.nPlaybackTimeMs = (int) ( ( (double) chip.nPlaybackTimeMs ) / this.db再生速度 );
+							chip.nPlaybackTimeMs = tConvertFromDoubleToIntBasedOnComputeMode(chip.nPlaybackTimeMs / this.db再生速度);
+						}
+					}
+					#endregion
+					//span = (TimeSpan) ( DateTime.Now - timeBeginLoad );
+					//Trace.TraceInformation( "発声時刻計算:             {0}", span.ToString() );
+					//timeBeginLoad = DateTime.Now;
+					this.nBGMAdjust = 0;
+					t各自動再生音チップの再生時刻を変更する( nBGMAdjust );
+					if( CDTXMania.ConfigIni.nCommonBGMAdjustMs != 0 )
+						t各自動再生音チップの再生時刻を変更する( CDTXMania.ConfigIni.nCommonBGMAdjustMs, false, true );
+					//span = (TimeSpan) ( DateTime.Now - timeBeginLoad );
+					//Trace.TraceInformation( "再生時刻変更:             {0}", span.ToString() );
+					//timeBeginLoad = DateTime.Now;
+					#region [ 可視チップ数カウント ]
+					for ( int n = 0; n < 14; n++ )
+					{
+						nVisibleChipsCount[ n ] = 0;
+					}
+					foreach ( CChip chip in listChip )
+					{
+						EChannel c = chip.nChannelNumber;
+						if ( ( EChannel.HiHatClose <= c ) && ( c <= EChannel.LeftBassDrum ) )
+						{
+							nVisibleChipsCount[ c - EChannel.HiHatClose ]++;
+						}
+						if ( ( EChannel.Guitar_Open <= c ) && ( c <= EChannel.Guitar_RGBxx ) || ( EChannel.Guitar_xxxYx <= c ) && ( c <= EChannel.Guitar_RxxxP ) || ( EChannel.Guitar_RxBxP <= c ) && ( c <= EChannel.Guitar_xGBYP ) || ( EChannel.Guitar_RxxYP <= c ) && ( c <= EChannel.Guitar_RGBYP ) )
+						{
+							nVisibleChipsCount.Guitar++;
+							nVisibleChipsCount.incrementChipCount(c);
+						}
+						if ( ( EChannel.Bass_Open <= c ) && ( c <= EChannel.Bass_RGBxx ) || ( EChannel.Bass_xxxYx <= c ) && ( c <= EChannel.Bass_xxBYx ) || ( EChannel.Bass_xGxYx <= c ) && ( c <= EChannel.Bass_xxBxP ) || ( EChannel.Bass_xGxxP <= c ) && ( c <= EChannel.Bass_RGBxP ) || ( EChannel.Bass_xxxYP <= c ) && ( c <= EChannel.Bass_RGBYP ) )
+						{
+							nVisibleChipsCount.Bass++;
+							nVisibleChipsCount.incrementChipCount(c);
+						}
+						if ( ( c >= EChannel.BonusEffect_Min ) && ( c <= EChannel.BonusEffect ) )
+						{
+							nボーナスチップ数++;
+						}
+					}
+					#endregion
+					//span = (TimeSpan) ( DateTime.Now - timeBeginLoad );
+					//Trace.TraceInformation( "可視チップ数カウント      {0}", span.ToString() );
+					//timeBeginLoad = DateTime.Now;
+					#region [ チップの種類を分類し、対応するフラグを立てる ]
+					foreach (CChip chip in listChip)
+					{
+						if ((chip.bWAVを使うチャンネルである && listWAV.ContainsKey(chip.nIntegerValue_InternalNumber)) && !listWAV[chip.nIntegerValue_InternalNumber].listこのWAVを使用するチャンネル番号の集合.Contains(chip.nChannelNumber))
+						{
+							listWAV[chip.nIntegerValue_InternalNumber].listこのWAVを使用するチャンネル番号の集合.Add(chip.nChannelNumber);
+
+							int c = (int)chip.nChannelNumber >> 4;
+							switch (c)
+							{
+								case 0x01:
+									listWAV[chip.nIntegerValue_InternalNumber].bIsDrumsSound = true; break;
+								case 0x02:
+									listWAV[chip.nIntegerValue_InternalNumber].bIsGuitarSound = true; break;
+								case 0x0A:
+									listWAV[chip.nIntegerValue_InternalNumber].bIsBassSound = true; break;
+								case 0x06:
+								case 0x07:
+								case 0x08:
+								case 0x09:
+									listWAV[chip.nIntegerValue_InternalNumber].bIsSESound = true; break;
+								case 0x00:
+									if (chip.nChannelNumber == EChannel.BGM)
+									{
+										listWAV[chip.nIntegerValue_InternalNumber].bIsBGMSound = true; break;
+									}
+									break;
+							}
+						}
+					}
+					#endregion
+					//span = (TimeSpan) ( DateTime.Now - timeBeginLoad );
+					//Trace.TraceInformation( "ch番号集合確認:           {0}", span.ToString() );
+					//timeBeginLoad = DateTime.Now;
+					#region [ hash値計算 ]
+					byte[] buffer = null;
+					try
+					{
+						FileStream stream = new( strFileNameFullPath, FileMode.Open, FileAccess.Read );
+						buffer = new byte[ stream.Length ];
+						stream.Read( buffer, 0, (int) stream.Length );
+						stream.Close();
+					}
+					catch ( Exception exception )
+					{
+						Trace.TraceError( exception.Message );
+						Trace.TraceError( "DTXのハッシュの計算に失敗しました。({0})", strFileNameFullPath );
+					}
+					if ( buffer != null )
+					{
+						byte[] buffer2 = MD5.HashData(buffer);
+						StringBuilder sb = new();
+						foreach ( byte b in buffer2 )
+						{
+							sb.Append( b.ToString( "x2" ) );
+						}
+						strDTXFileHash = sb.ToString();
+					}
+					else
+					{
+						strDTXFileHash = "00000000000000000000000000000000";
+					}
+					#endregion
+					//span = (TimeSpan) ( DateTime.Now - timeBeginLoad );
+					//Trace.TraceInformation( "hash計算:                 {0}", span.ToString() );
+					//timeBeginLoad = DateTime.Now;
+					#region [ bLogDTX詳細ログ出力 ]
+					if ( CDTXMania.ConfigIni.bLogDTX詳細ログ出力 )
+					{
+						foreach ( CWAV cwav in listWAV.Values )
+						{
+							Trace.TraceInformation( cwav.ToString() );
+						}
+						foreach ( CAVI cavi in listAVI.Values )
+						{
+							Trace.TraceInformation( cavi.ToString() );
+						}
+						//foreach ( CDirectShow cds in this.listDS.Values)
+						//{
+						//    Trace.TraceInformation( cds.ToString());
+						//}
+						foreach ( CAVIPAN cavipan in listAVIPAN.Values )
+						{
+							Trace.TraceInformation( cavipan.ToString() );
+						}
+						foreach ( CBGA cbga in listBGA.Values )
+						{
+							Trace.TraceInformation( cbga.ToString() );
+						}
+						foreach ( CBGAPAN cbgapan in listBGAPAN.Values )
+						{
+							Trace.TraceInformation( cbgapan.ToString() );
+						}
+						foreach ( CBMP cbmp in listBMP.Values )
+						{
+							Trace.TraceInformation( cbmp.ToString() );
+						}
+						foreach ( CBMPTEX cbmptex in listBMPTEX.Values )
+						{
+							Trace.TraceInformation( cbmptex.ToString() );
+						}
+						foreach ( CBPM cbpm3 in listBPM.Values )
+						{
+							Trace.TraceInformation( cbpm3.ToString() );
 						}
 						foreach ( CChip chip in listChip )
 						{
-							EChannel c = chip.nChannelNumber;
-							if ( ( EChannel.HiHatClose <= c ) && ( c <= EChannel.LeftBassDrum ) )
-							{
-								nVisibleChipsCount[ c - EChannel.HiHatClose ]++;
-							}
-                            if ( ( EChannel.Guitar_Open <= c ) && ( c <= EChannel.Guitar_RGBxx ) || ( EChannel.Guitar_xxxYx <= c ) && ( c <= EChannel.Guitar_RxxxP ) || ( EChannel.Guitar_RxBxP <= c ) && ( c <= EChannel.Guitar_xGBYP ) || ( EChannel.Guitar_RxxYP <= c ) && ( c <= EChannel.Guitar_RGBYP ) )
-                            {
-								nVisibleChipsCount.Guitar++;
-								nVisibleChipsCount.incrementChipCount(c);
-							}
-                            if ( ( EChannel.Bass_Open <= c ) && ( c <= EChannel.Bass_RGBxx ) || ( EChannel.Bass_xxxYx <= c ) && ( c <= EChannel.Bass_xxBYx ) || ( EChannel.Bass_xGxYx <= c ) && ( c <= EChannel.Bass_xxBxP ) || ( EChannel.Bass_xGxxP <= c ) && ( c <= EChannel.Bass_RGBxP ) || ( EChannel.Bass_xxxYP <= c ) && ( c <= EChannel.Bass_RGBYP ) )
-                            {
-								nVisibleChipsCount.Bass++;
-								nVisibleChipsCount.incrementChipCount(c);
-							}
-                            if ( ( c >= EChannel.BonusEffect_Min ) && ( c <= EChannel.BonusEffect ) )
-                            {
-                                nボーナスチップ数++;
-                            }
+							Trace.TraceInformation( chip.ToString() );
 						}
-						#endregion
-						//span = (TimeSpan) ( DateTime.Now - timeBeginLoad );
-						//Trace.TraceInformation( "可視チップ数カウント      {0}", span.ToString() );
-                        //timeBeginLoad = DateTime.Now;
-                        #region [ チップの種類を分類し、対応するフラグを立てる ]
-                        foreach (CChip chip in listChip)
-                        {
-                            if ((chip.bWAVを使うチャンネルである && listWAV.ContainsKey(chip.nIntegerValue_InternalNumber)) && !listWAV[chip.nIntegerValue_InternalNumber].listこのWAVを使用するチャンネル番号の集合.Contains(chip.nChannelNumber))
-                            {
-                                listWAV[chip.nIntegerValue_InternalNumber].listこのWAVを使用するチャンネル番号の集合.Add(chip.nChannelNumber);
-
-                                int c = (int)chip.nChannelNumber >> 4;
-                                switch (c)
-                                {
-                                    case 0x01:
-                                        listWAV[chip.nIntegerValue_InternalNumber].bIsDrumsSound = true; break;
-                                    case 0x02:
-                                        listWAV[chip.nIntegerValue_InternalNumber].bIsGuitarSound = true; break;
-                                    case 0x0A:
-                                        listWAV[chip.nIntegerValue_InternalNumber].bIsBassSound = true; break;
-                                    case 0x06:
-                                    case 0x07:
-                                    case 0x08:
-                                    case 0x09:
-                                        listWAV[chip.nIntegerValue_InternalNumber].bIsSESound = true; break;
-                                    case 0x00:
-                                        if (chip.nChannelNumber == EChannel.BGM)
-                                        {
-                                            listWAV[chip.nIntegerValue_InternalNumber].bIsBGMSound = true; break;
-                                        }
-                                        break;
-                                }
-                            }
-                        }
-                        #endregion
-                        //span = (TimeSpan) ( DateTime.Now - timeBeginLoad );
-						//Trace.TraceInformation( "ch番号集合確認:           {0}", span.ToString() );
-						//timeBeginLoad = DateTime.Now;
-						#region [ hash値計算 ]
-						byte[] buffer = null;
-						try
-						{
-							FileStream stream = new( strFileNameFullPath, FileMode.Open, FileAccess.Read );
-							buffer = new byte[ stream.Length ];
-							stream.Read( buffer, 0, (int) stream.Length );
-							stream.Close();
-						}
-						catch ( Exception exception )
-						{
-							Trace.TraceError( exception.Message );
-							Trace.TraceError( "DTXのハッシュの計算に失敗しました。({0})", strFileNameFullPath );
-						}
-						if ( buffer != null )
-						{
-							byte[] buffer2 = MD5.HashData(buffer);
-							StringBuilder sb = new();
-							foreach ( byte b in buffer2 )
-							{
-								sb.Append( b.ToString( "x2" ) );
-							}
-							strDTXFileHash = sb.ToString();
-						}
-						else
-						{
-							strDTXFileHash = "00000000000000000000000000000000";
-						}
-						#endregion
-						//span = (TimeSpan) ( DateTime.Now - timeBeginLoad );
-						//Trace.TraceInformation( "hash計算:                 {0}", span.ToString() );
-						//timeBeginLoad = DateTime.Now;
-						#region [ bLogDTX詳細ログ出力 ]
-						if ( CDTXMania.ConfigIni.bLogDTX詳細ログ出力 )
-						{
-							foreach ( CWAV cwav in listWAV.Values )
-							{
-								Trace.TraceInformation( cwav.ToString() );
-							}
-							foreach ( CAVI cavi in listAVI.Values )
-							{
-								Trace.TraceInformation( cavi.ToString() );
-							}
-                            //foreach ( CDirectShow cds in this.listDS.Values)
-                            //{
-                            //    Trace.TraceInformation( cds.ToString());
-                            //}
-							foreach ( CAVIPAN cavipan in listAVIPAN.Values )
-							{
-								Trace.TraceInformation( cavipan.ToString() );
-							}
-							foreach ( CBGA cbga in listBGA.Values )
-							{
-								Trace.TraceInformation( cbga.ToString() );
-							}
-							foreach ( CBGAPAN cbgapan in listBGAPAN.Values )
-							{
-								Trace.TraceInformation( cbgapan.ToString() );
-							}
-							foreach ( CBMP cbmp in listBMP.Values )
-							{
-								Trace.TraceInformation( cbmp.ToString() );
-							}
-							foreach ( CBMPTEX cbmptex in listBMPTEX.Values )
-							{
-								Trace.TraceInformation( cbmptex.ToString() );
-							}
-							foreach ( CBPM cbpm3 in listBPM.Values )
-							{
-								Trace.TraceInformation( cbpm3.ToString() );
-							}
-							foreach ( CChip chip in listChip )
-							{
-								Trace.TraceInformation( chip.ToString() );
-							}
-						}
-						#endregion
 					}
+					#endregion
 				}
 			}
 		}
@@ -4531,7 +4520,7 @@ namespace DTXMania
         private bool b動画読み込み;
 		private Stack<bool> bstackIFからENDIFをスキップする;
 	
-		private int n現在の行数;
+		private int lineNumber;
 		private int n現在の乱数;
 
 		private int nPolyphonicSounds = 4;							// #28228 2012.5.1 yyagi
@@ -4547,39 +4536,28 @@ namespace DTXMania
 		private int[] nRESULTMOVIE用優先順位;
 		private int[] nRESULTSOUND用優先順位;
 
-		private bool t入力_コマンド文字列を抜き出す( ref CharEnumerator ce, ref StringBuilder sb文字列 )
+		private static bool tSkipWhitespace(ref CharEnumerator ce)
 		{
-			if( !t入力_空白をスキップする( ref ce ) )
-				return false;	// 文字が尽きた
-
-			#region [ コマンド終端文字(':')、半角空白、コメント開始文字(';')、改行のいずれかが出現するまでをコマンド文字列と見なし、sb文字列 にコピーする。]
-			//-----------------
-			while( ce.Current != ':' && ce.Current != ' ' && ce.Current != ';' && ce.Current != '\n' )
+			while (char.IsWhiteSpace(ce.Current))
 			{
-				sb文字列.Append( ce.Current );
-
-				if( !ce.MoveNext() )
-					return false;	// 文字が尽きた
+				if (!ce.MoveNext()) return false;
 			}
-			//-----------------
-			#endregion
-
-			#region [ コマンド終端文字(':')で終端したなら、その次から空白をスキップしておく。]
-			//-----------------
-			if( ce.Current == ':' )
-			{
-				if( !ce.MoveNext() )
-					return false;	// 文字が尽きた
-
-				if( !t入力_空白をスキップする( ref ce ) )
-					return false;	// 文字が尽きた
-			}
-			//-----------------
-			#endregion
-
 			return true;
 		}
-		private bool t入力_コメントをスキップする( ref CharEnumerator ce )
+		
+		private static bool ExtractCommand( ref CharEnumerator ce, ref StringBuilder output )
+		{
+			if (!tSkipWhitespace(ref ce)) return false;
+
+			while (ce.Current is not (':' or ' ' or ';' or '\n'))
+			{
+				output.Append(ce.Current);
+				if (!ce.MoveNext()) return false;
+			}
+
+			return ce.Current == ':' && ce.MoveNext() && tSkipWhitespace(ref ce);
+		}
+		private bool tSkipComment( ref CharEnumerator ce )
 		{
 			// 改行が現れるまでをコメントと見なしてスキップする。
 
@@ -4593,76 +4571,44 @@ namespace DTXMania
 
 			return ce.MoveNext();
 		}
-		private bool t入力_コメント文字列を抜き出す( ref CharEnumerator ce, ref StringBuilder sb文字列 )
+		private static bool ExtractComment( ref CharEnumerator ce, ref StringBuilder output )
 		{
-			if( ce.Current != ';' )		// コメント開始文字(';')じゃなければ正常帰還。
-				return true;
+			if (ce.Current != ';') return true;
+			if (!ce.MoveNext()) return false;
 
-			if( !ce.MoveNext() )		// ';' の次で文字列が終わってたら終了帰還。
-				return false;
-
-			#region [ ';' の次の文字から '\n' の１つ前までをコメント文字列と見なし、sb文字列にコピーする。]
-			//-----------------
-			while( ce.Current != '\n' )
-			{
-				sb文字列.Append( ce.Current );
-
-				if( !ce.MoveNext() )
-					return false;
-			}
-			//-----------------
-			#endregion
+			while (ce.Current != '\n' && ce.MoveNext())
+				output.Append(ce.Current);
 
 			return true;
 		}
-		private void t入力_パラメータ食い込みチェック( string strコマンド名, ref string strコマンド, ref string strパラメータ )
+		private static void t入力_パラメータ食い込みチェック( string strCommandName, ref string strCommand, ref string strParameter )
 		{
-			if( ( strコマンド.Length > strコマンド名.Length ) && strコマンド.StartsWith( strコマンド名, StringComparison.OrdinalIgnoreCase ) )
+			if( ( strCommand.Length > strCommandName.Length ) && strCommand.StartsWith( strCommandName, StringComparison.OrdinalIgnoreCase ) )
 			{
-				strパラメータ = strコマンド.Substring( strコマンド名.Length ).Trim();
-				strコマンド = strコマンド.Substring( 0, strコマンド名.Length );
+				strParameter = strCommand.Substring( strCommandName.Length ).Trim();
+				strCommand = strCommand.Substring( 0, strCommandName.Length );
 			}
 		}
-		private bool t入力_パラメータ文字列を抜き出す( ref CharEnumerator ce, ref StringBuilder sb文字列 )
+		private static bool ExtractParameter( ref CharEnumerator ce, ref StringBuilder output )
 		{
-			if( !t入力_空白をスキップする( ref ce ) )
-				return false;	// 文字が尽きた
+			if (!tSkipWhitespace(ref ce)) return false;
 
-			#region [ 改行またはコメント開始文字(';')が出現するまでをパラメータ文字列と見なし、sb文字列 にコピーする。]
-			//-----------------
-			while( ce.Current != '\n' && ce.Current != ';' )
+			while (ce.Current is not ('\n' or ';'))
 			{
-				sb文字列.Append( ce.Current );
-
-				if( !ce.MoveNext() )
-					return false;
+				output.Append(ce.Current);
+				if (!ce.MoveNext()) return false;
 			}
-			//-----------------
-			#endregion
-
 			return true;
 		}
-		private bool t入力_空白と改行をスキップする( ref CharEnumerator ce )
+		private bool tSkipWhiteSpaceAndNewLines( ref CharEnumerator ce )
 		{
 			// 空白と改行が続く間はこれらをスキップする。
 
 			while( ce.Current == ' ' || ce.Current == '\n' )
 			{
 				if( ce.Current == '\n' )
-					n現在の行数++;		// 改行文字では行番号が増える。
+					lineNumber++;		// 改行文字では行番号が増える。
 
-				if( !ce.MoveNext() )
-					return false;	// 文字が尽きた
-			}
-
-			return true;
-		}
-		private bool t入力_空白をスキップする( ref CharEnumerator ce )
-		{
-			// 空白が続く間はこれをスキップする。
-
-			while( ce.Current == ' ' )
-			{
 				if( !ce.MoveNext() )
 					return false;	// 文字が尽きた
 			}
@@ -4689,19 +4635,26 @@ namespace DTXMania
 			(c >= '0' && c <= '9') || (c >= 'A' && c <= 'F');
 		
 		bool lastLineWasChipLocation = false;
-		private void tParseInputLine(ref StringBuilder sbCommand, ref StringBuilder sbParameter, ref StringBuilder sbComment)
+		public static int countSlow = 0;
+		public static int countFast = 0;
+		private void tParseInputLine(ref StringBuilder sbCommand, ref StringBuilder sbParameter, ref CharEnumerator ce)
 		{
 			string strCommand = sbCommand.ToString();
 			string strParameter = sbParameter.ToString().Trim();
-			string strComment = sbComment.ToString();
 			
 			//early out in case this is a chip location line
 			if (lastLineWasChipLocation && strCommand.Length == 5 && IsChipLocation(strCommand))
 			{
 				//parse chip location
 				tInput_LineAnalysis_ChipLocation(strCommand, strParameter);
+				countFast++;
 				return;
 			}
+			
+			//don't even attempt to parse comments for chips
+			StringBuilder comment = new(0x400);
+			if (!ExtractComment(ref ce, ref comment)) return;
+			string strComment = comment.ToString();
 			
 			lastLineWasChipLocation = false;
 
@@ -4715,7 +4668,7 @@ namespace DTXMania
 
 				if( bstackIFからENDIFをスキップする.Count == 255 )
 				{
-					Trace.TraceWarning( "#IF の入れ子の数が 255 を超えました。この #IF を無視します。[{0}: {1}行]", strFileNameFullPath, n現在の行数 );
+					Trace.TraceWarning( "#IF の入れ子の数が 255 を超えました。この #IF を無視します。[{0}: {1}行]", strFileNameFullPath, lineNumber );
 				}
 				else if( bstackIFからENDIFをスキップする.Peek() )
 				{
@@ -4745,7 +4698,7 @@ namespace DTXMania
 				}
 				else
 				{
-					Trace.TraceWarning( "#ENDIF に対応する #IF がありません。この #ENDIF を無視します。[{0}: {1}行]", strFileNameFullPath, n現在の行数 );
+					Trace.TraceWarning( "#ENDIF に対応する #IF がありません。この #ENDIF を無視します。[{0}: {1}行]", strFileNameFullPath, lineNumber );
 				}
 			}
 			//-----------------
@@ -5010,7 +4963,7 @@ namespace DTXMania
 				//-----------------
 				else if( strCommand.StartsWith( "BPM", StringComparison.OrdinalIgnoreCase ) )
 				{
-					t入力_行解析_BPM_BPMzz( strCommand, strParameter, strComment );
+					t入力_行解析_BPM_BPMzz( strCommand, strParameter );
 				}
 				//-----------------
 				#endregion
@@ -5127,22 +5080,23 @@ namespace DTXMania
 
 					// オブジェクト記述コマンドの処理。
 
-					else if( !t入力_行解析_WAVVOL_VOLUME( strCommand, strParameter, strComment ) &&
-						!t入力_行解析_WAVPAN_PAN( strCommand, strParameter, strComment ) &&
+					else if( !t入力_行解析_WAVVOL_VOLUME( strCommand, strParameter ) &&
+						!t入力_行解析_WAVPAN_PAN( strCommand, strParameter ) &&
 						!t入力_行解析_WAV( strCommand, strParameter, strComment ) &&
 						!t入力_行解析_BMPTEX( strCommand, strParameter, strComment ) &&
 						!t入力_行解析_BMP( strCommand, strParameter, strComment ) &&
-						!t入力_行解析_BGAPAN( strCommand, strParameter, strComment ) &&
-						!t入力_行解析_BGA( strCommand, strParameter, strComment ) &&
-						!t入力_行解析_AVIPAN( strCommand, strParameter, strComment ) &&
+						!t入力_行解析_BGAPAN( strCommand, strParameter ) &&
+						!t入力_行解析_BGA( strCommand, strParameter ) &&
+						!t入力_行解析_AVIPAN( strCommand, strParameter ) &&
 						!t入力_行解析_AVI_VIDEO( strCommand, strParameter, strComment ) &&
-						!t入力_行解析_RESULTIMAGE( strCommand, strParameter, strComment ) &&
-						!t入力_行解析_RESULTMOVIE( strCommand, strParameter, strComment ) &&
-						!t入力_行解析_RESULTSOUND( strCommand, strParameter, strComment ) &&
-						!t入力_行解析_SIZE( strCommand, strParameter, strComment ) )
+						!t入力_行解析_RESULTIMAGE( strCommand, strParameter ) &&
+						!t入力_行解析_RESULTMOVIE( strCommand, strParameter ) &&
+						!t入力_行解析_RESULTSOUND( strCommand, strParameter ) &&
+						!t入力_行解析_SIZE( strCommand, strParameter ) )
 					{
 						tInput_LineAnalysis_ChipLocation( strCommand, strParameter );
 						lastLineWasChipLocation = true;
+						countSlow++;
 					} 
 				}
 			}
@@ -5174,7 +5128,7 @@ namespace DTXMania
 			int zz = CConversion.nConvert2DigitBase36StringToNumber( strCommand.Substring( 0, 2 ) );
 			if( zz < 0 || zz >= 36 * 36 )
 			{
-				Trace.TraceError( "AVI(VIDEO)番号に 00～ZZ 以外の値または不正な文字列が指定されました。[{0}: {1}行]", strFileNameFullPath, n現在の行数 );
+				Trace.TraceError( "AVI(VIDEO)番号に 00～ZZ 以外の値または不正な文字列が指定されました。[{0}: {1}行]", strFileNameFullPath, lineNumber );
 				return false;
 			}
 			//-----------------
@@ -5210,30 +5164,30 @@ namespace DTXMania
 
 			return true;
 		}
-		private bool t入力_行解析_AVIPAN( string strコマンド, string strパラメータ, string strコメント )
+		private bool t入力_行解析_AVIPAN( string strCommand, string strParameter )
 		{
 			// (1) コマンドを処理。
 
 			#region [ "AVIPAN" で始まらないコマンドは無効。]
 			//-----------------
-			if( !strコマンド.StartsWith( "AVIPAN", StringComparison.OrdinalIgnoreCase ) )
+			if( !strCommand.StartsWith( "AVIPAN", StringComparison.OrdinalIgnoreCase ) )
 				return false;
 
-			strコマンド = strコマンド.Substring( 6 );	// strコマンド から先頭の"AVIPAN"文字を除去。
+			strCommand = strCommand.Substring( 6 );	// strコマンド から先頭の"AVIPAN"文字を除去。
 			//-----------------
 			#endregion
 
 			// (2) パラメータを処理。
 
-			if( strコマンド.Length < 2 )
+			if( strCommand.Length < 2 )
 				return false;	// AVIPAN番号 zz がないなら無効。
 
 			#region [ AVIPAN番号 zz を取得する。]
 			//-----------------
-			int zz = CConversion.nConvert2DigitBase36StringToNumber( strコマンド.Substring( 0, 2 ) );
+			int zz = CConversion.nConvert2DigitBase36StringToNumber( strCommand.Substring( 0, 2 ) );
 			if( zz < 0 || zz >= 36 * 36 )
 			{
-				Trace.TraceError( "AVIPAN番号に 00～ZZ 以外の値または不正な文字列が指定されました。[{0}: {1}行]", strFileNameFullPath, n現在の行数 );
+				Trace.TraceError( "AVIPAN番号に 00～ZZ 以外の値または不正な文字列が指定されました。[{0}: {1}行]", strFileNameFullPath, lineNumber );
 				return false;
 			}
 			//-----------------
@@ -5245,13 +5199,13 @@ namespace DTXMania
 
 			// パラメータ引数（14個）を取得し、avipan に登録していく。
 
-			string[] strParams = strパラメータ.Split( new char[] { ' ', ',', '(', ')', '[', ']', 'x', '|' }, StringSplitOptions.RemoveEmptyEntries );
+			string[] strParams = strParameter.Split( new char[] { ' ', ',', '(', ')', '[', ']', 'x', '|' }, StringSplitOptions.RemoveEmptyEntries );
 
 			#region [ パラメータ引数は全14個ないと無効。]
 			//-----------------
 			if( strParams.Length < 14 )
 			{
-				Trace.TraceError( "AVIPAN: 引数が足りません。[{0}: {1}行]", strFileNameFullPath, n現在の行数 );
+				Trace.TraceError( "AVIPAN: 引数が足りません。[{0}: {1}行]", strFileNameFullPath, lineNumber );
 				return false;
 			}
 			//-----------------
@@ -5264,13 +5218,13 @@ namespace DTXMania
 			//-----------------
 			if( string.IsNullOrEmpty( strParams[ i ] ) || strParams[ i ].Length > 2 )
 			{
-				Trace.TraceError( "AVIPAN: {2}番目の数（AVI番号）が異常です。[{0}: {1}行]", strFileNameFullPath, n現在の行数, i + 1 );
+				Trace.TraceError( "AVIPAN: {2}番目の数（AVI番号）が異常です。[{0}: {1}行]", strFileNameFullPath, lineNumber, i + 1 );
 				return false;
 			}
 			avipan.nAVI番号 = CConversion.nConvert2DigitBase36StringToNumber( strParams[ i ] );
 			if( avipan.nAVI番号 < 1 || avipan.nAVI番号 >= 36 * 36 )
 			{
-				Trace.TraceError( "AVIPAN: {2}番目の数（AVI番号）が異常です。[{0}: {1}行]", strFileNameFullPath, n現在の行数, i + 1 );
+				Trace.TraceError( "AVIPAN: {2}番目の数（AVI番号）が異常です。[{0}: {1}行]", strFileNameFullPath, lineNumber, i + 1 );
 				return false;
 			}
 			i++;
@@ -5281,7 +5235,7 @@ namespace DTXMania
 			n値 = 0;
 			if( !int.TryParse( strParams[ i ], out n値 ) )
 			{
-				Trace.TraceError( "AVIPAN: {2}番目の引数（開始転送サイズ_幅）が異常です。[{0}: {1}行]", strFileNameFullPath, n現在の行数, i + 1 );
+				Trace.TraceError( "AVIPAN: {2}番目の引数（開始転送サイズ_幅）が異常です。[{0}: {1}行]", strFileNameFullPath, lineNumber, i + 1 );
 				return false;
 			}
 			avipan.sz開始サイズ.Width = n値;
@@ -5293,7 +5247,7 @@ namespace DTXMania
 			n値 = 0;
 			if( !int.TryParse( strParams[ i ], out n値 ) )
 			{
-				Trace.TraceError( "AVIPAN: {2}番目の引数（開始転送サイズ_高さ）が異常です。[{0}: {1}行]", strFileNameFullPath, n現在の行数, i + 1 );
+				Trace.TraceError( "AVIPAN: {2}番目の引数（開始転送サイズ_高さ）が異常です。[{0}: {1}行]", strFileNameFullPath, lineNumber, i + 1 );
 				return false;
 			}
 			avipan.sz開始サイズ.Height = n値;
@@ -5305,7 +5259,7 @@ namespace DTXMania
 			n値 = 0;
 			if( !int.TryParse( strParams[ i ], out n値 ) )
 			{
-				Trace.TraceError( "AVIPAN: {2}番目の引数（終了転送サイズ_幅）が異常です。[{0}: {1}行]", strFileNameFullPath, n現在の行数, i + 1 );
+				Trace.TraceError( "AVIPAN: {2}番目の引数（終了転送サイズ_幅）が異常です。[{0}: {1}行]", strFileNameFullPath, lineNumber, i + 1 );
 				return false;
 			}
 			avipan.sz終了サイズ.Width = n値;
@@ -5317,7 +5271,7 @@ namespace DTXMania
 			n値 = 0;
 			if( !int.TryParse( strParams[ i ], out n値 ) )
 			{
-				Trace.TraceError( "AVIPAN: {2}番目の引数（終了転送サイズ_高さ）が異常です。[{0}: {1}行]", strFileNameFullPath, n現在の行数, i + 1 );
+				Trace.TraceError( "AVIPAN: {2}番目の引数（終了転送サイズ_高さ）が異常です。[{0}: {1}行]", strFileNameFullPath, lineNumber, i + 1 );
 				return false;
 			}
 			avipan.sz終了サイズ.Height = n値;
@@ -5329,7 +5283,7 @@ namespace DTXMania
 			n値 = 0;
 			if( !int.TryParse( strParams[ i ], out n値 ) )
 			{
-				Trace.TraceError( "AVIPAN: {2}番目の引数（動画側開始位置_X）が異常です。[{0}: {1}行]", strFileNameFullPath, n現在の行数, i + 1 );
+				Trace.TraceError( "AVIPAN: {2}番目の引数（動画側開始位置_X）が異常です。[{0}: {1}行]", strFileNameFullPath, lineNumber, i + 1 );
 				return false;
 			}
 			avipan.pt動画側開始位置.X = n値;
@@ -5341,7 +5295,7 @@ namespace DTXMania
 			n値 = 0;
 			if( !int.TryParse( strParams[ i ], out n値 ) )
 			{
-				Trace.TraceError( "AVIPAN: {2}番目の引数（動画側開始位置_Y）が異常です。[{0}: {1}行]", strFileNameFullPath, n現在の行数, i + 1 );
+				Trace.TraceError( "AVIPAN: {2}番目の引数（動画側開始位置_Y）が異常です。[{0}: {1}行]", strFileNameFullPath, lineNumber, i + 1 );
 				return false;
 			}
 			avipan.pt動画側開始位置.Y = n値;
@@ -5353,7 +5307,7 @@ namespace DTXMania
 			n値 = 0;
 			if( !int.TryParse( strParams[ i ], out n値 ) )
 			{
-				Trace.TraceError( "AVIPAN: {2}番目の引数（動画側終了位置_X）が異常です。[{0}: {1}行]", strFileNameFullPath, n現在の行数, i + 1 );
+				Trace.TraceError( "AVIPAN: {2}番目の引数（動画側終了位置_X）が異常です。[{0}: {1}行]", strFileNameFullPath, lineNumber, i + 1 );
 				return false;
 			}
 			avipan.pt動画側終了位置.X = n値;
@@ -5365,7 +5319,7 @@ namespace DTXMania
 			n値 = 0;
 			if( !int.TryParse( strParams[ i ], out n値 ) )
 			{
-				Trace.TraceError( "AVIPAN: {2}番目の引数（動画側終了位置_Y）が異常です。[{0}: {1}行]", strFileNameFullPath, n現在の行数, i + 1 );
+				Trace.TraceError( "AVIPAN: {2}番目の引数（動画側終了位置_Y）が異常です。[{0}: {1}行]", strFileNameFullPath, lineNumber, i + 1 );
 				return false;
 			}
 			avipan.pt動画側終了位置.Y = n値;
@@ -5377,7 +5331,7 @@ namespace DTXMania
 			n値 = 0;
 			if( !int.TryParse( strParams[ i ], out n値 ) )
 			{
-				Trace.TraceError( "AVIPAN: {2}番目の引数（表示側開始位置_X）が異常です。[{0}: {1}行]", strFileNameFullPath, n現在の行数, i + 1 );
+				Trace.TraceError( "AVIPAN: {2}番目の引数（表示側開始位置_X）が異常です。[{0}: {1}行]", strFileNameFullPath, lineNumber, i + 1 );
 				return false;
 			}
 			avipan.pt表示側開始位置.X = n値;
@@ -5389,7 +5343,7 @@ namespace DTXMania
 			n値 = 0;
 			if( !int.TryParse( strParams[ i ], out n値 ) )
 			{
-				Trace.TraceError( "AVIPAN: {2}番目の引数（表示側開始位置_Y）が異常です。[{0}: {1}行]", strFileNameFullPath, n現在の行数, i + 1 );
+				Trace.TraceError( "AVIPAN: {2}番目の引数（表示側開始位置_Y）が異常です。[{0}: {1}行]", strFileNameFullPath, lineNumber, i + 1 );
 				return false;
 			}
 			avipan.pt表示側開始位置.Y = n値;
@@ -5401,7 +5355,7 @@ namespace DTXMania
 			n値 = 0;
 			if( !int.TryParse( strParams[ i ], out n値 ) )
 			{
-				Trace.TraceError( "AVIPAN: {2}番目の引数（表示側終了位置_X）が異常です。[{0}: {1}行]", strFileNameFullPath, n現在の行数, i + 1 );
+				Trace.TraceError( "AVIPAN: {2}番目の引数（表示側終了位置_X）が異常です。[{0}: {1}行]", strFileNameFullPath, lineNumber, i + 1 );
 				return false;
 			}
 			avipan.pt表示側終了位置.X = n値;
@@ -5413,7 +5367,7 @@ namespace DTXMania
 			n値 = 0;
 			if( !int.TryParse( strParams[ i ], out n値 ) )
 			{
-				Trace.TraceError( "AVIPAN: {2}番目の引数（表示側終了位置_Y）が異常です。[{0}: {1}行]", strFileNameFullPath, n現在の行数, i + 1 );
+				Trace.TraceError( "AVIPAN: {2}番目の引数（表示側終了位置_Y）が異常です。[{0}: {1}行]", strFileNameFullPath, lineNumber, i + 1 );
 				return false;
 			}
 			avipan.pt表示側終了位置.Y = n値;
@@ -5425,7 +5379,7 @@ namespace DTXMania
 			n値 = 0;
 			if( !int.TryParse( strParams[ i ], out n値 ) )
 			{
-				Trace.TraceError( "AVIPAN: {2}番目の引数（移動時間）が異常です。[{0}: {1}行]", strFileNameFullPath, n現在の行数, i + 1 );
+				Trace.TraceError( "AVIPAN: {2}番目の引数（移動時間）が異常です。[{0}: {1}行]", strFileNameFullPath, lineNumber, i + 1 );
 				return false;
 			}
 
@@ -5448,30 +5402,30 @@ namespace DTXMania
 
 			return true;
 		}
-		private bool t入力_行解析_BGA( string strコマンド, string strパラメータ, string strコメント )
+		private bool t入力_行解析_BGA( string strCommand, string strParameter )
 		{
 			// (1) コマンドを処理。
 
 			#region [ "BGA" で始まらないコマンドは無効。]
 			//-----------------
-			if( !strコマンド.StartsWith( "BGA", StringComparison.OrdinalIgnoreCase ) )
+			if( !strCommand.StartsWith( "BGA", StringComparison.OrdinalIgnoreCase ) )
 				return false;
 
-			strコマンド = strコマンド.Substring( 3 );	// strコマンド から先頭の"BGA"文字を除去。
+			strCommand = strCommand.Substring( 3 );	// strコマンド から先頭の"BGA"文字を除去。
 			//-----------------
 			#endregion
 
 			// (2) パラメータを処理。
 
-			if( strコマンド.Length < 2 )
+			if( strCommand.Length < 2 )
 				return false;	// BGA番号 zz がないなら無効。
 
 			#region [ BGA番号 zz を取得する。]
 			//-----------------
-			int zz = CConversion.nConvert2DigitBase36StringToNumber( strコマンド.Substring( 0, 2 ) );
+			int zz = CConversion.nConvert2DigitBase36StringToNumber( strCommand.Substring( 0, 2 ) );
 			if( zz < 0 || zz >= 36 * 36 )
 			{
-				Trace.TraceError( "BGA番号に 00～ZZ 以外の値または不正な文字列が指定されました。[{0}: {1}行]", strFileNameFullPath, n現在の行数 );
+				Trace.TraceError( "BGA番号に 00～ZZ 以外の値または不正な文字列が指定されました。[{0}: {1}行]", strFileNameFullPath, lineNumber );
 				return false;
 			}
 			//-----------------
@@ -5483,13 +5437,13 @@ namespace DTXMania
 
 			// パラメータ引数（7個）を取得し、bga に登録していく。
 
-			string[] strParams = strパラメータ.Split( new char[] { ' ', ',', '(', ')', '[', ']', 'x', '|' }, StringSplitOptions.RemoveEmptyEntries );
+			string[] strParams = strParameter.Split( new char[] { ' ', ',', '(', ')', '[', ']', 'x', '|' }, StringSplitOptions.RemoveEmptyEntries );
 
 			#region [ パラメータ引数は全7個ないと無効。]
 			//-----------------
 			if( strParams.Length < 7 )
 			{
-				Trace.TraceError( "BGA: 引数が足りません。[{0}: {1}行]", strFileNameFullPath, n現在の行数 );
+				Trace.TraceError( "BGA: 引数が足りません。[{0}: {1}行]", strFileNameFullPath, lineNumber );
 				return false;
 			}
 			//-----------------
@@ -5502,13 +5456,13 @@ namespace DTXMania
 			//-----------------
 			if( string.IsNullOrEmpty( strParams[ i ] ) || strParams[ i ].Length > 2 )
 			{
-				Trace.TraceError( "BGA: {2}番目の数（BMP番号）が異常です。[{0}: {1}行]", strFileNameFullPath, n現在の行数, i + 1 );
+				Trace.TraceError( "BGA: {2}番目の数（BMP番号）が異常です。[{0}: {1}行]", strFileNameFullPath, lineNumber, i + 1 );
 				return false;
 			}
 			bga.nBMP番号 = CConversion.nConvert2DigitBase36StringToNumber( strParams[ i ] );
 			if( bga.nBMP番号 < 1 || bga.nBMP番号 >= 36 * 36 )
 			{
-				Trace.TraceError( "BGA: {2}番目の数（BMP番号）が異常です。[{0}: {1}行]", strFileNameFullPath, n現在の行数, i + 1 );
+				Trace.TraceError( "BGA: {2}番目の数（BMP番号）が異常です。[{0}: {1}行]", strFileNameFullPath, lineNumber, i + 1 );
 				return false;
 			}
 			i++;
@@ -5519,7 +5473,7 @@ namespace DTXMania
 			n値 = 0;
 			if( !int.TryParse( strParams[ i ], out n値 ) )
 			{
-				Trace.TraceError( "BGA: {2}番目の引数（画像側位置１_X）が異常です。[{0}: {1}行]", strFileNameFullPath, n現在の行数, i + 1 );
+				Trace.TraceError( "BGA: {2}番目の引数（画像側位置１_X）が異常です。[{0}: {1}行]", strFileNameFullPath, lineNumber, i + 1 );
 				return false;
 			}
 			bga.pt画像側左上座標.X = n値;
@@ -5531,7 +5485,7 @@ namespace DTXMania
 			n値 = 0;
 			if( !int.TryParse( strParams[ i ], out n値 ) )
 			{
-				Trace.TraceError( "BGA: {2}番目の引数（画像側位置１_Y）が異常です。[{0}: {1}行]", strFileNameFullPath, n現在の行数, i + 1 );
+				Trace.TraceError( "BGA: {2}番目の引数（画像側位置１_Y）が異常です。[{0}: {1}行]", strFileNameFullPath, lineNumber, i + 1 );
 				return false;
 			}
 			bga.pt画像側左上座標.Y = n値;
@@ -5543,7 +5497,7 @@ namespace DTXMania
 			n値 = 0;
 			if( !int.TryParse( strParams[ i ], out n値 ) )
 			{
-				Trace.TraceError( "BGA: {2}番目の引数（画像側位置２_X）が異常です。[{0}: {1}行]", strFileNameFullPath, n現在の行数, i + 1 );
+				Trace.TraceError( "BGA: {2}番目の引数（画像側位置２_X）が異常です。[{0}: {1}行]", strFileNameFullPath, lineNumber, i + 1 );
 				return false;
 			}
 			bga.pt画像側右下座標.X = n値;
@@ -5555,7 +5509,7 @@ namespace DTXMania
 			n値 = 0;
 			if( !int.TryParse( strParams[ i ], out n値 ) )
 			{
-				Trace.TraceError( "BGA: {2}番目の引数（画像側座標２_Y）が異常です。[{0}: {1}行]", strFileNameFullPath, n現在の行数, i + 1 );
+				Trace.TraceError( "BGA: {2}番目の引数（画像側座標２_Y）が異常です。[{0}: {1}行]", strFileNameFullPath, lineNumber, i + 1 );
 				return false;
 			}
 			bga.pt画像側右下座標.Y = n値;
@@ -5567,7 +5521,7 @@ namespace DTXMania
 			n値 = 0;
 			if( !int.TryParse( strParams[ i ], out n値 ) )
 			{
-				Trace.TraceError( "BGA: {2}番目の引数（表示位置_X）が異常です。[{0}: {1}行]", strFileNameFullPath, n現在の行数, i + 1 );
+				Trace.TraceError( "BGA: {2}番目の引数（表示位置_X）が異常です。[{0}: {1}行]", strFileNameFullPath, lineNumber, i + 1 );
 				return false;
 			}
 			bga.pt表示座標.X = n値;
@@ -5579,7 +5533,7 @@ namespace DTXMania
 			n値 = 0;
 			if( !int.TryParse( strParams[ i ], out n値 ) )
 			{
-				Trace.TraceError( "BGA: {2}番目の引数（表示位置_Y）が異常です。[{0}: {1}行]", strFileNameFullPath, n現在の行数, i + 1 );
+				Trace.TraceError( "BGA: {2}番目の引数（表示位置_Y）が異常です。[{0}: {1}行]", strFileNameFullPath, lineNumber, i + 1 );
 				return false;
 			}
 			bga.pt表示座標.Y = n値;
@@ -5614,30 +5568,30 @@ namespace DTXMania
 
 			return true;
 		}
-		private bool t入力_行解析_BGAPAN( string strコマンド, string strパラメータ, string strコメント )
+		private bool t入力_行解析_BGAPAN( string strCommand, string strParameter )
 		{
 			// (1) コマンドを処理。
 
 			#region [ "BGAPAN" で始まらないコマンドは無効。]
 			//-----------------
-			if( !strコマンド.StartsWith( "BGAPAN", StringComparison.OrdinalIgnoreCase ) )
+			if( !strCommand.StartsWith( "BGAPAN", StringComparison.OrdinalIgnoreCase ) )
 				return false;
 
-			strコマンド = strコマンド.Substring( 6 );	// strコマンド から先頭の"BGAPAN"文字を除去。
+			strCommand = strCommand.Substring( 6 );	// strコマンド から先頭の"BGAPAN"文字を除去。
 			//-----------------
 			#endregion
 
 			// (2) パラメータを処理。
 
-			if( strコマンド.Length < 2 )
+			if( strCommand.Length < 2 )
 				return false;	// BGAPAN番号 zz がないなら無効。
 
 			#region [ BGAPAN番号 zz を取得する。]
 			//-----------------
-			int zz = CConversion.nConvert2DigitBase36StringToNumber( strコマンド.Substring( 0, 2 ) );
+			int zz = CConversion.nConvert2DigitBase36StringToNumber( strCommand.Substring( 0, 2 ) );
 			if( zz < 0 || zz >= 36 * 36 )
 			{
-				Trace.TraceError( "BGAPAN番号に 00～ZZ 以外の値または不正な文字列が指定されました。[{0}: {1}行]", strFileNameFullPath, n現在の行数 );
+				Trace.TraceError( "BGAPAN番号に 00～ZZ 以外の値または不正な文字列が指定されました。[{0}: {1}行]", strFileNameFullPath, lineNumber );
 				return false;
 			}
 			//-----------------
@@ -5649,13 +5603,13 @@ namespace DTXMania
 
 			// パラメータ引数（14個）を取得し、bgapan に登録していく。
 
-			string[] strParams = strパラメータ.Split( new char[] { ' ', ',', '(', ')', '[', ']', 'x', '|' }, StringSplitOptions.RemoveEmptyEntries );
+			string[] strParams = strParameter.Split( new char[] { ' ', ',', '(', ')', '[', ']', 'x', '|' }, StringSplitOptions.RemoveEmptyEntries );
 
 			#region [ パラメータ引数は全14個ないと無効。]
 			//-----------------
 			if( strParams.Length < 14 )
 			{
-				Trace.TraceError( "BGAPAN: 引数が足りません。[{0}: {1}行]", strFileNameFullPath, n現在の行数 );
+				Trace.TraceError( "BGAPAN: 引数が足りません。[{0}: {1}行]", strFileNameFullPath, lineNumber );
 				return false;
 			}
 			//-----------------
@@ -5668,13 +5622,13 @@ namespace DTXMania
 			//-----------------
 			if( string.IsNullOrEmpty( strParams[ i ] ) || strParams[ i ].Length > 2 )
 			{
-				Trace.TraceError( "BGAPAN: {2}番目の数（BMP番号）が異常です。[{0}: {1}行]", strFileNameFullPath, n現在の行数, i + 1 );
+				Trace.TraceError( "BGAPAN: {2}番目の数（BMP番号）が異常です。[{0}: {1}行]", strFileNameFullPath, lineNumber, i + 1 );
 				return false;
 			}
 			bgapan.nBMP番号 = CConversion.nConvert2DigitBase36StringToNumber( strParams[ i ] );
 			if( bgapan.nBMP番号 < 1 || bgapan.nBMP番号 >= 36 * 36 )
 			{
-				Trace.TraceError( "BGAPAN: {2}番目の数（BMP番号）が異常です。[{0}: {1}行]", strFileNameFullPath, n現在の行数, i + 1 );
+				Trace.TraceError( "BGAPAN: {2}番目の数（BMP番号）が異常です。[{0}: {1}行]", strFileNameFullPath, lineNumber, i + 1 );
 				return false;
 			}
 			i++;
@@ -5685,7 +5639,7 @@ namespace DTXMania
 			n値 = 0;
 			if( !int.TryParse( strParams[ i ], out n値 ) )
 			{
-				Trace.TraceError( "BGAPAN: {2}番目の引数（開始転送サイズ_幅）が異常です。[{0}: {1}行]", strFileNameFullPath, n現在の行数, i + 1 );
+				Trace.TraceError( "BGAPAN: {2}番目の引数（開始転送サイズ_幅）が異常です。[{0}: {1}行]", strFileNameFullPath, lineNumber, i + 1 );
 				return false;
 			}
 			bgapan.sz開始サイズ.Width = n値;
@@ -5697,7 +5651,7 @@ namespace DTXMania
 			n値 = 0;
 			if( !int.TryParse( strParams[ i ], out n値 ) )
 			{
-				Trace.TraceError( "BGAPAN: {2}番目の引数（開始転送サイズ_高さ）が異常です。[{0}: {1}行]", strFileNameFullPath, n現在の行数, i + 1 );
+				Trace.TraceError( "BGAPAN: {2}番目の引数（開始転送サイズ_高さ）が異常です。[{0}: {1}行]", strFileNameFullPath, lineNumber, i + 1 );
 				return false;
 			}
 			bgapan.sz開始サイズ.Height = n値;
@@ -5709,7 +5663,7 @@ namespace DTXMania
 			n値 = 0;
 			if( !int.TryParse( strParams[ i ], out n値 ) )
 			{
-				Trace.TraceError( "BGAPAN: {2}番目の引数（終了転送サイズ_幅）が異常です。[{0}: {1}行]", strFileNameFullPath, n現在の行数, i + 1 );
+				Trace.TraceError( "BGAPAN: {2}番目の引数（終了転送サイズ_幅）が異常です。[{0}: {1}行]", strFileNameFullPath, lineNumber, i + 1 );
 				return false;
 			}
 			bgapan.sz終了サイズ.Width = n値;
@@ -5721,7 +5675,7 @@ namespace DTXMania
 			n値 = 0;
 			if( !int.TryParse( strParams[ i ], out n値 ) )
 			{
-				Trace.TraceError( "BGAPAN: {2}番目の引数（終了転送サイズ_高さ）が異常です。[{0}: {1}行]", strFileNameFullPath, n現在の行数, i + 1 );
+				Trace.TraceError( "BGAPAN: {2}番目の引数（終了転送サイズ_高さ）が異常です。[{0}: {1}行]", strFileNameFullPath, lineNumber, i + 1 );
 				return false;
 			}
 			bgapan.sz終了サイズ.Height = n値;
@@ -5733,7 +5687,7 @@ namespace DTXMania
 			n値 = 0;
 			if( !int.TryParse( strParams[ i ], out n値 ) )
 			{
-				Trace.TraceError( "BGAPAN: {2}番目の引数（画像側開始位置_X）が異常です。[{0}: {1}行]", strFileNameFullPath, n現在の行数, i + 1 );
+				Trace.TraceError( "BGAPAN: {2}番目の引数（画像側開始位置_X）が異常です。[{0}: {1}行]", strFileNameFullPath, lineNumber, i + 1 );
 				return false;
 			}
 			bgapan.pt画像側開始位置.X = n値;
@@ -5745,7 +5699,7 @@ namespace DTXMania
 			n値 = 0;
 			if( !int.TryParse( strParams[ i ], out n値 ) )
 			{
-				Trace.TraceError( "BGAPAN: {2}番目の引数（画像側開始位置_Y）が異常です。[{0}: {1}行]", strFileNameFullPath, n現在の行数, i + 1 );
+				Trace.TraceError( "BGAPAN: {2}番目の引数（画像側開始位置_Y）が異常です。[{0}: {1}行]", strFileNameFullPath, lineNumber, i + 1 );
 				return false;
 			}
 			bgapan.pt画像側開始位置.Y = n値;
@@ -5757,7 +5711,7 @@ namespace DTXMania
 			n値 = 0;
 			if( !int.TryParse( strParams[ i ], out n値 ) )
 			{
-				Trace.TraceError( "BGAPAN: {2}番目の引数（画像側終了位置_X）が異常です。[{0}: {1}行]", strFileNameFullPath, n現在の行数, i + 1 );
+				Trace.TraceError( "BGAPAN: {2}番目の引数（画像側終了位置_X）が異常です。[{0}: {1}行]", strFileNameFullPath, lineNumber, i + 1 );
 				return false;
 			}
 			bgapan.pt画像側終了位置.X = n値;
@@ -5769,7 +5723,7 @@ namespace DTXMania
 			n値 = 0;
 			if( !int.TryParse( strParams[ i ], out n値 ) )
 			{
-				Trace.TraceError( "BGAPAN: {2}番目の引数（画像側終了位置_Y）が異常です。[{0}: {1}行]", strFileNameFullPath, n現在の行数, i + 1 );
+				Trace.TraceError( "BGAPAN: {2}番目の引数（画像側終了位置_Y）が異常です。[{0}: {1}行]", strFileNameFullPath, lineNumber, i + 1 );
 				return false;
 			}
 			bgapan.pt画像側終了位置.Y = n値;
@@ -5781,7 +5735,7 @@ namespace DTXMania
 			n値 = 0;
 			if( !int.TryParse( strParams[ i ], out n値 ) )
 			{
-				Trace.TraceError( "BGAPAN: {2}番目の引数（表示側開始位置_X）が異常です。[{0}: {1}行]", strFileNameFullPath, n現在の行数, i + 1 );
+				Trace.TraceError( "BGAPAN: {2}番目の引数（表示側開始位置_X）が異常です。[{0}: {1}行]", strFileNameFullPath, lineNumber, i + 1 );
 				return false;
 			}
 			bgapan.pt表示側開始位置.X = n値;
@@ -5793,7 +5747,7 @@ namespace DTXMania
 			n値 = 0;
 			if( !int.TryParse( strParams[ i ], out n値 ) )
 			{
-				Trace.TraceError( "BGAPAN: {2}番目の引数（表示側開始位置_Y）が異常です。[{0}: {1}行]", strFileNameFullPath, n現在の行数, i + 1 );
+				Trace.TraceError( "BGAPAN: {2}番目の引数（表示側開始位置_Y）が異常です。[{0}: {1}行]", strFileNameFullPath, lineNumber, i + 1 );
 				return false;
 			}
 			bgapan.pt表示側開始位置.Y = n値;
@@ -5805,7 +5759,7 @@ namespace DTXMania
 			n値 = 0;
 			if( !int.TryParse( strParams[ i ], out n値 ) )
 			{
-				Trace.TraceError( "BGAPAN: {2}番目の引数（表示側終了位置_X）が異常です。[{0}: {1}行]", strFileNameFullPath, n現在の行数, i + 1 );
+				Trace.TraceError( "BGAPAN: {2}番目の引数（表示側終了位置_X）が異常です。[{0}: {1}行]", strFileNameFullPath, lineNumber, i + 1 );
 				return false;
 			}
 			bgapan.pt表示側終了位置.X = n値;
@@ -5817,7 +5771,7 @@ namespace DTXMania
 			n値 = 0;
 			if( !int.TryParse( strParams[ i ], out n値 ) )
 			{
-				Trace.TraceError( "BGAPAN: {2}番目の引数（表示側終了位置_Y）が異常です。[{0}: {1}行]", strFileNameFullPath, n現在の行数, i + 1 );
+				Trace.TraceError( "BGAPAN: {2}番目の引数（表示側終了位置_Y）が異常です。[{0}: {1}行]", strFileNameFullPath, lineNumber, i + 1 );
 				return false;
 			}
 			bgapan.pt表示側終了位置.Y = n値;
@@ -5829,7 +5783,7 @@ namespace DTXMania
 			n値 = 0;
 			if( !int.TryParse( strParams[ i ], out n値 ) )
 			{
-				Trace.TraceError( "BGAPAN: {2}番目の引数（移動時間）が異常です。[{0}: {1}行]", strFileNameFullPath, n現在の行数, i + 1 );
+				Trace.TraceError( "BGAPAN: {2}番目の引数（移動時間）が異常です。[{0}: {1}行]", strFileNameFullPath, lineNumber, i + 1 );
 				return false;
 			}
 
@@ -5852,16 +5806,16 @@ namespace DTXMania
 
 			return true;
 		}
-		private bool t入力_行解析_BMP( string strコマンド, string strパラメータ, string strコメント )
+		private bool t入力_行解析_BMP( string strCommand, string strParameter, string strComment )
 		{
 			// (1) コマンドを処理。
 
 			#region [ "BMP" で始まらないコマンドは無効。]
 			//-----------------
-			if( !strコマンド.StartsWith( "BMP", StringComparison.OrdinalIgnoreCase ) )
+			if( !strCommand.StartsWith( "BMP", StringComparison.OrdinalIgnoreCase ) )
 				return false;
 
-			strコマンド = strコマンド.Substring( 3 );	// strコマンド から先頭の"BMP"文字を除去。
+			strCommand = strCommand.Substring( 3 );	// strコマンド から先頭の"BMP"文字を除去。
 			//-----------------
 			#endregion
 
@@ -5871,7 +5825,7 @@ namespace DTXMania
 
 			#region [ BMP番号 zz を取得する。]
 			//-----------------
-			if( strコマンド.Length < 2 )
+			if( strCommand.Length < 2 )
 			{
 				#region [ (A) "#BMP:" の場合 → zz = 00 ]
 				//-----------------
@@ -5883,10 +5837,10 @@ namespace DTXMania
 			{
 				#region [ (B) "#BMPzz:" の場合 → zz = 00 ～ ZZ ]
 				//-----------------
-				zz = CConversion.nConvert2DigitBase36StringToNumber( strコマンド.Substring( 0, 2 ) );
+				zz = CConversion.nConvert2DigitBase36StringToNumber( strCommand.Substring( 0, 2 ) );
 				if( zz < 0 || zz >= 36 * 36 )
 				{
-					Trace.TraceError( "BMP番号に 00～ZZ 以外の値または不正な文字列が指定されました。[{0}: {1}行]", strFileNameFullPath, n現在の行数 );
+					Trace.TraceError( "BMP番号に 00～ZZ 以外の値または不正な文字列が指定されました。[{0}: {1}行]", strFileNameFullPath, lineNumber );
 					return false;
 				}
 				//-----------------
@@ -5898,8 +5852,8 @@ namespace DTXMania
 
 			var bmp = new CBMP() {
 				n番号 = zz,
-				strファイル名 = strパラメータ,
-				strコメント文 = strコメント,
+				strファイル名 = strParameter,
+				strコメント文 = strComment,
 			};
 
 			#region [ BMPリストに {zz, bmp} の組を登録。]
@@ -5913,30 +5867,30 @@ namespace DTXMania
 
 			return true;
 		}
-		private bool t入力_行解析_BMPTEX( string strコマンド, string strパラメータ, string strコメント )
+		private bool t入力_行解析_BMPTEX( string strCommand, string strParameter, string strComment )
 		{
 			// (1) コマンドを処理。
 
 			#region [ "BMPTEX" で始まらないコマンドは無効。]
 			//-----------------
-			if( !strコマンド.StartsWith( "BMPTEX", StringComparison.OrdinalIgnoreCase ) )
+			if( !strCommand.StartsWith( "BMPTEX", StringComparison.OrdinalIgnoreCase ) )
 				return false;
 
-			strコマンド = strコマンド.Substring( 6 );	// strコマンド から先頭の"BMPTEX"文字を除去。
+			strCommand = strCommand.Substring( 6 );	// strコマンド から先頭の"BMPTEX"文字を除去。
 			//-----------------
 			#endregion
 
 			// (2) パラメータを処理。
 
-			if( strコマンド.Length < 2 )
+			if( strCommand.Length < 2 )
 				return false;	// BMPTEX番号 zz がないなら無効。
 
 			#region [ BMPTEX番号 zz を取得する。]
 			//-----------------
-			int zz = CConversion.nConvert2DigitBase36StringToNumber( strコマンド.Substring( 0, 2 ) );
+			int zz = CConversion.nConvert2DigitBase36StringToNumber( strCommand.Substring( 0, 2 ) );
 			if( zz < 0 || zz >= 36 * 36 )
 			{
-				Trace.TraceError( "BMPTEX番号に 00～ZZ 以外の値または不正な文字列が指定されました。[{0}: {1}]", strFileNameFullPath, n現在の行数 );
+				Trace.TraceError( "BMPTEX番号に 00～ZZ 以外の値または不正な文字列が指定されました。[{0}: {1}]", strFileNameFullPath, lineNumber );
 				return false;
 			}
 			//-----------------
@@ -5944,8 +5898,8 @@ namespace DTXMania
 
 			var bmptex = new CBMPTEX() {
 				n番号 = zz,
-				strファイル名 = strパラメータ,
-				strコメント文 = strコメント,
+				strファイル名 = strParameter,
+				strコメント文 = strComment,
 			};
 
 			#region [ BMPTEXリストに {zz, bmptex} の組を登録する。]
@@ -5959,16 +5913,16 @@ namespace DTXMania
 
 			return true;
 		}
-		private bool t入力_行解析_BPM_BPMzz( string strコマンド, string strパラメータ, string strコメント )
+		private bool t入力_行解析_BPM_BPMzz( string strCommand, string strParameter )
 		{
 			// (1) コマンドを処理。
 
 			#region [ "BPM" で始まらないコマンドは無効。]
 			//-----------------
-			if( !strコマンド.StartsWith( "BPM", StringComparison.OrdinalIgnoreCase ) )
+			if( !strCommand.StartsWith( "BPM", StringComparison.OrdinalIgnoreCase ) )
 				return false;
 
-			strコマンド = strコマンド.Substring( 3 );	// strコマンド から先頭の"BPM"文字を除去。
+			strCommand = strCommand.Substring( 3 );	// strコマンド から先頭の"BPM"文字を除去。
 			//-----------------
 			#endregion
 
@@ -5978,7 +5932,7 @@ namespace DTXMania
 
 			#region [ BPM番号 zz を取得する。]
 			//-----------------
-			if( strコマンド.Length < 2 )
+			if( strCommand.Length < 2 )
 			{
 				#region [ (A) "#BPM:" の場合 → zz = 00 ]
 				//-----------------
@@ -5990,10 +5944,10 @@ namespace DTXMania
 			{
 				#region [ (B) "#BPMzz:" の場合 → zz = 00 ～ ZZ ]
 				//-----------------
-				zz = CConversion.nConvert2DigitBase36StringToNumber( strコマンド.Substring( 0, 2 ) );
+				zz = CConversion.nConvert2DigitBase36StringToNumber( strCommand.Substring( 0, 2 ) );
 				if( zz < 0 || zz >= 36 * 36 )
 				{
-					Trace.TraceError( "BPM番号に 00～ZZ 以外の値または不正な文字列が指定されました。[{0}: {1}行]", strFileNameFullPath, n現在の行数 );
+					Trace.TraceError( "BPM番号に 00～ZZ 以外の値または不正な文字列が指定されました。[{0}: {1}行]", strFileNameFullPath, lineNumber );
 					return false;
 				}
 				//-----------------
@@ -6007,7 +5961,7 @@ namespace DTXMania
 			#region [ BPM値を取得する。]
 			//-----------------
 			//if( !double.TryParse( strパラメータ, out result ) )
-			if( !TryParse( strパラメータ, out dbBPM ) )			// #23880 2010.12.30 yyagi: alternative TryParse to permit both '.' and ',' for decimal point
+			if( !TryParse( strParameter, out dbBPM ) )			// #23880 2010.12.30 yyagi: alternative TryParse to permit both '.' and ',' for decimal point
 				return false;
 
 			if( dbBPM <= 0.0 )
@@ -6049,30 +6003,30 @@ namespace DTXMania
 
 			return true;
 		}
-		private bool t入力_行解析_RESULTIMAGE( string strコマンド, string strパラメータ, string strコメント )
+		private bool t入力_行解析_RESULTIMAGE( string strCommand, string strParameter )
 		{
 			// (1) コマンドを処理。
 
 			#region [ "RESULTIMAGE" で始まらないコマンドは無効。]
 			//-----------------
-			if( !strコマンド.StartsWith( "RESULTIMAGE", StringComparison.OrdinalIgnoreCase ) )
+			if( !strCommand.StartsWith( "RESULTIMAGE", StringComparison.OrdinalIgnoreCase ) )
 				return false;
 
-			strコマンド = strコマンド.Substring( 11 );	// strコマンド から先頭の"RESULTIMAGE"文字を除去。
+			strCommand = strCommand.Substring( 11 );	// strコマンド から先頭の"RESULTIMAGE"文字を除去。
 			//-----------------
 			#endregion
 
 			// (2) パラメータを処理。
 			//     コマンドには "#RESULTIMAGE:" と "#RESULTIMAGE_SS～E" の2種類があり、パラメータの処理はそれぞれ異なる。
 
-			if( strコマンド.Length < 2 )
+			if( strCommand.Length < 2 )
 			{
 				#region [ (A) ランク指定がない場合("#RESULTIMAGE:") → 優先順位が設定されていないすべてのランクで同じパラメータを使用する。]
 				//-----------------
 				for( int i = 0; i < 7; i++ )
 				{
 					if( nRESULTIMAGE用優先順位[ i ] == 0 )
-						RESULTIMAGE[ i ] = strパラメータ.Trim();
+						RESULTIMAGE[ i ] = strParameter.Trim();
 				}
 				//-----------------
 				#endregion
@@ -6081,34 +6035,34 @@ namespace DTXMania
 			{
 				#region [ (B) ランク指定がある場合("#RESULTIMAGE_SS～E:") → 優先順位に従ってパラメータを記録する。]
 				//-----------------
-				switch( strコマンド.ToUpper() )
+				switch( strCommand.ToUpper() )
 				{
 					case "_SS":
-						t入力_行解析_RESULTIMAGE_ファイルを設定する( 0, strパラメータ );
+						t入力_行解析_RESULTIMAGE_ファイルを設定する( 0, strParameter );
 						break;
 
 					case "_S":
-						t入力_行解析_RESULTIMAGE_ファイルを設定する( 1, strパラメータ );
+						t入力_行解析_RESULTIMAGE_ファイルを設定する( 1, strParameter );
 						break;
 
 					case "_A":
-						t入力_行解析_RESULTIMAGE_ファイルを設定する( 2, strパラメータ );
+						t入力_行解析_RESULTIMAGE_ファイルを設定する( 2, strParameter );
 						break;
 
 					case "_B":
-						t入力_行解析_RESULTIMAGE_ファイルを設定する( 3, strパラメータ );
+						t入力_行解析_RESULTIMAGE_ファイルを設定する( 3, strParameter );
 						break;
 
 					case "_C":
-						t入力_行解析_RESULTIMAGE_ファイルを設定する( 4, strパラメータ );
+						t入力_行解析_RESULTIMAGE_ファイルを設定する( 4, strParameter );
 						break;
 
 					case "_D":
-						t入力_行解析_RESULTIMAGE_ファイルを設定する( 5, strパラメータ );
+						t入力_行解析_RESULTIMAGE_ファイルを設定する( 5, strParameter );
 						break;
 
 					case "_E":
-						t入力_行解析_RESULTIMAGE_ファイルを設定する( 6, strパラメータ );
+						t入力_行解析_RESULTIMAGE_ファイルを設定する( 6, strParameter );
 						break;
 				}
 				//-----------------
@@ -6138,30 +6092,30 @@ namespace DTXMania
 				}
 			}
 		}
-		private bool t入力_行解析_RESULTMOVIE( string strコマンド, string strパラメータ, string strコメント )
+		private bool t入力_行解析_RESULTMOVIE( string strCommand, string strParameter )
 		{
 			// (1) コマンドを処理。
 
 			#region [ "RESULTMOVIE" で始まらないコマンドは無効。]
 			//-----------------
-			if( !strコマンド.StartsWith( "RESULTMOVIE", StringComparison.OrdinalIgnoreCase ) )
+			if( !strCommand.StartsWith( "RESULTMOVIE", StringComparison.OrdinalIgnoreCase ) )
 				return false;
 
-			strコマンド = strコマンド.Substring( 11 );	// strコマンド から先頭の"RESULTMOVIE"文字を除去。
+			strCommand = strCommand.Substring( 11 );	// strコマンド から先頭の"RESULTMOVIE"文字を除去。
 			//-----------------
 			#endregion
 
 			// (2) パラメータを処理。
 			//     コマンドには "#RESULTMOVIE:" と "#RESULTMOVIE_SS～E" の2種類があり、パラメータの処理はそれぞれ異なる。
 
-			if( strコマンド.Length < 2 )
+			if( strCommand.Length < 2 )
 			{
 				#region [ (A) ランク指定がない場合("#RESULTMOVIE:") → 優先順位が設定されていないすべてのランクで同じパラメータを使用する。]
 				//-----------------
 				for( int i = 0; i < 7; i++ )
 				{
 					if( nRESULTMOVIE用優先順位[ i ] == 0 )
-						RESULTMOVIE[ i ] = strパラメータ.Trim();
+						RESULTMOVIE[ i ] = strParameter.Trim();
 				}
 				//-----------------
 				#endregion
@@ -6170,34 +6124,34 @@ namespace DTXMania
 			{
 				#region [ (B) ランク指定がある場合("#RESULTMOVIE_SS～E:") → 優先順位に従ってパラメータを記録する。]
 				//-----------------
-				switch( strコマンド.ToUpper() )
+				switch( strCommand.ToUpper() )
 				{
 					case "_SS":
-						t入力_行解析_RESULTMOVIE_ファイルを設定する( 0, strパラメータ );
+						t入力_行解析_RESULTMOVIE_ファイルを設定する( 0, strParameter );
 						break;
 
 					case "_S":
-						t入力_行解析_RESULTMOVIE_ファイルを設定する( 1, strパラメータ );
+						t入力_行解析_RESULTMOVIE_ファイルを設定する( 1, strParameter );
 						break;
 
 					case "_A":
-						t入力_行解析_RESULTMOVIE_ファイルを設定する( 2, strパラメータ );
+						t入力_行解析_RESULTMOVIE_ファイルを設定する( 2, strParameter );
 						break;
 
 					case "_B":
-						t入力_行解析_RESULTMOVIE_ファイルを設定する( 3, strパラメータ );
+						t入力_行解析_RESULTMOVIE_ファイルを設定する( 3, strParameter );
 						break;
 
 					case "_C":
-						t入力_行解析_RESULTMOVIE_ファイルを設定する( 4, strパラメータ );
+						t入力_行解析_RESULTMOVIE_ファイルを設定する( 4, strParameter );
 						break;
 
 					case "_D":
-						t入力_行解析_RESULTMOVIE_ファイルを設定する( 5, strパラメータ );
+						t入力_行解析_RESULTMOVIE_ファイルを設定する( 5, strParameter );
 						break;
 
 					case "_E":
-						t入力_行解析_RESULTMOVIE_ファイルを設定する( 6, strパラメータ );
+						t入力_行解析_RESULTMOVIE_ファイルを設定する( 6, strParameter );
 						break;
 				}
 				//-----------------
@@ -6227,30 +6181,30 @@ namespace DTXMania
 				}
 			}
 		}
-		private bool t入力_行解析_RESULTSOUND( string strコマンド, string strパラメータ, string strコメント )
+		private bool t入力_行解析_RESULTSOUND( string strCommand, string strParameter )
 		{
 			// (1) コマンドを処理。
 
 			#region [ "RESULTSOUND" で始まらないコマンドは無効。]
 			//-----------------
-			if( !strコマンド.StartsWith( "RESULTSOUND", StringComparison.OrdinalIgnoreCase ) )
+			if( !strCommand.StartsWith( "RESULTSOUND", StringComparison.OrdinalIgnoreCase ) )
 				return false;
 
-			strコマンド = strコマンド.Substring( 11 );	// strコマンド から先頭の"RESULTSOUND"文字を除去。
+			strCommand = strCommand.Substring( 11 );	// strコマンド から先頭の"RESULTSOUND"文字を除去。
 			//-----------------
 			#endregion
 
 			// (2) パラメータを処理。
 			//     コマンドには "#RESULTSOUND:" と "#RESULTSOUND_SS～E" の2種類があり、パラメータの処理はそれぞれ異なる。
 
-			if( strコマンド.Length < 2 )
+			if( strCommand.Length < 2 )
 			{
 				#region [ (A) ランク指定がない場合("#RESULTSOUND:") → 優先順位が設定されていないすべてのランクで同じパラメータを使用する。]
 				//-----------------
 				for( int i = 0; i < 7; i++ )
 				{
 					if( nRESULTSOUND用優先順位[ i ] == 0 )
-						RESULTSOUND[ i ] = strパラメータ.Trim();
+						RESULTSOUND[ i ] = strParameter.Trim();
 				}
 				//-----------------
 				#endregion
@@ -6259,34 +6213,34 @@ namespace DTXMania
 			{
 				#region [ (B) ランク指定がある場合("#RESULTSOUND_SS～E:") → 優先順位に従ってパラメータを記録する。]
 				//-----------------
-				switch( strコマンド.ToUpper() )
+				switch( strCommand.ToUpper() )
 				{
 					case "_SS":
-						t入力_行解析_RESULTSOUND_ファイルを設定する( 0, strパラメータ );
+						t入力_行解析_RESULTSOUND_ファイルを設定する( 0, strParameter );
 						break;
 
 					case "_S":
-						t入力_行解析_RESULTSOUND_ファイルを設定する( 1, strパラメータ );
+						t入力_行解析_RESULTSOUND_ファイルを設定する( 1, strParameter );
 						break;
 
 					case "_A":
-						t入力_行解析_RESULTSOUND_ファイルを設定する( 2, strパラメータ );
+						t入力_行解析_RESULTSOUND_ファイルを設定する( 2, strParameter );
 						break;
 
 					case "_B":
-						t入力_行解析_RESULTSOUND_ファイルを設定する( 3, strパラメータ );
+						t入力_行解析_RESULTSOUND_ファイルを設定する( 3, strParameter );
 						break;
 
 					case "_C":
-						t入力_行解析_RESULTSOUND_ファイルを設定する( 4, strパラメータ );
+						t入力_行解析_RESULTSOUND_ファイルを設定する( 4, strParameter );
 						break;
 
 					case "_D":
-						t入力_行解析_RESULTSOUND_ファイルを設定する( 5, strパラメータ );
+						t入力_行解析_RESULTSOUND_ファイルを設定する( 5, strParameter );
 						break;
 
 					case "_E":
-						t入力_行解析_RESULTSOUND_ファイルを設定する( 6, strパラメータ );
+						t入力_行解析_RESULTSOUND_ファイルを設定する( 6, strParameter );
 						break;
 				}
 				//-----------------
@@ -6316,7 +6270,7 @@ namespace DTXMania
 				}
 			}
 		}
-		private bool t入力_行解析_SIZE( string strコマンド, string strパラメータ, string strコメント )
+		private bool t入力_行解析_SIZE( string strコマンド, string strParameter )
 		{
 			// (1) コマンドを処理。
 
@@ -6338,7 +6292,7 @@ namespace DTXMania
 
 			if( nWAV番号 < 0 || nWAV番号 >= 36 * 36 )
 			{
-				Trace.TraceError( "SIZEのWAV番号に 00～ZZ 以外の値または不正な文字列が指定されました。[{0}: {1}行]", strFileNameFullPath, n現在の行数 );
+				Trace.TraceError( "SIZEのWAV番号に 00～ZZ 以外の値または不正な文字列が指定されました。[{0}: {1}行]", strFileNameFullPath, lineNumber );
 				return false;
 			}
 			//-----------------
@@ -6351,7 +6305,7 @@ namespace DTXMania
 			//-----------------
 			int nサイズ値;
 
-			if( !int.TryParse( strパラメータ, out nサイズ値 ) )
+			if( !int.TryParse( strParameter, out nサイズ値 ) )
 				return true;	// int変換に失敗しても、この行自体の処理は終えたのでtrueを返す。
 
 			nサイズ値 = Math.Min( Math.Max( nサイズ値, 0 ), 100 );	// 0未満は0、100超えは100に強制変換。
@@ -6374,43 +6328,44 @@ namespace DTXMania
 
 			return true;
 		}
-		private bool t入力_行解析_WAV( string strコマンド, string strパラメータ, string strコメント )
+		private bool t入力_行解析_WAV( string strCommand, string strParameter, string strComment )
 		{
 			// (1) コマンドを処理。
 
 			#region [ "WAV" で始まらないコマンドは無効。]
 			//-----------------
-			if( !strコマンド.StartsWith( "WAV", StringComparison.OrdinalIgnoreCase ) )
+			if( !strCommand.StartsWith( "WAV", StringComparison.OrdinalIgnoreCase ) )
 				return false;
 
-			strコマンド = strコマンド.Substring( 3 );	// strコマンド から先頭の"WAV"文字を除去。
+			strCommand = strCommand.Substring( 3 );	// strコマンド から先頭の"WAV"文字を除去。
 			//-----------------
 			#endregion
 
 			// (2) パラメータを処理。
 
-			if( strコマンド.Length < 2 )
+			if( strCommand.Length < 2 )
 				return false;	// WAV番号 zz がないなら無効。
 
 			#region [ WAV番号 zz を取得する。]
 			//-----------------
-			int zz = CConversion.nConvert2DigitBase36StringToNumber( strコマンド.Substring( 0, 2 ) );
+			int zz = CConversion.nConvert2DigitBase36StringToNumber( strCommand.Substring( 0, 2 ) );
 			if( zz < 0 || zz >= 36 * 36 )
 			{
-				Trace.TraceError( "WAV番号に 00～ZZ 以外の値または不正な文字列が指定されました。[{0}: {1}行]", strFileNameFullPath, n現在の行数 );
+				Trace.TraceError( "WAV番号に 00～ZZ 以外の値または不正な文字列が指定されました。[{0}: {1}行]", strFileNameFullPath, lineNumber );
 				return false;
 			}
 			//-----------------
 			#endregion
 
-			var wav = new CWAV() {
+			CWAV wav = new()
+			{
 				n内部番号 = n内部番号WAV1to,
 				n表記上の番号 = zz,
 				nチップサイズ = n無限管理SIZE[ zz ],
 				n位置 = n無限管理PAN[ zz ],
 				n音量 = n無限管理VOL[ zz ],
-				strファイル名 = strパラメータ,
-				strコメント文 = strコメント,
+				strファイル名 = strParameter,
+				strコメント文 = strComment,
 			};
 
 			#region [ WAVリストに {内部番号, wav} の組を登録。]
@@ -6438,17 +6393,17 @@ namespace DTXMania
 
 			return true;
 		}
-		private bool t入力_行解析_WAVPAN_PAN( string strコマンド, string strパラメータ, string strコメント )
+		private bool t入力_行解析_WAVPAN_PAN(string strCommand, string strParameter)
 		{
 			// (1) コマンドを処理。
 
 			#region [ "WAVPAN" or "PAN" で始まらないコマンドは無効。]
 			//-----------------
-			if( strコマンド.StartsWith( "WAVPAN", StringComparison.OrdinalIgnoreCase ) )
-				strコマンド = strコマンド.Substring( 6 );		// strコマンド から先頭の"WAVPAN"文字を除去。
+			if( strCommand.StartsWith( "WAVPAN", StringComparison.OrdinalIgnoreCase ) )
+				strCommand = strCommand.Substring( 6 );		// strコマンド から先頭の"WAVPAN"文字を除去。
 
-			else if( strコマンド.StartsWith( "PAN", StringComparison.OrdinalIgnoreCase ) )
-				strコマンド = strコマンド.Substring( 3 );		// strコマンド から先頭の"PAN"文字を除去。
+			else if( strCommand.StartsWith( "PAN", StringComparison.OrdinalIgnoreCase ) )
+				strCommand = strCommand.Substring( 3 );		// strコマンド から先頭の"PAN"文字を除去。
 
 			else
 				return false;
@@ -6457,15 +6412,15 @@ namespace DTXMania
 
 			// (2) パラメータを処理。
 
-			if( strコマンド.Length < 2 )
+			if( strCommand.Length < 2 )
 				return false;	// WAV番号 zz がないなら無効。
 
 			#region [ WAV番号 zz を取得する。]
 			//-----------------
-			int zz = CConversion.nConvert2DigitBase36StringToNumber( strコマンド.Substring( 0, 2 ) );
-			if( zz < 0 || zz >= 36 * 36 )
+			int zz = CConversion.nConvert2DigitBase36StringToNumber( strCommand.Substring( 0, 2 ) );
+			if( zz is < 0 or >= 36 * 36 )
 			{
-				Trace.TraceError( "WAVPAN(PAN)のWAV番号に 00～ZZ 以外の値または不正な文字列が指定されました。[{0}: {1}行]", strFileNameFullPath, n現在の行数 );
+				Trace.TraceError( "WAVPAN(PAN)のWAV番号に 00～ZZ 以外の値または不正な文字列が指定されました。[{0}: {1}行]", strFileNameFullPath, lineNumber );
 				return false;
 			}
 			//-----------------
@@ -6474,7 +6429,7 @@ namespace DTXMania
 			#region [ WAV番号 zz を持つWAVチップの位置を変更する。無限定義対応。]
 			//-----------------
 			int n位置;
-			if( int.TryParse( strパラメータ, out n位置 ) )
+			if( int.TryParse( strParameter, out n位置 ) )
 			{
 				n位置 = Math.Min( Math.Max( n位置, -100 ), 100 );	// -100～+100 に丸める
 
@@ -6493,17 +6448,17 @@ namespace DTXMania
 
 			return true;
 		}
-		private bool t入力_行解析_WAVVOL_VOLUME( string strコマンド, string strパラメータ, string strコメント )
+		private bool t入力_行解析_WAVVOL_VOLUME( string strCommand, string strParameter )
 		{
 			// (1) コマンドを処理。
 
 			#region [ "WAVCOL" or "VOLUME" で始まらないコマンドは無効。]
 			//-----------------
-			if( strコマンド.StartsWith( "WAVVOL", StringComparison.OrdinalIgnoreCase ) )
-				strコマンド = strコマンド.Substring( 6 );		// strコマンド から先頭の"WAVVOL"文字を除去。
+			if( strCommand.StartsWith( "WAVVOL", StringComparison.OrdinalIgnoreCase ) )
+				strCommand = strCommand.Substring( 6 );		// strコマンド から先頭の"WAVVOL"文字を除去。
 
-			else if( strコマンド.StartsWith( "VOLUME", StringComparison.OrdinalIgnoreCase ) )
-				strコマンド = strコマンド.Substring( 6 );		// strコマンド から先頭の"VOLUME"文字を除去。
+			else if( strCommand.StartsWith( "VOLUME", StringComparison.OrdinalIgnoreCase ) )
+				strCommand = strCommand.Substring( 6 );		// strコマンド から先頭の"VOLUME"文字を除去。
 
 			else
 				return false;
@@ -6512,15 +6467,15 @@ namespace DTXMania
 
 			// (2) パラメータを処理。
 
-			if( strコマンド.Length < 2 )
+			if( strCommand.Length < 2 )
 				return false;	// WAV番号 zz がないなら無効。
 
 			#region [ WAV番号 zz を取得する。]
 			//-----------------
-			int zz = CConversion.nConvert2DigitBase36StringToNumber( strコマンド.Substring( 0, 2 ) );
+			int zz = CConversion.nConvert2DigitBase36StringToNumber( strCommand.Substring( 0, 2 ) );
 			if( zz < 0 || zz >= 36 * 36 )
 			{
-				Trace.TraceError( "WAV番号に 00～ZZ 以外の値または不正な文字列が指定されました。[{0}: {1}行]", strFileNameFullPath, n現在の行数 );
+				Trace.TraceError( "WAV番号に 00～ZZ 以外の値または不正な文字列が指定されました。[{0}: {1}行]", strFileNameFullPath, lineNumber );
 				return false;
 			}
 			//-----------------
@@ -6529,7 +6484,7 @@ namespace DTXMania
 			#region [ WAV番号 zz を持つWAVチップの音量を変更する。無限定義対応。]
 			//-----------------
 			int n音量;
-			if( int.TryParse( strパラメータ, out n音量 ) )
+			if( int.TryParse( strParameter, out n音量 ) )
 			{
                 if( !bVol137to100 )
 				    n音量 = Math.Min( Math.Max( n音量, 0 ), 100 );	// 0～100に丸める。
@@ -6586,16 +6541,16 @@ namespace DTXMania
             }
         }
 
-		private bool tInput_LineAnalysis_ChipLocation( string strコマンド, string strパラメータ )
+		private bool tInput_LineAnalysis_ChipLocation( string strCommand, string strParameter )
 		{
 			// (1) コマンドを処理。
 
-			if( strコマンド.Length != 5 )	// コマンドは必ず5文字であること。
+			if( strCommand.Length != 5 )	// コマンドは必ず5文字であること。
 				return false;
 
 			#region [ n小節番号 を取得する。]
 			//-----------------
-			int n小節番号 = CConversion.nConvert3DigitMeasureNumberToNumber( strコマンド.Substring( 0, 3 ) );
+			int n小節番号 = CConversion.nConvert3DigitMeasureNumberToNumber( strCommand.Substring( 0, 3 ) );
 			if( n小節番号 < 0 )
 				return false;
 
@@ -6613,7 +6568,7 @@ namespace DTXMania
 			{
 				#region [ (A) GDA, G2D の場合：チャンネル文字列をDTXのチャンネル番号へ置き換える。]
 				//-----------------
-				string strチャンネル文字列 = strコマンド.Substring( 3, 2 );
+				string strチャンネル文字列 = strCommand.Substring( 3, 2 );
 
 				foreach( STGDAPARAM param in stGDAParam )
 				{
@@ -6632,7 +6587,7 @@ namespace DTXMania
 			{
 				#region [ (B) その他の場合：チャンネル番号は16進数2桁。]
 				//-----------------
-				nChannelNumber = (EChannel)( CConversion.nConvert2DigitHexadecimalStringToNumber( strコマンド.Substring( 3, 2 ) ));
+				nChannelNumber = (EChannel)( CConversion.nConvert2DigitHexadecimalStringToNumber( strCommand.Substring( 3, 2 ) ));
 
 				if( nChannelNumber < 0 )
 					return false;
@@ -6762,9 +6717,9 @@ namespace DTXMania
 
 				double db小節長倍率 = 1.0;
 				//if( !double.TryParse( strパラメータ, out result ) )
-				if( !TryParse( strパラメータ, out db小節長倍率 ) )			// #23880 2010.12.30 yyagi: alternative TryParse to permit both '.' and ',' for decimal point
+				if( !TryParse( strParameter, out db小節長倍率 ) )			// #23880 2010.12.30 yyagi: alternative TryParse to permit both '.' and ',' for decimal point
 				{
-					Trace.TraceError( "小節長倍率に不正な値を指定しました。[{0}: {1}行]", strFileNameFullPath, n現在の行数 );
+					Trace.TraceError( "小節長倍率に不正な値を指定しました。[{0}: {1}行]", strFileNameFullPath, lineNumber );
 					return false;
 				}
 
@@ -6786,18 +6741,18 @@ namespace DTXMania
 
 			// (3) パラメータを処理。
 
-			if( string.IsNullOrEmpty( strパラメータ ) )		// パラメータはnullまたは空文字列ではないこと。
+			if( string.IsNullOrEmpty( strParameter ) )		// パラメータはnullまたは空文字列ではないこと。
 				return false;
 
 			#region [ strパラメータ にオブジェクト記述を格納し、その n文字数 をカウントする。]
 			//-----------------
 			int n文字数 = 0;
 
-			var sb = new StringBuilder( strパラメータ.Length );
+			var sb = new StringBuilder( strParameter.Length );
 
 			// strパラメータを先頭から1文字ずつ見ながら正規化（無効文字('_')を飛ばしたり不正な文字でエラーを出したり）し、sb へ格納する。
 
-			CharEnumerator ce = strパラメータ.GetEnumerator();
+			CharEnumerator ce = strParameter.GetEnumerator();
 			while( ce.MoveNext() )
 			{
 				if( ce.Current == '_' )		// '_' は無視。
@@ -6805,7 +6760,7 @@ namespace DTXMania
 
 				if( CConversion.strBase36Characters.IndexOf( ce.Current ) < 0 )	// オブジェクト記述は36進数文字であること。
 				{
-					Trace.TraceError( "不正なオブジェクト指定があります。[{0}: {1}行]", strFileNameFullPath, n現在の行数 );
+					Trace.TraceError( "不正なオブジェクト指定があります。[{0}: {1}行]", strFileNameFullPath, lineNumber );
 					return false;
 				}
 
@@ -6813,7 +6768,7 @@ namespace DTXMania
 				n文字数++;
 			}
 
-			strパラメータ = sb.ToString();	// 正規化された文字列になりました。
+			strParameter = sb.ToString();	// 正規化された文字列になりました。
 
 			if( ( n文字数 % 2 ) != 0 )		// パラメータの文字数が奇数の場合、最後の1文字を無視する。
 				n文字数--;
@@ -6832,12 +6787,12 @@ namespace DTXMania
 				if( nChannelNumber == EChannel.BPM )
 				{
 					// Ch.03 のみ 16進数2桁。
-					nオブジェクト数値 = CConversion.nConvert2DigitHexadecimalStringToNumber( strパラメータ.Substring( i * 2, 2 ) );
+					nオブジェクト数値 = CConversion.nConvert2DigitHexadecimalStringToNumber( strParameter.Substring( i * 2, 2 ) );
 				}
 				else
 				{
 					// その他のチャンネルは36進数2桁。
-					nオブジェクト数値 = CConversion.nConvert2DigitBase36StringToNumber( strパラメータ.Substring( i * 2, 2 ) );
+					nオブジェクト数値 = CConversion.nConvert2DigitBase36StringToNumber( strParameter.Substring( i * 2, 2 ) );
 				}
 
 				if( nオブジェクト数値 == 0x00 )
