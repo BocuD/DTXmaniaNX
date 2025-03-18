@@ -217,7 +217,7 @@ namespace DTXMania
                     ( CDTXMania.DTX.bチップがある.Ride == false ) && 
                     ( CDTXMania.DTX.bチップがある.LP == false ) &&
                     ( CDTXMania.DTX.bチップがある.LBD == false) &&
-                    ( CDTXMania.DTX.b強制的にXG譜面にする == false))) )
+                    ( CDTXMania.DTX.bForceXGChart == false))) )
                 {
                     if ( txLaneCover != null )
                     {

@@ -536,7 +536,7 @@ namespace DTXMania
                         (CDTXMania.DTX.bチップがある.LBD == false) &&
                         (CDTXMania.DTX.bチップがある.FT == false) &&
                         (CDTXMania.DTX.bチップがある.Ride == false) &&
-                        (CDTXMania.DTX.b強制的にXG譜面にする == false)))
+                        (CDTXMania.DTX.bForceXGChart == false)))
                     {
                         str = string.Format("{0:00}", CDTXMania.DTX.LEVEL[j]);
                         bCLASSIC = true;

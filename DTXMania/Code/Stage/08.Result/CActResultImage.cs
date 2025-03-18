@@ -146,7 +146,7 @@ namespace DTXMania
                     (CDTXMania.DTX.bチップがある.LBD == false) && 
                     (CDTXMania.DTX.bチップがある.FT == false) && 
                     (CDTXMania.DTX.bチップがある.Ride == false) &&
-                    (CDTXMania.DTX.b強制的にXG譜面にする == false)))
+                    (CDTXMania.DTX.bForceXGChart == false)))
                 {
                     graphics.DrawString(string.Format("{0:00}", num), ftSongDifficultyFont, new SolidBrush(Color.FromArgb(0xba, 0xba, 0xba)), (float)0f, (float)-4f);
                 }

@@ -912,7 +912,6 @@ namespace DTXMania
 			}
 			
 			Console.WriteLine($"Processed {progress.Sum()} songs in {DateTime.Now - startTime}");
-			Console.WriteLine("Slow count: " + CDTX.countSlow + "Fast count: " + CDTX.countFast);
 		}
 		
 		public void PrepareProcessNewSongData(List<CSongListNode> nodeList, ref List<Task> list)

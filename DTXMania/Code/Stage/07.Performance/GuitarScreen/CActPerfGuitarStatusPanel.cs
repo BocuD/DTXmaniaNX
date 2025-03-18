@@ -370,7 +370,7 @@ namespace DTXMania
                         //If Skill Mode is CLASSIC, always display lvl as Classic Style
                         if( CDTXMania.ConfigIni.nSkillMode == 0 || (CDTXMania.ConfigIni.bCLASSIC譜面判別を有効にする &&
                             ( i == 1 ? !CDTXMania.DTX.bチップがある.YPGuitar : !CDTXMania.DTX.bチップがある.YPBass ) &&
-                            ( CDTXMania.DTX.b強制的にXG譜面にする == false )) )
+                            ( CDTXMania.DTX.bForceXGChart == false )) )
                         {
                             str = string.Format( "{0:00}", CDTXMania.DTX.LEVEL[ i ] );
                             bCLASSIC = true;

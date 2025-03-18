@@ -554,7 +554,7 @@ namespace DTXMania
                                             !CDTXMania.DTX.bチップがある.LBD &&
                                             !CDTXMania.DTX.bチップがある.FT &&
                                             !CDTXMania.DTX.bチップがある.Ride &&
-                                            !CDTXMania.DTX.b強制的にXG譜面にする
+                                            !CDTXMania.DTX.bForceXGChart
                                             );
                                     }
                                     
