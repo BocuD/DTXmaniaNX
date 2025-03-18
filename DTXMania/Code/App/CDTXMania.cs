@@ -8,7 +8,10 @@ using SharpDX.Direct3D9;
 using FDK;
 using SampleFramework;
 using System.Reflection;
+using Hexa.NET.ImGui;
+using Hexa.NET.ImGui.Backends.D3D9;
 using Point = System.Drawing.Point;
+using Vector2 = System.Numerics.Vector2;
 
 namespace DTXMania
 {
@@ -451,8 +454,13 @@ namespace DTXMania
                 Cursor.Hide();
                 bマウスカーソル表示中 = false;
             }
-            Device.SetTransform(TransformState.View, Matrix.LookAtLH(new Vector3(0f, 0f, (float)(-GameWindowSize.Height / 2 * Math.Sqrt(3.0))), new Vector3(0f, 0f, 0f), new Vector3(0f, 1f, 0f)));
-            Device.SetTransform(TransformState.Projection, Matrix.PerspectiveFovLH(CConversion.DegreeToRadian((float)60f), ((float)Device.Viewport.Width) / ((float)Device.Viewport.Height), -100f, 100f));
+
+            Device.SetTransform(TransformState.View,
+                Matrix.LookAtLH(new Vector3(0f, 0f, (float)(-GameWindowSize.Height / 2 * Math.Sqrt(3.0))),
+                    new Vector3(0f, 0f, 0f), new Vector3(0f, 1f, 0f)));
+            Device.SetTransform(TransformState.Projection,
+                Matrix.PerspectiveFovLH(CConversion.DegreeToRadian((float)60f),
+                    ((float)Device.Viewport.Width) / ((float)Device.Viewport.Height), -100f, 100f));
             Device.SetRenderState(RenderState.Lighting, false);
             Device.SetRenderState(RenderState.ZEnable, false);
             Device.SetRenderState(RenderState.AntialiasedLineEnable, false);
@@ -463,10 +471,10 @@ namespace DTXMania
             Device.SetSamplerState(0, SamplerState.MinFilter, TextureFilter.Linear);
             Device.SetSamplerState(0, SamplerState.MagFilter, TextureFilter.Linear);
 
-            Device.SetRenderState<Compare>(RenderState.AlphaFunc, Compare.Greater);
+            Device.SetRenderState(RenderState.AlphaFunc, Compare.Greater);
             Device.SetRenderState(RenderState.AlphaBlendEnable, true);
-            Device.SetRenderState<Blend>(RenderState.SourceBlend, Blend.SourceAlpha);
-            Device.SetRenderState<Blend>(RenderState.DestinationBlend, Blend.InverseSourceAlpha);
+            Device.SetRenderState(RenderState.SourceBlend, Blend.SourceAlpha);
+            Device.SetRenderState(RenderState.DestinationBlend, Blend.InverseSourceAlpha);
             Device.SetTextureStageState(0, TextureStage.AlphaOperation, TextureOperation.Modulate);
             Device.SetTextureStageState(0, TextureStage.AlphaArg1, 2);
             Device.SetTextureStageState(0, TextureStage.AlphaArg2, 1);
@@ -476,8 +484,23 @@ namespace DTXMania
                 foreach (CActivity activity in listTopLevelActivities)
                     activity.OnUnmanagedCreateResources();
             }
+
+            //init imgui
+            var context = ImGui.CreateContext();
+            ImGui.StyleColorsDark();
+            
+            var io = ImGui.GetIO();
+
+            io.DisplaySize = new Vector2(1280, 720);
+            io.DisplayFramebufferScale = new Vector2(1, 1);
+
+            unsafe
+            {
+                ImGuiImplD3D9.SetCurrentContext(context);
+                ImGuiImplD3D9.Init(new IDirect3DDevice9Ptr((IDirect3DDevice9*)app.Device.NativePointer));
+            }
         }
-        
+
         protected override void UnloadContent()
         {
             if (listTopLevelActivities != null)
@@ -485,6 +508,10 @@ namespace DTXMania
                 foreach (CActivity activity in listTopLevelActivities)
                     activity.OnUnmanagedReleaseResources();
             }
+            
+            ImGuiImplD3D9.Shutdown();
+            
+            ImGui.DestroyContext();
         }
         protected override void OnExiting(EventArgs e)
         {
@@ -586,6 +613,9 @@ namespace DTXMania
             Device.BeginScene();
             Device.Clear(ClearFlags.ZBuffer | ClearFlags.Target, SharpDX.Color.Black, 1f, 0);
 
+            ImGuiImplD3D9.NewFrame();
+            ImGui.NewFrame();
+            
             if (rCurrentStage != null)
             {
                 nUpdateAndDrawReturnValue = (rCurrentStage != null) ? rCurrentStage.OnUpdateAndDraw() : 0;
@@ -1196,6 +1226,12 @@ namespace DTXMania
                         break;
                 }
             }
+            
+            ImGui.EndFrame();
+            
+            ImGui.Render();
+            ImGuiImplD3D9.RenderDrawData(ImGui.GetDrawData());
+            
             Device.EndScene();			// Present()は game.csのOnFrameEnd()に登録された、GraphicsDeviceManager.game_FrameEnd() 内で実行されるので不要
             // (つまり、Present()は、Draw()完了後に実行される)
 #if !GPUFlushAfterPresent
@@ -1777,13 +1813,18 @@ namespace DTXMania
             Window.MaximizeBox = true;							// #23510 2010.11.04 yyagi: to support maximizing window
             Window.FormBorderStyle = FormBorderStyle.Sizable;	// #23510 2010.10.27 yyagi: changed from FixedDialog to Sizable, to support window resize
             Window.ShowIcon = true;
-            //base.Window.Icon = Properties.Resources.dtx;
-            Window.KeyDown += new KeyEventHandler(Window_KeyDown);
-            Window.MouseUp += new MouseEventHandler(Window_MouseUp);
-            Window.MouseDoubleClick += new MouseEventHandler(Window_MouseDoubleClick);	// #23510 2010.11.13 yyagi: to go fullscreen mode
-            Window.ResizeEnd += new EventHandler(Window_ResizeEnd);						// #23510 2010.11.20 yyagi: to set resized window size in Config.ini
-            Window.ApplicationActivated += new EventHandler(Window_ApplicationActivated);
-            Window.ApplicationDeactivated += new EventHandler(Window_ApplicationDeactivated);
+            base.Window.Icon = Properties.Resources.dtx;
+            Window.KeyDown += Window_KeyDown;
+            Window.KeyUp += Window_KeyUp;
+            Window.KeyPress += Window_KeyPress;
+            Window.MouseMove += Window_MouseMove;
+            Window.MouseDown += Window_MouseDown;
+            Window.MouseUp += Window_MouseUp;
+            Window.MouseWheel += Window_MouseWheel;
+            Window.MouseDoubleClick += Window_MouseDoubleClick;	// #23510 2010.11.13 yyagi: to go fullscreen mode
+            Window.ResizeEnd += Window_ResizeEnd;						// #23510 2010.11.20 yyagi: to set resized window size in Config.ini
+            Window.ApplicationActivated += Window_ApplicationActivated;
+            Window.ApplicationDeactivated += Window_ApplicationDeactivated;
             //Add CIMEHook
             Window.Controls.Add(cIMEHook = new CIMEHook());
             //---------------------
@@ -2509,16 +2550,24 @@ namespace DTXMania
         }
         #region [ Windowイベント処理 ]
         //-----------------
-        private void Window_ApplicationActivated(object sender, EventArgs e)
+        private void Window_ApplicationActivated(object? sender, EventArgs e)
         {
             bApplicationActive = true;
         }
-        private void Window_ApplicationDeactivated(object sender, EventArgs e)
+        private void Window_ApplicationDeactivated(object? sender, EventArgs e)
         {
             bApplicationActive = false;
         }
-        private void Window_KeyDown(object sender, KeyEventArgs e)
+        private void Window_KeyDown(object? sender, KeyEventArgs e) 
         {
+            ImGuiKey keyCode = WindowsKeyCodeToImGui(e.KeyCode);
+            
+            //update key state
+            if (keyCode != ImGuiKey.None)
+            {
+                ImGui.GetIO().AddKeyEvent(keyCode, true);
+            }
+            
             if (e.KeyCode == Keys.Menu)
             {
                 e.Handled = true;
@@ -2552,12 +2601,117 @@ namespace DTXMania
                 }
             }
         }
-        private void Window_MouseUp(object sender, MouseEventArgs e)
+
+        private void Window_KeyPress(object? sender, KeyPressEventArgs e)
         {
-            mb = e.Button;
+            if (ImGui.GetIO().WantCaptureKeyboard)
+            {
+                ImGui.GetIO().AddInputCharacter(e.KeyChar);
+                e.Handled = true;
+            }
+        }
+        
+        private void Window_KeyUp(object? sender, KeyEventArgs e)
+        {
+            //update key state
+            ImGuiKey keyCode = WindowsKeyCodeToImGui(e.KeyCode);
+            if (keyCode != ImGuiKey.None)
+            {
+                ImGui.GetIO().AddKeyEvent(keyCode, false);
+            }
         }
 
-        private void Window_MouseDoubleClick(object sender, MouseEventArgs e)	// #23510 2010.11.13 yyagi: to go full screen mode
+        private ImGuiKey WindowsKeyCodeToImGui(Keys keyCode)
+        {
+            return keyCode switch
+            {
+                Keys.Back => ImGuiKey.Backspace,
+                Keys.Tab => ImGuiKey.Tab,
+                Keys.Enter => ImGuiKey.Enter,
+                Keys.Pause => ImGuiKey.Pause,
+                Keys.Escape => ImGuiKey.Escape,
+                Keys.Space => ImGuiKey.Space,
+                Keys.End => ImGuiKey.End,
+                Keys.Home => ImGuiKey.Home,
+                Keys.Left => ImGuiKey.LeftArrow,
+                Keys.Up => ImGuiKey.UpArrow,
+                Keys.Right => ImGuiKey.RightArrow,
+                Keys.Down => ImGuiKey.DownArrow,
+                Keys.PageUp => ImGuiKey.PageUp,
+                Keys.PageDown => ImGuiKey.PageDown,
+                Keys.Insert => ImGuiKey.Insert,
+                Keys.Delete => ImGuiKey.Delete,
+                Keys.LShiftKey => ImGuiKey.LeftShift,
+                Keys.RShiftKey => ImGuiKey.RightShift,
+                Keys.LControlKey => ImGuiKey.LeftCtrl,
+                Keys.RControlKey => ImGuiKey.RightCtrl,
+                Keys.LMenu => ImGuiKey.LeftAlt,
+                Keys.RMenu => ImGuiKey.RightAlt,
+                Keys.OemSemicolon => ImGuiKey.Semicolon,
+                >= Keys.D0 and <= Keys.D9 => ImGuiKey.Key0 + (keyCode - Keys.D0),
+                >= Keys.A and <= Keys.Z => ImGuiKey.A + (keyCode - Keys.A),
+                >= Keys.F1 and <= Keys.F12 => ImGuiKey.F1 + (keyCode - Keys.F1),
+                >= Keys.NumPad0 and <= Keys.NumPad9 => ImGuiKey.Keypad0 + (keyCode - Keys.NumPad0),
+                _ => ImGuiKey.None
+            };
+        }
+
+        private void Window_MouseMove(object? sender, MouseEventArgs e)
+        {
+            var pos = e.Location;
+            
+            //take window scale into account (since the render resolution for imgui is fixed 1280x720)
+            var windowScale = new Vector2((float)Window.ClientSize.Width / 1280, (float)Window.ClientSize.Height / 720);
+            pos.X = (int)(pos.X / windowScale.X);
+            pos.Y = (int)(pos.Y / windowScale.Y);
+            
+            ImGui.GetIO().MousePos = new Vector2(pos.X, pos.Y);
+        }
+        
+        private void Window_MouseDown(object? sender, MouseEventArgs e)
+        {
+            switch (e.Button)
+            {
+                case MouseButtons.Left:
+                    ImGui.GetIO().MouseDown[0] = true;
+                    break;
+                
+                case MouseButtons.Middle:
+                    ImGui.GetIO().MouseDown[1] = true;
+                    break;
+                
+                case MouseButtons.Right:
+                    ImGui.GetIO().MouseDown[2] = true;
+                    break;
+            }
+        }
+        
+        private void Window_MouseUp(object? sender, MouseEventArgs e)
+        {
+            mb = e.Button;
+            
+            switch (e.Button)
+            {
+                case MouseButtons.Left:
+                    ImGui.GetIO().MouseDown[0] = false;
+                    break;
+                
+                case MouseButtons.Middle:
+                    ImGui.GetIO().MouseDown[1] = false;
+                    break;
+                
+                case MouseButtons.Right:
+                    ImGui.GetIO().MouseDown[2] = false;
+                    break;
+            }
+        }
+        
+        private void Window_MouseWheel(object? sender, MouseEventArgs e)
+        {
+            ImGui.GetIO().MouseWheel = e.Delta / 120.0f;
+        }
+
+        private void Window_MouseDoubleClick(object? sender, MouseEventArgs e)	// #23510 2010.11.13 yyagi: to go full screen mode
         {
             if (mb.Equals(MouseButtons.Left) && ConfigIni.bIsAllowedDoubleClickFullscreen)	// #26752 2011.11.27 yyagi
             {
@@ -2565,14 +2719,14 @@ namespace DTXMania
                 tSwitchFullScreenMode();
             }
         }
-        private void Window_ResizeEnd(object sender, EventArgs e)				// #23510 2010.11.20 yyagi: to get resized window size
+        private void Window_ResizeEnd(object? sender, EventArgs e)				// #23510 2010.11.20 yyagi: to get resized window size
         {
             if (ConfigIni.bWindowMode)
             {
                 ConfigIni.n初期ウィンドウ開始位置X = Window.Location.X;	// #30675 2013.02.04 ikanick add
                 ConfigIni.n初期ウィンドウ開始位置Y = Window.Location.Y;	//
             }
-
+        
             ConfigIni.nウインドウwidth = (ConfigIni.bWindowMode) ? Window.ClientSize.Width : currentClientSize.Width;	// #23510 2010.10.31 yyagi add
             ConfigIni.nウインドウheight = (ConfigIni.bWindowMode) ? Window.ClientSize.Height : currentClientSize.Height;
         }

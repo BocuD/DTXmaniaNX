@@ -4,6 +4,7 @@ using System.Diagnostics;
 using DTXMania.Code.UI;
 using DTXUIRenderer;
 using FDK;
+using Hexa.NET.ImGui;
 using SharpDX;
 using RectangleF = SharpDX.RectangleF;
 using SlimDXKey = SlimDX.DirectInput.Key;
@@ -342,6 +343,8 @@ namespace DTXMania
                     tMoveCursorDown();
                 }
             }
+            
+            ImGui.ShowDemoWindow();
             
             return 0;
         }
