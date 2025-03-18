@@ -542,10 +542,10 @@ namespace DTXMania
         {
             public bool bBGMとして使う;
             public List<EChannel> listこのWAVを使用するチャンネル番号の集合 = new(16);
-            public int nチップサイズ = 100;
-            public int n位置;
+            public int nChipSize = 100;
+            public int nPosition;
             public long[] nPauseTime = new long[CDTXMania.ConfigIni.nPoliphonicSounds]; // 4
-            public int n音量 = 100;
+            public int nVolume = 100;
             public int n現在再生中のサウンド番号;
             public long[] nPlayStartTime = new long[CDTXMania.ConfigIni.nPoliphonicSounds]; // 4
             public int n内部番号;
@@ -579,7 +579,7 @@ namespace DTXMania
                     sb.Append(string.Format("CWAV{0}(内部{1}): ", tZZ(n表記上の番号), n内部番号));
                 }
 
-                sb.Append(string.Format("音量:{0}, 位置:{1}, サイズ:{2}, BGM:{3}, File:{4}, Comment:{5}", n音量, n位置, nチップサイズ,
+                sb.Append(string.Format("音量:{0}, 位置:{1}, サイズ:{2}, BGM:{3}, File:{4}, Comment:{5}", nVolume, nPosition, nChipSize,
                     bBGMとして使う ? 'Y' : 'N', strファイル名, strコメント文));
 
                 return sb.ToString();
@@ -1445,7 +1445,7 @@ namespace DTXMania
         public string strFileNameFullPath;
         public string strFolderName;
         public string TITLE;
-        public bool b強制的にXG譜面にする;
+        public bool bForceXGChart;
         public bool bVol137to100;
         public double dbDTXVPlaySpeed;
 #if TEST_NOTEOFFMODE
@@ -1523,7 +1523,7 @@ namespace DTXMania
             nRESULTIMAGE用優先順位 = new int[7];
             nRESULTMOVIE用優先順位 = new int[7];
             nRESULTSOUND用優先順位 = new int[7];
-            b強制的にXG譜面にする = false;
+            bForceXGChart = false;
             bVol137to100 = false;
 
 
@@ -3167,8 +3167,8 @@ namespace DTXMania
 
                         sound.dbPlaySpeed = CDTXMania.ConfigIni.nPlaySpeed / 20.0;
                         // 再生速度によって、WASAPI/ASIOで使う使用mixerが決まるため、付随情報の設定(音量/PAN)は、再生速度の設定後に行う
-                        sound.nVolume = (int)(nVol * wc.n音量 / 100.0);
-                        sound.nPosition = wc.n位置;
+                        sound.nVolume = (int)(nVol * wc.nVolume / 100.0);
+                        sound.nPosition = wc.nPosition;
                         sound.tStartPlaying();
                     }
 
@@ -3628,8 +3628,8 @@ namespace DTXMania
 
                         sound.dbPlaySpeed = CDTXMania.ConfigIni.nPlaySpeed / 20.0;
                         // 再生速度によって、WASAPI/ASIOで使う使用mixerが決まるため、付随情報の設定(音量/PAN)は、再生速度の設定後に行う
-                        sound.nVolume = (int)(nVol * wc.n音量 / 100.0);
-                        sound.nPosition = wc.n位置;
+                        sound.nVolume = (int)(nVol * wc.nVolume / 100.0);
+                        sound.nPosition = wc.nPosition;
                         sound.tStartPlaying();
                     }
 
@@ -3754,25 +3754,29 @@ namespace DTXMania
             {
                 try
                 {
-                    //DateTime timeBeginLoad = DateTime.Now;
-                    //TimeSpan span;
-
                     this.db再生速度 = dbReplaySpeed;
 
                     StreamReader reader = new(strFileName, Encoding.GetEncoding("shift-jis"));
-                    //string str2 = reader.ReadToEnd();
-                    tRead_FromStream(reader);
-                    reader.Close();
-
-                    //span = (TimeSpan) ( DateTime.Now - timeBeginLoad );
-                    //Trace.TraceInformation( "DTXfileload時間:          {0}", span.ToString() );
-
-                    //tRead_FromString(str2, dbReplaySpeed, nBgmAdjust);
                     
+                    //Stopwatch sw = new();
+                    //sw.Start();
+                    tRead_FromStream(reader);
+                    //sw.Stop();
+                    //TimeSpan span = sw.Elapsed;
+                    //Console.WriteLine("{0} tRead_FromStream {1:0.00} ms", strFileName, span.TotalMilliseconds);
+                    reader.Close();
+                    
+                    // sw.Reset();
+                    // sw.Start();
                     tProcessChartData(nBgmAdjust);
+                    // sw.Stop();
+                    // span = sw.Elapsed;
+                    //Console.WriteLine("{0} tProcessChartData {1:0.00} ms", strFileName, span.TotalMilliseconds);
                 }
-                catch
+                catch (Exception e)
                 {
+                    Trace.TraceError(e.Message);
+                    Trace.TraceError(e.StackTrace);
                 }
             }
             else
@@ -3796,8 +3800,7 @@ namespace DTXMania
 
 			return ce.MoveNext();
 		}
-
-
+        
         private void tRead_FromString(string inputString)
         { 
             if (string.IsNullOrEmpty(inputString)) return;
@@ -3825,7 +3828,7 @@ namespace DTXMania
             n内部番号BPM1to = 1;
             bstackIFからENDIFをスキップする = new Stack<bool>();
             bstackIFからENDIFをスキップする.Push(false);
-            n現在の乱数 = 0;
+            nCurrentRandomNumber = 0;
             for (int k = 0; k < 7; k++)
             {
                 nRESULTIMAGE用優先順位[k] = 0;
@@ -3860,7 +3863,11 @@ namespace DTXMania
                 StringBuilder builder3 = new(0x400);
                 if (!ExtractComment(ref ce, ref builder3)) break;
 
-                tParseInputLine(ref builder, ref builder2, ref builder3);
+                string command = builder.ToString();
+                string parameter = builder2.ToString();
+                string comment = builder3.ToString();
+                
+                tParseInputLine(command, parameter, comment);
                 lineNumber++;
             } 
             while (t入力_コメントをスキップする(ref ce));
@@ -3868,6 +3875,13 @@ namespace DTXMania
             #endregion
         }
         
+        struct Command
+        {
+            public string command;
+            public string parameter;
+        }
+
+        private List<Command> commands;
         
         private void tRead_FromStream(StreamReader reader)
         {
@@ -3888,7 +3902,7 @@ namespace DTXMania
             n内部番号BPM1to = 1;
             bstackIFからENDIFをスキップする = new Stack<bool>();
             bstackIFからENDIFをスキップする.Push(false);
-            n現在の乱数 = 0;
+            nCurrentRandomNumber = 0;
             for (int k = 0; k < 7; k++)
             {
                 nRESULTIMAGE用優先順位[k] = 0;
@@ -3899,6 +3913,7 @@ namespace DTXMania
             #endregion
             
             lineNumber = 1;
+            commands = [];
             
             //iterate
             while (!reader.EndOfStream)
@@ -3906,47 +3921,57 @@ namespace DTXMania
                 string? line = reader.ReadLine();
                 if (string.IsNullOrWhiteSpace(line)) continue;
                 
-                StringBuilder command = new(0x20);
-                StringBuilder parameter = new(0x400);
-                StringBuilder comment = new(0x400);
-                
-                //Command
-                //Treat the characters until the command terminator (':'), space, comment start (';'), or newline appears as the command string, and copy it to the sb string.
-                CharEnumerator ce = line.GetEnumerator();
-                if (!ce.MoveNext()) continue;
-                
-                //skip # character
-                if (ce.Current != '#')
+                if (line[0] != '#') continue;
+                string cmd = SplitLineString(ref line, [':', ';', ' ', '\n'], 1);
+
+
+                string param;
+                if (line.Length != 0)
                 {
-                    continue;
+                    int offset = char.IsWhiteSpace(line[0]) ? 1 : 0;
+                    param = SplitLineString(ref line, [';', '\n'], offset);
+                }
+                else
+                {
+                    param = "";
                 }
 
-                ce.MoveNext();
+                commands.Add(new Command { command = cmd, parameter = param });
 
-                while (ce.Current != ':' && ce.Current != ' ' && ce.Current != ';' && ce.Current != '\n')
-                {
-                    command.Append(ce.Current);
-                    if (!ce.MoveNext()) break;
-                }
-                
-                
-                //Parameter
-                //Treat the characters until the comment start (';') or newline appears as the parameter string, and copy it to the sb string.
-                if (!ce.MoveNext()) continue;
-                
-                while (ce.Current != ';' && ce.Current != '\n')
-                {
-                    parameter.Append(ce.Current);
-                    if (!ce.MoveNext()) break;
-                }
-                
-                ce.Dispose();
-                
-                //Comment
-                //Treat the characters until the newline appears as the comment string, and copy it to the sb string.
-                tParseInputLine(ref command, ref parameter, ref comment);
                 lineNumber++;
             }
+            
+            foreach (Command command in commands)
+            {
+                tParseInputLine(command.command, command.parameter, string.Empty);
+            }
+        }
+
+        private static string SplitLineString(ref string input, char[] splitCharacters, int offset = 0)
+        {
+            int length = input.Length;
+            int startOffset = offset;
+            while (offset < length)
+            {
+                if (splitCharacters.Contains(input[offset]))
+                {
+                    break;
+                }
+
+                offset++;
+            }
+
+            string result = input.Substring(startOffset, offset - startOffset);
+            
+            if (offset == length)
+            {
+                input = string.Empty;
+                return result;
+            }
+
+            //when we trim the input string, we need to remove the split character
+            input = input.Substring(offset + 1);
+            return result;
         }
 
         private void tProcessChartData(int nBGMAdjust)
@@ -3958,9 +3983,6 @@ namespace DTXMania
                 CDTXMania.ConfigIni.nPlaySpeed = (int)(dbDTXVPlaySpeed * 20.0);
             }
 
-            //span = (TimeSpan) ( DateTime.Now - timeBeginLoad );
-            //Trace.TraceInformation( "抜き出し時間:             {0}", span.ToString() );
-            //timeBeginLoad = DateTime.Now;
             n無限管理WAV = null;
             n無限管理BPM = null;
             n無限管理VOL = null;
@@ -3969,9 +3991,9 @@ namespace DTXMania
 
             if (!bHeaderOnly)
             {
-                #region [ BPM/BMP初期化 ]
+                #region [ BPM Initialization ]
 
-                CBPM cbpm = null;
+                CBPM? cbpm = null;
                 foreach (CBPM cbpm2 in listBPM.Values)
                 {
                     if (cbpm2.n表記上の番号 == 0)
@@ -4025,74 +4047,38 @@ namespace DTXMania
                 }
 
                 #endregion
-
-                //span = (TimeSpan) ( DateTime.Now - timeBeginLoad );
-                //Trace.TraceInformation( "前準備完了時間:           {0}", span.ToString() );
-                //timeBeginLoad = DateTime.Now;
-
                 #region [ CWAV初期化 ]
 
                 foreach (CWAV cwav in listWAV.Values)
                 {
-                    if (cwav.nチップサイズ < 0)
+                    if (cwav.nChipSize < 0)
                     {
-                        cwav.nチップサイズ = 100;
+                        cwav.nChipSize = 100;
                     }
 
-                    if (cwav.n位置 <= -10000)
+                    if (cwav.nPosition <= -10000)
                     {
-                        cwav.n位置 = 0;
+                        cwav.nPosition = 0;
                     }
 
-                    if (cwav.n音量 < 0)
+                    if (cwav.nVolume < 0)
                     {
-                        cwav.n音量 = 100;
+                        cwav.nVolume = 100;
                     }
                 }
 
                 #endregion
-
-                //span = (TimeSpan) ( DateTime.Now - timeBeginLoad );
-                //Trace.TraceInformation( "CWAV前準備時間:           {0}", span.ToString() );
-                //timeBeginLoad = DateTime.Now;
-
                 #region [ チップ倍率設定 ] // #28145 2012.4.22 yyagi 二重ループを1重ループに変更して高速化)
 
                 foreach (CChip chip in listChip)
                 {
                     if (listWAV.TryGetValue(chip.nIntegerValue_InternalNumber, out CWAV? cwav))
                     {
-                        chip.dbChipSizeRatio = cwav.nチップサイズ / 100.0;
+                        chip.dbChipSizeRatio = cwav.nChipSize / 100.0;
                     }
                 }
 
                 #endregion
-
-                #region [ 必要に応じて空打ち音を0小節に定義する ]
-
-                //for ( int m = 0xb1; m <= 0xbe; m++ )			// #28146 2012.4.21 yyagi; bb -> bc
-                //{
-                //foreach ( CChip chip in this.listChip )
-                //{
-                //if ( chip.nChannelNumber == m )
-                //{
-                //CChip c = new CChip();
-                //c.nPlaybackPosition = 0;
-                //c.nChannelNumber = chip.nChannelNumber;
-                //c.nIntegerValue = chip.nIntegerValue;
-                //c.nIntegerValue_InternalNumber = chip.nIntegerValue_InternalNumber;
-                //this.listChip.Insert( 0, c );
-                //break;
-                //}
-                //}
-                //}
-
-                #endregion
-
-                //span = (TimeSpan) ( DateTime.Now - timeBeginLoad );
-                //Trace.TraceInformation( "空打確認時間:             {0}", span.ToString() );
-                //timeBeginLoad = DateTime.Now;
-
                 #region [ 拍子_拍線の挿入 ]
 
                 if (listChip.Count > 0)
@@ -4176,11 +4162,6 @@ namespace DTXMania
                 }
 
                 #endregion
-
-                //span = (TimeSpan) ( DateTime.Now - timeBeginLoad );
-                //Trace.TraceInformation( "拍子_拍線挿入時間:       {0}", span.ToString() );
-                //timeBeginLoad = DateTime.Now;
-
                 #region [ C2 [拍線_小節線表示指定] の処理 ] // #28145 2012.4.21 yyagi; 2重ループをほぼ1重にして高速化
 
                 bool bShowBeatBarLine = true;
@@ -4225,11 +4206,6 @@ namespace DTXMania
                 }
 
                 #endregion
-
-                //span = (TimeSpan) ( DateTime.Now - timeBeginLoad );
-                //Trace.TraceInformation( "C2 [拍線_小節線表示指定]:  {0}", span.ToString() );
-                //timeBeginLoad = DateTime.Now;
-
                 #region [ 発声時刻の計算 ]
 
                 double bpm = 120.0;
@@ -4435,17 +4411,11 @@ namespace DTXMania
                 }
 
                 #endregion
-
-                //span = (TimeSpan) ( DateTime.Now - timeBeginLoad );
-                //Trace.TraceInformation( "発声時刻計算:             {0}", span.ToString() );
-                //timeBeginLoad = DateTime.Now;
+                
                 this.nBGMAdjust = 0;
                 t各自動再生音チップの再生時刻を変更する(nBGMAdjust);
                 if (CDTXMania.ConfigIni.nCommonBGMAdjustMs != 0)
                     t各自動再生音チップの再生時刻を変更する(CDTXMania.ConfigIni.nCommonBGMAdjustMs, false, true);
-                //span = (TimeSpan) ( DateTime.Now - timeBeginLoad );
-                //Trace.TraceInformation( "再生時刻変更:             {0}", span.ToString() );
-                //timeBeginLoad = DateTime.Now;
 
                 #region [ 可視チップ数カウント ]
 
@@ -4488,11 +4458,6 @@ namespace DTXMania
                 }
 
                 #endregion
-
-                //span = (TimeSpan) ( DateTime.Now - timeBeginLoad );
-                //Trace.TraceInformation( "可視チップ数カウント      {0}", span.ToString() );
-                //timeBeginLoad = DateTime.Now;
-
                 #region [ チップの種類を分類し、対応するフラグを立てる ]
 
                 foreach (CChip chip in listChip)
@@ -4530,11 +4495,6 @@ namespace DTXMania
                 }
 
                 #endregion
-
-                //span = (TimeSpan) ( DateTime.Now - timeBeginLoad );
-                //Trace.TraceInformation( "ch番号集合確認:           {0}", span.ToString() );
-                //timeBeginLoad = DateTime.Now;
-
                 #region [ hash値計算 ]
 
                 byte[] buffer = null;
@@ -4568,11 +4528,6 @@ namespace DTXMania
                 }
 
                 #endregion
-
-                //span = (TimeSpan) ( DateTime.Now - timeBeginLoad );
-                //Trace.TraceInformation( "hash計算:                 {0}", span.ToString() );
-                //timeBeginLoad = DateTime.Now;
-
                 #region [ bLogDTX詳細ログ出力 ]
 
                 if (CDTXMania.ConfigIni.bLogDTX詳細ログ出力)
@@ -5301,7 +5256,7 @@ namespace DTXMania
         private Stack<bool> bstackIFからENDIFをスキップする;
 
         private int lineNumber;
-        private int n現在の乱数;
+        private int nCurrentRandomNumber;
 
         private int nPolyphonicSounds = 4; // #28228 2012.5.1 yyagi
 
@@ -5343,21 +5298,6 @@ namespace DTXMania
             if (ce.Current != ':') return true;
 
             return ce.MoveNext() && tSkipWhitespace(ref ce);
-        }
-
-        private bool tSkipComment(ref CharEnumerator ce)
-        {
-            // 改行が現れるまでをコメントと見なしてスキップする。
-
-            while (ce.Current != '\n')
-            {
-                if (!ce.MoveNext())
-                    return false; // 文字が尽きた
-            }
-
-            // 改行の次の文字へ移動した結果を返す。
-
-            return ce.MoveNext();
         }
 
         private static bool ExtractComment(ref CharEnumerator ce, ref StringBuilder output)
@@ -5436,31 +5376,116 @@ namespace DTXMania
             (c >= '0' && c <= '9') || (c >= 'A' && c <= 'F');
 
         bool lastLineWasChipLocation = false;
-        public static int countSlow = 0;
-        public static int countFast = 0;
 
-        private void tParseInputLine(ref StringBuilder sbCommand, ref StringBuilder sbParameter, ref StringBuilder sbComment)
+        private static readonly Dictionary<string, Action<CDTX, string>> commandHandlers = new(StringComparer.OrdinalIgnoreCase)
         {
-            string strCommand = sbCommand.ToString();
-            string strParameter = sbParameter.ToString().Trim();
-            string strComment = sbComment.ToString();
+            { "PATH_WAV", (dtx, param) => dtx.PATH_WAV = param },
+            { "PATH", (dtx, param) => dtx.PATH = (param != "PATH_WAV") ? param : "" },
+            { "TITLE", (dtx, param) => dtx.TITLE = param },
+            { "ARTIST", (dtx, param) => dtx.ARTIST = param },
+            { "COMMENT", (dtx, param) => dtx.COMMENT = param },
+            { "DLEVEL", (dtx, param) => ProcessLevel(dtx, "DLEVEL", param)},
+            { "PLAYLEVEL", (dtx, param) => ProcessLevel(dtx, "PLAYLEVEL", param)},
+            { "GLEVEL", (dtx, param) => ProcessLevel(dtx, "GLEVEL", param)},
+            { "BLEVEL", (dtx, param) => ProcessLevel(dtx, "BLEVEL", param)},
+            { "DLVDEC", (dtx, param) => ProcessLevel(dtx, "DLVDEC", param)},
+            { "GLVDEC", (dtx, param) => ProcessLevel(dtx, "GLVDEC", param)},
+            { "BLVDEC", (dtx, param) => ProcessLevel(dtx, "BLVDEC", param)},
+            { "GENRE", (dtx, param) => dtx.GENRE = param },
+            { "HIDDENLEVEL", (dtx, param) => dtx.HIDDENLEVEL = param.ToLower().Equals("on") },
+            { "STAGEFILE", (dtx, param) => dtx.STAGEFILE = param },
+            { "PREVIEW", (dtx, param) => dtx.PREVIEW = param },
+            { "PREIMAGE", (dtx, param) => dtx.PREIMAGE = param },
+            { "PREMOVIE", (dtx, param) => dtx.PREMOVIE = param },
+            { "BACKGROUND_GR", (dtx, param) => dtx.BACKGROUND_GR = param },
+            { "BACKGROUND", (dtx, param) => dtx.BACKGROUND = param },
+            { "WALL", (dtx, param) => dtx.BACKGROUND = param },
+            { "RANDOM", (dtx, param) =>
+                {
+                    if (!int.TryParse(param, out int nMaxValue))
+                        nMaxValue = 1;
 
+                    dtx.nCurrentRandomNumber = CDTXMania.Random.Next(nMaxValue) + 1; // 1～数値 までの乱数を生成。
+                }
+            },
+            { "SOUND_NOWLOADING", (dtx, param) => dtx.SOUND_NOWLOADING = param },
+            { "BPM", (dtx, param) => dtx.tAnalyzeLine_BPM_BPMzz("BPM", param) },
+            { "FORCINGXG", (dtx, param) => dtx.bForceXGChart = param.ToLower().Equals("on") },
+            { "VOL7FTO64", (dtx, param) => dtx.bVol137to100 = param.ToLower().Equals("on") },
+            { "DTXVPLAYSPEED", (dtx, param) =>
+            {
+                if (double.TryParse(param, out double dtxvplayspeed) && dtxvplayspeed > 0.0)
+                {
+                    dtx.dbDTXVPlaySpeed = dtxvplayspeed;
+                }
+            }}
+        };
+
+        private static void ProcessLevel(CDTX dtx, string command, string param)
+        {
+            int level;
+            int levelDec = 0;
+            if (int.TryParse(param, out level))
+            {
+                level = Math.Min(Math.Max(level, 0), 1000);
+                if (level >= 100)
+                {
+                    int levelTemp = level;
+                    level = (int)(level / 10.0f);
+                    levelDec = levelTemp - level * 10;
+                }
+                
+                switch (command)
+                {
+                    case "DLEVEL":
+                    case "PLAYLEVEL":
+                        dtx.LEVEL.Drums = level;
+                        dtx.LEVELDEC.Drums = levelDec;
+                        break;
+                    
+                    case "GLEVEL":
+                        dtx.LEVEL.Guitar = level;
+                        break;
+                    
+                    case "BLEVEL":
+                        dtx.LEVEL.Bass = level;
+                        break;
+                    
+                    case "DLVDEC":
+                        if (int.TryParse(param, out levelDec))
+                        {
+                            dtx.LEVELDEC.Drums = Math.Min(Math.Max(levelDec, 0), 10);
+                        }
+                        break;
+                    
+                    case "GLVDEC":
+                        if (int.TryParse(param, out levelDec))
+                        {
+                            dtx.LEVELDEC.Guitar = Math.Min(Math.Max(levelDec, 0), 10);
+                        }
+                        break;
+                    
+                    case "BLVDEC":
+                        if (int.TryParse(param, out levelDec))
+                        {
+                            dtx.LEVELDEC.Bass = Math.Min(Math.Max(levelDec, 0), 10);
+                        }
+                        break;
+                }
+            }
+        }
+        
+        private void tParseInputLine(string strCommand, string strParameter, string comment)
+        {
             //early out in case this is a chip location line
             if (lastLineWasChipLocation && strCommand.Length == 5 && IsChipLocation(strCommand))
             {
                 //parse chip location
-                tInput_LineAnalysis_ChipLocation(strCommand, strParameter);
-                countFast++;
-                return;
+                if (tInput_LineAnalysis_ChipLocation(strCommand, strParameter))
+                {
+                    return;
+                }
             }
-            
-            //Console.WriteLine(strCommand + " " + strParameter);
-
-            // //don't even attempt to parse comments for chips
-            // StringBuilder comment = new(0x400);
-            // if (!ExtractComment(ref ce, ref comment)) return;
-            // string strComment = comment.ToString();
-
             lastLineWasChipLocation = false;
 
             // 行頭コマンドの処理
@@ -5488,13 +5513,12 @@ namespace DTXMania
                     if (!int.TryParse(strParameter, out n数値))
                         n数値 = 1;
 
-                    bstackIFからENDIFをスキップする.Push(n数値 != n現在の乱数); // 乱数と数値が一致したら true 。
+                    bstackIFからENDIFをスキップする.Push(n数値 != nCurrentRandomNumber); // 乱数と数値が一致したら true 。
                 }
             }
             //-----------------
 
             #endregion
-
             #region [ ENDIF ]
 
             //-----------------
@@ -5515,500 +5539,147 @@ namespace DTXMania
             //-----------------
 
             #endregion
-
             else if (!bstackIFからENDIFをスキップする.Peek()) // IF～ENDIF をスキップするなら以下はすべて無視。
             {
-                #region [ PATH_WAV ]
-
-                //-----------------
-                if (strCommand.StartsWith("PATH_WAV", StringComparison.OrdinalIgnoreCase))
+                if (commandHandlers.TryGetValue(strCommand, out Action<CDTX, string>? handler))
                 {
-                    t入力_パラメータ食い込みチェック("PATH_WAV", ref strCommand, ref strParameter);
-                    PATH_WAV = strParameter;
+                    handler(this, strParameter);
+                    return;
                 }
+
+                if (bHeaderOnly) return; // ヘッダのみの解析の場合、以下は無視。
+
+                #region [ PANEL ]
+
                 //-----------------
-
-                #endregion
-
-                #region [ PATH ]
-
-                //----------------- #36034 ikanick add 16.2.18
-                else if (strCommand.StartsWith("PATH", StringComparison.OrdinalIgnoreCase))
+                if (strCommand.StartsWith("PANEL", StringComparison.OrdinalIgnoreCase))
                 {
-                    t入力_パラメータ食い込みチェック("PATH", ref strCommand, ref strParameter);
-                    PATH = (strParameter != "PATH_WAV") ? strParameter : "";
-                }
-                //-----------------
+                    t入力_パラメータ食い込みチェック("PANEL", ref strCommand, ref strParameter);
 
-                #endregion
-
-                #region [ TITLE ]
-
-                //-----------------
-                else if (strCommand.StartsWith("TITLE", StringComparison.OrdinalIgnoreCase))
-                {
-                    t入力_パラメータ食い込みチェック("TITLE", ref strCommand, ref strParameter);
-                    TITLE = strParameter;
-                }
-                //-----------------
-
-                #endregion
-
-                #region [ ARTIST ]
-
-                //-----------------
-                else if (strCommand.StartsWith("ARTIST", StringComparison.OrdinalIgnoreCase))
-                {
-                    t入力_パラメータ食い込みチェック("ARTIST", ref strCommand, ref strParameter);
-                    ARTIST = strParameter;
-                }
-                //-----------------
-
-                #endregion
-
-                #region [ COMMENT ]
-
-                //-----------------
-                else if (strCommand.StartsWith("COMMENT", StringComparison.OrdinalIgnoreCase))
-                {
-                    t入力_パラメータ食い込みチェック("COMMENT", ref strCommand, ref strParameter);
-                    COMMENT = strParameter;
-                }
-                //-----------------
-
-                #endregion
-
-                #region [ DLEVEL, PLAYLEVEL ]
-
-                //-----------------
-                else if (
-                    strCommand.StartsWith("DLEVEL", StringComparison.OrdinalIgnoreCase) ||
-                    strCommand.StartsWith("PLAYLEVEL", StringComparison.OrdinalIgnoreCase))
-                {
-                    t入力_パラメータ食い込みチェック("DLEVEL", ref strCommand, ref strParameter);
-                    t入力_パラメータ食い込みチェック("PLAYLEVEL", ref strCommand, ref strParameter);
-
-                    int dlevel;
-                    if (int.TryParse(strParameter, out dlevel))
+                    if (!int.TryParse(strParameter, out int _))
                     {
-                        LEVEL.Drums = Math.Min(Math.Max(dlevel, 0), 1000); // 0～100 に丸める
-                        if (LEVEL.Drums >= 100)
-                        {
-                            int dlevelTemp = LEVEL.Drums;
-                            LEVEL.Drums = (int)(LEVEL.Drums / 10.0f);
-                            LEVELDEC.Drums = dlevelTemp - LEVEL.Drums * 10;
-                        }
+                        // 数値じゃないならPANELとみなす
+                        PANEL = strParameter; //
+                    } // 数値ならPAN ELとみなす
+                }
+                //-----------------
+
+                #endregion
+
+                #region [ MIDIFILE ]
+
+                //-----------------
+                else if (strCommand.StartsWith("MIDIFILE", StringComparison.OrdinalIgnoreCase))
+                {
+                    t入力_パラメータ食い込みチェック("MIDIFILE", ref strCommand, ref strParameter);
+                    MIDIFILE = strParameter;
+                }
+                //-----------------
+
+                #endregion
+
+                #region [ MIDINOTE ]
+
+                //-----------------
+                else if (strCommand.StartsWith("MIDINOTE", StringComparison.OrdinalIgnoreCase))
+                {
+                    t入力_パラメータ食い込みチェック("MIDINOTE", ref strCommand, ref strParameter);
+                    MIDINOTE = strParameter.ToLower().Equals("on");
+                }
+                //-----------------
+
+                #endregion
+
+                #region [ BLACKCOLORKEY ]
+
+                //-----------------
+                else if (strCommand.StartsWith("BLACKCOLORKEY", StringComparison.OrdinalIgnoreCase))
+                {
+                    t入力_パラメータ食い込みチェック("BLACKCOLORKEY", ref strCommand, ref strParameter);
+                    BLACKCOLORKEY = strParameter.ToLower().Equals("on");
+                }
+                //-----------------
+
+                #endregion
+
+                #region [ BASEBPM ]
+
+                //-----------------
+                else if (strCommand.StartsWith("BASEBPM", StringComparison.OrdinalIgnoreCase))
+                {
+                    t入力_パラメータ食い込みチェック("BASEBPM", ref strCommand, ref strParameter);
+
+                    double basebpm = 0.0;
+                    //if( double.TryParse( str2, out num6 ) && ( num6 > 0.0 ) )
+                    if (TryParse(strParameter, out basebpm) &&
+                        basebpm >
+                        0.0) // #23880 2010.12.30 yyagi: alternative TryParse to permit both '.' and ',' for decimal point
+                    {
+                        // #24204 2011.01.21 yyagi: Fix the condition correctly
+                        BASEBPM = basebpm;
                     }
                 }
                 //-----------------
 
                 #endregion
 
-                #region [ GLEVEL ]
+                #region [ SOUND_STAGEFAILED ]
 
                 //-----------------
-                else if (strCommand.StartsWith("GLEVEL", StringComparison.OrdinalIgnoreCase))
+                else if (strCommand.StartsWith("SOUND_STAGEFAILED", StringComparison.OrdinalIgnoreCase))
                 {
-                    t入力_パラメータ食い込みチェック("GLEVEL", ref strCommand, ref strParameter);
-
-                    int glevel;
-                    if (int.TryParse(strParameter, out glevel))
-                    {
-                        LEVEL.Guitar = Math.Min(Math.Max(glevel, 0), 1000); // 0～100 に丸める
-                        if (LEVEL.Guitar >= 100)
-                        {
-                            int glevelTemp = LEVEL.Guitar;
-                            LEVEL.Guitar = (int)(LEVEL.Guitar / 10.0f);
-                            LEVELDEC.Guitar = glevelTemp - LEVEL.Guitar * 10;
-                        }
-                    }
+                    t入力_パラメータ食い込みチェック("SOUND_STAGEFAILED", ref strCommand, ref strParameter);
+                    SOUND_STAGEFAILED = strParameter;
                 }
                 //-----------------
 
                 #endregion
 
-                #region [ BLEVEL ]
+                #region [ SOUND_FULLCOMBO ]
 
                 //-----------------
-                else if (strCommand.StartsWith("BLEVEL", StringComparison.OrdinalIgnoreCase))
+                else if (strCommand.StartsWith("SOUND_FULLCOMBO", StringComparison.OrdinalIgnoreCase))
                 {
-                    t入力_パラメータ食い込みチェック("BLEVEL", ref strCommand, ref strParameter);
-
-                    int blevel;
-                    if (int.TryParse(strParameter, out blevel))
-                    {
-                        LEVEL.Bass = Math.Min(Math.Max(blevel, 0), 1000); // 0～100 に丸める
-                        if (LEVEL.Bass >= 100)
-                        {
-                            int blevelTemp = LEVEL.Bass;
-                            LEVEL.Bass = (int)(LEVEL.Bass / 10.0f);
-                            LEVELDEC.Bass = blevelTemp - LEVEL.Bass * 10;
-                        }
-                    }
+                    t入力_パラメータ食い込みチェック("SOUND_FULLCOMBO", ref strCommand, ref strParameter);
+                    SOUND_FULLCOMBO = strParameter;
                 }
                 //-----------------
 
                 #endregion
 
-                #region[ DLVDEC ]
-
-                else if (strCommand.StartsWith("DLVDEC", StringComparison.OrdinalIgnoreCase))
-                {
-                    t入力_パラメータ食い込みチェック("DLVDEC", ref strCommand, ref strParameter);
-                    int dleveldec;
-                    if (int.TryParse(strParameter, out dleveldec))
-                    {
-                        LEVELDEC.Drums = Math.Min(Math.Max(dleveldec, 0), 10);
-                    }
-                }
-
-                #endregion
-
-                #region[ GLVDEC ]
-
-                else if (strCommand.StartsWith("GLVDEC", StringComparison.OrdinalIgnoreCase))
-                {
-                    t入力_パラメータ食い込みチェック("GLVDEC", ref strCommand, ref strParameter);
-                    int gleveldec;
-                    if (int.TryParse(strParameter, out gleveldec))
-                    {
-                        LEVELDEC.Guitar = Math.Min(Math.Max(gleveldec, 0), 10);
-                    }
-                }
-
-                #endregion
-
-                #region[ BLVDEC ]
-
-                else if (strCommand.StartsWith("BLVDEC", StringComparison.OrdinalIgnoreCase))
-                {
-                    t入力_パラメータ食い込みチェック("BLVDEC", ref strCommand, ref strParameter);
-                    int bleveldec;
-                    if (int.TryParse(strParameter, out bleveldec))
-                    {
-                        LEVELDEC.Bass = Math.Min(Math.Max(bleveldec, 0), 10);
-                    }
-                }
-
-                #endregion
-
-#if TEST_NOTEOFFMODE
-				else if (str.StartsWith("SUPRESSNOTEOFF_HIHAT", StringComparison.OrdinalIgnoreCase)) {
-					this.t入力_パラメータ食い込みチェック("SUPRESSNOTEOFF_HIHAT", ref str, ref str2);
-					this.bHH演奏で直前のHHを消音する = !str2.ToLower().Equals("on");
-				} 
-				else if (str.StartsWith("SUPRESSNOTEOFF_GUITAR", StringComparison.OrdinalIgnoreCase)) {
-					this.t入力_パラメータ食い込みチェック("SUPRESSNOTEOFF_GUITAR", ref str, ref str2);
-					this.bGUITAR演奏で直前のGUITARを消音する = !str2.ToLower().Equals("on");
-				}
-				else if (str.StartsWith("SUPRESSNOTEOFF_BASS", StringComparison.OrdinalIgnoreCase)) {
-					this.t入力_パラメータ食い込みチェック("SUPRESSNOTEOFF_BASS", ref str, ref str2);
-					this.bBASS演奏で直前のBASSを消音する = !str2.ToLower().Equals("on");
-				}
-#endif
-
-                #region [ GENRE ]
+                #region [ SOUND_AUDIENCE ]
 
                 //-----------------
-                else if (strCommand.StartsWith("GENRE", StringComparison.OrdinalIgnoreCase))
+                else if (strCommand.StartsWith("SOUND_AUDIENCE", StringComparison.OrdinalIgnoreCase))
                 {
-                    t入力_パラメータ食い込みチェック("GENRE", ref strCommand, ref strParameter);
-                    GENRE = strParameter;
+                    t入力_パラメータ食い込みチェック("SOUND_AUDIENCE", ref strCommand, ref strParameter);
+                    SOUND_AUDIENCE = strParameter;
                 }
                 //-----------------
 
                 #endregion
 
-                #region [ HIDDENLEVEL ]
-
-                //-----------------
-                else if (strCommand.StartsWith("HIDDENLEVEL", StringComparison.OrdinalIgnoreCase))
+                // オブジェクト記述コマンドの処理。
+                else if (!t入力_行解析_WAVVOL_VOLUME(strCommand, strParameter) &&
+                         !t入力_行解析_WAVPAN_PAN(strCommand, strParameter) &&
+                         !t入力_行解析_WAV(strCommand, strParameter, comment) &&
+                         !t入力_行解析_BMPTEX(strCommand, strParameter, comment) &&
+                         !t入力_行解析_BMP(strCommand, strParameter, comment) &&
+                         !t入力_行解析_BGAPAN(strCommand, strParameter) &&
+                         !t入力_行解析_BGA(strCommand, strParameter) &&
+                         !t入力_行解析_AVIPAN(strCommand, strParameter) &&
+                         !t入力_行解析_AVI_VIDEO(strCommand, strParameter, comment) &&
+                         !t入力_行解析_RESULTIMAGE(strCommand, strParameter) &&
+                         !t入力_行解析_RESULTMOVIE(strCommand, strParameter) &&
+                         !t入力_行解析_RESULTSOUND(strCommand, strParameter) &&
+                         !t入力_行解析_SIZE(strCommand, strParameter))
                 {
-                    t入力_パラメータ食い込みチェック("HIDDENLEVEL", ref strCommand, ref strParameter);
-                    HIDDENLEVEL = strParameter.ToLower().Equals("on");
-                }
-                //-----------------
-
-                #endregion
-
-                #region [ STAGEFILE ]
-
-                //-----------------
-                else if (strCommand.StartsWith("STAGEFILE", StringComparison.OrdinalIgnoreCase))
-                {
-                    t入力_パラメータ食い込みチェック("STAGEFILE", ref strCommand, ref strParameter);
-                    STAGEFILE = strParameter;
-                }
-                //-----------------
-
-                #endregion
-
-                #region [ PREVIEW ]
-
-                //-----------------
-                else if (strCommand.StartsWith("PREVIEW", StringComparison.OrdinalIgnoreCase))
-                {
-                    t入力_パラメータ食い込みチェック("PREVIEW", ref strCommand, ref strParameter);
-                    PREVIEW = strParameter;
-                }
-                //-----------------
-
-                #endregion
-
-                #region [ PREIMAGE ]
-
-                //-----------------
-                else if (strCommand.StartsWith("PREIMAGE", StringComparison.OrdinalIgnoreCase))
-                {
-                    t入力_パラメータ食い込みチェック("PREIMAGE", ref strCommand, ref strParameter);
-                    PREIMAGE = strParameter;
-                }
-                //-----------------
-
-                #endregion
-
-                #region [ PREMOVIE ]
-
-                //-----------------
-                else if (strCommand.StartsWith("PREMOVIE", StringComparison.OrdinalIgnoreCase))
-                {
-                    t入力_パラメータ食い込みチェック("PREMOVIE", ref strCommand, ref strParameter);
-                    PREMOVIE = strParameter;
-                }
-                //-----------------
-
-                #endregion
-
-                #region [ BACKGROUND_GR ]
-
-                //-----------------
-                else if (strCommand.StartsWith("BACKGROUND_GR", StringComparison.OrdinalIgnoreCase))
-                {
-                    t入力_パラメータ食い込みチェック("BACKGROUND_GR", ref strCommand, ref strParameter);
-                    BACKGROUND_GR = strParameter;
-                }
-                //-----------------
-
-                #endregion
-
-                #region [ BACKGROU}ND, WALL ]
-
-                //-----------------
-                else if (
-                    strCommand.StartsWith("BACKGROUND", StringComparison.OrdinalIgnoreCase) ||
-                    strCommand.StartsWith("WALL", StringComparison.OrdinalIgnoreCase))
-                {
-                    t入力_パラメータ食い込みチェック("BACKGROUND", ref strCommand, ref strParameter);
-                    t入力_パラメータ食い込みチェック("WALL", ref strCommand, ref strParameter);
-                    BACKGROUND = strParameter;
-                }
-                //-----------------
-
-                #endregion
-
-                #region [ RANDOM ]
-
-                //-----------------
-                else if (strCommand.StartsWith("RANDOM", StringComparison.OrdinalIgnoreCase))
-                {
-                    t入力_パラメータ食い込みチェック("RANDOM", ref strCommand, ref strParameter);
-
-                    int n数値 = 1;
-                    if (!int.TryParse(strParameter, out n数値))
-                        n数値 = 1;
-
-                    n現在の乱数 = CDTXMania.Random.Next(n数値) + 1; // 1～数値 までの乱数を生成。
-                }
-                //-----------------
-
-                #endregion
-
-                #region [ SOUND_NOWLOADING ]
-
-                //-----------------
-                else if (strCommand.StartsWith("SOUND_NOWLOADING", StringComparison.OrdinalIgnoreCase))
-                {
-                    t入力_パラメータ食い込みチェック("SOUND_NOWLOADING", ref strCommand, ref strParameter);
-                    SOUND_NOWLOADING = strParameter;
-                }
-                //-----------------
-
-                #endregion
-
-                #region [ BPM ]
-
-                //-----------------
-                else if (strCommand.StartsWith("BPM", StringComparison.OrdinalIgnoreCase))
-                {
-                    t入力_行解析_BPM_BPMzz(strCommand, strParameter);
-                }
-                //-----------------
-
-                #endregion
-
-                else if (strCommand.StartsWith("FORCINGXG"))
-                {
-                    t入力_パラメータ食い込みチェック("FORCINGXG", ref strCommand, ref strParameter);
-                    b強制的にXG譜面にする = strParameter.ToLower().Equals("on");
-                }
-                else if (strCommand.StartsWith("VOL7FTO64"))
-                {
-                    t入力_パラメータ食い込みチェック("VOL7FTO64", ref strCommand, ref strParameter);
-                    bVol137to100 = strParameter.ToLower().Equals("on");
-                }
-
-                #region [ DTXVPLAYSPEED ]
-
-                //-----------------
-                else if (strCommand.StartsWith("DTXVPLAYSPEED", StringComparison.OrdinalIgnoreCase))
-                {
-                    t入力_パラメータ食い込みチェック("DTXVPLAYSPEED", ref strCommand, ref strParameter);
-
-                    double dtxvplayspeed = 0.0;
-                    if (TryParse(strParameter, out dtxvplayspeed) && dtxvplayspeed > 0.0)
-                    {
-                        dbDTXVPlaySpeed = dtxvplayspeed;
-                    }
-                }
-                //-----------------
-
-                #endregion
-
-                else if (!bHeaderOnly) // ヘッダのみの解析の場合、以下は無視。
-                {
-                    #region [ PANEL ]
-
-                    //-----------------
-                    if (strCommand.StartsWith("PANEL", StringComparison.OrdinalIgnoreCase))
-                    {
-                        t入力_パラメータ食い込みチェック("PANEL", ref strCommand, ref strParameter);
-
-                        if (!int.TryParse(strParameter, out int _))
-                        {
-                            // 数値じゃないならPANELとみなす
-                            PANEL = strParameter; //
-                        } // 数値ならPAN ELとみなす
-                    }
-                    //-----------------
-
-                    #endregion
-
-                    #region [ MIDIFILE ]
-
-                    //-----------------
-                    else if (strCommand.StartsWith("MIDIFILE", StringComparison.OrdinalIgnoreCase))
-                    {
-                        t入力_パラメータ食い込みチェック("MIDIFILE", ref strCommand, ref strParameter);
-                        MIDIFILE = strParameter;
-                    }
-                    //-----------------
-
-                    #endregion
-
-                    #region [ MIDINOTE ]
-
-                    //-----------------
-                    else if (strCommand.StartsWith("MIDINOTE", StringComparison.OrdinalIgnoreCase))
-                    {
-                        t入力_パラメータ食い込みチェック("MIDINOTE", ref strCommand, ref strParameter);
-                        MIDINOTE = strParameter.ToLower().Equals("on");
-                    }
-                    //-----------------
-
-                    #endregion
-
-                    #region [ BLACKCOLORKEY ]
-
-                    //-----------------
-                    else if (strCommand.StartsWith("BLACKCOLORKEY", StringComparison.OrdinalIgnoreCase))
-                    {
-                        t入力_パラメータ食い込みチェック("BLACKCOLORKEY", ref strCommand, ref strParameter);
-                        BLACKCOLORKEY = strParameter.ToLower().Equals("on");
-                    }
-                    //-----------------
-
-                    #endregion
-
-                    #region [ BASEBPM ]
-
-                    //-----------------
-                    else if (strCommand.StartsWith("BASEBPM", StringComparison.OrdinalIgnoreCase))
-                    {
-                        t入力_パラメータ食い込みチェック("BASEBPM", ref strCommand, ref strParameter);
-
-                        double basebpm = 0.0;
-                        //if( double.TryParse( str2, out num6 ) && ( num6 > 0.0 ) )
-                        if (TryParse(strParameter, out basebpm) &&
-                            basebpm >
-                            0.0) // #23880 2010.12.30 yyagi: alternative TryParse to permit both '.' and ',' for decimal point
-                        {
-                            // #24204 2011.01.21 yyagi: Fix the condition correctly
-                            BASEBPM = basebpm;
-                        }
-                    }
-                    //-----------------
-
-                    #endregion
-
-                    #region [ SOUND_STAGEFAILED ]
-
-                    //-----------------
-                    else if (strCommand.StartsWith("SOUND_STAGEFAILED", StringComparison.OrdinalIgnoreCase))
-                    {
-                        t入力_パラメータ食い込みチェック("SOUND_STAGEFAILED", ref strCommand, ref strParameter);
-                        SOUND_STAGEFAILED = strParameter;
-                    }
-                    //-----------------
-
-                    #endregion
-
-                    #region [ SOUND_FULLCOMBO ]
-
-                    //-----------------
-                    else if (strCommand.StartsWith("SOUND_FULLCOMBO", StringComparison.OrdinalIgnoreCase))
-                    {
-                        t入力_パラメータ食い込みチェック("SOUND_FULLCOMBO", ref strCommand, ref strParameter);
-                        SOUND_FULLCOMBO = strParameter;
-                    }
-                    //-----------------
-
-                    #endregion
-
-                    #region [ SOUND_AUDIENCE ]
-
-                    //-----------------
-                    else if (strCommand.StartsWith("SOUND_AUDIENCE", StringComparison.OrdinalIgnoreCase))
-                    {
-                        t入力_パラメータ食い込みチェック("SOUND_AUDIENCE", ref strCommand, ref strParameter);
-                        SOUND_AUDIENCE = strParameter;
-                    }
-                    //-----------------
-
-                    #endregion
-
-                    // オブジェクト記述コマンドの処理。
-                    else if (!t入力_行解析_WAVVOL_VOLUME(strCommand, strParameter) &&
-                             !t入力_行解析_WAVPAN_PAN(strCommand, strParameter) &&
-                             !t入力_行解析_WAV(strCommand, strParameter, strComment) &&
-                             !t入力_行解析_BMPTEX(strCommand, strParameter, strComment) &&
-                             !t入力_行解析_BMP(strCommand, strParameter, strComment) &&
-                             !t入力_行解析_BGAPAN(strCommand, strParameter) &&
-                             !t入力_行解析_BGA(strCommand, strParameter) &&
-                             !t入力_行解析_AVIPAN(strCommand, strParameter) &&
-                             !t入力_行解析_AVI_VIDEO(strCommand, strParameter, strComment) &&
-                             !t入力_行解析_RESULTIMAGE(strCommand, strParameter) &&
-                             !t入力_行解析_RESULTMOVIE(strCommand, strParameter) &&
-                             !t入力_行解析_RESULTSOUND(strCommand, strParameter) &&
-                             !t入力_行解析_SIZE(strCommand, strParameter))
-                    {
-                        tInput_LineAnalysis_ChipLocation(strCommand, strParameter);
-                        lastLineWasChipLocation = true;
-                        countSlow++;
-                    }
+                    tInput_LineAnalysis_ChipLocation(strCommand, strParameter);
+                    lastLineWasChipLocation = true;
                 }
             }
         }
-
+        
         private bool t入力_行解析_AVI_VIDEO(string strCommand, string strParameter, string strComment)
         {
             // (1) コマンドを処理。
@@ -7059,7 +6730,7 @@ namespace DTXMania
             return true;
         }
 
-        private bool t入力_行解析_BPM_BPMzz(string strCommand, string strParameter)
+        private bool tAnalyzeLine_BPM_BPMzz(string strCommand, string strParameter)
         {
             // (1) コマンドを処理。
 
@@ -7527,8 +7198,8 @@ namespace DTXMania
             {
                 foreach (CWAV wav in listWAV.Values) // これまでに出てきたWAVチップのうち、該当する（サイズが未設定の）チップのサイズを変更する（仕組み上、必ず後方参照となる）。
                 {
-                    if (wav.nチップサイズ == -nWAV番号) // #SIZExx 行より前の行に出現した #WAVxx では、チップサイズは -xx に初期化されている。
-                        wav.nチップサイズ = nサイズ値;
+                    if (wav.nChipSize == -nWAV番号) // #SIZExx 行より前の行に出現した #WAVxx では、チップサイズは -xx に初期化されている。
+                        wav.nChipSize = nサイズ値;
                 }
             }
 
@@ -7578,9 +7249,9 @@ namespace DTXMania
             {
                 n内部番号 = n内部番号WAV1to,
                 n表記上の番号 = zz,
-                nチップサイズ = n無限管理SIZE[zz],
-                n位置 = n無限管理PAN[zz],
-                n音量 = n無限管理VOL[zz],
+                nChipSize = n無限管理SIZE[zz],
+                nPosition = n無限管理PAN[zz],
+                nVolume = n無限管理VOL[zz],
                 strファイル名 = strParameter,
                 strコメント文 = strComment,
             };
@@ -7672,9 +7343,9 @@ namespace DTXMania
                 {
                     foreach (CWAV wav in listWAV.Values) // これまでに出てきたチップのうち、該当する（位置が未設定の）WAVチップの値を変更する（仕組み上、必ず後方参照となる）。
                     {
-                        if (wav.n位置 == (-10000 -
+                        if (wav.nPosition == (-10000 -
                                         zz)) // #WAVPANzz, #PANzz 行より前の行に出現した #WAVzz では、位置は -10000-zz に初期化されている。
-                            wav.n位置 = n位置;
+                            wav.nPosition = n位置;
                     }
                 }
 
@@ -7739,8 +7410,8 @@ namespace DTXMania
                 {
                     foreach (CWAV wav in listWAV.Values) // これまでに出てきたチップのうち、該当する（音量が未設定の）WAVチップの値を変更する（仕組み上、必ず後方参照となる）。
                     {
-                        if (wav.n音量 == -zz) // #WAVVOLzz, #VOLUMEzz 行より前の行に出現した #WAVzz では、音量は -zz に初期化されている。
-                            wav.n音量 = n音量;
+                        if (wav.nVolume == -zz) // #WAVVOLzz, #VOLUMEzz 行より前の行に出現した #WAVzz では、音量は -zz に初期化されている。
+                            wav.nVolume = n音量;
                     }
                 }
 
