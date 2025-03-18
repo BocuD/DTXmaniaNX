@@ -5454,7 +5454,7 @@ namespace DTXMania
                 return;
             }
             
-            Console.WriteLine(strCommand + " " + strParameter);
+            //Console.WriteLine(strCommand + " " + strParameter);
 
             // //don't even attempt to parse comments for chips
             // StringBuilder comment = new(0x400);
