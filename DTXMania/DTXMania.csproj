@@ -28,6 +28,11 @@
         <DependentUpon>Settings.settings</DependentUpon>
         <DesignTimeSharedInput>True</DesignTimeSharedInput>
       </Compile>
+      <Compile Update="Properties\Resources.Designer.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>Resources.resx</DependentUpon>
+      </Compile>
     </ItemGroup>
 
     <ItemGroup>
@@ -56,6 +61,13 @@
         <AssemblyAttribute Include="DTXMania.BuildDateTime">
             <_Parameter1>$([System.DateTime]::Now.ToString("s"))</_Parameter1>
         </AssemblyAttribute>
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Update="Properties\Resources.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
     </ItemGroup>
 
 </Project>
