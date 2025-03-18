@@ -1,9 +1,11 @@
 ﻿using System.Runtime.InteropServices;
 using System.Diagnostics;
-using System.Drawing;
+using DTXUIRenderer;
 using FDK;
-
+using SharpDX;
+using Rectangle = System.Drawing.Rectangle;
 using SlimDXKey = SlimDX.DirectInput.Key;
+using System.Drawing;
 
 namespace DTXMania
 {
@@ -71,6 +73,12 @@ namespace DTXMania
 			{
 				txBackground = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\2_background.jpg" ), false );
 				txMenu = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\2_menu.png" ), false );
+				
+				// UI
+				ui = new UIGroup();
+				CPrivateFastFont font = new(new FontFamily(CDTXMania.ConfigIni.str選曲リストフォント), 12);
+				ui.AddChild(new UIText(font, CDTXMania.VERSION_DISPLAY));
+				
 				base.OnManagedCreateResources();
 			}
 		}
@@ -80,6 +88,9 @@ namespace DTXMania
 			{
 				CDTXMania.tReleaseTexture( ref txBackground );
 				CDTXMania.tReleaseTexture( ref txMenu );
+				
+				ui.Dispose();
+				
 				base.OnManagedReleaseResources();
 			}
 		}
@@ -182,9 +193,7 @@ namespace DTXMania
 
 				if( txBackground != null )
 					txBackground.tDraw2D( CDTXMania.app.Device, 0, 0 );
-
-                CDTXMania.actDisplayString.tPrint( 2, 2, CCharacterConsole.EFontType.White, CDTXMania.VERSION_DISPLAY);
-
+				
 				if( txMenu != null )
 				{
 					int x = MENU_X;
@@ -217,6 +226,9 @@ namespace DTXMania
 					txMenu.tDraw2D( CDTXMania.app.Device, MENU_X, MENU_Y, new Rectangle( 0, 0, MENU_W, MENU_H ) );
 					txMenu.tDraw2D( CDTXMania.app.Device, MENU_X, MENU_Y + MENU_H, new Rectangle( 0, MENU_H * 2, MENU_W, MENU_H * 2 ) );
 				}
+				
+				ui.Draw(Matrix.Identity);
+				
 				EPhase ePhaseId = ePhaseID;
 				switch( ePhaseId )
 				{
@@ -338,6 +350,8 @@ namespace DTXMania
 		private int nCurrentCursorPosition;
 		private CTexture txMenu;
 		private CTexture txBackground;
+
+		private UIGroup ui;
 	
 		private void tMoveCursorDown()
 		{
