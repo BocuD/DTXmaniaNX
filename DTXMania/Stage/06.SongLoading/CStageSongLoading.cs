@@ -399,9 +399,24 @@ internal class CStageSongLoading : CStage
             }
 
             ePhaseID = EPhase.Common_FadeIn;
-            bJustStartedUpdate = false;
             
             nWAVcount = 1;
+            
+            try
+            {
+                string path = cdtx.strFolderName + cdtx.PREIMAGE;
+
+                if (txJacket == null) // 2019.04.26 kairera0467
+                {
+                    txJacket = CDTXMania.tGenerateTexture(!File.Exists(path) ? CSkin.Path(@"Graphics\5_preimage default.png") : path);
+                }
+            }
+            catch (Exception ex)
+            {
+                Trace.TraceError(ex.StackTrace);
+            }
+            
+            bJustStartedUpdate = false;
         }
 
         //-----------------------------
