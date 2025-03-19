@@ -4,11 +4,14 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Drawing;
 using DTXMania.Core;
+using DTXMania.UI;
+using DTXUIRenderer;
 using SharpDX;
 using FDK;
 using Color = System.Drawing.Color;
 using Point = System.Drawing.Point;
 using Rectangle = System.Drawing.Rectangle;
+using RectangleF = SharpDX.RectangleF;
 using SlimDXKey = SlimDX.DirectInput.Key;
 
 namespace DTXMania;
@@ -298,7 +301,18 @@ internal class CStageSongLoading : CStage
     {
         if (!bNotActivated)
         {
-            txBackground = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\6_background.jpg"));
+            ui = new UIGroup();
+            
+            DTXTexture bgTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\6_background.jpg")));
+            UIImage bg = ui.AddChild(new UIImage(bgTex));
+            bg.renderOrder = -100;
+            
+            DTXTexture difficultyPanelTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\6_Difficulty.png")));
+            UIImage difficultyPanel = ui.AddChild(new UIImage(difficultyPanelTex));
+            difficultyPanel.renderMode = ERenderMode.Sliced;
+            difficultyPanel.position = new Vector3(191, 102, 0);
+            difficultyPanel.clipRect = new RectangleF(0, nIndex * 50, 262, 50);
+            
             txLevel = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\6_LevelNumber.png"));
             txDifficultyPanel = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\6_Difficulty.png"));
             txPartPanel = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\6_Part.png"));
@@ -345,7 +359,6 @@ internal class CStageSongLoading : CStage
             {
                 Trace.TraceError("テクスチャの生成に失敗しました。({0})", strSTAGEFILE);
                 txTitle = null;
-                txBackground = null;
             }
 
             #endregion
@@ -358,9 +371,10 @@ internal class CStageSongLoading : CStage
     {
         if (!bNotActivated)
         {
+            ui.Dispose();
+            
             //テクスチャ11枚
             //2018.03.15 kairera0467 PrivateFontが抜けていた＆フォント生成直後に解放するようにしてみる
-            CDTXMania.tReleaseTexture(ref txBackground);
             CDTXMania.tReleaseTexture(ref txJacket);
             CDTXMania.tReleaseTexture(ref txTitle);
             CDTXMania.tReleaseTexture(ref txArtist);
@@ -727,9 +741,6 @@ internal class CStageSongLoading : CStage
     
     private void DrawLoadingScreenUI()
     {
-        if (txBackground != null)
-            txBackground.tDraw2D(CDTXMania.app.Device, 0, 0);
-        
         int y = 184;
         
         if (txJacket != null)
@@ -865,6 +876,8 @@ internal class CStageSongLoading : CStage
 
     #region [ private ]
 
+    private UIGroup ui;
+    
     //-----------------
     [StructLayout(LayoutKind.Sequential)]
     private struct STCharacterPosition
@@ -887,7 +900,6 @@ internal class CStageSongLoading : CStage
     private CTexture? txTitle;
     private CTexture? txArtist;
     private CTexture? txJacket;
-    private CTexture? txBackground;
     private CTexture? txDifficultyPanel;
     private CTexture? txPartPanel;
 
