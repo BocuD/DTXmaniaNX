@@ -18,6 +18,8 @@ internal class CStageSongLoading : CStage
     // retain presence from song select
     protected override RichPresence Presence => null;
 
+    private CDTX cdtx;
+    
     // コンストラクタ
 
     public CStageSongLoading()
@@ -180,7 +182,7 @@ internal class CStageSongLoading : CStage
                 ? CDTXMania.strCompactModeFile
                 : CDTXMania.stageSongSelection.rChosenScore.FileInformation.AbsoluteFilePath;
 
-            CDTX cdtx = new(strDTXFilePath, true);
+            cdtx = new(strDTXFilePath, true);
 
             if (!CDTXMania.bCompactMode && CDTXMania.ConfigIni.b曲名表示をdefのものにする)
                 strSongTitle = CDTXMania.stageSongSelection.rConfirmedSong.strタイトル;
@@ -725,7 +727,8 @@ internal class CStageSongLoading : CStage
     
     private void DrawLoadingScreenUI()
     {
-        ui.Draw(Matrix.Identity);
+        if (txBackground != null)
+            txBackground.tDraw2D(CDTXMania.app.Device, 0, 0);
         
         int y = 184;
         
