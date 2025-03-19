@@ -1,9 +1,8 @@
 ﻿using FDK;
 
-namespace DTXMania
-{
-	internal class CActPerfStageClear : CActivity
-	{
+namespace DTXMania;
 
-    }
+internal class CActPerfStageClear : CActivity
+{
+
 }

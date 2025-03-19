@@ -4,294 +4,293 @@ using SharpDX.DirectInput;
 using SlimDXKey = SlimDX.DirectInput.Key;
 using SharpDXKey = SharpDX.DirectInput.Key;
 
-namespace FDK
+namespace FDK;
+
+public class CInputKeyboard : IInputDevice, IDisposable
 {
-	public class CInputKeyboard : IInputDevice, IDisposable
+	// コンストラクタ
+
+	public CInputKeyboard(IntPtr hWnd, DirectInput directInput)
 	{
-		// コンストラクタ
-
-		public CInputKeyboard(IntPtr hWnd, DirectInput directInput)
+		eInputDeviceType = EInputDeviceType.Keyboard;
+		GUID = "";
+		ID = 0;
+		try
 		{
-			eInputDeviceType = EInputDeviceType.Keyboard;
-			GUID = "";
-			ID = 0;
-			try
+			devKeyboard = new Keyboard(directInput);
+			devKeyboard.SetCooperativeLevel(hWnd, CooperativeLevel.NoWinKey | CooperativeLevel.Foreground | CooperativeLevel.NonExclusive);
+			devKeyboard.Properties.BufferSize = 32;
+			Trace.TraceInformation(devKeyboard.Information.ProductName.Trim(new char[] { '\0' }) + " を生成しました。");    // なぜか0x00のゴミが出るので削除
+			strDeviceName = devKeyboard.Information.ProductName.Trim(new char[] { '\0' });
+		}
+		catch
+		{
+			if (devKeyboard != null)
 			{
-				devKeyboard = new Keyboard(directInput);
-				devKeyboard.SetCooperativeLevel(hWnd, CooperativeLevel.NoWinKey | CooperativeLevel.Foreground | CooperativeLevel.NonExclusive);
-				devKeyboard.Properties.BufferSize = 32;
-				Trace.TraceInformation(devKeyboard.Information.ProductName.Trim(new char[] { '\0' }) + " を生成しました。");    // なぜか0x00のゴミが出るので削除
-				strDeviceName = devKeyboard.Information.ProductName.Trim(new char[] { '\0' });
+				devKeyboard.Dispose();
+				devKeyboard = null;
 			}
-			catch
-			{
-				if (devKeyboard != null)
-				{
-					devKeyboard.Dispose();
-					devKeyboard = null;
-				}
-				Trace.TraceWarning("Keyboard デバイスの生成に失敗しました。");
-				throw;
-			}
-			try
-			{
-				devKeyboard.Acquire();
-			}
-			catch
-			{
-			}
-
-			for (int i = 0; i < bKeyState.Length; i++)
-				bKeyState[i] = false;
-
-			//this.timer = new CTimer( CTimer.E種別.MultiMedia );
-			listInputEvent = new List<STInputEvent>(32);
-			// this.ct = new CTimer( CTimer.E種別.PerformanceCounter );
+			Trace.TraceWarning("Keyboard デバイスの生成に失敗しました。");
+			throw;
+		}
+		try
+		{
+			devKeyboard.Acquire();
+		}
+		catch
+		{
 		}
 
+		for (int i = 0; i < bKeyState.Length; i++)
+			bKeyState[i] = false;
 
-		// メソッド
+		//this.timer = new CTimer( CTimer.E種別.MultiMedia );
+		listInputEvent = new List<STInputEvent>(32);
+		// this.ct = new CTimer( CTimer.E種別.PerformanceCounter );
+	}
 
-		#region [ IInputDevice 実装 ]
-		//-----------------
-		public EInputDeviceType eInputDeviceType { get; private set; }  // e入力デバイス種別
-		public string GUID { get; private set; }
-		public int ID { get; private set; }
-		public List<STInputEvent> listInputEvent { get; private set; }
-		public string strDeviceName { get; set; }
 
-		public void tPolling(bool bWindowがアクティブ中, bool bバッファ入力を使用する)  // tポーリング
+	// メソッド
+
+	#region [ IInputDevice 実装 ]
+	//-----------------
+	public EInputDeviceType eInputDeviceType { get; private set; }  // e入力デバイス種別
+	public string GUID { get; private set; }
+	public int ID { get; private set; }
+	public List<STInputEvent> listInputEvent { get; private set; }
+	public string strDeviceName { get; set; }
+
+	public void tPolling(bool bWindowがアクティブ中, bool bバッファ入力を使用する)  // tポーリング
+	{
+		for (int i = 0; i < 256; i++)
 		{
-			for (int i = 0; i < 256; i++)
+			bKeyPushDown[i] = false;
+			bKeyPullUp[i] = false;
+		}
+
+		if (bWindowがアクティブ中 && (devKeyboard != null))
+		{
+			devKeyboard.Acquire();
+			devKeyboard.Poll();
+
+			//this.list入力イベント = new List<STInputEvent>( 32 );
+			listInputEvent.Clear();            // #xxxxx 2012.6.11 yyagi; To optimize, I removed new();
+			int posEnter = -1;
+			//string d = DateTime.Now.ToString( "yyyy/MM/dd HH:mm:ss.ffff" );
+
+			if (bバッファ入力を使用する)
 			{
-				bKeyPushDown[i] = false;
-				bKeyPullUp[i] = false;
-			}
-
-			if (bWindowがアクティブ中 && (devKeyboard != null))
-			{
-				devKeyboard.Acquire();
-				devKeyboard.Poll();
-
-				//this.list入力イベント = new List<STInputEvent>( 32 );
-				listInputEvent.Clear();            // #xxxxx 2012.6.11 yyagi; To optimize, I removed new();
-				int posEnter = -1;
-				//string d = DateTime.Now.ToString( "yyyy/MM/dd HH:mm:ss.ffff" );
-
-				if (bバッファ入力を使用する)
+				#region [ a.バッファ入力 ]
+				//-----------------------------
+				var bufferedData = devKeyboard.GetBufferedData();
+				//if ( Result.Last.IsSuccess && bufferedData != null )
 				{
-					#region [ a.バッファ入力 ]
-					//-----------------------------
-					var bufferedData = devKeyboard.GetBufferedData();
-					//if ( Result.Last.IsSuccess && bufferedData != null )
+					foreach (KeyboardUpdate data in bufferedData)
 					{
-						foreach (KeyboardUpdate data in bufferedData)
+						// #xxxxx: 2017.5.7: from: DIK (SharpDX.DirectInput.Key) を SlimDX.DirectInput.Key に変換。
+						var key = DeviceConstantConverter.DIKtoKey(data.Key);
+						if (SlimDXKey.Unknown == key)
+							continue;   // 未対応キーは無視。
+
+						//foreach ( Key key in data.PressedKeys )
+						if (data.IsPressed)
 						{
-							// #xxxxx: 2017.5.7: from: DIK (SharpDX.DirectInput.Key) を SlimDX.DirectInput.Key に変換。
-							var key = DeviceConstantConverter.DIKtoKey(data.Key);
-							if (SlimDXKey.Unknown == key)
-								continue;   // 未対応キーは無視。
-
-							//foreach ( Key key in data.PressedKeys )
-							if (data.IsPressed)
-							{
-								// #23708 2016.3.19 yyagi; Even if we remove ALT+ENTER key input by SuppressKeyPress = true in Form,
-								// it doesn't affect to DirectInput (ALT+ENTER does not remove)
-								// So we ignore ENTER input in ALT+ENTER combination here.
-								// Note: ENTER will be alived if you keyup ALT after ALT+ENTER.
-								if (key != SlimDXKey.Return || (bKeyState[(int)SlimDXKey.LeftAlt] == false && bKeyState[(int)SlimDXKey.RightAlt] == false))
-								{
-									STInputEvent item = new STInputEvent()
-									{
-										nKey = (int)key,
-										b押された = true,
-										b離された = false,
-										nTimeStamp = CSoundManager.rcPerformanceTimer.nサウンドタイマーのシステム時刻msへの変換(data.Timestamp),
-										nVelocity = CInputManager.n通常音量
-									};
-									listInputEvent.Add(item);
-
-									bKeyState[(int)key] = true;
-									bKeyPushDown[(int)key] = true;
-								}
-								//if ( item.nKey == (int) SlimDXKey.Space )
-								//{
-								//    Trace.TraceInformation( "FDK(buffered): SPACE key registered. " + ct.nシステム時刻 );
-								//}
-							}
-							//foreach ( Key key in data.ReleasedKeys )
-							if (data.IsReleased)
+							// #23708 2016.3.19 yyagi; Even if we remove ALT+ENTER key input by SuppressKeyPress = true in Form,
+							// it doesn't affect to DirectInput (ALT+ENTER does not remove)
+							// So we ignore ENTER input in ALT+ENTER combination here.
+							// Note: ENTER will be alived if you keyup ALT after ALT+ENTER.
+							if (key != SlimDXKey.Return || (bKeyState[(int)SlimDXKey.LeftAlt] == false && bKeyState[(int)SlimDXKey.RightAlt] == false))
 							{
 								STInputEvent item = new STInputEvent()
 								{
 									nKey = (int)key,
-									b押された = false,
-									b離された = true,
+									b押された = true,
+									b離された = false,
 									nTimeStamp = CSoundManager.rcPerformanceTimer.nサウンドタイマーのシステム時刻msへの変換(data.Timestamp),
 									nVelocity = CInputManager.n通常音量
 								};
 								listInputEvent.Add(item);
 
-								bKeyState[(int)key] = false;
-								bKeyPullUp[(int)key] = true;
+								bKeyState[(int)key] = true;
+								bKeyPushDown[(int)key] = true;
 							}
+							//if ( item.nKey == (int) SlimDXKey.Space )
+							//{
+							//    Trace.TraceInformation( "FDK(buffered): SPACE key registered. " + ct.nシステム時刻 );
+							//}
+						}
+						//foreach ( Key key in data.ReleasedKeys )
+						if (data.IsReleased)
+						{
+							STInputEvent item = new STInputEvent()
+							{
+								nKey = (int)key,
+								b押された = false,
+								b離された = true,
+								nTimeStamp = CSoundManager.rcPerformanceTimer.nサウンドタイマーのシステム時刻msへの変換(data.Timestamp),
+								nVelocity = CInputManager.n通常音量
+							};
+							listInputEvent.Add(item);
+
+							bKeyState[(int)key] = false;
+							bKeyPullUp[(int)key] = true;
 						}
 					}
-					//-----------------------------
-					#endregion
 				}
-				else
+				//-----------------------------
+				#endregion
+			}
+			else
+			{
+				#region [ b.状態入力 ]
+				//-----------------------------
+				KeyboardState currentState = devKeyboard.GetCurrentState();
+				//if ( Result.Last.IsSuccess && currentState != null )
 				{
-					#region [ b.状態入力 ]
-					//-----------------------------
-					KeyboardState currentState = devKeyboard.GetCurrentState();
-					//if ( Result.Last.IsSuccess && currentState != null )
+					foreach (SharpDXKey dik in currentState.PressedKeys)
 					{
-						foreach (SharpDXKey dik in currentState.PressedKeys)
+						// #xxxxx: 2017.5.7: from: DIK (SharpDX.DirectInput.Key) を SlimDX.DirectInput.Key に変換。
+						var key = DeviceConstantConverter.DIKtoKey(dik);
+						if (SlimDXKey.Unknown == key)
+							continue;   // 未対応キーは無視。
+
+						if (bKeyState[(int)key] == false)
 						{
-							// #xxxxx: 2017.5.7: from: DIK (SharpDX.DirectInput.Key) を SlimDX.DirectInput.Key に変換。
-							var key = DeviceConstantConverter.DIKtoKey(dik);
-							if (SlimDXKey.Unknown == key)
-								continue;   // 未対応キーは無視。
-
-							if (bKeyState[(int)key] == false)
-							{
-								if (key != SlimDXKey.Return || (bKeyState[(int)SlimDXKey.LeftAlt] == false && bKeyState[(int)SlimDXKey.RightAlt] == false))    // #23708 2016.3.19 yyagi
-								{
-									var ev = new STInputEvent()
-									{
-										nKey = (int)key,
-										b押された = true,
-										b離された = false,
-										nTimeStamp = CSoundManager.rcPerformanceTimer.nシステム時刻, // 演奏用タイマと同じタイマを使うことで、BGMと譜面、入力ずれを防ぐ。
-										nVelocity = CInputManager.n通常音量,
-									};
-									listInputEvent.Add(ev);
-
-									bKeyState[(int)key] = true;
-									bKeyPushDown[(int)key] = true;
-								}
-
-								//if ( (int) key == (int) SlimDXKey.Space )
-								//{
-								//    Trace.TraceInformation( "FDK(direct): SPACE key registered. " + ct.nシステム時刻 );
-								//}
-							}
-						}
-						//foreach ( Key key in currentState.ReleasedKeys )
-						foreach (SharpDXKey dik in currentState.AllKeys)
-						{
-							// #xxxxx: 2017.5.7: from: DIK (SharpDX.DirectInput.Key) を SlimDX.DirectInput.Key に変換。
-							var key = DeviceConstantConverter.DIKtoKey(dik);
-							if (SlimDXKey.Unknown == key)
-								continue;   // 未対応キーは無視。
-
-							if (bKeyState[(int)key] == true && !currentState.IsPressed(dik)) // 前回は押されているのに今回は押されていない → 離された
+							if (key != SlimDXKey.Return || (bKeyState[(int)SlimDXKey.LeftAlt] == false && bKeyState[(int)SlimDXKey.RightAlt] == false))    // #23708 2016.3.19 yyagi
 							{
 								var ev = new STInputEvent()
 								{
 									nKey = (int)key,
-									b押された = false,
-									b離された = true,
+									b押された = true,
+									b離された = false,
 									nTimeStamp = CSoundManager.rcPerformanceTimer.nシステム時刻, // 演奏用タイマと同じタイマを使うことで、BGMと譜面、入力ずれを防ぐ。
 									nVelocity = CInputManager.n通常音量,
 								};
 								listInputEvent.Add(ev);
 
-								bKeyState[(int)key] = false;
-								bKeyPullUp[(int)key] = true;
+								bKeyState[(int)key] = true;
+								bKeyPushDown[(int)key] = true;
 							}
+
+							//if ( (int) key == (int) SlimDXKey.Space )
+							//{
+							//    Trace.TraceInformation( "FDK(direct): SPACE key registered. " + ct.nシステム時刻 );
+							//}
 						}
 					}
-					//-----------------------------
-					#endregion
+					//foreach ( Key key in currentState.ReleasedKeys )
+					foreach (SharpDXKey dik in currentState.AllKeys)
+					{
+						// #xxxxx: 2017.5.7: from: DIK (SharpDX.DirectInput.Key) を SlimDX.DirectInput.Key に変換。
+						var key = DeviceConstantConverter.DIKtoKey(dik);
+						if (SlimDXKey.Unknown == key)
+							continue;   // 未対応キーは無視。
+
+						if (bKeyState[(int)key] == true && !currentState.IsPressed(dik)) // 前回は押されているのに今回は押されていない → 離された
+						{
+							var ev = new STInputEvent()
+							{
+								nKey = (int)key,
+								b押された = false,
+								b離された = true,
+								nTimeStamp = CSoundManager.rcPerformanceTimer.nシステム時刻, // 演奏用タイマと同じタイマを使うことで、BGMと譜面、入力ずれを防ぐ。
+								nVelocity = CInputManager.n通常音量,
+							};
+							listInputEvent.Add(ev);
+
+							bKeyState[(int)key] = false;
+							bKeyPullUp[(int)key] = true;
+						}
+					}
 				}
-				#region [#23708 2011.4.8 yyagi Altが押されているときは、Enter押下情報を削除する -> 副作用が見つかり削除]
-				//if ( this.bKeyState[ (int) SlimDXKey.RightAlt ] ||
-				//     this.bKeyState[ (int) SlimDXKey.LeftAlt ] )
-				//{
-				//    int cr = (int) SlimDXKey.Return;
-				//    this.bKeyPushDown[ cr ] = false;
-				//    this.bKeyPullUp[ cr ] = false;
-				//    this.bKeyState[ cr ] = false;
-				//}
+				//-----------------------------
 				#endregion
 			}
+			#region [#23708 2011.4.8 yyagi Altが押されているときは、Enter押下情報を削除する -> 副作用が見つかり削除]
+			//if ( this.bKeyState[ (int) SlimDXKey.RightAlt ] ||
+			//     this.bKeyState[ (int) SlimDXKey.LeftAlt ] )
+			//{
+			//    int cr = (int) SlimDXKey.Return;
+			//    this.bKeyPushDown[ cr ] = false;
+			//    this.bKeyPullUp[ cr ] = false;
+			//    this.bKeyState[ cr ] = false;
+			//}
+			#endregion
 		}
-
-		/// <param name="nKey">
-		///		調べる SlimDX.DirectInput.Key を int にキャストした値。（SharpDX.DirectInput.Key ではないので注意。）
-		/// </param>
-		public bool bKeyPressed(int nKey)  // bキーが押された
-		{
-			return bKeyPushDown[nKey];
-		}
-
-		/// <param name="nKey">
-		///		調べる SlimDX.DirectInput.Key を int にキャストした値。（SharpDX.DirectInput.Key ではないので注意。）
-		/// </param>
-		public bool bKeyPressing(int nKey)  // bキーが押されている
-		{
-			return bKeyState[nKey];
-		}
-
-		/// <param name="nKey">
-		///		調べる SlimDX.DirectInput.Key を int にキャストした値。（SharpDX.DirectInput.Key ではないので注意。）
-		/// </param>
-		public bool bKeyReleased(int nKey)  // bキーが離された
-		{
-			return bKeyPullUp[nKey];
-		}
-
-		/// <param name="nKey">
-		///		調べる SlimDX.DirectInput.Key を int にキャストした値。（SharpDX.DirectInput.Key ではないので注意。）
-		/// </param>
-		public bool bKeyReleasing(int nKey)  // bキーが離されている
-		{
-			return !bKeyState[nKey];
-		}
-		//-----------------
-		#endregion
-
-		#region [ IDisposable 実装 ]
-		//-----------------
-		public void Dispose()
-		{
-			if (!bDispose完了済み)
-			{
-				if (devKeyboard != null)
-				{
-					devKeyboard.Dispose();
-					devKeyboard = null;
-				}
-				//if( this.timer != null )
-				//{
-				//    this.timer.Dispose();
-				//    this.timer = null;
-				//}
-				if (listInputEvent != null)
-				{
-					listInputEvent = null;
-				}
-				bDispose完了済み = true;
-			}
-		}
-		//-----------------
-		#endregion
-
-
-		// その他
-
-		#region [ private ]
-		//-----------------
-		private bool bDispose完了済み;
-		private bool[] bKeyPullUp = new bool[256];
-		private bool[] bKeyPushDown = new bool[256];
-		private bool[] bKeyState = new bool[256];
-		private Keyboard devKeyboard;
-		//private CTimer timer;
-		//private CTimer ct;
-		//-----------------
-		#endregion
 	}
+
+	/// <param name="nKey">
+	///		調べる SlimDX.DirectInput.Key を int にキャストした値。（SharpDX.DirectInput.Key ではないので注意。）
+	/// </param>
+	public bool bKeyPressed(int nKey)  // bキーが押された
+	{
+		return bKeyPushDown[nKey];
+	}
+
+	/// <param name="nKey">
+	///		調べる SlimDX.DirectInput.Key を int にキャストした値。（SharpDX.DirectInput.Key ではないので注意。）
+	/// </param>
+	public bool bKeyPressing(int nKey)  // bキーが押されている
+	{
+		return bKeyState[nKey];
+	}
+
+	/// <param name="nKey">
+	///		調べる SlimDX.DirectInput.Key を int にキャストした値。（SharpDX.DirectInput.Key ではないので注意。）
+	/// </param>
+	public bool bKeyReleased(int nKey)  // bキーが離された
+	{
+		return bKeyPullUp[nKey];
+	}
+
+	/// <param name="nKey">
+	///		調べる SlimDX.DirectInput.Key を int にキャストした値。（SharpDX.DirectInput.Key ではないので注意。）
+	/// </param>
+	public bool bKeyReleasing(int nKey)  // bキーが離されている
+	{
+		return !bKeyState[nKey];
+	}
+	//-----------------
+	#endregion
+
+	#region [ IDisposable 実装 ]
+	//-----------------
+	public void Dispose()
+	{
+		if (!bDispose完了済み)
+		{
+			if (devKeyboard != null)
+			{
+				devKeyboard.Dispose();
+				devKeyboard = null;
+			}
+			//if( this.timer != null )
+			//{
+			//    this.timer.Dispose();
+			//    this.timer = null;
+			//}
+			if (listInputEvent != null)
+			{
+				listInputEvent = null;
+			}
+			bDispose完了済み = true;
+		}
+	}
+	//-----------------
+	#endregion
+
+
+	// その他
+
+	#region [ private ]
+	//-----------------
+	private bool bDispose完了済み;
+	private bool[] bKeyPullUp = new bool[256];
+	private bool[] bKeyPushDown = new bool[256];
+	private bool[] bKeyState = new bool[256];
+	private Keyboard devKeyboard;
+	//private CTimer timer;
+	//private CTimer ct;
+	//-----------------
+	#endregion
 }

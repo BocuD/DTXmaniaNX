@@ -1,8 +1,7 @@
-namespace SampleFramework
+namespace SampleFramework;
+
+public static class GameWindowSize
 {
-	public static class GameWindowSize
-	{
-		public const int Width = 1280;
-		public const int Height = 720;
-	}
+	public const int Width = 1280;
+	public const int Height = 720;
 }

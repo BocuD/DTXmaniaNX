@@ -1,92 +1,91 @@
 ﻿using System.Diagnostics;
 
 
-namespace DTXMania
+namespace DTXMania;
+
+/// <summary>
+/// box.defによるスキン変更時に一時的に遷移する、スキン画像の一切無いステージ。
+/// </summary>
+internal class CStageChangeSkin : CStage
 {
-	/// <summary>
-	/// box.defによるスキン変更時に一時的に遷移する、スキン画像の一切無いステージ。
-	/// </summary>
-	internal class CStageChangeSkin : CStage
+	// コンストラクタ
+
+	public CStageChangeSkin()
 	{
-		// コンストラクタ
+		eStageID = EStage.ChangeSkin;
+		bNotActivated = true;
+	}
 
-		public CStageChangeSkin()
+
+	// CStage 実装
+
+	public override void OnActivate()
+	{
+		Trace.TraceInformation( "スキン変更ステージを活性化します。" );
+		Trace.Indent();
+		try
 		{
-			eStageID = EStage.ChangeSkin;
-			bNotActivated = true;
+			base.OnActivate();
+			Trace.TraceInformation( "スキン変更ステージの活性化を完了しました。" );
 		}
-
-
-		// CStage 実装
-
-		public override void OnActivate()
+		finally
 		{
-			Trace.TraceInformation( "スキン変更ステージを活性化します。" );
-			Trace.Indent();
-			try
-			{
-				base.OnActivate();
-				Trace.TraceInformation( "スキン変更ステージの活性化を完了しました。" );
-			}
-			finally
-			{
-				Trace.Unindent();
-			}
+			Trace.Unindent();
 		}
-		public override void OnDeactivate()
+	}
+	public override void OnDeactivate()
+	{
+		Trace.TraceInformation( "スキン変更ステージを非活性化します。" );
+		Trace.Indent();
+		try
 		{
-			Trace.TraceInformation( "スキン変更ステージを非活性化します。" );
-			Trace.Indent();
-			try
-			{
-				base.OnDeactivate();
-				Trace.TraceInformation( "スキン変更ステージの非活性化を完了しました。" );
-			}
-			finally
-			{
-				Trace.Unindent();
-			}
+			base.OnDeactivate();
+			Trace.TraceInformation( "スキン変更ステージの非活性化を完了しました。" );
 		}
-		public override void OnManagedCreateResources()
+		finally
 		{
-			if( !bNotActivated )
-			{
-				base.OnManagedCreateResources();
-			}
+			Trace.Unindent();
 		}
-		public override void OnManagedReleaseResources()
+	}
+	public override void OnManagedCreateResources()
+	{
+		if( !bNotActivated )
 		{
-			if( !bNotActivated )
-			{
-				base.OnManagedReleaseResources();
-			}
+			base.OnManagedCreateResources();
 		}
-		public override int OnUpdateAndDraw()
+	}
+	public override void OnManagedReleaseResources()
+	{
+		if( !bNotActivated )
 		{
-			if( !bNotActivated )
+			base.OnManagedReleaseResources();
+		}
+	}
+	public override int OnUpdateAndDraw()
+	{
+		if( !bNotActivated )
+		{
+			if ( bJustStartedUpdate )
 			{
-				if ( bJustStartedUpdate )
-				{
-					bJustStartedUpdate = false;
-					return 0;
-				}
+				bJustStartedUpdate = false;
+				return 0;
+			}
 
-				//スキン変更処理
-				tChangeSkinMain();
-				return 1;
-			}
-			return 0;
+			//スキン変更処理
+			tChangeSkinMain();
+			return 1;
 		}
-		public void tChangeSkinMain()
-		{
-			Trace.TraceInformation( "スキン変更:" + CDTXMania.Skin.GetCurrentSkinSubfolderFullName( false ) );
+		return 0;
+	}
+	public void tChangeSkinMain()
+	{
+		Trace.TraceInformation( "スキン変更:" + CDTXMania.Skin.GetCurrentSkinSubfolderFullName( false ) );
 
-			CDTXMania.actDisplayString.OnDeactivate();
+		CDTXMania.actDisplayString.OnDeactivate();
 
-			CDTXMania.Skin.PrepareReloadSkin();
-			CDTXMania.Skin.ReloadSkin();
+		CDTXMania.Skin.PrepareReloadSkin();
+		CDTXMania.Skin.ReloadSkin();
 
-			CDTXMania.actDisplayString.OnActivate();
-		}
+		CDTXMania.actDisplayString.OnActivate();
 	}
 }

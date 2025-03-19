@@ -1,89 +1,88 @@
 ﻿using System.Runtime.InteropServices;
 using System.Diagnostics;
 
-namespace DTXMania
+namespace DTXMania;
+
+[Serializable]
+internal class CProgress
 {
     [Serializable]
-    internal class CProgress
+    [StructLayout(LayoutKind.Sequential)]
+    public struct STProgressInfo
     {
-        [Serializable]
-        [StructLayout(LayoutKind.Sequential)]
-        public struct STProgressInfo
+        public STProgressInfo(int nPartDuration, short nMistakes, short nNoteCount)
         {
-            public STProgressInfo(int nPartDuration, short nMistakes, short nNoteCount)
-            {
-                this.nPartDuration = nPartDuration;
-                this.nMistakes = nMistakes;
-                this.nNoteCount = nNoteCount;
-            }
-
-            public int nPartDuration;
-            public short nMistakes;
-            public short nNoteCount;
+            this.nPartDuration = nPartDuration;
+            this.nMistakes = nMistakes;
+            this.nNoteCount = nNoteCount;
         }
 
-        public int nNumberOfParts;
-        public List<STProgressInfo> sTProgressInfos;
+        public int nPartDuration;
+        public short nMistakes;
+        public short nNoteCount;
+    }
 
-        public static void Serialize(string filePath, CProgress cProgressObject)
-        {            
-            try
-            {
-                using (Stream stream = File.Open(filePath, FileMode.Create))
-                {
-                    BinaryWriter bw = new BinaryWriter(stream);
-                    bw.Write(cProgressObject.sTProgressInfos.Count);
-                    for (int i = 0; i < cProgressObject.sTProgressInfos.Count; i++)
-                    {
-                        bw.Write(cProgressObject.sTProgressInfos[i].nPartDuration);
-                        bw.Write(cProgressObject.sTProgressInfos[i].nMistakes);
-                        bw.Write(cProgressObject.sTProgressInfos[i].nNoteCount);
-                    }
-                    bw.Close();
-                }                    
-            }
-            catch (Exception e)
-            {
-                Trace.TraceError("Exception Serializing CProgress ...");
-                Trace.TraceError(e.Message);
-                Trace.TraceError(e.StackTrace);                   
-            }            
+    public int nNumberOfParts;
+    public List<STProgressInfo> sTProgressInfos;
 
-        }
-
-        public static CProgress Deserialize(string filePath)
+    public static void Serialize(string filePath, CProgress cProgressObject)
+    {            
+        try
         {
-            CProgress ret = null;            
-            try
+            using (Stream stream = File.Open(filePath, FileMode.Create))
             {
-                using (Stream stream = File.Open(filePath, FileMode.Open))
+                BinaryWriter bw = new BinaryWriter(stream);
+                bw.Write(cProgressObject.sTProgressInfos.Count);
+                for (int i = 0; i < cProgressObject.sTProgressInfos.Count; i++)
                 {
-                    BinaryReader br = new BinaryReader(stream);
-                    int nParts = br.ReadInt32();
-                    ret = new CProgress();
-                    ret.nNumberOfParts = nParts;
-                    ret.sTProgressInfos = new List<STProgressInfo>();
-
-                    //
-                    for (int i = 0; i < nParts; i++)
-                    {
-                        STProgressInfo sTProgressInfo = new STProgressInfo();
-                        sTProgressInfo.nPartDuration = br.ReadInt32();
-                        sTProgressInfo.nMistakes = br.ReadInt16();
-                        sTProgressInfo.nNoteCount = br.ReadInt16();
-                        ret.sTProgressInfos.Add(sTProgressInfo);
-                    }
-                    br.Close();
+                    bw.Write(cProgressObject.sTProgressInfos[i].nPartDuration);
+                    bw.Write(cProgressObject.sTProgressInfos[i].nMistakes);
+                    bw.Write(cProgressObject.sTProgressInfos[i].nNoteCount);
                 }
-            }
-            catch (Exception e)
-            {
-                Trace.TraceError("Exception Deserializing CProgress ...");
-                Trace.TraceError(e.Message);
-                Trace.TraceError(e.StackTrace);
-            }            
-
-            return ret;
+                bw.Close();
+            }                    
         }
+        catch (Exception e)
+        {
+            Trace.TraceError("Exception Serializing CProgress ...");
+            Trace.TraceError(e.Message);
+            Trace.TraceError(e.StackTrace);                   
+        }            
+
+    }
+
+    public static CProgress Deserialize(string filePath)
+    {
+        CProgress ret = null;            
+        try
+        {
+            using (Stream stream = File.Open(filePath, FileMode.Open))
+            {
+                BinaryReader br = new BinaryReader(stream);
+                int nParts = br.ReadInt32();
+                ret = new CProgress();
+                ret.nNumberOfParts = nParts;
+                ret.sTProgressInfos = new List<STProgressInfo>();
+
+                //
+                for (int i = 0; i < nParts; i++)
+                {
+                    STProgressInfo sTProgressInfo = new STProgressInfo();
+                    sTProgressInfo.nPartDuration = br.ReadInt32();
+                    sTProgressInfo.nMistakes = br.ReadInt16();
+                    sTProgressInfo.nNoteCount = br.ReadInt16();
+                    ret.sTProgressInfos.Add(sTProgressInfo);
+                }
+                br.Close();
+            }
+        }
+        catch (Exception e)
+        {
+            Trace.TraceError("Exception Deserializing CProgress ...");
+            Trace.TraceError(e.Message);
+            Trace.TraceError(e.StackTrace);
+        }            
+
+        return ret;
     }
 }

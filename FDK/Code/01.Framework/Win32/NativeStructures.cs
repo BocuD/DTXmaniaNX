@@ -23,47 +23,46 @@
 using System.Drawing;
 using System.Runtime.InteropServices;
 
-namespace SampleFramework
+namespace SampleFramework;
+
+[StructLayout(LayoutKind.Sequential)]
+struct NativeRectangle
 {
-    [StructLayout(LayoutKind.Sequential)]
-    struct NativeRectangle
-    {
-        public int left;
-        public int top;
-        public int right;
-        public int bottom;
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    struct NativeMessage
-    {
-        public IntPtr hWnd;
-        public uint msg;
-        public IntPtr wParam;
-        public IntPtr lParam;
-        public uint time;
-        public Point p;
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    struct WINDOWPLACEMENT
-    {
-        public int length;
-        public int flags;
-        public int showCmd;
-        public Point ptMinPosition;
-        public Point ptMaxPosition;
-        public NativeRectangle rcNormalPosition;
-
-        public static int Length => Marshal.SizeOf(typeof(WINDOWPLACEMENT));
-    }
-    #region #28821 2014.1.23 yyagi add: 外部からの文字列メッセージ送受信 定数定義
-    [StructLayout(LayoutKind.Sequential)]
-    public struct COPYDATASTRUCT
-    {
-        public IntPtr dwData;
-        public UInt32 cbData;
-        public IntPtr lpData;
-    }
-    #endregion
+    public int left;
+    public int top;
+    public int right;
+    public int bottom;
 }
+
+[StructLayout(LayoutKind.Sequential)]
+struct NativeMessage
+{
+    public IntPtr hWnd;
+    public uint msg;
+    public IntPtr wParam;
+    public IntPtr lParam;
+    public uint time;
+    public Point p;
+}
+
+[StructLayout(LayoutKind.Sequential)]
+struct WINDOWPLACEMENT
+{
+    public int length;
+    public int flags;
+    public int showCmd;
+    public Point ptMinPosition;
+    public Point ptMaxPosition;
+    public NativeRectangle rcNormalPosition;
+
+    public static int Length => Marshal.SizeOf(typeof(WINDOWPLACEMENT));
+}
+#region #28821 2014.1.23 yyagi add: 外部からの文字列メッセージ送受信 定数定義
+[StructLayout(LayoutKind.Sequential)]
+public struct COPYDATASTRUCT
+{
+    public IntPtr dwData;
+    public UInt32 cbData;
+    public IntPtr lpData;
+}
+#endregion

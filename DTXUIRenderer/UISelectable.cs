@@ -1,8 +1,7 @@
-﻿namespace DTXUIRenderer
+﻿namespace DTXUIRenderer;
+
+public interface IUISelectable
 {
-    public interface IUISelectable
-    {
-        void SetSelected(bool selected);
-        void RunAction();
-    }
+    void SetSelected(bool selected);
+    void RunAction();
 }
