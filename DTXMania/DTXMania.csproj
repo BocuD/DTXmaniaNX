@@ -60,7 +60,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <AssemblyAttribute Include="DTXMania.BuildDateTime">
+        <AssemblyAttribute Include="DTXMania.Core.BuildDateTime">
             <_Parameter1>$([System.DateTime]::Now.ToString("s"))</_Parameter1>
         </AssemblyAttribute>
     </ItemGroup>
