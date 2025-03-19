@@ -274,6 +274,15 @@ internal class CStageSongLoading : CStage
                 tDetermineStatusLabelFromLabelName(
                     CDTXMania.stageSongSelection.rConfirmedSong.arDifficultyLabel[
                         CDTXMania.stageSongSelection.nConfirmedSongDifficulty]);
+            
+            //add difficulty panel to ui here
+            //todo: this should be moved when chart loading is moved
+            DTXTexture difficultyPanelTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\6_Difficulty.png")));
+            UIImage difficultyPanel = ui.AddChild(new UIImage(difficultyPanelTex));
+            difficultyPanel.renderMode = ERenderMode.Sliced;
+            difficultyPanel.position = new Vector3(191, 102, 0);
+            difficultyPanel.clipRect = new RectangleF(0, nIndex * 50, 262, 50);
+            difficultyPanel.isVisible = false;
         }
         finally
         {
@@ -306,12 +315,6 @@ internal class CStageSongLoading : CStage
             DTXTexture bgTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\6_background.jpg")));
             UIImage bg = ui.AddChild(new UIImage(bgTex));
             bg.renderOrder = -100;
-            
-            DTXTexture difficultyPanelTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\6_Difficulty.png")));
-            UIImage difficultyPanel = ui.AddChild(new UIImage(difficultyPanelTex));
-            difficultyPanel.renderMode = ERenderMode.Sliced;
-            difficultyPanel.position = new Vector3(191, 102, 0);
-            difficultyPanel.clipRect = new RectangleF(0, nIndex * 50, 262, 50);
             
             txLevel = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\6_LevelNumber.png"));
             txDifficultyPanel = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\6_Difficulty.png"));
@@ -741,6 +744,8 @@ internal class CStageSongLoading : CStage
     
     private void DrawLoadingScreenUI()
     {
+        ui.Draw(Matrix.Identity);
+        
         int y = 184;
         
         if (txJacket != null)
