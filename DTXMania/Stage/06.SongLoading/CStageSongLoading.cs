@@ -422,141 +422,8 @@ internal class CStageSongLoading : CStage
         }
 
         #endregion
-
-        #region [ 背景、レベル、タイトル表示 ]
-
-        //-----------------------------
-        if (txBackground != null)
-            txBackground.tDraw2D(CDTXMania.app.Device, 0, 0);
-
-        string strDTXFilePath = (CDTXMania.bCompactMode)
-            ? CDTXMania.strCompactModeFile
-            : CDTXMania.stageSongSelection.rChosenScore.FileInformation.AbsoluteFilePath;
-        CDTX cdtx = new(strDTXFilePath, true);
-
-        string path = cdtx.strFolderName + cdtx.PREIMAGE;
-        try
-        {
-            if (txJacket == null) // 2019.04.26 kairera0467
-            {
-                txJacket = CDTXMania.tGenerateTexture(!File.Exists(path) ? CSkin.Path(@"Graphics\5_preimage default.png") : path);
-            }
-        }
-        catch (Exception ex)
-        {
-            Trace.TraceError(ex.StackTrace);
-        }
-
-
-        int y = 184;
-
-        if (txJacket != null)
-        {
-            Matrix mat = Matrix.Identity;
-            float fScalingFactor;
-            float jacketOnScreenSize = 384.0f;
-            //Maintain aspect ratio by scaling only to the smaller scalingFactor
-            if (jacketOnScreenSize / txJacket.szImageSize.Width > jacketOnScreenSize / txJacket.szImageSize.Height)
-            {
-                fScalingFactor = jacketOnScreenSize / txJacket.szImageSize.Height;
-            }
-            else
-            {
-                fScalingFactor = jacketOnScreenSize / txJacket.szImageSize.Width;
-            }
-
-            mat *= Matrix.Scaling(fScalingFactor, fScalingFactor, 1f);
-            mat *= Matrix.Translation(206f, 66f, 0f);
-            mat *= Matrix.RotationZ(0.28f);
-
-            txJacket.tDraw3D(CDTXMania.app.Device, mat);
-        }
-
-        if (txTitle != null)
-        {
-            if (txTitle.szImageSize.Width > 625)
-                txTitle.vcScaleRatio.X = 625f / txTitle.szImageSize.Width;
-
-            txTitle.tDraw2D(CDTXMania.app.Device, 190, 285);
-        }
-
-        if (txArtist != null)
-        {
-            if (txArtist.szImageSize.Width > 625)
-                txArtist.vcScaleRatio.X = 625f / txArtist.szImageSize.Width;
-
-            txArtist.tDraw2D(CDTXMania.app.Device, 190, 360);
-        }
-
-        int[] iPart =
-            [0, CDTXMania.ConfigIni.bIsSwappedGuitarBass ? 2 : 1, CDTXMania.ConfigIni.bIsSwappedGuitarBass ? 1 : 2];
-
-        int j = 0;
-        int k = 0;
-
-        for (int i = 0; i < 3; i++)
-        {
-            j = iPart[i];
-
-            int DTXLevel = cdtx.LEVEL[j];
-            double DTXLevelDeci = cdtx.LEVELDEC[j];
-
-            if ((CDTXMania.ConfigIni.bDrumsEnabled && i == 0) || (CDTXMania.ConfigIni.bGuitarEnabled && i != 0))
-            {
-                if (DTXLevel != 0 || DTXLevelDeci != 0)
-                {
-                    //Always display CLASSIC style if Skill Mode is Classic
-                    if (CDTXMania.ConfigIni.nSkillMode == 0 || (CDTXMania.ConfigIni.bCLASSIC譜面判別を有効にする &&
-                                                                CDTXMania.stageSongSelection.rChosenScore
-                                                                    .SongInformation.b完全にCLASSIC譜面である[j] &&
-                                                                !cdtx.bForceXGChart))
-                    {
-                        tDrawStringLarge(187 + k, 152, $"{DTXLevel:00}");
-                    }
-                    else
-                    {
-                        if (cdtx.LEVEL[j] > 99)
-                        {
-                            DTXLevel = cdtx.LEVEL[j] / 100;
-                            DTXLevelDeci = cdtx.LEVEL[j] - (DTXLevel * 100);
-                        }
-                        else
-                        {
-                            DTXLevel = cdtx.LEVEL[j] / 10;
-                            DTXLevelDeci = ((cdtx.LEVEL[j] - DTXLevel * 10) * 10) + cdtx.LEVELDEC[j];
-                        }
-
-                        txLevel.tDraw2D(CDTXMania.app.Device, 282 + k, 243, new Rectangle(1000, 92, 30, 38));
-                        tDrawStringLarge(187 + k, 152, $"{DTXLevel:0}");
-                        tDrawStringLarge(307 + k, 152, $"{DTXLevelDeci:00}");
-                    }
-
-                    if (txPartPanel != null)
-                        txPartPanel.tDraw2D(CDTXMania.app.Device, 191 + k, 52, new Rectangle(0, j * 50, 262, 50));
-
-                    //this.txJacket.Dispose();
-                    if (!CDTXMania.bCompactMode && !CDTXMania.DTXVmode.Enabled && !CDTXMania.DTX2WAVmode.Enabled)
-                        tDrawDifficultyPanel(
-                            CDTXMania.stageSongSelection.rConfirmedSong.arDifficultyLabel[
-                                CDTXMania.stageSongSelection.nConfirmedSongDifficulty], 191 + k, 102);
-
-                    k = 700;
-                }
-            }
-
-            if (i == 2 && k == 0)
-            {
-                if (txPartPanel != null && CDTXMania.ConfigIni.bDrumsEnabled)
-                    txPartPanel.tDraw2D(CDTXMania.app.Device, 191, 52, new Rectangle(0, 0, 262, 50));
-
-                if (txDifficultyPanel != null)
-                    txDifficultyPanel.tDraw2D(CDTXMania.app.Device, 191, 102, new Rectangle(0, nIndex * 50, 262, 50));
-            }
-        }
-
-        //-----------------------------
-
-        #endregion
+        
+        DrawLoadingScreenUI();
 
         switch (ePhaseID)
         {
@@ -846,7 +713,115 @@ internal class CStageSongLoading : CStage
 
         return (int)ESongLoadingScreenReturnValue.Continue;
     }
+    
+    private void DrawLoadingScreenUI()
+    {
+        ui.Draw(Matrix.Identity);
+        
+        int y = 184;
+        
+        if (txJacket != null)
+        {
+            Matrix mat = Matrix.Identity;
+            float fScalingFactor;
+            float jacketOnScreenSize = 384.0f;
+            //Maintain aspect ratio by scaling only to the smaller scalingFactor
+            if (jacketOnScreenSize / txJacket.szImageSize.Width > jacketOnScreenSize / txJacket.szImageSize.Height)
+            {
+                fScalingFactor = jacketOnScreenSize / txJacket.szImageSize.Height;
+            }
+            else
+            {
+                fScalingFactor = jacketOnScreenSize / txJacket.szImageSize.Width;
+            }
+        
+            mat *= Matrix.Scaling(fScalingFactor, fScalingFactor, 1f);
+            mat *= Matrix.Translation(206f, 66f, 0f);
+            mat *= Matrix.RotationZ(0.28f);
+        
+            txJacket.tDraw3D(CDTXMania.app.Device, mat);
+        }
+        
+        if (txTitle != null)
+        {
+            if (txTitle.szImageSize.Width > 625)
+                txTitle.vcScaleRatio.X = 625f / txTitle.szImageSize.Width;
+        
+            txTitle.tDraw2D(CDTXMania.app.Device, 190, 285);
+        }
+        
+        if (txArtist != null)
+        {
+            if (txArtist.szImageSize.Width > 625)
+                txArtist.vcScaleRatio.X = 625f / txArtist.szImageSize.Width;
+        
+            txArtist.tDraw2D(CDTXMania.app.Device, 190, 360);
+        }
+        
+        int[] iPart =
+            [0, CDTXMania.ConfigIni.bIsSwappedGuitarBass ? 2 : 1, CDTXMania.ConfigIni.bIsSwappedGuitarBass ? 1 : 2];
 
+        int k = 0;
+        
+        for (int i = 0; i < 3; i++)
+        {
+            int j = iPart[i];
+        
+            int DTXLevel = cdtx.LEVEL[j];
+            double DTXLevelDeci = cdtx.LEVELDEC[j];
+        
+            if ((CDTXMania.ConfigIni.bDrumsEnabled && i == 0) || (CDTXMania.ConfigIni.bGuitarEnabled && i != 0))
+            {
+                if (DTXLevel != 0 || DTXLevelDeci != 0)
+                {
+                    //Always display CLASSIC style if Skill Mode is Classic
+                    if (CDTXMania.ConfigIni.nSkillMode == 0 || (CDTXMania.ConfigIni.bCLASSIC譜面判別を有効にする &&
+                                                                CDTXMania.stageSongSelection.rChosenScore
+                                                                    .SongInformation.b完全にCLASSIC譜面である[j] &&
+                                                                !cdtx.bForceXGChart))
+                    {
+                        tDrawStringLarge(187 + k, 152, $"{DTXLevel:00}");
+                    }
+                    else
+                    {
+                        if (cdtx.LEVEL[j] > 99)
+                        {
+                            DTXLevel = cdtx.LEVEL[j] / 100;
+                            DTXLevelDeci = cdtx.LEVEL[j] - (DTXLevel * 100);
+                        }
+                        else
+                        {
+                            DTXLevel = cdtx.LEVEL[j] / 10;
+                            DTXLevelDeci = ((cdtx.LEVEL[j] - DTXLevel * 10) * 10) + cdtx.LEVELDEC[j];
+                        }
+        
+                        txLevel.tDraw2D(CDTXMania.app.Device, 282 + k, 243, new Rectangle(1000, 92, 30, 38));
+                        tDrawStringLarge(187 + k, 152, $"{DTXLevel:0}");
+                        tDrawStringLarge(307 + k, 152, $"{DTXLevelDeci:00}");
+                    }
+        
+                    if (txPartPanel != null)
+                        txPartPanel.tDraw2D(CDTXMania.app.Device, 191 + k, 52, new Rectangle(0, j * 50, 262, 50));
+        
+                    //this.txJacket.Dispose();
+                    if (!CDTXMania.bCompactMode && !CDTXMania.DTXVmode.Enabled && !CDTXMania.DTX2WAVmode.Enabled)
+                        tDrawDifficultyPanel(CDTXMania.stageSongSelection.rConfirmedSong.arDifficultyLabel[
+                                CDTXMania.stageSongSelection.nConfirmedSongDifficulty], 191 + k, 102);
+        
+                    k = 700;
+                }
+            }
+        
+            if (i == 2 && k == 0)
+            {
+                if (txPartPanel != null && CDTXMania.ConfigIni.bDrumsEnabled)
+                    txPartPanel.tDraw2D(CDTXMania.app.Device, 191, 52, new Rectangle(0, 0, 262, 50));
+        
+                if (txDifficultyPanel != null)
+                    txDifficultyPanel.tDraw2D(CDTXMania.app.Device, 191, 102, new Rectangle(0, nIndex * 50, 262, 50));
+            }
+        }
+    }
 
     /// <summary>
     /// ESC押下時、trueを返す
