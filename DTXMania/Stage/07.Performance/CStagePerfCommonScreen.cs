@@ -112,7 +112,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                 Drums.eRandom[i] = CDTXMania.ConfigIni.eRandom[i];
                 Drums.bLight[i] = CDTXMania.ConfigIni.bLight[i];
                 Drums.bLeft[i] = CDTXMania.ConfigIni.bLeft[i];
-                Drums.fScrollSpeed[i] = ((float)(CDTXMania.ConfigIni.nScrollSpeed[i] + 1)) * 0.5f;
+                Drums.fScrollSpeed[i] = (CDTXMania.ConfigIni.nScrollSpeed[i] + 1) * 0.5f;
             }
             Drums.eDark = CDTXMania.ConfigIni.eDark;
             Drums.nPlaySpeedNumerator = CDTXMania.ConfigIni.nPlaySpeed;
@@ -183,7 +183,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                 Guitar.eRandom[i] = CDTXMania.ConfigIni.eRandom[i];
                 Guitar.bLight[i] = CDTXMania.ConfigIni.bLight[i];
                 Guitar.bLeft[i] = CDTXMania.ConfigIni.bLeft[i];
-                Guitar.fScrollSpeed[i] = ((float)(CDTXMania.ConfigIni.nScrollSpeed[i] + 1)) * 0.5f;
+                Guitar.fScrollSpeed[i] = (CDTXMania.ConfigIni.nScrollSpeed[i] + 1) * 0.5f;
             }
             Guitar.eDark = CDTXMania.ConfigIni.eDark;
             Guitar.nPlaySpeedNumerator = CDTXMania.ConfigIni.nPlaySpeed;
@@ -254,7 +254,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                 Bass.eRandom[i] = CDTXMania.ConfigIni.eRandom[i];
                 Bass.bLight[i] = CDTXMania.ConfigIni.bLight[i];
                 Bass.bLeft[i] = CDTXMania.ConfigIni.bLeft[i];
-                Bass.fScrollSpeed[i] = ((float)(CDTXMania.ConfigIni.nScrollSpeed[i] + 1)) * 0.5f;
+                Bass.fScrollSpeed[i] = (CDTXMania.ConfigIni.nScrollSpeed[i] + 1) * 0.5f;
             }
             Bass.eDark = CDTXMania.ConfigIni.eDark;
             Bass.nPlaySpeedNumerator = CDTXMania.ConfigIni.nPlaySpeed;
@@ -373,7 +373,7 @@ internal abstract class CStagePerfCommonScreen : CStage
         //lockmixer = new object();
         queueMixerSound = new Queue<stmixer>(64);
         bIsDirectSound = (CDTXMania.SoundManager.GetCurrentSoundDeviceType() == "DirectSound");
-        dbPlaySpeed = ((double)CDTXMania.ConfigIni.nPlaySpeed) / 20.0;
+        dbPlaySpeed = CDTXMania.ConfigIni.nPlaySpeed / 20.0;
         bValidScore = true;
 
         LoopBeginMs = -1;
@@ -2993,7 +2993,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                     if (!pChip.bHit && (pChip.nDistanceFromBar.Drums < 0))
                     {
                         pChip.bHit = true;
-                        actPlayInfo.dbBPM = (pChip.nIntegerValue * (((double)configIni.nPlaySpeed) / 20.0)) + dTX.BASEBPM;
+                        actPlayInfo.dbBPM = (pChip.nIntegerValue * (configIni.nPlaySpeed / 20.0)) + dTX.BASEBPM;
 
                         if (CDTXMania.ConfigIni.bDrumsEnabled)
                         {
@@ -3063,7 +3063,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                         pChip.bHit = true;
                         if (dTX.listBPM.ContainsKey(pChip.nIntegerValue_InternalNumber))
                         {
-                            actPlayInfo.dbBPM = (dTX.listBPM[pChip.nIntegerValue_InternalNumber].dbBPM値 * (((double)configIni.nPlaySpeed) / 20.0)) + dTX.BASEBPM;
+                            actPlayInfo.dbBPM = (dTX.listBPM[pChip.nIntegerValue_InternalNumber].dbBPM値 * (configIni.nPlaySpeed / 20.0)) + dTX.BASEBPM;
 
                             if (CDTXMania.ConfigIni.bDrumsEnabled)
                             {
@@ -3803,7 +3803,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                 else if (pChip.nDistanceFromBar[instIndex] < 300)
                 {
                     pChip.bVisible = true;
-                    pChip.nTransparency = 0xff - ((int)((((double)(pChip.nDistanceFromBar[instIndex] - 250)) * 255.0) / 75.0));
+                    pChip.nTransparency = 0xff - ((int)(((pChip.nDistanceFromBar[instIndex] - 250) * 255.0) / 75.0));
                 }
                 else
                 {
@@ -3822,7 +3822,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                 else if (pChip.nDistanceFromBar[instIndex] < 200)
                 {
                     pChip.bVisible = true;
-                    pChip.nTransparency = (int)((((double)(pChip.nDistanceFromBar[instIndex] - 150)) * 255.0) / 75.0);
+                    pChip.nTransparency = (int)(((pChip.nDistanceFromBar[instIndex] - 150) * 255.0) / 75.0);
                 }
             }
             #endregion
@@ -4271,7 +4271,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                                             CTexture obj = txChip;
                                             obj.nTransparency = obj.nTransparency / 2;
                                         }
-                                        txChip.vcScaleRatio.Y = 1f * (float)num3 / (float)rectangle2.Height;
+                                        txChip.vcScaleRatio.Y = 1f * num3 / rectangle2.Height;
                                         txChip.tDraw2D(CDTXMania.app.Device, num8, y - (CDTXMania.ConfigIni.bReverse[(int)inst] ? num3 : 0), rectangle2);
                                     }
                                 }
@@ -4543,7 +4543,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                 else if (pChip.nDistanceFromBar[indexInst] < 300)
                 {
                     pChip.bVisible = true;
-                    pChip.nTransparency = 0xff - ((int)((((double)(pChip.nDistanceFromBar[indexInst] - 250)) * 255.0) / 75.0));
+                    pChip.nTransparency = 0xff - ((int)(((pChip.nDistanceFromBar[indexInst] - 250) * 255.0) / 75.0));
                 }
                 else
                 {
@@ -4562,7 +4562,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                 else if (pChip.nDistanceFromBar[indexInst] < 200)
                 {
                     pChip.bVisible = true;
-                    pChip.nTransparency = (int)((((double)(pChip.nDistanceFromBar[indexInst] - 150)) * 255.0) / 75.0);
+                    pChip.nTransparency = (int)(((pChip.nDistanceFromBar[indexInst] - 150) * 255.0) / 75.0);
                 }
             }
             #endregion
@@ -4739,14 +4739,14 @@ internal abstract class CStagePerfCommonScreen : CStage
     }
     protected void tUpdateAndDraw_JudgementString1_ForNormalPosition()  // t進行描画_判定文字列1_通常位置指定の場合
     {
-        if (((EType)CDTXMania.ConfigIni.JudgementStringPosition.Drums) != EType.B)
+        if (CDTXMania.ConfigIni.JudgementStringPosition.Drums != EType.B)
         {
             actJudgeString.OnUpdateAndDraw();
         }
     }
     protected void tUpdateAndDraw_JudgementString2_ForPositionOnJudgementLine()  // t進行描画_判定文字列2_判定ライン上指定の場合
     {
-        if (((EType)CDTXMania.ConfigIni.JudgementStringPosition.Drums) == EType.B)
+        if (CDTXMania.ConfigIni.JudgementStringPosition.Drums == EType.B)
         {
             actJudgeString.OnUpdateAndDraw();
         }
@@ -4794,7 +4794,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                 matrix2.Matrix00 = 1f;
                 matrix2.Matrix11 = 1f;
                 matrix2.Matrix22 = 1f;
-                matrix2.Matrix33 = ((float)CDTXMania.ConfigIni.nBackgroundTransparency) / 255f;
+                matrix2.Matrix33 = CDTXMania.ConfigIni.nBackgroundTransparency / 255f;
                 matrix2.Matrix44 = 1f;
                 ColorMatrix newColorMatrix = matrix2;
                 ImageAttributes imageAttr = new ImageAttributes();
@@ -5614,12 +5614,12 @@ internal abstract class CStagePerfCommonScreen : CStage
         actAVI.Stop();
         actBGA.Stop();
         //Reset Hold note cache
-        chipロングノートHit中 = default(STDGBVALUE<CChip>);
-        nロングノートPart = default(STDGBVALUE<int>);
-        nCurrentLongNoteDuration = default(STDGBVALUE<int>);
+        chipロングノートHit中 = default;
+        nロングノートPart = default;
+        nCurrentLongNoteDuration = default;
 
         //Reset Accumulated Score
-        nAccumulatedLongNoteBonusScore = default(STDGBVALUE<int>);
+        nAccumulatedLongNoteBonusScore = default;
 
         // Loop to set new nCurrentTopChip
         // Also, if we are going backward, we need to unhit some chips, and reset TopChip
@@ -5660,7 +5660,7 @@ internal abstract class CStagePerfCommonScreen : CStage
         }
 
         //Adjust BGM to new position
-        List<CSound> pausedCSound = new List<CSound>();
+        List<CSound> pausedCSound = [];
 
         #region [ BGMやギターなど、演奏開始のタイミングで再生がかかっているサウンドのの途中再生開始 ] // (CDTXのt入力・行解析・チップ配置()で小節番号が+1されているのを削っておくこと)
         for (int i = nCurrentTopChip; i >= 0; i--)
@@ -5684,7 +5684,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                         if (wc.rSound[j] != null)
                         {
                             // Needed only if the tJumpInSong is called by tChangePlaySpeed
-                            wc.rSound[j].dbPlaySpeed = ((double)CDTXMania.ConfigIni.nPlaySpeed) / 20.0;
+                            wc.rSound[j].dbPlaySpeed = CDTXMania.ConfigIni.nPlaySpeed / 20.0;
 
                             wc.rSound[j].tPausePlayback();
                             wc.rSound[j].tChangePlaybackPosition(nNewPosition - pChip.nPlaybackTimeMs);
@@ -5716,7 +5716,7 @@ internal abstract class CStagePerfCommonScreen : CStage
         tDisplayPresence();
     }
 
-    protected void tChangePlaySpeed(int nSpeedOffset)
+    private void tChangePlaySpeed(int nSpeedOffset)
     {
         Trace.TraceInformation(((nSpeedOffset>0) ? "Increase" : "Decrease") + " Play Speed from " + CDTXMania.ConfigIni.nPlaySpeed + " to " + (CDTXMania.ConfigIni.nPlaySpeed+nSpeedOffset));
 
@@ -5726,18 +5726,18 @@ internal abstract class CStagePerfCommonScreen : CStage
 
         foreach (CChip chip in CDTXMania.DTX.listChip)
         {
-            chip.nPlaybackTimeMs = (int)(((double)chip.nPlaybackTimeMs * dbOldSpeed) / dbNewSpeed);
+            chip.nPlaybackTimeMs = (int)((chip.nPlaybackTimeMs * dbOldSpeed) / dbNewSpeed);
         }
         if (LoopBeginMs != -1)
         {
-            LoopBeginMs = (int)(((double)LoopBeginMs * dbOldSpeed) / dbNewSpeed);
+            LoopBeginMs = (int)((LoopBeginMs * dbOldSpeed) / dbNewSpeed);
         }
         if (LoopEndMs != -1)
         {
-            LoopEndMs = (int)(((double)LoopEndMs * dbOldSpeed) / dbNewSpeed);
+            LoopEndMs = (int)((LoopEndMs * dbOldSpeed) / dbNewSpeed);
         }
 
-        CSoundManager.rcPerformanceTimer.nCurrentTime = (int)(((double)CSoundManager.rcPerformanceTimer.nCurrentTime * dbOldSpeed) / dbNewSpeed);
+        CSoundManager.rcPerformanceTimer.nCurrentTime = (int)((CSoundManager.rcPerformanceTimer.nCurrentTime * dbOldSpeed) / dbNewSpeed);
 
         tJumpInSong(CSoundManager.rcPerformanceTimer.nCurrentTime);
 
@@ -5756,7 +5756,7 @@ internal abstract class CStagePerfCommonScreen : CStage
         CDTXMania.tReleaseTexture(ref txPlaySpeed);
         if (CDTXMania.ConfigIni.nPlaySpeed != 20)
         {
-            double d = (double)(CDTXMania.ConfigIni.nPlaySpeed / 20.0);
+            double d = CDTXMania.ConfigIni.nPlaySpeed / 20.0;
             String strModifiedPlaySpeed = "Play Speed: x" + d.ToString("0.000");
             CPrivateFastFont pfModifiedPlaySpeed = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.str選曲リストフォント), 18, FontStyle.Regular);
             Bitmap bmpModifiedPlaySpeed = pfModifiedPlaySpeed.DrawPrivateFont(strModifiedPlaySpeed, CPrivateFont.DrawMode.Edge, Color.White, Color.White, Color.Black, Color.Red, true);
@@ -5831,11 +5831,11 @@ internal abstract class CStagePerfCommonScreen : CStage
 
         nCurrentTopChip = CDTXMania.DTX.listChip.Count - 1;   // 終端にシーク
         //Reset Hold note cache
-        chipロングノートHit中 = default(STDGBVALUE<CChip>);
-        nロングノートPart = default(STDGBVALUE<int>);
-        nCurrentLongNoteDuration = default(STDGBVALUE<int>);
+        chipロングノートHit中 = default;
+        nロングノートPart = default;
+        nCurrentLongNoteDuration = default;
         //
-        nAccumulatedLongNoteBonusScore = default(STDGBVALUE<int>);
+        nAccumulatedLongNoteBonusScore = default;
         // 自分自身のOn活性化()相当の処理もすべき。
     }
 }

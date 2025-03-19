@@ -123,43 +123,44 @@ internal class CStageConfig : CStage
         if (!bNotActivated)
         {
             //create resources for menu elements
-            DTXTexture? bgTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_background.png")));
-            UIImage? bg = uiGroup.AddChild(new UIImage(bgTex));
+            DTXTexture bgTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_background.png")));
+            UIImage bg = uiGroup.AddChild(new UIImage(bgTex));
             bg.renderOrder = -100;
             bg.position = Vector3.Zero;
                 
-            DTXTexture? itemBarTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_item bar.png")));
-            UIImage? itemBar = uiGroup.AddChild(new UIImage(itemBarTex));
+            DTXTexture itemBarTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_item bar.png")));
+            UIImage itemBar = uiGroup.AddChild(new UIImage(itemBarTex));
             itemBar.position = new Vector3(400, 0, 0);
             itemBar.renderOrder = 50;
                 
-            DTXTexture? headerPanelTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_header panel.png")));
-            UIImage? headerPanel = uiGroup.AddChild(new UIImage(headerPanelTex));
+            DTXTexture headerPanelTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_header panel.png")));
+            UIImage headerPanel = uiGroup.AddChild(new UIImage(headerPanelTex));
             headerPanel.position = Vector3.Zero;
             headerPanel.renderOrder = 52;
                 
-            DTXTexture? footerPanelTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_footer panel.png")));
-            UIImage? footerPanel = uiGroup.AddChild(new UIImage(footerPanelTex));
+            DTXTexture footerPanelTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_footer panel.png")));
+            UIImage footerPanel = uiGroup.AddChild(new UIImage(footerPanelTex));
             footerPanel.position = new Vector3(0, 720 - footerPanel.Texture.Height, 0);
             footerPanel.renderOrder = 53;
                 
             //left menu
-            UIGroup? leftMenu = uiGroup.AddChild(new UIGroup());
+            UIGroup leftMenu = uiGroup.AddChild(new UIGroup());
             leftMenu.position = new Vector3(245, 140, 0);
             leftMenu.renderOrder = 50;
                 
-            DTXTexture? menuPanelTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_menu panel.png")));
-            UIImage? menuPanel = leftMenu.AddChild(new UIImage(menuPanelTex));
+            DTXTexture menuPanelTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_menu panel.png")));
+            UIImage menuPanel = leftMenu.AddChild(new UIImage(menuPanelTex));
             menuPanel.position = Vector3.Zero;
                 
             //menu items
             configLeftOptionsMenu = leftMenu.AddChild(new UISelectList());
             configLeftOptionsMenu.isVisible = true;
+            
             //340 - size/2, so this becomes 340-245= 95
             configLeftOptionsMenu.position = new Vector3(95, 4, 0);
 
             //todo: render menu cursor correctly to match current version of the game. right now its rendered as a stretched image.
-            DTXTexture? menuCursorTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_menu cursor.png")));
+            DTXTexture menuCursorTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_menu cursor.png")));
             menuCursor = configLeftOptionsMenu.AddChild(new UIImage(menuCursorTex));
             menuCursor.position = new Vector3(-5, 2, 0);
             menuCursor.size = new Vector2(170, 32);
@@ -167,7 +168,7 @@ internal class CStageConfig : CStage
             menuCursor.renderMode = ERenderMode.Sliced;
             menuCursor.sliceRect = new RectangleF(16, 0, 12, 32);
                 
-            CPrivateFastFont? font = new(new FontFamily(CDTXMania.ConfigIni.str選曲リストフォント), 18);
+            CPrivateFastFont font = new(new FontFamily(CDTXMania.ConfigIni.str選曲リストフォント), 18);
             configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(font, "System", () => { actList.tSetupItemList_System(); }));
             configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(font, "Drums", () => { actList.tSetupItemList_Drums(); }));
             configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(font, "Guitar", () => { actList.tSetupItemList_Guitar(); }));
@@ -417,11 +418,9 @@ internal class CStageConfig : CStage
     private CActFIFOWhite actFIFO;
     private CActConfigKeyAssign actKeyAssign;
     private CActConfigList actList;
-    //private CActOptionPanel actオプションパネル;
+    
     private bool bFocusIsOnMenu;
     private STKeyRepetitionCounter ctKeyRepetition;
-    private const int DESC_H = 0x80;
-    private const int DESC_W = 220;
     private EItemPanelMode eItemPanelMode;
     private Font ftFont;
         
@@ -484,8 +483,8 @@ internal class CStageConfig : CStage
     {
         try
         {
-            Bitmap? image = new( (int)(220 * 2 ), (int)(192 * 2 ) );		// 説明文領域サイズの縦横 2 倍。（描画時に 0.5 倍で表示する。）
-            Graphics? graphics = Graphics.FromImage( image );
+            Bitmap image = new( 220 * 2, 192 * 2 );		// 説明文領域サイズの縦横 2 倍。（描画時に 0.5 倍で表示する。）
+            Graphics graphics = Graphics.FromImage( image );
             graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
 				
             string[,] str = new string[ 2, 2 ];
@@ -551,19 +550,13 @@ internal class CStageConfig : CStage
     {
         try
         {
-            Bitmap? image = new( (int)(400), (int)(192) );		// 説明文領域サイズの縦横 2 倍。（描画時に 0.5 倍で表示する___のは中止。処理速度向上のため。）
-            Graphics? graphics = Graphics.FromImage( image );
+            Bitmap image = new( 400, 192 );		// 説明文領域サイズの縦横 2 倍。（描画時に 0.5 倍で表示する___のは中止。処理速度向上のため。）
+            Graphics graphics = Graphics.FromImage( image );
             graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
 
             CItemBase item = actList.ibCurrentSelection;
-            if( ( item.str説明文 != null ) && ( item.str説明文.Length > 0 ) )
+            if( item.str説明文 is { Length: > 0 } )
             {
-                //int num = 0;
-                //foreach( string str in item.str説明文.Split( new char[] { '\n' } ) )
-                //{
-                //    graphics.DrawString( str, this.ftFont, Brushes.White, new PointF( 4f * Scale.X, (float) num * Scale.Y ) );
-                //    num += 30;
-                //}
                 graphics.DrawString( item.str説明文, ftFont, Brushes.Black, new System.Drawing.RectangleF( 4f, (float) 0, 230, 430 ) );
             }
             graphics.Dispose();
@@ -572,8 +565,6 @@ internal class CStageConfig : CStage
                 txDescriptionPanel.Dispose();
             }
             txDescriptionPanel = new CTexture( CDTXMania.app.Device, image, CDTXMania.TextureFormat, false );
-            //this.txDescriptionPanel.vcScaleRatio.X = 0.58f;
-            //this.txDescriptionPanel.vcScaleRatio.Y = 0.58f;
             image.Dispose();
         }
         catch( CTextureCreateFailedException )

@@ -553,7 +553,7 @@ internal class CDTX : CActivity
         public int n表記上の番号;
         public CSound[] rSound = new CSound[CDTXMania.ConfigIni.nPoliphonicSounds]; // 4
         public string strコメント文 = "";
-        public string strファイル名 = "";
+        public string strFileName = "";
 
         public bool bBGMとして使わない
         {
@@ -581,7 +581,7 @@ internal class CDTX : CActivity
             }
 
             sb.Append(string.Format("音量:{0}, 位置:{1}, サイズ:{2}, BGM:{3}, File:{4}, Comment:{5}", nVolume, nPosition, nChipSize,
-                bBGMとして使う ? 'Y' : 'N', strファイル名, strコメント文));
+                bBGMとして使う ? 'Y' : 'N', strFileName, strコメント文));
 
             return sb.ToString();
         }
@@ -609,7 +609,7 @@ internal class CDTX : CActivity
                     rSound[i] = null;
 
                     if ((i == 0) && CDTXMania.ConfigIni.bLog作成解放ログ出力)
-                        Trace.TraceInformation("サウンドを解放しました。({0})({1})", strコメント文, strファイル名);
+                        Trace.TraceInformation("サウンドを解放しました。({0})({1})", strコメント文, strFileName);
                 }
             }
 
@@ -3068,13 +3068,13 @@ internal class CDTX : CActivity
         }
     }
 
-    public void t指定された発声位置と同じ位置の指定したチップにボーナスフラグを立てる(int n発声位置, int nレーン)
+    private void t指定された発声位置と同じ位置の指定したチップにボーナスフラグを立てる(int n発声位置, int nLane)
     {
         //ボーナスチップの内部番号→チャンネル番号変換
         //初期値は0で問題無いはず。
         EChannel n変換後のレーン番号 = 0;
         EChannel n変換後のレーン番号2 = 0; //HH、LP用
-        switch (nレーン)
+        switch (nLane)
         {
             case 1:
                 n変換後のレーン番号 = EChannel.LeftCymbal;
@@ -3123,28 +3123,12 @@ internal class CDTX : CActivity
         }
     }
 
-    public void tチップの再生(CChip rChip, long n再生開始システム時刻ms)
-    {
-        tチップの再生(rChip, n再生開始システム時刻ms, CDTXMania.ConfigIni.n自動再生音量, false, false);
-    }
-
-    public void tチップの再生(CChip rChip, long n再生開始システム時刻ms, int nVol)
-    {
-        tチップの再生(rChip, n再生開始システム時刻ms, nVol, false, false);
-    }
-
-    public void tチップの再生(CChip rChip, long n再生開始システム時刻ms, int nVol, bool bMIDIMonitor)
-    {
-        tチップの再生(rChip, n再生開始システム時刻ms, nVol, bMIDIMonitor, false);
-    }
-
-    public void tチップの再生(CChip pChip, long n再生開始システム時刻ms, int nVol, bool bMIDIMonitor, bool bBad)
+    public void tチップの再生(CChip pChip, long n再生開始システム時刻ms, int nVol, bool bBad = false)
     {
         if (pChip.nIntegerValue_InternalNumber >= 0)
         {
-            if (listWAV.ContainsKey(pChip.nIntegerValue_InternalNumber))
+            if (listWAV.TryGetValue(pChip.nIntegerValue_InternalNumber, out CWAV? wc))
             {
-                CWAV wc = listWAV[pChip.nIntegerValue_InternalNumber];
                 int index = wc.n現在再生中のサウンド番号 = (wc.n現在再生中のサウンド番号 + 1) % nPolyphonicSounds;
                 if ((wc.rSound[0] != null) &&
                     (wc.rSound[0].bストリーム再生する || wc.rSound[index] == null))
@@ -3167,6 +3151,7 @@ internal class CDTX : CActivity
                     }
 
                     sound.dbPlaySpeed = CDTXMania.ConfigIni.nPlaySpeed / 20.0;
+                    
                     // 再生速度によって、WASAPI/ASIOで使う使用mixerが決まるため、付随情報の設定(音量/PAN)は、再生速度の設定後に行う
                     sound.nVolume = (int)(nVol * wc.nVolume / 100.0);
                     sound.nPosition = wc.nPosition;
@@ -3212,48 +3197,15 @@ internal class CDTX : CActivity
         }
     }
 
-    public void tChangePlaybackPositionChip(CChip pChip)
-    {
-        if (listWAV.ContainsKey(pChip.nIntegerValue_InternalNumber))
-        {
-            CWAV wc = listWAV[pChip.nIntegerValue_InternalNumber];
-            if (wc.rSound[0] != null && wc.rSound[0].nTotalPlayTimeMs >= 1000)
-            {
-                for (int i = 0; i < nPolyphonicSounds; i++)
-                {
-                    if ((wc.rSound[i] != null) && (wc.rSound[i].b再生中))
-                    {
-                        if (CSoundManager.rcPerformanceTimer.nCurrentTime > pChip.nPlaybackTimeMs
-                            && CSoundManager.rcPerformanceTimer.nCurrentTime <
-                            pChip.nPlaybackTimeMs + wc.rSound[i].nTotalPlayTimeMs)
-                        {
-                            Trace.TraceInformation(
-                                "tChangePlaybackPositionChip: {0}, nPlaybackTimeMs={1}ms, nTotalPlayTimeMs={2}ms, nPlayStartTime={3}ms",
-                                Path.GetFileName(wc.rSound[i].strファイル名),
-                                pChip.nPlaybackTimeMs, //relative time chip is scheduled
-                                wc.rSound[i].nTotalPlayTimeMs, //wav duration
-                                wc.nPlayStartTime[i] //absolute time
-                            );
-                            wc.rSound[i].tChangePlaybackPosition(CSoundManager.rcPerformanceTimer.nCurrentTime -
-                                                                 pChip.nPlaybackTimeMs); // WASAPI/ASIO用
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     public void tStopPlayingWav(int nWaveの内部番号)
     {
-        if (listWAV.ContainsKey(nWaveの内部番号))
+        if (!listWAV.TryGetValue(nWaveの内部番号, out CWAV? cwav)) return;
+        
+        for (int i = 0; i < nPolyphonicSounds; i++)
         {
-            CWAV cwav = listWAV[nWaveの内部番号];
-            for (int i = 0; i < nPolyphonicSounds; i++)
+            if (cwav.rSound[i] != null && cwav.rSound[i].b再生中)
             {
-                if (cwav.rSound[i] != null && cwav.rSound[i].b再生中)
-                {
-                    cwav.rSound[i].tStopPlayback();
-                }
+                cwav.rSound[i].tStopPlayback();
             }
         }
     }
@@ -3270,7 +3222,7 @@ internal class CDTX : CActivity
 //				count++;
 
             string str = string.IsNullOrEmpty(PATH_WAV) ? strFolderName : PATH_WAV;
-            str = str + PATH + cwav.strファイル名;
+            str = str + PATH + cwav.strFileName;
             _ = (CDTXMania.SoundManager.GetCurrentSoundDeviceType() == "DirectSound");
             try
             {
@@ -3725,6 +3677,8 @@ internal class CDTX : CActivity
 
     private void tRead(string strFileName, bool bHeaderOnly, double dbReplaySpeed = 1.0, int nBgmAdjust = 0)
     {
+        Console.WriteLine("Reading DTX file: " + strFileName);
+        
         this.bHeaderOnly = bHeaderOnly;
         b動画読み込み = (CDTXMania.rCurrentStage.eStageID == CStage.EStage.SongLoading);
         strFileNameFullPath = Path.GetFullPath(strFileName);
@@ -4321,64 +4275,57 @@ internal class CDTX : CActivity
                     }
                     default:
                     {
-                        if (chip.nChannelNumber >= EChannel.BonusEffect_Min &&
-                            chip.nChannelNumber <= EChannel.BonusEffect)
+                        switch (chip.nChannelNumber)
                         {
-                            #region [ TEST ]
-
-                            t指定された発声位置と同じ位置の指定したチップにボーナスフラグを立てる(chip.nPlaybackPosition, chip.nIntegerValue);
-
-                            #endregion
-                        }
-                        //Process Long Notes for Guitar and Bass
-                        else if (chip.nChannelNumber == EChannel.Guitar_LongNote ||
-                                 chip.nChannelNumber == EChannel.Bass_LongNote)
-                        {
-                            #region [Long Note Processing]
-
-                            EInstrumentPart eChipPart = (chip.nChannelNumber == EChannel.Guitar_LongNote)
-                                ? EInstrumentPart.GUITAR
-                                : EInstrumentPart.BASS;
-                            //Check if this chip coincide with a KeyPress if currently no candidate start hold 
-                            if (cCandidateStartHold[(int)eChipPart] == null)
+                            case >= EChannel.BonusEffect_Min and <= EChannel.BonusEffect:
+                                #region [ TEST ]
+                                t指定された発声位置と同じ位置の指定したチップにボーナスフラグを立てる(chip.nPlaybackPosition, chip.nIntegerValue);
+                                #endregion
+                                break;
+                            
+                            //Process Long Notes for Guitar and Bass
+                            case EChannel.Guitar_LongNote:
+                            case EChannel.Bass_LongNote:
                             {
-                                foreach (CChip chip2 in listChip)
+                                #region [Long Note Processing]
+
+                                EInstrumentPart eChipPart = (chip.nChannelNumber == EChannel.Guitar_LongNote)
+                                    ? EInstrumentPart.GUITAR
+                                    : EInstrumentPart.BASS;
+                                //Check if this chip coincide with a KeyPress if currently no candidate start hold 
+                                if (cCandidateStartHold[(int)eChipPart] == null)
                                 {
-                                    if (chip2.nPlaybackPosition == chip.nPlaybackPosition &&
-                                        (eChipPart == chip2.eInstrumentPart && chip2.bChannelWithVisibleChip) &&
-                                        !chip2.bChipIsOpenNote)
+                                    foreach (CChip chip2 in listChip.Where(chip2 => chip2.nPlaybackPosition == chip.nPlaybackPosition &&
+                                                 eChipPart == chip2.eInstrumentPart && chip2 is { bChannelWithVisibleChip: true, bChipIsOpenNote: false }))
                                     {
                                         cCandidateStartHold[(int)eChipPart] = chip2;
                                         break;
                                     }
                                 }
-                            }
-                            //Check for EndHold note rule violation
-                            else
-                            {
-                                foreach (CChip chip2 in listChip)
+                                //Check for EndHold note rule violation
+                                else
                                 {
-                                    if (chip2.eInstrumentPart == eChipPart && chip2.bChannelWithVisibleChip &&
-                                        chip2.nPlaybackPosition >
-                                        cCandidateStartHold[(int)eChipPart].nPlaybackPosition &&
-                                        chip2.nPlaybackPosition <= chip.nPlaybackPosition
-                                       )
+                                    if (listChip.Any(chip2 => chip2.eInstrumentPart == eChipPart && chip2.bChannelWithVisibleChip &&
+                                                              chip2.nPlaybackPosition >
+                                                              cCandidateStartHold[(int)eChipPart].nPlaybackPosition &&
+                                                              chip2.nPlaybackPosition <= chip.nPlaybackPosition))
                                     {
                                         cCandidateStartHold[(int)eChipPart] = null;
-                                        break;
+                                    }
+
+                                    //If candidate start hold survives
+                                    if (cCandidateStartHold[(int)eChipPart] != null)
+                                    {
+                                        cCandidateStartHold[(int)eChipPart].chipロングノート終端 = chip;
+                                        //Reset
+                                        cCandidateStartHold[(int)eChipPart] = null;
                                     }
                                 }
 
-                                //If candidate start hold survives
-                                if (cCandidateStartHold[(int)eChipPart] != null)
-                                {
-                                    cCandidateStartHold[(int)eChipPart].chipロングノート終端 = chip;
-                                    //Reset
-                                    cCandidateStartHold[(int)eChipPart] = null;
-                                }
-                            }
+                                #endregion
 
-                            #endregion
+                                break;
+                            }
                         }
 
                         continue;
@@ -7248,7 +7195,7 @@ internal class CDTX : CActivity
             nChipSize = n無限管理SIZE[zz],
             nPosition = n無限管理PAN[zz],
             nVolume = n無限管理VOL[zz],
-            strファイル名 = strParameter,
+            strFileName = strParameter,
             strコメント文 = strComment,
         };
 
