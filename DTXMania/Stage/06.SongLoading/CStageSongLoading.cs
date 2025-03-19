@@ -508,8 +508,7 @@ internal class CStageSongLoading : CStage
                     //2016.06.18 kairera0467 「.ghost.score」ファイルが無かった場合ghostファイルから逆算を行う形に変更。
                     string[] prefix = ["none", "perfect", "lastplay", "hiskill", "hiscore", "online"];
                     int indPrefix = (int)CDTXMania.ConfigIni.eTargetGhost[i];
-                    string filename = cdtx.strFolderName + "\\" + cdtx.strFileName + "." + prefix[indPrefix] + "." +
-                                      inst[i] + ".ghost";
+                    string filename = $"{cdtx.strFolderName}\\{cdtx.strFileName}.{prefix[indPrefix]}.{inst[i]}.ghost";
 
                     if (stGhostLag[i] == null || File.Exists(filename + ".score"))
                         continue;
@@ -703,10 +702,8 @@ internal class CStageSongLoading : CStage
                 long nCurrentTime = CDTXMania.Timer.nCurrentTime;
                 if (nCurrentTime < nBGMPlayStartTime)
                     nBGMPlayStartTime = nCurrentTime;
-
-                //						if ( ( nCurrentTime - this.nBGMPlayStartTime ) > ( this.nBGMTotalPlayTimeMs - 1000 ) )
-                if ((nCurrentTime - nBGMPlayStartTime) >
-                    (nBGMTotalPlayTimeMs)) // #27787 2012.3.10 yyagi 1000ms == フェードイン分の時間
+                
+                if ((nCurrentTime - nBGMPlayStartTime) > (nBGMTotalPlayTimeMs)) // #27787 2012.3.10 yyagi 1000ms == フェードイン分の時間
                 {
                     actFO.tStartFadeOut();
                     ePhaseID = EPhase.Common_FadeOut;
@@ -716,13 +713,10 @@ internal class CStageSongLoading : CStage
             }
 
             case EPhase.Common_FadeOut:
-                //if (this.actFO.OnUpdateAndDraw() == 0)
-                //return 0;
                 if (sdLoadingSound != null)
                 {
                     sdLoadingSound.tRelease();
                 }
-
                 return (int)ESongLoadingScreenReturnValue.LoadingComplete;
         }
 
