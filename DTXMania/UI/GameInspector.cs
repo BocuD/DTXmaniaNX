@@ -15,12 +15,14 @@ public class GameStatus
         
         InspectorManager.hierarchyWindow.target = CDTXMania.rCurrentStage.ui;
 
-        ImGui.Begin("Game Status");
-        if (ImGui.CollapsingHeader("Game Status"))
+        ImGui.Begin("Game State");
+        if (ImGui.CollapsingHeader("Game State"))
         {
             ImGui.Text("Current Stage: " + CDTXMania.rCurrentStage.GetType());
             
             ImGui.Checkbox("Prevent game keyboard input", ref preventGameKeyboardInput);
+
+            ImGui.Checkbox("Render game viewport to window", ref CDTXMania.renderGameToSurface);
         }
 
         if (ImGui.CollapsingHeader("Skin"))
