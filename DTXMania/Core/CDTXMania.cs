@@ -2111,11 +2111,6 @@ internal class CDTXMania : Game
         }
         //---------------------
         #endregion
-        #region [ Initialize CAvi ]
-        //---------------------
-        CAvi.t初期化();
-        //---------------------
-        #endregion
         #region [ Initialize Random ]
         //---------------------
         Random = new Random((int)Timer.nシステム時刻);
@@ -2257,7 +2252,6 @@ internal class CDTXMania : Game
                     Trace.Unindent();
                 }
             }
-            CAvi.t終了();
             //---------------------
             #endregion
             #region [ スキンの終了処理 ]

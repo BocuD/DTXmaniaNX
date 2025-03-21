@@ -40,7 +40,6 @@ internal class CActFlushGPU : CActivity
 		if ( !bNotActivated )
 		{
 			IDirect3DQuery9.Issue( Issue.End );
-			DWM.Flush();
 			IDirect3DQuery9.GetData<int>( out _, true );	// flush GPU queue
 		}
 		return 0;
