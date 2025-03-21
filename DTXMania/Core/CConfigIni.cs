@@ -1394,7 +1394,7 @@ internal class CConfigIni
 		sw.WriteLine();
 		#region [ スキン関連 ]
 		#region [ Skinパスの絶対パス→相対パス変換 ]
-		Uri uriRoot = new Uri( Path.Combine( CDTXMania.strEXEのあるフォルダ, "System" + Path.DirectorySeparatorChar ) );
+		Uri uriRoot = new Uri( Path.Combine( CDTXMania.executableDirectory, "System" + Path.DirectorySeparatorChar ) );
 		Uri uriPath = new Uri( Path.Combine( strSystemSkinSubfolderFullName, "." + Path.DirectorySeparatorChar ) );
 		string relPath = uriRoot.MakeRelativeUri( uriPath ).ToString();				// 相対パスを取得
 		relPath = System.Web.HttpUtility.UrlDecode( relPath );						// デコードする
@@ -2476,7 +2476,7 @@ internal class CConfigIni
 										string absSkinPath = str4;
 										if ( !Path.IsPathRooted( str4 ) )
 										{
-											absSkinPath = Path.Combine( CDTXMania.strEXEのあるフォルダ, "System" );
+											absSkinPath = Path.Combine( CDTXMania.executableDirectory, "System" );
 											absSkinPath = Path.Combine( absSkinPath, str4 );
 											Uri u = new Uri( absSkinPath );
 											absSkinPath = u.AbsolutePath.ToString();	// str4内に相対パスがある場合に備える

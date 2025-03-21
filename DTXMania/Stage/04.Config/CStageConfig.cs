@@ -84,7 +84,7 @@ internal class CStageConfig : CStage
         Trace.Indent();
         try
         {
-            CDTXMania.ConfigIni.tWrite(CDTXMania.strEXEのあるフォルダ + "Config.ini");	// CONFIGだけ
+            CDTXMania.ConfigIni.tWrite(CDTXMania.executableDirectory + "Config.ini");	// CONFIGだけ
             if (ftFont != null)													// 以下OPTIONと共通
             {
                 ftFont.Dispose();

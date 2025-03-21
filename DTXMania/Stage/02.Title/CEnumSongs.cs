@@ -36,8 +36,8 @@ internal class CEnumSongs							// #27060 2011.2.7 yyagi 曲リストを取得�
             thDTXFileEnumerate.Priority = tp;
         }
     }
-    private readonly string strPathSongsDb = CDTXMania.strEXEのあるフォルダ + "songs.db";
-    private readonly string strPathSongList = CDTXMania.strEXEのあるフォルダ + "songlist.db";
+    private readonly string strPathSongsDb = CDTXMania.executableDirectory + "songs.db";
+    private readonly string strPathSongList = CDTXMania.executableDirectory + "songlist.db";
 
     public Thread? thDTXFileEnumerate
     {
@@ -436,7 +436,7 @@ internal class CEnumSongs							// #27060 2011.2.7 yyagi 曲リストを取得�
                             string path = str;
                             if (!Path.IsPathRooted(path))
                             {
-                                path = CDTXMania.strEXEのあるフォルダ + str;	// 相対パスの場合、絶対パスに直す(2010.9.16)
+                                path = CDTXMania.executableDirectory + str;	// 相対パスの場合、絶対パスに直す(2010.9.16)
                             }
 
                             if (!string.IsNullOrEmpty(path))

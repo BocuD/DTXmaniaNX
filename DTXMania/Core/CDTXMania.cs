@@ -263,7 +263,7 @@ internal class CDTXMania : Game
     public static CStage rCurrentStage = null;
     public static CStage rPreviousStage = null;
     public bool b汎用ムービーである = false;
-    public static string strEXEのあるフォルダ
+    public static string executableDirectory
     {
         get;
         private set;
@@ -1449,7 +1449,7 @@ internal class CDTXMania : Game
         //-----------------
         // BEGIN #23629 2010.11.13 from: デバッグ時は Application.ExecutablePath が ($SolutionDir)/bin/x86/Debug/ などになり System/ の読み込みに失敗するので、カレントディレクトリを採用する。（プロジェクトのプロパティ→デバッグ→作業ディレクトリが有効になる）
 #if DEBUG
-        strEXEのあるフォルダ = Environment.CurrentDirectory + @"\";
+        executableDirectory = Environment.CurrentDirectory + @"\";
 #else
             strEXEのあるフォルダ = Path.GetDirectoryName(Application.ExecutablePath) + @"\";	// #23629 2010.11.9 yyagi: set correct pathname where DTXManiaGR.exe is.
 #endif
@@ -1460,7 +1460,7 @@ internal class CDTXMania : Game
         #region [ Read Config.ini ]
         //---------------------
         ConfigIni = new CConfigIni();
-        string path = strEXEのあるフォルダ + "Config.ini";
+        string path = executableDirectory + "Config.ini";
         if (File.Exists(path))
         {
             try
@@ -1662,7 +1662,7 @@ internal class CDTXMania : Game
                 //thisProcess.PriorityClass = ProcessPriorityClass.AboveNormal;
 
                 // エンコーダーのパス設定 (=DLLフォルダ)
-                CSoundManager.strEncoderPath = Path.Combine(strEXEのあるフォルダ, "DLL");
+                CSoundManager.strEncoderPath = Path.Combine(executableDirectory, "DLL");
 
                 ConfigIni.nSoundDeviceType = (int)CConfigIni.ESoundDeviceTypeForConfig.WASAPI;
                 ConfigIni.bEventDrivenWASAPI = false;
@@ -2424,7 +2424,7 @@ internal class CDTXMania : Game
             {
                 ConfigIni.SwapGuitarBassInfos_AutoFlags();
             }
-            string str = strEXEのあるフォルダ + "Config.ini";
+            string str = executableDirectory + "Config.ini";
             Trace.Indent();
             try
             {
@@ -2604,7 +2604,7 @@ internal class CDTXMania : Game
                 {
                     // Debug.WriteLine( "capture: " + string.Format( "{0:2x}", (int) e.KeyCode ) + " " + (int) e.KeyCode );
                     string strFullPath =
-                        Path.Combine(strEXEのあるフォルダ, "Capture_img");
+                        Path.Combine(executableDirectory, "Capture_img");
                     strFullPath = Path.Combine(strFullPath, DateTime.Now.ToString("yyyyMMddHHmmss") + ".png");
                     SaveResultScreen(strFullPath);
                 }

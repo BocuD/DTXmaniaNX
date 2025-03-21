@@ -642,7 +642,7 @@ internal class CSkin : IDisposable
 	}
 	private string InitializeSkinPathRoot()
 	{
-		strSystemSkinRoot = System.IO.Path.Combine( CDTXMania.strEXEのあるフォルダ, "System" + System.IO.Path.DirectorySeparatorChar );
+		strSystemSkinRoot = System.IO.Path.Combine( CDTXMania.executableDirectory, "System" + System.IO.Path.DirectorySeparatorChar );
 		return strSystemSkinRoot;
 	}
 
