@@ -13,7 +13,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
 
     public CStagePerfDrumsScreen()
     {
-        eStageID = EStage.Playing;
+        eStageID = EStage.Performance_6;
         ePhaseID = EPhase.Common_DefaultState;
         bNotActivated = true;
         listChildActivities.Add( actPad = new CActPerfDrumsPad() );

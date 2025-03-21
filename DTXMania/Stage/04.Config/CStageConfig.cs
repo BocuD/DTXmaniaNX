@@ -23,7 +23,7 @@ internal class CStageConfig : CStage
     public CStageConfig()
     {
         CActDFPFont font;
-        eStageID = EStage.Config;
+        eStageID = EStage.Config_3;
         ePhaseID = EPhase.Common_DefaultState;
         actFont = font = new CActDFPFont();
         listChildActivities.Add(font);

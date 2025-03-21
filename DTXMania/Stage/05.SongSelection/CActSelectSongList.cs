@@ -427,7 +427,7 @@ internal class CActSelectSongList : CActivity
 		}
 		OnDeactivate();
 		rSelectedSong = null;
-		if( CDTXMania.rCurrentStage.eStageID == CStage.EStage.SongSelection )
+		if( CDTXMania.rCurrentStage.eStageID == CStage.EStage.SongSelection_4 )
 			OnActivate();
 	}
 

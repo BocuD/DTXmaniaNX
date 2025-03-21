@@ -13,7 +13,7 @@ internal class CStageChangeSkin : CStage
 
 	public CStageChangeSkin()
 	{
-		eStageID = EStage.ChangeSkin;
+		eStageID = EStage.ChangeSkin_9;
 		bNotActivated = true;
 	}
 

@@ -27,7 +27,7 @@ internal class CStageSongLoading : CStage
 
     public CStageSongLoading()
     {
-        eStageID = EStage.SongLoading;
+        eStageID = EStage.SongLoading_5;
         ePhaseID = EPhase.Common_DefaultState;
         bNotActivated = true;
         //			base.listChildActivities.Add( this.actFI = new CActFIFOBlack() );	// #27787 2012.3.10 yyagi 曲読み込み画面のフェードインの省略

@@ -72,7 +72,7 @@ internal class CStageSongSelection : CStage
 	// コンストラクタ
 	public CStageSongSelection()
 	{
-		eStageID = EStage.SongSelection;
+		eStageID = EStage.SongSelection_4;
 		ePhaseID = EPhase.Common_DefaultState;
 		bNotActivated = true;
 //			base.listChildActivities.Add( this.actオプションパネル = new CActOptionPanel() );

@@ -11,7 +11,7 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 
 	public CStagePerfGuitarScreen()
 	{
-		eStageID = EStage.Playing;
+		eStageID = EStage.Performance_6;
 		ePhaseID = EPhase.Common_DefaultState;
 		bNotActivated = true;
 		listChildActivities.Add( actStageFailed = new CActPerfStageFailure() );

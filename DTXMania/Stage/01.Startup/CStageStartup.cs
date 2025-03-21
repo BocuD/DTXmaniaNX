@@ -10,7 +10,7 @@ internal class CStageStartup : CStage
 
 	public CStageStartup()
 	{
-		eStageID = EStage.Startup;
+		eStageID = EStage.Startup_1;
 		bNotActivated = true;
 	}
 
@@ -173,9 +173,9 @@ internal class CStageStartup : CStage
 			//-----------------
 			#endregion
 
-			if( es is { IsSongListEnumCompletelyDone: true } )							// 曲リスト作成が終わったら
+			if( es is { IsSongListEnumCompletelyDone: true } )
 			{
-				CDTXMania.SongManager = ( es != null ) ? es.SongManager : null;		// 最後に、曲リストを拾い上げる
+				CDTXMania.SongManager = es.SongManager;
 				return 1;
 			}
 		}

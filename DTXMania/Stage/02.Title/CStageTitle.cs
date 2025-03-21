@@ -17,7 +17,7 @@ internal class CStageTitle : CStage
 
 	public CStageTitle()
 	{
-		eStageID = EStage.Title;
+		eStageID = EStage.Title_2;
 		bNotActivated = true;
 		listChildActivities.Add( actFIfromSetup = new CActFIFOWhite() );
 		listChildActivities.Add( actFI = new CActFIFOWhite() );

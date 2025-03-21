@@ -21,16 +21,16 @@ public abstract class CStage : CActivity
 	internal EStage eStageID;
 	public enum EStage
 	{
-		DoNothing,
-		Startup,
-		Title,
-		Config,
-		SongSelection,
-		SongLoading,
-		Playing,
-		Result,
-		ChangeSkin,						// #28195 2011.5.4 yyagi
-		End
+		DoNothing_0,
+		Startup_1,
+		Title_2,
+		Config_3,
+		SongSelection_4,
+		SongLoading_5,
+		Performance_6,
+		Result_7,
+		End_8,
+		ChangeSkin_9						// #28195 2011.5.4 yyagi
 	}
 		
 	internal EPhase ePhaseID;

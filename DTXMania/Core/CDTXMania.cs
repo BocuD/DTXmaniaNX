@@ -186,7 +186,7 @@ internal class CDTXMania : Game
     {
         get;
         private set;
-    }
+    } 
     public static CSongManager SongManager
     {
         get;
@@ -638,15 +638,15 @@ internal class CDTXMania : Game
             }							// "Enumerating Songs..."アイコンの描画
             switch (rCurrentStage.eStageID)
             {
-                case CStage.EStage.Title:
-                case CStage.EStage.Config:
-                case CStage.EStage.SongSelection:
-                case CStage.EStage.SongLoading:
+                case CStage.EStage.Title_2:
+                case CStage.EStage.Config_3:
+                case CStage.EStage.SongSelection_4:
+                case CStage.EStage.SongLoading_5:
                     if (EnumSongs != null)
                     {
                         #region [ (特定条件時) 曲検索スレッドの起動_開始 ]
-                        if (rCurrentStage.eStageID == CStage.EStage.Title &&
-                            rPreviousStage.eStageID == CStage.EStage.Startup &&
+                        if (rCurrentStage.eStageID == CStage.EStage.Title_2 &&
+                            rPreviousStage.eStageID == CStage.EStage.Startup_1 &&
                             nUpdateAndDrawReturnValue == (int)CStageTitle.E戻り値.継続 &&
                             !EnumSongs.IsSongListEnumStarted)
                         {
@@ -662,7 +662,7 @@ internal class CDTXMania : Game
                         #endregion
 
                         #region [ 曲検索の中断と再開 ]
-                        if (rCurrentStage.eStageID == CStage.EStage.SongSelection && !EnumSongs.IsSongListEnumCompletelyDone)
+                        if (rCurrentStage.eStageID == CStage.EStage.SongSelection_4 && !EnumSongs.IsSongListEnumCompletelyDone)
                         {
                             switch (nUpdateAndDrawReturnValue)
                             {
@@ -690,7 +690,7 @@ internal class CDTXMania : Game
                         #endregion
 
                         #region [ 曲探索中断待ち待機 ]
-                        if (rCurrentStage.eStageID == CStage.EStage.SongLoading && !EnumSongs.IsSongListEnumCompletelyDone &&
+                        if (rCurrentStage.eStageID == CStage.EStage.SongLoading_5 && !EnumSongs.IsSongListEnumCompletelyDone &&
                             EnumSongs.thDTXFileEnumerate != null)							// #28700 2012.6.12 yyagi; at Compact mode, enumerating thread does not exist.
                         {
                             EnumSongs.WaitUntilSuspended();									// 念のため、曲検索が一時中断されるまで待機
@@ -704,7 +704,7 @@ internal class CDTXMania : Game
                             actEnumSongs.OnDeactivate();
                             stageSongSelection.bIsEnumeratingSongs = false;
 
-                            bool bRemakeSongTitleBar = (rCurrentStage.eStageID == CStage.EStage.SongSelection) ? true : false;
+                            bool bRemakeSongTitleBar = (rCurrentStage.eStageID == CStage.EStage.SongSelection_4) ? true : false;
                             stageSongSelection.Refresh(EnumSongs.SongManager, bRemakeSongTitleBar);
                             EnumSongs.SongListEnumCompletelyDone();
                         }
@@ -717,10 +717,10 @@ internal class CDTXMania : Game
             //handle stage changes
             switch (rCurrentStage.eStageID)
             {
-                case CStage.EStage.DoNothing:
+                case CStage.EStage.DoNothing_0:
                     break;
 
-                case CStage.EStage.Startup:
+                case CStage.EStage.Startup_1:
                     #region [ *** ]
                     //-----------------------------
                     if (nUpdateAndDrawReturnValue != 0)
@@ -738,7 +738,7 @@ internal class CDTXMania : Game
                     #endregion
                     break;
 
-                case CStage.EStage.Title:
+                case CStage.EStage.Title_2:
                     #region [ *** ]
                     //-----------------------------
                     if( nUpdateAndDrawReturnValue != 0 )
@@ -763,18 +763,18 @@ internal class CDTXMania : Game
                     #endregion
                     break;
 
-                case CStage.EStage.Config:
+                case CStage.EStage.Config_3:
                     #region [ *** ]
                     //-----------------------------
                     if (nUpdateAndDrawReturnValue != 0)
                     {
                         switch (rPreviousStage.eStageID)
                         {
-                            case CStage.EStage.Title:
+                            case CStage.EStage.Title_2:
                                 tChangeStage(stageTitle);
                                 break;
 
-                            case CStage.EStage.SongSelection:
+                            case CStage.EStage.SongSelection_4:
                                 tChangeStage(stageSongSelection);
                                 break;
                         }
@@ -783,7 +783,7 @@ internal class CDTXMania : Game
                     #endregion
                     break;
 
-                case CStage.EStage.SongSelection:
+                case CStage.EStage.SongSelection_4:
                     #region [ *** ]
                     //-----------------------------
                     switch (nUpdateAndDrawReturnValue)
@@ -808,7 +808,7 @@ internal class CDTXMania : Game
                     #endregion
                     break;
 
-                case CStage.EStage.SongLoading:
+                case CStage.EStage.SongLoading_5:
                     #region [ *** ]
                     //-----------------------------
                     if (nUpdateAndDrawReturnValue != 0)
@@ -842,7 +842,7 @@ internal class CDTXMania : Game
                     #endregion
                     break;
 
-                case CStage.EStage.Playing:
+                case CStage.EStage.Performance_6:
                     #region [ *** ]
                     //-----------------------------
                     #region [ DTXVモード中にDTXCreatorから指示を受けた場合の処理 ]
@@ -1186,7 +1186,7 @@ internal class CDTXMania : Game
                     #endregion
                     break;
 
-                case CStage.EStage.Result:
+                case CStage.EStage.Result_7:
                     #region [ *** ]
                     //-----------------------------
                     if (nUpdateAndDrawReturnValue != 0)
@@ -1212,7 +1212,7 @@ internal class CDTXMania : Game
                     #endregion
                     break;
 
-                case CStage.EStage.ChangeSkin:
+                case CStage.EStage.ChangeSkin_9:
                     #region [ *** ]
                     //-----------------------------
                     if (nUpdateAndDrawReturnValue != 0)
@@ -1223,7 +1223,7 @@ internal class CDTXMania : Game
                     #endregion
                     break;
 
-                case CStage.EStage.End:
+                case CStage.EStage.End_8:
                     #region [ *** ]
                     //-----------------------------
                     if (nUpdateAndDrawReturnValue != 0)

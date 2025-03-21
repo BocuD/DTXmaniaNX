@@ -41,7 +41,7 @@ internal class CStageResult : CStage
 		rEmptyDrumChip = new CChip[ 10 ];
 		n総合ランク値 = -1;
 		nチャンネル0Atoレーン07 = new int[] { 1, 2, 3, 4, 5, 7, 6, 1, 8, 0, 9 };
-		eStageID = EStage.Result;
+		eStageID = EStage.Result_7;
 		ePhaseID = EPhase.Common_DefaultState;
 		bNotActivated = true;
 		listChildActivities.Add( actResultImage = new CActResultImage() );

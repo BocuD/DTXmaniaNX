@@ -10,7 +10,7 @@ internal class CStageEnd : CStage
 
 	public CStageEnd()
 	{
-		eStageID = EStage.End;
+		eStageID = EStage.End_8;
 		ePhaseID = EPhase.Common_DefaultState;
 		bNotActivated = true;
 	}
