@@ -21,177 +21,176 @@
 */
 using SharpDX;
 
-namespace SampleFramework
+namespace SampleFramework;
+
+/// <summary>
+/// Represents a view onto a 3D scene.
+/// </summary>
+public class Camera
 {
+    Vector3 location;
+    Vector3 target;
+    float fieldOfView;
+    float aspectRatio;
+    float nearPlane;
+    float farPlane;
+    Matrix viewMatrix;
+    Matrix projectionMatrix;
+    bool viewDirty = true;
+    bool projectionDirty = true;
+
     /// <summary>
-    /// Represents a view onto a 3D scene.
+    /// Gets or sets the location of the camera eye point.
     /// </summary>
-    public class Camera
+    /// <value>The location of the camera eye point.</value>
+    public Vector3 Location
     {
-        Vector3 location;
-        Vector3 target;
-        float fieldOfView;
-        float aspectRatio;
-        float nearPlane;
-        float farPlane;
-        Matrix viewMatrix;
-        Matrix projectionMatrix;
-        bool viewDirty = true;
-        bool projectionDirty = true;
-
-        /// <summary>
-        /// Gets or sets the location of the camera eye point.
-        /// </summary>
-        /// <value>The location of the camera eye point.</value>
-        public Vector3 Location
+        get => location;
+        set
         {
-            get { return location; }
-            set
-            {
-                if (location == value)
-                    return;
+            if (location == value)
+                return;
 
-                location = value;
-                viewDirty = true;
-            }
+            location = value;
+            viewDirty = true;
         }
+    }
 
-        /// <summary>
-        /// Gets or sets the view target point.
-        /// </summary>
-        /// <value>The view target point.</value>
-        public Vector3 Target
+    /// <summary>
+    /// Gets or sets the view target point.
+    /// </summary>
+    /// <value>The view target point.</value>
+    public Vector3 Target
+    {
+        get => target;
+        set
         {
-            get { return target; }
-            set
-            {
-                if (target == value)
-                    return;
+            if (target == value)
+                return;
 
-                target = value;
-                viewDirty = true;
-            }
+            target = value;
+            viewDirty = true;
         }
+    }
 
-        /// <summary>
-        /// Gets or sets the field of view.
-        /// </summary>
-        /// <value>The field of view.</value>
-        public float FieldOfView
+    /// <summary>
+    /// Gets or sets the field of view.
+    /// </summary>
+    /// <value>The field of view.</value>
+    public float FieldOfView
+    {
+        get => fieldOfView;
+        set
         {
-            get { return fieldOfView; }
-            set
-            {
-                if (fieldOfView == value)
-                    return;
+            if (fieldOfView == value)
+                return;
 
-                fieldOfView = value;
-                projectionDirty = true;
-            }
+            fieldOfView = value;
+            projectionDirty = true;
         }
+    }
 
-        /// <summary>
-        /// Gets or sets the aspect ratio.
-        /// </summary>
-        /// <value>The aspect ratio.</value>
-        public float AspectRatio
+    /// <summary>
+    /// Gets or sets the aspect ratio.
+    /// </summary>
+    /// <value>The aspect ratio.</value>
+    public float AspectRatio
+    {
+        get => aspectRatio;
+        set
         {
-            get { return aspectRatio; }
-            set
-            {
-                if (aspectRatio == value)
-                    return;
+            if (aspectRatio == value)
+                return;
 
-                aspectRatio = value;
-                projectionDirty = true;
-            }
+            aspectRatio = value;
+            projectionDirty = true;
         }
+    }
 
-        /// <summary>
-        /// Gets or sets the near plane.
-        /// </summary>
-        /// <value>The near plane.</value>
-        public float NearPlane
+    /// <summary>
+    /// Gets or sets the near plane.
+    /// </summary>
+    /// <value>The near plane.</value>
+    public float NearPlane
+    {
+        get => nearPlane;
+        set
         {
-            get { return nearPlane; }
-            set
-            {
-                if (nearPlane == value)
-                    return;
+            if (nearPlane == value)
+                return;
 
-                nearPlane = value;
-                projectionDirty = true;
-            }
+            nearPlane = value;
+            projectionDirty = true;
         }
+    }
 
-        /// <summary>
-        /// Gets or sets the far plane.
-        /// </summary>
-        /// <value>The far plane.</value>
-        public float FarPlane
+    /// <summary>
+    /// Gets or sets the far plane.
+    /// </summary>
+    /// <value>The far plane.</value>
+    public float FarPlane
+    {
+        get => farPlane;
+        set
         {
-            get { return farPlane; }
-            set
-            {
-                if (farPlane == value)
-                    return;
+            if (farPlane == value)
+                return;
 
-                farPlane = value;
-                projectionDirty = true;
-            }
+            farPlane = value;
+            projectionDirty = true;
         }
+    }
 
-        /// <summary>
-        /// Gets the view matrix.
-        /// </summary>
-        /// <value>The view matrix.</value>
-        public Matrix ViewMatrix
+    /// <summary>
+    /// Gets the view matrix.
+    /// </summary>
+    /// <value>The view matrix.</value>
+    public Matrix ViewMatrix
+    {
+        get
         {
-            get
-            {
-                if (viewDirty)
-                    RebuildViewMatrix();
-                return viewMatrix;
-            }
+            if (viewDirty)
+                RebuildViewMatrix();
+            return viewMatrix;
         }
+    }
 
-        /// <summary>
-        /// Gets the projection matrix.
-        /// </summary>
-        /// <value>The projection matrix.</value>
-        public Matrix ProjectionMatrix
+    /// <summary>
+    /// Gets the projection matrix.
+    /// </summary>
+    /// <value>The projection matrix.</value>
+    public Matrix ProjectionMatrix
+    {
+        get
         {
-            get
-            {
-                if (projectionDirty)
-                    RebuildProjectionMatrix();
-                return projectionMatrix;
-            }
+            if (projectionDirty)
+                RebuildProjectionMatrix();
+            return projectionMatrix;
         }
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Camera"/> class.
-        /// </summary>
-        public Camera()
-        {
-        }
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Camera"/> class.
+    /// </summary>
+    public Camera()
+    {
+    }
 
-        /// <summary>
-        /// Rebuilds the view matrix.
-        /// </summary>
-        protected virtual void RebuildViewMatrix()
-        {
-            viewMatrix = Matrix.LookAtLH(Location, Target, Vector3.UnitY);
-            viewDirty = false;
-        }
+    /// <summary>
+    /// Rebuilds the view matrix.
+    /// </summary>
+    protected virtual void RebuildViewMatrix()
+    {
+        viewMatrix = Matrix.LookAtLH(Location, Target, Vector3.UnitY);
+        viewDirty = false;
+    }
 
-        /// <summary>
-        /// Rebuilds the projection matrix.
-        /// </summary>
-        protected virtual void RebuildProjectionMatrix()
-        {
-            projectionMatrix = Matrix.PerspectiveFovLH(FieldOfView, AspectRatio, NearPlane, FarPlane);
-            projectionDirty = false;
-        }
+    /// <summary>
+    /// Rebuilds the projection matrix.
+    /// </summary>
+    protected virtual void RebuildProjectionMatrix()
+    {
+        projectionMatrix = Matrix.PerspectiveFovLH(FieldOfView, AspectRatio, NearPlane, FarPlane);
+        projectionDirty = false;
     }
 }

@@ -11,6 +11,7 @@
         <ApplicationIcon>dtx.ico</ApplicationIcon>
         <RootNamespace>DTXMania</RootNamespace>
         <AssemblyName>DTXManiaNX</AssemblyName>
+        <Version>1.5.0</Version>
     </PropertyGroup>
 
     <ItemGroup>
@@ -27,6 +28,11 @@
         <DependentUpon>Settings.settings</DependentUpon>
         <DesignTimeSharedInput>True</DesignTimeSharedInput>
       </Compile>
+      <Compile Update="Properties\Resources.Designer.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>Resources.resx</DependentUpon>
+      </Compile>
     </ItemGroup>
 
     <ItemGroup>
@@ -37,6 +43,8 @@
     <ItemGroup>
       <PackageReference Include="Accessibility" Version="4.6.0-preview3-27504-2" />
       <PackageReference Include="DiscordRichPresence" Version="1.0.169" />
+      <PackageReference Include="Hexa.NET.ImGui" Version="2.2.6" />
+      <PackageReference Include="Hexa.NET.ImGui.Backends" Version="1.0.14" />
       <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
       <PackageReference Include="System.Configuration.ConfigurationManager" Version="9.0.2" />
       <PackageReference Include="System.Text.Encoding.CodePages" Version="9.0.2" />
@@ -52,9 +60,16 @@
     </ItemGroup>
 
     <ItemGroup>
-        <AssemblyAttribute Include="DTXMania.BuildDateTime">
+        <AssemblyAttribute Include="DTXMania.Core.BuildDateTime">
             <_Parameter1>$([System.DateTime]::Now.ToString("s"))</_Parameter1>
         </AssemblyAttribute>
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Update="Properties\Resources.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
     </ItemGroup>
 
 </Project>

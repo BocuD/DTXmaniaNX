@@ -23,182 +23,181 @@
 using SharpDX.Direct3D9;
 using DXGI = SharpDX.DXGI;
 
-namespace SampleFramework
+namespace SampleFramework;
+
+static class ConversionMethods
 {
-    static class ConversionMethods
+    public static int GetDepthBits(Format format)
     {
-        public static int GetDepthBits(Format format)
+        switch (format)
         {
-            switch (format)
-            {
-                case Format.D32SingleLockable:
-                case Format.D32:
-                    return 32;
+            case Format.D32SingleLockable:
+            case Format.D32:
+                return 32;
 
-                case Format.D24X8:
-                case Format.D24S8:
-                case Format.D24X4S4:
-                case Format.D24SingleS8:
-                    return 24;
+            case Format.D24X8:
+            case Format.D24S8:
+            case Format.D24X4S4:
+            case Format.D24SingleS8:
+                return 24;
 
-                case Format.D16Lockable:
-                case Format.D16:
-                    return 16;
+            case Format.D16Lockable:
+            case Format.D16:
+                return 16;
 
-                case Format.D15S1:
-                    return 15;
+            case Format.D15S1:
+                return 15;
 
-                default:
-                    return 0;
-            }
+            default:
+                return 0;
+        }
+    }
+
+    public static int GetStencilBits(Format format)
+    {
+        switch (format)
+        {
+            case Format.D15S1:
+                return 1;
+
+            case Format.D24X4S4:
+                return 4;
+
+            case Format.D24S8:
+            case Format.D24SingleS8:
+                return 8;
+
+            default:
+                return 0;
+        }
+    }
+
+    public static int GetColorBits(Format format)
+    {
+        switch (format)
+        {
+            case Format.R8G8B8:
+            case Format.A8R8G8B8:
+            case Format.A8B8G8R8:
+            case Format.X8R8G8B8:
+                return 8;
+
+            case Format.R5G6B5:
+            case Format.X1R5G5B5:
+            case Format.A1R5G5B5:
+                return 5;
+
+            case Format.A4R4G4B4:
+            case Format.X4R4G4B4:
+                return 4;
+
+            case Format.R3G3B2:
+            case Format.A8R3G3B2:
+                return 2;
+
+            case Format.A2R10G10B10:
+            case Format.A2B10G10R10:
+                return 10;
+
+            case Format.A16B16G16R16:
+                return 16;
+
+            default:
+                return 0;
+        }
+    }
+
+    public static int GetColorBits(DXGI.Format format)
+    {
+        switch (format)
+        {
+            case DXGI.Format.R32G32B32A32_Float:
+            case DXGI.Format.R32G32B32A32_SInt:
+            case DXGI.Format.R32G32B32A32_Typeless:
+            case DXGI.Format.R32G32B32A32_UInt:
+            case DXGI.Format.R32G32B32_Float:
+            case DXGI.Format.R32G32B32_SInt:
+            case DXGI.Format.R32G32B32_Typeless:
+            case DXGI.Format.R32G32B32_UInt:
+                return 32;
+
+            case DXGI.Format.R16G16B16A16_Float:
+            case DXGI.Format.R16G16B16A16_SInt:
+            case DXGI.Format.R16G16B16A16_SNorm:
+            case DXGI.Format.R16G16B16A16_Typeless:
+            case DXGI.Format.R16G16B16A16_UInt:
+            case DXGI.Format.R16G16B16A16_UNorm:
+                return 16;
+
+            case DXGI.Format.R10G10B10A2_Typeless:
+            case DXGI.Format.R10G10B10A2_UInt:
+            case DXGI.Format.R10G10B10A2_UNorm:
+                return 10;
+
+            case DXGI.Format.R8G8B8A8_SInt:
+            case DXGI.Format.R8G8B8A8_SNorm:
+            case DXGI.Format.R8G8B8A8_Typeless:
+            case DXGI.Format.R8G8B8A8_UInt:
+            case DXGI.Format.R8G8B8A8_UNorm:
+            case DXGI.Format.R8G8B8A8_UNorm_SRgb:
+                return 8;
+
+            case DXGI.Format.B5G5R5A1_UNorm:
+            case DXGI.Format.B5G6R5_UNorm:
+                return 5;
+
+            default:
+                return 0;
+        }
+    }
+
+    public static MultisampleType ToDirect3D9(int type)
+    {
+        return (MultisampleType)type;
+    }
+
+    public static Format ToDirect3D9(DXGI.Format format)
+    {
+        switch (format)
+        {
+            case DXGI.Format.R8G8B8A8_UNorm:
+                return Format.A8R8G8B8;
+            case DXGI.Format.B5G6R5_UNorm:
+                return Format.R5G6B5;
+            case DXGI.Format.B5G5R5A1_UNorm:
+                return Format.A1R5G5B5;
+            case DXGI.Format.A8_UNorm:
+                return Format.A8;
+            case DXGI.Format.R10G10B10A2_UNorm:
+                return Format.A2B10G10R10;
+            case DXGI.Format.B8G8R8A8_UNorm:
+                return Format.A8B8G8R8;
+            case DXGI.Format.R16G16_UNorm:
+                return Format.G16R16;
+            case DXGI.Format.R16G16B16A16_UNorm:
+                return Format.A16B16G16R16;
+            case DXGI.Format.R16_Float:
+                return Format.R16F;
+            case DXGI.Format.R16G16_Float:
+                return Format.G16R16F;
+            case DXGI.Format.R16G16B16A16_Float:
+                return Format.A16B16G16R16F;
+            case DXGI.Format.R32_Float:
+                return Format.R32F;
+            case DXGI.Format.R32G32_Float:
+                return Format.G32R32F;
+            case DXGI.Format.R32G32B32A32_Float:
+                return Format.A32B32G32R32F;
         }
 
-        public static int GetStencilBits(Format format)
-        {
-            switch (format)
-            {
-                case Format.D15S1:
-                    return 1;
+        return Format.Unknown;
+    }
 
-                case Format.D24X4S4:
-                    return 4;
-
-                case Format.D24S8:
-                case Format.D24SingleS8:
-                    return 8;
-
-                default:
-                    return 0;
-            }
-        }
-
-        public static int GetColorBits(Format format)
-        {
-            switch (format)
-            {
-                case Format.R8G8B8:
-                case Format.A8R8G8B8:
-                case Format.A8B8G8R8:
-                case Format.X8R8G8B8:
-                    return 8;
-
-                case Format.R5G6B5:
-                case Format.X1R5G5B5:
-                case Format.A1R5G5B5:
-                    return 5;
-
-                case Format.A4R4G4B4:
-                case Format.X4R4G4B4:
-                    return 4;
-
-                case Format.R3G3B2:
-                case Format.A8R3G3B2:
-                    return 2;
-
-                case Format.A2R10G10B10:
-                case Format.A2B10G10R10:
-                    return 10;
-
-                case Format.A16B16G16R16:
-                    return 16;
-
-                default:
-                    return 0;
-            }
-        }
-
-        public static int GetColorBits(DXGI.Format format)
-        {
-            switch (format)
-            {
-                case DXGI.Format.R32G32B32A32_Float:
-                case DXGI.Format.R32G32B32A32_SInt:
-                case DXGI.Format.R32G32B32A32_Typeless:
-                case DXGI.Format.R32G32B32A32_UInt:
-                case DXGI.Format.R32G32B32_Float:
-                case DXGI.Format.R32G32B32_SInt:
-                case DXGI.Format.R32G32B32_Typeless:
-                case DXGI.Format.R32G32B32_UInt:
-                    return 32;
-
-                case DXGI.Format.R16G16B16A16_Float:
-                case DXGI.Format.R16G16B16A16_SInt:
-                case DXGI.Format.R16G16B16A16_SNorm:
-                case DXGI.Format.R16G16B16A16_Typeless:
-                case DXGI.Format.R16G16B16A16_UInt:
-                case DXGI.Format.R16G16B16A16_UNorm:
-                    return 16;
-
-                case DXGI.Format.R10G10B10A2_Typeless:
-                case DXGI.Format.R10G10B10A2_UInt:
-                case DXGI.Format.R10G10B10A2_UNorm:
-                    return 10;
-
-                case DXGI.Format.R8G8B8A8_SInt:
-                case DXGI.Format.R8G8B8A8_SNorm:
-                case DXGI.Format.R8G8B8A8_Typeless:
-                case DXGI.Format.R8G8B8A8_UInt:
-                case DXGI.Format.R8G8B8A8_UNorm:
-                case DXGI.Format.R8G8B8A8_UNorm_SRgb:
-                    return 8;
-
-                case DXGI.Format.B5G5R5A1_UNorm:
-                case DXGI.Format.B5G6R5_UNorm:
-                    return 5;
-
-                default:
-                    return 0;
-            }
-        }
-
-        public static MultisampleType ToDirect3D9(int type)
-        {
-            return (MultisampleType)type;
-        }
-
-        public static Format ToDirect3D9(DXGI.Format format)
-        {
-            switch (format)
-            {
-                case DXGI.Format.R8G8B8A8_UNorm:
-                    return Format.A8R8G8B8;
-                case DXGI.Format.B5G6R5_UNorm:
-                    return Format.R5G6B5;
-                case DXGI.Format.B5G5R5A1_UNorm:
-                    return Format.A1R5G5B5;
-                case DXGI.Format.A8_UNorm:
-                    return Format.A8;
-                case DXGI.Format.R10G10B10A2_UNorm:
-                    return Format.A2B10G10R10;
-                case DXGI.Format.B8G8R8A8_UNorm:
-                    return Format.A8B8G8R8;
-                case DXGI.Format.R16G16_UNorm:
-                    return Format.G16R16;
-                case DXGI.Format.R16G16B16A16_UNorm:
-                    return Format.A16B16G16R16;
-                case DXGI.Format.R16_Float:
-                    return Format.R16F;
-                case DXGI.Format.R16G16_Float:
-                    return Format.G16R16F;
-                case DXGI.Format.R16G16B16A16_Float:
-                    return Format.A16B16G16R16F;
-                case DXGI.Format.R32_Float:
-                    return Format.R32F;
-                case DXGI.Format.R32G32_Float:
-                    return Format.G32R32F;
-                case DXGI.Format.R32G32B32A32_Float:
-                    return Format.A32B32G32R32F;
-            }
-
-            return Format.Unknown;
-        }
-
-        public static float ToFloat(DXGI.Rational rational)
-        {
-            float denom = 1;
-            if (rational.Denominator != 0)
-                denom = rational.Denominator;
-            return rational.Numerator / denom;
-        }
+    public static float ToFloat(DXGI.Rational rational)
+    {
+        float denom = 1;
+        if (rational.Denominator != 0)
+            denom = rational.Denominator;
+        return rational.Numerator / denom;
     }
 }

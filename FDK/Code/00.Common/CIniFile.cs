@@ -1,130 +1,129 @@
 ﻿using System.Text;
 
-namespace FDK
+namespace FDK;
+
+/// <summary>
+/// 汎用的な .iniファイルを扱う。
+/// </summary>
+public class CIniFile
 {
-	/// <summary>
-	/// 汎用的な .iniファイルを扱う。
-	/// </summary>
-	public class CIniFile
+	// プロパティ
+
+	public string strFilename 
 	{
-		// プロパティ
+		get;
+		private set;
+	}
+	public List<CSection> Sections
+	{
+		get;
+		set; 
+	}
+	public class CSection
+	{
+		public string strセクション名 = "";
+		public List<KeyValuePair<string,string>> listパラメータリスト = new List<KeyValuePair<string, string>>();
+	}
 
-		public string strFilename 
+
+	// コンストラクタ
+
+	public CIniFile()
+	{
+		strFilename = "";
+		Sections = new List<CSection>();
+	}
+	public CIniFile( string strファイル名 )
+		:this()
+	{
+		tRead( strファイル名 );
+	}
+
+
+	// メソッド
+
+	public void tRead( string strファイル名 )
+	{
+		strFilename = strファイル名;
+
+		StreamReader sr = null;
+		CSection section = null;
+		try
 		{
-			get;
-			private set;
-		}
-		public List<CSection> Sections
-		{
-			get;
-			set; 
-		}
-		public class CSection
-		{
-			public string strセクション名 = "";
-			public List<KeyValuePair<string,string>> listパラメータリスト = new List<KeyValuePair<string, string>>();
-		}
+			sr = new StreamReader( strFilename, Encoding.GetEncoding( "Shift_JIS" ) );	// ファイルが存在しない場合は例外発生。
 
-
-		// コンストラクタ
-
-		public CIniFile()
-		{
-			this.strFilename = "";
-			this.Sections = new List<CSection>();
-		}
-		public CIniFile( string strファイル名 )
-			:this()
-		{
-			this.tRead( strファイル名 );
-		}
-
-
-		// メソッド
-
-		public void tRead( string strファイル名 )
-		{
-			this.strFilename = strファイル名;
-
-			StreamReader sr = null;
-			CSection section = null;
-			try
+			string line;
+			while( ( line = sr.ReadLine() ) != null )
 			{
-				sr = new StreamReader( this.strFilename, Encoding.GetEncoding( "Shift_JIS" ) );	// ファイルが存在しない場合は例外発生。
+				line = line.Replace( '\t', ' ' ).TrimStart( new char[] { '\t', ' ' } );
+				if( string.IsNullOrEmpty( line ) || line[ 0 ] == ';' )	// ';'以降はコメントとして無視
+					continue;
 
-				string line;
-				while( ( line = sr.ReadLine() ) != null )
+				if( line[ 0 ] == '[' )
 				{
-					line = line.Replace( '\t', ' ' ).TrimStart( new char[] { '\t', ' ' } );
-					if( string.IsNullOrEmpty( line ) || line[ 0 ] == ';' )	// ';'以降はコメントとして無視
-						continue;
+					#region [ セクションの変更 ]
+					//-----------------------------
+					var builder = new StringBuilder( 32 );
+					int num = 1;
+					while( ( num < line.Length ) && ( line[ num ] != ']' ) )
+						builder.Append( line[ num++ ] );
 
-					if( line[ 0 ] == '[' )
-					{
-						#region [ セクションの変更 ]
-						//-----------------------------
-						var builder = new StringBuilder( 32 );
-						int num = 1;
-						while( ( num < line.Length ) && ( line[ num ] != ']' ) )
-							builder.Append( line[ num++ ] );
+					// 変数 section が使用中の場合は、List<CSection> に追加して新しい section を作成する。
+					if( section != null )
+						Sections.Add( section );
 
-						// 変数 section が使用中の場合は、List<CSection> に追加して新しい section を作成する。
-						if( section != null )
-							this.Sections.Add( section );
+					section = new CSection();
+					section.strセクション名 = builder.ToString();
+					//-----------------------------
+					#endregion
 
-						section = new CSection();
-						section.strセクション名 = builder.ToString();
-						//-----------------------------
-						#endregion
-
-						continue;
-					}
-
-					string[] strArray = line.Split( new char[] { '=' } );
-					if( strArray.Length != 2 )
-						continue;
-
-					string key = strArray[ 0 ].Trim();
-					string value = strArray[ 1 ].Trim();
-
-					if( section != null && !string.IsNullOrEmpty( key ) && !string.IsNullOrEmpty( value ) )
-						section.listパラメータリスト.Add( new KeyValuePair<string, string>( key, value ) );
+					continue;
 				}
 
-				if( section != null )
-					this.Sections.Add( section );
+				string[] strArray = line.Split( new char[] { '=' } );
+				if( strArray.Length != 2 )
+					continue;
+
+				string key = strArray[ 0 ].Trim();
+				string value = strArray[ 1 ].Trim();
+
+				if( section != null && !string.IsNullOrEmpty( key ) && !string.IsNullOrEmpty( value ) )
+					section.listパラメータリスト.Add( new KeyValuePair<string, string>( key, value ) );
 			}
-			finally
+
+			if( section != null )
+				Sections.Add( section );
+		}
+		finally
+		{
+			if( sr != null )
+				sr.Close();
+		}
+	}
+	public void tWrite( string strファイル名 )
+	{
+		strFilename = strファイル名;
+		tWrite();
+	}
+	public void tWrite()
+	{
+		StreamWriter sw = null;
+		try
+		{
+			sw = new StreamWriter( strFilename, false, Encoding.GetEncoding( "Shift_JIS" ) );	// オープン失敗の場合は例外発生。
+
+			foreach( CSection section in Sections )
 			{
-				if( sr != null )
-					sr.Close();
+				sw.WriteLine( "[{0}]", section.strセクション名 );
+
+				foreach( KeyValuePair<string,string> kvp in section.listパラメータリスト )
+					sw.WriteLine( "{0}={1}", kvp.Key, kvp.Value );
 			}
 		}
-		public void tWrite( string strファイル名 )
+		finally
 		{
-			this.strFilename = strファイル名;
-			this.tWrite();
-		}
-		public void tWrite()
-		{
-			StreamWriter sw = null;
-			try
-			{
-				sw = new StreamWriter( this.strFilename, false, Encoding.GetEncoding( "Shift_JIS" ) );	// オープン失敗の場合は例外発生。
-
-				foreach( CSection section in this.Sections )
-				{
-					sw.WriteLine( "[{0}]", section.strセクション名 );
-
-					foreach( KeyValuePair<string,string> kvp in section.listパラメータリスト )
-						sw.WriteLine( "{0}={1}", kvp.Key, kvp.Value );
-				}
-			}
-			finally
-			{
-				if( sw != null )
-					sw.Close();
-			}
+			if( sw != null )
+				sw.Close();
 		}
 	}
 }

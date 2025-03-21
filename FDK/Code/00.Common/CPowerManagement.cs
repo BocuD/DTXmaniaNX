@@ -1,24 +1,23 @@
-﻿namespace FDK
+﻿namespace FDK;
+
+/// <summary>
+/// システムとモニタの省電力制御を行う
+/// </summary>
+public static class CPowerManagement
 {
 	/// <summary>
-	/// システムとモニタの省電力制御を行う
+	/// 本体/モニタの省電力モード移行を抑止する
 	/// </summary>
-	public static class CPowerManagement
+	public static void tDisableMonitorSuspend()
 	{
-		/// <summary>
-		/// 本体/モニタの省電力モード移行を抑止する
-		/// </summary>
-		public static void tDisableMonitorSuspend()
-		{
-			CWin32.SetThreadExecutionState( CWin32.ExecutionState.SystemRequired | CWin32.ExecutionState.DisplayRequired );
-		}
+		CWin32.SetThreadExecutionState( CWin32.ExecutionState.SystemRequired | CWin32.ExecutionState.DisplayRequired );
+	}
 
-		/// <summary>
-		/// 本体/モニタの省電力モニタ以降抑制を解除する
-		/// </summary>
-		public static void tEnableMonitorSuspend()
-		{
-			CWin32.SetThreadExecutionState( CWin32.ExecutionState.Continuous );		// スリープ抑止状態を解除
-		}
+	/// <summary>
+	/// 本体/モニタの省電力モニタ以降抑制を解除する
+	/// </summary>
+	public static void tEnableMonitorSuspend()
+	{
+		CWin32.SetThreadExecutionState( CWin32.ExecutionState.Continuous );		// スリープ抑止状態を解除
 	}
 }

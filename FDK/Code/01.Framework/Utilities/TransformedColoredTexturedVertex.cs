@@ -25,154 +25,147 @@ using System.Runtime.InteropServices;
 using SharpDX;
 using SharpDX.Direct3D9;
 
-namespace SampleFramework
+namespace SampleFramework;
+
+/// <summary>
+/// Represents a single transformed, colored, and textured vertex.
+/// </summary>
+[StructLayout(LayoutKind.Sequential)]
+public struct TransformedColoredTexturedVertex : IEquatable<TransformedColoredTexturedVertex>
 {
+    private Vector4 m_Position;
     /// <summary>
-    /// Represents a single transformed, colored, and textured vertex.
+    /// Gets or sets the transformed position of the vertex.
     /// </summary>
-    [StructLayout(LayoutKind.Sequential)]
-    public struct TransformedColoredTexturedVertex : IEquatable<TransformedColoredTexturedVertex>
+    /// <value>The transformed position of the vertex.</value>
+    [VertexElement(DeclarationType.Float4, DeclarationUsage.PositionTransformed)]
+    public Vector4 Position
     {
-		private Vector4 m_Position;
-        /// <summary>
-        /// Gets or sets the transformed position of the vertex.
-        /// </summary>
-        /// <value>The transformed position of the vertex.</value>
-        [VertexElement(DeclarationType.Float4, DeclarationUsage.PositionTransformed)]
-        public Vector4 Position
-        {
-			get { return m_Position; }
-			set { m_Position = value; }
-        }
+        get => m_Position;
+        set => m_Position = value;
+    }
 
-		private int m_Color;
-        /// <summary>
-        /// Gets or sets the color of the vertex.
-        /// </summary>
-        /// <value>The color of the vertex.</value>
-        [VertexElement(DeclarationType.Color, DeclarationUsage.Color)]
-        public int Color
-        {
-			get { return m_Color; }
-			set { m_Color = value; }
-        }
+    private int m_Color;
+    /// <summary>
+    /// Gets or sets the color of the vertex.
+    /// </summary>
+    /// <value>The color of the vertex.</value>
+    [VertexElement(DeclarationType.Color, DeclarationUsage.Color)]
+    public int Color
+    {
+        get => m_Color;
+        set => m_Color = value;
+    }
 
-		private Vector2 m_TextureCoordinates;
-        /// <summary>
-        /// Gets or sets the texture coordinates.
-        /// </summary>
-        /// <value>The texture coordinates.</value>
-        [VertexElement(DeclarationType.Float2, DeclarationUsage.TextureCoordinate)]
-        public Vector2 TextureCoordinates
-        {
-			get { return m_TextureCoordinates; }
-			set { m_TextureCoordinates = value; }
-        }
+    private Vector2 m_TextureCoordinates;
+    /// <summary>
+    /// Gets or sets the texture coordinates.
+    /// </summary>
+    /// <value>The texture coordinates.</value>
+    [VertexElement(DeclarationType.Float2, DeclarationUsage.TextureCoordinate)]
+    public Vector2 TextureCoordinates
+    {
+        get => m_TextureCoordinates;
+        set => m_TextureCoordinates = value;
+    }
 
-        /// <summary>
-        /// Gets the size in bytes.
-        /// </summary>
-        /// <value>The size in bytes.</value>
-        public static int SizeInBytes
-        {
-            get { return Marshal.SizeOf(typeof(TransformedColoredTexturedVertex)); }
-        }
+    /// <summary>
+    /// Gets the size in bytes.
+    /// </summary>
+    /// <value>The size in bytes.</value>
+    public static int SizeInBytes => Marshal.SizeOf(typeof(TransformedColoredTexturedVertex));
 
-        /// <summary>
-        /// Gets the format.
-        /// </summary>
-        /// <value>The format.</value>
-        public static VertexFormat Format
-        {
-            get { return VertexFormat.PositionRhw | VertexFormat.Diffuse | VertexFormat.Texture1; }
-        }
+    /// <summary>
+    /// Gets the format.
+    /// </summary>
+    /// <value>The format.</value>
+    public static VertexFormat Format => VertexFormat.PositionRhw | VertexFormat.Diffuse | VertexFormat.Texture1;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TransformedColoredTexturedVertex"/> struct.
-        /// </summary>
-        /// <param name="position">The position.</param>
-        /// <param name="color">The color.</param>
-        /// <param name="textureCoordinates">The texture coordinates.</param>
-        public TransformedColoredTexturedVertex(Vector4 position, int color, Vector2 textureCoordinates)
-            : this()
-        {
-            Position = position;
-            Color = color;
-            TextureCoordinates = textureCoordinates;
-        }
+    /// <summary>
+    /// Initializes a new instance of the <see cref="TransformedColoredTexturedVertex"/> struct.
+    /// </summary>
+    /// <param name="position">The position.</param>
+    /// <param name="color">The color.</param>
+    /// <param name="textureCoordinates">The texture coordinates.</param>
+    public TransformedColoredTexturedVertex(Vector4 position, int color, Vector2 textureCoordinates)
+        : this()
+    {
+        Position = position;
+        Color = color;
+        TextureCoordinates = textureCoordinates;
+    }
 
-        /// <summary>
-        /// Implements the operator ==.
-        /// </summary>
-        /// <param name="left">The left side of the operator.</param>
-        /// <param name="right">The right side of the operator.</param>
-        /// <returns>The result of the operator.</returns>
-        public static bool operator ==(TransformedColoredTexturedVertex left, TransformedColoredTexturedVertex right)
-        {
-            return left.Equals(right);
-        }
+    /// <summary>
+    /// Implements the operator ==.
+    /// </summary>
+    /// <param name="left">The left side of the operator.</param>
+    /// <param name="right">The right side of the operator.</param>
+    /// <returns>The result of the operator.</returns>
+    public static bool operator ==(TransformedColoredTexturedVertex left, TransformedColoredTexturedVertex right)
+    {
+        return left.Equals(right);
+    }
 
-        /// <summary>
-        /// Implements the operator !=.
-        /// </summary>
-        /// <param name="left">The left side of the operator.</param>
-        /// <param name="right">The right side of the operator.</param>
-        /// <returns>The result of the operator.</returns>
-        public static bool operator !=(TransformedColoredTexturedVertex left, TransformedColoredTexturedVertex right)
-        {
-            return !(left == right);
-        }
+    /// <summary>
+    /// Implements the operator !=.
+    /// </summary>
+    /// <param name="left">The left side of the operator.</param>
+    /// <param name="right">The right side of the operator.</param>
+    /// <returns>The result of the operator.</returns>
+    public static bool operator !=(TransformedColoredTexturedVertex left, TransformedColoredTexturedVertex right)
+    {
+        return !(left == right);
+    }
 
-        /// <summary>
-        /// Returns the hash code for this instance.
-        /// </summary>
-        /// <returns>
-        /// A 32-bit signed integer that is the hash code for this instance.
-        /// </returns>
-        public override int GetHashCode()
-        {
-            return Position.GetHashCode() + Color.GetHashCode() + TextureCoordinates.GetHashCode();
-        }
+    /// <summary>
+    /// Returns the hash code for this instance.
+    /// </summary>
+    /// <returns>
+    /// A 32-bit signed integer that is the hash code for this instance.
+    /// </returns>
+    public override int GetHashCode()
+    {
+        return Position.GetHashCode() + Color.GetHashCode() + TextureCoordinates.GetHashCode();
+    }
 
-        /// <summary>
-        /// Indicates whether this instance and a specified object are equal.
-        /// </summary>
-        /// <param name="obj">Another object to compare to.</param>
-        /// <returns>
-        /// true if <paramref name="obj"/> and this instance are the same type and represent the same value; otherwise, false.
-        /// </returns>
-        public override bool Equals(object obj)
-        {
-            if (obj == null)
-                return false;
+    /// <summary>
+    /// Indicates whether this instance and a specified object are equal.
+    /// </summary>
+    /// <param name="obj">Another object to compare to.</param>
+    /// <returns>
+    /// true if <paramref name="obj"/> and this instance are the same type and represent the same value; otherwise, false.
+    /// </returns>
+    public override bool Equals(object obj)
+    {
+        if (obj == null)
+            return false;
 
-            if (GetType() != obj.GetType())
-                return false;
+        if (GetType() != obj.GetType())
+            return false;
 
-            return Equals((TransformedColoredTexturedVertex)obj);
-        }
+        return Equals((TransformedColoredTexturedVertex)obj);
+    }
 
-        /// <summary>
-        /// Indicates whether the current object is equal to another object of the same type.
-        /// </summary>
-        /// <param name="other">An object to compare with this object.</param>
-        /// <returns>
-        /// true if the current object is equal to the <paramref name="other"/> parameter; otherwise, false.
-        /// </returns>
-        public bool Equals(TransformedColoredTexturedVertex other)
-        {
-            return (Position == other.Position && Color == other.Color && TextureCoordinates == other.TextureCoordinates);
-        }
+    /// <summary>
+    /// Indicates whether the current object is equal to another object of the same type.
+    /// </summary>
+    /// <param name="other">An object to compare with this object.</param>
+    /// <returns>
+    /// true if the current object is equal to the <paramref name="other"/> parameter; otherwise, false.
+    /// </returns>
+    public bool Equals(TransformedColoredTexturedVertex other)
+    {
+        return (Position == other.Position && Color == other.Color && TextureCoordinates == other.TextureCoordinates);
+    }
 
-        /// <summary>
-        /// Returns a string representation of the current object.
-        /// </summary>
-        /// <returns>
-        /// A <see cref="T:System.String"/> representing the vertex.
-        /// </returns>
-        public override string ToString()
-        {
-            return string.Format(CultureInfo.CurrentCulture, "{0} ({1}, {2})", Position.ToString(), System.Drawing.Color.FromArgb(Color).ToString(), TextureCoordinates.ToString());
-        }
+    /// <summary>
+    /// Returns a string representation of the current object.
+    /// </summary>
+    /// <returns>
+    /// A <see cref="T:System.String"/> representing the vertex.
+    /// </returns>
+    public override string ToString()
+    {
+        return string.Format(CultureInfo.CurrentCulture, "{0} ({1}, {2})", Position.ToString(), System.Drawing.Color.FromArgb(Color).ToString(), TextureCoordinates.ToString());
     }
 }
