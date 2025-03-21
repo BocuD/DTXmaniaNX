@@ -1698,7 +1698,7 @@ internal class CDTX : CActivity
     private static void BMPLoadAll(Dictionary<int, CBMP> listB) // バックグラウンドスレッドで、テクスチャファイルをひたすら読み込んではキューに追加する
     {
         //Trace.TraceInformation( "Back: ThreadID(BMPLoad)=" + Thread.CurrentThread.ManagedThreadId + ", listCount=" + listB.Count  );
-        foreach (CBMPbase cbmp in listB.Values)
+        foreach (CBMP cbmp in listB.Values)
         {
             LoadTexture(cbmp);
             lock (lockQueue)
@@ -1714,10 +1714,12 @@ internal class CDTX : CActivity
         }
     }
 
-    private static void BMPTEXLoadAll(Dictionary<int, CBMPTEX> listB) // ダサい実装だが、Dictionary<>の中には手を出せず、妥協した
+    private static void BMPTEXLoadAll(CDTX cdtx) // ダサい実装だが、Dictionary<>の中には手を出せず、妥協した
     {
+        var listB = cdtx.listBMPTEX;
+        
         //Trace.TraceInformation( "Back: ThreadID(BMPLoad)=" + Thread.CurrentThread.ManagedThreadId + ", listCount=" + listB.Count  );
-        foreach (CBMPbase cbmp in listB.Values)
+        foreach (CBMPTEX cbmp in listB.Values)
         {
             LoadTexture(cbmp);
             lock (lockQueue)
@@ -1741,32 +1743,22 @@ internal class CDTX : CActivity
 
     public void tLoadBMP_BMPTEX()
     {
-        #region [ CPUコア数の取得 ]
+        int nCPUCores = Environment.ProcessorCount;
 
-        CWin32.SYSTEM_INFO sysInfo = new();
-        CWin32.GetSystemInfo(out sysInfo);
-        int nCPUCores = (int)sysInfo.dwNumberOfProcessors;
-
-        #endregion
-
-        #region [ BMP読み込み ]
+        #region [ Read BMPs ]
 
         if (listBMP != null)
         {
             if (nCPUCores <= 1)
             {
-                #region [ シングルスレッドで逐次読み出し_デコード_テクスチャ定義 ]
-
                 foreach (CBMP cbmp in listBMP.Values)
                 {
                     cbmp.OnDeviceCreated();
                 }
-
-                #endregion
             }
             else
             {
-                #region [ メインスレッド(テクスチャ定義)とバックグラウンドスレッド(読み出し_デコード)を並列動作させ高速化 ]
+                //Initialize textures on main thread, load and decode on background thread
 
                 //Trace.TraceInformation( "Main: ThreadID(Main)=" + Thread.CurrentThread.ManagedThreadId + ", listCount=" + this.listBMP.Count );
                 nLoadDone = 0;
@@ -1797,14 +1789,12 @@ internal class CDTX : CActivity
                         Thread.Sleep(5); // WaitOneのイベント待ちにすると、メインスレッド処理中に2個以上イベント完了したときにそれを正しく検出できなくなるので、
                     } // ポーリングに逃げてしまいました。
                 }
-
-                #endregion
             }
         }
 
         #endregion
 
-        #region [ BMPTEX読み込み ]
+        #region [ Read BMPTEXs ]
 
         if (listBMPTEX != null)
         {
@@ -1825,7 +1815,7 @@ internal class CDTX : CActivity
 
                 //Trace.TraceInformation( "Main: ThreadID(Main)=" + Thread.CurrentThread.ManagedThreadId + ", listCount=" + this.listBMP.Count );
                 nLoadDone = 0;
-                Task.Run(() => BMPTEXLoadAll(listBMPTEX));
+                Task.Run(() => BMPTEXLoadAll(this));
                 int c = listBMPTEX.Count;
                 while (nLoadDone < c)
                 {
