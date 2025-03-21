@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Runtime;
 using System.Text;
 using System.Windows.Forms;
+using DTXMania.UI;
 using FDK;
 using Hexa.NET.ImGui;
 using Hexa.NET.ImGui.Backends.D3D9;
@@ -1227,6 +1228,9 @@ internal class CDTXMania : Game
                     break;
             }
         }
+        
+        InspectorManager.Draw();
+        GameStatus.Draw();
             
         ImGui.EndFrame();
             
@@ -2567,6 +2571,11 @@ internal class CDTXMania : Game
         if (keyCode != ImGuiKey.None)
         {
             ImGui.GetIO().AddKeyEvent(keyCode, true);
+        }
+        
+        if (ImGui.GetIO().WantCaptureKeyboard)
+        {
+            return;
         }
             
         if (e.KeyCode == Keys.Menu)

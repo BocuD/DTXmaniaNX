@@ -212,11 +212,12 @@ internal class CActSelectPopupMenu : CActivity
             base.OnDeactivate();
         }
     }
+
     public override void OnManagedCreateResources()
     {
         if (!bNotActivated)
         {
-            ui = new UIGroup();
+            ui = new UIGroup("Quick Select Menu");
             ui.position = new Vector3(1280.0f/2.0f, 720.0f/2.0f + 20.0f, 0); 
             ui.anchor = new Vector2(0.5f, 0.5f);
                 
@@ -231,7 +232,7 @@ internal class CActSelectPopupMenu : CActivity
             cursor.renderMode = ERenderMode.Sliced;
             cursor.sliceRect = new RectangleF(8, 0, 16, 32);
                 
-            menuItems = ui.AddChild(new UIGroup());
+            menuItems = ui.AddChild(new UIGroup("Menu Items"));
                 
             var menuText = ui.AddChild(new UIDFPText(font, strMenuTitle));
             menuText.position = new Vector3(96.0f, 4.0f, 0);
@@ -381,7 +382,7 @@ internal class CActSelectPopupMenu : CActivity
             }
                 
             tDrawSub();
-                
+            
             ui.Draw(Matrix.Identity);
         }
         return 0;

@@ -1,4 +1,5 @@
-﻿using SharpDX;
+﻿using Hexa.NET.ImGui;
+using SharpDX;
 
 namespace DTXUIRenderer;
 
@@ -34,5 +35,24 @@ public abstract class UITexture : UIDrawable
     public override void Dispose()
     {
         texture.Dispose();
+    }
+
+    public override void DrawInspector()
+    {
+        base.DrawInspector();
+
+        if (ImGui.CollapsingHeader("Texture"))
+        {
+            if (texture != null && texture.isValid())
+            {
+                ImGui.Text($"Name: {texture.name}");
+                ImGui.Text($"Width: {texture.Width}");
+                ImGui.Text($"Height: {texture.Height}");
+            }
+            else
+            {
+                ImGui.Text("No texture");
+            }
+        }
     }
 }

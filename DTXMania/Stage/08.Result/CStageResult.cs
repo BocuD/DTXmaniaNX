@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using DTXMania.Core;
+using DTXUIRenderer;
 using FDK;
 using SlimDXKey = SlimDX.DirectInput.Key;
 
@@ -440,6 +441,8 @@ internal class CStageResult : CStage
 	{
 		if( !bNotActivated )
 		{
+			ui = new UIGroup("Result Screen");
+			
 			//
 			rBackgroundVideoAVI = new CDTX.CAVI(1290, CSkin.Path(@"Graphics\8_background.mp4"), "", 20.0);
 			rBackgroundVideoAVI.OnDeviceCreated();
@@ -507,6 +510,8 @@ internal class CStageResult : CStage
 	{
 		if( !bNotActivated )
 		{
+			ui.Dispose();
+			
 			if( ct登場用 != null )
 			{
 				ct登場用 = null;

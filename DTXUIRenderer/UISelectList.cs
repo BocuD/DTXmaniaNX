@@ -6,6 +6,12 @@ public class UISelectList : UIGroup
 {
     public List<IUISelectable> selectableChildren = new List<IUISelectable>();
     public List<UIDrawable> selectableChildrenDrawables = new List<UIDrawable>();
+
+    public UISelectList(string name) : base(name)
+    {
+        
+    }
+
     public int currentlySelectedIndex { get; private set; } = 0;
         
     public T AddSelectableChild<T>(T child, int index = -1) where T : UIDrawable, IUISelectable

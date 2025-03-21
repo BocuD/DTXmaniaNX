@@ -1,6 +1,7 @@
 ﻿using DTXMania.Core;
 using DTXUIRenderer;
 using FDK;
+using Hexa.NET.ImGui;
 using SharpDX;
 
 namespace DTXMania.UI;
@@ -69,8 +70,23 @@ public class UIDFPText : UIDrawable
         }
     }
 
+    public override void DrawInspector()
+    {
+        base.DrawInspector();
+
+        if (ImGui.CollapsingHeader("UIDFPText"))
+        {
+            if (ImGui.InputText("Text", ref text, 256))
+            {
+                CalculateSize();
+            }
+
+            ImGui.Checkbox("Highlighted", ref isHighlighted);
+        }
+    }
+
     public override void Dispose()
     {
-            
+        
     }
 }

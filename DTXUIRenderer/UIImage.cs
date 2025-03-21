@@ -1,4 +1,7 @@
-﻿using SharpDX;
+﻿using System;
+using System.Linq;
+using Hexa.NET.ImGui;
+using SharpDX;
 
 namespace DTXUIRenderer;
 
@@ -47,6 +50,22 @@ public class UIImage : UITexture
         {
             size = new Vector2(texture.Width, texture.Height);
             clipRect = new RectangleF(0, 0, texture.Width, texture.Height);
+        }
+    }
+
+    public override void DrawInspector()
+    {
+        base.DrawInspector();
+
+        if (ImGui.CollapsingHeader("Image"))
+        {
+            int rm = (int)renderMode;
+            string options = Enum.GetNames(typeof(ERenderMode)).Aggregate((a, b) => $"{a}\0{b}");
+            ImGui.Combo("Render Mode", ref rm, options);
+            renderMode = (ERenderMode)rm;
+
+            Inspector.Inspect("Clip Rect", ref clipRect);
+            Inspector.Inspect("Slice Rect", ref sliceRect);
         }
     }
 }

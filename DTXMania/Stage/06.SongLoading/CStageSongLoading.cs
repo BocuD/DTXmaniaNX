@@ -310,7 +310,7 @@ internal class CStageSongLoading : CStage
     {
         if (!bNotActivated)
         {
-            ui = new UIGroup();
+            ui = new UIGroup("Song Loading");
             
             DTXTexture bgTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\6_background.jpg")));
             UIImage bg = ui.AddChild(new UIImage(bgTex));
@@ -365,7 +365,7 @@ internal class CStageSongLoading : CStage
             }
 
             #endregion
-
+            
             base.OnManagedCreateResources();
         }
     }
@@ -786,26 +786,24 @@ internal class CStageSongLoading : CStage
             txArtist.tDraw2D(CDTXMania.app.Device, 190, 360);
         }
         
-        int[] iPart =
-            [0, CDTXMania.ConfigIni.bIsSwappedGuitarBass ? 2 : 1, CDTXMania.ConfigIni.bIsSwappedGuitarBass ? 1 : 2];
+        int[] iPart = [0, CDTXMania.ConfigIni.bIsSwappedGuitarBass ? 2 : 1, CDTXMania.ConfigIni.bIsSwappedGuitarBass ? 1 : 2];
 
         int k = 0;
         
-        for (int i = 0; i < 3; i++)
+        for (int instrument = 0; instrument < 3; instrument++)
         {
-            int j = iPart[i];
+            int j = iPart[instrument];
         
             int DTXLevel = cdtx.LEVEL[j];
             double DTXLevelDeci = cdtx.LEVELDEC[j];
-        
-            if ((CDTXMania.ConfigIni.bDrumsEnabled && i == 0) || (CDTXMania.ConfigIni.bGuitarEnabled && i != 0))
+            
+            if ((CDTXMania.ConfigIni.bDrumsEnabled && instrument == 0) || (CDTXMania.ConfigIni.bGuitarEnabled && instrument != 0))
             {
                 if (DTXLevel != 0 || DTXLevelDeci != 0)
                 {
                     //Always display CLASSIC style if Skill Mode is Classic
                     if (CDTXMania.ConfigIni.nSkillMode == 0 || (CDTXMania.ConfigIni.bCLASSIC譜面判別を有効にする &&
-                                                                CDTXMania.stageSongSelection.rChosenScore
-                                                                    .SongInformation.b完全にCLASSIC譜面である[j] &&
+                                                                CDTXMania.stageSongSelection.rChosenScore.SongInformation.b完全にCLASSIC譜面である[j] && 
                                                                 !cdtx.bForceXGChart))
                     {
                         tDrawStringLarge(187 + k, 152, $"{DTXLevel:00}");
@@ -840,14 +838,15 @@ internal class CStageSongLoading : CStage
                 }
             }
         
-            if (i == 2 && k == 0)
-            {
-                if (txPartPanel != null && CDTXMania.ConfigIni.bDrumsEnabled)
-                    txPartPanel.tDraw2D(CDTXMania.app.Device, 191, 52, new Rectangle(0, 0, 262, 50));
-        
-                if (txDifficultyPanel != null)
-                    txDifficultyPanel.tDraw2D(CDTXMania.app.Device, 191, 102, new Rectangle(0, nIndex * 50, 262, 50));
-            }
+            // //second guitar... ?????
+            // if (instrument == 2 && k == 0)
+            // {
+            //     if (txPartPanel != null && CDTXMania.ConfigIni.bDrumsEnabled)
+            //         txPartPanel.tDraw2D(CDTXMania.app.Device, 191, 52, new Rectangle(0, 0, 262, 50));
+            //
+            //     if (txDifficultyPanel != null)
+            //         txDifficultyPanel.tDraw2D(CDTXMania.app.Device, 191, 102, new Rectangle(0, nIndex * 50, 262, 50));
+            // }
         }
     }
 
@@ -880,8 +879,6 @@ internal class CStageSongLoading : CStage
     // Other
 
     #region [ private ]
-
-    private UIGroup ui;
     
     //-----------------
     [StructLayout(LayoutKind.Sequential)]

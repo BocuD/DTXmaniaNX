@@ -15,9 +15,6 @@ namespace DTXMania;
 
 internal class CStageConfig : CStage
 {
-    // UI
-    public UIGroup uiGroup;
-
     // プロパティ
 
     public CActDFPFont actFont { get; private set; }
@@ -36,7 +33,7 @@ internal class CStageConfig : CStage
         listChildActivities.Add(actKeyAssign = new CActConfigKeyAssign());
         bNotActivated = true;
 
-        uiGroup = new UIGroup();
+        ui = new UIGroup("Stage Config");
     }
 
 
@@ -124,27 +121,27 @@ internal class CStageConfig : CStage
         {
             //create resources for menu elements
             DTXTexture bgTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_background.png")));
-            UIImage bg = uiGroup.AddChild(new UIImage(bgTex));
+            UIImage bg = ui.AddChild(new UIImage(bgTex));
             bg.renderOrder = -100;
             bg.position = Vector3.Zero;
                 
             DTXTexture itemBarTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_item bar.png")));
-            UIImage itemBar = uiGroup.AddChild(new UIImage(itemBarTex));
+            UIImage itemBar = ui.AddChild(new UIImage(itemBarTex));
             itemBar.position = new Vector3(400, 0, 0);
             itemBar.renderOrder = 50;
                 
             DTXTexture headerPanelTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_header panel.png")));
-            UIImage headerPanel = uiGroup.AddChild(new UIImage(headerPanelTex));
+            UIImage headerPanel = ui.AddChild(new UIImage(headerPanelTex));
             headerPanel.position = Vector3.Zero;
             headerPanel.renderOrder = 52;
                 
             DTXTexture footerPanelTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_footer panel.png")));
-            UIImage footerPanel = uiGroup.AddChild(new UIImage(footerPanelTex));
+            UIImage footerPanel = ui.AddChild(new UIImage(footerPanelTex));
             footerPanel.position = new Vector3(0, 720 - footerPanel.Texture.Height, 0);
             footerPanel.renderOrder = 53;
                 
             //left menu
-            UIGroup leftMenu = uiGroup.AddChild(new UIGroup());
+            UIGroup leftMenu = ui.AddChild(new UIGroup("Left Options Menu"));
             leftMenu.position = new Vector3(245, 140, 0);
             leftMenu.renderOrder = 50;
                 
@@ -153,7 +150,7 @@ internal class CStageConfig : CStage
             menuPanel.position = Vector3.Zero;
                 
             //menu items
-            configLeftOptionsMenu = leftMenu.AddChild(new UISelectList());
+            configLeftOptionsMenu = leftMenu.AddChild(new UISelectList("Button List"));
             configLeftOptionsMenu.isVisible = true;
             
             //340 - size/2, so this becomes 340-245= 95
@@ -167,13 +164,13 @@ internal class CStageConfig : CStage
             menuCursor.anchor = new Vector2(0.5f, 0f);
             menuCursor.renderMode = ERenderMode.Sliced;
             menuCursor.sliceRect = new RectangleF(16, 0, 12, 32);
-                
-            CPrivateFastFont font = new(new FontFamily(CDTXMania.ConfigIni.str選曲リストフォント), 18);
-            configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(font, "System", () => { actList.tSetupItemList_System(); }));
-            configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(font, "Drums", () => { actList.tSetupItemList_Drums(); }));
-            configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(font, "Guitar", () => { actList.tSetupItemList_Guitar(); }));
-            configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(font, "Bass", () => { actList.tSetupItemList_Bass(); }));
-            configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(font, "Exit", () => { actList.tSetupItemList_Exit(); }));
+
+            var family = new FontFamily(CDTXMania.ConfigIni.str選曲リストフォント);
+            configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(family, 18, "System", () => { actList.tSetupItemList_System(); }));
+            configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(family, 18, "Drums", () => { actList.tSetupItemList_Drums(); }));
+            configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(family, 18, "Guitar", () => { actList.tSetupItemList_Guitar(); }));
+            configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(family, 18, "Bass", () => { actList.tSetupItemList_Bass(); }));
+            configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(family, 18, "Exit", () => { actList.tSetupItemList_Exit(); }));
             configLeftOptionsMenu.UpdateLayout();
             configLeftOptionsMenu.SetSelectedIndex(0);
                 
@@ -195,7 +192,7 @@ internal class CStageConfig : CStage
         {
             CDTXMania.tReleaseTexture(ref txDescriptionPanel);
                 
-            uiGroup.Dispose();
+            ui.Dispose();
                 
             base.OnManagedReleaseResources();
         }
@@ -217,7 +214,7 @@ internal class CStageConfig : CStage
         menuCursor.Texture.transparency = bFocusIsOnMenu ? 1.0f : 0.5f;
         menuCursor.position.Y = 2 + configLeftOptionsMenu.currentlySelectedIndex * 32;
             
-        uiGroup.Draw(Matrix.Identity);
+        ui.Draw(Matrix.Identity);
             
         #region [ アイテム ]
         //---------------------

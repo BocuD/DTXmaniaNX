@@ -73,14 +73,15 @@ internal class CStageTitle : CStage
 	{
 		if( !bNotActivated )
 		{
+			ui = new UIGroup("Title Stage");
+			
 			txBackground = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\2_background.jpg" ), false );
 			txMenu = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\2_menu.png" ), false );
 				
 			// UI
-			ui = new UIGroup();
-			CPrivateFastFont font = new(new FontFamily(CDTXMania.ConfigIni.str選曲リストフォント), 12);
-			ui.AddChild(new UIText(font, CDTXMania.VERSION_DISPLAY));
-				
+			var family = new FontFamily(CDTXMania.ConfigIni.str選曲リストフォント);
+			ui.AddChild(new UIText(family, 12, CDTXMania.VERSION_DISPLAY));
+			
 			base.OnManagedCreateResources();
 		}
 	}
@@ -88,11 +89,11 @@ internal class CStageTitle : CStage
 	{
 		if( !bNotActivated )
 		{
+			ui.Dispose();
+
 			CDTXMania.tReleaseTexture( ref txBackground );
 			CDTXMania.tReleaseTexture( ref txMenu );
-				
-			ui.Dispose();
-				
+			
 			base.OnManagedReleaseResources();
 		}
 	}
@@ -352,8 +353,6 @@ internal class CStageTitle : CStage
 	private int nCurrentCursorPosition;
 	private CTexture txMenu;
 	private CTexture txBackground;
-
-	private UIGroup ui;
 	
 	private void tMoveCursorDown()
 	{

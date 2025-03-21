@@ -1,4 +1,5 @@
 ﻿using System;
+using Hexa.NET.ImGui;
 using SharpDX;
 
 namespace DTXUIRenderer;
@@ -32,4 +33,16 @@ public abstract class UIDrawable : IDisposable
     public abstract void Draw(Matrix parentMatrix);
         
     public abstract void Dispose();
+
+    public virtual void DrawInspector()
+    {
+        ImGui.Text(GetType().Name);
+        ImGui.InputInt("Render Order", ref renderOrder);
+        Inspector.Inspect("Position", ref position);
+        Inspector.Inspect("Anchor", ref anchor);
+        Inspector.Inspect("Size", ref size);
+        Inspector.Inspect("Scale", ref scale);
+        Inspector.Inspect("Rotation", ref rotation);
+        ImGui.Checkbox("Is Visible", ref isVisible);
+    }
 }

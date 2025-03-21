@@ -1,12 +1,19 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using SharpDX;
 
 namespace DTXUIRenderer;
 
 public class UIGroup : UIDrawable
 {
-    protected List<UIDrawable> children = new List<UIDrawable>();
-        
+    public string name;
+    internal List<UIDrawable> children = [];
+
+    public UIGroup(string name)
+    {
+        this.name = name;
+    }
+    
     public T AddChild<T>(T element) where T : UIDrawable
     {
         children.Add(element);
@@ -38,13 +45,13 @@ public class UIGroup : UIDrawable
         if (!isVisible) return;
             
         UpdateLocalTransformMatrix();
-            
+        
         Matrix combinedMatrix = localTransformMatrix * parentMatrix;
             
         //sort by draw priority
-        children.Sort((a, b) => a.renderOrder.CompareTo(b.renderOrder));
-            
-        foreach (UIDrawable element in children)
+        var sortedChildren = children.OrderBy(x => x.renderOrder);
+        
+        foreach (UIDrawable element in sortedChildren)
         {
             if (element.isVisible)
             {

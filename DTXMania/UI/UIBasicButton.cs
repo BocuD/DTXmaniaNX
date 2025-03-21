@@ -1,6 +1,7 @@
 ﻿using DTXMania.Core;
 using DTXUIRenderer;
 using SharpDX;
+using System.Drawing;
 using Color = System.Drawing.Color;
 
 namespace DTXMania.UI;
@@ -11,16 +12,16 @@ public class UIBasicButton : UIGroup, IUISelectable
     private UIText selectedText;
     private Action action;
         
-    public UIBasicButton(CPrivateFont font, string text, Action action)
+    public UIBasicButton(FontFamily font, int size, string text, Action action) : base($"UIBasicButton: {text}")
     {
         this.action = action;
             
-        normalText = AddChild(new UIText(font));
+        normalText = AddChild(new UIText(font, size));
         normalText.SetText(text);
         normalText.RenderTexture();
         normalText.anchor = new Vector2(0.5f, 0f);
             
-        selectedText = AddChild(new UIText(font));
+        selectedText = AddChild(new UIText(font, size));
         selectedText.SetText(text);
         selectedText.gradationTopColor = Color.Yellow;
         selectedText.gradationBottomColor = Color.OrangeRed;

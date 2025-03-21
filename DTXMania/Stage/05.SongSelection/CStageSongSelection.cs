@@ -5,6 +5,7 @@ using System.Diagnostics;
 using FDK;
 using DiscordRPC;
 using DTXMania.Core;
+using DTXUIRenderer;
 using SlimDXKey = SlimDX.DirectInput.Key;
 
 namespace DTXMania;
@@ -230,6 +231,8 @@ internal class CStageSongSelection : CStage
 	{
 		if( !bNotActivated )
 		{
+			ui = new UIGroup("Song Selection");
+			
 			txBackground = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\5_background.jpg" ), false );
 			txTopPanel = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\5_header panel.png" ), false );
 			txBottomPanel = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\5_footer panel.png" ), false );
@@ -254,6 +257,8 @@ internal class CStageSongSelection : CStage
 	{
 		if( !bNotActivated )
 		{
+			ui.Dispose();
+			
 			actBackgroundVideoAVI.Stop();
 				
 			//CDTXMania.t安全にDisposeする( ref this.r現在演奏中のスコアの背景動画 );

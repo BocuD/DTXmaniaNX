@@ -646,7 +646,7 @@ internal class CActSelectQuickConfig : CActSelectPopupMenu
     {
         if (!bNotActivated)
         {
-            subMenu = new UIGroup();
+            subMenu = new UIGroup("Quick Options Menu");
             subMenu.renderOrder = 100;
             subMenu.anchor = new Vector2(0.5f, 0.5f);
 

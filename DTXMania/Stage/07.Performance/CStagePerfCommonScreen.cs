@@ -6,7 +6,6 @@ using System.Diagnostics;
 using DTXMania.Core;
 using DTXUIRenderer;
 using FDK;
-
 using Color = System.Drawing.Color;
 using Rectangle = System.Drawing.Rectangle;
 using SlimDXKey = SlimDX.DirectInput.Key;
@@ -456,6 +455,8 @@ internal abstract class CStagePerfCommonScreen : CStage
     {
         if (!bNotActivated)
         {
+            ui = new UIGroup("Performance Common Screen");
+            
             //
             caviGenericBackgroundVideo = new CDTX.CAVI(1290, CSkin.Path(@"Graphics\7_Movie.mp4"), "", 20.0);
             caviGenericBackgroundVideo.OnDeviceCreated();
@@ -494,6 +495,8 @@ internal abstract class CStagePerfCommonScreen : CStage
     {
         if (!bNotActivated)
         {
+            ui.Dispose();
+            
             actBackgroundAVI.Stop();
 
             CDTXMania.tReleaseTexture(ref tx背景);
