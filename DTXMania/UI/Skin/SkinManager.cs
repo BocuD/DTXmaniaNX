@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using DTXMania.Core;
+using DTXUIRenderer;
 
 namespace DTXMania.UI.Skin;
 
@@ -62,6 +63,19 @@ public class SkinManager
             name = newSkinName,
             author = newSkinAuthor
         };
+        
+        foreach (CStage.EStage stage in Enum.GetValues<CStage.EStage>())
+        {
+            if (stage == CStage.EStage.DoNothing_0) continue;
+            
+            UIGroup stageGroup = new(stage.ToString());
+            
+            string stageJson = JsonSerializer.Serialize(stageGroup);
+            string path = Path.Combine(newSkinPath, $"{stage}.json");
+            File.WriteAllText(Path.Combine(newSkinPath, path), stageJson);
+            
+            newSkin.stageSkins[stage] = path;
+        }
         
         string json = JsonSerializer.Serialize(newSkin);
         File.WriteAllText(Path.Combine(newSkinPath, "skin.json"), json);
