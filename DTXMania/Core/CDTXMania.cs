@@ -12,6 +12,7 @@ using Hexa.NET.ImGui.Backends.D3D9;
 using SampleFramework;
 using SharpDX;
 using SharpDX.Direct3D9;
+using GameWindow = DTXMania.UI.GameWindow;
 using Point = System.Drawing.Point;
 using Vector2 = System.Numerics.Vector2;
 
@@ -309,6 +310,7 @@ internal class CDTXMania : Game
         get;
         set;
     }
+    
     //		public static CTimer ct;
     public IntPtr WindowHandle => Window.Handle; // 2012.10.24 yyagi; to add ASIO support
     public static CDTXVmode DTXVmode;                       // #28821 2014.1.23 yyagi
@@ -319,6 +321,14 @@ internal class CDTXMania : Game
     public static STDGBVALUE< List<int> > listTargetGhsotLag = new STDGBVALUE<List<int>>();
     public static STDGBVALUE< CScoreIni.CPerformanceEntry > listTargetGhostScoreData = new STDGBVALUE< CScoreIni.CPerformanceEntry >();
 
+    
+    //stuff to render game inside window
+    private Texture gameRenderTargetTexture;
+    private Surface gameRenderTargetSurface;
+    private Surface mainRenderTarget;
+    public static bool renderGameToSurface = false;
+    
+    
     // Constructor
 
     public CDTXMania()
@@ -435,18 +445,8 @@ internal class CDTXMania : Game
                 activity.OnManagedCreateResources();
             }
         }
-
-#if GPUFlushAfterPresent
-        FrameEnd += dtxmania_FrameEnd;
-#endif
     }
-#if GPUFlushAfterPresent
-        void dtxmania_FrameEnd( object sender, EventArgs e ) // GraphicsDeviceManager.game_FrameEnd()後に実行される
-        {	                                                                     // → Present()直後にGPUをFlushする
-                                                                                 // → 画面のカクツキが頻発したため、ここでのFlushは行わない
-            actFlushGPU.On進行描画(); // Flush GPU
-        }
-#endif
+
     protected override void LoadContent()
     {
         if (ConfigIni.bWindowMode)
@@ -508,6 +508,11 @@ internal class CDTXMania : Game
         {
             ImGuiImplD3D9.Init(new IDirect3DDevice9Ptr((IDirect3DDevice9*)app.Device.NativePointer));
         }
+        
+        gameRenderTargetTexture = new Texture(Device, 1280, 720, 1, Usage.RenderTarget, Format.A8R8G8B8, Pool.Default);
+        gameRenderTargetSurface = gameRenderTargetTexture.GetSurfaceLevel(0);
+        
+        mainRenderTarget = Device.GetRenderTarget(0);
     }
 
     protected override void UnloadContent()
@@ -517,7 +522,12 @@ internal class CDTXMania : Game
             foreach (CActivity activity in listTopLevelActivities)
                 activity.OnUnmanagedReleaseResources();
         }
-            
+        
+        gameRenderTargetSurface.Dispose();
+        gameRenderTargetTexture.Dispose();
+        mainRenderTarget.Dispose();
+
+        ImGuiImplD3D9.InvalidateDeviceObjects();
         ImGuiImplD3D9.Shutdown();
             
         ImGui.DestroyContext();
@@ -619,12 +629,70 @@ internal class CDTXMania : Game
         }
         #endregion
 
-        Device.BeginScene();
+        //cache this value to prevent it from changing during the frame
+        bool renderToSurface = renderGameToSurface;
+        if (renderToSurface)
+        {
+            Device.SetRenderTarget(0, gameRenderTargetSurface);
+        }
+
         Device.Clear(ClearFlags.ZBuffer | ClearFlags.Target, SharpDX.Color.Black, 1f, 0);
+        Device.BeginScene();
 
         ImGuiImplD3D9.NewFrame();
         ImGui.NewFrame();
-            
+
+        DrawStage();
+
+        InspectorManager.Draw();
+        GameStatus.Draw();
+
+        Device.EndScene();
+
+        if (renderToSurface)
+        {
+            Device.SetRenderTarget(0, mainRenderTarget);
+            Device.Clear(ClearFlags.ZBuffer | ClearFlags.Target, SharpDX.Color.Black, 1f, 0);
+
+            GameWindow.Draw(gameRenderTargetTexture);
+        }
+
+        ImGui.EndFrame();
+        ImGui.Render();
+        ImGuiImplD3D9.RenderDrawData(ImGui.GetDrawData());
+        
+        // Present()は game.csのOnFrameEnd()に登録された、GraphicsDeviceManager.game_FrameEnd() 内で実行されるので不要
+        // (つまり、Present()は、Draw()完了後に実行される)
+        actFlushGPU.OnUpdateAndDraw();		// Flush GPU	// EndScene()～Present()間 (つまりVSync前) でFlush実行
+        
+        #region [ Fullscreen mode switching ]
+        if (changeFullscreenModeOnNextFrame)
+        {
+            ConfigIni.bFullScreenMode = !ConfigIni.bFullScreenMode;
+            app.tSwitchFullScreenMode();
+            changeFullscreenModeOnNextFrame = false;
+        }
+        #endregion
+        #region [ VSync switching ]
+        if (changeVSyncModeOnNextFrame)
+        {
+            bool bIsMaximized = Window.IsMaximized;											// #23510 2010.11.3 yyagi: to backup current window mode before changing VSyncWait
+            currentClientSize = Window.ClientSize;												// #23510 2010.11.3 yyagi: to backup current window size before changing VSyncWait
+            DeviceSettings currentSettings = app.GraphicsDeviceManager.CurrentSettings;
+            currentSettings.EnableVSync = ConfigIni.bVerticalSyncWait;
+            app.GraphicsDeviceManager.ChangeDevice(currentSettings);
+            changeVSyncModeOnNextFrame = false;
+            Window.ClientSize = new Size(currentClientSize.Width, currentClientSize.Height);	// #23510 2010.11.3 yyagi: to resume window size after changing VSyncWait
+            if (bIsMaximized)
+            {
+                Window.WindowState = FormWindowState.Maximized;								// #23510 2010.11.3 yyagi: to resume window mode after changing VSyncWait
+            }
+        }
+        #endregion
+    }
+
+    private void DrawStage()
+    {
         if (rCurrentStage != null)
         {
             nUpdateAndDrawReturnValue = (rCurrentStage != null) ? rCurrentStage.OnUpdateAndDraw() : 0;
@@ -1235,44 +1303,6 @@ internal class CDTXMania : Game
                     break;
             }
         }
-        
-        InspectorManager.Draw();
-        GameStatus.Draw();
-            
-        ImGui.EndFrame();
-            
-        ImGui.Render();
-        ImGuiImplD3D9.RenderDrawData(ImGui.GetDrawData());
-            
-        Device.EndScene();			// Present()は game.csのOnFrameEnd()に登録された、GraphicsDeviceManager.game_FrameEnd() 内で実行されるので不要
-        // (つまり、Present()は、Draw()完了後に実行される)
-#if !GPUFlushAfterPresent
-        actFlushGPU.OnUpdateAndDraw();		// Flush GPU	// EndScene()～Present()間 (つまりVSync前) でFlush実行
-#endif
-        #region [ Fullscreen mode switching ]
-        if (changeFullscreenModeOnNextFrame)
-        {
-            ConfigIni.bFullScreenMode = !ConfigIni.bFullScreenMode;
-            app.tSwitchFullScreenMode();
-            changeFullscreenModeOnNextFrame = false;
-        }
-        #endregion
-        #region [ VSync switching ]
-        if (changeVSyncModeOnNextFrame)
-        {
-            bool bIsMaximized = Window.IsMaximized;											// #23510 2010.11.3 yyagi: to backup current window mode before changing VSyncWait
-            currentClientSize = Window.ClientSize;												// #23510 2010.11.3 yyagi: to backup current window size before changing VSyncWait
-            DeviceSettings currentSettings = app.GraphicsDeviceManager.CurrentSettings;
-            currentSettings.EnableVSync = ConfigIni.bVerticalSyncWait;
-            app.GraphicsDeviceManager.ChangeDevice(currentSettings);
-            changeVSyncModeOnNextFrame = false;
-            Window.ClientSize = new Size(currentClientSize.Width, currentClientSize.Height);	// #23510 2010.11.3 yyagi: to resume window size after changing VSyncWait
-            if (bIsMaximized)
-            {
-                Window.WindowState = FormWindowState.Maximized;								// #23510 2010.11.3 yyagi: to resume window mode after changing VSyncWait
-            }
-        }
-        #endregion
     }
 
     public void tChangeStage(CStage newStage, bool activateNewStage = true, bool deactivateOldStage = true)
