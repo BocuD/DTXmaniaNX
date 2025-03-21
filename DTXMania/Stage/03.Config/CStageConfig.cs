@@ -159,10 +159,10 @@ internal class CStageConfig : CStage
             DTXTexture menuCursorTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_menu cursor.png")));
             menuCursor = configLeftOptionsMenu.AddChild(new UIImage(menuCursorTex));
             menuCursor.position = new Vector3(-5, 2, 0);
-            menuCursor.size = new Vector2(170, 32);
+            menuCursor.size = new Vector2(170, 28);
             menuCursor.anchor = new Vector2(0.5f, 0f);
             menuCursor.renderMode = ERenderMode.Sliced;
-            menuCursor.sliceRect = new RectangleF(16, 0, 12, 32);
+            menuCursor.sliceRect = new RectangleF(16, 0, 12, 28);
 
             var family = new FontFamily(CDTXMania.ConfigIni.str選曲リストフォント);
             configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(family, 18, "System", () => { actList.tSetupItemList_System(); }));
