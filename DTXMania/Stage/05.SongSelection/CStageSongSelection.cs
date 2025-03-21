@@ -231,7 +231,7 @@ internal class CStageSongSelection : CStage
 	{
 		if( !bNotActivated )
 		{
-			ui = new UIGroup("Song Selection");
+			ui = new UIGroup("Song Loading");
 			
 			txBackground = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\5_background.jpg" ), false );
 			txTopPanel = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\5_header panel.png" ), false );

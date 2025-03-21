@@ -661,7 +661,7 @@ internal class CActSelectQuickConfig : CActSelectPopupMenu
                 
             //ui gets created here, we can add the subMenu to the ui afterwards
             base.OnManagedCreateResources();
-                
+            
             ui.AddChild(subMenu);
 
             subMenu.position.X = ui.size.X / 2.0f;

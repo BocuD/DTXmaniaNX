@@ -217,7 +217,7 @@ internal class CActSelectPopupMenu : CActivity
     {
         if (!bNotActivated)
         {
-            ui = new UIGroup("Quick Select Menu");
+            ui = CDTXMania.stageSongSelection.ui.AddChild(new UIGroup("Quick Select Menu"));
             ui.position = new Vector3(1280.0f/2.0f, 720.0f/2.0f + 20.0f, 0); 
             ui.anchor = new Vector2(0.5f, 0.5f);
                 
