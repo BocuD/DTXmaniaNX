@@ -857,8 +857,8 @@ internal class CStageSongLoading : CStage
     /// <returns></returns>
     private bool tHandleKeyInput()
     {
-        IInputDevice keyboard = CDTXMania.InputManager.Keyboard;
-        if (keyboard.bKeyPressed((int)SlimDXKey.Escape)) // escape (exit)
+        CInputKeyboard keyboard = CDTXMania.InputManager.Keyboard;
+        if (keyboard.bKeyPressed(SlimDXKey.Escape)) // escape (exit)
         {
             if (CDTXMania.ConfigIni.bGuitarRevolutionMode)
             {

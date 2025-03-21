@@ -1,4 +1,6 @@
-﻿namespace FDK;
+﻿using SlimDX.DirectInput;
+
+namespace FDK;
 
 public class CInputMIDI : IInputDevice, IDisposable
 {
@@ -64,7 +66,7 @@ public class CInputMIDI : IInputDevice, IDisposable
 
 		listEventBuffer.Clear();
 	}
-	public bool bKeyPressed( int nKey )
+	public bool bKeyPressed(int nKey)
 	{
 		foreach( STInputEvent event2 in listInputEvent )
 		{
@@ -75,7 +77,7 @@ public class CInputMIDI : IInputDevice, IDisposable
 		}
 		return false;
 	}
-	public bool bKeyPressing( int nKey )
+	public bool bKeyPressing(int nKey)
 	{
 		return false;
 	}

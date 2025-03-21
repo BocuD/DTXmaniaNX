@@ -441,8 +441,8 @@ internal class CStageSongSelection : CStage
 					#region [ Shift-F2: 未使用 ]
 					// #24525 2011.3.16 yyagi: [SHIFT]+[F2]は廃止(将来発生するかもしれない別用途のためにキープ)
 					/*
-                    if ((CDTXMania.InputManager.Keyboard.bKeyPressing((int)SlimDXKey.RightShift) || CDTXMania.InputManager.Keyboard.bKeyPressing((int)SlimDXKey.LeftShift)) &&
-                        CDTXMania.InputManager.Keyboard.bKeyPressed((int)SlimDXKey.F2))
+                    if ((CDTXMania.InputManager.Keyboard.bKeyPressing(SlimDXKey.RightShift) || CDTXMania.InputManager.Keyboard.bKeyPressing(SlimDXKey.LeftShift)) &&
+                        CDTXMania.InputManager.Keyboard.bKeyPressed(SlimDXKey.F2))
                     {	// [SHIFT] + [F2] CONFIGURATION
                         this.actPresound.tサウンド停止();
                         this.eReturnValueAfterFadeOut = EReturnValue.オプション呼び出し;
@@ -505,7 +505,7 @@ internal class CStageSongSelection : CStage
 						}
 						#endregion
 						#region [ Up ]
-						ctKeyRepeat.Up.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing((int)SlimDXKey.UpArrow), new CCounter.DGキー処理(tMoveCursorUp));
+						ctKeyRepeat.Up.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(SlimDXKey.UpArrow), new CCounter.DGキー処理(tMoveCursorUp));
 						ctKeyRepeat.R.tRepeatKey(CDTXMania.Pad.bPressingGB(EPad.R), new CCounter.DGキー処理(tMoveCursorUp));
 						//SD changed to HT to follow Gitadora style
 						if (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.HT))
@@ -514,7 +514,7 @@ internal class CStageSongSelection : CStage
 						}
 						#endregion
 						#region [ Down ]
-						ctKeyRepeat.Down.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing((int)SlimDXKey.DownArrow), new CCounter.DGキー処理(tMoveCursorDown));
+						ctKeyRepeat.Down.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(SlimDXKey.DownArrow), new CCounter.DGキー処理(tMoveCursorDown));
 						ctKeyRepeat.B.tRepeatKey(CDTXMania.Pad.bPressingGB(EPad.G), new CCounter.DGキー処理(tMoveCursorDown));
 						//FT changed to LT to follow Gitadora style
 						if (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.LT))
@@ -674,7 +674,7 @@ internal class CStageSongSelection : CStage
 						}
 						#endregion
 					}
-					//if( CDTXMania.InputManager.Keyboard.bKeyPressed((int)SlimDXKey.F6) )
+					//if( CDTXMania.InputManager.Keyboard.bKeyPressed(SlimDXKey.F6) )
 					//{
 					//    if (CDTXMania.EnumSongs.IsEnumerating)
 					//    {

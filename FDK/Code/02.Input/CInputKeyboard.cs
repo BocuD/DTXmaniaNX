@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using Hexa.NET.ImGui;
 using SharpDX.DirectInput;
 
 using SlimDXKey = SlimDX.DirectInput.Key;
@@ -219,36 +220,82 @@ public class CInputKeyboard : IInputDevice, IDisposable
 		}
 	}
 
-	/// <param name="nKey">
-	///		調べる SlimDX.DirectInput.Key を int にキャストした値。（SharpDX.DirectInput.Key ではないので注意。）
-	/// </param>
-	public bool bKeyPressed(int nKey)  // bキーが押された
+	public bool bKeyPressed(int nKey)
 	{
+		//block keyboard input if ImGui is overriding it
+		if (ImGui.GetIO().WantCaptureKeyboard)
+			return false;
+		
 		return bKeyPushDown[nKey];
 	}
 
-	/// <param name="nKey">
-	///		調べる SlimDX.DirectInput.Key を int にキャストした値。（SharpDX.DirectInput.Key ではないので注意。）
-	/// </param>
-	public bool bKeyPressing(int nKey)  // bキーが押されている
+	public bool bKeyPressing(int nKey)
 	{
+		//block keyboard input if ImGui is overriding it
+		if (ImGui.GetIO().WantCaptureKeyboard)
+			return false;
+		
 		return bKeyState[nKey];
 	}
 
-	/// <param name="nKey">
-	///		調べる SlimDX.DirectInput.Key を int にキャストした値。（SharpDX.DirectInput.Key ではないので注意。）
-	/// </param>
-	public bool bKeyReleased(int nKey)  // bキーが離された
+	public bool bKeyReleased(int nKey)
 	{
 		return bKeyPullUp[nKey];
+	}
+	
+	public bool bKeyReleasing(int nKey)
+	{
+		return !bKeyState[nKey];
+	}
+
+	///  
+	/// <param name="nKey">
+	///     調べる SlimDX.DirectInput.Key を int にキャストした値。（SharpDX.DirectInput.Key ではないので注意。）
+	/// </param>
+	public bool bKeyPressed(SlimDXKey nKey)  // bキーが押された
+	{
+		//block keyboard input if ImGui is overriding it
+		if (ImGui.GetIO().WantCaptureKeyboard)
+			return false;
+		
+		return bKeyPushDown[(int)nKey];
+	}
+
+	///  
+	/// <param name="nKey">
+	///     調べる SlimDX.DirectInput.Key を int にキャストした値。（SharpDX.DirectInput.Key ではないので注意。）
+	/// </param>
+	public bool bKeyPressing(SlimDXKey nKey)  // bキーが押されている
+	{
+		//block keyboard input if ImGui is overriding it
+		if (ImGui.GetIO().WantCaptureKeyboard)
+			return false;
+		
+		return bKeyState[(int)nKey];
 	}
 
 	/// <param name="nKey">
 	///		調べる SlimDX.DirectInput.Key を int にキャストした値。（SharpDX.DirectInput.Key ではないので注意。）
 	/// </param>
-	public bool bKeyReleasing(int nKey)  // bキーが離されている
+	public bool bKeyReleased(SlimDXKey nKey)  // bキーが離された
 	{
-		return !bKeyState[nKey];
+		//block keyboard input if ImGui is overriding it
+		if (ImGui.GetIO().WantCaptureKeyboard)
+			return false;
+		
+		return bKeyPullUp[(int)nKey];
+	}
+	
+	/// <param name="nKey">
+	///		調べる SlimDX.DirectInput.Key を int にキャストした値。（SharpDX.DirectInput.Key ではないので注意。）
+	/// </param>
+	public bool bKeyReleasing(SlimDXKey nKey)  // bキーが離されている
+	{
+		//block keyboard input if ImGui is overriding it
+		if (ImGui.GetIO().WantCaptureKeyboard)
+			return false;
+		
+		return !bKeyState[(int)nKey];
 	}
 	//-----------------
 	#endregion

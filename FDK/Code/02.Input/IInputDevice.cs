@@ -1,4 +1,6 @@
-﻿namespace FDK;
+﻿using SlimDX.DirectInput;
+
+namespace FDK;
 
 public interface IInputDevice : IDisposable
 {
@@ -29,8 +31,8 @@ public interface IInputDevice : IDisposable
 	// Method interfaces
 
 	void tPolling( bool bWindowがアクティブ中, bool bバッファ入力を使用する );  // tポーリング
-	bool bKeyPressed( int nKey );  // bキーが押された
-	bool bKeyPressing( int nKey );  // bキーが押されている
+	bool bKeyPressed(int nKey);  // bキーが押された
+	bool bKeyPressing(int nKey);  // bキーが押されている
 	bool bKeyReleased( int nKey );  // bキーが離された
 	bool bKeyReleasing( int nKey );  // bキーが離されている
 }

@@ -167,7 +167,7 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 				{
 					actStageFailed.Start();
 					CDTXMania.DTX.tStopPlayingAllChips();
-					ePhaseID = EPhase.演奏_STAGE_FAILED;
+					ePhaseID = EPhase.PERFORMANCE_STAGE_FAILED;
 				}
 			}
 			tUpdateAndDraw_Background();
@@ -222,7 +222,7 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 				else 
 				{
 					eReturnValueAfterFadeOut = EPerfScreenReturnValue.StageClear;
-					ePhaseID = EPhase.演奏_STAGE_CLEAR_フェードアウト;
+					ePhaseID = EPhase.PERFORMANCE_STAGE_CLEAR_FadeOut;
 					actFOStageClear.tStartFadeOut();
 				}
 			}
@@ -289,7 +289,7 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 					return (int)eReturnValueAfterFadeOut;
 				}
 			}
-			if (ePhaseID == EPhase.演奏_STAGE_RESTART)
+			if (ePhaseID == EPhase.PERFORMANCE_STAGE_RESTART)
 			{
 				Debug.WriteLine("Restarting");
 				return (int)eReturnValueAfterFadeOut;

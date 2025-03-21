@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using SharpDX.DirectInput;
+using Key = SlimDX.DirectInput.Key;
 
 namespace FDK;
 

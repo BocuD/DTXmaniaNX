@@ -331,14 +331,14 @@ internal class CStageConfig : CStage
                     }
                 }
             }
-            ctKeyRepetition.Up.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing((int)SlimDXKey.UpArrow), new CCounter.DGキー処理(tMoveCursorUp));
+            ctKeyRepetition.Up.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(SlimDXKey.UpArrow), new CCounter.DGキー処理(tMoveCursorUp));
             ctKeyRepetition.R.tRepeatKey(CDTXMania.Pad.bPressingGB(EPad.HH), new CCounter.DGキー処理(tMoveCursorUp));
             //Change to HT
             if (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.HT))
             {
                 tMoveCursorUp();
             }
-            ctKeyRepetition.Down.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing((int)SlimDXKey.DownArrow), new CCounter.DGキー処理(tMoveCursorDown));
+            ctKeyRepetition.Down.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(SlimDXKey.DownArrow), new CCounter.DGキー処理(tMoveCursorDown));
             ctKeyRepetition.B.tRepeatKey(CDTXMania.Pad.bPressingGB(EPad.SD), new CCounter.DGキー処理(tMoveCursorDown));
             //Change to LT
             if (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.LT))

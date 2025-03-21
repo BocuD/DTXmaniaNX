@@ -1,5 +1,6 @@
 ﻿using DiscordRPC;
 using DTXMania.Core;
+using DTXUIRenderer;
 using FDK;
 
 namespace DTXMania;
@@ -55,11 +56,11 @@ public abstract class CStage : CActivity
 		NOWLOADING_WAV_FILE_READING,
 		NOWLOADING_BMP_FILE_READING,
 		NOWLOADING_WAIT_BGM_SOUND_COMPLETION,
-		演奏_STAGE_FAILED,
-		演奏_STAGE_FAILED_フェードアウト,
-		演奏_STAGE_CLEAR,
-		演奏_STAGE_CLEAR_フェードアウト,
-		演奏_STAGE_RESTART
+		PERFORMANCE_STAGE_FAILED,
+		PERFORMANCE_STAGE_FAILED_フェードアウト,
+		PERFORMANCE_STAGE_CLEAR,
+		PERFORMANCE_STAGE_CLEAR_FadeOut,
+		PERFORMANCE_STAGE_RESTART
 	}
 
 	public override void OnActivate()
@@ -67,6 +68,8 @@ public abstract class CStage : CActivity
 		base.OnActivate();
 		tDisplayPresence();
 	}
+
+	public UIGroup ui;
 
 	/// <summary>
 	/// Display the current <see cref="Presence"/> of this stage.

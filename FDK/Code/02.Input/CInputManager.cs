@@ -18,7 +18,7 @@ public class CInputManager : IDisposable  // CInput管理
 		get;
 		private set;
 	}
-	public IInputDevice Keyboard
+	public CInputKeyboard Keyboard
 	{
 		get
 		{
@@ -30,14 +30,14 @@ public class CInputManager : IDisposable  // CInput管理
 			{
 				if (device.eInputDeviceType == EInputDeviceType.Keyboard)
 				{
-					_Keyboard = device;
-					return device;
+					_Keyboard = (CInputKeyboard) device;
+					return _Keyboard;
 				}
 			}
 			return null;
 		}
 	}
-	public IInputDevice Mouse
+	public CInputMouse Mouse
 	{
 		get
 		{
@@ -49,8 +49,8 @@ public class CInputManager : IDisposable  // CInput管理
 			{
 				if (device.eInputDeviceType == EInputDeviceType.Mouse)
 				{
-					_Mouse = device;
-					return device;
+					_Mouse = (CInputMouse) device;
+					return _Mouse;
 				}
 			}
 			return null;
@@ -252,8 +252,8 @@ public class CInputManager : IDisposable  // CInput管理
 	#region [ private ]
 	//-----------------
 	private DirectInput directInput;
-	private IInputDevice _Keyboard;
-	private IInputDevice _Mouse;
+	private CInputKeyboard? _Keyboard;
+	private CInputMouse? _Mouse;
 	private bool bDisposed済み;
 	private List<uint> listHMIDIIN = new List<uint>(8);
 	private object objMidiIn排他用 = new object();

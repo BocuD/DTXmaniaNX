@@ -196,7 +196,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
             {
                 actStageFailed.Start();
                 CDTXMania.DTX.tStopPlayingAllChips();
-                ePhaseID = EPhase.演奏_STAGE_FAILED;
+                ePhaseID = EPhase.PERFORMANCE_STAGE_FAILED;
             }
             tUpdateAndDraw_Background();
             tUpdateAndDraw_MIDIBGM();
@@ -313,12 +313,12 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                 {
                     actStageFailed.Start();
                     CDTXMania.DTX.tStopPlayingAllChips();
-                    ePhaseID = EPhase.演奏_STAGE_FAILED;
+                    ePhaseID = EPhase.PERFORMANCE_STAGE_FAILED;
                 }
                 else
                 {
                     eReturnValueAfterFadeOut = EPerfScreenReturnValue.StageClear;
-                    ePhaseID = EPhase.演奏_STAGE_CLEAR_フェードアウト;
+                    ePhaseID = EPhase.PERFORMANCE_STAGE_CLEAR_FadeOut;
                     if (nHitCount_ExclAuto.Drums.Miss + nHitCount_ExclAuto.Drums.Poor == 0)
                     {
                         nNumberPerfects = CDTXMania.ConfigIni.bAllDrumsAreAutoPlay ? nNumberPerfects = nHitCount_IncAuto.Drums.Perfect : nHitCount_ExclAuto.Drums.Perfect;
@@ -401,7 +401,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                     return (int)eReturnValueAfterFadeOut;
                 }
             }
-            if (ePhaseID == EPhase.演奏_STAGE_RESTART)
+            if (ePhaseID == EPhase.PERFORMANCE_STAGE_RESTART)
             {
                 Debug.WriteLine("Restarting");
                 return (int)eReturnValueAfterFadeOut;
@@ -516,7 +516,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
     private void tFadeOut()
     {
         eReturnValueAfterFadeOut = EPerfScreenReturnValue.StageClear;
-        ePhaseID = EPhase.演奏_STAGE_CLEAR_フェードアウト;
+        ePhaseID = EPhase.PERFORMANCE_STAGE_CLEAR_FadeOut;
 
         actFOStageClear.tStartFadeOut();
     }

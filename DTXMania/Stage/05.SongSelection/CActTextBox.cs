@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 using DTXMania.Core;
+using SlimDX.DirectInput;
 
 namespace DTXMania;
 
@@ -211,23 +212,23 @@ internal class CActTextBox : CActivity
 						}
 					}
 				}
-				if (CDTXMania.InputManager.Keyboard.bKeyPressed(117) || CDTXMania.InputManager.Keyboard.bKeyPressed(100))
+				if (CDTXMania.InputManager.Keyboard.bKeyPressed(Key.Return) || CDTXMania.InputManager.Keyboard.bKeyPressed(Key.NumberPadEnter))
 				{
 					if (!bIME確定文字列を入力した直後)
 					{
 						t入力を確定して終了();
 					}
 				}
-				else if (CDTXMania.InputManager.Keyboard.bKeyPressed(53))
+				else if (CDTXMania.InputManager.Keyboard.bKeyPressed(Key.Escape))
 				{
 					if (strIME入力中文字列_前フレーム == "")
 					{
 						t入力を確定せずに終了();
 					}
 				}
-				else if (CDTXMania.InputManager.Keyboard.bKeyPressed(31))
+				else if (CDTXMania.InputManager.Keyboard.bKeyPressed(Key.V))
 				{
-					if ((CDTXMania.InputManager.Keyboard.bKeyPressing(75) || CDTXMania.InputManager.Keyboard.bKeyPressing(116)) && strIME入力中文字列 == "")
+					if ((CDTXMania.InputManager.Keyboard.bKeyPressing(Key.LeftControl) || CDTXMania.InputManager.Keyboard.bKeyPressing(Key.RightControl)) && strIME入力中文字列 == "")
 					{
 						string text = tクリップボードから文字列を取得する().Replace("\r\n", "");
 						if (text != string.Empty)
@@ -238,23 +239,23 @@ internal class CActTextBox : CActivity
 						}
 					}
 				}
-				else if (CDTXMania.InputManager.Keyboard.bKeyPressed(12))
+				else if (CDTXMania.InputManager.Keyboard.bKeyPressed(Key.C))
 				{
-					if ((CDTXMania.InputManager.Keyboard.bKeyPressing(75) || CDTXMania.InputManager.Keyboard.bKeyPressing(116)) && strIME入力中文字列 == "")
+					if ((CDTXMania.InputManager.Keyboard.bKeyPressing(Key.LeftControl) || CDTXMania.InputManager.Keyboard.bKeyPressing(Key.RightControl)) && strIME入力中文字列 == "")
 					{
 						tクリップボードに文字列を設定する(str入力中文字列);
 					}
 				}
-				else if (CDTXMania.InputManager.Keyboard.bKeyPressed(10))
+				else if (CDTXMania.InputManager.Keyboard.bKeyPressed(Key.A))
 				{
-					if ((CDTXMania.InputManager.Keyboard.bKeyPressing(75) || CDTXMania.InputManager.Keyboard.bKeyPressing(116)) && strIME入力中文字列 == "")
+					if ((CDTXMania.InputManager.Keyboard.bKeyPressing(Key.LeftControl) || CDTXMania.InputManager.Keyboard.bKeyPressing(Key.RightControl)) && strIME入力中文字列 == "")
 					{
 						str入力中文字列 = "";
 						nカーソル位置 = 0;
 						flag = true;
 					}
 				}
-				else if (CDTXMania.InputManager.Keyboard.bKeyPressed(76))
+				else if (CDTXMania.InputManager.Keyboard.bKeyPressed(Key.LeftArrow))
 				{
 					if (strIME入力中文字列 == "")
 					{
@@ -266,7 +267,7 @@ internal class CActTextBox : CActivity
 						flag = true;
 					}
 				}
-				else if (CDTXMania.InputManager.Keyboard.bKeyPressed(118))
+				else if (CDTXMania.InputManager.Keyboard.bKeyPressed(Key.RightArrow))
 				{
 					if (strIME入力中文字列 == "")
 					{
@@ -278,7 +279,7 @@ internal class CActTextBox : CActivity
 						flag = true;
 					}
 				}
-				else if (CDTXMania.InputManager.Keyboard.bKeyPressed(132))
+				else if (CDTXMania.InputManager.Keyboard.bKeyPressed(Key.UpArrow))
 				{
 					if (strIME入力中文字列 == "" && L前回確定した文字列リスト.Count > 0)
 					{
@@ -292,7 +293,7 @@ internal class CActTextBox : CActivity
 						flag = true;
 					}
 				}
-				else if (CDTXMania.InputManager.Keyboard.bKeyPressed(50))
+				else if (CDTXMania.InputManager.Keyboard.bKeyPressed(Key.DownArrow))
 				{
 					if (strIME入力中文字列 == "" && L前回確定した文字列リスト.Count > 0)
 					{
@@ -310,7 +311,7 @@ internal class CActTextBox : CActivity
 						flag = true;
 					}
 				}
-				else if (CDTXMania.InputManager.Keyboard.bKeyPressed(49))
+				else if (CDTXMania.InputManager.Keyboard.bKeyPressed(Key.Delete))
 				{
 					if (strIME入力中文字列 == "")
 					{
