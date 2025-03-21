@@ -325,7 +325,7 @@ internal class CDTXMania : Game
     //stuff to render game inside window
     private Texture gameRenderTargetTexture;
     private Surface gameRenderTargetSurface;
-    private Surface? originalRenderTarget;
+    private Surface mainRenderTarget;
     public static bool renderGameToSurface = false;
     
     
@@ -445,19 +445,8 @@ internal class CDTXMania : Game
                 activity.OnManagedCreateResources();
             }
         }
-        
-
-#if GPUFlushAfterPresent
-        FrameEnd += dtxmania_FrameEnd;
-#endif
     }
-#if GPUFlushAfterPresent
-        void dtxmania_FrameEnd( object sender, EventArgs e ) // GraphicsDeviceManager.game_FrameEnd()後に実行される
-        {	                                                                     // → Present()直後にGPUをFlushする
-                                                                                 // → 画面のカクツキが頻発したため、ここでのFlushは行わない
-            actFlushGPU.On進行描画(); // Flush GPU
-        }
-#endif
+
     protected override void LoadContent()
     {
         if (ConfigIni.bWindowMode)
@@ -523,12 +512,7 @@ internal class CDTXMania : Game
         gameRenderTargetTexture = new Texture(Device, 1280, 720, 1, Usage.RenderTarget, Format.A8R8G8B8, Pool.Default);
         gameRenderTargetSurface = gameRenderTargetTexture.GetSurfaceLevel(0);
         
-        //remove old original render target if it exists
-        if (originalRenderTarget != null)
-        {
-            originalRenderTarget.Dispose();
-            originalRenderTarget = null;
-        }
+        mainRenderTarget = Device.GetRenderTarget(0);
     }
 
     protected override void UnloadContent()
@@ -540,18 +524,8 @@ internal class CDTXMania : Game
         }
         
         gameRenderTargetSurface.Dispose();
-        gameRenderTargetSurface = null;
         gameRenderTargetTexture.Dispose();
-        gameRenderTargetTexture = null;
-        
-        //restore rendertarget to original
-        if (renderGameToSurface)
-        {
-            Device.SetRenderTarget(0, originalRenderTarget);
-            
-            //release the original rendertarget
-            originalRenderTarget?.Dispose();
-        }
+        mainRenderTarget.Dispose();
 
         ImGuiImplD3D9.InvalidateDeviceObjects();
         ImGuiImplD3D9.Shutdown();
@@ -659,7 +633,6 @@ internal class CDTXMania : Game
         bool renderToSurface = renderGameToSurface;
         if (renderToSurface)
         {
-            originalRenderTarget = Device.GetRenderTarget(0);
             Device.SetRenderTarget(0, gameRenderTargetSurface);
         }
 
@@ -678,7 +651,7 @@ internal class CDTXMania : Game
 
         if (renderToSurface)
         {
-            Device.SetRenderTarget(0, originalRenderTarget);
+            Device.SetRenderTarget(0, mainRenderTarget);
             Device.Clear(ClearFlags.ZBuffer | ClearFlags.Target, SharpDX.Color.Black, 1f, 0);
 
             GameWindow.Draw(gameRenderTargetTexture);
@@ -690,9 +663,7 @@ internal class CDTXMania : Game
         
         // Present()は game.csのOnFrameEnd()に登録された、GraphicsDeviceManager.game_FrameEnd() 内で実行されるので不要
         // (つまり、Present()は、Draw()完了後に実行される)
-#if !GPUFlushAfterPresent
         actFlushGPU.OnUpdateAndDraw();		// Flush GPU	// EndScene()～Present()間 (つまりVSync前) でFlush実行
-#endif
         
         #region [ Fullscreen mode switching ]
         if (changeFullscreenModeOnNextFrame)
