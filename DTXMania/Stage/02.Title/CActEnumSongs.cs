@@ -62,13 +62,13 @@ internal class CActEnumSongs : CActivity
         var fontFamily = new FontFamily(CDTXMania.ConfigIni.str選曲リストフォント);
 
         //create ui
-        var ui = parent.AddChild(new UIGroup("EnumSongs"));
-        ui.size = new Vector2(1280, 720);
-        UIText message = ui.AddChild(new UIText(fontFamily, 12, CDTXMania.isJapanese ? strMessage[0] : strMessage[1]));
+        enumMessage = parent.AddChild(new UIGroup("EnumSongs"));
+        enumMessage.size = new Vector2(1280, 720);
+        UIText message = enumMessage.AddChild(new UIText(fontFamily, 12, CDTXMania.isJapanese ? strMessage[0] : strMessage[1]));
         message.position = new Vector3(0, 25, 0);
         message.anchor = new Vector2(0.0f, 0.0f);
             
-        text = ui.AddChild(new UIText(fontFamily, 12, "Step 0/0"));
+        text = enumMessage.AddChild(new UIText(fontFamily, 12, "Step 0/0"));
         text.position = new Vector3(0, 60, 0);
         text.anchor = new Vector2(0.0f, 0.0f);
         
@@ -82,8 +82,9 @@ internal class CActEnumSongs : CActivity
         base.OnManagedReleaseResources();
     }
 
+    private UIGroup enumMessage;
     private UIText text;
-
+    
     public override int OnUpdateAndDraw()
     {
         if (bNotActivated)
@@ -111,11 +112,11 @@ internal class CActEnumSongs : CActivity
                     break;
             }
                 
-            text.isVisible = true;
+            enumMessage.isVisible = true;
         }
         else
         {
-            text.isVisible = false;
+            enumMessage.isVisible = false;
         }
 
         double fade = Math.Sin(2 * Math.PI * ctNowEnumeratingSongs.nCurrentValue * 2 / 100.0);
