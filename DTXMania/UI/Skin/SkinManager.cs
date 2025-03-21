@@ -1,6 +1,6 @@
-﻿using System.Text.Json;
-using DTXMania.Core;
+﻿using DTXMania.Core;
 using DTXUIRenderer;
+using Newtonsoft.Json;
 
 namespace DTXMania.UI.Skin;
 
@@ -28,7 +28,7 @@ public class SkinManager
         {
             try
             {
-                SkinDescriptor? skin = LoadSkin(directory);
+                SkinDescriptor? skin = SkinDescriptor.LoadSkin(directory);
 
                 if (skin != null)
                 {
@@ -40,15 +40,6 @@ public class SkinManager
                 Console.WriteLine($"Failed to load skin from {directory}: {e.Message}");
             }
         }
-    }
-
-    private SkinDescriptor? LoadSkin(string path)
-    {
-        Console.WriteLine($"Loading skin {path}");
-        
-        string json = File.ReadAllText(Path.Combine(path, "skin.json"));
-
-        return JsonSerializer.Deserialize<SkinDescriptor>(json);
     }
 
     public void CreateNewSkin(string newSkinName, string newSkinAuthor)
@@ -70,15 +61,13 @@ public class SkinManager
             
             UIGroup stageGroup = new(stage.ToString());
             
-            string stageJson = JsonSerializer.Serialize(stageGroup);
             string path = Path.Combine(newSkinPath, $"{stage}.json");
-            File.WriteAllText(Path.Combine(newSkinPath, path), stageJson);
+            File.WriteAllText(path, JsonConvert.SerializeObject(stageGroup));
             
-            newSkin.stageSkins[stage] = path;
+            newSkin.stageSkins[stage] = $"{stage}.json";
         }
-        
-        string json = JsonSerializer.Serialize(newSkin);
-        File.WriteAllText(Path.Combine(newSkinPath, "skin.json"), json);
+
+        newSkin.Save(newSkinPath);
         
         //reload skins
         ScanSkinDirectory();
