@@ -6,7 +6,6 @@ using DTXMania.UI;
 using DTXMania.UI.Item;
 using DTXUIRenderer;
 using FDK;
-using Hexa.NET.ImGui;
 using SharpDX;
 using RectangleF = SharpDX.RectangleF;
 using SlimDXKey = SlimDX.DirectInput.Key;
@@ -343,9 +342,7 @@ internal class CStageConfig : CStage
                 tMoveCursorDown();
             }
         }
-            
-        ImGui.ShowDemoWindow();
-            
+        
         return 0;
     }
 
