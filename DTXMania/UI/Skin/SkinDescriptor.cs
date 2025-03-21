@@ -1,11 +1,9 @@
-﻿using DTXUIRenderer;
-
-namespace DTXMania.UI.Skin;
+﻿namespace DTXMania.UI.Skin;
 
 public class SkinDescriptor
 {
-    public string name { get; set; }
-    public string author { get; set; }
+    public required string name { get; set; }
+    public required string author { get; set; }
 
-    public Dictionary<CStage.EStage, UIGroup> stageRootNodes;
+    public Dictionary<CStage.EStage, string> stageSkins { get; set; } = new();
 }
