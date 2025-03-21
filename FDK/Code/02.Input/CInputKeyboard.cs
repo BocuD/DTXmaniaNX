@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using Hexa.NET.ImGui;
 using SharpDX.DirectInput;
 
 using SlimDXKey = SlimDX.DirectInput.Key;
@@ -223,7 +222,7 @@ public class CInputKeyboard : IInputDevice, IDisposable
 	public bool bKeyPressed(int nKey)
 	{
 		//block keyboard input if ImGui is overriding it
-		if (ImGui.GetIO().WantCaptureKeyboard)
+		if (preventKeyboardInput)
 			return false;
 		
 		return bKeyPushDown[nKey];
@@ -232,7 +231,7 @@ public class CInputKeyboard : IInputDevice, IDisposable
 	public bool bKeyPressing(int nKey)
 	{
 		//block keyboard input if ImGui is overriding it
-		if (ImGui.GetIO().WantCaptureKeyboard)
+		if (preventKeyboardInput)
 			return false;
 		
 		return bKeyState[nKey];
@@ -240,11 +239,17 @@ public class CInputKeyboard : IInputDevice, IDisposable
 
 	public bool bKeyReleased(int nKey)
 	{
+		if (preventKeyboardInput)
+			return false;
+		
 		return bKeyPullUp[nKey];
 	}
-	
+
 	public bool bKeyReleasing(int nKey)
 	{
+		if (preventKeyboardInput)
+			return false;
+		
 		return !bKeyState[nKey];
 	}
 
@@ -255,7 +260,7 @@ public class CInputKeyboard : IInputDevice, IDisposable
 	public bool bKeyPressed(SlimDXKey nKey)  // bキーが押された
 	{
 		//block keyboard input if ImGui is overriding it
-		if (ImGui.GetIO().WantCaptureKeyboard)
+		if (preventKeyboardInput)
 			return false;
 		
 		return bKeyPushDown[(int)nKey];
@@ -268,7 +273,7 @@ public class CInputKeyboard : IInputDevice, IDisposable
 	public bool bKeyPressing(SlimDXKey nKey)  // bキーが押されている
 	{
 		//block keyboard input if ImGui is overriding it
-		if (ImGui.GetIO().WantCaptureKeyboard)
+		if (preventKeyboardInput)
 			return false;
 		
 		return bKeyState[(int)nKey];
@@ -280,7 +285,7 @@ public class CInputKeyboard : IInputDevice, IDisposable
 	public bool bKeyReleased(SlimDXKey nKey)  // bキーが離された
 	{
 		//block keyboard input if ImGui is overriding it
-		if (ImGui.GetIO().WantCaptureKeyboard)
+		if (preventKeyboardInput)
 			return false;
 		
 		return bKeyPullUp[(int)nKey];
@@ -292,7 +297,7 @@ public class CInputKeyboard : IInputDevice, IDisposable
 	public bool bKeyReleasing(SlimDXKey nKey)  // bキーが離されている
 	{
 		//block keyboard input if ImGui is overriding it
-		if (ImGui.GetIO().WantCaptureKeyboard)
+		if (preventKeyboardInput)
 			return false;
 		
 		return !bKeyState[(int)nKey];
@@ -336,8 +341,11 @@ public class CInputKeyboard : IInputDevice, IDisposable
 	private bool[] bKeyPushDown = new bool[256];
 	private bool[] bKeyState = new bool[256];
 	private Keyboard devKeyboard;
+
+	public bool preventKeyboardInput = false;
 	//private CTimer timer;
 	//private CTimer ct;
 	//-----------------
+
 	#endregion
 }

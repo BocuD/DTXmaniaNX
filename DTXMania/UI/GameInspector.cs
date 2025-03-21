@@ -6,21 +6,43 @@ namespace DTXMania.UI;
 
 public class GameStatus
 {
+    private static bool demoWindowShown = false;
+    private static bool preventGameKeyboardInput = false;
+    
     public static void Draw()
     {
+        CDTXMania.InputManager.Keyboard.preventKeyboardInput = ImGui.GetIO().WantCaptureKeyboard || preventGameKeyboardInput;
+        
         InspectorManager.hierarchyWindow.target = CDTXMania.rCurrentStage.ui;
 
         ImGui.Begin("Game Status");
         if (ImGui.CollapsingHeader("Game Status"))
         {
             ImGui.Text("Current Stage: " + CDTXMania.rCurrentStage.GetType());
+            
+            ImGui.Checkbox("Prevent game keyboard input", ref preventGameKeyboardInput);
         }
 
         if (ImGui.CollapsingHeader("Skin"))
         {
             DrawSkinInspector();
         }
+
+        if (ImGui.CollapsingHeader("Other"))
+        {
+            //put a button at the bottom of the window to open demo window
+            if (ImGui.Button("Toggle Demo Window"))
+            {
+                demoWindowShown = !demoWindowShown;
+            }
+        }
+
         ImGui.End();
+        
+        if (demoWindowShown)
+        {
+            ImGui.ShowDemoWindow(ref demoWindowShown);
+        }
     }
 
     private static string newSkinName = "";
@@ -49,6 +71,8 @@ public class GameStatus
             CDTXMania.SkinManager.ScanSkinDirectory();
         }
 
+        ImGui.SameLine();
+        
         if (ImGui.Button("Create new skin"))
         {
             //create modal
