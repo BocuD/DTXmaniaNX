@@ -347,8 +347,8 @@ internal class CDTXMania : Game
             if (ConfigIni.bFullScreenMode)	// #23510 2010.10.27 yyagi: backup current window size before going fullscreen mode
             {
                 currentClientSize = Window.ClientSize;
-                ConfigIni.nウインドウwidth = Window.ClientSize.Width;
-                ConfigIni.nウインドウheight = Window.ClientSize.Height;
+                ConfigIni.nWindowWidth = Window.ClientSize.Width;
+                ConfigIni.nWindowHeight = Window.ClientSize.Height;
                 //FDK.CTaskBar.ShowTaskBar( false );
             }
 
@@ -464,7 +464,7 @@ internal class CDTXMania : Game
         }
 
         Device.SetTransform(TransformState.View,
-            Matrix.LookAtLH(new Vector3(0f, 0f, (float)(-GameWindowSize.Height / 2 * Math.Sqrt(3.0))),
+            Matrix.LookAtLH(new Vector3(0f, 0f, (float)(-GameFramebufferSize.Height / 2 * Math.Sqrt(3.0))),
                 new Vector3(0f, 0f, 0f), new Vector3(0f, 1f, 0f)));
         Device.SetTransform(TransformState.Projection,
             Matrix.PerspectiveFovLH(CConversion.DegreeToRadian((float)60f),
@@ -499,7 +499,7 @@ internal class CDTXMania : Game
             
         var io = ImGui.GetIO();
 
-        io.DisplaySize = new Vector2(1280, 720);
+        io.DisplaySize = new Vector2(GameWindowSize.Width, GameWindowSize.Height);
         io.DisplayFramebufferScale = new Vector2(1, 1);
 
         ImGuiImplD3D9.SetCurrentContext(context);
@@ -1642,8 +1642,8 @@ internal class CDTXMania : Game
                 ConfigIni.nMovieMode = 2;
 
                 //Set windows size to selected Window Size and set its position to a fixed location
-                ConfigIni.nウインドウwidth = DTXVmode.widthResolution;
-                ConfigIni.nウインドウheight = DTXVmode.heightResolution;
+                ConfigIni.nWindowWidth = DTXVmode.widthResolution;
+                ConfigIni.nWindowHeight = DTXVmode.heightResolution;
                 ConfigIni.n初期ウィンドウ開始位置X = 5;
                 ConfigIni.n初期ウィンドウ開始位置Y = 100;
 
@@ -1847,10 +1847,10 @@ internal class CDTXMania : Game
         Window.Location = new Point(ConfigIni.n初期ウィンドウ開始位置X, ConfigIni.n初期ウィンドウ開始位置Y);   // #30675 2013.02.04 ikanick add
 
         Window.Text = strWindowTitle;
-        Window.ClientSize = new Size(ConfigIni.nウインドウwidth, ConfigIni.nウインドウheight);	// #34510 yyagi 2010.10.31 to change window size got from Config.ini
+        Window.ClientSize = new Size(ConfigIni.nWindowWidth, ConfigIni.nWindowHeight);	// #34510 yyagi 2010.10.31 to change window size got from Config.ini
         if (!ConfigIni.bFullScreenExclusive || ConfigIni.bFullScreenMode)						// #23510 2010.11.02 yyagi: add; to recover window size in case bootup with fullscreen mode
         {
-            currentClientSize = new Size(ConfigIni.nウインドウwidth, ConfigIni.nウインドウheight);
+            currentClientSize = new Size(ConfigIni.nWindowWidth, ConfigIni.nWindowHeight);
         }
         Window.MaximizeBox = true;							// #23510 2010.11.04 yyagi: to support maximizing window
         Window.FormBorderStyle = FormBorderStyle.Sizable;	// #23510 2010.10.27 yyagi: changed from FixedDialog to Sizable, to support window resize
@@ -1905,7 +1905,7 @@ internal class CDTXMania : Game
 
         IsFixedTimeStep = false;
         //			base.TargetElapsedTime = TimeSpan.FromTicks( 10000000 / 75 );
-        Window.ClientSize = new Size(ConfigIni.nウインドウwidth, ConfigIni.nウインドウheight);	// #23510 2010.10.31 yyagi: to recover window size. width and height are able to get from Config.ini.
+        Window.ClientSize = new Size(ConfigIni.nWindowWidth, ConfigIni.nWindowHeight);	// #23510 2010.10.31 yyagi: to recover window size. width and height are able to get from Config.ini.
         InactiveSleepTime = TimeSpan.FromMilliseconds((float)(ConfigIni.n非フォーカス時スリープms));	// #23568 2010.11.3 yyagi: to support valiable sleep value when !IsActive
         // #23568 2010.11.4 ikanick changed ( 1 -> ConfigIni )
         if (!ConfigIni.bFullScreenExclusive)
@@ -2702,10 +2702,10 @@ internal class CDTXMania : Game
     {
         var pos = e.Location;
             
-        //take window scale into account (since the render resolution for imgui is fixed 1280x720)
-        var windowScale = new Vector2((float)Window.ClientSize.Width / 1280, (float)Window.ClientSize.Height / 720);
-        pos.X = (int)(pos.X / windowScale.X);
-        pos.Y = (int)(pos.Y / windowScale.Y);
+        // //take window scale into account (since the render resolution for imgui is fixed 1280x720)
+        // var windowScale = new Vector2((float)Window.ClientSize.Width / 1280, (float)Window.ClientSize.Height / 720);
+        // pos.X = (int)(pos.X / windowScale.X);
+        // pos.Y = (int)(pos.Y / windowScale.Y);
             
         ImGui.GetIO().MousePos = new Vector2(pos.X, pos.Y);
     }
@@ -2769,8 +2769,8 @@ internal class CDTXMania : Game
             ConfigIni.n初期ウィンドウ開始位置Y = Window.Location.Y;	//
         }
         
-        ConfigIni.nウインドウwidth = (ConfigIni.bWindowMode) ? Window.ClientSize.Width : currentClientSize.Width;	// #23510 2010.10.31 yyagi add
-        ConfigIni.nウインドウheight = (ConfigIni.bWindowMode) ? Window.ClientSize.Height : currentClientSize.Height;
+        ConfigIni.nWindowWidth = (ConfigIni.bWindowMode) ? Window.ClientSize.Width : currentClientSize.Width;	// #23510 2010.10.31 yyagi add
+        ConfigIni.nWindowHeight = (ConfigIni.bWindowMode) ? Window.ClientSize.Height : currentClientSize.Height;
     }
     #endregion
 

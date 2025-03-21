@@ -319,12 +319,12 @@ internal class CActSelectPreimagePanel : CActivity
 			try
 			{
 				image = new Bitmap( str現在のファイル名 );
-				bitmap2 = new Bitmap(SampleFramework.GameWindowSize.Width, SampleFramework.GameWindowSize.Height);
+				bitmap2 = new Bitmap(SampleFramework.GameFramebufferSize.Width, SampleFramework.GameFramebufferSize.Height);
 				Graphics graphics = Graphics.FromImage( bitmap2 );
 				int x = 0;
-				for (int i = 0; i < SampleFramework.GameWindowSize.Height; i += image.Height)
+				for (int i = 0; i < SampleFramework.GameFramebufferSize.Height; i += image.Height)
 				{
-					for (x = 0; x < SampleFramework.GameWindowSize.Width; x += image.Width)
+					for (x = 0; x < SampleFramework.GameFramebufferSize.Width; x += image.Width)
 					{
 						graphics.DrawImage( image, x, i, image.Width, image.Height );
 					}

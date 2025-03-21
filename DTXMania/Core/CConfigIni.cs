@@ -488,8 +488,8 @@ internal class CConfigIni
 	public bool bFullScreenExclusive;
 	public int n初期ウィンドウ開始位置X; // #30675 2013.02.04 ikanick add
 	public int n初期ウィンドウ開始位置Y;
-	public int nウインドウwidth;				// #23510 2010.10.31 yyagi add
-	public int nウインドウheight;				// #23510 2010.10.31 yyagi add
+	public int nWindowWidth;				// #23510 2010.10.31 yyagi add
+	public int nWindowHeight;				// #23510 2010.10.31 yyagi add
 	public bool DisplayBonusEffects;
 	public bool bHAZARD;
 	public int nSoundDeviceType; // #24820 2012.12.23 yyagi 出力サウンドデバイス(0=ACM(にしたいが設計がきつそうならDirectShow), 1=ASIO, 2=WASAPI)
@@ -1032,8 +1032,8 @@ internal class CConfigIni
 		n初期ウィンドウ開始位置X = 0; // #30675 2013.02.04 ikanick add
 		n初期ウィンドウ開始位置Y = 0;
 		//this.bDirectShowMode = true;
-		nウインドウwidth = SampleFramework.GameWindowSize.Width;			// #23510 2010.10.31 yyagi add
-		nウインドウheight = SampleFramework.GameWindowSize.Height;			// 
+		nWindowWidth = SampleFramework.GameFramebufferSize.Width;			// #23510 2010.10.31 yyagi add
+		nWindowHeight = SampleFramework.GameFramebufferSize.Height;			// 
 		nMovieMode = 1;
 		nMovieAlpha = 0;
 		nJudgeLine.Drums = 0;
@@ -1421,11 +1421,11 @@ internal class CConfigIni
 		sw.WriteLine();
 		sw.WriteLine("; ウインドウモード時の画面幅");				// #23510 2010.10.31 yyagi add
 		sw.WriteLine("; A width size in the window mode.");			//
-		sw.WriteLine("WindowWidth={0}", nウインドウwidth);		//
+		sw.WriteLine("WindowWidth={0}", nWindowWidth);		//
 		sw.WriteLine();												//
 		sw.WriteLine("; ウインドウモード時の画面高さ");				//
 		sw.WriteLine("; A height size in the window mode.");		//
-		sw.WriteLine("WindowHeight={0}", nウインドウheight);	//
+		sw.WriteLine("WindowHeight={0}", nWindowHeight);	//
 		sw.WriteLine();												//
 		sw.WriteLine("; ウィンドウモード時の位置X");				            // #30675 2013.02.04 ikanick add
 		sw.WriteLine("; X position in the window mode.");			            //
@@ -2539,18 +2539,18 @@ internal class CConfigIni
 									}
 									else if (str3.Equals("WindowWidth"))		// #23510 2010.10.31 yyagi add
 									{
-										nウインドウwidth = CConversion.nGetNumberIfInRange(str4, 1, 65535, nウインドウwidth);
-										if (nウインドウwidth <= 0)
+										nWindowWidth = CConversion.nGetNumberIfInRange(str4, 1, 65535, nWindowWidth);
+										if (nWindowWidth <= 0)
 										{
-											nウインドウwidth = SampleFramework.GameWindowSize.Width;
+											nWindowWidth = SampleFramework.GameFramebufferSize.Width;
 										}
 									}
 									else if (str3.Equals("WindowHeight"))		// #23510 2010.10.31 yyagi add
 									{
-										nウインドウheight = CConversion.nGetNumberIfInRange(str4, 1, 65535, nウインドウheight);
-										if (nウインドウheight <= 0)
+										nWindowHeight = CConversion.nGetNumberIfInRange(str4, 1, 65535, nWindowHeight);
+										if (nWindowHeight <= 0)
 										{
-											nウインドウheight = SampleFramework.GameWindowSize.Height;
+											nWindowHeight = SampleFramework.GameFramebufferSize.Height;
 										}
 									}
 									else if (str3.Equals("WindowX"))		// #30675 2013.02.04 ikanick add

@@ -554,7 +554,7 @@ internal class CActPerfDrumsChipFireD : CActivity
 
 					float x = (float)(st青い星[i].f半径 * Math.Cos((Math.PI / 2 * st青い星[i].ct進行.nCurrentValue) / 100.0));
 					mat *= Matrix.Scaling(x, x, 1f);
-					mat *= Matrix.Translation(st青い星[i].fX - SampleFramework.GameWindowSize.Width / 2, -(st青い星[i].fY - SampleFramework.GameWindowSize.Height / 2), 0f);
+					mat *= Matrix.Translation(st青い星[i].fX - SampleFramework.GameFramebufferSize.Width / 2, -(st青い星[i].fY - SampleFramework.GameFramebufferSize.Height / 2), 0f);
 
 					if (tx青い星[ st青い星[i].nLane ] != null)
 					{
@@ -634,9 +634,9 @@ internal class CActPerfDrumsChipFireD : CActivity
 						mat *= Matrix.RotationZ(0.09f * st飛び散るチップ[i].ct進行.nCurrentValue);
 						mat2 *= Matrix.RotationZ(-0.09f * st飛び散るチップ[i].ct進行.nCurrentValue);
 
-						mat *= Matrix.Translation((st飛び散るチップ[i].fXL - 50f) - SampleFramework.GameWindowSize.Width / 2, -(st飛び散るチップ[i].fY + nJudgeLinePosY_delta_Drums - SampleFramework.GameWindowSize.Height / 2), 0f);
-						mat2 *= Matrix.Translation((st飛び散るチップ[i].fXR - 50f) - SampleFramework.GameWindowSize.Width / 2, -(st飛び散るチップ[i].fY + nJudgeLinePosY_delta_Drums - SampleFramework.GameWindowSize.Height / 2), 0f);
-						//mat *= Matrix.Translation(this.st飛び散るチップ[i].fX - SampleFramework.GameWindowSize.Width / 2, -(this.st青い星[i].fY - SampleFramework.GameWindowSize.Height / 2), 0f);
+						mat *= Matrix.Translation((st飛び散るチップ[i].fXL - 50f) - SampleFramework.GameFramebufferSize.Width / 2, -(st飛び散るチップ[i].fY + nJudgeLinePosY_delta_Drums - SampleFramework.GameFramebufferSize.Height / 2), 0f);
+						mat2 *= Matrix.Translation((st飛び散るチップ[i].fXR - 50f) - SampleFramework.GameFramebufferSize.Width / 2, -(st飛び散るチップ[i].fY + nJudgeLinePosY_delta_Drums - SampleFramework.GameFramebufferSize.Height / 2), 0f);
+						//mat *= Matrix.Translation(this.st飛び散るチップ[i].fX - SampleFramework.GameFramebufferSize.Width / 2, -(this.st青い星[i].fY - SampleFramework.GameFramebufferSize.Height / 2), 0f);
 
 						if (txNotes != null)
 						{
@@ -823,44 +823,44 @@ internal class CActPerfDrumsChipFireD : CActivity
 						{
 							if (CDTXMania.ConfigIni.eRDPosition == ERDPosition.RDRC)
 							{
-								matrix3 *= Matrix.Translation(nレーンの中央X座標_改[st大波[i].nLane] + 280 - SampleFramework.GameWindowSize.Width / 2, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameWindowSize.Height / 2), 0f);
+								matrix3 *= Matrix.Translation(nレーンの中央X座標_改[st大波[i].nLane] + 280 - SampleFramework.GameFramebufferSize.Width / 2, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameFramebufferSize.Height / 2), 0f);
 							}
 							else
 							{
-								matrix3 *= Matrix.Translation(nレーンの中央X座標[st大波[i].nLane] + 280 - SampleFramework.GameWindowSize.Width / 2, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameWindowSize.Height / 2), 0f);
+								matrix3 *= Matrix.Translation(nレーンの中央X座標[st大波[i].nLane] + 280 - SampleFramework.GameFramebufferSize.Width / 2, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameFramebufferSize.Height / 2), 0f);
 							}
 						}
 						else if (CDTXMania.ConfigIni.eLaneType.Drums == EType.B)
 						{
 							if (CDTXMania.ConfigIni.eRDPosition == ERDPosition.RDRC)
 							{
-								matrix3 *= Matrix.Translation(nレーンの中央X座標B_改[st大波[i].nLane] + 280 - SampleFramework.GameWindowSize.Width / 2, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameWindowSize.Height / 2), 0f);
+								matrix3 *= Matrix.Translation(nレーンの中央X座標B_改[st大波[i].nLane] + 280 - SampleFramework.GameFramebufferSize.Width / 2, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameFramebufferSize.Height / 2), 0f);
 							}
 							else
 							{
-								matrix3 *= Matrix.Translation(nレーンの中央X座標B[st大波[i].nLane] + 280 - SampleFramework.GameWindowSize.Width / 2, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameWindowSize.Height / 2), 0f);
+								matrix3 *= Matrix.Translation(nレーンの中央X座標B[st大波[i].nLane] + 280 - SampleFramework.GameFramebufferSize.Width / 2, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameFramebufferSize.Height / 2), 0f);
 							}
 						}
 						else if (CDTXMania.ConfigIni.eLaneType.Drums == EType.C)
 						{
 							if (CDTXMania.ConfigIni.eRDPosition == ERDPosition.RDRC)
 							{
-								matrix3 *= Matrix.Translation(nレーンの中央X座標C_改[st大波[i].nLane] + 280 - SampleFramework.GameWindowSize.Width / 2, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameWindowSize.Height / 2), 0f);
+								matrix3 *= Matrix.Translation(nレーンの中央X座標C_改[st大波[i].nLane] + 280 - SampleFramework.GameFramebufferSize.Width / 2, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameFramebufferSize.Height / 2), 0f);
 							}
 							else
 							{
-								matrix3 *= Matrix.Translation(nレーンの中央X座標C[st大波[i].nLane] + 280 - SampleFramework.GameWindowSize.Width / 2, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameWindowSize.Height / 2), 0f);
+								matrix3 *= Matrix.Translation(nレーンの中央X座標C[st大波[i].nLane] + 280 - SampleFramework.GameFramebufferSize.Width / 2, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameFramebufferSize.Height / 2), 0f);
 							}
 						}
 						else if (CDTXMania.ConfigIni.eLaneType.Drums == EType.D)
 						{
 							if (CDTXMania.ConfigIni.eRDPosition == ERDPosition.RDRC)
 							{
-								matrix3 *= Matrix.Translation(nレーンの中央X座標D_改[st大波[i].nLane] + 280 - SampleFramework.GameWindowSize.Width / 2, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameWindowSize.Height / 2), 0f);
+								matrix3 *= Matrix.Translation(nレーンの中央X座標D_改[st大波[i].nLane] + 280 - SampleFramework.GameFramebufferSize.Width / 2, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameFramebufferSize.Height / 2), 0f);
 							}
 							else
 							{
-								matrix3 *= Matrix.Translation(nレーンの中央X座標D[st大波[i].nLane] + 280 - SampleFramework.GameWindowSize.Width / 2, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameWindowSize.Height / 2), 0f);
+								matrix3 *= Matrix.Translation(nレーンの中央X座標D[st大波[i].nLane] + 280 - SampleFramework.GameFramebufferSize.Width / 2, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameFramebufferSize.Height / 2), 0f);
 							}
 						}
 						if( tx大波 != null )
@@ -898,44 +898,44 @@ internal class CActPerfDrumsChipFireD : CActivity
 						{
 							if (CDTXMania.ConfigIni.eRDPosition == ERDPosition.RCRD)
 							{
-								matrix4 *= Matrix.Translation(nレーンの中央X座標[st細波[i].nLane] + 280 - SampleFramework.GameWindowSize.Width / 2, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameWindowSize.Height / 2), 0f);
+								matrix4 *= Matrix.Translation(nレーンの中央X座標[st細波[i].nLane] + 280 - SampleFramework.GameFramebufferSize.Width / 2, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameFramebufferSize.Height / 2), 0f);
 							}
 							else
 							{
-								matrix4 *= Matrix.Translation(nレーンの中央X座標_改[st細波[i].nLane] + 280 - SampleFramework.GameWindowSize.Width / 2, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameWindowSize.Height / 2), 0f);
+								matrix4 *= Matrix.Translation(nレーンの中央X座標_改[st細波[i].nLane] + 280 - SampleFramework.GameFramebufferSize.Width / 2, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameFramebufferSize.Height / 2), 0f);
 							}
 						}
 						else if (CDTXMania.ConfigIni.eLaneType.Drums == EType.B)
 						{
 							if (CDTXMania.ConfigIni.eRDPosition == ERDPosition.RCRD)
 							{
-								matrix4 *= Matrix.Translation(nレーンの中央X座標B[st細波[i].nLane] + 280 - SampleFramework.GameWindowSize.Width / 2, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameWindowSize.Height / 2), 0f);
+								matrix4 *= Matrix.Translation(nレーンの中央X座標B[st細波[i].nLane] + 280 - SampleFramework.GameFramebufferSize.Width / 2, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameFramebufferSize.Height / 2), 0f);
 							}
 							else
 							{
-								matrix4 *= Matrix.Translation(nレーンの中央X座標B_改[st細波[i].nLane] + 280 - SampleFramework.GameWindowSize.Width / 2, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameWindowSize.Height / 2), 0f);
+								matrix4 *= Matrix.Translation(nレーンの中央X座標B_改[st細波[i].nLane] + 280 - SampleFramework.GameFramebufferSize.Width / 2, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameFramebufferSize.Height / 2), 0f);
 							}
 						}
 						else if (CDTXMania.ConfigIni.eLaneType.Drums == EType.C)
 						{
 							if (CDTXMania.ConfigIni.eRDPosition == ERDPosition.RCRD)
 							{
-								matrix4 *= Matrix.Translation(nレーンの中央X座標C_改[st細波[i].nLane] + 280 - SampleFramework.GameWindowSize.Width / 2, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameWindowSize.Height / 2), 0f);
+								matrix4 *= Matrix.Translation(nレーンの中央X座標C_改[st細波[i].nLane] + 280 - SampleFramework.GameFramebufferSize.Width / 2, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameFramebufferSize.Height / 2), 0f);
 							}
 							else
 							{
-								matrix4 *= Matrix.Translation(nレーンの中央X座標C[st細波[i].nLane] + 280 - SampleFramework.GameWindowSize.Width / 2, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameWindowSize.Height / 2), 0f);
+								matrix4 *= Matrix.Translation(nレーンの中央X座標C[st細波[i].nLane] + 280 - SampleFramework.GameFramebufferSize.Width / 2, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameFramebufferSize.Height / 2), 0f);
 							}
 						}
 						else if (CDTXMania.ConfigIni.eLaneType.Drums == EType.D)
 						{
 							if (CDTXMania.ConfigIni.eRDPosition == ERDPosition.RDRC)
 							{
-								matrix4 *= Matrix.Translation(nレーンの中央X座標D_改[st細波[i].nLane] + 280 - SampleFramework.GameWindowSize.Width / 2, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameWindowSize.Height / 2), 0f);
+								matrix4 *= Matrix.Translation(nレーンの中央X座標D_改[st細波[i].nLane] + 280 - SampleFramework.GameFramebufferSize.Width / 2, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameFramebufferSize.Height / 2), 0f);
 							}
 							else
 							{
-								matrix4 *= Matrix.Translation(nレーンの中央X座標D[st細波[i].nLane] + 280 - SampleFramework.GameWindowSize.Width / 2, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameWindowSize.Height / 2), 0f);
+								matrix4 *= Matrix.Translation(nレーンの中央X座標D[st細波[i].nLane] + 280 - SampleFramework.GameFramebufferSize.Width / 2, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameFramebufferSize.Height / 2), 0f);
 							}
 						}
 						if (tx細波 != null)

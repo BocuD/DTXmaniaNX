@@ -1419,7 +1419,7 @@ internal class CActSelectSongList : CActivity
 
 	private void tDrawBar( int x, int y, EBarType type, bool b選択曲)  // tバーの描画
 	{
-		if( x >= SampleFramework.GameWindowSize.Width || y >= SampleFramework.GameWindowSize.Height )
+		if( x >= SampleFramework.GameFramebufferSize.Width || y >= SampleFramework.GameFramebufferSize.Height )
 			return;
 
 		if (b選択曲)

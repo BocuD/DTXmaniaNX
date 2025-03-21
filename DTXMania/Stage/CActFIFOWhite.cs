@@ -60,9 +60,9 @@ internal class CActFIFOWhite : CActivity
 		if (tx白タイル64x64 != null)
 		{
 			tx白タイル64x64.nTransparency = ( mode == EFIFOMode.FadeIn ) ? ( ( ( 100 - counter.nCurrentValue ) * 0xff ) / 100 ) : ( ( counter.nCurrentValue * 0xff ) / 100 );
-			for (int i = 0; i <= (SampleFramework.GameWindowSize.Width / 64); i++)		// #23510 2010.10.31 yyagi: change "clientSize.Width" to "640" to fix FIFO drawing size
+			for (int i = 0; i <= (SampleFramework.GameFramebufferSize.Width / 64); i++)		// #23510 2010.10.31 yyagi: change "clientSize.Width" to "640" to fix FIFO drawing size
 			{
-				for (int j = 0; j <= (SampleFramework.GameWindowSize.Height / 64); j++)	// #23510 2010.10.31 yyagi: change "clientSize.Height" to "480" to fix FIFO drawing size
+				for (int j = 0; j <= (SampleFramework.GameFramebufferSize.Height / 64); j++)	// #23510 2010.10.31 yyagi: change "clientSize.Height" to "480" to fix FIFO drawing size
 				{
 					if (bテクスチャを描画する)
 					{

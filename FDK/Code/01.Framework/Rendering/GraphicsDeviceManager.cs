@@ -183,9 +183,7 @@ public class GraphicsDeviceManager : IDisposable
 
 		ignoreSizeChanges = true;
 
-		bool keepCurrentWindowSize = false;
-		if (settings.BackBufferWidth == 0 && settings.BackBufferHeight == 0)
-			keepCurrentWindowSize = true;
+		bool keepCurrentWindowSize = settings.BackBufferWidth == 0 && settings.BackBufferHeight == 0;
 
 		// handle the window state in Direct3D9 (it will be handled for us in DXGI)
 		// check if we are going to windowed or fullscreen mode
