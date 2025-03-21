@@ -48,6 +48,15 @@ public abstract class UITexture : UIDrawable
                 ImGui.Text($"Name: {texture.name}");
                 ImGui.Text($"Width: {texture.Width}");
                 ImGui.Text($"Height: {texture.Height}");
+
+                var tex = texture.GetImTextureID();
+                if (tex != null)
+                {
+                    float windowWidth = ImGui.GetWindowWidth();
+                    float textureWidth = windowWidth - 64;
+                    float textureHeight = texture.Height * (textureWidth / texture.Width);
+                    ImGui.Image(tex.Value, new System.Numerics.Vector2(textureWidth, textureHeight));
+                }
             }
             else
             {

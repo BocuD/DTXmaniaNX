@@ -1,6 +1,7 @@
 ﻿using DTXMania.Core;
 using DTXUIRenderer;
 using FDK;
+using Hexa.NET.ImGui;
 using SharpDX;
 
 namespace DTXMania.UI;
@@ -47,5 +48,11 @@ public class DTXTexture : BaseTexture
     public override bool isValid()
     {
         return texture != null;
+    }
+
+    public override ImTextureID? GetImTextureID()
+    {
+        if (texture == null || texture.texture == null) return null;
+        return new ImTextureID(texture.texture.NativePointer);
     }
 }

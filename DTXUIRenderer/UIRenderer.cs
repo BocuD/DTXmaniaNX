@@ -1,4 +1,5 @@
 ﻿using System;
+using Hexa.NET.ImGui;
 using SharpDX;
 
 namespace DTXUIRenderer;
@@ -19,4 +20,6 @@ public abstract class BaseTexture : IDisposable
     }
 
     public abstract bool isValid();
+
+    public abstract ImTextureID? GetImTextureID();
 }
