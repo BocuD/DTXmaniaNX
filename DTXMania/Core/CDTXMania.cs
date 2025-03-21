@@ -499,7 +499,7 @@ internal class CDTXMania : Game
             
         var io = ImGui.GetIO();
 
-        io.DisplaySize = new Vector2(GameWindowSize.Width, GameWindowSize.Height);
+        io.DisplaySize = new Vector2(Window.ClientSize.Width, Window.ClientSize.Height);
         io.DisplayFramebufferScale = new Vector2(1, 1);
 
         ImGuiImplD3D9.SetCurrentContext(context);
@@ -2702,10 +2702,10 @@ internal class CDTXMania : Game
     {
         var pos = e.Location;
             
-        // //take window scale into account (since the render resolution for imgui is fixed 1280x720)
-        // var windowScale = new Vector2((float)Window.ClientSize.Width / 1280, (float)Window.ClientSize.Height / 720);
-        // pos.X = (int)(pos.X / windowScale.X);
-        // pos.Y = (int)(pos.Y / windowScale.Y);
+        //take window scale into account (since the render resolution for imgui is fixed 1280x720)
+        var windowScale = new Vector2((float)Window.ClientSize.Width / GameWindowSize.Width, (float)Window.ClientSize.Height / GameWindowSize.Height);
+        pos.X = (int)(pos.X / windowScale.X);
+        pos.Y = (int)(pos.Y / windowScale.Y);
             
         ImGui.GetIO().MousePos = new Vector2(pos.X, pos.Y);
     }
