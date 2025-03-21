@@ -5,6 +5,7 @@ using System.Runtime;
 using System.Text;
 using System.Windows.Forms;
 using DTXMania.UI;
+using DTXMania.UI.Skin;
 using FDK;
 using Hexa.NET.ImGui;
 using Hexa.NET.ImGui.Backends.D3D9;
@@ -176,6 +177,12 @@ internal class CDTXMania : Game
         private set;
     }
     public static CSkin Skin
+    {
+        get;
+        private set;
+    }
+
+    public static SkinManager SkinManager
     {
         get;
         private set;
@@ -1878,9 +1885,10 @@ internal class CDTXMania : Game
         actFlushGPU = new CActFlushGPU();
         //---------------------
         #endregion
-
         DTX = null;
-
+        #region [ Initialize Skin Manager ]
+        SkinManager = new SkinManager();
+        #endregion
         #region [ Initialize Skin ]
         //---------------------
         Trace.TraceInformation("スキンの初期化を行います。");
