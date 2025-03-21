@@ -34,8 +34,9 @@ public class HierarchyWindow
         {
             rootFlags |= ImGuiTreeNodeFlags.Selected;
         }
-
-        if (ImGui.TreeNodeEx(node.name, rootFlags))
+        
+        string id = node.GetHashCode().ToString();
+        if (ImGui.TreeNodeEx(id, rootFlags, node.name))
         {
             if (ImGui.IsItemClicked())
             {
