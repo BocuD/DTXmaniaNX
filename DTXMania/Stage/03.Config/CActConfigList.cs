@@ -177,7 +177,7 @@ internal partial class CActConfigList : CActivity
 
         ScanSkinFolders();
 
-        prvFont = new CPrivateFastFont( new FontFamily( CDTXMania.ConfigIni.str選曲リストフォント ), 15 );	// t項目リストの設定 の前に必要
+        prvFont = new CPrivateFastFont( new FontFamily( CDTXMania.ConfigIni.songListFont ), 15 );	// t項目リストの設定 の前に必要
 
         tSetupItemList_Bass();		// #27795 2012.3.11 yyagi; System設定の中でDrumsの設定を参照しているため、
         tSetupItemList_Guitar();	// 活性化の時点でDrumsの設定も入れ込んでおかないと、System設定中に例外発生することがある。
@@ -235,7 +235,7 @@ internal partial class CActConfigList : CActivity
         txArrow = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\4_Arrow.png" ) );
         txItemBoxCursor = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\4_itembox cursor.png" ) );
         txSkinSample1 = null;		// スキン選択時に動的に設定するため、ここでは初期化しない
-        prvFontForToastMessage = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.str選曲リストフォント), 14, FontStyle.Regular);
+        prvFontForToastMessage = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.songListFont), 14, FontStyle.Regular);
         base.OnManagedCreateResources();
     }
     public override void OnManagedReleaseResources()

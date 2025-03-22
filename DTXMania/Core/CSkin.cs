@@ -923,7 +923,7 @@ internal class CSkin : IDisposable
 			sw.WriteLine();
 			sw.WriteLine( "; 選曲リストのフォント名" );
 			sw.WriteLine( "; Font name for select song item." );
-			sw.WriteLine( "SelectListFontName={0}", CDTXMania.ConfigIni.str選曲リストフォント );
+			sw.WriteLine( "SelectListFontName={0}", CDTXMania.ConfigIni.songListFont );
 			sw.WriteLine();
 			sw.WriteLine( "; 選曲リストのフォントのサイズ[dot]" );
 			sw.WriteLine( "; Font size[dot] for select song item." );
@@ -1019,7 +1019,7 @@ internal class CSkin : IDisposable
 						//-----------------------------
 						if (str3.Equals("SelectListFontName"))
 						{
-							CDTXMania.ConfigIni.str選曲リストフォント = str4;
+							CDTXMania.ConfigIni.songListFont = str4;
 						}
 						else if (str3.Equals("DisplayFontName"))
 						{

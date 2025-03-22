@@ -69,13 +69,13 @@ internal class CActResultImage : CActivity
             else
                 strSongName = CDTXMania.DTX.TITLE;
 
-            CPrivateFastFont pfTitle = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.str選曲リストフォント), 20, FontStyle.Regular);
+            CPrivateFastFont pfTitle = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.songListFont), 20, FontStyle.Regular);
             Bitmap bmpSongName = pfTitle.DrawPrivateFont(strSongName, CPrivateFont.DrawMode.Edge, Color.Black, Color.Black, clGITADORAgradationTopColor, clGITADORAgradationBottomColor, true);
             txSongName = CDTXMania.tGenerateTexture(bmpSongName, false);
             bmpSongName.Dispose();
             pfTitle.Dispose();
 
-            CPrivateFastFont pfArtist = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.str選曲リストフォント), 15, FontStyle.Regular);
+            CPrivateFastFont pfArtist = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.songListFont), 15, FontStyle.Regular);
             Bitmap bmpArtistName = pfArtist.DrawPrivateFont(CDTXMania.DTX.ARTIST, CPrivateFont.DrawMode.Edge, Color.Black, Color.Black, clGITADORAgradationTopColor, clGITADORAgradationBottomColor, true);
             txArtistName = CDTXMania.tGenerateTexture(bmpArtistName, false);
             bmpArtistName.Dispose();
@@ -85,7 +85,7 @@ internal class CActResultImage : CActivity
             {
                 double d = (double)(CDTXMania.ConfigIni.nPlaySpeed / 20.0);
                 String strModifiedPlaySpeed = "Play Speed: x" + d.ToString("0.000");
-                CPrivateFastFont pfModifiedPlaySpeed = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.str選曲リストフォント), 18, FontStyle.Regular);
+                CPrivateFastFont pfModifiedPlaySpeed = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.songListFont), 18, FontStyle.Regular);
                 Bitmap bmpModifiedPlaySpeed = pfModifiedPlaySpeed.DrawPrivateFont(strModifiedPlaySpeed, CPrivateFont.DrawMode.Edge, Color.White, Color.White, Color.Black, Color.Red, true);
                 txModifiedPlaySpeed = CDTXMania.tGenerateTexture(bmpModifiedPlaySpeed, false);
                 bmpModifiedPlaySpeed.Dispose();
@@ -95,7 +95,7 @@ internal class CActResultImage : CActivity
             if (CDTXMania.stageResult.bIsTrainingMode)
             {
                 String strResultsNotSavedTraining = "Training feature used";
-                CPrivateFastFont pfResultsNotSavedTraining = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.str選曲リストフォント), 18, FontStyle.Regular);
+                CPrivateFastFont pfResultsNotSavedTraining = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.songListFont), 18, FontStyle.Regular);
                 Bitmap bmpResultsNotSavedTraining = pfResultsNotSavedTraining.DrawPrivateFont(strResultsNotSavedTraining, CPrivateFont.DrawMode.Edge, Color.White, Color.White, Color.Black, Color.Red, true);
                 txTrainingMode = CDTXMania.tGenerateTexture(bmpResultsNotSavedTraining, false);
                 bmpResultsNotSavedTraining.Dispose();
@@ -103,7 +103,7 @@ internal class CActResultImage : CActivity
             }
 
             String strResultsNotSaved = "Score will not be saved";
-            CPrivateFastFont pfResultsNotSaved = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.str選曲リストフォント), 18, FontStyle.Regular);
+            CPrivateFastFont pfResultsNotSaved = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.songListFont), 18, FontStyle.Regular);
             Bitmap bmpResultsNotSaved = pfResultsNotSaved.DrawPrivateFont(strResultsNotSaved, CPrivateFont.DrawMode.Edge, Color.White, Color.White, Color.Black, Color.Red, true);
             txResultsNotSaved = CDTXMania.tGenerateTexture(bmpResultsNotSaved, false);
             bmpResultsNotSaved.Dispose();

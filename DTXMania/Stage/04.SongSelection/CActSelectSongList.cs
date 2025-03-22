@@ -500,7 +500,7 @@ internal class CActSelectSongList : CActivity
 		FontStyle regular = FontStyle.Regular;
 		if( CDTXMania.ConfigIni.b選曲リストフォントを斜体にする ) regular |= FontStyle.Italic;
 		if( CDTXMania.ConfigIni.b選曲リストフォントを太字にする ) regular |= FontStyle.Bold;
-		ftSongListFont = new Font( CDTXMania.ConfigIni.str選曲リストフォント, (float) ( CDTXMania.ConfigIni.n選曲リストフォントのサイズdot * 2 ), regular, GraphicsUnit.Pixel );
+		ftSongListFont = new Font( CDTXMania.ConfigIni.songListFont, (float) ( CDTXMania.ConfigIni.n選曲リストフォントのサイズdot * 2 ), regular, GraphicsUnit.Pixel );
 			
 
 		// 現在選択中の曲がない（＝はじめての活性化）なら、現在選択中の曲をルートの先頭ノードに設定する。
@@ -545,8 +545,8 @@ internal class CActSelectSongList : CActivity
 		txTopPanel = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\5_header song list.png"), false);
 		txBottomPanel = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\5_footer song list.png"), false);
 
-		prvFont = new CPrivateFastFont( new FontFamily( CDTXMania.ConfigIni.str選曲リストフォント ), 30, FontStyle.Regular );
-		prvFontSmall = new CPrivateFastFont( new FontFamily( CDTXMania.ConfigIni.str選曲リストフォント ), 15, FontStyle.Regular );
+		prvFont = new CPrivateFastFont( new FontFamily( CDTXMania.ConfigIni.songListFont ), 30, FontStyle.Regular );
+		prvFontSmall = new CPrivateFastFont( new FontFamily( CDTXMania.ConfigIni.songListFont ), 15, FontStyle.Regular );
 
 		for( int i = 0; i < 13; i++ )
 		{

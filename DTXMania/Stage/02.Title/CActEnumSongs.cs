@@ -59,7 +59,7 @@ internal class CActEnumSongs : CActivity
 
         var parent = CDTXMania.rCurrentStage.ui;
             
-        var fontFamily = new FontFamily(CDTXMania.ConfigIni.str選曲リストフォント);
+        var fontFamily = new FontFamily(CDTXMania.ConfigIni.songListFont);
 
         //create ui
         enumMessage = parent.AddChild(new UIGroup("EnumSongs"));

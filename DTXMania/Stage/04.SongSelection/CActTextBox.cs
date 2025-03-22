@@ -119,8 +119,8 @@ internal class CActTextBox : CActivity
 		//prvf入力文字列 = new CPrivateFastFont(CSkin.Path(strファイルの相対パス), 20);
 		//prvf説明 = new CPrivateFastFont(CSkin.Path(strファイルの相対パス), 16);
 
-		prvf入力文字列 = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.str選曲リストフォント), 20, FontStyle.Regular);
-		prvf説明 = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.str選曲リストフォント), 14, FontStyle.Regular);
+		prvf入力文字列 = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.songListFont), 20, FontStyle.Regular);
+		prvf説明 = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.songListFont), 14, FontStyle.Regular);
 		t基本位置に応じて文字の描画範囲を設定する();
 		t背景テクスチャを生成();
 		using (Bitmap bitmap = new Bitmap(rectパネル基本位置.Width, 350))

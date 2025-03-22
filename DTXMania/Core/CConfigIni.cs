@@ -549,7 +549,7 @@ internal class CConfigIni
 	public STDGBVALUE<int> nScrollSpeed;
 	public string strDTXManiaのバージョン;
 	public string str曲データ検索パス;
-	public string str選曲リストフォント;
+	public string songListFont;
 	public string[] strCardName; //2015.12.3 kaiera0467 DrumとGuitarとBassで名前を別々にするため、string[3]に変更。
 	public string[] strGroupName;
 	public EDrumComboTextDisplayPosition ドラムコンボ文字の表示位置;
@@ -1137,7 +1137,7 @@ internal class CConfigIni
 		n表示可能な最小コンボ数.Drums = 10;
 		n表示可能な最小コンボ数.Guitar = 2;
 		n表示可能な最小コンボ数.Bass = 2;
-		str選曲リストフォント = "MS PGothic";
+		songListFont = "MS PGothic";
 		n選曲リストフォントのサイズdot = 20;
 		b選曲リストフォントを太字にする = true;
 		n自動再生音量 = 80;
@@ -1670,7 +1670,7 @@ internal class CConfigIni
 		#region [ 選曲リストのフォント ]
 		sw.WriteLine( "; 選曲リストのフォント名" );
 		sw.WriteLine( "; Font name for select song item." );
-		sw.WriteLine( "SelectListFontName={0}", str選曲リストフォント );
+		sw.WriteLine( "SelectListFontName={0}", songListFont );
 		sw.WriteLine();
 		sw.WriteLine( "; 選曲リストのフォントのサイズ[dot]" );
 		sw.WriteLine( "; Font size[dot] for select song item." );
@@ -2796,7 +2796,7 @@ internal class CConfigIni
 									#endregion
 									else if (str3.Equals("SelectListFontName"))
 									{
-										str選曲リストフォント = str4;
+										songListFont = str4;
 									}
 									else if (str3.Equals("SelectListFontSize"))
 									{

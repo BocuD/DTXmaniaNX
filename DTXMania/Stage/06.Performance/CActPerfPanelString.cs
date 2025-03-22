@@ -95,13 +95,13 @@ internal class CActPerfPanelString : CActivity
             else
                 strSongName = CDTXMania.DTX.TITLE;
 
-            pfタイトル = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.str選曲リストフォント), 20, FontStyle.Regular);
+            pfタイトル = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.songListFont), 20, FontStyle.Regular);
             Bitmap bmpSongName = new Bitmap(1, 1);
             bmpSongName = pfタイトル.DrawPrivateFont(strSongName, CPrivateFont.DrawMode.Edge, Color.Black, Color.Black, clGITADORAgradationTopColor, clGITADORAgradationBottomColor, true);
             txSongName = CDTXMania.tGenerateTexture(bmpSongName, false);
             bmpSongName.Dispose();
 
-            pfアーティスト = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.str選曲リストフォント), 15, FontStyle.Regular);
+            pfアーティスト = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.songListFont), 15, FontStyle.Regular);
             Bitmap bmpArtistName = new Bitmap(1, 1);
             bmpArtistName = pfアーティスト.DrawPrivateFont(CDTXMania.DTX.ARTIST, CPrivateFont.DrawMode.Edge, Color.Black, Color.Black, clGITADORAgradationTopColor, clGITADORAgradationBottomColor, true);
             txArtistName = CDTXMania.tGenerateTexture(bmpArtistName, false);
