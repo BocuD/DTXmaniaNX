@@ -159,53 +159,6 @@ public class CActivity
 		// 戻り値とその意味は子クラスで自由に決めていい。
 		return 0;
 	}
-	/// <summary>
-	/// <para>進行と描画を行う。（これらは分離されず、この１つのメソッドだけで実装する。）</para>
-	/// <para>このメソッドは BeginScene() の後に呼び出されるので、メソッド内でいきなり描画を行ってかまわない。</para>
-	/// <para>大体はSSTのOn進行とOn描画を合体させたようなものです。</para>
-	/// </summary>
-	/// <returns>任意の整数。呼び出し元との整合性を合わせておくこと。</returns>
-	public virtual int OnUpdateAndDraw(SharpDX.Direct3D9.Device D3D9Device)
-	{
-		// 活性化してないなら何もしない。
-		if (bNotActivated)
-			return 0;
-
-
-		/* ここで進行と描画を行う。*/
-
-
-		// 戻り値とその意味は子クラスで自由に決めていい。
-		return 0;
-	}
-	/// <summary>
-	/// <para>この Activity を活性化（有効化）する。</para>
-	/// <para>具体的には内部リソースの初期化などを行う。</para>
-	/// </summary>
-	public virtual void OnActivate(SharpDX.Direct3D9.Device D3D9Device)
-	{
-		if (bActivated)
-			return;
-
-		bActivated = true;		// このフラグは、以下の処理をする前にセットする。
-
-
-		// 自身のリソースを作成する。
-
-		OnManagedCreateResource(D3D9Device);
-		OnUnmanagedCreateResources(D3D9Device);
-
-
-		// すべての子Activityを活性化する。
-
-		foreach (CActivity activity in listChildActivities)
-			activity.OnActivate(D3D9Device);
-
-
-		// その他
-
-		bJustStartedUpdate = true;
-	}
 
 	/// <summary>
 	/// <para>Managed リソースの作成を行う。</para>
