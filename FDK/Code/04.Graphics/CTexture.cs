@@ -355,7 +355,7 @@ public class CTexture : IDisposable
 		{
 			Dispose();
 			// throw new CTextureCreateFailedException( string.Format( "テクスチャの生成に失敗しました。\n{0}", strファイル名 ) );
-			throw new CTextureCreateFailedException(string.Format("テクスチャの生成に失敗しました。\n"));
+			throw new CTextureCreateFailedException("テクスチャの生成に失敗しました。\n");
 		}
 	}
 	// メソッド
@@ -526,11 +526,6 @@ public class CTexture : IDisposable
 		tDraw2DUpsideDown(device, x, y, 1f, rcFullImage);
 	}
 
-	public void tDraw2DUpsideDown(Device device, int x, int y, Rectangle rcClipRect)
-	{
-		tDraw2DUpsideDown(device, x, y, 1f, rcClipRect);
-	}
-
 	public void tDraw2DUpsideDown(Device device, int x, int y, float depth, Rectangle rcClipRect)
 	{
 		if (texture == null)
@@ -606,13 +601,13 @@ public class CTexture : IDisposable
 		float vBottom = clipRect.Bottom / texHeight;
 
 		//vertices
-		var vertices = new TransformedColoredTexturedVertex[4];
+		TransformedColoredTexturedVertex[] vertices = new TransformedColoredTexturedVertex[4];
 		Vector3[] corners =
 		{
-			new Vector3(0 - 0.5f, 0 - 0.5f, 0), // TL
-			new Vector3(size.X - 0.5f, 0 - 0.5f, 0), // TR
-			new Vector3(0 - 0.5f, size.Y - 0.5f, 0), // BL
-			new Vector3(size.X - 0.5f, size.Y - 0.5f, 0) // BR
+			new(0 - 0.5f, 0 - 0.5f, 0), // TL
+			new(size.X - 0.5f, 0 - 0.5f, 0), // TR
+			new(0 - 0.5f, size.Y - 0.5f, 0), // BL
+			new(size.X - 0.5f, size.Y - 0.5f, 0) // BR
 		};
 
 		for (int i = 0; i < corners.Length; i++)
@@ -713,10 +708,10 @@ public class CTexture : IDisposable
 				
 			Vector3[] corners =
 			{
-				new Vector3(region.Left - 0.5f, region.Top - 0.5f, 0), // TL
-				new Vector3(region.Right - 0.5f, region.Top - 0.5f, 0), // TR
-				new Vector3(region.Left - 0.5f, region.Bottom - 0.5f, 0), // BL
-				new Vector3(region.Right - 0.5f, region.Bottom - 0.5f, 0), // BR
+				new(region.Left - 0.5f, region.Top - 0.5f, 0), // TL
+				new(region.Right - 0.5f, region.Top - 0.5f, 0), // TR
+				new(region.Left - 0.5f, region.Bottom - 0.5f, 0), // BL
+				new(region.Right - 0.5f, region.Bottom - 0.5f, 0), // BR
 			};
 				
 			var vertices = new TransformedColoredTexturedVertex[4];
@@ -941,7 +936,7 @@ public class CTexture : IDisposable
 		Pool.Managed;
 #endif
 //		byte[] _txData;
-	static object lockobj = new object();
+	static object lockobj = new();
 
 	private void tRenderStateSettings(Device device)
 	{
@@ -1015,7 +1010,7 @@ public class CTexture : IDisposable
 
 	protected Rectangle rcFullImage; // テクスチャ作ったらあとは不変
 
-	protected Color4 color4 = new Color4(1f, 1f, 1f, 1f); // アルファ以外は不変
+	protected Color4 color4 = new(1f, 1f, 1f, 1f); // アルファ以外は不変
 	//-----------------
 
 	#endregion

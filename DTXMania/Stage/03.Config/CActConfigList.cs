@@ -2,7 +2,7 @@
 using DTXMania.Core;
 using DTXMania.UI.Item;
 using FDK;
-
+using SampleFramework;
 using Color = System.Drawing.Color;
 using Rectangle = System.Drawing.Rectangle;
 using Point = System.Drawing.Point;
@@ -105,10 +105,10 @@ internal partial class CActConfigList : CActivity
             string path = skinSubFolders[nSkinIndex];
             path = Path.Combine(path, @"Graphics\2_background.jpg");
             Bitmap bmSrc = new(path);
-            Bitmap bmDest = new(1280, 720);
+            Bitmap bmDest = new(GameFramebufferSize.Width, GameFramebufferSize.Height);
             Graphics g = Graphics.FromImage(bmDest);
             g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-            g.DrawImage(bmSrc, new Rectangle(60, 106, (int)(1280 * 0.1984), (int)(720 * 0.1984)),
+            g.DrawImage(bmSrc, new Rectangle(60, 106, (int)(GameFramebufferSize.Width * 0.1984), (int)(GameFramebufferSize.Height * 0.1984)),
                 0, 0, 1280, 720, GraphicsUnit.Pixel);
             if (txSkinSample1 != null)
             {

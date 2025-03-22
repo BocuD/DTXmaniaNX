@@ -2,6 +2,7 @@
 using DTXMania.Core;
 using SharpDX.Direct3D9;
 using FDK;
+using SampleFramework;
 
 namespace DTXMania;
 
@@ -235,8 +236,9 @@ internal class CActSelectBackgroundAVI : CActivity
     private int position;
     //private int position2;
     //DTXNX is 1280 by 720
-    private readonly float fullScreenHeightPx = 1280f;
-    private readonly float fullScreenWidthPx = 720f;
+    private readonly float fullScreenHeightPx = GameFramebufferSize.Width;
+
+    private readonly float fullScreenWidthPx = GameFramebufferSize.Height;
     //NOTE: This is a soft reference to externally initialized object
     //Do not call Dispose() for rAVI
     private CDTX.CAVI rAVI;

@@ -328,7 +328,6 @@ internal class CDTXMania : Game
     private Texture gameRenderTargetTexture;
     private Surface gameRenderTargetSurface;
     private Surface mainRenderTarget;
-    private CTexture gameRenderTargetCTexture;
     public static bool renderGameToSurface = true;
     
     
@@ -518,7 +517,6 @@ internal class CDTXMania : Game
         gameRenderTargetSurface = gameRenderTargetTexture.GetSurfaceLevel(0);
         
         mainRenderTarget = Device.GetRenderTarget(0);
-        gameRenderTargetCTexture = new CTexture(gameRenderTargetTexture);
     }
 
     protected override void UnloadContent()
@@ -529,7 +527,6 @@ internal class CDTXMania : Game
                 activity.OnUnmanagedReleaseResources();
         }
         
-        gameRenderTargetCTexture.Dispose();
         gameRenderTargetSurface.Dispose();
         gameRenderTargetTexture.Dispose();
         mainRenderTarget.Dispose();
