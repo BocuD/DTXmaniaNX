@@ -13,7 +13,9 @@ using SampleFramework;
 using SharpDX;
 using SharpDX.Direct3D9;
 using GameWindow = DTXMania.UI.GameWindow;
+using ImGui = Hexa.NET.ImGui.ImGui;
 using Point = System.Drawing.Point;
+using RectangleF = SharpDX.RectangleF;
 using Vector2 = System.Numerics.Vector2;
 
 namespace DTXMania.Core;
@@ -326,7 +328,8 @@ internal class CDTXMania : Game
     private Texture gameRenderTargetTexture;
     private Surface gameRenderTargetSurface;
     private Surface mainRenderTarget;
-    public static bool renderGameToSurface = false;
+    private CTexture gameRenderTargetCTexture;
+    public static bool renderGameToSurface = true;
     
     
     // Constructor
@@ -501,6 +504,8 @@ internal class CDTXMania : Game
 
         io.DisplaySize = new Vector2(Window.ClientSize.Width, Window.ClientSize.Height);
         io.DisplayFramebufferScale = new Vector2(1, 1);
+        
+        io.ConfigFlags |= ImGuiConfigFlags.DockingEnable;
 
         ImGuiImplD3D9.SetCurrentContext(context);
 
@@ -513,6 +518,7 @@ internal class CDTXMania : Game
         gameRenderTargetSurface = gameRenderTargetTexture.GetSurfaceLevel(0);
         
         mainRenderTarget = Device.GetRenderTarget(0);
+        gameRenderTargetCTexture = new CTexture(gameRenderTargetTexture);
     }
 
     protected override void UnloadContent()
@@ -523,6 +529,7 @@ internal class CDTXMania : Game
                 activity.OnUnmanagedReleaseResources();
         }
         
+        gameRenderTargetCTexture.Dispose();
         gameRenderTargetSurface.Dispose();
         gameRenderTargetTexture.Dispose();
         mainRenderTarget.Dispose();
@@ -630,8 +637,9 @@ internal class CDTXMania : Game
         #endregion
 
         //cache this value to prevent it from changing during the frame
-        bool renderToSurface = renderGameToSurface;
-        if (renderToSurface)
+        bool renderGameToWindow = renderGameToSurface;
+
+        if (renderGameToWindow)
         {
             Device.SetRenderTarget(0, gameRenderTargetSurface);
         }
@@ -646,17 +654,17 @@ internal class CDTXMania : Game
 
         InspectorManager.Draw();
         GameStatus.Draw();
-
+        
         Device.EndScene();
 
-        if (renderToSurface)
+        if (renderGameToWindow)
         {
             Device.SetRenderTarget(0, mainRenderTarget);
             Device.Clear(ClearFlags.ZBuffer | ClearFlags.Target, SharpDX.Color.Black, 1f, 0);
-
+            
             GameWindow.Draw(gameRenderTargetTexture);
         }
-
+        
         ImGui.EndFrame();
         ImGui.Render();
         ImGuiImplD3D9.RenderDrawData(ImGui.GetDrawData());
@@ -696,9 +704,7 @@ internal class CDTXMania : Game
         if (rCurrentStage != null)
         {
             nUpdateAndDrawReturnValue = (rCurrentStage != null) ? rCurrentStage.OnUpdateAndDraw() : 0;
-                
-            CScoreIni scoreIni = null;
-                
+
             #region [ Handle enumerating songs ]					// ここに"Enumerating Songs..."表示を集約
             if (!bCompactMode)
             {
@@ -961,6 +967,7 @@ internal class CDTXMania : Game
                     }
                     #endregion
 
+                    CScoreIni scoreIni = null;
                     switch (nUpdateAndDrawReturnValue)
                     {
                         case (int)EPerfScreenReturnValue.Continue:
@@ -2631,12 +2638,9 @@ internal class CDTXMania : Game
             {
                 var captureCode = (SlimDX.DirectInput.Key)ConfigIni.KeyAssign.System[(int)EKeyConfigPad.Capture][i].Code;
 
-                if ((int)captureCode > 0 &&
-                    e.KeyCode == DeviceConstantConverter.KeyToKeys(captureCode))
+                if ((int)captureCode > 0 && e.KeyCode == DeviceConstantConverter.KeyToKeys(captureCode))
                 {
-                    // Debug.WriteLine( "capture: " + string.Format( "{0:2x}", (int) e.KeyCode ) + " " + (int) e.KeyCode );
-                    string strFullPath =
-                        Path.Combine(executableDirectory, "Capture_img");
+                    string strFullPath = Path.Combine(executableDirectory, "Capture_img");
                     strFullPath = Path.Combine(strFullPath, DateTime.Now.ToString("yyyyMMddHHmmss") + ".png");
                     SaveResultScreen(strFullPath);
                 }

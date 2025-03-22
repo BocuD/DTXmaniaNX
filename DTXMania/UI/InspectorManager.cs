@@ -1,5 +1,6 @@
 ﻿using DTXMania.Core;
 using DTXUIRenderer;
+using Hexa.NET.ImGui;
 using SlimDX.DirectInput;
 
 namespace DTXMania.UI;
@@ -24,6 +25,9 @@ public static class InspectorManager
         {
             inspectorEnabled = !inspectorEnabled;
         }
+        
+        ImGuiDockNodeFlags flags = ImGuiDockNodeFlags.PassthruCentralNode;
+        ImGui.DockSpaceOverViewport(ImGui.GetMainViewport(), flags);
         
         if (inspectorEnabled)
         {

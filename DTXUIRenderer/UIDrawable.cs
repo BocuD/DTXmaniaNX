@@ -12,7 +12,9 @@ public abstract class UIDrawable : IDisposable
     public Vector2 size = Vector2.One;    //scale in 3D space
     public Vector3 scale = Vector3.One;
     public Vector3 rotation = Vector3.Zero; //euler angles in radians (X = pitch, Y = yaw, Z = roll)
-        
+
+    public string name = "";
+    
     public bool isVisible = true;
         
     protected Matrix localTransformMatrix = Matrix.Identity;

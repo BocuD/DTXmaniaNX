@@ -4,7 +4,7 @@ namespace DTXUIRenderer;
 
 public class HierarchyWindow
 {
-    public UIGroup? target;
+    public UIDrawable? target;
     
     public void Draw()
     {
@@ -27,47 +27,34 @@ public class HierarchyWindow
         }
     }
     
-    private void DrawNode(UIGroup node)
+    private void DrawNode(UIDrawable node)
     {
+        UIGroup? group = node as UIGroup;
+        
         ImGuiTreeNodeFlags rootFlags = ImGuiTreeNodeFlags.OpenOnArrow | ImGuiTreeNodeFlags.OpenOnDoubleClick;
+
+        if (group == null) rootFlags |= ImGuiTreeNodeFlags.Leaf;
+        
         if (node == Inspector.inspectorTarget)
         {
             rootFlags |= ImGuiTreeNodeFlags.Selected;
         }
         
         string id = node.GetHashCode().ToString();
-        if (ImGui.TreeNodeEx(id, rootFlags, node.name))
+        string name = string.IsNullOrWhiteSpace(node.name) ? node.GetType().Name : node.name;
+        
+        if (ImGui.TreeNodeEx(id, rootFlags, name))
         {
             if (ImGui.IsItemClicked())
             {
                 Inspector.inspectorTarget = node;
             }
 
-            for (int index = 0; index < node.children.Count; index++)
+            if (group != null)
             {
-                UIDrawable child = node.children[index];
-
-                if (child is UIGroup group)
+                foreach (UIDrawable child in group.children)
                 {
-                    DrawNode(group);
-                }
-                else
-                {
-                    //leaf node
-                    ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.NoTreePushOnOpen;
-
-                    if (child == Inspector.inspectorTarget)
-                    {
-                        flags |= ImGuiTreeNodeFlags.Selected;
-                    }
-
-                    string childType = child.GetType().Name;
-                    ImGui.TreeNodeEx(child.GetHashCode().ToString(), flags, $"{index} - {childType}");
-
-                    if (ImGui.IsItemClicked())
-                    {
-                        Inspector.inspectorTarget = child;
-                    }
+                    DrawNode(child);
                 }
             }
 

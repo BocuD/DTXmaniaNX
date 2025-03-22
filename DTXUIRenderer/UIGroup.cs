@@ -6,8 +6,7 @@ namespace DTXUIRenderer;
 
 public class UIGroup : UIDrawable
 {
-    public string name;
-    internal List<UIDrawable> children = [];
+    internal readonly List<UIDrawable> children = [];
 
     public UIGroup(string name)
     {
