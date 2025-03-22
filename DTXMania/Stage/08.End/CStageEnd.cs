@@ -18,6 +18,11 @@ internal class CStageEnd : CStage
 
 	// CStage 実装
 
+	public override void InitializeBaseUI()
+	{
+		
+	}
+
 	public override void OnActivate()
 	{
 		Trace.TraceInformation( "終了ステージを活性化します。" );
@@ -65,29 +70,27 @@ internal class CStageEnd : CStage
 	}
 	public override int OnUpdateAndDraw()
 	{
-		if( !bNotActivated )
+		if (bNotActivated) return 0;
+		
+		base.OnUpdateAndDraw();
+
+		if( bJustStartedUpdate )
 		{
-			if( bJustStartedUpdate )
-			{
-				CDTXMania.Skin.soundGameEnd.tPlay();
-				ct時間稼ぎ.tStart( 0, 1, 0x3e8, CDTXMania.Timer );
-				bJustStartedUpdate = false;
-			}
-			ct時間稼ぎ.tUpdate();
-			if( ct時間稼ぎ.bReachedEndValue && !CDTXMania.Skin.soundGameEnd.b再生中 )
-			{
-				return 1;
-			}
-			if( txBackground != null )
-			{
-				txBackground.tDraw2D( CDTXMania.app.Device, 0, 0 );
-			}
+			CDTXMania.Skin.soundGameEnd.tPlay();
+			ct時間稼ぎ.tStart( 0, 1, 0x3e8, CDTXMania.Timer );
+			bJustStartedUpdate = false;
+		}
+		ct時間稼ぎ.tUpdate();
+		if( ct時間稼ぎ.bReachedEndValue && !CDTXMania.Skin.soundGameEnd.b再生中 )
+		{
+			return 1;
+		}
+		if( txBackground != null )
+		{
+			txBackground.tDraw2D( CDTXMania.app.Device, 0, 0 );
 		}
 		return 0;
 	}
-
-
-	// Other
 
 	#region [ private ]
 	//-----------------

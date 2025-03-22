@@ -148,6 +148,11 @@ internal class CStageSongSelection : CStage
 		actSongList.Refresh( cs, bRemakeSongTitleBar );
 	}
 
+	public override void InitializeBaseUI()
+	{
+		
+	}
+
 	public override void OnActivate()
 	{
 		Trace.TraceInformation( "選曲ステージを活性化します。" );
@@ -231,12 +236,10 @@ internal class CStageSongSelection : CStage
 	{
 		if( !bNotActivated )
 		{
-			ui = new UIGroup("Song Loading");
-			
 			txBackground = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\5_background.jpg" ), false );
 			txTopPanel = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\5_header panel.png" ), false );
 			txBottomPanel = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\5_footer panel.png" ), false );
-			prvFontSearchInputNotification = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.str選曲リストフォント), 14, FontStyle.Regular);
+			prvFontSearchInputNotification = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.songListFont), 14, FontStyle.Regular);
 			//this.dsBackgroundVideo = CDTXMania.t失敗してもスキップ可能なDirectShowを生成する(CSkin.Path(@"Graphics\5_background.mp4"), CDTXMania.app.WindowHandle, true);
 			txBPMLabel = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\5_BPM.png"), false);
 
@@ -257,8 +260,6 @@ internal class CStageSongSelection : CStage
 	{
 		if( !bNotActivated )
 		{
-			ui.Dispose();
-			
 			actBackgroundVideoAVI.Stop();
 				
 			//CDTXMania.t安全にDisposeする( ref this.r現在演奏中のスコアの背景動画 );
@@ -277,141 +278,166 @@ internal class CStageSongSelection : CStage
 	}
 	public override int OnUpdateAndDraw()
 	{
-		if( !bNotActivated )
+		if (bNotActivated) return 0;
+
+		base.OnUpdateAndDraw();
+		
+		#region [ 初めての進行描画 ]
+		//---------------------
+		if( bJustStartedUpdate )
 		{
-			#region [ 初めての進行描画 ]
-			//---------------------
-			if( bJustStartedUpdate )
+			ct登場時アニメ用共通 = new CCounter( 0, 100, 3, CDTXMania.Timer );
+			if( CDTXMania.rPreviousStage == CDTXMania.stageResult )
 			{
-				ct登場時アニメ用共通 = new CCounter( 0, 100, 3, CDTXMania.Timer );
-				if( CDTXMania.rPreviousStage == CDTXMania.stageResult )
-				{
-					actFIfrom結果画面.tフェードイン開始();
-					ePhaseID = EPhase.選曲_結果画面からのフェードイン;
-				}
-				else
-				{
-					actFIFO.tフェードイン開始();
-					ePhaseID = EPhase.Common_FadeIn;
-				}
-				ctSearchInputDisplayCounter = new CCounter(0, 1, 10000, CDTXMania.Timer);
-				tSelectedSongChanged();
-				bJustStartedUpdate = false;
+				actFIfrom結果画面.tフェードイン開始();
+				ePhaseID = EPhase.選曲_結果画面からのフェードイン;
 			}
-			//---------------------
-			#endregion
-
-			ct登場時アニメ用共通.tUpdate();
-			ctSearchInputDisplayCounter.tUpdate();
-			if (ctSearchInputDisplayCounter.bReachedEndValue)
+			else
 			{
-				tUpdateSearchNotification("");
+				actFIFO.tフェードイン開始();
+				ePhaseID = EPhase.Common_FadeIn;
 			}
+			ctSearchInputDisplayCounter = new CCounter(0, 1, 10000, CDTXMania.Timer);
+			tSelectedSongChanged();
+			bJustStartedUpdate = false;
+		}
+		//---------------------
+		#endregion
 
-			//Draw Background video  via CActPerfAVI methods
-			actBackgroundVideoAVI.tUpdateAndDraw();
-			//Draw background video and image
-			//if(this.dsBackgroundVideo != null)
-			//            {
-			//	this.dsBackgroundVideo.t再生開始();
-			//	this.dsBackgroundVideo.MediaSeeking.GetPositions(out this.lDshowPosition, out this.lStopPosition);
-			//	this.dsBackgroundVideo.bループ再生 = true;
+		ct登場時アニメ用共通.tUpdate();
+		ctSearchInputDisplayCounter.tUpdate();
+		if (ctSearchInputDisplayCounter.bReachedEndValue)
+		{
+			tUpdateSearchNotification("");
+		}
 
-			//	if (this.lDshowPosition == this.lStopPosition)
-			//	{
-			//		this.dsBackgroundVideo.MediaSeeking.SetPositions(
-			//		DsLong.FromInt64((long)(0)),
-			//		AMSeekingSeekingFlags.AbsolutePositioning,
-			//		0,
-			//		AMSeekingSeekingFlags.NoPositioning);
-			//	}
+		//Draw Background video  via CActPerfAVI methods
+		actBackgroundVideoAVI.tUpdateAndDraw();
+		//Draw background video and image
+		//if(this.dsBackgroundVideo != null)
+		//            {
+		//	this.dsBackgroundVideo.t再生開始();
+		//	this.dsBackgroundVideo.MediaSeeking.GetPositions(out this.lDshowPosition, out this.lStopPosition);
+		//	this.dsBackgroundVideo.bループ再生 = true;
 
-			//	this.dsBackgroundVideo.t現時点における最新のスナップイメージをTextureに転写する(this.txBackground);
-			//}
+		//	if (this.lDshowPosition == this.lStopPosition)
+		//	{
+		//		this.dsBackgroundVideo.MediaSeeking.SetPositions(
+		//		DsLong.FromInt64((long)(0)),
+		//		AMSeekingSeekingFlags.AbsolutePositioning,
+		//		0,
+		//		AMSeekingSeekingFlags.NoPositioning);
+		//	}
 
-			if( txBackground != null && rBackgroundVideoAVI.avi == null)
-			{
-				txBackground.tDraw2D(CDTXMania.app.Device, 0, 0);
-				//Removed drawing upside down	
-			}
+		//	this.dsBackgroundVideo.t現時点における最新のスナップイメージをTextureに転写する(this.txBackground);
+		//}
 
-			if (txBPMLabel != null)
-				txBPMLabel.tDraw2D(CDTXMania.app.Device, 32, 258);
+		if( txBackground != null && rBackgroundVideoAVI.avi == null)
+		{
+			txBackground.tDraw2D(CDTXMania.app.Device, 0, 0);
+			//Removed drawing upside down	
+		}
 
-			actPreimagePanel.OnUpdateAndDraw();
-			//	this.bIsEnumeratingSongs = !this.actPreimageパネル.bIsPlayingPremovie;				// #27060 2011.3.2 yyagi: #PREMOVIE再生中は曲検索を中断する
+		if (txBPMLabel != null)
+			txBPMLabel.tDraw2D(CDTXMania.app.Device, 32, 258);
 
-			//this.actStatusPanel.OnUpdateAndDraw();
-			actArtistComment.OnUpdateAndDraw();
-			actSongList.OnUpdateAndDraw();
-			actStatusPanel.OnUpdateAndDraw();
-			actPerHistoryPanel.OnUpdateAndDraw();
-			int y = 0;
-			if( ct登場時アニメ用共通.bInProgress )
-			{
-				double db登場割合 = ( (double) ct登場時アニメ用共通.nCurrentValue ) / 100.0;	// 100が最終値
-				double dbY表示割合 = Math.Sin( Math.PI / 2 * db登場割合 );
-				y = ( (int) ( txTopPanel.szImageSize.Height * dbY表示割合 ) ) - txTopPanel.szImageSize.Height;
-			}
-			if( txTopPanel != null )
-				txTopPanel.tDraw2D( CDTXMania.app.Device, 0, y );
+		actPreimagePanel.OnUpdateAndDraw();
+		//	this.bIsEnumeratingSongs = !this.actPreimageパネル.bIsPlayingPremovie;				// #27060 2011.3.2 yyagi: #PREMOVIE再生中は曲検索を中断する
 
-			actInformation.OnUpdateAndDraw();
-			if( txBottomPanel != null )
-				txBottomPanel.tDraw2D( CDTXMania.app.Device, 0, 720 - txBottomPanel.szImageSize.Height );
+		//this.actStatusPanel.OnUpdateAndDraw();
+		actArtistComment.OnUpdateAndDraw();
+		actSongList.OnUpdateAndDraw();
+		actStatusPanel.OnUpdateAndDraw();
+		actPerHistoryPanel.OnUpdateAndDraw();
+		int y = 0;
+		if( ct登場時アニメ用共通.bInProgress )
+		{
+			double db登場割合 = ( (double) ct登場時アニメ用共通.nCurrentValue ) / 100.0;	// 100が最終値
+			double dbY表示割合 = Math.Sin( Math.PI / 2 * db登場割合 );
+			y = ( (int) ( txTopPanel.szImageSize.Height * dbY表示割合 ) ) - txTopPanel.szImageSize.Height;
+		}
+		if( txTopPanel != null )
+			txTopPanel.tDraw2D( CDTXMania.app.Device, 0, y );
 
-			actPresound.OnUpdateAndDraw();
+		actInformation.OnUpdateAndDraw();
+		if( txBottomPanel != null )
+			txBottomPanel.tDraw2D( CDTXMania.app.Device, 0, 720 - txBottomPanel.szImageSize.Height );
+
+		actPresound.OnUpdateAndDraw();
 //				this.actオプションパネル.OnUpdateAndDraw();
-			actShowCurrentPosition.OnUpdateAndDraw();								// #27648 2011.3.28 yyagi
+		actShowCurrentPosition.OnUpdateAndDraw();								// #27648 2011.3.28 yyagi
 
-			switch ( ePhaseID )
-			{
-				case EPhase.Common_FadeIn:
-					if( actFIFO.OnUpdateAndDraw() != 0 )
-					{
-						ePhaseID = EPhase.Common_DefaultState;
-					}
+		switch ( ePhaseID )
+		{
+			case EPhase.Common_FadeIn:
+				if( actFIFO.OnUpdateAndDraw() != 0 )
+				{
+					ePhaseID = EPhase.Common_DefaultState;
+				}
+				break;
+
+			case EPhase.Common_FadeOut:
+				if( actFIFO.OnUpdateAndDraw() == 0 )
+				{
 					break;
+				}
+				return (int) eReturnValueWhenFadeOutCompleted;
 
-				case EPhase.Common_FadeOut:
-					if( actFIFO.OnUpdateAndDraw() == 0 )
-					{
-						break;
-					}
-					return (int) eReturnValueWhenFadeOutCompleted;
+			case EPhase.選曲_結果画面からのフェードイン:
+				if( actFIfrom結果画面.OnUpdateAndDraw() != 0 )
+				{
+					ePhaseID = EPhase.Common_DefaultState;
+				}
+				break;
 
-				case EPhase.選曲_結果画面からのフェードイン:
-					if( actFIfrom結果画面.OnUpdateAndDraw() != 0 )
-					{
-						ePhaseID = EPhase.Common_DefaultState;
-					}
-					break;
-
-				case EPhase.選曲_NowLoading画面へのフェードアウト:
-					//if (this.actFOtoNowLoading.OnUpdateAndDraw() == 0)
-					//{
-					//    break;
-					//}
-					return (int) eReturnValueWhenFadeOutCompleted;
-			}
-			if( !bBGMPlayed && ( ePhaseID == EPhase.Common_DefaultState ) )
-			{
-				CDTXMania.Skin.bgm選曲画面.n音量_次に鳴るサウンド = 100;
-				CDTXMania.Skin.bgm選曲画面.tPlay();
-				bBGMPlayed = true;
-			}
+			case EPhase.選曲_NowLoading画面へのフェードアウト:
+				//if (this.actFOtoNowLoading.OnUpdateAndDraw() == 0)
+				//{
+				//    break;
+				//}
+				return (int) eReturnValueWhenFadeOutCompleted;
+		}
+		if( !bBGMPlayed && ( ePhaseID == EPhase.Common_DefaultState ) )
+		{
+			CDTXMania.Skin.bgm選曲画面.n音量_次に鳴るサウンド = 100;
+			CDTXMania.Skin.bgm選曲画面.tPlay();
+			bBGMPlayed = true;
+		}
 
 
 //Debug.WriteLine( "パンくず=" + this.r現在選択中の曲.strBreadcrumbs );
 
 
-			// キー入力
-			if( ePhaseID == EPhase.Common_DefaultState)
+		// キー入力
+		if( ePhaseID == EPhase.Common_DefaultState)
+		{
+			#region [ 簡易CONFIGでMore、またはShift+F1: 詳細CONFIG呼び出し ]
+			if (  actQuickConfig.bGotoDetailConfig )
+			{	// 詳細CONFIG呼び出し
+				actQuickConfig.tDeativatePopupMenu();
+				actPresound.tサウンド停止();
+				eReturnValueWhenFadeOutCompleted = EReturnValue.CallConfig;	// #24525 2011.3.16 yyagi: [SHIFT]-[F1]でCONFIG呼び出し
+				actFIFO.tStartFadeOut();
+				ePhaseID = EPhase.Common_FadeOut;
+				CDTXMania.Skin.soundCancel.tPlay();
+				return 0;
+			}
+			#endregion
+			if ( !actSortSongs.bIsActivePopupMenu && !actQuickConfig.bIsActivePopupMenu && !CDTXMania.app.bテキスト入力中)
 			{
-				#region [ 簡易CONFIGでMore、またはShift+F1: 詳細CONFIG呼び出し ]
-				if (  actQuickConfig.bGotoDetailConfig )
-				{	// 詳細CONFIG呼び出し
-					actQuickConfig.tDeativatePopupMenu();
+				#region [ ESC ]
+				if (CDTXMania.Input.ActionCancel())
+				{	// [ESC]
+					CDTXMania.Skin.soundCancel.tPlay();
+					eReturnValueWhenFadeOutCompleted = EReturnValue.ReturnToTitle;
+					actFIFO.tStartFadeOut();
+					ePhaseID = EPhase.Common_FadeOut;
+					return 0;
+				}
+				#endregion
+				#region [ CONFIG画面 ]
+				if (CDTXMania.Pad.bPressed(EInstrumentPart.GUITAR, EPad.Help))
+				{	// [SHIFT] + [F1] CONFIG
 					actPresound.tサウンド停止();
 					eReturnValueWhenFadeOutCompleted = EReturnValue.CallConfig;	// #24525 2011.3.16 yyagi: [SHIFT]-[F1]でCONFIG呼び出し
 					actFIFO.tStartFadeOut();
@@ -420,32 +446,9 @@ internal class CStageSongSelection : CStage
 					return 0;
 				}
 				#endregion
-				if ( !actSortSongs.bIsActivePopupMenu && !actQuickConfig.bIsActivePopupMenu && !CDTXMania.app.bテキスト入力中)
-				{
-					#region [ ESC ]
-					if (CDTXMania.Input.ActionCancel())
-					{	// [ESC]
-						CDTXMania.Skin.soundCancel.tPlay();
-						eReturnValueWhenFadeOutCompleted = EReturnValue.ReturnToTitle;
-						actFIFO.tStartFadeOut();
-						ePhaseID = EPhase.Common_FadeOut;
-						return 0;
-					}
-					#endregion
-					#region [ CONFIG画面 ]
-					if (CDTXMania.Pad.bPressed(EInstrumentPart.GUITAR, EPad.Help))
-					{	// [SHIFT] + [F1] CONFIG
-						actPresound.tサウンド停止();
-						eReturnValueWhenFadeOutCompleted = EReturnValue.CallConfig;	// #24525 2011.3.16 yyagi: [SHIFT]-[F1]でCONFIG呼び出し
-						actFIFO.tStartFadeOut();
-						ePhaseID = EPhase.Common_FadeOut;
-						CDTXMania.Skin.soundCancel.tPlay();
-						return 0;
-					}
-					#endregion
-					#region [ Shift-F2: 未使用 ]
-					// #24525 2011.3.16 yyagi: [SHIFT]+[F2]は廃止(将来発生するかもしれない別用途のためにキープ)
-					/*
+				#region [ Shift-F2: 未使用 ]
+				// #24525 2011.3.16 yyagi: [SHIFT]+[F2]は廃止(将来発生するかもしれない別用途のためにキープ)
+				/*
                     if ((CDTXMania.InputManager.Keyboard.bKeyPressing(SlimDXKey.RightShift) || CDTXMania.InputManager.Keyboard.bKeyPressing(SlimDXKey.LeftShift)) &&
                         CDTXMania.InputManager.Keyboard.bKeyPressed(SlimDXKey.F2))
                     {	// [SHIFT] + [F2] CONFIGURATION
@@ -457,321 +460,320 @@ internal class CStageSongSelection : CStage
                         return 0;
                     }
 					*/
-					#endregion
-					if (actSongList.rSelectedSong != null)
-					{
-						#region [ Decide ]
-						if (CDTXMania.Input.ActionDecide())
-						{
-							if (actSongList.rSelectedSong != null)
-							{
-								switch (actSongList.rSelectedSong.eNodeType)
-								{
-									case CSongListNode.ENodeType.SCORE:
-										CDTXMania.Skin.soundDecide.tPlay();
-										tSelectSong();
-										break;
-
-									case CSongListNode.ENodeType.SCORE_MIDI:
-										CDTXMania.Skin.soundDecide.tPlay();
-										tSelectSong();
-										break;
-
-									case CSongListNode.ENodeType.BOX:
-									{
-										CDTXMania.Skin.soundDecide.tPlay();
-										bool bNeedChangeSkin = actSongList.tGoIntoBOX();
-										if (bNeedChangeSkin)
-										{
-											eReturnValueWhenFadeOutCompleted = EReturnValue.ChangeSking;
-											ePhaseID = EPhase.選曲_NowLoading画面へのフェードアウト;
-										}
-									}
-										break;
-
-									case CSongListNode.ENodeType.BACKBOX:
-									{
-										CDTXMania.Skin.soundCancel.tPlay();
-										bool bNeedChangeSkin = actSongList.tExitBOX();
-										if (bNeedChangeSkin)
-										{
-											eReturnValueWhenFadeOutCompleted = EReturnValue.ChangeSking;
-											ePhaseID = EPhase.選曲_NowLoading画面へのフェードアウト;
-										}
-									}
-										break;
-
-									case CSongListNode.ENodeType.RANDOM:
-										CDTXMania.Skin.soundDecide.tPlay();
-										tSelectSongRandomly();
-										break;
-								}
-							}
-						}
-						#endregion
-						#region [ Up ]
-						ctKeyRepeat.Up.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(SlimDXKey.UpArrow), new CCounter.DGキー処理(tMoveCursorUp));
-						ctKeyRepeat.R.tRepeatKey(CDTXMania.Pad.bPressingGB(EPad.R), new CCounter.DGキー処理(tMoveCursorUp));
-						//SD changed to HT to follow Gitadora style
-						if (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.HT))
-						{
-							tMoveCursorUp();
-						}
-						#endregion
-						#region [ Down ]
-						ctKeyRepeat.Down.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(SlimDXKey.DownArrow), new CCounter.DGキー処理(tMoveCursorDown));
-						ctKeyRepeat.B.tRepeatKey(CDTXMania.Pad.bPressingGB(EPad.G), new CCounter.DGキー処理(tMoveCursorDown));
-						//FT changed to LT to follow Gitadora style
-						if (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.LT))
-						{
-							tMoveCursorDown();
-						}
-						#endregion
-						#region [ Upstairs ]
-						if (((actSongList.rSelectedSong != null) && (actSongList.rSelectedSong.r親ノード != null)) && (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.LC) || CDTXMania.Pad.bPressedGB(EPad.Cancel)))
-						{
-							actPresound.tサウンド停止();
-							CDTXMania.Skin.soundCancel.tPlay();
-							actSongList.tExitBOX();
-							tSelectedSongChanged();
-						}
-						#endregion
-						#region [ BDx2: 簡易CONFIG ]
-						if (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.BD))
-						{	// [BD]x2 スクロール速度変更
-							CommandHistory.Add(EInstrumentPart.DRUMS, EPadFlag.BD);
-							EPadFlag[] comChangeScrollSpeed = new EPadFlag[] { EPadFlag.BD, EPadFlag.BD };
-							if (CommandHistory.CheckCommand(comChangeScrollSpeed, EInstrumentPart.DRUMS))
-							{
-								// Debug.WriteLine( "ドラムススクロール速度変更" );
-								// CDTXMania.ConfigIni.nScrollSpeed.Drums = ( CDTXMania.ConfigIni.nScrollSpeed.Drums + 1 ) % 0x10;
-								CDTXMania.Skin.soundChange.tPlay();
-								actQuickConfig.tActivatePopupMenu(EInstrumentPart.DRUMS);
-							}
-						}
-						#endregion
-						#region [ HHx2: 難易度変更 ]
-						if (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.HH) || CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.HHO))
-						{	// [HH]x2 難易度変更
-							CommandHistory.Add(EInstrumentPart.DRUMS, EPadFlag.HH);
-							EPadFlag[] comChangeDifficulty = new EPadFlag[] { EPadFlag.HH, EPadFlag.HH };
-							if (CommandHistory.CheckCommand(comChangeDifficulty, EInstrumentPart.DRUMS))
-							{
-								Debug.WriteLine("ドラムス難易度変更");
-								actSongList.t難易度レベルをひとつ進める();
-								//CDTXMania.Skin.sound変更音.tPlay();
-							}
-						}
-						#endregion
-						#region [ Bx2 Guitar: 難易度変更 ]
-						if (CDTXMania.Pad.bPressed(EInstrumentPart.GUITAR, EPad.B))	// #24177 2011.1.17 yyagi || -> &&
-						{	// [B]x2 ギター難易度変更
-							CommandHistory.Add(EInstrumentPart.GUITAR, EPadFlag.B);
-							EPadFlag[] comChangeDifficultyG = new EPadFlag[] { EPadFlag.B, EPadFlag.B };
-							if (CommandHistory.CheckCommand(comChangeDifficultyG, EInstrumentPart.GUITAR))
-							{
-								Debug.WriteLine("ギター難易度変更");
-								actSongList.t難易度レベルをひとつ進める();
-								//CDTXMania.Skin.sound変更音.tPlay();
-							}
-						}
-						#endregion
-						#region [ Bx2 Bass: 難易度変更 ]
-						if (CDTXMania.Pad.bPressed(EInstrumentPart.BASS, EPad.B))		// #24177 2011.1.17 yyagi || -> &&
-						{	// [B]x2 ベース難易度変更
-							CommandHistory.Add(EInstrumentPart.BASS, EPadFlag.B);
-							EPadFlag[] comChangeDifficultyB = new EPadFlag[] { EPadFlag.B, EPadFlag.B };
-							if (CommandHistory.CheckCommand(comChangeDifficultyB, EInstrumentPart.BASS))
-							{
-								Debug.WriteLine("ベース難易度変更");
-								actSongList.t難易度レベルをひとつ進める();
-								//CDTXMania.Skin.sound変更音.tPlay();
-							}
-						}
-						#endregion
-						#region [ Yx2 Guitar: ギターとベースを入れ替え ]
-						if (CDTXMania.Pad.bPressed(EInstrumentPart.GUITAR, EPad.Y))
-						{	// Pick, Y, Y, Pick で、ギターとベースを入れ替え
-							CommandHistory.Add(EInstrumentPart.GUITAR, EPadFlag.Y);
-							EPadFlag[] comSwapGtBs1 = new EPadFlag[] { EPadFlag.Y, EPadFlag.Y };
-							if (CommandHistory.CheckCommand(comSwapGtBs1, EInstrumentPart.GUITAR))
-							{
-								Debug.WriteLine("ギターとベースの入れ替え1");
-								CDTXMania.Skin.soundChange.tPlay();
-								// ギターとベースのキーを入れ替え
-								//CDTXMania.ConfigIni.SwapGuitarBassKeyAssign();
-								CDTXMania.ConfigIni.bIsSwappedGuitarBass = !CDTXMania.ConfigIni.bIsSwappedGuitarBass;
-								actSongList.tSwapClearLamps();
-							}
-						}
-						#endregion
-						#region [ Yx2 Bass: ギターとベースを入れ替え ]
-						if (CDTXMania.Pad.bPressed(EInstrumentPart.BASS, EPad.Y))
-						{	// ベース[Pick]: コマンドとしてEnqueue
-							CommandHistory.Add(EInstrumentPart.BASS, EPadFlag.Y);
-							// Pick, Y, Y, Pick で、ギターとベースを入れ替え
-							EPadFlag[] comSwapGtBs1 = new EPadFlag[] { EPadFlag.Y, EPadFlag.Y };
-							if (CommandHistory.CheckCommand(comSwapGtBs1, EInstrumentPart.BASS))
-							{
-								Debug.WriteLine("ギターとベースの入れ替え2");
-								CDTXMania.Skin.soundChange.tPlay();
-								// ギターとベースのキーを入れ替え
-								//CDTXMania.ConfigIni.SwapGuitarBassKeyAssign();
-								CDTXMania.ConfigIni.bIsSwappedGuitarBass = !CDTXMania.ConfigIni.bIsSwappedGuitarBass;
-								actSongList.tSwapClearLamps();
-							}
-						}
-						#endregion
-						#region [ Px2 Guitar: 簡易CONFIG ]
-						if (CDTXMania.Pad.bPressed(EInstrumentPart.GUITAR, EPad.P))
-						{	// [BD]x2 スクロール速度変更
-							CommandHistory.Add(EInstrumentPart.GUITAR, EPadFlag.P);
-							EPadFlag[] comChangeScrollSpeed = new EPadFlag[] { EPadFlag.P, EPadFlag.P };
-							if (CommandHistory.CheckCommand(comChangeScrollSpeed, EInstrumentPart.GUITAR))
-							{
-								// Debug.WriteLine( "ドラムススクロール速度変更" );
-								// CDTXMania.ConfigIni.nScrollSpeed.Drums = ( CDTXMania.ConfigIni.nScrollSpeed.Drums + 1 ) % 0x10;
-								CDTXMania.Skin.soundChange.tPlay();
-								actQuickConfig.tActivatePopupMenu(EInstrumentPart.GUITAR);
-							}
-						}
-						#endregion
-						#region [ Px2 Bass: 簡易CONFIG ]
-						if (CDTXMania.Pad.bPressed(EInstrumentPart.BASS, EPad.P))
-						{	// [BD]x2 スクロール速度変更
-							CommandHistory.Add(EInstrumentPart.BASS, EPadFlag.P);
-							EPadFlag[] comChangeScrollSpeed = new EPadFlag[] { EPadFlag.P, EPadFlag.P };
-							if (CommandHistory.CheckCommand(comChangeScrollSpeed, EInstrumentPart.BASS))
-							{
-								// Debug.WriteLine( "ドラムススクロール速度変更" );
-								// CDTXMania.ConfigIni.nScrollSpeed.Drums = ( CDTXMania.ConfigIni.nScrollSpeed.Drums + 1 ) % 0x10;
-								CDTXMania.Skin.soundChange.tPlay();
-								actQuickConfig.tActivatePopupMenu(EInstrumentPart.BASS);
-							}
-						}
-						#endregion
-						#region [ Y P Guitar: ソート画面 ]
-						if (CDTXMania.Pad.bPressing(EInstrumentPart.GUITAR, EPad.Y) && CDTXMania.Pad.bPressed(EInstrumentPart.GUITAR, EPad.P))
-						{	// ギター[Pick]: コマンドとしてEnqueue
-							CDTXMania.Skin.soundChange.tPlay();
-							actSortSongs.tActivatePopupMenu(EInstrumentPart.GUITAR, ref actSongList);
-						}
-						#endregion
-						#region [ Y P Bass: ソート画面 ]
-						if (CDTXMania.Pad.bPressing(EInstrumentPart.BASS, EPad.Y) && CDTXMania.Pad.bPressed(EInstrumentPart.BASS, EPad.P))
-						{	// ベース[Pick]: コマンドとしてEnqueue
-							CDTXMania.Skin.soundChange.tPlay();
-							actSortSongs.tActivatePopupMenu(EInstrumentPart.BASS, ref actSongList);
-						}
-						#endregion
-						#region [ FTx2 Drums: ソート画面 ]
-						if (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.FT))
-						{	// [HT]x2 ソート画面        2013.12.31.kairera0467
-							//Change to FT x 2 to follow Gitadora style
-							//
-							CommandHistory.Add(EInstrumentPart.DRUMS, EPadFlag.FT);
-							EPadFlag[] comSort = new EPadFlag[] { EPadFlag.FT, EPadFlag.FT };
-							if (CommandHistory.CheckCommand(comSort, EInstrumentPart.DRUMS))
-							{
-								CDTXMania.Skin.soundChange.tPlay();
-								actSortSongs.tActivatePopupMenu(EInstrumentPart.DRUMS, ref actSongList);
-							}
-						}
-						#endregion
-					}
-					//if( CDTXMania.InputManager.Keyboard.bKeyPressed(SlimDXKey.F6) )
-					//{
-					//    if (CDTXMania.EnumSongs.IsEnumerating)
-					//    {
-					//        // Debug.WriteLine( "バックグラウンドでEnumeratingSongs中だったので、一旦中断します。" );
-					//        CDTXMania.EnumSongs.Abort();
-					//        CDTXMania.actEnumSongs.OnDeactivate();
-					//    }
-
-					//    CDTXMania.EnumSongs.StartEnumFromDisk();
-					//    //CDTXMania.EnumSongs.ChangeEnumeratePriority(ThreadPriority.Normal);
-					//    CDTXMania.actEnumSongs.bコマンドでの曲データ取得 = true;
-					//    CDTXMania.actEnumSongs.OnActivate();
-					//}
-				}
-
-				#region [Test text field]
-				if (!CDTXMania.app.bテキスト入力中 && CDTXMania.Pad.bPressed(EKeyConfigPart.SYSTEM, EKeyConfigPad.Search))
-				{
-					CDTXMania.Skin.soundDecide.tPlay();
-					actTextBox.t表示();
-					actTextBox.t入力を開始();
-				}
 				#endregion
-
-				actSortSongs.tUpdateAndDraw();
-				actQuickConfig.tUpdateAndDraw();
-				actTextBox.OnUpdateAndDraw();
-				if (actTextBox.b入力が終了した)
+				if (actSongList.rSelectedSong != null)
 				{
-					strSearchString = actTextBox.str確定文字列を返す();
-					string searchOutcome = "";
-					if(strSearchString != "" && strSearchString != CSongSearch.ExitSwitch)
+					#region [ Decide ]
+					if (CDTXMania.Input.ActionDecide())
 					{
-						searchOutcome = "Search Input: " + strSearchString;
-						Trace.TraceInformation("Search Input: " + strSearchString);
-						if(CDTXMania.SongManager.listSongBeforeSearch == null)
+						if (actSongList.rSelectedSong != null)
 						{
-							CDTXMania.SongManager.listSongBeforeSearch = CDTXMania.SongManager.listSongRoot;
-						}
+							switch (actSongList.rSelectedSong.eNodeType)
+							{
+								case CSongListNode.ENodeType.SCORE:
+									CDTXMania.Skin.soundDecide.tPlay();
+									tSelectSong();
+									break;
 
-						List<CSongListNode> searchOutputList = CSongSearch.tSearchForSongs(CDTXMania.SongManager.listSongBeforeSearch, strSearchString);
-						if(searchOutputList.Count == 0)
+								case CSongListNode.ENodeType.SCORE_MIDI:
+									CDTXMania.Skin.soundDecide.tPlay();
+									tSelectSong();
+									break;
+
+								case CSongListNode.ENodeType.BOX:
+								{
+									CDTXMania.Skin.soundDecide.tPlay();
+									bool bNeedChangeSkin = actSongList.tGoIntoBOX();
+									if (bNeedChangeSkin)
+									{
+										eReturnValueWhenFadeOutCompleted = EReturnValue.ChangeSking;
+										ePhaseID = EPhase.選曲_NowLoading画面へのフェードアウト;
+									}
+								}
+									break;
+
+								case CSongListNode.ENodeType.BACKBOX:
+								{
+									CDTXMania.Skin.soundCancel.tPlay();
+									bool bNeedChangeSkin = actSongList.tExitBOX();
+									if (bNeedChangeSkin)
+									{
+										eReturnValueWhenFadeOutCompleted = EReturnValue.ChangeSking;
+										ePhaseID = EPhase.選曲_NowLoading画面へのフェードアウト;
+									}
+								}
+									break;
+
+								case CSongListNode.ENodeType.RANDOM:
+									CDTXMania.Skin.soundDecide.tPlay();
+									tSelectSongRandomly();
+									break;
+							}
+						}
+					}
+					#endregion
+					#region [ Up ]
+					ctKeyRepeat.Up.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(SlimDXKey.UpArrow), new CCounter.DGキー処理(tMoveCursorUp));
+					ctKeyRepeat.R.tRepeatKey(CDTXMania.Pad.bPressingGB(EPad.R), new CCounter.DGキー処理(tMoveCursorUp));
+					//SD changed to HT to follow Gitadora style
+					if (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.HT))
+					{
+						tMoveCursorUp();
+					}
+					#endregion
+					#region [ Down ]
+					ctKeyRepeat.Down.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(SlimDXKey.DownArrow), new CCounter.DGキー処理(tMoveCursorDown));
+					ctKeyRepeat.B.tRepeatKey(CDTXMania.Pad.bPressingGB(EPad.G), new CCounter.DGキー処理(tMoveCursorDown));
+					//FT changed to LT to follow Gitadora style
+					if (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.LT))
+					{
+						tMoveCursorDown();
+					}
+					#endregion
+					#region [ Upstairs ]
+					if (((actSongList.rSelectedSong != null) && (actSongList.rSelectedSong.r親ノード != null)) && (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.LC) || CDTXMania.Pad.bPressedGB(EPad.Cancel)))
+					{
+						actPresound.tサウンド停止();
+						CDTXMania.Skin.soundCancel.tPlay();
+						actSongList.tExitBOX();
+						tSelectedSongChanged();
+					}
+					#endregion
+					#region [ BDx2: 簡易CONFIG ]
+					if (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.BD))
+					{	// [BD]x2 スクロール速度変更
+						CommandHistory.Add(EInstrumentPart.DRUMS, EPadFlag.BD);
+						EPadFlag[] comChangeScrollSpeed = new EPadFlag[] { EPadFlag.BD, EPadFlag.BD };
+						if (CommandHistory.CheckCommand(comChangeScrollSpeed, EInstrumentPart.DRUMS))
 						{
-							Trace.TraceInformation("No songs found!");
-							//To print a outcome message
-							searchOutcome += "\r\nNo songs found";
+							// Debug.WriteLine( "ドラムススクロール速度変更" );
+							// CDTXMania.ConfigIni.nScrollSpeed.Drums = ( CDTXMania.ConfigIni.nScrollSpeed.Drums + 1 ) % 0x10;
+							CDTXMania.Skin.soundChange.tPlay();
+							actQuickConfig.tActivatePopupMenu(EInstrumentPart.DRUMS);
 						}
-						else
+					}
+					#endregion
+					#region [ HHx2: 難易度変更 ]
+					if (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.HH) || CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.HHO))
+					{	// [HH]x2 難易度変更
+						CommandHistory.Add(EInstrumentPart.DRUMS, EPadFlag.HH);
+						EPadFlag[] comChangeDifficulty = new EPadFlag[] { EPadFlag.HH, EPadFlag.HH };
+						if (CommandHistory.CheckCommand(comChangeDifficulty, EInstrumentPart.DRUMS))
 						{
-							CDTXMania.SongManager.listSongRoot = searchOutputList;
-
-							//
-							actSongList.SearchUpdate();
-							//this.actSongList.Refresh(CDTXMania.SongManager, true);
+							Debug.WriteLine("ドラムス難易度変更");
+							actSongList.t難易度レベルをひとつ進める();
+							//CDTXMania.Skin.sound変更音.tPlay();
 						}
+					}
+					#endregion
+					#region [ Bx2 Guitar: 難易度変更 ]
+					if (CDTXMania.Pad.bPressed(EInstrumentPart.GUITAR, EPad.B))	// #24177 2011.1.17 yyagi || -> &&
+					{	// [B]x2 ギター難易度変更
+						CommandHistory.Add(EInstrumentPart.GUITAR, EPadFlag.B);
+						EPadFlag[] comChangeDifficultyG = new EPadFlag[] { EPadFlag.B, EPadFlag.B };
+						if (CommandHistory.CheckCommand(comChangeDifficultyG, EInstrumentPart.GUITAR))
+						{
+							Debug.WriteLine("ギター難易度変更");
+							actSongList.t難易度レベルをひとつ進める();
+							//CDTXMania.Skin.sound変更音.tPlay();
+						}
+					}
+					#endregion
+					#region [ Bx2 Bass: 難易度変更 ]
+					if (CDTXMania.Pad.bPressed(EInstrumentPart.BASS, EPad.B))		// #24177 2011.1.17 yyagi || -> &&
+					{	// [B]x2 ベース難易度変更
+						CommandHistory.Add(EInstrumentPart.BASS, EPadFlag.B);
+						EPadFlag[] comChangeDifficultyB = new EPadFlag[] { EPadFlag.B, EPadFlag.B };
+						if (CommandHistory.CheckCommand(comChangeDifficultyB, EInstrumentPart.BASS))
+						{
+							Debug.WriteLine("ベース難易度変更");
+							actSongList.t難易度レベルをひとつ進める();
+							//CDTXMania.Skin.sound変更音.tPlay();
+						}
+					}
+					#endregion
+					#region [ Yx2 Guitar: ギターとベースを入れ替え ]
+					if (CDTXMania.Pad.bPressed(EInstrumentPart.GUITAR, EPad.Y))
+					{	// Pick, Y, Y, Pick で、ギターとベースを入れ替え
+						CommandHistory.Add(EInstrumentPart.GUITAR, EPadFlag.Y);
+						EPadFlag[] comSwapGtBs1 = new EPadFlag[] { EPadFlag.Y, EPadFlag.Y };
+						if (CommandHistory.CheckCommand(comSwapGtBs1, EInstrumentPart.GUITAR))
+						{
+							Debug.WriteLine("ギターとベースの入れ替え1");
+							CDTXMania.Skin.soundChange.tPlay();
+							// ギターとベースのキーを入れ替え
+							//CDTXMania.ConfigIni.SwapGuitarBassKeyAssign();
+							CDTXMania.ConfigIni.bIsSwappedGuitarBass = !CDTXMania.ConfigIni.bIsSwappedGuitarBass;
+							actSongList.tSwapClearLamps();
+						}
+					}
+					#endregion
+					#region [ Yx2 Bass: ギターとベースを入れ替え ]
+					if (CDTXMania.Pad.bPressed(EInstrumentPart.BASS, EPad.Y))
+					{	// ベース[Pick]: コマンドとしてEnqueue
+						CommandHistory.Add(EInstrumentPart.BASS, EPadFlag.Y);
+						// Pick, Y, Y, Pick で、ギターとベースを入れ替え
+						EPadFlag[] comSwapGtBs1 = new EPadFlag[] { EPadFlag.Y, EPadFlag.Y };
+						if (CommandHistory.CheckCommand(comSwapGtBs1, EInstrumentPart.BASS))
+						{
+							Debug.WriteLine("ギターとベースの入れ替え2");
+							CDTXMania.Skin.soundChange.tPlay();
+							// ギターとベースのキーを入れ替え
+							//CDTXMania.ConfigIni.SwapGuitarBassKeyAssign();
+							CDTXMania.ConfigIni.bIsSwappedGuitarBass = !CDTXMania.ConfigIni.bIsSwappedGuitarBass;
+							actSongList.tSwapClearLamps();
+						}
+					}
+					#endregion
+					#region [ Px2 Guitar: 簡易CONFIG ]
+					if (CDTXMania.Pad.bPressed(EInstrumentPart.GUITAR, EPad.P))
+					{	// [BD]x2 スクロール速度変更
+						CommandHistory.Add(EInstrumentPart.GUITAR, EPadFlag.P);
+						EPadFlag[] comChangeScrollSpeed = new EPadFlag[] { EPadFlag.P, EPadFlag.P };
+						if (CommandHistory.CheckCommand(comChangeScrollSpeed, EInstrumentPart.GUITAR))
+						{
+							// Debug.WriteLine( "ドラムススクロール速度変更" );
+							// CDTXMania.ConfigIni.nScrollSpeed.Drums = ( CDTXMania.ConfigIni.nScrollSpeed.Drums + 1 ) % 0x10;
+							CDTXMania.Skin.soundChange.tPlay();
+							actQuickConfig.tActivatePopupMenu(EInstrumentPart.GUITAR);
+						}
+					}
+					#endregion
+					#region [ Px2 Bass: 簡易CONFIG ]
+					if (CDTXMania.Pad.bPressed(EInstrumentPart.BASS, EPad.P))
+					{	// [BD]x2 スクロール速度変更
+						CommandHistory.Add(EInstrumentPart.BASS, EPadFlag.P);
+						EPadFlag[] comChangeScrollSpeed = new EPadFlag[] { EPadFlag.P, EPadFlag.P };
+						if (CommandHistory.CheckCommand(comChangeScrollSpeed, EInstrumentPart.BASS))
+						{
+							// Debug.WriteLine( "ドラムススクロール速度変更" );
+							// CDTXMania.ConfigIni.nScrollSpeed.Drums = ( CDTXMania.ConfigIni.nScrollSpeed.Drums + 1 ) % 0x10;
+							CDTXMania.Skin.soundChange.tPlay();
+							actQuickConfig.tActivatePopupMenu(EInstrumentPart.BASS);
+						}
+					}
+					#endregion
+					#region [ Y P Guitar: ソート画面 ]
+					if (CDTXMania.Pad.bPressing(EInstrumentPart.GUITAR, EPad.Y) && CDTXMania.Pad.bPressed(EInstrumentPart.GUITAR, EPad.P))
+					{	// ギター[Pick]: コマンドとしてEnqueue
+						CDTXMania.Skin.soundChange.tPlay();
+						actSortSongs.tActivatePopupMenu(EInstrumentPart.GUITAR, ref actSongList);
+					}
+					#endregion
+					#region [ Y P Bass: ソート画面 ]
+					if (CDTXMania.Pad.bPressing(EInstrumentPart.BASS, EPad.Y) && CDTXMania.Pad.bPressed(EInstrumentPart.BASS, EPad.P))
+					{	// ベース[Pick]: コマンドとしてEnqueue
+						CDTXMania.Skin.soundChange.tPlay();
+						actSortSongs.tActivatePopupMenu(EInstrumentPart.BASS, ref actSongList);
+					}
+					#endregion
+					#region [ FTx2 Drums: ソート画面 ]
+					if (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.FT))
+					{	// [HT]x2 ソート画面        2013.12.31.kairera0467
+						//Change to FT x 2 to follow Gitadora style
+						//
+						CommandHistory.Add(EInstrumentPart.DRUMS, EPadFlag.FT);
+						EPadFlag[] comSort = new EPadFlag[] { EPadFlag.FT, EPadFlag.FT };
+						if (CommandHistory.CheckCommand(comSort, EInstrumentPart.DRUMS))
+						{
+							CDTXMania.Skin.soundChange.tPlay();
+							actSortSongs.tActivatePopupMenu(EInstrumentPart.DRUMS, ref actSongList);
+						}
+					}
+					#endregion
+				}
+				//if( CDTXMania.InputManager.Keyboard.bKeyPressed(SlimDXKey.F6) )
+				//{
+				//    if (CDTXMania.EnumSongs.IsEnumerating)
+				//    {
+				//        // Debug.WriteLine( "バックグラウンドでEnumeratingSongs中だったので、一旦中断します。" );
+				//        CDTXMania.EnumSongs.Abort();
+				//        CDTXMania.actEnumSongs.OnDeactivate();
+				//    }
 
-						tUpdateSearchNotification(searchOutcome);
+				//    CDTXMania.EnumSongs.StartEnumFromDisk();
+				//    //CDTXMania.EnumSongs.ChangeEnumeratePriority(ThreadPriority.Normal);
+				//    CDTXMania.actEnumSongs.bコマンドでの曲データ取得 = true;
+				//    CDTXMania.actEnumSongs.OnActivate();
+				//}
+			}
+
+			#region [Test text field]
+			if (!CDTXMania.app.bテキスト入力中 && CDTXMania.Pad.bPressed(EKeyConfigPart.SYSTEM, EKeyConfigPad.Search))
+			{
+				CDTXMania.Skin.soundDecide.tPlay();
+				actTextBox.t表示();
+				actTextBox.t入力を開始();
+			}
+			#endregion
+
+			actSortSongs.tUpdateAndDraw();
+			actQuickConfig.tUpdateAndDraw();
+			actTextBox.OnUpdateAndDraw();
+			if (actTextBox.b入力が終了した)
+			{
+				strSearchString = actTextBox.str確定文字列を返す();
+				string searchOutcome = "";
+				if(strSearchString != "" && strSearchString != CSongSearch.ExitSwitch)
+				{
+					searchOutcome = "Search Input: " + strSearchString;
+					Trace.TraceInformation("Search Input: " + strSearchString);
+					if(CDTXMania.SongManager.listSongBeforeSearch == null)
+					{
+						CDTXMania.SongManager.listSongBeforeSearch = CDTXMania.SongManager.listSongRoot;
+					}
+
+					List<CSongListNode> searchOutputList = CSongSearch.tSearchForSongs(CDTXMania.SongManager.listSongBeforeSearch, strSearchString);
+					if(searchOutputList.Count == 0)
+					{
+						Trace.TraceInformation("No songs found!");
+						//To print a outcome message
+						searchOutcome += "\r\nNo songs found";
+					}
+					else
+					{
+						CDTXMania.SongManager.listSongRoot = searchOutputList;
+
+						//
+						actSongList.SearchUpdate();
+						//this.actSongList.Refresh(CDTXMania.SongManager, true);
+					}
+
+					tUpdateSearchNotification(searchOutcome);
+					ctSearchInputDisplayCounter.tStart(0, 1, 10000, CDTXMania.Timer);
+					CDTXMania.Skin.soundDecide.tPlay();
+				}
+				else if(strSearchString == CSongSearch.ExitSwitch)
+				{
+					if(CDTXMania.SongManager.listSongBeforeSearch != null)
+					{
+						CDTXMania.SongManager.listSongRoot = CDTXMania.SongManager.listSongBeforeSearch;
+						CDTXMania.SongManager.listSongBeforeSearch = null;
+						actSongList.SearchUpdate();
+						tUpdateSearchNotification("Exit Search Mode");
 						ctSearchInputDisplayCounter.tStart(0, 1, 10000, CDTXMania.Timer);
 						CDTXMania.Skin.soundDecide.tPlay();
-					}
-					else if(strSearchString == CSongSearch.ExitSwitch)
-					{
-						if(CDTXMania.SongManager.listSongBeforeSearch != null)
-						{
-							CDTXMania.SongManager.listSongRoot = CDTXMania.SongManager.listSongBeforeSearch;
-							CDTXMania.SongManager.listSongBeforeSearch = null;
-							actSongList.SearchUpdate();
-							tUpdateSearchNotification("Exit Search Mode");
-							ctSearchInputDisplayCounter.tStart(0, 1, 10000, CDTXMania.Timer);
-							CDTXMania.Skin.soundDecide.tPlay();
-						}
-						else
-						{
-							//Play cancel sound if input has no effect
-							CDTXMania.Skin.soundCancel.tPlay(); 
-						}
 					}
 					else
 					{
 						//Play cancel sound if input has no effect
-						CDTXMania.Skin.soundCancel.tPlay();
-					}						
-						
-					actTextBox.t非表示();
+						CDTXMania.Skin.soundCancel.tPlay(); 
+					}
 				}
-
-				if(txSearchInputNotification != null)
+				else
 				{
-					txSearchInputNotification.tDraw2D(CDTXMania.app.Device, 10, 130);
-				}
-
+					//Play cancel sound if input has no effect
+					CDTXMania.Skin.soundCancel.tPlay();
+				}						
+						
+				actTextBox.t非表示();
 			}
+
+			if(txSearchInputNotification != null)
+			{
+				txSearchInputNotification.tDraw2D(CDTXMania.app.Device, 10, 130);
+			}
+
 		}
 		return 0;
 	}

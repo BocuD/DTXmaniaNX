@@ -1,7 +1,9 @@
 ﻿using System.Diagnostics;
 using DTXMania.Core;
+using DTXMania.UI;
 using DTXUIRenderer;
 using FDK;
+using SharpDX;
 using SlimDXKey = SlimDX.DirectInput.Key;
 
 namespace DTXMania;
@@ -56,6 +58,11 @@ internal class CStageResult : CStage
 
 		
 	// CStage 実装
+
+	public override void InitializeBaseUI()
+	{
+		
+	}
 
 	public override void OnActivate()
 	{
@@ -533,273 +540,274 @@ internal class CStageResult : CStage
 	}
 	public override int OnUpdateAndDraw()
 	{
-		if( !bNotActivated )
+		if (bNotActivated) return 0;
+		
+		base.OnUpdateAndDraw();
+
+		int num;
+		if( bJustStartedUpdate )
 		{
-			int num;
-			if( bJustStartedUpdate )
+			ct登場用 = new CCounter( 0, 100, 5, CDTXMania.Timer );
+
+			//Check result to select the correct sound to play
+			int l_outputSoundEnum = 0; //0: Stage Clear 1: FC 2: EXC
+			bool l_newRecord = false;
+			for (int i = 0; i < 3; i++)
 			{
-				ct登場用 = new CCounter( 0, 100, 5, CDTXMania.Timer );
-
-				//Check result to select the correct sound to play
-				int l_outputSoundEnum = 0; //0: Stage Clear 1: FC 2: EXC
-				bool l_newRecord = false;
-				for (int i = 0; i < 3; i++)
-				{
-					if ((((i != 0) || (CDTXMania.DTX.bHasChips.Drums && !CDTXMania.ConfigIni.bGuitarRevolutionMode)) &&
-					     ((i != 1) || (CDTXMania.DTX.bHasChips.Guitar && CDTXMania.ConfigIni.bGuitarRevolutionMode))) &&
-					    ((i != 2) || (CDTXMania.DTX.bHasChips.Bass && CDTXMania.ConfigIni.bGuitarRevolutionMode)))
-					{ 
-						if(bAuto[i] == false)
+				if ((((i != 0) || (CDTXMania.DTX.bHasChips.Drums && !CDTXMania.ConfigIni.bGuitarRevolutionMode)) &&
+				     ((i != 1) || (CDTXMania.DTX.bHasChips.Guitar && CDTXMania.ConfigIni.bGuitarRevolutionMode))) &&
+				    ((i != 2) || (CDTXMania.DTX.bHasChips.Bass && CDTXMania.ConfigIni.bGuitarRevolutionMode)))
+				{ 
+					if(bAuto[i] == false)
+					{
+						if(fPerfect率[i] == 100.0)
 						{
-							if(fPerfect率[i] == 100.0)
-							{
-								l_outputSoundEnum = 2; //Excellent
-							}
-							else if(fPoor率[i] == 0.0 && fMiss率[i] == 0.0)
-							{
-								l_outputSoundEnum = 1; //Full Combo
-							}
+							l_outputSoundEnum = 2; //Excellent
 						}
-
-						if(bNewRecordSkill[i] == true)
+						else if(fPoor率[i] == 0.0 && fMiss率[i] == 0.0)
 						{
-							l_newRecord = true;
+							l_outputSoundEnum = 1; //Full Combo
 						}
 					}
-				}
 
-				//Play the corresponding sound
-				if(l_outputSoundEnum == 1)
-				{
-					CDTXMania.Skin.soundFullCombo.tPlay();
-				}
-				else if(l_outputSoundEnum == 2)
-				{
-					CDTXMania.Skin.soundExcellent.tPlay();
-				}
-				else
-				{
-					CDTXMania.Skin.soundStageClear.tPlay();
-				}
-
-				//Create the delay timer of 150 x 10 = 1500 ms to play New Record
-				if(l_newRecord)
-				{
-					ctPlayNewRecord = new CCounter(0, 150, 10, CDTXMania.Timer);
-				}
-						
-				actFI.tStartFadeIn(false);
-				ePhaseID = EPhase.Common_FadeIn;
-				bJustStartedUpdate = false;
-			}
-
-				
-			//Draw Background video  via CActPerfAVI methods
-			actBackgroundVideoAVI.tUpdateAndDraw();
-
-			//if ( this.ds背景動画 != null )
-			//            {
-			//                this.ds背景動画.t再生開始();
-			//                this.ds背景動画.MediaSeeking.GetPositions(out this.lDshowPosition, out this.lStopPosition);
-			//                this.ds背景動画.bループ再生 = true;
-                    
-			//                if (this.lDshowPosition == this.lStopPosition)
-			//                {
-			//                    this.ds背景動画.MediaSeeking.SetPositions(
-			//                    DsLong.FromInt64((long)(0)),
-			//                    AMSeekingSeekingFlags.AbsolutePositioning,
-			//                    0,
-			//                    AMSeekingSeekingFlags.NoPositioning);
-			//                }
-                    
-			//                this.ds背景動画.t現時点における最新のスナップイメージをTextureに転写する( this.txBackground );
-			//            }
-
-			bAnimationComplete = true;
-			if( ct登場用.bInProgress )
-			{
-				ct登場用.tUpdate();
-				if( ct登場用.bReachedEndValue )
-				{
-					ct登場用.tStop();
-				}
-				else
-				{
-					bAnimationComplete = false;
+					if(bNewRecordSkill[i] == true)
+					{
+						l_newRecord = true;
+					}
 				}
 			}
 
-			//Play new record if available
-			if(ctPlayNewRecord != null && ctPlayNewRecord.bInProgress)
+			//Play the corresponding sound
+			if(l_outputSoundEnum == 1)
 			{
-				ctPlayNewRecord.tUpdate();
-				if (ctPlayNewRecord.bReachedEndValue)
-				{
-					CDTXMania.Skin.soundNewRecord.tPlay();
-					ctPlayNewRecord.tStop();
-				}
+				CDTXMania.Skin.soundFullCombo.tPlay();
 			}
-
-			// 描画
-
-			if( txBackground != null && rBackgroundVideoAVI.avi == null)
+			else if(l_outputSoundEnum == 2)
 			{
-				txBackground.tDraw2D( CDTXMania.app.Device, 0, 0 );
-			}
-
-			if( ct登場用.bInProgress && ( txTopPanel != null ) )
-			{
-				double num2 = ( (double) ct登場用.nCurrentValue ) / 100.0;
-				double num3 = Math.Sin( Math.PI / 2 * num2 );
-				num = ( (int) ( txTopPanel.szImageSize.Height * num3 ) ) - txTopPanel.szImageSize.Height;
+				CDTXMania.Skin.soundExcellent.tPlay();
 			}
 			else
 			{
-				num = 0;
+				CDTXMania.Skin.soundStageClear.tPlay();
 			}
-			if( txTopPanel != null )
-			{
-				txTopPanel.tDraw2D( CDTXMania.app.Device, 0, num );
-			}
-			if( txBottomPanel != null )
-			{
-				txBottomPanel.tDraw2D( CDTXMania.app.Device, 0, 720 - txBottomPanel.szImageSize.Height );
-			}
-			if( actResultImage.OnUpdateAndDraw() == 0 )
-			{
-				bAnimationComplete = false;
-			}
-			if ( actParameterPanel.OnUpdateAndDraw() == 0 )
-			{
-				bAnimationComplete = false;
-			}
-			if (actRank.OnUpdateAndDraw() == 0)
-			{
-				bAnimationComplete = false;
-			}
-			if( ePhaseID == EPhase.Common_FadeIn )
-			{
-				if( actFI.OnUpdateAndDraw() != 0 )
-				{
-					ePhaseID = EPhase.Common_DefaultState;
-				}
-			}
-			else if( ( ePhaseID == EPhase.Common_FadeOut ) )			//&& ( this.actFO.OnUpdateAndDraw() != 0 ) )
-			{
-				return (int) eReturnValueWhenFadeOutCompleted;
-			}
-			#region [ #24609 2011.3.14 yyagi ランク更新or演奏型スキル更新時、リザルト画像をpngで保存する ]
-			if ( bAnimationComplete == true && bIsCheckedWhetherResultScreenShouldSaveOrNot == false	// #24609 2011.3.14 yyagi; to save result screen in case BestRank or HiSkill.
-			                                && CDTXMania.ConfigIni.bScoreIniを出力する
-			                                && CDTXMania.ConfigIni.bIsAutoResultCapture)												// #25399 2011.6.9 yyagi
-			{
-				CheckAndSaveResultScreen(true);
-				bIsCheckedWhetherResultScreenShouldSaveOrNot = true;
-			}
-			#endregion
 
-			// キー入力
-			if( CDTXMania.ConfigIni.bドラム打音を発声する && CDTXMania.ConfigIni.bDrumsEnabled )
+			//Create the delay timer of 150 x 10 = 1500 ms to play New Record
+			if(l_newRecord)
 			{
-				for( int i = 0; i < 11; i++ )
+				ctPlayNewRecord = new CCounter(0, 150, 10, CDTXMania.Timer);
+			}
+						
+			actFI.tStartFadeIn(false);
+			ePhaseID = EPhase.Common_FadeIn;
+			bJustStartedUpdate = false;
+		}
+
+				
+		//Draw Background video  via CActPerfAVI methods
+		actBackgroundVideoAVI.tUpdateAndDraw();
+
+		//if ( this.ds背景動画 != null )
+		//            {
+		//                this.ds背景動画.t再生開始();
+		//                this.ds背景動画.MediaSeeking.GetPositions(out this.lDshowPosition, out this.lStopPosition);
+		//                this.ds背景動画.bループ再生 = true;
+                    
+		//                if (this.lDshowPosition == this.lStopPosition)
+		//                {
+		//                    this.ds背景動画.MediaSeeking.SetPositions(
+		//                    DsLong.FromInt64((long)(0)),
+		//                    AMSeekingSeekingFlags.AbsolutePositioning,
+		//                    0,
+		//                    AMSeekingSeekingFlags.NoPositioning);
+		//                }
+                    
+		//                this.ds背景動画.t現時点における最新のスナップイメージをTextureに転写する( this.txBackground );
+		//            }
+
+		bAnimationComplete = true;
+		if( ct登場用.bInProgress )
+		{
+			ct登場用.tUpdate();
+			if( ct登場用.bReachedEndValue )
+			{
+				ct登場用.tStop();
+			}
+			else
+			{
+				bAnimationComplete = false;
+			}
+		}
+
+		//Play new record if available
+		if(ctPlayNewRecord != null && ctPlayNewRecord.bInProgress)
+		{
+			ctPlayNewRecord.tUpdate();
+			if (ctPlayNewRecord.bReachedEndValue)
+			{
+				CDTXMania.Skin.soundNewRecord.tPlay();
+				ctPlayNewRecord.tStop();
+			}
+		}
+
+		// 描画
+
+		if( txBackground != null && rBackgroundVideoAVI.avi == null)
+		{
+			txBackground.tDraw2D( CDTXMania.app.Device, 0, 0 );
+		}
+
+		if( ct登場用.bInProgress && ( txTopPanel != null ) )
+		{
+			double num2 = ( (double) ct登場用.nCurrentValue ) / 100.0;
+			double num3 = Math.Sin( Math.PI / 2 * num2 );
+			num = ( (int) ( txTopPanel.szImageSize.Height * num3 ) ) - txTopPanel.szImageSize.Height;
+		}
+		else
+		{
+			num = 0;
+		}
+		if( txTopPanel != null )
+		{
+			txTopPanel.tDraw2D( CDTXMania.app.Device, 0, num );
+		}
+		if( txBottomPanel != null )
+		{
+			txBottomPanel.tDraw2D( CDTXMania.app.Device, 0, 720 - txBottomPanel.szImageSize.Height );
+		}
+		if( actResultImage.OnUpdateAndDraw() == 0 )
+		{
+			bAnimationComplete = false;
+		}
+		if ( actParameterPanel.OnUpdateAndDraw() == 0 )
+		{
+			bAnimationComplete = false;
+		}
+		if (actRank.OnUpdateAndDraw() == 0)
+		{
+			bAnimationComplete = false;
+		}
+		if( ePhaseID == EPhase.Common_FadeIn )
+		{
+			if( actFI.OnUpdateAndDraw() != 0 )
+			{
+				ePhaseID = EPhase.Common_DefaultState;
+			}
+		}
+		else if( ( ePhaseID == EPhase.Common_FadeOut ) )			//&& ( this.actFO.OnUpdateAndDraw() != 0 ) )
+		{
+			return (int) eReturnValueWhenFadeOutCompleted;
+		}
+		#region [ #24609 2011.3.14 yyagi ランク更新or演奏型スキル更新時、リザルト画像をpngで保存する ]
+		if ( bAnimationComplete == true && bIsCheckedWhetherResultScreenShouldSaveOrNot == false	// #24609 2011.3.14 yyagi; to save result screen in case BestRank or HiSkill.
+		                                && CDTXMania.ConfigIni.bScoreIniを出力する
+		                                && CDTXMania.ConfigIni.bIsAutoResultCapture)												// #25399 2011.6.9 yyagi
+		{
+			CheckAndSaveResultScreen(true);
+			bIsCheckedWhetherResultScreenShouldSaveOrNot = true;
+		}
+		#endregion
+
+		// キー入力
+		if( CDTXMania.ConfigIni.bドラム打音を発声する && CDTXMania.ConfigIni.bDrumsEnabled )
+		{
+			for( int i = 0; i < 11; i++ )
+			{
+				List<STInputEvent> events = CDTXMania.Pad.GetEvents( EInstrumentPart.DRUMS, (EPad) i );
+				if( ( events != null ) && ( events.Count > 0 ) )
 				{
-					List<STInputEvent> events = CDTXMania.Pad.GetEvents( EInstrumentPart.DRUMS, (EPad) i );
-					if( ( events != null ) && ( events.Count > 0 ) )
+					foreach( STInputEvent event2 in events )
 					{
-						foreach( STInputEvent event2 in events )
+						if( !event2.b押された )
 						{
-							if( !event2.b押された )
+							continue;
+						}
+						CChip rChip = rEmptyDrumChip[ i ];
+						if( rChip == null )
+						{
+							switch( ( (EPad) i ) )
 							{
-								continue;
-							}
-							CChip rChip = rEmptyDrumChip[ i ];
-							if( rChip == null )
-							{
-								switch( ( (EPad) i ) )
-								{
-									case EPad.HH:
+								case EPad.HH:
+									rChip = rEmptyDrumChip[ 7 ];
+									if( rChip == null )
+									{
+										rChip = rEmptyDrumChip[ 9 ];
+									}
+									break;
+
+								case EPad.FT:
+									rChip = rEmptyDrumChip[ 4 ];
+									break;
+
+								case EPad.CY:
+									rChip = rEmptyDrumChip[ 8 ];
+									break;
+
+								case EPad.HHO:
+									rChip = rEmptyDrumChip[ 0 ];
+									if( rChip == null )
+									{
+										rChip = rEmptyDrumChip[ 9 ];
+									}
+									break;
+
+								case EPad.RD:
+									rChip = rEmptyDrumChip[ 6 ];
+									break;
+
+								case EPad.LC:
+									rChip = rEmptyDrumChip[ 0 ];
+									if( rChip == null )
+									{
 										rChip = rEmptyDrumChip[ 7 ];
-										if( rChip == null )
-										{
-											rChip = rEmptyDrumChip[ 9 ];
-										}
-										break;
-
-									case EPad.FT:
-										rChip = rEmptyDrumChip[ 4 ];
-										break;
-
-									case EPad.CY:
-										rChip = rEmptyDrumChip[ 8 ];
-										break;
-
-									case EPad.HHO:
-										rChip = rEmptyDrumChip[ 0 ];
-										if( rChip == null )
-										{
-											rChip = rEmptyDrumChip[ 9 ];
-										}
-										break;
-
-									case EPad.RD:
-										rChip = rEmptyDrumChip[ 6 ];
-										break;
-
-									case EPad.LC:
-										rChip = rEmptyDrumChip[ 0 ];
-										if( rChip == null )
-										{
-											rChip = rEmptyDrumChip[ 7 ];
-										}
-										break;
-								}
+									}
+									break;
 							}
-							if( ( ( rChip != null ) && ( rChip.nChannelNumber >= EChannel.HiHatClose ) ) && ( rChip.nChannelNumber <= EChannel.LeftPedal ) )
+						}
+						if( ( ( rChip != null ) && ( rChip.nChannelNumber >= EChannel.HiHatClose ) ) && ( rChip.nChannelNumber <= EChannel.LeftPedal ) )
+						{
+							int nLane = nチャンネル0Atoレーン07[ rChip.nChannelNumber - EChannel.HiHatClose ];
+							if( ( nLane == 1 ) && ( ( rChip.nChannelNumber == EChannel.HiHatClose ) || ( ( rChip.nChannelNumber == EChannel.HiHatOpen ) && ( n最後に再生したHHのチャンネル番号 != EChannel.HiHatOpen ) ) ) )
 							{
-								int nLane = nチャンネル0Atoレーン07[ rChip.nChannelNumber - EChannel.HiHatClose ];
-								if( ( nLane == 1 ) && ( ( rChip.nChannelNumber == EChannel.HiHatClose ) || ( ( rChip.nChannelNumber == EChannel.HiHatOpen ) && ( n最後に再生したHHのチャンネル番号 != EChannel.HiHatOpen ) ) ) )
-								{
-									CDTXMania.DTX.tStopPlayingWav( n最後に再生したHHのWAV番号 );
-									n最後に再生したHHのWAV番号 = rChip.nIntegerValue_InternalNumber;
-									n最後に再生したHHのチャンネル番号 = rChip.nChannelNumber;
-								}
-								CDTXMania.DTX.tPlayChip( rChip, CDTXMania.Timer.nシステム時刻, nLane, CDTXMania.ConfigIni.n手動再生音量, CDTXMania.ConfigIni.b演奏音を強調する.Drums );
+								CDTXMania.DTX.tStopPlayingWav( n最後に再生したHHのWAV番号 );
+								n最後に再生したHHのWAV番号 = rChip.nIntegerValue_InternalNumber;
+								n最後に再生したHHのチャンネル番号 = rChip.nChannelNumber;
 							}
+							CDTXMania.DTX.tPlayChip( rChip, CDTXMania.Timer.nシステム時刻, nLane, CDTXMania.ConfigIni.n手動再生音量, CDTXMania.ConfigIni.b演奏音を強調する.Drums );
 						}
 					}
 				}
 			}
-			if (CDTXMania.Input.ActionDecide())
-			{
-				actFI.tフェードイン完了();					// #25406 2011.6.9 yyagi
-				actResultImage.tアニメを完了させる();
-				actParameterPanel.tアニメを完了させる();
-				actRank.tアニメを完了させる();
-				ct登場用.tStop();
-			}
-			#region [ #24609 2011.4.7 yyagi リザルト画面で[F12]を押下すると、リザルト画像をpngで保存する機能は、CDTXManiaに移管。 ]
+		}
+		if (CDTXMania.Input.ActionDecide())
+		{
+			actFI.tフェードイン完了();					// #25406 2011.6.9 yyagi
+			actResultImage.tアニメを完了させる();
+			actParameterPanel.tアニメを完了させる();
+			actRank.tアニメを完了させる();
+			ct登場用.tStop();
+		}
+		#region [ #24609 2011.4.7 yyagi リザルト画面で[F12]を押下すると、リザルト画像をpngで保存する機能は、CDTXManiaに移管。 ]
 //					if ( CDTXMania.InputManager.Keyboard.bKeyPressed( (int) SlimDXKey.F12 ) &&
 //						CDTXMania.ConfigIni.bScoreIniを出力する )
 //					{
 //						CheckAndSaveResultScreen(false);
 //						this.bIsCheckedWhetherResultScreenShouldSaveOrNot = true;
 //					}
-			#endregion
-			if ( ePhaseID == EPhase.Common_DefaultState )
+		#endregion
+		if ( ePhaseID == EPhase.Common_DefaultState )
+		{
+			if ( CDTXMania.InputManager.Keyboard.bKeyPressed( (int)SlimDXKey.Escape ) )
 			{
-				if ( CDTXMania.InputManager.Keyboard.bKeyPressed( (int)SlimDXKey.Escape ) )
-				{
-					CDTXMania.Skin.soundCancel.tPlay();
-					actFO.tStartFadeOut();
-					ePhaseID = EPhase.Common_FadeOut;
-					eReturnValueWhenFadeOutCompleted = EReturnValue.Complete;
-				}
-				if (CDTXMania.Input.ActionDecide() && bAnimationComplete)
-				{
-					CDTXMania.Skin.soundCancel.tPlay();
-					ePhaseID = EPhase.Common_FadeOut;
-					eReturnValueWhenFadeOutCompleted = EReturnValue.Complete;
-				}
+				CDTXMania.Skin.soundCancel.tPlay();
+				actFO.tStartFadeOut();
+				ePhaseID = EPhase.Common_FadeOut;
+				eReturnValueWhenFadeOutCompleted = EReturnValue.Complete;
+			}
+			if (CDTXMania.Input.ActionDecide() && bAnimationComplete)
+			{
+				CDTXMania.Skin.soundCancel.tPlay();
+				ePhaseID = EPhase.Common_FadeOut;
+				eReturnValueWhenFadeOutCompleted = EReturnValue.Complete;
 			}
 		}
 		return 0;

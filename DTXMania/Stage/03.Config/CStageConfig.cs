@@ -31,8 +31,6 @@ internal class CStageConfig : CStage
         listChildActivities.Add(actList = new CActConfigList());
         listChildActivities.Add(actKeyAssign = new CActConfigKeyAssign());
         bNotActivated = true;
-
-        ui = new UIGroup("Stage Config");
     }
 
 
@@ -53,6 +51,30 @@ internal class CStageConfig : CStage
     }
         
     // CStage 実装
+
+    public override void InitializeBaseUI()
+    {
+        //create resources for menu elements
+        DTXTexture bgTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_background.png")));
+        UIImage bg = ui.AddChild(new UIImage(bgTex));
+        bg.renderOrder = -100;
+        bg.position = Vector3.Zero;
+                
+        DTXTexture itemBarTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_item bar.png")));
+        UIImage itemBar = ui.AddChild(new UIImage(itemBarTex));
+        itemBar.position = new Vector3(400, 0, 0);
+        itemBar.renderOrder = 50;
+                
+        DTXTexture headerPanelTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_header panel.png")));
+        UIImage headerPanel = ui.AddChild(new UIImage(headerPanelTex));
+        headerPanel.position = Vector3.Zero;
+        headerPanel.renderOrder = 52;
+                
+        DTXTexture footerPanelTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_footer panel.png")));
+        UIImage footerPanel = ui.AddChild(new UIImage(footerPanelTex));
+        footerPanel.position = new Vector3(0, 720 - footerPanel.Texture.Height, 0);
+        footerPanel.renderOrder = 53;
+    }
 
     public override void OnActivate()
     {
@@ -118,32 +140,11 @@ internal class CStageConfig : CStage
     {
         if (!bNotActivated)
         {
-            //create resources for menu elements
-            DTXTexture bgTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_background.png")));
-            UIImage bg = ui.AddChild(new UIImage(bgTex));
-            bg.renderOrder = -100;
-            bg.position = Vector3.Zero;
-                
-            DTXTexture itemBarTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_item bar.png")));
-            UIImage itemBar = ui.AddChild(new UIImage(itemBarTex));
-            itemBar.position = new Vector3(400, 0, 0);
-            itemBar.renderOrder = 50;
-                
-            DTXTexture headerPanelTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_header panel.png")));
-            UIImage headerPanel = ui.AddChild(new UIImage(headerPanelTex));
-            headerPanel.position = Vector3.Zero;
-            headerPanel.renderOrder = 52;
-                
-            DTXTexture footerPanelTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_footer panel.png")));
-            UIImage footerPanel = ui.AddChild(new UIImage(footerPanelTex));
-            footerPanel.position = new Vector3(0, 720 - footerPanel.Texture.Height, 0);
-            footerPanel.renderOrder = 53;
-                
             //left menu
             UIGroup leftMenu = ui.AddChild(new UIGroup("Left Options Menu"));
             leftMenu.position = new Vector3(245, 140, 0);
             leftMenu.renderOrder = 50;
-                
+            
             DTXTexture menuPanelTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_menu panel.png")));
             UIImage menuPanel = leftMenu.AddChild(new UIImage(menuPanelTex));
             menuPanel.position = Vector3.Zero;
@@ -164,7 +165,7 @@ internal class CStageConfig : CStage
             menuCursor.renderMode = ERenderMode.Sliced;
             menuCursor.sliceRect = new RectangleF(16, 0, 12, 28);
 
-            var family = new FontFamily(CDTXMania.ConfigIni.str選曲リストフォント);
+            var family = new FontFamily(CDTXMania.ConfigIni.songListFont);
             configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(family, 18, "System", () => { actList.tSetupItemList_System(); }));
             configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(family, 18, "Drums", () => { actList.tSetupItemList_Drums(); }));
             configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(family, 18, "Guitar", () => { actList.tSetupItemList_Guitar(); }));
@@ -190,16 +191,15 @@ internal class CStageConfig : CStage
         if (!bNotActivated)
         {
             CDTXMania.tReleaseTexture(ref txDescriptionPanel);
-                
-            ui.Dispose();
-                
+            
             base.OnManagedReleaseResources();
         }
     }
     public override int OnUpdateAndDraw()
     {
-        if (bNotActivated)
-            return 0;
+        if (bNotActivated) return 0;
+        
+        base.OnUpdateAndDraw();
 
         if (bJustStartedUpdate)
         {
@@ -212,9 +212,7 @@ internal class CStageConfig : CStage
         //update menu cursor position
         menuCursor.Texture.transparency = bFocusIsOnMenu ? 1.0f : 0.5f;
         menuCursor.position.Y = 2 + configLeftOptionsMenu.currentlySelectedIndex * 32;
-            
-        ui.Draw(Matrix.Identity);
-            
+        
         #region [ アイテム ]
         //---------------------
         switch (eItemPanelMode)

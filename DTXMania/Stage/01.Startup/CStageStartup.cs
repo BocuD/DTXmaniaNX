@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using DTXMania.Core;
+using DTXUIRenderer;
 using FDK;
 
 namespace DTXMania;
@@ -17,6 +18,11 @@ internal class CStageStartup : CStage
 	public List<string> list進行文字列;
 
 	// CStage 実装
+
+	public override void InitializeBaseUI()
+	{
+		
+	}
 
 	public override void OnActivate()
 	{
@@ -76,108 +82,109 @@ internal class CStageStartup : CStage
 	}
 	public override int OnUpdateAndDraw()
 	{
-		if(!bNotActivated)
+		if (bNotActivated) return 0;
+
+		base.OnUpdateAndDraw();
+		
+		if(bJustStartedUpdate)
 		{
-			if(bJustStartedUpdate)
+			list進行文字列.Add("DTXMania powered by YAMAHA Silent Session Drums\n");
+			list進行文字列.Add("Release: " + CDTXMania.VERSION + " [" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version + "]");
+
+			CDTXMania.stageStartup.ePhaseID = EPhase.起動0_システムサウンドを構築;
+
+			Trace.TraceInformation("0) システムサウンドを構築します。");
+			Trace.Indent();
+
+			try
 			{
-				list進行文字列.Add("DTXMania powered by YAMAHA Silent Session Drums\n");
-				list進行文字列.Add("Release: " + CDTXMania.VERSION + " [" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version + "]");
-
-				CDTXMania.stageStartup.ePhaseID = EPhase.起動0_システムサウンドを構築;
-
-				Trace.TraceInformation("0) システムサウンドを構築します。");
-				Trace.Indent();
-
-				try
-				{
-					CDTXMania.Skin.bgm起動画面.tPlay();
+				CDTXMania.Skin.bgm起動画面.tPlay();
                 
-					CDTXMania.Skin.ReloadSkin();
+				CDTXMania.Skin.ReloadSkin();
                 
-					lock (CDTXMania.stageStartup.list進行文字列)
-					{
-						CDTXMania.stageStartup.list進行文字列.Add("Loading system sounds ... OK ");
-					}
-				}
-				finally
+				lock (CDTXMania.stageStartup.list進行文字列)
 				{
-					Trace.Unindent();
+					CDTXMania.stageStartup.list進行文字列.Add("Loading system sounds ... OK ");
 				}
+			}
+			finally
+			{
+				Trace.Unindent();
+			}
 					
-				es = new CEnumSongs();
-				if (!CDTXMania.bCompactMode)
-				{
-					es.StartEnumFromCacheStartup();
-				}
-				bJustStartedUpdate = false;
-				return 0;
-			}
-
-			txBackground?.tDraw2D( CDTXMania.app.Device, 0, 0 );
-
-			#region [ this.str現在進行中 の決定 ]
-			//-----------------
-			switch( ePhaseID )
+			es = new CEnumSongs();
+			if (!CDTXMania.bCompactMode)
 			{
-				case EPhase.起動0_システムサウンドを構築:
-					str現在進行中 = "Loading system sounds ... ";
-					break;
-
-				case EPhase.起動00_songlistから曲リストを作成する:
-					str現在進行中 = "Loading songlist.db ... ";
-					break;
-
-				case EPhase.起動1_SongsDBからスコアキャッシュを構築:
-					str現在進行中 = "Loading songs.db ... ";
-					break;
-
-				case EPhase.起動2_曲を検索してリストを作成する:
-					str現在進行中 = $"Enumerating songs ... {es.SongManager.nNbScoresFound}";
-					break;
-
-				case EPhase.起動3_スコアキャッシュをリストに反映する:
-					str現在進行中 = $"Loading score properties from songs.db ... {es.SongManager.nNbScoresFromScoreCache}/{es.SongManager.nNbScoresFound}";
-					break;
-
-				case EPhase.起動4_スコアキャッシュになかった曲をファイルから読み込んで反映する:
-					str現在進行中 = $"Loading score properties from files ... {es.SongManager.nNbScoresFromFile}/{es.SongManager.nNbScoresFound - es.SongManager.nNbScoresFromScoreCache}";
-					break;
-
-				case EPhase.起動5_曲リストへ後処理を適用する:
-					str現在進行中 = "Building songlists ... ";
-					break;
-
-				case EPhase.起動6_スコアキャッシュをSongsDBに出力する:
-					str現在進行中 = "Saving songs.db ... ";
-					break;
-
-				case EPhase.起動7_完了:
-					str現在進行中 = "Setup done.";
-					break;
+				es.StartEnumFromCacheStartup();
 			}
-			//-----------------
-			#endregion
-			#region [ this.list進行文字列＋this.現在進行中 の表示 ]
-			//-----------------
-			lock( list進行文字列 )
+			bJustStartedUpdate = false;
+			return 0;
+		}
+
+		txBackground?.tDraw2D( CDTXMania.app.Device, 0, 0 );
+
+		#region [ this.str現在進行中 の決定 ]
+		//-----------------
+		switch( ePhaseID )
+		{
+			case EPhase.起動0_システムサウンドを構築:
+				str現在進行中 = "Loading system sounds ... ";
+				break;
+
+			case EPhase.起動00_songlistから曲リストを作成する:
+				str現在進行中 = "Loading songlist.db ... ";
+				break;
+
+			case EPhase.起動1_SongsDBからスコアキャッシュを構築:
+				str現在進行中 = "Loading songs.db ... ";
+				break;
+
+			case EPhase.起動2_曲を検索してリストを作成する:
+				str現在進行中 = $"Enumerating songs ... {es.SongManager.nNbScoresFound}";
+				break;
+
+			case EPhase.起動3_スコアキャッシュをリストに反映する:
+				str現在進行中 = $"Loading score properties from songs.db ... {es.SongManager.nNbScoresFromScoreCache}/{es.SongManager.nNbScoresFound}";
+				break;
+
+			case EPhase.起動4_スコアキャッシュになかった曲をファイルから読み込んで反映する:
+				str現在進行中 = $"Loading score properties from files ... {es.SongManager.nNbScoresFromFile}/{es.SongManager.nNbScoresFound - es.SongManager.nNbScoresFromScoreCache}";
+				break;
+
+			case EPhase.起動5_曲リストへ後処理を適用する:
+				str現在進行中 = "Building songlists ... ";
+				break;
+
+			case EPhase.起動6_スコアキャッシュをSongsDBに出力する:
+				str現在進行中 = "Saving songs.db ... ";
+				break;
+
+			case EPhase.起動7_完了:
+				str現在進行中 = "Setup done.";
+				break;
+		}
+		//-----------------
+		#endregion
+		#region [ this.list進行文字列＋this.現在進行中 の表示 ]
+		//-----------------
+		lock( list進行文字列 )
+		{
+			int x = 0;
+			int y = 0;
+			foreach( string str in list進行文字列 )
 			{
-				int x = 0;
-				int y = 0;
-				foreach( string str in list進行文字列 )
-				{
-					CDTXMania.actDisplayString.tPrint( x, y, CCharacterConsole.EFontType.AshThin, str );
-					y += 14;
-				}
-				CDTXMania.actDisplayString.tPrint( x, y, CCharacterConsole.EFontType.AshThin, str現在進行中 );
+				CDTXMania.actDisplayString.tPrint( x, y, CCharacterConsole.EFontType.AshThin, str );
+				y += 14;
 			}
-			//-----------------
-			#endregion
+			CDTXMania.actDisplayString.tPrint( x, y, CCharacterConsole.EFontType.AshThin, str現在進行中 );
+		}
+		//-----------------
+		#endregion
 
-			if( es is { IsSongListEnumCompletelyDone: true } )
-			{
-				CDTXMania.SongManager = es.SongManager;
-				return 1;
-			}
+		if( es is { IsSongListEnumCompletelyDone: true } )
+		{
+			CDTXMania.SongManager = es.SongManager;
+			return 1;
 		}
 		return 0;
 	}

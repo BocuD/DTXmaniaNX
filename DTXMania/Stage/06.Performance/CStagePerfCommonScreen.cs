@@ -283,6 +283,11 @@ internal abstract class CStagePerfCommonScreen : CStage
     }
     #endregion
 
+    public override void InitializeBaseUI()
+    {
+        
+    }
+
     // CStage 実装
 
     public override void OnActivate()

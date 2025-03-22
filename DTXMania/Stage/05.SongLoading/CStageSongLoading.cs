@@ -163,6 +163,13 @@ internal class CStageSongLoading : CStage
         }
     }
 
+    public override void InitializeBaseUI()
+    {
+        DTXTexture bgTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\6_background.jpg")));
+        UIImage bg = ui.AddChild(new UIImage(bgTex));
+        bg.renderOrder = -100;
+    }
+
     public override void OnActivate()
     {
         Trace.TraceInformation("曲読み込みステージを活性化します。");
@@ -310,12 +317,6 @@ internal class CStageSongLoading : CStage
     {
         if (!bNotActivated)
         {
-            ui = new UIGroup("Song Loading");
-            
-            DTXTexture bgTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\6_background.jpg")));
-            UIImage bg = ui.AddChild(new UIImage(bgTex));
-            bg.renderOrder = -100;
-            
             txLevel = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\6_LevelNumber.png"));
             txDifficultyPanel = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\6_Difficulty.png"));
             txPartPanel = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\6_Part.png"));
@@ -328,7 +329,7 @@ internal class CStageSongLoading : CStage
 
                 if (!string.IsNullOrWhiteSpace(strSongTitle))
                 {
-                    titleFont = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.str選曲リストフォント), 40,
+                    titleFont = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.songListFont), 40,
                         FontStyle.Regular);
                      Bitmap bmpSongName = titleFont.DrawPrivateFont(strSongTitle, CPrivateFont.DrawMode.Edge, Color.Black,
                         Color.Black, clGITADORAgradationTopColor, clGITADORAgradationBottomColor, true);
@@ -343,7 +344,7 @@ internal class CStageSongLoading : CStage
 
                 if (!string.IsNullOrWhiteSpace(strArtistName))
                 {
-                    artistNameFont = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.str選曲リストフォント), 30,
+                    artistNameFont = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.songListFont), 30,
                         FontStyle.Regular);
                     Bitmap bmpArtistName = artistNameFont.DrawPrivateFont(strArtistName, CPrivateFont.DrawMode.Edge, Color.Black,
                         Color.Black, clGITADORAgradationTopColor, clGITADORAgradationBottomColor, true);
@@ -390,9 +391,10 @@ internal class CStageSongLoading : CStage
 
     public override int OnUpdateAndDraw()
     {
-        if (bNotActivated)
-            return 0;
+        if (bNotActivated) return 0;
 
+        base.OnUpdateAndDraw();
+        
         #region [ 初めての進行描画 ]
 
         //-----------------------------
@@ -744,8 +746,6 @@ internal class CStageSongLoading : CStage
     
     private void DrawLoadingScreenUI()
     {
-        ui.Draw(Matrix.Identity);
-        
         int y = 184;
         
         if (txJacket != null)

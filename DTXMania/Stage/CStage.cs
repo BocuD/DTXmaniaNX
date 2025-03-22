@@ -2,6 +2,7 @@
 using DTXMania.Core;
 using DTXUIRenderer;
 using FDK;
+using SharpDX;
 
 namespace DTXMania;
 
@@ -62,9 +63,45 @@ public abstract class CStage : CActivity
 		PERFORMANCE_STAGE_CLEAR_FadeOut,
 		PERFORMANCE_STAGE_RESTART
 	}
+	
+	public void LoadUI()
+	{
+		//try to get the skin for this stage
+		UIGroup stageUI = null; //CDTXMania.SkinManager.GetStageSkin(eStageID);
+
+		if (stageUI == null)
+		{
+			ui = new UIGroup(GetType().ToString());
+			InitializeBaseUI();
+		}
+		else
+		{
+			ui = stageUI;
+		}
+	}
+
+	public abstract void InitializeBaseUI();
+
+	public override int OnUpdateAndDraw()
+	{
+		ui.Draw(Matrix.Identity);
+		
+		return base.OnUpdateAndDraw();
+	}
+
+	public override void OnManagedReleaseResources()
+	{
+		if (!bNotActivated)
+		{
+			ui.Dispose();
+		}
+		
+		base.OnManagedReleaseResources();
+	}
 
 	public override void OnActivate()
 	{
+		LoadUI();
 		base.OnActivate();
 		tDisplayPresence();
 	}

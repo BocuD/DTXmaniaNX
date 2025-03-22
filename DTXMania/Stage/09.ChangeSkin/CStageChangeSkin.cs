@@ -20,6 +20,11 @@ internal class CStageChangeSkin : CStage
 
 	// CStage 実装
 
+	public override void InitializeBaseUI()
+	{
+		
+	}
+
 	public override void OnActivate()
 	{
 		Trace.TraceInformation( "スキン変更ステージを活性化します。" );
@@ -64,19 +69,19 @@ internal class CStageChangeSkin : CStage
 	}
 	public override int OnUpdateAndDraw()
 	{
-		if( !bNotActivated )
-		{
-			if ( bJustStartedUpdate )
-			{
-				bJustStartedUpdate = false;
-				return 0;
-			}
+		if (bNotActivated) return 0;
 
-			//スキン変更処理
-			tChangeSkinMain();
-			return 1;
+		base.OnUpdateAndDraw();
+
+		if ( bJustStartedUpdate )
+		{
+			bJustStartedUpdate = false;
+			return 0;
 		}
-		return 0;
+
+		//スキン変更処理
+		tChangeSkinMain();
+		return 1;
 	}
 	public void tChangeSkinMain()
 	{
