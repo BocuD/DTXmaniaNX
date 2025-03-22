@@ -88,4 +88,9 @@ public class SkinManager
     {
         currentSkin = skin;
     }
+
+    public UIGroup? GetStageSkin(CStage.EStage stageId)
+    {
+        return currentSkin?.LoadStageSkin(stageId);
+    }
 }

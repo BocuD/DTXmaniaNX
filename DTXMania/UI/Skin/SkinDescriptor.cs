@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using DTXUIRenderer;
+using Newtonsoft.Json;
 
 namespace DTXMania.UI.Skin;
 
@@ -6,8 +7,10 @@ public class SkinDescriptor
 {
     public required string name { get; set; }
     public required string author { get; set; }
+    private string basePath;
 
     public Dictionary<CStage.EStage, string> stageSkins { get; set; } = new();
+    [JsonIgnore] private Dictionary<CStage.EStage, UIGroup?> stageSkinCache = new();
 
     public void Save(string path)
     {
@@ -32,6 +35,31 @@ public class SkinDescriptor
             }
         });
         
+        if (descriptor == null) return null;
+        
+        descriptor.basePath = path;
+        
+        foreach (CStage.EStage stage in Enum.GetValues<CStage.EStage>())
+        {
+            if (stage == CStage.EStage.DoNothing_0) continue;
+
+            descriptor.stageSkinCache[stage] = descriptor.LoadStageSkin(stage);
+        }
+        
         return descriptor;
+    }
+
+    public UIGroup? LoadStageSkin(CStage.EStage stageId)
+    {
+        bool available = stageSkins.TryGetValue(stageId, out string? uiGroupJson);
+        
+        if (available && uiGroupJson != null)
+        {
+            string path = Path.Combine(basePath, uiGroupJson);
+            string json = File.ReadAllText(path);
+            return JsonConvert.DeserializeObject<UIGroup>(json);
+        }
+        
+        return null;
     }
 }
