@@ -51,9 +51,23 @@ public class GameStatus
     private static string newSkinAuthor = "";
     private static void DrawSkinInspector()
     {
-        string skinName = CDTXMania.SkinManager.currentSkin?.name ?? "No skin selected";
-        ImGui.Text("Currently loaded skin: " + skinName);
+        var currentSkin = CDTXMania.SkinManager.currentSkin;
         
+        string skinName = currentSkin?.name ?? "No skin selected";
+
+        if (ImGui.CollapsingHeader("Currently loaded skin: " + skinName))
+        {
+            if (currentSkin != null)
+            {
+                currentSkin.DrawInspector();
+                
+                if (ImGui.Button("Save Skin Changes"))
+                {
+                    currentSkin.Save();
+                }
+            }
+        }
+
         //display list of skins
         foreach (SkinDescriptor skin in CDTXMania.SkinManager.skins)
         {

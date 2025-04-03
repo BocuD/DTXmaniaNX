@@ -1,4 +1,5 @@
 ﻿using DTXUIRenderer;
+using Hexa.NET.ImGui;
 using Newtonsoft.Json;
 
 namespace DTXMania.UI.Skin;
@@ -7,19 +8,12 @@ public class SkinDescriptor
 {
     public required string name { get; set; }
     public required string author { get; set; }
-    private string basePath;
+    [JsonIgnore] private string basePath = "";
 
     public Dictionary<CStage.EStage, string> stageSkins { get; set; } = new();
     [JsonIgnore] private Dictionary<CStage.EStage, UIGroup?> stageSkinCache = new();
-
-    public void Save(string path)
-    {
-        Console.WriteLine($"Saving skin {path}");
-        
-        var json = JsonConvert.SerializeObject(this, Formatting.Indented);
-        File.WriteAllText(Path.Combine(path, "skin.json"), json);
-    }
     
+    //Load a skin.json file from disk
     public static SkinDescriptor? LoadSkin(string path)
     {
         Console.WriteLine($"Loading skin {path}");
@@ -48,6 +42,35 @@ public class SkinDescriptor
         
         return descriptor;
     }
+    
+    //Write the skin to disk. Providing basePathOverride will save skin.json and all stage files to that folder
+    public void Save(string basePathOverride = "")
+    {
+        string targetPath = basePath;
+        if (!string.IsNullOrWhiteSpace(basePathOverride))
+        {
+            targetPath = basePathOverride;
+        }
+        
+        Console.WriteLine($"Saving skin to {targetPath}");
+        
+        var json = JsonConvert.SerializeObject(this, Formatting.Indented);
+        File.WriteAllText(Path.Combine(targetPath, "skin.json"), json);
+        
+        //write all stage skins
+        foreach (KeyValuePair<CStage.EStage, string> stageSkin in stageSkins)
+        {
+            if (string.IsNullOrWhiteSpace(stageSkin.Value)) continue;
+            
+            string stagePath = Path.Combine(targetPath, stageSkin.Value);
+            UIGroup? group = stageSkinCache[stageSkin.Key];
+            
+            if (group == null) continue;
+            
+            json = JsonConvert.SerializeObject(group, Formatting.Indented);
+            File.WriteAllText(stagePath, json);
+        }
+    }
 
     public UIGroup? LoadStageSkin(CStage.EStage stageId)
     {
@@ -61,5 +84,15 @@ public class SkinDescriptor
         }
         
         return null;
+    }
+
+    public void DrawInspector()
+    {
+        foreach (KeyValuePair<CStage.EStage,string> stage in stageSkins)
+        {
+            ImGui.Text("Stage " + stage.Key);
+            ImGui.SameLine();
+            ImGui.Text(stage.Value);
+        }
     }
 }
