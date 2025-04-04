@@ -63,8 +63,8 @@ public class SkinDescriptor
             if (string.IsNullOrWhiteSpace(stageSkin.Value)) continue;
             
             string stagePath = Path.Combine(targetPath, stageSkin.Value);
-            UIGroup? group = stageSkinCache[stageSkin.Key];
-            
+            stageSkinCache.TryGetValue(stageSkin.Key, out UIGroup? group);
+
             if (group == null) continue;
             
             json = JsonConvert.SerializeObject(group, Formatting.Indented);

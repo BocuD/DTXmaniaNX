@@ -67,7 +67,7 @@ public abstract class CStage : CActivity
 	public void LoadUI()
 	{
 		//try to get the skin for this stage
-		UIGroup stageUI = null; //CDTXMania.SkinManager.GetStageSkin(eStageID);
+		UIGroup? stageUI = CDTXMania.SkinManager.GetStageSkin(eStageID);
 
 		if (stageUI == null)
 		{
