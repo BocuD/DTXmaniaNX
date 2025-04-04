@@ -2617,15 +2617,15 @@ internal class CDTXMania : Game
         switch (e.Button)
         {
             case MouseButtons.Left:
-                ImGui.GetIO().MouseDown[0] = true;
+                ImGui.GetIO().MouseDown[(int)ImGuiMouseButton.Left] = true;
                 break;
 
             case MouseButtons.Middle:
-                ImGui.GetIO().MouseDown[1] = true;
+                ImGui.GetIO().MouseDown[(int)ImGuiMouseButton.Middle] = true;
                 break;
 
             case MouseButtons.Right:
-                ImGui.GetIO().MouseDown[2] = true;
+                ImGui.GetIO().MouseDown[(int)ImGuiMouseButton.Right] = true;
                 break;
         }
     }
@@ -2637,15 +2637,15 @@ internal class CDTXMania : Game
         switch (e.Button)
         {
             case MouseButtons.Left:
-                ImGui.GetIO().MouseDown[0] = false;
+                ImGui.GetIO().MouseDown[(int)ImGuiMouseButton.Left] = false;
                 break;
 
             case MouseButtons.Middle:
-                ImGui.GetIO().MouseDown[1] = false;
+                ImGui.GetIO().MouseDown[(int)ImGuiMouseButton.Middle] = false;
                 break;
 
             case MouseButtons.Right:
-                ImGui.GetIO().MouseDown[2] = false;
+                ImGui.GetIO().MouseDown[(int)ImGuiMouseButton.Right] = false;
                 break;
         }
     }
