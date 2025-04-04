@@ -20,7 +20,21 @@ public abstract class UITexture : UIDrawable
     }
         
     public BaseTexture Texture => texture;
-    protected BaseTexture texture;
+    protected BaseTexture texture = BaseTexture.None;
+    
+    public void SetTexture(BaseTexture t)
+    {
+        if (t.isValid())
+        {
+            this.texture = t;
+            size = new Vector2(t.Width, t.Height);
+        }
+        else
+        {
+            this.texture = BaseTexture.None;
+            size = new Vector2(0, 0);
+        }
+    }
         
     public override void Draw(Matrix parentMatrix)
     {
@@ -43,17 +57,23 @@ public abstract class UITexture : UIDrawable
 
         if (ImGui.CollapsingHeader("Texture"))
         {
-            if (texture != null && texture.isValid())
+            if (texture.isValid())
             {
                 ImGui.Text($"Name: {texture.name}");
                 ImGui.Text($"Width: {texture.Width}");
                 ImGui.Text($"Height: {texture.Height}");
 
-                var tex = texture.GetImTextureID();
+                ImTextureID? tex = texture.GetImTextureID();
                 if (tex != null)
                 {
                     float windowWidth = ImGui.GetWindowWidth();
                     float textureWidth = windowWidth - 64;
+                    
+                    if (textureWidth > texture.Width * 3)
+                    {
+                        textureWidth = texture.Width * 3;
+                    }
+                    
                     float textureHeight = texture.Height * (textureWidth / texture.Width);
                     ImGui.Image(tex.Value, new System.Numerics.Vector2(textureWidth, textureHeight));
                 }

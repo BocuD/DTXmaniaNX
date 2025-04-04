@@ -1,4 +1,6 @@
-﻿using Hexa.NET.ImGui;
+﻿using System;
+using System.Linq;
+using Hexa.NET.ImGui;
 using SharpDX;
 using Color = System.Drawing.Color;
 
@@ -49,6 +51,7 @@ public class Inspector
         
         vector.X = v.X;
         vector.Y = v.Y;
+        vector.Z = v.Z;
 
         return changed;
     }
@@ -76,6 +79,30 @@ public class Inspector
         if (changed)
         {
             vector = Color.FromArgb((int)(v.W * 255), (int)(v.X * 255), (int)(v.Y * 255), (int)(v.Z * 255));
+        }
+
+        return changed;
+    }
+    
+    //enum inspect
+    /*
+int dm = (int)drawMode;
+string options = Enum.GetNames(typeof(CPrivateFont.DrawMode)).Aggregate((a, b) => $"{a}\0{b}");
+if (ImGui.Combo("Draw Mode", ref dm, options))
+{
+    drawMode = (CPrivateFont.DrawMode)dm;
+    dirty = true;
+}
+     */
+    public static bool Inspect<T>(string label, ref T value) where T : Enum
+    {
+        int currentValue = Convert.ToInt32(value);
+        string options = Enum.GetNames(typeof(T)).Aggregate((a, b) => $"{a}\0{b}");
+        bool changed = ImGui.Combo(label, ref currentValue, options);
+        
+        if (changed)
+        {
+            value = (T)Enum.ToObject(typeof(T), currentValue);
         }
 
         return changed;

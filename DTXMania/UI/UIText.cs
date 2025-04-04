@@ -7,6 +7,11 @@ using Color = System.Drawing.Color;
 
 namespace DTXMania.UI;
 
+public enum TextSource
+{
+    String
+}
+
 public class UIText : UITexture
 {
     private bool dirty = true;
@@ -23,25 +28,26 @@ public class UIText : UITexture
     public FontFamily fontFamily;
     public int fontSize;
     public FontStyle fontStyle;
+    public TextSource textSource = TextSource.String;
 
     [AddChildMenu]
-    public UIText() : base(null)
+    public UIText() : base(BaseTexture.None)
     {
         
     }
     
-    public UIText(FontFamily font, int size) : base(null)
+    public UIText(FontFamily font, int size) : base(BaseTexture.None)
     {
-        this.fontFamily = font;
-        this.fontSize = size;
+        fontFamily = font;
+        fontSize = size;
         
         UpdateFont();
     }
         
-    public UIText(FontFamily font, int size, string text) : base(null)
+    public UIText(FontFamily font, int size, string text) : base(BaseTexture.None)
     {
-        this.fontFamily = font;
-        this.fontSize = size;
+        fontFamily = font;
+        fontSize = size;
         
         SetText(text);
         
@@ -83,7 +89,7 @@ public class UIText : UITexture
 
     public void RenderTexture()
     {
-        if (texture != null)
+        if (texture.isValid())
         {
             texture.Dispose();
         }
@@ -103,11 +109,6 @@ public class UIText : UITexture
 
         if (ImGui.CollapsingHeader("UIText"))
         {
-            if (ImGui.InputText("Text", ref text, 256))
-            {
-                dirty = true;
-            }
-
             if (Inspector.Inspect("Text Color", ref fontColor))
             {
                 dirty = true;
@@ -127,13 +128,23 @@ public class UIText : UITexture
             {
                 dirty = true;
             }
-
-            int dm = (int)drawMode;
-            string options = Enum.GetNames(typeof(CPrivateFont.DrawMode)).Aggregate((a, b) => $"{a}\0{b}");
-            if (ImGui.Combo("Draw Mode", ref dm, options))
+            
+            if (Inspector.Inspect("Draw Mode", ref drawMode))
             {
-                drawMode = (CPrivateFont.DrawMode)dm;
                 dirty = true;
+            }
+
+            if (Inspector.Inspect("Text Source", ref textSource))
+            {
+                dirty = true;
+            }
+
+            if (textSource == TextSource.String)
+            {
+                if (ImGui.InputTextMultiline("String", ref text, 256))
+                {
+                    dirty = true;
+                }
             }
 
             if (ImGui.CollapsingHeader("Font"))
@@ -146,11 +157,8 @@ public class UIText : UITexture
                     dirty = true;
                 }
 
-                var fs = (int)fontStyle;
-                string fsOptions = Enum.GetNames(typeof(FontStyle)).Aggregate((a, b) => $"{a}\0{b}");
-                if (ImGui.Combo("Font Style", ref fs, fsOptions))
+                if(Inspector.Inspect("Font Style", ref fontStyle))
                 {
-                    fontStyle = (FontStyle)fs;
                     fontDirty = true;
                     dirty = true;
                 }

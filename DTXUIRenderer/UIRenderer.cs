@@ -6,7 +6,7 @@ namespace DTXUIRenderer;
 
 public abstract class BaseTexture : IDisposable
 {
-    internal static BaseTexture None => new NoneTexture();
+    public static BaseTexture None => new NoneTexture();
     public abstract float transparency { get; set; }
     public abstract float Width { get; }
     public abstract float Height { get; }
@@ -17,7 +17,7 @@ public abstract class BaseTexture : IDisposable
 
     public virtual void Dispose()
     {
-            
+        
     }
 
     public abstract bool isValid();

@@ -43,6 +43,7 @@ public class DTXTexture : BaseTexture
     public override void Dispose()
     {
         CDTXMania.tReleaseTexture(ref texture);
+        texture = null;
     }
 
     public override bool isValid()
