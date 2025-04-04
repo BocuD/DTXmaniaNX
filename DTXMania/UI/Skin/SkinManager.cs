@@ -62,7 +62,7 @@ public class SkinManager
             UIGroup stageGroup = new(stage.ToString());
             
             string path = Path.Combine(newSkinPath, $"{stage}.json");
-            File.WriteAllText(path, JsonConvert.SerializeObject(stageGroup));
+            File.WriteAllText(path, JsonConvert.SerializeObject(stageGroup, Formatting.Indented));
             
             newSkin.stageSkins[stage] = $"{stage}.json";
         }
