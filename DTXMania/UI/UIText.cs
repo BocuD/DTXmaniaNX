@@ -105,8 +105,6 @@ public class UIText : UITexture
 
     public override void DrawInspector()
     {
-        base.DrawInspector();
-
         if (ImGui.CollapsingHeader("UIText"))
         {
             if (Inspector.Inspect("Text Color", ref fontColor))
@@ -147,12 +145,14 @@ public class UIText : UITexture
                 }
             }
 
-            if (ImGui.CollapsingHeader("Font"))
+            //dropdown
+            if (ImGui.TreeNode("Font"))
             {
                 ImGui.LabelText("Font Family", fontFamily.ToString());
-
+                
                 if (ImGui.InputInt("Font Size", ref fontSize))
                 {
+                    if (fontSize <= 0) fontSize = 1;
                     fontDirty = true;
                     dirty = true;
                 }
@@ -172,8 +172,12 @@ public class UIText : UITexture
                 {
                     RenderTexture();
                 }
+                ImGui.TreePop();
             }
         }
+        
+        //this is because of dumb stuff basically....
+        base.DrawInspector();
     }
 
     public override void Dispose()

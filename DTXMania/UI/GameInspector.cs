@@ -1,6 +1,7 @@
 ﻿using DTXMania.Core;
 using DTXMania.UI.Skin;
 using Hexa.NET.ImGui;
+using Hexa.NET.ImGuizmo;
 
 namespace DTXMania.UI;
 
@@ -55,7 +56,7 @@ public class GameStatus
         
         string skinName = currentSkin?.name ?? "No skin selected";
 
-        if (ImGui.CollapsingHeader("Currently loaded skin: " + skinName))
+        if (ImGui.TreeNode("Currently loaded skin: " + skinName))
         {
             if (currentSkin != null)
             {
@@ -66,22 +67,29 @@ public class GameStatus
                     currentSkin.Save();
                 }
             }
+            ImGui.TreePop();
         }
 
-        //display list of skins
-        foreach (SkinDescriptor skin in CDTXMania.SkinManager.skins)
+        ImGui.Spacing();
+
+        if (ImGui.TreeNode("Available Skins"))
         {
-            ImGui.Text(skin.name);
-            
-            ImGui.SameLine();
-            
-            int hash = skin.GetHashCode();
-            if (ImGui.Button("Load##" + hash))
+            //display list of skins
+            foreach (SkinDescriptor skin in CDTXMania.SkinManager.skins)
             {
-                CDTXMania.SkinManager.ChangeSkin(skin);
+                ImGui.Text(skin.name);
+
+                ImGui.SameLine();
+
+                int hash = skin.GetHashCode();
+                if (ImGui.Button("Load##" + hash))
+                {
+                    CDTXMania.SkinManager.ChangeSkin(skin);
+                }
             }
+            ImGui.TreePop();
         }
-        
+
         if (ImGui.Button("Scan skin directory"))
         {
             CDTXMania.SkinManager.ScanSkinDirectory();
