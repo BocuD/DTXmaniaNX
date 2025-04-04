@@ -7,7 +7,7 @@ public abstract class UITexture : UIDrawable
 {
     protected UITexture(BaseTexture texture)
     {
-        if (texture != null)
+        if (texture.isValid())
         {
             this.texture = texture;
             if (!texture.isValid()) return;

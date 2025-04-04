@@ -9,12 +9,16 @@ public class UIImage : UITexture
 {
     public RectangleF clipRect;
     public RectangleF sliceRect;
-        
+    
     public ERenderMode renderMode = ERenderMode.Stretched;
 
+    public UIImage() : base(BaseTexture.None)
+    {
+    }
+    
     public UIImage(BaseTexture texture) : base(texture)
     {
-        if (texture != null && texture.isValid())
+        if (texture.isValid())
         {
             clipRect = new RectangleF(0, 0, texture.Width, texture.Height);
         }
@@ -23,7 +27,8 @@ public class UIImage : UITexture
     public override void Draw(Matrix parentMatrix)
     {
         if (!isVisible) return;
-            
+        if (!texture.isValid()) return;
+        
         UpdateLocalTransformMatrix();
             
         Matrix combinedMatrix = localTransformMatrix * parentMatrix;
