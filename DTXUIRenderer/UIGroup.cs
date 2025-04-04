@@ -8,7 +8,6 @@ public class UIGroup : UIDrawable
 {
     internal readonly List<UIDrawable> children = [];
     
-    //parameterless constructor required to create the object in the inspector
     [AddChildMenu]
     public UIGroup() : this("New UIGroup")
     {

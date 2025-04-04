@@ -23,7 +23,13 @@ public class UIText : UITexture
     public FontFamily fontFamily;
     public int fontSize;
     public FontStyle fontStyle;
+
+    [AddChildMenu]
+    public UIText() : base(null)
+    {
         
+    }
+    
     public UIText(FontFamily font, int size) : base(null)
     {
         this.fontFamily = font;

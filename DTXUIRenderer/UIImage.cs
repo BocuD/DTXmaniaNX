@@ -12,6 +12,7 @@ public class UIImage : UITexture
     
     public ERenderMode renderMode = ERenderMode.Stretched;
 
+    [AddChildMenu]
     public UIImage() : base(BaseTexture.None)
     {
     }
