@@ -1,6 +1,7 @@
 ﻿using DTXMania.Core;
 using DTXUIRenderer;
 using Hexa.NET.ImGui;
+using SharpDX.Direct3D9;
 using SlimDX.DirectInput;
 
 namespace DTXMania.UI;
@@ -18,7 +19,7 @@ public static class InspectorManager
         hierarchyWindow = new HierarchyWindow();
     }
     
-    public static void Draw()
+    public static void Draw(bool drawGameWindow, Texture gameSurface)
     {
         if (CDTXMania.InputManager.Keyboard.bKeyPressing(Key.LeftControl) 
             && CDTXMania.InputManager.Keyboard.bKeyPressed(Key.I))
@@ -28,6 +29,11 @@ public static class InspectorManager
         
         ImGuiDockNodeFlags flags = ImGuiDockNodeFlags.PassthruCentralNode;
         ImGui.DockSpaceOverViewport(ImGui.GetMainViewport(), flags);
+
+        if (drawGameWindow)
+        {
+            GameWindow.Draw(gameSurface);
+        }
         
         if (inspectorEnabled)
         {

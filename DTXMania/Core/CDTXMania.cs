@@ -9,6 +9,7 @@ using DTXMania.UI.Skin;
 using FDK;
 using Hexa.NET.ImGui;
 using Hexa.NET.ImGui.Backends.D3D9;
+using Hexa.NET.ImGuizmo;
 using SampleFramework;
 using SharpDX;
 using SharpDX.Direct3D9;
@@ -177,6 +178,8 @@ internal class CDTXMania : Game
     public bool bApplicationActive { get; private set; }
     public bool changeVSyncModeOnNextFrame { get; set; }
     public bool changeFullscreenModeOnNextFrame { get; set; }
+    
+    private ImGuiContextPtr context;
 
     public Device Device => GraphicsDeviceManager.Direct3D9.Device;
 
@@ -377,22 +380,28 @@ internal class CDTXMania : Game
         }
 
         //init imgui
-        var context = ImGui.CreateContext();
-        ImGui.StyleColorsDark();
+        context = ImGui.CreateContext();
 
+        ImGui.SetCurrentContext(context);
+        ImGuiImplD3D9.SetCurrentContext(context);
+        
         var io = ImGui.GetIO();
+        
+        ImGui.StyleColorsDark();
 
         io.DisplaySize = new Vector2(Window.ClientSize.Width, Window.ClientSize.Height);
         io.DisplayFramebufferScale = new Vector2(1, 1);
 
-        io.ConfigFlags |= ImGuiConfigFlags.DockingEnable;
+        ImGuizmo.SetRect(0, 0, io.DisplaySize.X, io.DisplaySize.Y);
 
-        ImGuiImplD3D9.SetCurrentContext(context);
+        io.ConfigFlags |= ImGuiConfigFlags.DockingEnable;
 
         unsafe
         {
             ImGuiImplD3D9.Init(new IDirect3DDevice9Ptr((IDirect3DDevice9*)app.Device.NativePointer));
         }
+        
+        ImGuizmo.SetImGuiContext(context);
 
         gameRenderTargetTexture = new Texture(Device, 1280, 720, 1, Usage.RenderTarget, Format.A8R8G8B8, Pool.Default);
         gameRenderTargetSurface = gameRenderTargetTexture.GetSurfaceLevel(0);
@@ -534,24 +543,42 @@ internal class CDTXMania : Game
 
         Device.Clear(ClearFlags.ZBuffer | ClearFlags.Target, SharpDX.Color.Black, 1f, 0);
         Device.BeginScene();
+        
+        ImGui.SetCurrentContext(context);
+        ImGuizmo.SetImGuiContext(context);
+        ImGuiImplD3D9.SetCurrentContext(context);
 
         ImGuiImplD3D9.NewFrame();
         ImGui.NewFrame();
+        
+        ImGuizmo.BeginFrame();
+        
+        ImGuizmo.Enable(true);
+        ImGuizmo.SetOrthographic(true);
+
+        if (renderGameToWindow)
+        {
+            ImGuizmo.SetRect(GameWindow.position.X, GameWindow.position.Y, GameWindow.size.X, GameWindow.size.Y);
+        }
+        else
+        {
+            ImGuiIOPtr io = ImGui.GetIO();
+            ImGuizmo.SetRect(0, 0, io.DisplaySize.X, io.DisplaySize.Y);
+            ImGuizmo.SetDrawlist(ImGui.GetBackgroundDrawList());
+        }
 
         DrawStage();
-
-        InspectorManager.Draw();
-        GameStatus.Draw();
-
-        Device.EndScene();
 
         if (renderGameToWindow)
         {
             Device.SetRenderTarget(0, mainRenderTarget);
             Device.Clear(ClearFlags.ZBuffer | ClearFlags.Target, SharpDX.Color.Black, 1f, 0);
-
-            GameWindow.Draw(gameRenderTargetTexture);
         }
+        
+        InspectorManager.Draw(renderGameToWindow, gameRenderTargetTexture);
+        GameStatus.Draw();
+
+        Device.EndScene();
 
         ImGui.EndFrame();
         ImGui.Render();
