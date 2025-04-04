@@ -599,438 +599,600 @@ internal class CDTXMania : Game
 
     private void DrawStage()
     {
-        if (rCurrentStage != null)
+        if (rCurrentStage == null) return;
+
+        int nUpdateAndDrawReturnValue = rCurrentStage.OnUpdateAndDraw();
+
+        #region [ Handle enumerating songs ] // ここに"Enumerating Songs..."表示を集約
+        if (!bCompactMode)
         {
-            nUpdateAndDrawReturnValue = (rCurrentStage != null) ? rCurrentStage.OnUpdateAndDraw() : 0;
+            actEnumSongs.OnUpdateAndDraw();
+        }
+        switch (rCurrentStage.eStageID)
+        {
+            case CStage.EStage.Title_2:
+            case CStage.EStage.Config_3:
+            case CStage.EStage.SongSelection_4:
+            case CStage.EStage.SongLoading_5:
+                if (EnumSongs != null)
+                {
+                    #region [ (特定条件時) 曲検索スレッドの起動_開始 ]
 
-            #region [ Handle enumerating songs ] // ここに"Enumerating Songs..."表示を集約
-
-            if (!bCompactMode)
-            {
-                actEnumSongs.OnUpdateAndDraw(); // "Enumerating Songs..."アイコンの描画
-            } // "Enumerating Songs..."アイコンの描画
-
-            switch (rCurrentStage.eStageID)
-            {
-                case CStage.EStage.Title_2:
-                case CStage.EStage.Config_3:
-                case CStage.EStage.SongSelection_4:
-                case CStage.EStage.SongLoading_5:
-                    if (EnumSongs != null)
+                    if (rCurrentStage.eStageID == CStage.EStage.Title_2 &&
+                        rPreviousStage.eStageID == CStage.EStage.Startup_1 &&
+                        nUpdateAndDrawReturnValue == (int)CStageTitle.EReturnResult.CONTINUE &&
+                        !EnumSongs.IsSongListEnumStarted)
                     {
-                        #region [ (特定条件時) 曲検索スレッドの起動_開始 ]
-
-                        if (rCurrentStage.eStageID == CStage.EStage.Title_2 &&
-                            rPreviousStage.eStageID == CStage.EStage.Startup_1 &&
-                            nUpdateAndDrawReturnValue == (int)CStageTitle.E戻り値.継続 &&
-                            !EnumSongs.IsSongListEnumStarted)
+                        actEnumSongs.OnActivate();
+                        stageSongSelection.bIsEnumeratingSongs = true;
+                        EnumSongs.Init(SongManager.listSongsDB,
+                            SongManager.nNbScoresFromSongsDB); // songs.db情報と、取得した曲数を、新インスタンスにも与える
+                        EnumSongs.StartEnumFromDisk(false); // 曲検索スレッドの起動_開始
+                        if (SongManager.nNbScoresFromSongsDB == 0) // もし初回起動なら、検索スレッドのプライオリティをLowestでなくNormalにする
                         {
-                            actEnumSongs.OnActivate();
-                            stageSongSelection.bIsEnumeratingSongs = true;
-                            EnumSongs.Init(SongManager.listSongsDB,
-                                SongManager.nNbScoresFromSongsDB); // songs.db情報と、取得した曲数を、新インスタンスにも与える
-                            EnumSongs.StartEnumFromDisk(false); // 曲検索スレッドの起動_開始
-                            if (SongManager.nNbScoresFromSongsDB == 0) // もし初回起動なら、検索スレッドのプライオリティをLowestでなくNormalにする
-                            {
-                                EnumSongs.ChangeEnumeratePriority(ThreadPriority.Normal);
-                            }
-                        }
-
-                        #endregion
-
-                        #region [ 曲検索の中断と再開 ]
-
-                        if (rCurrentStage.eStageID == CStage.EStage.SongSelection_4 &&
-                            !EnumSongs.IsSongListEnumCompletelyDone)
-                        {
-                            switch (nUpdateAndDrawReturnValue)
-                            {
-                                case 0: // 何もない
-                                    //if ( CDTXMania.stageSongSelection.bIsEnumeratingSongs )
-                                    if (!stageSongSelection.bIsPlayingPremovie)
-                                    {
-                                        EnumSongs.Resume(); // #27060 2012.2.6 yyagi 中止していたバックグランド曲検索を再開
-                                        EnumSongs.IsSlowdown = false;
-                                    }
-                                    else
-                                    {
-                                        // EnumSongs.Suspend();					// #27060 2012.3.2 yyagi #PREMOVIE再生中は曲検索を低速化
-                                        EnumSongs.IsSlowdown = true;
-                                    }
-
-                                    actEnumSongs.OnActivate();
-                                    break;
-
-                                case 2: // 曲決定
-                                    EnumSongs.Suspend(); // #27060 バックグラウンドの曲検索を一時停止
-                                    actEnumSongs.OnDeactivate();
-                                    break;
-                            }
-                        }
-
-                        #endregion
-
-                        #region [ 曲探索中断待ち待機 ]
-
-                        if (rCurrentStage.eStageID == CStage.EStage.SongLoading_5 &&
-                            !EnumSongs.IsSongListEnumCompletelyDone &&
-                            EnumSongs.thDTXFileEnumerate !=
-                            null) // #28700 2012.6.12 yyagi; at Compact mode, enumerating thread does not exist.
-                        {
-                            EnumSongs.WaitUntilSuspended(); // 念のため、曲検索が一時中断されるまで待機
-                        }
-
-                        #endregion
-
-                        #region [ 曲検索が完了したら、実際の曲リストに反映する ]
-
-                        // CStageSongSelection.OnActivate() に回した方がいいかな？
-                        if (EnumSongs.IsSongListEnumerated)
-                        {
-                            actEnumSongs.OnDeactivate();
-                            stageSongSelection.bIsEnumeratingSongs = false;
-
-                            bool bRemakeSongTitleBar =
-                                (rCurrentStage.eStageID == CStage.EStage.SongSelection_4) ? true : false;
-                            stageSongSelection.Refresh(EnumSongs.SongManager, bRemakeSongTitleBar);
-                            EnumSongs.SongListEnumCompletelyDone();
-                        }
-
-                        #endregion
-                    }
-
-                    break;
-            }
-
-            #endregion
-
-            //handle stage changes
-            switch (rCurrentStage.eStageID)
-            {
-                case CStage.EStage.DoNothing_0:
-                    break;
-
-                case CStage.EStage.Startup_1:
-
-                    #region [ *** ]
-
-                    //-----------------------------
-                    if (nUpdateAndDrawReturnValue != 0)
-                    {
-                        if (!bCompactMode)
-                        {
-                            tChangeStage(stageTitle);
-                        }
-                        else
-                        {
-                            tChangeStage(stageSongLoading);
+                            EnumSongs.ChangeEnumeratePriority(ThreadPriority.Normal);
                         }
                     }
-
-                    //-----------------------------
 
                     #endregion
 
-                    break;
+                    #region [ 曲検索の中断と再開 ]
 
-                case CStage.EStage.Title_2:
-
-                    #region [ *** ]
-
-                    //-----------------------------
-                    if (nUpdateAndDrawReturnValue != 0)
+                    if (rCurrentStage.eStageID == CStage.EStage.SongSelection_4 &&
+                        !EnumSongs.IsSongListEnumCompletelyDone)
                     {
                         switch (nUpdateAndDrawReturnValue)
                         {
-                            case (int)CStageTitle.E戻り値.GAMESTART:
-                                tChangeStage(stageSongSelection);
+                            case 0: // 何もない
+                                //if ( CDTXMania.stageSongSelection.bIsEnumeratingSongs )
+                                if (!stageSongSelection.bIsPlayingPremovie)
+                                {
+                                    EnumSongs.Resume(); // #27060 2012.2.6 yyagi 中止していたバックグランド曲検索を再開
+                                    EnumSongs.IsSlowdown = false;
+                                }
+                                else
+                                {
+                                    // EnumSongs.Suspend();					// #27060 2012.3.2 yyagi #PREMOVIE再生中は曲検索を低速化
+                                    EnumSongs.IsSlowdown = true;
+                                }
+
+                                actEnumSongs.OnActivate();
                                 break;
 
-                            case (int)CStageTitle.E戻り値.CONFIG:
-                                tChangeStage(stageConfig);
-                                break;
-
-                            case (int)CStageTitle.E戻り値.EXIT:
-                                tChangeStage(stageEnd);
+                            case 2: // 曲決定
+                                EnumSongs.Suspend(); // #27060 バックグラウンドの曲検索を一時停止
+                                actEnumSongs.OnDeactivate();
                                 break;
                         }
                     }
 
-                    //-----------------------------
-
                     #endregion
 
-                    break;
+                    #region [ 曲探索中断待ち待機 ]
 
-                case CStage.EStage.Config_3:
-
-                    #region [ *** ]
-
-                    //-----------------------------
-                    if (nUpdateAndDrawReturnValue != 0)
+                    if (rCurrentStage.eStageID == CStage.EStage.SongLoading_5 &&
+                        !EnumSongs.IsSongListEnumCompletelyDone &&
+                        EnumSongs.thDTXFileEnumerate !=
+                        null) // #28700 2012.6.12 yyagi; at Compact mode, enumerating thread does not exist.
                     {
-                        switch (rPreviousStage.eStageID)
-                        {
-                            case CStage.EStage.Title_2:
-                                tChangeStage(stageTitle);
-                                break;
-
-                            case CStage.EStage.SongSelection_4:
-                                tChangeStage(stageSongSelection);
-                                break;
-                        }
+                        EnumSongs.WaitUntilSuspended(); // 念のため、曲検索が一時中断されるまで待機
                     }
-
-                    //-----------------------------
 
                     #endregion
 
-                    break;
+                    #region [ 曲検索が完了したら、実際の曲リストに反映する ]
 
-                case CStage.EStage.SongSelection_4:
+                    // CStageSongSelection.OnActivate() に回した方がいいかな？
+                    if (EnumSongs.IsSongListEnumerated)
+                    {
+                        actEnumSongs.OnDeactivate();
+                        stageSongSelection.bIsEnumeratingSongs = false;
 
-                    #region [ *** ]
+                        bool bRemakeSongTitleBar =
+                            (rCurrentStage.eStageID == CStage.EStage.SongSelection_4) ? true : false;
+                        stageSongSelection.Refresh(EnumSongs.SongManager, bRemakeSongTitleBar);
+                        EnumSongs.SongListEnumCompletelyDone();
+                    }
 
-                    //-----------------------------
+                    #endregion
+                }
+
+                break;
+        }
+        #endregion
+
+        //handle stage changes
+        switch (rCurrentStage.eStageID)
+        {
+            case CStage.EStage.DoNothing_0:
+                break;
+
+            case CStage.EStage.Startup_1:
+                if (nUpdateAndDrawReturnValue != 0)
+                {
+                    tChangeStage(bCompactMode ? stageSongLoading : stageTitle);
+                }
+
+                break;
+
+            case CStage.EStage.Title_2:
+
+                #region [ *** ]
+
+                //-----------------------------
+                if (nUpdateAndDrawReturnValue != 0)
+                {
                     switch (nUpdateAndDrawReturnValue)
                     {
-                        case (int)CStageSongSelection.EReturnValue.ReturnToTitle:
-                            tChangeStage(stageTitle);
+                        case (int)CStageTitle.EReturnResult.GAMESTART:
+                            tChangeStage(stageSongSelection);
                             break;
 
-                        case (int)CStageSongSelection.EReturnValue.Selected:
-                            tChangeStage(stageSongLoading);
-                            break;
-
-                        case (int)CStageSongSelection.EReturnValue.CallConfig:
+                        case (int)CStageTitle.EReturnResult.CONFIG:
                             tChangeStage(stageConfig);
                             break;
 
-                        case (int)CStageSongSelection.EReturnValue.ChangeSking:
-                            tChangeStage(stageChangeSkin);
+                        case (int)CStageTitle.EReturnResult.EXIT:
+                            tChangeStage(stageEnd);
                             break;
                     }
+                }
 
-                    //-----------------------------
+                //-----------------------------
+
+                #endregion
+
+                break;
+
+            case CStage.EStage.Config_3:
+
+                #region [ *** ]
+
+                //-----------------------------
+                if (nUpdateAndDrawReturnValue != 0)
+                {
+                    switch (rPreviousStage.eStageID)
+                    {
+                        case CStage.EStage.Title_2:
+                            tChangeStage(stageTitle);
+                            break;
+
+                        case CStage.EStage.SongSelection_4:
+                            tChangeStage(stageSongSelection);
+                            break;
+                    }
+                }
+
+                //-----------------------------
+
+                #endregion
+
+                break;
+
+            case CStage.EStage.SongSelection_4:
+
+                #region [ *** ]
+
+                //-----------------------------
+                switch (nUpdateAndDrawReturnValue)
+                {
+                    case (int)CStageSongSelection.EReturnValue.ReturnToTitle:
+                        tChangeStage(stageTitle);
+                        break;
+
+                    case (int)CStageSongSelection.EReturnValue.Selected:
+                        tChangeStage(stageSongLoading);
+                        break;
+
+                    case (int)CStageSongSelection.EReturnValue.CallConfig:
+                        tChangeStage(stageConfig);
+                        break;
+
+                    case (int)CStageSongSelection.EReturnValue.ChangeSking:
+                        tChangeStage(stageChangeSkin);
+                        break;
+                }
+
+                //-----------------------------
+
+                #endregion
+
+                break;
+
+            case CStage.EStage.SongLoading_5:
+
+                #region [ *** ]
+
+                //-----------------------------
+                if (nUpdateAndDrawReturnValue != 0)
+                {
+                    Pad.stDetectedDevice.Clear(); // 入力デバイスフラグクリア(2010.9.11)
+
+                    #region [ ESC押下時は、曲の読み込みを中止して選曲画面に戻る ]
+
+                    if (nUpdateAndDrawReturnValue == (int)ESongLoadingScreenReturnValue.LoadingStopped)
+                    {
+                        //DTX.tStopPlayingAllChips();
+                        DTX.OnDeactivate();
+                        Trace.TraceInformation("曲の読み込みを中止しました。");
+                        tRunGarbageCollector();
+
+                        tChangeStage(stageSongSelection);
+                        break;
+                    }
 
                     #endregion
 
-                    break;
 
-                case CStage.EStage.SongLoading_5:
-
-                    #region [ *** ]
-
-                    //-----------------------------
-                    if (nUpdateAndDrawReturnValue != 0)
+                    if (!ConfigIni.bGuitarRevolutionMode)
                     {
-                        Pad.stDetectedDevice.Clear(); // 入力デバイスフラグクリア(2010.9.11)
+                        tChangeStage(stagePerfDrumsScreen, false);
+                    }
+                    else
+                    {
+                        tChangeStage(stagePerfGuitarScreen, false);
+                    }
+                }
 
-                        #region [ ESC押下時は、曲の読み込みを中止して選曲画面に戻る ]
+                //-----------------------------
 
-                        if (nUpdateAndDrawReturnValue == (int)ESongLoadingScreenReturnValue.LoadingStopped)
+                #endregion
+
+                break;
+
+            case CStage.EStage.Performance_6:
+
+                #region [ *** ]
+
+                //-----------------------------
+
+                #region [ DTXVモード中にDTXCreatorから指示を受けた場合の処理 ]
+
+                if (DTXVmode.Enabled && DTXVmode.Refreshed)
+                {
+                    DTXVmode.Refreshed = false;
+
+                    if (DTXVmode.Command == CDTXVmode.ECommand.Stop)
+                    {
+                        ((CStagePerfCommonScreen)rCurrentStage).t停止();
+
+                        //if (previewSound != null)
+                        //{
+                        //    this.previewSound.tサウンドを停止する();
+                        //    this.previewSound.Dispose();
+                        //    this.previewSound = null;
+                        //}
+                    }
+                    else if (DTXVmode.Command == CDTXVmode.ECommand.Play)
+                    {
+                        if (DTXVmode.NeedReload)
                         {
-                            //DTX.tStopPlayingAllChips();
-                            DTX.OnDeactivate();
-                            Trace.TraceInformation("曲の読み込みを中止しました。");
-                            tRunGarbageCollector();
+                            ((CStagePerfCommonScreen)rCurrentStage).t再読込();
+                            if (DTXVmode.GRmode)
+                            {
+                                ConfigIni.bDrumsEnabled = false;
+                                ConfigIni.bGuitarEnabled = true;
+                            }
+                            else
+                            {
+                                //Both in Original DTXMania, but we don't support that
+                                ConfigIni.bDrumsEnabled = true;
+                                ConfigIni.bGuitarEnabled = false;
+                            }
 
-                            tChangeStage(stageSongSelection);
-                            break;
-                        }
-
-                        #endregion
-
-
-                        if (!ConfigIni.bGuitarRevolutionMode)
-                        {
-                            tChangeStage(stagePerfDrumsScreen, false);
+                            ConfigIni.bTimeStretch = DTXVmode.TimeStretch;
+                            CSoundManager.bIsTimeStretch = DTXVmode.TimeStretch;
+                            if (ConfigIni.bVerticalSyncWait != DTXVmode.VSyncWait)
+                            {
+                                ConfigIni.bVerticalSyncWait = DTXVmode.VSyncWait;
+                                //CDTXMania.b次のタイミングで垂直帰線同期切り替えを行う = true;
+                            }
                         }
                         else
                         {
-                            tChangeStage(stagePerfGuitarScreen, false);
+                            ((CStagePerfCommonScreen)rCurrentStage).tJumpInSongToBar(DTXVmode.nStartBar);
                         }
                     }
+                }
 
-                    //-----------------------------
+                #endregion
 
-                    #endregion
+                CScoreIni scoreIni = null;
+                switch (nUpdateAndDrawReturnValue)
+                {
+                    case (int)EPerfScreenReturnValue.Continue:
+                        break;
 
-                    break;
+                    case (int)EPerfScreenReturnValue.Interruption:
+                    case (int)EPerfScreenReturnValue.Restart:
 
-                case CStage.EStage.Performance_6:
+                        #region [ Cancel performance ]
 
-                    #region [ *** ]
-
-                    //-----------------------------
-
-                    #region [ DTXVモード中にDTXCreatorから指示を受けた場合の処理 ]
-
-                    if (DTXVmode.Enabled && DTXVmode.Refreshed)
-                    {
-                        DTXVmode.Refreshed = false;
-
-                        if (DTXVmode.Command == CDTXVmode.ECommand.Stop)
-                        {
-                            ((CStagePerfCommonScreen)rCurrentStage).t停止();
-
-                            //if (previewSound != null)
-                            //{
-                            //    this.previewSound.tサウンドを停止する();
-                            //    this.previewSound.Dispose();
-                            //    this.previewSound = null;
-                            //}
-                        }
-                        else if (DTXVmode.Command == CDTXVmode.ECommand.Play)
-                        {
-                            if (DTXVmode.NeedReload)
-                            {
-                                ((CStagePerfCommonScreen)rCurrentStage).t再読込();
-                                if (DTXVmode.GRmode)
-                                {
-                                    ConfigIni.bDrumsEnabled = false;
-                                    ConfigIni.bGuitarEnabled = true;
-                                }
-                                else
-                                {
-                                    //Both in Original DTXMania, but we don't support that
-                                    ConfigIni.bDrumsEnabled = true;
-                                    ConfigIni.bGuitarEnabled = false;
-                                }
-
-                                ConfigIni.bTimeStretch = DTXVmode.TimeStretch;
-                                CSoundManager.bIsTimeStretch = DTXVmode.TimeStretch;
-                                if (ConfigIni.bVerticalSyncWait != DTXVmode.VSyncWait)
-                                {
-                                    ConfigIni.bVerticalSyncWait = DTXVmode.VSyncWait;
-                                    //CDTXMania.b次のタイミングで垂直帰線同期切り替えを行う = true;
-                                }
-                            }
-                            else
-                            {
-                                ((CStagePerfCommonScreen)rCurrentStage).tJumpInSongToBar(DTXVmode.nStartBar);
-                            }
-                        }
-                    }
-
-                    #endregion
-
-                    CScoreIni scoreIni = null;
-                    switch (nUpdateAndDrawReturnValue)
-                    {
-                        case (int)EPerfScreenReturnValue.Continue:
-                            break;
-
-                        case (int)EPerfScreenReturnValue.Interruption:
-                        case (int)EPerfScreenReturnValue.Restart:
-
-                            #region [ Cancel performance ]
-
-                            //-----------------------------
-                            if (!DTXVmode.Enabled && !DTX2WAVmode.Enabled)
-                            {
-                                scoreIni = tScoreIniへBGMAdjustとHistoryとPlayCountを更新("Play cancelled");
-                            }
-
-                            DTX.tStopPlayingAllChips();
-                            DTX.OnDeactivate();
-                            rCurrentStage.OnDeactivate();
-                            if (bCompactMode && !DTXVmode.Enabled && !DTX2WAVmode.Enabled)
-                            {
-                                Window.Close();
-                            }
-                            else if (nUpdateAndDrawReturnValue == (int)EPerfScreenReturnValue.Restart)
-                            {
-                                tChangeStage(stageSongLoading, true, false);
-                            }
-                            else
-                            {
-                                tChangeStage(stageSongSelection, true, false);
-                            }
-
-                            break;
                         //-----------------------------
-
-                        #endregion
-
-                        case (int)EPerfScreenReturnValue.StageFailure:
-
-                            #region [ 演奏失敗(StageFailed) ]
-
-                            //-----------------------------
+                        if (!DTXVmode.Enabled && !DTX2WAVmode.Enabled)
                         {
-                            //New extract performance record
-                            CScoreIni.CPerformanceEntry cPerf_Drums, cPerf_Guitar, cPerf_Bass;
-                            bool bTrainingMode = false;
-                            CChip[] chipsArray = new CChip[10];
-                            if (ConfigIni.bGuitarRevolutionMode)
-                            {
-                                stagePerfGuitarScreen.tStorePerfResults(out cPerf_Drums, out cPerf_Guitar,
-                                    out cPerf_Bass, out bTrainingMode);
-                            }
-                            else
-                            {
-                                stagePerfDrumsScreen.tStorePerfResults(out cPerf_Drums, out cPerf_Guitar,
-                                    out cPerf_Bass, out chipsArray, out bTrainingMode);
-                            }
-                            //Original
-                            //scoreIni = this.tScoreIniへBGMAdjustとHistoryとPlayCountを更新("Stage failed");
+                            scoreIni = tScoreIniへBGMAdjustとHistoryとPlayCountを更新("Play cancelled");
+                        }
 
-                            //Save Performance Records if necessary
-                            if (!bTrainingMode)
-                            {
-                                //Swap if required
-                                if (ConfigIni.bIsSwappedGuitarBass) // #24063 2011.1.24 yyagi Gt/Bsを入れ替えていたなら、演奏結果も入れ替える
-                                {
-                                    CScoreIni.CPerformanceEntry t;
-                                    t = cPerf_Guitar;
-                                    cPerf_Guitar = cPerf_Bass;
-                                    cPerf_Bass = t;
-                                }
+                        DTX.tStopPlayingAllChips();
+                        DTX.OnDeactivate();
+                        rCurrentStage.OnDeactivate();
+                        if (bCompactMode && !DTXVmode.Enabled && !DTX2WAVmode.Enabled)
+                        {
+                            Window.Close();
+                        }
+                        else if (nUpdateAndDrawReturnValue == (int)EPerfScreenReturnValue.Restart)
+                        {
+                            tChangeStage(stageSongLoading, true, false);
+                        }
+                        else
+                        {
+                            tChangeStage(stageSongSelection, true, false);
+                        }
 
-                                string strInstrument = "";
-                                string strPerfSkill = "";
-                                //STDGBVALUE<string> strCurrProgressBars;
-                                STDGBVALUE<bool> bToSaveProgressBarRecord;
-                                bToSaveProgressBarRecord.Drums = false;
-                                bToSaveProgressBarRecord.Guitar = false;
-                                bToSaveProgressBarRecord.Bass = false;
-                                STDGBVALUE<bool> bNewProgressBarRecord;
-                                bNewProgressBarRecord.Drums = false;
-                                bNewProgressBarRecord.Guitar = false;
-                                bNewProgressBarRecord.Bass = false;
-                                bool bGuitarAndBass = false;
-                                if (!cPerf_Drums.b全AUTOである && cPerf_Drums.nTotalChipsCount > 0)
+                        break;
+                    //-----------------------------
+
+                    #endregion
+
+                    case (int)EPerfScreenReturnValue.StageFailure:
+
+                        #region [ 演奏失敗(StageFailed) ]
+
+                        //-----------------------------
+                    {
+                        //New extract performance record
+                        CScoreIni.CPerformanceEntry cPerf_Drums, cPerf_Guitar, cPerf_Bass;
+                        bool bTrainingMode = false;
+                        CChip[] chipsArray = new CChip[10];
+                        if (ConfigIni.bGuitarRevolutionMode)
+                        {
+                            stagePerfGuitarScreen.tStorePerfResults(out cPerf_Drums, out cPerf_Guitar,
+                                out cPerf_Bass, out bTrainingMode);
+                        }
+                        else
+                        {
+                            stagePerfDrumsScreen.tStorePerfResults(out cPerf_Drums, out cPerf_Guitar,
+                                out cPerf_Bass, out chipsArray, out bTrainingMode);
+                        }
+                        //Original
+                        //scoreIni = this.tScoreIniへBGMAdjustとHistoryとPlayCountを更新("Stage failed");
+
+                        //Save Performance Records if necessary
+                        if (!bTrainingMode)
+                        {
+                            //Swap if required
+                            if (ConfigIni.bIsSwappedGuitarBass) // #24063 2011.1.24 yyagi Gt/Bsを入れ替えていたなら、演奏結果も入れ替える
+                            {
+                                CScoreIni.CPerformanceEntry t;
+                                t = cPerf_Guitar;
+                                cPerf_Guitar = cPerf_Bass;
+                                cPerf_Bass = t;
+                            }
+
+                            string strInstrument = "";
+                            string strPerfSkill = "";
+                            //STDGBVALUE<string> strCurrProgressBars;
+                            STDGBVALUE<bool> bToSaveProgressBarRecord;
+                            bToSaveProgressBarRecord.Drums = false;
+                            bToSaveProgressBarRecord.Guitar = false;
+                            bToSaveProgressBarRecord.Bass = false;
+                            STDGBVALUE<bool> bNewProgressBarRecord;
+                            bNewProgressBarRecord.Drums = false;
+                            bNewProgressBarRecord.Guitar = false;
+                            bNewProgressBarRecord.Bass = false;
+                            bool bGuitarAndBass = false;
+                            if (!cPerf_Drums.b全AUTOである && cPerf_Drums.nTotalChipsCount > 0)
+                            {
+                                //Drums played
+                                strInstrument = " Drums";
+                                bToSaveProgressBarRecord.Drums = true;
+                            }
+                            else if (!cPerf_Guitar.b全AUTOである && cPerf_Guitar.nTotalChipsCount > 0)
+                            {
+                                if (!cPerf_Bass.b全AUTOである && cPerf_Bass.nTotalChipsCount > 0)
                                 {
-                                    //Drums played
-                                    strInstrument = " Drums";
-                                    bToSaveProgressBarRecord.Drums = true;
-                                }
-                                else if (!cPerf_Guitar.b全AUTOである && cPerf_Guitar.nTotalChipsCount > 0)
-                                {
-                                    if (!cPerf_Bass.b全AUTOである && cPerf_Bass.nTotalChipsCount > 0)
-                                    {
-                                        // Guitar and bass played together
-                                        bGuitarAndBass = true;
-                                        strInstrument = " G+B";
-                                        bToSaveProgressBarRecord.Guitar = true;
-                                        bToSaveProgressBarRecord.Bass = true;
-                                    }
-                                    else
-                                    {
-                                        // Guitar only played
-                                        strInstrument = " Guitar";
-                                        bToSaveProgressBarRecord.Guitar = true;
-                                    }
-                                }
-                                else
-                                {
-                                    //Bass only played
-                                    strInstrument = " Bass";
+                                    // Guitar and bass played together
+                                    bGuitarAndBass = true;
+                                    strInstrument = " G+B";
+                                    bToSaveProgressBarRecord.Guitar = true;
                                     bToSaveProgressBarRecord.Bass = true;
                                 }
+                                else
+                                {
+                                    // Guitar only played
+                                    strInstrument = " Guitar";
+                                    bToSaveProgressBarRecord.Guitar = true;
+                                }
+                            }
+                            else
+                            {
+                                //Bass only played
+                                strInstrument = " Bass";
+                                bToSaveProgressBarRecord.Bass = true;
+                            }
 
-                                string str = "";
+                            string str = "";
+                            string strSpeed = "";
+                            if (ConfigIni.nPlaySpeed != 20)
+                            {
+                                double d = (double)(ConfigIni.nPlaySpeed / 20.0);
+                                strSpeed = (bGuitarAndBass ? " x" : " Speed x") + d.ToString("0.00");
+                            }
+
+                            str = string.Format("Stage failed{0} {1}", strInstrument, strSpeed);
+
+                            scoreIni = tScoreIniへBGMAdjustとHistoryとPlayCountを更新(str);
+
+                            CScore cScore = stageSongSelection.rChosenScore;
+
+                            if (bToSaveProgressBarRecord.Drums)
+                            {
+                                scoreIni.stSection.LastPlayDrums.strProgress = cPerf_Drums.strProgress;
+
+                                if (CScoreIni.tCheckIfUpdateProgressBarRecordOrNot(
+                                        cScore.SongInformation.progress.Drums, cPerf_Drums.strProgress))
+                                {
+                                    scoreIni.stSection.HiSkillDrums.strProgress = cPerf_Drums.strProgress;
+                                    bNewProgressBarRecord.Drums = true;
+                                }
+                            }
+
+                            if (bToSaveProgressBarRecord.Guitar)
+                            {
+                                scoreIni.stSection.LastPlayGuitar.strProgress = cPerf_Guitar.strProgress;
+                                if (CScoreIni.tCheckIfUpdateProgressBarRecordOrNot(
+                                        cScore.SongInformation.progress.Guitar, cPerf_Guitar.strProgress))
+                                {
+                                    scoreIni.stSection.HiSkillGuitar.strProgress = cPerf_Guitar.strProgress;
+                                    bNewProgressBarRecord.Guitar = true;
+                                }
+                            }
+
+                            if (bToSaveProgressBarRecord.Bass)
+                            {
+                                scoreIni.stSection.LastPlayBass.strProgress = cPerf_Bass.strProgress;
+                                if (CScoreIni.tCheckIfUpdateProgressBarRecordOrNot(
+                                        cScore.SongInformation.progress.Bass, cPerf_Bass.strProgress))
+                                {
+                                    scoreIni.stSection.HiSkillBass.strProgress = cPerf_Bass.strProgress;
+                                    bNewProgressBarRecord.Bass = true;
+                                }
+                            }
+
+                            scoreIni.tExport(DTX.strFileNameFullPath + ".score.ini");
+
+                            if (!bCompactMode)
+                            {
+                                bool[] b更新が必要か否か = new bool[3];
+                                CScoreIni.tGetIsUpdateNeeded(out b更新が必要か否か[0], out b更新が必要か否か[1], out b更新が必要か否か[2]);
+                                if (bNewProgressBarRecord.Drums)
+                                {
+                                    // New Song Progress
+                                    cScore.SongInformation.progress.Drums = cPerf_Drums.strProgress;
+                                }
+
+                                if (bNewProgressBarRecord.Guitar)
+                                {
+                                    // New Song Progress
+                                    cScore.SongInformation.progress.Guitar = cPerf_Guitar.strProgress;
+                                }
+
+                                if (bNewProgressBarRecord.Bass)
+                                {
+                                    // New Song Progress
+                                    cScore.SongInformation.progress.Bass = cPerf_Bass.strProgress;
+                                }
+                            }
+                        }
+                    }
+
+                        DTX.tStopPlayingAllChips();
+                        DTX.OnDeactivate();
+                        if (bCompactMode)
+                        {
+                            Window.Close();
+                        }
+                        else
+                        {
+                            tChangeStage(stageSongSelection);
+                        }
+
+                        break;
+                    //-----------------------------
+
+                    #endregion
+
+                    case (int)EPerfScreenReturnValue.StageClear:
+
+                        #region [ 演奏クリア ]
+
+                        //-----------------------------
+                        CScoreIni.CPerformanceEntry cPerfEntry_Drums, cPerfEntry_Guitar, cPerfEntry_Bass;
+                        bool bIsTrainingMode = false;
+                        CChip[] chipArray = new CChip[10];
+                        if (ConfigIni.bGuitarRevolutionMode)
+                        {
+                            stagePerfGuitarScreen.tStorePerfResults(out cPerfEntry_Drums, out cPerfEntry_Guitar,
+                                out cPerfEntry_Bass, out bIsTrainingMode);
+                            //Transfer nTimingHitCount to stageResult
+                            stageResult.nTimingHitCount = stagePerfGuitarScreen.nTimingHitCount;
+                        }
+                        else
+                        {
+                            stagePerfDrumsScreen.tStorePerfResults(out cPerfEntry_Drums, out cPerfEntry_Guitar,
+                                out cPerfEntry_Bass, out chipArray, out bIsTrainingMode);
+                            //Transfer nTimingHitCount to stageResult
+                            stageResult.nTimingHitCount = stagePerfDrumsScreen.nTimingHitCount;
+                        }
+
+                        if (!bIsTrainingMode)
+                        {
+                            if (ConfigIni.bIsSwappedGuitarBass) // #24063 2011.1.24 yyagi Gt/Bsを入れ替えていたなら、演奏結果も入れ替える
+                            {
+                                CScoreIni.CPerformanceEntry t;
+                                t = cPerfEntry_Guitar;
+                                cPerfEntry_Guitar = cPerfEntry_Bass;
+                                cPerfEntry_Bass = t;
+
+                                DTX.SwapGuitarBassInfos(); // 譜面情報も元に戻す
+                                ConfigIni.SwapGuitarBassInfos_AutoFlags(); // #24415 2011.2.27 yyagi
+                                // リザルト集計時のみ、Auto系のフラグも元に戻す。
+                                // これを戻すのは、リザルト集計後。
+                            } // "case CStage.EStage.Result:"のところ。
+
+                            double ps = 0.0;
+                            int nRank = 0;
+                            string strInstrument = "";
+                            string strPerfSkill = "";
+                            bool bGuitarAndBass = false;
+                            if (!cPerfEntry_Drums.b全AUTOである && cPerfEntry_Drums.nTotalChipsCount > 0)
+                            {
+                                //Drums played
+                                strPerfSkill = String.Format(" {0:F2}", cPerfEntry_Drums.dbPerformanceSkill);
+                                nRank = (ConfigIni.nSkillMode == 0)
+                                    ? CScoreIni.tCalculateRankOld(cPerfEntry_Drums)
+                                    : CScoreIni.tCalculateRank(0, cPerfEntry_Drums.dbPerformanceSkill);
+                            }
+                            else if (!cPerfEntry_Guitar.b全AUTOである && cPerfEntry_Guitar.nTotalChipsCount > 0)
+                            {
+                                if (!cPerfEntry_Bass.b全AUTOである && cPerfEntry_Bass.nTotalChipsCount > 0)
+                                {
+                                    // Guitar and bass played together
+                                    bGuitarAndBass = true;
+                                    strPerfSkill = String.Format("{0:F2}/{1:F2}",
+                                        cPerfEntry_Guitar.dbPerformanceSkill, cPerfEntry_Bass.dbPerformanceSkill);
+                                    nRank = CScoreIni.tCalculateOverallRankValue(cPerfEntry_Drums,
+                                        cPerfEntry_Guitar, cPerfEntry_Bass);
+                                    strInstrument = " G+B";
+                                }
+                                else
+                                {
+                                    // Guitar only played
+                                    strPerfSkill = String.Format(" {0:F2}", cPerfEntry_Guitar.dbPerformanceSkill);
+                                    nRank = (ConfigIni.nSkillMode == 0)
+                                        ? CScoreIni.tCalculateRankOld(cPerfEntry_Guitar)
+                                        : CScoreIni.tCalculateRank(0, cPerfEntry_Guitar.dbPerformanceSkill);
+                                    strInstrument = " Guitar";
+                                }
+                            }
+                            else
+                            {
+                                //Bass only played
+                                strPerfSkill = String.Format(" {0:F2}", cPerfEntry_Bass.dbPerformanceSkill);
+                                nRank = (ConfigIni.nSkillMode == 0)
+                                    ? CScoreIni.tCalculateRankOld(cPerfEntry_Bass)
+                                    : CScoreIni.tCalculateRank(0, cPerfEntry_Bass.dbPerformanceSkill);
+                                strInstrument = " Bass";
+                            }
+
+                            string str = "";
+                            if (nRank == (int)CScoreIni.ERANK.UNKNOWN)
+                            {
+                                str = "Cleared (No chips)";
+                            }
+                            else
+                            {
                                 string strSpeed = "";
                                 if (ConfigIni.nPlaySpeed != 20)
                                 {
@@ -1038,276 +1200,90 @@ internal class CDTXMania : Game
                                     strSpeed = (bGuitarAndBass ? " x" : " Speed x") + d.ToString("0.00");
                                 }
 
-                                str = string.Format("Stage failed{0} {1}", strInstrument, strSpeed);
-
-                                scoreIni = tScoreIniへBGMAdjustとHistoryとPlayCountを更新(str);
-
-                                CScore cScore = stageSongSelection.rChosenScore;
-
-                                if (bToSaveProgressBarRecord.Drums)
-                                {
-                                    scoreIni.stSection.LastPlayDrums.strProgress = cPerf_Drums.strProgress;
-
-                                    if (CScoreIni.tCheckIfUpdateProgressBarRecordOrNot(
-                                            cScore.SongInformation.progress.Drums, cPerf_Drums.strProgress))
-                                    {
-                                        scoreIni.stSection.HiSkillDrums.strProgress = cPerf_Drums.strProgress;
-                                        bNewProgressBarRecord.Drums = true;
-                                    }
-                                }
-
-                                if (bToSaveProgressBarRecord.Guitar)
-                                {
-                                    scoreIni.stSection.LastPlayGuitar.strProgress = cPerf_Guitar.strProgress;
-                                    if (CScoreIni.tCheckIfUpdateProgressBarRecordOrNot(
-                                            cScore.SongInformation.progress.Guitar, cPerf_Guitar.strProgress))
-                                    {
-                                        scoreIni.stSection.HiSkillGuitar.strProgress = cPerf_Guitar.strProgress;
-                                        bNewProgressBarRecord.Guitar = true;
-                                    }
-                                }
-
-                                if (bToSaveProgressBarRecord.Bass)
-                                {
-                                    scoreIni.stSection.LastPlayBass.strProgress = cPerf_Bass.strProgress;
-                                    if (CScoreIni.tCheckIfUpdateProgressBarRecordOrNot(
-                                            cScore.SongInformation.progress.Bass, cPerf_Bass.strProgress))
-                                    {
-                                        scoreIni.stSection.HiSkillBass.strProgress = cPerf_Bass.strProgress;
-                                        bNewProgressBarRecord.Bass = true;
-                                    }
-                                }
-
-                                scoreIni.tExport(DTX.strFileNameFullPath + ".score.ini");
-
-                                if (!bCompactMode)
-                                {
-                                    bool[] b更新が必要か否か = new bool[3];
-                                    CScoreIni.tGetIsUpdateNeeded(out b更新が必要か否か[0], out b更新が必要か否か[1], out b更新が必要か否か[2]);
-                                    if (bNewProgressBarRecord.Drums)
-                                    {
-                                        // New Song Progress
-                                        cScore.SongInformation.progress.Drums = cPerf_Drums.strProgress;
-                                    }
-
-                                    if (bNewProgressBarRecord.Guitar)
-                                    {
-                                        // New Song Progress
-                                        cScore.SongInformation.progress.Guitar = cPerf_Guitar.strProgress;
-                                    }
-
-                                    if (bNewProgressBarRecord.Bass)
-                                    {
-                                        // New Song Progress
-                                        cScore.SongInformation.progress.Bass = cPerf_Bass.strProgress;
-                                    }
-                                }
+                                str = string.Format("Cleared{0} ({1}:{2}{3})", strInstrument,
+                                    Enum.GetName(typeof(CScoreIni.ERANK), nRank), strPerfSkill, strSpeed);
                             }
+
+                            scoreIni = tScoreIniへBGMAdjustとHistoryとPlayCountを更新(str);
                         }
 
-                            DTX.tStopPlayingAllChips();
-                            DTX.OnDeactivate();
-                            if (bCompactMode)
-                            {
-                                Window.Close();
-                            }
-                            else
-                            {
-                                tChangeStage(stageSongSelection);
-                            }
+                        stageResult.stPerformanceEntry.Drums = cPerfEntry_Drums;
+                        stageResult.stPerformanceEntry.Guitar = cPerfEntry_Guitar;
+                        stageResult.stPerformanceEntry.Bass = cPerfEntry_Bass;
+                        stageResult.rEmptyDrumChip = chipArray;
+                        stageResult.bIsTrainingMode = bIsTrainingMode;
 
-                            break;
-                        //-----------------------------
-
-                        #endregion
-
-                        case (int)EPerfScreenReturnValue.StageClear:
-
-                            #region [ 演奏クリア ]
-
-                            //-----------------------------
-                            CScoreIni.CPerformanceEntry cPerfEntry_Drums, cPerfEntry_Guitar, cPerfEntry_Bass;
-                            bool bIsTrainingMode = false;
-                            CChip[] chipArray = new CChip[10];
-                            if (ConfigIni.bGuitarRevolutionMode)
-                            {
-                                stagePerfGuitarScreen.tStorePerfResults(out cPerfEntry_Drums, out cPerfEntry_Guitar,
-                                    out cPerfEntry_Bass, out bIsTrainingMode);
-                                //Transfer nTimingHitCount to stageResult
-                                stageResult.nTimingHitCount = stagePerfGuitarScreen.nTimingHitCount;
-                            }
-                            else
-                            {
-                                stagePerfDrumsScreen.tStorePerfResults(out cPerfEntry_Drums, out cPerfEntry_Guitar,
-                                    out cPerfEntry_Bass, out chipArray, out bIsTrainingMode);
-                                //Transfer nTimingHitCount to stageResult
-                                stageResult.nTimingHitCount = stagePerfDrumsScreen.nTimingHitCount;
-                            }
-
-                            if (!bIsTrainingMode)
-                            {
-                                if (ConfigIni.bIsSwappedGuitarBass) // #24063 2011.1.24 yyagi Gt/Bsを入れ替えていたなら、演奏結果も入れ替える
-                                {
-                                    CScoreIni.CPerformanceEntry t;
-                                    t = cPerfEntry_Guitar;
-                                    cPerfEntry_Guitar = cPerfEntry_Bass;
-                                    cPerfEntry_Bass = t;
-
-                                    DTX.SwapGuitarBassInfos(); // 譜面情報も元に戻す
-                                    ConfigIni.SwapGuitarBassInfos_AutoFlags(); // #24415 2011.2.27 yyagi
-                                    // リザルト集計時のみ、Auto系のフラグも元に戻す。
-                                    // これを戻すのは、リザルト集計後。
-                                } // "case CStage.EStage.Result:"のところ。
-
-                                double ps = 0.0;
-                                int nRank = 0;
-                                string strInstrument = "";
-                                string strPerfSkill = "";
-                                bool bGuitarAndBass = false;
-                                if (!cPerfEntry_Drums.b全AUTOである && cPerfEntry_Drums.nTotalChipsCount > 0)
-                                {
-                                    //Drums played
-                                    strPerfSkill = String.Format(" {0:F2}", cPerfEntry_Drums.dbPerformanceSkill);
-                                    nRank = (ConfigIni.nSkillMode == 0)
-                                        ? CScoreIni.tCalculateRankOld(cPerfEntry_Drums)
-                                        : CScoreIni.tCalculateRank(0, cPerfEntry_Drums.dbPerformanceSkill);
-                                }
-                                else if (!cPerfEntry_Guitar.b全AUTOである && cPerfEntry_Guitar.nTotalChipsCount > 0)
-                                {
-                                    if (!cPerfEntry_Bass.b全AUTOである && cPerfEntry_Bass.nTotalChipsCount > 0)
-                                    {
-                                        // Guitar and bass played together
-                                        bGuitarAndBass = true;
-                                        strPerfSkill = String.Format("{0:F2}/{1:F2}",
-                                            cPerfEntry_Guitar.dbPerformanceSkill, cPerfEntry_Bass.dbPerformanceSkill);
-                                        nRank = CScoreIni.tCalculateOverallRankValue(cPerfEntry_Drums,
-                                            cPerfEntry_Guitar, cPerfEntry_Bass);
-                                        strInstrument = " G+B";
-                                    }
-                                    else
-                                    {
-                                        // Guitar only played
-                                        strPerfSkill = String.Format(" {0:F2}", cPerfEntry_Guitar.dbPerformanceSkill);
-                                        nRank = (ConfigIni.nSkillMode == 0)
-                                            ? CScoreIni.tCalculateRankOld(cPerfEntry_Guitar)
-                                            : CScoreIni.tCalculateRank(0, cPerfEntry_Guitar.dbPerformanceSkill);
-                                        strInstrument = " Guitar";
-                                    }
-                                }
-                                else
-                                {
-                                    //Bass only played
-                                    strPerfSkill = String.Format(" {0:F2}", cPerfEntry_Bass.dbPerformanceSkill);
-                                    nRank = (ConfigIni.nSkillMode == 0)
-                                        ? CScoreIni.tCalculateRankOld(cPerfEntry_Bass)
-                                        : CScoreIni.tCalculateRank(0, cPerfEntry_Bass.dbPerformanceSkill);
-                                    strInstrument = " Bass";
-                                }
-
-                                string str = "";
-                                if (nRank == (int)CScoreIni.ERANK.UNKNOWN)
-                                {
-                                    str = "Cleared (No chips)";
-                                }
-                                else
-                                {
-                                    string strSpeed = "";
-                                    if (ConfigIni.nPlaySpeed != 20)
-                                    {
-                                        double d = (double)(ConfigIni.nPlaySpeed / 20.0);
-                                        strSpeed = (bGuitarAndBass ? " x" : " Speed x") + d.ToString("0.00");
-                                    }
-
-                                    str = string.Format("Cleared{0} ({1}:{2}{3})", strInstrument,
-                                        Enum.GetName(typeof(CScoreIni.ERANK), nRank), strPerfSkill, strSpeed);
-                                }
-
-                                scoreIni = tScoreIniへBGMAdjustとHistoryとPlayCountを更新(str);
-                            }
-
-                            stageResult.stPerformanceEntry.Drums = cPerfEntry_Drums;
-                            stageResult.stPerformanceEntry.Guitar = cPerfEntry_Guitar;
-                            stageResult.stPerformanceEntry.Bass = cPerfEntry_Bass;
-                            stageResult.rEmptyDrumChip = chipArray;
-                            stageResult.bIsTrainingMode = bIsTrainingMode;
-
-                            tChangeStage(stageResult);
-                            break;
-                        //-----------------------------
-
-                        #endregion
-                    }
-
+                        tChangeStage(stageResult);
+                        break;
                     //-----------------------------
 
                     #endregion
+                }
 
-                    break;
+                //-----------------------------
 
-                case CStage.EStage.Result_7:
+                #endregion
 
-                    #region [ *** ]
+                break;
 
-                    //-----------------------------
-                    if (nUpdateAndDrawReturnValue != 0)
+            case CStage.EStage.Result_7:
+
+                #region [ *** ]
+
+                //-----------------------------
+                if (nUpdateAndDrawReturnValue != 0)
+                {
+                    if (ConfigIni
+                        .bIsSwappedGuitarBass) // #24415 2011.2.27 yyagi Gt/Bsを入れ替えていたなら、Auto状態をリザルト画面終了後に元に戻す
                     {
-                        if (ConfigIni
-                            .bIsSwappedGuitarBass) // #24415 2011.2.27 yyagi Gt/Bsを入れ替えていたなら、Auto状態をリザルト画面終了後に元に戻す
-                        {
-                            ConfigIni.SwapGuitarBassInfos_AutoFlags(); // Auto入れ替え
-                        }
-
-                        DTX.tPausePlaybackForAllChips();
-                        DTX.OnDeactivate();
-                        rCurrentStage.OnDeactivate();
-                        if (!bCompactMode)
-                        {
-                            tChangeStage(stageSongSelection);
-                        }
-                        else
-                        {
-                            Window.Close();
-                        }
+                        ConfigIni.SwapGuitarBassInfos_AutoFlags(); // Auto入れ替え
                     }
 
-                    //-----------------------------
-
-                    #endregion
-
-                    break;
-
-                case CStage.EStage.ChangeSkin_9:
-
-                    #region [ *** ]
-
-                    //-----------------------------
-                    if (nUpdateAndDrawReturnValue != 0)
+                    DTX.tPausePlaybackForAllChips();
+                    DTX.OnDeactivate();
+                    rCurrentStage.OnDeactivate();
+                    if (!bCompactMode)
                     {
                         tChangeStage(stageSongSelection);
                     }
-
-                    //-----------------------------
-
-                    #endregion
-
-                    break;
-
-                case CStage.EStage.End_8:
-
-                    #region [ *** ]
-
-                    //-----------------------------
-                    if (nUpdateAndDrawReturnValue != 0)
+                    else
                     {
-                        Exit();
+                        Window.Close();
                     }
+                }
 
-                    //-----------------------------
+                //-----------------------------
 
-                    #endregion
+                #endregion
 
-                    break;
-            }
+                break;
+
+            case CStage.EStage.ChangeSkin_9:
+
+                #region [ *** ]
+
+                //-----------------------------
+                if (nUpdateAndDrawReturnValue != 0)
+                {
+                    tChangeStage(stageSongSelection);
+                }
+
+                //-----------------------------
+
+                #endregion
+
+                break;
+
+            case CStage.EStage.End_8:
+                #region [ *** ]
+                //-----------------------------
+                if (nUpdateAndDrawReturnValue != 0)
+                {
+                    Exit();
+                }
+                //-----------------------------
+                #endregion
+                break;
         }
     }
 
@@ -1488,7 +1464,6 @@ internal class CDTXMania : Game
     private bool bTerminated;
     private static CDTX dtx;
     private List<CActivity> listTopLevelActivities;
-    public int nUpdateAndDrawReturnValue;
     private MouseButtons mb = MouseButtons.Left;
     private string strWindowTitle = "";
 

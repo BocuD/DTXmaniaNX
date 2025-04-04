@@ -164,7 +164,7 @@ internal class CStageTitle : CStage
 		if( ePhaseID == EPhase.Common_DefaultState)
 		{
 			if( CDTXMania.InputManager.Keyboard.bKeyPressed( (int) SlimDXKey.Escape ) )
-				return (int) E戻り値.EXIT;
+				return (int) EReturnResult.EXIT;
 
 			ctキー反復用.Up.tRepeatKey( CDTXMania.InputManager.Keyboard.bKeyPressing( (int)SlimDXKey.UpArrow ), new CCounter.DGキー処理( tMoveCursorUp ) );
 			ctキー反復用.R.tRepeatKey( CDTXMania.Pad.bPressingGB( EPad.HH ), new CCounter.DGキー処理( tMoveCursorUp ) );
@@ -180,7 +180,7 @@ internal class CStageTitle : CStage
 
 			if (CDTXMania.Input.ActionDecide())
 			{
-				if ( ( nCurrentCursorPosition == (int) E戻り値.GAMESTART - 1 ) && CDTXMania.Skin.soundGameStart.b読み込み成功 )
+				if ( ( nCurrentCursorPosition == (int) EReturnResult.GAMESTART - 1 ) && CDTXMania.Skin.soundGameStart.b読み込み成功 )
 				{
 					CDTXMania.Skin.soundGameStart.tPlay();
 				}
@@ -188,9 +188,9 @@ internal class CStageTitle : CStage
 				{
 					CDTXMania.Skin.soundDecide.tPlay();
 				}
-				if( nCurrentCursorPosition == (int)E戻り値.EXIT - 1 )
+				if( nCurrentCursorPosition == (int)EReturnResult.EXIT - 1 )
 				{
-					return (int)E戻り値.EXIT;
+					return (int)EReturnResult.EXIT;
 				}
 				actFO.tStartFadeOut();
 				ePhaseID = EPhase.Common_FadeOut;
@@ -249,14 +249,14 @@ internal class CStageTitle : CStage
 				ePhaseID = EPhase.Common_EndStatus;
 				switch ( nCurrentCursorPosition )
 				{
-					case (int)E戻り値.GAMESTART - 1:
-						return (int)E戻り値.GAMESTART;
+					case (int)EReturnResult.GAMESTART - 1:
+						return (int)EReturnResult.GAMESTART;
 
-					case (int) E戻り値.CONFIG - 1:
-						return (int) E戻り値.CONFIG;
+					case (int) EReturnResult.CONFIG - 1:
+						return (int) EReturnResult.CONFIG;
 
-					case (int)E戻り値.EXIT - 1:
-						return (int) E戻り値.EXIT;
+					case (int)EReturnResult.EXIT - 1:
+						return (int) EReturnResult.EXIT;
 					//return ( this.n現在のカーソル行 + 1 );
 				}
 				break;
@@ -271,9 +271,9 @@ internal class CStageTitle : CStage
 		}
 		return 0;
 	}
-	public enum E戻り値
+	public enum EReturnResult
 	{
-		継続 = 0,
+		CONTINUE = 0,
 		GAMESTART,
 		CONFIG,
 		EXIT
@@ -352,7 +352,7 @@ internal class CStageTitle : CStage
 	
 	private void tMoveCursorDown()
 	{
-		if ( nCurrentCursorPosition != (int) E戻り値.EXIT - 1 )
+		if ( nCurrentCursorPosition != (int) EReturnResult.EXIT - 1 )
 		{
 			CDTXMania.Skin.soundCursorMovement.tPlay();
 			nCurrentCursorPosition++;
@@ -366,7 +366,7 @@ internal class CStageTitle : CStage
 	}
 	private void tMoveCursorUp()
 	{
-		if ( nCurrentCursorPosition != (int) E戻り値.GAMESTART - 1 )
+		if ( nCurrentCursorPosition != (int) EReturnResult.GAMESTART - 1 )
 		{
 			CDTXMania.Skin.soundCursorMovement.tPlay();
 			nCurrentCursorPosition--;
