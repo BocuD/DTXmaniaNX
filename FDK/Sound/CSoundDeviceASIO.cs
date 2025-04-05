@@ -39,7 +39,7 @@ public class CSoundDeviceASIO : ISoundDevice
 {
 	// プロパティ
 
-	public ESoundDeviceType e出力デバイス
+	public ESoundDeviceType eOutputDevice
 	{
 		get;
 		protected set;
@@ -127,7 +127,7 @@ public class CSoundDeviceASIO : ISoundDevice
 		// 初期化。
 
 		Trace.TraceInformation("BASS (ASIO) の初期化を開始します。");
-		e出力デバイス = ESoundDeviceType.Unknown;
+		eOutputDevice = ESoundDeviceType.Unknown;
 		n実出力遅延ms = 0;
 		n経過時間ms = 0;
 		n経過時間を更新したシステム時刻ms = CTimer.nUnused;
@@ -187,7 +187,7 @@ public class CSoundDeviceASIO : ISoundDevice
 		{
 			#region [ ASIO の初期化に成功。]
 			//-----------------
-			e出力デバイス = ESoundDeviceType.ASIO;
+			eOutputDevice = ESoundDeviceType.ASIO;
 			asioInfo = BassAsio.BASS_ASIO_GetInfo();
 			n出力チャンネル数 = asioInfo.outputs;
 			db周波数 = BassAsio.BASS_ASIO_GetRate();
@@ -435,7 +435,7 @@ public class CSoundDeviceASIO : ISoundDevice
 	}
 	protected void Dispose(bool bManagedDispose)
 	{
-		e出力デバイス = ESoundDeviceType.Unknown;        // まず出力停止する(Dispose中にクラス内にアクセスされることを防ぐ)
+		eOutputDevice = ESoundDeviceType.Unknown;        // まず出力停止する(Dispose中にクラス内にアクセスされることを防ぐ)
 		if (hMixer_DeviceOut != 0)
 		{
 			BassMix.BASS_Mixer_ChannelPause(hMixer_DeviceOut);

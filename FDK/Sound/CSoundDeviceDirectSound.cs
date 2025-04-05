@@ -8,7 +8,7 @@ public class CSoundDeviceDirectSound : ISoundDevice
 {
 	// プロパティ
 
-	public ESoundDeviceType e出力デバイス
+	public ESoundDeviceType eOutputDevice
 	{
 		get;
 		protected set;
@@ -115,7 +115,7 @@ public class CSoundDeviceDirectSound : ISoundDevice
 	{
 		Trace.TraceInformation("DirectSound の初期化を開始します。");
 
-		e出力デバイス = ESoundDeviceType.Unknown;
+		eOutputDevice = ESoundDeviceType.Unknown;
 		n実バッファサイズms = n実出力遅延ms = n遅延時間ms;
 		tmシステムタイマ = new CTimer(CTimer.EType.MultiMedia);
 
@@ -144,7 +144,7 @@ public class CSoundDeviceDirectSound : ISoundDevice
 
 		// デバイス作成完了。
 
-		e出力デバイス = ESoundDeviceType.DirectSound;
+		eOutputDevice = ESoundDeviceType.DirectSound;
 		//-----------------
 		#endregion
 
@@ -262,7 +262,7 @@ public class CSoundDeviceDirectSound : ISoundDevice
 	}
 	protected void Dispose(bool bManagedDispose)
 	{
-		e出力デバイス = ESoundDeviceType.Unknown;        // まず出力停止する(Dispose中にクラス内にアクセスされることを防ぐ)
+		eOutputDevice = ESoundDeviceType.Unknown;        // まず出力停止する(Dispose中にクラス内にアクセスされることを防ぐ)
 		if (bManagedDispose)
 		{
 			#region [ 経緯時間計測用サウンドバッファを解放。]

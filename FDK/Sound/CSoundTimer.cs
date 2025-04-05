@@ -8,9 +8,9 @@ public class CSoundTimer : CTimerBase
 	{
 		get
 		{
-			if( Device.e出力デバイス == ESoundDeviceType.ExclusiveWASAPI || 
-			    Device.e出力デバイス == ESoundDeviceType.SharedWASAPI ||
-			    Device.e出力デバイス == ESoundDeviceType.ASIO )
+			if( Device.eOutputDevice == ESoundDeviceType.ExclusiveWASAPI || 
+			    Device.eOutputDevice == ESoundDeviceType.SharedWASAPI ||
+			    Device.eOutputDevice == ESoundDeviceType.ASIO )
 			{
 				// BASS 系の ISoundDevice.n経過時間ms はオーディオバッファの更新間隔ずつでしか更新されないため、単にこれを返すだけではとびとびの値になる。
 				// そこで、更新間隔の最中に呼ばれた場合は、システムタイマを使って補間する。
@@ -22,7 +22,7 @@ public class CSoundTimer : CTimerBase
 				return Device.n経過時間ms
 				       + ( Device.tmシステムタイマ.nSystemTimeMs - Device.n経過時間を更新したシステム時刻ms );
 			}
-			else if( Device.e出力デバイス == ESoundDeviceType.DirectSound )
+			else if( Device.eOutputDevice == ESoundDeviceType.DirectSound )
 			{
 				//return this.Device.n経過時間ms;		// #24820 2013.2.3 yyagi TESTCODE DirectSoundでスクロールが滑らかにならないため、
 				return ct.nSystemTimeMs;				// 仮にCSoundTimerをCTimer相当の動作にしてみた
@@ -35,7 +35,7 @@ public class CSoundTimer : CTimerBase
 	{
 		Device = device;
 
-		if ( Device.e出力デバイス != ESoundDeviceType.DirectSound )
+		if ( Device.eOutputDevice != ESoundDeviceType.DirectSound )
 		{
 			TimerCallback timerDelegate = new TimerCallback( SnapTimers );	// CSoundTimerをシステム時刻に変換するために、
 			timer = new Timer( timerDelegate, null, 0, 1000 );				// CSoundTimerとCTimerを両方とも走らせておき、
@@ -49,7 +49,7 @@ public class CSoundTimer : CTimerBase
 	
 	private void SnapTimers(object o)	// 1秒に1回呼び出され、2つのタイマー間の現在値をそれぞれ保持する。
 	{
-		if ( Device.e出力デバイス != ESoundDeviceType.DirectSound )
+		if ( Device.eOutputDevice != ESoundDeviceType.DirectSound )
 		{
 			nDInputTimerCounter = ctDInputTimer.nSystemTimeMs;
 			nSoundTimerCounter = nSystemTimeMs;

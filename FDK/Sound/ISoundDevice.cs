@@ -2,7 +2,7 @@
 
 public interface ISoundDevice : IDisposable
 {
-	ESoundDeviceType e出力デバイス { get; }
+	ESoundDeviceType eOutputDevice { get; }
 	int nMasterVolume { get; set; }
 	long n実出力遅延ms { get; }
 	long n実バッファサイズms { get; }

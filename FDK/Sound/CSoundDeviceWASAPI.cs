@@ -10,7 +10,7 @@ public class CSoundDeviceWASAPI : ISoundDevice
 {
 	// プロパティ
 
-	public ESoundDeviceType e出力デバイス
+	public ESoundDeviceType eOutputDevice
 	{
 		get;
 		protected set;
@@ -123,7 +123,7 @@ public class CSoundDeviceWASAPI : ISoundDevice
 
 		Trace.TraceInformation("BASS (WASAPI{0}) の初期化を開始します。", mode.ToString());
 
-		e出力デバイス = ESoundDeviceType.Unknown;
+		eOutputDevice = ESoundDeviceType.Unknown;
 		n実出力遅延ms = 0;
 		n経過時間ms = 0;
 		n経過時間を更新したシステム時刻ms = CTimer.nUnused;
@@ -365,7 +365,7 @@ public class CSoundDeviceWASAPI : ISoundDevice
 			{
 				#region [ 排他モードで作成成功。]
 				//-----------------
-				e出力デバイス = ESoundDeviceType.ExclusiveWASAPI;
+				eOutputDevice = ESoundDeviceType.ExclusiveWASAPI;
 
 				nDevNo = BassWasapi.BASS_WASAPI_GetDevice();
 				deviceInfo = BassWasapi.BASS_WASAPI_GetDeviceInfo(nDevNo);
@@ -401,7 +401,7 @@ public class CSoundDeviceWASAPI : ISoundDevice
 			{
 				#region [ 共有モードで作成成功。]
 				//-----------------
-				e出力デバイス = ESoundDeviceType.SharedWASAPI;
+				eOutputDevice = ESoundDeviceType.SharedWASAPI;
 
 				var wasapiInfo = BassWasapi.BASS_WASAPI_GetInfo();
 				int n1サンプルのバイト数 = 2 * wasapiInfo.chans; // default;
@@ -648,7 +648,7 @@ public class CSoundDeviceWASAPI : ISoundDevice
 #else
 		int hmixer = hMixer_Chips[(int)eInstType];
 #endif
-		sound.tWASAPIサウンドを作成する(strファイル名, hmixer, e出力デバイス, eInstType);
+		sound.tWASAPIサウンドを作成する(strファイル名, hmixer, eOutputDevice, eInstType);
 		return sound;
 	}
 	public CSound tサウンドを作成する(byte[] byArrWAVファイルイメージ)
@@ -663,7 +663,7 @@ public class CSoundDeviceWASAPI : ISoundDevice
 #else
 		int hmixer = hMixer_Chips[(int)eInstType];
 #endif
-		sound.tWASAPIサウンドを作成する(byArrWAVファイルイメージ, hmixer, e出力デバイス, eInstType);
+		sound.tWASAPIサウンドを作成する(byArrWAVファイルイメージ, hmixer, eOutputDevice, eInstType);
 		return sound;
 	}
 	public void tサウンドを作成する(string strファイル名, ref CSound sound, CSound.EInstType eInstType)
@@ -673,7 +673,7 @@ public class CSoundDeviceWASAPI : ISoundDevice
 #else
 		int hmixer = hMixer_Chips[(int)eInstType];
 #endif
-		sound.tWASAPIサウンドを作成する(strファイル名, hmixer, e出力デバイス, eInstType);
+		sound.tWASAPIサウンドを作成する(strファイル名, hmixer, eOutputDevice, eInstType);
 	}
 	public void tサウンドを作成する(byte[] byArrWAVファイルイメージ, ref CSound sound, CSound.EInstType eInstType)
 	{
@@ -682,7 +682,7 @@ public class CSoundDeviceWASAPI : ISoundDevice
 #else
 		int hmixer = hMixer_Chips[(int)eInstType];
 #endif
-		sound.tWASAPIサウンドを作成する(byArrWAVファイルイメージ, hmixer, e出力デバイス, eInstType);
+		sound.tWASAPIサウンドを作成する(byArrWAVファイルイメージ, hmixer, eOutputDevice, eInstType);
 	}
 	#endregion
 
@@ -701,7 +701,7 @@ public class CSoundDeviceWASAPI : ISoundDevice
 			encoder.Dispose();
 			encoder = null;
 		}
-		e出力デバイス = ESoundDeviceType.Unknown;        // まず出力停止する(Dispose中にクラス内にアクセスされることを防ぐ)
+		eOutputDevice = ESoundDeviceType.Unknown;        // まず出力停止する(Dispose中にクラス内にアクセスされることを防ぐ)
 
 		if (hMixer_DeviceOut != 0)
 		{
