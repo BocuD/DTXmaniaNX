@@ -76,6 +76,9 @@ public abstract class UITexture : UIDrawable
                     
                     float textureHeight = texture.Height * (textureWidth / texture.Width);
                     ImGui.Image(tex.Value, new System.Numerics.Vector2(textureWidth, textureHeight));
+                    
+                    //draw bounds around the texture
+                    ImGui.GetWindowDrawList().AddRect(ImGui.GetItemRectMin(), ImGui.GetItemRectMax(), 0xFF00FF00, 0, 0, 2);
                 }
             }
             else

@@ -14,7 +14,7 @@ public static class InspectorManager
     public static Inspector inspector { get; private set; }
     public static HierarchyWindow hierarchyWindow { get; private set; }
 
-    private static bool inspectorEnabled = false;
+    private static bool inspectorEnabled = true;
     
     public static ImDrawListPtr gizmoDrawList;
     public static Rectangle gizmoRect;
@@ -61,5 +61,54 @@ public static class InspectorManager
             inspector.Draw();
             hierarchyWindow.Draw();
         }
+    }
+    
+    public static void DrawGizmoPoint(Vector2 point, uint color)
+    {
+        //transform from world space to screen space
+        var m = GameWindow.GetViewMatrix();
+        Vector2 transformed = Vector2.Transform(point, m);
+        transformed += new Vector2(gizmoRect.X, gizmoRect.Y);
+        
+        gizmoDrawList.AddCircle(new Vector2(transformed.X, transformed.Y), 5, color);
+    }
+    
+    public static void DrawGizmoPoint(SharpDX.Vector2 point, uint color)
+    {
+        DrawGizmoPoint(new Vector2(point.X, point.Y), color);
+    }
+    
+    public static void DrawGizmoLine(Vector2 start, Vector2 end, uint color)
+    {
+        var m = GameWindow.GetViewMatrix();
+        Vector2 startTransformed = Vector2.Transform(start, m);
+        Vector2 endTransformed = Vector2.Transform(end, m);
+        
+        startTransformed += new Vector2(gizmoRect.X, gizmoRect.Y);
+        endTransformed += new Vector2(gizmoRect.X, gizmoRect.Y);
+        gizmoDrawList.AddLine(new Vector2(startTransformed.X, startTransformed.Y), new Vector2(endTransformed.X, endTransformed.Y), color);
+    }
+    
+    public static void DrawGizmoLine(SharpDX.Vector2 start, SharpDX.Vector2 end, uint color)
+    {
+        DrawGizmoLine(new Vector2(start.X, start.Y), new Vector2(end.X, end.Y), color);
+    }
+    
+    public static void DrawGizmoQuad(Vector2 topLeft, Vector2 topRight, Vector2 bottomLeft, Vector2 bottomRight, uint color)
+    {
+        DrawGizmoLine(topLeft, topRight, color);
+        DrawGizmoLine(topRight, bottomRight, color);
+        DrawGizmoLine(bottomRight, bottomLeft, color);
+        DrawGizmoLine(bottomLeft, topLeft, color);
+    }
+
+    public static void DrawGizmoQuad(SharpDX.Vector2 topLeft, SharpDX.Vector2 topRight, SharpDX.Vector2 bottomLeft,
+        SharpDX.Vector2 bottomRight, uint color)
+    {
+        DrawGizmoQuad(new Vector2(topLeft.X, topLeft.Y),
+            new Vector2(topRight.X, topRight.Y),
+            new Vector2(bottomLeft.X, bottomLeft.Y),
+            new Vector2(bottomRight.X, bottomRight.Y),
+            color);
     }
 }
