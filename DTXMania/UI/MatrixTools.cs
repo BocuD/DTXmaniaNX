@@ -24,13 +24,4 @@ public static class MatrixTools
             matrix.M31, matrix.M32, matrix.M33, matrix.M34,
             matrix.M41, matrix.M42, matrix.M43, matrix.M44);
     }
-    
-    public static void Decompose(this Matrix matrix, out Vector3 translation, out Quaternion rotation, out Vector3 scale)
-    {
-        // Decompose the matrix into translation, rotation, and scale
-        matrix.Decompose(out scale, out rotation, out translation);
-        
-        // Convert the quaternion to a more usable format if needed
-        rotation = Quaternion.Normalize(rotation);
-    }
 }

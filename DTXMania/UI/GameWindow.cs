@@ -1,16 +1,16 @@
-﻿using System.Numerics;
-using Hexa.NET.ImGui;
-using Hexa.NET.ImGuizmo;
+﻿using Hexa.NET.ImGui;
+using SharpDX;
 using SharpDX.Direct3D9;
+using Vector2 = System.Numerics.Vector2;
 
 namespace DTXMania.UI;
 
 public class GameWindow
 {
-    public static Vector2 size = new(1280, 720);
-    public static Vector2 position = new(0, 0);
+    private static Vector2 size = new(1280, 720);
+    private static Vector2 position = new(0, 0);
     
-    public static void Draw(Texture gameRenderTargetTexture)
+    public static (ImDrawListPtr drawList, Rectangle rect) Draw(Texture gameRenderTargetTexture)
     {
         // Draw the game window
         ImGui.Begin("Game Window");
@@ -19,13 +19,13 @@ public class GameWindow
         ImTextureID textureID = new(gameRenderTargetTexture.NativePointer);
         ImGui.Image(textureID, new Vector2(1280, 720));
         
-        //update size and position with actual values
-        ImGui.GetWindowSize(ref size);
-        ImGui.GetWindowPos(ref position);
+        //get rect of the image
+        ImGui.GetItemRectSize(ref size);
+        ImGui.GetItemRectMin(ref position);
         
-        ImGuizmo.SetDrawlist(ImGui.GetWindowDrawList());
-        ImGuizmo.SetRect(position.X, position.Y, size.X, size.Y);
-        
+        ImDrawListPtr windowDrawList = ImGui.GetWindowDrawList();
         ImGui.End();
+
+        return (windowDrawList, new Rectangle((int) position.X, (int) position.Y, (int) size.X, (int) size.Y));
     }
 }

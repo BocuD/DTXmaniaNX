@@ -18,9 +18,15 @@ public class UIGroup : UIDrawable
         this.name = name;
     }
     
-    public T AddChild<T>(T element) where T : UIDrawable
+    public T AddChild<T>(T element, bool setParent = true) where T : UIDrawable
     {
         children.Add(element);
+        
+        if (setParent)
+        {
+            element.SetParent(this, false);
+        }
+        
         return element;
     }
         

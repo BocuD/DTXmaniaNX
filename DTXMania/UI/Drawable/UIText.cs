@@ -33,7 +33,14 @@ public class UIText : UITexture
     [AddChildMenu]
     public UIText() : base(BaseTexture.None)
     {
+        //set font to default
+        fontFamily = new FontFamily(CDTXMania.ConfigIni.songListFont);
+        fontSize = 20;
+        fontStyle = FontStyle.Regular;
+        text = "New UIText";
         
+        UpdateFont();
+        RenderTexture();
     }
     
     public UIText(FontFamily font, int size) : base(BaseTexture.None)

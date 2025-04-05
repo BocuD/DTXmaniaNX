@@ -1,9 +1,8 @@
-﻿using System;
-using System.Numerics;
+﻿using System.Numerics;
+using DTXMania.UI;
 using Hexa.NET.ImGui;
 using Hexa.NET.ImGuizmo;
 using SharpDX;
-using Matrix3x2 = System.Numerics.Matrix3x2;
 using Quaternion = SharpDX.Quaternion;
 using Vector2 = SharpDX.Vector2;
 using Vector3 = SharpDX.Vector3;
@@ -24,6 +23,8 @@ public abstract class UIDrawable : IDisposable
     public bool isVisible = true;
         
     protected Matrix localTransformMatrix = Matrix.Identity;
+    
+    public UIGroup? parent { get; private set; } = null;
 
     public void UpdateLocalTransformMatrix()
     {
@@ -35,9 +36,21 @@ public abstract class UIDrawable : IDisposable
         Matrix anchorMatrix = Matrix.Translation(anchorOffset);
 
         //combine transformations: anchor * scale * rotation * translation
-        localTransformMatrix = scaleMatrix * rotationMatrix * anchorMatrix * translationMatrix;
+        localTransformMatrix = scaleMatrix * anchorMatrix * rotationMatrix * translationMatrix;
+        //localTransformMatrix = scaleMatrix * rotationMatrix * anchorMatrix * translationMatrix;
     }
-        
+
+    public void SetParent(UIGroup? newParent, bool updateGroup = true)
+    {
+        if (updateGroup)
+        {
+            parent?.RemoveChild(this);
+            newParent?.AddChild(this, false);
+        }
+
+        parent = newParent;
+    }
+
     public abstract void Draw(Matrix parentMatrix);
         
     public abstract void Dispose();
@@ -56,32 +69,59 @@ public abstract class UIDrawable : IDisposable
         //draw imguizmo
         Matrix4x4 view = Matrix.LookAtLH(new Vector3(0, 0, -1), new Vector3(0, 0, 0), new Vector3(0, 1, 0)).ToMatrix4x4();
         
-        //create orthographic projection matrix
-        Matrix4x4 projection = Matrix.OrthoLH(1280, -720, -1, 1).ToMatrix4x4();
+        //create orthographic "projection" matrix
+        var gizmoRect = InspectorManager.gizmoRect;
+        Matrix4x4 projection = Matrix.OrthoLH(gizmoRect.Width, -gizmoRect.Height, -1, 1).ToMatrix4x4();
         
         //apply screen space transform to view matrix
-        Vector2 windowSize = new(1280, 720);
+        Vector2 windowSize = new(gizmoRect.Width, gizmoRect.Height);
         Vector2 centerOffset = -windowSize / 2f;
         
         //apply window size and position to view matrix
         var screenSpaceTransform = Matrix4x4.CreateTranslation(centerOffset.X, centerOffset.Y, 0);// * scaleMatrix;
         Matrix4x4.Invert(screenSpaceTransform, out Matrix4x4 inverseScreenSpaceTransform);
         
-        //transform matrix
-        Matrix4x4 transform4x4 = localTransformMatrix.ToMatrix4x4();
+        //construct transform matrix
+        Matrix translationMatrix = Matrix.Translation(position);
+        Matrix rotationMatrix = Matrix.RotationYawPitchRoll(rotation.Y, rotation.X, rotation.Z);
+        Matrix scaleMatrix = Matrix.Scaling(scale);
+        Matrix anchorMatrix = Matrix.Identity; //Matrix.Translation(anchorOffset);
+
+        //combine transformations (but skip anchor, since we don't want it to affect the gizmo)
+        Matrix transform = (scaleMatrix * rotationMatrix * anchorMatrix * translationMatrix);
+        
+        //construct parent matrix
+        int iterations = 0;
+        Matrix parentMatrix = Matrix.Identity;
+        UIGroup? currentParent = parent;
+        while (currentParent != null && iterations < 100)
+        {
+            parentMatrix *= currentParent.localTransformMatrix;
+            currentParent = currentParent.parent;
+            iterations++;
+        }
+        
+        Matrix combined = transform * parentMatrix;
+        Matrix4x4 transform4x4 = combined.ToMatrix4x4();
         
         //apply scale
         transform4x4 *= screenSpaceTransform;
         
         Matrix4x4 deltaMatrix = Matrix4x4.Identity;
 
-        if (ImGuizmo.Manipulate(ref view, ref projection, ImGuizmoOperation.TranslateX | ImGuizmoOperation.TranslateY | ImGuizmoOperation.RotateZ, ImGuizmoMode.Local,
-                ref transform4x4,
-                ref deltaMatrix))
+        ImGuizmoOperation operations = ImGuizmoOperation.TranslateX | ImGuizmoOperation.TranslateY |
+                                       ImGuizmoOperation.RotateZ | 
+                                       ImGuizmoOperation.ScaleX | ImGuizmoOperation.ScaleY;
+        
+        if (ImGuizmo.Manipulate(ref view, ref projection, operations, ImGuizmoMode.World, ref transform4x4, ref deltaMatrix))
         {
             var mat = (transform4x4 * inverseScreenSpaceTransform);
+            
+            //remove parent transform
+            parentMatrix.Invert();
+            
             //update local transform matrix
-            localTransformMatrix = mat.ToMatrix();
+            localTransformMatrix = mat.ToMatrix() * parentMatrix;
             
             mat.ToMatrix().Decompose(out scale, out Quaternion rot, out position);
             

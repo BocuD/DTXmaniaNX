@@ -556,17 +556,13 @@ internal class CDTXMania : Game
         ImGuizmo.Enable(true);
         ImGuizmo.SetOrthographic(true);
 
-        if (renderGameToWindow)
-        {
-            ImGuizmo.SetRect(GameWindow.position.X, GameWindow.position.Y, GameWindow.size.X, GameWindow.size.Y);
-        }
-        else
+        if (!renderGameToWindow)
         {
             ImGuiIOPtr io = ImGui.GetIO();
             ImGuizmo.SetRect(0, 0, io.DisplaySize.X, io.DisplaySize.Y);
             ImGuizmo.SetDrawlist(ImGui.GetBackgroundDrawList());
         }
-
+        
         DrawStage();
 
         if (renderGameToWindow)

@@ -90,6 +90,7 @@ public class HierarchyWindow
                     if (group.children.Contains(removeDrawable))
                     {
                         group.RemoveChild(removeDrawable);
+                        removeDrawable.Dispose();
                         removeDrawable = null;
                     }
                 }
@@ -124,8 +125,13 @@ public class HierarchyWindow
         {
             if (ImGui.BeginMenu("Add Child"))
             {
+                //get all executing assemblies
+                var assemblies = AppDomain.CurrentDomain.GetAssemblies()
+                    .Where(a => !a.IsDynamic && !string.IsNullOrWhiteSpace(a.Location))
+                    .ToArray();
+                
                 //get types that inherit from UIDrawable
-                Type[] types = typeof(UIDrawable).Assembly.GetTypes()
+                Type[] types = assemblies.SelectMany(x => x.GetTypes())
                     .Where(t => t.IsSubclassOf(typeof(UIDrawable)) && !t.IsAbstract)
                     .ToArray();
                     
