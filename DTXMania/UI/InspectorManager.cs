@@ -1,4 +1,5 @@
-﻿using DTXMania.Core;
+﻿using System.Numerics;
+using DTXMania.Core;
 using DTXUIRenderer;
 using Hexa.NET.ImGui;
 using Hexa.NET.ImGuizmo;
@@ -18,6 +19,8 @@ public static class InspectorManager
     
     public static ImDrawListPtr gizmoDrawList;
     public static Rectangle gizmoRect;
+    
+    private static Matrix4x4 view = Matrix4x4.Identity;
     
     static InspectorManager()
     {
@@ -43,6 +46,8 @@ public static class InspectorManager
             
             gizmoRect = windowInfo.rect;
             gizmoDrawList = windowInfo.drawList;
+
+            view = GameWindow.GetViewMatrix();
         }
         else
         {
@@ -51,6 +56,8 @@ public static class InspectorManager
             Vector2 size = ImGui.GetIO().DisplaySize;
             gizmoRect = new Rectangle(0, 0, (int) size.X, (int) size.Y);
             gizmoDrawList = ImGui.GetBackgroundDrawList();
+            
+            view = Matrix4x4.Identity;
         }
         
         ImGuizmo.SetDrawlist(gizmoDrawList);
@@ -63,26 +70,24 @@ public static class InspectorManager
         }
     }
     
-    public static void DrawGizmoPoint(Vector2 point, uint color)
+    public static void DrawGizmoPoint(Vector2 point, float radius, uint color, float thickness = 1.0f)
     {
         //transform from world space to screen space
-        var m = GameWindow.GetViewMatrix();
-        Vector2 transformed = Vector2.Transform(point, m);
+        Vector2 transformed = Vector2.Transform(point, view);
         transformed += new Vector2(gizmoRect.X, gizmoRect.Y);
         
-        gizmoDrawList.AddCircle(new Vector2(transformed.X, transformed.Y), 5, color);
+        gizmoDrawList.AddCircle(new Vector2(transformed.X, transformed.Y), radius, color, 12, thickness);
     }
     
-    public static void DrawGizmoPoint(SharpDX.Vector2 point, uint color)
+    public static void DrawGizmoPoint(SharpDX.Vector2 point, float radius, uint color, float thickness = 1.0f)
     {
-        DrawGizmoPoint(new Vector2(point.X, point.Y), color);
+        DrawGizmoPoint(new Vector2(point.X, point.Y), radius, color, thickness);
     }
     
     public static void DrawGizmoLine(Vector2 start, Vector2 end, uint color)
     {
-        var m = GameWindow.GetViewMatrix();
-        Vector2 startTransformed = Vector2.Transform(start, m);
-        Vector2 endTransformed = Vector2.Transform(end, m);
+        Vector2 startTransformed = Vector2.Transform(start, view);
+        Vector2 endTransformed = Vector2.Transform(end, view);
         
         startTransformed += new Vector2(gizmoRect.X, gizmoRect.Y);
         endTransformed += new Vector2(gizmoRect.X, gizmoRect.Y);
@@ -110,5 +115,10 @@ public static class InspectorManager
             new Vector2(bottomLeft.X, bottomLeft.Y),
             new Vector2(bottomRight.X, bottomRight.Y),
             color);
+    }
+
+    public static Matrix4x4 GetViewMatrix()
+    {
+        return view;
     }
 }

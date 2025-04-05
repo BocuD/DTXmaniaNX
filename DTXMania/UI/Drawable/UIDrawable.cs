@@ -58,17 +58,17 @@ public abstract class UIDrawable : IDisposable
     
     public Matrix GetFullTransformMatrix()
     {
-        int iterations = 0;
-        Matrix parentMatrix = Matrix.Identity;
+        Matrix combined = localTransformMatrix;
         UIGroup? currentParent = parent;
+        int iterations = 0;
         while (currentParent != null && iterations < 100)
         {
-            parentMatrix *= currentParent.localTransformMatrix;
+            combined *= currentParent.localTransformMatrix; // LOCAL * PARENT
             currentParent = currentParent.parent;
             iterations++;
         }
-        
-        return parentMatrix * localTransformMatrix;
+
+        return combined;
     }
 
     public virtual void DrawInspector()
@@ -104,7 +104,7 @@ public abstract class UIDrawable : IDisposable
         var gizmoRect = InspectorManager.gizmoRect;
         
         // Get the view matrix (camera transform) from GameWindow
-        Matrix4x4 view = GameWindow.GetViewMatrix();
+        Matrix4x4 view = InspectorManager.GetViewMatrix();
         
         view *= Matrix4x4.CreateScale(1, -1, 1); // flip Y axis
         
@@ -163,28 +163,37 @@ public abstract class UIDrawable : IDisposable
 
     private void DrawTransformGizmo()
     {
-        //create a quad in local space
-        Vector2 quadTopLeft = Vector2.Zero;
-        Vector2 quadTopRight = new(size.X, 0);
-        Vector2 quadBottomLeft = new(0, size.Y);
-        Vector2 quadBottomRight = size;
-        
-        //transform the quad to world space
+        // Create a quad in local 3D space (Z=0)
+        Vector3 quadTopLeft = new(0, 0, 0);
+        Vector3 quadTopRight = new(size.X, 0, 0);
+        Vector3 quadBottomLeft = new(0, size.Y, 0);
+        Vector3 quadBottomRight = new(size.X, size.Y, 0);
+
+        // Full world transform
         Matrix t = GetFullTransformMatrix();
-        Vector2.Transform(ref quadTopLeft, ref t, out Vector4 topLeft);
-        Vector2.Transform(ref quadTopRight, ref t, out Vector4 topRight);
-        Vector2.Transform(ref quadBottomLeft, ref t, out Vector4 bottomLeft);
-        Vector2.Transform(ref quadBottomRight, ref t, out Vector4 bottomRight);
-        
-        //draw the quad
+
+        // Transform points using full matrix
+        Vector3.TransformCoordinate(ref quadTopLeft, ref t, out Vector3 worldTopLeft);
+        Vector3.TransformCoordinate(ref quadTopRight, ref t, out Vector3 worldTopRight);
+        Vector3.TransformCoordinate(ref quadBottomLeft, ref t, out Vector3 worldBottomLeft);
+        Vector3.TransformCoordinate(ref quadBottomRight, ref t, out Vector3 worldBottomRight);
+
+        // Draw the quad in 2D screen space (ignore Z after transformation)
         InspectorManager.DrawGizmoQuad(
-            new Vector2(topLeft.X, topLeft.Y),
-            new Vector2(topRight.X, topRight.Y),
-            new Vector2(bottomLeft.X, bottomLeft.Y),
-            new Vector2(bottomRight.X, bottomRight.Y),
+            new Vector2(worldTopLeft.X, worldTopLeft.Y),
+            new Vector2(worldTopRight.X, worldTopRight.Y),
+            new Vector2(worldBottomLeft.X, worldBottomLeft.Y),
+            new Vector2(worldBottomRight.X, worldBottomRight.Y),
             0xFF00FF00);
-        
-        //draw point at the center
-        InspectorManager.DrawGizmoPoint(new Vector2(position.X, position.Y), 0xFFFF0000);
+
+        // Draw the center point
+        Vector3 center = (quadTopLeft + quadTopRight + quadBottomLeft + quadBottomRight) / 4;
+        Vector3.TransformCoordinate(ref center, ref t, out Vector3 transformedCenter);
+        InspectorManager.DrawGizmoPoint(new Vector2(transformedCenter.X, transformedCenter.Y), 15, 0xFFFF0000, 2.5f);
+
+        // Draw anchor point
+        Vector3 anchorPoint = new(anchor.X * size.X, anchor.Y * size.Y, 0);
+        Vector3.TransformCoordinate(ref anchorPoint, ref t, out Vector3 transformedAnchor);
+        InspectorManager.DrawGizmoPoint(new Vector2(transformedAnchor.X, transformedAnchor.Y), 20, 0xFF0000FF, 2.5f);
     }
 }
