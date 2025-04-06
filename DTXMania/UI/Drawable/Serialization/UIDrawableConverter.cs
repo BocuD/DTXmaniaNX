@@ -63,7 +63,7 @@ public class UIDrawableConverter : JsonConverter
 
             case UIImage image:
             {
-                image.LoadResource();
+                image.LoadResource(false);
                 break;
             }
         }

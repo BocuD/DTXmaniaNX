@@ -63,7 +63,7 @@ public class UIImage : UITexture
         }
     }
 
-    public void LoadResource()
+    public void LoadResource(bool updateRects)
     {
         if (imageSource == ImageSource.Resource)
         {
@@ -74,7 +74,7 @@ public class UIImage : UITexture
                 return;
             }
 
-            SetTexture(new DTXTexture(fullPath), false);
+            SetTexture(new DTXTexture(fullPath), updateRects);
         }
     }
 
@@ -110,7 +110,7 @@ public class UIImage : UITexture
                         string resourcePath = currentSkin.AddResource(path);
                         imageSource = ImageSource.Resource;
                         resource = resourcePath;
-                        LoadResource();
+                        LoadResource(true);
                     }
                     else
                     {
@@ -214,5 +214,6 @@ public enum ERenderMode
 public enum ImageSource
 {
     File,
-    Resource
+    Resource,
+    Dynamic
 }
