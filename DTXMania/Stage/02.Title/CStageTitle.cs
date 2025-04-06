@@ -33,7 +33,7 @@ internal class CStageTitle : CStage
 		var family = new FontFamily(CDTXMania.ConfigIni.songListFont);
 		ui.AddChild(new UIText(family, 12, CDTXMania.VERSION_DISPLAY));
 		
-		DTXTexture bgTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\2_background.jpg")));
+		DTXTexture bgTex = new(CSkin.Path(@"Graphics\2_background.jpg"));
 		UIImage bg = ui.AddChild(new UIImage(bgTex));
 		bg.renderOrder = -100;
 		bg.position = Vector3.Zero;
@@ -101,32 +101,28 @@ internal class CStageTitle : CStage
 			base.OnManagedReleaseResources();
 		}
 	}
+
+	public override void FirstUpdate()
+	{
+		if( CDTXMania.rPreviousStage == CDTXMania.stageStartup )
+		{
+			actFIfromSetup.tStartFadeIn();
+			ePhaseID = EPhase.タイトル_起動画面からのフェードイン;
+		}
+		else
+		{
+			actFI.tStartFadeIn();
+			ePhaseID = EPhase.Common_FadeIn;
+		}
+		ctカーソルフラッシュ用.tStart( 0, 700, 5, CDTXMania.Timer );
+		ctカーソルフラッシュ用.nCurrentValue = 100;
+	}
+
 	public override int OnUpdateAndDraw()
 	{
 		if (bNotActivated) return 0;
 		
 		base.OnUpdateAndDraw();
-			
-		#region [ 初めての進行描画 ]
-		//---------------------
-		if( bJustStartedUpdate )
-		{
-			if( CDTXMania.rPreviousStage == CDTXMania.stageStartup )
-			{
-				actFIfromSetup.tStartFadeIn();
-				ePhaseID = EPhase.タイトル_起動画面からのフェードイン;
-			}
-			else
-			{
-				actFI.tStartFadeIn();
-				ePhaseID = EPhase.Common_FadeIn;
-			}
-			ctカーソルフラッシュ用.tStart( 0, 700, 5, CDTXMania.Timer );
-			ctカーソルフラッシュ用.nCurrentValue = 100;
-			bJustStartedUpdate = false;
-		}
-		//---------------------
-		#endregion
 
 		// 進行
 

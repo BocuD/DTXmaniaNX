@@ -68,18 +68,19 @@ internal class CStageEnd : CStage
 			base.OnManagedReleaseResources();
 		}
 	}
+
+	public override void FirstUpdate()
+	{
+		CDTXMania.Skin.soundGameEnd.tPlay();
+		ct時間稼ぎ.tStart( 0, 1, 0x3e8, CDTXMania.Timer );
+	}
+
 	public override int OnUpdateAndDraw()
 	{
 		if (bNotActivated) return 0;
 		
 		base.OnUpdateAndDraw();
-
-		if( bJustStartedUpdate )
-		{
-			CDTXMania.Skin.soundGameEnd.tPlay();
-			ct時間稼ぎ.tStart( 0, 1, 0x3e8, CDTXMania.Timer );
-			bJustStartedUpdate = false;
-		}
+		
 		ct時間稼ぎ.tUpdate();
 		if( ct時間稼ぎ.bReachedEndValue && !CDTXMania.Skin.soundGameEnd.b再生中 )
 		{

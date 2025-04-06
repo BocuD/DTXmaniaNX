@@ -221,6 +221,8 @@ internal class CActSelectPopupMenu : CActivity
             ui = CDTXMania.stageSongSelection.ui.AddChild(new UIGroup("Quick Select Menu"));
             ui.position = new Vector3(1280.0f/2.0f, 720.0f/2.0f + 20.0f, 0); 
             ui.anchor = new Vector2(0.5f, 0.5f);
+            ui.renderOrder = 100;
+            ui.isVisible = false;
                 
             var bgTex = new DTXTexture(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\ScreenSelect sort menu background.png"), false));
             var bg = ui.AddChild(new UIImage(bgTex));
@@ -381,10 +383,13 @@ internal class CActSelectPopupMenu : CActivity
                 pair.value.SetText(s);
                 pair.value.isHighlighted = bValueBold;
             }
-                
-            tDrawSub();
             
-            ui.Draw(Matrix.Identity);
+            tDrawSub();
+            ui.isVisible = true;
+        }
+        else
+        {
+            ui.isVisible = false;
         }
         return 0;
     }

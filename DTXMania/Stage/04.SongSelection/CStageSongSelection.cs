@@ -5,6 +5,8 @@ using System.Diagnostics;
 using FDK;
 using DiscordRPC;
 using DTXMania.Core;
+using DTXMania.UI;
+using DTXMania.UI.Drawable;
 using DTXUIRenderer;
 using SlimDXKey = SlimDX.DirectInput.Key;
 
@@ -148,11 +150,6 @@ internal class CStageSongSelection : CStage
 		actSongList.Refresh( cs, bRemakeSongTitleBar );
 	}
 
-	public override void InitializeBaseUI()
-	{
-		
-	}
-
 	public override void OnActivate()
 	{
 		Trace.TraceInformation( "選曲ステージを活性化します。" );
@@ -232,13 +229,59 @@ internal class CStageSongSelection : CStage
 			Trace.Unindent();
 		}
 	}
+	
+	public override void InitializeBaseUI()
+	{
+		DTXTexture bgTex = new(CSkin.Path(@"Graphics\5_background.jpg"));
+		UIImage bg = ui.AddChild(new UIImage(bgTex));
+		bg.renderOrder = -100;
+		bg.position = SharpDX.Vector3.Zero;
+		bg.name = "Background";
+		
+		LegacyDrawable backgroundVideo = ui.AddChild(new LegacyDrawable(() => actBackgroundVideoAVI.tUpdateAndDraw()));
+		backgroundVideo.renderOrder = -99;
+		
+		DTXTexture topPanelTex = new(CSkin.Path(@"Graphics\5_header panel.png"));
+		UIImage topPanel = ui.AddChild(new UIImage(topPanelTex));
+		topPanel.position = new SharpDX.Vector3(0, 0, 0);
+		topPanel.name = "TopPanel";
+		
+		DTXTexture bottomPanelTex = new(CSkin.Path(@"Graphics\5_footer panel.png"));
+		UIImage bottomPanel = ui.AddChild(new UIImage(bottomPanelTex));
+		bottomPanel.position = new SharpDX.Vector3(0, 720 - bottomPanelTex.Height, 0);
+		bottomPanel.name = "BottomPanel";
+		
+		DTXTexture bpmLabelTex = new(CSkin.Path(@"Graphics\5_BPM.png"));
+		UIImage bpmLabel = ui.AddChild(new UIImage(bpmLabelTex));
+		bpmLabel.position = new SharpDX.Vector3(32, 258, 0);
+		bpmLabel.name = "BPMLabel";
+		
+		LegacyDrawable preImagePanel = ui.AddChild(new LegacyDrawable(() => actPreimagePanel.OnUpdateAndDraw()));
+		preImagePanel.name = "PreImagePanel";
+		
+		LegacyDrawable artistComment = ui.AddChild(new LegacyDrawable(() => actArtistComment.OnUpdateAndDraw()));
+		artistComment.name = "ArtistComment";
+		
+		LegacyDrawable songList = ui.AddChild(new LegacyDrawable(() => actSongList.OnUpdateAndDraw()));
+		songList.name = "SongList";
+		
+		LegacyDrawable statusPanel = ui.AddChild(new LegacyDrawable(() => actStatusPanel.OnUpdateAndDraw()));
+		statusPanel.name = "StatusPanel";
+		
+		LegacyDrawable perfHistoryPanel = ui.AddChild(new LegacyDrawable(() => actPerHistoryPanel.OnUpdateAndDraw()));
+		perfHistoryPanel.name = "PerfHistoryPanel";
+		
+		LegacyDrawable information = ui.AddChild(new LegacyDrawable(() => actInformation.OnUpdateAndDraw()));
+		information.name = "Information";
+		
+		LegacyDrawable showCurrentPosition = ui.AddChild(new LegacyDrawable(() => actShowCurrentPosition.OnUpdateAndDraw()));
+		showCurrentPosition.name = "ShowCurrentPosition";
+	}
+	
 	public override void OnManagedCreateResources()
 	{
 		if( !bNotActivated )
 		{
-			txBackground = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\5_background.jpg" ), false );
-			txTopPanel = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\5_header panel.png" ), false );
-			txBottomPanel = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\5_footer panel.png" ), false );
 			prvFontSearchInputNotification = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.songListFont), 14, FontStyle.Regular);
 			//this.dsBackgroundVideo = CDTXMania.t失敗してもスキップ可能なDirectShowを生成する(CSkin.Path(@"Graphics\5_background.mp4"), CDTXMania.app.WindowHandle, true);
 			txBPMLabel = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\5_BPM.png"), false);
@@ -261,50 +304,40 @@ internal class CStageSongSelection : CStage
 		if( !bNotActivated )
 		{
 			actBackgroundVideoAVI.Stop();
-				
-			//CDTXMania.t安全にDisposeする( ref this.r現在演奏中のスコアの背景動画 );
-			//CDTXMania.t安全にDisposeする(ref this.dsBackgroundVideo);			
-
-			CDTXMania.tReleaseTexture( ref txBackground);
-			CDTXMania.tReleaseTexture( ref txTopPanel);
-			CDTXMania.tReleaseTexture( ref txBottomPanel);
+			
 			CDTXMania.tReleaseTexture(ref txBPMLabel);
-			//
+			
 			CDTXMania.tDisposeSafely(ref txSearchInputNotification);
 			CDTXMania.tDisposeSafely(ref prvFontSearchInputNotification);
 
 			base.OnManagedReleaseResources();
 		}
 	}
+
+	public override void FirstUpdate()
+	{
+		ctInitialAppearAnimation = new CCounter( 0, 100, 3, CDTXMania.Timer );
+		if( CDTXMania.rPreviousStage == CDTXMania.stageResult )
+		{
+			actFIfrom結果画面.tフェードイン開始();
+			ePhaseID = EPhase.選曲_結果画面からのフェードイン;
+		}
+		else
+		{
+			actFIFO.tフェードイン開始();
+			ePhaseID = EPhase.Common_FadeIn;
+		}
+		ctSearchInputDisplayCounter = new CCounter(0, 1, 10000, CDTXMania.Timer);
+		tSelectedSongChanged();
+	}
+
 	public override int OnUpdateAndDraw()
 	{
 		if (bNotActivated) return 0;
-
-		base.OnUpdateAndDraw();
 		
-		#region [ 初めての進行描画 ]
-		//---------------------
-		if( bJustStartedUpdate )
-		{
-			ct登場時アニメ用共通 = new CCounter( 0, 100, 3, CDTXMania.Timer );
-			if( CDTXMania.rPreviousStage == CDTXMania.stageResult )
-			{
-				actFIfrom結果画面.tフェードイン開始();
-				ePhaseID = EPhase.選曲_結果画面からのフェードイン;
-			}
-			else
-			{
-				actFIFO.tフェードイン開始();
-				ePhaseID = EPhase.Common_FadeIn;
-			}
-			ctSearchInputDisplayCounter = new CCounter(0, 1, 10000, CDTXMania.Timer);
-			tSelectedSongChanged();
-			bJustStartedUpdate = false;
-		}
-		//---------------------
-		#endregion
+		base.OnUpdateAndDraw();
 
-		ct登場時アニメ用共通.tUpdate();
+		ctInitialAppearAnimation.tUpdate();
 		ctSearchInputDisplayCounter.tUpdate();
 		if (ctSearchInputDisplayCounter.bReachedEndValue)
 		{
@@ -312,60 +345,31 @@ internal class CStageSongSelection : CStage
 		}
 
 		//Draw Background video  via CActPerfAVI methods
-		actBackgroundVideoAVI.tUpdateAndDraw();
-		//Draw background video and image
-		//if(this.dsBackgroundVideo != null)
-		//            {
-		//	this.dsBackgroundVideo.t再生開始();
-		//	this.dsBackgroundVideo.MediaSeeking.GetPositions(out this.lDshowPosition, out this.lStopPosition);
-		//	this.dsBackgroundVideo.bループ再生 = true;
+		//        actBackgroundVideoAVI.tUpdateAndDraw();
 
-		//	if (this.lDshowPosition == this.lStopPosition)
-		//	{
-		//		this.dsBackgroundVideo.MediaSeeking.SetPositions(
-		//		DsLong.FromInt64((long)(0)),
-		//		AMSeekingSeekingFlags.AbsolutePositioning,
-		//		0,
-		//		AMSeekingSeekingFlags.NoPositioning);
-		//	}
+		//        actPreimagePanel.OnUpdateAndDraw();
+		
+		//        actArtistComment.OnUpdateAndDraw();
+		
+		//        actSongList.OnUpdateAndDraw();
+		
+		//        actStatusPanel.OnUpdateAndDraw();
+		//        actPerHistoryPanel.OnUpdateAndDraw();
+		
+		// int y = 0;
+		// if( ct登場時アニメ用共通.bInProgress )
+		// {
+		// 	double db登場割合 = ( (double) ct登場時アニメ用共通.nCurrentValue ) / 100.0;	// 100が最終値
+		// 	double dbY表示割合 = Math.Sin( Math.PI / 2 * db登場割合 );
+		// 	y = ( (int) ( txTopPanel.szImageSize.Height * dbY表示割合 ) ) - txTopPanel.szImageSize.Height;
+		// }
+		// if( txTopPanel != null )
+		// 	txTopPanel.tDraw2D( CDTXMania.app.Device, 0, y );
 
-		//	this.dsBackgroundVideo.t現時点における最新のスナップイメージをTextureに転写する(this.txBackground);
-		//}
-
-		if( txBackground != null && rBackgroundVideoAVI.avi == null)
-		{
-			txBackground.tDraw2D(CDTXMania.app.Device, 0, 0);
-			//Removed drawing upside down	
-		}
-
-		if (txBPMLabel != null)
-			txBPMLabel.tDraw2D(CDTXMania.app.Device, 32, 258);
-
-		actPreimagePanel.OnUpdateAndDraw();
-		//	this.bIsEnumeratingSongs = !this.actPreimageパネル.bIsPlayingPremovie;				// #27060 2011.3.2 yyagi: #PREMOVIE再生中は曲検索を中断する
-
-		//this.actStatusPanel.OnUpdateAndDraw();
-		actArtistComment.OnUpdateAndDraw();
-		actSongList.OnUpdateAndDraw();
-		actStatusPanel.OnUpdateAndDraw();
-		actPerHistoryPanel.OnUpdateAndDraw();
-		int y = 0;
-		if( ct登場時アニメ用共通.bInProgress )
-		{
-			double db登場割合 = ( (double) ct登場時アニメ用共通.nCurrentValue ) / 100.0;	// 100が最終値
-			double dbY表示割合 = Math.Sin( Math.PI / 2 * db登場割合 );
-			y = ( (int) ( txTopPanel.szImageSize.Height * dbY表示割合 ) ) - txTopPanel.szImageSize.Height;
-		}
-		if( txTopPanel != null )
-			txTopPanel.tDraw2D( CDTXMania.app.Device, 0, y );
-
-		actInformation.OnUpdateAndDraw();
-		if( txBottomPanel != null )
-			txBottomPanel.tDraw2D( CDTXMania.app.Device, 0, 720 - txBottomPanel.szImageSize.Height );
+		//         actInformation.OnUpdateAndDraw();
 
 		actPresound.OnUpdateAndDraw();
-//				this.actオプションパネル.OnUpdateAndDraw();
-		actShowCurrentPosition.OnUpdateAndDraw();								// #27648 2011.3.28 yyagi
+		//        actShowCurrentPosition.OnUpdateAndDraw();
 
 		switch ( ePhaseID )
 		{
@@ -446,21 +450,7 @@ internal class CStageSongSelection : CStage
 					return 0;
 				}
 				#endregion
-				#region [ Shift-F2: 未使用 ]
-				// #24525 2011.3.16 yyagi: [SHIFT]+[F2]は廃止(将来発生するかもしれない別用途のためにキープ)
-				/*
-                    if ((CDTXMania.InputManager.Keyboard.bKeyPressing(SlimDXKey.RightShift) || CDTXMania.InputManager.Keyboard.bKeyPressing(SlimDXKey.LeftShift)) &&
-                        CDTXMania.InputManager.Keyboard.bKeyPressed(SlimDXKey.F2))
-                    {	// [SHIFT] + [F2] CONFIGURATION
-                        this.actPresound.tサウンド停止();
-                        this.eReturnValueAfterFadeOut = EReturnValue.オプション呼び出し;
-                        this.actFIFO.tStartFadeOut();
-                        base.ePhaseID = CStage.EPhase.Common_FadeOut;
-                        CDTXMania.Skin.soundCancel.tPlay();
-                        return 0;
-                    }
-					*/
-				#endregion
+
 				if (actSongList.rSelectedSong != null)
 				{
 					#region [ Decide ]
@@ -682,20 +672,6 @@ internal class CStageSongSelection : CStage
 					}
 					#endregion
 				}
-				//if( CDTXMania.InputManager.Keyboard.bKeyPressed(SlimDXKey.F6) )
-				//{
-				//    if (CDTXMania.EnumSongs.IsEnumerating)
-				//    {
-				//        // Debug.WriteLine( "バックグラウンドでEnumeratingSongs中だったので、一旦中断します。" );
-				//        CDTXMania.EnumSongs.Abort();
-				//        CDTXMania.actEnumSongs.OnDeactivate();
-				//    }
-
-				//    CDTXMania.EnumSongs.StartEnumFromDisk();
-				//    //CDTXMania.EnumSongs.ChangeEnumeratePriority(ThreadPriority.Normal);
-				//    CDTXMania.actEnumSongs.bコマンドでの曲データ取得 = true;
-				//    CDTXMania.actEnumSongs.OnActivate();
-				//}
 			}
 
 			#region [Test text field]
@@ -710,6 +686,7 @@ internal class CStageSongSelection : CStage
 			actSortSongs.tUpdateAndDraw();
 			actQuickConfig.tUpdateAndDraw();
 			actTextBox.OnUpdateAndDraw();
+			
 			if (actTextBox.b入力が終了した)
 			{
 				strSearchString = actTextBox.str確定文字列を返す();
@@ -865,13 +842,11 @@ internal class CStageSongSelection : CStage
 	private string strSearchString;
 	private bool bBGMPlayed;  // bBGM再生済み
 	private STKeyRepeatCounter ctKeyRepeat;  // ctキー反復用
-	public CCounter ct登場時アニメ用共通;
+	public CCounter ctInitialAppearAnimation;
 	private CCounter ctSearchInputDisplayCounter;
 	private EReturnValue eReturnValueWhenFadeOutCompleted;  // eフェードアウト完了時の戻り値
 	private Font ftFont;  // ftフォント
-	private CTexture txBottomPanel;  // tx下部パネル
-	private CTexture txTopPanel;  // tx上部パネル
-	private CTexture txBackground;  // tx背景
+	
 	private CTexture txBPMLabel;
 	//private CDirectShow dsBackgroundVideo; // background Video
 	private CAVI rBackgroundVideoAVI;// background Video using CAVI class

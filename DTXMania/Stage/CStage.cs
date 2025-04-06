@@ -91,8 +91,19 @@ public abstract class CStage : CActivity
 
 	public abstract void InitializeBaseUI();
 
+	public virtual void FirstUpdate()
+	{
+		
+	}
+	
 	public override int OnUpdateAndDraw()
 	{
+		if (bJustStartedUpdate)
+		{
+			FirstUpdate();
+			bJustStartedUpdate = false;
+		}
+		
 		ui.Draw(Matrix.Identity);
 		
 		return base.OnUpdateAndDraw();

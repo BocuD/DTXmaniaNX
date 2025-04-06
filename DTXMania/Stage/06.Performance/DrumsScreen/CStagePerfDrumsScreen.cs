@@ -146,6 +146,44 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         }
     }
 
+    public override void FirstUpdate()
+    {
+        CSoundManager.rcPerformanceTimer.tReset();
+        CDTXMania.Timer.tReset();
+        actChipFireD.Start(ELane.HH, false, false, false, 0, false); // #31554 2013.6.12 yyagi
+
+        ctChipPatternAnimation.Drums = new CCounter(0, 7, 70, CDTXMania.Timer);
+        double UnitTime;
+        UnitTime = ((60.0 / (CDTXMania.stagePerfDrumsScreen.actPlayInfo.dbBPM) / 14.0));
+        ctBPMBar = new CCounter(1, 14, (int)(UnitTime * 1000.0), CDTXMania.Timer);
+
+        ctComboTimer = new CCounter(1, 16,
+            (int)((60.0 / (CDTXMania.stagePerfDrumsScreen.actPlayInfo.dbBPM) / 16) * 1000.0), CDTXMania.Timer);
+
+        ctChipPatternAnimation.Guitar = new CCounter(0, 0x17, 20, CDTXMania.Timer);
+        ctChipPatternAnimation.Bass = new CCounter(0, 0x17, 20, CDTXMania.Timer);
+        ctWailingChipPatternAnimation = new CCounter(0, 4, 50, CDTXMania.Timer);
+        ePhaseID = EPhase.Common_FadeIn;
+
+        if (tx判定画像anime != null && txBonusEffect != null)
+        {
+            tx判定画像anime.tDraw2D(CDTXMania.app.Device, 1280, 720);
+            txBonusEffect.tDraw2D(CDTXMania.app.Device, 1280, 720);
+        }
+
+        actFI.tStartFadeIn();
+        ct登場用.tUpdate();
+
+        if (CDTXMania.DTXVmode.Enabled)
+        {
+            tSetSettingsForDTXV();
+            tJumpInSongToBar(CDTXMania.DTXVmode.nStartBar + 1);
+        }
+        
+        // display presence now that the initial timer reset has been performed
+        tDisplayPresence();
+    }
+
     public override int OnUpdateAndDraw()
     {
         sw.Start();
@@ -158,45 +196,6 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         bIsFinishedFadeout = false;
         bExc = false;
         bFullCom = false;
-        if (bJustStartedUpdate)
-        {
-            CSoundManager.rcPerformanceTimer.tReset();
-            CDTXMania.Timer.tReset();
-            actChipFireD.Start(ELane.HH, false, false, false, 0, false); // #31554 2013.6.12 yyagi
-
-            ctChipPatternAnimation.Drums = new CCounter(0, 7, 70, CDTXMania.Timer);
-            double UnitTime;
-            UnitTime = ((60.0 / (CDTXMania.stagePerfDrumsScreen.actPlayInfo.dbBPM) / 14.0));
-            ctBPMBar = new CCounter(1, 14, (int)(UnitTime * 1000.0), CDTXMania.Timer);
-
-            ctComboTimer = new CCounter(1, 16,
-                (int)((60.0 / (CDTXMania.stagePerfDrumsScreen.actPlayInfo.dbBPM) / 16) * 1000.0), CDTXMania.Timer);
-
-            ctChipPatternAnimation.Guitar = new CCounter(0, 0x17, 20, CDTXMania.Timer);
-            ctChipPatternAnimation.Bass = new CCounter(0, 0x17, 20, CDTXMania.Timer);
-            ctWailingChipPatternAnimation = new CCounter(0, 4, 50, CDTXMania.Timer);
-            ePhaseID = EPhase.Common_FadeIn;
-
-            if (tx判定画像anime != null && txBonusEffect != null)
-            {
-                tx判定画像anime.tDraw2D(CDTXMania.app.Device, 1280, 720);
-                txBonusEffect.tDraw2D(CDTXMania.app.Device, 1280, 720);
-            }
-
-            actFI.tStartFadeIn();
-            ct登場用.tUpdate();
-
-            if (CDTXMania.DTXVmode.Enabled)
-            {
-                tSetSettingsForDTXV();
-                tJumpInSongToBar(CDTXMania.DTXVmode.nStartBar + 1);
-            }
-
-            bJustStartedUpdate = false;
-
-            // display presence now that the initial timer reset has been performed
-            tDisplayPresence();
-        }
 
         if ((CDTXMania.ConfigIni.bSTAGEFAILEDEnabled && !bIsTrainingMode && actGauge.IsFailed(EInstrumentPart.DRUMS)) &&
             (ePhaseID == EPhase.Common_DefaultState))

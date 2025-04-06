@@ -196,18 +196,19 @@ internal class CStageConfig : CStage
             base.OnManagedReleaseResources();
         }
     }
+
+    public override void FirstUpdate()
+    {
+        ePhaseID = EPhase.Common_FadeIn;
+        actFIFO.tStartFadeIn();
+    }
+
     public override int OnUpdateAndDraw()
     {
         if (bNotActivated) return 0;
         
         base.OnUpdateAndDraw();
-
-        if (bJustStartedUpdate)
-        {
-            ePhaseID = EPhase.Common_FadeIn;
-            actFIFO.tStartFadeIn();
-            bJustStartedUpdate = false;
-        }
+        
         ctDisplayWait.tUpdate();
             
         //update menu cursor position

@@ -80,47 +80,46 @@ internal class CStageStartup : CStage
 			base.OnManagedReleaseResources();
 		}
 	}
+
+	public override void FirstUpdate()
+	{
+		list進行文字列.Add("DTXMania powered by YAMAHA Silent Session Drums\n");
+		list進行文字列.Add("Release: " + CDTXMania.VERSION + " [" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version + "]");
+
+		CDTXMania.stageStartup.ePhaseID = EPhase.起動0_システムサウンドを構築;
+
+		Trace.TraceInformation("0) システムサウンドを構築します。");
+		Trace.Indent();
+
+		try
+		{
+			CDTXMania.Skin.bgm起動画面.tPlay();
+                
+			CDTXMania.Skin.ReloadSkin();
+                
+			lock (CDTXMania.stageStartup.list進行文字列)
+			{
+				CDTXMania.stageStartup.list進行文字列.Add("Loading system sounds ... OK ");
+			}
+		}
+		finally
+		{
+			Trace.Unindent();
+		}
+					
+		es = new CEnumSongs();
+		if (!CDTXMania.bCompactMode)
+		{
+			es.StartEnumFromCacheStartup();
+		}
+	}
+
 	public override int OnUpdateAndDraw()
 	{
 		if (bNotActivated) return 0;
 
 		base.OnUpdateAndDraw();
 		
-		if(bJustStartedUpdate)
-		{
-			list進行文字列.Add("DTXMania powered by YAMAHA Silent Session Drums\n");
-			list進行文字列.Add("Release: " + CDTXMania.VERSION + " [" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version + "]");
-
-			CDTXMania.stageStartup.ePhaseID = EPhase.起動0_システムサウンドを構築;
-
-			Trace.TraceInformation("0) システムサウンドを構築します。");
-			Trace.Indent();
-
-			try
-			{
-				CDTXMania.Skin.bgm起動画面.tPlay();
-                
-				CDTXMania.Skin.ReloadSkin();
-                
-				lock (CDTXMania.stageStartup.list進行文字列)
-				{
-					CDTXMania.stageStartup.list進行文字列.Add("Loading system sounds ... OK ");
-				}
-			}
-			finally
-			{
-				Trace.Unindent();
-			}
-					
-			es = new CEnumSongs();
-			if (!CDTXMania.bCompactMode)
-			{
-				es.StartEnumFromCacheStartup();
-			}
-			bJustStartedUpdate = false;
-			return 0;
-		}
-
 		txBackground?.tDraw2D( CDTXMania.app.Device, 0, 0 );
 
 		#region [ this.str現在進行中 の決定 ]

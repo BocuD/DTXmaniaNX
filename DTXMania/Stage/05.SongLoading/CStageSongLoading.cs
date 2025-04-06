@@ -390,60 +390,51 @@ internal class CStageSongLoading : CStage
         }
     }
 
+    public override void FirstUpdate()
+    {
+        if (sdLoadingSound != null)
+        {
+            if (CDTXMania.Skin.soundNowLoading.bExclusive &&
+                (CSkin.CSystemSound.rLastPlayedExclusiveSystemSound != null))
+            {
+                CSkin.CSystemSound.rLastPlayedExclusiveSystemSound.t停止する();
+            }
+
+            sdLoadingSound.tStartPlaying();
+            nBGMPlayStartTime = CSoundManager.rcPerformanceTimer.nCurrentTime;
+            nBGMTotalPlayTimeMs = sdLoadingSound.nTotalPlayTimeMs;
+        }
+        else if (!CDTXMania.DTXVmode.Enabled && !CDTXMania.DTX2WAVmode.Enabled)
+        {
+            CDTXMania.Skin.soundNowLoading.tPlay();
+            nBGMPlayStartTime = CSoundManager.rcPerformanceTimer.nCurrentTime;
+            nBGMTotalPlayTimeMs = CDTXMania.Skin.soundNowLoading.nLength_CurrentSound;
+        }
+
+        ePhaseID = EPhase.Common_FadeIn;
+            
+        nWAVcount = 1;
+            
+        try
+        {
+            string path = cdtx.strFolderName + cdtx.PREIMAGE;
+
+            if (txJacket == null) // 2019.04.26 kairera0467
+            {
+                txJacket = CDTXMania.tGenerateTexture(!File.Exists(path) ? CSkin.Path(@"Graphics\5_preimage default.png") : path);
+            }
+        }
+        catch (Exception ex)
+        {
+            Trace.TraceError(ex.StackTrace);
+        }
+    }
+
     public override int OnUpdateAndDraw()
     {
         if (bNotActivated) return 0;
 
         base.OnUpdateAndDraw();
-        
-        #region [ 初めての進行描画 ]
-
-        //-----------------------------
-        if (bJustStartedUpdate)
-        {
-            if (sdLoadingSound != null)
-            {
-                if (CDTXMania.Skin.soundNowLoading.bExclusive &&
-                    (CSkin.CSystemSound.rLastPlayedExclusiveSystemSound != null))
-                {
-                    CSkin.CSystemSound.rLastPlayedExclusiveSystemSound.t停止する();
-                }
-
-                sdLoadingSound.tStartPlaying();
-                nBGMPlayStartTime = CSoundManager.rcPerformanceTimer.nCurrentTime;
-                nBGMTotalPlayTimeMs = sdLoadingSound.nTotalPlayTimeMs;
-            }
-            else if (!CDTXMania.DTXVmode.Enabled && !CDTXMania.DTX2WAVmode.Enabled)
-            {
-                CDTXMania.Skin.soundNowLoading.tPlay();
-                nBGMPlayStartTime = CSoundManager.rcPerformanceTimer.nCurrentTime;
-                nBGMTotalPlayTimeMs = CDTXMania.Skin.soundNowLoading.nLength_CurrentSound;
-            }
-
-            ePhaseID = EPhase.Common_FadeIn;
-            
-            nWAVcount = 1;
-            
-            try
-            {
-                string path = cdtx.strFolderName + cdtx.PREIMAGE;
-
-                if (txJacket == null) // 2019.04.26 kairera0467
-                {
-                    txJacket = CDTXMania.tGenerateTexture(!File.Exists(path) ? CSkin.Path(@"Graphics\5_preimage default.png") : path);
-                }
-            }
-            catch (Exception ex)
-            {
-                Trace.TraceError(ex.StackTrace);
-            }
-            
-            bJustStartedUpdate = false;
-        }
-
-        //-----------------------------
-
-        #endregion
 
         #region [ If escape is pressed, stop the loading ]
 

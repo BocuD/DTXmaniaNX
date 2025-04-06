@@ -72,13 +72,7 @@ internal class CStageChangeSkin : CStage
 		if (bNotActivated) return 0;
 
 		base.OnUpdateAndDraw();
-
-		if ( bJustStartedUpdate )
-		{
-			bJustStartedUpdate = false;
-			return 0;
-		}
-
+		
 		//スキン変更処理
 		tChangeSkinMain();
 		return 1;

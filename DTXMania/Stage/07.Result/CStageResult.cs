@@ -541,6 +541,63 @@ internal class CStageResult : CStage
 			base.OnManagedReleaseResources();
 		}
 	}
+
+	public override void FirstUpdate()
+	{
+		ct登場用 = new CCounter( 0, 100, 5, CDTXMania.Timer );
+
+		//Check result to select the correct sound to play
+		int l_outputSoundEnum = 0; //0: Stage Clear 1: FC 2: EXC
+		bool l_newRecord = false;
+		for (int i = 0; i < 3; i++)
+		{
+			if ((((i != 0) || (CDTXMania.DTX.bHasChips.Drums && !CDTXMania.ConfigIni.bGuitarRevolutionMode)) &&
+			     ((i != 1) || (CDTXMania.DTX.bHasChips.Guitar && CDTXMania.ConfigIni.bGuitarRevolutionMode))) &&
+			    ((i != 2) || (CDTXMania.DTX.bHasChips.Bass && CDTXMania.ConfigIni.bGuitarRevolutionMode)))
+			{ 
+				if(bAuto[i] == false)
+				{
+					if(fPerfect率[i] == 100.0)
+					{
+						l_outputSoundEnum = 2; //Excellent
+					}
+					else if(fPoor率[i] == 0.0 && fMiss率[i] == 0.0)
+					{
+						l_outputSoundEnum = 1; //Full Combo
+					}
+				}
+
+				if(bNewRecordSkill[i] == true)
+				{
+					l_newRecord = true;
+				}
+			}
+		}
+
+		//Play the corresponding sound
+		if(l_outputSoundEnum == 1)
+		{
+			CDTXMania.Skin.soundFullCombo.tPlay();
+		}
+		else if(l_outputSoundEnum == 2)
+		{
+			CDTXMania.Skin.soundExcellent.tPlay();
+		}
+		else
+		{
+			CDTXMania.Skin.soundStageClear.tPlay();
+		}
+
+		//Create the delay timer of 150 x 10 = 1500 ms to play New Record
+		if(l_newRecord)
+		{
+			ctPlayNewRecord = new CCounter(0, 150, 10, CDTXMania.Timer);
+		}
+						
+		actFI.tStartFadeIn(false);
+		ePhaseID = EPhase.Common_FadeIn;
+	}
+
 	public override int OnUpdateAndDraw()
 	{
 		if (bNotActivated) return 0;
@@ -548,63 +605,6 @@ internal class CStageResult : CStage
 		base.OnUpdateAndDraw();
 
 		int num;
-		if( bJustStartedUpdate )
-		{
-			ct登場用 = new CCounter( 0, 100, 5, CDTXMania.Timer );
-
-			//Check result to select the correct sound to play
-			int l_outputSoundEnum = 0; //0: Stage Clear 1: FC 2: EXC
-			bool l_newRecord = false;
-			for (int i = 0; i < 3; i++)
-			{
-				if ((((i != 0) || (CDTXMania.DTX.bHasChips.Drums && !CDTXMania.ConfigIni.bGuitarRevolutionMode)) &&
-				     ((i != 1) || (CDTXMania.DTX.bHasChips.Guitar && CDTXMania.ConfigIni.bGuitarRevolutionMode))) &&
-				    ((i != 2) || (CDTXMania.DTX.bHasChips.Bass && CDTXMania.ConfigIni.bGuitarRevolutionMode)))
-				{ 
-					if(bAuto[i] == false)
-					{
-						if(fPerfect率[i] == 100.0)
-						{
-							l_outputSoundEnum = 2; //Excellent
-						}
-						else if(fPoor率[i] == 0.0 && fMiss率[i] == 0.0)
-						{
-							l_outputSoundEnum = 1; //Full Combo
-						}
-					}
-
-					if(bNewRecordSkill[i] == true)
-					{
-						l_newRecord = true;
-					}
-				}
-			}
-
-			//Play the corresponding sound
-			if(l_outputSoundEnum == 1)
-			{
-				CDTXMania.Skin.soundFullCombo.tPlay();
-			}
-			else if(l_outputSoundEnum == 2)
-			{
-				CDTXMania.Skin.soundExcellent.tPlay();
-			}
-			else
-			{
-				CDTXMania.Skin.soundStageClear.tPlay();
-			}
-
-			//Create the delay timer of 150 x 10 = 1500 ms to play New Record
-			if(l_newRecord)
-			{
-				ctPlayNewRecord = new CCounter(0, 150, 10, CDTXMania.Timer);
-			}
-						
-			actFI.tStartFadeIn(false);
-			ePhaseID = EPhase.Common_FadeIn;
-			bJustStartedUpdate = false;
-		}
-
 				
 		//Draw Background video  via CActPerfAVI methods
 		actBackgroundVideoAVI.tUpdateAndDraw();
