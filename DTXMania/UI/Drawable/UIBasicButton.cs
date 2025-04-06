@@ -1,10 +1,9 @@
-﻿using DTXMania.Core;
-using DTXUIRenderer;
+﻿using System.Drawing;
+using DTXMania.Core;
 using SharpDX;
-using System.Drawing;
 using Color = System.Drawing.Color;
 
-namespace DTXMania.UI;
+namespace DTXMania.UI.Drawable;
 
 public class UIBasicButton : UIGroup, IUISelectable
 {

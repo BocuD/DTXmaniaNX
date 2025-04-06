@@ -8,6 +8,7 @@ using SlimDXKey = SlimDX.DirectInput.Key;
 using System.Drawing;
 using DTXMania.Core;
 using DTXMania.UI;
+using DTXMania.UI.Drawable;
 
 namespace DTXMania;
 

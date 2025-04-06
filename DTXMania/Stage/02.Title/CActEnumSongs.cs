@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Windows.Forms.VisualStyles;
 using DTXMania.Core;
 using DTXMania.UI;
+using DTXMania.UI.Drawable;
 using DTXUIRenderer;
 using SharpDX;
 using FDK;

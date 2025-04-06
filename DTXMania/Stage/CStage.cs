@@ -1,5 +1,6 @@
 ﻿using DiscordRPC;
 using DTXMania.Core;
+using DTXMania.UI.Drawable;
 using DTXUIRenderer;
 using FDK;
 using SharpDX;

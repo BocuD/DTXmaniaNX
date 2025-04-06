@@ -1,4 +1,4 @@
-﻿namespace DTXUIRenderer;
+﻿namespace DTXMania.UI.Drawable;
 
 public interface IUISelectable
 {

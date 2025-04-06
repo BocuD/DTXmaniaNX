@@ -1,4 +1,6 @@
 ﻿using DTXMania.Core;
+using DTXMania.UI.Drawable;
+using DTXMania.UI.Drawable.Serialization;
 using DTXUIRenderer;
 using Newtonsoft.Json;
 

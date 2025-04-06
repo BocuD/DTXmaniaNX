@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace DTXUIRenderer;
+﻿namespace DTXMania.UI.Drawable;
 
 public class UISelectList : UIGroup
 {

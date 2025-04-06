@@ -1,4 +1,5 @@
 ﻿using DTXMania.Core;
+using DTXMania.UI.Drawable;
 using DTXUIRenderer;
 using FDK;
 using Hexa.NET.ImGui;

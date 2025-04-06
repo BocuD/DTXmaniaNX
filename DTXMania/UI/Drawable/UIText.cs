@@ -1,11 +1,11 @@
-﻿using DTXMania.Core;
+﻿using System.Drawing;
+using DTXMania.Core;
 using DTXUIRenderer;
 using Hexa.NET.ImGui;
 using SharpDX;
-using System.Drawing;
 using Color = System.Drawing.Color;
 
-namespace DTXMania.UI;
+namespace DTXMania.UI.Drawable;
 
 public enum TextSource
 {

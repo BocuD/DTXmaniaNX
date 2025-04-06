@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using System.Drawing;
 using DTXMania.Core;
 using DTXMania.UI;
+using DTXMania.UI.Drawable;
 using DTXUIRenderer;
 using SharpDX;
 using FDK;

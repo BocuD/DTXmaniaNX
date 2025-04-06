@@ -1,9 +1,8 @@
-﻿using System;
-using System.Linq;
+﻿using DTXUIRenderer;
 using Hexa.NET.ImGui;
 using SharpDX;
 
-namespace DTXUIRenderer;
+namespace DTXMania.UI.Drawable;
 
 public class UIImage : UITexture
 {

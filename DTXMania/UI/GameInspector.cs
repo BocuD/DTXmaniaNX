@@ -1,7 +1,6 @@
 ﻿using DTXMania.Core;
 using DTXMania.UI.Skin;
 using Hexa.NET.ImGui;
-using Hexa.NET.ImGuizmo;
 
 namespace DTXMania.UI;
 

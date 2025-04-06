@@ -1,14 +1,14 @@
 ﻿using System.Numerics;
-using DTXMania.UI;
+using DTXUIRenderer;
 using Hexa.NET.ImGui;
 using Hexa.NET.ImGuizmo;
+using Newtonsoft.Json;
 using SharpDX;
 using Quaternion = SharpDX.Quaternion;
 using Vector2 = SharpDX.Vector2;
 using Vector3 = SharpDX.Vector3;
-using Vector4 = SharpDX.Vector4;
 
-namespace DTXUIRenderer;
+namespace DTXMania.UI.Drawable;
 
 public abstract class UIDrawable : IDisposable
 {

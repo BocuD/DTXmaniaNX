@@ -1,10 +1,9 @@
 ﻿using DTXMania.Core;
-using DTXUIRenderer;
 using FDK;
 using Hexa.NET.ImGui;
 using SharpDX;
 
-namespace DTXMania.UI;
+namespace DTXMania.UI.Drawable;
 
 public class UIDFPText : UIDrawable
 {

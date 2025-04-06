@@ -1,8 +1,7 @@
-﻿using System;
-using Hexa.NET.ImGui;
+﻿using Hexa.NET.ImGui;
 using SharpDX;
 
-namespace DTXUIRenderer;
+namespace DTXMania.UI.Drawable;
 
 public abstract class BaseTexture : IDisposable
 {

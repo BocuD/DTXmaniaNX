@@ -5,6 +5,7 @@ using System.Drawing.Imaging;
 using System.Diagnostics;
 using DTXMania.Core;
 using DTXMania.UI;
+using DTXMania.UI.Drawable;
 using DTXUIRenderer;
 using FDK;
 using Color = System.Drawing.Color;

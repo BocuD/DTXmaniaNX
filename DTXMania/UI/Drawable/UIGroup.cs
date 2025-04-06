@@ -1,8 +1,7 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using DTXUIRenderer;
 using SharpDX;
 
-namespace DTXUIRenderer;
+namespace DTXMania.UI.Drawable;
 
 public class UIGroup : UIDrawable
 {
