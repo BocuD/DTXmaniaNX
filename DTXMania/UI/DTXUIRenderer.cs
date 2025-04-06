@@ -25,7 +25,7 @@ public class DTXTexture : BaseTexture
     {
         texture = CDTXMania.tGenerateTexture(texturePath);
     }
-        
+    
     public DTXTexture(CTexture texture)
     {
         this.texture = texture;
