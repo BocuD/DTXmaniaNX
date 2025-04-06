@@ -1,4 +1,5 @@
-﻿using DTXUIRenderer;
+﻿using DTXMania.Core;
+using DTXUIRenderer;
 using Hexa.NET.ImGui;
 using SharpDX;
 
@@ -10,6 +11,9 @@ public class UIImage : UITexture
     public RectangleF sliceRect;
     
     public ERenderMode renderMode = ERenderMode.Stretched;
+    
+    public ImageSource imageSource = ImageSource.File;
+    public string resource = "";
 
     [AddChildMenu]
     public UIImage() : base(BaseTexture.None)
@@ -55,6 +59,22 @@ public class UIImage : UITexture
         {
             size = new Vector2(texture.Width, texture.Height);
             clipRect = new RectangleF(0, 0, texture.Width, texture.Height);
+            sliceRect = new RectangleF(0, 0, texture.Width, texture.Height);
+        }
+    }
+
+    public void LoadResource()
+    {
+        if (imageSource == ImageSource.Resource)
+        {
+            string? fullPath = CDTXMania.SkinManager.currentSkin?.GetResource(resource);
+            if (string.IsNullOrWhiteSpace(fullPath) || !File.Exists(fullPath))
+            {
+                SetTexture(BaseTexture.None);
+                return;
+            }
+
+            SetTexture(new DTXTexture(fullPath), false);
         }
     }
 
@@ -64,12 +84,48 @@ public class UIImage : UITexture
 
         if (ImGui.CollapsingHeader("Image"))
         {
-            int rm = (int)renderMode;
-            string options = Enum.GetNames(typeof(ERenderMode)).Aggregate((a, b) => $"{a}\0{b}");
-            ImGui.Combo("Render Mode", ref rm, options);
-            renderMode = (ERenderMode)rm;
+            Inspector.Inspect("Image Source", ref imageSource);
+            if (imageSource == ImageSource.Resource)
+            {
+                ImGui.SameLine();
+                ImGui.LabelText("Resource: ", resource);
+            }
+            
+            if (ImGui.Button("Load New Texture"))
+            {
+                //open windows file selection dialog
+                Dictionary<string, string> filterList = new()
+                {
+                    { "Images", "png" }
+                };
+                
+                string path = NativeFileDialog.Extended.NFD.OpenDialog("", filterList);
+
+                if (!string.IsNullOrWhiteSpace(path) && File.Exists(path))
+                {
+                    var currentSkin = CDTXMania.SkinManager.currentSkin;
+                    
+                    if (currentSkin != null)
+                    {
+                        string resourcePath = currentSkin.AddResource(path);
+                        imageSource = ImageSource.Resource;
+                        resource = resourcePath;
+                        LoadResource();
+                    }
+                    else
+                    {
+                        SetTexture(new DTXTexture(CDTXMania.tGenerateTexture(path)));
+                    }
+                }
+            }
             
             Inspector.Inspect("Clip Rect", ref clipRect);
+            
+            Inspector.Inspect("Render Mode", ref renderMode);
+            if (renderMode == ERenderMode.Sliced)
+            {
+                Inspector.Inspect("Slice Rect", ref sliceRect);
+            }
             
             //display texture
             if (texture.isValid())
@@ -145,11 +201,6 @@ public class UIImage : UITexture
                     ImGui.GetWindowDrawList().AddRect(clipRectMin, clipRectMax, 0xFFFF0000, 0, 0, 2);
                 }
             }
-            
-            if (renderMode == ERenderMode.Sliced)
-            {
-                Inspector.Inspect("Slice Rect", ref sliceRect);
-            }
         }
     }
 }
@@ -158,4 +209,10 @@ public enum ERenderMode
 {
     Stretched,
     Sliced
+}
+
+public enum ImageSource
+{
+    File,
+    Resource
 }
