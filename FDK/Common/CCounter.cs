@@ -56,10 +56,10 @@ public class CCounter
 	/// 生成と同時に開始する。
 	/// Starts the counter immediately upon creation.
 	/// </summary>
-	public CCounter(int n開始値, int n終了値, int n間隔ms, CTimer timer)
+	public CCounter(int nStartValue, int nEndValue, int nInterval, CTimer timer)
 		: this()
 	{
-		tStart(n開始値, n終了値, n間隔ms, timer);
+		tStart(nStartValue, nEndValue, nInterval, timer);
 	}
 
 
