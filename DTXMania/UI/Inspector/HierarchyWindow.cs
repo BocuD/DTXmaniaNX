@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using DTXMania.UI;
 using DTXMania.UI.Drawable;
 using Hexa.NET.ImGui;
 
@@ -7,8 +8,6 @@ namespace DTXUIRenderer;
 public class HierarchyWindow
 {
     public UIDrawable? target;
-    
-    private UIDrawable? removeDrawable;
     
     public void Draw()
     {
@@ -84,13 +83,11 @@ public class HierarchyWindow
                 }
 
                 //we need to remove the drawable from the group, but since this method is called recursively, we need to make sure we're actually at the parent level again
-                if (removeDrawable != null)
+                if (InspectorManager.toRemove != null)
                 {
-                    if (group.children.Contains(removeDrawable))
+                    if (group.children.Contains(InspectorManager.toRemove))
                     {
-                        group.RemoveChild(removeDrawable);
-                        removeDrawable.Dispose();
-                        removeDrawable = null;
+                        group.RemoveChild(InspectorManager.toRemove);
                     }
                 }
             }
@@ -168,7 +165,7 @@ public class HierarchyWindow
         ImGui.PushStyleColor(ImGuiCol.Text, new System.Numerics.Vector4(1, 0, 0, 1));
         if (ImGui.Selectable("Delete"))
         {
-            removeDrawable = node;
+            InspectorManager.toRemove = node;
         }
         ImGui.PopStyleColor();
 

@@ -1,5 +1,6 @@
 ﻿using System.Numerics;
 using DTXMania.Core;
+using DTXMania.UI.Drawable;
 using DTXUIRenderer;
 using Hexa.NET.ImGui;
 using Hexa.NET.ImGuizmo;
@@ -21,6 +22,8 @@ public static class InspectorManager
     public static Rectangle gizmoRect;
     
     private static Matrix4x4 view = Matrix4x4.Identity;
+
+    public static UIDrawable? toRemove;
     
     static InspectorManager()
     {
@@ -30,6 +33,17 @@ public static class InspectorManager
     
     public static void Draw(bool drawGameWindow, Texture gameSurface)
     {
+        if (toRemove != null)
+        {
+            if (Inspector.inspectorTarget == toRemove)
+            {
+                Inspector.inspectorTarget = null;
+            }
+            
+            toRemove.Dispose();
+            toRemove = null;
+        }
+        
         if (CDTXMania.InputManager.Keyboard.bKeyPressing(Key.LeftControl) 
             && CDTXMania.InputManager.Keyboard.bKeyPressed(Key.I))
         {
