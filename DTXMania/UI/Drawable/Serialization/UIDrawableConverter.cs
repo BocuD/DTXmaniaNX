@@ -60,6 +60,12 @@ public class UIDrawableConverter : JsonConverter
                 }
                 break;
             }
+
+            case UIImage image:
+            {
+                image.LoadResource();
+                break;
+            }
         }
 
         return result;
