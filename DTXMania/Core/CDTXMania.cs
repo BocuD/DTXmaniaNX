@@ -16,6 +16,7 @@ using SharpDX.Direct3D9;
 using GameWindow = DTXMania.UI.GameWindow;
 using ImGui = Hexa.NET.ImGui.ImGui;
 using Point = System.Drawing.Point;
+using ResourceManager = DTXMania.UI.ResourceManager;
 using Vector2 = System.Numerics.Vector2;
 
 namespace DTXMania.Core;
@@ -28,7 +29,6 @@ internal class CDTXMania : Game
     public static string VERSION; // = "v1.4.2 20240519";
 
     public static string D3DXDLL = "d3dx9_43.dll"; // June 2010
-
 
     public static CDTXMania app { get; private set; }
 
@@ -64,13 +64,13 @@ internal class CDTXMania : Game
             if ((dtx != null) && (app != null))
             {
                 dtx.OnDeactivate();
-                app.listTopLevelActivities.Remove(dtx);
+                app.mainActivities.Remove(dtx);
             }
 
             dtx = value;
             if ((dtx != null) && (app != null))
             {
-                app.listTopLevelActivities.Add(dtx);
+                app.mainActivities.Add(dtx);
             }
         }
     }
@@ -146,6 +146,8 @@ internal class CDTXMania : Game
     public static CSkin Skin { get; private set; }
 
     public static SkinManager SkinManager { get; private set; }
+    
+    public static ResourceManager Resources { get; private set; }
 
     public static CSongManager SongManager
     {
@@ -323,10 +325,9 @@ internal class CDTXMania : Game
     // Game 実装
     protected override void Initialize()
     {
-        //			new GCBeep();
-        if (listTopLevelActivities != null)
+        if (mainActivities != null)
         {
-            foreach (CActivity activity in listTopLevelActivities)
+            foreach (CActivity activity in mainActivities)
             {
                 activity.OnManagedCreateResources();
             }
@@ -373,9 +374,9 @@ internal class CDTXMania : Game
         Device.SetTextureStageState(0, TextureStage.AlphaArg1, 2);
         Device.SetTextureStageState(0, TextureStage.AlphaArg2, 1);
 
-        if (listTopLevelActivities != null)
+        if (mainActivities != null)
         {
-            foreach (CActivity activity in listTopLevelActivities)
+            foreach (CActivity activity in mainActivities)
                 activity.OnUnmanagedCreateResources();
         }
 
@@ -411,9 +412,9 @@ internal class CDTXMania : Game
 
     protected override void UnloadContent()
     {
-        if (listTopLevelActivities != null)
+        if (mainActivities != null)
         {
-            foreach (CActivity activity in listTopLevelActivities)
+            foreach (CActivity activity in mainActivities)
                 activity.OnUnmanagedReleaseResources();
         }
 
@@ -442,6 +443,8 @@ internal class CDTXMania : Game
     {
         //Do not draw until SoundManager is initialized
         //Fixed issue where exception is raised upon loading when Japanese IME is enabled
+        
+        //....????
         if (SoundManager == null)
         {
             return;
@@ -1483,10 +1486,9 @@ internal class CDTXMania : Game
 
     //-----------------
     private bool bMouseCursorShown = true;
-    public bool bウィンドウがアクティブである = true;
     private bool bTerminated;
     private static CDTX dtx;
-    private List<CActivity> listTopLevelActivities;
+    private List<CActivity> mainActivities;
     private MouseButtons mb = MouseButtons.Left;
     private string strWindowTitle = "";
 
@@ -1497,6 +1499,21 @@ internal class CDTXMania : Game
 
     private void tStartProcess()
     {
+        void SafeInitialize(string name, Action action)
+        {
+            try
+            {
+                Trace.TraceInformation($"Initializing {name}");
+                action();
+            }
+            catch (Exception e)
+            {
+                Trace.TraceError($"Failed to initialize {name}: {e}");
+                MessageBox.Show($"Failed to initialize {name}: {e}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                throw;
+            }
+        }
+        
         //Update version information
         Assembly assembly = Assembly.GetExecutingAssembly();
         DateTime? buildDate = GetAssemblyBuildDateTime() ?? DateTime.UnixEpoch;
@@ -1510,7 +1527,7 @@ internal class CDTXMania : Game
 #if DEBUG
         executableDirectory = Environment.CurrentDirectory + @"\";
 #else
-            strEXEのあるフォルダ =
+        executableDirectory =
  Path.GetDirectoryName(Application.ExecutablePath) + @"\";	// #23629 2010.11.9 yyagi: set correct pathname where DTXManiaGR.exe is.
 #endif
         // END #23629 2010.11.13 from
@@ -1568,7 +1585,7 @@ internal class CDTXMania : Game
 
         Trace.WriteLine("");
         Trace.WriteLine("DTXMania powered by YAMAHA Silent Session Drums");
-        Trace.WriteLine(string.Format("Release: {0}", VERSION));
+        Trace.WriteLine($"Release: {VERSION}");
         Trace.WriteLine("");
         Trace.TraceInformation("----------------------");
         Trace.TraceInformation("■ アプリケーションの初期化");
@@ -1594,30 +1611,18 @@ internal class CDTXMania : Game
         //---------------------
 
         #endregion
-
-        #region [ Initialize DTXVmode, DTX2WAVmode, CommandParse classes ]
-
-        //Trace.TraceInformation( "DTXVモードの初期化を行います。" );
-        //Trace.Indent();
-        try
+        
+        SafeInitialize("DTXVMode, DTX2WAVMode, CommandParse", () =>
         {
-            DTXVmode = new CDTXVmode();
-            DTXVmode.Enabled = false;
-            //Trace.TraceInformation( "DTXVモードの初期化を完了しました。" );
+            DTXVmode = new CDTXVmode
+            {
+                Enabled = false
+            };
 
             DTX2WAVmode = new CDTX2WAVmode();
-            //Trace.TraceInformation( "DTX2WAVモードの初期化を完了しました。" );
-
             CommandParse = new CCommandParse();
-            //Trace.TraceInformation( "CommandParseの初期化を完了しました。" );
-        }
-        finally
-        {
-            //Trace.Unindent();
-        }
-
-        #endregion
-
+        });
+        
         #region [ Detect compact mode、or start as DTXViewer/DTX2WAV ]
 
         bCompactMode = false;
@@ -1929,343 +1934,144 @@ internal class CDTXMania : Game
         //---------------------
 
         #endregion
-
-        #region [ Generate Direct3D9 device ]
-
-        //---------------------
-        DeviceSettings settings = new DeviceSettings();
-        if (ConfigIni.bFullScreenExclusive)
+        
+        //Init DX9
+        SafeInitialize("DX9", () =>
         {
-            settings.Windowed = ConfigIni.bWindowMode;
-        }
-        else
-        {
-            settings.Windowed = true; // #30666 2013.2.2 yyagi: Fullscreenmode is "Maximized window" mode
-        }
+            DeviceSettings settings = new();
+            if (ConfigIni.bFullScreenExclusive)
+            {
+                settings.Windowed = ConfigIni.bWindowMode;
+            }
+            else
+            {
+                settings.Windowed = true; // #30666 2013.2.2 yyagi: Fullscreenmode is "Maximized window" mode
+            }
 
-        settings.BackBufferWidth = GameWindowSize.Width;
-        settings.BackBufferHeight = GameWindowSize.Height;
-        //			settings.BackBufferCount = 3;
-        settings.EnableVSync = ConfigIni.bVerticalSyncWait;
-        //			settings.BackBufferFormat = Format.A8R8G8B8;
-        //			settings.MultisampleType = MultisampleType.FourSamples;
-        //			settings.MultisampleQuality = 4;
-        //			settings.MultisampleType = MultisampleType.None;
-        //			settings.MultisampleQuality = 0;
+            settings.BackBufferWidth = GameWindowSize.Width;
+            settings.BackBufferHeight = GameWindowSize.Height;
 
-        try
-        {
+            settings.EnableVSync = ConfigIni.bVerticalSyncWait;
+            
             GraphicsDeviceManager.ChangeDevice(settings);
-        }
-        catch (DeviceCreationException e)
-        {
-            Trace.TraceError(e.ToString());
-            MessageBox.Show(e.Message + e.ToString(), "DTXMania failed to boot: DirectX9 Initialize Error",
-                MessageBoxButtons.OK, MessageBoxIcon.Error);
-            Environment.Exit(-1);
-        }
+            
 
-        IsFixedTimeStep = false;
-        //			base.TargetElapsedTime = TimeSpan.FromTicks( 10000000 / 75 );
-        Window.ClientSize =
-            new Size(ConfigIni.nWindowWidth,
-                ConfigIni.nWindowHeight); // #23510 2010.10.31 yyagi: to recover window size. width and height are able to get from Config.ini.
-        InactiveSleepTime =
-            TimeSpan.FromMilliseconds((float)(ConfigIni
-                .n非フォーカス時スリープms)); // #23568 2010.11.3 yyagi: to support valiable sleep value when !IsActive
-        // #23568 2010.11.4 ikanick changed ( 1 -> ConfigIni )
-        if (!ConfigIni.bFullScreenExclusive)
-        {
-            tSwitchFullScreenMode(); // #30666 2013.2.2 yyagi: finalize settings for "Maximized window mode"
-        }
+            IsFixedTimeStep = false;
+            Window.ClientSize = new Size(ConfigIni.nWindowWidth, ConfigIni.nWindowHeight);
+            InactiveSleepTime = TimeSpan.FromMilliseconds((float)(ConfigIni.n非フォーカス時スリープms));
+        
+            // #23568 2010.11.4 ikanick changed ( 1 -> ConfigIni )
+            if (!ConfigIni.bFullScreenExclusive)
+            {
+                tSwitchFullScreenMode(); // #30666 2013.2.2 yyagi: finalize settings for "Maximized window mode"
+            }
 
-        actFlushGPU = new CActFlushGPU();
-        //---------------------
-
-        #endregion
-
+            actFlushGPU = new CActFlushGPU();
+        });
+        
         DTX = null;
 
-        #region [ Initialize Skin Manager ]
-
+        Resources = new ResourceManager();
         SkinManager = new SkinManager();
-
-        #endregion
-
-        #region [ Initialize Skin ]
-
-        //---------------------
-        Trace.TraceInformation("スキンの初期化を行います。");
-        Trace.Indent();
-        try
+        
+        SafeInitialize("Skin", () =>
         {
             Skin = new CSkin(ConfigIni.strSystemSkinSubfolderFullName, ConfigIni.bUseBoxDefSkin);
-            ConfigIni.strSystemSkinSubfolderFullName =
-                Skin.GetCurrentSkinSubfolderFullName(true); // 旧指定のSkinフォルダが消滅していた場合に備える
-            Trace.TraceInformation("スキンの初期化を完了しました。");
-        }
-        catch
-        {
-            Trace.TraceInformation("スキンの初期化に失敗しました。");
-            throw;
-        }
-        finally
-        {
-            Trace.Unindent();
-        }
+            ConfigIni.strSystemSkinSubfolderFullName = Skin.GetCurrentSkinSubfolderFullName(true); // 旧指定のSkinフォルダが消滅していた場合に備える
+        });
 
-        //---------------------
-
-        #endregion
-
-        #region [ Initialize Timer ]
-
-        //---------------------
-        Trace.TraceInformation("タイマの初期化を行います。");
-        Trace.Indent();
-        try
+        SafeInitialize("Timer", () =>
         {
             Timer = new CTimer(CTimer.EType.MultiMedia);
-            Trace.TraceInformation("タイマの初期化を完了しました。");
-        }
-        finally
-        {
-            Trace.Unindent();
-        }
+        });
 
-        //---------------------
-
-        #endregion
-
-        #region [ FPS カウンタの初期化 ]
-
-        //---------------------
-        Trace.TraceInformation("FPSカウンタの初期化を行います。");
-        Trace.Indent();
-        try
+        SafeInitialize("FPS Counter", () =>
         {
             FPS = new CFPS();
-            Trace.TraceInformation("FPSカウンタを生成しました。");
-        }
-        finally
-        {
-            Trace.Unindent();
-        }
+        });
 
-        //---------------------
-
-        #endregion
-
-        #region [ act文字コンソールの初期化 ]
-
-        //---------------------
-        Trace.TraceInformation("文字コンソールの初期化を行います。");
-        Trace.Indent();
-        try
+        SafeInitialize("Character Console", () =>
         {
             actDisplayString = new CCharacterConsole();
-            Trace.TraceInformation("文字コンソールを生成しました。");
             actDisplayString.OnActivate();
-            Trace.TraceInformation("文字コンソールを活性化しました。");
-            Trace.TraceInformation("文字コンソールの初期化を完了しました。");
-        }
-        catch (Exception exception)
-        {
-            Trace.TraceError(exception.Message);
-            Trace.TraceError("文字コンソールの初期化に失敗しました。");
-        }
-        finally
-        {
-            Trace.Unindent();
-        }
-
-        //---------------------
-
-        #endregion
-
-        #region [ Initialize Input Manager ]
-
-        //---------------------
-        Trace.TraceInformation("DirectInput, MIDI入力の初期化を行います。");
-        Trace.Indent();
-        try
+        });
+        
+        SafeInitialize("Input Manager (DirectInput, MIDI)", () =>
         {
             InputManager = new CInputManager(Window.Handle);
             foreach (IInputDevice device in InputManager.listInputDevices)
             {
                 if ((device.eInputDeviceType == EInputDeviceType.Joystick) &&
-                    !ConfigIni.dicJoystick.ContainsValue(device.GUID))
+                    !ConfigIni.joystickDict.ContainsValue(device.GUID))
                 {
                     int key = 0;
-                    while (ConfigIni.dicJoystick.ContainsKey(key))
+                    while (ConfigIni.joystickDict.ContainsKey(key))
                     {
                         key++;
                     }
 
-                    ConfigIni.dicJoystick.Add(key, device.GUID);
+                    ConfigIni.joystickDict.Add(key, device.GUID);
                 }
             }
 
-            foreach (IInputDevice device2 in InputManager.listInputDevices)
+            foreach (IInputDevice device2 in InputManager.listInputDevices
+                         .Where(x => x.eInputDeviceType == EInputDeviceType.Joystick))
             {
-                if (device2.eInputDeviceType == EInputDeviceType.Joystick)
+                foreach (KeyValuePair<int, string> pair in ConfigIni.joystickDict.Where(pair => device2.GUID.Equals(pair.Value)))
                 {
-                    foreach (KeyValuePair<int, string> pair in ConfigIni.dicJoystick)
-                    {
-                        if (device2.GUID.Equals(pair.Value))
-                        {
-                            ((CInputJoystick)device2).SetID(pair.Key);
-                            break;
-                        }
-                    }
-
-                    continue;
+                    ((CInputJoystick)device2).SetID(pair.Key);
+                    break;
                 }
             }
+        });
 
-            Trace.TraceInformation("DirectInput の初期化を完了しました。");
-        }
-        catch (Exception exception2)
-        {
-            Trace.TraceError(exception2.Message);
-            Trace.TraceError("DirectInput, MIDI入力の初期化に失敗しました。");
-            throw;
-        }
-        finally
-        {
-            Trace.Unindent();
-        }
-
-        //---------------------
-
-        #endregion
-
-        #region [ Initialize Pad ]
-
-        //---------------------
-        Trace.TraceInformation("パッドの初期化を行います。");
-        Trace.Indent();
-        try
+        SafeInitialize("Pad", () =>
         {
             Pad = new CPad(ConfigIni, InputManager);
-            Trace.TraceInformation("パッドの初期化を完了しました。");
-        }
-        catch (Exception exception3)
+        });
+
+        SafeInitialize("Sound Manager", () =>
         {
-            Trace.TraceError(exception3.Message);
-            Trace.TraceError("パッドの初期化に失敗しました。");
-        }
-        finally
-        {
-            Trace.Unindent();
-        }
-
-        //---------------------
-
-        #endregion
-
-        #region [ Initialize Sound Manager ]
-
-        //---------------------
-        Trace.TraceInformation("サウンドデバイスの初期化を行います。");
-        Trace.Indent();
-        try
-        {
+            ESoundDeviceType soundDeviceType = ConfigIni.nSoundDeviceType switch
             {
-                ESoundDeviceType soundDeviceType;
-                switch (ConfigIni.nSoundDeviceType)
-                {
-                    case 0:
-                        soundDeviceType = ESoundDeviceType.DirectSound;
-                        break;
-                    case 1:
-                        soundDeviceType = ESoundDeviceType.ASIO;
-                        break;
-                    case 2:
-                        soundDeviceType = ESoundDeviceType.ExclusiveWASAPI;
-                        break;
-                    case 3:
-                        soundDeviceType = ESoundDeviceType.SharedWASAPI;
-                        break;
-                    default:
-                        soundDeviceType = ESoundDeviceType.Unknown;
-                        break;
-                }
+                0 => ESoundDeviceType.DirectSound,
+                1 => ESoundDeviceType.ASIO,
+                2 => ESoundDeviceType.ExclusiveWASAPI,
+                3 => ESoundDeviceType.SharedWASAPI,
+                _ => ESoundDeviceType.Unknown
+            };
 
-                SoundManager = new CSoundManager(Window.Handle,
-                    soundDeviceType,
-                    ConfigIni.nWASAPIBufferSizeMs,
-                    ConfigIni.bEventDrivenWASAPI,
-                    0,
-                    ConfigIni.nASIODevice,
-                    ConfigIni.bUseOSTimer
-                );
-                AddSoundTypeToWindowTitle();
-                CSoundManager.bIsTimeStretch = ConfigIni.bTimeStretch;
-                SoundManager.nMasterVolume = ConfigIni.nMasterVolume;
-                //FDK.CSound管理.bIsMP3DecodeByWindowsCodec = CDTXMania.ConfigIni.bNoMP3Streaming;
+            SoundManager = new CSoundManager(Window.Handle,
+                soundDeviceType,
+                ConfigIni.nWASAPIBufferSizeMs,
+                ConfigIni.bEventDrivenWASAPI,
+                0,
+                ConfigIni.nASIODevice,
+                ConfigIni.bUseOSTimer
+            );
+            AddSoundTypeToWindowTitle();
+            CSoundManager.bIsTimeStretch = ConfigIni.bTimeStretch;
+            SoundManager.nMasterVolume = ConfigIni.nMasterVolume;
 
-
-                string strDefaultSoundDeviceBusType = CSoundManager.strDefaultDeviceBusType;
-                Trace.TraceInformation($"Bus type of the default sound device = {strDefaultSoundDeviceBusType}");
-
-                Trace.TraceInformation("サウンドデバイスの初期化を完了しました。");
-            }
-        }
-        catch (Exception e)
-        {
-            Trace.TraceError(e.Message);
-            throw;
-        }
-        finally
-        {
-            Trace.Unindent();
-        }
-
-        //---------------------
-
-        #endregion
-
-        #region [ Initialize Song Manager ]
-
-        //---------------------
-        Trace.TraceInformation("曲リストの初期化を行います。");
-        Trace.Indent();
-        try
+            string strDefaultSoundDeviceBusType = CSoundManager.strDefaultDeviceBusType;
+            Trace.TraceInformation($"Bus type of the default sound device = {strDefaultSoundDeviceBusType}");
+        });
+        
+        SafeInitialize("Song Manager", () =>
         {
             SongManager = new CSongManager();
-            //				Songs管理_裏読 = new CSongManager();
             EnumSongs = new CEnumSongs();
             actEnumSongs = new CActEnumSongs();
-            Trace.TraceInformation("曲リストの初期化を完了しました。");
-        }
-        catch (Exception e)
-        {
-            Trace.TraceError(e.Message);
-            Trace.TraceError("曲リストの初期化に失敗しました。");
-        }
-        finally
-        {
-            Trace.Unindent();
-        }
-
-        //---------------------
-
-        #endregion
-
-        #region [ Initialize Random ]
-
-        //---------------------
+        });
+        
         Random = new Random((int)Timer.nシステム時刻);
-        //---------------------
-
-        #endregion
 
         #region [ Initialize Stage ]
 
         //---------------------
         rCurrentStage = null;
         rPreviousStage = null;
+        
         stageStartup = new CStageStartup();
         stageTitle = new CStageTitle();
         stageConfig = new CStageConfig();
@@ -2276,21 +2082,25 @@ internal class CDTXMania : Game
         stageResult = new CStageResult();
         stageChangeSkin = new CStageChangeSkin();
         stageEnd = new CStageEnd();
-        listTopLevelActivities = new List<CActivity>();
-        listTopLevelActivities.Add(actEnumSongs);
-        listTopLevelActivities.Add(actDisplayString);
-        listTopLevelActivities.Add(stageStartup);
-        listTopLevelActivities.Add(stageTitle);
-        listTopLevelActivities.Add(stageConfig);
-        listTopLevelActivities.Add(stageSongSelection);
-        listTopLevelActivities.Add(stageSongLoading);
-        listTopLevelActivities.Add(stagePerfDrumsScreen);
-        listTopLevelActivities.Add(stagePerfGuitarScreen);
-        listTopLevelActivities.Add(stageResult);
-        listTopLevelActivities.Add(stageChangeSkin);
-        listTopLevelActivities.Add(stageEnd);
-        listTopLevelActivities.Add(actFlushGPU);
-        //---------------------
+        
+        mainActivities =
+        [
+            actEnumSongs,
+            actDisplayString,
+            
+            stageStartup,
+            stageTitle,
+            stageConfig,
+            stageSongSelection,
+            stageSongLoading,
+            stagePerfDrumsScreen,
+            stagePerfGuitarScreen,
+            stageResult,
+            stageChangeSkin,
+            stageEnd,
+            
+            actFlushGPU
+        ];
 
         #endregion
 
@@ -2311,15 +2121,7 @@ internal class CDTXMania : Game
         Trace.TraceInformation("----------------------");
         Trace.TraceInformation("■ Startup");
 
-        if (bCompactMode)
-        {
-            rCurrentStage = stageSongLoading;
-        }
-        else
-        {
-            rCurrentStage = stageStartup;
-        }
-
+        rCurrentStage = bCompactMode ? stageSongLoading : stageStartup;
         rCurrentStage.OnActivate();
         //---------------------
 
@@ -2341,23 +2143,30 @@ internal class CDTXMania : Game
     {
         if (!bTerminated)
         {
-            void SafeTerminate(Action action, string name)
+            void SafeTerminate(string name, Action action)
             {
                 Trace.TraceInformation($"Cleaning up {name}");
                 try { action(); }
                 catch (Exception e) { Trace.TraceError(e.Message); }
             }
+            
             Trace.TraceInformation("----------------------");
             Trace.TraceInformation("Shutting down application");
 
-            SafeTerminate(() => actEnumSongs?.OnDeactivate(), "ActEnumSongs");
-            SafeTerminate(() =>
+            SafeTerminate("ActEnumSongs", () =>
+            {
+                actEnumSongs?.OnDeactivate();
+            });
+            SafeTerminate("Current Stage", () =>
             {
                 if (rCurrentStage is { bActivated: true })
                     rCurrentStage.OnDeactivate();
-            }, "Current Stage");
-            SafeTerminate(() => SongManager = null, "SongManager");
-            SafeTerminate(() =>
+            });
+            SafeTerminate("SongManager", () =>
+            {
+                SongManager = null;
+            });
+            SafeTerminate("Skin", () =>
             {
                 if (Skin != null)
                 {
@@ -2365,14 +2174,32 @@ internal class CDTXMania : Game
                     Skin.Dispose();
                     Skin = null;
                 }
-            }, "Skin");
-            SafeTerminate(() => SoundManager.Dispose(), "SoundManager");
-            SafeTerminate(() => Pad = null, "Pad");
-            SafeTerminate(() => InputManager.Dispose(), "InputManager");
-            SafeTerminate(() => actDisplayString.OnDeactivate(), "ActDisplayString");
-            SafeTerminate(() => FPS = null, "FPS Counter");
-            SafeTerminate(() => Timer?.Dispose(), "Timer");
-            SafeTerminate(() =>
+            });
+            SafeTerminate("SoundManager", () =>
+            {
+                SoundManager.Dispose();
+            });
+            SafeTerminate("Pad", () =>
+            {
+                Pad = null;
+            });
+            SafeTerminate("InputManager", () =>
+            {
+                InputManager.Dispose();
+            });
+            SafeTerminate("ActDisplayString", () =>
+            {
+                actDisplayString.OnDeactivate();
+            });
+            SafeTerminate("FPS Counter", () =>
+            {
+                FPS = null;
+            });
+            SafeTerminate("Timer", () =>
+            {
+                Timer?.Dispose();
+            });
+            SafeTerminate("Config.ini (and writing it to disk)", () =>
             {
                 if (ConfigIni.bIsSwappedGuitarBass_AutoFlagsAreSwapped)
                 {
@@ -2380,39 +2207,28 @@ internal class CDTXMania : Game
                 }
 
                 string path = executableDirectory + "Config.ini";
-                Trace.Indent();
-                try
+                
+                //no need to save if we are in DTXVmode
+                if (DTXVmode.Enabled) return;
+                
+                if (DTX2WAVmode.Enabled)
                 {
-                    if (DTXVmode.Enabled)
-                    {
-                        //TODO
-                        //DTXVmode.tUpdateConfigIni();
-                        //Trace.TraceInformation("DTXVモードの設定情報を、Config.xmlに保存しました。");
-                    }
-                    else if (DTX2WAVmode.Enabled)
-                    {
-                        //TODO
-                        //DTX2WAVmode.tUpdateConfigIni();
-                        //Trace.TraceInformation("DTX2WAVモードの設定情報を、Config.xmlに保存しました。");
-                        DTX2WAVmode.SendMessage2DTX2WAV("TERM");
-                    }
-                    else
-                    {
-                        ConfigIni.tWrite(path);
-                        Trace.TraceInformation("保存しました。({0})", path);
-                    }
+                    DTX2WAVmode.SendMessage2DTX2WAV("TERM");
                 }
-                catch (Exception e)
+                else
                 {
-                    Trace.TraceError(e.Message);
-                    Trace.TraceError("Config.ini の出力に失敗しました。({0})", path);
+                    ConfigIni.tWrite(path);
+                    Trace.TraceInformation("保存しました。({0})", path);
                 }
-                finally
-                {
-                    Trace.Unindent();
-                }
-            }, "Config.ini (and writing it to disk)");
-            SafeTerminate(() => DiscordRichPresence?.Dispose(), "Discord Rich Presence");
+            });
+            SafeTerminate("ResourceManager", () =>
+            {
+                Resources.Dispose();
+            });
+            SafeTerminate("Discord Rich Presence", () =>
+            {
+                DiscordRichPresence?.Dispose();
+            });
             Console.WriteLine("Finished shutting down application");
             bTerminated = true;
         }
@@ -2420,7 +2236,6 @@ internal class CDTXMania : Game
 
     private CScoreIni tScoreIniへBGMAdjustとHistoryとPlayCountを更新(string str新ヒストリ行)
     {
-        bool bIsUpdatedDrums, bIsUpdatedGuitar, bIsUpdatedBass;
         string strFilename = DTX.strFileNameFullPath + ".score.ini";
         CScoreIni ini = new CScoreIni(strFilename);
         if (!File.Exists(strFilename))
@@ -2455,7 +2270,7 @@ internal class CDTXMania : Game
         }
 
         ini.stFile.BGMAdjust = DTX.nBGMAdjust;
-        CScoreIni.tGetIsUpdateNeeded(out bIsUpdatedDrums, out bIsUpdatedGuitar, out bIsUpdatedBass);
+        CScoreIni.tGetIsUpdateNeeded(out bool bIsUpdatedDrums, out bool bIsUpdatedGuitar, out bool bIsUpdatedBass);
         if (bIsUpdatedDrums || bIsUpdatedGuitar || bIsUpdatedBass)
         {
             if (bIsUpdatedDrums)

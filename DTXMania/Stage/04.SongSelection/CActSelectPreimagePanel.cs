@@ -142,7 +142,7 @@ internal class CActSelectPreimagePanel : CActivity
 
 	#region [ private ]
 	//-----------------
-	private CDTX.CAVI rAVI;
+	private CAVI rAVI;
 	private bool b動画フレームを作成した;
 	private CCounter ct遅延表示;
 	private CCounter ct登場アニメ用;
@@ -277,7 +277,7 @@ internal class CActSelectPreimagePanel : CActivity
 			}
 			try
 			{
-				CDTX.CAVI cAVI = new CDTX.CAVI(0, filename, "", (int)CDTXMania.ConfigIni.nPlaySpeed);
+				CAVI cAVI = new CAVI(0, filename, "", (int)CDTXMania.ConfigIni.nPlaySpeed);
 				cAVI.OnDeviceCreated();
 
 				rAVI = cAVI;

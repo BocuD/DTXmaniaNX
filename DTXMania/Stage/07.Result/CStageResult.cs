@@ -451,7 +451,7 @@ internal class CStageResult : CStage
 		{
 			ui = new UIGroup("Result Screen");
 			
-			rBackgroundVideoAVI = new CDTX.CAVI(1290, CSkin.Path(@"Graphics\8_background.mp4"), "", 20.0);
+			rBackgroundVideoAVI = new CAVI(1290, CSkin.Path(@"Graphics\8_background.mp4"), "", 20.0);
 			rBackgroundVideoAVI.OnDeviceCreated();
 			if (rBackgroundVideoAVI.avi != null)
 			{					
@@ -851,7 +851,7 @@ internal class CStageResult : CStage
 	private long lStopPosition;
 
 	private readonly CActSelectBackgroundAVI actBackgroundVideoAVI;
-	private CDTX.CAVI rBackgroundVideoAVI;
+	private CAVI rBackgroundVideoAVI;
 
 	#region [ #24609 リザルト画像をpngで保存する ]		// #24609 2011.3.14 yyagi; to save result screen in case BestRank or HiSkill.
 	/// <summary>

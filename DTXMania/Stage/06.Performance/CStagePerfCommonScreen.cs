@@ -465,7 +465,7 @@ internal abstract class CStagePerfCommonScreen : CStage
             ui = new UIGroup("Performance Common Screen");
             
             //
-            caviGenericBackgroundVideo = new CDTX.CAVI(1290, CSkin.Path(@"Graphics\7_Movie.mp4"), "", 20.0);
+            caviGenericBackgroundVideo = new CAVI(1290, CSkin.Path(@"Graphics\7_Movie.mp4"), "", 20.0);
             caviGenericBackgroundVideo.OnDeviceCreated();
             if (caviGenericBackgroundVideo.avi != null)
             {
@@ -891,7 +891,7 @@ internal abstract class CStagePerfCommonScreen : CStage
     protected long LoopEndMs;
 
     //Generic video object
-    private CDTX.CAVI caviGenericBackgroundVideo;
+    private CAVI caviGenericBackgroundVideo;
     private bool bGenericVideoEnabled;
 
     // Use a property instead of a field to automatically set training mode on the graph too

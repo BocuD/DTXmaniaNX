@@ -120,7 +120,7 @@ public class CPad
 					}
 					case EInputDevice.Joypad:
 					{
-						if( !rConfigIni.dicJoystick.ContainsKey( stkeyassignArray[ i ].ID ) )
+						if( !rConfigIni.joystickDict.ContainsKey( stkeyassignArray[ i ].ID ) )
 							break;
 
 						IInputDevice device = rInput管理.Joystick( stkeyassignArray[ i ].ID );
@@ -169,7 +169,7 @@ public class CPad
 					}
 					case EInputDevice.Joypad:
 					{
-						if (!rConfigIni.dicJoystick.ContainsKey(stkeyassignArray[i].ID))
+						if (!rConfigIni.joystickDict.ContainsKey(stkeyassignArray[i].ID))
 							break;
 
 						IInputDevice device = rInput管理.Joystick(stkeyassignArray[i].ID);
@@ -225,7 +225,7 @@ public class CPad
 
 					case EInputDevice.Joypad:
 					{
-						if( !rConfigIni.dicJoystick.ContainsKey( stkeyassignArray[ i ].ID ) )
+						if( !rConfigIni.joystickDict.ContainsKey( stkeyassignArray[ i ].ID ) )
 						{
 							break;
 						}

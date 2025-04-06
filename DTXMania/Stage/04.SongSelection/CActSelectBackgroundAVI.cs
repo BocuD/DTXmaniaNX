@@ -16,7 +16,7 @@ internal class CActSelectBackgroundAVI : CActivity
         bNotActivated = true;
     }
 
-    public void Start(EChannel nチャンネル番号, CDTX.CAVI rAVI, int n総移動時間ms, int n移動開始時刻ms)
+    public void Start(EChannel nチャンネル番号, CAVI rAVI, int n総移動時間ms, int n移動開始時刻ms)
     {
         //2016.01.21 kairera0467 VfW時代のコードを除去+大改造
         Trace.TraceInformation("CActSelectBackgroundAVI: Start(): " + rAVI.strファイル名);
@@ -241,7 +241,7 @@ internal class CActSelectBackgroundAVI : CActivity
     private readonly float fullScreenWidthPx = GameFramebufferSize.Height;
     //NOTE: This is a soft reference to externally initialized object
     //Do not call Dispose() for rAVI
-    private CDTX.CAVI rAVI;
+    private CAVI rAVI;
         
     #endregion
 

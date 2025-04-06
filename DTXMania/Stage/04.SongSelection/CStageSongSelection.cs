@@ -244,7 +244,7 @@ internal class CStageSongSelection : CStage
 			txBPMLabel = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\5_BPM.png"), false);
 
 			//
-			rBackgroundVideoAVI = new CDTX.CAVI(1290, CSkin.Path(@"Graphics\5_background.mp4"), "", 20.0);
+			rBackgroundVideoAVI = new CAVI(1290, CSkin.Path(@"Graphics\5_background.mp4"), "", 20.0);
 			rBackgroundVideoAVI.OnDeviceCreated();
 			if (rBackgroundVideoAVI.avi != null)
 			{					
@@ -874,7 +874,7 @@ internal class CStageSongSelection : CStage
 	private CTexture txBackground;  // tx背景
 	private CTexture txBPMLabel;
 	//private CDirectShow dsBackgroundVideo; // background Video
-	private CDTX.CAVI rBackgroundVideoAVI;// background Video using CAVI class
+	private CAVI rBackgroundVideoAVI;// background Video using CAVI class
 	private long lDshowPosition;
 	private long lStopPosition;
 

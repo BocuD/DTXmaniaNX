@@ -512,7 +512,7 @@ internal class CConfigIni
 	public ERDPosition eRDPosition;
 	public int nInfoType;
 	public int nSkillMode;
-	public Dictionary<int, string> dicJoystick;
+	public Dictionary<int, string> joystickDict;
 	public ECYGroup eCYGroup;
 	public EDarkMode eDark;
 	public EFTGroup eFTGroup;
@@ -1229,7 +1229,7 @@ internal class CConfigIni
 		#endregion
 
 		ConfigIniファイル名 = "";
-		dicJoystick = new Dictionary<int, string>( 10 );
+		joystickDict = new Dictionary<int, string>( 10 );
 		tSetDefaultKeyAssignments();
 		#region [ velocityMin ]
 		nVelocityMin.LC = 0;					// #23857 2011.1.31 yyagi VelocityMin
@@ -2142,7 +2142,7 @@ internal class CConfigIni
 		#region [ GUID ]
 		sw.WriteLine( "[GUID]" );
 		sw.WriteLine();
-		foreach( KeyValuePair<int, string> pair in dicJoystick )
+		foreach( KeyValuePair<int, string> pair in joystickDict )
 		{
 			sw.WriteLine( "JoystickID={0},{1}", pair.Key, pair.Value );
 		}
@@ -3860,11 +3860,11 @@ internal class CConfigIni
 			int result = 0;
 			if( ( int.TryParse( strArray[ 0 ], out result ) && ( result >= 0 ) ) && ( result <= 9 ) )
 			{
-				if( dicJoystick.ContainsKey( result ) )
+				if( joystickDict.ContainsKey( result ) )
 				{
-					dicJoystick.Remove( result );
+					joystickDict.Remove( result );
 				}
-				dicJoystick.Add( result, strArray[ 1 ] );
+				joystickDict.Add( result, strArray[ 1 ] );
 			}
 		}
 	}

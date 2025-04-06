@@ -98,13 +98,13 @@ public class CInputManager : IDisposable  // CInput管理
 		#endregion
 		if (bUseMidiIn)
 		{
-			proc = new CWin32.MidiInProc(MidiInCallback);
+			proc = MidiInCallback;
 			uint nMidiDevices = CWin32.midiInGetNumDevs();
 			Trace.TraceInformation("MIDI入力デバイス数: {0}", nMidiDevices);
 			for (uint i = 0; i < nMidiDevices; i++)
 			{
-				CInputMIDI item = new CInputMIDI(i);
-				CWin32.MIDIINCAPS lpMidiInCaps = new CWin32.MIDIINCAPS();
+				CInputMIDI item = new(i);
+				CWin32.MIDIINCAPS lpMidiInCaps = new();
 				uint num3 = CWin32.midiInGetDevCaps(i, ref lpMidiInCaps, (uint)Marshal.SizeOf(lpMidiInCaps));
 				if (num3 != 0)
 				{
