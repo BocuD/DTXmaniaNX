@@ -15,8 +15,8 @@ public enum TextSource
 public class UIText : UITexture
 {
     private bool dirty = true;
-    private string text = "";
-        
+    public string text = "";
+    
     public Color fontColor = Color.White;
     public Color edgeColor = Color.Black;
     public Color gradationTopColor = Color.White;
@@ -112,6 +112,8 @@ public class UIText : UITexture
 
     public override void DrawInspector()
     {
+        base.DrawInspector();
+        
         if (ImGui.CollapsingHeader("UIText"))
         {
             if (Inspector.Inspect("Text Color", ref fontColor))
@@ -182,9 +184,6 @@ public class UIText : UITexture
                 ImGui.TreePop();
             }
         }
-        
-        //this is because of dumb stuff basically....
-        base.DrawInspector();
     }
 
     public override void Dispose()

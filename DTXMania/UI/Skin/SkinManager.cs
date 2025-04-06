@@ -89,6 +89,8 @@ public class SkinManager
     public void ChangeSkin(SkinDescriptor skin)
     {
         currentSkin = skin;
+        
+        CDTXMania.rCurrentStage.LoadUI();
     }
 
     public UIGroup? GetStageSkin(CStage.EStage stageId)

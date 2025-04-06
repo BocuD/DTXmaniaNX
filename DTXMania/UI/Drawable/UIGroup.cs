@@ -5,7 +5,7 @@ namespace DTXMania.UI.Drawable;
 
 public class UIGroup : UIDrawable
 {
-    internal readonly List<UIDrawable> children = [];
+    public List<UIDrawable> children = [];
     
     [AddChildMenu]
     public UIGroup() : this("New UIGroup")

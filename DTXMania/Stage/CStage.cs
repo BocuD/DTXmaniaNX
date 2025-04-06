@@ -81,6 +81,14 @@ public abstract class CStage : CActivity
 		}
 	}
 
+	public void ReloadUI()
+	{
+		ui.Dispose();
+		ui = null;
+		
+		LoadUI();
+	}
+
 	public abstract void InitializeBaseUI();
 
 	public override int OnUpdateAndDraw()

@@ -76,13 +76,24 @@ public class SkinDescriptor
 
     public UIGroup? LoadStageSkin(CStage.EStage stageId)
     {
+        //load from skin cache
+        if (stageSkinCache.TryGetValue(stageId, out UIGroup? group))
+        {
+            return group;
+        }
+        
         bool available = stageSkins.TryGetValue(stageId, out string? uiGroupJson);
         
         if (available && uiGroupJson != null)
         {
             string path = Path.Combine(basePath, uiGroupJson);
             string json = File.ReadAllText(path);
-            return JsonConvert.DeserializeObject<UIGroup>(json);
+            UIGroup? loadedGroup = JsonConvert.DeserializeObject<UIGroup>(json, new UIDrawableConverter());
+            if (loadedGroup != null)
+            {
+                stageSkinCache[stageId] = loadedGroup;
+                return loadedGroup;
+            }
         }
         
         return null;

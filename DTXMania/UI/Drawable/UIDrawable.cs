@@ -12,6 +12,7 @@ namespace DTXMania.UI.Drawable;
 
 public abstract class UIDrawable : IDisposable
 {
+    public string type => GetType().FullName;
     public int renderOrder = 0;
     public Vector3 position = Vector3.Zero;
     public Vector2 anchor = Vector2.Zero; //pivot in 2D space
@@ -25,7 +26,7 @@ public abstract class UIDrawable : IDisposable
         
     protected Matrix localTransformMatrix = Matrix.Identity;
     
-    public UIGroup? parent { get; private set; } = null;
+    [JsonIgnore] public UIGroup? parent { get; private set; } = null;
 
     public void UpdateLocalTransformMatrix()
     {
