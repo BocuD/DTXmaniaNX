@@ -35,11 +35,10 @@ public abstract class UIDrawable : IDisposable
         Matrix translationMatrix = Matrix.Translation(position);
         Matrix rotationMatrix = Matrix.RotationYawPitchRoll(rotation.Y, rotation.X, rotation.Z);
         Matrix scaleMatrix = Matrix.Scaling(scale);
-        Matrix anchorMatrix = Matrix.Translation(anchorOffset);
+        Matrix anchorMatrix = Matrix.Translation(anchorOffset * scale);
 
         //combine transformations: anchor * scale * rotation * translation
         localTransformMatrix = scaleMatrix * anchorMatrix * rotationMatrix * translationMatrix;
-        //localTransformMatrix = scaleMatrix * rotationMatrix * anchorMatrix * translationMatrix;
     }
 
     public void SetParent(UIGroup? newParent, bool updateGroup = true)
