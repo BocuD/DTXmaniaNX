@@ -10,7 +10,7 @@ public class SkinDescriptor
 {
     public required string name { get; set; }
     public required string author { get; set; }
-    [JsonIgnore] private string basePath = "";
+    [JsonIgnore] public string basePath { get; private set; } = "";
 
     public Dictionary<CStage.EStage, string> stageSkins { get; set; } = new();
     [JsonIgnore] private Dictionary<CStage.EStage, UIGroup?> stageSkinCache = new();
@@ -34,14 +34,7 @@ public class SkinDescriptor
         if (descriptor == null) return null;
         
         descriptor.basePath = path;
-        
-        foreach (CStage.EStage stage in Enum.GetValues<CStage.EStage>())
-        {
-            if (stage == CStage.EStage.DoNothing_0) continue;
 
-            descriptor.stageSkinCache[stage] = descriptor.LoadStageSkin(stage);
-        }
-        
         return descriptor;
     }
     
@@ -107,5 +100,39 @@ public class SkinDescriptor
             ImGui.SameLine();
             ImGui.Text(stage.Value);
         }
+    }
+
+    public string AddResource(string path)
+    {
+        //copy the file into the skin directory
+        string fileName = Path.GetFileName(path);
+        string targetPath = Path.Combine(basePath, "Resources", fileName);
+        
+        if (File.Exists(targetPath))
+        {
+            return targetPath;
+        }
+        
+        if (!Directory.Exists(Path.GetDirectoryName(targetPath)))
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(targetPath)!);
+        }
+        
+        File.Copy(path, targetPath, true);
+        return fileName;
+    }
+
+    public string GetResource(string fileName)
+    {
+        if (string.IsNullOrWhiteSpace(fileName)) return "";
+        
+        string targetPath = Path.Combine(basePath, "Resources", fileName);
+        if (File.Exists(targetPath))
+        {
+            return targetPath;
+        }
+        
+        //if the file does not exist, return empty string
+        return "";
     }
 }

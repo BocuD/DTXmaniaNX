@@ -88,7 +88,7 @@ public class SkinManager
 
     public void ChangeSkin(SkinDescriptor skin)
     {
-        currentSkin = skin;
+        currentSkin = SkinDescriptor.LoadSkin(skin.basePath);
         
         CDTXMania.rCurrentStage.LoadUI();
     }
