@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Diagnostics;
 using DTXMania.Core;
+using DTXMania.UI;
 using DTXUIRenderer;
 using FDK;
 using Color = System.Drawing.Color;
@@ -504,8 +505,6 @@ internal abstract class CStagePerfCommonScreen : CStage
             
             actBackgroundAVI.Stop();
 
-            CDTXMania.tReleaseTexture(ref tx背景);
-
             CDTXMania.tReleaseTexture(ref txWailingFrame);
             CDTXMania.tReleaseTexture(ref tx判定画像anime);
             CDTXMania.tReleaseTexture(ref tx判定画像anime_2);
@@ -875,7 +874,6 @@ internal abstract class CStagePerfCommonScreen : CStage
     protected STDGBVALUE<int> nコンボ数_TargetGhost;
     public STDGBVALUE<int> n最大コンボ数_TargetGhost;
 
-    protected CTexture tx背景;
     protected STDGBVALUE<int> nInputAdjustTimeMs;		// #23580 2011.1.3 yyagi
     public STAUTOPLAY bIsAutoPlay;		// #24239 2011.1.23 yyagi
     //		protected int nRisky_InitialVar, nRiskyTime;		// #23559 2011.7.28 yyagi → CAct演奏ゲージ共通クラスに隠蔽
@@ -4702,15 +4700,18 @@ internal abstract class CStagePerfCommonScreen : CStage
             actPlayInfo.tUpdateAndDraw(x, y);
         }
     }
+    
+    protected UIImage background;
     protected void tUpdateAndDraw_Background()
     {
         //Draw either Background image or video
         if (bGenericVideoEnabled) {
             actBackgroundAVI.tUpdateAndDraw();
+            background.isVisible = false;
         }
-        else if (tx背景 != null)
+        else if (background != null)
         {
-            tx背景.tDraw2D(CDTXMania.app.Device, 0, 0);
+            background.isVisible = true;
         }
         //CDTXMania.app.Device.Clear( ClearFlags.ZBuffer | ClearFlags.Target, Color.Black, 0f, 0 );
     }
@@ -4770,10 +4771,13 @@ internal abstract class CStagePerfCommonScreen : CStage
 
 
 
+    
     protected void tGenerateBackgroundTexture(string DefaultBgFilename, Rectangle bgrect, string bgfilename)
     {
         Bitmap image = null;
         bool flag = true;
+        
+        CTexture txBackground = null;
 
         if (bgfilename != null && File.Exists(bgfilename))
         {
@@ -4783,7 +4787,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                 bitmap2 = new Bitmap(bgfilename);
                 if ((bitmap2.Size.Width == 0) && (bitmap2.Size.Height == 0))
                 {
-                    tx背景 = null;
+                    txBackground = null;
                     return;
                 }
                 Bitmap bitmap3 = new Bitmap(SampleFramework.GameFramebufferSize.Width, SampleFramework.GameFramebufferSize.Height);
@@ -4830,7 +4834,7 @@ internal abstract class CStagePerfCommonScreen : CStage
             catch
             {
                 Trace.TraceError("背景画像の読み込みに失敗しました。({0})", new object[] { bgfilename });
-                tx背景 = null;
+                txBackground = null;
                 return;
             }
         }
@@ -4842,14 +4846,20 @@ internal abstract class CStagePerfCommonScreen : CStage
         }
         try
         {
-            tx背景 = new CTexture(CDTXMania.app.Device, image, CDTXMania.TextureFormat);
+            txBackground = new CTexture(CDTXMania.app.Device, image, CDTXMania.TextureFormat);
         }
         catch (CTextureCreateFailedException)
         {
             Trace.TraceError("背景テクスチャの生成に失敗しました。");
-            tx背景 = null;
+            txBackground = null;
         }
         image.Dispose();
+        
+        if (txBackground != null)
+        {
+            DTXTexture texture = new(txBackground);
+            background = ui.AddChild(new UIImage(texture));
+        }
     }
 
     protected virtual void tHandleInput_Guitar()

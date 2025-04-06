@@ -450,7 +450,6 @@ internal class CStageResult : CStage
 		{
 			ui = new UIGroup("Result Screen");
 			
-			//
 			rBackgroundVideoAVI = new CDTX.CAVI(1290, CSkin.Path(@"Graphics\8_background.mp4"), "", 20.0);
 			rBackgroundVideoAVI.OnDeviceCreated();
 			if (rBackgroundVideoAVI.avi != null)
@@ -460,8 +459,7 @@ internal class CStageResult : CStage
 				Trace.TraceInformation("Playing Background video for Result Screen");
 			}
 
-			//this.ds背景動画 = CDTXMania.t失敗してもスキップ可能なDirectShowを生成する(CSkin.Path(@"Graphics\8_background.mp4"), CDTXMania.app.WindowHandle, true);
-			txBackground = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\8_background.jpg" ) );
+			var txBackground = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\8_background.jpg" ) );
 			switch (CDTXMania.stageResult.n総合ランク値)
 			{
 				case 0:
@@ -508,6 +506,11 @@ internal class CStageResult : CStage
 					}
 					break;
 			}
+
+			var dtxTex = new DTXTexture(txBackground);
+			background = ui.AddChild(new UIImage(dtxTex));
+			background.renderOrder = -100;
+			
 			txTopPanel = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\8_header panel.png" ), true );
 			txBottomPanel = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\8_footer panel.png" ), true );
 			base.OnManagedCreateResources();
@@ -532,7 +535,6 @@ internal class CStageResult : CStage
 			actBackgroundVideoAVI.Stop();
 
 			//CDTXMania.t安全にDisposeする( ref this.ds背景動画 );
-			CDTXMania.tReleaseTexture( ref txBackground );
 			CDTXMania.tReleaseTexture( ref txTopPanel );
 			CDTXMania.tReleaseTexture( ref txBottomPanel );
 			base.OnManagedReleaseResources();
@@ -650,11 +652,7 @@ internal class CStageResult : CStage
 		}
 
 		// 描画
-
-		if( txBackground != null && rBackgroundVideoAVI.avi == null)
-		{
-			txBackground.tDraw2D( CDTXMania.app.Device, 0, 0 );
-		}
+		background.isVisible = rBackgroundVideoAVI.avi == null;
 
 		if( ct登場用.bInProgress && ( txTopPanel != null ) )
 		{
@@ -843,7 +841,7 @@ internal class CStageResult : CStage
 	private CSound rResultSound;
 	private CTexture txBottomPanel;  // tx下部パネル
 	private CTexture txTopPanel;  // tx上部パネル
-	private CTexture txBackground;  // tx背景
+	private UIImage background;  // tx背景
 	//Copy from CStagePerfCommonScreen
 	public STDGBVALUE<CStagePerfCommonScreen.CLAGTIMINGHITCOUNT> nTimingHitCount;
 
