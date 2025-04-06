@@ -26,12 +26,12 @@ public abstract class UITexture : UIDrawable
     {
         if (t.isValid())
         {
-            this.texture = t;
+            texture = t;
             size = new Vector2(t.Width, t.Height);
         }
         else
         {
-            this.texture = BaseTexture.None;
+            texture = BaseTexture.None;
             size = new Vector2(0, 0);
         }
     }
