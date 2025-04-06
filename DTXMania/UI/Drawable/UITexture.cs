@@ -63,22 +63,27 @@ public abstract class UITexture : UIDrawable
                 ImGui.Text($"Width: {texture.Width}");
                 ImGui.Text($"Height: {texture.Height}");
 
-                ImTextureID? tex = texture.GetImTextureID();
-                if (tex != null)
+                float windowWidth = ImGui.GetWindowWidth();
+                float textureWidth = windowWidth - 64;
+
+                if (textureWidth > texture.Width * 3)
+                    textureWidth = texture.Width * 3;
+
+                float textureHeight = texture.Height * (textureWidth / texture.Width);
+
+                ImGui.Dummy(new System.Numerics.Vector2(textureWidth, textureHeight));
+
+                var pMin = ImGui.GetItemRectMin();
+                var pMax = ImGui.GetItemRectMax();
+                
+                var textureId = texture.GetImTextureID();
+
+                if (textureId != null)
                 {
-                    float windowWidth = ImGui.GetWindowWidth();
-                    float textureWidth = windowWidth - 64;
-                    
-                    if (textureWidth > texture.Width * 3)
-                    {
-                        textureWidth = texture.Width * 3;
-                    }
-                    
-                    float textureHeight = texture.Height * (textureWidth / texture.Width);
-                    ImGui.Image(tex.Value, new System.Numerics.Vector2(textureWidth, textureHeight));
+                    ImGui.GetWindowDrawList().AddImage(textureId.Value, pMin, pMax);
                     
                     //draw bounds around the texture
-                    ImGui.GetWindowDrawList().AddRect(ImGui.GetItemRectMin(), ImGui.GetItemRectMax(), 0xFF00FF00, 0, 0, 2);
+                    ImGui.GetWindowDrawList().AddRect(pMin, pMax, 0xFF00FF00, 0, 0, 2);
                 }
             }
             else
