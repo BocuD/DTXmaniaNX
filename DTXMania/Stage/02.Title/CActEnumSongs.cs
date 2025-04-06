@@ -79,6 +79,21 @@ internal class CActEnumSongs : CActivity
         if (bNotActivated)
             return;
         
+        //release ui
+        var parent = CDTXMania.rCurrentStage.ui;
+        if (enumMessage != null)
+        {
+            parent.RemoveChild(enumMessage);
+            enumMessage.Dispose();
+            enumMessage = null;
+        }
+        if (text != null)
+        {
+            parent.RemoveChild(text);
+            text.Dispose();
+            text = null;
+        }
+        
         base.OnManagedReleaseResources();
     }
 
