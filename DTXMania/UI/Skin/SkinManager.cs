@@ -93,7 +93,7 @@ public class SkinManager
         CDTXMania.rCurrentStage.LoadUI();
     }
 
-    public UIGroup? GetStageSkin(CStage.EStage stageId)
+    public UIGroup? LoadStageSkin(CStage.EStage stageId)
     {
         return currentSkin?.LoadStageSkin(stageId);
     }

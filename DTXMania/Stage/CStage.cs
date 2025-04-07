@@ -68,7 +68,7 @@ public abstract class CStage : CActivity
 	public void LoadUI()
 	{
 		//try to get the skin for this stage
-		UIGroup? stageUI = CDTXMania.SkinManager.GetStageSkin(eStageID);
+		UIGroup? stageUI = CDTXMania.SkinManager.LoadStageSkin(eStageID);
 
 		if (stageUI == null)
 		{
@@ -108,6 +108,16 @@ public abstract class CStage : CActivity
 		
 		return base.OnUpdateAndDraw();
 	}
+	
+	public override void OnManagedCreateResources()
+	{
+		if (!bNotActivated)
+		{
+			LoadUI();
+		}
+		
+		base.OnManagedCreateResources();
+	}
 
 	public override void OnManagedReleaseResources()
 	{
@@ -121,7 +131,6 @@ public abstract class CStage : CActivity
 
 	public override void OnActivate()
 	{
-		LoadUI();
 		base.OnActivate();
 		tDisplayPresence();
 	}

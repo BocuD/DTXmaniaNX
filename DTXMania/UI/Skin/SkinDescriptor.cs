@@ -69,12 +69,6 @@ public class SkinDescriptor
 
     public UIGroup? LoadStageSkin(CStage.EStage stageId)
     {
-        //load from skin cache
-        if (stageSkinCache.TryGetValue(stageId, out UIGroup? group))
-        {
-            return group;
-        }
-        
         bool available = stageSkins.TryGetValue(stageId, out string? uiGroupJson);
         
         if (available && uiGroupJson != null)
