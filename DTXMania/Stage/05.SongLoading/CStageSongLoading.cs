@@ -166,6 +166,11 @@ internal class CStageSongLoading : CStage
 
     public override void InitializeBaseUI()
     {
+        
+    }
+    
+    public override void InitializeDefaultUI()
+    {
         DTXTexture bgTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\6_background.jpg")));
         UIImage bg = ui.AddChild(new UIImage(bgTex));
         bg.renderOrder = -100;

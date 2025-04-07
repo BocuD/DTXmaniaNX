@@ -23,6 +23,11 @@ internal class CStageEnd : CStage
 		
 	}
 
+	public override void InitializeDefaultUI()
+	{
+		
+	}
+	
 	public override void OnActivate()
 	{
 		Trace.TraceInformation( "終了ステージを活性化します。" );

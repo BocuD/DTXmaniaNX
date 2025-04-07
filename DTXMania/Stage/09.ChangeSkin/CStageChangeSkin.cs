@@ -24,6 +24,11 @@ internal class CStageChangeSkin : CStage
 	{
 		
 	}
+	
+	public override void InitializeDefaultUI()
+	{
+		
+	}
 
 	public override void OnActivate()
 	{

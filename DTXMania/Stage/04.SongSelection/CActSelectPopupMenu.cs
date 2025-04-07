@@ -223,6 +223,7 @@ internal class CActSelectPopupMenu : CActivity
             ui.anchor = new Vector2(0.5f, 0.5f);
             ui.renderOrder = 100;
             ui.isVisible = false;
+            ui.dontSerialize = true;
                 
             var bgTex = new DTXTexture(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\ScreenSelect sort menu background.png"), false));
             var bg = ui.AddChild(new UIImage(bgTex));

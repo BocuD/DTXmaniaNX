@@ -101,11 +101,6 @@ internal class CStageSongSelection : CStage
 		//
 		bCheckDrumsEnabled = CDTXMania.ConfigIni.bDrumsEnabled;
 		bCheckRandSubBox = CDTXMania.ConfigIni.bランダムセレクトで子BOXを検索対象とする;
-
-		dynamicStringSources["SongName"] = new DynamicStringSource(() => actSongList.rSelectedScore.SongInformation.Title ?? "");
-		dynamicStringSources["SongArtist"] = new DynamicStringSource(() => actSongList.rSelectedScore.SongInformation.ArtistName ?? "");
-		dynamicStringSources["SongGenre"] = new DynamicStringSource(() => actSongList.rSelectedScore.SongInformation.Genre ?? "");
-		dynamicStringSources["SongBPM"] = new DynamicStringSource(() => actSongList.rSelectedScore.SongInformation.Bpm.ToString());
 	}
 		
 		
@@ -187,11 +182,16 @@ internal class CStageSongSelection : CStage
 				bToReset = true;
 				bCheckRandSubBox = CDTXMania.ConfigIni.bランダムセレクトで子BOXを検索対象とする;
 			}
-				
+
 			if (bToReset)
 			{
 				tResetRandomListForNode(null);
-			}				
+			}
+			
+			dynamicStringSources["SongName"] = new DynamicStringSource(() => actSongList.rSelectedScore.SongInformation.Title ?? "");
+			dynamicStringSources["SongArtist"] = new DynamicStringSource(() => actSongList.rSelectedScore.SongInformation.ArtistName ?? "");
+			dynamicStringSources["SongGenre"] = new DynamicStringSource(() => actSongList.rSelectedScore.SongInformation.Genre ?? "");
+			dynamicStringSources["SongBPM"] = new DynamicStringSource(() => actSongList.rSelectedScore.SongInformation.Bpm.ToString());
 		}
 		finally
 		{
@@ -240,32 +240,9 @@ internal class CStageSongSelection : CStage
 	
 	public override void InitializeBaseUI()
 	{
-		DTXTexture bgTex = new(CSkin.Path(@"Graphics\5_background.jpg"));
-		UIImage bg = ui.AddChild(new UIImage(bgTex));
-		bg.renderOrder = -100;
-		bg.position = SharpDX.Vector3.Zero;
-		bg.name = "Background";
-		
 		LegacyDrawable backgroundVideo = ui.AddChild(new LegacyDrawable(() => actBackgroundVideoAVI.tUpdateAndDraw()));
 		backgroundVideo.renderOrder = -99;
 		backgroundVideo.name = "BackgroundVideo";
-		
-		DTXTexture topPanelTex = new(CSkin.Path(@"Graphics\5_header panel.png"));
-		topPanel = ui.AddChild(new UIImage(topPanelTex));
-		topPanel.position = new SharpDX.Vector3(0, 0, 0);
-		topPanel.name = "TopPanel";
-		topPanel.renderOrder = 4;
-		
-		DTXTexture bottomPanelTex = new(CSkin.Path(@"Graphics\5_footer panel.png"));
-		UIImage bottomPanel = ui.AddChild(new UIImage(bottomPanelTex));
-		bottomPanel.position = new SharpDX.Vector3(0, 720 - bottomPanelTex.Height, 0);
-		bottomPanel.name = "BottomPanel";
-		bottomPanel.renderOrder = 4;
-		
-		DTXTexture bpmLabelTex = new(CSkin.Path(@"Graphics\5_BPM.png"));
-		UIImage bpmLabel = ui.AddChild(new UIImage(bpmLabelTex));
-		bpmLabel.position = new SharpDX.Vector3(32, 258, 0);
-		bpmLabel.name = "BPMLabel";
 		
 		LegacyDrawable preImagePanel = ui.AddChild(new LegacyDrawable(() => actPreimagePanel.OnUpdateAndDraw()));
 		preImagePanel.name = "PreImagePanel";
@@ -292,6 +269,32 @@ internal class CStageSongSelection : CStage
 		LegacyDrawable showCurrentPosition = ui.AddChild(new LegacyDrawable(() => actShowCurrentPosition.OnUpdateAndDraw()));
 		showCurrentPosition.name = "ShowCurrentPosition";
 		showCurrentPosition.renderOrder = 5;
+	}
+	
+	public override void InitializeDefaultUI()
+	{
+		DTXTexture bgTex = new(CSkin.Path(@"Graphics\5_background.jpg"));
+		UIImage bg = ui.AddChild(new UIImage(bgTex));
+		bg.renderOrder = -100;
+		bg.position = SharpDX.Vector3.Zero;
+		bg.name = "Background";
+		
+		DTXTexture topPanelTex = new(CSkin.Path(@"Graphics\5_header panel.png"));
+		topPanel = ui.AddChild(new UIImage(topPanelTex));
+		topPanel.position = new SharpDX.Vector3(0, 0, 0);
+		topPanel.name = "TopPanel";
+		topPanel.renderOrder = 4;
+		
+		DTXTexture bottomPanelTex = new(CSkin.Path(@"Graphics\5_footer panel.png"));
+		UIImage bottomPanel = ui.AddChild(new UIImage(bottomPanelTex));
+		bottomPanel.position = new SharpDX.Vector3(0, 720 - bottomPanelTex.Height, 0);
+		bottomPanel.name = "BottomPanel";
+		bottomPanel.renderOrder = 4;
+		
+		DTXTexture bpmLabelTex = new(CSkin.Path(@"Graphics\5_BPM.png"));
+		UIImage bpmLabel = ui.AddChild(new UIImage(bpmLabelTex));
+		bpmLabel.position = new SharpDX.Vector3(32, 258, 0);
+		bpmLabel.name = "BPMLabel";
 	}
 	
 	public override void OnManagedCreateResources()

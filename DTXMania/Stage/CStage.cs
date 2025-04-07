@@ -76,23 +76,18 @@ public abstract class CStage : CActivity
 		if (stageUI == null)
 		{
 			ui = new UIGroup(GetType().ToString());
-			InitializeBaseUI();
+			InitializeDefaultUI();
 		}
 		else
 		{
 			ui = stageUI;
 		}
-	}
-
-	public void ReloadUI()
-	{
-		ui.Dispose();
-		ui = null;
 		
-		LoadUI();
+		InitializeBaseUI();
 	}
 
 	public abstract void InitializeBaseUI();
+	public abstract void InitializeDefaultUI();
 
 	public virtual void FirstUpdate()
 	{

@@ -55,6 +55,45 @@ internal class CStageConfig : CStage
 
     public override void InitializeBaseUI()
     {
+        //left menu
+        UIGroup leftMenu = ui.AddChild(new UIGroup("Left Options Menu"));
+        leftMenu.position = new Vector3(245, 140, 0);
+        leftMenu.renderOrder = 50;
+        leftMenu.dontSerialize = true;
+        
+        DTXTexture menuPanelTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_menu panel.png")));
+        UIImage menuPanel = leftMenu.AddChild(new UIImage(menuPanelTex));
+        menuPanel.position = Vector3.Zero;
+            
+        //menu items
+        configLeftOptionsMenu = leftMenu.AddChild(new UISelectList("Button List"));
+        configLeftOptionsMenu.isVisible = true;
+        configLeftOptionsMenu.dontSerialize = true;
+        
+        //340 - size/2, so this becomes 340-245= 95
+        configLeftOptionsMenu.position = new Vector3(95, 4, 0);
+
+        //todo: render menu cursor correctly to match current version of the game. right now its rendered as a stretched image.
+        DTXTexture menuCursorTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_menu cursor.png")));
+        menuCursor = configLeftOptionsMenu.AddChild(new UIImage(menuCursorTex));
+        menuCursor.position = new Vector3(-5, 2, 0);
+        menuCursor.size = new Vector2(170, 28);
+        menuCursor.anchor = new Vector2(0.5f, 0f);
+        menuCursor.renderMode = ERenderMode.Sliced;
+        menuCursor.sliceRect = new RectangleF(16, 0, 12, 28);
+
+        var family = new FontFamily(CDTXMania.ConfigIni.songListFont);
+        configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(family, 18, "System", () => { actList.tSetupItemList_System(); }));
+        configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(family, 18, "Drums", () => { actList.tSetupItemList_Drums(); }));
+        configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(family, 18, "Guitar", () => { actList.tSetupItemList_Guitar(); }));
+        configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(family, 18, "Bass", () => { actList.tSetupItemList_Bass(); }));
+        configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(family, 18, "Exit", () => { actList.tSetupItemList_Exit(); }));
+        configLeftOptionsMenu.UpdateLayout();
+        configLeftOptionsMenu.SetSelectedIndex(0);
+    }
+
+    public override void InitializeDefaultUI()
+    {
         //create resources for menu elements
         DTXTexture bgTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_background.png")));
         UIImage bg = ui.AddChild(new UIImage(bgTex));
@@ -141,40 +180,6 @@ internal class CStageConfig : CStage
     {
         if (!bNotActivated)
         {
-            //left menu
-            UIGroup leftMenu = ui.AddChild(new UIGroup("Left Options Menu"));
-            leftMenu.position = new Vector3(245, 140, 0);
-            leftMenu.renderOrder = 50;
-            
-            DTXTexture menuPanelTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_menu panel.png")));
-            UIImage menuPanel = leftMenu.AddChild(new UIImage(menuPanelTex));
-            menuPanel.position = Vector3.Zero;
-                
-            //menu items
-            configLeftOptionsMenu = leftMenu.AddChild(new UISelectList("Button List"));
-            configLeftOptionsMenu.isVisible = true;
-            
-            //340 - size/2, so this becomes 340-245= 95
-            configLeftOptionsMenu.position = new Vector3(95, 4, 0);
-
-            //todo: render menu cursor correctly to match current version of the game. right now its rendered as a stretched image.
-            DTXTexture menuCursorTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_menu cursor.png")));
-            menuCursor = configLeftOptionsMenu.AddChild(new UIImage(menuCursorTex));
-            menuCursor.position = new Vector3(-5, 2, 0);
-            menuCursor.size = new Vector2(170, 28);
-            menuCursor.anchor = new Vector2(0.5f, 0f);
-            menuCursor.renderMode = ERenderMode.Sliced;
-            menuCursor.sliceRect = new RectangleF(16, 0, 12, 28);
-
-            var family = new FontFamily(CDTXMania.ConfigIni.songListFont);
-            configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(family, 18, "System", () => { actList.tSetupItemList_System(); }));
-            configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(family, 18, "Drums", () => { actList.tSetupItemList_Drums(); }));
-            configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(family, 18, "Guitar", () => { actList.tSetupItemList_Guitar(); }));
-            configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(family, 18, "Bass", () => { actList.tSetupItemList_Bass(); }));
-            configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(family, 18, "Exit", () => { actList.tSetupItemList_Exit(); }));
-            configLeftOptionsMenu.UpdateLayout();
-            configLeftOptionsMenu.SetSelectedIndex(0);
-                
             if (bFocusIsOnMenu)
             {
                 tDrawSelectedMenuDescriptionInDescriptionPanel();
