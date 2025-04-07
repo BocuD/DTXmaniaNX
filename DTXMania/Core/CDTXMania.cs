@@ -722,7 +722,6 @@ internal class CDTXMania : Game
 
                     #endregion
                 }
-
                 break;
         }
         #endregion
@@ -852,11 +851,11 @@ internal class CDTXMania : Game
 
                     if (!ConfigIni.bGuitarRevolutionMode)
                     {
-                        tChangeStage(stagePerfDrumsScreen, false);
+                        tChangeStage(stagePerfDrumsScreen);
                     }
                     else
                     {
-                        tChangeStage(stagePerfGuitarScreen, false);
+                        tChangeStage(stagePerfGuitarScreen);
                     }
                 }
 
@@ -1311,10 +1310,25 @@ internal class CDTXMania : Game
                 #endregion
                 break;
         }
+        
+        if (!preventStageChanges && cachedTransition != null)
+        {
+            cachedTransition();
+            cachedTransition = null;
+        }
     }
+
+    public static bool preventStageChanges;
+    private Action? cachedTransition;
 
     public void tChangeStage(CStage newStage, bool activateNewStage = true, bool deactivateOldStage = true)
     {
+        if (preventStageChanges)
+        {
+            cachedTransition = () => tChangeStage(newStage, activateNewStage, deactivateOldStage);
+            return;
+        }
+        
         if (deactivateOldStage)
         {
             rCurrentStage.OnDeactivate();
@@ -1322,6 +1336,7 @@ internal class CDTXMania : Game
 
         Trace.TraceInformation("----------------------");
         Trace.TraceInformation($"■ {newStage.eStageID}");
+        Console.WriteLine($"Changing Stage from {rCurrentStage.GetType().Name} to {newStage.GetType().Name}");
 
         if (activateNewStage)
         {
