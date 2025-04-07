@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using DTXMania.Core;
+using DTXMania.UI.DynamicElements;
 using DTXUIRenderer;
 using FDK;
 
@@ -23,6 +24,11 @@ internal class CStageStartup : CStage
 	{
 		
 	}
+	
+	public override void InitializeDefaultUI()
+	{
+		
+	}
 
 	public override void OnActivate()
 	{
@@ -32,6 +38,9 @@ internal class CStageStartup : CStage
 		{
 			list進行文字列 = new List<string>();
 			ePhaseID = EPhase.Common_DefaultState;
+			
+			dynamicStringSources["Version"] = new DynamicStringSource(() => CDTXMania.VERSION_DISPLAY);
+
 			base.OnActivate();
 			Trace.TraceInformation( "起動ステージの活性化を完了しました。" );
 		}

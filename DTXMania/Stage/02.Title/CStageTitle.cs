@@ -9,6 +9,7 @@ using System.Drawing;
 using DTXMania.Core;
 using DTXMania.UI;
 using DTXMania.UI.Drawable;
+using DTXMania.UI.DynamicElements;
 
 namespace DTXMania;
 
@@ -29,6 +30,11 @@ internal class CStageTitle : CStage
 	// CStage 実装
 
 	public override void InitializeBaseUI()
+	{
+		
+	}
+	
+	public override void InitializeDefaultUI()
 	{
 		var family = new FontFamily(CDTXMania.ConfigIni.songListFont);
 		ui.AddChild(new UIText(family, 12, CDTXMania.VERSION_DISPLAY));
@@ -52,6 +58,9 @@ internal class CStageTitle : CStage
 			ct上移動用 = new CCounter();
 			ct下移動用 = new CCounter();
 			ctカーソルフラッシュ用 = new CCounter();
+			
+			dynamicStringSources["Version"] = new DynamicStringSource(() => CDTXMania.VERSION_DISPLAY);
+
 			base.OnActivate();
 		}
 		finally
