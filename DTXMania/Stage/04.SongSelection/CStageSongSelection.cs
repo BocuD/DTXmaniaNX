@@ -229,6 +229,8 @@ internal class CStageSongSelection : CStage
 			Trace.Unindent();
 		}
 	}
+
+	private UIImage? topPanel;
 	
 	public override void InitializeBaseUI()
 	{
@@ -240,16 +242,19 @@ internal class CStageSongSelection : CStage
 		
 		LegacyDrawable backgroundVideo = ui.AddChild(new LegacyDrawable(() => actBackgroundVideoAVI.tUpdateAndDraw()));
 		backgroundVideo.renderOrder = -99;
+		backgroundVideo.name = "BackgroundVideo";
 		
 		DTXTexture topPanelTex = new(CSkin.Path(@"Graphics\5_header panel.png"));
-		UIImage topPanel = ui.AddChild(new UIImage(topPanelTex));
+		topPanel = ui.AddChild(new UIImage(topPanelTex));
 		topPanel.position = new SharpDX.Vector3(0, 0, 0);
 		topPanel.name = "TopPanel";
+		topPanel.renderOrder = 4;
 		
 		DTXTexture bottomPanelTex = new(CSkin.Path(@"Graphics\5_footer panel.png"));
 		UIImage bottomPanel = ui.AddChild(new UIImage(bottomPanelTex));
 		bottomPanel.position = new SharpDX.Vector3(0, 720 - bottomPanelTex.Height, 0);
 		bottomPanel.name = "BottomPanel";
+		bottomPanel.renderOrder = 4;
 		
 		DTXTexture bpmLabelTex = new(CSkin.Path(@"Graphics\5_BPM.png"));
 		UIImage bpmLabel = ui.AddChild(new UIImage(bpmLabelTex));
@@ -264,18 +269,23 @@ internal class CStageSongSelection : CStage
 		
 		LegacyDrawable songList = ui.AddChild(new LegacyDrawable(() => actSongList.OnUpdateAndDraw()));
 		songList.name = "SongList";
+		songList.renderOrder = 1;
 		
 		LegacyDrawable statusPanel = ui.AddChild(new LegacyDrawable(() => actStatusPanel.OnUpdateAndDraw()));
 		statusPanel.name = "StatusPanel";
+		statusPanel.renderOrder = 5;
 		
 		LegacyDrawable perfHistoryPanel = ui.AddChild(new LegacyDrawable(() => actPerHistoryPanel.OnUpdateAndDraw()));
 		perfHistoryPanel.name = "PerfHistoryPanel";
+		perfHistoryPanel.renderOrder = 5;
 		
 		LegacyDrawable information = ui.AddChild(new LegacyDrawable(() => actInformation.OnUpdateAndDraw()));
 		information.name = "Information";
+		information.renderOrder = 5;
 		
 		LegacyDrawable showCurrentPosition = ui.AddChild(new LegacyDrawable(() => actShowCurrentPosition.OnUpdateAndDraw()));
 		showCurrentPosition.name = "ShowCurrentPosition";
+		showCurrentPosition.renderOrder = 5;
 	}
 	
 	public override void OnManagedCreateResources()
@@ -344,32 +354,20 @@ internal class CStageSongSelection : CStage
 			tUpdateSearchNotification("");
 		}
 
-		//Draw Background video  via CActPerfAVI methods
-		//        actBackgroundVideoAVI.tUpdateAndDraw();
-
-		//        actPreimagePanel.OnUpdateAndDraw();
-		
-		//        actArtistComment.OnUpdateAndDraw();
-		
-		//        actSongList.OnUpdateAndDraw();
-		
-		//        actStatusPanel.OnUpdateAndDraw();
-		//        actPerHistoryPanel.OnUpdateAndDraw();
-		
-		// int y = 0;
-		// if( ct登場時アニメ用共通.bInProgress )
-		// {
-		// 	double db登場割合 = ( (double) ct登場時アニメ用共通.nCurrentValue ) / 100.0;	// 100が最終値
-		// 	double dbY表示割合 = Math.Sin( Math.PI / 2 * db登場割合 );
-		// 	y = ( (int) ( txTopPanel.szImageSize.Height * dbY表示割合 ) ) - txTopPanel.szImageSize.Height;
-		// }
-		// if( txTopPanel != null )
-		// 	txTopPanel.tDraw2D( CDTXMania.app.Device, 0, y );
-
-		//         actInformation.OnUpdateAndDraw();
+		if (topPanel != null)
+		{
+			float y = 0;
+			if (ctInitialAppearAnimation.bInProgress)
+			{
+				double db登場割合 = ( (double) ctInitialAppearAnimation.nCurrentValue ) / 100.0;	// 100が最終値
+				double dbY表示割合 = Math.Sin( Math.PI / 2 * db登場割合 );
+				y = (float)(topPanel.Texture.Height * dbY表示割合) - topPanel.Texture.Height;
+			}
+			
+			topPanel.position.Y = y;
+		}
 
 		actPresound.OnUpdateAndDraw();
-		//        actShowCurrentPosition.OnUpdateAndDraw();
 
 		switch ( ePhaseID )
 		{
