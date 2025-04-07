@@ -80,7 +80,7 @@ internal class CStageConfig : CStage
         menuCursor.size = new Vector2(170, 28);
         menuCursor.anchor = new Vector2(0.5f, 0f);
         menuCursor.renderMode = ERenderMode.Sliced;
-        menuCursor.sliceRect = new RectangleF(16, 0, 12, 28);
+        menuCursor.sliceRect = new RectangleF(16, 0, 32, 28);
 
         var family = new FontFamily(CDTXMania.ConfigIni.songListFont);
         configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(family, 18, "System", () => { actList.tSetupItemList_System(); }));
@@ -90,6 +90,15 @@ internal class CStageConfig : CStage
         configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(family, 18, "Exit", () => { actList.tSetupItemList_Exit(); }));
         configLeftOptionsMenu.UpdateLayout();
         configLeftOptionsMenu.SetSelectedIndex(0);
+        
+        if (bFocusIsOnMenu)
+        {
+            tDrawSelectedMenuDescriptionInDescriptionPanel();
+        }
+        else
+        {
+            tDrawSelectedItemDescriptionInDescriptionPanel();
+        }
     }
 
     public override void InitializeDefaultUI()
@@ -180,15 +189,6 @@ internal class CStageConfig : CStage
     {
         if (!bNotActivated)
         {
-            if (bFocusIsOnMenu)
-            {
-                tDrawSelectedMenuDescriptionInDescriptionPanel();
-            }
-            else
-            {
-                tDrawSelectedItemDescriptionInDescriptionPanel();
-            }
-
             base.OnManagedCreateResources();
         }
     }
