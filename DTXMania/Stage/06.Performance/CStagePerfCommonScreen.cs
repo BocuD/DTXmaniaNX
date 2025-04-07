@@ -2367,340 +2367,328 @@ internal abstract class CStagePerfCommonScreen : CStage
                 CDTXMania.DTX.tResumePlaybackForAllChips();
             }
         }
-        if (((ePhaseID != EPhase.PERFORMANCE_STAGE_FAILED)) && (ePhaseID != EPhase.PERFORMANCE_STAGE_FAILED_フェードアウト))
-        {
-            if (!bPAUSE)
-            {
-                tHandleInput_Drums();
-                tHandleInput_GuitarBass(EInstrumentPart.GUITAR);
-                tHandleInput_GuitarBass(EInstrumentPart.BASS);
-            }
-            if (!bPAUSE && keyboard.bKeyPressed(SlimDXKey.UpArrow) && (keyboard.bKeyPressing(SlimDXKey.RightShift) || keyboard.bKeyPressing(SlimDXKey.LeftShift)))
-            {	// shift (+ctrl) + UpArrow (BGMAdjust)
-                CDTXMania.DTX.t各自動再生音チップの再生時刻を変更する((keyboard.bKeyPressing(SlimDXKey.LeftControl) || keyboard.bKeyPressing(SlimDXKey.RightControl)) ? 1 : 10);
-                CDTXMania.DTX.tAutoCorrectWavPlaybackPosition();
-            }
-            else if (!bPAUSE && keyboard.bKeyPressed(SlimDXKey.DownArrow) && (keyboard.bKeyPressing(SlimDXKey.RightShift) || keyboard.bKeyPressing(SlimDXKey.LeftShift)))
-            {	// shift + DownArrow (BGMAdjust)
-                CDTXMania.DTX.t各自動再生音チップの再生時刻を変更する((keyboard.bKeyPressing(SlimDXKey.LeftControl) || keyboard.bKeyPressing(SlimDXKey.RightControl)) ? -1 : -10);
-                CDTXMania.DTX.tAutoCorrectWavPlaybackPosition();
-            }
-            else if (keyboard.bKeyPressed(SlimDXKey.UpArrow))
-            {	// UpArrow(scrollspeed up)
-                ScrollSpeedUp();
-            }
-            else if (keyboard.bKeyPressed(SlimDXKey.DownArrow))
-            {	// DownArrow (scrollspeed down)
-                ScrollSpeedDown();
-            }
 
-            else if (CDTXMania.Pad.bPressed(EInstrumentPart.GUITAR, EPad.Help))
-            {	// del (debug info)
-                CDTXMania.ConfigIni.bShowPerformanceInformation = !CDTXMania.ConfigIni.bShowPerformanceInformation;
-            }
-            else if (!bPAUSE && keyboard.bKeyPressed(SlimDXKey.LeftArrow))		// #24243 2011.1.16 yyagi UI for InputAdjustTime in playing screen.
+        if (((ePhaseID == EPhase.PERFORMANCE_STAGE_FAILED)) || (ePhaseID == EPhase.PERFORMANCE_STAGE_FAILED_FADEOUT)) return;
+        
+        if (!bPAUSE)
+        {
+            tHandleInput_Drums();
+            tHandleInput_GuitarBass(EInstrumentPart.GUITAR);
+            tHandleInput_GuitarBass(EInstrumentPart.BASS);
+        }
+        if (!bPAUSE && keyboard.bKeyPressed(SlimDXKey.UpArrow) && (keyboard.bKeyPressing(SlimDXKey.RightShift) || keyboard.bKeyPressing(SlimDXKey.LeftShift)))
+        {	// shift (+ctrl) + UpArrow (BGMAdjust)
+            CDTXMania.DTX.t各自動再生音チップの再生時刻を変更する((keyboard.bKeyPressing(SlimDXKey.LeftControl) || keyboard.bKeyPressing(SlimDXKey.RightControl)) ? 1 : 10);
+            CDTXMania.DTX.tAutoCorrectWavPlaybackPosition();
+        }
+        else if (!bPAUSE && keyboard.bKeyPressed(SlimDXKey.DownArrow) && (keyboard.bKeyPressing(SlimDXKey.RightShift) || keyboard.bKeyPressing(SlimDXKey.LeftShift)))
+        {	// shift + DownArrow (BGMAdjust)
+            CDTXMania.DTX.t各自動再生音チップの再生時刻を変更する((keyboard.bKeyPressing(SlimDXKey.LeftControl) || keyboard.bKeyPressing(SlimDXKey.RightControl)) ? -1 : -10);
+            CDTXMania.DTX.tAutoCorrectWavPlaybackPosition();
+        }
+        else if (keyboard.bKeyPressed(SlimDXKey.UpArrow))
+        {	// UpArrow(scrollspeed up)
+            ScrollSpeedUp();
+        }
+        else if (keyboard.bKeyPressed(SlimDXKey.DownArrow))
+        {	// DownArrow (scrollspeed down)
+            ScrollSpeedDown();
+        }
+
+        else if (CDTXMania.Pad.bPressed(EInstrumentPart.GUITAR, EPad.Help))
+        {	// del (debug info)
+            CDTXMania.ConfigIni.bShowPerformanceInformation = !CDTXMania.ConfigIni.bShowPerformanceInformation;
+        }
+        else if (!bPAUSE && keyboard.bKeyPressed(SlimDXKey.LeftArrow))		// #24243 2011.1.16 yyagi UI for InputAdjustTime in playing screen.
+        {
+            ChangeInputAdjustTimeInPlaying(keyboard, -1);
+        }
+        else if (!bPAUSE && keyboard.bKeyPressed(SlimDXKey.RightArrow))		// #24243 2011.1.16 yyagi UI for InputAdjustTime in playing screen.
+        {
+            ChangeInputAdjustTimeInPlaying(keyboard, +1);
+        }
+        else if (!bPAUSE && (ePhaseID == EPhase.Common_DefaultState) && !CDTXMania.DTXVmode.Enabled && (keyboard.bKeyPressed(SlimDXKey.Escape)))
+        {	// escape (exit)
+            actFO.tStartFadeOut();
+            ePhaseID = EPhase.Common_FadeOut;
+            eReturnValueAfterFadeOut = EPerfScreenReturnValue.Interruption;
+        }
+        else if (CDTXMania.Pad.bPressed(EKeyConfigPart.SYSTEM, EKeyConfigPad.Restart))
+        {
+            if (bPAUSE)
             {
-                ChangeInputAdjustTimeInPlaying(keyboard, -1);
+                CSoundManager.rcPerformanceTimer.tResume();
+                CDTXMania.Timer.tResume();
             }
-            else if (!bPAUSE && keyboard.bKeyPressed(SlimDXKey.RightArrow))		// #24243 2011.1.16 yyagi UI for InputAdjustTime in playing screen.
+            ePhaseID = EPhase.PERFORMANCE_STAGE_RESTART;
+            eReturnValueAfterFadeOut = EPerfScreenReturnValue.Restart;
+        }
+        else if (CDTXMania.Pad.bPressed(EKeyConfigPart.SYSTEM, EKeyConfigPad.SkipForward))
+        {
+            bIsTrainingMode = true;
+            Trace.TraceInformation("SKIP FORWARD CSoundManager.rcPerformanceTimer.nCurrentTime=" + CSoundManager.rcPerformanceTimer.nCurrentTime + ", CDTXMania.Timer.nCurrentTime=" + CDTXMania.Timer.nCurrentTime);
+            tJumpInSong(CSoundManager.rcPerformanceTimer.nCurrentTime + CDTXMania.ConfigIni.nSkipTimeMs);
+        }
+        else if (CDTXMania.Pad.bPressed(EKeyConfigPart.SYSTEM, EKeyConfigPad.SkipBackward))
+        {
+            bIsTrainingMode = true;
+            Trace.TraceInformation("SKIP BACKWARD CSoundManager.rcPerformanceTimer.nCurrentTime=" + CSoundManager.rcPerformanceTimer.nCurrentTime + ", CDTXMania.Timer.nCurrentTime=" + CDTXMania.Timer.nCurrentTime);
+            tJumpInSong(Math.Max(0, CSoundManager.rcPerformanceTimer.nCurrentTime - CDTXMania.ConfigIni.nSkipTimeMs));
+        }
+        else if (CDTXMania.Pad.bPressed(EKeyConfigPart.SYSTEM, EKeyConfigPad.LoopCreate))
+        {
+            bIsTrainingMode = true;
+            if (LoopBeginMs == -1)
             {
-                ChangeInputAdjustTimeInPlaying(keyboard, +1);
+                Trace.TraceInformation("INSERT LOOP BEGIN CSoundManager.rcPerformanceTimer.nCurrentTime=" + CSoundManager.rcPerformanceTimer.nCurrentTime + ", CDTXMania.Timer.nCurrentTime=" + CDTXMania.Timer.nCurrentTime);
+                LoopBeginMs = CSoundManager.rcPerformanceTimer.nCurrentTime;
             }
-            else if (!bPAUSE && (ePhaseID == EPhase.Common_DefaultState) && !CDTXMania.DTXVmode.Enabled && (keyboard.bKeyPressed(SlimDXKey.Escape)))
-            {	// escape (exit)
-                actFO.tStartFadeOut();
-                ePhaseID = EPhase.Common_FadeOut;
-                eReturnValueAfterFadeOut = EPerfScreenReturnValue.Interruption;
-            }
-            else if (CDTXMania.Pad.bPressed(EKeyConfigPart.SYSTEM, EKeyConfigPad.Restart))
+            else
             {
-                if (bPAUSE)
+                if (LoopEndMs == -1)
                 {
-                    CSoundManager.rcPerformanceTimer.tResume();
-                    CDTXMania.Timer.tResume();
-                }
-                ePhaseID = EPhase.PERFORMANCE_STAGE_RESTART;
-                eReturnValueAfterFadeOut = EPerfScreenReturnValue.Restart;
-            }
-            else if (CDTXMania.Pad.bPressed(EKeyConfigPart.SYSTEM, EKeyConfigPad.SkipForward))
-            {
-                bIsTrainingMode = true;
-                Trace.TraceInformation("SKIP FORWARD CSoundManager.rcPerformanceTimer.nCurrentTime=" + CSoundManager.rcPerformanceTimer.nCurrentTime + ", CDTXMania.Timer.nCurrentTime=" + CDTXMania.Timer.nCurrentTime);
-                tJumpInSong(CSoundManager.rcPerformanceTimer.nCurrentTime + CDTXMania.ConfigIni.nSkipTimeMs);
-            }
-            else if (CDTXMania.Pad.bPressed(EKeyConfigPart.SYSTEM, EKeyConfigPad.SkipBackward))
-            {
-                bIsTrainingMode = true;
-                Trace.TraceInformation("SKIP BACKWARD CSoundManager.rcPerformanceTimer.nCurrentTime=" + CSoundManager.rcPerformanceTimer.nCurrentTime + ", CDTXMania.Timer.nCurrentTime=" + CDTXMania.Timer.nCurrentTime);
-                tJumpInSong(Math.Max(0, CSoundManager.rcPerformanceTimer.nCurrentTime - CDTXMania.ConfigIni.nSkipTimeMs));
-            }
-            else if (CDTXMania.Pad.bPressed(EKeyConfigPart.SYSTEM, EKeyConfigPad.LoopCreate))
-            {
-                bIsTrainingMode = true;
-                if (LoopBeginMs == -1)
-                {
-                    Trace.TraceInformation("INSERT LOOP BEGIN CSoundManager.rcPerformanceTimer.nCurrentTime=" + CSoundManager.rcPerformanceTimer.nCurrentTime + ", CDTXMania.Timer.nCurrentTime=" + CDTXMania.Timer.nCurrentTime);
-                    LoopBeginMs = CSoundManager.rcPerformanceTimer.nCurrentTime;
-                }
-                else
-                {
-                    if (LoopEndMs == -1)
+                    if (LoopBeginMs < CSoundManager.rcPerformanceTimer.nCurrentTime)
                     {
-                        if (LoopBeginMs < CSoundManager.rcPerformanceTimer.nCurrentTime)
+                        Trace.TraceInformation("INSERT LOOP END CSoundManager.rcPerformanceTimer.nCurrentTime=" + CSoundManager.rcPerformanceTimer.nCurrentTime + ", CDTXMania.Timer.nCurrentTime=" + CDTXMania.Timer.nCurrentTime);
+                        LoopEndMs = CSoundManager.rcPerformanceTimer.nCurrentTime;
+                    }
+                    else
+                    {
+                        Trace.TraceInformation("INSERT LOOP BEGIN AND SWAP CSoundManager.rcPerformanceTimer.nCurrentTime=" + CSoundManager.rcPerformanceTimer.nCurrentTime + ", CDTXMania.Timer.nCurrentTime=" + CDTXMania.Timer.nCurrentTime);
+                        LoopEndMs = LoopBeginMs;
+                        LoopBeginMs = CSoundManager.rcPerformanceTimer.nCurrentTime;
+                    }
+                }
+                //Else loop already set, do nothing
+            }
+        }
+        else if (CDTXMania.Pad.bPressed(EKeyConfigPart.SYSTEM, EKeyConfigPad.LoopDelete))
+        {
+            Trace.TraceInformation("REMOVE LOOP CSoundManager.rcPerformanceTimer.nCurrentTime=" + CSoundManager.rcPerformanceTimer.nCurrentTime + ", CDTXMania.Timer.nCurrentTime=" + CDTXMania.Timer.nCurrentTime);
+            LoopBeginMs = -1;
+            LoopEndMs = -1;
+        }
+        else if (CDTXMania.Pad.bPressed(EKeyConfigPart.SYSTEM, EKeyConfigPad.DecreasePlaySpeed))
+        {
+            // Decrease Play Speed
+            if (CDTXMania.ConfigIni.nPlaySpeed > CConstants.PLAYSPEED_MIN)
+            {
+                bIsTrainingMode = true;
+                tChangePlaySpeed(-1);
+            }
+        }
+        else if (CDTXMania.Pad.bPressed(EKeyConfigPart.SYSTEM, EKeyConfigPad.IncreasePlaySpeed))
+        {
+            // Increase Play Speed
+            if (CDTXMania.ConfigIni.nPlaySpeed < CConstants.PLAYSPEED_MAX)
+            {
+                bIsTrainingMode = true;
+                tChangePlaySpeed(1);
+            }
+        }
+
+        if (!CDTXMania.ConfigIni.bReverse.Drums && keyboard.bKeyPressing(SlimDXKey.PageUp))
+        {
+            if (!sw.IsRunning)
+            {
+                sw2 = Stopwatch.StartNew();
+                sw = Stopwatch.StartNew();
+                if (nJudgeLinePosY.Drums > nJudgeLineMinPosY)
+                {
+                    nJudgeLinePosY.Drums--;
+                }
+            }
+            else
+            {
+                if (sw.ElapsedMilliseconds > 10L)
+                {
+                    if (sw2.IsRunning)
+                    {
+                        if (sw2.ElapsedMilliseconds > 100L)
                         {
-                            Trace.TraceInformation("INSERT LOOP END CSoundManager.rcPerformanceTimer.nCurrentTime=" + CSoundManager.rcPerformanceTimer.nCurrentTime + ", CDTXMania.Timer.nCurrentTime=" + CDTXMania.Timer.nCurrentTime);
-                            LoopEndMs = CSoundManager.rcPerformanceTimer.nCurrentTime;
-                        }
-                        else
-                        {
-                            Trace.TraceInformation("INSERT LOOP BEGIN AND SWAP CSoundManager.rcPerformanceTimer.nCurrentTime=" + CSoundManager.rcPerformanceTimer.nCurrentTime + ", CDTXMania.Timer.nCurrentTime=" + CDTXMania.Timer.nCurrentTime);
-                            LoopEndMs = LoopBeginMs;
-                            LoopBeginMs = CSoundManager.rcPerformanceTimer.nCurrentTime;
+                            sw2.Reset();
                         }
                     }
-                    //Else loop already set, do nothing
-                }
-            }
-            else if (CDTXMania.Pad.bPressed(EKeyConfigPart.SYSTEM, EKeyConfigPad.LoopDelete))
-            {
-                Trace.TraceInformation("REMOVE LOOP CSoundManager.rcPerformanceTimer.nCurrentTime=" + CSoundManager.rcPerformanceTimer.nCurrentTime + ", CDTXMania.Timer.nCurrentTime=" + CDTXMania.Timer.nCurrentTime);
-                LoopBeginMs = -1;
-                LoopEndMs = -1;
-            }
-            else if (CDTXMania.Pad.bPressed(EKeyConfigPart.SYSTEM, EKeyConfigPad.DecreasePlaySpeed))
-            {
-                // Decrease Play Speed
-                if (CDTXMania.ConfigIni.nPlaySpeed > CConstants.PLAYSPEED_MIN)
-                {
-                    bIsTrainingMode = true;
-                    tChangePlaySpeed(-1);
-                }
-            }
-            else if (CDTXMania.Pad.bPressed(EKeyConfigPart.SYSTEM, EKeyConfigPad.IncreasePlaySpeed))
-            {
-                // Increase Play Speed
-                if (CDTXMania.ConfigIni.nPlaySpeed < CConstants.PLAYSPEED_MAX)
-                {
-                    bIsTrainingMode = true;
-                    tChangePlaySpeed(1);
-                }
-            }
-
-            if (!CDTXMania.ConfigIni.bReverse.Drums && keyboard.bKeyPressing(SlimDXKey.PageUp))
-            {
-                if (!sw.IsRunning)
-                {
-                    sw2 = Stopwatch.StartNew();
-                    sw = Stopwatch.StartNew();
-                    if (nJudgeLinePosY.Drums > nJudgeLineMinPosY)
+                    else if (nJudgeLinePosY.Drums > nJudgeLineMinPosY)
                     {
                         nJudgeLinePosY.Drums--;
                     }
-                }
-                else
-                {
-                    if (sw.ElapsedMilliseconds > 10L)
-                    {
-                        if (sw2.IsRunning)
-                        {
-                            if (sw2.ElapsedMilliseconds > 100L)
-                            {
-                                sw2.Reset();
-                            }
-                        }
-                        else if (nJudgeLinePosY.Drums > nJudgeLineMinPosY)
-                        {
-                            nJudgeLinePosY.Drums--;
-                        }
-                        sw.Reset();
-                        sw.Start();
-                    }
-                }
-                CDTXMania.ConfigIni.nJudgeLine.Drums = nJudgeLineMaxPosY - nJudgeLinePosY.Drums;
-                CDTXMania.stagePerfDrumsScreen.tJudgeLineMovingUpandDown();
-            }
-            if (!CDTXMania.ConfigIni.bReverse.Drums && keyboard.bKeyPressing(SlimDXKey.PageDown))
-            {
-                if (!sw.IsRunning)
-                {
-                    sw2 = Stopwatch.StartNew();
-                    sw = Stopwatch.StartNew();
-                    if (nJudgeLinePosY.Drums < nJudgeLineMaxPosY)
-                    {
-                        nJudgeLinePosY.Drums++;
-                    }
-                }
-                else if (sw.ElapsedMilliseconds > 10L)
-                {
-                    if (sw2.IsRunning)
-                    {
-                        if (sw2.ElapsedMilliseconds > 100L)
-                        {
-                            sw2.Reset();
-                        }
-                    }
-                    else if (nJudgeLinePosY.Drums < nJudgeLineMaxPosY)
-                    {
-                        nJudgeLinePosY.Drums++;
-                    }
                     sw.Reset();
                     sw.Start();
                 }
-                CDTXMania.ConfigIni.nJudgeLine.Drums = nJudgeLineMaxPosY - nJudgeLinePosY.Drums;
-                CDTXMania.stagePerfDrumsScreen.tJudgeLineMovingUpandDown();
             }
+            CDTXMania.ConfigIni.nJudgeLine.Drums = nJudgeLineMaxPosY - nJudgeLinePosY.Drums;
+            CDTXMania.stagePerfDrumsScreen.tJudgeLineMovingUpandDown();
+        }
+        if (!CDTXMania.ConfigIni.bReverse.Drums && keyboard.bKeyPressing(SlimDXKey.PageDown))
+        {
+            if (!sw.IsRunning)
+            {
+                sw2 = Stopwatch.StartNew();
+                sw = Stopwatch.StartNew();
+                if (nJudgeLinePosY.Drums < nJudgeLineMaxPosY)
+                {
+                    nJudgeLinePosY.Drums++;
+                }
+            }
+            else if (sw.ElapsedMilliseconds > 10L)
+            {
+                if (sw2.IsRunning)
+                {
+                    if (sw2.ElapsedMilliseconds > 100L)
+                    {
+                        sw2.Reset();
+                    }
+                }
+                else if (nJudgeLinePosY.Drums < nJudgeLineMaxPosY)
+                {
+                    nJudgeLinePosY.Drums++;
+                }
+                sw.Reset();
+                sw.Start();
+            }
+            CDTXMania.ConfigIni.nJudgeLine.Drums = nJudgeLineMaxPosY - nJudgeLinePosY.Drums;
+            CDTXMania.stagePerfDrumsScreen.tJudgeLineMovingUpandDown();
+        }
 
-            if (keyboard.bKeyPressing(SlimDXKey.NumberPad8))
+        if (keyboard.bKeyPressing(SlimDXKey.NumberPad8))
+        {
+            if (!sw.IsRunning)
             {
-                if (!sw.IsRunning)
+                sw2 = Stopwatch.StartNew();
+                sw = Stopwatch.StartNew();
+                if (nShutterInPosY.Drums > 0)
                 {
-                    sw2 = Stopwatch.StartNew();
-                    sw = Stopwatch.StartNew();
-                    if (nShutterInPosY.Drums > 0)
-                    {
-                        nShutterInPosY.Drums--;
-                    }
+                    nShutterInPosY.Drums--;
                 }
-                else if (sw.ElapsedMilliseconds > 10L)
-                {
-                    if (sw2.IsRunning)
-                    {
-                        if (sw2.ElapsedMilliseconds > 100L)
-                        {
-                            sw2.Reset();
-                        }
-                    }
-                    else if (nShutterInPosY.Drums > 0)
-                    {
-                        nShutterInPosY.Drums--;
-                    }
-                    sw.Reset();
-                    sw.Start();
-                }
-                CDTXMania.ConfigIni.nShutterInSide.Drums = nShutterInPosY.Drums;
             }
-            if (keyboard.bKeyPressing(SlimDXKey.NumberPad2))
+            else if (sw.ElapsedMilliseconds > 10L)
             {
-                if (!sw.IsRunning)
+                if (sw2.IsRunning)
                 {
-                    sw2 = Stopwatch.StartNew();
-                    sw = Stopwatch.StartNew();
-                    if (nShutterInPosY.Drums < 100)
+                    if (sw2.ElapsedMilliseconds > 100L)
                     {
-                        if (nShutterInPosY.Drums + nShutterOutPosY.Drums <= 99)
-                            nShutterInPosY.Drums++;
+                        sw2.Reset();
                     }
                 }
-                else if (sw.ElapsedMilliseconds > 10L)
+                else if (nShutterInPosY.Drums > 0)
                 {
-                    if (sw2.IsRunning)
-                    {
-                        if (sw2.ElapsedMilliseconds > 100L)
-                        {
-                            sw2.Reset();
-                        }
-                    }
-                    else if (nShutterInPosY.Drums < 100)
-                    {
-                        if (nShutterInPosY.Drums + nShutterOutPosY.Drums <= 99)
-                            nShutterInPosY.Drums++;
-                    }
-                    sw.Reset();
-                    sw.Start();
+                    nShutterInPosY.Drums--;
                 }
-                CDTXMania.ConfigIni.nShutterInSide = nShutterInPosY;
+                sw.Reset();
+                sw.Start();
             }
-            if (keyboard.bKeyPressing(SlimDXKey.NumberPad4))
+            CDTXMania.ConfigIni.nShutterInSide.Drums = nShutterInPosY.Drums;
+        }
+        if (keyboard.bKeyPressing(SlimDXKey.NumberPad2))
+        {
+            if (!sw.IsRunning)
             {
-                if (!sw.IsRunning)
+                sw2 = Stopwatch.StartNew();
+                sw = Stopwatch.StartNew();
+                if (nShutterInPosY.Drums < 100)
                 {
-                    sw2 = Stopwatch.StartNew();
-                    sw = Stopwatch.StartNew();
-                    if (nShutterOutPosY.Drums < 100)
-                    {
-                        if (nShutterInPosY.Drums + nShutterOutPosY.Drums <= 99)
-                            nShutterOutPosY.Drums++;
-                    }
+                    if (nShutterInPosY.Drums + nShutterOutPosY.Drums <= 99)
+                        nShutterInPosY.Drums++;
                 }
-                else if (sw.ElapsedMilliseconds > 10L)
-                {
-                    if (sw2.IsRunning)
-                    {
-                        if (sw2.ElapsedMilliseconds > 100L)
-                        {
-                            sw2.Reset();
-                        }
-                    }
-                    else if (nShutterOutPosY.Drums < 100)
-                    {
-                        if (nShutterInPosY.Drums + nShutterOutPosY.Drums <= 99)
-                            nShutterOutPosY.Drums++;
-                    }
-                    sw.Reset();
-                    sw.Start();
-                }
-                CDTXMania.ConfigIni.nShutterOutSide.Drums = nShutterOutPosY.Drums;
             }
-            if (keyboard.bKeyPressing(SlimDXKey.NumberPad6))
+            else if (sw.ElapsedMilliseconds > 10L)
             {
-                if (!sw.IsRunning)
+                if (sw2.IsRunning)
                 {
-                    sw2 = Stopwatch.StartNew();
-                    sw = Stopwatch.StartNew();
-                    if (nShutterOutPosY.Drums > 0)
+                    if (sw2.ElapsedMilliseconds > 100L)
                     {
-                        nShutterOutPosY.Drums--;
+                        sw2.Reset();
                     }
                 }
-                else if (sw.ElapsedMilliseconds > 10L)
+                else if (nShutterInPosY.Drums < 100)
                 {
-                    if (sw2.IsRunning)
-                    {
-                        if (sw2.ElapsedMilliseconds > 100L)
-                        {
-                            sw2.Reset();
-                        }
-                    }
-                    else if (nShutterOutPosY.Drums > 0)
-                    {
-                        nShutterOutPosY.Drums--;
-                    }
-                    sw.Reset();
-                    sw.Start();
+                    if (nShutterInPosY.Drums + nShutterOutPosY.Drums <= 99)
+                        nShutterInPosY.Drums++;
                 }
-                CDTXMania.ConfigIni.nShutterOutSide.Drums = nShutterOutPosY.Drums;
+                sw.Reset();
+                sw.Start();
             }
+            CDTXMania.ConfigIni.nShutterInSide = nShutterInPosY;
+        }
+        if (keyboard.bKeyPressing(SlimDXKey.NumberPad4))
+        {
+            if (!sw.IsRunning)
+            {
+                sw2 = Stopwatch.StartNew();
+                sw = Stopwatch.StartNew();
+                if (nShutterOutPosY.Drums < 100)
+                {
+                    if (nShutterInPosY.Drums + nShutterOutPosY.Drums <= 99)
+                        nShutterOutPosY.Drums++;
+                }
+            }
+            else if (sw.ElapsedMilliseconds > 10L)
+            {
+                if (sw2.IsRunning)
+                {
+                    if (sw2.ElapsedMilliseconds > 100L)
+                    {
+                        sw2.Reset();
+                    }
+                }
+                else if (nShutterOutPosY.Drums < 100)
+                {
+                    if (nShutterInPosY.Drums + nShutterOutPosY.Drums <= 99)
+                        nShutterOutPosY.Drums++;
+                }
+                sw.Reset();
+                sw.Start();
+            }
+            CDTXMania.ConfigIni.nShutterOutSide.Drums = nShutterOutPosY.Drums;
+        }
+        if (keyboard.bKeyPressing(SlimDXKey.NumberPad6))
+        {
+            if (!sw.IsRunning)
+            {
+                sw2 = Stopwatch.StartNew();
+                sw = Stopwatch.StartNew();
+                if (nShutterOutPosY.Drums > 0)
+                {
+                    nShutterOutPosY.Drums--;
+                }
+            }
+            else if (sw.ElapsedMilliseconds > 10L)
+            {
+                if (sw2.IsRunning)
+                {
+                    if (sw2.ElapsedMilliseconds > 100L)
+                    {
+                        sw2.Reset();
+                    }
+                }
+                else if (nShutterOutPosY.Drums > 0)
+                {
+                    nShutterOutPosY.Drums--;
+                }
+                sw.Reset();
+                sw.Start();
+            }
+            CDTXMania.ConfigIni.nShutterOutSide.Drums = nShutterOutPosY.Drums;
+        }
 
-            if (keyboard.bKeyPressed(SlimDXKey.F5))
+        if (keyboard.bKeyPressed(SlimDXKey.F5))
+        {
+            CConfigIni configIni = CDTXMania.ConfigIni;
+            configIni.nMovieMode++;
+            if (CDTXMania.ConfigIni.nMovieMode >= 4)
             {
-                CConfigIni configIni = CDTXMania.ConfigIni;
-                configIni.nMovieMode++;
-                if (CDTXMania.ConfigIni.nMovieMode >= 4)
-                {
-                    CDTXMania.ConfigIni.nMovieMode = 0;
-                }
-                actAVI.MovieMode();
+                CDTXMania.ConfigIni.nMovieMode = 0;
             }
-            if (keyboard.bKeyPressed(SlimDXKey.F6))
+            actAVI.MovieMode();
+        }
+        if (keyboard.bKeyPressed(SlimDXKey.F6))
+        {
+            CConfigIni configIni = CDTXMania.ConfigIni;
+            configIni.nInfoType++;
+            if (CDTXMania.ConfigIni.nInfoType >= 2)
             {
-                CConfigIni configIni = CDTXMania.ConfigIni;
-                configIni.nInfoType++;
-                if (CDTXMania.ConfigIni.nInfoType >= 2)
-                {
-                    CDTXMania.ConfigIni.nInfoType = 0;
-                }
-            }
-            if (keyboard.bKeyPressing(SlimDXKey.F7))
-            {
-                //F7
-                //CDTXMania.stagePerfDrumsScreen.actGauge.db現在のゲージ値.Drums = 1.0;
-                //CDTXMania.stagePerfDrumsScreen.actGraph.dbグラフ値現在_渡 = 100.0;
-                //CDTXMania.ConfigIni.nヒット範囲ms.Perfect = 1000;
-            }
-            if (keyboard.bKeyPressed(SlimDXKey.F8))
-            {
-                //F8キー
-
+                CDTXMania.ConfigIni.nInfoType = 0;
             }
         }
     }
@@ -2728,7 +2716,7 @@ internal abstract class CStagePerfCommonScreen : CStage
     //      protected abstract void tUpdateAndDraw_AVI();
     protected void tUpdateAndDraw_AVI()
     {
-        if (((ePhaseID != EPhase.PERFORMANCE_STAGE_FAILED) && (ePhaseID != EPhase.PERFORMANCE_STAGE_FAILED_フェードアウト)) && (!CDTXMania.ConfigIni.bストイックモード))
+        if (((ePhaseID != EPhase.PERFORMANCE_STAGE_FAILED) && (ePhaseID != EPhase.PERFORMANCE_STAGE_FAILED_FADEOUT)) && (!CDTXMania.ConfigIni.bストイックモード))
         {
             actAVI.tUpdateAndDraw(0, 0);
         }
@@ -2757,17 +2745,17 @@ internal abstract class CStagePerfCommonScreen : CStage
     }
     protected void tUpdateAndDraw_STAGEFAILED()
     {
-        if (((ePhaseID == EPhase.PERFORMANCE_STAGE_FAILED) || (ePhaseID == EPhase.PERFORMANCE_STAGE_FAILED_フェードアウト)) && ((actStageFailed.OnUpdateAndDraw() != 0) && (ePhaseID != EPhase.PERFORMANCE_STAGE_FAILED_フェードアウト)))
+        if (((ePhaseID == EPhase.PERFORMANCE_STAGE_FAILED) || (ePhaseID == EPhase.PERFORMANCE_STAGE_FAILED_FADEOUT)) && ((actStageFailed.OnUpdateAndDraw() != 0) && (ePhaseID != EPhase.PERFORMANCE_STAGE_FAILED_FADEOUT)))
         {
             eReturnValueAfterFadeOut = EPerfScreenReturnValue.StageFailure;
-            ePhaseID = EPhase.PERFORMANCE_STAGE_FAILED_フェードアウト;
+            ePhaseID = EPhase.PERFORMANCE_STAGE_FAILED_FADEOUT;
             CDTXMania.DTX.tStopPlayingAllChips();
             actFO.tStartFadeOut();
         }
     }
     protected void tUpdateAndDraw_WailingBonus()
     {
-        if ((ePhaseID != EPhase.PERFORMANCE_STAGE_FAILED) && (ePhaseID != EPhase.PERFORMANCE_STAGE_FAILED_フェードアウト))
+        if ((ePhaseID != EPhase.PERFORMANCE_STAGE_FAILED) && (ePhaseID != EPhase.PERFORMANCE_STAGE_FAILED_FADEOUT))
         {
             actWailingBonus.OnUpdateAndDraw();
         }
@@ -2775,7 +2763,7 @@ internal abstract class CStagePerfCommonScreen : CStage
 
     protected void tUpdateAndDraw_GuitarBonus()
     {
-        if ((ePhaseID != EPhase.PERFORMANCE_STAGE_FAILED) && (ePhaseID != EPhase.PERFORMANCE_STAGE_FAILED_フェードアウト))
+        if ((ePhaseID != EPhase.PERFORMANCE_STAGE_FAILED) && (ePhaseID != EPhase.PERFORMANCE_STAGE_FAILED_FADEOUT))
         {
             actGuitarBonus.OnUpdateAndDraw();
         }
@@ -2835,7 +2823,7 @@ internal abstract class CStagePerfCommonScreen : CStage
     }
     protected bool tUpdateAndDraw_Chips(EInstrumentPart ePlayMode)
     {
-        if ((ePhaseID == EPhase.PERFORMANCE_STAGE_FAILED) || (ePhaseID == EPhase.PERFORMANCE_STAGE_FAILED_フェードアウト))
+        if ((ePhaseID == EPhase.PERFORMANCE_STAGE_FAILED) || (ePhaseID == EPhase.PERFORMANCE_STAGE_FAILED_FADEOUT))
         {
             return true;
         }
@@ -3509,7 +3497,7 @@ internal abstract class CStagePerfCommonScreen : CStage
     }
     protected bool tUpdateAndDraw_BarLines(EInstrumentPart ePlayMode)
     {
-        if ((ePhaseID == EPhase.PERFORMANCE_STAGE_FAILED) || (ePhaseID == EPhase.PERFORMANCE_STAGE_FAILED_フェードアウト))
+        if ((ePhaseID == EPhase.PERFORMANCE_STAGE_FAILED) || (ePhaseID == EPhase.PERFORMANCE_STAGE_FAILED_FADEOUT))
         {
             return true;
         }
@@ -3626,7 +3614,7 @@ internal abstract class CStagePerfCommonScreen : CStage
 
     protected bool tUpdateAndDraw_Chip_PatternOnly(EInstrumentPart ePlayMode)
     {
-        if ((ePhaseID == EPhase.PERFORMANCE_STAGE_FAILED) || (ePhaseID == EPhase.PERFORMANCE_STAGE_FAILED_フェードアウト))
+        if ((ePhaseID == EPhase.PERFORMANCE_STAGE_FAILED) || (ePhaseID == EPhase.PERFORMANCE_STAGE_FAILED_FADEOUT))
         {
             return true;
         }
@@ -4667,7 +4655,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                 break;
 
             case EPhase.Common_FadeOut:
-            case EPhase.PERFORMANCE_STAGE_FAILED_フェードアウト:
+            case EPhase.PERFORMANCE_STAGE_FAILED_FADEOUT:
                 if (actFO.OnUpdateAndDraw() != 0)
                 {
                     return true;
@@ -4686,7 +4674,7 @@ internal abstract class CStagePerfCommonScreen : CStage
     }
     protected void tUpdateAndDraw_LaneFlushD()
     {
-        if ((ePhaseID != EPhase.PERFORMANCE_STAGE_FAILED) && (ePhaseID != EPhase.PERFORMANCE_STAGE_FAILED_フェードアウト))
+        if ((ePhaseID != EPhase.PERFORMANCE_STAGE_FAILED) && (ePhaseID != EPhase.PERFORMANCE_STAGE_FAILED_FADEOUT))
         {
             actLaneFlushD.OnUpdateAndDraw();
         }

@@ -679,10 +679,10 @@ internal class CStageSongLoading : CStage
                     CDTXMania.DTX.tRandomizeGuitarAndBass(EInstrumentPart.GUITAR, CDTXMania.ConfigIni.eRandom.Guitar);
                     CDTXMania.DTX.tRandomizeGuitarAndBass(EInstrumentPart.BASS, CDTXMania.ConfigIni.eRandom.Bass);
 
-                    if (CDTXMania.ConfigIni.bGuitarRevolutionMode)
-                        CDTXMania.stagePerfGuitarScreen.OnActivate();
-                    else
-                        CDTXMania.stagePerfDrumsScreen.OnActivate();
+                    // if (CDTXMania.ConfigIni.bGuitarRevolutionMode)
+                    //     CDTXMania.stagePerfGuitarScreen.OnActivate();
+                    // else
+                    //     CDTXMania.stagePerfDrumsScreen.OnActivate();
 
                     span = DateTime.Now - timeBeginLoadWAV;
                     Trace.TraceInformation("WAV/譜面後処理時間({0,4}):  {1}",
