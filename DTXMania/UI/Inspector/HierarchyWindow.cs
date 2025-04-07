@@ -48,6 +48,11 @@ public class HierarchyWindow
         
         string contextMenuId = id + "ContextMenu";
 
+        if (node.dontSerialize)
+        {
+            ImGui.PushStyleColor(ImGuiCol.Text, new System.Numerics.Vector4(1, 0, 0, 1));
+        }
+
         if (ImGui.TreeNodeEx(id, rootFlags, name))
         {
             if (ImGui.IsItemClicked(ImGuiMouseButton.Left))
@@ -111,6 +116,11 @@ public class HierarchyWindow
             {
                 DrawNodeContextMenu(node);
             }
+        }
+        
+        if (node.dontSerialize)
+        {
+            ImGui.PopStyleColor();
         }
     }
 

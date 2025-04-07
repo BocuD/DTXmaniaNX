@@ -21,10 +21,11 @@ public abstract class UIDrawable : IDisposable
     public Vector3 rotation = Vector3.Zero; //euler angles in radians (X = pitch, Y = yaw, Z = roll)
 
     public string name = "";
-    
     public bool isVisible = true;
         
     protected Matrix localTransformMatrix = Matrix.Identity;
+
+    public bool dontSerialize = false;
     
     [JsonIgnore] public UIGroup? parent { get; private set; } = null;
 

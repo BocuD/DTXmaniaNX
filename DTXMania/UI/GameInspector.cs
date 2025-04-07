@@ -64,6 +64,7 @@ public class GameStatus
                 if (ImGui.Button("Save Skin Changes"))
                 {
                     currentSkin.Save();
+                    currentSkin.SaveCurrentStageChanges();
                 }
             }
             ImGui.TreePop();

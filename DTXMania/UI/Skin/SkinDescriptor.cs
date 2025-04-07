@@ -1,6 +1,6 @@
-﻿using DTXMania.UI.Drawable;
+﻿using DTXMania.Core;
+using DTXMania.UI.Drawable;
 using DTXMania.UI.Drawable.Serialization;
-using DTXUIRenderer;
 using Hexa.NET.ImGui;
 using Newtonsoft.Json;
 
@@ -13,7 +13,6 @@ public class SkinDescriptor
     [JsonIgnore] public string basePath { get; private set; } = "";
 
     public Dictionary<CStage.EStage, string> stageSkins { get; set; } = new();
-    [JsonIgnore] private Dictionary<CStage.EStage, UIGroup?> stageSkinCache = new();
     
     //Load a skin.json file from disk
     public static SkinDescriptor? LoadSkin(string path)
@@ -51,18 +50,31 @@ public class SkinDescriptor
         
         var json = JsonConvert.SerializeObject(this, Formatting.Indented);
         File.WriteAllText(Path.Combine(targetPath, "skin.json"), json);
-        
-        //write all stage skins
+    }
+
+    public void SaveCurrentStageChanges()
+    {
+        //write current stage skin
         foreach (KeyValuePair<CStage.EStage, string> stageSkin in stageSkins)
         {
-            if (string.IsNullOrWhiteSpace(stageSkin.Value)) continue;
+            if (CDTXMania.rCurrentStage.eStageID != stageSkin.Key) continue;
             
-            string stagePath = Path.Combine(targetPath, stageSkin.Value);
-            stageSkinCache.TryGetValue(stageSkin.Key, out UIGroup? group);
+            if (string.IsNullOrWhiteSpace(stageSkin.Value)) continue;
 
+            var group = CDTXMania.rCurrentStage.ui;
+            
             if (group == null) continue;
             
-            json = JsonConvert.SerializeObject(group, Formatting.Indented);
+            //create a copy of the group to avoid modifying the original
+            var groupCopy = new UIGroup(group.name);
+            groupCopy.children = new List<UIDrawable>(group.children);
+            
+            //remove any base elements
+            groupCopy.children.RemoveAll(x => x.dontSerialize);
+            
+            var json = JsonConvert.SerializeObject(groupCopy, Formatting.Indented);
+            
+            string stagePath = Path.Combine(basePath, stageSkin.Value);
             File.WriteAllText(stagePath, json);
         }
     }
@@ -74,11 +86,16 @@ public class SkinDescriptor
         if (available && uiGroupJson != null)
         {
             string path = Path.Combine(basePath, uiGroupJson);
+            if (!File.Exists(path))
+            {
+                Console.WriteLine($"Stage skin file at {path} does not exist, loading default");
+                return null;
+            }
+            
             string json = File.ReadAllText(path);
             UIGroup? loadedGroup = JsonConvert.DeserializeObject<UIGroup>(json, new UIDrawableConverter());
             if (loadedGroup != null)
             {
-                stageSkinCache[stageId] = loadedGroup;
                 return loadedGroup;
             }
         }

@@ -6,10 +6,11 @@ namespace DTXMania.UI.Drawable;
 public class LegacyDrawable : UIDrawable
 {
     private Action drawAction;
-    
+
     public LegacyDrawable(Action drawAction)
     {
         this.drawAction = drawAction;
+        dontSerialize = true;
     }
     
     public override void Draw(Matrix parentMatrix)
