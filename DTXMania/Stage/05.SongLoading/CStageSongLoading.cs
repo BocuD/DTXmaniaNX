@@ -196,7 +196,7 @@ internal class CStageSongLoading : CStage
             cdtx = new(strDTXFilePath, true);
 
             if (!CDTXMania.bCompactMode && CDTXMania.ConfigIni.b曲名表示をdefのものにする)
-                strSongTitle = CDTXMania.stageSongSelection.rConfirmedSong.strタイトル;
+                strSongTitle = CDTXMania.stageSongSelection.rConfirmedSong.strTitle;
             else
                 strSongTitle = cdtx.TITLE;
 

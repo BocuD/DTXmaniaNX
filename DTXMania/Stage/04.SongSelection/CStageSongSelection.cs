@@ -7,6 +7,7 @@ using DiscordRPC;
 using DTXMania.Core;
 using DTXMania.UI;
 using DTXMania.UI.Drawable;
+using DTXMania.UI.DynamicElements;
 using DTXUIRenderer;
 using SlimDXKey = SlimDX.DirectInput.Key;
 
@@ -100,6 +101,11 @@ internal class CStageSongSelection : CStage
 		//
 		bCheckDrumsEnabled = CDTXMania.ConfigIni.bDrumsEnabled;
 		bCheckRandSubBox = CDTXMania.ConfigIni.bランダムセレクトで子BOXを検索対象とする;
+
+		dynamicStringSources["SongName"] = new DynamicStringSource(() => actSongList.rSelectedScore.SongInformation.Title ?? "");
+		dynamicStringSources["SongArtist"] = new DynamicStringSource(() => actSongList.rSelectedScore.SongInformation.ArtistName ?? "");
+		dynamicStringSources["SongGenre"] = new DynamicStringSource(() => actSongList.rSelectedScore.SongInformation.Genre ?? "");
+		dynamicStringSources["SongBPM"] = new DynamicStringSource(() => actSongList.rSelectedScore.SongInformation.Bpm.ToString());
 	}
 		
 		

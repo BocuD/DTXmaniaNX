@@ -91,7 +91,7 @@ internal class CActPerfPanelString : CActivity
 
             #region[ 曲名、アーティスト名テクスチャの生成 ]
             if (string.IsNullOrEmpty(CDTXMania.DTX.TITLE) || (!CDTXMania.bCompactMode && CDTXMania.ConfigIni.b曲名表示をdefのものにする))
-                strSongName = CDTXMania.stageSongSelection.r現在選択中の曲.strタイトル;
+                strSongName = CDTXMania.stageSongSelection.r現在選択中の曲.strTitle;
             else
                 strSongName = CDTXMania.DTX.TITLE;
 

@@ -1,5 +1,6 @@
 ﻿using System.Drawing;
 using DTXMania.Core;
+using DTXMania.UI.DynamicElements;
 using DTXUIRenderer;
 using Hexa.NET.ImGui;
 using SharpDX;
@@ -9,7 +10,8 @@ namespace DTXMania.UI.Drawable;
 
 public enum TextSource
 {
-    String
+    String,
+    Dynamic
 }
 
 public class UIText : UITexture
@@ -29,6 +31,7 @@ public class UIText : UITexture
     public int fontSize;
     public FontStyle fontStyle;
     public TextSource textSource = TextSource.String;
+    public string dynamicSource = "Not Set";
 
     [AddChildMenu]
     public UIText() : base(BaseTexture.None)
@@ -70,6 +73,11 @@ public class UIText : UITexture
         
     public override void Draw(Matrix parentMatrix)
     {
+        if (textSource == TextSource.Dynamic)
+        {
+            UpdateDynamicText();
+        }
+        
         if (fontDirty)
         {
             UpdateFont();
@@ -81,6 +89,19 @@ public class UIText : UITexture
         }
         
         base.Draw(parentMatrix);
+    }
+    
+    private void UpdateDynamicText()
+    {
+        CDTXMania.rCurrentStage.dynamicStringSources.TryGetValue(dynamicSource, out var source);
+        if (source != null)
+        {
+            SetText(source.GetString());
+        }
+        else
+        {
+            SetText($"Dynamic source: {dynamicSource} not found");
+        }
     }
 
     public void UpdateFont()
@@ -146,11 +167,27 @@ public class UIText : UITexture
                 dirty = true;
             }
 
-            if (textSource == TextSource.String)
+            switch (textSource)
             {
-                if (ImGui.InputTextMultiline("String", ref text, 256))
+                case TextSource.String:
                 {
-                    dirty = true;
+                    if (ImGui.InputTextMultiline("String", ref text, 256))
+                    {
+                        dirty = true;
+                    }
+
+                    break;
+                }
+                case TextSource.Dynamic:
+                {
+                    string[] sources = CDTXMania.rCurrentStage.dynamicStringSources.Keys.ToArray();
+                    int selectedIndex = Array.IndexOf(sources, dynamicSource);
+                    if (ImGui.Combo("Dynamic Source", ref selectedIndex, sources, sources.Length))
+                    {
+                        dynamicSource = sources[selectedIndex];
+                        dirty = true;
+                    }
+                    break;
                 }
             }
 

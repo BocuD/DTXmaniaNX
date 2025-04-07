@@ -791,7 +791,7 @@ internal class CActSelectSongList : CActivity
 						song = rNextSong( song );
 
 					int index = ( nSelectedRow + 7 ) % 13;	// 新しく最下部に表示されるパネルのインデックス（0～12）。
-					stBarInformation[ index ].strTitleString = song.strタイトル;
+					stBarInformation[ index ].strTitleString = song.strTitle;
 					stBarInformation[ index ].colLetter = song.col文字色;
 					tGenerateSongNameBar( index, stBarInformation[ index ].strTitleString, stBarInformation[ index ].colLetter );
 					stBarInformation[index].eBarType = eGetSongBarType(song);
@@ -854,7 +854,7 @@ internal class CActSelectSongList : CActivity
 						song = rPreviousSong( song );
 
 					int index = ( ( nSelectedRow - 5 ) + 13 ) % 13;	// 新しく最上部に表示されるパネルのインデックス（0～12）。
-					stBarInformation[ index ].strTitleString = song.strタイトル;
+					stBarInformation[ index ].strTitleString = song.strTitle;
 					stBarInformation[ index ].colLetter = song.col文字色;
 					tGenerateSongNameBar( index, stBarInformation[ index ].strTitleString, stBarInformation[ index ].colLetter );
 					stBarInformation[index].eBarType = eGetSongBarType(song);
@@ -1369,7 +1369,7 @@ internal class CActSelectSongList : CActivity
 
 		for( int i = 0; i < 13; i++ )
 		{
-			stBarInformation[ i ].strTitleString = song.strタイトル;
+			stBarInformation[ i ].strTitleString = song.strTitle;
 			stBarInformation[ i ].colLetter = song.col文字色;
 			stBarInformation[ i ].eBarType = eGetSongBarType( song );
 				

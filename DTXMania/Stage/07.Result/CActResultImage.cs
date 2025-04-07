@@ -65,7 +65,7 @@ internal class CActResultImage : CActivity
 
             #region[ Generation of song title, artist name and disclaimer textures ]
             if (string.IsNullOrEmpty(CDTXMania.DTX.TITLE) || (!CDTXMania.bCompactMode && CDTXMania.ConfigIni.b曲名表示をdefのものにする))
-                strSongName = CDTXMania.stageSongSelection.r現在選択中の曲.strタイトル;
+                strSongName = CDTXMania.stageSongSelection.r現在選択中の曲.strTitle;
             else
                 strSongName = CDTXMania.DTX.TITLE;
 

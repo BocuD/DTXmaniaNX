@@ -157,8 +157,8 @@ internal class CSongManager
 					CSetDef.CBlock block = def.blocks[ i ];
 					CSongListNode item = new CSongListNode();
 					item.eNodeType = CSongListNode.ENodeType.SCORE;
-					item.strタイトル = block.Title;
-					item.strジャンル = block.Genre;
+					item.strTitle = block.Title;
+					item.strGenre = block.Genre;
 					item.nスコア数 = 0;
 					item.col文字色 = block.FontColor;
 					item.SetDefのブロック番号 = i;
@@ -214,13 +214,13 @@ internal class CSongManager
 							{
 								builder.Append( "(onRoot):" );
 							}
-							if( ( item.strタイトル != null ) && ( item.strタイトル.Length > 0 ) )
+							if( ( item.strTitle != null ) && ( item.strTitle.Length > 0 ) )
 							{
-								builder.Append( " SONG, Title=" + item.strタイトル );
+								builder.Append( " SONG, Title=" + item.strTitle );
 							}
-							if( ( item.strジャンル != null ) && ( item.strジャンル.Length > 0 ) )
+							if( ( item.strGenre != null ) && ( item.strGenre.Length > 0 ) )
 							{
-								builder.Append( ", Genre=" + item.strジャンル );
+								builder.Append( ", Genre=" + item.strGenre );
 							}
 							if( item.col文字色 != Color.White )
 							{
@@ -343,7 +343,7 @@ internal class CSongManager
 				CSongListNode c曲リストノード = new CSongListNode();
 				c曲リストノード.eNodeType = CSongListNode.ENodeType.BOX;
 				c曲リストノード.bDTXFilesで始まるフォルダ名のBOXである = true;
-				c曲リストノード.strタイトル = infoDir.Name.Substring( 9 );
+				c曲リストノード.strTitle = infoDir.Name.Substring( 9 );
 				c曲リストノード.nスコア数 = 1;
 				c曲リストノード.r親ノード = node親;
 
@@ -352,13 +352,13 @@ internal class CSongManager
 					"" : c曲リストノード.r親ノード.strSkinPath;
 
 				c曲リストノード.strBreadcrumbs = ( c曲リストノード.r親ノード == null ) ?
-					c曲リストノード.strタイトル : c曲リストノード.r親ノード.strBreadcrumbs + " > " + c曲リストノード.strタイトル;
+					c曲リストノード.strTitle : c曲リストノード.r親ノード.strBreadcrumbs + " > " + c曲リストノード.strTitle;
 
 		
 				c曲リストノード.list子リスト = new List<CSongListNode>();
 				c曲リストノード.arScore[ 0 ] = new CScore();
 				c曲リストノード.arScore[ 0 ].FileInformation.AbsoluteFolderPath = infoDir.FullName + @"\";
-				c曲リストノード.arScore[ 0 ].SongInformation.Title = c曲リストノード.strタイトル;
+				c曲リストノード.arScore[ 0 ].SongInformation.Title = c曲リストノード.strTitle;
 				c曲リストノード.arScore[ 0 ].SongInformation.Comment =
 					(CDTXMania.isJapanese) ?
 						"BOX に移動します。" :
@@ -369,11 +369,11 @@ internal class CSongManager
 					CBoxDef boxdef = new CBoxDef( infoDir.FullName + @"\box.def" );
 					if( ( boxdef.Title != null ) && ( boxdef.Title.Length > 0 ) )
 					{
-						c曲リストノード.strタイトル = boxdef.Title;
+						c曲リストノード.strTitle = boxdef.Title;
 					}
 					if( ( boxdef.Genre != null ) && ( boxdef.Genre.Length > 0 ) )
 					{
-						c曲リストノード.strジャンル = boxdef.Genre;
+						c曲リストノード.strGenre = boxdef.Genre;
 					}
 					if( boxdef.Color != Color.White )
 					{
@@ -450,7 +450,7 @@ internal class CSongManager
 						{
 							sb.Append( "(onRoot):" );
 						}
-						sb.Append( " BOX, Title=" + c曲リストノード.strタイトル );
+						sb.Append( " BOX, Title=" + c曲リストノード.strTitle );
 						sb.Append( ", Folder=" + c曲リストノード.arScore[ 0 ].FileInformation.AbsoluteFolderPath );
 						sb.Append( ", Comment=" + c曲リストノード.arScore[ 0 ].SongInformation.Comment );
 						sb.Append( ", SkinPath=" + c曲リストノード.strSkinPath );
@@ -477,8 +477,8 @@ internal class CSongManager
 				CSongListNode c曲リストノード = new CSongListNode();
 				c曲リストノード.eNodeType = CSongListNode.ENodeType.BOX;
 				c曲リストノード.bDTXFilesで始まるフォルダ名のBOXである = false;
-				c曲リストノード.strタイトル = boxdef.Title;
-				c曲リストノード.strジャンル = boxdef.Genre;
+				c曲リストノード.strTitle = boxdef.Title;
+				c曲リストノード.strGenre = boxdef.Genre;
 				c曲リストノード.col文字色 = boxdef.Color;
 				c曲リストノード.nスコア数 = 1;
 				c曲リストノード.arScore[ 0 ] = new CScore();
@@ -517,7 +517,7 @@ internal class CSongManager
 					}
 				}
 				c曲リストノード.strBreadcrumbs = ( c曲リストノード.r親ノード == null ) ?
-					c曲リストノード.strタイトル : c曲リストノード.r親ノード.strBreadcrumbs + " > " + c曲リストノード.strタイトル;
+					c曲リストノード.strTitle : c曲リストノード.r親ノード.strBreadcrumbs + " > " + c曲リストノード.strTitle;
 	
 					
 				c曲リストノード.list子リスト = new List<CSongListNode>();
@@ -542,10 +542,10 @@ internal class CSongManager
 						{
 							sb.Append( "(onRoot):" );
 						}
-						sb.Append( "BOX, Title=" + c曲リストノード.strタイトル );
-						if( ( c曲リストノード.strジャンル != null ) && ( c曲リストノード.strジャンル.Length > 0 ) )
+						sb.Append( "BOX, Title=" + c曲リストノード.strTitle );
+						if( ( c曲リストノード.strGenre != null ) && ( c曲リストノード.strGenre.Length > 0 ) )
 						{
-							sb.Append( ", Genre=" + c曲リストノード.strジャンル );
+							sb.Append( ", Genre=" + c曲リストノード.strGenre );
 						}
 						if( ( c曲リストノード.arScore[ 0 ].SongInformation.ArtistName != null ) && ( c曲リストノード.arScore[ 0 ].SongInformation.ArtistName.Length > 0 ) )
 						{
@@ -1102,12 +1102,12 @@ internal class CSongManager
 		{
 			CSongListNode itemRandom = new CSongListNode();
 			itemRandom.eNodeType = CSongListNode.ENodeType.RANDOM;
-			itemRandom.strタイトル = "< RANDOM SELECT >";
+			itemRandom.strTitle = "< RANDOM SELECT >";
 			itemRandom.nスコア数 = 5;
 			itemRandom.r親ノード = ノードリスト[ 0 ].r親ノード;
 
 			itemRandom.strBreadcrumbs = ( itemRandom.r親ノード == null ) ?
-				itemRandom.strタイトル :  itemRandom.r親ノード.strBreadcrumbs + " > " + itemRandom.strタイトル;
+				itemRandom.strTitle :  itemRandom.r親ノード.strBreadcrumbs + " > " + itemRandom.strTitle;
 
 			for( int i = 0; i < 5; i++ )
 			{
@@ -1161,7 +1161,7 @@ internal class CSongManager
 
 				CSongListNode itemBack = new CSongListNode();
 				itemBack.eNodeType = CSongListNode.ENodeType.BACKBOX;
-				itemBack.strタイトル = "<< BACK";
+				itemBack.strTitle = "<< BACK";
 				itemBack.nスコア数 = 1;
 				itemBack.r親ノード = c曲リストノード;
 
@@ -1169,11 +1169,11 @@ internal class CSongManager
 					"" : c曲リストノード.r親ノード.strSkinPath;
 
 				itemBack.strBreadcrumbs = ( itemBack.r親ノード == null ) ?
-					itemBack.strタイトル : itemBack.r親ノード.strBreadcrumbs + " > " + itemBack.strタイトル;
+					itemBack.strTitle : itemBack.r親ノード.strBreadcrumbs + " > " + itemBack.strTitle;
 
 				itemBack.arScore[ 0 ] = new CScore();
 				itemBack.arScore[ 0 ].FileInformation.AbsoluteFolderPath = "";
-				itemBack.arScore[ 0 ].SongInformation.Title = itemBack.strタイトル;
+				itemBack.arScore[ 0 ].SongInformation.Title = itemBack.strTitle;
 				itemBack.arScore[ 0 ].SongInformation.Preimage = CSkin.Path(@"Graphics\5_preimage backbox.png");
 				itemBack.arScore[ 0 ].SongInformation.Comment =
 					CDTXMania.isJapanese ?
@@ -1209,16 +1209,16 @@ internal class CSongManager
 
 			#region [ ノードにタイトルがないなら、最初に見つけたスコアのタイトルを設定する ]
 			//-----------------------------
-			if( string.IsNullOrEmpty( c曲リストノード.strタイトル ) )
+			if( string.IsNullOrEmpty( c曲リストノード.strTitle ) )
 			{
 				for( int j = 0; j < 5; j++ )
 				{
 					if( ( c曲リストノード.arScore[ j ] != null ) && !string.IsNullOrEmpty( c曲リストノード.arScore[ j ].SongInformation.Title ) )
 					{
-						c曲リストノード.strタイトル = c曲リストノード.arScore[ j ].SongInformation.Title;
+						c曲リストノード.strTitle = c曲リストノード.arScore[ j ].SongInformation.Title;
 
 						if( CDTXMania.ConfigIni.bLogSongSearch )
-							Trace.TraceInformation( "タイトルを設定しました。(nID#{0:D3}, title={1})", c曲リストノード.nID, c曲リストノード.strタイトル );
+							Trace.TraceInformation( "タイトルを設定しました。(nID#{0:D3}, title={1})", c曲リストノード.nID, c曲リストノード.strTitle );
 
 						break;
 					}
@@ -1451,7 +1451,7 @@ internal class CSongManager
 			{
 				return order * num;
 			}
-			return order * n1.strタイトル.CompareTo( n2.strタイトル );
+			return order * n1.strTitle.CompareTo( n2.strTitle );
 		} );
 //			foreach( CSongListNode c曲リストノード in ノードリスト )
 //			{
@@ -1507,7 +1507,7 @@ internal class CSongManager
 				{
 					return order * num;
 				}
-				return order * n1.strタイトル.CompareTo( n2.strタイトル );
+				return order * n1.strTitle.CompareTo( n2.strTitle );
 			} );
 			foreach ( CSongListNode c曲リストノード in ノードリスト )
 			{
@@ -1569,7 +1569,7 @@ internal class CSongManager
 				{
 					return (int)( (order * num) * 100 );
 				}
-				return order * n1.strタイトル.CompareTo( n2.strタイトル );
+				return order * n1.strTitle.CompareTo( n2.strTitle );
 			} );
 			foreach ( CSongListNode c曲リストノード in ノードリスト )
 			{
@@ -1626,7 +1626,7 @@ internal class CSongManager
 				{
 					return order * num;
 				}
-				return order * n1.strタイトル.CompareTo( n2.strタイトル );
+				return order * n1.strTitle.CompareTo( n2.strTitle );
 			} );
 			foreach ( CSongListNode c曲リストノード in ノードリスト )
 			{
@@ -1676,7 +1676,7 @@ internal class CSongManager
 				{
 					return order * Math.Sign(d);
 				}
-				return order * n1.strタイトル.CompareTo( n2.strタイトル );
+				return order * n1.strTitle.CompareTo( n2.strTitle );
 			} );
 			foreach ( CSongListNode c曲リストノード in ノードリスト )
 			{
@@ -1726,7 +1726,7 @@ internal class CSongManager
 				{
 					return order * Math.Sign( d );
 				}
-				return order * n1.strタイトル.CompareTo( n2.strタイトル );
+				return order * n1.strTitle.CompareTo( n2.strTitle );
 			} );
 			foreach ( CSongListNode c曲リストノード in ノードリスト )
 			{
@@ -1773,7 +1773,7 @@ internal class CSongManager
 			{
 				s = c曲リストノード.arScore[ nL12345 ].SongInformation.ArtistName;
 			}
-			Debug.WriteLine( s + ":" + c曲リストノード.strタイトル );
+			Debug.WriteLine( s + ":" + c曲リストノード.strTitle );
 		}
 	}
 #if TEST_SORTBGM

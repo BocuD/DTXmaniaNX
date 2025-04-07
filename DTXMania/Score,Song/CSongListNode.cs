@@ -39,11 +39,11 @@ internal class CSongListNode
 	public CSongListNode r親ノード;
 	public int SetDefのブロック番号;
 	public Stack<int> stackRandomPerformanceNumber = new Stack<int>();
-	public string strジャンル = "";
-	public string strタイトル = "";
+	public string strGenre = "";
+	public string strTitle = "";
 	public string strBreadcrumbs = "";		// #27060 2011.2.27 yyagi; MUSIC BOXのパンくずリスト (曲リスト構造内の絶対位置捕捉のために使う)
 	public string strSkinPath = "";			// #28195 2012.5.4 yyagi; box.defでのスキン切り替え対応
-	public string strバージョン = "";
+	public string strVersion = "";
 		
 	// コンストラクタ
 
@@ -74,9 +74,9 @@ internal class CSongListNode
 		newNode.r親ノード = r親ノード;
 		newNode.SetDefのブロック番号 = SetDefのブロック番号;
 		newNode.stackRandomPerformanceNumber = stackRandomPerformanceNumber;
-		newNode.strジャンル = strジャンル;
-		newNode.strタイトル = strタイトル;
-		newNode.strバージョン = strバージョン;
+		newNode.strGenre = strGenre;
+		newNode.strTitle = strTitle;
+		newNode.strVersion = strVersion;
 		newNode.strBreadcrumbs = strBreadcrumbs;
 		newNode.strSkinPath = strSkinPath;
 

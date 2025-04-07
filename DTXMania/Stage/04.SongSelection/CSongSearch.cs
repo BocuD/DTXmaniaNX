@@ -43,7 +43,7 @@ internal class CSongSearch
                     //Check title
                     if (bTitleSearchEnabled)
                     {
-                        string l_strTitle = bCaseSensitiveEnabled ? listInputList[i].strタイトル : listInputList[i].strタイトル.ToLower();
+                        string l_strTitle = bCaseSensitiveEnabled ? listInputList[i].strTitle : listInputList[i].strTitle.ToLower();
                         if (l_strTitle.Contains(bCaseSensitiveEnabled ? strSearchText : strSearchText.ToLower()))
                         {
                             bFound = true;

@@ -35,7 +35,7 @@ internal abstract class CStagePerfCommonScreen : CStage
             var nEndTimeMs = CDTXMania.DTX.listChip.OrderBy(c => c.nPlaybackTimeMs).LastOrDefault()?.nPlaybackTimeMs ?? 0;
 
             //Shorten details string to avoid hitting max of 128 bytes
-            string detailsString = $"{rConfirmedSong.strタイトル}";
+            string detailsString = $"{rConfirmedSong.strTitle}";
             if(detailsString.Length > 50)
             {
                 detailsString = detailsString.Substring(0, 50);

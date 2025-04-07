@@ -371,7 +371,7 @@ internal class CActSelectPreimagePanel : CActivity
 			switch( c曲リストノード.eNodeType )
 			{
 				case CSongListNode.ENodeType.SCORE:
-					if( ( c曲リストノード.strジャンル == null ) || ( c曲リストノード.strジャンル.Length <= 0 ) )
+					if( ( c曲リストノード.strGenre == null ) || ( c曲リストノード.strGenre.Length <= 0 ) )
 					{
 						if( ( cスコア.SongInformation.Genre != null ) && ( cスコア.SongInformation.Genre.Length > 0 ) )
 						{
@@ -405,7 +405,7 @@ internal class CActSelectPreimagePanel : CActivity
 						}
 						break;
 					}
-					str = c曲リストノード.strジャンル;
+					str = c曲リストノード.strGenre;
 					break;
 
 				case CSongListNode.ENodeType.SCORE_MIDI:

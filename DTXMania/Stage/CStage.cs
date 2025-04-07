@@ -1,6 +1,7 @@
 ﻿using DiscordRPC;
 using DTXMania.Core;
 using DTXMania.UI.Drawable;
+using DTXMania.UI.DynamicElements;
 using DTXUIRenderer;
 using FDK;
 using SharpDX;
@@ -64,6 +65,8 @@ public abstract class CStage : CActivity
 		PERFORMANCE_STAGE_CLEAR_FadeOut,
 		PERFORMANCE_STAGE_RESTART
 	}
+
+	public Dictionary<string, DynamicStringSource> dynamicStringSources = new();
 	
 	public void LoadUI()
 	{
