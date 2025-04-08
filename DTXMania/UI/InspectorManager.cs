@@ -81,6 +81,7 @@ public static class InspectorManager
         {
             inspector.Draw();
             hierarchyWindow.Draw();
+            DrawableTracker.DrawWindow();
         }
     }
     
