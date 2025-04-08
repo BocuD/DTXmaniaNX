@@ -12,6 +12,7 @@ namespace DTXMania.UI.Drawable;
 
 public abstract class UIDrawable : IDisposable
 {
+    public string id;
     public string type => GetType().FullName;
     public int renderOrder = 0;
     public Vector3 position = Vector3.Zero;
@@ -28,6 +29,12 @@ public abstract class UIDrawable : IDisposable
     public bool dontSerialize = false;
     
     [JsonIgnore] public UIGroup? parent { get; private set; } = null;
+
+    public UIDrawable()
+    {
+        id = Guid.NewGuid().ToString();
+        DrawableTracker.Register(this);
+    }
 
     public void UpdateLocalTransformMatrix()
     {
@@ -56,7 +63,12 @@ public abstract class UIDrawable : IDisposable
     public abstract void Draw(Matrix parentMatrix);
         
     public abstract void Dispose();
-    
+
+    ~UIDrawable()
+    {
+        DrawableTracker.Remove(id);
+    }
+
     public Matrix GetFullTransformMatrix()
     {
         Matrix combined = localTransformMatrix;
