@@ -55,8 +55,6 @@ public class CTexture : IDisposable
 
 	// 画面が変わるたび以下のプロパティを設定し治すこと。
 
-	public static Size szLogicalScreen = Size.Empty;
-	public static Size szPhysicalScreen = Size.Empty;
 	public static Rectangle rcPhysicalScreenDrawingArea = Rectangle.Empty;
 
 	/// <summary>
@@ -121,24 +119,6 @@ public class CTexture : IDisposable
 	}
 
 	/// <summary>
-	/// <para>空の Managed テクスチャを作成する。</para>
-	/// <para>テクスチャのサイズは、指定された希望サイズ以上、かつ、D3D9デバイスで生成可能な最小のサイズに自動的に調節される。
-	/// その際、テクスチャの調節後のサイズにあわせた画像の拡大縮小は行わない。</para>
-	/// <para>テクスチャのテクセルデータは未初期化。（おそらくゴミデータが入ったまま。）</para>
-	/// <para>その他、ミップマップ数は 1、Usage は None、イメージフィルタは Point、ミップマップフィルタは None、
-	/// カラーキーは 0x00000000（透過しない）になる。</para>
-	/// </summary>
-	/// <param name="device">Direct3D9 デバイス。</param>
-	/// <param name="n幅">テクスチャの幅（希望値）。</param>
-	/// <param name="n高さ">テクスチャの高さ（希望値）。</param>
-	/// <param name="format">テクスチャのフォーマット。</param>
-	/// <exception cref="CTextureCreateFailedException">テクスチャの作成に失敗しました。</exception>
-	public CTexture(Device device, int n幅, int n高さ, Format format)
-		: this(device, n幅, n高さ, format, Pool.Managed)
-	{
-	}
-
-	/// <summary>
 	/// <para>指定された画像ファイルから Managed テクスチャを作成する。</para>
 	/// <para>利用可能な画像形式は、BMP, JPG, PNG, TGA, DDS, PPM, DIB, HDR, PFM のいずれか。</para>
 	/// </summary>
@@ -176,12 +156,7 @@ public class CTexture : IDisposable
 	/// <param name="format">テクスチャのフォーマット。</param>
 	/// <param name="pool">テクスチャの管理方法。</param>
 	/// <exception cref="CTextureCreateFailedException">テクスチャの作成に失敗しました。</exception>
-	public CTexture(Device device, int n幅, int n高さ, Format format, Pool pool)
-		: this(device, n幅, n高さ, format, pool, Usage.None)
-	{
-	}
-
-	public CTexture(Device device, int n幅, int n高さ, Format format, Pool pool, Usage usage)
+	public CTexture(Device device, int n幅, int n高さ, Format format, Pool pool, Usage usage = Usage.None)
 		: this()
 	{
 		try
@@ -301,50 +276,21 @@ public class CTexture : IDisposable
 			rcFullImage = new Rectangle(0, 0, szImageSize.Width, szImageSize.Height);
 			int colorKey = (b黒を透過する) ? unchecked((int)0xFF000000) : 0;
 			szTextureSize = tGetOptimalTextureSizeNotExceedingSpecifiedSize(device, szImageSize);
-#if TEST_Direct3D9Ex
-				pool = poolvar;
-#endif
+
 			//Trace.TraceInformation( "CTExture() start: " );
 			unsafe // Bitmapの内部データ(a8r8g8b8)を自前でゴリゴリコピーする
 			{
-				int tw =
-#if TEST_Direct3D9Ex
-					288;		// 32の倍数にする(グラフによっては2のべき乗にしないとダメかも)
-#else
-					szImageSize.Width;
-#endif
-#if TEST_Direct3D9Ex
-					this.texture =
- new Texture( device, tw, this.sz画像サイズ.Height, 1, Usage.Dynamic, format, Pool.Default );
-#else
-				texture = new Texture(device, szImageSize.Width, szImageSize.Height, 1, Usage.None,
-					format, pool);
-#endif
+				texture = new Texture(device, szImageSize.Width, szImageSize.Height, 1, Usage.None, format, pool);
 				BitmapData srcBufData =
 					bitmap.LockBits(new Rectangle(0, 0, szImageSize.Width, szImageSize.Height),
 						ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
 				DataRectangle destDataRectangle = texture.LockRectangle(0, LockFlags.Discard); // None
-#if TEST_Direct3D9Ex
-					byte[] filldata = null;
-					if ( tw > this.sz画像サイズ.Width )
-					{
-						filldata = new byte[ (tw - this.sz画像サイズ.Width) * 4 ];
-					}
-					for ( int y = 0; y < this.sz画像サイズ.Height; y++ )
-					{
-						IntPtr src_scan0 = (IntPtr) ( (Int64) srcBufData.Scan0 + y * srcBufData.Stride );
-						destDataRectangle.Data.WriteRange( src_scan0, this.sz画像サイズ.Width * 4  );
-						if ( tw > this.sz画像サイズ.Width )
-						{
-							destDataRectangle.Data.WriteRange( filldata );
-						}
-					}
-#else
+
 				IntPtr src_scan0 = (IntPtr)((Int64)srcBufData.Scan0);
 				//destDataRectangle.Data.WriteRange( src_scan0, this.szImageSize.Width * 4 * this.szImageSize.Height );
 				CopyMemory(destDataRectangle.DataPointer.ToPointer(), src_scan0.ToPointer(),
 					szImageSize.Width * 4 * szImageSize.Height);
-#endif
+
 				texture.UnlockRectangle(0);
 				bitmap.UnlockBits(srcBufData);
 				bSharpDXTextureDispose完了済み = false;
