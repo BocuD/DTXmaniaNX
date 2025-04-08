@@ -5,28 +5,17 @@ using Rectangle = System.Drawing.Rectangle;
 
 namespace DTXMania;
 
-internal class CActSelectShowCurrentPosition : CActivity
+internal class CActScrollBar : CActivity
 {
 	// メソッド
 
-	public CActSelectShowCurrentPosition()
+	public CActScrollBar()
 	{
 		bNotActivated = true;
 	}
 
 	// CActivity 実装
 
-	public override void OnActivate()
-	{
-		if ( bActivated )
-			return;
-
-		base.OnActivate();
-	}
-	public override void OnDeactivate()
-	{
-		base.OnDeactivate();
-	}
 	public override void OnManagedCreateResources()
 	{
 		if ( !bNotActivated )
