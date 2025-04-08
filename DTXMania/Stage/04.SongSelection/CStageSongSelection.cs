@@ -90,7 +90,7 @@ internal class CStageSongSelection : CStage
 		listChildActivities.Add( actArtistComment = new CActSelectArtistComment() );
 		listChildActivities.Add( actInformation = new CActSelectInformation() );
 		listChildActivities.Add( actSortSongs = new CActSortSongs() );
-		listChildActivities.Add( actShowCurrentPosition = new CActSelectShowCurrentPosition() );
+		listChildActivities.Add( actShowCurrentPosition = new CActScrollBar() );
 		listChildActivities.Add(actBackgroundVideoAVI = new CActSelectBackgroundAVI());
 		listChildActivities.Add( actQuickConfig = new CActSelectQuickConfig() );
 
@@ -237,6 +237,8 @@ internal class CStageSongSelection : CStage
 	}
 
 	private UIImage? topPanel;
+	private UIImage? songListTopPanel;
+	private UIImage? songListBottomPanel;
 	
 	public override void InitializeBaseUI()
 	{
@@ -249,10 +251,12 @@ internal class CStageSongSelection : CStage
 		
 		LegacyDrawable artistComment = ui.AddChild(new LegacyDrawable(() => actArtistComment.OnUpdateAndDraw()));
 		artistComment.name = "ArtistComment";
-		
-		LegacyDrawable songList = ui.AddChild(new LegacyDrawable(() => actSongList.OnUpdateAndDraw()));
-		songList.name = "SongList";
+
+		UIGroup songList = ui.AddChild(new UIGroup("SongList"));
 		songList.renderOrder = 1;
+
+		LegacyDrawable listView = songList.AddChild(new LegacyDrawable(() => actSongList.OnUpdateAndDraw()));
+		listView.name = "SongList";
 		
 		LegacyDrawable statusPanel = ui.AddChild(new LegacyDrawable(() => actStatusPanel.OnUpdateAndDraw()));
 		statusPanel.name = "StatusPanel";
@@ -267,7 +271,7 @@ internal class CStageSongSelection : CStage
 		information.renderOrder = 5;
 		
 		LegacyDrawable showCurrentPosition = ui.AddChild(new LegacyDrawable(() => actShowCurrentPosition.OnUpdateAndDraw()));
-		showCurrentPosition.name = "ShowCurrentPosition";
+		showCurrentPosition.name = "ScrollBar";
 		showCurrentPosition.renderOrder = 5;
 	}
 	
@@ -295,6 +299,20 @@ internal class CStageSongSelection : CStage
 		UIImage bpmLabel = ui.AddChild(new UIImage(bpmLabelTex));
 		bpmLabel.position = new SharpDX.Vector3(32, 258, 0);
 		bpmLabel.name = "BPMLabel";
+
+		UIGroup? songList = ui.GetChild<UIGroup>("SongList");
+
+		if (songList != null)
+		{
+			DTXTexture songListTopPanelTex = new(CSkin.Path(@"Graphics\5_header song list.png"));
+			songListTopPanel = songList.AddChild(new UIImage(songListTopPanelTex));
+			songListTopPanel.name = "SongListTopPanel";
+
+			DTXTexture songListBottomPanelTex = new(CSkin.Path(@"Graphics\5_footer song list.png"));
+			songListBottomPanel = songList.AddChild(new UIImage(songListBottomPanelTex));
+			songListBottomPanel.position = new SharpDX.Vector3(0, 720 - songListBottomPanelTex.Height, 0);
+			songListBottomPanel.name = "SongListBottomPanel";
+		}
 	}
 	
 	public override void OnManagedCreateResources()
@@ -368,13 +386,26 @@ internal class CStageSongSelection : CStage
 			float y = 0;
 			if (ctInitialAppearAnimation.bInProgress)
 			{
-				double db登場割合 = ( (double) ctInitialAppearAnimation.nCurrentValue ) / 100.0;	// 100が最終値
+				double db登場割合 = ctInitialAppearAnimation.nCurrentValue / 100.0;	// 100が最終値
 				double dbY表示割合 = Math.Sin( Math.PI / 2 * db登場割合 );
 				y = (float)(topPanel.Texture.Height * dbY表示割合) - topPanel.Texture.Height;
 			}
 			
 			topPanel.position.Y = y;
 		}
+
+		if (songListTopPanel != null)
+		{
+			songListTopPanel.position.Y = songListTopPanel.size.Y * (ctInitialAppearAnimation.nCurrentValue / 100f) 
+			                              - songListTopPanel.size.Y;
+		}
+		
+		if (songListBottomPanel != null)
+		{
+			songListBottomPanel.position.Y = 720 - 
+			                                 songListBottomPanel.size.Y * (ctInitialAppearAnimation.nCurrentValue / 100f);
+		}
+
 
 		actPresound.OnUpdateAndDraw();
 
@@ -838,7 +869,7 @@ internal class CStageSongSelection : CStage
 	public CActSelectStatusPanel actStatusPanel;  // actステータスパネル
 	private CActSelectPerfHistoryPanel actPerHistoryPanel;  // act演奏履歴パネル
 	private CActSelectSongList actSongList;
-	private CActSelectShowCurrentPosition actShowCurrentPosition;
+	private CActScrollBar actShowCurrentPosition;
 	private readonly CActSelectBackgroundAVI actBackgroundVideoAVI;
 
 	private CActSortSongs actSortSongs;

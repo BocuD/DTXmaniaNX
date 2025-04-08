@@ -542,9 +542,7 @@ internal class CActSelectSongList : CActivity
 		txSongSelectionBar.Box = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\5_bar box selected.png" ), false );
 		txSongSelectionBar.Other = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\5_bar other selected.png" ), false );
 		txSkillNumbers = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\ScreenSelect skill number on list.png"), false);
-		txTopPanel = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\5_header song list.png"), false);
-		txBottomPanel = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\5_footer song list.png"), false);
-
+		
 		prvFont = new CPrivateFastFont( new FontFamily( CDTXMania.ConfigIni.songListFont ), 30, FontStyle.Regular );
 		prvFontSmall = new CPrivateFastFont( new FontFamily( CDTXMania.ConfigIni.songListFont ), 15, FontStyle.Regular );
 
@@ -637,8 +635,6 @@ internal class CActSelectSongList : CActivity
 		CDTXMania.tDisposeSafely( ref txSongSelectionBar.Score );
 		CDTXMania.tDisposeSafely( ref txSongSelectionBar.Box );
 		CDTXMania.tDisposeSafely( ref txSongSelectionBar.Other );
-		CDTXMania.tDisposeSafely( ref txTopPanel );
-		CDTXMania.tDisposeSafely( ref txBottomPanel );
 
 		CDTXMania.tDisposeSafely( ref prvFont );
 		CDTXMania.tDisposeSafely( ref prvFontSmall );
@@ -1002,10 +998,6 @@ internal class CActSelectSongList : CActivity
 							stBarInformation[nパネル番号].txClearLamp.tDraw2D(CDTXMania.app.Device, x + 24, y + 6);
 						#endregion
 					}
-					if (txTopPanel != null)
-						txTopPanel.tDraw2DFloat(CDTXMania.app.Device, 0f, ((float)(txTopPanel.szTextureSize.Height) * ((float)(ct登場アニメ用[0].nCurrentValue) / 100f)) - (float)(txTopPanel.szTextureSize.Height));
-					if (txBottomPanel != null)
-						txBottomPanel.tDraw2DFloat(CDTXMania.app.Device, 0f, 720 - ((float)(txBottomPanel.szTextureSize.Height) * ((float)(ct登場アニメ用[0].nCurrentValue) / 100f)));
 				}
 			}
 			//-----------------
@@ -1107,11 +1099,6 @@ internal class CActSelectSongList : CActivity
 			}
 			//-----------------
 			#endregion
-			if( txTopPanel != null )
-				txTopPanel.tDraw2D( CDTXMania.app.Device, 0, 0 );
-			if( txBottomPanel != null )
-				txBottomPanel.tDraw2D( CDTXMania.app.Device, 0, 720 - txBottomPanel.szTextureSize.Height );
-
 		}
 		#region [ スクロール地点の計算(描画はCActSelectShowCurrentPositionにて行う) #27648 ]
 		int py;
@@ -1270,8 +1257,6 @@ internal class CActSelectSongList : CActivity
 	private CTexture txItemNumbers;        // txアイテム数数字
 	private CTexture txSelectedSongName;
 	private CTexture txSelectedArtistName;
-	private CTexture txTopPanel;           // tx上部パネル
-	private CTexture txBottomPanel;        // tx下部パネル
 	private CActSelectStatusPanel actステータスパネル;
 	private STBar txSongNameBar;           // tx曲名バー
 	private STSongSelectionBar txSongSelectionBar;  // tx選曲バー
