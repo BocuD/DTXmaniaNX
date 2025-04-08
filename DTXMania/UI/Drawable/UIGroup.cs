@@ -6,8 +6,13 @@ namespace DTXMania.UI.Drawable;
 public class UIGroup : UIDrawable
 {
     public List<UIDrawable> children = [];
-    
+
     [AddChildMenu]
+    public static UIDrawable Create()
+    {
+        return new UIGroup("New UIGroup");
+    }
+    
     public UIGroup() : this("New UIGroup")
     {
     }
@@ -33,10 +38,20 @@ public class UIGroup : UIDrawable
     {
         return (T)children[i];
     }
+    
+    public T? GetChild<T>(string name) where T : UIDrawable
+    {
+        return (T?)children.FirstOrDefault(x => x.name == name);
+    }
         
     public UIDrawable GetChild(int i)
     {
         return children[i];
+    }
+    
+    public UIDrawable? GetChild(string name)
+    {
+        return children.FirstOrDefault(x => x.name == name);
     }
         
     public void RemoveChild(UIDrawable element)

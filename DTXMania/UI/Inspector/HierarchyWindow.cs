@@ -140,28 +140,33 @@ public class HierarchyWindow
                 Type[] types = assemblies.SelectMany(x => x.GetTypes())
                     .Where(t => t.IsSubclassOf(typeof(UIDrawable)) && !t.IsAbstract)
                     .ToArray();
-                    
-                //filter by types that have constructors with AddChildMenuAttribute
-                types = types.Where(t =>
-                {
-                    ConstructorInfo? constructor = t.GetConstructor(Type.EmptyTypes);
-                    if (constructor == null) return false;
-                        
-                    var attributes = constructor.GetCustomAttributes(typeof(AddChildMenuAttribute), false);
-                    return attributes.Length != 0;
-                }).ToArray();
-
+                
+                Dictionary<Type, MethodInfo> creators = new();
+                
                 foreach (Type type in types)
                 {
-                    string typeName = type.Name;
+                    //get static methods with AddChildMenuAttribute
+                    var staticMethods = type.GetMethods(BindingFlags.Public | BindingFlags.Static)
+                        .Where(m => m.GetCustomAttributes(typeof(AddChildMenuAttribute), false).Length != 0)
+                        .ToArray();
+
+                    if (staticMethods.Length > 0)
+                        creators[type] = staticMethods.FirstOrDefault()!;
+                }
+
+                foreach (var creator in creators)
+                {
+                    string typeName = creator.Key.Name;
                     if (ImGui.Selectable(typeName))
                     {
-                        //create instance of type using the constructor with the AddChildMenuAttribute
-                        ConstructorInfo? constructor = type.GetConstructor(Type.EmptyTypes);
-                        if (constructor == null) continue;
-                        var newChild = (UIDrawable)constructor.Invoke(null);
-                        group.AddChild(newChild);
-                            
+                        //create instance of type using the static method
+                        object? newChild = creator.Value.Invoke(null, null);
+
+                        if (newChild is UIDrawable drawable)
+                        {
+                            group.AddChild(drawable);
+                        }
+                        
                         //close popup
                         ImGui.CloseCurrentPopup();
                     }

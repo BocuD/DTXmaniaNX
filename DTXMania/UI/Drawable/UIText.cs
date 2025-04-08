@@ -34,16 +34,24 @@ public class UIText : UITexture
     public string dynamicSource = "Not Set";
 
     [AddChildMenu]
+    public static UIDrawable Create()
+    {
+        var text = new UIText();
+        
+        text.fontFamily = new FontFamily(CDTXMania.ConfigIni.songListFont);
+        text.fontSize = 20;
+        text.fontStyle = FontStyle.Regular;
+        text.text = "New UIText";
+        
+        text.UpdateFont();
+        text.RenderTexture();
+        
+        return text;
+    }
+    
     public UIText() : base(BaseTexture.None)
     {
-        //set font to default
-        fontFamily = new FontFamily(CDTXMania.ConfigIni.songListFont);
-        fontSize = 20;
-        fontStyle = FontStyle.Regular;
-        text = "New UIText";
         
-        UpdateFont();
-        RenderTexture();
     }
     
     public UIText(FontFamily font, int size) : base(BaseTexture.None)

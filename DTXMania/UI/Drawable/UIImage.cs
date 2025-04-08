@@ -16,6 +16,11 @@ public class UIImage : UITexture
     public string resource = "";
 
     [AddChildMenu]
+    public static UIDrawable Create()
+    {
+        return new UIImage();
+    }
+    
     public UIImage() : base(BaseTexture.None)
     {
     }
