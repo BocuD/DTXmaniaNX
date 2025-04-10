@@ -105,11 +105,11 @@ public abstract class UIDrawable : IDisposable
         }
         
         ImGui.InputInt("Render Order", ref renderOrder);
-        Inspector.Inspect("Position", ref position);
-        Inspector.Inspect("Anchor", ref anchor);
-        Inspector.Inspect("Size", ref size);
-        Inspector.Inspect("Scale", ref scale);
-        Inspector.Inspect("Rotation", ref rotation);
+        Inspector.Inspector.Inspect("Position", ref position);
+        Inspector.Inspector.Inspect("Anchor", ref anchor);
+        Inspector.Inspector.Inspect("Size", ref size);
+        Inspector.Inspector.Inspect("Scale", ref scale);
+        Inspector.Inspector.Inspect("Rotation", ref rotation);
         ImGui.Checkbox("Is Visible", ref isVisible);
         
         DrawTransformGizmo();

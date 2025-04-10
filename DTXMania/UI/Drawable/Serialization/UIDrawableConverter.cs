@@ -52,11 +52,8 @@ public class UIDrawableConverter : JsonConverter
             {
                 foreach (var child in uiGroup.children)
                 {
-                    if (child is UIDrawable childDrawable)
-                    {
-                        var field = childDrawable.GetType().GetField("parent", BindingFlags.NonPublic | BindingFlags.Instance);
-                        field?.SetValue(childDrawable, uiGroup);
-                    }
+                    var field = child?.GetType().GetField("parent", BindingFlags.NonPublic | BindingFlags.Instance);
+                    field?.SetValue(child, uiGroup);
                 }
                 break;
             }
@@ -67,6 +64,8 @@ public class UIDrawableConverter : JsonConverter
                 break;
             }
         }
+        
+        DrawableTracker.Register((result as UIDrawable)!);
 
         return result;
     }

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace DTXUIRenderer;
+﻿namespace DTXMania.UI.Inspector;
 
 public class AddChildMenuAttribute : Attribute
 {

@@ -5,7 +5,7 @@ using SharpDX;
 using SharpDX.Direct3D9;
 using Vector2 = System.Numerics.Vector2;
 
-namespace DTXMania.UI;
+namespace DTXMania.UI.Inspector;
 
 public class GameWindow
 {
@@ -41,7 +41,7 @@ public class GameWindow
                 translation += (mouseWorldAfterZoom - mouseWorldBeforeZoom) * scale;
             }
 
-            if (ImGui.IsMouseClicked(ImGuiMouseButton.Middle))
+            if (ImGui.IsMouseClicked(ImGuiMouseButton.Right))
             {
                 mouseDragStart = ImGui.GetMousePos();
                 isDragging = true;
@@ -56,7 +56,7 @@ public class GameWindow
             translation += dragDelta;
             mouseDragStart = currentMouse;
 
-            if (ImGui.IsMouseReleased(ImGuiMouseButton.Middle))
+            if (ImGui.IsMouseReleased(ImGuiMouseButton.Right))
             {
                 isDragging = false;
             }

@@ -1,4 +1,5 @@
-﻿using DTXMania.UI.Drawable;
+﻿using DTXMania.Core;
+using DTXMania.UI.Drawable;
 using Hexa.NET.ImGui;
 using Newtonsoft.Json;
 
@@ -25,10 +26,16 @@ public class DrawableTracker
         
         //count
         ImGui.Text($"Count: {drawables.Count}");
+        ImGui.SameLine();
+        if (ImGui.Button("Run GC"))
+        {
+            CDTXMania.tRunGarbageCollector();
+        }
         
-        ImGui.BeginTable("DrawablesTable", 2);
+        ImGui.BeginTable("DrawablesTable", 3);
         ImGui.TableSetupColumn("ID");
         ImGui.TableSetupColumn("Type");
+        ImGui.TableSetupColumn("Name");
         ImGui.TableHeadersRow();
         foreach (var drawable in drawables)
         {
@@ -37,9 +44,22 @@ public class DrawableTracker
             ImGui.Text(drawable.Key);
             ImGui.TableNextColumn();
             ImGui.Text(drawable.Value.TryGetTarget(out var target) ? target.type : "null");
+            ImGui.TableNextColumn();
+            ImGui.Text(drawable.Value.TryGetTarget(out var target2) ? (string.IsNullOrEmpty(target2.name) ? target2.GetType().Name : target2.name) : "null");
         }
         ImGui.EndTable();
         ImGui.End();
+    }
+
+    public static UIDrawable? GetDrawable(string guid)
+    {
+        if (drawables.TryGetValue(guid, out WeakReference<UIDrawable>? weakReference) 
+            && weakReference.TryGetTarget(out UIDrawable? drawable))
+        {
+            return drawable;
+        }
+
+        return null;
     }
 }
 
@@ -64,8 +84,19 @@ public class DrawableReference<T> where T : UIDrawable
         id = drawable.id;
         reference = new WeakReference<T>(drawable);
     }
+    
+    //implicit conversion from T to DrawableReference<T> so we can do DrawableReference<T> drawable = new T();
+    public static implicit operator DrawableReference<T>(T drawable)
+    {
+        return new DrawableReference<T>(drawable);
+    }
+    
+    public static implicit operator T(DrawableReference<T> drawable)
+    {
+        return drawable.Get()!;
+    }
 
-    public T? GetDrawable()
+    public T? Get()
     {
         T? value = null;
         
@@ -100,24 +131,35 @@ public class DrawableReferenceSerializer : JsonConverter
 {
     public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
     {
-        if (value is DrawableReference<UIDrawable> drawableReference)
+        //get type of value
+        Type type = value?.GetType() ?? throw new JsonSerializationException("Value is null");
+
+        //check if it inherits from drawablereference
+        if (!type.IsGenericType || type.GetGenericTypeDefinition() != typeof(DrawableReference<>))
         {
-            writer.WriteStartObject();
-            writer.WritePropertyName("id");
-            writer.WriteValue(drawableReference.id);
-            writer.WriteEndObject();
+            throw new JsonSerializationException("Value is not a DrawableReference");
         }
-        else
-        {
-            throw new JsonSerializationException("Invalid type for DrawableReferenceSerializer");
-        }
+
+        //get the id field through reflection
+        var fieldInfo = type.GetField("id");
+        string id = fieldInfo.GetValue(value) as string ?? throw new JsonSerializationException("ID is null");
+        
+        writer.WriteStartObject();
+        writer.WritePropertyName("type");
+        writer.WriteValue(type.FullName);
+        writer.WritePropertyName("id");
+        writer.WriteValue(id);
+        writer.WriteEndObject();
     }
 
     public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
     {
         if (reader.TokenType == JsonToken.StartObject)
         {
-            DrawableReference<UIDrawable> drawableReference = new();
+            //create generic object of the right type
+            object? drawableReference;
+            string type = "";
+            string id = "";
             while (reader.Read())
             {
                 if (reader.TokenType == JsonToken.EndObject)
@@ -127,13 +169,33 @@ public class DrawableReferenceSerializer : JsonConverter
                 {
                     string propertyName = reader.Value.ToString();
                     reader.Read();
-
-                    if (propertyName == "id")
+                    
+                    switch (propertyName)
                     {
-                        drawableReference.id = reader.Value.ToString();
+                        case "type":
+                            type = reader.Value.ToString()!;
+                            break;
+                        
+                        case "id":
+                            id = reader.Value.ToString()!;
+                            break;
                     }
                 }
             }
+
+            Type? t = Type.GetType(type) ?? objectType;
+            
+            //create instance
+            drawableReference = Activator.CreateInstance(t);
+            
+            //set id
+            var fieldInfo = t.GetField("id");
+            if (fieldInfo == null)
+            {
+                throw new JsonSerializationException("ID field not found");
+            }
+            fieldInfo.SetValue(drawableReference, id);
+            
             return drawableReference;
         }
 
@@ -142,6 +204,6 @@ public class DrawableReferenceSerializer : JsonConverter
 
     public override bool CanConvert(Type objectType)
     {
-        return objectType == typeof(DrawableReference<UIDrawable>);
+        return objectType == typeof(DrawableReference<>);
     }
 }

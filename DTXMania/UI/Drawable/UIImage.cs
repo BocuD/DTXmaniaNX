@@ -1,4 +1,5 @@
 ﻿using DTXMania.Core;
+using DTXMania.UI.Inspector;
 using DTXUIRenderer;
 using Hexa.NET.ImGui;
 using SharpDX;
@@ -89,7 +90,7 @@ public class UIImage : UITexture
 
         if (ImGui.CollapsingHeader("Image"))
         {
-            Inspector.Inspect("Image Source", ref imageSource);
+            Inspector.Inspector.Inspect("Image Source", ref imageSource);
             if (imageSource == ImageSource.Resource)
             {
                 ImGui.SameLine();
@@ -124,12 +125,12 @@ public class UIImage : UITexture
                 }
             }
             
-            Inspector.Inspect("Clip Rect", ref clipRect);
+            Inspector.Inspector.Inspect("Clip Rect", ref clipRect);
             
-            Inspector.Inspect("Render Mode", ref renderMode);
+            Inspector.Inspector.Inspect("Render Mode", ref renderMode);
             if (renderMode == ERenderMode.Sliced)
             {
-                Inspector.Inspect("Slice Rect", ref sliceRect);
+                Inspector.Inspector.Inspect("Slice Rect", ref sliceRect);
             }
             
             //display texture

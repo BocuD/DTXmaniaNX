@@ -1,9 +1,8 @@
 ﻿using System.Reflection;
-using DTXMania.UI;
 using DTXMania.UI.Drawable;
 using Hexa.NET.ImGui;
 
-namespace DTXUIRenderer;
+namespace DTXMania.UI.Inspector;
 
 public class HierarchyWindow
 {
@@ -38,7 +37,7 @@ public class HierarchyWindow
 
         if (group == null) rootFlags |= ImGuiTreeNodeFlags.Leaf;
         
-        if (node == Inspector.inspectorTarget)
+        if (node.id == Inspector.inspectorTarget)
         {
             rootFlags |= ImGuiTreeNodeFlags.Selected;
         }
@@ -55,9 +54,24 @@ public class HierarchyWindow
 
         if (ImGui.TreeNodeEx(id, rootFlags, name))
         {
-            if (ImGui.IsItemClicked(ImGuiMouseButton.Left))
+            if (ImGui.BeginDragDropSource(ImGuiDragDropFlags.None))
             {
-                Inspector.inspectorTarget = node;
+                Type type = node.GetType();
+
+                unsafe
+                {
+                    string typeString = Inspector.GetDrawableDragDropType(type);
+                    ImGui.SetDragDropPayload(typeString, (void*)IntPtr.Zero, 0);
+                    Inspector.dragDropPayload = node.id;
+                }
+
+                ImGui.Text(name);
+                ImGui.EndDragDropSource();
+            }
+            
+            if (ImGui.IsItemHovered() && ImGui.IsMouseReleased(ImGuiMouseButton.Left))
+            {
+                Inspector.inspectorTarget = node.id;
             }
             
             if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
@@ -88,11 +102,14 @@ public class HierarchyWindow
                 }
 
                 //we need to remove the drawable from the group, but since this method is called recursively, we need to make sure we're actually at the parent level again
-                if (InspectorManager.toRemove != null)
+                if (!string.IsNullOrEmpty(InspectorManager.toRemove))
                 {
-                    if (group.children.Contains(InspectorManager.toRemove))
+                    var drawable = InspectorManager.toRemoveDrawable;
+                    if (drawable == null) return;
+                    
+                    if (group.children.Contains(drawable))
                     {
-                        group.RemoveChild(InspectorManager.toRemove);
+                        group.RemoveChild(drawable);
                     }
                 }
             }
@@ -101,9 +118,24 @@ public class HierarchyWindow
         }
         else
         {
-            if (ImGui.IsItemClicked(ImGuiMouseButton.Left))
+            if (ImGui.IsItemHovered() && ImGui.IsMouseReleased(ImGuiMouseButton.Left))
             {
-                Inspector.inspectorTarget = node;
+                Inspector.inspectorTarget = node.id;
+            }
+            
+            if (ImGui.BeginDragDropSource(ImGuiDragDropFlags.None))
+            {
+                Type type = node.GetType();
+
+                unsafe
+                {
+                    string typeString = Inspector.GetDrawableDragDropType(type);
+                    ImGui.SetDragDropPayload(typeString, (void*)IntPtr.Zero, 0);
+                    Inspector.dragDropPayload = node.id;
+                }
+
+                ImGui.Text(name);
+                ImGui.EndDragDropSource();
             }
             
             if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
@@ -180,7 +212,7 @@ public class HierarchyWindow
         ImGui.PushStyleColor(ImGuiCol.Text, new System.Numerics.Vector4(1, 0, 0, 1));
         if (ImGui.Selectable("Delete"))
         {
-            InspectorManager.toRemove = node;
+            InspectorManager.toRemove = node.id;
         }
         ImGui.PopStyleColor();
 

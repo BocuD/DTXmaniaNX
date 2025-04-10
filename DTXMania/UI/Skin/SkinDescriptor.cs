@@ -71,11 +71,19 @@ public class SkinDescriptor
             
             //remove any base elements
             groupCopy.children.RemoveAll(x => x.dontSerialize);
-            
-            var json = JsonConvert.SerializeObject(groupCopy, Formatting.Indented);
-            
-            string stagePath = Path.Combine(basePath, stageSkin.Value);
-            File.WriteAllText(stagePath, json);
+
+            try
+            {
+                var json = JsonConvert.SerializeObject(groupCopy, Formatting.Indented);
+                string stagePath = Path.Combine(basePath, stageSkin.Value);
+                File.WriteAllText(stagePath, json);
+            }
+            catch (Exception e)
+            {
+                string stackTrace = e.StackTrace ?? "No stack trace";
+                Console.WriteLine($"Failed to save stage skin: {e} Stacktrace: {stackTrace}");
+                return;
+            }
         }
     }
 

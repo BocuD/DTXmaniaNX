@@ -1,6 +1,7 @@
 ﻿using System.Numerics;
 using DTXMania.Core;
 using DTXMania.UI.Drawable;
+using DTXMania.UI.Inspector;
 using DTXUIRenderer;
 using Hexa.NET.ImGui;
 using Hexa.NET.ImGuizmo;
@@ -13,7 +14,7 @@ namespace DTXMania.UI;
 
 public static class InspectorManager
 {
-    public static Inspector inspector { get; private set; }
+    public static Inspector.Inspector inspector { get; private set; }
     public static HierarchyWindow hierarchyWindow { get; private set; }
 
     private static bool inspectorEnabled = true;
@@ -23,25 +24,30 @@ public static class InspectorManager
     
     private static Matrix4x4 view = Matrix4x4.Identity;
 
-    public static UIDrawable? toRemove;
-    
+    public static string toRemove;
+    public static UIDrawable? toRemoveDrawable => DrawableTracker.GetDrawable(toRemove);
+
     static InspectorManager()
     {
-        inspector = new Inspector();
+        inspector = new Inspector.Inspector();
         hierarchyWindow = new HierarchyWindow();
     }
     
     public static void Draw(bool drawGameWindow, Texture gameSurface)
     {
-        if (toRemove != null)
+        if (!string.IsNullOrWhiteSpace(toRemove))
         {
-            if (Inspector.inspectorTarget == toRemove)
+            if (Inspector.Inspector.inspectorTarget == toRemove)
             {
-                Inspector.inspectorTarget = null;
+                Inspector.Inspector.inspectorTarget = "";
             }
             
-            toRemove.Dispose();
-            toRemove = null;
+            if (toRemoveDrawable != null)
+            {
+                toRemoveDrawable.Dispose();
+            }
+
+            toRemove = "";
         }
         
         if (CDTXMania.InputManager.Keyboard.bKeyPressing(Key.LeftControl) 

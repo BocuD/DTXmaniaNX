@@ -1,8 +1,10 @@
 ﻿using System.Drawing;
 using DTXMania.Core;
 using DTXMania.UI.DynamicElements;
+using DTXMania.UI.Inspector;
 using DTXUIRenderer;
 using Hexa.NET.ImGui;
+using Newtonsoft.Json;
 using SharpDX;
 using Color = System.Drawing.Color;
 
@@ -27,7 +29,14 @@ public class UIText : UITexture
     private bool fontDirty = true;
     private CPrivateFastFont font;
     public CPrivateFont.DrawMode drawMode = CPrivateFont.DrawMode.Edge;
-    public FontFamily fontFamily;
+    [JsonIgnore] public FontFamily fontFamily;
+
+    public string serializedFont
+    {
+        get => fontFamily.Name;
+        set => fontFamily = new FontFamily(value);
+    }
+    
     public int fontSize;
     public FontStyle fontStyle;
     public TextSource textSource = TextSource.String;
@@ -145,32 +154,32 @@ public class UIText : UITexture
         
         if (ImGui.CollapsingHeader("UIText"))
         {
-            if (Inspector.Inspect("Text Color", ref fontColor))
+            if (Inspector.Inspector.Inspect("Text Color", ref fontColor))
             {
                 dirty = true;
             }
 
-            if (Inspector.Inspect("Edge Color", ref edgeColor))
+            if (Inspector.Inspector.Inspect("Edge Color", ref edgeColor))
             {
                 dirty = true;
             }
 
-            if (Inspector.Inspect("Gradation Top Color", ref gradationTopColor))
+            if (Inspector.Inspector.Inspect("Gradation Top Color", ref gradationTopColor))
             {
                 dirty = true;
             }
 
-            if (Inspector.Inspect("Gradation Bottom Color", ref gradationBottomColor))
+            if (Inspector.Inspector.Inspect("Gradation Bottom Color", ref gradationBottomColor))
             {
                 dirty = true;
             }
             
-            if (Inspector.Inspect("Draw Mode", ref drawMode))
+            if (Inspector.Inspector.Inspect("Draw Mode", ref drawMode))
             {
                 dirty = true;
             }
 
-            if (Inspector.Inspect("Text Source", ref textSource))
+            if (Inspector.Inspector.Inspect("Text Source", ref textSource))
             {
                 dirty = true;
             }
@@ -211,7 +220,7 @@ public class UIText : UITexture
                     dirty = true;
                 }
 
-                if(Inspector.Inspect("Font Style", ref fontStyle))
+                if(Inspector.Inspector.Inspect("Font Style", ref fontStyle))
                 {
                     fontDirty = true;
                     dirty = true;

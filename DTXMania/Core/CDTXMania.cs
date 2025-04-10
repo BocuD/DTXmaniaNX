@@ -5,6 +5,7 @@ using System.Runtime;
 using System.Text;
 using System.Windows.Forms;
 using DTXMania.UI;
+using DTXMania.UI.Inspector;
 using DTXMania.UI.Skin;
 using FDK;
 using Hexa.NET.ImGui;
@@ -13,7 +14,7 @@ using Hexa.NET.ImGuizmo;
 using SampleFramework;
 using SharpDX;
 using SharpDX.Direct3D9;
-using GameWindow = DTXMania.UI.GameWindow;
+using GameWindow = DTXMania.UI.Inspector.GameWindow;
 using ImGui = Hexa.NET.ImGui.ImGui;
 using Point = System.Drawing.Point;
 using ResourceManager = DTXMania.UI.ResourceManager;
@@ -2324,7 +2325,7 @@ internal class CDTXMania : Game
         return ini;
     }
 
-    private void tRunGarbageCollector()
+    public static void tRunGarbageCollector()
     {
         //LOHに対するコンパクションを要求
         GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;

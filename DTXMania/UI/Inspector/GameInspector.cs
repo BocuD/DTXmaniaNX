@@ -2,7 +2,7 @@
 using DTXMania.UI.Skin;
 using Hexa.NET.ImGui;
 
-namespace DTXMania.UI;
+namespace DTXMania.UI.Inspector;
 
 public class GameStatus
 {

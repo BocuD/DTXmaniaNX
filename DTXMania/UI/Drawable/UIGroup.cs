@@ -1,4 +1,5 @@
-﻿using DTXUIRenderer;
+﻿using DTXMania.UI.Inspector;
+using DTXUIRenderer;
 using SharpDX;
 
 namespace DTXMania.UI.Drawable;
@@ -79,8 +80,16 @@ public class UIGroup : UIDrawable
         {
             if (element.isVisible)
             {
-                //draw elements at their position relative to the group
-                element.Draw(combinedMatrix);
+                try
+                {
+                    //draw elements at their position relative to the group
+                    element.Draw(combinedMatrix);
+                }
+                catch (Exception e)
+                {
+                    string stackTrace = e.StackTrace ?? "No stack trace";
+                    Console.WriteLine($"Error drawing {element.name}: {e} Stacktrace: {stackTrace}");
+                }
             }
         }
     }

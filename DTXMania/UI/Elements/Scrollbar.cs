@@ -1,5 +1,6 @@
 ﻿using DTXMania.Core;
 using DTXMania.UI.Drawable;
+using DTXMania.UI.Inspector;
 using DTXUIRenderer;
 using Hexa.NET.ImGui;
 using SharpDX;
@@ -14,19 +15,23 @@ public class Scrollbar : UIGroup
         var scrollbar = new Scrollbar();
         scrollbar.name = "New Scrollbar";
         
-        scrollbar.scrollBarImage = scrollbar.AddChild(new UIImage(new DTXTexture(CSkin.Path(@"Graphics\5_scrollbar.png"))));
-        scrollbar.scrollBarImage.clipRect = new RectangleF(0, 0, 12, 492);
-        scrollbar.scrollBarImage.size = new Vector2(12, 492);
+        var bar = scrollbar.AddChild(new UIImage(new DTXTexture(CSkin.Path(@"Graphics\5_scrollbar.png"))));
+        scrollbar.scrollBarImage = bar;
         
-        scrollbar.scrollBarHandleImage = scrollbar.AddChild(new UIImage(new DTXTexture(CSkin.Path(@"Graphics\5_scrollbar.png"))));
-        scrollbar.scrollBarHandleImage.clipRect = new RectangleF(0, 492, 12, 12);
-        scrollbar.scrollBarHandleImage.size = new Vector2(12, 12);
+        bar.clipRect = new RectangleF(0, 0, 12, 492);
+        bar.size = new Vector2(12, 492);
+        
+        var handle = scrollbar.AddChild(new UIImage(new DTXTexture(CSkin.Path(@"Graphics\5_scrollbar.png"))));
+        scrollbar.scrollBarHandleImage = handle;
+        
+        handle.clipRect = new RectangleF(0, 492, 12, 12);
+        handle.size = new Vector2(12, 12);
 
         return scrollbar;
     }
     
-    public UIImage scrollBarImage;
-    public UIImage scrollBarHandleImage;
+    public DrawableReference<UIImage> scrollBarImage;
+    public DrawableReference<UIImage> scrollBarHandleImage;
 
     public float progress = 0;
     
@@ -38,9 +43,12 @@ public class Scrollbar : UIGroup
     public override void Draw(Matrix parentMatrix)
     {
         //update position of handle
-        var handleHeight = scrollBarHandleImage.clipRect.Height;
-        var handleY = scrollBarImage.clipRect.Height - handleHeight - (scrollBarImage.clipRect.Height - handleHeight) * (1 - progress);
-        scrollBarHandleImage.position.Y = handleY;
+        UIImage bar = scrollBarImage;
+        UIImage handle = scrollBarHandleImage;
+        
+        var handleHeight = handle.clipRect.Height;
+        var handleY = bar.clipRect.Height - handleHeight - (bar.clipRect.Height - handleHeight) * (1 - progress);
+        handle.position.Y = handleY;
         
         base.Draw(parentMatrix);
     }
@@ -52,6 +60,9 @@ public class Scrollbar : UIGroup
         if (ImGui.CollapsingHeader("Scrollbar"))
         {
             ImGui.SliderFloat("Progress", ref progress, 0f, 1f);
+            
+            Inspector.Inspector.Inspect("Bar Image", ref scrollBarImage);
+            Inspector.Inspector.Inspect("Handle Image", ref scrollBarHandleImage);
         }
     }
 }

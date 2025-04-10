@@ -1,15 +1,14 @@
-﻿using System;
-using System.Linq;
-using DTXMania.UI.Drawable;
+﻿using DTXMania.UI.Drawable;
 using Hexa.NET.ImGui;
 using SharpDX;
 using Color = System.Drawing.Color;
 
-namespace DTXUIRenderer;
+namespace DTXMania.UI.Inspector;
 
 public class Inspector
 {
-    internal static UIDrawable? inspectorTarget;
+    internal static string inspectorTarget;
+    internal static string dragDropPayload;
 
     public void Draw()
     {
@@ -17,9 +16,17 @@ public class Inspector
         {
             ImGui.Begin("Inspector");
             
-            if (inspectorTarget != null)
+            if (!string.IsNullOrEmpty(inspectorTarget))
             {
-                inspectorTarget.DrawInspector();
+                UIDrawable? drawable = DrawableTracker.GetDrawable(inspectorTarget);
+                if (drawable != null)
+                {
+                    drawable.DrawInspector();
+                }
+                else 
+                {
+                    ImGui.Text("Target not found");
+                }
             }
             else
             {
@@ -30,6 +37,11 @@ public class Inspector
         {
             ImGui.End();
         }
+    }
+    
+    public static string GetDrawableDragDropType(Type t)
+    {
+        return "UIDrawable" + t.Name;
     }
     
     public static bool Inspect(string label, ref Vector2 vector)
@@ -86,15 +98,6 @@ public class Inspector
     }
     
     //enum inspect
-    /*
-int dm = (int)drawMode;
-string options = Enum.GetNames(typeof(CPrivateFont.DrawMode)).Aggregate((a, b) => $"{a}\0{b}");
-if (ImGui.Combo("Draw Mode", ref dm, options))
-{
-    drawMode = (CPrivateFont.DrawMode)dm;
-    dirty = true;
-}
-     */
     public static bool Inspect<T>(string label, ref T value) where T : Enum
     {
         int currentValue = Convert.ToInt32(value);
@@ -107,5 +110,50 @@ if (ImGui.Combo("Draw Mode", ref dm, options))
         }
 
         return changed;
+    }
+    
+    //drawablereference inspect
+    public static bool Inspect<T>(string label, ref DrawableReference<T> value) where T : UIDrawable
+    {
+        T? currentValue = value.Get();
+        string name = currentValue?.name ?? "null";
+        if (string.IsNullOrEmpty(name))
+        {
+            if (currentValue != null) 
+            {
+                name = currentValue.GetType().Name;
+            }
+            else
+            {
+                name = "null";
+            }
+        }
+        
+        ImGui.Text(label);
+        ImGui.SameLine();
+        ImGui.Text(name);
+
+        bool modified = false;
+        
+        //drag and drop target
+        if (ImGui.BeginDragDropTarget())
+        {
+            ImGuiPayloadPtr ptr = ImGui.AcceptDragDropPayload(GetDrawableDragDropType(typeof(T)));
+            
+            //check if delivery
+            if (ptr.IsNull)
+            {
+                ImGui.EndDragDropTarget();
+                return modified;
+            }
+            
+            string id = dragDropPayload;
+            value = new DrawableReference<T>(id);
+            modified = true;
+            
+            ImGui.EndDragDropTarget();
+        }
+
+        return modified;
     }
 }
