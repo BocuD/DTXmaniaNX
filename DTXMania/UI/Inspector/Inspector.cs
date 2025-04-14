@@ -9,6 +9,7 @@ public class Inspector
 {
     internal static string inspectorTarget;
     internal static string dragDropPayload;
+    internal static Type dragDropType;
 
     public void Draw()
     {
@@ -132,13 +133,22 @@ public class Inspector
         ImGui.Text(label);
         ImGui.SameLine();
         ImGui.Text(name);
+        
+        //draw box around the text
+        var min = ImGui.GetItemRectMin();
+        var max = ImGui.GetItemRectMax();
+        var drawList = ImGui.GetWindowDrawList();
+        drawList.AddRectFilled(min, max, ImGui.GetColorU32(ImGuiCol.BorderShadow), 5);
 
         bool modified = false;
         
         //drag and drop target
         if (ImGui.BeginDragDropTarget())
         {
-            ImGuiPayloadPtr ptr = ImGui.AcceptDragDropPayload(GetDrawableDragDropType(typeof(T)));
+            ImGuiPayloadPtr ptr = ImGui.AcceptDragDropPayload(nameof(UIDrawable));
+            
+            //check the type of the payload
+            if (dragDropType == typeof(T))
             
             //check if delivery
             if (ptr.IsNull)
@@ -152,6 +162,16 @@ public class Inspector
             modified = true;
             
             ImGui.EndDragDropTarget();
+        }
+
+        if (value.Get() != null)
+        {
+            ImGui.SameLine();
+            var id = value.Get().GetHashCode().ToString();
+            if (ImGui.Button($"Select##{id}"))
+            {
+                inspectorTarget = value.Get().id;
+            }
         }
 
         return modified;

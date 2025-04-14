@@ -76,14 +76,14 @@ public abstract class CStage : CActivity
 		if (stageUI == null)
 		{
 			ui = new UIGroup(GetType().ToString());
+			InitializeBaseUI();
 			InitializeDefaultUI();
 		}
 		else
 		{
 			ui = stageUI;
+			InitializeBaseUI();
 		}
-		
-		InitializeBaseUI();
 	}
 
 	public abstract void InitializeBaseUI();

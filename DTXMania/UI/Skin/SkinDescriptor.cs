@@ -104,6 +104,35 @@ public class SkinDescriptor
             UIGroup? loadedGroup = JsonConvert.DeserializeObject<UIGroup>(json, new UIDrawableConverter());
             if (loadedGroup != null)
             {
+                //register elements
+                void Register(UIDrawable? drawable)
+                {
+                    if (drawable == null) return;
+                    
+                    DrawableTracker.Register(drawable);
+
+                    if (drawable is UIGroup group)
+                    {
+                        var nullChildren = new List<UIDrawable>();
+                        foreach (var d in group.children)
+                        {
+                            if (d == null)
+                            {
+                                nullChildren.Add(d);
+                                continue;
+                            }
+                            Register(d);
+                            d.SetParent(group, false);
+                        }
+                        foreach (var d in nullChildren)
+                        {
+                            group.children.Remove(d);
+                        }
+                    }
+                }
+                
+                Register(loadedGroup);
+                
                 return loadedGroup;
             }
         }

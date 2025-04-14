@@ -1,5 +1,4 @@
-﻿using DTXUIRenderer;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using System.Reflection;
 
@@ -10,11 +9,6 @@ public class UIDrawableConverter : JsonConverter
     public override bool CanConvert(Type objectType)
     {
         return typeof(UIDrawable).IsAssignableFrom(objectType);
-    }
-
-    public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
-    {
-        throw new NotImplementedException("Use the default writer for serialization.");
     }
 
     public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
@@ -34,6 +28,8 @@ public class UIDrawableConverter : JsonConverter
         {
             throw new JsonSerializationException($"Type {typeName} not found.");
         }
+
+        if (targetType == typeof(LegacyDrawable)) return null;
         
         // Deserialize the object into the correct type
         var result = Activator.CreateInstance(targetType);
@@ -64,10 +60,13 @@ public class UIDrawableConverter : JsonConverter
                 break;
             }
         }
-        
-        DrawableTracker.Register((result as UIDrawable)!);
 
         return result;
+    }
+    
+    public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+    {
+        throw new NotImplementedException("Use the default writer for serialization.");
     }
 }
 

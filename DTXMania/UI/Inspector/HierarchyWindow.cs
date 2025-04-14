@@ -7,6 +7,9 @@ namespace DTXMania.UI.Inspector;
 public class HierarchyWindow
 {
     public UIDrawable? target;
+
+    private UIDrawable? reparentNode;
+    private UIGroup? reparentGroup;
     
     public void Draw()
     {
@@ -26,6 +29,13 @@ public class HierarchyWindow
         finally
         {
             ImGui.End();
+        }
+        
+        if (reparentNode != null && reparentGroup != null)
+        {
+            reparentNode.SetParent(reparentGroup);
+            reparentNode = null;
+            reparentGroup = null;
         }
     }
     
@@ -54,21 +64,8 @@ public class HierarchyWindow
 
         if (ImGui.TreeNodeEx(id, rootFlags, name))
         {
-            if (ImGui.BeginDragDropSource(ImGuiDragDropFlags.None))
-            {
-                Type type = node.GetType();
+            HandleNodeDragDrop(node);
 
-                unsafe
-                {
-                    string typeString = Inspector.GetDrawableDragDropType(type);
-                    ImGui.SetDragDropPayload(typeString, (void*)IntPtr.Zero, 0);
-                    Inspector.dragDropPayload = node.id;
-                }
-
-                ImGui.Text(name);
-                ImGui.EndDragDropSource();
-            }
-            
             if (ImGui.IsItemHovered() && ImGui.IsMouseReleased(ImGuiMouseButton.Left))
             {
                 Inspector.inspectorTarget = node.id;
@@ -123,20 +120,7 @@ public class HierarchyWindow
                 Inspector.inspectorTarget = node.id;
             }
             
-            if (ImGui.BeginDragDropSource(ImGuiDragDropFlags.None))
-            {
-                Type type = node.GetType();
-
-                unsafe
-                {
-                    string typeString = Inspector.GetDrawableDragDropType(type);
-                    ImGui.SetDragDropPayload(typeString, (void*)IntPtr.Zero, 0);
-                    Inspector.dragDropPayload = node.id;
-                }
-
-                ImGui.Text(name);
-                ImGui.EndDragDropSource();
-            }
+            HandleNodeDragDrop(node);
             
             if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
             {
@@ -153,6 +137,46 @@ public class HierarchyWindow
         if (node.dontSerialize)
         {
             ImGui.PopStyleColor();
+        }
+    }
+
+    private void HandleNodeDragDrop(UIDrawable node)
+    {
+        if (ImGui.BeginDragDropSource(ImGuiDragDropFlags.None))
+        {
+            Type type = node.GetType();
+
+            unsafe
+            {
+                ImGui.SetDragDropPayload(nameof(UIDrawable), (void*)IntPtr.Zero, 0);
+                Inspector.dragDropPayload = node.id;
+                Inspector.dragDropType = type;
+            }
+
+            ImGui.Text(node.name);
+            ImGui.EndDragDropSource();
+        }
+            
+        //drag and drop target
+        if (node is UIGroup group && ImGui.BeginDragDropTarget())
+        {
+            ImGuiPayloadPtr ptr = ImGui.AcceptDragDropPayload(nameof(UIDrawable));
+            
+            //check if delivery
+            if (ptr.IsNull)
+            {
+                ImGui.EndDragDropTarget();
+            }
+            else
+            {
+                string droppedId = Inspector.dragDropPayload;
+                var drawable = DrawableTracker.GetDrawable(droppedId);
+                
+                reparentNode = drawable;
+                reparentGroup = group;
+                
+                ImGui.EndDragDropTarget();
+            }
         }
     }
 

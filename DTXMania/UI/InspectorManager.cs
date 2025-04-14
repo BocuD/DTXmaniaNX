@@ -41,12 +41,12 @@ public static class InspectorManager
             {
                 Inspector.Inspector.inspectorTarget = "";
             }
-            
-            if (toRemoveDrawable != null)
-            {
-                toRemoveDrawable.Dispose();
-            }
 
+            if (toRemoveDrawable.parent != null)
+            {
+                toRemoveDrawable.parent.RemoveChild(toRemoveDrawable);
+            }
+            toRemoveDrawable?.Dispose();
             toRemove = "";
         }
         

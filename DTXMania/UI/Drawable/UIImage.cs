@@ -124,7 +124,7 @@ public class UIImage : UITexture
                     }
                 }
             }
-            
+
             Inspector.Inspector.Inspect("Clip Rect", ref clipRect);
             
             Inspector.Inspector.Inspect("Render Mode", ref renderMode);
