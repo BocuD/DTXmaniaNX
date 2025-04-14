@@ -24,19 +24,19 @@ internal partial class CActConfigList
         
     private void CacheCurrentSoundDevices()
     {
-        iSystemSoundType_initial = iSystemSoundType.n現在選択されている項目番号; // CONFIGに入ったときの値を保持しておく
+        iSystemSoundType_initial = iSystemSoundType.nCurrentlySelectedIndex; // CONFIGに入ったときの値を保持しておく
         iSystemWASAPIBufferSizeMs_initial = iSystemWASAPIBufferSizeMs.nCurrentValue; // CONFIG脱出時にこの値から変更されているようなら
-        iSystemASIODevice_initial = iSystemASIODevice.n現在選択されている項目番号; //
+        iSystemASIODevice_initial = iSystemASIODevice.nCurrentlySelectedIndex; //
     }
     private void HandleSoundDeviceChanges()
     {
-        if (iSystemSoundType_initial != iSystemSoundType.n現在選択されている項目番号 ||
+        if (iSystemSoundType_initial != iSystemSoundType.nCurrentlySelectedIndex ||
             iSystemWASAPIBufferSizeMs_initial != iSystemWASAPIBufferSizeMs.nCurrentValue ||
-            iSystemASIODevice_initial != iSystemASIODevice.n現在選択されている項目番号 ||
+            iSystemASIODevice_initial != iSystemASIODevice.nCurrentlySelectedIndex ||
             iSystemSoundTimerType_initial != iSystemSoundTimerType.GetIndex())
         {
             ESoundDeviceType soundDeviceType;
-            switch (iSystemSoundType.n現在選択されている項目番号)
+            switch (iSystemSoundType.nCurrentlySelectedIndex)
             {
                 case 0:
                     soundDeviceType = ESoundDeviceType.DirectSound;
@@ -59,7 +59,7 @@ internal partial class CActConfigList
                 iSystemWASAPIBufferSizeMs.nCurrentValue,
                 false,
                 0,
-                iSystemASIODevice.n現在選択されている項目番号,
+                iSystemASIODevice.nCurrentlySelectedIndex,
                 iSystemSoundTimerType.bON);
             //CDTXMania.app.ShowWindowTitleWithSoundType();   //XGオプション
             CDTXMania.app.AddSoundTypeToWindowTitle();    //GDオプション
@@ -256,7 +256,7 @@ internal partial class CActConfigList
             "Instrument selection:\nDrOnly: Activate Drums screen.\nGROnly: Activate single screen for Guitar and Bass.\n",
             new string[] { "DrOnly", "GROnly" });
         iSystemGRmode.BindConfig(
-            () => iSystemGRmode.n現在選択されている項目番号 = nDGmode, 
+            () => iSystemGRmode.nCurrentlySelectedIndex = nDGmode, 
             () => { } );
         listItems.Add(iSystemGRmode);
             
@@ -276,8 +276,8 @@ internal partial class CActConfigList
             "Movie Mode:\n0 = Hide\n1 = Full screen\n2 = Window mode\n3 = Both Full screen and window\nUse F5 to switch during game.",
             new string[] { "Off", "Full Screen", "Window Mode", "Both" });
         iSystemMovieMode.BindConfig(
-            () => iSystemMovieMode.n現在選択されている項目番号 = CDTXMania.ConfigIni.nMovieMode,
-            () => CDTXMania.ConfigIni.nMovieMode = iSystemMovieMode.n現在選択されている項目番号);
+            () => iSystemMovieMode.nCurrentlySelectedIndex = CDTXMania.ConfigIni.nMovieMode,
+            () => CDTXMania.ConfigIni.nMovieMode = iSystemMovieMode.nCurrentlySelectedIndex);
         listItems.Add(iSystemMovieMode);
 
         CItemList iSystemMovieAlpha = new("LaneAlpha", CItemBase.EPanelType.Normal, CDTXMania.ConfigIni.nMovieAlpha,
@@ -285,8 +285,8 @@ internal partial class CActConfigList
             "Degree of transparency for Movie.\n\n0%=No transparency,\n100%=Completely transparent",
             new string[] { "0%", "10%", "20%", "30%", "40%", "50%", "60%", "70%", "80%", "90%", "100%" });
         iSystemMovieAlpha.BindConfig(
-            () => iSystemMovieAlpha.n現在選択されている項目番号 = CDTXMania.ConfigIni.nMovieAlpha,
-            () => CDTXMania.ConfigIni.nMovieAlpha = iSystemMovieAlpha.n現在選択されている項目番号);
+            () => iSystemMovieAlpha.nCurrentlySelectedIndex = CDTXMania.ConfigIni.nMovieAlpha,
+            () => CDTXMania.ConfigIni.nMovieAlpha = iSystemMovieAlpha.nCurrentlySelectedIndex);
         listItems.Add(iSystemMovieAlpha);
 
         iCommonPlaySpeed = new CItemInteger("PlaySpeed", CConstants.PLAYSPEED_MIN, CConstants.PLAYSPEED_MAX, CDTXMania.ConfigIni.nPlaySpeed,
@@ -323,8 +323,8 @@ internal partial class CActConfigList
             "Skill rate and score calculation method\nCLASSIC: Pre-V6 score calculation and pre-V8 rank calculation\nXG: Current score and rank calculation",
             new string[] { "CLASSIC", "XG" });
         iSystemSkillMode.BindConfig(
-            () => iSystemSkillMode.n現在選択されている項目番号 = CDTXMania.ConfigIni.nSkillMode,
-            () => CDTXMania.ConfigIni.nSkillMode = iSystemSkillMode.n現在選択されている項目番号);
+            () => iSystemSkillMode.nCurrentlySelectedIndex = CDTXMania.ConfigIni.nSkillMode,
+            () => CDTXMania.ConfigIni.nSkillMode = iSystemSkillMode.nCurrentlySelectedIndex);
         listItems.Add(iSystemSkillMode);
 
         CItemToggle iSystemClassicNotes = new("CLASSIC Notes", CDTXMania.ConfigIni.bCLASSIC譜面判別を有効にする,
@@ -502,8 +502,8 @@ internal partial class CActConfigList
             "Degree of decrease of the damage gauge when missing chips.\nThis setting is ignored when Risky >= 1.",
             new string[] { "Small", "Normal", "Large" });
         iSystemDamageLevel.BindConfig(
-            () => iSystemDamageLevel.n現在選択されている項目番号 = (int)CDTXMania.ConfigIni.eDamageLevel,
-            () => CDTXMania.ConfigIni.eDamageLevel = (EDamageLevel)iSystemDamageLevel.n現在選択されている項目番号);
+            () => iSystemDamageLevel.nCurrentlySelectedIndex = (int)CDTXMania.ConfigIni.eDamageLevel,
+            () => CDTXMania.ConfigIni.eDamageLevel = (EDamageLevel)iSystemDamageLevel.nCurrentlySelectedIndex);
         listItems.Add(iSystemDamageLevel);
 
         CItemToggle iSystemSaveScore = new("SaveScore", CDTXMania.ConfigIni.bScoreIniを出力する,
@@ -568,8 +568,8 @@ internal partial class CActConfigList
             "Display the lag from ideal hit time (ms)\nOFF: Don't show.\nON: Show.\nGREAT-: Show except for perfect chips.",
             new string[] { "OFF", "ON", "GREAT-" });
         iSystemShowLag.BindConfig(
-            () => iSystemShowLag.n現在選択されている項目番号 = CDTXMania.ConfigIni.nShowLagType,
-            () => CDTXMania.ConfigIni.nShowLagType = iSystemShowLag.n現在選択されている項目番号);
+            () => iSystemShowLag.nCurrentlySelectedIndex = CDTXMania.ConfigIni.nShowLagType,
+            () => CDTXMania.ConfigIni.nShowLagType = iSystemShowLag.nCurrentlySelectedIndex);
         listItems.Add(iSystemShowLag);
 
         CItemList iSystemShowLagColor = new("ShowLagTimeColor", CItemBase.EPanelType.Normal, CDTXMania.ConfigIni.nShowLagTypeColor,
@@ -577,8 +577,8 @@ internal partial class CActConfigList
             "Change color of lag time display：\nTYPE-A: early notes in blue and late notes in red.\nTYPE-B: early notes in red and late notes in blue.",
             new string[] { "TYPE-A", "TYPE-B" } );
         iSystemShowLagColor.BindConfig(
-            () => iSystemShowLagColor.n現在選択されている項目番号 = CDTXMania.ConfigIni.nShowLagTypeColor,
-            () => CDTXMania.ConfigIni.nShowLagTypeColor = iSystemShowLagColor.n現在選択されている項目番号);
+            () => iSystemShowLagColor.nCurrentlySelectedIndex = CDTXMania.ConfigIni.nShowLagTypeColor,
+            () => CDTXMania.ConfigIni.nShowLagTypeColor = iSystemShowLagColor.nCurrentlySelectedIndex);
         listItems.Add(iSystemShowLagColor);
 
         CItemToggle iSystemShowLagHitCount = new("ShowLagHitCount", CDTXMania.ConfigIni.bShowLagHitCount,
@@ -653,8 +653,8 @@ internal partial class CActConfigList
             "Note: Exit CONFIG to make the setting take effect.",
             new string[] { "DSound", "ASIO", "WASAPIExclusive", "WASAPIShared" });
         iSystemSoundType.BindConfig(
-            () => iSystemSoundType.n現在選択されている項目番号 = CDTXMania.ConfigIni.nSoundDeviceType,
-            () => CDTXMania.ConfigIni.nSoundDeviceType = iSystemSoundType.n現在選択されている項目番号);
+            () => iSystemSoundType.nCurrentlySelectedIndex = CDTXMania.ConfigIni.nSoundDeviceType,
+            () => CDTXMania.ConfigIni.nSoundDeviceType = iSystemSoundType.nCurrentlySelectedIndex);
         listItems.Add(iSystemSoundType);
 
         // #24820 2013.1.15 yyagi
@@ -688,8 +688,8 @@ internal partial class CActConfigList
             "Note: Exit CONFIG to make the setting take effect.",
             asiodevs);
         iSystemASIODevice.BindConfig(
-            () => iSystemASIODevice.n現在選択されている項目番号 = CDTXMania.ConfigIni.nASIODevice,
-            () => CDTXMania.ConfigIni.nASIODevice = iSystemASIODevice.n現在選択されている項目番号);
+            () => iSystemASIODevice.nCurrentlySelectedIndex = CDTXMania.ConfigIni.nASIODevice,
+            () => CDTXMania.ConfigIni.nASIODevice = iSystemASIODevice.nCurrentlySelectedIndex);
         listItems.Add(iSystemASIODevice);
         // #24820 2013.1.3 yyagi
 
@@ -809,7 +809,7 @@ internal partial class CActConfigList
                 
                 if (nSkinIndex != -1) {
 
-                    iSystemSkinSubfolder.n現在選択されている項目番号 = nSkinIndex;
+                    iSystemSkinSubfolder.nCurrentlySelectedIndex = nSkinIndex;
                     this.nSkinIndex = nSkinIndex;
                     CDTXMania.Skin.SetCurrentSkinSubfolderFullName(CDTXMania.ConfigIni.strSystemSkinSubfolderFullName, true);
                 }
@@ -841,8 +841,8 @@ internal partial class CActConfigList
             "Type-B: Number of perfect/great etc. skill rate are displayed.",
             new string[] { "Type-A", "Type-B" });
         iInfoType.BindConfig(
-            () => iInfoType.n現在選択されている項目番号 = CDTXMania.ConfigIni.nInfoType,
-            () => CDTXMania.ConfigIni.nInfoType = iInfoType.n現在選択されている項目番号);
+            () => iInfoType.nCurrentlySelectedIndex = CDTXMania.ConfigIni.nInfoType,
+            () => CDTXMania.ConfigIni.nInfoType = iInfoType.nCurrentlySelectedIndex);
         listItems.Add(iInfoType);
 
         // #36372 2016.06.19 kairera0467
@@ -883,8 +883,8 @@ internal partial class CActConfigList
             "NOTE: Only songs with many BPM/Bar-Length changes have observable time differences. Most songs are not affected by this option.",
             new string[] { "Original", "Accurate" });
         iSystemChipPlayTimeComputeMode.BindConfig(
-            () => iSystemChipPlayTimeComputeMode.n現在選択されている項目番号 = CDTXMania.ConfigIni.nChipPlayTimeComputeMode,
-            () => CDTXMania.ConfigIni.nChipPlayTimeComputeMode = iSystemChipPlayTimeComputeMode.n現在選択されている項目番号);
+            () => iSystemChipPlayTimeComputeMode.nCurrentlySelectedIndex = CDTXMania.ConfigIni.nChipPlayTimeComputeMode,
+            () => CDTXMania.ConfigIni.nChipPlayTimeComputeMode = iSystemChipPlayTimeComputeMode.nCurrentlySelectedIndex);
         listItems.Add(iSystemChipPlayTimeComputeMode);
 
         OnListMenuの初期化();

@@ -554,9 +554,9 @@ internal class CStageConfig : CStage
             graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
 
             CItemBase item = actList.ibCurrentSelection;
-            if( item.str説明文 is { Length: > 0 } )
+            if( item.strDescription is { Length: > 0 } )
             {
-                graphics.DrawString( item.str説明文, ftFont, Brushes.Black, new System.Drawing.RectangleF( 4f, (float) 0, 230, 430 ) );
+                graphics.DrawString( item.strDescription, ftFont, Brushes.Black, new System.Drawing.RectangleF( 4f, (float) 0, 230, 430 ) );
             }
             graphics.Dispose();
             if( txDescriptionPanel != null )

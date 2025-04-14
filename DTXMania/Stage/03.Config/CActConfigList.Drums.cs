@@ -20,7 +20,7 @@ internal partial class CActConfigList
         listItems.Add(iDrumsReturnToMenu);
             
         //----------AutoPlay----------
-        CItemThreeState? iDrumsAutoPlayAll = new("AutoPlay (All)", CItemThreeState.E状態.不定,
+        CItemThreeState? iDrumsAutoPlayAll = new("AutoPlay (All)", CItemThreeState.EState.UNDEFINED,
             "全パッドの自動演奏のON/OFFを\n" +
             "まとめて切り替えます。",
             "Activate/deactivate Auto for all drum lanes at once.");
@@ -119,7 +119,7 @@ internal partial class CActConfigList
         //add the action for this later, as it needs to be able to change all of the above buttons
         iDrumsAutoPlayAll.action = () =>
         {
-            bool bAutoOn = iDrumsAutoPlayAll.e現在の状態 == CItemThreeState.E状態.ON;
+            bool bAutoOn = iDrumsAutoPlayAll.eCurrentState == CItemThreeState.EState.ON;
                 
             iDrumsLeftCymbal.bON = bAutoOn;
             iDrumsHiHat.bON = bAutoOn;
@@ -162,8 +162,8 @@ internal partial class CActConfigList
             "Stealth: Chips are transparent",
             new string[] { "OFF", "Hidden", "Sudden", "HidSud", "Stealth" });
         iDrumsHIDSUD.BindConfig(
-            () => iDrumsHIDSUD.n現在選択されている項目番号 = CDTXMania.ConfigIni.nHidSud.Drums,
-            () => CDTXMania.ConfigIni.nHidSud.Drums = iDrumsHIDSUD.n現在選択されている項目番号);
+            () => iDrumsHIDSUD.nCurrentlySelectedIndex = CDTXMania.ConfigIni.nHidSud.Drums,
+            () => CDTXMania.ConfigIni.nHidSud.Drums = iDrumsHIDSUD.nCurrentlySelectedIndex);
         listItems.Add(iDrumsHIDSUD);
 
         //----------DisplayOption----------
@@ -193,8 +193,8 @@ internal partial class CActConfigList
             "ALL OFF: Do not display any",
             new string[] { "ALL ON", "LANE OFF", "LINE OFF", "ALL OFF" });
         iDrumsLaneDisp.BindConfig(
-            () => iDrumsLaneDisp.n現在選択されている項目番号 = CDTXMania.ConfigIni.nLaneDisp.Drums,
-            () => CDTXMania.ConfigIni.nLaneDisp.Drums = iDrumsLaneDisp.n現在選択されている項目番号);
+            () => iDrumsLaneDisp.nCurrentlySelectedIndex = CDTXMania.ConfigIni.nLaneDisp.Drums,
+            () => CDTXMania.ConfigIni.nLaneDisp.Drums = iDrumsLaneDisp.nCurrentlySelectedIndex);
         listItems.Add(iDrumsLaneDisp);
 
         CItemToggle? iDrumsJudgeLineDisp = new("JudgeLineDisp", CDTXMania.ConfigIni.bJudgeLineDisp.Drums,
@@ -217,21 +217,21 @@ internal partial class CActConfigList
         //add the action for this later, as it needs to be able to change all of the above buttons
         iDrumsDark.action = () =>
         {
-            if (iDrumsDark.n現在選択されている項目番号 == (int)EDarkMode.FULL)
+            if (iDrumsDark.nCurrentlySelectedIndex == (int)EDarkMode.FULL)
             {
-                iDrumsLaneDisp.n現在選択されている項目番号 = 3;
+                iDrumsLaneDisp.nCurrentlySelectedIndex = 3;
                 iDrumsJudgeLineDisp.bON = false;
                 iDrumsLaneFlush.bON = false;
             }
-            else if (iDrumsDark.n現在選択されている項目番号 == (int)EDarkMode.HALF)
+            else if (iDrumsDark.nCurrentlySelectedIndex == (int)EDarkMode.HALF)
             {
-                iDrumsLaneDisp.n現在選択されている項目番号 = 1;
+                iDrumsLaneDisp.nCurrentlySelectedIndex = 1;
                 iDrumsJudgeLineDisp.bON = true;
                 iDrumsLaneFlush.bON = true;
             }
             else
             {
-                iDrumsLaneDisp.n現在選択されている項目番号 = 0;
+                iDrumsLaneDisp.nCurrentlySelectedIndex = 0;
                 iDrumsJudgeLineDisp.bON = true;
                 iDrumsLaneFlush.bON = true;
             }
@@ -246,8 +246,8 @@ internal partial class CActConfigList
             "",
             new string[] { "ALL ON", "ChipOFF", "EffectOnly", "ALL OFF" });
         iDrumsAttackEffect.BindConfig(
-            () => iDrumsAttackEffect.n現在選択されている項目番号 = (int)CDTXMania.ConfigIni.eAttackEffect.Drums,
-            () => CDTXMania.ConfigIni.eAttackEffect.Drums = (EType)iDrumsAttackEffect.n現在選択されている項目番号);
+            () => iDrumsAttackEffect.nCurrentlySelectedIndex = (int)CDTXMania.ConfigIni.eAttackEffect.Drums,
+            () => CDTXMania.ConfigIni.eAttackEffect.Drums = (EType)iDrumsAttackEffect.nCurrentlySelectedIndex);
         listItems.Add(iDrumsAttackEffect);
 
         CItemToggle? iDrumsReverse = new("Reverse", CDTXMania.ConfigIni.bReverse.Drums,
@@ -275,8 +275,8 @@ internal partial class CActConfigList
             " OFF: no judgement mark.",
             new string[] { "P-A", "P-B", "OFF" });
         iDrumsPosition.BindConfig(
-            () => iDrumsPosition.n現在選択されている項目番号 = (int)CDTXMania.ConfigIni.JudgementStringPosition.Drums,
-            () => CDTXMania.ConfigIni.JudgementStringPosition.Drums = (EType)iDrumsPosition.n現在選択されている項目番号);
+            () => iDrumsPosition.nCurrentlySelectedIndex = (int)CDTXMania.ConfigIni.JudgementStringPosition.Drums,
+            () => CDTXMania.ConfigIni.JudgementStringPosition.Drums = (EType)iDrumsPosition.nCurrentlySelectedIndex);
         listItems.Add(iDrumsPosition);
 
         CItemToggle? iDrumsComboDisp = new("Combo", CDTXMania.ConfigIni.bドラムコンボ文字の表示,
@@ -302,8 +302,8 @@ internal partial class CActConfigList
             "Type-D Work In Progress....",
             new string[] { "Type-A", "Type-B", "Type-C", "Type-D" });
         iDrumsLaneType.BindConfig(
-            () => iDrumsLaneType.n現在選択されている項目番号 = (int)CDTXMania.ConfigIni.eLaneType.Drums,
-            () => CDTXMania.ConfigIni.eLaneType.Drums = (EType)iDrumsLaneType.n現在選択されている項目番号);
+            () => iDrumsLaneType.nCurrentlySelectedIndex = (int)CDTXMania.ConfigIni.eLaneType.Drums,
+            () => CDTXMania.ConfigIni.eLaneType.Drums = (EType)iDrumsLaneType.nCurrentlySelectedIndex);
         listItems.Add(iDrumsLaneType);
 
         CItemList? iDrumsRDPosition = new("RDPosition", CItemBase.EPanelType.Normal, (int)CDTXMania.ConfigIni.eRDPosition,
@@ -316,8 +316,8 @@ internal partial class CActConfigList
             "RC RD: Rightmost lane is RD",
             new string[] { "RD RC", "RC RD" });
         iDrumsRDPosition.BindConfig(
-            () => iDrumsRDPosition.n現在選択されている項目番号 = (int)CDTXMania.ConfigIni.eRDPosition,
-            () => CDTXMania.ConfigIni.eRDPosition = (ERDPosition)iDrumsRDPosition.n現在選択されている項目番号);
+            () => iDrumsRDPosition.nCurrentlySelectedIndex = (int)CDTXMania.ConfigIni.eRDPosition,
+            () => CDTXMania.ConfigIni.eRDPosition = (ERDPosition)iDrumsRDPosition.nCurrentlySelectedIndex);
         listItems.Add(iDrumsRDPosition);
             
         //----------SpecialOption----------
@@ -362,8 +362,8 @@ internal partial class CActConfigList
             "\n",
             new string[] { "HH-0", "HH-1", "HH-2", "HH-3" });
         iSystemHHGroup.BindConfig(
-            () => iSystemHHGroup.n現在選択されている項目番号 = (int)CDTXMania.ConfigIni.eHHGroup,
-            () => CDTXMania.ConfigIni.eHHGroup = (EHHGroup)iSystemHHGroup.n現在選択されている項目番号);
+            () => iSystemHHGroup.nCurrentlySelectedIndex = (int)CDTXMania.ConfigIni.eHHGroup,
+            () => CDTXMania.ConfigIni.eHHGroup = (EHHGroup)iSystemHHGroup.nCurrentlySelectedIndex);
         listItems.Add(iSystemHHGroup);
 
         CItemList? iSystemFTGroup = new("FT Group", CItemBase.EPanelType.Normal, (int)CDTXMania.ConfigIni.eFTGroup,
@@ -378,8 +378,8 @@ internal partial class CActConfigList
             " LT and FT are grouped.",
             new string[] { "FT-0", "FT-1" });
         iSystemFTGroup.BindConfig(
-            () => iSystemFTGroup.n現在選択されている項目番号 = (int)CDTXMania.ConfigIni.eFTGroup,
-            () => CDTXMania.ConfigIni.eFTGroup = (EFTGroup)iSystemFTGroup.n現在選択されている項目番号);
+            () => iSystemFTGroup.nCurrentlySelectedIndex = (int)CDTXMania.ConfigIni.eFTGroup,
+            () => CDTXMania.ConfigIni.eFTGroup = (EFTGroup)iSystemFTGroup.nCurrentlySelectedIndex);
         listItems.Add(iSystemFTGroup);
 
         CItemList? iSystemCYGroup = new("CY Group", CItemBase.EPanelType.Normal, (int)CDTXMania.ConfigIni.eCYGroup,
@@ -394,8 +394,8 @@ internal partial class CActConfigList
             " CY and RD are grouped.",
             new string[] { "CY-0", "CY-1" });
         iSystemCYGroup.BindConfig(
-            () => iSystemCYGroup.n現在選択されている項目番号 = (int)CDTXMania.ConfigIni.eCYGroup,
-            () => CDTXMania.ConfigIni.eCYGroup = (ECYGroup)iSystemCYGroup.n現在選択されている項目番号);
+            () => iSystemCYGroup.nCurrentlySelectedIndex = (int)CDTXMania.ConfigIni.eCYGroup,
+            () => CDTXMania.ConfigIni.eCYGroup = (ECYGroup)iSystemCYGroup.nCurrentlySelectedIndex);
         listItems.Add(iSystemCYGroup);
 
         CItemList? iSystemBDGroup = new("BD Group", CItemBase.EPanelType.Normal, (int)CDTXMania.ConfigIni.eBDGroup,		// #27029 2012.1.4 from
@@ -416,8 +416,8 @@ internal partial class CActConfigList
             "  BD-3 ... LP & LBD & BD\n",
             new string[] { "BD-0", "BD-1", "BD-2", "BD-3" });
         iSystemBDGroup.BindConfig(
-            () => iSystemBDGroup.n現在選択されている項目番号 = (int)CDTXMania.ConfigIni.eBDGroup,
-            () => CDTXMania.ConfigIni.eBDGroup = (EBDGroup)iSystemBDGroup.n現在選択されている項目番号);
+            () => iSystemBDGroup.nCurrentlySelectedIndex = (int)CDTXMania.ConfigIni.eBDGroup,
+            () => CDTXMania.ConfigIni.eBDGroup = (EBDGroup)iSystemBDGroup.nCurrentlySelectedIndex);
         listItems.Add(iSystemBDGroup);
 
         CItemToggle? iSystemCymbalFree = new("CymbalFree", CDTXMania.ConfigIni.bシンバルフリー,
@@ -455,8 +455,8 @@ internal partial class CActConfigList
             "  BD Group is set as BD-1.",
             new string[] { "C>P", "P>C" });
         iSystemHitSoundPriorityHH.BindConfig(
-            () => iSystemHitSoundPriorityHH.n現在選択されている項目番号 = (int)CDTXMania.ConfigIni.eHitSoundPriorityHH,
-            () => CDTXMania.ConfigIni.eHitSoundPriorityHH = (EPlaybackPriority)iSystemHitSoundPriorityHH.n現在選択されている項目番号);
+            () => iSystemHitSoundPriorityHH.nCurrentlySelectedIndex = (int)CDTXMania.ConfigIni.eHitSoundPriorityHH,
+            () => CDTXMania.ConfigIni.eHitSoundPriorityHH = (EPlaybackPriority)iSystemHitSoundPriorityHH.nCurrentlySelectedIndex);
         listItems.Add(iSystemHitSoundPriorityHH);
 
         CItemList? iSystemHitSoundPriorityFT = new("FT Priority", CItemBase.EPanelType.Normal, (int)CDTXMania.ConfigIni.eHitSoundPriorityFT,
@@ -475,8 +475,8 @@ internal partial class CActConfigList
             " Pad sound is prior to the chip sound.",
             new string[] { "C>P", "P>C" });
         iSystemHitSoundPriorityFT.BindConfig(
-            () => iSystemHitSoundPriorityFT.n現在選択されている項目番号 = (int)CDTXMania.ConfigIni.eHitSoundPriorityFT,
-            () => CDTXMania.ConfigIni.eHitSoundPriorityFT = (EPlaybackPriority)iSystemHitSoundPriorityFT.n現在選択されている項目番号);
+            () => iSystemHitSoundPriorityFT.nCurrentlySelectedIndex = (int)CDTXMania.ConfigIni.eHitSoundPriorityFT,
+            () => CDTXMania.ConfigIni.eHitSoundPriorityFT = (EPlaybackPriority)iSystemHitSoundPriorityFT.nCurrentlySelectedIndex);
         listItems.Add(iSystemHitSoundPriorityFT);
 
         CItemList? iSystemHitSoundPriorityCY = new("CY Priority", CItemBase.EPanelType.Normal, (int)CDTXMania.ConfigIni.eHitSoundPriorityCY,
@@ -495,8 +495,8 @@ internal partial class CActConfigList
             " Pad sound is prior to the chip sound.",
             new string[] { "C>P", "P>C" });
         iSystemHitSoundPriorityCY.BindConfig(
-            () => iSystemHitSoundPriorityCY.n現在選択されている項目番号 = (int)CDTXMania.ConfigIni.eHitSoundPriorityCY,
-            () => CDTXMania.ConfigIni.eHitSoundPriorityCY = (EPlaybackPriority)iSystemHitSoundPriorityCY.n現在選択されている項目番号);
+            () => iSystemHitSoundPriorityCY.nCurrentlySelectedIndex = (int)CDTXMania.ConfigIni.eHitSoundPriorityCY,
+            () => CDTXMania.ConfigIni.eHitSoundPriorityCY = (EPlaybackPriority)iSystemHitSoundPriorityCY.nCurrentlySelectedIndex);
         listItems.Add(iSystemHitSoundPriorityCY);
 
         CItemToggle? iSystemFillIn = new("FillIn", CDTXMania.ConfigIni.bFillInEnabled,
@@ -566,8 +566,8 @@ internal partial class CActConfigList
             "C: same as closed hihat",
             new string[] { "Type A", "Type B", "Type C" });
         iDrumsHHOGraphics.BindConfig(
-            () => iDrumsHHOGraphics.n現在選択されている項目番号 = (int)CDTXMania.ConfigIni.eHHOGraphics.Drums,
-            () => CDTXMania.ConfigIni.eHHOGraphics.Drums = (EType)iDrumsHHOGraphics.n現在選択されている項目番号);
+            () => iDrumsHHOGraphics.nCurrentlySelectedIndex = (int)CDTXMania.ConfigIni.eHHOGraphics.Drums,
+            () => CDTXMania.ConfigIni.eHHOGraphics.Drums = (EType)iDrumsHHOGraphics.nCurrentlySelectedIndex);
         listItems.Add(iDrumsHHOGraphics);
 
         CItemList? iDrumsLBDGraphics = new("LBDGraphics", CItemBase.EPanelType.Normal, (int)CDTXMania.ConfigIni.eLBDGraphics.Drums,
@@ -579,8 +579,8 @@ internal partial class CActConfigList
             "B: In LP and LBD Color-coded.",
             new string[] { "Type A", "Type B" });
         iDrumsLBDGraphics.BindConfig(
-            () => iDrumsLBDGraphics.n現在選択されている項目番号 = (int)CDTXMania.ConfigIni.eLBDGraphics.Drums,
-            () => CDTXMania.ConfigIni.eLBDGraphics.Drums = (EType)iDrumsLBDGraphics.n現在選択されている項目番号);
+            () => iDrumsLBDGraphics.nCurrentlySelectedIndex = (int)CDTXMania.ConfigIni.eLBDGraphics.Drums,
+            () => CDTXMania.ConfigIni.eLBDGraphics.Drums = (EType)iDrumsLBDGraphics.nCurrentlySelectedIndex);
         listItems.Add(iDrumsLBDGraphics);
 
         CItemInteger? iDrumsJudgeLinePos = new("JudgeLinePos", 0, 100, CDTXMania.ConfigIni.nJudgeLine.Drums,
@@ -656,8 +656,8 @@ internal partial class CActConfigList
             "lane",
             new string[] { "L R", "R L", "R Only" });
         iDrumsDkdkType.BindConfig(
-            () => iDrumsDkdkType.n現在選択されている項目番号 = (int)CDTXMania.ConfigIni.eDkdkType.Drums,
-            () => CDTXMania.ConfigIni.eDkdkType.Drums = (EType)iDrumsDkdkType.n現在選択されている項目番号);
+            () => iDrumsDkdkType.nCurrentlySelectedIndex = (int)CDTXMania.ConfigIni.eDkdkType.Drums,
+            () => CDTXMania.ConfigIni.eDkdkType.Drums = (EType)iDrumsDkdkType.nCurrentlySelectedIndex);
         listItems.Add(iDrumsDkdkType);
 
         CItemList? iDrumsNumOfLanes = new("NumOfLanes", CItemBase.EPanelType.Normal, (int)CDTXMania.ConfigIni.eNumOfLanes.Drums,
@@ -672,8 +672,8 @@ internal partial class CActConfigList
             "6: classic style 6 lanes",
             new string[] { "10", "9", "6" });
         iDrumsNumOfLanes.BindConfig(
-            () => iDrumsNumOfLanes.n現在選択されている項目番号 = (int)CDTXMania.ConfigIni.eNumOfLanes.Drums,
-            () => CDTXMania.ConfigIni.eNumOfLanes.Drums = (EType)iDrumsNumOfLanes.n現在選択されている項目番号);
+            () => iDrumsNumOfLanes.nCurrentlySelectedIndex = (int)CDTXMania.ConfigIni.eNumOfLanes.Drums,
+            () => CDTXMania.ConfigIni.eNumOfLanes.Drums = (EType)iDrumsNumOfLanes.nCurrentlySelectedIndex);
         listItems.Add(iDrumsNumOfLanes);
 
         CItemList? iDrumsRandomPad = new("RandomPad", CItemBase.EPanelType.Normal, (int)CDTXMania.ConfigIni.eRandom.Drums,
@@ -695,8 +695,8 @@ internal partial class CActConfigList
             "chip randomly",
             new string[] { "OFF", "Mirror", "Part", "Super", "Hyper", "Master", "Another" });
         iDrumsRandomPad.BindConfig(
-            () => iDrumsRandomPad.n現在選択されている項目番号 = (int)CDTXMania.ConfigIni.eRandom.Drums,
-            () => CDTXMania.ConfigIni.eRandom.Drums = (ERandomMode)iDrumsRandomPad.n現在選択されている項目番号);
+            () => iDrumsRandomPad.nCurrentlySelectedIndex = (int)CDTXMania.ConfigIni.eRandom.Drums,
+            () => CDTXMania.ConfigIni.eRandom.Drums = (ERandomMode)iDrumsRandomPad.nCurrentlySelectedIndex);
         listItems.Add(iDrumsRandomPad);
 
         CItemList? iDrumsRandomPedal = new("RandomPedal", CItemBase.EPanelType.Normal, (int)CDTXMania.ConfigIni.eRandomPedal.Drums,
@@ -716,8 +716,8 @@ internal partial class CActConfigList
             "chip randomly",
             new string[] { "OFF", "Mirror", "Part", "Super", "Hyper", "Master", "Another" });
         iDrumsRandomPedal.BindConfig(
-            () => iDrumsRandomPedal.n現在選択されている項目番号 = (int)CDTXMania.ConfigIni.eRandomPedal.Drums,
-            () => CDTXMania.ConfigIni.eRandomPedal.Drums = (ERandomMode)iDrumsRandomPedal.n現在選択されている項目番号);
+            () => iDrumsRandomPedal.nCurrentlySelectedIndex = (int)CDTXMania.ConfigIni.eRandomPedal.Drums,
+            () => CDTXMania.ConfigIni.eRandomPedal.Drums = (ERandomMode)iDrumsRandomPedal.nCurrentlySelectedIndex);
         listItems.Add(iDrumsRandomPedal);
 
         iDrumsGraph = new CItemToggle( "Graph", CDTXMania.ConfigIni.bGraph有効.Drums,

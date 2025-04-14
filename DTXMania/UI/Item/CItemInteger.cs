@@ -6,58 +6,47 @@
 /// </summary>
 internal class CItemInteger : CItemBase
 {
-	// プロパティ
-
 	public int nCurrentValue;
-	public bool b値がフォーカスされている;
-
-
-	// コンストラクタ
-
-	public CItemInteger()
+	public bool bIsCurrentlyInFocus;
+	
+	private readonly int nMinimumValue;
+	private readonly int nMaximumValue;
+	
+	public CItemInteger(string strItemName, int nMinimumValue, int nMaximumValue, int nCurrentValue, string strDescriptionJp, string strDescriptionEn)
 	{
+		tInitialize(strItemName, EPanelType.Normal, strDescriptionJp, strDescriptionEn);
+
 		eType = EType.Integer;
-		n最小値 = 0;
-		n最大値 = 0;
-		nCurrentValue = 0;
-		b値がフォーカスされている = false;
-	}
-	public CItemInteger(string str項目名, int n最小値, int n最大値, int n初期値, string str説明文jp, string str説明文en)
-		: this() {
-		tInitialize(str項目名, n最小値, n最大値, n初期値, str説明文jp, str説明文en);
+		
+		this.nMinimumValue = nMinimumValue;
+		this.nMaximumValue = nMaximumValue;
+		this.nCurrentValue = nCurrentValue;
+		
+		bIsCurrentlyInFocus = false;
 	}
 		
 	// CItemBase 実装
 
-	protected override void tEnter押下()
+	protected override void tEnterPressed()
 	{
-		b値がフォーカスされている = !b値がフォーカスされている;
+		bIsCurrentlyInFocus = !bIsCurrentlyInFocus;
 	}
 	public override void tMoveItemValueToNext()
 	{
-		if( ++nCurrentValue > n最大値 )
+		if( ++nCurrentValue > nMaximumValue )
 		{
-			nCurrentValue = n最大値;
+			nCurrentValue = nMaximumValue;
 		}
 	}
 	public override void tMoveItemValueToPrevious()
 	{
-		if( --nCurrentValue < n最小値 )
+		if( --nCurrentValue < nMinimumValue )
 		{
-			nCurrentValue = n最小値;
+			nCurrentValue = nMinimumValue;
 		}
 	}
-	public void tInitialize(string str項目名, int n最小値, int n最大値, int n初期値, string str説明文jp, string str説明文en) {
-		tInitialize(str項目名, n最小値, n最大値, n初期値, EPanelType.Normal, str説明文jp, str説明文en);
-	}
-	public void tInitialize(string str項目名, int n最小値, int n最大値, int n初期値, EPanelType eパネル種別, string str説明文jp, string str説明文en) {
-		base.tInitialize(str項目名, eパネル種別, str説明文jp, str説明文en);
-		this.n最小値 = n最小値;
-		this.n最大値 = n最大値;
-		nCurrentValue = n初期値;
-		b値がフォーカスされている = false;
-	}
-	public override object obj現在値()
+
+	public override object GetCurrentValue()
 	{
 		return nCurrentValue;
 	}
@@ -69,12 +58,4 @@ internal class CItemInteger : CItemBase
 	{
 		nCurrentValue = index;
 	}
-	// Other
-
-	#region [ private ]
-	//-----------------
-	private int n最小値;
-	private int n最大値;
-	//-----------------
-	#endregion
 }

@@ -6,26 +6,23 @@
 /// </summary>
 internal class CItemToggle : CItemBase
 {
-	// プロパティ
-
 	public bool bON;
-
-		
-	// コンストラクタ
 
 	public CItemToggle()
 	{
 		eType = EType.ONorOFFToggle;
 		bON = false;
 	}
-	public CItemToggle(string str項目名, bool b初期状態, string str説明文jp, string str説明文en)
-		: this() {
-		tInitialize(str項目名, b初期状態, str説明文jp, str説明文en);
+	public CItemToggle(string strItemName, bool b初期状態, string strDescriptionJp, string strDescriptionEn)
+		: this()
+	{
+		tInitialize(strItemName, EPanelType.Normal, strDescriptionJp, strDescriptionEn);
+		bON = b初期状態;
 	}
 
 	// CItemBase 実装
 
-	protected override void tEnter押下()
+	protected override void tEnterPressed()
 	{
 		tMoveItemValueToNext();
 	}
@@ -37,21 +34,16 @@ internal class CItemToggle : CItemBase
 	{
 		tMoveItemValueToNext();
 	}
-	public void tInitialize(string str項目名, bool b初期状態, string str説明文jp, string str説明文en) {
-		tInitialize(str項目名, b初期状態, EPanelType.Normal, str説明文jp, str説明文en);
-	}
-	public void tInitialize(string str項目名, bool b初期状態, EPanelType eパネル種別, string str説明文jp, string str説明文en) {
-		base.tInitialize(str項目名, eパネル種別, str説明文jp, str説明文en);
-		bON = b初期状態;
-	}
-	public override object obj現在値()
+
+	public override object GetCurrentValue()
 	{
-		return ( bON ) ? "ON" : "OFF";
+		return bON ? "ON" : "OFF";
 	}
 	public override int GetIndex()
 	{
-		return ( bON ) ? 1 : 0;
+		return bON ? 1 : 0;
 	}
+	
 	public override void SetIndex( int index )
 	{
 		switch ( index )

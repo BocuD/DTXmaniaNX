@@ -19,7 +19,7 @@ internal partial class CActConfigList
             "Return to left menu.");
         listItems.Add(iGuitarReturnToMenu);
 
-        CItemThreeState iGuitarAutoPlayAll = new("AutoPlay (All)", CItemThreeState.E状態.不定,
+        CItemThreeState iGuitarAutoPlayAll = new("AutoPlay (All)", CItemThreeState.EState.UNDEFINED,
             "全ネック/ピックの自動演奏の ON/OFF を\n" +
             "まとめて切り替えます。",
             "You can change whether Auto or not\n" +
@@ -85,7 +85,7 @@ internal partial class CActConfigList
         //add the action for this later, as it needs to be able to change all of the above buttons
         iGuitarAutoPlayAll.action = () =>
         {
-            bool bAutoOn = iGuitarAutoPlayAll.e現在の状態 == CItemThreeState.E状態.ON;
+            bool bAutoOn = iGuitarAutoPlayAll.eCurrentState == CItemThreeState.EState.ON;
                 
             iGuitarR.bON = bAutoOn;
             iGuitarG.bON = bAutoOn;
@@ -116,8 +116,8 @@ internal partial class CActConfigList
             " at Autoplay ([Left] is forcely used).",
             new string[] { "OFF", "Hidden", "Sudden", "HidSud", "Stealth" });
         iGuitarHIDSUD.BindConfig(
-            () => iGuitarHIDSUD.n現在選択されている項目番号 = CDTXMania.ConfigIni.nHidSud.Guitar,
-            () => CDTXMania.ConfigIni.nHidSud.Guitar = iGuitarHIDSUD.n現在選択されている項目番号);
+            () => iGuitarHIDSUD.nCurrentlySelectedIndex = CDTXMania.ConfigIni.nHidSud.Guitar,
+            () => CDTXMania.ConfigIni.nHidSud.Guitar = iGuitarHIDSUD.nCurrentlySelectedIndex);
         listItems.Add(iGuitarHIDSUD);
             
         //----------DisplayOption----------
@@ -139,8 +139,8 @@ internal partial class CActConfigList
             "",
             new string[] { "ALL ON", "LANE OFF", "LINE OFF", "ALL OFF" });
         iGuitarLaneDisp.BindConfig(
-            () => iGuitarLaneDisp.n現在選択されている項目番号 = CDTXMania.ConfigIni.nLaneDisp.Guitar,
-            () => CDTXMania.ConfigIni.nLaneDisp.Guitar = iGuitarLaneDisp.n現在選択されている項目番号);
+            () => iGuitarLaneDisp.nCurrentlySelectedIndex = CDTXMania.ConfigIni.nLaneDisp.Guitar,
+            () => CDTXMania.ConfigIni.nLaneDisp.Guitar = iGuitarLaneDisp.nCurrentlySelectedIndex);
         listItems.Add(iGuitarLaneDisp);
 
         CItemToggle iGuitarJudgeLineDisp = new("JudgeLineDisp", CDTXMania.ConfigIni.bJudgeLineDisp.Guitar,
@@ -163,21 +163,21 @@ internal partial class CActConfigList
         //add the action for this later, as it needs to be able to change all of the above buttons
         iGuitarDark.action = () =>
         {
-            if (iGuitarDark.n現在選択されている項目番号 == (int)EDarkMode.FULL)
+            if (iGuitarDark.nCurrentlySelectedIndex == (int)EDarkMode.FULL)
             {
-                iGuitarLaneDisp.n現在選択されている項目番号 = 3;
+                iGuitarLaneDisp.nCurrentlySelectedIndex = 3;
                 iGuitarJudgeLineDisp.bON = false;
                 iGuitarLaneFlush.bON = false;
             }
-            else if (iGuitarDark.n現在選択されている項目番号 == (int)EDarkMode.HALF)
+            else if (iGuitarDark.nCurrentlySelectedIndex == (int)EDarkMode.HALF)
             {
-                iGuitarLaneDisp.n現在選択されている項目番号 = 1;
+                iGuitarLaneDisp.nCurrentlySelectedIndex = 1;
                 iGuitarJudgeLineDisp.bON = true;
                 iGuitarLaneFlush.bON = true;
             }
             else
             {
-                iGuitarLaneDisp.n現在選択されている項目番号 = 0;
+                iGuitarLaneDisp.nCurrentlySelectedIndex = 0;
                 iGuitarJudgeLineDisp.bON = true;
                 iGuitarLaneFlush.bON = true;
             }
@@ -189,8 +189,8 @@ internal partial class CActConfigList
             "",
             new string[] { "ON", "OFF" });
         iGuitarAttackEffect.BindConfig(
-            () => iGuitarAttackEffect.n現在選択されている項目番号 = (int)CDTXMania.ConfigIni.eAttackEffect.Guitar,
-            () => CDTXMania.ConfigIni.eAttackEffect.Guitar = (EType)iGuitarAttackEffect.n現在選択されている項目番号);
+            () => iGuitarAttackEffect.nCurrentlySelectedIndex = (int)CDTXMania.ConfigIni.eAttackEffect.Guitar,
+            () => CDTXMania.ConfigIni.eAttackEffect.Guitar = (EType)iGuitarAttackEffect.nCurrentlySelectedIndex);
         listItems.Add(iGuitarAttackEffect);
 
         CItemToggle iGuitarReverse = new("Reverse", CDTXMania.ConfigIni.bReverse.Guitar,
@@ -210,8 +210,8 @@ internal partial class CActConfigList
             "The position to show judgement mark.\n(Perfect, Great, ...)\n\n P-A: on the lanes.\n P-B: under the COMBO indication.\n P-C: on the JudgeLine.\n OFF: no judgement mark.",
             new string[] { "P-A", "P-B", "P-C", "OFF" });
         iGuitarPosition.BindConfig(
-            () => iGuitarPosition.n現在選択されている項目番号 = (int)CDTXMania.ConfigIni.JudgementStringPosition.Guitar,
-            () => CDTXMania.ConfigIni.JudgementStringPosition.Guitar = (EType)iGuitarPosition.n現在選択されている項目番号);
+            () => iGuitarPosition.nCurrentlySelectedIndex = (int)CDTXMania.ConfigIni.JudgementStringPosition.Guitar,
+            () => CDTXMania.ConfigIni.JudgementStringPosition.Guitar = (EType)iGuitarPosition.nCurrentlySelectedIndex);
         listItems.Add(iGuitarPosition);
 
         //実機ではここにオートオプションが入る。
@@ -229,8 +229,8 @@ internal partial class CActConfigList
             "Turn on/off Specialist Mode for Guitar\n Normal: Default Performance mode\n Specialist: Different sound is played when you make a mistake",
             new string[] { "Normal", "Specialist" });
         iGuitarSpecialist.BindConfig(
-            () => iGuitarSpecialist.n現在選択されている項目番号 = CDTXMania.ConfigIni.bSpecialist.Guitar ? 1 : 0,
-            () => CDTXMania.ConfigIni.bSpecialist.Guitar = iGuitarSpecialist.n現在選択されている項目番号 == 1);
+            () => iGuitarSpecialist.nCurrentlySelectedIndex = CDTXMania.ConfigIni.bSpecialist.Guitar ? 1 : 0,
+            () => CDTXMania.ConfigIni.bSpecialist.Guitar = iGuitarSpecialist.nCurrentlySelectedIndex == 1);
         listItems.Add(iGuitarSpecialist);
 
         CItemList iGuitarRandom = new("Random", CItemBase.EPanelType.Normal, (int)CDTXMania.ConfigIni.eRandom.Guitar,
@@ -238,8 +238,8 @@ internal partial class CActConfigList
             "Guitar chips come randomly.\n Mirror: \n Part: swapping lanes randomly for each\n  measures.\n Super: swapping chip randomly\n Hyper: swapping randomly\n  (number of lanes also changes)",
             new string[] { "OFF", "Mirror", "Part", "Super", "Hyper" });
         iGuitarRandom.BindConfig(
-            () => iGuitarRandom.n現在選択されている項目番号 = (int)CDTXMania.ConfigIni.eRandom.Guitar,
-            () => CDTXMania.ConfigIni.eRandom.Guitar = (ERandomMode)iGuitarRandom.n現在選択されている項目番号);
+            () => iGuitarRandom.nCurrentlySelectedIndex = (int)CDTXMania.ConfigIni.eRandom.Guitar,
+            () => CDTXMania.ConfigIni.eRandom.Guitar = (ERandomMode)iGuitarRandom.nCurrentlySelectedIndex);
         listItems.Add(iGuitarRandom);
 
         //NumOfLanes(ここではレーンオ－トに相当する。)

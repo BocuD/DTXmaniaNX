@@ -20,7 +20,7 @@ internal class CActSelectPopupMenu : CActivity
     }
     public object GetObj現在値(int pos)
     {
-        return lciMenuItems[pos].obj現在値();
+        return lciMenuItems[pos].GetCurrentValue();
     }
     public bool bGotoDetailConfig
     {
@@ -360,19 +360,19 @@ internal class CActSelectPopupMenu : CActivity
                 {
                     case "PlaySpeed":
                     {
-                        double d = (double)((int)lciMenuItems[i].obj現在値() / 20.0);
+                        double d = (double)((int)lciMenuItems[i].GetCurrentValue() / 20.0);
                         s = "x" + d.ToString("0.000");
                     }
                         break;
                     case "ScrollSpeed":
                     {
-                        double d = (double)((((int)lciMenuItems[i].obj現在値()) + 1) / 2.0);
+                        double d = (double)((((int)lciMenuItems[i].GetCurrentValue()) + 1) / 2.0);
                         s = "x" + d.ToString("0.0");
                     }
                         break;
 
                     default:
-                        s = lciMenuItems[i].obj現在値().ToString();
+                        s = lciMenuItems[i].GetCurrentValue().ToString();
                         break;
                 }
 

@@ -19,7 +19,7 @@ internal partial class CActConfigList
             "Return to left menu.");
         listItems.Add(iBassReturnToMenu);
 
-        CItemThreeState? iBassAutoPlayAll = new("AutoPlay (All)", CItemThreeState.E状態.不定,
+        CItemThreeState? iBassAutoPlayAll = new("AutoPlay (All)", CItemThreeState.EState.UNDEFINED,
             "全ネック/ピックの自動演奏の ON/OFF を\n" +
             "まとめて切り替えます。",
             "You can change whether Auto or not\n" +
@@ -85,7 +85,7 @@ internal partial class CActConfigList
         //add the action for this later, as it needs to be able to change all of the above buttons
         iBassAutoPlayAll.action = () =>
         {
-            bool bAutoOn = iBassAutoPlayAll.e現在の状態 == CItemThreeState.E状態.ON;
+            bool bAutoOn = iBassAutoPlayAll.eCurrentState == CItemThreeState.EState.ON;
 
             iBassR.bON = bAutoOn;
             iBassG.bON = bAutoOn;
@@ -115,8 +115,8 @@ internal partial class CActConfigList
             " at Autoplay ([Left] is forcely used).",
             new string[] { "OFF", "Hidden", "Sudden", "HidSud", "Stealth" });
         iBassHIDSUD.BindConfig(
-            () => iBassHIDSUD.n現在選択されている項目番号 = CDTXMania.ConfigIni.nHidSud.Bass,
-            () => CDTXMania.ConfigIni.nHidSud.Bass = iBassHIDSUD.n現在選択されている項目番号);
+            () => iBassHIDSUD.nCurrentlySelectedIndex = CDTXMania.ConfigIni.nHidSud.Bass,
+            () => CDTXMania.ConfigIni.nHidSud.Bass = iBassHIDSUD.nCurrentlySelectedIndex);
         listItems.Add(iBassHIDSUD);
 
         //----------DisplayOption----------
@@ -138,8 +138,8 @@ internal partial class CActConfigList
             "",
             new string[] { "ALL ON", "LANE OFF", "LINE OFF", "ALL OFF" });
         iBassLaneDisp.BindConfig(
-            () => iBassLaneDisp.n現在選択されている項目番号 = CDTXMania.ConfigIni.nLaneDisp.Bass,
-            () => CDTXMania.ConfigIni.nLaneDisp.Bass = iBassLaneDisp.n現在選択されている項目番号);
+            () => iBassLaneDisp.nCurrentlySelectedIndex = CDTXMania.ConfigIni.nLaneDisp.Bass,
+            () => CDTXMania.ConfigIni.nLaneDisp.Bass = iBassLaneDisp.nCurrentlySelectedIndex);
         listItems.Add(iBassLaneDisp);
 
         CItemToggle? iBassJudgeLineDisp = new("JudgeLineDisp", CDTXMania.ConfigIni.bJudgeLineDisp.Bass,
@@ -162,21 +162,21 @@ internal partial class CActConfigList
         //add the action for this later, as it needs to be able to change all of the above buttons
         iBassDark.action = () =>
         {
-            if (iBassDark.n現在選択されている項目番号 == (int)EDarkMode.FULL)
+            if (iBassDark.nCurrentlySelectedIndex == (int)EDarkMode.FULL)
             {
-                iBassLaneDisp.n現在選択されている項目番号 = 3;
+                iBassLaneDisp.nCurrentlySelectedIndex = 3;
                 iBassJudgeLineDisp.bON = false;
                 iBassLaneFlush.bON = false;
             }
-            else if (iBassDark.n現在選択されている項目番号 == (int)EDarkMode.HALF)
+            else if (iBassDark.nCurrentlySelectedIndex == (int)EDarkMode.HALF)
             {
-                iBassLaneDisp.n現在選択されている項目番号 = 1;
+                iBassLaneDisp.nCurrentlySelectedIndex = 1;
                 iBassJudgeLineDisp.bON = true;
                 iBassLaneFlush.bON = true;
             }
             else
             {
-                iBassLaneDisp.n現在選択されている項目番号 = 0;
+                iBassLaneDisp.nCurrentlySelectedIndex = 0;
                 iBassJudgeLineDisp.bON = true;
                 iBassLaneFlush.bON = true;
             }
@@ -188,8 +188,8 @@ internal partial class CActConfigList
             "",
             new string[] { "ON", "OFF" });
         iBassAttackEffect.BindConfig(
-            () => iBassAttackEffect.n現在選択されている項目番号 = (int)CDTXMania.ConfigIni.eAttackEffect.Bass,
-            () => CDTXMania.ConfigIni.eAttackEffect.Bass = (EType)iBassAttackEffect.n現在選択されている項目番号);
+            () => iBassAttackEffect.nCurrentlySelectedIndex = (int)CDTXMania.ConfigIni.eAttackEffect.Bass,
+            () => CDTXMania.ConfigIni.eAttackEffect.Bass = (EType)iBassAttackEffect.nCurrentlySelectedIndex);
         listItems.Add(iBassAttackEffect);
 
 
@@ -207,8 +207,8 @@ internal partial class CActConfigList
             "The position to show judgement mark.\n(Perfect, Great, ...)\n\n P-A: on the lanes.\n P-B: under the COMBO indication.\n P-C: on the JudgeLine.\n OFF: no judgement mark.",
             new string[] { "P-A", "P-B", "P-C", "OFF" });
         iBassPosition.BindConfig(
-            () => iBassPosition.n現在選択されている項目番号 = (int)CDTXMania.ConfigIni.JudgementStringPosition.Bass,
-            () => CDTXMania.ConfigIni.JudgementStringPosition.Bass = (EType)iBassPosition.n現在選択されている項目番号);
+            () => iBassPosition.nCurrentlySelectedIndex = (int)CDTXMania.ConfigIni.JudgementStringPosition.Bass,
+            () => CDTXMania.ConfigIni.JudgementStringPosition.Bass = (EType)iBassPosition.nCurrentlySelectedIndex);
         listItems.Add(iBassPosition);
 
         CItemList? iBassRandom = new("Random", CItemBase.EPanelType.Normal,
@@ -217,8 +217,8 @@ internal partial class CActConfigList
             "Bass chips come randomly.\n Mirror: \n Part: swapping lanes randomly for each\n  measures.\n Super: swapping chip randomly\n Hyper: swapping randomly\n  (number of lanes also changes)",
             new string[] { "OFF", "Mirror", "Part", "Super", "Hyper" });
         iBassRandom.BindConfig(
-            () => iBassRandom.n現在選択されている項目番号 = (int)CDTXMania.ConfigIni.eRandom.Bass,
-            () => CDTXMania.ConfigIni.eRandom.Bass = (ERandomMode)iBassRandom.n現在選択されている項目番号);
+            () => iBassRandom.nCurrentlySelectedIndex = (int)CDTXMania.ConfigIni.eRandom.Bass,
+            () => CDTXMania.ConfigIni.eRandom.Bass = (ERandomMode)iBassRandom.nCurrentlySelectedIndex);
         listItems.Add(iBassRandom);
 
         CItemToggle? iBassLight = new("Light", CDTXMania.ConfigIni.bLight.Bass,
@@ -234,8 +234,8 @@ internal partial class CActConfigList
             "Turn on/off Specialist Mode for Bass\n Normal: Default Performance mode\n Specialist: Different sound is played when you make a mistake",
             new string[] { "Normal", "Specialist" });
         iBassSpecialist.BindConfig(
-            () => iBassSpecialist.n現在選択されている項目番号 = CDTXMania.ConfigIni.bSpecialist.Bass ? 1 : 0,
-            () => CDTXMania.ConfigIni.bSpecialist.Bass = iBassSpecialist.n現在選択されている項目番号 == 1);
+            () => iBassSpecialist.nCurrentlySelectedIndex = CDTXMania.ConfigIni.bSpecialist.Bass ? 1 : 0,
+            () => CDTXMania.ConfigIni.bSpecialist.Bass = iBassSpecialist.nCurrentlySelectedIndex == 1);
         listItems.Add(iBassSpecialist);
 
         CItemToggle? iBassLeft = new("Left", CDTXMania.ConfigIni.bLeft.Bass,

@@ -99,7 +99,7 @@ internal partial class CActConfigList : CActivity
 
     private void tGenerateSkinSample()
     {
-        nSkinIndex = ((CItemList)listItems[nCurrentSelection]).n現在選択されている項目番号;
+        nSkinIndex = ((CItemList)listItems[nCurrentSelection]).nCurrentlySelectedIndex;
         if (nSkinSampleIndex != nSkinIndex)
         {
             string path = skinSubFolders[nSkinIndex];
@@ -487,13 +487,13 @@ internal partial class CActConfigList : CActivity
                 case CItemBase.EType.ONorOFForUndefined3State:
                     #region [ *** ]
                     //-----------------
-                    switch( ( (CItemThreeState) listItems[ nItem ] ).e現在の状態 )
+                    switch( ( (CItemThreeState) listItems[ nItem ] ).eCurrentState )
                     {
-                        case CItemThreeState.E状態.ON:
+                        case CItemThreeState.EState.ON:
                             strParam = "ON";
                             break;
 
-                        case CItemThreeState.E状態.不定:
+                        case CItemThreeState.EState.UNDEFINED:
                             strParam = "- -";
                             break;
 
@@ -537,7 +537,7 @@ internal partial class CActConfigList : CActivity
                 {
                     CItemList list = (CItemList) listItems[ nItem ];
                     //CDTXMania.stageConfig.actFont.tDrawString( x + 210, y + 12, list.list項目値[ list.n現在選択されている項目番号 ] );
-                    strParam = list.list項目値[ list.n現在選択されている項目番号 ];
+                    strParam = list.listItemValues[ list.nCurrentlySelectedIndex ];
 
                     #region [ 必要な場合に、Skinのサンプルを生成_描画する。#28195 2012.5.2 yyagi ]
                     if ( listItems[ nCurrentSelection ] == iSystemSkinSubfolder )
@@ -568,7 +568,7 @@ internal partial class CActConfigList : CActivity
                 {
                     stMenuItemRight stm = listMenu[ nItem ];
                     stm.nParam = nIndex;
-                    object o = listItems[ nItem ].obj現在値();
+                    object o = listItems[ nItem ].GetCurrentValue();
                     stm.strParam = ( o == null ) ? "" : o.ToString();
 
                     Bitmap bmpStr =
@@ -745,8 +745,8 @@ internal partial class CActConfigList : CActivity
 
         if (eMenuType == EMenuType.System)
         {
-            CDTXMania.ConfigIni.bGuitarEnabled = (((iSystemGRmode.n現在選択されている項目番号 + 1) / 2) == 1);
-            CDTXMania.ConfigIni.bDrumsEnabled = (((iSystemGRmode.n現在選択されている項目番号 + 1) % 2) == 1);
+            CDTXMania.ConfigIni.bGuitarEnabled = (((iSystemGRmode.nCurrentlySelectedIndex + 1) / 2) == 1);
+            CDTXMania.ConfigIni.bDrumsEnabled = (((iSystemGRmode.nCurrentlySelectedIndex + 1) % 2) == 1);
 
             CDTXMania.ConfigIni.strSystemSkinSubfolderFullName = skinSubFolders[nSkinIndex];				// #28195 2012.5.2 yyagi
             CDTXMania.Skin.SetCurrentSkinSubfolderFullName(CDTXMania.ConfigIni.strSystemSkinSubfolderFullName, true);
