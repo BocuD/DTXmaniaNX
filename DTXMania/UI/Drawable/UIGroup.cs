@@ -62,6 +62,10 @@ public class UIGroup : UIDrawable
         
     public void ClearChildren()
     {
+        foreach (UIDrawable element in children)
+        {
+            element.Dispose();
+        }
         children.Clear();
     }
         
