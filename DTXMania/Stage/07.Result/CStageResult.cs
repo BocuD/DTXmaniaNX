@@ -25,7 +25,7 @@ internal class CStageResult : CStage
 	//        10.11.17 change (int to bool) ikanick
 	public STDGBVALUE<int> nRankValue;
 	public STDGBVALUE<int> nNbPerformances;
-	public int n総合ランク値;
+	public int nResultRank;
 	public CChip[] rEmptyDrumChip;
 	public STDGBVALUE<CScoreIni.CPerformanceEntry> stPerformanceEntry;
 	public bool bIsTrainingMode;
@@ -42,7 +42,7 @@ internal class CStageResult : CStage
 		stPerformanceEntry.Guitar = new CScoreIni.CPerformanceEntry();
 		stPerformanceEntry.Bass = new CScoreIni.CPerformanceEntry();
 		rEmptyDrumChip = new CChip[ 10 ];
-		n総合ランク値 = -1;
+		nResultRank = -1;
 		nチャンネル0Atoレーン07 = new int[] { 1, 2, 3, 4, 5, 7, 6, 1, 8, 0, 9 };
 		eStageID = EStage.Result_7;
 		ePhaseID = EPhase.Common_DefaultState;
@@ -67,7 +67,69 @@ internal class CStageResult : CStage
 
 	public override void InitializeDefaultUI()
 	{
+		rBackgroundVideoAVI = new CAVI(1290, CSkin.Path(@"Graphics\8_background.mp4"), "", 20.0);
+		rBackgroundVideoAVI.OnDeviceCreated();
+		if (rBackgroundVideoAVI.avi != null)
+		{					
+			actBackgroundVideoAVI.bLoop = true;
+			actBackgroundVideoAVI.Start(EChannel.MovieFull, rBackgroundVideoAVI, 0, -1);
+			Trace.TraceInformation("Playing Background video for Result Screen");
+		}
+
+		var txBackground = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\8_background.jpg" ) );
+		switch (CDTXMania.stageResult.nResultRank)
+		{
+			case 0:
+				if (File.Exists(CSkin.Path(@"Graphics\8_background rankSS.png")))
+				{
+					txBackground = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_background rankSS.png"));
+				}
+				break;
+			case 1:
+				if (File.Exists(CSkin.Path(@"Graphics\8_background rankS.png")))
+				{
+					txBackground = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_background rankS.png"));
+				}
+				break;
+			case 2:
+				if (File.Exists(CSkin.Path(@"Graphics\8_background rankA.png")))
+				{
+					txBackground = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_background rankA.png"));
+				}
+				break;
+			case 3:
+				if (File.Exists(CSkin.Path(@"Graphics\8_background rankB.png")))
+				{
+					txBackground = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_background rankB.png"));
+				}
+				break;
+			case 4:
+				if (File.Exists(CSkin.Path(@"Graphics\8_background rankC.png")))
+				{
+					txBackground = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_background rankC.png"));
+				}
+				break;
+			case 5:
+				if (File.Exists(CSkin.Path(@"Graphics\8_background rankD.png")))
+				{
+					txBackground = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_background rankD.png"));
+				}
+				break;
+			case 6:
+			case 99:
+				if (File.Exists(CSkin.Path(@"Graphics\8_background rankE.png")))
+				{
+					txBackground = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_background rankE.png"));
+				}
+				break;
+		}
+
+		DTXTexture dtxTex = new(txBackground);
+		background = ui.AddChild(new UIImage(dtxTex));
+		background.renderOrder = -100;
 		
+		txTopPanel = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\8_header panel.png" ), true );
+		txBottomPanel = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\8_footer panel.png" ), true );
 	}
 
 	public override void OnActivate()
@@ -148,7 +210,7 @@ internal class CStageResult : CStage
 						strCurrProgressBarRecord[i] = stPerformanceEntry[i].strProgress;
 					}
 				}
-				n総合ランク値 = CScoreIni.tCalculateOverallRankValue(stPerformanceEntry.Drums, stPerformanceEntry.Guitar, stPerformanceEntry.Bass);
+				nResultRank = CScoreIni.tCalculateOverallRankValue(stPerformanceEntry.Drums, stPerformanceEntry.Guitar, stPerformanceEntry.Bass);
 				//---------------------
 				#endregion
 
@@ -454,71 +516,6 @@ internal class CStageResult : CStage
 	{
 		if( !bNotActivated )
 		{
-			ui = new UIGroup("Result Screen");
-			
-			rBackgroundVideoAVI = new CAVI(1290, CSkin.Path(@"Graphics\8_background.mp4"), "", 20.0);
-			rBackgroundVideoAVI.OnDeviceCreated();
-			if (rBackgroundVideoAVI.avi != null)
-			{					
-				actBackgroundVideoAVI.bLoop = true;
-				actBackgroundVideoAVI.Start(EChannel.MovieFull, rBackgroundVideoAVI, 0, -1);
-				Trace.TraceInformation("Playing Background video for Result Screen");
-			}
-
-			var txBackground = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\8_background.jpg" ) );
-			switch (CDTXMania.stageResult.n総合ランク値)
-			{
-				case 0:
-					if (File.Exists(CSkin.Path(@"Graphics\8_background rankSS.png")))
-					{
-						txBackground = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_background rankSS.png"));
-					}
-					break;
-				case 1:
-					if (File.Exists(CSkin.Path(@"Graphics\8_background rankS.png")))
-					{
-						txBackground = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_background rankS.png"));
-					}
-					break;
-				case 2:
-					if (File.Exists(CSkin.Path(@"Graphics\8_background rankA.png")))
-					{
-						txBackground = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_background rankA.png"));
-					}
-					break;
-				case 3:
-					if (File.Exists(CSkin.Path(@"Graphics\8_background rankB.png")))
-					{
-						txBackground = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_background rankB.png"));
-					}
-					break;
-				case 4:
-					if (File.Exists(CSkin.Path(@"Graphics\8_background rankC.png")))
-					{
-						txBackground = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_background rankC.png"));
-					}
-					break;
-				case 5:
-					if (File.Exists(CSkin.Path(@"Graphics\8_background rankD.png")))
-					{
-						txBackground = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_background rankD.png"));
-					}
-					break;
-				case 6:
-				case 99:
-					if (File.Exists(CSkin.Path(@"Graphics\8_background rankE.png")))
-					{
-						txBackground = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_background rankE.png"));
-					}
-					break;
-			}
-
-			var dtxTex = new DTXTexture(txBackground);
-			background = ui.AddChild(new UIImage(dtxTex));
-			background.renderOrder = -100;
-			
-			txTopPanel = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\8_header panel.png" ), true );
-			txBottomPanel = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\8_footer panel.png" ), true );
 			base.OnManagedCreateResources();
 		}
 	}
