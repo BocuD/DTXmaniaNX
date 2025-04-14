@@ -70,9 +70,15 @@ public abstract class CStage : CActivity
 	
 	public void LoadUI()
 	{
+		//remove old ui
+		if (ui != null)
+		{
+			ui.Dispose();
+		}
+		
 		//try to get the skin for this stage
 		UIGroup? stageUI = CDTXMania.SkinManager.LoadStageSkin(eStageID);
-
+		
 		if (stageUI == null)
 		{
 			ui = new UIGroup(GetType().ToString());

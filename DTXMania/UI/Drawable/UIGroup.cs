@@ -111,6 +111,8 @@ public class UIGroup : UIDrawable
 
     public override void Dispose()
     {
+        base.Dispose();
+        
         foreach (UIDrawable element in children)
         {
             element.Dispose();

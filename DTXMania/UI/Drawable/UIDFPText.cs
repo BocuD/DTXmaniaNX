@@ -9,7 +9,7 @@ public class UIDFPText : UIDrawable
 {
     private CActDFPFont font;
     private string text;
-    public bool isHighlighted = false;
+    public bool isHighlighted;
         
     public UIDFPText(CActDFPFont font, string text)
     {
@@ -82,10 +82,5 @@ public class UIDFPText : UIDrawable
 
             ImGui.Checkbox("Highlighted", ref isHighlighted);
         }
-    }
-
-    public override void Dispose()
-    {
-        
     }
 }

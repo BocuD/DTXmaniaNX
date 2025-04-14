@@ -247,9 +247,4 @@ public class UIText : UITexture
             }
         }
     }
-
-    public override void Dispose()
-    {
-        texture.Dispose();
-    }
 }

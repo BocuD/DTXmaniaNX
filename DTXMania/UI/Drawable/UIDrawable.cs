@@ -33,7 +33,6 @@ public abstract class UIDrawable : IDisposable
     public UIDrawable()
     {
         id = Guid.NewGuid().ToString();
-        Console.WriteLine($"Creating {GetType().Name} with ID {id}");
         DrawableTracker.Register(this);
     }
 
@@ -62,10 +61,8 @@ public abstract class UIDrawable : IDisposable
     }
 
     public abstract void Draw(Matrix parentMatrix);
-        
-    public abstract void Dispose();
 
-    ~UIDrawable()
+    public virtual void Dispose()
     {
         DrawableTracker.Remove(this);
     }

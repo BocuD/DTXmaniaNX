@@ -33,6 +33,8 @@ public class LegacyDrawable : UIDrawable
 
     public override void Dispose()
     {
+        base.Dispose();
+        
         drawAction = null;
     }
 }
