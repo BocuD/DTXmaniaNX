@@ -2,13 +2,13 @@
 using System.Runtime.InteropServices;
 using System.Drawing;
 using System.Diagnostics;
+using System.Globalization;
 using FDK;
 using DiscordRPC;
 using DTXMania.Core;
 using DTXMania.UI;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.DynamicElements;
-using DTXUIRenderer;
 using SlimDXKey = SlimDX.DirectInput.Key;
 
 namespace DTXMania;
@@ -21,20 +21,8 @@ internal class CStageSongSelection : CStage
 		Details = "Selecting a song",
 	};
 
-	public int nScrollbarRelativeYCoordinate
-	{
-		get
-		{
-			if ( actSongList != null )
-			{
-				return actSongList.nスクロールバー相対y座標;
-			}
-			else
-			{
-				return 0;
-			}
-		}
-	}
+	public int nScrollbarRelativeYCoordinate => actSongList != null ? actSongList.nスクロールバー相対y座標 : 0;
+
 	public bool bIsEnumeratingSongs
 	{
 		get => actSongList.bIsEnumeratingSongs;
@@ -160,7 +148,7 @@ internal class CStageSongSelection : CStage
 			dynamicStringSources["SongName"] = new DynamicStringSource(() => actSongList.rSelectedScore.SongInformation.Title ?? "");
 			dynamicStringSources["SongArtist"] = new DynamicStringSource(() => actSongList.rSelectedScore.SongInformation.ArtistName ?? "");
 			dynamicStringSources["SongGenre"] = new DynamicStringSource(() => actSongList.rSelectedScore.SongInformation.Genre ?? "");
-			dynamicStringSources["SongBPM"] = new DynamicStringSource(() => actSongList.rSelectedScore.SongInformation.Bpm.ToString());
+			dynamicStringSources["SongBPM"] = new DynamicStringSource(() => actSongList.rSelectedScore.SongInformation.Bpm.ToString(CultureInfo.InvariantCulture));
 		}
 		finally
 		{

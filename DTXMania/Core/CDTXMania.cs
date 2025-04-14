@@ -537,6 +537,7 @@ internal class CDTXMania : Game
 
         #endregion
 
+        #if INSPECTOR
         //cache this value to prevent it from changing during the frame
         bool renderGameToWindow = renderGameToSurface;
 
@@ -544,10 +545,12 @@ internal class CDTXMania : Game
         {
             Device.SetRenderTarget(0, gameRenderTargetSurface);
         }
+        #endif
 
         Device.Clear(ClearFlags.ZBuffer | ClearFlags.Target, SharpDX.Color.Black, 1f, 0);
         Device.BeginScene();
         
+        #if INSPECTOR
         ImGui.SetCurrentContext(context);
         ImGuizmo.SetImGuiContext(context);
         ImGuiImplD3D9.SetCurrentContext(context);
@@ -566,9 +569,11 @@ internal class CDTXMania : Game
             ImGuizmo.SetRect(0, 0, io.DisplaySize.X, io.DisplaySize.Y);
             ImGuizmo.SetDrawlist(ImGui.GetBackgroundDrawList());
         }
-        
+        #endif
+
         DrawStage();
 
+        #if INSPECTOR
         if (renderGameToWindow)
         {
             Device.SetRenderTarget(0, mainRenderTarget);
@@ -577,12 +582,15 @@ internal class CDTXMania : Game
         
         InspectorManager.Draw(renderGameToWindow, gameRenderTargetTexture);
         GameStatus.Draw();
-
+        
         Device.EndScene();
 
         ImGui.EndFrame();
         ImGui.Render();
         ImGuiImplD3D9.RenderDrawData(ImGui.GetDrawData());
+        #else
+        Device.EndScene();
+        #endif
 
         // Present()は game.csのOnFrameEnd()に登録された、GraphicsDeviceManager.game_FrameEnd() 内で実行されるので不要
         // (つまり、Present()は、Draw()完了後に実行される)
