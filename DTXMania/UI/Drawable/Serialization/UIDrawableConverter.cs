@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace DTXMania.UI.Drawable.Serialization;
 
@@ -16,51 +17,25 @@ public class UIDrawableConverter : JsonConverter
         JObject jObject = JObject.Load(reader);
         
         // Read the type name from the "type" property
-        var typeName = jObject["type"]?.ToString();
+        string? typeName = jObject["type"]?.ToString();
         
         if (string.IsNullOrEmpty(typeName))
         {
             throw new JsonSerializationException("Type name is missing in the JSON.");
         }
         
-        var targetType = Type.GetType(typeName);
+        Type? targetType = Type.GetType(typeName);
         if (targetType == null)
         {
             throw new JsonSerializationException($"Type {typeName} not found.");
         }
-
-        if (targetType == typeof(LegacyDrawable)) return null;
         
         // Deserialize the object into the correct type
-        var result = Activator.CreateInstance(targetType);
+        var result = RuntimeHelpers.GetUninitializedObject(targetType);
         serializer.Populate(jObject.CreateReader(), result);
-
-        //type specific post serialization methods
-        switch (result)
-        {
-            case UIText text:
-                text.UpdateFont();
-                text.RenderTexture();
-                break;
-            
-            // If it's a UIGroup, set the parent field on each child
-            case UIGroup uiGroup:
-            {
-                foreach (var child in uiGroup.children)
-                {
-                    var field = child?.GetType().GetField("parent", BindingFlags.NonPublic | BindingFlags.Instance);
-                    field?.SetValue(child, uiGroup);
-                }
-                break;
-            }
-
-            case UIImage image:
-            {
-                image.LoadResource(false);
-                break;
-            }
-        }
-
+        
+        UIDrawable drawable = (UIDrawable)result;
+        drawable.OnDeserialize();
         return result;
     }
     

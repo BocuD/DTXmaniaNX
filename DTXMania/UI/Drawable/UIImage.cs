@@ -69,6 +69,13 @@ public class UIImage : UITexture
         }
     }
 
+    public override void OnDeserialize()
+    {
+        base.OnDeserialize();
+        
+        LoadResource(false);
+    }
+
     public void LoadResource(bool updateRects)
     {
         if (imageSource == ImageSource.Resource)

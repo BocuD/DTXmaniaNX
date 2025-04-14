@@ -51,6 +51,13 @@ public abstract class UITexture : UIDrawable
         texture.Dispose();
     }
 
+    public override void OnDeserialize()
+    {
+        base.OnDeserialize();
+        
+        texture = BaseTexture.None;
+    }
+
     public override void DrawInspector()
     {
         base.DrawInspector();

@@ -11,12 +11,14 @@ public class DrawableTracker
     
     public static void Register(UIDrawable drawable)
     {
+        Console.WriteLine($"Registering drawable {drawable.GetType().Name} with id {drawable.id}");
         drawables[drawable.id] = new WeakReference<UIDrawable>(drawable);
     }
 
-    public static void Remove(string id)
+    //some really cursed code but it works..? C# was a mistake lol
+    public static void Remove(UIDrawable drawable)
     {
-        drawables.Remove(id);
+        drawables.Remove(drawable.id);
     }
 
     public static void DrawWindow()

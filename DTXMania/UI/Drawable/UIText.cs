@@ -148,6 +148,14 @@ public class UIText : UITexture
         dirty = false;
     }
 
+    public override void OnDeserialize()
+    {
+        base.OnDeserialize();
+        
+        UpdateFont();
+        RenderTexture();
+    }
+
     public override void DrawInspector()
     {
         base.DrawInspector();

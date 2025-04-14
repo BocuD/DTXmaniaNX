@@ -33,6 +33,7 @@ public abstract class UIDrawable : IDisposable
     public UIDrawable()
     {
         id = Guid.NewGuid().ToString();
+        Console.WriteLine($"Creating {GetType().Name} with ID {id}");
         DrawableTracker.Register(this);
     }
 
@@ -66,7 +67,12 @@ public abstract class UIDrawable : IDisposable
 
     ~UIDrawable()
     {
-        DrawableTracker.Remove(id);
+        DrawableTracker.Remove(this);
+    }
+
+    public virtual void OnDeserialize()
+    {
+        DrawableTracker.Register(this);
     }
 
     public Matrix GetFullTransformMatrix()

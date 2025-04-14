@@ -94,6 +94,21 @@ public class UIGroup : UIDrawable
         }
     }
 
+    public override void OnDeserialize()
+    {
+        base.OnDeserialize();
+        
+        foreach (var child in children)
+        {
+            if (child == null) continue;
+            
+            child.SetParent(this, false);
+        }
+        
+        //remove null children
+        children.RemoveAll(x => x == null);
+    }
+
     public override void Dispose()
     {
         foreach (UIDrawable element in children)

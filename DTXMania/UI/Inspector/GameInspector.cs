@@ -67,6 +67,12 @@ public class GameStatus
                 {
                     currentSkin.Save();
                     currentSkin.SaveCurrentStageChanges();
+                    
+                    //run gc
+                    CDTXMania.tRunGarbageCollector();
+                
+                    //load the skin again
+                    CDTXMania.rCurrentStage.LoadUI();
                 }
             }
             ImGui.TreePop();
