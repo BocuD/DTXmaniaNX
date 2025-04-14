@@ -218,7 +218,7 @@ internal class CActSelectSongList : CActivity
 		{
 			rSelectedSong = rSelectedSong.list子リスト[ 0 ];
 			t現在選択中の曲を元に曲バーを再構成する();
-			t選択曲が変更された(false);									// #27648 項目数変更を反映させる
+			tSelectedSongHasChanged(false);									// #27648 項目数変更を反映させる
 		}
 		return ret;
 	}
@@ -236,7 +236,7 @@ internal class CActSelectSongList : CActivity
 		{
 			rSelectedSong = rSelectedSong.r親ノード;
 			t現在選択中の曲を元に曲バーを再構成する();
-			t選択曲が変更された(false);									// #27648 項目数変更を反映させる
+			tSelectedSongHasChanged(false);									// #27648 項目数変更を反映させる
 		}
 		return ret;
 	}
@@ -388,7 +388,7 @@ internal class CActSelectSongList : CActivity
 	{
 		rSelectedSong = CDTXMania.SongManager.listSongRoot[0];
 		t現在選択中の曲を元に曲バーを再構成する();
-		t選択曲が変更された(true);
+		tSelectedSongHasChanged(true);
 		CDTXMania.stageSongSelection.tSelectedSongChanged();
 	}
 
@@ -459,7 +459,7 @@ internal class CActSelectSongList : CActivity
 	/// <summary>
 	/// BOXのアイテム数と、今何番目を選択しているかをセットする
 	/// </summary>
-	public void t選択曲が変更された( bool bForce)    // t選択曲が変更された  #27648
+	public void tSelectedSongHasChanged( bool bForce)    // t選択曲が変更された  #27648
 	{
 		CSongListNode song = CDTXMania.stageSongSelection.r現在選択中の曲;
 		if ( song == null )
@@ -515,7 +515,7 @@ internal class CActSelectSongList : CActivity
 
 		base.OnActivate();
 
-		t選択曲が変更された(true);		// #27648 2012.3.31 yyagi 選曲画面に入った直後の 現在位置/全アイテム数 の表示を正しく行うため
+		tSelectedSongHasChanged(true);		// #27648 2012.3.31 yyagi 選曲画面に入った直後の 現在位置/全アイテム数 の表示を正しく行うため
 	}
 	public override void OnDeactivate()
 	{
@@ -814,7 +814,7 @@ internal class CActSelectSongList : CActivity
 					nCurrentScrollCounter -= 100;
 					nTargetScrollCounter -= 100;
 
-					t選択曲が変更された( false );				// スクロールバー用に今何番目を選択しているかを更新
+					tSelectedSongHasChanged( false );				// スクロールバー用に今何番目を選択しているかを更新
 					if( txSelectedSongName != null )
 					{
 						txSelectedSongName.Dispose();
@@ -877,7 +877,7 @@ internal class CActSelectSongList : CActivity
 					nCurrentScrollCounter += 100;
 					nTargetScrollCounter += 100;
 
-					t選択曲が変更された( false );				// スクロールバー用に今何番目を選択しているかを更新
+					tSelectedSongHasChanged( false );				// スクロールバー用に今何番目を選択しているかを更新
 					if( txSelectedSongName != null )
 					{
 						txSelectedSongName.Dispose();
