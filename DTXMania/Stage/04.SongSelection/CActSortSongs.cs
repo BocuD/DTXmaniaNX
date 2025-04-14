@@ -86,15 +86,6 @@ internal class CActSortSongs : CActSelectPopupMenu
 				);
 				actSongList.t選択曲が変更された( true );
 				break;
-#if TEST_SORTBGM
-						case (int) ESortItem.BPM:
-						this.act曲リスト.t曲リストのソート(
-							CDTXMania.Songs管理.t曲リストのソート9_BPM順, eInst, nSortOrder,
-							this.act曲リスト.n現在のアンカ難易度レベル
-						);
-					this.act曲リスト.t選択曲が変更された(true);
-						break;
-#endif
 			case (int) EOrder.Date:
 				actSongList.tSortSongList(
 					CDTXMania.SongManager.t曲リストのソート7_更新日時順, eInst, nSortOrder,
@@ -145,9 +136,6 @@ internal class CActSortSongs : CActSelectPopupMenu
 		Title = 0, Level, BestRank, PlayCount,
 		Author,
 		SkillPoint,
-#if TEST_SORTBGM
-			BPM,
-#endif
 		Date,
 		Return, END,
 		Default = 99
