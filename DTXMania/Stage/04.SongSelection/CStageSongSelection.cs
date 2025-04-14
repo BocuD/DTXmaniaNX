@@ -15,8 +15,6 @@ namespace DTXMania;
 
 internal class CStageSongSelection : CStage
 {
-	// プロパティ
-
 	protected override RichPresence Presence => new CDTXRichPresence
 	{
 		State = "In Menu",
@@ -78,32 +76,28 @@ internal class CStageSongSelection : CStage
 		eStageID = EStage.SongSelection_4;
 		ePhaseID = EPhase.Common_DefaultState;
 		bNotActivated = true;
-//			base.listChildActivities.Add( this.actオプションパネル = new CActOptionPanel() );
-		listChildActivities.Add( actFIFO = new CActFIFOBlack() );
-		listChildActivities.Add( actFIfrom結果画面 = new CActFIFOBlack() );
-//			base.listChildActivities.Add( this.actFOtoNowLoading = new CActFIFOBlack() );	// #27787 2012.3.10 yyagi 曲決定時の画面フェードアウトの省略
-		listChildActivities.Add( actSongList = new CActSelectSongList() );
-		listChildActivities.Add( actStatusPanel = new CActSelectStatusPanel() );
-		listChildActivities.Add( actPerHistoryPanel = new CActSelectPerfHistoryPanel() );
-		listChildActivities.Add( actPreimagePanel = new CActSelectPreimagePanel() );
-		listChildActivities.Add( actPresound = new CActSelectPresound() );
-		listChildActivities.Add( actArtistComment = new CActSelectArtistComment() );
-		listChildActivities.Add( actInformation = new CActSelectInformation() );
-		listChildActivities.Add( actSortSongs = new CActSortSongs() );
-		listChildActivities.Add( actShowCurrentPosition = new CActScrollBar() );
+		listChildActivities.Add(actFIFO = new CActFIFOBlack());
+		listChildActivities.Add(actFIFromResultsScreen = new CActFIFOBlack());
+		listChildActivities.Add(actSongList = new CActSelectSongList());
+		listChildActivities.Add(actStatusPanel = new CActSelectStatusPanel());
+		listChildActivities.Add(actPerHistoryPanel = new CActSelectPerfHistoryPanel());
+		listChildActivities.Add(actPreimagePanel = new CActSelectPreimagePanel());
+		listChildActivities.Add(actPresound = new CActSelectPresound());
+		listChildActivities.Add(actArtistComment = new CActSelectArtistComment());
+		listChildActivities.Add(actInformation = new CActSelectInformation());
+		listChildActivities.Add(actSortSongs = new CActSortSongs());
+		listChildActivities.Add(actShowCurrentPosition = new CActScrollBar());
 		listChildActivities.Add(actBackgroundVideoAVI = new CActSelectBackgroundAVI());
-		listChildActivities.Add( actQuickConfig = new CActSelectQuickConfig() );
+		listChildActivities.Add(actQuickConfig = new CActSelectQuickConfig());
+		
+		listChildActivities.Add(actSearchBox = new CActSearchBox());
 
-		//
-		listChildActivities.Add(actTextBox = new CActTextBox());
-
-		CommandHistory = new CCommandHistory();        // #24063 2011.1.16 yyagi
-		//
+		CommandHistory = new CCommandHistory(); // #24063 2011.1.16 yyagi
 		bCheckDrumsEnabled = CDTXMania.ConfigIni.bDrumsEnabled;
 		bCheckRandSubBox = CDTXMania.ConfigIni.bランダムセレクトで子BOXを検索対象とする;
 	}
-		
-		
+
+
 	// メソッド
 
 	public void tSelectedSongChanged()
@@ -113,31 +107,6 @@ internal class CStageSongSelection : CStage
 		actPerHistoryPanel.t選択曲が変更された();
 		actStatusPanel.tSelectedSongChanged();
 		actArtistComment.t選択曲が変更された();
-
-		#region [ プラグインにも通知する（BOX, RANDOM, BACK なら通知しない）]
-		//---------------------
-		if( CDTXMania.app != null )
-		{
-			var c曲リストノード = CDTXMania.stageSongSelection.r現在選択中の曲;
-			var cスコア = CDTXMania.stageSongSelection.rSelectedScore;
-
-			if( c曲リストノード != null && cスコア != null && c曲リストノード.eNodeType == CSongListNode.ENodeType.SCORE )
-			{
-				string str選択曲ファイル名 = cスコア.FileInformation.AbsoluteFilePath;
-				CSetDef setDef = null;
-				int nブロック番号inSetDef = -1;
-				int n曲番号inブロック = -1;
-
-				if( !string.IsNullOrEmpty( c曲リストノード.pathSetDefの絶対パス ) && File.Exists( c曲リストノード.pathSetDefの絶対パス ) )
-				{
-					setDef = new CSetDef( c曲リストノード.pathSetDefの絶対パス );
-					nブロック番号inSetDef = c曲リストノード.SetDefのブロック番号;
-					n曲番号inブロック = CDTXMania.stageSongSelection.actSongList.n現在のアンカ難易度レベルに最も近い難易度レベルを返す( c曲リストノード );
-				}
-			}
-		}
-		//---------------------
-		#endregion
 	}
 
 	// CStage 実装
@@ -166,7 +135,7 @@ internal class CStageSongSelection : CStage
 
 			base.OnActivate();
 
-			actTextBox.t検索説明文を表示する設定にする();
+			actSearchBox.t検索説明文を表示する設定にする();
 			actStatusPanel.tSelectedSongChanged(); // 最大ランクを更新
 
 			//Reset random list upon reactivation only when a change in config for drumsEnabled or RandSubBox is detected
@@ -356,7 +325,7 @@ internal class CStageSongSelection : CStage
 		ctInitialAppearAnimation = new CCounter( 0, 100, 3, CDTXMania.Timer );
 		if( CDTXMania.rPreviousStage == CDTXMania.stageResult )
 		{
-			actFIfrom結果画面.tフェードイン開始();
+			actFIFromResultsScreen.tフェードイン開始();
 			ePhaseID = EPhase.選曲_結果画面からのフェードイン;
 		}
 		else
@@ -426,17 +395,13 @@ internal class CStageSongSelection : CStage
 				return (int) eReturnValueWhenFadeOutCompleted;
 
 			case EPhase.選曲_結果画面からのフェードイン:
-				if( actFIfrom結果画面.OnUpdateAndDraw() != 0 )
+				if( actFIFromResultsScreen.OnUpdateAndDraw() != 0 )
 				{
 					ePhaseID = EPhase.Common_DefaultState;
 				}
 				break;
 
 			case EPhase.選曲_NowLoading画面へのフェードアウト:
-				//if (this.actFOtoNowLoading.OnUpdateAndDraw() == 0)
-				//{
-				//    break;
-				//}
 				return (int) eReturnValueWhenFadeOutCompleted;
 		}
 		if( !bBGMPlayed && ( ePhaseID == EPhase.Common_DefaultState ) )
@@ -445,10 +410,7 @@ internal class CStageSongSelection : CStage
 			CDTXMania.Skin.bgm選曲画面.tPlay();
 			bBGMPlayed = true;
 		}
-
-
-//Debug.WriteLine( "パンくず=" + this.r現在選択中の曲.strBreadcrumbs );
-
+		
 
 		// キー入力
 		if( ePhaseID == EPhase.Common_DefaultState)
@@ -585,7 +547,7 @@ internal class CStageSongSelection : CStage
 					if (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.HH) || CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.HHO))
 					{	// [HH]x2 難易度変更
 						CommandHistory.Add(EInstrumentPart.DRUMS, EPadFlag.HH);
-						EPadFlag[] comChangeDifficulty = new EPadFlag[] { EPadFlag.HH, EPadFlag.HH };
+						EPadFlag[] comChangeDifficulty = [EPadFlag.HH, EPadFlag.HH];
 						if (CommandHistory.CheckCommand(comChangeDifficulty, EInstrumentPart.DRUMS))
 						{
 							Debug.WriteLine("ドラムス難易度変更");
@@ -716,22 +678,21 @@ internal class CStageSongSelection : CStage
 			if (!CDTXMania.app.bテキスト入力中 && CDTXMania.Pad.bPressed(EKeyConfigPart.SYSTEM, EKeyConfigPad.Search))
 			{
 				CDTXMania.Skin.soundDecide.tPlay();
-				actTextBox.t表示();
-				actTextBox.t入力を開始();
+				actSearchBox.t表示();
+				actSearchBox.t入力を開始();
 			}
 			#endregion
 
 			actSortSongs.tUpdateAndDraw();
 			actQuickConfig.tUpdateAndDraw();
-			actTextBox.OnUpdateAndDraw();
+			actSearchBox.OnUpdateAndDraw();
 			
-			if (actTextBox.b入力が終了した)
+			if (actSearchBox.b入力が終了した)
 			{
-				strSearchString = actTextBox.str確定文字列を返す();
-				string searchOutcome = "";
+				strSearchString = actSearchBox.str確定文字列を返す();
 				if(strSearchString != "" && strSearchString != CSongSearch.ExitSwitch)
 				{
-					searchOutcome = "Search Input: " + strSearchString;
+					string searchOutcome = "Search Input: " + strSearchString;
 					Trace.TraceInformation("Search Input: " + strSearchString);
 					if(CDTXMania.SongManager.listSongBeforeSearch == null)
 					{
@@ -781,7 +742,7 @@ internal class CStageSongSelection : CStage
 					CDTXMania.Skin.soundCancel.tPlay();
 				}						
 						
-				actTextBox.t非表示();
+				actSearchBox.tHide();
 			}
 
 			if(txSearchInputNotification != null)
@@ -860,12 +821,10 @@ internal class CStageSongSelection : CStage
 	}
 	private CActSelectArtistComment actArtistComment;
 	private CActFIFOBlack actFIFO;
-	private CActFIFOBlack actFIfrom結果画面;
-//		private CActFIFOBlack actFOtoNowLoading;	// #27787 2012.3.10 yyagi 曲決定時の画面フェードアウトの省略
+	private CActFIFOBlack actFIFromResultsScreen;
 	private CActSelectInformation actInformation;
 	private CActSelectPreimagePanel actPreimagePanel;  // actPreimageパネル
 	private CActSelectPresound actPresound;
-//		private CActOptionPanel actオプションパネル;
 	public CActSelectStatusPanel actStatusPanel;  // actステータスパネル
 	private CActSelectPerfHistoryPanel actPerHistoryPanel;  // act演奏履歴パネル
 	private CActSelectSongList actSongList;
@@ -876,7 +835,7 @@ internal class CStageSongSelection : CStage
 	private CActSelectQuickConfig actQuickConfig;
 
 	//
-	private CActTextBox actTextBox;
+	private CActSearchBox actSearchBox;
 	private string strSearchString;
 	private bool bBGMPlayed;  // bBGM再生済み
 	private STKeyRepeatCounter ctKeyRepeat;  // ctキー反復用
@@ -886,7 +845,6 @@ internal class CStageSongSelection : CStage
 	private Font ftFont;  // ftフォント
 	
 	private CTexture txBPMLabel;
-	//private CDirectShow dsBackgroundVideo; // background Video
 	private CAVI rBackgroundVideoAVI;// background Video using CAVI class
 	private long lDshowPosition;
 	private long lStopPosition;
@@ -1077,19 +1035,16 @@ internal class CStageSongSelection : CStage
 		rConfirmedSong = actSongList.rSelectedSong;
 		rChosenScore = actSongList.rSelectedScore;
 		nConfirmedSongDifficulty = actSongList.n現在選択中の曲の現在の難易度レベル;
-		//
+
 		bool bScoreExistForMode = tCheckScoreExistForMode(rChosenScore);
 		if ( ( rConfirmedSong != null ) && ( rChosenScore != null ) && bScoreExistForMode)
 		{
 			eReturnValueWhenFadeOutCompleted = EReturnValue.Selected;
-//				this.actFOtoNowLoading.tStartFadeOut();                 // #27787 2012.3.10 yyagi 曲決定時の画面フェードアウトの省略
 			ePhaseID = EPhase.選曲_NowLoading画面へのフェードアウト;
 		}
 		else
 		{
-			tUpdateSearchNotification(string.Format("Score unavailable for {0} mode",
-				CDTXMania.ConfigIni.bDrumsEnabled ? "Drum":"Guitar/Bass"
-			));
+			tUpdateSearchNotification($"Score unavailable for {(CDTXMania.ConfigIni.bDrumsEnabled ? "Drum" : "Guitar/Bass")} mode");
 			ctSearchInputDisplayCounter.tStart(0, 1, 10000, CDTXMania.Timer);
 		}
 		CDTXMania.Skin.bgm選曲画面.t停止する();
@@ -1132,7 +1087,7 @@ internal class CStageSongSelection : CStage
 
 	private List<CSongListNode> t指定された曲が存在する場所の曲を列挙する_子リスト含む( CSongListNode song )
 	{
-		List<CSongListNode> list = new List<CSongListNode>();
+		List<CSongListNode> list = [];
 		song = song.r親ノード;
 		if( ( song == null ) && ( CDTXMania.SongManager.listSongRoot.Count > 0 ) )
 		{

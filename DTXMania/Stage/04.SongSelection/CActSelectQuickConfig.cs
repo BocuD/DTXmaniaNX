@@ -483,7 +483,7 @@ internal class CActSelectQuickConfig : CActSelectPopupMenu
         autoStatus.SetTexture(new DTXTexture(txAutoStatus));
     }
 
-    public override void tPressEnterMain(int nSortOrder)
+    public override void tPressEnterMain()
     {
         lci[nCurrentTarget][nCurrentSelection].RunAction();
     }

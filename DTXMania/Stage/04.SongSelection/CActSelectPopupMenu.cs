@@ -102,7 +102,7 @@ internal class CActSelectPopupMenu : CActivity
                     bIsSelectingIntItem = !bIsSelectingIntItem;		// 選択状態/選択解除状態を反転する
                 }
             }
-            tPressEnterMain(lciMenuItems[nCurrentSelection].GetIndex());
+            tPressEnterMain();
 
             bキー入力待ち = true;
         }
@@ -111,8 +111,7 @@ internal class CActSelectPopupMenu : CActivity
     /// <summary>
     /// Decide押下時の処理を、継承先で記述する。
     /// </summary>
-    /// <param name="val">CItemBaseの現在の設定値のindex</param>
-    public virtual void tPressEnterMain(int val)
+    public virtual void tPressEnterMain()
     {
     }
     /// <summary>
@@ -353,6 +352,8 @@ internal class CActSelectPopupMenu : CActivity
             //draw value items
             for (int i = 0; i < lciMenuItems.Count; i++)
             {
+                bool bItemBold = i == nCurrentSelection;
+                
                 var pair = listItems[i];
                 string s;
                 switch (lciMenuItems[i].strItemName)

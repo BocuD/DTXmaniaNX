@@ -158,37 +158,30 @@ internal class CActSelectSongList : CActivity
 		return closestLevel;
 	}
 
-	private List<CSongListNode> GetSongListWithinMe( CSongListNode song )
+	private List<CSongListNode>? GetSongListWithinMe( CSongListNode song )
 	{
 		if ( song.r親ノード == null )					// root階層のノートだったら
 		{
 			return CDTXMania.SongManager.listSongRoot;	// rootのリストを返す
 		}
-		else
+
+		if ( ( song.r親ノード.list子リスト != null ) && ( song.r親ノード.list子リスト.Count > 0 ) )
 		{
-			if ( ( song.r親ノード.list子リスト != null ) && ( song.r親ノード.list子リスト.Count > 0 ) )
-			{
-				return song.r親ノード.list子リスト;
-			}
-			else
-			{
-				return null;
-			}
+			return song.r親ノード.list子リスト;
 		}
+
+		return null;
 	}
 
 
 	public delegate void DGSortFunc( List<CSongListNode> songList, EInstrumentPart eInst, int order, params object[] p);
 
-	public void tSortSongList( DGSortFunc sf, EInstrumentPart eInst, int order, params object[] p)  // t曲リストのソート
+	public void tSortSongList(DGSortFunc sf, EInstrumentPart eInst, int order, params object[] p)  // t曲リストのソート
 	{
-		List<CSongListNode> songList = GetSongListWithinMe( rSelectedSong );
-		if ( songList == null )
+		List<CSongListNode>? songList = GetSongListWithinMe(rSelectedSong);
+		if (songList != null)
 		{
-		}
-		else
-		{
-			sf( songList, eInst, order, p );
+			sf(songList, eInst, order, p);
 			t現在選択中の曲を元に曲バーを再構成する();
 		}
 	}

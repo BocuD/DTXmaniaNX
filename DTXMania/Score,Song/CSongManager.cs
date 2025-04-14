@@ -1453,13 +1453,6 @@ internal class CSongManager
 			}
 			return order * n1.strTitle.CompareTo( n2.strTitle );
 		} );
-//			foreach( CSongListNode c曲リストノード in ノードリスト )
-//			{
-//				if( ( c曲リストノード.list子リスト != null ) && ( c曲リストノード.list子リスト.Count > 1 ) )
-//				{
-//					this.t曲リストのソート2_タイトル順( c曲リストノード.list子リスト, part, order );
-//				}
-//			}
 	}
 	/// <summary>
 	/// 
