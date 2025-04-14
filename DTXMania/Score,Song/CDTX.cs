@@ -3670,7 +3670,7 @@ internal class CDTX : CActivity
             if (offset < line.Length)
             {
                 offset += char.IsWhiteSpace(line[offset]) ? 1 : 0;
-                param = SplitLineString(ref line, [';', '\n'], ref offset);
+                param = SplitLineString(ref line, [';', '\n', '\t'], ref offset);
             }
             else
             {
