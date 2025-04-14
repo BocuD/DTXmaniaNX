@@ -1510,7 +1510,7 @@ internal class CDTXMania : Game
 
     //
     public CIMEHook cIMEHook;
-    public CActTextBox textboxテキスト入力中;
+    public CActSearchBox textboxテキスト入力中;
     public bool bテキスト入力中 => textboxテキスト入力中 != null;
 
     private void tStartProcess()

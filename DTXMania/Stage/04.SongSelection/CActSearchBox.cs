@@ -7,9 +7,9 @@ using SlimDX.DirectInput;
 
 namespace DTXMania;
 
-internal class CActTextBox : CActivity
+internal class CActSearchBox : CActivity
 {
-	private bool b表示中;
+	private bool bShowing;
 
 	private bool b次のフレームで入力中にする;
 
@@ -75,7 +75,7 @@ internal class CActTextBox : CActivity
 		}
 	}
 
-	public CActTextBox()
+	public CActSearchBox()
 	{
 		bNotActivated = true;
 	}
@@ -83,7 +83,7 @@ internal class CActTextBox : CActivity
 	public override void OnActivate()
 	{
 		rectパネル基本位置 = new Rectangle(390, 200, 500, 40);
-		b表示中 = false;
+		bShowing = false;
 		b入力中 = false;
 		b入力終了直後 = false;
 		b次のフレームで入力中にする = false;
@@ -128,7 +128,7 @@ internal class CActTextBox : CActivity
 			using (Graphics graphics = Graphics.FromImage(bitmap))
 			{
 				graphics.FillRectangle(new SolidBrush(Color.FromArgb(160, Color.Black)), 0, 0, bitmap.Width, bitmap.Height);
-				StringBuilder stringBuilder = new StringBuilder(256);
+				StringBuilder stringBuilder = new(256);
 				stringBuilder.AppendLine("*Song Search*");
 				stringBuilder.AppendLine("Type in Text and press Enter to search by Title, Artist");
 				stringBuilder.AppendLine("and Comment");
@@ -182,7 +182,7 @@ internal class CActTextBox : CActivity
 		{
 			return 0;
 		}
-		if (b表示中)
+		if (bShowing)
 		{
 			tx背景?.tDraw2D(CDTXMania.app.Device, rectパネル基本位置.X, rectパネル基本位置.Y);
 			if (b入力中)
@@ -420,12 +420,12 @@ internal class CActTextBox : CActivity
 	public void t表示(int x, int y)
 	{
 		t表示位置を変更する(x, y);
-		b表示中 = true;
+		bShowing = true;
 	}
 
-	public void t非表示()
+	public void tHide()
 	{
-		b表示中 = false;
+		bShowing = false;
 	}
 
 	public void t表示位置を変更する(int x, int y)
@@ -487,7 +487,7 @@ internal class CActTextBox : CActivity
 		CDTXMania.app.textboxテキスト入力中 = null;
 		if (b入力終了時に非表示にする)
 		{
-			t非表示();
+			tHide();
 			b入力終了時に非表示にする = false;
 		}
 	}
