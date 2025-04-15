@@ -184,14 +184,7 @@ internal class CStageConfig : CStage
 
     private UISelectList configLeftOptionsMenu;
     private UIImage menuCursor;
-        
-    public override void OnManagedCreateResources()											// OPTIONと画像以外共通
-    {
-        if (!bNotActivated)
-        {
-            base.OnManagedCreateResources();
-        }
-    }
+    
     public override void OnManagedReleaseResources()											// OPTIONと同じ(COnfig.iniの書き出しタイミングのみ異なるが、無視して良い)
     {
         if (!bNotActivated)
