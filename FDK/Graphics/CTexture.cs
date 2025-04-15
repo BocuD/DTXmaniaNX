@@ -889,14 +889,14 @@ public class CTexture : IDisposable
 		if (bAdditiveBlending)
 		{
 			device.SetRenderState(RenderState.AlphaBlendEnable, true);
-			device.SetRenderState(RenderState.SourceBlend, Blend.SourceAlpha); // 5
-			device.SetRenderState(RenderState.DestinationBlend, Blend.One); // 2
+			device.SetRenderState(RenderState.SourceBlend, (int)Blend.SourceAlpha); // 5
+			device.SetRenderState(RenderState.DestinationBlend, (int)Blend.One); // 2
 		}
 		else
 		{
 			device.SetRenderState(RenderState.AlphaBlendEnable, true);
-			device.SetRenderState(RenderState.SourceBlend, Blend.SourceAlpha); // 5
-			device.SetRenderState(RenderState.DestinationBlend, Blend.InverseSourceAlpha); // 6
+			device.SetRenderState(RenderState.SourceBlend, (int)Blend.SourceAlpha); // 5
+			device.SetRenderState(RenderState.DestinationBlend, (int)Blend.InverseSourceAlpha); // 6
 		}
 	}
 
