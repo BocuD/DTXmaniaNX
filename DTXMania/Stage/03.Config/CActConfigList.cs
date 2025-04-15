@@ -63,6 +63,9 @@ internal partial class CActConfigList : CActivity
         switch (eMenuType)
         {
             case EMenuType.KeyAssignSystem:
+            case EMenuType.SystemGraphics:
+            case EMenuType.SystemAudio:
+            case EMenuType.SystemGameplay:
                 tSetupItemList_System();
                 break;
             case EMenuType.KeyAssignDrums:
@@ -189,8 +192,7 @@ internal partial class CActConfigList : CActivity
         scrollTimerValue = -1;
         ctTriangleArrowAnimation = new CCounter();
         ctToastMessageCounter = new CCounter(0, 1, 10000, CDTXMania.Timer);
-
-        CacheCurrentSoundDevices();
+        
         base.OnActivate();
     }
 
@@ -668,6 +670,9 @@ internal partial class CActConfigList : CActivity
         Guitar,
         Bass,
         KeyAssignSystem,		// #24609 2011.4.12 yyagi: 画面キャプチャキーのアサイン
+        SystemGraphics,
+        SystemAudio,
+        SystemGameplay,
         KeyAssignDrums,
         KeyAssignGuitar,
         KeyAssignBass,
