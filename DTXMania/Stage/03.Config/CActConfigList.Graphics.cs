@@ -24,6 +24,15 @@ internal partial class CActConfigList
             () => iSystemAVI.bON = CDTXMania.ConfigIni.bAVIEnabled,
             () => CDTXMania.ConfigIni.bAVIEnabled = iSystemAVI.bON);
         listItems.Add(iSystemAVI);
+        
+        CItemList iSystemMovieMode = new("Movie Mode", CItemBase.EPanelType.Normal, CDTXMania.ConfigIni.nMovieMode,
+            "Movie Mode:\n0 = 非表示\n1 = 全画面\n2 = ウインドウモード\n3 = 全画面&ウインドウ\n演奏中にF5キーで切り替え。",
+            "Movie Mode:\n0 = Hide\n1 = Full screen\n2 = Window mode\n3 = Both Full screen and window\nUse F5 to switch during game.",
+            ["Off", "Full Screen", "Window Mode", "Both"]);
+        iSystemMovieMode.BindConfig(
+            () => iSystemMovieMode.nCurrentlySelectedIndex = CDTXMania.ConfigIni.nMovieMode,
+            () => CDTXMania.ConfigIni.nMovieMode = iSystemMovieMode.nCurrentlySelectedIndex);
+        listItems.Add(iSystemMovieMode);
 
         CItemToggle iSystemBGA = new("BGA", CDTXMania.ConfigIni.bBGAEnabled,
             "BGAの使用：\n画像(BGA)を表示可能にする場合に\nON にします。BGA の再生には、それ\nなりのマシンパワーが必要とされます。",
@@ -46,15 +55,6 @@ internal partial class CActConfigList
             () => CDTXMania.ConfigIni.nBackgroundTransparency = iSystemBGAlpha.nCurrentValue);
         listItems.Add(iSystemBGAlpha);
         
-        CItemList iSystemMovieMode = new("Movie Mode", CItemBase.EPanelType.Normal, CDTXMania.ConfigIni.nMovieMode,
-            "Movie Mode:\n0 = 非表示\n1 = 全画面\n2 = ウインドウモード\n3 = 全画面&ウインドウ\n演奏中にF5キーで切り替え。",
-            "Movie Mode:\n0 = Hide\n1 = Full screen\n2 = Window mode\n3 = Both Full screen and window\nUse F5 to switch during game.",
-            ["Off", "Full Screen", "Window Mode", "Both"]);
-        iSystemMovieMode.BindConfig(
-            () => iSystemMovieMode.nCurrentlySelectedIndex = CDTXMania.ConfigIni.nMovieMode,
-            () => CDTXMania.ConfigIni.nMovieMode = iSystemMovieMode.nCurrentlySelectedIndex);
-        listItems.Add(iSystemMovieMode);
-
         CItemList iSystemMovieAlpha = new("LaneAlpha", CItemBase.EPanelType.Normal, CDTXMania.ConfigIni.nMovieAlpha,
             "レーンの透明度を指定します。\n0% が完全不透明で、\n100% が完全透明となります。",
             "Degree of transparency for Movie.\n\n0%=No transparency,\n100%=Completely transparent",
