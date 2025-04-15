@@ -18,7 +18,7 @@ internal class CItemList : CItemBase
 		nCurrentlySelectedIndex = 0;
 		listItemValues = [];
 	}
-	public CItemList(string strItemName, EPanelType panelType, int initialSelectedIndex, string strDescriptionJp, string strDescriptionEn, params string[] argItemList)
+	public CItemList(string strItemName, EPanelType panelType, int initialSelectedIndex, string strDescriptionJp, string strDescriptionEn, string[] argItemList)
 		: this() {
 		tInitialize(strItemName, panelType, initialSelectedIndex, strDescriptionJp, strDescriptionEn, argItemList);
 	}
@@ -86,7 +86,7 @@ internal class CSwitchItemList : CItemList
 		nCurrentlySelectedIndex = 0;
 		listItemValues = new List<string>();
 	}
-	public CSwitchItemList( string strItemName, EPanelType ePanelType, int nInitialSelectedIndex, string strDescriptionJp, string strDescriptionEn, params string[] argItemList )
+	public CSwitchItemList( string strItemName, EPanelType ePanelType, int nInitialSelectedIndex, string strDescriptionJp, string strDescriptionEn, string[] argItemList )
 		: this()
 	{
 		tInitialize( strItemName, ePanelType, nInitialSelectedIndex, strDescriptionJp, strDescriptionEn, argItemList );
