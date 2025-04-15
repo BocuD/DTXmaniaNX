@@ -4,9 +4,6 @@ using System.Reflection;
 using System.Runtime;
 using System.Text;
 using System.Windows.Forms;
-using DTXMania.UI;
-using DTXMania.UI.Inspector;
-using DTXMania.UI.Skin;
 using FDK;
 using Hexa.NET.ImGui;
 using Hexa.NET.ImGui.Backends.D3D9;
@@ -18,6 +15,13 @@ using ImGui = Hexa.NET.ImGui.ImGui;
 using Point = System.Drawing.Point;
 using ResourceManager = DTXMania.UI.ResourceManager;
 using Vector2 = System.Numerics.Vector2;
+
+#if INSPECTOR
+using DTXMania.UI;
+using DTXMania.UI.Inspector;
+#endif
+
+using DTXMania.UI.Skin;
 
 namespace DTXMania.Core;
 
@@ -191,11 +195,10 @@ internal class CDTXMania : Game
     public static CCommandParse CommandParse;
 
     //fork
-    public static STDGBVALUE<List<int>> listAutoGhostLag = new STDGBVALUE<List<int>>();
-    public static STDGBVALUE<List<int>> listTargetGhsotLag = new STDGBVALUE<List<int>>();
+    public static STDGBVALUE<List<int>> listAutoGhostLag = new();
+    public static STDGBVALUE<List<int>> listTargetGhsotLag = new();
 
-    public static STDGBVALUE<CScoreIni.CPerformanceEntry> listTargetGhostScoreData =
-        new STDGBVALUE<CScoreIni.CPerformanceEntry>();
+    public static STDGBVALUE<CScoreIni.CPerformanceEntry> listTargetGhostScoreData = new();
 
 
     //stuff to render game inside window
@@ -210,7 +213,586 @@ internal class CDTXMania : Game
     public CDTXMania()
     {
         app = this;
-        tStartProcess();
+
+        void SafeInitialize(string name, Action action)
+        {
+            try
+            {
+                Console.WriteLine($"Initializing {name}");
+                action();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Failed to initialize {name}: {e}");
+                MessageBox.Show($"Failed to initialize {name}: {e}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                throw;
+            }
+        }
+
+        //Update version information
+        Assembly assembly = Assembly.GetExecutingAssembly();
+        DateTime? buildDate = GetAssemblyBuildDateTime() ?? DateTime.UnixEpoch;
+        VERSION = $"v{assembly.GetName().Version.ToString().Substring(0, 5)} ({buildDate:yyyyMMdd})";
+        VERSION_DISPLAY = $"DTX:NX:A:A:{buildDate:yyyyMMdd}00";
+
+        #region [ Determine strEXE folder ]
+
+        //-----------------
+        // BEGIN #23629 2010.11.13 from: デバッグ時は Application.ExecutablePath が ($SolutionDir)/bin/x86/Debug/ などになり System/ の読み込みに失敗するので、カレントディレクトリを採用する。（プロジェクトのプロパティ→デバッグ→作業ディレクトリが有効になる）
+#if DEBUG
+        executableDirectory = Environment.CurrentDirectory + @"\";
+#else
+        executableDirectory =
+            Path.GetDirectoryName(Application.ExecutablePath) + @"\";	// #23629 2010.11.9 yyagi: set correct pathname where DTXManiaGR.exe is.
+#endif
+        // END #23629 2010.11.13 from
+        //-----------------
+
+        #endregion
+
+        #region [ Read Config.ini ]
+
+        //---------------------
+        ConfigIni = new CConfigIni();
+        string path = executableDirectory + "Config.ini";
+        if (File.Exists(path))
+        {
+            try
+            {
+                ConfigIni.tReadFromFile(path);
+            }
+            catch
+            {
+                //ConfigIni = new CConfigIni();	// 存在してなければ新規生成
+            }
+        }
+
+        Window.EnableSystemMenu = ConfigIni.bIsEnabledSystemMenu; // #28200 2011.5.1 yyagi
+        // 2012.8.22 Config.iniが無いときに初期値が適用されるよう、この設定行をifブロック外に移動
+
+        //---------------------
+
+        #endregion
+
+        #region [ Start output log ]
+
+        //---------------------
+        Trace.AutoFlush = true;
+        if (ConfigIni.bOutputLogs)
+        {
+            try
+            {
+                Trace.Listeners.Add(
+                    new CTraceLogListener(new StreamWriter("DTXManiaLog.txt", false, Encoding.Unicode)));
+            }
+            catch (UnauthorizedAccessException) // #24481 2011.2.20 yyagi
+            {
+                int c = isJapanese ? 0 : 1;
+                string[] mes_writeErr =
+                {
+                    "DTXManiaLog.txtへの書き込みができませんでした。書き込みできるようにしてから、再度起動してください。",
+                    "Failed to write DTXManiaLog.txt. Please set it writable and try again."
+                };
+                MessageBox.Show(mes_writeErr[c], "DTXMania boot error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Environment.Exit(1);
+            }
+        }
+
+        Trace.WriteLine("");
+        Trace.WriteLine("DTXMania powered by YAMAHA Silent Session Drums");
+        Trace.WriteLine($"Release: {VERSION}");
+        Trace.WriteLine("");
+        Trace.TraceInformation("----------------------");
+        Trace.TraceInformation("■ アプリケーションの初期化");
+        Trace.TraceInformation("OS Version: " + Environment.OSVersion);
+        Trace.TraceInformation("ProcessorCount: " + Environment.ProcessorCount);
+        Trace.TraceInformation("CLR Version: " + Environment.Version);
+        //---------------------
+
+        #endregion
+
+        SafeInitialize("DTXVMode, DTX2WAVMode, CommandParse", () =>
+        {
+            DTXVmode = new CDTXVmode
+            {
+                Enabled = false
+            };
+
+            DTX2WAVmode = new CDTX2WAVmode();
+            CommandParse = new CCommandParse();
+        });
+
+        #region [ Detect compact mode、or start as DTXViewer/DTX2WAV ]
+
+        bCompactMode = false;
+        strCompactModeFile = "";
+        string appName = "DTXManiaNX";
+        string[] commandLineArgs = Environment.GetCommandLineArgs();
+        if ((commandLineArgs != null) && (commandLineArgs.Length > 1))
+        {
+            bCompactMode = true;
+            string arg = "";
+
+            for (int i = 1; i < commandLineArgs.Length; i++)
+            {
+                if (i != 1)
+                {
+                    arg += " " + "\"" + commandLineArgs[i] + "\"";
+                }
+                else
+                {
+                    arg += commandLineArgs[i];
+                }
+            }
+
+            Trace.TraceInformation("Parsing arguments: {0}。", arg);
+            CommandParse.ParseArguments(arg, ref DTXVmode, ref DTX2WAVmode);
+            if (DTXVmode.Enabled)
+            {
+                DTXVmode.Refreshed = false; // 初回起動時は再読み込みに走らせない
+                strCompactModeFile = DTXVmode.filename;
+                switch (DTXVmode.soundDeviceType) // サウンド再生方式の設定
+                {
+                    case ESoundDeviceType.DirectSound:
+                        ConfigIni.nSoundDeviceType = (int)CConfigIni.ESoundDeviceTypeForConfig.ACM;
+                        break;
+                    case ESoundDeviceType.ExclusiveWASAPI:
+                        ConfigIni.nSoundDeviceType = (int)CConfigIni.ESoundDeviceTypeForConfig.WASAPI;
+                        break;
+                    case ESoundDeviceType.SharedWASAPI:
+                        ConfigIni.nSoundDeviceType = (int)CConfigIni.ESoundDeviceTypeForConfig.WASAPI_Share;
+                        break;
+                    case ESoundDeviceType.ASIO:
+                        ConfigIni.nSoundDeviceType = (int)CConfigIni.ESoundDeviceTypeForConfig.ASIO;
+                        ConfigIni.nASIODevice = DTXVmode.nASIOdevice;
+                        break;
+                }
+
+                ConfigIni.bVerticalSyncWait = DTXVmode.VSyncWait;
+                ConfigIni.bTimeStretch = DTXVmode.TimeStretch;
+                if (DTXVmode.GRmode)
+                {
+                    ConfigIni.bDrumsEnabled = false;
+                    ConfigIni.bGuitarEnabled = true;
+                }
+                else
+                {
+                    //Both in Original DTXMania, but we don't support that
+                    ConfigIni.bDrumsEnabled = true;
+                    ConfigIni.bGuitarEnabled = false;
+                }
+
+                //Disable Movie and FullScreen mode
+                ConfigIni.bFullScreenMode = false;
+                ConfigIni.nMovieMode = 2;
+
+                //Set windows size to selected Window Size and set its position to a fixed location
+                ConfigIni.nWindowWidth = DTXVmode.widthResolution;
+                ConfigIni.nWindowHeight = DTXVmode.heightResolution;
+                ConfigIni.n初期ウィンドウ開始位置X = 5;
+                ConfigIni.n初期ウィンドウ開始位置Y = 100;
+
+                //Disable Reverse options in DTXVMode
+                ConfigIni.bReverse.Drums = false;
+                ConfigIni.bReverse.Guitar = false;
+                ConfigIni.bReverse.Bass = false;
+
+                //Turn off all random mode settings in DTXVMode
+                ConfigIni.eRandom.Drums = ERandomMode.OFF;
+                ConfigIni.eRandom.Guitar = ERandomMode.OFF;
+                ConfigIni.eRandom.Bass = ERandomMode.OFF;
+                ConfigIni.eRandomPedal.Drums = ERandomMode.OFF;
+
+                //Set scroll speed to fixed values
+                ConfigIni.nScrollSpeed.Drums = 4; //2.0
+                ConfigIni.nScrollSpeed.Guitar = 4; //2.0
+                ConfigIni.nScrollSpeed.Bass = 4; //2.0
+
+                //全オート
+                for (int i = 0; i < (int)ELane.MAX; i++)
+                {
+                    ConfigIni.bAutoPlay[i] = true;
+                }
+            }
+            else if (DTX2WAVmode.Enabled)
+            {
+                strCompactModeFile = DTX2WAVmode.dtxfilename;
+
+                #region [ FDKへの録音設定 ]
+
+                CSoundManager.strRecordInputDTXfilename = DTX2WAVmode.dtxfilename;
+                CSoundManager.strRecordOutFilename = DTX2WAVmode.outfilename;
+                CSoundManager.strRecordFileType = DTX2WAVmode.Format.ToString();
+                CSoundManager.nBitrate = DTX2WAVmode.bitrate;
+                for (int i = 0; i < (int)CSound.EInstType.Unknown; i++)
+                {
+                    CSoundManager.nMixerVolume[i] = DTX2WAVmode.nMixerVolume[i];
+                }
+
+                ConfigIni.nMasterVolume =
+                    DTX2WAVmode.nMixerVolume[(int)CSound.EInstType.Unknown]; // [5](Unknown)のところにMasterVolumeが入ってくるので注意
+                // CSound管理.nMixerVolume[5]は、結局ここからは変更しないため、
+                // 事実上初期値=100で固定。
+
+                #endregion
+
+                #region [ 録音用の本体設定 ]
+
+                // 本体プロセスの優先度を少し上げる (最小化状態で動作させると、処理性能が落ちるようなので
+                // → ほとんど効果がなかったので止めます
+                //Process thisProcess = System.Diagnostics.Process.GetCurrentProcess();
+                //thisProcess.PriorityClass = ProcessPriorityClass.AboveNormal;
+
+                // エンコーダーのパス設定 (=DLLフォルダ)
+                CSoundManager.strEncoderPath = Path.Combine(executableDirectory, "DLL");
+
+                ConfigIni.nSoundDeviceType = (int)CConfigIni.ESoundDeviceTypeForConfig.WASAPI;
+                ConfigIni.bEventDrivenWASAPI = false;
+
+                ConfigIni.bVerticalSyncWait = false;
+                ConfigIni.bTimeStretch = false;
+
+                //Both in Original DTXMania, but we don't support that
+                ConfigIni.bDrumsEnabled = true;
+                ConfigIni.bGuitarEnabled = false;
+
+                ConfigIni.bFullScreenMode = false;
+
+                //全オート
+                for (int i = 0; i < (int)ELane.MAX; i++)
+                {
+                    ConfigIni.bAutoPlay[i] = true;
+                }
+
+                //FillInオフ, 歓声オフ
+                ConfigIni.bFillInEnabled = false;
+                ConfigIni.b歓声を発声する = false; // bAudience
+                //ストイックモード
+                ConfigIni.bストイックモード = false; // bStoicMode
+                //チップ非表示
+                ConfigIni.nHidSud.Drums = 4; // ESudHidInv.FullInv;
+                ConfigIni.nHidSud.Guitar = 4; // ESudHidInv.FullInv;
+                ConfigIni.nHidSud.Bass = 4; // ESudHidInv.FullInv;
+
+                // Dark=Full
+                ConfigIni.eDark = EDarkMode.FULL;
+
+                //多重再生数=4
+                ConfigIni.nPoliphonicSounds = 4;
+
+                //再生速度x1
+                ConfigIni.nPlaySpeed = 20;
+
+                //メトロノーム音量0
+                //CDTXMania.ConfigIni.eClickType.Value = EClickType.Off;
+                //CDTXMania.ConfigIni.nClickHighVolume.Value = 0;
+                //CDTXMania.ConfigIni.nClickLowVolume.Value = 0;
+
+                //自動再生音量=100
+                ConfigIni.n自動再生音量 = 100; // nAutoVolume
+                ConfigIni.n手動再生音量 = 100; // nChipVolume
+
+                //マスターボリューム100
+                //CDTXMania.ConfigIni.nMasterVolume.Value = 100;	// DTX2WAV側から設定するので、ここでは触らない
+
+                //StageFailedオフ
+                ConfigIni.bSTAGEFAILEDEnabled = false;
+
+                //グラフ無効
+                ConfigIni.bGraph有効.Drums = false;
+                ConfigIni.bGraph有効.Guitar = false;
+                ConfigIni.bGraph有効.Bass = false;
+
+                //コンボ非表示,判定非表示
+                ConfigIni.bドラムコンボ文字の表示 = false; // bドラムコンボ文字の表示
+                ConfigIni.n表示可能な最小コンボ数.Drums = 0;
+                ConfigIni.n表示可能な最小コンボ数.Guitar = 0; // CDTXMania.ConfigIni.bDisplayCombo.Guitar.Value = false;
+                ConfigIni.n表示可能な最小コンボ数.Bass = 0; // CDTXMania.ConfigIni.bDisplayCombo.Bass.Value = false;
+                ConfigIni.bDisplayJudge.Drums = false;
+                ConfigIni.bDisplayJudge.Guitar = false;
+                ConfigIni.bDisplayJudge.Bass = false;
+
+
+                //デバッグ表示オフ
+                //CDTXMania.ConfigIni.b演奏情報を表示する = false;
+                ConfigIni.bHidePerformanceInformation = true; // bDebugInfo = false
+
+                //BGAオフ, AVIオフ
+                ConfigIni.bBGAEnabled = false;
+                ConfigIni.bAVIEnabled = false;
+
+                //BGMオン、チップ音オン
+                ConfigIni.bBGM音を発声する = true; // bBGMPlay
+                ConfigIni.bドラム打音を発声する = true; // bDrumsHitSound
+
+                //パート強調オフ
+                //CDTXMania.ConfigIni.bEmphasizePlaySound.Drums.Value = false;
+                //CDTXMania.ConfigIni.bEmphasizePlaySound.Guitar.Value = false;
+                //CDTXMania.ConfigIni.bEmphasizePlaySound.Bass.Value = false;
+
+                // パッド入力等、基本操作の無効化 (ESCを除く)
+                //CDTXMania.ConfigIni.KeyAssign[][];
+
+                #endregion
+            }
+            else // 通常のコンパクトモード
+            {
+                strCompactModeFile = commandLineArgs[1];
+            }
+
+            if (!File.Exists(strCompactModeFile)) // #32985 2014.1.23 yyagi 
+            {
+                Trace.TraceError("The file specified in compact mode cannot be found. Terminating DTXMania. [{0}]",
+                    strCompactModeFile);
+#if DEBUG
+                Environment.Exit(-1);
+#else
+                if (strCompactModeFile == "")  // DTXMania未起動状態で、DTXCで再生停止ボタンを押した場合は、何もせず終了
+                {
+                    Environment.Exit(-1);
+                }
+                else
+                {
+                    throw new FileNotFoundException("The file specified in compact mode cannot be found. Terminating DTXMania.", strCompactModeFile);
+                }
+#endif
+            }
+
+            if (DTXVmode.Enabled)
+            {
+                Trace.TraceInformation("Start in DTXV mode. [{0}]", strCompactModeFile);
+                appName = "DTXViewerNX";
+            }
+            else if (DTX2WAVmode.Enabled)
+            {
+                Trace.TraceInformation("Start in DTX2WAV mode. [{0}]", strCompactModeFile);
+                DTX2WAVmode.SendMessage2DTX2WAV("BOOT");
+                appName = "DTX2WAV";
+            }
+            else
+            {
+                Trace.TraceInformation("Start in compact mode. [{0}]", strCompactModeFile);
+                appName = "DTXManiaNX (Compact)";
+            }
+        }
+        else
+        {
+            Trace.TraceInformation("Start in normal mode。");
+        }
+
+        #endregion
+        
+        #region [ Initialize window ]
+
+        //---------------------
+        string process64bitText = Environment.Is64BitProcess ? "x64(64-bit) " : "";
+        strWindowTitle = appName + " " + process64bitText + VERSION;
+        Window.StartPosition = FormStartPosition.Manual; // #30675 2013.02.04 ikanick add
+        Window.Location = new Point(ConfigIni.n初期ウィンドウ開始位置X, ConfigIni.n初期ウィンドウ開始位置Y); // #30675 2013.02.04 ikanick add
+
+        Window.Text = strWindowTitle;
+        Window.ClientSize =
+            new Size(ConfigIni.nWindowWidth,
+                ConfigIni.nWindowHeight); // #34510 yyagi 2010.10.31 to change window size got from Config.ini
+        if (!ConfigIni.bFullScreenExclusive ||
+            ConfigIni.bFullScreenMode) // #23510 2010.11.02 yyagi: add; to recover window size in case bootup with fullscreen mode
+        {
+            currentClientSize = new Size(ConfigIni.nWindowWidth, ConfigIni.nWindowHeight);
+        }
+
+        Window.MaximizeBox = true; // #23510 2010.11.04 yyagi: to support maximizing window
+        Window.FormBorderStyle =
+            FormBorderStyle
+                .Sizable; // #23510 2010.10.27 yyagi: changed from FixedDialog to Sizable, to support window resize
+        Window.ShowIcon = true;
+        base.Window.Icon = Properties.Resources.dtx;
+        Window.KeyDown += Window_KeyDown;
+        Window.KeyUp += Window_KeyUp;
+        Window.KeyPress += Window_KeyPress;
+        Window.MouseMove += Window_MouseMove;
+        Window.MouseDown += Window_MouseDown;
+        Window.MouseUp += Window_MouseUp;
+        Window.MouseWheel += Window_MouseWheel;
+        Window.MouseDoubleClick += Window_MouseDoubleClick; // #23510 2010.11.13 yyagi: to go fullscreen mode
+        Window.ResizeEnd += Window_ResizeEnd; // #23510 2010.11.20 yyagi: to set resized window size in Config.ini
+        Window.ApplicationActivated += Window_ApplicationActivated;
+        Window.ApplicationDeactivated += Window_ApplicationDeactivated;
+        //Add CIMEHook
+        Window.Controls.Add(cIMEHook = new CIMEHook());
+        //---------------------
+
+        #endregion
+
+        //Init DX9
+        SafeInitialize("DX9", () =>
+        {
+            DeviceSettings settings = new();
+            if (ConfigIni.bFullScreenExclusive)
+            {
+                settings.Windowed = ConfigIni.bWindowMode;
+            }
+            else
+            {
+                settings.Windowed = true; // #30666 2013.2.2 yyagi: Fullscreenmode is "Maximized window" mode
+            }
+
+            settings.BackBufferWidth = GameWindowSize.Width;
+            settings.BackBufferHeight = GameWindowSize.Height;
+
+            settings.EnableVSync = ConfigIni.bVerticalSyncWait;
+
+            GraphicsDeviceManager.ChangeDevice(settings);
+
+
+            IsFixedTimeStep = false;
+            Window.ClientSize = new Size(ConfigIni.nWindowWidth, ConfigIni.nWindowHeight);
+            InactiveSleepTime = TimeSpan.FromMilliseconds((float)(ConfigIni.n非フォーカス時スリープms));
+
+            // #23568 2010.11.4 ikanick changed ( 1 -> ConfigIni )
+            if (!ConfigIni.bFullScreenExclusive)
+            {
+                tSwitchFullScreenMode(); // #30666 2013.2.2 yyagi: finalize settings for "Maximized window mode"
+            }
+
+            actFlushGPU = new CActFlushGPU();
+        });
+
+        DTX = null;
+
+        Resources = new ResourceManager();
+        SkinManager = new SkinManager();
+
+        SafeInitialize("Skin", () =>
+        {
+            Skin = new CSkin(ConfigIni.strSystemSkinSubfolderFullName, ConfigIni.bUseBoxDefSkin);
+            ConfigIni.strSystemSkinSubfolderFullName =
+                Skin.GetCurrentSkinSubfolderFullName(true); // 旧指定のSkinフォルダが消滅していた場合に備える
+        });
+
+        SafeInitialize("Timer", () => { Timer = new CTimer(CTimer.EType.MultiMedia); });
+
+        SafeInitialize("FPS Counter", () => { FPS = new CFPS(); });
+
+        SafeInitialize("Character Console", () =>
+        {
+            actDisplayString = new CCharacterConsole();
+            actDisplayString.OnActivate();
+        });
+
+        SafeInitialize("Input Manager (DirectInput, MIDI)", () =>
+        {
+            InputManager = new CInputManager(Window.Handle);
+            foreach (IInputDevice device in InputManager.listInputDevices)
+            {
+                if ((device.eInputDeviceType == EInputDeviceType.Joystick) &&
+                    !ConfigIni.joystickDict.ContainsValue(device.GUID))
+                {
+                    int key = 0;
+                    while (ConfigIni.joystickDict.ContainsKey(key))
+                    {
+                        key++;
+                    }
+
+                    ConfigIni.joystickDict.Add(key, device.GUID);
+                }
+            }
+
+            foreach (IInputDevice device2 in InputManager.listInputDevices
+                         .Where(x => x.eInputDeviceType == EInputDeviceType.Joystick))
+            {
+                foreach (KeyValuePair<int, string> pair in ConfigIni.joystickDict.Where(pair =>
+                             device2.GUID.Equals(pair.Value)))
+                {
+                    ((CInputJoystick)device2).SetID(pair.Key);
+                    break;
+                }
+            }
+        });
+
+        SafeInitialize("Pad", () => { Pad = new CPad(ConfigIni, InputManager); });
+
+        SafeInitialize("Sound Manager", () =>
+        {
+            ESoundDeviceType soundDeviceType = ConfigIni.nSoundDeviceType switch
+            {
+                0 => ESoundDeviceType.DirectSound,
+                1 => ESoundDeviceType.ASIO,
+                2 => ESoundDeviceType.ExclusiveWASAPI,
+                3 => ESoundDeviceType.SharedWASAPI,
+                _ => ESoundDeviceType.Unknown
+            };
+
+            SoundManager = new CSoundManager(Window.Handle,
+                soundDeviceType,
+                ConfigIni.nWASAPIBufferSizeMs,
+                ConfigIni.bEventDrivenWASAPI,
+                0,
+                ConfigIni.nASIODevice,
+                ConfigIni.bUseOSTimer
+            );
+            AddSoundTypeToWindowTitle();
+            CSoundManager.bIsTimeStretch = ConfigIni.bTimeStretch;
+            SoundManager.nMasterVolume = ConfigIni.nMasterVolume;
+
+            string strDefaultSoundDeviceBusType = CSoundManager.strDefaultDeviceBusType;
+            Trace.TraceInformation($"Bus type of the default sound device = {strDefaultSoundDeviceBusType}");
+        });
+
+        SafeInitialize("Song Manager", () =>
+        {
+            SongManager = new CSongManager();
+            EnumSongs = new CEnumSongs();
+            actEnumSongs = new CActEnumSongs();
+        });
+
+        Random = new Random((int)Timer.nシステム時刻);
+
+        #region [ Initialize Stage ]
+
+        StageManager = new StageManager();
+
+        mainActivities =
+        [
+            actEnumSongs,
+            actDisplayString,
+
+            StageManager.stageStartup,
+            StageManager.stageTitle,
+            StageManager.stageConfig,
+            StageManager.stageSongSelection,
+            StageManager.stageSongLoading,
+            StageManager.stagePerfDrumsScreen,
+            StageManager.stagePerfGuitarScreen,
+            StageManager.stageResult,
+            StageManager.stageChangeSkin,
+            StageManager.stageEnd,
+
+            actFlushGPU
+        ];
+
+        #endregion
+
+        Input = new Input();
+
+        #region [ Discord Rich Presence ]
+
+        if (ConfigIni.bDiscordRichPresenceEnabled && !bCompactMode)
+            DiscordRichPresence = new CDiscordRichPresence(ConfigIni.strDiscordRichPresenceApplicationID);
+
+        #endregion
+
+        Trace.TraceInformation("アプリケーションの初期化を完了しました。");
+
+        #region [ Launch First stage ]
+
+        //---------------------
+        Trace.TraceInformation("----------------------");
+        Trace.TraceInformation("■ Startup");
+
+        StageManager.LoadInitialStage();
+        //---------------------
+
+        #endregion
     }
 
 
@@ -280,8 +862,7 @@ internal class CDTXMania : Game
             }
         }
     }
-
-
+    
     #region [ #24609 リザルト画像をpngで保存する ] // #24609 2011.3.14 yyagi; to save result screen in case BestRank or HiSkill.
 
     /// <summary>
@@ -870,597 +1451,13 @@ internal class CDTXMania : Game
     public CActSearchBox textboxテキスト入力中;
     public bool bテキスト入力中 => textboxテキスト入力中 != null;
 
-    private void tStartProcess()
-    {
-        void SafeInitialize(string name, Action action)
-        {
-            try
-            {
-                Trace.TraceInformation($"Initializing {name}");
-                action();
-            }
-            catch (Exception e)
-            {
-                Trace.TraceError($"Failed to initialize {name}: {e}");
-                MessageBox.Show($"Failed to initialize {name}: {e}", "Error", MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
-                throw;
-            }
-        }
-
-        //Update version information
-        Assembly assembly = Assembly.GetExecutingAssembly();
-        DateTime? buildDate = GetAssemblyBuildDateTime() ?? DateTime.UnixEpoch;
-        VERSION = $"v{assembly.GetName().Version.ToString().Substring(0, 5)} ({buildDate:yyyyMMdd})";
-        VERSION_DISPLAY = $"DTX:NX:A:A:{buildDate:yyyyMMdd}00";
-
-        #region [ Determine strEXE folder ]
-
-        //-----------------
-        // BEGIN #23629 2010.11.13 from: デバッグ時は Application.ExecutablePath が ($SolutionDir)/bin/x86/Debug/ などになり System/ の読み込みに失敗するので、カレントディレクトリを採用する。（プロジェクトのプロパティ→デバッグ→作業ディレクトリが有効になる）
-#if DEBUG
-        executableDirectory = Environment.CurrentDirectory + @"\";
-#else
-        executableDirectory =
- Path.GetDirectoryName(Application.ExecutablePath) + @"\";	// #23629 2010.11.9 yyagi: set correct pathname where DTXManiaGR.exe is.
-#endif
-        // END #23629 2010.11.13 from
-        //-----------------
-
-        #endregion
-
-        #region [ Read Config.ini ]
-
-        //---------------------
-        ConfigIni = new CConfigIni();
-        string path = executableDirectory + "Config.ini";
-        if (File.Exists(path))
-        {
-            try
-            {
-                ConfigIni.tReadFromFile(path);
-            }
-            catch
-            {
-                //ConfigIni = new CConfigIni();	// 存在してなければ新規生成
-            }
-        }
-
-        Window.EnableSystemMenu = ConfigIni.bIsEnabledSystemMenu; // #28200 2011.5.1 yyagi
-        // 2012.8.22 Config.iniが無いときに初期値が適用されるよう、この設定行をifブロック外に移動
-
-        //---------------------
-
-        #endregion
-
-        #region [ Start output log ]
-
-        //---------------------
-        Trace.AutoFlush = true;
-        if (ConfigIni.bOutputLogs)
-        {
-            try
-            {
-                Trace.Listeners.Add(
-                    new CTraceLogListener(new StreamWriter("DTXManiaLog.txt", false, Encoding.Unicode)));
-            }
-            catch (UnauthorizedAccessException) // #24481 2011.2.20 yyagi
-            {
-                int c = isJapanese ? 0 : 1;
-                string[] mes_writeErr =
-                {
-                    "DTXManiaLog.txtへの書き込みができませんでした。書き込みできるようにしてから、再度起動してください。",
-                    "Failed to write DTXManiaLog.txt. Please set it writable and try again."
-                };
-                MessageBox.Show(mes_writeErr[c], "DTXMania boot error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Environment.Exit(1);
-            }
-        }
-
-        Trace.WriteLine("");
-        Trace.WriteLine("DTXMania powered by YAMAHA Silent Session Drums");
-        Trace.WriteLine($"Release: {VERSION}");
-        Trace.WriteLine("");
-        Trace.TraceInformation("----------------------");
-        Trace.TraceInformation("■ アプリケーションの初期化");
-        Trace.TraceInformation("OS Version: " + Environment.OSVersion);
-        Trace.TraceInformation("ProcessorCount: " + Environment.ProcessorCount);
-        Trace.TraceInformation("CLR Version: " + Environment.Version);
-        //---------------------
-
-        #endregion
-
-        SafeInitialize("DTXVMode, DTX2WAVMode, CommandParse", () =>
-        {
-            DTXVmode = new CDTXVmode
-            {
-                Enabled = false
-            };
-
-            DTX2WAVmode = new CDTX2WAVmode();
-            CommandParse = new CCommandParse();
-        });
-
-        #region [ Detect compact mode、or start as DTXViewer/DTX2WAV ]
-
-        bCompactMode = false;
-        strCompactModeFile = "";
-        string appName = "DTXManiaNX";
-        string[] commandLineArgs = Environment.GetCommandLineArgs();
-        if ((commandLineArgs != null) && (commandLineArgs.Length > 1))
-        {
-            bCompactMode = true;
-            string arg = "";
-
-            for (int i = 1; i < commandLineArgs.Length; i++)
-            {
-                if (i != 1)
-                {
-                    arg += " " + "\"" + commandLineArgs[i] + "\"";
-                }
-                else
-                {
-                    arg += commandLineArgs[i];
-                }
-            }
-
-            Trace.TraceInformation("Parsing arguments: {0}。", arg);
-            CommandParse.ParseArguments(arg, ref DTXVmode, ref DTX2WAVmode);
-            if (DTXVmode.Enabled)
-            {
-                DTXVmode.Refreshed = false; // 初回起動時は再読み込みに走らせない
-                strCompactModeFile = DTXVmode.filename;
-                switch (DTXVmode.soundDeviceType) // サウンド再生方式の設定
-                {
-                    case ESoundDeviceType.DirectSound:
-                        ConfigIni.nSoundDeviceType = (int)CConfigIni.ESoundDeviceTypeForConfig.ACM;
-                        break;
-                    case ESoundDeviceType.ExclusiveWASAPI:
-                        ConfigIni.nSoundDeviceType = (int)CConfigIni.ESoundDeviceTypeForConfig.WASAPI;
-                        break;
-                    case ESoundDeviceType.SharedWASAPI:
-                        ConfigIni.nSoundDeviceType = (int)CConfigIni.ESoundDeviceTypeForConfig.WASAPI_Share;
-                        break;
-                    case ESoundDeviceType.ASIO:
-                        ConfigIni.nSoundDeviceType = (int)CConfigIni.ESoundDeviceTypeForConfig.ASIO;
-                        ConfigIni.nASIODevice = DTXVmode.nASIOdevice;
-                        break;
-                }
-
-                ConfigIni.bVerticalSyncWait = DTXVmode.VSyncWait;
-                ConfigIni.bTimeStretch = DTXVmode.TimeStretch;
-                if (DTXVmode.GRmode)
-                {
-                    ConfigIni.bDrumsEnabled = false;
-                    ConfigIni.bGuitarEnabled = true;
-                }
-                else
-                {
-                    //Both in Original DTXMania, but we don't support that
-                    ConfigIni.bDrumsEnabled = true;
-                    ConfigIni.bGuitarEnabled = false;
-                }
-
-                //Disable Movie and FullScreen mode
-                ConfigIni.bFullScreenMode = false;
-                ConfigIni.nMovieMode = 2;
-
-                //Set windows size to selected Window Size and set its position to a fixed location
-                ConfigIni.nWindowWidth = DTXVmode.widthResolution;
-                ConfigIni.nWindowHeight = DTXVmode.heightResolution;
-                ConfigIni.n初期ウィンドウ開始位置X = 5;
-                ConfigIni.n初期ウィンドウ開始位置Y = 100;
-
-                //Disable Reverse options in DTXVMode
-                ConfigIni.bReverse.Drums = false;
-                ConfigIni.bReverse.Guitar = false;
-                ConfigIni.bReverse.Bass = false;
-
-                //Turn off all random mode settings in DTXVMode
-                ConfigIni.eRandom.Drums = ERandomMode.OFF;
-                ConfigIni.eRandom.Guitar = ERandomMode.OFF;
-                ConfigIni.eRandom.Bass = ERandomMode.OFF;
-                ConfigIni.eRandomPedal.Drums = ERandomMode.OFF;
-
-                //Set scroll speed to fixed values
-                ConfigIni.nScrollSpeed.Drums = 4; //2.0
-                ConfigIni.nScrollSpeed.Guitar = 4; //2.0
-                ConfigIni.nScrollSpeed.Bass = 4; //2.0
-
-                //全オート
-                for (int i = 0; i < (int)ELane.MAX; i++)
-                {
-                    ConfigIni.bAutoPlay[i] = true;
-                }
-            }
-            else if (DTX2WAVmode.Enabled)
-            {
-                strCompactModeFile = DTX2WAVmode.dtxfilename;
-
-                #region [ FDKへの録音設定 ]
-
-                CSoundManager.strRecordInputDTXfilename = DTX2WAVmode.dtxfilename;
-                CSoundManager.strRecordOutFilename = DTX2WAVmode.outfilename;
-                CSoundManager.strRecordFileType = DTX2WAVmode.Format.ToString();
-                CSoundManager.nBitrate = DTX2WAVmode.bitrate;
-                for (int i = 0; i < (int)CSound.EInstType.Unknown; i++)
-                {
-                    CSoundManager.nMixerVolume[i] = DTX2WAVmode.nMixerVolume[i];
-                }
-
-                ConfigIni.nMasterVolume =
-                    DTX2WAVmode.nMixerVolume[(int)CSound.EInstType.Unknown]; // [5](Unknown)のところにMasterVolumeが入ってくるので注意
-                // CSound管理.nMixerVolume[5]は、結局ここからは変更しないため、
-                // 事実上初期値=100で固定。
-
-                #endregion
-
-                #region [ 録音用の本体設定 ]
-
-                // 本体プロセスの優先度を少し上げる (最小化状態で動作させると、処理性能が落ちるようなので
-                // → ほとんど効果がなかったので止めます
-                //Process thisProcess = System.Diagnostics.Process.GetCurrentProcess();
-                //thisProcess.PriorityClass = ProcessPriorityClass.AboveNormal;
-
-                // エンコーダーのパス設定 (=DLLフォルダ)
-                CSoundManager.strEncoderPath = Path.Combine(executableDirectory, "DLL");
-
-                ConfigIni.nSoundDeviceType = (int)CConfigIni.ESoundDeviceTypeForConfig.WASAPI;
-                ConfigIni.bEventDrivenWASAPI = false;
-
-                ConfigIni.bVerticalSyncWait = false;
-                ConfigIni.bTimeStretch = false;
-
-                //Both in Original DTXMania, but we don't support that
-                ConfigIni.bDrumsEnabled = true;
-                ConfigIni.bGuitarEnabled = false;
-
-                ConfigIni.bFullScreenMode = false;
-
-                //全オート
-                for (int i = 0; i < (int)ELane.MAX; i++)
-                {
-                    ConfigIni.bAutoPlay[i] = true;
-                }
-
-                //FillInオフ, 歓声オフ
-                ConfigIni.bFillInEnabled = false;
-                ConfigIni.b歓声を発声する = false; // bAudience
-                //ストイックモード
-                ConfigIni.bストイックモード = false; // bStoicMode
-                //チップ非表示
-                ConfigIni.nHidSud.Drums = 4; // ESudHidInv.FullInv;
-                ConfigIni.nHidSud.Guitar = 4; // ESudHidInv.FullInv;
-                ConfigIni.nHidSud.Bass = 4; // ESudHidInv.FullInv;
-
-                // Dark=Full
-                ConfigIni.eDark = EDarkMode.FULL;
-
-                //多重再生数=4
-                ConfigIni.nPoliphonicSounds = 4;
-
-                //再生速度x1
-                ConfigIni.nPlaySpeed = 20;
-
-                //メトロノーム音量0
-                //CDTXMania.ConfigIni.eClickType.Value = EClickType.Off;
-                //CDTXMania.ConfigIni.nClickHighVolume.Value = 0;
-                //CDTXMania.ConfigIni.nClickLowVolume.Value = 0;
-
-                //自動再生音量=100
-                ConfigIni.n自動再生音量 = 100; // nAutoVolume
-                ConfigIni.n手動再生音量 = 100; // nChipVolume
-
-                //マスターボリューム100
-                //CDTXMania.ConfigIni.nMasterVolume.Value = 100;	// DTX2WAV側から設定するので、ここでは触らない
-
-                //StageFailedオフ
-                ConfigIni.bSTAGEFAILEDEnabled = false;
-
-                //グラフ無効
-                ConfigIni.bGraph有効.Drums = false;
-                ConfigIni.bGraph有効.Guitar = false;
-                ConfigIni.bGraph有効.Bass = false;
-
-                //コンボ非表示,判定非表示
-                ConfigIni.bドラムコンボ文字の表示 = false; // bドラムコンボ文字の表示
-                ConfigIni.n表示可能な最小コンボ数.Drums = 0;
-                ConfigIni.n表示可能な最小コンボ数.Guitar = 0; // CDTXMania.ConfigIni.bDisplayCombo.Guitar.Value = false;
-                ConfigIni.n表示可能な最小コンボ数.Bass = 0; // CDTXMania.ConfigIni.bDisplayCombo.Bass.Value = false;
-                ConfigIni.bDisplayJudge.Drums = false;
-                ConfigIni.bDisplayJudge.Guitar = false;
-                ConfigIni.bDisplayJudge.Bass = false;
-
-
-                //デバッグ表示オフ
-                //CDTXMania.ConfigIni.b演奏情報を表示する = false;
-                ConfigIni.bHidePerformanceInformation = true; // bDebugInfo = false
-
-                //BGAオフ, AVIオフ
-                ConfigIni.bBGAEnabled = false;
-                ConfigIni.bAVIEnabled = false;
-
-                //BGMオン、チップ音オン
-                ConfigIni.bBGM音を発声する = true; // bBGMPlay
-                ConfigIni.bドラム打音を発声する = true; // bDrumsHitSound
-
-                //パート強調オフ
-                //CDTXMania.ConfigIni.bEmphasizePlaySound.Drums.Value = false;
-                //CDTXMania.ConfigIni.bEmphasizePlaySound.Guitar.Value = false;
-                //CDTXMania.ConfigIni.bEmphasizePlaySound.Bass.Value = false;
-
-                // パッド入力等、基本操作の無効化 (ESCを除く)
-                //CDTXMania.ConfigIni.KeyAssign[][];
-
-                #endregion
-            }
-            else // 通常のコンパクトモード
-            {
-                strCompactModeFile = commandLineArgs[1];
-            }
-
-            if (!File.Exists(strCompactModeFile)) // #32985 2014.1.23 yyagi 
-            {
-                Trace.TraceError("The file specified in compact mode cannot be found. Terminating DTXMania. [{0}]",
-                    strCompactModeFile);
-#if DEBUG
-                Environment.Exit(-1);
-#else
-                    if (strCompactModeFile == "")  // DTXMania未起動状態で、DTXCで再生停止ボタンを押した場合は、何もせず終了
-                    {
-                        Environment.Exit(-1);
-                    }
-                    else
-                    {
-                        throw new FileNotFoundException("The file specified in compact mode cannot be found. Terminating DTXMania.", strCompactModeFile);
-                    }
-#endif
-            }
-
-            if (DTXVmode.Enabled)
-            {
-                Trace.TraceInformation("Start in DTXV mode. [{0}]", strCompactModeFile);
-                appName = "DTXViewerNX";
-            }
-            else if (DTX2WAVmode.Enabled)
-            {
-                Trace.TraceInformation("Start in DTX2WAV mode. [{0}]", strCompactModeFile);
-                DTX2WAVmode.SendMessage2DTX2WAV("BOOT");
-                appName = "DTX2WAV";
-            }
-            else
-            {
-                Trace.TraceInformation("Start in compact mode. [{0}]", strCompactModeFile);
-                appName = "DTXManiaNX (Compact)";
-            }
-        }
-        else
-        {
-            Trace.TraceInformation("Start in normal mode。");
-        }
-
-        #endregion
-
-        #region [ Initialize window ]
-
-        //---------------------
-        string process64bitText = Environment.Is64BitProcess ? "x64(64-bit) " : "";
-        strWindowTitle = appName + " " + process64bitText + VERSION;
-        Window.StartPosition = FormStartPosition.Manual; // #30675 2013.02.04 ikanick add
-        Window.Location = new Point(ConfigIni.n初期ウィンドウ開始位置X, ConfigIni.n初期ウィンドウ開始位置Y); // #30675 2013.02.04 ikanick add
-
-        Window.Text = strWindowTitle;
-        Window.ClientSize =
-            new Size(ConfigIni.nWindowWidth,
-                ConfigIni.nWindowHeight); // #34510 yyagi 2010.10.31 to change window size got from Config.ini
-        if (!ConfigIni.bFullScreenExclusive ||
-            ConfigIni.bFullScreenMode) // #23510 2010.11.02 yyagi: add; to recover window size in case bootup with fullscreen mode
-        {
-            currentClientSize = new Size(ConfigIni.nWindowWidth, ConfigIni.nWindowHeight);
-        }
-
-        Window.MaximizeBox = true; // #23510 2010.11.04 yyagi: to support maximizing window
-        Window.FormBorderStyle =
-            FormBorderStyle
-                .Sizable; // #23510 2010.10.27 yyagi: changed from FixedDialog to Sizable, to support window resize
-        Window.ShowIcon = true;
-        base.Window.Icon = Properties.Resources.dtx;
-        Window.KeyDown += Window_KeyDown;
-        Window.KeyUp += Window_KeyUp;
-        Window.KeyPress += Window_KeyPress;
-        Window.MouseMove += Window_MouseMove;
-        Window.MouseDown += Window_MouseDown;
-        Window.MouseUp += Window_MouseUp;
-        Window.MouseWheel += Window_MouseWheel;
-        Window.MouseDoubleClick += Window_MouseDoubleClick; // #23510 2010.11.13 yyagi: to go fullscreen mode
-        Window.ResizeEnd += Window_ResizeEnd; // #23510 2010.11.20 yyagi: to set resized window size in Config.ini
-        Window.ApplicationActivated += Window_ApplicationActivated;
-        Window.ApplicationDeactivated += Window_ApplicationDeactivated;
-        //Add CIMEHook
-        Window.Controls.Add(cIMEHook = new CIMEHook());
-        //---------------------
-
-        #endregion
-
-        //Init DX9
-        SafeInitialize("DX9", () =>
-        {
-            DeviceSettings settings = new();
-            if (ConfigIni.bFullScreenExclusive)
-            {
-                settings.Windowed = ConfigIni.bWindowMode;
-            }
-            else
-            {
-                settings.Windowed = true; // #30666 2013.2.2 yyagi: Fullscreenmode is "Maximized window" mode
-            }
-
-            settings.BackBufferWidth = GameWindowSize.Width;
-            settings.BackBufferHeight = GameWindowSize.Height;
-
-            settings.EnableVSync = ConfigIni.bVerticalSyncWait;
-
-            GraphicsDeviceManager.ChangeDevice(settings);
-
-
-            IsFixedTimeStep = false;
-            Window.ClientSize = new Size(ConfigIni.nWindowWidth, ConfigIni.nWindowHeight);
-            InactiveSleepTime = TimeSpan.FromMilliseconds((float)(ConfigIni.n非フォーカス時スリープms));
-
-            // #23568 2010.11.4 ikanick changed ( 1 -> ConfigIni )
-            if (!ConfigIni.bFullScreenExclusive)
-            {
-                tSwitchFullScreenMode(); // #30666 2013.2.2 yyagi: finalize settings for "Maximized window mode"
-            }
-
-            actFlushGPU = new CActFlushGPU();
-        });
-
-        DTX = null;
-
-        Resources = new ResourceManager();
-        SkinManager = new SkinManager();
-
-        SafeInitialize("Skin", () =>
-        {
-            Skin = new CSkin(ConfigIni.strSystemSkinSubfolderFullName, ConfigIni.bUseBoxDefSkin);
-            ConfigIni.strSystemSkinSubfolderFullName =
-                Skin.GetCurrentSkinSubfolderFullName(true); // 旧指定のSkinフォルダが消滅していた場合に備える
-        });
-
-        SafeInitialize("Timer", () => { Timer = new CTimer(CTimer.EType.MultiMedia); });
-
-        SafeInitialize("FPS Counter", () => { FPS = new CFPS(); });
-
-        SafeInitialize("Character Console", () =>
-        {
-            actDisplayString = new CCharacterConsole();
-            actDisplayString.OnActivate();
-        });
-
-        SafeInitialize("Input Manager (DirectInput, MIDI)", () =>
-        {
-            InputManager = new CInputManager(Window.Handle);
-            foreach (IInputDevice device in InputManager.listInputDevices)
-            {
-                if ((device.eInputDeviceType == EInputDeviceType.Joystick) &&
-                    !ConfigIni.joystickDict.ContainsValue(device.GUID))
-                {
-                    int key = 0;
-                    while (ConfigIni.joystickDict.ContainsKey(key))
-                    {
-                        key++;
-                    }
-
-                    ConfigIni.joystickDict.Add(key, device.GUID);
-                }
-            }
-
-            foreach (IInputDevice device2 in InputManager.listInputDevices
-                         .Where(x => x.eInputDeviceType == EInputDeviceType.Joystick))
-            {
-                foreach (KeyValuePair<int, string> pair in ConfigIni.joystickDict.Where(pair =>
-                             device2.GUID.Equals(pair.Value)))
-                {
-                    ((CInputJoystick)device2).SetID(pair.Key);
-                    break;
-                }
-            }
-        });
-
-        SafeInitialize("Pad", () => { Pad = new CPad(ConfigIni, InputManager); });
-
-        SafeInitialize("Sound Manager", () =>
-        {
-            ESoundDeviceType soundDeviceType = ConfigIni.nSoundDeviceType switch
-            {
-                0 => ESoundDeviceType.DirectSound,
-                1 => ESoundDeviceType.ASIO,
-                2 => ESoundDeviceType.ExclusiveWASAPI,
-                3 => ESoundDeviceType.SharedWASAPI,
-                _ => ESoundDeviceType.Unknown
-            };
-
-            SoundManager = new CSoundManager(Window.Handle,
-                soundDeviceType,
-                ConfigIni.nWASAPIBufferSizeMs,
-                ConfigIni.bEventDrivenWASAPI,
-                0,
-                ConfigIni.nASIODevice,
-                ConfigIni.bUseOSTimer
-            );
-            AddSoundTypeToWindowTitle();
-            CSoundManager.bIsTimeStretch = ConfigIni.bTimeStretch;
-            SoundManager.nMasterVolume = ConfigIni.nMasterVolume;
-
-            string strDefaultSoundDeviceBusType = CSoundManager.strDefaultDeviceBusType;
-            Trace.TraceInformation($"Bus type of the default sound device = {strDefaultSoundDeviceBusType}");
-        });
-
-        SafeInitialize("Song Manager", () =>
-        {
-            SongManager = new CSongManager();
-            EnumSongs = new CEnumSongs();
-            actEnumSongs = new CActEnumSongs();
-        });
-
-        Random = new Random((int)Timer.nシステム時刻);
-
-        #region [ Initialize Stage ]
-
-        StageManager = new StageManager();
-
-        mainActivities =
-        [
-            actEnumSongs,
-            actDisplayString,
-
-            StageManager.stageStartup,
-            StageManager.stageTitle,
-            StageManager.stageConfig,
-            StageManager.stageSongSelection,
-            StageManager.stageSongLoading,
-            StageManager.stagePerfDrumsScreen,
-            StageManager.stagePerfGuitarScreen,
-            StageManager.stageResult,
-            StageManager.stageChangeSkin,
-            StageManager.stageEnd,
-
-            actFlushGPU
-        ];
-
-        #endregion
-
-        Input = new Input();
-
-        #region [ Discord Rich Presence ]
-
-        if (ConfigIni.bDiscordRichPresenceEnabled && !bCompactMode)
-            DiscordRichPresence = new CDiscordRichPresence(ConfigIni.strDiscordRichPresenceApplicationID);
-
-        #endregion
-
-        Trace.TraceInformation("アプリケーションの初期化を完了しました。");
-
-        #region [ Launch First stage ]
-
-        //---------------------
-        Trace.TraceInformation("----------------------");
-        Trace.TraceInformation("■ Startup");
-
-        StageManager.LoadInitialStage();
-        //---------------------
-
-        #endregion
-    }
-
     private void tTerminate() // t終了処理
     {
         if (!bTerminated)
         {
             void SafeTerminate(string name, Action action)
             {
-                Trace.TraceInformation($"Cleaning up {name}");
+                Console.WriteLine($"Cleaning up {name}");
                 try
                 {
                     action();
@@ -1471,8 +1468,7 @@ internal class CDTXMania : Game
                 }
             }
 
-            Trace.TraceInformation("----------------------");
-            Trace.TraceInformation("Shutting down application");
+            Console.WriteLine("Shutting down application");
 
             SafeTerminate("ActEnumSongs", () => { actEnumSongs?.OnDeactivate(); });
             SafeTerminate("Current Stage", () =>
