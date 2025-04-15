@@ -52,7 +52,7 @@ internal class CActSelectQuickConfig : CActSelectPopupMenu
         List<CItemBase> itemList = new();
             
         #region [ 共通 Target/AutoMode/AutoLane ]
-        var target = new CSwitchItemList("Target", CItemBase.EPanelType.Normal, nInstrument, "", "", "Drums", "Guitar", "Bass")
+        var target = new CSwitchItemList("Target", CItemBase.EPanelType.Normal, nInstrument, "", "", ["Drums", "Guitar", "Bass"])
         {
             action = () =>
             {
@@ -68,7 +68,7 @@ internal class CActSelectQuickConfig : CActSelectPopupMenu
         List<int> automode = tConfigureAuto_DefaultSettings();
         if (nInstrument == (int)EInstrumentPart.DRUMS)
         {
-            var autoMode = new CItemList("Auto Mode", CItemBase.EPanelType.Normal, automode[nInstrument], "", "", "All Auto", "Auto LP", "Auto BD", "2PedalAuto", "XGLaneAuto", "Custom", "OFF")
+            var autoMode = new CItemList("Auto Mode", CItemBase.EPanelType.Normal, automode[nInstrument], "", "", ["All Auto", "Auto LP", "Auto BD", "2PedalAuto", "XGLaneAuto", "Custom", "OFF"])
             {
                 action = MakeAutoPanel
             };
@@ -76,7 +76,7 @@ internal class CActSelectQuickConfig : CActSelectPopupMenu
         }
         else
         {
-            var autoMode = new CItemList("Auto Mode", CItemBase.EPanelType.Normal, automode[nInstrument], "", "", "All Auto", "Auto Neck", "Auto Pick", "Custom", "OFF")
+            var autoMode = new CItemList("Auto Mode", CItemBase.EPanelType.Normal, automode[nInstrument], "", "", ["All Auto", "Auto Neck", "Auto Pick", "Custom", "OFF"])
             {
                 action = MakeAutoPanel
             };
@@ -113,7 +113,7 @@ internal class CActSelectQuickConfig : CActSelectPopupMenu
             "HALF: wallpaper, lanes and gauge are\n" +
             " disappeared.\n" +
             "FULL: additionaly to HALF, bar/beat\n" +
-            " lines, hit bar, pads are disappeared.", "OFF", "HALF", "FULL")
+            " lines, hit bar, pads are disappeared.", ["OFF", "HALF", "FULL"])
         {
             action = () =>
             {
@@ -188,7 +188,7 @@ internal class CActSelectQuickConfig : CActSelectPopupMenu
 
         var suddenHidden = new CItemList("HID/SUD", CItemBase.EPanelType.Normal, CDTXMania.ConfigIni.nHidSud[nInstrument],
             "",
-            "", "OFF", "HIDDEN", "SUDDEN", "HID/SUD", "STEALTH")
+            "", ["OFF", "HIDDEN", "SUDDEN", "HID/SUD", "STEALTH"])
         {
             action = () =>
             {
@@ -230,7 +230,8 @@ internal class CActSelectQuickConfig : CActSelectPopupMenu
         var autoGhost = new CItemList("AUTO Ghost", CItemBase.EPanelType.Normal,
             (int)CDTXMania.ConfigIni.eAutoGhost[nInstrument],
             "AUTOプレーのゴーストを指定します。\n",
-            "Specify Play Ghost data.\n", "Perfect", "Last Play", "Hi Skill", "Hi Score", "Online")
+            "Specify Play Ghost data.\n", 
+            ["Perfect", "Last Play", "Hi Skill", "Hi Score", "Online"])
         {
             action = () =>
             {
@@ -243,7 +244,8 @@ internal class CActSelectQuickConfig : CActSelectPopupMenu
         var targetGhost = new CItemList("Target Ghost", CItemBase.EPanelType.Normal,
             (int)CDTXMania.ConfigIni.eTargetGhost[nInstrument],
             "ターゲットゴーストを指定します。\n",
-            "Specify Target Ghost data.\n", "None", "Perfect", "Last Play", "Hi Skill", "Hi Score", "Online")
+            "Specify Target Ghost data.\n", 
+            ["None", "Perfect", "Last Play", "Hi Skill", "Hi Score", "Online"])
         {
             action = () =>
             {
@@ -256,7 +258,7 @@ internal class CActSelectQuickConfig : CActSelectPopupMenu
             
         #region [ 共通 SET切り替え/More/Return ]
         //l.Add(new CSwitchItemList("Config Set", CItemBase.EPanelType.Normal, nCurrentConfigSet, "", "", new string[] { "SET-1", "SET-2", "SET-3" }));
-        var more = new CSwitchItemList("More...", CItemBase.EPanelType.Normal, 0, "", "", "")
+        var more = new CSwitchItemList("More...", CItemBase.EPanelType.Normal, 0, "", "", [""])
         {
             action = () =>
             {
@@ -267,7 +269,7 @@ internal class CActSelectQuickConfig : CActSelectPopupMenu
         };
         itemList.Add(more);
 
-        var returnBtn = new CSwitchItemList("Return", CItemBase.EPanelType.Normal, 0, "", "", "", "")
+        var returnBtn = new CSwitchItemList("Return", CItemBase.EPanelType.Normal, 0, "", "", [""])
         {
             action = () =>
             {

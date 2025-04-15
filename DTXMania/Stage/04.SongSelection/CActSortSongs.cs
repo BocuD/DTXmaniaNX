@@ -15,7 +15,7 @@ internal class CActSortSongs : CActSelectPopupMenu
 	{
 		lci = [];
 		
-		CItemList title = new("Title", CItemBase.EPanelType.Normal, 0, "", "", "Z,Y,X,...", "A,B,C,...");
+		CItemList title = new("Title", CItemBase.EPanelType.Normal, 0, "", "", ["Z,Y,X,...", "A,B,C,..."]);
 		title.action = () =>
 		{
 			int order = title.GetIndex() * 2 - 1;
@@ -24,7 +24,7 @@ internal class CActSortSongs : CActSelectPopupMenu
 		};
 		lci.Add(title);
 
-		CItemList level = new("Level", CItemBase.EPanelType.Normal, 0, "", "", "99,98,97,...", "1,2,3,...");
+		CItemList level = new("Level", CItemBase.EPanelType.Normal, 0, "", "", ["99,98,97,...", "1,2,3,..."]);
 		level.action = () =>
 		{
 			int order = level.GetIndex() * 2 - 1;
@@ -33,7 +33,7 @@ internal class CActSortSongs : CActSelectPopupMenu
 		};
 		lci.Add(level);
 
-		CItemList bestRank = new("Best Rank", CItemBase.EPanelType.Normal, 0, "", "", "E,D,C,...", "SS,S,A,...");
+		CItemList bestRank = new("Best Rank", CItemBase.EPanelType.Normal, 0, "", "", ["E,D,C,...", "SS,S,A,..."]);
 		bestRank.action = () =>
 		{
 			int order = bestRank.GetIndex() * 2 - 1;
@@ -41,7 +41,7 @@ internal class CActSortSongs : CActSelectPopupMenu
 		};
 		lci.Add(bestRank);
 
-		CItemList playCount = new("PlayCount", CItemBase.EPanelType.Normal, 0, "", "", "10,9,8,...", "1,2,3,...");
+		CItemList playCount = new("PlayCount", CItemBase.EPanelType.Normal, 0, "", "", ["10,9,8,...", "1,2,3,..."]);
 		playCount.action = () =>
 		{
 			int order = playCount.GetIndex() * 2 - 1;
@@ -50,7 +50,7 @@ internal class CActSortSongs : CActSelectPopupMenu
 		};
 		lci.Add(playCount);
 
-		CItemList artist = new("Artist", CItemBase.EPanelType.Normal, 0, "", "", "Z,Y,X,...", "A,B,C,...");
+		CItemList artist = new("Artist", CItemBase.EPanelType.Normal, 0, "", "", ["Z,Y,X,...", "A,B,C,..."]);
 		artist.action = () =>
 		{
 			int order = artist.GetIndex() * 2 - 1;
@@ -59,7 +59,7 @@ internal class CActSortSongs : CActSelectPopupMenu
 		};
 		lci.Add(artist);
 
-		CItemList? skillPoint = new("SkillPoint", CItemBase.EPanelType.Normal, 0, "", "", "100,99,98,...", "1,2,3,...");
+		CItemList? skillPoint = new("SkillPoint", CItemBase.EPanelType.Normal, 0, "", "", ["100,99,98,...", "1,2,3,..."]);
 		skillPoint.action = () =>
 		{
 			int order = skillPoint.GetIndex() * 2 - 1;
@@ -68,7 +68,7 @@ internal class CActSortSongs : CActSelectPopupMenu
 		};
 		lci.Add(skillPoint);
 
-		CItemList date = new("Date", CItemBase.EPanelType.Normal, 0, "", "", "Dec.31,30,...", "Jan.1,2,...");
+		CItemList date = new("Date", CItemBase.EPanelType.Normal, 0, "", "", ["Dec.31,30,...", "Jan.1,2,..."]);
 		date.action = () =>
 		{
 			int order = date.GetIndex() * 2 - 1;
@@ -77,7 +77,7 @@ internal class CActSortSongs : CActSelectPopupMenu
 		};
 		lci.Add(date);
 
-		CItemList returnButton = new("Return", CItemBase.EPanelType.Normal, 0, "", "", "", "")
+		CItemList returnButton = new("Return", CItemBase.EPanelType.Normal, 0, "", "", [""])
 		{
 			action = tDeativatePopupMenu
 		};

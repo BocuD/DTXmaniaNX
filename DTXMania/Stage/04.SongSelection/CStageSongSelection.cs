@@ -66,15 +66,15 @@ internal class CStageSongSelection : CStage
 		bNotActivated = true;
 		listChildActivities.Add(actFIFO = new CActFIFOBlack());
 		listChildActivities.Add(actFIFromResultsScreen = new CActFIFOBlack());
-		listChildActivities.Add(actSongList = new CActSelectSongList());
+		listChildActivities.Add(actSongList = new CActSelectSongList(this));
 		listChildActivities.Add(actStatusPanel = new CActSelectStatusPanel());
 		listChildActivities.Add(actPerHistoryPanel = new CActSelectPerfHistoryPanel());
-		listChildActivities.Add(actPreimagePanel = new CActSelectPreimagePanel());
+		listChildActivities.Add(actPreimagePanel = new CActSelectPreimagePanel(this));
 		listChildActivities.Add(actPresound = new CActSelectPresound());
 		listChildActivities.Add(actArtistComment = new CActSelectArtistComment());
 		listChildActivities.Add(actInformation = new CActSelectInformation());
 		listChildActivities.Add(actSortSongs = new CActSortSongs());
-		listChildActivities.Add(actShowCurrentPosition = new CActScrollBar());
+		listChildActivities.Add(actShowCurrentPosition = new CActScrollBar(this));
 		listChildActivities.Add(actBackgroundVideoAVI = new CActSelectBackgroundAVI());
 		listChildActivities.Add(actQuickConfig = new CActSelectQuickConfig());
 		

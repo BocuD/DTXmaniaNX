@@ -68,11 +68,13 @@ internal class CActSelectSongList : CActivity
 	// (前と同じ曲なら選択曲変更に掛かる再計算を省略して高速化するため)
 	private CSongListNode song_last = null;
 
-		
-	// コンストラクタ
 
-	public CActSelectSongList()
+	private CStageSongSelection stageSongSelection;
+
+	public CActSelectSongList(CStageSongSelection cStageSongSelection)
 	{
+		stageSongSelection = cStageSongSelection;
+		
 		rSelectedSong = null;
 		n現在のアンカ難易度レベル = 0;
 		bNotActivated = true;
@@ -351,7 +353,7 @@ internal class CActSelectSongList : CActivity
 
 		// 選曲ステージに変更通知を発出し、関係Activityの対応を行ってもらう。
 
-		CDTXMania.stageSongSelection.tSelectedSongChanged();
+		stageSongSelection.tSelectedSongChanged();
 	}
 
 	public void tラベル名からステータスパネルを決定する(string strラベル名)
@@ -382,7 +384,7 @@ internal class CActSelectSongList : CActivity
 		rSelectedSong = CDTXMania.SongManager.listSongRoot[0];
 		t現在選択中の曲を元に曲バーを再構成する();
 		tSelectedSongHasChanged(true);
-		CDTXMania.stageSongSelection.tSelectedSongChanged();
+		stageSongSelection.tSelectedSongChanged();
 	}
 
 	/// <summary>
@@ -444,7 +446,7 @@ internal class CActSelectSongList : CActivity
 	/// </summary>
 	public void tSelectedSongHasChanged( bool bForce)    // t選択曲が変更された  #27648
 	{
-		CSongListNode song = CDTXMania.stageSongSelection.r現在選択中の曲;
+		CSongListNode song = stageSongSelection.r現在選択中の曲;
 		if ( song == null )
 			return;
 		if ( song == song_last && bForce == false )
@@ -648,7 +650,7 @@ internal class CActSelectSongList : CActivity
 				ct登場アニメ用[ i ] = new CCounter( -i * 10, 100, 3, CDTXMania.Timer );
 
 			nScrollTimer = CSoundManager.rcPerformanceTimer.nCurrentTime;
-			CDTXMania.stageSongSelection.tSelectedSongChanged();
+			stageSongSelection.tSelectedSongChanged();
 				
 			bJustStartedUpdate = false;
 		}
@@ -810,7 +812,7 @@ internal class CActSelectSongList : CActivity
 					}
 
 					if( nTargetScrollCounter == 0 )
-						CDTXMania.stageSongSelection.tSelectedSongChanged();		// スクロール完了＝選択曲変更！
+						stageSongSelection.tSelectedSongChanged();		// スクロール完了＝選択曲変更！
 
 					//-----------------
 					#endregion
@@ -873,7 +875,7 @@ internal class CActSelectSongList : CActivity
 					}
 						
 					if( nTargetScrollCounter == 0 )
-						CDTXMania.stageSongSelection.tSelectedSongChanged();		// スクロール完了＝選択曲変更！
+						stageSongSelection.tSelectedSongChanged();		// スクロール完了＝選択曲変更！
 					//-----------------
 					#endregion
 				}
@@ -1028,10 +1030,10 @@ internal class CActSelectSongList : CActivity
 					if ( stBarInformation[ nパネル番号 ].txTitleName != null )
 						stBarInformation[ nパネル番号 ].txTitleName.tDraw2D( CDTXMania.app.Device, i選択曲バーX座標 + 55 + titleOffsets.X, y選曲 + titleOffsets.Y);
 
-					if (CDTXMania.stageSongSelection.r現在選択中の曲.eNodeType == CSongListNode.ENodeType.SCORE && actステータスパネル.txパネル本体 == null)
+					if (stageSongSelection.r現在選択中の曲.eNodeType == CSongListNode.ENodeType.SCORE && actステータスパネル.txパネル本体 == null)
 					{
 						if (txSelectedSongName == null)
-							txSelectedSongName = tGenerateTextTexture(CDTXMania.stageSongSelection.rSelectedScore.SongInformation.Title);
+							txSelectedSongName = tGenerateTextTexture(stageSongSelection.rSelectedScore.SongInformation.Title);
 						if (txSelectedSongName != null)
 						{
 							if (txSelectedSongName.szImageSize.Width > 600)
@@ -1041,7 +1043,7 @@ internal class CActSelectSongList : CActivity
 						}
 
 						if ( txSelectedArtistName == null )
-							txSelectedArtistName = tGenerateTextTexture_Small( CDTXMania.stageSongSelection.rSelectedScore.SongInformation.ArtistName );
+							txSelectedArtistName = tGenerateTextTexture_Small( stageSongSelection.rSelectedScore.SongInformation.ArtistName );
 						if ( txSelectedArtistName != null )
 						{
 							if ( txSelectedArtistName.szImageSize.Width > 600 )

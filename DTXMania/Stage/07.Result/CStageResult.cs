@@ -24,7 +24,6 @@ internal class CStageResult : CStage
 	public STDGBVALUE<bool> bAuto;        // #23596 10.11.16 add ikanick
 	//        10.11.17 change (int to bool) ikanick
 	public STDGBVALUE<int> nRankValue;
-	public STDGBVALUE<int> nNbPerformances;
 	public int nResultRank;
 	public CChip[] rEmptyDrumChip;
 	public STDGBVALUE<CScoreIni.CPerformanceEntry> stPerformanceEntry;
@@ -43,14 +42,14 @@ internal class CStageResult : CStage
 		stPerformanceEntry.Bass = new CScoreIni.CPerformanceEntry();
 		rEmptyDrumChip = new CChip[ 10 ];
 		nResultRank = -1;
-		nチャンネル0Atoレーン07 = new int[] { 1, 2, 3, 4, 5, 7, 6, 1, 8, 0, 9 };
+		nチャンネル0Atoレーン07 = [1, 2, 3, 4, 5, 7, 6, 1, 8, 0, 9];
 		eStageID = EStage.Result_7;
 		ePhaseID = EPhase.Common_DefaultState;
 		bNotActivated = true;
 		listChildActivities.Add( actResultImage = new CActResultImage(this) );
 		listChildActivities.Add( actParameterPanel = new CActResultParameterPanel(this) );
 		listChildActivities.Add( actRank = new CActResultRank(this) );
-		listChildActivities.Add( actSongBar = new CActResultSongBar() );
+		listChildActivities.Add( new CActResultSongBar() );
 		//base.listChildActivities.Add( this.actProgressBar = new CActPerfProgressBar(true) );
 		listChildActivities.Add( actFI = new CActFIFOWhite() );
 		listChildActivities.Add( actFO = new CActFIFOBlack() );
@@ -205,7 +204,7 @@ internal class CStageResult : CStage
 						}
 
 						//Save progress bar records
-						CScore cScore = CDTXMania.stageSongSelection.rChosenScore;
+						CScore cScore = CDTXMania.StageManager.stageSongSelection.rChosenScore;
 						strBestProgressBarRecord[i] = cScore.SongInformation.progress[i];
 						//May not need to save this...
 						strCurrProgressBarRecord[i] = stPerformanceEntry[i].strProgress;
@@ -300,17 +299,12 @@ internal class CStageResult : CStage
 				}
 				//---------------------
 				#endregion
-
-				#region [ Update nb of performance #24281 2011.1.30 yyagi]
-				nNbPerformances.Drums = ini.stFile.PlayCountDrums;
-				nNbPerformances.Guitar = ini.stFile.PlayCountGuitar;
-				nNbPerformances.Bass = ini.stFile.PlayCountBass;
-				#endregion
+				
 				#region [ Update score information on Song Selection screen ]
 				//---------------------
 				if (!CDTXMania.bCompactMode)
 				{
-					CScore cScore = CDTXMania.stageSongSelection.rChosenScore;
+					CScore cScore = CDTXMania.StageManager.stageSongSelection.rChosenScore;
 					bool[] b更新が必要か否か = new bool[3];
 					CScoreIni.tGetIsUpdateNeeded(out b更新が必要か否か[0], out b更新が必要か否か[1], out b更新が必要か否か[2]);
 					for (int m = 0; m < 3; m++)
@@ -361,18 +355,20 @@ internal class CStageResult : CStage
 	{
 		//return; //2015.12.31 kairera0467 以下封印
 
-		STDGBVALUE<bool> saveCond = new STDGBVALUE<bool>();
-		saveCond.Drums = true;
-		saveCond.Guitar = true;
-		saveCond.Bass = true;
-            
+		STDGBVALUE<bool> saveCond = new()
+		{
+			Drums = true,
+			Guitar = true,
+			Bass = true
+		};
+
 		foreach( CChip chip in CDTXMania.DTX.listChip )
 		{
 			if( chip.bIsAutoPlayed )
 			{
 				if (chip.nChannelNumber != EChannel.Guitar_Wailing && chip.nChannelNumber != EChannel.Bass_Wailing) // Guitar/Bass Wailing は OK
 				{
-					saveCond[(int)(chip.eInstrumentPart)] = false;
+					saveCond[(int)chip.eInstrumentPart] = false;
 				}
 			}
 		}
@@ -385,50 +381,44 @@ internal class CStageResult : CStage
 		string filename = CDTXMania.DTX.strFileName + ".";
 		EInstrumentPart inst = EInstrumentPart.UNKNOWN;
 
-		if ( sectionIndex == 0 )
+		switch (sectionIndex)
 		{
-			filename += "hiscore.dr.ghost";
-			inst = EInstrumentPart.DRUMS;
-		}
-		else if (sectionIndex == 1 )
-		{
-			filename += "hiskill.dr.ghost";
-			inst = EInstrumentPart.DRUMS;
-		}
-		if (sectionIndex == 2 )
-		{
-			filename += "hiscore.gt.ghost";
-			inst = EInstrumentPart.GUITAR;
-		}
-		else if (sectionIndex == 3 )
-		{
-			filename += "hiskill.gt.ghost";
-			inst = EInstrumentPart.GUITAR;
-		}
-		if (sectionIndex == 4 )
-		{
-			filename += "hiscore.bs.ghost";
-			inst = EInstrumentPart.BASS;
-		}
-		else if (sectionIndex == 5)
-		{
-			filename += "hiskill.bs.ghost";
-			inst = EInstrumentPart.BASS;
-		}
-		else if (sectionIndex == 6)
-		{
-			filename += "lastplay.dr.ghost";
-			inst = EInstrumentPart.DRUMS;
-		}
-		else if (sectionIndex == 7 )
-		{
-			filename += "lastplay.gt.ghost";
-			inst = EInstrumentPart.GUITAR;
-		}
-		else if (sectionIndex == 8)
-		{
-			filename += "lastplay.bs.ghost";
-			inst = EInstrumentPart.BASS;
+			case 0:
+				filename += "hiscore.dr.ghost";
+				inst = EInstrumentPart.DRUMS;
+				break;
+			case 1:
+				filename += "hiskill.dr.ghost";
+				inst = EInstrumentPart.DRUMS;
+				break;
+			case 2:
+				filename += "hiscore.gt.ghost";
+				inst = EInstrumentPart.GUITAR;
+				break;
+			case 3:
+				filename += "hiskill.gt.ghost";
+				inst = EInstrumentPart.GUITAR;
+				break;
+			case 4:
+				filename += "hiscore.bs.ghost";
+				inst = EInstrumentPart.BASS;
+				break;
+			case 5:
+				filename += "hiskill.bs.ghost";
+				inst = EInstrumentPart.BASS;
+				break;
+			case 6:
+				filename += "lastplay.dr.ghost";
+				inst = EInstrumentPart.DRUMS;
+				break;
+			case 7:
+				filename += "lastplay.gt.ghost";
+				inst = EInstrumentPart.GUITAR;
+				break;
+			case 8:
+				filename += "lastplay.bs.ghost";
+				inst = EInstrumentPart.BASS;
+				break;
 		}
 
 		if (inst == EInstrumentPart.UNKNOWN)
@@ -833,7 +823,7 @@ internal class CStageResult : CStage
 	private CActResultParameterPanel actParameterPanel;
 	private CActResultRank actRank;
 	private CActResultImage actResultImage;
-	private CActResultSongBar actSongBar;		
+
 	//private CActPerfProgressBar actProgressBar;
 	private bool bAnimationComplete;  // bアニメが完了
 	private bool bIsCheckedWhetherResultScreenShouldSaveOrNot;				// #24509 2011.3.14 yyagi
@@ -865,48 +855,20 @@ internal class CStageResult : CStage
 	{
 		string path = Path.GetDirectoryName( CDTXMania.DTX.strFileNameFullPath );
 		string datetime = DateTime.Now.ToString( "yyyyMMddHHmmss" );
-		if ( bIsAutoSave )
+		if (bIsAutoSave)
 		{
 			// リザルト画像を自動保存するときは、dtxファイル名.yyMMddHHmmss_DRUMS_SS.png という形式で保存。
-			for ( int i = 0; i < 3; i++ )
+			for (int i = 0; i < 3; i++)
 			{
-				if ( bNewRecordRank[ i ] == true || bNewRecordSkill[ i ] == true )
+				if (bNewRecordRank[i] || bNewRecordSkill[i])
 				{
-					string strPart = ( (EInstrumentPart) ( i ) ).ToString();
-					string strRank = ( (CScoreIni.ERANK) ( nRankValue[ i ] ) ).ToString();
-					string strFullPath = CDTXMania.DTX.strFileNameFullPath + "." + datetime + "_" + strPart + "_" + strRank + ".png";
-					//Surface.ToFile( pSurface, strFullPath, ImageFileFormat.Png );
-					CDTXMania.app.SaveResultScreen( strFullPath );
+					string strPart = ((EInstrumentPart)(i)).ToString();
+					string strRank = ((CScoreIni.ERANK)(nRankValue[i])).ToString();
+					string strFullPath = $"{CDTXMania.DTX.strFileNameFullPath}.{datetime}_{strPart}_{strRank}.png";
+					CDTXMania.app.SaveResultScreen(strFullPath);
 				}
 			}
 		}
-		#region [ #24609 2011.4.11 yyagi; リザルトの手動保存ロジックは、CDTXManiaに移管した。]
-//			else
-//			{
-//				// リザルト画像を手動保存するときは、dtxファイル名.yyMMddHHmmss_SS.png という形式で保存。(楽器名無し)
-//				string strRank = ( (CScoreIni.ERANK) ( CDTXMania.stageResult.n総合ランク値 ) ).ToString();
-//				string strSavePath = CDTXMania.strEXEのあるフォルダ + "\\" + "Capture_img";
-//				if ( !Directory.Exists( strSavePath ) )
-//				{
-//					try
-//					{
-//						Directory.CreateDirectory( strSavePath );
-//					}
-//					catch
-//					{
-//					}
-//				}
-//				string strSetDefDifficulty = CDTXMania.stageSongSelection.rConfirmedSong.arDifficultyLabel[ CDTXMania.stageSongSelection.nConfirmedSongDifficulty ];
-//				if ( strSetDefDifficulty != null )
-//				{
-//					strSetDefDifficulty = "(" + strSetDefDifficulty + ")";
-//				}
-//				string strFullPath = strSavePath + "\\" + CDTXMania.DTX.TITLE + strSetDefDifficulty +
-//					"." + datetime + "_" + strRank + ".png";
-//				// Surface.ToFile( pSurface, strFullPath, ImageFileFormat.Png );
-//				CDTXMania.app.SaveResultScreen( strFullPath );
-//			}
-		#endregion
 	}
 	#endregion
 	//-----------------
