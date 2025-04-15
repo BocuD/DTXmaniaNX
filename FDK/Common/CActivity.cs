@@ -1,4 +1,6 @@
-﻿namespace FDK;
+﻿using System.Diagnostics;
+
+namespace FDK;
 
 public class CActivity
 {
@@ -59,13 +61,31 @@ public class CActivity
 		if( bNotActivated )
 			return;
 
-		// 自身のリソースを解放する。
-		OnUnmanagedReleaseResources();
-		OnManagedReleaseResources();
-
+		try
+		{
+			// 自身のリソースを解放する。
+			OnUnmanagedReleaseResources();
+			OnManagedReleaseResources();
+		}
+		catch (Exception e)
+		{
+			Trace.TraceError($"An exception was thrown during CActivity.OnDeactivate()! {e} {e.StackTrace}");
+		}
+		
 		// すべての 子Activity を非活性化する。
-		foreach( CActivity activity in listChildActivities )
-			activity.OnDeactivate();
+		foreach (CActivity activity in listChildActivities)
+		{
+			try
+			{
+				activity.OnDeactivate();
+			}
+			catch (Exception e)
+			{
+				Trace.TraceError(
+					$"An exception was thrown during CActivity.OnDeactivate() while deactivating child" +
+					$"{(activity != null ? activity.GetType().Name : "null activity")}! {e} {e.StackTrace}");
+			}
+		}
 
 		bNotActivated = true;	// このフラグは、以上のメソッドを呼び出した後にセットする。
 	}
