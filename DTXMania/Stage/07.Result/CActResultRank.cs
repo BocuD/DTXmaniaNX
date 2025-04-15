@@ -12,7 +12,7 @@ internal class CActResultRank : CActivity
     public CActResultRank(CStageResult cStageResult)
     {
         stageResult = cStageResult;
-        bNotActivated = true;
+        bActivated = false;
     }
 
 
@@ -98,7 +98,7 @@ internal class CActResultRank : CActivity
     }
     public override void OnManagedCreateResources()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
 
             txStageCleared = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\ScreenResult StageCleared.png"));
@@ -150,7 +150,7 @@ internal class CActResultRank : CActivity
     }
     public override void OnManagedReleaseResources()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             CDTXMania.tReleaseTexture(ref txStageCleared);
             CDTXMania.tReleaseTexture(ref txFullCombo);
@@ -161,7 +161,7 @@ internal class CActResultRank : CActivity
     }
     public override int OnUpdateAndDraw()
     {
-        if (bNotActivated)
+        if (!bActivated)
         {
             return 0;
         }

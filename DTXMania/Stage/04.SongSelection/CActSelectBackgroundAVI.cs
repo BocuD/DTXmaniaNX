@@ -13,7 +13,7 @@ internal class CActSelectBackgroundAVI : CActivity
         bLoop = true;
         position = 0;
 
-        bNotActivated = true;
+        bActivated = false;
     }
 
     public void Start(EChannel nチャンネル番号, CAVI rAVI, int n総移動時間ms, int n移動開始時刻ms)
@@ -108,7 +108,7 @@ internal class CActSelectBackgroundAVI : CActivity
 
     public int tUpdateAndDraw() 
     {
-        if ((!bNotActivated))
+        if ((bActivated))
         {
             #region[ムービーのフレーム作成処理]
             if (((tx描画用 != null)) && (rAVI != null)) //クリップ無し曲での進入防止。
@@ -194,7 +194,7 @@ internal class CActSelectBackgroundAVI : CActivity
 
     public override void OnManagedCreateResources()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             base.OnManagedCreateResources();
         }
@@ -202,7 +202,7 @@ internal class CActSelectBackgroundAVI : CActivity
 
     public override void OnManagedReleaseResources()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             if (tx描画用 != null)
             {

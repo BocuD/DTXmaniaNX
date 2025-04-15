@@ -14,7 +14,7 @@ internal class CActPerfScrollSpeed : CActivity
 
 	public CActPerfScrollSpeed()
 	{
-		bNotActivated = true;
+		bActivated = false;
 	}
 
 
@@ -31,7 +31,7 @@ internal class CActPerfScrollSpeed : CActivity
 	}
 	public override unsafe int OnUpdateAndDraw()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			if( bJustStartedUpdate )
 			{

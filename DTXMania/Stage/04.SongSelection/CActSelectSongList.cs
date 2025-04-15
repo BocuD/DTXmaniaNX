@@ -77,7 +77,7 @@ internal class CActSelectSongList : CActivity
 		
 		rSelectedSong = null;
 		n現在のアンカ難易度レベル = 0;
-		bNotActivated = true;
+		bActivated = false;
 		bIsEnumeratingSongs = false;
 
 		listChildActivities.Add( actステータスパネル = new CActSelectStatusPanel() );
@@ -504,7 +504,7 @@ internal class CActSelectSongList : CActivity
 	}
 	public override void OnDeactivate()
 	{
-		if( bNotActivated )
+		if (!bActivated)
 			return;
 
 		CDTXMania.tDisposeSafely( ref ftSongListFont );
@@ -516,7 +516,7 @@ internal class CActSelectSongList : CActivity
 	}
 	public override void OnManagedCreateResources()
 	{
-		if( bNotActivated )
+		if (!bActivated)
 			return;
 
 		strDefaultPreImage = CSkin.Path(@"Graphics\5_preimage default.png");
@@ -599,7 +599,7 @@ internal class CActSelectSongList : CActivity
 	}
 	public override void OnManagedReleaseResources()
 	{
-		if( bNotActivated )
+		if (!bActivated)
 			return;
 
 		CDTXMania.tDisposeSafely( ref txItemNumbers );
@@ -639,7 +639,7 @@ internal class CActSelectSongList : CActivity
 	}
 	public override int OnUpdateAndDraw()
 	{
-		if( bNotActivated )
+		if (!bActivated)
 			return 0;
 
 		#region [ 初めての進行描画 ]

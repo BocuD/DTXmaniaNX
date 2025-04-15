@@ -12,14 +12,14 @@ internal class CActScrollBar : CActivity
 	public CActScrollBar(CStageSongSelection cStageSongSelection)
 	{
 		stageSongSelection = cStageSongSelection;
-		bNotActivated = true;
+		bActivated = false;
 	}
 
 	// CActivity 実装
 
 	public override void OnManagedCreateResources()
 	{
-		if ( !bNotActivated )
+		if ( bActivated )
 		{
 			txScrollBar = CDTXMania.tGenerateTexture( CSkin.Path(@"Graphics\5_scrollbar.png"), false );
 			base.OnManagedCreateResources();
@@ -27,7 +27,7 @@ internal class CActScrollBar : CActivity
 	}
 	public override void OnManagedReleaseResources()
 	{
-		if ( !bNotActivated )
+		if ( bActivated )
 		{
 			CDTXMania.tDisposeSafely( ref txScrollBar );
 			base.OnManagedReleaseResources();

@@ -12,7 +12,7 @@ internal abstract class CActPerfChipFireGB : CActivity
 
 	public CActPerfChipFireGB()
 	{
-		bNotActivated = true;
+		bActivated = false;
 	}
 
 
@@ -51,7 +51,7 @@ internal abstract class CActPerfChipFireGB : CActivity
 	}
 	public override void OnManagedCreateResources()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			tx火花[ 0 ] = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlay chip fire red.png" ) );
 			if( tx火花[ 0 ] != null )
@@ -84,7 +84,7 @@ internal abstract class CActPerfChipFireGB : CActivity
 	}
 	public override void OnManagedReleaseResources()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			CDTXMania.tReleaseTexture( ref tx火花[ 0 ] );
 			CDTXMania.tReleaseTexture( ref tx火花[ 1 ] );
@@ -97,7 +97,7 @@ internal abstract class CActPerfChipFireGB : CActivity
 	}
 	public override int OnUpdateAndDraw()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			for( int i = 0; i < 10; i++ )
 			{

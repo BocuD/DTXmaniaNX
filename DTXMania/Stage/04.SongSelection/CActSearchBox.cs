@@ -77,7 +77,7 @@ internal class CActSearchBox : CActivity
 
 	public CActSearchBox()
 	{
-		bNotActivated = true;
+		bActivated = false;
 	}
 
 	public override void OnActivate()
@@ -111,7 +111,7 @@ internal class CActSearchBox : CActivity
 
 	public override void OnManagedCreateResources()
 	{
-		if (bNotActivated)
+		if (!bActivated)
 		{
 			return;
 		}
@@ -164,7 +164,7 @@ internal class CActSearchBox : CActivity
 
 	public override void OnManagedReleaseResources()
 	{
-		if (!bNotActivated)
+		if (bActivated)
 		{
 			CDTXMania.tDisposeSafely(ref prvf入力文字列);
 			CDTXMania.tDisposeSafely(ref prvf説明);
@@ -178,7 +178,7 @@ internal class CActSearchBox : CActivity
 
 	public override int OnUpdateAndDraw()
 	{
-		if (bNotActivated)
+		if (!bActivated)
 		{
 			return 0;
 		}

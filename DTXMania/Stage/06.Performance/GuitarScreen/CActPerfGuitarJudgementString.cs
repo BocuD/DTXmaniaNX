@@ -87,7 +87,7 @@ internal class CActPerfGuitarJudgementString : CActPerfCommonJudgementString
             this.stレーンサイズ[ i ].x = sizeXW[ i, 0 ];
             this.stレーンサイズ[ i ].w = sizeXW[ i, 1 ];
         }
-        bNotActivated = true; 
+        bActivated = false; 
     }
 
 
@@ -95,7 +95,7 @@ internal class CActPerfGuitarJudgementString : CActPerfCommonJudgementString
 
     public override int OnUpdateAndDraw()
     {
-        if( !bNotActivated  && (CDTXMania.ConfigIni.bDisplayJudge.Guitar || CDTXMania.ConfigIni.bDisplayJudge.Bass))
+        if( bActivated  && (CDTXMania.ConfigIni.bDisplayJudge.Guitar || CDTXMania.ConfigIni.bDisplayJudge.Bass))
         {
             int index = 0;
             #region[ 座標など定義 ]

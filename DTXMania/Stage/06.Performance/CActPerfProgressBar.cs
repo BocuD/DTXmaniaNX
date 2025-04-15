@@ -11,7 +11,7 @@ internal class CActPerfProgressBar : CActivity
 	public CActPerfProgressBar(bool bIsCalledFromOutsidePerformance = false)
 	{
 		b演奏画面以外からの呼び出し = bIsCalledFromOutsidePerformance;
-		bNotActivated = true;
+		bActivated = false;
 	}
 
 
@@ -102,7 +102,7 @@ internal class CActPerfProgressBar : CActivity
 
 	public override void OnDeactivate()
 	{
-		if (!bNotActivated)
+		if (bActivated)
 		{
 			ct登場用 = null;
 		}
@@ -112,7 +112,7 @@ internal class CActPerfProgressBar : CActivity
 
 	public override void OnManagedCreateResources()
 	{
-		if (!bNotActivated)
+		if (bActivated)
 		{
 			tCreateBestProgressBarRecordTexture(CDTXMania.stageSongSelection.rChosenScore);
 			tサイズが絡むテクスチャの生成();
@@ -151,7 +151,7 @@ internal class CActPerfProgressBar : CActivity
 
 	public override void OnManagedReleaseResources()
 	{
-		if (!bNotActivated)
+		if (bActivated)
 		{
 			CDTXMania.tDisposeSafely(ref txパネル用);
 			CDTXMania.tDisposeSafely(ref tx背景);
@@ -174,7 +174,7 @@ internal class CActPerfProgressBar : CActivity
 
 	public override int OnUpdateAndDraw()
 	{
-		if (!bNotActivated)
+		if (bActivated)
 		{
 			//if (base.bJustStartedUpdate)
 			//{
@@ -538,7 +538,7 @@ internal class CActPerfProgressBar : CActivity
 
 	public void t選択曲が変更された()
 	{
-		if (bNotActivated)
+		if (!bActivated)
 		{
 			return;
 		}

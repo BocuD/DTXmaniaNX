@@ -36,20 +36,13 @@ internal partial class CActConfigList : CActivity
     private CItemBase iGuitarReturnToMenu;
     private CItemBase iBassReturnToMenu;
         
-    public bool b現在選択されている項目はReturnToMenuである
+    public bool bCurrentlySelectedItemIsReturnToMenu
     {
         get
         {
             CItemBase currentItem = listItems[nCurrentSelection];
-            if (currentItem == iSystemReturnToMenu || currentItem == iDrumsReturnToMenu ||
-                currentItem == iGuitarReturnToMenu || currentItem == iBassReturnToMenu)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return currentItem == iSystemReturnToMenu || currentItem == iDrumsReturnToMenu ||
+                   currentItem == iGuitarReturnToMenu || currentItem == iBassReturnToMenu;
         }
     }
     public CItemBase ibCurrentSelection => listItems[nCurrentSelection];
@@ -68,12 +61,15 @@ internal partial class CActConfigList : CActivity
             case EMenuType.SystemGameplay:
                 tSetupItemList_System();
                 break;
+            
             case EMenuType.KeyAssignDrums:
                 tSetupItemList_Drums();
                 break;
+            
             case EMenuType.KeyAssignGuitar:
                 tSetupItemList_Guitar();
                 break;
+            
             case EMenuType.KeyAssignBass:
                 tSetupItemList_Bass();
                 break;
@@ -198,7 +194,7 @@ internal partial class CActConfigList : CActivity
 
     public override void OnDeactivate()
     {
-        if (bNotActivated)
+        if (!bActivated)
             return;
 
         tRecordToConfigIni();
@@ -226,7 +222,7 @@ internal partial class CActConfigList : CActivity
 
     public override void OnManagedCreateResources()
     {
-        if (bNotActivated)
+        if (!bActivated)
             return;
 
         txItemBoxNormal = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_itembox.png"), false);
@@ -241,7 +237,7 @@ internal partial class CActConfigList : CActivity
     }
     public override void OnManagedReleaseResources()
     {
-        if (bNotActivated)
+        if (!bActivated)
             return;
 
         CDTXMania.tReleaseTexture(ref txSkinSample1);
@@ -289,7 +285,7 @@ internal partial class CActConfigList : CActivity
     }
     public int tUpdateAndDraw(bool isFocusOnItemList)  // t進行描画 bool b項目リスト側にフォーカスがある
     {
-        if (bNotActivated)
+        if (!bActivated)
             return 0;
 
         // 進行

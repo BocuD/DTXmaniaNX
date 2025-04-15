@@ -65,7 +65,7 @@ internal class CActPerfCommonStatusPanel : CActivity
         stLagCountBlueText = LagCountBlueTextList.ToArray();
         stLagCountRedText = LagCountRedTextList.ToArray();
 
-        bNotActivated = true;
+        bActivated = false;
     }
         
         

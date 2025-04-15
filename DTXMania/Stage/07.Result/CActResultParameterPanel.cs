@@ -332,7 +332,7 @@ internal class CActResultParameterPanel : CActivity
         stLagCountBlueText = LagCountBlueTextList.ToArray();
         stLagCountRedText = LagCountRedTextList.ToArray();
 
-        bNotActivated = true;
+        bActivated = false;
         
         
     }
@@ -425,7 +425,7 @@ internal class CActResultParameterPanel : CActivity
     }
     public override void OnManagedCreateResources()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             txCharacter[0] = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_Ratenumber_s.png"));
             txCharacter[1] = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_Ratenumber_l.png"));
@@ -579,7 +579,7 @@ internal class CActResultParameterPanel : CActivity
     }
     public override void OnManagedReleaseResources()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             CDTXMania.tReleaseTexture( ref txパネル本体 );
             CDTXMania.tReleaseTexture( ref txNewRecord );
@@ -610,7 +610,7 @@ internal class CActResultParameterPanel : CActivity
     }
     public override int OnUpdateAndDraw()
     {
-        if (bNotActivated)
+        if (!bActivated)
         {
             return 0;
         }

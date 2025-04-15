@@ -115,7 +115,7 @@ public abstract class CStage : CActivity
 	
 	public override void OnManagedCreateResources()
 	{
-		if (!bNotActivated)
+		if (bActivated)
 		{
 			LoadUI();
 		}
@@ -125,7 +125,7 @@ public abstract class CStage : CActivity
 
 	public override void OnManagedReleaseResources()
 	{
-		if (!bNotActivated)
+		if (bActivated)
 		{
 			ui.Dispose();
 		}

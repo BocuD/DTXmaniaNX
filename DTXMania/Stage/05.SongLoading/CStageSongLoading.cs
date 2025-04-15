@@ -30,7 +30,7 @@ internal class CStageSongLoading : CStage
     {
         eStageID = EStage.SongLoading_5;
         ePhaseID = EPhase.Common_DefaultState;
-        bNotActivated = true;
+        bActivated = false;
         //			base.listChildActivities.Add( this.actFI = new CActFIFOBlack() );	// #27787 2012.3.10 yyagi 曲読み込み画面のフェードインの省略
         listChildActivities.Add(actFO = new CActFIFOBlackStart());
 
@@ -321,7 +321,7 @@ internal class CStageSongLoading : CStage
 
     public override void OnManagedCreateResources()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             txLevel = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\6_LevelNumber.png"));
             txDifficultyPanel = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\6_Difficulty.png"));
@@ -379,7 +379,7 @@ internal class CStageSongLoading : CStage
 
     public override void OnManagedReleaseResources()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             //テクスチャ11枚
             //2018.03.15 kairera0467 PrivateFontが抜けていた＆フォント生成直後に解放するようにしてみる
@@ -435,7 +435,7 @@ internal class CStageSongLoading : CStage
 
     public override int OnUpdateAndDraw()
     {
-        if (bNotActivated) return 0;
+        if (!bActivated) return 0;
 
         base.OnUpdateAndDraw();
 

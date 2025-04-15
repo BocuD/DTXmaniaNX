@@ -9,7 +9,7 @@ internal class CActPerfGuitarChipFire : CActPerfChipFireGB
 
 	public CActPerfGuitarChipFire()
 	{
-		bNotActivated = true;
+		bActivated = false;
 	}
 		
 		

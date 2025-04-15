@@ -11,7 +11,7 @@ internal class CActOptionPanel : CActivity
 
     public override void OnDeactivate()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             CDTXMania.tReleaseTexture(ref txOptionPanel);
             base.OnDeactivate();
@@ -19,7 +19,7 @@ internal class CActOptionPanel : CActivity
     }
     public override void OnManagedCreateResources()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             txOptionPanel = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\Screen option panels.png"), false);
             base.OnManagedCreateResources();
@@ -27,7 +27,7 @@ internal class CActOptionPanel : CActivity
     }
     public override int OnUpdateAndDraw()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             Device device = CDTXMania.app.Device;
             CConfigIni configIni = CDTXMania.ConfigIni;

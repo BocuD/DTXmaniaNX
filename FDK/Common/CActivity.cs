@@ -6,12 +6,7 @@ public class CActivity
 {
 	// プロパティ
 
-	public bool bActivated { get; private set; }
-	public bool bNotActivated
-	{
-		get => !bActivated;
-		set => bActivated = !value;
-	}
+	public bool bActivated { get; set; }
 	public List<CActivity> listChildActivities;
 
 	/// <summary>
@@ -26,7 +21,7 @@ public class CActivity
 
 	public CActivity()
 	{
-		bNotActivated = true;
+		bActivated = false;
 		listChildActivities = new List<CActivity>();
 	}
 
@@ -58,7 +53,7 @@ public class CActivity
 	public virtual void OnDeactivate()
 	{
 		// 活性化してないなら何もしない。
-		if( bNotActivated )
+		if (!bActivated)
 			return;
 
 		try
@@ -87,7 +82,7 @@ public class CActivity
 			}
 		}
 
-		bNotActivated = true;	// このフラグは、以上のメソッドを呼び出した後にセットする。
+		bActivated = false;	// このフラグは、以上のメソッドを呼び出した後にセットする。
 	}
 
 	/// <summary>
@@ -100,7 +95,7 @@ public class CActivity
 	public virtual void OnManagedCreateResources()
 	{
 		// 活性化してないなら何もしない。
-		if( bNotActivated )
+		if (!bActivated)
 			return;
 
 		// すべての 子Activity の Managed リソースを作成する。
@@ -118,7 +113,7 @@ public class CActivity
 	public virtual void OnUnmanagedCreateResources()
 	{
 		// 活性化してないなら何もしない。
-		if( bNotActivated )
+		if (!bActivated)
 			return;
 
 		// すべての 子Activity の Unmanaged リソースを作成する。
@@ -135,7 +130,7 @@ public class CActivity
 	public virtual void OnUnmanagedReleaseResources()
 	{
 		// 活性化してないなら何もしない。
-		if( bNotActivated )
+		if (!bActivated)
 			return;
 
 		// すべての 子Activity の Unmanaged リソースを解放する。
@@ -153,7 +148,7 @@ public class CActivity
 	public virtual void OnManagedReleaseResources()
 	{
 		// 活性化してないなら何もしない。
-		if( bNotActivated )
+		if (!bActivated)
 			return;
 
 		// すべての 子Activity の Managed リソースを解放する。
@@ -169,7 +164,7 @@ public class CActivity
 	public virtual int OnUpdateAndDraw()
 	{
 		// 活性化してないなら何もしない。
-		if( bNotActivated )
+		if (!bActivated)
 			return 0;
 
 

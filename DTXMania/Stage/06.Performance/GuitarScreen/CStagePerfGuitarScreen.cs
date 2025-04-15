@@ -13,7 +13,7 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 	{
 		eStageID = EStage.Performance_6;
 		ePhaseID = EPhase.Common_DefaultState;
-		bNotActivated = true;
+		bActivated = false;
 		listChildActivities.Add( actStageFailed = new CActPerfStageFailure() );
 		listChildActivities.Add( actDANGER = new CActPerfGuitarDanger() );
 		listChildActivities.Add( actAVI = new CActPerfAVI() );
@@ -96,7 +96,7 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 	}
 	public override void OnManagedCreateResources()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			bサビ区間 = false;
 			//this.tGenerateBackgroundTexture();
@@ -109,7 +109,7 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 	}
 	public override void OnManagedReleaseResources()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			//CDTXMania.tReleaseTexture( ref this.txBackground );
 			CDTXMania.tReleaseTexture( ref txChip );
@@ -156,7 +156,7 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 
 	public override int OnUpdateAndDraw()
 	{
-		if (bNotActivated) return 0;
+		if (!bActivated) return 0;
 
 		base.OnUpdateAndDraw();
 

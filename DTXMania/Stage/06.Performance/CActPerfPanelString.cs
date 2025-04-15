@@ -74,7 +74,7 @@ internal class CActPerfPanelString : CActivity
     }
     public override void OnManagedCreateResources()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             txジャケットパネル = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_JacketPanel.png"));
             string path = CDTXMania.DTX.strFolderName + CDTXMania.DTX.PREIMAGE;
@@ -113,7 +113,7 @@ internal class CActPerfPanelString : CActivity
     }
     public override void OnManagedReleaseResources()
     {
-        if ( !bNotActivated )
+        if ( bActivated )
         {
 //              CDTXMania.tReleaseTexture( ref this.txPanel );
             CDTXMania.tReleaseTexture( ref txSongName );
@@ -131,7 +131,7 @@ internal class CActPerfPanelString : CActivity
     }
     public int tUpdateAndDraw()  // t進行描画
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             /*
             //this.ct進行用.tUpdateLoop();

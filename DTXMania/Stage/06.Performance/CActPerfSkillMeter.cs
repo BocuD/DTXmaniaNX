@@ -56,7 +56,7 @@ internal class CActPerfSkillMeter : CActivity
 
 	public CActPerfSkillMeter()
 	{
-		bNotActivated = true;
+		bActivated = false;
 	}
 
 
@@ -77,7 +77,7 @@ internal class CActPerfSkillMeter : CActivity
 	}
 	public override void OnManagedCreateResources()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			//this.pfNameFont = new CPrivateFastFont( new FontFamily( "Arial" ), 16, FontStyle.Bold );
 			txグラフ = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\7_Graph_Main.png" ) );
@@ -99,7 +99,7 @@ internal class CActPerfSkillMeter : CActivity
 	}
 	public override void OnManagedReleaseResources()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			CDTXMania.tReleaseTexture( ref txグラフ );
 			CDTXMania.tReleaseTexture( ref txグラフ_ゲージ );
@@ -109,7 +109,7 @@ internal class CActPerfSkillMeter : CActivity
 	}
 	public override int OnUpdateAndDraw()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			if( bJustStartedUpdate )
 			{

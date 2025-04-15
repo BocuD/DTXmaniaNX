@@ -31,7 +31,7 @@ internal class CStageConfig : CStage
         listChildActivities.Add(actFIFO = new CActFIFOWhite());
         listChildActivities.Add(actList = new CActConfigList(this));
         listChildActivities.Add(actKeyAssign = new CActConfigKeyAssign(this));
-        bNotActivated = true;
+        bActivated = false;
     }
 
 
@@ -187,7 +187,7 @@ internal class CStageConfig : CStage
     
     public override void OnManagedReleaseResources()											// OPTIONと同じ(COnfig.iniの書き出しタイミングのみ異なるが、無視して良い)
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             CDTXMania.tReleaseTexture(ref txDescriptionPanel);
             
@@ -203,7 +203,7 @@ internal class CStageConfig : CStage
 
     public override int OnUpdateAndDraw()
     {
-        if (bNotActivated) return 0;
+        if (!bActivated) return 0;
         
         base.OnUpdateAndDraw();
         
@@ -309,7 +309,7 @@ internal class CStageConfig : CStage
                         case EItemPanelMode.PadList:
                             bool bIsKeyAssignSelectedBeforeHitEnter = actList.bIsKeyAssignSelected;	// #24525 2011.3.15 yyagi
                             actList.tPressEnter();
-                            if (actList.b現在選択されている項目はReturnToMenuである)
+                            if (actList.bCurrentlySelectedItemIsReturnToMenu)
                             {
                                 tDrawSelectedMenuDescriptionInDescriptionPanel();
                                 if (bIsKeyAssignSelectedBeforeHitEnter == false)							// #24525 2011.3.15 yyagi

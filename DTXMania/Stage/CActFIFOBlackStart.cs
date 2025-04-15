@@ -23,7 +23,7 @@ internal class CActFIFOBlackStart : CActivity
 
 	public override void OnDeactivate()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			CDTXMania.tReleaseTexture( ref tx黒タイル64x64 );
 			CDTXMania.tReleaseTexture( ref tx黒幕 );
@@ -33,7 +33,7 @@ internal class CActFIFOBlackStart : CActivity
 	}
 	public override void OnManagedCreateResources()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			tx黒タイル64x64 = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\Tile black 64x64.png" ), false );
 			tx黒幕 = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\6_FadeOut.jpg"), false);
@@ -42,7 +42,7 @@ internal class CActFIFOBlackStart : CActivity
 	}
 	public override int OnUpdateAndDraw()
 	{
-		if( bNotActivated || ( counter == null ) )
+		if( !bActivated || ( counter == null ) )
 		{
 			return 0;
 		}

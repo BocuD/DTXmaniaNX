@@ -16,7 +16,7 @@ internal class CActFlushGPU : CActivity
 
 	public override void OnManagedCreateResources()
 	{
-		if ( !bNotActivated )
+		if ( bActivated )
 		{
 			try			// #xxxxx 2012.12.31 yyagi: to prepare flush, first of all, I create q queue to the GPU.
 			{
@@ -37,7 +37,7 @@ internal class CActFlushGPU : CActivity
 	}
 	public override int OnUpdateAndDraw()
 	{
-		if ( !bNotActivated )
+		if ( bActivated )
 		{
 			IDirect3DQuery9.Issue( Issue.End );
 			IDirect3DQuery9.GetData<int>( out _, true );	// flush GPU queue

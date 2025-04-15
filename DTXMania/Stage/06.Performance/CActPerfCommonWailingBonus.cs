@@ -9,7 +9,7 @@ internal abstract class CActPerfCommonWailingBonus : CActivity
 
 	public CActPerfCommonWailingBonus()
 	{
-		bNotActivated = true;
+		bActivated = false;
 	}
 
 	public void Start( EInstrumentPart part )
@@ -33,7 +33,7 @@ internal abstract class CActPerfCommonWailingBonus : CActivity
 
 	public override void OnManagedCreateResources()
 	{
-		if ( !bNotActivated )
+		if ( bActivated )
 		{
 			txWailingBonus = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlay wailing bonus.png" ) );
 			txWailingFlush = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\7_WailingFlush.png" ) );
@@ -43,7 +43,7 @@ internal abstract class CActPerfCommonWailingBonus : CActivity
 	}
 	public override void OnManagedReleaseResources()
 	{
-		if ( !bNotActivated )
+		if ( bActivated )
 		{
 			CDTXMania.tReleaseTexture( ref txWailingBonus );
 			CDTXMania.tReleaseTexture( ref txWailingFlush );

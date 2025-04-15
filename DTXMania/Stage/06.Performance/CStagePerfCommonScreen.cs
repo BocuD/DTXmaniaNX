@@ -465,7 +465,7 @@ internal abstract class CStagePerfCommonScreen : CStage
     }
     public override void OnManagedCreateResources()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             ui = new UIGroup("Performance Common Screen");
             
@@ -505,7 +505,7 @@ internal abstract class CStagePerfCommonScreen : CStage
     }
     public override void OnManagedReleaseResources()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             actBackgroundAVI.Stop();
 

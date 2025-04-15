@@ -34,7 +34,7 @@ internal class CActFIFOWhite : CActivity
 
 	public override void OnDeactivate()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			CDTXMania.tReleaseTexture( ref tx白タイル64x64 );
 			base.OnDeactivate();
@@ -42,7 +42,7 @@ internal class CActFIFOWhite : CActivity
 	}
 	public override void OnManagedCreateResources()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			tx白タイル64x64 = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\Tile white 64x64.png" ), false );
 			base.OnManagedCreateResources();
@@ -50,7 +50,7 @@ internal class CActFIFOWhite : CActivity
 	}
 	public override int OnUpdateAndDraw()
 	{
-		if( bNotActivated || ( counter == null ) )
+		if( !bActivated || ( counter == null ) )
 		{
 			return 0;
 		}

@@ -636,7 +636,7 @@ internal class CActSelectQuickConfig : CActSelectPopupMenu
     }
     public override void OnManagedCreateResources()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             subMenu = new UIGroup("Quick Options Menu");
             subMenu.renderOrder = 100;
@@ -662,7 +662,7 @@ internal class CActSelectQuickConfig : CActSelectPopupMenu
     }
     public override void OnManagedReleaseResources()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             CDTXMania.tReleaseTexture(ref txAutoStatus);
                 

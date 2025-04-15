@@ -13,7 +13,7 @@ internal class CActSelectPerfHistoryPanel : CActivity
 	public CActSelectPerfHistoryPanel()
 	{
 		listChildActivities.Add( actステータスパネル = new CActSelectStatusPanel() );
-		bNotActivated = true;
+		bActivated = false;
 	}
 	public void t選択曲が変更された()
 	{
@@ -69,7 +69,7 @@ internal class CActSelectPerfHistoryPanel : CActivity
 	}
 	public override void OnManagedCreateResources()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			txパネル本体 = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\5_play history panel.png" ), true );
 			t選択曲が変更された();
@@ -78,7 +78,7 @@ internal class CActSelectPerfHistoryPanel : CActivity
 	}
 	public override void OnManagedReleaseResources()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			CDTXMania.tReleaseTexture( ref txパネル本体 );
 			CDTXMania.tReleaseTexture( ref tx文字列パネル );
@@ -87,7 +87,7 @@ internal class CActSelectPerfHistoryPanel : CActivity
 	}
 	public override int OnUpdateAndDraw()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			if( bJustStartedUpdate )
 			{

@@ -86,7 +86,7 @@ internal class CActPerfDrumsLaneFlushD : CActivity
 
            
 
-        bNotActivated = true;
+        bActivated = false;
     }
 		
 		
@@ -119,7 +119,7 @@ internal class CActPerfDrumsLaneFlushD : CActivity
     }
     public override void OnManagedCreateResources()
     {
-        if( !bNotActivated )
+        if( bActivated )
         {
             if (CDTXMania.ConfigIni.nLaneDisp.Drums == 0 || CDTXMania.ConfigIni.nLaneDisp.Drums == 2)
             {
@@ -143,7 +143,7 @@ internal class CActPerfDrumsLaneFlushD : CActivity
     }
     public override void OnManagedReleaseResources()
     {
-        if( !bNotActivated )
+        if( bActivated )
         {
             for( int i = 0; i < 22; i++ )
             {
@@ -158,7 +158,7 @@ internal class CActPerfDrumsLaneFlushD : CActivity
     }
     public override int OnUpdateAndDraw()
     {
-        if( !bNotActivated )
+        if( bActivated )
         {
             for( int i = 0; i < 11; i++ )
             {

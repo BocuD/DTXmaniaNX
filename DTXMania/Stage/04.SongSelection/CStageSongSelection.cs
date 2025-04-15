@@ -63,7 +63,7 @@ internal class CStageSongSelection : CStage
 	{
 		eStageID = EStage.SongSelection_4;
 		ePhaseID = EPhase.Common_DefaultState;
-		bNotActivated = true;
+		bActivated = false;
 		listChildActivities.Add(actFIFO = new CActFIFOBlack());
 		listChildActivities.Add(actFIFromResultsScreen = new CActFIFOBlack());
 		listChildActivities.Add(actSongList = new CActSelectSongList(this));
@@ -274,7 +274,7 @@ internal class CStageSongSelection : CStage
 	
 	public override void OnManagedCreateResources()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			prvFontSearchInputNotification = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.songListFont), 14, FontStyle.Regular);
 			//this.dsBackgroundVideo = CDTXMania.t失敗してもスキップ可能なDirectShowを生成する(CSkin.Path(@"Graphics\5_background.mp4"), CDTXMania.app.WindowHandle, true);
@@ -295,7 +295,7 @@ internal class CStageSongSelection : CStage
 	}
 	public override void OnManagedReleaseResources()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			actBackgroundVideoAVI.Stop();
 			
@@ -327,7 +327,7 @@ internal class CStageSongSelection : CStage
 
 	public override int OnUpdateAndDraw()
 	{
-		if (bNotActivated) return 0;
+		if (!bActivated) return 0;
 		
 		base.OnUpdateAndDraw();
 

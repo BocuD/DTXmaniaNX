@@ -9,7 +9,7 @@ internal class CActPerfGuitarRGB : CActPerfCommonRGB
 
     public CActPerfGuitarRGB()
     {
-        bNotActivated = true;
+        bActivated = false;
     }
 
 
@@ -17,7 +17,7 @@ internal class CActPerfGuitarRGB : CActPerfCommonRGB
 
     public override int OnUpdateAndDraw()
     {
-        if( !bNotActivated )
+        if( bActivated )
         {
             if (!CDTXMania.ConfigIni.bGuitarEnabled)
             {

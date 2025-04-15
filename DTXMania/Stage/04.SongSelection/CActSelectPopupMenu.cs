@@ -181,7 +181,7 @@ internal class CActSelectPopupMenu : CActivity
         {
             ctキー反復用[i] = new CCounter(0, 0, 0, CDTXMania.Timer);
         }
-        bNotActivated = true;
+        bActivated = false;
 
         bIsActivePopupMenu = false;
         font = new CActDFPFont();
@@ -192,7 +192,7 @@ internal class CActSelectPopupMenu : CActivity
     }
     public override void OnDeactivate()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             listChildActivities.Remove(font);
             font.OnDeactivate();
@@ -210,7 +210,7 @@ internal class CActSelectPopupMenu : CActivity
 
     public override void OnManagedCreateResources()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             ui = CDTXMania.stageSongSelection.ui.AddChild(new UIGroup("Popup Menu"));
             ui.position = new Vector3(1280.0f/2.0f, 720.0f/2.0f + 20.0f, 0); 
@@ -240,7 +240,7 @@ internal class CActSelectPopupMenu : CActivity
     }
     public override void OnManagedReleaseResources()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             ui.Dispose();
         }
@@ -254,7 +254,7 @@ internal class CActSelectPopupMenu : CActivity
 
     public int tUpdateAndDraw()  // t進行描画
     {
-        if (!bNotActivated && bIsActivePopupMenu)
+        if (bActivated && bIsActivePopupMenu)
         {
             if (bキー入力待ち)
             {

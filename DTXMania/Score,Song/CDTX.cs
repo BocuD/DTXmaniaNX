@@ -4920,7 +4920,7 @@ internal class CDTX : CActivity
 
     public override void OnManagedCreateResources()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             tLoadBMP_BMPTEX();
             tLoadAVI();
@@ -4930,7 +4930,7 @@ internal class CDTX : CActivity
 
     public override void OnManagedReleaseResources()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             if (listBMP != null)
             {

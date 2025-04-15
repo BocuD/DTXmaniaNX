@@ -20,7 +20,7 @@ internal class CStageTitle : CStage
 	public CStageTitle()
 	{
 		eStageID = EStage.Title_2;
-		bNotActivated = true;
+		bActivated = false;
 		listChildActivities.Add( actFIfromSetup = new CActFIFOWhite() );
 		listChildActivities.Add( actFI = new CActFIFOWhite() );
 		listChildActivities.Add( actFO = new CActFIFOWhite() );
@@ -92,7 +92,7 @@ internal class CStageTitle : CStage
 	}
 	public override void OnManagedCreateResources()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			txMenu = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\2_menu.png" ), false );
 			
@@ -101,7 +101,7 @@ internal class CStageTitle : CStage
 	}
 	public override void OnManagedReleaseResources()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			CDTXMania.tReleaseTexture( ref txMenu );
 			
@@ -127,7 +127,7 @@ internal class CStageTitle : CStage
 
 	public override int OnUpdateAndDraw()
 	{
-		if (bNotActivated) return 0;
+		if (!bActivated) return 0;
 		
 		base.OnUpdateAndDraw();
 

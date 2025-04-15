@@ -86,7 +86,7 @@ internal class CActConfigKeyAssign : CActivity
 	}
 	public override void OnDeactivate()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			CDTXMania.tReleaseTexture( ref txカーソル );
 			CDTXMania.tReleaseTexture( ref txHitKeyダイアログ );
@@ -95,7 +95,7 @@ internal class CActConfigKeyAssign : CActivity
 	}
 	public override void OnManagedCreateResources()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			txカーソル = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenConfig menu cursor.png" ), false );
 			txHitKeyダイアログ = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenConfig hit key to assign dialog.png" ), false );
@@ -104,7 +104,7 @@ internal class CActConfigKeyAssign : CActivity
 	}
 	public override int OnUpdateAndDraw()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			if( bWaitingForKeyInput )
 			{

@@ -16,7 +16,7 @@ internal class CActResultImage : CActivity
     public CActResultImage(CStageResult cStageResult)
     {
         stageResult = cStageResult;
-        bNotActivated = true;
+        bActivated = false;
     }
 
 
@@ -48,7 +48,7 @@ internal class CActResultImage : CActivity
     }
     public override void OnManagedCreateResources()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             ftSongDifficultyFont = new Font("Impact", 15f, FontStyle.Regular);
             iDrumSpeed = Image.FromFile(CSkin.Path(@"Graphics\7_panel_icons.jpg"));
@@ -172,7 +172,7 @@ internal class CActResultImage : CActivity
     }
     public override void OnManagedReleaseResources()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             CDTXMania.tDisposeSafely(ref ftSongDifficultyFont);
             CDTXMania.tDisposeSafely(ref iDrumSpeed);
@@ -194,7 +194,7 @@ internal class CActResultImage : CActivity
     }
     public override unsafe int OnUpdateAndDraw()
     {
-        if (bNotActivated)
+        if (!bActivated)
         {
             return 0;
         }

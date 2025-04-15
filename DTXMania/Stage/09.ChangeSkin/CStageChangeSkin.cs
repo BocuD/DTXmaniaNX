@@ -14,7 +14,7 @@ internal class CStageChangeSkin : CStage
 	public CStageChangeSkin()
 	{
 		eStageID = EStage.ChangeSkin_9;
-		bNotActivated = true;
+		bActivated = false;
 	}
 
 
@@ -60,21 +60,21 @@ internal class CStageChangeSkin : CStage
 	}
 	public override void OnManagedCreateResources()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			base.OnManagedCreateResources();
 		}
 	}
 	public override void OnManagedReleaseResources()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			base.OnManagedReleaseResources();
 		}
 	}
 	public override int OnUpdateAndDraw()
 	{
-		if (bNotActivated) return 0;
+		if (!bActivated) return 0;
 
 		base.OnUpdateAndDraw();
 		

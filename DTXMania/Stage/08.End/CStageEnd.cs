@@ -12,7 +12,7 @@ internal class CStageEnd : CStage
 	{
 		eStageID = EStage.End_8;
 		ePhaseID = EPhase.Common_DefaultState;
-		bNotActivated = true;
+		bActivated = false;
 	}
 
 
@@ -59,7 +59,7 @@ internal class CStageEnd : CStage
 	}
 	public override void OnManagedCreateResources()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			txBackground = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\9_background.jpg" ), false );
 			base.OnManagedCreateResources();
@@ -67,7 +67,7 @@ internal class CStageEnd : CStage
 	}
 	public override void OnManagedReleaseResources()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			CDTXMania.tReleaseTexture( ref txBackground );
 			base.OnManagedReleaseResources();
@@ -82,7 +82,7 @@ internal class CStageEnd : CStage
 
 	public override int OnUpdateAndDraw()
 	{
-		if (bNotActivated) return 0;
+		if (!bActivated) return 0;
 		
 		base.OnUpdateAndDraw();
 		

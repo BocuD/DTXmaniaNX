@@ -45,7 +45,7 @@ internal class CStageResult : CStage
 		nチャンネル0Atoレーン07 = [1, 2, 3, 4, 5, 7, 6, 1, 8, 0, 9];
 		eStageID = EStage.Result_7;
 		ePhaseID = EPhase.Common_DefaultState;
-		bNotActivated = true;
+		bActivated = false;
 		listChildActivities.Add( actResultImage = new CActResultImage(this) );
 		listChildActivities.Add( actParameterPanel = new CActResultParameterPanel(this) );
 		listChildActivities.Add( actRank = new CActResultRank(this) );
@@ -505,14 +505,14 @@ internal class CStageResult : CStage
 	}
 	public override void OnManagedCreateResources()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			base.OnManagedCreateResources();
 		}
 	}
 	public override void OnManagedReleaseResources()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			if( ct登場用 != null )
 			{
@@ -591,7 +591,7 @@ internal class CStageResult : CStage
 
 	public override int OnUpdateAndDraw()
 	{
-		if (bNotActivated) return 0;
+		if (!bActivated) return 0;
 		
 		base.OnUpdateAndDraw();
 

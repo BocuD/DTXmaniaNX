@@ -13,7 +13,7 @@ internal class CActSelectStatusPanel : CActivity
 
     public CActSelectStatusPanel()
     {
-        bNotActivated = true;
+        bActivated = false;
     }
     public void tSelectedSongChanged()
     {
@@ -191,7 +191,7 @@ internal class CActSelectStatusPanel : CActivity
     }
     public override void OnManagedCreateResources()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             txパネル本体 = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\5_status panel.png"));
             tx難易度パネル = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\5_difficulty panel.png"));
@@ -211,7 +211,7 @@ internal class CActSelectStatusPanel : CActivity
     }
     public override void OnManagedReleaseResources()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             CDTXMania.tReleaseTexture(ref txパネル本体);
             CDTXMania.tReleaseTexture(ref tx難易度パネル);
@@ -239,7 +239,7 @@ internal class CActSelectStatusPanel : CActivity
     public override int OnUpdateAndDraw()
     {
 
-        if (!bNotActivated)
+        if (bActivated)
         {
             #region [ 初めての進行描画 ]
             //-----------------

@@ -25,7 +25,7 @@ internal class CActPerfCommonRGB : CActivity
 	public CActPerfCommonRGB()
 	{
 		listChildActivities.Add(actLVFont = new CActLVLNFont());
-		bNotActivated = true;
+		bActivated = false;
 	}
 		
 		
@@ -49,7 +49,7 @@ internal class CActPerfCommonRGB : CActivity
 	}
 	public override void OnManagedCreateResources()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			txRGB = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_RGB buttons.png"));
 			txShutter = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_shutter_GB.png"));
@@ -58,7 +58,7 @@ internal class CActPerfCommonRGB : CActivity
 	}
 	public override void OnManagedReleaseResources()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			CDTXMania.tReleaseTexture( ref txRGB );
 			CDTXMania.tReleaseTexture(ref txShutter);

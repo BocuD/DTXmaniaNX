@@ -9,7 +9,7 @@ internal class CActPerfGuitarScore : CActPerfCommonScore
 
     public CActPerfGuitarScore()
     {
-        bNotActivated = true;
+        bActivated = false;
     }
 
     public override void OnActivate()
@@ -45,7 +45,7 @@ internal class CActPerfGuitarScore : CActPerfCommonScore
 
     public override unsafe int OnUpdateAndDraw()
     {
-        if( !bNotActivated && !CDTXMania.DTXVmode.Enabled && !CDTXMania.DTX2WAVmode.Enabled)
+        if( bActivated && !CDTXMania.DTXVmode.Enabled && !CDTXMania.DTX2WAVmode.Enabled)
         {
             if( bJustStartedUpdate )
             {

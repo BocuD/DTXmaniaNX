@@ -160,7 +160,7 @@ internal class CActPerfDrumsStatusPanel : CActPerfCommonStatusPanel
         st難易度文字位置Ar[10] = st難易度文字位置11;
         st難易度数字位置 = st難易度文字位置Ar;
 
-        bNotActivated = true;
+        bActivated = false;
     }
 
     public override void OnActivate()
@@ -184,7 +184,7 @@ internal class CActPerfDrumsStatusPanel : CActPerfCommonStatusPanel
     }
     public override void OnManagedCreateResources()
     {
-        if( !bNotActivated )
+        if( bActivated )
         {
             prv表示用フォント = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.str曲名表示フォント), 20, FontStyle.Regular);
             prv称号フォント = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.str曲名表示フォント), 12, FontStyle.Regular);
@@ -305,7 +305,7 @@ internal class CActPerfDrumsStatusPanel : CActPerfCommonStatusPanel
     }
     public override void OnManagedReleaseResources()
     {
-        if( !bNotActivated )
+        if( bActivated )
         {
             CDTXMania.tDisposeSafely(ref prv表示用フォント);
             CDTXMania.tDisposeSafely(ref prv称号フォント);
@@ -326,7 +326,7 @@ internal class CActPerfDrumsStatusPanel : CActPerfCommonStatusPanel
 
     public override int OnUpdateAndDraw()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             double dbPERFECT率 = 0;
             double dbGREAT率 = 0;

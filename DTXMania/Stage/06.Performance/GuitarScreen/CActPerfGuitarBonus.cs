@@ -10,7 +10,7 @@ internal class CActPerfGuitarBonus : CActivity
 
     public CActPerfGuitarBonus()
     {
-        bNotActivated = true;
+        bActivated = false;
     }
 
     public override void OnActivate()
@@ -29,7 +29,7 @@ internal class CActPerfGuitarBonus : CActivity
 
     public override void OnManagedCreateResources()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             txBonus100 = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_Bonus_100.png"));
             base.OnManagedCreateResources();
@@ -38,7 +38,7 @@ internal class CActPerfGuitarBonus : CActivity
 
     public override void OnManagedReleaseResources()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             CDTXMania.tReleaseTexture(ref txBonus100);
             base.OnManagedReleaseResources();
@@ -47,7 +47,7 @@ internal class CActPerfGuitarBonus : CActivity
 
     public override unsafe int OnUpdateAndDraw()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             if (bJustStartedUpdate)
             {

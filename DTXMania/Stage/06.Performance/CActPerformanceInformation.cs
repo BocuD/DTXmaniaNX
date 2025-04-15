@@ -21,7 +21,7 @@ internal class CActPerformanceInformation : CActivity
 
 	public CActPerformanceInformation()
 	{
-		bNotActivated = true;
+		bActivated = false;
 	}
 
 				
@@ -46,7 +46,7 @@ internal class CActPerformanceInformation : CActivity
 	}
 	public void tUpdateAndDraw( int x, int y)  // t進行描画
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			y += 0x143;
 			CDTXMania.actDisplayString.tPrint(x, y, CCharacterConsole.EFontType.White, string.Format("BGM/D/G/B Adj: {0:####0}/{1:####0}/{2:####0}/{3:####0} ms", CDTXMania.DTX.nBGMAdjust, CDTXMania.ConfigIni.nInputAdjustTimeMs.Drums, CDTXMania.ConfigIni.nInputAdjustTimeMs.Guitar, CDTXMania.ConfigIni.nInputAdjustTimeMs.Bass));

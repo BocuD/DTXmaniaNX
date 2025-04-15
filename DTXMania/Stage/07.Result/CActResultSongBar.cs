@@ -14,7 +14,7 @@ internal class CActResultSongBar : CActivity
 
 	public CActResultSongBar()
 	{
-		bNotActivated = true;
+		bActivated = false;
 	}
 
 
@@ -50,7 +50,7 @@ internal class CActResultSongBar : CActivity
 	}
 	public override void OnManagedCreateResources()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			//this.txバー = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenResult song bar.png" ) );
 			try
@@ -74,7 +74,7 @@ internal class CActResultSongBar : CActivity
 	}
 	public override void OnManagedReleaseResources()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			CDTXMania.tReleaseTexture( ref txバー );
 			CDTXMania.tReleaseTexture( ref tx曲名 );
@@ -83,7 +83,7 @@ internal class CActResultSongBar : CActivity
 	}
 	public override int OnUpdateAndDraw()
 	{
-		if( bNotActivated )
+		if (!bActivated)
 		{
 			return 0;
 		}

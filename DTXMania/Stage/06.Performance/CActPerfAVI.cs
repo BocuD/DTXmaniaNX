@@ -24,7 +24,7 @@ internal class CActPerfAVI : CActivity
             listChildActivities.Add(actPanel = new CActPerfPanelString());
         }
             
-        bNotActivated = true;
+        bActivated = false;
     }
 
 
@@ -359,7 +359,7 @@ internal class CActPerfAVI : CActivity
     }
     public override void OnManagedCreateResources()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             //this.txドラム = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_Drums.png"));
             if (CDTXMania.ConfigIni.bGuitarEnabled)
@@ -400,7 +400,7 @@ internal class CActPerfAVI : CActivity
     }
     public override void OnManagedReleaseResources()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {                
             //特殊テクスチャ 3枚
             if (tx描画用 != null)
@@ -437,7 +437,7 @@ internal class CActPerfAVI : CActivity
     }
     public unsafe int tUpdateAndDraw(int x, int y)
     {   
-        if ((!bNotActivated))
+        if ((bActivated))
         {
             #region[ムービーのフレーム作成処理]
             if ( ( ( tx描画用 != null )) && ( rAVI != null ) ) //クリップ無し曲での進入防止。

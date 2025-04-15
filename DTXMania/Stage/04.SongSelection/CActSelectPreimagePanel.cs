@@ -17,7 +17,7 @@ internal class CActSelectPreimagePanel : CActivity
 	{
 		stageSongSelection = cStageSongSelection;
 		listChildActivities.Add(actStatusPanel = new CActSelectStatusPanel());
-		bNotActivated = true;
+		bActivated = false;
 	}
 
 	public void t選択曲が変更された()
@@ -52,7 +52,7 @@ internal class CActSelectPreimagePanel : CActivity
 	}
 	public override void OnManagedCreateResources()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			txパネル本体 = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\5_preimage panel.png" ), false );
 			txプレビュー画像 = null;
@@ -68,7 +68,7 @@ internal class CActSelectPreimagePanel : CActivity
 	}
 	public override void OnManagedReleaseResources()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			CDTXMania.tReleaseTexture( ref txパネル本体 );
 			CDTXMania.tReleaseTexture( ref txプレビュー画像 );
@@ -84,7 +84,7 @@ internal class CActSelectPreimagePanel : CActivity
 	}
 	public override int OnUpdateAndDraw()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			if( bJustStartedUpdate )
 			{

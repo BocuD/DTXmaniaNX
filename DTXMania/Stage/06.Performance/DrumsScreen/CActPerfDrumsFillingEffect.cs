@@ -7,18 +7,18 @@ internal class CActPerfDrumsFillingEffect : CActivity
 
     public CActPerfDrumsFillingEffect()
     {
-        bNotActivated = true;
+        bActivated = false;
     }
 
     public override void OnManagedCreateResources()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
         }
     }
     public override void OnManagedReleaseResources()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             base.OnManagedReleaseResources();
         }

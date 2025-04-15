@@ -11,7 +11,7 @@ internal class CActSelectInformation : CActivity
 
 	public CActSelectInformation()
 	{
-		bNotActivated = true;
+		bActivated = false;
 	}
 
 
@@ -30,7 +30,7 @@ internal class CActSelectInformation : CActivity
 	}
 	public override void OnManagedCreateResources()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			string[] infofiles = {		// #25381 2011.6.4 yyagi
 				@"Graphics\5_information.png" ,
@@ -43,7 +43,7 @@ internal class CActSelectInformation : CActivity
 	}
 	public override void OnManagedReleaseResources()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			CDTXMania.tReleaseTexture( ref txInfo );
 			base.OnManagedReleaseResources();
@@ -51,7 +51,7 @@ internal class CActSelectInformation : CActivity
 	}
 	public override int OnUpdateAndDraw()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			if( bJustStartedUpdate )
 			{

@@ -15,7 +15,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
     {
         eStageID = EStage.Performance_6;
         ePhaseID = EPhase.Common_DefaultState;
-        bNotActivated = true;
+        bActivated = false;
         listChildActivities.Add( actPad = new CActPerfDrumsPad() );
         listChildActivities.Add( actCombo = new CActPerfDrumsComboDGB() );
         listChildActivities.Add( actDANGER = new CActPerfDrumsDanger() );
@@ -110,7 +110,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
     }
     public override void OnManagedCreateResources()
     {
-        if( !bNotActivated )
+        if( bActivated )
         {
             bChorusSection = false;
             bBonus = false;
@@ -133,7 +133,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
     }
     public override void OnManagedReleaseResources()
     {
-        if( !bNotActivated )
+        if( bActivated )
         {
             CDTXMania.tReleaseTexture( ref txHitBar );
             CDTXMania.tReleaseTexture( ref txChip );
@@ -188,7 +188,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
     {
         sw.Start();
 
-        if (bNotActivated) return 0;
+        if (!bActivated) return 0;
 
         base.OnUpdateAndDraw();
 

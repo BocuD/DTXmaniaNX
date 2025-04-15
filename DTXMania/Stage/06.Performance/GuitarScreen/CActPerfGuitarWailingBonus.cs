@@ -18,7 +18,7 @@ internal class CActPerfGuitarWailingBonus : CActPerfCommonWailingBonus
 
 	public CActPerfGuitarWailingBonus()
 	{
-		bNotActivated = true;
+		bActivated = false;
 	}
 	//public override void Start( EInstrumentPart part )
 	//{
@@ -68,7 +68,7 @@ internal class CActPerfGuitarWailingBonus : CActPerfCommonWailingBonus
 	}
 	public override int OnUpdateAndDraw()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			for( int i = 0; i < 2; i++ )
 			{

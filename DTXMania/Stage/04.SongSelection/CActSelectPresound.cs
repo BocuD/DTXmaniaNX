@@ -10,7 +10,7 @@ internal class CActSelectPresound : CActivity
 
 	public CActSelectPresound()
 	{
-		bNotActivated = true;
+		bActivated = false;
 	}
 	public void tサウンド停止()
 	{
@@ -57,7 +57,7 @@ internal class CActSelectPresound : CActivity
 	}
 	public override int OnUpdateAndDraw()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			if( ( ctBGMフェードイン用 != null ) && ctBGMフェードイン用.bInProgress )
 			{

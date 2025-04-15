@@ -13,7 +13,7 @@ internal class CStageStartup : CStage
 	public CStageStartup()
 	{
 		eStageID = EStage.Startup_1;
-		bNotActivated = true;
+		bActivated = false;
 	}
 
 	public List<string> startupScreenConsole;
@@ -75,7 +75,7 @@ internal class CStageStartup : CStage
 	}
 	public override void OnManagedCreateResources()
 	{
-		if(!bNotActivated)
+		if(bActivated)
 		{
 			txBackground = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\1_background.jpg"), false);
 			base.OnManagedCreateResources();
@@ -83,7 +83,7 @@ internal class CStageStartup : CStage
 	}
 	public override void OnManagedReleaseResources()
 	{
-		if(!bNotActivated)
+		if(bActivated)
 		{
 			CDTXMania.tReleaseTexture(ref txBackground);
 			base.OnManagedReleaseResources();
@@ -125,7 +125,7 @@ internal class CStageStartup : CStage
 
 	public override int OnUpdateAndDraw()
 	{
-		if (bNotActivated) return 0;
+		if (!bActivated) return 0;
 
 		base.OnUpdateAndDraw();
 		

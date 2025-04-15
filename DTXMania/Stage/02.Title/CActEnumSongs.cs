@@ -25,7 +25,7 @@ internal class CActEnumSongs : CActivity
         
     private void Init(bool _bコマンドでの曲データ取得)
     {
-        bNotActivated = true;
+        bActivated = false;
         bコマンドでの曲データ取得 = _bコマンドでの曲データ取得;
     }
 
@@ -42,14 +42,14 @@ internal class CActEnumSongs : CActivity
     }
     public override void OnDeactivate()
     {
-        if (bNotActivated)
+        if (!bActivated)
             return;
         base.OnDeactivate();
         ctNowEnumeratingSongs = null;
     }
     public override void OnManagedCreateResources()
     {
-        if (bNotActivated)
+        if (!bActivated)
             return;
         
         string[] strMessage = 
@@ -77,7 +77,7 @@ internal class CActEnumSongs : CActivity
     }
     public override void OnManagedReleaseResources()
     {
-        if (bNotActivated)
+        if (!bActivated)
             return;
         
         //release ui
@@ -103,7 +103,7 @@ internal class CActEnumSongs : CActivity
     
     public override int OnUpdateAndDraw()
     {
-        if (bNotActivated)
+        if (!bActivated)
         {
             return 0;
         }
