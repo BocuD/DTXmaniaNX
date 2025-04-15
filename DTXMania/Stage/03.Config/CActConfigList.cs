@@ -174,6 +174,7 @@ internal partial class CActConfigList : CActivity
         eMenuType = EMenuType.Unknown;
 
         ScanSkinFolders();
+        ScanNewSkinData();
 
         prvFont = new CPrivateFastFont( new FontFamily( CDTXMania.ConfigIni.songListFont ), 15 );	// t項目リストの設定 の前に必要
 
@@ -211,6 +212,8 @@ internal partial class CActConfigList : CActivity
         {
             CDTXMania.StageManager.stageChangeSkin.tChangeSkinMain();	// #28195 2012.6.11 yyagi CONFIG脱出時にSkin更新
         }
+
+        ApplySkinChanges();
         #endregion
 
         HandleSoundDeviceChanges();
@@ -540,7 +543,6 @@ internal partial class CActConfigList : CActivity
                     if ( listItems[ nCurrentSelection ] == iSystemSkinSubfolder )
                     {
                         tGenerateSkinSample();		// 最初にSkinの選択肢にきたとき(Enterを押す前)に限り、サンプル生成が発生する。
-
                     }
                     #endregion
                     break;

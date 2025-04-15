@@ -2,6 +2,7 @@
 using System.Windows.Forms;
 using DTXMania.Core;
 using DTXMania.UI.Item;
+using DTXMania.UI.Skin;
 using FDK;
 
 namespace DTXMania;
@@ -44,6 +45,42 @@ internal partial class CActConfigList
         nSkinSampleIndex = -1;
     }
         
+    #endregion
+    
+    #region [ NEW SKIN ]
+    private CItemList iNewSkinSelector;
+    private string[] newSkinNames;
+    private int nNewSkinIndex;
+
+    private void ScanNewSkinData()
+    {
+        CDTXMania.SkinManager.ScanSkinDirectory();
+        newSkinNames = CDTXMania.SkinManager.skins.Select(x => x.name).Prepend("None").ToArray();
+        
+        //find current skin index
+        for (int i = 0; i < CDTXMania.SkinManager.skins.Count; i++)
+        {
+            var skin = CDTXMania.SkinManager.skins[i];
+            if (skin.name == CDTXMania.SkinManager.currentSkin?.name)
+            {
+                nNewSkinIndex = i + 1; //account for none
+                break;
+            }
+        }
+    }
+    
+    private void ApplySkinChanges()
+    {
+        //Apply skin changes
+        if (iNewSkinSelector.nCurrentlySelectedIndex != 0) //0 is none
+        {
+            CDTXMania.SkinManager.ChangeSkin(CDTXMania.SkinManager.skins[iNewSkinSelector.nCurrentlySelectedIndex - 1]); //account for none
+        }
+        else
+        {
+            CDTXMania.SkinManager.ChangeSkin(null);
+        }
+    }
     #endregion
     
     public void tSetupItemList_System()
@@ -197,7 +234,7 @@ internal partial class CActConfigList
             () => CDTXMania.ConfigIni.bOutputLogs = iLogOutputLog.bON);
         listItems.Add(iLogOutputLog);
             
-        iSystemSkinSubfolder = new CItemList("Skin (General)", CItemBase.EPanelType.Normal, nSkinIndex,
+        iSystemSkinSubfolder = new CItemList("Skin (Legacy)", CItemBase.EPanelType.Normal, nSkinIndex,
             "スキン切替：スキンを切り替えます。\n" +
             "\n",
             "Choose skin",
@@ -224,6 +261,13 @@ internal partial class CActConfigList
             () => { });
         iSystemSkinSubfolder.action = tGenerateSkinSample;
         listItems.Add(iSystemSkinSubfolder);
+        
+        iNewSkinSelector = new CItemList("Skin (New)", CItemBase.EPanelType.Normal, nNewSkinIndex,
+            "スキン切替：スキンを切り替えます。\n" +
+            "\n",
+            "Choose skin",
+            newSkinNames);
+        listItems.Add(iNewSkinSelector);
 
         CItemToggle iSystemUseBoxDefSkin = new("Skin (Box)", CDTXMania.ConfigIni.bUseBoxDefSkin,
             "Music boxスキンの利用：\n" +
