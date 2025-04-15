@@ -103,8 +103,6 @@ internal class CStageTitle : CStage
 	{
 		if( !bNotActivated )
 		{
-			ui.Dispose();
-
 			CDTXMania.tReleaseTexture( ref txMenu );
 			
 			base.OnManagedReleaseResources();

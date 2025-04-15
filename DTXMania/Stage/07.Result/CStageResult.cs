@@ -524,8 +524,6 @@ internal class CStageResult : CStage
 	{
 		if( !bNotActivated )
 		{
-			ui.Dispose();
-			
 			if( ct登場用 != null )
 			{
 				ct登場用 = null;

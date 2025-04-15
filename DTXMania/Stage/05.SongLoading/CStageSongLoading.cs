@@ -381,8 +381,6 @@ internal class CStageSongLoading : CStage
     {
         if (!bNotActivated)
         {
-            ui.Dispose();
-            
             //テクスチャ11枚
             //2018.03.15 kairera0467 PrivateFontが抜けていた＆フォント生成直後に解放するようにしてみる
             CDTXMania.tReleaseTexture(ref txJacket);

@@ -507,8 +507,6 @@ internal abstract class CStagePerfCommonScreen : CStage
     {
         if (!bNotActivated)
         {
-            ui.Dispose();
-            
             actBackgroundAVI.Stop();
 
             CDTXMania.tReleaseTexture(ref txWailingFrame);
