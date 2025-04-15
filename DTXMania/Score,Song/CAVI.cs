@@ -50,8 +50,6 @@ public class CAVI : IDisposable
             {
                 //Trace.TraceWarning( "ファイルが存在しません。({0})({1})", this.strコメント文, strAVIファイル名 );
                 Trace.TraceWarning("File does not exist. ({0})({1})", strコメント文, strAVIFileName);
-
-                CDTXMania.app.b汎用ムービーである = true;
                 avi = null;
                 return;
             }
@@ -62,7 +60,6 @@ public class CAVI : IDisposable
             {
                 avi = new CAviDS(strAVIFileName, dbPlaySpeed);
                 Trace.TraceInformation("動画を生成しました。({0})({1})({2}msec)", strコメント文, strAVIFileName, avi.GetDuration());
-                CDTXMania.app.b汎用ムービーである = false;
             }
             catch (Exception e)
             {

@@ -48,7 +48,7 @@ internal class CActConfigKeyAssign : CActivity
 					return;
 
 				case 0x11:
-					CDTXMania.stageConfig.tNotifyAssignmentComplete();
+					stageConfig.tNotifyAssignmentComplete();
 					return;
 			}
 			bWaitingForKeyInput = true;
@@ -147,7 +147,7 @@ internal class CActConfigKeyAssign : CActivity
 			// 15SEP20 Increasing x position by 120 pixels (was 0x134)
 			int x = 0x1ac;
 			int y = 0x40;
-			CDTXMania.stageConfig.actFont.t文字列描画( x, y, strパッド名, false, 0.75f );
+			stageConfig.actFont.t文字列描画( x, y, strパッド名, false, 0.75f );
 			y += num5;
 			CConfigIni.CKeyAssign.STKEYASSIGN[] stkeyassignArray = CDTXMania.ConfigIni.KeyAssign[ (int) part ][ (int) pad ];
 			for( int i = 0; i < 0x10; i++ )
@@ -171,14 +171,14 @@ internal class CActConfigKeyAssign : CActivity
 						break;
 
 					default:
-						CDTXMania.stageConfig.actFont.t文字列描画( x + 20, y, string.Format( "{0,2}.", i + 1 ), nSelectedRow == i, 0.75f );
+						stageConfig.actFont.t文字列描画( x + 20, y, string.Format( "{0,2}.", i + 1 ), nSelectedRow == i, 0.75f );
 						break;
 				}
 				y += num5;
 			}
-			CDTXMania.stageConfig.actFont.t文字列描画( x + 20, y, "Reset", nSelectedRow == 0x10, 0.75f );
+			stageConfig.actFont.t文字列描画( x + 20, y, "Reset", nSelectedRow == 0x10, 0.75f );
 			y += num5;
-			CDTXMania.stageConfig.actFont.t文字列描画( x + 20, y, "<< Returnto List", nSelectedRow == 0x11, 0.75f );
+			stageConfig.actFont.t文字列描画( x + 20, y, "<< Returnto List", nSelectedRow == 0x11, 0.75f );
 			y += num5;
 			if( bWaitingForKeyInput && ( txHitKeyダイアログ != null ) )
 			{
@@ -349,6 +349,13 @@ internal class CActConfigKeyAssign : CActivity
 	private CTexture txHitKeyダイアログ;
 	private CTexture txカーソル;
 
+	private CStageConfig stageConfig;
+
+	public CActConfigKeyAssign(CStageConfig cStageConfig)
+	{
+		stageConfig = cStageConfig;
+	}
+
 	private void tアサインコードの描画_Joypad( int line, int x, int y, int nID, int nCode, bool b強調 )
 	{
 		string str = "";
@@ -393,7 +400,7 @@ internal class CActConfigKeyAssign : CActivity
 				}
 				break;
 		}
-		CDTXMania.stageConfig.actFont.t文字列描画( x, y, string.Format( "{0,2}. Joypad #{1} ", line, nID ) + str, b強調, 0.75f );
+		stageConfig.actFont.t文字列描画( x, y, string.Format( "{0,2}. Joypad #{1} ", line, nID ) + str, b強調, 0.75f );
 	}
 	private void tアサインコードの描画_Keyboard( int line, int x, int y, int nID, int nCode, bool b強調 )
 	{
@@ -410,15 +417,15 @@ internal class CActConfigKeyAssign : CActivity
 		{
 			str = string.Format( "{0,2}. Key 0x{1:X2}", line, nCode );
 		}
-		CDTXMania.stageConfig.actFont.t文字列描画( x, y, str, b強調, 0.75f );
+		stageConfig.actFont.t文字列描画( x, y, str, b強調, 0.75f );
 	}
 	private void tアサインコードの描画_MidiIn( int line, int x, int y, int nID, int nCode, bool b強調 )
 	{
-		CDTXMania.stageConfig.actFont.t文字列描画( x, y, string.Format( "{0,2}. MidiIn #{1} code.{2}", line, nID, nCode ), b強調, 0.75f );
+		stageConfig.actFont.t文字列描画( x, y, string.Format( "{0,2}. MidiIn #{1} code.{2}", line, nID, nCode ), b強調, 0.75f );
 	}
 	private void tアサインコードの描画_Mouse( int line, int x, int y, int nID, int nCode, bool b強調 )
 	{
-		CDTXMania.stageConfig.actFont.t文字列描画( x, y, string.Format( "{0,2}. Mouse Button{1}", line, nCode ), b強調, 0.75f );
+		stageConfig.actFont.t文字列描画( x, y, string.Format( "{0,2}. Mouse Button{1}", line, nCode ), b強調, 0.75f );
 	}
 	private bool tキーチェックとアサイン_Joypad()
 	{

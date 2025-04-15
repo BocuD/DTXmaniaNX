@@ -53,7 +53,7 @@ internal class CEnumSongs							// #27060 2011.2.7 yyagi 曲リストを取得�
         CompletelyDone			// 探索完了、現在の曲リストに反映完了
     }
     private DTXEnumState state = DTXEnumState.None;
-        
+
     /// <summary>
     /// Constractor
     /// </summary>
@@ -62,6 +62,109 @@ internal class CEnumSongs							// #27060 2011.2.7 yyagi 曲リストを取得�
         SongManager = new CSongManager();
     }
 
+    
+    
+    
+    public void HandleEnumSongs(int nUpdateAndDrawReturnValue)
+    {
+        if (!CDTXMania.bCompactMode)
+        {
+            CDTXMania.actEnumSongs.OnUpdateAndDraw();
+        }
+
+        switch (CDTXMania.StageManager.rCurrentStage.eStageID)
+        {
+            case CStage.EStage.Title_2:
+            case CStage.EStage.Config_3:
+            case CStage.EStage.SongSelection_4:
+            case CStage.EStage.SongLoading_5:
+
+                #region [ (特定条件時) 曲検索スレッドの起動_開始 ]
+
+                if (CDTXMania.StageManager.rCurrentStage.eStageID == CStage.EStage.Title_2 &&
+                    CDTXMania.StageManager.rPreviousStage.eStageID == CStage.EStage.Startup_1 &&
+                    nUpdateAndDrawReturnValue == (int)CStageTitle.EReturnResult.CONTINUE &&
+                    !IsSongListEnumStarted)
+                {
+                    CDTXMania.actEnumSongs.OnActivate();
+                    CDTXMania.StageManager.stageSongSelection.bIsEnumeratingSongs = true;
+                    Init(SongManager.listSongsDB,
+                        SongManager.nNbScoresFromSongsDB); // songs.db情報と、取得した曲数を、新インスタンスにも与える
+                    StartEnumFromDisk(false); // 曲検索スレッドの起動_開始
+                    if (SongManager.nNbScoresFromSongsDB == 0) // もし初回起動なら、検索スレッドのプライオリティをLowestでなくNormalにする
+                    {
+                        ChangeEnumeratePriority(ThreadPriority.Normal);
+                    }
+                }
+
+                #endregion
+
+                #region [ 曲検索の中断と再開 ]
+
+                if (CDTXMania.StageManager.rCurrentStage.eStageID == CStage.EStage.SongSelection_4 &&
+                    !IsSongListEnumCompletelyDone)
+                {
+                    switch (nUpdateAndDrawReturnValue)
+                    {
+                        case 0: // 何もない
+                            //if ( CDTXMania.stageSongSelection.bIsEnumeratingSongs )
+                            if (!CDTXMania.StageManager.stageSongSelection.bIsPlayingPremovie)
+                            {
+                                Resume(); // #27060 2012.2.6 yyagi 中止していたバックグランド曲検索を再開
+                                IsSlowdown = false;
+                            }
+                            else
+                            {
+                                // EnumSongs.Suspend();					// #27060 2012.3.2 yyagi #PREMOVIE再生中は曲検索を低速化
+                                IsSlowdown = true;
+                            }
+
+                            CDTXMania.actEnumSongs.OnActivate();
+                            break;
+
+                        case 2: // 曲決定
+                            Suspend(); // #27060 バックグラウンドの曲検索を一時停止
+                            CDTXMania.actEnumSongs.OnDeactivate();
+                            break;
+                    }
+                }
+
+                #endregion
+
+                #region [ 曲探索中断待ち待機 ]
+
+                if (CDTXMania.StageManager.rCurrentStage.eStageID == CStage.EStage.SongLoading_5 &&
+                    !IsSongListEnumCompletelyDone &&
+                    thDTXFileEnumerate !=
+                    null) // #28700 2012.6.12 yyagi; at Compact mode, enumerating thread does not exist.
+                {
+                    WaitUntilSuspended(); // 念のため、曲検索が一時中断されるまで待機
+                }
+
+                #endregion
+
+                #region [ 曲検索が完了したら、実際の曲リストに反映する ]
+
+                // CStageSongSelection.OnActivate() に回した方がいいかな？
+                if (IsSongListEnumerated)
+                {
+                    CDTXMania.actEnumSongs.OnDeactivate();
+                    CDTXMania.StageManager.stageSongSelection.bIsEnumeratingSongs = false;
+
+                    bool bRemakeSongTitleBar = CDTXMania.StageManager.rCurrentStage.eStageID == CStage.EStage.SongSelection_4;
+                    CDTXMania.StageManager.stageSongSelection.Refresh(SongManager, bRemakeSongTitleBar);
+                    SongListEnumCompletelyDone();
+                }
+
+                #endregion
+
+                break;
+        }
+    }
+    
+    
+    
+    
     public void Init(List<CScore> ls, int n)
     {
         if (state == DTXEnumState.None)
@@ -74,9 +177,9 @@ internal class CEnumSongs							// #27060 2011.2.7 yyagi 曲リストを取得�
     /// <summary>
     /// 曲リストのキャッシュ(songlist.db)取得スレッドの開始
     /// </summary>
-    public void StartEnumFromCacheStartup()
+    public void StartEnumFromCacheStartup(CStageStartup stageStartup)
     {
-        thDTXFileEnumerate = new Thread(() => _ = BuildSongListFromCache())
+        thDTXFileEnumerate = new Thread(() => _ = BuildSongListFromCache(stageStartup))
         {
             Name = "Loading song database",
             IsBackground = true
@@ -194,11 +297,12 @@ internal class CEnumSongs							// #27060 2011.2.7 yyagi 曲リストを取得�
     }
 
     public SongEnumProgress? EnumProgress { get; private set; }
-        
+
     /// <summary>
     /// songlist.dbからの曲リスト構築
     /// </summary>
-    private async Task BuildSongListFromCache()
+    /// <param name="stageStartup"></param>
+    private async Task BuildSongListFromCache(CStageStartup stageStartup)
     {
         // ！注意！
         // 本メソッドは別スレッドで動作するが、プラグイン側でカレントディレクトリを変更しても大丈夫なように、
@@ -211,7 +315,7 @@ internal class CEnumSongs							// #27060 2011.2.7 yyagi 曲リストを取得�
             #region [ 00) songlist.dbの読み込みによる曲リストの構築  ]
             //-----------------------------
             EnumProgress = SongEnumProgress.ReadSongListDB;
-            CDTXMania.stageStartup.ePhaseID = CStage.EPhase.起動00_songlistから曲リストを作成する;
+            stageStartup.ePhaseID = CStage.EPhase.起動00_songlistから曲リストを作成する;
             DateTime start1 = DateTime.Now;
             Trace.TraceInformation("1) Loading songlist.db ...");
             Trace.Indent();
@@ -229,17 +333,17 @@ internal class CEnumSongs							// #27060 2011.2.7 yyagi 曲リストを取得�
 
                     int scores = SongManager.nNbScoresFound;
                     Trace.TraceInformation("Loading songlist.db complete. [{0} scores]", scores);
-                    lock (CDTXMania.stageStartup.list進行文字列)
+                    lock (stageStartup.startupScreenConsole)
                     {
-                        CDTXMania.stageStartup.list進行文字列.Add("Loading songlist.db ... OK");
+                        stageStartup.startupScreenConsole.Add("Loading songlist.db ... OK");
                     }
                 }
                 else
                 {
                     Trace.TraceInformation("初回の起動であるかまたはDTXManiaのバージョンが上がったため、songlist.db の読み込みをスキップします。");
-                    lock (CDTXMania.stageStartup.list進行文字列)
+                    lock (stageStartup.startupScreenConsole)
                     {
-                        CDTXMania.stageStartup.list進行文字列.Add("Loading songlist.db ... Skip");
+                        stageStartup.startupScreenConsole.Add("Loading songlist.db ... Skip");
                     }
                 }
             }
@@ -254,7 +358,7 @@ internal class CEnumSongs							// #27060 2011.2.7 yyagi 曲リストを取得�
             #region [ 1) songs.db の読み込み ]
             //-----------------------------
             EnumProgress = SongEnumProgress.ReadSongsDB;
-            CDTXMania.stageStartup.ePhaseID = CStage.EPhase.起動1_SongsDBからスコアキャッシュを構築;
+            stageStartup.ePhaseID = CStage.EPhase.起動1_SongsDBからスコアキャッシュを構築;
             start1 = DateTime.Now;
             Trace.TraceInformation("2) Loading songs.db ...");
             Trace.Indent();
@@ -274,17 +378,17 @@ internal class CEnumSongs							// #27060 2011.2.7 yyagi 曲リストを取得�
 
                     int scores = (SongManager == null) ? 0 : SongManager.nNbScoresFromSongsDB;	// 読み込み途中でアプリ終了した場合など、CDTXMania.SongManager がnullの場合があるので注意
                     Trace.TraceInformation("Loading songs.db complete. [{0} scores]", scores);
-                    lock (CDTXMania.stageStartup.list進行文字列)
+                    lock (stageStartup.startupScreenConsole)
                     {
-                        CDTXMania.stageStartup.list進行文字列.Add("Loading songs.db ... OK");
+                        stageStartup.startupScreenConsole.Add("Loading songs.db ... OK");
                     }
                 }
                 else
                 {
                     Trace.TraceInformation("初回の起動であるかまたはDTXManiaのバージョンが上がったため、songs.db の読み込みをスキップします。");
-                    lock (CDTXMania.stageStartup.list進行文字列)
+                    lock (stageStartup.startupScreenConsole)
                     {
-                        CDTXMania.stageStartup.list進行文字列.Add("Loading songs.db ... Skip");
+                        stageStartup.startupScreenConsole.Add("Loading songs.db ... Skip");
                     }
                 }
             }
@@ -299,7 +403,7 @@ internal class CEnumSongs							// #27060 2011.2.7 yyagi 曲リストを取得�
         }
         finally
         {
-            CDTXMania.stageStartup.ePhaseID = CStage.EPhase.起動7_完了;
+            stageStartup.ePhaseID = CStage.EPhase.起動7_完了;
             TimeSpan span = DateTime.Now - now;
             Trace.TraceInformation("Initialization Time: {0}", span.ToString());
             lock (this)							// #28700 2012.6.12 yyagi; state change must be in finally{} for exiting as of compact mode.
@@ -333,7 +437,6 @@ internal class CEnumSongs							// #27060 2011.2.7 yyagi 曲リストを取得�
                     //-----------------------------
                     EnumProgress = SongEnumProgress.ReadSongListDB;
 
-                    //CDTXMania.stageStartup.ePhaseID = CStage.EPhase.起動00_songlistから曲リストを作成する;
                     DateTime start1 = DateTime.Now;
                     Trace.TraceInformation("1) Loading songlist.db ...");
                     Trace.Indent();
@@ -368,7 +471,6 @@ internal class CEnumSongs							// #27060 2011.2.7 yyagi 曲リストを取得�
                     //-----------------------------
                     EnumProgress = SongEnumProgress.ReadSongsDB;
         
-                    //CDTXMania.stageStartup.ePhaseID = CStage.EPhase.起動1_SongsDBからスコアキャッシュを構築;
                     start1 = DateTime.Now;
                     Trace.TraceInformation("2) Loading songs.db ...");
                     Trace.Indent();

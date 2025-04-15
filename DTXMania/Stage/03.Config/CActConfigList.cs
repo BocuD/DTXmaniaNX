@@ -12,7 +12,6 @@ namespace DTXMania;
 internal partial class CActConfigList : CActivity
 {
     // プロパティ
-
     public bool bIsKeyAssignSelected		// #24525 2011.3.15 yyagi
     {
         get
@@ -139,7 +138,7 @@ internal partial class CActConfigList : CActivity
         else
         {
             nTargetScrollCounter += 100;
-            CDTXMania.stageConfig.ctDisplayWait.nCurrentValue = 0;
+            stageConfig.ctDisplayWait.nCurrentValue = 0;
         }
     }
     public void tMoveToNext()
@@ -153,7 +152,7 @@ internal partial class CActConfigList : CActivity
         else
         {
             nTargetScrollCounter -= 100;
-            CDTXMania.stageConfig.ctDisplayWait.nCurrentValue = 0;
+            stageConfig.ctDisplayWait.nCurrentValue = 0;
         }
     }
     private void tPostProcessMoveUpDown()  // t要素値を上下に変更中の処理
@@ -212,7 +211,7 @@ internal partial class CActConfigList : CActivity
         #region [ Skin変更 ]
         if (CDTXMania.Skin.GetCurrentSkinSubfolderFullName(true) != skinSubFolder_org)
         {
-            CDTXMania.stageChangeSkin.tChangeSkinMain();	// #28195 2012.6.11 yyagi CONFIG脱出時にSkin更新
+            CDTXMania.StageManager.stageChangeSkin.tChangeSkinMain();	// #28195 2012.6.11 yyagi CONFIG脱出時にSkin更新
         }
         #endregion
 
@@ -369,7 +368,7 @@ internal partial class CActConfigList : CActivity
                 nTargetScrollCounter -= 100;
                 if (nTargetScrollCounter == 0)
                 {
-                    CDTXMania.stageConfig.tNotifyItemChange();
+                    stageConfig.tNotifyItemChange();
                 }
             }
             else if (currentScrollCounter <= -100)
@@ -379,7 +378,7 @@ internal partial class CActConfigList : CActivity
                 nTargetScrollCounter += 100;
                 if (nTargetScrollCounter == 0)
                 {
-                    CDTXMania.stageConfig.tNotifyItemChange();
+                    stageConfig.tNotifyItemChange();
                 }
             }
             //-----------------
@@ -466,7 +465,7 @@ internal partial class CActConfigList : CActivity
 //					CDTXMania.tReleaseTexture( ref ctItem );
                 CDTXMania.tDisposeSafely( ref bmpItem );
             }
-            //CDTXMania.stageConfig.actFont.tDrawString( x + 0x12, y + 12, this.listItems[ nItem ].strItemName );
+            //stageConfig.actFont.tDrawString( x + 0x12, y + 12, this.listItems[ nItem ].strItemName );
             //-----------------
             #endregion
             #region [ Render Item Elements ]
@@ -478,7 +477,7 @@ internal partial class CActConfigList : CActivity
                 case CItemBase.EType.ONorOFFToggle:
                     #region [ *** ]
                     //-----------------
-                    //CDTXMania.stageConfig.actFont.tDrawString( x + 210, y + 12, ( (CItemToggle) this.listItems[ nItem ] ).bON ? "ON" : "OFF" );
+                    //stageConfig.actFont.tDrawString( x + 210, y + 12, ( (CItemToggle) this.listItems[ nItem ] ).bON ? "ON" : "OFF" );
                     strParam = ( (CItemToggle) listItems[ nItem ] ).bON ? "ON" : "OFF";
                     break;
                 //-----------------
@@ -501,7 +500,7 @@ internal partial class CActConfigList : CActivity
                             strParam = "OFF";
                             break;
                     }
-                    //CDTXMania.stageConfig.actFont.tDrawString( x + 210, y + 12, "ON" );
+                    //stageConfig.actFont.tDrawString( x + 210, y + 12, "ON" );
                     break;
                 //-----------------
                 #endregion
@@ -512,18 +511,18 @@ internal partial class CActConfigList : CActivity
                     if( listItems[ nItem ] == iCommonPlaySpeed )
                     {
                         double d = ( (double) ( (CItemInteger) listItems[ nItem ] ).nCurrentValue ) / 20.0;
-                        //CDTXMania.stageConfig.actFont.tDrawString( x + 210, y + 12, d.ToString( "0.000" ), ( n行番号 == 0 ) && this.bFocusIsOnElementValue );
+                        //stageConfig.actFont.tDrawString( x + 210, y + 12, d.ToString( "0.000" ), ( n行番号 == 0 ) && this.bFocusIsOnElementValue );
                         strParam = d.ToString( "0.000" );
                     }
                     else if( listItems[ nItem ] == iDrumsScrollSpeed || listItems[ nItem ] == iGuitarScrollSpeed || listItems[ nItem ] == iBassScrollSpeed )
                     {
                         float f = ( ( (CItemInteger) listItems[ nItem ] ).nCurrentValue + 1 ) * 0.5f;
-                        //CDTXMania.stageConfig.actFont.tDrawString( x + 210, y + 12, f.ToString( "x0.0" ), ( n行番号 == 0 ) && this.bFocusIsOnElementValue );
+                        //stageConfig.actFont.tDrawString( x + 210, y + 12, f.ToString( "x0.0" ), ( n行番号 == 0 ) && this.bFocusIsOnElementValue );
                         strParam = f.ToString( "x0.0" );
                     }
                     else
                     {
-                        //CDTXMania.stageConfig.actFont.tDrawString( x + 210, y + 12, ( (CItemInteger) this.listItems[ nItem ] ).nCurrentValue.ToString(), ( n行番号 == 0 ) && this.bFocusIsOnElementValue );
+                        //stageConfig.actFont.tDrawString( x + 210, y + 12, ( (CItemInteger) this.listItems[ nItem ] ).nCurrentValue.ToString(), ( n行番号 == 0 ) && this.bFocusIsOnElementValue );
                         strParam = ( (CItemInteger) listItems[ nItem ] ).nCurrentValue.ToString();
                     }
                     isHighlighted = ( rowIndex == 0 ) && bFocusIsOnElementValue;
@@ -536,7 +535,7 @@ internal partial class CActConfigList : CActivity
                     //-----------------
                 {
                     CItemList list = (CItemList) listItems[ nItem ];
-                    //CDTXMania.stageConfig.actFont.tDrawString( x + 210, y + 12, list.list項目値[ list.n現在選択されている項目番号 ] );
+                    //stageConfig.actFont.tDrawString( x + 210, y + 12, list.list項目値[ list.n現在選択されている項目番号 ] );
                     strParam = list.listItemValues[ list.nCurrentlySelectedIndex ];
 
                     #region [ 必要な場合に、Skinのサンプルを生成_描画する。#28195 2012.5.2 yyagi ]
@@ -596,7 +595,7 @@ internal partial class CActConfigList : CActivity
         #endregion
 
         #region[ Explanation Panel ]
-        if( bFocusIsOnItemList && nTargetScrollCounter == 0 && CDTXMania.stageConfig.ctDisplayWait.bReachedEndValue )
+        if( bFocusIsOnItemList && nTargetScrollCounter == 0 && stageConfig.ctDisplayWait.bReachedEndValue )
         {
             // 15SEP20 Increasing x position by 180 pixels (was 601)
             txDescriptionPanel.tDraw2D( CDTXMania.app.Device, 781, 252 );
@@ -710,7 +709,14 @@ internal partial class CActConfigList : CActivity
         
     private CItemList iSystemGRmode;
     private CItemInteger iCommonPlaySpeed;
-        
+
+    private CStageConfig stageConfig;
+
+    public CActConfigList(CStageConfig cStageConfig)
+    {
+        stageConfig = cStageConfig;
+    }
+
     private int tPreviousItem(int nItem)
     {
         if (--nItem < 0)

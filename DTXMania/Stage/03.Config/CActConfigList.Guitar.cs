@@ -363,7 +363,7 @@ internal partial class CActConfigList
             "ギターのキー設定：\nRボタンへのキーの割り当てを設定し\nます。",
             "Guitar key assign:\nTo assign key/pads for R button.")
         {
-            action = () => CDTXMania.stageConfig.tNotifyPadSelection(EKeyConfigPart.GUITAR, EKeyConfigPad.R)
+            action = () => stageConfig.tNotifyPadSelection(EKeyConfigPart.GUITAR, EKeyConfigPad.R)
         };
         listItems.Add(iKeyAssignGuitarR);
 
@@ -371,7 +371,7 @@ internal partial class CActConfigList
             "ギターのキー設定：\nGボタンへのキーの割り当てを設定し\nます。",
             "Guitar key assign:\nTo assign key/pads for G button.")
         {
-            action = () => CDTXMania.stageConfig.tNotifyPadSelection(EKeyConfigPart.GUITAR, EKeyConfigPad.G)
+            action = () => stageConfig.tNotifyPadSelection(EKeyConfigPart.GUITAR, EKeyConfigPad.G)
         };
         listItems.Add(iKeyAssignGuitarG);
 
@@ -379,7 +379,7 @@ internal partial class CActConfigList
             "ギターのキー設定：\nBボタンへのキーの割り当てを設定し\nます。",
             "Guitar key assign:\nTo assign key/pads for B button.")
         {
-            action = () => CDTXMania.stageConfig.tNotifyPadSelection(EKeyConfigPart.GUITAR, EKeyConfigPad.B)
+            action = () => stageConfig.tNotifyPadSelection(EKeyConfigPart.GUITAR, EKeyConfigPad.B)
         };
         listItems.Add(iKeyAssignGuitarB);
 
@@ -387,7 +387,7 @@ internal partial class CActConfigList
             "ギターのキー設定：\nYボタンへのキーの割り当てを設定し\nます。",
             "Guitar key assign:\nTo assign key/pads for Y button.")
         {
-            action = () => CDTXMania.stageConfig.tNotifyPadSelection(EKeyConfigPart.GUITAR, EKeyConfigPad.Y)
+            action = () => stageConfig.tNotifyPadSelection(EKeyConfigPart.GUITAR, EKeyConfigPad.Y)
         };
         listItems.Add(iKeyAssignGuitarY);
 
@@ -395,7 +395,7 @@ internal partial class CActConfigList
             "ギターのキー設定：\nPボタンへのキーの割り当てを設定し\nます。",
             "Guitar key assign:\nTo assign key/pads for P button.")
         {
-            action = () => CDTXMania.stageConfig.tNotifyPadSelection(EKeyConfigPart.GUITAR, EKeyConfigPad.P)
+            action = () => stageConfig.tNotifyPadSelection(EKeyConfigPart.GUITAR, EKeyConfigPad.P)
         };
         listItems.Add(iKeyAssignGuitarP);
 
@@ -403,7 +403,7 @@ internal partial class CActConfigList
             "ギターのキー設定：\nピックボタンへのキーの割り当てを設\n定します。",
             "Guitar key assign:\nTo assign key/pads for Pick button.")
         {
-            action = () => CDTXMania.stageConfig.tNotifyPadSelection(EKeyConfigPart.GUITAR, EKeyConfigPad.Pick)
+            action = () => stageConfig.tNotifyPadSelection(EKeyConfigPart.GUITAR, EKeyConfigPad.Pick)
         };
         listItems.Add(iKeyAssignGuitarPick);
 
@@ -411,7 +411,7 @@ internal partial class CActConfigList
             "ギターのキー設定：\nWailingボタンへのキーの割り当てを\n設定します。",
             "Guitar key assign:\nTo assign key/pads for Wailing button.")
         {
-            action = () => CDTXMania.stageConfig.tNotifyPadSelection(EKeyConfigPart.GUITAR, EKeyConfigPad.Wail)
+            action = () => stageConfig.tNotifyPadSelection(EKeyConfigPart.GUITAR, EKeyConfigPad.Wail)
         };
         listItems.Add(iKeyAssignGuitarWail);
 
@@ -419,7 +419,7 @@ internal partial class CActConfigList
             "ギターのキー設定：\n決定ボタンへのキーの割り当てを設\n定します。",
             "Guitar key assign:\nTo assign key/pads for Decide button.")
         {
-            action = () => CDTXMania.stageConfig.tNotifyPadSelection(EKeyConfigPart.GUITAR, EKeyConfigPad.Decide)
+            action = () => stageConfig.tNotifyPadSelection(EKeyConfigPart.GUITAR, EKeyConfigPad.Decide)
         };
         listItems.Add(iKeyAssignGuitarDecide);
 
@@ -427,7 +427,7 @@ internal partial class CActConfigList
             "ギターのキー設定：\n取消ボタンへのキーの割り当てを設\n定します。",
             "Guitar key assign:\nTo assign key/pads for Cancel button.")
         {
-            action = () => CDTXMania.stageConfig.tNotifyPadSelection(EKeyConfigPart.GUITAR, EKeyConfigPad.Cancel)
+            action = () => stageConfig.tNotifyPadSelection(EKeyConfigPart.GUITAR, EKeyConfigPad.Cancel)
         };
         listItems.Add(iKeyAssignGuitarCancel);
 

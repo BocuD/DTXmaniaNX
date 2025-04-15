@@ -58,7 +58,7 @@ internal class CActEnumSongs : CActivity
             "Now enumerating songs.\nPlease wait..."
         ];
 
-        var parent = CDTXMania.rCurrentStage.ui;
+        var parent = CDTXMania.StageManager.rCurrentStage.ui;
             
         var fontFamily = new FontFamily(CDTXMania.ConfigIni.songListFont);
 
@@ -81,7 +81,7 @@ internal class CActEnumSongs : CActivity
             return;
         
         //release ui
-        var parent = CDTXMania.rCurrentStage.ui;
+        var parent = CDTXMania.StageManager.rCurrentStage.ui;
         if (enumMessage != null)
         {
             parent.RemoveChild(enumMessage);

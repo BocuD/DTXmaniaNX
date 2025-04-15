@@ -311,7 +311,7 @@ internal class CStageSongSelection : CStage
 	public override void FirstUpdate()
 	{
 		ctInitialAppearAnimation = new CCounter( 0, 100, 3, CDTXMania.Timer );
-		if( CDTXMania.rPreviousStage == CDTXMania.stageResult )
+		if (CDTXMania.StageManager.rPreviousStage.eStageID == EStage.Result_7)
 		{
 			actFIFromResultsScreen.tフェードイン開始();
 			ePhaseID = EPhase.選曲_結果画面からのフェードイン;

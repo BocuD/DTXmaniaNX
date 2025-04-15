@@ -16,7 +16,7 @@ internal class CStageStartup : CStage
 		bNotActivated = true;
 	}
 
-	public List<string> list進行文字列;
+	public List<string> startupScreenConsole;
 
 	// CStage 実装
 
@@ -36,7 +36,7 @@ internal class CStageStartup : CStage
 		Trace.Indent();
 		try
 		{
-			list進行文字列 = new List<string>();
+			startupScreenConsole = new List<string>();
 			ePhaseID = EPhase.Common_DefaultState;
 			
 			dynamicStringSources["Version"] = new DynamicStringSource(() => CDTXMania.VERSION_DISPLAY);
@@ -55,7 +55,7 @@ internal class CStageStartup : CStage
 		Trace.Indent();
 		try
 		{
-			list進行文字列 = null;
+			startupScreenConsole = null;
 			if ( es != null )
 			{
 				if ( es.thDTXFileEnumerate is { IsAlive: true } )
@@ -92,10 +92,10 @@ internal class CStageStartup : CStage
 
 	public override void FirstUpdate()
 	{
-		list進行文字列.Add("DTXMania powered by YAMAHA Silent Session Drums\n");
-		list進行文字列.Add("Release: " + CDTXMania.VERSION + " [" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version + "]");
+		startupScreenConsole.Add("DTXMania powered by YAMAHA Silent Session Drums\n");
+		startupScreenConsole.Add("Release: " + CDTXMania.VERSION + " [" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version + "]");
 
-		CDTXMania.stageStartup.ePhaseID = EPhase.起動0_システムサウンドを構築;
+		ePhaseID = EPhase.起動0_システムサウンドを構築;
 
 		Trace.TraceInformation("0) システムサウンドを構築します。");
 		Trace.Indent();
@@ -106,9 +106,9 @@ internal class CStageStartup : CStage
                 
 			CDTXMania.Skin.ReloadSkin();
                 
-			lock (CDTXMania.stageStartup.list進行文字列)
+			lock (startupScreenConsole)
 			{
-				CDTXMania.stageStartup.list進行文字列.Add("Loading system sounds ... OK ");
+				startupScreenConsole.Add("Loading system sounds ... OK ");
 			}
 		}
 		finally
@@ -119,7 +119,7 @@ internal class CStageStartup : CStage
 		es = new CEnumSongs();
 		if (!CDTXMania.bCompactMode)
 		{
-			es.StartEnumFromCacheStartup();
+			es.StartEnumFromCacheStartup(this);
 		}
 	}
 
@@ -175,11 +175,11 @@ internal class CStageStartup : CStage
 		#endregion
 		#region [ this.list進行文字列＋this.現在進行中 の表示 ]
 		//-----------------
-		lock( list進行文字列 )
+		lock( startupScreenConsole )
 		{
 			int x = 0;
 			int y = 0;
-			foreach( string str in list進行文字列 )
+			foreach( string str in startupScreenConsole )
 			{
 				CDTXMania.actDisplayString.tPrint( x, y, CCharacterConsole.EFontType.AshThin, str );
 				y += 14;

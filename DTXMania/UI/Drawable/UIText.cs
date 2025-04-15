@@ -110,7 +110,7 @@ public class UIText : UITexture
     
     private void UpdateDynamicText()
     {
-        CDTXMania.rCurrentStage.dynamicStringSources.TryGetValue(dynamicSource, out var source);
+        CDTXMania.StageManager.rCurrentStage.dynamicStringSources.TryGetValue(dynamicSource, out var source);
         if (source != null)
         {
             SetText(source.GetString());
@@ -205,7 +205,7 @@ public class UIText : UITexture
                 }
                 case TextSource.Dynamic:
                 {
-                    string[] sources = CDTXMania.rCurrentStage.dynamicStringSources.Keys.ToArray();
+                    string[] sources = CDTXMania.StageManager.rCurrentStage.dynamicStringSources.Keys.ToArray();
                     int selectedIndex = Array.IndexOf(sources, dynamicSource);
                     if (ImGui.Combo("Dynamic Source", ref selectedIndex, sources, sources.Length))
                     {

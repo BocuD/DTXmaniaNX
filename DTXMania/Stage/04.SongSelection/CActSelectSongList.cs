@@ -404,23 +404,12 @@ internal class CActSelectSongList : CActivity
 				{
 					t現在選択中の曲を元に曲バーを再構成する();
 				}
-#if false          // list子リストの中まではmatchしてくれないので、検索ロジックは手書きで実装 (searchCurrentBreadcrumbs())
-					string bc = this.rSelectedSong.strBreadcrumbs;
-					Predicate<C曲リストノード> match = delegate( C曲リストノード c )
-					{
-						return ( c.strBreadcrumbs.Equals( bc ) );
-					};
-					int nMatched = CDTXMania.Songs管理.list曲ルート.FindIndex( match );
-
-					this.rSelectedSong = ( nMatched == -1 ) ? null : CDTXMania.Songs管理.list曲ルート[ nMatched ];
-					this.t現在選択中の曲を元に曲バーを再構成する();
-#endif
 				return;
 			}
 		}
 		OnDeactivate();
 		rSelectedSong = null;
-		if( CDTXMania.rCurrentStage.eStageID == CStage.EStage.SongSelection_4 )
+		if( CDTXMania.StageManager.rCurrentStage.eStageID == CStage.EStage.SongSelection_4 )
 			OnActivate();
 	}
 
@@ -440,7 +429,8 @@ internal class CActSelectSongList : CActivity
 			{
 				return n;
 			}
-			else if ( n.list子リスト != null && n.list子リスト.Count > 0 )	// 子リストが存在するなら、再帰で探す
+
+			if ( n.list子リスト != null && n.list子リスト.Count > 0 )	// 子リストが存在するなら、再帰で探す
 			{
 				CSongListNode r = searchCurrentBreadcrumbsPosition( n.list子リスト, bc );
 				if ( r != null ) return r;

@@ -11,10 +11,11 @@ namespace DTXMania;
 
 internal class CActResultImage : CActivity
 {
-    // コンストラクタ
-
-    public CActResultImage()
+    CStageResult stageResult;
+    
+    public CActResultImage(CStageResult cStageResult)
     {
+        stageResult = cStageResult;
         bNotActivated = true;
     }
 
@@ -92,7 +93,7 @@ internal class CActResultImage : CActivity
                 pfModifiedPlaySpeed.Dispose();
             }
 
-            if (CDTXMania.stageResult.bIsTrainingMode)
+            if (stageResult.bIsTrainingMode)
             {
                 String strResultsNotSavedTraining = "Training feature used";
                 CPrivateFastFont pfResultsNotSavedTraining = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.songListFont), 18, FontStyle.Regular);
@@ -242,12 +243,12 @@ internal class CActResultImage : CActivity
             txModifiedPlaySpeed.tDraw2D(CDTXMania.app.Device, 840, nDisclaimerY);
             nDisclaimerY += 25;
         }
-        if (CDTXMania.stageResult.bIsTrainingMode)
+        if (stageResult.bIsTrainingMode)
         {
             txTrainingMode.tDraw2D(CDTXMania.app.Device, 840, nDisclaimerY);
             nDisclaimerY += 25;
         }
-        if (CDTXMania.stageResult.bIsTrainingMode || ((CDTXMania.ConfigIni.nPlaySpeed != 20) && !CDTXMania.ConfigIni.bSaveScoreIfModifiedPlaySpeed))
+        if (stageResult.bIsTrainingMode || ((CDTXMania.ConfigIni.nPlaySpeed != 20) && !CDTXMania.ConfigIni.bSaveScoreIfModifiedPlaySpeed))
         {
             txResultsNotSaved.tDraw2D(CDTXMania.app.Device, 840, nDisclaimerY);
         }
@@ -311,7 +312,7 @@ internal class CActResultImage : CActivity
     }
     private bool tリザルト画像の指定があれば構築する()
     {
-        int rank = CScoreIni.tCalculateOverallRankValue(CDTXMania.stageResult.stPerformanceEntry.Drums, CDTXMania.stageResult.stPerformanceEntry.Guitar, CDTXMania.stageResult.stPerformanceEntry.Bass);
+        int rank = CScoreIni.tCalculateOverallRankValue(stageResult.stPerformanceEntry.Drums, stageResult.stPerformanceEntry.Guitar, stageResult.stPerformanceEntry.Bass);
         if (rank == 99)	// #23534 2010.10.28 yyagi: 演奏チップが0個のときは、rankEと見なす
         {
             rank = 6;

@@ -908,7 +908,7 @@ internal partial class CActConfigList
             "キャプチャキー設定：\n画面キャプチャのキーの割り当てを設\n定します。",
             "Capture key assign:\nTo assign key for screen capture.\n (You can use keyboard only. You can't\nuse pads to capture screenshot.")
         {
-            action = () => CDTXMania.stageConfig.tNotifyPadSelection(EKeyConfigPart.SYSTEM, EKeyConfigPad.Capture)
+            action = () => stageConfig.tNotifyPadSelection(EKeyConfigPart.SYSTEM, EKeyConfigPad.Capture)
         };
         listItems.Add(iKeyAssignSystemCapture);
 
@@ -916,7 +916,7 @@ internal partial class CActConfigList
             "サーチボタンのキー設定：\nサーチボタンへのキーの割り当\nてを設定します。",
             "Search button key assign:\nTo assign key for Search Button.")
         {
-            action = () => CDTXMania.stageConfig.tNotifyPadSelection(EKeyConfigPart.SYSTEM, EKeyConfigPad.Search)
+            action = () => stageConfig.tNotifyPadSelection(EKeyConfigPart.SYSTEM, EKeyConfigPad.Search)
         };
         listItems.Add(iKeyAssignSystemSearch);
 
@@ -924,7 +924,7 @@ internal partial class CActConfigList
             "ヘルプボタンのキー設定：\nヘルプボタンへのキーの割り当\nてを設定します。",
             "Help button key assign:\nTo assign key/pads for Help button.")
         {
-            action = () => CDTXMania.stageConfig.tNotifyPadSelection(EKeyConfigPart.GUITAR, EKeyConfigPad.Help)
+            action = () => stageConfig.tNotifyPadSelection(EKeyConfigPart.GUITAR, EKeyConfigPad.Help)
         };
         listItems.Add(iKeyAssignGuitarHelp);
 
@@ -932,7 +932,7 @@ internal partial class CActConfigList
             "一時停止キー設定：\n 一時停止キーの割り当てを設定します。",
             "Pause key assign:\n To assign key/pads for Pause button.")
         {
-            action = () => CDTXMania.stageConfig.tNotifyPadSelection(EKeyConfigPart.BASS, EKeyConfigPad.Help)
+            action = () => stageConfig.tNotifyPadSelection(EKeyConfigPart.BASS, EKeyConfigPad.Help)
         };
         listItems.Add(iKeyAssignBassHelp);
 
@@ -940,7 +940,7 @@ internal partial class CActConfigList
             "",
             "Loop Create assign:\n To assign key/pads for loop creation.")
         {
-            action = () => CDTXMania.stageConfig.tNotifyPadSelection(EKeyConfigPart.SYSTEM, EKeyConfigPad.LoopCreate)
+            action = () => stageConfig.tNotifyPadSelection(EKeyConfigPart.SYSTEM, EKeyConfigPad.LoopCreate)
         };
         listItems.Add(iKeyAssignSystemLoopCreate);
 
@@ -948,7 +948,7 @@ internal partial class CActConfigList
             "",
             "Pause key assign:\n To assign key/pads for loop deletion.")
         {
-            action = () => CDTXMania.stageConfig.tNotifyPadSelection(EKeyConfigPart.SYSTEM, EKeyConfigPad.LoopDelete)
+            action = () => stageConfig.tNotifyPadSelection(EKeyConfigPart.SYSTEM, EKeyConfigPad.LoopDelete)
         };
         listItems.Add(iKeyAssignSystemLoopDelete);
 
@@ -956,7 +956,7 @@ internal partial class CActConfigList
             "",
             "Skip forward assign:\n To assign key/pads for Skip forward.")
         {
-            action = () => CDTXMania.stageConfig.tNotifyPadSelection(EKeyConfigPart.SYSTEM, EKeyConfigPad.SkipForward)
+            action = () => stageConfig.tNotifyPadSelection(EKeyConfigPart.SYSTEM, EKeyConfigPad.SkipForward)
         };
         listItems.Add(iKeyAssignSystemSkipForward);
 
@@ -964,7 +964,7 @@ internal partial class CActConfigList
             "",
             "Skip backward assign:\n To assign key/pads for Skip backward (rewind).")
         {
-            action = () => CDTXMania.stageConfig.tNotifyPadSelection(EKeyConfigPart.SYSTEM, EKeyConfigPad.SkipBackward)
+            action = () => stageConfig.tNotifyPadSelection(EKeyConfigPart.SYSTEM, EKeyConfigPad.SkipBackward)
         };
         listItems.Add(iKeyAssignSystemSkipBackward);
 
@@ -972,7 +972,7 @@ internal partial class CActConfigList
             "",
             "Increase play speed assign:\n To assign key/pads for increasing play speed.")
         {
-            action = () => CDTXMania.stageConfig.tNotifyPadSelection(EKeyConfigPart.SYSTEM, EKeyConfigPad.IncreasePlaySpeed)
+            action = () => stageConfig.tNotifyPadSelection(EKeyConfigPart.SYSTEM, EKeyConfigPad.IncreasePlaySpeed)
         };
         listItems.Add(iKeyAssignSystemIncreasePlaySpeed);
 
@@ -980,7 +980,7 @@ internal partial class CActConfigList
             "",
             "Decrease play speed assign:\n To assign key/pads for decreasing play speed.")
         {
-            action = () => CDTXMania.stageConfig.tNotifyPadSelection(EKeyConfigPart.SYSTEM, EKeyConfigPad.DecreasePlaySpeed)
+            action = () => stageConfig.tNotifyPadSelection(EKeyConfigPart.SYSTEM, EKeyConfigPad.DecreasePlaySpeed)
         };
         listItems.Add(iKeyAssignSystemDecreasePlaySpeed);
 
@@ -988,7 +988,7 @@ internal partial class CActConfigList
             "",
             "Restart assign:\n To assign key/pads for Restart button.")
         {
-            action = () => CDTXMania.stageConfig.tNotifyPadSelection(EKeyConfigPart.SYSTEM, EKeyConfigPad.Restart)
+            action = () => stageConfig.tNotifyPadSelection(EKeyConfigPart.SYSTEM, EKeyConfigPad.Restart)
         };
         listItems.Add(iKeyAssignSystemRestart);
 

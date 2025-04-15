@@ -47,9 +47,9 @@ internal class CStageResult : CStage
 		eStageID = EStage.Result_7;
 		ePhaseID = EPhase.Common_DefaultState;
 		bNotActivated = true;
-		listChildActivities.Add( actResultImage = new CActResultImage() );
-		listChildActivities.Add( actParameterPanel = new CActResultParameterPanel() );
-		listChildActivities.Add( actRank = new CActResultRank() );
+		listChildActivities.Add( actResultImage = new CActResultImage(this) );
+		listChildActivities.Add( actParameterPanel = new CActResultParameterPanel(this) );
+		listChildActivities.Add( actRank = new CActResultRank(this) );
 		listChildActivities.Add( actSongBar = new CActResultSongBar() );
 		//base.listChildActivities.Add( this.actProgressBar = new CActPerfProgressBar(true) );
 		listChildActivities.Add( actFI = new CActFIFOWhite() );
@@ -77,7 +77,8 @@ internal class CStageResult : CStage
 		}
 
 		var txBackground = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\8_background.jpg" ) );
-		switch (CDTXMania.stageResult.nResultRank)
+		
+		switch (nResultRank)
 		{
 			case 0:
 				if (File.Exists(CSkin.Path(@"Graphics\8_background rankSS.png")))

@@ -13,18 +13,18 @@ public class GameStatus
     {
         CDTXMania.InputManager.Keyboard.preventKeyboardInput = ImGui.GetIO().WantCaptureKeyboard || preventGameKeyboardInput;
         
-        InspectorManager.hierarchyWindow.target = CDTXMania.rCurrentStage.ui;
+        InspectorManager.hierarchyWindow.target = CDTXMania.StageManager.rCurrentStage.ui;
 
         ImGui.Begin("Game State");
         if (ImGui.CollapsingHeader("Game State"))
         {
-            ImGui.Text("Current Stage: " + CDTXMania.rCurrentStage.GetType());
+            ImGui.Text("Current Stage: " + CDTXMania.StageManager.rCurrentStage.GetType());
             
             ImGui.Checkbox("Prevent game keyboard input", ref preventGameKeyboardInput);
 
             ImGui.Checkbox("Render game viewport to window", ref CDTXMania.renderGameToSurface);
             
-            ImGui.Checkbox("Prevent stage transitions", ref CDTXMania.preventStageChanges);
+            ImGui.Checkbox("Prevent stage transitions", ref StageManager.preventStageChanges);
         }
 
         if (ImGui.CollapsingHeader("Skin"))
@@ -72,7 +72,7 @@ public class GameStatus
                     CDTXMania.tRunGarbageCollector();
                 
                     //load the skin again
-                    CDTXMania.rCurrentStage.LoadUI();
+                    CDTXMania.StageManager.rCurrentStage.LoadUI();
                 }
             }
             ImGui.TreePop();

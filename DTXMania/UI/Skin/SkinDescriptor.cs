@@ -57,11 +57,11 @@ public class SkinDescriptor
         //write current stage skin
         foreach (KeyValuePair<CStage.EStage, string> stageSkin in stageSkins)
         {
-            if (CDTXMania.rCurrentStage.eStageID != stageSkin.Key) continue;
+            if (CDTXMania.StageManager.rCurrentStage.eStageID != stageSkin.Key) continue;
             
             if (string.IsNullOrWhiteSpace(stageSkin.Value)) continue;
 
-            var group = CDTXMania.rCurrentStage.ui;
+            var group = CDTXMania.StageManager.rCurrentStage.ui;
             
             if (group == null) continue;
             

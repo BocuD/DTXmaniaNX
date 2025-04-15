@@ -29,8 +29,8 @@ internal class CStageConfig : CStage
         actFont = font = new CActDFPFont();
         listChildActivities.Add(font);
         listChildActivities.Add(actFIFO = new CActFIFOWhite());
-        listChildActivities.Add(actList = new CActConfigList());
-        listChildActivities.Add(actKeyAssign = new CActConfigKeyAssign());
+        listChildActivities.Add(actList = new CActConfigList(this));
+        listChildActivities.Add(actKeyAssign = new CActConfigKeyAssign(this));
         bNotActivated = true;
     }
 
@@ -279,7 +279,7 @@ internal class CStageConfig : CStage
                 {
                     if (eItemPanelMode == EItemPanelMode.KeyCodeList)
                     {
-                        CDTXMania.stageConfig.tNotifyAssignmentComplete();
+                        tNotifyAssignmentComplete();
                         return 0;
                     }
                     if (!actList.bIsKeyAssignSelected && !actList.bIsFocusingParameter)	// #24525 2011.3.15 yyagi, #32059 2013.9.17 yyagi

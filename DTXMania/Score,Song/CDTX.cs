@@ -3474,7 +3474,7 @@ internal class CDTX : CActivity
         Console.WriteLine("Reading DTX file: " + strFileName);
         
         this.bHeaderOnly = bHeaderOnly;
-        b動画読み込み = (CDTXMania.rCurrentStage.eStageID == CStage.EStage.SongLoading_5);
+        b動画読み込み = (CDTXMania.StageManager.rCurrentStage.eStageID == CStage.EStage.SongLoading_5);
         strFileNameFullPath = Path.GetFullPath(strFileName);
         this.strFileName = Path.GetFileName(strFileNameFullPath);
         strFolderName = Path.GetDirectoryName(strFileNameFullPath) + @"\";

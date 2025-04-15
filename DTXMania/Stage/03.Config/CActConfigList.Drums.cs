@@ -771,7 +771,7 @@ internal partial class CActConfigList
             "ドラムのキー設定：\n左シンバルへのキーの割り当てを設\n定します。",
             "Drums key assign:\nTo assign key/pads for LeftCymbal\n button.")
         {
-            action = () => CDTXMania.stageConfig.tNotifyPadSelection(EKeyConfigPart.DRUMS, EKeyConfigPad.LC)
+            action = () => stageConfig.tNotifyPadSelection(EKeyConfigPart.DRUMS, EKeyConfigPad.LC)
         };
         listItems.Add(iKeyAssignDrumsLC);
 
@@ -779,7 +779,7 @@ internal partial class CActConfigList
             "ドラムのキー設定：\nハイハット（クローズ）へのキーの割り\n当てを設定します。",
             "Drums key assign:\nTo assign key/pads for HiHat(Close)\n button.")
         {
-            action = () => CDTXMania.stageConfig.tNotifyPadSelection(EKeyConfigPart.DRUMS, EKeyConfigPad.HH)
+            action = () => stageConfig.tNotifyPadSelection(EKeyConfigPart.DRUMS, EKeyConfigPad.HH)
         };
         listItems.Add(iKeyAssignDrumsHHC);
 
@@ -787,7 +787,7 @@ internal partial class CActConfigList
             "ドラムのキー設定：\nハイハット（オープン）へのキーの割り\n当てを設定します。",
             "Drums key assign:\nTo assign key/pads for HiHat(Open)\n button.")
         {
-            action = () => CDTXMania.stageConfig.tNotifyPadSelection(EKeyConfigPart.DRUMS, EKeyConfigPad.HHO)
+            action = () => stageConfig.tNotifyPadSelection(EKeyConfigPart.DRUMS, EKeyConfigPad.HHO)
         };
         listItems.Add(iKeyAssignDrumsHHO);
 
@@ -795,7 +795,7 @@ internal partial class CActConfigList
             "ドラムのキー設定：\nスネアへのキーの割り当てを設定し\nます。",
             "Drums key assign:\nTo assign key/pads for Snare button.")
         {
-            action = () => CDTXMania.stageConfig.tNotifyPadSelection(EKeyConfigPart.DRUMS, EKeyConfigPad.SD)
+            action = () => stageConfig.tNotifyPadSelection(EKeyConfigPart.DRUMS, EKeyConfigPad.SD)
         };
         listItems.Add(iKeyAssignDrumsSD);
 
@@ -803,7 +803,7 @@ internal partial class CActConfigList
             "ドラムのキー設定：\nバスドラムへのキーの割り当てを設定\nします。",
             "Drums key assign:\nTo assign key/pads for Bass button.")
         {
-            action = () => CDTXMania.stageConfig.tNotifyPadSelection(EKeyConfigPart.DRUMS, EKeyConfigPad.BD)
+            action = () => stageConfig.tNotifyPadSelection(EKeyConfigPart.DRUMS, EKeyConfigPad.BD)
         };
         listItems.Add(iKeyAssignDrumsBD);
 
@@ -811,7 +811,7 @@ internal partial class CActConfigList
             "ドラムのキー設定：\nハイタムへのキーの割り当てを設定\nします。",
             "Drums key assign:\nTo assign key/pads for HighTom\n button.")
         {
-            action = () => CDTXMania.stageConfig.tNotifyPadSelection(EKeyConfigPart.DRUMS, EKeyConfigPad.HT)
+            action = () => stageConfig.tNotifyPadSelection(EKeyConfigPart.DRUMS, EKeyConfigPad.HT)
         };
         listItems.Add(iKeyAssignDrumsHT);
 
@@ -819,7 +819,7 @@ internal partial class CActConfigList
             "ドラムのキー設定：\nロータムへのキーの割り当てを設定\nします。",
             "Drums key assign:\nTo assign key/pads for LowTom button.")
         {
-            action = () => CDTXMania.stageConfig.tNotifyPadSelection(EKeyConfigPart.DRUMS, EKeyConfigPad.LT)
+            action = () => stageConfig.tNotifyPadSelection(EKeyConfigPart.DRUMS, EKeyConfigPad.LT)
         };
         listItems.Add(iKeyAssignDrumsLT);
 
@@ -827,7 +827,7 @@ internal partial class CActConfigList
             "ドラムのキー設定：\nフロアタムへのキーの割り当てを設\n定します。",
             "Drums key assign:\nTo assign key/pads for FloorTom\n button.")
         {
-            action = () => CDTXMania.stageConfig.tNotifyPadSelection(EKeyConfigPart.DRUMS, EKeyConfigPad.FT)
+            action = () => stageConfig.tNotifyPadSelection(EKeyConfigPart.DRUMS, EKeyConfigPad.FT)
         };
         listItems.Add(iKeyAssignDrumsFT);
 
@@ -835,7 +835,7 @@ internal partial class CActConfigList
             "ドラムのキー設定：\n右シンバルへのキーの割り当てを設\n定します。",
             "Drums key assign:\nTo assign key/pads for RightCymbal\n button.")
         {
-            action = () => CDTXMania.stageConfig.tNotifyPadSelection(EKeyConfigPart.DRUMS, EKeyConfigPad.CY)
+            action = () => stageConfig.tNotifyPadSelection(EKeyConfigPart.DRUMS, EKeyConfigPad.CY)
         };
         listItems.Add(iKeyAssignDrumsCY);
 
@@ -843,7 +843,7 @@ internal partial class CActConfigList
             "ドラムのキー設定：\nライドシンバルへのキーの割り当て\nを設定します。",
             "Drums key assign:\nTo assign key/pads for RideCymbal\n button.")
         {
-            action = () => CDTXMania.stageConfig.tNotifyPadSelection(EKeyConfigPart.DRUMS, EKeyConfigPad.RD)
+            action = () => stageConfig.tNotifyPadSelection(EKeyConfigPart.DRUMS, EKeyConfigPad.RD)
         };
         listItems.Add(iKeyAssignDrumsRD);
 
@@ -851,7 +851,7 @@ internal partial class CActConfigList
             "ドラムのキー設定：\n左ペダルへのキーの\n割り当てを設定します。",
             "Drums key assign:\nTo assign key/pads for HiHatPedal\n button.")
         {
-            action = () => CDTXMania.stageConfig.tNotifyPadSelection(EKeyConfigPart.DRUMS, EKeyConfigPad.LP)
+            action = () => stageConfig.tNotifyPadSelection(EKeyConfigPart.DRUMS, EKeyConfigPad.LP)
         };
         listItems.Add(iKeyAssignDrumsLP);
 
@@ -859,7 +859,7 @@ internal partial class CActConfigList
             "ドラムのキー設定：\n左バスドラムへのキーの割り当てを設\n定します。",
             "Drums key assign:\nTo assign key/pads for RightCymbal\n button.")
         {
-            action = () => CDTXMania.stageConfig.tNotifyPadSelection(EKeyConfigPart.DRUMS, EKeyConfigPad.LBD)
+            action = () => stageConfig.tNotifyPadSelection(EKeyConfigPart.DRUMS, EKeyConfigPad.LBD)
         };
         listItems.Add(iKeyAssignDrumsLBD);
 

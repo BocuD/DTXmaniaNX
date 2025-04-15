@@ -113,7 +113,7 @@ internal class CStageTitle : CStage
 
 	public override void FirstUpdate()
 	{
-		if( CDTXMania.rPreviousStage == CDTXMania.stageStartup )
+		if (CDTXMania.StageManager.rPreviousStage == CDTXMania.StageManager.stageStartup )
 		{
 			actFIfromSetup.tStartFadeIn();
 			ePhaseID = EPhase.タイトル_起動画面からのフェードイン;
