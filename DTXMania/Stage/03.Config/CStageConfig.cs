@@ -275,7 +275,7 @@ internal class CStageConfig : CStage
                         tNotifyAssignmentComplete();
                         return 0;
                     }
-                    if (!actList.bIsKeyAssignSelected && !actList.bIsFocusingParameter)	// #24525 2011.3.15 yyagi, #32059 2013.9.17 yyagi
+                    if (!actList.bIsSubMenuSelected && !actList.bIsFocusingParameter)	// #24525 2011.3.15 yyagi, #32059 2013.9.17 yyagi
                     {
                         bFocusIsOnMenu = true;
                     }
@@ -307,7 +307,7 @@ internal class CStageConfig : CStage
                     switch (eItemPanelMode)
                     {
                         case EItemPanelMode.PadList:
-                            bool bIsKeyAssignSelectedBeforeHitEnter = actList.bIsKeyAssignSelected;	// #24525 2011.3.15 yyagi
+                            bool bIsKeyAssignSelectedBeforeHitEnter = actList.bIsSubMenuSelected;	// #24525 2011.3.15 yyagi
                             actList.tPressEnter();
                             if (actList.bCurrentlySelectedItemIsReturnToMenu)
                             {

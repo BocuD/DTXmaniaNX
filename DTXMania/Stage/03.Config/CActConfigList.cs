@@ -12,20 +12,20 @@ namespace DTXMania;
 internal partial class CActConfigList : CActivity
 {
     // プロパティ
-    public bool bIsKeyAssignSelected		// #24525 2011.3.15 yyagi
+    public bool bIsSubMenuSelected		// #24525 2011.3.15 yyagi
     {
         get
         {
             EMenuType e = eMenuType;
             if (e == EMenuType.KeyAssignBass || e == EMenuType.KeyAssignDrums ||
-                e == EMenuType.KeyAssignGuitar || e == EMenuType.KeyAssignSystem)
+                e == EMenuType.KeyAssignGuitar || e == EMenuType.KeyAssignSystem ||
+                e == EMenuType.SystemGraphics || e == EMenuType.SystemAudio ||
+                e == EMenuType.SystemGameplay)
             {
                 return true;
             }
-            else
-            {
-                return false;
-            }
+
+            return false;
         }
     }
     public bool bIsFocusingParameter => bFocusIsOnElementValue; // #32059 2013.9.17 yyagi

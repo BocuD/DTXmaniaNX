@@ -78,14 +78,6 @@ internal partial class CActConfigList
     private void tSetupItemList_Audio()
     {
         listItems.Clear();
-            
-        CItemBase audioSystemReturnToMenu = new("<< Return To Menu", CItemBase.EPanelType.Other,
-            "左側のメニューに戻ります。",
-            "Return to left menu.")
-        {
-            action = tSetupItemList_System
-        };
-        listItems.Add(audioSystemReturnToMenu);
 
         // #33700 2013.1.3 yyagi
         iSystemMasterVolume = new CItemInteger("MasterVolume", 0, 100, CDTXMania.ConfigIni.nMasterVolume,
@@ -258,6 +250,14 @@ internal partial class CActConfigList
             () => iSystemASIODevice.nCurrentlySelectedIndex = CDTXMania.ConfigIni.nASIODevice,
             () => CDTXMania.ConfigIni.nASIODevice = iSystemASIODevice.nCurrentlySelectedIndex);
         listItems.Add(iSystemASIODevice);
+        
+        iSystemReturnToMenu = new CItemBase("<< Return To Menu", CItemBase.EPanelType.Other,
+            "左側のメニューに戻ります。",
+            "Return to left menu.")
+        {
+            action = tSetupItemList_System
+        };
+        listItems.Add(iSystemReturnToMenu);
 
         CacheCurrentSoundDevices();
 

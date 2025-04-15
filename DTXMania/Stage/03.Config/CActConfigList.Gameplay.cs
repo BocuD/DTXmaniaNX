@@ -9,14 +9,6 @@ internal partial class CActConfigList
     {
         listItems.Clear();
             
-        CItemBase gameplayReturnToMenu = new("<< Return To Menu", CItemBase.EPanelType.Other,
-            "左側のメニューに戻ります。",
-            "Return to left menu.")
-        {
-            action = tSetupItemList_System
-        };
-        listItems.Add(gameplayReturnToMenu);
-            
         CItemInteger iSystemRisky = new("Risky", 0, 10, CDTXMania.ConfigIni.nRisky,
             "設定した回数分\n" +
             "ミスをすると、強制的に\n"+
@@ -195,7 +187,14 @@ internal partial class CActConfigList
             () => CDTXMania.ConfigIni.bIsAutoResultCapture = iSystemAutoResultCapture.bON);
         listItems.Add(iSystemAutoResultCapture);
         
-
+        iSystemReturnToMenu = new CItemBase("<< Return To Menu", CItemBase.EPanelType.Other,
+            "左側のメニューに戻ります。",
+            "Return to left menu.")
+        {
+            action = tSetupItemList_System
+        };
+        listItems.Add(iSystemReturnToMenu);
+        
         OnListMenuの初期化();
         nCurrentSelection = 0;
         eMenuType = EMenuType.SystemGameplay;

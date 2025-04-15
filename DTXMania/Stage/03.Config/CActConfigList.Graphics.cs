@@ -8,14 +8,6 @@ internal partial class CActConfigList
     private void tSetupItemList_Graphics()
     {
         listItems.Clear();
-            
-        CItemBase graphicsSystemReturnToMenu = new("<< Return To Menu", CItemBase.EPanelType.Other,
-            "左側のメニューに戻ります。",
-            "Return to left menu.")
-        {
-            action = tSetupItemList_System
-        };
-        listItems.Add(graphicsSystemReturnToMenu);
 
         CItemToggle iSystemAVI = new("AVI", CDTXMania.ConfigIni.bAVIEnabled,
             "AVIの使用：\n動画(AVI)を再生可能にする場合に\nON にします。AVI の再生には、それ\nなりのマシンパワーが必要とされます。",
@@ -109,6 +101,14 @@ internal partial class CActConfigList
             }, 
             () => CDTXMania.ConfigIni.bVerticalSyncWait = iSystemVSyncWait.bON);
         listItems.Add(iSystemVSyncWait);
+        
+        iSystemReturnToMenu = new CItemBase("<< Return To Menu", CItemBase.EPanelType.Other,
+            "左側のメニューに戻ります。",
+            "Return to left menu.")
+        {
+            action = tSetupItemList_System
+        };
+        listItems.Add(iSystemReturnToMenu);
 
         OnListMenuの初期化();
         nCurrentSelection = 0;
