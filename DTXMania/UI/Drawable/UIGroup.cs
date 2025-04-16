@@ -124,4 +124,25 @@ public class UIGroup : UIDrawable
             
         children.Clear();
     }
+
+    public int GetChildIndex(UIDrawable node)
+    {
+        return children.IndexOf(node);
+    }
+
+    public void SetChildIndex(UIDrawable node, int index)
+    {
+        if (index < 0 || index >= children.Count)
+        {
+            Console.WriteLine($"Index {index} is out of bounds for children list of size {children.Count}");
+            return;
+        }
+
+        int currentIndex = GetChildIndex(node);
+        if (currentIndex != -1)
+        {
+            children.RemoveAt(currentIndex);
+            children.Insert(index, node);
+        }
+    }
 }
