@@ -22,32 +22,37 @@ public class DrawableTracker
     public static void DrawWindow()
     {
         //draw imgui window with table and scroll to show objects
-        ImGui.Begin("Drawables");
-        
-        //count
-        ImGui.Text($"Count: {drawables.Count}");
-        ImGui.SameLine();
-        if (ImGui.Button("Run GC"))
+        if (ImGui.Begin("Drawables"))
         {
-            CDTXMania.tRunGarbageCollector();
+            //count
+            ImGui.Text($"Count: {drawables.Count}");
+            ImGui.SameLine();
+            if (ImGui.Button("Run GC"))
+            {
+                CDTXMania.tRunGarbageCollector();
+            }
+
+            ImGui.BeginTable("DrawablesTable", 3);
+            ImGui.TableSetupColumn("ID");
+            ImGui.TableSetupColumn("Type");
+            ImGui.TableSetupColumn("Name");
+            ImGui.TableHeadersRow();
+            foreach (var drawable in drawables)
+            {
+                ImGui.TableNextRow();
+                ImGui.TableNextColumn();
+                ImGui.Text(drawable.Key);
+                ImGui.TableNextColumn();
+                ImGui.Text(drawable.Value.TryGetTarget(out var target) ? target.type : "null");
+                ImGui.TableNextColumn();
+                ImGui.Text(drawable.Value.TryGetTarget(out var target2)
+                    ? (string.IsNullOrEmpty(target2.name) ? target2.GetType().Name : target2.name)
+                    : "null");
+            }
+
+            ImGui.EndTable();
         }
         
-        ImGui.BeginTable("DrawablesTable", 3);
-        ImGui.TableSetupColumn("ID");
-        ImGui.TableSetupColumn("Type");
-        ImGui.TableSetupColumn("Name");
-        ImGui.TableHeadersRow();
-        foreach (var drawable in drawables)
-        {
-            ImGui.TableNextRow();
-            ImGui.TableNextColumn();
-            ImGui.Text(drawable.Key);
-            ImGui.TableNextColumn();
-            ImGui.Text(drawable.Value.TryGetTarget(out var target) ? target.type : "null");
-            ImGui.TableNextColumn();
-            ImGui.Text(drawable.Value.TryGetTarget(out var target2) ? (string.IsNullOrEmpty(target2.name) ? target2.GetType().Name : target2.name) : "null");
-        }
-        ImGui.EndTable();
         ImGui.End();
     }
 
