@@ -346,7 +346,6 @@ internal class CActPerfAVI : CActivity
         n前回表示したフレーム番号 = -1;
         bフレームを作成した = false;
         b再生トグル = false;
-        bDShowクリップを再生している = false;
         pBmp = IntPtr.Zero;
         MovieMode();
         nAlpha = 255 - ((int)(((float)(CDTXMania.ConfigIni.nMovieAlpha * 255)) / 10f));
@@ -850,7 +849,6 @@ internal class CActPerfAVI : CActivity
     public bool bWindowMode;
     private bool bフレームを作成した;
     private bool b再生トグル;
-    private bool bDShowクリップを再生している;
     //private bool bUseMRenderer = false;
     private bool bUseCAviDS = true;//
     public float fClipアスペクト比;

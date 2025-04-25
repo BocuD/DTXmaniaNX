@@ -5,7 +5,6 @@ namespace DTXMania;
 
 internal partial class CActConfigList
 {
-    #region [ t項目リストの設定_Guitar() ]
     private CItemInteger iGuitarScrollSpeed;
     private CItemToggle iGuitarGraph;
         
@@ -435,5 +434,4 @@ internal partial class CActConfigList
         nCurrentSelection = 0;
         eMenuType = EMenuType.KeyAssignGuitar;
     }
-    #endregion
 }

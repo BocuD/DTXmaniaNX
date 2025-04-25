@@ -161,22 +161,22 @@ internal class CActConfigKeyAssign : CActivity
 			switch (stkeyassignArray[i].InputDevice)
 			{
 				case EInputDevice.Keyboard:
-					tアサインコードの描画_Keyboard(i + 1, x + 20, y, stkeyassignArray[i].ID, stkeyassignArray[i].Code,
+					tDrawAssignedCodeKeyboard(i + 1, x + 20, y, stkeyassignArray[i].ID, stkeyassignArray[i].Code,
 						nSelectedRow == i);
 					break;
 
 				case EInputDevice.MIDI入力:
-					tアサインコードの描画_MidiIn(i + 1, x + 20, y, stkeyassignArray[i].ID, stkeyassignArray[i].Code,
+					tDrawAssignedCodeMidiIn(i + 1, x + 20, y, stkeyassignArray[i].ID, stkeyassignArray[i].Code,
 						nSelectedRow == i);
 					break;
 
 				case EInputDevice.Joypad:
-					tアサインコードの描画_Joypad(i + 1, x + 20, y, stkeyassignArray[i].ID, stkeyassignArray[i].Code,
+					tDrawAssignedCodeJoypad(i + 1, x + 20, y, stkeyassignArray[i].ID, stkeyassignArray[i].Code,
 						nSelectedRow == i);
 					break;
 
 				case EInputDevice.Mouse:
-					tアサインコードの描画_Mouse(i + 1, x + 20, y, stkeyassignArray[i].ID, stkeyassignArray[i].Code,
+					tDrawAssignedCodeMouse(i + 1, x + 20, y, stkeyassignArray[i].ID, stkeyassignArray[i].Code,
 						nSelectedRow == i);
 					break;
 
@@ -373,7 +373,7 @@ internal class CActConfigKeyAssign : CActivity
 		stageConfig = cStageConfig;
 	}
 
-	private void tアサインコードの描画_Joypad(int line, int x, int y, int nID, int nCode, bool b強調)
+	private void tDrawAssignedCodeJoypad(int line, int x, int y, int nID, int nCode, bool b強調)
 	{
 		string str = "";
 		switch (nCode)
@@ -403,17 +403,21 @@ internal class CActConfigKeyAssign : CActivity
 				break;
 
 			default:
-				if ((6 <= nCode) && (nCode < 6 + 128)) // other buttons (128 types)
+				switch (nCode)
 				{
-					str = $"Button{nCode - 5}";
-				}
-				else if ((6 + 128 <= nCode) && (nCode < 6 + 128 + 8)) // POV HAT ( 8 types; 45 degrees per HATs)
-				{
-					str = $"POV {(nCode - 6 - 128) * 45}";
-				}
-				else
-				{
-					str = $"Code{nCode}";
+					// other buttons (128 types)
+					case >= 6 and < 6 + 128:
+						str = $"Button{nCode - 5}";
+						break;
+					
+					// POV HAT ( 8 types; 45 degrees per HATs)
+					case >= 6 + 128 and < 6 + 128 + 8:
+						str = $"POV {(nCode - 6 - 128) * 45}";
+						break;
+					
+					default:
+						str = $"Code{nCode}";
+						break;
 				}
 
 				break;
@@ -422,7 +426,7 @@ internal class CActConfigKeyAssign : CActivity
 		stageConfig.actFont.t文字列描画(x, y, $"{line,2}. Joypad #{nID} " + str, b強調, 0.75f);
 	}
 
-	private void tアサインコードの描画_Keyboard(int line, int x, int y, int nID, int nCode, bool b強調)
+	private void tDrawAssignedCodeKeyboard(int line, int x, int y, int nID, int nCode, bool b強調)
 	{
 		string str = null;
 		foreach (STKEYLABEL stkeylabel in keyLabel)
@@ -442,12 +446,12 @@ internal class CActConfigKeyAssign : CActivity
 		stageConfig.actFont.t文字列描画(x, y, str, b強調, 0.75f);
 	}
 
-	private void tアサインコードの描画_MidiIn(int line, int x, int y, int nID, int nCode, bool b強調)
+	private void tDrawAssignedCodeMidiIn(int line, int x, int y, int nID, int nCode, bool b強調)
 	{
 		stageConfig.actFont.t文字列描画(x, y, $"{line,2}. MidiIn #{nID} code.{nCode}", b強調, 0.75f);
 	}
 
-	private void tアサインコードの描画_Mouse(int line, int x, int y, int nID, int nCode, bool b強調)
+	private void tDrawAssignedCodeMouse(int line, int x, int y, int nID, int nCode, bool b強調)
 	{
 		stageConfig.actFont.t文字列描画(x, y, $"{line,2}. Mouse Button{nCode}", b強調, 0.75f);
 	}
