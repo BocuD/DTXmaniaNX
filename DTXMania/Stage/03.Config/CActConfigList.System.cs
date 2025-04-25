@@ -171,30 +171,6 @@ internal partial class CActConfigList
             () => iSystemGRmode.nCurrentlySelectedIndex = nDGmode, 
             () => { } );
         listItems.Add(iSystemGRmode);
-            
-        CItemToggle iSystemDebugInfo = new("Debug Info", CDTXMania.ConfigIni.bShowPerformanceInformation,
-            "演奏情報の表示：\n" +
-            "演奏中、BGA領域の下部に\n" +
-            "演奏情報を表示します。\n" +
-            "また、小節線の横に\n"+
-            "小節番号が表示されるように\n"+
-            "なります。",
-            "Show song information on playing BGA area (FPS, BPM, total time etc)\nYou can turn ON/OFF the indications by pushing [Del] while playing drums, guitar or bass.");
-        iSystemDebugInfo.BindConfig(
-            () => iSystemDebugInfo.bON = CDTXMania.ConfigIni.bShowPerformanceInformation,
-            () => CDTXMania.ConfigIni.bShowPerformanceInformation = iSystemDebugInfo.bON);
-        listItems.Add(iSystemDebugInfo);
-
-        CItemToggle iSystemSaveScore = new("SaveScore", CDTXMania.ConfigIni.bScoreIniを出力する,
-            "演奏記録の保存：\n"+
-            "ONで演奏記録を.score.iniに\n"+
-            "保存します。\n",
-            "Turn ON to save high scores/skills.\nTurn OFF in case your song data are on read-only media.\n"+
-            "Note that the score files also contain 'BGM Adjust' parameter, so turn ON to keep adjustment.");
-        iSystemSaveScore.BindConfig(
-            () => iSystemSaveScore.bON = CDTXMania.ConfigIni.bScoreIniを出力する,
-            () => CDTXMania.ConfigIni.bScoreIniを出力する = iSystemSaveScore.bON);
-        listItems.Add(iSystemSaveScore);
 
         CItemToggle iSystemMusicNameDispDef = new("MusicNameDispDEF", CDTXMania.ConfigIni.b曲名表示をdefのものにする,
             "表示される曲名をdefのものにします。\n" +
@@ -206,33 +182,6 @@ internal partial class CActConfigList
             () => iSystemMusicNameDispDef.bON = CDTXMania.ConfigIni.b曲名表示をdefのものにする,
             () => CDTXMania.ConfigIni.b曲名表示をdefのものにする = iSystemMusicNameDispDef.bON);
         listItems.Add(iSystemMusicNameDispDef);
-            
-        CItemToggle iAutoAddGage = new("AutoAddGage", CDTXMania.ConfigIni.bAutoAddGage,
-            "ONの場合、AUTO判定も\n"+
-            "ゲージに加算されます。\n",
-            "If ON, will be added to the judgment also gauge AUTO.\n" +
-            "");
-        iAutoAddGage.BindConfig(
-            () => iAutoAddGage.bON = CDTXMania.ConfigIni.bAutoAddGage,
-            () => CDTXMania.ConfigIni.bAutoAddGage = iAutoAddGage.bON);
-        listItems.Add(iAutoAddGage);
-            
-        CItemToggle iSystemBufferedInput = new("BufferedInput", CDTXMania.ConfigIni.bバッファ入力を行う,
-            "バッファ入力モード：\nON にすると、FPS を超える入力解像\n度を実現します。\nOFF にすると、入力解像度は FPS に\n等しくなります。",
-            "Select joystick/keyboard/\nmouse input buffer mode.\nON to use buffer input. No lost/lags.\n"+
-            "OFF to use realtime input. May cause lost/lags for input. Input frequency is synchronized with FPS.");
-        iSystemBufferedInput.BindConfig(
-            () => iSystemBufferedInput.bON = CDTXMania.ConfigIni.bバッファ入力を行う,
-            () => CDTXMania.ConfigIni.bバッファ入力を行う = iSystemBufferedInput.bON);
-        listItems.Add(iSystemBufferedInput);
-
-        CItemToggle iLogOutputLog = new("TraceLog", CDTXMania.ConfigIni.bOutputLogs,
-            "Traceログ出力：\nDTXManiaLog.txt にログを出力します。\n変更した場合は、DTXMania の再起動\n後に有効となります。",
-            "Turn ON to output debug logs to DTXManiaLog.txt file\nEffective after next DTXMania restart.");
-        iLogOutputLog.BindConfig(
-            () => iLogOutputLog.bON = CDTXMania.ConfigIni.bOutputLogs,
-            () => CDTXMania.ConfigIni.bOutputLogs = iLogOutputLog.bON);
-        listItems.Add(iLogOutputLog);
             
         iSystemSkinSubfolder = new CItemList("Skin (Legacy)", CItemBase.EPanelType.Normal, nSkinIndex,
             "スキン切替：スキンを切り替えます。\n" +
@@ -295,21 +244,36 @@ internal partial class CActConfigList
             () => iInfoType.nCurrentlySelectedIndex = CDTXMania.ConfigIni.nInfoType,
             () => CDTXMania.ConfigIni.nInfoType = iInfoType.nCurrentlySelectedIndex);
         listItems.Add(iInfoType);
-
-        CItemBase iSystemGoToKeyAssign = new("System Keys", CItemBase.EPanelType.Normal,
-            "システムのキー入力に関する項目を設定します。",
-            "Settings for the system key/pad inputs.")
-        {
-            action = tSetupItemList_KeyAssignSystem
-        };
-        listItems.Add(iSystemGoToKeyAssign);
-            
-        CItemToggle iSystemMetronome = new("Metronome", CDTXMania.ConfigIni.bMetronome,
-            "メトロノームを有効にします。", "Enable Metronome.");
-        iSystemMetronome.BindConfig(
-            () => iSystemMetronome.bON = CDTXMania.ConfigIni.bMetronome,
-            () => CDTXMania.ConfigIni.bMetronome = iSystemMetronome.bON);
-        listItems.Add(iSystemMetronome);
+        
+        CItemToggle iSystemBufferedInput = new("BufferedInput", CDTXMania.ConfigIni.bバッファ入力を行う,
+            "バッファ入力モード：\nON にすると、FPS を超える入力解像\n度を実現します。\nOFF にすると、入力解像度は FPS に\n等しくなります。",
+            "Select joystick/keyboard/\nmouse input buffer mode.\nON to use buffer input. No lost/lags.\n"+
+            "OFF to use realtime input. May cause lost/lags for input. Input frequency is synchronized with FPS.");
+        iSystemBufferedInput.BindConfig(
+            () => iSystemBufferedInput.bON = CDTXMania.ConfigIni.bバッファ入力を行う,
+            () => CDTXMania.ConfigIni.bバッファ入力を行う = iSystemBufferedInput.bON);
+        listItems.Add(iSystemBufferedInput);
+        
+        CItemToggle iSystemDebugInfo = new("Debug Info", CDTXMania.ConfigIni.bShowPerformanceInformation,
+            "演奏情報の表示：\n" +
+            "演奏中、BGA領域の下部に\n" +
+            "演奏情報を表示します。\n" +
+            "また、小節線の横に\n"+
+            "小節番号が表示されるように\n"+
+            "なります。",
+            "Show song information on playing BGA area (FPS, BPM, total time etc)\nYou can turn ON/OFF the indications by pushing [Del] while playing drums, guitar or bass.");
+        iSystemDebugInfo.BindConfig(
+            () => iSystemDebugInfo.bON = CDTXMania.ConfigIni.bShowPerformanceInformation,
+            () => CDTXMania.ConfigIni.bShowPerformanceInformation = iSystemDebugInfo.bON);
+        listItems.Add(iSystemDebugInfo);
+        
+        CItemToggle iLogOutputLog = new("TraceLog", CDTXMania.ConfigIni.bOutputLogs,
+            "Traceログ出力：\nDTXManiaLog.txt にログを出力します。\n変更した場合は、DTXMania の再起動\n後に有効となります。",
+            "Turn ON to output debug logs to DTXManiaLog.txt file\nEffective after next DTXMania restart.");
+        iLogOutputLog.BindConfig(
+            () => iLogOutputLog.bON = CDTXMania.ConfigIni.bOutputLogs,
+            () => CDTXMania.ConfigIni.bOutputLogs = iLogOutputLog.bON);
+        listItems.Add(iLogOutputLog);
 
         CItemList iSystemChipPlayTimeComputeMode = new("Chip Timing Mode", CItemBase.EPanelType.Normal, CDTXMania.ConfigIni.nChipPlayTimeComputeMode,
             "発声時刻の計算方式を選択\n" +
@@ -325,6 +289,14 @@ internal partial class CActConfigList
             () => iSystemChipPlayTimeComputeMode.nCurrentlySelectedIndex = CDTXMania.ConfigIni.nChipPlayTimeComputeMode,
             () => CDTXMania.ConfigIni.nChipPlayTimeComputeMode = iSystemChipPlayTimeComputeMode.nCurrentlySelectedIndex);
         listItems.Add(iSystemChipPlayTimeComputeMode);
+        
+        CItemBase iSystemGoToKeyAssign = new("System Keys", CItemBase.EPanelType.Normal,
+            "システムのキー入力に関する項目を設定します。",
+            "Settings for the system key/pad inputs.")
+        {
+            action = tSetupItemList_KeyAssignSystem
+        };
+        listItems.Add(iSystemGoToKeyAssign);
         
         CItemBase iSystemImportConfig = new("Import Config", CItemBase.EPanelType.Normal,
             "config.iniファイルから設定\n" +

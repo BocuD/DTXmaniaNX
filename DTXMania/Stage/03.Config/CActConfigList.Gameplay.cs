@@ -64,6 +64,16 @@ internal partial class CActConfigList
             () => CDTXMania.ConfigIni.bCLASSIC譜面判別を有効にする = iSystemClassicNotes.bON);
         listItems.Add(iSystemClassicNotes);
             
+        CItemToggle iAutoAddGage = new("AutoAddGage", CDTXMania.ConfigIni.bAutoAddGage,
+            "ONの場合、AUTO判定も\n"+
+            "ゲージに加算されます。\n",
+            "If ON, will be added to the judgment also gauge AUTO.\n" +
+            "");
+        iAutoAddGage.BindConfig(
+            () => iAutoAddGage.bON = CDTXMania.ConfigIni.bAutoAddGage,
+            () => CDTXMania.ConfigIni.bAutoAddGage = iAutoAddGage.bON);
+        listItems.Add(iAutoAddGage);
+        
         CItemToggle iSystemStageFailed = new("StageFailed", CDTXMania.ConfigIni.bSTAGEFAILEDEnabled,
             "ONにするとゲージが\n" +
             "なくなった時にSTAGE FAILED" +
@@ -176,6 +186,24 @@ internal partial class CActConfigList
             () => CDTXMania.ConfigIni.bShowLagHitCount = iSystemShowLagHitCount.bON);
         listItems.Add(iSystemShowLagHitCount);
 
+        CItemToggle iSystemMetronome = new("Metronome", CDTXMania.ConfigIni.bMetronome,
+            "メトロノームを有効にします。", "Enable Metronome.");
+        iSystemMetronome.BindConfig(
+            () => iSystemMetronome.bON = CDTXMania.ConfigIni.bMetronome,
+            () => CDTXMania.ConfigIni.bMetronome = iSystemMetronome.bON);
+        listItems.Add(iSystemMetronome);
+        
+        CItemToggle iSystemSaveScore = new("SaveScore", CDTXMania.ConfigIni.bScoreIniを出力する,
+            "演奏記録の保存：\n"+
+            "ONで演奏記録を.score.iniに\n"+
+            "保存します。\n",
+            "Turn ON to save high scores/skills.\nTurn OFF in case your song data are on read-only media.\n"+
+            "Note that the score files also contain 'BGM Adjust' parameter, so turn ON to keep adjustment.");
+        iSystemSaveScore.BindConfig(
+            () => iSystemSaveScore.bON = CDTXMania.ConfigIni.bScoreIniを出力する,
+            () => CDTXMania.ConfigIni.bScoreIniを出力する = iSystemSaveScore.bON);
+        listItems.Add(iSystemSaveScore);
+        
         CItemToggle iSystemAutoResultCapture = new("AutoSaveResult", CDTXMania.ConfigIni.bIsAutoResultCapture,
             "ONにすると、NewRecord時に\n"+
             "自動でリザルト画像を\n"+
