@@ -5,7 +5,6 @@ namespace DTXMania;
 
 internal partial class CActConfigList
 {
-    #region [ t項目リストの設定_Bass() ]
     private CItemInteger iBassScrollSpeed;
     private CItemToggle iBassGraph;
         
@@ -104,7 +103,7 @@ internal partial class CActConfigList
             () => CDTXMania.ConfigIni.nScrollSpeed.Bass = iBassScrollSpeed.nCurrentValue);
         listItems.Add(iBassScrollSpeed);
 
-        CItemList iBassHIDSUD = new("HID-SUD", CItemBase.EPanelType.Normal, (int)CDTXMania.ConfigIni.nHidSud.Bass,
+        CItemList iBassHIDSUD = new("HID-SUD", CItemBase.EPanelType.Normal, CDTXMania.ConfigIni.nHidSud.Bass,
             "HIDDEN:チップが途中から見えなくなります。\n" +
             "SUDDEN:チップが途中まで見えません。\n" +
             "HID-SUD:HIDDEN、SUDDENの両方が適用\n" +
@@ -129,7 +128,7 @@ internal partial class CActConfigList
             ["OFF", "HALF", "FULL"]);
         listItems.Add(iBassDark);
             
-        CItemList iBassLaneDisp = new("LaneDisp", CItemBase.EPanelType.Normal, (int)CDTXMania.ConfigIni.nLaneDisp.Bass,
+        CItemList iBassLaneDisp = new("LaneDisp", CItemBase.EPanelType.Normal, CDTXMania.ConfigIni.nLaneDisp.Bass,
             "レーンの縦線と小節線の表示を切り替えます。\n" +
             "ALL  ON :レーン背景、小節線を表示します。\n" +
             "LANE OFF:レーン背景を表示しません。\n" +
@@ -305,7 +304,7 @@ internal partial class CActConfigList
             () => CDTXMania.ConfigIni.bGraph有効.Bass = iBassGraph.bON);
         iBassGraph.action = () =>
         {
-            if (iBassGraph.bON == true)
+            if (iBassGraph.bON)
             {
                 CDTXMania.ConfigIni.bGraph有効.Guitar = false;
                 iGuitarGraph.bON = false;
@@ -334,8 +333,8 @@ internal partial class CActConfigList
         nCurrentSelection = 0;
         eMenuType = EMenuType.Bass;
     }
-        
-    public void tSetupItemList_KeyAssignBass()
+
+    private void tSetupItemList_KeyAssignBass()
     {
         listItems.Clear();
             
@@ -423,5 +422,4 @@ internal partial class CActConfigList
         nCurrentSelection = 0;
         eMenuType = EMenuType.KeyAssignBass;
     }
-    #endregion
 }

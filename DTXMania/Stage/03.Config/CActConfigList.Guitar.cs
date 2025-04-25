@@ -105,7 +105,7 @@ internal partial class CActConfigList
             
         listItems.Add(iGuitarScrollSpeed);
 
-        CItemList iGuitarHIDSUD = new("HID-SUD", CItemBase.EPanelType.Normal, (int)CDTXMania.ConfigIni.nHidSud.Guitar,
+        CItemList iGuitarHIDSUD = new("HID-SUD", CItemBase.EPanelType.Normal, CDTXMania.ConfigIni.nHidSud.Guitar,
             "HIDDEN:チップが途中から見えなくなります。\n" +
             "SUDDEN:チップが途中まで見えません。\n" +
             "HID-SUD:HIDDEN、SUDDENの両方が適用\n" +
@@ -114,7 +114,7 @@ internal partial class CActConfigList
             "The display position for Drums Combo.\n" +
             "Note that it doesn't take effect\n" +
             " at Autoplay ([Left] is forcely used).",
-            new string[] { "OFF", "Hidden", "Sudden", "HidSud", "Stealth" });
+            ["OFF", "Hidden", "Sudden", "HidSud", "Stealth"]);
         iGuitarHIDSUD.BindConfig(
             () => iGuitarHIDSUD.nCurrentlySelectedIndex = CDTXMania.ConfigIni.nHidSud.Guitar,
             () => CDTXMania.ConfigIni.nHidSud.Guitar = iGuitarHIDSUD.nCurrentlySelectedIndex);
@@ -127,17 +127,17 @@ internal partial class CActConfigList
             "FULL: さらに小節線、拍線、判定ラインも\n" +
             "表示されなくなります。",
             "OFF: all display parts are shown.\nHALF: lanes and gauge are\n disappeared.\nFULL: additionaly to HALF, bar/beat\n lines, hit bar are disappeared.",
-            new string[] { "OFF", "HALF", "FULL" });
+            ["OFF", "HALF", "FULL"]);
         listItems.Add(iGuitarDark);
             
-        CItemList iGuitarLaneDisp = new("LaneDisp", CItemBase.EPanelType.Normal, (int)CDTXMania.ConfigIni.nLaneDisp.Guitar,
+        CItemList iGuitarLaneDisp = new("LaneDisp", CItemBase.EPanelType.Normal, CDTXMania.ConfigIni.nLaneDisp.Guitar,
             "レーンの縦線と小節線の表示を切り替えます。\n" +
             "ALL  ON :レーン背景、小節線を表示します。\n" +
             "LANE OFF:レーン背景を表示しません。\n" +
             "LINE OFF:小節線を表示しません。\n" +
             "ALL  OFF:レーン背景、小節線を表示しません。",
             "",
-            new string[] { "ALL ON", "LANE OFF", "LINE OFF", "ALL OFF" });
+            ["ALL ON", "LANE OFF", "LINE OFF", "ALL OFF"]);
         iGuitarLaneDisp.BindConfig(
             () => iGuitarLaneDisp.nCurrentlySelectedIndex = CDTXMania.ConfigIni.nLaneDisp.Guitar,
             () => CDTXMania.ConfigIni.nLaneDisp.Guitar = iGuitarLaneDisp.nCurrentlySelectedIndex);
@@ -187,7 +187,7 @@ internal partial class CActConfigList
             "アタックエフェクトの表示 / 非表示を\n" +
             "切り替えます。",
             "",
-            new string[] { "ON", "OFF" });
+            ["ON", "OFF"]);
         iGuitarAttackEffect.BindConfig(
             () => iGuitarAttackEffect.nCurrentlySelectedIndex = (int)CDTXMania.ConfigIni.eAttackEffect.Guitar,
             () => CDTXMania.ConfigIni.eAttackEffect.Guitar = (EType)iGuitarAttackEffect.nCurrentlySelectedIndex);
@@ -208,7 +208,7 @@ internal partial class CActConfigList
         CItemList iGuitarPosition = new("Position", CItemBase.EPanelType.Normal, (int)CDTXMania.ConfigIni.JudgementStringPosition.Guitar,
             "ギターの判定文字の表示位置を指定\nします。\n  P-A: OnTheLane\n  P-B: COMBO の下\n  P-C: 判定ライン上\n  OFF: 表示しない",
             "The position to show judgement mark.\n(Perfect, Great, ...)\n\n P-A: on the lanes.\n P-B: under the COMBO indication.\n P-C: on the JudgeLine.\n OFF: no judgement mark.",
-            new string[] { "P-A", "P-B", "P-C", "OFF" });
+            ["P-A", "P-B", "P-C", "OFF"]);
         iGuitarPosition.BindConfig(
             () => iGuitarPosition.nCurrentlySelectedIndex = (int)CDTXMania.ConfigIni.JudgementStringPosition.Guitar,
             () => CDTXMania.ConfigIni.JudgementStringPosition.Guitar = (EType)iGuitarPosition.nCurrentlySelectedIndex);
@@ -227,7 +227,7 @@ internal partial class CActConfigList
         CItemList iGuitarSpecialist = new("Performance Mode", CItemBase.EPanelType.Normal, CDTXMania.ConfigIni.bSpecialist.Guitar ? 1 : 0,
             "ギターの演奏・モード\nします。\n  Normal: 通常の演奏モードです\n  Specialist: 間違えると違う音が流れます",
             "Turn on/off Specialist Mode for Guitar\n Normal: Default Performance mode\n Specialist: Different sound is played when you make a mistake",
-            new string[] { "Normal", "Specialist" });
+            ["Normal", "Specialist"]);
         iGuitarSpecialist.BindConfig(
             () => iGuitarSpecialist.nCurrentlySelectedIndex = CDTXMania.ConfigIni.bSpecialist.Guitar ? 1 : 0,
             () => CDTXMania.ConfigIni.bSpecialist.Guitar = iGuitarSpecialist.nCurrentlySelectedIndex == 1);
@@ -236,7 +236,7 @@ internal partial class CActConfigList
         CItemList iGuitarRandom = new("Random", CItemBase.EPanelType.Normal, (int)CDTXMania.ConfigIni.eRandom.Guitar,
             "ギターのチップがランダムに降ってきます。\n  Mirror: ミラーをかけます\n  Part: 小節_レーン単位で交換\n  Super: チップ単位で交換\n  Hyper: 全部完全に変更",
             "Guitar chips come randomly.\n Mirror: \n Part: swapping lanes randomly for each\n  measures.\n Super: swapping chip randomly\n Hyper: swapping randomly\n  (number of lanes also changes)",
-            new string[] { "OFF", "Mirror", "Part", "Super", "Hyper" });
+            ["OFF", "Mirror", "Part", "Super", "Hyper"]);
         iGuitarRandom.BindConfig(
             () => iGuitarRandom.nCurrentlySelectedIndex = (int)CDTXMania.ConfigIni.eRandom.Guitar,
             () => CDTXMania.ConfigIni.eRandom.Guitar = (ERandomMode)iGuitarRandom.nCurrentlySelectedIndex);

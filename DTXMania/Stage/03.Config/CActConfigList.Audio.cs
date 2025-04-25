@@ -19,13 +19,14 @@ internal partial class CActConfigList
     private CItemToggle iSystemSoundTimerType;
     private CItemToggle iSystemWASAPIEventDriven;
 
-    private bool audioMenuOpened = false;
+    private bool audioMenuOpened;
         
     private void CacheCurrentSoundDevices()
     {
         iSystemSoundType_initial = iSystemSoundType.nCurrentlySelectedIndex; // CONFIGに入ったときの値を保持しておく
         iSystemWASAPIBufferSizeMs_initial = iSystemWASAPIBufferSizeMs.nCurrentValue; // CONFIG脱出時にこの値から変更されているようなら
-        iSystemASIODevice_initial = iSystemASIODevice.nCurrentlySelectedIndex; //
+        iSystemASIODevice_initial = iSystemASIODevice.nCurrentlySelectedIndex;
+        iSystemSoundTimerType_initial = iSystemSoundTimerType.GetIndex();
 
         audioMenuOpened = true;
     }
