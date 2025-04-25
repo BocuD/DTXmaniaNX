@@ -259,7 +259,7 @@ internal class CStageConfig : CStage
             
         // キー入力
 
-        if ((ePhaseID != EPhase.Common_DefaultState) || actKeyAssign.bキー入力待ちの最中である)
+        if ((ePhaseID != EPhase.Common_DefaultState) || actKeyAssign.bWaitingForKeyInput)
             return 0;
 
         // 曲データの一覧取得中は、キー入力を無効化する
