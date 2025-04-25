@@ -82,4 +82,15 @@ internal class CItemThreeState : CItemBase
 			_ => throw new ArgumentOutOfRangeException()
 		};
 	}
+
+	public override string GetStringValue()
+	{
+		return eCurrentState switch
+		{
+			EState.ON => "ON",
+			EState.OFF => "OFF",
+			EState.UNDEFINED => "- -",
+			_ => throw new ArgumentOutOfRangeException()
+		};
+	}
 }

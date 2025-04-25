@@ -58,4 +58,9 @@ internal class CItemToggle : CItemBase
 				throw new ArgumentOutOfRangeException();
 		}
 	}
+
+	public override string GetStringValue()
+	{
+		return bON ? "ON" : "OFF";
+	}
 }

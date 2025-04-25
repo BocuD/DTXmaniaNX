@@ -261,7 +261,7 @@ internal partial class CActConfigList
 
         CacheCurrentSoundDevices();
 
-        OnListMenuの初期化();
+        InitializeList();
         nCurrentSelection = 0;
         eMenuType = EMenuType.SystemAudio;
     }

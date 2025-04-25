@@ -107,4 +107,9 @@ internal class CItemBase
 		_readFromConfig = readFromConfig;
 		_writeToConfig = writeToConfig;
 	}
+
+	public virtual string GetStringValue()
+	{
+		return string.Empty;
+	}
 }

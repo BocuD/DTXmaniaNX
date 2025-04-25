@@ -223,7 +223,7 @@ internal partial class CActConfigList
         };
         listItems.Add(iSystemReturnToMenu);
         
-        OnListMenuの初期化();
+        InitializeList();
         nCurrentSelection = 0;
         eMenuType = EMenuType.SystemGameplay;
     }

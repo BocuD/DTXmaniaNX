@@ -67,6 +67,11 @@ internal class CItemList : CItemBase
 	{
 		nCurrentlySelectedIndex = index;
 	}
+
+	public override string GetStringValue()
+	{
+		return listItemValues[nCurrentlySelectedIndex];
+	}
 }
 
 

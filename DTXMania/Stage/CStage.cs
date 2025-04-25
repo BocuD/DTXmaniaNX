@@ -10,8 +10,6 @@ namespace DTXMania;
 
 public abstract class CStage : CActivity
 {
-	// プロパティ
-
 	/// <summary>
 	/// The presence used to indicate the user's activity within this stage, or <see langword="null"/> if there is none.
 	/// </summary>

@@ -330,7 +330,7 @@ internal partial class CActConfigList
         };
         listItems.Add(iBassGoToKeyAssign);
 
-        OnListMenuの初期化();
+        InitializeList();
         nCurrentSelection = 0;
         eMenuType = EMenuType.Bass;
     }
@@ -392,7 +392,7 @@ internal partial class CActConfigList
             "Bass key assign:\nTo assign key/pads for Cancel button.");
         listItems.Add(iKeyAssignBassCancel);
 
-        OnListMenuの初期化();
+        InitializeList();
         nCurrentSelection = 0;
         eMenuType = EMenuType.KeyAssignBass;
     }

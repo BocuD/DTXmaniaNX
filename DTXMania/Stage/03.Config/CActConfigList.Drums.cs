@@ -750,7 +750,7 @@ internal partial class CActConfigList
         };
         listItems.Add(iDrumsGoToKeyAssign);
 
-        OnListMenuの初期化();
+        InitializeList();
         nCurrentSelection = 0;
         eMenuType = EMenuType.Drums;
     }
@@ -863,7 +863,7 @@ internal partial class CActConfigList
         };
         listItems.Add(iKeyAssignDrumsLBD);
 
-        OnListMenuの初期化();
+        InitializeList();
         nCurrentSelection = 0;
         eMenuType = EMenuType.KeyAssignDrums;
     }

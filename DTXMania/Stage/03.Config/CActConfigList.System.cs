@@ -1,9 +1,11 @@
 ﻿using System.Diagnostics;
+using System.Drawing;
 using System.Windows.Forms;
 using DTXMania.Core;
 using DTXMania.UI.Item;
 using DTXMania.UI.Skin;
 using FDK;
+using SampleFramework;
 
 namespace DTXMania;
 
@@ -13,7 +15,36 @@ internal partial class CActConfigList
         
     private CItemList iSystemSkinSubfolder;
         
-    private CTexture txSkinSample1;				// #28195 2012.5.2 yyagi
+    private CTexture? txSkinSample;				// #28195 2012.5.2 yyagi
+    
+    private void tGenerateSkinSample()
+    {
+        nSkinIndex = iSystemSkinSubfolder.nCurrentlySelectedIndex;
+        if (nSkinSampleIndex != nSkinIndex)
+        {
+            string path = skinSubFolders[nSkinIndex];
+            path = Path.Combine(path, @"Graphics\2_background.jpg");
+            Bitmap bmSrc = new(path);
+            Bitmap bmDest = new(GameFramebufferSize.Width, GameFramebufferSize.Height);
+            Graphics g = Graphics.FromImage(bmDest);
+            g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+            g.DrawImage(bmSrc,
+                new Rectangle(60, 106, (int)(GameFramebufferSize.Width * 0.1984),
+                    (int)(GameFramebufferSize.Height * 0.1984)),
+                0, 0, 1280, 720, GraphicsUnit.Pixel);
+            if (txSkinSample != null)
+            {
+                CDTXMania.tDisposeSafely(ref txSkinSample);
+            }
+
+            txSkinSample = CDTXMania.tGenerateTexture(bmDest, false);
+            g.Dispose();
+            bmDest.Dispose();
+            bmSrc.Dispose();
+            nSkinSampleIndex = nSkinIndex;
+        }
+    }
+    
     private string[] skinSubFolders;			//
     private string[] skinNames;					//
     private string skinSubFolder_org;			//
@@ -328,7 +359,7 @@ internal partial class CActConfigList
                         tUpdateDisplayValuesFromConfigIni();
                         //Update Toast Message
                         string fileName = filePath.Substring(filePath.LastIndexOf("\\") + 1);
-                        tUpdateToastMessage(string.Format("Imported {0} successfully.", fileName));
+                        tUpdateToastMessage($"Imported {fileName} successfully.");
                         ctToastMessageCounter.tStart(0, 1, 10000, CDTXMania.Timer);
                     }
                     catch (Exception)
@@ -383,7 +414,8 @@ internal partial class CActConfigList
         };
         listItems.Add(iSystemExportConfig);
 
-        OnListMenuの初期化();
+        InitializeList();
+        
         nCurrentSelection = 0;
         eMenuType = EMenuType.System;
     }
@@ -487,8 +519,8 @@ internal partial class CActConfigList
             action = () => stageConfig.tNotifyPadSelection(EKeyConfigPart.SYSTEM, EKeyConfigPad.Restart)
         };
         listItems.Add(iKeyAssignSystemRestart);
-
-        OnListMenuの初期化();
+        
+        InitializeList();
         nCurrentSelection = 0;
         eMenuType = EMenuType.KeyAssignSystem;
     }

@@ -342,7 +342,7 @@ internal partial class CActConfigList
         };
         listItems.Add(iGuitarGoToKeyAssign);
 
-        OnListMenuの初期化();
+        InitializeList();
         nCurrentSelection = 0;
         eMenuType = EMenuType.Guitar;
     }
@@ -431,7 +431,7 @@ internal partial class CActConfigList
         };
         listItems.Add(iKeyAssignGuitarCancel);
 
-        OnListMenuの初期化();
+        InitializeList();
         nCurrentSelection = 0;
         eMenuType = EMenuType.KeyAssignGuitar;
     }

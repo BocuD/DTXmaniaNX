@@ -58,4 +58,9 @@ internal class CItemInteger : CItemBase
 	{
 		nCurrentValue = index;
 	}
+
+	public override string GetStringValue()
+	{
+		return nCurrentValue.ToString();
+	}
 }
