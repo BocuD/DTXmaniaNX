@@ -1333,7 +1333,7 @@ internal class CDTXMania : Game
     #endregion
 
     /// <summary>プロパティ、インデクサには ref は使用できないので注意。</summary>
-    public static void tDisposeSafely<T>(ref T obj)
+    public static void tDisposeSafely<T>(ref T? obj)
     {
         if (obj == null)
             return;
@@ -1341,7 +1341,7 @@ internal class CDTXMania : Game
         if (obj is IDisposable d)
             d.Dispose();
 
-        obj = default(T);
+        obj = default;
     }
 
     //-----------------
