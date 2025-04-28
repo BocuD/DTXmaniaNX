@@ -8,8 +8,9 @@ namespace DTXMania.UI.Skin;
 
 public class SkinDescriptor
 {
-    public required string name { get; set; }
-    public required string author { get; set; }
+    public string name { get; set; } = "New skin";
+    public string author { get; set; } = "Unknown Author";
+        
     [JsonIgnore] public string basePath { get; private set; } = "";
 
     public Dictionary<CStage.EStage, string> stageSkins { get; set; } = new();
