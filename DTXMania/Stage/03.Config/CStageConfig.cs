@@ -475,67 +475,73 @@ internal class CStageConfig : CStage
     {
         try
         {
-            Bitmap image = new( 220 * 2, 192 * 2 );		// 説明文領域サイズの縦横 2 倍。（描画時に 0.5 倍で表示する。）
-            Graphics graphics = Graphics.FromImage( image );
+            Bitmap image = new(220 * 2, 192 * 2); // 説明文領域サイズの縦横 2 倍。（描画時に 0.5 倍で表示する。）
+            Graphics graphics = Graphics.FromImage(image);
             graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
-				
-            string[,] str = new string[ 2, 2 ];
-            switch( configLeftOptionsMenu.currentlySelectedIndex )
+
+            string[,] str = new string[2, 2];
+            switch (configLeftOptionsMenu.currentlySelectedIndex)
             {
                 case 0: //system
-                    str[ 0, 0 ] = "システムに関係する項目を設定します。";
-                    str[ 0, 1 ] = "";
-                    str[ 1, 0 ] = "Settings for an overall systems.";
+                    str[0, 0] = "システムに関係する項目を設定します。";
+                    str[0, 1] = "";
+                    str[1, 0] = "Settings for an overall systems.";
                     break;
-                    
+
                 case 1: //drums
-                    str[ 0, 0 ] = "ドラムの演奏に関する項目を設定します。";
-                    str[ 0, 1 ] = "";
-                    str[ 1, 0 ] = "Settings to play the drums.";
-                    str[ 1, 1 ] = "";
+                    str[0, 0] = "ドラムの演奏に関する項目を設定します。";
+                    str[0, 1] = "";
+                    str[1, 0] = "Settings to play the drums.";
+                    str[1, 1] = "";
                     break;
 
                 case 2: //guitar
-                    str[ 0, 0 ] = "ギターの演奏に関する項目を設定します。";
-                    str[ 0, 1 ] = "";
-                    str[ 1, 0 ] = "Settings to play the guitar.";
-                    str[ 1, 1 ] = "";
+                    str[0, 0] = "ギターの演奏に関する項目を設定します。";
+                    str[0, 1] = "";
+                    str[1, 0] = "Settings to play the guitar.";
+                    str[1, 1] = "";
                     break;
 
                 case 3: //bass
-                    str[ 0, 0 ] = "ベースの演奏に関する項目を設定します。";
-                    str[ 0, 1 ] = "";
-                    str[ 1, 0 ] = "Settings to play the bass.";
-                    str[ 1, 1 ] = "";
+                    str[0, 0] = "ベースの演奏に関する項目を設定します。";
+                    str[0, 1] = "";
+                    str[1, 0] = "Settings to play the bass.";
+                    str[1, 1] = "";
                     break;
 
                 case 4: //exit
-                    str[ 0, 0 ] = "設定を保存し、コンフィグ画面を終了します。";
-                    str[ 0, 1 ] = "";
-                    str[ 1, 0 ] = "Save the settings and exit from\nCONFIGURATION menu.";
-                    str[ 1, 1 ] = "";
+                    str[0, 0] = "設定を保存し、コンフィグ画面を終了します。";
+                    str[0, 1] = "";
+                    str[1, 0] = "Save the settings and exit from\nCONFIGURATION menu.";
+                    str[1, 1] = "";
                     break;
             }
-				
+
             int c = CDTXMania.isJapanese ? 0 : 1;
             for (int i = 0; i < 2; i++)
             {
-                graphics.DrawString( str[ c, i ], ftFont, Brushes.Black, new PointF( 4f , ( i * 30 ) ) );
+                graphics.DrawString(str[c, i], ftFont, Brushes.Black, new PointF(4f, (i * 30)));
             }
+
             graphics.Dispose();
-            if( txDescriptionPanel != null )
+            if (txDescriptionPanel != null)
             {
                 txDescriptionPanel.Dispose();
             }
+
             //this.txDescriptionPanel = new CTexture( CDTXMania.app.Device, image, CDTXMania.TextureFormat );
             // this.txDescriptionPanel.vcScaleRatio.X = 0.5f;
             // this.txDescriptionPanel.vcScaleRatio.Y = 0.5f;
             image.Dispose();
         }
-        catch( CTextureCreateFailedException )
+        catch (CTextureCreateFailedException)
         {
-            Trace.TraceError( "説明文テクスチャの作成に失敗しました。" );
+            Trace.TraceError("説明文テクスチャの作成に失敗しました。");
             txDescriptionPanel = null;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message + "\nTrace: " + e.StackTrace);
         }
     }
     private void tDrawSelectedItemDescriptionInDescriptionPanel()
