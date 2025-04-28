@@ -5148,7 +5148,6 @@ internal class CDTX : CActivity
             }
         },
         { "SOUND_NOWLOADING", (dtx, param) => dtx.SOUND_NOWLOADING = param },
-        { "BPM", (dtx, param) => dtx.tAnalyzeLine_BPM_BPMzz("BPM", param) },
         { "FORCINGXG", (dtx, param) => dtx.bForceXGChart = param.ToLower().Equals("on") },
         { "VOL7FTO64", (dtx, param) => dtx.bVol137to100 = param.ToLower().Equals("on") },
         { "DTXVPLAYSPEED", (dtx, param) =>
@@ -5285,7 +5284,7 @@ internal class CDTX : CActivity
             }
 
             if (bHeaderOnly) return; // ヘッダのみの解析の場合、以下は無視。
-
+            
             #region [ PANEL ]
 
             //-----------------
@@ -5357,9 +5356,8 @@ internal class CDTX : CActivity
                 }
             }
             //-----------------
-
             #endregion
-
+            
             #region [ SOUND_STAGEFAILED ]
 
             //-----------------
@@ -5409,7 +5407,8 @@ internal class CDTX : CActivity
                      !t入力_行解析_RESULTIMAGE(strCommand, strParameter) &&
                      !t入力_行解析_RESULTMOVIE(strCommand, strParameter) &&
                      !t入力_行解析_RESULTSOUND(strCommand, strParameter) &&
-                     !t入力_行解析_SIZE(strCommand, strParameter))
+                     !t入力_行解析_SIZE(strCommand, strParameter) &&
+                     !tAnalyzeLine_BPM_BPMzz(strCommand, strParameter))
             {
                 tInput_LineAnalysis_ChipLocation(ref strCommand, ref strParameter);
                 lastLineWasChipLocation = true;
