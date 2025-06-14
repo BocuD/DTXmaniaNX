@@ -1,7 +1,6 @@
 ﻿using DTXMania.Core;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.Inspector;
-using DTXUIRenderer;
 using Hexa.NET.ImGui;
 using SharpDX;
 

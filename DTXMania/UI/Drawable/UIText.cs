@@ -1,8 +1,6 @@
 ﻿using System.Drawing;
 using DTXMania.Core;
-using DTXMania.UI.DynamicElements;
 using DTXMania.UI.Inspector;
-using DTXUIRenderer;
 using Hexa.NET.ImGui;
 using Newtonsoft.Json;
 using SharpDX;

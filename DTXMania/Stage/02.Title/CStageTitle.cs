@@ -1,6 +1,5 @@
 ﻿using System.Runtime.InteropServices;
 using System.Diagnostics;
-using DTXUIRenderer;
 using FDK;
 using SharpDX;
 using Rectangle = System.Drawing.Rectangle;

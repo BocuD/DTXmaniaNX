@@ -1,5 +1,4 @@
 ﻿using DTXMania.UI.Inspector;
-using DTXUIRenderer;
 using SharpDX;
 
 namespace DTXMania.UI.Drawable;

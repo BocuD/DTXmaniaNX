@@ -4,7 +4,6 @@ using DTXMania.Core;
 using DTXMania.UI;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.Item;
-using DTXUIRenderer;
 using SharpDX;
 using FDK;
 

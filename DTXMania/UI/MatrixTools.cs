@@ -1,7 +1,5 @@
 ﻿using System.Numerics;
 using SharpDX;
-using Quaternion = SharpDX.Quaternion;
-using Vector3 = SharpDX.Vector3;
 
 namespace DTXUIRenderer;
 

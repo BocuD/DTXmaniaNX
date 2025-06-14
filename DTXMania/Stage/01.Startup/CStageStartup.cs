@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 using DTXMania.Core;
 using DTXMania.UI.DynamicElements;
-using DTXUIRenderer;
 using FDK;
 
 namespace DTXMania;

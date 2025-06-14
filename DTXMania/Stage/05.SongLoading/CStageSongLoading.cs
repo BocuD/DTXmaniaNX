@@ -6,7 +6,6 @@ using System.Drawing;
 using DTXMania.Core;
 using DTXMania.UI;
 using DTXMania.UI.Drawable;
-using DTXUIRenderer;
 using SharpDX;
 using FDK;
 using Color = System.Drawing.Color;

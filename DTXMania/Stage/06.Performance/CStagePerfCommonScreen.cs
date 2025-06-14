@@ -6,7 +6,6 @@ using System.Diagnostics;
 using DTXMania.Core;
 using DTXMania.UI;
 using DTXMania.UI.Drawable;
-using DTXUIRenderer;
 using FDK;
 using Color = System.Drawing.Color;
 using Rectangle = System.Drawing.Rectangle;
