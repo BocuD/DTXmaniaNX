@@ -167,7 +167,7 @@ public class CInputManager : IDisposable  // CInput管理
 	}
 	public void tPolling(bool bWindowがアクティブ中, bool bバッファ入力を使用する)  // tポーリング
 	{
-		lock (objMidiIn排他用)
+		lock (objMidiInMutex)
 		{
 			//				foreach( IInputDevice device in this.list入力デバイス )
 			for (int i = listInputDevices.Count - 1; i >= 0; i--)    // #24016 2011.1.6 yyagi: change not to use "foreach" to avoid InvalidOperation exception by Remove().
@@ -222,7 +222,7 @@ public class CInputManager : IDisposable  // CInput管理
 				{
 					device2.Dispose();
 				}
-				lock (objMidiIn排他用)
+				lock (objMidiInMutex)
 				{
 					listInputDevices.Clear();
 				}
@@ -255,8 +255,7 @@ public class CInputManager : IDisposable  // CInput管理
 	private CInputKeyboard? _Keyboard;
 	private CInputMouse? _Mouse;
 	private bool bDisposed済み;
-	private List<uint> listHMIDIIN = new List<uint>(8);
-	private object objMidiIn排他用 = new object();
+	private object objMidiInMutex = new();
 	private CWin32.MidiInProc proc;
 	//		private CTimer timer;
 
@@ -268,7 +267,7 @@ public class CInputManager : IDisposable  // CInput管理
 
 		long time = CSoundManager.rcPerformanceTimer.nシステム時刻;  // lock前に取得。演奏用タイマと同じタイマを使うことで、BGMと譜面、入力ずれを防ぐ。
 
-		lock (objMidiIn排他用)
+		lock (objMidiInMutex)
 		{
 			if ((listInputDevices != null) && (listInputDevices.Count != 0))
 			{

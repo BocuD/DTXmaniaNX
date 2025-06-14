@@ -608,7 +608,7 @@ internal class CConfigIni
 	public STDGBVALUE<int> nHidSud;
 	public bool bIsAutoResultCapture;			// #25399 2011.6.9 yyagi リザルト画像自動保存機能のON/OFF制御
 	public int nPoliphonicSounds;				// #28228 2012.5.1 yyagi レーン毎の最大同時発音数
-	public bool bバッファ入力を行う;
+	public bool bBufferedInput;
 	public bool bIsEnabledSystemMenu;			// #28200 2012.5.1 yyagi System Menuの使用可否切替
 	public string strSystemSkinSubfolderFullName;	// #28195 2012.5.2 yyagi Skin切替用 System/以下のサブフォルダ名
 	public bool bUseBoxDefSkin;                     // #28195 2012.5.6 yyagi Skin切替用 box.defによるスキン変更機能を使用するか否か
@@ -1266,7 +1266,7 @@ internal class CConfigIni
 		str曲名表示フォント = "MS PGothic";
 		#endregion
 
-		bバッファ入力を行う = true;
+		bBufferedInput = true;
 		bIsSwappedGuitarBass = false;			// #24063 2011.1.16 yyagi ギターとベースの切り替え
 		bIsAllowedDoubleClickFullscreen = true;	// #26752 2011.11.26 ダブルクリックでのフルスクリーンモード移行を許可
 		eBDGroup = EBDGroup.打ち分ける;		// #27029 2012.1.4 from HHPedalとBassPedalのグルーピング
@@ -1699,7 +1699,7 @@ internal class CConfigIni
 		sw.WriteLine();
 		sw.WriteLine( "; バッファ入力モード(0:OFF, 1:ON)" );
 		sw.WriteLine( "; Using Buffered input (0:OFF, 1:ON)" );
-		sw.WriteLine( "BufferedInput={0}", bバッファ入力を行う ? 1 : 0 );
+		sw.WriteLine( "BufferedInput={0}", bBufferedInput ? 1 : 0 );
 		sw.WriteLine();
 		sw.WriteLine("; オープンハイハットの表示画像(0:DTXMania仕様, 1:○なし, 2:クローズハットと同じ)");
 		sw.WriteLine("HHOGraphics={0}", (int)eHHOGraphics.Drums);
@@ -2890,7 +2890,7 @@ internal class CConfigIni
 									#endregion
 									else if (str3.Equals("BufferedInput"))
 									{
-										bバッファ入力を行う = CConversion.bONorOFF(str4[0]);
+										bBufferedInput = CConversion.bONorOFF(str4[0]);
 									}
 									else if (str3.Equals("PolyphonicSounds"))		// #28228 2012.5.1 yyagi
 									{

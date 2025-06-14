@@ -4,7 +4,7 @@ public class CFPS
 {
 	// プロパティ
 
-	public int n現在のFPS
+	public int nCurrentFPS
 	{
 		get;
 		private set;
@@ -20,7 +20,7 @@ public class CFPS
 
 	public CFPS()
 	{
-		n現在のFPS = 0;
+		nCurrentFPS = 0;
 		timer = new CTimer( CTimer.EType.MultiMedia );
 		基点時刻ms = timer.nCurrentTime;
 		内部FPS = 0;
@@ -30,7 +30,7 @@ public class CFPS
 
 	// メソッド
 
-	public void tカウンタ更新()
+	public void tUpdateCounter()
 	{
 		timer.tUpdate();
 		bFPSの値が変化した = false;
@@ -38,7 +38,7 @@ public class CFPS
 		const long INTERVAL = 1000;
 		while( ( timer.nCurrentTime - 基点時刻ms ) >= INTERVAL )
 		{
-			n現在のFPS = 内部FPS;
+			nCurrentFPS = 内部FPS;
 			内部FPS = 0;
 			bFPSの値が変化した = true;
 			基点時刻ms += INTERVAL;

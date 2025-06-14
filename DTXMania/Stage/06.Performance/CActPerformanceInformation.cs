@@ -61,7 +61,7 @@ internal class CActPerformanceInformation : CActivity
 			y -= 0x10;
 			CDTXMania.actDisplayString.tPrint(x, y, CCharacterConsole.EFontType.White, string.Format("BPM:           {0:####0.00}", dbBPM));
 			y -= 0x10;
-			CDTXMania.actDisplayString.tPrint(x, y, CCharacterConsole.EFontType.White, string.Format("Frame:         {0:####0} fps", CDTXMania.FPS.n現在のFPS));
+			CDTXMania.actDisplayString.tPrint(x, y, CCharacterConsole.EFontType.White, string.Format("Frame:         {0:####0} fps", CDTXMania.FPS.nCurrentFPS));
 			y -= 0x10;
                     
 			if (CDTXMania.ConfigIni.nSoundDeviceType != 0)

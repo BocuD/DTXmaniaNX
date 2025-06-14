@@ -3,7 +3,6 @@ using System.Drawing;
 using System.Windows.Forms;
 using DTXMania.Core;
 using DTXMania.UI.Item;
-using DTXMania.UI.Skin;
 using FDK;
 using SampleFramework;
 
@@ -276,13 +275,13 @@ internal partial class CActConfigList
             () => CDTXMania.ConfigIni.nInfoType = iInfoType.nCurrentlySelectedIndex);
         listItems.Add(iInfoType);
         
-        CItemToggle iSystemBufferedInput = new("BufferedInput", CDTXMania.ConfigIni.bバッファ入力を行う,
+        CItemToggle iSystemBufferedInput = new("BufferedInput", CDTXMania.ConfigIni.bBufferedInput,
             "バッファ入力モード：\nON にすると、FPS を超える入力解像\n度を実現します。\nOFF にすると、入力解像度は FPS に\n等しくなります。",
             "Select joystick/keyboard/\nmouse input buffer mode.\nON to use buffer input. No lost/lags.\n"+
             "OFF to use realtime input. May cause lost/lags for input. Input frequency is synchronized with FPS.");
         iSystemBufferedInput.BindConfig(
-            () => iSystemBufferedInput.bON = CDTXMania.ConfigIni.bバッファ入力を行う,
-            () => CDTXMania.ConfigIni.bバッファ入力を行う = iSystemBufferedInput.bON);
+            () => iSystemBufferedInput.bON = CDTXMania.ConfigIni.bBufferedInput,
+            () => CDTXMania.ConfigIni.bBufferedInput = iSystemBufferedInput.bON);
         listItems.Add(iSystemBufferedInput);
         
         CItemToggle iSystemDebugInfo = new("Debug Info", CDTXMania.ConfigIni.bShowPerformanceInformation,
