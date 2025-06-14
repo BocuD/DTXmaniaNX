@@ -41,7 +41,6 @@ public class CActivity
 
 		// 自身のリソースを作成する。
 		OnManagedCreateResources();
-		OnUnmanagedCreateResources();
 
 		// すべての子 Activity を活性化する。
 		foreach( CActivity activity in listChildActivities )
@@ -59,7 +58,6 @@ public class CActivity
 		try
 		{
 			// 自身のリソースを解放する。
-			OnUnmanagedReleaseResources();
 			OnManagedReleaseResources();
 		}
 		catch (Exception e)
@@ -101,41 +99,6 @@ public class CActivity
 		// すべての 子Activity の Managed リソースを作成する。
 		foreach( CActivity activity in listChildActivities )
 			activity.OnManagedCreateResources();
-	}
-
-	/// <summary>
-	/// <para>Unmanaged リソースの作成を行う。</para>
-	/// <para>Direct3D デバイスが作成またはリセットされた直後に呼び出されるので、自分が活性化している時に限り、
-	/// Unmanaged リソースを作成（または再構築）すること。</para>
-	/// <para>いつどのタイミングで呼び出されるか（いつDirect3Dが再作成またはリセットされるか）分からないので、
-	/// いつ何時呼び出されても問題無いようにコーディングしておくこと。</para>
-	/// </summary>
-	public virtual void OnUnmanagedCreateResources()
-	{
-		// 活性化してないなら何もしない。
-		if (!bActivated)
-			return;
-
-		// すべての 子Activity の Unmanaged リソースを作成する。
-		foreach( CActivity activity in listChildActivities )
-			activity.OnUnmanagedCreateResources();
-	}
-		
-	/// <summary>
-	/// <para>Unmanaged リソースの解放を行う。</para>
-	/// <para>Direct3D デバイスの解放直前またはリセット直前に呼び出される。</para>
-	/// <para>いつどのタイミングで呼び出されるか（いつDirect3Dが解放またはリセットされるか）分からないので、
-	/// いつ何時呼び出されても問題無いようにコーディングしておくこと。</para>
-	/// </summary>
-	public virtual void OnUnmanagedReleaseResources()
-	{
-		// 活性化してないなら何もしない。
-		if (!bActivated)
-			return;
-
-		// すべての 子Activity の Unmanaged リソースを解放する。
-		foreach( CActivity activity in listChildActivities )
-			activity.OnUnmanagedReleaseResources();
 	}
 
 	/// <summary>

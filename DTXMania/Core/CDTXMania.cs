@@ -947,12 +947,6 @@ internal class CDTXMania : Game
         Device.SetTextureStageState(0, TextureStage.AlphaArg1, 2);
         Device.SetTextureStageState(0, TextureStage.AlphaArg2, 1);
 
-        if (mainActivities != null)
-        {
-            foreach (CActivity activity in mainActivities)
-                activity.OnUnmanagedCreateResources();
-        }
-
         //init imgui
         context = ImGui.CreateContext();
 
@@ -985,12 +979,6 @@ internal class CDTXMania : Game
 
     protected override void UnloadContent()
     {
-        if (mainActivities != null)
-        {
-            foreach (CActivity activity in mainActivities)
-                activity.OnUnmanagedReleaseResources();
-        }
-
         gameRenderTargetSurface.Dispose();
         gameRenderTargetTexture.Dispose();
         mainRenderTarget.Dispose();
@@ -1031,10 +1019,10 @@ internal class CDTXMania : Game
             CSoundManager.rcPerformanceTimer.tUpdate();
 
         if (InputManager != null)
-            InputManager.tPolling(bApplicationActive, ConfigIni.bバッファ入力を行う);
+            InputManager.tPolling(bApplicationActive, ConfigIni.bBufferedInput);
 
         if (FPS != null)
-            FPS.tカウンタ更新();
+            FPS.tUpdateCounter();
 
         if (Device == null)
             return;
@@ -1052,63 +1040,9 @@ internal class CDTXMania : Game
         }
 
         #endregion
-
-        #region [ DTXCreator/DTX2WAVからの指示 ]
-
-        if (Window.IsReceivedMessage) // ウインドウメッセージで、
-        {
-            //Received message from DTXCreator
-            string strMes = Window.strMessage;
-            Window.IsReceivedMessage = false;
-            if (strMes != null)
-            {
-                Trace.TraceInformation("Received Message. ParseArguments {0}。", strMes);
-                CommandParse.ParseArguments(strMes, ref DTXVmode, ref DTX2WAVmode);
-
-                if (DTXVmode.Enabled)
-                {
-                    //Bring DTXViewer to the front whenever a DTXCreator Play DTX button is triggered
-                    if (!Window.Visible)
-                    {
-                        Window.Show();
-                    }
-
-                    if (Window.WindowState == FormWindowState.Minimized)
-                    {
-                        Window.WindowState = FormWindowState.Normal;
-                    }
-
-                    Window.Activate();
-                    Window.TopMost = true; // important
-                    Window.TopMost = false; // important
-                    Window.Focus(); // important
-
-                    bCompactMode = true;
-                    strCompactModeFile = DTXVmode.filename;
-                }
-
-                if (DTX2WAVmode.Enabled)
-                {
-                    if (DTX2WAVmode.Command == CDTX2WAVmode.ECommand.Cancel)
-                    {
-                        Trace.TraceInformation("録音のCancelコマンドをDTXMania本体が受信しました。");
-
-                        if (DTX != null) // 曲読み込みの前に録音Cancelされると、DTXがnullのままここにきてでGPFとなる→nullチェック追加
-                        {
-                            DTX.tStopPlayingAllChips();
-                            DTX.OnDeactivate();
-                        }
-
-                        StageManager.rCurrentStage.OnDeactivate();
-
-                        Environment.Exit(10010); // このやり方ならばOK
-                    }
-                }
-            }
-        }
-
-        #endregion
-
+        
+        ProcessWindowMessages();
+        
 #if INSPECTOR
         //cache this value to prevent it from changing during the frame
         bool renderGameToWindow = renderGameToSurface;
@@ -1203,7 +1137,62 @@ internal class CDTXMania : Game
 
         #endregion
     }
-    
+
+    private void ProcessWindowMessages()
+    {
+        if (Window.IsReceivedMessage) // ウインドウメッセージで、
+        {
+            //Received message from DTXCreator
+            string strMes = Window.strMessage;
+            Window.IsReceivedMessage = false;
+            if (strMes != null)
+            {
+                Trace.TraceInformation("Received Message. ParseArguments {0}。", strMes);
+                CommandParse.ParseArguments(strMes, ref DTXVmode, ref DTX2WAVmode);
+
+                if (DTXVmode.Enabled)
+                {
+                    //Bring DTXViewer to the front whenever a DTXCreator Play DTX button is triggered
+                    if (!Window.Visible)
+                    {
+                        Window.Show();
+                    }
+
+                    if (Window.WindowState == FormWindowState.Minimized)
+                    {
+                        Window.WindowState = FormWindowState.Normal;
+                    }
+
+                    Window.Activate();
+                    Window.TopMost = true; // important
+                    Window.TopMost = false; // important
+                    Window.Focus(); // important
+
+                    bCompactMode = true;
+                    strCompactModeFile = DTXVmode.filename;
+                }
+
+                if (DTX2WAVmode.Enabled)
+                {
+                    if (DTX2WAVmode.Command == CDTX2WAVmode.ECommand.Cancel)
+                    {
+                        Trace.TraceInformation("録音のCancelコマンドをDTXMania本体が受信しました。");
+
+                        if (DTX != null) // 曲読み込みの前に録音Cancelされると、DTXがnullのままここにきてでGPFとなる→nullチェック追加
+                        {
+                            DTX.tStopPlayingAllChips();
+                            DTX.OnDeactivate();
+                        }
+
+                        StageManager.rCurrentStage.OnDeactivate();
+
+                        Environment.Exit(10010); // このやり方ならばOK
+                    }
+                }
+            }
+        }
+    }
+
     public static void tRunGarbageCollector()
     {
         //LOHに対するコンパクションを要求
