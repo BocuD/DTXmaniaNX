@@ -162,14 +162,14 @@ internal class CActSelectSongList : CActivity
 
 	private List<CSongListNode>? GetSongListWithinMe( CSongListNode song )
 	{
-		if ( song.r親ノード == null )					// root階層のノートだったら
+		if ( song.parentNode == null )					// root階層のノートだったら
 		{
 			return CDTXMania.SongManager.listSongRoot;	// rootのリストを返す
 		}
 
-		if ( ( song.r親ノード.list子リスト != null ) && ( song.r親ノード.list子リスト.Count > 0 ) )
+		if ( ( song.parentNode.listChildNodes != null ) && ( song.parentNode.listChildNodes.Count > 0 ) )
 		{
-			return song.r親ノード.list子リスト;
+			return song.parentNode.listChildNodes;
 		}
 
 		return null;
@@ -209,9 +209,9 @@ internal class CActSelectSongList : CActivity
 				CDTXMania.Skin.GetSkinSubfolderFullNameFromSkinName( CSkin.GetSkinName( rSelectedSong.strSkinPath ) ), false );
 		}
 
-		if( ( rSelectedSong.list子リスト != null ) && ( rSelectedSong.list子リスト.Count > 0 ) )
+		if( ( rSelectedSong.listChildNodes != null ) && ( rSelectedSong.listChildNodes.Count > 0 ) )
 		{
-			rSelectedSong = rSelectedSong.list子リスト[ 0 ];
+			rSelectedSong = rSelectedSong.listChildNodes[ 0 ];
 			t現在選択中の曲を元に曲バーを再構成する();
 			tSelectedSongHasChanged(false);									// #27648 項目数変更を反映させる
 		}
@@ -227,9 +227,9 @@ internal class CActSelectSongList : CActivity
 		}
 		CDTXMania.Skin.SetCurrentSkinSubfolderFullName(
 			( rSelectedSong.strSkinPath == "" ) ? "" : CDTXMania.Skin.GetSkinSubfolderFullNameFromSkinName( CSkin.GetSkinName( rSelectedSong.strSkinPath ) ), false );
-		if ( rSelectedSong.r親ノード != null )
+		if ( rSelectedSong.parentNode != null )
 		{
-			rSelectedSong = rSelectedSong.r親ノード;
+			rSelectedSong = rSelectedSong.parentNode;
 			t現在選択中の曲を元に曲バーを再構成する();
 			tSelectedSongHasChanged(false);									// #27648 項目数変更を反映させる
 		}
@@ -432,9 +432,9 @@ internal class CActSelectSongList : CActivity
 				return n;
 			}
 
-			if ( n.list子リスト != null && n.list子リスト.Count > 0 )	// 子リストが存在するなら、再帰で探す
+			if ( n.listChildNodes != null && n.listChildNodes.Count > 0 )	// 子リストが存在するなら、再帰で探す
 			{
-				CSongListNode r = searchCurrentBreadcrumbsPosition( n.list子リスト, bc );
+				CSongListNode r = searchCurrentBreadcrumbsPosition( n.listChildNodes, bc );
 				if ( r != null ) return r;
 			}
 		}
@@ -453,7 +453,7 @@ internal class CActSelectSongList : CActivity
 			return;
 				
 		song_last = song;
-		List<CSongListNode> list = ( song.r親ノード != null ) ? song.r親ノード.list子リスト : CDTXMania.SongManager.listSongRoot;
+		List<CSongListNode> list = ( song.parentNode != null ) ? song.parentNode.listChildNodes : CDTXMania.SongManager.listSongRoot;
 		int index = list.IndexOf( song ) + 1;
 		if ( index <= 0 )
 		{
@@ -1298,7 +1298,7 @@ internal class CActSelectSongList : CActivity
 		if( song == null )
 			return null;
 
-		List<CSongListNode> list = (song.r親ノード != null ) ? song.r親ノード.list子リスト : CDTXMania.SongManager.listSongRoot;
+		List<CSongListNode> list = (song.parentNode != null ) ? song.parentNode.listChildNodes : CDTXMania.SongManager.listSongRoot;
 	
 		int index = list.IndexOf( song );
 
@@ -1315,7 +1315,7 @@ internal class CActSelectSongList : CActivity
 		if( song == null )
 			return null;
 
-		List<CSongListNode> list = (song.r親ノード != null ) ? song.r親ノード.list子リスト : CDTXMania.SongManager.listSongRoot;
+		List<CSongListNode> list = (song.parentNode != null ) ? song.parentNode.listChildNodes : CDTXMania.SongManager.listSongRoot;
 
 		int index = list.IndexOf( song );
 	

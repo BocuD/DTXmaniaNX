@@ -90,7 +90,7 @@ internal class CDTXMania : Game
     {
         get
         {
-            CSongListNode confirmedNode = stageSongSelection.rConfirmedSong?.r親ノード;
+            CSongListNode confirmedNode = stageSongSelection.rConfirmedSong?.parentNode;
             if (confirmedNode?.eNodeType == CSongListNode.ENodeType.BOX)
                 return STHitRanges.tCompose(confirmedNode.stDrumHitRanges, ConfigIni.stDrumHitRanges);
 
@@ -105,7 +105,7 @@ internal class CDTXMania : Game
     {
         get
         {
-            CSongListNode confirmedNode = stageSongSelection.rConfirmedSong?.r親ノード;
+            CSongListNode confirmedNode = stageSongSelection.rConfirmedSong?.parentNode;
             if (confirmedNode?.eNodeType == CSongListNode.ENodeType.BOX)
                 return STHitRanges.tCompose(confirmedNode.stDrumPedalHitRanges, ConfigIni.stDrumPedalHitRanges);
 
@@ -120,7 +120,7 @@ internal class CDTXMania : Game
     {
         get
         {
-            CSongListNode confirmedNode = stageSongSelection.rConfirmedSong?.r親ノード;
+            CSongListNode confirmedNode = stageSongSelection.rConfirmedSong?.parentNode;
             if (confirmedNode?.eNodeType == CSongListNode.ENodeType.BOX)
                 return STHitRanges.tCompose(confirmedNode.stGuitarHitRanges, ConfigIni.stGuitarHitRanges);
 
@@ -135,7 +135,7 @@ internal class CDTXMania : Game
     {
         get
         {
-            CSongListNode confirmedNode = stageSongSelection.rConfirmedSong?.r親ノード;
+            CSongListNode confirmedNode = stageSongSelection.rConfirmedSong?.parentNode;
             if (confirmedNode?.eNodeType == CSongListNode.ENodeType.BOX)
                 return STHitRanges.tCompose(confirmedNode.stBassHitRanges, ConfigIni.stBassHitRanges);
 

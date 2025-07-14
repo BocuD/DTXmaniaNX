@@ -509,7 +509,7 @@ internal class CStageSongSelection : CStage
 					}
 					#endregion
 					#region [ Upstairs ]
-					if (((actSongList.rSelectedSong != null) && (actSongList.rSelectedSong.r親ノード != null)) && (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.LC) || CDTXMania.Pad.bPressedGB(EPad.Cancel)))
+					if (((actSongList.rSelectedSong != null) && (actSongList.rSelectedSong.parentNode != null)) && (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.LC) || CDTXMania.Pad.bPressedGB(EPad.Cancel)))
 					{
 						actPresound.tサウンド停止();
 						CDTXMania.Skin.soundCancel.tPlay();
@@ -1063,9 +1063,9 @@ internal class CStageSongSelection : CStage
 		{
 			song.listランダム用ノードリスト = null;
 			song.stackRandomPerformanceNumber = new Stack<int>();
-			if(song.list子リスト != null)
+			if(song.listChildNodes != null)
 			{
-				foreach (CSongListNode cSong in song.list子リスト)
+				foreach (CSongListNode cSong in song.listChildNodes)
 				{
 					tResetRandomListForNode(cSong);
 				}
@@ -1076,7 +1076,7 @@ internal class CStageSongSelection : CStage
 	private List<CSongListNode> t指定された曲が存在する場所の曲を列挙する_子リスト含む( CSongListNode song )
 	{
 		List<CSongListNode> list = [];
-		song = song.r親ノード;
+		song = song.parentNode;
 		if( ( song == null ) && ( CDTXMania.SongManager.listSongRoot.Count > 0 ) )
 		{
 			foreach( CSongListNode c曲リストノード in CDTXMania.SongManager.listSongRoot )
@@ -1103,7 +1103,7 @@ internal class CStageSongSelection : CStage
 						list.Add(c曲リストノード);
 					}						
 				}
-				if( ( c曲リストノード.list子リスト != null ) && CDTXMania.ConfigIni.bランダムセレクトで子BOXを検索対象とする )
+				if( ( c曲リストノード.listChildNodes != null ) && CDTXMania.ConfigIni.bランダムセレクトで子BOXを検索対象とする )
 				{
 					t指定された曲の子リストの曲を列挙する_孫リスト含む( c曲リストノード, ref list );
 				}
@@ -1115,9 +1115,9 @@ internal class CStageSongSelection : CStage
 	}
 	private void t指定された曲の子リストの曲を列挙する_孫リスト含む( CSongListNode r親, ref List<CSongListNode> list )
 	{
-		if( ( r親 != null ) && ( r親.list子リスト != null ) )
+		if( ( r親 != null ) && ( r親.listChildNodes != null ) )
 		{
-			foreach( CSongListNode c曲リストノード in r親.list子リスト )
+			foreach( CSongListNode c曲リストノード in r親.listChildNodes )
 			{
 				if( ( c曲リストノード.eNodeType == CSongListNode.ENodeType.SCORE ) || ( c曲リストノード.eNodeType == CSongListNode.ENodeType.SCORE_MIDI ) )
 				{
@@ -1140,7 +1140,7 @@ internal class CStageSongSelection : CStage
 						list.Add(c曲リストノード);
 					}
 				}
-				if( ( c曲リストノード.list子リスト != null ) && CDTXMania.ConfigIni.bランダムセレクトで子BOXを検索対象とする )
+				if( ( c曲リストノード.listChildNodes != null ) && CDTXMania.ConfigIni.bランダムセレクトで子BOXを検索対象とする )
 				{
 					t指定された曲の子リストの曲を列挙する_孫リスト含む( c曲リストノード, ref list );
 				}

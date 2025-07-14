@@ -29,14 +29,14 @@ internal class CSongListNode
 	}
 	public Color col文字色 = Color.White;
 	public List<CSongListNode> listランダム用ノードリスト;
-	public List<CSongListNode> list子リスト;
+	public List<CSongListNode> listChildNodes;
 	public STHitRanges stDrumHitRanges = new STHitRanges(nDefaultSizeMs: -1);
 	public STHitRanges stDrumPedalHitRanges = new STHitRanges(nDefaultSizeMs: -1);
 	public STHitRanges stGuitarHitRanges = new STHitRanges(nDefaultSizeMs: -1);
 	public STHitRanges stBassHitRanges = new STHitRanges(nDefaultSizeMs: -1);
 	public int nスコア数;
 	public string pathSetDefの絶対パス = "";
-	public CSongListNode r親ノード;
+	public CSongListNode parentNode;
 	public int SetDefのブロック番号;
 	public Stack<int> stackRandomPerformanceNumber = new Stack<int>();
 	public string strGenre = "";
@@ -64,14 +64,14 @@ internal class CSongListNode
 		newNode.bBoxDefで作成されたBOXである = bBoxDefで作成されたBOXである;
 		newNode.col文字色 = col文字色;
 		newNode.listランダム用ノードリスト = listランダム用ノードリスト;
-		newNode.list子リスト = list子リスト;
+		newNode.listChildNodes = listChildNodes;
 		newNode.stDrumHitRanges = stDrumHitRanges;
 		newNode.stDrumPedalHitRanges = stDrumPedalHitRanges;
 		newNode.stGuitarHitRanges = stGuitarHitRanges;
 		newNode.stBassHitRanges = stBassHitRanges;
 		newNode.nスコア数 = nスコア数;
 		newNode.pathSetDefの絶対パス = pathSetDefの絶対パス;
-		newNode.r親ノード = r親ノード;
+		newNode.parentNode = parentNode;
 		newNode.SetDefのブロック番号 = SetDefのブロック番号;
 		newNode.stackRandomPerformanceNumber = stackRandomPerformanceNumber;
 		newNode.strGenre = strGenre;

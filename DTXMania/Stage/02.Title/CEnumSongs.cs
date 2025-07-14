@@ -548,7 +548,7 @@ internal class CEnumSongs							// #27060 2011.2.7 yyagi 曲リストを取得�
 
                                 try
                                 {
-                                    SongManager.tSearchSongsAndCreateList(path, true);
+                                    SongManager.tSearchSongsAndCreateList(path);
                                 }
                                 catch (Exception e)
                                 {
