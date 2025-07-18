@@ -9,7 +9,7 @@ using FDK;
 
 namespace DTXMania;
 
-internal class CDTX : CActivity
+public class CDTX : CActivity
 {
     // 定数
 

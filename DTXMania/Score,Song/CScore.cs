@@ -4,7 +4,7 @@ using DTXMania.Core;
 namespace DTXMania;
 
 [Serializable]
-internal class CScore
+public class CScore
 {
     // プロパティ
 

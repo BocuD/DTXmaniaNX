@@ -230,7 +230,7 @@ internal enum EDrumComboTextDisplayPosition
 	RIGHT,
 	OFF
 }
-internal enum ELane
+public enum ELane
 {
 	LC = 0,
 	HH,
