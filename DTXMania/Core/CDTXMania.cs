@@ -16,12 +16,13 @@ using Point = System.Drawing.Point;
 using ResourceManager = DTXMania.UI.ResourceManager;
 using Vector2 = System.Numerics.Vector2;
 
-#if INSPECTOR
+//#if INSPECTOR
 using DTXMania.UI;
 using DTXMania.UI.Inspector;
-#endif
+//#endif
 
 using DTXMania.UI.Skin;
+using Hexa.NET.ImGui.Utilities;
 
 namespace DTXMania.Core;
 
@@ -1049,7 +1050,7 @@ internal class CDTXMania : Game
         
         ProcessWindowMessages();
         
-#if INSPECTOR
+//#if INSPECTOR
         //cache this value to prevent it from changing during the frame
         bool renderGameToWindow = renderGameToSurface;
 
@@ -1057,12 +1058,12 @@ internal class CDTXMania : Game
         {
             Device.SetRenderTarget(0, gameRenderTargetSurface);
         }
-#endif
+//#endif
 
         Device.Clear(ClearFlags.ZBuffer | ClearFlags.Target, SharpDX.Color.Black, 1f, 0);
         Device.BeginScene();
 
-#if INSPECTOR
+//#if INSPECTOR
         ImGui.SetCurrentContext(context);
         ImGuizmo.SetImGuiContext(context);
         ImGuiImplD3D9.SetCurrentContext(context);
@@ -1081,11 +1082,11 @@ internal class CDTXMania : Game
             ImGuizmo.SetRect(0, 0, io.DisplaySize.X, io.DisplaySize.Y);
             ImGuizmo.SetDrawlist(ImGui.GetBackgroundDrawList());
         }
-#endif
+//#endif
 
         StageManager.DrawStage();
 
-#if INSPECTOR
+//#if INSPECTOR
         if (renderGameToWindow)
         {
             Device.SetRenderTarget(0, mainRenderTarget);
@@ -1100,9 +1101,9 @@ internal class CDTXMania : Game
         ImGui.EndFrame();
         ImGui.Render();
         ImGuiImplD3D9.RenderDrawData(ImGui.GetDrawData());
-#else
-        Device.EndScene();
-#endif
+//#else
+// Device.EndScene();
+//#endif
 
         // Present()は game.csのOnFrameEnd()に登録された、GraphicsDeviceManager.game_FrameEnd() 内で実行されるので不要
         // (つまり、Present()は、Draw()完了後に実行される)
