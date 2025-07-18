@@ -35,9 +35,9 @@ internal class CSongListNode
 	public STHitRanges stGuitarHitRanges = new STHitRanges(nDefaultSizeMs: -1);
 	public STHitRanges stBassHitRanges = new STHitRanges(nDefaultSizeMs: -1);
 	public int nスコア数;
-	public string pathSetDefの絶対パス = "";
+	public string pathSetDefPath = "";
 	public CSongListNode parentNode;
-	public int SetDefのブロック番号;
+	public int SetDefBlockNumber;
 	public Stack<int> stackRandomPerformanceNumber = new Stack<int>();
 	public string strGenre = "";
 	public string strTitle = "";
@@ -70,9 +70,9 @@ internal class CSongListNode
 		newNode.stGuitarHitRanges = stGuitarHitRanges;
 		newNode.stBassHitRanges = stBassHitRanges;
 		newNode.nスコア数 = nスコア数;
-		newNode.pathSetDefの絶対パス = pathSetDefの絶対パス;
+		newNode.pathSetDefPath = pathSetDefPath;
 		newNode.parentNode = parentNode;
-		newNode.SetDefのブロック番号 = SetDefのブロック番号;
+		newNode.SetDefBlockNumber = SetDefBlockNumber;
 		newNode.stackRandomPerformanceNumber = stackRandomPerformanceNumber;
 		newNode.strGenre = strGenre;
 		newNode.strTitle = strTitle;

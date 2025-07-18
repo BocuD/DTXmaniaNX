@@ -2,7 +2,6 @@
 using DTXMania.Core;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.DynamicElements;
-using DTXUIRenderer;
 using FDK;
 using SharpDX;
 

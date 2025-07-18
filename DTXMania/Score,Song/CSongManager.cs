@@ -154,7 +154,7 @@ internal class CSongManager
 
 		#region [ b.フォルダ内に set.def が存在しない場合 → 個別ファイルからノード作成 ]
 
-		// If set.def does not exist in the folder, create nodes from individual files
+		// If set.def does not exist in the folder, there are probably chart files in the folder
 		//-----------------------------
 		else
 		{
@@ -575,8 +575,8 @@ internal class CSongManager
 					strGenre = block.Genre,
 					nスコア数 = 0,
 					col文字色 = block.FontColor,
-					SetDefのブロック番号 = i,
-					pathSetDefの絶対パス = path,
+					SetDefBlockNumber = i,
+					pathSetDefPath = path,
 					parentNode = nodeParent
 				};
 
@@ -657,7 +657,7 @@ internal class CSongManager
 								{
 									CScore cスコア = item.arScore[k];
 									builder.Remove(0, builder.Length);
-									builder.Append($"ブロック{item.SetDefのブロック番号 + 1}-{k + 1}:");
+									builder.Append($"ブロック{item.SetDefBlockNumber + 1}-{k + 1}:");
 									builder.Append(" Label=" + item.arDifficultyLabel[k]);
 									builder.Append(", File=" + cスコア.FileInformation.AbsoluteFilePath);
 									builder.Append(", Size=" + cスコア.FileInformation.FileSize);
@@ -1495,7 +1495,7 @@ internal class CSongManager
 			}
 			#endregion
 			string str = "";
-			if( string.IsNullOrEmpty( n1.pathSetDefの絶対パス ) )
+			if( string.IsNullOrEmpty( n1.pathSetDefPath ) )
 			{
 				for( int i = 0; i < 5; i++ )
 				{
@@ -1512,10 +1512,10 @@ internal class CSongManager
 			}
 			else
 			{
-				str = n1.pathSetDefの絶対パス + n1.SetDefのブロック番号.ToString( "00" );
+				str = n1.pathSetDefPath + n1.SetDefBlockNumber.ToString( "00" );
 			}
 			string strB = "";
-			if( string.IsNullOrEmpty( n2.pathSetDefの絶対パス ) )
+			if( string.IsNullOrEmpty( n2.pathSetDefPath ) )
 			{
 				for( int j = 0; j < 5; j++ )
 				{
@@ -1532,7 +1532,7 @@ internal class CSongManager
 			}
 			else
 			{
-				strB = n2.pathSetDefの絶対パス + n2.SetDefのブロック番号.ToString( "00" );
+				strB = n2.pathSetDefPath + n2.SetDefBlockNumber.ToString( "00" );
 			}
 			return str.CompareTo( strB );
 		} );
