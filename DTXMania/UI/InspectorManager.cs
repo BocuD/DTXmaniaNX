@@ -1,5 +1,6 @@
 ﻿using System.Numerics;
 using DTXMania.Core;
+using DTXMania.SongDb;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.Inspector;
 using Hexa.NET.ImGui;
@@ -87,6 +88,7 @@ public static class InspectorManager
             inspector.Draw();
             hierarchyWindow.Draw();
             DrawableTracker.DrawWindow();
+            SongDBTester.DrawWindow();
         }
     }
     
