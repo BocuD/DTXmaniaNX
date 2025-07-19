@@ -1,5 +1,6 @@
 ﻿using System.Numerics;
 using Hexa.NET.ImGui;
+using NativeFileDialog.Extended;
 
 namespace DTXMania.SongDb;
 
@@ -10,6 +11,17 @@ public class SongDBTester
     public static void DrawWindow()
     {
         ImGui.Begin("SongDB");
+        
+        if (ImGui.Button("Export to CSV"))
+        {
+            string defaultPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            string filePath = NFD.SaveDialog(defaultPath, "SongDb.csv");
+            
+            if (!string.IsNullOrEmpty(filePath))
+            {
+                ExportSongDb(filePath);
+            }
+        }
 
         if (ImGui.Button("Scan"))
         {
@@ -84,6 +96,38 @@ public class SongDBTester
             }
 
             ImGui.TreePop();
+        }
+    }
+    
+    private static async Task ExportSongDb(string filePath)
+    {
+        List<SongNode> flattened = await songDb.FlattenSongList(songDb.songNodeRoot);
+
+        await using StreamWriter writer = new(filePath);
+        await writer.WriteLineAsync("Title,Artist,Comment");
+        
+        foreach (SongNode node in flattened)
+        {
+            string title = node.title.Replace(",", " ");
+            
+            var chart = node.charts.FirstOrDefault(x => x != null);
+            if (chart == null)
+            {
+                continue; // Skip nodes without valid charts
+            }
+            
+            if (string.IsNullOrWhiteSpace(title)) 
+            {
+                title = chart.SongInformation.Title.Replace(",", " ");
+            }
+            if (string.IsNullOrWhiteSpace(title))
+            {
+                title = node.path.Replace(",", " ");
+            }
+            string artist = chart.SongInformation.ArtistName.Replace(",", " ");
+            string comment = chart.SongInformation.Comment.Replace(",", " ");
+            
+            await writer.WriteLineAsync($"{title},{artist},{comment}");
         }
     }
 }

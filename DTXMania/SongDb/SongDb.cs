@@ -381,7 +381,7 @@ public class SongDb
 		tempSongs++;
 	}
 	
-	private async Task<List<SongNode>> FlattenSongList(List<SongNode> toFlatten)
+	public async Task<List<SongNode>> FlattenSongList(List<SongNode> toFlatten)
 	{
 		List<SongNode> fullList = [];
 		
