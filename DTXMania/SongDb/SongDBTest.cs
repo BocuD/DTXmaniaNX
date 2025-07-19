@@ -38,7 +38,11 @@ public class SongDBTester
                     break;
             }
         }
-
+        
+        ImGui.Separator();
+        ImGui.Text("Total Song Nodes: " + songDb.totalSongs);
+        ImGui.Text("Total Charts: " + songDb.totalCharts);
+        ImGui.Separator();
         foreach (SongNode node in songDb.songNodeRoot)
         {
             DrawNode(node);
