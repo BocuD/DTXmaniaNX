@@ -48,15 +48,14 @@ public class SongDb
 
 			if (!string.IsNullOrEmpty(CDTXMania.ConfigIni.str曲データ検索パス))
 			{
-				string[] strArray = CDTXMania.ConfigIni.str曲データ検索パス.Split([';']);
-				if (strArray.Length > 0)
+				string[] paths = CDTXMania.ConfigIni.strSongDataSearchPath.Split([';']);
+				if (paths.Length > 0)
 				{
-					foreach (string str in strArray)
+					foreach (string path in paths)
 					{
-						if (!string.IsNullOrEmpty(str))
-						{
-							tasks.Add(ScanSongsAsync(str, songNodeRoot));
-						}
+						if (string.IsNullOrEmpty(path)) continue;
+						
+						tasks.Add(ScanSongsAsync(path, tempList));
 					}
 				}
 			}

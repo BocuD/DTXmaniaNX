@@ -548,7 +548,7 @@ internal class CConfigIni
 	public STDGBVALUE<int> n表示可能な最小コンボ数;
 	public STDGBVALUE<int> nScrollSpeed;
 	public string strDTXManiaのバージョン;
-	public string str曲データ検索パス;
+	public string strSongDataSearchPath;
 	public string songListFont;
 	public string[] strCardName; //2015.12.3 kaiera0467 DrumとGuitarとBassで名前を別々にするため、string[3]に変更。
 	public string[] strGroupName;
@@ -1025,7 +1025,7 @@ internal class CConfigIni
 			//----------------------------------------
 #endif
 		strDTXManiaのバージョン = "Unknown";
-		str曲データ検索パス = @".\";
+		strSongDataSearchPath = @".\";
 		bFullScreenMode = false;
 		bFullScreenExclusive = true;
 		bVerticalSyncWait = true;
@@ -1354,7 +1354,7 @@ internal class CConfigIni
 		sw.WriteLine( @"; セミコロン(;)で区切ることにより複数のパスを指定できます。（例: d:\DTXFiles1\;e:\DTXFiles2\）" );
 		sw.WriteLine( "; Pathes for DTX data." );
 		sw.WriteLine( @"; You can specify many pathes separated with semicolon(;). (e.g. d:\DTXFiles1\;e:\DTXFiles2\)" );
-		sw.WriteLine( "DTXPath={0}", str曲データ検索パス );
+		sw.WriteLine( "DTXPath={0}", strSongDataSearchPath );
 		sw.WriteLine();
 		#endregion
 		sw.WriteLine("; プレイヤーネーム。");
@@ -2469,7 +2469,7 @@ internal class CConfigIni
 									}
 									else if( str3.Equals( "DTXPath" ) )
 									{
-										str曲データ検索パス = str4;
+										strSongDataSearchPath = str4;
 									}
 									else if ( str3.Equals( "SkinPath" ) )
 									{

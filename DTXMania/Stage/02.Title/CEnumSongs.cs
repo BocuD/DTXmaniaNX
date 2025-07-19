@@ -517,19 +517,17 @@ internal class CEnumSongs							// #27060 2011.2.7 yyagi 曲リストを取得�
             }
 
             #region [ 2) 曲データの検索 ]
-            //-----------------------------
             EnumProgress = SongEnumProgress.ScanSongs;
 
             //	base.ePhaseID = CStage.EPhase.起動2_曲を検索してリストを作成する;
             DateTime start = DateTime.Now;
-            Trace.TraceInformation("enum2) Searching Song Data ...");                
-            Trace.Indent();
-
+            Console.WriteLine("enum2) Searching Song Data ...");
+            
             try
             {
-                if (!string.IsNullOrEmpty(CDTXMania.ConfigIni.str曲データ検索パス))
+                if (!string.IsNullOrEmpty(CDTXMania.ConfigIni.strSongDataSearchPath))
                 {
-                    string[] strArray = CDTXMania.ConfigIni.str曲データ検索パス.Split(new char[] { ';' });
+                    string[] strArray = CDTXMania.ConfigIni.strSongDataSearchPath.Split(new char[] { ';' });
                     if (strArray.Length > 0)
                     {
                         // 全パスについて…
@@ -571,16 +569,11 @@ internal class CEnumSongs							// #27060 2011.2.7 yyagi 曲リストを取得�
             }
             finally
             {
-                Trace.TraceInformation("Song Data search complete. [{0} songs {1} scores]", SongManager.nNbSongNodesFound, SongManager.nNbScoresFound);
-                Trace.Unindent();
                 TimeSpan currSpan = DateTime.Now - start;
-                Trace.TraceInformation("Duration of enum2) Searching Song Data : {0}", currSpan.ToString());
+                
+                Console.WriteLine("Song Data search complete. [{0} songs {1} scores]", SongManager.nNbSongNodesFound, SongManager.nNbScoresFound);
+                Console.WriteLine("Duration of enum2) Searching Song Data : {0}", currSpan.ToString());
             }
-            //	lock ( this.list進行文字列 )
-            //	{
-            //		this.list進行文字列.Add( string.Format( "{0} ... {1} scores ({2} songs)", "Enumerating songs", this..Songs管理_裏読.nNbScoresFound, this.Songs管理_裏読.nNbSongNodesFound ) );
-            //	}
-            //-----------------------------
             #endregion
             #region [ 3) songs.db 情報の曲リストへの反映 ]
             //-----------------------------
@@ -611,18 +604,10 @@ internal class CEnumSongs							// #27060 2011.2.7 yyagi 曲リストを取得�
                 TimeSpan currSpan = DateTime.Now - start;
                 Trace.TraceInformation("Duration of enum3) Loading score cache into songs.db. : {0}", currSpan.ToString());
             }
-            //	lock ( this.list進行文字列 )
-            //	{
-            //		this.list進行文字列.Add( string.Format( "{0} ... {1}/{2}", "Loading score properties from songs.db", CDTXMania.Songs管理_裏読.nNbScoresFromScoreCache, cs.nNbScoresFound ) );
-            //	}
-            //-----------------------------
             #endregion
             #region [ 4) songs.db になかった曲データをファイルから読み込んで反映 ]
-            //-----------------------------
             EnumProgress = SongEnumProgress.ReadSongData;
-                
-            //					base.ePhaseID = CStage.EPhase.起動4_スコアキャッシュになかった曲をファイルから読み込んで反映する;
-
+            
             int num2 = SongManager.nNbScoresFound - SongManager.nNbScoresFromScoreCache;
                 
             Trace.TraceInformation("{0}, {1}", SongManager.nNbScoresFound, SongManager.nNbScoresFromScoreCache);
@@ -632,8 +617,6 @@ internal class CEnumSongs							// #27060 2011.2.7 yyagi 曲リストを取得�
 
             try
             {
-                //NOTE: This is the most time consuming step in Song Loading. To be optimized
-                //Songs管理.ProcessNewSongData();
                 await SongManager.PrepareProcessNewSongData();
             }
             catch (Exception e)
@@ -649,11 +632,6 @@ internal class CEnumSongs							// #27060 2011.2.7 yyagi 曲リストを取得�
                 TimeSpan currSpan = DateTime.Now - start;
                 Trace.TraceInformation("Duration of enum4) Reads and copy song data: {0}", currSpan.ToString());
             }
-            //					lock ( this.list進行文字列 )
-            //					{
-            //						this.list進行文字列.Add( string.Format( "{0} ... {1}/{2}", "Loading score properties from files", CDTXMania.Songs管理_裏読.nNbScoresFromFile, CDTXMania.Songs管理_裏読.nNbScoresFound - cs.nNbScoresFromScoreCache ) );
-            //					}
-            //-----------------------------
             #endregion
             #region [ 5) 曲リストへの後処理の適用 ]
             //-----------------------------
