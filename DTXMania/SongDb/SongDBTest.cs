@@ -1,4 +1,5 @@
-﻿using Hexa.NET.ImGui;
+﻿using System.Numerics;
+using Hexa.NET.ImGui;
 
 namespace DTXMania.SongDb;
 
@@ -12,15 +13,29 @@ public class SongDBTester
 
         if (ImGui.Button("Scan"))
         {
-            songDb.ScanAsync();
+            Task.Run(songDb.ScanAsync);
         }
-        
-        if (songDb.scanning)
+
+        if (songDb.status != SongDbScanStatus.Idle)
         {
-            ImGui.SameLine();
-            ImGui.Text("Scanning...");
+            switch (songDb.status)
+            {
+                case SongDbScanStatus.Scanning:
+                    ImGui.SameLine();
+                    ImGui.Text("Scanning...");
+                    break;
+
+                case SongDbScanStatus.Processing:
+                    ImGui.SameLine();
+                    ImGui.Text("Processing...");
+                    ImGui.Text(songDb.processSongDataPath);
+                    ImGui.ProgressBar((float)songDb.processDoneCount / songDb.processTotalCount,
+                        new Vector2(ImGui.GetWindowSize().X - 20.0f, 20),
+                        $"{songDb.processDoneCount} / {songDb.processTotalCount}");
+                    break;
+            }
         }
-        
+
         foreach (SongNode node in songDb.songNodeRoot)
         {
             DrawNode(node);

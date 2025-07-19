@@ -3,15 +3,24 @@ using DTXMania.Core;
 
 namespace DTXMania.SongDb;
 
+public enum SongDbScanStatus
+{
+	Idle,
+	Scanning,
+	Processing
+}
+
 public class SongDb
 {
 	//public properties
+	public SongDbScanStatus status { get; private set; } = SongDbScanStatus.Idle;
+	public Dictionary<SongDbScanStatus, TimeSpan> statusDuration { get; private set; } = new();
 	public List<SongNode> songNodeRoot { get; private set; } = [];
 	public int totalSongs { get; private set; } = 0;
 	public int totalCharts { get; private set; } = 0;
-	
-	public bool scanning { get; private set; }
 	public string processSongDataPath { get; private set; } = string.Empty;
+	public int processDoneCount { get; private set; } = 0;
+	public int processTotalCount { get; private set; } = 0;
 	
 	private int tempCharts = 0;
 	private int tempSongs = 0;
@@ -22,55 +31,70 @@ public class SongDb
 		DateTime start = DateTime.Now;
 		tempSongs = 0;
 		tempCharts = 0;
-
+		processSongDataPath = string.Empty;
+		processDoneCount = 0;
+		processTotalCount = 0;
+		
 		try
 		{
-			scanning = true;
+			int maxThreadCount = Environment.ProcessorCount - 2;
 			
-			List<Task> tasks = [];
-
+			if (maxThreadCount < 2)
+				maxThreadCount = 2;
+			
+			Console.WriteLine($"Starting song scan with {maxThreadCount} threads");
+			status = SongDbScanStatus.Scanning;
+			
 			if (!string.IsNullOrEmpty(CDTXMania.ConfigIni.strSongDataSearchPath))
 			{
 				string[] paths = CDTXMania.ConfigIni.strSongDataSearchPath.Split([';']);
 				if (paths.Length > 0)
 				{
-					foreach (string path in paths)
-					{
-						if (string.IsNullOrEmpty(path)) continue;
-						
-						tasks.Add(ScanSongsAsync(path, tempList));
-					}
+					await Parallel.ForEachAsync(paths, new ParallelOptions { MaxDegreeOfParallelism = maxThreadCount },
+						async (path, cancellationToken) => await ScanSongsAsync(path, tempList));
 				}
 			}
-
-			await Task.WhenAll(tasks);
+			
+			statusDuration[SongDbScanStatus.Scanning] = DateTime.Now - start;
 			
 			//log time taken to scan
-			Console.WriteLine($"Song scan completed in {(DateTime.Now - start)} s.");
-			Console.WriteLine($"Found {tempSongs} songs and {tempCharts} charts.");
-
-			List<SongNode> allSongs = await PrepareFullSongList();
+			Console.WriteLine($"Song scan completed in {statusDuration[SongDbScanStatus.Scanning]} s");
+			Console.WriteLine($"Found {tempSongs} songs and {tempCharts} charts");
+			
+			List<SongNode> allSongs = await FlattenSongList(tempList);
 			
 			Console.WriteLine($"Total song count after flattening: {allSongs.Count}");
-
-			//process songs
-			foreach (SongNode song in allSongs)
-			{
-				ProcessListNode(song);
-			}
+			
+			processTotalCount = allSongs.Count;
+			
+			status = SongDbScanStatus.Processing;
+			
+			start = DateTime.Now;
+			
+			await Parallel.ForEachAsync(allSongs, new ParallelOptions { MaxDegreeOfParallelism = maxThreadCount },
+				(song, cancellationToken) =>
+				{
+					ProcessListNode(song);
+					return ValueTask.CompletedTask;
+				});
+			
+			statusDuration[SongDbScanStatus.Processing] = DateTime.Now - start;
+			Console.WriteLine($"Processed {tempSongs} songs and {tempCharts} charts");
+			Console.WriteLine($"Processed full song list in {statusDuration[SongDbScanStatus.Processing]} s");
 		}
 		catch (Exception ex)
 		{
 			Console.WriteLine("An error occurred while scanning songs: " + ex.Message);
-			scanning = false;
+			status = SongDbScanStatus.Idle;
 		}
 		finally
 		{
 			songNodeRoot = tempList;
+			
 			totalSongs = tempSongs;
 			totalCharts = tempCharts;
 			
-			scanning = false;
+			status = SongDbScanStatus.Idle;
 		}
 	}
 
@@ -350,11 +374,11 @@ public class SongDb
 		tempSongs++;
 	}
 	
-	private async Task<List<SongNode>> PrepareFullSongList()
+	private async Task<List<SongNode>> FlattenSongList(List<SongNode> toFlatten)
 	{
 		List<SongNode> fullList = [];
 		
-		foreach (SongNode node in songNodeRoot)
+		foreach (SongNode node in toFlatten)
 		{
 			if (node.nodeType == SongNode.ENodeType.BOX)
 			{
@@ -386,7 +410,7 @@ public class SongDb
 			}
 		}
 	}
-
+	
 	private void ProcessListNode(SongNode node)
 	{
 		for (int i = 0; i < 5; i++)
@@ -477,6 +501,8 @@ public class SongDb
 
 			LoadScoreFile(score.FileInformation.AbsoluteFilePath + ".score.ini", ref score);
 		}
+
+		processDoneCount++;
 	}
 
 	private void LoadScoreFile(string path, ref CScore score)
