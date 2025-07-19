@@ -3506,21 +3506,9 @@ public class CDTX : CActivity
                 this.db再生速度 = dbReplaySpeed;
 
                 StreamReader reader = new(strFileName, Encoding.GetEncoding("shift-jis"));
-                    
-                //Stopwatch sw = new();
-                //sw.Start();
                 tRead_FromStream(reader);
-                //sw.Stop();
-                //TimeSpan span = sw.Elapsed;
-                //Console.WriteLine("{0} tRead_FromStream {1:0.00} ms", strFileName, span.TotalMilliseconds);
                 reader.Close();
-                    
-                // sw.Reset();
-                // sw.Start();
                 tProcessChartData(nBgmAdjust);
-                // sw.Stop();
-                // span = sw.Elapsed;
-                //Console.WriteLine("{0} tProcessChartData {1:0.00} ms", strFileName, span.TotalMilliseconds);
             }
             catch (Exception e)
             {
