@@ -15,6 +15,9 @@ public class SongDBTester
         {
             Task.Run(songDb.ScanAsync);
         }
+        
+        ImGui.Text("Last scan time: " + songDb.statusDuration[SongDbScanStatus.Scanning]);
+        ImGui.Text("Last process time: " + songDb.statusDuration[SongDbScanStatus.Processing]);
 
         if (songDb.status != SongDbScanStatus.Idle)
         {

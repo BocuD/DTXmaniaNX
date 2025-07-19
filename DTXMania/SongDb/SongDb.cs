@@ -14,7 +14,14 @@ public class SongDb
 {
 	//public properties
 	public SongDbScanStatus status { get; private set; } = SongDbScanStatus.Idle;
-	public Dictionary<SongDbScanStatus, TimeSpan> statusDuration { get; private set; } = new();
+
+	public Dictionary<SongDbScanStatus, TimeSpan> statusDuration { get; private set; } = new()
+	{
+		{ SongDbScanStatus.Idle, TimeSpan.Zero },
+		{ SongDbScanStatus.Scanning, TimeSpan.Zero },
+		{ SongDbScanStatus.Processing, TimeSpan.Zero }
+	};
+	
 	public List<SongNode> songNodeRoot { get; private set; } = [];
 	public int totalSongs { get; private set; } = 0;
 	public int totalCharts { get; private set; } = 0;
