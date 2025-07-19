@@ -3471,8 +3471,6 @@ public class CDTX : CActivity
 
     private void tRead(string strFileName, bool bHeaderOnly, double dbReplaySpeed = 1.0, int nBgmAdjust = 0)
     {
-        Console.WriteLine("Reading DTX file: " + strFileName);
-        
         this.bHeaderOnly = bHeaderOnly;
         b動画読み込み = (CDTXMania.StageManager.rCurrentStage.eStageID == CStage.EStage.SongLoading_5);
         strFileNameFullPath = Path.GetFullPath(strFileName);
