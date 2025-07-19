@@ -475,7 +475,95 @@ public class SongDb
 				}
 			}
 
-			tReadScoreIniAndSetScoreInformation(score.FileInformation.AbsoluteFilePath + ".score.ini", ref score);
+			LoadScoreFile(score.FileInformation.AbsoluteFilePath + ".score.ini", ref score);
+		}
+	}
+
+	private void LoadScoreFile(string path, ref CScore score)
+	{
+		if (!File.Exists(path))
+			return;
+
+		try
+		{
+			var ini = new CScoreIni(path);
+			ini.tCheckIntegrity();
+
+			for (int nInstrumentNumber = 0; nInstrumentNumber < 3; nInstrumentNumber++)
+			{
+				int n = (nInstrumentNumber * 2) + 1; // n = 0～5
+
+				#region socre.譜面情報.最大ランク[ n楽器番号 ] = ...
+
+				//-----------------
+				if (ini.stSection[n].bMIDIUsed ||
+				    ini.stSection[n].bKeyboardUsed ||
+				    ini.stSection[n].bJoypadUsed ||
+				    ini.stSection[n].bMouseUsed)
+				{
+					// (A) 全オートじゃないようなので、演奏結果情報を有効としてランクを算出する。
+					if (CDTXMania.ConfigIni.nSkillMode == 0)
+					{
+						score.SongInformation.BestRank[nInstrumentNumber] =
+							CScoreIni.tCalculateRankOld(
+								ini.stSection[n].nTotalChipsCount,
+								ini.stSection[n].nPerfectCount,
+								ini.stSection[n].nGreatCount,
+								ini.stSection[n].nGoodCount,
+								ini.stSection[n].nPoorCount,
+								ini.stSection[n].nMissCount
+							);
+					}
+					else if (CDTXMania.ConfigIni.nSkillMode == 1)
+					{
+						score.SongInformation.BestRank[nInstrumentNumber] =
+							CScoreIni.tCalculateRank(
+								ini.stSection[n].nTotalChipsCount,
+								ini.stSection[n].nPerfectCount,
+								ini.stSection[n].nGreatCount,
+								ini.stSection[n].nGoodCount,
+								ini.stSection[n].nPoorCount,
+								ini.stSection[n].nMissCount,
+								ini.stSection[n].nMaxCombo
+							);
+					}
+				}
+				else
+				{
+					// (B) 全オートらしいので、ランクは無効とする。
+					score.SongInformation.BestRank[nInstrumentNumber] = (int)CScoreIni.ERANK.UNKNOWN;
+				}
+
+				//-----------------
+
+				#endregion
+
+				score.SongInformation.HighSkill[nInstrumentNumber] = ini.stSection[n].dbPerformanceSkill;
+				score.SongInformation.HighSongSkill[nInstrumentNumber] = ini.stSection[n].dbGameSkill;
+				score.SongInformation.FullCombo[nInstrumentNumber] = ini.stSection[n].bIsFullCombo | ini.stSection[nInstrumentNumber * 2].bIsFullCombo;
+				
+				//New for Progress
+				score.SongInformation.progress[nInstrumentNumber] = ini.stSection[n].strProgress;
+				if (score.SongInformation.progress[nInstrumentNumber] == "")
+				{
+					//TODO: Read from another file if progress string is empty
+					//Set a hard-coded 64 char string for now
+					score.SongInformation.progress[nInstrumentNumber] =
+						"0000000000000000000000000000000000000000000000000000000000000000";
+				}
+			}
+
+			score.SongInformation.NbPerformances.Drums = ini.stFile.PlayCountDrums;
+			score.SongInformation.NbPerformances.Guitar = ini.stFile.PlayCountGuitar;
+			score.SongInformation.NbPerformances.Bass = ini.stFile.PlayCountBass;
+			
+			for (int i = 0; i < 5; i++)
+				score.SongInformation.PerformanceHistory[i] = ini.stFile.History[i];
+		}
+		catch (Exception e)
+		{
+			Console.WriteLine("Failed to read score.ini file: " + path);
+			Console.WriteLine(e.Message);
 		}
 	}
 }
