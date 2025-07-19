@@ -797,7 +797,7 @@ internal class CStageSongLoading : CStage
                 {
                     //Always display CLASSIC style if Skill Mode is Classic
                     if (CDTXMania.ConfigIni.nSkillMode == 0 || (CDTXMania.ConfigIni.bCLASSIC譜面判別を有効にする &&
-                                                                CDTXMania.stageSongSelection.rChosenScore.SongInformation.b完全にCLASSIC譜面である[j] && 
+                                                                CDTXMania.stageSongSelection.rChosenScore.SongInformation.bIsClassicChart[j] && 
                                                                 !cdtx.bForceXGChart))
                     {
                         tDrawStringLarge(187 + k, 152, $"{DTXLevel:00}");

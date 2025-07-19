@@ -894,9 +894,9 @@ internal class CSongManager
 		cスコア.SongInformation.PerformanceHistory.行4 = br.ReadString();
 		cスコア.SongInformation.PerformanceHistory.行5 = br.ReadString();
 		cスコア.SongInformation.bHiddenLevel = br.ReadBoolean();
-		cスコア.SongInformation.b完全にCLASSIC譜面である.Drums = br.ReadBoolean();
-		cスコア.SongInformation.b完全にCLASSIC譜面である.Guitar = br.ReadBoolean();
-		cスコア.SongInformation.b完全にCLASSIC譜面である.Bass = br.ReadBoolean();
+		cスコア.SongInformation.bIsClassicChart.Drums = br.ReadBoolean();
+		cスコア.SongInformation.bIsClassicChart.Guitar = br.ReadBoolean();
+		cスコア.SongInformation.bIsClassicChart.Bass = br.ReadBoolean();
 		cスコア.SongInformation.bScoreExists.Drums = br.ReadBoolean();
 		cスコア.SongInformation.bScoreExists.Guitar = br.ReadBoolean();
 		cスコア.SongInformation.bScoreExists.Bass = br.ReadBoolean();
@@ -961,9 +961,6 @@ internal class CSongManager
 		int workerThreads = Environment.ProcessorCount;
 
 		workerThreads = Math.Max(2, workerThreads - 4); //leave some cpu for the game
-			
-		//Console.WriteLine("WARNING: Worker threads limited to 1 to debug!!!");
-		//workerThreads = 1;
 			
 		Console.WriteLine("Song processing worker threads: " + workerThreads);
 
@@ -1076,9 +1073,9 @@ internal class CSongManager
 				score.SongInformation.LevelDec.Guitar = cdtx.LEVELDEC.Guitar;
 				score.SongInformation.LevelDec.Bass = cdtx.LEVELDEC.Bass;
 				score.SongInformation.bHiddenLevel = cdtx.HIDDENLEVEL;
-				score.SongInformation.b完全にCLASSIC譜面である.Drums = cdtx.bHasChips is { LeftCymbal: false, LP: false, LBD: false, FT: false, Ride: false };
-				score.SongInformation.b完全にCLASSIC譜面である.Guitar = !cdtx.bHasChips.YPGuitar;
-				score.SongInformation.b完全にCLASSIC譜面である.Bass = !cdtx.bHasChips.YPBass;
+				score.SongInformation.bIsClassicChart.Drums = cdtx.bHasChips is { LeftCymbal: false, LP: false, LBD: false, FT: false, Ride: false };
+				score.SongInformation.bIsClassicChart.Guitar = !cdtx.bHasChips.YPGuitar;
+				score.SongInformation.bIsClassicChart.Bass = !cdtx.bHasChips.YPBass;
 				score.SongInformation.bScoreExists.Drums = cdtx.bHasChips.Drums;
 				score.SongInformation.bScoreExists.Guitar = cdtx.bHasChips.Guitar;
 				score.SongInformation.bScoreExists.Bass = cdtx.bHasChips.Bass;
@@ -1140,7 +1137,7 @@ internal class CSongManager
 					sb.Append(", lvGt=" + score.SongInformation.Level.Guitar);
 					sb.Append(", lvBs=" + score.SongInformation.Level.Bass);
 					sb.Append(", lvHide=" + score.SongInformation.bHiddenLevel);
-					sb.Append(", classic=" + score.SongInformation.b完全にCLASSIC譜面である);
+					sb.Append(", classic=" + score.SongInformation.bIsClassicChart);
 					sb.Append(", type=" + score.SongInformation.SongType);
 					sb.Append(", bpm=" + score.SongInformation.Bpm);
 					//	sb.Append( ", duration=" + c曲リストノード.arScore[ i ].SongInformation.Duration );
@@ -1409,9 +1406,9 @@ internal class CSongManager
 				bw.Write( node.arScore[ i ].SongInformation.PerformanceHistory.行4 );
 				bw.Write( node.arScore[ i ].SongInformation.PerformanceHistory.行5 );
 				bw.Write( node.arScore[ i ].SongInformation.bHiddenLevel );
-				bw.Write( node.arScore[ i ].SongInformation.b完全にCLASSIC譜面である.Drums );
-				bw.Write( node.arScore[ i ].SongInformation.b完全にCLASSIC譜面である.Guitar );
-				bw.Write( node.arScore[ i ].SongInformation.b完全にCLASSIC譜面である.Bass );
+				bw.Write( node.arScore[ i ].SongInformation.bIsClassicChart.Drums );
+				bw.Write( node.arScore[ i ].SongInformation.bIsClassicChart.Guitar );
+				bw.Write( node.arScore[ i ].SongInformation.bIsClassicChart.Bass );
 				bw.Write( node.arScore[ i ].SongInformation.bScoreExists.Drums );
 				bw.Write( node.arScore[ i ].SongInformation.bScoreExists.Guitar );
 				bw.Write( node.arScore[ i ].SongInformation.bScoreExists.Bass );

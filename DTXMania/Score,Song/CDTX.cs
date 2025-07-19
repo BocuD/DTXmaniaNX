@@ -1058,7 +1058,7 @@ public class CDTX : CActivity
         }
     }
 
-    public struct STチップがある
+    public struct STHASCHIPS
     {
         public bool Drums;
         public bool Guitar;
@@ -1204,7 +1204,7 @@ public class CDTX : CActivity
     public double BASEBPM;
     public bool BLACKCOLORKEY;
     public double BPM;
-    public STチップがある bHasChips;
+    public STHASCHIPS bHasChips;
     public string COMMENT;
     public double db再生速度;
     public EType eFileType;
@@ -1300,7 +1300,7 @@ public class CDTX : CActivity
 
         db再生速度 = 1.0;
         strDTXFileHash = "";
-        bHasChips = new STチップがある
+        bHasChips = new STHASCHIPS
         {
             Drums = false,
             Guitar = false,
@@ -4324,7 +4324,7 @@ public class CDTX : CActivity
             #endregion
         }
     }
-        
+
     /// <summary>
     /// サウンドミキサーにサウンドを登録_削除する時刻を事前に算出する
     /// </summary>

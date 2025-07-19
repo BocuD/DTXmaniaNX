@@ -67,7 +67,7 @@ public class CScore
         public CDTX.EType SongType;
         public double Bpm;
         public int Duration;
-        public STDGBVALUE<bool> b完全にCLASSIC譜面である;
+        public STDGBVALUE<bool> bIsClassicChart;
         public STDGBVALUE<bool> bScoreExists;
         //
         //public STDGBVALUE<EUseLanes> 使用レーン数;
@@ -275,9 +275,9 @@ public class CScore
         SongInformation.SongType = CDTX.EType.DTX;
         SongInformation.Bpm = 120.0;
         SongInformation.Duration = 0;
-        SongInformation.b完全にCLASSIC譜面である.Drums = false;
-        SongInformation.b完全にCLASSIC譜面である.Guitar = false;
-        SongInformation.b完全にCLASSIC譜面である.Bass = false;
+        SongInformation.bIsClassicChart.Drums = false;
+        SongInformation.bIsClassicChart.Guitar = false;
+        SongInformation.bIsClassicChart.Bass = false;
         SongInformation.bScoreExists.Drums = false;
         SongInformation.bScoreExists.Guitar = false;
         SongInformation.bScoreExists.Bass = false;
