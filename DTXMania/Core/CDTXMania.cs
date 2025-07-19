@@ -206,7 +206,7 @@ internal class CDTXMania : Game
     private Texture gameRenderTargetTexture;
     private Surface gameRenderTargetSurface;
     private Surface mainRenderTarget;
-    public static bool renderGameToSurface = true;
+    public static bool renderGameToSurface = false;
 
 
     // Constructor
