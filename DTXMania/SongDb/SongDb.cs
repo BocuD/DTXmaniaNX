@@ -3,50 +3,33 @@ using DTXMania.Core;
 
 namespace DTXMania.SongDb;
 
-public class SongNode
-{
-    public enum ENodeType
-    {
-        SONG,
-        BOX
-    }
-    
-    public ENodeType NodeType { get; set; } = ENodeType.SONG;
-    public string skinPath = string.Empty;
-    
-    public string title = string.Empty;
-    public string path = string.Empty;
-    public Color color = Color.White;
-
-    public SongNode? parent = null;
-    public List<SongNode>? childNodes = null;
-
-    public int chartCount;
-    public CScore[] charts = new CScore[5];
-    public string[] difficultyLabel = new string[5];
-    
-    public STHitRanges stDrumHitRanges = new(nDefaultSizeMs: -1);
-    public STHitRanges stDrumPedalHitRanges = new(nDefaultSizeMs: -1);
-    public STHitRanges stGuitarHitRanges = new(nDefaultSizeMs: -1);
-    public STHitRanges stBassHitRanges = new(nDefaultSizeMs: -1);
-}
-
 public class SongDb
 {
-	public bool scanning = false;
-	public List<SongNode> songNodeRoot = [];
+	//public properties
+	public List<SongNode> songNodeRoot { get; private set; } = [];
+	public int totalSongs { get; private set; } = 0;
+	public int totalCharts { get; private set; } = 0;
+	
+	public bool scanning { get; private set; }
+	public string processSongDataPath { get; private set; } = string.Empty;
+	
+	private int tempCharts = 0;
+	private int tempSongs = 0;
 
 	public async Task ScanAsync()
 	{
+		List<SongNode> tempList = [];
+		DateTime start = DateTime.Now;
+		tempSongs = 0;
+		tempCharts = 0;
+
 		try
 		{
-			//clear
 			scanning = true;
-			songNodeRoot.Clear();
-
+			
 			List<Task> tasks = [];
 
-			if (!string.IsNullOrEmpty(CDTXMania.ConfigIni.str曲データ検索パス))
+			if (!string.IsNullOrEmpty(CDTXMania.ConfigIni.strSongDataSearchPath))
 			{
 				string[] paths = CDTXMania.ConfigIni.strSongDataSearchPath.Split([';']);
 				if (paths.Length > 0)
@@ -61,6 +44,20 @@ public class SongDb
 			}
 
 			await Task.WhenAll(tasks);
+			
+			//log time taken to scan
+			Console.WriteLine($"Song scan completed in {(DateTime.Now - start)} s.");
+			Console.WriteLine($"Found {tempSongs} songs and {tempCharts} charts.");
+
+			List<SongNode> allSongs = await PrepareFullSongList();
+			
+			Console.WriteLine($"Total song count after flattening: {allSongs.Count}");
+
+			//process songs
+			foreach (SongNode song in allSongs)
+			{
+				ProcessListNode(song);
+			}
 		}
 		catch (Exception ex)
 		{
@@ -69,6 +66,10 @@ public class SongDb
 		}
 		finally
 		{
+			songNodeRoot = tempList;
+			totalSongs = tempSongs;
+			totalCharts = tempCharts;
+			
 			scanning = false;
 		}
 	}
@@ -116,14 +117,12 @@ public class SongDb
 		//scan subdirectories
 		foreach (DirectoryInfo infoDir in info.GetDirectories())
 		{
-			#region [ a. "dtxfiles." で始まるフォルダの場合 ]
-
-			//-----------------------------
+			//if the directory starts with dtxfiles. it should be treated as a box
 			if (infoDir.Name.ToLower().StartsWith("dtxfiles."))
 			{
 				SongNode node = new()
 				{
-					NodeType = SongNode.ENodeType.BOX,
+					nodeType = SongNode.ENodeType.BOX,
 					title = infoDir.Name.Substring(9),
 					path = infoDir.FullName + @"\",
 					parent = parent,
@@ -150,22 +149,15 @@ public class SongDb
 				
 				targetList.Add(node);
 				
-				await TryLoadBoxDef(node, infoDir);
-				
+				TryLoadBoxDef(node, infoDir);
 				await ScanSongsAsync(infoDir.FullName + @"\", node.childNodes, node);
 			}
-			//-----------------------------
-
-			#endregion
-
-			#region [ b.box.def を含むフォルダの場合  ]
-
 			//if the folder contains a box.def file, handle it differently
 			else if (File.Exists(infoDir.FullName + @"\box.def"))
 			{
 				SongNode node = new()
 				{
-					NodeType = SongNode.ENodeType.BOX,
+					nodeType = SongNode.ENodeType.BOX,
 					path = infoDir.FullName + @"\",
 					chartCount = 1,
 					charts =
@@ -180,28 +172,18 @@ public class SongDb
 		
 				targetList.Add(node);
 		
-				await TryLoadBoxDef(node, infoDir);
+				TryLoadBoxDef(node, infoDir);
 				await ScanSongsAsync(infoDir.FullName + @"\", node.childNodes, node);
 			}
-			//-----------------------------
-
-			#endregion
-
-			#region [ c.通常フォルダの場合 ]
-
-			//-----------------------------
 			else
+			//folder should not be treated as a box of any kind, just recursively scan its contents
 			{
 				await ScanSongsAsync(infoDir.FullName + @"\", targetList, parent);
 			}
-
-			//-----------------------------
-
-			#endregion
 		}
 	}
 
-	private async Task TryLoadBoxDef(SongNode node, DirectoryInfo infoDir)
+	private void TryLoadBoxDef(SongNode node, DirectoryInfo infoDir)
 	{
 		string boxDefPath = infoDir.FullName + @"\box.def";
 		if (File.Exists(boxDefPath))
@@ -281,7 +263,7 @@ public class SongDb
 			{
 				SongNode song = new()
 				{
-					NodeType = SongNode.ENodeType.SONG,
+					nodeType = SongNode.ENodeType.SONG,
 					title = block.Title,
 					path = baseFolder + @"\",
 					color = block.FontColor,
@@ -314,13 +296,13 @@ public class SongDb
 					}
 
 					song.chartCount++;
-					nChartCount++;
+					tempCharts++;
 				}
 
 				if (song.chartCount > 0)
 				{
 					targetList.Add(song);
-					nSongCount++;
+					tempSongs++;
 				}
 			}
 		}
@@ -335,7 +317,7 @@ public class SongDb
 	{
 		SongNode songNode = new()
 		{
-			NodeType = SongNode.ENodeType.SONG,
+			nodeType = SongNode.ENodeType.SONG,
 			chartCount = 1,
 			parent = nodeParent,
 			path = fileinfo.FullName + @"\",
@@ -362,12 +344,138 @@ public class SongDb
 			songNode.charts[0].ScoreIniInformation.LastModified = infoScoreIni.LastWriteTime;
 		}
 
-		nChartCount++;
-
 		listNodeList.Add(songNode);
-		nSongCount++;
+		
+		tempCharts++;
+		tempSongs++;
 	}
 	
-	public int nChartCount = 0; // Number of scores found
-	public int nSongCount = 0; // Number of song nodes found
+	private async Task<List<SongNode>> PrepareFullSongList()
+	{
+		List<SongNode> fullList = [];
+		
+		foreach (SongNode node in songNodeRoot)
+		{
+			if (node.nodeType == SongNode.ENodeType.BOX)
+			{
+				await AddChildrenToList(node, fullList);
+			}
+			else
+			{
+				fullList.Add(node);
+			}
+		}
+
+		return fullList;
+	}
+	
+	private async Task AddChildrenToList(SongNode node, List<SongNode> fullList)
+	{
+		if (node.childNodes is { Count: > 0 })
+		{
+			foreach (SongNode child in node.childNodes)
+			{
+				if (child.nodeType == SongNode.ENodeType.BOX)
+				{
+					await AddChildrenToList(child, fullList);
+				}
+				else
+				{
+					fullList.Add(child);
+				}
+			}
+		}
+	}
+
+	private void ProcessListNode(SongNode node)
+	{
+		for (int i = 0; i < 5; i++)
+		{
+			if (node.charts[i] == null || node.charts[i].bHadACacheInSongDB) continue;
+
+			CScore score = node.charts[i];
+			string path = score.FileInformation.AbsoluteFilePath;
+
+			if (File.Exists(path))
+			{
+				try
+				{
+					processSongDataPath = path;
+					CDTX cdtx = new(score.FileInformation.AbsoluteFilePath, false);
+
+					score.SongInformation.Title = cdtx.TITLE;
+					score.SongInformation.ArtistName = cdtx.ARTIST;
+					score.SongInformation.Comment = cdtx.COMMENT;
+					score.SongInformation.Genre = cdtx.GENRE;
+					score.SongInformation.Preimage = cdtx.PREIMAGE;
+					score.SongInformation.Premovie = cdtx.PREMOVIE;
+					score.SongInformation.Presound = cdtx.PREVIEW;
+					score.SongInformation.Backgound = cdtx.BACKGROUND is { Length: > 0 } ? cdtx.BACKGROUND : cdtx.BACKGROUND_GR;
+					score.SongInformation.Level.Drums = cdtx.LEVEL.Drums;
+					score.SongInformation.Level.Guitar = cdtx.LEVEL.Guitar;
+					score.SongInformation.Level.Bass = cdtx.LEVEL.Bass;
+					score.SongInformation.LevelDec.Drums = cdtx.LEVELDEC.Drums;
+					score.SongInformation.LevelDec.Guitar = cdtx.LEVELDEC.Guitar;
+					score.SongInformation.LevelDec.Bass = cdtx.LEVELDEC.Bass;
+					score.SongInformation.bHiddenLevel = cdtx.HIDDENLEVEL;
+					score.SongInformation.bIsClassicChart.Drums = cdtx.bHasChips is { LeftCymbal: false, LP: false, LBD: false, FT: false, Ride: false };
+					score.SongInformation.bIsClassicChart.Guitar = !cdtx.bHasChips.YPGuitar;
+					score.SongInformation.bIsClassicChart.Bass = !cdtx.bHasChips.YPBass;
+					score.SongInformation.bScoreExists.Drums = cdtx.bHasChips.Drums;
+					score.SongInformation.bScoreExists.Guitar = cdtx.bHasChips.Guitar;
+					score.SongInformation.bScoreExists.Bass = cdtx.bHasChips.Bass;
+					score.SongInformation.SongType = cdtx.eFileType;
+					score.SongInformation.Bpm = cdtx.BPM;
+					score.SongInformation.Duration = (cdtx.listChip == null)
+						? 0
+						: cdtx.listChip[cdtx.listChip.Count - 1].nPlaybackTimeMs;
+
+					score.SongInformation.chipCountByInstrument.Drums = cdtx.nVisibleChipsCount.Drums;
+					{
+						score.SongInformation.chipCountByLane[ELane.LC] = cdtx.nVisibleChipsCount.chipCountInLane(ELane.LC);
+						score.SongInformation.chipCountByLane[ELane.HH] = cdtx.nVisibleChipsCount.chipCountInLane(ELane.HH);
+						score.SongInformation.chipCountByLane[ELane.SD] = cdtx.nVisibleChipsCount.chipCountInLane(ELane.SD);
+						score.SongInformation.chipCountByLane[ELane.LP] = cdtx.nVisibleChipsCount.chipCountInLane(ELane.LP);
+						score.SongInformation.chipCountByLane[ELane.HT] = cdtx.nVisibleChipsCount.chipCountInLane(ELane.HT);
+						score.SongInformation.chipCountByLane[ELane.BD] = cdtx.nVisibleChipsCount.chipCountInLane(ELane.BD);
+						score.SongInformation.chipCountByLane[ELane.LT] = cdtx.nVisibleChipsCount.chipCountInLane(ELane.LT);
+						score.SongInformation.chipCountByLane[ELane.FT] = cdtx.nVisibleChipsCount.chipCountInLane(ELane.FT);
+						score.SongInformation.chipCountByLane[ELane.CY] = cdtx.nVisibleChipsCount.chipCountInLane(ELane.CY);
+					}
+
+					score.SongInformation.chipCountByInstrument.Guitar = cdtx.nVisibleChipsCount.Guitar;
+					{
+						score.SongInformation.chipCountByLane[ELane.GtR] = cdtx.nVisibleChipsCount.chipCountInLane(ELane.GtR);
+						score.SongInformation.chipCountByLane[ELane.GtG] = cdtx.nVisibleChipsCount.chipCountInLane(ELane.GtG);
+						score.SongInformation.chipCountByLane[ELane.GtB] = cdtx.nVisibleChipsCount.chipCountInLane(ELane.GtB);
+						score.SongInformation.chipCountByLane[ELane.GtY] = cdtx.nVisibleChipsCount.chipCountInLane(ELane.GtY);
+						score.SongInformation.chipCountByLane[ELane.GtP] = cdtx.nVisibleChipsCount.chipCountInLane(ELane.GtP);
+						score.SongInformation.chipCountByLane[ELane.GtPick] = cdtx.nVisibleChipsCount.chipCountInLane(ELane.GtPick);
+					}
+
+					score.SongInformation.chipCountByInstrument.Bass = cdtx.nVisibleChipsCount.Bass;
+					{
+						score.SongInformation.chipCountByLane[ELane.BsR] = cdtx.nVisibleChipsCount.chipCountInLane(ELane.BsR);
+						score.SongInformation.chipCountByLane[ELane.BsG] = cdtx.nVisibleChipsCount.chipCountInLane(ELane.BsG);
+						score.SongInformation.chipCountByLane[ELane.BsB] = cdtx.nVisibleChipsCount.chipCountInLane(ELane.BsB);
+						score.SongInformation.chipCountByLane[ELane.BsY] = cdtx.nVisibleChipsCount.chipCountInLane(ELane.BsY);
+						score.SongInformation.chipCountByLane[ELane.BsP] = cdtx.nVisibleChipsCount.chipCountInLane(ELane.BsP);
+						score.SongInformation.chipCountByLane[ELane.BsPick] = cdtx.nVisibleChipsCount.chipCountInLane(ELane.BsPick);
+					}
+
+					cdtx.OnDeactivate();
+				}
+				catch (Exception exception)
+				{
+					Console.WriteLine("An error occurred while reading the song data file: " + path);
+					Console.WriteLine("" + exception.Message);
+					node.chartCount--;
+					tempCharts--;
+					continue;
+				}
+			}
+
+			tReadScoreIniAndSetScoreInformation(score.FileInformation.AbsoluteFilePath + ".score.ini", ref score);
+		}
+	}
 }

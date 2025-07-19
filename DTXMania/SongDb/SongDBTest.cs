@@ -1,5 +1,4 @@
-﻿using System.Numerics;
-using Hexa.NET.ImGui;
+﻿using Hexa.NET.ImGui;
 
 namespace DTXMania.SongDb;
 
@@ -15,17 +14,16 @@ public class SongDBTester
         {
             songDb.ScanAsync();
         }
-
-        if (!songDb.scanning)
+        
+        if (songDb.scanning)
         {
-            foreach (SongNode node in songDb.songNodeRoot)
-            {
-                DrawNode(node);
-            }
-        }
-        else
-        {
+            ImGui.SameLine();
             ImGui.Text("Scanning...");
+        }
+        
+        foreach (SongNode node in songDb.songNodeRoot)
+        {
+            DrawNode(node);
         }
 
         ImGui.End();
