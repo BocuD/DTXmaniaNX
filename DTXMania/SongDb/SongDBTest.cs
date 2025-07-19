@@ -116,14 +116,6 @@ public class SongDBTester
                 continue; // Skip nodes without valid charts
             }
             
-            if (string.IsNullOrWhiteSpace(title)) 
-            {
-                title = chart.SongInformation.Title.Replace(",", " ");
-            }
-            if (string.IsNullOrWhiteSpace(title))
-            {
-                title = node.path.Replace(",", " ");
-            }
             string artist = chart.SongInformation.ArtistName.Replace(",", " ");
             string comment = chart.SongInformation.Comment.Replace(",", " ");
             

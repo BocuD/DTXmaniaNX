@@ -433,6 +433,11 @@ public class SongDb
 				{
 					processSongDataPath = path;
 					CDTX cdtx = new(score.FileInformation.AbsoluteFilePath, false);
+					
+					if (string.IsNullOrWhiteSpace(node.title))
+					{
+						node.title = cdtx.TITLE;
+					}
 
 					score.SongInformation.Title = cdtx.TITLE;
 					score.SongInformation.ArtistName = cdtx.ARTIST;
@@ -504,6 +509,11 @@ public class SongDb
 					tempCharts--;
 					continue;
 				}
+			}
+			
+			if (string.IsNullOrWhiteSpace(node.title))
+			{
+				node.title = node.path;
 			}
 
 			LoadScoreFile(score.FileInformation.AbsoluteFilePath + ".score.ini", ref score);
