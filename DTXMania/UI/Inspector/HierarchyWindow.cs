@@ -1,5 +1,6 @@
 ﻿using System.Numerics;
 using System.Reflection;
+using DTXMania.Core;
 using DTXMania.UI.Drawable;
 using Hexa.NET.ImGui;
 
@@ -17,7 +18,11 @@ public class HierarchyWindow
         try
         {
             ImGui.Begin("Hierarchy");
-
+            
+            DrawNode(CDTXMania.persistentUIGroup);
+            
+            ImGui.Separator();
+            
             if (target != null)
             {
                 DrawNode(target);
@@ -87,8 +92,29 @@ public class HierarchyWindow
             {
                 ImGui.PopStyleColor();
             }
+
+            if (ImGui.IsItemHovered())
+            {
+                if (ImGui.IsMouseReleased(ImGuiMouseButton.Left))
+                {
+                    Inspector.inspectorTarget = node.id;
+                }
+
+                if (ImGui.IsMouseReleased(ImGuiMouseButton.Right))
+                {
+                    //open context menu
+                    ImGui.OpenPopup(contextMenuId);
+                }
+                
+                Console.WriteLine($"Hovered {node.name} ({node.GetType().Name})");
+            }
             
             HandleNodeDragDrop(node);
+            
+            if (ImGui.BeginPopup(contextMenuId))
+            {
+                DrawNodeContextMenu(node);
+            }
 
             if (selected && node.parent != null)
             {
@@ -104,17 +130,6 @@ public class HierarchyWindow
                     }
                 }
                 ImGui.SetCursorPosY(y);
-            }
-
-            if (ImGui.IsItemHovered() && ImGui.IsMouseReleased(ImGuiMouseButton.Left))
-            {
-                Inspector.inspectorTarget = node.id;
-            }
-            
-            if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
-            {
-                //open context menu
-                ImGui.OpenPopup(contextMenuId);
             }
 
             if (group != null)
@@ -135,29 +150,7 @@ public class HierarchyWindow
                     {
                         UIDrawable child = group.children[index];
                         DrawNode(child);
-                        
-                        /* lastItemPos = ImGui.GetItemRectMin();
-                        lastItemRect = ImGui.GetItemRectMax();
-                        
-                        float endY = (lastItemPos.Y + lastItemRect.Y) / 2;
-
-                        DrawReorderDragDropArea(startY, endY, content.X, group);
-                        ImGui.GetWindowDrawList().AddRect(new Vector2(lastItemPos.X, startY), new Vector2(lastItemPos.X + content.X, endY), ImGui.GetColorU32(0xFF0000FF));
-
-                        startY = endY; */
                     }
-
-                    /*
-                    if (group.children.Count != 0)
-                    {
-                        //draw another drag drop area at the end of the group
-                        ImGui.Dummy(new Vector2(content.X, 3));
-                        float endY = lastItemRect.Y + 3;
-                        
-                        DrawReorderDragDropArea(startY, endY, content.X, group);
-                        ImGui.GetWindowDrawList().AddRect(new Vector2(lastItemPos.X, startY), new Vector2(lastItemPos.X + content.X, endY), ImGui.GetColorU32(0xFF0000FF));
-                    }
-                    */
                 }
                 else
                 {
@@ -187,12 +180,24 @@ public class HierarchyWindow
             {
                 ImGui.PopStyleColor();
             }
-            
-            if (ImGui.IsItemHovered() && ImGui.IsMouseReleased(ImGuiMouseButton.Left))
+
+            if (ImGui.IsItemHovered())
             {
-                Inspector.inspectorTarget = node.id;
+                if (ImGui.IsMouseReleased(ImGuiMouseButton.Left))
+                {
+                    Inspector.inspectorTarget = node.id;
+                }
+
+                if (ImGui.IsMouseReleased(ImGuiMouseButton.Right))
+                {
+                    //open context menu
+                    ImGui.OpenPopup(contextMenuId);
+                    Console.WriteLine("Right click");
+                }
+
+                Console.WriteLine($"Hovered {node.name} ({node.GetType().Name})");
             }
-            
+
             if (selected && node.parent != null)
             {
                 ImGui.SetCursorPosX(ImGui.GetWindowWidth() - 80);
@@ -211,21 +216,10 @@ public class HierarchyWindow
             
             HandleNodeDragDrop(node);
             
-            if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
-            {
-                //open context menu
-                ImGui.OpenPopup(contextMenuId);
-            }
-            
             if (ImGui.BeginPopup(contextMenuId))
             {
                 DrawNodeContextMenu(node);
             }
-        }
-        
-        if (ImGui.BeginPopup(contextMenuId))
-        {
-            DrawNodeContextMenu(node);
         }
     }
     
