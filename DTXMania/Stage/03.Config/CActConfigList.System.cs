@@ -123,7 +123,7 @@ internal partial class CActConfigList
             "Return to left menu.");
         listItems.Add(iSystemReturnToMenu);
         
-        CItemBase iSystemGoToGraphics = new("Graphics Options", CItemBase.EPanelType.Normal,
+        CItemBase iSystemGoToGraphics = new("Graphics Options", CItemBase.EPanelType.Folder,
             "システムのグラフィック設定に関する項目を設定します。",
             "Open the graphics settings sub menu.")
         {
@@ -131,7 +131,7 @@ internal partial class CActConfigList
         };
         listItems.Add(iSystemGoToGraphics);
         
-        CItemBase iSystemGoToAudio = new("Audio Options", CItemBase.EPanelType.Normal,
+        CItemBase iSystemGoToAudio = new("Audio Options", CItemBase.EPanelType.Folder,
             "システムのオーディオ設定に関する項目を設定します。",
             "Open the audio settings sub menu.")
         {
@@ -139,7 +139,7 @@ internal partial class CActConfigList
         };
         listItems.Add(iSystemGoToAudio);
         
-        CItemBase iSystemGoToGameplay = new("Gameplay Options", CItemBase.EPanelType.Normal,
+        CItemBase iSystemGoToGameplay = new("Gameplay Options", CItemBase.EPanelType.Folder,
             "ゲーム設定に関する項目を設定します。",
             "Open the gameplay settings sub menu.")
         {
@@ -147,6 +147,13 @@ internal partial class CActConfigList
         };
         listItems.Add(iSystemGoToGameplay);
         
+        CItemBase iSystemGoToMenu = new("Menu Options", CItemBase.EPanelType.Folder,
+            "メニュー設定に関する項目を設定します。",
+            "Open the menu settings sub menu.")
+        {
+            action = tSetupItemList_Menu
+        };
+        listItems.Add(iSystemGoToMenu);
 
         CItemBase iSystemReloadDTX = new("Reload Songs", CItemBase.EPanelType.Normal,
             "曲データの一覧情報を\n"+
@@ -157,7 +164,6 @@ internal partial class CActConfigList
             {
                 if (CDTXMania.EnumSongs.IsEnumerating)
                 {
-                    // Debug.WriteLine( "バックグラウンドでEnumeratingSongs中だったので、一旦中断します。" );
                     CDTXMania.EnumSongs.Abort();
                     CDTXMania.actEnumSongs.OnDeactivate();
                 }
@@ -179,7 +185,6 @@ internal partial class CActConfigList
             {
                 if (CDTXMania.EnumSongs.IsEnumerating)
                 {
-                    // Debug.WriteLine( "バックグラウンドでEnumeratingSongs中だったので、一旦中断します。" );
                     CDTXMania.EnumSongs.Abort();
                     CDTXMania.actEnumSongs.OnDeactivate();
                 }
@@ -201,17 +206,6 @@ internal partial class CActConfigList
             () => iSystemGRmode.nCurrentlySelectedIndex = nDGmode, 
             () => { } );
         listItems.Add(iSystemGRmode);
-
-        CItemToggle iSystemMusicNameDispDef = new("MusicNameDispDEF", CDTXMania.ConfigIni.b曲名表示をdefのものにする,
-            "表示される曲名をdefのものにします。\n" +
-            "ただし選曲画面の表示は、\n" +
-            "defファイルの曲名が\n"+
-            "優先されます。",
-            "Display the music title from SET.def file");
-        iSystemMusicNameDispDef.BindConfig(
-            () => iSystemMusicNameDispDef.bON = CDTXMania.ConfigIni.b曲名表示をdefのものにする,
-            () => CDTXMania.ConfigIni.b曲名表示をdefのものにする = iSystemMusicNameDispDef.bON);
-        listItems.Add(iSystemMusicNameDispDef);
             
         iSystemSkinSubfolder = new CItemList("Skin (Legacy)", CItemBase.EPanelType.Normal, nSkinIndex,
             "スキン切替：スキンを切り替えます。\n" +
@@ -320,7 +314,7 @@ internal partial class CActConfigList
             () => CDTXMania.ConfigIni.nChipPlayTimeComputeMode = iSystemChipPlayTimeComputeMode.nCurrentlySelectedIndex);
         listItems.Add(iSystemChipPlayTimeComputeMode);
         
-        CItemBase iSystemGoToKeyAssign = new("System Keys", CItemBase.EPanelType.Normal,
+        CItemBase iSystemGoToKeyAssign = new("System Keys", CItemBase.EPanelType.Folder,
             "システムのキー入力に関する項目を設定します。",
             "Settings for the system key/pad inputs.")
         {

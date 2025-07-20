@@ -741,7 +741,7 @@ internal partial class CActConfigList
             () => CDTXMania.ConfigIni.nInputAdjustTimeMs.Drums = iDrumsInputAdjustTimeMs.nCurrentValue);
         listItems.Add(iDrumsInputAdjustTimeMs);
 
-        CItemBase iDrumsGoToKeyAssign = new("Drums Keys", CItemBase.EPanelType.Normal,
+        CItemBase iDrumsGoToKeyAssign = new("Drums Keys", CItemBase.EPanelType.Folder,
             "ドラムのキー入力に関する項目を設定します。",
             "Settings for the drums key/pad inputs.")
         {

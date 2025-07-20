@@ -14,6 +14,7 @@ internal class CItemBase
 	public enum EPanelType
 	{
 		Normal,
+		Folder,
 		Other
 	}
 

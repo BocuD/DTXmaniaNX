@@ -19,7 +19,7 @@ internal partial class CActConfigList : CActivity
             if (e == EMenuType.KeyAssignBass || e == EMenuType.KeyAssignDrums ||
                 e == EMenuType.KeyAssignGuitar || e == EMenuType.KeyAssignSystem ||
                 e == EMenuType.SystemGraphics || e == EMenuType.SystemAudio ||
-                e == EMenuType.SystemGameplay)
+                e == EMenuType.SystemGameplay || e == EMenuType.SystemMenu)
             {
                 return true;
             }
@@ -60,6 +60,7 @@ internal partial class CActConfigList : CActivity
             case EMenuType.SystemGraphics:
             case EMenuType.SystemAudio:
             case EMenuType.SystemGameplay:
+            case EMenuType.SystemMenu:
                 tSetupItemList_System();
                 break;
 
@@ -211,6 +212,13 @@ internal partial class CActConfigList : CActivity
             return;
 
         txItemBoxNormal = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_itembox.png"), false);
+        txItemBoxFolder = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_itembox folder.png"), false);
+        
+        if (txItemBoxFolder == null)
+        {
+            txItemBoxFolder = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_itembox.png"), false);
+        }
+        
         txItemBoxOther = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_itembox other.png"), false);
         txTriangleArrow = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_triangle arrow.png"), false);
         txDescriptionPanel = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_Description Panel.png"));
@@ -231,6 +239,7 @@ internal partial class CActConfigList : CActivity
 
         CDTXMania.tReleaseTexture(ref txSkinSample);
         CDTXMania.tReleaseTexture(ref txItemBoxNormal);
+        CDTXMania.tReleaseTexture(ref txItemBoxFolder);
         CDTXMania.tReleaseTexture(ref txItemBoxOther);
         CDTXMania.tReleaseTexture(ref txTriangleArrow);
         CDTXMania.tReleaseTexture(ref txDescriptionPanel);
@@ -480,6 +489,10 @@ internal partial class CActConfigList : CActivity
             case CItemBase.EPanelType.Normal:
                 txItemBoxNormal?.tDraw2D(CDTXMania.app.Device, n新項目パネルX, y);
                 break;
+            
+            case CItemBase.EPanelType.Folder:
+                txItemBoxFolder?.tDraw2D(CDTXMania.app.Device, n新項目パネルX, y);
+                break;
 
             case CItemBase.EPanelType.Other:
                 txItemBoxOther?.tDraw2D(CDTXMania.app.Device, n新項目パネルX, y);
@@ -579,6 +592,7 @@ internal partial class CActConfigList : CActivity
         SystemGraphics,
         SystemAudio,
         SystemGameplay,
+        SystemMenu,
         KeyAssignDrums,
         KeyAssignGuitar,
         KeyAssignBass,
@@ -611,6 +625,7 @@ internal partial class CActConfigList : CActivity
     private CTexture txTriangleArrow;
     private CTexture txArrow;
     private CTexture txItemBoxNormal;
+    private CTexture txItemBoxFolder;
     private CTexture txItemBoxCursor;
     private CTexture txDescriptionPanel;
     private CTexture txToastMessage;

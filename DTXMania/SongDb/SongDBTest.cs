@@ -110,7 +110,7 @@ public class SongDBTester
         {
             string title = node.title.Replace(",", " ");
             
-            var chart = node.charts.FirstOrDefault(x => x != null);
+            CScore? chart = node.charts.FirstOrDefault(x => x != null);
             if (chart == null)
             {
                 continue; // Skip nodes without valid charts

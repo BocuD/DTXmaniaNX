@@ -333,7 +333,7 @@ internal partial class CActConfigList
             () => CDTXMania.ConfigIni.nInputAdjustTimeMs.Guitar = iGuitarInputAdjustTimeMs.nCurrentValue);
         listItems.Add(iGuitarInputAdjustTimeMs);
 
-        CItemBase iGuitarGoToKeyAssign = new("Guitar Keys", CItemBase.EPanelType.Normal,
+        CItemBase iGuitarGoToKeyAssign = new("Guitar Keys", CItemBase.EPanelType.Folder,
             "ギターのキー入力に関する項目を設定します。",
             "Settings for the guitar key/pad inputs.")
         {
