@@ -18,11 +18,11 @@ using Vector2 = System.Numerics.Vector2;
 
 //#if INSPECTOR
 using DTXMania.UI;
+using DTXMania.UI.Drawable;
 using DTXMania.UI.Inspector;
 //#endif
 
 using DTXMania.UI.Skin;
-using Hexa.NET.ImGui.Utilities;
 
 namespace DTXMania.Core;
 
@@ -207,8 +207,10 @@ internal class CDTXMania : Game
     private Surface gameRenderTargetSurface;
     private Surface mainRenderTarget;
     public static bool renderGameToSurface = false;
-
-
+    
+    //ui
+    public static UIGroup persistentUIGroup { get; private set; } = new("PersistentUIGroup");
+    
     // Constructor
 
     public CDTXMania()
@@ -1085,6 +1087,7 @@ internal class CDTXMania : Game
 //#endif
 
         StageManager.DrawStage();
+        persistentUIGroup.Draw(Matrix.Identity);
 
 //#if INSPECTOR
         if (renderGameToWindow)
