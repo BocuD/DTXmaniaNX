@@ -74,7 +74,11 @@ public class SongSelectionContainer : UIDrawable
     {
         var tex = preImageCache[currentSelection];
         albumArt.SetTexture(tex, false);
-        albumArt.clipRect = new RectangleF(0, 0, tex.Width, tex.Height);
+
+        if (tex != null)
+        {
+            albumArt.clipRect = new RectangleF(0, 0, tex.Width, tex.Height);
+        }
     }
 
     public override void Draw(Matrix parentMatrix)
