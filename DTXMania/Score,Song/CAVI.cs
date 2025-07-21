@@ -48,7 +48,7 @@ public class CAVI : IDisposable
 
             if (!File.Exists(strAVIFileName))
             {
-                //Trace.TraceWarning( "ファイルが存在しません。({0})({1})", this.strコメント文, strAVIファイル名 );
+                //Trace.TraceWarning( "File doesn't exist!({0})({1})", this.strコメント文, strAVIファイル名 );
                 Trace.TraceWarning("File does not exist. ({0})({1})", strコメント文, strAVIFileName);
                 avi = null;
                 return;

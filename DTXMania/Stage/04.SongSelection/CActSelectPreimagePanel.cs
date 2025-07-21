@@ -241,7 +241,7 @@ internal class CActSelectPreimagePanel : CActivity
 			str現在のファイル名 = str;
 			if( !File.Exists( str現在のファイル名 ) )
 			{
-				Trace.TraceWarning( "ファイルが存在しません。({0})", new object[] { str現在のファイル名 } );
+				Trace.TraceWarning( "File doesn't exist!({0})", new object[] { str現在のファイル名 } );
 				return false;
 			}
 			txプレビュー画像 = CDTXMania.tGenerateTexture( str現在のファイル名, false );
@@ -274,7 +274,7 @@ internal class CActSelectPreimagePanel : CActivity
 			str現在のファイル名 = filename;
 			if( !File.Exists( str現在のファイル名 ) )
 			{
-				Trace.TraceWarning( "ファイルが存在しません。({0})", new object[] { str現在のファイル名 } );
+				Trace.TraceWarning( "File doesn't exist!({0})", new object[] { str現在のファイル名 } );
 				return false;
 			}
 			try
@@ -310,7 +310,7 @@ internal class CActSelectPreimagePanel : CActivity
 		{
 			if( !File.Exists( path ) )
 			{
-				Trace.TraceWarning( "ファイルが存在しません。({0})", new object[] { path } );
+				Trace.TraceWarning( "File doesn't exist!({0})", new object[] { path } );
 				return false;
 			}
 			CDTXMania.tReleaseTexture( ref txプレビュー画像 );

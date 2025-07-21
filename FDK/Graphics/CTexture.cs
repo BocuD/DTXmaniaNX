@@ -218,7 +218,7 @@ public class CTexture : IDisposable
 	{
 		if (!File.Exists(
 			    strファイル名)) // #27122 2012.1.13 from: ImageInformation では FileNotFound 例外は返ってこないので、ここで自分でチェックする。わかりやすいログのために。
-			throw new FileNotFoundException(string.Format("ファイルが存在しません。\n[{0}]", strファイル名));
+			throw new FileNotFoundException(string.Format("File doesn't exist!\n[{0}]", strファイル名));
 
 		Byte[] _txData = File.ReadAllBytes(strファイル名);
 		filename = Path.GetFileName(strファイル名);

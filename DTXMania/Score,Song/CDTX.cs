@@ -213,7 +213,7 @@ public class CDTX : CActivity
 
             if (!File.Exists(strテクスチャファイル名))
             {
-                Trace.TraceWarning("ファイルが存在しません。({0})({1})", strコメント文, strテクスチャファイル名);
+                Trace.TraceWarning("File doesn't exist!({0})({1})", strコメント文, strテクスチャファイル名);
                 tx画像 = null;
                 return;
             }
@@ -1491,7 +1491,7 @@ public class CDTX : CActivity
         string filename = cbmp.GetFullPathname;
         if (!File.Exists(filename))
         {
-            Trace.TraceWarning("ファイルが存在しません。({0})", filename);
+            Trace.TraceWarning("File doesn't exist! ({0})", filename);
             cbmp.bitmap = null;
             return;
         }

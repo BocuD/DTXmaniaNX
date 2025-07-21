@@ -57,7 +57,7 @@ internal class CActFIFOBlackStart : CActivity
 			{
 				if (!File.Exists(path))
 				{
-					//Trace.TraceWarning("ファイルが存在しません。({0})", new object[] { path });
+					//Trace.TraceWarning("File doesn't exist!({0})", new object[] { path });
 					txジャケット = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\\5_preimage default.png"));
 				}
 				else

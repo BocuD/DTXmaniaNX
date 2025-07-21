@@ -51,7 +51,7 @@ public class CTextureAf : CTexture, IDisposable
 	public new void MakeTexture( Device device, string strファイル名, Format format, bool b黒を透過する, Pool pool )
 	{
 		if ( !File.Exists( strファイル名 ) )		// #27122 2012.1.13 from: ImageInformation では FileNotFound 例外は返ってこないので、ここで自分でチェックする。わかりやすいログのために。
-			throw new FileNotFoundException( string.Format( "ファイルが存在しません。\n[{0}]", strファイル名 ) );
+			throw new FileNotFoundException( string.Format( "File doesn't exist!\n[{0}]", strファイル名 ) );
 
 		Byte[] _txData = File.ReadAllBytes( strファイル名 );
 		bool b条件付きでサイズは２の累乗でなくてもOK = ( device.Capabilities.TextureCaps & TextureCaps.NonPow2Conditional ) != 0;

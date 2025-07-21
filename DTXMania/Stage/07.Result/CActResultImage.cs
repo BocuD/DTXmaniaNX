@@ -303,7 +303,7 @@ internal class CActResultImage : CActivity
         string path = CDTXMania.DTX.strFolderName + CDTXMania.DTX.PREIMAGE;
         if (!File.Exists(path))
         {
-            Trace.TraceWarning("ファイルが存在しません。({0})", new object[] { path });
+            Trace.TraceWarning("File doesn't exist!({0})", new object[] { path });
             return false;
         }
         txリザルト画像 = CDTXMania.tGenerateTexture(path);
@@ -326,7 +326,7 @@ internal class CActResultImage : CActivity
         string path = CDTXMania.DTX.strFolderName + CDTXMania.DTX.RESULTIMAGE[rank];
         if (!File.Exists(path))
         {
-            Trace.TraceWarning("ファイルが存在しません。({0})", new object[] { path });
+            Trace.TraceWarning("File doesn't exist!({0})", new object[] { path });
             return false;
         }
         txリザルト画像 = CDTXMania.tGenerateTexture(path);
