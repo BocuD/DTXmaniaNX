@@ -32,7 +32,13 @@ public class CStageSongSelectionNew : CStage
         statusText = ui.AddChild(new UIText(family, 18));
         statusText.renderOrder = 100;
 
-        selectionContainer = ui.AddChild(new SongSelectionContainer(songDb));
+        UIImage bigAlbumArt = ui.AddChild(new UIImage());
+        bigAlbumArt.position = new Vector3(300, 200, 0);
+        bigAlbumArt.renderOrder = 1;
+        bigAlbumArt.size = new Vector2(300, 300);
+
+        selectionContainer = ui.AddChild(new SongSelectionContainer(songDb, bigAlbumArt));
+        
         //700 from left, -100 to allow clean scrolling offscreen
         selectionContainer.position = new Vector3(700, -100, 0);
     }

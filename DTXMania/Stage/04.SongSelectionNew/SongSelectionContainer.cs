@@ -10,6 +10,7 @@ namespace DTXMania;
 public class SongSelectionContainer : UIDrawable
 {
     private SongDb.SongDb songDb;
+    private UIImage albumArt;
     private SongSelectionElement[] songSelectionElements = new SongSelectionElement[20];
     private SongNode currentRoot;
 
@@ -17,9 +18,11 @@ public class SongSelectionContainer : UIDrawable
     
     private DTXTexture fallbackPreImage = new(CSkin.Path(@"Graphics\5_preimage default.png"));
     
-    public SongSelectionContainer(SongDb.SongDb songDb)
+    public SongSelectionContainer(SongDb.SongDb songDb, UIImage albumArt)
     {
         this.songDb = songDb;
+        this.albumArt = albumArt;
+        
         currentRoot = songDb.songNodeRoot;
         dontSerialize = true;
         
@@ -62,8 +65,18 @@ public class SongSelectionContainer : UIDrawable
             var tex = CachePreImage(prevNode);
             songSelectionElements[i].UpdateSongNode(prevNode, tex);
         }
+        
+        //update album art
+        UpdateAlbumArt();
     }
-    
+
+    private void UpdateAlbumArt()
+    {
+        var tex = preImageCache[currentSelection];
+        albumArt.SetTexture(tex, false);
+        albumArt.clipRect = new RectangleF(0, 0, tex.Width, tex.Height);
+    }
+
     public override void Draw(Matrix parentMatrix)
     {
         //calculate object matrix for container
@@ -163,6 +176,8 @@ public class SongSelectionContainer : UIDrawable
             var node = SongNode.rPreviousSong(element.node);
             element.UpdateSongNode(node, preImageCache[node]);
         }
+        
+        UpdateAlbumArt();
     }
 
     private void MoveDown()
@@ -183,6 +198,8 @@ public class SongSelectionContainer : UIDrawable
             var node = SongNode.rNextSong(element.node);
             element.UpdateSongNode(node, preImageCache[node]);
         }
+        
+        UpdateAlbumArt();
     }
     
     private void MoveLeft()
