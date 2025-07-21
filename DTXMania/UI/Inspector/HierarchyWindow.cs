@@ -3,6 +3,7 @@ using System.Reflection;
 using DTXMania.Core;
 using DTXMania.UI.Drawable;
 using Hexa.NET.ImGui;
+using NativeFileDialog.Extended;
 
 namespace DTXMania.UI.Inspector;
 
@@ -105,8 +106,6 @@ public class HierarchyWindow
                     //open context menu
                     ImGui.OpenPopup(contextMenuId);
                 }
-                
-                Console.WriteLine($"Hovered {node.name} ({node.GetType().Name})");
             }
             
             HandleNodeDragDrop(node);
@@ -194,8 +193,6 @@ public class HierarchyWindow
                     ImGui.OpenPopup(contextMenuId);
                     Console.WriteLine("Right click");
                 }
-
-                Console.WriteLine($"Hovered {node.name} ({node.GetType().Name})");
             }
 
             if (selected && node.parent != null)
@@ -354,13 +351,48 @@ public class HierarchyWindow
                         ImGui.CloseCurrentPopup();
                     }
                 }
+
+                if (ImGui.Selectable("Load from JSON"))
+                {
+                    string defaultPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                    string path = NFD.OpenDialog(defaultPath);
+                    
+                    if (!string.IsNullOrEmpty(path))
+                    {
+                        string json = File.ReadAllText(path);
+                        UIGroup? loadedGroup = UIGroup.DeserializeFromJSON(json);
+                        if (loadedGroup != null)
+                        {
+                            //add loaded group as child
+                            group.AddChild(loadedGroup);
+                        }
+                        else
+                        {
+                            Console.WriteLine("Failed to load group from JSON");
+                        }
+                    }
+                }
                     
                 ImGui.EndMenu();
+            }
+            
+            //serialize
+            if (ImGui.Selectable("Serialize Group"))
+            {
+                //mydocuments
+                string defaultPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                string path = NFD.SaveDialog(defaultPath, $"{group.name}.json");
+                if (!string.IsNullOrEmpty(path))
+                {
+                    //serialize group to json
+                    string json = group.SerializeToJSON();
+                    File.WriteAllText(path, json);
+                }
             }
         }
             
         //delete
-        ImGui.PushStyleColor(ImGuiCol.Text, new System.Numerics.Vector4(1, 0, 0, 1));
+        ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1, 0, 0, 1));
         if (ImGui.Selectable("Delete"))
         {
             InspectorManager.toRemove = node.id;
