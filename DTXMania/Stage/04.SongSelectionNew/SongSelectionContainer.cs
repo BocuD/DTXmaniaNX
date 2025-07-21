@@ -2,6 +2,7 @@
 using DTXMania.SongDb;
 using DTXMania.UI;
 using DTXMania.UI.Drawable;
+using FDK;
 using SharpDX;
 using SlimDX.DirectInput;
 
@@ -14,7 +15,7 @@ public class SongSelectionContainer : UIDrawable
     private SongSelectionElement[] songSelectionElements = new SongSelectionElement[20];
     private SongNode currentRoot;
 
-    private int currentSongIndex;
+    private long scrollTimer;
     
     public static DTXTexture fallbackPreImage = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_preimage default.png"));
     
@@ -30,6 +31,8 @@ public class SongSelectionContainer : UIDrawable
         {
             songSelectionElements[i] = SongSelectionElement.Create();
         }
+        
+        scrollTimer = CSoundManager.rcPerformanceTimer.nCurrentTime;
     }
 
     private const int selectionIndex = 4; //the center element is the 6th element in the array (0-based index)
@@ -38,8 +41,8 @@ public class SongSelectionContainer : UIDrawable
     public void UpdateRoot(SongNode? newRoot = null)
     {
         currentRoot = newRoot ?? songDb.songNodeRoot;
-        
-        SongNode firstNode = currentRoot.childNodes.First();
+
+        SongNode firstNode = currentRoot.CurrentSelection;
 
         //remove cache
         foreach (KeyValuePair<SongNode, DTXTexture> element in preImageCache)
@@ -72,7 +75,7 @@ public class SongSelectionContainer : UIDrawable
 
     private void UpdateAlbumArt()
     {
-        preImageCache.TryGetValue(currentSelection, out DTXTexture tex);
+        preImageCache.TryGetValue(currentSelection, out DTXTexture? tex);
 
         if (tex == null)
         {
@@ -82,7 +85,7 @@ public class SongSelectionContainer : UIDrawable
         albumArt.SetTexture(tex, false);
         albumArt.clipRect = new RectangleF(0, 0, tex.Width, tex.Height);
     }
-
+    
     public override void Draw(Matrix parentMatrix)
     {
         //calculate object matrix for container
@@ -136,7 +139,7 @@ public class SongSelectionContainer : UIDrawable
     
     Dictionary<SongNode, DTXTexture> preImageCache = new();
 
-    private DTXTexture CachePreImage(SongNode node)
+    private DTXTexture? CachePreImage(SongNode node)
     {
         if (!preImageCache.TryGetValue(node, out DTXTexture? preImage))
         {
@@ -182,6 +185,8 @@ public class SongSelectionContainer : UIDrawable
             var node = SongNode.rPreviousSong(element.node);
             element.UpdateSongNode(node, CachePreImage(node));
         }
+
+        currentRoot.CurrentSelection = currentSelection;
         
         UpdateAlbumArt();
     }
@@ -204,6 +209,8 @@ public class SongSelectionContainer : UIDrawable
             var node = SongNode.rNextSong(element.node);
             element.UpdateSongNode(node, CachePreImage(node));
         }
+        
+        currentRoot.CurrentSelection = currentSelection;
         
         UpdateAlbumArt();
     }

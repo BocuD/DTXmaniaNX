@@ -23,6 +23,20 @@ public class SongNode
     public SongNode parent;
     public List<SongNode> childNodes = [];
 
+    public SongNode CurrentSelection
+    {
+        get
+        {
+            if (currentSelection != null) return currentSelection;
+            
+            currentSelection = childNodes.FirstOrDefault();
+            return currentSelection;
+        }
+        set => currentSelection = value;
+    }
+
+    private SongNode? currentSelection = null;
+
     public int chartCount;
     public CScore[] charts = new CScore[5];
     public string[] difficultyLabel = new string[5];

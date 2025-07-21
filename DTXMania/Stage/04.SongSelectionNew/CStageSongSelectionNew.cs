@@ -4,9 +4,7 @@ using DTXMania.Core;
 using DTXMania.SongDb;
 using DTXMania.UI;
 using DTXMania.UI.Drawable;
-using FDK;
 using SharpDX;
-using SlimDX.DirectInput;
 
 namespace DTXMania;
 
@@ -14,7 +12,7 @@ public class CStageSongSelectionNew : CStage
 {
     private SongDb.SongDb songDb = new();
     private SongSelectionContainer selectionContainer;
-
+    
     protected override RichPresence Presence => new CDTXRichPresence
     {
         State = "In Menu",
@@ -58,7 +56,7 @@ public class CStageSongSelectionNew : CStage
     {
         Task.Run(() => songDb.ScanAsync(() => selectionContainer.UpdateRoot()));
     }
-
+    
     public override int OnUpdateAndDraw()
     {
         base.OnUpdateAndDraw();

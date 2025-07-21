@@ -44,14 +44,14 @@ public class SongSelectionElement : UIGroup
 
     public SongNode node { get; private set; }
 
-    public void UpdateSongNode(SongNode newNode, DTXTexture tex)
+    public void UpdateSongNode(SongNode newNode, DTXTexture? tex)
     {
         if (node != newNode)
         {
             node = newNode;
             
             songTitleText.SetText(node.title);
-
+            
             CScore chart = node.charts.FirstOrDefault(x => x != null);
 
             songArtistText.SetText(chart.SongInformation.ArtistName);
