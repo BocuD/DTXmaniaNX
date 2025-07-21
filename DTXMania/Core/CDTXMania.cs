@@ -966,10 +966,13 @@ internal class CDTXMania : Game
             ImGui.GetIO().Fonts.Build();
         }
 
-        io.DisplaySize = new Vector2(Window.ClientSize.Width, Window.ClientSize.Height);
+        //todo: fix actual resizing
+        //io.DisplaySize = new Vector2(Window.ClientSize.Width, Window.ClientSize.Height);
+        io.DisplaySize = new Vector2(GameWindowSize.Width, GameWindowSize.Height);
         io.DisplayFramebufferScale = new Vector2(1, 1);
 
-        ImGuizmo.SetRect(0, 0, io.DisplaySize.X, io.DisplaySize.Y);
+        //ImGuizmo.SetRect(0, 0, io.DisplaySize.X, io.DisplaySize.Y);
+        ImGuizmo.SetRect(0, 0, GameWindowSize.Width, GameWindowSize.Height);
 
         io.ConfigFlags |= ImGuiConfigFlags.DockingEnable;
 
