@@ -21,8 +21,11 @@ public class SongDb
 		{ SongDbScanStatus.Scanning, TimeSpan.Zero },
 		{ SongDbScanStatus.Processing, TimeSpan.Zero }
 	};
-	
-	public List<SongNode> songNodeRoot { get; private set; } = [];
+
+	public SongNode songNodeRoot { get; private set; } = new(null!)
+	{
+		nodeType = SongNode.ENodeType.ROOT,
+	};
 	public int totalSongs { get; private set; } = 0;
 	public int totalCharts { get; private set; } = 0;
 	public string processSongDataPath { get; private set; } = string.Empty;
@@ -32,9 +35,9 @@ public class SongDb
 	private int tempCharts = 0;
 	private int tempSongs = 0;
 
-	public async Task ScanAsync()
+	public async Task ScanAsync(Action? onComplete = null)
 	{
-		List<SongNode> tempList = [];
+		SongNode tempRoot = new(null!) { nodeType = SongNode.ENodeType.ROOT };
 		DateTime start = DateTime.Now;
 		tempSongs = 0;
 		tempCharts = 0;
@@ -58,7 +61,7 @@ public class SongDb
 				if (paths.Length > 0)
 				{
 					await Parallel.ForEachAsync(paths, new ParallelOptions { MaxDegreeOfParallelism = maxThreadCount },
-						async (path, cancellationToken) => await ScanSongsAsync(path, tempList));
+						async (path, cancellationToken) => await ScanSongsAsync(path, tempRoot.childNodes, tempRoot));
 				}
 			}
 			
@@ -68,17 +71,18 @@ public class SongDb
 			Console.WriteLine($"Song scan completed in {statusDuration[SongDbScanStatus.Scanning]} s");
 			Console.WriteLine($"Found {tempSongs} songs and {tempCharts} charts");
 			
-			List<SongNode> allSongs = await FlattenSongList(tempList);
+			//flatten songs so we can process them all sequentially. Include boxes since we want to generate back boxes.
+			List<SongNode> flattened = await FlattenSongList(tempRoot.childNodes, true);
 			
-			Console.WriteLine($"Total song count after flattening: {allSongs.Count}");
+			Console.WriteLine($"Total song count after flattening: {flattened.Count}");
 			
-			processTotalCount = allSongs.Count;
+			processTotalCount = flattened.Count;
 			
 			status = SongDbScanStatus.Processing;
 			
 			start = DateTime.Now;
 			
-			await Parallel.ForEachAsync(allSongs, new ParallelOptions { MaxDegreeOfParallelism = maxThreadCount },
+			await Parallel.ForEachAsync(flattened, new ParallelOptions { MaxDegreeOfParallelism = maxThreadCount },
 				(song, cancellationToken) =>
 				{
 					ProcessListNode(song);
@@ -96,16 +100,17 @@ public class SongDb
 		}
 		finally
 		{
-			songNodeRoot = tempList;
+			songNodeRoot = tempRoot;
 			
 			totalSongs = tempSongs;
 			totalCharts = tempCharts;
 			
 			status = SongDbScanStatus.Idle;
+			onComplete?.Invoke();
 		}
 	}
 
-	public async Task ScanSongsAsync(string searchPath, List<SongNode> targetList, SongNode? parent = null)
+	public async Task ScanSongsAsync(string searchPath, List<SongNode> targetList, SongNode parent)
 	{
 		if (!searchPath.EndsWith(@"\"))
 			searchPath += @"\";
@@ -151,15 +156,12 @@ public class SongDb
 			//if the directory starts with dtxfiles. it should be treated as a box
 			if (infoDir.Name.ToLower().StartsWith("dtxfiles."))
 			{
-				SongNode node = new()
+				SongNode node = new(parent)
 				{
 					nodeType = SongNode.ENodeType.BOX,
 					title = infoDir.Name.Substring(9),
 					path = infoDir.FullName + @"\",
-					parent = parent,
-					skinPath = parent == null
-						? string.Empty
-						: parent.skinPath,
+					skinPath = parent.skinPath,
 					charts = 
 					[
 						new CScore
@@ -174,8 +176,7 @@ public class SongDb
 								Comment = CDTXMania.isJapanese ? "BOX に移動します。" : "Enter into the BOX."
 							}
 						}
-					],
-					childNodes = []
+					]
 				};
 				
 				targetList.Add(node);
@@ -186,7 +187,7 @@ public class SongDb
 			//if the folder contains a box.def file, handle it differently
 			else if (File.Exists(infoDir.FullName + @"\box.def"))
 			{
-				SongNode node = new()
+				SongNode node = new(parent)
 				{
 					nodeType = SongNode.ENodeType.BOX,
 					path = infoDir.FullName + @"\",
@@ -198,8 +199,6 @@ public class SongDb
 				};
 			
 				node.charts[0].FileInformation.AbsoluteFolderPath = infoDir.FullName + @"\";
-				node.parent = parent;
-				node.childNodes = [];
 		
 				targetList.Add(node);
 		
@@ -283,7 +282,7 @@ public class SongDb
 		}
 	}
 
-	private async Task ParseSetDef(string filePath, string baseFolder, List<SongNode> targetList, SongNode? parent)
+	private async Task ParseSetDef(string filePath, string baseFolder, List<SongNode> targetList, SongNode parent)
 	{
 		CSetDef def = new(filePath);
 
@@ -292,13 +291,12 @@ public class SongDb
 			//each block indicates a "song" which can contain multiple "charts" (scores)
 			foreach (CSetDef.CBlock block in def.blocks)
 			{
-				SongNode song = new()
+				SongNode song = new(parent)
 				{
 					nodeType = SongNode.ENodeType.SONG,
 					title = block.Title,
 					path = baseFolder + @"\",
-					color = block.FontColor,
-					parent = parent
+					color = block.FontColor
 				};
 
 				for (int j = 0; j < 5; j++)
@@ -344,13 +342,12 @@ public class SongDb
 		}
 	}
 
-	private void AddSongChart(List<SongNode> listNodeList, SongNode? nodeParent, FileInfo fileinfo)
+	private void AddSongChart(List<SongNode> listNodeList, SongNode parent, FileInfo fileinfo)
 	{
-		SongNode songNode = new()
+		SongNode songNode = new(parent)
 		{
 			nodeType = SongNode.ENodeType.SONG,
 			chartCount = 1,
-			parent = nodeParent,
 			path = fileinfo.FullName + @"\",
 			charts =
 			{
@@ -381,7 +378,7 @@ public class SongDb
 		tempSongs++;
 	}
 	
-	public async Task<List<SongNode>> FlattenSongList(List<SongNode> toFlatten)
+	public async Task<List<SongNode>> FlattenSongList(List<SongNode> toFlatten, bool includeBox = false)
 	{
 		List<SongNode> fullList = [];
 		
@@ -389,9 +386,14 @@ public class SongDb
 		{
 			if (node.nodeType == SongNode.ENodeType.BOX)
 			{
-				await AddChildrenToList(node, fullList);
+				await AddChildrenToList(node, fullList, includeBox);
+				
+				if (includeBox)
+				{
+					fullList.Add(node);
+				}
 			}
-			else
+			else if (node.nodeType == SongNode.ENodeType.SONG)
 			{
 				fullList.Add(node);
 			}
@@ -400,7 +402,7 @@ public class SongDb
 		return fullList;
 	}
 	
-	private async Task AddChildrenToList(SongNode node, List<SongNode> fullList)
+	private async Task AddChildrenToList(SongNode node, List<SongNode> fullList, bool includeBox = false)
 	{
 		if (node.childNodes is { Count: > 0 })
 		{
@@ -409,6 +411,11 @@ public class SongDb
 				if (child.nodeType == SongNode.ENodeType.BOX)
 				{
 					await AddChildrenToList(child, fullList);
+					
+					if (includeBox)
+					{
+						fullList.Add(child);
+					}
 				}
 				else
 				{
@@ -420,6 +427,37 @@ public class SongDb
 	
 	private void ProcessListNode(SongNode node)
 	{
+		if (node.nodeType == SongNode.ENodeType.BOX)
+		{
+			//add a return node
+			SongNode returnNode = new(node)
+			{
+				title = "<< BACK",
+				nodeType = SongNode.ENodeType.BACKBOX,
+				charts =
+				{
+					[0] = new CScore
+					{
+						FileInformation = new CScore.STFileInformation
+						{
+							AbsoluteFolderPath = ""
+						},
+						SongInformation = new CScore.STMusicInformation
+						{
+							Title = "<< BACK",
+							Preimage = CSkin.Path(@"Graphics\5_preimage backbox.png"),
+							Comment = CDTXMania.isJapanese ?
+								"BOX を出ます。" :
+								"Exit from the BOX."
+						}
+					}
+				}
+			};
+
+			node.childNodes.Insert(0, returnNode);
+			return;
+		}
+		
 		for (int i = 0; i < 5; i++)
 		{
 			if (node.charts[i] == null || node.charts[i].bHadACacheInSongDB) continue;

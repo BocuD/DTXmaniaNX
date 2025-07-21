@@ -25,7 +25,7 @@ public class SongDBTester
 
         if (ImGui.Button("Scan"))
         {
-            Task.Run(songDb.ScanAsync);
+            Task.Run(() => songDb.ScanAsync());
         }
         
         ImGui.Text("Last scan time: " + songDb.statusDuration[SongDbScanStatus.Scanning]);
@@ -55,7 +55,7 @@ public class SongDBTester
         ImGui.Text("Total Song Nodes: " + songDb.totalSongs);
         ImGui.Text("Total Charts: " + songDb.totalCharts);
         ImGui.Separator();
-        foreach (SongNode node in songDb.songNodeRoot)
+        foreach (SongNode node in songDb.songNodeRoot.childNodes)
         {
             DrawNode(node);
         }
@@ -65,6 +65,8 @@ public class SongDBTester
 
     private static void DrawNode(SongNode node)
     {
+        if (node.nodeType == SongNode.ENodeType.BACKBOX) return;
+        
         //treenode ex
         ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags.None;
         if (node.childNodes != null && node.childNodes.Count > 0)
@@ -101,7 +103,7 @@ public class SongDBTester
     
     private static async Task ExportSongDb(string filePath)
     {
-        List<SongNode> flattened = await songDb.FlattenSongList(songDb.songNodeRoot);
+        List<SongNode> flattened = await songDb.FlattenSongList(songDb.songNodeRoot.childNodes);
 
         await using StreamWriter writer = new(filePath);
         await writer.WriteLineAsync("Title,Artist,Comment");
