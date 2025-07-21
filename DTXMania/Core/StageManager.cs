@@ -9,6 +9,7 @@ internal class StageManager
     public CStageTitle stageTitle { get; }
     public CStageConfig stageConfig { get; }
     public CStageSongSelection stageSongSelection { get; }
+    public CStageSongSelectionNew stageSongSelectionNew { get; }
     public CStageSongLoading stageSongLoading { get; }
     public CStagePerfGuitarScreen stagePerfGuitarScreen { get; }
     public CStagePerfDrumsScreen stagePerfDrumsScreen { get; }
@@ -25,6 +26,7 @@ internal class StageManager
         stageTitle = new CStageTitle();
         stageConfig = new CStageConfig();
         stageSongSelection = new CStageSongSelection();
+        stageSongSelectionNew = new CStageSongSelectionNew();
         stageSongLoading = new CStageSongLoading();
         stagePerfDrumsScreen = new CStagePerfDrumsScreen();
         stagePerfGuitarScreen = new CStagePerfGuitarScreen();
@@ -71,7 +73,8 @@ internal class StageManager
                     switch (nUpdateAndDrawReturnValue)
                     {
                         case (int)CStageTitle.EReturnResult.GAMESTART:
-                            tChangeStage(stageSongSelection);
+                            //tChangeStage(stageSongSelection);
+                            tChangeStage(stageSongSelectionNew);
                             break;
 
                         case (int)CStageTitle.EReturnResult.CONFIG:
