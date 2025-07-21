@@ -2,7 +2,6 @@
 using DTXMania.SongDb;
 using DTXMania.UI;
 using DTXMania.UI.Drawable;
-using FDK;
 using SharpDX;
 using SlimDX.DirectInput;
 
@@ -14,8 +13,6 @@ public class SongSelectionContainer : UIDrawable
     private UIImage albumArt;
     private SongSelectionElement[] songSelectionElements = new SongSelectionElement[20];
     private SongNode currentRoot;
-
-    private long scrollTimer;
     
     public static DTXTexture fallbackPreImage = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_preimage default.png"));
     
@@ -31,11 +28,11 @@ public class SongSelectionContainer : UIDrawable
         {
             songSelectionElements[i] = SongSelectionElement.Create();
         }
-        
-        scrollTimer = CSoundManager.rcPerformanceTimer.nCurrentTime;
     }
 
-    private const int selectionIndex = 4; //the center element is the 6th element in the array (0-based index)
+    private const float rowSpacing = 85.0f; //vertical spacing between elements
+    private const float verticalRenderOffset = -500.0f; //offset to center the selection in the middle of the screen
+    private const int selectionIndex = 10; //the center element is the 10th element in the array (0-based index)
     private SongNode currentSelection => songSelectionElements[selectionIndex].node;
     
     public void UpdateRoot(SongNode? newRoot = null)
@@ -71,6 +68,8 @@ public class SongSelectionContainer : UIDrawable
         
         //update album art
         UpdateAlbumArt();
+        
+        lastDrawTime = CDTXMania.Timer.nCurrentTime;
     }
 
     private void UpdateAlbumArt()
@@ -85,9 +84,37 @@ public class SongSelectionContainer : UIDrawable
         albumArt.SetTexture(tex, false);
         albumArt.clipRect = new RectangleF(0, 0, tex.Width, tex.Height);
     }
+
+    private long lastDrawTime;
+    private float targetY = 0.0f; //used for smooth scrolling
     
     public override void Draw(Matrix parentMatrix)
     {
+        float delta = (CDTXMania.Timer.nCurrentTime - lastDrawTime) / 1000.0f;
+        
+        if (Math.Abs(targetY - position.Y) > 0.01f)
+        {
+            //smoothly move towards targetY
+            position.Y += (targetY - position.Y) * delta * 10.0f; //10.0f is the speed factor
+        }
+        else
+        {
+            position.Y = targetY; //snap to target if close enough
+        }
+        
+        if (position.Y >= rowSpacing / 2)
+        {
+            position.Y -= rowSpacing;
+            targetY -= rowSpacing;
+            MoveUp();
+        }
+        else if (position.Y <= -rowSpacing / 2)
+        {
+            position.Y += rowSpacing;
+            targetY += rowSpacing;
+            MoveDown();
+        }
+        
         //calculate object matrix for container
         UpdateLocalTransformMatrix();
         Matrix combinedMatrix = localTransformMatrix * parentMatrix;
@@ -95,9 +122,11 @@ public class SongSelectionContainer : UIDrawable
         for (int i = 0; i < songSelectionElements.Length; i++)
         {
             SongSelectionElement element = songSelectionElements[i];
-            element.position = new Vector3(i == selectionIndex ? -20 : 0, i * 85, 0);
+            element.position = new Vector3(i == selectionIndex ? -20 : 0, i * rowSpacing + verticalRenderOffset, 0);
             element.Draw(combinedMatrix);
         }
+        
+        lastDrawTime = CDTXMania.Timer.nCurrentTime;
     }
 
     public void HandleNavigation()
@@ -108,7 +137,7 @@ public class SongSelectionContainer : UIDrawable
             || CDTXMania.Pad.bPressedGB(EPad.R)
             || CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.HT))
         {
-            MoveUp();
+            targetY += rowSpacing;
         }
         //ctKeyRepeat.Down.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(Key.DownArrow), new CCounter.DGキー処理(MoveDown));
         //ctKeyRepeat.B.tRepeatKey(CDTXMania.Pad.bPressingGB(EPad.G), new CCounter.DGキー処理(MoveDown));
@@ -116,7 +145,7 @@ public class SongSelectionContainer : UIDrawable
             || CDTXMania.Pad.bPressedGB(EPad.G)
             || CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.LT))
         {
-            MoveDown();
+            targetY -= rowSpacing;
         }
         if (CDTXMania.InputManager.Keyboard.bKeyPressed(Key.LeftArrow)
             || CDTXMania.Pad.bPressedGB(EPad.Pick) //??

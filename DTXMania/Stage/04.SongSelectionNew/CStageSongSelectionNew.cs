@@ -36,9 +36,7 @@ public class CStageSongSelectionNew : CStage
         bigAlbumArt.size = new Vector2(300, 300);
 
         selectionContainer = ui.AddChild(new SongSelectionContainer(songDb, bigAlbumArt));
-        
-        //700 from left, -100 to allow clean scrolling offscreen
-        selectionContainer.position = new Vector3(700, -100, 0);
+        selectionContainer.position = new Vector3(800, 0, 0);
     }
 
     public override void InitializeDefaultUI()
