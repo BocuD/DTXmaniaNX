@@ -62,32 +62,20 @@ public class SkinDescriptor
             
             if (string.IsNullOrWhiteSpace(stageSkin.Value)) continue;
 
-            var group = CDTXMania.StageManager.rCurrentStage.ui;
+            UIGroup? stageGroup = CDTXMania.StageManager.rCurrentStage.ui;
             
-            if (group == null) continue;
-            
-            //create a copy of the group to avoid modifying the original
-            var groupCopy = new UIGroup(group.name);
-            groupCopy.children = new List<UIDrawable>(group.children);
-            
-            //remove any base elements
-            //todo: actually implement a better way of not serializing certain children
-            groupCopy.children.RemoveAll(x => x.dontSerialize);
+            if (stageGroup == null) continue;
 
-            try
+            string json = stageGroup.SerializeToJSON();
+
+            if (!string.IsNullOrWhiteSpace(json))
             {
-                var json = JsonConvert.SerializeObject(groupCopy, Formatting.Indented);
                 string stagePath = Path.Combine(basePath, stageSkin.Value);
                 File.WriteAllText(stagePath, json);
-                
-                groupCopy.Dispose();
-                groupCopy = null;
             }
-            catch (Exception e)
+            else
             {
-                string stackTrace = e.StackTrace ?? "No stack trace";
-                Console.WriteLine($"Failed to save stage skin: {e} Stacktrace: {stackTrace}");
-                return;
+                Console.WriteLine($"Failed to save stage skin for stage {stageSkin.Key}, Serialization Failed!");
             }
         }
     }
@@ -106,7 +94,7 @@ public class SkinDescriptor
             }
             
             string json = File.ReadAllText(path);
-            UIGroup? loadedGroup = JsonConvert.DeserializeObject<UIGroup>(json, new UIDrawableConverter());
+            UIGroup? loadedGroup = UIGroup.DeserializeFromJSON(json);
             if (loadedGroup != null)
             {
                 return loadedGroup;

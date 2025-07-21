@@ -1,4 +1,6 @@
-﻿using DTXMania.UI.Inspector;
+﻿using DTXMania.UI.Drawable.Serialization;
+using DTXMania.UI.Inspector;
+using Newtonsoft.Json;
 using SharpDX;
 
 namespace DTXMania.UI.Drawable;
@@ -142,6 +144,51 @@ public class UIGroup : UIDrawable
         {
             children.RemoveAt(currentIndex);
             children.Insert(index, node);
+        }
+    }
+
+    public string SerializeToJSON()
+    {
+        //create a copy of the group to avoid modifying the original
+        var groupCopy = new UIGroup(name);
+        groupCopy.children = new List<UIDrawable>(children);
+            
+        //remove any base elements
+        //todo: actually implement a better way of not serializing certain children
+        groupCopy.children.RemoveAll(x => x.dontSerialize);
+
+        try
+        {
+            string json = JsonConvert.SerializeObject(groupCopy, Formatting.Indented);
+            groupCopy.Dispose();
+            return json;
+        }
+        catch (Exception e)
+        {
+            string stackTrace = e.StackTrace ?? "No stack trace";
+            Console.WriteLine($"Failed to save stage skin: {e} Stacktrace: {stackTrace}");
+            return "";
+        }
+    }
+    
+    public static UIGroup? DeserializeFromJSON(string json)
+    {
+        try
+        {
+            UIGroup? loadedGroup = JsonConvert.DeserializeObject<UIGroup>(json, new UIDrawableConverter());
+            if (loadedGroup == null)
+            {
+                Console.WriteLine("Deserialization returned null, possibly due to an empty or invalid JSON.");
+                return null;
+            }
+            
+            return loadedGroup;
+        }
+        catch (Exception e)
+        {
+            string stackTrace = e.StackTrace ?? "No stack trace";
+            Console.WriteLine($"Failed to deserialize UIGroup: {e} Stacktrace: {stackTrace}");
+            return null;
         }
     }
 }
