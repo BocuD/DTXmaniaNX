@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System.Diagnostics;
+using System.Numerics;
 using System.Reflection;
 using DTXMania.Core;
 using DTXMania.UI.Drawable;
@@ -191,7 +192,6 @@ public class HierarchyWindow
                 {
                     //open context menu
                     ImGui.OpenPopup(contextMenuId);
-                    Console.WriteLine("Right click");
                 }
             }
 
@@ -368,7 +368,7 @@ public class HierarchyWindow
                         }
                         else
                         {
-                            Console.WriteLine("Failed to load group from JSON");
+                            Trace.TraceError("Failed to load group from JSON");
                         }
                     }
                 }

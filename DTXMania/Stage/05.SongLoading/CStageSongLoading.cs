@@ -618,7 +618,7 @@ internal class CStageSongLoading : CStage
                 }
 
                 TimeSpan span = DateTime.Now - timeBeginLoad;
-                Console.WriteLine($"Time to load DTX file: {span}");
+                Trace.TraceInformation($"Time to load DTX file: {span}");
                 
                 if (CDTXMania.bCompactMode)
                     CDTXMania.DTX.MIDIレベル = 1;

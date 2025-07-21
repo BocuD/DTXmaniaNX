@@ -1,4 +1,5 @@
-﻿using DTXMania.Core;
+﻿using System.Diagnostics;
+using DTXMania.Core;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.Drawable.Serialization;
 using Hexa.NET.ImGui;
@@ -18,7 +19,7 @@ public class SkinDescriptor
     //Load a skin.json file from disk
     public static SkinDescriptor? LoadSkin(string path)
     {
-        Console.WriteLine($"Loading skin {path}");
+        Trace.TraceInformation($"Loading skin {path}");
         
         string json = File.ReadAllText(Path.Combine(path, "skin.json"));
 
@@ -26,7 +27,7 @@ public class SkinDescriptor
         {
             Error = (sender, args) =>
             {
-                Console.WriteLine(args.ErrorContext.Error.Message);
+                Trace.TraceError(args.ErrorContext.Error.Message);
                 args.ErrorContext.Handled = true;
             }
         });
@@ -47,7 +48,7 @@ public class SkinDescriptor
             targetPath = basePathOverride;
         }
         
-        Console.WriteLine($"Saving skin to {targetPath}");
+        Trace.TraceInformation($"Saving skin to {targetPath}");
         
         var json = JsonConvert.SerializeObject(this, Formatting.Indented);
         File.WriteAllText(Path.Combine(targetPath, "skin.json"), json);
@@ -75,7 +76,7 @@ public class SkinDescriptor
             }
             else
             {
-                Console.WriteLine($"Failed to save stage skin for stage {stageSkin.Key}, Serialization Failed!");
+                Trace.TraceError($"Failed to save stage skin for stage {stageSkin.Key}, Serialization Failed!");
             }
         }
     }
@@ -89,7 +90,7 @@ public class SkinDescriptor
             string path = Path.Combine(basePath, uiGroupJson);
             if (!File.Exists(path))
             {
-                Console.WriteLine($"Stage skin file at {path} does not exist, loading default");
+                Trace.TraceInformation($"Stage skin file at {path} does not exist, loading default");
                 return null;
             }
             

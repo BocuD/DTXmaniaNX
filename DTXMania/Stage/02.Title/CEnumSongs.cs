@@ -521,7 +521,7 @@ internal class CEnumSongs							// #27060 2011.2.7 yyagi 曲リストを取得�
 
             //	base.ePhaseID = CStage.EPhase.起動2_曲を検索してリストを作成する;
             DateTime start = DateTime.Now;
-            Console.WriteLine("enum2) Searching Song Data ...");
+            Trace.TraceInformation("enum2) Searching Song Data ...");
             
             try
             {
@@ -571,8 +571,8 @@ internal class CEnumSongs							// #27060 2011.2.7 yyagi 曲リストを取得�
             {
                 TimeSpan currSpan = DateTime.Now - start;
                 
-                Console.WriteLine("Song Data search complete. [{0} songs {1} scores]", SongManager.nNbSongNodesFound, SongManager.nNbScoresFound);
-                Console.WriteLine("Duration of enum2) Searching Song Data : {0}", currSpan.ToString());
+                Trace.TraceInformation("Song Data search complete. [{0} songs {1} scores]", SongManager.nNbSongNodesFound, SongManager.nNbScoresFound);
+                Trace.TraceInformation("Duration of enum2) Searching Song Data : {0}", currSpan.ToString());
             }
             #endregion
             #region [ 3) songs.db 情報の曲リストへの反映 ]
@@ -715,7 +715,6 @@ internal class CEnumSongs							// #27060 2011.2.7 yyagi 曲リストを取得�
         {
             TimeSpan span = DateTime.Now - startTime;
             Trace.TraceInformation("Duration of full Song Enumerating: {0}", span.ToString());
-            Console.WriteLine("Duration of full Song Enumerating: {0}", span.ToString());
                 
             EnumProgress = null;
         }
@@ -735,7 +734,7 @@ internal class CEnumSongs							// #27060 2011.2.7 yyagi 曲リストを取得�
         Stream output = null;
         try
         {
-            Console.WriteLine("BinaryFormatter is no longer supported apparently, so we can't load songlist.db");
+            Trace.TraceError("BinaryFormatter is no longer supported apparently, so we can't load songlist.db");
 
             // output = File.Create(strPathSongList);
             // BinaryFormatter formatter = new BinaryFormatter();
@@ -786,7 +785,7 @@ internal class CEnumSongs							// #27060 2011.2.7 yyagi 曲リストを取得�
                     using Stream input = File.OpenRead(strPathSongList);
                     try
                     {
-                        Console.WriteLine("BinaryFormatter is no longer supported apparently, so we can't load songlist.db");
+                        Trace.TraceError("BinaryFormatter is no longer supported apparently, so we can't load songlist.db");
                         //BinaryFormatter formatter = new BinaryFormatter();
                         //songs管理 = (CSongManager)formatter.Deserialize(input);
                     }

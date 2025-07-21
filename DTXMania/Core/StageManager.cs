@@ -664,7 +664,7 @@ internal class StageManager
 
         Trace.TraceInformation("----------------------");
         Trace.TraceInformation($"■ {newStage.eStageID}");
-        Console.WriteLine($"Changing Stage from {rCurrentStage.GetType().Name} to {newStage.GetType().Name}");
+        Trace.TraceInformation($"Changing Stage from {rCurrentStage.GetType().Name} to {newStage.GetType().Name}");
 
         if (activateNewStage)
         {

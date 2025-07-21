@@ -1,4 +1,5 @@
-﻿using DTXMania.UI.Drawable.Serialization;
+﻿using System.Diagnostics;
+using DTXMania.UI.Drawable.Serialization;
 using DTXMania.UI.Inspector;
 using Newtonsoft.Json;
 using SharpDX;
@@ -93,7 +94,7 @@ public class UIGroup : UIDrawable
                 catch (Exception e)
                 {
                     string stackTrace = e.StackTrace ?? "No stack trace";
-                    Console.WriteLine($"Error drawing {element.name}: {e} Stacktrace: {stackTrace}");
+                    Trace.TraceError($"Error drawing {element.name}: {e} Stacktrace: {stackTrace}");
                 }
             }
         }
@@ -135,7 +136,7 @@ public class UIGroup : UIDrawable
     {
         if (index < 0 || index >= children.Count)
         {
-            Console.WriteLine($"Index {index} is out of bounds for children list of size {children.Count}");
+            Trace.TraceError($"Index {index} is out of bounds for children list of size {children.Count}");
             return;
         }
 
@@ -166,7 +167,7 @@ public class UIGroup : UIDrawable
         catch (Exception e)
         {
             string stackTrace = e.StackTrace ?? "No stack trace";
-            Console.WriteLine($"Failed to save stage skin: {e} Stacktrace: {stackTrace}");
+            Trace.TraceError($"Failed to save stage skin: {e} Stacktrace: {stackTrace}");
             return "";
         }
     }
@@ -178,7 +179,7 @@ public class UIGroup : UIDrawable
             UIGroup? loadedGroup = JsonConvert.DeserializeObject<UIGroup>(json, new UIDrawableConverter());
             if (loadedGroup == null)
             {
-                Console.WriteLine("Deserialization returned null, possibly due to an empty or invalid JSON.");
+                Trace.TraceError("Deserialization returned null, possibly due to an empty or invalid JSON.");
                 return null;
             }
             
@@ -187,7 +188,7 @@ public class UIGroup : UIDrawable
         catch (Exception e)
         {
             string stackTrace = e.StackTrace ?? "No stack trace";
-            Console.WriteLine($"Failed to deserialize UIGroup: {e} Stacktrace: {stackTrace}");
+            Trace.TraceError($"Failed to deserialize UIGroup: {e} Stacktrace: {stackTrace}");
             return null;
         }
     }

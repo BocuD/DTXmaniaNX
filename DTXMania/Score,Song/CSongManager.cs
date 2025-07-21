@@ -962,7 +962,7 @@ internal class CSongManager
 
 		workerThreads = Math.Max(2, workerThreads - 4); //leave some cpu for the game
 			
-		Console.WriteLine("Song processing worker threads: " + workerThreads);
+		Trace.TraceInformation("Song processing worker threads: " + workerThreads);
 
 		int totalTasks = taskList.Count;
 			
@@ -1015,7 +1015,7 @@ internal class CSongManager
 			await Task.Delay(100);
 		}
 			
-		Console.WriteLine($"Processed {progress.Sum()} songs in {DateTime.Now - startTime}");
+		Trace.TraceInformation($"Processed {progress.Sum()} songs in {DateTime.Now - startTime}");
 	}
 		
 	public void PrepareProcessNewSongData(List<CSongListNode> nodeList, ref List<Task> list)

@@ -1,4 +1,5 @@
-﻿using DTXMania.Core;
+﻿using System.Diagnostics;
+using DTXMania.Core;
 using DTXMania.UI.Drawable;
 using Newtonsoft.Json;
 
@@ -37,7 +38,7 @@ public class SkinManager
             }
             catch (Exception e)
             {
-                Console.WriteLine($"Failed to load skin from {directory}: {e.Message}");
+                Trace.TraceError($"Failed to load skin from {directory}: {e.Message}");
             }
         }
     }
@@ -76,7 +77,7 @@ public class SkinManager
 
         if (skin == null)
         {
-            Console.WriteLine("Failed to create new skin");
+            Trace.TraceError("Failed to create new skin");
             return;
         }
         

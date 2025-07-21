@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System.Diagnostics;
+using System.Drawing;
 using DTXMania.Core;
 
 namespace DTXMania.SongDb;
@@ -52,7 +53,7 @@ public class SongDb
 			if (maxThreadCount < 2)
 				maxThreadCount = 2;
 			
-			Console.WriteLine($"Starting song scan with {maxThreadCount} threads");
+			Trace.TraceInformation($"Starting song scan with {maxThreadCount} threads");
 			status = SongDbScanStatus.Scanning;
 			
 			if (!string.IsNullOrEmpty(CDTXMania.ConfigIni.strSongDataSearchPath))
@@ -68,13 +69,13 @@ public class SongDb
 			statusDuration[SongDbScanStatus.Scanning] = DateTime.Now - start;
 			
 			//log time taken to scan
-			Console.WriteLine($"Song scan completed in {statusDuration[SongDbScanStatus.Scanning]} s");
-			Console.WriteLine($"Found {tempSongs} songs and {tempCharts} charts");
+			Trace.TraceInformation($"Song scan completed in {statusDuration[SongDbScanStatus.Scanning]} s");
+			Trace.TraceInformation($"Found {tempSongs} songs and {tempCharts} charts");
 			
 			//flatten songs so we can process them all sequentially. Include boxes since we want to generate back boxes.
 			List<SongNode> flattened = await FlattenSongList(tempRoot.childNodes, true);
 			
-			Console.WriteLine($"Total song count after flattening: {flattened.Count}");
+			Trace.TraceInformation($"Total song count after flattening: {flattened.Count}");
 			
 			processTotalCount = flattened.Count;
 			
@@ -90,12 +91,12 @@ public class SongDb
 				});
 			
 			statusDuration[SongDbScanStatus.Processing] = DateTime.Now - start;
-			Console.WriteLine($"Processed {tempSongs} songs and {tempCharts} charts");
-			Console.WriteLine($"Processed full song list in {statusDuration[SongDbScanStatus.Processing]} s");
+			Trace.TraceInformation($"Processed {tempSongs} songs and {tempCharts} charts");
+			Trace.TraceInformation($"Processed full song list in {statusDuration[SongDbScanStatus.Processing]} s");
 		}
 		catch (Exception ex)
 		{
-			Console.WriteLine("An error occurred while scanning songs: " + ex.Message);
+			Trace.TraceError("An error occurred while scanning songs: " + ex.Message);
 			status = SongDbScanStatus.Idle;
 		}
 		finally
@@ -152,7 +153,7 @@ public class SongDb
 				}
 				catch (Exception ex)
 				{
-					Console.WriteLine($"Failed to process file {fileinfo.FullName}: {ex.Message}");
+					Trace.TraceError($"Failed to process file {fileinfo.FullName}: {ex.Message}");
 				}
 			}
 		}
@@ -222,7 +223,7 @@ public class SongDb
 			}
 			catch (Exception ex)
 			{
-				Console.WriteLine($"Failed to process directory {infoDir.FullName}: {ex.Message}");
+				Trace.TraceError($"Failed to process directory {infoDir.FullName}: {ex.Message}");
 			}
 		}
 	}
@@ -351,8 +352,8 @@ public class SongDb
 		}
 		catch (Exception ex)
 		{
-			Console.WriteLine("Failed to parse set.def file: " + filePath);
-			Console.WriteLine(ex.Message);
+			Trace.TraceError("Failed to parse set.def file: " + filePath);
+			Trace.TraceError(ex.Message);
 		}
 	}
 
@@ -555,8 +556,8 @@ public class SongDb
 				}
 				catch (Exception exception)
 				{
-					Console.WriteLine("An error occurred while reading the song data file: " + path);
-					Console.WriteLine("" + exception.Message);
+					Trace.TraceError("An error occurred while reading the song data file: " + path);
+					Trace.TraceError("" + exception.Message);
 					node.chartCount--;
 					tempCharts--;
 					continue;
@@ -657,8 +658,8 @@ public class SongDb
 		}
 		catch (Exception e)
 		{
-			Console.WriteLine("Failed to read score.ini file: " + path);
-			Console.WriteLine(e.Message);
+			Trace.TraceError("Failed to read score.ini file: " + path);
+			Trace.TraceError(e.Message);
 		}
 	}
 }

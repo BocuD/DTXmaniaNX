@@ -540,7 +540,7 @@ internal class CStageConfig : CStage
         }
         catch (Exception e)
         {
-            Console.WriteLine(e.Message + "\nTrace: " + e.StackTrace);
+            Trace.TraceError(e.Message + "\nTrace: " + e.StackTrace);
         }
     }
     private void tDrawSelectedItemDescriptionInDescriptionPanel()

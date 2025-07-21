@@ -221,12 +221,12 @@ internal class CDTXMania : Game
         {
             try
             {
-                Console.WriteLine($"Initializing {name}");
+                Trace.TraceInformation($"Initializing {name}");
                 action();
             }
             catch (Exception e)
             {
-                Console.WriteLine($"Failed to initialize {name}: {e}");
+                Trace.TraceError($"Failed to initialize {name}: {e}");
                 MessageBox.Show($"Failed to initialize {name}: {e}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 throw;
             }
@@ -1459,7 +1459,7 @@ internal class CDTXMania : Game
         {
             void SafeTerminate(string name, Action action)
             {
-                Console.WriteLine($"Cleaning up {name}");
+                Trace.TraceInformation($"Cleaning up {name}");
                 try
                 {
                     action();
@@ -1470,7 +1470,7 @@ internal class CDTXMania : Game
                 }
             }
 
-            Console.WriteLine("Shutting down application");
+            Trace.TraceInformation("Shutting down application");
 
             SafeTerminate("ActEnumSongs", () => { actEnumSongs?.OnDeactivate(); });
             SafeTerminate("Current Stage", () =>
@@ -1518,7 +1518,7 @@ internal class CDTXMania : Game
             });
             SafeTerminate("ResourceManager", () => { Resources.Dispose(); });
             SafeTerminate("Discord Rich Presence", () => { DiscordRichPresence?.Dispose(); });
-            Console.WriteLine("Finished shutting down application");
+            Trace.TraceInformation("Finished shutting down application");
             bTerminated = true;
         }
     }
