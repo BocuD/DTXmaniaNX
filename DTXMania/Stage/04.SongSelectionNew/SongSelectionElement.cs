@@ -56,6 +56,7 @@ public class SongSelectionElement : UIGroup
 
             songArtistText.SetText(chart.SongInformation.ArtistName);
             albumArtImage.SetTexture(tex, false);
+            albumArtImage.clipRect = new SharpDX.RectangleF(0, 0, tex.Width, tex.Height);
         }
     }
 }
