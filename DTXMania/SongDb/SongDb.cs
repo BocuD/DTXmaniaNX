@@ -130,22 +130,29 @@ public class SongDb
 			//loop over all files, try to load them as charts
 			foreach (FileInfo fileinfo in info.GetFiles())
 			{
-				string strExt = fileinfo.Extension.ToLower();
-				switch (strExt)
+				try
 				{
-					case ".dtx":
-					case ".gda":
-					case ".g2d":
-					case ".bms":
-					case ".bme":
-						AddSongChart(targetList, parent, fileinfo);
-						break;
-					
-					case ".mid":
-					case ".smf":
-						// DoNothing
-						//????
-						break;
+					string strExt = fileinfo.Extension.ToLower();
+					switch (strExt)
+					{
+						case ".dtx":
+						case ".gda":
+						case ".g2d":
+						case ".bms":
+						case ".bme":
+							AddSongChart(targetList, parent, fileinfo);
+							break;
+
+						case ".mid":
+						case ".smf":
+							// DoNothing
+							//????
+							break;
+					}
+				}
+				catch (Exception ex)
+				{
+					Console.WriteLine($"Failed to process file {fileinfo.FullName}: {ex.Message}");
 				}
 			}
 		}
@@ -153,62 +160,69 @@ public class SongDb
 		//scan subdirectories
 		foreach (DirectoryInfo infoDir in info.GetDirectories())
 		{
-			//if the directory starts with dtxfiles. it should be treated as a box
-			if (infoDir.Name.ToLower().StartsWith("dtxfiles."))
+			try
 			{
-				SongNode node = new(parent)
+				//if the directory starts with dtxfiles. it should be treated as a box
+				if (infoDir.Name.ToLower().StartsWith("dtxfiles."))
 				{
-					nodeType = SongNode.ENodeType.BOX,
-					title = infoDir.Name.Substring(9),
-					path = infoDir.FullName + @"\",
-					skinPath = parent.skinPath,
-					charts = 
-					[
-						new CScore
-						{
-							FileInformation = new CScore.STFileInformation
+					SongNode node = new(parent)
+					{
+						nodeType = SongNode.ENodeType.BOX,
+						title = infoDir.Name.Substring(9),
+						path = infoDir.FullName + @"\",
+						skinPath = parent.skinPath,
+						charts =
+						[
+							new CScore
 							{
-								AbsoluteFolderPath = infoDir.FullName + @"\"
-							},
-							SongInformation = new CScore.STMusicInformation
-							{
-								Title = infoDir.Name.Substring(9),
-								Comment = CDTXMania.isJapanese ? "BOX に移動します。" : "Enter into the BOX."
+								FileInformation = new CScore.STFileInformation
+								{
+									AbsoluteFolderPath = infoDir.FullName + @"\"
+								},
+								SongInformation = new CScore.STMusicInformation
+								{
+									Title = infoDir.Name.Substring(9),
+									Comment = CDTXMania.isJapanese ? "BOX に移動します。" : "Enter into the BOX."
+								}
 							}
-						}
-					]
-				};
-				
-				targetList.Add(node);
-				
-				TryLoadBoxDef(node, infoDir);
-				await ScanSongsAsync(infoDir.FullName + @"\", node.childNodes, node);
-			}
-			//if the folder contains a box.def file, handle it differently
-			else if (File.Exists(infoDir.FullName + @"\box.def"))
-			{
-				SongNode node = new(parent)
+						]
+					};
+
+					targetList.Add(node);
+
+					TryLoadBoxDef(node, infoDir);
+					await ScanSongsAsync(infoDir.FullName + @"\", node.childNodes, node);
+				}
+				//if the folder contains a box.def file, handle it differently
+				else if (File.Exists(infoDir.FullName + @"\box.def"))
 				{
-					nodeType = SongNode.ENodeType.BOX,
-					path = infoDir.FullName + @"\",
-					chartCount = 1,
-					charts =
-					[
-						new CScore()
-					]
-				};
-			
-				node.charts[0].FileInformation.AbsoluteFolderPath = infoDir.FullName + @"\";
-		
-				targetList.Add(node);
-		
-				TryLoadBoxDef(node, infoDir);
-				await ScanSongsAsync(infoDir.FullName + @"\", node.childNodes, node);
+					SongNode node = new(parent)
+					{
+						nodeType = SongNode.ENodeType.BOX,
+						path = infoDir.FullName + @"\",
+						chartCount = 1,
+						charts =
+						[
+							new CScore()
+						]
+					};
+
+					node.charts[0].FileInformation.AbsoluteFolderPath = infoDir.FullName + @"\";
+
+					targetList.Add(node);
+
+					TryLoadBoxDef(node, infoDir);
+					await ScanSongsAsync(infoDir.FullName + @"\", node.childNodes, node);
+				}
+				else
+					//folder should not be treated as a box of any kind, just recursively scan its contents
+				{
+					await ScanSongsAsync(infoDir.FullName + @"\", targetList, parent);
+				}
 			}
-			else
-			//folder should not be treated as a box of any kind, just recursively scan its contents
+			catch (Exception ex)
 			{
-				await ScanSongsAsync(infoDir.FullName + @"\", targetList, parent);
+				Console.WriteLine($"Failed to process directory {infoDir.FullName}: {ex.Message}");
 			}
 		}
 	}
