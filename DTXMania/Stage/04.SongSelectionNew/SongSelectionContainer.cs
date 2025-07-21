@@ -16,7 +16,7 @@ public class SongSelectionContainer : UIDrawable
 
     private int currentSongIndex;
     
-    private DTXTexture fallbackPreImage = new(CSkin.Path(@"Graphics\5_preimage default.png"));
+    public static DTXTexture fallbackPreImage = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_preimage default.png"));
     
     public SongSelectionContainer(SongDb.SongDb songDb, UIImage albumArt)
     {
@@ -72,13 +72,15 @@ public class SongSelectionContainer : UIDrawable
 
     private void UpdateAlbumArt()
     {
-        var tex = preImageCache[currentSelection];
-        albumArt.SetTexture(tex, false);
+        preImageCache.TryGetValue(currentSelection, out DTXTexture tex);
 
-        if (tex != null)
+        if (tex == null)
         {
-            albumArt.clipRect = new RectangleF(0, 0, tex.Width, tex.Height);
+            tex = fallbackPreImage;
         }
+
+        albumArt.SetTexture(tex, false);
+        albumArt.clipRect = new RectangleF(0, 0, tex.Width, tex.Height);
     }
 
     public override void Draw(Matrix parentMatrix)
@@ -141,16 +143,16 @@ public class SongSelectionContainer : UIDrawable
             string imagePath = node.GetImagePath();
             if (!string.IsNullOrEmpty(imagePath) && File.Exists(imagePath))
             {
-                preImage = new DTXTexture(imagePath);
-            }
-            else
-            {
-                preImage = fallbackPreImage;
+                preImage = DTXTexture.LoadFromPath(imagePath);
             }
         }
-        
-        preImageCache[node] = preImage;
-        return preImage;
+
+        if (preImage != null)
+        {
+            preImageCache[node] = preImage;
+            return preImage;
+        }
+        return null;
     }
 
     private void RemoveFromCache(SongNode node)
@@ -178,7 +180,7 @@ public class SongSelectionContainer : UIDrawable
         foreach (SongSelectionElement element in songSelectionElements)
         {
             var node = SongNode.rPreviousSong(element.node);
-            element.UpdateSongNode(node, preImageCache[node]);
+            element.UpdateSongNode(node, CachePreImage(node));
         }
         
         UpdateAlbumArt();
@@ -200,7 +202,7 @@ public class SongSelectionContainer : UIDrawable
         foreach (SongSelectionElement element in songSelectionElements)
         {
             var node = SongNode.rNextSong(element.node);
-            element.UpdateSongNode(node, preImageCache[node]);
+            element.UpdateSongNode(node, CachePreImage(node));
         }
         
         UpdateAlbumArt();

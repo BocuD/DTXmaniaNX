@@ -45,7 +45,7 @@ public class CStageSongSelectionNew : CStage
 
     public override void InitializeDefaultUI()
     {
-        DTXTexture bgTex = new(CSkin.Path(@"Graphics\5_background.jpg"));
+        DTXTexture bgTex = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_background.jpg"));
         UIImage bg = ui.AddChild(new UIImage(bgTex));
         bg.renderOrder = -100;
         bg.position = Vector3.Zero;

@@ -641,7 +641,7 @@ internal class CActSelectQuickConfig : CActSelectPopupMenu
             subMenu.renderOrder = 100;
             subMenu.anchor = new Vector2(0.5f, 0.5f);
 
-            var popupTex = new DTXTexture(CSkin.Path(@"Graphics\ScreenSelect popup auto settings.png"));
+            var popupTex = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\ScreenSelect popup auto settings.png"));
             var popup = new UIImage(popupTex);
             subMenu.AddChild(popup);
             subMenu.size = popup.size;

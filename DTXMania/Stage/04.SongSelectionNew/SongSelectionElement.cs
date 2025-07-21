@@ -15,7 +15,7 @@ public class SongSelectionElement : UIGroup
         var element = new SongSelectionElement();
         element.size = new SharpDX.Vector2(400, 80);
         
-        element.albumArtImage = element.AddChild(new UIImage(new DTXTexture(CSkin.Path(@"Graphics\5_preimage default.png"))));
+        element.albumArtImage = element.AddChild(new UIImage(DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_preimage default.png"))));
         element.albumArtImage.size = new SharpDX.Vector2(65, 65);
         element.albumArtImage.position = new SharpDX.Vector3(40, 40, 0);
         element.albumArtImage.anchor = new SharpDX.Vector2(0.5f, 0.5f);
@@ -55,12 +55,14 @@ public class SongSelectionElement : UIGroup
             CScore chart = node.charts.FirstOrDefault(x => x != null);
 
             songArtistText.SetText(chart.SongInformation.ArtistName);
-            albumArtImage.SetTexture(tex, false);
 
-            if (tex != null)
+            if (tex == null)
             {
-                albumArtImage.clipRect = new SharpDX.RectangleF(0, 0, tex.Width, tex.Height);
+                tex = SongSelectionContainer.fallbackPreImage;
             }
+
+            albumArtImage.SetTexture(tex, false);
+            albumArtImage.clipRect = new SharpDX.RectangleF(0, 0, tex.Width, tex.Height);
         }
     }
 }

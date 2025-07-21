@@ -234,25 +234,25 @@ internal class CStageSongSelection : CStage
 	
 	public override void InitializeDefaultUI()
 	{
-		DTXTexture bgTex = new(CSkin.Path(@"Graphics\5_background.jpg"));
+		DTXTexture bgTex = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_background.jpg"));
 		UIImage bg = ui.AddChild(new UIImage(bgTex));
 		bg.renderOrder = -100;
 		bg.position = SharpDX.Vector3.Zero;
 		bg.name = "Background";
 		
-		DTXTexture topPanelTex = new(CSkin.Path(@"Graphics\5_header panel.png"));
+		DTXTexture topPanelTex = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_header panel.png"));
 		topPanel = ui.AddChild(new UIImage(topPanelTex));
 		topPanel.position = new SharpDX.Vector3(0, 0, 0);
 		topPanel.name = "TopPanel";
 		topPanel.renderOrder = 4;
 		
-		DTXTexture bottomPanelTex = new(CSkin.Path(@"Graphics\5_footer panel.png"));
+		DTXTexture bottomPanelTex = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_footer panel.png"));
 		UIImage bottomPanel = ui.AddChild(new UIImage(bottomPanelTex));
 		bottomPanel.position = new SharpDX.Vector3(0, 720 - bottomPanelTex.Height, 0);
 		bottomPanel.name = "BottomPanel";
 		bottomPanel.renderOrder = 4;
 		
-		DTXTexture bpmLabelTex = new(CSkin.Path(@"Graphics\5_BPM.png"));
+		DTXTexture bpmLabelTex = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_BPM.png"));
 		UIImage bpmLabel = ui.AddChild(new UIImage(bpmLabelTex));
 		bpmLabel.position = new SharpDX.Vector3(32, 258, 0);
 		bpmLabel.name = "BPMLabel";
@@ -261,11 +261,11 @@ internal class CStageSongSelection : CStage
 
 		if (songList != null)
 		{
-			DTXTexture songListTopPanelTex = new(CSkin.Path(@"Graphics\5_header song list.png"));
+			DTXTexture songListTopPanelTex = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_header song list.png"));
 			songListTopPanel = songList.AddChild(new UIImage(songListTopPanelTex));
 			songListTopPanel.name = "SongListTopPanel";
 
-			DTXTexture songListBottomPanelTex = new(CSkin.Path(@"Graphics\5_footer song list.png"));
+			DTXTexture songListBottomPanelTex = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_footer song list.png"));
 			songListBottomPanel = songList.AddChild(new UIImage(songListBottomPanelTex));
 			songListBottomPanel.position = new SharpDX.Vector3(0, 720 - songListBottomPanelTex.Height, 0);
 			songListBottomPanel.name = "SongListBottomPanel";

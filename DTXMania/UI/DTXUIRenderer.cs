@@ -20,9 +20,16 @@ public class DTXTexture : BaseTexture
     public override float Height => texture.szTextureSize.Height;
     public override string name => texture.filename;
 
-    public DTXTexture(string texturePath)
+    public static DTXTexture LoadFromPath(string texturePath)
     {
-        texture = CDTXMania.tGenerateTexture(texturePath);
+        var tex = CDTXMania.tGenerateTexture(texturePath);
+
+        if (tex != null)
+        {
+            return new DTXTexture(tex);
+        }
+
+        return null;
     }
     
     public DTXTexture(CTexture texture)

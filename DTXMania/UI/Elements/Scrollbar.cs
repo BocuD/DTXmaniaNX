@@ -14,13 +14,13 @@ public class Scrollbar : UIGroup
         var scrollbar = new Scrollbar();
         scrollbar.name = "New Scrollbar";
         
-        var bar = scrollbar.AddChild(new UIImage(new DTXTexture(CSkin.Path(@"Graphics\5_scrollbar.png"))));
+        var bar = scrollbar.AddChild(new UIImage(DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_scrollbar.png"))));
         scrollbar.scrollBarImage = bar;
         
         bar.clipRect = new RectangleF(0, 0, 12, 492);
         bar.size = new Vector2(12, 492);
         
-        var handle = scrollbar.AddChild(new UIImage(new DTXTexture(CSkin.Path(@"Graphics\5_scrollbar.png"))));
+        var handle = scrollbar.AddChild(new UIImage(DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_scrollbar.png"))));
         scrollbar.scrollBarHandleImage = handle;
         
         handle.clipRect = new RectangleF(0, 492, 12, 12);

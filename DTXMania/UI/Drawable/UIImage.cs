@@ -86,7 +86,7 @@ public class UIImage : UITexture
                 return;
             }
 
-            SetTexture(new DTXTexture(fullPath), updateRects);
+            SetTexture(DTXTexture.LoadFromPath(fullPath), updateRects);
         }
     }
 

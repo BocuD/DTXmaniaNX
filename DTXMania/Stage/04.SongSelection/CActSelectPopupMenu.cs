@@ -218,11 +218,11 @@ internal class CActSelectPopupMenu : CActivity
             ui.isVisible = false;
             ui.dontSerialize = true;
                 
-            var bgTex = new DTXTexture(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\ScreenSelect sort menu background.png"), false));
+            var bgTex = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\ScreenSelect sort menu background.png"));
             var bg = ui.AddChild(new UIImage(bgTex));
             ui.size = bg.size;
-                
-            var cursorTex = new DTXTexture(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\ScreenConfig menu cursor.png"), false));
+            
+            var cursorTex = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\ScreenConfig menu cursor.png"));
             cursor = ui.AddChild(new UIImage(cursorTex));
             cursor.position = new Vector3(12, 32 + 6, 0);
             cursor.size = new Vector2(336, 32);
