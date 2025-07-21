@@ -47,7 +47,8 @@ internal class StageManager
 
         int nUpdateAndDrawReturnValue = rCurrentStage.OnUpdateAndDraw();
 
-        CDTXMania.EnumSongs.HandleEnumSongs(nUpdateAndDrawReturnValue);
+        //TODO: ENUM SONGS DISABLED(!)
+        //CDTXMania.EnumSongs.HandleEnumSongs(nUpdateAndDrawReturnValue);
 
         //handle stage changes
         switch (rCurrentStage.eStageID)
