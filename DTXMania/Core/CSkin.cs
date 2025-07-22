@@ -354,7 +354,7 @@ internal class CSkin : IDisposable
 	public CSystemSound soundAdvanced = null;
 	public CSystemSound soundExtreme = null;
 	public CSystemSound soundMetronome = null;
-	public readonly int nシステムサウンド数 = (int)ESystemSound.Count;
+	public readonly int nSystemSoundCount = (int)ESystemSound.Count;
 	public CSystemSound this[ ESystemSound sound ]
 	{
 		get
@@ -661,7 +661,7 @@ internal class CSkin : IDisposable
 				strBoxDefSkinSubfolderFullName
 		);
 
-		for ( int i = 0; i < nシステムサウンド数; i++ )
+		for ( int i = 0; i < nSystemSoundCount; i++ )
 		{
 			if ( this[ i ] != null && this[i].b読み込み成功 )
 			{
@@ -702,28 +702,27 @@ internal class CSkin : IDisposable
 
 	public void ReloadSkin()
 	{
-		for ( int i = 0; i < nシステムサウンド数; i++ )
+		for ( int i = 0; i < nSystemSoundCount; i++ )
 		{
-			if ( !this[ i ].bExclusive )	// BGM系以外のみ読み込む。(BGM系は必要になったときに読み込む)
+			if (this[i].bExclusive) continue; // BGM系以外のみ読み込む。(BGM系は必要になったときに読み込む)
+			
+			CSystemSound cSystemSound = this[ i ];
+
+			if (CDTXMania.bCompactMode && !cSystemSound.bCompact対象) continue;
+			
+			try
 			{
-				CSystemSound cシステムサウンド = this[ i ];
-				if ( !CDTXMania.bCompactMode || cシステムサウンド.bCompact対象 )
-				{
-					try
-					{
-						cシステムサウンド.tRead();
-						Trace.TraceInformation( "システムサウンドを読み込みました。({0})", cシステムサウンド.strFilename );
-					}
-					catch ( FileNotFoundException )
-					{
-						Trace.TraceWarning( "システムサウンドが存在しません。({0})", cシステムサウンド.strFilename );
-					}
-					catch ( Exception e )
-					{
-						Trace.TraceError( e.Message );
-						Trace.TraceWarning( "システムサウンドの読み込みに失敗しました。({0})", cシステムサウンド.strFilename );
-					}
-				}
+				cSystemSound.tRead();
+				Trace.TraceInformation( "Loaded system sound: ({0})", cSystemSound.strFilename );
+			}
+			catch ( FileNotFoundException )
+			{
+				Trace.TraceWarning( "System sound doesn't exist: ({0})", cSystemSound.strFilename );
+			}
+			catch ( Exception e )
+			{
+				Trace.TraceError( e.Message );
+				Trace.TraceWarning( "Failed to read system sound: ({0})", cSystemSound.strFilename );
 			}
 		}
 	}
@@ -882,7 +881,7 @@ internal class CSkin : IDisposable
 
 	public void tRemoveMixerAll()
 	{
-		for (int i = 0; i < nシステムサウンド数; i++)
+		for (int i = 0; i < nSystemSoundCount; i++)
 		{
 			if (this[i] != null && this[i].b読み込み成功)
 			{
@@ -1136,7 +1135,7 @@ internal class CSkin : IDisposable
 	{
 		if( !bDisposed済み )
 		{
-			for( int i = 0; i < nシステムサウンド数; i++ )
+			for( int i = 0; i < nSystemSoundCount; i++ )
 				this[ i ].Dispose();
 
 			bDisposed済み = true;

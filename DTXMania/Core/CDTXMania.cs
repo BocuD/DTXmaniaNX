@@ -784,7 +784,7 @@ internal class CDTXMania : Game
 
         #endregion
 
-        Trace.TraceInformation("アプリケーションの初期化を完了しました。");
+        Trace.TraceInformation("Finished game initialization");
 
         #region [ Launch First stage ]
 
