@@ -36,7 +36,7 @@ public class CStageSongSelectionNew : CStage
         bigAlbumArt.size = new Vector2(300, 300);
 
         selectionContainer = ui.AddChild(new SongSelectionContainer(songDb, bigAlbumArt));
-        selectionContainer.position = new Vector3(800, 0, 0);
+        selectionContainer.position = new Vector3(800, 320, 0);
     }
 
     public override void InitializeDefaultUI()

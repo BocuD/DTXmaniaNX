@@ -10,9 +10,9 @@ namespace DTXMania;
 public class SongSelectionElement : UIGroup
 {
     [AddChildMenu]
-    public static SongSelectionElement Create()
+    public new static SongSelectionElement Create()
     {
-        var element = new SongSelectionElement();
+        SongSelectionElement element = new();
         element.size = new SharpDX.Vector2(400, 80);
         
         element.albumArtImage = element.AddChild(new UIImage(DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_preimage default.png"))));
@@ -20,7 +20,7 @@ public class SongSelectionElement : UIGroup
         element.albumArtImage.position = new SharpDX.Vector3(40, 40, 0);
         element.albumArtImage.anchor = new SharpDX.Vector2(0.5f, 0.5f);
         
-        var family = new FontFamily(CDTXMania.ConfigIni.songListFont);
+        FontFamily family = new(CDTXMania.ConfigIni.songListFont);
         
         element.songTitleText = element.AddChild(new UIText(family, 18));
         element.songTitleText.position = new SharpDX.Vector3(80, 40, 0);

@@ -7,48 +7,69 @@ using SlimDX.DirectInput;
 
 namespace DTXMania;
 
-public class SongSelectionContainer : UIDrawable
+public class SongSelectionContainer : UIGroup
 {
     private SongDb.SongDb songDb;
     private UIImage albumArt;
-    private SongSelectionElement[] songSelectionElements = new SongSelectionElement[20];
+    
     private SongNode currentRoot;
     
     public static DTXTexture fallbackPreImage = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_preimage default.png"));
     
+    private SongSelectionElement[] songSelectionElements = new SongSelectionElement[20];
+    private int bufferStartIndex = 0;
+
+    private int WrapIndex(int index)
+    {
+        return (index + songSelectionElements.Length) % songSelectionElements.Length;
+    }
+
+    private SongSelectionElement GetElement(int logicalIndex)
+    {
+        return songSelectionElements[WrapIndex(bufferStartIndex + logicalIndex)];
+    }
+
+    private UIGroup elementsContainer;
+    
     public SongSelectionContainer(SongDb.SongDb songDb, UIImage albumArt)
     {
+        name = "SongSelectionContainer";
+
         this.songDb = songDb;
         this.albumArt = albumArt;
         
         currentRoot = songDb.songNodeRoot;
         dontSerialize = true;
+
+        elementsContainer = AddChild(new UIGroup("Elements"));
         
         for (int i = 0; i < songSelectionElements.Length; i++)
         {
-            songSelectionElements[i] = SongSelectionElement.Create();
+            songSelectionElements[i] = elementsContainer.AddChild(SongSelectionElement.Create());
         }
     }
 
     private const float rowSpacing = 85.0f; //vertical spacing between elements
-    private const float verticalRenderOffset = -500.0f; //offset to center the selection in the middle of the screen
     private const int selectionIndex = 10; //the center element is the 10th element in the array (0-based index)
-    private SongNode currentSelection => songSelectionElements[selectionIndex].node;
+
+    private SongNode currentSelection => songSelectionElements[WrapIndex(bufferStartIndex + selectionIndex)].node;
     
     public void UpdateRoot(SongNode? newRoot = null)
     {
         currentRoot = newRoot ?? songDb.songNodeRoot;
+        SongNode node = currentRoot.CurrentSelection;
 
-        SongNode firstNode = currentRoot.CurrentSelection;
-
-        //remove cache
+        bufferStartIndex = 0;
+        
+        //clear image cache
         foreach (KeyValuePair<SongNode, DTXTexture> element in preImageCache)
         {
             RemoveFromCache(element.Key);
         }
         
         //assign first node to the first element, then use rNextSong to fill the rest
-        songSelectionElements[selectionIndex].UpdateSongNode(firstNode, CachePreImage(firstNode));
+        songSelectionElements[selectionIndex].UpdateSongNode(node, CachePreImage(node));
+        songSelectionElements[selectionIndex].position.Y = 0;
         
         //fill the rest of the elements with next songs
         for (int i = selectionIndex + 1; i < songSelectionElements.Length; i++)
@@ -56,6 +77,7 @@ public class SongSelectionContainer : UIDrawable
             SongNode nextNode = SongNode.rNextSong(songSelectionElements[i - 1].node);
             var tex = CachePreImage(nextNode);
             songSelectionElements[i].UpdateSongNode(nextNode, tex);
+            songSelectionElements[i].position.Y = (i - selectionIndex) * rowSpacing;
         }
         
         //fill the first elements with previous songs
@@ -64,15 +86,16 @@ public class SongSelectionContainer : UIDrawable
             SongNode prevNode = SongNode.rPreviousSong(songSelectionElements[i + 1].node);
             var tex = CachePreImage(prevNode);
             songSelectionElements[i].UpdateSongNode(prevNode, tex);
+            songSelectionElements[i].position.Y = (i - selectionIndex) * rowSpacing;
         }
         
         //update album art
-        UpdateAlbumArt();
+        UpdateSelectedSongAlbumArt();
         
         lastDrawTime = CDTXMania.Timer.nCurrentTime;
     }
 
-    private void UpdateAlbumArt()
+    private void UpdateSelectedSongAlbumArt()
     {
         preImageCache.TryGetValue(currentSelection, out DTXTexture? tex);
 
@@ -86,47 +109,44 @@ public class SongSelectionContainer : UIDrawable
     }
 
     private long lastDrawTime;
-    private float targetY = 0.0f; //used for smooth scrolling
+    private float targetY; //used for smooth scrolling
     
     public override void Draw(Matrix parentMatrix)
     {
         float delta = (CDTXMania.Timer.nCurrentTime - lastDrawTime) / 1000.0f;
-        
-        if (Math.Abs(targetY - position.Y) > 0.01f)
+        lastDrawTime = CDTXMania.Timer.nCurrentTime;
+
+        if (Math.Abs(targetY - elementsContainer.position.Y) > 0.01f)
         {
             //smoothly move towards targetY
-            position.Y += (targetY - position.Y) * delta * 10.0f; //10.0f is the speed factor
+            elementsContainer.position.Y += (targetY - elementsContainer.position.Y) * delta * 10.0f; //10.0f is the speed factor
         }
         else
         {
-            position.Y = targetY; //snap to target if close enough
+            elementsContainer.position.Y = targetY; //snap to target if close enough
         }
         
-        if (position.Y >= rowSpacing / 2)
+        if (elementsContainer.position.Y >= rowSpacing / 2)
         {
-            position.Y -= rowSpacing;
+            elementsContainer.position.Y -= rowSpacing;
             targetY -= rowSpacing;
             MoveUp();
         }
-        else if (position.Y <= -rowSpacing / 2)
+        else if (elementsContainer.position.Y <= -rowSpacing / 2)
         {
-            position.Y += rowSpacing;
+            elementsContainer.position.Y += rowSpacing;
             targetY += rowSpacing;
             MoveDown();
         }
         
-        //calculate object matrix for container
-        UpdateLocalTransformMatrix();
-        Matrix combinedMatrix = localTransformMatrix * parentMatrix;
-        
         for (int i = 0; i < songSelectionElements.Length; i++)
         {
-            SongSelectionElement element = songSelectionElements[i];
-            element.position = new Vector3(i == selectionIndex ? -20 : 0, i * rowSpacing + verticalRenderOffset, 0);
-            element.Draw(combinedMatrix);
+            int realIndex = WrapIndex(bufferStartIndex + i);
+            var slot = songSelectionElements[realIndex];
+            slot.position = new Vector3(i == selectionIndex ? -20 : 0, slot.position.Y, 0);
         }
-        
-        lastDrawTime = CDTXMania.Timer.nCurrentTime;
+
+        base.Draw(parentMatrix);
     }
 
     public void HandleNavigation()
@@ -166,82 +186,92 @@ public class SongSelectionContainer : UIDrawable
         }
     }
     
-    Dictionary<SongNode, DTXTexture> preImageCache = new();
-
-    private DTXTexture? CachePreImage(SongNode node)
-    {
-        if (!preImageCache.TryGetValue(node, out DTXTexture? preImage))
-        {
-            string imagePath = node.GetImagePath();
-            if (!string.IsNullOrEmpty(imagePath) && File.Exists(imagePath))
-            {
-                preImage = DTXTexture.LoadFromPath(imagePath);
-            }
-        }
-
-        if (preImage != null)
-        {
-            preImageCache[node] = preImage;
-            return preImage;
-        }
-        return null;
-    }
-
-    private void RemoveFromCache(SongNode node)
-    {
-        if (preImageCache.TryGetValue(node, out DTXTexture? tex))
-        {
-            tex.Dispose();
-            preImageCache.Remove(node);
-        }
-    }
-    
     private void MoveUp()
     {
         CDTXMania.Skin.soundCursorMovement.tPlay();
-        
-        //add new image to cache
-        CachePreImage(SongNode.rPreviousSong(songSelectionElements.First().node));
+
+        //slot to overwrite is the last one logically (before decrementing)
+        int overwriteIndex = WrapIndex(bufferStartIndex + songSelectionElements.Length - 1);
+        var overwriteElement = songSelectionElements[overwriteIndex];
 
         if (currentRoot.childNodes.Count > songSelectionElements.Length)
         {
-            //remove cache for last element
-            RemoveFromCache(songSelectionElements.Last().node);
+            RemoveFromCache(overwriteElement.node);
         }
 
-        foreach (SongSelectionElement element in songSelectionElements)
+        //determine new node to load: one before the currently top-most visible element
+        int topIndex = bufferStartIndex;
+        var firstVisibleNode = songSelectionElements[topIndex].node;
+        var newNode = SongNode.rPreviousSong(firstVisibleNode);
+        
+        Task.Run(() =>
         {
-            var node = SongNode.rPreviousSong(element.node);
-            element.UpdateSongNode(node, CachePreImage(node));
-        }
+            var newTex = CachePreImage(newNode);
+            overwriteElement.UpdateSongNode(newNode, newTex);
+        });
+
+        //move ring buffer backward
+        bufferStartIndex = WrapIndex(bufferStartIndex - 1);
+
+        //overwrite the new head
+        //overwriteElement.UpdateSongNode(newNode, newTex);
+        int newTopIndex = bufferStartIndex;
+        float newYOffset = songSelectionElements[WrapIndex(newTopIndex + 1)].position.Y - rowSpacing;
+        overwriteElement.position.Y = newYOffset;
+        songSelectionElements[newTopIndex] = overwriteElement;
 
         currentRoot.CurrentSelection = currentSelection;
+        UpdateSelectedSongAlbumArt();
         
-        UpdateAlbumArt();
+        UpdateRingbufferPositions();
     }
-
+    
     private void MoveDown()
     {
         CDTXMania.Skin.soundCursorMovement.tPlay();
 
+        //determine logical slot to overwrite: the "topmost" one
+        int overwriteIndex = WrapIndex(bufferStartIndex);
+        var overwriteElement = songSelectionElements[overwriteIndex];
+
         if (currentRoot.childNodes.Count > songSelectionElements.Length)
         {
-            //remove for first element
-            RemoveFromCache(songSelectionElements.First().node);
+            RemoveFromCache(overwriteElement.node);
         }
 
-        //add new image to cache
-        CachePreImage(SongNode.rNextSong(songSelectionElements.Last().node));
+        //determine new node to load: one after the currently bottom-most visible element
+        int bottomIndex = WrapIndex(bufferStartIndex + songSelectionElements.Length - 1);
+        var lastVisibleNode = songSelectionElements[bottomIndex].node;
+        var newNode = SongNode.rNextSong(lastVisibleNode);
         
-        foreach (SongSelectionElement element in songSelectionElements)
+        Task.Run(() =>
         {
-            var node = SongNode.rNextSong(element.node);
-            element.UpdateSongNode(node, CachePreImage(node));
-        }
-        
+            var newTex = CachePreImage(newNode);
+            overwriteElement.UpdateSongNode(newNode, newTex);
+        });
+
+        //update the overwritten slot
+        //overwriteElement.UpdateSongNode(newNode, newTex);
+        overwriteElement.position.Y = songSelectionElements[bottomIndex].position.Y + rowSpacing;
+        songSelectionElements[overwriteIndex] = overwriteElement;
+
+        //advance ring buffer start
+        bufferStartIndex = WrapIndex(bufferStartIndex + 1);
+
         currentRoot.CurrentSelection = currentSelection;
+        UpdateSelectedSongAlbumArt();
         
-        UpdateAlbumArt();
+        UpdateRingbufferPositions();
+    }
+
+    private void UpdateRingbufferPositions()
+    {
+        //recalculate all positions based on logical order
+        for (int i = 0; i < songSelectionElements.Length; i++)
+        {
+            int realIndex = WrapIndex(bufferStartIndex + i);
+            songSelectionElements[realIndex].position.Y = (i - selectionIndex) * rowSpacing;
+        }
     }
     
     private void MoveLeft()
@@ -275,4 +305,35 @@ public class SongSelectionContainer : UIDrawable
         }
     }
 
+    #region PreImage cache
+    private Dictionary<SongNode, DTXTexture> preImageCache = new();
+
+    private DTXTexture? CachePreImage(SongNode node)
+    {
+        if (!preImageCache.TryGetValue(node, out DTXTexture? preImage))
+        {
+            string imagePath = node.GetImagePath();
+            if (!string.IsNullOrEmpty(imagePath) && File.Exists(imagePath))
+            {
+                preImage = DTXTexture.LoadFromPath(imagePath);
+            }
+        }
+
+        if (preImage != null)
+        {
+            preImageCache[node] = preImage;
+            return preImage;
+        }
+        return null;
+    }
+
+    private void RemoveFromCache(SongNode node)
+    {
+        if (preImageCache.TryGetValue(node, out DTXTexture? tex))
+        {
+            tex.Dispose();
+            preImageCache.Remove(node);
+        }
+    }
+    #endregion
 }
