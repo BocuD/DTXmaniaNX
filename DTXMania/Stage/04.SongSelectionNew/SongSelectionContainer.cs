@@ -54,8 +54,8 @@ public class SongSelectionContainer : UIGroup
         }
     }
 
-    private const float rowSpacing = 85.0f; //vertical spacing between elements
-    private const int selectionIndex = 10; //the center element is the 10th element in the array (0-based index)
+    private float rowSpacing = 85.0f; //vertical spacing between elements
+    private int selectionIndex = 10; //the center element is the 10th element in the array (0-based index)
 
     private SongNode currentSelection => songSelectionElements[WrapIndex(bufferStartIndex + selectionIndex)].node;
     
@@ -172,6 +172,12 @@ public class SongSelectionContainer : UIGroup
     public override void DrawInspector()
     {
         base.DrawInspector();
+
+        if (ImGui.CollapsingHeader("Song Element Positioning"))
+        {
+            ImGui.InputFloat("Row Spacing", ref rowSpacing);
+            ImGui.InputInt("Selection Index", ref selectionIndex);
+        }
 
         if (ImGui.CollapsingHeader("Song Element Animation"))
         {
