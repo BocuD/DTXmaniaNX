@@ -78,6 +78,7 @@ public class SortByTitle : SongDbSort
                         title = "Sorting Error",
                         nodeType = SongNode.ENodeType.BOX
                     };
+                    root.childNodes.Add(error);
                 }
                 
                 error.childNodes.Add(song);
