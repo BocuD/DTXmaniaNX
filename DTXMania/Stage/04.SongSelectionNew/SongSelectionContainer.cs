@@ -3,6 +3,8 @@ using DTXMania.Core;
 using DTXMania.SongDb;
 using DTXMania.UI;
 using DTXMania.UI.Drawable;
+using DTXMania.UI.Inspector;
+using Hexa.NET.ImGui;
 using SharpDX;
 using SlimDX.DirectInput;
 
@@ -149,10 +151,33 @@ public class SongSelectionContainer : UIGroup
         {
             int realIndex = WrapIndex(bufferStartIndex + i);
             var slot = songSelectionElements[realIndex];
-            slot.position = new Vector3(i == selectionIndex ? -20 : 0, slot.position.Y, 0);
+            
+            //determine how close we are to Y 0: y 0 should give an offset to x,
+            //abs of y greater than offsetRange should give no offset, with the part in between having a curve
+            float distanceTo0 = MathF.Abs(slot.position.Y + elementsContainer.position.Y); //positive only
+            float t = Math.Clamp((distanceTo0 - offsetRange) * -1, 0, offsetRange);
+            //first subtract offsetRange so the range is now -offsetRange - maxDistance.
+            //then invert, so range becomes -maxDistance - offsetRange, then clamp from 0-offsetRange
+            t /= offsetRange; //normalize range
+
+            //x offset is 30 to the left here
+            slot.position.X = t * -offsetDistance;
         }
 
         base.Draw(parentMatrix);
+    }
+
+    private float offsetRange = 90;
+    private float offsetDistance = 25;
+    public override void DrawInspector()
+    {
+        base.DrawInspector();
+
+        if (ImGui.CollapsingHeader("Song Element Animation"))
+        {
+            ImGui.InputFloat("Offset Range", ref offsetRange);
+            ImGui.InputFloat("Offset Distance", ref offsetDistance);
+        }
     }
 
     public int HandleNavigation()
