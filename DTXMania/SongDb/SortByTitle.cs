@@ -42,10 +42,12 @@ public class SortByTitle : SongDbSort
 
         SongNode other = new(root)
         {
-            title = "#",
+            title = "Other",
             nodeType = SongNode.ENodeType.BOX
         };
         root.childNodes.Add(other);
+
+        SongNode? error = null;
 
         foreach (SongNode song in flattenedNodes)
         {
@@ -68,6 +70,17 @@ public class SortByTitle : SongDbSort
             catch (Exception ex)
             {
                 Trace.TraceError("Error sorting song {0}: {1}", song.title, ex.Message);
+
+                if (error == null)
+                {
+                    error = new SongNode(root)
+                    {
+                        title = "Sorting Error",
+                        nodeType = SongNode.ENodeType.BOX
+                    };
+                }
+                
+                error.childNodes.Add(song);
             }
         }
 
