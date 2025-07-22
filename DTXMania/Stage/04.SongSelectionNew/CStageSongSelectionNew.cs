@@ -54,7 +54,11 @@ public class CStageSongSelectionNew : CStage
 
     public override void FirstUpdate()
     {
-        if (hasScanned) return;
+        if (hasScanned)
+        {
+            selectionContainer.UpdateRoot();
+            return;
+        }
         
         Task.Run(() => songDb.ScanAsync(() => selectionContainer.UpdateRoot()));
         hasScanned = true;
