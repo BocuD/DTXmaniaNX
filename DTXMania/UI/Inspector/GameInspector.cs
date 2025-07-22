@@ -41,7 +41,7 @@ public class GameStatus
         // Smoothed max as before
         if (deltaTime > smoothedMax)
         {
-            smoothedMax = deltaTime;
+            smoothedMax = MathF.Min(deltaTime, 5000); // cap to avoid extreme values
         }
         else
         {
