@@ -1,11 +1,9 @@
-﻿namespace DTXMania.SongDb;
+﻿using System.Diagnostics;
 
-using Kawazu;
+namespace DTXMania.SongDb;
 
 public class SortByTitle : SongDbSort
 {
-    private KawazuConverter converter = new();
-    
     public override async Task<SongNode> Sort(List<SongNode> flattenedNodes)
     {
         //create a new root node
@@ -51,18 +49,25 @@ public class SortByTitle : SongDbSort
 
         foreach (SongNode song in flattenedNodes)
         {
-            //this shouldn't be needed but just in case
-            if (song.nodeType != SongNode.ENodeType.SONG) continue;
-            
-            char key = GetSortKey(song);
+            try
+            {
+                //this shouldn't be needed but just in case
+                if (song.nodeType != SongNode.ENodeType.SONG) continue;
 
-            if (letterNodes.TryGetValue(key, out SongNode? letterNode))
-            {
-                letterNode.childNodes.Add(song);
+                char key = GetSortKey(song);
+
+                if (letterNodes.TryGetValue(key, out SongNode? letterNode))
+                {
+                    letterNode.childNodes.Add(song);
+                }
+                else
+                {
+                    other.childNodes.Add(song);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                other.childNodes.Add(song);
+                Trace.TraceError("Error sorting song {0}: {1}", song.title, ex.Message);
             }
         }
 
