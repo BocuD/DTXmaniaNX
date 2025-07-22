@@ -1,4 +1,5 @@
-﻿using DTXMania.Core;
+﻿using System.Numerics;
+using DTXMania.Core;
 using DTXMania.UI.Skin;
 using Hexa.NET.ImGui;
 
@@ -8,6 +9,49 @@ public class GameStatus
 {
     private static bool demoWindowShown = false;
     private static bool preventGameKeyboardInput = false;
+    
+    //fps graph
+    private const int BufferSize = 200;
+    private static readonly float[] frametimes = new float[BufferSize];
+    private static int index = 0;
+    
+    //average
+    private static float rollingSum = 0.0f;
+    private static int filledSamples = 0;
+
+    private static float smoothedMax = 0.01f;
+    
+    public static void UpdatePerformanceGraph(float deltaTime)
+    {
+        float old = frametimes[index];
+
+        frametimes[index] = deltaTime;
+
+        // Maintain sum for rolling average
+        if (filledSamples < BufferSize)
+        {
+            rollingSum += deltaTime;
+            filledSamples++;
+        }
+        else
+        {
+            rollingSum += deltaTime - old;
+        }
+
+        // Smoothed max as before
+        if (deltaTime > smoothedMax)
+        {
+            smoothedMax = deltaTime;
+        }
+        else
+        {
+            const float decayHalfLife = 1.0f;
+            float decayFactor = MathF.Pow(0.5f, deltaTime / decayHalfLife);
+            smoothedMax = MathF.Max(smoothedMax * decayFactor, 0.001f);
+        }
+
+        index = (index + 1) % BufferSize;
+    }
     
     public static void Draw()
     {
@@ -41,11 +85,59 @@ public class GameStatus
             }
         }
 
+        DrawFPSGraph();
+
         ImGui.End();
         
         if (demoWindowShown)
         {
             ImGui.ShowDemoWindow(ref demoWindowShown);
+        }
+    }
+
+    private static void DrawFPSGraph()
+    {
+        //calculate dynamic max for autoscaling
+        float maxInBuffer = 0.001f; //start from something tiny to avoid 0
+        for (int i = 0; i < BufferSize; i++)
+        {
+            if (frametimes[i] > maxInBuffer)
+                maxInBuffer = frametimes[i];
+        }
+
+        //show current frame time
+        float currentMs = frametimes[(index - 1 + BufferSize) % BufferSize] * 1000.0f;
+        float avgFrametime = (filledSamples > 0) ? rollingSum / filledSamples : 0.016f; // fallback to ~60 FPS
+        float scaleMax = MathF.Max(smoothedMax, avgFrametime * 2.0f);
+        
+        ImGui.Text($"Current Frame Time: {currentMs:F2} ms ({1000.0f / currentMs:F1} FPS)");
+        ImGui.Text($"Average Frame Time: {avgFrametime * 1000:F2} ms ({1 / avgFrametime:F1} FPS)");
+
+        //draw label column next to graph
+        ImGui.BeginGroup();
+        ImGui.Text($"{scaleMax * 1000:F1} ms");
+        ImGui.Dummy(new Vector2(0, 60));
+        ImGui.Text("0 ms");
+        ImGui.EndGroup();
+
+        ImGui.SameLine();
+
+        //draw graph
+        unsafe
+        {
+            fixed (float* dataPtr = frametimes)
+            {
+                ImGui.PlotLines(
+                    label: "##Plot",
+                    values: dataPtr,
+                    valuesCount: BufferSize,
+                    valuesOffset: index,
+                    overlayText: (ReadOnlySpan<byte>)null,
+                    scaleMin: 0.0f,
+                    scaleMax: scaleMax,
+                    graphSize: new Vector2(300, 100)
+                );
+            }
         }
     }
 

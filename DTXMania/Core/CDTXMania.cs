@@ -1012,11 +1012,13 @@ internal class CDTXMania : Game
     {
     }
 
+    private long lastDrawTime;
     protected override void Draw(GameTime gameTime)
     {
-        //Do not draw until SoundManager is initialized
-        //Fixed issue where exception is raised upon loading when Japanese IME is enabled
-
+        float delta = (Timer.nCurrentTime - lastDrawTime) / 1000.0f;
+        lastDrawTime = Timer.nCurrentTime;
+        GameStatus.UpdatePerformanceGraph(delta);
+        
         //....????
         if (SoundManager == null)
         {
