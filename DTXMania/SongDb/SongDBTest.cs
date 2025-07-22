@@ -118,6 +118,18 @@ public class SongDBTester
         }
         
         ImGui.SameLine();
+
+        if (ImGui.Button("Artist"))
+        {
+            SortByArtist sortByArtist = new();
+            Task.Run(async () =>
+            {
+                List<SongNode> flattened = await songDb.FlattenSongList(songDb.songNodeRoot.childNodes); 
+                currentRoot = await sortByArtist.Sort(flattened);
+            });
+        }
+        
+        ImGui.SameLine();
         
         if (ImGui.Button("Version"))
         {
@@ -134,13 +146,6 @@ public class SongDBTester
         ImGui.SameLine();
 
         if (ImGui.Button("Level"))
-        {
-            
-        }
-        
-        ImGui.SameLine();
-
-        if (ImGui.Button("Artist"))
         {
             
         }
