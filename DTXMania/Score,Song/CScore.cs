@@ -53,6 +53,16 @@ public class CScore
     {
         public string Title;
         public string ArtistName;
+
+        public bool TitleHasJapanese;
+        public bool ArtistNameHasJapanese;
+
+        public string TitleKana;
+        public string ArtistNameKana;
+        
+        public string TitleRoman;
+        public string ArtistNameRoman;
+        
         public string Comment;
         public string Genre;
         public string Preimage;

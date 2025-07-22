@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Drawing;
 using DTXMania.Core;
+using Kawazu;
 
 namespace DTXMania.SongDb;
 
@@ -15,6 +16,8 @@ public class SongDb
 {
 	//public properties
 	public SongDbScanStatus status { get; private set; } = SongDbScanStatus.Idle;
+	
+	private KawazuConverter jpConverter = new();
 
 	public Dictionary<SongDbScanStatus, TimeSpan> statusDuration { get; private set; } = new()
 	{
@@ -25,8 +28,24 @@ public class SongDb
 
 	public SongNode songNodeRoot { get; private set; } = new(null!)
 	{
-		nodeType = SongNode.ENodeType.ROOT,
+		nodeType = SongNode.ENodeType.ROOT
 	};
+
+	public SongNode byDifficulty { get; private set; } = new(null!)
+	{
+		nodeType = SongNode.ENodeType.ROOT
+	};
+	
+	public SongNode byName { get; private set; } = new(null!)
+	{
+		nodeType = SongNode.ENodeType.ROOT
+	};
+	
+	public SongNode byArtist { get; private set; } = new(null!)
+	{
+		nodeType = SongNode.ENodeType.ROOT
+	};
+	
 	public int totalSongs { get; private set; } = 0;
 	public int totalCharts { get; private set; } = 0;
 	public string processSongDataPath { get; private set; } = string.Empty;
@@ -84,10 +103,9 @@ public class SongDb
 			start = DateTime.Now;
 			
 			await Parallel.ForEachAsync(flattened, new ParallelOptions { MaxDegreeOfParallelism = maxThreadCount },
-				(song, cancellationToken) =>
+				async (song, cancellationToken) =>
 				{
-					ProcessListNode(song);
-					return ValueTask.CompletedTask;
+					await ProcessListNode(song);
 				});
 			
 			statusDuration[SongDbScanStatus.Processing] = DateTime.Now - start;
@@ -440,7 +458,7 @@ public class SongDb
 		}
 	}
 	
-	private void ProcessListNode(SongNode node)
+	private async Task ProcessListNode(SongNode node)
 	{
 		if (node.nodeType == SongNode.ENodeType.BOX)
 		{
@@ -494,6 +512,31 @@ public class SongDb
 
 					score.SongInformation.Title = cdtx.TITLE;
 					score.SongInformation.ArtistName = cdtx.ARTIST;
+
+					if (Utilities.HasJapanese(score.SongInformation.Title))
+					{
+						score.SongInformation.TitleHasJapanese = true;
+						score.SongInformation.TitleKana = await jpConverter.Convert(score.SongInformation.Title);
+						score.SongInformation.TitleRoman = await jpConverter.Convert(score.SongInformation.Title, To.Romaji);
+					}
+					else
+					{
+						score.SongInformation.TitleKana = score.SongInformation.Title;
+						score.SongInformation.TitleRoman = score.SongInformation.Title.ToLowerInvariant();
+					}
+					
+					if (Utilities.HasJapanese(score.SongInformation.ArtistName))
+					{
+						score.SongInformation.ArtistNameHasJapanese = true;
+						score.SongInformation.ArtistNameKana = await jpConverter.Convert(score.SongInformation.ArtistName);
+						score.SongInformation.ArtistNameRoman = await jpConverter.Convert(score.SongInformation.ArtistName, To.Romaji);
+					}
+					else
+					{
+						score.SongInformation.ArtistNameKana = score.SongInformation.ArtistName;
+						score.SongInformation.ArtistNameRoman = score.SongInformation.ArtistName.ToLowerInvariant();
+					}
+
 					score.SongInformation.Comment = cdtx.COMMENT;
 					score.SongInformation.Genre = cdtx.GENRE;
 					score.SongInformation.Preimage = cdtx.PREIMAGE;
