@@ -50,20 +50,19 @@ public class CStageSongSelectionNew : CStage
 
     private UIText statusText;
 
+    private bool hasScanned = false;
+
     public override void FirstUpdate()
     {
+        if (hasScanned) return;
+        
         Task.Run(() => songDb.ScanAsync(() => selectionContainer.UpdateRoot()));
+        hasScanned = true;
     }
-    
+
     public override int OnUpdateAndDraw()
     {
         base.OnUpdateAndDraw();
-
-        if (CDTXMania.Input.ActionCancel())
-        {
-            CDTXMania.Skin.soundCancel.tPlay();
-            return (int)CStageSongSelection.EReturnValue.ReturnToTitle;
-        }
 
         UpdateSongDbStatus();
 
@@ -77,8 +76,8 @@ public class CStageSongSelectionNew : CStage
             }
             else
             {
-                selectionContainer.HandleNavigation();
                 selectionContainer.isVisible = true;
+                return selectionContainer.HandleNavigation();
             }
         }
 

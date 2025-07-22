@@ -1,4 +1,5 @@
-﻿using DTXMania.Core;
+﻿using System.Diagnostics;
+using DTXMania.Core;
 using DTXMania.SongDb;
 using DTXMania.UI;
 using DTXMania.UI.Drawable;
@@ -11,10 +12,13 @@ public class SongSelectionContainer : UIGroup
 {
     private SongDb.SongDb songDb;
     private UIImage albumArt;
+    private UIGroup elementsContainer;
     
     private SongNode currentRoot;
-    
-    public static DTXTexture fallbackPreImage = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_preimage default.png"));
+
+    public int targetDifficultyLevel { get; private set; } = 0;
+
+    public static DTXTexture fallbackPreImage;
     
     private SongSelectionElement[] songSelectionElements = new SongSelectionElement[20];
     private int bufferStartIndex = 0;
@@ -29,7 +33,6 @@ public class SongSelectionContainer : UIGroup
         return songSelectionElements[WrapIndex(bufferStartIndex + logicalIndex)];
     }
 
-    private UIGroup elementsContainer;
     
     public SongSelectionContainer(SongDb.SongDb songDb, UIImage albumArt)
     {
@@ -93,6 +96,9 @@ public class SongSelectionContainer : UIGroup
         UpdateSelectedSongAlbumArt();
         
         lastDrawTime = CDTXMania.Timer.nCurrentTime;
+        
+        //make sure the fallback is loaded
+        fallbackPreImage = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_preimage default.png"));
     }
 
     private void UpdateSelectedSongAlbumArt()
@@ -149,7 +155,7 @@ public class SongSelectionContainer : UIGroup
         base.Draw(parentMatrix);
     }
 
-    public void HandleNavigation()
+    public int HandleNavigation()
     {
         //ctKeyRepeat.Up.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(Key.UpArrow), new CCounter.DGキー処理(MoveUp));
         //ctKeyRepeat.R.tRepeatKey(CDTXMania.Pad.bPressingGB(EPad.R), new CCounter.DGキー処理(MoveUp));
@@ -182,8 +188,17 @@ public class SongSelectionContainer : UIGroup
 
         if (CDTXMania.Input.ActionDecide())
         {
-            ActionDecide();
+            if (ActionDecide()) //returns true on song select
+                return (int)CStageSongSelection.EReturnValue.Selected;
         }
+        
+        if (CDTXMania.Input.ActionCancel())
+        {
+            CDTXMania.Skin.soundCancel.tPlay();
+            return (int)CStageSongSelection.EReturnValue.ReturnToTitle;
+        }
+
+        return 0;
     }
     
     private void MoveUp()
@@ -283,12 +298,30 @@ public class SongSelectionContainer : UIGroup
     {
         CDTXMania.Skin.soundCursorMovement.tPlay();
     }
-    
-    private void ActionDecide()
+
+    private bool ActionDecide()
     {
         switch (currentSelection.nodeType)
         {
             case SongNode.ENodeType.SONG:
+                var confirmedSong = currentSelection;
+                var confirmedChart = currentSelection.charts.FirstOrDefault(x => x != null);
+                var confirmedSongDifficulty = GetClosestLevelToTargetForSong(currentSelection);
+
+                if (confirmedSong != null && confirmedChart != null)
+                {
+                    if (confirmedChart.HasChartForCurrentMode())
+                    {
+                        CDTXMania.UpdateSelection(confirmedSong, confirmedChart,
+                            confirmedSongDifficulty);
+                        return true;
+                    }
+                }
+
+                //todo: Notification lol
+                CDTXMania.Skin.soundCancel.tPlay();
+                Trace.TraceInformation("Score unavailable for {0} mode",
+                    CDTXMania.ConfigIni.bDrumsEnabled ? "Drum" : "Guitar/Bass");
                 break;
 
             //switch to box node
@@ -296,13 +329,63 @@ public class SongSelectionContainer : UIGroup
                 CDTXMania.Skin.soundDecide.tPlay();
                 UpdateRoot(currentSelection);
                 break;
-            
+
             case SongNode.ENodeType.BACKBOX:
                 CDTXMania.Skin.soundCancel.tPlay();
                 //two levels: the parent of current selection is the box we are in right now
                 UpdateRoot(currentSelection.parent.parent);
                 break;
         }
+
+        return false;
+    }
+
+    public int GetClosestLevelToTargetForSong(SongNode song)
+    {
+        // 事前チェック。
+
+        if (song == null)
+            return targetDifficultyLevel; // 曲がまったくないよ
+
+        if (song.charts[targetDifficultyLevel] != null)
+            return targetDifficultyLevel; // 難易度ぴったりの曲があったよ
+
+        if ((song.nodeType == SongNode.ENodeType.BOX) || (song.nodeType == SongNode.ENodeType.BACKBOX))
+            return 0; // BOX と BACKBOX は関係無いよ
+
+
+        // 現在のアンカレベルから、難易度上向きに検索開始。
+
+        int closestLevel = targetDifficultyLevel;
+
+        for (int i = 0; i < 5; i++)
+        {
+            if (song.charts[closestLevel] != null)
+                break; // 曲があった。
+
+            closestLevel = (closestLevel + 1) % 5; // 曲がなかったので次の難易度レベルへGo。（5以上になったら0に戻る。）
+        }
+
+
+        // 見つかった曲がアンカより下のレベルだった場合……
+        // アンカから下向きに検索すれば、もっとアンカに近い曲があるんじゃね？
+
+        if (closestLevel < targetDifficultyLevel)
+        {
+            // 現在のアンカレベルから、難易度下向きに検索開始。
+
+            closestLevel = targetDifficultyLevel;
+
+            for (int i = 0; i < 5; i++)
+            {
+                if (song.charts[closestLevel] != null)
+                    break; // 曲があった。
+
+                closestLevel = ((closestLevel - 1) + 5) % 5; // 曲がなかったので次の難易度レベルへGo。（0未満になったら4に戻る。）
+            }
+        }
+
+        return closestLevel;
     }
 
     #region PreImage cache

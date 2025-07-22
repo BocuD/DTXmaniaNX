@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Runtime;
 using System.Text;
 using System.Windows.Forms;
+using DTXMania.SongDb;
 using FDK;
 using Hexa.NET.ImGui;
 using Hexa.NET.ImGui.Backends.D3D9;
@@ -91,9 +92,9 @@ internal class CDTXMania : Game
     {
         get
         {
-            CSongListNode confirmedNode = stageSongSelection.rConfirmedSong?.parentNode;
-            if (confirmedNode?.eNodeType == CSongListNode.ENodeType.BOX)
-                return STHitRanges.tCompose(confirmedNode.stDrumHitRanges, ConfigIni.stDrumHitRanges);
+            SongNode parentNode = confirmedSong?.parent;
+            if (parentNode?.nodeType == SongNode.ENodeType.BOX)
+                return STHitRanges.tCompose(parentNode.stDrumHitRanges, ConfigIni.stDrumHitRanges);
 
             return ConfigIni.stDrumHitRanges;
         }
@@ -106,9 +107,9 @@ internal class CDTXMania : Game
     {
         get
         {
-            CSongListNode confirmedNode = stageSongSelection.rConfirmedSong?.parentNode;
-            if (confirmedNode?.eNodeType == CSongListNode.ENodeType.BOX)
-                return STHitRanges.tCompose(confirmedNode.stDrumPedalHitRanges, ConfigIni.stDrumPedalHitRanges);
+            SongNode parentNode = confirmedSong?.parent;
+            if (parentNode?.nodeType == SongNode.ENodeType.BOX)
+                return STHitRanges.tCompose(parentNode.stDrumPedalHitRanges, ConfigIni.stDrumPedalHitRanges);
 
             return ConfigIni.stDrumPedalHitRanges;
         }
@@ -121,9 +122,9 @@ internal class CDTXMania : Game
     {
         get
         {
-            CSongListNode confirmedNode = stageSongSelection.rConfirmedSong?.parentNode;
-            if (confirmedNode?.eNodeType == CSongListNode.ENodeType.BOX)
-                return STHitRanges.tCompose(confirmedNode.stGuitarHitRanges, ConfigIni.stGuitarHitRanges);
+            SongNode parentNode = confirmedSong?.parent;
+            if (parentNode?.nodeType == SongNode.ENodeType.BOX)
+                return STHitRanges.tCompose(parentNode.stGuitarHitRanges, ConfigIni.stGuitarHitRanges);
 
             return ConfigIni.stGuitarHitRanges;
         }
@@ -136,9 +137,9 @@ internal class CDTXMania : Game
     {
         get
         {
-            CSongListNode confirmedNode = stageSongSelection.rConfirmedSong?.parentNode;
-            if (confirmedNode?.eNodeType == CSongListNode.ENodeType.BOX)
-                return STHitRanges.tCompose(confirmedNode.stBassHitRanges, ConfigIni.stBassHitRanges);
+            SongNode parentNode = confirmedSong?.parent;
+            if (parentNode?.nodeType == SongNode.ENodeType.BOX)
+                return STHitRanges.tCompose(parentNode.stBassHitRanges, ConfigIni.stBassHitRanges);
 
             return ConfigIni.stBassHitRanges;
         }
@@ -1407,15 +1408,15 @@ internal class CDTXMania : Game
             ini.tAddHistory(str新ヒストリ行);
             if (!bCompactMode)
             {
-                StageManager.stageSongSelection.rSelectedScore.SongInformation.NbPerformances.Drums =
+                confirmedChart.SongInformation.NbPerformances.Drums =
                     ini.stFile.PlayCountDrums;
-                StageManager.stageSongSelection.rSelectedScore.SongInformation.NbPerformances.Guitar =
+                confirmedChart.SongInformation.NbPerformances.Guitar =
                     ini.stFile.PlayCountGuitar;
-                StageManager.stageSongSelection.rSelectedScore.SongInformation.NbPerformances.Bass =
+                confirmedChart.SongInformation.NbPerformances.Bass =
                     ini.stFile.PlayCountBass;
                 for (int j = 0; j < ini.stFile.History.Length; j++)
                 {
-                    StageManager.stageSongSelection.rSelectedScore.SongInformation.PerformanceHistory[j] =
+                    confirmedChart.SongInformation.PerformanceHistory[j] =
                         ini.stFile.History[j];
                 }
             }
@@ -1438,6 +1439,17 @@ internal class CDTXMania : Game
         }
 
         Window.Text = strWindowTitle + " (" + SoundManager.GetCurrentSoundDeviceType() + delay + ")";
+    }
+    
+    public static SongNode confirmedSong { get; private set; }
+    public static CScore confirmedChart { get; private set; }
+    public static int confirmedSongDifficulty { get; private set; }
+    
+    public static void UpdateSelection(SongNode song, CScore chart, int difficulty)
+    {
+        confirmedSong = song;
+        confirmedChart = chart;
+        confirmedSongDifficulty = difficulty;
     }
 
     #region [ private ]

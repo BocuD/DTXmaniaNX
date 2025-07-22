@@ -34,12 +34,12 @@ internal class CActSelectSongList : CActivity
 			return true;
 		}
 	}
-	public int n現在のアンカ難易度レベル 
+	public int nTargetDifficultyLevel 
 	{
 		get;
 		private set;
 	}
-	public int n現在選択中の曲の現在の難易度レベル => n現在のアンカ難易度レベルに最も近い難易度レベルを返す( rSelectedSong );
+	public int nSelectedSongDifficultyLevel => nGetClosestLevelToTargetLevelForSong( rSelectedSong );
 
 	public CScore rSelectedScore  // r現在選択中のスコア
 	{
@@ -47,7 +47,7 @@ internal class CActSelectSongList : CActivity
 		{
 			if( rSelectedSong != null )
 			{
-				return rSelectedSong.arScore[ n現在選択中の曲の現在の難易度レベル ];
+				return rSelectedSong.arScore[ nSelectedSongDifficultyLevel ];
 			}
 			return null;
 		}
@@ -76,7 +76,7 @@ internal class CActSelectSongList : CActivity
 		stageSongSelection = cStageSongSelection;
 		
 		rSelectedSong = null;
-		n現在のアンカ難易度レベル = 0;
+		nTargetDifficultyLevel = 0;
 		bActivated = false;
 		bIsEnumeratingSongs = false;
 
@@ -112,15 +112,15 @@ internal class CActSelectSongList : CActivity
 
 	// メソッド
 
-	public int n現在のアンカ難易度レベルに最も近い難易度レベルを返す( CSongListNode song )
+	public int nGetClosestLevelToTargetLevelForSong( CSongListNode song )
 	{
 		// 事前チェック。
 
 		if( song == null )
-			return n現在のアンカ難易度レベル;	// 曲がまったくないよ
+			return nTargetDifficultyLevel;	// 曲がまったくないよ
 
-		if( song.arScore[ n現在のアンカ難易度レベル ] != null )
-			return n現在のアンカ難易度レベル;	// 難易度ぴったりの曲があったよ
+		if( song.arScore[ nTargetDifficultyLevel ] != null )
+			return nTargetDifficultyLevel;	// 難易度ぴったりの曲があったよ
 
 		if( ( song.eNodeType == CSongListNode.ENodeType.BOX ) || ( song.eNodeType == CSongListNode.ENodeType.BACKBOX ) )
 			return 0;								// BOX と BACKBOX は関係無いよ
@@ -128,7 +128,7 @@ internal class CActSelectSongList : CActivity
 
 		// 現在のアンカレベルから、難易度上向きに検索開始。
 
-		int closestLevel = n現在のアンカ難易度レベル;
+		int closestLevel = nTargetDifficultyLevel;
 
 		for( int i = 0; i < 5; i++ )
 		{
@@ -142,11 +142,11 @@ internal class CActSelectSongList : CActivity
 		// 見つかった曲がアンカより下のレベルだった場合……
 		// アンカから下向きに検索すれば、もっとアンカに近い曲があるんじゃね？
 
-		if( closestLevel < n現在のアンカ難易度レベル )
+		if( closestLevel < nTargetDifficultyLevel )
 		{
 			// 現在のアンカレベルから、難易度下向きに検索開始。
 
-			closestLevel = n現在のアンカ難易度レベル;
+			closestLevel = nTargetDifficultyLevel;
 
 			for( int i = 0; i < 5; i++ )
 			{
@@ -267,12 +267,12 @@ internal class CActSelectSongList : CActivity
 
 		// 難易度レベルを＋１し、現在選曲中のスコアを変更する。
 
-		n現在のアンカ難易度レベル = n現在のアンカ難易度レベルに最も近い難易度レベルを返す( rSelectedSong );
+		nTargetDifficultyLevel = nGetClosestLevelToTargetLevelForSong( rSelectedSong );
 
 		for( int i = 0; i < 5; i++ )
 		{
-			n現在のアンカ難易度レベル = ( n現在のアンカ難易度レベル + 1 ) % 5;	// ５以上になったら０に戻る。
-			if( rSelectedSong.arScore[ n現在のアンカ難易度レベル ] != null )	// 曲が存在してるならここで終了。存在してないなら次のレベルへGo。
+			nTargetDifficultyLevel = ( nTargetDifficultyLevel + 1 ) % 5;	// ５以上になったら０に戻る。
+			if( rSelectedSong.arScore[ nTargetDifficultyLevel ] != null )	// 曲が存在してるならここで終了。存在してないなら次のレベルへGo。
 				break;
 		}
 
@@ -288,12 +288,12 @@ internal class CActSelectSongList : CActivity
 			int index = ( i + 13 ) % 13;
 			for( int m = 0; m < 3; m++ )
 			{
-				stBarInformation[ index ].nSkillValue[ m ] = (int) song.arScore[ n現在のアンカ難易度レベルに最も近い難易度レベルを返す( song ) ].SongInformation.HighSkill[ m ];
+				stBarInformation[ index ].nSkillValue[ m ] = (int) song.arScore[ nGetClosestLevelToTargetLevelForSong( song ) ].SongInformation.HighSkill[ m ];
 			}
 			song = rNextSong( song );
 		}
 
-		tラベル名からステータスパネルを決定する( rSelectedSong.arDifficultyLabel[ n現在選択中の曲の現在の難易度レベル ] );
+		tラベル名からステータスパネルを決定する( rSelectedSong.arDifficultyLabel[ nSelectedSongDifficultyLevel ] );
 
 		switch( nIndex  )
 		{
@@ -777,7 +777,7 @@ internal class CActSelectSongList : CActivity
 					tGenerateSongNameBar( index, stBarInformation[ index ].strTitleString, stBarInformation[ index ].colLetter );
 					stBarInformation[index].eBarType = eGetSongBarType(song);
 
-					int nNearestIndex = n現在のアンカ難易度レベルに最も近い難易度レベルを返す(song);
+					int nNearestIndex = nGetClosestLevelToTargetLevelForSong(song);
 					//Update Preview Image Path					
 					stBarInformation[index].strPreviewImageFullPath = sGetPreviewImagePath(song.arScore[nNearestIndex]);
 					//Load the image (NOTE: May have performance issue)
@@ -840,7 +840,7 @@ internal class CActSelectSongList : CActivity
 					tGenerateSongNameBar( index, stBarInformation[ index ].strTitleString, stBarInformation[ index ].colLetter );
 					stBarInformation[index].eBarType = eGetSongBarType(song);
 
-					int nNearestIndex = n現在のアンカ難易度レベルに最も近い難易度レベルを返す(song);
+					int nNearestIndex = nGetClosestLevelToTargetLevelForSong(song);
 					//Update Preview Image Path						
 					stBarInformation[index].strPreviewImageFullPath = sGetPreviewImagePath(song.arScore[nNearestIndex]);
 					//Load the image (NOTE: May have performance issue)
@@ -1343,7 +1343,7 @@ internal class CActSelectSongList : CActivity
 			stBarInformation[ i ].colLetter = song.col文字色;
 			stBarInformation[ i ].eBarType = eGetSongBarType( song );
 				
-			int nNearestScoreIndex = n現在のアンカ難易度レベルに最も近い難易度レベルを返す(song);				
+			int nNearestScoreIndex = nGetClosestLevelToTargetLevelForSong(song);				
 
 			for ( int j = 0; j < 3; j++ )
 				stBarInformation[ i ].nSkillValue[ j ] = (int) song.arScore[nNearestScoreIndex].SongInformation.HighSkill[ j ];

@@ -6,6 +6,7 @@ using System.Globalization;
 using FDK;
 using DiscordRPC;
 using DTXMania.Core;
+using DTXMania.SongDb;
 using DTXMania.UI;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.DynamicElements;
@@ -32,27 +33,17 @@ internal class CStageSongSelection : CStage
 
 	public bool bScrolling => actSongList.bScrolling;
 
-	public int nConfirmedSongDifficulty
-	{
-		get;
-		private set;
-	}
-	public CScore rChosenScore
-	{
-		get;
-		private set;
-	}
-	public CSongListNode rConfirmedSong 
-	{
-		get;
-		private set;
-	}
+	//Legacy, not used anymore
+	private int nConfirmedSongDifficulty { get; set; }
+	private CScore rChosenScore { get; set; }
+	private CSongListNode rConfirmedSong { get; set; }
+	
 	/// <summary>
 	/// <para>現在演奏中の曲のスコアに対応する背景動画。</para>
 	/// <para>r現在演奏中の曲のスコア の読み込み時に、自動検索_抽出_生成される。</para>
 	/// </summary>
 	//public CDirectShow r現在演奏中のスコアの背景動画 = null;
-	public int nSelectedSongDifficultyLevel => actSongList.n現在選択中の曲の現在の難易度レベル;
+	public int nSelectedSongDifficultyLevel => actSongList.nSelectedSongDifficultyLevel;
 
 	public CScore rSelectedScore => actSongList.rSelectedScore; // r現在選択中のスコア
 
@@ -993,8 +984,23 @@ internal class CStageSongSelection : CStage
 			}
 		}
 		rConfirmedSong = song.listランダム用ノードリスト[ song.stackRandomPerformanceNumber.Pop() ];
-		nConfirmedSongDifficulty = actSongList.n現在のアンカ難易度レベルに最も近い難易度レベルを返す( rConfirmedSong );
+		nConfirmedSongDifficulty = actSongList.nGetClosestLevelToTargetLevelForSong( rConfirmedSong );
 		rChosenScore = rConfirmedSong.arScore[ nConfirmedSongDifficulty ];
+
+		SongNode node = new(new SongNode(null));
+		node.title = rConfirmedSong.strTitle;
+		node.charts = rConfirmedSong.arScore;
+		node.difficultyLabel = rConfirmedSong.arDifficultyLabel;
+		
+		node.skinPath = rConfirmedSong.strSkinPath;
+		
+		node.stDrumHitRanges = rConfirmedSong.stDrumHitRanges;
+		node.stDrumPedalHitRanges = rConfirmedSong.stDrumPedalHitRanges;
+		node.stGuitarHitRanges = rConfirmedSong.stGuitarHitRanges;
+		node.stBassHitRanges = rConfirmedSong.stBassHitRanges;
+		
+		CDTXMania.UpdateSelection(node, rChosenScore, nConfirmedSongDifficulty);
+		
 		eReturnValueWhenFadeOutCompleted = EReturnValue.Selected;
 		//	this.actFOtoNowLoading.tStartFadeOut();					// #27787 2012.3.10 yyagi 曲決定時の画面フェードアウトの省略
 		ePhaseID = EPhase.選曲_NowLoading画面へのフェードアウト;
@@ -1022,7 +1028,7 @@ internal class CStageSongSelection : CStage
 	{
 		rConfirmedSong = actSongList.rSelectedSong;
 		rChosenScore = actSongList.rSelectedScore;
-		nConfirmedSongDifficulty = actSongList.n現在選択中の曲の現在の難易度レベル;
+		nConfirmedSongDifficulty = actSongList.nSelectedSongDifficultyLevel;
 
 		bool bScoreExistForMode = tCheckScoreExistForMode(rChosenScore);
 		if ( ( rConfirmedSong != null ) && ( rChosenScore != null ) && bScoreExistForMode)

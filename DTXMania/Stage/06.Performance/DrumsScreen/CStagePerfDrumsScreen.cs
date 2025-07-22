@@ -75,7 +75,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
     {
         bInFillIn = false;
         base.OnActivate();
-        CScore cScore = CDTXMania.stageSongSelection.rChosenScore;
+        CScore cScore = CDTXMania.confirmedChart;
         ct登場用 = new CCounter(0, 12, 16, CDTXMania.Timer);
 
         actChipFireD.iPosY = (CDTXMania.ConfigIni.bReverse.Drums ? nJudgeLinePosY.Drums - 183 : nJudgeLinePosY.Drums - 186);
@@ -89,8 +89,8 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         }
         else
         {
-            actGraph.dbGraphValue_Goal = CDTXMania.stageSongSelection.rChosenScore.SongInformation.HighSkill[ 0 ];	// #24074 2011.01.23 add ikanick
-            actGraph.dbGraphValue_PersonalBest = CDTXMania.stageSongSelection.rChosenScore.SongInformation.HighSkill[ 0 ];
+            actGraph.dbGraphValue_Goal = CDTXMania.confirmedChart.SongInformation.HighSkill[ 0 ];	// #24074 2011.01.23 add ikanick
+            actGraph.dbGraphValue_PersonalBest = CDTXMania.confirmedChart.SongInformation.HighSkill[ 0 ];
 
             // #35411 2015.08.21 chnmr0 add
             // ゴースト利用可のなとき、0で初期化

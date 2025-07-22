@@ -550,7 +550,7 @@ internal class CActResultParameterPanel : CActivity
             prv表示用フォント.Dispose();
             prv称号フォント.Dispose();
 
-            tGetDifficultyLabelFromScript( CDTXMania.stageSongSelection.rConfirmedSong.arDifficultyLabel[ CDTXMania.stageSongSelection.nConfirmedSongDifficulty ] );
+            tGetDifficultyLabelFromScript( CDTXMania.confirmedSong.difficultyLabel[ CDTXMania.confirmedSongDifficulty ] );
 
             //Progress Bars
             for (int i = 0; i < 3; i++)

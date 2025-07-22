@@ -79,8 +79,8 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		}
 		else
 		{
-			actGraph.dbGraphValue_Goal = CDTXMania.stageSongSelection.rChosenScore.SongInformation.HighSkill[ nGraphUsePart ];	// #24074 2011.01.23 add ikanick
-			actGraph.dbGraphValue_PersonalBest = CDTXMania.stageSongSelection.rChosenScore.SongInformation.HighSkill[ nGraphUsePart ];
+			actGraph.dbGraphValue_Goal = CDTXMania.confirmedChart.SongInformation.HighSkill[ nGraphUsePart ];	// #24074 2011.01.23 add ikanick
+			actGraph.dbGraphValue_PersonalBest = CDTXMania.confirmedChart.SongInformation.HighSkill[ nGraphUsePart ];
 
 			// #35411 2015.08.21 chnmr0 add
 			// ゴースト利用可のなとき、0で初期化

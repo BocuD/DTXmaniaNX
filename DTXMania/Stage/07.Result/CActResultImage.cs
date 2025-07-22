@@ -66,7 +66,7 @@ internal class CActResultImage : CActivity
 
             #region[ Generation of song title, artist name and disclaimer textures ]
             if (string.IsNullOrEmpty(CDTXMania.DTX.TITLE) || (!CDTXMania.bCompactMode && CDTXMania.ConfigIni.b曲名表示をdefのものにする))
-                strSongName = CDTXMania.stageSongSelection.r現在選択中の曲.strTitle;
+                strSongName = CDTXMania.confirmedSong.title;
             else
                 strSongName = CDTXMania.DTX.TITLE;
 
@@ -84,7 +84,7 @@ internal class CActResultImage : CActivity
 
             if (CDTXMania.ConfigIni.nPlaySpeed != 20)
             {
-                double d = (double)(CDTXMania.ConfigIni.nPlaySpeed / 20.0);
+                double d = CDTXMania.ConfigIni.nPlaySpeed / 20.0;
                 String strModifiedPlaySpeed = "Play Speed: x" + d.ToString("0.000");
                 CPrivateFastFont pfModifiedPlaySpeed = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.songListFont), 18, FontStyle.Regular);
                 Bitmap bmpModifiedPlaySpeed = pfModifiedPlaySpeed.DrawPrivateFont(strModifiedPlaySpeed, CPrivateFont.DrawMode.Edge, Color.White, Color.White, Color.Black, Color.Red, true);
@@ -128,17 +128,17 @@ internal class CActResultImage : CActivity
                                                         (CDTXMania.DTX.bHasChips.FT == false) && 
                                                         (CDTXMania.DTX.bHasChips.Ride == false)))
             {
-                num = ((float)CDTXMania.stageSongSelection.rChosenScore.SongInformation.Level.Drums);
+                num = CDTXMania.confirmedChart.SongInformation.Level.Drums;
             }
             else
             {
-                if (CDTXMania.stageSongSelection.rChosenScore.SongInformation.Level.Drums > 100)
+                if (CDTXMania.confirmedChart.SongInformation.Level.Drums > 100)
                 {
-                    num = ((float)CDTXMania.stageSongSelection.rChosenScore.SongInformation.Level.Drums);
+                    num = CDTXMania.confirmedChart.SongInformation.Level.Drums;
                 }
                 else
                 {
-                    num = ((float)CDTXMania.stageSongSelection.rChosenScore.SongInformation.Level.Drums) / 10f;
+                    num = CDTXMania.confirmedChart.SongInformation.Level.Drums / 10f;
                 }
             }
             //If Skill Mode is CLASSIC, always display lvl as Classic Style
@@ -150,11 +150,11 @@ internal class CActResultImage : CActivity
                                                         (CDTXMania.DTX.bHasChips.Ride == false) &&
                                                         (CDTXMania.DTX.bForceXGChart == false)))
             {
-                graphics.DrawString(string.Format("{0:00}", num), ftSongDifficultyFont, new SolidBrush(Color.FromArgb(0xba, 0xba, 0xba)), (float)0f, (float)-4f);
+                graphics.DrawString(string.Format("{0:00}", num), ftSongDifficultyFont, new SolidBrush(Color.FromArgb(0xba, 0xba, 0xba)), 0f, -4f);
             }
             else
             {
-                graphics.DrawString(string.Format("{0:0.00}", num), ftSongDifficultyFont, new SolidBrush(Color.FromArgb(0xba, 0xba, 0xba)), (float)0f, (float)-4f);
+                graphics.DrawString(string.Format("{0:0.00}", num), ftSongDifficultyFont, new SolidBrush(Color.FromArgb(0xba, 0xba, 0xba)), 0f, -4f);
             }
             txSongLevel = new CTexture(CDTXMania.app.Device, bitmap3, CDTXMania.TextureFormat, false);
             graphics.Dispose();

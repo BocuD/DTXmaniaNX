@@ -40,7 +40,7 @@ internal class StageManager
         rCurrentStage = CDTXMania.bCompactMode ? stageSongLoading : stageStartup;
         rCurrentStage.OnActivate();
     }
-    
+
     public void DrawStage()
     {
         if (rCurrentStage == null) return;
@@ -74,7 +74,6 @@ internal class StageManager
                     switch (nUpdateAndDrawReturnValue)
                     {
                         case (int)CStageTitle.EReturnResult.GAMESTART:
-                            //tChangeStage(stageSongSelection);
                             tChangeStage(stageSongSelectionNew);
                             break;
 
@@ -108,7 +107,7 @@ internal class StageManager
                             break;
 
                         case CStage.EStage.SongSelection_4:
-                            tChangeStage(stageSongSelection);
+                            tChangeStage(stageSongSelectionNew);
                             break;
                     }
                 }
@@ -167,7 +166,7 @@ internal class StageManager
                         Trace.TraceInformation("曲の読み込みを中止しました。");
                         CDTXMania.tRunGarbageCollector();
 
-                        tChangeStage(stageSongSelection);
+                        tChangeStage(stageSongSelectionNew);
                         break;
                     }
 
@@ -277,7 +276,7 @@ internal class StageManager
                         }
                         else
                         {
-                            tChangeStage(stageSongSelection, true, false);
+                            tChangeStage(stageSongSelectionNew, true, false);
                         }
 
                         break;
@@ -290,152 +289,153 @@ internal class StageManager
                         #region [ 演奏失敗(StageFailed) ]
 
                         //-----------------------------
-                    {
-                        //New extract performance record
-                        CScoreIni.CPerformanceEntry cPerf_Drums, cPerf_Guitar, cPerf_Bass;
-                        bool bTrainingMode = false;
-                        CChip[] chipsArray = new CChip[10];
-                        if (CDTXMania.ConfigIni.bGuitarRevolutionMode)
                         {
-                            stagePerfGuitarScreen.tStorePerfResults(out cPerf_Drums, out cPerf_Guitar,
-                                out cPerf_Bass, out bTrainingMode);
-                        }
-                        else
-                        {
-                            stagePerfDrumsScreen.tStorePerfResults(out cPerf_Drums, out cPerf_Guitar,
-                                out cPerf_Bass, out chipsArray, out bTrainingMode);
-                        }
-                        //Original
-                        //scoreIni = this.tScoreIniへBGMAdjustとHistoryとPlayCountを更新("Stage failed");
-
-                        //Save Performance Records if necessary
-                        if (!bTrainingMode)
-                        {
-                            //Swap if required
-                            if (CDTXMania.ConfigIni.bIsSwappedGuitarBass) // #24063 2011.1.24 yyagi Gt/Bsを入れ替えていたなら、演奏結果も入れ替える
+                            //New extract performance record
+                            CScoreIni.CPerformanceEntry cPerf_Drums, cPerf_Guitar, cPerf_Bass;
+                            bool bTrainingMode = false;
+                            CChip[] chipsArray = new CChip[10];
+                            if (CDTXMania.ConfigIni.bGuitarRevolutionMode)
                             {
-                                CScoreIni.CPerformanceEntry t;
-                                t = cPerf_Guitar;
-                                cPerf_Guitar = cPerf_Bass;
-                                cPerf_Bass = t;
-                            }
-
-                            string strInstrument = "";
-                            string strPerfSkill = "";
-                            //STDGBVALUE<string> strCurrProgressBars;
-                            STDGBVALUE<bool> bToSaveProgressBarRecord;
-                            bToSaveProgressBarRecord.Drums = false;
-                            bToSaveProgressBarRecord.Guitar = false;
-                            bToSaveProgressBarRecord.Bass = false;
-                            STDGBVALUE<bool> bNewProgressBarRecord;
-                            bNewProgressBarRecord.Drums = false;
-                            bNewProgressBarRecord.Guitar = false;
-                            bNewProgressBarRecord.Bass = false;
-                            bool bGuitarAndBass = false;
-                            if (!cPerf_Drums.b全AUTOである && cPerf_Drums.nTotalChipsCount > 0)
-                            {
-                                //Drums played
-                                strInstrument = " Drums";
-                                bToSaveProgressBarRecord.Drums = true;
-                            }
-                            else if (!cPerf_Guitar.b全AUTOである && cPerf_Guitar.nTotalChipsCount > 0)
-                            {
-                                if (!cPerf_Bass.b全AUTOである && cPerf_Bass.nTotalChipsCount > 0)
-                                {
-                                    // Guitar and bass played together
-                                    bGuitarAndBass = true;
-                                    strInstrument = " G+B";
-                                    bToSaveProgressBarRecord.Guitar = true;
-                                    bToSaveProgressBarRecord.Bass = true;
-                                }
-                                else
-                                {
-                                    // Guitar only played
-                                    strInstrument = " Guitar";
-                                    bToSaveProgressBarRecord.Guitar = true;
-                                }
+                                stagePerfGuitarScreen.tStorePerfResults(out cPerf_Drums, out cPerf_Guitar,
+                                    out cPerf_Bass, out bTrainingMode);
                             }
                             else
                             {
-                                //Bass only played
-                                strInstrument = " Bass";
-                                bToSaveProgressBarRecord.Bass = true;
+                                stagePerfDrumsScreen.tStorePerfResults(out cPerf_Drums, out cPerf_Guitar,
+                                    out cPerf_Bass, out chipsArray, out bTrainingMode);
                             }
+                            //Original
+                            //scoreIni = this.tScoreIniへBGMAdjustとHistoryとPlayCountを更新("Stage failed");
 
-                            string str = "";
-                            string strSpeed = "";
-                            if (CDTXMania.ConfigIni.nPlaySpeed != 20)
+                            //Save Performance Records if necessary
+                            if (!bTrainingMode)
                             {
-                                double d = CDTXMania.ConfigIni.nPlaySpeed / 20.0;
-                                strSpeed = (bGuitarAndBass ? " x" : " Speed x") + d.ToString("0.00");
-                            }
-
-                            str = $"Stage failed{strInstrument} {strSpeed}";
-
-                            scoreIni = CDTXMania.tScoreIniへBGMAdjustとHistoryとPlayCountを更新(str);
-
-                            CScore cScore = stageSongSelection.rChosenScore;
-
-                            if (bToSaveProgressBarRecord.Drums)
-                            {
-                                scoreIni.stSection.LastPlayDrums.strProgress = cPerf_Drums.strProgress;
-
-                                if (CScoreIni.tCheckIfUpdateProgressBarRecordOrNot(
-                                        cScore.SongInformation.progress.Drums, cPerf_Drums.strProgress))
+                                //Swap if required
+                                if (CDTXMania.ConfigIni
+                                    .bIsSwappedGuitarBass) // #24063 2011.1.24 yyagi Gt/Bsを入れ替えていたなら、演奏結果も入れ替える
                                 {
-                                    scoreIni.stSection.HiSkillDrums.strProgress = cPerf_Drums.strProgress;
-                                    bNewProgressBarRecord.Drums = true;
-                                }
-                            }
-
-                            if (bToSaveProgressBarRecord.Guitar)
-                            {
-                                scoreIni.stSection.LastPlayGuitar.strProgress = cPerf_Guitar.strProgress;
-                                if (CScoreIni.tCheckIfUpdateProgressBarRecordOrNot(
-                                        cScore.SongInformation.progress.Guitar, cPerf_Guitar.strProgress))
-                                {
-                                    scoreIni.stSection.HiSkillGuitar.strProgress = cPerf_Guitar.strProgress;
-                                    bNewProgressBarRecord.Guitar = true;
-                                }
-                            }
-
-                            if (bToSaveProgressBarRecord.Bass)
-                            {
-                                scoreIni.stSection.LastPlayBass.strProgress = cPerf_Bass.strProgress;
-                                if (CScoreIni.tCheckIfUpdateProgressBarRecordOrNot(
-                                        cScore.SongInformation.progress.Bass, cPerf_Bass.strProgress))
-                                {
-                                    scoreIni.stSection.HiSkillBass.strProgress = cPerf_Bass.strProgress;
-                                    bNewProgressBarRecord.Bass = true;
-                                }
-                            }
-
-                            scoreIni.tExport(CDTXMania.DTX.strFileNameFullPath + ".score.ini");
-
-                            if (!CDTXMania.bCompactMode)
-                            {
-                                bool[] b更新が必要か否か = new bool[3];
-                                CScoreIni.tGetIsUpdateNeeded(out b更新が必要か否か[0], out b更新が必要か否か[1], out b更新が必要か否か[2]);
-                                if (bNewProgressBarRecord.Drums)
-                                {
-                                    // New Song Progress
-                                    cScore.SongInformation.progress.Drums = cPerf_Drums.strProgress;
+                                    CScoreIni.CPerformanceEntry t;
+                                    t = cPerf_Guitar;
+                                    cPerf_Guitar = cPerf_Bass;
+                                    cPerf_Bass = t;
                                 }
 
-                                if (bNewProgressBarRecord.Guitar)
+                                string strInstrument = "";
+                                string strPerfSkill = "";
+                                //STDGBVALUE<string> strCurrProgressBars;
+                                STDGBVALUE<bool> bToSaveProgressBarRecord;
+                                bToSaveProgressBarRecord.Drums = false;
+                                bToSaveProgressBarRecord.Guitar = false;
+                                bToSaveProgressBarRecord.Bass = false;
+                                STDGBVALUE<bool> bNewProgressBarRecord;
+                                bNewProgressBarRecord.Drums = false;
+                                bNewProgressBarRecord.Guitar = false;
+                                bNewProgressBarRecord.Bass = false;
+                                bool bGuitarAndBass = false;
+                                if (!cPerf_Drums.b全AUTOである && cPerf_Drums.nTotalChipsCount > 0)
                                 {
-                                    // New Song Progress
-                                    cScore.SongInformation.progress.Guitar = cPerf_Guitar.strProgress;
+                                    //Drums played
+                                    strInstrument = " Drums";
+                                    bToSaveProgressBarRecord.Drums = true;
+                                }
+                                else if (!cPerf_Guitar.b全AUTOである && cPerf_Guitar.nTotalChipsCount > 0)
+                                {
+                                    if (!cPerf_Bass.b全AUTOである && cPerf_Bass.nTotalChipsCount > 0)
+                                    {
+                                        // Guitar and bass played together
+                                        bGuitarAndBass = true;
+                                        strInstrument = " G+B";
+                                        bToSaveProgressBarRecord.Guitar = true;
+                                        bToSaveProgressBarRecord.Bass = true;
+                                    }
+                                    else
+                                    {
+                                        // Guitar only played
+                                        strInstrument = " Guitar";
+                                        bToSaveProgressBarRecord.Guitar = true;
+                                    }
+                                }
+                                else
+                                {
+                                    //Bass only played
+                                    strInstrument = " Bass";
+                                    bToSaveProgressBarRecord.Bass = true;
                                 }
 
-                                if (bNewProgressBarRecord.Bass)
+                                string str = "";
+                                string strSpeed = "";
+                                if (CDTXMania.ConfigIni.nPlaySpeed != 20)
                                 {
-                                    // New Song Progress
-                                    cScore.SongInformation.progress.Bass = cPerf_Bass.strProgress;
+                                    double d = CDTXMania.ConfigIni.nPlaySpeed / 20.0;
+                                    strSpeed = (bGuitarAndBass ? " x" : " Speed x") + d.ToString("0.00");
+                                }
+
+                                str = $"Stage failed{strInstrument} {strSpeed}";
+
+                                scoreIni = CDTXMania.tScoreIniへBGMAdjustとHistoryとPlayCountを更新(str);
+
+                                CScore cScore = CDTXMania.confirmedChart;
+
+                                if (bToSaveProgressBarRecord.Drums)
+                                {
+                                    scoreIni.stSection.LastPlayDrums.strProgress = cPerf_Drums.strProgress;
+
+                                    if (CScoreIni.tCheckIfUpdateProgressBarRecordOrNot(
+                                            cScore.SongInformation.progress.Drums, cPerf_Drums.strProgress))
+                                    {
+                                        scoreIni.stSection.HiSkillDrums.strProgress = cPerf_Drums.strProgress;
+                                        bNewProgressBarRecord.Drums = true;
+                                    }
+                                }
+
+                                if (bToSaveProgressBarRecord.Guitar)
+                                {
+                                    scoreIni.stSection.LastPlayGuitar.strProgress = cPerf_Guitar.strProgress;
+                                    if (CScoreIni.tCheckIfUpdateProgressBarRecordOrNot(
+                                            cScore.SongInformation.progress.Guitar, cPerf_Guitar.strProgress))
+                                    {
+                                        scoreIni.stSection.HiSkillGuitar.strProgress = cPerf_Guitar.strProgress;
+                                        bNewProgressBarRecord.Guitar = true;
+                                    }
+                                }
+
+                                if (bToSaveProgressBarRecord.Bass)
+                                {
+                                    scoreIni.stSection.LastPlayBass.strProgress = cPerf_Bass.strProgress;
+                                    if (CScoreIni.tCheckIfUpdateProgressBarRecordOrNot(
+                                            cScore.SongInformation.progress.Bass, cPerf_Bass.strProgress))
+                                    {
+                                        scoreIni.stSection.HiSkillBass.strProgress = cPerf_Bass.strProgress;
+                                        bNewProgressBarRecord.Bass = true;
+                                    }
+                                }
+
+                                scoreIni.tExport(CDTXMania.DTX.strFileNameFullPath + ".score.ini");
+
+                                if (!CDTXMania.bCompactMode)
+                                {
+                                    bool[] b更新が必要か否か = new bool[3];
+                                    CScoreIni.tGetIsUpdateNeeded(out b更新が必要か否か[0], out b更新が必要か否か[1], out b更新が必要か否か[2]);
+                                    if (bNewProgressBarRecord.Drums)
+                                    {
+                                        // New Song Progress
+                                        cScore.SongInformation.progress.Drums = cPerf_Drums.strProgress;
+                                    }
+
+                                    if (bNewProgressBarRecord.Guitar)
+                                    {
+                                        // New Song Progress
+                                        cScore.SongInformation.progress.Guitar = cPerf_Guitar.strProgress;
+                                    }
+
+                                    if (bNewProgressBarRecord.Bass)
+                                    {
+                                        // New Song Progress
+                                        cScore.SongInformation.progress.Bass = cPerf_Bass.strProgress;
+                                    }
                                 }
                             }
                         }
-                    }
 
                         CDTXMania.DTX.tStopPlayingAllChips();
                         CDTXMania.DTX.OnDeactivate();
@@ -445,11 +445,10 @@ internal class StageManager
                         }
                         else
                         {
-                            tChangeStage(stageSongSelection);
+                            tChangeStage(stageSongSelectionNew);
                         }
 
                         break;
-                    //-----------------------------
 
                     #endregion
 
@@ -478,7 +477,8 @@ internal class StageManager
 
                         if (!bIsTrainingMode)
                         {
-                            if (CDTXMania.ConfigIni.bIsSwappedGuitarBass) // #24063 2011.1.24 yyagi Gt/Bsを入れ替えていたなら、演奏結果も入れ替える
+                            if (CDTXMania.ConfigIni
+                                .bIsSwappedGuitarBass) // #24063 2011.1.24 yyagi Gt/Bsを入れ替えていたなら、演奏結果も入れ替える
                             {
                                 CScoreIni.CPerformanceEntry t;
                                 t = cPerfEntry_Guitar;
@@ -583,7 +583,8 @@ internal class StageManager
                 //-----------------------------
                 if (nUpdateAndDrawReturnValue != 0)
                 {
-                    if (CDTXMania.ConfigIni.bIsSwappedGuitarBass) // #24415 2011.2.27 yyagi Gt/Bsを入れ替えていたなら、Auto状態をリザルト画面終了後に元に戻す
+                    if (CDTXMania.ConfigIni
+                        .bIsSwappedGuitarBass) // #24415 2011.2.27 yyagi Gt/Bsを入れ替えていたなら、Auto状態をリザルト画面終了後に元に戻す
                     {
                         CDTXMania.ConfigIni.SwapGuitarBassInfos_AutoFlags(); // Auto入れ替え
                     }
@@ -593,7 +594,7 @@ internal class StageManager
                     rCurrentStage.OnDeactivate();
                     if (!CDTXMania.bCompactMode)
                     {
-                        tChangeStage(stageSongSelection);
+                        tChangeStage(stageSongSelectionNew);
                     }
                     else
                     {
@@ -614,7 +615,7 @@ internal class StageManager
                 //-----------------------------
                 if (nUpdateAndDrawReturnValue != 0)
                 {
-                    tChangeStage(stageSongSelection);
+                    tChangeStage(stageSongSelectionNew);
                 }
 
                 //-----------------------------

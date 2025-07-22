@@ -202,7 +202,7 @@ internal class CStageResult : CStage
 						}
 
 						//Save progress bar records
-						CScore cScore = CDTXMania.StageManager.stageSongSelection.rChosenScore;
+						CScore cScore = CDTXMania.confirmedChart;
 						strBestProgressBarRecord[i] = cScore.SongInformation.progress[i];
 						//May not need to save this...
 						strCurrProgressBarRecord[i] = stPerformanceEntry[i].strProgress;
@@ -302,7 +302,7 @@ internal class CStageResult : CStage
 				//---------------------
 				if (!CDTXMania.bCompactMode)
 				{
-					CScore cScore = CDTXMania.StageManager.stageSongSelection.rChosenScore;
+					CScore cScore = CDTXMania.confirmedChart;
 					bool[] b更新が必要か否か = new bool[3];
 					CScoreIni.tGetIsUpdateNeeded(out b更新が必要か否か[0], out b更新が必要か否か[1], out b更新が必要か否か[2]);
 					for (int m = 0; m < 3; m++)

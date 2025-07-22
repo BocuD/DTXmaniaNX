@@ -28,7 +28,7 @@ internal class CActSortSongs : CActSelectPopupMenu
 		level.action = () =>
 		{
 			int order = level.GetIndex() * 2 - 1;
-			actSongList.tSortSongList(CDTXMania.SongManager.t曲リストのソート4_LEVEL順, eInst, order, actSongList.n現在のアンカ難易度レベル);
+			actSongList.tSortSongList(CDTXMania.SongManager.t曲リストのソート4_LEVEL順, eInst, order, actSongList.nTargetDifficultyLevel);
 			actSongList.tSelectedSongHasChanged( true );
 		};
 		lci.Add(level);
@@ -37,7 +37,7 @@ internal class CActSortSongs : CActSelectPopupMenu
 		bestRank.action = () =>
 		{
 			int order = bestRank.GetIndex() * 2 - 1;
-			actSongList.tSortSongList(CDTXMania.SongManager.t曲リストのソート5_BestRank順, eInst, order, actSongList.n現在のアンカ難易度レベル);
+			actSongList.tSortSongList(CDTXMania.SongManager.t曲リストのソート5_BestRank順, eInst, order, actSongList.nTargetDifficultyLevel);
 		};
 		lci.Add(bestRank);
 
@@ -45,7 +45,7 @@ internal class CActSortSongs : CActSelectPopupMenu
 		playCount.action = () =>
 		{
 			int order = playCount.GetIndex() * 2 - 1;
-			actSongList.tSortSongList(CDTXMania.SongManager.t曲リストのソート3_演奏回数の多い順, eInst, order, actSongList.n現在のアンカ難易度レベル);
+			actSongList.tSortSongList(CDTXMania.SongManager.t曲リストのソート3_演奏回数の多い順, eInst, order, actSongList.nTargetDifficultyLevel);
 			actSongList.tSelectedSongHasChanged( true );
 		};
 		lci.Add(playCount);
@@ -54,7 +54,7 @@ internal class CActSortSongs : CActSelectPopupMenu
 		artist.action = () =>
 		{
 			int order = artist.GetIndex() * 2 - 1;
-			actSongList.tSortSongList(CDTXMania.SongManager.t曲リストのソート8_アーティスト名順, eInst, order, actSongList.n現在のアンカ難易度レベル);
+			actSongList.tSortSongList(CDTXMania.SongManager.t曲リストのソート8_アーティスト名順, eInst, order, actSongList.nTargetDifficultyLevel);
 			actSongList.tSelectedSongHasChanged( true );
 		};
 		lci.Add(artist);
@@ -63,7 +63,7 @@ internal class CActSortSongs : CActSelectPopupMenu
 		skillPoint.action = () =>
 		{
 			int order = skillPoint.GetIndex() * 2 - 1;
-			actSongList.tSortSongList(CDTXMania.SongManager.t曲リストのソート6_SkillPoint順, eInst, order, actSongList.n現在のアンカ難易度レベル);
+			actSongList.tSortSongList(CDTXMania.SongManager.t曲リストのソート6_SkillPoint順, eInst, order, actSongList.nTargetDifficultyLevel);
 			actSongList.tSelectedSongHasChanged( true );
 		};
 		lci.Add(skillPoint);
@@ -72,7 +72,7 @@ internal class CActSortSongs : CActSelectPopupMenu
 		date.action = () =>
 		{
 			int order = date.GetIndex() * 2 - 1;
-			actSongList.tSortSongList(CDTXMania.SongManager.t曲リストのソート7_更新日時順, eInst, order, actSongList.n現在のアンカ難易度レベル);
+			actSongList.tSortSongList(CDTXMania.SongManager.t曲リストのソート7_更新日時順, eInst, order, actSongList.nTargetDifficultyLevel);
 			actSongList.tSelectedSongHasChanged( true );
 		};
 		lci.Add(date);

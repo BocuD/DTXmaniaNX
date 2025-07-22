@@ -327,4 +327,15 @@ public class CScore
             SongInformation.chipCountByLane[eLane] = 0;
         }
     }
+
+    public bool HasChartForCurrentMode()
+    {
+        bool bScoreExistForMode = CDTXMania.ConfigIni.bDrumsEnabled && SongInformation.bScoreExists.Drums;
+        if (!bScoreExistForMode)
+        {
+            bScoreExistForMode = CDTXMania.ConfigIni.bGuitarEnabled &&
+                                 (SongInformation.bScoreExists.Guitar || SongInformation.bScoreExists.Bass);
+        }
+        return bScoreExistForMode;
+    }
 }

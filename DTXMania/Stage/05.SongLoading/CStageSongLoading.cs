@@ -195,12 +195,12 @@ internal class CStageSongLoading : CStage
 
             string strDTXFilePath = (CDTXMania.bCompactMode)
                 ? CDTXMania.strCompactModeFile
-                : CDTXMania.stageSongSelection.rChosenScore.FileInformation.AbsoluteFilePath;
+                : CDTXMania.confirmedChart.FileInformation.AbsoluteFilePath;
 
             cdtx = new(strDTXFilePath, true);
 
             if (!CDTXMania.bCompactMode && CDTXMania.ConfigIni.b曲名表示をdefのものにする)
-                strSongTitle = CDTXMania.stageSongSelection.rConfirmedSong.strTitle;
+                strSongTitle = CDTXMania.confirmedSong.title;
             else
                 strSongTitle = cdtx.TITLE;
 
@@ -284,8 +284,8 @@ internal class CStageSongLoading : CStage
             base.OnActivate();
             if (!CDTXMania.bCompactMode && !CDTXMania.DTXVmode.Enabled && !CDTXMania.DTX2WAVmode.Enabled)
                 tDetermineStatusLabelFromLabelName(
-                    CDTXMania.stageSongSelection.rConfirmedSong.arDifficultyLabel[
-                        CDTXMania.stageSongSelection.nConfirmedSongDifficulty]);
+                    CDTXMania.confirmedSong.difficultyLabel[
+                        CDTXMania.confirmedSongDifficulty]);
             
             //add difficulty panel to ui here
             //todo: this should be moved when chart loading is moved
@@ -468,7 +468,7 @@ internal class CStageSongLoading : CStage
             {
                 timeBeginLoad = DateTime.Now;
 
-                string songPath = !CDTXMania.bCompactMode ? CDTXMania.stageSongSelection.rChosenScore.FileInformation.AbsoluteFilePath : CDTXMania.strCompactModeFile;
+                string songPath = !CDTXMania.bCompactMode ? CDTXMania.confirmedChart.FileInformation.AbsoluteFilePath : CDTXMania.strCompactModeFile;
 
                 CScoreIni ini = new(songPath + ".score.ini");
                 ini.tCheckIntegrity();
@@ -620,12 +620,7 @@ internal class CStageSongLoading : CStage
                 TimeSpan span = DateTime.Now - timeBeginLoad;
                 Trace.TraceInformation($"Time to load DTX file: {span}");
                 
-                if (CDTXMania.bCompactMode)
-                    CDTXMania.DTX.MIDIレベル = 1;
-                else
-                    CDTXMania.DTX.MIDIレベル =
-                        (CDTXMania.stageSongSelection.rConfirmedSong.eNodeType == CSongListNode.ENodeType.SCORE_MIDI)
-                            ? CDTXMania.stageSongSelection.nSelectedSongDifficultyLevel : 0;
+                CDTXMania.DTX.MIDIレベル = CDTXMania.bCompactMode ? 1 : 0;
 
                 ePhaseID = EPhase.NOWLOADING_WAV_FILE_READING;
                 timeBeginLoadWAV = DateTime.Now;
@@ -797,7 +792,7 @@ internal class CStageSongLoading : CStage
                 {
                     //Always display CLASSIC style if Skill Mode is Classic
                     if (CDTXMania.ConfigIni.nSkillMode == 0 || (CDTXMania.ConfigIni.bCLASSIC譜面判別を有効にする &&
-                                                                CDTXMania.stageSongSelection.rChosenScore.SongInformation.bIsClassicChart[j] && 
+                                                                CDTXMania.confirmedChart.SongInformation.bIsClassicChart[j] && 
                                                                 !cdtx.bForceXGChart))
                     {
                         tDrawStringLarge(187 + k, 152, $"{DTXLevel:00}");
@@ -825,8 +820,9 @@ internal class CStageSongLoading : CStage
         
                     //this.txJacket.Dispose();
                     if (!CDTXMania.bCompactMode && !CDTXMania.DTXVmode.Enabled && !CDTXMania.DTX2WAVmode.Enabled)
-                        tDrawDifficultyPanel(CDTXMania.stageSongSelection.rConfirmedSong.arDifficultyLabel[
-                                CDTXMania.stageSongSelection.nConfirmedSongDifficulty], 191 + k, 102);
+                        tDrawDifficultyPanel(
+                            CDTXMania.confirmedSong.difficultyLabel[
+                                CDTXMania.confirmedSongDifficulty], 191 + k, 102);
         
                     k = 700;
                 }

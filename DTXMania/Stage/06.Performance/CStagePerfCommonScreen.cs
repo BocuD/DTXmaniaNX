@@ -27,19 +27,16 @@ internal abstract class CStagePerfCommonScreen : CStage
             // so dont display any presence until initialisation has occurred
             if (bJustStartedUpdate || CDTXMania.bCompactMode)
                 return null;
-
-            var stSongInformation = CDTXMania.stageSongSelection.rSelectedScore.SongInformation;
-            var rConfirmedSong = CDTXMania.stageSongSelection.rConfirmedSong;
-            var nConfirmedDifficulty = CDTXMania.stageSongSelection.nConfirmedSongDifficulty;
+            
             var nEndTimeMs = CDTXMania.DTX.listChip.OrderBy(c => c.nPlaybackTimeMs).LastOrDefault()?.nPlaybackTimeMs ?? 0;
 
             //Shorten details string to avoid hitting max of 128 bytes
-            string detailsString = $"{rConfirmedSong.strTitle}";
+            string detailsString = $"{CDTXMania.confirmedSong.title}";
             if(detailsString.Length > 50)
             {
                 detailsString = detailsString.Substring(0, 50);
             }
-            detailsString += $" [{rConfirmedSong.arDifficultyLabel[nConfirmedDifficulty]}]";
+            detailsString += $" [{CDTXMania.confirmedSong.difficultyLabel[CDTXMania.confirmedSongDifficulty]}]";
             return new CDTXRichPresence
             {
                 State = "In Game",
@@ -1402,9 +1399,9 @@ internal abstract class CStagePerfCommonScreen : CStage
         {
             //this.actStatusPanel.tSetDifficultyLabelFromScript( CDTXMania.stageSongSelection.rConfirmedSong.arDifficultyLabel[ CDTXMania.stageSongSelection.nConfirmedSongDifficulty ] );
         }
-        else if( CDTXMania.stageSongSelection.rConfirmedSong != null )
+        else if( CDTXMania.confirmedSong != null )
         {
-            actStatusPanel.tSetDifficultyLabelFromScript( CDTXMania.stageSongSelection.rConfirmedSong.arDifficultyLabel[ CDTXMania.stageSongSelection.nConfirmedSongDifficulty ] );
+            actStatusPanel.tSetDifficultyLabelFromScript( CDTXMania.confirmedSong.difficultyLabel[ CDTXMania.confirmedSongDifficulty ] );
         }
     }
     protected EJudgement tProcessChipHit(long nHitTime, CChip pChip)  // tチップのヒット処理
