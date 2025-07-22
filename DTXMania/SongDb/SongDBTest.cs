@@ -7,6 +7,9 @@ namespace DTXMania.SongDb;
 public class SongDBTester
 {
     private static SongDb songDb = new();
+
+    private static SongNode currentRoot;
+    private static SongNode? selectedNode;
     
     public static void DrawWindow()
     {
@@ -25,7 +28,7 @@ public class SongDBTester
 
         if (ImGui.Button("Scan"))
         {
-            Task.Run(() => songDb.ScanAsync());
+            Task.Run(() => songDb.ScanAsync(() => currentRoot = songDb.songNodeRoot));
         }
         
         ImGui.Text("Last scan time: " + songDb.statusDuration[SongDbScanStatus.Scanning]);
@@ -50,17 +53,111 @@ public class SongDBTester
                     break;
             }
         }
-        
+
+        if (selectedNode != null)
+        {
+            ImGui.Separator();
+
+            CScore chart = selectedNode.charts.FirstOrDefault(x => x != null);
+            if (chart != null)
+            {
+                ImGui.Text("Selected Node: " + selectedNode.title);
+                ImGui.Text("Path: " + selectedNode.path);
+                ImGui.Text("Title: " + chart.SongInformation.Title);
+                ImGui.Text("Title has japanese: " + chart.SongInformation.TitleHasJapanese);
+                ImGui.Text("Title (kana): " + chart.SongInformation.TitleKana);
+                ImGui.Text("Title (roman): " + chart.SongInformation.TitleRoman);
+                ImGui.Text("Artist: " + chart.SongInformation.ArtistName);
+                ImGui.Text("Artist has japanese: " + chart.SongInformation.ArtistNameHasJapanese);
+                ImGui.Text("Artist (kana): " + chart.SongInformation.ArtistNameKana);
+                ImGui.Text("Artist (roman): " + chart.SongInformation.ArtistNameRoman);
+                ImGui.Text("Comment: " + chart.SongInformation.Comment);
+            }
+            else
+            {
+                ImGui.Text("Selected Node: " + selectedNode.title);
+                ImGui.Text("Path: " + selectedNode.path);
+                ImGui.Text("No valid charts found.");
+            }
+        }
+
         ImGui.Separator();
+        DrawSortingOptions();
+        ImGui.Separator();
+        
         ImGui.Text("Total Song Nodes: " + songDb.totalSongs);
         ImGui.Text("Total Charts: " + songDb.totalCharts);
+        
         ImGui.Separator();
-        foreach (SongNode node in songDb.songNodeRoot.childNodes)
+
+        if (currentRoot != null)
         {
-            DrawNode(node);
+            foreach (SongNode node in currentRoot.childNodes)
+            {
+                DrawNode(node);
+            }
+        }
+        else
+        {
+            ImGui.Text("No song database selected");
         }
 
         ImGui.End();
+    }
+
+    private static void DrawSortingOptions()
+    {
+        if (ImGui.Button("Title"))
+        {
+            SortByTitle sortByTitle = new();
+            Task.Run(async () =>
+            {
+                List<SongNode> flattened = await songDb.FlattenSongList(songDb.songNodeRoot.childNodes); 
+                currentRoot = await sortByTitle.Sort(flattened);
+            });
+        }
+        
+        ImGui.SameLine();
+        
+        if (ImGui.Button("Version"))
+        {
+            
+        }
+        
+        ImGui.SameLine();
+
+        if (ImGui.Button("Difficulty"))
+        {
+            
+        }
+
+        ImGui.SameLine();
+
+        if (ImGui.Button("Level"))
+        {
+            
+        }
+        
+        ImGui.SameLine();
+
+        if (ImGui.Button("Artist"))
+        {
+            
+        }
+        
+        ImGui.SameLine();
+
+        if (ImGui.Button("NEW"))
+        {
+            
+        }
+        
+        ImGui.SameLine();
+
+        if (ImGui.Button("All Songs"))
+        {
+            currentRoot = songDb.songNodeRoot;
+        }
     }
 
     private static void DrawNode(SongNode node)
@@ -86,6 +183,12 @@ public class SongDBTester
         }
         
         bool isOpen = ImGui.TreeNodeEx(id, flags);
+
+        if (ImGui.IsItemClicked())
+        {
+            if (node == selectedNode) selectedNode = null;
+            selectedNode = node;
+        }
 
         if (isOpen)
         {
