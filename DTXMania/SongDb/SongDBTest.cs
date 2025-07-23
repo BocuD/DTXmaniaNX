@@ -73,44 +73,48 @@ public class SongDBTester
                 ImGui.Text("Artist (kana): " + chart.SongInformation.ArtistNameKana);
                 ImGui.Text("Artist (roman): " + chart.SongInformation.ArtistNameRoman);
                 ImGui.Text("Comment: " + chart.SongInformation.Comment);
-                
-                //imgui table 3x6
-                ImGui.Separator();
-                ImGui.Text("Charts:");
-                ImGui.Columns(3, "Charts", true);
-                ImGui.Text("Drums LV");
-                ImGui.NextColumn();
-                ImGui.Text("Guitar LV");
-                ImGui.NextColumn();
-                ImGui.Text("Bass LV");
-                ImGui.NextColumn();
-                ImGui.Separator();
-                
-                for (int i = 0; i < 5; i++)
-                {
-                    if (selectedNode.charts[i] != null)
-                    {
-                        bool bShowClassicLevel = CDTXMania.ConfigIni.nSkillMode == 0 || CDTXMania.ConfigIni.bClassicScoreDisplay;
 
-                        var level = selectedNode.charts[i].SongInformation.Level;
-                        
-                        //empty
-                        ImGui.Text(level.Drums.ToString());
-                        ImGui.NextColumn();
-                        ImGui.Text(level.Guitar.ToString());
-                        ImGui.NextColumn();
-                        ImGui.Text(level.Bass.ToString());
-                        ImGui.NextColumn();
-                    }
-                    else
+                if (selectedNode.nodeType == SongNode.ENodeType.SONG)
+                {
+                    //imgui table 3x6
+                    ImGui.Separator();
+                    ImGui.Text("Charts:");
+                    ImGui.Columns(3, "Charts", true);
+                    ImGui.Text("Drums LV");
+                    ImGui.NextColumn();
+                    ImGui.Text("Guitar LV");
+                    ImGui.NextColumn();
+                    ImGui.Text("Bass LV");
+                    ImGui.NextColumn();
+                    ImGui.Separator();
+
+                    for (int i = 0; i < 5; i++)
                     {
-                        //empty
-                        ImGui.Text("N/A");
-                        ImGui.NextColumn();
-                        ImGui.Text("N/A");
-                        ImGui.NextColumn();
-                        ImGui.Text("N/A");
-                        ImGui.NextColumn();
+                        if (selectedNode.charts[i] != null)
+                        {
+                            bool bShowClassicLevel = CDTXMania.ConfigIni.nSkillMode == 0 ||
+                                                     CDTXMania.ConfigIni.bClassicScoreDisplay;
+
+                            var level = selectedNode.charts[i].SongInformation.Level;
+
+                            //empty
+                            ImGui.Text(level.Drums.ToString());
+                            ImGui.NextColumn();
+                            ImGui.Text(level.Guitar.ToString());
+                            ImGui.NextColumn();
+                            ImGui.Text(level.Bass.ToString());
+                            ImGui.NextColumn();
+                        }
+                        else
+                        {
+                            //empty
+                            ImGui.Text("N/A");
+                            ImGui.NextColumn();
+                            ImGui.Text("N/A");
+                            ImGui.NextColumn();
+                            ImGui.Text("N/A");
+                            ImGui.NextColumn();
+                        }
                     }
                 }
             }
@@ -150,24 +154,14 @@ public class SongDBTester
     {
         if (ImGui.Button("Title"))
         {
-            SortByTitle sortByTitle = new();
-            Task.Run(async () =>
-            {
-                List<SongNode> flattened = await songDb.FlattenSongList(songDb.songNodeRoot.childNodes); 
-                currentRoot = await sortByTitle.Sort(flattened);
-            });
+            Sort(new SortByTitle());
         }
         
         ImGui.SameLine();
 
         if (ImGui.Button("Artist"))
         {
-            SortByArtist sortByArtist = new();
-            Task.Run(async () =>
-            {
-                List<SongNode> flattened = await songDb.FlattenSongList(songDb.songNodeRoot.childNodes); 
-                currentRoot = await sortByArtist.Sort(flattened);
-            });
+            Sort(new SortByArtist());
         }
         
         ImGui.SameLine();
@@ -181,12 +175,7 @@ public class SongDBTester
 
         if (ImGui.Button("Difficulty"))
         {
-            SortByDifficulty sortByDifficulty = new();
-            Task.Run(async () =>
-            {
-                List<SongNode> flattened = await songDb.FlattenSongList(songDb.songNodeRoot.childNodes); 
-                currentRoot = await sortByDifficulty.Sort(flattened);
-            });
+            Sort(new SortByDifficulty());
         }
 
         ImGui.SameLine();
@@ -205,9 +194,26 @@ public class SongDBTester
         
         ImGui.SameLine();
 
+        if (ImGui.Button("BOX"))
+        {
+            Sort(new SortByBox());
+        }
+        
+        ImGui.SameLine();
+
         if (ImGui.Button("All Songs"))
         {
-            currentRoot = songDb.songNodeRoot;
+            Sort(new SortByAllSongs());
+        }
+
+        return;
+
+        void Sort(SongDbSort sort)
+        {
+            Task.Run(async () =>
+            {
+                currentRoot = await sort.Sort(songDb);
+            });
         }
     }
 

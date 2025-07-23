@@ -51,12 +51,56 @@ public class SongNode
     public SongNode(SongNode parent)
     {
         this.parent = parent;
+        
+        parent.childNodes.Add(this);
     }
 
-    public static SongNode Clone(SongNode original, SongNode parent)
+    public SongNode(SongNode? parent, ENodeType type)
+    {
+        this.parent = parent!;
+        nodeType = type;
+
+        switch (type)
+        {
+            case ENodeType.ROOT:
+                title = "Root";
+                break;
+            
+            case ENodeType.BACKBOX:
+                charts =
+                [
+                    new CScore
+                    {
+                        FileInformation = new CScore.STFileInformation
+                        {
+                            AbsoluteFolderPath = ""
+                        },
+                        SongInformation = new CScore.STMusicInformation
+                        {
+                            Preimage = CSkin.Path(@"Graphics\5_preimage backbox.png")
+                        }
+                    }
+                ];
+                break;
+            
+            case ENodeType.BOX:
+                parent?.childNodes.Add(this);
+
+                //add a return node
+                SongNode backBox = new(this, ENodeType.BACKBOX);
+                childNodes.Insert(0, backBox);
+                break;
+            
+            default:
+                parent?.childNodes.Add(this);
+                break;
+        }
+    }
+
+    public static SongNode Clone(SongNode original, SongNode parent, bool copyCharts = true)
     {
         //copy all properties except for charts
-        SongNode clone = new(parent)
+        SongNode clone = new(parent, original.nodeType)
         {
             nodeType = original.nodeType,
             skinPath = original.skinPath,
@@ -68,12 +112,32 @@ public class SongNode
             stGuitarHitRanges = original.stGuitarHitRanges,
             stBassHitRanges = original.stBassHitRanges
         };
+
+        if (original.nodeType == ENodeType.BOX)
+        {
+            foreach (SongNode node in original.childNodes)
+            {
+                Clone(node, clone);
+            }
+        }
+
+        if (copyCharts)
+        {
+            clone.chartCount = original.chartCount;
+            for (int i = 0; i < original.charts.Length; i++)
+            {
+                clone.charts[i] = original.charts[i];
+                clone.difficultyLabel[i] = original.difficultyLabel[i];
+            }
+        }
         return clone;
     }
 
     public string GetImagePath()
     {
         var chart = charts.FirstOrDefault(x => x != null);
+
+        if (chart == null) return "";
         
         string imagePath = "";
         string preImagePath = chart.SongInformation.Preimage;
