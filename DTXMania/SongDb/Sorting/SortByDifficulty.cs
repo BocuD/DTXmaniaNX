@@ -15,6 +15,29 @@ public class SortByDifficulty : SongDbSort
         
         Dictionary<string, SongNode> difficultyNodes = new();
 
+        foreach (var difficultyLabel in difficultyLabels)
+        {
+            SongNode node = new(root, SongNode.ENodeType.BOX)
+            {
+                title = difficultyLabel
+            };
+            difficultyNodes[difficultyLabel] = node;
+        }
+
+        if (!CDTXMania.ConfigIni.bDrumsEnabled)
+        {
+            //add bass nodes too
+            foreach (var difficultyLabel in difficultyLabels)
+            {
+                string bassDifficultyLabel = "BASS " + difficultyLabel;
+                SongNode node = new(root, SongNode.ENodeType.BOX)
+                {
+                    title = bassDifficultyLabel
+                };
+                difficultyNodes[bassDifficultyLabel] = node;
+            }
+        }
+
         foreach (SongNode songNode in songDb.flattenedSongList)
         {
             for (int index = 0; index < songNode.charts.Length; index++)
@@ -32,12 +55,6 @@ public class SortByDifficulty : SongDbSort
 
                 if (CDTXMania.ConfigIni.bDrumsEnabled)
                 {
-                    if (!difficultyNodes.ContainsKey(difficultyName))
-                    {
-                        SongNode newDifficultyNode = CreateDifficultyLabel(difficultyName, root);
-                        difficultyNodes[difficultyName] = newDifficultyNode;
-                    }
-                    
                     SongNode difficultyNode = difficultyNodes[difficultyName];
                     SongNode newNode = SongNode.Clone(songNode, difficultyNode, false);
                     newNode.charts[index] = chart;
@@ -48,12 +65,6 @@ public class SortByDifficulty : SongDbSort
                 {
                     if (chart.SongInformation.bScoreExists.Guitar)
                     {
-                        if (!difficultyNodes.ContainsKey(difficultyName))
-                        {
-                            SongNode newDifficultyNode = CreateDifficultyLabel(difficultyName, root);
-                            difficultyNodes[difficultyName] = newDifficultyNode;
-                        }
-                        
                         SongNode difficultyNode = difficultyNodes[difficultyName];
                         SongNode newNode = SongNode.Clone(songNode, difficultyNode, false);
                         newNode.charts[index] = chart;
@@ -64,12 +75,6 @@ public class SortByDifficulty : SongDbSort
                     if (chart.SongInformation.bScoreExists.Bass)
                     {
                         difficultyName = "BASS " + difficultyName; // prefix for bass difficulties
-                        
-                        if (!difficultyNodes.ContainsKey(difficultyName))
-                        {
-                            SongNode newDifficultyNode = CreateDifficultyLabel(difficultyName, root);
-                            difficultyNodes[difficultyName] = newDifficultyNode;
-                        }
                         
                         SongNode difficultyNode = difficultyNodes[difficultyName];
                         SongNode newNode = SongNode.Clone(songNode, difficultyNode, false);
