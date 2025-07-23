@@ -265,9 +265,6 @@ public class CScore
 
     public bool bHadACacheInSongDB;
 
-    public bool bIsScoreValid =>
-        (((SongInformation.Level[0] + SongInformation.Level[1]) + SongInformation.Level[2]) != 0);
-
 
     // Constructor
 
