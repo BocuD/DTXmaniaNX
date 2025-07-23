@@ -124,8 +124,11 @@ public class SongSelectionContainer : UIGroup
 
         if (Math.Abs(targetY - elementsContainer.position.Y) > 0.01f)
         {
-            //smoothly move towards targetY
-            elementsContainer.position.Y += (targetY - elementsContainer.position.Y) * delta * 10.0f; //10.0f is the speed factor
+            float movementAmount = (targetY - elementsContainer.position.Y) * delta * 10.0f; //10.0f is the speed factor
+            
+            //clamp
+            movementAmount = Math.Clamp(movementAmount, -10.0f, 10.0f);
+            elementsContainer.position.Y += movementAmount;
         }
         else
         {

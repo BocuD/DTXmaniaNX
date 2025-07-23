@@ -41,6 +41,7 @@ public class CStageSongSelectionNew : CStage
 
         SongDbSort[] sorters =
         [
+            new SortDefault(),
             new SortByBox(),
             new SortByTitle(),
             new SortByArtist(),

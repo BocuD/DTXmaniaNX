@@ -17,8 +17,11 @@ public class SortByArtist : SortByTitle
 
         if (string.IsNullOrWhiteSpace(chart.SongInformation.ArtistNameRoman))
         {
-            return '#';
+            return '-';
         }
+
+        //returning '-' for no data, this will force it into other
+        if (chart.SongInformation.ArtistNameRoman[0] == '-') return '#';
 
         return chart.SongInformation.ArtistNameRoman[0];
     }

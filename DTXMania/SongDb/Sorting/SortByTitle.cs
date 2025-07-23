@@ -34,6 +34,12 @@ public class SortByTitle : SongDbSort
             letterNodes[c] = node;
         }
 
+        SongNode noData = new(root, SongNode.ENodeType.BOX)
+        {
+            title = $"No {Name}"
+        };
+        letterNodes.Add('-', noData);
+        
         SongNode other = new(root, SongNode.ENodeType.BOX)
         {
             title = "Other"
@@ -93,8 +99,11 @@ public class SortByTitle : SongDbSort
 
         if (string.IsNullOrWhiteSpace(chart.SongInformation.TitleRoman))
         {
-            return '#';
+            return '-';
         }
+        
+        //returning '-' for no data, this will force it into other
+        if (chart.SongInformation.TitleRoman[0] == '-') return '#';
 
         return chart.SongInformation.TitleRoman[0];
     }
