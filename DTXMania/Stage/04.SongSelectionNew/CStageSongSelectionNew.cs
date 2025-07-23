@@ -12,6 +12,7 @@ public class CStageSongSelectionNew : CStage
 {
     private SongDb.SongDb songDb = new();
     private SongSelectionContainer selectionContainer;
+    private SortMenuContainer sortMenuContainer;
     
     protected override RichPresence Presence => new CDTXRichPresence
     {
@@ -26,7 +27,7 @@ public class CStageSongSelectionNew : CStage
 
     public override void InitializeBaseUI()
     {
-        var family = new FontFamily(CDTXMania.ConfigIni.songListFont); 
+        FontFamily family = new(CDTXMania.ConfigIni.songListFont); 
         statusText = ui.AddChild(new UIText(family, 18));
         statusText.renderOrder = 100;
 
@@ -37,6 +38,17 @@ public class CStageSongSelectionNew : CStage
 
         selectionContainer = ui.AddChild(new SongSelectionContainer(songDb, bigAlbumArt));
         selectionContainer.position = new Vector3(800, 320, 0);
+
+        SongDbSort[] sorters =
+        [
+            new SortByBox(),
+            new SortByTitle(),
+            new SortByArtist(),
+            new SortByDifficulty(),
+            new SortByAllSongs()
+        ];
+        sortMenuContainer = ui.AddChild(new SortMenuContainer(songDb, sorters));
+        sortMenuContainer.position = new Vector3(300, 50, 0);
     }
 
     public override void InitializeDefaultUI()
@@ -81,11 +93,18 @@ public class CStageSongSelectionNew : CStage
             else
             {
                 selectionContainer.isVisible = true;
+                
+                sortMenuContainer.HandleNavigation();
                 return selectionContainer.HandleNavigation();
             }
         }
 
         return 0;
+    }
+
+    public void UpdateRoot(SongNode newRoot)
+    {
+        selectionContainer.UpdateRoot(newRoot);
     }
     
     private void UpdateSongDbStatus()

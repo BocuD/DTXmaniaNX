@@ -3,7 +3,6 @@ using DTXMania.Core;
 using DTXMania.SongDb;
 using DTXMania.UI;
 using DTXMania.UI.Drawable;
-using DTXMania.UI.Inspector;
 using Hexa.NET.ImGui;
 using SharpDX;
 using SlimDX.DirectInput;
@@ -34,7 +33,6 @@ public class SongSelectionContainer : UIGroup
     {
         return songSelectionElements[WrapIndex(bufferStartIndex + logicalIndex)];
     }
-
     
     public SongSelectionContainer(SongDb.SongDb songDb, UIImage albumArt)
     {
@@ -50,17 +48,20 @@ public class SongSelectionContainer : UIGroup
         
         for (int i = 0; i < songSelectionElements.Length; i++)
         {
-            songSelectionElements[i] = elementsContainer.AddChild(SongSelectionElement.Create());
+            songSelectionElements[i] = elementsContainer.AddChild(new SongSelectionElement());
         }
     }
 
-    private float rowSpacing = 85.0f; //vertical spacing between elements
+    private float elementSpacing = 85.0f; //spacing between elements
     private int selectionIndex = 10; //the center element is the 10th element in the array (0-based index)
 
     private SongNode currentSelection => songSelectionElements[WrapIndex(bufferStartIndex + selectionIndex)].node;
     
     public void UpdateRoot(SongNode? newRoot = null)
     {
+        //make sure the fallback is loaded
+        fallbackPreImage = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_preimage default.png"));
+
         currentRoot = newRoot ?? songDb.songNodeRoot;
         SongNode node = currentRoot.CurrentSelection;
 
@@ -82,7 +83,7 @@ public class SongSelectionContainer : UIGroup
             SongNode nextNode = SongNode.rNextSong(songSelectionElements[i - 1].node);
             var tex = CachePreImage(nextNode);
             songSelectionElements[i].UpdateSongNode(nextNode, tex);
-            songSelectionElements[i].position.Y = (i - selectionIndex) * rowSpacing;
+            songSelectionElements[i].position.Y = (i - selectionIndex) * elementSpacing;
         }
         
         //fill the first elements with previous songs
@@ -91,16 +92,13 @@ public class SongSelectionContainer : UIGroup
             SongNode prevNode = SongNode.rPreviousSong(songSelectionElements[i + 1].node);
             var tex = CachePreImage(prevNode);
             songSelectionElements[i].UpdateSongNode(prevNode, tex);
-            songSelectionElements[i].position.Y = (i - selectionIndex) * rowSpacing;
+            songSelectionElements[i].position.Y = (i - selectionIndex) * elementSpacing;
         }
         
         //update album art
         UpdateSelectedSongAlbumArt();
         
-        lastDrawTime = CDTXMania.Timer.nCurrentTime;
-        
-        //make sure the fallback is loaded
-        fallbackPreImage = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_preimage default.png"));
+        lastDrawTime = CDTXMania.Timer.nCurrentTime; 
     }
 
     private void UpdateSelectedSongAlbumArt()
@@ -134,16 +132,16 @@ public class SongSelectionContainer : UIGroup
             elementsContainer.position.Y = targetY; //snap to target if close enough
         }
         
-        if (elementsContainer.position.Y >= rowSpacing / 2)
+        if (elementsContainer.position.Y >= elementSpacing / 2)
         {
-            elementsContainer.position.Y -= rowSpacing;
-            targetY -= rowSpacing;
+            elementsContainer.position.Y -= elementSpacing;
+            targetY -= elementSpacing;
             MoveUp();
         }
-        else if (elementsContainer.position.Y <= -rowSpacing / 2)
+        else if (elementsContainer.position.Y <= -elementSpacing / 2)
         {
-            elementsContainer.position.Y += rowSpacing;
-            targetY += rowSpacing;
+            elementsContainer.position.Y += elementSpacing;
+            targetY += elementSpacing;
             MoveDown();
         }
         
@@ -173,13 +171,13 @@ public class SongSelectionContainer : UIGroup
     {
         base.DrawInspector();
 
-        if (ImGui.CollapsingHeader("Song Element Positioning"))
+        if (ImGui.CollapsingHeader("Element Positioning"))
         {
-            ImGui.InputFloat("Row Spacing", ref rowSpacing);
+            ImGui.InputFloat("Element Spacing", ref elementSpacing);
             ImGui.InputInt("Selection Index", ref selectionIndex);
         }
 
-        if (ImGui.CollapsingHeader("Song Element Animation"))
+        if (ImGui.CollapsingHeader("Element Animation"))
         {
             ImGui.InputFloat("Offset Range", ref offsetRange);
             ImGui.InputFloat("Offset Distance", ref offsetDistance);
@@ -194,7 +192,7 @@ public class SongSelectionContainer : UIGroup
             || CDTXMania.Pad.bPressedGB(EPad.R)
             || CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.HT))
         {
-            targetY += rowSpacing;
+            targetY += elementSpacing;
         }
         //ctKeyRepeat.Down.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(Key.DownArrow), new CCounter.DGキー処理(MoveDown));
         //ctKeyRepeat.B.tRepeatKey(CDTXMania.Pad.bPressingGB(EPad.G), new CCounter.DGキー処理(MoveDown));
@@ -202,19 +200,7 @@ public class SongSelectionContainer : UIGroup
             || CDTXMania.Pad.bPressedGB(EPad.G)
             || CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.LT))
         {
-            targetY -= rowSpacing;
-        }
-        if (CDTXMania.InputManager.Keyboard.bKeyPressed(Key.LeftArrow)
-            || CDTXMania.Pad.bPressedGB(EPad.Pick) //??
-            || CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.SD))
-        {
-            MoveLeft();
-        }
-        if (CDTXMania.InputManager.Keyboard.bKeyPressed(Key.RightArrow)
-            || CDTXMania.Pad.bPressedGB(EPad.Pick) //??
-            || CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.FT))
-        {
-            MoveRight();
+            targetY -= elementSpacing;
         }
 
         if (CDTXMania.Input.ActionDecide())
@@ -262,7 +248,7 @@ public class SongSelectionContainer : UIGroup
         //overwrite the new head
         //overwriteElement.UpdateSongNode(newNode, newTex);
         int newTopIndex = bufferStartIndex;
-        float newYOffset = songSelectionElements[WrapIndex(newTopIndex + 1)].position.Y - rowSpacing;
+        float newYOffset = songSelectionElements[WrapIndex(newTopIndex + 1)].position.Y - elementSpacing;
         overwriteElement.position.Y = newYOffset;
         songSelectionElements[newTopIndex] = overwriteElement;
 
@@ -298,7 +284,7 @@ public class SongSelectionContainer : UIGroup
 
         //update the overwritten slot
         //overwriteElement.UpdateSongNode(newNode, newTex);
-        overwriteElement.position.Y = songSelectionElements[bottomIndex].position.Y + rowSpacing;
+        overwriteElement.position.Y = songSelectionElements[bottomIndex].position.Y + elementSpacing;
         songSelectionElements[overwriteIndex] = overwriteElement;
 
         //advance ring buffer start
@@ -316,18 +302,8 @@ public class SongSelectionContainer : UIGroup
         for (int i = 0; i < songSelectionElements.Length; i++)
         {
             int realIndex = WrapIndex(bufferStartIndex + i);
-            songSelectionElements[realIndex].position.Y = (i - selectionIndex) * rowSpacing;
+            songSelectionElements[realIndex].position.Y = (i - selectionIndex) * elementSpacing;
         }
-    }
-    
-    private void MoveLeft()
-    {
-        CDTXMania.Skin.soundCursorMovement.tPlay();
-    }
-    
-    private void MoveRight()
-    {
-        CDTXMania.Skin.soundCursorMovement.tPlay();
     }
 
     private bool ActionDecide()
