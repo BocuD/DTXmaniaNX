@@ -204,8 +204,7 @@ public class SongSelectionContainer : UIGroup
         ctKeyRepeat.R.tRepeatKey(CDTXMania.Pad.bPressingGB(EPad.R),
             () => ApplyScrollDelta(elementSpacing), 400, 25);
         
-        if (CDTXMania.Pad.bPressedGB(EPad.R)
-            || CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.HT))
+        if (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.HT))
         {
             ApplyScrollDelta(elementSpacing);
         }
@@ -215,8 +214,7 @@ public class SongSelectionContainer : UIGroup
         ctKeyRepeat.B.tRepeatKey(CDTXMania.Pad.bPressingGB(EPad.G), 
             () => ApplyScrollDelta(-elementSpacing), 400, 25);
         
-        if (CDTXMania.Pad.bPressedGB(EPad.G)
-            || CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.LT))
+        if (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.LT))
         {
             ApplyScrollDelta(-elementSpacing);
         }
