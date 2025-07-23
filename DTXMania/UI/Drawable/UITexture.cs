@@ -49,8 +49,9 @@ public abstract class UITexture : UIDrawable
     public override void Dispose()
     {
         base.Dispose();
-        
-        texture.Dispose();
+
+        if (texture != null)
+            texture.Dispose();
     }
 
     public override void OnDeserialize()
