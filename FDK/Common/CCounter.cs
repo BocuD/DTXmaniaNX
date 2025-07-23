@@ -153,7 +153,7 @@ public class CCounter
 	/// </summary>
 	/// <param name="bキー押下">キーが押下されている場合は true。</param>
 	/// <param name="tキー処理">キーが押下されている場合に実行する処理。</param>
-	public void tRepeatKey(bool bキー押下, DGキー処理 tキー処理)  // tキー反復
+	public void tRepeatKey(bool bキー押下, DGキー処理 tキー処理, int firstInterval = 200, int repeatPressInterval = 30)  // tキー反復
 	{
 		const int n1回目 = 0;
 		const int n2回目 = 1;
@@ -172,7 +172,7 @@ public class CCounter
 
 				case n2回目:
 
-					if ((timer.nCurrentTime - nCurrentElapsedTimeMs) > 200)
+					if ((timer.nCurrentTime - nCurrentElapsedTimeMs) > firstInterval)
 					{
 						tキー処理();
 						nCurrentElapsedTimeMs = timer.nCurrentTime;
@@ -182,7 +182,7 @@ public class CCounter
 
 				case n3回目以降:
 
-					if ((timer.nCurrentTime - nCurrentElapsedTimeMs) > 30)
+					if ((timer.nCurrentTime - nCurrentElapsedTimeMs) > repeatPressInterval)
 					{
 						tキー処理();
 						nCurrentElapsedTimeMs = timer.nCurrentTime;

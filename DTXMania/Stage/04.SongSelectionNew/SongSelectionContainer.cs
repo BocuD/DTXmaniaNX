@@ -1,8 +1,10 @@
 ﻿using System.Diagnostics;
+using System.Runtime.InteropServices;
 using DTXMania.Core;
 using DTXMania.SongDb;
 using DTXMania.UI;
 using DTXMania.UI.Drawable;
+using FDK;
 using Hexa.NET.ImGui;
 using SharpDX;
 using SlimDX.DirectInput;
@@ -27,11 +29,6 @@ public class SongSelectionContainer : UIGroup
     private int WrapIndex(int index)
     {
         return (index + songSelectionElements.Length) % songSelectionElements.Length;
-    }
-
-    private SongSelectionElement GetElement(int logicalIndex)
-    {
-        return songSelectionElements[WrapIndex(bufferStartIndex + logicalIndex)];
     }
     
     public SongSelectionContainer(SongDb.SongDb songDb, UIImage albumArt)
@@ -191,24 +188,37 @@ public class SongSelectionContainer : UIGroup
             ImGui.InputFloat("Offset Distance", ref offsetDistance);
         }
     }
-
+    
+    private STKeyRepeatCounter ctKeyRepeat = new();
+    
     public int HandleNavigation()
     {
-        //ctKeyRepeat.Up.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(Key.UpArrow), new CCounter.DGキー処理(MoveUp));
-        //ctKeyRepeat.R.tRepeatKey(CDTXMania.Pad.bPressingGB(EPad.R), new CCounter.DGキー処理(MoveUp));
-        if (CDTXMania.InputManager.Keyboard.bKeyPressed(Key.UpArrow)
-            || CDTXMania.Pad.bPressedGB(EPad.R)
+        void ApplyScrollDelta(float amount)
+        {
+            if (amount < 0 && targetY > amount * 2) targetY += amount;
+            else if (amount > 0 && targetY < amount * 2) targetY += amount;
+        }
+        
+        ctKeyRepeat.Up.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(Key.UpArrow),
+            () => ApplyScrollDelta(elementSpacing), 400, 25);
+        ctKeyRepeat.R.tRepeatKey(CDTXMania.Pad.bPressingGB(EPad.R),
+            () => ApplyScrollDelta(elementSpacing), 400, 25);
+        
+        if (CDTXMania.Pad.bPressedGB(EPad.R)
             || CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.HT))
         {
-            targetY += elementSpacing;
+            ApplyScrollDelta(elementSpacing);
         }
-        //ctKeyRepeat.Down.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(Key.DownArrow), new CCounter.DGキー処理(MoveDown));
-        //ctKeyRepeat.B.tRepeatKey(CDTXMania.Pad.bPressingGB(EPad.G), new CCounter.DGキー処理(MoveDown));
-        if (CDTXMania.InputManager.Keyboard.bKeyPressed(Key.DownArrow)
-            || CDTXMania.Pad.bPressedGB(EPad.G)
+        
+        ctKeyRepeat.Down.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(Key.DownArrow), 
+            () => ApplyScrollDelta(-elementSpacing), 400, 25);
+        ctKeyRepeat.B.tRepeatKey(CDTXMania.Pad.bPressingGB(EPad.G), 
+            () => ApplyScrollDelta(-elementSpacing), 400, 25);
+        
+        if (CDTXMania.Pad.bPressedGB(EPad.G)
             || CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.LT))
         {
-            targetY -= elementSpacing;
+            ApplyScrollDelta(-elementSpacing);
         }
 
         if (CDTXMania.Input.ActionDecide())
@@ -224,6 +234,14 @@ public class SongSelectionContainer : UIGroup
         }
 
         return 0;
+    }
+    
+    public struct STKeyRepeatCounter() //reused from CStageSongSelection
+    {
+        public CCounter Up = new( 0, 0, 0, CDTXMania.Timer );
+        public CCounter Down = new( 0, 0, 0, CDTXMania.Timer );
+        public CCounter R = new( 0, 0, 0, CDTXMania.Timer );
+        public CCounter B = new( 0, 0, 0, CDTXMania.Timer );
     }
     
     private void MoveUp()
