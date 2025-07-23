@@ -2,6 +2,8 @@
 
 public class SortByArtist : SortByTitle
 {
+    public override string Name => "Artist";
+
     protected override char GetSortKey(SongNode song)
     {
         //get song title
@@ -32,6 +34,10 @@ public class SortByArtist : SortByTitle
                 {
                     CScore chartA = a.charts.FirstOrDefault(x => x != null);
                     CScore chartB = b.charts.FirstOrDefault(x => x != null);
+                    
+                    if (chartA == null && chartB == null) return 0; //both null
+                    if (chartA == null) return 1; //a is null, b is not, b comes first
+                    if (chartB == null) return -1; //b is null, a is not, a comes first
                     
                     if (chartA.SongInformation.ArtistNameHasJapanese && chartB.SongInformation.ArtistNameHasJapanese)
                     {

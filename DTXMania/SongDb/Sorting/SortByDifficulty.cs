@@ -4,19 +4,18 @@ namespace DTXMania.SongDb;
 
 public class SortByDifficulty : SongDbSort
 {
+    public override string Name => "Difficulty";
+
     public string[] difficultyLabels = ["BASIC", "ADVANCED", "EXTREME", "MASTER", "DTX"];
     
-    public override async Task<SongNode> Sort(List<SongNode> flattenedNodes)
+    public override async Task<SongNode> Sort(SongDb songDb)
     {
         //create a new root node
-        SongNode root = new(null)
-        {
-            nodeType = SongNode.ENodeType.ROOT
-        };
+        SongNode root = new(null, SongNode.ENodeType.ROOT);
         
         Dictionary<string, SongNode> difficultyNodes = new();
 
-        foreach (SongNode songNode in flattenedNodes)
+        foreach (SongNode songNode in songDb.flattenedSongList)
         {
             for (int index = 0; index < songNode.charts.Length; index++)
             {
@@ -40,12 +39,10 @@ public class SortByDifficulty : SongDbSort
                     }
                     
                     SongNode difficultyNode = difficultyNodes[difficultyName];
-                    SongNode newNode = SongNode.Clone(songNode, difficultyNode);
+                    SongNode newNode = SongNode.Clone(songNode, difficultyNode, false);
                     newNode.charts[index] = chart;
                     newNode.chartCount = 1;
                     newNode.filteredInstrumentPart = EInstrumentPart.DRUMS;
-
-                    difficultyNode.childNodes.Add(newNode);
                 }
                 else
                 {
@@ -58,12 +55,10 @@ public class SortByDifficulty : SongDbSort
                         }
                         
                         SongNode difficultyNode = difficultyNodes[difficultyName];
-                        SongNode newNode = SongNode.Clone(songNode, difficultyNode);
+                        SongNode newNode = SongNode.Clone(songNode, difficultyNode, false);
                         newNode.charts[index] = chart;
                         newNode.chartCount = 1;
                         newNode.filteredInstrumentPart = EInstrumentPart.GUITAR;
-
-                        difficultyNode.childNodes.Add(newNode);
                     }
                     
                     if (chart.SongInformation.bScoreExists.Bass)
@@ -77,12 +72,10 @@ public class SortByDifficulty : SongDbSort
                         }
                         
                         SongNode difficultyNode = difficultyNodes[difficultyName];
-                        SongNode newNode = SongNode.Clone(songNode, difficultyNode);
+                        SongNode newNode = SongNode.Clone(songNode, difficultyNode, false);
                         newNode.charts[index] = chart;
                         newNode.chartCount = 1;
                         newNode.filteredInstrumentPart = EInstrumentPart.BASS;
-
-                        difficultyNode.childNodes.Add(newNode);
                     }
                 }
             }
@@ -121,11 +114,10 @@ public class SortByDifficulty : SongDbSort
 
     private SongNode CreateDifficultyLabel(string difficultyName, SongNode root)
     {
-        SongNode node = new(root)
+        SongNode node = new(root, SongNode.ENodeType.BOX)
         {
             title = difficultyName
         };
-        root.childNodes.Add(node);
         return node;
     }
 }

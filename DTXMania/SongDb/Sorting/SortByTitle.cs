@@ -4,13 +4,12 @@ namespace DTXMania.SongDb;
 
 public class SortByTitle : SongDbSort
 {
-    public override async Task<SongNode> Sort(List<SongNode> flattenedNodes)
+    public override string Name => "Title";
+
+    public override async Task<SongNode> Sort(SongDb songDb)
     {
         //create a new root node
-        SongNode root = new(null)
-        {
-            nodeType = SongNode.ENodeType.ROOT
-        };
+        SongNode root = new(null, SongNode.ENodeType.ROOT);
         
         Dictionary<char, SongNode> letterNodes = new();
         
@@ -18,37 +17,31 @@ public class SortByTitle : SongDbSort
         //A-Z, #, あ　か　さ　た　な　は　ま　や　ら　わ and other
         for (char c = 'a'; c <= 'z'; c++)
         {
-            SongNode node = new(root)
+            SongNode node = new(root, SongNode.ENodeType.BOX)
             {
-                title = c.ToString().ToUpper(),
-                nodeType = SongNode.ENodeType.BOX
+                title = c.ToString().ToUpper()
             };
             letterNodes[c] = node;
-            root.childNodes.Add(node);
         }
         
         char[] japaneseChars = { 'あ', 'か', 'さ', 'た', 'な', 'は', 'ま', 'や', 'ら', 'わ' };
         foreach (char c in japaneseChars)
         {
-            SongNode node = new(root)
+            SongNode node = new(root, SongNode.ENodeType.BOX)
             {
-                title = c.ToString(),
-                nodeType = SongNode.ENodeType.BOX
+                title = c.ToString()
             };
             letterNodes[c] = node;
-            root.childNodes.Add(node);
         }
 
-        SongNode other = new(root)
+        SongNode other = new(root, SongNode.ENodeType.BOX)
         {
-            title = "Other",
-            nodeType = SongNode.ENodeType.BOX
+            title = "Other"
         };
-        root.childNodes.Add(other);
 
         SongNode? error = null;
 
-        foreach (SongNode song in flattenedNodes)
+        foreach (SongNode song in songDb.flattenedSongList)
         {
             try
             {
@@ -59,11 +52,11 @@ public class SortByTitle : SongDbSort
 
                 if (letterNodes.TryGetValue(key, out SongNode? letterNode))
                 {
-                    letterNode.childNodes.Add(song);
+                    SongNode.Clone(song, letterNode);
                 }
                 else
                 {
-                    other.childNodes.Add(song);
+                    SongNode.Clone(song, other);
                 }
             }
             catch (Exception ex)
@@ -72,15 +65,13 @@ public class SortByTitle : SongDbSort
 
                 if (error == null)
                 {
-                    error = new SongNode(root)
+                    error = new SongNode(root, SongNode.ENodeType.BOX)
                     {
-                        title = "Sorting Error",
-                        nodeType = SongNode.ENodeType.BOX
+                        title = "Sorting Error"
                     };
-                    root.childNodes.Add(error);
                 }
                 
-                error.childNodes.Add(song);
+                SongNode.Clone(song, error);
             }
         }
 
@@ -119,6 +110,10 @@ public class SortByTitle : SongDbSort
                 {
                     CScore chartA = a.charts.FirstOrDefault(x => x != null);
                     CScore chartB = b.charts.FirstOrDefault(x => x != null);
+
+                    if (chartA == null && chartB == null) return 0; //both null
+                    if (chartA == null) return 1; //a is null, b is not, b comes first
+                    if (chartB == null) return -1; //b is null, a is not, a comes first
                     
                     if (chartA.SongInformation.TitleHasJapanese && chartB.SongInformation.TitleHasJapanese)
                     {

@@ -2,5 +2,6 @@
 
 public abstract class SongDbSort
 {
-    public abstract Task<SongNode> Sort(List<SongNode> flattenedNodes);
+    public abstract string Name { get; }
+    public abstract Task<SongNode> Sort(SongDb songDb);
 }
