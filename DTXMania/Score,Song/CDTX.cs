@@ -5178,21 +5178,21 @@ public class CDTX : CActivity
                 case "DLVDEC":
                     if (int.TryParse(param, out levelDec))
                     {
-                        dtx.LEVELDEC.Drums = Math.Min(Math.Max(levelDec, 0), 10);
+                        dtx.LEVELDEC.Drums = Math.Clamp(levelDec, 0, 10);
                     }
                     break;
                     
                 case "GLVDEC":
                     if (int.TryParse(param, out levelDec))
                     {
-                        dtx.LEVELDEC.Guitar = Math.Min(Math.Max(levelDec, 0), 10);
+                        dtx.LEVELDEC.Guitar = Math.Clamp(levelDec, 0, 10);
                     }
                     break;
                     
                 case "BLVDEC":
                     if (int.TryParse(param, out levelDec))
                     {
-                        dtx.LEVELDEC.Bass = Math.Min(Math.Max(levelDec, 0), 10);
+                        dtx.LEVELDEC.Bass = Math.Clamp(levelDec, 0, 10);
                     }
                     break;
             }
