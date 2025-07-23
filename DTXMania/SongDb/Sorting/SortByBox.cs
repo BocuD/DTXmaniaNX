@@ -23,7 +23,7 @@ public class SortByBox : SongDbSort
             title = "No Box"
         };
         
-        foreach (SongNode song in songDb.flattenedSongList)
+        foreach (SongNode song in songDb.songNodeRoot.childNodes)
         {
             if (song.nodeType == SongNode.ENodeType.SONG)
             {
