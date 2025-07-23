@@ -221,7 +221,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
 
         //シャッターを使うのはLC、LP、FT、RDレーンのみ。その他のレーンでは一切使用しない。
         //If Skill Mode is CLASSIC, always display lvl as Classic Style
-        if (CDTXMania.ConfigIni.nSkillMode == 0 || ((CDTXMania.ConfigIni.bCLASSIC譜面判別を有効にする == true) &&
+        if (CDTXMania.ConfigIni.nSkillMode == 0 || ((CDTXMania.ConfigIni.bClassicScoreDisplay == true) &&
                                                     ((CDTXMania.DTX.bHasChips.LeftCymbal == false) &&
                                                      (CDTXMania.DTX.bHasChips.FT == false) &&
                                                      (CDTXMania.DTX.bHasChips.Ride == false) &&

@@ -121,7 +121,7 @@ internal class CActResultImage : CActivity
             graphics = Graphics.FromImage(bitmap3);
             float num;
             //If Skill Mode is CLASSIC, always display lvl as Classic Style
-            if (CDTXMania.ConfigIni.nSkillMode == 0 || (CDTXMania.ConfigIni.bCLASSIC譜面判別を有効にする && 
+            if (CDTXMania.ConfigIni.nSkillMode == 0 || (CDTXMania.ConfigIni.bClassicScoreDisplay && 
                                                         (CDTXMania.DTX.bHasChips.LeftCymbal == false) && 
                                                         (CDTXMania.DTX.bHasChips.LP == false) && 
                                                         (CDTXMania.DTX.bHasChips.LBD == false) && 
@@ -142,7 +142,7 @@ internal class CActResultImage : CActivity
                 }
             }
             //If Skill Mode is CLASSIC, always display lvl as Classic Style
-            if (CDTXMania.ConfigIni.nSkillMode == 0 || (CDTXMania.ConfigIni.bCLASSIC譜面判別を有効にする && 
+            if (CDTXMania.ConfigIni.nSkillMode == 0 || (CDTXMania.ConfigIni.bClassicScoreDisplay && 
                                                         (CDTXMania.DTX.bHasChips.LeftCymbal == false) && 
                                                         (CDTXMania.DTX.bHasChips.LP == false) && 
                                                         (CDTXMania.DTX.bHasChips.LBD == false) && 

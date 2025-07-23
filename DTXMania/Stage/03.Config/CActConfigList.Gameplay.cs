@@ -56,12 +56,12 @@ internal partial class CActConfigList
             () => CDTXMania.ConfigIni.nSkillMode = iSystemSkillMode.nCurrentlySelectedIndex);
         listItems.Add(iSystemSkillMode);
 
-        CItemToggle iSystemClassicNotes = new("CLASSIC Notes", CDTXMania.ConfigIni.bCLASSIC譜面判別を有効にする,
+        CItemToggle iSystemClassicNotes = new("CLASSIC Notes", CDTXMania.ConfigIni.bClassicScoreDisplay,
             "CLASSIC譜面の判別の有無を設定します。\n",
             "Use CLASSIC score calculation when a classic song is detected.\n");
         iSystemClassicNotes.BindConfig(
-            () => iSystemClassicNotes.bON = CDTXMania.ConfigIni.bCLASSIC譜面判別を有効にする,
-            () => CDTXMania.ConfigIni.bCLASSIC譜面判別を有効にする = iSystemClassicNotes.bON);
+            () => iSystemClassicNotes.bON = CDTXMania.ConfigIni.bClassicScoreDisplay,
+            () => CDTXMania.ConfigIni.bClassicScoreDisplay = iSystemClassicNotes.bON);
         listItems.Add(iSystemClassicNotes);
             
         CItemToggle iAutoAddGage = new("AutoAddGage", CDTXMania.ConfigIni.bAutoAddGage,

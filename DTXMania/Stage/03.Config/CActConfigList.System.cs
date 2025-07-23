@@ -197,7 +197,7 @@ internal partial class CActConfigList
         };
         listItems.Add(iSystemFastReloadDTX);
         
-        int nDGmode = (CDTXMania.ConfigIni.bGuitarEnabled ? 1 : 1) + (CDTXMania.ConfigIni.bDrumsEnabled ? 0 : 1) - 1;
+        int nDGmode = CDTXMania.ConfigIni.bDrumsEnabled ? 0 : 1;
         iSystemGRmode = new CItemList("Drums & GR ", CItemBase.EPanelType.Normal, nDGmode,
             "使用楽器の選択：\nDrOnly: ドラムのみ有効にします。\nGROnly: ギター/ベースのみの専用画面を\n用います。",
             "Instrument selection:\nDrOnly: Activate Drums screen.\nGROnly: Activate single screen for Guitar and Bass.\n",

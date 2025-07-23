@@ -549,7 +549,7 @@ internal class CActSelectStatusPanel : CActivity
                                 // convert the level back into a whole number (0-999) to make it easier to work with
                                 int nLevel = (n現在選択中の曲のレベル難易度毎DGB[i][j] * 10) + n現在選択中の曲のレベル小数点難易度毎DGB[i][j];
                                 bool bHasSong = b現在選択中の曲に譜面がある[i][j];
-                                bool bClassChartModeSet = CDTXMania.ConfigIni.bCLASSIC譜面判別を有効にする;
+                                bool bClassChartModeSet = CDTXMania.ConfigIni.bClassicScoreDisplay;
                                 if(CDTXMania.DTX != null)
                                 {
                                     bClassChartModeSet = bClassChartModeSet && (

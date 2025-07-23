@@ -369,7 +369,7 @@ internal class CActPerfGuitarStatusPanel : CActPerfCommonStatusPanel
                     string str = string.Format( "{0:0.00}", ( (float)CDTXMania.DTX.LEVEL[ i ] ) / 10.0f + ( CDTXMania.DTX.LEVELDEC[ i ] != 0 ? CDTXMania.DTX.LEVELDEC[ i ] / 100.0f : 0 ) );
                     bool bCLASSIC = false;
                     //If Skill Mode is CLASSIC, always display lvl as Classic Style
-                    if( CDTXMania.ConfigIni.nSkillMode == 0 || (CDTXMania.ConfigIni.bCLASSIC譜面判別を有効にする &&
+                    if( CDTXMania.ConfigIni.nSkillMode == 0 || (CDTXMania.ConfigIni.bClassicScoreDisplay &&
                                                                 ( i == 1 ? !CDTXMania.DTX.bHasChips.YPGuitar : !CDTXMania.DTX.bHasChips.YPBass ) &&
                                                                 ( CDTXMania.DTX.bForceXGChart == false )) )
                     {

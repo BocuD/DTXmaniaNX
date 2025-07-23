@@ -25,7 +25,7 @@ internal class CActPerfGuitarRGB : CActPerfCommonRGB
             }
 
             //CLASSICシャッター(レーンシャッター)は未実装。
-            //if ((CDTXMania.ConfigIni.bCLASSIC譜面判別を有効にする == true ) && ((CDTXMania.DTX.bチップがある.LeftCymbal == false) && ( CDTXMania.DTX.bチップがある.FT == false ) && ( CDTXMania.DTX.bチップがある.Ride == false ) && ( CDTXMania.DTX.bチップがある.LP == false )))
+            //if ((CDTXMania.ConfigIni.bClassicScoreDisplay == true ) && ((CDTXMania.DTX.bチップがある.LeftCymbal == false) && ( CDTXMania.DTX.bチップがある.FT == false ) && ( CDTXMania.DTX.bチップがある.Ride == false ) && ( CDTXMania.DTX.bチップがある.LP == false )))
             {
                 //if ( this.txLaneCover != null )
                 {

@@ -559,7 +559,7 @@ internal class CConfigIni
 	public STDGBVALUE<int> nJudgeLine;
 	public STDGBVALUE<int> nShutterInSide;
 	public STDGBVALUE<int> nShutterOutSide;
-	public bool bCLASSIC譜面判別を有効にする;
+	public bool bClassicScoreDisplay;
 	public bool bMutingLP;
 	public bool bSkillModeを自動切換えする;
 
@@ -1177,7 +1177,7 @@ internal class CConfigIni
 		bSmallGraph = true;
 		ドラムコンボ文字の表示位置 = EDrumComboTextDisplayPosition.RIGHT;
 		bドラムコンボ文字の表示 = true;
-		bCLASSIC譜面判別を有効にする = false;
+		bClassicScoreDisplay = false;
 		bSkillModeを自動切換えする = false;
 		bMutingLP = true;
 		#region [ AutoPlay ]
@@ -1956,7 +1956,7 @@ internal class CConfigIni
 		sw.WriteLine("DrumsLaneType={0}", (int)eLaneType.Drums);
 		sw.WriteLine();
 		sw.WriteLine("; CLASSIC譜面判別");
-		sw.WriteLine("CLASSIC={0}", bCLASSIC譜面判別を有効にする ? 1 : 0);
+		sw.WriteLine("CLASSIC={0}", bClassicScoreDisplay ? 1 : 0);
 		sw.WriteLine();
 		sw.WriteLine("; スキルモード(0:旧仕様, 1:XG仕様)");
 		sw.WriteLine("SkillMode={0}", (int)nSkillMode);
@@ -3182,7 +3182,7 @@ internal class CConfigIni
 									}
 									else if (str3.Equals("CLASSIC"))
 									{
-										bCLASSIC譜面判別を有効にする = CConversion.bONorOFF(str4[0]);
+										bClassicScoreDisplay = CConversion.bONorOFF(str4[0]);
 									}
 									else if (str3.Equals("MutingLP"))
 									{
