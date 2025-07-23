@@ -98,6 +98,9 @@ public class SongSelectionContainer : UIGroup
         //update album art
         UpdateSelectedSongAlbumArt();
         
+        //when updating root manually, we fetch images for each node already synchronously
+        updatedImages.Clear();
+        
         lastDrawTime = CDTXMania.Timer.nCurrentTime; 
     }
 
@@ -119,6 +122,8 @@ public class SongSelectionContainer : UIGroup
     
     public override void Draw(Matrix parentMatrix)
     {
+        ApplyUpdatedImages();
+        
         float delta = (CDTXMania.Timer.nCurrentTime - lastDrawTime) / 1000.0f;
         lastDrawTime = CDTXMania.Timer.nCurrentTime;
 
@@ -239,10 +244,10 @@ public class SongSelectionContainer : UIGroup
         var firstVisibleNode = songSelectionElements[topIndex].node;
         var newNode = SongNode.rPreviousSong(firstVisibleNode);
         
+        overwriteElement.UpdateSongNode(newNode, null);
         Task.Run(() =>
         {
-            var newTex = CachePreImage(newNode);
-            overwriteElement.UpdateSongNode(newNode, newTex);
+            CachePreImage(newNode);
         });
 
         //move ring buffer backward
@@ -279,10 +284,10 @@ public class SongSelectionContainer : UIGroup
         var lastVisibleNode = songSelectionElements[bottomIndex].node;
         var newNode = SongNode.rNextSong(lastVisibleNode);
         
+        overwriteElement.UpdateSongNode(newNode, null);
         Task.Run(() =>
         {
-            var newTex = CachePreImage(newNode);
-            overwriteElement.UpdateSongNode(newNode, newTex);
+            CachePreImage(newNode);
         });
 
         //update the overwritten slot
@@ -337,13 +342,13 @@ public class SongSelectionContainer : UIGroup
             //switch to box node
             case SongNode.ENodeType.BOX:
                 CDTXMania.Skin.soundDecide.tPlay();
-                UpdateRoot(currentSelection);
+                CDTXMania.StageManager.stageSongSelectionNew.RequestUpdateRoot(currentSelection);
                 break;
 
             case SongNode.ENodeType.BACKBOX:
                 CDTXMania.Skin.soundCancel.tPlay();
                 //two levels: the parent of current selection is the box we are in right now
-                UpdateRoot(currentSelection.parent.parent);
+                CDTXMania.StageManager.stageSongSelectionNew.RequestUpdateRoot(currentSelection.parent.parent);
                 break;
         }
 
@@ -400,6 +405,8 @@ public class SongSelectionContainer : UIGroup
 
     #region PreImage cache
     private Dictionary<SongNode, DTXTexture> preImageCache = new();
+    
+    private List<SongNode> updatedImages = [];
 
     private DTXTexture? CachePreImage(SongNode node)
     {
@@ -415,6 +422,7 @@ public class SongSelectionContainer : UIGroup
         if (preImage != null)
         {
             preImageCache[node] = preImage;
+            updatedImages.Add(node); //mark as updated
             return preImage;
         }
         return null;
@@ -427,6 +435,23 @@ public class SongSelectionContainer : UIGroup
             tex.Dispose();
             preImageCache.Remove(node);
         }
+    }
+
+    private void ApplyUpdatedImages()
+    {
+        foreach (var node in updatedImages)
+        {
+            var element = songSelectionElements.FirstOrDefault(x => x.node == node);
+            if (element != null)
+            {
+                if (preImageCache.TryGetValue(node, out DTXTexture? texture))
+                {
+                    element.UpdateSongThumbnail(texture);
+                }
+            }
+        }
+        
+        updatedImages.Clear();
     }
     #endregion
 }

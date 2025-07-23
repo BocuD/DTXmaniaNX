@@ -69,11 +69,11 @@ public class CStageSongSelectionNew : CStage
     {
         if (hasScanned)
         {
-            selectionContainer.UpdateRoot();
+            RequestUpdateRoot(songDb.songNodeRoot);
             return;
         }
         
-        Task.Run(() => songDb.ScanAsync(() => selectionContainer.UpdateRoot()));
+        Task.Run(() => songDb.ScanAsync(() => RequestUpdateRoot(songDb.songNodeRoot)));
         hasScanned = true;
     }
 
@@ -81,6 +81,12 @@ public class CStageSongSelectionNew : CStage
     {
         base.OnUpdateAndDraw();
 
+        if (updateRootRequested)
+        {
+            selectionContainer.UpdateRoot(newSongRoot);
+            updateRootRequested = false;
+        }
+        
         UpdateSongDbStatus();
 
         if (songDb.status == SongDbScanStatus.Idle)
@@ -103,9 +109,13 @@ public class CStageSongSelectionNew : CStage
         return 0;
     }
 
-    public void UpdateRoot(SongNode newRoot)
+    private bool updateRootRequested;
+    private SongNode? newSongRoot;
+    
+    public void RequestUpdateRoot(SongNode newRoot)
     {
-        selectionContainer.UpdateRoot(newRoot);
+        updateRootRequested = true;
+        newSongRoot = newRoot;
     }
     
     private void UpdateSongDbStatus()

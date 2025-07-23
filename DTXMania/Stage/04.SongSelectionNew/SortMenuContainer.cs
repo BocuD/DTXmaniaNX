@@ -1,4 +1,5 @@
-﻿using DTXMania.Core;
+﻿using System.Diagnostics;
+using DTXMania.Core;
 using DTXMania.SongDb;
 using DTXMania.UI.Drawable;
 using Hexa.NET.ImGui;
@@ -117,13 +118,32 @@ public class SortMenuContainer : UIGroup
         ApplySort();
     }
 
+    private bool sortLocked = false;
     private void ApplySort()
     {
+        if (sortLocked)
+        {
+            Trace.TraceWarning("Sort operation skipped as another sort is in progress");
+            return;
+        }
+        
         //apply sort
         Task.Run(async () =>
         {
-            SongNode newRoot = await sortMenuElements[selectionIndex].Sort();
-            CDTXMania.StageManager.stageSongSelectionNew.UpdateRoot(newRoot);
+            try
+            {
+                sortLocked = true;
+                SongNode newRoot = await sortMenuElements[selectionIndex].Sort();
+                CDTXMania.StageManager.stageSongSelectionNew.RequestUpdateRoot(newRoot);
+            }
+            catch (Exception e)
+            {
+                Trace.TraceError("Sorting failed: " + e.Message);
+            }
+            finally
+            {
+                sortLocked = false;
+            }
         });
     }
 

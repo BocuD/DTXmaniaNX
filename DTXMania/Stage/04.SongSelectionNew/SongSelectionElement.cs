@@ -63,7 +63,6 @@ public class SongSelectionElement : UIGroup
                     break;
             }
             
-
             if (tex == null)
             {
                 tex = SongSelectionContainer.fallbackPreImage;
@@ -72,5 +71,16 @@ public class SongSelectionElement : UIGroup
             albumArtImage.SetTexture(tex, false);
             albumArtImage.clipRect = new SharpDX.RectangleF(0, 0, tex.Width, tex.Height);
         }
+    }
+
+    public void UpdateSongThumbnail(DTXTexture? tex)
+    {
+        if (tex == null)
+        {
+            tex = SongSelectionContainer.fallbackPreImage;
+        }
+
+        albumArtImage.SetTexture(tex, false);
+        albumArtImage.clipRect = new SharpDX.RectangleF(0, 0, tex.Width, tex.Height);
     }
 }
