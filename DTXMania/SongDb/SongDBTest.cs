@@ -1,4 +1,5 @@
 ﻿using System.Numerics;
+using DTXMania.Core;
 using Hexa.NET.ImGui;
 using NativeFileDialog.Extended;
 
@@ -72,6 +73,46 @@ public class SongDBTester
                 ImGui.Text("Artist (kana): " + chart.SongInformation.ArtistNameKana);
                 ImGui.Text("Artist (roman): " + chart.SongInformation.ArtistNameRoman);
                 ImGui.Text("Comment: " + chart.SongInformation.Comment);
+                
+                //imgui table 3x6
+                ImGui.Separator();
+                ImGui.Text("Charts:");
+                ImGui.Columns(3, "Charts", true);
+                ImGui.Text("Drums LV");
+                ImGui.NextColumn();
+                ImGui.Text("Guitar LV");
+                ImGui.NextColumn();
+                ImGui.Text("Bass LV");
+                ImGui.NextColumn();
+                ImGui.Separator();
+                
+                for (int i = 0; i < 5; i++)
+                {
+                    if (selectedNode.charts[i] != null)
+                    {
+                        bool bShowClassicLevel = CDTXMania.ConfigIni.nSkillMode == 0 || CDTXMania.ConfigIni.bClassicScoreDisplay;
+
+                        var level = selectedNode.charts[i].SongInformation.Level;
+                        
+                        //empty
+                        ImGui.Text(level.Drums.ToString());
+                        ImGui.NextColumn();
+                        ImGui.Text(level.Guitar.ToString());
+                        ImGui.NextColumn();
+                        ImGui.Text(level.Bass.ToString());
+                        ImGui.NextColumn();
+                    }
+                    else
+                    {
+                        //empty
+                        ImGui.Text("N/A");
+                        ImGui.NextColumn();
+                        ImGui.Text("N/A");
+                        ImGui.NextColumn();
+                        ImGui.Text("N/A");
+                        ImGui.NextColumn();
+                    }
+                }
             }
             else
             {
@@ -140,7 +181,12 @@ public class SongDBTester
 
         if (ImGui.Button("Difficulty"))
         {
-            
+            SortByDifficulty sortByDifficulty = new();
+            Task.Run(async () =>
+            {
+                List<SongNode> flattened = await songDb.FlattenSongList(songDb.songNodeRoot.childNodes); 
+                currentRoot = await sortByDifficulty.Sort(flattened);
+            });
         }
 
         ImGui.SameLine();

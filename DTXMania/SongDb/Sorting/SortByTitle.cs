@@ -9,7 +9,6 @@ public class SortByTitle : SongDbSort
         //create a new root node
         SongNode root = new(null)
         {
-            title = "Sorted by Title",
             nodeType = SongNode.ENodeType.ROOT
         };
         

@@ -16,6 +16,8 @@ public class SongNode
     public ENodeType nodeType = ENodeType.SONG;
     public string skinPath = string.Empty;
     
+    public EInstrumentPart filteredInstrumentPart = EInstrumentPart.UNKNOWN;
+    
     public string title = string.Empty;
     public string path = string.Empty;
     public Color color = Color.White;
@@ -49,6 +51,24 @@ public class SongNode
     public SongNode(SongNode parent)
     {
         this.parent = parent;
+    }
+
+    public static SongNode Clone(SongNode original, SongNode parent)
+    {
+        //copy all properties except for charts
+        SongNode clone = new(parent)
+        {
+            nodeType = original.nodeType,
+            skinPath = original.skinPath,
+            title = original.title,
+            path = original.path,
+            color = original.color,
+            stDrumHitRanges = original.stDrumHitRanges,
+            stDrumPedalHitRanges = original.stDrumPedalHitRanges,
+            stGuitarHitRanges = original.stGuitarHitRanges,
+            stBassHitRanges = original.stBassHitRanges
+        };
+        return clone;
     }
 
     public string GetImagePath()
