@@ -35,7 +35,7 @@ public class SortByLevel : SongDbSort
                 CScore? chart = node.charts[chartIndex];
                 if (chart == null) continue;
 
-                for (int instrument = 0; instrument < 2; instrument++)
+                for (int instrument = 0; instrument < 3; instrument++)
                 {
                     //only process charts for the selected instrument
                     if (CDTXMania.ConfigIni.bDrumsEnabled && instrument != 0) continue;
