@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System.Diagnostics;
+using System.Drawing;
 using DiscordRPC;
 using DTXMania.Core;
 using DTXMania.SongDb;
@@ -27,8 +28,22 @@ public class CStageSongSelectionNew : CStage
         eStageID = EStage.SongSelection_4;
         
         listChildActivities.Add(actPresound = new CActSelectPresound());
+
+        currentSort = sorters[0];
     }
 
+    private readonly SongDbSort[] sorters =
+    [
+        new SortDefault(),
+        new SortByBox(),
+        new SortByTitle(),
+        new SortByArtist(),
+        new SortByDifficulty(),
+        new SortByLevel(),
+        new SortByLastPlayed(),
+        new SortByAllSongs()
+    ];
+    
     public override void InitializeBaseUI()
     {
         FontFamily family = new(CDTXMania.ConfigIni.songListFont); 
@@ -42,18 +57,7 @@ public class CStageSongSelectionNew : CStage
 
         selectionContainer = ui.AddChild(new SongSelectionContainer(songDb, bigAlbumArt));
         selectionContainer.position = new Vector3(765, 320, 0);
-
-        SongDbSort[] sorters =
-        [
-            new SortDefault(),
-            new SortByBox(),
-            new SortByTitle(),
-            new SortByArtist(),
-            new SortByDifficulty(),
-            new SortByLevel(),
-            new SortByLastPlayed(),
-            new SortByAllSongs()
-        ];
+        
         sortMenuContainer = ui.AddChild(new SortMenuContainer(songDb, sorters));
         sortMenuContainer.position = new Vector3(1280, 35, 0);
 
@@ -70,19 +74,27 @@ public class CStageSongSelectionNew : CStage
     }
 
     private UIText statusText;
-    private bool hasScanned = false;
+    private bool hasScanned;
 
     public override void FirstUpdate()
     {
         CDTXMania.Skin.soundTitle.tStop();
         
+        //set initial sort menu container position to be default,
+        //or in case of reloading the menu, whatever was last selected
+        sortMenuContainer.SetCurrentSelection(currentSort);
+
         if (hasScanned)
         {
-            RequestUpdateRoot(songDb.songNodeRoot);
+            //restore existing root
+            RequestUpdateRoot(currentSongRoot);
             return;
         }
         
-        Task.Run(() => songDb.ScanAsync(() => RequestUpdateRoot(songDb.songNodeRoot)));
+        Task.Run(() => songDb.ScanAsync(() =>
+        {
+            ApplySort(sortMenuContainer.currentSelection.sorter);
+        }));
         hasScanned = true;
     }
 
@@ -92,7 +104,7 @@ public class CStageSongSelectionNew : CStage
 
         if (updateRootRequested)
         {
-            selectionContainer.UpdateRoot(newSongRoot);
+            selectionContainer.UpdateRoot(currentSongRoot);
             updateRootRequested = false;
         }
         
@@ -122,12 +134,12 @@ public class CStageSongSelectionNew : CStage
     }
 
     private bool updateRootRequested;
-    private SongNode? newSongRoot;
+    private SongNode? currentSongRoot;
     
     public void RequestUpdateRoot(SongNode newRoot)
     {
         updateRootRequested = true;
-        newSongRoot = newRoot;
+        currentSongRoot = newRoot;
     }
     
     public SongNode node { get; private set; }
@@ -216,5 +228,96 @@ public class CStageSongSelectionNew : CStage
                 CDTXMania.Skin.soundChange.tPlay();
                 break;
         }
+    }
+    
+    public int GetClosestLevelToTargetForSong(SongNode song)
+    {
+        if (song.nodeType != SongNode.ENodeType.SONG) return 0;
+        
+        var targetDifficultyLevel = this.targetDifficultyLevel;
+        // 事前チェック。
+
+        if (song == null)
+            return targetDifficultyLevel; // 曲がまったくないよ
+
+        if (song.charts[targetDifficultyLevel] != null)
+            return targetDifficultyLevel; // 難易度ぴったりの曲があったよ
+
+        if ((song.nodeType == SongNode.ENodeType.BOX) || (song.nodeType == SongNode.ENodeType.BACKBOX))
+            return 0; // BOX と BACKBOX は関係無いよ
+
+
+        // 現在のアンカレベルから、難易度上向きに検索開始。
+
+        int closestLevel = targetDifficultyLevel;
+
+        for (int i = 0; i < 5; i++)
+        {
+            if (song.charts[closestLevel] != null)
+                break; // 曲があった。
+
+            closestLevel = (closestLevel + 1) % 5; // 曲がなかったので次の難易度レベルへGo。（5以上になったら0に戻る。）
+        }
+
+
+        // 見つかった曲がアンカより下のレベルだった場合……
+        // アンカから下向きに検索すれば、もっとアンカに近い曲があるんじゃね？
+
+        if (closestLevel < targetDifficultyLevel)
+        {
+            // 現在のアンカレベルから、難易度下向きに検索開始。
+
+            closestLevel = targetDifficultyLevel;
+
+            for (int i = 0; i < 5; i++)
+            {
+                if (song.charts[closestLevel] != null)
+                    break; // 曲があった。
+
+                closestLevel = ((closestLevel - 1) + 5) % 5; // 曲がなかったので次の難易度レベルへGo。（0未満になったら4に戻る。）
+            }
+        }
+
+        return closestLevel;
+    }
+    
+    private bool sortLocked = false;
+    private SongDbSort currentSort;
+    private Dictionary<SongDbSort, SongNode> sortCache = new();
+
+    public void ApplySort(SongDbSort sorter)
+    {
+        if (sortLocked)
+        {
+            Trace.TraceWarning("Sort operation skipped as another sort is in progress");
+            return;
+        }
+
+        //apply sort
+        Task.Run(async () =>
+        {
+            try
+            {
+                sortLocked = true;
+                if (!sortCache.TryGetValue(sorter, out SongNode? newRoot))
+                {
+                    newRoot = await sorter.Sort(songDb);
+                    sortCache[sorter] = newRoot;
+                }
+                else
+                {
+                    newRoot.CurrentSelection = newRoot.childNodes[0];
+                }
+                CDTXMania.StageManager.stageSongSelectionNew.RequestUpdateRoot(newRoot);
+            }
+            catch (Exception e)
+            {
+                Trace.TraceError("Sorting failed: " + e.Message);
+            }
+            finally
+            {
+                sortLocked = false;
+            }
+        });
     }
 }

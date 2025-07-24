@@ -15,7 +15,7 @@ public class SortMenuContainer : UIGroup
 
     //ring buffer
     private SortMenuElement[] sortMenuElements;
-    private SortMenuElement currentSelection => sortMenuElements[selectionIndex];
+    public SortMenuElement currentSelection => sortMenuElements[selectionIndex];
     
     private int selectionIndex = 2;
     
@@ -126,7 +126,8 @@ public class SortMenuContainer : UIGroup
         sortMenuElements[0] = last;
 
         RecalculateElementPositions();
-        ApplySort();
+        sortMenuElements[selectionIndex].PlaySound();
+        CDTXMania.StageManager.stageSongSelectionNew.ApplySort(sortMenuElements[selectionIndex].sorter);
     }
 
     private void MoveRight()
@@ -142,38 +143,40 @@ public class SortMenuContainer : UIGroup
         sortMenuElements[^1] = first;
         
         RecalculateElementPositions();
-        ApplySort();
+        sortMenuElements[selectionIndex].PlaySound();
+        CDTXMania.StageManager.stageSongSelectionNew.ApplySort(sortMenuElements[selectionIndex].sorter);
     }
 
-    private bool sortLocked = false;
-    private void ApplySort()
+    public void SetCurrentSelection(SongDbSort newSelection, bool applySort = false, bool playSound = false)
     {
-        if (sortLocked)
+        SortMenuElement? element = sortMenuElements.FirstOrDefault(x => x.sorter == newSelection);
+        if (element == null)
         {
-            Trace.TraceWarning("Sort operation skipped as another sort is in progress");
+            Trace.TraceError("Failed to apply selection: sorter not found in array");
             return;
         }
         
-        sortMenuElements[selectionIndex].PlaySound();
+        int newIndex = Array.IndexOf(sortMenuElements, element);
+        if (newIndex == -1 || newIndex == selectionIndex) return;
 
-        //apply sort
-        Task.Run(async () =>
+        //how many positions we need to rotate the array by
+        int rotateBy = (selectionIndex - newIndex + sortMenuElements.Length) % sortMenuElements.Length;
+
+        //rotate right
+        for (int i = 0; i < rotateBy; i++)
         {
-            try
+            var last = sortMenuElements[^1];
+            for (int j = sortMenuElements.Length - 1; j > 0; j--)
             {
-                sortLocked = true;
-                SongNode newRoot = await sortMenuElements[selectionIndex].Sort();
-                CDTXMania.StageManager.stageSongSelectionNew.RequestUpdateRoot(newRoot);
+                sortMenuElements[j] = sortMenuElements[j - 1];
             }
-            catch (Exception e)
-            {
-                Trace.TraceError("Sorting failed: " + e.Message);
-            }
-            finally
-            {
-                sortLocked = false;
-            }
-        });
+
+            sortMenuElements[0] = last;
+        }
+
+        RecalculateElementPositions();
+        if (playSound) sortMenuElements[selectionIndex].PlaySound();
+        if (applySort) CDTXMania.StageManager.stageSongSelectionNew.ApplySort(sortMenuElements[selectionIndex].sorter);
     }
 
     private void RecalculateElementPositions()

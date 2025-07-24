@@ -23,21 +23,16 @@ public class SortMenuElement : UIGroup
         icon = AddChild(new UIImage(DTXTexture.LoadFromPath(CSkin.Path($@"Graphics\Sorting\{sorter.IconName}.png"))));
         icon.anchor = new Vector2(0.5f, 0.5f);
         
-        var path = CSkin.Path($@"Graphics\Sorting\{sorter.IconName}.wav");
+        string path = CSkin.Path($@"Graphics\Sorting\{sorter.IconName}.wav");
         sound = CDTXMania.SoundManager.tGenerateSound(path);
         sound.nVolume = 80;
     }
     
     private UIText textElement;
     private UIImage icon;
-    private SongDbSort sorter;
+    public SongDbSort sorter { get; private set; }
     private SongDb.SongDb songDb;
     private CSound sound;
-
-    public async Task<SongNode> Sort()
-    {
-        return await sorter.Sort(songDb);
-    }
 
     public void PlaySound()
     {

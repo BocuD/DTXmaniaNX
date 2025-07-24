@@ -52,7 +52,7 @@ public class SongSelectionContainer : UIGroup
 
     private SongNode currentSelection => songSelectionElements[WrapIndex(bufferStartIndex + selectionIndex)].node;
     
-    public void UpdateRoot(SongNode? newRoot = null)
+    public void UpdateRoot(SongNode? newRoot = null, bool preLoadImages = true)
     {
         //make sure the fallback is loaded
         fallbackPreImage = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_preimage default.png"));
@@ -68,16 +68,33 @@ public class SongSelectionContainer : UIGroup
             RemoveFromCache(element.Key);
         }
         
-        //assign first node to the first element, then use rNextSong to fill the rest
-        songSelectionElements[selectionIndex].UpdateSongNode(node, CachePreImage(node));
-        songSelectionElements[selectionIndex].position.Y = 0;
+        List<SongNode> toCache = [];
         
+        //assign first node to the first element, then use rNextSong to fill the rest
+        if (preLoadImages)
+        {
+            songSelectionElements[selectionIndex].UpdateSongNode(node, CachePreImage(node));
+        }
+        else
+        {
+            songSelectionElements[selectionIndex].UpdateSongNode(node, null);
+            toCache.Add(node);
+        }
+        songSelectionElements[selectionIndex].position.Y = 0;
+
         //fill the rest of the elements with next songs
         for (int i = selectionIndex + 1; i < songSelectionElements.Length; i++)
         {
             SongNode nextNode = SongNode.rNextSong(songSelectionElements[i - 1].node);
-            var tex = CachePreImage(nextNode);
-            songSelectionElements[i].UpdateSongNode(nextNode, tex);
+            if (preLoadImages)
+            {
+                songSelectionElements[i].UpdateSongNode(nextNode, CachePreImage(nextNode));
+            }
+            else
+            {
+                songSelectionElements[i].UpdateSongNode(nextNode, null);
+                toCache.Add(nextNode);
+            }
             songSelectionElements[i].position.Y = (i - selectionIndex) * elementSpacing;
         }
         
@@ -85,14 +102,34 @@ public class SongSelectionContainer : UIGroup
         for (int i = selectionIndex - 1; i >= 0; i--)
         {
             SongNode prevNode = SongNode.rPreviousSong(songSelectionElements[i + 1].node);
-            var tex = CachePreImage(prevNode);
-            songSelectionElements[i].UpdateSongNode(prevNode, tex);
+            if (preLoadImages)
+            {
+                songSelectionElements[i].UpdateSongNode(prevNode, CachePreImage(prevNode));
+            }
+            else
+            {
+                songSelectionElements[i].UpdateSongNode(prevNode, null);
+                toCache.Add(prevNode);
+            }
             songSelectionElements[i].position.Y = (i - selectionIndex) * elementSpacing;
         }
-        
-        //when updating root manually, we fetch images for each node already synchronously
-        updatedImages.Clear();
-        
+
+        if (preLoadImages)
+        {
+            //since we pre loaded all the images, no need to update them later
+            updatedImages.Clear();
+        }
+        else
+        {
+            Task.Run(() =>
+            {
+                foreach (SongNode node in toCache)
+                {
+                    CachePreImage(node);
+                }
+            });
+        }
+
         lastDrawTime = CDTXMania.Timer.nCurrentTime;
         
         //update album art, preview sound, etc
@@ -105,7 +142,7 @@ public class SongSelectionContainer : UIGroup
         
         currentRoot.CurrentSelection = currentSelection;
         
-        int closestLevelToTarget = GetClosestLevelToTargetForSong(currentSelection);
+        int closestLevelToTarget = CDTXMania.StageManager.stageSongSelectionNew.GetClosestLevelToTargetForSong(currentSelection);
         CDTXMania.StageManager.stageSongSelectionNew.ChangeSelection(currentSelection, currentSelection.charts[closestLevelToTarget]);
     }
 
@@ -341,7 +378,7 @@ public class SongSelectionContainer : UIGroup
             case SongNode.ENodeType.SONG:
                 var confirmedSong = currentSelection;
                 var confirmedChart = currentSelection.charts.FirstOrDefault(x => x != null);
-                var confirmedSongDifficulty = GetClosestLevelToTargetForSong(currentSelection);
+                var confirmedSongDifficulty = CDTXMania.StageManager.stageSongSelectionNew.GetClosestLevelToTargetForSong(currentSelection);
 
                 if (confirmedSong != null && confirmedChart != null)
                 {
@@ -373,57 +410,6 @@ public class SongSelectionContainer : UIGroup
         }
 
         return false;
-    }
-
-    public int GetClosestLevelToTargetForSong(SongNode song)
-    {
-        if (song.nodeType != SongNode.ENodeType.SONG) return 0;
-        
-        var targetDifficultyLevel = CDTXMania.StageManager.stageSongSelectionNew.targetDifficultyLevel;
-        // 事前チェック。
-
-        if (song == null)
-            return targetDifficultyLevel; // 曲がまったくないよ
-
-        if (song.charts[targetDifficultyLevel] != null)
-            return targetDifficultyLevel; // 難易度ぴったりの曲があったよ
-
-        if ((song.nodeType == SongNode.ENodeType.BOX) || (song.nodeType == SongNode.ENodeType.BACKBOX))
-            return 0; // BOX と BACKBOX は関係無いよ
-
-
-        // 現在のアンカレベルから、難易度上向きに検索開始。
-
-        int closestLevel = targetDifficultyLevel;
-
-        for (int i = 0; i < 5; i++)
-        {
-            if (song.charts[closestLevel] != null)
-                break; // 曲があった。
-
-            closestLevel = (closestLevel + 1) % 5; // 曲がなかったので次の難易度レベルへGo。（5以上になったら0に戻る。）
-        }
-
-
-        // 見つかった曲がアンカより下のレベルだった場合……
-        // アンカから下向きに検索すれば、もっとアンカに近い曲があるんじゃね？
-
-        if (closestLevel < targetDifficultyLevel)
-        {
-            // 現在のアンカレベルから、難易度下向きに検索開始。
-
-            closestLevel = targetDifficultyLevel;
-
-            for (int i = 0; i < 5; i++)
-            {
-                if (song.charts[closestLevel] != null)
-                    break; // 曲があった。
-
-                closestLevel = ((closestLevel - 1) + 5) % 5; // 曲がなかったので次の難易度レベルへGo。（0未満になったら4に戻る。）
-            }
-        }
-
-        return closestLevel;
     }
 
     #region PreImage cache
