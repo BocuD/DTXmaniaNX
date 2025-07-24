@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using DTXMania.Core;
 using DTXMania.SongDb;
+using DTXMania.UI;
 using DTXMania.UI.Drawable;
 using Hexa.NET.ImGui;
 using SharpDX;
@@ -16,15 +17,21 @@ public class SortMenuContainer : UIGroup
     private SortMenuElement[] sortMenuElements;
     private SortMenuElement currentSelection => sortMenuElements[selectionIndex];
     
-    private int selectionIndex = 0;
+    private int selectionIndex = 2;
     
     public SortMenuContainer(SongDb.SongDb songDb, SongDbSort[] sorters)
     {
         name = "SortMenuContainer";
         
+        size = new Vector2(662, 92);
+        anchor = new Vector2(1.0f, 0.0f);
+        
+        var backgroundImage = AddChild(new UIImage(DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_sortmenu_bg.png"))));
+        
         sortMenuElements = new SortMenuElement[sorters.Length];
         
         elementsContainer = AddChild(new UIGroup("Elements"));
+        elementsContainer.position = new Vector3(0, 40, 0);
         
         for (int i = 0; i < sortMenuElements.Length; i++)
         {
@@ -33,9 +40,13 @@ public class SortMenuContainer : UIGroup
         }
     }
 
-    private float elementSpacing = 85.0f; //spacing between elements
+    private float elementSpacing = 90.0f; //spacing between elements
     private long lastDrawTime;
     private float targetX = 0f;
+    
+    //animation
+    private float offsetRange = 90;
+    private float offsetDistance = 18;
     public override void Draw(Matrix parentMatrix)
     {
         float delta = (CDTXMania.Timer.nCurrentTime - lastDrawTime) / 1000.0f;
@@ -65,6 +76,22 @@ public class SortMenuContainer : UIGroup
             elementsContainer.position.X += elementSpacing;
             targetX += elementSpacing;
             MoveRight();
+        }
+        
+        //animate the selected one slightly downwards
+        foreach (var element in sortMenuElements)
+        {
+            var targetX = elementSpacing * selectionIndex;
+            
+            //same logic as in SongSelectionContainer
+            float distanceTo0 = MathF.Abs(targetX - (element.position.X + elementsContainer.position.X)); //positive only
+            float t = Math.Clamp((distanceTo0 - offsetRange) * -1, 0, offsetRange);
+            //first subtract offsetRange so the range is now -offsetRange - maxDistance.
+            //then invert, so range becomes -maxDistance - offsetRange, then clamp from 0-offsetRange
+            t /= offsetRange; //normalize range
+            
+            //x offset is 30 to the left here
+            element.position.Y = t * offsetDistance;
         }
         
         base.Draw(parentMatrix);
@@ -127,6 +154,8 @@ public class SortMenuContainer : UIGroup
             return;
         }
         
+        sortMenuElements[selectionIndex].PlaySound();
+
         //apply sort
         Task.Run(async () =>
         {
@@ -155,7 +184,6 @@ public class SortMenuContainer : UIGroup
         }
     }
 
-
     public override void DrawInspector()
     {
         base.DrawInspector();
@@ -164,6 +192,12 @@ public class SortMenuContainer : UIGroup
         {
             ImGui.InputFloat("Element Spacing", ref elementSpacing);
             ImGui.Text("Current Selection Index: " + selectionIndex);
+        }
+        
+        if (ImGui.CollapsingHeader("Animation"))
+        {
+            ImGui.InputFloat("Offset Range", ref offsetRange);
+            ImGui.InputFloat("Offset Distance", ref offsetDistance);
         }
     }
 }

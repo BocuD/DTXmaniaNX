@@ -35,12 +35,12 @@ public class CStageSongSelectionNew : CStage
         statusText.renderOrder = 100;
 
         UIImage bigAlbumArt = ui.AddChild(new UIImage());
-        bigAlbumArt.position = new Vector3(300, 200, 0);
+        bigAlbumArt.position = new Vector3(320, 35, 0);
         bigAlbumArt.renderOrder = 1;
         bigAlbumArt.size = new Vector2(300, 300);
 
         selectionContainer = ui.AddChild(new SongSelectionContainer(songDb, bigAlbumArt));
-        selectionContainer.position = new Vector3(800, 320, 0);
+        selectionContainer.position = new Vector3(765, 320, 0);
 
         SongDbSort[] sorters =
         [
@@ -50,10 +50,11 @@ public class CStageSongSelectionNew : CStage
             new SortByArtist(),
             new SortByDifficulty(),
             new SortByLevel(),
+            new SortByLastPlayed(),
             new SortByAllSongs()
         ];
         sortMenuContainer = ui.AddChild(new SortMenuContainer(songDb, sorters));
-        sortMenuContainer.position = new Vector3(300, 50, 0);
+        sortMenuContainer.position = new Vector3(1280, 35, 0);
     }
 
     public override void InitializeDefaultUI()
