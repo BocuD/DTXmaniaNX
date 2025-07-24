@@ -92,13 +92,23 @@ public class SongSelectionContainer : UIGroup
             songSelectionElements[i].position.Y = (i - selectionIndex) * elementSpacing;
         }
         
-        //update album art
-        UpdateSelectedSongAlbumArt();
-        
         //when updating root manually, we fetch images for each node already synchronously
         updatedImages.Clear();
         
-        lastDrawTime = CDTXMania.Timer.nCurrentTime; 
+        lastDrawTime = CDTXMania.Timer.nCurrentTime;
+        
+        //update album art, preview sound, etc
+        HandleSelectionChanged();
+    }
+
+    private void HandleSelectionChanged()
+    {
+        UpdateSelectedSongAlbumArt();
+        
+        currentRoot.CurrentSelection = currentSelection;
+        
+        int closestLevelToTarget = GetClosestLevelToTargetForSong(currentSelection);
+        CDTXMania.StageManager.stageSongSelectionNew.ChangeSelection(currentSelection, currentSelection.charts[closestLevelToTarget]);
     }
 
     private void UpdateSelectedSongAlbumArt()
@@ -276,9 +286,7 @@ public class SongSelectionContainer : UIGroup
         overwriteElement.position.Y = newYOffset;
         songSelectionElements[newTopIndex] = overwriteElement;
 
-        currentRoot.CurrentSelection = currentSelection;
-        UpdateSelectedSongAlbumArt();
-        
+        HandleSelectionChanged();
         UpdateRingbufferPositions();
     }
     
@@ -314,9 +322,7 @@ public class SongSelectionContainer : UIGroup
         //advance ring buffer start
         bufferStartIndex = WrapIndex(bufferStartIndex + 1);
 
-        currentRoot.CurrentSelection = currentSelection;
-        UpdateSelectedSongAlbumArt();
-        
+        HandleSelectionChanged();
         UpdateRingbufferPositions();
     }
 

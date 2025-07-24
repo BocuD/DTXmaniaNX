@@ -37,8 +37,6 @@ public class CCounter
 
 	public bool bReachedEndValue => (nCurrentValue >= nEndValue); // n現在の経過時間ms
 
-	public bool b終了値に達してない => !bReachedEndValue;
-
 
 	// コンストラクタ
 		

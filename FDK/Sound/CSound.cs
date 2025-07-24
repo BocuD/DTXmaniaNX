@@ -1147,7 +1147,7 @@ public class CSound : IDisposable, ICloneable
 			}
 		}
 	}
-	public bool b再生中
+	public bool bIsPlaying
 	{
 		get
 		{

@@ -13,6 +13,7 @@ public class CStageSongSelectionNew : CStage
     private SongDb.SongDb songDb = new();
     private SongSelectionContainer selectionContainer;
     private SortMenuContainer sortMenuContainer;
+    private CActSelectPresound actPresound;
     
     protected override RichPresence Presence => new CDTXRichPresence
     {
@@ -23,6 +24,8 @@ public class CStageSongSelectionNew : CStage
     public CStageSongSelectionNew()
     {
         eStageID = EStage.SongSelection_4;
+        
+        listChildActivities.Add(actPresound = new CActSelectPresound());
     }
 
     public override void InitializeBaseUI()
@@ -68,6 +71,8 @@ public class CStageSongSelectionNew : CStage
 
     public override void FirstUpdate()
     {
+        CDTXMania.Skin.soundTitle.tStop();
+        
         if (hasScanned)
         {
             RequestUpdateRoot(songDb.songNodeRoot);
@@ -102,6 +107,8 @@ public class CStageSongSelectionNew : CStage
             {
                 selectionContainer.isVisible = true;
                 
+                actPresound.OnUpdateAndDraw();
+                
                 sortMenuContainer.HandleNavigation();
                 return selectionContainer.HandleNavigation();
             }
@@ -117,6 +124,11 @@ public class CStageSongSelectionNew : CStage
     {
         updateRootRequested = true;
         newSongRoot = newRoot;
+    }
+
+    public void ChangeSelection(SongNode node, CScore chart)
+    {
+        actPresound.tSelectionChanged(chart);
     }
     
     private void UpdateSongDbStatus()

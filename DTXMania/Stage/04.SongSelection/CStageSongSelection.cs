@@ -82,7 +82,7 @@ internal class CStageSongSelection : CStage
 	public void tSelectedSongChanged()
 	{
 		actPreimagePanel.t選択曲が変更された();
-		actPresound.t選択曲が変更された();
+		actPresound.tSelectionChanged(rSelectedScore);
 		actPerHistoryPanel.t選択曲が変更された();
 		actStatusPanel.tSelectedSongChanged();
 		actArtistComment.t選択曲が変更された();

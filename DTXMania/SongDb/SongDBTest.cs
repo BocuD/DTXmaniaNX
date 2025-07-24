@@ -116,6 +116,8 @@ public class SongDBTester
                             ImGui.NextColumn();
                         }
                     }
+                    
+                    ImGui.Columns();
                 }
             }
             else
