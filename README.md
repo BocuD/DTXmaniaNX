@@ -1,31 +1,51 @@
 ## What is this repository?
 
-This is a fork of DTXManiaNX, with the goal of modernizing and refactoring the codebase, to eventually have the ability to add various features.
-The main focus right now is restructuring up the codebase to a point where various parts of the game, such as the menu systems, gameplay, and configuration systems, are all abstracted to their own semi self contained systems.
-One part that has made a decent amount of progress is rewriting the UI system to be hierarchy based, and render elements using matrices instead of hardcoding everything to fixed positions on screen. As part of this, this UI rendering code also uses an abstract rendering backend, to in the future more easily allow porting to other graphics backends, such as OpenGL, rather than just DirectX9. Ideally this will allow better multi platform support in the future.
+This is a fork of DTXManiaNX, with the main focus being improving QOL, as well as cleaning up and improving the codebase. This fork was initially started from frustration with the lack of QOL features or decent UX in essentially all DTXMania forks, and intends to create a gameplay and menu navigation system more in line with the arcade.
 
-## Changes from base DTXManiaNX
+## Some of the changes made from upstream DTXManiaNX:
 
-- Newly written UI framework
-  - Supports translating, rotating and scaling elements according to a hierarchy
+- Newly written UI rendering framework
+  - Supports translating, rotating, and scaling elements according to a hierarchy
   - Fully serializable and skinnable
+  - Resolution independent
+
+- New theming engine
+  - Written on top of new UI framework
+  - Can't affect old UI elements (for now)
+
 - Rewritten song database
-  - ~4-8x performance speedups
+  - ~4-8x performance speedup
   - Safer handling of files
   - No more reliance on legacy (unsafe) BinaryFormatter
   - Song name transliteration (romanization)
+
 - Greatly improved sorting functionality
   - Sorting functionality similar to GITADORA, with songs grouped in various categories
   - Group by BOX, Difficulty, Level, Title, Artist, etc
+
 - Song selection UI recreated from scratch
-  - Support for new skinning system
   - Customizable options for various display parts
   - Grealy improved smoothness and UX
+
 - Improved Guitar navigation
   - P + strum to confirm
   - Y + strum to go back
+
 - Improved settings menu
   - Most menu options are now sorted into categories (for example, Audio, Video, Gameplay, etc)
+
+- Extensive Dear ImGui-based tooling
+  - Inspector and hierarchy views for new UI framework, performance analysis, song database tests, etc
+  - Toggle using `ctrl + i`
+ 
+## Current roadmap
+
+- Feature parity on song select screen with upstream DTXManiaNX
+- Song database serialization
+- Song favourite filters
+- (fuzzy) song search
+- Better engine-level support for arbitrary rendering resolutions
+- Play results screen rework
 
 ## Building
 
