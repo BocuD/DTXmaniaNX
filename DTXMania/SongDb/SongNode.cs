@@ -181,4 +181,30 @@ public class SongNode
 
         return list[index - 1];
     }
+
+    //loop over all charts on this node. find the one that has the highest skill points (if any)
+    public double GetTopSkillPoints()
+    {
+        double skill = 0;
+        foreach (CScore chart in charts)
+        {
+            if (chart == null) continue;
+            if (!chart.HasChartForCurrentMode()) continue;
+            
+            for (int instrument = 0; instrument < 3; instrument++)
+            {
+                if (instrument != 0 && CDTXMania.ConfigIni.bDrumsEnabled) continue;
+                if (instrument == 0 && !CDTXMania.ConfigIni.bDrumsEnabled) continue;
+                
+                double chartSkill = CScoreIni.tCalculateGameSkillFromPlayingSkill(
+                    chart.SongInformation.Level[instrument],
+                    chart.SongInformation.LevelDec[instrument],
+                    chart.SongInformation.HighSkill[instrument],
+                    false);
+                if (chartSkill > skill) skill = chartSkill;
+            }
+        }
+
+        return skill;
+    }
 }
