@@ -1740,4 +1740,10 @@ internal class CDTXMania : Game
 
     #endregion
     #endregion
+
+    public static int GetCurrentInstrument()
+    {
+        return ConfigIni.bDrumsEnabled ? 0
+            : ConfigIni.bIsSwappedGuitarBass ? 2 : 1;
+    }
 }
