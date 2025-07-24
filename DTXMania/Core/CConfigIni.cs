@@ -647,26 +647,6 @@ internal class CConfigIni
 		}
 	}
 
-	public bool bEnterがキー割り当てのどこにも使用されていない
-	{
-		get
-		{
-			for( int i = 0; i <= (int)EKeyConfigPart.SYSTEM; i++ )
-			{
-				for( int j = 0; j < (int)EKeyConfigPad.MAX; j++ )
-				{
-					for( int k = 0; k < 0x10; k++ )
-					{
-						if( ( KeyAssign[ i ][ j ][ k ].InputDevice == EInputDevice.Keyboard ) && ( KeyAssign[ i ][ j ][ k ].Code == (int) SlimDXKey.Return ) )
-						{
-							return false;
-						}
-					}
-				}
-			}
-			return true;
-		}
-	}
 	public bool bGuitarEnabled
 	{
 		get => _bGuitar有効;
