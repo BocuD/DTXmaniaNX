@@ -5,6 +5,7 @@ using Hexa.NET.ImGui;
 using Newtonsoft.Json;
 using SharpDX;
 using Color = System.Drawing.Color;
+using RectangleF = SharpDX.RectangleF;
 
 namespace DTXMania.UI.Drawable;
 
@@ -85,6 +86,9 @@ public class UIText : UITexture
         this.text = text;
         dirty = true;
     }
+
+    public bool customClipRect = false;
+    public RectangleF overrideClipRect;
         
     public override void Draw(Matrix parentMatrix)
     {
@@ -103,7 +107,11 @@ public class UIText : UITexture
             RenderTexture();
         }
         
-        base.Draw(parentMatrix);
+        UpdateLocalTransformMatrix();
+        
+        Matrix combinedMatrix = localTransformMatrix * parentMatrix;
+        texture.tDraw2DMatrix(combinedMatrix, size,
+            customClipRect ? overrideClipRect : new RectangleF(0, 0, texture.Width, texture.Height));
     }
     
     private void UpdateDynamicText()
@@ -130,7 +138,7 @@ public class UIText : UITexture
         fontDirty = false;
     }
 
-    public void RenderTexture()
+    public virtual void RenderTexture()
     {
         if (texture.isValid())
         {

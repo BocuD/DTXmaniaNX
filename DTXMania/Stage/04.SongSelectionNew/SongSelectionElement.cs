@@ -6,6 +6,7 @@ using DTXMania.UI.Drawable;
 using DTXMania.UI.Inspector;
 using SharpDX;
 using Color = System.Drawing.Color;
+using RectangleF = SharpDX.RectangleF;
 
 namespace DTXMania;
 
@@ -35,21 +36,23 @@ public class SongSelectionElement : UIGroup
         
         FontFamily family = new(CDTXMania.ConfigIni.songListFont);
         
-        songTitleText = AddChild(new UIText(family, 18));
+        songTitleText = AddChild(new HorizontallyScrollingText(family, 18));
         songTitleText.fontColor = Color.Black;
         songTitleText.edgeColor = Color.White;
         songTitleText.position = new Vector3(78, 38, 0);
         songTitleText.anchor = new Vector2(0, 0.5f);
         songTitleText.renderOrder = 1;
         songTitleText.name = "title";
+        songTitleText.maximumWidth = 460.0f;
         
-        songArtistText = AddChild(new UIText(family, 12));
+        songArtistText = AddChild(new HorizontallyScrollingText(family, 12));
         songArtistText.position = new Vector3(80, 60, 0);
         songArtistText.fontColor = Color.Black;
         songArtistText.edgeColor = Color.White;
         songArtistText.anchor = new Vector2(0, 0.5f);
         songArtistText.renderOrder = 1;
         songArtistText.name = "artist";
+        songArtistText.maximumWidth = 460.0f;
         
         skillbar = AddChild(new UIImage(DTXTexture.LoadFromPath(CSkin.Path($@"Graphics\5_skillbar.png"))));
         skillbar.anchor = new Vector2(0.0f, 0.5f);
@@ -80,8 +83,8 @@ public class SongSelectionElement : UIGroup
 
     private UIImage backgroundImage;
     private UIImage albumArtImage;
-    private UIText songTitleText;
-    private UIText songArtistText;
+    private HorizontallyScrollingText songTitleText;
+    private HorizontallyScrollingText songArtistText;
     private UIImage skillbar;
     private UIImage skillbarFill;
     private UIText skillText;
@@ -139,7 +142,7 @@ public class SongSelectionElement : UIGroup
             }
 
             albumArtImage.SetTexture(tex, false);
-            albumArtImage.clipRect = new SharpDX.RectangleF(0, 0, tex.Width, tex.Height);
+            albumArtImage.clipRect = new RectangleF(0, 0, tex.Width, tex.Height);
         }
     }
 
@@ -177,6 +180,6 @@ public class SongSelectionElement : UIGroup
         }
 
         albumArtImage.SetTexture(tex, false);
-        albumArtImage.clipRect = new SharpDX.RectangleF(0, 0, tex.Width, tex.Height);
+        albumArtImage.clipRect = new RectangleF(0, 0, tex.Width, tex.Height);
     }
 }
