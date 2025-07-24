@@ -166,8 +166,6 @@ internal class CDTXMania : Game
         set; // 2012.1.26 yyagi private解除 CStage起動でのdesirialize読み込みのため
     }
 
-    public static CEnumSongs EnumSongs { get; private set; }
-    public static CActEnumSongs actEnumSongs { get; private set; }
     public static SongDb.SongDb SongDb { get; private set; }
 
     public static CActFlushGPU actFlushGPU { get; private set; }
@@ -744,14 +742,7 @@ internal class CDTXMania : Game
             string strDefaultSoundDeviceBusType = CSoundManager.strDefaultDeviceBusType;
             Trace.TraceInformation($"Bus type of the default sound device = {strDefaultSoundDeviceBusType}");
         });
-
-        SafeInitialize("Song Manager", () =>
-        {
-            SongManager = new CSongManager();
-            EnumSongs = new CEnumSongs();
-            actEnumSongs = new CActEnumSongs();
-        });
-
+        
         Random = new Random((int)Timer.nシステム時刻);
 
         #region [ Initialize Stage ]
@@ -760,7 +751,6 @@ internal class CDTXMania : Game
 
         mainActivities =
         [
-            actEnumSongs,
             actDisplayString,
 
             StageManager.stageStartup,
@@ -1492,7 +1482,6 @@ internal class CDTXMania : Game
 
             Trace.TraceInformation("Shutting down application");
 
-            SafeTerminate("ActEnumSongs", () => { actEnumSongs?.OnDeactivate(); });
             SafeTerminate("Current Stage", () =>
             {
                 if (StageManager.rCurrentStage is { bActivated: true })

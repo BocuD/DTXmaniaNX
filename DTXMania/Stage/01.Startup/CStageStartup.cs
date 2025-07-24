@@ -55,15 +55,6 @@ internal class CStageStartup : CStage
 		try
 		{
 			startupScreenConsole = null;
-			if ( es != null )
-			{
-				if ( es.thDTXFileEnumerate is { IsAlive: true } )
-				{
-					Trace.TraceWarning( "リスト構築スレッドを強制停止します。" );
-					es.thDTXFileEnumerate.Abort();
-					es.thDTXFileEnumerate.Join();
-				}
-			}
 			base.OnDeactivate();
 			Trace.TraceInformation( "起動ステージの非活性化を完了しました。" );
 		}
@@ -114,12 +105,6 @@ internal class CStageStartup : CStage
 		{
 			Trace.Unindent();
 		}
-					
-		es = new CEnumSongs();
-		if (!CDTXMania.bCompactMode)
-		{
-			es.StartEnumFromCacheStartup(this);
-		}
 	}
 
 	public override int OnUpdateAndDraw()
@@ -136,34 +121,6 @@ internal class CStageStartup : CStage
 		{
 			case EPhase.起動0_システムサウンドを構築:
 				str現在進行中 = "Loading system sounds ... ";
-				break;
-
-			case EPhase.起動00_songlistから曲リストを作成する:
-				str現在進行中 = "Loading songlist.db ... ";
-				break;
-
-			case EPhase.起動1_SongsDBからスコアキャッシュを構築:
-				str現在進行中 = "Loading songs.db ... ";
-				break;
-
-			case EPhase.起動2_曲を検索してリストを作成する:
-				str現在進行中 = $"Enumerating songs ... {es.SongManager.nNbScoresFound}";
-				break;
-
-			case EPhase.起動3_スコアキャッシュをリストに反映する:
-				str現在進行中 = $"Loading score properties from songs.db ... {es.SongManager.nNbScoresFromScoreCache}/{es.SongManager.nNbScoresFound}";
-				break;
-
-			case EPhase.起動4_スコアキャッシュになかった曲をファイルから読み込んで反映する:
-				str現在進行中 = $"Loading score properties from files ... {es.SongManager.nNbScoresFromFile}/{es.SongManager.nNbScoresFound - es.SongManager.nNbScoresFromScoreCache}";
-				break;
-
-			case EPhase.起動5_曲リストへ後処理を適用する:
-				str現在進行中 = "Building songlists ... ";
-				break;
-
-			case EPhase.起動6_スコアキャッシュをSongsDBに出力する:
-				str現在進行中 = "Saving songs.db ... ";
 				break;
 
 			case EPhase.起動7_完了:
@@ -187,13 +144,8 @@ internal class CStageStartup : CStage
 		}
 		//-----------------
 		#endregion
-
-		if( es is { IsSongListEnumCompletelyDone: true } )
-		{
-			CDTXMania.SongManager = es.SongManager;
-			return 1;
-		}
-		return 0;
+		
+		return 1;
 	}
 
 
@@ -203,7 +155,5 @@ internal class CStageStartup : CStage
 	//-----------------
 	private string str現在進行中 = "";
 	private CTexture? txBackground;
-	private CEnumSongs es;
-		
 	#endregion
 }

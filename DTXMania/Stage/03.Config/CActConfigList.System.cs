@@ -162,40 +162,16 @@ internal partial class CActConfigList
         {
             action = () =>
             {
-                if (CDTXMania.EnumSongs.IsEnumerating)
+                if (CDTXMania.SongDb.status == SongDbScanStatus.Idle)
                 {
-                    CDTXMania.EnumSongs.Abort();
-                    CDTXMania.actEnumSongs.OnDeactivate();
+                    Task.Run(() => CDTXMania.SongDb.ScanAsync(() =>
+                    {
+                        CDTXMania.StageManager.stageSongSelectionNew.Reload();
+                    }));
                 }
-
-                CDTXMania.EnumSongs.StartEnumFromDisk(false);
-                CDTXMania.EnumSongs.ChangeEnumeratePriority(ThreadPriority.Normal);
-                CDTXMania.actEnumSongs.bコマンドでの曲データ取得 = true;
-                CDTXMania.actEnumSongs.OnActivate();
             }
         };
         listItems.Add(iSystemReloadDTX);
-
-        CItemBase iSystemFastReloadDTX = new("Fast Reload", CItemBase.EPanelType.Normal,
-            "曲データの一覧情報を\n" +
-            "取得し直します。",
-            "Detect changes in DTX Data folder from song list cache and load these changes only.\nWARNING: This feature is experimental and may corrupt the song list cache. Select Reload Songs if something goes wrong.")
-        {
-            action = () =>
-            {
-                if (CDTXMania.EnumSongs.IsEnumerating)
-                {
-                    CDTXMania.EnumSongs.Abort();
-                    CDTXMania.actEnumSongs.OnDeactivate();
-                }
-
-                CDTXMania.EnumSongs.StartEnumFromDisk(true);
-                CDTXMania.EnumSongs.ChangeEnumeratePriority(ThreadPriority.Normal);
-                CDTXMania.actEnumSongs.bコマンドでの曲データ取得 = true;
-                CDTXMania.actEnumSongs.OnActivate();
-            }
-        };
-        listItems.Add(iSystemFastReloadDTX);
         
         int nDGmode = CDTXMania.ConfigIni.bDrumsEnabled ? 0 : 1;
         iSystemGRmode = new CItemList("Drums & GR ", CItemBase.EPanelType.Normal, nDGmode,
