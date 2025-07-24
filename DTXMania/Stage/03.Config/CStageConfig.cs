@@ -203,16 +203,17 @@ internal class CStageConfig : CStage
     public override int OnUpdateAndDraw()
     {
         if (!bActivated) return 0;
-        
+
         base.OnUpdateAndDraw();
-        
+
         ctDisplayWait.tUpdate();
-            
+
         //update menu cursor position
         menuCursor.Texture.transparency = bFocusIsOnMenu ? 1.0f : 0.5f;
         menuCursor.position.Y = 2 + configLeftOptionsMenu.currentlySelectedIndex * 32;
-        
+
         #region [ アイテム ]
+
         //---------------------
         switch (eItemPanelMode)
         {
@@ -224,17 +225,24 @@ internal class CStageConfig : CStage
                 actKeyAssign.OnUpdateAndDraw();
                 break;
         }
+
         //---------------------
+
         #endregion
+
         #region [ Description panel ]
+
         //---------------------
-        if( txDescriptionPanel != null && !bFocusIsOnMenu && actList.nTargetScrollCounter == 0 && ctDisplayWait.bReachedEndValue )
+        if (txDescriptionPanel != null && !bFocusIsOnMenu && actList.nTargetScrollCounter == 0 &&
+            ctDisplayWait.bReachedEndValue)
             // 15SEP20 Increasing x position by 180 pixels (was 620)
             txDescriptionPanel.tDraw2D(CDTXMania.app.Device, 800, 270);
         //---------------------
+
         #endregion
 
         #region [ Fade in and out ]
+
         //---------------------
         switch (ePhaseID)
         {
@@ -244,6 +252,7 @@ internal class CStageConfig : CStage
                     CDTXMania.Skin.bgmコンフィグ画面.tPlay();
                     ePhaseID = EPhase.Common_DefaultState;
                 }
+
                 break;
 
             case EPhase.Common_FadeOut:
@@ -251,95 +260,103 @@ internal class CStageConfig : CStage
                 {
                     break;
                 }
+
                 return 1;
         }
+
         //---------------------
+
         #endregion
-            
+
         // キー入力
 
         if ((ePhaseID != EPhase.Common_DefaultState) || actKeyAssign.bWaitingForKeyInput)
             return 0;
 
         // 曲データの一覧取得中は、キー入力を無効化する
-        if (!CDTXMania.EnumSongs.IsEnumerating || CDTXMania.actEnumSongs.bコマンドでの曲データ取得 != true)
+        if (CDTXMania.Input.ActionCancel())
         {
-            if (CDTXMania.Input.ActionCancel())
+            CDTXMania.Skin.soundCancel.tPlay();
+            if (!bFocusIsOnMenu)
             {
-                CDTXMania.Skin.soundCancel.tPlay();
-                if (!bFocusIsOnMenu)
+                if (eItemPanelMode == EItemPanelMode.KeyCodeList)
                 {
-                    if (eItemPanelMode == EItemPanelMode.KeyCodeList)
-                    {
-                        tNotifyAssignmentComplete();
-                        return 0;
-                    }
-                    if (!actList.bIsSubMenuSelected && !actList.bIsFocusingParameter)	// #24525 2011.3.15 yyagi, #32059 2013.9.17 yyagi
-                    {
-                        bFocusIsOnMenu = true;
-                    }
-                    tDrawSelectedMenuDescriptionInDescriptionPanel();
-                    actList.tPressEsc();								// #24525 2011.3.15 yyagi ESC押下時の右メニュー描画用
+                    tNotifyAssignmentComplete();
+                    return 0;
                 }
-                else
-                {
-                    actFIFO.tStartFadeOut();
-                    ePhaseID = EPhase.Common_FadeOut;
-                }
-            }
-            else if (CDTXMania.Input.ActionDecide())
-            {
-                if (configLeftOptionsMenu.currentlySelectedIndex == 4)
-                {
-                    CDTXMania.Skin.soundDecide.tPlay();
-                    actFIFO.tStartFadeOut();
-                    ePhaseID = EPhase.Common_FadeOut;
-                }
-                else if (bFocusIsOnMenu)
-                {
-                    CDTXMania.Skin.soundDecide.tPlay();
-                    bFocusIsOnMenu = false;
-                    tDrawSelectedItemDescriptionInDescriptionPanel();
-                }
-                else
-                {
-                    switch (eItemPanelMode)
-                    {
-                        case EItemPanelMode.PadList:
-                            bool bIsKeyAssignSelectedBeforeHitEnter = actList.bIsSubMenuSelected;	// #24525 2011.3.15 yyagi
-                            actList.tPressEnter();
-                            if (actList.bCurrentlySelectedItemIsReturnToMenu)
-                            {
-                                tDrawSelectedMenuDescriptionInDescriptionPanel();
-                                if (bIsKeyAssignSelectedBeforeHitEnter == false)							// #24525 2011.3.15 yyagi
-                                {
-                                    bFocusIsOnMenu = true;
-                                }
-                            }
-                            break;
 
-                        case EItemPanelMode.KeyCodeList:
-                            actKeyAssign.tPressEnter();
-                            break;
-                    }
+                if (!actList.bIsSubMenuSelected &&
+                    !actList.bIsFocusingParameter) // #24525 2011.3.15 yyagi, #32059 2013.9.17 yyagi
+                {
+                    bFocusIsOnMenu = true;
                 }
+
+                tDrawSelectedMenuDescriptionInDescriptionPanel();
+                actList.tPressEsc(); // #24525 2011.3.15 yyagi ESC押下時の右メニュー描画用
             }
-            ctKeyRepetition.Up.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(SlimDXKey.UpArrow), new CCounter.DGキー処理(tMoveCursorUp));
-            ctKeyRepetition.R.tRepeatKey(CDTXMania.Pad.bPressingGB(EPad.HH), new CCounter.DGキー処理(tMoveCursorUp));
-            //Change to HT
-            if (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.HT))
+            else
             {
-                tMoveCursorUp();
-            }
-            ctKeyRepetition.Down.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(SlimDXKey.DownArrow), new CCounter.DGキー処理(tMoveCursorDown));
-            ctKeyRepetition.B.tRepeatKey(CDTXMania.Pad.bPressingGB(EPad.SD), new CCounter.DGキー処理(tMoveCursorDown));
-            //Change to LT
-            if (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.LT))
-            {
-                tMoveCursorDown();
+                actFIFO.tStartFadeOut();
+                ePhaseID = EPhase.Common_FadeOut;
             }
         }
-        
+        else if (CDTXMania.Input.ActionDecide())
+        {
+            if (configLeftOptionsMenu.currentlySelectedIndex == 4)
+            {
+                CDTXMania.Skin.soundDecide.tPlay();
+                actFIFO.tStartFadeOut();
+                ePhaseID = EPhase.Common_FadeOut;
+            }
+            else if (bFocusIsOnMenu)
+            {
+                CDTXMania.Skin.soundDecide.tPlay();
+                bFocusIsOnMenu = false;
+                tDrawSelectedItemDescriptionInDescriptionPanel();
+            }
+            else
+            {
+                switch (eItemPanelMode)
+                {
+                    case EItemPanelMode.PadList:
+                        bool bIsKeyAssignSelectedBeforeHitEnter = actList.bIsSubMenuSelected; // #24525 2011.3.15 yyagi
+                        actList.tPressEnter();
+                        if (actList.bCurrentlySelectedItemIsReturnToMenu)
+                        {
+                            tDrawSelectedMenuDescriptionInDescriptionPanel();
+                            if (bIsKeyAssignSelectedBeforeHitEnter == false) // #24525 2011.3.15 yyagi
+                            {
+                                bFocusIsOnMenu = true;
+                            }
+                        }
+
+                        break;
+
+                    case EItemPanelMode.KeyCodeList:
+                        actKeyAssign.tPressEnter();
+                        break;
+                }
+            }
+        }
+
+        ctKeyRepetition.Up.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(SlimDXKey.UpArrow),
+            tMoveCursorUp);
+        ctKeyRepetition.R.tRepeatKey(CDTXMania.Pad.bPressingGB(EPad.HH), tMoveCursorUp);
+        //Change to HT
+        if (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.HT))
+        {
+            tMoveCursorUp();
+        }
+
+        ctKeyRepetition.Down.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(SlimDXKey.DownArrow),
+            tMoveCursorDown);
+        ctKeyRepetition.B.tRepeatKey(CDTXMania.Pad.bPressingGB(EPad.SD), tMoveCursorDown);
+        //Change to LT
+        if (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.LT))
+        {
+            tMoveCursorDown();
+        }
+
         return 0;
     }
 
