@@ -37,18 +37,18 @@ internal partial class CActConfigList
             () => CDTXMania.ConfigIni.bランダムセレクトで子BOXを検索対象とする = iSystemRandomFromSubBox.bON);
         listItems.Add(iSystemRandomFromSubBox);
             
-        CItemInteger iSystemPreviewSoundWait = new("PreSoundWait", 0, 0x2710, CDTXMania.ConfigIni.n曲が選択されてからプレビュー音が鳴るまでのウェイトms,
+        CItemInteger iSystemPreviewSoundWait = new("PreSoundWait", 0, 0x2710, CDTXMania.ConfigIni.nSongSelectSoundPreviewWaitTimeMs,
             "カーソルが合わされてから\n"+
             "プレビュー音が鳴り始める\n"+
             "までの時間を指定します。\n"+
             "0～10000[ms]が指定可能です。",
             "Delay time (ms) to start playing preview sound in song selection screen.\nYou can specify from 0ms to 10000ms.");
         iSystemPreviewSoundWait.BindConfig(
-            () => iSystemPreviewSoundWait.nCurrentValue = CDTXMania.ConfigIni.n曲が選択されてからプレビュー音が鳴るまでのウェイトms,
-            () => CDTXMania.ConfigIni.n曲が選択されてからプレビュー音が鳴るまでのウェイトms = iSystemPreviewSoundWait.nCurrentValue);
+            () => iSystemPreviewSoundWait.nCurrentValue = CDTXMania.ConfigIni.nSongSelectSoundPreviewWaitTimeMs,
+            () => CDTXMania.ConfigIni.nSongSelectSoundPreviewWaitTimeMs = iSystemPreviewSoundWait.nCurrentValue);
         listItems.Add(iSystemPreviewSoundWait);
 
-        CItemInteger iSystemPreviewImageWait = new("PreImageWait", 0, 0x2710, CDTXMania.ConfigIni.n曲が選択されてからプレビュー画像が表示開始されるまでのウェイトms,
+        CItemInteger iSystemPreviewImageWait = new("PreImageWait", 0, 0x2710, CDTXMania.ConfigIni.nSongSelectImagePreviewWaitTimeMs,
             "カーソルが合わされてから\n"+
             "プレビュー画像が表示\n"+
             "されるまでの時間を\n"+
@@ -56,8 +56,8 @@ internal partial class CActConfigList
             "0～10000[ms]が指定可能です。",
             "Delay time (ms) to show preview image in song selection screen.\nYou can specify from 0ms to 10000ms.");
         iSystemPreviewImageWait.BindConfig(
-            () => iSystemPreviewImageWait.nCurrentValue = CDTXMania.ConfigIni.n曲が選択されてからプレビュー画像が表示開始されるまでのウェイトms,
-            () => CDTXMania.ConfigIni.n曲が選択されてからプレビュー画像が表示開始されるまでのウェイトms = iSystemPreviewImageWait.nCurrentValue);
+            () => iSystemPreviewImageWait.nCurrentValue = CDTXMania.ConfigIni.nSongSelectImagePreviewWaitTimeMs,
+            () => CDTXMania.ConfigIni.nSongSelectImagePreviewWaitTimeMs = iSystemPreviewImageWait.nCurrentValue);
         listItems.Add(iSystemPreviewImageWait);
         
         iSystemReturnToMenu = new CItemBase("<< Return To Menu", CItemBase.EPanelType.Other,

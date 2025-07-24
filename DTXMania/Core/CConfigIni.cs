@@ -539,8 +539,8 @@ internal class CConfigIni
 	public int nフレーム毎スリープms;			// #xxxxx 2011.11.27 yyagi add
 	public int nPlaySpeed;
 	public bool bSaveScoreIfModifiedPlaySpeed;
-	public int n曲が選択されてからプレビュー音が鳴るまでのウェイトms;
-	public int n曲が選択されてからプレビュー画像が表示開始されるまでのウェイトms;
+	public int nSongSelectSoundPreviewWaitTimeMs;
+	public int nSongSelectImagePreviewWaitTimeMs;
 	public int n自動再生音量;  // nAutoVolume
 	public int n手動再生音量;  // nChipVolume
 	public int n選曲リストフォントのサイズdot;
@@ -1125,8 +1125,8 @@ internal class CConfigIni
 		nPedalLagTime = 0;
 
 		bAutoAddGage = false;
-		n曲が選択されてからプレビュー音が鳴るまでのウェイトms = 1000;
-		n曲が選択されてからプレビュー画像が表示開始されるまでのウェイトms = 100;
+		nSongSelectSoundPreviewWaitTimeMs = 1000;
+		nSongSelectImagePreviewWaitTimeMs = 100;
 		bWave再生位置自動調整機能有効 = true;
 		bBGM音を発声する = true;
 		bドラム打音を発声する = true;
@@ -1603,10 +1603,10 @@ internal class CConfigIni
 		#endregion     
 		#region [ プレビュー音 ]
 		sw.WriteLine( "; 曲選択からプレビュー音の再生までのウェイト[ms]" );
-		sw.WriteLine( "PreviewSoundWait={0}", n曲が選択されてからプレビュー音が鳴るまでのウェイトms );
+		sw.WriteLine( "PreviewSoundWait={0}", nSongSelectSoundPreviewWaitTimeMs );
 		sw.WriteLine();
 		sw.WriteLine( "; 曲選択からプレビュー画像表示までのウェイト[ms]" );
-		sw.WriteLine( "PreviewImageWait={0}", n曲が選択されてからプレビュー画像が表示開始されるまでのウェイトms );
+		sw.WriteLine( "PreviewImageWait={0}", nSongSelectImagePreviewWaitTimeMs );
 		sw.WriteLine();
 		#endregion
 		sw.WriteLine( "; Waveの再生位置自動補正(0:OFF, 1:ON)" );
@@ -2710,11 +2710,11 @@ internal class CConfigIni
 									}
 									else if (str3.Equals("PreviewSoundWait"))
 									{
-										n曲が選択されてからプレビュー音が鳴るまでのウェイトms = CConversion.nGetNumberIfInRange(str4, 0, 0x5f5e0ff, n曲が選択されてからプレビュー音が鳴るまでのウェイトms);
+										nSongSelectSoundPreviewWaitTimeMs = CConversion.nGetNumberIfInRange(str4, 0, 0x5f5e0ff, nSongSelectSoundPreviewWaitTimeMs);
 									}
 									else if (str3.Equals("PreviewImageWait"))
 									{
-										n曲が選択されてからプレビュー画像が表示開始されるまでのウェイトms = CConversion.nGetNumberIfInRange(str4, 0, 0x5f5e0ff, n曲が選択されてからプレビュー画像が表示開始されるまでのウェイトms);
+										nSongSelectImagePreviewWaitTimeMs = CConversion.nGetNumberIfInRange(str4, 0, 0x5f5e0ff, nSongSelectImagePreviewWaitTimeMs);
 									}
 									else if (str3.Equals("AdjustWaves"))
 									{

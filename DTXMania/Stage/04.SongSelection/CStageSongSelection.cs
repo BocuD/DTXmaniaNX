@@ -385,8 +385,8 @@ internal class CStageSongSelection : CStage
 		}
 		if( !bBGMPlayed && ( ePhaseID == EPhase.Common_DefaultState ) )
 		{
-			CDTXMania.Skin.bgm選曲画面.n音量_次に鳴るサウンド = 100;
-			CDTXMania.Skin.bgm選曲画面.tPlay();
+			CDTXMania.Skin.bgmSongSelectScreen.n音量_次に鳴るサウンド = 100;
+			CDTXMania.Skin.bgmSongSelectScreen.tPlay();
 			bBGMPlayed = true;
 		}
 		
@@ -398,7 +398,7 @@ internal class CStageSongSelection : CStage
 			if (  actQuickConfig.bGotoDetailConfig )
 			{	// 詳細CONFIG呼び出し
 				actQuickConfig.tDeativatePopupMenu();
-				actPresound.tサウンド停止();
+				actPresound.tStopSound();
 				eReturnValueWhenFadeOutCompleted = EReturnValue.CallConfig;	// #24525 2011.3.16 yyagi: [SHIFT]-[F1]でCONFIG呼び出し
 				actFIFO.tStartFadeOut();
 				ePhaseID = EPhase.Common_FadeOut;
@@ -421,7 +421,7 @@ internal class CStageSongSelection : CStage
 				#region [ CONFIG画面 ]
 				if (CDTXMania.Pad.bPressed(EInstrumentPart.GUITAR, EPad.Help))
 				{	// [SHIFT] + [F1] CONFIG
-					actPresound.tサウンド停止();
+					actPresound.tStopSound();
 					eReturnValueWhenFadeOutCompleted = EReturnValue.CallConfig;	// #24525 2011.3.16 yyagi: [SHIFT]-[F1]でCONFIG呼び出し
 					actFIFO.tStartFadeOut();
 					ePhaseID = EPhase.Common_FadeOut;
@@ -502,7 +502,7 @@ internal class CStageSongSelection : CStage
 					#region [ Upstairs ]
 					if (((actSongList.rSelectedSong != null) && (actSongList.rSelectedSong.parentNode != null)) && (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.LC) || CDTXMania.Pad.bPressedGB(EPad.Cancel)))
 					{
-						actPresound.tサウンド停止();
+						actPresound.tStopSound();
 						CDTXMania.Skin.soundCancel.tPlay();
 						actSongList.tExitBOX();
 						tSelectedSongChanged();
@@ -1022,7 +1022,7 @@ internal class CStageSongSelection : CStage
 			}
 			Trace.TraceInformation( builder2.ToString() );
 		}
-		CDTXMania.Skin.bgm選曲画面.t停止する();
+		CDTXMania.Skin.bgmSongSelectScreen.tStop();
 	}
 	private void tSelectSong()  // t曲を選択する
 	{
@@ -1041,7 +1041,7 @@ internal class CStageSongSelection : CStage
 			tUpdateSearchNotification($"Score unavailable for {(CDTXMania.ConfigIni.bDrumsEnabled ? "Drum" : "Guitar/Bass")} mode");
 			ctSearchInputDisplayCounter.tStart(0, 1, 10000, CDTXMania.Timer);
 		}
-		CDTXMania.Skin.bgm選曲画面.t停止する();
+		CDTXMania.Skin.bgmSongSelectScreen.tStop();
 	}
 
 	private bool tCheckScoreExistForMode(CScore score)

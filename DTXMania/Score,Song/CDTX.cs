@@ -2972,7 +2972,7 @@ public class CDTX : CActivity
         {
             for (int i = 0; i < nPolyphonicSounds; i++)
             {
-                if ((wc.rSound[i] != null) && (wc.rSound[i].b再生中))
+                if ((wc.rSound[i] != null) && (wc.rSound[i].bIsPlaying))
                 {
                     long nCurrentTime = CSoundManager.rcPerformanceTimer.nSystemTimeMs;
                     if (nCurrentTime > wc.nPlayStartTime[i])
@@ -2997,7 +2997,7 @@ public class CDTX : CActivity
         
         for (int i = 0; i < nPolyphonicSounds; i++)
         {
-            if (cwav.rSound[i] != null && cwav.rSound[i].b再生中)
+            if (cwav.rSound[i] != null && cwav.rSound[i].bIsPlaying)
             {
                 cwav.rSound[i].tStopPlayback();
             }
@@ -3419,7 +3419,7 @@ public class CDTX : CActivity
         {
             for (int j = 0; j < nPolyphonicSounds; j++)
             {
-                if ((cwav.rSound[j] != null) && cwav.rSound[j].b再生中)
+                if ((cwav.rSound[j] != null) && cwav.rSound[j].bIsPlaying)
                 {
                     cwav.nPlayStartTime[j] += nBGMAdjustの増減値;
                 }
@@ -3433,7 +3433,7 @@ public class CDTX : CActivity
         {
             for (int i = 0; i < nPolyphonicSounds; i++)
             {
-                if ((cwav.rSound[i] != null) && cwav.rSound[i].b再生中)
+                if ((cwav.rSound[i] != null) && cwav.rSound[i].bIsPlaying)
                 {
                     cwav.rSound[i].tPausePlayback();
                     cwav.nPauseTime[i] = CSoundManager.rcPerformanceTimer.nSystemTimeMs;

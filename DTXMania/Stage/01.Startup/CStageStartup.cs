@@ -101,7 +101,7 @@ internal class CStageStartup : CStage
 
 		try
 		{
-			CDTXMania.Skin.bgm起動画面.tPlay();
+			CDTXMania.Skin.bgmTitleScreen.tPlay();
                 
 			CDTXMania.Skin.ReloadSkin();
                 

@@ -399,7 +399,7 @@ internal class CStageSongLoading : CStage
             if (CDTXMania.Skin.soundNowLoading.bExclusive &&
                 (CSkin.CSystemSound.rLastPlayedExclusiveSystemSound != null))
             {
-                CSkin.CSystemSound.rLastPlayedExclusiveSystemSound.t停止する();
+                CSkin.CSystemSound.rLastPlayedExclusiveSystemSound.tStop();
             }
 
             sdLoadingSound.tStartPlaying();

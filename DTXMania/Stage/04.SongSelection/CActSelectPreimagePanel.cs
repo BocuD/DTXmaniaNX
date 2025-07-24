@@ -22,7 +22,7 @@ internal class CActSelectPreimagePanel : CActivity
 
 	public void t選択曲が変更された()
 	{
-		ct遅延表示 = new CCounter( -CDTXMania.ConfigIni.n曲が選択されてからプレビュー画像が表示開始されるまでのウェイトms, 100, 1, CDTXMania.Timer );
+		ct遅延表示 = new CCounter( -CDTXMania.ConfigIni.nSongSelectImagePreviewWaitTimeMs, 100, 1, CDTXMania.Timer );
 		b新しいプレビューファイルを読み込んだ = false;
 	}
 
