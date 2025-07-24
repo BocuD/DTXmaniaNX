@@ -3,7 +3,8 @@
 public class SortByBox : SongDbSort
 {
     public override string Name => "BOX";
-    
+    public override string IconName => "recommended";
+
     public override Task<SongNode> Sort(SongDb songDb)
     {
         //create a new root node

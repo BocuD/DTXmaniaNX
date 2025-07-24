@@ -6,7 +6,8 @@ namespace DTXMania.SongDb;
 public class SortByLevel : SongDbSort
 {
     public override string Name => "Level";
-    
+    public override string IconName => "level";
+
     public override Task<SongNode> Sort(SongDb songDb)
     {
         //create a new root node

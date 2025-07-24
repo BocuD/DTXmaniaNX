@@ -3,6 +3,7 @@
 public class SortByArtist : SortByTitle
 {
     public override string Name => "Artist";
+    public override string IconName => "artist";
 
     protected override char GetSortKey(SongNode song)
     {

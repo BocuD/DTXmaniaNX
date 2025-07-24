@@ -5,6 +5,7 @@ namespace DTXMania.SongDb;
 public class SortByDifficulty : SongDbSort
 {
     public override string Name => "Difficulty";
+    public override string IconName => "difficulty";
 
     public string[] difficultyLabels = ["BASIC", "ADVANCED", "EXTREME", "MASTER", "DTX"];
     

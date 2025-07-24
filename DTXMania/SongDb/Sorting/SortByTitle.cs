@@ -5,6 +5,7 @@ namespace DTXMania.SongDb;
 public class SortByTitle : SongDbSort
 {
     public override string Name => "Title";
+    public override string IconName => "title";
 
     public override async Task<SongNode> Sort(SongDb songDb)
     {

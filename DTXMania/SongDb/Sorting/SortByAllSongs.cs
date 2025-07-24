@@ -3,6 +3,7 @@
 public class SortByAllSongs : SongDbSort
 {
     public override string Name => "All Songs";
+    public override string IconName => "allmusic";
 
     public override Task<SongNode> Sort(SongDb songDb)
     {
