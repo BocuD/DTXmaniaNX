@@ -1103,7 +1103,6 @@ internal class CDTXMania : Game
         }
 
         InspectorManager.Draw(renderGameToWindow, gameRenderTargetTexture);
-        GameStatus.Draw();
 
         Device.EndScene();
 

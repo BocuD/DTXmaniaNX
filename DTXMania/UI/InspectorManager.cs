@@ -17,7 +17,7 @@ public static class InspectorManager
     public static Inspector.Inspector inspector { get; private set; }
     public static HierarchyWindow hierarchyWindow { get; private set; }
 
-    private static bool inspectorEnabled = true;
+    private static bool inspectorEnabled = false;
     
     public static ImDrawListPtr gizmoDrawList;
     public static Rectangle gizmoRect;
@@ -89,6 +89,7 @@ public static class InspectorManager
             hierarchyWindow.Draw();
             DrawableTracker.DrawWindow();
             SongDBTester.DrawWindow();
+            GameStatus.Draw();
         }
     }
     
