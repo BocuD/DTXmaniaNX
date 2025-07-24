@@ -116,13 +116,4 @@ public class SortByDifficulty : SongDbSort
 
         await Task.CompletedTask; // Simulate async operation
     }
-
-    private SongNode CreateDifficultyLabel(string difficultyName, SongNode root)
-    {
-        SongNode node = new(root, SongNode.ENodeType.BOX)
-        {
-            title = difficultyName
-        };
-        return node;
-    }
 }

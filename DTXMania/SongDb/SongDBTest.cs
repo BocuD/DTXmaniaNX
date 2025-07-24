@@ -182,7 +182,7 @@ public class SongDBTester
 
         if (ImGui.Button("Level"))
         {
-            
+            Sort(new SortByLevel());
         }
         
         ImGui.SameLine();

@@ -46,6 +46,7 @@ public class CStageSongSelectionNew : CStage
             new SortByTitle(),
             new SortByArtist(),
             new SortByDifficulty(),
+            new SortByLevel(),
             new SortByAllSongs()
         ];
         sortMenuContainer = ui.AddChild(new SortMenuContainer(songDb, sorters));
