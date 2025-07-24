@@ -117,6 +117,10 @@ public class SongSelectionElement : UIGroup
                     CScore chart = node.charts.FirstOrDefault(x => x != null);
                     songArtistText.SetText(chart != null ? chart.SongInformation.ArtistName : "");
                     backgroundImage.SetTexture(bar);
+                    
+                    //some dirty hacks to fix clipping issues with a bad texture (?)
+                    backgroundImage.clipRect.X = 0;
+                    backgroundImage.position.X = -40.0f;
                     break;
                 
                 case SongNode.ENodeType.BOX:
@@ -125,12 +129,20 @@ public class SongSelectionElement : UIGroup
                         ? $"{node.childNodes.Count - 1} songs"
                         : "Empty collection");
                     backgroundImage.SetTexture(boxClosed);
+                    
+                    //some dirty hacks to fix clipping issues with a bad texture (?)
+                    backgroundImage.clipRect.X = 1;
+                    backgroundImage.position.X = -39.0f;
                     break;
                 
                 case SongNode.ENodeType.BACKBOX:
                     songTitleText.SetText("<< BACK");
                     songArtistText.SetText(CDTXMania.isJapanese ? "BOX を出ます。" : "Exit from the BOX.");
                     backgroundImage.SetTexture(boxOpen);
+                    
+                    //some dirty hacks to fix clipping issues with a bad texture (?)
+                    backgroundImage.clipRect.X = 1;
+                    backgroundImage.position.X = -39.0f;
                     break;
             }
             
