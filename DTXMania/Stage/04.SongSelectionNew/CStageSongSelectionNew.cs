@@ -14,6 +14,7 @@ public class CStageSongSelectionNew : CStage
     private SongSelectionContainer selectionContainer;
     private SortMenuContainer sortMenuContainer;
     private CActSelectPresound actPresound;
+    private StatusPanel statusPanel;
     
     protected override RichPresence Presence => new CDTXRichPresence
     {
@@ -55,6 +56,8 @@ public class CStageSongSelectionNew : CStage
         ];
         sortMenuContainer = ui.AddChild(new SortMenuContainer(songDb, sorters));
         sortMenuContainer.position = new Vector3(1280, 35, 0);
+
+        statusPanel = ui.AddChild(new StatusPanel());
     }
 
     public override void InitializeDefaultUI()
@@ -130,6 +133,7 @@ public class CStageSongSelectionNew : CStage
     public void ChangeSelection(SongNode node, CScore chart)
     {
         actPresound.tSelectionChanged(chart);
+        statusPanel.SelectionChanged(node, chart);
     }
     
     private void UpdateSongDbStatus()
