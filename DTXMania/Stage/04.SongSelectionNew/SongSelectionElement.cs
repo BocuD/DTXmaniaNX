@@ -149,15 +149,16 @@ public class SongSelectionElement : UIGroup
         {
             var skill = node.GetTopSkillPoints();
 
-            bool drawSkill = skill > 0;
+            bool drawSkill = skill.skillPoints > 0;
             skillbar.isVisible = drawSkill;
             skillbarFill.isVisible = drawSkill;
             skillText.isVisible = drawSkill;
 
             if (drawSkill)
             {
-                skillText.SetText($"{skill:0.00}");
-                skillbarFill.size = new Vector2(286, 8);
+                double ratio = skill.skillPoints / skill.maxSkillPoints;
+                skillText.SetText($"{skill.skillPoints:0.00}");
+                skillbarFill.size = new Vector2(286.0f * (float)ratio, 8);
             }
         }
         else

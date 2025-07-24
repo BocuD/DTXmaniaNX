@@ -277,6 +277,11 @@ public class CScore
 
             return dbLevel;
         }
+
+        public double GetMaxSkill(int instrument)
+        {
+            return GetLevel(instrument) * 20;
+        }
     }
 
     public bool bHadACacheInSongDB;
