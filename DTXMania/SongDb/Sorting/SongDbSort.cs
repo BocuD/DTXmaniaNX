@@ -1,4 +1,6 @@
-﻿namespace DTXMania.SongDb;
+﻿using DTXMania.Core;
+
+namespace DTXMania.SongDb;
 
 public abstract class SongDbSort
 {
@@ -18,13 +20,12 @@ public abstract class SongDbSort
             {
                 return 0; // skip if no valid chart
             }
+            
+            int instrumentA = (int) a.filteredInstrumentPart;
+            int instrumentB = (int) b.filteredInstrumentPart;
 
-            int instrument = (int) a.filteredInstrumentPart;
-
-            double chartALevel = chartA.SongInformation.Level[instrument] / 10.0f;
-            chartALevel += chartA.SongInformation.LevelDec[instrument] / 100.0f;
-            double chartBLevel = chartB.SongInformation.Level[instrument] / 10.0f;
-            chartALevel += chartB.SongInformation.LevelDec[instrument] / 100.0f;
+            double chartALevel = chartA.SongInformation.GetLevel(instrumentA);
+            double chartBLevel = chartB.SongInformation.GetLevel(instrumentB);
 
             //compare by difficulty number
             return chartALevel - chartBLevel > 0 ? 1 : chartALevel - chartBLevel < 0 ? -1 : 0;

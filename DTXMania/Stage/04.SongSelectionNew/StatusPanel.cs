@@ -75,17 +75,7 @@ public class StatusPanel : UIGroup
                 else
                 {
                     //get difficulty number
-                    double dbLevel = song.charts[c].SongInformation.Level[instrument];
-                    int levelDec = song.charts[c].SongInformation.LevelDec[instrument];
-                    if (dbLevel >= 100)
-                    {
-                        dbLevel /= 100.0;
-                    }
-                    else if (dbLevel < 100)
-                    {
-                        dbLevel = dbLevel / 10.0 + levelDec / 100.0;
-                    }
-                    
+                    double dbLevel = song.charts[c].SongInformation.GetLevel(instrument);
                     tDrawDifficulty(x, y, $"{dbLevel:0.00}");
                 }
 

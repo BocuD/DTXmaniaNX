@@ -261,6 +261,22 @@ public class CScore
                 }
             }
         }
+
+        public double GetLevel(int instrument)
+        {
+            double dbLevel = Level[instrument];
+            int levelDec = LevelDec[instrument];
+            if (dbLevel >= 100)
+            {
+                dbLevel /= 100.0;
+            }
+            else if (dbLevel < 100)
+            {
+                dbLevel = dbLevel / 10.0 + levelDec / 100.0;
+            }
+
+            return dbLevel;
+        }
     }
 
     public bool bHadACacheInSongDB;

@@ -43,10 +43,8 @@ public class SortByLevel : SongDbSort
                     
                     if (!chart.HasChartForCurrentMode()) continue;
 
-                    //level is from 0-99. our level folders are 0-9.5, with the array being 0-18
-                    int level = chart.SongInformation.Level[instrument];
-                    double levelDouble = level / 10.0;
-                    levelDouble += chart.SongInformation.LevelDec[instrument] / 100.0f;
+                    //level is from 0-9.99. our level folders are 0-9.5, with the array being 0-18
+                    double levelDouble = chart.SongInformation.GetLevel(instrument);
                     int levelKey = (int)(levelDouble * 2); //multiply by 2 to get the key for the dictionary
                     levelKey = Math.Clamp(levelKey, 2, 19);
 
