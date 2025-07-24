@@ -81,6 +81,7 @@ public class SongSelectionContainer : UIGroup
             toCache.Add(node);
         }
         songSelectionElements[selectionIndex].position.Y = 0;
+        songSelectionElements[selectionIndex].SetHighlighted(true);
 
         //fill the rest of the elements with next songs
         for (int i = selectionIndex + 1; i < songSelectionElements.Length; i++)
@@ -96,6 +97,7 @@ public class SongSelectionContainer : UIGroup
                 toCache.Add(nextNode);
             }
             songSelectionElements[i].position.Y = (i - selectionIndex) * elementSpacing;
+            songSelectionElements[i].SetHighlighted(false);
         }
         
         //fill the first elements with previous songs
@@ -112,6 +114,7 @@ public class SongSelectionContainer : UIGroup
                 toCache.Add(prevNode);
             }
             songSelectionElements[i].position.Y = (i - selectionIndex) * elementSpacing;
+            songSelectionElements[i].SetHighlighted(false);
         }
 
         if (preLoadImages)
@@ -290,6 +293,10 @@ public class SongSelectionContainer : UIGroup
     private void MoveUp()
     {
         CDTXMania.Skin.soundCursorMovement.tPlay();
+        
+        //determine the currently highlighted element and update it
+        var previouslySelected = songSelectionElements[WrapIndex(bufferStartIndex + selectionIndex)];
+        previouslySelected.SetHighlighted(false);
 
         //slot to overwrite is the last one logically (before decrementing)
         int overwriteIndex = WrapIndex(bufferStartIndex + songSelectionElements.Length - 1);
@@ -320,6 +327,10 @@ public class SongSelectionContainer : UIGroup
         float newYOffset = songSelectionElements[WrapIndex(newTopIndex + 1)].position.Y - elementSpacing;
         overwriteElement.position.Y = newYOffset;
         songSelectionElements[newTopIndex] = overwriteElement;
+        
+        //determine the new highlighted element
+        var newlySelected = songSelectionElements[WrapIndex(bufferStartIndex + selectionIndex)];
+        newlySelected.SetHighlighted(true);
 
         HandleSelectionChanged();
         UpdateRingbufferPositions();
@@ -328,6 +339,10 @@ public class SongSelectionContainer : UIGroup
     private void MoveDown()
     {
         CDTXMania.Skin.soundCursorMovement.tPlay();
+        
+        //determine the currently highlighted element and unset highlight
+        var previouslySelected = songSelectionElements[WrapIndex(bufferStartIndex + selectionIndex)];
+        previouslySelected.SetHighlighted(false);
 
         //determine logical slot to overwrite: the "topmost" one
         int overwriteIndex = WrapIndex(bufferStartIndex);
@@ -356,7 +371,11 @@ public class SongSelectionContainer : UIGroup
 
         //advance ring buffer start
         bufferStartIndex = WrapIndex(bufferStartIndex + 1);
-
+        
+        //determine the new highlighted element and set highlight
+        var newlySelected = songSelectionElements[WrapIndex(bufferStartIndex + selectionIndex)];
+        newlySelected.SetHighlighted(true);
+    
         HandleSelectionChanged();
         UpdateRingbufferPositions();
     }

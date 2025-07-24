@@ -194,4 +194,10 @@ public class SongSelectionElement : UIGroup
         albumArtImage.SetTexture(tex, false);
         albumArtImage.clipRect = new RectangleF(0, 0, tex.Width, tex.Height);
     }
+    
+    public void SetHighlighted(bool highlighted)
+    {
+        songTitleText.scrollingEnabled = highlighted;
+        songArtistText.scrollingEnabled = highlighted;
+    }
 }
