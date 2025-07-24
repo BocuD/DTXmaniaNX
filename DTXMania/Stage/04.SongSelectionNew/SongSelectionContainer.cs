@@ -443,6 +443,7 @@ public class SongSelectionContainer : UIGroup
     private Dictionary<SongNode, DTXTexture> preImageCache = new();
     
     private List<SongNode> updatedImages = [];
+    public bool isScrolling => MathF.Abs(targetY) > 2.0f;
 
     private DTXTexture? CachePreImage(SongNode node)
     {

@@ -173,7 +173,7 @@ internal class CActSelectPresound : CActivity
 			if (ctWaitForPlayback.bReachedEndValue)
 			{
 				ctWaitForPlayback.tStop();
-				if (!CDTXMania.stageSongSelection.bScrolling)
+				if (!CDTXMania.StageManager.stageSongSelectionNew.isScrolling)
 				{
 					tLoadPreviewSound();
 				}
