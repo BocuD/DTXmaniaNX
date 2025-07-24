@@ -11,7 +11,7 @@ public class StatusPanel : UIGroup
 	public StatusPanel() : base("StatusPanel")
 	{
 		drums = AddChild(new StatusPane(EInstrumentPart.DRUMS));
-		drums.position = new Vector3(320, 720, 0);
+		drums.position = new Vector3(430, 720, 0);
 
 		guitar = AddChild(new StatusPane(EInstrumentPart.GUITAR));
 		guitar.position = new Vector3(200, 720, 0);
