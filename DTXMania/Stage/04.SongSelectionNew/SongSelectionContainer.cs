@@ -18,9 +18,7 @@ public class SongSelectionContainer : UIGroup
     private UIGroup elementsContainer;
     
     private SongNode currentRoot;
-
-    public int targetDifficultyLevel { get; private set; } = 0;
-
+    
     public static DTXTexture fallbackPreImage;
     
     private SongSelectionElement[] songSelectionElements = new SongSelectionElement[20];
@@ -379,6 +377,9 @@ public class SongSelectionContainer : UIGroup
 
     public int GetClosestLevelToTargetForSong(SongNode song)
     {
+        if (song.nodeType != SongNode.ENodeType.SONG) return 0;
+        
+        var targetDifficultyLevel = CDTXMania.StageManager.stageSongSelectionNew.targetDifficultyLevel;
         // 事前チェック。
 
         if (song == null)
