@@ -4,6 +4,29 @@ This is a fork of DTXManiaNX, with the goal of modernizing and refactoring the c
 The main focus right now is restructuring up the codebase to a point where various parts of the game, such as the menu systems, gameplay, and configuration systems, are all abstracted to their own semi self contained systems.
 One part that has made a decent amount of progress is rewriting the UI system to be hierarchy based, and render elements using matrices instead of hardcoding everything to fixed positions on screen. As part of this, this UI rendering code also uses an abstract rendering backend, to in the future more easily allow porting to other graphics backends, such as OpenGL, rather than just DirectX9. Ideally this will allow better multi platform support in the future.
 
+## Changes from base DTXManiaNX
+
+- Newly written UI framework
+  - Supports translating, rotating and scaling elements according to a hierarchy
+  - Fully serializable and skinnable
+- Rewritten song database
+  - ~4-8x performance speedups
+  - Safer handling of files
+  - No more reliance on legacy (unsafe) BinaryFormatter
+  - Song name transliteration (romanization)
+- Greatly improved sorting functionality
+  - Sorting functionality similar to GITADORA, with songs grouped in various categories
+  - Group by BOX, Difficulty, Level, Title, Artist, etc
+- Song selection UI recreated from scratch
+  - Support for new skinning system
+  - Customizable options for various display parts
+  - Grealy improved smoothness and UX
+- Improved Guitar navigation
+  - P + strum to confirm
+  - Y + strum to go back
+- Improved settings menu
+  - Most menu options are now sorted into categories (for example, Audio, Video, Gameplay, etc)
+
 ## Building
 
 The current .net SDK target is 6.0 (mainly so we can still support Windows 7, which is used by real hardware GITADORA machines)
