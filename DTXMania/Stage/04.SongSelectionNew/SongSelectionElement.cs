@@ -58,7 +58,7 @@ public class SongSelectionElement : UIGroup
         skillbar.anchor = new Vector2(0.0f, 0.5f);
         skillbar.position = new Vector3(82.0f, 15.0f, 0.0f);
         skillbar.name = "skillbar";
-        skillbar.renderOrder = 1;
+        skillbar.renderOrder = 2;
         skillbar.isVisible = false;
         
         skillbarFill = AddChild(new UIImage(DTXTexture.LoadFromPath(CSkin.Path($@"Graphics\5_skillbar_fill.png"))));
@@ -66,7 +66,7 @@ public class SongSelectionElement : UIGroup
         skillbarFill.position = new Vector3(161.0f, 16.0f, 0.0f);
         skillbarFill.name = "skillbarFill";
         skillbarFill.size = new Vector2(286, 8);
-        skillbarFill.renderOrder = 2;
+        skillbarFill.renderOrder = 1;
         skillbarFill.isVisible = false;
         
         skillText = AddChild(new UIText(family, 12));
