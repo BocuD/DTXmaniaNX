@@ -275,8 +275,16 @@ public class SongSelectionContainer : UIGroup
         
         if (CDTXMania.Input.ActionCancel())
         {
-            CDTXMania.Skin.soundCancel.tPlay();
-            return (int)CStageSongSelection.EReturnValue.ReturnToTitle;
+            if (currentRoot.nodeType != SongNode.ENodeType.ROOT)
+            {
+                CDTXMania.Skin.soundCancel.tPlay();
+                CDTXMania.StageManager.stageSongSelectionNew.RequestUpdateRoot(currentRoot.parent);
+            }
+            else
+            {
+                CDTXMania.Skin.soundCancel.tPlay();
+                return (int)CStageSongSelection.EReturnValue.ReturnToTitle;
+            }
         }
 
         return 0;
@@ -396,8 +404,8 @@ public class SongSelectionContainer : UIGroup
         {
             case SongNode.ENodeType.SONG:
                 var confirmedSong = currentSelection;
-                var confirmedChart = currentSelection.charts.FirstOrDefault(x => x != null);
                 var confirmedSongDifficulty = CDTXMania.StageManager.stageSongSelectionNew.GetClosestLevelToTargetForSong(currentSelection);
+                var confirmedChart = confirmedSong.charts[confirmedSongDifficulty];
 
                 if (confirmedSong != null && confirmedChart != null)
                 {
