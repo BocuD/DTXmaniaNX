@@ -38,6 +38,12 @@ internal class CActSelectPresound : CActivity
 				ctWaitForPlayback = new CCounter(0, CDTXMania.ConfigIni.nSongSelectSoundPreviewWaitTimeMs, 1, CDTXMania.Timer);
 			}
 		}
+		else if (chart == null) //make sure we still stop playing even when the chart itself is null
+		{
+			tStopSound();
+			tStartFadeInBgm();
+			selectedChart = chart;
+		}
 	}
 
 
