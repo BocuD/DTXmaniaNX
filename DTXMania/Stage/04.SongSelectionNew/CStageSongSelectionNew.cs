@@ -86,8 +86,16 @@ public class CStageSongSelectionNew : CStage
 
         if (hasScanned)
         {
-            //restore existing root
-            RequestUpdateRoot(currentSongRoot);
+            if (lastInstrument == CDTXMania.GetCurrentInstrument())
+            {
+                //restore existing root
+                RequestUpdateRoot(currentSongRoot);
+            }
+            else
+            {
+                ApplySort(sortMenuContainer.currentSelection.sorter);
+            }
+
             return;
         }
         
@@ -180,9 +188,7 @@ public class CStageSongSelectionNew : CStage
             int newLevel = (targetDifficultyLevel + i) % 5;
             if (newLevel == targetDifficultyLevel) continue;
 
-            int currentInstrument =
-                CDTXMania.ConfigIni.bDrumsEnabled ? 0
-                : CDTXMania.ConfigIni.bIsSwappedGuitarBass ? 2 : 1;
+            int currentInstrument = CDTXMania.GetCurrentInstrument();
             
             //check if this chart is valid
             var chart = node.charts[newLevel];
@@ -284,6 +290,7 @@ public class CStageSongSelectionNew : CStage
     private bool sortLocked = false;
     private SongDbSort currentSort;
     private Dictionary<SongDbSort, SongNode> sortCache = new();
+    private int lastInstrument;
 
     public void ApplySort(SongDbSort sorter)
     {
@@ -292,6 +299,15 @@ public class CStageSongSelectionNew : CStage
             Trace.TraceWarning("Sort operation skipped as another sort is in progress");
             return;
         }
+
+        //invalidate cache if instrument changed
+        if (CDTXMania.GetCurrentInstrument() != lastInstrument)
+        {
+            sortCache.Clear();
+        }
+
+        lastInstrument = CDTXMania.GetCurrentInstrument();
+        currentSort = sorter;
 
         //apply sort
         Task.Run(async () =>
