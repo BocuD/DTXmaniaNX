@@ -168,6 +168,8 @@ internal class CDTXMania : Game
 
     public static CEnumSongs EnumSongs { get; private set; }
     public static CActEnumSongs actEnumSongs { get; private set; }
+    public static SongDb.SongDb SongDb { get; private set; }
+
     public static CActFlushGPU actFlushGPU { get; private set; }
     public static CSoundManager SoundManager { get; private set; }
 
@@ -664,6 +666,7 @@ internal class CDTXMania : Game
         DTX = null;
 
         Resources = new ResourceManager();
+        SongDb = new SongDb.SongDb();
         SkinManager = new SkinManager();
 
         SafeInitialize("Skin", () =>
@@ -988,6 +991,8 @@ internal class CDTXMania : Game
         gameRenderTargetSurface = gameRenderTargetTexture.GetSurfaceLevel(0);
 
         mainRenderTarget = Device.GetRenderTarget(0);
+
+        persistentUIGroup.AddChild(new SongDBStatus());
     }
 
     protected override void UnloadContent()
@@ -1000,6 +1005,8 @@ internal class CDTXMania : Game
         ImGuiImplD3D9.Shutdown();
 
         ImGui.DestroyContext();
+        
+        persistentUIGroup.Dispose();
     }
 
     protected override void OnExiting(EventArgs e)
@@ -1492,6 +1499,7 @@ internal class CDTXMania : Game
                     StageManager.rCurrentStage.OnDeactivate();
             });
             SafeTerminate("SongManager", () => { SongManager = null; });
+            SafeTerminate("SongDb", () => { SongDb = null; });
             SafeTerminate("Skin", () =>
             {
                 if (Skin != null)

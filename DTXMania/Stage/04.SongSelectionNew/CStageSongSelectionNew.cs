@@ -11,7 +11,7 @@ namespace DTXMania;
 
 public class CStageSongSelectionNew : CStage
 {
-    private SongDb.SongDb songDb = new();
+    private SongDb.SongDb songDb => CDTXMania.SongDb;
     private SongSelectionContainer selectionContainer;
     private SortMenuContainer sortMenuContainer;
     private CActSelectPresound actPresound;
@@ -46,10 +46,6 @@ public class CStageSongSelectionNew : CStage
     
     public override void InitializeBaseUI()
     {
-        FontFamily family = new(CDTXMania.ConfigIni.songListFont); 
-        statusText = ui.AddChild(new UIText(family, 18));
-        statusText.renderOrder = 100;
-
         UIImage bigAlbumArt = ui.AddChild(new UIImage());
         bigAlbumArt.position = new Vector3(320, 35, 0);
         bigAlbumArt.renderOrder = 1;
@@ -73,7 +69,6 @@ public class CStageSongSelectionNew : CStage
         bg.name = "Background";
     }
 
-    private UIText statusText;
     private bool hasScanned;
 
     public override void FirstUpdate()
@@ -116,15 +111,11 @@ public class CStageSongSelectionNew : CStage
             updateRootRequested = false;
         }
         
-        UpdateSongDbStatus();
-
         if (songDb.status == SongDbScanStatus.Idle)
         {
             if (songDb.totalSongs == 0)
             {
                 selectionContainer.isVisible = false;
-                statusText.isVisible = true;
-                statusText.SetText("No songs found.");
             }
             else
             {
@@ -158,23 +149,6 @@ public class CStageSongSelectionNew : CStage
         this.chart = chart;
         actPresound.tSelectionChanged(chart);
         statusPanel.SelectionChanged(node, chart);
-    }
-    
-    private void UpdateSongDbStatus()
-    {
-        switch (songDb.status)
-        {
-            case SongDbScanStatus.Scanning:
-                statusText.SetText("Scanning song database...");
-                break;
-            
-            case SongDbScanStatus.Processing:
-                statusText.SetText(
-                    $"Processing songs... {songDb.processDoneCount} / {songDb.processTotalCount}\n{songDb.processSongDataPath}");
-                break;
-        }
-        
-        statusText.isVisible = songDb.status != SongDbScanStatus.Idle;
     }
 
     public int targetDifficultyLevel { get; private set; } = 0;
@@ -291,6 +265,7 @@ public class CStageSongSelectionNew : CStage
     private SongDbSort currentSort;
     private Dictionary<SongDbSort, SongNode> sortCache = new();
     private int lastInstrument;
+    public bool isScrolling => selectionContainer.isScrolling;
 
     public void ApplySort(SongDbSort sorter)
     {
@@ -335,5 +310,12 @@ public class CStageSongSelectionNew : CStage
                 sortLocked = false;
             }
         });
+    }
+
+    //reload current view
+    public void Reload()
+    {
+        sortCache.Clear();
+        ApplySort(currentSort);
     }
 }
