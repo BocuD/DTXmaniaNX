@@ -59,7 +59,7 @@ public class CStageSongSelectionNew : CStage
         selectionContainer.position = new Vector3(765, 320, 0);
         
         sortMenuContainer = ui.AddChild(new SortMenuContainer(songDb, sorters));
-        sortMenuContainer.position = new Vector3(1280, 35, 0);
+        sortMenuContainer.position = new Vector3(1281, 35, 0);
 
         statusPanel = ui.AddChild(new StatusPanel());
     }
