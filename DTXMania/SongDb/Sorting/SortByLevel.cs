@@ -66,6 +66,12 @@ public class SortByLevel : SongDbSort
                 }
             }
         }
+        
+        //sort the difficulty nodes by difficulty number
+        foreach (SongNode difficulty in root.childNodes)
+        {
+            OrderByDifficulty(difficulty.childNodes);
+        }
 
         return Task.FromResult(root);
     }

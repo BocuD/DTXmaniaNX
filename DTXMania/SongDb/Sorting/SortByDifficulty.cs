@@ -89,31 +89,9 @@ public class SortByDifficulty : SongDbSort
         //sort the difficulty nodes by difficulty number
         foreach (SongNode difficulty in root.childNodes)
         {
-            await OrderByDifficulty(difficulty.childNodes);
+            OrderByDifficulty(difficulty.childNodes);
         }
 
         return root;
-    }
-
-    private async Task OrderByDifficulty(List<SongNode> difficultyChildNodes)
-    {
-        difficultyChildNodes.Sort((a, b) =>
-        {
-            //get the first chart for each song
-            CScore chartA = a.charts.FirstOrDefault(x => x != null);
-            CScore chartB = b.charts.FirstOrDefault(x => x != null);
-
-            if (chartA == null || chartB == null)
-            {
-                return 0; // skip if no valid chart
-            }
-
-            int instrument = (int) a.filteredInstrumentPart;
-
-            //compare by difficulty number
-            return chartA.SongInformation.Level[instrument] - chartB.SongInformation.Level[instrument];
-        });
-
-        await Task.CompletedTask; // Simulate async operation
     }
 }
