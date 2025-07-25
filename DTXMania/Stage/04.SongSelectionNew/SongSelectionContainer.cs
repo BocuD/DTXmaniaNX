@@ -367,10 +367,10 @@ public class SongSelectionContainer : UIGroup
         var newNode = SongNode.rNextSong(lastVisibleNode);
         
         overwriteElement.UpdateSongNode(newNode, null);
-        Task.Run(() =>
-        {
+        //Task.Run(() =>
+        //{
             CachePreImage(newNode);
-        });
+        //});
 
         //update the overwritten slot
         //overwriteElement.UpdateSongNode(newNode, newTex);
