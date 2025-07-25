@@ -97,7 +97,7 @@ public class StatusPanel : UIGroup
 
 		#endregion
 
-		#region [ Yx2 Guitar: ギターとベースを入れ替え ]
+		#region [ Yx2 Guitar: Switch between guitar and bass ]
 
 		if (CDTXMania.Pad.bPressed(EInstrumentPart.GUITAR, EPad.Y))
 		{
@@ -116,7 +116,7 @@ public class StatusPanel : UIGroup
 
 		#endregion
 
-		#region [ Yx2 Bass: ギターとベースを入れ替え ]
+		#region [ Yx2 Bass: Switch between guitar and bass ]
 
 		if (CDTXMania.Pad.bPressed(EInstrumentPart.BASS, EPad.Y))
 		{

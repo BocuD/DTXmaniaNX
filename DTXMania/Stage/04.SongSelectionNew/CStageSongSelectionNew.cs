@@ -212,13 +212,12 @@ public class CStageSongSelectionNew : CStage
     
     public int GetClosestLevelToTargetForSong(SongNode song)
     {
-        if (song.nodeType != SongNode.ENodeType.SONG) return 0;
-        
         var targetDifficultyLevel = this.targetDifficultyLevel;
-        // 事前チェック。
 
         if (song == null)
             return targetDifficultyLevel; // 曲がまったくないよ
+        
+        if (song.nodeType != SongNode.ENodeType.SONG) return 0;
 
         if (song.charts[targetDifficultyLevel] != null)
             return targetDifficultyLevel; // 難易度ぴったりの曲があったよ

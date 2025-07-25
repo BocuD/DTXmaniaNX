@@ -43,9 +43,10 @@ public class StatusPane : UIGroup
 
         for (int c = 0; c < 5; c++)
         {
-            bool hideDifficulty = song.filteredInstrumentPart != EInstrumentPart.UNKNOWN &&
-                                  song.filteredInstrumentPart != instrument;
-            if (song.nodeType != SongNode.ENodeType.SONG
+            bool hideDifficulty = song != null && (song.filteredInstrumentPart != EInstrumentPart.UNKNOWN &&
+                                  song.filteredInstrumentPart != instrument);
+            if (song == null
+                || song.nodeType != SongNode.ENodeType.SONG
                 || song.charts[c] == null 
                 || song.charts[c].SongInformation.chipCountByInstrument[(int)instrument] == 0
                 || hideDifficulty)
