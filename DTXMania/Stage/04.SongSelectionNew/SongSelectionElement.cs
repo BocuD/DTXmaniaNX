@@ -77,7 +77,7 @@ public class SongSelectionElement : UIGroup
         skillText.UpdateFont();
         skillText.anchor = new Vector2(0, 0.5f);
         skillText.name = "skilltext";
-        skillbarFill.renderOrder = 2;
+        skillText.renderOrder = 2;
         skillText.isVisible = false;
     }
 
