@@ -20,7 +20,7 @@ public class SortByLevel : SongDbSort
         {
             SongNode node = new(root, SongNode.ENodeType.BOX)
             {
-                title = $"Level {level:0.00}~{level + 0.49:0.00}"
+                title = $"Level {level:0.00} - {level + 0.49:0.00}"
             };
             levelNodes[(int)(level * 2)] = node; //level * 2 so we don't need to worry about 0.5
         }
