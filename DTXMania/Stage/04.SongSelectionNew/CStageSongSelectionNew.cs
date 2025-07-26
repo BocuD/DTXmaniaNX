@@ -69,17 +69,17 @@ public class CStageSongSelectionNew : CStage
         bg.name = "Background";
     }
 
-    private bool hasScanned;
-
+    private bool needsToOpen = true;
     public override void FirstUpdate()
     {
         CDTXMania.Skin.soundTitle.tStop();
+
+        needsToOpen = true;
         
         //set initial sort menu container position to be default,
         //or in case of reloading the menu, whatever was last selected
         sortMenuContainer.SetCurrentSelection(currentSort);
 
-        if (hasScanned)
         if (songDb.hasEverScanned)
         {
             if (lastInstrument == CDTXMania.GetCurrentInstrument())
@@ -109,6 +109,19 @@ public class CStageSongSelectionNew : CStage
         {
             selectionContainer.UpdateRoot(currentSongRoot);
             updateRootRequested = false;
+
+            if (needsToOpen)
+            {
+                Task.Run(async () =>
+                {
+                    needsToOpen = false;
+                    await Task.Delay(100);
+                    if (CDTXMania.gitadoraTransition.closed)
+                    {
+                        CDTXMania.gitadoraTransition.Open();
+                    }
+                });
+            }
         }
         
         if (songDb.status == SongDbScanStatus.Idle)
