@@ -80,6 +80,7 @@ public class CStageSongSelectionNew : CStage
         sortMenuContainer.SetCurrentSelection(currentSort);
 
         if (hasScanned)
+        if (songDb.hasEverScanned)
         {
             if (lastInstrument == CDTXMania.GetCurrentInstrument())
             {
@@ -93,12 +94,11 @@ public class CStageSongSelectionNew : CStage
 
             return;
         }
-        
-        Task.Run(() => songDb.ScanAsync(() =>
+
+        if (songDb.status == SongDbScanStatus.Idle)
         {
-            ApplySort(sortMenuContainer.currentSelection.sorter);
-        }));
-        hasScanned = true;
+            Task.Run(() => songDb.StartScan(() => { ApplySort(sortMenuContainer.currentSelection.sorter); }));
+        }
     }
 
     public override int OnUpdateAndDraw()
@@ -120,6 +120,11 @@ public class CStageSongSelectionNew : CStage
             else
             {
                 selectionContainer.isVisible = true;
+
+                if (currentSongRoot == null)
+                {
+                    ApplySort(sortMenuContainer.currentSelection.sorter);
+                }
                 
                 actPresound.OnUpdateAndDraw();
                 
@@ -127,6 +132,10 @@ public class CStageSongSelectionNew : CStage
                 statusPanel.HandleNavigation();
                 return selectionContainer.HandleNavigation();
             }
+        }
+        else
+        {
+            selectionContainer.isVisible = false;
         }
 
         return 0;

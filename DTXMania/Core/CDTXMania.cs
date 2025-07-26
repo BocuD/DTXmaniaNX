@@ -211,7 +211,7 @@ internal class CDTXMania : Game
     
     //ui
     public static UIGroup persistentUIGroup { get; private set; } = new("PersistentUIGroup");
-    
+    public static GitaDoraTransition gitadoraTransition { get; private set; }
     // Constructor
 
     public CDTXMania()
@@ -664,7 +664,11 @@ internal class CDTXMania : Game
         DTX = null;
 
         Resources = new ResourceManager();
-        SongDb = new SongDb.SongDb();
+        SafeInitialize("SongDb", () =>
+        {
+            SongDb = new SongDb.SongDb();
+            SongDb.StartScan();
+        });
         SkinManager = new SkinManager();
 
         SafeInitialize("Skin", () =>

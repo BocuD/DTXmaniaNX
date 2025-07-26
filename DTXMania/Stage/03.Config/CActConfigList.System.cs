@@ -165,10 +165,10 @@ internal partial class CActConfigList
             {
                 if (CDTXMania.SongDb.status == SongDbScanStatus.Idle)
                 {
-                    Task.Run(() => CDTXMania.SongDb.ScanAsync(() =>
+                    CDTXMania.SongDb.StartScan(() =>
                     {
                         CDTXMania.StageManager.stageSongSelectionNew.Reload();
-                    }));
+                    });
                 }
             }
         };

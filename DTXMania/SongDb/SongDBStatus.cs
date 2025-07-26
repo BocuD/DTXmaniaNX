@@ -20,11 +20,16 @@ public class SongDBStatus : UIText
     private SongDbScanStatus lastStatus;
     public override void Draw(Matrix parentMatrix)
     {
+        bool statusChanged = lastStatus != songDb.status;
         switch (songDb.status)
         {
             case SongDbScanStatus.Scanning:
-                if (lastStatus != SongDbScanStatus.Scanning)
+                if (statusChanged)
                     SetText("Scanning song database...");
+                break;
+            
+            case SongDbScanStatus.Unpacking:
+                SetText($"Unpacking songs... {songDb.processDoneCount} / {songDb.processTotalCount}\n{songDb.processUnpackZipFile}");
                 break;
             
             case SongDbScanStatus.Processing:
@@ -32,7 +37,7 @@ public class SongDBStatus : UIText
                 break;
             
             case SongDbScanStatus.Idle:
-                if (lastStatus != SongDbScanStatus.Idle)
+                if (statusChanged)
                     SetText("");
                 break;
         }

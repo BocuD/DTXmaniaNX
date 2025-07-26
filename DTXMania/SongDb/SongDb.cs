@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Drawing;
+using System.IO.Compression;
 using DTXMania.Core;
 using Kawazu;
 
@@ -9,6 +10,7 @@ public enum SongDbScanStatus
 {
 	Idle,
 	Scanning,
+	Unpacking,
 	Processing
 }
 
@@ -29,51 +31,58 @@ public class SongDb
 	public SongNode songNodeRoot { get; private set; } = new(null, SongNode.ENodeType.ROOT);
 
 	public List<SongNode> flattenedSongList { get; private set; }  = [];
-
+	
+	public bool hasEverScanned { get; private set; }
 	public int totalSongs { get; private set; } = 0;
 	public int totalCharts { get; private set; } = 0;
 	public string processSongDataPath { get; private set; } = string.Empty;
+	public string processUnpackZipFile { get; private set; } = string.Empty;
 	public int processDoneCount { get; private set; } = 0;
 	public int processTotalCount { get; private set; } = 0;
 	
 	private int tempCharts = 0;
 	private int tempSongs = 0;
+	private DateTime start;
+	private Task scanTask;
 
+	public void StartScan(Action? onComplete = null)
+	{
+		scanTask = ScanAsync(onComplete);
+	}
+	
 	public async Task ScanAsync(Action? onComplete = null)
 	{
-		SongNode tempRoot = new(null, SongNode.ENodeType.ROOT);
-		DateTime start = DateTime.Now;
-		tempSongs = 0;
-		tempCharts = 0;
 		processSongDataPath = string.Empty;
 		processDoneCount = 0;
 		processTotalCount = 0;
 		
+		int maxThreadCount = Environment.ProcessorCount - 2;
+		if (maxThreadCount < 2)
+			maxThreadCount = 2;
+		
 		try
 		{
-			int maxThreadCount = Environment.ProcessorCount - 2;
+			SongNode tempRoot = await RunFullSongScan();
 			
-			if (maxThreadCount < 2)
-				maxThreadCount = 2;
-			
-			Trace.TraceInformation($"Starting song scan with {maxThreadCount} threads");
-			status = SongDbScanStatus.Scanning;
-			
-			if (!string.IsNullOrEmpty(CDTXMania.ConfigIni.strSongDataSearchPath))
+			int maxLoopCount = 5; //max number of times to loop through unpacking and rescanning
+			while (foundZipFiles.Count > 0 && maxLoopCount-- > 0)
 			{
-				string[] paths = CDTXMania.ConfigIni.strSongDataSearchPath.Split([';']);
-				if (paths.Length > 0)
-				{
-					await Parallel.ForEachAsync(paths, new ParallelOptions { MaxDegreeOfParallelism = maxThreadCount },
-						async (path, cancellationToken) => await ScanSongsAsync(path, tempRoot));
-				}
+				status = SongDbScanStatus.Unpacking;
+				start = DateTime.Now;
+				processTotalCount = foundZipFiles.Count;
+				
+				await Parallel.ForEachAsync(foundZipFiles, new ParallelOptions { MaxDegreeOfParallelism = maxThreadCount },
+					async (info, cancellationToken) => await UnpackZipFile(info));
+				
+				//reset found zip files after unpacking
+				foundZipFiles.Clear();
+				
+				statusDuration[SongDbScanStatus.Unpacking] = DateTime.Now - start;
+				Trace.TraceInformation($"Unpacked {foundZipFiles.Count} zip files in {statusDuration[SongDbScanStatus.Unpacking]} s");
+				
+				Trace.TraceInformation($"Rescanning because ZIP files were unpacked");
+				tempRoot = await RunFullSongScan();
 			}
-			
-			statusDuration[SongDbScanStatus.Scanning] = DateTime.Now - start;
-			
-			//log time taken to scan
-			Trace.TraceInformation($"Song scan completed in {statusDuration[SongDbScanStatus.Scanning]} s");
-			Trace.TraceInformation($"Found {tempSongs} songs and {tempCharts} charts");
 			
 			//flatten songs so we can process them all sequentially. Include boxes since we want to generate back boxes.
 			List<SongNode> flattened = await FlattenSongList(tempRoot.childNodes, true);
@@ -81,7 +90,6 @@ public class SongDb
 			Trace.TraceInformation($"Total song count after flattening: {flattened.Count}");
 			
 			processTotalCount = flattened.Count;
-			
 			status = SongDbScanStatus.Processing;
 			
 			start = DateTime.Now;
@@ -102,6 +110,16 @@ public class SongDb
 			statusDuration[SongDbScanStatus.Processing] = DateTime.Now - start;
 			Trace.TraceInformation($"Processed {tempSongs} songs and {tempCharts} charts");
 			Trace.TraceInformation($"Processed full song list in {statusDuration[SongDbScanStatus.Processing]} s");
+			
+			songNodeRoot = tempRoot;
+			flattenedSongList = await FlattenSongList(tempRoot.childNodes);
+			
+			totalSongs = tempSongs;
+			totalCharts = tempCharts;
+
+			hasEverScanned = true;
+			
+			onComplete?.Invoke();
 		}
 		catch (Exception ex)
 		{
@@ -110,21 +128,52 @@ public class SongDb
 		}
 		finally
 		{
-			songNodeRoot = tempRoot;
-			flattenedSongList = await FlattenSongList(tempRoot.childNodes);
-			
-			totalSongs = tempSongs;
-			totalCharts = tempCharts;
-			
 			status = SongDbScanStatus.Idle;
-			onComplete?.Invoke();
 		}
 	}
 
-	public async Task ScanSongsAsync(string searchPath, SongNode parent)
+	private async Task<SongNode> RunFullSongScan()
+	{
+		start = DateTime.Now;
+		tempSongs = 0;
+		tempCharts = 0;
+		
+		int maxThreadCount = Environment.ProcessorCount - 2;
+		if (maxThreadCount < 2)
+			maxThreadCount = 2;
+
+		Trace.TraceInformation($"Starting song data scan with {maxThreadCount} threads");
+		status = SongDbScanStatus.Scanning;
+
+		SongNode tempRoot = new(null, SongNode.ENodeType.ROOT);
+
+		if (!string.IsNullOrEmpty(CDTXMania.ConfigIni.strSongDataSearchPath))
+		{
+			string[] paths = CDTXMania.ConfigIni.strSongDataSearchPath.Split([';']);
+			if (paths.Length > 0)
+			{
+				await Parallel.ForEachAsync(paths, new ParallelOptions { MaxDegreeOfParallelism = maxThreadCount },
+					async (path, cancellationToken) => await ScanDirectoryAsyncRecursive(path, tempRoot));
+			}
+		}
+
+		statusDuration[SongDbScanStatus.Scanning] = DateTime.Now - start;
+
+		//log time taken to scan
+		Trace.TraceInformation($"Song scan completed in {statusDuration[SongDbScanStatus.Scanning]} s");
+		Trace.TraceInformation($"Found {tempSongs} songs and {tempCharts} charts");
+
+		return tempRoot;
+	}
+
+	private async Task ScanDirectoryAsyncRecursive(string searchPath, SongNode parent)
 	{
 		if (!searchPath.EndsWith(@"\"))
 			searchPath += @"\";
+		
+		int maxThreadCount = Environment.ProcessorCount - 2;
+		if (maxThreadCount < 2)
+			maxThreadCount = 2;
 
 		DirectoryInfo info = new(searchPath);
 
@@ -153,6 +202,11 @@ public class SongDb
 						case ".bme":
 							AddSongChart(parent, fileinfo);
 							break;
+						
+						case ".zip":
+							foundZipFiles.Add(fileinfo);
+							//UnpackZipFile(fileinfo);
+							break;
 
 						case ".mid":
 						case ".smf":
@@ -168,8 +222,14 @@ public class SongDb
 			}
 		}
 
+		DirectoryInfo[] directories = info.GetDirectories();
+		await Parallel.ForEachAsync(directories, new ParallelOptions { MaxDegreeOfParallelism = maxThreadCount },
+			async (directory, cancellationToken) => await ScanDirectory(directory));
+		
+		return;
+
 		//scan subdirectories
-		foreach (DirectoryInfo infoDir in info.GetDirectories())
+		async Task ScanDirectory(DirectoryInfo infoDir)
 		{
 			try
 			{
@@ -199,7 +259,7 @@ public class SongDb
 					};
 
 					TryLoadBoxDef(node, infoDir);
-					await ScanSongsAsync(infoDir.FullName + @"\", node);
+					await ScanDirectoryAsyncRecursive(infoDir.FullName + @"\", node);
 				}
 				//if the folder contains a box.def file, handle it differently
 				else if (File.Exists(infoDir.FullName + @"\box.def"))
@@ -217,18 +277,64 @@ public class SongDb
 					node.charts[0].FileInformation.AbsoluteFolderPath = infoDir.FullName + @"\";
 
 					TryLoadBoxDef(node, infoDir);
-					await ScanSongsAsync(infoDir.FullName + @"\", node);
+					await ScanDirectoryAsyncRecursive(infoDir.FullName + @"\", node);
 				}
-				else
-					//folder should not be treated as a box of any kind, just recursively scan its contents
+				else //folder should not be treated as a box of any kind, just recursively scan its contents
 				{
-					await ScanSongsAsync(infoDir.FullName + @"\", parent);
+					await ScanDirectoryAsyncRecursive(infoDir.FullName + @"\", parent);
 				}
 			}
 			catch (Exception ex)
 			{
 				Trace.TraceError($"Failed to process directory {infoDir.FullName}: {ex.Message}");
 			}
+		}
+	}
+
+	private readonly List<FileInfo> foundZipFiles = [];
+	private async Task UnpackZipFile(FileInfo fileinfo)
+	{
+		Trace.TraceInformation("Found zip file in song database, unpacking: " + fileinfo.FullName);
+
+		processUnpackZipFile = fileinfo.FullName;
+		//List<string> newlyCreatedDirectories = [];
+		try
+		{
+			{
+				using ZipArchive zip = new(fileinfo.OpenRead(), ZipArchiveMode.Read);
+
+				//HashSet<string> rootDirectories = []; //to track unique root directories
+
+				foreach (ZipArchiveEntry entry in zip.Entries)
+				{
+					if (string.IsNullOrEmpty(entry.Name)) continue;
+
+					string entryPath = Path.Combine(fileinfo.DirectoryName!, entry.FullName);
+					
+					//skip directories: if directories need to be created for files we will create them below
+					if (entry.FullName.EndsWith(@"\")) continue;
+					
+					//ensure directory exists
+					string directory = Path.GetDirectoryName(entryPath)!;
+					Directory.CreateDirectory(directory);
+					entry.ExtractToFile(entryPath, true);
+					
+					// string rootDirectory = Path.Combine(fileinfo.DirectoryName!, entry.FullName.Split(Path.DirectorySeparatorChar)[0]);
+					// if (rootDirectories.Add(rootDirectory)) //add to HashSet and check if it's new
+					// {
+					// 	newlyCreatedDirectories.Add(rootDirectory);
+					// }
+				}
+			}
+
+			//success: delete the zip file
+			Trace.TraceInformation("Successfully unpacked zip file: " + fileinfo.FullName);
+			fileinfo.Delete();
+			processDoneCount++;
+		}
+		catch (Exception ex)
+		{
+			Trace.TraceError($"Failed to unpack zip file {fileinfo.FullName}: {ex.Message}");
 		}
 	}
 

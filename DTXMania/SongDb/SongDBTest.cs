@@ -7,7 +7,7 @@ namespace DTXMania.SongDb;
 
 public class SongDBTester
 {
-    private static SongDb songDb = new();
+    private static readonly SongDb songDb = new();
 
     private static SongNode currentRoot;
     private static SongNode? selectedNode;
@@ -29,7 +29,7 @@ public class SongDBTester
 
         if (ImGui.Button("Scan"))
         {
-            Task.Run(() => songDb.ScanAsync(() => currentRoot = songDb.songNodeRoot));
+            songDb.StartScan(() => currentRoot = songDb.songNodeRoot);
         }
         
         ImGui.Text("Last scan time: " + songDb.statusDuration[SongDbScanStatus.Scanning]);

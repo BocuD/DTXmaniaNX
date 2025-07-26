@@ -323,7 +323,7 @@ public class SongSelectionContainer : UIGroup
         overwriteElement.UpdateSongNode(newNode, null);
         //Task.Run(() =>
         //{
-            CachePreImage(newNode);
+        CachePreImage(newNode);
         //});
 
         //move ring buffer backward
