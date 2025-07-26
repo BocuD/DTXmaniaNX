@@ -681,14 +681,10 @@ internal class CStageResult : CStage
 				ePhaseID = EPhase.Common_DefaultState;
 			}
 		}
-		else if( ( ePhaseID == EPhase.Common_FadeOut ) )			//&& ( this.actFO.OnUpdateAndDraw() != 0 ) )
-		{
-			return (int) eReturnValueWhenFadeOutCompleted;
-		}
 		#region [ #24609 2011.3.14 yyagi ランク更新or演奏型スキル更新時、リザルト画像をpngで保存する ]
-		if ( bAnimationComplete == true && bIsCheckedWhetherResultScreenShouldSaveOrNot == false	// #24609 2011.3.14 yyagi; to save result screen in case BestRank or HiSkill.
-		                                && CDTXMania.ConfigIni.bScoreIniを出力する
-		                                && CDTXMania.ConfigIni.bIsAutoResultCapture)												// #25399 2011.6.9 yyagi
+		if ( bAnimationComplete && bIsCheckedWhetherResultScreenShouldSaveOrNot == false	// #24609 2011.3.14 yyagi; to save result screen in case BestRank or HiSkill.
+		                        && CDTXMania.ConfigIni.bScoreIniを出力する
+		                        && CDTXMania.ConfigIni.bIsAutoResultCapture)												// #25399 2011.6.9 yyagi
 		{
 			CheckAndSaveResultScreen(true);
 			bIsCheckedWhetherResultScreenShouldSaveOrNot = true;
@@ -787,15 +783,24 @@ internal class CStageResult : CStage
 			if ( CDTXMania.InputManager.Keyboard.bKeyPressed( (int)SlimDXKey.Escape ) )
 			{
 				CDTXMania.Skin.soundCancel.tPlay();
-				actFO.tStartFadeOut();
 				ePhaseID = EPhase.Common_FadeOut;
 				eReturnValueWhenFadeOutCompleted = EReturnValue.Complete;
+				
+				CDTXMania.gitadoraTransition.Close(() =>
+				{
+					CDTXMania.StageManager.tChangeStage(CDTXMania.StageManager.stageSongSelectionNew);
+				});
 			}
 			if (CDTXMania.Input.ActionDecide() && bAnimationComplete)
 			{
 				CDTXMania.Skin.soundCancel.tPlay();
 				ePhaseID = EPhase.Common_FadeOut;
 				eReturnValueWhenFadeOutCompleted = EReturnValue.Complete;
+				
+				CDTXMania.gitadoraTransition.Close(() =>
+				{
+					CDTXMania.StageManager.tChangeStage(CDTXMania.StageManager.stageSongSelectionNew);
+				});
 			}
 		}
 		return 0;
