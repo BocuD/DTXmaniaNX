@@ -195,7 +195,27 @@ internal class CStageTitle : CStage
 				{
 					return (int)EReturnResult.EXIT;
 				}
-				actFO.tStartFadeOut();
+				CDTXMania.gitadoraTransition.Close(async () =>
+				{
+					await Task.Delay(300);
+					ePhaseID = EPhase.Common_EndStatus;
+					
+					switch ( nCurrentCursorPosition )
+					{
+						case (int)EReturnResult.GAMESTART - 1:
+							CDTXMania.StageManager.tChangeStage(CDTXMania.StageManager.stageSongSelectionNew);
+							break;
+						
+						case (int) EReturnResult.CONFIG - 1:
+							CDTXMania.StageManager.tChangeStage(CDTXMania.StageManager.stageConfig);
+							break;
+						
+						case (int)EReturnResult.EXIT - 1:
+							CDTXMania.StageManager.tChangeStage(CDTXMania.StageManager.stageEnd);
+							break;
+					}
+				});
+				//actFO.tStartFadeOut();
 				ePhaseID = EPhase.Common_FadeOut;
 			}
 		}

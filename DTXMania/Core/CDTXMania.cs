@@ -782,6 +782,8 @@ internal class CDTXMania : Game
 
         #endregion
 
+        gitadoraTransition = persistentUIGroup.AddChild(new GitaDoraTransition());
+
         Trace.TraceInformation("Finished game initialization");
 
         #region [ Launch First stage ]

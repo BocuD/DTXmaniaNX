@@ -197,7 +197,12 @@ internal class CStageConfig : CStage
     public override void FirstUpdate()
     {
         ePhaseID = EPhase.Common_FadeIn;
-        actFIFO.tStartFadeIn();
+        //actFIFO.tStartFadeIn();
+        CDTXMania.gitadoraTransition.Open(() =>
+        {
+            CDTXMania.Skin.bgmコンフィグ画面.tPlay();
+            ePhaseID = EPhase.Common_DefaultState;
+        });
     }
 
     public override int OnUpdateAndDraw()
@@ -256,11 +261,12 @@ internal class CStageConfig : CStage
                 break;
 
             case EPhase.Common_FadeOut:
-                if (actFIFO.OnUpdateAndDraw() == 0)
-                {
-                    break;
-                }
+                // if (actFIFO.OnUpdateAndDraw() == 0)
+                // {
+                //     break;
+                // }
 
+                if (CDTXMania.gitadoraTransition.animate) break;
                 return 1;
         }
 
@@ -296,7 +302,12 @@ internal class CStageConfig : CStage
             }
             else
             {
-                actFIFO.tStartFadeOut();
+                //actFIFO.tStartFadeOut();
+                CDTXMania.gitadoraTransition.Close(async () =>
+                {
+                    await Task.Delay(150);
+                    CDTXMania.gitadoraTransition.Open();
+                });
                 ePhaseID = EPhase.Common_FadeOut;
             }
         }
@@ -305,7 +316,12 @@ internal class CStageConfig : CStage
             if (configLeftOptionsMenu.currentlySelectedIndex == 4)
             {
                 CDTXMania.Skin.soundDecide.tPlay();
-                actFIFO.tStartFadeOut();
+                //actFIFO.tStartFadeOut();
+                CDTXMania.gitadoraTransition.Close(async () =>
+                {
+                    await Task.Delay(500);
+                    CDTXMania.gitadoraTransition.Open();
+                });
                 ePhaseID = EPhase.Common_FadeOut;
             }
             else if (bFocusIsOnMenu)
