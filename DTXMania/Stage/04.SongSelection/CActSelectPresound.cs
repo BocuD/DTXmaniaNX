@@ -5,9 +5,7 @@ using FDK;
 namespace DTXMania;
 
 internal class CActSelectPresound : CActivity
-{
-	// メソッド
-
+{ 
 	public CActSelectPresound()
 	{
 		bActivated = false;
@@ -92,7 +90,7 @@ internal class CActSelectPresound : CActivity
 				}
 			}
 
-			t進行処理_プレビューサウンド();
+			tUpdatePreviewSound();
 		}
 
 		return 0;
@@ -150,11 +148,11 @@ internal class CActSelectPresound : CActivity
 				sound.tStartPlaying(true);
 				strCurrentlyPlayingAudioPath = strPreviewFilename;
 				tStartFadeOutBgm();
-				Trace.TraceInformation("プレビューサウンドを生成しました。({0})", strPreviewFilename);
+				Trace.TraceInformation("Created preview sound: ({0})", strPreviewFilename);
 			}
-			catch
+			catch (Exception e)
 			{
-				Trace.TraceError("プレビューサウンドの生成に失敗しました。({0})", strPreviewFilename);
+				Trace.TraceError($"An error occurred while loading preview sound ({strPreviewFilename}): {e}");
 				if (sound != null)
 				{
 					sound.Dispose();
@@ -165,7 +163,7 @@ internal class CActSelectPresound : CActivity
 		}
 	}
 
-	private void t進行処理_プレビューサウンド()
+	private void tUpdatePreviewSound()
 	{
 		if (ctWaitForPlayback != null && !ctWaitForPlayback.bStopped)
 		{
