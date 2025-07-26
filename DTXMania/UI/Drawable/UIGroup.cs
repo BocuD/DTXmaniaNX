@@ -51,11 +51,6 @@ public class UIGroup : UIDrawable
     {
         return children[i];
     }
-    
-    public UIDrawable? GetChild(string name)
-    {
-        return children.FirstOrDefault(x => x.name == name);
-    }
         
     public void RemoveChild(UIDrawable element)
     {
@@ -80,10 +75,11 @@ public class UIGroup : UIDrawable
         Matrix combinedMatrix = localTransformMatrix * parentMatrix;
             
         //sort by draw priority
-        var sortedChildren = children.OrderBy(x => x.renderOrder);
-        
-        foreach (UIDrawable element in sortedChildren)
+        children.Sort((a, b) => a.renderOrder.CompareTo(b.renderOrder));
+
+        for (int index = 0; index < children.Count; index++)
         {
+            UIDrawable element = children[index];
             if (element.isVisible)
             {
                 try
