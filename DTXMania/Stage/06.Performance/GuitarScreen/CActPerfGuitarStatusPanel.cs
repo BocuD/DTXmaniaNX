@@ -335,7 +335,7 @@ internal class CActPerfGuitarStatusPanel : CActPerfCommonStatusPanel
         {
             CDTXMania.tDisposeSafely(ref prv表示用フォント);
             CDTXMania.tDisposeSafely(ref prv称号フォント);
-            CDTXMania.tDisposeSafely(ref txスキルパネル);
+            CDTXMania.tReleaseTexture(ref txスキルパネル);
             CDTXMania.tReleaseTexture(ref txパネル文字[0]);
             CDTXMania.tReleaseTexture(ref txパネル文字[1]);
             CDTXMania.tReleaseTexture(ref tx難易度パネル);

@@ -708,7 +708,7 @@ internal partial class CActConfigList : CActivity
 
     private void tUpdateToastMessage(string strMessage)
     {
-        CDTXMania.tDisposeSafely(ref txToastMessage);
+        CDTXMania.tReleaseTexture(ref txToastMessage);
 
         if (strMessage != "" && prvFontForToastMessage != null)
         {

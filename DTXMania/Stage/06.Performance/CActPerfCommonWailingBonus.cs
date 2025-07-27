@@ -47,7 +47,7 @@ internal abstract class CActPerfCommonWailingBonus : CActivity
 		{
 			CDTXMania.tReleaseTexture( ref txWailingBonus );
 			CDTXMania.tReleaseTexture( ref txWailingFlush );
-			CDTXMania.tReleaseTexture( ref txWailingFire );
+			CDTXMania.tDisposeSafely( ref txWailingFire );
 			base.OnManagedReleaseResources();
 		}
 	}

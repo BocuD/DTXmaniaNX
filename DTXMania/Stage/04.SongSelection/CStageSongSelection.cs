@@ -292,7 +292,7 @@ internal class CStageSongSelection : CStage
 			
 			CDTXMania.tReleaseTexture(ref txBPMLabel);
 			
-			CDTXMania.tDisposeSafely(ref txSearchInputNotification);
+			CDTXMania.tReleaseTexture(ref txSearchInputNotification);
 			CDTXMania.tDisposeSafely(ref prvFontSearchInputNotification);
 
 			base.OnManagedReleaseResources();
@@ -1156,7 +1156,7 @@ internal class CStageSongSelection : CStage
 
 	public void tUpdateSearchNotification(string strNotification)
 	{
-		CDTXMania.tDisposeSafely(ref txSearchInputNotification);
+		CDTXMania.tReleaseTexture(ref txSearchInputNotification);
 
 		//
 		if(strNotification != "")

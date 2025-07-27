@@ -34,7 +34,7 @@ internal partial class CActConfigList
                 0, 0, 1280, 720, GraphicsUnit.Pixel);
             if (txSkinSample != null)
             {
-                CDTXMania.tDisposeSafely(ref txSkinSample);
+                CDTXMania.tReleaseTexture(ref txSkinSample);
             }
 
             txSkinSample = CDTXMania.tGenerateTexture(bmDest, false);

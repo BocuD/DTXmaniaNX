@@ -153,20 +153,20 @@ internal class CActPerfProgressBar : CActivity
 	{
 		if (bActivated)
 		{
-			CDTXMania.tDisposeSafely(ref txパネル用);
-			CDTXMania.tDisposeSafely(ref tx背景);
-			CDTXMania.tDisposeSafely(ref tx縦線);
-			CDTXMania.tDisposeSafely(ref tx進捗);
-			CDTXMania.tDisposeSafely(ref tx灰);
-			CDTXMania.tDisposeSafely(ref tx黄);
-			CDTXMania.tDisposeSafely(ref tx青);
+			CDTXMania.tReleaseTexture(ref txパネル用);
+			CDTXMania.tReleaseTexture(ref tx背景);
+			CDTXMania.tReleaseTexture(ref tx縦線);
+			CDTXMania.tReleaseTexture(ref tx進捗);
+			CDTXMania.tReleaseTexture(ref tx灰);
+			CDTXMania.tReleaseTexture(ref tx黄);
+			CDTXMania.tReleaseTexture(ref tx青);
 
-			CDTXMania.tDisposeSafely(ref txBestProgressBarRecord.Drums);
-			CDTXMania.tDisposeSafely(ref txBestProgressBarRecord.Guitar);
-			CDTXMania.tDisposeSafely(ref txBestProgressBarRecord.Bass);
+			CDTXMania.tReleaseTexture(ref txBestProgressBarRecord.Drums);
+			CDTXMania.tReleaseTexture(ref txBestProgressBarRecord.Guitar);
+			CDTXMania.tReleaseTexture(ref txBestProgressBarRecord.Bass);
 
-			CDTXMania.tDisposeSafely(ref txProgressBarBackgroundDrums);
-			CDTXMania.tDisposeSafely(ref txProgressBarBackgroundGuitar);
+			CDTXMania.tReleaseTexture(ref txProgressBarBackgroundDrums);
+			CDTXMania.tReleaseTexture(ref txProgressBarBackgroundGuitar);
 
 			base.OnManagedReleaseResources();
 		}				
@@ -429,7 +429,7 @@ internal class CActPerfProgressBar : CActivity
 
 	private void tサイズが絡むテクスチャの生成()
 	{
-		CDTXMania.tDisposeSafely(ref txパネル用);
+		CDTXMania.tReleaseTexture(ref txパネル用);
 		if (b演奏画面以外からの呼び出し)
 		{
 			using (Bitmap bitmap = new Bitmap(nWidth + 40, nHeight + 40)) 
@@ -441,7 +441,7 @@ internal class CActPerfProgressBar : CActivity
 				txパネル用 = CDTXMania.tGenerateTexture(bitmap);
 			} 				
 		}
-		CDTXMania.tDisposeSafely(ref tx背景);
+		CDTXMania.tReleaseTexture(ref tx背景);
 		int num = 255; // (b演奏画面以外からの呼び出し ? 128 : ((int)CDTXMania.Instance.ConfigIni.nBGAlpha));
 		using (Bitmap bitmap3 = new Bitmap(nWidth + ((!b演奏画面以外からの呼び出し) ? 2 : 0), nHeight))
 		{
@@ -467,7 +467,7 @@ internal class CActPerfProgressBar : CActivity
 			}
 			tx背景 = CDTXMania.tGenerateTexture(bitmap3);
 		}
-		CDTXMania.tDisposeSafely(ref tx縦線);
+		CDTXMania.tReleaseTexture(ref tx縦線);
 		using (Bitmap bitmap4 = new Bitmap(2, nHeight))
 		{
 			using (Graphics graphics3 = Graphics.FromImage(bitmap4))
@@ -477,7 +477,7 @@ internal class CActPerfProgressBar : CActivity
 			}
 			tx縦線 = CDTXMania.tGenerateTexture(bitmap4);
 		}
-		CDTXMania.tDisposeSafely(ref tx進捗);
+		CDTXMania.tReleaseTexture(ref tx進捗);
 		using (Bitmap bitmap5 = new Bitmap(nWidth, nHeight)) 
 		{
 			using (Graphics graphics4 = Graphics.FromImage(bitmap5))

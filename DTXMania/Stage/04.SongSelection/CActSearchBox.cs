@@ -168,10 +168,10 @@ internal class CActSearchBox : CActivity
 		{
 			CDTXMania.tDisposeSafely(ref prvf入力文字列);
 			CDTXMania.tDisposeSafely(ref prvf説明);
-			CDTXMania.tDisposeSafely(ref tx背景);
-			CDTXMania.tDisposeSafely(ref tx文字列);
-			CDTXMania.tDisposeSafely(ref tx説明);
-			CDTXMania.tDisposeSafely(ref txカーソル);
+			CDTXMania.tReleaseTexture(ref tx背景);
+			CDTXMania.tReleaseTexture(ref tx文字列);
+			CDTXMania.tReleaseTexture(ref tx説明);
+			CDTXMania.tReleaseTexture(ref txカーソル);
 			base.OnManagedReleaseResources();
 		}
 	}
@@ -358,7 +358,7 @@ internal class CActSearchBox : CActivity
 
 	private void t背景テクスチャを生成()
 	{
-		CDTXMania.tDisposeSafely(ref tx背景);
+		CDTXMania.tReleaseTexture(ref tx背景);
 		using (Bitmap bitmap = new Bitmap(rectパネル基本位置.Width, rectパネル基本位置.Height))
 		{
 			using (Graphics graphics = Graphics.FromImage(bitmap))
@@ -372,7 +372,7 @@ internal class CActSearchBox : CActivity
 
 	private void t文字テクスチャを生成()
 	{
-		CDTXMania.tDisposeSafely(ref tx文字列);
+		CDTXMania.tReleaseTexture(ref tx文字列);
 		string text = str入力中文字列.Substring(0, nカーソル位置) + strIME入力中文字列 + str入力中文字列.Substring(nカーソル位置);
 		Color fontColor = (strIME入力中文字列 != "") ? Color.Yellow : Color.White;
 		if (text.Length >= nカーソル位置)

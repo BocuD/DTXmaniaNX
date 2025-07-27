@@ -29,7 +29,7 @@ internal class CActScrollBar : CActivity
 	{
 		if ( bActivated )
 		{
-			CDTXMania.tDisposeSafely( ref txScrollBar );
+			CDTXMania.tReleaseTexture(ref txScrollBar);
 			base.OnManagedReleaseResources();
 		}
 	}

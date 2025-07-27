@@ -557,7 +557,7 @@ internal class CActResultParameterPanel : CActivity
             {
                 //Best Record (Previous)
                 CTexture bestRecordProgressBarTexture = txPreviousBestProgressBar[i];
-                CDTXMania.tDisposeSafely(ref bestRecordProgressBarTexture);
+                CDTXMania.tReleaseTexture(ref bestRecordProgressBarTexture);
                 CActPerfProgressBar.txGenerateProgressBarHelper(
                     ref bestRecordProgressBarTexture,
                     stageResult.strBestProgressBarRecord[i], 4, 425,
@@ -566,7 +566,7 @@ internal class CActResultParameterPanel : CActivity
 
                 //Current Progress Bar
                 CTexture currProgressBarTexture = txCurrentProgressBar[i];
-                CDTXMania.tDisposeSafely(ref currProgressBarTexture);
+                CDTXMania.tReleaseTexture(ref currProgressBarTexture);
                 CActPerfProgressBar.txGenerateProgressBarHelper(
                     ref currProgressBarTexture,
                     stageResult.strCurrProgressBarRecord[i], 12, 425, 
@@ -599,12 +599,12 @@ internal class CActResultParameterPanel : CActivity
             }
             CDTXMania.tReleaseTexture(ref txLagHitCount);
             //
-            CDTXMania.tDisposeSafely(ref txPreviousBestProgressBar.Drums);
-            CDTXMania.tDisposeSafely(ref txPreviousBestProgressBar.Guitar);
-            CDTXMania.tDisposeSafely(ref txPreviousBestProgressBar.Bass);
-            CDTXMania.tDisposeSafely(ref txCurrentProgressBar.Drums);
-            CDTXMania.tDisposeSafely(ref txCurrentProgressBar.Guitar);
-            CDTXMania.tDisposeSafely(ref txCurrentProgressBar.Bass);
+            CDTXMania.tReleaseTexture(ref txPreviousBestProgressBar.Drums);
+            CDTXMania.tReleaseTexture(ref txPreviousBestProgressBar.Guitar);
+            CDTXMania.tReleaseTexture(ref txPreviousBestProgressBar.Bass);
+            CDTXMania.tReleaseTexture(ref txCurrentProgressBar.Drums);
+            CDTXMania.tReleaseTexture(ref txCurrentProgressBar.Guitar);
+            CDTXMania.tReleaseTexture(ref txCurrentProgressBar.Bass);
             base.OnManagedReleaseResources();
         }
     }

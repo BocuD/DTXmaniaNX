@@ -602,24 +602,24 @@ internal class CActSelectSongList : CActivity
 		if (!bActivated)
 			return;
 
-		CDTXMania.tDisposeSafely( ref txItemNumbers );
+		CDTXMania.tReleaseTexture(ref txItemNumbers);
 
 		for( int i = 0; i < 13; i++ )
 		{
-			CDTXMania.tDisposeSafely(ref stBarInformation[i].txTitleName);
-			CDTXMania.tDisposeSafely(ref stBarInformation[i].txPreviewImage);
-			CDTXMania.tDisposeSafely(ref stBarInformation[i].txClearLamp);
+			CDTXMania.tReleaseTexture(ref stBarInformation[i].txTitleName);
+			CDTXMania.tReleaseTexture(ref stBarInformation[i].txPreviewImage);
+			CDTXMania.tReleaseTexture(ref stBarInformation[i].txClearLamp);
 		}
 
-		CDTXMania.tDisposeSafely( ref txSkillNumbers );
-		CDTXMania.tDisposeSafely( ref txEnumeratingSongs );
-		CDTXMania.tDisposeSafely( ref txSongNotFound );
-		CDTXMania.tDisposeSafely( ref txSongNameBar.Score );
-		CDTXMania.tDisposeSafely( ref txSongNameBar.Box );
-		CDTXMania.tDisposeSafely( ref txSongNameBar.Other );
-		CDTXMania.tDisposeSafely( ref txSongSelectionBar.Score );
-		CDTXMania.tDisposeSafely( ref txSongSelectionBar.Box );
-		CDTXMania.tDisposeSafely( ref txSongSelectionBar.Other );
+		CDTXMania.tReleaseTexture(ref txSkillNumbers);
+		CDTXMania.tReleaseTexture(ref txEnumeratingSongs);
+		CDTXMania.tReleaseTexture(ref txSongNotFound);
+		CDTXMania.tReleaseTexture(ref txSongNameBar.Score);
+		CDTXMania.tReleaseTexture(ref txSongNameBar.Box);
+		CDTXMania.tReleaseTexture(ref txSongNameBar.Other);
+		CDTXMania.tReleaseTexture(ref txSongSelectionBar.Score);
+		CDTXMania.tReleaseTexture(ref txSongSelectionBar.Box);
+		CDTXMania.tReleaseTexture(ref txSongSelectionBar.Other);
 
 		CDTXMania.tDisposeSafely( ref prvFont );
 		CDTXMania.tDisposeSafely( ref prvFontSmall );
@@ -1474,7 +1474,7 @@ internal class CActSelectSongList : CActivity
 				g.DrawString( strSongName, ftSongListFont, new SolidBrush( color文字影 ), (float) 2f, (float) ( y + 2f ) );
 				g.DrawString( strSongName, ftSongListFont, new SolidBrush( color ), 0f, y );
 
-				CDTXMania.tDisposeSafely( ref stBarInformation[ nバー番号 ].txTitleName );
+				CDTXMania.tReleaseTexture(ref stBarInformation[ nバー番号 ].txTitleName);
 
 				stBarInformation[ nバー番号 ].txTitleName = new CTexture( CDTXMania.app.Device, bmp, CDTXMania.TextureFormat );
 				stBarInformation[ nバー番号 ].txTitleName.vcScaleRatio = new Vector3( f拡大率X, 0.5f, 1f );
@@ -1496,7 +1496,7 @@ internal class CActSelectSongList : CActivity
 
 		try
 		{
-			CDTXMania.tDisposeSafely(ref stBarInformation[nBarIndex].txPreviewImage);
+			CDTXMania.tReleaseTexture(ref stBarInformation[nBarIndex].txPreviewImage);
 			string strSelectedPreviewImagePath = strPreviewImagePath;
 			if(!File.Exists(strSelectedPreviewImagePath))
 			{
@@ -1565,7 +1565,7 @@ internal class CActSelectSongList : CActivity
 		{
 			try
 			{
-				CDTXMania.tDisposeSafely(ref stBarInformation[nBarIndex].txClearLamp);
+				CDTXMania.tReleaseTexture(ref stBarInformation[nBarIndex].txClearLamp);
 
 				Bitmap bitmap = new Bitmap(7, 41);
 				SolidBrush[] lampBrushes = {
