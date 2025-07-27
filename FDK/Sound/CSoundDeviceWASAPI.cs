@@ -636,10 +636,6 @@ public class CSoundDeviceWASAPI : ISoundDevice
 	#endregion
 
 	#region [ tサウンドを作成する() ]
-	public CSound tサウンドを作成する(string strファイル名)
-	{
-		return tサウンドを作成する(strファイル名, CSound.EInstType.Unknown);
-	}
 	public CSound tサウンドを作成する(string strファイル名, CSound.EInstType eInstType)
 	{
 		var sound = new CSound();
@@ -649,21 +645,6 @@ public class CSoundDeviceWASAPI : ISoundDevice
 		int hmixer = hMixer_Chips[(int)eInstType];
 #endif
 		sound.tWASAPIサウンドを作成する(strファイル名, hmixer, eOutputDevice, eInstType);
-		return sound;
-	}
-	public CSound tサウンドを作成する(byte[] byArrWAVファイルイメージ)
-	{
-		return tサウンドを作成する(byArrWAVファイルイメージ, CSound.EInstType.Unknown);
-	}
-	public CSound tサウンドを作成する(byte[] byArrWAVファイルイメージ, CSound.EInstType eInstType)
-	{
-		var sound = new CSound();
-#if TEST_MultiThreadedMixer
-			int hmixer = (int)hMixerThreaded_Chips[(int)eInstType];
-#else
-		int hmixer = hMixer_Chips[(int)eInstType];
-#endif
-		sound.tWASAPIサウンドを作成する(byArrWAVファイルイメージ, hmixer, eOutputDevice, eInstType);
 		return sound;
 	}
 	public void tサウンドを作成する(string strファイル名, ref CSound sound, CSound.EInstType eInstType)

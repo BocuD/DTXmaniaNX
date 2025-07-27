@@ -65,7 +65,7 @@ internal partial class CActConfigList
                     break;
             }
 
-            CDTXMania.SoundManager.t初期化(soundDeviceType,
+            CDTXMania.SoundManager.tInitialize(soundDeviceType,
                 iSystemWASAPIBufferSizeMs.nCurrentValue,
                 false,
                 0,

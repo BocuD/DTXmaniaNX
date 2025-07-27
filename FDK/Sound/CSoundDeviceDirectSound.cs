@@ -103,10 +103,6 @@ public class CSoundDeviceDirectSound : ISoundDevice
 
 	// メソッド
 
-	public CSoundDeviceDirectSound(IntPtr hWnd, long n遅延時間ms)
-	{
-		t初期化(hWnd, n遅延時間ms, false);
-	}
 	public CSoundDeviceDirectSound(IntPtr hWnd, long n遅延時間ms, bool bUseOSTimer)
 	{
 		t初期化(hWnd, n遅延時間ms, bUseOSTimer);
@@ -211,10 +207,6 @@ public class CSoundDeviceDirectSound : ISoundDevice
 	#endregion
 
 	#region [ tサウンドを作成する() ]
-	public CSound tサウンドを作成する(string strファイル名)
-	{
-		return tサウンドを作成する(strファイル名, CSound.EInstType.Unknown);
-	}
 	public CSound tサウンドを作成する(string strファイル名, CSound.EInstType eInstType)
 	{
 		var sound = new CSound();
@@ -229,12 +221,6 @@ public class CSoundDeviceDirectSound : ISoundDevice
 	{
 		var sound = new CSound();
 		sound.tDirectSoundサウンドを作成する(byArrWAVファイルイメージ, DirectSound, eInstType);
-		return sound;
-	}
-	public CSound tサウンドを作成する(byte[] byArrWAVファイルイメージ, BufferFlags flags, CSound.EInstType eInstType)
-	{
-		var sound = new CSound();
-		sound.tDirectSoundサウンドを作成する(byArrWAVファイルイメージ, DirectSound, flags, eInstType);
 		return sound;
 	}
 

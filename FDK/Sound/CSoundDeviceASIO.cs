@@ -16,7 +16,7 @@ public static class CEnumerateAllAsioDevices
 		//Debug.WriteLine( "BassAsio.BASS_ASIO_GetDeviceInfos():" );
 		BASS_ASIO_DEVICEINFO[] bassAsioDevInfo = BassAsio.BASS_ASIO_GetDeviceInfos();
 
-		List<string> asioDeviceList = new List<string>();
+		List<string> asioDeviceList = [];
 
 		if (bassAsioDevInfo.Length == 0)
 		{
@@ -24,10 +24,9 @@ public static class CEnumerateAllAsioDevices
 		}
 		else
 		{
-			for (int i = 0; i < bassAsioDevInfo.Length; i++)
+			foreach (BASS_ASIO_DEVICEINFO t in bassAsioDevInfo)
 			{
-				asioDeviceList.Add(bassAsioDevInfo[i].name);
-				//Trace.TraceInformation( "ASIO Device {0}: {1}", i, bassAsioDevInfo[ i ].name );
+				asioDeviceList.Add(t.name);
 			}
 		}
 
@@ -122,11 +121,11 @@ public class CSoundDeviceASIO : ISoundDevice
 
 	// メソッド
 
-	public CSoundDeviceASIO(long n希望バッファサイズms, int _nASIODevice)
+	public CSoundDeviceASIO(long nTargetBufferSizeMs, int _nASIODevice)
 	{
 		// 初期化。
 
-		Trace.TraceInformation("BASS (ASIO) の初期化を開始します。");
+		Trace.TraceInformation("Starting BASS (ASIO) initialization...");
 		eOutputDevice = ESoundDeviceType.Unknown;
 		n実出力遅延ms = 0;
 		n経過時間ms = 0;
@@ -136,37 +135,37 @@ public class CSoundDeviceASIO : ISoundDevice
 
 		#region [ BASS registration ]
 		// BASS.NET ユーザ登録（BASSスプラッシュが非表示になる）。
+		//lmao
 		BassNet.Registration("dtxmaniaxgk@gmail.com", "2X9182021152222");
 		#endregion
 
 		#region [ BASS Version Check ]
-		// BASS のバージョンチェック。
 		int nBASSVersion = Utils.HighWord(Bass.BASS_GetVersion());
 		if (nBASSVersion != Bass.BASSVERSION)
-			throw new DllNotFoundException(string.Format("bass.dll のバージョンが異なります({0})。このプログラムはバージョン{1}で動作します。", nBASSVersion, Bass.BASSVERSION));
+			throw new DllNotFoundException($"Incorrect bass.dll version detected ({nBASSVersion}). Please use {Bass.BASSVERSION}.");
 
 		int nBASSMixVersion = Utils.HighWord(BassMix.BASS_Mixer_GetVersion());
 		if (nBASSMixVersion != BassMix.BASSMIXVERSION)
-			throw new DllNotFoundException(string.Format("bassmix.dll のバージョンが異なります({0})。このプログラムはバージョン{1}で動作します。", nBASSMixVersion, BassMix.BASSMIXVERSION));
+			throw new DllNotFoundException($"Incorrect bassmix.dll version detected ({nBASSMixVersion}). Please use {BassMix.BASSMIXVERSION}.");
 
-		int nBASSASIO = Utils.HighWord(BassAsio.BASS_ASIO_GetVersion());
-		if (nBASSASIO != BassAsio.BASSASIOVERSION)
-			throw new DllNotFoundException(string.Format("bassasio.dll のバージョンが異なります({0})。このプログラムはバージョン{1}で動作します。", nBASSASIO, BassAsio.BASSASIOVERSION));
+		int nBASSASIOVersion = Utils.HighWord(BassAsio.BASS_ASIO_GetVersion());
+		if (nBASSASIOVersion != BassAsio.BASSASIOVERSION)
+			throw new DllNotFoundException($"Incorrect bassasio.dll version detected ({nBASSASIOVersion})。. Please use {BassAsio.BASSASIOVERSION}.");
 		#endregion
 
 		// BASS の設定。
 
 		bIsBASSFree = true;
 		Debug.Assert(Bass.BASS_SetConfig(BASSConfig.BASS_CONFIG_UPDATEPERIOD, 0),       // 0:BASSストリームの自動更新を行わない。（BASSWASAPIから行うため）
-			string.Format("BASS_SetConfig() に失敗しました。[{0}", Bass.BASS_ErrorGetCode()));
+			$"An error occurred during BASS_SetConfig() [{Bass.BASS_ErrorGetCode()}]");
 
 
 		// BASS の初期化。
 
-		int nデバイス = 0;      // 0:"no device" … BASS からはデバイスへアクセスさせない。アクセスは BASSASIO アドオンから行う。
-		int n周波数 = 44100;   // 仮決め。最終的な周波数はデバイス（≠ドライバ）が決める。
-		if (!Bass.BASS_Init(nデバイス, n周波数, BASSInit.BASS_DEVICE_DEFAULT, IntPtr.Zero))
-			throw new Exception(string.Format("BASS の初期化に失敗しました。(BASS_Init)[{0}]", Bass.BASS_ErrorGetCode().ToString()));
+		int nDevice = 0;      // 0:"no device" … BASS からはデバイスへアクセスさせない。アクセスは BASSASIO アドオンから行う。
+		int nFrequency = 44100;   // 仮決め。最終的な周波数はデバイス（≠ドライバ）が決める。
+		if (!Bass.BASS_Init(nDevice, nFrequency, BASSInit.BASS_DEVICE_DEFAULT, IntPtr.Zero))
+			throw new Exception($"BASS Initialization failed. (BASS_Init)[{Bass.BASS_ErrorGetCode().ToString()}]");
 
 		//Debug.WriteLine( "BASS_Init()完了。" );
 		#region [ デバッグ用: ASIOデバイスのenumerateと、ログ出力 ]
@@ -229,7 +228,7 @@ public class CSoundDeviceASIO : ISoundDevice
 			}
 			Bass.BASS_Free();
 			bIsBASSFree = true;
-			throw new Exception(string.Format("BASS (ASIO) の初期化に失敗しました。(BASS_ASIO_Init)[{0}]", errmes));
+			throw new Exception($"BASS (ASIO) の初期化に失敗しました。(BASS_ASIO_Init)[{errmes}]");
 			//-----------------
 			#endregion
 		}
@@ -238,7 +237,7 @@ public class CSoundDeviceASIO : ISoundDevice
 
 		// ASIO 出力チャンネルの初期化。
 
-		tAsioProc = new ASIOPROC(tAsio処理);        // アンマネージに渡す delegate は、フィールドとして保持しておかないとGCでアドレスが変わってしまう。
+		tAsioProc = tProcessASIO;        // アンマネージに渡す delegate は、フィールドとして保持しておかないとGCでアドレスが変わってしまう。
 		if (!BassAsio.BASS_ASIO_ChannelEnable(false, 0, tAsioProc, IntPtr.Zero))       // 出力チャンネル0 の有効化。
 		{
 			#region [ ASIO 出力チャンネルの初期化に失敗。]
@@ -246,7 +245,7 @@ public class CSoundDeviceASIO : ISoundDevice
 			BassAsio.BASS_ASIO_Free();
 			Bass.BASS_Free();
 			bIsBASSFree = true;
-			throw new Exception(string.Format("Failed BASS_ASIO_ChannelEnable() [{0}]", BassAsio.BASS_ASIO_ErrorGetCode().ToString()));
+			throw new Exception($"Failed BASS_ASIO_ChannelEnable() [{BassAsio.BASS_ASIO_ErrorGetCode().ToString()}]");
 			//-----------------
 			#endregion
 		}
@@ -271,7 +270,7 @@ public class CSoundDeviceASIO : ISoundDevice
 			BassAsio.BASS_ASIO_Free();
 			Bass.BASS_Free();
 			bIsBASSFree = true;
-			throw new Exception(string.Format("Failed BASS_ASIO_ChannelSetFormat() [{0}]", BassAsio.BASS_ASIO_ErrorGetCode().ToString()));
+			throw new Exception($"Failed BASS_ASIO_ChannelSetFormat() [{BassAsio.BASS_ASIO_ErrorGetCode().ToString()}]");
 			//-----------------
 			#endregion
 		}
@@ -290,35 +289,9 @@ public class CSoundDeviceASIO : ISoundDevice
 			BassAsio.BASS_ASIO_Free();
 			Bass.BASS_Free();
 			bIsBASSFree = true;
-			throw new Exception(string.Format("BASSミキサ(mixing)の作成に失敗しました。[{0}]", err));
+			throw new Exception($"BASSミキサ(mixing)の作成に失敗しました。[{err}]");
 		}
-
-		////以下は録音用なので、WASAPIのみで使う
-		//for (int i = 0; i < (int)CSound.EInstType.Unknown; i++)
-		//{
-		//	this.hMixer_forChips[i] = BassMix.BASS_Mixer_StreamCreate((int)this.db周波数, this.n出力チャンネル数, flag);
-		//	if (this.hMixer_forChips[i] == 0)
-		//	{
-		//		BASSError errcode = Bass.BASS_ErrorGetCode();
-		//		BassAsio.BASS_ASIO_Free();
-		//		Bass.BASS_Free();
-		//		this.bIsBASSFree = true;
-		//		throw new Exception(string.Format("BASSミキサ(楽器[{1}]ごとのmixing)の作成に失敗しました。[{0}]", errcode, i));
-		//	}
-
-		//	bool b1 = BassMix.BASS_Mixer_StreamAddChannel(this.hMixer, this.hMixer_forChips[i], BASSFlag.BASS_DEFAULT);
-		//	if (!b1)
-		//	{
-		//		BASSError errcode = Bass.BASS_ErrorGetCode();
-		//		BassAsio.BASS_ASIO_Free();
-		//		Bass.BASS_Free();
-		//		this.bIsBASSFree = true;
-		//		throw new Exception(string.Format("個別BASSミキサ({1}}から(mixing)への接続に失敗しました。[{0}]", errcode, i));
-		//	};
-		//}
-
-
-
+		
 		// BASS ミキサーの1秒あたりのバイト数を算出。
 
 		var mixerInfo = Bass.BASS_ChannelGetInfo(hMixer);
@@ -347,7 +320,7 @@ public class CSoundDeviceASIO : ISoundDevice
 			BassAsio.BASS_ASIO_Free();
 			Bass.BASS_Free();
 			bIsBASSFree = true;
-			throw new Exception(string.Format("BASSミキサ(最終段)の作成に失敗しました。[{0}]", errcode));
+			throw new Exception($"BASSミキサ(最終段)の作成に失敗しました。[{errcode}]");
 		}
 		{
 			bool b1 = BassMix.BASS_Mixer_StreamAddChannel(hMixer_DeviceOut, hMixer, BASSFlag.BASS_DEFAULT);
@@ -357,14 +330,14 @@ public class CSoundDeviceASIO : ISoundDevice
 				BassAsio.BASS_ASIO_Free();
 				Bass.BASS_Free();
 				bIsBASSFree = true;
-				throw new Exception(string.Format("BASSミキサ(最終段とmixing)の接続に失敗しました。[{0}]", errcode));
+				throw new Exception($"BASSミキサ(最終段とmixing)の接続に失敗しました。[{errcode}]");
 			};
 		}
 
 
 		// 出力を開始。
 
-		nバッファサイズsample = (int)(n希望バッファサイズms * db周波数 / 1000.0);
+		nバッファサイズsample = (int)(nTargetBufferSizeMs * db周波数 / 1000.0);
 		//this.nバッファサイズsample = (int)  nバッファサイズbyte;
 		if (!BassAsio.BASS_ASIO_Start(nバッファサイズsample))     // 範囲外の値を指定した場合は自動的にデフォルト値に設定される。
 		{
@@ -372,15 +345,13 @@ public class CSoundDeviceASIO : ISoundDevice
 			BassAsio.BASS_ASIO_Free();
 			Bass.BASS_Free();
 			bIsBASSFree = true;
-			throw new Exception("ASIO デバイス出力開始に失敗しました。" + err.ToString());
+			throw new Exception("ASIO デバイス出力開始に失敗しました。" + err);
 		}
-		else
-		{
-			int n遅延sample = BassAsio.BASS_ASIO_GetLatency(false);   // この関数は BASS_ASIO_Start() 後にしか呼び出せない。
-			int n希望遅延sample = (int)(n希望バッファサイズms * db周波数 / 1000.0);
-			n実バッファサイズms = n実出力遅延ms = (long)(n遅延sample * 1000.0f / db周波数);
-			Trace.TraceInformation("ASIO デバイス出力開始：バッファ{0}sample(希望{1}) [{2}ms(希望{3}ms)]", n遅延sample, n希望遅延sample, n実出力遅延ms, n希望バッファサイズms);
-		}
+
+		int n遅延sample = BassAsio.BASS_ASIO_GetLatency(false);   // この関数は BASS_ASIO_Start() 後にしか呼び出せない。
+		int n希望遅延sample = (int)(nTargetBufferSizeMs * db周波数 / 1000.0);
+		n実バッファサイズms = n実出力遅延ms = (long)(n遅延sample * 1000.0f / db周波数);
+		Trace.TraceInformation("ASIO デバイス出力開始：バッファ{0}sample(希望{1}) [{2}ms(希望{3}ms)]", n遅延sample, n希望遅延sample, n実出力遅延ms, nTargetBufferSizeMs);
 	}
 
 	#region [ 録音制御用(WASAPI以外でのみ使用) ]
@@ -395,24 +366,10 @@ public class CSoundDeviceASIO : ISoundDevice
 	#endregion
 
 	#region [ tサウンドを作成する() ]
-	public CSound tサウンドを作成する(string strファイル名)
-	{
-		return tサウンドを作成する(strファイル名, CSound.EInstType.Unknown);
-	}
 	public CSound tサウンドを作成する(string strファイル名, CSound.EInstType eInstType)
 	{
 		var sound = new CSound();
 		sound.tASIOサウンドを作成する(strファイル名, hMixer, eInstType);
-		return sound;
-	}
-	public CSound tサウンドを作成する(byte[] byArrWAVファイルイメージ)
-	{
-		return tサウンドを作成する(byArrWAVファイルイメージ, CSound.EInstType.Unknown);
-	}
-	public CSound tサウンドを作成する(byte[] byArrWAVファイルイメージ, CSound.EInstType eInstType)
-	{
-		var sound = new CSound();
-		sound.tASIOサウンドを作成する(byArrWAVファイルイメージ, hMixer, eInstType);
 		return sound;
 	}
 	public void tサウンドを作成する(string strファイル名, ref CSound sound, CSound.EInstType eInstType)
@@ -479,7 +436,7 @@ public class CSoundDeviceASIO : ISoundDevice
 	//protected BASSASIOFormat fmtASIOチャンネルフォーマット = BASSASIOFormat.BASS_ASIO_FORMAT_32BIT;// 16bit 固定
 	protected ASIOPROC tAsioProc = null;
 
-	protected int tAsio処理(bool input, int channel, IntPtr buffer, int length, IntPtr user)
+	protected int tProcessASIO(bool input, int channel, IntPtr buffer, int length, IntPtr user)
 	{
 		if (input) return 0;
 

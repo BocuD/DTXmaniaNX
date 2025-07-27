@@ -39,50 +39,6 @@ public class CSoundManager   // CSound管理
 	public int nMasterVolume
 	{
 		get => _nMasterVolume;
-		//get
-		//{
-		//    if ( SoundDeviceType == ESoundDeviceType.ExclusiveWASAPI || SoundDeviceType == ESoundDeviceType.ASIO )
-		//    {
-		//        return Bass.BASS_GetConfig(BASSConfig.BASS_CONFIG_GVOL_STREAM ) / 100;
-		//    }
-		//    else
-		//    {
-		//        return 100;
-		//    }
-		//}
-		//set
-		//{
-		//    if ( SoundDeviceType == ESoundDeviceType.ExclusiveWASAPI )
-		//    {
-		//			// LINEARでなくWINDOWS(2)を使う必要があるが、exclusive時は使用不可、またデバイス側が対応してないと使用不可
-		//        bool b = BassWasapi.BASS_WASAPI_SetVolume( BASSWASAPIVolume.BASS_WASAPI_CURVE_LINEAR, value / 100.0f );
-		//        if ( !b )
-		//        {
-		//            BASSError be = Bass.BASS_ErrorGetCode();
-		//            Trace.TraceInformation( "WASAPI Master Volume Set Error: " + be.ToString() );
-		//        }
-		//    }
-		//}
-		//set
-		//{
-		//    if ( SoundDeviceType == ESoundDeviceType.ExclusiveWASAPI || SoundDeviceType == ESoundDeviceType.ASIO )
-		//    {
-		//        bool b = Bass.BASS_SetConfig(BASSConfig.BASS_CONFIG_GVOL_STREAM, value * 100 );
-		//        if ( !b )
-		//        {
-		//            BASSError be = Bass.BASS_ErrorGetCode();
-		//            Trace.TraceInformation( "Master Volume Set Error: " + be.ToString() );
-		//        }
-		//    }
-		//}
-		//set
-		//{
-		//    if ( SoundDeviceType == ESoundDeviceType.ExclusiveWASAPI || SoundDeviceType == ESoundDeviceType.ASIO )
-		//    {
-		//        var nodes = new BASS_MIXER_NODE[ 1 ] { new BASS_MIXER_NODE( 0, (float) value ) };
-		//        BassMix.BASS_Mixer_ChannelSetEnvelope( SoundDevice.hMixer, BASSMIXEnvelope.BASS_MIXER_ENV_VOL, nodes );
-		//    }
-		//}
 		set
 		{
 			SoundDevice.nMasterVolume = value;
@@ -113,14 +69,7 @@ public class CSoundManager   // CSound管理
 	/// <para>0以下の値を指定すると、この数値はWASAPI初期化時に自動設定する。正数を指定すると、その値を設定しようと試みる。</para>
 	/// </summary>
 	public static int SoundDelayExclusiveWASAPI = 0;        // SSTでは、50ms
-	public int GetSoundExclusiveWASAPI()
-	{
-		return SoundDelayExclusiveWASAPI;
-	}
-	public void SetSoundDelayExclusiveWASAPI(int value)
-	{
-		SoundDelayExclusiveWASAPI = value;
-	}
+
 	/// <summary>
 	/// <para>WASAPI 共有モード出力における再生遅延[ms]。ユーザが決定する。</para>
 	/// </summary>
@@ -222,17 +171,6 @@ public class CSoundManager   // CSound管理
 
 
 	/// <summary>
-	/// DTXC用コンストラクタ
-	/// </summary>
-	/// <param name="handle"></param>
-	public CSoundManager(IntPtr handle)  // #30803 従来のコンストラクタ相当のI/Fを追加。(DTXC用)
-	{
-		WindowHandle = handle;
-		SoundDevice = null;
-		bUseOSTimer = true;
-		t初期化(ESoundDeviceType.DirectSound, 0, 0, 0);
-	}
-	/// <summary>
 	/// DTXMania用コンストラクタ
 	/// </summary>
 	/// <param name="handle"></param>
@@ -248,33 +186,14 @@ public class CSoundManager   // CSound管理
 		WindowHandle = handle;
 		SoundDevice = null;
 		//bUseOSTimer = false;
-		t初期化(soundDeviceType, nSoundDelayExclusiveWASAPI, _bSoundUpdateByEventWASAPI, nSoundDelayASIO, nASIODevice, _bUseOSTimer);
+		tInitialize(soundDeviceType, nSoundDelayExclusiveWASAPI, _bSoundUpdateByEventWASAPI, nSoundDelayASIO, nASIODevice, _bUseOSTimer);
 	}
 	public void Dispose()
 	{
 		t終了();
 	}
-
-	//public static void t初期化()
-	//{
-	//    t初期化( ESoundDeviceType.DirectSound, 0, 0, 0 );
-	//}
-
-	public void t初期化(ESoundDeviceType soundDeviceType, int _nSoundDelayExclusiveWASAPI, int _nSoundDelayASIO, int _nASIODevice, IntPtr handle)
-	{
-		//if ( !bInitialized )
-		{
-			WindowHandle = handle;
-			t初期化(soundDeviceType, _nSoundDelayExclusiveWASAPI, _nSoundDelayASIO, _nASIODevice);
-			//bInitialized = true;
-		}
-	}
-	public void t初期化(ESoundDeviceType soundDeviceType, int _nSoundDelayExclusiveWASAPI, int _nSoundDelayASIO, int _nASIODevice)
-	{
-		t初期化(soundDeviceType, _nSoundDelayExclusiveWASAPI, false, _nSoundDelayASIO, _nASIODevice, false);
-	}
-
-	public void t初期化(ESoundDeviceType soundDeviceType,
+	
+	public void tInitialize(ESoundDeviceType soundDeviceType,
 		int _nSoundDelayExclusiveWASAPI, bool _bSoundUpdateByEventWASAPI,
 		int _nSoundDelayASIO, int _nASIODevice,
 		bool _bUseOSTimer)
@@ -289,14 +208,14 @@ public class CSoundManager   // CSound管理
 		bUseOSTimer = _bUseOSTimer;
 		bSoundUpdateByEventWASAPI = _bSoundUpdateByEventWASAPI;
 
-		ESoundDeviceType[] ESoundDeviceTypes = new ESoundDeviceType[5]
-		{
+		ESoundDeviceType[] ESoundDeviceTypes =
+		[
 			ESoundDeviceType.ASIO,
 			ESoundDeviceType.ExclusiveWASAPI,
 			ESoundDeviceType.SharedWASAPI,
 			ESoundDeviceType.DirectSound,
 			ESoundDeviceType.Unknown
-		};
+		];
 
 		int n初期デバイス;    // = (int) soundDeviceType;
 		switch (soundDeviceType)
@@ -329,7 +248,7 @@ public class CSoundManager   // CSound管理
 				Trace.TraceInformation(e.Message);
 				if (ESoundDeviceTypes[n初期デバイス] == ESoundDeviceType.Unknown)
 				{
-					Trace.TraceError(string.Format("サウンドデバイスの初期化に失敗しました。"));
+					Trace.TraceError("サウンドデバイスの初期化に失敗しました。");
 					break;
 				}
 			}
@@ -412,7 +331,7 @@ public class CSoundManager   // CSound管理
 				break;
 
 			default:
-				throw new Exception(string.Format("未対応の SoundDeviceType です。[{0}]", SoundDeviceType.ToString()));
+				throw new Exception($"未対応の SoundDeviceType です。[{SoundDeviceType.ToString()}]");
 		}
 		//-----------------
 		#endregion
@@ -435,16 +354,11 @@ public class CSoundManager   // CSound管理
 	{
 		if (SoundDeviceType == ESoundDeviceType.Unknown)
 		{
-			throw new Exception(string.Format("未対応の SoundDeviceType です。[{0}]", SoundDeviceType.ToString()));
+			throw new Exception($"未対応の SoundDeviceType です。[{SoundDeviceType.ToString()}]");
 		}
 		return SoundDevice.tサウンドを作成する(filename, eInstType);
 	}
 
-	private static DateTime lastUpdateTime = DateTime.MinValue;
-	public void t再生中の処理をする(object o)            // #26122 2011.9.1 yyagi; delegate経由の呼び出し用
-	{
-		t再生中の処理をする();
-	}
 	public void t再生中の処理をする()
 	{
 		//★★★★★★★★★★★★★★★★★★★★★ダミー★★★★★★★★★★★★★★★★★★
@@ -506,7 +420,6 @@ public class CSoundManager   // CSound管理
 				return "Unknown";
 		}
 	}
-	public ESoundDeviceType CurrentSoundDeviceType => SoundDeviceType;
 
 	public void AddMixer(CSound cs, double db再生速度, bool _b演奏終了後も再生が続くチップである)
 	{
@@ -527,19 +440,6 @@ public class CSoundManager   // CSound管理
 	{
 		cs.tBASSサウンドをミキサーから削除する();
 	}
-
-	/// <summary>
-	/// 録音のPAUSEを解除し、録音を開始する。
-	/// </summary>
-	public static bool t録音開始()
-	{
-		return SoundDevice.tStartRecording();
-
-	}
-	public static bool t録音終了()
-	{
-		return SoundDevice.tStartRecording();
-	}
 }
 #endregion
 
@@ -557,8 +457,7 @@ public class CSound : IDisposable, ICloneable
 	public int nサウンドバッファサイズ => 0; // 取りあえず0固定★★★★★★★★★★★★★★★★★★★★
 
 	public bool bストリーム再生する          // 取りあえずfalse固定★★★★★★★★★★★★★★★★★★★★
-		=>
-			false; // trueにすると同一チップ音の多重再生で問題が出る(4POLY音源として動かない)
+		=> false; // trueにすると同一チップ音の多重再生で問題が出る(4POLY音源として動かない)
 
 	public double db周波数倍率
 	{
@@ -570,13 +469,13 @@ public class CSound : IDisposable, ICloneable
 				_db周波数倍率 = value;
 				if (bIsBASS)
 				{
-					Bass.BASS_ChannelSetAttribute(hBassStream, BASSAttribute.BASS_ATTRIB_FREQ, (float)(_db周波数倍率 * _db再生速度 * nオリジナルの周波数));
+					Bass.BASS_ChannelSetAttribute(hBassStream, BASSAttribute.BASS_ATTRIB_FREQ, (float)(_db周波数倍率 * _dbPlaySpeed * nオリジナルの周波数));
 				}
 				else
 				{
 					//						if ( b再生中 )	// #30838 2012.2.24 yyagi (delete b再生中)
 					//						{
-					Buffer.Frequency = (int)(_db周波数倍率 * _db再生速度 * nオリジナルの周波数);
+					Buffer.Frequency = (int)(_db周波数倍率 * _dbPlaySpeed * nオリジナルの周波数);
 					//						}
 				}
 			}
@@ -584,13 +483,13 @@ public class CSound : IDisposable, ICloneable
 	}
 	public double dbPlaySpeed  // db再生速度
 	{
-		get => _db再生速度;
+		get => _dbPlaySpeed;
 		set
 		{
-			if (_db再生速度 != value)
+			if (_dbPlaySpeed != value)
 			{
-				_db再生速度 = value;
-				bIs1倍速再生 = (_db再生速度 == 1.000f);
+				_dbPlaySpeed = value;
+				bIs1倍速再生 = (_dbPlaySpeed == 1.000f);
 				if (bIsBASS)
 				{
 					if (_hTempoStream != 0 && !bIs1倍速再生)   // 再生速度がx1.000のときは、TempoStreamを用いないようにして高速化する
@@ -610,14 +509,14 @@ public class CSound : IDisposable, ICloneable
 					}
 					else
 					{
-						Bass.BASS_ChannelSetAttribute(hBassStream, BASSAttribute.BASS_ATTRIB_FREQ, (float)(_db周波数倍率 * _db再生速度 * nオリジナルの周波数));
+						Bass.BASS_ChannelSetAttribute(hBassStream, BASSAttribute.BASS_ATTRIB_FREQ, (float)(_db周波数倍率 * _dbPlaySpeed * nオリジナルの周波数));
 					}
 				}
 				else
 				{
 					//						if ( b再生中 )	// #30838 2012.2.24 yyagi (delete b再生中)
 					//						{
-					Buffer.Frequency = (int)(_db周波数倍率 * _db再生速度 * nオリジナルの周波数);
+					Buffer.Frequency = (int)(_db周波数倍率 * _dbPlaySpeed * nオリジナルの周波数);
 					//						}
 				}
 			}
@@ -656,7 +555,8 @@ public class CSound : IDisposable, ICloneable
 					return 100;
 				return (int)(f音量 * 100);
 			}
-			else if (bIsDirectSound)
+
+			if (bIsDirectSound)
 			{
 				return _n音量;
 			}
@@ -705,7 +605,8 @@ public class CSound : IDisposable, ICloneable
 					return 0;
 				return (int)(f位置 * 100);
 			}
-			else if (bIsDirectSound)
+
+			if (bIsDirectSound)
 			{
 				return _n位置;
 			}
@@ -769,23 +670,14 @@ public class CSound : IDisposable, ICloneable
 	/// <para>全インスタンスリスト。</para>
 	/// <para>～を作成する() で追加され、t解放する() or Dispose() で解放される。</para>
 	/// </summary>
-	public static List<CSound> listインスタンス = new List<CSound>();
-
-	public static void ShowAllCSoundFiles()
-	{
-		int i = 0;
-		foreach (CSound cs in listインスタンス)
-		{
-			Debug.WriteLine(i++.ToString("d3") + ": " + Path.GetFileName(cs.strファイル名));
-		}
-	}
+	public static List<CSound> listインスタンス = [];
 
 	public CSound()
 	{
 		nVolume = 100;
 		nPosition = 0;
 		_db周波数倍率 = 1.0;
-		_db再生速度 = 1.0;
+		_dbPlaySpeed = 1.0;
 		DirectSoundBufferFlags = CSoundDeviceDirectSound.DefaultFlags;
 		//			this._cbRemoveMixerChannel = new WaitCallback( RemoveMixerChannelLater );
 		_hBassStream = -1;
@@ -991,7 +883,7 @@ public class CSound : IDisposable, ICloneable
 							tag, samplesPerSecond, channels, averageBytesPerSecond, blockAlignment, bitsPerSample);
 					}
 					else
-						throw new InvalidDataException(string.Format("未対応のWAVEフォーマットタグです。(Tag:{0})", tag.ToString()));
+						throw new InvalidDataException($"未対応のWAVEフォーマットタグです。(Tag:{tag.ToString()})");
 
 					long nフォーマットサイズbyte = 16;
 
@@ -1324,7 +1216,7 @@ public class CSound : IDisposable, ICloneable
 		}
 		else if (bIsDirectSound)
 		{
-			int n位置sample = (int)(_Format.SampleRate * n位置ms * 0.001 * _db周波数倍率 * _db再生速度);  // #30839 2013.2.24 yyagi; add _db周波数倍率 and _db再生速度
+			int n位置sample = (int)(_Format.SampleRate * n位置ms * 0.001 * _db周波数倍率 * _dbPlaySpeed);  // #30839 2013.2.24 yyagi; add _db周波数倍率 and _db再生速度
 			try
 			{
 				Buffer.CurrentPosition = n位置sample * _Format.BlockAlign;
@@ -1355,7 +1247,7 @@ public class CSound : IDisposable, ICloneable
 		{
 			Buffer.GetCurrentPosition(out int pos, out _);
 			n位置byte = (long)pos;
-			db位置ms = n位置byte / _Format.SampleRate / 0.001 / _db周波数倍率 / _db再生速度;
+			db位置ms = n位置byte / _Format.SampleRate / 0.001 / _db周波数倍率 / _dbPlaySpeed;
 		}
 		else
 		{
@@ -1577,7 +1469,7 @@ public class CSound : IDisposable, ICloneable
 	private int n一時停止回数 = 0;
 	private int nオリジナルの周波数 = 0;
 	private double _db周波数倍率 = 1.0;
-	private double _db再生速度 = 1.0;
+	private double _dbPlaySpeed = 1.0;
 	private bool bIs1倍速再生 = true;
 	private WaveFormat _Format;
 
@@ -1630,7 +1522,7 @@ public class CSound : IDisposable, ICloneable
 
 		_hBassStream = Bass.BASS_StreamCreateFile(strファイル名, 0, 0, flags);
 		if (_hBassStream == 0)
-			throw new Exception(string.Format("サウンドストリームの生成に失敗しました。(BASS_StreamCreateFile)[{0}]", Bass.BASS_ErrorGetCode().ToString()));
+			throw new Exception($"サウンドストリームの生成に失敗しました。(BASS_StreamCreateFile)[{Bass.BASS_ErrorGetCode().ToString()}]");
 
 		nBytes = Bass.BASS_ChannelGetLength(_hBassStream);
 
@@ -1647,7 +1539,7 @@ public class CSound : IDisposable, ICloneable
 
 		_hBassStream = Bass.BASS_StreamCreateFile(hGC.AddrOfPinnedObject(), 0, byArrWAVファイルイメージ.Length, flags);
 		if (_hBassStream == 0)
-			throw new Exception(string.Format("サウンドストリームの生成に失敗しました。(BASS_StreamCreateFile)[{0}]", Bass.BASS_ErrorGetCode().ToString()));
+			throw new Exception($"サウンドストリームの生成に失敗しました。(BASS_StreamCreateFile)[{Bass.BASS_ErrorGetCode().ToString()}]");
 
 		nBytes = Bass.BASS_ChannelGetLength(_hBassStream);
 
@@ -1736,7 +1628,7 @@ public class CSound : IDisposable, ICloneable
 		if (_hBassStream == 0)
 		{
 			hGC.Free();
-			throw new Exception(string.Format("サウンドストリームの生成に失敗しました。(BASS_SampleCreate)[{0}]", Bass.BASS_ErrorGetCode().ToString()));
+			throw new Exception($"サウンドストリームの生成に失敗しました。(BASS_SampleCreate)[{Bass.BASS_ErrorGetCode().ToString()}]");
 		}
 
 		nBytes = Bass.BASS_ChannelGetLength(_hBassStream);
@@ -1761,7 +1653,7 @@ public class CSound : IDisposable, ICloneable
 			if (_hTempoStream == 0)
 			{
 				hGC.Free();
-				throw new Exception(string.Format("サウンドストリームの生成に失敗しました。(BASS_FX_TempoCreate)[{0}]", Bass.BASS_ErrorGetCode().ToString()));
+				throw new Exception($"サウンドストリームの生成に失敗しました。(BASS_FX_TempoCreate)[{Bass.BASS_ErrorGetCode().ToString()}]");
 			}
 			else
 			{
@@ -1794,7 +1686,8 @@ public class CSound : IDisposable, ICloneable
 		if (!Bass.BASS_ChannelGetAttribute(_hBassStream, BASSAttribute.BASS_ATTRIB_FREQ, ref freq))
 		{
 			hGC.Free();
-			throw new Exception(string.Format("サウンドストリームの周波数取得に失敗しました。(BASS_ChannelGetAttribute)[{0}]", Bass.BASS_ErrorGetCode().ToString()));
+			throw new Exception(
+				$"サウンドストリームの周波数取得に失敗しました。(BASS_ChannelGetAttribute)[{Bass.BASS_ErrorGetCode().ToString()}]");
 		}
 		nオリジナルの周波数 = (int)freq;
 	}
@@ -1916,24 +1809,24 @@ public class CSound : IDisposable, ICloneable
 
 		if (!File.Exists(strファイル名))
 		{
-			throw new Exception(string.Format("ファイルが見つかりませんでした。({0})", strファイル名));
+			throw new Exception($"ファイルが見つかりませんでした。({strファイル名})");
 		}
 		int ret = sounddecoder.Open(strファイル名);
 		if (ret < 0)
 		{
-			throw new Exception(string.Format("Open() に失敗しました。({0})({1})", ret, strファイル名));
+			throw new Exception($"Open() に失敗しました。({ret})({strファイル名})");
 		}
 		wfx = sounddecoder.wfx;
 		if (wfx.wFormatTag == 0)    // 正しく初期化されていない場合
 		{
 			sounddecoder.Close();
-			throw new Exception(string.Format("GetFormat() に失敗しました。({0})", strファイル名));
+			throw new Exception($"GetFormat() に失敗しました。({strファイル名})");
 		}
 		totalPCMSize = (int)sounddecoder.nTotalPCMSize;     //  tデコード後のサイズを調べる()で既に取得済みの値を流用する。ms単位の高速化だが、チップ音がたくさんあると塵積で結構効果がある
 		if (totalPCMSize == 0)
 		{
 			sounddecoder.Close();
-			throw new Exception(string.Format("GetTotalPCMSize() に失敗しました。({0})", strファイル名));
+			throw new Exception($"GetTotalPCMSize() に失敗しました。({strファイル名})");
 		}
 		totalPCMSize += ((totalPCMSize % 2) != 0) ? 1 : 0;
 		int wavheadersize = (bIntegrateWaveHeader) ? 44 : 0;
@@ -1943,7 +1836,7 @@ public class CSound : IDisposable, ICloneable
 			if (sounddecoder.Decode(ref buffer, wavheadersize) < 0)
 			{
 				buffer = null;
-				throw new Exception(string.Format("デコードに失敗しました。({0})", strファイル名));
+				throw new Exception($"デコードに失敗しました。({strファイル名})");
 			}
 			if (bIntegrateWaveHeader)
 			{
