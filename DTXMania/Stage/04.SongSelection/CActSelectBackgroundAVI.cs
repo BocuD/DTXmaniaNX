@@ -19,7 +19,7 @@ internal class CActSelectBackgroundAVI : CActivity
     public void Start(EChannel nチャンネル番号, CAVI rAVI, int n総移動時間ms, int n移動開始時刻ms)
     {
         //2016.01.21 kairera0467 VfW時代のコードを除去+大改造
-        Trace.TraceInformation("CActSelectBackgroundAVI: Start(): " + rAVI.strファイル名);
+        Trace.TraceInformation("CActSelectBackgroundAVI: Start(): " + rAVI.strFileName);
 
         this.rAVI = rAVI;
         #region[ アスペクト比からどっちを使うか判別 ]
