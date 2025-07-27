@@ -1,7 +1,12 @@
-﻿using DTXMania.Core;
+﻿using System.Diagnostics;
+using System.Drawing;
+using DTXMania.Core;
 using DTXMania.UI.Inspector;
+using FDK;
 using Hexa.NET.ImGui;
 using SharpDX;
+using Color = System.Drawing.Color;
+using Rectangle = System.Drawing.Rectangle;
 
 namespace DTXMania.UI.Drawable;
 
@@ -19,33 +24,74 @@ public class GitaDoraTransition : UIGroup
         position = new Vector3(640, 360, 0);
         anchor = new Vector2(0.5f, 0.5f);
         
-        top = AddChild(new UIImage(DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\black.png"))));
+        //create a black texture
+        Bitmap bitmap = new(32, 32);
+        Graphics graphics = Graphics.FromImage(bitmap);
+        Color black = Color.FromArgb(255, Color.Black);
+        graphics.FillRectangle(new SolidBrush(black), new Rectangle(0, 0, bitmap.Width, bitmap.Height));
+        graphics.Dispose();
+        CTexture blackTexture = new(CDTXMania.app.Device, bitmap, CDTXMania.TextureFormat, false);
+        bitmap.Dispose();
+        
+        top = AddChild(new UIImage(new DTXTexture(blackTexture)));
         top.size = new Vector2(3000, 1000);
         top.anchor = new Vector2(0.5f, 1.0f);
         top.position = new Vector3(640, 0, 0);
         
-        bottom = AddChild(new UIImage(DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\black.png"))));
+        bottom = AddChild(new UIImage(new DTXTexture(blackTexture)));
         bottom.size = new Vector2(3000, 1000);
         bottom.anchor = new Vector2(0.5f, 0.0f);
         bottom.position = new Vector3(640, 720, 0);
     }
     
-    long lastDrawTime = 0;
-    private float animationProgress = 1.5f;
-    public bool animate = false;
+    //these need to be static since the UIDrawable itself might get destroyed
+    struct GitaDoraTransitionState
+    {
+        public long lastDrawTime = 0;
+        public float animationProgress = 1.5f;
+        public bool animate = false;
+        public float targetRotation = MathF.PI * 2.0f;
+        public float animationSpeed = 3.4f;
+        public float animationDirection = 1.0f;
+        public float animationTarget = 2.0f;
+        public Action? onComplete = null;
+        public bool closed = false;
 
-    private float verticalOffset = 600;
-    private float targetRotation = MathF.PI * 2;
+        public bool finishOnNextFrame = false;
 
-    private float animationSpeed = 3.4f;
-    private float animationDirection = 1.0f;
-    private float animationTarget;
+        public GitaDoraTransitionState()
+        {
+        }
+    }
+
+    private static GitaDoraTransitionState state = new();
+
+    public static bool isClosed => state.closed;
+    public static bool isAnimating => state.animate;
+    
+    private UIImage top;
+    private UIImage bottom;
+    
     public override void Draw(Matrix parentMatrix)
     {
-        float delta = (CDTXMania.Timer.nCurrentTime - lastDrawTime) / 1000.0f;
-        lastDrawTime = CDTXMania.Timer.nCurrentTime;
+        //cursed way to ensure we don't stop animating when the animation isn't completed yet
+        if (state.finishOnNextFrame)
+        {
+            state.animate = false;
+            if (state.onComplete != null)
+            {
+                state.onComplete.Invoke();
+                state.onComplete = null;
+            }
+            state.finishOnNextFrame = false;
+        }
+        
+        float delta = (CDTXMania.Timer.nCurrentTime - state.lastDrawTime) / 1000.0f;
+        state.lastDrawTime = CDTXMania.Timer.nCurrentTime;
+        
+        delta = Math.Clamp(delta, 0.0f, 0.1f); //clamp delta to prevent too fast animations
 
-        float t = animationProgress;
+        float t = state.animationProgress;
         
         //clamp
         t = Math.Clamp(t, 0f, 2.0f);
@@ -57,74 +103,59 @@ public class GitaDoraTransition : UIGroup
         top.position.Y = 360 - distance / 2;
         bottom.position.Y = 360 + distance / 2;
         
-        if (animate)
+        if (state.animate)
         {
-            animationProgress += delta * animationSpeed * animationDirection;
-            if (animationProgress > 2.0f && animationTarget >= 1.5f)
+            Trace.TraceInformation($"Animating GITADORA transition: {state.animationProgress} -> {state.animationTarget} (direction: {state.animationDirection})");
+            state.animationProgress += delta * state.animationSpeed * state.animationDirection;
+            if (state.animationProgress > 2.0f && state.animationTarget >= 1.5f)
             {
-                animationProgress = animationTarget;
-                animate = false;
-                if (onComplete != null)
-                {
-                    onComplete.Invoke();
-                    onComplete = null;
-                    closed = false;
-                }
+                state.animationProgress = state.animationTarget;
+                state.finishOnNextFrame = true;
+                state.closed = false;
             }
-            if (animationProgress <= 0.0f && animationTarget <= 0.5f)
+
+            if (state.animationProgress <= 0.0f && state.animationTarget <= 0.5f)
             {
-                animationProgress = animationTarget;
-                animate = false;
-                if (onComplete != null)
-                {
-                    onComplete.Invoke();
-                    onComplete = null;
-                    closed = true;
-                }
+                state.animationProgress = state.animationTarget;
+                state.finishOnNextFrame = true;
+                state.closed = true;
             }
         }
 
         base.Draw(parentMatrix);
     }
-
-    private Action? onComplete;
-
-    public void Close(Action? action = null)
+    
+    public static void Close(Action? action = null)
     {
-        animate = true;
-        animationProgress = 2.0f;
-        animationTarget = 0.0f;
-        animationDirection = -1.0f;
-        onComplete = action;
-        lastDrawTime = CDTXMania.Timer.nCurrentTime;
+        state.animate = true;
+        state.animationProgress = 2.0f;
+        state.animationTarget = 0.0f;
+        state.animationDirection = -1.0f;
+        state.onComplete = action;
+        state.lastDrawTime = CDTXMania.Timer.nCurrentTime;
     }
 
-    public void Open(Action? action = null)
+    public static void Open(Action? action = null)
     {
-        animate = true;
-        animationProgress = 0.0f;
-        animationTarget = 2.0f;
-        animationDirection = 1.0f;
-        onComplete = action;
-        lastDrawTime = CDTXMania.Timer.nCurrentTime;
+        state.animate = true;
+        state.animationProgress = 0.0f;
+        state.animationTarget = 2.0f;
+        state.animationDirection = 1.0f;
+        state.onComplete = action;
+        state.lastDrawTime = CDTXMania.Timer.nCurrentTime;
     }
-
-    private UIImage top;
-    private UIImage bottom;
-    public bool closed = false;
-
+    
     public override void DrawInspector()
     {
         base.DrawInspector();
 
         if (ImGui.CollapsingHeader("GITADORA Transition"))
         {
-            ImGui.Checkbox("Animate progress", ref animate);
-            ImGui.SliderFloat("Animation Progress", ref animationProgress, 0.0f, 1.0f);
-            ImGui.InputFloat("Animation Speed", ref animationSpeed, 0.1f, 10.0f);
+            ImGui.Checkbox("Animate progress", ref state.animate);
+            ImGui.SliderFloat("Animation Progress", ref state.animationProgress, 0.0f, 1.0f);
+            ImGui.InputFloat("Animation Speed", ref state.animationSpeed, 0.1f, 10.0f);
             
-            ImGui.InputFloat("Vertical Multiplier", ref verticalOffset, 1.0f, 100.0f);
-            ImGui.InputFloat("Target Rotation", ref targetRotation, 0.1f, 10.0f);
+            ImGui.InputFloat("Target Rotation", ref state.targetRotation, 0.1f, 10.0f);
             
             if (ImGui.Button("Open Transition"))
             {

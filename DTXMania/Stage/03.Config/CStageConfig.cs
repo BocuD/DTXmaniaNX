@@ -198,7 +198,7 @@ internal class CStageConfig : CStage
     {
         ePhaseID = EPhase.Common_FadeIn;
         //actFIFO.tStartFadeIn();
-        CDTXMania.gitadoraTransition.Open(() =>
+        GitaDoraTransition.Open(() =>
         {
             CDTXMania.Skin.bgmコンフィグ画面.tPlay();
             ePhaseID = EPhase.Common_DefaultState;
@@ -266,7 +266,7 @@ internal class CStageConfig : CStage
                 //     break;
                 // }
 
-                if (CDTXMania.gitadoraTransition.animate) break;
+                if (GitaDoraTransition.isAnimating) break;
                 return 1;
         }
 
@@ -303,10 +303,10 @@ internal class CStageConfig : CStage
             else
             {
                 //actFIFO.tStartFadeOut();
-                CDTXMania.gitadoraTransition.Close(async () =>
+                GitaDoraTransition.Close(async () =>
                 {
                     await Task.Delay(150);
-                    CDTXMania.gitadoraTransition.Open();
+                    GitaDoraTransition.Open();
                 });
                 ePhaseID = EPhase.Common_FadeOut;
             }
@@ -317,10 +317,10 @@ internal class CStageConfig : CStage
             {
                 CDTXMania.Skin.soundDecide.tPlay();
                 //actFIFO.tStartFadeOut();
-                CDTXMania.gitadoraTransition.Close(async () =>
+                GitaDoraTransition.Close(async () =>
                 {
                     await Task.Delay(500);
-                    CDTXMania.gitadoraTransition.Open();
+                    GitaDoraTransition.Open();
                 });
                 ePhaseID = EPhase.Common_FadeOut;
             }

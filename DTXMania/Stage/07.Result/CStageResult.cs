@@ -786,10 +786,7 @@ internal class CStageResult : CStage
 				ePhaseID = EPhase.Common_FadeOut;
 				eReturnValueWhenFadeOutCompleted = EReturnValue.Complete;
 				
-				CDTXMania.gitadoraTransition.Close(() =>
-				{
-					CDTXMania.StageManager.tChangeStage(CDTXMania.StageManager.stageSongSelectionNew);
-				});
+				GitaDoraTransition.Close();
 			}
 			if (CDTXMania.Input.ActionDecide() && bAnimationComplete)
 			{
@@ -797,10 +794,15 @@ internal class CStageResult : CStage
 				ePhaseID = EPhase.Common_FadeOut;
 				eReturnValueWhenFadeOutCompleted = EReturnValue.Complete;
 				
-				CDTXMania.gitadoraTransition.Close(() =>
-				{
-					CDTXMania.StageManager.tChangeStage(CDTXMania.StageManager.stageSongSelectionNew);
-				});
+				GitaDoraTransition.Close();
+			}
+		}
+
+		if (ePhaseID == EPhase.Common_FadeOut)
+		{
+			if (!GitaDoraTransition.isAnimating)
+			{
+				return (int) eReturnValueWhenFadeOutCompleted;
 			}
 		}
 		return 0;

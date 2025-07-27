@@ -24,15 +24,25 @@ public class SongSelectionElement : UIGroup
         }
         return "Unknown Artist";
     }
+
+    public static void LoadSongSelectElementAssets()
+    {
+        bar = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_bar.png"));
+        boxClosed = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_box_closed.png"));
+        boxOpen = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_box_open.png"));
+    }
+
+    public static void DisposeSongSelectElementAssets()
+    {
+        if (bar != null) bar.Dispose();
+        if (bar != null) boxClosed.Dispose();
+        if (bar != null) boxOpen.Dispose();
+    }
     
     [AddChildMenu]
     public SongSelectionElement() : base("SongElement")
     {
         size = new Vector2(400, 80);
-
-        bar = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_bar.png"));
-        boxClosed = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_box_closed.png"));
-        boxOpen = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_box_open.png"));
             
         backgroundImage = AddChild(new UIImage(bar));
         backgroundImage.anchor = new Vector2(0.0f, 0.5f);
@@ -102,20 +112,13 @@ public class SongSelectionElement : UIGroup
     private UIImage skillbarFill;
     private UIText skillText;
 
-    private DTXTexture bar;
-    private DTXTexture boxClosed;
-    private DTXTexture boxOpen;
+    private static DTXTexture bar;
+    private static DTXTexture boxClosed;
+    private static DTXTexture boxOpen;
 
     public override void Dispose()
     {
         base.Dispose();
-        
-        //we don't need to dispose the thumbnail, because it will be disposed by base.Dispose()
-        //since it a child of the group
-        
-        if (bar != null) bar.Dispose();
-        if (bar != null) boxClosed.Dispose();
-        if (bar != null) boxOpen.Dispose();
     }
 
     public SongNode? node { get; private set; }
@@ -192,18 +195,10 @@ public class SongSelectionElement : UIGroup
         }
     }
 
-    public DTXTexture? songThumbnail;
     public void UpdateSongThumbnail(DTXTexture? tex)
     {
         tex ??= SongSelectionContainer.fallbackPreImage;
         
-        //if we had a (valid) thumbnail before, dispose it
-        if (songThumbnail != null && songThumbnail.isValid())
-        {
-            songThumbnail.Dispose();
-        }
-        songThumbnail = tex;
-
         albumArtImage.SetTexture(tex, false);
         albumArtImage.clipRect = new RectangleF(0, 0, tex.Width, tex.Height);
     }

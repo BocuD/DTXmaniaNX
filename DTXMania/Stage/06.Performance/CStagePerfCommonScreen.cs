@@ -2403,7 +2403,7 @@ internal abstract class CStagePerfCommonScreen : CStage
         }
         else if (!bPAUSE && (ePhaseID == EPhase.Common_DefaultState) && !CDTXMania.DTXVmode.Enabled && (keyboard.bKeyPressed(SlimDXKey.Escape)))
         {	// escape (exit)
-            actFO.tStartFadeOut();
+            GitaDoraTransition.Close();
             ePhaseID = EPhase.Common_FadeOut;
             eReturnValueAfterFadeOut = EPerfScreenReturnValue.Interruption;
         }
@@ -4651,6 +4651,11 @@ internal abstract class CStagePerfCommonScreen : CStage
             case EPhase.Common_FadeOut:
             case EPhase.PERFORMANCE_STAGE_FAILED_FADEOUT:
                 if (actFO.OnUpdateAndDraw() != 0)
+                {
+                    return true;
+                }
+
+                if (!GitaDoraTransition.isAnimating)
                 {
                     return true;
                 }

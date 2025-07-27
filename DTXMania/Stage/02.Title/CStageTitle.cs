@@ -195,26 +195,7 @@ internal class CStageTitle : CStage
 				{
 					return (int)EReturnResult.EXIT;
 				}
-				CDTXMania.gitadoraTransition.Close(async () =>
-				{
-					await Task.Delay(300);
-					ePhaseID = EPhase.Common_EndStatus;
-					
-					switch ( nCurrentCursorPosition )
-					{
-						case (int)EReturnResult.GAMESTART - 1:
-							CDTXMania.StageManager.tChangeStage(CDTXMania.StageManager.stageSongSelectionNew);
-							break;
-						
-						case (int) EReturnResult.CONFIG - 1:
-							CDTXMania.StageManager.tChangeStage(CDTXMania.StageManager.stageConfig);
-							break;
-						
-						case (int)EReturnResult.EXIT - 1:
-							CDTXMania.StageManager.tChangeStage(CDTXMania.StageManager.stageEnd);
-							break;
-					}
-				});
+				GitaDoraTransition.Close();
 				//actFO.tStartFadeOut();
 				ePhaseID = EPhase.Common_FadeOut;
 			}
@@ -265,13 +246,12 @@ internal class CStageTitle : CStage
 				break;
 
 			case EPhase.Common_FadeOut:
-				if( actFO.OnUpdateAndDraw() == 0 )
-				{
-					break;
-				}
+				if (GitaDoraTransition.isAnimating) break;
+				
 				ePhaseID = EPhase.Common_EndStatus;
+				
 				switch ( nCurrentCursorPosition )
-				{
+				{ 
 					case (int)EReturnResult.GAMESTART - 1:
 						return (int)EReturnResult.GAMESTART;
 
@@ -280,7 +260,6 @@ internal class CStageTitle : CStage
 
 					case (int)EReturnResult.EXIT - 1:
 						return (int) EReturnResult.EXIT;
-					//return ( this.n現在のカーソル行 + 1 );
 				}
 				break;
 
