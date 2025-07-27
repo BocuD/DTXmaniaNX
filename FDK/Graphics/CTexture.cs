@@ -1,5 +1,4 @@
-﻿using System.Drawing;
-using System.Drawing.Imaging;
+﻿using System.Drawing.Imaging;
 using System.Diagnostics;
 using SharpDX;
 using SharpDX.Direct3D9;
@@ -123,12 +122,12 @@ public class CTexture : IDisposable
 	/// <para>利用可能な画像形式は、BMP, JPG, PNG, TGA, DDS, PPM, DIB, HDR, PFM のいずれか。</para>
 	/// </summary>
 	/// <param name="device">Direct3D9 デバイス。</param>
-	/// <param name="strファイル名">画像ファイル名。</param>
+	/// <param name="strFilename">画像ファイル名。</param>
 	/// <param name="format">テクスチャのフォーマット。</param>
 	/// <param name="bBlackIsTransparent">画像の黒（0xFFFFFFFF）を透過させるなら true。</param>
 	/// <exception cref="CTextureCreateFailedException">テクスチャの作成に失敗しました。</exception>
-	public CTexture(Device device, string strファイル名, Format format, bool bBlackIsTransparent)
-		: this(device, strファイル名, format, bBlackIsTransparent, Pool.Managed)
+	public CTexture(Device device, string strFilename, Format format, bool bBlackIsTransparent)
+		: this(device, strFilename, format, bBlackIsTransparent, Pool.Managed)
 	{
 	}
 
@@ -203,18 +202,18 @@ public class CTexture : IDisposable
 	/// <para>その他、ミップマップ数は 1、Usage は None、イメージフィルタは Point、ミップマップフィルタは None になる。</para>
 	/// </summary>
 	/// <param name="device">Direct3D9 デバイス。</param>
-	/// <param name="strファイル名">画像ファイル名。</param>
+	/// <param name="strFilename">画像ファイル名。</param>
 	/// <param name="format">テクスチャのフォーマット。</param>
 	/// <param name="bBlackIsTransparent">画像の黒（0xFFFFFFFF）を透過させるなら true。</param>
 	/// <param name="pool">テクスチャの管理方法。</param>
 	/// <exception cref="CTextureCreateFailedException">テクスチャの作成に失敗しました。</exception>
-	public CTexture(Device device, string strファイル名, Format format, bool bBlackIsTransparent, Pool pool)
+	public CTexture(Device device, string strFilename, Format format, bool bBlackIsTransparent, Pool pool)
 		: this()
 	{
-		MakeTexture(device, strファイル名, format, bBlackIsTransparent, pool);
+		MakeTexture(device, strFilename, format, bBlackIsTransparent, pool);
 	}
 
-	public void MakeTexture(Device device, string strファイル名, Format format, bool b黒を透過する, Pool pool)
+	public void MakeTexture(Device device, string strファイル名, Format format, bool bBlackIsTransparent, Pool pool)
 	{
 		DateTime start = DateTime.Now;
 		if (!File.Exists(
@@ -223,7 +222,7 @@ public class CTexture : IDisposable
 
 		Byte[] _txData = File.ReadAllBytes(strファイル名);
 		filename = Path.GetFileName(strファイル名);
-		MakeTexture(device, _txData, format, b黒を透過する, pool);
+		MakeTexture(device, _txData, format, bBlackIsTransparent, pool);
 		TimeSpan elapsed = DateTime.Now - start;
 		
 		Trace.TraceInformation("MakeTexture() {0} ({1}x{2}, {3}) : {4}ms",
@@ -236,7 +235,7 @@ public class CTexture : IDisposable
 		MakeTexture(device, txData, format, bBlackIsTransparent, pool);
 	}
 
-	public void MakeTexture(Device device, byte[] txData, Format format, bool b黒を透過する, Pool pool)
+	public void MakeTexture(Device device, byte[] txData, Format format, bool bBlackIsTransparent, Pool pool)
 	{
 		try
 		{
@@ -244,7 +243,7 @@ public class CTexture : IDisposable
 			Format = format;
 			szImageSize = new Size(information.Width, information.Height);
 			rcFullImage = new Rectangle(0, 0, szImageSize.Width, szImageSize.Height);
-			int colorKey = (b黒を透過する) ? unchecked((int)0xFF000000) : 0;
+			int colorKey = (bBlackIsTransparent) ? unchecked((int)0xFF000000) : 0;
 			szTextureSize = tGetOptimalTextureSizeNotExceedingSpecifiedSize(device, szImageSize);
 #if TEST_Direct3D9Ex
 				pool = poolvar;
@@ -272,14 +271,14 @@ public class CTexture : IDisposable
 		MakeTexture(device, bitmap, format, bBlackIsTransparent, pool);
 	}
 
-	public void MakeTexture(Device device, Bitmap bitmap, Format format, bool b黒を透過する, Pool pool)
+	public void MakeTexture(Device device, Bitmap bitmap, Format format, bool bBlackIsTransparent, Pool pool)
 	{
 		try
 		{
 			Format = format;
 			szImageSize = new Size(bitmap.Width, bitmap.Height);
 			rcFullImage = new Rectangle(0, 0, szImageSize.Width, szImageSize.Height);
-			int colorKey = (b黒を透過する) ? unchecked((int)0xFF000000) : 0;
+			int colorKey = (bBlackIsTransparent) ? unchecked((int)0xFF000000) : 0;
 			szTextureSize = tGetOptimalTextureSizeNotExceedingSpecifiedSize(device, szImageSize);
 
 			//Trace.TraceInformation( "CTExture() start: " );

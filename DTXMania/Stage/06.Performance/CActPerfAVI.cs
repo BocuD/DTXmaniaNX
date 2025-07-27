@@ -33,7 +33,7 @@ internal class CActPerfAVI : CActivity
     public void Start(EChannel nチャンネル番号, CAVI rAVI, int n開始サイズW, int n開始サイズH, int n終了サイズW, int n終了サイズH, int n画像側開始位置X, int n画像側開始位置Y, int n画像側終了位置X, int n画像側終了位置Y, int n表示側開始位置X, int n表示側開始位置Y, int n表示側終了位置X, int n表示側終了位置Y, int n総移動時間ms, int n移動開始時刻ms, bool bPlayFromBeginning = false)
     {
         //2016.01.21 kairera0467 VfW時代のコードを除去+大改造
-        Trace.TraceInformation("CActPerfAVI: Start(): " + rAVI.strファイル名);
+        Trace.TraceInformation("CActPerfAVI: Start(): " + rAVI.strFileName);
 
         this.rAVI = rAVI;
             

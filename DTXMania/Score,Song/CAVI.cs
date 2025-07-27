@@ -9,15 +9,15 @@ public class CAVI : IDisposable
         public CAviDS avi;
         private bool bDispose済み;
         public int n番号;
-        public string strコメント文 = "";
-        public string strファイル名 = "";
+        public string strComment = "";
+        public string strFileName = "";
         public double dbPlaySpeed = 1.0;
 
         public CAVI(int number, string filename, string comment, double playSpeed)
         {
             n番号 = number;
-            strファイル名 = filename;
-            strコメント文 = comment;
+            strFileName = filename;
+            strComment = comment;
             dbPlaySpeed = playSpeed;
             //taskLoad = null;
         }
@@ -30,16 +30,16 @@ public class CAVI : IDisposable
             string strAVIFileName;
             //strAVIファイル名 = CSkin.Path(@"Graphics\7_Movie.avi");
 
-            if (CDTXMania.DTX == null || Path.IsPathRooted(strファイル名))
+            if (CDTXMania.DTX == null || Path.IsPathRooted(strFileName))
             {
-                strAVIFileName = strファイル名;
+                strAVIFileName = strFileName;
             }
             else
             {
                 if (!string.IsNullOrEmpty(CDTXMania.DTX.PATH_WAV))
-                    strAVIFileName = CDTXMania.DTX.PATH_WAV + strファイル名;
+                    strAVIFileName = CDTXMania.DTX.PATH_WAV + strFileName;
                 else
-                    strAVIFileName = CDTXMania.DTX.strFolderName + CDTXMania.DTX.PATH + strファイル名;
+                    strAVIFileName = CDTXMania.DTX.strFolderName + CDTXMania.DTX.PATH + strFileName;
             }
 
             //-----------------
@@ -49,7 +49,7 @@ public class CAVI : IDisposable
             if (!File.Exists(strAVIFileName))
             {
                 //Trace.TraceWarning( "File doesn't exist!({0})({1})", this.strコメント文, strAVIファイル名 );
-                Trace.TraceWarning("File does not exist. ({0})({1})", strコメント文, strAVIFileName);
+                Trace.TraceWarning("File does not exist. ({0})({1})", strComment, strAVIFileName);
                 avi = null;
                 return;
             }
@@ -59,19 +59,19 @@ public class CAVI : IDisposable
             try
             {
                 avi = new CAviDS(strAVIFileName, dbPlaySpeed);
-                Trace.TraceInformation("動画を生成しました。({0})({1})({2}msec)", strコメント文, strAVIFileName, avi.GetDuration());
+                Trace.TraceInformation("動画を生成しました。({0})({1})({2}msec)", strComment, strAVIFileName, avi.GetDuration());
             }
             catch (Exception e)
             {
                 Trace.TraceError(e.Message);
-                Trace.TraceError("動画の生成に失敗しました。({0})({1})", strコメント文, strAVIFileName);
+                Trace.TraceError("動画の生成に失敗しました。({0})({1})", strComment, strAVIFileName);
                 avi = null;
             }
         }
 
         public override string ToString()
         {
-            return string.Format("CAVI{0}: File:{1}, Comment:{2}", CDTX.Base36ToString(n番号), strファイル名, strコメント文);
+            return string.Format("CAVI{0}: File:{1}, Comment:{2}", CDTX.Base36ToString(n番号), strFileName, strComment);
         }
 
         #region [ IDisposable 実装 ]
@@ -87,7 +87,7 @@ public class CAVI : IDisposable
                 avi.Dispose();
                 avi = null;
 
-                Trace.TraceInformation("動画を解放しました。({0})({1})", strコメント文, strファイル名);
+                Trace.TraceInformation("動画を解放しました。({0})({1})", strComment, strFileName);
             }
 
             bDispose済み = true;
