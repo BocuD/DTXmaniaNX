@@ -990,6 +990,8 @@ internal class CDTXMania : Game
 
         mainRenderTarget = Device.GetRenderTarget(0);
 
+        DTXTexture.UpdateFallback();
+
         SongDBStatus songDbStatus = persistentUIGroup.AddChild(new SongDBStatus());
         songDbStatus.position = new Vector3(0, 720, 0);
         songDbStatus.anchor = new SharpDX.Vector2(0.0f, 1.0f);

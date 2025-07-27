@@ -1,8 +1,10 @@
-﻿using DTXMania.Core;
+﻿using System.Drawing;
+using DTXMania.Core;
 using DTXMania.UI.Drawable;
 using FDK;
 using Hexa.NET.ImGui;
 using SharpDX;
+using RectangleF = SharpDX.RectangleF;
 
 namespace DTXMania.UI;
 
@@ -20,6 +22,8 @@ public class DTXTexture : BaseTexture
     public override float Height => texture.szTextureSize.Height;
     public override string name => texture.filename;
 
+    private bool isFallback = false;
+
     public static DTXTexture LoadFromPath(string texturePath)
     {
         var tex = CDTXMania.tGenerateTexture(texturePath);
@@ -29,9 +33,30 @@ public class DTXTexture : BaseTexture
             return new DTXTexture(tex);
         }
 
-        return null;
+        return fallback;
     }
-    
+
+    public static DTXTexture fallback;
+
+    public static void UpdateFallback()
+    {
+        if (fallback != null)
+        {
+            CDTXMania.tReleaseTexture(ref fallback.texture);
+        }
+
+        Font fallbackFont = new Font("MS PGothic", 40f, GraphicsUnit.Pixel);
+        Bitmap bitmap = new(64, 64);
+        
+        Graphics graphics = Graphics.FromImage(bitmap);
+        graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
+        graphics.DrawString("ERROR", fallbackFont, Brushes.White, 0f, 0f);
+        graphics.Dispose();
+        fallback = new DTXTexture(new CTexture(CDTXMania.app.Device, bitmap, CDTXMania.TextureFormat));
+        fallback.isFallback = true;
+        bitmap.Dispose();
+    }
+
     public DTXTexture(CTexture texture)
     {
         this.texture = texture;
@@ -49,6 +74,8 @@ public class DTXTexture : BaseTexture
 
     public override void Dispose()
     {
+        if (isFallback) return;
+        
         CDTXMania.tReleaseTexture(ref texture);
         texture = null;
     }
