@@ -73,11 +73,12 @@ public class SongSelectionContainer : UIGroup
         //assign first node to the first element, then use rNextSong to fill the rest
         if (preLoadImages)
         {
-            songSelectionElements[selectionIndex].UpdateSongNode(node, CachePreImage(node));
+            songSelectionElements[selectionIndex].UpdateSongNode(node);
+            songSelectionElements[selectionIndex].UpdateSongThumbnail(CachePreImage(node));
         }
         else
         {
-            songSelectionElements[selectionIndex].UpdateSongNode(node, null);
+            songSelectionElements[selectionIndex].UpdateSongNode(node);
             toCache.Add(node);
         }
         songSelectionElements[selectionIndex].position.Y = 0;
@@ -89,11 +90,12 @@ public class SongSelectionContainer : UIGroup
             SongNode nextNode = SongNode.rNextSong(songSelectionElements[i - 1].node);
             if (preLoadImages)
             {
-                songSelectionElements[i].UpdateSongNode(nextNode, CachePreImage(nextNode));
+                songSelectionElements[i].UpdateSongNode(nextNode);
+                songSelectionElements[i].UpdateSongThumbnail(CachePreImage(nextNode));
             }
             else
             {
-                songSelectionElements[i].UpdateSongNode(nextNode, null);
+                songSelectionElements[i].UpdateSongNode(nextNode);
                 toCache.Add(nextNode);
             }
             songSelectionElements[i].position.Y = (i - selectionIndex) * elementSpacing;
@@ -106,11 +108,12 @@ public class SongSelectionContainer : UIGroup
             SongNode prevNode = SongNode.rPreviousSong(songSelectionElements[i + 1].node);
             if (preLoadImages)
             {
-                songSelectionElements[i].UpdateSongNode(prevNode, CachePreImage(prevNode));
+                songSelectionElements[i].UpdateSongNode(prevNode);
+                songSelectionElements[i].UpdateSongThumbnail(CachePreImage(prevNode));
             }
             else
             {
-                songSelectionElements[i].UpdateSongNode(prevNode, null);
+                songSelectionElements[i].UpdateSongNode(prevNode);
                 toCache.Add(prevNode);
             }
             songSelectionElements[i].position.Y = (i - selectionIndex) * elementSpacing;
@@ -320,7 +323,7 @@ public class SongSelectionContainer : UIGroup
         var firstVisibleNode = songSelectionElements[topIndex].node;
         var newNode = SongNode.rPreviousSong(firstVisibleNode);
         
-        overwriteElement.UpdateSongNode(newNode, null);
+        overwriteElement.UpdateSongNode(newNode);
         //Task.Run(() =>
         //{
         CachePreImage(newNode);
@@ -366,7 +369,7 @@ public class SongSelectionContainer : UIGroup
         var lastVisibleNode = songSelectionElements[bottomIndex].node;
         var newNode = SongNode.rNextSong(lastVisibleNode);
         
-        overwriteElement.UpdateSongNode(newNode, null);
+        overwriteElement.UpdateSongNode(newNode);
         //Task.Run(() =>
         //{
             CachePreImage(newNode);
