@@ -855,10 +855,11 @@ public class CTexture : IDisposable
 	{
 		// ファイナライザの動作時にtextureのDisposeがされていない場合は、
 		// CTextureのDispose漏れと見做して警告をログ出力する
+		// If the texture has not been disposed at the time the finalizer runs,
+		// log a warning assuming a missing call to CTexture.Dispose.
 		if (!bSharpDXTextureDispose完了済み)
 		{
-			Trace.TraceWarning("CTexture: Dispose漏れを検出しました。(Size=({0}, {1}), filename={2})", szImageSize.Width,
-				szImageSize.Height, filename);
+			Trace.TraceWarning($"CTexture: Detected a missing Dispose call. (Size=({szImageSize.Width}, {szImageSize.Height}), filename={filename})");
 		}
 
 		Dispose(false);
