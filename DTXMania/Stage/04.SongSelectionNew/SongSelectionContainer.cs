@@ -41,6 +41,8 @@ public class SongSelectionContainer : UIGroup
 
         elementsContainer = AddChild(new UIGroup("Elements"));
         
+        SongSelectionElement.LoadSongSelectElementAssets();
+        
         for (int i = 0; i < songSelectionElements.Length; i++)
         {
             songSelectionElements[i] = elementsContainer.AddChild(new SongSelectionElement());
@@ -54,6 +56,8 @@ public class SongSelectionContainer : UIGroup
     
     public void UpdateRoot(SongNode? newRoot = null, bool preLoadImages = true)
     {
+        Trace.TraceInformation("Updating song selection root to {0}", newRoot?.title ?? "default root");
+        
         //make sure the fallback is loaded
         fallbackPreImage = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_preimage default.png"));
 
@@ -403,6 +407,12 @@ public class SongSelectionContainer : UIGroup
 
     private bool ActionDecide()
     {
+        if (currentSelection == null)
+        {
+            //play cancel sound if no selection
+            CDTXMania.Skin.soundCancel.tPlay();
+            return false;
+        }
         switch (currentSelection.nodeType)
         {
             case SongNode.ENodeType.SONG:
@@ -493,5 +503,13 @@ public class SongSelectionContainer : UIGroup
         
         updatedImages.Clear();
     }
+
     #endregion
+
+    public override void Dispose()
+    {
+        base.Dispose();
+        
+        SongSelectionElement.DisposeSongSelectElementAssets();
+    }
 }
