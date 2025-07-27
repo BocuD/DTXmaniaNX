@@ -20,14 +20,18 @@ internal partial class CActConfigList
             () => CDTXMania.ConfigIni.b曲名表示をdefのものにする = iSystemMusicNameDispDef.bON);
         listItems.Add(iSystemMusicNameDispDef);
         
-        CItemToggle iSystemDifficulty = new("Difficulty", CDTXMania.ConfigIni.b難易度表示をXG表示にする,
-            "選曲画面での難易度表示方法を変更します。\nON でXG風3ケタ、\nOFF で従来の2ケタ表示になります。",
-            "Change difficulty display mode on song selection screen.\n"+
-            "ON for XG-style 3-digit display\nOFF for classic 2-digit display.");
-        iSystemDifficulty.BindConfig(
-            () => iSystemDifficulty.bON = CDTXMania.ConfigIni.b難易度表示をXG表示にする,
-            () => CDTXMania.ConfigIni.b難易度表示をXG表示にする = iSystemDifficulty.bON);
-        listItems.Add(iSystemDifficulty);
+        CItemList iSystemDifficltyDisplay = new("Difficulty Display", CItemBase.EPanelType.Normal, CDTXMania.ConfigIni.nSkillMode,
+            "選曲画面での難易度表示方法を変更します。\n" +
+            "CLASSIC: 2桁表示\n" +
+            "XG: 3桁表示",
+            "Change difficulty display mode on song selection screen.\n" +
+            "CLASSIC: 2-digit display.\n"+
+            "XG: 3-digit display",
+            ["CLASSIC", "XG"]);
+        iSystemDifficltyDisplay.BindConfig(
+            () => iSystemDifficltyDisplay.nCurrentlySelectedIndex = CDTXMania.ConfigIni.bDisplayDifficultyXGStyle ? 1 : 0,
+            () => CDTXMania.ConfigIni.bDisplayDifficultyXGStyle = iSystemDifficltyDisplay.nCurrentlySelectedIndex == 1);
+        listItems.Add(iSystemDifficltyDisplay);
         
         CItemToggle iSystemRandomFromSubBox = new("RandSubBox", CDTXMania.ConfigIni.bランダムセレクトで子BOXを検索対象とする,
             "子BOXをRANDOMの対象とする：\nON にすると、RANDOM SELECT 時に、\n子BOXも選択対象とします。",

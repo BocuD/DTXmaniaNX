@@ -574,7 +574,7 @@ internal class CConfigIni
 	#endregion
 
 	#region [ GDオプション ]
-	public bool b難易度表示をXG表示にする;
+	public bool bDisplayDifficultyXGStyle;
 	public bool bShowMusicInfo;
 	public bool bShowScore;
 	public string str曲名表示フォント;
@@ -1105,8 +1105,8 @@ internal class CConfigIni
 		nPedalLagTime = 0;
 
 		bAutoAddGage = false;
-		nSongSelectSoundPreviewWaitTimeMs = 1000;
-		nSongSelectImagePreviewWaitTimeMs = 100;
+		nSongSelectSoundPreviewWaitTimeMs = 50;
+		nSongSelectImagePreviewWaitTimeMs = 0;
 		bWave再生位置自動調整機能有効 = true;
 		bBGM音を発声する = true;
 		bドラム打音を発声する = true;
@@ -1240,7 +1240,7 @@ internal class CConfigIni
 		#endregion
 
 		#region [ GDオプション ]
-		b難易度表示をXG表示にする = true;
+		bDisplayDifficultyXGStyle = true;
 		bShowScore = true;
 		bShowMusicInfo = true;
 		str曲名表示フォント = "MS PGothic";
@@ -1632,7 +1632,7 @@ internal class CConfigIni
 		sw.WriteLine();
 		#region [ GDオプション ]
 		sw.WriteLine( "; 選曲画面の難易度表示をXG表示にする (0:OFF, 1:ON)");
-		sw.WriteLine( "Difficulty={0}", b難易度表示をXG表示にする ? 1 : 0);
+		sw.WriteLine( "Difficulty={0}", bDisplayDifficultyXGStyle ? 1 : 0);
 		sw.WriteLine();
 		sw.WriteLine("; スコアの表示(0:OFF, 1:ON)");
 		sw.WriteLine("ShowScore={0}", bShowScore ? 1 : 0);
@@ -2755,7 +2755,7 @@ internal class CConfigIni
 									#region [ GDオプション ]
 									else if (str3.Equals("Difficulty"))
 									{
-										b難易度表示をXG表示にする = CConversion.bONorOFF(str4[0]);
+										bDisplayDifficultyXGStyle = CConversion.bONorOFF(str4[0]);
 									}
 									else if (str3.Equals("ShowScore"))
 									{
