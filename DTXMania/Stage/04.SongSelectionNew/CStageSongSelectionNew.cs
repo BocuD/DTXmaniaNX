@@ -16,6 +16,8 @@ public class CStageSongSelectionNew : CStage
     private SortMenuContainer sortMenuContainer;
     private CActSelectPresound actPresound;
     private StatusPanel statusPanel;
+    private CActSelectBackgroundAVI actBackgroundVideoAVI;
+    private CAVI cAviBackgroundVideo;
     
     protected override RichPresence Presence => new CDTXRichPresence
     {
@@ -28,6 +30,7 @@ public class CStageSongSelectionNew : CStage
         eStageID = EStage.SongSelection_4;
         
         listChildActivities.Add(actPresound = new CActSelectPresound());
+        listChildActivities.Add(actBackgroundVideoAVI = new CActSelectBackgroundAVI());
 
         currentSort = sorters[0];
     }
@@ -67,6 +70,36 @@ public class CStageSongSelectionNew : CStage
         bg.renderOrder = -100;
         bg.position = Vector3.Zero;
         bg.name = "Background";
+        
+        LegacyDrawable backgroundVideo = ui.AddChild(new LegacyDrawable(() => actBackgroundVideoAVI.tUpdateAndDraw()));
+        backgroundVideo.renderOrder = -99;
+        backgroundVideo.name = "BackgroundVideo";
+    }
+
+    public override void OnManagedCreateResources()
+    {
+        cAviBackgroundVideo = new CAVI(1290, CSkin.Path(@"Graphics\5_background.mp4"), "", 20.0);
+        cAviBackgroundVideo.OnDeviceCreated();
+        if (cAviBackgroundVideo.avi != null)
+        {
+            actBackgroundVideoAVI.bLoop = true;
+            actBackgroundVideoAVI.Start(EChannel.MovieFull, cAviBackgroundVideo, 0, -1);
+            Trace.TraceInformation("Started song select background video");
+        }
+        
+        base.OnManagedCreateResources();
+    }
+
+    public override void OnManagedReleaseResources()
+    {
+        if (cAviBackgroundVideo != null)
+        {
+            cAviBackgroundVideo.Dispose();
+            cAviBackgroundVideo = null;
+        }
+        actBackgroundVideoAVI.Stop();
+        
+        base.OnManagedReleaseResources();
     }
 
     private bool needsToOpen = true;
@@ -85,47 +118,49 @@ public class CStageSongSelectionNew : CStage
             if (lastInstrument == CDTXMania.GetCurrentInstrument())
             {
                 //restore existing root
-                RequestUpdateRoot(currentSongRoot);
+                if (currentSongRoot == null)
+                {
+                    ApplySort(sortMenuContainer.currentSelection.sorter);
+                }
+                else
+                {
+                    RequestUpdateRoot(currentSongRoot);
+                }
             }
             else
             {
                 ApplySort(sortMenuContainer.currentSelection.sorter);
             }
-
-            return;
         }
-
-        if (songDb.status == SongDbScanStatus.Idle)
+        else if (songDb.status == SongDbScanStatus.Idle)
         {
             Task.Run(() => songDb.StartScan(() => { ApplySort(sortMenuContainer.currentSelection.sorter); }));
         }
     }
-
+    
     public override int OnUpdateAndDraw()
     {
         base.OnUpdateAndDraw();
+
+        if (currentSongRoot == null && songDb.hasEverScanned)
+        {
+            ApplySort(sortMenuContainer.currentSelection.sorter);
+        }
 
         if (updateRootRequested)
         {
             selectionContainer.UpdateRoot(currentSongRoot);
             updateRootRequested = false;
-
-            if (needsToOpen)
-            {
-                Task.Run(async () =>
-                {
-                    needsToOpen = false;
-                    await Task.Delay(100);
-                    if (CDTXMania.gitadoraTransition.closed)
-                    {
-                        CDTXMania.gitadoraTransition.Open();
-                    }
-                });
-            }
         }
         
         if (songDb.status == SongDbScanStatus.Idle)
         {
+            if (needsToOpen)
+            {
+                needsToOpen = false;
+                GitaDoraTransition.Open();
+            }
+            
             if (songDb.totalSongs == 0)
             {
                 selectionContainer.isVisible = false;
@@ -134,11 +169,6 @@ public class CStageSongSelectionNew : CStage
             {
                 selectionContainer.isVisible = true;
 
-                if (currentSongRoot == null)
-                {
-                    ApplySort(sortMenuContainer.currentSelection.sorter);
-                }
-                
                 actPresound.OnUpdateAndDraw();
                 
                 sortMenuContainer.HandleNavigation();
@@ -295,6 +325,8 @@ public class CStageSongSelectionNew : CStage
             Trace.TraceWarning("Sort operation skipped as another sort is in progress");
             return;
         }
+        
+        Trace.TraceInformation("Applying sort: " + sorter.Name);
 
         //invalidate cache if instrument changed
         if (CDTXMania.GetCurrentInstrument() != lastInstrument)
@@ -320,7 +352,7 @@ public class CStageSongSelectionNew : CStage
                 {
                     newRoot.CurrentSelection = newRoot.childNodes[0];
                 }
-                CDTXMania.StageManager.stageSongSelectionNew.RequestUpdateRoot(newRoot);
+                RequestUpdateRoot(newRoot);
             }
             catch (Exception e)
             {
