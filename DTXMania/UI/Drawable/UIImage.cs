@@ -56,9 +56,9 @@ public class UIImage : UITexture
 
     public void SetTexture(BaseTexture newTexture, bool updateRects = true)
     {
+        if (!newTexture.isValid()) return;
+        
         texture = newTexture;
-            
-        if (!texture.isValid()) return;
 
         if (updateRects)
         {
