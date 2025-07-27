@@ -1276,7 +1276,6 @@ internal class CDTXMania : Game
 
         try
         {
-            //Trace.WriteLine("CTextureをFileから生成 + Filename:" + fileName);
             return new CTexture(app.Device, fileName, TextureFormat, b黒を透過する);
         }
         catch (CTextureCreateFailedException e)
@@ -1296,7 +1295,8 @@ internal class CDTXMania : Game
         if (tx != null && tx != fallbackTexture)
         {
             //Trace.WriteLine( "CTextureを解放 Size W:" + tx.szImageSize.Width + " H:" + tx.szImageSize.Height );
-            tReleaseTexture(ref tx);
+            tx.Dispose();
+            tx = null;
         }
     }
 
