@@ -18,6 +18,7 @@ public static class InspectorManager
     public static HierarchyWindow hierarchyWindow { get; private set; }
 
     private static bool inspectorEnabled = false;
+    private static bool logWindowEnabled = false;
     
     public static ImDrawListPtr gizmoDrawList;
     public static Rectangle gizmoRect;
@@ -56,6 +57,12 @@ public static class InspectorManager
             inspectorEnabled = !inspectorEnabled;
         }
         
+        if (CDTXMania.InputManager.Keyboard.bKeyPressing(Key.LeftControl) 
+            && CDTXMania.InputManager.Keyboard.bKeyPressed(Key.L))
+        {
+            logWindowEnabled = !logWindowEnabled;
+        }
+        
         ImGuiDockNodeFlags flags = ImGuiDockNodeFlags.PassthruCentralNode;
         ImGui.DockSpaceOverViewport(ImGui.GetMainViewport(), flags);
 
@@ -90,6 +97,11 @@ public static class InspectorManager
             DrawableTracker.DrawWindow();
             SongDBTester.DrawWindow();
             GameStatus.Draw();
+        }
+
+        if (logWindowEnabled && CDTXMania.logWindow != null)
+        {
+            CDTXMania.logWindow.DrawWindow();
         }
     }
     

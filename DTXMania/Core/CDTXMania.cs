@@ -209,11 +209,12 @@ internal class CDTXMania : Game
     private Surface mainRenderTarget;
     public static bool renderGameToSurface = false;
     
-    //ui
+    //new
     public static UIGroup persistentUIGroup { get; private set; } = new("PersistentUIGroup");
     public static GitaDoraTransition gitadoraTransition { get; private set; }
-    // Constructor
+    public static LogWindow logWindow { get; private set; }
 
+    // Constructor
     public CDTXMania()
     {
         app = this;
@@ -286,8 +287,9 @@ internal class CDTXMania : Game
         {
             try
             {
-                Trace.Listeners.Add(
-                    new CTraceLogListener(new StreamWriter("DTXManiaLog.txt", false, Encoding.Unicode)));
+                Trace.Listeners.Add(new CTraceLogListener(new StreamWriter("DTXManiaLog.txt", false, Encoding.Unicode)));
+                logWindow = new LogWindow();
+                Trace.Listeners.Add(logWindow);
             }
             catch (UnauthorizedAccessException) // #24481 2011.2.20 yyagi
             {
