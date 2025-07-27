@@ -1251,12 +1251,15 @@ internal class CDTXMania : Game
             tReleaseTexture(ref fallbackTexture);
         }
 
-        Font fallbackFont = new("MS PGothic", 40f, GraphicsUnit.Pixel);
+        Font fallbackFont = new("MS PGothic", 16f, GraphicsUnit.Pixel);
         Bitmap bitmap = new(64, 64);
         
         Graphics graphics = Graphics.FromImage(bitmap);
         graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
-        graphics.DrawString("ERROR", fallbackFont, Brushes.White, 0f, 0f);
+        graphics.DrawString("ERROR ERROR ERROR ERROR ERROR", fallbackFont, Brushes.White, 0f, 0f);
+        graphics.DrawString("ERROR ERROR ERROR ERROR ERROR", fallbackFont, Brushes.White, 0f, 16f);
+        graphics.DrawString("ERROR ERROR ERROR ERROR ERROR", fallbackFont, Brushes.White, 0f, 32f);
+        graphics.DrawString("ERROR ERROR ERROR ERROR ERROR", fallbackFont, Brushes.White, 0f, 48f);
         graphics.Dispose();
         fallbackTexture = new CTexture(app.Device, bitmap, TextureFormat);
         bitmap.Dispose();
