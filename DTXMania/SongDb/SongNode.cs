@@ -1,8 +1,10 @@
-﻿using System.Drawing;
+﻿using System.Diagnostics;
+using System.Drawing;
 using DTXMania.Core;
 
 namespace DTXMania.SongDb;
 
+[DebuggerDisplay("{title} - {path}")]
 public class SongNode
 {
     public enum ENodeType

@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System.Diagnostics;
+using System.Drawing;
 using DTXMania.Core;
 using DTXMania.SongDb;
 using DTXMania.UI;
@@ -10,8 +11,20 @@ using RectangleF = SharpDX.RectangleF;
 
 namespace DTXMania;
 
+[DebuggerDisplay("{GetTitle()} - {GetArtist()}")]
 public class SongSelectionElement : UIGroup
 {
+    public string GetTitle() => node?.title ?? "Unknown Song";
+    public string GetArtist()
+    {
+        if (node?.nodeType == SongNode.ENodeType.SONG)
+        {
+            CScore chart = node.charts.FirstOrDefault(x => x != null);
+            return chart?.SongInformation.ArtistName ?? "Unknown Artist";
+        }
+        return "Unknown Artist";
+    }
+    
     [AddChildMenu]
     public SongSelectionElement() : base("SongElement")
     {
@@ -97,6 +110,9 @@ public class SongSelectionElement : UIGroup
     {
         base.Dispose();
         
+        //we don't need to dispose the thumbnail, because it will be disposed by base.Dispose()
+        //since it a child of the group
+        
         if (bar != null) bar.Dispose();
         if (bar != null) boxClosed.Dispose();
         if (bar != null) boxOpen.Dispose();
@@ -104,7 +120,7 @@ public class SongSelectionElement : UIGroup
 
     public SongNode? node { get; private set; }
 
-    public void UpdateSongNode(SongNode newNode, DTXTexture? tex)
+    public void UpdateSongNode(SongNode newNode)
     {
         if (node != newNode)
         {
@@ -147,14 +163,6 @@ public class SongSelectionElement : UIGroup
             }
             
             UpdateSkillbar();
-            
-            if (tex == null)
-            {
-                tex = SongSelectionContainer.fallbackPreImage;
-            }
-
-            albumArtImage.SetTexture(tex, false);
-            albumArtImage.clipRect = new RectangleF(0, 0, tex.Width, tex.Height);
         }
     }
 
@@ -184,12 +192,17 @@ public class SongSelectionElement : UIGroup
         }
     }
 
+    public DTXTexture? songThumbnail;
     public void UpdateSongThumbnail(DTXTexture? tex)
     {
-        if (tex == null)
+        tex ??= SongSelectionContainer.fallbackPreImage;
+        
+        //if we had a (valid) thumbnail before, dispose it
+        if (songThumbnail != null && songThumbnail.isValid())
         {
-            tex = SongSelectionContainer.fallbackPreImage;
+            songThumbnail.Dispose();
         }
+        songThumbnail = tex;
 
         albumArtImage.SetTexture(tex, false);
         albumArtImage.clipRect = new RectangleF(0, 0, tex.Width, tex.Height);
