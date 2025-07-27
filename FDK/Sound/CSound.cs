@@ -348,6 +348,10 @@ public class CSoundManager   // CSound管理
 
 	public CSound tGenerateSound(string filename)  // tサウンドを生成する
 	{
+		if (!File.Exists(filename))
+		{
+			throw new FileNotFoundException($"Can't create audio clip! File not found: {filename}");
+		}
 		return tGenerateSound(filename, CSound.EInstType.Unknown);
 	}
 	public CSound tGenerateSound(string filename, CSound.EInstType eInstType)  // tサウンドを生成する
