@@ -24,6 +24,7 @@ using DTXMania.UI.Inspector;
 //#endif
 
 using DTXMania.UI.Skin;
+using Font = System.Drawing.Font;
 
 namespace DTXMania.Core;
 
@@ -989,7 +990,8 @@ internal class CDTXMania : Game
         gameRenderTargetSurface = gameRenderTargetTexture.GetSurfaceLevel(0);
 
         mainRenderTarget = Device.GetRenderTarget(0);
-
+        
+        UpdateFallback();
         DTXTexture.UpdateFallback();
 
         SongDBStatus songDbStatus = persistentUIGroup.AddChild(new SongDBStatus());
@@ -1009,6 +1011,11 @@ internal class CDTXMania : Game
         ImGui.DestroyContext();
         
         persistentUIGroup.Dispose();
+        
+        if (fallbackTexture != null)
+        {
+            tReleaseTexture(ref fallbackTexture);
+        }
     }
 
     protected override void OnExiting(EventArgs e)
@@ -1234,7 +1241,27 @@ internal class CDTXMania : Game
 
     #region [ Texture Creation / Disposal (why is this in the main game class??) ]
 
-    //-----------------
+    private static CTexture fallbackTexture;
+    public static CTexture FallbackTexture => fallbackTexture;
+    
+    public static void UpdateFallback()
+    {
+        if (fallbackTexture != null)
+        {
+            tReleaseTexture(ref fallbackTexture);
+        }
+
+        Font fallbackFont = new("MS PGothic", 40f, GraphicsUnit.Pixel);
+        Bitmap bitmap = new(64, 64);
+        
+        Graphics graphics = Graphics.FromImage(bitmap);
+        graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
+        graphics.DrawString("ERROR", fallbackFont, Brushes.White, 0f, 0f);
+        graphics.Dispose();
+        fallbackTexture = new CTexture(app.Device, bitmap, TextureFormat);
+        bitmap.Dispose();
+    }
+    
     public static CTexture tGenerateTexture(string fileName)
     {
         return tGenerateTexture(fileName, false);
@@ -1244,7 +1271,7 @@ internal class CDTXMania : Game
     {
         if (app == null)
         {
-            return null;
+            return fallbackTexture;
         }
 
         try
@@ -1252,30 +1279,25 @@ internal class CDTXMania : Game
             //Trace.WriteLine("CTextureをFileから生成 + Filename:" + fileName);
             return new CTexture(app.Device, fileName, TextureFormat, b黒を透過する);
         }
-        catch (CTextureCreateFailedException)
+        catch (CTextureCreateFailedException e)
         {
-            Trace.TraceError("テクスチャの生成に失敗しました。({0})", fileName);
-            return null;
+            Trace.TraceError($"Couldn't create texture: ({fileName}) {e.Message}");
+            return fallbackTexture;
         }
-        catch (FileNotFoundException)
+        catch (FileNotFoundException e)
         {
-            Trace.TraceError("テクスチャファイルが見つかりませんでした。({0})", fileName);
-            return null;
+            Trace.TraceError($"Couldn't find texture file: ({fileName}) {e.Message}");
+            return fallbackTexture;
         }
     }
 
     public static void tReleaseTexture(ref CTexture? tx)
     {
-        if (tx != null)
+        if (tx != null && tx != fallbackTexture)
         {
             //Trace.WriteLine( "CTextureを解放 Size W:" + tx.szImageSize.Width + " H:" + tx.szImageSize.Height );
-            tDisposeSafely(ref tx);
+            tReleaseTexture(ref tx);
         }
-    }
-
-    public static void tReleaseTexture(ref CTextureAf tx)
-    {
-        tDisposeSafely(ref tx);
     }
 
     public static CTexture tGenerateTexture(byte[] txData, bool b黒を透過する)

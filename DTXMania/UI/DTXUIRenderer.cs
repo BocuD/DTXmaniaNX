@@ -45,16 +45,8 @@ public class DTXTexture : BaseTexture
             CDTXMania.tReleaseTexture(ref fallback.texture);
         }
 
-        Font fallbackFont = new Font("MS PGothic", 40f, GraphicsUnit.Pixel);
-        Bitmap bitmap = new(64, 64);
-        
-        Graphics graphics = Graphics.FromImage(bitmap);
-        graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
-        graphics.DrawString("ERROR", fallbackFont, Brushes.White, 0f, 0f);
-        graphics.Dispose();
-        fallback = new DTXTexture(new CTexture(CDTXMania.app.Device, bitmap, CDTXMania.TextureFormat));
+        fallback = new DTXTexture(CDTXMania.FallbackTexture);
         fallback.isFallback = true;
-        bitmap.Dispose();
     }
 
     public DTXTexture(CTexture texture)
