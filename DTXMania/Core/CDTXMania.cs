@@ -24,6 +24,7 @@ using DTXMania.UI.Inspector;
 //#endif
 
 using DTXMania.UI.Skin;
+using Color = System.Drawing.Color;
 using Font = System.Drawing.Font;
 
 namespace DTXMania.Core;
@@ -784,9 +785,7 @@ internal class CDTXMania : Game
             DiscordRichPresence = new CDiscordRichPresence(ConfigIni.strDiscordRichPresenceApplicationID);
 
         #endregion
-
-        gitadoraTransition = persistentUIGroup.AddChild(new GitaDoraTransition());
-
+        
         Trace.TraceInformation("Finished game initialization");
 
         #region [ Launch First stage ]
@@ -997,6 +996,8 @@ internal class CDTXMania : Game
         SongDBStatus songDbStatus = persistentUIGroup.AddChild(new SongDBStatus());
         songDbStatus.position = new Vector3(0, 720, 0);
         songDbStatus.anchor = new SharpDX.Vector2(0.0f, 1.0f);
+        
+        gitadoraTransition = persistentUIGroup.AddChild(new GitaDoraTransition());
     }
 
     protected override void UnloadContent()
@@ -1255,13 +1256,16 @@ internal class CDTXMania : Game
         Bitmap bitmap = new(64, 64);
         
         Graphics graphics = Graphics.FromImage(bitmap);
+        
+        //fill with black
+        graphics.Clear(Color.Black);
         graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
         graphics.DrawString("ERROR ERROR ERROR ERROR ERROR", fallbackFont, Brushes.White, 0f, 0f);
         graphics.DrawString("ERROR ERROR ERROR ERROR ERROR", fallbackFont, Brushes.White, 0f, 16f);
         graphics.DrawString("ERROR ERROR ERROR ERROR ERROR", fallbackFont, Brushes.White, 0f, 32f);
         graphics.DrawString("ERROR ERROR ERROR ERROR ERROR", fallbackFont, Brushes.White, 0f, 48f);
         graphics.Dispose();
-        fallbackTexture = new CTexture(app.Device, bitmap, TextureFormat);
+        fallbackTexture = new CTexture(app.Device, bitmap, TextureFormat, false);
         bitmap.Dispose();
     }
     
