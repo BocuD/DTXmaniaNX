@@ -47,10 +47,11 @@ public class SongDb
 
 	public void StartScan(Action? onComplete = null)
 	{
+		Trace.TraceInformation("Scheduling song scan task...");
 		scanTask = ScanAsync(onComplete);
 	}
-	
-	public async Task ScanAsync(Action? onComplete = null)
+
+	private async Task ScanAsync(Action? onComplete = null)
 	{
 		processSongDataPath = string.Empty;
 		processDoneCount = 0;
