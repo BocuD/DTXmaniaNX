@@ -27,7 +27,7 @@ internal class CStageTitle : CStage
 		listChildActivities.Add( actFI = new CActFIFOWhite() );
 		listChildActivities.Add( actFO = new CActFIFOWhite() );
 		videoPlayerTest = new SoftwareVideoPlayer();
-		videoPlayerTest.Open(CSkin.Path(@"Graphics\5_background.mp4"));
+		videoPlayerTest.Open(CSkin.Path(@"Graphics\2_background.mp4"));
 		videoPlayerTest.CreateResources();
 	}
 
