@@ -462,7 +462,10 @@ public class SongSelectionContainer : UIGroup
     {
         if (!preImageCache.TryGetValue(node, out DTXTexture? preImage))
         {
-            string imagePath = node.GetImagePath();
+            string imagePath = node.nodeType != SongNode.ENodeType.BACKBOX 
+                ? node.GetImagePath() 
+                : CSkin.Path(@"Graphics\5_preimage backbox.png");
+            
             if (!string.IsNullOrEmpty(imagePath) && File.Exists(imagePath))
             {
                 preImage = DTXTexture.LoadFromPath(imagePath);

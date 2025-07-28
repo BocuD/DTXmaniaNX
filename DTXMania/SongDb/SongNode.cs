@@ -71,17 +71,7 @@ public class SongNode
             case ENodeType.BACKBOX:
                 charts =
                 [
-                    new CScore
-                    {
-                        FileInformation = new CScore.STFileInformation
-                        {
-                            AbsoluteFolderPath = ""
-                        },
-                        SongInformation = new CScore.STMusicInformation
-                        {
-                            Preimage = CSkin.Path(@"Graphics\5_preimage backbox.png")
-                        }
-                    }
+                    new CScore()
                 ];
                 break;
             
