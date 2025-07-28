@@ -6,6 +6,7 @@ using SharpDX.Direct3D9;
 using Rectangle = System.Drawing.Rectangle;
 using RectangleF = System.Drawing.RectangleF;
 using System.Runtime.InteropServices;
+using Color = SharpDX.Color;
 
 namespace FDK;
 
@@ -538,6 +539,49 @@ public class CTexture : IDisposable
 
 	private static readonly TransformedColoredTexturedVertex[] vertices = new TransformedColoredTexturedVertex[4];
 	private static readonly Vector3[] corners = new Vector3[4];
+	
+	public static void tDraw2DMatrix(Device device, Texture texture, Matrix transformMatrix, Vector2 size, SharpDX.RectangleF clipRect)
+	{
+		if (texture == null) return;
+
+		//texture dimensions
+		float texWidth = size.X;
+		float texHeight = size.Y;
+
+		//calculate UV coordinates
+		float uLeft = clipRect.Left / texWidth;
+		float uRight = clipRect.Right / texWidth;
+		float vTop = clipRect.Top / texHeight;
+		float vBottom = clipRect.Bottom / texHeight;
+
+		//vertices
+		corners[0] = new Vector3(0 - 0.5f, 0 - 0.5f, 0); // TL
+		corners[1] = new Vector3(size.X - 0.5f, 0 - 0.5f, 0); // TR
+		corners[2] = new Vector3(0 - 0.5f, size.Y - 0.5f, 0); // BL
+		corners[3] = new Vector3(size.X - 0.5f, size.Y - 0.5f, 0); // BR
+
+		for (int i = 0; i < corners.Length; i++)
+		{
+			//transform corner
+			Vector3 transformed = Vector3.TransformCoordinate(corners[i], transformMatrix);
+
+			vertices[i].Position = new Vector4(transformed.X, transformed.Y, transformed.Z, 1f);
+			vertices[i].TextureCoordinates = i switch
+			{
+				0 => new Vector2(uLeft, vTop),
+				1 => new Vector2(uRight, vTop),
+				2 => new Vector2(uLeft, vBottom),
+				_ => new Vector2(uRight, vBottom)
+			};
+			vertices[i].Color = Color.White.ToRgba();
+		}
+
+		//render texture
+		device.SetTexture(0, texture);
+		device.VertexFormat = TransformedColoredTexturedVertex.Format;
+		device.DrawUserPrimitives(PrimitiveType.TriangleStrip, 2, vertices);
+	}
+	
 	public void tDraw2DMatrix(Device device, Matrix transformMatrix, Vector2 size, SharpDX.RectangleF clipRect)
 	{
 		if (texture == null) return;

@@ -6,6 +6,7 @@ using Rectangle = System.Drawing.Rectangle;
 using SlimDXKey = SlimDX.DirectInput.Key;
 using System.Drawing;
 using DTXMania.Core;
+using DTXMania.Core.Video;
 using DTXMania.UI;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.DynamicElements;
@@ -16,6 +17,8 @@ internal class CStageTitle : CStage
 {		
 	// コンストラクタ
 
+	private FFmpegVideoPlayer videoPlayerTest;
+	
 	public CStageTitle()
 	{
 		eStageID = EStage.Title_2;
@@ -23,6 +26,9 @@ internal class CStageTitle : CStage
 		listChildActivities.Add( actFIfromSetup = new CActFIFOWhite() );
 		listChildActivities.Add( actFI = new CActFIFOWhite() );
 		listChildActivities.Add( actFO = new CActFIFOWhite() );
+		videoPlayerTest = new SoftwareVideoPlayer();
+		videoPlayerTest.Open(CSkin.Path(@"Graphics\5_background.mp4"));
+		videoPlayerTest.CreateResources();
 	}
 
 
@@ -38,10 +44,13 @@ internal class CStageTitle : CStage
 		var family = new FontFamily(CDTXMania.ConfigIni.songListFont);
 		ui.AddChild(new UIText(family, 12, CDTXMania.VERSION_DISPLAY));
 		
-		DTXTexture bgTex = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\2_background.jpg"));
+		DTXTexture bgTex = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\2_background.png"));
 		UIImage bg = ui.AddChild(new UIImage(bgTex));
-		bg.renderOrder = -100;
+		bg.renderOrder = -99;
 		bg.position = Vector3.Zero;
+		
+		VideoPlayer videoPlayer = ui.AddChild(new VideoPlayer(videoPlayerTest));
+		videoPlayer.renderOrder = -100;
 	}
 
 	public override void OnActivate()
@@ -129,7 +138,7 @@ internal class CStageTitle : CStage
 		if (!bActivated) return 0;
 		
 		base.OnUpdateAndDraw();
-
+		
 		// 進行
 
 		#region [ カーソル上移動 ]
