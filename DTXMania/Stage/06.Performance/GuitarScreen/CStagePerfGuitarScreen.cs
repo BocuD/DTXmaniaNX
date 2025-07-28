@@ -1010,8 +1010,8 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 	protected override void tDraw_LoopLine(CConfigIni configIni, bool bIsEnd)
 	{
 		const double speed = 286;   // BPM150の時の1小節の長さ[dot]
-		double ScrollSpeedGuitar = (actScrollSpeed.db現在の譜面スクロール速度.Guitar + 1.0) * 0.5 * 0.5 * 37.5 * speed / 60000.0;
-		double ScrollSpeedBass = (actScrollSpeed.db現在の譜面スクロール速度.Bass + 1.0) * 0.5 * 0.5 * 37.5 * speed / 60000.0;
+		double ScrollSpeedGuitar = (actScrollSpeed.db現在の譜面スクロール速度.Guitar + 1.0) * 0.5 * 0.5 * 37.5 * speed * 1.52f / 60000.0; //todo: verify if this is the correct approach to fix guitar scroll speed
+		double ScrollSpeedBass = (actScrollSpeed.db現在の譜面スクロール速度.Bass + 1.0) * 0.5 * 0.5 * 37.5 * speed * 1.52f / 60000.0; //todo: verify if this is the correct approach to fix guitar scroll speed
 
 		int nDistanceFromBarGuitar = (int)(((bIsEnd ? LoopEndMs : LoopBeginMs) - CSoundManager.rcPerformanceTimer.nCurrentTime) * ScrollSpeedGuitar);
 		int nDistanceFromBarBass = (int)(((bIsEnd ? LoopEndMs : LoopBeginMs) - CSoundManager.rcPerformanceTimer.nCurrentTime) * ScrollSpeedBass);

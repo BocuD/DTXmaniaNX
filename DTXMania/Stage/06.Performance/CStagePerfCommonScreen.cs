@@ -2851,7 +2851,7 @@ internal abstract class CStagePerfCommonScreen : CStage
         }
         #endregion
 
-        const double speed = 286;	// BPM150の時の1小節の長さ[dot]
+        // BPM150の時の1小節の長さ[dot]
         //XGのHS4.5が1289。思えばBPMじゃなくて拍の長さが関係あるよね。
 
         //double ScrollSpeedDrums = (this.actScrollSpeed.db現在の譜面スクロール速度.Drums + 1.0) * 0.5 * 37.5 * speed / 60000.0;
@@ -3504,7 +3504,7 @@ internal abstract class CStagePerfCommonScreen : CStage
             return true;
         }
 
-        const double speed = 286;	// BPM150の時の1小節の長さ[dot]
+        // BPM150の時の1小節の長さ[dot]
         //XGのHS4.5が1289。思えばBPMじゃなくて拍の長さが関係あるよね。
 
         //double ScrollSpeedDrums = (this.actScrollSpeed.db現在の譜面スクロール速度.Drums + 1.0) * 0.5 * 37.5 * speed / 60000.0;
@@ -3621,7 +3621,7 @@ internal abstract class CStagePerfCommonScreen : CStage
             return true;
         }
 
-        const double speed = 286;	// BPM150の時の1小節の長さ[dot]
+        // BPM150の時の1小節の長さ[dot]
         //XGのHS4.5が1289。思えばBPMじゃなくて拍の長さが関係あるよね。
 
         //double ScrollSpeedDrums = (this.actScrollSpeed.db現在の譜面スクロール速度.Drums + 1.0) * 0.5 * 37.5 * speed / 60000.0;
