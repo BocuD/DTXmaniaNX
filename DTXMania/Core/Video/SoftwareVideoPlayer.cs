@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Diagnostics;
+using System.Runtime.InteropServices;
 using FFmpeg.AutoGen.Abstractions;
 using SharpDX.Direct3D9;
 
@@ -13,12 +14,15 @@ public unsafe class SoftwareVideoPlayer : FFmpegVideoPlayer
 
     public override void DeviceCreated()
     {
+        Trace.TraceInformation("Device created. Setting up video player resources");
+
         texture = new Texture(CDTXMania.app.Device, codecContext->width, codecContext->height, 1,
             Usage.Dynamic, Format.A8R8G8B8, Pool.Default);
     }
 
     public override void DeviceReset()
     {
+        Trace.TraceInformation("Device reset: resetting video player");
         if (texture != null)
         {
             texture.Dispose();
@@ -56,12 +60,15 @@ public unsafe class SoftwareVideoPlayer : FFmpegVideoPlayer
         var data = *(byte_ptr4*) &data_ptr8;
         var linesize = *(int4*) &linesize8;
         ffmpeg.av_image_fill_arrays(ref data, ref linesize, rgbBuffer, AVPixelFormat.AV_PIX_FMT_BGRA, codecContext->width, codecContext->height, 1);
-        
-        DeviceCreated();
     }
 
     public override Texture GetUpdatedTexture()
     {
+        if (texture == null)
+        {
+            return CDTXMania.FallbackTexture.texture;
+        }
+        
         if (TryDecodeNextFrame(out byte[] frameData))
         {
             UploadToD3D9Texture(texture, frameData);

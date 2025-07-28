@@ -25,6 +25,7 @@ using DTXMania.UI.Inspector;
 //#endif
 
 using DTXMania.UI.Skin;
+using Microsoft.VisualBasic.Logging;
 using Color = System.Drawing.Color;
 using Font = System.Drawing.Font;
 
@@ -917,6 +918,8 @@ internal class CDTXMania : Game
 
     protected override void LoadContent()
     {
+        Trace.TraceInformation("CDTXMania.LoadContent()");
+        
         if (ConfigIni.bWindowMode)
         {
             if (!bMouseCursorShown)
@@ -1005,6 +1008,8 @@ internal class CDTXMania : Game
 
     protected override void UnloadContent()
     {
+        Trace.TraceInformation("CDTXMania.UnloadContent()");
+
         gameRenderTargetSurface.Dispose();
         gameRenderTargetTexture.Dispose();
         mainRenderTarget.Dispose();
@@ -1018,7 +1023,7 @@ internal class CDTXMania : Game
         
         if (fallbackTexture != null)
         {
-            tReleaseTexture(ref fallbackTexture);
+            tDisposeSafely(ref fallbackTexture);
         }
     }
 
