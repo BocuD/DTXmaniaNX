@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Runtime;
 using System.Text;
 using System.Windows.Forms;
+using DTXMania.Core.Video;
 using DTXMania.SongDb;
 using FDK;
 using Hexa.NET.ImGui;
@@ -650,8 +651,7 @@ internal class CDTXMania : Game
             settings.EnableVSync = ConfigIni.bVerticalSyncWait;
 
             GraphicsDeviceManager.ChangeDevice(settings);
-
-
+            
             IsFixedTimeStep = false;
             Window.ClientSize = new Size(ConfigIni.nWindowWidth, ConfigIni.nWindowHeight);
             InactiveSleepTime = TimeSpan.FromMilliseconds((float)(ConfigIni.n非フォーカス時スリープms));
@@ -668,11 +668,6 @@ internal class CDTXMania : Game
         DTX = null;
 
         Resources = new ResourceManager();
-        SafeInitialize("SongDb", () =>
-        {
-            SongDb = new SongDb.SongDb();
-            SongDb.StartScan();
-        });
         SkinManager = new SkinManager();
 
         SafeInitialize("Skin", () =>
@@ -681,6 +676,14 @@ internal class CDTXMania : Game
             ConfigIni.strSystemSkinSubfolderFullName =
                 Skin.GetCurrentSkinSubfolderFullName(true); // 旧指定のSkinフォルダが消滅していた場合に備える
         });
+        
+        SafeInitialize("SongDb", () =>
+        {
+            SongDb = new SongDb.SongDb();
+            SongDb.StartScan();
+        });
+
+        SafeInitialize("FFmpeg", FFmpegCore.Initialize);
 
         SafeInitialize("Timer", () => { Timer = new CTimer(CTimer.EType.MultiMedia); });
 
@@ -697,7 +700,7 @@ internal class CDTXMania : Game
             InputManager = new CInputManager(Window.Handle);
             foreach (IInputDevice device in InputManager.listInputDevices)
             {
-                if ((device.eInputDeviceType == EInputDeviceType.Joystick) &&
+                if (device.eInputDeviceType == EInputDeviceType.Joystick &&
                     !ConfigIni.joystickDict.ContainsValue(device.GUID))
                 {
                     int key = 0;
