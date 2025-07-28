@@ -11,11 +11,12 @@ namespace DTXMania;
 
 internal class CActResultImage : CActivity
 {
-    // コンストラクタ
-
-    public CActResultImage()
+    CStageResult stageResult;
+    
+    public CActResultImage(CStageResult cStageResult)
     {
-        bNotActivated = true;
+        stageResult = cStageResult;
+        bActivated = false;
     }
 
 
@@ -47,7 +48,7 @@ internal class CActResultImage : CActivity
     }
     public override void OnManagedCreateResources()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             ftSongDifficultyFont = new Font("Impact", 15f, FontStyle.Regular);
             iDrumSpeed = Image.FromFile(CSkin.Path(@"Graphics\7_panel_icons.jpg"));
@@ -65,17 +66,17 @@ internal class CActResultImage : CActivity
 
             #region[ Generation of song title, artist name and disclaimer textures ]
             if (string.IsNullOrEmpty(CDTXMania.DTX.TITLE) || (!CDTXMania.bCompactMode && CDTXMania.ConfigIni.b曲名表示をdefのものにする))
-                strSongName = CDTXMania.stageSongSelection.r現在選択中の曲.strタイトル;
+                strSongName = CDTXMania.confirmedSong.title;
             else
                 strSongName = CDTXMania.DTX.TITLE;
 
-            CPrivateFastFont pfTitle = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.str選曲リストフォント), 20, FontStyle.Regular);
+            CPrivateFastFont pfTitle = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.songListFont), 20, FontStyle.Regular);
             Bitmap bmpSongName = pfTitle.DrawPrivateFont(strSongName, CPrivateFont.DrawMode.Edge, Color.Black, Color.Black, clGITADORAgradationTopColor, clGITADORAgradationBottomColor, true);
             txSongName = CDTXMania.tGenerateTexture(bmpSongName, false);
             bmpSongName.Dispose();
             pfTitle.Dispose();
 
-            CPrivateFastFont pfArtist = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.str選曲リストフォント), 15, FontStyle.Regular);
+            CPrivateFastFont pfArtist = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.songListFont), 15, FontStyle.Regular);
             Bitmap bmpArtistName = pfArtist.DrawPrivateFont(CDTXMania.DTX.ARTIST, CPrivateFont.DrawMode.Edge, Color.Black, Color.Black, clGITADORAgradationTopColor, clGITADORAgradationBottomColor, true);
             txArtistName = CDTXMania.tGenerateTexture(bmpArtistName, false);
             bmpArtistName.Dispose();
@@ -83,19 +84,19 @@ internal class CActResultImage : CActivity
 
             if (CDTXMania.ConfigIni.nPlaySpeed != 20)
             {
-                double d = (double)(CDTXMania.ConfigIni.nPlaySpeed / 20.0);
+                double d = CDTXMania.ConfigIni.nPlaySpeed / 20.0;
                 String strModifiedPlaySpeed = "Play Speed: x" + d.ToString("0.000");
-                CPrivateFastFont pfModifiedPlaySpeed = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.str選曲リストフォント), 18, FontStyle.Regular);
+                CPrivateFastFont pfModifiedPlaySpeed = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.songListFont), 18, FontStyle.Regular);
                 Bitmap bmpModifiedPlaySpeed = pfModifiedPlaySpeed.DrawPrivateFont(strModifiedPlaySpeed, CPrivateFont.DrawMode.Edge, Color.White, Color.White, Color.Black, Color.Red, true);
                 txModifiedPlaySpeed = CDTXMania.tGenerateTexture(bmpModifiedPlaySpeed, false);
                 bmpModifiedPlaySpeed.Dispose();
                 pfModifiedPlaySpeed.Dispose();
             }
 
-            if (CDTXMania.stageResult.bIsTrainingMode)
+            if (stageResult.bIsTrainingMode)
             {
                 String strResultsNotSavedTraining = "Training feature used";
-                CPrivateFastFont pfResultsNotSavedTraining = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.str選曲リストフォント), 18, FontStyle.Regular);
+                CPrivateFastFont pfResultsNotSavedTraining = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.songListFont), 18, FontStyle.Regular);
                 Bitmap bmpResultsNotSavedTraining = pfResultsNotSavedTraining.DrawPrivateFont(strResultsNotSavedTraining, CPrivateFont.DrawMode.Edge, Color.White, Color.White, Color.Black, Color.Red, true);
                 txTrainingMode = CDTXMania.tGenerateTexture(bmpResultsNotSavedTraining, false);
                 bmpResultsNotSavedTraining.Dispose();
@@ -103,7 +104,7 @@ internal class CActResultImage : CActivity
             }
 
             String strResultsNotSaved = "Score will not be saved";
-            CPrivateFastFont pfResultsNotSaved = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.str選曲リストフォント), 18, FontStyle.Regular);
+            CPrivateFastFont pfResultsNotSaved = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.songListFont), 18, FontStyle.Regular);
             Bitmap bmpResultsNotSaved = pfResultsNotSaved.DrawPrivateFont(strResultsNotSaved, CPrivateFont.DrawMode.Edge, Color.White, Color.White, Color.Black, Color.Red, true);
             txResultsNotSaved = CDTXMania.tGenerateTexture(bmpResultsNotSaved, false);
             bmpResultsNotSaved.Dispose();
@@ -120,28 +121,28 @@ internal class CActResultImage : CActivity
             graphics = Graphics.FromImage(bitmap3);
             float num;
             //If Skill Mode is CLASSIC, always display lvl as Classic Style
-            if (CDTXMania.ConfigIni.nSkillMode == 0 || (CDTXMania.ConfigIni.bCLASSIC譜面判別を有効にする && 
+            if (CDTXMania.ConfigIni.nSkillMode == 0 || (CDTXMania.ConfigIni.bClassicScoreDisplay && 
                                                         (CDTXMania.DTX.bHasChips.LeftCymbal == false) && 
                                                         (CDTXMania.DTX.bHasChips.LP == false) && 
                                                         (CDTXMania.DTX.bHasChips.LBD == false) && 
                                                         (CDTXMania.DTX.bHasChips.FT == false) && 
                                                         (CDTXMania.DTX.bHasChips.Ride == false)))
             {
-                num = ((float)CDTXMania.stageSongSelection.rChosenScore.SongInformation.Level.Drums);
+                num = CDTXMania.confirmedChart.SongInformation.Level.Drums;
             }
             else
             {
-                if (CDTXMania.stageSongSelection.rChosenScore.SongInformation.Level.Drums > 100)
+                if (CDTXMania.confirmedChart.SongInformation.Level.Drums > 100)
                 {
-                    num = ((float)CDTXMania.stageSongSelection.rChosenScore.SongInformation.Level.Drums);
+                    num = CDTXMania.confirmedChart.SongInformation.Level.Drums;
                 }
                 else
                 {
-                    num = ((float)CDTXMania.stageSongSelection.rChosenScore.SongInformation.Level.Drums) / 10f;
+                    num = CDTXMania.confirmedChart.SongInformation.Level.Drums / 10f;
                 }
             }
             //If Skill Mode is CLASSIC, always display lvl as Classic Style
-            if (CDTXMania.ConfigIni.nSkillMode == 0 || (CDTXMania.ConfigIni.bCLASSIC譜面判別を有効にする && 
+            if (CDTXMania.ConfigIni.nSkillMode == 0 || (CDTXMania.ConfigIni.bClassicScoreDisplay && 
                                                         (CDTXMania.DTX.bHasChips.LeftCymbal == false) && 
                                                         (CDTXMania.DTX.bHasChips.LP == false) && 
                                                         (CDTXMania.DTX.bHasChips.LBD == false) && 
@@ -149,11 +150,11 @@ internal class CActResultImage : CActivity
                                                         (CDTXMania.DTX.bHasChips.Ride == false) &&
                                                         (CDTXMania.DTX.bForceXGChart == false)))
             {
-                graphics.DrawString(string.Format("{0:00}", num), ftSongDifficultyFont, new SolidBrush(Color.FromArgb(0xba, 0xba, 0xba)), (float)0f, (float)-4f);
+                graphics.DrawString(string.Format("{0:00}", num), ftSongDifficultyFont, new SolidBrush(Color.FromArgb(0xba, 0xba, 0xba)), 0f, -4f);
             }
             else
             {
-                graphics.DrawString(string.Format("{0:0.00}", num), ftSongDifficultyFont, new SolidBrush(Color.FromArgb(0xba, 0xba, 0xba)), (float)0f, (float)-4f);
+                graphics.DrawString(string.Format("{0:0.00}", num), ftSongDifficultyFont, new SolidBrush(Color.FromArgb(0xba, 0xba, 0xba)), 0f, -4f);
             }
             txSongLevel = new CTexture(CDTXMania.app.Device, bitmap3, CDTXMania.TextureFormat, false);
             graphics.Dispose();
@@ -171,7 +172,7 @@ internal class CActResultImage : CActivity
     }
     public override void OnManagedReleaseResources()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             CDTXMania.tDisposeSafely(ref ftSongDifficultyFont);
             CDTXMania.tDisposeSafely(ref iDrumSpeed);
@@ -193,7 +194,7 @@ internal class CActResultImage : CActivity
     }
     public override unsafe int OnUpdateAndDraw()
     {
-        if (bNotActivated)
+        if (!bActivated)
         {
             return 0;
         }
@@ -242,12 +243,12 @@ internal class CActResultImage : CActivity
             txModifiedPlaySpeed.tDraw2D(CDTXMania.app.Device, 840, nDisclaimerY);
             nDisclaimerY += 25;
         }
-        if (CDTXMania.stageResult.bIsTrainingMode)
+        if (stageResult.bIsTrainingMode)
         {
             txTrainingMode.tDraw2D(CDTXMania.app.Device, 840, nDisclaimerY);
             nDisclaimerY += 25;
         }
-        if (CDTXMania.stageResult.bIsTrainingMode || ((CDTXMania.ConfigIni.nPlaySpeed != 20) && !CDTXMania.ConfigIni.bSaveScoreIfModifiedPlaySpeed))
+        if (stageResult.bIsTrainingMode || ((CDTXMania.ConfigIni.nPlaySpeed != 20) && !CDTXMania.ConfigIni.bSaveScoreIfModifiedPlaySpeed))
         {
             txResultsNotSaved.tDraw2D(CDTXMania.app.Device, 840, nDisclaimerY);
         }
@@ -302,7 +303,7 @@ internal class CActResultImage : CActivity
         string path = CDTXMania.DTX.strFolderName + CDTXMania.DTX.PREIMAGE;
         if (!File.Exists(path))
         {
-            Trace.TraceWarning("ファイルが存在しません。({0})", new object[] { path });
+            Trace.TraceWarning("File doesn't exist!({0})", new object[] { path });
             return false;
         }
         txリザルト画像 = CDTXMania.tGenerateTexture(path);
@@ -311,7 +312,7 @@ internal class CActResultImage : CActivity
     }
     private bool tリザルト画像の指定があれば構築する()
     {
-        int rank = CScoreIni.tCalculateOverallRankValue(CDTXMania.stageResult.stPerformanceEntry.Drums, CDTXMania.stageResult.stPerformanceEntry.Guitar, CDTXMania.stageResult.stPerformanceEntry.Bass);
+        int rank = CScoreIni.tCalculateOverallRankValue(stageResult.stPerformanceEntry.Drums, stageResult.stPerformanceEntry.Guitar, stageResult.stPerformanceEntry.Bass);
         if (rank == 99)	// #23534 2010.10.28 yyagi: 演奏チップが0個のときは、rankEと見なす
         {
             rank = 6;
@@ -325,7 +326,7 @@ internal class CActResultImage : CActivity
         string path = CDTXMania.DTX.strFolderName + CDTXMania.DTX.RESULTIMAGE[rank];
         if (!File.Exists(path))
         {
-            Trace.TraceWarning("ファイルが存在しません。({0})", new object[] { path });
+            Trace.TraceWarning("File doesn't exist!({0})", new object[] { path });
             return false;
         }
         txリザルト画像 = CDTXMania.tGenerateTexture(path);

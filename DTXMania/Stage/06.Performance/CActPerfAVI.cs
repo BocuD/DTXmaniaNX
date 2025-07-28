@@ -24,16 +24,16 @@ internal class CActPerfAVI : CActivity
             listChildActivities.Add(actPanel = new CActPerfPanelString());
         }
             
-        bNotActivated = true;
+        bActivated = false;
     }
 
 
     // メソッド
         
-    public void Start(EChannel nチャンネル番号, CDTX.CAVI rAVI, int n開始サイズW, int n開始サイズH, int n終了サイズW, int n終了サイズH, int n画像側開始位置X, int n画像側開始位置Y, int n画像側終了位置X, int n画像側終了位置Y, int n表示側開始位置X, int n表示側開始位置Y, int n表示側終了位置X, int n表示側終了位置Y, int n総移動時間ms, int n移動開始時刻ms, bool bPlayFromBeginning = false)
+    public void Start(EChannel nチャンネル番号, CAVI rAVI, int n開始サイズW, int n開始サイズH, int n終了サイズW, int n終了サイズH, int n画像側開始位置X, int n画像側開始位置Y, int n画像側終了位置X, int n画像側終了位置Y, int n表示側開始位置X, int n表示側開始位置Y, int n表示側終了位置X, int n表示側終了位置Y, int n総移動時間ms, int n移動開始時刻ms, bool bPlayFromBeginning = false)
     {
         //2016.01.21 kairera0467 VfW時代のコードを除去+大改造
-        Trace.TraceInformation("CActPerfAVI: Start(): " + rAVI.strファイル名);
+        Trace.TraceInformation("CActPerfAVI: Start(): " + rAVI.strFileName);
 
         this.rAVI = rAVI;
             
@@ -346,7 +346,6 @@ internal class CActPerfAVI : CActivity
         n前回表示したフレーム番号 = -1;
         bフレームを作成した = false;
         b再生トグル = false;
-        bDShowクリップを再生している = false;
         pBmp = IntPtr.Zero;
         MovieMode();
         nAlpha = 255 - ((int)(((float)(CDTXMania.ConfigIni.nMovieAlpha * 255)) / 10f));
@@ -359,7 +358,7 @@ internal class CActPerfAVI : CActivity
     }
     public override void OnManagedCreateResources()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             //this.txドラム = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_Drums.png"));
             if (CDTXMania.ConfigIni.bGuitarEnabled)
@@ -400,7 +399,7 @@ internal class CActPerfAVI : CActivity
     }
     public override void OnManagedReleaseResources()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {                
             //特殊テクスチャ 3枚
             if (tx描画用 != null)
@@ -437,7 +436,7 @@ internal class CActPerfAVI : CActivity
     }
     public unsafe int tUpdateAndDraw(int x, int y)
     {   
-        if ((!bNotActivated))
+        if ((bActivated))
         {
             #region[ムービーのフレーム作成処理]
             if ( ( ( tx描画用 != null )) && ( rAVI != null ) ) //クリップ無し曲での進入防止。
@@ -850,7 +849,6 @@ internal class CActPerfAVI : CActivity
     public bool bWindowMode;
     private bool bフレームを作成した;
     private bool b再生トグル;
-    private bool bDShowクリップを再生している;
     //private bool bUseMRenderer = false;
     private bool bUseCAviDS = true;//
     public float fClipアスペクト比;
@@ -886,7 +884,7 @@ internal class CActPerfAVI : CActivity
     private int position2;
     //NOTE: This is a soft reference to externally initialized object
     //Do not call Dispose() for rAVI
-    private CDTX.CAVI rAVI;
+    private CAVI rAVI;
     public bool bIsPreviewMovie { get; set; }
     public bool bHasBGA { get; set; }
     public bool bFullScreenMovie { get; set; }

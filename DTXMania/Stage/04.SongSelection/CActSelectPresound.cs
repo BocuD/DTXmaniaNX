@@ -5,33 +5,42 @@ using FDK;
 namespace DTXMania;
 
 internal class CActSelectPresound : CActivity
-{
-	// メソッド
-
+{ 
 	public CActSelectPresound()
 	{
-		bNotActivated = true;
+		bActivated = false;
 	}
-	public void tサウンド停止()
+
+	public void tStopSound()
 	{
-		if( sound != null )
+		if (sound != null)
 		{
 			sound.tStopPlayback();
-			CDTXMania.SoundManager.tDiscard( sound );
+			CDTXMania.SoundManager.tDiscard(sound);
 			sound = null;
 		}
 	}
-	public void t選択曲が変更された()
+
+	public void tSelectionChanged(CScore chart)
 	{
-		CScore cスコア = CDTXMania.stageSongSelection.rSelectedScore;
-		if( ( cスコア != null ) && ( ( !( cスコア.FileInformation.AbsoluteFolderPath + cスコア.SongInformation.Presound ).Equals( str現在のファイル名 ) || ( sound == null ) ) || !sound.b再生中 ) )
+		if (chart != null &&
+		    (!(chart.FileInformation.AbsoluteFolderPath + chart.SongInformation.Presound).Equals(strCurrentlyPlayingAudioPath) ||
+		     sound == null || !sound.bIsPlaying))
 		{
-			tサウンド停止();
-			tBGMフェードイン開始();
-			if( ( cスコア.SongInformation.Presound != null ) && ( cスコア.SongInformation.Presound.Length > 0 ) )
+			tStopSound();
+			tStartFadeInBgm();
+			selectedChart = chart;
+			
+			if (chart.SongInformation.Presound != null && chart.SongInformation.Presound.Length > 0)
 			{
-				ct再生待ちウェイト = new CCounter( 0, CDTXMania.ConfigIni.n曲が選択されてからプレビュー音が鳴るまでのウェイトms, 1, CDTXMania.Timer );
+				ctWaitForPlayback = new CCounter(0, CDTXMania.ConfigIni.nSongSelectSoundPreviewWaitTimeMs, 1, CDTXMania.Timer);
 			}
+		}
+		else if (chart == null) //make sure we still stop playing even when the chart itself is null
+		{
+			tStopSound();
+			tStartFadeInBgm();
+			selectedChart = chart;
 		}
 	}
 
@@ -41,44 +50,49 @@ internal class CActSelectPresound : CActivity
 	public override void OnActivate()
 	{
 		sound = null;
-		str現在のファイル名 = "";
-		ct再生待ちウェイト = null;
-		ctBGMフェードアウト用 = null;
-		ctBGMフェードイン用 = null;
+		strCurrentlyPlayingAudioPath = "";
+		ctWaitForPlayback = null;
+		ctBgmFadeOut = null;
+		ctBgmFadeIn = null;
 		base.OnActivate();
 	}
+
 	public override void OnDeactivate()
 	{
-		tサウンド停止();
-		ct再生待ちウェイト = null;
-		ctBGMフェードイン用 = null;
-		ctBGMフェードアウト用 = null;
+		tStopSound();
+		ctWaitForPlayback = null;
+		ctBgmFadeIn = null;
+		ctBgmFadeOut = null;
 		base.OnDeactivate();
 	}
+
 	public override int OnUpdateAndDraw()
 	{
-		if( !bNotActivated )
+		if (bActivated)
 		{
-			if( ( ctBGMフェードイン用 != null ) && ctBGMフェードイン用.bInProgress )
+			if (ctBgmFadeIn != null && ctBgmFadeIn.bInProgress)
 			{
-				ctBGMフェードイン用.tUpdate();
-				CDTXMania.Skin.bgm選曲画面.n音量_現在のサウンド = ctBGMフェードイン用.nCurrentValue;
-				if( ctBGMフェードイン用.bReachedEndValue )
+				ctBgmFadeIn.tUpdate();
+				CDTXMania.Skin.bgmSongSelectScreen.nCurrentSoundVolume = ctBgmFadeIn.nCurrentValue;
+				if (ctBgmFadeIn.bReachedEndValue)
 				{
-					ctBGMフェードイン用.tStop();
+					ctBgmFadeIn.tStop();
 				}
 			}
-			if( ( ctBGMフェードアウト用 != null ) && ctBGMフェードアウト用.bInProgress )
+
+			if (ctBgmFadeOut != null && ctBgmFadeOut.bInProgress)
 			{
-				ctBGMフェードアウト用.tUpdate();
-				CDTXMania.Skin.bgm選曲画面.n音量_現在のサウンド = 100 - ctBGMフェードアウト用.nCurrentValue;
-				if( ctBGMフェードアウト用.bReachedEndValue )
+				ctBgmFadeOut.tUpdate();
+				CDTXMania.Skin.bgmSongSelectScreen.nCurrentSoundVolume = 100 - ctBgmFadeOut.nCurrentValue;
+				if (ctBgmFadeOut.bReachedEndValue)
 				{
-					ctBGMフェードアウト用.tStop();
+					ctBgmFadeOut.tStop();
 				}
 			}
-			t進行処理_プレビューサウンド();
+
+			tUpdatePreviewSound();
 		}
+
 		return 0;
 	}
 
@@ -86,72 +100,86 @@ internal class CActSelectPresound : CActivity
 	// Other
 
 	#region [ private ]
-	//-----------------
-	private CCounter ctBGMフェードアウト用;
-	private CCounter ctBGMフェードイン用;
-	private CCounter ct再生待ちウェイト;
+
+	private CCounter ctBgmFadeOut;
+	private CCounter ctBgmFadeIn;
+	private CCounter ctWaitForPlayback;
 	private CSound sound;
-	private string str現在のファイル名;
-		
-	private void tBGMフェードアウト開始()
+	
+	private string strCurrentlyPlayingAudioPath;
+
+	private void tStartFadeOutBgm()
 	{
-		if( ctBGMフェードイン用 != null )
+		if (ctBgmFadeIn != null)
 		{
-			ctBGMフェードイン用.tStop();
+			ctBgmFadeIn.tStop();
 		}
-		ctBGMフェードアウト用 = new CCounter( 0, 100, 10, CDTXMania.Timer );
-		ctBGMフェードアウト用.nCurrentValue = 100 - CDTXMania.Skin.bgm選曲画面.n音量_現在のサウンド;
-	}
-	private void tBGMフェードイン開始()
-	{
-		if( ctBGMフェードアウト用 != null )
+
+		ctBgmFadeOut = new CCounter(0, 100, 10, CDTXMania.Timer)
 		{
-			ctBGMフェードアウト用.tStop();
+			nCurrentValue = 100 - CDTXMania.Skin.bgmSongSelectScreen.nCurrentSoundVolume
+		};
+	}
+
+	private void tStartFadeInBgm()
+	{
+		if (ctBgmFadeOut != null)
+		{
+			ctBgmFadeOut.tStop();
 		}
-		ctBGMフェードイン用 = new CCounter( 0, 100, 20, CDTXMania.Timer );
-		ctBGMフェードイン用.nCurrentValue = CDTXMania.Skin.bgm選曲画面.n音量_現在のサウンド;
-	}
-	private void tプレビューサウンドの作成()
-	{
-		CScore cスコア = CDTXMania.stageSongSelection.rSelectedScore;
-		if( ( cスコア != null ) && !string.IsNullOrEmpty( cスコア.SongInformation.Presound ) )
+
+		ctBgmFadeIn = new CCounter(0, 100, 20, CDTXMania.Timer)
 		{
-			string strPreviewFilename = cスコア.FileInformation.AbsoluteFolderPath + cスコア.SongInformation.Presound;
+			nCurrentValue = CDTXMania.Skin.bgmSongSelectScreen.nCurrentSoundVolume
+		};
+	}
+
+	private CScore? selectedChart;
+	private void tLoadPreviewSound()
+	{
+		if (selectedChart != null && !string.IsNullOrEmpty(selectedChart.SongInformation.Presound))
+		{
+			string strPreviewFilename = selectedChart.FileInformation.AbsoluteFolderPath +
+			                            selectedChart.SongInformation.Presound;
 			try
 			{
-				sound = CDTXMania.SoundManager.tGenerateSound( strPreviewFilename );
-				sound.nVolume = 80;	// CDTXMania.ConfigIni.n自動再生音量;			// #25217 changed preview volume from AutoVolume
-				sound.tStartPlaying( true );
-				str現在のファイル名 = strPreviewFilename;
-				tBGMフェードアウト開始();
-				Trace.TraceInformation( "プレビューサウンドを生成しました。({0})", strPreviewFilename );
+				sound = CDTXMania.SoundManager.tGenerateSound(strPreviewFilename);
+				sound.nVolume = 80; // CDTXMania.ConfigIni.n自動再生音量;			// #25217 changed preview volume from AutoVolume
+				sound.tStartPlaying(true);
+				strCurrentlyPlayingAudioPath = strPreviewFilename;
+				tStartFadeOutBgm();
+				Trace.TraceInformation("Created preview sound: ({0})", strPreviewFilename);
 			}
-			catch
+			catch (Exception e)
 			{
-				Trace.TraceError( "プレビューサウンドの生成に失敗しました。({0})", strPreviewFilename );
-				if( sound != null )
+				Trace.TraceError($"An error occurred while loading preview sound ({strPreviewFilename}): {e}");
+				if (sound != null)
 				{
 					sound.Dispose();
 				}
+
 				sound = null;
 			}
 		}
 	}
-	private void t進行処理_プレビューサウンド()
+
+	private void tUpdatePreviewSound()
 	{
-		if( ( ct再生待ちウェイト != null ) && !ct再生待ちウェイト.bStopped )
+		if (ctWaitForPlayback != null && !ctWaitForPlayback.bStopped)
 		{
-			ct再生待ちウェイト.tUpdate();
-			if( !ct再生待ちウェイト.b終了値に達してない )
+			ctWaitForPlayback.tUpdate();
+			if (ctWaitForPlayback.bReachedEndValue)
 			{
-				ct再生待ちウェイト.tStop();
-				if( !CDTXMania.stageSongSelection.bScrolling )
+				ctWaitForPlayback.tStop();
+				if (!CDTXMania.StageManager.stageSongSelectionNew.isScrolling)
 				{
-					tプレビューサウンドの作成();
+					tLoadPreviewSound();
 				}
 			}
 		}
 	}
+
 	//-----------------
+
 	#endregion
 }

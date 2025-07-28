@@ -15,7 +15,7 @@ internal class CActPerfCommonLaneFlushGB : CActivity
 
 	public CActPerfCommonLaneFlushGB()
 	{
-		bNotActivated = true;
+		bActivated = false;
 	}
 
 
@@ -51,7 +51,7 @@ internal class CActPerfCommonLaneFlushGB : CActivity
 	}
 	public override void OnManagedCreateResources()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			txFlush[ 0 ] = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlay lane flush red.png" ) );
 			txFlush[ 1 ] = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlay lane flush green.png" ) );
@@ -69,7 +69,7 @@ internal class CActPerfCommonLaneFlushGB : CActivity
 	}
 	public override void OnManagedReleaseResources()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			for( int i = 0; i < 10; i++ )
 			{

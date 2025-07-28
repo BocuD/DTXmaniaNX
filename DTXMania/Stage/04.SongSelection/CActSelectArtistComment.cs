@@ -14,7 +14,7 @@ internal class CActSelectArtistComment : CActivity
 
 	public CActSelectArtistComment()
 	{
-		bNotActivated = true;
+		bActivated = false;
 	}
 	public void t選択曲が変更された()
 	{
@@ -155,7 +155,7 @@ internal class CActSelectArtistComment : CActivity
 	}
 	public override void OnManagedCreateResources()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			txコメントバー = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\5_comment bar.png"), true);
 			t選択曲が変更された();
@@ -164,7 +164,7 @@ internal class CActSelectArtistComment : CActivity
 	}
 	public override void OnManagedReleaseResources()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			CDTXMania.tReleaseTexture( ref txArtist );
 			CDTXMania.tReleaseTexture( ref txComment );
@@ -174,7 +174,7 @@ internal class CActSelectArtistComment : CActivity
 	}
 	public override int OnUpdateAndDraw()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			if (txコメントバー != null)
 				txコメントバー.tDraw2D(CDTXMania.app.Device, 560, 257);

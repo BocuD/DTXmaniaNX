@@ -12,7 +12,7 @@ internal class CActPerfBGA : CActivity
 
 	public CActPerfBGA()
 	{
-		bNotActivated = true;
+		bActivated = false;
 	}
 		
 		
@@ -126,7 +126,7 @@ internal class CActPerfBGA : CActivity
 	}
 	public override void OnManagedCreateResources()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			txBGAバックパネル = new CTexture(CDTXMania.app.Device, 278, 355, CDTXMania.app.GraphicsDeviceManager.CurrentSettings.BackBufferFormat, Pool.Managed);
 			using( Surface surface = CDTXMania.app.Device.GetBackBuffer( 0, 0 ) )
@@ -138,7 +138,7 @@ internal class CActPerfBGA : CActivity
 	}
 	public override void OnManagedReleaseResources()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			CDTXMania.tReleaseTexture( ref txBGAバックパネル );
 			if( sfBackBuffer != null )
@@ -155,7 +155,7 @@ internal class CActPerfBGA : CActivity
 	}
 	public int tUpdateAndDraw( int x, int y )
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			txBGAバックパネル.tDraw2D(CDTXMania.app.Device, 980, 0);
 			for( int i = 0; i < 8; i++ )

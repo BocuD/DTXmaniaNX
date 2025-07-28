@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <OutputType>WinExe</OutputType>
-        <TargetFramework>net8.0-windows</TargetFramework>
+        <TargetFramework>net6.0-windows</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -11,7 +11,12 @@
         <ApplicationIcon>dtx.ico</ApplicationIcon>
         <RootNamespace>DTXMania</RootNamespace>
         <AssemblyName>DTXManiaNX</AssemblyName>
-        <Version>1.5.0</Version>
+        <Version>2.0.0</Version>
+        <LangVersion>12</LangVersion>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+      <DefineConstants>TRACE;INSPECTOR</DefineConstants>
     </PropertyGroup>
 
     <ItemGroup>
@@ -36,27 +41,22 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\DTXUIRenderer\DTXUIRenderer.csproj" />
       <ProjectReference Include="..\FDK\FDK.csproj" />
     </ItemGroup>
 
     <ItemGroup>
       <PackageReference Include="Accessibility" Version="4.6.0-preview3-27504-2" />
       <PackageReference Include="DiscordRichPresence" Version="1.0.169" />
-      <PackageReference Include="Hexa.NET.ImGui" Version="2.2.6" />
-      <PackageReference Include="Hexa.NET.ImGui.Backends" Version="1.0.14" />
+      <PackageReference Include="FFmpeg.AutoGen.Bindings.DynamicallyLoaded" Version="7.1.1" />
+      <PackageReference Include="Hexa.NET.ImGui" Version="2.2.7" />
+      <PackageReference Include="Hexa.NET.ImGui.Backends" Version="1.0.15" />
+      <PackageReference Include="Hexa.NET.ImGuizmo" Version="2.2.7" />
+      <PackageReference Include="Kawazu" Version="1.1.4" />
+      <PackageReference Include="NativeFileDialog.Extended" Version="1.2.0" />
       <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-      <PackageReference Include="System.Configuration.ConfigurationManager" Version="9.0.2" />
-      <PackageReference Include="System.Text.Encoding.CodePages" Version="9.0.2" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Reference Include="SharpDX.Mathematics">
-        <HintPath>..\Runtime\dll\SharpDX.Mathematics.dll</HintPath>
-      </Reference>
-      <Reference Include="System.Windows.Forms">
-        <HintPath>C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Windows.Forms\v4.0_4.0.0.0__b77a5c561934e089\System.Windows.Forms.dll</HintPath>
-      </Reference>
+      <PackageReference Include="SharpDX.Mathematics" Version="4.2.0" />
+      <PackageReference Include="System.Configuration.ConfigurationManager" Version="6.0.2" />
+      <PackageReference Include="System.Text.Encoding.CodePages" Version="6.0.1" />
     </ItemGroup>
 
     <ItemGroup>

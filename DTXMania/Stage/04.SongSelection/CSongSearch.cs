@@ -25,7 +25,7 @@ internal class CSongSearch
             //Recursive search through all directories
             if (listInputList[i].eNodeType == CSongListNode.ENodeType.BOX)
             {
-                List<CSongListNode> tempSearchOutputList = tInnerSearchFunction(listInputList[i].list子リスト);
+                List<CSongListNode> tempSearchOutputList = tInnerSearchFunction(listInputList[i].listChildNodes);
                 searchOutputList.AddRange(tempSearchOutputList);
             }
             //Match search string only if node is a score or score_midi type
@@ -43,7 +43,7 @@ internal class CSongSearch
                     //Check title
                     if (bTitleSearchEnabled)
                     {
-                        string l_strTitle = bCaseSensitiveEnabled ? listInputList[i].strタイトル : listInputList[i].strタイトル.ToLower();
+                        string l_strTitle = bCaseSensitiveEnabled ? listInputList[i].strTitle : listInputList[i].strTitle.ToLower();
                         if (l_strTitle.Contains(bCaseSensitiveEnabled ? strSearchText : strSearchText.ToLower()))
                         {
                             bFound = true;
@@ -91,8 +91,8 @@ internal class CSongSearch
                 {
                     CSongListNode foundNode = listInputList[i].ShallowCopyOfSelf();
                     //Remove any children and parent nodes from shallow copy. Search return list is flat.
-                    foundNode.list子リスト = null;
-                    foundNode.r親ノード = null;
+                    foundNode.listChildNodes = null;
+                    foundNode.parentNode = null;
 
                     searchOutputList.Add(foundNode);
                 }

@@ -8,7 +8,7 @@ internal abstract class CActPerfCommonDanger : CActivity
 
 	public CActPerfCommonDanger()
 	{
-		bNotActivated = true;
+		bActivated = false;
 	}
 
 

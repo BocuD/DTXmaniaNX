@@ -1,14 +1,14 @@
 ﻿using DiscordRPC;
 using DTXMania.Core;
-using DTXUIRenderer;
+using DTXMania.UI.Drawable;
+using DTXMania.UI.DynamicElements;
 using FDK;
+using SharpDX;
 
 namespace DTXMania;
 
 public abstract class CStage : CActivity
 {
-	// プロパティ
-
 	/// <summary>
 	/// The presence used to indicate the user's activity within this stage, or <see langword="null"/> if there is none.
 	/// </summary>
@@ -57,10 +57,77 @@ public abstract class CStage : CActivity
 		NOWLOADING_BMP_FILE_READING,
 		NOWLOADING_WAIT_BGM_SOUND_COMPLETION,
 		PERFORMANCE_STAGE_FAILED,
-		PERFORMANCE_STAGE_FAILED_フェードアウト,
+		PERFORMANCE_STAGE_FAILED_FADEOUT,
 		PERFORMANCE_STAGE_CLEAR,
 		PERFORMANCE_STAGE_CLEAR_FadeOut,
 		PERFORMANCE_STAGE_RESTART
+	}
+
+	public Dictionary<string, DynamicStringSource> dynamicStringSources = new();
+	
+	public void LoadUI()
+	{
+		//remove old ui
+		if (ui != null)
+		{
+			ui.Dispose();
+		}
+		
+		//try to get the skin for this stage
+		UIGroup? stageUI = CDTXMania.SkinManager.LoadStageSkin(eStageID);
+		
+		if (stageUI == null)
+		{
+			ui = new UIGroup(GetType().ToString());
+			InitializeBaseUI();
+			InitializeDefaultUI();
+		}
+		else
+		{
+			ui = stageUI;
+			InitializeBaseUI();
+		}
+	}
+
+	public abstract void InitializeBaseUI();
+	public abstract void InitializeDefaultUI();
+
+	public virtual void FirstUpdate()
+	{
+		
+	}
+	
+	public override int OnUpdateAndDraw()
+	{
+		if (bJustStartedUpdate)
+		{
+			FirstUpdate();
+			bJustStartedUpdate = false;
+		}
+		
+		ui.Draw(Matrix.Identity);
+		
+		return base.OnUpdateAndDraw();
+	}
+	
+	public override void OnManagedCreateResources()
+	{
+		if (bActivated)
+		{
+			LoadUI();
+		}
+		
+		base.OnManagedCreateResources();
+	}
+
+	public override void OnManagedReleaseResources()
+	{
+		if (bActivated)
+		{
+			ui.Dispose();
+		}
+		
+		base.OnManagedReleaseResources();
 	}
 
 	public override void OnActivate()

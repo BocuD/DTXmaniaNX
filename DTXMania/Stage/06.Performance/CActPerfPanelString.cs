@@ -74,7 +74,7 @@ internal class CActPerfPanelString : CActivity
     }
     public override void OnManagedCreateResources()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             txジャケットパネル = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_JacketPanel.png"));
             string path = CDTXMania.DTX.strFolderName + CDTXMania.DTX.PREIMAGE;
@@ -91,17 +91,17 @@ internal class CActPerfPanelString : CActivity
 
             #region[ 曲名、アーティスト名テクスチャの生成 ]
             if (string.IsNullOrEmpty(CDTXMania.DTX.TITLE) || (!CDTXMania.bCompactMode && CDTXMania.ConfigIni.b曲名表示をdefのものにする))
-                strSongName = CDTXMania.stageSongSelection.r現在選択中の曲.strタイトル;
+                strSongName = CDTXMania.confirmedSong.title;
             else
                 strSongName = CDTXMania.DTX.TITLE;
 
-            pfタイトル = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.str選曲リストフォント), 20, FontStyle.Regular);
+            pfタイトル = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.songListFont), 20, FontStyle.Regular);
             Bitmap bmpSongName = new Bitmap(1, 1);
             bmpSongName = pfタイトル.DrawPrivateFont(strSongName, CPrivateFont.DrawMode.Edge, Color.Black, Color.Black, clGITADORAgradationTopColor, clGITADORAgradationBottomColor, true);
             txSongName = CDTXMania.tGenerateTexture(bmpSongName, false);
             bmpSongName.Dispose();
 
-            pfアーティスト = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.str選曲リストフォント), 15, FontStyle.Regular);
+            pfアーティスト = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.songListFont), 15, FontStyle.Regular);
             Bitmap bmpArtistName = new Bitmap(1, 1);
             bmpArtistName = pfアーティスト.DrawPrivateFont(CDTXMania.DTX.ARTIST, CPrivateFont.DrawMode.Edge, Color.Black, Color.Black, clGITADORAgradationTopColor, clGITADORAgradationBottomColor, true);
             txArtistName = CDTXMania.tGenerateTexture(bmpArtistName, false);
@@ -113,7 +113,7 @@ internal class CActPerfPanelString : CActivity
     }
     public override void OnManagedReleaseResources()
     {
-        if ( !bNotActivated )
+        if ( bActivated )
         {
 //              CDTXMania.tReleaseTexture( ref this.txPanel );
             CDTXMania.tReleaseTexture( ref txSongName );
@@ -131,7 +131,7 @@ internal class CActPerfPanelString : CActivity
     }
     public int tUpdateAndDraw()  // t進行描画
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             /*
             //this.ct進行用.tUpdateLoop();

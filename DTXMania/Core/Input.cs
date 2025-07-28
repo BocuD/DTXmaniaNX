@@ -6,11 +6,11 @@ public class Input
 {
     public bool ActionDecide()
     {
-        return (CDTXMania.Pad.bPressedDGB(EPad.Decide) || CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.CY) ||
-                CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.RD)) ||
+        return CDTXMania.Pad.bPressedDGB(EPad.Decide) || 
+               CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.CY) ||
+               CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.RD) ||
                (CDTXMania.Pad.bPressingGB(EPad.P) && CDTXMania.Pad.bPressedGB(EPad.Pick)) ||
-               (CDTXMania.ConfigIni.bEnterがキー割り当てのどこにも使用されていない &&
-                CDTXMania.InputManager.Keyboard.bKeyPressed(SlimDXKey.Return));
+               CDTXMania.InputManager.Keyboard.bKeyPressed(SlimDXKey.Return);
     }
 
     public bool ActionCancel()

@@ -10,7 +10,7 @@ internal class CActPerfStageFailure : CActivity
 
     public CActPerfStageFailure()
     {
-        bNotActivated = true;
+        bActivated = false;
     }
 
 
@@ -43,7 +43,7 @@ internal class CActPerfStageFailure : CActivity
     }
     public override void OnManagedCreateResources()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             txStageFailed = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_stage_failed.jpg"));
             base.OnManagedCreateResources();
@@ -51,7 +51,7 @@ internal class CActPerfStageFailure : CActivity
     }
     public override void OnManagedReleaseResources()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             CDTXMania.tReleaseTexture(ref txStageFailed);
             base.OnManagedReleaseResources();
@@ -59,7 +59,7 @@ internal class CActPerfStageFailure : CActivity
     }
     public override int OnUpdateAndDraw()
     {
-        if (bNotActivated)
+        if (!bActivated)
         {
             return 0;
         }

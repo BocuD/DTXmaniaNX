@@ -85,7 +85,7 @@ internal class CActPerfDrumsPad : CActivity
         st基本位置Array[9] = st基本位置10;
 
         this.st基本位置 = st基本位置Array;
-        bNotActivated = true;
+        bActivated = false;
     }
 
 
@@ -124,7 +124,7 @@ internal class CActPerfDrumsPad : CActivity
     }
     public override void OnManagedCreateResources()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             txパッド = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_pads.png"));
             tx光るパッド = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\ScreenPlayDrums pads flush.png"));
@@ -134,7 +134,7 @@ internal class CActPerfDrumsPad : CActivity
     }
     public override void OnManagedReleaseResources()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             CDTXMania.tReleaseTexture(ref txパッド);
             CDTXMania.tReleaseTexture(ref tx光るパッド);
@@ -144,7 +144,7 @@ internal class CActPerfDrumsPad : CActivity
     }
     public override int OnUpdateAndDraw()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             int num1 = CDTXMania.stagePerfDrumsScreen.ctBPMBar.nCurrentValue;
 

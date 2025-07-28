@@ -28,7 +28,7 @@ internal class CCharacterConsole : CActivity
 
 	public void tPrint( int x, int y, EFontType font, string str英数字文字列 )
 	{
-		if( !bNotActivated && !string.IsNullOrEmpty( str英数字文字列 ) )
+		if( bActivated && !string.IsNullOrEmpty( str英数字文字列 ) )
 		{
 			int BOL = x;
 			for( int i = 0; i < str英数字文字列.Length; i++ )
@@ -87,7 +87,7 @@ internal class CCharacterConsole : CActivity
 	}
 	public override void OnManagedCreateResources()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			txフォント8x16[ 0 ] = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\Console font 8x16.png" ) );
 			txフォント8x16[ 1 ] = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\Console font 2 8x16.png" ) );
@@ -96,7 +96,7 @@ internal class CCharacterConsole : CActivity
 	}
 	public override void OnManagedReleaseResources()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			for( int i = 0; i < 2; i++ )
 			{

@@ -13,7 +13,7 @@ internal class CActPerfDrumsChipFireD : CActivity
 
 	public CActPerfDrumsChipFireD()
 	{
-		bNotActivated = true;
+		bActivated = false;
 	}
 		
 		
@@ -375,7 +375,7 @@ internal class CActPerfDrumsChipFireD : CActivity
 	}
 	public override void OnManagedCreateResources()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			if (CDTXMania.ConfigIni.nExplosionFrames >= 2)
 			{
@@ -511,7 +511,7 @@ internal class CActPerfDrumsChipFireD : CActivity
 	}
 	public override void OnManagedReleaseResources()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			for (int tx1 = 0; tx1 < 10; tx1++)
 			{
@@ -529,7 +529,7 @@ internal class CActPerfDrumsChipFireD : CActivity
 	}
 	public override int OnUpdateAndDraw()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			for (int i = 0; i < STAR_MAX; i++)
 			{

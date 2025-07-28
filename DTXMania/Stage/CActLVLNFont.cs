@@ -39,7 +39,7 @@ public class CActLVLNFont : CActivity
 	}
 	public void tDrawString(int x, int y, string str, EFontColor efc, EFontAlign efa)
 	{
-		if (!bNotActivated && !string.IsNullOrEmpty(str))
+		if (bActivated && !string.IsNullOrEmpty(str))
 		{
 			if (tx数値 != null)
 			{
@@ -70,7 +70,7 @@ public class CActLVLNFont : CActivity
 
 	public override void OnManagedCreateResources()
 	{
-		if (!bNotActivated)
+		if (bActivated)
 		{
 			tx数値 = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\ScreenSelect level numbers.png"));
 			base.OnManagedCreateResources();
@@ -78,7 +78,7 @@ public class CActLVLNFont : CActivity
 	}
 	public override void OnManagedReleaseResources()
 	{
-		if (!bNotActivated)
+		if (bActivated)
 		{
 			if ( tx数値 != null )
 			{

@@ -3,8 +3,8 @@ using System.Drawing;
 using System.Diagnostics;
 using DTXMania.Core;
 using DTXMania.UI;
+using DTXMania.UI.Drawable;
 using DTXMania.UI.Item;
-using DTXUIRenderer;
 using FDK;
 using SharpDX;
 using RectangleF = SharpDX.RectangleF;
@@ -28,11 +28,9 @@ internal class CStageConfig : CStage
         actFont = font = new CActDFPFont();
         listChildActivities.Add(font);
         listChildActivities.Add(actFIFO = new CActFIFOWhite());
-        listChildActivities.Add(actList = new CActConfigList());
-        listChildActivities.Add(actKeyAssign = new CActConfigKeyAssign());
-        bNotActivated = true;
-
-        ui = new UIGroup("Stage Config");
+        listChildActivities.Add(actList = new CActConfigList(this));
+        listChildActivities.Add(actKeyAssign = new CActConfigKeyAssign(this));
+        bActivated = false;
     }
 
 
@@ -53,6 +51,78 @@ internal class CStageConfig : CStage
     }
         
     // CStage 実装
+
+    public override void InitializeBaseUI()
+    {
+        //left menu
+        UIGroup leftMenu = ui.AddChild(new UIGroup("Left Options Menu"));
+        leftMenu.position = new Vector3(245, 140, 0);
+        leftMenu.renderOrder = 50;
+        leftMenu.dontSerialize = true;
+        
+        DTXTexture menuPanelTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_menu panel.png")));
+        UIImage menuPanel = leftMenu.AddChild(new UIImage(menuPanelTex));
+        menuPanel.position = Vector3.Zero;
+            
+        //menu items
+        configLeftOptionsMenu = leftMenu.AddChild(new UISelectList("Button List"));
+        configLeftOptionsMenu.isVisible = true;
+        configLeftOptionsMenu.dontSerialize = true;
+        
+        //340 - size/2, so this becomes 340-245= 95
+        configLeftOptionsMenu.position = new Vector3(95, 4, 0);
+
+        //todo: render menu cursor correctly to match current version of the game. right now its rendered as a stretched image.
+        DTXTexture menuCursorTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_menu cursor.png")));
+        menuCursor = configLeftOptionsMenu.AddChild(new UIImage(menuCursorTex));
+        menuCursor.position = new Vector3(-5, 2, 0);
+        menuCursor.size = new Vector2(170, 28);
+        menuCursor.anchor = new Vector2(0.5f, 0f);
+        menuCursor.renderMode = ERenderMode.Sliced;
+        menuCursor.sliceRect = new RectangleF(16, 0, 32, 28);
+
+        var family = new FontFamily(CDTXMania.ConfigIni.songListFont);
+        configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(family, 18, "System", () => { actList.tSetupItemList_System(); }));
+        configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(family, 18, "Drums", () => { actList.tSetupItemList_Drums(); }));
+        configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(family, 18, "Guitar", () => { actList.tSetupItemList_Guitar(); }));
+        configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(family, 18, "Bass", () => { actList.tSetupItemList_Bass(); }));
+        configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(family, 18, "Exit", () => { actList.tSetupItemList_Exit(); }));
+        configLeftOptionsMenu.UpdateLayout();
+        configLeftOptionsMenu.SetSelectedIndex(0);
+        
+        if (bFocusIsOnMenu)
+        {
+            tDrawSelectedMenuDescriptionInDescriptionPanel();
+        }
+        else
+        {
+            tDrawSelectedItemDescriptionInDescriptionPanel();
+        }
+    }
+
+    public override void InitializeDefaultUI()
+    {
+        //create resources for menu elements
+        DTXTexture bgTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_background.png")));
+        UIImage bg = ui.AddChild(new UIImage(bgTex));
+        bg.renderOrder = -100;
+        bg.position = Vector3.Zero;
+                
+        DTXTexture itemBarTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_item bar.png")));
+        UIImage itemBar = ui.AddChild(new UIImage(itemBarTex));
+        itemBar.position = new Vector3(400, 0, 0);
+        itemBar.renderOrder = 50;
+                
+        DTXTexture headerPanelTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_header panel.png")));
+        UIImage headerPanel = ui.AddChild(new UIImage(headerPanelTex));
+        headerPanel.position = Vector3.Zero;
+        headerPanel.renderOrder = 52;
+                
+        DTXTexture footerPanelTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_footer panel.png")));
+        UIImage footerPanel = ui.AddChild(new UIImage(footerPanelTex));
+        footerPanel.position = new Vector3(0, 720 - footerPanel.Texture.Height, 0);
+        footerPanel.renderOrder = 53;
+    }
 
     public override void OnActivate()
     {
@@ -113,109 +183,42 @@ internal class CStageConfig : CStage
 
     private UISelectList configLeftOptionsMenu;
     private UIImage menuCursor;
-        
-    public override void OnManagedCreateResources()											// OPTIONと画像以外共通
-    {
-        if (!bNotActivated)
-        {
-            //create resources for menu elements
-            DTXTexture bgTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_background.png")));
-            UIImage bg = ui.AddChild(new UIImage(bgTex));
-            bg.renderOrder = -100;
-            bg.position = Vector3.Zero;
-                
-            DTXTexture itemBarTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_item bar.png")));
-            UIImage itemBar = ui.AddChild(new UIImage(itemBarTex));
-            itemBar.position = new Vector3(400, 0, 0);
-            itemBar.renderOrder = 50;
-                
-            DTXTexture headerPanelTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_header panel.png")));
-            UIImage headerPanel = ui.AddChild(new UIImage(headerPanelTex));
-            headerPanel.position = Vector3.Zero;
-            headerPanel.renderOrder = 52;
-                
-            DTXTexture footerPanelTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_footer panel.png")));
-            UIImage footerPanel = ui.AddChild(new UIImage(footerPanelTex));
-            footerPanel.position = new Vector3(0, 720 - footerPanel.Texture.Height, 0);
-            footerPanel.renderOrder = 53;
-                
-            //left menu
-            UIGroup leftMenu = ui.AddChild(new UIGroup("Left Options Menu"));
-            leftMenu.position = new Vector3(245, 140, 0);
-            leftMenu.renderOrder = 50;
-                
-            DTXTexture menuPanelTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_menu panel.png")));
-            UIImage menuPanel = leftMenu.AddChild(new UIImage(menuPanelTex));
-            menuPanel.position = Vector3.Zero;
-                
-            //menu items
-            configLeftOptionsMenu = leftMenu.AddChild(new UISelectList("Button List"));
-            configLeftOptionsMenu.isVisible = true;
-            
-            //340 - size/2, so this becomes 340-245= 95
-            configLeftOptionsMenu.position = new Vector3(95, 4, 0);
-
-            //todo: render menu cursor correctly to match current version of the game. right now its rendered as a stretched image.
-            DTXTexture menuCursorTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_menu cursor.png")));
-            menuCursor = configLeftOptionsMenu.AddChild(new UIImage(menuCursorTex));
-            menuCursor.position = new Vector3(-5, 2, 0);
-            menuCursor.size = new Vector2(170, 32);
-            menuCursor.anchor = new Vector2(0.5f, 0f);
-            menuCursor.renderMode = ERenderMode.Sliced;
-            menuCursor.sliceRect = new RectangleF(16, 0, 12, 32);
-
-            var family = new FontFamily(CDTXMania.ConfigIni.str選曲リストフォント);
-            configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(family, 18, "System", () => { actList.tSetupItemList_System(); }));
-            configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(family, 18, "Drums", () => { actList.tSetupItemList_Drums(); }));
-            configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(family, 18, "Guitar", () => { actList.tSetupItemList_Guitar(); }));
-            configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(family, 18, "Bass", () => { actList.tSetupItemList_Bass(); }));
-            configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(family, 18, "Exit", () => { actList.tSetupItemList_Exit(); }));
-            configLeftOptionsMenu.UpdateLayout();
-            configLeftOptionsMenu.SetSelectedIndex(0);
-                
-            if (bFocusIsOnMenu)
-            {
-                tDrawSelectedMenuDescriptionInDescriptionPanel();
-            }
-            else
-            {
-                tDrawSelectedItemDescriptionInDescriptionPanel();
-            }
-
-            base.OnManagedCreateResources();
-        }
-    }
+    
     public override void OnManagedReleaseResources()											// OPTIONと同じ(COnfig.iniの書き出しタイミングのみ異なるが、無視して良い)
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             CDTXMania.tReleaseTexture(ref txDescriptionPanel);
-                
-            ui.Dispose();
-                
+            
             base.OnManagedReleaseResources();
         }
     }
+
+    public override void FirstUpdate()
+    {
+        ePhaseID = EPhase.Common_FadeIn;
+        //actFIFO.tStartFadeIn();
+        GitaDoraTransition.Open(() =>
+        {
+            CDTXMania.Skin.bgmコンフィグ画面.tPlay();
+            ePhaseID = EPhase.Common_DefaultState;
+        });
+    }
+
     public override int OnUpdateAndDraw()
     {
-        if (bNotActivated)
-            return 0;
+        if (!bActivated) return 0;
 
-        if (bJustStartedUpdate)
-        {
-            ePhaseID = EPhase.Common_FadeIn;
-            actFIFO.tStartFadeIn();
-            bJustStartedUpdate = false;
-        }
+        base.OnUpdateAndDraw();
+
         ctDisplayWait.tUpdate();
-            
+
         //update menu cursor position
         menuCursor.Texture.transparency = bFocusIsOnMenu ? 1.0f : 0.5f;
         menuCursor.position.Y = 2 + configLeftOptionsMenu.currentlySelectedIndex * 32;
-            
-        ui.Draw(Matrix.Identity);
-            
+
         #region [ アイテム ]
+
         //---------------------
         switch (eItemPanelMode)
         {
@@ -227,17 +230,24 @@ internal class CStageConfig : CStage
                 actKeyAssign.OnUpdateAndDraw();
                 break;
         }
+
         //---------------------
+
         #endregion
+
         #region [ Description panel ]
+
         //---------------------
-        if( txDescriptionPanel != null && !bFocusIsOnMenu && actList.nTargetScrollCounter == 0 && ctDisplayWait.bReachedEndValue )
+        if (txDescriptionPanel != null && !bFocusIsOnMenu && actList.nTargetScrollCounter == 0 &&
+            ctDisplayWait.bReachedEndValue)
             // 15SEP20 Increasing x position by 180 pixels (was 620)
             txDescriptionPanel.tDraw2D(CDTXMania.app.Device, 800, 270);
         //---------------------
+
         #endregion
 
         #region [ Fade in and out ]
+
         //---------------------
         switch (ePhaseID)
         {
@@ -247,102 +257,122 @@ internal class CStageConfig : CStage
                     CDTXMania.Skin.bgmコンフィグ画面.tPlay();
                     ePhaseID = EPhase.Common_DefaultState;
                 }
+
                 break;
 
             case EPhase.Common_FadeOut:
-                if (actFIFO.OnUpdateAndDraw() == 0)
-                {
-                    break;
-                }
+                // if (actFIFO.OnUpdateAndDraw() == 0)
+                // {
+                //     break;
+                // }
+
+                if (GitaDoraTransition.isAnimating) break;
                 return 1;
         }
+
         //---------------------
+
         #endregion
-            
+
         // キー入力
 
-        if ((ePhaseID != EPhase.Common_DefaultState) || actKeyAssign.bキー入力待ちの最中である)
+        if ((ePhaseID != EPhase.Common_DefaultState) || actKeyAssign.bWaitingForKeyInput)
             return 0;
 
         // 曲データの一覧取得中は、キー入力を無効化する
-        if (!CDTXMania.EnumSongs.IsEnumerating || CDTXMania.actEnumSongs.bコマンドでの曲データ取得 != true)
+        if (CDTXMania.Input.ActionCancel())
         {
-            if (CDTXMania.Input.ActionCancel())
+            CDTXMania.Skin.soundCancel.tPlay();
+            if (!bFocusIsOnMenu)
             {
-                CDTXMania.Skin.soundCancel.tPlay();
-                if (!bFocusIsOnMenu)
+                if (eItemPanelMode == EItemPanelMode.KeyCodeList)
                 {
-                    if (eItemPanelMode == EItemPanelMode.KeyCodeList)
-                    {
-                        CDTXMania.stageConfig.tNotifyAssignmentComplete();
-                        return 0;
-                    }
-                    if (!actList.bIsKeyAssignSelected && !actList.bIsFocusingParameter)	// #24525 2011.3.15 yyagi, #32059 2013.9.17 yyagi
-                    {
-                        bFocusIsOnMenu = true;
-                    }
-                    tDrawSelectedMenuDescriptionInDescriptionPanel();
-                    actList.tPressEsc();								// #24525 2011.3.15 yyagi ESC押下時の右メニュー描画用
+                    tNotifyAssignmentComplete();
+                    return 0;
                 }
-                else
-                {
-                    actFIFO.tStartFadeOut();
-                    ePhaseID = EPhase.Common_FadeOut;
-                }
-            }
-            else if (CDTXMania.Input.ActionDecide())
-            {
-                if (configLeftOptionsMenu.currentlySelectedIndex == 4)
-                {
-                    CDTXMania.Skin.soundDecide.tPlay();
-                    actFIFO.tStartFadeOut();
-                    ePhaseID = EPhase.Common_FadeOut;
-                }
-                else if (bFocusIsOnMenu)
-                {
-                    CDTXMania.Skin.soundDecide.tPlay();
-                    bFocusIsOnMenu = false;
-                    tDrawSelectedItemDescriptionInDescriptionPanel();
-                }
-                else
-                {
-                    switch (eItemPanelMode)
-                    {
-                        case EItemPanelMode.PadList:
-                            bool bIsKeyAssignSelectedBeforeHitEnter = actList.bIsKeyAssignSelected;	// #24525 2011.3.15 yyagi
-                            actList.tPressEnter();
-                            if (actList.b現在選択されている項目はReturnToMenuである)
-                            {
-                                tDrawSelectedMenuDescriptionInDescriptionPanel();
-                                if (bIsKeyAssignSelectedBeforeHitEnter == false)							// #24525 2011.3.15 yyagi
-                                {
-                                    bFocusIsOnMenu = true;
-                                }
-                            }
-                            break;
 
-                        case EItemPanelMode.KeyCodeList:
-                            actKeyAssign.tPressEnter();
-                            break;
-                    }
+                if (!actList.bIsSubMenuSelected &&
+                    !actList.bIsFocusingParameter) // #24525 2011.3.15 yyagi, #32059 2013.9.17 yyagi
+                {
+                    bFocusIsOnMenu = true;
                 }
+
+                tDrawSelectedMenuDescriptionInDescriptionPanel();
+                actList.tPressEsc(); // #24525 2011.3.15 yyagi ESC押下時の右メニュー描画用
             }
-            ctKeyRepetition.Up.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(SlimDXKey.UpArrow), new CCounter.DGキー処理(tMoveCursorUp));
-            ctKeyRepetition.R.tRepeatKey(CDTXMania.Pad.bPressingGB(EPad.HH), new CCounter.DGキー処理(tMoveCursorUp));
-            //Change to HT
-            if (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.HT))
+            else
             {
-                tMoveCursorUp();
-            }
-            ctKeyRepetition.Down.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(SlimDXKey.DownArrow), new CCounter.DGキー処理(tMoveCursorDown));
-            ctKeyRepetition.B.tRepeatKey(CDTXMania.Pad.bPressingGB(EPad.SD), new CCounter.DGキー処理(tMoveCursorDown));
-            //Change to LT
-            if (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.LT))
-            {
-                tMoveCursorDown();
+                //actFIFO.tStartFadeOut();
+                GitaDoraTransition.Close(async () =>
+                {
+                    await Task.Delay(150);
+                    GitaDoraTransition.Open();
+                });
+                ePhaseID = EPhase.Common_FadeOut;
             }
         }
-        
+        else if (CDTXMania.Input.ActionDecide())
+        {
+            if (configLeftOptionsMenu.currentlySelectedIndex == 4)
+            {
+                CDTXMania.Skin.soundDecide.tPlay();
+                //actFIFO.tStartFadeOut();
+                GitaDoraTransition.Close(async () =>
+                {
+                    await Task.Delay(500);
+                    GitaDoraTransition.Open();
+                });
+                ePhaseID = EPhase.Common_FadeOut;
+            }
+            else if (bFocusIsOnMenu)
+            {
+                CDTXMania.Skin.soundDecide.tPlay();
+                bFocusIsOnMenu = false;
+                tDrawSelectedItemDescriptionInDescriptionPanel();
+            }
+            else
+            {
+                switch (eItemPanelMode)
+                {
+                    case EItemPanelMode.PadList:
+                        bool bIsKeyAssignSelectedBeforeHitEnter = actList.bIsSubMenuSelected; // #24525 2011.3.15 yyagi
+                        actList.tPressEnter();
+                        if (actList.bCurrentlySelectedItemIsReturnToMenu)
+                        {
+                            tDrawSelectedMenuDescriptionInDescriptionPanel();
+                            if (bIsKeyAssignSelectedBeforeHitEnter == false) // #24525 2011.3.15 yyagi
+                            {
+                                bFocusIsOnMenu = true;
+                            }
+                        }
+
+                        break;
+
+                    case EItemPanelMode.KeyCodeList:
+                        actKeyAssign.tPressEnter();
+                        break;
+                }
+            }
+        }
+
+        ctKeyRepetition.Up.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(SlimDXKey.UpArrow),
+            tMoveCursorUp);
+        ctKeyRepetition.R.tRepeatKey(CDTXMania.Pad.bPressingGB(EPad.HH), tMoveCursorUp);
+        //Change to HT
+        if (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.HT))
+        {
+            tMoveCursorUp();
+        }
+
+        ctKeyRepetition.Down.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(SlimDXKey.DownArrow),
+            tMoveCursorDown);
+        ctKeyRepetition.B.tRepeatKey(CDTXMania.Pad.bPressingGB(EPad.SD), tMoveCursorDown);
+        //Change to LT
+        if (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.LT))
+        {
+            tMoveCursorDown();
+        }
+
         return 0;
     }
 
@@ -477,67 +507,73 @@ internal class CStageConfig : CStage
     {
         try
         {
-            Bitmap image = new( 220 * 2, 192 * 2 );		// 説明文領域サイズの縦横 2 倍。（描画時に 0.5 倍で表示する。）
-            Graphics graphics = Graphics.FromImage( image );
+            Bitmap image = new(220 * 2, 192 * 2); // 説明文領域サイズの縦横 2 倍。（描画時に 0.5 倍で表示する。）
+            Graphics graphics = Graphics.FromImage(image);
             graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
-				
-            string[,] str = new string[ 2, 2 ];
-            switch( configLeftOptionsMenu.currentlySelectedIndex )
+
+            string[,] str = new string[2, 2];
+            switch (configLeftOptionsMenu.currentlySelectedIndex)
             {
                 case 0: //system
-                    str[ 0, 0 ] = "システムに関係する項目を設定します。";
-                    str[ 0, 1 ] = "";
-                    str[ 1, 0 ] = "Settings for an overall systems.";
+                    str[0, 0] = "システムに関係する項目を設定します。";
+                    str[0, 1] = "";
+                    str[1, 0] = "Settings for an overall systems.";
                     break;
-                    
+
                 case 1: //drums
-                    str[ 0, 0 ] = "ドラムの演奏に関する項目を設定します。";
-                    str[ 0, 1 ] = "";
-                    str[ 1, 0 ] = "Settings to play the drums.";
-                    str[ 1, 1 ] = "";
+                    str[0, 0] = "ドラムの演奏に関する項目を設定します。";
+                    str[0, 1] = "";
+                    str[1, 0] = "Settings to play the drums.";
+                    str[1, 1] = "";
                     break;
 
                 case 2: //guitar
-                    str[ 0, 0 ] = "ギターの演奏に関する項目を設定します。";
-                    str[ 0, 1 ] = "";
-                    str[ 1, 0 ] = "Settings to play the guitar.";
-                    str[ 1, 1 ] = "";
+                    str[0, 0] = "ギターの演奏に関する項目を設定します。";
+                    str[0, 1] = "";
+                    str[1, 0] = "Settings to play the guitar.";
+                    str[1, 1] = "";
                     break;
 
                 case 3: //bass
-                    str[ 0, 0 ] = "ベースの演奏に関する項目を設定します。";
-                    str[ 0, 1 ] = "";
-                    str[ 1, 0 ] = "Settings to play the bass.";
-                    str[ 1, 1 ] = "";
+                    str[0, 0] = "ベースの演奏に関する項目を設定します。";
+                    str[0, 1] = "";
+                    str[1, 0] = "Settings to play the bass.";
+                    str[1, 1] = "";
                     break;
 
                 case 4: //exit
-                    str[ 0, 0 ] = "設定を保存し、コンフィグ画面を終了します。";
-                    str[ 0, 1 ] = "";
-                    str[ 1, 0 ] = "Save the settings and exit from\nCONFIGURATION menu.";
-                    str[ 1, 1 ] = "";
+                    str[0, 0] = "設定を保存し、コンフィグ画面を終了します。";
+                    str[0, 1] = "";
+                    str[1, 0] = "Save the settings and exit from\nCONFIGURATION menu.";
+                    str[1, 1] = "";
                     break;
             }
-				
+
             int c = CDTXMania.isJapanese ? 0 : 1;
             for (int i = 0; i < 2; i++)
             {
-                graphics.DrawString( str[ c, i ], ftFont, Brushes.Black, new PointF( 4f , ( i * 30 ) ) );
+                graphics.DrawString(str[c, i], ftFont, Brushes.Black, new PointF(4f, (i * 30)));
             }
+
             graphics.Dispose();
-            if( txDescriptionPanel != null )
+            if (txDescriptionPanel != null)
             {
                 txDescriptionPanel.Dispose();
             }
+
             //this.txDescriptionPanel = new CTexture( CDTXMania.app.Device, image, CDTXMania.TextureFormat );
             // this.txDescriptionPanel.vcScaleRatio.X = 0.5f;
             // this.txDescriptionPanel.vcScaleRatio.Y = 0.5f;
             image.Dispose();
         }
-        catch( CTextureCreateFailedException )
+        catch (CTextureCreateFailedException)
         {
-            Trace.TraceError( "説明文テクスチャの作成に失敗しました。" );
+            Trace.TraceError("説明文テクスチャの作成に失敗しました。");
             txDescriptionPanel = null;
+        }
+        catch (Exception e)
+        {
+            Trace.TraceError(e.Message + "\nTrace: " + e.StackTrace);
         }
     }
     private void tDrawSelectedItemDescriptionInDescriptionPanel()
@@ -549,9 +585,9 @@ internal class CStageConfig : CStage
             graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
 
             CItemBase item = actList.ibCurrentSelection;
-            if( item.str説明文 is { Length: > 0 } )
+            if( item.strDescription is { Length: > 0 } )
             {
-                graphics.DrawString( item.str説明文, ftFont, Brushes.Black, new System.Drawing.RectangleF( 4f, (float) 0, 230, 430 ) );
+                graphics.DrawString( item.strDescription, ftFont, Brushes.Black, new System.Drawing.RectangleF( 4f, (float) 0, 230, 430 ) );
             }
             graphics.Dispose();
             if( txDescriptionPanel != null )

@@ -1,5 +1,6 @@
-﻿using DTXMania.Core;
-using DTXUIRenderer;
+﻿using System.Diagnostics;
+using DTXMania.Core;
+using DTXMania.UI.Drawable;
 using Newtonsoft.Json;
 
 namespace DTXMania.UI.Skin;
@@ -37,7 +38,7 @@ public class SkinManager
             }
             catch (Exception e)
             {
-                Console.WriteLine($"Failed to load skin from {directory}: {e.Message}");
+                Trace.TraceError($"Failed to load skin from {directory}: {e.Message}");
             }
         }
     }
@@ -62,7 +63,7 @@ public class SkinManager
             UIGroup stageGroup = new(stage.ToString());
             
             string path = Path.Combine(newSkinPath, $"{stage}.json");
-            File.WriteAllText(path, JsonConvert.SerializeObject(stageGroup));
+            File.WriteAllText(path, JsonConvert.SerializeObject(stageGroup, Formatting.Indented));
             
             newSkin.stageSkins[stage] = $"{stage}.json";
         }
@@ -76,7 +77,7 @@ public class SkinManager
 
         if (skin == null)
         {
-            Console.WriteLine("Failed to create new skin");
+            Trace.TraceError("Failed to create new skin");
             return;
         }
         
@@ -84,8 +85,15 @@ public class SkinManager
         ChangeSkin(skin);
     }
 
-    public void ChangeSkin(SkinDescriptor skin)
+    public void ChangeSkin(SkinDescriptor? skin)
     {
-        currentSkin = skin;
+        currentSkin = skin == null ? null : SkinDescriptor.LoadSkin(skin.basePath);
+
+        CDTXMania.StageManager.rCurrentStage.LoadUI();
+    }
+
+    public UIGroup? LoadStageSkin(CStage.EStage stageId)
+    {
+        return currentSkin?.LoadStageSkin(stageId);
     }
 }

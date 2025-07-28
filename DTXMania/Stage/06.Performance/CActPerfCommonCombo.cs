@@ -202,7 +202,7 @@ internal class CActPerfCommonCombo : CActivity
 
     public CActPerfCommonCombo()
     {
-        bNotActivated = true;
+        bActivated = false;
 
         // 180度分のジャンプY座標差分を取得。(0度: 0 → 90度:-15 → 180度: 0)
         for (int i = 0; i < 180; i++)
@@ -630,7 +630,7 @@ internal class CActPerfCommonCombo : CActivity
     }
     public override void OnManagedCreateResources()
     {
-        if( bNotActivated )
+        if (!bActivated)
             return;
 
         txCOMBOドラム = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlayDrums combo.png" ) );
@@ -643,7 +643,7 @@ internal class CActPerfCommonCombo : CActivity
     }
     public override void OnManagedReleaseResources()
     {
-        if( bNotActivated )
+        if (!bActivated)
             return;
 
         CDTXMania.tReleaseTexture( ref txCOMBOドラム );
@@ -655,7 +655,7 @@ internal class CActPerfCommonCombo : CActivity
     }
     public override int OnUpdateAndDraw()
     {
-        if (bNotActivated)
+        if (!bActivated)
             return 0;
 
         for (int i = 2; i >= 0; i--)

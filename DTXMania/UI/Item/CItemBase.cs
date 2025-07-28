@@ -14,6 +14,7 @@ internal class CItemBase
 	public enum EPanelType
 	{
 		Normal,
+		Folder,
 		Other
 	}
 
@@ -29,7 +30,7 @@ internal class CItemBase
 	}
 
 	public string strItemName;
-	public string str説明文;
+	public string strDescription;
 
 
 	// コンストラクタ
@@ -37,17 +38,17 @@ internal class CItemBase
 	public CItemBase()
 	{
 		strItemName = "";
-		str説明文 = "";
+		strDescription = "";
 	}
 		
-	public CItemBase(string str項目名,  string str説明文jp, string str説明文en)
+	public CItemBase(string strItemName, string strDescriptionJp, string strDescriptionEn)
 		: this() {
-		tInitialize(str項目名, str説明文jp, str説明文en);
+		tInitialize(strItemName, EPanelType.Normal, strDescriptionJp, strDescriptionEn);
 	}
 
-	public CItemBase(string str項目名, EPanelType eパネル種別, string str説明文jp, string str説明文en)
+	public CItemBase(string strItemName, EPanelType ePanelType, string strDescriptionJp, string strDescriptionEn)
 		: this() {
-		tInitialize(str項目名, eパネル種別, str説明文jp, str説明文en);
+		tInitialize(strItemName, ePanelType, strDescriptionJp, strDescriptionEn);
 	}
 		
 	// メソッド；子クラスで実装する
@@ -57,13 +58,13 @@ internal class CItemBase
 
 	public void RunAction()
 	{
-		tEnter押下();
+		tEnterPressed();
 
 		action?.Invoke();
 	}
 
 	//existing method which gets inherited by CItemInteger, CItemList, etc
-	protected virtual void tEnter押下()
+	protected virtual void tEnterPressed()
 	{
 	}
 	public virtual void tMoveItemValueToNext()
@@ -73,16 +74,12 @@ internal class CItemBase
 	{
 	}
 
-	public virtual void tInitialize(string str項目名, string str説明文jp, string str説明文en) {
-		tInitialize(str項目名, EPanelType.Normal, str説明文jp, str説明文en);
+	public void tInitialize(string strItemName, EPanelType ePanelType, string strDescriptionJp, string strDescriptionEn) {
+		this.strItemName = strItemName;
+		this.ePanelType = ePanelType;
+		strDescription = CDTXMania.isJapanese ? strDescriptionJp : strDescriptionEn;
 	}
-		
-	public virtual void tInitialize(string str項目名, EPanelType eパネル種別, string str説明文jp, string str説明文en) {
-		strItemName = str項目名;
-		ePanelType = eパネル種別;
-		str説明文 = CDTXMania.isJapanese ? str説明文jp : str説明文en;
-	}
-	public virtual object obj現在値()
+	public virtual object GetCurrentValue()
 	{
 		return null;
 	}
@@ -101,7 +98,7 @@ internal class CItemBase
 	}
 
 	private Action _writeToConfig;
-	public virtual void WriteToConfig()
+	public void WriteToConfig()
 	{
 		_writeToConfig?.Invoke();
 	}
@@ -110,5 +107,10 @@ internal class CItemBase
 	{
 		_readFromConfig = readFromConfig;
 		_writeToConfig = writeToConfig;
+	}
+
+	public virtual string GetStringValue()
+	{
+		return string.Empty;
 	}
 }

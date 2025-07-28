@@ -1,7 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 using System.Drawing;
 using DTXMania.Core;
-//using SharpDX;
 using FDK;
 
 using Rectangle = System.Drawing.Rectangle;
@@ -14,7 +13,7 @@ internal class CActSelectStatusPanel : CActivity
 
     public CActSelectStatusPanel()
     {
-        bNotActivated = true;
+        bActivated = false;
     }
     public void tSelectedSongChanged()
     {
@@ -192,7 +191,7 @@ internal class CActSelectStatusPanel : CActivity
     }
     public override void OnManagedCreateResources()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             txパネル本体 = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\5_status panel.png"));
             tx難易度パネル = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\5_difficulty panel.png"));
@@ -212,7 +211,7 @@ internal class CActSelectStatusPanel : CActivity
     }
     public override void OnManagedReleaseResources()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             CDTXMania.tReleaseTexture(ref txパネル本体);
             CDTXMania.tReleaseTexture(ref tx難易度パネル);
@@ -240,7 +239,7 @@ internal class CActSelectStatusPanel : CActivity
     public override int OnUpdateAndDraw()
     {
 
-        if (!bNotActivated)
+        if (bActivated)
         {
             #region [ 初めての進行描画 ]
             //-----------------
@@ -311,7 +310,7 @@ internal class CActSelectStatusPanel : CActivity
                         int bpm_int = (int)Math.Round(cスコア.SongInformation.Bpm);
                         strBPM = bpm_int.ToString();
                         int duration = cスコア.SongInformation.Duration;
-                        TimeSpan timeSpan = new TimeSpan(0, 0, 0, 0, duration);
+                        TimeSpan timeSpan = new(0, 0, 0, 0, duration);
                         strDuration = timeSpan.ToString(@"m\:ss");
                                 
                         //DrOnly always show Drum
@@ -321,7 +320,8 @@ internal class CActSelectStatusPanel : CActivity
                             if (cスコア.SongInformation.chipCountByInstrument.Drums > 0)
                             {
                                 nPanelNoteCount = cスコア.SongInformation.chipCountByInstrument.Drums;
-                                arrChipsByLane = new int[] {
+                                arrChipsByLane =
+                                [
                                     cスコア.SongInformation.chipCountByLane[ELane.LC],
                                     cスコア.SongInformation.chipCountByLane[ELane.HH],
                                     cスコア.SongInformation.chipCountByLane[ELane.LP],
@@ -331,7 +331,7 @@ internal class CActSelectStatusPanel : CActivity
                                     cスコア.SongInformation.chipCountByLane[ELane.LT],
                                     cスコア.SongInformation.chipCountByLane[ELane.FT],
                                     cスコア.SongInformation.chipCountByLane[ELane.CY]
-                                };
+                                ];
                                 if (dbDrumSP > 0.00)
                                 {                                            
                                     strSP = string.Format("{0,6:##0.00}", dbDrumSP);
@@ -353,14 +353,15 @@ internal class CActSelectStatusPanel : CActivity
                                 if (cスコア.SongInformation.chipCountByInstrument.Bass > 0)
                                 {
                                     nPanelNoteCount = cスコア.SongInformation.chipCountByInstrument.Bass;
-                                    arrChipsByLane = new int[] {
+                                    arrChipsByLane =
+                                    [
                                         cスコア.SongInformation.chipCountByLane[ELane.BsR],
                                         cスコア.SongInformation.chipCountByLane[ELane.BsG],
                                         cスコア.SongInformation.chipCountByLane[ELane.BsB],
                                         cスコア.SongInformation.chipCountByLane[ELane.BsY],
                                         cスコア.SongInformation.chipCountByLane[ELane.BsP],
                                         cスコア.SongInformation.chipCountByLane[ELane.BsPick]
-                                    };
+                                    ];
                                     //Get Progress data here
                                     strProgressText = cスコア.SongInformation.progress.Bass;
                                 }
@@ -370,14 +371,15 @@ internal class CActSelectStatusPanel : CActivity
                                 if (cスコア.SongInformation.chipCountByInstrument.Guitar > 0)
                                 {
                                     nPanelNoteCount = cスコア.SongInformation.chipCountByInstrument.Guitar;
-                                    arrChipsByLane = new int[] {
+                                    arrChipsByLane =
+                                    [
                                         cスコア.SongInformation.chipCountByLane[ELane.GtR],
                                         cスコア.SongInformation.chipCountByLane[ELane.GtG],
                                         cスコア.SongInformation.chipCountByLane[ELane.GtB],
                                         cスコア.SongInformation.chipCountByLane[ELane.GtY],
                                         cスコア.SongInformation.chipCountByLane[ELane.GtP],
                                         cスコア.SongInformation.chipCountByLane[ELane.GtPick]
-                                    };
+                                    ];
                                     //Get Progress data here
                                     strProgressText = cスコア.SongInformation.progress.Guitar;
                                 }
@@ -480,7 +482,8 @@ internal class CActSelectStatusPanel : CActivity
             #endregion
             //-----------------
 
-            int[] nPart = { 0, CDTXMania.ConfigIni.bIsSwappedGuitarBass ? 2 : 1, CDTXMania.ConfigIni.bIsSwappedGuitarBass ? 1 : 2 };
+            int[] nPart = [0, CDTXMania.ConfigIni.bIsSwappedGuitarBass ? 2 : 1, CDTXMania.ConfigIni.bIsSwappedGuitarBass ? 1 : 2
+            ];
 
             int nBaseX = 130;
             int nBaseY = 350;//350
@@ -546,7 +549,7 @@ internal class CActSelectStatusPanel : CActivity
                                 // convert the level back into a whole number (0-999) to make it easier to work with
                                 int nLevel = (n現在選択中の曲のレベル難易度毎DGB[i][j] * 10) + n現在選択中の曲のレベル小数点難易度毎DGB[i][j];
                                 bool bHasSong = b現在選択中の曲に譜面がある[i][j];
-                                bool bClassChartModeSet = CDTXMania.ConfigIni.bCLASSIC譜面判別を有効にする;
+                                bool bClassChartModeSet = CDTXMania.ConfigIni.bClassicScoreDisplay;
                                 if(CDTXMania.DTX != null)
                                 {
                                     bClassChartModeSet = bClassChartModeSet && (
@@ -833,70 +836,70 @@ internal class CActSelectStatusPanel : CActivity
     };
      */
     private CSongListNode r直前の曲;
-    public string[] str難易度ラベル = new string[] { "", "", "", "", "" };
+    public string[] str難易度ラベル = ["", "", "", "", ""];
         
-    private readonly ST数字[] st数字 = new ST数字[]
-    {
-        new ST数字('0', new Rectangle(0 * 12, 0, 12, 20)),
-        new ST数字('1', new Rectangle(1 * 12, 0, 12, 20)),
-        new ST数字('2', new Rectangle(2 * 12, 0, 12, 20)),
-        new ST数字('3', new Rectangle(3 * 12, 0, 12, 20)),
-        new ST数字('4', new Rectangle(4 * 12, 0, 12, 20)),
-        new ST数字('5', new Rectangle(5 * 12, 0, 12, 20)),
-        new ST数字('6', new Rectangle(6 * 12, 0, 12, 20)),
-        new ST数字('7', new Rectangle(7 * 12, 0, 12, 20)),
-        new ST数字('8', new Rectangle(8 * 12, 0, 12, 20)),
-        new ST数字('9', new Rectangle(9 * 12, 0, 12, 20)),
-        new ST数字(':', new Rectangle(10 * 12 + 3, 0, 6, 20)),
-        new ST数字('p', new Rectangle(11 * 12, 0, 12, 20)),
-    };
-    private readonly ST難易度数字[] stDifficultyNumber = new ST難易度数字[]
-    {
-        new ST難易度数字('0', new Rectangle(0 * 20, 0, 20, 28)),
-        new ST難易度数字('1', new Rectangle(1 * 20, 0, 20, 28)),
-        new ST難易度数字('2', new Rectangle(2 * 20, 0, 20, 28)),
-        new ST難易度数字('3', new Rectangle(3 * 20, 0, 20, 28)),
-        new ST難易度数字('4', new Rectangle(4 * 20, 0, 20, 28)),
-        new ST難易度数字('5', new Rectangle(5 * 20, 0, 20, 28)),
-        new ST難易度数字('6', new Rectangle(6 * 20, 0, 20, 28)),
-        new ST難易度数字('7', new Rectangle(7 * 20, 0, 20, 28)),
-        new ST難易度数字('8', new Rectangle(8 * 20, 0, 20, 28)),
-        new ST難易度数字('9', new Rectangle(9 * 20, 0, 20, 28)),
-        new ST難易度数字('.', new Rectangle(10 * 20, 0, 10, 28)),
-        new ST難易度数字('-', new Rectangle(11 * 20 - 10, 0, 20, 28)),
-        new ST難易度数字('?', new Rectangle(12 * 20 - 10, 0, 20, 28))
-    };
-    private readonly ST達成率数字[] st達成率数字 = new ST達成率数字[]
-    {
-        new ST達成率数字('0', new Rectangle(0 * 12, 0, 12, 20)),
-        new ST達成率数字('1', new Rectangle(1 * 12, 0, 12, 20)),
-        new ST達成率数字('2', new Rectangle(2 * 12, 0, 12, 20)),
-        new ST達成率数字('3', new Rectangle(3 * 12, 0, 12, 20)),
-        new ST達成率数字('4', new Rectangle(4 * 12, 0, 12, 20)),
-        new ST達成率数字('5', new Rectangle(5 * 12, 0, 12, 20)),
-        new ST達成率数字('6', new Rectangle(6 * 12, 0, 12, 20)),
-        new ST達成率数字('7', new Rectangle(7 * 12, 0, 12, 20)),
-        new ST達成率数字('8', new Rectangle(8 * 12, 0, 12, 20)),
-        new ST達成率数字('9', new Rectangle(9 * 12, 0, 12, 20)),
-        new ST達成率数字('.', new Rectangle(10 * 12, 0, 6, 20)),
-        new ST達成率数字('%', new Rectangle(11 * 12 - 6, 0, 12, 20))
-    };
-    private readonly ST数字[] stLargeCharPositions = new ST数字[]
-    {
-        new ST数字('0', new Rectangle(0 * 28, 0, 28, 42)),
-        new ST数字('1', new Rectangle(1 * 28, 0, 28, 42)),
-        new ST数字('2', new Rectangle(2 * 28, 0, 28, 42)),
-        new ST数字('3', new Rectangle(3 * 28, 0, 28, 42)),
-        new ST数字('4', new Rectangle(4 * 28, 0, 28, 42)),
-        new ST数字('5', new Rectangle(5 * 28, 0, 28, 42)),
-        new ST数字('6', new Rectangle(6 * 28, 0, 28, 42)),
-        new ST数字('7', new Rectangle(7 * 28, 0, 28, 42)),
-        new ST数字('8', new Rectangle(8 * 28, 0, 28, 42)),
-        new ST数字('9', new Rectangle(9 * 28, 0, 28, 42)),
-        new ST数字('.', new Rectangle(10 * 28, 0, 10, 42))
-    };
+    private readonly ST数字[] st数字 =
+    [
+        new('0', new Rectangle(0 * 12, 0, 12, 20)),
+        new('1', new Rectangle(1 * 12, 0, 12, 20)),
+        new('2', new Rectangle(2 * 12, 0, 12, 20)),
+        new('3', new Rectangle(3 * 12, 0, 12, 20)),
+        new('4', new Rectangle(4 * 12, 0, 12, 20)),
+        new('5', new Rectangle(5 * 12, 0, 12, 20)),
+        new('6', new Rectangle(6 * 12, 0, 12, 20)),
+        new('7', new Rectangle(7 * 12, 0, 12, 20)),
+        new('8', new Rectangle(8 * 12, 0, 12, 20)),
+        new('9', new Rectangle(9 * 12, 0, 12, 20)),
+        new(':', new Rectangle(10 * 12 + 3, 0, 6, 20)),
+        new('p', new Rectangle(11 * 12, 0, 12, 20))
+    ];
+    private readonly ST難易度数字[] stDifficultyNumber =
+    [
+        new('0', new Rectangle(0 * 20, 0, 20, 28)),
+        new('1', new Rectangle(1 * 20, 0, 20, 28)),
+        new('2', new Rectangle(2 * 20, 0, 20, 28)),
+        new('3', new Rectangle(3 * 20, 0, 20, 28)),
+        new('4', new Rectangle(4 * 20, 0, 20, 28)),
+        new('5', new Rectangle(5 * 20, 0, 20, 28)),
+        new('6', new Rectangle(6 * 20, 0, 20, 28)),
+        new('7', new Rectangle(7 * 20, 0, 20, 28)),
+        new('8', new Rectangle(8 * 20, 0, 20, 28)),
+        new('9', new Rectangle(9 * 20, 0, 20, 28)),
+        new('.', new Rectangle(10 * 20, 0, 10, 28)),
+        new('-', new Rectangle(11 * 20 - 10, 0, 20, 28)),
+        new('?', new Rectangle(12 * 20 - 10, 0, 20, 28))
+    ];
+    private readonly ST達成率数字[] st達成率数字 =
+    [
+        new('0', new Rectangle(0 * 12, 0, 12, 20)),
+        new('1', new Rectangle(1 * 12, 0, 12, 20)),
+        new('2', new Rectangle(2 * 12, 0, 12, 20)),
+        new('3', new Rectangle(3 * 12, 0, 12, 20)),
+        new('4', new Rectangle(4 * 12, 0, 12, 20)),
+        new('5', new Rectangle(5 * 12, 0, 12, 20)),
+        new('6', new Rectangle(6 * 12, 0, 12, 20)),
+        new('7', new Rectangle(7 * 12, 0, 12, 20)),
+        new('8', new Rectangle(8 * 12, 0, 12, 20)),
+        new('9', new Rectangle(9 * 12, 0, 12, 20)),
+        new('.', new Rectangle(10 * 12, 0, 6, 20)),
+        new('%', new Rectangle(11 * 12 - 6, 0, 12, 20))
+    ];
+    private readonly ST数字[] stLargeCharPositions =
+    [
+        new('0', new Rectangle(0 * 28, 0, 28, 42)),
+        new('1', new Rectangle(1 * 28, 0, 28, 42)),
+        new('2', new Rectangle(2 * 28, 0, 28, 42)),
+        new('3', new Rectangle(3 * 28, 0, 28, 42)),
+        new('4', new Rectangle(4 * 28, 0, 28, 42)),
+        new('5', new Rectangle(5 * 28, 0, 28, 42)),
+        new('6', new Rectangle(6 * 28, 0, 28, 42)),
+        new('7', new Rectangle(7 * 28, 0, 28, 42)),
+        new('8', new Rectangle(8 * 28, 0, 28, 42)),
+        new('9', new Rectangle(9 * 28, 0, 28, 42)),
+        new('.', new Rectangle(10 * 28, 0, 10, 42))
+    ];
 
-    private readonly Rectangle rcunused = new Rectangle(0, 0x21, 80, 15);
+    private readonly Rectangle rcunused = new(0, 0x21, 80, 15);
     public CTexture txパネル本体;
     private CTexture txランク;
     private CTexture tx達成率MAX;
@@ -910,8 +913,8 @@ internal class CActSelectStatusPanel : CActivity
     //private CTexture txBPM画像;
     //private CTexture txTestSolidLine;
     private CTexture[] txDrumChipsBarLine = new CTexture[9];
-    private Color[] clDrumChipsBarColors = new Color[9]
-    {
+    private Color[] clDrumChipsBarColors =
+    [
         Color.PaleVioletRed,
         Color.DeepSkyBlue,
         Color.HotPink,
@@ -921,26 +924,26 @@ internal class CActSelectStatusPanel : CActivity
         Color.Red,
         Color.Orange,
         Color.DeepSkyBlue
-    };
+    ];
     private CTexture[] txGBChipsBarLine = new CTexture[6];
-    private Color[] clGBChipsBarColors = new Color[6]
-    {
+    private Color[] clGBChipsBarColors =
+    [
         Color.Red,
         Color.Green,
         Color.DeepSkyBlue,
         Color.Yellow,
         Color.HotPink,
         Color.White
-    };
+    ];
     private CTexture txSkillPointPanel;
     private CTexture txProgressBar;
-    private Color[] clProgressBarColors = new Color[4]
-    {
+    private Color[] clProgressBarColors =
+    [
         Color.Black,
         Color.DeepSkyBlue,
         Color.Yellow,
         Color.Yellow
-    };
+    ];
     private int nCheckDifficultyLabelDisplayAndReturnScrollDirection()
     {
         int num = 0;
@@ -1070,7 +1073,7 @@ internal class CActSelectStatusPanel : CActivity
             {
                 if (st達成率数字[i].ch == c)
                 {
-                    Rectangle rectangle = new Rectangle(st達成率数字[i].rc.X, st達成率数字[i].rc.Y, 12, 20);
+                    Rectangle rectangle = new(st達成率数字[i].rc.X, st達成率数字[i].rc.Y, 12, 20);
                     if (c == '.')
                     {
                         rectangle.Width -= 6;
@@ -1103,7 +1106,7 @@ internal class CActSelectStatusPanel : CActivity
             {
                 if (stDifficultyNumber[i].ch == c)
                 {
-                    Rectangle rectangle = new Rectangle(stDifficultyNumber[i].rc.X, stDifficultyNumber[i].rc.Y, stDifficultyNumber[i].rc.Width, stDifficultyNumber[i].rc.Height);
+                    Rectangle rectangle = new(stDifficultyNumber[i].rc.X, stDifficultyNumber[i].rc.Y, stDifficultyNumber[i].rc.Width, stDifficultyNumber[i].rc.Height);
                     if (txDifficultyNumber != null)
                     {
                         txDifficultyNumber.tDraw2D(CDTXMania.app.Device, x, y, rectangle);
@@ -1125,7 +1128,7 @@ internal class CActSelectStatusPanel : CActivity
             {
                 if (stDifficultyNumber[i].ch == c)
                 {
-                    Rectangle rectangle = new Rectangle(stDifficultyNumber[i].rc.X, stDifficultyNumber[i].rc.Y, 20, 28);
+                    Rectangle rectangle = new(stDifficultyNumber[i].rc.X, stDifficultyNumber[i].rc.Y, 20, 28);
                     if (c == '.')
                     {
                         rectangle.Width -= 10;
@@ -1156,7 +1159,7 @@ internal class CActSelectStatusPanel : CActivity
             {
                 if (st数字[i].ch == str[j])
                 {
-                    Rectangle rectangle = new Rectangle(st数字[i].rc.X, st数字[i].rc.Y, st数字[i].rc.Width, st数字[i].rc.Height);
+                    Rectangle rectangle = new(st数字[i].rc.X, st数字[i].rc.Y, st数字[i].rc.Width, st数字[i].rc.Height);
                     if (txBPM数字 != null)
                     {
                         txBPM数字.tDraw2D(CDTXMania.app.Device, x, y, rectangle);

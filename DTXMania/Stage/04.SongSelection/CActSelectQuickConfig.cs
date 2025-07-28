@@ -2,8 +2,8 @@
 using System.Drawing;
 using DTXMania.Core;
 using DTXMania.UI;
+using DTXMania.UI.Drawable;
 using DTXMania.UI.Item;
-using DTXUIRenderer;
 using SharpDX;
 using FDK;
 
@@ -48,11 +48,10 @@ internal class CActSelectQuickConfig : CActSelectPopupMenu
 
     private List<CItemBase> MakeListCItemBase(int nInstrument)
     {
-        List<CItemBase> itemList = new List<CItemBase>();
+        List<CItemBase> itemList = new();
             
         #region [ 共通 Target/AutoMode/AutoLane ]
-        var target = new CSwitchItemList("Target", CItemBase.EPanelType.Normal, nInstrument, "", "",
-            new string[] { "Drums", "Guitar", "Bass" })
+        var target = new CSwitchItemList("Target", CItemBase.EPanelType.Normal, nInstrument, "", "", ["Drums", "Guitar", "Bass"])
         {
             action = () =>
             {
@@ -68,8 +67,7 @@ internal class CActSelectQuickConfig : CActSelectPopupMenu
         List<int> automode = tConfigureAuto_DefaultSettings();
         if (nInstrument == (int)EInstrumentPart.DRUMS)
         {
-            var autoMode = new CItemList("Auto Mode", CItemBase.EPanelType.Normal, automode[nInstrument], "", "",
-                new string[] { "All Auto", "Auto LP", "Auto BD", "2PedalAuto", "XGLaneAuto", "Custom", "OFF" })
+            var autoMode = new CItemList("Auto Mode", CItemBase.EPanelType.Normal, automode[nInstrument], "", "", ["All Auto", "Auto LP", "Auto BD", "2PedalAuto", "XGLaneAuto", "Custom", "OFF"])
             {
                 action = MakeAutoPanel
             };
@@ -77,8 +75,7 @@ internal class CActSelectQuickConfig : CActSelectPopupMenu
         }
         else
         {
-            var autoMode = new CItemList("Auto Mode", CItemBase.EPanelType.Normal, automode[nInstrument], "", "",
-                new string[] { "All Auto", "Auto Neck", "Auto Pick", "Custom", "OFF" })
+            var autoMode = new CItemList("Auto Mode", CItemBase.EPanelType.Normal, automode[nInstrument], "", "", ["All Auto", "Auto Neck", "Auto Pick", "Custom", "OFF"])
             {
                 action = MakeAutoPanel
             };
@@ -115,8 +112,7 @@ internal class CActSelectQuickConfig : CActSelectPopupMenu
             "HALF: wallpaper, lanes and gauge are\n" +
             " disappeared.\n" +
             "FULL: additionaly to HALF, bar/beat\n" +
-            " lines, hit bar, pads are disappeared.",
-            new string[] { "OFF", "HALF", "FULL" })
+            " lines, hit bar, pads are disappeared.", ["OFF", "HALF", "FULL"])
         {
             action = () =>
             {
@@ -191,8 +187,7 @@ internal class CActSelectQuickConfig : CActSelectPopupMenu
 
         var suddenHidden = new CItemList("HID/SUD", CItemBase.EPanelType.Normal, CDTXMania.ConfigIni.nHidSud[nInstrument],
             "",
-            "",
-            new string[] { "OFF", "HIDDEN", "SUDDEN", "HID/SUD", "STEALTH" })
+            "", ["OFF", "HIDDEN", "SUDDEN", "HID/SUD", "STEALTH"])
         {
             action = () =>
             {
@@ -234,9 +229,8 @@ internal class CActSelectQuickConfig : CActSelectPopupMenu
         var autoGhost = new CItemList("AUTO Ghost", CItemBase.EPanelType.Normal,
             (int)CDTXMania.ConfigIni.eAutoGhost[nInstrument],
             "AUTOプレーのゴーストを指定します。\n",
-            "Specify Play Ghost data.\n",
-            new string[] { "Perfect", "Last Play", "Hi Skill", "Hi Score", "Online" }
-        )
+            "Specify Play Ghost data.\n", 
+            ["Perfect", "Last Play", "Hi Skill", "Hi Score", "Online"])
         {
             action = () =>
             {
@@ -249,9 +243,8 @@ internal class CActSelectQuickConfig : CActSelectPopupMenu
         var targetGhost = new CItemList("Target Ghost", CItemBase.EPanelType.Normal,
             (int)CDTXMania.ConfigIni.eTargetGhost[nInstrument],
             "ターゲットゴーストを指定します。\n",
-            "Specify Target Ghost data.\n",
-            new string[] { "None", "Perfect", "Last Play", "Hi Skill", "Hi Score", "Online" }
-        )
+            "Specify Target Ghost data.\n", 
+            ["None", "Perfect", "Last Play", "Hi Skill", "Hi Score", "Online"])
         {
             action = () =>
             {
@@ -264,7 +257,7 @@ internal class CActSelectQuickConfig : CActSelectPopupMenu
             
         #region [ 共通 SET切り替え/More/Return ]
         //l.Add(new CSwitchItemList("Config Set", CItemBase.EPanelType.Normal, nCurrentConfigSet, "", "", new string[] { "SET-1", "SET-2", "SET-3" }));
-        var more = new CSwitchItemList("More...", CItemBase.EPanelType.Normal, 0, "", "", new string[] { "" })
+        var more = new CSwitchItemList("More...", CItemBase.EPanelType.Normal, 0, "", "", [""])
         {
             action = () =>
             {
@@ -275,7 +268,7 @@ internal class CActSelectQuickConfig : CActSelectPopupMenu
         };
         itemList.Add(more);
 
-        var returnBtn = new CSwitchItemList("Return", CItemBase.EPanelType.Normal, 0, "", "", new string[] { "", "" })
+        var returnBtn = new CSwitchItemList("Return", CItemBase.EPanelType.Normal, 0, "", "", [""])
         {
             action = () =>
             {
@@ -295,7 +288,7 @@ internal class CActSelectQuickConfig : CActSelectPopupMenu
     /// <returns>Drums,Guitar,BassのAutoMode値のリスト</returns>
     private List<int> tConfigureAuto_DefaultSettings()
     {
-        List<int> l = new List<int>();
+        List<int> l = new();
         int automode;
         #region [ Drums ]
         // "All Auto", "Auto LP", "Auto BD", "2Pedal Auto", "3 Auto", "Custom", "OFF"
@@ -463,8 +456,6 @@ internal class CActSelectQuickConfig : CActSelectPopupMenu
             case (int)EInstrumentPart.BASS:
                 header = "RGBYPPW";
                 break;
-            default:
-                break;
         }
         s = GetAutoParameters(nCurrentTarget);
         for (int i = 0; i < header.Length; i++)
@@ -493,7 +484,7 @@ internal class CActSelectQuickConfig : CActSelectPopupMenu
         autoStatus.SetTexture(new DTXTexture(txAutoStatus));
     }
 
-    public override void tPressEnterMain(int nSortOrder)
+    public override void tPressEnterMain()
     {
         lci[nCurrentTarget][nCurrentSelection].RunAction();
     }
@@ -644,13 +635,13 @@ internal class CActSelectQuickConfig : CActSelectPopupMenu
     }
     public override void OnManagedCreateResources()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             subMenu = new UIGroup("Quick Options Menu");
             subMenu.renderOrder = 100;
             subMenu.anchor = new Vector2(0.5f, 0.5f);
 
-            var popupTex = new DTXTexture(CSkin.Path(@"Graphics\ScreenSelect popup auto settings.png"));
+            var popupTex = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\ScreenSelect popup auto settings.png"));
             var popup = new UIImage(popupTex);
             subMenu.AddChild(popup);
             subMenu.size = popup.size;
@@ -670,7 +661,7 @@ internal class CActSelectQuickConfig : CActSelectPopupMenu
     }
     public override void OnManagedReleaseResources()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             CDTXMania.tReleaseTexture(ref txAutoStatus);
                 

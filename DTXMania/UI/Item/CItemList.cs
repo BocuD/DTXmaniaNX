@@ -6,10 +6,8 @@
 /// </summary>
 internal class CItemList : CItemBase
 {
-	// プロパティ
-
-	public List<string> list項目値;
-	public int n現在選択されている項目番号;
+	public List<string> listItemValues;
+	public int nCurrentlySelectedIndex;
 
 
 	// コンストラクタ
@@ -17,54 +15,62 @@ internal class CItemList : CItemBase
 	public CItemList()
 	{
 		eType = EType.List;
-		n現在選択されている項目番号 = 0;
-		list項目値 = new List<string>();
+		nCurrentlySelectedIndex = 0;
+		listItemValues = [];
 	}
-	public CItemList(string str項目名, EPanelType eパネル種別, int n初期インデックス値, string str説明文jp, string str説明文en, params string[] arg項目リスト)
+	public CItemList(string strItemName, EPanelType panelType, int initialSelectedIndex, string strDescriptionJp, string strDescriptionEn, string[] argItemList)
 		: this() {
-		tInitialize(str項目名, eパネル種別, n初期インデックス値, str説明文jp, str説明文en, arg項目リスト);
+		tInitialize(strItemName, panelType, initialSelectedIndex, strDescriptionJp, strDescriptionEn, argItemList);
 	}
 
 
 	// CItemBase 実装
 
-	protected override void tEnter押下()
+	protected override void tEnterPressed()
 	{
 		tMoveItemValueToNext();
 	}
 	public override void tMoveItemValueToNext()
 	{
-		if( ++n現在選択されている項目番号 >= list項目値.Count )
+		if( ++nCurrentlySelectedIndex >= listItemValues.Count )
 		{
-			n現在選択されている項目番号 = 0;
+			nCurrentlySelectedIndex = 0;
 		}
 	}
 	public override void tMoveItemValueToPrevious()
 	{
-		if( --n現在選択されている項目番号 < 0 )
+		if( --nCurrentlySelectedIndex < 0 )
 		{
-			n現在選択されている項目番号 = list項目値.Count - 1;
+			nCurrentlySelectedIndex = listItemValues.Count - 1;
 		}
 	}
 
-	public void tInitialize(string str項目名, EPanelType eパネル種別, int n初期インデックス値, string str説明文jp, string str説明文en, params string[] arg項目リスト) {
-		base.tInitialize(str項目名, eパネル種別, str説明文jp, str説明文en);
-		n現在選択されている項目番号 = n初期インデックス値;
+	public void tInitialize(string strItemDescription, EPanelType ePanelType, int nInitialSelectedIndex, string strDescriptionJp, string strDescriptionEn, params string[] arg項目リスト) {
+		base.tInitialize(strItemDescription, ePanelType, strDescriptionJp, strDescriptionEn);
+		nCurrentlySelectedIndex = nInitialSelectedIndex;
 		foreach (string str in arg項目リスト) {
-			list項目値.Add(str);
+			listItemValues.Add(str);
 		}
 	}
-	public override object obj現在値()
+
+	public override object GetCurrentValue()
 	{
-		return list項目値[ n現在選択されている項目番号 ];
+		return listItemValues[nCurrentlySelectedIndex];
 	}
+
 	public override int GetIndex()
 	{
-		return n現在選択されている項目番号;
+		return nCurrentlySelectedIndex;
 	}
-	public override void SetIndex( int index )
+
+	public override void SetIndex(int index)
 	{
-		n現在選択されている項目番号 = index;
+		nCurrentlySelectedIndex = index;
+	}
+
+	public override string GetStringValue()
+	{
+		return listItemValues[nCurrentlySelectedIndex];
 	}
 }
 
@@ -82,16 +88,16 @@ internal class CSwitchItemList : CItemList
 	public CSwitchItemList()
 	{
 		eType = EType.切替リスト;
-		n現在選択されている項目番号 = 0;
-		list項目値 = new List<string>();
+		nCurrentlySelectedIndex = 0;
+		listItemValues = new List<string>();
 	}
-	public CSwitchItemList( string str項目名, EPanelType eパネル種別, int n初期インデックス値, string str説明文jp, string str説明文en, params string[] arg項目リスト )
+	public CSwitchItemList( string strItemName, EPanelType ePanelType, int nInitialSelectedIndex, string strDescriptionJp, string strDescriptionEn, string[] argItemList )
 		: this()
 	{
-		tInitialize( str項目名, eパネル種別, n初期インデックス値, str説明文jp, str説明文en, arg項目リスト );
+		tInitialize( strItemName, ePanelType, nInitialSelectedIndex, strDescriptionJp, strDescriptionEn, argItemList );
 	}
 
-	protected override void tEnter押下()
+	protected override void tEnterPressed()
 	{
 		// this.tMoveItemValueToNext();	// DoNothing
 	}

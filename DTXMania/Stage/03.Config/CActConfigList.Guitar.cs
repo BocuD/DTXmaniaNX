@@ -5,7 +5,6 @@ namespace DTXMania;
 
 internal partial class CActConfigList
 {
-    #region [ t項目リストの設定_Guitar() ]
     private CItemInteger iGuitarScrollSpeed;
     private CItemToggle iGuitarGraph;
         
@@ -19,7 +18,7 @@ internal partial class CActConfigList
             "Return to left menu.");
         listItems.Add(iGuitarReturnToMenu);
 
-        CItemThreeState iGuitarAutoPlayAll = new("AutoPlay (All)", CItemThreeState.E状態.不定,
+        CItemThreeState iGuitarAutoPlayAll = new("AutoPlay (All)", CItemThreeState.EState.UNDEFINED,
             "全ネック/ピックの自動演奏の ON/OFF を\n" +
             "まとめて切り替えます。",
             "You can change whether Auto or not\n" +
@@ -85,7 +84,7 @@ internal partial class CActConfigList
         //add the action for this later, as it needs to be able to change all of the above buttons
         iGuitarAutoPlayAll.action = () =>
         {
-            bool bAutoOn = iGuitarAutoPlayAll.e現在の状態 == CItemThreeState.E状態.ON;
+            bool bAutoOn = iGuitarAutoPlayAll.eCurrentState == CItemThreeState.EState.ON;
                 
             iGuitarR.bON = bAutoOn;
             iGuitarG.bON = bAutoOn;
@@ -105,7 +104,7 @@ internal partial class CActConfigList
             
         listItems.Add(iGuitarScrollSpeed);
 
-        CItemList iGuitarHIDSUD = new("HID-SUD", CItemBase.EPanelType.Normal, (int)CDTXMania.ConfigIni.nHidSud.Guitar,
+        CItemList iGuitarHIDSUD = new("HID-SUD", CItemBase.EPanelType.Normal, CDTXMania.ConfigIni.nHidSud.Guitar,
             "HIDDEN:チップが途中から見えなくなります。\n" +
             "SUDDEN:チップが途中まで見えません。\n" +
             "HID-SUD:HIDDEN、SUDDENの両方が適用\n" +
@@ -114,10 +113,10 @@ internal partial class CActConfigList
             "The display position for Drums Combo.\n" +
             "Note that it doesn't take effect\n" +
             " at Autoplay ([Left] is forcely used).",
-            new string[] { "OFF", "Hidden", "Sudden", "HidSud", "Stealth" });
+            ["OFF", "Hidden", "Sudden", "HidSud", "Stealth"]);
         iGuitarHIDSUD.BindConfig(
-            () => iGuitarHIDSUD.n現在選択されている項目番号 = CDTXMania.ConfigIni.nHidSud.Guitar,
-            () => CDTXMania.ConfigIni.nHidSud.Guitar = iGuitarHIDSUD.n現在選択されている項目番号);
+            () => iGuitarHIDSUD.nCurrentlySelectedIndex = CDTXMania.ConfigIni.nHidSud.Guitar,
+            () => CDTXMania.ConfigIni.nHidSud.Guitar = iGuitarHIDSUD.nCurrentlySelectedIndex);
         listItems.Add(iGuitarHIDSUD);
             
         //----------DisplayOption----------
@@ -127,20 +126,20 @@ internal partial class CActConfigList
             "FULL: さらに小節線、拍線、判定ラインも\n" +
             "表示されなくなります。",
             "OFF: all display parts are shown.\nHALF: lanes and gauge are\n disappeared.\nFULL: additionaly to HALF, bar/beat\n lines, hit bar are disappeared.",
-            new string[] { "OFF", "HALF", "FULL" });
+            ["OFF", "HALF", "FULL"]);
         listItems.Add(iGuitarDark);
             
-        CItemList iGuitarLaneDisp = new("LaneDisp", CItemBase.EPanelType.Normal, (int)CDTXMania.ConfigIni.nLaneDisp.Guitar,
+        CItemList iGuitarLaneDisp = new("LaneDisp", CItemBase.EPanelType.Normal, CDTXMania.ConfigIni.nLaneDisp.Guitar,
             "レーンの縦線と小節線の表示を切り替えます。\n" +
             "ALL  ON :レーン背景、小節線を表示します。\n" +
             "LANE OFF:レーン背景を表示しません。\n" +
             "LINE OFF:小節線を表示しません。\n" +
             "ALL  OFF:レーン背景、小節線を表示しません。",
             "",
-            new string[] { "ALL ON", "LANE OFF", "LINE OFF", "ALL OFF" });
+            ["ALL ON", "LANE OFF", "LINE OFF", "ALL OFF"]);
         iGuitarLaneDisp.BindConfig(
-            () => iGuitarLaneDisp.n現在選択されている項目番号 = CDTXMania.ConfigIni.nLaneDisp.Guitar,
-            () => CDTXMania.ConfigIni.nLaneDisp.Guitar = iGuitarLaneDisp.n現在選択されている項目番号);
+            () => iGuitarLaneDisp.nCurrentlySelectedIndex = CDTXMania.ConfigIni.nLaneDisp.Guitar,
+            () => CDTXMania.ConfigIni.nLaneDisp.Guitar = iGuitarLaneDisp.nCurrentlySelectedIndex);
         listItems.Add(iGuitarLaneDisp);
 
         CItemToggle iGuitarJudgeLineDisp = new("JudgeLineDisp", CDTXMania.ConfigIni.bJudgeLineDisp.Guitar,
@@ -163,21 +162,21 @@ internal partial class CActConfigList
         //add the action for this later, as it needs to be able to change all of the above buttons
         iGuitarDark.action = () =>
         {
-            if (iGuitarDark.n現在選択されている項目番号 == (int)EDarkMode.FULL)
+            if (iGuitarDark.nCurrentlySelectedIndex == (int)EDarkMode.FULL)
             {
-                iGuitarLaneDisp.n現在選択されている項目番号 = 3;
+                iGuitarLaneDisp.nCurrentlySelectedIndex = 3;
                 iGuitarJudgeLineDisp.bON = false;
                 iGuitarLaneFlush.bON = false;
             }
-            else if (iGuitarDark.n現在選択されている項目番号 == (int)EDarkMode.HALF)
+            else if (iGuitarDark.nCurrentlySelectedIndex == (int)EDarkMode.HALF)
             {
-                iGuitarLaneDisp.n現在選択されている項目番号 = 1;
+                iGuitarLaneDisp.nCurrentlySelectedIndex = 1;
                 iGuitarJudgeLineDisp.bON = true;
                 iGuitarLaneFlush.bON = true;
             }
             else
             {
-                iGuitarLaneDisp.n現在選択されている項目番号 = 0;
+                iGuitarLaneDisp.nCurrentlySelectedIndex = 0;
                 iGuitarJudgeLineDisp.bON = true;
                 iGuitarLaneFlush.bON = true;
             }
@@ -187,10 +186,10 @@ internal partial class CActConfigList
             "アタックエフェクトの表示 / 非表示を\n" +
             "切り替えます。",
             "",
-            new string[] { "ON", "OFF" });
+            ["ON", "OFF"]);
         iGuitarAttackEffect.BindConfig(
-            () => iGuitarAttackEffect.n現在選択されている項目番号 = (int)CDTXMania.ConfigIni.eAttackEffect.Guitar,
-            () => CDTXMania.ConfigIni.eAttackEffect.Guitar = (EType)iGuitarAttackEffect.n現在選択されている項目番号);
+            () => iGuitarAttackEffect.nCurrentlySelectedIndex = (int)CDTXMania.ConfigIni.eAttackEffect.Guitar,
+            () => CDTXMania.ConfigIni.eAttackEffect.Guitar = (EType)iGuitarAttackEffect.nCurrentlySelectedIndex);
         listItems.Add(iGuitarAttackEffect);
 
         CItemToggle iGuitarReverse = new("Reverse", CDTXMania.ConfigIni.bReverse.Guitar,
@@ -208,10 +207,10 @@ internal partial class CActConfigList
         CItemList iGuitarPosition = new("Position", CItemBase.EPanelType.Normal, (int)CDTXMania.ConfigIni.JudgementStringPosition.Guitar,
             "ギターの判定文字の表示位置を指定\nします。\n  P-A: OnTheLane\n  P-B: COMBO の下\n  P-C: 判定ライン上\n  OFF: 表示しない",
             "The position to show judgement mark.\n(Perfect, Great, ...)\n\n P-A: on the lanes.\n P-B: under the COMBO indication.\n P-C: on the JudgeLine.\n OFF: no judgement mark.",
-            new string[] { "P-A", "P-B", "P-C", "OFF" });
+            ["P-A", "P-B", "P-C", "OFF"]);
         iGuitarPosition.BindConfig(
-            () => iGuitarPosition.n現在選択されている項目番号 = (int)CDTXMania.ConfigIni.JudgementStringPosition.Guitar,
-            () => CDTXMania.ConfigIni.JudgementStringPosition.Guitar = (EType)iGuitarPosition.n現在選択されている項目番号);
+            () => iGuitarPosition.nCurrentlySelectedIndex = (int)CDTXMania.ConfigIni.JudgementStringPosition.Guitar,
+            () => CDTXMania.ConfigIni.JudgementStringPosition.Guitar = (EType)iGuitarPosition.nCurrentlySelectedIndex);
         listItems.Add(iGuitarPosition);
 
         //実機ではここにオートオプションが入る。
@@ -227,19 +226,19 @@ internal partial class CActConfigList
         CItemList iGuitarSpecialist = new("Performance Mode", CItemBase.EPanelType.Normal, CDTXMania.ConfigIni.bSpecialist.Guitar ? 1 : 0,
             "ギターの演奏・モード\nします。\n  Normal: 通常の演奏モードです\n  Specialist: 間違えると違う音が流れます",
             "Turn on/off Specialist Mode for Guitar\n Normal: Default Performance mode\n Specialist: Different sound is played when you make a mistake",
-            new string[] { "Normal", "Specialist" });
+            ["Normal", "Specialist"]);
         iGuitarSpecialist.BindConfig(
-            () => iGuitarSpecialist.n現在選択されている項目番号 = CDTXMania.ConfigIni.bSpecialist.Guitar ? 1 : 0,
-            () => CDTXMania.ConfigIni.bSpecialist.Guitar = iGuitarSpecialist.n現在選択されている項目番号 == 1);
+            () => iGuitarSpecialist.nCurrentlySelectedIndex = CDTXMania.ConfigIni.bSpecialist.Guitar ? 1 : 0,
+            () => CDTXMania.ConfigIni.bSpecialist.Guitar = iGuitarSpecialist.nCurrentlySelectedIndex == 1);
         listItems.Add(iGuitarSpecialist);
 
         CItemList iGuitarRandom = new("Random", CItemBase.EPanelType.Normal, (int)CDTXMania.ConfigIni.eRandom.Guitar,
             "ギターのチップがランダムに降ってきます。\n  Mirror: ミラーをかけます\n  Part: 小節_レーン単位で交換\n  Super: チップ単位で交換\n  Hyper: 全部完全に変更",
             "Guitar chips come randomly.\n Mirror: \n Part: swapping lanes randomly for each\n  measures.\n Super: swapping chip randomly\n Hyper: swapping randomly\n  (number of lanes also changes)",
-            new string[] { "OFF", "Mirror", "Part", "Super", "Hyper" });
+            ["OFF", "Mirror", "Part", "Super", "Hyper"]);
         iGuitarRandom.BindConfig(
-            () => iGuitarRandom.n現在選択されている項目番号 = (int)CDTXMania.ConfigIni.eRandom.Guitar,
-            () => CDTXMania.ConfigIni.eRandom.Guitar = (ERandomMode)iGuitarRandom.n現在選択されている項目番号);
+            () => iGuitarRandom.nCurrentlySelectedIndex = (int)CDTXMania.ConfigIni.eRandom.Guitar,
+            () => CDTXMania.ConfigIni.eRandom.Guitar = (ERandomMode)iGuitarRandom.nCurrentlySelectedIndex);
         listItems.Add(iGuitarRandom);
 
         //NumOfLanes(ここではレーンオ－トに相当する。)
@@ -334,7 +333,7 @@ internal partial class CActConfigList
             () => CDTXMania.ConfigIni.nInputAdjustTimeMs.Guitar = iGuitarInputAdjustTimeMs.nCurrentValue);
         listItems.Add(iGuitarInputAdjustTimeMs);
 
-        CItemBase iGuitarGoToKeyAssign = new("Guitar Keys", CItemBase.EPanelType.Normal,
+        CItemBase iGuitarGoToKeyAssign = new("Guitar Keys", CItemBase.EPanelType.Folder,
             "ギターのキー入力に関する項目を設定します。",
             "Settings for the guitar key/pad inputs.")
         {
@@ -342,7 +341,7 @@ internal partial class CActConfigList
         };
         listItems.Add(iGuitarGoToKeyAssign);
 
-        OnListMenuの初期化();
+        InitializeList();
         nCurrentSelection = 0;
         eMenuType = EMenuType.Guitar;
     }
@@ -363,7 +362,7 @@ internal partial class CActConfigList
             "ギターのキー設定：\nRボタンへのキーの割り当てを設定し\nます。",
             "Guitar key assign:\nTo assign key/pads for R button.")
         {
-            action = () => CDTXMania.stageConfig.tNotifyPadSelection(EKeyConfigPart.GUITAR, EKeyConfigPad.R)
+            action = () => stageConfig.tNotifyPadSelection(EKeyConfigPart.GUITAR, EKeyConfigPad.R)
         };
         listItems.Add(iKeyAssignGuitarR);
 
@@ -371,7 +370,7 @@ internal partial class CActConfigList
             "ギターのキー設定：\nGボタンへのキーの割り当てを設定し\nます。",
             "Guitar key assign:\nTo assign key/pads for G button.")
         {
-            action = () => CDTXMania.stageConfig.tNotifyPadSelection(EKeyConfigPart.GUITAR, EKeyConfigPad.G)
+            action = () => stageConfig.tNotifyPadSelection(EKeyConfigPart.GUITAR, EKeyConfigPad.G)
         };
         listItems.Add(iKeyAssignGuitarG);
 
@@ -379,7 +378,7 @@ internal partial class CActConfigList
             "ギターのキー設定：\nBボタンへのキーの割り当てを設定し\nます。",
             "Guitar key assign:\nTo assign key/pads for B button.")
         {
-            action = () => CDTXMania.stageConfig.tNotifyPadSelection(EKeyConfigPart.GUITAR, EKeyConfigPad.B)
+            action = () => stageConfig.tNotifyPadSelection(EKeyConfigPart.GUITAR, EKeyConfigPad.B)
         };
         listItems.Add(iKeyAssignGuitarB);
 
@@ -387,7 +386,7 @@ internal partial class CActConfigList
             "ギターのキー設定：\nYボタンへのキーの割り当てを設定し\nます。",
             "Guitar key assign:\nTo assign key/pads for Y button.")
         {
-            action = () => CDTXMania.stageConfig.tNotifyPadSelection(EKeyConfigPart.GUITAR, EKeyConfigPad.Y)
+            action = () => stageConfig.tNotifyPadSelection(EKeyConfigPart.GUITAR, EKeyConfigPad.Y)
         };
         listItems.Add(iKeyAssignGuitarY);
 
@@ -395,7 +394,7 @@ internal partial class CActConfigList
             "ギターのキー設定：\nPボタンへのキーの割り当てを設定し\nます。",
             "Guitar key assign:\nTo assign key/pads for P button.")
         {
-            action = () => CDTXMania.stageConfig.tNotifyPadSelection(EKeyConfigPart.GUITAR, EKeyConfigPad.P)
+            action = () => stageConfig.tNotifyPadSelection(EKeyConfigPart.GUITAR, EKeyConfigPad.P)
         };
         listItems.Add(iKeyAssignGuitarP);
 
@@ -403,7 +402,7 @@ internal partial class CActConfigList
             "ギターのキー設定：\nピックボタンへのキーの割り当てを設\n定します。",
             "Guitar key assign:\nTo assign key/pads for Pick button.")
         {
-            action = () => CDTXMania.stageConfig.tNotifyPadSelection(EKeyConfigPart.GUITAR, EKeyConfigPad.Pick)
+            action = () => stageConfig.tNotifyPadSelection(EKeyConfigPart.GUITAR, EKeyConfigPad.Pick)
         };
         listItems.Add(iKeyAssignGuitarPick);
 
@@ -411,7 +410,7 @@ internal partial class CActConfigList
             "ギターのキー設定：\nWailingボタンへのキーの割り当てを\n設定します。",
             "Guitar key assign:\nTo assign key/pads for Wailing button.")
         {
-            action = () => CDTXMania.stageConfig.tNotifyPadSelection(EKeyConfigPart.GUITAR, EKeyConfigPad.Wail)
+            action = () => stageConfig.tNotifyPadSelection(EKeyConfigPart.GUITAR, EKeyConfigPad.Wail)
         };
         listItems.Add(iKeyAssignGuitarWail);
 
@@ -419,7 +418,7 @@ internal partial class CActConfigList
             "ギターのキー設定：\n決定ボタンへのキーの割り当てを設\n定します。",
             "Guitar key assign:\nTo assign key/pads for Decide button.")
         {
-            action = () => CDTXMania.stageConfig.tNotifyPadSelection(EKeyConfigPart.GUITAR, EKeyConfigPad.Decide)
+            action = () => stageConfig.tNotifyPadSelection(EKeyConfigPart.GUITAR, EKeyConfigPad.Decide)
         };
         listItems.Add(iKeyAssignGuitarDecide);
 
@@ -427,13 +426,12 @@ internal partial class CActConfigList
             "ギターのキー設定：\n取消ボタンへのキーの割り当てを設\n定します。",
             "Guitar key assign:\nTo assign key/pads for Cancel button.")
         {
-            action = () => CDTXMania.stageConfig.tNotifyPadSelection(EKeyConfigPart.GUITAR, EKeyConfigPad.Cancel)
+            action = () => stageConfig.tNotifyPadSelection(EKeyConfigPart.GUITAR, EKeyConfigPad.Cancel)
         };
         listItems.Add(iKeyAssignGuitarCancel);
 
-        OnListMenuの初期化();
+        InitializeList();
         nCurrentSelection = 0;
         eMenuType = EMenuType.KeyAssignGuitar;
     }
-    #endregion
 }

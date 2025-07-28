@@ -98,7 +98,7 @@ internal class CActPerfCommonJudgementString : CActivity
 		}
 
 		stLag数値 = new STlag数値[ 12 * 2 ];		// #25370 2011.2.1 yyagi
-		bNotActivated = true;
+		bActivated = false;
 	}
 
 
@@ -225,7 +225,7 @@ internal class CActPerfCommonJudgementString : CActivity
 	}
 	public override void OnManagedCreateResources()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			if(CDTXMania.ConfigIni.nJudgeAnimeType == 1)
 			{
@@ -251,7 +251,7 @@ internal class CActPerfCommonJudgementString : CActivity
 	}
 	public override void OnManagedReleaseResources()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			CDTXMania.tReleaseTexture( ref tx判定文字列[ 0 ] );
 			CDTXMania.tReleaseTexture( ref tx判定文字列[ 1 ] );

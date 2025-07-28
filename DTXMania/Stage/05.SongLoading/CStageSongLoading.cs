@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using System.Drawing;
 using DTXMania.Core;
 using DTXMania.UI;
-using DTXUIRenderer;
+using DTXMania.UI.Drawable;
 using SharpDX;
 using FDK;
 using Color = System.Drawing.Color;
@@ -29,7 +29,7 @@ internal class CStageSongLoading : CStage
     {
         eStageID = EStage.SongLoading_5;
         ePhaseID = EPhase.Common_DefaultState;
-        bNotActivated = true;
+        bActivated = false;
         //			base.listChildActivities.Add( this.actFI = new CActFIFOBlack() );	// #27787 2012.3.10 yyagi 曲読み込み画面のフェードインの省略
         listChildActivities.Add(actFO = new CActFIFOBlackStart());
 
@@ -163,6 +163,18 @@ internal class CStageSongLoading : CStage
         }
     }
 
+    public override void InitializeBaseUI()
+    {
+        
+    }
+    
+    public override void InitializeDefaultUI()
+    {
+        DTXTexture bgTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\6_background.jpg")));
+        UIImage bg = ui.AddChild(new UIImage(bgTex));
+        bg.renderOrder = -100;
+    }
+
     public override void OnActivate()
     {
         Trace.TraceInformation("曲読み込みステージを活性化します。");
@@ -183,12 +195,12 @@ internal class CStageSongLoading : CStage
 
             string strDTXFilePath = (CDTXMania.bCompactMode)
                 ? CDTXMania.strCompactModeFile
-                : CDTXMania.stageSongSelection.rChosenScore.FileInformation.AbsoluteFilePath;
+                : CDTXMania.confirmedChart.FileInformation.AbsoluteFilePath;
 
             cdtx = new(strDTXFilePath, true);
 
             if (!CDTXMania.bCompactMode && CDTXMania.ConfigIni.b曲名表示をdefのものにする)
-                strSongTitle = CDTXMania.stageSongSelection.rConfirmedSong.strタイトル;
+                strSongTitle = CDTXMania.confirmedSong.title;
             else
                 strSongTitle = cdtx.TITLE;
 
@@ -272,8 +284,8 @@ internal class CStageSongLoading : CStage
             base.OnActivate();
             if (!CDTXMania.bCompactMode && !CDTXMania.DTXVmode.Enabled && !CDTXMania.DTX2WAVmode.Enabled)
                 tDetermineStatusLabelFromLabelName(
-                    CDTXMania.stageSongSelection.rConfirmedSong.arDifficultyLabel[
-                        CDTXMania.stageSongSelection.nConfirmedSongDifficulty]);
+                    CDTXMania.confirmedSong.difficultyLabel[
+                        CDTXMania.confirmedSongDifficulty]);
             
             //add difficulty panel to ui here
             //todo: this should be moved when chart loading is moved
@@ -308,14 +320,8 @@ internal class CStageSongLoading : CStage
 
     public override void OnManagedCreateResources()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
-            ui = new UIGroup("Song Loading");
-            
-            DTXTexture bgTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\6_background.jpg")));
-            UIImage bg = ui.AddChild(new UIImage(bgTex));
-            bg.renderOrder = -100;
-            
             txLevel = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\6_LevelNumber.png"));
             txDifficultyPanel = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\6_Difficulty.png"));
             txPartPanel = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\6_Part.png"));
@@ -328,7 +334,7 @@ internal class CStageSongLoading : CStage
 
                 if (!string.IsNullOrWhiteSpace(strSongTitle))
                 {
-                    titleFont = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.str選曲リストフォント), 40,
+                    titleFont = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.songListFont), 40,
                         FontStyle.Regular);
                      Bitmap bmpSongName = titleFont.DrawPrivateFont(strSongTitle, CPrivateFont.DrawMode.Edge, Color.Black,
                         Color.Black, clGITADORAgradationTopColor, clGITADORAgradationBottomColor, true);
@@ -343,7 +349,7 @@ internal class CStageSongLoading : CStage
 
                 if (!string.IsNullOrWhiteSpace(strArtistName))
                 {
-                    artistNameFont = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.str選曲リストフォント), 30,
+                    artistNameFont = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.songListFont), 30,
                         FontStyle.Regular);
                     Bitmap bmpArtistName = artistNameFont.DrawPrivateFont(strArtistName, CPrivateFont.DrawMode.Edge, Color.Black,
                         Color.Black, clGITADORAgradationTopColor, clGITADORAgradationBottomColor, true);
@@ -372,10 +378,8 @@ internal class CStageSongLoading : CStage
 
     public override void OnManagedReleaseResources()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
-            ui.Dispose();
-            
             //テクスチャ11枚
             //2018.03.15 kairera0467 PrivateFontが抜けていた＆フォント生成直後に解放するようにしてみる
             CDTXMania.tReleaseTexture(ref txJacket);
@@ -388,59 +392,51 @@ internal class CStageSongLoading : CStage
         }
     }
 
-    public override int OnUpdateAndDraw()
+    public override void FirstUpdate()
     {
-        if (bNotActivated)
-            return 0;
-
-        #region [ 初めての進行描画 ]
-
-        //-----------------------------
-        if (bJustStartedUpdate)
+        if (sdLoadingSound != null)
         {
-            if (sdLoadingSound != null)
+            if (CDTXMania.Skin.soundNowLoading.bExclusive &&
+                (CSkin.CSystemSound.rLastPlayedExclusiveSystemSound != null))
             {
-                if (CDTXMania.Skin.soundNowLoading.bExclusive &&
-                    (CSkin.CSystemSound.rLastPlayedExclusiveSystemSound != null))
-                {
-                    CSkin.CSystemSound.rLastPlayedExclusiveSystemSound.t停止する();
-                }
-
-                sdLoadingSound.tStartPlaying();
-                nBGMPlayStartTime = CSoundManager.rcPerformanceTimer.nCurrentTime;
-                nBGMTotalPlayTimeMs = sdLoadingSound.nTotalPlayTimeMs;
-            }
-            else if (!CDTXMania.DTXVmode.Enabled && !CDTXMania.DTX2WAVmode.Enabled)
-            {
-                CDTXMania.Skin.soundNowLoading.tPlay();
-                nBGMPlayStartTime = CSoundManager.rcPerformanceTimer.nCurrentTime;
-                nBGMTotalPlayTimeMs = CDTXMania.Skin.soundNowLoading.nLength_CurrentSound;
+                CSkin.CSystemSound.rLastPlayedExclusiveSystemSound.tStop();
             }
 
-            ePhaseID = EPhase.Common_FadeIn;
-            
-            nWAVcount = 1;
-            
-            try
-            {
-                string path = cdtx.strFolderName + cdtx.PREIMAGE;
-
-                if (txJacket == null) // 2019.04.26 kairera0467
-                {
-                    txJacket = CDTXMania.tGenerateTexture(!File.Exists(path) ? CSkin.Path(@"Graphics\5_preimage default.png") : path);
-                }
-            }
-            catch (Exception ex)
-            {
-                Trace.TraceError(ex.StackTrace);
-            }
-            
-            bJustStartedUpdate = false;
+            sdLoadingSound.tStartPlaying();
+            nBGMPlayStartTime = CSoundManager.rcPerformanceTimer.nCurrentTime;
+            nBGMTotalPlayTimeMs = sdLoadingSound.nTotalPlayTimeMs;
+        }
+        else if (!CDTXMania.DTXVmode.Enabled && !CDTXMania.DTX2WAVmode.Enabled)
+        {
+            CDTXMania.Skin.soundNowLoading.tPlay();
+            nBGMPlayStartTime = CSoundManager.rcPerformanceTimer.nCurrentTime;
+            nBGMTotalPlayTimeMs = CDTXMania.Skin.soundNowLoading.nLength_CurrentSound;
         }
 
-        //-----------------------------
+        ePhaseID = EPhase.Common_FadeIn;
+            
+        nWAVcount = 1;
+            
+        try
+        {
+            string path = cdtx.strFolderName + cdtx.PREIMAGE;
 
-        #endregion
+            if (txJacket == null) // 2019.04.26 kairera0467
+            {
+                txJacket = CDTXMania.tGenerateTexture(!File.Exists(path) ? CSkin.Path(@"Graphics\5_preimage default.png") : path);
+            }
+        }
+        catch (Exception ex)
+        {
+            Trace.TraceError(ex.StackTrace);
+        }
+    }
+
+    public override int OnUpdateAndDraw()
+    {
+        if (!bActivated) return 0;
+
+        base.OnUpdateAndDraw();
 
         #region [ If escape is pressed, stop the loading ]
 
@@ -472,7 +468,7 @@ internal class CStageSongLoading : CStage
             {
                 timeBeginLoad = DateTime.Now;
 
-                string songPath = !CDTXMania.bCompactMode ? CDTXMania.stageSongSelection.rChosenScore.FileInformation.AbsoluteFilePath : CDTXMania.strCompactModeFile;
+                string songPath = !CDTXMania.bCompactMode ? CDTXMania.confirmedChart.FileInformation.AbsoluteFilePath : CDTXMania.strCompactModeFile;
 
                 CScoreIni ini = new(songPath + ".score.ini");
                 ini.tCheckIntegrity();
@@ -622,14 +618,9 @@ internal class CStageSongLoading : CStage
                 }
 
                 TimeSpan span = DateTime.Now - timeBeginLoad;
-                Console.WriteLine($"Time to load DTX file: {span}");
+                Trace.TraceInformation($"Time to load DTX file: {span}");
                 
-                if (CDTXMania.bCompactMode)
-                    CDTXMania.DTX.MIDIレベル = 1;
-                else
-                    CDTXMania.DTX.MIDIレベル =
-                        (CDTXMania.stageSongSelection.rConfirmedSong.eNodeType == CSongListNode.ENodeType.SCORE_MIDI)
-                            ? CDTXMania.stageSongSelection.nSelectedSongDifficultyLevel : 0;
+                CDTXMania.DTX.MIDIレベル = CDTXMania.bCompactMode ? 1 : 0;
 
                 ePhaseID = EPhase.NOWLOADING_WAV_FILE_READING;
                 timeBeginLoadWAV = DateTime.Now;
@@ -680,10 +671,10 @@ internal class CStageSongLoading : CStage
                     CDTXMania.DTX.tRandomizeGuitarAndBass(EInstrumentPart.GUITAR, CDTXMania.ConfigIni.eRandom.Guitar);
                     CDTXMania.DTX.tRandomizeGuitarAndBass(EInstrumentPart.BASS, CDTXMania.ConfigIni.eRandom.Bass);
 
-                    if (CDTXMania.ConfigIni.bGuitarRevolutionMode)
-                        CDTXMania.stagePerfGuitarScreen.OnActivate();
-                    else
-                        CDTXMania.stagePerfDrumsScreen.OnActivate();
+                    // if (CDTXMania.ConfigIni.bGuitarRevolutionMode)
+                    //     CDTXMania.stagePerfGuitarScreen.OnActivate();
+                    // else
+                    //     CDTXMania.stagePerfDrumsScreen.OnActivate();
 
                     span = DateTime.Now - timeBeginLoadWAV;
                     Trace.TraceInformation("WAV/譜面後処理時間({0,4}):  {1}",
@@ -744,8 +735,6 @@ internal class CStageSongLoading : CStage
     
     private void DrawLoadingScreenUI()
     {
-        ui.Draw(Matrix.Identity);
-        
         int y = 184;
         
         if (txJacket != null)
@@ -802,8 +791,8 @@ internal class CStageSongLoading : CStage
                 if (DTXLevel != 0 || DTXLevelDeci != 0)
                 {
                     //Always display CLASSIC style if Skill Mode is Classic
-                    if (CDTXMania.ConfigIni.nSkillMode == 0 || (CDTXMania.ConfigIni.bCLASSIC譜面判別を有効にする &&
-                                                                CDTXMania.stageSongSelection.rChosenScore.SongInformation.b完全にCLASSIC譜面である[j] && 
+                    if (CDTXMania.ConfigIni.nSkillMode == 0 || (CDTXMania.ConfigIni.bClassicScoreDisplay &&
+                                                                CDTXMania.confirmedChart.SongInformation.bIsClassicChart[j] && 
                                                                 !cdtx.bForceXGChart))
                     {
                         tDrawStringLarge(187 + k, 152, $"{DTXLevel:00}");
@@ -831,8 +820,9 @@ internal class CStageSongLoading : CStage
         
                     //this.txJacket.Dispose();
                     if (!CDTXMania.bCompactMode && !CDTXMania.DTXVmode.Enabled && !CDTXMania.DTX2WAVmode.Enabled)
-                        tDrawDifficultyPanel(CDTXMania.stageSongSelection.rConfirmedSong.arDifficultyLabel[
-                                CDTXMania.stageSongSelection.nConfirmedSongDifficulty], 191 + k, 102);
+                        tDrawDifficultyPanel(
+                            CDTXMania.confirmedSong.difficultyLabel[
+                                CDTXMania.confirmedSongDifficulty], 191 + k, 102);
         
                     k = 700;
                 }

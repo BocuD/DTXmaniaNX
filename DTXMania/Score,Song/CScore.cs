@@ -4,11 +4,12 @@ using DTXMania.Core;
 namespace DTXMania;
 
 [Serializable]
-internal class CScore
+public class CScore
 {
     // プロパティ
 
     public STScoreIniInformation ScoreIniInformation;
+
     [Serializable]
     [StructLayout(LayoutKind.Sequential)]
     public struct STScoreIniInformation
@@ -24,6 +25,7 @@ internal class CScore
     }
 
     public STFileInformation FileInformation;
+
     [Serializable]
     [StructLayout(LayoutKind.Sequential)]
     public struct STFileInformation
@@ -33,7 +35,8 @@ internal class CScore
         public DateTime LastModified;
         public long FileSize;
 
-        public STFileInformation(string AbsoluteFilePath, string AbsoluteFolderPath, DateTime LastModified, long FileSize)
+        public STFileInformation(string AbsoluteFilePath, string AbsoluteFolderPath, DateTime LastModified,
+            long FileSize)
         {
             this.AbsoluteFilePath = AbsoluteFilePath;
             this.AbsoluteFolderPath = AbsoluteFolderPath;
@@ -43,12 +46,23 @@ internal class CScore
     }
 
     public STMusicInformation SongInformation;
+
     [Serializable]
     [StructLayout(LayoutKind.Sequential)]
     public struct STMusicInformation
     {
         public string Title;
         public string ArtistName;
+
+        public bool TitleHasJapanese;
+        public bool ArtistNameHasJapanese;
+
+        public string TitleKana;
+        public string ArtistNameKana;
+        
+        public string TitleRoman;
+        public string ArtistNameRoman;
+        
         public string Comment;
         public string Genre;
         public string Preimage;
@@ -67,8 +81,10 @@ internal class CScore
         public CDTX.EType SongType;
         public double Bpm;
         public int Duration;
-        public STDGBVALUE<bool> b完全にCLASSIC譜面である;
+        public STDGBVALUE<bool> bIsClassicChart;
+
         public STDGBVALUE<bool> bScoreExists;
+
         //
         //public STDGBVALUE<EUseLanes> 使用レーン数;
         public STDGBVALUE<int> chipCountByInstrument;
@@ -84,6 +100,7 @@ internal class CScore
             public string 行3;
             public string 行4;
             public string 行5;
+
             public string this[int index]
             {
                 get
@@ -105,6 +122,7 @@ internal class CScore
                         case 4:
                             return 行5;
                     }
+
                     throw new IndexOutOfRangeException();
                 }
                 set
@@ -131,6 +149,7 @@ internal class CScore
                             行5 = value;
                             return;
                     }
+
                     throw new IndexOutOfRangeException();
                 }
             }
@@ -143,6 +162,7 @@ internal class CScore
             public int Drums;
             public int Guitar;
             public int Bass;
+
             public int this[int index]
             {
                 get
@@ -158,14 +178,17 @@ internal class CScore
                         case 2:
                             return Bass;
                     }
+
                     throw new IndexOutOfRangeException();
                 }
                 set
                 {
-                    if ((value < (int)CScoreIni.ERANK.SS) || ((value != (int)CScoreIni.ERANK.UNKNOWN) && (value > (int)CScoreIni.ERANK.E)))
+                    if ((value < (int)CScoreIni.ERANK.SS) ||
+                        ((value != (int)CScoreIni.ERANK.UNKNOWN) && (value > (int)CScoreIni.ERANK.E)))
                     {
                         throw new ArgumentOutOfRangeException();
                     }
+
                     switch (index)
                     {
                         case 0:
@@ -180,6 +203,7 @@ internal class CScore
                             Bass = value;
                             return;
                     }
+
                     throw new IndexOutOfRangeException();
                 }
             }
@@ -192,6 +216,7 @@ internal class CScore
             public double Drums;
             public double Guitar;
             public double Bass;
+
             public double this[int index]
             {
                 get
@@ -207,6 +232,7 @@ internal class CScore
                         case 2:
                             return Bass;
                     }
+
                     throw new IndexOutOfRangeException();
                 }
                 set
@@ -215,6 +241,7 @@ internal class CScore
                     {
                         throw new ArgumentOutOfRangeException();
                     }
+
                     switch (index)
                     {
                         case 0:
@@ -229,14 +256,35 @@ internal class CScore
                             Bass = value;
                             return;
                     }
+
                     throw new IndexOutOfRangeException();
                 }
             }
         }
+
+        public double GetLevel(int instrument)
+        {
+            double dbLevel = Level[instrument];
+            int levelDec = LevelDec[instrument];
+            if (dbLevel >= 100)
+            {
+                dbLevel /= 100.0;
+            }
+            else if (dbLevel < 100)
+            {
+                dbLevel = dbLevel / 10.0 + levelDec / 100.0;
+            }
+
+            return dbLevel;
+        }
+
+        public double GetMaxSkill(int instrument)
+        {
+            return GetLevel(instrument) * 20;
+        }
     }
 
     public bool bHadACacheInSongDB;
-    public bool bIsScoreValid => (((SongInformation.Level[0] + SongInformation.Level[1]) + SongInformation.Level[2]) != 0);
 
 
     // Constructor
@@ -246,56 +294,76 @@ internal class CScore
         ScoreIniInformation = new STScoreIniInformation(DateTime.MinValue, 0L);
         bHadACacheInSongDB = false;
         FileInformation = new STFileInformation("", "", DateTime.MinValue, 0L);
-        SongInformation = new STMusicInformation();
-        SongInformation.Title = "";
-        SongInformation.ArtistName = "";
-        SongInformation.Comment = "";
-        SongInformation.Genre = "";
-        SongInformation.Preimage = "";
-        SongInformation.Premovie = "";
-        SongInformation.Presound = "";
-        SongInformation.Backgound = "";
-        SongInformation.Level = new STDGBVALUE<int>();
-        SongInformation.LevelDec = new STDGBVALUE<int>();
-        SongInformation.BestRank = new STMusicInformation.STRANK();
-        SongInformation.BestRank.Drums = (int)CScoreIni.ERANK.UNKNOWN;
-        SongInformation.BestRank.Guitar = (int)CScoreIni.ERANK.UNKNOWN;
-        SongInformation.BestRank.Bass = (int)CScoreIni.ERANK.UNKNOWN;
-        SongInformation.FullCombo = new STDGBVALUE<bool>();
-        SongInformation.NbPerformances = new STDGBVALUE<int>();
-        SongInformation.PerformanceHistory = new STMusicInformation.STHISTORY();
-        SongInformation.PerformanceHistory.行1 = "";
-        SongInformation.PerformanceHistory.行2 = "";
-        SongInformation.PerformanceHistory.行3 = "";
-        SongInformation.PerformanceHistory.行4 = "";
-        SongInformation.PerformanceHistory.行5 = "";
-        SongInformation.bHiddenLevel = false;
-        SongInformation.HighSkill = new STMusicInformation.STSKILL();
-        SongInformation.HighSongSkill = new STMusicInformation.STSKILL();
-        SongInformation.SongType = CDTX.EType.DTX;
-        SongInformation.Bpm = 120.0;
-        SongInformation.Duration = 0;
-        SongInformation.b完全にCLASSIC譜面である.Drums = false;
-        SongInformation.b完全にCLASSIC譜面である.Guitar = false;
-        SongInformation.b完全にCLASSIC譜面である.Bass = false;
-        SongInformation.bScoreExists.Drums = false;
-        SongInformation.bScoreExists.Guitar = false;
-        SongInformation.bScoreExists.Bass = false;
-        //
-        SongInformation.chipCountByInstrument = default(STDGBVALUE<int>);
-        SongInformation.chipCountByLane = new Dictionary<ELane, int>();
-        SongInformation.progress = new STDGBVALUE<string>()
+        SongInformation = new STMusicInformation
         {
-            Drums = "",
-            Guitar = "",
-            Bass = ""
+            Title = "",
+            ArtistName = "",
+            Comment = "",
+            Genre = "",
+            Preimage = "",
+            Premovie = "",
+            Presound = "",
+            Backgound = "",
+            Level = new STDGBVALUE<int>(),
+            LevelDec = new STDGBVALUE<int>(),
+            BestRank = new STMusicInformation.STRANK
+            {
+                Drums = (int)CScoreIni.ERANK.UNKNOWN,
+                Guitar = (int)CScoreIni.ERANK.UNKNOWN,
+                Bass = (int)CScoreIni.ERANK.UNKNOWN
+            },
+            FullCombo = new STDGBVALUE<bool>(),
+            NbPerformances = new STDGBVALUE<int>(),
+            PerformanceHistory = new STMusicInformation.STHISTORY
+            {
+                行1 = "",
+                行2 = "",
+                行3 = "",
+                行4 = "",
+                行5 = ""
+            },
+            bHiddenLevel = false,
+            HighSkill = new STMusicInformation.STSKILL(),
+            HighSongSkill = new STMusicInformation.STSKILL(),
+            SongType = CDTX.EType.DTX,
+            Bpm = 120.0,
+            Duration = 0,
+            bIsClassicChart = new STDGBVALUE<bool>()
+            {
+                Drums = false,
+                Guitar = false,
+                Bass = false
+            },
+            bScoreExists = new STDGBVALUE<bool>()
+            {
+                Drums = false,
+                Guitar = false,
+                Bass = false
+            },
+            chipCountByInstrument = default,
+            chipCountByLane = new Dictionary<ELane, int>(),
+            progress = new STDGBVALUE<string>()
+            {
+                Drums = "",
+                Guitar = "",
+                Bass = ""
+            }
         };
 
         for (ELane eLane = ELane.LC; eLane < ELane.BGM; eLane++)
         {
             SongInformation.chipCountByLane[eLane] = 0;
         }
+    }
 
-
+    public bool HasChartForCurrentMode()
+    {
+        bool bScoreExistForMode = CDTXMania.ConfigIni.bDrumsEnabled && SongInformation.bScoreExists.Drums;
+        if (!bScoreExistForMode)
+        {
+            bScoreExistForMode = CDTXMania.ConfigIni.bGuitarEnabled &&
+                                 (SongInformation.bScoreExists.Guitar || SongInformation.bScoreExists.Bass);
+        }
+        return bScoreExistForMode;
     }
 }

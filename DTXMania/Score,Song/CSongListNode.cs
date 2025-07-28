@@ -29,21 +29,21 @@ internal class CSongListNode
 	}
 	public Color col文字色 = Color.White;
 	public List<CSongListNode> listランダム用ノードリスト;
-	public List<CSongListNode> list子リスト;
+	public List<CSongListNode> listChildNodes;
 	public STHitRanges stDrumHitRanges = new STHitRanges(nDefaultSizeMs: -1);
 	public STHitRanges stDrumPedalHitRanges = new STHitRanges(nDefaultSizeMs: -1);
 	public STHitRanges stGuitarHitRanges = new STHitRanges(nDefaultSizeMs: -1);
 	public STHitRanges stBassHitRanges = new STHitRanges(nDefaultSizeMs: -1);
 	public int nスコア数;
-	public string pathSetDefの絶対パス = "";
-	public CSongListNode r親ノード;
-	public int SetDefのブロック番号;
+	public string pathSetDefPath = "";
+	public CSongListNode parentNode;
+	public int SetDefBlockNumber;
 	public Stack<int> stackRandomPerformanceNumber = new Stack<int>();
-	public string strジャンル = "";
-	public string strタイトル = "";
+	public string strGenre = "";
+	public string strTitle = "";
 	public string strBreadcrumbs = "";		// #27060 2011.2.27 yyagi; MUSIC BOXのパンくずリスト (曲リスト構造内の絶対位置捕捉のために使う)
 	public string strSkinPath = "";			// #28195 2012.5.4 yyagi; box.defでのスキン切り替え対応
-	public string strバージョン = "";
+	public string strVersion = "";
 		
 	// コンストラクタ
 
@@ -64,19 +64,19 @@ internal class CSongListNode
 		newNode.bBoxDefで作成されたBOXである = bBoxDefで作成されたBOXである;
 		newNode.col文字色 = col文字色;
 		newNode.listランダム用ノードリスト = listランダム用ノードリスト;
-		newNode.list子リスト = list子リスト;
+		newNode.listChildNodes = listChildNodes;
 		newNode.stDrumHitRanges = stDrumHitRanges;
 		newNode.stDrumPedalHitRanges = stDrumPedalHitRanges;
 		newNode.stGuitarHitRanges = stGuitarHitRanges;
 		newNode.stBassHitRanges = stBassHitRanges;
 		newNode.nスコア数 = nスコア数;
-		newNode.pathSetDefの絶対パス = pathSetDefの絶対パス;
-		newNode.r親ノード = r親ノード;
-		newNode.SetDefのブロック番号 = SetDefのブロック番号;
+		newNode.pathSetDefPath = pathSetDefPath;
+		newNode.parentNode = parentNode;
+		newNode.SetDefBlockNumber = SetDefBlockNumber;
 		newNode.stackRandomPerformanceNumber = stackRandomPerformanceNumber;
-		newNode.strジャンル = strジャンル;
-		newNode.strタイトル = strタイトル;
-		newNode.strバージョン = strバージョン;
+		newNode.strGenre = strGenre;
+		newNode.strTitle = strTitle;
+		newNode.strVersion = strVersion;
 		newNode.strBreadcrumbs = strBreadcrumbs;
 		newNode.strSkinPath = strSkinPath;
 

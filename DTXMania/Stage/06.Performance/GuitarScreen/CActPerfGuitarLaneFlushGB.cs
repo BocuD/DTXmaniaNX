@@ -10,7 +10,7 @@ internal class CActPerfGuitarLaneFlushGB : CActPerfCommonLaneFlushGB
 
 	public CActPerfGuitarLaneFlushGB()
 	{
-		bNotActivated = true;
+		bActivated = false;
 	}
 	// 2013.02.22 kairera0467
 	// ギターのレーンフラッシュの幅は37。
@@ -35,7 +35,7 @@ internal class CActPerfGuitarLaneFlushGB : CActPerfCommonLaneFlushGB
 
 	public override int OnUpdateAndDraw()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			#region[ レーンの描画 ]
 			//---------------

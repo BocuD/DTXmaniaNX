@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.7.34024.191
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DTXUIRenderer", "DTXUIRenderer\DTXUIRenderer.csproj", "{8DF6486A-A281-4E34-A110-769C7CE90F43}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DTXMania", "DTXMania\DTXMania.csproj", "{FC2591A4-63D2-4A7B-BAD3-3DD38666EE6A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FDK", "FDK\FDK.csproj", "{64DBD349-61FC-427F-96A5-876298E1CEF4}"
@@ -21,18 +19,6 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{8DF6486A-A281-4E34-A110-769C7CE90F43}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8DF6486A-A281-4E34-A110-769C7CE90F43}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8DF6486A-A281-4E34-A110-769C7CE90F43}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{8DF6486A-A281-4E34-A110-769C7CE90F43}.Debug|x64.Build.0 = Debug|Any CPU
-		{8DF6486A-A281-4E34-A110-769C7CE90F43}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{8DF6486A-A281-4E34-A110-769C7CE90F43}.Debug|x86.Build.0 = Debug|Any CPU
-		{8DF6486A-A281-4E34-A110-769C7CE90F43}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8DF6486A-A281-4E34-A110-769C7CE90F43}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8DF6486A-A281-4E34-A110-769C7CE90F43}.Release|x64.ActiveCfg = Release|Any CPU
-		{8DF6486A-A281-4E34-A110-769C7CE90F43}.Release|x64.Build.0 = Release|Any CPU
-		{8DF6486A-A281-4E34-A110-769C7CE90F43}.Release|x86.ActiveCfg = Release|Any CPU
-		{8DF6486A-A281-4E34-A110-769C7CE90F43}.Release|x86.Build.0 = Release|Any CPU
 		{FC2591A4-63D2-4A7B-BAD3-3DD38666EE6A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{FC2591A4-63D2-4A7B-BAD3-3DD38666EE6A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FC2591A4-63D2-4A7B-BAD3-3DD38666EE6A}.Debug|x64.ActiveCfg = Debug|Any CPU

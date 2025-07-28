@@ -1,8 +1,8 @@
 ﻿using System.Runtime.InteropServices;
 using DTXMania.Core;
 using DTXMania.UI;
+using DTXMania.UI.Drawable;
 using DTXMania.UI.Item;
-using DTXUIRenderer;
 using FDK;
 using SharpDX;
 using SlimDXKey = SlimDX.DirectInput.Key;
@@ -19,7 +19,7 @@ internal class CActSelectPopupMenu : CActivity
     }
     public object GetObj現在値(int pos)
     {
-        return lciMenuItems[pos].obj現在値();
+        return lciMenuItems[pos].GetCurrentValue();
     }
     public bool bGotoDetailConfig
     {
@@ -47,11 +47,6 @@ internal class CActSelectPopupMenu : CActivity
         bIsActivePopupMenu = false;
     }
 
-
-    public void Initialize(List<CItemBase> menulist, string title)
-    {
-        Initialize(menulist, title, 0);
-    }
 
     struct ItemPair
     {
@@ -106,7 +101,7 @@ internal class CActSelectPopupMenu : CActivity
                     bIsSelectingIntItem = !bIsSelectingIntItem;		// 選択状態/選択解除状態を反転する
                 }
             }
-            tPressEnterMain(lciMenuItems[nCurrentSelection].GetIndex());
+            tPressEnterMain();
 
             bキー入力待ち = true;
         }
@@ -115,8 +110,7 @@ internal class CActSelectPopupMenu : CActivity
     /// <summary>
     /// Decide押下時の処理を、継承先で記述する。
     /// </summary>
-    /// <param name="val">CItemBaseの現在の設定値のindex</param>
-    public virtual void tPressEnterMain(int val)
+    public virtual void tPressEnterMain()
     {
     }
     /// <summary>
@@ -186,7 +180,7 @@ internal class CActSelectPopupMenu : CActivity
         {
             ctキー反復用[i] = new CCounter(0, 0, 0, CDTXMania.Timer);
         }
-        bNotActivated = true;
+        bActivated = false;
 
         bIsActivePopupMenu = false;
         font = new CActDFPFont();
@@ -197,7 +191,7 @@ internal class CActSelectPopupMenu : CActivity
     }
     public override void OnDeactivate()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             listChildActivities.Remove(font);
             font.OnDeactivate();
@@ -215,17 +209,20 @@ internal class CActSelectPopupMenu : CActivity
 
     public override void OnManagedCreateResources()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
-            ui = CDTXMania.stageSongSelection.ui.AddChild(new UIGroup("Quick Select Menu"));
+            ui = CDTXMania.stageSongSelection.ui.AddChild(new UIGroup("Popup Menu"));
             ui.position = new Vector3(1280.0f/2.0f, 720.0f/2.0f + 20.0f, 0); 
             ui.anchor = new Vector2(0.5f, 0.5f);
+            ui.renderOrder = 100;
+            ui.isVisible = false;
+            ui.dontSerialize = true;
                 
-            var bgTex = new DTXTexture(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\ScreenSelect sort menu background.png"), false));
+            var bgTex = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\ScreenSelect sort menu background.png"));
             var bg = ui.AddChild(new UIImage(bgTex));
             ui.size = bg.size;
-                
-            var cursorTex = new DTXTexture(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\ScreenConfig menu cursor.png"), false));
+            
+            var cursorTex = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\ScreenConfig menu cursor.png"));
             cursor = ui.AddChild(new UIImage(cursorTex));
             cursor.position = new Vector3(12, 32 + 6, 0);
             cursor.size = new Vector2(336, 32);
@@ -242,7 +239,7 @@ internal class CActSelectPopupMenu : CActivity
     }
     public override void OnManagedReleaseResources()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             ui.Dispose();
         }
@@ -256,7 +253,7 @@ internal class CActSelectPopupMenu : CActivity
 
     public int tUpdateAndDraw()  // t進行描画
     {
-        if (!bNotActivated && bIsActivePopupMenu)
+        if (bActivated && bIsActivePopupMenu)
         {
             if (bキー入力待ち)
             {
@@ -354,25 +351,27 @@ internal class CActSelectPopupMenu : CActivity
             //draw value items
             for (int i = 0; i < lciMenuItems.Count; i++)
             {
+                bool bItemBold = i == nCurrentSelection;
+                
                 var pair = listItems[i];
                 string s;
                 switch (lciMenuItems[i].strItemName)
                 {
                     case "PlaySpeed":
                     {
-                        double d = (double)((int)lciMenuItems[i].obj現在値() / 20.0);
+                        double d = (double)((int)lciMenuItems[i].GetCurrentValue() / 20.0);
                         s = "x" + d.ToString("0.000");
                     }
                         break;
                     case "ScrollSpeed":
                     {
-                        double d = (double)((((int)lciMenuItems[i].obj現在値()) + 1) / 2.0);
+                        double d = (double)((((int)lciMenuItems[i].GetCurrentValue()) + 1) / 2.0);
                         s = "x" + d.ToString("0.0");
                     }
                         break;
 
                     default:
-                        s = lciMenuItems[i].obj現在値().ToString();
+                        s = lciMenuItems[i].GetCurrentValue().ToString();
                         break;
                 }
 
@@ -380,10 +379,13 @@ internal class CActSelectPopupMenu : CActivity
                 pair.value.SetText(s);
                 pair.value.isHighlighted = bValueBold;
             }
-                
-            tDrawSub();
             
-            ui.Draw(Matrix.Identity);
+            tDrawSub();
+            ui.isVisible = true;
+        }
+        else
+        {
+            ui.isVisible = false;
         }
         return 0;
     }

@@ -22,7 +22,7 @@ public class CChip : IComparable<CChip>, ICloneable
 	public bool bBonusChip;
 	public int nLag;                // 2011.2.1 yyagi
 	public int nCurrentComboForGhost; // 2015.9.29 chnmr0 fork
-	internal CDTX.CAVI rAVI;
+	internal CAVI rAVI;
 	//internal CDTX.CDirectShow rDShow;
 	internal CDTX.CAVIPAN rAVIPan;
 	internal CDTX.CBGA rBGA;
@@ -528,7 +528,7 @@ public class CChip : IComparable<CChip>, ICloneable
 			dbChipSizeRatio,
 			bWAVを使うチャンネルである,
 			b自動再生音チャンネルである,
-			CDTX.tZZ(nIntegerValue));
+			CDTX.Base36ToString(nIntegerValue));
 	}
 	/// <summary>
 	/// チップの再生長を取得する。現状、WAVチップとBGAチップでのみ使用可能。
@@ -573,8 +573,8 @@ public class CChip : IComparable<CChip>, ICloneable
 		const double speed = 286;   // BPM150の時の1小節の長さ[dot]
 		//XGのHS4.5が1289。思えばBPMじゃなくて拍の長さが関係あるよね。
 		double ScrollSpeedDrums = (dbPerformanceScrollSpeed.Drums + 1.0) * 0.5 * 37.5 * speed / 60000.0;
-		double ScrollSpeedGuitar = (dbPerformanceScrollSpeed.Guitar + 1.0) * 0.5 * 0.5 * 37.5 * speed / 60000.0;
-		double ScrollSpeedBass = (dbPerformanceScrollSpeed.Bass + 1.0) * 0.5 * 0.5 * 37.5 * speed / 60000.0;
+		double ScrollSpeedGuitar = (dbPerformanceScrollSpeed.Guitar + 1.0) * 0.5 * 0.5 * 37.5 * speed * 1.52f / 60000.0; //todo: verify if this is the correct approach to fix guitar scroll speed
+		double ScrollSpeedBass = (dbPerformanceScrollSpeed.Bass + 1.0) * 0.5 * 0.5 * 37.5 * speed * 1.52f / 60000.0; //todo: verify if this is the correct approach to fix guitar scroll speed
 
 		nDistanceFromBar.Drums = (int)((nPlaybackTimeMs - nCurrentTime) * ScrollSpeedDrums);
 		nDistanceFromBar.Guitar = (int)((nPlaybackTimeMs - nCurrentTime) * ScrollSpeedGuitar);

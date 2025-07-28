@@ -13,7 +13,7 @@ internal class CActPerfGuitarGauge : CActPerfCommonGauge
 
     public CActPerfGuitarGauge()
     {
-        bNotActivated = true;
+        bActivated = false;
     }
 
 
@@ -33,7 +33,7 @@ internal class CActPerfGuitarGauge : CActPerfCommonGauge
     }
     public override void OnManagedCreateResources()
     {
-        if (!bNotActivated && !CDTXMania.DTXVmode.Enabled && !CDTXMania.DTX2WAVmode.Enabled)
+        if (bActivated && !CDTXMania.DTXVmode.Enabled && !CDTXMania.DTX2WAVmode.Enabled)
         {
             txフレーム.Guitar = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_Gauge_Guitar.png"));
             txフレーム.Bass = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_Gauge_Bass.png"));
@@ -49,7 +49,7 @@ internal class CActPerfGuitarGauge : CActPerfCommonGauge
     }
     public override void OnManagedReleaseResources()
     {
-        if (!bNotActivated && !CDTXMania.DTXVmode.Enabled && !CDTXMania.DTX2WAVmode.Enabled)
+        if (bActivated && !CDTXMania.DTXVmode.Enabled && !CDTXMania.DTX2WAVmode.Enabled)
         {
             CDTXMania.tReleaseTexture(ref txゲージ);
             CDTXMania.tReleaseTexture(ref txフルゲージ);

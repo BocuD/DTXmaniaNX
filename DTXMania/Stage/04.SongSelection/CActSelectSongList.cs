@@ -34,12 +34,12 @@ internal class CActSelectSongList : CActivity
 			return true;
 		}
 	}
-	public int n現在のアンカ難易度レベル 
+	public int nTargetDifficultyLevel 
 	{
 		get;
 		private set;
 	}
-	public int n現在選択中の曲の現在の難易度レベル => n現在のアンカ難易度レベルに最も近い難易度レベルを返す( rSelectedSong );
+	public int nSelectedSongDifficultyLevel => nGetClosestLevelToTargetLevelForSong( rSelectedSong );
 
 	public CScore rSelectedScore  // r現在選択中のスコア
 	{
@@ -47,7 +47,7 @@ internal class CActSelectSongList : CActivity
 		{
 			if( rSelectedSong != null )
 			{
-				return rSelectedSong.arScore[ n現在選択中の曲の現在の難易度レベル ];
+				return rSelectedSong.arScore[ nSelectedSongDifficultyLevel ];
 			}
 			return null;
 		}
@@ -68,14 +68,16 @@ internal class CActSelectSongList : CActivity
 	// (前と同じ曲なら選択曲変更に掛かる再計算を省略して高速化するため)
 	private CSongListNode song_last = null;
 
-		
-	// コンストラクタ
 
-	public CActSelectSongList()
+	private CStageSongSelection stageSongSelection;
+
+	public CActSelectSongList(CStageSongSelection cStageSongSelection)
 	{
+		stageSongSelection = cStageSongSelection;
+		
 		rSelectedSong = null;
-		n現在のアンカ難易度レベル = 0;
-		bNotActivated = true;
+		nTargetDifficultyLevel = 0;
+		bActivated = false;
 		bIsEnumeratingSongs = false;
 
 		listChildActivities.Add( actステータスパネル = new CActSelectStatusPanel() );
@@ -110,15 +112,15 @@ internal class CActSelectSongList : CActivity
 
 	// メソッド
 
-	public int n現在のアンカ難易度レベルに最も近い難易度レベルを返す( CSongListNode song )
+	public int nGetClosestLevelToTargetLevelForSong( CSongListNode song )
 	{
 		// 事前チェック。
 
 		if( song == null )
-			return n現在のアンカ難易度レベル;	// 曲がまったくないよ
+			return nTargetDifficultyLevel;	// 曲がまったくないよ
 
-		if( song.arScore[ n現在のアンカ難易度レベル ] != null )
-			return n現在のアンカ難易度レベル;	// 難易度ぴったりの曲があったよ
+		if( song.arScore[ nTargetDifficultyLevel ] != null )
+			return nTargetDifficultyLevel;	// 難易度ぴったりの曲があったよ
 
 		if( ( song.eNodeType == CSongListNode.ENodeType.BOX ) || ( song.eNodeType == CSongListNode.ENodeType.BACKBOX ) )
 			return 0;								// BOX と BACKBOX は関係無いよ
@@ -126,7 +128,7 @@ internal class CActSelectSongList : CActivity
 
 		// 現在のアンカレベルから、難易度上向きに検索開始。
 
-		int closestLevel = n現在のアンカ難易度レベル;
+		int closestLevel = nTargetDifficultyLevel;
 
 		for( int i = 0; i < 5; i++ )
 		{
@@ -140,11 +142,11 @@ internal class CActSelectSongList : CActivity
 		// 見つかった曲がアンカより下のレベルだった場合……
 		// アンカから下向きに検索すれば、もっとアンカに近い曲があるんじゃね？
 
-		if( closestLevel < n現在のアンカ難易度レベル )
+		if( closestLevel < nTargetDifficultyLevel )
 		{
 			// 現在のアンカレベルから、難易度下向きに検索開始。
 
-			closestLevel = n現在のアンカ難易度レベル;
+			closestLevel = nTargetDifficultyLevel;
 
 			for( int i = 0; i < 5; i++ )
 			{
@@ -158,37 +160,30 @@ internal class CActSelectSongList : CActivity
 		return closestLevel;
 	}
 
-	private List<CSongListNode> GetSongListWithinMe( CSongListNode song )
+	private List<CSongListNode>? GetSongListWithinMe( CSongListNode song )
 	{
-		if ( song.r親ノード == null )					// root階層のノートだったら
+		if ( song.parentNode == null )					// root階層のノートだったら
 		{
 			return CDTXMania.SongManager.listSongRoot;	// rootのリストを返す
 		}
-		else
+
+		if ( ( song.parentNode.listChildNodes != null ) && ( song.parentNode.listChildNodes.Count > 0 ) )
 		{
-			if ( ( song.r親ノード.list子リスト != null ) && ( song.r親ノード.list子リスト.Count > 0 ) )
-			{
-				return song.r親ノード.list子リスト;
-			}
-			else
-			{
-				return null;
-			}
+			return song.parentNode.listChildNodes;
 		}
+
+		return null;
 	}
 
 
 	public delegate void DGSortFunc( List<CSongListNode> songList, EInstrumentPart eInst, int order, params object[] p);
 
-	public void tSortSongList( DGSortFunc sf, EInstrumentPart eInst, int order, params object[] p)  // t曲リストのソート
+	public void tSortSongList(DGSortFunc sf, EInstrumentPart eInst, int order, params object[] p)  // t曲リストのソート
 	{
-		List<CSongListNode> songList = GetSongListWithinMe( rSelectedSong );
-		if ( songList == null )
+		List<CSongListNode>? songList = GetSongListWithinMe(rSelectedSong);
+		if (songList != null)
 		{
-		}
-		else
-		{
-			sf( songList, eInst, order, p );
+			sf(songList, eInst, order, p);
 			t現在選択中の曲を元に曲バーを再構成する();
 		}
 	}
@@ -214,11 +209,11 @@ internal class CActSelectSongList : CActivity
 				CDTXMania.Skin.GetSkinSubfolderFullNameFromSkinName( CSkin.GetSkinName( rSelectedSong.strSkinPath ) ), false );
 		}
 
-		if( ( rSelectedSong.list子リスト != null ) && ( rSelectedSong.list子リスト.Count > 0 ) )
+		if( ( rSelectedSong.listChildNodes != null ) && ( rSelectedSong.listChildNodes.Count > 0 ) )
 		{
-			rSelectedSong = rSelectedSong.list子リスト[ 0 ];
+			rSelectedSong = rSelectedSong.listChildNodes[ 0 ];
 			t現在選択中の曲を元に曲バーを再構成する();
-			t選択曲が変更された(false);									// #27648 項目数変更を反映させる
+			tSelectedSongHasChanged(false);									// #27648 項目数変更を反映させる
 		}
 		return ret;
 	}
@@ -232,11 +227,11 @@ internal class CActSelectSongList : CActivity
 		}
 		CDTXMania.Skin.SetCurrentSkinSubfolderFullName(
 			( rSelectedSong.strSkinPath == "" ) ? "" : CDTXMania.Skin.GetSkinSubfolderFullNameFromSkinName( CSkin.GetSkinName( rSelectedSong.strSkinPath ) ), false );
-		if ( rSelectedSong.r親ノード != null )
+		if ( rSelectedSong.parentNode != null )
 		{
-			rSelectedSong = rSelectedSong.r親ノード;
+			rSelectedSong = rSelectedSong.parentNode;
 			t現在選択中の曲を元に曲バーを再構成する();
-			t選択曲が変更された(false);									// #27648 項目数変更を反映させる
+			tSelectedSongHasChanged(false);									// #27648 項目数変更を反映させる
 		}
 		return ret;
 	}
@@ -272,12 +267,12 @@ internal class CActSelectSongList : CActivity
 
 		// 難易度レベルを＋１し、現在選曲中のスコアを変更する。
 
-		n現在のアンカ難易度レベル = n現在のアンカ難易度レベルに最も近い難易度レベルを返す( rSelectedSong );
+		nTargetDifficultyLevel = nGetClosestLevelToTargetLevelForSong( rSelectedSong );
 
 		for( int i = 0; i < 5; i++ )
 		{
-			n現在のアンカ難易度レベル = ( n現在のアンカ難易度レベル + 1 ) % 5;	// ５以上になったら０に戻る。
-			if( rSelectedSong.arScore[ n現在のアンカ難易度レベル ] != null )	// 曲が存在してるならここで終了。存在してないなら次のレベルへGo。
+			nTargetDifficultyLevel = ( nTargetDifficultyLevel + 1 ) % 5;	// ５以上になったら０に戻る。
+			if( rSelectedSong.arScore[ nTargetDifficultyLevel ] != null )	// 曲が存在してるならここで終了。存在してないなら次のレベルへGo。
 				break;
 		}
 
@@ -293,12 +288,12 @@ internal class CActSelectSongList : CActivity
 			int index = ( i + 13 ) % 13;
 			for( int m = 0; m < 3; m++ )
 			{
-				stBarInformation[ index ].nSkillValue[ m ] = (int) song.arScore[ n現在のアンカ難易度レベルに最も近い難易度レベルを返す( song ) ].SongInformation.HighSkill[ m ];
+				stBarInformation[ index ].nSkillValue[ m ] = (int) song.arScore[ nGetClosestLevelToTargetLevelForSong( song ) ].SongInformation.HighSkill[ m ];
 			}
 			song = rNextSong( song );
 		}
 
-		tラベル名からステータスパネルを決定する( rSelectedSong.arDifficultyLabel[ n現在選択中の曲の現在の難易度レベル ] );
+		tラベル名からステータスパネルを決定する( rSelectedSong.arDifficultyLabel[ nSelectedSongDifficultyLevel ] );
 
 		switch( nIndex  )
 		{
@@ -358,7 +353,7 @@ internal class CActSelectSongList : CActivity
 
 		// 選曲ステージに変更通知を発出し、関係Activityの対応を行ってもらう。
 
-		CDTXMania.stageSongSelection.tSelectedSongChanged();
+		stageSongSelection.tSelectedSongChanged();
 	}
 
 	public void tラベル名からステータスパネルを決定する(string strラベル名)
@@ -388,8 +383,8 @@ internal class CActSelectSongList : CActivity
 	{
 		rSelectedSong = CDTXMania.SongManager.listSongRoot[0];
 		t現在選択中の曲を元に曲バーを再構成する();
-		t選択曲が変更された(true);
-		CDTXMania.stageSongSelection.tSelectedSongChanged();
+		tSelectedSongHasChanged(true);
+		stageSongSelection.tSelectedSongChanged();
 	}
 
 	/// <summary>
@@ -411,23 +406,12 @@ internal class CActSelectSongList : CActivity
 				{
 					t現在選択中の曲を元に曲バーを再構成する();
 				}
-#if false          // list子リストの中まではmatchしてくれないので、検索ロジックは手書きで実装 (searchCurrentBreadcrumbs())
-					string bc = this.rSelectedSong.strBreadcrumbs;
-					Predicate<C曲リストノード> match = delegate( C曲リストノード c )
-					{
-						return ( c.strBreadcrumbs.Equals( bc ) );
-					};
-					int nMatched = CDTXMania.Songs管理.list曲ルート.FindIndex( match );
-
-					this.rSelectedSong = ( nMatched == -1 ) ? null : CDTXMania.Songs管理.list曲ルート[ nMatched ];
-					this.t現在選択中の曲を元に曲バーを再構成する();
-#endif
 				return;
 			}
 		}
 		OnDeactivate();
 		rSelectedSong = null;
-		if( CDTXMania.rCurrentStage.eStageID == CStage.EStage.SongSelection_4 )
+		if( CDTXMania.StageManager.rCurrentStage.eStageID == CStage.EStage.SongSelection_4 )
 			OnActivate();
 	}
 
@@ -447,9 +431,10 @@ internal class CActSelectSongList : CActivity
 			{
 				return n;
 			}
-			else if ( n.list子リスト != null && n.list子リスト.Count > 0 )	// 子リストが存在するなら、再帰で探す
+
+			if ( n.listChildNodes != null && n.listChildNodes.Count > 0 )	// 子リストが存在するなら、再帰で探す
 			{
-				CSongListNode r = searchCurrentBreadcrumbsPosition( n.list子リスト, bc );
+				CSongListNode r = searchCurrentBreadcrumbsPosition( n.listChildNodes, bc );
 				if ( r != null ) return r;
 			}
 		}
@@ -459,16 +444,16 @@ internal class CActSelectSongList : CActivity
 	/// <summary>
 	/// BOXのアイテム数と、今何番目を選択しているかをセットする
 	/// </summary>
-	public void t選択曲が変更された( bool bForce)    // t選択曲が変更された  #27648
+	public void tSelectedSongHasChanged( bool bForce)    // t選択曲が変更された  #27648
 	{
-		CSongListNode song = CDTXMania.stageSongSelection.r現在選択中の曲;
+		CSongListNode song = stageSongSelection.r現在選択中の曲;
 		if ( song == null )
 			return;
 		if ( song == song_last && bForce == false )
 			return;
 				
 		song_last = song;
-		List<CSongListNode> list = ( song.r親ノード != null ) ? song.r親ノード.list子リスト : CDTXMania.SongManager.listSongRoot;
+		List<CSongListNode> list = ( song.parentNode != null ) ? song.parentNode.listChildNodes : CDTXMania.SongManager.listSongRoot;
 		int index = list.IndexOf( song ) + 1;
 		if ( index <= 0 )
 		{
@@ -500,7 +485,7 @@ internal class CActSelectSongList : CActivity
 		FontStyle regular = FontStyle.Regular;
 		if( CDTXMania.ConfigIni.b選曲リストフォントを斜体にする ) regular |= FontStyle.Italic;
 		if( CDTXMania.ConfigIni.b選曲リストフォントを太字にする ) regular |= FontStyle.Bold;
-		ftSongListFont = new Font( CDTXMania.ConfigIni.str選曲リストフォント, (float) ( CDTXMania.ConfigIni.n選曲リストフォントのサイズdot * 2 ), regular, GraphicsUnit.Pixel );
+		ftSongListFont = new Font( CDTXMania.ConfigIni.songListFont, (float) ( CDTXMania.ConfigIni.n選曲リストフォントのサイズdot * 2 ), regular, GraphicsUnit.Pixel );
 			
 
 		// 現在選択中の曲がない（＝はじめての活性化）なら、現在選択中の曲をルートの先頭ノードに設定する。
@@ -515,11 +500,11 @@ internal class CActSelectSongList : CActivity
 
 		base.OnActivate();
 
-		t選択曲が変更された(true);		// #27648 2012.3.31 yyagi 選曲画面に入った直後の 現在位置/全アイテム数 の表示を正しく行うため
+		tSelectedSongHasChanged(true);		// #27648 2012.3.31 yyagi 選曲画面に入った直後の 現在位置/全アイテム数 の表示を正しく行うため
 	}
 	public override void OnDeactivate()
 	{
-		if( bNotActivated )
+		if (!bActivated)
 			return;
 
 		CDTXMania.tDisposeSafely( ref ftSongListFont );
@@ -531,7 +516,7 @@ internal class CActSelectSongList : CActivity
 	}
 	public override void OnManagedCreateResources()
 	{
-		if( bNotActivated )
+		if (!bActivated)
 			return;
 
 		strDefaultPreImage = CSkin.Path(@"Graphics\5_preimage default.png");
@@ -542,11 +527,9 @@ internal class CActSelectSongList : CActivity
 		txSongSelectionBar.Box = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\5_bar box selected.png" ), false );
 		txSongSelectionBar.Other = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\5_bar other selected.png" ), false );
 		txSkillNumbers = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\ScreenSelect skill number on list.png"), false);
-		txTopPanel = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\5_header song list.png"), false);
-		txBottomPanel = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\5_footer song list.png"), false);
-
-		prvFont = new CPrivateFastFont( new FontFamily( CDTXMania.ConfigIni.str選曲リストフォント ), 30, FontStyle.Regular );
-		prvFontSmall = new CPrivateFastFont( new FontFamily( CDTXMania.ConfigIni.str選曲リストフォント ), 15, FontStyle.Regular );
+		
+		prvFont = new CPrivateFastFont( new FontFamily( CDTXMania.ConfigIni.songListFont ), 30, FontStyle.Regular );
+		prvFontSmall = new CPrivateFastFont( new FontFamily( CDTXMania.ConfigIni.songListFont ), 15, FontStyle.Regular );
 
 		for( int i = 0; i < 13; i++ )
 		{
@@ -616,29 +599,27 @@ internal class CActSelectSongList : CActivity
 	}
 	public override void OnManagedReleaseResources()
 	{
-		if( bNotActivated )
+		if (!bActivated)
 			return;
 
-		CDTXMania.tDisposeSafely( ref txItemNumbers );
+		CDTXMania.tReleaseTexture(ref txItemNumbers);
 
 		for( int i = 0; i < 13; i++ )
 		{
-			CDTXMania.tDisposeSafely(ref stBarInformation[i].txTitleName);
-			CDTXMania.tDisposeSafely(ref stBarInformation[i].txPreviewImage);
-			CDTXMania.tDisposeSafely(ref stBarInformation[i].txClearLamp);
+			CDTXMania.tReleaseTexture(ref stBarInformation[i].txTitleName);
+			CDTXMania.tReleaseTexture(ref stBarInformation[i].txPreviewImage);
+			CDTXMania.tReleaseTexture(ref stBarInformation[i].txClearLamp);
 		}
 
-		CDTXMania.tDisposeSafely( ref txSkillNumbers );
-		CDTXMania.tDisposeSafely( ref txEnumeratingSongs );
-		CDTXMania.tDisposeSafely( ref txSongNotFound );
-		CDTXMania.tDisposeSafely( ref txSongNameBar.Score );
-		CDTXMania.tDisposeSafely( ref txSongNameBar.Box );
-		CDTXMania.tDisposeSafely( ref txSongNameBar.Other );
-		CDTXMania.tDisposeSafely( ref txSongSelectionBar.Score );
-		CDTXMania.tDisposeSafely( ref txSongSelectionBar.Box );
-		CDTXMania.tDisposeSafely( ref txSongSelectionBar.Other );
-		CDTXMania.tDisposeSafely( ref txTopPanel );
-		CDTXMania.tDisposeSafely( ref txBottomPanel );
+		CDTXMania.tReleaseTexture(ref txSkillNumbers);
+		CDTXMania.tReleaseTexture(ref txEnumeratingSongs);
+		CDTXMania.tReleaseTexture(ref txSongNotFound);
+		CDTXMania.tReleaseTexture(ref txSongNameBar.Score);
+		CDTXMania.tReleaseTexture(ref txSongNameBar.Box);
+		CDTXMania.tReleaseTexture(ref txSongNameBar.Other);
+		CDTXMania.tReleaseTexture(ref txSongSelectionBar.Score);
+		CDTXMania.tReleaseTexture(ref txSongSelectionBar.Box);
+		CDTXMania.tReleaseTexture(ref txSongSelectionBar.Other);
 
 		CDTXMania.tDisposeSafely( ref prvFont );
 		CDTXMania.tDisposeSafely( ref prvFontSmall );
@@ -658,7 +639,7 @@ internal class CActSelectSongList : CActivity
 	}
 	public override int OnUpdateAndDraw()
 	{
-		if( bNotActivated )
+		if (!bActivated)
 			return 0;
 
 		#region [ 初めての進行描画 ]
@@ -669,7 +650,7 @@ internal class CActSelectSongList : CActivity
 				ct登場アニメ用[ i ] = new CCounter( -i * 10, 100, 3, CDTXMania.Timer );
 
 			nScrollTimer = CSoundManager.rcPerformanceTimer.nCurrentTime;
-			CDTXMania.stageSongSelection.tSelectedSongChanged();
+			stageSongSelection.tSelectedSongChanged();
 				
 			bJustStartedUpdate = false;
 		}
@@ -791,12 +772,12 @@ internal class CActSelectSongList : CActivity
 						song = rNextSong( song );
 
 					int index = ( nSelectedRow + 7 ) % 13;	// 新しく最下部に表示されるパネルのインデックス（0～12）。
-					stBarInformation[ index ].strTitleString = song.strタイトル;
+					stBarInformation[ index ].strTitleString = song.strTitle;
 					stBarInformation[ index ].colLetter = song.col文字色;
 					tGenerateSongNameBar( index, stBarInformation[ index ].strTitleString, stBarInformation[ index ].colLetter );
 					stBarInformation[index].eBarType = eGetSongBarType(song);
 
-					int nNearestIndex = n現在のアンカ難易度レベルに最も近い難易度レベルを返す(song);
+					int nNearestIndex = nGetClosestLevelToTargetLevelForSong(song);
 					//Update Preview Image Path					
 					stBarInformation[index].strPreviewImageFullPath = sGetPreviewImagePath(song.arScore[nNearestIndex]);
 					//Load the image (NOTE: May have performance issue)
@@ -818,7 +799,7 @@ internal class CActSelectSongList : CActivity
 					nCurrentScrollCounter -= 100;
 					nTargetScrollCounter -= 100;
 
-					t選択曲が変更された( false );				// スクロールバー用に今何番目を選択しているかを更新
+					tSelectedSongHasChanged( false );				// スクロールバー用に今何番目を選択しているかを更新
 					if( txSelectedSongName != null )
 					{
 						txSelectedSongName.Dispose();
@@ -831,7 +812,7 @@ internal class CActSelectSongList : CActivity
 					}
 
 					if( nTargetScrollCounter == 0 )
-						CDTXMania.stageSongSelection.tSelectedSongChanged();		// スクロール完了＝選択曲変更！
+						stageSongSelection.tSelectedSongChanged();		// スクロール完了＝選択曲変更！
 
 					//-----------------
 					#endregion
@@ -854,12 +835,12 @@ internal class CActSelectSongList : CActivity
 						song = rPreviousSong( song );
 
 					int index = ( ( nSelectedRow - 5 ) + 13 ) % 13;	// 新しく最上部に表示されるパネルのインデックス（0～12）。
-					stBarInformation[ index ].strTitleString = song.strタイトル;
+					stBarInformation[ index ].strTitleString = song.strTitle;
 					stBarInformation[ index ].colLetter = song.col文字色;
 					tGenerateSongNameBar( index, stBarInformation[ index ].strTitleString, stBarInformation[ index ].colLetter );
 					stBarInformation[index].eBarType = eGetSongBarType(song);
 
-					int nNearestIndex = n現在のアンカ難易度レベルに最も近い難易度レベルを返す(song);
+					int nNearestIndex = nGetClosestLevelToTargetLevelForSong(song);
 					//Update Preview Image Path						
 					stBarInformation[index].strPreviewImageFullPath = sGetPreviewImagePath(song.arScore[nNearestIndex]);
 					//Load the image (NOTE: May have performance issue)
@@ -881,7 +862,7 @@ internal class CActSelectSongList : CActivity
 					nCurrentScrollCounter += 100;
 					nTargetScrollCounter += 100;
 
-					t選択曲が変更された( false );				// スクロールバー用に今何番目を選択しているかを更新
+					tSelectedSongHasChanged( false );				// スクロールバー用に今何番目を選択しているかを更新
 					if( txSelectedSongName != null )
 					{
 						txSelectedSongName.Dispose();
@@ -894,7 +875,7 @@ internal class CActSelectSongList : CActivity
 					}
 						
 					if( nTargetScrollCounter == 0 )
-						CDTXMania.stageSongSelection.tSelectedSongChanged();		// スクロール完了＝選択曲変更！
+						stageSongSelection.tSelectedSongChanged();		// スクロール完了＝選択曲変更！
 					//-----------------
 					#endregion
 				}
@@ -1002,10 +983,6 @@ internal class CActSelectSongList : CActivity
 							stBarInformation[nパネル番号].txClearLamp.tDraw2D(CDTXMania.app.Device, x + 24, y + 6);
 						#endregion
 					}
-					if (txTopPanel != null)
-						txTopPanel.tDraw2DFloat(CDTXMania.app.Device, 0f, ((float)(txTopPanel.szTextureSize.Height) * ((float)(ct登場アニメ用[0].nCurrentValue) / 100f)) - (float)(txTopPanel.szTextureSize.Height));
-					if (txBottomPanel != null)
-						txBottomPanel.tDraw2DFloat(CDTXMania.app.Device, 0f, 720 - ((float)(txBottomPanel.szTextureSize.Height) * ((float)(ct登場アニメ用[0].nCurrentValue) / 100f)));
 				}
 			}
 			//-----------------
@@ -1053,10 +1030,10 @@ internal class CActSelectSongList : CActivity
 					if ( stBarInformation[ nパネル番号 ].txTitleName != null )
 						stBarInformation[ nパネル番号 ].txTitleName.tDraw2D( CDTXMania.app.Device, i選択曲バーX座標 + 55 + titleOffsets.X, y選曲 + titleOffsets.Y);
 
-					if (CDTXMania.stageSongSelection.r現在選択中の曲.eNodeType == CSongListNode.ENodeType.SCORE && actステータスパネル.txパネル本体 == null)
+					if (stageSongSelection.r現在選択中の曲.eNodeType == CSongListNode.ENodeType.SCORE && actステータスパネル.txパネル本体 == null)
 					{
 						if (txSelectedSongName == null)
-							txSelectedSongName = tGenerateTextTexture(CDTXMania.stageSongSelection.rSelectedScore.SongInformation.Title);
+							txSelectedSongName = tGenerateTextTexture(stageSongSelection.rSelectedScore.SongInformation.Title);
 						if (txSelectedSongName != null)
 						{
 							if (txSelectedSongName.szImageSize.Width > 600)
@@ -1066,7 +1043,7 @@ internal class CActSelectSongList : CActivity
 						}
 
 						if ( txSelectedArtistName == null )
-							txSelectedArtistName = tGenerateTextTexture_Small( CDTXMania.stageSongSelection.rSelectedScore.SongInformation.ArtistName );
+							txSelectedArtistName = tGenerateTextTexture_Small( stageSongSelection.rSelectedScore.SongInformation.ArtistName );
 						if ( txSelectedArtistName != null )
 						{
 							if ( txSelectedArtistName.szImageSize.Width > 600 )
@@ -1107,11 +1084,6 @@ internal class CActSelectSongList : CActivity
 			}
 			//-----------------
 			#endregion
-			if( txTopPanel != null )
-				txTopPanel.tDraw2D( CDTXMania.app.Device, 0, 0 );
-			if( txBottomPanel != null )
-				txBottomPanel.tDraw2D( CDTXMania.app.Device, 0, 720 - txBottomPanel.szTextureSize.Height );
-
 		}
 		#region [ スクロール地点の計算(描画はCActSelectShowCurrentPositionにて行う) #27648 ]
 		int py;
@@ -1270,8 +1242,6 @@ internal class CActSelectSongList : CActivity
 	private CTexture txItemNumbers;        // txアイテム数数字
 	private CTexture txSelectedSongName;
 	private CTexture txSelectedArtistName;
-	private CTexture txTopPanel;           // tx上部パネル
-	private CTexture txBottomPanel;        // tx下部パネル
 	private CActSelectStatusPanel actステータスパネル;
 	private STBar txSongNameBar;           // tx曲名バー
 	private STSongSelectionBar txSongSelectionBar;  // tx選曲バー
@@ -1328,7 +1298,7 @@ internal class CActSelectSongList : CActivity
 		if( song == null )
 			return null;
 
-		List<CSongListNode> list = (song.r親ノード != null ) ? song.r親ノード.list子リスト : CDTXMania.SongManager.listSongRoot;
+		List<CSongListNode> list = (song.parentNode != null ) ? song.parentNode.listChildNodes : CDTXMania.SongManager.listSongRoot;
 	
 		int index = list.IndexOf( song );
 
@@ -1345,7 +1315,7 @@ internal class CActSelectSongList : CActivity
 		if( song == null )
 			return null;
 
-		List<CSongListNode> list = (song.r親ノード != null ) ? song.r親ノード.list子リスト : CDTXMania.SongManager.listSongRoot;
+		List<CSongListNode> list = (song.parentNode != null ) ? song.parentNode.listChildNodes : CDTXMania.SongManager.listSongRoot;
 
 		int index = list.IndexOf( song );
 	
@@ -1369,11 +1339,11 @@ internal class CActSelectSongList : CActivity
 
 		for( int i = 0; i < 13; i++ )
 		{
-			stBarInformation[ i ].strTitleString = song.strタイトル;
+			stBarInformation[ i ].strTitleString = song.strTitle;
 			stBarInformation[ i ].colLetter = song.col文字色;
 			stBarInformation[ i ].eBarType = eGetSongBarType( song );
 				
-			int nNearestScoreIndex = n現在のアンカ難易度レベルに最も近い難易度レベルを返す(song);				
+			int nNearestScoreIndex = nGetClosestLevelToTargetLevelForSong(song);				
 
 			for ( int j = 0; j < 3; j++ )
 				stBarInformation[ i ].nSkillValue[ j ] = (int) song.arScore[nNearestScoreIndex].SongInformation.HighSkill[ j ];
@@ -1504,7 +1474,7 @@ internal class CActSelectSongList : CActivity
 				g.DrawString( strSongName, ftSongListFont, new SolidBrush( color文字影 ), (float) 2f, (float) ( y + 2f ) );
 				g.DrawString( strSongName, ftSongListFont, new SolidBrush( color ), 0f, y );
 
-				CDTXMania.tDisposeSafely( ref stBarInformation[ nバー番号 ].txTitleName );
+				CDTXMania.tReleaseTexture(ref stBarInformation[ nバー番号 ].txTitleName);
 
 				stBarInformation[ nバー番号 ].txTitleName = new CTexture( CDTXMania.app.Device, bmp, CDTXMania.TextureFormat );
 				stBarInformation[ nバー番号 ].txTitleName.vcScaleRatio = new Vector3( f拡大率X, 0.5f, 1f );
@@ -1526,7 +1496,7 @@ internal class CActSelectSongList : CActivity
 
 		try
 		{
-			CDTXMania.tDisposeSafely(ref stBarInformation[nBarIndex].txPreviewImage);
+			CDTXMania.tReleaseTexture(ref stBarInformation[nBarIndex].txPreviewImage);
 			string strSelectedPreviewImagePath = strPreviewImagePath;
 			if(!File.Exists(strSelectedPreviewImagePath))
 			{
@@ -1595,7 +1565,7 @@ internal class CActSelectSongList : CActivity
 		{
 			try
 			{
-				CDTXMania.tDisposeSafely(ref stBarInformation[nBarIndex].txClearLamp);
+				CDTXMania.tReleaseTexture(ref stBarInformation[nBarIndex].txClearLamp);
 
 				Bitmap bitmap = new Bitmap(7, 41);
 				SolidBrush[] lampBrushes = {

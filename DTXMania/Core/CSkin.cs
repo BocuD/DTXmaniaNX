@@ -63,7 +63,7 @@ internal class CSkin : IDisposable
 				if( rSound[ 1 - n次に鳴るサウンド番号 ] == null )
 					return false;
 
-				return rSound[ 1 - n次に鳴るサウンド番号 ].b再生中;
+				return rSound[ 1 - n次に鳴るサウンド番号 ].bIsPlaying;
 			}
 		}
 		public int n位置_現在のサウンド
@@ -100,7 +100,7 @@ internal class CSkin : IDisposable
 					sound.nPosition = value;
 			}
 		}
-		public int n音量_現在のサウンド
+		public int nCurrentSoundVolume
 		{
 			get
 			{
@@ -254,7 +254,7 @@ internal class CSkin : IDisposable
 			if( bExclusive )
 			{
 				if( rLastPlayedExclusiveSystemSound != null )
-					rLastPlayedExclusiveSystemSound.t停止する();
+					rLastPlayedExclusiveSystemSound.tStop();
 
 				rLastPlayedExclusiveSystemSound = this;
 			}
@@ -266,7 +266,7 @@ internal class CSkin : IDisposable
 			}
 			n次に鳴るサウンド番号 = 1 - n次に鳴るサウンド番号;
 		}
-		public void t停止する()
+		public void tStop()
 		{
 			if( rSound[ 0 ] != null )
 				rSound[ 0 ].tStopPlayback();
@@ -327,9 +327,9 @@ internal class CSkin : IDisposable
 
 	public CSystemSound bgmオプション画面 = null;
 	public CSystemSound bgmコンフィグ画面 = null;
-	public CSystemSound bgm起動画面 = null;
-	public CSystemSound bgm選曲画面 = null;
-	public CSystemSound bgm結果画面 = null;
+	public CSystemSound bgmTitleScreen = null;
+	public CSystemSound bgmSongSelectScreen = null;
+	public CSystemSound bgmResultScreen = null;
 	public CSystemSound soundSTAGEFAILED音 = null;
 	public CSystemSound soundCursorMovement = null;
 	public CSystemSound soundGameStart = null;  // soundゲーム開始音
@@ -354,7 +354,7 @@ internal class CSkin : IDisposable
 	public CSystemSound soundAdvanced = null;
 	public CSystemSound soundExtreme = null;
 	public CSystemSound soundMetronome = null;
-	public readonly int nシステムサウンド数 = (int)ESystemSound.Count;
+	public readonly int nSystemSoundCount = (int)ESystemSound.Count;
 	public CSystemSound this[ ESystemSound sound ]
 	{
 		get
@@ -431,7 +431,7 @@ internal class CSkin : IDisposable
 					return soundSelectMusic;
 
 				case ESystemSound.BGM起動画面:
-					return bgm起動画面;
+					return bgmTitleScreen;
 
 				case ESystemSound.BGMオプション画面:
 					return bgmオプション画面;
@@ -440,10 +440,10 @@ internal class CSkin : IDisposable
 					return bgmコンフィグ画面;
 
 				case ESystemSound.BGM選曲画面:
-					return bgm選曲画面;
+					return bgmSongSelectScreen;
 
 				case ESystemSound.BGM結果画面:
-					return bgm結果画面;
+					return bgmResultScreen;
 			}
 			throw new IndexOutOfRangeException();
 		}
@@ -497,7 +497,7 @@ internal class CSkin : IDisposable
 					return soundDecideSong;
 
 				case 14:
-					return bgm起動画面;
+					return bgmTitleScreen;
 
 				case 15:
 					return bgmオプション画面;
@@ -506,10 +506,10 @@ internal class CSkin : IDisposable
 					return bgmコンフィグ画面;
 
 				case 17:
-					return bgm選曲画面;
+					return bgmSongSelectScreen;
 
 				case 18:
-					return bgm結果画面;
+					return bgmResultScreen;
 
 				case 19:
 					return soundStageClear;
@@ -661,11 +661,11 @@ internal class CSkin : IDisposable
 				strBoxDefSkinSubfolderFullName
 		);
 
-		for ( int i = 0; i < nシステムサウンド数; i++ )
+		for ( int i = 0; i < nSystemSoundCount; i++ )
 		{
 			if ( this[ i ] != null && this[i].b読み込み成功 )
 			{
-				this[ i ].t停止する();
+				this[ i ].tStop();
 				this[ i ].Dispose();
 			}
 		}
@@ -692,38 +692,37 @@ internal class CSkin : IDisposable
 		soundExtreme	        = new CSystemSound( @"Sounds\Extreme.ogg",		    false, false, false );
 		soundMaster		    = new CSystemSound( @"Sounds\Master.ogg",			false, false, false );
 		soundSelectMusic       = new CSystemSound( @"Sounds\SelectMusic.ogg",     false, false, false );
-		bgm起動画面			= new CSystemSound( @"Sounds\Setup BGM.ogg",		true,  true,  false );
+		bgmTitleScreen			= new CSystemSound( @"Sounds\Setup BGM.ogg",		true,  true,  false );
 		bgmオプション画面		= new CSystemSound( @"Sounds\Option BGM.ogg",		true,  true,  false );
 		bgmコンフィグ画面		= new CSystemSound( @"Sounds\Config BGM.ogg",		true,  true,  false );
-		bgm選曲画面			= new CSystemSound( @"Sounds\Select BGM.ogg",		true,  true,  false );
-		bgm結果画面            = new CSystemSound( @"Sounds\Result BGM.ogg",      true,  true,  false);
+		bgmSongSelectScreen			= new CSystemSound( @"Sounds\Select BGM.ogg",		true,  true,  false );
+		bgmResultScreen            = new CSystemSound( @"Sounds\Result BGM.ogg",      true,  true,  false);
 		soundMetronome     = new CSystemSound(@"Sounds\Metronome.ogg",         false, false, false);
 	}
 
 	public void ReloadSkin()
 	{
-		for ( int i = 0; i < nシステムサウンド数; i++ )
+		for ( int i = 0; i < nSystemSoundCount; i++ )
 		{
-			if ( !this[ i ].bExclusive )	// BGM系以外のみ読み込む。(BGM系は必要になったときに読み込む)
+			if (this[i].bExclusive) continue; // BGM系以外のみ読み込む。(BGM系は必要になったときに読み込む)
+			
+			CSystemSound cSystemSound = this[ i ];
+
+			if (CDTXMania.bCompactMode && !cSystemSound.bCompact対象) continue;
+			
+			try
 			{
-				CSystemSound cシステムサウンド = this[ i ];
-				if ( !CDTXMania.bCompactMode || cシステムサウンド.bCompact対象 )
-				{
-					try
-					{
-						cシステムサウンド.tRead();
-						Trace.TraceInformation( "システムサウンドを読み込みました。({0})", cシステムサウンド.strFilename );
-					}
-					catch ( FileNotFoundException )
-					{
-						Trace.TraceWarning( "システムサウンドが存在しません。({0})", cシステムサウンド.strFilename );
-					}
-					catch ( Exception e )
-					{
-						Trace.TraceError( e.Message );
-						Trace.TraceWarning( "システムサウンドの読み込みに失敗しました。({0})", cシステムサウンド.strFilename );
-					}
-				}
+				cSystemSound.tRead();
+				Trace.TraceInformation( "Loaded system sound: ({0})", cSystemSound.strFilename );
+			}
+			catch ( FileNotFoundException )
+			{
+				Trace.TraceWarning( "System sound doesn't exist: ({0})", cSystemSound.strFilename );
+			}
+			catch ( Exception e )
+			{
+				Trace.TraceError( e.Message );
+				Trace.TraceWarning( "Failed to read system sound: ({0})", cSystemSound.strFilename );
 			}
 		}
 	}
@@ -882,11 +881,11 @@ internal class CSkin : IDisposable
 
 	public void tRemoveMixerAll()
 	{
-		for (int i = 0; i < nシステムサウンド数; i++)
+		for (int i = 0; i < nSystemSoundCount; i++)
 		{
 			if (this[i] != null && this[i].b読み込み成功)
 			{
-				this[i].t停止する();
+				this[i].tStop();
 				this[i].tRemoveMixer();
 			}
 		}
@@ -923,7 +922,7 @@ internal class CSkin : IDisposable
 			sw.WriteLine();
 			sw.WriteLine( "; 選曲リストのフォント名" );
 			sw.WriteLine( "; Font name for select song item." );
-			sw.WriteLine( "SelectListFontName={0}", CDTXMania.ConfigIni.str選曲リストフォント );
+			sw.WriteLine( "SelectListFontName={0}", CDTXMania.ConfigIni.songListFont );
 			sw.WriteLine();
 			sw.WriteLine( "; 選曲リストのフォントのサイズ[dot]" );
 			sw.WriteLine( "; Font size[dot] for select song item." );
@@ -1019,7 +1018,7 @@ internal class CSkin : IDisposable
 						//-----------------------------
 						if (str3.Equals("SelectListFontName"))
 						{
-							CDTXMania.ConfigIni.str選曲リストフォント = str4;
+							CDTXMania.ConfigIni.songListFont = str4;
 						}
 						else if (str3.Equals("DisplayFontName"))
 						{
@@ -1136,7 +1135,7 @@ internal class CSkin : IDisposable
 	{
 		if( !bDisposed済み )
 		{
-			for( int i = 0; i < nシステムサウンド数; i++ )
+			for( int i = 0; i < nSystemSoundCount; i++ )
 				this[ i ].Dispose();
 
 			bDisposed済み = true;

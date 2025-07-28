@@ -512,7 +512,7 @@ internal class CConfigIni
 	public ERDPosition eRDPosition;
 	public int nInfoType;
 	public int nSkillMode;
-	public Dictionary<int, string> dicJoystick;
+	public Dictionary<int, string> joystickDict;
 	public ECYGroup eCYGroup;
 	public EDarkMode eDark;
 	public EFTGroup eFTGroup;
@@ -539,8 +539,8 @@ internal class CConfigIni
 	public int nフレーム毎スリープms;			// #xxxxx 2011.11.27 yyagi add
 	public int nPlaySpeed;
 	public bool bSaveScoreIfModifiedPlaySpeed;
-	public int n曲が選択されてからプレビュー音が鳴るまでのウェイトms;
-	public int n曲が選択されてからプレビュー画像が表示開始されるまでのウェイトms;
+	public int nSongSelectSoundPreviewWaitTimeMs;
+	public int nSongSelectImagePreviewWaitTimeMs;
 	public int n自動再生音量;  // nAutoVolume
 	public int n手動再生音量;  // nChipVolume
 	public int n選曲リストフォントのサイズdot;
@@ -548,8 +548,8 @@ internal class CConfigIni
 	public STDGBVALUE<int> n表示可能な最小コンボ数;
 	public STDGBVALUE<int> nScrollSpeed;
 	public string strDTXManiaのバージョン;
-	public string str曲データ検索パス;
-	public string str選曲リストフォント;
+	public string strSongDataSearchPath;
+	public string songListFont;
 	public string[] strCardName; //2015.12.3 kaiera0467 DrumとGuitarとBassで名前を別々にするため、string[3]に変更。
 	public string[] strGroupName;
 	public EDrumComboTextDisplayPosition ドラムコンボ文字の表示位置;
@@ -559,7 +559,7 @@ internal class CConfigIni
 	public STDGBVALUE<int> nJudgeLine;
 	public STDGBVALUE<int> nShutterInSide;
 	public STDGBVALUE<int> nShutterOutSide;
-	public bool bCLASSIC譜面判別を有効にする;
+	public bool bClassicScoreDisplay;
 	public bool bMutingLP;
 	public bool bSkillModeを自動切換えする;
 
@@ -574,7 +574,7 @@ internal class CConfigIni
 	#endregion
 
 	#region [ GDオプション ]
-	public bool b難易度表示をXG表示にする;
+	public bool bDisplayDifficultyXGStyle;
 	public bool bShowMusicInfo;
 	public bool bShowScore;
 	public string str曲名表示フォント;
@@ -608,7 +608,7 @@ internal class CConfigIni
 	public STDGBVALUE<int> nHidSud;
 	public bool bIsAutoResultCapture;			// #25399 2011.6.9 yyagi リザルト画像自動保存機能のON/OFF制御
 	public int nPoliphonicSounds;				// #28228 2012.5.1 yyagi レーン毎の最大同時発音数
-	public bool bバッファ入力を行う;
+	public bool bBufferedInput;
 	public bool bIsEnabledSystemMenu;			// #28200 2012.5.1 yyagi System Menuの使用可否切替
 	public string strSystemSkinSubfolderFullName;	// #28195 2012.5.2 yyagi Skin切替用 System/以下のサブフォルダ名
 	public bool bUseBoxDefSkin;                     // #28195 2012.5.6 yyagi Skin切替用 box.defによるスキン変更機能を使用するか否か
@@ -647,26 +647,6 @@ internal class CConfigIni
 		}
 	}
 
-	public bool bEnterがキー割り当てのどこにも使用されていない
-	{
-		get
-		{
-			for( int i = 0; i <= (int)EKeyConfigPart.SYSTEM; i++ )
-			{
-				for( int j = 0; j < (int)EKeyConfigPad.MAX; j++ )
-				{
-					for( int k = 0; k < 0x10; k++ )
-					{
-						if( ( KeyAssign[ i ][ j ][ k ].InputDevice == EInputDevice.Keyboard ) && ( KeyAssign[ i ][ j ][ k ].Code == (int) SlimDXKey.Return ) )
-						{
-							return false;
-						}
-					}
-				}
-			}
-			return true;
-		}
-	}
 	public bool bGuitarEnabled
 	{
 		get => _bGuitar有効;
@@ -1025,7 +1005,7 @@ internal class CConfigIni
 			//----------------------------------------
 #endif
 		strDTXManiaのバージョン = "Unknown";
-		str曲データ検索パス = @".\";
+		strSongDataSearchPath = @".\";
 		bFullScreenMode = false;
 		bFullScreenExclusive = true;
 		bVerticalSyncWait = true;
@@ -1125,8 +1105,8 @@ internal class CConfigIni
 		nPedalLagTime = 0;
 
 		bAutoAddGage = false;
-		n曲が選択されてからプレビュー音が鳴るまでのウェイトms = 1000;
-		n曲が選択されてからプレビュー画像が表示開始されるまでのウェイトms = 100;
+		nSongSelectSoundPreviewWaitTimeMs = 50;
+		nSongSelectImagePreviewWaitTimeMs = 0;
 		bWave再生位置自動調整機能有効 = true;
 		bBGM音を発声する = true;
 		bドラム打音を発声する = true;
@@ -1137,7 +1117,7 @@ internal class CConfigIni
 		n表示可能な最小コンボ数.Drums = 10;
 		n表示可能な最小コンボ数.Guitar = 2;
 		n表示可能な最小コンボ数.Bass = 2;
-		str選曲リストフォント = "MS PGothic";
+		songListFont = "MS PGothic";
 		n選曲リストフォントのサイズdot = 20;
 		b選曲リストフォントを太字にする = true;
 		n自動再生音量 = 80;
@@ -1177,7 +1157,7 @@ internal class CConfigIni
 		bSmallGraph = true;
 		ドラムコンボ文字の表示位置 = EDrumComboTextDisplayPosition.RIGHT;
 		bドラムコンボ文字の表示 = true;
-		bCLASSIC譜面判別を有効にする = false;
+		bClassicScoreDisplay = false;
 		bSkillModeを自動切換えする = false;
 		bMutingLP = true;
 		#region [ AutoPlay ]
@@ -1229,7 +1209,7 @@ internal class CConfigIni
 		#endregion
 
 		ConfigIniファイル名 = "";
-		dicJoystick = new Dictionary<int, string>( 10 );
+		joystickDict = new Dictionary<int, string>( 10 );
 		tSetDefaultKeyAssignments();
 		#region [ velocityMin ]
 		nVelocityMin.LC = 0;					// #23857 2011.1.31 yyagi VelocityMin
@@ -1260,13 +1240,13 @@ internal class CConfigIni
 		#endregion
 
 		#region [ GDオプション ]
-		b難易度表示をXG表示にする = true;
+		bDisplayDifficultyXGStyle = true;
 		bShowScore = true;
 		bShowMusicInfo = true;
 		str曲名表示フォント = "MS PGothic";
 		#endregion
 
-		bバッファ入力を行う = true;
+		bBufferedInput = true;
 		bIsSwappedGuitarBass = false;			// #24063 2011.1.16 yyagi ギターとベースの切り替え
 		bIsAllowedDoubleClickFullscreen = true;	// #26752 2011.11.26 ダブルクリックでのフルスクリーンモード移行を許可
 		eBDGroup = EBDGroup.打ち分ける;		// #27029 2012.1.4 from HHPedalとBassPedalのグルーピング
@@ -1354,7 +1334,7 @@ internal class CConfigIni
 		sw.WriteLine( @"; セミコロン(;)で区切ることにより複数のパスを指定できます。（例: d:\DTXFiles1\;e:\DTXFiles2\）" );
 		sw.WriteLine( "; Pathes for DTX data." );
 		sw.WriteLine( @"; You can specify many pathes separated with semicolon(;). (e.g. d:\DTXFiles1\;e:\DTXFiles2\)" );
-		sw.WriteLine( "DTXPath={0}", str曲データ検索パス );
+		sw.WriteLine( "DTXPath={0}", strSongDataSearchPath );
 		sw.WriteLine();
 		#endregion
 		sw.WriteLine("; プレイヤーネーム。");
@@ -1603,10 +1583,10 @@ internal class CConfigIni
 		#endregion     
 		#region [ プレビュー音 ]
 		sw.WriteLine( "; 曲選択からプレビュー音の再生までのウェイト[ms]" );
-		sw.WriteLine( "PreviewSoundWait={0}", n曲が選択されてからプレビュー音が鳴るまでのウェイトms );
+		sw.WriteLine( "PreviewSoundWait={0}", nSongSelectSoundPreviewWaitTimeMs );
 		sw.WriteLine();
 		sw.WriteLine( "; 曲選択からプレビュー画像表示までのウェイト[ms]" );
-		sw.WriteLine( "PreviewImageWait={0}", n曲が選択されてからプレビュー画像が表示開始されるまでのウェイトms );
+		sw.WriteLine( "PreviewImageWait={0}", nSongSelectImagePreviewWaitTimeMs );
 		sw.WriteLine();
 		#endregion
 		sw.WriteLine( "; Waveの再生位置自動補正(0:OFF, 1:ON)" );
@@ -1652,7 +1632,7 @@ internal class CConfigIni
 		sw.WriteLine();
 		#region [ GDオプション ]
 		sw.WriteLine( "; 選曲画面の難易度表示をXG表示にする (0:OFF, 1:ON)");
-		sw.WriteLine( "Difficulty={0}", b難易度表示をXG表示にする ? 1 : 0);
+		sw.WriteLine( "Difficulty={0}", bDisplayDifficultyXGStyle ? 1 : 0);
 		sw.WriteLine();
 		sw.WriteLine("; スコアの表示(0:OFF, 1:ON)");
 		sw.WriteLine("ShowScore={0}", bShowScore ? 1 : 0);
@@ -1670,7 +1650,7 @@ internal class CConfigIni
 		#region [ 選曲リストのフォント ]
 		sw.WriteLine( "; 選曲リストのフォント名" );
 		sw.WriteLine( "; Font name for select song item." );
-		sw.WriteLine( "SelectListFontName={0}", str選曲リストフォント );
+		sw.WriteLine( "SelectListFontName={0}", songListFont );
 		sw.WriteLine();
 		sw.WriteLine( "; 選曲リストのフォントのサイズ[dot]" );
 		sw.WriteLine( "; Font size[dot] for select song item." );
@@ -1699,7 +1679,7 @@ internal class CConfigIni
 		sw.WriteLine();
 		sw.WriteLine( "; バッファ入力モード(0:OFF, 1:ON)" );
 		sw.WriteLine( "; Using Buffered input (0:OFF, 1:ON)" );
-		sw.WriteLine( "BufferedInput={0}", bバッファ入力を行う ? 1 : 0 );
+		sw.WriteLine( "BufferedInput={0}", bBufferedInput ? 1 : 0 );
 		sw.WriteLine();
 		sw.WriteLine("; オープンハイハットの表示画像(0:DTXMania仕様, 1:○なし, 2:クローズハットと同じ)");
 		sw.WriteLine("HHOGraphics={0}", (int)eHHOGraphics.Drums);
@@ -1956,7 +1936,7 @@ internal class CConfigIni
 		sw.WriteLine("DrumsLaneType={0}", (int)eLaneType.Drums);
 		sw.WriteLine();
 		sw.WriteLine("; CLASSIC譜面判別");
-		sw.WriteLine("CLASSIC={0}", bCLASSIC譜面判別を有効にする ? 1 : 0);
+		sw.WriteLine("CLASSIC={0}", bClassicScoreDisplay ? 1 : 0);
 		sw.WriteLine();
 		sw.WriteLine("; スキルモード(0:旧仕様, 1:XG仕様)");
 		sw.WriteLine("SkillMode={0}", (int)nSkillMode);
@@ -2142,7 +2122,7 @@ internal class CConfigIni
 		#region [ GUID ]
 		sw.WriteLine( "[GUID]" );
 		sw.WriteLine();
-		foreach( KeyValuePair<int, string> pair in dicJoystick )
+		foreach( KeyValuePair<int, string> pair in joystickDict )
 		{
 			sw.WriteLine( "JoystickID={0},{1}", pair.Key, pair.Value );
 		}
@@ -2469,7 +2449,7 @@ internal class CConfigIni
 									}
 									else if( str3.Equals( "DTXPath" ) )
 									{
-										str曲データ検索パス = str4;
+										strSongDataSearchPath = str4;
 									}
 									else if ( str3.Equals( "SkinPath" ) )
 									{
@@ -2710,11 +2690,11 @@ internal class CConfigIni
 									}
 									else if (str3.Equals("PreviewSoundWait"))
 									{
-										n曲が選択されてからプレビュー音が鳴るまでのウェイトms = CConversion.nGetNumberIfInRange(str4, 0, 0x5f5e0ff, n曲が選択されてからプレビュー音が鳴るまでのウェイトms);
+										nSongSelectSoundPreviewWaitTimeMs = CConversion.nGetNumberIfInRange(str4, 0, 0x5f5e0ff, nSongSelectSoundPreviewWaitTimeMs);
 									}
 									else if (str3.Equals("PreviewImageWait"))
 									{
-										n曲が選択されてからプレビュー画像が表示開始されるまでのウェイトms = CConversion.nGetNumberIfInRange(str4, 0, 0x5f5e0ff, n曲が選択されてからプレビュー画像が表示開始されるまでのウェイトms);
+										nSongSelectImagePreviewWaitTimeMs = CConversion.nGetNumberIfInRange(str4, 0, 0x5f5e0ff, nSongSelectImagePreviewWaitTimeMs);
 									}
 									else if (str3.Equals("AdjustWaves"))
 									{
@@ -2775,7 +2755,7 @@ internal class CConfigIni
 									#region [ GDオプション ]
 									else if (str3.Equals("Difficulty"))
 									{
-										b難易度表示をXG表示にする = CConversion.bONorOFF(str4[0]);
+										bDisplayDifficultyXGStyle = CConversion.bONorOFF(str4[0]);
 									}
 									else if (str3.Equals("ShowScore"))
 									{
@@ -2796,7 +2776,7 @@ internal class CConfigIni
 									#endregion
 									else if (str3.Equals("SelectListFontName"))
 									{
-										str選曲リストフォント = str4;
+										songListFont = str4;
 									}
 									else if (str3.Equals("SelectListFontSize"))
 									{
@@ -2890,7 +2870,7 @@ internal class CConfigIni
 									#endregion
 									else if (str3.Equals("BufferedInput"))
 									{
-										bバッファ入力を行う = CConversion.bONorOFF(str4[0]);
+										bBufferedInput = CConversion.bONorOFF(str4[0]);
 									}
 									else if (str3.Equals("PolyphonicSounds"))		// #28228 2012.5.1 yyagi
 									{
@@ -3182,7 +3162,7 @@ internal class CConfigIni
 									}
 									else if (str3.Equals("CLASSIC"))
 									{
-										bCLASSIC譜面判別を有効にする = CConversion.bONorOFF(str4[0]);
+										bClassicScoreDisplay = CConversion.bONorOFF(str4[0]);
 									}
 									else if (str3.Equals("MutingLP"))
 									{
@@ -3860,11 +3840,11 @@ internal class CConfigIni
 			int result = 0;
 			if( ( int.TryParse( strArray[ 0 ], out result ) && ( result >= 0 ) ) && ( result <= 9 ) )
 			{
-				if( dicJoystick.ContainsKey( result ) )
+				if( joystickDict.ContainsKey( result ) )
 				{
-					dicJoystick.Remove( result );
+					joystickDict.Remove( result );
 				}
-				dicJoystick.Add( result, strArray[ 1 ] );
+				joystickDict.Add( result, strArray[ 1 ] );
 			}
 		}
 	}

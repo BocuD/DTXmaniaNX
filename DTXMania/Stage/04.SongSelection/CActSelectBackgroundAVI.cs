@@ -2,6 +2,7 @@
 using DTXMania.Core;
 using SharpDX.Direct3D9;
 using FDK;
+using SampleFramework;
 
 namespace DTXMania;
 
@@ -12,13 +13,13 @@ internal class CActSelectBackgroundAVI : CActivity
         bLoop = true;
         position = 0;
 
-        bNotActivated = true;
+        bActivated = false;
     }
 
-    public void Start(EChannel nチャンネル番号, CDTX.CAVI rAVI, int n総移動時間ms, int n移動開始時刻ms)
+    public void Start(EChannel nチャンネル番号, CAVI rAVI, int n総移動時間ms, int n移動開始時刻ms)
     {
         //2016.01.21 kairera0467 VfW時代のコードを除去+大改造
-        Trace.TraceInformation("CActSelectBackgroundAVI: Start(): " + rAVI.strファイル名);
+        Trace.TraceInformation("CActSelectBackgroundAVI: Start(): " + rAVI.strFileName);
 
         this.rAVI = rAVI;
         #region[ アスペクト比からどっちを使うか判別 ]
@@ -107,7 +108,7 @@ internal class CActSelectBackgroundAVI : CActivity
 
     public int tUpdateAndDraw() 
     {
-        if ((!bNotActivated))
+        if ((bActivated))
         {
             #region[ムービーのフレーム作成処理]
             if (((tx描画用 != null)) && (rAVI != null)) //クリップ無し曲での進入防止。
@@ -193,7 +194,7 @@ internal class CActSelectBackgroundAVI : CActivity
 
     public override void OnManagedCreateResources()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             base.OnManagedCreateResources();
         }
@@ -201,7 +202,7 @@ internal class CActSelectBackgroundAVI : CActivity
 
     public override void OnManagedReleaseResources()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             if (tx描画用 != null)
             {
@@ -235,11 +236,12 @@ internal class CActSelectBackgroundAVI : CActivity
     private int position;
     //private int position2;
     //DTXNX is 1280 by 720
-    private readonly float fullScreenHeightPx = 1280f;
-    private readonly float fullScreenWidthPx = 720f;
+    private readonly float fullScreenHeightPx = GameFramebufferSize.Width;
+
+    private readonly float fullScreenWidthPx = GameFramebufferSize.Height;
     //NOTE: This is a soft reference to externally initialized object
     //Do not call Dispose() for rAVI
-    private CDTX.CAVI rAVI;
+    private CAVI rAVI;
         
     #endregion
 

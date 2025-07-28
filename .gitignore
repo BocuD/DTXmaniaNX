@@ -11,10 +11,8 @@
 [Dd]ebug/
 [Dd]ebugPublic/
 [Rr]elease/
-x64/
 build/
 bld/
-[Bb]in/
 [Oo]bj/
 
 # Roslyn cache directories
@@ -190,7 +188,7 @@ _Pvt_Extensions/
 ModelManifest.xml
 
 # DTX songs
-実行時フォルダ/Songs/*
+Runtime/Songs/*
 
 # DTX specific files
 Runtime/config.ini
@@ -201,9 +199,12 @@ Runtime/System/*
 Runtime/DTXFiles/*
 !Runtime/System/Sounds
 !Runtime/System/Graphics
+!Runtime/FFpmeg/*
 
-Runtime/dll
-Runtime/*.dll
+#!/Runtime/FFmpeg/*
+#!/Runtime/FFmpeg/bin/x64/*.dll
+#/Runtime/dll
+/Runtime/*.dll
 
 # IDE files
 .idea/*

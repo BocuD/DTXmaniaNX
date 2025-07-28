@@ -160,7 +160,7 @@ internal class CActPerfGuitarStatusPanel : CActPerfCommonStatusPanel
         st難易度文字位置Ar[10] = st難易度文字位置11;
         st難易度数字位置 = st難易度文字位置Ar;
 
-        bNotActivated = true;
+        bActivated = false;
     }
 
     public override void OnActivate()
@@ -205,7 +205,7 @@ internal class CActPerfGuitarStatusPanel : CActPerfCommonStatusPanel
     }
     public override void OnManagedCreateResources()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             prv表示用フォント = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.str曲名表示フォント), 20, FontStyle.Regular);
             prv称号フォント = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.str曲名表示フォント), 12, FontStyle.Regular);
@@ -331,11 +331,11 @@ internal class CActPerfGuitarStatusPanel : CActPerfCommonStatusPanel
     }
     public override void OnManagedReleaseResources()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             CDTXMania.tDisposeSafely(ref prv表示用フォント);
             CDTXMania.tDisposeSafely(ref prv称号フォント);
-            CDTXMania.tDisposeSafely(ref txスキルパネル);
+            CDTXMania.tReleaseTexture(ref txスキルパネル);
             CDTXMania.tReleaseTexture(ref txパネル文字[0]);
             CDTXMania.tReleaseTexture(ref txパネル文字[1]);
             CDTXMania.tReleaseTexture(ref tx難易度パネル);
@@ -353,7 +353,7 @@ internal class CActPerfGuitarStatusPanel : CActPerfCommonStatusPanel
 
     public override int OnUpdateAndDraw()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             double dbPERFECT率 = 0;
             double dbGREAT率 = 0;
@@ -369,7 +369,7 @@ internal class CActPerfGuitarStatusPanel : CActPerfCommonStatusPanel
                     string str = string.Format( "{0:0.00}", ( (float)CDTXMania.DTX.LEVEL[ i ] ) / 10.0f + ( CDTXMania.DTX.LEVELDEC[ i ] != 0 ? CDTXMania.DTX.LEVELDEC[ i ] / 100.0f : 0 ) );
                     bool bCLASSIC = false;
                     //If Skill Mode is CLASSIC, always display lvl as Classic Style
-                    if( CDTXMania.ConfigIni.nSkillMode == 0 || (CDTXMania.ConfigIni.bCLASSIC譜面判別を有効にする &&
+                    if( CDTXMania.ConfigIni.nSkillMode == 0 || (CDTXMania.ConfigIni.bClassicScoreDisplay &&
                                                                 ( i == 1 ? !CDTXMania.DTX.bHasChips.YPGuitar : !CDTXMania.DTX.bHasChips.YPBass ) &&
                                                                 ( CDTXMania.DTX.bForceXGChart == false )) )
                     {

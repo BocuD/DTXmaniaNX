@@ -95,7 +95,7 @@ internal class CSongManager
 				{
 					throw new InvalidDataException( "ヘッダが異なります。" );
 				}
-				listSongsDB = new List<CScore>();
+				listSongsDB = [];
 
 				while( true )
 				{
@@ -123,306 +123,168 @@ internal class CSongManager
 
 	#region [ Search songs and create a list ]
 	//-----------------
-	public void tSearchSongsAndCreateList( string str基点フォルダ, bool b子BOXへ再帰する )
+	public void tSearchSongsAndCreateList( string strBaseFolder )
 	{
-		tSearchSongsAndCreateList( str基点フォルダ, b子BOXへ再帰する, listSongRoot, null );
+		tSearchSongsAndCreateList( strBaseFolder, listSongRoot, null );
 	}
-	private void tSearchSongsAndCreateList( string str基点フォルダ, bool b子BOXへ再帰する, List<CSongListNode> listノードリスト, CSongListNode node親 )
+
+	private void tSearchSongsAndCreateList(string strBaseFolder, List<CSongListNode> listNodeList,
+		CSongListNode nodeParent)
 	{
-		if( !str基点フォルダ.EndsWith( @"\" ) )
-			str基点フォルダ = str基点フォルダ + @"\";
+		if (!strBaseFolder.EndsWith(@"\"))
+			strBaseFolder += @"\";
 
-		DirectoryInfo info = new DirectoryInfo( str基点フォルダ );
+		DirectoryInfo info = new(strBaseFolder);
 
-		if( CDTXMania.ConfigIni.bLogSongSearch )
-			Trace.TraceInformation( "基点フォルダ: " + str基点フォルダ );
+		if (CDTXMania.ConfigIni.bLogSongSearch)
+			Trace.TraceInformation("基点フォルダ: " + strBaseFolder);
 
 		#region [ a.フォルダ内に set.def が存在する場合 → set.def からノード作成]
+
+		//If set.def exists in the folder, create nodes from set.def
 		//-----------------------------
-		string path = str基点フォルダ + "set.def";
-		if( File.Exists( path ) )
+		string path = strBaseFolder + "set.def";
+		if (File.Exists(path))
 		{
-			CSetDef def = new CSetDef( path );
-			new FileInfo( path );
-			if( CDTXMania.ConfigIni.bLogSongSearch )
-			{
-				Trace.TraceInformation( "set.def検出 : {0}", path );
-				Trace.Indent();
-			}
-			try
-			{
-				SlowOrSuspendSearchTask();		// #27060 中断要求があったら、解除要求が来るまで待機, #PREMOVIE再生中は検索負荷を落とす
-				for( int i = 0; i < def.blocks.Count; i++ )
-				{
-					CSetDef.CBlock block = def.blocks[ i ];
-					CSongListNode item = new CSongListNode();
-					item.eNodeType = CSongListNode.ENodeType.SCORE;
-					item.strタイトル = block.Title;
-					item.strジャンル = block.Genre;
-					item.nスコア数 = 0;
-					item.col文字色 = block.FontColor;
-					item.SetDefのブロック番号 = i;
-					item.pathSetDefの絶対パス = path;
-					item.r親ノード = node親;
-
-					item.strBreadcrumbs = ( item.r親ノード == null ) ?
-						path + i : item.r親ノード.strBreadcrumbs + " > " + path + i;
-
-					for( int j = 0; j < 5; j++ )
-					{
-						if( !string.IsNullOrEmpty( block.File[ j ] ) )
-						{
-							string str2 = str基点フォルダ + block.File[ j ];
-							if( File.Exists( str2 ) )
-							{
-								item.arDifficultyLabel[ j ] = block.Label[ j ];
-								item.arScore[ j ] = new CScore();
-								item.arScore[ j ].FileInformation.AbsoluteFilePath = str2;
-								item.arScore[ j ].FileInformation.AbsoluteFolderPath = Path.GetFullPath( Path.GetDirectoryName( str2 ) ) + @"\";
-								FileInfo info2 = new FileInfo( str2 );
-								item.arScore[ j ].FileInformation.FileSize = info2.Length;
-								item.arScore[ j ].FileInformation.LastModified = info2.LastWriteTime;
-								string str3 = str2 + ".score.ini";
-								if( File.Exists( str3 ) )
-								{
-									FileInfo info3 = new FileInfo( str3 );
-									item.arScore[ j ].ScoreIniInformation.FileSize = info3.Length;
-									item.arScore[ j ].ScoreIniInformation.LastModified = info3.LastWriteTime;
-								}
-								item.nスコア数++;
-								nNbScoresFound++;
-							}
-							else
-							{
-								item.arScore[ j ] = null;
-							}
-						}
-					}
-					if( item.nスコア数 > 0 )
-					{
-						listノードリスト.Add( item );
-						nNbSongNodesFound++;
-						if( CDTXMania.ConfigIni.bLogSongSearch )
-						{
-							StringBuilder builder = new StringBuilder( 0x200 );
-							builder.Append( string.Format( "nID#{0:D3}", item.nID ) );
-							if( item.r親ノード != null )
-							{
-								builder.Append( string.Format( "(in#{0:D3}):", item.r親ノード.nID ) );
-							}
-							else
-							{
-								builder.Append( "(onRoot):" );
-							}
-							if( ( item.strタイトル != null ) && ( item.strタイトル.Length > 0 ) )
-							{
-								builder.Append( " SONG, Title=" + item.strタイトル );
-							}
-							if( ( item.strジャンル != null ) && ( item.strジャンル.Length > 0 ) )
-							{
-								builder.Append( ", Genre=" + item.strジャンル );
-							}
-							if( item.col文字色 != Color.White )
-							{
-								builder.Append( ", FontColor=" + item.col文字色 );
-							}
-							Trace.TraceInformation( builder.ToString() );
-							Trace.Indent();
-							try
-							{
-								for( int k = 0; k < 5; k++ )
-								{
-									if( item.arScore[ k ] != null )
-									{
-										CScore cスコア = item.arScore[ k ];
-										builder.Remove( 0, builder.Length );
-										builder.Append( string.Format( "ブロック{0}-{1}:", item.SetDefのブロック番号 + 1, k + 1 ) );
-										builder.Append( " Label=" + item.arDifficultyLabel[ k ] );
-										builder.Append( ", File=" + cスコア.FileInformation.AbsoluteFilePath );
-										builder.Append( ", Size=" + cスコア.FileInformation.FileSize );
-										builder.Append( ", LastUpdate=" + cスコア.FileInformation.LastModified );
-										Trace.TraceInformation( builder.ToString() );
-									}
-								}
-							}
-							finally
-							{
-								Trace.Unindent();
-							}
-						}
-					}
-				}
-			}
-			finally
-			{
-				if( CDTXMania.ConfigIni.bLogSongSearch )
-				{
-					Trace.Unindent();
-				}
-			}
+			ParseSetDef(strBaseFolder, listNodeList, nodeParent, path);
 		}
 		//-----------------------------
+
 		#endregion
 
 		#region [ b.フォルダ内に set.def が存在しない場合 → 個別ファイルからノード作成 ]
+
+		// If set.def does not exist in the folder, there are probably chart files in the folder
 		//-----------------------------
 		else
 		{
-			foreach( FileInfo fileinfo in info.GetFiles() )
+			//loop over all files, try to load them as charts
+			foreach (FileInfo fileinfo in info.GetFiles())
 			{
-				SlowOrSuspendSearchTask();		// #27060 中断要求があったら、解除要求が来るまで待機, #PREMOVIE再生中は検索負荷を落とす
+				SlowOrSuspendSearchTask(); // #27060 中断要求があったら、解除要求が来るまで待機, #PREMOVIE再生中は検索負荷を落とす
 				string strExt = fileinfo.Extension.ToLower();
-				if( ( strExt.Equals( ".dtx" ) || strExt.Equals( ".gda" ) ) || ( ( strExt.Equals( ".g2d" ) || strExt.Equals( ".bms" ) ) || strExt.Equals( ".bme" ) ) )
+				if (strExt.Equals(".dtx") || strExt.Equals(".gda") || strExt.Equals(".g2d") || strExt.Equals(".bms") ||
+				    strExt.Equals(".bme"))
 				{
-					CSongListNode c曲リストノード = new CSongListNode();
-					c曲リストノード.eNodeType = CSongListNode.ENodeType.SCORE;
-					c曲リストノード.nスコア数 = 1;
-					c曲リストノード.r親ノード = node親;
-
-					c曲リストノード.strBreadcrumbs = ( c曲リストノード.r親ノード == null ) ?
-						str基点フォルダ + fileinfo.Name : c曲リストノード.r親ノード.strBreadcrumbs + " > " + str基点フォルダ + fileinfo.Name;
-
-					c曲リストノード.arScore[ 0 ] = new CScore();
-					c曲リストノード.arScore[ 0 ].FileInformation.AbsoluteFilePath = str基点フォルダ + fileinfo.Name;
-					c曲リストノード.arScore[ 0 ].FileInformation.AbsoluteFolderPath = str基点フォルダ;
-					c曲リストノード.arScore[ 0 ].FileInformation.FileSize = fileinfo.Length;
-					c曲リストノード.arScore[ 0 ].FileInformation.LastModified = fileinfo.LastWriteTime;
-					string strFileNameScoreIni = c曲リストノード.arScore[ 0 ].FileInformation.AbsoluteFilePath + ".score.ini";
-					if( File.Exists( strFileNameScoreIni ) )
-					{
-						FileInfo infoScoreIni = new FileInfo( strFileNameScoreIni );
-						c曲リストノード.arScore[ 0 ].ScoreIniInformation.FileSize = infoScoreIni.Length;
-						c曲リストノード.arScore[ 0 ].ScoreIniInformation.LastModified = infoScoreIni.LastWriteTime;
-					}
-					nNbScoresFound++;
-					listノードリスト.Add( c曲リストノード );
-					nNbSongNodesFound++;
-					if( CDTXMania.ConfigIni.bLogSongSearch )
-					{
-						Trace.Indent();
-						try
-						{
-							StringBuilder sb = new StringBuilder( 0x100 );
-							sb.Append( string.Format( "nID#{0:D3}", c曲リストノード.nID ) );
-							if( c曲リストノード.r親ノード != null )
-							{
-								sb.Append( string.Format( "(in#{0:D3}):", c曲リストノード.r親ノード.nID ) );
-							}
-							else
-							{
-								sb.Append( "(onRoot):" );
-							}
-							sb.Append( " SONG, File=" + c曲リストノード.arScore[ 0 ].FileInformation.AbsoluteFilePath );
-							sb.Append( ", Size=" + c曲リストノード.arScore[ 0 ].FileInformation.FileSize );
-							sb.Append( ", LastUpdate=" + c曲リストノード.arScore[ 0 ].FileInformation.LastModified );
-							Trace.TraceInformation( sb.ToString() );
-						}
-						finally
-						{
-							Trace.Unindent();
-						}
-					}
+					AddSongChart(strBaseFolder, listNodeList, nodeParent, fileinfo);
 				}
-				else if( strExt.Equals( ".mid" ) || strExt.Equals( ".smf" ))
+				else if (strExt.Equals(".mid") || strExt.Equals(".smf"))
 				{
 					// DoNothing
+					//????
 				}
 			}
 		}
+
 		//-----------------------------
+
 		#endregion
 
-		foreach( DirectoryInfo infoDir in info.GetDirectories() )
+		//scan subdirectories
+		foreach (DirectoryInfo infoDir in info.GetDirectories())
 		{
-			SlowOrSuspendSearchTask();		// #27060 中断要求があったら、解除要求が来るまで待機, #PREMOVIE再生中は検索負荷を落とす
+			SlowOrSuspendSearchTask(); // #27060 中断要求があったら、解除要求が来るまで待機, #PREMOVIE再生中は検索負荷を落とす
 
 			#region [ a. "dtxfiles." で始まるフォルダの場合 ]
+
 			//-----------------------------
-			if( infoDir.Name.ToLower().StartsWith( "dtxfiles." ) )
+			if (infoDir.Name.ToLower().StartsWith("dtxfiles."))
 			{
-				CSongListNode c曲リストノード = new CSongListNode();
-				c曲リストノード.eNodeType = CSongListNode.ENodeType.BOX;
-				c曲リストノード.bDTXFilesで始まるフォルダ名のBOXである = true;
-				c曲リストノード.strタイトル = infoDir.Name.Substring( 9 );
-				c曲リストノード.nスコア数 = 1;
-				c曲リストノード.r親ノード = node親;
+				CSongListNode cSongListNode = new()
+				{
+					eNodeType = CSongListNode.ENodeType.BOX,
+					bDTXFilesで始まるフォルダ名のBOXである = true,
+					strTitle = infoDir.Name.Substring(9),
+					nスコア数 = 1,
+					parentNode = nodeParent
+				};
 
 				// 一旦、上位BOXのスキン情報をコピー (後でbox.defの記載にて上書きされる場合がある)
-				c曲リストノード.strSkinPath = ( c曲リストノード.r親ノード == null ) ?
-					"" : c曲リストノード.r親ノード.strSkinPath;
+				cSongListNode.strSkinPath =
+					cSongListNode.parentNode == null ? "" : cSongListNode.parentNode.strSkinPath;
 
-				c曲リストノード.strBreadcrumbs = ( c曲リストノード.r親ノード == null ) ?
-					c曲リストノード.strタイトル : c曲リストノード.r親ノード.strBreadcrumbs + " > " + c曲リストノード.strタイトル;
+				cSongListNode.strBreadcrumbs = cSongListNode.parentNode == null
+					? cSongListNode.strTitle
+					: cSongListNode.parentNode.strBreadcrumbs + " > " + cSongListNode.strTitle;
 
-		
-				c曲リストノード.list子リスト = new List<CSongListNode>();
-				c曲リストノード.arScore[ 0 ] = new CScore();
-				c曲リストノード.arScore[ 0 ].FileInformation.AbsoluteFolderPath = infoDir.FullName + @"\";
-				c曲リストノード.arScore[ 0 ].SongInformation.Title = c曲リストノード.strタイトル;
-				c曲リストノード.arScore[ 0 ].SongInformation.Comment =
-					(CDTXMania.isJapanese) ?
-						"BOX に移動します。" :
-						"Enter into the BOX.";
-				listノードリスト.Add(c曲リストノード);
-				if( File.Exists( infoDir.FullName + @"\box.def" ) )
+
+				cSongListNode.listChildNodes = [];
+				cSongListNode.arScore[0] = new CScore();
+				cSongListNode.arScore[0].FileInformation.AbsoluteFolderPath = infoDir.FullName + @"\";
+				cSongListNode.arScore[0].SongInformation.Title = cSongListNode.strTitle;
+				cSongListNode.arScore[0].SongInformation.Comment = CDTXMania.isJapanese ? "BOX に移動します。" : "Enter into the BOX.";
+				
+				listNodeList.Add(cSongListNode);
+				if (File.Exists(infoDir.FullName + @"\box.def"))
 				{
-					CBoxDef boxdef = new CBoxDef( infoDir.FullName + @"\box.def" );
-					if( ( boxdef.Title != null ) && ( boxdef.Title.Length > 0 ) )
+					CBoxDef boxdef = new(infoDir.FullName + @"\box.def");
+					if (boxdef.Title is { Length: > 0 })
 					{
-						c曲リストノード.strタイトル = boxdef.Title;
+						cSongListNode.strTitle = boxdef.Title;
 					}
-					if( ( boxdef.Genre != null ) && ( boxdef.Genre.Length > 0 ) )
+
+					if (boxdef.Genre is { Length: > 0 })
 					{
-						c曲リストノード.strジャンル = boxdef.Genre;
+						cSongListNode.strGenre = boxdef.Genre;
 					}
-					if( boxdef.Color != Color.White )
+
+					if (boxdef.Color != Color.White)
 					{
-						c曲リストノード.col文字色 = boxdef.Color;
+						cSongListNode.col文字色 = boxdef.Color;
 					}
-					if( ( boxdef.Artist != null ) && ( boxdef.Artist.Length > 0 ) )
+
+					if (boxdef.Artist is { Length: > 0 })
 					{
-						c曲リストノード.arScore[ 0 ].SongInformation.ArtistName = boxdef.Artist;
+						cSongListNode.arScore[0].SongInformation.ArtistName = boxdef.Artist;
 					}
-					if( ( boxdef.Comment != null ) && ( boxdef.Comment.Length > 0 ) )
+
+					if (boxdef.Comment is { Length: > 0 })
 					{
-						c曲リストノード.arScore[ 0 ].SongInformation.Comment = boxdef.Comment;
+						cSongListNode.arScore[0].SongInformation.Comment = boxdef.Comment;
 					}
-					if( ( boxdef.Preimage != null ) && ( boxdef.Preimage.Length > 0 ) )
+
+					if (boxdef.Preimage is { Length: > 0 })
 					{
-						c曲リストノード.arScore[ 0 ].SongInformation.Preimage = boxdef.Preimage;
+						cSongListNode.arScore[0].SongInformation.Preimage = boxdef.Preimage;
 					}
-					if( ( boxdef.Premovie != null ) && ( boxdef.Premovie.Length > 0 ) )
+
+					if (boxdef.Premovie is { Length: > 0 })
 					{
-						c曲リストノード.arScore[ 0 ].SongInformation.Premovie = boxdef.Premovie;
+						cSongListNode.arScore[0].SongInformation.Premovie = boxdef.Premovie;
 					}
-					if( ( boxdef.Presound != null ) && ( boxdef.Presound.Length > 0 ) )
+
+					if (boxdef.Presound is { Length: > 0 })
 					{
-						c曲リストノード.arScore[ 0 ].SongInformation.Presound = boxdef.Presound;
+						cSongListNode.arScore[0].SongInformation.Presound = boxdef.Presound;
 					}
-					if ( boxdef.SkinPath != null )
+
+					if (boxdef.SkinPath != null)
 					{
-						if ( boxdef.SkinPath == "" )
+						if (boxdef.SkinPath == "")
 						{
 							// box.defにスキン情報が記載されていないなら、上位BOXのスキン情報をコピー
-							c曲リストノード.strSkinPath = ( c曲リストノード.r親ノード == null ) ?
-								"" : c曲リストノード.r親ノード.strSkinPath;
+							cSongListNode.strSkinPath = cSongListNode.parentNode == null
+								? ""
+								: cSongListNode.parentNode.strSkinPath;
 						}
 						else
 						{
 							// box.defに記載されているスキン情報をコピー。末尾に必ず\をつけておくこと。
-							string s = Path.Combine( infoDir.FullName, boxdef.SkinPath );
-							if ( s[ s.Length - 1 ] != Path.DirectorySeparatorChar )	// フォルダ名末尾に\を必ずつけて、CSkin側と表記を統一する
+							string s = Path.Combine(infoDir.FullName, boxdef.SkinPath);
+							if (s[s.Length - 1] != Path.DirectorySeparatorChar) // フォルダ名末尾に\を必ずつけて、CSkin側と表記を統一する
 							{
 								s += Path.DirectorySeparatorChar;
 							}
-							if ( CDTXMania.Skin.bIsValid( s ) )
+
+							if (CDTXMania.Skin.bIsValid(s))
 							{
-								c曲リストノード.strSkinPath = s;
+								cSongListNode.strSkinPath = s;
 							}
 							else
 							{
-								c曲リストノード.strSkinPath = ( c曲リストノード.r親ノード == null ) ?
-									"" : c曲リストノード.r親ノード.strSkinPath;
+								cSongListNode.strSkinPath = cSongListNode.parentNode == null
+									? ""
+									: cSongListNode.parentNode.strSkinPath;
 							}
 						}
 					}
@@ -430,182 +292,394 @@ internal class CSongManager
 					// copy hit ranges from the box.def
 					// these can always be copied regardless of being set,
 					// as song list nodes and boxdefs use the same method to indicate an unset range
-					c曲リストノード.stDrumHitRanges = boxdef.stDrumHitRanges;
-					c曲リストノード.stDrumPedalHitRanges = boxdef.stDrumPedalHitRanges;
-					c曲リストノード.stGuitarHitRanges = boxdef.stGuitarHitRanges;
-					c曲リストノード.stBassHitRanges = boxdef.stBassHitRanges;
+					cSongListNode.stDrumHitRanges = boxdef.stDrumHitRanges;
+					cSongListNode.stDrumPedalHitRanges = boxdef.stDrumPedalHitRanges;
+					cSongListNode.stGuitarHitRanges = boxdef.stGuitarHitRanges;
+					cSongListNode.stBassHitRanges = boxdef.stBassHitRanges;
 				}
-				if( CDTXMania.ConfigIni.bLogSongSearch )
+
+				if (CDTXMania.ConfigIni.bLogSongSearch)
 				{
 					Trace.Indent();
 					try
 					{
-						StringBuilder sb = new StringBuilder( 0x100 );
-						sb.Append( string.Format( "nID#{0:D3}", c曲リストノード.nID ) );
-						if( c曲リストノード.r親ノード != null )
+						StringBuilder sb = new(0x100);
+						sb.Append($"nID#{cSongListNode.nID:D3}");
+						if (cSongListNode.parentNode != null)
 						{
-							sb.Append( string.Format( "(in#{0:D3}):", c曲リストノード.r親ノード.nID ) );
+							sb.Append($"(in#{cSongListNode.parentNode.nID:D3}):");
 						}
 						else
 						{
-							sb.Append( "(onRoot):" );
+							sb.Append("(onRoot):");
 						}
-						sb.Append( " BOX, Title=" + c曲リストノード.strタイトル );
-						sb.Append( ", Folder=" + c曲リストノード.arScore[ 0 ].FileInformation.AbsoluteFolderPath );
-						sb.Append( ", Comment=" + c曲リストノード.arScore[ 0 ].SongInformation.Comment );
-						sb.Append( ", SkinPath=" + c曲リストノード.strSkinPath );
-						Trace.TraceInformation( sb.ToString() );
+
+						sb.Append(" BOX, Title=" + cSongListNode.strTitle);
+						sb.Append(", Folder=" + cSongListNode.arScore[0].FileInformation.AbsoluteFolderPath);
+						sb.Append(", Comment=" + cSongListNode.arScore[0].SongInformation.Comment);
+						sb.Append(", SkinPath=" + cSongListNode.strSkinPath);
+						Trace.TraceInformation(sb.ToString());
 					}
 					finally
 					{
 						Trace.Unindent();
 					}
 				}
-				if( b子BOXへ再帰する )
-				{
-					tSearchSongsAndCreateList( infoDir.FullName + @"\", b子BOXへ再帰する, c曲リストノード.list子リスト, c曲リストノード );
-				}
+
+				tSearchSongsAndCreateList(infoDir.FullName + @"\", cSongListNode.listChildNodes, cSongListNode);
 			}
 			//-----------------------------
+
 			#endregion
 
 			#region [ b.box.def を含むフォルダの場合  ]
-			//-----------------------------
-			else if( File.Exists( infoDir.FullName + @"\box.def" ) )
+
+			//if the folder contains a box.def file, handle it differently
+			else if (File.Exists(infoDir.FullName + @"\box.def"))
 			{
-				CBoxDef boxdef = new CBoxDef( infoDir.FullName + @"\box.def" );
-				CSongListNode c曲リストノード = new CSongListNode();
-				c曲リストノード.eNodeType = CSongListNode.ENodeType.BOX;
-				c曲リストノード.bDTXFilesで始まるフォルダ名のBOXである = false;
-				c曲リストノード.strタイトル = boxdef.Title;
-				c曲リストノード.strジャンル = boxdef.Genre;
-				c曲リストノード.col文字色 = boxdef.Color;
-				c曲リストノード.nスコア数 = 1;
-				c曲リストノード.arScore[ 0 ] = new CScore();
-				c曲リストノード.arScore[ 0 ].FileInformation.AbsoluteFolderPath = infoDir.FullName + @"\";
-				c曲リストノード.arScore[ 0 ].SongInformation.Title = boxdef.Title;
-				c曲リストノード.arScore[ 0 ].SongInformation.Genre = boxdef.Genre;
-				c曲リストノード.arScore[ 0 ].SongInformation.ArtistName = boxdef.Artist;
-				c曲リストノード.arScore[ 0 ].SongInformation.Comment = boxdef.Comment;
-				c曲リストノード.arScore[ 0 ].SongInformation.Preimage = boxdef.Preimage;
-				c曲リストノード.arScore[ 0 ].SongInformation.Premovie = boxdef.Premovie;
-				c曲リストノード.arScore[ 0 ].SongInformation.Presound = boxdef.Presound;
-				c曲リストノード.r親ノード = node親;
-
-				if ( boxdef.SkinPath == "" )
-				{
-					// box.defにスキン情報が記載されていないなら、上位BOXのスキン情報をコピー
-					c曲リストノード.strSkinPath = ( c曲リストノード.r親ノード == null ) ?
-						"" : c曲リストノード.r親ノード.strSkinPath;
-				}
-				else
-				{
-					// box.defに記載されているスキン情報をコピー。末尾に必ず\をつけておくこと。
-					string s = Path.Combine( infoDir.FullName, boxdef.SkinPath );
-					if ( s[ s.Length - 1 ] != Path.DirectorySeparatorChar )	// フォルダ名末尾に\を必ずつけて、CSkin側と表記を統一する
-					{
-						s += Path.DirectorySeparatorChar;
-					}
-					if ( CDTXMania.Skin.bIsValid( s ) )
-					{
-						c曲リストノード.strSkinPath = s;
-					}
-					else
-					{
-						c曲リストノード.strSkinPath = ( c曲リストノード.r親ノード == null ) ?
-							"" : c曲リストノード.r親ノード.strSkinPath;
-					}
-				}
-				c曲リストノード.strBreadcrumbs = ( c曲リストノード.r親ノード == null ) ?
-					c曲リストノード.strタイトル : c曲リストノード.r親ノード.strBreadcrumbs + " > " + c曲リストノード.strタイトル;
-	
-					
-				c曲リストノード.list子リスト = new List<CSongListNode>();
-				c曲リストノード.stDrumHitRanges = boxdef.stDrumHitRanges;
-				c曲リストノード.stDrumPedalHitRanges = boxdef.stDrumPedalHitRanges;
-				c曲リストノード.stGuitarHitRanges = boxdef.stGuitarHitRanges;
-				c曲リストノード.stBassHitRanges = boxdef.stBassHitRanges;
-				listノードリスト.Add( c曲リストノード );
-				if( CDTXMania.ConfigIni.bLogSongSearch )
-				{
-					Trace.TraceInformation( "box.def検出 : {0}", infoDir.FullName + @"\box.def" );
-					Trace.Indent();
-					try
-					{
-						StringBuilder sb = new StringBuilder( 0x400 );
-						sb.Append( string.Format( "nID#{0:D3}", c曲リストノード.nID ) );
-						if( c曲リストノード.r親ノード != null )
-						{
-							sb.Append( string.Format( "(in#{0:D3}):", c曲リストノード.r親ノード.nID ) );
-						}
-						else
-						{
-							sb.Append( "(onRoot):" );
-						}
-						sb.Append( "BOX, Title=" + c曲リストノード.strタイトル );
-						if( ( c曲リストノード.strジャンル != null ) && ( c曲リストノード.strジャンル.Length > 0 ) )
-						{
-							sb.Append( ", Genre=" + c曲リストノード.strジャンル );
-						}
-						if( ( c曲リストノード.arScore[ 0 ].SongInformation.ArtistName != null ) && ( c曲リストノード.arScore[ 0 ].SongInformation.ArtistName.Length > 0 ) )
-						{
-							sb.Append( ", Artist=" + c曲リストノード.arScore[ 0 ].SongInformation.ArtistName );
-						}
-						if( ( c曲リストノード.arScore[ 0 ].SongInformation.Comment != null ) && ( c曲リストノード.arScore[ 0 ].SongInformation.Comment.Length > 0 ) )
-						{
-							sb.Append( ", Comment=" + c曲リストノード.arScore[ 0 ].SongInformation.Comment );
-						}
-						if( ( c曲リストノード.arScore[ 0 ].SongInformation.Preimage != null ) && ( c曲リストノード.arScore[ 0 ].SongInformation.Preimage.Length > 0 ) )
-						{
-							sb.Append( ", Preimage=" + c曲リストノード.arScore[ 0 ].SongInformation.Preimage );
-						}
-						if( ( c曲リストノード.arScore[ 0 ].SongInformation.Premovie != null ) && ( c曲リストノード.arScore[ 0 ].SongInformation.Premovie.Length > 0 ) )
-						{
-							sb.Append( ", Premovie=" + c曲リストノード.arScore[ 0 ].SongInformation.Premovie );
-						}
-						if( ( c曲リストノード.arScore[ 0 ].SongInformation.Presound != null ) && ( c曲リストノード.arScore[ 0 ].SongInformation.Presound.Length > 0 ) )
-						{
-							sb.Append( ", Presound=" + c曲リストノード.arScore[ 0 ].SongInformation.Presound );
-						}
-						if( c曲リストノード.col文字色 != ColorTranslator.FromHtml( "White" ) )
-						{
-							sb.Append( ", FontColor=" + c曲リストノード.col文字色 );
-						}
-
-						// hit ranges
-						tTryAppendHitRanges(c曲リストノード.stDrumHitRanges, @"Drum", sb);
-						tTryAppendHitRanges(c曲リストノード.stDrumPedalHitRanges, @"DrumPedal", sb);
-						tTryAppendHitRanges(c曲リストノード.stGuitarHitRanges, @"Guitar", sb);
-						tTryAppendHitRanges(c曲リストノード.stBassHitRanges, @"Bass", sb);
-
-						if ( ( c曲リストノード.strSkinPath != null ) && ( c曲リストノード.strSkinPath.Length > 0 ) )
-						{
-							sb.Append( ", SkinPath=" + c曲リストノード.strSkinPath );
-						}
-
-						Trace.TraceInformation( sb.ToString() );
-					}
-					finally
-					{
-						Trace.Unindent();
-					}
-				}
-				if( b子BOXへ再帰する )
-				{
-					tSearchSongsAndCreateList( infoDir.FullName + @"\", b子BOXへ再帰する, c曲リストノード.list子リスト, c曲リストノード );
-				}
+				LoadBoxDef(listNodeList, nodeParent, infoDir);
 			}
 			//-----------------------------
+
 			#endregion
 
 			#region [ c.通常フォルダの場合 ]
+
 			//-----------------------------
 			else
 			{
-				tSearchSongsAndCreateList( infoDir.FullName + @"\", b子BOXへ再帰する, listノードリスト, node親 );
+				tSearchSongsAndCreateList(infoDir.FullName + @"\", listNodeList, nodeParent);
 			}
+
 			//-----------------------------
+
 			#endregion
+		}
+	}
+
+	private void LoadBoxDef(List<CSongListNode> listNodeList, CSongListNode nodeParent, DirectoryInfo infoDir)
+	{
+		CBoxDef boxdef = new(infoDir.FullName + @"\box.def");
+		CSongListNode cSongListNode = new()
+		{
+			eNodeType = CSongListNode.ENodeType.BOX,
+			bDTXFilesで始まるフォルダ名のBOXである = false,
+			strTitle = boxdef.Title,
+			strGenre = boxdef.Genre,
+			col文字色 = boxdef.Color,
+			nスコア数 = 1,
+			arScore =
+			{
+				[0] = new CScore()
+			}
+		};
+		cSongListNode.arScore[0].FileInformation.AbsoluteFolderPath = infoDir.FullName + @"\";
+		cSongListNode.arScore[0].SongInformation.Title = boxdef.Title;
+		cSongListNode.arScore[0].SongInformation.Genre = boxdef.Genre;
+		cSongListNode.arScore[0].SongInformation.ArtistName = boxdef.Artist;
+		cSongListNode.arScore[0].SongInformation.Comment = boxdef.Comment;
+		cSongListNode.arScore[0].SongInformation.Preimage = boxdef.Preimage;
+		cSongListNode.arScore[0].SongInformation.Premovie = boxdef.Premovie;
+		cSongListNode.arScore[0].SongInformation.Presound = boxdef.Presound;
+		cSongListNode.parentNode = nodeParent;
+
+		if (boxdef.SkinPath == "")
+		{
+			// box.defにスキン情報が記載されていないなら、上位BOXのスキン情報をコピー
+			cSongListNode.strSkinPath =
+				cSongListNode.parentNode == null ? "" : cSongListNode.parentNode.strSkinPath;
+		}
+		else
+		{
+			// box.defに記載されているスキン情報をコピー。末尾に必ず\をつけておくこと。
+			string s = Path.Combine(infoDir.FullName, boxdef.SkinPath);
+			if (s[s.Length - 1] != Path.DirectorySeparatorChar) // フォルダ名末尾に\を必ずつけて、CSkin側と表記を統一する
+			{
+				s += Path.DirectorySeparatorChar;
+			}
+
+			if (CDTXMania.Skin.bIsValid(s))
+			{
+				cSongListNode.strSkinPath = s;
+			}
+			else
+			{
+				cSongListNode.strSkinPath =
+					cSongListNode.parentNode == null ? "" : cSongListNode.parentNode.strSkinPath;
+			}
+		}
+
+		cSongListNode.strBreadcrumbs = cSongListNode.parentNode == null
+			? cSongListNode.strTitle
+			: cSongListNode.parentNode.strBreadcrumbs + " > " + cSongListNode.strTitle;
+
+
+		cSongListNode.listChildNodes = [];
+		cSongListNode.stDrumHitRanges = boxdef.stDrumHitRanges;
+		cSongListNode.stDrumPedalHitRanges = boxdef.stDrumPedalHitRanges;
+		cSongListNode.stGuitarHitRanges = boxdef.stGuitarHitRanges;
+		cSongListNode.stBassHitRanges = boxdef.stBassHitRanges;
+		listNodeList.Add(cSongListNode);
+
+		if (CDTXMania.ConfigIni.bLogSongSearch)
+		{
+			Trace.TraceInformation("box.def検出 : {0}", infoDir.FullName + @"\box.def");
+			Trace.Indent();
+			try
+			{
+				StringBuilder sb = new(0x400);
+				sb.Append($"nID#{cSongListNode.nID:D3}");
+				if (cSongListNode.parentNode != null)
+				{
+					sb.Append($"(in#{cSongListNode.parentNode.nID:D3}):");
+				}
+				else
+				{
+					sb.Append("(onRoot):");
+				}
+
+				sb.Append("BOX, Title=" + cSongListNode.strTitle);
+				if (cSongListNode.strGenre is { Length: > 0 })
+				{
+					sb.Append(", Genre=" + cSongListNode.strGenre);
+				}
+
+				if (cSongListNode.arScore[0].SongInformation.ArtistName is { Length: > 0 })
+				{
+					sb.Append(", Artist=" + cSongListNode.arScore[0].SongInformation.ArtistName);
+				}
+
+				if (cSongListNode.arScore[0].SongInformation.Comment is { Length: > 0 })
+				{
+					sb.Append(", Comment=" + cSongListNode.arScore[0].SongInformation.Comment);
+				}
+
+				if (cSongListNode.arScore[0].SongInformation.Preimage is { Length: > 0 })
+				{
+					sb.Append(", Preimage=" + cSongListNode.arScore[0].SongInformation.Preimage);
+				}
+
+				if (cSongListNode.arScore[0].SongInformation.Premovie is { Length: > 0 })
+				{
+					sb.Append(", Premovie=" + cSongListNode.arScore[0].SongInformation.Premovie);
+				}
+
+				if (cSongListNode.arScore[0].SongInformation.Presound is { Length: > 0 })
+				{
+					sb.Append(", Presound=" + cSongListNode.arScore[0].SongInformation.Presound);
+				}
+
+				if (cSongListNode.col文字色 != ColorTranslator.FromHtml("White"))
+				{
+					sb.Append(", FontColor=" + cSongListNode.col文字色);
+				}
+
+				// hit ranges
+				tTryAppendHitRanges(cSongListNode.stDrumHitRanges, @"Drum", sb);
+				tTryAppendHitRanges(cSongListNode.stDrumPedalHitRanges, @"DrumPedal", sb);
+				tTryAppendHitRanges(cSongListNode.stGuitarHitRanges, @"Guitar", sb);
+				tTryAppendHitRanges(cSongListNode.stBassHitRanges, @"Bass", sb);
+
+				if (cSongListNode.strSkinPath is { Length: > 0 })
+				{
+					sb.Append(", SkinPath=" + cSongListNode.strSkinPath);
+				}
+
+				Trace.TraceInformation(sb.ToString());
+			}
+			finally
+			{
+				Trace.Unindent();
+			}
+		}
+
+		tSearchSongsAndCreateList(infoDir.FullName + @"\", cSongListNode.listChildNodes, cSongListNode);
+	}
+
+	private void AddSongChart(string strBaseFolder, List<CSongListNode> listNodeList, CSongListNode nodeParent, FileInfo fileinfo)
+	{
+		CSongListNode cSongListNode = new()
+		{
+			eNodeType = CSongListNode.ENodeType.SCORE,
+			nスコア数 = 1,
+			parentNode = nodeParent
+		};
+
+		cSongListNode.strBreadcrumbs = ( cSongListNode.parentNode == null ) ?
+			strBaseFolder + fileinfo.Name : cSongListNode.parentNode.strBreadcrumbs + " > " + strBaseFolder + fileinfo.Name;
+
+		cSongListNode.arScore[ 0 ] = new CScore();
+		cSongListNode.arScore[ 0 ].FileInformation.AbsoluteFilePath = strBaseFolder + fileinfo.Name;
+		cSongListNode.arScore[ 0 ].FileInformation.AbsoluteFolderPath = strBaseFolder;
+		cSongListNode.arScore[ 0 ].FileInformation.FileSize = fileinfo.Length;
+		cSongListNode.arScore[ 0 ].FileInformation.LastModified = fileinfo.LastWriteTime;
+		string strFileNameScoreIni = cSongListNode.arScore[ 0 ].FileInformation.AbsoluteFilePath + ".score.ini";
+		if( File.Exists( strFileNameScoreIni ) )
+		{
+			FileInfo infoScoreIni = new( strFileNameScoreIni );
+			cSongListNode.arScore[ 0 ].ScoreIniInformation.FileSize = infoScoreIni.Length;
+			cSongListNode.arScore[ 0 ].ScoreIniInformation.LastModified = infoScoreIni.LastWriteTime;
+		}
+		nNbScoresFound++;
+		listNodeList.Add( cSongListNode );
+		nNbSongNodesFound++;
+		
+		if( CDTXMania.ConfigIni.bLogSongSearch )
+		{
+			Trace.Indent();
+			try
+			{
+				StringBuilder sb = new( 0x100 );
+				sb.Append($"nID#{cSongListNode.nID:D3}");
+				if( cSongListNode.parentNode != null )
+				{
+					sb.Append($"(in#{cSongListNode.parentNode.nID:D3}):");
+				}
+				else
+				{
+					sb.Append( "(onRoot):" );
+				}
+				sb.Append( " SONG, File=" + cSongListNode.arScore[ 0 ].FileInformation.AbsoluteFilePath );
+				sb.Append( ", Size=" + cSongListNode.arScore[ 0 ].FileInformation.FileSize );
+				sb.Append( ", LastUpdate=" + cSongListNode.arScore[ 0 ].FileInformation.LastModified );
+				Trace.TraceInformation( sb.ToString() );
+			}
+			finally
+			{
+				Trace.Unindent();
+			}
+		}
+	}
+
+	private void ParseSetDef(string strBaseFolder, List<CSongListNode> listNodeList, CSongListNode nodeParent,
+		string path)
+	{
+		CSetDef def = new(path);
+
+		if (CDTXMania.ConfigIni.bLogSongSearch)
+		{
+			Trace.TraceInformation("set.def検出 : {0}", path);
+			Trace.Indent();
+		}
+
+		try
+		{
+			SlowOrSuspendSearchTask(); // #27060 中断要求があったら、解除要求が来るまで待機, #PREMOVIE再生中は検索負荷を落とす
+			for (int i = 0; i < def.blocks.Count; i++)
+			{
+				CSetDef.CBlock block = def.blocks[i];
+				CSongListNode item = new()
+				{
+					eNodeType = CSongListNode.ENodeType.SCORE,
+					strTitle = block.Title,
+					strGenre = block.Genre,
+					nスコア数 = 0,
+					col文字色 = block.FontColor,
+					SetDefBlockNumber = i,
+					pathSetDefPath = path,
+					parentNode = nodeParent
+				};
+
+				item.strBreadcrumbs = (item.parentNode == null) ? path + i : item.parentNode.strBreadcrumbs + " > " + path + i;
+
+				for (int j = 0; j < 5; j++)
+				{
+					if (!string.IsNullOrEmpty(block.File[j]))
+					{
+						string str2 = strBaseFolder + block.File[j];
+						if (File.Exists(str2))
+						{
+							item.arDifficultyLabel[j] = block.Label[j];
+							item.arScore[j] = new CScore();
+							item.arScore[j].FileInformation.AbsoluteFilePath = str2;
+							item.arScore[j].FileInformation.AbsoluteFolderPath =
+								Path.GetFullPath(Path.GetDirectoryName(str2)) + @"\";
+							FileInfo info2 = new(str2);
+							item.arScore[j].FileInformation.FileSize = info2.Length;
+							item.arScore[j].FileInformation.LastModified = info2.LastWriteTime;
+							string str3 = str2 + ".score.ini";
+							if (File.Exists(str3))
+							{
+								FileInfo info3 = new(str3);
+								item.arScore[j].ScoreIniInformation.FileSize = info3.Length;
+								item.arScore[j].ScoreIniInformation.LastModified = info3.LastWriteTime;
+							}
+
+							item.nスコア数++;
+							nNbScoresFound++;
+						}
+						else
+						{
+							item.arScore[j] = null;
+						}
+					}
+				}
+
+				if (item.nスコア数 > 0)
+				{
+					listNodeList.Add(item);
+					nNbSongNodesFound++;
+					if (CDTXMania.ConfigIni.bLogSongSearch)
+					{
+						StringBuilder builder = new(0x200);
+						builder.Append($"nID#{item.nID:D3}");
+						if (item.parentNode != null)
+						{
+							builder.Append($"(in#{item.parentNode.nID:D3}):");
+						}
+						else
+						{
+							builder.Append("(onRoot):");
+						}
+
+						if (item.strTitle is { Length: > 0 })
+						{
+							builder.Append(" SONG, Title=" + item.strTitle);
+						}
+
+						if (item.strGenre is { Length: > 0 })
+						{
+							builder.Append(", Genre=" + item.strGenre);
+						}
+
+						if (item.col文字色 != Color.White)
+						{
+							builder.Append(", FontColor=" + item.col文字色);
+						}
+
+						Trace.TraceInformation(builder.ToString());
+						Trace.Indent();
+						try
+						{
+							for (int k = 0; k < 5; k++)
+							{
+								if (item.arScore[k] != null)
+								{
+									CScore cスコア = item.arScore[k];
+									builder.Remove(0, builder.Length);
+									builder.Append($"ブロック{item.SetDefBlockNumber + 1}-{k + 1}:");
+									builder.Append(" Label=" + item.arDifficultyLabel[k]);
+									builder.Append(", File=" + cスコア.FileInformation.AbsoluteFilePath);
+									builder.Append(", Size=" + cスコア.FileInformation.FileSize);
+									builder.Append(", LastUpdate=" + cスコア.FileInformation.LastModified);
+									Trace.TraceInformation(builder.ToString());
+								}
+							}
+						}
+						finally
+						{
+							Trace.Unindent();
+						}
+					}
+				}
+			}
+		}
+		finally
+		{
+			if (CDTXMania.ConfigIni.bLogSongSearch)
+			{
+				Trace.Unindent();
+			}
 		}
 	}
 
@@ -639,109 +713,137 @@ internal class CSongManager
 		nNbScoresFromScoreCache = 0;
 		tReflectScoreCacheInSongList( listSongRoot );
 	}
-	private void tReflectScoreCacheInSongList( List<CSongListNode> ノードリスト )
-	{
-		using( List<CSongListNode>.Enumerator enumerator = ノードリスト.GetEnumerator() )
-		{
-			while( enumerator.MoveNext() )
-			{
-				SlowOrSuspendSearchTask();		// #27060 中断要求があったら、解除要求が来るまで待機, #PREMOVIE再生中は検索負荷を落とす
 
-				CSongListNode node = enumerator.Current;
-				if( node.eNodeType == CSongListNode.ENodeType.BOX )
+	private void tReflectScoreCacheInSongList(List<CSongListNode> nodeList)
+	{
+		using List<CSongListNode>.Enumerator enumerator = nodeList.GetEnumerator();
+
+		while (enumerator.MoveNext())
+		{
+			SlowOrSuspendSearchTask(); // #27060 中断要求があったら、解除要求が来るまで待機, #PREMOVIE再生中は検索負荷を落とす
+
+			CSongListNode node = enumerator.Current;
+			if (node.eNodeType == CSongListNode.ENodeType.BOX)
+			{
+				tReflectScoreCacheInSongList(node.listChildNodes);
+			}
+			else if ((node.eNodeType == CSongListNode.ENodeType.SCORE) ||
+			         (node.eNodeType == CSongListNode.ENodeType.SCORE_MIDI))
+			{
+				Predicate<CScore> match = null;
+				for (int lv = 0; lv < 5; lv++)
 				{
-					tReflectScoreCacheInSongList( node.list子リスト );
-				}
-				else if( ( node.eNodeType == CSongListNode.ENodeType.SCORE ) || ( node.eNodeType == CSongListNode.ENodeType.SCORE_MIDI ) )
-				{
-					Predicate<CScore> match = null;
-					for( int lv = 0; lv < 5; lv++ )
+					if (node.arScore[lv] != null)
 					{
-						if( node.arScore[ lv ] != null )
+						if (match == null)
 						{
-							if( match == null )
+							match = delegate(CScore sc)
 							{
-								match = delegate( CScore sc )
-								{
-									return
-										(
-											( sc.FileInformation.AbsoluteFilePath.Equals( node.arScore[ lv ].FileInformation.AbsoluteFilePath )
-											  && sc.FileInformation.FileSize.Equals( node.arScore[ lv ].FileInformation.FileSize ) )
-											&& ( sc.FileInformation.LastModified.Equals( node.arScore[ lv ].FileInformation.LastModified )
-											     && sc.ScoreIniInformation.FileSize.Equals( node.arScore[ lv ].ScoreIniInformation.FileSize ) ) )
-										&& sc.ScoreIniInformation.LastModified.Equals( node.arScore[ lv ].ScoreIniInformation.LastModified );
-								};
-							}
-							int nMatched = listSongsDB.FindIndex( match );
-							if( nMatched == -1 )
-							{
+								return
+									(
+										(sc.FileInformation.AbsoluteFilePath.Equals(node.arScore[lv].FileInformation
+											 .AbsoluteFilePath)
+										 && sc.FileInformation.FileSize.Equals(
+											 node.arScore[lv].FileInformation.FileSize))
+										&& (sc.FileInformation.LastModified.Equals(node.arScore[lv].FileInformation
+											    .LastModified)
+										    && sc.ScoreIniInformation.FileSize.Equals(node.arScore[lv]
+											    .ScoreIniInformation.FileSize)))
+									&& sc.ScoreIniInformation.LastModified.Equals(node.arScore[lv].ScoreIniInformation
+										.LastModified);
+							};
+						}
+
+						int nMatched = listSongsDB.FindIndex(match);
+						if (nMatched == -1)
+						{
 //Trace.TraceInformation( "songs.db に存在しません。({0})", node.arScore[ lv ].FileInformation.AbsoluteFilePath );
-								if ( CDTXMania.ConfigIni.bLogSongSearch )
-								{
-									Trace.TraceInformation( "Not found in songs.db. ({0})", node.arScore[ lv ].FileInformation.AbsoluteFilePath );
-								}
-							}
-							else
+							if (CDTXMania.ConfigIni.bLogSongSearch)
 							{
-								node.arScore[ lv ].SongInformation = listSongsDB[ nMatched ].SongInformation;
-								node.arScore[ lv ].bHadACacheInSongDB = true;
-								if( CDTXMania.ConfigIni.bLogSongSearch )
+								Trace.TraceInformation("Not found in songs.db. ({0})",
+									node.arScore[lv].FileInformation.AbsoluteFilePath);
+							}
+						}
+						else
+						{
+							node.arScore[lv].SongInformation = listSongsDB[nMatched].SongInformation;
+							node.arScore[lv].bHadACacheInSongDB = true;
+							if (CDTXMania.ConfigIni.bLogSongSearch)
+							{
+								Trace.TraceInformation("Transcribing data from songs.db. ({0})",
+									node.arScore[lv].FileInformation.AbsoluteFilePath);
+							}
+
+							nNbScoresFromScoreCache++;
+							if (node.arScore[lv].ScoreIniInformation.LastModified !=
+							    listSongsDB[nMatched].ScoreIniInformation.LastModified)
+							{
+								string strFileNameScoreIni =
+									node.arScore[lv].FileInformation.AbsoluteFilePath + ".score.ini";
+								try
 								{
-									Trace.TraceInformation( "Transcribing data from songs.db. ({0})", node.arScore[ lv ].FileInformation.AbsoluteFilePath );
-								}
-								nNbScoresFromScoreCache++;
-								if( node.arScore[ lv ].ScoreIniInformation.LastModified != listSongsDB[ nMatched ].ScoreIniInformation.LastModified )
-								{
-									string strFileNameScoreIni = node.arScore[ lv ].FileInformation.AbsoluteFilePath + ".score.ini";
-									try
+									CScoreIni scoreIni = new(strFileNameScoreIni);
+									scoreIni.tCheckIntegrity();
+									for (int i = 0; i < 3; i++)
 									{
-										CScoreIni scoreIni = new CScoreIni( strFileNameScoreIni );
-										scoreIni.tCheckIntegrity();
-										for( int i = 0; i < 3; i++ )
+										int nSectionHiSkill = (i * 2) + 1;
+										int nSectionHiScore = i * 2;
+										if (scoreIni.stSection[nSectionHiSkill].bMIDIUsed
+										    || scoreIni.stSection[nSectionHiSkill].bKeyboardUsed
+										    || scoreIni.stSection[nSectionHiSkill].bJoypadUsed
+										    || scoreIni.stSection[nSectionHiSkill].bMouseUsed)
 										{
-											int nSectionHiSkill = ( i * 2 ) + 1;
-											int nSectionHiScore = i * 2;
-											if(    scoreIni.stSection[ nSectionHiSkill ].bMIDIUsed
-											       || scoreIni.stSection[ nSectionHiSkill ].bKeyboardUsed
-											       || scoreIni.stSection[ nSectionHiSkill ].bJoypadUsed
-											       || scoreIni.stSection[ nSectionHiSkill ].bMouseUsed )
+											if (CDTXMania.ConfigIni.nSkillMode == 0)
 											{
-												if (CDTXMania.ConfigIni.nSkillMode == 0)
-												{
-													node.arScore[lv].SongInformation.BestRank[i] =
-														(scoreIni.stFile.BestRank[i] != (int)CScoreIni.ERANK.UNKNOWN) ?
-															(int)scoreIni.stFile.BestRank[i] : CScoreIni.tCalculateRankOld(scoreIni.stSection[nSectionHiSkill]);
-												}
-												else
-												{
-													node.arScore[lv].SongInformation.BestRank[i] =
-														(scoreIni.stFile.BestRank[i] != (int)CScoreIni.ERANK.UNKNOWN) ?
-															(int)scoreIni.stFile.BestRank[i] : CScoreIni.tCalculateRank(scoreIni.stSection[nSectionHiSkill]);
-												}
+												node.arScore[lv].SongInformation.BestRank[i] =
+													(scoreIni.stFile.BestRank[i] != (int)CScoreIni.ERANK.UNKNOWN)
+														? (int)scoreIni.stFile.BestRank[i]
+														: CScoreIni.tCalculateRankOld(
+															scoreIni.stSection[nSectionHiSkill]);
 											}
 											else
 											{
-												node.arScore[ lv ].SongInformation.BestRank[ i ] = (int)CScoreIni.ERANK.UNKNOWN;
+												node.arScore[lv].SongInformation.BestRank[i] =
+													(scoreIni.stFile.BestRank[i] != (int)CScoreIni.ERANK.UNKNOWN)
+														? (int)scoreIni.stFile.BestRank[i]
+														: CScoreIni.tCalculateRank(scoreIni.stSection[nSectionHiSkill]);
 											}
-											node.arScore[ lv ].SongInformation.HighSkill[ i ] = scoreIni.stSection[ nSectionHiSkill ].dbPerformanceSkill;
-											node.arScore[ lv ].SongInformation.FullCombo[ i ] = scoreIni.stSection[ nSectionHiSkill ].bIsFullCombo | scoreIni.stSection[ nSectionHiScore ].bIsFullCombo;
 										}
-										node.arScore[ lv ].SongInformation.NbPerformances.Drums = scoreIni.stFile.PlayCountDrums;
-										node.arScore[ lv ].SongInformation.NbPerformances.Guitar = scoreIni.stFile.PlayCountGuitar;
-										node.arScore[ lv ].SongInformation.NbPerformances.Bass = scoreIni.stFile.PlayCountBass;
-										for( int j = 0; j < 5; j++ )
+										else
 										{
-											node.arScore[ lv ].SongInformation.PerformanceHistory[ j ] = scoreIni.stFile.History[ j ];
+											node.arScore[lv].SongInformation.BestRank[i] = (int)CScoreIni.ERANK.UNKNOWN;
 										}
-										if( CDTXMania.ConfigIni.bLogSongSearch )
-										{
-											Trace.TraceInformation("HiSkill information and performance history were retrieved from the performance record file. ({0})", strFileNameScoreIni );
-										}
+
+										node.arScore[lv].SongInformation.HighSkill[i] =
+											scoreIni.stSection[nSectionHiSkill].dbPerformanceSkill;
+										node.arScore[lv].SongInformation.FullCombo[i] =
+											scoreIni.stSection[nSectionHiSkill].bIsFullCombo |
+											scoreIni.stSection[nSectionHiScore].bIsFullCombo;
 									}
-									catch
+
+									node.arScore[lv].SongInformation.NbPerformances.Drums =
+										scoreIni.stFile.PlayCountDrums;
+									node.arScore[lv].SongInformation.NbPerformances.Guitar =
+										scoreIni.stFile.PlayCountGuitar;
+									node.arScore[lv].SongInformation.NbPerformances.Bass =
+										scoreIni.stFile.PlayCountBass;
+									for (int j = 0; j < 5; j++)
 									{
-										Trace.TraceError("Failed to read the performance record file. ({0})", strFileNameScoreIni );
+										node.arScore[lv].SongInformation.PerformanceHistory[j] =
+											scoreIni.stFile.History[j];
 									}
+
+									if (CDTXMania.ConfigIni.bLogSongSearch)
+									{
+										Trace.TraceInformation(
+											"HiSkill information and performance history were retrieved from the performance record file. ({0})",
+											strFileNameScoreIni);
+									}
+								}
+								catch
+								{
+									Trace.TraceError("Failed to read the performance record file. ({0})",
+										strFileNameScoreIni);
 								}
 							}
 						}
@@ -750,9 +852,10 @@ internal class CSongManager
 			}
 		}
 	}
+
 	private CScore tReadOneScoreFromSongsDB( BinaryReader br )
 	{
-		CScore cスコア = new CScore();
+		CScore cスコア = new();
 		cスコア.FileInformation.AbsoluteFilePath = br.ReadString();
 		cスコア.FileInformation.AbsoluteFolderPath = br.ReadString();
 		cスコア.FileInformation.LastModified = new DateTime( br.ReadInt64() );
@@ -791,9 +894,9 @@ internal class CSongManager
 		cスコア.SongInformation.PerformanceHistory.行4 = br.ReadString();
 		cスコア.SongInformation.PerformanceHistory.行5 = br.ReadString();
 		cスコア.SongInformation.bHiddenLevel = br.ReadBoolean();
-		cスコア.SongInformation.b完全にCLASSIC譜面である.Drums = br.ReadBoolean();
-		cスコア.SongInformation.b完全にCLASSIC譜面である.Guitar = br.ReadBoolean();
-		cスコア.SongInformation.b完全にCLASSIC譜面である.Bass = br.ReadBoolean();
+		cスコア.SongInformation.bIsClassicChart.Drums = br.ReadBoolean();
+		cスコア.SongInformation.bIsClassicChart.Guitar = br.ReadBoolean();
+		cスコア.SongInformation.bIsClassicChart.Bass = br.ReadBoolean();
 		cスコア.SongInformation.bScoreExists.Drums = br.ReadBoolean();
 		cスコア.SongInformation.bScoreExists.Guitar = br.ReadBoolean();
 		cスコア.SongInformation.bScoreExists.Bass = br.ReadBoolean();
@@ -859,10 +962,7 @@ internal class CSongManager
 
 		workerThreads = Math.Max(2, workerThreads - 4); //leave some cpu for the game
 			
-		//Console.WriteLine("WARNING: Worker threads limited to 1 to debug!!!");
-		//workerThreads = 1;
-			
-		Console.WriteLine("Song processing worker threads: " + workerThreads);
+		Trace.TraceInformation("Song processing worker threads: " + workerThreads);
 
 		int totalTasks = taskList.Count;
 			
@@ -915,7 +1015,7 @@ internal class CSongManager
 			await Task.Delay(100);
 		}
 			
-		Console.WriteLine($"Processed {progress.Sum()} songs in {DateTime.Now - startTime}");
+		Trace.TraceInformation($"Processed {progress.Sum()} songs in {DateTime.Now - startTime}");
 	}
 		
 	public void PrepareProcessNewSongData(List<CSongListNode> nodeList, ref List<Task> list)
@@ -925,7 +1025,7 @@ internal class CSongManager
 			switch (songListNode.eNodeType)
 			{
 				case CSongListNode.ENodeType.BOX:
-					PrepareProcessNewSongData(songListNode.list子リスト, ref list);
+					PrepareProcessNewSongData(songListNode.listChildNodes, ref list);
 					break;
 		            
 				case CSongListNode.ENodeType.SCORE or CSongListNode.ENodeType.SCORE_MIDI:
@@ -973,9 +1073,9 @@ internal class CSongManager
 				score.SongInformation.LevelDec.Guitar = cdtx.LEVELDEC.Guitar;
 				score.SongInformation.LevelDec.Bass = cdtx.LEVELDEC.Bass;
 				score.SongInformation.bHiddenLevel = cdtx.HIDDENLEVEL;
-				score.SongInformation.b完全にCLASSIC譜面である.Drums = cdtx.bHasChips is { LeftCymbal: false, LP: false, LBD: false, FT: false, Ride: false };
-				score.SongInformation.b完全にCLASSIC譜面である.Guitar = !cdtx.bHasChips.YPGuitar;
-				score.SongInformation.b完全にCLASSIC譜面である.Bass = !cdtx.bHasChips.YPBass;
+				score.SongInformation.bIsClassicChart.Drums = cdtx.bHasChips is { LeftCymbal: false, LP: false, LBD: false, FT: false, Ride: false };
+				score.SongInformation.bIsClassicChart.Guitar = !cdtx.bHasChips.YPGuitar;
+				score.SongInformation.bIsClassicChart.Bass = !cdtx.bHasChips.YPBass;
 				score.SongInformation.bScoreExists.Drums = cdtx.bHasChips.Drums;
 				score.SongInformation.bScoreExists.Guitar = cdtx.bHasChips.Guitar;
 				score.SongInformation.bScoreExists.Bass = cdtx.bHasChips.Bass;
@@ -1037,7 +1137,7 @@ internal class CSongManager
 					sb.Append(", lvGt=" + score.SongInformation.Level.Guitar);
 					sb.Append(", lvBs=" + score.SongInformation.Level.Bass);
 					sb.Append(", lvHide=" + score.SongInformation.bHiddenLevel);
-					sb.Append(", classic=" + score.SongInformation.b完全にCLASSIC譜面である);
+					sb.Append(", classic=" + score.SongInformation.bIsClassicChart);
 					sb.Append(", type=" + score.SongInformation.SongType);
 					sb.Append(", bpm=" + score.SongInformation.Bpm);
 					//	sb.Append( ", duration=" + c曲リストノード.arScore[ i ].SongInformation.Duration );
@@ -1100,14 +1200,16 @@ internal class CSongManager
 		//-----------------------------
 		if( ノードリスト.Count > 0 )
 		{
-			CSongListNode itemRandom = new CSongListNode();
-			itemRandom.eNodeType = CSongListNode.ENodeType.RANDOM;
-			itemRandom.strタイトル = "< RANDOM SELECT >";
-			itemRandom.nスコア数 = 5;
-			itemRandom.r親ノード = ノードリスト[ 0 ].r親ノード;
+			CSongListNode itemRandom = new()
+			{
+				eNodeType = CSongListNode.ENodeType.RANDOM,
+				strTitle = "< RANDOM SELECT >",
+				nスコア数 = 5,
+				parentNode = ノードリスト[ 0 ].parentNode
+			};
 
-			itemRandom.strBreadcrumbs = ( itemRandom.r親ノード == null ) ?
-				itemRandom.strタイトル :  itemRandom.r親ノード.strBreadcrumbs + " > " + itemRandom.strタイトル;
+			itemRandom.strBreadcrumbs = ( itemRandom.parentNode == null ) ?
+				itemRandom.strTitle :  itemRandom.parentNode.strBreadcrumbs + " > " + itemRandom.strTitle;
 
 			for( int i = 0; i < 5; i++ )
 			{
@@ -1128,9 +1230,9 @@ internal class CSongManager
 			{
 				StringBuilder sb = new StringBuilder( 0x100 );
 				sb.Append( string.Format( "nID#{0:D3}", itemRandom.nID ) );
-				if( itemRandom.r親ノード != null )
+				if( itemRandom.parentNode != null )
 				{
-					sb.Append( string.Format( "(in#{0:D3}):", itemRandom.r親ノード.nID ) );
+					sb.Append( string.Format( "(in#{0:D3}):", itemRandom.parentNode.nID ) );
 				}
 				else
 				{
@@ -1159,37 +1261,38 @@ internal class CSongManager
 					listStrBoxDefSkinSubfolderFullName.Add(c曲リストノード.strSkinPath);
 				}
 
-				CSongListNode itemBack = new CSongListNode();
-				itemBack.eNodeType = CSongListNode.ENodeType.BACKBOX;
-				itemBack.strタイトル = "<< BACK";
-				itemBack.nスコア数 = 1;
-				itemBack.r親ノード = c曲リストノード;
+				CSongListNode itemBack = new()
+				{
+					eNodeType = CSongListNode.ENodeType.BACKBOX,
+					strTitle = "<< BACK",
+					nスコア数 = 1,
+					parentNode = c曲リストノード,
+					strSkinPath = ( c曲リストノード.parentNode == null ) ?
+						"" : c曲リストノード.parentNode.strSkinPath
+				};
 
-				itemBack.strSkinPath = ( c曲リストノード.r親ノード == null ) ?
-					"" : c曲リストノード.r親ノード.strSkinPath;
-
-				itemBack.strBreadcrumbs = ( itemBack.r親ノード == null ) ?
-					itemBack.strタイトル : itemBack.r親ノード.strBreadcrumbs + " > " + itemBack.strタイトル;
+				itemBack.strBreadcrumbs = ( itemBack.parentNode == null ) ?
+					itemBack.strTitle : itemBack.parentNode.strBreadcrumbs + " > " + itemBack.strTitle;
 
 				itemBack.arScore[ 0 ] = new CScore();
 				itemBack.arScore[ 0 ].FileInformation.AbsoluteFolderPath = "";
-				itemBack.arScore[ 0 ].SongInformation.Title = itemBack.strタイトル;
+				itemBack.arScore[ 0 ].SongInformation.Title = itemBack.strTitle;
 				itemBack.arScore[ 0 ].SongInformation.Preimage = CSkin.Path(@"Graphics\5_preimage backbox.png");
 				itemBack.arScore[ 0 ].SongInformation.Comment =
 					CDTXMania.isJapanese ?
 						"BOX を出ます。" :
 						"Exit from the BOX.";
-				c曲リストノード.list子リスト.Insert( 0, itemBack );
+				c曲リストノード.listChildNodes.Insert( 0, itemBack );
 
 				#region [ ログ出力 ]
 				//-----------------------------
 				if( CDTXMania.ConfigIni.bLogSongSearch )
 				{
-					StringBuilder sb = new StringBuilder( 0x100 );
-					sb.Append( string.Format( "nID#{0:D3}", itemBack.nID ) );
-					if( itemBack.r親ノード != null )
+					StringBuilder sb = new( 0x100 );
+					sb.Append($"nID#{itemBack.nID:D3}");
+					if( itemBack.parentNode != null )
 					{
-						sb.Append( string.Format( "(in#{0:D3}):", itemBack.r親ノード.nID ) );
+						sb.Append($"(in#{itemBack.parentNode.nID:D3}):");
 					}
 					else
 					{
@@ -1201,7 +1304,7 @@ internal class CSongManager
 				//-----------------------------
 				#endregion
 
-				t曲リストへ後処理を適用する( c曲リストノード.list子リスト );
+				t曲リストへ後処理を適用する( c曲リストノード.listChildNodes );
 				continue;
 			}
 			//-----------------------------
@@ -1209,16 +1312,16 @@ internal class CSongManager
 
 			#region [ ノードにタイトルがないなら、最初に見つけたスコアのタイトルを設定する ]
 			//-----------------------------
-			if( string.IsNullOrEmpty( c曲リストノード.strタイトル ) )
+			if( string.IsNullOrEmpty( c曲リストノード.strTitle ) )
 			{
 				for( int j = 0; j < 5; j++ )
 				{
 					if( ( c曲リストノード.arScore[ j ] != null ) && !string.IsNullOrEmpty( c曲リストノード.arScore[ j ].SongInformation.Title ) )
 					{
-						c曲リストノード.strタイトル = c曲リストノード.arScore[ j ].SongInformation.Title;
+						c曲リストノード.strTitle = c曲リストノード.arScore[ j ].SongInformation.Title;
 
 						if( CDTXMania.ConfigIni.bLogSongSearch )
-							Trace.TraceInformation( "タイトルを設定しました。(nID#{0:D3}, title={1})", c曲リストノード.nID, c曲リストノード.strタイトル );
+							Trace.TraceInformation( "タイトルを設定しました。(nID#{0:D3}, title={1})", c曲リストノード.nID, c曲リストノード.strTitle );
 
 						break;
 					}
@@ -1243,7 +1346,7 @@ internal class CSongManager
 		nNbScoresForSongsDB = 0;
 		try
 		{
-			BinaryWriter bw = new BinaryWriter( new FileStream( SongsDBファイル名, FileMode.Create, FileAccess.Write ) );
+			BinaryWriter bw = new( new FileStream( SongsDBファイル名, FileMode.Create, FileAccess.Write ) );
 			bw.Write( SONGSDB_VERSION );
 			tSongsDBにリストを１つ出力する( bw, listSongRoot );
 			bw.Close();
@@ -1303,9 +1406,9 @@ internal class CSongManager
 				bw.Write( node.arScore[ i ].SongInformation.PerformanceHistory.行4 );
 				bw.Write( node.arScore[ i ].SongInformation.PerformanceHistory.行5 );
 				bw.Write( node.arScore[ i ].SongInformation.bHiddenLevel );
-				bw.Write( node.arScore[ i ].SongInformation.b完全にCLASSIC譜面である.Drums );
-				bw.Write( node.arScore[ i ].SongInformation.b完全にCLASSIC譜面である.Guitar );
-				bw.Write( node.arScore[ i ].SongInformation.b完全にCLASSIC譜面である.Bass );
+				bw.Write( node.arScore[ i ].SongInformation.bIsClassicChart.Drums );
+				bw.Write( node.arScore[ i ].SongInformation.bIsClassicChart.Guitar );
+				bw.Write( node.arScore[ i ].SongInformation.bIsClassicChart.Bass );
 				bw.Write( node.arScore[ i ].SongInformation.bScoreExists.Drums );
 				bw.Write( node.arScore[ i ].SongInformation.bScoreExists.Guitar );
 				bw.Write( node.arScore[ i ].SongInformation.bScoreExists.Bass );
@@ -1358,9 +1461,9 @@ internal class CSongManager
 			{
 				tSongsDBにノードを１つ出力する( bw, c曲リストノード );
 			}
-			if( c曲リストノード.list子リスト != null )
+			if( c曲リストノード.listChildNodes != null )
 			{
-				tSongsDBにリストを１つ出力する( bw, c曲リストノード.list子リスト );
+				tSongsDBにリストを１つ出力する( bw, c曲リストノード.listChildNodes );
 			}
 		}
 	}
@@ -1389,7 +1492,7 @@ internal class CSongManager
 			}
 			#endregion
 			string str = "";
-			if( string.IsNullOrEmpty( n1.pathSetDefの絶対パス ) )
+			if( string.IsNullOrEmpty( n1.pathSetDefPath ) )
 			{
 				for( int i = 0; i < 5; i++ )
 				{
@@ -1406,10 +1509,10 @@ internal class CSongManager
 			}
 			else
 			{
-				str = n1.pathSetDefの絶対パス + n1.SetDefのブロック番号.ToString( "00" );
+				str = n1.pathSetDefPath + n1.SetDefBlockNumber.ToString( "00" );
 			}
 			string strB = "";
-			if( string.IsNullOrEmpty( n2.pathSetDefの絶対パス ) )
+			if( string.IsNullOrEmpty( n2.pathSetDefPath ) )
 			{
 				for( int j = 0; j < 5; j++ )
 				{
@@ -1426,15 +1529,15 @@ internal class CSongManager
 			}
 			else
 			{
-				strB = n2.pathSetDefの絶対パス + n2.SetDefのブロック番号.ToString( "00" );
+				strB = n2.pathSetDefPath + n2.SetDefBlockNumber.ToString( "00" );
 			}
 			return str.CompareTo( strB );
 		} );
 		foreach( CSongListNode c曲リストノード in ノードリスト )
 		{
-			if( ( c曲リストノード.list子リスト != null ) && ( c曲リストノード.list子リスト.Count > 1 ) )
+			if( ( c曲リストノード.listChildNodes != null ) && ( c曲リストノード.listChildNodes.Count > 1 ) )
 			{
-				t曲リストのソート1_絶対パス順( c曲リストノード.list子リスト );
+				t曲リストのソート1_絶対パス順( c曲リストノード.listChildNodes );
 			}
 		}
 	}
@@ -1451,15 +1554,8 @@ internal class CSongManager
 			{
 				return order * num;
 			}
-			return order * n1.strタイトル.CompareTo( n2.strタイトル );
+			return order * n1.strTitle.CompareTo( n2.strTitle );
 		} );
-//			foreach( CSongListNode c曲リストノード in ノードリスト )
-//			{
-//				if( ( c曲リストノード.list子リスト != null ) && ( c曲リストノード.list子リスト.Count > 1 ) )
-//				{
-//					this.t曲リストのソート2_タイトル順( c曲リストノード.list子リスト, part, order );
-//				}
-//			}
 	}
 	/// <summary>
 	/// 
@@ -1507,7 +1603,7 @@ internal class CSongManager
 				{
 					return order * num;
 				}
-				return order * n1.strタイトル.CompareTo( n2.strタイトル );
+				return order * n1.strTitle.CompareTo( n2.strTitle );
 			} );
 			foreach ( CSongListNode c曲リストノード in ノードリスト )
 			{
@@ -1569,7 +1665,7 @@ internal class CSongManager
 				{
 					return (int)( (order * num) * 100 );
 				}
-				return order * n1.strタイトル.CompareTo( n2.strタイトル );
+				return order * n1.strTitle.CompareTo( n2.strTitle );
 			} );
 			foreach ( CSongListNode c曲リストノード in ノードリスト )
 			{
@@ -1626,7 +1722,7 @@ internal class CSongManager
 				{
 					return order * num;
 				}
-				return order * n1.strタイトル.CompareTo( n2.strタイトル );
+				return order * n1.strTitle.CompareTo( n2.strTitle );
 			} );
 			foreach ( CSongListNode c曲リストノード in ノードリスト )
 			{
@@ -1676,7 +1772,7 @@ internal class CSongManager
 				{
 					return order * Math.Sign(d);
 				}
-				return order * n1.strタイトル.CompareTo( n2.strタイトル );
+				return order * n1.strTitle.CompareTo( n2.strTitle );
 			} );
 			foreach ( CSongListNode c曲リストノード in ノードリスト )
 			{
@@ -1726,7 +1822,7 @@ internal class CSongManager
 				{
 					return order * Math.Sign( d );
 				}
-				return order * n1.strタイトル.CompareTo( n2.strタイトル );
+				return order * n1.strTitle.CompareTo( n2.strTitle );
 			} );
 			foreach ( CSongListNode c曲リストノード in ノードリスト )
 			{
@@ -1773,61 +1869,10 @@ internal class CSongManager
 			{
 				s = c曲リストノード.arScore[ nL12345 ].SongInformation.ArtistName;
 			}
-			Debug.WriteLine( s + ":" + c曲リストノード.strタイトル );
+			Debug.WriteLine( s + ":" + c曲リストノード.strTitle );
 		}
 	}
-#if TEST_SORTBGM
-		public void t曲リストのソート9_BPM順( List<C曲リストノード> ノードリスト, E楽器パート part, int order, params object[] p )
-		{
-			order = -order;
-			int nL12345 = (int) p[ 0 ];
-			if ( part != E楽器パート.UNKNOWN )
-			{
-				ノードリスト.Sort( delegate( C曲リストノード n1, C曲リストノード n2 )
-				{
-					#region [ 共通処理 ]
-					if ( n1 == n2 )
-					{
-						return 0;
-					}
-					int num = this.t比較0_共通( n1, n2 );
-					if ( num != 0 )
-					{
-						return order * num;
-					}
-					if ( ( n1.eノード種別 == C曲リストノード.Eノード種別.BOX ) && ( n2.eノード種別 == C曲リストノード.Eノード種別.BOX ) )
-					{
-						return order * n1.arスコア[ 0 ].ファイル情報.フォルダの絶対パス.CompareTo( n2.arスコア[ 0 ].ファイル情報.フォルダの絶対パス );
-					}
-					#endregion
-					double dBPMn1 = 0.0, dBPMn2 = 0.0;
-					if ( n1.arスコア[ nL12345 ] != null )
-					{
-						dBPMn1 = n1.arスコア[ nL12345 ].譜面情報.bpm;
-					}
-					if ( n2.arスコア[ nL12345 ] != null )
-					{
-						dBPMn2 = n2.arスコア[ nL12345 ].譜面情報.bpm;
-					}
-					double d = dBPMn1- dBPMn2;
-					if ( d != 0 )
-					{
-						return order * System.Math.Sign( d );
-					}
-					return order * n1.strタイトル.CompareTo( n2.strタイトル );
-				} );
-				foreach ( C曲リストノード c曲リストノード in ノードリスト )
-				{
-					double dBPM = 0;
-					if ( c曲リストノード.arスコア[ nL12345 ] != null )
-					{
-						dBPM = c曲リストノード.arスコア[ nL12345 ].譜面情報.bpm;
-					}
-Debug.WriteLine( dBPM + ":" + c曲リストノード.strタイトル );
-				}
-			}
-		}
-#endif
+	
 	//-----------------
 	#endregion
 	#region [ .score.ini を読み込んで Cスコア.譜面情報に設定する ]

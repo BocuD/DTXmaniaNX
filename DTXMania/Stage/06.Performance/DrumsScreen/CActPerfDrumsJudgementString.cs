@@ -12,7 +12,7 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
 
     public CActPerfDrumsJudgementString()
     {
-        bNotActivated = true;
+        bActivated = false;
     }
 		
 
@@ -20,7 +20,7 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
 
     public override int OnUpdateAndDraw()
     {
-        if (!bNotActivated && CDTXMania.ConfigIni.bDisplayJudge.Drums)
+        if (bActivated && CDTXMania.ConfigIni.bDisplayJudge.Drums)
         {
             int index = 0;
             #region[ 座標など定義 ]

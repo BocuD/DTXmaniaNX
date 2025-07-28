@@ -1,27 +1,29 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net8.0-windows</TargetFramework>
+        <TargetFramework>net6.0-windows</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <RootNamespace>FDKCore</RootNamespace>
         <UseWindowsForms>true</UseWindowsForms>
+        <LangVersion>12</LangVersion>
     </PropertyGroup>
 
-    <ItemGroup>
-      <Compile Update="Code\01.Framework\Core\GameWindow.cs">
-        <SubType>Form</SubType>
-      </Compile>
-    </ItemGroup>
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+      <DefineConstants>TRACE;INSPECTOR</DefineConstants>
+    </PropertyGroup>
 
     <ItemGroup>
       <PackageReference Include="SharpDX" Version="4.2.0" />
       <PackageReference Include="SharpDX.Direct3D9" Version="4.2.0" />
+      <PackageReference Include="SharpDX.DirectInput" Version="4.2.0" />
+      <PackageReference Include="SharpDX.DirectSound" Version="4.2.0" />
       <PackageReference Include="SharpDX.DXGI" Version="4.2.0" />
-      <PackageReference Include="System.Drawing.Common" Version="9.0.2" />
-      <PackageReference Include="System.Management" Version="9.0.2" />
-      <PackageReference Include="System.Security.Permissions" Version="9.0.2" />
+      <PackageReference Include="SharpDX.Mathematics" Version="4.2.0" />
+      <PackageReference Include="System.Drawing.Common" Version="6.0.0" />
+      <PackageReference Include="System.Management" Version="6.0.2" />
+      <PackageReference Include="System.Security.Permissions" Version="6.0.1" />
     </ItemGroup>
 
     <ItemGroup>
@@ -30,15 +32,6 @@
       </Reference>
       <Reference Include="DirectShowLib-2005">
         <HintPath>..\Runtime\dll\DirectShowLib-2005.dll</HintPath>
-      </Reference>
-      <Reference Include="SharpDX.DirectInput">
-        <HintPath>..\Runtime\dll\SharpDX.DirectInput.dll</HintPath>
-      </Reference>
-      <Reference Include="SharpDX.DirectSound">
-        <HintPath>..\Runtime\dll\SharpDX.DirectSound.dll</HintPath>
-      </Reference>
-      <Reference Include="SharpDX.Mathematics">
-        <HintPath>..\Runtime\dll\SharpDX.Mathematics.dll</HintPath>
       </Reference>
       <Reference Include="System.Windows.Forms">
         <HintPath>..\..\..\..\..\..\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Windows.Forms\v4.0_4.0.0.0__b77a5c561934e089\System.Windows.Forms.dll</HintPath>

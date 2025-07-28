@@ -160,7 +160,7 @@ internal class CActPerfDrumsStatusPanel : CActPerfCommonStatusPanel
         st難易度文字位置Ar[10] = st難易度文字位置11;
         st難易度数字位置 = st難易度文字位置Ar;
 
-        bNotActivated = true;
+        bActivated = false;
     }
 
     public override void OnActivate()
@@ -184,7 +184,7 @@ internal class CActPerfDrumsStatusPanel : CActPerfCommonStatusPanel
     }
     public override void OnManagedCreateResources()
     {
-        if( !bNotActivated )
+        if( bActivated )
         {
             prv表示用フォント = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.str曲名表示フォント), 20, FontStyle.Regular);
             prv称号フォント = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.str曲名表示フォント), 12, FontStyle.Regular);
@@ -305,7 +305,7 @@ internal class CActPerfDrumsStatusPanel : CActPerfCommonStatusPanel
     }
     public override void OnManagedReleaseResources()
     {
-        if( !bNotActivated )
+        if( bActivated )
         {
             CDTXMania.tDisposeSafely(ref prv表示用フォント);
             CDTXMania.tDisposeSafely(ref prv称号フォント);
@@ -326,7 +326,7 @@ internal class CActPerfDrumsStatusPanel : CActPerfCommonStatusPanel
 
     public override int OnUpdateAndDraw()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             double dbPERFECT率 = 0;
             double dbGREAT率 = 0;
@@ -340,7 +340,7 @@ internal class CActPerfDrumsStatusPanel : CActPerfCommonStatusPanel
             string str = string.Format( "{0:0.00}", ( (float)CDTXMania.DTX.LEVEL[ i ]) / 10.0f + ( CDTXMania.DTX.LEVELDEC[ i ] != 0 ? CDTXMania.DTX.LEVELDEC[ i ] / 100.0f : 0 ) );
             bool bCLASSIC = false;
             //If Skill Mode is CLASSIC, always display lvl as Classic Style
-            if (CDTXMania.ConfigIni.nSkillMode == 0 || (CDTXMania.ConfigIni.bCLASSIC譜面判別を有効にする &&
+            if (CDTXMania.ConfigIni.nSkillMode == 0 || (CDTXMania.ConfigIni.bClassicScoreDisplay &&
                                                         (CDTXMania.DTX.bHasChips.LeftCymbal == false) &&
                                                         (CDTXMania.DTX.bHasChips.LP == false) &&
                                                         (CDTXMania.DTX.bHasChips.LBD == false) &&

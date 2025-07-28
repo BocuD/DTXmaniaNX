@@ -12,231 +12,329 @@ namespace DTXMania;
 
 internal class CActResultParameterPanel : CActivity
 {
-    // コンストラクタ
-
-    public CActResultParameterPanel()
+    CStageResult stageResult;
+    
+    public CActResultParameterPanel(CStageResult cStageResult)
     {
+        stageResult = cStageResult;
+        
         txCharacter = new CTexture[3];
         ST文字位置[] st文字位置Array = new ST文字位置[11];
-        ST文字位置 st文字位置 = new ST文字位置();
-        st文字位置.ch = '0';
-        st文字位置.pt = new Point(0, 0);
+        ST文字位置 st文字位置 = new()
+        {
+            ch = '0',
+            pt = new Point(0, 0)
+        };
         st文字位置Array[0] = st文字位置;
-        ST文字位置 st文字位置2 = new ST文字位置();
-        st文字位置2.ch = '1';
-        st文字位置2.pt = new Point(28, 0);
+        ST文字位置 st文字位置2 = new()
+        {
+            ch = '1',
+            pt = new Point(28, 0)
+        };
         st文字位置Array[1] = st文字位置2;
-        ST文字位置 st文字位置3 = new ST文字位置();
-        st文字位置3.ch = '2';
-        st文字位置3.pt = new Point(56, 0);
+        ST文字位置 st文字位置3 = new()
+        {
+            ch = '2',
+            pt = new Point(56, 0)
+        };
         st文字位置Array[2] = st文字位置3;
-        ST文字位置 st文字位置4 = new ST文字位置();
-        st文字位置4.ch = '3';
-        st文字位置4.pt = new Point(84, 0);
+        ST文字位置 st文字位置4 = new()
+        {
+            ch = '3',
+            pt = new Point(84, 0)
+        };
         st文字位置Array[3] = st文字位置4;
-        ST文字位置 st文字位置5 = new ST文字位置();
-        st文字位置5.ch = '4';
-        st文字位置5.pt = new Point(112, 0);
+        ST文字位置 st文字位置5 = new()
+        {
+            ch = '4',
+            pt = new Point(112, 0)
+        };
         st文字位置Array[4] = st文字位置5;
-        ST文字位置 st文字位置6 = new ST文字位置();
-        st文字位置6.ch = '5';
-        st文字位置6.pt = new Point(140, 0);
+        ST文字位置 st文字位置6 = new()
+        {
+            ch = '5',
+            pt = new Point(140, 0)
+        };
         st文字位置Array[5] = st文字位置6;
-        ST文字位置 st文字位置7 = new ST文字位置();
-        st文字位置7.ch = '6';
-        st文字位置7.pt = new Point(168, 0);
+        ST文字位置 st文字位置7 = new()
+        {
+            ch = '6',
+            pt = new Point(168, 0)
+        };
         st文字位置Array[6] = st文字位置7;
-        ST文字位置 st文字位置8 = new ST文字位置();
-        st文字位置8.ch = '7';
-        st文字位置8.pt = new Point(196, 0);
+        ST文字位置 st文字位置8 = new()
+        {
+            ch = '7',
+            pt = new Point(196, 0)
+        };
         st文字位置Array[7] = st文字位置8;
-        ST文字位置 st文字位置9 = new ST文字位置();
-        st文字位置9.ch = '8';
-        st文字位置9.pt = new Point(224, 0);
+        ST文字位置 st文字位置9 = new()
+        {
+            ch = '8',
+            pt = new Point(224, 0)
+        };
         st文字位置Array[8] = st文字位置9;
-        ST文字位置 st文字位置10 = new ST文字位置();
-        st文字位置10.ch = '9';
-        st文字位置10.pt = new Point(252, 0);
+        ST文字位置 st文字位置10 = new()
+        {
+            ch = '9',
+            pt = new Point(252, 0)
+        };
         st文字位置Array[9] = st文字位置10;
-        ST文字位置 st文字位置11 = new ST文字位置();
-        st文字位置11.ch = '.';
-        st文字位置11.pt = new Point(280, 0);
+        ST文字位置 st文字位置11 = new()
+        {
+            ch = '.',
+            pt = new Point(280, 0)
+        };
         st文字位置Array[10] = st文字位置11;
         stLargeStringPosition = st文字位置Array;
 
         ST文字位置[] st文字位置Array2 = new ST文字位置[11];
-        ST文字位置 st文字位置12 = new ST文字位置();
-        st文字位置12.ch = '0';
-        st文字位置12.pt = new Point(0, 0);
+        ST文字位置 st文字位置12 = new()
+        {
+            ch = '0',
+            pt = new Point(0, 0)
+        };
         st文字位置Array2[0] = st文字位置12;
-        ST文字位置 st文字位置13 = new ST文字位置();
-        st文字位置13.ch = '1';
-        st文字位置13.pt = new Point(20, 0);
+        ST文字位置 st文字位置13 = new()
+        {
+            ch = '1',
+            pt = new Point(20, 0)
+        };
         st文字位置Array2[1] = st文字位置13;
-        ST文字位置 st文字位置14 = new ST文字位置();
-        st文字位置14.ch = '2';
-        st文字位置14.pt = new Point(40, 0);
+        ST文字位置 st文字位置14 = new()
+        {
+            ch = '2',
+            pt = new Point(40, 0)
+        };
         st文字位置Array2[2] = st文字位置14;
-        ST文字位置 st文字位置15 = new ST文字位置();
-        st文字位置15.ch = '3';
-        st文字位置15.pt = new Point(60, 0);
+        ST文字位置 st文字位置15 = new()
+        {
+            ch = '3',
+            pt = new Point(60, 0)
+        };
         st文字位置Array2[3] = st文字位置15;
-        ST文字位置 st文字位置16 = new ST文字位置();
-        st文字位置16.ch = '4';
-        st文字位置16.pt = new Point(80, 0);
+        ST文字位置 st文字位置16 = new()
+        {
+            ch = '4',
+            pt = new Point(80, 0)
+        };
         st文字位置Array2[4] = st文字位置16;
-        ST文字位置 st文字位置17 = new ST文字位置();
-        st文字位置17.ch = '5';
-        st文字位置17.pt = new Point(100, 0);
+        ST文字位置 st文字位置17 = new()
+        {
+            ch = '5',
+            pt = new Point(100, 0)
+        };
         st文字位置Array2[5] = st文字位置17;
-        ST文字位置 st文字位置18 = new ST文字位置();
-        st文字位置18.ch = '6';
-        st文字位置18.pt = new Point(120, 0);
+        ST文字位置 st文字位置18 = new()
+        {
+            ch = '6',
+            pt = new Point(120, 0)
+        };
         st文字位置Array2[6] = st文字位置18;
-        ST文字位置 st文字位置19 = new ST文字位置();
-        st文字位置19.ch = '7';
-        st文字位置19.pt = new Point(140, 0);
+        ST文字位置 st文字位置19 = new()
+        {
+            ch = '7',
+            pt = new Point(140, 0)
+        };
         st文字位置Array2[7] = st文字位置19;
-        ST文字位置 st文字位置20 = new ST文字位置();
-        st文字位置20.ch = '8';
-        st文字位置20.pt = new Point(160, 0);
+        ST文字位置 st文字位置20 = new()
+        {
+            ch = '8',
+            pt = new Point(160, 0)
+        };
         st文字位置Array2[8] = st文字位置20;
-        ST文字位置 st文字位置21 = new ST文字位置();
-        st文字位置21.ch = '9';
-        st文字位置21.pt = new Point(180, 0);
+        ST文字位置 st文字位置21 = new()
+        {
+            ch = '9',
+            pt = new Point(180, 0)
+        };
         st文字位置Array2[9] = st文字位置21;
-        ST文字位置 st文字位置22 = new ST文字位置();
-        st文字位置22.ch = '%';
-        st文字位置22.pt = new Point(200, 0);
+        ST文字位置 st文字位置22 = new()
+        {
+            ch = '%',
+            pt = new Point(200, 0)
+        };
         st文字位置Array2[10] = st文字位置22;
         stSmallStringPosition = st文字位置Array2;
         ST文字位置[] st文字位置Array3 = new ST文字位置[12];
-        ST文字位置 st文字位置23 = new ST文字位置();
-        st文字位置23.ch = '0';
-        st文字位置23.pt = new Point(0, 0);
+        ST文字位置 st文字位置23 = new()
+        {
+            ch = '0',
+            pt = new Point(0, 0)
+        };
         st文字位置Array3[0] = st文字位置23;
-        ST文字位置 st文字位置24 = new ST文字位置();
-        st文字位置24.ch = '1';
-        st文字位置24.pt = new Point(0x12, 0);
+        ST文字位置 st文字位置24 = new()
+        {
+            ch = '1',
+            pt = new Point(0x12, 0)
+        };
         st文字位置Array3[1] = st文字位置24;
-        ST文字位置 st文字位置25 = new ST文字位置();
-        st文字位置25.ch = '2';
-        st文字位置25.pt = new Point(0x24, 0);
+        ST文字位置 st文字位置25 = new()
+        {
+            ch = '2',
+            pt = new Point(0x24, 0)
+        };
         st文字位置Array3[2] = st文字位置25;
-        ST文字位置 st文字位置26 = new ST文字位置();
-        st文字位置26.ch = '3';
-        st文字位置26.pt = new Point(0x36, 0);
+        ST文字位置 st文字位置26 = new()
+        {
+            ch = '3',
+            pt = new Point(0x36, 0)
+        };
         st文字位置Array3[3] = st文字位置26;
-        ST文字位置 st文字位置27 = new ST文字位置();
-        st文字位置27.ch = '4';
-        st文字位置27.pt = new Point(0x48, 0);
+        ST文字位置 st文字位置27 = new()
+        {
+            ch = '4',
+            pt = new Point(0x48, 0)
+        };
         st文字位置Array3[4] = st文字位置27;
-        ST文字位置 st文字位置28 = new ST文字位置();
-        st文字位置28.ch = '5';
-        st文字位置28.pt = new Point(0, 0x18);
+        ST文字位置 st文字位置28 = new()
+        {
+            ch = '5',
+            pt = new Point(0, 0x18)
+        };
         st文字位置Array3[5] = st文字位置28;
-        ST文字位置 st文字位置29 = new ST文字位置();
-        st文字位置29.ch = '6';
-        st文字位置29.pt = new Point(0x12, 0x18);
+        ST文字位置 st文字位置29 = new()
+        {
+            ch = '6',
+            pt = new Point(0x12, 0x18)
+        };
         st文字位置Array3[6] = st文字位置29;
-        ST文字位置 st文字位置30 = new ST文字位置();
-        st文字位置30.ch = '7';
-        st文字位置30.pt = new Point(0x24, 0x18);
+        ST文字位置 st文字位置30 = new()
+        {
+            ch = '7',
+            pt = new Point(0x24, 0x18)
+        };
         st文字位置Array3[7] = st文字位置30;
-        ST文字位置 st文字位置31 = new ST文字位置();
-        st文字位置31.ch = '8';
-        st文字位置31.pt = new Point(0x36, 0x18);
+        ST文字位置 st文字位置31 = new()
+        {
+            ch = '8',
+            pt = new Point(0x36, 0x18)
+        };
         st文字位置Array3[8] = st文字位置31;
-        ST文字位置 st文字位置32 = new ST文字位置();
-        st文字位置32.ch = '9';
-        st文字位置32.pt = new Point(0x48, 0x18);
+        ST文字位置 st文字位置32 = new()
+        {
+            ch = '9',
+            pt = new Point(0x48, 0x18)
+        };
         st文字位置Array3[9] = st文字位置32;
-        ST文字位置 st文字位置33 = new ST文字位置();
-        st文字位置33.ch = '.';
-        st文字位置33.pt = new Point(90, 24);
+        ST文字位置 st文字位置33 = new()
+        {
+            ch = '.',
+            pt = new Point(90, 24)
+        };
         st文字位置Array3[10] = st文字位置33;
-        ST文字位置 st文字位置34 = new ST文字位置();
-        st文字位置34.ch = '%';
-        st文字位置34.pt = new Point(90, 0);
+        ST文字位置 st文字位置34 = new()
+        {
+            ch = '%',
+            pt = new Point(90, 0)
+        };
         st文字位置Array3[11] = st文字位置34;
         st特大文字位置 = st文字位置Array3;
 
 
         ST文字位置[] st難易度文字位置Ar = new ST文字位置[11];
-        ST文字位置 st難易度文字位置 = new ST文字位置();
-        st難易度文字位置.ch = '0';
-        st難易度文字位置.pt = new Point(0, 0);
+        ST文字位置 st難易度文字位置 = new()
+        {
+            ch = '0',
+            pt = new Point(0, 0)
+        };
         st難易度文字位置Ar[0] = st難易度文字位置;
-        ST文字位置 st難易度文字位置2 = new ST文字位置();
-        st難易度文字位置2.ch = '1';
-        st難易度文字位置2.pt = new Point(16, 0);
+        ST文字位置 st難易度文字位置2 = new()
+        {
+            ch = '1',
+            pt = new Point(16, 0)
+        };
         st難易度文字位置Ar[1] = st難易度文字位置2;
-        ST文字位置 st難易度文字位置3 = new ST文字位置();
-        st難易度文字位置3.ch = '2';
-        st難易度文字位置3.pt = new Point(32, 0);
+        ST文字位置 st難易度文字位置3 = new()
+        {
+            ch = '2',
+            pt = new Point(32, 0)
+        };
         st難易度文字位置Ar[2] = st難易度文字位置3;
-        ST文字位置 st難易度文字位置4 = new ST文字位置();
-        st難易度文字位置4.ch = '3';
-        st難易度文字位置4.pt = new Point(48, 0);
+        ST文字位置 st難易度文字位置4 = new()
+        {
+            ch = '3',
+            pt = new Point(48, 0)
+        };
         st難易度文字位置Ar[3] = st難易度文字位置4;
-        ST文字位置 st難易度文字位置5 = new ST文字位置();
-        st難易度文字位置5.ch = '4';
-        st難易度文字位置5.pt = new Point(64, 0);
+        ST文字位置 st難易度文字位置5 = new()
+        {
+            ch = '4',
+            pt = new Point(64, 0)
+        };
         st難易度文字位置Ar[4] = st難易度文字位置5;
-        ST文字位置 st難易度文字位置6 = new ST文字位置();
-        st難易度文字位置6.ch = '5';
-        st難易度文字位置6.pt = new Point(80, 0);
+        ST文字位置 st難易度文字位置6 = new()
+        {
+            ch = '5',
+            pt = new Point(80, 0)
+        };
         st難易度文字位置Ar[5] = st難易度文字位置6;
-        ST文字位置 st難易度文字位置7 = new ST文字位置();
-        st難易度文字位置7.ch = '6';
-        st難易度文字位置7.pt = new Point(96, 0);
+        ST文字位置 st難易度文字位置7 = new()
+        {
+            ch = '6',
+            pt = new Point(96, 0)
+        };
         st難易度文字位置Ar[6] = st難易度文字位置7;
-        ST文字位置 st難易度文字位置8 = new ST文字位置();
-        st難易度文字位置8.ch = '7';
-        st難易度文字位置8.pt = new Point(112, 0);
+        ST文字位置 st難易度文字位置8 = new()
+        {
+            ch = '7',
+            pt = new Point(112, 0)
+        };
         st難易度文字位置Ar[7] = st難易度文字位置8;
-        ST文字位置 st難易度文字位置9 = new ST文字位置();
-        st難易度文字位置9.ch = '8';
-        st難易度文字位置9.pt = new Point(128, 0);
+        ST文字位置 st難易度文字位置9 = new()
+        {
+            ch = '8',
+            pt = new Point(128, 0)
+        };
         st難易度文字位置Ar[8] = st難易度文字位置9;
-        ST文字位置 st難易度文字位置10 = new ST文字位置();
-        st難易度文字位置10.ch = '9';
-        st難易度文字位置10.pt = new Point(144, 0);
+        ST文字位置 st難易度文字位置10 = new()
+        {
+            ch = '9',
+            pt = new Point(144, 0)
+        };
         st難易度文字位置Ar[9] = st難易度文字位置10;
-        ST文字位置 st難易度文字位置11 = new ST文字位置();
-        st難易度文字位置11.ch = '.';
-        st難易度文字位置11.pt = new Point(160, 0);
+        ST文字位置 st難易度文字位置11 = new()
+        {
+            ch = '.',
+            pt = new Point(160, 0)
+        };
         st難易度文字位置Ar[10] = st難易度文字位置11;
         st難易度数字位置 = st難易度文字位置Ar;
 
-        ptFullCombo位置 = new Point[] { new Point(220, 160), new Point(0xdf, 0xed), new Point(0x141, 0xed) };
+        ptFullCombo位置 = new Point[] { new(220, 160), new(0xdf, 0xed), new(0x141, 0xed) };
 
         //Initialize positions of character in lag text sprite
         int nWidth = 15;
         int nHeight = 19;
-        Point ptRedTextOffset = new Point(64, 64);
-        List<ST文字位置Ex> LagCountBlueTextList = new List<ST文字位置Ex>();
-        List<ST文字位置Ex> LagCountRedTextList = new List<ST文字位置Ex>();
+        Point ptRedTextOffset = new(64, 64);
+        List<ST文字位置Ex> LagCountBlueTextList = new();
+        List<ST文字位置Ex> LagCountRedTextList = new();
         int[] nPosXArray = { 0, 15, 30, 45, 0, 15, 30, 45, 0, 15 };
         int[] nPosYArray = { 0, 0, 0, 0, 19, 19, 19, 19, 38, 38 };
         for (int i = 0; i < nPosXArray.Length; i++)
         {
-            ST文字位置Ex stCurrText = new ST文字位置Ex();
-            stCurrText.ch = (char)('0' + i);
-            stCurrText.rect = new Rectangle(nPosXArray[i], nPosYArray[i], nWidth, nHeight);
+            ST文字位置Ex stCurrText = new()
+            {
+                ch = (char)('0' + i),
+                rect = new Rectangle(nPosXArray[i], nPosYArray[i], nWidth, nHeight)
+            };
             LagCountBlueTextList.Add(stCurrText);
 
-            ST文字位置Ex stNextCurrText = new ST文字位置Ex();
-            stNextCurrText.ch = (char)('0' + i);
-            stNextCurrText.rect = new Rectangle(nPosXArray[i] + ptRedTextOffset.X,
-                nPosYArray[i] + ptRedTextOffset.Y, nWidth, nHeight);
+            ST文字位置Ex stNextCurrText = new()
+            {
+                ch = (char)('0' + i),
+                rect = new Rectangle(nPosXArray[i] + ptRedTextOffset.X,
+                    nPosYArray[i] + ptRedTextOffset.Y, nWidth, nHeight)
+            };
             LagCountRedTextList.Add(stNextCurrText);
         }
 
         stLagCountBlueText = LagCountBlueTextList.ToArray();
         stLagCountRedText = LagCountRedTextList.ToArray();
 
-        bNotActivated = true;
+        bActivated = false;
+        
+        
     }
 
 
@@ -327,7 +425,7 @@ internal class CActResultParameterPanel : CActivity
     }
     public override void OnManagedCreateResources()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             txCharacter[0] = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_Ratenumber_s.png"));
             txCharacter[1] = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_Ratenumber_l.png"));
@@ -452,26 +550,26 @@ internal class CActResultParameterPanel : CActivity
             prv表示用フォント.Dispose();
             prv称号フォント.Dispose();
 
-            tGetDifficultyLabelFromScript( CDTXMania.stageSongSelection.rConfirmedSong.arDifficultyLabel[ CDTXMania.stageSongSelection.nConfirmedSongDifficulty ] );
+            tGetDifficultyLabelFromScript( CDTXMania.confirmedSong.difficultyLabel[ CDTXMania.confirmedSongDifficulty ] );
 
             //Progress Bars
             for (int i = 0; i < 3; i++)
             {
                 //Best Record (Previous)
                 CTexture bestRecordProgressBarTexture = txPreviousBestProgressBar[i];
-                CDTXMania.tDisposeSafely(ref bestRecordProgressBarTexture);
+                CDTXMania.tReleaseTexture(ref bestRecordProgressBarTexture);
                 CActPerfProgressBar.txGenerateProgressBarHelper(
                     ref bestRecordProgressBarTexture,
-                    CDTXMania.stageResult.strBestProgressBarRecord[i], 4, 425,
+                    stageResult.strBestProgressBarRecord[i], 4, 425,
                     CActPerfProgressBar.nSectionIntervalCount);
                 txPreviousBestProgressBar[i] = bestRecordProgressBarTexture;
 
                 //Current Progress Bar
                 CTexture currProgressBarTexture = txCurrentProgressBar[i];
-                CDTXMania.tDisposeSafely(ref currProgressBarTexture);
+                CDTXMania.tReleaseTexture(ref currProgressBarTexture);
                 CActPerfProgressBar.txGenerateProgressBarHelper(
                     ref currProgressBarTexture,
-                    CDTXMania.stageResult.strCurrProgressBarRecord[i], 12, 425, 
+                    stageResult.strCurrProgressBarRecord[i], 12, 425, 
                     CActPerfProgressBar.nSectionIntervalCount);
                 txCurrentProgressBar[i] = currProgressBarTexture;
             }
@@ -481,7 +579,7 @@ internal class CActResultParameterPanel : CActivity
     }
     public override void OnManagedReleaseResources()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             CDTXMania.tReleaseTexture( ref txパネル本体 );
             CDTXMania.tReleaseTexture( ref txNewRecord );
@@ -501,18 +599,18 @@ internal class CActResultParameterPanel : CActivity
             }
             CDTXMania.tReleaseTexture(ref txLagHitCount);
             //
-            CDTXMania.tDisposeSafely(ref txPreviousBestProgressBar.Drums);
-            CDTXMania.tDisposeSafely(ref txPreviousBestProgressBar.Guitar);
-            CDTXMania.tDisposeSafely(ref txPreviousBestProgressBar.Bass);
-            CDTXMania.tDisposeSafely(ref txCurrentProgressBar.Drums);
-            CDTXMania.tDisposeSafely(ref txCurrentProgressBar.Guitar);
-            CDTXMania.tDisposeSafely(ref txCurrentProgressBar.Bass);
+            CDTXMania.tReleaseTexture(ref txPreviousBestProgressBar.Drums);
+            CDTXMania.tReleaseTexture(ref txPreviousBestProgressBar.Guitar);
+            CDTXMania.tReleaseTexture(ref txPreviousBestProgressBar.Bass);
+            CDTXMania.tReleaseTexture(ref txCurrentProgressBar.Drums);
+            CDTXMania.tReleaseTexture(ref txCurrentProgressBar.Guitar);
+            CDTXMania.tReleaseTexture(ref txCurrentProgressBar.Bass);
             base.OnManagedReleaseResources();
         }
     }
     public override int OnUpdateAndDraw()
     {
-        if (bNotActivated)
+        if (!bActivated)
         {
             return 0;
         }
@@ -531,7 +629,7 @@ internal class CActResultParameterPanel : CActivity
                 string str = string.Format("{0:0.00}", ((float)CDTXMania.DTX.LEVEL[j]) / 10.0f + (CDTXMania.DTX.LEVELDEC[j] != 0 ? CDTXMania.DTX.LEVELDEC[j] / 100.0f : 0));
                 bool bCLASSIC = false;
                 //If Skill Mode is CLASSIC, always display lvl as Classic Style
-                if (CDTXMania.ConfigIni.nSkillMode == 0 || (CDTXMania.ConfigIni.bCLASSIC譜面判別を有効にする &&
+                if (CDTXMania.ConfigIni.nSkillMode == 0 || (CDTXMania.ConfigIni.bClassicScoreDisplay &&
                                                             (CDTXMania.DTX.bHasChips.LeftCymbal == false) &&
                                                             (CDTXMania.DTX.bHasChips.LP == false) &&
                                                             (CDTXMania.DTX.bHasChips.LBD == false) &&
@@ -546,35 +644,35 @@ internal class CActResultParameterPanel : CActivity
                 txSkillPanel.tDraw2D(CDTXMania.app.Device, n本体X[j], n本体Y);
                 txネームプレート用文字[ j ].tDraw2D(CDTXMania.app.Device, n本体X[j], n本体Y);
 
-                tDrawStringSmall(80 + n本体X[j], 72 + n本体Y, string.Format("{0,4:###0}", CDTXMania.stageResult.stPerformanceEntry[j].nPerfectCount_ExclAuto));
-                tDrawStringSmall(80 + n本体X[j], 102 + n本体Y, string.Format("{0,4:###0}", CDTXMania.stageResult.stPerformanceEntry[j].nGreatCount_ExclAuto));
-                tDrawStringSmall(80 + n本体X[j], 132 + n本体Y, string.Format("{0,4:###0}", CDTXMania.stageResult.stPerformanceEntry[j].nGoodCount_ExclAuto));
-                tDrawStringSmall(80 + n本体X[j], 162 + n本体Y, string.Format("{0,4:###0}", CDTXMania.stageResult.stPerformanceEntry[j].nPoorCount_ExclAuto));
-                tDrawStringSmall(80 + n本体X[j], 192 + n本体Y, string.Format("{0,4:###0}", CDTXMania.stageResult.stPerformanceEntry[j].nMissCount_ExclAuto));
-                tDrawStringSmall(80 + n本体X[j], 222 + n本体Y, string.Format("{0,4:###0}", CDTXMania.stageResult.stPerformanceEntry[j].nMaxCombo));
+                tDrawStringSmall(80 + n本体X[j], 72 + n本体Y, string.Format("{0,4:###0}", stageResult.stPerformanceEntry[j].nPerfectCount_ExclAuto));
+                tDrawStringSmall(80 + n本体X[j], 102 + n本体Y, string.Format("{0,4:###0}", stageResult.stPerformanceEntry[j].nGreatCount_ExclAuto));
+                tDrawStringSmall(80 + n本体X[j], 132 + n本体Y, string.Format("{0,4:###0}", stageResult.stPerformanceEntry[j].nGoodCount_ExclAuto));
+                tDrawStringSmall(80 + n本体X[j], 162 + n本体Y, string.Format("{0,4:###0}", stageResult.stPerformanceEntry[j].nPoorCount_ExclAuto));
+                tDrawStringSmall(80 + n本体X[j], 192 + n本体Y, string.Format("{0,4:###0}", stageResult.stPerformanceEntry[j].nMissCount_ExclAuto));
+                tDrawStringSmall(80 + n本体X[j], 222 + n本体Y, string.Format("{0,4:###0}", stageResult.stPerformanceEntry[j].nMaxCombo));
 
 
-                tDrawStringSmall(167 + n本体X[j], 72 + n本体Y, string.Format("{0,3:##0}%", (int)Math.Round(CDTXMania.stageResult.fPerfect率[j])));
-                tDrawStringSmall(167 + n本体X[j], 102 + n本体Y, string.Format("{0,3:##0}%", (int)Math.Round(CDTXMania.stageResult.fGreat率[j])));
-                tDrawStringSmall(167 + n本体X[j], 132 + n本体Y, string.Format("{0,3:##0}%", (int)Math.Round(CDTXMania.stageResult.fGood率[j])));
-                tDrawStringSmall(167 + n本体X[j], 162 + n本体Y, string.Format("{0,3:##0}%", (int)Math.Round(CDTXMania.stageResult.fPoor率[j])));
-                tDrawStringSmall(167 + n本体X[j], 192 + n本体Y, string.Format("{0,3:##0}%", (int)Math.Round(CDTXMania.stageResult.fMiss率[j])));
-                tDrawStringSmall(167 + n本体X[j], 222 + n本体Y, string.Format("{0,3:##0}%", (int)Math.Round((100.0 * CDTXMania.stageResult.stPerformanceEntry[j].nMaxCombo / CDTXMania.stageResult.stPerformanceEntry[j].nTotalChipsCount))));
+                tDrawStringSmall(167 + n本体X[j], 72 + n本体Y, string.Format("{0,3:##0}%", (int)Math.Round(stageResult.fPerfect率[j])));
+                tDrawStringSmall(167 + n本体X[j], 102 + n本体Y, string.Format("{0,3:##0}%", (int)Math.Round(stageResult.fGreat率[j])));
+                tDrawStringSmall(167 + n本体X[j], 132 + n本体Y, string.Format("{0,3:##0}%", (int)Math.Round(stageResult.fGood率[j])));
+                tDrawStringSmall(167 + n本体X[j], 162 + n本体Y, string.Format("{0,3:##0}%", (int)Math.Round(stageResult.fPoor率[j])));
+                tDrawStringSmall(167 + n本体X[j], 192 + n本体Y, string.Format("{0,3:##0}%", (int)Math.Round(stageResult.fMiss率[j])));
+                tDrawStringSmall(167 + n本体X[j], 222 + n本体Y, string.Format("{0,3:##0}%", (int)Math.Round((100.0 * stageResult.stPerformanceEntry[j].nMaxCombo / stageResult.stPerformanceEntry[j].nTotalChipsCount))));
 
-                //this.tDrawStringLarge(58 + this.n本体X[j], 277 + this.n本体Y, string.Format("{0,6:##0.00}", CDTXMania.stageResult.stPerformanceEntry[j].dbPerformanceSkill));
+                //this.tDrawStringLarge(58 + this.n本体X[j], 277 + this.n本体Y, string.Format("{0,6:##0.00}", stageResult.stPerformanceEntry[j].dbPerformanceSkill));
                 //Conditional checks for MAX
-                if(txSkillMax != null && CDTXMania.stageResult.stPerformanceEntry[j].dbPerformanceSkill >= 100.0)
+                if(txSkillMax != null && stageResult.stPerformanceEntry[j].dbPerformanceSkill >= 100.0)
                 {
                     txSkillMax.tDraw2D(CDTXMania.app.Device, 127 + n本体X[j], 277 + n本体Y);
                 }
                 else
                 {
-                    tDrawStringLarge(58 + n本体X[j], 277 + n本体Y, string.Format("{0,6:##0.00}", CDTXMania.stageResult.stPerformanceEntry[j].dbPerformanceSkill));
+                    tDrawStringLarge(58 + n本体X[j], 277 + n本体Y, string.Format("{0,6:##0.00}", stageResult.stPerformanceEntry[j].dbPerformanceSkill));
                     if(txPercent != null)
                         txPercent.tDraw2D(CDTXMania.app.Device, 217 + n本体X[j], 287 + n本体Y);
                 }
 
-                tDrawStringLarge(88 + n本体X[j], 363 + n本体Y, string.Format("{0,6:##0.00}", CDTXMania.stageResult.stPerformanceEntry[j].dbGameSkill));
+                tDrawStringLarge(88 + n本体X[j], 363 + n本体Y, string.Format("{0,6:##0.00}", stageResult.stPerformanceEntry[j].dbGameSkill));
                     
                 if(tx難易度パネル != null)
                     tx難易度パネル.tDraw2D(CDTXMania.app.Device, 14 + n本体X[j], 266 + n本体Y, new Rectangle( rectDiffPanelPoint.X, rectDiffPanelPoint.Y, 60, 60));
@@ -590,7 +688,7 @@ internal class CActResultParameterPanel : CActivity
                 txCurrentProgressBar[j].tDraw2D(CDTXMania.app.Device, 256 + n本体X[j], 2 + n本体Y);
                 txPreviousBestProgressBar[j].tDraw2D(CDTXMania.app.Device, 270 + n本体X[j], 2 + n本体Y);
 
-                string strScore = string.Format("{0,7:######0}", CDTXMania.stageResult.stPerformanceEntry[j].nスコア);
+                string strScore = string.Format("{0,7:######0}", stageResult.stPerformanceEntry[j].nスコア);
                 for (int i = 0; i < 7; i++)
                 {
                     Rectangle rectangle;
@@ -616,18 +714,18 @@ internal class CActResultParameterPanel : CActivity
 
                 for (int i = 0; i < 1; i++)
                 {
-                    if (CDTXMania.stageResult.bNewRecordSkill[i])
+                    if (stageResult.bNewRecordSkill[i])
                     {
                         txNewRecord.tDraw2D( CDTXMania.app.Device, 118 + n本体X[j], 322 + n本体Y );
                     }
                 }
                 if (ct表示用.nCurrentValue >= 900)
                 {
-                    if (CDTXMania.stageResult.stPerformanceEntry[j].nPerfectCount == CDTXMania.stageResult.stPerformanceEntry[j].nTotalChipsCount)
+                    if (stageResult.stPerformanceEntry[j].nPerfectCount == stageResult.stPerformanceEntry[j].nTotalChipsCount)
                     {
                         //えくせ
                     }
-                    else if (CDTXMania.stageResult.stPerformanceEntry[j].bIsFullCombo && CDTXMania.stageResult.stPerformanceEntry[j].nPerfectCount != CDTXMania.stageResult.stPerformanceEntry[j].nTotalChipsCount)
+                    else if (stageResult.stPerformanceEntry[j].bIsFullCombo && stageResult.stPerformanceEntry[j].nPerfectCount != stageResult.stPerformanceEntry[j].nTotalChipsCount)
                     {
                         //ふるこん
                     }
@@ -640,9 +738,9 @@ internal class CActResultParameterPanel : CActivity
                     bool bTypeAColor = CDTXMania.ConfigIni.nShowLagTypeColor == 0;
 
                     tDrawLagCounterText(n本体X[j] + 170, n本体Y + 335,
-                        string.Format("{0,4:###0}", CDTXMania.stageResult.nTimingHitCount[j].nEarly), !bTypeAColor);
+                        string.Format("{0,4:###0}", stageResult.nTimingHitCount[j].nEarly), !bTypeAColor);
                     tDrawLagCounterText(n本体X[j] + 245, n本体Y + 335,
-                        string.Format("{0,4:###0}", CDTXMania.stageResult.nTimingHitCount[j].nLate), bTypeAColor);
+                        string.Format("{0,4:###0}", stageResult.nTimingHitCount[j].nLate), bTypeAColor);
                 }
             }
         }

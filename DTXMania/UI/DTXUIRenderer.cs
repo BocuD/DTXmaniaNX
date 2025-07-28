@@ -1,8 +1,10 @@
-﻿using DTXMania.Core;
-using DTXUIRenderer;
+﻿using System.Drawing;
+using DTXMania.Core;
+using DTXMania.UI.Drawable;
 using FDK;
 using Hexa.NET.ImGui;
 using SharpDX;
+using RectangleF = SharpDX.RectangleF;
 
 namespace DTXMania.UI;
 
@@ -20,11 +22,33 @@ public class DTXTexture : BaseTexture
     public override float Height => texture.szTextureSize.Height;
     public override string name => texture.filename;
 
-    public DTXTexture(string texturePath)
+    private bool isFallback = false;
+
+    public static DTXTexture LoadFromPath(string texturePath)
     {
-        texture = CDTXMania.tGenerateTexture(texturePath);
+        var tex = CDTXMania.tGenerateTexture(texturePath);
+
+        if (tex != null)
+        {
+            return new DTXTexture(tex);
+        }
+
+        return fallback;
     }
-        
+
+    public static DTXTexture fallback;
+
+    public static void UpdateFallback()
+    {
+        if (fallback != null)
+        {
+            CDTXMania.tReleaseTexture(ref fallback.texture);
+        }
+
+        fallback = new DTXTexture(CDTXMania.FallbackTexture);
+        fallback.isFallback = true;
+    }
+
     public DTXTexture(CTexture texture)
     {
         this.texture = texture;
@@ -42,7 +66,10 @@ public class DTXTexture : BaseTexture
 
     public override void Dispose()
     {
+        if (isFallback) return;
+        
         CDTXMania.tReleaseTexture(ref texture);
+        texture = null;
     }
 
     public override bool isValid()

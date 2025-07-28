@@ -14,11 +14,21 @@ internal class CStageChangeSkin : CStage
 	public CStageChangeSkin()
 	{
 		eStageID = EStage.ChangeSkin_9;
-		bNotActivated = true;
+		bActivated = false;
 	}
 
 
 	// CStage 実装
+
+	public override void InitializeBaseUI()
+	{
+		
+	}
+	
+	public override void InitializeDefaultUI()
+	{
+		
+	}
 
 	public override void OnActivate()
 	{
@@ -50,33 +60,27 @@ internal class CStageChangeSkin : CStage
 	}
 	public override void OnManagedCreateResources()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			base.OnManagedCreateResources();
 		}
 	}
 	public override void OnManagedReleaseResources()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			base.OnManagedReleaseResources();
 		}
 	}
 	public override int OnUpdateAndDraw()
 	{
-		if( !bNotActivated )
-		{
-			if ( bJustStartedUpdate )
-			{
-				bJustStartedUpdate = false;
-				return 0;
-			}
+		if (!bActivated) return 0;
 
-			//スキン変更処理
-			tChangeSkinMain();
-			return 1;
-		}
-		return 0;
+		base.OnUpdateAndDraw();
+		
+		//スキン変更処理
+		tChangeSkinMain();
+		return 1;
 	}
 	public void tChangeSkinMain()
 	{

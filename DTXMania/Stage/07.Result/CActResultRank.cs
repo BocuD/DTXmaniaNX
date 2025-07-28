@@ -7,11 +7,12 @@ namespace DTXMania;
 
 internal class CActResultRank : CActivity
 {
-    // コンストラクタ
-
-    public CActResultRank()
+    private CStageResult stageResult;
+    
+    public CActResultRank(CStageResult cStageResult)
     {
-        bNotActivated = true;
+        stageResult = cStageResult;
+        bActivated = false;
     }
 
 
@@ -97,7 +98,7 @@ internal class CActResultRank : CActivity
     }
     public override void OnManagedCreateResources()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
 
             txStageCleared = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\ScreenResult StageCleared.png"));
@@ -106,7 +107,7 @@ internal class CActResultRank : CActivity
 
             for (int j = 0; j < 3; j++)
             {
-                switch (CDTXMania.stageResult.nRankValue[j])
+                switch (stageResult.nRankValue[j])
                 {
                     case 0:
                         txランク文字[j] = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_rankSS.png"));
@@ -149,7 +150,7 @@ internal class CActResultRank : CActivity
     }
     public override void OnManagedReleaseResources()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             CDTXMania.tReleaseTexture(ref txStageCleared);
             CDTXMania.tReleaseTexture(ref txFullCombo);
@@ -160,7 +161,7 @@ internal class CActResultRank : CActivity
     }
     public override int OnUpdateAndDraw()
     {
-        if (bNotActivated)
+        if (!bActivated)
         {
             return 0;
         }
@@ -189,12 +190,12 @@ internal class CActResultRank : CActivity
                 int num14 = -165 + n本体X[j];
                 int num15 = 100 + n本体Y[j];
 
-                if (CDTXMania.stageResult.stPerformanceEntry[j].nPerfectCount == CDTXMania.stageResult.stPerformanceEntry[j].nTotalChipsCount)
+                if (stageResult.stPerformanceEntry[j].nPerfectCount == stageResult.stPerformanceEntry[j].nTotalChipsCount)
                 {
                     if (txExcellent != null)
                         txExcellent.tDraw2D(CDTXMania.app.Device, num14, num15);
                 }
-                else if (CDTXMania.stageResult.stPerformanceEntry[j].bIsFullCombo)
+                else if (stageResult.stPerformanceEntry[j].bIsFullCombo)
                 {
                     if (txFullCombo != null)
                         txFullCombo.tDraw2D(CDTXMania.app.Device, num14, num15);

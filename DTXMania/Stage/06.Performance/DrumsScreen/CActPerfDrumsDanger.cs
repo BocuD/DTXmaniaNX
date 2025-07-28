@@ -8,7 +8,7 @@ internal class CActPerfDrumsDanger : CActPerfCommonDanger
 {
 	public override void OnManagedCreateResources()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			tx黒 = CDTXMania.tGenerateTexture(CSkin.Path( @"Graphics\7_Danger.png" ) );
 			base.OnManagedCreateResources();
@@ -16,7 +16,7 @@ internal class CActPerfDrumsDanger : CActPerfCommonDanger
 	}
 	public override void OnManagedReleaseResources()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			CDTXMania.tReleaseTexture(ref tx黒);
 			base.OnManagedReleaseResources();
@@ -35,7 +35,7 @@ internal class CActPerfDrumsDanger : CActPerfCommonDanger
 	/// <returns></returns>
 	public override int tUpdateAndDraw( bool bIsDangerDrums, bool bIsDangerGuitar, bool bIsDangerBass )
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			if( !bIsDangerDrums )
 			{

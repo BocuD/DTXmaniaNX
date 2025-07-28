@@ -11,7 +11,7 @@ internal class CActPerfProgressBar : CActivity
 	public CActPerfProgressBar(bool bIsCalledFromOutsidePerformance = false)
 	{
 		b演奏画面以外からの呼び出し = bIsCalledFromOutsidePerformance;
-		bNotActivated = true;
+		bActivated = false;
 	}
 
 
@@ -102,7 +102,7 @@ internal class CActPerfProgressBar : CActivity
 
 	public override void OnDeactivate()
 	{
-		if (!bNotActivated)
+		if (bActivated)
 		{
 			ct登場用 = null;
 		}
@@ -112,9 +112,9 @@ internal class CActPerfProgressBar : CActivity
 
 	public override void OnManagedCreateResources()
 	{
-		if (!bNotActivated)
+		if (bActivated)
 		{
-			tCreateBestProgressBarRecordTexture(CDTXMania.stageSongSelection.rChosenScore);
+			tCreateBestProgressBarRecordTexture(CDTXMania.confirmedChart);
 			tサイズが絡むテクスチャの生成();
 			using (Bitmap bitmap = new Bitmap(64, 64))
 			{
@@ -151,22 +151,22 @@ internal class CActPerfProgressBar : CActivity
 
 	public override void OnManagedReleaseResources()
 	{
-		if (!bNotActivated)
+		if (bActivated)
 		{
-			CDTXMania.tDisposeSafely(ref txパネル用);
-			CDTXMania.tDisposeSafely(ref tx背景);
-			CDTXMania.tDisposeSafely(ref tx縦線);
-			CDTXMania.tDisposeSafely(ref tx進捗);
-			CDTXMania.tDisposeSafely(ref tx灰);
-			CDTXMania.tDisposeSafely(ref tx黄);
-			CDTXMania.tDisposeSafely(ref tx青);
+			CDTXMania.tReleaseTexture(ref txパネル用);
+			CDTXMania.tReleaseTexture(ref tx背景);
+			CDTXMania.tReleaseTexture(ref tx縦線);
+			CDTXMania.tReleaseTexture(ref tx進捗);
+			CDTXMania.tReleaseTexture(ref tx灰);
+			CDTXMania.tReleaseTexture(ref tx黄);
+			CDTXMania.tReleaseTexture(ref tx青);
 
-			CDTXMania.tDisposeSafely(ref txBestProgressBarRecord.Drums);
-			CDTXMania.tDisposeSafely(ref txBestProgressBarRecord.Guitar);
-			CDTXMania.tDisposeSafely(ref txBestProgressBarRecord.Bass);
+			CDTXMania.tReleaseTexture(ref txBestProgressBarRecord.Drums);
+			CDTXMania.tReleaseTexture(ref txBestProgressBarRecord.Guitar);
+			CDTXMania.tReleaseTexture(ref txBestProgressBarRecord.Bass);
 
-			CDTXMania.tDisposeSafely(ref txProgressBarBackgroundDrums);
-			CDTXMania.tDisposeSafely(ref txProgressBarBackgroundGuitar);
+			CDTXMania.tReleaseTexture(ref txProgressBarBackgroundDrums);
+			CDTXMania.tReleaseTexture(ref txProgressBarBackgroundGuitar);
 
 			base.OnManagedReleaseResources();
 		}				
@@ -174,7 +174,7 @@ internal class CActPerfProgressBar : CActivity
 
 	public override int OnUpdateAndDraw()
 	{
-		if (!bNotActivated)
+		if (bActivated)
 		{
 			//if (base.bJustStartedUpdate)
 			//{
@@ -429,7 +429,7 @@ internal class CActPerfProgressBar : CActivity
 
 	private void tサイズが絡むテクスチャの生成()
 	{
-		CDTXMania.tDisposeSafely(ref txパネル用);
+		CDTXMania.tReleaseTexture(ref txパネル用);
 		if (b演奏画面以外からの呼び出し)
 		{
 			using (Bitmap bitmap = new Bitmap(nWidth + 40, nHeight + 40)) 
@@ -441,7 +441,7 @@ internal class CActPerfProgressBar : CActivity
 				txパネル用 = CDTXMania.tGenerateTexture(bitmap);
 			} 				
 		}
-		CDTXMania.tDisposeSafely(ref tx背景);
+		CDTXMania.tReleaseTexture(ref tx背景);
 		int num = 255; // (b演奏画面以外からの呼び出し ? 128 : ((int)CDTXMania.Instance.ConfigIni.nBGAlpha));
 		using (Bitmap bitmap3 = new Bitmap(nWidth + ((!b演奏画面以外からの呼び出し) ? 2 : 0), nHeight))
 		{
@@ -467,7 +467,7 @@ internal class CActPerfProgressBar : CActivity
 			}
 			tx背景 = CDTXMania.tGenerateTexture(bitmap3);
 		}
-		CDTXMania.tDisposeSafely(ref tx縦線);
+		CDTXMania.tReleaseTexture(ref tx縦線);
 		using (Bitmap bitmap4 = new Bitmap(2, nHeight))
 		{
 			using (Graphics graphics3 = Graphics.FromImage(bitmap4))
@@ -477,7 +477,7 @@ internal class CActPerfProgressBar : CActivity
 			}
 			tx縦線 = CDTXMania.tGenerateTexture(bitmap4);
 		}
-		CDTXMania.tDisposeSafely(ref tx進捗);
+		CDTXMania.tReleaseTexture(ref tx進捗);
 		using (Bitmap bitmap5 = new Bitmap(nWidth, nHeight)) 
 		{
 			using (Graphics graphics4 = Graphics.FromImage(bitmap5))
@@ -534,124 +534,6 @@ internal class CActPerfProgressBar : CActivity
 		}
 			
 		return ret;
-	}
-
-	public void t選択曲が変更された()
-	{
-		if (bNotActivated)
-		{
-			return;
-		}
-		for (EInstrumentPart ePart = EInstrumentPart.DRUMS; ePart <= EInstrumentPart.BASS; ePart++)
-		{
-			for (int i = 0; i < nSectionIntervalCount; i++)
-			{
-				CProgressSection c区間 = listProgressSection[(int)ePart][i];
-				c区間.nChipCount = 0;
-				c区間.nHitCount = 0;
-				c区間.rectDrawingFrame.Width = 0;
-			}
-		}
-		CScore r現在選択中のスコア = CDTXMania.stageSongSelection.rSelectedScore;
-		if (r現在選択中のスコア != null)
-		{
-			//Use config.ini Drums / Guitar enabled to decide
-			epartプレイ楽器 = EInstrumentPart.UNKNOWN;
-			if (CDTXMania.ConfigIni.bDrumsEnabled)
-			{
-				epartプレイ楽器 = EInstrumentPart.DRUMS;
-			}
-			else
-			{
-				epartプレイ楽器 = EInstrumentPart.GUITAR;
-				if (CDTXMania.ConfigIni.bIsSwappedGuitarBass)
-				{
-					epartプレイ楽器 = EInstrumentPart.BASS;
-				}
-			}
-			//epartプレイ楽器 = CDTXMania.stageSongSelection.tオートを参考にこれからプレイするであろうパートを推測する();
-			//epartプレイ楽器 = CDTXMania.ConfigIni.GetFlipInst(epartプレイ楽器);
-			if (epartプレイ楽器 >= EInstrumentPart.DRUMS && epartプレイ楽器 <= EInstrumentPart.BASS && r現在選択中のスコア.SongInformation.progress[(int)epartプレイ楽器] != null)
-			{
-				char[] arrプログレス = r現在選択中のスコア.SongInformation.progress[(int)epartプレイ楽器].ToCharArray();
-				tプログレス配列から区間情報を設定する(arrプログレス);
-			}
-		}
-	}
-
-	public void t演奏記録から区間情報を設定する(STDGBVALUE<CScoreIni.CPerformanceEntry> stPerformanceEntry, EInstrumentPart eInstrumentPart)
-	{
-		for (EInstrumentPart ePart = EInstrumentPart.DRUMS; ePart <= EInstrumentPart.BASS; ePart++)
-		{
-			for (int i = 0; i < nSectionIntervalCount; i++)
-			{
-				CProgressSection c区間 = listProgressSection[(int)ePart][i];
-				c区間.nChipCount = 0;
-				c区間.nHitCount = 0;
-				c区間.rectDrawingFrame.Width = 0;
-			}
-		}
-		epartプレイ楽器 = eInstrumentPart;//CDTXMania.stageSongSelection.tオートを参考にこれからプレイするであろうパートを推測する();
-		if (epartプレイ楽器 >= EInstrumentPart.DRUMS && epartプレイ楽器 <= EInstrumentPart.BASS && stPerformanceEntry[(int)epartプレイ楽器] != null)
-		{
-			char[] arrプログレス = stPerformanceEntry[(int)epartプレイ楽器].strProgress.ToCharArray();
-			tプログレス配列から区間情報を設定する(arrプログレス);
-		}
-	}
-
-	private void tプログレス配列から区間情報を設定する(char[] arrプログレス)
-	{
-		if (arrプログレス.Length == nSectionIntervalCount)
-		{
-			_ = nHeight / nSectionIntervalCount;
-			for (int i = 0; i < nSectionIntervalCount; i++)
-			{
-				CProgressSection cSection = listProgressSection[(int)epartプレイ楽器][i];
-				/* AL definition
-				 *
-				 '0': No chips (Yellow)
-				 '1': Has chips with some misses (Blue)
-				 '2': Has chips with no misses (Yellow)
-
-				to be changed to
-
-				'0': Section Not attempted (Black)
-				'1': Has chips with some misses (Blue)
-				'2': Has chips with no misses (Yellow)
-				'3': No chips aka Free Pass (Yellow)
-
-				 */
-				cSection.bIsAttempted = arrプログレス[i] != '0';
-				cSection.nChipCount = ((arrプログレス[i] == '1' || arrプログレス[i] == '2') ? 1 : 0);
-				cSection.nHitCount = ((arrプログレス[i] == '2') ? 1 : 0);
-				_ = (double)n楽器毎のチップ数基準値[(int)epartプレイ楽器] / (double)nブロック最大数 / (double)nSectionIntervalCount;
-				int num = ((cSection.nChipCount > 0) ? nブロック最大数 : 0);
-				cSection.rectDrawingFrame.Width = num * (nWidth / nブロック最大数);
-			}
-		}
-	}
-
-	public void t表示レイアウトを設定する(int 本体x, int 本体y, int グラフ部w, int グラフ部h)
-	{
-		if (!b演奏画面以外からの呼び出し)
-		{
-			return;
-		}
-		nWidth = グラフ部w;
-		nHeight = グラフ部h;
-		tサイズが絡むテクスチャの生成();
-		for (EInstrumentPart ePart = EInstrumentPart.DRUMS; ePart <= EInstrumentPart.BASS; ePart++)
-		{
-			p表示位置[(int)ePart] = new Point(本体x, 本体y);
-			int y = nHeight;
-			for (int i = 0; i < nSectionIntervalCount; i++)
-			{
-				CProgressSection c区間 = listProgressSection[(int)ePart][i];
-				c区間.rectDrawingFrame.Y = (int)Math.Round((double)nHeight - ((double)i + 1.0) * (double)nHeight / (double)nSectionIntervalCount);
-				c区間.rectDrawingFrame.Height = y - c区間.rectDrawingFrame.Y;
-				y = c区間.rectDrawingFrame.Y;
-			}
-		}
 	}
 
 	// Other

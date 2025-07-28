@@ -230,7 +230,7 @@ internal enum EDrumComboTextDisplayPosition
 	RIGHT,
 	OFF
 }
-internal enum ELane
+public enum ELane
 {
 	LC = 0,
 	HH,
@@ -776,69 +776,6 @@ public struct STAUTOPLAY								// Eレーンとindexを一致させること
 
 internal class CConstants
 {
-	public const int BGA_H = 1280;
-	public const int BGA_W = 720;
-	public const int HIDDEN_POS = 100;
-	public const int MAX_AVI_LAYER = 1;
-	public const int MAX_WAILING = 4;
-	public const int PANEL_H = 0x1a;
-	public const int PANEL_W = 0x116;
-	public const int PREVIEW_H = 0x10d;
-	public const int PREVIEW_W = 0xcc;
-	public const int SCORE_H = 0x18;
-	public const int SCORE_W = 12;
-	public const int SUDDEN_POS = 200;
 	public const int PLAYSPEED_MIN = 5;
 	public const int PLAYSPEED_MAX = 40;
-
-	public class Drums
-	{
-		public const int BAR_Y = 0x1a6;
-		public const int BAR_Y_REV = 0x38;
-		public const int BASS_BAR_Y = 0x5f;
-		public const int BASS_BAR_Y_REV = 0x176;
-		public const int BASS_H = 0x163;
-		public const int BASS_W = 0x6d;
-		public const int BASS_X = 0x18e;
-		public const int BASS_Y = 0x39;
-		public const int BGA_X = 1280;
-		public const int BGA_Y = 720;
-		public const int GAUGE_H = 0x160;
-		public const int GAUGE_W = 0x10;
-		public const int GAUGE_X = 6;
-		public const int GAUGE_Y = 0x35;
-		public const int GUITAR_BAR_Y = 0x5f;
-		public const int GUITAR_BAR_Y_REV = 0x176;
-		public const int GUITAR_H = 0x163;
-		public const int GUITAR_W = 0x6d;
-		public const int GUITAR_X = 0x1fb;
-		public const int GUITAR_Y = 0x39;
-		public const int PANEL_X = 0x150;
-		public const int PANEL_Y = 0x1ab;
-		public const int SCORE_X = 0x164;
-		public const int SCORE_Y = 14;
-	}
-	public class Guitar
-	{
-		public const int BAR_Y = 40;
-		public const int BAR_Y_REV = 0x171;
-		public const int BASS_H = 0x199;
-		public const int BASS_W = 140;
-		public const int BASS_X = 480;
-		public const int BASS_Y = 0;
-		public const int BGA_X = 0xb5;
-		public const int BGA_Y = 50;
-		public const int GAUGE_H = 0x10;
-		public const int GAUGE_W = 0x80;
-		public const int GAUGE_X_BASS = 0x14f;
-		public const int GAUGE_X_GUITAR = 0xb2;
-		public const int GAUGE_Y_BASS = 8;
-		public const int GAUGE_Y_GUITAR = 8;
-		public const int GUITAR_H = 0x199;
-		public const int GUITAR_W = 140;
-		public const int GUITAR_X = 0x1a;
-		public const int GUITAR_Y = 0;
-		public const int PANEL_X = 0xb5;
-		public const int PANEL_Y = 430;
-	}
 }

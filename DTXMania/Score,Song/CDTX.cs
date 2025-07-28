@@ -9,7 +9,7 @@ using FDK;
 
 namespace DTXMania;
 
-internal class CDTX : CActivity
+public class CDTX : CActivity
 {
     // 定数
 
@@ -61,202 +61,6 @@ internal class CDTX : CActivity
 
 
     // クラス
-
-    public class CAVI : IDisposable
-    {
-        public CAviDS avi;
-        private bool bDispose済み;
-        public int n番号;
-        public string strコメント文 = "";
-        public string strファイル名 = "";
-        public double dbPlaySpeed = 1.0;
-
-        public CAVI(int number, string filename, string comment, double playSpeed)
-        {
-            n番号 = number;
-            strファイル名 = filename;
-            strコメント文 = comment;
-            dbPlaySpeed = playSpeed;
-            //taskLoad = null;
-        }
-
-        public void OnDeviceCreated()
-        {
-            #region [ strAVIファイル名の作成。]
-
-            //-----------------
-            string strAVIファイル名;
-            //strAVIファイル名 = CSkin.Path(@"Graphics\7_Movie.avi");
-
-            if (CDTXMania.DTX == null || Path.IsPathRooted(strファイル名))
-            {
-                strAVIファイル名 = strファイル名;
-            }
-            else
-            {
-                if (!string.IsNullOrEmpty(CDTXMania.DTX.PATH_WAV))
-                    strAVIファイル名 = CDTXMania.DTX.PATH_WAV + strファイル名;
-                else
-                    strAVIファイル名 = CDTXMania.DTX.strFolderName + CDTXMania.DTX.PATH + strファイル名;
-            }
-
-            //-----------------
-
-            #endregion
-
-            if (!File.Exists(strAVIファイル名))
-            {
-                //Trace.TraceWarning( "ファイルが存在しません。({0})({1})", this.strコメント文, strAVIファイル名 );
-                Trace.TraceWarning("File does not exist. ({0})({1})", strコメント文, strAVIファイル名);
-
-                CDTXMania.app.b汎用ムービーである = true;
-                avi = null;
-                return;
-            }
-
-            // AVI の生成。
-
-            try
-            {
-                avi = new CAviDS(strAVIファイル名, dbPlaySpeed);
-                Trace.TraceInformation("動画を生成しました。({0})({1})({2}msec)", strコメント文, strAVIファイル名, avi.GetDuration());
-                CDTXMania.app.b汎用ムービーである = false;
-            }
-            catch (Exception e)
-            {
-                Trace.TraceError(e.Message);
-                Trace.TraceError("動画の生成に失敗しました。({0})({1})", strコメント文, strAVIファイル名);
-                avi = null;
-            }
-        }
-
-        public override string ToString()
-        {
-            return string.Format("CAVI{0}: File:{1}, Comment:{2}", tZZ(n番号), strファイル名, strコメント文);
-        }
-
-        #region [ IDisposable 実装 ]
-
-        //-----------------
-        public void Dispose()
-        {
-            if (bDispose済み)
-                return;
-
-            if (avi != null)
-            {
-                #region [ strAVIファイル名 の作成。 ]
-
-                //-----------------
-                //string strAVIファイル名;
-                //if( !string.IsNullOrEmpty( CDTXMania.DTX.PATH_WAV ) )
-                //	strAVIファイル名 = CDTXMania.DTX.PATH_WAV + this.strファイル名;
-                //else
-                //	strAVIファイル名 = CDTXMania.DTX.strFolderName + this.strファイル名;
-                //-----------------
-
-                #endregion
-
-                avi.Dispose();
-                avi = null;
-
-                Trace.TraceInformation("動画を解放しました。({0})({1})", strコメント文, strファイル名);
-            }
-
-            bDispose済み = true;
-        }
-
-        //-----------------
-
-        #endregion
-    }
-
-    public class CDirectShow : IDisposable
-    {
-        public FDK.CDirectShow dshow;
-        private bool bDispose済み;
-        public int n番号;
-        public string strコメント文 = "";
-        public string strファイル名 = "";
-
-        public void OnDeviceCreated()
-        {
-            #region [ str動画ファイル名の作成。]
-
-            //-----------------
-            string str動画ファイル名;
-            if (!string.IsNullOrEmpty(CDTXMania.DTX.PATH_WAV))
-                str動画ファイル名 = CDTXMania.DTX.PATH_WAV + strファイル名;
-            else
-                str動画ファイル名 = CDTXMania.DTX.strFolderName + CDTXMania.DTX.PATH + strファイル名;
-            //-----------------
-
-            #endregion
-
-            if (!File.Exists(str動画ファイル名))
-            {
-                Trace.TraceWarning("ファイルが存在しません。({0})({1})", strコメント文, str動画ファイル名);
-                dshow = null;
-            }
-
-            // AVI の生成。
-
-            try
-            {
-                dshow = new FDK.CDirectShow(str動画ファイル名, CDTXMania.app.WindowHandle, true);
-                Trace.TraceInformation("DirectShowを生成しました。({0})({1})({2}byte)", strコメント文, str動画ファイル名,
-                    dshow.nデータサイズbyte);
-                CDTXMania.app.b汎用ムービーである = false;
-            }
-            catch (Exception e)
-            {
-                Trace.TraceError(e.Message);
-                Trace.TraceError("DirectShowの生成に失敗しました。({0})({1})", strコメント文, str動画ファイル名);
-                dshow = null;
-            }
-        }
-
-        public override string ToString()
-        {
-            return $"CAVI{tZZ(n番号)}: File:{strファイル名}, Comment:{strコメント文}";
-        }
-
-        #region [ IDisposable 実装 ]
-
-        //-----------------
-        public void Dispose()
-        {
-            if (bDispose済み)
-                return;
-
-            if (dshow != null)
-            {
-                #region [ strAVIファイル名 の作成。 ]
-
-                //-----------------
-                string str動画ファイル名;
-                if (!string.IsNullOrEmpty(CDTXMania.DTX.PATH_WAV))
-                    str動画ファイル名 = CDTXMania.DTX.PATH_WAV + strファイル名;
-                else
-                    str動画ファイル名 = CDTXMania.DTX.strFolderName + strファイル名;
-                //-----------------
-
-                #endregion
-
-                dshow.Dispose();
-                dshow = null;
-
-                Trace.TraceInformation("動画を解放しました。({0})({1})", strコメント文, str動画ファイル名);
-            }
-
-            bDispose済み = true;
-        }
-
-        //-----------------
-
-        #endregion
-    }
-
     public class CAVIPAN
     {
         public int nAVI番号;
@@ -273,7 +77,7 @@ internal class CDTX : CActivity
         {
             return string.Format(
                 "CAVIPAN{0}: AVI:{14}, 開始サイズ:{1}x{2}, 終了サイズ:{3}x{4}, 動画側開始位置:{5}x{6}, 動画側終了位置:{7}x{8}, 表示側開始位置:{9}x{10}, 表示側終了位置:{11}x{12}, 移動時間:{13}ct",
-                tZZ(n番号),
+                Base36ToString(n番号),
                 sz開始サイズ.Width, sz開始サイズ.Height,
                 sz終了サイズ.Width, sz終了サイズ.Height,
                 pt動画側開始位置.X, pt動画側開始位置.Y,
@@ -281,7 +85,7 @@ internal class CDTX : CActivity
                 pt表示側開始位置.X, pt表示側開始位置.Y,
                 pt表示側終了位置.X, pt表示側終了位置.Y,
                 n移動時間ct,
-                tZZ(nAVI番号));
+                Base36ToString(nAVI番号));
         }
     }
 
@@ -296,8 +100,8 @@ internal class CDTX : CActivity
         public override string ToString()
         {
             return string.Format("CBGA{0}, BMP:{1}, 画像側左上座標:{2}x{3}, 画像側右下座標:{4}x{5}, 表示座標:{6}x{7}",
-                tZZ(n番号),
-                tZZ(nBMP番号),
+                Base36ToString(n番号),
+                Base36ToString(nBMP番号),
                 pt画像側左上座標.X, pt画像側左上座標.Y,
                 pt画像側右下座標.X, pt画像側右下座標.Y,
                 pt表示座標.X, pt表示座標.Y);
@@ -320,7 +124,7 @@ internal class CDTX : CActivity
         {
             return string.Format(
                 "CBGAPAN{0}: BMP:{14}, 開始サイズ:{1}x{2}, 終了サイズ:{3}x{4}, 画像側開始位置:{5}x{6}, 画像側終了位置:{7}x{8}, 表示側開始位置:{9}x{10}, 表示側終了位置:{11}x{12}, 移動時間:{13}ct",
-                tZZ(nBMP番号),
+                Base36ToString(nBMP番号),
                 sz開始サイズ.Width, sz開始サイズ.Height,
                 sz終了サイズ.Width, sz終了サイズ.Height,
                 pt画像側開始位置.X, pt画像側開始位置.Y,
@@ -328,7 +132,7 @@ internal class CDTX : CActivity
                 pt表示側開始位置.X, pt表示側開始位置.Y,
                 pt表示側終了位置.X, pt表示側終了位置.Y,
                 n移動時間ct,
-                tZZ(nBMP番号));
+                Base36ToString(nBMP番号));
         }
     }
 
@@ -346,7 +150,7 @@ internal class CDTX : CActivity
 
         public override string ToString()
         {
-            return string.Format("CBMP{0}: File:{1}, Comment:{2}", tZZ(n番号), strファイル名, strコメント文);
+            return string.Format("CBMP{0}: File:{1}, Comment:{2}", Base36ToString(n番号), strファイル名, strコメント文);
         }
     }
 
@@ -366,7 +170,7 @@ internal class CDTX : CActivity
 
         public override string ToString()
         {
-            return string.Format("CBMPTEX{0}: File:{1}, Comment:{2}", tZZ(n番号), strファイル名, strコメント文);
+            return string.Format("CBMPTEX{0}: File:{1}, Comment:{2}", Base36ToString(n番号), strファイル名, strコメント文);
         }
     }
 
@@ -409,7 +213,7 @@ internal class CDTX : CActivity
 
             if (!File.Exists(strテクスチャファイル名))
             {
-                Trace.TraceWarning("ファイルが存在しません。({0})({1})", strコメント文, strテクスチャファイル名);
+                Trace.TraceWarning("File doesn't exist!({0})({1})", strコメント文, strテクスチャファイル名);
                 tx画像 = null;
                 return;
             }
@@ -527,11 +331,11 @@ internal class CDTX : CActivity
             StringBuilder builder = new(0x80);
             if (n内部番号 != n表記上の番号)
             {
-                builder.Append(string.Format("CBPM{0}(内部{1})", tZZ(n表記上の番号), n内部番号));
+                builder.Append(string.Format("CBPM{0}(内部{1})", Base36ToString(n表記上の番号), n内部番号));
             }
             else
             {
-                builder.Append(string.Format("CBPM{0}", tZZ(n表記上の番号)));
+                builder.Append(string.Format("CBPM{0}", Base36ToString(n表記上の番号)));
             }
 
             builder.Append(string.Format(", BPM:{0}", dbBPM値));
@@ -573,11 +377,11 @@ internal class CDTX : CActivity
 
             if (n表記上の番号 == n内部番号)
             {
-                sb.Append(string.Format("CWAV{0}: ", tZZ(n表記上の番号)));
+                sb.Append(string.Format("CWAV{0}: ", Base36ToString(n表記上の番号)));
             }
             else
             {
-                sb.Append(string.Format("CWAV{0}(内部{1}): ", tZZ(n表記上の番号), n内部番号));
+                sb.Append(string.Format("CWAV{0}(内部{1}): ", Base36ToString(n表記上の番号), n内部番号));
             }
 
             sb.Append(string.Format("音量:{0}, 位置:{1}, サイズ:{2}, BGM:{3}, File:{4}, Comment:{5}", nVolume, nPosition, nChipSize,
@@ -1254,7 +1058,7 @@ internal class CDTX : CActivity
         }
     }
 
-    public struct STチップがある
+    public struct STHASCHIPS
     {
         public bool Drums;
         public bool Guitar;
@@ -1400,7 +1204,7 @@ internal class CDTX : CActivity
     public double BASEBPM;
     public bool BLACKCOLORKEY;
     public double BPM;
-    public STチップがある bHasChips;
+    public STHASCHIPS bHasChips;
     public string COMMENT;
     public double db再生速度;
     public EType eFileType;
@@ -1496,7 +1300,7 @@ internal class CDTX : CActivity
 
         db再生速度 = 1.0;
         strDTXFileHash = "";
-        bHasChips = new STチップがある
+        bHasChips = new STHASCHIPS
         {
             Drums = false,
             Guitar = false,
@@ -1687,7 +1491,7 @@ internal class CDTX : CActivity
         string filename = cbmp.GetFullPathname;
         if (!File.Exists(filename))
         {
-            Trace.TraceWarning("ファイルが存在しません。({0})", filename);
+            Trace.TraceWarning("File doesn't exist! ({0})", filename);
             cbmp.bitmap = null;
             return;
         }
@@ -3168,7 +2972,7 @@ internal class CDTX : CActivity
         {
             for (int i = 0; i < nPolyphonicSounds; i++)
             {
-                if ((wc.rSound[i] != null) && (wc.rSound[i].b再生中))
+                if ((wc.rSound[i] != null) && (wc.rSound[i].bIsPlaying))
                 {
                     long nCurrentTime = CSoundManager.rcPerformanceTimer.nSystemTimeMs;
                     if (nCurrentTime > wc.nPlayStartTime[i])
@@ -3193,7 +2997,7 @@ internal class CDTX : CActivity
         
         for (int i = 0; i < nPolyphonicSounds; i++)
         {
-            if (cwav.rSound[i] != null && cwav.rSound[i].b再生中)
+            if (cwav.rSound[i] != null && cwav.rSound[i].bIsPlaying)
             {
                 cwav.rSound[i].tStopPlayback();
             }
@@ -3329,10 +3133,10 @@ internal class CDTX : CActivity
         }
     }
 
-    public static string tZZ(int n)
+    public static string Base36ToString(int n)
     {
         if (n < 0 || n >= 36 * 36)
-            return "!!"; // オーバー／アンダーフロー。
+            return "!!"; // Over or underflow
 
         // n を36進数2桁の文字列にして返す。
 
@@ -3615,7 +3419,7 @@ internal class CDTX : CActivity
         {
             for (int j = 0; j < nPolyphonicSounds; j++)
             {
-                if ((cwav.rSound[j] != null) && cwav.rSound[j].b再生中)
+                if ((cwav.rSound[j] != null) && cwav.rSound[j].bIsPlaying)
                 {
                     cwav.nPlayStartTime[j] += nBGMAdjustの増減値;
                 }
@@ -3629,7 +3433,7 @@ internal class CDTX : CActivity
         {
             for (int i = 0; i < nPolyphonicSounds; i++)
             {
-                if ((cwav.rSound[i] != null) && cwav.rSound[i].b再生中)
+                if ((cwav.rSound[i] != null) && cwav.rSound[i].bIsPlaying)
                 {
                     cwav.rSound[i].tPausePlayback();
                     cwav.nPauseTime[i] = CSoundManager.rcPerformanceTimer.nSystemTimeMs;
@@ -3667,10 +3471,8 @@ internal class CDTX : CActivity
 
     private void tRead(string strFileName, bool bHeaderOnly, double dbReplaySpeed = 1.0, int nBgmAdjust = 0)
     {
-        Console.WriteLine("Reading DTX file: " + strFileName);
-        
         this.bHeaderOnly = bHeaderOnly;
-        b動画読み込み = (CDTXMania.rCurrentStage.eStageID == CStage.EStage.SongLoading_5);
+        b動画読み込み = (CDTXMania.StageManager.rCurrentStage.eStageID == CStage.EStage.SongLoading_5);
         strFileNameFullPath = Path.GetFullPath(strFileName);
         this.strFileName = Path.GetFileName(strFileNameFullPath);
         strFolderName = Path.GetDirectoryName(strFileNameFullPath) + @"\";
@@ -3702,21 +3504,9 @@ internal class CDTX : CActivity
                 this.db再生速度 = dbReplaySpeed;
 
                 StreamReader reader = new(strFileName, Encoding.GetEncoding("shift-jis"));
-                    
-                //Stopwatch sw = new();
-                //sw.Start();
                 tRead_FromStream(reader);
-                //sw.Stop();
-                //TimeSpan span = sw.Elapsed;
-                //Console.WriteLine("{0} tRead_FromStream {1:0.00} ms", strFileName, span.TotalMilliseconds);
                 reader.Close();
-                    
-                // sw.Reset();
-                // sw.Start();
                 tProcessChartData(nBgmAdjust);
-                // sw.Stop();
-                // span = sw.Elapsed;
-                //Console.WriteLine("{0} tProcessChartData {1:0.00} ms", strFileName, span.TotalMilliseconds);
             }
             catch (Exception e)
             {
@@ -3866,7 +3656,7 @@ internal class CDTX : CActivity
             if (offset < line.Length)
             {
                 offset += char.IsWhiteSpace(line[offset]) ? 1 : 0;
-                param = SplitLineString(ref line, [';', '\n'], ref offset);
+                param = SplitLineString(ref line, [';', '\n', '\t'], ref offset);
             }
             else
             {
@@ -4520,7 +4310,7 @@ internal class CDTX : CActivity
             #endregion
         }
     }
-        
+
     /// <summary>
     /// サウンドミキサーにサウンドを登録_削除する時刻を事前に算出する
     /// </summary>
@@ -5116,7 +4906,7 @@ internal class CDTX : CActivity
 
     public override void OnManagedCreateResources()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             tLoadBMP_BMPTEX();
             tLoadAVI();
@@ -5126,7 +4916,7 @@ internal class CDTX : CActivity
 
     public override void OnManagedReleaseResources()
     {
-        if (!bNotActivated)
+        if (bActivated)
         {
             if (listBMP != null)
             {
@@ -5344,7 +5134,6 @@ internal class CDTX : CActivity
             }
         },
         { "SOUND_NOWLOADING", (dtx, param) => dtx.SOUND_NOWLOADING = param },
-        { "BPM", (dtx, param) => dtx.tAnalyzeLine_BPM_BPMzz("BPM", param) },
         { "FORCINGXG", (dtx, param) => dtx.bForceXGChart = param.ToLower().Equals("on") },
         { "VOL7FTO64", (dtx, param) => dtx.bVol137to100 = param.ToLower().Equals("on") },
         { "DTXVPLAYSPEED", (dtx, param) =>
@@ -5389,21 +5178,21 @@ internal class CDTX : CActivity
                 case "DLVDEC":
                     if (int.TryParse(param, out levelDec))
                     {
-                        dtx.LEVELDEC.Drums = Math.Min(Math.Max(levelDec, 0), 10);
+                        dtx.LEVELDEC.Drums = Math.Clamp(levelDec, 0, 10);
                     }
                     break;
                     
                 case "GLVDEC":
                     if (int.TryParse(param, out levelDec))
                     {
-                        dtx.LEVELDEC.Guitar = Math.Min(Math.Max(levelDec, 0), 10);
+                        dtx.LEVELDEC.Guitar = Math.Clamp(levelDec, 0, 10);
                     }
                     break;
                     
                 case "BLVDEC":
                     if (int.TryParse(param, out levelDec))
                     {
-                        dtx.LEVELDEC.Bass = Math.Min(Math.Max(levelDec, 0), 10);
+                        dtx.LEVELDEC.Bass = Math.Clamp(levelDec, 0, 10);
                     }
                     break;
             }
@@ -5481,7 +5270,7 @@ internal class CDTX : CActivity
             }
 
             if (bHeaderOnly) return; // ヘッダのみの解析の場合、以下は無視。
-
+            
             #region [ PANEL ]
 
             //-----------------
@@ -5553,9 +5342,8 @@ internal class CDTX : CActivity
                 }
             }
             //-----------------
-
             #endregion
-
+            
             #region [ SOUND_STAGEFAILED ]
 
             //-----------------
@@ -5605,7 +5393,8 @@ internal class CDTX : CActivity
                      !t入力_行解析_RESULTIMAGE(strCommand, strParameter) &&
                      !t入力_行解析_RESULTMOVIE(strCommand, strParameter) &&
                      !t入力_行解析_RESULTSOUND(strCommand, strParameter) &&
-                     !t入力_行解析_SIZE(strCommand, strParameter))
+                     !t入力_行解析_SIZE(strCommand, strParameter) &&
+                     !tAnalyzeLine_BPM_BPMzz(strCommand, strParameter))
             {
                 tInput_LineAnalysis_ChipLocation(ref strCommand, ref strParameter);
                 lastLineWasChipLocation = true;

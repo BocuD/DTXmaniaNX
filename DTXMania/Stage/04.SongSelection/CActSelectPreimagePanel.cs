@@ -11,16 +11,18 @@ namespace DTXMania;
 
 internal class CActSelectPreimagePanel : CActivity
 {
-	// メソッド
+	CStageSongSelection stageSongSelection;
 
-	public CActSelectPreimagePanel()
+	public CActSelectPreimagePanel(CStageSongSelection cStageSongSelection)
 	{
-		listChildActivities.Add( actステータスパネル = new CActSelectStatusPanel() );
-		bNotActivated = true;
+		stageSongSelection = cStageSongSelection;
+		listChildActivities.Add(actStatusPanel = new CActSelectStatusPanel());
+		bActivated = false;
 	}
+
 	public void t選択曲が変更された()
 	{
-		ct遅延表示 = new CCounter( -CDTXMania.ConfigIni.n曲が選択されてからプレビュー画像が表示開始されるまでのウェイトms, 100, 1, CDTXMania.Timer );
+		ct遅延表示 = new CCounter( -CDTXMania.ConfigIni.nSongSelectImagePreviewWaitTimeMs, 100, 1, CDTXMania.Timer );
 		b新しいプレビューファイルを読み込んだ = false;
 	}
 
@@ -50,7 +52,7 @@ internal class CActSelectPreimagePanel : CActivity
 	}
 	public override void OnManagedCreateResources()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			txパネル本体 = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\5_preimage panel.png" ), false );
 			txプレビュー画像 = null;
@@ -66,7 +68,7 @@ internal class CActSelectPreimagePanel : CActivity
 	}
 	public override void OnManagedReleaseResources()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			CDTXMania.tReleaseTexture( ref txパネル本体 );
 			CDTXMania.tReleaseTexture( ref txプレビュー画像 );
@@ -82,7 +84,7 @@ internal class CActSelectPreimagePanel : CActivity
 	}
 	public override int OnUpdateAndDraw()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			if( bJustStartedUpdate )
 			{
@@ -90,7 +92,7 @@ internal class CActSelectPreimagePanel : CActivity
 				bJustStartedUpdate = false;
 			}
 			ct登場アニメ用.tUpdate();
-			if( ( !CDTXMania.stageSongSelection.bScrolling && ( ct遅延表示 != null ) ) && ct遅延表示.bInProgress )
+			if( ( !stageSongSelection.bScrolling && ( ct遅延表示 != null ) ) && ct遅延表示.bInProgress )
 			{
 				ct遅延表示.tUpdate();
 				if( ct遅延表示.bReachedEndValue )
@@ -142,7 +144,7 @@ internal class CActSelectPreimagePanel : CActivity
 
 	#region [ private ]
 	//-----------------
-	private CDTX.CAVI rAVI;
+	private CAVI rAVI;
 	private bool b動画フレームを作成した;
 	private CCounter ct遅延表示;
 	private CCounter ct登場アニメ用;
@@ -157,7 +159,7 @@ internal class CActSelectPreimagePanel : CActivity
 	private CTexture txプレビュー画像;
 	private CTexture txプレビュー画像がないときの画像;
 	private CTexture r表示するプレビュー画像;
-	private CActSelectStatusPanel actステータスパネル;
+	private CActSelectStatusPanel actStatusPanel;
 	private bool b新しいプレビューファイルを読み込んだ;
 	private bool b新しいプレビューファイルをまだ読み込んでいない
 	{
@@ -227,7 +229,7 @@ internal class CActSelectPreimagePanel : CActivity
 	}
 	private bool tプレビュー画像の指定があれば構築する()
 	{
-		CScore cスコア = CDTXMania.stageSongSelection.rSelectedScore;
+		CScore cスコア = stageSongSelection.rSelectedScore;
 		if( ( cスコア == null ) || string.IsNullOrEmpty( cスコア.SongInformation.Preimage ) )
 		{
 			return false;
@@ -239,7 +241,7 @@ internal class CActSelectPreimagePanel : CActivity
 			str現在のファイル名 = str;
 			if( !File.Exists( str現在のファイル名 ) )
 			{
-				Trace.TraceWarning( "ファイルが存在しません。({0})", new object[] { str現在のファイル名 } );
+				Trace.TraceWarning( "File doesn't exist!({0})", new object[] { str現在のファイル名 } );
 				return false;
 			}
 			txプレビュー画像 = CDTXMania.tGenerateTexture( str現在のファイル名, false );
@@ -256,7 +258,7 @@ internal class CActSelectPreimagePanel : CActivity
 	}
 	private bool tプレビュー動画の指定があれば構築する()
 	{
-		CScore cスコア = CDTXMania.stageSongSelection.rSelectedScore;
+		CScore cスコア = stageSongSelection.rSelectedScore;
 		if( ( CDTXMania.ConfigIni.bAVIEnabled && ( cスコア != null ) ) && !string.IsNullOrEmpty( cスコア.SongInformation.Premovie ) )
 		{
 			string filename = cスコア.FileInformation.AbsoluteFolderPath + cスコア.SongInformation.Premovie;
@@ -272,12 +274,12 @@ internal class CActSelectPreimagePanel : CActivity
 			str現在のファイル名 = filename;
 			if( !File.Exists( str現在のファイル名 ) )
 			{
-				Trace.TraceWarning( "ファイルが存在しません。({0})", new object[] { str現在のファイル名 } );
+				Trace.TraceWarning( "File doesn't exist!({0})", new object[] { str現在のファイル名 } );
 				return false;
 			}
 			try
 			{
-				CDTX.CAVI cAVI = new CDTX.CAVI(0, filename, "", (int)CDTXMania.ConfigIni.nPlaySpeed);
+				CAVI cAVI = new CAVI(0, filename, "", (int)CDTXMania.ConfigIni.nPlaySpeed);
 				cAVI.OnDeviceCreated();
 
 				rAVI = cAVI;
@@ -298,7 +300,7 @@ internal class CActSelectPreimagePanel : CActivity
 	}
 	private bool t背景画像があればその一部からプレビュー画像を構築する()
 	{
-		CScore cスコア = CDTXMania.stageSongSelection.rSelectedScore;
+		CScore cスコア = stageSongSelection.rSelectedScore;
 		if( ( cスコア == null ) || string.IsNullOrEmpty( cスコア.SongInformation.Backgound ) )
 		{
 			return false;
@@ -308,7 +310,7 @@ internal class CActSelectPreimagePanel : CActivity
 		{
 			if( !File.Exists( path ) )
 			{
-				Trace.TraceWarning( "ファイルが存在しません。({0})", new object[] { path } );
+				Trace.TraceWarning( "File doesn't exist!({0})", new object[] { path } );
 				return false;
 			}
 			CDTXMania.tReleaseTexture( ref txプレビュー画像 );
@@ -363,15 +365,15 @@ internal class CActSelectPreimagePanel : CActivity
 	}
 	private void t描画処理_ジャンル文字列()
 	{
-		CSongListNode c曲リストノード = CDTXMania.stageSongSelection.r現在選択中の曲;
-		CScore cスコア = CDTXMania.stageSongSelection.rSelectedScore;
+		CSongListNode c曲リストノード = stageSongSelection.r現在選択中の曲;
+		CScore cスコア = stageSongSelection.rSelectedScore;
 		if( ( c曲リストノード != null ) && ( cスコア != null ) )
 		{
 			string str = "";
 			switch( c曲リストノード.eNodeType )
 			{
 				case CSongListNode.ENodeType.SCORE:
-					if( ( c曲リストノード.strジャンル == null ) || ( c曲リストノード.strジャンル.Length <= 0 ) )
+					if( ( c曲リストノード.strGenre == null ) || ( c曲リストノード.strGenre.Length <= 0 ) )
 					{
 						if( ( cスコア.SongInformation.Genre != null ) && ( cスコア.SongInformation.Genre.Length > 0 ) )
 						{
@@ -405,7 +407,7 @@ internal class CActSelectPreimagePanel : CActivity
 						}
 						break;
 					}
-					str = c曲リストノード.strジャンル;
+					str = c曲リストノード.strGenre;
 					break;
 
 				case CSongListNode.ENodeType.SCORE_MIDI:
@@ -436,7 +438,7 @@ internal class CActSelectPreimagePanel : CActivity
 		int n基X = 0x12;
 		int n基Y = 0x58;
 
-		if (actステータスパネル.txパネル本体 != null)
+		if (actStatusPanel.txパネル本体 != null)
 		{
 			n基X = 250;
 			n基Y = 34;
@@ -461,13 +463,13 @@ internal class CActSelectPreimagePanel : CActivity
 	}
 	private unsafe void t描画処理_プレビュー画像()
 	{
-		if( !CDTXMania.stageSongSelection.bScrolling && ( ( ( ct遅延表示 != null ) && ( ct遅延表示.nCurrentValue > 0 ) ) && !b新しいプレビューファイルをまだ読み込んでいない ) )
+		if( !stageSongSelection.bScrolling && ( ( ( ct遅延表示 != null ) && ( ct遅延表示.nCurrentValue > 0 ) ) && !b新しいプレビューファイルをまだ読み込んでいない ) )
 		{
 			int n差X = 0x25;
 			int n差Y = 0x18;
 			int n表示ジャケットサイズ = 368;
 
-			if (actステータスパネル.txパネル本体 != null)
+			if (actStatusPanel.txパネル本体 != null)
 			{
 				n差X = 8;
 				n差Y = 8;

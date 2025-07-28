@@ -139,7 +139,15 @@ public class CPrivateFont : IDisposable
 			// nullを返すと、その後bmp→texture処理や、textureのサイズを見て__の処理で全部例外が発生することになる。
 			// それは非常に面倒なので、最小限のbitmapを返してしまう。
 			// まずはこの仕様で進めますが、問題有れば(上位側からエラー検出が必要であれば)例外を出したりエラー状態であるプロパティを定義するなり検討します。
-			Trace.TraceError("DrawPrivateFont()の入力不正。最小値のbitmapを返します。");
+			if (fontFamily == null)
+			{
+				Trace.TraceError("Invalid input for DrawPrivateFont(): fontFamily is null. Empty texture will be returned.");
+			}
+			if (string.IsNullOrEmpty(drawStr))
+			{
+				Trace.TraceError("Invalid input for DrawPrivateFont(): drawStr is null or empty. Empty texture will be returned.");
+			}
+
 			RectStrings = new Rectangle(0, 0, 0, 0);
 			PtOrigin = new Point(0, 0);
 			return new Bitmap(1, 1);

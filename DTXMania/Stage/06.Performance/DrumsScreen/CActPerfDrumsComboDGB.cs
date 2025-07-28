@@ -63,9 +63,6 @@ internal class CActPerfDrumsComboDGB : CActPerfCommonCombo
     }
     protected override void tDrawCombo_Drums( int nCombo値, int nジャンプインデックス )
     {
-        bool guitar = CDTXMania.DTX.bHasChips.Guitar;
-        bool bass = CDTXMania.DTX.bHasChips.Bass;
-
         if( CDTXMania.ConfigIni.bドラムコンボ文字の表示 )
         {
             if (CDTXMania.ConfigIni.bGraph有効.Drums && CDTXMania.ConfigIni.bSmallGraph)

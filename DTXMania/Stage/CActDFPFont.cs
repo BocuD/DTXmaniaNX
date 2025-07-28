@@ -526,7 +526,7 @@ public class CActDFPFont : CActivity
 	}
 	public void t文字列描画( int x, int y, string str, bool b強調, float fScale )
 	{
-		if( !bNotActivated && !string.IsNullOrEmpty( str ) )
+		if( bActivated && !string.IsNullOrEmpty( str ) )
 		{
 			CTexture texture = b強調 ? txHighlightCharacterMap : txCharacterMap;
 			if( texture != null )
@@ -558,7 +558,7 @@ public class CActDFPFont : CActivity
 
 	public override void OnManagedCreateResources()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			txCharacterMap = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\Screen font dfp.png" ), false );
 			txHighlightCharacterMap = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\Screen font dfp em.png" ), false );
@@ -567,7 +567,7 @@ public class CActDFPFont : CActivity
 	}
 	public override void OnManagedReleaseResources()
 	{
-		if( !bNotActivated )
+		if( bActivated )
 		{
 			if( txHighlightCharacterMap != null )
 			{
