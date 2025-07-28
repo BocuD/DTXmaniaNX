@@ -288,6 +288,7 @@ public class SongDb
 			catch (Exception ex)
 			{
 				Trace.TraceError($"Failed to process directory {infoDir.FullName}: {ex.Message}");
+				Trace.TraceError($"Stack trace: {ex.StackTrace}");
 			}
 		}
 	}
