@@ -1,6 +1,6 @@
 ## What is this repository?
 
-This is a fork of DTXManiaNX, with the main focus being improving QOL, as well as cleaning up and improving the codebase. This fork was initially started from frustration with the lack of QOL features or decent UX in essentially all DTXMania forks, and intends to create a gameplay and menu navigation system more in line with the arcade.
+This is a fork of DTXManiaNX, with a main focus on improving QOL, as well as cleaning up and improving the codebase. This fork was initially started from frustration with the lack of QOL features or decent UX in essentially all DTXMania forks, and intends to create a gameplay and menu navigation system more in line with the arcade.
 
 ## Some of the changes made from upstream DTXManiaNX:
 
@@ -11,7 +11,12 @@ This is a fork of DTXManiaNX, with the main focus being improving QOL, as well a
 
 - New theming engine
   - Written on top of new UI framework
-  - Can't affect old UI elements (for now)
+  - Doesn't affect old UI elements (for now)
+ 
+- Support for arbitrary resolutions
+  - Currently restricted to 16:9
+  - UI scales gracefully, independent of resolution
+  - Gameplay is still fixed at 720p
 
 - Rewritten song database
   - ~4-8x performance speedup
@@ -33,6 +38,9 @@ This is a fork of DTXManiaNX, with the main focus being improving QOL, as well a
 
 - Improved settings menu
   - Most menu options are now sorted into categories (for example, Audio, Video, Gameplay, etc)
+  - Added options for drum velocity
+  - Removed options that don't affect the current game
+  - Improved naming and description for various elements
 
 - Extensive Dear ImGui-based tooling
   - Inspector and hierarchy views for new UI framework, performance analysis, song database tests, etc
@@ -45,7 +53,6 @@ This is a fork of DTXManiaNX, with the main focus being improving QOL, as well a
 - Song database serialization
 - Song favourite filters
 - (fuzzy) song search
-- Better engine-level support for arbitrary rendering resolutions
 - Play results screen rework
 
 ## Building
@@ -78,6 +85,8 @@ Run the game
 cd ../Runtime
 ./DTXManiaNX.exe
 ```
+
+In the root of the repository, a `build_and_run.bat` script is included to automate these steps.
 
 ## What is DTXManiaNX?
 DTXManiaNX is a program that replicates gameplay from Konami's music video game, Gitadora - Drummania/GuitarFreaks. It processes DTX files (including older formats such as BMS/BME or GDA/G2D) and allows playing of custom created charts with a use of a game, keyboard or MIDI controller.
