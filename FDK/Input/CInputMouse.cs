@@ -109,7 +109,7 @@ public class CInputMouse : IInputDevice, IDisposable
 									b押された = true,
 									b離された = false,
 									nTimeStamp = CSoundManager.rcPerformanceTimer.nサウンドタイマーのシステム時刻msへの変換(data.Timestamp),
-									nVelocity = CInputManager.n通常音量
+									nVelocity = CInputManager.nDefaultVelocity
 								};
 								listInputEvent.Add(item);
 
@@ -125,7 +125,7 @@ public class CInputMouse : IInputDevice, IDisposable
 									b押された = false,
 									b離された = true,
 									nTimeStamp = CSoundManager.rcPerformanceTimer.nサウンドタイマーのシステム時刻msへの変換(data.Timestamp),
-									nVelocity = CInputManager.n通常音量
+									nVelocity = CInputManager.nDefaultVelocity
 								};
 								listInputEvent.Add(item);
 
@@ -157,7 +157,7 @@ public class CInputMouse : IInputDevice, IDisposable
 								b押された = true,
 								b離された = false,
 								nTimeStamp = CSoundManager.rcPerformanceTimer.nシステム時刻, // 演奏用タイマと同じタイマを使うことで、BGMと譜面、入力ずれを防ぐ。
-								nVelocity = CInputManager.n通常音量,
+								nVelocity = CInputManager.nDefaultVelocity,
 							};
 							listInputEvent.Add(ev);
 
@@ -172,7 +172,7 @@ public class CInputMouse : IInputDevice, IDisposable
 								b押された = false,
 								b離された = true,
 								nTimeStamp = CSoundManager.rcPerformanceTimer.nシステム時刻, // 演奏用タイマと同じタイマを使うことで、BGMと譜面、入力ずれを防ぐ。
-								nVelocity = CInputManager.n通常音量,
+								nVelocity = CInputManager.nDefaultVelocity,
 							};
 							listInputEvent.Add(ev);
 

@@ -1068,9 +1068,7 @@ internal class CDTXMania : Game
         float delta = (Timer.nCurrentTime - lastDrawTime) / 1000.0f;
         lastDrawTime = Timer.nCurrentTime;
         GameStatus.UpdatePerformanceGraph(delta);
-
-        InputManager.ScanDevices();
-
+        
         //....????
         if (SoundManager == null)
         {
@@ -1085,7 +1083,10 @@ internal class CDTXMania : Game
             CSoundManager.rcPerformanceTimer.tUpdate();
 
         if (InputManager != null)
+        {
+            InputManager.ScanDevices();
             InputManager.tPolling(bApplicationActive, ConfigIni.bBufferedInput);
+        }
 
         if (FPS != null)
             FPS.tUpdateCounter();

@@ -3438,7 +3438,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
             if ( autoPlayCondition )
             {
                 pChip.bHit = true;
-                actLaneFlushD.Start( (ELane) indexSevenLanes, ( (float) CInputManager.n通常音量 ) / 127f );
+                actLaneFlushD.Start( (ELane) indexSevenLanes, ( (float) CInputManager.nDefaultVelocity ) / 127f );
                 bool flag = bInFillIn;
                 bool flag2 = bInFillIn && bフィルイン区間の最後のChipである( pChip );
                 //bool flag3 = flag2;
