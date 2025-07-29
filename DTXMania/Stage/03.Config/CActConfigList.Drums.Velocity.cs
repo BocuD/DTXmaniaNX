@@ -30,37 +30,37 @@ internal partial class CActConfigList
         };
         listItems.Add(iVelocityDrumsReturnToMenu);
 
-        AddDrumVelocityItem("LC", 
+        AddDrumVelocityItem("Left cymbal", 
 			() => CDTXMania.ConfigIni.nVelocityMin.LC, 
 			value => CDTXMania.ConfigIni.nVelocityMin.LC = value);
-        AddDrumVelocityItem("HH", 
+        AddDrumVelocityItem("Hi-hat", 
 	        () => CDTXMania.ConfigIni.nVelocityMin.HH, 
 	        value => CDTXMania.ConfigIni.nVelocityMin.HH = value);
-        AddDrumVelocityItem("LC", 
+        AddDrumVelocityItem("Snare drum", 
 	        () => CDTXMania.ConfigIni.nVelocityMin.SD, 
 	        value => CDTXMania.ConfigIni.nVelocityMin.SD = value);
-        AddDrumVelocityItem("BD", 
+        AddDrumVelocityItem("Bass drum", 
 	        () => CDTXMania.ConfigIni.nVelocityMin.BD, 
 	        value => CDTXMania.ConfigIni.nVelocityMin.BD = value);
-        AddDrumVelocityItem("HT", 
+        AddDrumVelocityItem("High tom", 
 	        () => CDTXMania.ConfigIni.nVelocityMin.HT, 
 	        value => CDTXMania.ConfigIni.nVelocityMin.HT = value);
-        AddDrumVelocityItem("LT", 
+        AddDrumVelocityItem("Low tom", 
 	        () => CDTXMania.ConfigIni.nVelocityMin.LT, 
 	        value => CDTXMania.ConfigIni.nVelocityMin.LT = value);
-        AddDrumVelocityItem("FT", 
+        AddDrumVelocityItem("Floor tom", 
 	        () => CDTXMania.ConfigIni.nVelocityMin.FT, 
 	        value => CDTXMania.ConfigIni.nVelocityMin.FT = value);
-        AddDrumVelocityItem("CY", 
+        AddDrumVelocityItem("Cymbal", 
 	        () => CDTXMania.ConfigIni.nVelocityMin.CY, 
 	        value => CDTXMania.ConfigIni.nVelocityMin.CY = value);
-        AddDrumVelocityItem("RD", 
+        AddDrumVelocityItem("Ride cymbal", 
 	        () => CDTXMania.ConfigIni.nVelocityMin.RD, 
 	        value => CDTXMania.ConfigIni.nVelocityMin.RD = value);
-        AddDrumVelocityItem("LP", 
+        AddDrumVelocityItem("Left pedal", 
 	        () => CDTXMania.ConfigIni.nVelocityMin.LP, 
 	        value => CDTXMania.ConfigIni.nVelocityMin.LP = value);
-        AddDrumVelocityItem("LBD", 
+        AddDrumVelocityItem("Left bass drum", 
 	        () => CDTXMania.ConfigIni.nVelocityMin.LBD, 
 	        value => CDTXMania.ConfigIni.nVelocityMin.LBD = value);
 
@@ -74,7 +74,7 @@ internal partial class CActConfigList
 	    CItemInteger iVelocityAdjust = new($"{name} Velocity", 0, 100, get(),
 		    $"{name} ドラムの最小速度を調整します。\n" +
 		    $"0から100の範囲で選択できます。",
-		    $"Adjust the minimum hit velocity threshold of the {name} drum.\n" +
+		    $"Adjust the minimum hit velocity threshold of the {name}.\n" +
 		    $"A range from 0 to 100 can be selected.");
 	    iVelocityAdjust.BindConfig(
 		    () => iVelocityAdjust.nCurrentValue = get(),
