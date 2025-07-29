@@ -161,26 +161,28 @@ public class CInputManager : IDisposable // CInput管理
 	
 	private bool ConnectMidiDevice(uint id)
 	{
-		uint result = CWin32.midiInGetDevCaps(id, ref caps, (uint)Marshal.SizeOf(caps));
+		CInputMIDI midiDevice = new(id);
+		CWin32.MIDIINCAPS midiCaps = new();
+		uint result = CWin32.midiInGetDevCaps(id, ref midiCaps, (uint)Marshal.SizeOf(midiCaps));
 		if (result != 0)
 		{
-			Trace.TraceError("MIDI In: Device {0}: midiInGetDevCaps() failed with error 0x{1:X2}", id, result);
+			Trace.TraceError("New MIDI device with id {0}: midiInGetDevCaps() failed with error 0x{1:X2}.", id, result);
 			return false;
 		}
 
-		CInputMIDI newMidi = new(id);
-		if (CWin32.midiInOpen(ref newMidi.hMidiIn, id, proc, IntPtr.Zero, 0x30000) != 0 ||
-		    newMidi.hMidiIn == IntPtr.Zero)
+		if (CWin32.midiInOpen(ref midiDevice.hMidiIn, id, proc, IntPtr.Zero, 0x30000) != 0 ||
+		    midiDevice.hMidiIn == IntPtr.Zero)
 		{
-			Trace.TraceWarning("MIDI In: [{0}] \"{1}\" failed to connect.", id, caps.szPname);
-			newMidi.Dispose();
+			Trace.TraceError("New MIDI device: [{0}] \"{1}\" failed to start input.", id, midiCaps.szPname);
 			return false;
 		}
 
-		CWin32.midiInStart(newMidi.hMidiIn);
-		newMidi.strDeviceName = caps.szPname;
-		connectedMidiDevices[id] = newMidi;
-		Trace.TraceInformation("MIDI In: [{0}] \"{1}\" has been connected and input started.", id, caps.szPname);
+		CWin32.midiInStart(midiDevice.hMidiIn);
+		Trace.TraceInformation("New MIDI device: [{0}] \"{1}\" Connected, input started successfully.", id, midiCaps.szPname);
+
+		midiDevice.strDeviceName = midiCaps.szPname;
+		listInputDevices.Add(midiDevice);
+		connectedMidiDevices[id] = midiDevice;
 		return true;
 	}
 	
