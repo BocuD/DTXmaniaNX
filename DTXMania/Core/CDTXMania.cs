@@ -933,6 +933,9 @@ internal class CDTXMania : Game
             Cursor.Hide();
             bMouseCursorShown = false;
         }
+        DeviceResetManager.NotifyDeviceReset();
+
+        UpdateCursorState();
 
         Device.SetTransform(TransformState.View,
             Matrix.LookAtLH(new Vector3(0f, 0f, (float)(-GameFramebufferSize.Height / 2 * Math.Sqrt(3.0))),
@@ -1009,6 +1012,7 @@ internal class CDTXMania : Game
     protected override void UnloadContent()
     {
         Trace.TraceInformation("CDTXMania.UnloadContent()");
+        DeviceResetManager.NotifyDeviceLost();
 
         gameRenderTargetSurface.Dispose();
         gameRenderTargetTexture.Dispose();

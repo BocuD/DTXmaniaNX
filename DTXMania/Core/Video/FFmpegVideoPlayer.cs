@@ -1,4 +1,4 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Diagnostics;
 using FFmpeg.AutoGen.Abstractions;
 using SharpDX.Direct3D9;
 
@@ -13,37 +13,60 @@ public abstract unsafe class FFmpegVideoPlayer : IDisposable
     
     public int Width => codecContext->width;
     public int Height => codecContext->height;
-    
-    public void Open(string path)
+
+    public bool Open(string path)
     {
         AVFormatContext* pFormatContext = ffmpeg.avformat_alloc_context();
-        
+
         if (ffmpeg.avformat_open_input(&pFormatContext, path, null, null) != 0)
-            throw new Exception("Couldn't open file");
-        
+        {
+            Trace.TraceWarning($"Loading video file ({path}) failed: Couldn't open file");
+            return false;
+        }
+
         formatContext = pFormatContext;
 
         if (ffmpeg.avformat_find_stream_info(formatContext, null) != 0)
-            throw new Exception("Couldn't find stream info");
+        {
+            Trace.TraceError($"Loading video file ({path}) failed: Couldn't find stream info");
+            return false;
+        }
 
         AVCodec* codec = null;
         videoStreamIndex = ffmpeg.av_find_best_stream(formatContext, AVMediaType.AVMEDIA_TYPE_VIDEO, -1, -1, &codec, 0);
 
         if (videoStreamIndex < 0)
-            throw new Exception("Couldn't find video stream");
+        {
+            Trace.TraceError($"Loading video file ({path}) failed: Couldn't find video stream");
+            return false;
+        }
 
         codecContext = ffmpeg.avcodec_alloc_context3(codec);
         ffmpeg.avcodec_parameters_to_context(codecContext, formatContext->streams[videoStreamIndex]->codecpar);
 
         if (ffmpeg.avcodec_open2(codecContext, codec, null) != 0)
-            throw new Exception("Couldn't open codec");
+        {
+            Trace.TraceError($"Loading video file ({path}) failed: Couldn't open codec");
+            return false;
+        }
 
         frame = ffmpeg.av_frame_alloc();
+        
+        if (frame == null)
+        {
+            Trace.TraceError($"Loading video file ({path}) failed: Couldn't allocate frame");
+            return false;
+        }
+
+        if (!CreateResources())
+        {
+            Trace.TraceError($"Loading video file ({path}) failed: Couldn't create resources for player");
+            return false;
+        }
+        return true;
     }
 
-    public abstract void DeviceCreated();
-    public abstract void DeviceReset();
-    public abstract void CreateResources();
+    protected abstract bool CreateResources();
     public abstract Texture GetUpdatedTexture();
 
     public virtual void Dispose()

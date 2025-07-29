@@ -1,38 +1,37 @@
 ﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
+using FDK;
 using FFmpeg.AutoGen.Abstractions;
+using SharpDX;
 using SharpDX.Direct3D9;
 
 namespace DTXMania.Core.Video;
 
-public unsafe class SoftwareVideoPlayer : FFmpegVideoPlayer
+public unsafe class SoftwareVideoPlayer : FFmpegVideoPlayer, IDeviceResettable
 {
     private SwsContext* swsContext;
     private AVFrame* bgraFrame;
     
-    private Texture texture;
+    private Texture? texture;
 
-    public override void DeviceCreated()
+    public SoftwareVideoPlayer()
     {
-        Trace.TraceInformation("Device created. Setting up video player resources");
-
-        texture = new Texture(CDTXMania.app.Device, codecContext->width, codecContext->height, 1,
-            Usage.Dynamic, Format.A8R8G8B8, Pool.Default);
+        DeviceResetManager.Register(this);
     }
 
-    public override void DeviceReset()
-    {
-        Trace.TraceInformation("Device reset: resetting video player");
-        if (texture != null)
-        {
-            texture.Dispose();
-            texture = null;
-        }
-    }
-
-    public override void CreateResources()
+    protected override bool CreateResources()
     {
         bgraFrame = ffmpeg.av_frame_alloc();
+        
+        //setup bgraFrame
+        bgraFrame->format = (int)AVPixelFormat.AV_PIX_FMT_BGRA;
+        bgraFrame->width = codecContext->width;
+        bgraFrame->height = codecContext->height;
+        if (ffmpeg.av_frame_get_buffer(bgraFrame, 0) < 0)
+        {
+            Trace.TraceError("Failed to allocate frame buffer for BGRA frame.");
+            return false;
+        }
         
         swsContext = ffmpeg.sws_getContext(
             codecContext->width,
@@ -44,15 +43,13 @@ public unsafe class SoftwareVideoPlayer : FFmpegVideoPlayer
             ffmpeg.SWS_BILINEAR,
             null, null, null
         );
+        if (swsContext == null)
+        {
+            Trace.TraceError("Failed to create swsContext for video conversion.");
+            return false;
+        }
         
-        //setup bgraFrame
-        bgraFrame->format = (int)AVPixelFormat.AV_PIX_FMT_BGRA;
-        bgraFrame->width = codecContext->width;
-        bgraFrame->height = codecContext->height;
-        if (ffmpeg.av_frame_get_buffer(bgraFrame, 0) < 0)
-            throw new Exception("Couldn't allocate frame buffer");
-        
-        // Allocate memory for the BGRA frame data
+        //allocate memory for the BGRA frame data
         int numBytes = ffmpeg.av_image_get_buffer_size(AVPixelFormat.AV_PIX_FMT_BGRA, codecContext->width, codecContext->height, 1);
         byte* rgbBuffer = (byte*)ffmpeg.av_malloc((ulong)numBytes);
         byte_ptr8 data_ptr8 = bgraFrame->data;
@@ -60,6 +57,13 @@ public unsafe class SoftwareVideoPlayer : FFmpegVideoPlayer
         var data = *(byte_ptr4*) &data_ptr8;
         var linesize = *(int4*) &linesize8;
         ffmpeg.av_image_fill_arrays(ref data, ref linesize, rgbBuffer, AVPixelFormat.AV_PIX_FMT_BGRA, codecContext->width, codecContext->height, 1);
+        
+        texture = new Texture(CDTXMania.app.Device, codecContext->width, codecContext->height, 1, Usage.Dynamic, Format.A8R8G8B8, Pool.Default);
+        if (texture == null)
+        {
+            Trace.TraceError("Failed to create Direct3D9 texture for video playback!");
+        }
+        return true;
     }
 
     public override Texture GetUpdatedTexture()
@@ -79,8 +83,6 @@ public unsafe class SoftwareVideoPlayer : FFmpegVideoPlayer
     
     public bool TryDecodeNextFrame(out byte[] bgraFrameData)
     {
-        bgraFrameData = null;
-
         AVPacket* packet = ffmpeg.av_packet_alloc();
 
         while (ffmpeg.av_read_frame(formatContext, packet) >= 0)
@@ -124,18 +126,21 @@ public unsafe class SoftwareVideoPlayer : FFmpegVideoPlayer
             ffmpeg.av_packet_unref(packet);
         }
 
+        bgraFrameData = [];
         return false;
     }
     
-    public void UploadToD3D9Texture(Texture texture, byte[] data)
+    public static void UploadToD3D9Texture(Texture tex, byte[] data)
     {
-        var rect = texture.LockRectangle(0, LockFlags.Discard);
+        DataRectangle rect = tex.LockRectangle(0, LockFlags.Discard);
         Marshal.Copy(data, 0, rect.DataPointer, data.Length);
-        texture.UnlockRectangle(0);
+        tex.UnlockRectangle(0);
     }
 
     public override void Dispose()
     {
+        DeviceResetManager.Unregister(this);
+        
         if (bgraFrame != null)
         {
             AVFrame* tmp = bgraFrame;
@@ -149,6 +154,27 @@ public unsafe class SoftwareVideoPlayer : FFmpegVideoPlayer
             swsContext = null;
         }
         
+        if (texture != null)
+        {
+            texture.Dispose();
+            texture = null;
+        }
+        
         base.Dispose();
+    }
+
+    public void OnDeviceLost()
+    {
+        texture?.Dispose();
+        texture = null;
+    }
+
+    public void OnDeviceReset()
+    {
+        texture = new Texture(CDTXMania.app.Device, codecContext->width, codecContext->height, 1, Usage.Dynamic, Format.A8R8G8B8, Pool.Default);
+        if (texture == null)
+        {
+            Trace.TraceError("Failed to create Direct3D9 texture for video playback!");
+        }
     }
 }
