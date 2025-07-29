@@ -105,6 +105,9 @@ public abstract class CStage : CActivity
 			bJustStartedUpdate = false;
 		}
 		
+		//scale by CDTXMania.renderScale;
+		ui.scale.X = CDTXMania.renderScale;
+		ui.scale.Y = CDTXMania.renderScale;
 		ui.Draw(Matrix.Identity);
 		
 		return base.OnUpdateAndDraw();

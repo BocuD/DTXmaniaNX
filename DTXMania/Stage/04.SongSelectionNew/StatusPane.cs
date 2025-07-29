@@ -37,7 +37,7 @@ public class StatusPane : UIGroup
     {
         base.Draw(parentMatrix);
 
-        Matrix textTranslation = localTransformMatrix * Matrix.Translation(textOffset);
+        Matrix textTranslation = Matrix.Translation(textOffset) * localTransformMatrix * parentMatrix;
         
         difficultyFrame.position = new Vector3(-7.0f, 5.0f - verticalSpacing * CDTXMania.StageManager.stageSongSelectionNew.GetClosestLevelToTargetForSong(song), 0.0f);
 
@@ -60,7 +60,7 @@ public class StatusPane : UIGroup
                 tDrawDifficulty(textTranslation, txLevelNumber, $"{dbLevel:0.00}");
             }
 
-            textTranslation *= Matrix.Translation(0, -verticalSpacing, 0);
+            textTranslation *= Matrix.Translation(0, -verticalSpacing * CDTXMania.renderScale, 0);
         }
     }
     
@@ -78,7 +78,7 @@ public class StatusPane : UIGroup
                     txLevelNumber.tDraw2DMatrix(matrix, new Vector2(rectangle.Width, rectangle.Height), rectangle);
                 }
                 
-                characterTranslation *= Matrix.Translation(rectangle.Width, 0, 0);
+                characterTranslation *= Matrix.Translation(rectangle.Width * CDTXMania.renderScale, 0, 0);
             }
         }
     }

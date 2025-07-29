@@ -125,15 +125,7 @@ public class GraphicsDeviceManager : IDisposable
 
 		CreateDevice(validSettings);
 	}
-	public void ChangeDevice(bool windowed, int desiredWidth, int desiredHeight)
-	{
-		DeviceSettings desiredSettings = new DeviceSettings();
-		desiredSettings.Windowed = windowed;
-		desiredSettings.BackBufferWidth = desiredWidth;
-		desiredSettings.BackBufferHeight = desiredHeight;
 
-		ChangeDevice(desiredSettings, null);
-	}
 	public void ChangeDevice(DeviceSettings settings)
 	{
 		ChangeDevice(settings, null);
@@ -338,8 +330,8 @@ public class GraphicsDeviceManager : IDisposable
 					if (newSettings.Direct3D9 != null)
 					{
 						var pp = newSettings.Direct3D9.PresentParameters;
-						pp.BackBufferWidth = GameWindowSize.Width;  // #23510 2010.10.31 add yyagi: to avoid setting BackBufferSize=ClientSize
-						pp.BackBufferHeight = GameWindowSize.Height;   // #23510 2010.10.31 add yyagi: to avoid setting BackBufferSize=ClientSize
+						pp.BackBufferWidth = clientWidth;
+						pp.BackBufferHeight = clientHeight;
 						newSettings.Direct3D9.PresentParameters = pp;
 					}
 
@@ -374,8 +366,8 @@ public class GraphicsDeviceManager : IDisposable
 			newSettings.BackBufferWidth = 0;
 			newSettings.BackBufferHeight = 0;
 			var pp = newSettings.Direct3D9.PresentParameters;
-			pp.BackBufferWidth = GameWindowSize.Width;      // #23510 2010.10.31 add yyagi: to avoid setting BackBufferSize=ClientSize
-			pp.BackBufferHeight = GameWindowSize.Height;   // 
+			pp.BackBufferWidth = rect.Width;
+			pp.BackBufferHeight = rect.Height;
 			newSettings.Direct3D9.PresentParameters = pp;
 			CreateDevice(newSettings);
 		}

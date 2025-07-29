@@ -10,6 +10,7 @@ public class HorizontallyScrollingText : UIText
 {
     public bool scrollingEnabled;
     public float maximumWidth;
+    private float maximumRenderWidth => maximumWidth * CDTXMania.renderScale;
     public float scrollSpeed = 50.0f;
 
     public HorizontallyScrollingText(FontFamily family, int size) : base(family, size)
@@ -43,10 +44,10 @@ public class HorizontallyScrollingText : UIText
     {
         base.RenderTexture();
 
-        if (size.X > maximumWidth)
+        if (size.X > maximumRenderWidth)
         {
-            size.X = maximumWidth;
-            overrideClipRect = new RectangleF(0, 0, maximumWidth, size.Y);
+            size.X = maximumRenderWidth;
+            overrideClipRect = new RectangleF(0, 0, maximumRenderWidth, size.Y);
             customClipRect = true;
         }
         else

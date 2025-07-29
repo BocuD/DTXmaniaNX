@@ -110,8 +110,7 @@ public class UIText : UITexture
         UpdateLocalTransformMatrix();
         
         Matrix combinedMatrix = localTransformMatrix * parentMatrix;
-        texture.tDraw2DMatrix(combinedMatrix, size,
-            customClipRect ? overrideClipRect : new RectangleF(0, 0, texture.Width, texture.Height));
+        texture.tDraw2DMatrix(combinedMatrix, size, customClipRect ? overrideClipRect : new RectangleF(0, 0, texture.Width, texture.Height));
     }
     
     private void UpdateDynamicText()
@@ -134,7 +133,8 @@ public class UIText : UITexture
             font.Dispose();
         }
 
-        font = new CPrivateFastFont(fontFamily, fontSize, fontStyle);
+        font = new CPrivateFastFont(fontFamily, fontSize * CDTXMania.renderScale, fontStyle);
+        scale = new Vector3(1 / CDTXMania.renderScale);
         fontDirty = false;
     }
 
