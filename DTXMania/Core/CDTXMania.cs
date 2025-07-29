@@ -399,8 +399,8 @@ internal class CDTXMania : Game
                 //Set windows size to selected Window Size and set its position to a fixed location
                 ConfigIni.nWindowWidth = DTXVmode.widthResolution;
                 ConfigIni.nWindowHeight = DTXVmode.heightResolution;
-                ConfigIni.n初期ウィンドウ開始位置X = 5;
-                ConfigIni.n初期ウィンドウ開始位置Y = 100;
+                ConfigIni.nInitialWindowXPosition = 5;
+                ConfigIni.nInitialWindowYPosition = 100;
 
                 //Disable Reverse options in DTXVMode
                 ConfigIni.bReverse.Drums = false;
@@ -598,7 +598,7 @@ internal class CDTXMania : Game
         string process64bitText = Environment.Is64BitProcess ? "x64(64-bit) " : "";
         strWindowTitle = appName + " " + process64bitText + VERSION;
         Window.StartPosition = FormStartPosition.Manual; // #30675 2013.02.04 ikanick add
-        Window.Location = new Point(ConfigIni.n初期ウィンドウ開始位置X, ConfigIni.n初期ウィンドウ開始位置Y); // #30675 2013.02.04 ikanick add
+        Window.Location = new Point(ConfigIni.nInitialWindowXPosition, ConfigIni.nInitialWindowYPosition); // #30675 2013.02.04 ikanick add
 
         Window.Text = strWindowTitle;
         Window.ClientSize =
@@ -1778,8 +1778,8 @@ internal class CDTXMania : Game
     {
         if (ConfigIni.bWindowMode)
         {
-            ConfigIni.n初期ウィンドウ開始位置X = Window.Location.X; // #30675 2013.02.04 ikanick add
-            ConfigIni.n初期ウィンドウ開始位置Y = Window.Location.Y; //
+            ConfigIni.nInitialWindowXPosition = Window.Location.X; // #30675 2013.02.04 ikanick add
+            ConfigIni.nInitialWindowYPosition = Window.Location.Y; //
         }
 
         ConfigIni.nWindowWidth =

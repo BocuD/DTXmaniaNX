@@ -486,8 +486,8 @@ internal class CConfigIni
 	//public bool bDirectShowMode;
 	public bool bFullScreenMode;
 	public bool bFullScreenExclusive;
-	public int n初期ウィンドウ開始位置X; // #30675 2013.02.04 ikanick add
-	public int n初期ウィンドウ開始位置Y;
+	public int nInitialWindowXPosition; // #30675 2013.02.04 ikanick add
+	public int nInitialWindowYPosition;
 	public int nWindowWidth;				// #23510 2010.10.31 yyagi add
 	public int nWindowHeight;				// #23510 2010.10.31 yyagi add
 	public bool DisplayBonusEffects;
@@ -1009,8 +1009,8 @@ internal class CConfigIni
 		bFullScreenMode = false;
 		bFullScreenExclusive = true;
 		bVerticalSyncWait = true;
-		n初期ウィンドウ開始位置X = 0; // #30675 2013.02.04 ikanick add
-		n初期ウィンドウ開始位置Y = 0;
+		nInitialWindowXPosition = 0; // #30675 2013.02.04 ikanick add
+		nInitialWindowYPosition = 0;
 		//this.bDirectShowMode = true;
 		nWindowWidth = SampleFramework.GameFramebufferSize.Width;			// #23510 2010.10.31 yyagi add
 		nWindowHeight = SampleFramework.GameFramebufferSize.Height;			// 
@@ -1409,11 +1409,11 @@ internal class CConfigIni
 		sw.WriteLine();												//
 		sw.WriteLine("; ウィンドウモード時の位置X");				            // #30675 2013.02.04 ikanick add
 		sw.WriteLine("; X position in the window mode.");			            //
-		sw.WriteLine("WindowX={0}", n初期ウィンドウ開始位置X);			//
+		sw.WriteLine("WindowX={0}", nInitialWindowXPosition);			//
 		sw.WriteLine();											            	//
 		sw.WriteLine("; ウィンドウモード時の位置Y");			            	//
 		sw.WriteLine("; Y position in the window mode.");	            	    //
-		sw.WriteLine("WindowY={0}", n初期ウィンドウ開始位置Y);   		//
+		sw.WriteLine("WindowY={0}", nInitialWindowYPosition);   		//
 		sw.WriteLine();												            //
 
 		sw.WriteLine( "; ウインドウをダブルクリックした時にフルスクリーンに移行するか(0:移行しない,1:移行する)" );	// #26752 2011.11.27 yyagi
@@ -2535,13 +2535,13 @@ internal class CConfigIni
 									}
 									else if (str3.Equals("WindowX"))		// #30675 2013.02.04 ikanick add
 									{
-										n初期ウィンドウ開始位置X = CConversion.nGetNumberIfInRange(
-											str4, 0, System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width - 1, n初期ウィンドウ開始位置X);
+										nInitialWindowXPosition = CConversion.nGetNumberIfInRange(
+											str4, 0, System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width - 1, nInitialWindowXPosition);
 									}
 									else if (str3.Equals("WindowY"))		// #30675 2013.02.04 ikanick add
 									{
-										n初期ウィンドウ開始位置Y = CConversion.nGetNumberIfInRange(
-											str4, 0, System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height - 1, n初期ウィンドウ開始位置Y);
+										nInitialWindowYPosition = CConversion.nGetNumberIfInRange(
+											str4, 0, System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height - 1, nInitialWindowYPosition);
 									}
 									else if (str3.Equals("MovieMode"))
 									{
