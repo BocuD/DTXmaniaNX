@@ -71,7 +71,7 @@ internal partial class CActConfigList
     
     private void AddDrumVelocityItem(string name, Func<int> get, Action<int> set)
     {
-	    CItemInteger iVelocityAdjust = new($"{name} Velocity", 0, 100, get(),
+	    CItemInteger iVelocityAdjust = new($"{name}", 0, 100, get(),
 		    $"{name} ドラムの最小速度を調整します。\n" +
 		    $"0から100の範囲で選択できます。",
 		    $"Adjust the minimum hit velocity threshold of the {name}.\n" +
