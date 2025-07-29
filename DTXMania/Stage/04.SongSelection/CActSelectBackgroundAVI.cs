@@ -236,9 +236,9 @@ internal class CActSelectBackgroundAVI : CActivity
     private int position;
     //private int position2;
     //DTXNX is 1280 by 720
-    private readonly float fullScreenHeightPx = GameFramebufferSize.Width;
+    private readonly float fullScreenHeightPx = GameFramebufferSize.Width * CDTXMania.renderScale;
 
-    private readonly float fullScreenWidthPx = GameFramebufferSize.Height;
+    private readonly float fullScreenWidthPx = GameFramebufferSize.Height * CDTXMania.renderScale;
     //NOTE: This is a soft reference to externally initialized object
     //Do not call Dispose() for rAVI
     private CAVI rAVI;

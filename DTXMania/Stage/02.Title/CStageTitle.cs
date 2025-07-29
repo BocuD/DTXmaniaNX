@@ -18,17 +18,18 @@ internal class CStageTitle : CStage
 	// コンストラクタ
 
 	private FFmpegVideoPlayer videoPlayerTest;
-	
+	private bool videoLoaded = false;
+
 	public CStageTitle()
 	{
 		eStageID = EStage.Title_2;
 		bActivated = false;
-		listChildActivities.Add( actFIfromSetup = new CActFIFOWhite() );
-		listChildActivities.Add( actFI = new CActFIFOWhite() );
-		listChildActivities.Add( actFO = new CActFIFOWhite() );
+		listChildActivities.Add(actFIfromSetup = new CActFIFOWhite());
+		listChildActivities.Add(actFI = new CActFIFOWhite());
+		listChildActivities.Add(actFO = new CActFIFOWhite());
+
 		videoPlayerTest = new SoftwareVideoPlayer();
-		videoPlayerTest.Open(CSkin.Path(@"Graphics\2_background.mp4"));
-		videoPlayerTest.CreateResources();
+		videoLoaded = videoPlayerTest.Open(CSkin.Path(@"Graphics\2_background.mp4"));
 	}
 
 
@@ -38,19 +39,22 @@ internal class CStageTitle : CStage
 	{
 		
 	}
-	
+
 	public override void InitializeDefaultUI()
 	{
 		var family = new FontFamily(CDTXMania.ConfigIni.songListFont);
 		ui.AddChild(new UIText(family, 12, CDTXMania.VERSION_DISPLAY));
-		
+
 		DTXTexture bgTex = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\2_background.png"));
 		UIImage bg = ui.AddChild(new UIImage(bgTex));
 		bg.renderOrder = -99;
 		bg.position = Vector3.Zero;
-		
-		VideoPlayer videoPlayer = ui.AddChild(new VideoPlayer(videoPlayerTest));
-		videoPlayer.renderOrder = -100;
+
+		if (videoLoaded)
+		{
+			VideoPlayer videoPlayer = ui.AddChild(new VideoPlayer(videoPlayerTest));
+			videoPlayer.renderOrder = -100;
+		}
 	}
 
 	public override void OnActivate()
