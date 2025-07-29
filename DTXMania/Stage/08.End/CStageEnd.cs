@@ -1,5 +1,7 @@
 ﻿using System.Diagnostics;
 using DTXMania.Core;
+using DTXMania.UI;
+using DTXMania.UI.Drawable;
 using FDK;
 
 namespace DTXMania;
@@ -25,7 +27,7 @@ internal class CStageEnd : CStage
 
 	public override void InitializeDefaultUI()
 	{
-		
+		ui.AddChild(new UIImage(DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\9_background.jpg"))));
 	}
 	
 	public override void OnActivate()
@@ -57,22 +59,6 @@ internal class CStageEnd : CStage
 			Trace.Unindent();
 		}
 	}
-	public override void OnManagedCreateResources()
-	{
-		if( bActivated )
-		{
-			txBackground = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\9_background.jpg" ), false );
-			base.OnManagedCreateResources();
-		}
-	}
-	public override void OnManagedReleaseResources()
-	{
-		if( bActivated )
-		{
-			CDTXMania.tReleaseTexture( ref txBackground );
-			base.OnManagedReleaseResources();
-		}
-	}
 
 	public override void FirstUpdate()
 	{
@@ -91,17 +77,12 @@ internal class CStageEnd : CStage
 		{
 			return 1;
 		}
-		if( txBackground != null )
-		{
-			txBackground.tDraw2D( CDTXMania.app.Device, 0, 0 );
-		}
 		return 0;
 	}
 
 	#region [ private ]
 	//-----------------
 	private CCounter ct時間稼ぎ;
-	private CTexture txBackground;
 	//-----------------
 	#endregion
 }
