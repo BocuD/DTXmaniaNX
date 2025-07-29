@@ -156,7 +156,7 @@ internal partial class CActConfigList : CActivity
         ScanSkinFolders();
         ScanNewSkinData();
 
-        prvFont = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.songListFont), 15); // t項目リストの設定 の前に必要
+        prvFont = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.songListFont), 15 * CDTXMania.renderScale); // t項目リストの設定 の前に必要
 
         tSetupItemList_Bass(); // #27795 2012.3.11 yyagi; System設定の中でDrumsの設定を参照しているため、
         tSetupItemList_Guitar(); // 活性化の時点でDrumsの設定も入れ込んでおかないと、System設定中に例外発生することがある。
@@ -434,7 +434,8 @@ internal partial class CActConfigList : CActivity
         #region[ Draw Cursor ]
         if (bFocusIsOnItemList)
         {
-            txItemBoxCursor.tDraw2D(CDTXMania.app.Device, 413, 193);
+            Matrix cursorMatrix = Matrix.Translation(413, 193, 0) * scaleMatrix;
+            txItemBoxCursor.tDraw2DMatrix(CDTXMania.app.Device, cursorMatrix);
         }
         #endregion
 
@@ -442,12 +443,14 @@ internal partial class CActConfigList : CActivity
         if (bFocusIsOnItemList && nTargetScrollCounter == 0 && stageConfig.ctDisplayWait.bReachedEndValue)
         {
             // 15SEP20 Increasing x position by 180 pixels (was 601)
-            txDescriptionPanel.tDraw2D(CDTXMania.app.Device, 781, 252);
+            Matrix explanationMatrix = Matrix.Translation(781, 252, 0) * scaleMatrix;
+            txDescriptionPanel.tDraw2DMatrix(CDTXMania.app.Device, explanationMatrix);
             if (txSkinSample != null && nTargetScrollCounter == 0 &&
                 listItems[nCurrentSelection] == iSystemSkinSubfolder)
             {
                 // 15SEP20 Increasing x position by 180 pixels (was 615 - 60)
-                txSkinSample.tDraw2D(CDTXMania.app.Device, 735, 442 - 106);
+                Matrix txSkinSampleMatrix = Matrix.Translation(735, 442 - 106, 0) * scaleMatrix;
+                txSkinSample.tDraw2DMatrix(CDTXMania.app.Device, txSkinSampleMatrix);
             }
         }
         #endregion
@@ -457,13 +460,17 @@ internal partial class CActConfigList : CActivity
         {
             const int nArrowPosX = 394;
             
-            txArrow?.tDraw2D(CDTXMania.app.Device, nArrowPosX, 174, new SharpDX.RectangleF(0, 0, 40, 40));
-            txArrow?.tDraw2D(CDTXMania.app.Device, nArrowPosX, 240, new SharpDX.RectangleF(0, 40, 40, 40));
+            Matrix arrowMatrix = Matrix.Translation(nArrowPosX, 174, 0) * scaleMatrix;
+            Matrix arrowMatrix2 = Matrix.Translation(nArrowPosX, 240, 0) * scaleMatrix;
+            Vector2 size = new(40, 40);
+            txArrow?.tDraw2DMatrix(CDTXMania.app.Device, arrowMatrix, size, new SharpDX.RectangleF(0, 0, 40, 40));
+            txArrow?.tDraw2DMatrix(CDTXMania.app.Device, arrowMatrix2, size, new SharpDX.RectangleF(0, 40, 40, 40));
         }
         #endregion
 
         //draw toasat
-        txToastMessage?.tDraw2D(CDTXMania.app.Device, 15, 325);
+        Matrix toastMatrix = Matrix.Translation(15, 325, 0) * scaleMatrix;
+        txToastMessage?.tDraw2DMatrix(CDTXMania.app.Device, toastMatrix);
 
         return 0;
     }
@@ -471,66 +478,89 @@ internal partial class CActConfigList : CActivity
     private int DrawListElement(int rowIndex, int nItem, Matrix parentMatrix)
     {
         #region [ Skip Offscreen Item Panels ]
+
         if ((rowIndex == -4 && currentScrollCounter > 0) || // 上に飛び出そうとしている
             (rowIndex == +9 && currentScrollCounter < 0)) // 下に飛び出そうとしている
         {
             nItem = tNextItem(nItem);
             return nItem;
         }
+
         #endregion
 
         int n移動元の行の基本位置 = rowIndex + 4;
-        int n移動先の行の基本位置 = currentScrollCounter <= 0 ? (n移動元の行の基本位置 + 1) % 14 : (n移動元の行の基本位置 - 1 + 14) % 14;
+        int n移動先の行の基本位置 = currentScrollCounter <= 0
+            ? (n移動元の行の基本位置 + 1) % 14
+            : (n移動元の行の基本位置 - 1 + 14) % 14;
 
-        int y = pt新パネルの基本座標[n移動元の行の基本位置].Y + (int)((pt新パネルの基本座標[n移動先の行の基本位置].Y - pt新パネルの基本座標[n移動元の行の基本位置].Y) *
-                                                   (Math.Abs(currentScrollCounter) / 100.0));
+        int y = pt新パネルの基本座標[n移動元の行の基本位置].Y +
+                (int)((pt新パネルの基本座標[n移動先の行の基本位置].Y -
+                       pt新パネルの基本座標[n移動元の行の基本位置].Y) *
+                      (Math.Abs(currentScrollCounter) / 100.0));
+
         int n新項目パネルX = 420;
 
+        Matrix localMatrix = Matrix.Translation(n新項目パネルX, y, 0);
+        Matrix finalMatrix = localMatrix * parentMatrix;
+        
         #region [ Render Row Panel Frame ]
+
         switch (listItems[nItem].ePanelType)
         {
             case CItemBase.EPanelType.Normal:
-                txItemBoxNormal?.tDraw2D(CDTXMania.app.Device, n新項目パネルX, y);
+                txItemBoxNormal?.tDraw2DMatrix(CDTXMania.app.Device, finalMatrix);
                 break;
-            
+
             case CItemBase.EPanelType.Folder:
-                txItemBoxFolder?.tDraw2D(CDTXMania.app.Device, n新項目パネルX, y);
+                txItemBoxFolder?.tDraw2DMatrix(CDTXMania.app.Device, finalMatrix);
                 break;
 
             case CItemBase.EPanelType.Other:
-                txItemBoxOther?.tDraw2D(CDTXMania.app.Device, n新項目パネルX, y);
+                txItemBoxOther?.tDraw2DMatrix(CDTXMania.app.Device, finalMatrix);
                 break;
         }
+
         #endregion
 
         #region [ Render Item Name ]
 
-        if (listMenu[nItem].txMenuItemRight == null) //cache the texture containing the item text
+        if (listMenu[nItem].txMenuItemRight == null)
         {
             Bitmap bmpItem = prvFont.DrawPrivateFont(listItems[nItem].strItemName, Color.White, Color.Transparent);
             listMenu[nItem].txMenuItemRight = CDTXMania.tGenerateTexture(bmpItem);
             bmpItem.Dispose();
         }
-        
-        listMenu[nItem].txMenuItemRight?.tDraw2D(CDTXMania.app.Device, n新項目パネルX + 20, y + 24);
+
+        {
+            Matrix textMatrix = Matrix.Translation(n新項目パネルX + 25, y + 24, 0) * parentMatrix;
+
+            if (listMenu[nItem].txMenuItemRight != null)
+            {
+                Vector2 size = new(listMenu[nItem].txMenuItemRight!.szImageSize.Width,
+                    listMenu[nItem].txMenuItemRight!.szImageSize.Height);
+                size *= 1 / CDTXMania.renderScale;
+                listMenu[nItem].txMenuItemRight?.tDraw2DMatrix(CDTXMania.app.Device, textMatrix, size);
+            }
+        }
 
         #endregion
 
         #region [ Render Item Elements ]
+
         bool isHighlighted = false;
 
         string strParam = listItems[nItem].GetStringValue();
-            
-        //some list entries have special handling (?)
+
         switch (listItems[nItem].eType)
         {
-            case CItemBase.EType.Integer: // #24789 2011.4.8 yyagi: add PlaySpeed supports (copied them from OPTION)
+            case CItemBase.EType.Integer:
                 if (listItems[nItem] == iCommonPlaySpeed)
                 {
                     double d = ((CItemInteger)listItems[nItem]).nCurrentValue / 20.0;
                     strParam = d.ToString("0.000");
                 }
-                else if (listItems[nItem] == iDrumsScrollSpeed || listItems[nItem] == iGuitarScrollSpeed ||
+                else if (listItems[nItem] == iDrumsScrollSpeed ||
+                         listItems[nItem] == iGuitarScrollSpeed ||
                          listItems[nItem] == iBassScrollSpeed)
                 {
                     float f = (((CItemInteger)listItems[nItem]).nCurrentValue + 1) * 0.5f;
@@ -543,13 +573,14 @@ internal partial class CActConfigList : CActivity
 
         if (isHighlighted)
         {
-            Bitmap bmpStr = isHighlighted
-                ? prvFont.DrawPrivateFont(strParam, Color.White, Color.Black, Color.Yellow, Color.OrangeRed)
-                : prvFont.DrawPrivateFont(strParam, Color.Black, Color.Transparent);
+            Bitmap bmpStr = prvFont.DrawPrivateFont(strParam, Color.White, Color.Black, Color.Yellow, Color.OrangeRed);
             CTexture txStr = CDTXMania.tGenerateTexture(bmpStr, false);
-            
-            txStr.tDraw2D(CDTXMania.app.Device, n新項目パネルX + 260, y + 20);
-            
+
+            Matrix highlightMatrix = Matrix.Translation(n新項目パネルX + 265, y + 20, 0) * parentMatrix;
+            Vector2 size = new(txStr.szImageSize.Width, txStr.szImageSize.Height);
+            size *= 1 / CDTXMania.renderScale;
+            txStr.tDraw2DMatrix(CDTXMania.app.Device, highlightMatrix, size);
+
             bmpStr.Dispose();
             txStr.Dispose();
         }
@@ -568,16 +599,21 @@ internal partial class CActConfigList : CActivity
                 listMenu[nItem] = stm;
             }
 
-            listMenu[nItem].txParam?.tDraw2D(CDTXMania.app.Device, n新項目パネルX + 260, y + 24);
+            Matrix paramMatrix = Matrix.Translation(n新項目パネルX + 265, y + 24, 0) * parentMatrix;
+            if (listMenu[nItem].txParam != null)
+            {
+                Vector2 size = new(listMenu[nItem].txParam!.szImageSize.Width, listMenu[nItem].txParam!.szImageSize.Height);
+                size *= 1 / CDTXMania.renderScale;
+                listMenu[nItem].txParam?.tDraw2DMatrix(CDTXMania.app.Device, paramMatrix, size);
+            }
         }
-
-        //-----------------
 
         #endregion
 
         nItem = tNextItem(nItem);
         return nItem;
     }
+
 
 
     // Other

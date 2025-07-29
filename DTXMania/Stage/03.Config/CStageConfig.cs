@@ -131,7 +131,7 @@ internal class CStageConfig : CStage
         try
         {
             configLeftOptionsMenu?.SetSelectedIndex(0);
-            ftFont = new Font("MS PGothic", 17f, FontStyle.Regular, GraphicsUnit.Pixel);
+            ftFont = new Font("MS PGothic", 17f * CDTXMania.renderScale, FontStyle.Regular, GraphicsUnit.Pixel);
             for (int i = 0; i < 4; i++)
             {
                 ctKeyRepetition[i] = new CCounter(0, 0, 0, CDTXMania.Timer);
@@ -240,9 +240,14 @@ internal class CStageConfig : CStage
         //---------------------
         if (txDescriptionPanel != null && !bFocusIsOnMenu && actList.nTargetScrollCounter == 0 &&
             ctDisplayWait.bReachedEndValue)
+        {
             // 15SEP20 Increasing x position by 180 pixels (was 620)
-            txDescriptionPanel.tDraw2D(CDTXMania.app.Device, 800, 270);
-        //---------------------
+            Matrix mat = Matrix.Translation(800, 270, 0) * Matrix.Scaling(CDTXMania.renderScale);
+            Vector2 size = new(txDescriptionPanel.szImageSize.Width, txDescriptionPanel.szImageSize.Height);
+            size *= 1 / CDTXMania.renderScale;
+            txDescriptionPanel.tDraw2DMatrix(CDTXMania.app.Device, mat, size);
+            //---------------------
+        }
 
         #endregion
 
@@ -507,7 +512,7 @@ internal class CStageConfig : CStage
     {
         try
         {
-            Bitmap image = new(220 * 2, 192 * 2); // 説明文領域サイズの縦横 2 倍。（描画時に 0.5 倍で表示する。）
+            Bitmap image = new((int)(440 * CDTXMania.renderScale), (int)(384 * CDTXMania.renderScale)); // 説明文領域サイズの縦横 2 倍。（描画時に 0.5 倍で表示する。）
             Graphics graphics = Graphics.FromImage(image);
             graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
 
@@ -580,26 +585,30 @@ internal class CStageConfig : CStage
     {
         try
         {
-            Bitmap image = new( 400, 192 );		// 説明文領域サイズの縦横 2 倍。（描画時に 0.5 倍で表示する___のは中止。処理速度向上のため。）
-            Graphics graphics = Graphics.FromImage( image );
+            Bitmap image = new((int)(400 * CDTXMania.renderScale),
+                (int)(192 * CDTXMania.renderScale)); // 説明文領域サイズの縦横 2 倍。（描画時に 0.5 倍で表示する___のは中止。処理速度向上のため。）
+            Graphics graphics = Graphics.FromImage(image);
             graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
 
             CItemBase item = actList.ibCurrentSelection;
-            if( item.strDescription is { Length: > 0 } )
+            if (item.strDescription is { Length: > 0 })
             {
-                graphics.DrawString( item.strDescription, ftFont, Brushes.Black, new System.Drawing.RectangleF( 4f, (float) 0, 230, 430 ) );
+                graphics.DrawString(item.strDescription, ftFont, Brushes.Black,
+                    new System.Drawing.RectangleF(4f, (float)0, 230 * CDTXMania.renderScale, 430 * CDTXMania.renderScale));
             }
+
             graphics.Dispose();
-            if( txDescriptionPanel != null )
+            if (txDescriptionPanel != null)
             {
                 txDescriptionPanel.Dispose();
             }
-            txDescriptionPanel = new CTexture( CDTXMania.app.Device, image, CDTXMania.TextureFormat, false );
+
+            txDescriptionPanel = new CTexture(CDTXMania.app.Device, image, CDTXMania.TextureFormat, false);
             image.Dispose();
         }
-        catch( CTextureCreateFailedException )
+        catch (CTextureCreateFailedException)
         {
-            Trace.TraceError( "説明文パネルテクスチャの作成に失敗しました。" );
+            Trace.TraceError("説明文パネルテクスチャの作成に失敗しました。");
             txDescriptionPanel = null;
         }
     }

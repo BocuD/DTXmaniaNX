@@ -559,7 +559,7 @@ public class CTexture : IDisposable
 		corners[1] = new Vector3(size.X - 0.5f, 0 - 0.5f, 0); // TR
 		corners[2] = new Vector3(0 - 0.5f, size.Y - 0.5f, 0); // BL
 		corners[3] = new Vector3(size.X - 0.5f, size.Y - 0.5f, 0); // BR
-
+		
 		for (int i = 0; i < corners.Length; i++)
 		{
 			//transform corner
@@ -582,6 +582,12 @@ public class CTexture : IDisposable
 		device.DrawUserPrimitives(PrimitiveType.TriangleStrip, 2, vertices);
 	}
 
+	public void tDraw2DMatrix(Device device, Matrix transformMatrix)
+	{
+		Vector2 size = new(szImageSize.Width, szImageSize.Height);
+		tDraw2DMatrix(device, transformMatrix, size, rcFullImage);
+	}
+
 	public void tDraw2DMatrix(Device device, Matrix transformMatrix, Vector2 size)
 	{
 		tDraw2DMatrix(device, transformMatrix, size, rcFullImage);
@@ -591,6 +597,8 @@ public class CTexture : IDisposable
 	{
 		if (texture == null) return;
 
+		tRenderStateSettings(device);
+		
 		//texture dimensions
 		float texWidth = szTextureSize.Width;
 		float texHeight = szTextureSize.Height;
@@ -602,10 +610,17 @@ public class CTexture : IDisposable
 		float vBottom = clipRect.Bottom / texHeight;
 
 		//vertices
-		corners[0] = new Vector3(0 - 0.5f, 0 - 0.5f, 0); // TL
-		corners[1] = new Vector3(size.X - 0.5f, 0 - 0.5f, 0); // TR
-		corners[2] = new Vector3(0 - 0.5f, size.Y - 0.5f, 0); // BL
-		corners[3] = new Vector3(size.X - 0.5f, size.Y - 0.5f, 0); // BR
+		// corners[0] = new Vector3(0, 0, 0); // TL
+		// corners[1] = new Vector3(size.X, 0, 0); // TR
+		// corners[2] = new Vector3(0, size.Y, 0); // BL
+		// corners[3] = new Vector3(size.X, size.Y, 0); // BR
+		corners[1].X = size.X;
+		corners[2].Y = size.Y;
+		corners[3].X = size.X;
+		corners[3].Y = size.Y;
+		
+		color4.Alpha = ((float)_Transparency) / 255f;
+		int color = color4.ToRgba();
 
 		for (int i = 0; i < corners.Length; i++)
 		{
@@ -620,7 +635,7 @@ public class CTexture : IDisposable
 				2 => new Vector2(uLeft, vBottom),
 				_ => new Vector2(uRight, vBottom)
 			};
-			vertices[i].Color = color4.ToRgba();
+			vertices[i].Color = color;
 		}
 
 		//render texture
@@ -635,6 +650,8 @@ public class CTexture : IDisposable
 	{
 		if (texture == null) return;
 			
+		tRenderStateSettings(device);
+
 		float texWidth = szTextureSize.Width;
 		float texHeight = szTextureSize.Height;
 
@@ -697,6 +714,9 @@ public class CTexture : IDisposable
 			new RectangleF(uSliceRight, vSliceBottom, uRight - uSliceRight, vBottom - vSliceBottom), // BR
 		};
 
+		color4.Alpha = ((float)_Transparency) / 255f;
+		int color = color4.ToRgba();
+		
 		//render
 		for (int i = 0; i < regions.Length; i++)
 		{
@@ -723,7 +743,7 @@ public class CTexture : IDisposable
 						j == 1 ? new Vector2(uvRegion.Right, uvRegion.Top) :
 						j == 2 ? new Vector2(uvRegion.Left, uvRegion.Bottom) :
 						new Vector2(uvRegion.Right, uvRegion.Bottom),
-					Color = color4.ToRgba()
+					Color = color
 				};
 			}
 

@@ -10,6 +10,7 @@ using DTXMania.Core.Video;
 using DTXMania.UI;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.DynamicElements;
+using SharpDX.Direct3D9;
 using RectangleF = SharpDX.RectangleF;
 
 namespace DTXMania;
@@ -70,7 +71,7 @@ internal class CStageTitle : CStage
 			}
 			ct上移動用 = new CCounter();
 			ct下移動用 = new CCounter();
-			ctカーソルフラッシュ用 = new CCounter();
+			ctCursorFlash = new CCounter();
 			
 			dynamicStringSources["Version"] = new DynamicStringSource(() => CDTXMania.VERSION_DISPLAY);
 
@@ -94,7 +95,7 @@ internal class CStageTitle : CStage
 			}
 			ct上移動用 = null;
 			ct下移動用 = null;
-			ctカーソルフラッシュ用 = null;
+			ctCursorFlash = null;
 		}
 		finally
 		{
@@ -134,8 +135,8 @@ internal class CStageTitle : CStage
 			actFI.tStartFadeIn();
 			ePhaseID = EPhase.Common_FadeIn;
 		}
-		ctカーソルフラッシュ用.tStart( 0, 700, 5, CDTXMania.Timer );
-		ctカーソルフラッシュ用.nCurrentValue = 100;
+		ctCursorFlash.tStart( 0, 700, 5, CDTXMania.Timer );
+		ctCursorFlash.nCurrentValue = 100;
 	}
 
 	public override int OnUpdateAndDraw()
@@ -143,6 +144,8 @@ internal class CStageTitle : CStage
 		if (!bActivated) return 0;
 		
 		base.OnUpdateAndDraw();
+
+		Matrix scaleMatrix = Matrix.Scaling(CDTXMania.renderScale);
 		
 		// 進行
 
@@ -172,7 +175,7 @@ internal class CStageTitle : CStage
 		#endregion
 		#region [ カーソルフラッシュ ]
 		//---------------------
-		ctカーソルフラッシュ用.tUpdateLoop();
+		ctCursorFlash.tUpdateLoop();
 		//---------------------
 		#endregion
 
@@ -197,7 +200,7 @@ internal class CStageTitle : CStage
 
 			if (CDTXMania.Input.ActionDecide())
 			{
-				if ( ( nCurrentCursorPosition == (int) EReturnResult.GAMESTART - 1 ) && CDTXMania.Skin.soundGameStart.b読み込み成功 )
+				if ( nCurrentCursorPosition == (int) EReturnResult.GAMESTART - 1 && CDTXMania.Skin.soundGameStart.b読み込み成功 )
 				{
 					CDTXMania.Skin.soundGameStart.tPlay();
 				}
@@ -218,34 +221,44 @@ internal class CStageTitle : CStage
 		if( txMenu != null )
 		{
 			int x = MENU_X;
-			int y = MENU_Y + ( nCurrentCursorPosition * MENU_H );
+			int y = MENU_Y + nCurrentCursorPosition * MENU_H;
 			if( ct上移動用.bInProgress )
 			{
-				y += (int) ( (double)MENU_H / 2 * ( Math.Cos( Math.PI * ( ( (double) ct上移動用.nCurrentValue ) / 100.0 ) ) + 1.0 ) );
+				y += (int) ( (double)MENU_H / 2 * ( Math.Cos( Math.PI * ( ct上移動用.nCurrentValue / 100.0 ) ) + 1.0 ) );
 			}
 			else if( ct下移動用.bInProgress )
 			{
-				y -= (int) ( (double)MENU_H / 2 * ( Math.Cos( Math.PI * ( ( (double) ct下移動用.nCurrentValue ) / 100.0 ) ) + 1.0 ) );
+				y -= (int) ( (double)MENU_H / 2 * ( Math.Cos( Math.PI * ( ct下移動用.nCurrentValue / 100.0 ) ) + 1.0 ) );
 			}
-			if( ctカーソルフラッシュ用.nCurrentValue <= 100 )
+			if (ctCursorFlash.nCurrentValue <= 100)
 			{
-				float nMag = (float) ( 1.0 + ( ( ( (double) ctカーソルフラッシュ用.nCurrentValue ) / 100.0 ) * 0.5 ) );
-				txMenu.vcScaleRatio.X = nMag;
-				txMenu.vcScaleRatio.Y = nMag;
-				txMenu.nTransparency = (int) ( 255.0 * ( 1.0 - ( ( (double) ctカーソルフラッシュ用.nCurrentValue ) / 100.0 ) ) );
-				int x_magnified = x + ( (int) ( ( MENU_W * ( 1.0 - nMag ) ) / 2.0 ) );
-				int y_magnified = y + ( (int) ( ( MENU_H * ( 1.0 - nMag ) ) / 2.0 ) );
-				txMenu.tDraw2D( CDTXMania.app.Device, x_magnified, y_magnified, new RectangleF( 0, MENU_H * 5, MENU_W, MENU_H ) );
+				float nMag = (float)(1.0 + ctCursorFlash.nCurrentValue / 100.0 * 0.5);
+
+				// Apply scale and center pivot offset
+				Matrix scaleEffectMatrix = Matrix.Scaling(nMag, nMag, 1.0f);
+				Matrix translateMatrix = Matrix.Translation(
+					x + (MENU_W * (1.0f - nMag) / 2.0f),
+					y + (MENU_H * (1.0f - nMag) / 2.0f),
+					0.0f
+				);
+				Matrix finalMatrix = scaleEffectMatrix * translateMatrix * scaleMatrix;
+
+				txMenu.nTransparency = (int) ( 255.0 * ( 1.0 - ( ( (double) ctCursorFlash.nCurrentValue ) / 100.0 ) ) );
+				txMenu.tDraw2DMatrix(CDTXMania.app.Device, finalMatrix, new Vector2(MENU_W, MENU_H), new RectangleF(0, MENU_H * 5, MENU_W, MENU_H));
 			}
 			txMenu.vcScaleRatio.X = 1f;
 			txMenu.vcScaleRatio.Y = 1f;
 			txMenu.nTransparency = 0xff;
-			txMenu.tDraw2D( CDTXMania.app.Device, x, y, new RectangleF( 0, MENU_H * 4, MENU_W, MENU_H ) );
+			
+			Matrix mat2 = Matrix.Translation(x, y, 0f) * scaleMatrix;
+			txMenu.tDraw2DMatrix( CDTXMania.app.Device, mat2, new Vector2(MENU_W, MENU_H), new RectangleF( 0, MENU_H * 4, MENU_W, MENU_H ) );
 		}
 		if( txMenu != null )
 		{
-			txMenu.tDraw2D( CDTXMania.app.Device, MENU_X, MENU_Y, new RectangleF( 0, 0, MENU_W, MENU_H ) );
-			txMenu.tDraw2D( CDTXMania.app.Device, MENU_X, MENU_Y + MENU_H, new RectangleF( 0, MENU_H * 2, MENU_W, MENU_H * 2 ) );
+			Matrix mat = Matrix.Translation(MENU_X, MENU_Y, 0) * scaleMatrix;
+			Matrix mat2 = Matrix.Translation(MENU_X, MENU_Y + MENU_H, 0) * scaleMatrix;
+			txMenu.tDraw2DMatrix( CDTXMania.app.Device, mat, new Vector2(MENU_W, MENU_H), new RectangleF( 0, 0, MENU_W, MENU_H ));
+			txMenu.tDraw2DMatrix( CDTXMania.app.Device, mat2, new Vector2(MENU_W, MENU_H * 2), new RectangleF( 0, MENU_H * 2, MENU_W, MENU_H * 2 ) );
 		}
 				
 		EPhase ePhaseId = ePhaseID;
@@ -355,7 +368,7 @@ internal class CStageTitle : CStage
 	private CActFIFOWhite actFI;
 	private CActFIFOWhite actFIfromSetup;
 	private CActFIFOWhite actFO;
-	private CCounter ctカーソルフラッシュ用;
+	private CCounter ctCursorFlash;
 	private STキー反復用カウンタ ctキー反復用;
 	private CCounter ct下移動用;
 	private CCounter ct上移動用;
