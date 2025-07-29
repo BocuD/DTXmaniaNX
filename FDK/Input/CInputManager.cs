@@ -147,8 +147,7 @@ public class CInputManager : IDisposable // CInput管理
 			//add newly connected devices
 			for (uint i = 0; i < nMidiDevices; i++)
 			{
-				bool alreadyExists = listInputDevices.OfType<CInputMIDI>().Any(m => m.ID == i);
-				if (!alreadyExists)
+				if (!connectedMidiDevices.ContainsKey(i))
 				{
 					ConnectMidiDevice(i);
 				}
@@ -158,9 +157,10 @@ public class CInputManager : IDisposable // CInput管理
 
 	//connect a new MIDI device by its ID
 	//returns true if the device was successfully connected, false otherwise
+	private Dictionary<uint, CInputMIDI> connectedMidiDevices = new();
+	
 	private bool ConnectMidiDevice(uint id)
 	{
-		CWin32.MIDIINCAPS caps = new();
 		uint result = CWin32.midiInGetDevCaps(id, ref caps, (uint)Marshal.SizeOf(caps));
 		if (result != 0)
 		{
@@ -179,6 +179,7 @@ public class CInputManager : IDisposable // CInput管理
 
 		CWin32.midiInStart(newMidi.hMidiIn);
 		newMidi.strDeviceName = caps.szPname;
+		connectedMidiDevices[id] = newMidi;
 		Trace.TraceInformation("MIDI In: [{0}] \"{1}\" has been connected and input started.", id, caps.szPname);
 		return true;
 	}
@@ -192,6 +193,7 @@ public class CInputManager : IDisposable // CInput管理
 			CWin32.midiInClose(midiDevice.hMidiIn);
 		}
 
+		connectedMidiDevices.Remove((uint)midiDevice.ID);
 		Trace.TraceInformation("MIDI In: [{0}] \"{1}\" has been disconnected.", midiDevice.ID, midiDevice.strDeviceName);
 		midiDevice.Dispose();
 	}
