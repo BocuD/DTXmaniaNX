@@ -13,7 +13,7 @@ This is a fork of DTXManiaNX, with a main focus on improving QOL, as well as cle
   - Written on top of new UI framework
   - Doesn't affect old UI elements (for now)
  
-- Support for arbitrary resolutions
+- Support for arbitrary resolutions such as 1080p or 2160p (4K)
   - Currently restricted to 16:9
   - UI scales gracefully, independent of resolution
   - Gameplay is still fixed at 720p
