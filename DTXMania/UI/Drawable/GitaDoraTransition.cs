@@ -105,7 +105,7 @@ public class GitaDoraTransition : UIGroup
         
         if (state.animate)
         {
-            Trace.TraceInformation($"Animating GITADORA transition: {state.animationProgress} -> {state.animationTarget} (direction: {state.animationDirection})");
+            //Trace.TraceInformation($"Animating GITADORA transition: {state.animationProgress} -> {state.animationTarget} (direction: {state.animationDirection})");
             state.animationProgress += delta * state.animationSpeed * state.animationDirection;
             if (state.animationProgress > 2.0f && state.animationTarget >= 1.5f)
             {
