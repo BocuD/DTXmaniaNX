@@ -56,7 +56,7 @@ public class CInputMIDI : IInputDevice, IDisposable
 	public List<STInputEvent> listInputEvent { get; private set; }
 	public string strDeviceName { get; set; }
 
-	public void tPolling( bool bWindowがアクティブ中, bool bバッファ入力を使用する )
+	public void tPolling( bool isWindowActive, bool useBufferedInput )
 	{
 		// this.listInputEvent = new List<STInputEvent>( 32 );
 		listInputEvent.Clear();								// #xxxxx 2012.6.11 yyagi; To optimize, I removed new();

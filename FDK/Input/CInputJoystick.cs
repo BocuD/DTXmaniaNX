@@ -94,7 +94,7 @@ public class CInputJoystick : IInputDevice, IDisposable
 		set;
 	}
 
-	public void tPolling(bool bWindowがアクティブ中, bool bバッファ入力を使用する)  // tポーリング
+	public void tPolling(bool isWindowActive, bool useBufferedInput)  // tポーリング
 	{
 		#region [ bButtonフラグ初期化 ]
 		for (int i = 0; i < 256; i++)
@@ -104,7 +104,7 @@ public class CInputJoystick : IInputDevice, IDisposable
 		}
 		#endregion
 
-		if (bWindowがアクティブ中)
+		if (isWindowActive)
 		{
 			devJoystick.Acquire();
 			devJoystick.Poll();
@@ -113,7 +113,7 @@ public class CInputJoystick : IInputDevice, IDisposable
 			listInputEvent.Clear();                        // #xxxxx 2012.6.11 yyagi; To optimize, I removed new();
 
 
-			if (bバッファ入力を使用する)
+			if (useBufferedInput)
 			{
 				#region [ a.バッファ入力 ]
 				//-----------------------------

@@ -61,14 +61,12 @@ public class CInputManager : IDisposable  // CInput管理
 	// コンストラクタ
 	public CInputManager(IntPtr hWnd, bool bUseMidiIn = true)
 	{
-		CInput管理初期化(hWnd, bUseMidiIn);
+		InitializeInputManager(hWnd, bUseMidiIn);
 	}
 
-	public void CInput管理初期化(IntPtr hWnd, bool bUseMidiIn)
+	private void InitializeInputManager(IntPtr hWnd, bool bUseMidiIn)
 	{
 		directInput = new DirectInput();
-		// this.timer = new CTimer( CTimer.E種別.MultiMedia );
-
 		listInputDevices = new List<IInputDevice>(10);
 		#region [ Enumerate keyboard/mouse: exception is masked if keyboard/mouse is not connected ]
 		CInputKeyboard cinputkeyboard = null;
@@ -78,8 +76,9 @@ public class CInputManager : IDisposable  // CInput管理
 			cinputkeyboard = new CInputKeyboard(hWnd, directInput);
 			cinputmouse = new CInputMouse(hWnd, directInput);
 		}
-		catch
+		catch (Exception e)
 		{
+			Trace.TraceError("CInputManager: Failed to initialize keyboard/mouse input devices: {0}", e.Message);
 		}
 		if (cinputkeyboard != null)
 		{
@@ -90,47 +89,95 @@ public class CInputManager : IDisposable  // CInput管理
 			listInputDevices.Add(cinputmouse);
 		}
 		#endregion
+		
 		#region [ Enumerate joypad ]
 		foreach (DeviceInstance instance in directInput.GetDevices(DeviceClass.GameControl, DeviceEnumerationFlags.AttachedOnly))
 		{
 			listInputDevices.Add(new CInputJoystick(hWnd, instance, directInput));
 		}
 		#endregion
+		
 		if (bUseMidiIn)
 		{
 			proc = MidiInCallback;
-			uint nMidiDevices = CWin32.midiInGetNumDevs();
-			Trace.TraceInformation("MIDI入力デバイス数: {0}", nMidiDevices);
-			for (uint i = 0; i < nMidiDevices; i++)
+			uint midiDeviceCount = CWin32.midiInGetNumDevs();
+			Trace.TraceInformation("Number of MIDI input devices: {0}", midiDeviceCount);
+
+			for (uint i = 0; i < midiDeviceCount; i++)
 			{
-				CInputMIDI item = new(i);
-				CWin32.MIDIINCAPS lpMidiInCaps = new();
-				uint num3 = CWin32.midiInGetDevCaps(i, ref lpMidiInCaps, (uint)Marshal.SizeOf(lpMidiInCaps));
-				if (num3 != 0)
+				CInputMIDI midiDevice = new(i);
+				CWin32.MIDIINCAPS midiCaps = new();
+				uint result = CWin32.midiInGetDevCaps(i, ref midiCaps, (uint)Marshal.SizeOf(midiCaps));
+
+				if (result != 0)
 				{
-					Trace.TraceError("MIDI In: Device{0}: midiInDevCaps(): {1:X2}: ", i, num3);
+					Trace.TraceError("MIDI In: Device {0}: midiInGetDevCaps() failed with error 0x{1:X2}.", i, result);
 				}
-				else if ((CWin32.midiInOpen(ref item.hMidiIn, i, proc, IntPtr.Zero, 0x30000) == 0) && (item.hMidiIn != IntPtr.Zero))
+				else if (CWin32.midiInOpen(ref midiDevice.hMidiIn, i, proc, IntPtr.Zero, 0x30000) == 0 && midiDevice.hMidiIn != IntPtr.Zero)
 				{
-					CWin32.midiInStart(item.hMidiIn);
-					Trace.TraceInformation("MIDI In: [{0}] \"{1}\" の入力受付を開始しました。", i, lpMidiInCaps.szPname);
+					CWin32.midiInStart(midiDevice.hMidiIn);
+					Trace.TraceInformation("MIDI In: [{0}] \"{1}\" input started successfully.", i, midiCaps.szPname);
 				}
 				else
 				{
-					Trace.TraceError("MIDI In: [{0}] \"{1}\" の入力受付の開始に失敗しました。", i, lpMidiInCaps.szPname);
+					Trace.TraceError("MIDI In: [{0}] \"{1}\" failed to start input.", i, midiCaps.szPname);
 				}
-				item.strDeviceName = lpMidiInCaps.szPname;
-				listInputDevices.Add(item);
+
+				midiDevice.strDeviceName = midiCaps.szPname;
+				listInputDevices.Add(midiDevice);
 			}
-		}
-		else
-		{
-			Trace.TraceInformation("DTXVモードのため、MIDI入力は使用しません。");
 		}
 	}
 
 
 	// メソッド
+	private CWin32.MIDIINCAPS caps;
+	public void ScanDevices()
+	{
+		lock (objMidiInMutex)
+		{
+			if (isDisposed) return;
+			
+			uint nMidiDevices = CWin32.midiInGetNumDevs();
+
+			for (uint i = 0; i < nMidiDevices; i++)
+			{
+				//skip if this device ID is already in the list
+				bool alreadyExists = false;
+				foreach (IInputDevice t in listInputDevices)
+				{
+					if (t is not CInputMIDI midi || midi.ID != i) continue;
+					alreadyExists = true;
+					break;
+				}
+				if (alreadyExists)
+				{
+					continue;
+				}
+
+				//try to reinitialize MIDI device
+				uint result = CWin32.midiInGetDevCaps(i, ref caps, (uint)Marshal.SizeOf(caps));
+				if (result != 0)
+				{
+					Trace.TraceError("MIDI In: Device {0}: midiInGetDevCaps() failed with error 0x{1:X2}", i, result);
+					continue;
+				}
+
+				CInputMIDI newMidi = new(i);
+				if (CWin32.midiInOpen(ref newMidi.hMidiIn, i, proc, IntPtr.Zero, 0x30000) == 0 && newMidi.hMidiIn != IntPtr.Zero)
+				{
+					CWin32.midiInStart(newMidi.hMidiIn);
+					newMidi.strDeviceName = caps.szPname;
+					listInputDevices.Add(newMidi);
+					Trace.TraceInformation("MIDI In: [{0}] \"{1}\" has been reconnected and input has been started.", i, caps.szPname);
+				}
+				else
+				{
+					Trace.TraceWarning("MIDI In: [{0}] \"{1}\" failed to reconnect.", i, caps.szPname);
+				}
+			}
+		}
+	}
 
 	public IInputDevice Joystick(int ID)
 	{
@@ -165,7 +212,7 @@ public class CInputManager : IDisposable  // CInput管理
 		}
 		return null;
 	}
-	public void tPolling(bool bWindowがアクティブ中, bool bバッファ入力を使用する)  // tポーリング
+	public void tPolling(bool isWindowActive, bool useBufferedInput)  // tポーリング
 	{
 		lock (objMidiInMutex)
 		{
@@ -175,7 +222,7 @@ public class CInputManager : IDisposable  // CInput管理
 				IInputDevice device = listInputDevices[i];
 				try
 				{
-					device.tPolling(bWindowがアクティブ中, bバッファ入力を使用する);
+					device.tPolling(isWindowActive, useBufferedInput);
 				}
 				catch (SharpDX.SharpDXException e)                                      // #24016 2011.1.6 yyagi: catch exception for unplugging USB joystick, and remove the device object from the polling items.
 				{
@@ -188,7 +235,7 @@ public class CInputManager : IDisposable  // CInput管理
 						// #xxxxx: 2017.5.9: from: その他のエラーの場合は、デバイスが外されたと想定してRemoveする。
 						listInputDevices.Remove(device);
 						device.Dispose();
-						Trace.TraceError("tポーリング時に対象deviceが抜かれており例外発生。同deviceをポーリング対象からRemoveしました。");
+						Trace.TraceError("Failed to poll device [{0}]. The device was probably disconnected. {1}", device.ID, e.Message);
 					}
 				}
 			}
@@ -201,9 +248,10 @@ public class CInputManager : IDisposable  // CInput管理
 	{
 		Dispose(true);
 	}
-	public void Dispose(bool disposeManagedObjects)
+
+	private void Dispose(bool disposeManagedObjects)
 	{
-		if (!bDisposed済み)
+		if (!isDisposed)
 		{
 			if (disposeManagedObjects)
 			{
@@ -235,7 +283,7 @@ public class CInputManager : IDisposable  // CInput管理
 				//    this.timer = null;
 				//}
 			}
-			bDisposed済み = true;
+			isDisposed = true;
 		}
 	}
 	~CInputManager()
@@ -254,7 +302,7 @@ public class CInputManager : IDisposable  // CInput管理
 	private DirectInput directInput;
 	private CInputKeyboard? _Keyboard;
 	private CInputMouse? _Mouse;
-	private bool bDisposed済み;
+	private bool isDisposed;
 	private object objMidiInMutex = new();
 	private CWin32.MidiInProc proc;
 	//		private CTimer timer;
@@ -273,8 +321,7 @@ public class CInputManager : IDisposable  // CInput管理
 			{
 				foreach (IInputDevice device in listInputDevices)
 				{
-					CInputMIDI tmidi = device as CInputMIDI;
-					if ((tmidi != null) && (tmidi.hMidiIn == hMidiIn))
+					if ((device is CInputMIDI tmidi) && (tmidi.hMidiIn == hMidiIn))
 					{
 						tmidi.tメッセージからMIDI信号のみ受信(wMsg, dwInstance, dwParam1, dwParam2, time);
 						break;

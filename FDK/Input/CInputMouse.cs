@@ -62,7 +62,7 @@ public class CInputMouse : IInputDevice, IDisposable
 	public List<STInputEvent> listInputEvent { get; private set; }  // list入力イベント
 	public string strDeviceName { get; set; }
 
-	public void tPolling(bool bWindowがアクティブ中, bool bバッファ入力を使用する)  // tポーリング
+	public void tPolling(bool isWindowActive, bool useBufferedInput)  // tポーリング
 	{
 		for (int i = 0; i < 8; i++)
 		{
@@ -70,7 +70,7 @@ public class CInputMouse : IInputDevice, IDisposable
 			bMousePullUp[i] = false;
 		}
 
-		if (bWindowがアクティブ中 && (devMouse != null))
+		if (isWindowActive && (devMouse != null))
 		{
 			devMouse.Acquire();
 			devMouse.Poll();
@@ -78,7 +78,7 @@ public class CInputMouse : IInputDevice, IDisposable
 			// this.list入力イベント = new List<STInputEvent>( 32 );
 			listInputEvent.Clear();            // #xxxxx 2012.6.11 yyagi; To optimize, I removed new();
 
-			if (bバッファ入力を使用する)
+			if (useBufferedInput)
 			{
 				#region [ a.バッファ入力 ]
 				//-----------------------------

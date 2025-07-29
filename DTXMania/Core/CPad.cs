@@ -30,7 +30,7 @@ public class CPad
 	internal CPad( CConfigIni configIni, CInputManager mgrInput )
 	{
 		rConfigIni = configIni;
-		rInput管理 = mgrInput;
+		rInputManager = mgrInput;
 		stDetectedDevice.Clear();
 	}
 
@@ -40,70 +40,79 @@ public class CPad
 	public List<STInputEvent> GetEvents( EInstrumentPart part, EPad pad )
 	{
 		CConfigIni.CKeyAssign.STKEYASSIGN[] stkeyassignArray = rConfigIni.KeyAssign[ (int) part ][ (int) pad ];
-		List<STInputEvent> list = new List<STInputEvent>();
+		List<STInputEvent> list = [];
 
 		// すべての入力デバイスについて…
-		foreach( IInputDevice device in rInput管理.listInputDevices )
+		foreach (IInputDevice device in rInputManager.listInputDevices)
 		{
-			if( ( device.listInputEvent != null ) && ( device.listInputEvent.Count != 0 ) )
+			if ((device.listInputEvent != null) && (device.listInputEvent.Count != 0))
 			{
-				foreach( STInputEvent event2 in device.listInputEvent )
+				foreach (STInputEvent event2 in device.listInputEvent)
 				{
-					for( int i = 0; i < stkeyassignArray.Length; i++ )
+					for (int i = 0; i < stkeyassignArray.Length; i++)
 					{
-						switch( stkeyassignArray[ i ].InputDevice )
+						switch (stkeyassignArray[i].InputDevice)
 						{
 							case EInputDevice.Keyboard:
-								if( ( device.eInputDeviceType == EInputDeviceType.Keyboard ) && ( event2.nKey == stkeyassignArray[ i ].Code ) )
+								if ((device.eInputDeviceType == EInputDeviceType.Keyboard) &&
+								    (event2.nKey == stkeyassignArray[i].Code))
 								{
-									list.Add( event2 );
+									list.Add(event2);
 									stDetectedDevice.Keyboard = true;
 								}
+
 								break;
 
 							case EInputDevice.MIDI入力:
-								if( ( ( device.eInputDeviceType == EInputDeviceType.MidiIn ) && ( device.ID == stkeyassignArray[ i ].ID ) ) && ( event2.nKey == stkeyassignArray[ i ].Code ) )
+								if (((device.eInputDeviceType == EInputDeviceType.MidiIn) &&
+								     (device.ID == stkeyassignArray[i].ID)) &&
+								    (event2.nKey == stkeyassignArray[i].Code))
 								{
-									list.Add( event2 );
+									list.Add(event2);
 									stDetectedDevice.MIDIIN = true;
 								}
+
 								break;
 
 							case EInputDevice.Joypad:
-								if( ( ( device.eInputDeviceType == EInputDeviceType.Joystick ) && ( device.ID == stkeyassignArray[ i ].ID ) ) && ( event2.nKey == stkeyassignArray[ i ].Code ) )
+								if (((device.eInputDeviceType == EInputDeviceType.Joystick) &&
+								     (device.ID == stkeyassignArray[i].ID)) &&
+								    (event2.nKey == stkeyassignArray[i].Code))
 								{
-									list.Add( event2 );
+									list.Add(event2);
 									stDetectedDevice.Joypad = true;
 								}
+
 								break;
 
 							case EInputDevice.Mouse:
-								if( ( device.eInputDeviceType == EInputDeviceType.Mouse ) && ( event2.nKey == stkeyassignArray[ i ].Code ) )
+								if ((device.eInputDeviceType == EInputDeviceType.Mouse) &&
+								    (event2.nKey == stkeyassignArray[i].Code))
 								{
-									list.Add( event2 );
+									list.Add(event2);
 									stDetectedDevice.Mouse = true;
 								}
+
 								break;
 						}
 					}
 				}
-				continue;
 			}
 		}
+
 		return list;
 	}
 	public bool bPressed( EInstrumentPart part, EPad pad )
 	{
 		if( part != EInstrumentPart.UNKNOWN )
 		{
-				
 			CConfigIni.CKeyAssign.STKEYASSIGN[] stkeyassignArray = rConfigIni.KeyAssign[ (int) part ][ (int) pad ];
 			for( int i = 0; i < stkeyassignArray.Length; i++ )
 			{
 				switch( stkeyassignArray[ i ].InputDevice )
 				{
 					case EInputDevice.Keyboard:
-						if( !rInput管理.Keyboard.bKeyPressed( stkeyassignArray[ i ].Code ) )
+						if( !rInputManager.Keyboard.bKeyPressed( stkeyassignArray[ i ].Code ) )
 							break;
 
 						stDetectedDevice.Keyboard = true;
@@ -111,7 +120,7 @@ public class CPad
 
 					case EInputDevice.MIDI入力:
 					{
-						IInputDevice device2 = rInput管理.MidiIn( stkeyassignArray[ i ].ID );
+						IInputDevice device2 = rInputManager.MidiIn( stkeyassignArray[ i ].ID );
 						if( ( device2 == null ) || !device2.bKeyPressed( stkeyassignArray[ i ].Code ) )
 							break;
 
@@ -123,7 +132,7 @@ public class CPad
 						if( !rConfigIni.joystickDict.ContainsKey( stkeyassignArray[ i ].ID ) )
 							break;
 
-						IInputDevice device = rInput管理.Joystick( stkeyassignArray[ i ].ID );
+						IInputDevice device = rInputManager.Joystick( stkeyassignArray[ i ].ID );
 						if( ( device == null ) || !device.bKeyPressed( stkeyassignArray[ i ].Code ) )
 							break;
 
@@ -131,7 +140,7 @@ public class CPad
 						return true;
 					}
 					case EInputDevice.Mouse:
-						if( !rInput管理.Mouse.bKeyPressed( stkeyassignArray[ i ].Code ) )
+						if( !rInputManager.Mouse.bKeyPressed( stkeyassignArray[ i ].Code ) )
 							break;
 
 						stDetectedDevice.Mouse = true;
@@ -152,7 +161,7 @@ public class CPad
 				switch (stkeyassignArray[i].InputDevice)
 				{
 					case EInputDevice.Keyboard:
-						if (!rInput管理.Keyboard.bKeyPressed(stkeyassignArray[i].Code))
+						if (!rInputManager.Keyboard.bKeyPressed(stkeyassignArray[i].Code))
 							break;
 
 						stDetectedDevice.Keyboard = true;
@@ -160,7 +169,7 @@ public class CPad
 
 					case EInputDevice.MIDI入力:
 					{
-						IInputDevice device2 = rInput管理.MidiIn(stkeyassignArray[i].ID);
+						IInputDevice device2 = rInputManager.MidiIn(stkeyassignArray[i].ID);
 						if ((device2 == null) || !device2.bKeyPressed(stkeyassignArray[i].Code))
 							break;
 
@@ -172,7 +181,7 @@ public class CPad
 						if (!rConfigIni.joystickDict.ContainsKey(stkeyassignArray[i].ID))
 							break;
 
-						IInputDevice device = rInput管理.Joystick(stkeyassignArray[i].ID);
+						IInputDevice device = rInputManager.Joystick(stkeyassignArray[i].ID);
 						if ((device == null) || !device.bKeyPressed(stkeyassignArray[i].Code))
 							break;
 
@@ -180,7 +189,7 @@ public class CPad
 						return true;
 					}
 					case EInputDevice.Mouse:
-						if (!rInput管理.Mouse.bKeyPressed(stkeyassignArray[i].Code))
+						if (!rInputManager.Mouse.bKeyPressed(stkeyassignArray[i].Code))
 							break;
 
 						stDetectedDevice.Mouse = true;
@@ -216,7 +225,7 @@ public class CPad
 				switch( stkeyassignArray[ i ].InputDevice )
 				{
 					case EInputDevice.Keyboard:
-						if( !rInput管理.Keyboard.bKeyPressing( stkeyassignArray[ i ].Code ) )
+						if( !rInputManager.Keyboard.bKeyPressing( stkeyassignArray[ i ].Code ) )
 						{
 							break;
 						}
@@ -229,7 +238,7 @@ public class CPad
 						{
 							break;
 						}
-						IInputDevice device = rInput管理.Joystick( stkeyassignArray[ i ].ID );
+						IInputDevice device = rInputManager.Joystick( stkeyassignArray[ i ].ID );
 						if( ( device == null ) || !device.bKeyPressing( stkeyassignArray[ i ].Code ) )
 						{
 							break;
@@ -238,7 +247,7 @@ public class CPad
 						return true;
 					}
 					case EInputDevice.Mouse:
-						if( !rInput管理.Mouse.bKeyPressing( stkeyassignArray[ i ].Code ) )
+						if( !rInputManager.Mouse.bKeyPressing( stkeyassignArray[ i ].Code ) )
 						{
 							break;
 						}
@@ -264,7 +273,7 @@ public class CPad
 	#region [ private ]
 	//-----------------
 	private CConfigIni rConfigIni;
-	private CInputManager rInput管理;
+	private CInputManager rInputManager;
 	//-----------------
 	#endregion
 }

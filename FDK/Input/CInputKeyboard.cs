@@ -60,7 +60,7 @@ public class CInputKeyboard : IInputDevice, IDisposable
 	public List<STInputEvent> listInputEvent { get; private set; }
 	public string strDeviceName { get; set; }
 
-	public void tPolling(bool bWindowがアクティブ中, bool bバッファ入力を使用する)  // tポーリング
+	public void tPolling(bool isWindowActive, bool useBufferedInput)  // tポーリング
 	{
 		for (int i = 0; i < 256; i++)
 		{
@@ -68,7 +68,7 @@ public class CInputKeyboard : IInputDevice, IDisposable
 			bKeyPullUp[i] = false;
 		}
 
-		if (bWindowがアクティブ中 && (devKeyboard != null))
+		if (isWindowActive && (devKeyboard != null))
 		{
 			devKeyboard.Acquire();
 			devKeyboard.Poll();
@@ -78,7 +78,7 @@ public class CInputKeyboard : IInputDevice, IDisposable
 			int posEnter = -1;
 			//string d = DateTime.Now.ToString( "yyyy/MM/dd HH:mm:ss.ffff" );
 
-			if (bバッファ入力を使用する)
+			if (useBufferedInput)
 			{
 				#region [ a.バッファ入力 ]
 				//-----------------------------

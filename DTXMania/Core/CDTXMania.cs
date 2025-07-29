@@ -1069,6 +1069,8 @@ internal class CDTXMania : Game
         lastDrawTime = Timer.nCurrentTime;
         GameStatus.UpdatePerformanceGraph(delta);
 
+        InputManager.ScanDevices();
+
         //....????
         if (SoundManager == null)
         {
