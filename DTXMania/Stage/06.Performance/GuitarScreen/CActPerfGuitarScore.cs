@@ -1,5 +1,6 @@
 ﻿using System.Drawing;
 using DTXMania.Core;
+using RectangleF = SharpDX.RectangleF;
 
 namespace DTXMania;
 
@@ -82,16 +83,16 @@ internal class CActPerfGuitarScore : CActPerfCommonScore
                     string str = string.Format("{0,7:######0}", n現在表示中のスコア[j]);
                     for (int i = 0; i < 7; i++)
                     {
-                        Rectangle rectangle;
+                        RectangleF rectangle;
                         char ch = str[i];
                         if (ch.Equals(' '))
                         {
-                            rectangle = new Rectangle(0, 0, 0, 0);
+                            rectangle = new RectangleF(0, 0, 0, 0);
                         }
                         else
                         {
                             int num4 = int.Parse(str.Substring(i, 1));
-                            rectangle = new Rectangle(num4 * 36, 0, 36, 50);
+                            rectangle = new RectangleF(num4 * 36, 0, 36, 50);
                         }
                         if (txScore != null)
                         {
@@ -100,7 +101,7 @@ internal class CActPerfGuitarScore : CActPerfCommonScore
                     }
                     if (txScore != null)
                     {
-                        txScore.tDraw2D(CDTXMania.app.Device, n本体X[j], n本体Y, new Rectangle(0, 50, 86, 28));
+                        txScore.tDraw2D(CDTXMania.app.Device, n本体X[j], n本体Y, new RectangleF(0, 50, 86, 28));
                     }
                 }
             }

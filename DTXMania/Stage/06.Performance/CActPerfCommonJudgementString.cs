@@ -1,7 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using DTXMania.Core;
 using FDK;
-
+using SharpDX;
 using Rectangle = System.Drawing.Rectangle;
 
 namespace DTXMania;
@@ -46,14 +46,14 @@ internal class CActPerfCommonJudgementString : CActivity
 	protected struct ST判定文字列
 	{
 		public int n画像番号;
-		public Rectangle rc;
+		public RectangleF rc;
 	}
 
 	protected readonly STlag数値[] stLag数値;			// #25370 2011.2.1 yyagi
 	[StructLayout( LayoutKind.Sequential )]
 	protected struct STlag数値
 	{
-		public Rectangle rc;
+		public RectangleF rc;
 	}
 
 	protected CTexture[] tx判定文字列 = new CTexture[ 3 ];
@@ -80,15 +80,16 @@ internal class CActPerfCommonJudgementString : CActivity
 		int iP_A = 390;
 		int iP_B = 0x248;
 		st判定文字列 = new ST判定文字列[ 7 ];
-		Rectangle[] r = new Rectangle[] {
-			new Rectangle( 0, 0,    0x80, 0x2a ),		// Perfect
-			new Rectangle( 0, 0x2b, 0x80, 0x2a ),		// Great
-			new Rectangle( 0, 0x56, 0x80, 0x2a ),		// Good
-			new Rectangle( 0, 0,    0x80, 0x2a ),		// Poor
-			new Rectangle( 0, 0x2b, 0x80, 0x2a ),		// Miss
-			new Rectangle( 0, 0x56, 0x80, 0x2a ),		// Bad
-			new Rectangle( 0, 0,    0x80, 0x2a )		// Auto
-		};
+		RectangleF[] r =
+		[
+			new ( 0, 0,    0x80, 0x2a ),		// Perfect
+			new ( 0, 0x2b, 0x80, 0x2a ),		// Great
+			new ( 0, 0x56, 0x80, 0x2a ),		// Good
+			new ( 0, 0,    0x80, 0x2a ),		// Poor
+			new ( 0, 0x2b, 0x80, 0x2a ),		// Miss
+			new ( 0, 0x56, 0x80, 0x2a ),		// Bad
+			new ( 0, 0,    0x80, 0x2a )		// Auto
+		];
 
 		for ( int i = 0; i < 7; i++ )
 		{
@@ -158,13 +159,13 @@ internal class CActPerfCommonJudgementString : CActivity
 		{
 			if( CDTXMania.ConfigIni.nShowLagTypeColor == 0 )
 			{
-				stLag数値[ i      ].rc = new Rectangle( ( i % 4 ) * 15     , ( i / 4 ) * 19     , 15, 19 );	// plus numbers
-				stLag数値[ i + 12 ].rc = new Rectangle( ( i % 4 ) * 15 + 64, ( i / 4 ) * 19 + 64, 15, 19 );	// minus numbers
+				stLag数値[ i      ].rc = new RectangleF( ( i % 4 ) * 15     , ( i / 4 ) * 19     , 15, 19 );	// plus numbers
+				stLag数値[ i + 12 ].rc = new RectangleF( ( i % 4 ) * 15 + 64, ( i / 4 ) * 19 + 64, 15, 19 );	// minus numbers
 			}
 			else
 			{
-				stLag数値[ i      ].rc = new Rectangle( ( i % 4 ) * 15 + 64, ( i / 4 ) * 19 + 64, 15, 19 );	// minus numbers
-				stLag数値[ i + 12 ].rc = new Rectangle( ( i % 4 ) * 15     , ( i / 4 ) * 19     , 15, 19 );	// plus numbers
+				stLag数値[ i      ].rc = new RectangleF( ( i % 4 ) * 15 + 64, ( i / 4 ) * 19 + 64, 15, 19 );	// minus numbers
+				stLag数値[ i + 12 ].rc = new RectangleF( ( i % 4 ) * 15     , ( i / 4 ) * 19     , 15, 19 );	// plus numbers
 			}
 		}
 

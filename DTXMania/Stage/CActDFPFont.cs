@@ -538,11 +538,13 @@ public class CActDFPFont : CActivity
 					{
 						if( st文字領域.ch == ch )
 						{
-							System.Drawing.RectangleF rectanglef = new System.Drawing.RectangleF();
-							rectanglef.X = st文字領域.rc.X;
-							rectanglef.Y = st文字領域.rc.Y;
-							rectanglef.Width = st文字領域.rc.Width;
-							rectanglef.Height = st文字領域.rc.Height;
+							RectangleF rectanglef = new()
+							{
+								X = st文字領域.rc.X,
+								Y = st文字領域.rc.Y,
+								Width = st文字領域.rc.Width,
+								Height = st文字領域.rc.Height
+							};
 							texture.tDraw2D( CDTXMania.app.Device, x, y, rectanglef );
 							x += (int) ( ( st文字領域.rc.Width - 5 ) * fScale );
 							break;

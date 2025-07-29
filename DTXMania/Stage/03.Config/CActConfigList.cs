@@ -2,6 +2,7 @@
 using DTXMania.Core;
 using DTXMania.UI.Item;
 using FDK;
+using SharpDX;
 using Color = System.Drawing.Color;
 using Rectangle = System.Drawing.Rectangle;
 using Point = System.Drawing.Point;
@@ -274,6 +275,8 @@ internal partial class CActConfigList : CActivity
         if (!bActivated)
             return 0;
 
+        Matrix scaleMatrix = Matrix.Scaling(CDTXMania.renderScale);
+        
         // 進行
 
         #region [ First update and draw ] //初めての進行描画
@@ -424,7 +427,7 @@ internal partial class CActConfigList : CActivity
 
         for (int rowIndex = -4; rowIndex < 10; rowIndex++) // n行番号 == 0 がフォーカスされている項目パネル。
         {
-            nItem = DrawListElement(rowIndex, nItem);
+            nItem = DrawListElement(rowIndex, nItem, scaleMatrix);
         }
         #endregion
 
@@ -454,8 +457,8 @@ internal partial class CActConfigList : CActivity
         {
             const int nArrowPosX = 394;
             
-            txArrow?.tDraw2D(CDTXMania.app.Device, nArrowPosX, 174, new Rectangle(0, 0, 40, 40));
-            txArrow?.tDraw2D(CDTXMania.app.Device, nArrowPosX, 240, new Rectangle(0, 40, 40, 40));
+            txArrow?.tDraw2D(CDTXMania.app.Device, nArrowPosX, 174, new SharpDX.RectangleF(0, 0, 40, 40));
+            txArrow?.tDraw2D(CDTXMania.app.Device, nArrowPosX, 240, new SharpDX.RectangleF(0, 40, 40, 40));
         }
         #endregion
 
@@ -465,7 +468,7 @@ internal partial class CActConfigList : CActivity
         return 0;
     }
 
-    private int DrawListElement(int rowIndex, int nItem)
+    private int DrawListElement(int rowIndex, int nItem, Matrix parentMatrix)
     {
         #region [ Skip Offscreen Item Panels ]
         if ((rowIndex == -4 && currentScrollCounter > 0) || // 上に飛び出そうとしている

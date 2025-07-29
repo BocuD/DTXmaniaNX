@@ -75,7 +75,7 @@ internal class CActPerfProgressBar : CActivity
 			for (EInstrumentPart ePart2 = EInstrumentPart.DRUMS; ePart2 <= EInstrumentPart.BASS; ePart2++)
 			{
 				double num = (double)n楽器毎のチップ数基準値[(int)ePart2] / (double)nブロック最大数 / (double)nSectionIntervalCount;
-				int y2 = nHeight;
+				float y2 = nHeight;
 				for (int j = 0; j < nSectionIntervalCount; j++)
 				{
 					CProgressSection c区間 = listProgressSection[(int)ePart2][j];
@@ -245,14 +245,14 @@ internal class CActPerfProgressBar : CActivity
 					{
 						num3 = nHeight;
 					}
-					Rectangle rectangle = new Rectangle(0, 0, tx進捗.szTextureSize.Width, num3);
+					SharpDX.RectangleF rectangle = new(0, 0, tx進捗.szTextureSize.Width, num3);
 					num2 = nHeight - num3 + pBarPosition[(int)ePart].Y;
 					tx進捗.tDraw2D(CDTXMania.app.Device, num, num2, rectangle);
 				}
 				for (int i = 0; i < nSectionIntervalCount; i++)
 				{
 					CProgressSection c区間 = listProgressSection[(int)ePart][i];
-					num2 = p表示位置[(int)ePart].Y + (b演奏画面以外からの呼び出し ? 20 : 0) + c区間.rectDrawingFrame.Y + pBarPosition[(int)ePart].Y;
+					num2 = p表示位置[(int)ePart].Y + (b演奏画面以外からの呼び出し ? 20 : 0) + (int)c区間.rectDrawingFrame.Y + pBarPosition[(int)ePart].Y;
 					//if (c区間.nChipCount <= 0)
 					//{
 					//	continue;
@@ -551,7 +551,7 @@ internal class CActPerfProgressBar : CActivity
 		//New
 		public bool bIsAttempted;
 
-		public Rectangle rectDrawingFrame;
+		public SharpDX.RectangleF rectDrawingFrame;
 
 		public CProgressSection()
 		{
@@ -559,7 +559,7 @@ internal class CActPerfProgressBar : CActivity
 			nHitCount = 0;
 			bHasMistakes = true;
 			bIsAttempted = false;
-			rectDrawingFrame = new Rectangle(0, 0, 1, 1);
+			rectDrawingFrame = new(0, 0, 1, 1);
 		}
 	}
 

@@ -7,6 +7,7 @@ using FDK;
 using Point = System.Drawing.Point;
 using Rectangle = System.Drawing.Rectangle;
 using Color = System.Drawing.Color;
+using RectangleF = SharpDX.RectangleF;
 
 namespace DTXMania;
 
@@ -672,10 +673,10 @@ internal class CActResultParameterPanel : CActivity
                         txPercent.tDraw2D(CDTXMania.app.Device, 217 + n本体X[j], 287 + n本体Y);
                 }
 
-                tDrawStringLarge(88 + n本体X[j], 363 + n本体Y, string.Format("{0,6:##0.00}", stageResult.stPerformanceEntry[j].dbGameSkill));
+                tDrawStringLarge(88 + n本体X[j], 363 + n本体Y, $"{stageResult.stPerformanceEntry[j].dbGameSkill,6:##0.00}");
                     
                 if(tx難易度パネル != null)
-                    tx難易度パネル.tDraw2D(CDTXMania.app.Device, 14 + n本体X[j], 266 + n本体Y, new Rectangle( rectDiffPanelPoint.X, rectDiffPanelPoint.Y, 60, 60));
+                    tx難易度パネル.tDraw2D(CDTXMania.app.Device, 14 + n本体X[j], 266 + n本体Y, new RectangleF( rectDiffPanelPoint.X, rectDiffPanelPoint.Y, 60, 60));
                 tレベル数字描画((bCLASSIC == true ? 26 : 18) + n本体X[j], 290 + n本体Y, str);
 
                 //Draw Progress Bar Panels first
@@ -691,16 +692,16 @@ internal class CActResultParameterPanel : CActivity
                 string strScore = string.Format("{0,7:######0}", stageResult.stPerformanceEntry[j].nスコア);
                 for (int i = 0; i < 7; i++)
                 {
-                    Rectangle rectangle;
+                    RectangleF rectangle;
                     char ch = strScore[i];
                     if (ch.Equals(' '))
                     {
-                        rectangle = new Rectangle(0, 0, 0, 0);
+                        rectangle = new RectangleF(0, 0, 0, 0);
                     }
                     else
                     {
                         int num4 = int.Parse(strScore.Substring(i, 1));
-                        rectangle = new Rectangle(num4 * 36, 0, 36, 50);
+                        rectangle = new RectangleF(num4 * 36, 0, 36, 50);
                     }
                     if (txScore != null)
                     {
@@ -709,7 +710,7 @@ internal class CActResultParameterPanel : CActivity
                 }
                 if (txScore != null)
                 {
-                    txScore.tDraw2D(CDTXMania.app.Device, nスコアX[j], 30, new Rectangle(0, 50, 86, 28));
+                    txScore.tDraw2D(CDTXMania.app.Device, nスコアX[j], 30, new RectangleF(0, 50, 86, 28));
                 }
 
                 for (int i = 0; i < 1; i++)
@@ -815,7 +816,7 @@ internal class CActResultParameterPanel : CActivity
             {
                 if (stSmallStringPosition[i].ch == ch)
                 {
-                    Rectangle rectangle = new Rectangle(stSmallStringPosition[i].pt.X, stSmallStringPosition[i].pt.Y, 20, 26);
+                    RectangleF rectangle = new(stSmallStringPosition[i].pt.X, stSmallStringPosition[i].pt.Y, 20, 26);
                     if (txCharacter[0] != null)
                     {
                         txCharacter[0].tDraw2D(CDTXMania.app.Device, x, y, rectangle);
@@ -834,7 +835,7 @@ internal class CActResultParameterPanel : CActivity
             {
                 if( stSmallStringPosition[ i ].ch == ch )
                 {
-                    Rectangle rectangle = new Rectangle( stSmallStringPosition[ i ].pt.X, stSmallStringPosition[ i ].pt.Y, 14, 0x12 );
+                    RectangleF rectangle = new( stSmallStringPosition[ i ].pt.X, stSmallStringPosition[ i ].pt.Y, 14, 0x12 );
                     if( ch == '%' )
                     {
                         rectangle.Width -= 2;
@@ -862,7 +863,7 @@ internal class CActResultParameterPanel : CActivity
             {
                 if( stLargeStringPosition[ i ].ch == ch )
                 {
-                    Rectangle rectangle = new Rectangle( stLargeStringPosition[ i ].pt.X, stLargeStringPosition[ i ].pt.Y, 28, 42 );
+                    RectangleF rectangle = new( stLargeStringPosition[ i ].pt.X, stLargeStringPosition[ i ].pt.Y, 28, 42 );
                     if( ch == '.' )
                     {
                         rectangle.Width -= 18;
@@ -890,7 +891,7 @@ internal class CActResultParameterPanel : CActivity
             {
                 if (currTextPosStructArray[i].ch == str[j])
                 {
-                    Rectangle rectangle = new Rectangle(
+                    RectangleF rectangle = new (
                         currTextPosStructArray[i].rect.X,
                         currTextPosStructArray[i].rect.Y,
                         currTextPosStructArray[i].rect.Width,
@@ -960,7 +961,7 @@ internal class CActResultParameterPanel : CActivity
                         num = 0;
                         num2 = 0;
                     }
-                    Rectangle rc画像内の描画領域 = new Rectangle(st特大文字位置[j].pt.X + num, st特大文字位置[j].pt.Y + num2, bExtraLarge ? 24 : 18, bExtraLarge ? 32 : 24);
+                    RectangleF rc画像内の描画領域 = new(st特大文字位置[j].pt.X + num, st特大文字位置[j].pt.Y + num2, bExtraLarge ? 24 : 18, bExtraLarge ? 32 : 24);
                     if (c == '.')
                     {
                         rc画像内の描画領域.Width -= 2;
@@ -1007,7 +1008,7 @@ internal class CActResultParameterPanel : CActivity
             {
                 if (st難易度数字位置[i].ch == ch)
                 {
-                    Rectangle rectangle = new Rectangle(st難易度数字位置[i].pt.X, st難易度数字位置[i].pt.Y, 16, 32);
+                    RectangleF rectangle = new(st難易度数字位置[i].pt.X, st難易度数字位置[i].pt.Y, 16, 32);
                     if (ch == '.')
                     {
                         rectangle.Width -= 11;

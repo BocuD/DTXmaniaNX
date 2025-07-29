@@ -140,11 +140,11 @@ internal class CActPerfSkillMeter : CActivity
 				txグラフ.vcScaleRatio = new Vector3( 1f, 1f, 1f );
 				if (CDTXMania.ConfigIni.bSmallGraph)
 				{
-					txグラフ.tDraw2D(CDTXMania.app.Device, nGraphBG_XPos[nGraphUsePart], nGraphBG_YPos, new Rectangle(448, 2, 111, 584));
+					txグラフ.tDraw2D(CDTXMania.app.Device, nGraphBG_XPos[nGraphUsePart], nGraphBG_YPos, new RectangleF(448, 2, 111, 584));
 				}
 				else
 				{
-					txグラフ.tDraw2D(CDTXMania.app.Device, nGraphBG_XPos[nGraphUsePart], nGraphBG_YPos, new Rectangle(2, 2, 251, 584));
+					txグラフ.tDraw2D(CDTXMania.app.Device, nGraphBG_XPos[nGraphUsePart], nGraphBG_YPos, new RectangleF(2, 2, 251, 584));
 				}
 
 				//自己ベスト数値表示
@@ -167,33 +167,33 @@ internal class CActPerfSkillMeter : CActivity
 				if (!bIsTrainingMode)
 				{
 					txグラフ_ゲージ.nTransparency = 255;
-					txグラフ_ゲージ.tDraw2D(CDTXMania.app.Device, nGraphBG_XPos[nGraphUsePart] + 45 + nGraphSizeOffset, nPosY, new Rectangle(2, 2, 30, nGaugeSize));
+					txグラフ_ゲージ.tDraw2D(CDTXMania.app.Device, nGraphBG_XPos[nGraphUsePart] + 45 + nGraphSizeOffset, nPosY, new RectangleF(2, 2, 30, nGaugeSize));
 				}
 				//ゲージ比較
 				int nTargetGaugeSize = (int)( 434.0f * ( (float)dbGraphValue_Goal / 100.0f ) );
 				int nTargetGaugePosY = nGraphUsePart == 0 ? 527 - nTargetGaugeSize : 587 - nTargetGaugeSize;
 				int nTargetGaugeRectX = dbグラフ値現在_渡 > dbGraphValue_Goal ? 38 : 74;
 				txグラフ_ゲージ.nTransparency = 255;
-				txグラフ_ゲージ.tDraw2D( CDTXMania.app.Device, nGraphBG_XPos[ nGraphUsePart ] + 75 + nGraphSizeOffset, nTargetGaugePosY, new Rectangle( nTargetGaugeRectX, 2, 30, nTargetGaugeSize ) );
+				txグラフ_ゲージ.tDraw2D( CDTXMania.app.Device, nGraphBG_XPos[ nGraphUsePart ] + 75 + nGraphSizeOffset, nTargetGaugePosY, new RectangleF( nTargetGaugeRectX, 2, 30, nTargetGaugeSize ) );
 				if( txグラフ != null )
 				{
 					//ターゲット達成率数値
 
 					//ターゲット名
 					//現在
-					txグラフ.tDraw2D( CDTXMania.app.Device, nGraphBG_XPos[ nGraphUsePart ] + 45 + nGraphSizeOffset, nGraphBG_YPos + 357, new Rectangle( 260, 2, 30, 120 ) );
+					txグラフ.tDraw2D( CDTXMania.app.Device, nGraphBG_XPos[ nGraphUsePart ] + 45 + nGraphSizeOffset, nGraphBG_YPos + 357, new RectangleF( 260, 2, 30, 120 ) );
 					//比較対象
-					txグラフ.tDraw2D( CDTXMania.app.Device, nGraphBG_XPos[ nGraphUsePart ] + 75 + nGraphSizeOffset, nGraphBG_YPos + 357, new Rectangle( 260 + ( 30 * ( (int)CDTXMania.ConfigIni.eTargetGhost[ nGraphUsePart ] ) ), 2, 30, 120 ) );
+					txグラフ.tDraw2D( CDTXMania.app.Device, nGraphBG_XPos[ nGraphUsePart ] + 75 + nGraphSizeOffset, nGraphBG_YPos + 357, new RectangleF( 260 + ( 30 * ( (int)CDTXMania.ConfigIni.eTargetGhost[ nGraphUsePart ] ) ), 2, 30, 120 ) );
 
 					//以下使用予定
 					if (!CDTXMania.ConfigIni.bSmallGraph)
 					{
 						//最終プレイ
-						txグラフ.tDraw2D(CDTXMania.app.Device, nGraphBG_XPos[nGraphUsePart] + 106, nGraphBG_YPos + 357, new Rectangle(260 + 60, 2, 30, 120));
+						txグラフ.tDraw2D(CDTXMania.app.Device, nGraphBG_XPos[nGraphUsePart] + 106, nGraphBG_YPos + 357, new RectangleF(260 + 60, 2, 30, 120));
 						//自己ベスト
-						txグラフ.tDraw2D(CDTXMania.app.Device, nGraphBG_XPos[nGraphUsePart] + 136, nGraphBG_YPos + 357, new Rectangle(260 + 90, 2, 30, 120));
+						txグラフ.tDraw2D(CDTXMania.app.Device, nGraphBG_XPos[nGraphUsePart] + 136, nGraphBG_YPos + 357, new RectangleF(260 + 90, 2, 30, 120));
 						//最高スコア
-						txグラフ.tDraw2D(CDTXMania.app.Device, nGraphBG_XPos[nGraphUsePart] + 164, nGraphBG_YPos + 357, new Rectangle(260 + 120, 2, 30, 120));
+						txグラフ.tDraw2D(CDTXMania.app.Device, nGraphBG_XPos[nGraphUsePart] + 164, nGraphBG_YPos + 357, new RectangleF(260 + 120, 2, 30, 120));
 					}
 				}
 				t比較文字表示( nGraphBG_XPos[ nGraphUsePart ] + 44 + nGraphSizeOffset, nPosY - 10, string.Format( "{0,5:##0.00}", Math.Abs( dbグラフ値現在_渡 ) ) );
@@ -273,7 +273,7 @@ internal class CActPerfSkillMeter : CActivity
 				{
 					int RectX = 8;
 					if( ch == '.' ) RectX = 2;
-					Rectangle rectangle = new( 260 + st比較数字位置[ i ].pt.X, 162, RectX, 10 );
+					RectangleF rectangle = new( 260 + st比較数字位置[ i ].pt.X, 162, RectX, 10 );
 					if( txグラフ != null )
 					{
 						txグラフ.nTransparency = 255;
@@ -296,7 +296,7 @@ internal class CActPerfSkillMeter : CActivity
 				{
 					int RectX = 16;
 					if( ch == '.' ) RectX = 8;
-					Rectangle rectangle = new( 260 + st達成率数字位置[ i ].pt.X, 128, RectX, 28 );
+					RectangleF rectangle = new( 260 + st達成率数字位置[ i ].pt.X, 128, RectX, 28 );
 					if( txグラフ != null )
 					{
 						txグラフ.nTransparency = 255;

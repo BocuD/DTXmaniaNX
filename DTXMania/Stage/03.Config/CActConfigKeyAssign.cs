@@ -1,6 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using DTXMania.Core;
 using FDK;
+using SharpDX;
 using Rectangle = System.Drawing.Rectangle;
 using SlimDXKey = SlimDX.DirectInput.Key;
 
@@ -137,16 +138,16 @@ internal class CActConfigKeyAssign : CActivity
 			// 15SEP20 Increasing x position by 120 pixels (was 0x144)
 			int cursPosX = 444;
 			int cursPosY = 62 + num * (nSelectedRow + 1);
-			txCursor.tDraw2D(CDTXMania.app.Device, cursPosX, cursPosY, new Rectangle(0, 0, 16, 32));
+			txCursor.tDraw2D(CDTXMania.app.Device, cursPosX, cursPosY, new RectangleF(0, 0, 16, 32));
 			cursPosX += 16;
-			Rectangle rectangle = new(8, 0, 16, 32);
+			RectangleF rectangle = new(8, 0, 16, 32);
 			for (int j = 0; j < 14; j++)
 			{
 				txCursor.tDraw2D(CDTXMania.app.Device, cursPosX, cursPosY, rectangle);
 				cursPosX += 16;
 			}
 
-			txCursor.tDraw2D(CDTXMania.app.Device, cursPosX, cursPosY, new Rectangle(16, 0, 16, 32));
+			txCursor.tDraw2D(CDTXMania.app.Device, cursPosX, cursPosY, new RectangleF(16, 0, 16, 32));
 		}
 
 		int num5 = 20;

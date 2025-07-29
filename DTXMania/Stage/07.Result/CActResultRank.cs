@@ -1,6 +1,6 @@
 ﻿using DTXMania.Core;
 using FDK;
-
+using SharpDX;
 using Rectangle = System.Drawing.Rectangle;
 
 namespace DTXMania;
@@ -182,7 +182,7 @@ internal class CActResultRank : CActivity
                     double num2 = ((double)ctランク表示.nCurrentValue - 200.0) / 300.0;
 
                     if (ctランク表示.nCurrentValue >= 200.0)
-                        txランク文字[j].tDraw2D(CDTXMania.app.Device, n本体X[j], n本体Y[j] + ((int)((double)txランク文字[j].szImageSize.Height * (1.0 - num2))), new Rectangle(0, 0, txランク文字[j].szImageSize.Width, (int)((double)txランク文字[j].szImageSize.Height * num2)));
+                        txランク文字[j].tDraw2D(CDTXMania.app.Device, n本体X[j], n本体Y[j] + ((int)((double)txランク文字[j].szImageSize.Height * (1.0 - num2))), new RectangleF(0, 0, txランク文字[j].szImageSize.Width, (int)((double)txランク文字[j].szImageSize.Height * num2)));
                 }
                 #endregion
 

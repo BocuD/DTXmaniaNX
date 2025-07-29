@@ -1,6 +1,6 @@
-﻿using System.Drawing;
-using DTXMania.Core;
+﻿using DTXMania.Core;
 using FDK;
+using SharpDX;
 
 namespace DTXMania;
 
@@ -133,7 +133,7 @@ internal class CActPerfGuitarWailingBonus : CActPerfCommonWailingBonus
 						{
 							num6 = ( 670 - num6 ) - 244;
 						}
-						Rectangle rectangle = new Rectangle( 0, 0, 26, 122 );
+						RectangleF rectangle = new( 0, 0, 26, 122 );
 						if( ( 720 - num6 ) < rectangle.Bottom )
 						{
 							rectangle.Height = ( 720 - num6 ) - rectangle.Top;
@@ -149,7 +149,7 @@ internal class CActPerfGuitarWailingBonus : CActPerfCommonWailingBonus
 							txWailingBonus.tDraw2D( CDTXMania.app.Device, x, num6 + num7, rectangle );
 						}
 						num7 = 0;
-						rectangle = new Rectangle( 26, 0, 26, 122 );
+						rectangle = new RectangleF( 26, 0, 26, 122 );
 						if( ( 720 - ( num6 + 122 ) ) < rectangle.Bottom )
 						{
 							rectangle.Height = ( 720 - ( num6 + 122 ) ) - rectangle.Top;
@@ -169,7 +169,7 @@ internal class CActPerfGuitarWailingBonus : CActPerfCommonWailingBonus
 						{
 							for( int i = 0; i <= 12; i++ )
 							{
-								txWailingFlush.tDraw2D( CDTXMania.app.Device, ( e楽器パート2 == EInstrumentPart.GUITAR ) ? 283 : 1153, 64 * i, new Rectangle( 0, 0, 42, 64 ) );
+								txWailingFlush.tDraw2D( CDTXMania.app.Device, ( e楽器パート2 == EInstrumentPart.GUITAR ) ? 283 : 1153, 64 * i, new RectangleF( 0, 0, 42, 64 ) );
 							}
 
 							int count = ct進行用[ (int)e楽器パート2, m ].nCurrentValue;
@@ -183,11 +183,11 @@ internal class CActPerfGuitarWailingBonus : CActPerfCommonWailingBonus
 						{
 							if( e楽器パート2 == EInstrumentPart.GUITAR )
 							{
-								txWailingFire.t2D描画( CDTXMania.app.Device, posXGuitar, posY, new Rectangle( rectW * ctWailing炎[ (int) e楽器パート2, m ].nCurrentValue, 0, rectW, rectH ) );
+								txWailingFire.t2D描画( CDTXMania.app.Device, posXGuitar, posY, new System.Drawing.Rectangle( rectW * ctWailing炎[ (int) e楽器パート2, m ].nCurrentValue, 0, rectW, rectH ) );
 							}
 							if( e楽器パート2 == EInstrumentPart.BASS )
 							{
-								txWailingFire.t2D描画( CDTXMania.app.Device, posXBass, posY, new Rectangle( rectW * ctWailing炎[ (int) e楽器パート2, m ].nCurrentValue, 0, rectW, rectH ) );
+								txWailingFire.t2D描画( CDTXMania.app.Device, posXBass, posY, new System.Drawing.Rectangle( rectW * ctWailing炎[ (int) e楽器パート2, m ].nCurrentValue, 0, rectW, rectH ) );
 							}
 						}
 					}

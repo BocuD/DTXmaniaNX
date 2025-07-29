@@ -810,13 +810,13 @@ internal class CStageSongLoading : CStage
                             DTXLevelDeci = ((cdtx.LEVEL[j] - DTXLevel * 10) * 10) + cdtx.LEVELDEC[j];
                         }
         
-                        txLevel.tDraw2D(CDTXMania.app.Device, 282 + k, 243, new Rectangle(1000, 92, 30, 38));
+                        txLevel.tDraw2D(CDTXMania.app.Device, 282 + k, 243, new RectangleF(1000, 92, 30, 38));
                         tDrawStringLarge(187 + k, 152, $"{DTXLevel:0}");
                         tDrawStringLarge(307 + k, 152, $"{DTXLevelDeci:00}");
                     }
         
                     if (txPartPanel != null)
-                        txPartPanel.tDraw2D(CDTXMania.app.Device, 191 + k, 52, new Rectangle(0, j * 50, 262, 50));
+                        txPartPanel.tDraw2D(CDTXMania.app.Device, 191 + k, 52, new RectangleF(0, j * 50, 262, 50));
         
                     //this.txJacket.Dispose();
                     if (!CDTXMania.bCompactMode && !CDTXMania.DTXVmode.Enabled && !CDTXMania.DTX2WAVmode.Enabled)
@@ -1053,7 +1053,7 @@ internal class CStageSongLoading : CStage
             {
                 if (st大文字位置[j].ch != c) continue;
 
-                Rectangle rc画像内の描画領域 = new(st大文字位置[j].pt.X, st大文字位置[j].pt.Y, 100, 130);
+                RectangleF rc画像内の描画領域 = new(st大文字位置[j].pt.X, st大文字位置[j].pt.Y, 100, 130);
                 if (txLevel != null)
                 {
                     txLevel.tDraw2D(CDTXMania.app.Device, x, y, rc画像内の描画領域);
@@ -1075,7 +1075,7 @@ internal class CStageSongLoading : CStage
 
     private void tDrawDifficultyPanel(string strLabelName, int nX, int nY)
     {
-        Rectangle rect = new(0, 0, 262, 50);
+        RectangleF rect = new(0, 0, 262, 50);
 
         //Check if the script file exists
         if (File.Exists(CSkin.Path(@"Script\difficult.dtxs")))

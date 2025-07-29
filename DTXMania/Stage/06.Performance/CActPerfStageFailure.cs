@@ -73,8 +73,8 @@ internal class CActPerfStageFailure : CActivity
             int x = (int)(640.0 * Math.Cos((Math.PI / 2 * ct進行.nCurrentValue) / 100.0));
             if ((x != 1280) && (txStageFailed != null))
             {
-                txStageFailed.tDraw2D(CDTXMania.app.Device, 0, 0, new Rectangle(x, 0, 640 - x, 720));
-                txStageFailed.tDraw2D(CDTXMania.app.Device, 640 + x, 0, new Rectangle(640, 0, 640 - x, 720));
+                txStageFailed.tDraw2D(CDTXMania.app.Device, 0, 0, new SharpDX.RectangleF(x, 0, 640 - x, 720));
+                txStageFailed.tDraw2D(CDTXMania.app.Device, 640 + x, 0, new SharpDX.RectangleF(640, 0, 640 - x, 720));
             }
         }
         else

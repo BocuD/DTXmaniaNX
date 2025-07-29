@@ -458,7 +458,7 @@ internal class CActSelectStatusPanel : CActivity
                         for (int i = 0; i < txGBChipsBarLine.Length; i++)
                         {
                             txGBChipsBarLine[i].tDraw2D(CDTXMania.app.Device,
-                                nGraphBaseX + 38 + i * 10, nGraphBaseY + 21 + (nBarMaxHeight - chipsBarHeights[i]), new Rectangle(0, 0, 4, chipsBarHeights[i]));
+                                nGraphBaseX + 38 + i * 10, nGraphBaseY + 21 + (nBarMaxHeight - chipsBarHeights[i]), new SharpDX.RectangleF(0, 0, 4, chipsBarHeights[i]));
                         }
                     }                        
                 }
@@ -469,7 +469,7 @@ internal class CActSelectStatusPanel : CActivity
                         for (int i = 0; i < txDrumChipsBarLine.Length; i++)
                         {
                             txDrumChipsBarLine[i].tDraw2D(CDTXMania.app.Device,
-                                nGraphBaseX + 31 + i * 8, nGraphBaseY + 21 + (nBarMaxHeight - chipsBarHeights[i]), new Rectangle(0, 0, 4, chipsBarHeights[i]));
+                                nGraphBaseX + 31 + i * 8, nGraphBaseY + 21 + (nBarMaxHeight - chipsBarHeights[i]), new SharpDX.RectangleF(0, 0, 4, chipsBarHeights[i]));
                         }
                     }
                 }
@@ -525,7 +525,7 @@ internal class CActSelectStatusPanel : CActivity
                     double db変数;
 
                     if (tx難易度パネル != null)
-                        tx難易度パネル.tDraw2D(CDTXMania.app.Device, nPanelX, nPanelY, new Rectangle(nPanelW * j, 0, nPanelW, tx難易度パネル.szImageSize.Height));
+                        tx難易度パネル.tDraw2D(CDTXMania.app.Device, nPanelX, nPanelY, new SharpDX.RectangleF(nPanelW * j, 0, nPanelW, tx難易度パネル.szImageSize.Height));
 
                     int[] n難易度整数 = new int[5];
                     int[] n難易度小数 = new int[5];
@@ -598,9 +598,9 @@ internal class CActSelectStatusPanel : CActivity
 
                                     #region [ 選択曲の FullCombo Excellent の 描画 ]
                                     if (db現在選択中の曲の最高スキル値難易度毎[i][j] == 100)
-                                        txランク.tDraw2D(CDTXMania.app.Device, nBoxX + 42, nBoxY + 5, new Rectangle(nRankW * 8, 0, nRankW, txランク.szImageSize.Height));
+                                        txランク.tDraw2D(CDTXMania.app.Device, nBoxX + 42, nBoxY + 5, new SharpDX.RectangleF(nRankW * 8, 0, nRankW, txランク.szImageSize.Height));
                                     else if (b現在選択中の曲がフルコンボ難易度毎[i][j])
-                                        txランク.tDraw2D(CDTXMania.app.Device, nBoxX + 42, nBoxY + 5, new Rectangle(nRankW * 7, 0, nRankW, txランク.szImageSize.Height));
+                                        txランク.tDraw2D(CDTXMania.app.Device, nBoxX + 42, nBoxY + 5, new SharpDX.RectangleF(nRankW * 7, 0, nRankW, txランク.szImageSize.Height));
                                     #endregion
                                     #region [ 選択曲の 最高ランクの描画 ]
                                     n変数 = n現在選択中の曲の最高ランク難易度毎[i][j];
@@ -613,7 +613,7 @@ internal class CActSelectStatusPanel : CActivity
                                         if (n変数 > 6)
                                             n変数 = 6;
 
-                                        txランク.tDraw2D(CDTXMania.app.Device, nBoxX + 7, nBoxY + 5, new Rectangle(nRankW * n変数, 0, nRankW, txランク.szImageSize.Height));
+                                        txランク.tDraw2D(CDTXMania.app.Device, nBoxX + 7, nBoxY + 5, new SharpDX.RectangleF(nRankW * n変数, 0, nRankW, txランク.szImageSize.Height));
                                     }
                                     #endregion
                                 }
@@ -675,9 +675,9 @@ internal class CActSelectStatusPanel : CActivity
 
                                 #region [ 選択曲の FullCombo Excellent の 描画 ]
                                 if (db現在選択中の曲の最高スキル値[j] == 100)
-                                    txランク.tDraw2D(CDTXMania.app.Device, nBoxX + 42, nBoxY + 5, new Rectangle(nRankW * 8, 0, nRankW, txランク.szImageSize.Height));
+                                    txランク.tDraw2D(CDTXMania.app.Device, nBoxX + 42, nBoxY + 5, new SharpDX.RectangleF(nRankW * 8, 0, nRankW, txランク.szImageSize.Height));
                                 else if (b現在選択中の曲がフルコンボ[j])
-                                    txランク.tDraw2D(CDTXMania.app.Device, nBoxX + 42, nBoxY + 5, new Rectangle(nRankW * 7, 0, nRankW, txランク.szImageSize.Height));
+                                    txランク.tDraw2D(CDTXMania.app.Device, nBoxX + 42, nBoxY + 5, new SharpDX.RectangleF(nRankW * 7, 0, nRankW, txランク.szImageSize.Height));
                                 #endregion
                                 #region [ 選択曲の 最高ランクの描画 ]
                                 n変数 = n現在選択中の曲の最高ランク[j];
@@ -690,7 +690,7 @@ internal class CActSelectStatusPanel : CActivity
                                     if (n変数 > 6)
                                         n変数 = 6;
 
-                                    txランク.tDraw2D(CDTXMania.app.Device, nBoxX + 7, nBoxY + 5, new Rectangle(nRankW * n変数, 0, nRankW, txランク.szImageSize.Height));
+                                    txランク.tDraw2D(CDTXMania.app.Device, nBoxX + 7, nBoxY + 5, new SharpDX.RectangleF(nRankW * n変数, 0, nRankW, txランク.szImageSize.Height));
                                 }
                                 #endregion
                             }
@@ -719,7 +719,7 @@ internal class CActSelectStatusPanel : CActivity
                     int nDGBIndex = 0;
                     int nBoxX = 130 + txパネル本体.szImageSize.Width + (nPanelW * (nPart[nDGBIndex] - 3));
                     int nBoxY = (391 + ((4 - nDiffOffset) * 60)) - 2;
-                    txランク.tDraw2D(CDTXMania.app.Device, nBoxX + 75, nBoxY + 5, new Rectangle(nBadgeWidth * 9, 0, nBadgeWidth, txランク.szImageSize.Height));                       
+                    txランク.tDraw2D(CDTXMania.app.Device, nBoxX + 75, nBoxY + 5, new SharpDX.RectangleF(nBadgeWidth * 9, 0, nBadgeWidth, txランク.szImageSize.Height));                       
                 }
                 #endregion
 
@@ -735,7 +735,7 @@ internal class CActSelectStatusPanel : CActivity
                     int nDGBIndex = 1 + nSpInGuitarOrBass;
                     int nBoxX = 130 + txパネル本体.szImageSize.Width + (nPanelW * (nPart[nDGBIndex] - 3));
                     int nBoxY = (391 + ((4 - nDiffOffset) * 60)) - 2;
-                    txランク.tDraw2D(CDTXMania.app.Device, nBoxX + 75, nBoxY + 5, new Rectangle(nBadgeWidth * 9, 0, nBadgeWidth, txランク.szImageSize.Height));
+                    txランク.tDraw2D(CDTXMania.app.Device, nBoxX + 75, nBoxY + 5, new SharpDX.RectangleF(nBadgeWidth * 9, 0, nBadgeWidth, txランク.szImageSize.Height));
                 }
                 #endregion
 
@@ -1073,7 +1073,7 @@ internal class CActSelectStatusPanel : CActivity
             {
                 if (st達成率数字[i].ch == c)
                 {
-                    Rectangle rectangle = new(st達成率数字[i].rc.X, st達成率数字[i].rc.Y, 12, 20);
+                    SharpDX.RectangleF rectangle = new(st達成率数字[i].rc.X, st達成率数字[i].rc.Y, 12, 20);
                     if (c == '.')
                     {
                         rectangle.Width -= 6;
@@ -1106,7 +1106,7 @@ internal class CActSelectStatusPanel : CActivity
             {
                 if (stDifficultyNumber[i].ch == c)
                 {
-                    Rectangle rectangle = new(stDifficultyNumber[i].rc.X, stDifficultyNumber[i].rc.Y, stDifficultyNumber[i].rc.Width, stDifficultyNumber[i].rc.Height);
+                    SharpDX.RectangleF rectangle = new(stDifficultyNumber[i].rc.X, stDifficultyNumber[i].rc.Y, stDifficultyNumber[i].rc.Width, stDifficultyNumber[i].rc.Height);
                     if (txDifficultyNumber != null)
                     {
                         txDifficultyNumber.tDraw2D(CDTXMania.app.Device, x, y, rectangle);
@@ -1128,7 +1128,7 @@ internal class CActSelectStatusPanel : CActivity
             {
                 if (stDifficultyNumber[i].ch == c)
                 {
-                    Rectangle rectangle = new(stDifficultyNumber[i].rc.X, stDifficultyNumber[i].rc.Y, 20, 28);
+                    SharpDX.RectangleF rectangle = new(stDifficultyNumber[i].rc.X, stDifficultyNumber[i].rc.Y, 20, 28);
                     if (c == '.')
                     {
                         rectangle.Width -= 10;
@@ -1159,7 +1159,7 @@ internal class CActSelectStatusPanel : CActivity
             {
                 if (st数字[i].ch == str[j])
                 {
-                    Rectangle rectangle = new(st数字[i].rc.X, st数字[i].rc.Y, st数字[i].rc.Width, st数字[i].rc.Height);
+                    SharpDX.RectangleF rectangle = new(st数字[i].rc.X, st数字[i].rc.Y, st数字[i].rc.Width, st数字[i].rc.Height);
                     if (txBPM数字 != null)
                     {
                         txBPM数字.tDraw2D(CDTXMania.app.Device, x, y, rectangle);

@@ -184,8 +184,8 @@ internal class CActPerfBGA : CActivity
 						stLayer[ i ].sz開始サイズ = size = size2;
 						stLayer[ i ].n総移動時間ms = num2 = 0;
 					}
-					Rectangle rectangle = new Rectangle();
-					Rectangle rectangle2 = new Rectangle();
+					SharpDX.RectangleF rectangle = new();
+					SharpDX.RectangleF rectangle2 = new();
 					if( num2 == 0 )
 					{
 						rectangle.X = point.X;
@@ -264,11 +264,11 @@ internal class CActPerfBGA : CActivity
 						{
 							if( ( stLayer[ i ].rBMP != null ) && ( stLayer[ i ].rBMP.tx画像 != null ) )
 							{
-								stLayer[ i ].rBMP.tx画像.tDraw2D( CDTXMania.app.Device, x + rectangle2.X, y + rectangle2.Y, rectangle );
+								stLayer[ i ].rBMP.tx画像.tDraw2DFloat( CDTXMania.app.Device, x + rectangle2.X, y + rectangle2.Y, rectangle );
 							}
 							else if( ( stLayer[ i ].rBMPTEX != null ) && ( stLayer[ i ].rBMPTEX.tx画像 != null ) )
 							{
-								stLayer[ i ].rBMPTEX.tx画像.tDraw2D( CDTXMania.app.Device, x + rectangle2.X, y + rectangle2.Y, rectangle );
+								stLayer[ i ].rBMPTEX.tx画像.tDraw2DFloat( CDTXMania.app.Device, x + rectangle2.X, y + rectangle2.Y, rectangle );
 							}
 						}
 					}

@@ -5,6 +5,7 @@ using SharpDX;
 using FDK;
 
 using Rectangle = System.Drawing.Rectangle;
+using RectangleF = SharpDX.RectangleF;
 
 namespace DTXMania;
 
@@ -207,14 +208,14 @@ internal class CActSelectArtistComment : CActivity
 					rectangle.Width -= -rectangle.X;
 					rectangle.X = 0;
 				}
-				int num5 = ((int)(((float)rectangle.X) / txComment.vcScaleRatio.X)) / nテクスチャの最大幅;
-				Rectangle rectangle2 = new Rectangle();
+				int num5 = ((int)(rectangle.X / txComment.vcScaleRatio.X)) / nテクスチャの最大幅;
+				RectangleF rectangle2 = new();
 				while (rectangle.Width > 0)
 				{
-					rectangle2.X = ((int)(((float)rectangle.X) / txComment.vcScaleRatio.X)) % nテクスチャの最大幅;
+					rectangle2.X = ((int)(rectangle.X / txComment.vcScaleRatio.X)) % nテクスチャの最大幅;
 					rectangle2.Y = num5 * ((int)ft描画用フォント.Size);
-					int num6 = ((num5 + 1) == nComment行数) ? nComment最終行の幅 : nテクスチャの最大幅;
-					int num7 = num6 - rectangle2.X;
+					float num6 = ((num5 + 1) == nComment行数) ? nComment最終行の幅 : nテクスチャの最大幅;
+					float num7 = num6 - rectangle2.X;
 					rectangle2.Width = num7;
 					rectangle2.Height = (int)ft描画用フォント.Size;
 					txComment.tDraw2D(CDTXMania.app.Device, num3, num4, rectangle2);

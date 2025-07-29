@@ -1,5 +1,6 @@
 ﻿using System.Drawing;
 using SharpDX.Direct3D9;
+using RectangleF = SharpDX.RectangleF;
 
 namespace FDK;
 
@@ -210,63 +211,63 @@ public class CTextureAf : CTexture, IDisposable
 #else
 		for ( int n = 0; n <= _foldtimes; n++ )
 		{
-			Rectangle r;
+			RectangleF r;
 			if ( b横長のテクスチャである )
 			{
 				int currentHeight = n * _orgHeight;
-				r = new Rectangle( 0, currentHeight, rcFullImage.Width, _orgHeight );
+				r = new RectangleF( 0, currentHeight, rcFullImage.Width, _orgHeight );
 				tDraw2D( device, x + n * rcFullImage.Width, y, 1f, r );
 			}
 			else
 			{
 				int currentWidth = n * _orgWidth;
-				r = new Rectangle( currentWidth, 0, _orgWidth, rcFullImage.Height );
+				r = new RectangleF( currentWidth, 0, _orgWidth, rcFullImage.Height );
 				tDraw2D( device, x, y + n * rcFullImage.Height, 1f, r );
 			}
 		}
 #endif
 	}
-	public new void t2D描画( Device device, int x, int y, Rectangle rc )
+	public new void t2D描画( Device device, float x, float y, SharpDX.RectangleF rc )
 	{
-		Rectangle r;
+		SharpDX.RectangleF r;
 		if ( b横長のテクスチャである )
 		{
-			int beginFold = rc.X / rcFullImage.Width;
-			int endFold = ( rc.X + rc.Width ) / rcFullImage.Width;
-			for ( int i = beginFold; i <= endFold; i++ )
+			float beginFold = rc.X / rcFullImage.Width;
+			float endFold = ( rc.X + rc.Width ) / rcFullImage.Width;
+			for ( float i = beginFold; i <= endFold; i++ )
 			{
 				if ( i > _foldtimes ) break;
 
-				int newRcY = i * _orgHeight + rc.Y;
-				int newRcX = ( i == beginFold ) ? ( rc.X % rcFullImage.Width ) : 0;
-				int newRcWidth = ( newRcX + rc.Width > rcFullImage.Width ) ? rcFullImage.Width - newRcX : rc.Width;
+				float newRcY = i * _orgHeight + rc.Y;
+				float newRcX = ( i == beginFold ) ? ( rc.X % rcFullImage.Width ) : 0;
+				float newRcWidth = ( newRcX + rc.Width > rcFullImage.Width ) ? rcFullImage.Width - newRcX : rc.Width;
 
-				r = new Rectangle( newRcX, newRcY, newRcWidth, rc.Height );
+				r = new SharpDX.RectangleF( newRcX, newRcY, newRcWidth, rc.Height );
 				tDraw2D( device, x, y, 1f, r );
 
-				int deltaX = ( i == beginFold ) ? ( i + 1 ) * rcFullImage.Width - rc.X : rcFullImage.Width;
-				int newWidth = rc.Width - deltaX;
+				float deltaX = ( i == beginFold ) ? ( i + 1 ) * rcFullImage.Width - rc.X : rcFullImage.Width;
+				float newWidth = rc.Width - deltaX;
 				x += deltaX;
 				rc.Width = newWidth;
 			}
 		}
 		else
 		{
-			int beginFold = rc.Y / rcFullImage.Height;
-			int endFold = ( rc.Y + rc.Height ) / rcFullImage.Height;
-			for ( int i = beginFold; i <= endFold; i++ )
+			float beginFold = rc.Y / rcFullImage.Height;
+			float endFold = ( rc.Y + rc.Height ) / rcFullImage.Height;
+			for ( float i = beginFold; i <= endFold; i++ )
 			{
 				if ( i > _foldtimes ) break;
 
-				int newRcX = i * _orgWidth + rc.X;
-				int newRcY = ( i == beginFold ) ? ( rc.Y % rcFullImage.Height ) : 0;
-				int newRcHeight = ( newRcY + rc.Height > rcFullImage.Height ) ? rcFullImage.Height - newRcY : rc.Height;
+				float newRcX = i * _orgWidth + rc.X;
+				float newRcY = ( i == beginFold ) ? ( rc.Y % rcFullImage.Height ) : 0;
+				float newRcHeight = ( newRcY + rc.Height > rcFullImage.Height ) ? rcFullImage.Height - newRcY : rc.Height;
 
-				r = new Rectangle( newRcX, newRcY, rc.Width, newRcHeight );
+				r = new SharpDX.RectangleF( newRcX, newRcY, rc.Width, newRcHeight );
 				tDraw2D( device, x, y, 1f, r );
 
-				int deltaY = ( i == beginFold ) ? ( i + 1 ) * rcFullImage.Height - rc.Y : rcFullImage.Height;
-				int newHeight = rc.Height - deltaY;
+				float deltaY = ( i == beginFold ) ? ( i + 1 ) * rcFullImage.Height - rc.Y : rcFullImage.Height;
+				float newHeight = rc.Height - deltaY;
 				y += deltaY;
 				rc.Height = newHeight;
 			}

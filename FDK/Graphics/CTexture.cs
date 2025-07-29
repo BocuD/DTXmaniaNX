@@ -99,7 +99,7 @@ public class CTexture : IDisposable
 			Format = format;
 			szImageSize = new Size(bitmap.Width, bitmap.Height);
 			szTextureSize = tGetOptimalTextureSizeNotExceedingSpecifiedSize(device, szImageSize);
-			rcFullImage = new Rectangle(0, 0, szImageSize.Width, szImageSize.Height);
+			rcFullImage = new SharpDX.RectangleF(0, 0, szImageSize.Width, szImageSize.Height);
 
 			using (var stream = new MemoryStream())
 			{
@@ -164,7 +164,7 @@ public class CTexture : IDisposable
 			Format = format;
 			szImageSize = new Size(n幅, n高さ);
 			szTextureSize = tGetOptimalTextureSizeNotExceedingSpecifiedSize(device, szImageSize);
-			rcFullImage = new Rectangle(0, 0, szImageSize.Width, szImageSize.Height);
+			rcFullImage = new SharpDX.RectangleF(0, 0, szImageSize.Width, szImageSize.Height);
 
 			using (var bitmap = new Bitmap(1, 1))
 			{
@@ -243,7 +243,7 @@ public class CTexture : IDisposable
 			var information = ImageInformation.FromMemory(txData);
 			Format = format;
 			szImageSize = new Size(information.Width, information.Height);
-			rcFullImage = new Rectangle(0, 0, szImageSize.Width, szImageSize.Height);
+			rcFullImage = new SharpDX.RectangleF(0, 0, szImageSize.Width, szImageSize.Height);
 			int colorKey = (bBlackIsTransparent) ? unchecked((int)0xFF000000) : 0;
 			szTextureSize = tGetOptimalTextureSizeNotExceedingSpecifiedSize(device, szImageSize);
 #if TEST_Direct3D9Ex
@@ -278,7 +278,7 @@ public class CTexture : IDisposable
 		{
 			Format = format;
 			szImageSize = new Size(bitmap.Width, bitmap.Height);
-			rcFullImage = new Rectangle(0, 0, szImageSize.Width, szImageSize.Height);
+			rcFullImage = new SharpDX.RectangleF(0, 0, szImageSize.Width, szImageSize.Height);
 			int colorKey = (bBlackIsTransparent) ? unchecked((int)0xFF000000) : 0;
 			szTextureSize = tGetOptimalTextureSizeNotExceedingSpecifiedSize(device, szImageSize);
 
@@ -322,7 +322,7 @@ public class CTexture : IDisposable
 		tDraw2D(device, x, y, 1f, rcFullImage);
 	}
 
-	public void tDraw2D(Device device, int x, int y, RectangleF rcClipRect)
+	public void tDraw2D(Device device, int x, int y, SharpDX.RectangleF rcClipRect)
 	{
 		tDraw2D(device, x, y, 1f, rcClipRect);
 	}
@@ -332,12 +332,12 @@ public class CTexture : IDisposable
 		tDraw2D(device, x, y, 1f, rcFullImage);
 	}
 
-	public void tDraw2DFloat(Device device, float x, float y, RectangleF rcClipRect)
+	public void tDraw2DFloat(Device device, float x, float y, SharpDX.RectangleF rcClipRect)
 	{
 		tDraw2D(device, x, y, 1f, rcClipRect);
 	}
 
-	public void tDraw2D(Device device, float x, float y, float depth, RectangleF rcClipRect)
+	public void tDraw2D(Device device, float x, float y, float depth, SharpDX.RectangleF rcClipRect)
 	{
 		if (texture == null)
 			return;
@@ -477,7 +477,7 @@ public class CTexture : IDisposable
 		tDraw2DUpsideDown(device, x, y, 1f, rcFullImage);
 	}
 
-	public void tDraw2DUpsideDown(Device device, int x, int y, float depth, Rectangle rcClipRect)
+	public void tDraw2DUpsideDown(Device device, int x, int y, float depth, SharpDX.RectangleF rcClipRect)
 	{
 		if (texture == null)
 			throw new InvalidOperationException("テクスチャは生成されていません。");
@@ -580,6 +580,11 @@ public class CTexture : IDisposable
 		device.SetTexture(0, texture);
 		device.VertexFormat = TransformedColoredTexturedVertex.Format;
 		device.DrawUserPrimitives(PrimitiveType.TriangleStrip, 2, vertices);
+	}
+
+	public void tDraw2DMatrix(Device device, Matrix transformMatrix, Vector2 size)
+	{
+		tDraw2DMatrix(device, transformMatrix, size, rcFullImage);
 	}
 	
 	public void tDraw2DMatrix(Device device, Matrix transformMatrix, Vector2 size, SharpDX.RectangleF clipRect)
@@ -738,7 +743,7 @@ public class CTexture : IDisposable
 		tDraw3D(device, mat, rcFullImage);
 	}
 
-	public void tDraw3D(Device device, Matrix mat, Rectangle rcClipRect)
+	public void tDraw3D(Device device, Matrix mat, SharpDX.RectangleF rcClipRect)
 	{
 		if (texture == null)
 			return;
@@ -805,7 +810,7 @@ public class CTexture : IDisposable
 	///   mat *= SharpDX.Matrix.Translation( x, y, z );
 	/// 「mat =」ではなく「mat *=」であることを忘れないこと。
 	/// </summary>
-	public void tDraw3DTopLeftReference(Device device, Matrix mat, Rectangle rcClipRect)
+	public void tDraw3DTopLeftReference(Device device, Matrix mat, SharpDX.RectangleF rcClipRect)
 	{
 		//とりあえず補正値などは無し。にしても使う機会少なさそうだなー____
 		if (texture == null)
@@ -1001,7 +1006,7 @@ public class CTexture : IDisposable
 
 	// 2012.3.21 さらなる new の省略作戦
 
-	protected Rectangle rcFullImage; // テクスチャ作ったらあとは不変
+	protected SharpDX.RectangleF rcFullImage; // テクスチャ作ったらあとは不変
 
 	protected Color4 color4 = new(1f, 1f, 1f, 1f); // アルファ以外は不変
 	//-----------------

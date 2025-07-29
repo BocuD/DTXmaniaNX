@@ -1,4 +1,5 @@
 ﻿using DTXMania.Core;
+using SharpDX;
 using Rectangle = System.Drawing.Rectangle;
 
 namespace DTXMania;
@@ -47,16 +48,16 @@ internal class CActPerfDrumsScore : CActPerfCommonScore
             string str = string.Format("{0,7:######0}", n現在表示中のスコア[0]);
             for (int i = 0; i < 7; i++)
             {
-                Rectangle rectangle;
+                RectangleF rectangle;
                 char ch = str[i];
                 if (ch.Equals(' '))
                 {
-                    rectangle = new Rectangle(0, 0, 0, 0);
+                    rectangle = new RectangleF(0, 0, 0, 0);
                 }
                 else
                 {
                     int num4 = int.Parse(str.Substring(i, 1));
-                    rectangle = new Rectangle(num4 * 36, 0, 36, 50);
+                    rectangle = new RectangleF(num4 * 36, 0, 36, 50);
                 }
                 if( txScore != null )
                 {
@@ -65,7 +66,7 @@ internal class CActPerfDrumsScore : CActPerfCommonScore
             }
             if( txScore != null )
             {
-                txScore.tDraw2D(CDTXMania.app.Device, n本体X[0], n本体Y, new Rectangle(0, 50, 86, 28));
+                txScore.tDraw2D(CDTXMania.app.Device, n本体X[0], n本体Y, new RectangleF(0, 50, 86, 28));
             }
         }
         return 0;

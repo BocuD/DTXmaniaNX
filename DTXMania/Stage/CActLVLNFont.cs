@@ -21,9 +21,9 @@ public class CActLVLNFont : CActivity
 			for (int i = 0; i < 12; i++)
 			{
 				st数字[i, j].ch = numChars[i];
-				st数字[i, j].rc = new Rectangle(
+				st数字[i, j].rc = new SharpDX.RectangleF(
 					(i % 4) * numWidth + (j % 2) * 64,
-					(i / 4) * numHeight + (j / 2) * 64,
+					(i / 4.0f) * numHeight + (j / 2.0f) * 64,
 					numWidth,
 					numHeight
 				);
@@ -37,7 +37,7 @@ public class CActLVLNFont : CActivity
 	{
 		tDrawString(x, y, str, EFontColor.White, EFontAlign.Right);
 	}
-	public void tDrawString(int x, int y, string str, EFontColor efc, EFontAlign efa)
+	public void tDrawString(float x, float y, string str, EFontColor efc, EFontAlign efa)
 	{
 		if (bActivated && !string.IsNullOrEmpty(str))
 		{
@@ -56,9 +56,9 @@ public class CActLVLNFont : CActivity
 				{
 					int p = (ch == '-' ? 11 : ch - '0');
 					ST数字 s = st数字[p, (int)efc];
-					int sw = s.rc.Width;
-					int delta = bRightAlign ? 0 : -sw;
-					tx数値.tDraw2D(CDTXMania.app.Device, x + delta, y, s.rc);
+					float sw = s.rc.Width;
+					float delta = bRightAlign ? 0 : -sw;
+					tx数値.tDraw2DFloat(CDTXMania.app.Device, x + delta, y, s.rc);
 					x += bRightAlign ? -sw : sw;
 				}
 			}
@@ -98,7 +98,7 @@ public class CActLVLNFont : CActivity
 	private struct ST数字
 	{
 		public char ch;
-		public Rectangle rc;
+		public SharpDX.RectangleF rc;
 	}
 
 	public enum EFontColor

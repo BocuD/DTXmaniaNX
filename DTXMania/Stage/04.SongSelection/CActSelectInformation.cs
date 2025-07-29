@@ -72,7 +72,7 @@ internal class CActSelectInformation : CActivity
 				if( n画像Index上 >= 0 )
 				{
 					STINFO stinfo = stInfo[ n画像Index上 ];
-					Rectangle rectangle = new Rectangle( stinfo.pt左上座標.X, stinfo.pt左上座標.Y + ( (int) ( 42.0 * n現在の割合 ) ), 240, Convert.ToInt32(42.0 * (1.0 - n現在の割合)) );
+					SharpDX.RectangleF rectangle = new( stinfo.pt左上座標.X, stinfo.pt左上座標.Y + ( (int) ( 42.0 * n現在の割合 ) ), 240, Convert.ToInt32(42.0 * (1.0 - n現在の割合)) );
 					if( txInfo != null )
 					{
 						txInfo.tDraw2D( CDTXMania.app.Device, 4, 0, rectangle );
@@ -81,7 +81,7 @@ internal class CActSelectInformation : CActivity
 				if( n画像Index下 >= 0 )
 				{
 					STINFO stinfo = stInfo[ n画像Index下 ];
-					Rectangle rectangle = new Rectangle( stinfo.pt左上座標.X, stinfo.pt左上座標.Y, 240, (int) ( 42.0 * n現在の割合 ) );
+					SharpDX.RectangleF rectangle = new( stinfo.pt左上座標.X, stinfo.pt左上座標.Y, 240, (int) ( 42.0 * n現在の割合 ) );
 					if( txInfo != null )
 					{
 						txInfo.tDraw2D( CDTXMania.app.Device, 4, 0 + ( (int) ( 42.0 * ( 1.0 - n現在の割合 ) ) ), rectangle );
@@ -91,7 +91,7 @@ internal class CActSelectInformation : CActivity
 			else
 			{
 				STINFO stinfo = stInfo[ n画像Index下 ];
-				Rectangle rectangle = new Rectangle( stinfo.pt左上座標.X, stinfo.pt左上座標.Y, 240, 42 );
+				SharpDX.RectangleF rectangle = new( stinfo.pt左上座標.X, stinfo.pt左上座標.Y, 240, 42 );
 				if( txInfo != null )
 				{
 					txInfo.tDraw2D( CDTXMania.app.Device, 4, 0, rectangle );

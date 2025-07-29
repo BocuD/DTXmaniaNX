@@ -1,5 +1,5 @@
-﻿using System.Drawing;
-using FDK;
+﻿using FDK;
+using SharpDX;
 
 namespace DTXMania.Core;
 
@@ -16,13 +16,6 @@ internal class CCharacterConsole : CActivity
 		RedThin,   // 赤細
 		AshThin    // 灰細
 	}
-	public enum E配置
-	{
-		左詰,
-		中央,
-		右詰
-	}
-
 
 	// メソッド
 
@@ -48,9 +41,9 @@ internal class CCharacterConsole : CActivity
 					}
 					else
 					{
-						if( txフォント8x16[ (int) ( (int) font / (int) EFontType.WhiteThin ) ] != null )
+						if( txフォント8x16[ (int) font / (int) EFontType.WhiteThin ] != null )
 						{
-							txフォント8x16[ (int) ( (int) font / (int) EFontType.WhiteThin ) ].tDraw2D( CDTXMania.app.Device, x, y, rc文字の矩形領域[ (int) ( (int) font % (int) EFontType.WhiteThin ), index ] );
+							txフォント8x16[ (int) font / (int) EFontType.WhiteThin ].tDraw2D( CDTXMania.app.Device, x, y, rc文字の矩形領域[ (int) font % (int) EFontType.WhiteThin, index ] );
 						}
 						x += nFontWidth;
 					}
@@ -64,7 +57,7 @@ internal class CCharacterConsole : CActivity
 
 	public override void OnActivate()
 	{
-		rc文字の矩形領域 = new Rectangle[3, str表記可能文字.Length ];
+		rc文字の矩形領域 = new RectangleF[3, str表記可能文字.Length ];
 		for( int i = 0; i < 3; i++ )
 		{
 			for (int j = 0; j < str表記可能文字.Length; j++)
@@ -115,7 +108,7 @@ internal class CCharacterConsole : CActivity
 
 	#region [ private ]
 	//-----------------
-	private Rectangle[,] rc文字の矩形領域;
+	private RectangleF[,] rc文字の矩形領域;
 	private const string str表記可能文字 = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~ ";
 	private const int nFontWidth = 8, nFontHeight = 16;
 	private CTexture[] txフォント8x16 = new CTexture[ 2 ];

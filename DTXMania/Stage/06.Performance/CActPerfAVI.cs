@@ -8,6 +8,7 @@ using FDK;
 
 using Rectangle = System.Drawing.Rectangle;
 using Point = System.Drawing.Point;
+using RectangleF = SharpDX.RectangleF;
 
 namespace DTXMania;
 
@@ -643,7 +644,7 @@ internal class CActPerfAVI : CActivity
                             {
                                 stageDrum.txBonusEffect.vcScaleRatio = new Vector3( 2.0f, 2.0f, 1.0f );
                                 stageDrum.txBonusEffect.bAdditiveBlending = true;
-                                stageDrum.txBonusEffect.tDraw2D( CDTXMania.app.Device, 0, -2, new Rectangle(0, 0 + ( 360 * numf ), 640, 360 )) ;
+                                stageDrum.txBonusEffect.tDraw2D( CDTXMania.app.Device, 0, -2, new RectangleF(0, 0 + ( 360 * numf ), 640, 360 )) ;
                                 try
                                 {
                                     //if( this.txフィルインエフェクト[ this.stFillIn[ i ].ctUpdate.nCurrentValue ] != null )

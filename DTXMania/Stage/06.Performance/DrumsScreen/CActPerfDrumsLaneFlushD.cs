@@ -194,64 +194,64 @@ internal class CActPerfDrumsLaneFlushD : CActivity
                     {
                         if (index == 0) //LC
                         {
-                            txLine.tDraw2D(CDTXMania.app.Device, 295, 0, new Rectangle(0, 0, 72, 720)); //左の棒
+                            txLine.tDraw2D(CDTXMania.app.Device, 295, 0, new  SharpDX.RectangleF(0, 0, 72, 720)); //左の棒
                         }
                         if (index == 1) //HH
                         {
-                            txLine.tDraw2D(CDTXMania.app.Device, 367, 0, new Rectangle(72, 0, 49, 720)); //左の棒
+                            txLine.tDraw2D(CDTXMania.app.Device, 367, 0, new  SharpDX.RectangleF(72, 0, 49, 720)); //左の棒
                         }
                         if (index == 2) //SD
                         {
                             if (CDTXMania.ConfigIni.eLaneType.Drums == EType.A || CDTXMania.ConfigIni.eLaneType.Drums == EType.C)
                             {
-                                txLine.tDraw2D(CDTXMania.app.Device, 467, 0, new Rectangle(172, 0, 57, 720));
+                                txLine.tDraw2D(CDTXMania.app.Device, 467, 0, new  SharpDX.RectangleF(172, 0, 57, 720));
                             }
                             else if (CDTXMania.ConfigIni.eLaneType.Drums == EType.B || CDTXMania.ConfigIni.eLaneType.Drums == EType.D)
                             {
-                                txLine.tDraw2D(CDTXMania.app.Device, 416, 0, new Rectangle(172, 0, 57, 720));
+                                txLine.tDraw2D(CDTXMania.app.Device, 416, 0, new  SharpDX.RectangleF(172, 0, 57, 720));
                             }
                         }
                         if (index == 3) //BD
                         {
                             if (CDTXMania.ConfigIni.eLaneType.Drums == EType.A || CDTXMania.ConfigIni.eLaneType.Drums == EType.D)
                             {
-                                txLine.tDraw2D(CDTXMania.app.Device, 573, 0, new Rectangle(278, 0, 69, 720));
+                                txLine.tDraw2D(CDTXMania.app.Device, 573, 0, new  SharpDX.RectangleF(278, 0, 69, 720));
                             }
                             else if (CDTXMania.ConfigIni.eLaneType.Drums == EType.B || CDTXMania.ConfigIni.eLaneType.Drums == EType.C)
                             {
-                                txLine.tDraw2D(CDTXMania.app.Device, 524, 0, new Rectangle(278, 0, 69, 720));
+                                txLine.tDraw2D(CDTXMania.app.Device, 524, 0, new  SharpDX.RectangleF(278, 0, 69, 720));
                             }
                         }
                         if (index == 4) //HT
                         {
                             if (CDTXMania.ConfigIni.eLaneType.Drums == EType.A)
                             {
-                                txLine.tDraw2D(CDTXMania.app.Device, 524, 0, new Rectangle(229, 0, 49, 720));
+                                txLine.tDraw2D(CDTXMania.app.Device, 524, 0, new  SharpDX.RectangleF(229, 0, 49, 720));
                             }
                             else if (CDTXMania.ConfigIni.eLaneType.Drums == EType.B || CDTXMania.ConfigIni.eLaneType.Drums == EType.C)
                             {
-                                txLine.tDraw2D(CDTXMania.app.Device, 593, 0, new Rectangle(229, 0, 49, 720));
+                                txLine.tDraw2D(CDTXMania.app.Device, 593, 0, new  SharpDX.RectangleF(229, 0, 49, 720));
                             }
                             else if (CDTXMania.ConfigIni.eLaneType.Drums == EType.D)
                             {
-                                txLine.tDraw2D(CDTXMania.app.Device, 473, 0, new Rectangle(229, 0, 49, 720));
+                                txLine.tDraw2D(CDTXMania.app.Device, 473, 0, new  SharpDX.RectangleF(229, 0, 49, 720));
                             }
                         }
 
                         if (index == 5) //LT
                         {
-                            txLine.tDraw2D(CDTXMania.app.Device, 642, 0, new Rectangle(347, 0, 49, 720));
+                            txLine.tDraw2D(CDTXMania.app.Device, 642, 0, new  SharpDX.RectangleF(347, 0, 49, 720));
                         }
                         if (index == 6) //FT
                         {
-                            txLine.tDraw2D(CDTXMania.app.Device, 691, 0, new Rectangle(396, 0, 54, 720));
+                            txLine.tDraw2D(CDTXMania.app.Device, 691, 0, new  SharpDX.RectangleF(396, 0, 54, 720));
                             //if (CDTXMania.ConfigIni.eRDPosition == ERDPosition.RCRD)
                             {
-                                //this.txLine.tDraw2D(CDTXMania.app.Device, 742, 0, new Rectangle(447, 0, 5, 720));
+                                //this.txLine.tDraw2D(CDTXMania.app.Device, 742, 0, new  SharpDX.RectangleF(447, 0, 5, 720));
                             }
                             //else
                             {
-                                //this.txLine.tDraw2D(CDTXMania.app.Device, 742, 0, new Rectangle(447, 0, 4, 720));
+                                //this.txLine.tDraw2D(CDTXMania.app.Device, 742, 0, new  SharpDX.RectangleF(447, 0, 4, 720));
                             }
 
                         }
@@ -260,38 +260,38 @@ internal class CActPerfDrumsLaneFlushD : CActivity
                         {
                             if (CDTXMania.ConfigIni.eRDPosition == ERDPosition.RCRD)
                             {
-                                txLine.tDraw2D(CDTXMania.app.Device, 745, 0, new Rectangle(450, 0, 70, 720));
+                                txLine.tDraw2D(CDTXMania.app.Device, 745, 0, new  SharpDX.RectangleF(450, 0, 70, 720));
                             }
                             else if (CDTXMania.ConfigIni.eRDPosition == ERDPosition.RDRC)
                             {
-                                txLine.tDraw2D(CDTXMania.app.Device, xCY - 31, 0, new Rectangle(450, 0, 70, 720));
+                                txLine.tDraw2D(CDTXMania.app.Device, xCY - 31, 0, new  SharpDX.RectangleF(450, 0, 70, 720));
                             }
                         }
                         if (index == 8) //RD
                         {
                             if (CDTXMania.ConfigIni.eRDPosition == ERDPosition.RCRD)
                             {
-                                txLine.tDraw2D(CDTXMania.app.Device, xCY - 55, 0, new Rectangle(520, 0, 38, 720));
+                                txLine.tDraw2D(CDTXMania.app.Device, xCY - 55, 0, new  SharpDX.RectangleF(520, 0, 38, 720));
                             }
                             else if (CDTXMania.ConfigIni.eRDPosition == ERDPosition.RDRC)
                             {
-                                txLine.tDraw2D(CDTXMania.app.Device, xCY - 124, 0, new Rectangle(520, 0, 38, 720));
+                                txLine.tDraw2D(CDTXMania.app.Device, xCY - 124, 0, new  SharpDX.RectangleF(520, 0, 38, 720));
                             }                                
                         }
                         if (index == 9) //LP
                         {
                             if (CDTXMania.ConfigIni.eLaneType.Drums == EType.A || CDTXMania.ConfigIni.eLaneType.Drums == EType.C)
                             {
-                                txLine.tDraw2D(CDTXMania.app.Device, x2 - 12, 0, new Rectangle(121, 0, 51, 720));
+                                txLine.tDraw2D(CDTXMania.app.Device, x2 - 12, 0, new  SharpDX.RectangleF(121, 0, 51, 720));
                             }
                             else if (CDTXMania.ConfigIni.eLaneType.Drums == EType.B)
                             {
-                                txLine.tDraw2D(CDTXMania.app.Device, x2 + 45, 0, new Rectangle(121, 0, 51, 720));
-                                //this.txLine.tDraw2D(CDTXMania.app.Device, 524, 0, new Rectangle(278, 0, 6, 720));
+                                txLine.tDraw2D(CDTXMania.app.Device, x2 + 45, 0, new  SharpDX.RectangleF(121, 0, 51, 720));
+                                //this.txLine.tDraw2D(CDTXMania.app.Device, 524, 0, new  SharpDX.RectangleF(278, 0, 6, 720));
                             }
                             else if (CDTXMania.ConfigIni.eLaneType.Drums == EType.D)
                             {
-                                txLine.tDraw2D(CDTXMania.app.Device, 522, 0, new Rectangle(121, 0, 51, 720));
+                                txLine.tDraw2D(CDTXMania.app.Device, 522, 0, new  SharpDX.RectangleF(121, 0, 51, 720));
                             }
                         }
                     }
@@ -311,7 +311,7 @@ internal class CActPerfDrumsLaneFlushD : CActivity
                                 l_drumPanelWidth = 447;
                                 l_xOffset = 72;
                             }
-                            txLine.tDraw2D(CDTXMania.app.Device, 295 + l_xOffset, 0, new Rectangle(0, 0, l_drumPanelWidth, 720));
+                            txLine.tDraw2D(CDTXMania.app.Device, 295 + l_xOffset, 0, new  SharpDX.RectangleF(0, 0, l_drumPanelWidth, 720));
                         }
                     }                        
                 }
@@ -399,7 +399,7 @@ internal class CActPerfDrumsLaneFlushD : CActivity
                                 {
                                     if (txFlush[j + 11] != null)
                                     {
-                                        txFlush[j + 11].tDraw2D(CDTXMania.app.Device, x + m, y, new Rectangle((k * 42), 0, ((w - m) < 42) ? (w - m) : 42, 128));
+                                        txFlush[j + 11].tDraw2D(CDTXMania.app.Device, x + m, y, new  SharpDX.RectangleF((k * 42), 0, ((w - m) < 42) ? (w - m) : 42, 128));
                                     }
                                 }
                             }
@@ -413,7 +413,7 @@ internal class CActPerfDrumsLaneFlushD : CActivity
                                         if (txFlush[j] != null)
                                         {
                                             txFlush[j].nTransparency = (num8);
-                                            txFlush[j].tDraw2D(CDTXMania.app.Device, x + n, num8, new Rectangle(k * 42, 0, ((w - n) < 42) ? (w - n) : 42, 128));
+                                            txFlush[j].tDraw2D(CDTXMania.app.Device, x + n, num8, new  SharpDX.RectangleF(k * 42, 0, ((w - n) < 42) ? (w - n) : 42, 128));
                                         }
                                     }
                                 }

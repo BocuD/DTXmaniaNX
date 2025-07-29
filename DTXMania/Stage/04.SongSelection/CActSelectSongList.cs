@@ -1633,7 +1633,7 @@ internal class CActSelectSongList : CActivity
 		}
 		if (txItemNumbers != null)
 		{
-			txItemNumbers.tDraw2D(CDTXMania.app.Device, x, y, new Rectangle(dx, dy, 16, 16));
+			txItemNumbers.tDraw2D(CDTXMania.app.Device, x, y, new SharpDX.RectangleF(dx, dy, 16, 16));
 		}
 	}
 	//-----------------

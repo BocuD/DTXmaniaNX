@@ -1,5 +1,5 @@
-﻿using System.Drawing;
-using DTXMania.Core;
+﻿using DTXMania.Core;
+using SharpDX;
 
 namespace DTXMania;
 
@@ -106,7 +106,7 @@ internal class CActPerfGuitarRGB : CActPerfCommonRGB
                 for( int j = 0; j < 5; j++ )
                 {
                     int index = CDTXMania.ConfigIni.bLeft.Guitar ? ( 2 - j ) : j;
-                    Rectangle rectangle = new Rectangle( index * 24, 0, 0x18, 0x20 );
+                    RectangleF rectangle = new RectangleF( index * 24, 0, 0x18, 0x20 );
                     //if( base.bPressedState[ index ] )
                     {
                         rectangle.Y += 0x20;
@@ -121,10 +121,10 @@ internal class CActPerfGuitarRGB : CActPerfCommonRGB
                 if (txRGB != null)
                 {
                     if (nシャッター下.Guitar == 0)
-                        txRGB.tDraw2D(CDTXMania.app.Device, 67, 670, new Rectangle(0, 128, 277, 50));
+                        txRGB.tDraw2D(CDTXMania.app.Device, 67, 670, new RectangleF(0, 128, 277, 50));
 
                     if (nシャッター上.Guitar == 0)
-                        txRGB.tDraw2D(CDTXMania.app.Device, 67, 42, new Rectangle(0, (CDTXMania.ConfigIni.bLeft.Guitar ? 64 : 0), 277, 64));
+                        txRGB.tDraw2D(CDTXMania.app.Device, 67, 42, new RectangleF(0, (CDTXMania.ConfigIni.bLeft.Guitar ? 64 : 0), 277, 64));
                 }
 
                 if (txShutter != null)
@@ -153,7 +153,7 @@ internal class CActPerfGuitarRGB : CActPerfCommonRGB
                 for( int j = 0; j < 5; j++ )
                 {
                     int index = CDTXMania.ConfigIni.bLeft.Guitar ? ( 2 - j ) : j;
-                    Rectangle rectangle = new Rectangle( index * 24, 0, 0x18, 0x20 );
+                    RectangleF rectangle = new RectangleF( index * 24, 0, 0x18, 0x20 );
                     //if( base.bPressedState[ index ] )
                     {
                         rectangle.Y += 0x20;
@@ -168,10 +168,10 @@ internal class CActPerfGuitarRGB : CActPerfCommonRGB
                 if (txRGB != null)
                 {
                     if (nシャッター下.Bass == 0)
-                        txRGB.tDraw2D(CDTXMania.app.Device, 937, 670, new Rectangle(0, 128, 277, 50));
+                        txRGB.tDraw2D(CDTXMania.app.Device, 937, 670, new RectangleF(0, 128, 277, 50));
 
                     if (nシャッター上.Bass == 0)
-                        txRGB.tDraw2D(CDTXMania.app.Device, 937, 42, new Rectangle(0, (CDTXMania.ConfigIni.bLeft.Bass ? 64 : 0), 277, 64));
+                        txRGB.tDraw2D(CDTXMania.app.Device, 937, 42, new RectangleF(0, (CDTXMania.ConfigIni.bLeft.Bass ? 64 : 0), 277, 64));
                 }
 
                 if (txShutter != null)

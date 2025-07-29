@@ -10,6 +10,7 @@ using DTXMania.Core.Video;
 using DTXMania.UI;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.DynamicElements;
+using RectangleF = SharpDX.RectangleF;
 
 namespace DTXMania;
 
@@ -234,17 +235,17 @@ internal class CStageTitle : CStage
 				txMenu.nTransparency = (int) ( 255.0 * ( 1.0 - ( ( (double) ctカーソルフラッシュ用.nCurrentValue ) / 100.0 ) ) );
 				int x_magnified = x + ( (int) ( ( MENU_W * ( 1.0 - nMag ) ) / 2.0 ) );
 				int y_magnified = y + ( (int) ( ( MENU_H * ( 1.0 - nMag ) ) / 2.0 ) );
-				txMenu.tDraw2D( CDTXMania.app.Device, x_magnified, y_magnified, new Rectangle( 0, MENU_H * 5, MENU_W, MENU_H ) );
+				txMenu.tDraw2D( CDTXMania.app.Device, x_magnified, y_magnified, new RectangleF( 0, MENU_H * 5, MENU_W, MENU_H ) );
 			}
 			txMenu.vcScaleRatio.X = 1f;
 			txMenu.vcScaleRatio.Y = 1f;
 			txMenu.nTransparency = 0xff;
-			txMenu.tDraw2D( CDTXMania.app.Device, x, y, new Rectangle( 0, MENU_H * 4, MENU_W, MENU_H ) );
+			txMenu.tDraw2D( CDTXMania.app.Device, x, y, new RectangleF( 0, MENU_H * 4, MENU_W, MENU_H ) );
 		}
 		if( txMenu != null )
 		{
-			txMenu.tDraw2D( CDTXMania.app.Device, MENU_X, MENU_Y, new Rectangle( 0, 0, MENU_W, MENU_H ) );
-			txMenu.tDraw2D( CDTXMania.app.Device, MENU_X, MENU_Y + MENU_H, new Rectangle( 0, MENU_H * 2, MENU_W, MENU_H * 2 ) );
+			txMenu.tDraw2D( CDTXMania.app.Device, MENU_X, MENU_Y, new RectangleF( 0, 0, MENU_W, MENU_H ) );
+			txMenu.tDraw2D( CDTXMania.app.Device, MENU_X, MENU_Y + MENU_H, new RectangleF( 0, MENU_H * 2, MENU_W, MENU_H * 2 ) );
 		}
 				
 		EPhase ePhaseId = ePhaseID;

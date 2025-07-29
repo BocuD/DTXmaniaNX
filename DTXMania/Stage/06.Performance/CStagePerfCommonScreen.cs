@@ -3584,7 +3584,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                             l_xOffset = 72;
                         }
                         txChip.vcScaleRatio.Y = 1f;
-                        txChip.tDraw2D(CDTXMania.app.Device, 0x127 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + pChip.nDistanceFromBar.Drums) - 1) : ((nJudgeLinePosY.Drums - pChip.nDistanceFromBar.Drums) - 1), new Rectangle(0, 772, l_drumPanelWidth, 2));
+                        txChip.tDraw2D(CDTXMania.app.Device, 0x127 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + pChip.nDistanceFromBar.Drums) - 1) : ((nJudgeLinePosY.Drums - pChip.nDistanceFromBar.Drums) - 1), new SharpDX.RectangleF(0, 772, l_drumPanelWidth, 2));
                     }
                     break;
                 #endregion
@@ -4188,7 +4188,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                         {
                             txChip.vcScaleRatio.Y = 1f;
                             int xo = (inst == EInstrumentPart.GUITAR) ? 88 : 959;
-                            txChip.tDraw2D(CDTXMania.app.Device, xo, y - 2, new Rectangle(0, 10, 196, 10));
+                            txChip.tDraw2D(CDTXMania.app.Device, xo, y - 2, new SharpDX.RectangleF(0, 10, 196, 10));
                         }
                         Rectangle rc = new Rectangle(rectOpenOffsetX, chipHeight, chipWidth, 10);
                         int x;
@@ -4223,12 +4223,12 @@ internal abstract class CStagePerfCommonScreen : CStage
                             Array.Reverse(nChipXPos);
                         }
 
-                        Rectangle[] rChipTxRectArray = {
-                            new Rectangle(0, 0, 38, 10),
-                            new Rectangle(38, 0, 38, 10),
-                            new Rectangle(76, 0, 38, 10),
-                            new Rectangle(114, 0, 38, 10),
-                            new Rectangle(152, 0, 38, 10)
+                        SharpDX.RectangleF[] rChipTxRectArray = {
+                            new(0, 0, 38, 10),
+                            new(38, 0, 38, 10),
+                            new(76, 0, 38, 10),
+                            new(114, 0, 38, 10),
+                            new(152, 0, 38, 10)
                         };
 
                         bool[] bChipColorFlags = {
@@ -4246,7 +4246,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                                 if(inst == EInstrumentPart.GUITAR || inst == EInstrumentPart.BASS)
                                 {
                                     int num8 = nChipXPos[i];
-                                    Rectangle rect1 = rChipTxRectArray[i];
+                                    SharpDX.RectangleF rect1 = rChipTxRectArray[i];
                                     //this.txChip.tDraw2D(CDTXMania.app.Device, num8, y - chipHeight / 2, rect1);
                                     txChip.vcScaleRatio.Y = 1f;
                                     if (!pChip.bHit)
@@ -4257,7 +4257,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                                     if (pChip.bロングノートである)
                                     {
                                         //_ = (bool)CDTXMania.Instance.ConfigIni.bReverse[inst];
-                                        Rectangle rectangle2 = rect1;
+                                        SharpDX.RectangleF rectangle2 = rect1;
                                         rectangle2.Y += 3;
                                         rectangle2.Height = 5;
                                         txChip.nTransparency = 128;
@@ -4729,7 +4729,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                     l_drumPanelWidth = 447;
                     l_xOffset = 72;
                 }
-                txHitBar.tDraw2D(CDTXMania.app.Device, 295 + l_xOffset, y, new Rectangle(0, 0, l_drumPanelWidth, 6));
+                txHitBar.tDraw2D(CDTXMania.app.Device, 295 + l_xOffset, y, new SharpDX.RectangleF(0, 0, l_drumPanelWidth, 6));
             }
             if (CDTXMania.ConfigIni.bShowPerformanceInformation)
                 actLVFont.tDrawString(295, (CDTXMania.ConfigIni.bReverse.Drums ? y - 20 : y + 8), CDTXMania.ConfigIni.nJudgeLine.Drums.ToString());

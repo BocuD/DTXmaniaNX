@@ -16,147 +16,215 @@ internal class CActPerfGuitarStatusPanel : CActPerfCommonStatusPanel
     {
         txパネル文字 = new CTexture[2];
         ST文字位置[] st文字位置Array = new ST文字位置[11];
-        ST文字位置 st文字位置 = new ST文字位置();
-        st文字位置.ch = '0';
-        st文字位置.pt = new Point(0, 0);
+        ST文字位置 st文字位置 = new()
+        {
+            ch = '0',
+            pt = new Point(0, 0)
+        };
         st文字位置Array[0] = st文字位置;
-        ST文字位置 st文字位置2 = new ST文字位置();
-        st文字位置2.ch = '1';
-        st文字位置2.pt = new Point(28, 0);
+        ST文字位置 st文字位置2 = new()
+        {
+            ch = '1',
+            pt = new Point(28, 0)
+        };
         st文字位置Array[1] = st文字位置2;
-        ST文字位置 st文字位置3 = new ST文字位置();
-        st文字位置3.ch = '2';
-        st文字位置3.pt = new Point(56, 0);
+        ST文字位置 st文字位置3 = new()
+        {
+            ch = '2',
+            pt = new Point(56, 0)
+        };
         st文字位置Array[2] = st文字位置3;
-        ST文字位置 st文字位置4 = new ST文字位置();
-        st文字位置4.ch = '3';
-        st文字位置4.pt = new Point(84, 0);
+        ST文字位置 st文字位置4 = new()
+        {
+            ch = '3',
+            pt = new Point(84, 0)
+        };
         st文字位置Array[3] = st文字位置4;
-        ST文字位置 st文字位置5 = new ST文字位置();
-        st文字位置5.ch = '4';
-        st文字位置5.pt = new Point(112, 0);
+        ST文字位置 st文字位置5 = new()
+        {
+            ch = '4',
+            pt = new Point(112, 0)
+        };
         st文字位置Array[4] = st文字位置5;
-        ST文字位置 st文字位置6 = new ST文字位置();
-        st文字位置6.ch = '5';
-        st文字位置6.pt = new Point(140, 0);
+        ST文字位置 st文字位置6 = new()
+        {
+            ch = '5',
+            pt = new Point(140, 0)
+        };
         st文字位置Array[5] = st文字位置6;
-        ST文字位置 st文字位置7 = new ST文字位置();
-        st文字位置7.ch = '6';
-        st文字位置7.pt = new Point(168, 0);
+        ST文字位置 st文字位置7 = new()
+        {
+            ch = '6',
+            pt = new Point(168, 0)
+        };
         st文字位置Array[6] = st文字位置7;
-        ST文字位置 st文字位置8 = new ST文字位置();
-        st文字位置8.ch = '7';
-        st文字位置8.pt = new Point(196, 0);
+        ST文字位置 st文字位置8 = new()
+        {
+            ch = '7',
+            pt = new Point(196, 0)
+        };
         st文字位置Array[7] = st文字位置8;
-        ST文字位置 st文字位置9 = new ST文字位置();
-        st文字位置9.ch = '8';
-        st文字位置9.pt = new Point(224, 0);
+        ST文字位置 st文字位置9 = new()
+        {
+            ch = '8',
+            pt = new Point(224, 0)
+        };
         st文字位置Array[8] = st文字位置9;
-        ST文字位置 st文字位置10 = new ST文字位置();
-        st文字位置10.ch = '9';
-        st文字位置10.pt = new Point(252, 0);
+        ST文字位置 st文字位置10 = new()
+        {
+            ch = '9',
+            pt = new Point(252, 0)
+        };
         st文字位置Array[9] = st文字位置10;
-        ST文字位置 st文字位置11 = new ST文字位置();
-        st文字位置11.ch = '.';
-        st文字位置11.pt = new Point(280, 0);
+        ST文字位置 st文字位置11 = new()
+        {
+            ch = '.',
+            pt = new Point(280, 0)
+        };
         st文字位置Array[10] = st文字位置11;
         st大文字位置 = st文字位置Array;
 
         ST文字位置[] st文字位置Array2 = new ST文字位置[12];
-        ST文字位置 st文字位置13 = new ST文字位置();
-        st文字位置13.ch = '0';
-        st文字位置13.pt = new Point(0, 0);
+        ST文字位置 st文字位置13 = new()
+        {
+            ch = '0',
+            pt = new Point(0, 0)
+        };
         st文字位置Array2[0] = st文字位置13;
-        ST文字位置 st文字位置14 = new ST文字位置();
-        st文字位置14.ch = '1';
-        st文字位置14.pt = new Point(20, 0);
+        ST文字位置 st文字位置14 = new()
+        {
+            ch = '1',
+            pt = new Point(20, 0)
+        };
         st文字位置Array2[1] = st文字位置14;
-        ST文字位置 st文字位置15 = new ST文字位置();
-        st文字位置15.ch = '2';
-        st文字位置15.pt = new Point(40, 0);
+        ST文字位置 st文字位置15 = new()
+        {
+            ch = '2',
+            pt = new Point(40, 0)
+        };
         st文字位置Array2[2] = st文字位置15;
-        ST文字位置 st文字位置16 = new ST文字位置();
-        st文字位置16.ch = '3';
-        st文字位置16.pt = new Point(60, 0);
+        ST文字位置 st文字位置16 = new()
+        {
+            ch = '3',
+            pt = new Point(60, 0)
+        };
         st文字位置Array2[3] = st文字位置16;
-        ST文字位置 st文字位置17 = new ST文字位置();
-        st文字位置17.ch = '4';
-        st文字位置17.pt = new Point(80, 0);
+        ST文字位置 st文字位置17 = new()
+        {
+            ch = '4',
+            pt = new Point(80, 0)
+        };
         st文字位置Array2[4] = st文字位置17;
-        ST文字位置 st文字位置18 = new ST文字位置();
-        st文字位置18.ch = '5';
-        st文字位置18.pt = new Point(100, 0);
+        ST文字位置 st文字位置18 = new()
+        {
+            ch = '5',
+            pt = new Point(100, 0)
+        };
         st文字位置Array2[5] = st文字位置18;
-        ST文字位置 st文字位置19 = new ST文字位置();
-        st文字位置19.ch = '6';
-        st文字位置19.pt = new Point(120, 0);
+        ST文字位置 st文字位置19 = new()
+        {
+            ch = '6',
+            pt = new Point(120, 0)
+        };
         st文字位置Array2[6] = st文字位置19;
-        ST文字位置 st文字位置20 = new ST文字位置();
-        st文字位置20.ch = '7';
-        st文字位置20.pt = new Point(140, 0);
+        ST文字位置 st文字位置20 = new()
+        {
+            ch = '7',
+            pt = new Point(140, 0)
+        };
         st文字位置Array2[7] = st文字位置20;
-        ST文字位置 st文字位置21 = new ST文字位置();
-        st文字位置21.ch = '8';
-        st文字位置21.pt = new Point(160, 0);
+        ST文字位置 st文字位置21 = new()
+        {
+            ch = '8',
+            pt = new Point(160, 0)
+        };
         st文字位置Array2[8] = st文字位置21;
-        ST文字位置 st文字位置22 = new ST文字位置();
-        st文字位置22.ch = '9';
-        st文字位置22.pt = new Point(180, 0);
+        ST文字位置 st文字位置22 = new()
+        {
+            ch = '9',
+            pt = new Point(180, 0)
+        };
         st文字位置Array2[9] = st文字位置22;
-        ST文字位置 st文字位置23 = new ST文字位置();
-        st文字位置23.ch = '%';
-        st文字位置23.pt = new Point(200, 0);
+        ST文字位置 st文字位置23 = new()
+        {
+            ch = '%',
+            pt = new Point(200, 0)
+        };
         st文字位置Array2[10] = st文字位置23;
-        ST文字位置 st文字位置24 = new ST文字位置();
-        st文字位置24.ch = '.';
-        st文字位置24.pt = new Point(210, 0);
+        ST文字位置 st文字位置24 = new()
+        {
+            ch = '.',
+            pt = new Point(210, 0)
+        };
         st文字位置Array2[11] = st文字位置24;
         st小文字位置 = st文字位置Array2;
 
         ST文字位置[] st難易度文字位置Ar = new ST文字位置[11];
-        ST文字位置 st難易度文字位置 = new ST文字位置();
-        st難易度文字位置.ch = '0';
-        st難易度文字位置.pt = new Point(0, 0);
+        ST文字位置 st難易度文字位置 = new()
+        {
+            ch = '0',
+            pt = new Point(0, 0)
+        };
         st難易度文字位置Ar[0] = st難易度文字位置;
-        ST文字位置 st難易度文字位置2 = new ST文字位置();
-        st難易度文字位置2.ch = '1';
-        st難易度文字位置2.pt = new Point(16, 0);
+        ST文字位置 st難易度文字位置2 = new()
+        {
+            ch = '1',
+            pt = new Point(16, 0)
+        };
         st難易度文字位置Ar[1] = st難易度文字位置2;
-        ST文字位置 st難易度文字位置3 = new ST文字位置();
-        st難易度文字位置3.ch = '2';
-        st難易度文字位置3.pt = new Point(32, 0);
+        ST文字位置 st難易度文字位置3 = new()
+        {
+            ch = '2',
+            pt = new Point(32, 0)
+        };
         st難易度文字位置Ar[2] = st難易度文字位置3;
-        ST文字位置 st難易度文字位置4 = new ST文字位置();
-        st難易度文字位置4.ch = '3';
-        st難易度文字位置4.pt = new Point(48, 0);
+        ST文字位置 st難易度文字位置4 = new()
+        {
+            ch = '3',
+            pt = new Point(48, 0)
+        };
         st難易度文字位置Ar[3] = st難易度文字位置4;
-        ST文字位置 st難易度文字位置5 = new ST文字位置();
-        st難易度文字位置5.ch = '4';
-        st難易度文字位置5.pt = new Point(64, 0);
+        ST文字位置 st難易度文字位置5 = new()
+        {
+            ch = '4',
+            pt = new Point(64, 0)
+        };
         st難易度文字位置Ar[4] = st難易度文字位置5;
-        ST文字位置 st難易度文字位置6 = new ST文字位置();
-        st難易度文字位置6.ch = '5';
-        st難易度文字位置6.pt = new Point(80, 0);
+        ST文字位置 st難易度文字位置6 = new()
+        {
+            ch = '5',
+            pt = new Point(80, 0)
+        };
         st難易度文字位置Ar[5] = st難易度文字位置6;
-        ST文字位置 st難易度文字位置7 = new ST文字位置();
-        st難易度文字位置7.ch = '6';
-        st難易度文字位置7.pt = new Point(96, 0);
+        ST文字位置 st難易度文字位置7 = new()
+        {
+            ch = '6',
+            pt = new Point(96, 0)
+        };
         st難易度文字位置Ar[6] = st難易度文字位置7;
-        ST文字位置 st難易度文字位置8 = new ST文字位置();
-        st難易度文字位置8.ch = '7';
-        st難易度文字位置8.pt = new Point(112, 0);
+        ST文字位置 st難易度文字位置8 = new()
+        {
+            ch = '7',
+            pt = new Point(112, 0)
+        };
         st難易度文字位置Ar[7] = st難易度文字位置8;
-        ST文字位置 st難易度文字位置9 = new ST文字位置();
-        st難易度文字位置9.ch = '8';
-        st難易度文字位置9.pt = new Point(128, 0);
+        ST文字位置 st難易度文字位置9 = new()
+        {
+            ch = '8',
+            pt = new Point(128, 0)
+        };
         st難易度文字位置Ar[8] = st難易度文字位置9;
-        ST文字位置 st難易度文字位置10 = new ST文字位置();
-        st難易度文字位置10.ch = '9';
-        st難易度文字位置10.pt = new Point(144, 0);
+        ST文字位置 st難易度文字位置10 = new()
+        {
+            ch = '9',
+            pt = new Point(144, 0)
+        };
         st難易度文字位置Ar[9] = st難易度文字位置10;
-        ST文字位置 st難易度文字位置11 = new ST文字位置();
-        st難易度文字位置11.ch = '.';
-        st難易度文字位置11.pt = new Point(160, 0);
+        ST文字位置 st難易度文字位置11 = new()
+        {
+            ch = '.',
+            pt = new Point(160, 0)
+        };
         st難易度文字位置Ar[10] = st難易度文字位置11;
         st難易度数字位置 = st難易度文字位置Ar;
 
@@ -227,7 +295,7 @@ internal class CActPerfGuitarStatusPanel : CActPerfCommonStatusPanel
 
             for( int i = 0; i < 2; i++ )
             {
-                Bitmap image2 = new Bitmap( 200, 100 );
+                Bitmap image2 = new( 200, 100 );
                 Graphics graネームプレート用 = Graphics.FromImage(image2);
 
                 #region[ ネームカラー ]
@@ -310,9 +378,9 @@ internal class CActPerfGuitarStatusPanel : CActPerfCommonStatusPanel
                 //--------------------
                 #endregion
                 #region[ 名前とか ]
-                Bitmap bmpCardName = new Bitmap(1, 1);
+                Bitmap bmpCardName = new(1, 1);
                 bmpCardName = prv表示用フォント.DrawPrivateFont( strPlayerName[ i ], Color.White, Color.Transparent, clNameColor, ( CDTXMania.ConfigIni.nNameColor[ 0 ] > 11 ? clNameColorLower : clNameColor ) );
-                Bitmap bmpTitleName = new Bitmap(1, 1);
+                Bitmap bmpTitleName = new(1, 1);
                 bmpTitleName = prv称号フォント.DrawPrivateFont( strTitleName[ i ], Color.White, Color.Transparent );
 
                 graネームプレート用.DrawImage( bmpCardName, -2f, 26f );
@@ -464,7 +532,7 @@ internal class CActPerfGuitarStatusPanel : CActPerfCommonStatusPanel
                                                 
 
                     if( tx難易度パネル != null )
-                        tx難易度パネル.tDraw2D( CDTXMania.app.Device, 14 + n本体X[ i ], 266 + n本体Y, new Rectangle( rectDiffPanelPoint.X, rectDiffPanelPoint.Y, 60, 60 ) );
+                        tx難易度パネル.tDraw2D( CDTXMania.app.Device, 14 + n本体X[ i ], 266 + n本体Y, new SharpDX.RectangleF( rectDiffPanelPoint.X, rectDiffPanelPoint.Y, 60, 60 ) );
                     tレベル数字描画( ( bCLASSIC == true ? 26 : 18 ) + n本体X[ i ], 290 + n本体Y, str );
                 }
             }
@@ -513,7 +581,7 @@ internal class CActPerfGuitarStatusPanel : CActPerfCommonStatusPanel
             {
                 if (st小文字位置[i].ch == ch)
                 {
-                    Rectangle rectangle = new Rectangle(st小文字位置[i].pt.X, st小文字位置[i].pt.Y, 20, 26);
+                    SharpDX.RectangleF rectangle = new(st小文字位置[i].pt.X, st小文字位置[i].pt.Y, 20, 26);
                     if (txパネル文字[0] != null)
                     {
                         txパネル文字[0].tDraw2D(CDTXMania.app.Device, x, y, rectangle);
@@ -537,7 +605,7 @@ internal class CActPerfGuitarStatusPanel : CActPerfCommonStatusPanel
             {
                 if (currTextPosStructArray[i].ch == str[j])
                 {                        
-                    Rectangle rectangle = new Rectangle(
+                    SharpDX.RectangleF rectangle = new(
                         currTextPosStructArray[i].rect.X,
                         currTextPosStructArray[i].rect.Y,
                         currTextPosStructArray[i].rect.Width,
@@ -563,7 +631,7 @@ internal class CActPerfGuitarStatusPanel : CActPerfCommonStatusPanel
             {
                 if (st大文字位置[i].ch == ch)
                 {
-                    Rectangle rectangle = new Rectangle(st大文字位置[i].pt.X, st大文字位置[i].pt.Y, 28, 42);
+                    SharpDX.RectangleF rectangle = new(st大文字位置[i].pt.X, st大文字位置[i].pt.Y, 28, 42);
                     if (ch == '.')
                     {
                         rectangle.Width -= 18;
@@ -586,7 +654,7 @@ internal class CActPerfGuitarStatusPanel : CActPerfCommonStatusPanel
             {
                 if (st難易度数字位置[i].ch == ch)
                 {
-                    Rectangle rectangle = new Rectangle(st難易度数字位置[i].pt.X, st難易度数字位置[i].pt.Y, 16, 32);
+                    SharpDX.RectangleF rectangle = new(st難易度数字位置[i].pt.X, st難易度数字位置[i].pt.Y, 16, 32);
                     if (ch == '.')
                     {
                         rectangle.Width -= 11;

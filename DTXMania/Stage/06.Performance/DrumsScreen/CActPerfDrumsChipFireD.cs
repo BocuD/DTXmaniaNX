@@ -640,8 +640,8 @@ internal class CActPerfDrumsChipFireD : CActivity
 
 						if (txNotes != null)
 						{
-							txNotes.tDraw3D(CDTXMania.app.Device, mat, new Rectangle((nノーツの左上X座標[st飛び散るチップ[i].nLane]), 640, (nノーツの幅[st飛び散るチップ[i].nLane] + 10) / 2, 64));
-							txNotes.tDraw3D(CDTXMania.app.Device, mat2, new Rectangle((nノーツの左上X座標[st飛び散るチップ[i].nLane]), 640, (nノーツの幅[st飛び散るチップ[i].nLane] + 10) / 2, 64));
+							txNotes.tDraw3D(CDTXMania.app.Device, mat, new RectangleF((nノーツの左上X座標[st飛び散るチップ[i].nLane]), 640, (nノーツの幅[st飛び散るチップ[i].nLane] + 10) / 2, 64));
+							txNotes.tDraw3D(CDTXMania.app.Device, mat2, new RectangleF((nノーツの左上X座標[st飛び散るチップ[i].nLane]), 640, (nノーツの幅[st飛び散るチップ[i].nLane] + 10) / 2, 64));
 						}
 					}
 
@@ -771,9 +771,9 @@ internal class CActPerfDrumsChipFireD : CActivity
 							int n幅 = CDTXMania.ConfigIni.nExplosionWidgh;
 							int n高さ = CDTXMania.ConfigIni.nExplosionHeight;
 
-							tx火花2.tDraw3D(CDTXMania.app.Device, identity, new Rectangle( n幅 * st火花[i].ct進行.nCurrentValue, st火花[i].nLane * n高さ, n幅, n高さ));
+							tx火花2.tDraw3D(CDTXMania.app.Device, identity, new RectangleF( n幅 * st火花[i].ct進行.nCurrentValue, st火花[i].nLane * n高さ, n幅, n高さ));
 							if (CDTXMania.stagePerfDrumsScreen.bChorusSection == true && txボーナス花火 != null)
-								tx火花2.tDraw3D(CDTXMania.app.Device, identity, new Rectangle(st火花[i].ct進行.nCurrentValue * n幅, 10 * n高さ, n幅, n高さ));
+								tx火花2.tDraw3D(CDTXMania.app.Device, identity, new RectangleF(st火花[i].ct進行.nCurrentValue * n幅, 10 * n高さ, n幅, n高さ));
 						}
 					}
 				}
