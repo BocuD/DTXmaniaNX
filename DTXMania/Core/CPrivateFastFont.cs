@@ -30,29 +30,26 @@ public class CPrivateFastFont : CPrivateFont
 
 
 	#region [ コンストラクタ ]
-	public CPrivateFastFont(FontFamily fontfamily, int pt, FontStyle style)
+	public CPrivateFastFont(FontFamily fontfamily, float pt, FontStyle style)
 	{
 		Initialize(null, fontfamily, pt, style);
 	}
-	public CPrivateFastFont(FontFamily fontfamily, int pt)
+	public CPrivateFastFont(FontFamily fontfamily, float pt)
 	{
 		Initialize(null, fontfamily, pt, FontStyle.Regular);
 	}
-	public CPrivateFastFont(string fontpath, int pt, FontStyle style)
+	public CPrivateFastFont(string fontpath, float pt, FontStyle style)
 	{
 		Initialize(fontpath, null, pt, style);
 	}
-	public CPrivateFastFont(string fontpath, int pt)
+	public CPrivateFastFont(string fontpath, float pt)
 	{
 		Initialize(fontpath, null, pt, FontStyle.Regular);
 	}
-	public CPrivateFastFont()
-	{
-		throw new ArgumentException("CPrivateFastFont: 引数があるコンストラクタを使用してください。");
-	}
+
 	#endregion
 	#region [ コンストラクタから呼ばれる初期化処理 ]
-	protected new void Initialize(string fontpath, FontFamily fontfamily, int pt, FontStyle style)
+	protected new void Initialize(string fontpath, FontFamily fontfamily, float pt, FontStyle style)
 	{
 		bDispose完了済み_CPrivateFastFont = false;
 		listFontCache = new List<FontCache>();

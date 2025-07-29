@@ -34,7 +34,7 @@ namespace DTXMania.Core;
 /// </remarks>
 public class CPrivateFont : IDisposable
 {
-	protected void Initialize(string fontPath, FontFamily? fontFamily, int fontSize, FontStyle style)
+	protected void Initialize(string fontPath, FontFamily? fontFamily, float fontSize, FontStyle style)
 	{
 		pfc = null;
 		this.fontFamily = null;
@@ -158,7 +158,7 @@ public class CPrivateFont : IDisposable
 			
 		// 縁取りの縁のサイズは、とりあえずフォントの大きさの1/4とする
 		// Changed to 1/6 as 1/4 is too thick for new Black-White Style
-		int nEdgePt = bEdgeGradation ? pt / 6 : bEdge ? pt / 4 : 0;
+		float nEdgePt = bEdgeGradation ? pt / 6 : bEdge ? pt / 4 : 0;
 		const TextFormatFlags flags = TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding;
 			
 		// 描画サイズを測定する
@@ -167,7 +167,7 @@ public class CPrivateFont : IDisposable
 			
 		//取得した描画サイズを基に、描画先のbitmapを作成する
 		int lWidth = (int)(stringSize.Width * 1.1f + 10.0f); //Add 10% and 10 pixels so we avoid text truncation
-		Bitmap bmp = new(lWidth + nEdgePt * 2, stringSize.Height + nEdgePt * 2);
+		Bitmap bmp = new((int)(lWidth + nEdgePt * 2), (int)(stringSize.Height + nEdgePt * 2));
 		bmp.MakeTransparent();
 		Graphics g = Graphics.FromImage(bmp);
 		g.SmoothingMode = SmoothingMode.HighQuality;
@@ -175,9 +175,11 @@ public class CPrivateFont : IDisposable
 		sf.LineAlignment = StringAlignment.Far; // 画面下部（垂直方向位置）
 		sf.Alignment = StringAlignment.Near;    // 画面中央（水平方向位置）//Changed to Left (Near) of Texture rect
 		sf.FormatFlags = StringFormatFlags.NoClip | StringFormatFlags.NoWrap;
-			
+		
+		//center vertically
+		
 		// レイアウト枠
-		Rectangle r = new(0, 0, lWidth + nEdgePt * 2, stringSize.Height + nEdgePt * 2);
+		Rectangle r = new(0, 0, (int)(lWidth + nEdgePt * 2), (int)(stringSize.Height + nEdgePt * 2));
 			
 		if (bEdgeGradation || bEdge)
 		{
@@ -238,7 +240,7 @@ public class CPrivateFont : IDisposable
 			g.DrawRectangle( new Pen( Color.Green, 1 ), new Rectangle( 0, 0, bmp.Width - 1, bmp.Height - 1 ) );
 #endif
 		RectStrings = new Rectangle(0, 0, stringSize.Width, stringSize.Height);
-		PtOrigin = new Point(nEdgePt * 2, nEdgePt * 2);
+		PtOrigin = new Point((int)(nEdgePt * 2), (int)(nEdgePt * 2));
 
 
 		sf.Dispose();
@@ -284,7 +286,7 @@ public class CPrivateFont : IDisposable
 
 	private PrivateFontCollection pfc;
 	private FontFamily fontFamily;
-	private int pt;
+	private float pt;
 
 	//-----------------
 	#endregion
