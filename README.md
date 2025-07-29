@@ -37,6 +37,7 @@ This is a fork of DTXManiaNX, with the main focus being improving QOL, as well a
 - Extensive Dear ImGui-based tooling
   - Inspector and hierarchy views for new UI framework, performance analysis, song database tests, etc
   - Toggle using `ctrl + i`
+  - In game log viewer (`ctrl + l`)
  
 ## Current roadmap
 
