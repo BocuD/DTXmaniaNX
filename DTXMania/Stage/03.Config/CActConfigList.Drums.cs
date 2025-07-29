@@ -741,6 +741,14 @@ internal partial class CActConfigList
             () => CDTXMania.ConfigIni.nInputAdjustTimeMs.Drums = iDrumsInputAdjustTimeMs.nCurrentValue);
         listItems.Add(iDrumsInputAdjustTimeMs);
 
+        CItemBase iDrumsGoToVelocity = new("Drum Hit Velocity", CItemBase.EPanelType.Folder,
+            "ドラムのヒットベロシティに関する項目を設定します。",
+            "Settings for the drums hit velocity.")
+        {
+            action = tSetupItemList_DrumsVelocity
+        };
+        listItems.Add(iDrumsGoToVelocity);
+        
         CItemBase iDrumsGoToKeyAssign = new("Drums Keys", CItemBase.EPanelType.Folder,
             "ドラムのキー入力に関する項目を設定します。",
             "Settings for the drums key/pad inputs.")

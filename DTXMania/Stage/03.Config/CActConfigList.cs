@@ -17,10 +17,11 @@ internal partial class CActConfigList : CActivity
         get
         {
             EMenuType e = eMenuType;
-            if (e == EMenuType.KeyAssignBass || e == EMenuType.KeyAssignDrums ||
-                e == EMenuType.KeyAssignGuitar || e == EMenuType.KeyAssignSystem ||
-                e == EMenuType.SystemGraphics || e == EMenuType.SystemAudio ||
-                e == EMenuType.SystemGameplay || e == EMenuType.SystemMenu)
+            if (e is EMenuType.KeyAssignBass or EMenuType.KeyAssignDrums 
+                or EMenuType.KeyAssignGuitar or EMenuType.KeyAssignSystem 
+                or EMenuType.SystemGraphics or EMenuType.SystemAudio 
+                or EMenuType.SystemGameplay or EMenuType.SystemMenu
+                or EMenuType.VelocityDrums)
             {
                 return true;
             }
@@ -66,6 +67,10 @@ internal partial class CActConfigList : CActivity
                 break;
 
             case EMenuType.KeyAssignDrums:
+                tSetupItemList_Drums();
+                break;
+            
+            case EMenuType.VelocityDrums:
                 tSetupItemList_Drums();
                 break;
 
@@ -633,6 +638,7 @@ internal partial class CActConfigList : CActivity
         SystemGameplay,
         SystemMenu,
         KeyAssignDrums,
+        VelocityDrums,
         KeyAssignGuitar,
         KeyAssignBass,
         Unknown
