@@ -1032,9 +1032,9 @@ internal class CDTXMania : Game
         base.OnExiting(e);
     }
 
-    public static void UpdateCursorState(bool forceVisible = false)
+    public static void UpdateCursorState()
     {
-        if (forceVisible)
+        if (InspectorManager.inspectorEnabled || InspectorManager.logWindowEnabled)
         {
             if (!bMouseCursorShown)
             {

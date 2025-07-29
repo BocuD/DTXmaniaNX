@@ -17,8 +17,8 @@ public static class InspectorManager
     public static Inspector.Inspector inspector { get; private set; }
     public static HierarchyWindow hierarchyWindow { get; private set; }
 
-    private static bool inspectorEnabled = false;
-    private static bool logWindowEnabled = false;
+    public static bool inspectorEnabled = false;
+    public static bool logWindowEnabled = false;
     
     public static ImDrawListPtr gizmoDrawList;
     public static Rectangle gizmoRect;
@@ -55,12 +55,14 @@ public static class InspectorManager
             && CDTXMania.InputManager.Keyboard.bKeyPressed(Key.I))
         {
             inspectorEnabled = !inspectorEnabled;
+            CDTXMania.UpdateCursorState();
         }
         
         if (CDTXMania.InputManager.Keyboard.bKeyPressing(Key.LeftControl) 
             && CDTXMania.InputManager.Keyboard.bKeyPressed(Key.L))
         {
             logWindowEnabled = !logWindowEnabled;
+            CDTXMania.UpdateCursorState();
         }
         
         ImGuiDockNodeFlags flags = ImGuiDockNodeFlags.PassthruCentralNode;
