@@ -516,39 +516,35 @@ public class CActDFPFont : CActivity
 		}
 		return num;
 	}
-	public void t文字列描画( int x, int y, string str )
+	
+	public void t文字列描画( Matrix matrix, string str, bool bHighlight, float fScale )
 	{
-		t文字列描画( x, y, str, false, 1f );
-	}
-	public void t文字列描画( int x, int y, string str, bool b強調 )
-	{
-		t文字列描画( x, y, str, b強調, 1f );
-	}
-	public void t文字列描画( int x, int y, string str, bool b強調, float fScale )
-	{
-		if( bActivated && !string.IsNullOrEmpty( str ) )
+		if (!bActivated || string.IsNullOrEmpty(str)) return;
+
+		float x = 0;
+		
+		CTexture texture = bHighlight ? txHighlightCharacterMap : txCharacterMap;
+		if( texture != null )
 		{
-			CTexture texture = b強調 ? txHighlightCharacterMap : txCharacterMap;
-			if( texture != null )
+			texture.vcScaleRatio = new Vector3( fScale, fScale, 1f );
+			foreach( char ch in str )
 			{
-				texture.vcScaleRatio = new Vector3( fScale, fScale, 1f );
-				foreach( char ch in str )
+				foreach( STCharacterMap st文字領域 in stCharacterRects )
 				{
-					foreach( STCharacterMap st文字領域 in stCharacterRects )
+					if( st文字領域.ch == ch )
 					{
-						if( st文字領域.ch == ch )
+						RectangleF rect = new()
 						{
-							RectangleF rectanglef = new()
-							{
-								X = st文字領域.rc.X,
-								Y = st文字領域.rc.Y,
-								Width = st文字領域.rc.Width,
-								Height = st文字領域.rc.Height
-							};
-							texture.tDraw2D( CDTXMania.app.Device, x, y, rectanglef );
-							x += (int) ( ( st文字領域.rc.Width - 5 ) * fScale );
-							break;
-						}
+							X = st文字領域.rc.X,
+							Y = st文字領域.rc.Y,
+							Width = st文字領域.rc.Width,
+							Height = st文字領域.rc.Height
+						};
+						Vector2 size = new( rect.Width, rect.Height );
+						Matrix mat = Matrix.Translation(x, 0, 0);
+						texture.tDraw2DMatrix(CDTXMania.app.Device, mat * matrix, size, rect);
+						x += st文字領域.rc.Width * fScale;
+						break;
 					}
 				}
 			}

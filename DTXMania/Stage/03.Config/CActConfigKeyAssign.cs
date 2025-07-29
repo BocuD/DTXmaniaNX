@@ -107,7 +107,10 @@ internal class CActConfigKeyAssign : CActivity
 	public override int OnUpdateAndDraw()
 	{
 		if (!bActivated) return 0;
-
+		
+		Matrix scaleMatrix = Matrix.Scaling(CDTXMania.renderScale);
+		Matrix mat = Matrix.Identity;
+		
 		if (bWaitingForKeyInput)
 		{
 			if (CDTXMania.InputManager.Keyboard.bKeyPressed((int)SlimDXKey.Escape))
@@ -135,26 +138,30 @@ internal class CActConfigKeyAssign : CActivity
 		if (txCursor != null)
 		{
 			int num = 20;
-			// 15SEP20 Increasing x position by 120 pixels (was 0x144)
 			int cursPosX = 444;
 			int cursPosY = 62 + num * (nSelectedRow + 1);
-			txCursor.tDraw2D(CDTXMania.app.Device, cursPosX, cursPosY, new RectangleF(0, 0, 16, 32));
+			mat = Matrix.Translation(cursPosX, cursPosY, 0); 
+			txCursor.tDraw2DMatrix(CDTXMania.app.Device, mat * scaleMatrix, new Vector2(16, 32), new RectangleF(0, 0, 16, 32));
 			cursPosX += 16;
 			RectangleF rectangle = new(8, 0, 16, 32);
 			for (int j = 0; j < 14; j++)
 			{
-				txCursor.tDraw2D(CDTXMania.app.Device, cursPosX, cursPosY, rectangle);
+				mat = Matrix.Translation(cursPosX, cursPosY, 0);
+				txCursor.tDraw2DMatrix(CDTXMania.app.Device, mat * scaleMatrix, new Vector2(16, 32), rectangle);
 				cursPosX += 16;
 			}
 
-			txCursor.tDraw2D(CDTXMania.app.Device, cursPosX, cursPosY, new RectangleF(16, 0, 16, 32));
+			mat = Matrix.Translation(cursPosX, cursPosY, 0);
+			txCursor.tDraw2DMatrix(CDTXMania.app.Device, mat * scaleMatrix, new Vector2(16, 32), new RectangleF(16, 0, 16, 32));
 		}
 
 		int num5 = 20;
 		// 15SEP20 Increasing x position by 120 pixels (was 0x134)
 		int x = 428;
 		int y = 64;
-		stageConfig.actFont.t文字列描画(x, y, strPadName, false, 0.75f);
+		
+		mat = Matrix.Translation(x, y, 0);
+		stageConfig.actFont.t文字列描画(mat * scaleMatrix, strPadName, false, 0.75f);
 		y += num5;
 		CConfigIni.CKeyAssign.STKEYASSIGN[] stkeyassignArray = CDTXMania.ConfigIni.KeyAssign[(int)part][(int)pad];
 		for (int i = 0; i < 16; i++)
@@ -182,21 +189,26 @@ internal class CActConfigKeyAssign : CActivity
 					break;
 
 				default:
-					stageConfig.actFont.t文字列描画(x + 20, y, $"{i + 1,2}.", nSelectedRow == i, 0.75f);
+					mat = Matrix.Translation(x + 20, y, 0);
+					stageConfig.actFont.t文字列描画(mat * scaleMatrix, $"{i + 1,2}.", nSelectedRow == i, 0.75f);
 					break;
 			}
 
 			y += num5;
 		}
 
-		stageConfig.actFont.t文字列描画(x + 20, y, "Reset", nSelectedRow == 16, 0.75f);
+		mat = Matrix.Translation(x + 20, y, 0);
+		stageConfig.actFont.t文字列描画(mat * scaleMatrix, "Reset", nSelectedRow == 16, 0.75f);
 		y += num5;
-		stageConfig.actFont.t文字列描画(x + 20, y, "<< Return to List", nSelectedRow == 17, 0.75f);
+		mat = Matrix.Translation(x + 20, y, 0);
+		stageConfig.actFont.t文字列描画(mat * scaleMatrix, "<< Return to List", nSelectedRow == 17, 0.75f);
 		y += num5;
+		
 		if (bWaitingForKeyInput && txHitKeyDialog != null)
 		{
+			mat = Matrix.Translation(509, 215, 0);
 			// 15SEP20 Increasing x position by 120 pixels (was 0x185)
-			txHitKeyDialog.tDraw2D(CDTXMania.app.Device, 509, 215);
+			txHitKeyDialog.tDraw2DMatrix(CDTXMania.app.Device, mat * scaleMatrix);
 		}
 
 		return 0;
@@ -423,8 +435,10 @@ internal class CActConfigKeyAssign : CActivity
 
 				break;
 		}
-
-		stageConfig.actFont.t文字列描画(x, y, $"{line,2}. Joypad #{nID} " + str, b強調, 0.75f);
+		
+		Matrix translation = Matrix.Translation(x, y, 0);
+		translation *= Matrix.Scaling(CDTXMania.renderScale);
+		stageConfig.actFont.t文字列描画(translation, $"{line,2}. Joypad #{nID} " + str, b強調, 0.75f);
 	}
 
 	private void tDrawAssignedCodeKeyboard(int line, int x, int y, int nID, int nCode, bool b強調)
@@ -444,17 +458,23 @@ internal class CActConfigKeyAssign : CActivity
 			str = $"{line,2}. Key 0x{nCode:X2}";
 		}
 
-		stageConfig.actFont.t文字列描画(x, y, str, b強調, 0.75f);
+		Matrix translation = Matrix.Translation(x, y, 0);
+		translation *= Matrix.Scaling(CDTXMania.renderScale);
+		stageConfig.actFont.t文字列描画(translation, str, b強調, 0.75f);
 	}
 
 	private void tDrawAssignedCodeMidiIn(int line, int x, int y, int nID, int nCode, bool b強調)
 	{
-		stageConfig.actFont.t文字列描画(x, y, $"{line,2}. MidiIn #{nID} code.{nCode}", b強調, 0.75f);
+		Matrix translation = Matrix.Translation(x, y, 0);
+		translation *= Matrix.Scaling(CDTXMania.renderScale);
+		stageConfig.actFont.t文字列描画(translation, $"{line,2}. MidiIn #{nID} code.{nCode}", b強調, 0.75f);
 	}
 
 	private void tDrawAssignedCodeMouse(int line, int x, int y, int nID, int nCode, bool b強調)
 	{
-		stageConfig.actFont.t文字列描画(x, y, $"{line,2}. Mouse Button{nCode}", b強調, 0.75f);
+		Matrix translation = Matrix.Translation(x, y, 0);
+		translation *= Matrix.Scaling(CDTXMania.renderScale);
+		stageConfig.actFont.t文字列描画(translation, $"{line,2}. Mouse Button{nCode}", b強調, 0.75f);
 	}
 
 	private bool tKeyCheckAndAssignJoypad()
