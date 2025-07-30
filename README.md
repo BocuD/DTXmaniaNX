@@ -47,9 +47,10 @@ This is a fork of DTXManiaNX, with a main focus on improving QOL, as well as cle
   - Toggle using `ctrl + i`
   - In game log viewer (`ctrl + l`)
  
-## Current roadmap
+## Current roadmap (in no particular order)
 
 - Feature parity on song select screen with upstream DTXManiaNX
+- Lane swapping (similar to DTXMania AL)
 - Song database serialization
 - Song favourite filters
 - (fuzzy) song search
