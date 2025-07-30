@@ -43,7 +43,7 @@ public class CStageSongSelectionNew : CStage
         new SortByArtist(),
         new SortByDifficulty(),
         new SortByLevel(),
-        new SortByLastPlayed(),
+        new SortByPlayer(),
         new SortByAllSongs()
     ];
     
