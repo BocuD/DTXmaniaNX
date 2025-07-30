@@ -118,10 +118,8 @@ public class GitaDoraTransition : UIGroup
         bottom.position.Y = 360 + distance / 2;
         
         float remappedT = Remap(state.animationProgress, 0.63f, -1.0f, 0.0f, 1.0f);
-        Trace.TraceInformation($"Remapped T: {remappedT:F3}");
         float tClamped = Math.Clamp(remappedT, 0.0f, 1.0f);
         float easedT = 1 - MathF.Pow(1 - tClamped, 5);
-        Trace.TraceInformation($"Eased T: {easedT:F3}");
         
         float t_logo = Remap(easedT, 0.0f, 1.0f, logoStartX, logoFinalX);
         logo.position.X = t_logo;
@@ -132,7 +130,7 @@ public class GitaDoraTransition : UIGroup
         
         if (state.animate)
         {
-            Trace.TraceInformation($"Animating GITADORA transition: {state.animationProgress} -> {state.animationTarget} (direction: {state.animationDirection})");
+            //Trace.TraceInformation($"Animating GITADORA transition: {state.animationProgress} -> {state.animationTarget} (direction: {state.animationDirection})");
             state.animationProgress += delta * state.animationSpeed * state.animationDirection;
             if (state.animationProgress > 2.0f && state.animationTarget >= 1.5f)
             {
