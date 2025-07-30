@@ -30,6 +30,8 @@ public class SongSelectionElement : UIGroup
         bar = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_bar.png"));
         boxClosed = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_box_closed.png"));
         boxOpen = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_box_open.png"));
+        skillBarTex = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_skillbar.png"));
+        skillBarFillTex = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_skillbar_fill.png"));
     }
 
     public static void DisposeSongSelectElementAssets()
@@ -37,6 +39,8 @@ public class SongSelectionElement : UIGroup
         if (bar != null) bar.Dispose();
         if (bar != null) boxClosed.Dispose();
         if (bar != null) boxOpen.Dispose();
+        if (skillBarTex != null) skillBarTex.Dispose();
+        if (skillBarFillTex != null) skillBarFillTex.Dispose();
     }
     
     [AddChildMenu]
@@ -50,7 +54,7 @@ public class SongSelectionElement : UIGroup
         backgroundImage.renderOrder = -1;
         backgroundImage.name = "background";
         
-        albumArtImage = AddChild(new UIImage(DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_preimage default.png"))));
+        albumArtImage = AddChild(new UIImage());
         albumArtImage.size = new Vector2(65, 65);
         albumArtImage.position = new Vector3(40, 40, 0);
         albumArtImage.anchor = new Vector2(0.5f, 0.5f);
@@ -77,14 +81,14 @@ public class SongSelectionElement : UIGroup
         songArtistText.name = "artist";
         songArtistText.maximumWidth = 460.0f;
         
-        skillbar = AddChild(new UIImage(DTXTexture.LoadFromPath(CSkin.Path($@"Graphics\5_skillbar.png"))));
+        skillbar = AddChild(new UIImage(skillBarTex));
         skillbar.anchor = new Vector2(0.0f, 0.5f);
         skillbar.position = new Vector3(82.0f, 15.0f, 0.0f);
         skillbar.name = "skillbar";
         skillbar.renderOrder = 2;
         skillbar.isVisible = false;
         
-        skillbarFill = AddChild(new UIImage(DTXTexture.LoadFromPath(CSkin.Path($@"Graphics\5_skillbar_fill.png"))));
+        skillbarFill = AddChild(new UIImage(skillBarFillTex));
         skillbarFill.anchor = new Vector2(0.0f, 0.5f);
         skillbarFill.position = new Vector3(161.0f, 16.0f, 0.0f);
         skillbarFill.name = "skillbarFill";
@@ -115,12 +119,9 @@ public class SongSelectionElement : UIGroup
     private static DTXTexture bar;
     private static DTXTexture boxClosed;
     private static DTXTexture boxOpen;
-
-    public override void Dispose()
-    {
-        base.Dispose();
-    }
-
+    private static DTXTexture skillBarTex;
+    private static DTXTexture skillBarFillTex;
+    
     public SongNode? node { get; private set; }
 
     public void UpdateSongNode(SongNode newNode)

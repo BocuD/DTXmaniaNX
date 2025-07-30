@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Runtime.InteropServices;
 using DTXMania.Core;
 using DTXMania.SongDb;
 using DTXMania.UI;
@@ -41,8 +40,6 @@ public class SongSelectionContainer : UIGroup
 
         elementsContainer = AddChild(new UIGroup("Elements"));
         
-        SongSelectionElement.LoadSongSelectElementAssets();
-        
         for (int i = 0; i < songSelectionElements.Length; i++)
         {
             songSelectionElements[i] = elementsContainer.AddChild(new SongSelectionElement());
@@ -72,19 +69,12 @@ public class SongSelectionContainer : UIGroup
             RemoveFromCache(element.Key);
         }
         
-        List<SongNode> toCache = [];
-        
         //assign first node to the first element, then use rNextSong to fill the rest
+        songSelectionElements[selectionIndex].UpdateSongNode(node);
         if (preLoadImages)
-        {
-            songSelectionElements[selectionIndex].UpdateSongNode(node);
             songSelectionElements[selectionIndex].UpdateSongThumbnail(CachePreImage(node));
-        }
-        else
-        {
-            songSelectionElements[selectionIndex].UpdateSongNode(node);
-            toCache.Add(node);
-        }
+        else toBeCached.Add(node);
+
         songSelectionElements[selectionIndex].position.Y = 0;
         songSelectionElements[selectionIndex].SetHighlighted(true);
 
@@ -92,16 +82,12 @@ public class SongSelectionContainer : UIGroup
         for (int i = selectionIndex + 1; i < songSelectionElements.Length; i++)
         {
             SongNode nextNode = SongNode.rNextSong(songSelectionElements[i - 1].node);
+
+            songSelectionElements[i].UpdateSongNode(nextNode);
             if (preLoadImages)
-            {
-                songSelectionElements[i].UpdateSongNode(nextNode);
                 songSelectionElements[i].UpdateSongThumbnail(CachePreImage(nextNode));
-            }
-            else
-            {
-                songSelectionElements[i].UpdateSongNode(nextNode);
-                toCache.Add(nextNode);
-            }
+            else toBeCached.Add(nextNode);
+            
             songSelectionElements[i].position.Y = (i - selectionIndex) * elementSpacing;
             songSelectionElements[i].SetHighlighted(false);
         }
@@ -110,36 +96,16 @@ public class SongSelectionContainer : UIGroup
         for (int i = selectionIndex - 1; i >= 0; i--)
         {
             SongNode prevNode = SongNode.rPreviousSong(songSelectionElements[i + 1].node);
+
+            songSelectionElements[i].UpdateSongNode(prevNode);
             if (preLoadImages)
-            {
-                songSelectionElements[i].UpdateSongNode(prevNode);
                 songSelectionElements[i].UpdateSongThumbnail(CachePreImage(prevNode));
-            }
-            else
-            {
-                songSelectionElements[i].UpdateSongNode(prevNode);
-                toCache.Add(prevNode);
-            }
+            else toBeCached.Add(prevNode);
+            
             songSelectionElements[i].position.Y = (i - selectionIndex) * elementSpacing;
             songSelectionElements[i].SetHighlighted(false);
         }
-
-        if (preLoadImages)
-        {
-            //since we pre loaded all the images, no need to update them later
-            updatedImages.Clear();
-        }
-        else
-        {
-            Task.Run(() =>
-            {
-                foreach (SongNode node in toCache)
-                {
-                    CachePreImage(node);
-                }
-            });
-        }
-
+        
         lastDrawTime = CDTXMania.Timer.nCurrentTime;
         
         //update album art, preview sound, etc
@@ -174,7 +140,11 @@ public class SongSelectionContainer : UIGroup
     
     public override void Draw(Matrix parentMatrix)
     {
-        ApplyUpdatedImages();
+        //update image cache at the start of the frame
+        //this makes sure that requesting a new image to be cached means
+        //it won't get handled until the next frame,
+        //further spreading the load
+        UpdateImageCache();
         
         float delta = (CDTXMania.Timer.nCurrentTime - lastDrawTime) / 1000.0f;
         lastDrawTime = CDTXMania.Timer.nCurrentTime;
@@ -244,6 +214,13 @@ public class SongSelectionContainer : UIGroup
         }
     }
     
+    private struct STKeyRepeatCounter()
+    {
+        public CCounter Up = new( 0, 0, 0, CDTXMania.Timer );
+        public CCounter Down = new( 0, 0, 0, CDTXMania.Timer );
+        public CCounter R = new( 0, 0, 0, CDTXMania.Timer );
+        public CCounter B = new( 0, 0, 0, CDTXMania.Timer );
+    }
     private STKeyRepeatCounter ctKeyRepeat = new();
     
     public int HandleNavigation()
@@ -297,14 +274,6 @@ public class SongSelectionContainer : UIGroup
         return 0;
     }
     
-    public struct STKeyRepeatCounter() //reused from CStageSongSelection
-    {
-        public CCounter Up = new( 0, 0, 0, CDTXMania.Timer );
-        public CCounter Down = new( 0, 0, 0, CDTXMania.Timer );
-        public CCounter R = new( 0, 0, 0, CDTXMania.Timer );
-        public CCounter B = new( 0, 0, 0, CDTXMania.Timer );
-    }
-    
     private void MoveUp()
     {
         CDTXMania.Skin.soundCursorMovement.tPlay();
@@ -328,16 +297,12 @@ public class SongSelectionContainer : UIGroup
         var newNode = SongNode.rPreviousSong(firstVisibleNode);
         
         overwriteElement.UpdateSongNode(newNode);
-        //Task.Run(() =>
-        //{
-        CachePreImage(newNode);
-        //});
+        toBeCached.Add(newNode);
 
         //move ring buffer backward
         bufferStartIndex = WrapIndex(bufferStartIndex - 1);
 
         //overwrite the new head
-        //overwriteElement.UpdateSongNode(newNode, newTex);
         int newTopIndex = bufferStartIndex;
         float newYOffset = songSelectionElements[WrapIndex(newTopIndex + 1)].position.Y - elementSpacing;
         overwriteElement.position.Y = newYOffset;
@@ -374,11 +339,9 @@ public class SongSelectionContainer : UIGroup
         var newNode = SongNode.rNextSong(lastVisibleNode);
         
         overwriteElement.UpdateSongNode(newNode);
-        //Task.Run(() =>
-        //{
-            CachePreImage(newNode);
-        //});
-
+        toBeCached.Add(newNode);
+        //CachePreImage(newNode);
+        
         //update the overwritten slot
         //overwriteElement.UpdateSongNode(newNode, newTex);
         overwriteElement.position.Y = songSelectionElements[bottomIndex].position.Y + elementSpacing;
@@ -453,9 +416,10 @@ public class SongSelectionContainer : UIGroup
     }
 
     #region PreImage cache
+
+    private List<SongNode> toBeCached = [];
     private Dictionary<SongNode, DTXTexture> preImageCache = new();
     
-    private List<SongNode> updatedImages = [];
     public bool isScrolling => MathF.Abs(targetY) > 2.0f;
 
     private DTXTexture? CachePreImage(SongNode node)
@@ -475,7 +439,6 @@ public class SongSelectionContainer : UIGroup
         if (preImage != null)
         {
             preImageCache[node] = preImage;
-            updatedImages.Add(node); //mark as updated
             return preImage;
         }
         return null;
@@ -490,21 +453,24 @@ public class SongSelectionContainer : UIGroup
         }
     }
 
-    private void ApplyUpdatedImages()
+    private void UpdateImageCache()
     {
-        foreach (var node in updatedImages)
+        //cache one image per frame
+        if (toBeCached.Count > 0)
         {
-            var element = songSelectionElements.FirstOrDefault(x => x.node == node);
-            if (element != null)
+            var toCache = toBeCached.First();
+            toBeCached.RemoveAt(0);
+
+            DTXTexture? preImage = CachePreImage(toCache);
+
+            foreach (SongSelectionElement element in songSelectionElements)
             {
-                if (preImageCache.TryGetValue(node, out DTXTexture? texture))
+                if (element.node == toCache)
                 {
-                    element.UpdateSongThumbnail(texture);
+                    element.UpdateSongThumbnail(preImage);
                 }
             }
         }
-        
-        updatedImages.Clear();
     }
 
     #endregion
