@@ -291,6 +291,17 @@ internal partial class CActConfigList
             () => CDTXMania.ConfigIni.nChipPlayTimeComputeMode = iSystemChipPlayTimeComputeMode.nCurrentlySelectedIndex);
         listItems.Add(iSystemChipPlayTimeComputeMode);
         
+        CItemToggle iDiscordRichPresence = new("Discord Integration", CDTXMania.ConfigIni.bDiscordRichPresenceEnabled,
+            "Discord Rich Presence：\n" +
+            "Discordのステータスを更新します。\n" +
+            "ONにすると、現在の曲名や\n" +
+            "プレイ中のモードなどが表示されます。",
+            "Enable Discord Rich Presence to update your Discord status with current song and playing mode.");
+        iDiscordRichPresence.BindConfig(
+            () => iDiscordRichPresence.bON = CDTXMania.ConfigIni.bDiscordRichPresenceEnabled,
+            () => CDTXMania.ConfigIni.bDiscordRichPresenceEnabled = iDiscordRichPresence.bON);
+        listItems.Add(iDiscordRichPresence);
+        
         CItemBase iSystemGoToKeyAssign = new("System Keys", CItemBase.EPanelType.Folder,
             "システムのキー入力に関する項目を設定します。",
             "Settings for the system key/pad inputs.")
