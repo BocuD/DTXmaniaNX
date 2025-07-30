@@ -46,8 +46,8 @@ public class GitaDoraTransition : UIGroup
         bottom.position = new Vector3(640, 720, 0);
 
         logo = AddChild(new UIImage(DTXTexture.LoadFromPath(CSkin.Path("Graphics/logo_small.png"))));
-        logo.position = new Vector3(870, 610, 0);
-        logo.size = new Vector2(429, 74);
+        logo.position = new Vector3(870, 572, 0);
+        logo.size = new Vector2(412, 71);
     }
     
     //these need to be static since the UIDrawable itself might get destroyed
@@ -80,8 +80,8 @@ public class GitaDoraTransition : UIGroup
     private UIGroup childContainer;
     private UIImage logo;
 
-    private const float logoStartX = 730;
-    private const float logoFinalX = 840;
+    private const float logoStartX = 635;
+    private const float logoFinalX = 815;
     
     public override void Draw(Matrix parentMatrix)
     {
@@ -117,10 +117,11 @@ public class GitaDoraTransition : UIGroup
         top.position.Y = 360 - distance / 2;
         bottom.position.Y = 360 + distance / 2;
         
-        //remap t from 0.547 (0) to -1 (1)
-        float remappedT = Remap(t, 0.547f, -1.0f, 0.0f, 1.0f);
+        float remappedT = Remap(state.animationProgress, 0.63f, -1.0f, 0.0f, 1.0f);
+        Trace.TraceInformation($"Remapped T: {remappedT:F3}");
         float tClamped = Math.Clamp(remappedT, 0.0f, 1.0f);
         float easedT = 1 - MathF.Pow(1 - tClamped, 5);
+        Trace.TraceInformation($"Eased T: {easedT:F3}");
         
         float t_logo = Remap(easedT, 0.0f, 1.0f, logoStartX, logoFinalX);
         logo.position.X = t_logo;
@@ -140,7 +141,7 @@ public class GitaDoraTransition : UIGroup
                 state.closed = false;
             }
 
-            if (state.animationProgress <= -1.0f && state.animationTarget <= 0.5f)
+            if (state.animationProgress <= -1.0f && state.animationTarget <= -0.5f)
             {
                 state.animationProgress = state.animationTarget;
                 state.finishOnNextFrame = true;
@@ -160,7 +161,7 @@ public class GitaDoraTransition : UIGroup
     {
         state.animate = true;
         state.animationProgress = 2.0f;
-        state.animationTarget = 0.0f;
+        state.animationTarget = -1.0f;
         state.animationDirection = -1.0f;
         state.onComplete = action;
         state.lastDrawTime = CDTXMania.Timer.nCurrentTime;
@@ -183,7 +184,7 @@ public class GitaDoraTransition : UIGroup
         if (ImGui.CollapsingHeader("GITADORA Transition"))
         {
             ImGui.Checkbox("Animate progress", ref state.animate);
-            ImGui.SliderFloat("Animation Progress", ref state.animationProgress, 0.0f, 1.0f);
+            ImGui.SliderFloat("Animation Progress", ref state.animationProgress, -1.0f, 1.0f);
             ImGui.InputFloat("Animation Speed", ref state.animationSpeed, 0.1f, 10.0f);
             
             ImGui.InputFloat("Target Rotation", ref state.targetRotation, 0.1f, 10.0f);
