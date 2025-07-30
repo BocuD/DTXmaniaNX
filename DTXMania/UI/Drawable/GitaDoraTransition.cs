@@ -20,10 +20,6 @@ public class GitaDoraTransition : UIGroup
     
     public GitaDoraTransition() : base("GITADORA Transition")
     {
-        size = new Vector2(1280, 720);
-        position = new Vector3(640, 360, 0);
-        anchor = new Vector2(0.5f, 0.5f);
-        
         //create a black texture
         Bitmap bitmap = new(32, 32);
         Graphics graphics = Graphics.FromImage(bitmap);
@@ -33,15 +29,25 @@ public class GitaDoraTransition : UIGroup
         CTexture blackTexture = new(CDTXMania.app.Device, bitmap, CDTXMania.TextureFormat, false);
         bitmap.Dispose();
         
-        top = AddChild(new UIImage(new DTXTexture(blackTexture)));
+        //create childContainer
+        childContainer = AddChild(new UIGroup("covers"));
+        childContainer.size = new Vector2(1280, 720);
+        childContainer.position = new Vector3(640, 360, 0);
+        childContainer.anchor = new Vector2(0.5f, 0.5f);
+        
+        top = childContainer.AddChild(new UIImage(new DTXTexture(blackTexture)));
         top.size = new Vector2(3000, 1000);
         top.anchor = new Vector2(0.5f, 1.0f);
         top.position = new Vector3(640, 0, 0);
         
-        bottom = AddChild(new UIImage(new DTXTexture(blackTexture)));
+        bottom = childContainer.AddChild(new UIImage(new DTXTexture(blackTexture)));
         bottom.size = new Vector2(3000, 1000);
         bottom.anchor = new Vector2(0.5f, 0.0f);
         bottom.position = new Vector3(640, 720, 0);
+
+        logo = AddChild(new UIImage(DTXTexture.LoadFromPath(CSkin.Path("Graphics/logo_small.png"))));
+        logo.position = new Vector3(870, 610, 0);
+        logo.size = new Vector2(429, 74);
     }
     
     //these need to be static since the UIDrawable itself might get destroyed
@@ -51,7 +57,7 @@ public class GitaDoraTransition : UIGroup
         public float animationProgress = 1.5f;
         public bool animate = false;
         public float targetRotation = MathF.PI * 2.0f;
-        public float animationSpeed = 3.4f;
+        public float animationSpeed = 3.0f;
         public float animationDirection = 1.0f;
         public float animationTarget = 2.0f;
         public Action? onComplete = null;
@@ -71,6 +77,11 @@ public class GitaDoraTransition : UIGroup
     
     private UIImage top;
     private UIImage bottom;
+    private UIGroup childContainer;
+    private UIImage logo;
+
+    private const float logoStartX = 740;
+    private const float logoFinalX = 870;
     
     public override void Draw(Matrix parentMatrix)
     {
@@ -96,16 +107,31 @@ public class GitaDoraTransition : UIGroup
         //clamp
         t = Math.Clamp(t, 0f, 2.0f);
         float rotationDegrees = 52.08f * t + 87.88f * MathF.Pow(t, 2) - 2.72f;
-        rotation.Z = MathF.PI * 2 * (rotationDegrees / 360.0f) + 0.047F;
+        childContainer.rotation.Z = MathF.PI * 2 * (rotationDegrees / 360.0f) + 0.047F;
         
         //distance = 142.74 * t + 1717.83 * t² - 614.51 * t³ - 0.64
-        float distance = 142.74f * t + 1717.83f * MathF.Pow(t, 2) - 614.51f * MathF.Pow(t, 3) - 0.64f;
+        float clampedT = Math.Clamp(t, 0.0f, 2.5f);
+        float distance = 142.74f * clampedT + 1717.83f
+            * MathF.Pow(clampedT, 2) - 614.51f
+            * MathF.Pow(clampedT, 3) - 0.64f;
         top.position.Y = 360 - distance / 2;
         bottom.position.Y = 360 + distance / 2;
         
+        //remap t from 0.547 (0) to -1 (1)
+        float remappedT = Remap(t, 0.547f, -1.0f, 0.0f, 1.0f);
+        float tClamped = Math.Clamp(remappedT, 0.0f, 1.0f);
+        float easedT = 1 - MathF.Pow(1 - tClamped, 3);
+        
+        float t_logo = Remap(easedT, 0.0f, 1.0f, logoStartX, logoFinalX);
+        logo.position.X = t_logo;
+        
+        float alpha_logo = Remap(t, 0.5f, 0.0f, 0, 1);
+        logo.position.X = t_logo;
+        logo.Texture.transparency = alpha_logo;
+        
         if (state.animate)
         {
-            //Trace.TraceInformation($"Animating GITADORA transition: {state.animationProgress} -> {state.animationTarget} (direction: {state.animationDirection})");
+            Trace.TraceInformation($"Animating GITADORA transition: {state.animationProgress} -> {state.animationTarget} (direction: {state.animationDirection})");
             state.animationProgress += delta * state.animationSpeed * state.animationDirection;
             if (state.animationProgress > 2.0f && state.animationTarget >= 1.5f)
             {
@@ -114,7 +140,7 @@ public class GitaDoraTransition : UIGroup
                 state.closed = false;
             }
 
-            if (state.animationProgress <= 0.0f && state.animationTarget <= 0.5f)
+            if (state.animationProgress <= -1.0f && state.animationTarget <= 0.5f)
             {
                 state.animationProgress = state.animationTarget;
                 state.finishOnNextFrame = true;
@@ -123,6 +149,11 @@ public class GitaDoraTransition : UIGroup
         }
 
         base.Draw(parentMatrix);
+    }
+    
+    private static float Remap(float value, float fromMin, float fromMax, float toMin, float toMax)
+    {
+        return toMin + (value - fromMin) * (toMax - toMin) / (fromMax - fromMin);
     }
     
     public static void Close(Action? action = null)
