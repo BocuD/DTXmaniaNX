@@ -80,8 +80,8 @@ public class GitaDoraTransition : UIGroup
     private UIGroup childContainer;
     private UIImage logo;
 
-    private const float logoStartX = 740;
-    private const float logoFinalX = 870;
+    private const float logoStartX = 730;
+    private const float logoFinalX = 840;
     
     public override void Draw(Matrix parentMatrix)
     {
@@ -120,7 +120,7 @@ public class GitaDoraTransition : UIGroup
         //remap t from 0.547 (0) to -1 (1)
         float remappedT = Remap(t, 0.547f, -1.0f, 0.0f, 1.0f);
         float tClamped = Math.Clamp(remappedT, 0.0f, 1.0f);
-        float easedT = 1 - MathF.Pow(1 - tClamped, 3);
+        float easedT = 1 - MathF.Pow(1 - tClamped, 5);
         
         float t_logo = Remap(easedT, 0.0f, 1.0f, logoStartX, logoFinalX);
         logo.position.X = t_logo;
