@@ -242,8 +242,8 @@ internal class CDTXMania : Game
         //Update version information
         Assembly assembly = Assembly.GetExecutingAssembly();
         DateTime? buildDate = GetAssemblyBuildDateTime() ?? DateTime.UnixEpoch;
-        VERSION = $"v{assembly.GetName().Version.ToString().Substring(0, 5)} ({buildDate:yyyyMMdd})";
-        VERSION_DISPLAY = $"DTX:NX:A:A:{buildDate:yyyyMMdd}00";
+        VERSION = $"v{assembly.GetName().Version.ToString().Substring(0, 5)} Beta ({buildDate:yyyyMMdd})";
+        VERSION_DISPLAY = $"DTX:NX:A:A:{buildDate:yyyyMMdd}00 Beta";
 
         #region [ Determine strEXE folder ]
 
