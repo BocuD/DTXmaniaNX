@@ -7,7 +7,10 @@ public class SortByAllSongs : SongDbSort
 
     public override Task<SongNode> Sort(SongDb songDb)
     {
-        SongNode root = new(null, SongNode.ENodeType.ROOT);
+        SongNode root = new(null, SongNode.ENodeType.ROOT)
+        {
+            title = "All Songs"
+        };
 
         foreach (SongNode node in songDb.flattenedSongList.Where(node => node.nodeType == SongNode.ENodeType.SONG))
         {

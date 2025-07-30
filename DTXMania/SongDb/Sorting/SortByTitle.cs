@@ -10,8 +10,11 @@ public class SortByTitle : SongDbSort
     public override async Task<SongNode> Sort(SongDb songDb)
     {
         //create a new root node
-        SongNode root = new(null, SongNode.ENodeType.ROOT);
-        
+        SongNode root = new(null, SongNode.ENodeType.ROOT)
+        {
+            title = $"By {Name}"
+        };
+
         Dictionary<char, SongNode> letterNodes = new();
         
         //create sub nodes for each letter

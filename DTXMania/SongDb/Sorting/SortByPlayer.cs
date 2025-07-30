@@ -7,7 +7,10 @@ public class SortByPlayer : SongDbSort
 
     public override Task<SongNode> Sort(SongDb songDb)
     {
-        SongNode root = new(null, SongNode.ENodeType.ROOT);
+        SongNode root = new(null, SongNode.ENodeType.ROOT)
+        {
+            title = "Player"
+        };
 
         var recentlyPlayed = GetRecentlyPlayed(songDb);
         root.childNodes.Add(recentlyPlayed);

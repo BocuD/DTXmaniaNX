@@ -12,8 +12,11 @@ public class SortByDifficulty : SongDbSort
     public override async Task<SongNode> Sort(SongDb songDb)
     {
         //create a new root node
-        SongNode root = new(null, SongNode.ENodeType.ROOT);
-        
+        SongNode root = new(null, SongNode.ENodeType.ROOT)
+        {
+            title = "Difficulty"
+        };
+
         Dictionary<string, SongNode> difficultyNodes = new();
 
         foreach (var difficultyLabel in difficultyLabels)

@@ -11,8 +11,11 @@ public class SortByLevel : SongDbSort
     public override Task<SongNode> Sort(SongDb songDb)
     {
         //create a new root node
-        SongNode root = new(null, SongNode.ENodeType.ROOT);
-        
+        SongNode root = new(null, SongNode.ENodeType.ROOT)
+        {
+            title = "Level"
+        };
+
         Dictionary<int, SongNode> levelNodes = new();
         
         //create boxes for level: Level 1.00~1.49, Level 1.50~1.99, Level 2.00~2.49, etc.
