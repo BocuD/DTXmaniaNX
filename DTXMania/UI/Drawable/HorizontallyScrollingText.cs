@@ -44,9 +44,9 @@ public class HorizontallyScrollingText : UIText
     {
         base.RenderTexture();
 
-        if (size.X > maximumWidth)
+        if (size.X > maximumRenderWidth)
         {
-            size.X = maximumWidth;
+            size.X = maximumRenderWidth;
             overrideClipRect = new RectangleF(0, 0, maximumRenderWidth, size.Y);
             customClipRect = true;
         }
