@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using DTXMania.Core;
 using DTXMania.SongDb;
+using DTXMania.SongDb.Sorting;
 using DTXMania.UI;
 using DTXMania.UI.Drawable;
 using Hexa.NET.ImGui;

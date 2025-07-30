@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace DTXMania.SongDb;
+namespace DTXMania.SongDb.Sorting;
 
 public class SortByTitle : SongDbSort
 {

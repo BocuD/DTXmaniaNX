@@ -1,6 +1,4 @@
-﻿using DTXMania.Core;
-
-namespace DTXMania.SongDb;
+﻿namespace DTXMania.SongDb.Sorting;
 
 public abstract class SongDbSort
 {

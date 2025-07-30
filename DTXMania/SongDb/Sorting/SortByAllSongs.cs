@@ -1,4 +1,4 @@
-﻿namespace DTXMania.SongDb;
+﻿namespace DTXMania.SongDb.Sorting;
 
 public class SortByAllSongs : SongDbSort
 {
