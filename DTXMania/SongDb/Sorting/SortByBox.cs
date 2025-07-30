@@ -32,6 +32,9 @@ public class SortByBox : SongDbSort
             }
         }
         
+        //order nodes by path
+        root.childNodes.Sort((a, b) => string.Compare(a.path, b.path, StringComparison.OrdinalIgnoreCase));
+        
         return Task.FromResult(root);
     }
 }
