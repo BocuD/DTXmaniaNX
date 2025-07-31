@@ -982,7 +982,7 @@ internal class CDTXMania : Game
 
         unsafe
         {
-            var font = ImGui.GetIO().Fonts.AddFontFromFileTTF(Path.Combine(executableDirectory, "Fonts", "NotoSansCJKjp-Regular.otf"), 16f, ImGui.GetIO().Fonts.GetGlyphRangesJapanese()); 
+            var font = ImGui.GetIO().Fonts.AddFontFromFileTTF(Path.Combine(executableDirectory, "Fonts", "NotoSansCJKjp-Regular.otf"), 20f, ImGui.GetIO().Fonts.GetGlyphRangesJapanese()); 
             ImGui.GetIO().Fonts.Build();
         }
 
