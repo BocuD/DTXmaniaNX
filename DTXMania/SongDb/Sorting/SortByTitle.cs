@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using Kawazu;
 
 namespace DTXMania.SongDb.Sorting;
 
@@ -95,15 +96,14 @@ public class SortByTitle : SongDbSort
         //get song title
         CScore chart = song.charts.FirstOrDefault(x => x != null);
 
-        if (chart.SongInformation.TitleHasJapanese)
-        {
-            string title = chart.SongInformation.TitleKana;
-            return ConvertKanaToSortKana(title[0]);
-        }
-
         if (string.IsNullOrWhiteSpace(chart.SongInformation.TitleRoman))
         {
             return '-';
+        }
+        
+        if (Utilities.IsJapanese(chart.SongInformation.Title[0]))
+        {
+            return ConvertKanaToSortKana(chart.SongInformation.TitleKana[0]);
         }
         
         //returning '-' for no data, this will force it into other
@@ -139,7 +139,7 @@ public class SortByTitle : SongDbSort
         }
     }
     
-    private static readonly char[] a = ['あ', 'い', 'う', 'え', 'お'];
+    private static readonly char[] a = ['あ', 'い', 'う', 'え', 'お', 'ゔ', 'ぁ', 'ぃ', 'ぅ', 'ぇ', 'ぉ'];
     private static readonly char[] ka = ['か', 'き', 'く', 'け', 'こ', 'が', 'ぎ', 'ぐ', 'げ', 'ご'];
     private static readonly char[] sa = ['さ', 'し', 'す', 'せ', 'そ', 'ざ', 'じ', 'ず', 'ぜ', 'ぞ'];
     private static readonly char[] ta = ['た', 'ち', 'つ', 'て', 'と', 'だ', 'ぢ', 'づ', 'で', 'ど'];

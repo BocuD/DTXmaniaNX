@@ -1,4 +1,6 @@
-﻿namespace DTXMania.SongDb.Sorting;
+﻿using Kawazu;
+
+namespace DTXMania.SongDb.Sorting;
 
 public class SortByArtist : SortByTitle
 {
@@ -9,18 +11,17 @@ public class SortByArtist : SortByTitle
     {
         //get song title
         CScore chart = song.charts.FirstOrDefault(x => x != null);
-
-        if (chart.SongInformation.ArtistNameHasJapanese)
-        {
-            string title = chart.SongInformation.ArtistNameKana;
-            return ConvertKanaToSortKana(title[0]);
-        }
-
+        
         if (string.IsNullOrWhiteSpace(chart.SongInformation.ArtistNameRoman))
         {
             return '-';
         }
-
+        
+        if (Utilities.IsJapanese(chart.SongInformation.ArtistName[0]))
+        {
+            return ConvertKanaToSortKana(chart.SongInformation.ArtistNameKana[0]);
+        }
+        
         //returning '-' for no data, this will force it into other
         if (chart.SongInformation.ArtistNameRoman[0] == '-') return '#';
 
