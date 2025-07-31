@@ -233,8 +233,20 @@ public class SongSelectionElement : UIGroup
         {
             if (node != null)
             {
+                CScore? chart = node.charts.FirstOrDefault(x => x != null);
+
                 ImGui.Text($"Node Type: {node.nodeType}");
                 ImGui.Text($"Title: {node.title}");
+                
+                if (chart != null)
+                {
+                    ImGui.Text($"Title Roman: {chart.SongInformation.TitleRoman}");
+                    ImGui.Text($"Title Kana: {chart.SongInformation.TitleKana}");
+                    
+                    ImGui.Text($"Artist: {chart.SongInformation.ArtistName}");
+                    ImGui.Text($"Artist Roman: {chart.SongInformation.ArtistNameRoman}");
+                    ImGui.Text($"Artist Kana: {chart.SongInformation.ArtistNameKana}");
+                }
             }
             else
             {
