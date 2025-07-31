@@ -37,10 +37,10 @@ public class SongSelectionContainer : UIGroup
         
         currentRoot = songDb.songNodeRoot;
         dontSerialize = true;
-        sortByRenderOrder = false;
 
         elementsContainer = AddChild(new UIGroup("Elements"));
-        
+        elementsContainer.sortByRenderOrder = false;
+
         for (int i = 0; i < songSelectionElements.Length; i++)
         {
             songSelectionElements[i] = elementsContainer.AddChild(new SongSelectionElement());
