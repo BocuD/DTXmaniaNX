@@ -198,7 +198,7 @@ internal class CStageConfig : CStage
     {
         ePhaseID = EPhase.Common_FadeIn;
         //actFIFO.tStartFadeIn();
-        GitaDoraTransition.Open(() =>
+        GitaDoraTransition.Open(2, () =>
         {
             CDTXMania.Skin.bgmコンフィグ画面.tPlay();
             ePhaseID = EPhase.Common_DefaultState;
@@ -308,7 +308,7 @@ internal class CStageConfig : CStage
             else
             {
                 //actFIFO.tStartFadeOut();
-                GitaDoraTransition.Close(async () =>
+                GitaDoraTransition.Close(0, async () =>
                 {
                     await Task.Delay(150);
                     GitaDoraTransition.Open();
@@ -322,7 +322,7 @@ internal class CStageConfig : CStage
             {
                 CDTXMania.Skin.soundDecide.tPlay();
                 //actFIFO.tStartFadeOut();
-                GitaDoraTransition.Close(async () =>
+                GitaDoraTransition.Close(0, async () =>
                 {
                     await Task.Delay(500);
                     GitaDoraTransition.Open();

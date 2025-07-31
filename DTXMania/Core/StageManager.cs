@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using DTXMania.UI.Drawable;
 using FDK;
 
 namespace DTXMania.Core;
@@ -163,7 +164,7 @@ internal class StageManager
                         Trace.TraceInformation("曲の読み込みを中止しました。");
                         CDTXMania.tRunGarbageCollector();
 
-                        tChangeStage(stageSongSelectionNew);
+                        GitaDoraTransition.Close(10, () => tChangeStage(stageSongSelectionNew));
                         break;
                     }
 

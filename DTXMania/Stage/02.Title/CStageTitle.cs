@@ -213,6 +213,7 @@ internal class CStageTitle : CStage
 					return (int)EReturnResult.EXIT;
 				}
 				GitaDoraTransition.Close();
+				CDTXMania.Skin.soundTitle.tStop();
 				//actFO.tStartFadeOut();
 				ePhaseID = EPhase.Common_FadeOut;
 			}
