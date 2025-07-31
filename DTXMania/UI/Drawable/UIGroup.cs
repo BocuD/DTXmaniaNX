@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using DTXMania.UI.Drawable.Serialization;
 using DTXMania.UI.Inspector;
+using Hexa.NET.ImGui;
 using Newtonsoft.Json;
 using SharpDX;
 
@@ -8,6 +9,7 @@ namespace DTXMania.UI.Drawable;
 
 public class UIGroup : UIDrawable
 {
+    public bool sortByRenderOrder = true; //if true, children will be sorted by their render order before drawing
     public List<UIDrawable> children = [];
 
     [AddChildMenu]
@@ -73,9 +75,12 @@ public class UIGroup : UIDrawable
         UpdateLocalTransformMatrix();
         
         Matrix combinedMatrix = localTransformMatrix * parentMatrix;
-            
-        //sort by draw priority
-        children.Sort((a, b) => a.renderOrder.CompareTo(b.renderOrder));
+
+        if (sortByRenderOrder)
+        {
+            //sort by draw priority
+            children.Sort((a, b) => a.renderOrder.CompareTo(b.renderOrder));
+        }
 
         for (int index = 0; index < children.Count; index++)
         {
@@ -187,5 +192,12 @@ public class UIGroup : UIDrawable
             Trace.TraceError($"Failed to deserialize UIGroup: {e} Stacktrace: {stackTrace}");
             return null;
         }
+    }
+
+    public override void DrawInspector()
+    {
+        base.DrawInspector();
+        
+        ImGui.Checkbox("Sort by Render Order", ref sortByRenderOrder);
     }
 }
