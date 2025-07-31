@@ -216,7 +216,7 @@ public class CTexture : IDisposable
 
 	public void MakeTexture(Device device, string strファイル名, Format format, bool bBlackIsTransparent, Pool pool)
 	{
-		DateTime start = DateTime.Now;
+		//DateTime start = DateTime.Now;
 		if (!File.Exists(
 			    strファイル名)) // #27122 2012.1.13 from: ImageInformation では FileNotFound 例外は返ってこないので、ここで自分でチェックする。わかりやすいログのために。
 			throw new FileNotFoundException(string.Format("File doesn't exist!\n[{0}]", strファイル名));
@@ -224,10 +224,11 @@ public class CTexture : IDisposable
 		Byte[] _txData = File.ReadAllBytes(strファイル名);
 		filename = Path.GetFileName(strファイル名);
 		MakeTexture(device, _txData, format, bBlackIsTransparent, pool);
-		TimeSpan elapsed = DateTime.Now - start;
 		
-		Trace.TraceInformation("MakeTexture() {0} ({1}x{2}, {3}) : {4}ms",
-			filename, szImageSize.Width, szImageSize.Height, format, elapsed.TotalMilliseconds);
+		// TimeSpan elapsed = DateTime.Now - start;
+		//
+		// Trace.TraceInformation("MakeTexture() {0} ({1}x{2}, {3}) : {4}ms",
+		// 	filename, szImageSize.Width, szImageSize.Height, format, elapsed.TotalMilliseconds);
 	}
 
 	public CTexture(Device device, byte[] txData, Format format, bool bBlackIsTransparent, Pool pool)
