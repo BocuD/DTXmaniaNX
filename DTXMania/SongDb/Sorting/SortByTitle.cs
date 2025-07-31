@@ -52,7 +52,11 @@ public class SortByTitle : SongDbSort
 
         SongNode? error = null;
 
-        foreach (SongNode song in songDb.flattenedSongList)
+        var flattenedSorted = songDb.flattenedSongList
+            .Where(song => song.nodeType == SongNode.ENodeType.SONG)
+            .OrderBy(song => song.title)
+            .ToList();
+        foreach (SongNode song in flattenedSorted)
         {
             try
             {
