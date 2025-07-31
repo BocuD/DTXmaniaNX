@@ -2,6 +2,7 @@
 using DiscordRPC;
 using DTXMania.Core;
 using DTXMania.SongDb;
+using DTXMania.SongDb.Sorting;
 using DTXMania.UI;
 using DTXMania.UI.Drawable;
 using SharpDX;
@@ -21,13 +22,14 @@ public class CStageSongSelectionNew : CStage
 
     private SongSelectionContainer currentSelectionContainer;
     
-    private ELoadPhase loadPhase = ELoadPhase.InitialLoad;
+    private ELoadPhase loadPhase = ELoadPhase.Initialize;
     
     private enum ELoadPhase
     {
-        InitialLoad,
-        Sorting,
-        FinishedSort,
+        Initialize,
+        Prepare,
+        CacheThumbnails,
+        ReadyToOpen,
         Complete
     }
     
@@ -43,7 +45,7 @@ public class CStageSongSelectionNew : CStage
         
         listChildActivities.Add(actPresound = new CActSelectPresound());
         listChildActivities.Add(actBackgroundVideoAVI = new CActSelectBackgroundAVI());
-
+        
         currentSort = sorters[0];
     }
 
@@ -65,15 +67,21 @@ public class CStageSongSelectionNew : CStage
         bigAlbumArt.position = new Vector3(320, 35, 0);
         bigAlbumArt.renderOrder = 2;
         bigAlbumArt.size = new Vector2(300, 300);
-
-        // selectionContainer = ui.AddChild(new SongSelectionContainer(songDb, bigAlbumArt));
-        //selectionContainer.position = new Vector3(765, 320, 0);
         
         sortMenuContainer = ui.AddChild(new SortMenuContainer(songDb, sorters));
         sortMenuContainer.position = new Vector3(1281, 35, 0);
         sortMenuContainer.renderOrder = 1;
 
         statusPanel = ui.AddChild(new StatusPanel());
+
+        //create songselectioncontainer for each sorter
+        foreach (SongDbSort sorter in sorters)
+        {
+            SongSelectionContainer container = ui.AddChild(new SongSelectionContainer(songDb, bigAlbumArt));
+            container.name = "SongSelect " + sorter.Name;
+            container.position = new Vector3(765, 320, 0);
+            selectionContainers[sorter] = container;
+        }
     }
 
     public override void InitializeDefaultUI()
@@ -100,6 +108,8 @@ public class CStageSongSelectionNew : CStage
             Trace.TraceInformation("Started song select background video");
         }
         
+        SongSelectionElement.LoadSongSelectElementAssets();
+        
         base.OnManagedCreateResources();
     }
 
@@ -115,86 +125,68 @@ public class CStageSongSelectionNew : CStage
         base.OnManagedReleaseResources();
     }
 
-    private bool needsToOpen = true;
     public override void FirstUpdate()
     {
-        CDTXMania.Skin.soundTitle.tStop();
-
-        needsToOpen = true;
-        
         //set initial sort menu container position to be default,
         //or in case of reloading the menu, whatever was last selected
         sortMenuContainer.SetCurrentSelection(currentSort);
         
-        lastInstrument = CDTXMania.GetCurrentInstrument();
-
-        switch (loadPhase)
-        {
-            case ELoadPhase.InitialLoad:
-                Task.Run(PrepareSortCache);
-                loadPhase = ELoadPhase.Sorting;
-                break;
-        }
-
-        // if (songDb.hasEverScanned)
-        // {
-        //     if (lastInstrument == CDTXMania.GetCurrentInstrument())
-        //     {
-        //         //restore existing root
-        //         if (currentSongRoot == null)
-        //         {
-        //             ApplySort(sortMenuContainer.currentSelection.sorter);
-        //         }
-        //         else
-        //         {
-        //             RequestUpdateRoot(currentSongRoot);
-        //         }
-        //     }
-        //     else
-        //     {
-        //         ApplySort(sortMenuContainer.currentSelection.sorter);
-        //     }
-        // }
-        // else if (songDb.status == SongDbScanStatus.Idle)
-        // {
-        //     Task.Run(() => songDb.StartScan(() => { ApplySort(sortMenuContainer.currentSelection.sorter); }));
-        // }
+        //every time we load the stage, containers need to be recreated
+        loadPhase = ELoadPhase.Initialize;
     }
 
-    private async Task PrepareSortCache()
+    private async Task PrepareSelectionContainers()
     {
-        Trace.TraceInformation("Preparing song selection element assets...");
-        SongSelectionElement.LoadSongSelectElementAssets();
-
+        //determine if we need to rebuild sort cache or not
+        if (CDTXMania.GetCurrentInstrument() != lastInstrument)
+        {
+            //force a recreation of sort cache if instrument has changed
+            sortCache.Clear();
+        }
+        
+        lastInstrument = CDTXMania.GetCurrentInstrument();
+        
         Trace.TraceInformation("Preparing sort cache...");
+        DateTime startTime = DateTime.Now;
+        
         foreach (SongDbSort sorter in sorters)
         {
             try
             {
-                SongNode rootNode = await sorter.Sort(songDb);
-
-                SongSelectionContainer container = ui.AddChild(new SongSelectionContainer(songDb, bigAlbumArt));
-                container.name = "SongSelect " + sorter.Name;
-                container.position = new Vector3(765, 320, 0);
-
+                if (!sortCache.TryGetValue(sorter, out SongNode? rootNode))
+                {
+                    rootNode = await sorter.Sort(songDb);
+                    sortCache[sorter] = rootNode;
+                };
+                
+                if (!selectionContainers.TryGetValue(sorter, out SongSelectionContainer? container))
+                {
+                    container = ui.AddChild(new SongSelectionContainer(songDb, bigAlbumArt));
+                    container.name = "SongSelect " + sorter.Name;
+                    container.position = new Vector3(765, 320, 0);
+                    selectionContainers[sorter] = container;
+                }
+                
                 container.UpdateRoot(rootNode, false);
-
                 container.isVisible = false;
-                sortCache[sorter] = container;
 
-                Trace.TraceInformation($"Sort cache prepared for {sorter.Name}");
+                Trace.TraceInformation($"Containers prepared for {sorter.Name}");
             }
             catch (Exception e)
             {
-                Trace.TraceError($"Failed to prepare sort cache for {sorter.Name}: {e.Message}");
+                Trace.TraceError($"Failed to prepare container for {sorter.Name}: {e.Message}");
             }
         }
-        Trace.TraceInformation("Sort cache preparation complete.");
         
         //enable the current sort
         ApplySort(currentSort);
         
-        loadPhase = ELoadPhase.FinishedSort;
+        Trace.TraceInformation("Sort cache preparation complete.");
+        
+        TimeSpan elapsed = DateTime.Now - startTime;
+        Trace.TraceInformation($"Sort cache prepared in {elapsed} s.");
+        
+        loadPhase = ELoadPhase.CacheThumbnails;
     }
     
     public override int OnUpdateAndDraw()
@@ -204,45 +196,49 @@ public class CStageSongSelectionNew : CStage
         switch (loadPhase)
         {
             //don't do anything until the sort cache is prepared
-            case ELoadPhase.InitialLoad:
-            case ELoadPhase.Sorting:
+            case ELoadPhase.Initialize:
+                if (songDb.status == SongDbScanStatus.Idle)
+                {
+                    loadPhase = ELoadPhase.Prepare;
+                    Task.Run(PrepareSelectionContainers);
+                }
+                return 0;
+            
+            case ELoadPhase.Prepare:
+                return 0;
+            
+            case ELoadPhase.CacheThumbnails:
+                DateTime start = DateTime.Now;
+                foreach (var container in selectionContainers.Values)
+                {
+                    //cache thumbnails for this container
+                    container.UpdateImageCache(true);
+                    container.PreRenderText();
+                }
+                TimeSpan elapsed = DateTime.Now - start;
+                Trace.TraceInformation($"Thumbnail cache updated in {elapsed} s.");
+                loadPhase = ELoadPhase.ReadyToOpen;
                 return 0;
 
-            case ELoadPhase.FinishedSort:
-                GitaDoraTransition.Open();
+            case ELoadPhase.ReadyToOpen:
+                GitaDoraTransition.Open(20);
                 loadPhase = ELoadPhase.Complete;
                 return 0;
         }
-
-        if (updateRootRequested)
-        {
-            currentSelectionContainer.UpdateRoot(currentSongRoot);
-            updateRootRequested = false;
-        }
         
-        if (songDb.status == SongDbScanStatus.Idle)
-        {
-            if (needsToOpen)
-            {
-                needsToOpen = false;
-                GitaDoraTransition.Open();
-            }
-          
-            actPresound.OnUpdateAndDraw();
-            
-            sortMenuContainer.HandleNavigation();
-            statusPanel.HandleNavigation();
-            return currentSelectionContainer.HandleNavigation();
-        }
-        return 0;
+        actPresound.OnUpdateAndDraw();
+        sortMenuContainer.HandleNavigation();
+        statusPanel.HandleNavigation();
+        return currentSelectionContainer.HandleNavigation();
     }
     
-    public SongNode node { get; private set; }
-    public CScore chart { get; private set; }
-    public void ChangeSelection(SongNode node, CScore chart)
+    public SongNode? selectedNode { get; private set; }
+    public CScore? selectedChart { get; private set; }
+    public void ChangeSelection(SongNode? node, CScore? chart)
     {
-        this.node = node;
-        this.chart = chart;
+        selectedNode = node;
+        selectedChart = chart;
+        
         actPresound.tSelectionChanged(chart);
         statusPanel.SelectionChanged(node, chart);
     }
@@ -261,7 +257,7 @@ public class CStageSongSelectionNew : CStage
             int currentInstrument = CDTXMania.GetCurrentInstrument();
             
             //check if this chart is valid
-            var chart = node.charts[newLevel];
+            var chart = selectedNode.charts[newLevel];
             if (chart == null) continue;
 
             if (chart.SongInformation.chipCountByInstrument[currentInstrument] > 0)
@@ -306,7 +302,7 @@ public class CStageSongSelectionNew : CStage
         }
     }
     
-    public int GetClosestLevelToTargetForSong(SongNode song)
+    public int GetClosestLevelToTargetForSong(SongNode? song)
     {
         var targetDifficultyLevel = this.targetDifficultyLevel;
 
@@ -356,29 +352,23 @@ public class CStageSongSelectionNew : CStage
         return closestLevel;
     }
     
-    private bool updateRootRequested;
-    private SongNode? currentSongRoot;
-    
-    public void RequestUpdateRoot(SongNode newRoot)
-    {
-        updateRootRequested = true;
-        currentSongRoot = newRoot;
-    }
-    
     private bool sortLocked = false;
     private SongDbSort currentSort;
-    private Dictionary<SongDbSort, SongSelectionContainer> sortCache = new();
+    private Dictionary<SongDbSort, SongNode> sortCache = new();
+    private Dictionary<SongDbSort, SongSelectionContainer> selectionContainers = new();
     private int lastInstrument;
     public bool isScrolling => currentSelectionContainer.isScrolling;
 
     public void ApplySort(SongDbSort sorter)
     {
-        //check if the sort cache contains a container for this sorter
-        if (!sortCache.TryGetValue(sorter, out SongSelectionContainer? container))
+        //check if we have a container for this sorter
+        if (!selectionContainers.TryGetValue(sorter, out SongSelectionContainer? container))
         {
             Trace.TraceError("Sort cache does not contain a container for sorter: " + sorter.Name);
             return;
         }
+        
+        currentSort = sorter;
         
         //hide the current selection container
         if (currentSelectionContainer != null)
@@ -389,57 +379,23 @@ public class CStageSongSelectionNew : CStage
         //set the new container
         currentSelectionContainer = container;
         currentSelectionContainer.isVisible = true;
-
         
-        // if (sortLocked)
-        // {
-        //     Trace.TraceWarning("Sort operation skipped as another sort is in progress");
-        //     return;
-        // }
-        //
-        // Trace.TraceInformation("Applying sort: " + sorter.Name);
-        //
-        // //invalidate cache if instrument changed
-        // if (CDTXMania.GetCurrentInstrument() != lastInstrument)
-        // {
-        //     sortCache.Clear();
-        // }
-        //
-        // lastInstrument = CDTXMania.GetCurrentInstrument();
-        // currentSort = sorter;
-        //
-        // //apply sort
-        // Task.Run(async () =>
-        // {
-        //     try
-        //     {
-        //         sortLocked = true;
-        //         if (!sortCache.TryGetValue(sorter, out SongNode? newRoot))
-        //         {
-        //             newRoot = await sorter.Sort(songDb);
-        //             sortCache[sorter] = newRoot;
-        //         }
-        //         else
-        //         {
-        //             newRoot.CurrentSelection = newRoot.childNodes[0];
-        //         }
-        //         RequestUpdateRoot(newRoot);
-        //     }
-        //     catch (Exception e)
-        //     {
-        //         Trace.TraceError("Sorting failed: " + e.Message);
-        //     }
-        //     finally
-        //     {
-        //         sortLocked = false;
-        //     }
-        // });
+        SongNode newSelection = currentSelectionContainer.currentSelection;
+        int closestLevelToTarget = GetClosestLevelToTargetForSong(currentSelectionContainer.currentSelection);
+        CScore? chart = null;
+        
+        //check if the closest level is valid
+        chart = closestLevelToTarget > newSelection.charts.Length - 1 
+            ? newSelection.charts.FirstOrDefault()
+            : newSelection.charts[closestLevelToTarget];
+        
+        ChangeSelection(currentSelectionContainer.currentSelection, chart);   
     }
 
     //reload current view
     public void Reload()
     {
-        sortCache.Clear();
+        selectionContainers.Clear();
         ApplySort(currentSort);
     }
 }

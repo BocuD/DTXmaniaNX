@@ -37,6 +37,7 @@ public class SongSelectionContainer : UIGroup
         
         currentRoot = songDb.songNodeRoot;
         dontSerialize = true;
+        sortByRenderOrder = false;
 
         elementsContainer = AddChild(new UIGroup("Elements"));
         
@@ -49,11 +50,21 @@ public class SongSelectionContainer : UIGroup
     private float elementSpacing = 85.0f; //spacing between elements
     private int selectionIndex = 10; //the center element is the 10th element in the array (0-based index)
 
-    private SongNode currentSelection => songSelectionElements[WrapIndex(bufferStartIndex + selectionIndex)].node;
+    public SongNode currentSelection => songSelectionElements[WrapIndex(bufferStartIndex + selectionIndex)].node;
+    
+    private bool updateRootRequested;
+    private SongNode? newSongRoot;
+    
+    public void RequestUpdateRoot(SongNode newRoot)
+    {
+        updateRootRequested = true;
+        newSongRoot = newRoot;
+    }
     
     public void UpdateRoot(SongNode? newRoot = null, bool preLoadImages = true)
     {
         Trace.TraceInformation("Updating song selection root to {0}", newRoot?.title ?? "default root");
+        DateTime start = DateTime.Now;
         
         //make sure the fallback is loaded
         fallbackPreImage = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_preimage default.png"));
@@ -110,6 +121,8 @@ public class SongSelectionContainer : UIGroup
         
         //update album art, preview sound, etc
         HandleSelectionChanged();
+        
+        Trace.TraceInformation("Song selection root updated in {0}ms", (DateTime.Now - start).TotalMilliseconds);
     }
 
     private void HandleSelectionChanged()
@@ -140,6 +153,12 @@ public class SongSelectionContainer : UIGroup
     
     public override void Draw(Matrix parentMatrix)
     {
+        if (updateRootRequested)
+        {
+            UpdateRoot(newSongRoot, false);
+            updateRootRequested = false;
+        }
+        
         //update image cache at the start of the frame
         //this makes sure that requesting a new image to be cached means
         //it won't get handled until the next frame,
@@ -262,7 +281,7 @@ public class SongSelectionContainer : UIGroup
             if (currentRoot.nodeType != SongNode.ENodeType.ROOT)
             {
                 CDTXMania.Skin.soundCancel.tPlay();
-                CDTXMania.StageManager.stageSongSelectionNew.RequestUpdateRoot(currentRoot.parent);
+                RequestUpdateRoot(currentRoot.parent);
             }
             else
             {
@@ -340,7 +359,6 @@ public class SongSelectionContainer : UIGroup
         
         overwriteElement.UpdateSongNode(newNode);
         toBeCached.Add(newNode);
-        //CachePreImage(newNode);
         
         //update the overwritten slot
         //overwriteElement.UpdateSongNode(newNode, newTex);
@@ -402,23 +420,31 @@ public class SongSelectionContainer : UIGroup
             //switch to box node
             case SongNode.ENodeType.BOX:
                 CDTXMania.Skin.soundDecide.tPlay();
-                CDTXMania.StageManager.stageSongSelectionNew.RequestUpdateRoot(currentSelection);
+                RequestUpdateRoot(currentSelection);
                 break;
 
             case SongNode.ENodeType.BACKBOX:
                 CDTXMania.Skin.soundCancel.tPlay();
                 //two levels: the parent of current selection is the box we are in right now
-                CDTXMania.StageManager.stageSongSelectionNew.RequestUpdateRoot(currentSelection.parent.parent);
+                RequestUpdateRoot(currentSelection.parent.parent);
                 break;
         }
 
         return false;
     }
 
+    public void PreRenderText()
+    {
+        foreach (SongSelectionElement element in songSelectionElements)
+        {
+            element.PreRenderText();
+        }
+    }
+
     #region PreImage cache
 
-    private List<SongNode> toBeCached = [];
-    private Dictionary<SongNode, DTXTexture> preImageCache = new();
+    private readonly List<SongNode> toBeCached = [];
+    private readonly Dictionary<SongNode, DTXTexture> preImageCache = new();
     
     public bool isScrolling => MathF.Abs(targetY) > 2.0f;
 
@@ -427,7 +453,7 @@ public class SongSelectionContainer : UIGroup
         if (!preImageCache.TryGetValue(node, out DTXTexture? preImage))
         {
             string imagePath = node.nodeType != SongNode.ENodeType.BACKBOX 
-                ? node.GetImagePath() 
+                ? node.GetImagePath()
                 : CSkin.Path(@"Graphics\5_preimage backbox.png");
             
             if (!string.IsNullOrEmpty(imagePath) && File.Exists(imagePath))
@@ -453,21 +479,25 @@ public class SongSelectionContainer : UIGroup
         }
     }
 
-    private void UpdateImageCache()
+    public void UpdateImageCache(bool updateAll = false)
     {
+        int maxIterationCount = updateAll ? songSelectionElements.Length : 1;
         //cache one image per frame
         if (toBeCached.Count > 0)
         {
-            var toCache = toBeCached.First();
-            toBeCached.RemoveAt(0);
-
-            DTXTexture? preImage = CachePreImage(toCache);
-
-            foreach (SongSelectionElement element in songSelectionElements)
+            for (int i = 0; i < maxIterationCount && toBeCached.Count > 0; i++)
             {
-                if (element.node == toCache)
+                SongNode toCache = toBeCached.First();
+                toBeCached.RemoveAt(0);
+
+                DTXTexture? preImage = CachePreImage(toCache);
+
+                foreach (SongSelectionElement element in songSelectionElements)
                 {
-                    element.UpdateSongThumbnail(preImage);
+                    if (element.node == toCache)
+                    {
+                        element.UpdateSongThumbnail(preImage);
+                    }
                 }
             }
         }
