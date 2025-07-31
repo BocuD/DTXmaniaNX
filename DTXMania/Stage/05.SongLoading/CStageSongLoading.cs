@@ -334,7 +334,7 @@ internal class CStageSongLoading : CStage
 
                 if (!string.IsNullOrWhiteSpace(strSongTitle))
                 {
-                    titleFont = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.songListFont), 40,
+                    titleFont = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.songListFont), 40 * CDTXMania.renderScale,
                         FontStyle.Regular);
                      Bitmap bmpSongName = titleFont.DrawPrivateFont(strSongTitle, CPrivateFont.DrawMode.Edge, Color.Black,
                         Color.Black, clGITADORAgradationTopColor, clGITADORAgradationBottomColor, true);
@@ -349,7 +349,7 @@ internal class CStageSongLoading : CStage
 
                 if (!string.IsNullOrWhiteSpace(strArtistName))
                 {
-                    artistNameFont = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.songListFont), 30,
+                    artistNameFont = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.songListFont), 30 * CDTXMania.renderScale,
                         FontStyle.Regular);
                     Bitmap bmpArtistName = artistNameFont.DrawPrivateFont(strArtistName, CPrivateFont.DrawMode.Edge, Color.Black,
                         Color.Black, clGITADORAgradationTopColor, clGITADORAgradationBottomColor, true);
@@ -735,6 +735,7 @@ internal class CStageSongLoading : CStage
     
     private void DrawLoadingScreenUI()
     {
+        Matrix scaling = Matrix.Scaling(CDTXMania.renderScale);
         int y = 184;
         
         if (txJacket != null)
@@ -753,8 +754,7 @@ internal class CStageSongLoading : CStage
             }
         
             mat *= Matrix.Scaling(fScalingFactor, fScalingFactor, 1f);
-            mat *= Matrix.Translation(206f, 66f, 0f);
-            mat *= Matrix.RotationZ(0.28f);
+            mat *= Matrix.Translation(-348, 84f, 0f);
         
             txJacket.tDraw3D(CDTXMania.app.Device, mat);
         }
@@ -763,8 +763,11 @@ internal class CStageSongLoading : CStage
         {
             if (txTitle.szImageSize.Width > 625)
                 txTitle.vcScaleRatio.X = 625f / txTitle.szImageSize.Width;
-        
-            txTitle.tDraw2D(CDTXMania.app.Device, 190, 285);
+
+            Matrix mat = Matrix.Translation(500, 285, 0) * scaling;
+            Vector2 size = new(txTitle.szImageSize.Width, txTitle.szImageSize.Height);
+            size *= 1 / CDTXMania.renderScale;
+            txTitle.tDraw2DMatrix(CDTXMania.app.Device, mat, size);
         }
         
         if (txArtist != null)
@@ -772,7 +775,10 @@ internal class CStageSongLoading : CStage
             if (txArtist.szImageSize.Width > 625)
                 txArtist.vcScaleRatio.X = 625f / txArtist.szImageSize.Width;
         
-            txArtist.tDraw2D(CDTXMania.app.Device, 190, 360);
+            Matrix mat = Matrix.Translation(500, 360, 0) * scaling;
+            Vector2 size = new(txArtist.szImageSize.Width, txArtist.szImageSize.Height);
+            size *= 1 / CDTXMania.renderScale;
+            txArtist.tDraw2DMatrix(CDTXMania.app.Device, mat, size);
         }
         
         int[] iPart = [0, CDTXMania.ConfigIni.bIsSwappedGuitarBass ? 2 : 1, CDTXMania.ConfigIni.bIsSwappedGuitarBass ? 1 : 2];

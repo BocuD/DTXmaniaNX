@@ -175,7 +175,6 @@ internal class CActPerfPanelString : CActivity
                    
                 mat *= SharpDX.Matrix.Scaling(fScalingFactor, fScalingFactor, 1f);
                 mat *= SharpDX.Matrix.Translation(400f, -227f, 0f);
-                mat *= SharpDX.Matrix.RotationZ(0.3f);
             }
 
             if (CDTXMania.ConfigIni.bGuitarEnabled)
@@ -185,7 +184,6 @@ internal class CActPerfPanelString : CActivity
 
                 mat *= SharpDX.Matrix.Scaling(fScalingFactor, fScalingFactor, 1f);
                 mat *= SharpDX.Matrix.Translation(-28f, -94.5f, 0f);
-                mat *= SharpDX.Matrix.RotationZ(0.3f);
             }
 
             if (txジャケットパネル != null)
