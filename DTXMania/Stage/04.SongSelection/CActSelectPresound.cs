@@ -21,7 +21,7 @@ internal class CActSelectPresound : CActivity
 		}
 	}
 
-	public void tSelectionChanged(CScore chart)
+	public void tSelectionChanged(CScore? chart)
 	{
 		if (chart != null &&
 		    (!(chart.FileInformation.AbsoluteFolderPath + chart.SongInformation.Presound).Equals(strCurrentlyPlayingAudioPath) ||

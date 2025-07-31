@@ -31,7 +31,7 @@ public class StatusPane : UIGroup
     private float verticalSpacing = 74;
     private Vector3 textOffset = new(125, -45, 0);
     
-    public SongNode song;
+    public SongNode? song;
 
     public override void Draw(Matrix parentMatrix)
     {

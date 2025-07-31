@@ -24,7 +24,7 @@ public class StatusPanel : UIGroup
 		CommandHistory = new CStageSongSelection.CCommandHistory();
 	}
 
-	public void SelectionChanged(SongNode song, CScore chart)
+	public void SelectionChanged(SongNode? song, CScore? chart)
 	{
 		foreach (StatusPane pane in instruments)
 		{
