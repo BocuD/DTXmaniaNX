@@ -5,6 +5,7 @@ using DTXMania.SongDb;
 using DTXMania.UI;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.Inspector;
+using Hexa.NET.ImGui;
 using SharpDX;
 using Color = System.Drawing.Color;
 using RectangleF = SharpDX.RectangleF;
@@ -36,11 +37,11 @@ public class SongSelectionElement : UIGroup
 
     public static void DisposeSongSelectElementAssets()
     {
-        if (bar != null) bar.Dispose();
-        if (bar != null) boxClosed.Dispose();
-        if (bar != null) boxOpen.Dispose();
-        if (skillBarTex != null) skillBarTex.Dispose();
-        if (skillBarFillTex != null) skillBarFillTex.Dispose();
+        bar?.Dispose();
+        boxClosed?.Dispose();
+        boxOpen?.Dispose();
+        skillBarTex?.Dispose();
+        skillBarFillTex?.Dispose();
     }
     
     [AddChildMenu]
@@ -71,6 +72,7 @@ public class SongSelectionElement : UIGroup
         songTitleText.renderOrder = 1;
         songTitleText.name = "title";
         songTitleText.maximumWidth = 460.0f;
+        songTitleText.isVisible = false;
         
         songArtistText = AddChild(new HorizontallyScrollingText(family, 12));
         songArtistText.position = new Vector3(80, 60, 0);
@@ -80,6 +82,7 @@ public class SongSelectionElement : UIGroup
         songArtistText.renderOrder = 1;
         songArtistText.name = "artist";
         songArtistText.maximumWidth = 460.0f;
+        songArtistText.isVisible = false;
         
         skillbar = AddChild(new UIImage(skillBarTex));
         skillbar.anchor = new Vector2(0.0f, 0.5f);
@@ -166,6 +169,9 @@ public class SongSelectionElement : UIGroup
                     break;
             }
             
+            songTitleText.isVisible = !string.IsNullOrWhiteSpace(songTitleText.text);
+            songArtistText.isVisible = !string.IsNullOrWhiteSpace(songArtistText.text);
+            
             UpdateSkillbar();
         }
     }
@@ -196,6 +202,14 @@ public class SongSelectionElement : UIGroup
         }
     }
 
+    public void PreRenderText()
+    {
+        //force render the text
+        if (songTitleText.isVisible) songTitleText.RenderTexture();
+        if (songArtistText.isVisible) songArtistText.RenderTexture();
+        if (skillText.isVisible) skillText.RenderTexture();
+    }
+
     public void UpdateSongThumbnail(DTXTexture? tex)
     {
         tex ??= SongSelectionContainer.fallbackPreImage;
@@ -208,5 +222,24 @@ public class SongSelectionElement : UIGroup
     {
         songTitleText.scrollingEnabled = highlighted;
         songArtistText.scrollingEnabled = highlighted;
+    }
+
+    public override void DrawInspector()
+    {
+        base.DrawInspector();
+        
+        //open header by default
+        if (ImGui.CollapsingHeader("Song Selection Element", ImGuiTreeNodeFlags.DefaultOpen))
+        {
+            if (node != null)
+            {
+                ImGui.Text($"Node Type: {node.nodeType}");
+                ImGui.Text($"Title: {node.title}");
+            }
+            else
+            {
+                ImGui.Text("Node: null");
+            }
+        }
     }
 }
