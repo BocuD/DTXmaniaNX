@@ -596,8 +596,7 @@ internal class CDTXMania : Game
         #region [ Initialize window ]
 
         //---------------------
-        string process64bitText = Environment.Is64BitProcess ? "x64(64-bit) " : "";
-        strWindowTitle = appName + " " + process64bitText + VERSION;
+        strWindowTitle = appName + " " + VERSION;
         Window.StartPosition = FormStartPosition.Manual; // #30675 2013.02.04 ikanick add
         Window.Location = new Point(ConfigIni.nInitialWindowXPosition, ConfigIni.nInitialWindowYPosition); // #30675 2013.02.04 ikanick add
 
