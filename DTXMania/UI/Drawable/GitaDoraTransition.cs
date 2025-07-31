@@ -57,13 +57,14 @@ public class GitaDoraTransition : UIGroup
         public float animationProgress = 1.5f;
         public bool animate = false;
         public float targetRotation = MathF.PI * 2.0f;
-        public float animationSpeed = 3.0f;
+        public float animationSpeed = 3.4f;
         public float animationDirection = 1.0f;
         public float animationTarget = 2.0f;
         public Action? onComplete = null;
         public bool closed = false;
-
         public bool finishOnNextFrame = false;
+
+        public int delayFrameCounter = 0;
 
         public GitaDoraTransitionState()
         {
@@ -128,9 +129,12 @@ public class GitaDoraTransition : UIGroup
         logo.position.X = t_logo;
         logo.Texture.transparency = alpha_logo;
         
-        if (state.animate)
+        if (state.delayFrameCounter > 0)
         {
-            //Trace.TraceInformation($"Animating GITADORA transition: {state.animationProgress} -> {state.animationTarget} (direction: {state.animationDirection})");
+            state.delayFrameCounter--;
+        }
+        else if (state.animate)
+        {
             state.animationProgress += delta * state.animationSpeed * state.animationDirection;
             if (state.animationProgress > 2.0f && state.animationTarget >= 1.5f)
             {
@@ -155,7 +159,7 @@ public class GitaDoraTransition : UIGroup
         return toMin + (value - fromMin) * (toMax - toMin) / (fromMax - fromMin);
     }
     
-    public static void Close(Action? action = null)
+    public static void Close(int delayFrames = 0, Action? action = null)
     {
         state.animate = true;
         state.animationProgress = 2.0f;
@@ -163,9 +167,10 @@ public class GitaDoraTransition : UIGroup
         state.animationDirection = -1.0f;
         state.onComplete = action;
         state.lastDrawTime = CDTXMania.Timer.nCurrentTime;
+        state.delayFrameCounter = delayFrames;
     }
 
-    public static void Open(Action? action = null)
+    public static void Open(int delayFrames = 5, Action? action = null)
     {
         state.animate = true;
         state.animationProgress = 0.0f;
@@ -173,6 +178,7 @@ public class GitaDoraTransition : UIGroup
         state.animationDirection = 1.0f;
         state.onComplete = action;
         state.lastDrawTime = CDTXMania.Timer.nCurrentTime;
+        state.delayFrameCounter = delayFrames;
     }
     
     public override void DrawInspector()
