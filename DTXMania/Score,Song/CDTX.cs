@@ -1563,6 +1563,7 @@ public class CDTX : CActivity
 
     public void tLoadBMP_BMPTEX()
     {
+        return;
         int nCPUCores = Environment.ProcessorCount;
 
         #region [ Read BMPs ]
