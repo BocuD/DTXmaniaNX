@@ -1521,21 +1521,29 @@ public class CDTX : CActivity
     private static void BMPTEXLoadAll(CDTX cdtx) // ダサい実装だが、Dictionary<>の中には手を出せず、妥協した
     {
         var listB = cdtx.listBMPTEX;
-        
-        //Trace.TraceInformation( "Back: ThreadID(BMPLoad)=" + Thread.CurrentThread.ManagedThreadId + ", listCount=" + listB.Count  );
-        foreach (CBMPTEX cbmp in listB.Values)
-        {
-            LoadTexture(cbmp);
-            lock (lockQueue)
-            {
-                queueCBMPbaseDone.Enqueue(cbmp);
-                //  Trace.TraceInformation( "Back: Enqueued(" + queueCBMPbaseDone.Count + "): " + cbmp.strFilename );
-            }
 
-            if (queueCBMPbaseDone.Count > 8)
+        try
+        {
+            //Trace.TraceInformation( "Back: ThreadID(BMPLoad)=" + Thread.CurrentThread.ManagedThreadId + ", listCount=" + listB.Count  );
+            foreach (CBMPTEX cbmp in listB.Values)
             {
-                Thread.Sleep(10);
+                LoadTexture(cbmp);
+                lock (lockQueue)
+                {
+                    queueCBMPbaseDone.Enqueue(cbmp);
+                    //  Trace.TraceInformation( "Back: Enqueued(" + queueCBMPbaseDone.Count + "): " + cbmp.strFilename );
+                }
+
+                if (queueCBMPbaseDone.Count > 8)
+                {
+                    Thread.Sleep(10);
+                }
             }
+        }
+        catch (Exception e)
+        {
+            Trace.TraceError($"Error in BMPTEXLoadAll: {e.Message} DTX File: {cdtx.strFileNameFullPath}");
+            Trace.TraceError($"Stack Trace: {e.StackTrace}");
         }
     }
 
