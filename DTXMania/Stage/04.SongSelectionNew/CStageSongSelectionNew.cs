@@ -135,7 +135,7 @@ public class CStageSongSelectionNew : CStage
         loadPhase = ELoadPhase.Initialize;
     }
 
-    private async Task PrepareSelectionContainers()
+    private void PrepareSelectionContainers()
     {
         //determine if we need to rebuild sort cache or not
         if (CDTXMania.GetCurrentInstrument() != lastInstrument)
@@ -155,7 +155,7 @@ public class CStageSongSelectionNew : CStage
             {
                 if (!sortCache.TryGetValue(sorter, out SongNode? rootNode))
                 {
-                    rootNode = await sorter.Sort(songDb);
+                    rootNode = sorter.Sort(songDb).Result;
                     sortCache[sorter] = rootNode;
                 };
                 
@@ -200,7 +200,7 @@ public class CStageSongSelectionNew : CStage
                 if (songDb.status == SongDbScanStatus.Idle)
                 {
                     loadPhase = ELoadPhase.Prepare;
-                    Task.Run(PrepareSelectionContainers);
+                    PrepareSelectionContainers();
                 }
                 return 0;
             
