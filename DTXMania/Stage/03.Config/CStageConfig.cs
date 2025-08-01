@@ -84,8 +84,8 @@ internal class CStageConfig : CStage
         var family = new FontFamily(CDTXMania.ConfigIni.songListFont);
         configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(family, 18, "System", () => { actList.tSetupItemList_System(); }));
         configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(family, 18, "Drums", () => { actList.tSetupItemList_Drums(); }));
-        configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(family, 18, "Guitar", () => { actList.tSetupItemList_Guitar(); }));
-        configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(family, 18, "Bass", () => { actList.tSetupItemList_Bass(); }));
+        configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(family, 18, "Guitar P1", () => { actList.tSetupItemList_Guitar(); }));
+        configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(family, 18, "Guitar P2", () => { actList.tSetupItemList_Bass(); }));
         configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(family, 18, "Exit", () => { actList.tSetupItemList_Exit(); }));
         configLeftOptionsMenu.UpdateLayout();
         configLeftOptionsMenu.SetSelectedIndex(0);
