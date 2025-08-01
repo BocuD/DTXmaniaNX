@@ -321,9 +321,9 @@ internal partial class CActConfigList
             () => CDTXMania.ConfigIni.nInputAdjustTimeMs.Bass = iBassInputAdjustTimeMs.nCurrentValue);
         listItems.Add(iBassInputAdjustTimeMs);
 
-        CItemBase iBassGoToKeyAssign = new("Bass Keys", CItemBase.EPanelType.Folder,
+        CItemBase iBassGoToKeyAssign = new("Input Mapping", CItemBase.EPanelType.Folder,
             "ベースのキー入力に関する項目を設定します。",
-            "Settings for the bass key/pad inputs.")
+            "P2 guitar input mapping configuration.")
         {
             action = tSetupItemList_KeyAssignBass
         };
@@ -338,7 +338,7 @@ internal partial class CActConfigList
     {
         listItems.Clear();
             
-        CItemBase iKeyAssignBassReturnToMenu = new("<< ReturnTo Menu", CItemBase.EPanelType.Other,
+        CItemBase iKeyAssignBassReturnToMenu = new("<< Return To Menu", CItemBase.EPanelType.Other,
             "左側のメニューに戻ります。",
             "Return to left menu.")
         {

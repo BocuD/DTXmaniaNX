@@ -302,9 +302,9 @@ internal partial class CActConfigList
             () => CDTXMania.ConfigIni.bDiscordRichPresenceEnabled = iDiscordRichPresence.bON);
         listItems.Add(iDiscordRichPresence);
         
-        CItemBase iSystemGoToKeyAssign = new("System Keys", CItemBase.EPanelType.Folder,
+        CItemBase iSystemGoToKeyAssign = new("System Key Mapping", CItemBase.EPanelType.Folder,
             "システムのキー入力に関する項目を設定します。",
-            "Settings for the system key/pad inputs.")
+            "System key input mapping configuration.")
         {
             action = tSetupItemList_KeyAssignSystem
         };

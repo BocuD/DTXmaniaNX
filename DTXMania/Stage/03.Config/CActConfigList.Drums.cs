@@ -749,9 +749,9 @@ internal partial class CActConfigList
         };
         listItems.Add(iDrumsGoToVelocity);
         
-        CItemBase iDrumsGoToKeyAssign = new("Drums Keys", CItemBase.EPanelType.Folder,
+        CItemBase iDrumsGoToKeyAssign = new("Input Mapping", CItemBase.EPanelType.Folder,
             "ドラムのキー入力に関する項目を設定します。",
-            "Settings for the drums key/pad inputs.")
+            "Drum input mapping configuration.")
         {
             action = tSetupItemList_KeyAssignDrums
         };
@@ -766,7 +766,7 @@ internal partial class CActConfigList
     {
         listItems.Clear();
 
-        CItemBase iKeyAssignDrumsReturnToMenu = new("<< ReturnTo Menu", CItemBase.EPanelType.Other,
+        CItemBase iKeyAssignDrumsReturnToMenu = new("<< Return To Menu", CItemBase.EPanelType.Other,
             "左側のメニューに戻ります。",
             "Return to left menu.")
         {
