@@ -1563,6 +1563,7 @@ public class CDTX : CActivity
 
     public void tLoadBMP_BMPTEX()
     {
+        //todo: fix this so we can initialize textures on the main thread
         return;
         int nCPUCores = Environment.ProcessorCount;
 
