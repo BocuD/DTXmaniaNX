@@ -246,30 +246,39 @@ public class CStageSongSelectionNew : CStage
     public int targetDifficultyLevel { get; private set; } = 0;
     public void IncrementDifficultyLevel()
     {
-        var nextAvailableLevel = targetDifficultyLevel;
-        
-        //find first available new level
-        for (int i = 0; i < 5; i++)
+        if (selectedNode.nodeType != SongNode.ENodeType.SONG)
         {
-            int newLevel = (targetDifficultyLevel + i) % 5;
-            if (newLevel == targetDifficultyLevel) continue;
+            targetDifficultyLevel = (targetDifficultyLevel + 1) % 5;
+        }
+        else
+        {
 
-            int currentInstrument = CDTXMania.GetCurrentInstrument();
-            
-            //check if this chart is valid
-            var chart = selectedNode.charts[newLevel];
-            if (chart == null) continue;
+            var nextAvailableLevel = targetDifficultyLevel;
 
-            if (chart.SongInformation.chipCountByInstrument[currentInstrument] > 0)
+            //find first available new level
+            for (int i = 0; i < 5; i++)
             {
-                nextAvailableLevel = newLevel;
-                break;
+                int newLevel = (targetDifficultyLevel + i) % 5;
+                if (newLevel == targetDifficultyLevel) continue;
+
+                int currentInstrument = CDTXMania.GetCurrentInstrument();
+
+                //check if this chart is valid
+                var chart = selectedNode.charts[newLevel];
+                if (chart == null) continue;
+
+                if (chart.SongInformation.chipCountByInstrument[currentInstrument] > 0)
+                {
+                    nextAvailableLevel = newLevel;
+                    break;
+                }
             }
+
+            if (nextAvailableLevel == targetDifficultyLevel) return;
+
+            targetDifficultyLevel = nextAvailableLevel;
         }
 
-        if (nextAvailableLevel == targetDifficultyLevel) return;
-        
-        targetDifficultyLevel = nextAvailableLevel;
         switch (targetDifficultyLevel)
         {
             case 0:
