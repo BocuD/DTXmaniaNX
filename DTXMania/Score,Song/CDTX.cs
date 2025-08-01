@@ -1501,20 +1501,28 @@ public class CDTX : CActivity
 
     private static void BMPLoadAll(Dictionary<int, CBMP> listB) // バックグラウンドスレッドで、テクスチャファイルをひたすら読み込んではキューに追加する
     {
-        //Trace.TraceInformation( "Back: ThreadID(BMPLoad)=" + Thread.CurrentThread.ManagedThreadId + ", listCount=" + listB.Count  );
-        foreach (CBMP cbmp in listB.Values)
+        try
         {
-            LoadTexture(cbmp);
-            lock (lockQueue)
+            //Trace.TraceInformation( "Back: ThreadID(BMPLoad)=" + Thread.CurrentThread.ManagedThreadId + ", listCount=" + listB.Count  );
+            foreach (CBMP cbmp in listB.Values)
             {
-                queueCBMPbaseDone.Enqueue(cbmp);
-                //  Trace.TraceInformation( "Back: Enqueued(" + queueCBMPbaseDone.Count + "): " + cbmp.strFilename );
-            }
+                LoadTexture(cbmp);
+                lock (lockQueue)
+                {
+                    queueCBMPbaseDone.Enqueue(cbmp);
+                    //  Trace.TraceInformation( "Back: Enqueued(" + queueCBMPbaseDone.Count + "): " + cbmp.strFilename );
+                }
 
-            if (queueCBMPbaseDone.Count > 8)
-            {
-                Thread.Sleep(10);
+                if (queueCBMPbaseDone.Count > 8)
+                {
+                    Thread.Sleep(10);
+                }
             }
+        }
+        catch (Exception e)
+        {
+            Trace.TraceError($"Error in BMPLoadAll: {e.Message}");
+            Trace.TraceError($"Stack Trace: {e.StackTrace}");
         }
     }
 
