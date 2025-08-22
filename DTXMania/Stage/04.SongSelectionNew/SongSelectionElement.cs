@@ -33,6 +33,14 @@ public class SongSelectionElement : UIGroup
         boxOpen = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_box_open.png"));
         skillBarTex = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_skillbar.png"));
         skillBarFillTex = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_skillbar_fill.png"));
+        
+        //load lamp textures
+        lampTextures = new DTXTexture[6];
+        for (int i = 0; i < 6; i++)
+        {
+            lampTextures[i] = DTXTexture.LoadFromPath(CSkin.Path($@"Graphics\Lamp\{i:00}.png"));
+        }
+        lampGlow = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\Lamp\GLOW.png"));
     }
 
     public static void DisposeSongSelectElementAssets()
@@ -42,6 +50,14 @@ public class SongSelectionElement : UIGroup
         boxOpen?.Dispose();
         skillBarTex?.Dispose();
         skillBarFillTex?.Dispose();
+        
+        foreach (var tex in lampTextures)
+        {
+            tex?.Dispose();
+        }
+
+        lampTextures = [];
+        lampGlow?.Dispose();
     }
     
     [AddChildMenu]
@@ -109,6 +125,13 @@ public class SongSelectionElement : UIGroup
         skillText.name = "skilltext";
         skillText.renderOrder = 2;
         skillText.isVisible = false;
+        
+        lamp = AddChild(new UIImage(lampTextures[0]));
+        lamp.position = new Vector3(-40, 40, 0);
+        lamp.anchor = new Vector2(0.5f, 0.5f);
+        lamp.renderOrder = 1;
+        lamp.name = "lamp";
+        lamp.isVisible = false;
     }
 
     private UIImage backgroundImage;
@@ -118,12 +141,16 @@ public class SongSelectionElement : UIGroup
     private UIImage skillbar;
     private UIImage skillbarFill;
     private UIText skillText;
+    private UIImage lamp;
 
     private static DTXTexture bar;
     private static DTXTexture boxClosed;
     private static DTXTexture boxOpen;
     private static DTXTexture skillBarTex;
     private static DTXTexture skillBarFillTex;
+    
+    private static DTXTexture[] lampTextures = [];
+    private static DTXTexture lampGlow;
     
     public SongNode? node { get; private set; }
 
@@ -173,6 +200,7 @@ public class SongSelectionElement : UIGroup
             songArtistText.isVisible = !string.IsNullOrWhiteSpace(songArtistText.text);
             
             UpdateSkillbar();
+            UpdateLamp();
         }
     }
 
@@ -200,6 +228,33 @@ public class SongSelectionElement : UIGroup
             skillbarFill.isVisible = false;
             skillText.isVisible = false;
         }
+    }
+
+    private void UpdateLamp()
+    {
+        if (node.nodeType != SongNode.ENodeType.SONG)
+        {
+            lamp.isVisible = false;
+            return;
+        }
+        
+        int bestLamp = 0;
+        
+        //get best lamp
+        for (int index = 0; index < node.charts.Length; index++)
+        {
+            CScore? child = node.charts[index];
+            if (child == null) continue;
+            if (!child.HasChartForCurrentMode()) continue;
+
+            if (child.SongInformation.BestRank[CDTXMania.GetCurrentInstrument()] != 99)
+            {
+                bestLamp = index + 1;
+            }
+        }
+        
+        lamp.SetTexture(lampTextures[bestLamp], false);
+        lamp.isVisible = true;
     }
 
     public void PreRenderText()
