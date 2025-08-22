@@ -175,10 +175,12 @@ public class SongNode
     }
 
     //loop over all charts on this node. find the one that has the highest skill points (if any)
-    public (double skillPoints, double maxSkillPoints) GetTopSkillPoints()
+    public (CScore chart, double skillPoints, double maxSkillPoints, int instrument) GetTopSkillPoints()
     {
         double skill = 0;
         double maxSkill = 0;
+        int inst = 0;
+        CScore skillChart = null;
         foreach (CScore chart in charts)
         {
             if (chart == null) continue;
@@ -199,10 +201,12 @@ public class SongNode
                 {
                     skill = chartSkill;
                     maxSkill = chart.SongInformation.GetMaxSkill(instrument);
+                    skillChart = chart;
+                    inst = instrument;
                 }
             }
         }
 
-        return (skill, maxSkill);
+        return (skillChart, skill, maxSkill, inst);
     }
 }

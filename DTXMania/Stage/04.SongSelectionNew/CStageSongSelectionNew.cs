@@ -58,7 +58,8 @@ public class CStageSongSelectionNew : CStage
         new SortByDifficulty(),
         new SortByLevel(),
         new SortByPlayer(),
-        new SortByAllSongs()
+        new SortByAllSongs(),
+        new SortBySkill()
     ];
     
     public override void InitializeBaseUI()
