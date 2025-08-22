@@ -6,7 +6,8 @@ public class SortBySkill : SongDbSort
 {
     public override string Name => "skill";
     public override string IconName => "skill";
-    
+    public override bool requireResort => true;
+
     public override Task<SongNode> Sort(SongDb songDb)
     {
         SongNode root = new(null, SongNode.ENodeType.ROOT)

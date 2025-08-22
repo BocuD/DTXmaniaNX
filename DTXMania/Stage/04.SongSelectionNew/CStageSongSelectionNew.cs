@@ -154,9 +154,12 @@ public class CStageSongSelectionNew : CStage
         {
             try
             {
-                if (!sortCache.TryGetValue(sorter, out SongNode? rootNode))
+                if (!sortCache.TryGetValue(sorter, out SongNode? rootNode) || sorter.requireResort)
                 {
+                    DateTime now = DateTime.Now;
                     rootNode = sorter.Sort(songDb).Result;
+                    TimeSpan sortTime = DateTime.Now - now;
+                    Trace.TraceInformation($"{sorter.Name} finished sorting in {sortTime.TotalMilliseconds} ms");
                     sortCache[sorter] = rootNode;
                 };
                 
@@ -405,6 +408,7 @@ public class CStageSongSelectionNew : CStage
     //reload current view
     public void Reload()
     {
+        sortCache.Clear();
         PrepareSelectionContainers();
         ApplySort(currentSort);
     }

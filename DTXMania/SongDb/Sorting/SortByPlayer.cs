@@ -7,6 +7,7 @@ public class SortByPlayer : SongDbSort
 {
     public override string Name => "Player";
     public override string IconName => "player";
+    public override bool requireResort => true;
 
     public override Task<SongNode> Sort(SongDb songDb)
     {

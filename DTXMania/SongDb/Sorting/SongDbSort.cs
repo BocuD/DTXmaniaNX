@@ -5,6 +5,7 @@ public abstract class SongDbSort
     public abstract string Name { get; }
     public abstract string IconName { get; }
     public abstract Task<SongNode> Sort(SongDb songDb);
+    public virtual bool requireResort => false;
     
     protected static void OrderByDifficulty(List<SongNode> nodes)
     {
