@@ -37,14 +37,14 @@ public class StatusPane : UIGroup
         {
             skillIconHolders[i] = AddChild(new UIImage(rankIcons[0]));
             skillIconHolders[i].anchor = new Vector2(0.0f, 1.0f);
-            skillIconHolders[i].position = new Vector3(20.0f, -50.0f - verticalSpacing * i, 0.0f);
+            skillIconHolders[i].position = new Vector3(14.0f, -49.0f - verticalSpacing * i, 0.0f);
             skillIconHolders[i].size = new Vector2(27.0f, 27.0f);
             skillIconHolders[i].name = $"Skill_{i}";
             skillIconHolders[i].isVisible = false;
             
             rankIconHolders[i] = AddChild(new UIImage(skillIcon));
             rankIconHolders[i].anchor = new Vector2(0.0f, 1.0f);
-            rankIconHolders[i].position = new Vector3(60.0f, -50.0f - verticalSpacing * i, 0.0f);
+            rankIconHolders[i].position = new Vector3(60.0f, -49.0f - verticalSpacing * i, 0.0f);
             rankIconHolders[i].size = new Vector2(27.0f, 27.0f);
             rankIconHolders[i].name = $"Rank_{i}";
             rankIconHolders[i].isVisible = false;
