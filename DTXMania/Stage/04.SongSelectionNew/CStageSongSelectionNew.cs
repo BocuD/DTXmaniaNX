@@ -404,7 +404,7 @@ public class CStageSongSelectionNew : CStage
     //reload current view
     public void Reload()
     {
-        selectionContainers.Clear();
+        PrepareSelectionContainers();
         ApplySort(currentSort);
     }
 }
