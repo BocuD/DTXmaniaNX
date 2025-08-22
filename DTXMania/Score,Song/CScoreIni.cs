@@ -429,6 +429,7 @@ public class CScoreIni
 			#region [ section ]
 			if (str[0] == '[')
 			{
+				
 				StringBuilder builder = new(0x20);
 				int num = 1;
 				while (num < str.Length && str[num] != ']')
@@ -701,8 +702,10 @@ public class CScoreIni
 						cPerformanceEntry.eRandom.Guitar = ERandomMode.HYPERRANDOM;
 						break;
 					}
+					default:
+						throw new Exception("RandomGuitar の値が無効です。");
 				}
-				throw new Exception("RandomGuitar の値が無効です。");
+				break;
 
 			case "RandomBass":
 				switch (int.Parse(param))
@@ -727,8 +730,10 @@ public class CScoreIni
 						cPerformanceEntry.eRandom.Bass = ERandomMode.HYPERRANDOM;
 						break;
 					}
+					default:
+						throw new Exception("RandomBass の値が無効です。");
 				}
-				throw new Exception("RandomBass の値が無効です。");
+				break;
 
 			case "LightGuitar":
 				cPerformanceEntry.bLight.Guitar = CConversion.bONorOFF(param[0]);
@@ -764,8 +769,10 @@ public class CScoreIni
 						cPerformanceEntry.eDark = EDarkMode.FULL;
 						break;
 					}
+					default:
+						throw new Exception("Dark の値が無効です。");
 				}
-				throw new Exception("Dark の値が無効です。");
+				break;
 				
 			case "ScrollSpeedDrums":
 				cPerformanceEntry.fScrollSpeed.Drums = (float)decimal.Parse(param);
@@ -813,8 +820,10 @@ public class CScoreIni
 						cPerformanceEntry.eHHGroup = EHHGroup.全部共通;
 						break;
 					}
+					default:
+						throw new Exception("HHGroup の値が無効です。");
 				}
-				throw new Exception("HHGroup の値が無効です。");
+				break;
 
 			case "FTGroup":
 				switch (int.Parse(param))
@@ -829,8 +838,10 @@ public class CScoreIni
 						cPerformanceEntry.eFTGroup = EFTGroup.共通;
 						break;
 					}
+					default:
+						throw new Exception("FTGroup の値が無効です。");
 				}
-				throw new Exception("FTGroup の値が無効です。");
+				break;
 
 			case "CYGroup":
 				switch (int.Parse(param))
@@ -845,8 +856,10 @@ public class CScoreIni
 						cPerformanceEntry.eCYGroup = ECYGroup.共通;
 						break;
 					}
+					default:
+						throw new Exception("CYGroup の値が無効です。");
 				}
-				throw new Exception("CYGroup の値が無効です。");
+				break;
 
 			case "BDGroup":
 				switch (int.Parse(param))
@@ -866,8 +879,11 @@ public class CScoreIni
 						cPerformanceEntry.eBDGroup = EBDGroup.どっちもBD;
 						break;
 					}
+					default:
+						throw new Exception("HHGroup の値が無効です。");
 				}
-				throw new Exception("HHGroup の値が無効です。");
+
+				break;
 
 			case "HitSoundPriorityHH":
 				switch (int.Parse(param))
@@ -884,8 +900,10 @@ public class CScoreIni
 							EPlaybackPriority.PadOverChipPriority;
 						break;
 					}
+					default:
+						throw new Exception("HitSoundPriorityHH の値が無効です。");
 				}
-				throw new Exception("HitSoundPriorityHH の値が無効です。");
+				break;
 
 			case "HitSoundPriorityFT":
 				switch (int.Parse(param))
@@ -902,8 +920,10 @@ public class CScoreIni
 							EPlaybackPriority.PadOverChipPriority;
 						break;
 					}
+					default:
+						throw new Exception("HitSoundPriorityFT の値が無効です。");
 				}
-				throw new Exception("HitSoundPriorityFT の値が無効です。");
+				break;
 
 			case "HitSoundPriorityCY":
 				switch (int.Parse(param))
@@ -920,8 +940,10 @@ public class CScoreIni
 							EPlaybackPriority.PadOverChipPriority;
 						break;
 					}
+					default:
+						throw new Exception("HitSoundPriorityCY の値が無効です。");
 				}
-				throw new Exception("HitSoundPriorityCY の値が無効です。");
+				break;
 
 			case "Guitar":
 				cPerformanceEntry.bGuitarEnabled = CConversion.bONorOFF(param[0]);
@@ -953,8 +975,10 @@ public class CScoreIni
 						cPerformanceEntry.eDamageLevel = EDamageLevel.High;
 						break;
 					}
+					default:
+						throw new Exception("DamageLevel の値が無効です。");
 				}
-				throw new Exception("DamageLevel の値が無効です。");
+				break;
 
 			case "UseKeyboard":
 				cPerformanceEntry.bKeyboardUsed = CConversion.bONorOFF(param[0]);
@@ -1078,98 +1102,104 @@ public class CScoreIni
 		}
 	}
 
-	internal void tAddHistory( string str追加文字列 )
+	internal void tAddHistory(string str追加文字列)
 	{
 		stFile.HistoryCount++;
-		for( int i = 3; i >= 0; i-- )
-			stFile.History[ i + 1 ] = stFile.History[ i ];
+		for (int i = 3; i >= 0; i--)
+			stFile.History[i + 1] = stFile.History[i];
 		DateTime now = DateTime.Now;
-		stFile.History[ 0 ] = string.Format( "{0:0}.{1:D2}/{2}/{3} {4}", stFile.HistoryCount, now.Year % 100, now.Month, now.Day, str追加文字列 );
+		stFile.History[0] = $"{stFile.HistoryCount:0}.{now.Year % 100:D2}/{now.Month}/{now.Day} {str追加文字列}";
 	}
-	internal void tExport( string iniファイル名 )
-	{
-		iniFileDirectoryName = Path.GetDirectoryName( iniファイル名 );
-		iniFilename = Path.GetFileName( iniファイル名 );
 
-		StreamWriter writer = new StreamWriter( iniファイル名, false, Encoding.GetEncoding( "shift-jis" ) );
-		writer.WriteLine( "[File]" );
-		writer.WriteLine( "Title={0}", stFile.Title );
-		writer.WriteLine( "Name={0}", stFile.Name );
-		writer.WriteLine( "Hash={0}", stFile.Hash );
-		writer.WriteLine( "PlayCountDrums={0}", stFile.PlayCountDrums );
-		writer.WriteLine( "PlayCountGuitars={0}", stFile.PlayCountGuitar );
-		writer.WriteLine( "PlayCountBass={0}", stFile.PlayCountBass );
-		writer.WriteLine( "ClearCountDrums={0}", stFile.ClearCountDrums );       // #23596 10.11.16 add ikanick
-		writer.WriteLine( "ClearCountGuitars={0}", stFile.ClearCountGuitar );    //
-		writer.WriteLine( "ClearCountBass={0}", stFile.ClearCountBass );         //
-		writer.WriteLine( "BestRankDrums={0}", stFile.BestRank.Drums );		// #24459 2011.2.24 yyagi
-		writer.WriteLine( "BestRankGuitar={0}", stFile.BestRank.Guitar );		//
-		writer.WriteLine( "BestRankBass={0}", stFile.BestRank.Bass );			//
-		writer.WriteLine( "HistoryCount={0}", stFile.HistoryCount );
-		writer.WriteLine( "History0={0}", stFile.History[ 0 ] );
-		writer.WriteLine( "History1={0}", stFile.History[ 1 ] );
-		writer.WriteLine( "History2={0}", stFile.History[ 2 ] );
-		writer.WriteLine( "History3={0}", stFile.History[ 3 ] );
-		writer.WriteLine( "History4={0}", stFile.History[ 4 ] );
-		writer.WriteLine( "BGMAdjust={0}", stFile.BGMAdjust );
+	internal void tExport(string iniFilePath)
+	{
+		iniFileDirectoryName = Path.GetDirectoryName(iniFilePath);
+		iniFilename = Path.GetFileName(iniFilePath);
+
+		StreamWriter writer = new(iniFilePath, false, Encoding.GetEncoding("shift-jis"));
+		writer.WriteLine("[File]");
+		writer.WriteLine("Title={0}", stFile.Title);
+		writer.WriteLine("Name={0}", stFile.Name);
+		writer.WriteLine("Hash={0}", stFile.Hash);
+		writer.WriteLine("PlayCountDrums={0}", stFile.PlayCountDrums);
+		writer.WriteLine("PlayCountGuitars={0}", stFile.PlayCountGuitar);
+		writer.WriteLine("PlayCountBass={0}", stFile.PlayCountBass);
+		writer.WriteLine("ClearCountDrums={0}", stFile.ClearCountDrums); // #23596 10.11.16 add ikanick
+		writer.WriteLine("ClearCountGuitars={0}", stFile.ClearCountGuitar); //
+		writer.WriteLine("ClearCountBass={0}", stFile.ClearCountBass); //
+		writer.WriteLine("BestRankDrums={0}", stFile.BestRank.Drums); // #24459 2011.2.24 yyagi
+		writer.WriteLine("BestRankGuitar={0}", stFile.BestRank.Guitar); //
+		writer.WriteLine("BestRankBass={0}", stFile.BestRank.Bass); //
+		writer.WriteLine("HistoryCount={0}", stFile.HistoryCount);
+		writer.WriteLine("History0={0}", stFile.History[0]);
+		writer.WriteLine("History1={0}", stFile.History[1]);
+		writer.WriteLine("History2={0}", stFile.History[2]);
+		writer.WriteLine("History3={0}", stFile.History[3]);
+		writer.WriteLine("History4={0}", stFile.History[4]);
+		writer.WriteLine("BGMAdjust={0}", stFile.BGMAdjust);
 		writer.WriteLine();
-		for( int i = 0; i < 9; i++ )
+		for (int i = 0; i < 9; i++)
 		{
-			string[] strArray = { "HiScore.Drums", "HiSkill.Drums", "HiScore.Guitar", "HiSkill.Guitar", "HiScore.Bass", "HiSkill.Bass", "LastPlay.Drums", "LastPlay.Guitar", "LastPlay.Bass" };
-			writer.WriteLine( "[{0}]", strArray[ i ] );
-			writer.WriteLine( "Score={0}", stSection[ i ].nScore );
-			writer.WriteLine( "PlaySkill={0}", stSection[ i ].dbPerformanceSkill );
-			writer.WriteLine( "Skill={0}", stSection[ i ].dbGameSkill );
-			writer.WriteLine( "Perfect={0}", stSection[ i ].nPerfectCount );
-			writer.WriteLine( "Great={0}", stSection[ i ].nGreatCount );
-			writer.WriteLine( "Good={0}", stSection[ i ].nGoodCount );
-			writer.WriteLine( "Poor={0}", stSection[ i ].nPoorCount );
-			writer.WriteLine( "Miss={0}", stSection[ i ].nMissCount );
-			writer.WriteLine( "MaxCombo={0}", stSection[ i ].nMaxCombo );
-			writer.WriteLine( "TotalChips={0}", stSection[ i ].nTotalChipsCount );
-			writer.Write( "AutoPlay=" );
-			for ( int j = 0; j < (int) ELane.MAX; j++ )
+			string[] strArray =
+			[
+				"HiScore.Drums", "HiSkill.Drums", "HiScore.Guitar", "HiSkill.Guitar", "HiScore.Bass", "HiSkill.Bass",
+				"LastPlay.Drums", "LastPlay.Guitar", "LastPlay.Bass"
+			];
+			writer.WriteLine("[{0}]", strArray[i]);
+			writer.WriteLine("Score={0}", stSection[i].nScore);
+			writer.WriteLine("PlaySkill={0}", stSection[i].dbPerformanceSkill);
+			writer.WriteLine("Skill={0}", stSection[i].dbGameSkill);
+			writer.WriteLine("Perfect={0}", stSection[i].nPerfectCount);
+			writer.WriteLine("Great={0}", stSection[i].nGreatCount);
+			writer.WriteLine("Good={0}", stSection[i].nGoodCount);
+			writer.WriteLine("Poor={0}", stSection[i].nPoorCount);
+			writer.WriteLine("Miss={0}", stSection[i].nMissCount);
+			writer.WriteLine("MaxCombo={0}", stSection[i].nMaxCombo);
+			writer.WriteLine("TotalChips={0}", stSection[i].nTotalChipsCount);
+			writer.Write("AutoPlay=");
+			for (int j = 0; j < (int)ELane.MAX; j++)
 			{
-				writer.Write( stSection[ i ].bAutoPlay[ j ] ? 1 : 0 );
+				writer.Write(stSection[i].bAutoPlay[j] ? 1 : 0);
 			}
+
 			writer.WriteLine();
-			writer.WriteLine( "Risky={0}", stSection[ i ].nRisky );
-			writer.WriteLine( "SuddenDrums={0}", stSection[ i ].bSudden.Drums ? 1 : 0 );
-			writer.WriteLine( "SuddenGuitar={0}", stSection[ i ].bSudden.Guitar ? 1 : 0 );
-			writer.WriteLine( "SuddenBass={0}", stSection[ i ].bSudden.Bass ? 1 : 0 );
-			writer.WriteLine( "HiddenDrums={0}", stSection[ i ].bHidden.Drums ? 1 : 0 );
-			writer.WriteLine( "HiddenGuitar={0}", stSection[ i ].bHidden.Guitar ? 1 : 0 );
-			writer.WriteLine( "HiddenBass={0}", stSection[ i ].bHidden.Bass ? 1 : 0 );
-			writer.WriteLine( "ReverseDrums={0}", stSection[ i ].bReverse.Drums ? 1 : 0 );
-			writer.WriteLine( "ReverseGuitar={0}", stSection[ i ].bReverse.Guitar ? 1 : 0 );
-			writer.WriteLine( "ReverseBass={0}", stSection[ i ].bReverse.Bass ? 1 : 0 );
-			writer.WriteLine( "TightDrums={0}", stSection[ i ].bTight ? 1 : 0 );
-			writer.WriteLine( "RandomGuitar={0}", (int) stSection[ i ].eRandom.Guitar );
-			writer.WriteLine( "RandomBass={0}", (int) stSection[ i ].eRandom.Bass );
-			writer.WriteLine( "LightGuitar={0}", stSection[ i ].bLight.Guitar ? 1 : 0 );
-			writer.WriteLine( "LightBass={0}", stSection[ i ].bLight.Bass ? 1 : 0 );
-			writer.WriteLine( "LeftGuitar={0}", stSection[ i ].bLeft.Guitar ? 1 : 0 );
-			writer.WriteLine( "LeftBass={0}", stSection[ i ].bLeft.Bass ? 1 : 0 );
-			writer.WriteLine( "Dark={0}", (int) stSection[ i ].eDark );
-			writer.WriteLine( "ScrollSpeedDrums={0}", stSection[ i ].fScrollSpeed.Drums );
-			writer.WriteLine( "ScrollSpeedGuitar={0}", stSection[ i ].fScrollSpeed.Guitar );
-			writer.WriteLine( "ScrollSpeedBass={0}", stSection[ i ].fScrollSpeed.Bass );
-			writer.WriteLine( "PlaySpeed={0}/{1}", stSection[ i ].nPlaySpeedNumerator, stSection[ i ].nPlaySpeedDenominator );
-			writer.WriteLine( "HHGroup={0}", (int) stSection[ i ].eHHGroup );
-			writer.WriteLine( "FTGroup={0}", (int) stSection[ i ].eFTGroup );
-			writer.WriteLine( "CYGroup={0}", (int) stSection[ i ].eCYGroup );
-			writer.WriteLine( "BDGroup={0}", (int) stSection[ i ].eBDGroup);
-			writer.WriteLine( "HitSoundPriorityHH={0}", (int) stSection[ i ].eHitSoundPriorityHH );
-			writer.WriteLine( "HitSoundPriorityFT={0}", (int) stSection[ i ].eHitSoundPriorityFT );
-			writer.WriteLine( "HitSoundPriorityCY={0}", (int) stSection[ i ].eHitSoundPriorityCY );
-			writer.WriteLine( "Guitar={0}", stSection[ i ].bGuitarEnabled ? 1 : 0 );
-			writer.WriteLine( "Drums={0}", stSection[ i ].bDrumsEnabled ? 1 : 0 );
-			writer.WriteLine( "StageFailed={0}", stSection[ i ].bSTAGEFAILEDEnabled ? 1 : 0 );
-			writer.WriteLine( "DamageLevel={0}", (int) stSection[ i ].eDamageLevel );
-			writer.WriteLine( "UseKeyboard={0}", stSection[ i ].bKeyboardUsed ? 1 : 0 );
-			writer.WriteLine( "UseMIDIIN={0}", stSection[ i ].bMIDIUsed ? 1 : 0 );
-			writer.WriteLine( "UseJoypad={0}", stSection[ i ].bJoypadUsed ? 1 : 0 );
-			writer.WriteLine( "UseMouse={0}", stSection[ i ].bMouseUsed ? 1 : 0 );
+			writer.WriteLine("Risky={0}", stSection[i].nRisky);
+			writer.WriteLine("SuddenDrums={0}", stSection[i].bSudden.Drums ? 1 : 0);
+			writer.WriteLine("SuddenGuitar={0}", stSection[i].bSudden.Guitar ? 1 : 0);
+			writer.WriteLine("SuddenBass={0}", stSection[i].bSudden.Bass ? 1 : 0);
+			writer.WriteLine("HiddenDrums={0}", stSection[i].bHidden.Drums ? 1 : 0);
+			writer.WriteLine("HiddenGuitar={0}", stSection[i].bHidden.Guitar ? 1 : 0);
+			writer.WriteLine("HiddenBass={0}", stSection[i].bHidden.Bass ? 1 : 0);
+			writer.WriteLine("ReverseDrums={0}", stSection[i].bReverse.Drums ? 1 : 0);
+			writer.WriteLine("ReverseGuitar={0}", stSection[i].bReverse.Guitar ? 1 : 0);
+			writer.WriteLine("ReverseBass={0}", stSection[i].bReverse.Bass ? 1 : 0);
+			writer.WriteLine("TightDrums={0}", stSection[i].bTight ? 1 : 0);
+			writer.WriteLine("RandomGuitar={0}", (int)stSection[i].eRandom.Guitar);
+			writer.WriteLine("RandomBass={0}", (int)stSection[i].eRandom.Bass);
+			writer.WriteLine("LightGuitar={0}", stSection[i].bLight.Guitar ? 1 : 0);
+			writer.WriteLine("LightBass={0}", stSection[i].bLight.Bass ? 1 : 0);
+			writer.WriteLine("LeftGuitar={0}", stSection[i].bLeft.Guitar ? 1 : 0);
+			writer.WriteLine("LeftBass={0}", stSection[i].bLeft.Bass ? 1 : 0);
+			writer.WriteLine("Dark={0}", (int)stSection[i].eDark);
+			writer.WriteLine("ScrollSpeedDrums={0}", stSection[i].fScrollSpeed.Drums);
+			writer.WriteLine("ScrollSpeedGuitar={0}", stSection[i].fScrollSpeed.Guitar);
+			writer.WriteLine("ScrollSpeedBass={0}", stSection[i].fScrollSpeed.Bass);
+			writer.WriteLine("PlaySpeed={0}/{1}", stSection[i].nPlaySpeedNumerator, stSection[i].nPlaySpeedDenominator);
+			writer.WriteLine("HHGroup={0}", (int)stSection[i].eHHGroup);
+			writer.WriteLine("FTGroup={0}", (int)stSection[i].eFTGroup);
+			writer.WriteLine("CYGroup={0}", (int)stSection[i].eCYGroup);
+			writer.WriteLine("BDGroup={0}", (int)stSection[i].eBDGroup);
+			writer.WriteLine("HitSoundPriorityHH={0}", (int)stSection[i].eHitSoundPriorityHH);
+			writer.WriteLine("HitSoundPriorityFT={0}", (int)stSection[i].eHitSoundPriorityFT);
+			writer.WriteLine("HitSoundPriorityCY={0}", (int)stSection[i].eHitSoundPriorityCY);
+			writer.WriteLine("Guitar={0}", stSection[i].bGuitarEnabled ? 1 : 0);
+			writer.WriteLine("Drums={0}", stSection[i].bDrumsEnabled ? 1 : 0);
+			writer.WriteLine("StageFailed={0}", stSection[i].bSTAGEFAILEDEnabled ? 1 : 0);
+			writer.WriteLine("DamageLevel={0}", (int)stSection[i].eDamageLevel);
+			writer.WriteLine("UseKeyboard={0}", stSection[i].bKeyboardUsed ? 1 : 0);
+			writer.WriteLine("UseMIDIIN={0}", stSection[i].bMIDIUsed ? 1 : 0);
+			writer.WriteLine("UseJoypad={0}", stSection[i].bJoypadUsed ? 1 : 0);
+			writer.WriteLine("UseMouse={0}", stSection[i].bMouseUsed ? 1 : 0);
 			writer.WriteLine($@"PrimaryPerfectRange={stSection[i].stPrimaryHitRanges.nPerfectSizeMs}");
 			writer.WriteLine($@"PrimaryGreatRange={stSection[i].stPrimaryHitRanges.nGreatSizeMs}");
 			writer.WriteLine($@"PrimaryGoodRange={stSection[i].stPrimaryHitRanges.nGoodSizeMs}");
@@ -1178,11 +1208,12 @@ public class CScoreIni
 			writer.WriteLine($@"SecondaryGreatRange={stSection[i].stSecondaryHitRanges.nGreatSizeMs}");
 			writer.WriteLine($@"SecondaryGoodRange={stSection[i].stSecondaryHitRanges.nGoodSizeMs}");
 			writer.WriteLine($@"SecondaryPoorRange={stSection[i].stSecondaryHitRanges.nPoorSizeMs}");
-			writer.WriteLine("DTXManiaVersion={0}", stSection[ i ].strDTXManiaVersion );
-			writer.WriteLine("DateTime={0}", stSection[ i ].strDateTime );
+			writer.WriteLine("DTXManiaVersion={0}", stSection[i].strDTXManiaVersion);
+			writer.WriteLine("DateTime={0}", stSection[i].strDateTime);
 			writer.WriteLine("Progress={0}", stSection[i].strProgress);
-			writer.WriteLine("Hash={0}", stSection[ i ].Hash );
+			writer.WriteLine("Hash={0}", stSection[i].Hash);
 		}
+
 		writer.Close();
 	}
 
@@ -1258,37 +1289,21 @@ public class CScoreIni
 	/// nDummy 適当な数値を入れてください。特に使いません。
 	/// dRate 達成率を入れます。
 	/// </summary>
-	internal static int tCalculateRank( int nDummy, double dRate )
+	internal static int tCalculateRank(double completionRate)
 	{
-		if ( dRate == 0 )
-			return (int)ERANK.UNKNOWN;
-
-		if ( dRate >= 95 )
+		return completionRate switch
 		{
-			return (int)ERANK.SS;
-		}
-		if ( dRate >= 80 )
-		{
-			return (int)ERANK.S;
-		}
-		if ( dRate >= 73 )
-		{
-			return (int)ERANK.A;
-		}
-		if ( dRate >= 63 )
-		{
-			return (int)ERANK.B;
-		}
-		if ( dRate >= 53 )
-		{
-			return (int)ERANK.C;
-		}
-		if ( dRate >= 45 )
-		{
-			return (int)ERANK.D;
-		}
-		return (int)ERANK.E;
+			0 => (int)ERANK.UNKNOWN,
+			>= 95 => (int)ERANK.SS,
+			>= 80 => (int)ERANK.S,
+			>= 73 => (int)ERANK.A,
+			>= 63 => (int)ERANK.B,
+			>= 53 => (int)ERANK.C,
+			>= 45 => (int)ERANK.D,
+			_ => (int)ERANK.E
+		};
 	}
+
 	internal static int tCalculateRank(int nTotal, int nPerfect, int nGreat, int nGood, int nPoor, int nMiss, int nCombo)
 	{
 		if (nTotal <= 0)
@@ -1306,36 +1321,16 @@ public class CScoreIni
 		// So this is probably wrong, but I'm not touching it for now.
 		double dRate = 100.0 * nPerfect / (nTotal - nAuto) * 0.85 + 100.0 * nGreat / (nTotal - nAuto) * 0.35 + 100.0 * nCombo / (nTotal - nAuto) * 0.15;
 
-		//System.IO.StreamWriter sw = new System.IO.StreamWriter(@"debug.txt", true, System.Text.Encoding.GetEncoding("shift_jis"));
-		//sw.WriteLine("-------------------------------");
-		//sw.WriteLine("dRateの値は{0}です。", dRate);
-		//sw.WriteLine("nTotalは{0}で、nAutoは{1}です。", nTotal, nAuto);
-		//sw.Close();
-		if (dRate >= 95)
+		return dRate switch
 		{
-			return (int)ERANK.SS;
-		}
-		if (dRate >= 80)
-		{
-			return (int)ERANK.S;
-		}
-		if (dRate >= 73)
-		{
-			return (int)ERANK.A;
-		}
-		if (dRate >= 63)
-		{
-			return (int)ERANK.B;
-		}
-		if (dRate >= 53)
-		{
-			return (int)ERANK.C;
-		}
-		if (dRate >= 45)
-		{
-			return (int)ERANK.D;
-		}
-		return (int)ERANK.E;
+			>= 95 => (int)ERANK.SS,
+			>= 80 => (int)ERANK.S,
+			>= 73 => (int)ERANK.A,
+			>= 63 => (int)ERANK.B,
+			>= 53 => (int)ERANK.C,
+			>= 45 => (int)ERANK.D,
+			_ => (int)ERANK.E
+		};
 	}
 	internal static double tCalculateGameSkill(double dbLevel, int nLevelDec, int nTotal, int nPerfect, int nGreat, int nGood, int nPoor, int nMiss, int nCombo, EInstrumentPart inst, STAUTOPLAY bAutoPlay)
 	{
@@ -1381,12 +1376,6 @@ public class CScoreIni
 		}
 
 		double ret = dbPERFECT率 * 0.85 + dbGREAT率 * 0.35 + dbCOMBO率 * 0.15;
-
-		//System.IO.StreamWriter sw = new System.IO.StreamWriter(@"debug.txt", true, System.Text.Encoding.GetEncoding("shift_jis"));
-		//sw.WriteLine("retの値は{0}です。", ret);
-		//sw.WriteLine("nTotalは{0}で、dbPERFECT率は{1}、dbGREAT率は{2}です。", nTotal, dbPERFECT率, dbGREAT率);
-		//sw.Close();
-
 		ret *= dbCalcReviseValForDrGtBsAutoLanes(inst, bAutoPlay);
 		return ret;
 	}
@@ -1565,14 +1554,14 @@ public class CScoreIni
 				if (!CDTXMania.ConfigIni.bAllDrumsAreAutoPlay)
 				{
 					#region [ Auto BD ]
-					if (bAutoPlay.BD && bAutoPlay.LP == false && bAutoPlay.LBD == false)
+					if (bAutoPlay.BD && !bAutoPlay.LP && !bAutoPlay.LBD)
 					{
 						ret /= 2;
 					}
 					#endregion
 
 					#region [ Auto LP ]
-					else if (bAutoPlay.BD == false && bAutoPlay.LP || bAutoPlay.LBD)
+					else if (!bAutoPlay.BD && bAutoPlay.LP || bAutoPlay.LBD)
 					{
 						ret /= 2;
 					}
@@ -1666,7 +1655,7 @@ public class CScoreIni
 	}
 	internal static string tComputePerformanceSectionMD5( CPerformanceEntry cc )
 	{
-		StringBuilder builder = new StringBuilder();
+		StringBuilder builder = new();
 		builder.Append( cc.nScore.ToString() );
 		builder.Append( cc.dbGameSkill.ToString( ".000000" ) );
 		builder.Append( cc.dbPerformanceSkill.ToString( ".000000" ) );
@@ -1727,9 +1716,9 @@ public class CScoreIni
 		builder.Append( cc.strDateTime );
 
 		byte[] bytes = Encoding.GetEncoding( "shift-jis" ).GetBytes( builder.ToString() );
-		StringBuilder builder2 = new StringBuilder(0x21);
+		StringBuilder builder2 = new(0x21);
 		{
-			MD5CryptoServiceProvider m = new MD5CryptoServiceProvider();
+			MD5CryptoServiceProvider m = new();
 			byte[] buffer2 = m.ComputeHash(bytes);
 			foreach (byte num2 in buffer2)
 				builder2.Append(num2.ToString("x2"));

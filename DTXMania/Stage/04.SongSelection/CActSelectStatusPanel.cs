@@ -31,7 +31,7 @@ internal class CActSelectStatusPanel : CActivity
                 }
                 else if (CDTXMania.ConfigIni.nSkillMode == 1)
                 {
-                    n現在選択中の曲の最高ランク[i] = CScoreIni.tCalculateRank(0, cスコア.SongInformation.HighCompletionRate[i]);
+                    n現在選択中の曲の最高ランク[i] = CScoreIni.tCalculateRank(cスコア.SongInformation.HighCompletionRate[i]);
                 }
 
                 b現在選択中の曲がフルコンボ[i] = cスコア.SongInformation.FullCombo[i];
@@ -56,7 +56,7 @@ internal class CActSelectStatusPanel : CActivity
                         {
                             // Fix github.com/limyz/DTXmaniaXG/issues/33
                             //this.n現在選択中の曲の最高ランク難易度毎[j][i] = (DTXMania.CScoreIni.tCalculateRank(0, c曲リストノード.arScore[j].SongInformation.HighSkill[i]) == (int)DTXMania.CScoreIni.ERANK.S && DTXMania.CScoreIni.tCalculateRank(0, c曲リストノード.arScore[j].SongInformation.HighSkill[i]) >= 95 ? DTXMania.CScoreIni.tCalculateRank(0, cスコア.SongInformation.HighSkill[i]) : c曲リストノード.arScore[j].SongInformation.BestRank[i]);
-                            n現在選択中の曲の最高ランク難易度毎[j][i] = CScoreIni.tCalculateRank(0, c曲リストノード.arScore[j].SongInformation.HighCompletionRate[i]);
+                            n現在選択中の曲の最高ランク難易度毎[j][i] = CScoreIni.tCalculateRank(c曲リストノード.arScore[j].SongInformation.HighCompletionRate[i]);
                             dbCurrentSkillPointForAllDifficulty[j][i] = CScoreIni.tCalculateGameSkillFromPlayingSkill(
                                 c曲リストノード.arScore[j].SongInformation.Level[i],
                                 c曲リストノード.arScore[j].SongInformation.LevelDec[i],

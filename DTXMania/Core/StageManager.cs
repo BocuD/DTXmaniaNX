@@ -498,7 +498,7 @@ internal class StageManager
                                 strPerfSkill = $" {cPerfEntry_Drums.dbPerformanceSkill:F2}";
                                 nRank = (CDTXMania.ConfigIni.nSkillMode == 0)
                                     ? CScoreIni.tCalculateRankOld(cPerfEntry_Drums)
-                                    : CScoreIni.tCalculateRank(0, cPerfEntry_Drums.dbPerformanceSkill);
+                                    : CScoreIni.tCalculateRank(cPerfEntry_Drums.dbPerformanceSkill);
                             }
                             else if (cPerfEntry_Guitar is { bHasAnyAutoAtAll: false, nTotalChipsCount: > 0 })
                             {
@@ -518,7 +518,7 @@ internal class StageManager
                                     strPerfSkill = $" {cPerfEntry_Guitar.dbPerformanceSkill:F2}";
                                     nRank = (CDTXMania.ConfigIni.nSkillMode == 0)
                                         ? CScoreIni.tCalculateRankOld(cPerfEntry_Guitar)
-                                        : CScoreIni.tCalculateRank(0, cPerfEntry_Guitar.dbPerformanceSkill);
+                                        : CScoreIni.tCalculateRank(cPerfEntry_Guitar.dbPerformanceSkill);
                                     strInstrument = " Guitar";
                                 }
                             }
@@ -528,7 +528,7 @@ internal class StageManager
                                 strPerfSkill = $" {cPerfEntry_Bass.dbPerformanceSkill:F2}";
                                 nRank = (CDTXMania.ConfigIni.nSkillMode == 0)
                                     ? CScoreIni.tCalculateRankOld(cPerfEntry_Bass)
-                                    : CScoreIni.tCalculateRank(0, cPerfEntry_Bass.dbPerformanceSkill);
+                                    : CScoreIni.tCalculateRank(cPerfEntry_Bass.dbPerformanceSkill);
                                 strInstrument = " Bass";
                             }
 
