@@ -35,14 +35,14 @@ public class StatusPane : UIGroup
         
         for (int i = 0; i < 5; i++)
         {
-            skillIconHolders[i] = AddChild(new UIImage(rankIcons[0]));
+            skillIconHolders[i] = AddChild(new UIImage(skillIcon));
             skillIconHolders[i].anchor = new Vector2(0.0f, 1.0f);
             skillIconHolders[i].position = new Vector3(14.0f, -49.0f - verticalSpacing * i, 0.0f);
             skillIconHolders[i].size = new Vector2(27.0f, 27.0f);
             skillIconHolders[i].name = $"Skill_{i}";
             skillIconHolders[i].isVisible = false;
             
-            rankIconHolders[i] = AddChild(new UIImage(skillIcon));
+            rankIconHolders[i] = AddChild(new UIImage(rankIcons[0]));
             rankIconHolders[i].anchor = new Vector2(0.0f, 1.0f);
             rankIconHolders[i].position = new Vector3(60.0f, -49.0f - verticalSpacing * i, 0.0f);
             rankIconHolders[i].size = new Vector2(27.0f, 27.0f);
@@ -86,6 +86,7 @@ public class StatusPane : UIGroup
             {
                 tDrawDifficulty(textTranslation, txLevelNumber, 1.0f, "-.--");
                 rankIconHolders[c].isVisible = false;
+                skillIconHolders[c].isVisible = false;
             }
             else
             {
@@ -98,6 +99,8 @@ public class StatusPane : UIGroup
                 {
                     rankIconHolders[c].SetTexture(rankIcons[rank], false);
                     rankIconHolders[c].isVisible = true;
+
+                    skillIconHolders[c].isVisible = song.charts[c].countSkill;
                     
                     //get score as well
                     double score = song.charts[c].SongInformation.HighCompletionRate[(int)instrument];
@@ -108,6 +111,7 @@ public class StatusPane : UIGroup
                 else
                 {
                     rankIconHolders[c].isVisible = false;
+                    skillIconHolders[c].isVisible = false;
                 }
             }
 

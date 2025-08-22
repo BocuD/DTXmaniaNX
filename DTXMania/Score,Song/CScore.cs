@@ -285,6 +285,7 @@ public class CScore
     }
 
     public bool bHadACacheInSongDB;
+    public bool countSkill = false;
 
 
     // Constructor

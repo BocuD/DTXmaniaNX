@@ -32,6 +32,8 @@ public class SongDb
 
 	public List<SongNode> flattenedSongList { get; private set; }  = [];
 	
+	public List<(SongNode node, CScore chart, double skill, int inst)> skillSongs = [];
+	
 	public bool hasEverScanned { get; private set; }
 	public int totalSongs { get; private set; } = 0;
 	public int totalCharts { get; private set; } = 0;
@@ -112,8 +114,12 @@ public class SongDb
 			Trace.TraceInformation($"Processed {tempSongs} songs and {tempCharts} charts");
 			Trace.TraceInformation($"Processed full song list in {statusDuration[SongDbScanStatus.Processing]} s");
 			
+			var tempFlattenedSongList = await FlattenSongList(tempRoot.childNodes);
+			var tempSkillSongs = CalculateSkill(tempFlattenedSongList, out double totalSkill);
+			
 			songNodeRoot = tempRoot;
-			flattenedSongList = await FlattenSongList(tempRoot.childNodes);
+			flattenedSongList = tempFlattenedSongList;
+			skillSongs = tempSkillSongs;
 			
 			totalSongs = tempSongs;
 			totalCharts = tempCharts;
@@ -131,6 +137,40 @@ public class SongDb
 		{
 			status = SongDbScanStatus.Idle;
 		}
+	}
+
+	private static List<(SongNode node, CScore chart, double skill, int inst)> CalculateSkill(List<SongNode> songList, out double totalSkill)
+	{
+		//calculate skill
+		Trace.TraceInformation("Calculating skill songs and total skill...");
+
+		List<(SongNode node, CScore chart, double skill, int inst)> tempSkillSongs = [];
+
+		foreach (SongNode node in songList)
+		{
+			(CScore chart, double skill, double max, int inst) = node.GetTopSkillPoints();
+			if (skill > 0)
+			{
+				tempSkillSongs.Add((node, chart, skill, inst));
+			}
+		}
+        
+		//sort by skill descending
+		tempSkillSongs = tempSkillSongs.OrderByDescending(s => s.skill).ToList();
+        
+		//cut to top 50
+		tempSkillSongs = tempSkillSongs.Take(50).ToList();
+			
+		//update skill state, calculate skill
+		totalSkill = tempSkillSongs.Sum(song => song.skill);
+
+		foreach (var song in tempSkillSongs)
+		{
+			song.chart.countSkill = true;
+		}
+			
+		Trace.TraceInformation($"Total skill points across all ({tempSkillSongs.Count}) skill songs: {totalSkill}");
+		return tempSkillSongs;
 	}
 
 	private async Task<SongNode> RunFullSongScan()

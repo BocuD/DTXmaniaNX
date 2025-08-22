@@ -14,7 +14,7 @@ public class SortBySkill : SongDbSort
             title = "Skill"
         };
 
-        var includedInSkill = GetSkillSongs(songDb);
+        SongNode includedInSkill = GetSkillSongs(songDb);
         root.childNodes.Add(includedInSkill);
         includedInSkill.parent = root;
         
@@ -29,24 +29,7 @@ public class SortBySkill : SongDbSort
             title = "Top 50 Skill Songs"
         };
         
-        List<(SongNode node, CScore chart, double skill, int inst)> skillSongs = [];
-
-        foreach (SongNode node in songDb.flattenedSongList)
-        {
-            (CScore chart, double skill, double max, int inst) = node.GetTopSkillPoints();
-            if (skill > 0)
-            {
-                skillSongs.Add((node, chart, skill, inst));
-            }
-        }
-        
-        //sort by skill descending
-        skillSongs = skillSongs.OrderByDescending(s => s.skill).ToList();
-        
-        //cut to top 50
-        skillSongs = skillSongs.Take(50).ToList();
-        
-        foreach (var song in skillSongs)
+        foreach (var song in songDb.skillSongs)
         {
             SongNode newNode = SongNode.Clone(song.node, skillSongRoot, false);
             
