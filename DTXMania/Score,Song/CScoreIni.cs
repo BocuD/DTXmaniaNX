@@ -376,17 +376,6 @@ public class CScoreIni
 	// メソッド
 
 	/// <summary>
-	/// <para>現在の this.Record[] オブジェクトの、指定されたセクションの情報が正当であるか否かを判定する。
-	/// 真偽どちらでも、その内容は書き換えない。</para>
-	/// </summary>
-	/// <param name="eセクション">判定するセクション。</param>
-	/// <returns>正当である（整合性がある）場合は true。</returns>
-	public bool bCheckConsistency(ESectionType eセクション)
-	{
-		return true; // オープンソース化に伴い、整合性チェックを無効化。（2010.10.21）
-	}
-
-	/// <summary>
 	/// 指定されたファイルの内容から MD5 値を求め、それを16進数に変換した文字列を返す。
 	/// </summary>
 	/// <param name="filePath">MD5 を求めるファイル名。</param>
@@ -437,11 +426,7 @@ public class CScoreIni
 	{
 		try
 		{
-			string item;
-			string para;
-
 			#region [ section ]
-
 			if (str[0] == '[')
 			{
 				StringBuilder builder = new(0x20);
@@ -467,613 +452,630 @@ public class CScoreIni
 					_ => ESectionType.Unknown
 				};
 			}
-
 			#endregion
-
 			else
 			{
 				string[] strArray = str.Split(['=']);
-				if (strArray.Length == 2)
+				if (strArray.Length != 2) return true;
+				
+				string item = strArray[0].Trim();
+				string param = strArray[1].Trim();
+
+				switch (section)
 				{
-					item = strArray[0].Trim();
-					para = strArray[1].Trim();
-
-					switch (section)
+					case ESectionType.File:
 					{
-						case ESectionType.File:
-						{
-							if (!item.Equals("Title"))
-							{
-								goto Label_File;
-							}
-
-							stFile.Title = para;
-							return true;
-						}
-						case ESectionType.HiScoreDrums:
-						case ESectionType.HiSkillDrums:
-						case ESectionType.HiScoreGuitar:
-						case ESectionType.HiSkillGuitar:
-						case ESectionType.HiScoreBass:
-						case ESectionType.HiSkillBass:
-						case ESectionType.LastPlayDrums: // #23595 2011.1.9 ikanick
-						case ESectionType.LastPlayGuitar:
-						case ESectionType.LastPlayBass:
-						{
-							cPerformanceEntry = stSection[(int)section];
-							if (!item.Equals("Score"))
-							{
-								goto Label_Score;
-							}
-
-							cPerformanceEntry.nScore = long.Parse(para);
-							return true;
-						}
+						HandleFileSectionLine(item, param);
+						break;
+					}
+					case ESectionType.HiScoreDrums:
+					case ESectionType.HiSkillDrums:
+					case ESectionType.HiScoreGuitar:
+					case ESectionType.HiSkillGuitar:
+					case ESectionType.HiScoreBass:
+					case ESectionType.HiSkillBass:
+					case ESectionType.LastPlayDrums: // #23595 2011.1.9 ikanick
+					case ESectionType.LastPlayGuitar:
+					case ESectionType.LastPlayBass:
+					{
+						cPerformanceEntry = stSection[(int)section];
+						HandleScoreSectionLine(cPerformanceEntry, item, param);
+						break;
 					}
 				}
-			}
-
-			return true;
-
-			#region [ File section ]
-			Label_File:
-			switch (item)
-			{
-				case "Name":
-					stFile.Name = para;
-					break;
-				case "Hash":
-					stFile.Hash = para;
-					break;
-				case "PlayCountDrums":
-					stFile.PlayCountDrums = CConversion.nGetNumberIfInRange(para, 0, 99999999, 0);
-					break;
-				// #23596 11.2.5 changed ikanick
-				case "PlayCountGuitars":
-					stFile.PlayCountGuitar = CConversion.nGetNumberIfInRange(para, 0, 99999999, 0);
-					break;
-				case "PlayCountBass":
-					stFile.PlayCountBass = CConversion.nGetNumberIfInRange(para, 0, 99999999, 0);
-					break;
-				// #23596 10.11.16 add ikanick------------------------------------/
-				case "ClearCountDrums":
-					stFile.ClearCountDrums = CConversion.nGetNumberIfInRange(para, 0, 99999999, 0);
-					break;
-				// #23596 11.2.5 changed ikanick
-				case "ClearCountGuitars":
-					stFile.ClearCountGuitar = CConversion.nGetNumberIfInRange(para, 0, 99999999, 0);
-					break;
-				case "ClearCountBass":
-					stFile.ClearCountBass = CConversion.nGetNumberIfInRange(para, 0, 99999999, 0);
-					break;
-				// #24459 2011.2.24 yyagi-----------------------------------------/
-				case "BestRankDrums":
-					stFile.BestRank.Drums =
-						CConversion.nGetNumberIfInRange(para, (int)ERANK.SS, (int)ERANK.E, (int)ERANK.UNKNOWN);
-					break;
-				case "BestRankGuitar":
-					stFile.BestRank.Guitar =
-						CConversion.nGetNumberIfInRange(para, (int)ERANK.SS, (int)ERANK.E, (int)ERANK.UNKNOWN);
-					break;
-				case "BestRankBass":
-					stFile.BestRank.Bass =
-						CConversion.nGetNumberIfInRange(para, (int)ERANK.SS, (int)ERANK.E, (int)ERANK.UNKNOWN);
-					break;
-				//----------------------------------------------------------------/
-				case "History0":
-					stFile.History[0] = para;
-					break;
-				case "History1":
-					stFile.History[1] = para;
-					break;
-				case "History2":
-					stFile.History[2] = para;
-					break;
-				case "History3":
-					stFile.History[3] = para;
-					break;
-				case "History4":
-					stFile.History[4] = para;
-					break;
-				case "HistoryCount":
-					stFile.HistoryCount = CConversion.nGetNumberIfInRange(para, 0, 99999999, 0);
-					break;
-				case "BGMAdjust":
-					stFile.BGMAdjust = CConversion.nStringToInt(para, 0);
-					break;
 			}
 			return true;
-			#endregion
-
-			#region [ Score section ]
-
-			Label_Score:
-			switch (item)
-			{
-				case "PlaySkill":
-					cPerformanceEntry.dbPerformanceSkill = (double)decimal.Parse(para);
-					break;
-				case "Skill":
-					cPerformanceEntry.dbGameSkill = (double)decimal.Parse(para);
-					break;
-				case "Perfect":
-					cPerformanceEntry.nPerfectCount = int.Parse(para);
-					break;
-				case "Great":
-					cPerformanceEntry.nGreatCount = int.Parse(para);
-					break;
-				case "Good":
-					cPerformanceEntry.nGoodCount = int.Parse(para);
-					break;
-				case "Poor":
-					cPerformanceEntry.nPoorCount = int.Parse(para);
-					break;
-				case "Miss":
-					cPerformanceEntry.nMissCount = int.Parse(para);
-					break;
-				case "MaxCombo":
-					cPerformanceEntry.nMaxCombo = int.Parse(para);
-					break;
-				case "TotalChips":
-					cPerformanceEntry.nTotalChipsCount = int.Parse(para);
-					break;
-				case "AutoPlay":
-				{
-					// LCなし               LCあり               CYとRDが別           Gt/Bs autolane/pick
-					if (para.Length == 9 || para.Length == 10 || para.Length == 11 || para.Length == 21)
-					{
-						for (int i = 0; i < para.Length; i++)
-						{
-							cPerformanceEntry.bAutoPlay[i] = ONorOFF(para[i]);
-						}
-					}
-
-					break;
-				}
-				case "Risky":
-					cPerformanceEntry.nRisky = int.Parse(para);
-					break;
-				case "TightDrums":
-					cPerformanceEntry.bTight = CConversion.bONorOFF(para[0]);
-					break;
-				case "SuddenDrums":
-					cPerformanceEntry.bSudden.Drums = CConversion.bONorOFF(para[0]);
-					break;
-				case "SuddenGuitar":
-					cPerformanceEntry.bSudden.Guitar = CConversion.bONorOFF(para[0]);
-					break;
-				case "SuddenBass":
-					cPerformanceEntry.bSudden.Bass = CConversion.bONorOFF(para[0]);
-					break;
-				case "HiddenDrums":
-					cPerformanceEntry.bHidden.Drums = CConversion.bONorOFF(para[0]);
-					break;
-				case "HiddenGuitar":
-					cPerformanceEntry.bHidden.Guitar = CConversion.bONorOFF(para[0]);
-					break;
-				case "HiddenBass":
-					cPerformanceEntry.bHidden.Bass = CConversion.bONorOFF(para[0]);
-					break;
-				case "ReverseDrums":
-					cPerformanceEntry.bReverse.Drums = CConversion.bONorOFF(para[0]);
-					break;
-				case "ReverseGuitar":
-					cPerformanceEntry.bReverse.Guitar = CConversion.bONorOFF(para[0]);
-					break;
-				case "ReverseBass":
-					cPerformanceEntry.bReverse.Bass = CConversion.bONorOFF(para[0]);
-					break;
-				case "RandomGuitar":
-					switch (int.Parse(para))
-					{
-						case (int)ERandomMode.OFF:
-						{
-							cPerformanceEntry.eRandom.Guitar = ERandomMode.OFF;
-							return true;
-						}
-						case (int)ERandomMode.RANDOM:
-						{
-							cPerformanceEntry.eRandom.Guitar = ERandomMode.RANDOM;
-							return true;
-						}
-						case (int)ERandomMode.SUPERRANDOM:
-						{
-							cPerformanceEntry.eRandom.Guitar = ERandomMode.SUPERRANDOM;
-							return true;
-						}
-						case (int)ERandomMode.HYPERRANDOM: // #25452 2011.6.20 yyagi
-						{
-							cPerformanceEntry.eRandom.Guitar = ERandomMode.HYPERRANDOM;
-							return true;
-						}
-					}
-
-					throw new Exception("RandomGuitar の値が無効です。");
-
-				case "RandomBass":
-					switch (int.Parse(para))
-					{
-						case (int)ERandomMode.OFF:
-						{
-							cPerformanceEntry.eRandom.Bass = ERandomMode.OFF;
-							return true;
-						}
-						case (int)ERandomMode.RANDOM:
-						{
-							cPerformanceEntry.eRandom.Bass = ERandomMode.RANDOM;
-							return true;
-						}
-						case (int)ERandomMode.SUPERRANDOM:
-						{
-							cPerformanceEntry.eRandom.Bass = ERandomMode.SUPERRANDOM;
-							return true;
-						}
-						case (int)ERandomMode.HYPERRANDOM: // #25452 2011.6.20 yyagi
-						{
-							cPerformanceEntry.eRandom.Bass = ERandomMode.SUPERRANDOM;
-							return true;
-						}
-					}
-
-					throw new Exception("RandomBass の値が無効です。");
-
-				case "LightGuitar":
-					cPerformanceEntry.bLight.Guitar = CConversion.bONorOFF(para[0]);
-					break;
-
-				case "LightBass":
-					cPerformanceEntry.bLight.Bass = CConversion.bONorOFF(para[0]);
-					break;
-
-				case "LeftGuitar":
-					cPerformanceEntry.bLeft.Guitar = CConversion.bONorOFF(para[0]);
-					break;
-
-				case "LeftBass":
-					cPerformanceEntry.bLeft.Bass = CConversion.bONorOFF(para[0]);
-					break;
-
-				case "Dark":
-					switch (int.Parse(para))
-					{
-						case 0:
-						{
-							cPerformanceEntry.eDark = EDarkMode.OFF;
-							return true;
-						}
-						case 1:
-						{
-							cPerformanceEntry.eDark = EDarkMode.HALF;
-							return true;
-						}
-						case 2:
-						{
-							cPerformanceEntry.eDark = EDarkMode.FULL;
-							return true;
-						}
-					}
-
-					throw new Exception("Dark の値が無効です。");
-				case "ScrollSpeedDrums":
-					cPerformanceEntry.fScrollSpeed.Drums = (float)decimal.Parse(para);
-					break;
-				case "ScrollSpeedGuitar":
-					cPerformanceEntry.fScrollSpeed.Guitar = (float)decimal.Parse(para);
-					break;
-				case "ScrollSpeedBass":
-					cPerformanceEntry.fScrollSpeed.Bass = (float)decimal.Parse(para);
-					break;
-				case "PlaySpeed":
-				{
-					string[] strArray2 = para.Split(['/']);
-					if (strArray2.Length == 2)
-					{
-						cPerformanceEntry.nPlaySpeedNumerator = int.Parse(strArray2[0]);
-						cPerformanceEntry.nPlaySpeedDenominator = int.Parse(strArray2[1]);
-					}
-
-					break;
-				}
-				case "HHGroup":
-					switch (int.Parse(para))
-					{
-						case 0:
-						{
-							cPerformanceEntry.eHHGroup = EHHGroup.全部打ち分ける;
-							return true;
-						}
-						case 1:
-						{
-							cPerformanceEntry.eHHGroup = EHHGroup.ハイハットのみ打ち分ける;
-							return true;
-						}
-						case 2:
-						{
-							cPerformanceEntry.eHHGroup = EHHGroup.左シンバルのみ打ち分ける;
-							return true;
-						}
-						case 3:
-						{
-							cPerformanceEntry.eHHGroup = EHHGroup.全部共通;
-							return true;
-						}
-					}
-
-					throw new Exception("HHGroup の値が無効です。");
-
-				case "FTGroup":
-					switch (int.Parse(para))
-					{
-						case 0:
-						{
-							cPerformanceEntry.eFTGroup = EFTGroup.打ち分ける;
-							return true;
-						}
-						case 1:
-						{
-							cPerformanceEntry.eFTGroup = EFTGroup.共通;
-							return true;
-						}
-					}
-
-					throw new Exception("FTGroup の値が無効です。");
-
-				case "CYGroup":
-					switch (int.Parse(para))
-					{
-						case 0:
-						{
-							cPerformanceEntry.eCYGroup = ECYGroup.打ち分ける;
-							return true;
-						}
-						case 1:
-						{
-							cPerformanceEntry.eCYGroup = ECYGroup.共通;
-							return true;
-						}
-					}
-
-					throw new Exception("CYGroup の値が無効です。");
-
-				case "BDGroup":
-					switch (int.Parse(para))
-					{
-						case 0:
-						{
-							cPerformanceEntry.eBDGroup = EBDGroup.打ち分ける;
-							return true;
-						}
-						case 1:
-						{
-							cPerformanceEntry.eBDGroup = EBDGroup.左右ペダルのみ打ち分ける;
-							return true;
-						}
-						case 2:
-						{
-							cPerformanceEntry.eBDGroup = EBDGroup.どっちもBD;
-							return true;
-						}
-					}
-
-					throw new Exception("HHGroup の値が無効です。");
-
-				case "HitSoundPriorityHH":
-					switch (int.Parse(para))
-					{
-						case 0:
-						{
-							cPerformanceEntry.eHitSoundPriorityHH =
-								EPlaybackPriority.ChipOverPadPriority;
-							return true;
-						}
-						case 1:
-						{
-							cPerformanceEntry.eHitSoundPriorityHH =
-								EPlaybackPriority.PadOverChipPriority;
-							return true;
-						}
-					}
-
-					throw new Exception("HitSoundPriorityHH の値が無効です。");
-
-				case "HitSoundPriorityFT":
-					switch (int.Parse(para))
-					{
-						case 0:
-						{
-							cPerformanceEntry.eHitSoundPriorityFT =
-								EPlaybackPriority.ChipOverPadPriority;
-							return true;
-						}
-						case 1:
-						{
-							cPerformanceEntry.eHitSoundPriorityFT =
-								EPlaybackPriority.PadOverChipPriority;
-							return true;
-						}
-					}
-
-					throw new Exception("HitSoundPriorityFT の値が無効です。");
-
-				case "HitSoundPriorityCY":
-					switch (int.Parse(para))
-					{
-						case 0:
-						{
-							cPerformanceEntry.eHitSoundPriorityCY =
-								EPlaybackPriority.ChipOverPadPriority;
-							return true;
-						}
-						case 1:
-						{
-							cPerformanceEntry.eHitSoundPriorityCY =
-								EPlaybackPriority.PadOverChipPriority;
-							return true;
-						}
-					}
-
-					throw new Exception("HitSoundPriorityCY の値が無効です。");
-
-				case "Guitar":
-					cPerformanceEntry.bGuitarEnabled = CConversion.bONorOFF(para[0]);
-					break;
-
-				case "Drums":
-					cPerformanceEntry.bDrumsEnabled = CConversion.bONorOFF(para[0]);
-					break;
-
-				case "StageFailed":
-					cPerformanceEntry.bSTAGEFAILEDEnabled = CConversion.bONorOFF(para[0]);
-					break;
-
-				case "DamageLevel":
-					switch (int.Parse(para))
-					{
-						case 0:
-						{
-							cPerformanceEntry.eDamageLevel = EDamageLevel.Small;
-							return true;
-						}
-						case 1:
-						{
-							cPerformanceEntry.eDamageLevel = EDamageLevel.Normal;
-							return true;
-						}
-						case 2:
-						{
-							cPerformanceEntry.eDamageLevel = EDamageLevel.High;
-							return true;
-						}
-					}
-
-					throw new Exception("DamageLevel の値が無効です。");
-
-				case "UseKeyboard":
-					cPerformanceEntry.bKeyboardUsed = CConversion.bONorOFF(para[0]);
-					break;
-
-				case "UseMIDIIN":
-					cPerformanceEntry.bMIDIUsed = CConversion.bONorOFF(para[0]);
-					break;
-
-				case "UseJoypad":
-					cPerformanceEntry.bJoypadUsed = CConversion.bONorOFF(para[0]);
-					break;
-
-				case "UseMouse":
-					cPerformanceEntry.bMouseUsed = CConversion.bONorOFF(para[0]);
-					break;
-
-				case "DTXManiaVersion":
-					cPerformanceEntry.strDTXManiaVersion = para;
-					break;
-
-				case "DateTime":
-					cPerformanceEntry.strDateTime = para;
-					break;
-
-				case "Progress":
-					cPerformanceEntry.strProgress = para;
-					break;
-
-				case "Hash":
-					cPerformanceEntry.Hash = para;
-					break;
-
-				case "9LaneMode":
-					CConversion.bONorOFF(para[0]);
-					break;
-
-				default:
-				{
-					int.TryParse(para, out int nValue);
-
-					switch (item)
-					{
-						// legacy hit ranges
-						// map legacy hit ranges to both primary and secondary,
-						// to emulate the previous behaviour of both being identical
-
-						// legacy perfect range size (±ms)
-						case @"PerfectRange":
-							cPerformanceEntry.stPrimaryHitRanges.nPerfectSizeMs = nValue;
-							cPerformanceEntry.stSecondaryHitRanges.nPerfectSizeMs = nValue;
-							break;
-
-						// legacy great range size (±ms)
-						case @"GreatRange":
-							cPerformanceEntry.stPrimaryHitRanges.nGreatSizeMs = nValue;
-							cPerformanceEntry.stSecondaryHitRanges.nGreatSizeMs = nValue;
-							break;
-
-						// legacy good range size (±ms)
-						case @"GoodRange":
-							cPerformanceEntry.stPrimaryHitRanges.nGoodSizeMs = nValue;
-							cPerformanceEntry.stSecondaryHitRanges.nGoodSizeMs = nValue;
-							break;
-
-						// legacy poor range size (±ms)
-						case @"PoorRange":
-							cPerformanceEntry.stPrimaryHitRanges.nPoorSizeMs = nValue;
-							cPerformanceEntry.stSecondaryHitRanges.nPoorSizeMs = nValue;
-							break;
-
-						// primary hit ranges
-
-						// primary perfect range size (±ms)
-						case @"PrimaryPerfectRange":
-							cPerformanceEntry.stPrimaryHitRanges.nPerfectSizeMs = nValue;
-							break;
-
-						// primary great range size (±ms)
-						case @"PrimaryGreatRange":
-							cPerformanceEntry.stPrimaryHitRanges.nGreatSizeMs = nValue;
-							break;
-
-						// primary good range size (±ms)
-						case @"PrimaryGoodRange":
-							cPerformanceEntry.stPrimaryHitRanges.nGoodSizeMs = nValue;
-							break;
-
-						// primary poor range size (±ms)
-						case @"PrimaryPoorRange":
-							cPerformanceEntry.stPrimaryHitRanges.nPoorSizeMs = nValue;
-							break;
-
-						// secondary hit ranges
-
-						// secondary perfect range size (±ms)
-						case @"SecondaryPerfectRange":
-							cPerformanceEntry.stSecondaryHitRanges.nPerfectSizeMs = nValue;
-							break;
-
-						// secondary great range size (±ms)
-						case @"SecondaryGreatRange":
-							cPerformanceEntry.stSecondaryHitRanges.nGreatSizeMs = nValue;
-							break;
-
-						// secondary good range size (±ms)
-						case @"SecondaryGoodRange":
-							cPerformanceEntry.stSecondaryHitRanges.nGoodSizeMs = nValue;
-							break;
-
-						// secondary poor range size (±ms)
-						case @"SecondaryPoorRange":
-							cPerformanceEntry.stSecondaryHitRanges.nPoorSizeMs = nValue;
-							break;
-					}
-					break;
-				}
-			}
-			#endregion
 		}
 		catch (Exception exception)
 		{
 			Trace.TraceError("{0}読み込みを中断します。({1})", exception.Message, iniFilePath);
 			return false;
 		}
+	}
 
-		return true;
+	private void HandleFileSectionLine(string item, string param)
+	{
+		switch (item)
+		{
+			case "Title":
+				stFile.Title = param;
+				break;
+				
+			case "Name":
+				stFile.Name = param;
+				break;
+				
+			case "Hash":
+				stFile.Hash = param;
+				break;
+				
+			case "PlayCountDrums":
+				stFile.PlayCountDrums = CConversion.nGetNumberIfInRange(param, 0, 99999999, 0);
+				break;
+				
+			// #23596 11.2.5 changed ikanick
+			case "PlayCountGuitars":
+				stFile.PlayCountGuitar = CConversion.nGetNumberIfInRange(param, 0, 99999999, 0);
+				break;
+			case "PlayCountBass":
+				stFile.PlayCountBass = CConversion.nGetNumberIfInRange(param, 0, 99999999, 0);
+				break;
+				
+			// #23596 10.11.16 add ikanick------------------------------------/
+			case "ClearCountDrums":
+				stFile.ClearCountDrums = CConversion.nGetNumberIfInRange(param, 0, 99999999, 0);
+				break;
+				
+			// #23596 11.2.5 changed ikanick
+			case "ClearCountGuitars":
+				stFile.ClearCountGuitar = CConversion.nGetNumberIfInRange(param, 0, 99999999, 0);
+				break;
+				
+			case "ClearCountBass":
+				stFile.ClearCountBass = CConversion.nGetNumberIfInRange(param, 0, 99999999, 0);
+				break;
+				
+			// #24459 2011.2.24 yyagi-----------------------------------------/
+			case "BestRankDrums":
+				stFile.BestRank.Drums = CConversion.nGetNumberIfInRange(param, (int)ERANK.SS, (int)ERANK.E, (int)ERANK.UNKNOWN);
+				break;
+				
+			case "BestRankGuitar":
+				stFile.BestRank.Guitar = CConversion.nGetNumberIfInRange(param, (int)ERANK.SS, (int)ERANK.E, (int)ERANK.UNKNOWN);
+				break;
+				
+			case "BestRankBass":
+				stFile.BestRank.Bass = CConversion.nGetNumberIfInRange(param, (int)ERANK.SS, (int)ERANK.E, (int)ERANK.UNKNOWN);
+				break;
+				
+			case "BGMAdjust":
+				stFile.BGMAdjust = CConversion.nStringToInt(param, 0);
+				break;
+				
+			default:
+				if (item.StartsWith("History"))
+				{
+					if (item.Equals("HistoryCount"))
+					{
+						stFile.HistoryCount = CConversion.nGetNumberIfInRange(param, 0, 99999999, 0);
+					}
+					//if there is a number after "History"
+					else if (int.TryParse(item[7..], out int index))
+					{
+						if (index >= 0)
+						{
+							if (index >= stFile.History.Length)
+							{
+								Array.Resize(ref stFile.History, index + 1);
+							}
+								
+							stFile.History[index] = param;
+						}
+					}
+				}
+				break;
+		}
+	}
+
+	private void HandleScoreSectionLine(CPerformanceEntry cPerformanceEntry, string item, string param)
+	{
+		switch (item)
+		{
+			case "Score":
+				cPerformanceEntry.nScore = long.Parse(param);
+				break;
+				
+			case "PlaySkill":
+				cPerformanceEntry.dbPerformanceSkill = (double)decimal.Parse(param);
+				break;
+				
+			case "Skill":
+				cPerformanceEntry.dbGameSkill = (double)decimal.Parse(param);
+				break;
+				
+			case "Perfect":
+				cPerformanceEntry.nPerfectCount = int.Parse(param);
+				break;
+				
+			case "Great":
+				cPerformanceEntry.nGreatCount = int.Parse(param);
+				break;
+				
+			case "Good":
+				cPerformanceEntry.nGoodCount = int.Parse(param);
+				break;
+				
+			case "Poor":
+				cPerformanceEntry.nPoorCount = int.Parse(param);
+				break;
+				
+			case "Miss":
+				cPerformanceEntry.nMissCount = int.Parse(param);
+				break;
+				
+			case "MaxCombo":
+				cPerformanceEntry.nMaxCombo = int.Parse(param);
+				break;
+				
+			case "TotalChips":
+				cPerformanceEntry.nTotalChipsCount = int.Parse(param);
+				break;
+				
+			case "AutoPlay":
+			{
+				// LCなし               LCあり               CYとRDが別           Gt/Bs autolane/pick
+				if (param.Length is 9 or 10 or 11 or 21)
+				{
+					for (int i = 0; i < param.Length; i++)
+					{
+						cPerformanceEntry.bAutoPlay[i] = ONorOFF(param[i]);
+					}
+				}
+				break;
+			}
+				
+			case "Risky":
+				cPerformanceEntry.nRisky = int.Parse(param);
+				break;
+				
+			case "TightDrums":
+				cPerformanceEntry.bTight = CConversion.bONorOFF(param[0]);
+				break;
+				
+			case "SuddenDrums":
+				cPerformanceEntry.bSudden.Drums = CConversion.bONorOFF(param[0]);
+				break;
+				
+			case "SuddenGuitar":
+				cPerformanceEntry.bSudden.Guitar = CConversion.bONorOFF(param[0]);
+				break;
+				
+			case "SuddenBass":
+				cPerformanceEntry.bSudden.Bass = CConversion.bONorOFF(param[0]);
+				break;
+				
+			case "HiddenDrums":
+				cPerformanceEntry.bHidden.Drums = CConversion.bONorOFF(param[0]);
+				break;
+				
+			case "HiddenGuitar":
+				cPerformanceEntry.bHidden.Guitar = CConversion.bONorOFF(param[0]);
+				break;
+				
+			case "HiddenBass":
+				cPerformanceEntry.bHidden.Bass = CConversion.bONorOFF(param[0]);
+				break;
+				
+			case "ReverseDrums":
+				cPerformanceEntry.bReverse.Drums = CConversion.bONorOFF(param[0]);
+				break;
+				
+			case "ReverseGuitar":
+				cPerformanceEntry.bReverse.Guitar = CConversion.bONorOFF(param[0]);
+				break;
+				
+			case "ReverseBass":
+				cPerformanceEntry.bReverse.Bass = CConversion.bONorOFF(param[0]);
+				break;
+				
+			case "RandomGuitar":
+				switch (int.Parse(param))
+				{
+					case (int)ERandomMode.OFF:
+					{
+						cPerformanceEntry.eRandom.Guitar = ERandomMode.OFF;
+						break;
+					}
+					case (int)ERandomMode.RANDOM:
+					{
+						cPerformanceEntry.eRandom.Guitar = ERandomMode.RANDOM;
+						break;
+					}
+					case (int)ERandomMode.SUPERRANDOM:
+					{
+						cPerformanceEntry.eRandom.Guitar = ERandomMode.SUPERRANDOM;
+						break;
+					}
+					case (int)ERandomMode.HYPERRANDOM: // #25452 2011.6.20 yyagi
+					{
+						cPerformanceEntry.eRandom.Guitar = ERandomMode.HYPERRANDOM;
+						break;
+					}
+				}
+				throw new Exception("RandomGuitar の値が無効です。");
+
+			case "RandomBass":
+				switch (int.Parse(param))
+				{
+					case (int)ERandomMode.OFF:
+					{
+						cPerformanceEntry.eRandom.Bass = ERandomMode.OFF;
+						break;
+					}
+					case (int)ERandomMode.RANDOM:
+					{
+						cPerformanceEntry.eRandom.Bass = ERandomMode.RANDOM;
+						break;
+					}
+					case (int)ERandomMode.SUPERRANDOM:
+					{
+						cPerformanceEntry.eRandom.Bass = ERandomMode.SUPERRANDOM;
+						break;
+					}
+					case (int)ERandomMode.HYPERRANDOM: // #25452 2011.6.20 yyagi
+					{
+						cPerformanceEntry.eRandom.Bass = ERandomMode.HYPERRANDOM;
+						break;
+					}
+				}
+				throw new Exception("RandomBass の値が無効です。");
+
+			case "LightGuitar":
+				cPerformanceEntry.bLight.Guitar = CConversion.bONorOFF(param[0]);
+				break;
+
+			case "LightBass":
+				cPerformanceEntry.bLight.Bass = CConversion.bONorOFF(param[0]);
+				break;
+
+			case "LeftGuitar":
+				cPerformanceEntry.bLeft.Guitar = CConversion.bONorOFF(param[0]);
+				break;
+
+			case "LeftBass":
+				cPerformanceEntry.bLeft.Bass = CConversion.bONorOFF(param[0]);
+				break;
+
+			case "Dark":
+				switch (int.Parse(param))
+				{
+					case 0:
+					{
+						cPerformanceEntry.eDark = EDarkMode.OFF;
+						break;
+					}
+					case 1:
+					{
+						cPerformanceEntry.eDark = EDarkMode.HALF;
+						break;
+					}
+					case 2:
+					{
+						cPerformanceEntry.eDark = EDarkMode.FULL;
+						break;
+					}
+				}
+				throw new Exception("Dark の値が無効です。");
+				
+			case "ScrollSpeedDrums":
+				cPerformanceEntry.fScrollSpeed.Drums = (float)decimal.Parse(param);
+				break;
+				
+			case "ScrollSpeedGuitar":
+				cPerformanceEntry.fScrollSpeed.Guitar = (float)decimal.Parse(param);
+				break;
+				
+			case "ScrollSpeedBass":
+				cPerformanceEntry.fScrollSpeed.Bass = (float)decimal.Parse(param);
+				break;
+				
+			case "PlaySpeed":
+			{
+				string[] strArray2 = param.Split(['/']);
+				if (strArray2.Length == 2)
+				{
+					cPerformanceEntry.nPlaySpeedNumerator = int.Parse(strArray2[0]);
+					cPerformanceEntry.nPlaySpeedDenominator = int.Parse(strArray2[1]);
+				}
+				break;
+			}
+				
+			case "HHGroup":
+				switch (int.Parse(param))
+				{
+					case 0:
+					{
+						cPerformanceEntry.eHHGroup = EHHGroup.全部打ち分ける;
+						break;
+					}
+					case 1:
+					{
+						cPerformanceEntry.eHHGroup = EHHGroup.ハイハットのみ打ち分ける;
+						break;
+					}
+					case 2:
+					{
+						cPerformanceEntry.eHHGroup = EHHGroup.左シンバルのみ打ち分ける;
+						break;
+					}
+					case 3:
+					{
+						cPerformanceEntry.eHHGroup = EHHGroup.全部共通;
+						break;
+					}
+				}
+				throw new Exception("HHGroup の値が無効です。");
+
+			case "FTGroup":
+				switch (int.Parse(param))
+				{
+					case 0:
+					{
+						cPerformanceEntry.eFTGroup = EFTGroup.打ち分ける;
+						break;
+					}
+					case 1:
+					{
+						cPerformanceEntry.eFTGroup = EFTGroup.共通;
+						break;
+					}
+				}
+				throw new Exception("FTGroup の値が無効です。");
+
+			case "CYGroup":
+				switch (int.Parse(param))
+				{
+					case 0:
+					{
+						cPerformanceEntry.eCYGroup = ECYGroup.打ち分ける;
+						break;
+					}
+					case 1:
+					{
+						cPerformanceEntry.eCYGroup = ECYGroup.共通;
+						break;
+					}
+				}
+				throw new Exception("CYGroup の値が無効です。");
+
+			case "BDGroup":
+				switch (int.Parse(param))
+				{
+					case 0:
+					{
+						cPerformanceEntry.eBDGroup = EBDGroup.打ち分ける;
+						break;
+					}
+					case 1:
+					{
+						cPerformanceEntry.eBDGroup = EBDGroup.左右ペダルのみ打ち分ける;
+						break;
+					}
+					case 2:
+					{
+						cPerformanceEntry.eBDGroup = EBDGroup.どっちもBD;
+						break;
+					}
+				}
+				throw new Exception("HHGroup の値が無効です。");
+
+			case "HitSoundPriorityHH":
+				switch (int.Parse(param))
+				{
+					case 0:
+					{
+						cPerformanceEntry.eHitSoundPriorityHH =
+							EPlaybackPriority.ChipOverPadPriority;
+						break;
+					}
+					case 1:
+					{
+						cPerformanceEntry.eHitSoundPriorityHH =
+							EPlaybackPriority.PadOverChipPriority;
+						break;
+					}
+				}
+				throw new Exception("HitSoundPriorityHH の値が無効です。");
+
+			case "HitSoundPriorityFT":
+				switch (int.Parse(param))
+				{
+					case 0:
+					{
+						cPerformanceEntry.eHitSoundPriorityFT =
+							EPlaybackPriority.ChipOverPadPriority;
+						break;
+					}
+					case 1:
+					{
+						cPerformanceEntry.eHitSoundPriorityFT =
+							EPlaybackPriority.PadOverChipPriority;
+						break;
+					}
+				}
+				throw new Exception("HitSoundPriorityFT の値が無効です。");
+
+			case "HitSoundPriorityCY":
+				switch (int.Parse(param))
+				{
+					case 0:
+					{
+						cPerformanceEntry.eHitSoundPriorityCY =
+							EPlaybackPriority.ChipOverPadPriority;
+						break;
+					}
+					case 1:
+					{
+						cPerformanceEntry.eHitSoundPriorityCY =
+							EPlaybackPriority.PadOverChipPriority;
+						break;
+					}
+				}
+				throw new Exception("HitSoundPriorityCY の値が無効です。");
+
+			case "Guitar":
+				cPerformanceEntry.bGuitarEnabled = CConversion.bONorOFF(param[0]);
+				break;
+
+			case "Drums":
+				cPerformanceEntry.bDrumsEnabled = CConversion.bONorOFF(param[0]);
+				break;
+
+			case "StageFailed":
+				cPerformanceEntry.bSTAGEFAILEDEnabled = CConversion.bONorOFF(param[0]);
+				break;
+
+			case "DamageLevel":
+				switch (int.Parse(param))
+				{
+					case 0:
+					{
+						cPerformanceEntry.eDamageLevel = EDamageLevel.Small;
+						break;
+					}
+					case 1:
+					{
+						cPerformanceEntry.eDamageLevel = EDamageLevel.Normal;
+						break;
+					}
+					case 2:
+					{
+						cPerformanceEntry.eDamageLevel = EDamageLevel.High;
+						break;
+					}
+				}
+				throw new Exception("DamageLevel の値が無効です。");
+
+			case "UseKeyboard":
+				cPerformanceEntry.bKeyboardUsed = CConversion.bONorOFF(param[0]);
+				break;
+
+			case "UseMIDIIN":
+				cPerformanceEntry.bMIDIUsed = CConversion.bONorOFF(param[0]);
+				break;
+
+			case "UseJoypad":
+				cPerformanceEntry.bJoypadUsed = CConversion.bONorOFF(param[0]);
+				break;
+
+			case "UseMouse":
+				cPerformanceEntry.bMouseUsed = CConversion.bONorOFF(param[0]);
+				break;
+
+			case "DTXManiaVersion":
+				cPerformanceEntry.strDTXManiaVersion = param;
+				break;
+
+			case "DateTime":
+				cPerformanceEntry.strDateTime = param;
+				break;
+
+			case "Progress":
+				cPerformanceEntry.strProgress = param;
+				break;
+
+			case "Hash":
+				cPerformanceEntry.Hash = param;
+				break;
+
+			case "9LaneMode":
+				CConversion.bONorOFF(param[0]);
+				break;
+
+			default:
+			{
+				if (!int.TryParse(param, out int nValue))
+				{
+					break;
+				}
+
+				switch (item)
+				{
+					// legacy hit ranges
+					// map legacy hit ranges to both primary and secondary,
+					// to emulate the previous behaviour of both being identical
+
+					// legacy perfect range size (±ms)
+					case @"PerfectRange":
+						cPerformanceEntry.stPrimaryHitRanges.nPerfectSizeMs = nValue;
+						cPerformanceEntry.stSecondaryHitRanges.nPerfectSizeMs = nValue;
+						break;
+
+					// legacy great range size (±ms)
+					case @"GreatRange":
+						cPerformanceEntry.stPrimaryHitRanges.nGreatSizeMs = nValue;
+						cPerformanceEntry.stSecondaryHitRanges.nGreatSizeMs = nValue;
+						break;
+
+					// legacy good range size (±ms)
+					case @"GoodRange":
+						cPerformanceEntry.stPrimaryHitRanges.nGoodSizeMs = nValue;
+						cPerformanceEntry.stSecondaryHitRanges.nGoodSizeMs = nValue;
+						break;
+
+					// legacy poor range size (±ms)
+					case @"PoorRange":
+						cPerformanceEntry.stPrimaryHitRanges.nPoorSizeMs = nValue;
+						cPerformanceEntry.stSecondaryHitRanges.nPoorSizeMs = nValue;
+						break;
+
+					// primary hit ranges
+
+					// primary perfect range size (±ms)
+					case @"PrimaryPerfectRange":
+						cPerformanceEntry.stPrimaryHitRanges.nPerfectSizeMs = nValue;
+						break;
+
+					// primary great range size (±ms)
+					case @"PrimaryGreatRange":
+						cPerformanceEntry.stPrimaryHitRanges.nGreatSizeMs = nValue;
+						break;
+
+					// primary good range size (±ms)
+					case @"PrimaryGoodRange":
+						cPerformanceEntry.stPrimaryHitRanges.nGoodSizeMs = nValue;
+						break;
+
+					// primary poor range size (±ms)
+					case @"PrimaryPoorRange":
+						cPerformanceEntry.stPrimaryHitRanges.nPoorSizeMs = nValue;
+						break;
+
+					// secondary hit ranges
+
+					// secondary perfect range size (±ms)
+					case @"SecondaryPerfectRange":
+						cPerformanceEntry.stSecondaryHitRanges.nPerfectSizeMs = nValue;
+						break;
+
+					// secondary great range size (±ms)
+					case @"SecondaryGreatRange":
+						cPerformanceEntry.stSecondaryHitRanges.nGreatSizeMs = nValue;
+						break;
+
+					// secondary good range size (±ms)
+					case @"SecondaryGoodRange":
+						cPerformanceEntry.stSecondaryHitRanges.nGoodSizeMs = nValue;
+						break;
+
+					// secondary poor range size (±ms)
+					case @"SecondaryPoorRange":
+						cPerformanceEntry.stSecondaryHitRanges.nPoorSizeMs = nValue;
+						break;
+				}
+				break;
+			}
+		}
 	}
 
 	internal void tAddHistory( string str追加文字列 )
