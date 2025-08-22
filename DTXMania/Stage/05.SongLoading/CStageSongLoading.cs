@@ -489,20 +489,30 @@ internal class CStageSongLoading : CStage
                     curCount[i] = 0;
                 }
 
+                bool stopLoadingGhost = false;
                 foreach (CChip chip in CDTXMania.DTX.listChip.Where(chip => chip.eInstrumentPart != EInstrumentPart.UNKNOWN))
                 {
                     chip.n楽器パートでの出現順 = curCount[(int)chip.eInstrumentPart]++;
-                    if (CDTXMania.listTargetGhsotLag[(int)chip.eInstrumentPart] != null)
+                    if (!stopLoadingGhost && CDTXMania.listTargetGhsotLag[(int)chip.eInstrumentPart] != null)
                     {
-                        STGhostLag lag = new()
+                        if (chip.n楽器パートでの出現順 >= CDTXMania.listTargetGhsotLag[(int)chip.eInstrumentPart].Count)
                         {
-                            index = chip.n楽器パートでの出現順,
-                            nJudgeTime = chip.nPlaybackTimeMs +
-                                         CDTXMania.listTargetGhsotLag[(int)chip.eInstrumentPart][chip.n楽器パートでの出現順],
-                            nLagTime = CDTXMania.listTargetGhsotLag[(int)chip.eInstrumentPart][chip.n楽器パートでの出現順]
-                        };
+                            Trace.TraceError(
+                                "Ghost file seems to be missing chips. Is this ghost file valid for this chart??");
+                            stopLoadingGhost = true;
+                        }
+                        else
+                        {
+                            STGhostLag lag = new()
+                            {
+                                index = chip.n楽器パートでの出現順,
+                                nJudgeTime = chip.nPlaybackTimeMs +
+                                             CDTXMania.listTargetGhsotLag[(int)chip.eInstrumentPart][chip.n楽器パートでの出現順],
+                                nLagTime = CDTXMania.listTargetGhsotLag[(int)chip.eInstrumentPart][chip.n楽器パートでの出現順]
+                            };
 
-                        stGhostLag[(int)chip.eInstrumentPart].Add(lag);
+                            stGhostLag[(int)chip.eInstrumentPart].Add(lag);
+                        }
                     }
                 }
 
