@@ -5187,10 +5187,12 @@ public class CDTX : CActivity
                     
                 case "GLEVEL":
                     dtx.LEVEL.Guitar = level;
+                    dtx.LEVELDEC.Guitar = levelDec;
                     break;
                     
                 case "BLEVEL":
                     dtx.LEVEL.Bass = level;
+                    dtx.LEVELDEC.Bass = levelDec;
                     break;
                     
                 case "DLVDEC":
