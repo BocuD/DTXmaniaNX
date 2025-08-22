@@ -638,41 +638,45 @@ internal class StageManager
 
                 break;
         }
-
-        if (!preventStageChanges && cachedTransition != null)
-        {
-            cachedTransition();
-            cachedTransition = null;
-        }
     }
 
     public static bool preventStageChanges;
-    private Action? cachedTransition;
 
     public void tChangeStage(CStage newStage, bool activateNewStage = true, bool deactivateOldStage = true)
     {
-        if (preventStageChanges)
-        {
-            cachedTransition = () => tChangeStage(newStage, activateNewStage, deactivateOldStage);
-            return;
-        }
+        nextStage = newStage;
+        this.activateNewStage = activateNewStage;
+        this.deactivateOldStage = deactivateOldStage;
+        stageChangeRequested = true;
+    }
 
+    private bool stageChangeRequested = false;
+    private CStage nextStage;
+    private bool activateNewStage;
+    private bool deactivateOldStage;
+    public void HandleStageChanges()
+    {
+        if (preventStageChanges) return;
+        if (!stageChangeRequested) return;
+        
         if (deactivateOldStage)
         {
             rCurrentStage.OnDeactivate();
         }
 
         Trace.TraceInformation("----------------------");
-        Trace.TraceInformation($"■ {newStage.eStageID}");
-        Trace.TraceInformation($"Changing Stage from {rCurrentStage.GetType().Name} to {newStage.GetType().Name}");
+        Trace.TraceInformation($"■ {nextStage.eStageID}");
+        Trace.TraceInformation($"Changing Stage from {rCurrentStage.GetType().Name} to {nextStage.GetType().Name}");
 
         if (activateNewStage)
         {
-            newStage.OnActivate();
+            nextStage.OnActivate();
         }
 
         rPreviousStage = rCurrentStage;
-        rCurrentStage = newStage;
+        rCurrentStage = nextStage;
+        
+        stageChangeRequested = false;
 
         CDTXMania.tRunGarbageCollector();
     }

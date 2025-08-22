@@ -1110,7 +1110,6 @@ internal class CDTXMania : Game
         ProcessWindowMessages();
 
         bool forceFrameBufferRenderer = StageManager.rCurrentStage.eStageID is CStage.EStage.Performance_6 or CStage.EStage.Result_7;
-        renderScale = forceFrameBufferRenderer ? 1.0f : physicalRenderScale;
         
 //#if INSPECTOR
         //cache this value to prevent it from changing during the frame
@@ -1146,11 +1145,15 @@ internal class CDTXMania : Game
         }
 //#endif
 
+        renderScale = forceFrameBufferRenderer ? 1.0f : physicalRenderScale;
         StageManager.DrawStage();
         
         persistentUIGroup.scale.X = renderScale;
         persistentUIGroup.scale.Y = renderScale;
         persistentUIGroup.Draw(Matrix.Identity);
+        renderScale = physicalRenderScale;
+
+        StageManager.HandleStageChanges();
 
 //#if INSPECTOR
         if (renderGameToWindow || forceFrameBufferRenderer)
