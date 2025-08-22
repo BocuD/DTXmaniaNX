@@ -471,7 +471,6 @@ internal class CStageSongLoading : CStage
                 string songPath = !CDTXMania.bCompactMode ? CDTXMania.confirmedChart.FileInformation.AbsoluteFilePath : CDTXMania.strCompactModeFile;
 
                 CScoreIni ini = new(songPath + ".score.ini");
-                ini.tCheckIntegrity();
 
                 if ((CDTXMania.DTX != null) && CDTXMania.DTX.bActivated)
                     CDTXMania.DTX.OnDeactivate();
@@ -1005,7 +1004,7 @@ internal class CStageSongLoading : CStage
                     switch (strA[0])
                     {
                         case "Score":
-                            CDTXMania.listTargetGhostScoreData[nCurrentInst].nスコア = Convert.ToInt32(strA[1]);
+                            CDTXMania.listTargetGhostScoreData[nCurrentInst].nScore = Convert.ToInt32(strA[1]);
                             continue;
                         case "PlaySkill":
                             CDTXMania.listTargetGhostScoreData[nCurrentInst].dbPerformanceSkill = Convert.ToDouble(strA[1]);

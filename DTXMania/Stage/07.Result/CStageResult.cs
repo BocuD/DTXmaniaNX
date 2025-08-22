@@ -14,11 +14,11 @@ internal class CStageResult : CStage
 	public STDGBVALUE<bool> bNewRecordSkill;
 	public STDGBVALUE<bool> bNewRecordScore;
 	public STDGBVALUE<bool> bNewRecordRank;
-	public STDGBVALUE<float> fPerfect率;
-	public STDGBVALUE<float> fGreat率;
-	public STDGBVALUE<float> fGood率;
-	public STDGBVALUE<float> fPoor率;
-	public STDGBVALUE<float> fMiss率;
+	public STDGBVALUE<float> fPerfectPercentage;
+	public STDGBVALUE<float> fGreatPercentage;
+	public STDGBVALUE<float> fGoodPercentage;
+	public STDGBVALUE<float> fPoorPercentage;
+	public STDGBVALUE<float> fMissPercentage;
 	public STDGBVALUE<bool> bAuto;        // #23596 10.11.16 add ikanick
 	//        10.11.17 change (int to bool) ikanick
 	public STDGBVALUE<int> nRankValue;
@@ -48,7 +48,6 @@ internal class CStageResult : CStage
 		listChildActivities.Add( actParameterPanel = new CActResultParameterPanel(this) );
 		listChildActivities.Add( actRank = new CActResultRank(this) );
 		listChildActivities.Add( new CActResultSongBar() );
-		//base.listChildActivities.Add( this.actProgressBar = new CActPerfProgressBar(true) );
 		listChildActivities.Add( actFI = new CActFIFOWhite() );
 		listChildActivities.Add( actFO = new CActFIFOBlack() );
 		listChildActivities.Add(actBackgroundVideoAVI = new CActSelectBackgroundAVI());
@@ -125,9 +124,6 @@ internal class CStageResult : CStage
 		DTXTexture dtxTex = new(txBackground);
 		background = ui.AddChild(new UIImage(dtxTex));
 		background.renderOrder = -100;
-		
-		txTopPanel = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\8_header panel.png" ), true );
-		txBottomPanel = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\8_footer panel.png" ), true );
 	}
 
 	public override void OnActivate()
@@ -145,9 +141,10 @@ internal class CStageResult : CStage
 			n最後に再生したHHのチャンネル番号 = 0;
 			for( int i = 0; i < 3; i++ )
 			{
-				bNewRecordSkill[ i ] = false;
-				bNewRecordScore[ i ] = false;
-				bNewRecordRank[ i ] = false;
+				bNewRecordSkill[i] = false;
+				bNewRecordScore[i] = false;
+				bNewRecordRank[i] = false;
+				
 				//Initialize to empty string so that the Progress Bar texture can be drawn correctly
 				strBestProgressBarRecord[i] = "";
 				strCurrProgressBarRecord[i] = "";
@@ -162,10 +159,10 @@ internal class CStageResult : CStage
 				for (int i = 0; i < 3; i++)
 				{
 					nRankValue[i] = -1;
-					fPerfect率[i] = fGreat率[i] = fGood率[i] = fPoor率[i] = fMiss率[i] = 0.0f;  // #28500 2011.5.24 yyagi
-					if ((((i != 0) || (CDTXMania.DTX.bHasChips.Drums && !CDTXMania.ConfigIni.bGuitarRevolutionMode)) &&
-					     ((i != 1) || (CDTXMania.DTX.bHasChips.Guitar && CDTXMania.ConfigIni.bGuitarRevolutionMode))) &&
-					    ((i != 2) || (CDTXMania.DTX.bHasChips.Bass && CDTXMania.ConfigIni.bGuitarRevolutionMode)))
+					fPerfectPercentage[i] = fGreatPercentage[i] = fGoodPercentage[i] = fPoorPercentage[i] = fMissPercentage[i] = 0.0f;  // #28500 2011.5.24 yyagi
+					if ((i != 0 || (CDTXMania.DTX.bHasChips.Drums && !CDTXMania.ConfigIni.bGuitarRevolutionMode)) &&
+					    (i != 1 || (CDTXMania.DTX.bHasChips.Guitar && CDTXMania.ConfigIni.bGuitarRevolutionMode)) &&
+					    (i != 2 || (CDTXMania.DTX.bHasChips.Bass && CDTXMania.ConfigIni.bGuitarRevolutionMode)))
 					{
 						CScoreIni.CPerformanceEntry part = stPerformanceEntry[i];
 						bool bIsAutoPlay = true;
@@ -184,14 +181,14 @@ internal class CStageResult : CStage
 								break;
 						}
 
-						fPerfect率[i] = bIsAutoPlay ? 0f : ((100f * part.nPerfectCount) / ((float)part.nTotalChipsCount));
-						fGreat率[i] = bIsAutoPlay ? 0f : ((100f * part.nGreatCount) / ((float)part.nTotalChipsCount));
-						fGood率[i] = bIsAutoPlay ? 0f : ((100f * part.nGoodCount) / ((float)part.nTotalChipsCount));
-						fPoor率[i] = bIsAutoPlay ? 0f : ((100f * part.nPoorCount) / ((float)part.nTotalChipsCount));
-						fMiss率[i] = bIsAutoPlay ? 0f : ((100f * part.nMissCount) / ((float)part.nTotalChipsCount));
-						bAuto[i] = bIsAutoPlay; // #23596 10.11.16 add ikanick そのパートがオートなら1
-						//        10.11.17 change (int to bool) ikanick
-						//18072020: Change first condition check to 1, XG mode is 1, not 0. Fisyher
+						bAuto[i] = bIsAutoPlay;
+						fPerfectPercentage[i] = bIsAutoPlay ? 0f : 100f * part.nPerfectCount / part.nTotalChipsCount;
+						fGreatPercentage[i] = bIsAutoPlay ? 0f : 100f * part.nGreatCount / part.nTotalChipsCount;
+						fGoodPercentage[i] = bIsAutoPlay ? 0f : 100f * part.nGoodCount / part.nTotalChipsCount;
+						fPoorPercentage[i] = bIsAutoPlay ? 0f : 100f * part.nPoorCount / part.nTotalChipsCount;
+						fMissPercentage[i] = bIsAutoPlay ? 0f : 100f * part.nMissCount / part.nTotalChipsCount;
+						
+						//Skill mode 1 for XG style, 0 for old style
 						if (CDTXMania.ConfigIni.nSkillMode == 1)
 						{
 							nRankValue[i] = CScoreIni.tCalculateRank(part);
@@ -204,6 +201,7 @@ internal class CStageResult : CStage
 						//Save progress bar records
 						CScore cScore = CDTXMania.confirmedChart;
 						strBestProgressBarRecord[i] = cScore.SongInformation.progress[i];
+						
 						//May not need to save this...
 						strCurrProgressBarRecord[i] = stPerformanceEntry[i].strProgress;
 					}
@@ -214,64 +212,55 @@ internal class CStageResult : CStage
 
 				#region [ Write .score.ini ]
 				//---------------------
-				string str = CDTXMania.DTX.strFileNameFullPath + ".score.ini";
-				CScoreIni ini = new CScoreIni(str);
+				string iniPath = CDTXMania.DTX.strFileNameFullPath + ".score.ini";
+				CScoreIni ini = new(iniPath);
 
-				bool[] b今までにフルコンボしたことがある = new bool[] { false, false, false };
+				bool[] bExistingFullCombo = [false, false, false]; //did we have a full combo before?
 				if (!CDTXMania.ConfigIni.bAllDrumsAreAutoPlay || !CDTXMania.ConfigIni.bAllGuitarsAreAutoPlay || !CDTXMania.ConfigIni.bAllBassAreAutoPlay)
 				{
-					for (int i = 0; i < 3; i++)
+					for (int instrument = 0; instrument < 3; instrument++)
 					{
-
 						// フルコンボチェックならびに新記録ランクチェックは、ini.Record[] が、スコアチェックや演奏型スキルチェックの IF 内で書き直されてしまうよりも前に行う。(2010.9.10)
+						bExistingFullCombo[instrument] = ini.stSection[instrument * 2].bIsFullCombo | ini.stSection[instrument * 2 + 1].bIsFullCombo;
 
-						b今までにフルコンボしたことがある[i] = ini.stSection[i * 2].bIsFullCombo | ini.stSection[i * 2 + 1].bIsFullCombo;
-
-						#region [deleted by #24459]
-						//		if( this.nRankValue[ i ] <= CScoreIni.tCalculateRank( ini.stSection[ ( i * 2 ) + 1 ] ) )
-						//		{
-						//			this.bNewRecordRank[ i ] = true;
-						//		}
-						#endregion
 						// #24459 上記の条件だと[HiSkill.***]でのランクしかチェックしていないので、BestRankと比較するよう変更。
-						if (nRankValue[i] >= 0 && ini.stFile.BestRank[i] > nRankValue[i])     // #24459 2011.3.1 yyagi update BestRank
+						if (nRankValue[instrument] >= 0 && ini.stFile.BestRank[instrument] > nRankValue[instrument])     // #24459 2011.3.1 yyagi update BestRank
 						{
-							bNewRecordRank[i] = true;
-							ini.stFile.BestRank[i] = nRankValue[i];
+							bNewRecordRank[instrument] = true;
+							ini.stFile.BestRank[instrument] = nRankValue[instrument];
 						}
 
-						// 新記録スコアチェック
-						if (stPerformanceEntry[i].nスコア > ini.stSection[i * 2].nスコア)
+						//new record score check
+						if (stPerformanceEntry[instrument].nScore > ini.stSection[instrument * 2].nScore)
 						{
-							bNewRecordScore[i] = true;
-							ini.stSection[i * 2] = stPerformanceEntry[i];
-							SaveGhost(i * 2); // #35411 chnmr0 add
+							bNewRecordScore[instrument] = true;
+							ini.stSection[instrument * 2] = stPerformanceEntry[instrument];
+							SaveGhost(instrument * 2); // #35411 chnmr0 add
 						}
 
-						// 新記録スキルチェック
-						if ((stPerformanceEntry[i].dbPerformanceSkill > ini.stSection[(i * 2) + 1].dbPerformanceSkill) && !bAuto[i])
+						//new record skill check
+						if (stPerformanceEntry[instrument].dbPerformanceSkill > ini.stSection[instrument * 2 + 1].dbPerformanceSkill && !bAuto[instrument])
 						{
-							bNewRecordSkill[i] = true;
-							ini.stSection[(i * 2) + 1] = stPerformanceEntry[i];
-							SaveGhost((i * 2) + 1); // #35411 chnmr0 add
+							bNewRecordSkill[instrument] = true;
+							ini.stSection[instrument * 2 + 1] = stPerformanceEntry[instrument];
+							SaveGhost(instrument * 2 + 1); // #35411 chnmr0 add
 						}
 
-						// ラストプレイ #23595 2011.1.9 ikanick
-						// オートじゃなければプレイ結果を書き込む
-						if (bAuto[i] == false)
+						//last play (if using auto play, don't save)
+						if (!bAuto[instrument])
 						{
-							ini.stSection[i + 6] = stPerformanceEntry[i];
-							SaveGhost(i + 6); // #35411 chnmr0 add
+							ini.stSection[instrument + 6] = stPerformanceEntry[instrument];
+							SaveGhost(instrument + 6); // #35411 chnmr0 add
 						}
 
 						// #23596 10.11.16 add ikanick オートじゃないならクリア回数を1増やす
 						//        11.02.05 bAuto to tGetIsUpdateNeeded use      ikanick
-						bool[] b更新が必要か否か = new bool[3];
-						CScoreIni.tGetIsUpdateNeeded(out b更新が必要か否か[0], out b更新が必要か否か[1], out b更新が必要か否か[2]);
+						STDGBVALUE<bool> isUpdateNeeded = CScoreIni.tGetIsUpdateNeeded();
 
-						if (b更新が必要か否か[i])
+						//only update clear count if the score is not auto-played
+						if (isUpdateNeeded[instrument])
 						{
-							switch (i)
+							switch (instrument)
 							{
 								case 0:
 									ini.stFile.ClearCountDrums++;
@@ -289,11 +278,8 @@ internal class CStageResult : CStage
 
 						//---------------------------------------------------------------------/
 					}
-					// Already checked
-					//if (CDTXMania.ConfigIni.bScoreIniを出力する)
-					{
-						ini.tExport(str);
-					}
+
+					ini.tExport(iniPath);
 				}
 				//---------------------
 				#endregion
@@ -303,32 +289,31 @@ internal class CStageResult : CStage
 				if (!CDTXMania.bCompactMode)
 				{
 					CScore cScore = CDTXMania.confirmedChart;
-					bool[] b更新が必要か否か = new bool[3];
-					CScoreIni.tGetIsUpdateNeeded(out b更新が必要か否か[0], out b更新が必要か否か[1], out b更新が必要か否か[2]);
-					for (int m = 0; m < 3; m++)
+					STDGBVALUE<bool> isUpdateNeeded = CScoreIni.tGetIsUpdateNeeded();
+					for (int instrument = 0; instrument < 3; instrument++)
 					{
-						if (b更新が必要か否か[m])
+						if (isUpdateNeeded[instrument])
 						{
 							// FullCombo した記録を FullCombo なしで超えた場合、FullCombo マークが消えてしまう。
 							// → FullCombo は、最新記録と関係なく、一度達成したらずっとつくようにする。(2010.9.11)
-							cScore.SongInformation.FullCombo[m] = stPerformanceEntry[m].bIsFullCombo | b今までにフルコンボしたことがある[m];
+							cScore.SongInformation.FullCombo[instrument] = stPerformanceEntry[instrument].bIsFullCombo | bExistingFullCombo[instrument];
 
-							if (bNewRecordSkill[m])
+							if (bNewRecordSkill[instrument])
 							{
-								cScore.SongInformation.HighCompletionRate[m] = stPerformanceEntry[m].dbPerformanceSkill;
+								cScore.SongInformation.HighCompletionRate[instrument] = stPerformanceEntry[instrument].dbPerformanceSkill;
 								// New Song Progress for new skill record
-								cScore.SongInformation.progress[m] = stPerformanceEntry[m].strProgress;
+								cScore.SongInformation.progress[instrument] = stPerformanceEntry[instrument].strProgress;
 							}
 
-							if (bNewRecordRank[m])
+							if (bNewRecordRank[instrument])
 							{
-								cScore.SongInformation.BestRank[m] = nRankValue[m];
+								cScore.SongInformation.BestRank[instrument] = nRankValue[instrument];
 							}
 
 							//Check if Progress record existed or not; if not, update anyway
-							if(CScoreIni.tProgressBarLength(cScore.SongInformation.progress[m]) == 0)
+							if(CScoreIni.tProgressBarLength(cScore.SongInformation.progress[instrument]) == 0)
 							{
-								cScore.SongInformation.progress[m] = stPerformanceEntry[m].strProgress;
+								cScore.SongInformation.progress[instrument] = stPerformanceEntry[instrument].strProgress;
 							}
 						}
 					}
@@ -338,8 +323,6 @@ internal class CStageResult : CStage
 			}
 
 			base.OnActivate();
-			//this.actProgressBar.t表示レイアウトを設定する(180, 540, 20, 460);
-			//this.actProgressBar.t演奏記録から区間情報を設定する(st演奏記録);
 		}
 		finally
 		{
@@ -436,53 +419,32 @@ internal class CStageResult : CStage
 		if( saveCond[(int)inst] )
 			//if(false)
 		{
-			using (FileStream fs = new FileStream(directory + "\\" + filename, FileMode.Create, FileAccess.Write))
+			using FileStream fs = new(directory + "\\" + filename, FileMode.Create, FileAccess.Write);
+			using BinaryWriter bw = new(fs);
+			
+			bw.Write(cnt);
+			
+			foreach (CChip chip in CDTXMania.DTX.listChip)
 			{
-				using (BinaryWriter bw = new BinaryWriter(fs))
+				if (chip.eInstrumentPart == inst)
 				{
-					bw.Write((Int32)cnt);
-					foreach (CChip chip in CDTXMania.DTX.listChip)
+					// -128 ms から 127 ms までのラグしか保存しない
+					// その範囲を超えているラグはクランプ
+					// ラグデータの 上位８ビットでそのチップの前でギター空打ちBADがあったことを示す
+					int lag = chip.nLag;
+					if (lag < -128)
 					{
-						if (chip.eInstrumentPart == inst)
-						{
-							// -128 ms から 127 ms までのラグしか保存しない
-							// その範囲を超えているラグはクランプ
-							// ラグデータの 上位８ビットでそのチップの前でギター空打ちBADがあったことを示す
-							int lag = chip.nLag;
-							if (lag < -128)
-							{
-								lag = -128;
-							}
-							if (lag > 127)
-							{
-								lag = 127;
-							}
-							byte lower = (byte)(lag + 128);
-							int upper = chip.nCurrentComboForGhost == 0 ? 1 : 0;
-							bw.Write((short)( (upper<<8) | lower));
-						}
+						lag = -128;
 					}
+					if (lag > 127)
+					{
+						lag = 127;
+					}
+					byte lower = (byte)(lag + 128);
+					int upper = chip.nCurrentComboForGhost == 0 ? 1 : 0;
+					bw.Write((short)((upper << 8) | lower));
 				}
 			}
-
-			//Ver.K追加 演奏結果の記録
-			//CScoreIni.CPerformanceEntry cScoreData;
-			//cScoreData = this.stPerformanceEntry[ (int)inst ];
-			//using (FileStream fs = new FileStream(directory + "\\" + filename + ".score", FileMode.Create, FileAccess.Write))
-			//{
-			//    using (StreamWriter sw = new StreamWriter(fs))
-			//    {
-			//        sw.WriteLine( "Score=" + cScoreData.nスコア );
-			//        sw.WriteLine( "PlaySkill=" + cScoreData.dbPerformanceSkill );
-			//        sw.WriteLine( "Skill=" + cScoreData.dbGameSkill );
-			//        sw.WriteLine( "Perfect=" + cScoreData.nPerfectCount_ExclAuto );
-			//        sw.WriteLine( "Great=" + cScoreData.nGreatCount_ExclAuto );
-			//        sw.WriteLine( "Good=" + cScoreData.nGoodCount_ExclAuto );
-			//        sw.WriteLine( "Poor=" + cScoreData.nPoorCount_ExclAuto );
-			//        sw.WriteLine( "Miss=" + cScoreData.nMissCount_ExclAuto );
-			//        sw.WriteLine( "MaxCombo=" + cScoreData.nMaxCombo );
-			//    }
-			//}
 		}
 	}
 	public override void OnDeactivate()
@@ -512,11 +474,6 @@ internal class CStageResult : CStage
 	{
 		if( bActivated )
 		{
-			if( ct登場用 != null )
-			{
-				ct登場用 = null;
-			}
-			//
 			if(ctPlayNewRecord != null)
 			{
 				ctPlayNewRecord = null;
@@ -524,33 +481,29 @@ internal class CStageResult : CStage
 
 			actBackgroundVideoAVI.Stop();
 
-			//CDTXMania.t安全にDisposeする( ref this.ds背景動画 );
-			CDTXMania.tReleaseTexture( ref txTopPanel );
-			CDTXMania.tReleaseTexture( ref txBottomPanel );
+			//CDTXMania.t安全にDisposeする( ref this.ds背景動画 );t
 			base.OnManagedReleaseResources();
 		}
 	}
 
 	public override void FirstUpdate()
 	{
-		ct登場用 = new CCounter( 0, 100, 5, CDTXMania.Timer );
-
 		//Check result to select the correct sound to play
 		int l_outputSoundEnum = 0; //0: Stage Clear 1: FC 2: EXC
 		bool l_newRecord = false;
 		for (int i = 0; i < 3; i++)
 		{
-			if ((((i != 0) || (CDTXMania.DTX.bHasChips.Drums && !CDTXMania.ConfigIni.bGuitarRevolutionMode)) &&
-			     ((i != 1) || (CDTXMania.DTX.bHasChips.Guitar && CDTXMania.ConfigIni.bGuitarRevolutionMode))) &&
-			    ((i != 2) || (CDTXMania.DTX.bHasChips.Bass && CDTXMania.ConfigIni.bGuitarRevolutionMode)))
+			if ((i != 0 || (CDTXMania.DTX.bHasChips.Drums && !CDTXMania.ConfigIni.bGuitarRevolutionMode)) &&
+			    (i != 1 || (CDTXMania.DTX.bHasChips.Guitar && CDTXMania.ConfigIni.bGuitarRevolutionMode)) &&
+			    (i != 2 || (CDTXMania.DTX.bHasChips.Bass && CDTXMania.ConfigIni.bGuitarRevolutionMode)))
 			{ 
 				if(bAuto[i] == false)
 				{
-					if(fPerfect率[i] == 100.0)
+					if(fPerfectPercentage[i] == 100.0)
 					{
 						l_outputSoundEnum = 2; //Excellent
 					}
-					else if(fPoor率[i] == 0.0 && fMiss率[i] == 0.0)
+					else if(fPoorPercentage[i] == 0.0 && fMissPercentage[i] == 0.0)
 					{
 						l_outputSoundEnum = 1; //Full Combo
 					}
@@ -617,18 +570,6 @@ internal class CStageResult : CStage
 		//            }
 
 		bAnimationComplete = true;
-		if( ct登場用.bInProgress )
-		{
-			ct登場用.tUpdate();
-			if( ct登場用.bReachedEndValue )
-			{
-				ct登場用.tStop();
-			}
-			else
-			{
-				bAnimationComplete = false;
-			}
-		}
 
 		//Play new record if available
 		if(ctPlayNewRecord != null && ctPlayNewRecord.bInProgress)
@@ -643,25 +584,7 @@ internal class CStageResult : CStage
 
 		// 描画
 		background.isVisible = rBackgroundVideoAVI.avi == null;
-
-		if( ct登場用.bInProgress && ( txTopPanel != null ) )
-		{
-			double num2 = ( (double) ct登場用.nCurrentValue ) / 100.0;
-			double num3 = Math.Sin( Math.PI / 2 * num2 );
-			num = ( (int) ( txTopPanel.szImageSize.Height * num3 ) ) - txTopPanel.szImageSize.Height;
-		}
-		else
-		{
-			num = 0;
-		}
-		if( txTopPanel != null )
-		{
-			txTopPanel.tDraw2D( CDTXMania.app.Device, 0, num );
-		}
-		if( txBottomPanel != null )
-		{
-			txBottomPanel.tDraw2D( CDTXMania.app.Device, 0, 720 - txBottomPanel.szImageSize.Height );
-		}
+		
 		if( actResultImage.OnUpdateAndDraw() == 0 )
 		{
 			bAnimationComplete = false;
@@ -697,7 +620,7 @@ internal class CStageResult : CStage
 			for( int i = 0; i < 11; i++ )
 			{
 				List<STInputEvent> events = CDTXMania.Pad.GetEvents( EInstrumentPart.DRUMS, (EPad) i );
-				if( ( events != null ) && ( events.Count > 0 ) )
+				if( events != null && events.Count > 0 )
 				{
 					foreach( STInputEvent event2 in events )
 					{
@@ -708,7 +631,7 @@ internal class CStageResult : CStage
 						CChip rChip = rEmptyDrumChip[ i ];
 						if( rChip == null )
 						{
-							switch( ( (EPad) i ) )
+							switch( (EPad) i )
 							{
 								case EPad.HH:
 									rChip = rEmptyDrumChip[ 7 ];
@@ -747,10 +670,10 @@ internal class CStageResult : CStage
 									break;
 							}
 						}
-						if( ( ( rChip != null ) && ( rChip.nChannelNumber >= EChannel.HiHatClose ) ) && ( rChip.nChannelNumber <= EChannel.LeftPedal ) )
+						if( rChip != null && rChip.nChannelNumber >= EChannel.HiHatClose && rChip.nChannelNumber <= EChannel.LeftPedal )
 						{
 							int nLane = nチャンネル0Atoレーン07[ rChip.nChannelNumber - EChannel.HiHatClose ];
-							if( ( nLane == 1 ) && ( ( rChip.nChannelNumber == EChannel.HiHatClose ) || ( ( rChip.nChannelNumber == EChannel.HiHatOpen ) && ( n最後に再生したHHのチャンネル番号 != EChannel.HiHatOpen ) ) ) )
+							if( nLane == 1 && ( rChip.nChannelNumber == EChannel.HiHatClose || ( rChip.nChannelNumber == EChannel.HiHatOpen && n最後に再生したHHのチャンネル番号 != EChannel.HiHatOpen ) ) )
 							{
 								CDTXMania.DTX.tStopPlayingWav( n最後に再生したHHのWAV番号 );
 								n最後に再生したHHのWAV番号 = rChip.nIntegerValue_InternalNumber;
@@ -768,7 +691,6 @@ internal class CStageResult : CStage
 			actResultImage.tアニメを完了させる();
 			actParameterPanel.tアニメを完了させる();
 			actRank.tアニメを完了させる();
-			ct登場用.tStop();
 		}
 		#region [ #24609 2011.4.7 yyagi リザルト画面で[F12]を押下すると、リザルト画像をpngで保存する機能は、CDTXManiaに移管。 ]
 //					if ( CDTXMania.InputManager.Keyboard.bKeyPressed( (int) SlimDXKey.F12 ) &&
@@ -819,7 +741,6 @@ internal class CStageResult : CStage
 
 	#region [ private ]
 	//-----------------
-	private CCounter ct登場用;
 	//New Counter
 	private CCounter ctPlayNewRecord;
 	private EReturnValue eReturnValueWhenFadeOutCompleted;  // eフェードアウト完了時の戻り値
@@ -867,8 +788,8 @@ internal class CStageResult : CStage
 			{
 				if (bNewRecordRank[i] || bNewRecordSkill[i])
 				{
-					string strPart = ((EInstrumentPart)(i)).ToString();
-					string strRank = ((CScoreIni.ERANK)(nRankValue[i])).ToString();
+					string strPart = ((EInstrumentPart)i).ToString();
+					string strRank = ((CScoreIni.ERANK)nRankValue[i]).ToString();
 					string strFullPath = $"{CDTXMania.DTX.strFileNameFullPath}.{datetime}_{strPart}_{strRank}.png";
 					CDTXMania.app.SaveResultScreen(strFullPath);
 				}

@@ -1436,7 +1436,7 @@ internal class CDTXMania : Game
 
     //-----------------
 
-    public static CScoreIni tScoreIniへBGMAdjustとHistoryとPlayCountを更新(string str新ヒストリ行)
+    public static CScoreIni tScoreIniへBGMAdjustとHistoryとPlayCountを更新(string strNewHistoryLine)
     {
         string strFilename = DTX.strFileNameFullPath + ".score.ini";
         CScoreIni ini = new(strFilename);
@@ -1472,25 +1472,25 @@ internal class CDTXMania : Game
         }
 
         ini.stFile.BGMAdjust = DTX.nBGMAdjust;
-        CScoreIni.tGetIsUpdateNeeded(out bool bIsUpdatedDrums, out bool bIsUpdatedGuitar, out bool bIsUpdatedBass);
-        if (bIsUpdatedDrums || bIsUpdatedGuitar || bIsUpdatedBass)
+        STDGBVALUE<bool> isUpdateNeeded = CScoreIni.tGetIsUpdateNeeded();
+        if (isUpdateNeeded.Drums || isUpdateNeeded.Guitar || isUpdateNeeded.Bass)
         {
-            if (bIsUpdatedDrums)
+            if (isUpdateNeeded.Drums)
             {
                 ini.stFile.PlayCountDrums++;
             }
 
-            if (bIsUpdatedGuitar)
+            if (isUpdateNeeded.Guitar)
             {
                 ini.stFile.PlayCountGuitar++;
             }
 
-            if (bIsUpdatedBass)
+            if (isUpdateNeeded.Bass)
             {
                 ini.stFile.PlayCountBass++;
             }
 
-            ini.tAddHistory(str新ヒストリ行);
+            ini.tAddHistory(strNewHistoryLine);
             if (!bCompactMode)
             {
                 confirmedChart.SongInformation.NbPerformances.Drums =

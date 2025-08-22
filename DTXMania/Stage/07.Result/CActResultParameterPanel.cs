@@ -653,11 +653,11 @@ internal class CActResultParameterPanel : CActivity
                 tDrawStringSmall(80 + n本体X[j], 222 + n本体Y, string.Format("{0,4:###0}", stageResult.stPerformanceEntry[j].nMaxCombo));
 
 
-                tDrawStringSmall(167 + n本体X[j], 72 + n本体Y, string.Format("{0,3:##0}%", (int)Math.Round(stageResult.fPerfect率[j])));
-                tDrawStringSmall(167 + n本体X[j], 102 + n本体Y, string.Format("{0,3:##0}%", (int)Math.Round(stageResult.fGreat率[j])));
-                tDrawStringSmall(167 + n本体X[j], 132 + n本体Y, string.Format("{0,3:##0}%", (int)Math.Round(stageResult.fGood率[j])));
-                tDrawStringSmall(167 + n本体X[j], 162 + n本体Y, string.Format("{0,3:##0}%", (int)Math.Round(stageResult.fPoor率[j])));
-                tDrawStringSmall(167 + n本体X[j], 192 + n本体Y, string.Format("{0,3:##0}%", (int)Math.Round(stageResult.fMiss率[j])));
+                tDrawStringSmall(167 + n本体X[j], 72 + n本体Y, string.Format("{0,3:##0}%", (int)Math.Round(stageResult.fPerfectPercentage[j])));
+                tDrawStringSmall(167 + n本体X[j], 102 + n本体Y, string.Format("{0,3:##0}%", (int)Math.Round(stageResult.fGreatPercentage[j])));
+                tDrawStringSmall(167 + n本体X[j], 132 + n本体Y, string.Format("{0,3:##0}%", (int)Math.Round(stageResult.fGoodPercentage[j])));
+                tDrawStringSmall(167 + n本体X[j], 162 + n本体Y, string.Format("{0,3:##0}%", (int)Math.Round(stageResult.fPoorPercentage[j])));
+                tDrawStringSmall(167 + n本体X[j], 192 + n本体Y, string.Format("{0,3:##0}%", (int)Math.Round(stageResult.fMissPercentage[j])));
                 tDrawStringSmall(167 + n本体X[j], 222 + n本体Y, string.Format("{0,3:##0}%", (int)Math.Round((100.0 * stageResult.stPerformanceEntry[j].nMaxCombo / stageResult.stPerformanceEntry[j].nTotalChipsCount))));
 
                 //this.tDrawStringLarge(58 + this.n本体X[j], 277 + this.n本体Y, string.Format("{0,6:##0.00}", stageResult.stPerformanceEntry[j].dbPerformanceSkill));
@@ -689,7 +689,7 @@ internal class CActResultParameterPanel : CActivity
                 txCurrentProgressBar[j].tDraw2D(CDTXMania.app.Device, 256 + n本体X[j], 2 + n本体Y);
                 txPreviousBestProgressBar[j].tDraw2D(CDTXMania.app.Device, 270 + n本体X[j], 2 + n本体Y);
 
-                string strScore = string.Format("{0,7:######0}", stageResult.stPerformanceEntry[j].nスコア);
+                string strScore = string.Format("{0,7:######0}", stageResult.stPerformanceEntry[j].nScore);
                 for (int i = 0; i < 7; i++)
                 {
                     RectangleF rectangle;

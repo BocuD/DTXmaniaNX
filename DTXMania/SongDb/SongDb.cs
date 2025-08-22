@@ -719,8 +719,7 @@ public class SongDb
 
 		try
 		{
-			var ini = new CScoreIni(path);
-			ini.tCheckIntegrity();
+			CScoreIni ini = new(path);
 
 			for (int nInstrumentNumber = 0; nInstrumentNumber < 3; nInstrumentNumber++)
 			{

@@ -330,15 +330,15 @@ internal class StageManager
                                 bNewProgressBarRecord.Guitar = false;
                                 bNewProgressBarRecord.Bass = false;
                                 bool bGuitarAndBass = false;
-                                if (!cPerf_Drums.b全AUTOである && cPerf_Drums.nTotalChipsCount > 0)
+                                if (!cPerf_Drums.bHasAnyAutoAtAll && cPerf_Drums.nTotalChipsCount > 0)
                                 {
                                     //Drums played
                                     strInstrument = " Drums";
                                     bToSaveProgressBarRecord.Drums = true;
                                 }
-                                else if (!cPerf_Guitar.b全AUTOである && cPerf_Guitar.nTotalChipsCount > 0)
+                                else if (!cPerf_Guitar.bHasAnyAutoAtAll && cPerf_Guitar.nTotalChipsCount > 0)
                                 {
-                                    if (!cPerf_Bass.b全AUTOである && cPerf_Bass.nTotalChipsCount > 0)
+                                    if (!cPerf_Bass.bHasAnyAutoAtAll && cPerf_Bass.nTotalChipsCount > 0)
                                     {
                                         // Guitar and bass played together
                                         bGuitarAndBass = true;
@@ -412,8 +412,6 @@ internal class StageManager
 
                                 if (!CDTXMania.bCompactMode)
                                 {
-                                    bool[] b更新が必要か否か = new bool[3];
-                                    CScoreIni.tGetIsUpdateNeeded(out b更新が必要か否か[0], out b更新が必要か否か[1], out b更新が必要か否か[2]);
                                     if (bNewProgressBarRecord.Drums)
                                     {
                                         // New Song Progress
@@ -494,7 +492,7 @@ internal class StageManager
                             string strInstrument = "";
                             string strPerfSkill = "";
                             bool bGuitarAndBass = false;
-                            if (!cPerfEntry_Drums.b全AUTOである && cPerfEntry_Drums.nTotalChipsCount > 0)
+                            if (cPerfEntry_Drums is { bHasAnyAutoAtAll: false, nTotalChipsCount: > 0 })
                             {
                                 //Drums played
                                 strPerfSkill = $" {cPerfEntry_Drums.dbPerformanceSkill:F2}";
@@ -502,9 +500,9 @@ internal class StageManager
                                     ? CScoreIni.tCalculateRankOld(cPerfEntry_Drums)
                                     : CScoreIni.tCalculateRank(0, cPerfEntry_Drums.dbPerformanceSkill);
                             }
-                            else if (!cPerfEntry_Guitar.b全AUTOである && cPerfEntry_Guitar.nTotalChipsCount > 0)
+                            else if (cPerfEntry_Guitar is { bHasAnyAutoAtAll: false, nTotalChipsCount: > 0 })
                             {
-                                if (!cPerfEntry_Bass.b全AUTOである && cPerfEntry_Bass.nTotalChipsCount > 0)
+                                if (cPerfEntry_Bass is { bHasAnyAutoAtAll: false, nTotalChipsCount: > 0 })
                                 {
                                     // Guitar and bass played together
                                     bGuitarAndBass = true;

@@ -783,7 +783,7 @@ internal class CSongManager
 								try
 								{
 									CScoreIni scoreIni = new(strFileNameScoreIni);
-									scoreIni.tCheckIntegrity();
+
 									for (int i = 0; i < 3; i++)
 									{
 										int nSectionHiSkill = (i * 2) + 1;
@@ -1885,7 +1885,6 @@ internal class CSongManager
 		try
 		{
 			var ini = new CScoreIni( strScoreIniファイルパス );
-			ini.tCheckIntegrity();
 
 			for( int n楽器番号 = 0; n楽器番号 < 3; n楽器番号++ )
 			{

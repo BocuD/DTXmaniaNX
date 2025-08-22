@@ -74,7 +74,7 @@ internal abstract class CStagePerfCommonScreen : CStage
 
         if (CDTXMania.DTX.bHasChips.Drums && !CDTXMania.ConfigIni.bGuitarRevolutionMode)
         {
-            Drums.nスコア = (long)actScore.Get(EInstrumentPart.DRUMS);
+            Drums.nScore = (long)actScore.Get(EInstrumentPart.DRUMS);
             if (CDTXMania.ConfigIni.nSkillMode == 0)
             {
                 Drums.dbGameSkill = CScoreIni.tCalculateGameSkillOld(CDTXMania.DTX.LEVEL.Drums, CDTXMania.DTX.LEVELDEC.Drums, CDTXMania.DTX.nVisibleChipsCount.Drums, nHitCount_ExclAuto.Drums.Perfect, nHitCount_ExclAuto.Drums.Great, actCombo.nCurrentCombo.HighestValue.Drums, EInstrumentPart.DRUMS, bIsAutoPlay);
@@ -145,7 +145,7 @@ internal abstract class CStagePerfCommonScreen : CStage
 
         if (CDTXMania.DTX.bHasChips.Guitar)
         {
-            Guitar.nスコア = (long)actScore.Get(EInstrumentPart.GUITAR);
+            Guitar.nScore = (long)actScore.Get(EInstrumentPart.GUITAR);
             if (CDTXMania.ConfigIni.nSkillMode == 0)
             {
                 Guitar.dbGameSkill = CScoreIni.tCalculateGameSkillOld(CDTXMania.DTX.LEVEL.Guitar, CDTXMania.DTX.LEVELDEC.Guitar, CDTXMania.DTX.nVisibleChipsCount.Guitar, nHitCount_ExclAuto.Guitar.Perfect, nHitCount_ExclAuto.Guitar.Great, actCombo.nCurrentCombo.HighestValue.Guitar, EInstrumentPart.GUITAR, bIsAutoPlay);
@@ -216,7 +216,7 @@ internal abstract class CStagePerfCommonScreen : CStage
 
         if (CDTXMania.DTX.bHasChips.Bass)
         {
-            Bass.nスコア = (long)actScore.Get(EInstrumentPart.BASS);
+            Bass.nScore = (long)actScore.Get(EInstrumentPart.BASS);
             if (CDTXMania.ConfigIni.nSkillMode == 0)
             {
                 Bass.dbGameSkill = CScoreIni.tCalculateGameSkillOld(CDTXMania.DTX.LEVEL.Bass, CDTXMania.DTX.LEVELDEC.Bass, CDTXMania.DTX.nVisibleChipsCount.Bass, nHitCount_ExclAuto.Bass.Perfect, nHitCount_ExclAuto.Bass.Great, actCombo.nCurrentCombo.HighestValue.Bass, EInstrumentPart.BASS, bIsAutoPlay);
