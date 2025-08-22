@@ -72,7 +72,7 @@ public class CScore
         public STDGBVALUE<int> Level;
         public STDGBVALUE<int> LevelDec;
         public STRANK BestRank;
-        public STSKILL HighSkill;
+        public STSKILL HighCompletionRate;
         public STSKILL HighSongSkill;
         public STDGBVALUE<bool> FullCombo;
         public STDGBVALUE<int> NbPerformances;
@@ -323,7 +323,7 @@ public class CScore
                 行5 = ""
             },
             bHiddenLevel = false,
-            HighSkill = new STMusicInformation.STSKILL(),
+            HighCompletionRate = new STMusicInformation.STSKILL(),
             HighSongSkill = new STMusicInformation.STSKILL(),
             SongType = CDTX.EType.DTX,
             Bpm = 120.0,

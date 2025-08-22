@@ -31,11 +31,11 @@ internal class CActSelectStatusPanel : CActivity
                 }
                 else if (CDTXMania.ConfigIni.nSkillMode == 1)
                 {
-                    n現在選択中の曲の最高ランク[i] = CScoreIni.tCalculateRank(0, cスコア.SongInformation.HighSkill[i]);
+                    n現在選択中の曲の最高ランク[i] = CScoreIni.tCalculateRank(0, cスコア.SongInformation.HighCompletionRate[i]);
                 }
 
                 b現在選択中の曲がフルコンボ[i] = cスコア.SongInformation.FullCombo[i];
-                db現在選択中の曲の最高スキル値[i] = cスコア.SongInformation.HighSkill[i];
+                db現在選択中の曲の最高スキル値[i] = cスコア.SongInformation.HighCompletionRate[i];
                 db現在選択中の曲の曲別スキル[i] = cスコア.SongInformation.HighSongSkill[i];
                 b現在選択中の曲の譜面[i] = cスコア.SongInformation.bScoreExists[i];
                 n現在選択中の曲のレベル[i] = cスコア.SongInformation.Level[i];
@@ -56,16 +56,16 @@ internal class CActSelectStatusPanel : CActivity
                         {
                             // Fix github.com/limyz/DTXmaniaXG/issues/33
                             //this.n現在選択中の曲の最高ランク難易度毎[j][i] = (DTXMania.CScoreIni.tCalculateRank(0, c曲リストノード.arScore[j].SongInformation.HighSkill[i]) == (int)DTXMania.CScoreIni.ERANK.S && DTXMania.CScoreIni.tCalculateRank(0, c曲リストノード.arScore[j].SongInformation.HighSkill[i]) >= 95 ? DTXMania.CScoreIni.tCalculateRank(0, cスコア.SongInformation.HighSkill[i]) : c曲リストノード.arScore[j].SongInformation.BestRank[i]);
-                            n現在選択中の曲の最高ランク難易度毎[j][i] = CScoreIni.tCalculateRank(0, c曲リストノード.arScore[j].SongInformation.HighSkill[i]);
+                            n現在選択中の曲の最高ランク難易度毎[j][i] = CScoreIni.tCalculateRank(0, c曲リストノード.arScore[j].SongInformation.HighCompletionRate[i]);
                             dbCurrentSkillPointForAllDifficulty[j][i] = CScoreIni.tCalculateGameSkillFromPlayingSkill(
                                 c曲リストノード.arScore[j].SongInformation.Level[i],
                                 c曲リストノード.arScore[j].SongInformation.LevelDec[i],
-                                c曲リストノード.arScore[j].SongInformation.HighSkill[i],
+                                c曲リストノード.arScore[j].SongInformation.HighCompletionRate[i],
                                 false
                             );
                         }
 
-                        db現在選択中の曲の最高スキル値難易度毎[j][i] = c曲リストノード.arScore[j].SongInformation.HighSkill[i];
+                        db現在選択中の曲の最高スキル値難易度毎[j][i] = c曲リストノード.arScore[j].SongInformation.HighCompletionRate[i];
                         b現在選択中の曲がフルコンボ難易度毎[j][i] = c曲リストノード.arScore[j].SongInformation.FullCombo[i];
                         b現在選択中の曲に譜面がある[j][i] = c曲リストノード.arScore[j].SongInformation.bScoreExists[i];
                     }

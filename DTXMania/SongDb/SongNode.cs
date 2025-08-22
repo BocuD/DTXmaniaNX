@@ -192,7 +192,7 @@ public class SongNode
                 double chartSkill = CScoreIni.tCalculateGameSkillFromPlayingSkill(
                     chart.SongInformation.Level[instrument],
                     chart.SongInformation.LevelDec[instrument],
-                    chart.SongInformation.HighSkill[instrument],
+                    chart.SongInformation.HighCompletionRate[instrument],
                     false);
                 
                 if (chartSkill > skill)

@@ -315,7 +315,7 @@ internal class CStageResult : CStage
 
 							if (bNewRecordSkill[m])
 							{
-								cScore.SongInformation.HighSkill[m] = stPerformanceEntry[m].dbPerformanceSkill;
+								cScore.SongInformation.HighCompletionRate[m] = stPerformanceEntry[m].dbPerformanceSkill;
 								// New Song Progress for new skill record
 								cScore.SongInformation.progress[m] = stPerformanceEntry[m].strProgress;
 							}

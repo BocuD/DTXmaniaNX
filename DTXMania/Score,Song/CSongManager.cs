@@ -814,7 +814,7 @@ internal class CSongManager
 											node.arScore[lv].SongInformation.BestRank[i] = (int)CScoreIni.ERANK.UNKNOWN;
 										}
 
-										node.arScore[lv].SongInformation.HighSkill[i] =
+										node.arScore[lv].SongInformation.HighCompletionRate[i] =
 											scoreIni.stSection[nSectionHiSkill].dbPerformanceSkill;
 										node.arScore[lv].SongInformation.FullCombo[i] =
 											scoreIni.stSection[nSectionHiSkill].bIsFullCombo |
@@ -879,9 +879,9 @@ internal class CSongManager
 		cスコア.SongInformation.BestRank.Drums = br.ReadInt32();
 		cスコア.SongInformation.BestRank.Guitar = br.ReadInt32();
 		cスコア.SongInformation.BestRank.Bass = br.ReadInt32();
-		cスコア.SongInformation.HighSkill.Drums = br.ReadDouble();
-		cスコア.SongInformation.HighSkill.Guitar = br.ReadDouble();
-		cスコア.SongInformation.HighSkill.Bass = br.ReadDouble();
+		cスコア.SongInformation.HighCompletionRate.Drums = br.ReadDouble();
+		cスコア.SongInformation.HighCompletionRate.Guitar = br.ReadDouble();
+		cスコア.SongInformation.HighCompletionRate.Bass = br.ReadDouble();
 		cスコア.SongInformation.FullCombo.Drums = br.ReadBoolean();
 		cスコア.SongInformation.FullCombo.Guitar = br.ReadBoolean();
 		cスコア.SongInformation.FullCombo.Bass = br.ReadBoolean();
@@ -1391,9 +1391,9 @@ internal class CSongManager
 				bw.Write( node.arScore[ i ].SongInformation.BestRank.Drums );
 				bw.Write( node.arScore[ i ].SongInformation.BestRank.Guitar );
 				bw.Write( node.arScore[ i ].SongInformation.BestRank.Bass );
-				bw.Write( node.arScore[ i ].SongInformation.HighSkill.Drums );
-				bw.Write( node.arScore[ i ].SongInformation.HighSkill.Guitar );
-				bw.Write( node.arScore[ i ].SongInformation.HighSkill.Bass );
+				bw.Write( node.arScore[ i ].SongInformation.HighCompletionRate.Drums );
+				bw.Write( node.arScore[ i ].SongInformation.HighCompletionRate.Guitar );
+				bw.Write( node.arScore[ i ].SongInformation.HighCompletionRate.Bass );
 				bw.Write( node.arScore[ i ].SongInformation.FullCombo.Drums );
 				bw.Write( node.arScore[ i ].SongInformation.FullCombo.Guitar );
 				bw.Write( node.arScore[ i ].SongInformation.FullCombo.Bass );
@@ -1761,11 +1761,11 @@ internal class CSongManager
 				double nSumPlayCountN1 = 0, nSumPlayCountN2 = 0;
 				if ( n1.arScore[ nL12345 ] != null )
 				{
-					nSumPlayCountN1 = n1.arScore[ nL12345 ].SongInformation.HighSkill[ (int) part ];
+					nSumPlayCountN1 = n1.arScore[ nL12345 ].SongInformation.HighCompletionRate[ (int) part ];
 				}
 				if ( n2.arScore[ nL12345 ] != null )
 				{
-					nSumPlayCountN2 = n2.arScore[ nL12345 ].SongInformation.HighSkill[ (int) part ];
+					nSumPlayCountN2 = n2.arScore[ nL12345 ].SongInformation.HighCompletionRate[ (int) part ];
 				}
 				double d = nSumPlayCountN2 - nSumPlayCountN1;
 				if ( d != 0 )
@@ -1779,7 +1779,7 @@ internal class CSongManager
 				double nSumPlayCountN1 = 0;
 				if ( c曲リストノード.arScore[ nL12345 ] != null )
 				{
-					nSumPlayCountN1 = c曲リストノード.arScore[ nL12345 ].SongInformation.HighSkill[ (int) part ];
+					nSumPlayCountN1 = c曲リストノード.arScore[ nL12345 ].SongInformation.HighCompletionRate[ (int) part ];
 				}
 // Debug.WriteLine( nSumPlayCountN1 + ":" + c曲リストノード.strタイトル );
 			}
@@ -1932,7 +1932,7 @@ internal class CSongManager
 				}
 				//-----------------
 				#endregion
-				score.SongInformation.HighSkill[ n楽器番号 ] = ini.stSection[ n ].dbPerformanceSkill;
+				score.SongInformation.HighCompletionRate[ n楽器番号 ] = ini.stSection[ n ].dbPerformanceSkill;
 				score.SongInformation.HighSongSkill[ n楽器番号 ] = ini.stSection[ n ].dbGameSkill;
 				score.SongInformation.FullCombo[ n楽器番号 ] = ini.stSection[ n ].bIsFullCombo | ini.stSection[ n楽器番号 * 2 ].bIsFullCombo;
 				//New for Progress

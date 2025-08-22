@@ -771,7 +771,7 @@ public class SongDb
 
 				#endregion
 
-				score.SongInformation.HighSkill[nInstrumentNumber] = ini.stSection[n].dbPerformanceSkill;
+				score.SongInformation.HighCompletionRate[nInstrumentNumber] = ini.stSection[n].dbPerformanceSkill;
 				score.SongInformation.HighSongSkill[nInstrumentNumber] = ini.stSection[n].dbGameSkill;
 				score.SongInformation.FullCombo[nInstrumentNumber] = ini.stSection[n].bIsFullCombo | ini.stSection[nInstrumentNumber * 2].bIsFullCombo;
 				

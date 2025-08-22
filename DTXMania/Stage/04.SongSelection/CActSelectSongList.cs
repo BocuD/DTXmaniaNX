@@ -288,7 +288,7 @@ internal class CActSelectSongList : CActivity
 			int index = ( i + 13 ) % 13;
 			for( int m = 0; m < 3; m++ )
 			{
-				stBarInformation[ index ].nSkillValue[ m ] = (int) song.arScore[ nGetClosestLevelToTargetLevelForSong( song ) ].SongInformation.HighSkill[ m ];
+				stBarInformation[ index ].nSkillValue[ m ] = (int) song.arScore[ nGetClosestLevelToTargetLevelForSong( song ) ].SongInformation.HighCompletionRate[ m ];
 			}
 			song = rNextSong( song );
 		}
@@ -791,7 +791,7 @@ internal class CActSelectSongList : CActivity
 					// 新しく最下部に表示されるパネル用のスキル値を取得。
 
 					for ( int i = 0; i < 3; i++ )
-						stBarInformation[ index ].nSkillValue[ i ] = (int) song.arScore[nNearestIndex].SongInformation.HighSkill[ i ];
+						stBarInformation[ index ].nSkillValue[ i ] = (int) song.arScore[nNearestIndex].SongInformation.HighCompletionRate[ i ];
 
 
 					// 1行(100カウント)移動完了。
@@ -854,7 +854,7 @@ internal class CActSelectSongList : CActivity
 					// 新しく最上部に表示されるパネル用のスキル値を取得。
 
 					for ( int i = 0; i < 3; i++ )
-						stBarInformation[ index ].nSkillValue[ i ] = (int) song.arScore[nNearestIndex].SongInformation.HighSkill[ i ];
+						stBarInformation[ index ].nSkillValue[ i ] = (int) song.arScore[nNearestIndex].SongInformation.HighCompletionRate[ i ];
 
 
 					// 1行(100カウント)移動完了。
@@ -1346,7 +1346,7 @@ internal class CActSelectSongList : CActivity
 			int nNearestScoreIndex = nGetClosestLevelToTargetLevelForSong(song);				
 
 			for ( int j = 0; j < 3; j++ )
-				stBarInformation[ i ].nSkillValue[ j ] = (int) song.arScore[nNearestScoreIndex].SongInformation.HighSkill[ j ];
+				stBarInformation[ i ].nSkillValue[ j ] = (int) song.arScore[nNearestScoreIndex].SongInformation.HighCompletionRate[ j ];
 
 			//
 			stBarInformation[i].strPreviewImageFullPath = sGetPreviewImagePath(song.arScore[nNearestScoreIndex]);
@@ -1369,7 +1369,7 @@ internal class CActSelectSongList : CActivity
 			{
 				if (cSong.arScore[k] != null)
 				{
-					if (cSong.arScore[k].SongInformation.HighSkill[j] > 0.0)
+					if (cSong.arScore[k].SongInformation.HighCompletionRate[j] > 0.0)
 					{
 						if(cSong.arDifficultyLabel[k] != null)
 						{

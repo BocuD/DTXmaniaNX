@@ -84,12 +84,12 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         {
             var score = new CScore();
             CDTXMania.SongManager.tReadScoreIniAndSetScoreInformation( CDTXMania.strCompactModeFile + ".score.ini", ref score );
-            actGraph.dbGraphValue_Goal = score.SongInformation.HighSkill[ 0 ];
+            actGraph.dbGraphValue_Goal = score.SongInformation.HighCompletionRate[ 0 ];
         }
         else
         {
-            actGraph.dbGraphValue_Goal = CDTXMania.confirmedChart.SongInformation.HighSkill[ 0 ];	// #24074 2011.01.23 add ikanick
-            actGraph.dbGraphValue_PersonalBest = CDTXMania.confirmedChart.SongInformation.HighSkill[ 0 ];
+            actGraph.dbGraphValue_Goal = CDTXMania.confirmedChart.SongInformation.HighCompletionRate[ 0 ];	// #24074 2011.01.23 add ikanick
+            actGraph.dbGraphValue_PersonalBest = CDTXMania.confirmedChart.SongInformation.HighCompletionRate[ 0 ];
 
             // #35411 2015.08.21 chnmr0 add
             // ゴースト利用可のなとき、0で初期化
