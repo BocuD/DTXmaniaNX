@@ -62,7 +62,7 @@ public class StatusPane : UIGroup
     private EInstrumentPart instrument;
     
     private float verticalSpacing = 74;
-    private Vector3 textOffset = new(125, -42, 0);
+    private Vector3 textOffset = new(125, -41, 0);
     
     public SongNode? song;
 
@@ -102,7 +102,7 @@ public class StatusPane : UIGroup
                     //get score as well
                     double score = song.charts[c].SongInformation.HighCompletionRate[(int)instrument];
                     
-                    var completionRate = textTranslation * Matrix.Translation(-102 * CDTXMania.renderScale, 12 * CDTXMania.renderScale, 0);
+                    var completionRate = textTranslation * Matrix.Translation(-102 * CDTXMania.renderScale, 11 * CDTXMania.renderScale, 0);
                     tDrawDifficulty(completionRate, txLevelNumber, 0.6f, $"{score:0.00}%");
                 }
                 else
