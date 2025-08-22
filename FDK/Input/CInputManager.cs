@@ -115,6 +115,7 @@ public class CInputManager : IDisposable // CInput管理
 	//scan connected MIDI devices, remove disconnected devices and add newly connected ones
 	public void ScanDevices()
 	{
+		
 		lock (objMidiInMutex)
 		{
 			if (isDisposed) return;
@@ -183,9 +184,11 @@ public class CInputManager : IDisposable // CInput管理
 		midiDevice.strDeviceName = midiCaps.szPname;
 		listInputDevices.Add(midiDevice);
 		connectedMidiDevices[id] = midiDevice;
+		lostMidiDevice = false;
 		return true;
 	}
-	
+
+	public bool lostMidiDevice = false;
 	private void DisconnectMidiDevice(CInputMIDI midiDevice)
 	{
 		if (midiDevice.hMidiIn != IntPtr.Zero)
@@ -198,6 +201,7 @@ public class CInputManager : IDisposable // CInput管理
 		connectedMidiDevices.Remove((uint)midiDevice.ID);
 		Trace.TraceInformation("MIDI In: [{0}] \"{1}\" has been disconnected.", midiDevice.ID, midiDevice.strDeviceName);
 		midiDevice.Dispose();
+		lostMidiDevice = true;
 	}
 
 	public IInputDevice Joystick(int ID)

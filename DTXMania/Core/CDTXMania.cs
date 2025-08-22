@@ -1083,7 +1083,17 @@ internal class CDTXMania : Game
 
         if (InputManager != null)
         {
-            InputManager.ScanDevices();
+            if (StageManager.rCurrentStage.eStageID == CStage.EStage.Performance_6)
+            {
+                if (InputManager.lostMidiDevice)
+                {
+                    InputManager.ScanDevices();
+                }
+            }
+            else
+            {
+                InputManager.ScanDevices();
+            }
             InputManager.tPolling(bApplicationActive, ConfigIni.bBufferedInput);
         }
 
