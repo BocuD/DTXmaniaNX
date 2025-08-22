@@ -1,4 +1,7 @@
-﻿namespace DTXMania.SongDb.Sorting;
+﻿using System.Diagnostics;
+using DTXMania.Core;
+
+namespace DTXMania.SongDb.Sorting;
 
 public class SortByPlayer : SongDbSort
 {
@@ -15,6 +18,10 @@ public class SortByPlayer : SongDbSort
         var recentlyPlayed = GetRecentlyPlayed(songDb);
         root.childNodes.Add(recentlyPlayed);
         recentlyPlayed.parent = root;
+
+        var clearRank = GetByClearRank(songDb);
+        root.childNodes.Add(clearRank);
+        clearRank.parent = root;
         
         return Task.FromResult(root);
     }
@@ -87,5 +94,62 @@ public class SortByPlayer : SongDbSort
         }
         
         return recentlyPlayed;
+    }
+    
+    public SongNode GetByClearRank(SongDb songDb)
+    {
+        //create a new root node
+        SongNode clearRank = new(null, SongNode.ENodeType.BOX)
+        {
+            title = "By Clear Rank"
+        };
+
+        //create groups for each clear rank
+        Dictionary<CScoreIni.ERANK, SongNode> clearRankNodes = new();
+        foreach (CScoreIni.ERANK rank in Enum.GetValues(typeof(CScoreIni.ERANK)))
+        {
+            SongNode rankNode = new(clearRank, SongNode.ENodeType.BOX)
+            {
+                title = rank == CScoreIni.ERANK.UNKNOWN ? "Unknown" : rank.ToString()
+            };
+            clearRankNodes[rank] = rankNode;
+        }
+
+        //go through songs and add them based on their highest clear rank
+        foreach (SongNode songNode in songDb.flattenedSongList)
+        {
+            for (int chartIndex = 0; chartIndex < songNode.charts.Length; chartIndex++)
+            {
+                CScore? chart = songNode.charts[chartIndex];
+                if (chart == null || !chart.HasChartForCurrentMode()) continue;
+
+                for (int instrument = 0; instrument < 3; instrument++)
+                {
+                    if (CDTXMania.ConfigIni.bDrumsEnabled && instrument != 0) continue;
+                    if (!CDTXMania.ConfigIni.bDrumsEnabled && instrument == 0) continue;
+
+                    int rank = chart.SongInformation.BestRank[instrument];
+                    if (clearRankNodes.TryGetValue((CScoreIni.ERANK)rank, out SongNode? rankNode))
+                    {
+                        var newNode = SongNode.Clone(songNode, rankNode, false);
+
+                        //add chart
+                        newNode.filteredInstrumentPart = (EInstrumentPart)instrument;
+                        newNode.charts[chartIndex] = chart;
+                    }
+                    else
+                    {
+                        Trace.TraceWarning($"Clear rank node not found for rank {rank} in song {songNode.title}");
+                    }
+                }
+            }
+        }
+
+        foreach (SongNode box in clearRank.childNodes)
+        {
+            //OrderBySkill(box.childNodes);
+        }
+
+        return clearRank;
     }
 }
