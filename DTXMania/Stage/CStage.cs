@@ -4,6 +4,7 @@ using DTXMania.UI.Drawable;
 using DTXMania.UI.DynamicElements;
 using FDK;
 using SharpDX;
+using SharpDX.Direct3D9;
 
 namespace DTXMania;
 
@@ -104,6 +105,14 @@ public abstract class CStage : CActivity
 			FirstUpdate();
 			bJustStartedUpdate = false;
 		}
+		
+		//set texture filtering to linear
+		var device = CDTXMania.app.Device;
+		device.SetSamplerState(0, SamplerState.MinFilter, TextureFilter.Linear);
+		device.SetSamplerState(0, SamplerState.MagFilter, TextureFilter.Linear);
+		device.SetSamplerState(0, SamplerState.MipFilter, TextureFilter.Linear);
+		device.SetSamplerState(0, SamplerState.AddressU, TextureAddress.Clamp);
+		device.SetSamplerState(0, SamplerState.AddressV, TextureAddress.Clamp);
 		
 		//scale by CDTXMania.renderScale;
 		ui.scale.X = CDTXMania.renderScale;

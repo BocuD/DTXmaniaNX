@@ -10,7 +10,6 @@ using SharpDX;
 using FDK;
 using Color = System.Drawing.Color;
 using Point = System.Drawing.Point;
-using Rectangle = System.Drawing.Rectangle;
 using RectangleF = SharpDX.RectangleF;
 using SlimDXKey = SlimDX.DirectInput.Key;
 
