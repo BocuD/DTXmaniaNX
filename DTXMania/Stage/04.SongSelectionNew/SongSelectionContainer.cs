@@ -16,6 +16,7 @@ public class SongSelectionContainer : UIGroup
     private UIImage albumArt;
     private UIGroup elementsContainer;
     
+    public SongNode CurrentRoot => currentRoot;
     private SongNode currentRoot;
     
     public static DTXTexture fallbackPreImage;
@@ -123,6 +124,53 @@ public class SongSelectionContainer : UIGroup
         HandleSelectionChanged();
         
         Trace.TraceInformation("Song selection root updated in {0}ms", (DateTime.Now - start).TotalMilliseconds);
+    }
+    
+    public void UpdateSelection(SongNode node)
+    {
+        if (node == null || currentRoot == null)
+            return;
+
+        // Find the target index inside the current root
+        int targetIndex = currentRoot.childNodes.FindIndex(x => x == node);
+        if (targetIndex < 0)
+            return; // Node not in current root
+        
+        //unhighlight old
+        var previouslySelected = songSelectionElements[WrapIndex(bufferStartIndex + selectionIndex)];
+        previouslySelected.SetHighlighted(false);
+        
+        bufferStartIndex = 0;
+
+        //update selectionIndex element with the requested node
+        songSelectionElements[selectionIndex].UpdateSongNode(node);
+        songSelectionElements[selectionIndex].UpdateSongThumbnail(CachePreImage(node));
+        songSelectionElements[selectionIndex].position.Y = 0;
+        songSelectionElements[selectionIndex].SetHighlighted(true);
+
+        //fill next elements
+        for (int i = selectionIndex + 1; i < songSelectionElements.Length; i++)
+        {
+            SongNode nextNode = SongNode.rNextSong(songSelectionElements[i - 1].node);
+            songSelectionElements[i].UpdateSongNode(nextNode);
+            songSelectionElements[i].UpdateSongThumbnail(CachePreImage(nextNode));
+            songSelectionElements[i].position.Y = (i - selectionIndex) * elementSpacing;
+            songSelectionElements[i].SetHighlighted(false);
+        }
+
+        //fill previous elements
+        for (int i = selectionIndex - 1; i >= 0; i--)
+        {
+            SongNode prevNode = SongNode.rPreviousSong(songSelectionElements[i + 1].node);
+            songSelectionElements[i].UpdateSongNode(prevNode);
+            songSelectionElements[i].UpdateSongThumbnail(CachePreImage(prevNode));
+            songSelectionElements[i].position.Y = (i - selectionIndex) * elementSpacing;
+            songSelectionElements[i].SetHighlighted(false);
+        }
+
+        //update album art, preview sound, etc.
+        HandleSelectionChanged();
+        UpdateRingbufferPositions();
     }
 
     private void HandleSelectionChanged()

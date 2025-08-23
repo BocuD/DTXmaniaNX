@@ -138,6 +138,10 @@ public class CStageSongSelectionNew : CStage
 
     private void PrepareSelectionContainers()
     {
+        //backup our current selection
+        SongNode? selectedNodeBackup = this.selectedNode;
+        CScore? selectedChartBackup = this.selectedChart;
+        
         //determine if we need to rebuild sort cache or not
         if (CDTXMania.GetCurrentInstrument() != lastInstrument)
         {
@@ -185,6 +189,12 @@ public class CStageSongSelectionNew : CStage
         //enable the current sort
         ApplySort(currentSort);
         
+        //try to restore the last selected song if possible
+        if (selectedNodeBackup != null && selectedChartBackup != null)
+        {
+            RestoreSelection(selectedNodeBackup, selectedChartBackup);
+        }
+        
         Trace.TraceInformation("Sort cache preparation complete.");
         
         TimeSpan elapsed = DateTime.Now - startTime;
@@ -192,7 +202,45 @@ public class CStageSongSelectionNew : CStage
         
         loadPhase = ELoadPhase.CacheThumbnails;
     }
-    
+
+    private void RestoreSelection(SongNode selectedNodeBackup, CScore selectedChartBackup)
+    {
+        //walk down the tree recursively to find the node
+        SongNode currentRoot = currentSelectionContainer.CurrentRoot;
+        SongNode? targetRoot = null;
+        SongNode? targetNode = null;
+            
+        FindRoot(currentRoot);
+            
+        if (targetRoot != null)
+        {
+            currentSelectionContainer.UpdateRoot(targetRoot);
+            currentSelectionContainer.UpdateSelection(targetNode);
+        }
+            
+        void FindRoot(SongNode node)
+        {
+            foreach (var child in node.childNodes)
+            {
+                if (child == null) continue;
+                    
+                if (child.path.Equals(selectedNodeBackup.path, StringComparison.InvariantCulture))
+                {
+                    targetRoot = node;
+                    targetNode = child;
+                    return;
+                }
+
+                if (child.nodeType is SongNode.ENodeType.BOX or SongNode.ENodeType.ROOT)
+                {
+                    FindRoot(child);
+                }
+
+                if (targetRoot != null) return;
+            }
+        }
+    }
+
     public override int OnUpdateAndDraw()
     {
         base.OnUpdateAndDraw();
