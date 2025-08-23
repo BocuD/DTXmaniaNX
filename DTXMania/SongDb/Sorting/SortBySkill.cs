@@ -30,6 +30,9 @@ public class SortBySkill : SongDbSort
             title = "Top 50 Skill Songs"
         };
         
+        //force sort songdb skill
+        songDb.RecalculateSkill();
+        
         foreach (var song in songDb.skillSongs)
         {
             SongNode newNode = SongNode.Clone(song.node, skillSongRoot, false);

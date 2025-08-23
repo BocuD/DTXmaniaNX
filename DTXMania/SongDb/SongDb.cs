@@ -139,8 +139,15 @@ public class SongDb
 		}
 	}
 
+	public void RecalculateSkill()
+	{
+		skillSongs = CalculateSkill(flattenedSongList, out double totalSkill);
+	}
+	
 	private static List<(SongNode node, CScore chart, double skill, int inst)> CalculateSkill(List<SongNode> songList, out double totalSkill)
 	{
+		DateTime start = DateTime.Now;
+		
 		//calculate skill
 		Trace.TraceInformation("Calculating skill songs and total skill...");
 
@@ -169,6 +176,8 @@ public class SongDb
 			song.chart.countSkill = true;
 		}
 			
+		TimeSpan duration = DateTime.Now - start;
+		Trace.TraceInformation($"Calculated skill for {tempSkillSongs.Count} songs in {duration.Milliseconds} ms");
 		Trace.TraceInformation($"Total skill points across all ({tempSkillSongs.Count}) skill songs: {totalSkill}");
 		return tempSkillSongs;
 	}
