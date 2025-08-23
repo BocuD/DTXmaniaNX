@@ -139,8 +139,9 @@ public class CStageSongSelectionNew : CStage
     private void PrepareSelectionContainers()
     {
         //backup our current selection
-        SongNode? selectedNodeBackup = this.selectedNode;
-        CScore? selectedChartBackup = this.selectedChart;
+        SongNode? selectedRootBackup = currentSelectionContainer?.CurrentRoot;
+        SongNode? selectedNodeBackup = selectedNode;
+        CScore? selectedChartBackup = selectedChart;
         
         //determine if we need to rebuild sort cache or not
         if (CDTXMania.GetCurrentInstrument() != lastInstrument)
@@ -190,9 +191,9 @@ public class CStageSongSelectionNew : CStage
         ApplySort(currentSort);
         
         //try to restore the last selected song if possible
-        if (selectedNodeBackup != null && selectedChartBackup != null)
+        if (selectedRootBackup != null && selectedNodeBackup != null && selectedChartBackup != null)
         {
-            RestoreSelection(selectedNodeBackup, selectedChartBackup);
+            RestoreSelection(selectedRootBackup, selectedNodeBackup, selectedChartBackup);
         }
         
         Trace.TraceInformation("Sort cache preparation complete.");
@@ -203,7 +204,7 @@ public class CStageSongSelectionNew : CStage
         loadPhase = ELoadPhase.CacheThumbnails;
     }
 
-    private void RestoreSelection(SongNode selectedNodeBackup, CScore selectedChartBackup)
+    private void RestoreSelection(SongNode selectedRootBackup, SongNode selectedNodeBackup, CScore selectedChartBackup)
     {
         //walk down the tree recursively to find the node
         SongNode currentRoot = currentSelectionContainer.CurrentRoot;
@@ -211,13 +212,18 @@ public class CStageSongSelectionNew : CStage
         SongNode? targetNode = null;
             
         FindRoot(currentRoot);
-            
-        if (targetRoot != null)
+        
+        if (targetRoot != null && targetNode != null)
         {
+            if (targetRoot.parent != null)
+            {
+                targetRoot.parent.CurrentSelection = targetRoot;
+            }
+            
             currentSelectionContainer.UpdateRoot(targetRoot);
             currentSelectionContainer.UpdateSelection(targetNode);
         }
-            
+        
         void FindRoot(SongNode node)
         {
             foreach (var child in node.childNodes)
@@ -226,9 +232,12 @@ public class CStageSongSelectionNew : CStage
                     
                 if (child.path.Equals(selectedNodeBackup.path, StringComparison.InvariantCulture))
                 {
-                    targetRoot = node;
-                    targetNode = child;
-                    return;
+                    if (node.title.Equals(selectedRootBackup.title, StringComparison.InvariantCulture))
+                    {
+                        targetRoot = node;
+                        targetNode = child;
+                        return;
+                    }
                 }
 
                 if (child.nodeType is SongNode.ENodeType.BOX or SongNode.ENodeType.ROOT)
