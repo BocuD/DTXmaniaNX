@@ -297,6 +297,16 @@ public class SongSelectionContainer : UIGroup
             if (amount < 0 && targetY > amount * 2) targetY += amount;
             else if (amount > 0 && targetY < amount * 2) targetY += amount;
         }
+
+        if (CDTXMania.InputManager.Keyboard.bKeyPressed(Key.R))
+        {
+            //find a random song
+            var random = new Random();
+            int randomIndex = random.Next(0, currentRoot.childNodes.Count);
+            var randomNode = currentRoot.childNodes[randomIndex];
+            UpdateSelection(randomNode);
+            return 0;
+        }
         
         ctKeyRepeat.Up.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(Key.UpArrow),
             () => ApplyScrollDelta(elementSpacing), 400, 25);
