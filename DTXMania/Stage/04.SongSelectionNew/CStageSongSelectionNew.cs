@@ -66,14 +66,15 @@ public class CStageSongSelectionNew : CStage
     {
         bigAlbumArt = ui.AddChild(new UIImage());
         bigAlbumArt.position = new Vector3(320, 35, 0);
-        bigAlbumArt.renderOrder = 2;
+        bigAlbumArt.renderOrder = 10;
         bigAlbumArt.size = new Vector2(300, 300);
         
         sortMenuContainer = ui.AddChild(new SortMenuContainer(songDb, sorters));
         sortMenuContainer.position = new Vector3(1281, 35, 0);
-        sortMenuContainer.renderOrder = 1;
+        sortMenuContainer.renderOrder = 8;
 
         statusPanel = ui.AddChild(new StatusPanel());
+        statusPanel.renderOrder = 6;
 
         //create songselectioncontainer for each sorter
         foreach (SongDbSort sorter in sorters)
@@ -96,6 +97,29 @@ public class CStageSongSelectionNew : CStage
         LegacyDrawable backgroundVideo = ui.AddChild(new LegacyDrawable(() => actBackgroundVideoAVI.tUpdateAndDraw()));
         backgroundVideo.renderOrder = -99;
         backgroundVideo.name = "BackgroundVideo";
+        
+        //create panel elements
+        var back1 = ui.AddChild(new UIImage(DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\SongSelect\back1.png"))));
+        back1.renderOrder = 1;
+        back1.position = new Vector3(174, 393, 0);
+        back1.rotation = new Vector3(0, 0, 1.63f);
+        back1.name = "Back1";
+        
+        var back2 = ui.AddChild(new UIImage(DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\SongSelect\back2.png"))));
+        back2.renderOrder = 2;
+        back2.position = new Vector3(126, 336, 0);
+        back2.rotation = new Vector3(0, 0, -0.06f);
+        back2.name = "Back2";
+        
+        var graphPanel = ui.AddChild(new UIImage(DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\SongSelect\graph_panel_drums.png"))));
+        graphPanel.position = new Vector3(212, 355, 0);
+        graphPanel.renderOrder = 4;
+        graphPanel.name = "GraphPanelDrums";
+        
+        var graphFg = ui.AddChild(new UIImage(DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\SongSelect\graph_fg_drums.png"))));
+        graphFg.position = new Vector3(242, 370, 0);
+        graphFg.renderOrder = 5;
+        graphFg.name = "GraphFgDrums";
     }
 
     public override void OnManagedCreateResources()
