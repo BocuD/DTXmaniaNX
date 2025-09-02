@@ -12,7 +12,6 @@ namespace DTXMania;
 public class CStageSongSelectionNew : CStage
 {
     private SongDb.SongDb songDb => CDTXMania.SongDb;
-    //private SongSelectionContainer selectionContainer;
     private SortMenuContainer sortMenuContainer;
     private UIImage bigAlbumArt;
     private CActSelectPresound actPresound;
@@ -21,6 +20,8 @@ public class CStageSongSelectionNew : CStage
     private CAVI cAviBackgroundVideo;
 
     private SongSelectionContainer currentSelectionContainer;
+    private DensityGraph densityGraph1;
+    private DensityGraph densityGraph2;
     
     private ELoadPhase loadPhase = ELoadPhase.Initialize;
     
@@ -68,6 +69,7 @@ public class CStageSongSelectionNew : CStage
         bigAlbumArt.position = new Vector3(320, 35, 0);
         bigAlbumArt.renderOrder = 10;
         bigAlbumArt.size = new Vector2(300, 300);
+        bigAlbumArt.name  = "AlbumArt";
         
         sortMenuContainer = ui.AddChild(new SortMenuContainer(songDb, sorters));
         sortMenuContainer.position = new Vector3(1281, 35, 0);
@@ -110,16 +112,16 @@ public class CStageSongSelectionNew : CStage
         back2.position = new Vector3(126, 336, 0);
         back2.rotation = new Vector3(0, 0, -0.06f);
         back2.name = "Back2";
+
+        densityGraph1 = ui.AddChild(new DensityGraph((EInstrumentPart)CDTXMania.GetCurrentInstrument()));
+        densityGraph1.position = new Vector3(CDTXMania.GetCurrentInstrument() == 0 ? 212 : 64, 355, 0);
+        densityGraph1.renderOrder = 4;
+        densityGraph1.name = "DensityGraph";
         
-        var graphPanel = ui.AddChild(new UIImage(DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\SongSelect\graph_panel_drums.png"))));
-        graphPanel.position = new Vector3(212, 355, 0);
-        graphPanel.renderOrder = 4;
-        graphPanel.name = "GraphPanelDrums";
-        
-        var graphFg = ui.AddChild(new UIImage(DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\SongSelect\graph_fg_drums.png"))));
-        graphFg.position = new Vector3(242, 370, 0);
-        graphFg.renderOrder = 5;
-        graphFg.name = "GraphFgDrums";
+        var topBar = ui.AddChild(new UIImage(DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\SongSelect\top_bar.png"))));
+        topBar.renderOrder = 12;
+        topBar.name = "TopBar";
+        topBar.size.X = 1280;
     }
 
     public override void OnManagedCreateResources()
