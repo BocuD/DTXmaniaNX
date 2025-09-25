@@ -488,9 +488,9 @@ internal class StageManager
                             } // "case CStage.EStage.Result:"のところ。
 
                             double ps = 0.0;
-                            int nRank = 0;
+                            int nRank;
                             string strInstrument = "";
-                            string strPerfSkill = "";
+                            string strPerfSkill;
                             bool bGuitarAndBass = false;
                             if (cPerfEntry_Drums is { bHasAnyAutoAtAll: false, nTotalChipsCount: > 0 })
                             {
@@ -506,8 +506,8 @@ internal class StageManager
                                 {
                                     // Guitar and bass played together
                                     bGuitarAndBass = true;
-                                    strPerfSkill = String.Format("{0:F2}/{1:F2}",
-                                        cPerfEntry_Guitar.dbPerformanceSkill, cPerfEntry_Bass.dbPerformanceSkill);
+                                    strPerfSkill =
+                                        $"{cPerfEntry_Guitar.dbPerformanceSkill:F2}/{cPerfEntry_Bass.dbPerformanceSkill:F2}";
                                     nRank = CScoreIni.tCalculateOverallRankValue(cPerfEntry_Drums,
                                         cPerfEntry_Guitar, cPerfEntry_Bass);
                                     strInstrument = " G+B";
@@ -532,7 +532,7 @@ internal class StageManager
                                 strInstrument = " Bass";
                             }
 
-                            string str = "";
+                            string str;
                             if (nRank == (int)CScoreIni.ERANK.UNKNOWN)
                             {
                                 str = "Cleared (No chips)";
@@ -542,12 +542,11 @@ internal class StageManager
                                 string strSpeed = "";
                                 if (CDTXMania.ConfigIni.nPlaySpeed != 20)
                                 {
-                                    double d = (double)(CDTXMania.ConfigIni.nPlaySpeed / 20.0);
+                                    double d = CDTXMania.ConfigIni.nPlaySpeed / 20.0;
                                     strSpeed = (bGuitarAndBass ? " x" : " Speed x") + d.ToString("0.00");
                                 }
 
-                                str = string.Format("Cleared{0} ({1}:{2}{3})", strInstrument,
-                                    Enum.GetName(typeof(CScoreIni.ERANK), nRank), strPerfSkill, strSpeed);
+                                str = $"Cleared{strInstrument} ({Enum.GetName(typeof(CScoreIni.ERANK), nRank)}:{strPerfSkill}{strSpeed})";
                             }
 
                             scoreIni = CDTXMania.tScoreIniへBGMAdjustとHistoryとPlayCountを更新(str);
