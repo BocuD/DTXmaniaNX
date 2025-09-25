@@ -214,7 +214,7 @@ internal class CStageConfig : CStage
         ctDisplayWait.tUpdate();
 
         //update menu cursor position
-        menuCursor.Texture.transparency = bFocusIsOnMenu ? 1.0f : 0.5f;
+        menuCursor.color.Alpha = bFocusIsOnMenu ? 1.0f : 0.5f;
         menuCursor.position.Y = 2 + configLeftOptionsMenu.currentlySelectedIndex * 32;
 
         #region [ アイテム ]

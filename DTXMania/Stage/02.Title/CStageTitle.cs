@@ -244,22 +244,23 @@ internal class CStageTitle : CStage
 				);
 				Matrix finalMatrix = scaleEffectMatrix * translateMatrix * scaleMatrix;
 
-				txMenu.nTransparency = (int) ( 255.0 * ( 1.0 - ( ( (double) ctCursorFlash.nCurrentValue ) / 100.0 ) ) );
-				txMenu.tDraw2DMatrix(CDTXMania.app.Device, finalMatrix, new Vector2(MENU_W, MENU_H), new RectangleF(0, MENU_H * 5, MENU_W, MENU_H));
+				Color4 col = Color4.White;
+				col.Alpha = (float) (1.0 - ctCursorFlash.nCurrentValue / 100.0 );
+				txMenu.tDraw2DMatrix(CDTXMania.app.Device, finalMatrix, new Vector2(MENU_W, MENU_H), new RectangleF(0, MENU_H * 5, MENU_W, MENU_H), col);
 			}
 			txMenu.vcScaleRatio.X = 1f;
 			txMenu.vcScaleRatio.Y = 1f;
 			txMenu.nTransparency = 0xff;
 			
 			Matrix mat2 = Matrix.Translation(x, y, 0f) * scaleMatrix;
-			txMenu.tDraw2DMatrix( CDTXMania.app.Device, mat2, new Vector2(MENU_W, MENU_H), new RectangleF( 0, MENU_H * 4, MENU_W, MENU_H ) );
+			txMenu.tDraw2DMatrix( CDTXMania.app.Device, mat2, new Vector2(MENU_W, MENU_H), new RectangleF( 0, MENU_H * 4, MENU_W, MENU_H ));
 		}
 		if( txMenu != null )
 		{
 			Matrix mat = Matrix.Translation(MENU_X, MENU_Y, 0) * scaleMatrix;
 			Matrix mat2 = Matrix.Translation(MENU_X, MENU_Y + MENU_H, 0) * scaleMatrix;
 			txMenu.tDraw2DMatrix( CDTXMania.app.Device, mat, new Vector2(MENU_W, MENU_H), new RectangleF( 0, 0, MENU_W, MENU_H ));
-			txMenu.tDraw2DMatrix( CDTXMania.app.Device, mat2, new Vector2(MENU_W, MENU_H * 2), new RectangleF( 0, MENU_H * 2, MENU_W, MENU_H * 2 ) );
+			txMenu.tDraw2DMatrix( CDTXMania.app.Device, mat2, new Vector2(MENU_W, MENU_H * 2), new RectangleF( 0, MENU_H * 2, MENU_W, MENU_H * 2 ));
 		}
 				
 		EPhase ePhaseId = ePhaseID;

@@ -5,6 +5,8 @@ namespace DTXMania.UI.Drawable;
 
 public abstract class UITexture : UIDrawable
 {
+    public Color4 color = Color4.White;
+    
     protected UITexture(BaseTexture texture)
     {
         if (texture.isValid())
@@ -43,7 +45,7 @@ public abstract class UITexture : UIDrawable
         UpdateLocalTransformMatrix();
             
         Matrix combinedMatrix = localTransformMatrix * parentMatrix;
-        texture.tDraw2DMatrix(combinedMatrix, size, new RectangleF(0, 0, texture.Width, texture.Height));
+        texture.tDraw2DMatrix(combinedMatrix, size, new RectangleF(0, 0, texture.Width, texture.Height), color);
     }
 
     public override void Dispose()

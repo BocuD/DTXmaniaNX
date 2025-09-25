@@ -28,22 +28,8 @@ public class CTexture : IDisposable
 
 	public int nTransparency
 	{
-		get => _Transparency;
-		set
-		{
-			if (value < 0)
-			{
-				_Transparency = 0;
-			}
-			else if (value > 0xff)
-			{
-				_Transparency = 0xff;
-			}
-			else
-			{
-				_Transparency = value;
-			}
-		}
+		get => (int)(color4.Alpha * 255.0f);
+		set => color4.Alpha = Math.Clamp(value / 255.0f, 0, 1);
 	}
 
 	public Size szTextureSize { get; private set; }
@@ -354,11 +340,11 @@ public class CTexture : IDisposable
 			float f補正値Y = -0.5f; //
 			float w = rcClipRect.Width;
 			float h = rcClipRect.Height;
-			float fULeft = ((float)rcClipRect.Left) / ((float)szTextureSize.Width);
-			float fURight = ((float)rcClipRect.Right) / ((float)szTextureSize.Width);
-			float fVTop = ((float)rcClipRect.Top) / ((float)szTextureSize.Height);
-			float fVBottom = ((float)rcClipRect.Bottom) / ((float)szTextureSize.Height);
-			color4.Alpha = ((float)_Transparency) / 255f;
+			float fULeft = rcClipRect.Left / szTextureSize.Width;
+			float fURight = rcClipRect.Right / szTextureSize.Width;
+			float fVTop = rcClipRect.Top / szTextureSize.Height;
+			float fVBottom = rcClipRect.Bottom / szTextureSize.Height;
+
 			int color = color4.ToRgba();
 
 			if (cvTransformedColoredVertexies == null)
@@ -412,13 +398,13 @@ public class CTexture : IDisposable
 			//-----------------
 			float f補正値X = ((rcClipRect.Width % 2) == 0) ? -0.5f : 0f; // -0.5 は座標とピクセルの誤差を吸収するための座標補正値。(MSDN参照)
 			float f補正値Y = ((rcClipRect.Height % 2) == 0) ? -0.5f : 0f; // 3D（回転する）なら補正はいらない。
-			float f中央X = ((float)rcClipRect.Width) / 2f;
-			float f中央Y = ((float)rcClipRect.Height) / 2f;
-			float fULeft = ((float)rcClipRect.Left) / ((float)szTextureSize.Width);
-			float fURight = ((float)rcClipRect.Right) / ((float)szTextureSize.Width);
-			float fVTop = ((float)rcClipRect.Top) / ((float)szTextureSize.Height);
-			float fVBottom = ((float)rcClipRect.Bottom) / ((float)szTextureSize.Height);
-			color4.Alpha = ((float)_Transparency) / 255f;
+			float f中央X = rcClipRect.Width / 2f;
+			float f中央Y = rcClipRect.Height / 2f;
+			float fULeft = rcClipRect.Left / szTextureSize.Width;
+			float fURight = rcClipRect.Right / szTextureSize.Width;
+			float fVTop = rcClipRect.Top / szTextureSize.Height;
+			float fVBottom = rcClipRect.Bottom / szTextureSize.Height;
+
 			int color = color4.ToRgba();
 
 			if (cvPositionColoredVertexies == null)
@@ -456,8 +442,8 @@ public class CTexture : IDisposable
 
 			float n描画領域内X = x + (rcClipRect.Width / 2.0f);
 			float n描画領域内Y = y + (rcClipRect.Height / 2.0f);
-			var vc3移動量 = new Vector3(n描画領域内X - (((float)device.Viewport.Width) / 2f),
-				-(n描画領域内Y - (((float)device.Viewport.Height) / 2f)), 0f);
+			var vc3移動量 = new Vector3(n描画領域内X - (device.Viewport.Width / 2f),
+				-(n描画領域内Y - (device.Viewport.Height / 2f)), 0f);
 
 			var matrix = Matrix.Identity * Matrix.Scaling(vcScaleRatio);
 			matrix *= Matrix.RotationZ(fZAxisRotation);
@@ -489,11 +475,11 @@ public class CTexture : IDisposable
 		float fy = y * fScreenRatio + rcPhysicalScreenDrawingArea.Y - 0.5f; //
 		float w = rcClipRect.Width * vcScaleRatio.X * fScreenRatio;
 		float h = rcClipRect.Height * vcScaleRatio.Y * fScreenRatio;
-		float fULeft = ((float)rcClipRect.Left) / ((float)szTextureSize.Width);
-		float fURight = ((float)rcClipRect.Right) / ((float)szTextureSize.Width);
-		float fVTop = ((float)rcClipRect.Top) / ((float)szTextureSize.Height);
-		float fVBottom = ((float)rcClipRect.Bottom) / ((float)szTextureSize.Height);
-		color4.Alpha = ((float)_Transparency) / 255f;
+		float fULeft = rcClipRect.Left / szTextureSize.Width;
+		float fURight = rcClipRect.Right / szTextureSize.Width;
+		float fVTop = rcClipRect.Top / szTextureSize.Height;
+		float fVBottom = rcClipRect.Bottom / szTextureSize.Height;
+
 		int color = color4.ToRgba();
 
 		if (cvTransformedColoredVertexies == null)
@@ -586,15 +572,20 @@ public class CTexture : IDisposable
 	public void tDraw2DMatrix(Device device, Matrix transformMatrix)
 	{
 		Vector2 size = new(szImageSize.Width, szImageSize.Height);
-		tDraw2DMatrix(device, transformMatrix, size, rcFullImage);
+		tDraw2DMatrix(device, transformMatrix, size, rcFullImage, Color4.White);
 	}
 
 	public void tDraw2DMatrix(Device device, Matrix transformMatrix, Vector2 size)
 	{
-		tDraw2DMatrix(device, transformMatrix, size, rcFullImage);
+		tDraw2DMatrix(device, transformMatrix, size, rcFullImage, Color4.White);
+	}
+
+	public void tDraw2DMatrix(Device device, Matrix transformMatrix, Vector2 size, SharpDX.RectangleF clipRect)
+	{
+		tDraw2DMatrix(device, transformMatrix, size, clipRect, Color4.White);
 	}
 	
-	public void tDraw2DMatrix(Device device, Matrix transformMatrix, Vector2 size, SharpDX.RectangleF clipRect)
+	public void tDraw2DMatrix(Device device, Matrix transformMatrix, Vector2 size, SharpDX.RectangleF clipRect, Color4 color)
 	{
 		if (texture == null) return;
 
@@ -619,9 +610,8 @@ public class CTexture : IDisposable
 		corners[2].Y = size.Y;
 		corners[3].X = size.X;
 		corners[3].Y = size.Y;
-		
-		color4.Alpha = ((float)_Transparency) / 255f;
-		int color = color4.ToRgba();
+
+		int rgba = color.ToRgba();
 
 		for (int i = 0; i < corners.Length; i++)
 		{
@@ -636,7 +626,7 @@ public class CTexture : IDisposable
 				2 => new Vector2(uLeft, vBottom),
 				_ => new Vector2(uRight, vBottom)
 			};
-			vertices[i].Color = color;
+			vertices[i].Color = rgba;
 		}
 
 		//render texture
@@ -647,7 +637,7 @@ public class CTexture : IDisposable
 
 	//todo: cache the vertices on the UI side so this can be more efficient
 	//todo: render 9 slices in one draw call
-	public void tDraw2DMatrixSliced(Device device, Matrix transformMatrix, Vector2 size, SharpDX.RectangleF clipRect, SharpDX.RectangleF sliceRect)
+	public void tDraw2DMatrixSliced(Device device, Matrix transformMatrix, Vector2 size, SharpDX.RectangleF clipRect, Color4 color, SharpDX.RectangleF sliceRect)
 	{
 		if (texture == null) return;
 			
@@ -715,8 +705,7 @@ public class CTexture : IDisposable
 			new RectangleF(uSliceRight, vSliceBottom, uRight - uSliceRight, vBottom - vSliceBottom), // BR
 		};
 
-		color4.Alpha = ((float)_Transparency) / 255f;
-		int color = color4.ToRgba();
+		int rgba = color.ToRgba();
 		
 		//render
 		for (int i = 0; i < regions.Length; i++)
@@ -744,7 +733,7 @@ public class CTexture : IDisposable
 						j == 1 ? new Vector2(uvRegion.Right, uvRegion.Top) :
 						j == 2 ? new Vector2(uvRegion.Left, uvRegion.Bottom) :
 						new Vector2(uvRegion.Right, uvRegion.Bottom),
-					Color = color
+					Color = rgba
 				};
 			}
 
@@ -769,14 +758,14 @@ public class CTexture : IDisposable
 		if (texture == null)
 			return;
 
-		float x = ((float)rcClipRect.Width) / 2f;
-		float y = ((float)rcClipRect.Height) / 2f;
+		float x = rcClipRect.Width / 2f;
+		float y = rcClipRect.Height / 2f;
 		float z = 0.0f;
-		float fULeft = ((float)rcClipRect.Left) / ((float)szTextureSize.Width);
-		float fURight = ((float)rcClipRect.Right) / ((float)szTextureSize.Width);
-		float fVTop = ((float)rcClipRect.Top) / ((float)szTextureSize.Height);
-		float fVBottom = ((float)rcClipRect.Bottom) / ((float)szTextureSize.Height);
-		color4.Alpha = ((float)_Transparency) / 255f;
+		float fULeft = rcClipRect.Left / szTextureSize.Width;
+		float fURight = rcClipRect.Right / szTextureSize.Width;
+		float fVTop = rcClipRect.Top / szTextureSize.Height;
+		float fVBottom = rcClipRect.Bottom / szTextureSize.Height;
+
 		int color = color4.ToRgba();
 
 		if (cvPositionColoredVertexies == null)
@@ -840,11 +829,11 @@ public class CTexture : IDisposable
 		float x = 0.0f;
 		float y = 0.0f;
 		float z = 0.0f;
-		float fULeft = ((float)rcClipRect.Left) / ((float)szTextureSize.Width);
-		float fURight = ((float)rcClipRect.Right) / ((float)szTextureSize.Width);
-		float fVTop = ((float)rcClipRect.Top) / ((float)szTextureSize.Height);
-		float fVBottom = ((float)rcClipRect.Bottom) / ((float)szTextureSize.Height);
-		color4.Alpha = ((float)_Transparency) / 255f;
+		float fULeft = rcClipRect.Left / szTextureSize.Width;
+		float fURight = rcClipRect.Right / szTextureSize.Width;
+		float fVTop = rcClipRect.Top / szTextureSize.Height;
+		float fVBottom = rcClipRect.Bottom / szTextureSize.Height;
+
 		int color = color4.ToRgba();
 
 		if (cvPositionColoredVertexies == null)
@@ -1029,7 +1018,7 @@ public class CTexture : IDisposable
 
 	protected SharpDX.RectangleF rcFullImage; // テクスチャ作ったらあとは不変
 
-	protected Color4 color4 = new(1f, 1f, 1f, 1f); // アルファ以外は不変
+	public Color4 color4 = new(1f, 1f, 1f, 1f); // アルファ以外は不変
 	//-----------------
 
 	#endregion

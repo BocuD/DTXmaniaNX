@@ -156,7 +156,7 @@ public class StatusPane : UIGroup
                     offsetY *= 111.0f / 128.0f; //character is about 111/128 as tall as the texture height
                     matrix *= Matrix.Translation(0, -offsetY * CDTXMania.renderScale, 0);
                 }
-                txLevelNumber.tDraw2DMatrix(matrix, new Vector2(rectangle.Width, rectangle.Height) * characterScale, scaledRect);
+                txLevelNumber.tDraw2DMatrix(matrix, new Vector2(rectangle.Width, rectangle.Height) * characterScale, scaledRect, Color4.White);
             }
 
             characterTranslation *= Matrix.Translation(rectangle.Width * CDTXMania.renderScale * characterScale, 0, 0);

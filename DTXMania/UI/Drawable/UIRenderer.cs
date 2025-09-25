@@ -6,13 +6,12 @@ namespace DTXMania.UI.Drawable;
 public abstract class BaseTexture : IDisposable
 {
     public static BaseTexture None => new NoneTexture();
-    public abstract float transparency { get; set; }
     public abstract float Width { get; }
     public abstract float Height { get; }
     public abstract string name { get; }
         
-    public abstract void tDraw2DMatrix(Matrix transformMatrix, Vector2 size, RectangleF clipRect);
-    public abstract void tDraw2DMatrixSliced(Matrix transformMatrix, Vector2 size, RectangleF clipRect, RectangleF sliceRect);
+    public abstract void tDraw2DMatrix(Matrix transformMatrix, Vector2 size, RectangleF clipRect, Color4 color);
+    public abstract void tDraw2DMatrixSliced(Matrix transformMatrix, Vector2 size, RectangleF clipRect, Color4 color, RectangleF sliceRect);
 
     public virtual void Dispose()
     {
@@ -26,16 +25,15 @@ public abstract class BaseTexture : IDisposable
 
 public class NoneTexture : BaseTexture
 {
-    public override float transparency { get; set; }
     public override float Width => 0;
     public override float Height => 0;
     public override string name => "None";
 
-    public override void tDraw2DMatrix(Matrix transformMatrix, Vector2 size, RectangleF clipRect)
+    public override void tDraw2DMatrix(Matrix transformMatrix, Vector2 size, RectangleF clipRect, Color4 color)
     {
     }
 
-    public override void tDraw2DMatrixSliced(Matrix transformMatrix, Vector2 size, RectangleF clipRect, RectangleF sliceRect)
+    public override void tDraw2DMatrixSliced(Matrix transformMatrix, Vector2 size, RectangleF clipRect, Color4 color, RectangleF sliceRect)
     {
     }
 

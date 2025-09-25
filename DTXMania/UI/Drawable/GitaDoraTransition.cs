@@ -126,8 +126,9 @@ public class GitaDoraTransition : UIGroup
         logo.position.X = t_logo;
         
         float alpha_logo = Remap(t, 0.5f, 0.0f, 0, 1);
+        alpha_logo = Math.Clamp(alpha_logo, 0.0f, 1.0f);
         logo.position.X = t_logo;
-        logo.Texture.transparency = alpha_logo;
+        logo.color.Alpha = alpha_logo;
         
         if (state.delayFrameCounter > 0)
         {

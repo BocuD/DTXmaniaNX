@@ -45,11 +45,11 @@ public class UIImage : UITexture
         switch (renderMode)
         {
             case ERenderMode.Stretched:
-                texture.tDraw2DMatrix(combinedMatrix, size, clipRect);
+                texture.tDraw2DMatrix(combinedMatrix, size, clipRect, color);
                 break;
                 
             case ERenderMode.Sliced:
-                texture.tDraw2DMatrixSliced(combinedMatrix, size, clipRect, sliceRect);
+                texture.tDraw2DMatrixSliced(combinedMatrix, size, clipRect, color, sliceRect);
                 break;
         }
     }
@@ -142,6 +142,8 @@ public class UIImage : UITexture
             //display texture
             if (texture.isValid())
             {
+                Inspector.Inspector.Inspect("Color", ref color);
+                
                 float windowWidth = ImGui.GetWindowWidth();
                 float textureWidth = windowWidth - 64;
 

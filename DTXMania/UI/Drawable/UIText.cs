@@ -110,7 +110,7 @@ public class UIText : UITexture
         UpdateLocalTransformMatrix();
         
         Matrix combinedMatrix = localTransformMatrix * parentMatrix;
-        texture.tDraw2DMatrix(combinedMatrix, size, customClipRect ? overrideClipRect : new RectangleF(0, 0, texture.Width, texture.Height));
+        texture.tDraw2DMatrix(combinedMatrix, size, customClipRect ? overrideClipRect : new RectangleF(0, 0, texture.Width, texture.Height), Color4.White);
     }
     
     private void UpdateDynamicText()

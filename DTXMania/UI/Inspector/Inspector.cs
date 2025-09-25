@@ -97,6 +97,21 @@ public class Inspector
 
         return changed;
     }
+
+    public static bool Inspect(string label, ref Color4 vector)
+    {
+        System.Numerics.Vector4 v = new(vector.Blue, vector.Green, vector.Red, vector.Alpha);
+        
+        bool changed = ImGui.ColorEdit4(label, ref v);
+
+        if (changed)
+        {
+            vector = new Color4(v.Z, v.Y, v.X, v.W);
+        }
+
+        return changed;
+        
+    }
     
     //enum inspect
     public static bool Inspect<T>(string label, ref T value) where T : Enum

@@ -4,6 +4,7 @@ using DTXMania.UI.Drawable;
 using FDK;
 using Hexa.NET.ImGui;
 using SharpDX;
+using Color = SharpDX.Color;
 using RectangleF = SharpDX.RectangleF;
 
 namespace DTXMania.UI;
@@ -11,12 +12,6 @@ namespace DTXMania.UI;
 public class DTXTexture : BaseTexture
 {
     private CTexture texture;
-
-    public override float transparency
-    {
-        get => texture.nTransparency / 255.0f;
-        set => texture.nTransparency = (int)(value * 255.0f);
-    }
 
     public override float Width => texture.szTextureSize.Width;
     public override float Height => texture.szTextureSize.Height;
@@ -54,14 +49,14 @@ public class DTXTexture : BaseTexture
         this.texture = texture;
     }
 
-    public override void tDraw2DMatrix(Matrix transformMatrix, Vector2 size, RectangleF clipRect)
+    public override void tDraw2DMatrix(Matrix transformMatrix, Vector2 size, RectangleF clipRect, Color4 color)
     {
-        texture.tDraw2DMatrix(CDTXMania.app.Device, transformMatrix, size, clipRect);
+        texture.tDraw2DMatrix(CDTXMania.app.Device, transformMatrix, size, clipRect, color);
     }
 
-    public override void tDraw2DMatrixSliced(Matrix transformMatrix, Vector2 size, RectangleF clipRect, RectangleF sliceRect)
+    public override void tDraw2DMatrixSliced(Matrix transformMatrix, Vector2 size, RectangleF clipRect, Color4 color4, RectangleF sliceRect)
     {
-        texture.tDraw2DMatrixSliced(CDTXMania.app.Device, transformMatrix, size, clipRect, sliceRect);
+        texture.tDraw2DMatrixSliced(CDTXMania.app.Device, transformMatrix, size, clipRect, color4, sliceRect);
     }
 
     public override void Dispose()
