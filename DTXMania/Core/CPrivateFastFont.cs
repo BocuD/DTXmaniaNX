@@ -59,16 +59,6 @@ public class CPrivateFastFont : CPrivateFont
 
 
 	#region [ DrawPrivateFontのオーバーロード群 ]
-	/// <summary>
-	/// 文字列を描画したテクスチャを返す
-	/// </summary>
-	/// <param name="drawstr">描画文字列</param>
-	/// <param name="fontColor">描画色</param>
-	/// <returns>描画済テクスチャ</returns>
-	public new Bitmap DrawPrivateFont(string drawstr, Color fontColor)
-	{
-		return DrawPrivateFont(drawstr, DrawMode.Normal, fontColor, Color.White, Color.White, Color.White);
-	}
 
 	/// <summary>
 	/// 文字列を描画したテクスチャを返す
