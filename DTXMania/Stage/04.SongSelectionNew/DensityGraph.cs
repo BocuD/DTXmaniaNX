@@ -2,6 +2,7 @@
 using DTXMania.SongDb;
 using DTXMania.UI;
 using DTXMania.UI.Drawable;
+using FDK;
 using SharpDX;
 
 namespace DTXMania;
@@ -42,6 +43,30 @@ public class DensityGraph : UIGroup
                 break;
         }
     }
+    
+    private CTexture[] txDrumChipsBarLine = new CTexture[9];
+    private Color[] clDrumChipsBarColors =
+    [
+        Color.PaleVioletRed,
+        Color.DeepSkyBlue,
+        Color.HotPink,
+        Color.Yellow,
+        Color.Green,
+        Color.MediumPurple,
+        Color.Red,
+        Color.Orange,
+        Color.DeepSkyBlue
+    ];
+    private CTexture[] txGBChipsBarLine = new CTexture[6];
+    private Color[] clGBChipsBarColors =
+    [
+        Color.Red,
+        Color.Green,
+        Color.DeepSkyBlue,
+        Color.Yellow,
+        Color.HotPink,
+        Color.White
+    ];
 
     public void SelectionChanged(SongNode? song, CScore? chart)
     {
