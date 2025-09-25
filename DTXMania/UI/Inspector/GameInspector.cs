@@ -39,16 +39,15 @@ public class GameStatus
         }
 
         // Smoothed max as before
-        if (deltaTime > smoothedMax)
-        {
-            smoothedMax = MathF.Min(deltaTime, 5000); // cap to avoid extreme values
-        }
-        else
+        if (!(deltaTime > smoothedMax))
         {
             const float decayHalfLife = 1.0f;
             float decayFactor = MathF.Pow(0.5f, deltaTime / decayHalfLife);
             smoothedMax = MathF.Max(smoothedMax * decayFactor, 0.001f);
         }
+
+        smoothedMax = MathF.Min(deltaTime, 1000);
+
 
         index = (index + 1) % BufferSize;
     }
