@@ -58,13 +58,13 @@ This is a fork of DTXManiaNX, with a main focus on improving QOL, as well as cle
 
 ## Building
 
-The current .net SDK target is 6.0 (mainly so we can still support Windows 7, which is used by real hardware GITADORA machines)
-https://dotnet.microsoft.com/en-us/download/dotnet/6.0
+The current .NET SDK target is 8.0 (In the future this will  be lowered to 6.0, mainly so we can still support Windows 7, which is used by real hardware GITADORA machines)
+https://dotnet.microsoft.com/en-us/download/dotnet/8.0
 
-Install the required SDK (Currently .net 6.0)
+Install the required SDK (Currently .NET 8.0)
 
 ```
-winget install Microsoft.DotNet.SDK.6
+winget install Microsoft.DotNet.SDK.8
 ```
 
 Clone the repository
