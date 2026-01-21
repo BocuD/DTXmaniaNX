@@ -9,6 +9,7 @@ on:
     branches:
       - master
       - main
+  workflow_dispatch:
 
 env:
   VERSION_MAJOR_MINOR_PATCH: "2.0.0"
