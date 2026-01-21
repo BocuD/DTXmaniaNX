@@ -11,6 +11,9 @@ on:
       - main
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 env:
   VERSION_MAJOR_MINOR_PATCH: "2.0.0"
 
@@ -88,7 +91,7 @@ jobs:
         tag_name: ${{ steps.version.outputs.tag }}
         name: DTXManiaNX ${{ steps.version.outputs.tag }}
         body: |
-          ## DTXManiaNX Release ${{ steps.version.outputs.tag }}
+          ## DTXManiaNX 2.0 Beta Release ${{ steps.version.outputs.tag }}
           
           Automated build from commit ${{ github.sha }}
           
@@ -103,6 +106,6 @@ jobs:
         files: |
           DTXManiaNX-${{ steps.version.outputs.tag }}.zip
         draft: false
-        prerelease: false
+        prerelease: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
