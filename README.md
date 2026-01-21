@@ -2,6 +2,10 @@
 
 This is a fork of DTXManiaNX, with a main focus on improving QOL, as well as cleaning up and improving the codebase. This fork was initially started from frustration with the lack of QOL features or decent UX in essentially all DTXMania forks, and intends to create a gameplay and menu navigation system more in line with the arcade.
 
+## Installation / Downloads
+
+Visit [releases](https://github.com/BocuD/DTXmaniaNX/releases) for automated builds. Stable builds are not provided at this point.
+
 ## Some of the changes made from upstream DTXManiaNX:
 
 - Newly written UI rendering framework
