@@ -40,21 +40,16 @@ jobs:
       id: version
       run: |
         $date = Get-Date -Format "yyyyMMdd"
-        $version = "V${{ env.VERSION_MAJOR_MINOR_PATCH }}-$date"
+        $version = "V${{ env.VERSION_MAJOR_MINOR_PATCH }}-$date-${{ github.run_number }}"
         echo "tag=$version" >> $env:GITHUB_OUTPUT
         echo "Generated version: $version"
       shell: pwsh
       
     - name: Prepare release artifacts
       run: |
-        # Create a release directory
-        New-Item -ItemType Directory -Force -Path release
-        
-        # Copy the Runtime folder contents (the game executable and dependencies)
-        Copy-Item -Path Runtime\* -Destination release\ -Recurse -Force
-        
-        # Compress the release folder
-        Compress-Archive -Path release\* -DestinationPath DTXManiaNX-${{ steps.version.outputs.tag }}.zip
+        # Copy the Runtime folder contents directly (no intermediate folder)
+        # Compress directly to the final zip name
+        Compress-Archive -Path Runtime\* -DestinationPath DTXManiaNX-${{ steps.version.outputs.tag }}.zip
       shell: pwsh
       
     - name: Upload build artifacts
@@ -76,7 +71,7 @@ jobs:
       id: version
       run: |
         date=$(date +%Y%m%d)
-        version="V${{ env.VERSION_MAJOR_MINOR_PATCH }}-$date"
+        version="V${{ env.VERSION_MAJOR_MINOR_PATCH }}-$date-${{ github.run_number }}"
         echo "tag=$version" >> $GITHUB_OUTPUT
         echo "Generated version: $version"
         
