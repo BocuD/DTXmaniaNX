@@ -15,6 +15,7 @@ internal class CItemBase
 	{
 		Normal,
 		Folder,
+		Return,
 		Other
 	}
 
