@@ -1,0 +1,106 @@
+name: CI Build and Release
+
+on:
+  push:
+    branches:
+      - master
+      - main
+  pull_request:
+    branches:
+      - master
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  VERSION_MAJOR_MINOR_PATCH: "2.0.0"
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup .NET SDK 8.0
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+        
+    - name: Restore dependencies
+      run: dotnet restore DTXMania.sln
+      
+    - name: Build Release
+      run: dotnet build DTXMania.sln -c Release --no-restore
+      
+    - name: Generate version tag
+      id: version
+      run: |
+        $date = Get-Date -Format "yyyyMMdd"
+        $version = "V${{ env.VERSION_MAJOR_MINOR_PATCH }}-$date-${{ github.run_number }}"
+        echo "tag=$version" >> $env:GITHUB_OUTPUT
+        echo "Generated version: $version"
+      shell: pwsh
+      
+    - name: Prepare release artifacts
+      run: |
+        # Copy the Runtime folder contents directly (no intermediate folder)
+        # Compress directly to the final zip name
+        Compress-Archive -Path Runtime\* -DestinationPath DTXManiaNX-${{ steps.version.outputs.tag }}.zip
+      shell: pwsh
+      
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: DTXManiaNX-${{ steps.version.outputs.tag }}
+        path: DTXManiaNX-${{ steps.version.outputs.tag }}.zip
+        
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Generate version tag
+      id: version
+      run: |
+        date=$(date +%Y%m%d)
+        version="V${{ env.VERSION_MAJOR_MINOR_PATCH }}-$date-${{ github.run_number }}"
+        echo "tag=$version" >> $GITHUB_OUTPUT
+        echo "Generated version: $version"
+        
+    - name: Download artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: DTXManiaNX-${{ steps.version.outputs.tag }}
+        
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ steps.version.outputs.tag }}
+        name: DTXManiaNX ${{ steps.version.outputs.tag }}
+        body: |
+          ## DTXManiaNX 2.0 Beta Release ${{ steps.version.outputs.tag }}
+          
+          Automated build from commit ${{ github.sha }}
+          
+          ### Installation
+          1. Download and extract the zip file
+          2. Install [.NET 8.0 Runtime](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) if not already installed
+          3. Install [DirectX End-User Runtime](https://www.microsoft.com/en-us/download/details.aspx?displaylang=en&id=35)
+          4. Run DTXManiaNX.exe
+          
+          ### Changes
+          See commit history for details: ${{ github.event.head_commit.url }}
+        files: |
+          DTXManiaNX-${{ steps.version.outputs.tag }}.zip
+        draft: false
+        prerelease: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
