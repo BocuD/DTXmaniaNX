@@ -31,20 +31,13 @@ internal partial class CActConfigList : CActivity
     }
 
     public bool bIsFocusingParameter => bFocusIsOnElementValue; // #32059 2013.9.17 yyagi
-
-    //Keep these temporarily
-    private CItemBase iSystemReturnToMenu;
-    private CItemBase iDrumsReturnToMenu;
-    private CItemBase iGuitarReturnToMenu;
-    private CItemBase iBassReturnToMenu;
-
+    
     public bool bCurrentlySelectedItemIsReturnToMenu
     {
         get
         {
             CItemBase currentItem = listItems[nCurrentSelection];
-            return currentItem == iSystemReturnToMenu || currentItem == iDrumsReturnToMenu ||
-                   currentItem == iGuitarReturnToMenu || currentItem == iBassReturnToMenu;
+            return currentItem.ePanelType == CItemBase.EPanelType.Return;
         }
     }
 
@@ -521,6 +514,7 @@ internal partial class CActConfigList : CActivity
                 break;
 
             case CItemBase.EPanelType.Other:
+            case CItemBase.EPanelType.Return:
                 txItemBoxOther?.tDraw2DMatrix(CDTXMania.app.Device, finalMatrix);
                 break;
         }
@@ -765,6 +759,17 @@ internal partial class CActConfigList : CActivity
         {
             txToastMessage = null;
         }
+    }
+
+    private void tAddReturnToMenuItem(Action? action = null)
+    {
+        var returnToMenuButton = new CItemBase("<< Back", CItemBase.EPanelType.Return,
+            "前のメニューに戻ります。",
+            "Return to the previous menu.") 
+        {
+            action = action
+        };
+        listItems.Add(returnToMenuButton);
     }
 
     #endregion

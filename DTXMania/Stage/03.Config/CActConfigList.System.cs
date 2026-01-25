@@ -119,10 +119,7 @@ internal partial class CActConfigList
         tRecordToConfigIni();
         listItems.Clear();
 
-        iSystemReturnToMenu = new CItemBase("<< Return To Menu", CItemBase.EPanelType.Other,
-            "左側のメニューに戻ります。",
-            "Return to left menu.");
-        listItems.Add(iSystemReturnToMenu);
+        tAddReturnToMenuItem();
         
         CItemBase iSystemGoToGraphics = new("Graphics Options", CItemBase.EPanelType.Folder,
             "システムのグラフィック設定に関する項目を設定します。",

@@ -13,10 +13,7 @@ internal partial class CActConfigList
         tRecordToConfigIni();
         listItems.Clear();
             
-        iBassReturnToMenu = new CItemBase("<< Return To Menu", CItemBase.EPanelType.Other,
-            "左側のメニューに戻ります。",
-            "Return to left menu.");
-        listItems.Add(iBassReturnToMenu);
+        tAddReturnToMenuItem();
 
         CItemThreeState iBassAutoPlayAll = new("AutoPlay (All)", CItemThreeState.EState.UNDEFINED,
             "全ネック/ピックの自動演奏の ON/OFF を\n" +

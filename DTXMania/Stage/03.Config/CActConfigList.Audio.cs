@@ -252,13 +252,7 @@ internal partial class CActConfigList
             () => CDTXMania.ConfigIni.nASIODevice = iSystemASIODevice.nCurrentlySelectedIndex);
         listItems.Add(iSystemASIODevice);
         
-        iSystemReturnToMenu = new CItemBase("<< Return To Menu", CItemBase.EPanelType.Other,
-            "左側のメニューに戻ります。",
-            "Return to left menu.")
-        {
-            action = tSetupItemList_System
-        };
-        listItems.Add(iSystemReturnToMenu);
+        tAddReturnToMenuItem(tSetupItemList_System);
 
         CacheCurrentSoundDevices();
 

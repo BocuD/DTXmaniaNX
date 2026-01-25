@@ -13,10 +13,7 @@ internal partial class CActConfigList
         tRecordToConfigIni();
         listItems.Clear();
             
-        iDrumsReturnToMenu = new CItemBase("<< Return To Menu", CItemBase.EPanelType.Other,
-            "左側のメニューに戻ります。",
-            "Return to left menu.");
-        listItems.Add(iDrumsReturnToMenu);
+        tAddReturnToMenuItem();
             
         //----------AutoPlay----------
         CItemThreeState iDrumsAutoPlayAll = new("AutoPlay (All)", CItemThreeState.EState.UNDEFINED,
