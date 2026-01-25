@@ -1,11 +1,10 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
 using DTXMania.Core;
 using DTXMania.SongDb;
 using DTXMania.UI.Item;
 using FDK;
-using SampleFramework;
 
 namespace DTXMania;
 

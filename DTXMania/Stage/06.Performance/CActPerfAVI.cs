@@ -1,4 +1,4 @@
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using System.Drawing;
 using System.Diagnostics;
 using DTXMania.Core;
@@ -77,7 +77,7 @@ internal class CActPerfAVI : CActivity
                     frameheight = (uint)this.rAVI.avi.nフレーム高さ;
                     if( tx描画用 == null )
                     {
-                        tx描画用 = new CTexture( CDTXMania.app.Device, (int)framewidth, (int)frameheight, CDTXMania.app.GraphicsDeviceManager.CurrentSettings.BackBufferFormat, Pool.Managed );
+                        tx描画用 = new CTexture( CDTXMania.app.Device, (int)framewidth, (int)frameheight, CDTXMania.app.PresentParameters.BackBufferFormat, Pool.Managed );
                     }
 
                     if( fClipアスペクト比 < 1.77f )
@@ -178,7 +178,7 @@ internal class CActPerfAVI : CActivity
                     frameheight = this.rAVI.avi.nフレーム高さ;
                     if( tx描画用 == null )
                     {
-                        tx描画用 = new CTexture( CDTXMania.app.Device, (int)framewidth, (int)frameheight, CDTXMania.app.GraphicsDeviceManager.CurrentSettings.BackBufferFormat, Pool.Managed );
+                        tx描画用 = new CTexture( CDTXMania.app.Device, (int)framewidth, (int)frameheight, CDTXMania.app.PresentParameters.BackBufferFormat, Pool.Managed );
                     }
                     if( fClipアスペクト比 < 1.77f )
                     {
@@ -374,7 +374,7 @@ internal class CActPerfAVI : CActivity
             {
                 txクリップパネル = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_ClipPanel.png"));
             }
-            txDShow汎用 = new CTexture(CDTXMania.app.Device, 1280, 720, CDTXMania.app.GraphicsDeviceManager.CurrentSettings.BackBufferFormat, Pool.Managed);
+            txDShow汎用 = new CTexture(CDTXMania.app.Device, 1280, 720, CDTXMania.app.PresentParameters.BackBufferFormat, Pool.Managed);
 
             for (int i = 0; i < 1; i++)
             {

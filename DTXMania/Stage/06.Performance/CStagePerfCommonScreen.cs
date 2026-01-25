@@ -1,4 +1,4 @@
-using DiscordRPC;
+﻿using DiscordRPC;
 using System.Runtime.InteropServices;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -4783,11 +4783,11 @@ internal abstract class CStagePerfCommonScreen : CStage
                     txBackground = null;
                     return;
                 }
-                Bitmap bitmap3 = new Bitmap(SampleFramework.GameFramebufferSize.Width, SampleFramework.GameFramebufferSize.Height);
+                Bitmap bitmap3 = new Bitmap(GameFramebufferSize.Width, GameFramebufferSize.Height);
                 Graphics graphics = Graphics.FromImage(bitmap3);
-                for (int i = 0; i < SampleFramework.GameFramebufferSize.Height; i += bitmap2.Size.Height)
+                for (int i = 0; i < GameFramebufferSize.Height; i += bitmap2.Size.Height)
                 {
-                    for (int j = 0; j < SampleFramework.GameFramebufferSize.Width; j += bitmap2.Size.Width)
+                    for (int j = 0; j < GameFramebufferSize.Width; j += bitmap2.Size.Width)
                     {
                         graphics.DrawImage(bitmap2, j, i, bitmap2.Width, bitmap2.Height);
                     }
@@ -4805,7 +4805,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                 ColorMatrix newColorMatrix = matrix2;
                 ImageAttributes imageAttr = new ImageAttributes();
                 imageAttr.SetColorMatrix(newColorMatrix);
-                graphics.DrawImage(bitmap3, new Rectangle(0, 0, SampleFramework.GameFramebufferSize.Width, SampleFramework.GameFramebufferSize.Height), 0, 0, SampleFramework.GameFramebufferSize.Width, SampleFramework.GameFramebufferSize.Height, GraphicsUnit.Pixel, imageAttr);
+                graphics.DrawImage(bitmap3, new Rectangle(0, 0, GameFramebufferSize.Width, GameFramebufferSize.Height), 0, 0, GameFramebufferSize.Width, GameFramebufferSize.Height, GraphicsUnit.Pixel, imageAttr);
                 imageAttr.Dispose();
                 graphics.DrawImage(bitmap3, bgrect, bgrect.X, bgrect.Y, bgrect.Width, bgrect.Height, GraphicsUnit.Pixel);
                 graphics.Dispose();

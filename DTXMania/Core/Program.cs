@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -131,8 +131,24 @@ internal class Program
 					try
 #endif
 				{
-					using( var mania = new CDTXMania() )
-						mania.Run();
+					bool useTriangleTest = false;
+					string[] commandLineArgs = Environment.GetCommandLineArgs();
+					for (int i = 0; i < commandLineArgs.Length; i++)
+					{
+						string arg = commandLineArgs[i];
+						if (string.Equals(arg, "--triangle-test", StringComparison.OrdinalIgnoreCase) ||
+						    string.Equals(arg, "-tri", StringComparison.OrdinalIgnoreCase))
+						{
+							useTriangleTest = true;
+							break;
+						}
+					}
+
+					using (var context = new GameContext("DTXManiaNX", 1280, 720))
+					{
+						using IGameClient game = new GameSwitcher(context, useTriangleTest);
+						context.Run(game);
+					}
 
 					Trace.WriteLine( "" );
 					Trace.WriteLine( "遊んでくれてありがとう！" );

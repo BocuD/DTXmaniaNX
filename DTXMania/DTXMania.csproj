@@ -38,6 +38,8 @@
         <AutoGen>True</AutoGen>
         <DependentUpon>Resources.resx</DependentUpon>
       </Compile>
+      <Compile Remove="UI\Drawable\UIFont.cs" />
+      <Compile Remove="UI\Drawable\UINewText.cs" />
     </ItemGroup>
 
     <ItemGroup>

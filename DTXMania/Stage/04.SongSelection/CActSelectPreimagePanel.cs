@@ -57,7 +57,7 @@ internal class CActSelectPreimagePanel : CActivity
 			txパネル本体 = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\5_preimage panel.png" ), false );
 			txプレビュー画像 = null;
 			txプレビュー画像がないときの画像 = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\5_preimage default.png" ), false );
-			sfAVI画像 = Surface.CreateOffscreenPlain( CDTXMania.app.Device, 0xcc, 0x10d, CDTXMania.app.GraphicsDeviceManager.CurrentSettings.BackBufferFormat, Pool.SystemMemory );
+			sfAVI画像 = Surface.CreateOffscreenPlain( CDTXMania.app.Device, 0xcc, 0x10d, CDTXMania.app.PresentParameters.BackBufferFormat, Pool.SystemMemory );
 			nAVI再生開始時刻 = -1L;
 			n前回描画したフレーム番号 = -1;
 			b動画フレームを作成した = false;
@@ -321,12 +321,12 @@ internal class CActSelectPreimagePanel : CActivity
 			try
 			{
 				image = new Bitmap( str現在のファイル名 );
-				bitmap2 = new Bitmap(SampleFramework.GameFramebufferSize.Width, SampleFramework.GameFramebufferSize.Height);
+				bitmap2 = new Bitmap(GameFramebufferSize.Width, GameFramebufferSize.Height);
 				Graphics graphics = Graphics.FromImage( bitmap2 );
 				int x = 0;
-				for (int i = 0; i < SampleFramework.GameFramebufferSize.Height; i += image.Height)
+				for (int i = 0; i < GameFramebufferSize.Height; i += image.Height)
 				{
-					for (x = 0; x < SampleFramework.GameFramebufferSize.Width; x += image.Width)
+					for (x = 0; x < GameFramebufferSize.Width; x += image.Width)
 					{
 						graphics.DrawImage( image, x, i, image.Width, image.Height );
 					}

@@ -743,6 +743,7 @@ public class SongDb
 					{
 						Trace.TraceError("An error occurred while reading the song data file: " + path);
 						Trace.TraceError("" + exception.Message);
+						Trace.TraceError(exception.StackTrace);
 						node.chartCount--;
 						tempCharts--;
 						continue;

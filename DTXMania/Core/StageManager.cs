@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using DTXMania.UI.Drawable;
 using FDK;
 
@@ -266,7 +266,7 @@ internal class StageManager
                         rCurrentStage.OnDeactivate();
                         if (CDTXMania.bCompactMode && !CDTXMania.DTXVmode.Enabled && !CDTXMania.DTX2WAVmode.Enabled)
                         {
-                            CDTXMania.app.Window.Close();
+                            CDTXMania.app.RequestExit();
                         }
                         else if (nUpdateAndDrawReturnValue == (int)EPerfScreenReturnValue.Restart)
                         {
@@ -437,7 +437,7 @@ internal class StageManager
                         CDTXMania.DTX.OnDeactivate();
                         if (CDTXMania.bCompactMode)
                         {
-                            CDTXMania.app.Window.Close();
+                            CDTXMania.app.RequestExit();
                         }
                         else
                         {
@@ -593,7 +593,7 @@ internal class StageManager
                     }
                     else
                     {
-                        CDTXMania.app.Window.Close();
+                        CDTXMania.app.RequestExit();
                     }
                 }
 
@@ -626,7 +626,7 @@ internal class StageManager
                 //-----------------------------
                 if (nUpdateAndDrawReturnValue != 0)
                 {
-                    CDTXMania.app.Exit();
+                    CDTXMania.app.RequestExit();
                 }
 
                 //-----------------------------

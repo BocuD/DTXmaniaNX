@@ -472,7 +472,6 @@ internal class CActSearchBox : CActivity
 
 	private void t入力を確定して終了()
 	{
-		CDTXMania.app.Window.ActiveControl = null;
 		str確定文字列 = str入力中文字列;
 		str入力中文字列 = "";
 		nカーソル位置 = 0;

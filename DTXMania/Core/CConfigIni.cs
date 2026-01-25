@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 using FDK;
@@ -1012,8 +1012,8 @@ internal class CConfigIni
 		nInitialWindowXPosition = 0; // #30675 2013.02.04 ikanick add
 		nInitialWindowYPosition = 0;
 		//this.bDirectShowMode = true;
-		nWindowWidth = SampleFramework.GameFramebufferSize.Width;			// #23510 2010.10.31 yyagi add
-		nWindowHeight = SampleFramework.GameFramebufferSize.Height;			// 
+		nWindowWidth = GameFramebufferSize.Width;			// #23510 2010.10.31 yyagi add
+		nWindowHeight = GameFramebufferSize.Height;			// 
 		nMovieMode = 1;
 		nMovieAlpha = 0;
 		nJudgeLine.Drums = 0;
@@ -2522,7 +2522,7 @@ internal class CConfigIni
 										nWindowWidth = CConversion.nGetNumberIfInRange(str4, 1, 65535, nWindowWidth);
 										if (nWindowWidth <= 0)
 										{
-											nWindowWidth = SampleFramework.GameFramebufferSize.Width;
+											nWindowWidth = GameFramebufferSize.Width;
 										}
 									}
 									else if (str3.Equals("WindowHeight"))		// #23510 2010.10.31 yyagi add
@@ -2530,7 +2530,7 @@ internal class CConfigIni
 										nWindowHeight = CConversion.nGetNumberIfInRange(str4, 1, 65535, nWindowHeight);
 										if (nWindowHeight <= 0)
 										{
-											nWindowHeight = SampleFramework.GameFramebufferSize.Height;
+											nWindowHeight = GameFramebufferSize.Height;
 										}
 									}
 									else if (str3.Equals("WindowX"))		// #30675 2013.02.04 ikanick add

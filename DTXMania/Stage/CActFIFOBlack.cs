@@ -1,4 +1,4 @@
-﻿using DTXMania.Core;
+using DTXMania.Core;
 using FDK;
 
 namespace DTXMania;
@@ -52,9 +52,9 @@ internal class CActFIFOBlack : CActivity
 		if (tx黒タイル64x64 != null)
 		{
 			tx黒タイル64x64.nTransparency = ( mode == EFIFOMode.FadeIn ) ? ( ( ( 100 - counter.nCurrentValue ) * 0xff ) / 100 ) : ( ( counter.nCurrentValue * 0xff ) / 100 );
-			for (int i = 0; i <= (SampleFramework.GameFramebufferSize.Width / 64); i++)		// #23510 2010.10.31 yyagi: change "clientSize.Width" to "640" to fix FIFO drawing size
+			for (int i = 0; i <= (GameFramebufferSize.Width / 64); i++)		// #23510 2010.10.31 yyagi: change "clientSize.Width" to "640" to fix FIFO drawing size
 			{
-				for (int j = 0; j <= (SampleFramework.GameFramebufferSize.Height / 64); j++)	// #23510 2010.10.31 yyagi: change "clientSize.Height" to "480" to fix FIFO drawing size
+				for (int j = 0; j <= (GameFramebufferSize.Height / 64); j++)	// #23510 2010.10.31 yyagi: change "clientSize.Height" to "480" to fix FIFO drawing size
 				{
 					tx黒タイル64x64.tDraw2D( CDTXMania.app.Device, i * 64, j * 64 );
 				}

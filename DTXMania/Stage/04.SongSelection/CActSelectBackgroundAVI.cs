@@ -2,7 +2,6 @@
 using DTXMania.Core;
 using SharpDX.Direct3D9;
 using FDK;
-using SampleFramework;
 
 namespace DTXMania;
 
@@ -54,7 +53,7 @@ internal class CActSelectBackgroundAVI : CActivity
                 frameheight = (uint)this.rAVI.avi.nフレーム高さ;
                 if (tx描画用 == null)
                 {
-                    tx描画用 = new CTexture(CDTXMania.app.Device, (int)framewidth, (int)frameheight, CDTXMania.app.GraphicsDeviceManager.CurrentSettings.BackBufferFormat, Pool.Managed);
+                    tx描画用 = new CTexture(CDTXMania.app.Device, (int)framewidth, (int)frameheight, CDTXMania.app.PresentParameters.BackBufferFormat, Pool.Managed);
                 }
 
                 if (fClipアスペクト比 < 1.77f)

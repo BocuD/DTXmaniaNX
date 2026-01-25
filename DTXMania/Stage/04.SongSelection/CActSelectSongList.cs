@@ -1,4 +1,4 @@
-﻿using System.Runtime.InteropServices;
+using System.Runtime.InteropServices;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Diagnostics;
@@ -1389,7 +1389,7 @@ internal class CActSelectSongList : CActivity
 
 	private void tDrawBar( int x, int y, EBarType type, bool b選択曲)  // tバーの描画
 	{
-		if( x >= SampleFramework.GameFramebufferSize.Width || y >= SampleFramework.GameFramebufferSize.Height )
+		if( x >= GameFramebufferSize.Width || y >= GameFramebufferSize.Height )
 			return;
 
 		if (b選択曲)

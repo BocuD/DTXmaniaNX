@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Drawing;
 using System.Reflection;
 using System.Runtime;
@@ -10,7 +10,6 @@ using FDK;
 using Hexa.NET.ImGui;
 using Hexa.NET.ImGui.Backends.D3D9;
 using Hexa.NET.ImGuizmo;
-using SampleFramework;
 using SharpDX;
 using SharpDX.Direct3D9;
 using ImGui = Hexa.NET.ImGui.ImGui;
@@ -32,8 +31,9 @@ using RectangleF = SharpDX.RectangleF;
 
 namespace DTXMania.Core;
 
-internal class CDTXMania : Game
+internal sealed class CDTXMania : IGameClient
 {
+    private readonly GameContext context;
     // プロパティ
     //these get set when initializing the game
     public static string VERSION_DISPLAY; // = "DTX:NX:A:A:2024051900";
@@ -184,9 +184,11 @@ internal class CDTXMania : Game
     public bool changeVSyncModeOnNextFrame { get; set; }
     public bool changeFullscreenModeOnNextFrame { get; set; }
 
-    private ImGuiContextPtr context;
+    private ImGuiContextPtr imguiContext;
+    private bool imguiReady;
 
-    public Device Device => GraphicsDeviceManager.Direct3D9.Device;
+    public Device Device => context.Device;
+    public PresentParameters PresentParameters => context.PresentParameters;
 
     private static Size currentClientSize // #23510 2010.10.27 add yyagi to keep current window size
     {
@@ -195,7 +197,7 @@ internal class CDTXMania : Game
     }
 
     //		public static CTimer ct;
-    public IntPtr WindowHandle => Window.Handle; // 2012.10.24 yyagi; to add ASIO support
+    public IntPtr WindowHandle => context.WindowHandle; // 2012.10.24 yyagi; to add ASIO support
     public static CDTXVmode DTXVmode; // #28821 2014.1.23 yyagi
     public static CDTX2WAVmode DTX2WAVmode;
 
@@ -213,6 +215,7 @@ internal class CDTXMania : Game
     private Surface gameRenderTargetSurface;
     private Surface mainRenderTarget;
     public static bool renderGameToSurface = false;
+    private bool contentLoaded;
     
     //new
     public static UIGroup persistentUIGroup { get; private set; } = new("PersistentUIGroup");
@@ -220,8 +223,9 @@ internal class CDTXMania : Game
     public static LogWindow logWindow { get; private set; }
 
     // Constructor
-    public CDTXMania()
+    public CDTXMania(GameContext context)
     {
+        this.context = context;
         app = this;
 
         void SafeInitialize(string name, Action action)
@@ -276,9 +280,6 @@ internal class CDTXMania : Game
                 //ConfigIni = new CConfigIni();	// 存在してなければ新規生成
             }
         }
-
-        Window.EnableSystemMenu = ConfigIni.bIsEnabledSystemMenu; // #28200 2011.5.1 yyagi
-        // 2012.8.22 Config.iniが無いときに初期値が適用されるよう、この設定行をifブロック外に移動
 
         //---------------------
 
@@ -339,7 +340,8 @@ internal class CDTXMania : Game
         strCompactModeFile = "";
         string appName = "DTXManiaNX";
         string[] commandLineArgs = Environment.GetCommandLineArgs();
-        if ((commandLineArgs != null) && (commandLineArgs.Length > 1))
+        
+        if (commandLineArgs is { Length: > 1 } && commandLineArgs[1] != "-tri" && commandLineArgs[1] != "--triangle-test")
         {
             bCompactMode = true;
             string arg = "";
@@ -597,34 +599,16 @@ internal class CDTXMania : Game
 
         //---------------------
         strWindowTitle = appName + " " + VERSION;
-        Window.StartPosition = FormStartPosition.Manual; // #30675 2013.02.04 ikanick add
-        Window.Location = new Point(ConfigIni.nInitialWindowXPosition, ConfigIni.nInitialWindowYPosition); // #30675 2013.02.04 ikanick add
-
-        Window.Text = strWindowTitle;
-        Window.ClientSize = new Size(ConfigIni.nWindowWidth, ConfigIni.nWindowHeight); // #34510 yyagi 2010.10.31 to change window size got from Config.ini
+        context.SetWindowPosition(ConfigIni.nInitialWindowXPosition, ConfigIni.nInitialWindowYPosition);
+        context.SetWindowTitle(strWindowTitle);
+        context.SetClientSize(ConfigIni.nWindowWidth, ConfigIni.nWindowHeight); // #34510 yyagi 2010.10.31 to change window size got from Config.ini
         if (!ConfigIni.bFullScreenExclusive ||
             ConfigIni.bFullScreenMode) // #23510 2010.11.02 yyagi: add; to recover window size in case bootup with fullscreen mode
         {
             currentClientSize = new Size(ConfigIni.nWindowWidth, ConfigIni.nWindowHeight);
         }
-
-        Window.MaximizeBox = true; // #23510 2010.11.04 yyagi: to support maximizing window
-        Window.FormBorderStyle = FormBorderStyle.Sizable; // #23510 2010.10.27 yyagi: changed from FixedDialog to Sizable, to support window resize
-        Window.ShowIcon = true;
-        base.Window.Icon = Properties.Resources.dtx;
-        Window.KeyDown += Window_KeyDown;
-        Window.KeyUp += Window_KeyUp;
-        Window.KeyPress += Window_KeyPress;
-        Window.MouseMove += Window_MouseMove;
-        Window.MouseDown += Window_MouseDown;
-        Window.MouseUp += Window_MouseUp;
-        Window.MouseWheel += Window_MouseWheel;
-        Window.MouseDoubleClick += Window_MouseDoubleClick; // #23510 2010.11.13 yyagi: to go fullscreen mode
-        Window.ResizeEnd += Window_ResizeEnd; // #23510 2010.11.20 yyagi: to set resized window size in Config.ini
-        Window.ApplicationActivated += Window_ApplicationActivated;
-        Window.ApplicationDeactivated += Window_ApplicationDeactivated;
-        //Add CIMEHook
-        Window.Controls.Add(cIMEHook = new CIMEHook());
+        context.SetBorderless(false);
+        context.Show();
         //---------------------
 
         #endregion
@@ -632,40 +616,23 @@ internal class CDTXMania : Game
         //Init DX9
         SafeInitialize("DX9", () =>
         {
-            DeviceSettings settings = new();
-            if (ConfigIni.bFullScreenExclusive)
-            {
-                settings.Windowed = ConfigIni.bWindowMode;
-            }
-            else
-            {
-                settings.Windowed = true; // #30666 2013.2.2 yyagi: Fullscreenmode is "Maximized window" mode
-            }
-
-            settings.BackBufferWidth = GameWindowSize.Width;
-            settings.BackBufferHeight = GameWindowSize.Height;
-
-            settings.EnableVSync = ConfigIni.bVerticalSyncWait;
+            bool windowed = !ConfigIni.bFullScreenExclusive || ConfigIni.bWindowMode;
+            int backBufferWidth = GameWindowSize.Width;
+            int backBufferHeight = GameWindowSize.Height;
 
             if (ConfigIni.bWindowMode)
             {
-                settings.BackBufferWidth = ConfigIni.nWindowWidth;
-                settings.BackBufferHeight = ConfigIni.nWindowHeight;
+                backBufferWidth = ConfigIni.nWindowWidth;
+                backBufferHeight = ConfigIni.nWindowHeight;
             }
-            else
+            else if (ConfigIni.bFullScreenExclusive)
             {
-                if (ConfigIni.bFullScreenExclusive)
-                {
-                    settings.BackBufferWidth = Screen.PrimaryScreen.Bounds.Width;
-                    settings.BackBufferHeight = Screen.PrimaryScreen.Bounds.Height;
-                }
+                backBufferWidth = Screen.PrimaryScreen.Bounds.Width;
+                backBufferHeight = Screen.PrimaryScreen.Bounds.Height;
             }
 
-            GraphicsDeviceManager.ChangeDevice(settings);
-            
-            IsFixedTimeStep = false;
-            Window.ClientSize = new Size(ConfigIni.nWindowWidth, ConfigIni.nWindowHeight);
-            InactiveSleepTime = TimeSpan.FromMilliseconds((float)(ConfigIni.n非フォーカス時スリープms));
+            context.ResetDevice(windowed, backBufferWidth, backBufferHeight, ConfigIni.bVerticalSyncWait);
+            context.SetClientSize(ConfigIni.nWindowWidth, ConfigIni.nWindowHeight);
 
             // #23568 2010.11.4 ikanick changed ( 1 -> ConfigIni )
             if (!ConfigIni.bFullScreenExclusive)
@@ -694,7 +661,7 @@ internal class CDTXMania : Game
         SafeInitialize("SongDb", () =>
         {
             SongDb = new SongDb.SongDb();
-            SongDb.StartScan();
+            //SongDb.StartScan();
         });
 
         SafeInitialize("FFmpeg", FFmpegCore.Initialize);
@@ -711,7 +678,7 @@ internal class CDTXMania : Game
 
         SafeInitialize("Input Manager (DirectInput, MIDI)", () =>
         {
-            InputManager = new CInputManager(Window.Handle);
+            InputManager = new CInputManager(context.WindowHandle);
             foreach (IInputDevice device in InputManager.listInputDevices)
             {
                 if (device.eInputDeviceType == EInputDeviceType.Joystick &&
@@ -752,7 +719,7 @@ internal class CDTXMania : Game
                 _ => ESoundDeviceType.Unknown
             };
 
-            SoundManager = new CSoundManager(Window.Handle,
+            SoundManager = new CSoundManager(context.WindowHandle,
                 soundDeviceType,
                 ConfigIni.nWASAPIBufferSizeMs,
                 ConfigIni.bEventDrivenWASAPI,
@@ -832,38 +799,22 @@ internal class CDTXMania : Game
         {
             if (ConfigIni.bFullScreenMode) // #23510 2010.10.27 yyagi: backup current window size before going fullscreen mode
             {
-                currentClientSize = Window.ClientSize;
-                ConfigIni.nWindowWidth = Window.ClientSize.Width;
-                ConfigIni.nWindowHeight = Window.ClientSize.Height;
+                currentClientSize = context.GetClientSize();
+                ConfigIni.nWindowWidth = currentClientSize.Width;
+                ConfigIni.nWindowHeight = currentClientSize.Height;
                 //FDK.CTaskBar.ShowTaskBar( false );
             }
 
             if (ConfigIni.bFullScreenExclusive)
             {
                 // Full screen uses DirectX Exclusive mode
-                DeviceSettings settings = GraphicsDeviceManager.CurrentSettings.Clone();
-                if (ConfigIni.bWindowMode != settings.Windowed)
+                bool windowed = ConfigIni.bWindowMode;
+                int width = windowed ? currentClientSize.Width : Screen.PrimaryScreen.Bounds.Width;
+                int height = windowed ? currentClientSize.Height : Screen.PrimaryScreen.Bounds.Height;
+                context.ResetDevice(windowed, width, height, ConfigIni.bVerticalSyncWait);
+                if (windowed) // #23510 2010.10.27 yyagi: to resume window size from backuped value
                 {
-                    settings.Windowed = ConfigIni.bWindowMode;
-                    
-                    //get monitor resolution
-                    if (ConfigIni.bWindowMode)
-                    {
-                        // #30666 2013.2.2 yyagi: Fullscreen mode is "Maximized window" mode
-                        settings.BackBufferWidth = currentClientSize.Width;
-                        settings.BackBufferHeight = currentClientSize.Height;
-                    }
-                    else
-                    {
-                        settings.BackBufferWidth = Screen.PrimaryScreen.Bounds.Width;
-                        settings.BackBufferHeight = Screen.PrimaryScreen.Bounds.Height;
-                    }
-                    
-                    GraphicsDeviceManager.ChangeDevice(settings);
-                    if (ConfigIni.bWindowMode) // #23510 2010.10.27 yyagi: to resume window size from backuped value
-                    {
-                        Window.ClientSize = new Size(currentClientSize.Width, currentClientSize.Height);
-                    }
+                    context.SetClientSize(currentClientSize.Width, currentClientSize.Height);
                 }
             }
             else
@@ -874,17 +825,15 @@ internal class CDTXMania : Game
                     // #30666 2013.2.2 yyagi Don't use Fullscreen mode becasue NVIDIA GeForce is
                     // tend to delay drawing on Fullscreen mode. So DTXMania uses Maximized window
                     // in spite of using fullscreen mode.
-                    app.Window.WindowState = FormWindowState.Normal;
-                    app.Window.FormBorderStyle = FormBorderStyle.Sizable;
-                    app.Window.WindowState = FormWindowState.Normal;
-                    Window.ClientSize = new Size(currentClientSize.Width, currentClientSize.Height);
+                    context.SetBorderless(false);
+                    context.SetWindowState(GameContext.WindowState.Normal);
+                    context.SetClientSize(currentClientSize.Width, currentClientSize.Height);
                     //FDK.CTaskBar.ShowTaskBar( true );
                 }
                 else
                 {
-                    app.Window.WindowState = FormWindowState.Normal;
-                    app.Window.FormBorderStyle = FormBorderStyle.None;
-                    app.Window.WindowState = FormWindowState.Maximized;
+                    context.SetBorderless(true);
+                    context.SetWindowState(GameContext.WindowState.Maximized);
                 }
 
                 UpdateCursorState();
@@ -925,7 +874,7 @@ internal class CDTXMania : Game
     #endregion
 
     // Game 実装
-    protected override void Initialize()
+    public void Initialize()
     {
         if (mainActivities != null)
         {
@@ -939,8 +888,14 @@ internal class CDTXMania : Game
     public static float physicalRenderScale = 1.0f;
     public static float renderScale = 1.0f;
     
-    protected override void LoadContent()
+    public void LoadContent()
     {
+        if (contentLoaded)
+        {
+            return;
+        }
+
+        contentLoaded = true;
         Trace.TraceInformation("CDTXMania.LoadContent()");
         DeviceResetManager.NotifyDeviceReset();
 
@@ -971,10 +926,10 @@ internal class CDTXMania : Game
         Device.SetTextureStageState(0, TextureStage.AlphaArg2, 1);
 
         //init imgui
-        context = ImGui.CreateContext();
+        imguiContext = ImGui.CreateContext();
 
-        ImGui.SetCurrentContext(context);
-        ImGuiImplD3D9.SetCurrentContext(context);
+        ImGui.SetCurrentContext(imguiContext);
+        ImGuiImplD3D9.SetCurrentContext(imguiContext);
 
         var io = ImGui.GetIO();
 
@@ -986,12 +941,12 @@ internal class CDTXMania : Game
             ImGui.GetIO().Fonts.Build();
         }
 
-        var settings = app.GraphicsDeviceManager.CurrentSettings;
-        io.DisplaySize = new Vector2(settings.BackBufferWidth, settings.BackBufferHeight);
+        Size clientSize = context.GetClientSize();
+        io.DisplaySize = new Vector2(clientSize.Width, clientSize.Height);
         io.DisplayFramebufferScale = new Vector2(1, 1);
         ImGuizmo.SetRect(0, 0, io.DisplaySize.X, io.DisplaySize.Y);
 
-        renderScale = settings.BackBufferWidth / (float)GameFramebufferSize.Width;
+        renderScale = clientSize.Width / (float)GameFramebufferSize.Width;
         physicalRenderScale = renderScale;
 
         io.ConfigFlags |= ImGuiConfigFlags.DockingEnable;
@@ -1001,22 +956,44 @@ internal class CDTXMania : Game
             ImGuiImplD3D9.Init(new IDirect3DDevice9Ptr((IDirect3DDevice9*)app.Device.NativePointer));
         }
 
-        ImGuizmo.SetImGuiContext(context);
+        ImGuizmo.SetImGuiContext(imguiContext);
 
         gameRenderTargetTexture = new Texture(Device, 1280, 720, 1, Usage.RenderTarget, Format.A8R8G8B8, Pool.Default);
         gameRenderTargetSurface = gameRenderTargetTexture.GetSurfaceLevel(0);
 
         mainRenderTarget = Device.GetRenderTarget(0);
+        imguiReady = true;
     }
 
-    protected override void UnloadContent()
+    public void UnloadContent()
     {
+        if (!contentLoaded)
+        {
+            return;
+        }
+
+        contentLoaded = false;
         Trace.TraceInformation("CDTXMania.UnloadContent()");
         DeviceResetManager.NotifyDeviceLost();
+        imguiReady = false;
 
-        gameRenderTargetSurface.Dispose();
-        gameRenderTargetTexture.Dispose();
-        mainRenderTarget.Dispose();
+        if (gameRenderTargetSurface != null)
+        {
+            gameRenderTargetSurface.Dispose();
+            gameRenderTargetSurface = null;
+        }
+
+        if (gameRenderTargetTexture != null)
+        {
+            gameRenderTargetTexture.Dispose();
+            gameRenderTargetTexture = null;
+        }
+
+        if (mainRenderTarget != null)
+        {
+            mainRenderTarget.Dispose();
+            mainRenderTarget = null;
+        }
 
         ImGuiImplD3D9.InvalidateDeviceObjects();
         ImGuiImplD3D9.Shutdown();
@@ -1024,11 +1001,10 @@ internal class CDTXMania : Game
         ImGui.DestroyContext();
     }
 
-    protected override void OnExiting(EventArgs e)
+    public void OnExiting()
     {
         CPowerManagement.tEnableMonitorSuspend(); // スリープ抑止状態を解除
         tTerminate();
-        base.OnExiting(e);
     }
 
     public static void UpdateCursorState()
@@ -1056,13 +1032,9 @@ internal class CDTXMania : Game
         }
     }
 
-    protected override void Update(GameTime gameTime)
-    {
-    }
-
     private long lastDrawTime;
 
-    protected override void Draw(GameTime gameTime)
+    public void Draw()
     {
         float delta = (Timer.nCurrentTime - lastDrawTime) / 1000.0f;
         lastDrawTime = Timer.nCurrentTime;
@@ -1124,6 +1096,7 @@ internal class CDTXMania : Game
 //#if INSPECTOR
         //cache this value to prevent it from changing during the frame
         bool renderGameToWindow = renderGameToSurface;
+        bool useImGui = imguiReady;
 
         if (renderGameToWindow || forceFrameBufferRenderer)
         {
@@ -1135,23 +1108,26 @@ internal class CDTXMania : Game
         Device.BeginScene();
 
 //#if INSPECTOR
-        ImGui.SetCurrentContext(context);
-        ImGuizmo.SetImGuiContext(context);
-        ImGuiImplD3D9.SetCurrentContext(context);
-
-        ImGuiImplD3D9.NewFrame();
-        ImGui.NewFrame();
-
-        ImGuizmo.BeginFrame();
-
-        ImGuizmo.Enable(true);
-        ImGuizmo.SetOrthographic(true);
-
-        if (!renderGameToWindow && !forceFrameBufferRenderer)
+        if (useImGui)
         {
-            ImGuiIOPtr io = ImGui.GetIO();
-            ImGuizmo.SetRect(0, 0, io.DisplaySize.X, io.DisplaySize.Y);
-            ImGuizmo.SetDrawlist(ImGui.GetBackgroundDrawList());
+            ImGui.SetCurrentContext(imguiContext);
+            ImGuizmo.SetImGuiContext(imguiContext);
+            ImGuiImplD3D9.SetCurrentContext(imguiContext);
+
+            ImGuiImplD3D9.NewFrame();
+            ImGui.NewFrame();
+
+            ImGuizmo.BeginFrame();
+
+            ImGuizmo.Enable(true);
+            ImGuizmo.SetOrthographic(true);
+
+            if (!renderGameToWindow && !forceFrameBufferRenderer)
+            {
+                ImGuiIOPtr io = ImGui.GetIO();
+                ImGuizmo.SetRect(0, 0, io.DisplaySize.X, io.DisplaySize.Y);
+                ImGuizmo.SetDrawlist(ImGui.GetBackgroundDrawList());
+            }
         }
 //#endif
 
@@ -1181,9 +1157,12 @@ internal class CDTXMania : Game
         
         Device.EndScene();
 
-        ImGui.EndFrame();
-        ImGui.Render();
-        ImGuiImplD3D9.RenderDrawData(ImGui.GetDrawData());
+        if (useImGui)
+        {
+            ImGui.EndFrame();
+            ImGui.Render();
+            ImGuiImplD3D9.RenderDrawData(ImGui.GetDrawData());
+        }
 //#else
 // Device.EndScene();
 //#endif
@@ -1208,20 +1187,18 @@ internal class CDTXMania : Game
         if (changeVSyncModeOnNextFrame)
         {
             bool bIsMaximized =
-                Window.IsMaximized; // #23510 2010.11.3 yyagi: to backup current window mode before changing VSyncWait
+                context.IsMaximized; // #23510 2010.11.3 yyagi: to backup current window mode before changing VSyncWait
             currentClientSize =
-                Window.ClientSize; // #23510 2010.11.3 yyagi: to backup current window size before changing VSyncWait
-            DeviceSettings currentSettings = app.GraphicsDeviceManager.CurrentSettings;
-            currentSettings.EnableVSync = ConfigIni.bVerticalSyncWait;
-            app.GraphicsDeviceManager.ChangeDevice(currentSettings);
+                context.GetClientSize(); // #23510 2010.11.3 yyagi: to backup current window size before changing VSyncWait
+            context.ResetDevice(!ConfigIni.bFullScreenExclusive || ConfigIni.bWindowMode,
+                currentClientSize.Width,
+                currentClientSize.Height,
+                ConfigIni.bVerticalSyncWait);
             changeVSyncModeOnNextFrame = false;
-            Window.ClientSize =
-                new Size(currentClientSize.Width,
-                    currentClientSize.Height); // #23510 2010.11.3 yyagi: to resume window size after changing VSyncWait
+            context.SetClientSize(currentClientSize.Width, currentClientSize.Height); // #23510 2010.11.3 yyagi: to resume window size after changing VSyncWait
             if (bIsMaximized)
             {
-                Window.WindowState =
-                    FormWindowState.Maximized; // #23510 2010.11.3 yyagi: to resume window mode after changing VSyncWait
+                context.SetWindowState(GameContext.WindowState.Maximized); // #23510 2010.11.3 yyagi: to resume window mode after changing VSyncWait
             }
         }
 
@@ -1230,11 +1207,9 @@ internal class CDTXMania : Game
 
     private void ProcessWindowMessages()
     {
-        if (Window.IsReceivedMessage) // ウインドウメッセージで、
+        while (context.TryDequeueCopyData(out string strMes)) // ウインドウメッセージで、
         {
             //Received message from DTXCreator
-            string strMes = Window.strMessage;
-            Window.IsReceivedMessage = false;
             if (strMes != null)
             {
                 Trace.TraceInformation("Received Message. ParseArguments {0}。", strMes);
@@ -1243,20 +1218,20 @@ internal class CDTXMania : Game
                 if (DTXVmode.Enabled)
                 {
                     //Bring DTXViewer to the front whenever a DTXCreator Play DTX button is triggered
-                    if (!Window.Visible)
+                    if (!context.IsVisible)
                     {
-                        Window.Show();
+                        context.Show();
                     }
 
-                    if (Window.WindowState == FormWindowState.Minimized)
+                    if (context.GetWindowState() == GameContext.WindowState.Minimized)
                     {
-                        Window.WindowState = FormWindowState.Normal;
+                        context.SetWindowState(GameContext.WindowState.Normal);
                     }
 
-                    Window.Activate();
-                    Window.TopMost = true; // important
-                    Window.TopMost = false; // important
-                    Window.Focus(); // important
+                    context.Activate();
+                    context.SetTopMost(true); // important
+                    context.SetTopMost(false); // important
+                    context.Focus(); // important
 
                     bCompactMode = true;
                     strCompactModeFile = DTXVmode.filename;
@@ -1533,7 +1508,22 @@ internal class CDTXMania : Game
             delay = "(" + SoundManager.GetSoundDelay() + "ms)";
         }
 
-        Window.Text = strWindowTitle + " (" + SoundManager.GetCurrentSoundDeviceType() + delay + ")";
+        context.SetWindowTitle(strWindowTitle + " (" + SoundManager.GetCurrentSoundDeviceType() + delay + ")");
+    }
+
+    public void OnDeviceLost()
+    {
+        UnloadContent();
+    }
+
+    public void OnDeviceReset()
+    {
+        LoadContent();
+    }
+
+    public void RequestExit()
+    {
+        context.RequestExit();
     }
     
     public static SongNode confirmedSong { get; private set; }
@@ -1659,46 +1649,37 @@ internal class CDTXMania : Game
     #region [ Windowイベント処理 ]
 
     //-----------------
-    private void Window_ApplicationActivated(object? sender, EventArgs e)
+    public void OnActivated()
     {
         bApplicationActive = true;
     }
 
-    private void Window_ApplicationDeactivated(object? sender, EventArgs e)
+    public void OnDeactivated()
     {
         bApplicationActive = false;
     }
 
-    private void Window_KeyDown(object? sender, KeyEventArgs e)
+    public void OnKeyDown(Keys keyCode, bool isAlt)
     {
-        ImGuiKey keyCode = WindowsKeyCodeToImGui(e.KeyCode);
+        if (imguiReady)
+        {
+            ImGuiKey imguiKeyCode = WindowsKeyCodeToImGui(keyCode);
 
-        //update key state
-        if (keyCode != ImGuiKey.None)
-        {
-            ImGui.GetIO().AddKeyEvent(keyCode, true);
-        }
-
-        if (ImGui.GetIO().WantCaptureKeyboard)
-        {
-            return;
-        }
-
-        if (e.KeyCode == Keys.Menu)
-        {
-            e.Handled = true;
-            e.SuppressKeyPress = true;
-        }
-        else if ((e.KeyCode == Keys.Return) && e.Alt)
-        {
-            if (ConfigIni != null)
+            //update key state
+            if (imguiKeyCode != ImGuiKey.None)
             {
-                ConfigIni.bWindowMode = !ConfigIni.bWindowMode;
-                tSwitchFullScreenMode();
+                ImGui.GetIO().AddKeyEvent(imguiKeyCode, true);
             }
 
-            e.Handled = true;
-            e.SuppressKeyPress = true;
+            if (ImGui.GetIO().WantCaptureKeyboard)
+            {
+                return;
+            }
+        }
+
+        if (keyCode == Keys.Menu)
+        {
+            return;
         }
         else
         {
@@ -1707,7 +1688,7 @@ internal class CDTXMania : Game
                 var captureCode =
                     (SlimDX.DirectInput.Key)ConfigIni.KeyAssign.System[(int)EKeyConfigPad.Capture][i].Code;
 
-                if ((int)captureCode > 0 && e.KeyCode == DeviceConstantConverter.KeyToKeys(captureCode))
+                if ((int)captureCode > 0 && keyCode == DeviceConstantConverter.KeyToKeys(captureCode))
                 {
                     string strFullPath = Path.Combine(executableDirectory, "Capture_img");
                     strFullPath = Path.Combine(strFullPath, DateTime.Now.ToString("yyyyMMddHHmmss") + ".png");
@@ -1717,22 +1698,26 @@ internal class CDTXMania : Game
         }
     }
 
-    private void Window_KeyPress(object? sender, KeyPressEventArgs e)
+    public void OnKeyChar(char keyChar)
     {
-        if (ImGui.GetIO().WantCaptureKeyboard)
+        if (imguiReady && ImGui.GetIO().WantCaptureKeyboard)
         {
-            ImGui.GetIO().AddInputCharacter(e.KeyChar);
-            e.Handled = true;
+            ImGui.GetIO().AddInputCharacter(keyChar);
         }
     }
 
-    private void Window_KeyUp(object? sender, KeyEventArgs e)
+    public void OnKeyUp(Keys keyCode)
     {
-        //update key state
-        ImGuiKey keyCode = WindowsKeyCodeToImGui(e.KeyCode);
-        if (keyCode != ImGuiKey.None)
+        if (!imguiReady)
         {
-            ImGui.GetIO().AddKeyEvent(keyCode, false);
+            return;
+        }
+
+        //update key state
+        ImGuiKey imguiKeyCode = WindowsKeyCodeToImGui(keyCode);
+        if (imguiKeyCode != ImGuiKey.None)
+        {
+            ImGui.GetIO().AddKeyEvent(imguiKeyCode, false);
         }
     }
 
@@ -1771,9 +1756,14 @@ internal class CDTXMania : Game
         };
     }
 
-    private void Window_MouseMove(object? sender, MouseEventArgs e)
+    public void OnMouseMove(int x, int y)
     {
-        var pos = e.Location;
+        if (!imguiReady)
+        {
+            return;
+        }
+
+        var pos = new Point(x, y);
 
         // //take window scale into account (since the render resolution for imgui is fixed 1280x720)
         // var windowScale = new Vector2((float)Window.ClientSize.Width / GameWindowSize.Width,
@@ -1784,9 +1774,14 @@ internal class CDTXMania : Game
         ImGui.GetIO().MousePos = new Vector2(pos.X, pos.Y);
     }
 
-    private void Window_MouseDown(object? sender, MouseEventArgs e)
+    public void OnMouseDown(MouseButtons button, int x, int y)
     {
-        switch (e.Button)
+        if (!imguiReady)
+        {
+            return;
+        }
+
+        switch (button)
         {
             case MouseButtons.Left:
                 ImGui.GetIO().MouseDown[(int)ImGuiMouseButton.Left] = true;
@@ -1802,11 +1797,16 @@ internal class CDTXMania : Game
         }
     }
 
-    private void Window_MouseUp(object? sender, MouseEventArgs e)
+    public void OnMouseUp(MouseButtons button, int x, int y)
     {
-        mb = e.Button;
+        mb = button;
 
-        switch (e.Button)
+        if (!imguiReady)
+        {
+            return;
+        }
+
+        switch (button)
         {
             case MouseButtons.Left:
                 ImGui.GetIO().MouseDown[(int)ImGuiMouseButton.Left] = false;
@@ -1822,12 +1822,17 @@ internal class CDTXMania : Game
         }
     }
 
-    private void Window_MouseWheel(object? sender, MouseEventArgs e)
+    public void OnMouseWheel(int delta)
     {
-        ImGui.GetIO().MouseWheel = e.Delta / 120.0f;
+        if (!imguiReady)
+        {
+            return;
+        }
+
+        ImGui.GetIO().MouseWheel = delta / 120.0f;
     }
 
-    private void Window_MouseDoubleClick(object? sender, MouseEventArgs e) // #23510 2010.11.13 yyagi: to go full screen mode
+    public void OnMouseDoubleClick(MouseButtons button, int x, int y) // #23510 2010.11.13 yyagi: to go full screen mode
     {
         if (mb.Equals(MouseButtons.Left) && ConfigIni.bIsAllowedDoubleClickFullscreen) // #26752 2011.11.27 yyagi
         {
@@ -1836,16 +1841,27 @@ internal class CDTXMania : Game
         }
     }
 
-    private void Window_ResizeEnd(object? sender, EventArgs e) // #23510 2010.11.20 yyagi: to get resized window size
+    public void OnResizeEnd() // #23510 2010.11.20 yyagi: to get resized window size
     {
         if (ConfigIni.bWindowMode)
         {
-            ConfigIni.nInitialWindowXPosition = Window.Location.X; // #30675 2013.02.04 ikanick add
-            ConfigIni.nInitialWindowYPosition = Window.Location.Y; //
+            var position = context.GetWindowPosition();
+            ConfigIni.nInitialWindowXPosition = position.X; // #30675 2013.02.04 ikanick add
+            ConfigIni.nInitialWindowYPosition = position.Y; //
         }
 
-        ConfigIni.nWindowWidth = (ConfigIni.bWindowMode) ? Window.ClientSize.Width : currentClientSize.Width; // #23510 2010.10.31 yyagi add
-        ConfigIni.nWindowHeight = (ConfigIni.bWindowMode) ? Window.ClientSize.Height : currentClientSize.Height;
+        Size clientSize = context.GetClientSize();
+        ConfigIni.nWindowWidth = (ConfigIni.bWindowMode) ? clientSize.Width : currentClientSize.Width; // #23510 2010.10.31 yyagi add
+        ConfigIni.nWindowHeight = (ConfigIni.bWindowMode) ? clientSize.Height : currentClientSize.Height;
+    }
+
+    public void ToggleFullscreen()
+    {
+        if (ConfigIni != null)
+        {
+            ConfigIni.bWindowMode = !ConfigIni.bWindowMode;
+            tSwitchFullScreenMode();
+        }
     }
 
     #endregion
@@ -1855,5 +1871,10 @@ internal class CDTXMania : Game
     {
         return ConfigIni.bDrumsEnabled ? 0
             : ConfigIni.bIsSwappedGuitarBass ? 2 : 1;
+    }
+
+    public void Dispose()
+    {
+        tTerminate();
     }
 }

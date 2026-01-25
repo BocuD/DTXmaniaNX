@@ -128,7 +128,7 @@ internal class CActPerfBGA : CActivity
 	{
 		if( bActivated )
 		{
-			txBGAバックパネル = new CTexture(CDTXMania.app.Device, 278, 355, CDTXMania.app.GraphicsDeviceManager.CurrentSettings.BackBufferFormat, Pool.Managed);
+			txBGAバックパネル = new CTexture(CDTXMania.app.Device, 278, 355, CDTXMania.app.PresentParameters.BackBufferFormat, Pool.Managed);
 			using( Surface surface = CDTXMania.app.Device.GetBackBuffer( 0, 0 ) )
 			{
 				sfBackBuffer = Surface.CreateOffscreenPlain( CDTXMania.app.Device, surface.Description.Width, surface.Description.Height, surface.Description.Format, Pool.SystemMemory );

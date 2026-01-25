@@ -1,4 +1,4 @@
-﻿using System.Drawing;
+using System.Drawing;
 using System.Diagnostics;
 using DTXMania.Core;
 using SharpDX;
@@ -31,9 +31,9 @@ internal class CActSelectArtistComment : CActivity
 				graphics.PageUnit = GraphicsUnit.Pixel;
 				SizeF ef = graphics.MeasureString( strArtist, ft描画用フォント );
 				graphics.Dispose();
-				//if (ef.Width > SampleFramework.GameWindowSize.Width)
+				//if (ef.Width > GameWindowSize.Width)
 				//{
-				//	ef.Width = SampleFramework.GameWindowSize.Width;
+				//	ef.Width = GameWindowSize.Width;
 				//}
 				try
 				{
