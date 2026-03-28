@@ -72,57 +72,56 @@ internal class CStageResult : CStage
 			Trace.TraceInformation("Playing Background video for Result Screen");
 		}
 
-		var txBackground = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\8_background.jpg" ) );
+		BaseTexture txBackground = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\8_background.jpg" ) );
 		
 		switch (nResultRank)
 		{
 			case 0:
 				if (File.Exists(CSkin.Path(@"Graphics\8_background rankSS.png")))
 				{
-					txBackground = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_background rankSS.png"));
+					txBackground = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_background rankSS.png"));
 				}
 				break;
 			case 1:
 				if (File.Exists(CSkin.Path(@"Graphics\8_background rankS.png")))
 				{
-					txBackground = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_background rankS.png"));
+					txBackground = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_background rankS.png"));
 				}
 				break;
 			case 2:
 				if (File.Exists(CSkin.Path(@"Graphics\8_background rankA.png")))
 				{
-					txBackground = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_background rankA.png"));
+					txBackground = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_background rankA.png"));
 				}
 				break;
 			case 3:
 				if (File.Exists(CSkin.Path(@"Graphics\8_background rankB.png")))
 				{
-					txBackground = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_background rankB.png"));
+					txBackground = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_background rankB.png"));
 				}
 				break;
 			case 4:
 				if (File.Exists(CSkin.Path(@"Graphics\8_background rankC.png")))
 				{
-					txBackground = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_background rankC.png"));
+					txBackground = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_background rankC.png"));
 				}
 				break;
 			case 5:
 				if (File.Exists(CSkin.Path(@"Graphics\8_background rankD.png")))
 				{
-					txBackground = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_background rankD.png"));
+					txBackground = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_background rankD.png"));
 				}
 				break;
 			case 6:
 			case 99:
 				if (File.Exists(CSkin.Path(@"Graphics\8_background rankE.png")))
 				{
-					txBackground = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_background rankE.png"));
+					txBackground = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_background rankE.png"));
 				}
 				break;
 		}
 
-		DTXTexture dtxTex = new(txBackground);
-		background = ui.AddChild(new UIImage(dtxTex));
+		background = ui.AddChild(new UIImage(txBackground));
 		background.renderOrder = -100;
 	}
 

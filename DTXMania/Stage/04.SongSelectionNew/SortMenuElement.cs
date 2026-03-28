@@ -1,11 +1,9 @@
 ﻿using System.Drawing;
+using System.Numerics;
 using DTXMania.Core;
-using DTXMania.SongDb;
 using DTXMania.SongDb.Sorting;
-using DTXMania.UI;
 using DTXMania.UI.Drawable;
 using FDK;
-using SharpDX;
 
 namespace DTXMania;
 
@@ -16,12 +14,11 @@ public class SortMenuElement : UIGroup
         this.sorter = sorter;
         this.songDb = songDb;
         
-        textElement = AddChild(new UIText(new FontFamily(CDTXMania.ConfigIni.songListFont), 18));
-        textElement.SetText(sorter.Name);
+        textElement = AddChild(new UIText(sorter.Name, 18));
         textElement.anchor = new Vector2(0.5f, 0.5f);
         textElement.isVisible = false;
         
-        icon = AddChild(new UIImage(DTXTexture.LoadFromPath(CSkin.Path($@"Graphics\Sorting\{sorter.IconName}.png"))));
+        icon = AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path($@"Graphics\Sorting\{sorter.IconName}.png"))));
         icon.anchor = new Vector2(0.5f, 0.5f);
         
         string path = CSkin.Path($@"Graphics\Sorting\{sorter.IconName}.wav");

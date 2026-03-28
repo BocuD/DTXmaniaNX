@@ -3,14 +3,13 @@ using System.Text;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Drawing;
+using System.Numerics;
 using DTXMania.Core;
 using DTXMania.UI;
 using DTXMania.UI.Drawable;
-using SharpDX;
 using FDK;
 using Color = System.Drawing.Color;
 using Point = System.Drawing.Point;
-using RectangleF = SharpDX.RectangleF;
 using SlimDXKey = SlimDX.DirectInput.Key;
 
 namespace DTXMania;
@@ -169,8 +168,7 @@ internal class CStageSongLoading : CStage
     
     public override void InitializeDefaultUI()
     {
-        DTXTexture bgTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\6_background.jpg")));
-        UIImage bg = ui.AddChild(new UIImage(bgTex));
+        UIImage bg = ui.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\6_background.jpg"))));
         bg.renderOrder = -100;
     }
 
@@ -288,8 +286,7 @@ internal class CStageSongLoading : CStage
             
             //add difficulty panel to ui here
             //todo: this should be moved when chart loading is moved
-            DTXTexture difficultyPanelTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\6_Difficulty.png")));
-            UIImage difficultyPanel = ui.AddChild(new UIImage(difficultyPanelTex));
+            UIImage difficultyPanel = ui.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\6_Difficulty.png"))));
             difficultyPanel.renderMode = ERenderMode.Sliced;
             difficultyPanel.position = new Vector3(191, 102, 0);
             difficultyPanel.clipRect = new RectangleF(0, nIndex * 50, 262, 50);
@@ -743,12 +740,12 @@ internal class CStageSongLoading : CStage
     
     private void DrawLoadingScreenUI()
     {
-        Matrix scaling = Matrix.Scaling(CDTXMania.renderScale);
+        Matrix4x4 scaling = Matrix4x4.CreateScale(CDTXMania.renderScale);
         int y = 184;
         
         if (txJacket != null)
         {
-            Matrix mat = Matrix.Identity;
+            Matrix4x4 mat = Matrix4x4.Identity;
             float fScalingFactor;
             float jacketOnScreenSize = 384.0f;
             //Maintain aspect ratio by scaling only to the smaller scalingFactor
@@ -761,10 +758,11 @@ internal class CStageSongLoading : CStage
                 fScalingFactor = jacketOnScreenSize / txJacket.szImageSize.Width;
             }
         
-            mat *= Matrix.Scaling(fScalingFactor, fScalingFactor, 1f);
-            mat *= Matrix.Translation(-348, 84f, 0f);
+            mat *= Matrix4x4.CreateScale(fScalingFactor, fScalingFactor, 1f);
+            mat *= Matrix4x4.CreateTranslation(-348, 84f, 0f);
         
-            txJacket.tDraw3D(CDTXMania.app.Device, mat);
+            //todo: COMMENTED OUT tDraw2DMatrix
+            //txJacket.tDraw3D(CDTXMania.app.Device, mat);
         }
         
         if (txTitle != null)
@@ -772,10 +770,11 @@ internal class CStageSongLoading : CStage
             if (txTitle.szImageSize.Width > 625)
                 txTitle.vcScaleRatio.X = 625f / txTitle.szImageSize.Width;
 
-            Matrix mat = Matrix.Translation(500, 285, 0) * scaling;
+            Matrix4x4 mat = Matrix4x4.CreateTranslation(500, 285, 0) * scaling;
             Vector2 size = new(txTitle.szImageSize.Width, txTitle.szImageSize.Height);
             size *= 1 / CDTXMania.renderScale;
-            txTitle.tDraw2DMatrix(CDTXMania.app.Device, mat, size);
+            //todo: COMMENTED OUT tDraw2DMatrix
+            //txTitle.tDraw2DMatrix(CDTXMania.app.Device, mat, size);
         }
         
         if (txArtist != null)
@@ -783,10 +782,11 @@ internal class CStageSongLoading : CStage
             if (txArtist.szImageSize.Width > 625)
                 txArtist.vcScaleRatio.X = 625f / txArtist.szImageSize.Width;
         
-            Matrix mat = Matrix.Translation(500, 360, 0) * scaling;
+            Matrix4x4 mat = Matrix4x4.CreateTranslation(500, 360, 0) * scaling;
             Vector2 size = new(txArtist.szImageSize.Width, txArtist.szImageSize.Height);
             size *= 1 / CDTXMania.renderScale;
-            txArtist.tDraw2DMatrix(CDTXMania.app.Device, mat, size);
+            //todo: COMMENTED OUT tDraw2DMatrix
+            //txArtist.tDraw2DMatrix(CDTXMania.app.Device, mat, size);
         }
         
         int[] iPart = [0, CDTXMania.ConfigIni.bIsSwappedGuitarBass ? 2 : 1, CDTXMania.ConfigIni.bIsSwappedGuitarBass ? 1 : 2];
@@ -824,14 +824,18 @@ internal class CStageSongLoading : CStage
                             DTXLevelDeci = ((cdtx.LEVEL[j] - DTXLevel * 10) * 10) + cdtx.LEVELDEC[j];
                         }
         
-                        txLevel.tDraw2D(CDTXMania.app.Device, 282 + k, 243, new RectangleF(1000, 92, 30, 38));
+                        //todo: COMMENTED OUT tDraw2D
+                        //txLevel.tDraw2D(CDTXMania.app.Device, 282 + k, 243, new RectangleF(1000, 92, 30, 38));
                         tDrawStringLarge(187 + k, 152, $"{DTXLevel:0}");
                         tDrawStringLarge(307 + k, 152, $"{DTXLevelDeci:00}");
                     }
-        
+
                     if (txPartPanel != null)
-                        txPartPanel.tDraw2D(CDTXMania.app.Device, 191 + k, 52, new RectangleF(0, j * 50, 262, 50));
-        
+                    {
+                        //todo: COMMENTED OUT tDraw2D
+                        //txPartPanel.tDraw2D(CDTXMania.app.Device, 191 + k, 52, new RectangleF(0, j * 50, 262, 50));
+                    }
+
                     //this.txJacket.Dispose();
                     if (!CDTXMania.bCompactMode && !CDTXMania.DTXVmode.Enabled && !CDTXMania.DTX2WAVmode.Enabled)
                         tDrawDifficultyPanel(
@@ -1070,7 +1074,8 @@ internal class CStageSongLoading : CStage
                 RectangleF rc画像内の描画領域 = new(st大文字位置[j].pt.X, st大文字位置[j].pt.Y, 100, 130);
                 if (txLevel != null)
                 {
-                    txLevel.tDraw2D(CDTXMania.app.Device, x, y, rc画像内の描画領域);
+                    //todo: COMMENTED OUT tDraw2D
+                    //txLevel.tDraw2D(CDTXMania.app.Device, x, y, rc画像内の描画領域);
                 }
 
                 break;
@@ -1143,7 +1148,10 @@ internal class CStageSongLoading : CStage
         }
 
         if (txDifficultyPanel != null)
-            txDifficultyPanel.tDraw2D(CDTXMania.app.Device, nX, nY, rect);
+        {
+            //todo: COMMENTED OUT tDraw2D
+            //txDifficultyPanel.tDraw2D(CDTXMania.app.Device, nX, nY, rect);
+        }
     }
 
     #endregion

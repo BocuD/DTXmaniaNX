@@ -1,0 +1,459 @@
+using System.Diagnostics;
+using System.Numerics;
+using System.Runtime.CompilerServices;
+using DTXMania.UI;
+using DTXMania.UI.Drawable;
+using DTXMania.UI.Inspector;
+using DTXMania.UI.OpenGL;
+using Hexa.NET.GLFW;
+using Hexa.NET.ImGui;
+using Hexa.NET.ImGui.Backends.GLFW;
+using Hexa.NET.ImGui.Backends.OpenGL3;
+using Silk.NET.OpenGL;
+
+namespace OpenGLTest;
+
+internal sealed unsafe class GlfwOpenGlHost : IDisposable
+{
+    private const int GlfwTrue = 1;
+    private const int GlfwFalse = 0;
+    private const int GlfwDecorated = 0x00020005;
+    private const int GlfwContextVersionMajor = 0x00022002;
+    private const int GlfwContextVersionMinor = 0x00022003;
+    private const int GlfwOpenGlProfile = 0x00022008;
+    private const int GlfwOpenGlCoreProfile = 0x00032001;
+    private const int GlfwOpenGlForwardCompat = 0x00022006;
+
+    private readonly OpenGlGame _game;
+    private readonly GameRenderTarget _gameRenderTarget = new();
+    private readonly OpenGlUiRenderer _uiRenderer = new();
+    private readonly OpenGlSkiaTextRenderer _skiaTextRenderer = new();
+    private readonly OpenGlTextureFactory _textureFactory = new();
+    private readonly Stopwatch _stopwatch = Stopwatch.StartNew();
+
+    private Hexa.NET.GLFW.GLFWwindowPtr _window;
+    private GlfwNativeContext? _nativeContext;
+    private GL? _gl;
+    private ImGuiContextPtr _imguiContext;
+
+    private bool _vsyncEnabled = true;
+    private FullscreenMode _fullscreenMode = FullscreenMode.Windowed;
+    private bool _renderInGameWindow;
+    private int _windowedX = 80;
+    private int _windowedY = 80;
+    private int _windowedWidth = 1280;
+    private int _windowedHeight = 720;
+
+    private double _lastFrameTime;
+    private double _fpsAccumulatedTime;
+    private int _fpsFrameCount;
+    private float _displayedFps;
+    private float _displayedFrameTimeMs;
+    private double _memorySampleAccumulator;
+    private float _workingSetMb;
+    private float _privateMb;
+    private float _managedMb;
+    private float _deltaTime;
+    private int _windowWidth;
+    private int _windowHeight;
+    private int _framebufferWidth;
+    private int _framebufferHeight;
+
+    private bool? _pendingVsyncEnabled;
+    private FullscreenMode? _pendingFullscreenMode;
+
+    public GlfwOpenGlHost(OpenGlGame game)
+    {
+        _game = game;
+    }
+
+    public bool VsyncEnabled => _vsyncEnabled;
+    public FullscreenMode FullscreenMode => _fullscreenMode;
+    public bool RenderInGameWindow
+    {
+        get => _renderInGameWindow;
+        set => _renderInGameWindow = value;
+    }
+
+    public float Fps => _displayedFps;
+    public float FrameTimeMs => _displayedFrameTimeMs;
+    public int WindowWidth => _windowWidth;
+    public int WindowHeight => _windowHeight;
+    public int FramebufferWidth => _framebufferWidth;
+    public int FramebufferHeight => _framebufferHeight;
+    public float WorkingSetMb => _workingSetMb;
+    public float PrivateMb => _privateMb;
+    public float ManagedMb => _managedMb;
+
+    public void RequestVsync(bool enabled)
+    {
+        _pendingVsyncEnabled = enabled;
+    }
+
+    public void RequestFullscreenMode(FullscreenMode fullscreenMode)
+    {
+        _pendingFullscreenMode = fullscreenMode;
+    }
+
+    public void Run()
+    {
+        if (GLFW.Init() == 0)
+        {
+            throw new InvalidOperationException("GLFW initialization failed.");
+        }
+
+        try
+        {
+            CreateInitialWindowAndGraphics();
+            MainLoop();
+        }
+        finally
+        {
+            Dispose();
+        }
+    }
+
+    public void Dispose()
+    {
+        if (_window.Handle != null)
+        {
+            GLFW.MakeContextCurrent(_window);
+        }
+
+        ShutdownImGui();
+        _uiRenderer.Dispose();
+        OpenGlUi.Renderer = null;
+        OpenGlUi.SkiaTextRenderer = null;
+        OpenGlUi.TextureFactory = null;
+        BaseTexture.Factory = null;
+        _gameRenderTarget.Dispose();
+        _game.Dispose();
+
+        if (_window.Handle != null)
+        {
+            GLFW.DestroyWindow(_window);
+            _window = default;
+        }
+
+        _nativeContext?.Dispose();
+        _nativeContext = null;
+        _gl = null;
+
+        GLFW.Terminate();
+    }
+
+    private void CreateInitialWindowAndGraphics()
+    {
+        _window = CreateWindow(default);
+        _nativeContext = new GlfwNativeContext();
+        _gl = GL.GetApi(_nativeContext);
+        _game.AttachGraphics(_gl);
+        _gameRenderTarget.AttachGraphics(_gl);
+        _uiRenderer.AttachGraphics(_gl);
+        OpenGlUi.Renderer = _uiRenderer;
+        OpenGlUi.SkiaTextRenderer = _skiaTextRenderer;
+        OpenGlUi.TextureFactory = _textureFactory;
+        BaseTexture.Factory = _textureFactory;
+        InitializeImGui();
+    }
+
+    private Hexa.NET.GLFW.GLFWwindowPtr CreateWindow(Hexa.NET.GLFW.GLFWwindowPtr shareWindow)
+    {
+        GLFW.DefaultWindowHints();
+        GLFW.WindowHint(GlfwContextVersionMajor, 3);
+        GLFW.WindowHint(GlfwContextVersionMinor, 3);
+        GLFW.WindowHint(GlfwOpenGlProfile, GlfwOpenGlCoreProfile);
+
+        if (OperatingSystem.IsMacOS())
+        {
+            GLFW.WindowHint(GlfwOpenGlForwardCompat, GlfwTrue);
+        }
+
+        Hexa.NET.GLFW.GLFWmonitorPtr primaryMonitor = GLFW.GetPrimaryMonitor();
+        GLFWvidmodePtr videoMode = primaryMonitor.Handle != null ? GLFW.GetVideoMode(primaryMonitor) : default;
+        Hexa.NET.GLFW.GLFWwindowPtr window;
+
+        switch (_fullscreenMode)
+        {
+            case FullscreenMode.Windowed:
+                GLFW.WindowHint(GlfwDecorated, GlfwTrue);
+                window = GLFW.CreateWindow(_windowedWidth, _windowedHeight, "OpenGLTest", default, shareWindow);
+                break;
+            case FullscreenMode.BorderlessFullscreen:
+                if (primaryMonitor.Handle == null || videoMode.Handle == null)
+                {
+                    throw new InvalidOperationException("Primary monitor unavailable.");
+                }
+
+                GLFW.WindowHint(GlfwDecorated, GlfwFalse);
+                window = GLFW.CreateWindow(videoMode.Width, videoMode.Height, "OpenGLTest", default, shareWindow);
+                break;
+            case FullscreenMode.ExclusiveFullscreen:
+                if (primaryMonitor.Handle == null || videoMode.Handle == null)
+                {
+                    throw new InvalidOperationException("Primary monitor unavailable.");
+                }
+
+                window = GLFW.CreateWindow(videoMode.Width, videoMode.Height, "OpenGLTest", primaryMonitor, shareWindow);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+
+        if (window.Handle == null)
+        {
+            throw new InvalidOperationException("Window creation failed.");
+        }
+
+        GLFW.MakeContextCurrent(window);
+
+        if (_fullscreenMode == FullscreenMode.Windowed)
+        {
+            GLFW.SetWindowPos(window, _windowedX, _windowedY);
+        }
+        else if (_fullscreenMode == FullscreenMode.BorderlessFullscreen)
+        {
+            int monitorX = 0;
+            int monitorY = 0;
+            GLFW.GetMonitorPos(primaryMonitor, ref monitorX, ref monitorY);
+            GLFW.SetWindowPos(window, monitorX, monitorY);
+        }
+
+        GLFW.SwapInterval(_vsyncEnabled ? 1 : 0);
+        return window;
+    }
+
+    private void InitializeImGui()
+    {
+        _imguiContext = ImGui.CreateContext();
+        ImGui.SetCurrentContext(_imguiContext);
+        ImGui.StyleColorsDark();
+
+        ImGuiIOPtr io = ImGui.GetIO();
+        io.ConfigFlags |= ImGuiConfigFlags.NavEnableKeyboard;
+        io.ConfigFlags |= ImGuiConfigFlags.DockingEnable;
+        ConfigureImGuiFonts(io);
+
+        ImGuiImplGLFW.SetCurrentContext(_imguiContext);
+        ImGuiImplOpenGL3.SetCurrentContext(_imguiContext);
+
+        var backendWindow = Unsafe.BitCast<Hexa.NET.GLFW.GLFWwindowPtr, Hexa.NET.ImGui.Backends.GLFW.GLFWwindowPtr>(_window);
+        if (!ImGuiImplGLFW.InitForOpenGL(backendWindow, true))
+        {
+            throw new InvalidOperationException("Failed to initialize Hexa.NET ImGui GLFW backend.");
+        }
+
+        if (!ImGuiImplOpenGL3.Init("#version 330 core"))
+        {
+            throw new InvalidOperationException("Failed to initialize Hexa.NET ImGui OpenGL3 backend.");
+        }
+    }
+
+    private static void ConfigureImGuiFonts(ImGuiIOPtr io)
+    {
+        io.Fonts.Clear();
+
+        string? defaultFontPath = UiFontDefaults.TryGetDefaultUiFontPath();
+        if (string.IsNullOrWhiteSpace(defaultFontPath) || !File.Exists(defaultFontPath))
+        {
+            io.Fonts.AddFontDefault();
+            return;
+        }
+
+        unsafe
+        {
+            ImFontPtr font = ImGui.AddFontFromFileTTF(io.Fonts, defaultFontPath, 18f);
+            if (font.Handle == null)
+            {
+                io.Fonts.AddFontDefault();
+                return;
+            }
+
+            io.FontDefault = font;
+        }
+    }
+
+    private void ShutdownImGui()
+    {
+        if (_imguiContext.Handle == null)
+        {
+            return;
+        }
+
+        if (_window.Handle != null)
+        {
+            GLFW.MakeContextCurrent(_window);
+        }
+
+        ImGui.SetCurrentContext(_imguiContext);
+        ImGuiImplOpenGL3.SetCurrentContext(_imguiContext);
+        ImGuiImplGLFW.SetCurrentContext(_imguiContext);
+        ImGuiImplOpenGL3.Shutdown();
+        ImGuiImplGLFW.Shutdown();
+        ImGuiImplOpenGL3.SetCurrentContext(default);
+        ImGuiImplGLFW.SetCurrentContext(default);
+        ImGui.DestroyContext(_imguiContext);
+        _imguiContext = default;
+    }
+
+    private void RecreateWindow(FullscreenMode previousMode)
+    {
+        if (_window.Handle != null && previousMode == FullscreenMode.Windowed)
+        {
+            GLFW.GetWindowPos(_window, ref _windowedX, ref _windowedY);
+            GLFW.GetWindowSize(_window, ref _windowedWidth, ref _windowedHeight);
+        }
+
+        Hexa.NET.GLFW.GLFWwindowPtr oldWindow = _window;
+        _game.ReleaseContextResources();
+        _gameRenderTarget.ReleaseContextResources();
+        _uiRenderer.ReleaseContextResources();
+        ShutdownImGui();
+        
+        Hexa.NET.GLFW.GLFWwindowPtr newWindow = CreateWindow(oldWindow);
+        _window = newWindow;
+        _game.AttachGraphics(_gl!);
+        _gameRenderTarget.AttachGraphics(_gl!);
+        _uiRenderer.AttachGraphics(_gl!);
+        InitializeImGui();
+
+        if (oldWindow.Handle != null)
+        {
+            GLFW.DestroyWindow(oldWindow);
+        }
+    }
+
+    private void MainLoop()
+    {
+        _game.Init();
+        
+        while (GLFW.WindowShouldClose(_window) == 0)
+        {
+            GLFW.PollEvents();
+
+            if (GLFW.WindowShouldClose(_window) != 0)
+            {
+                break;
+            }
+
+            GLFW.GetFramebufferSize(_window, ref _framebufferWidth, ref _framebufferHeight);
+            GLFW.GetWindowSize(_window, ref _windowWidth, ref _windowHeight);
+            UpdateDiagnostics();
+
+            GLFW.MakeContextCurrent(_window);
+            ImGui.SetCurrentContext(_imguiContext);
+            ImGuiImplGLFW.SetCurrentContext(_imguiContext);
+            ImGuiImplOpenGL3.SetCurrentContext(_imguiContext);
+            ImGuiImplOpenGL3.NewFrame();
+            ImGuiImplGLFW.NewFrame();
+            ImGui.NewFrame();
+
+            int targetWidth;
+            int targetHeight;
+            if (_renderInGameWindow)
+            {
+                var desiredRenderSize = GameWindow.DesiredRenderSize;
+                targetWidth = Math.Max((int)desiredRenderSize.X, 1);
+                targetHeight = Math.Max((int)desiredRenderSize.Y, 1);
+            }
+            else
+            {
+                targetWidth = Math.Max(_framebufferWidth, 1);
+                targetHeight = Math.Max(_framebufferHeight, 1);
+            }
+
+            _gameRenderTarget.Resize(targetWidth, targetHeight);
+            _uiRenderer.BeginFrame(targetWidth, targetHeight);
+            _gameRenderTarget.BindForRendering();
+            _game.Update(_deltaTime, _stopwatch.Elapsed.TotalSeconds);
+            _game.Render(targetWidth, targetHeight, _stopwatch.Elapsed.TotalSeconds);
+            _gameRenderTarget.BindDefaultFramebuffer(Math.Max(_framebufferWidth, 1), Math.Max(_framebufferHeight, 1));
+
+            PrototypeControlsWindow.Draw(this);
+            InspectorManager.Draw(_renderInGameWindow, _gameRenderTarget.TextureId, new Vector2(_gameRenderTarget.Width, _gameRenderTarget.Height));
+            
+            ImGui.Render();
+            GLFW.MakeContextCurrent(_window);
+            if (_renderInGameWindow)
+            {
+                _gameRenderTarget.ClearDefaultFramebuffer(0.08f, 0.09f, 0.12f, 1f, Math.Max(_framebufferWidth, 1), Math.Max(_framebufferHeight, 1));
+            }
+            else
+            {
+                _gameRenderTarget.BlitToDefaultFramebuffer(Math.Max(_framebufferWidth, 1), Math.Max(_framebufferHeight, 1));
+            }
+            ImGuiImplOpenGL3.RenderDrawData(ImGui.GetDrawData());
+            GLFW.SwapBuffers(_window);
+
+            if (GLFW.WindowShouldClose(_window) != 0)
+            {
+                break;
+            }
+
+            ApplyPendingDisplayChanges();
+        }
+    }
+
+    private void UpdateDiagnostics()
+    {
+        double currentTime = _stopwatch.Elapsed.TotalSeconds;
+        _deltaTime = Math.Max((float)(currentTime - _lastFrameTime), 1e-6f);
+        _lastFrameTime = currentTime;
+
+        UpdateFrameStats(_deltaTime);
+        UpdateMemoryStats(_deltaTime);
+    }
+
+    private void UpdateFrameStats(float deltaTime)
+    {
+        _fpsAccumulatedTime += deltaTime;
+        _fpsFrameCount++;
+
+        if (_fpsAccumulatedTime < 0.25)
+        {
+            return;
+        }
+
+        _displayedFps = (float)(_fpsFrameCount / _fpsAccumulatedTime);
+        _displayedFrameTimeMs = 1000f / Math.Max(_displayedFps, 0.0001f);
+        _fpsAccumulatedTime = 0;
+        _fpsFrameCount = 0;
+    }
+
+    private void UpdateMemoryStats(float deltaTime)
+    {
+        _memorySampleAccumulator += deltaTime;
+        if (_memorySampleAccumulator < 0.5)
+        {
+            return;
+        }
+
+        using Process process = Process.GetCurrentProcess();
+        _workingSetMb = process.WorkingSet64 / (1024f * 1024f);
+        _privateMb = process.PrivateMemorySize64 / (1024f * 1024f);
+        _managedMb = GC.GetTotalMemory(false) / (1024f * 1024f);
+        _memorySampleAccumulator = 0;
+    }
+
+    private void ApplyPendingDisplayChanges()
+    {
+        if (_pendingFullscreenMode is { } fullscreenMode && fullscreenMode != _fullscreenMode)
+        {
+            FullscreenMode previousMode = _fullscreenMode;
+            _fullscreenMode = fullscreenMode;
+            RecreateWindow(previousMode);
+            _pendingFullscreenMode = null;
+            _pendingVsyncEnabled = null;
+            return;
+        }
+
+        if (_pendingVsyncEnabled is { } vsyncEnabled && vsyncEnabled != _vsyncEnabled)
+        {
+            _vsyncEnabled = vsyncEnabled;
+            RecreateWindow(_fullscreenMode);
+        }
+
+        _pendingVsyncEnabled = null;
+        _pendingFullscreenMode = null;
+    }
+}

@@ -1,10 +1,11 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Drawing;
+using System.Numerics;
+using System.Runtime.InteropServices;
 using DTXMania.Core;
 using DTXMania.UI;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.Item;
 using FDK;
-using SharpDX;
 using SlimDXKey = SlimDX.DirectInput.Key;
 
 namespace DTXMania;
@@ -218,11 +219,11 @@ internal class CActSelectPopupMenu : CActivity
             ui.isVisible = false;
             ui.dontSerialize = true;
                 
-            var bgTex = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\ScreenSelect sort menu background.png"));
+            var bgTex = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\ScreenSelect sort menu background.png"));
             var bg = ui.AddChild(new UIImage(bgTex));
             ui.size = bg.size;
             
-            var cursorTex = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\ScreenConfig menu cursor.png"));
+            var cursorTex = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\ScreenConfig menu cursor.png"));
             cursor = ui.AddChild(new UIImage(cursorTex));
             cursor.position = new Vector3(12, 32 + 6, 0);
             cursor.size = new Vector2(336, 32);

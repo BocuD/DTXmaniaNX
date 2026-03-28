@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 using FFmpeg.AutoGen.Abstractions;
-using SharpDX.Direct3D9;
+using DTXMania.UI.Drawable;
 
 namespace DTXMania.Core.Video;
 
@@ -13,6 +13,9 @@ public abstract unsafe class FFmpegVideoPlayer : IDisposable
     
     public int Width => codecContext->width;
     public int Height => codecContext->height;
+
+    // Controls whether playback restarts automatically when EOF is reached.
+    public bool LoopOnEof { get; set; } = true;
 
     public bool Open(string path)
     {
@@ -67,7 +70,7 @@ public abstract unsafe class FFmpegVideoPlayer : IDisposable
     }
 
     protected abstract bool CreateResources();
-    public abstract Texture GetUpdatedTexture();
+    public abstract BaseTexture GetUpdatedTexture();
 
     public virtual void Dispose()
     {

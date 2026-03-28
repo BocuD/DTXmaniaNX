@@ -1,13 +1,12 @@
 ﻿using System.Runtime.InteropServices;
 using System.Drawing;
 using System.Diagnostics;
+using System.Numerics;
 using DTXMania.Core;
 using DTXMania.UI;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.Item;
 using FDK;
-using SharpDX;
-using RectangleF = SharpDX.RectangleF;
 using SlimDXKey = SlimDX.DirectInput.Key;
 
 namespace DTXMania;
@@ -60,8 +59,7 @@ internal class CStageConfig : CStage
         leftMenu.renderOrder = 50;
         leftMenu.dontSerialize = true;
         
-        DTXTexture menuPanelTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_menu panel.png")));
-        UIImage menuPanel = leftMenu.AddChild(new UIImage(menuPanelTex));
+        UIImage menuPanel = leftMenu.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\4_menu panel.png"))));
         menuPanel.position = Vector3.Zero;
             
         //menu items
@@ -73,8 +71,7 @@ internal class CStageConfig : CStage
         configLeftOptionsMenu.position = new Vector3(95, 4, 0);
 
         //todo: render menu cursor correctly to match current version of the game. right now its rendered as a stretched image.
-        DTXTexture menuCursorTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_menu cursor.png")));
-        menuCursor = configLeftOptionsMenu.AddChild(new UIImage(menuCursorTex));
+        menuCursor = configLeftOptionsMenu.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\4_menu cursor.png"))));
         menuCursor.position = new Vector3(-5, 2, 0);
         menuCursor.size = new Vector2(170, 28);
         menuCursor.anchor = new Vector2(0.5f, 0f);
@@ -103,23 +100,19 @@ internal class CStageConfig : CStage
     public override void InitializeDefaultUI()
     {
         //create resources for menu elements
-        DTXTexture bgTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_background.png")));
-        UIImage bg = ui.AddChild(new UIImage(bgTex));
+        UIImage bg = ui.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\4_background.png"))));
         bg.renderOrder = -100;
         bg.position = Vector3.Zero;
                 
-        DTXTexture itemBarTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_item bar.png")));
-        UIImage itemBar = ui.AddChild(new UIImage(itemBarTex));
+        UIImage itemBar = ui.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\4_item bar.png"))));
         itemBar.position = new Vector3(400, 0, 0);
         itemBar.renderOrder = 50;
                 
-        DTXTexture headerPanelTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_header panel.png")));
-        UIImage headerPanel = ui.AddChild(new UIImage(headerPanelTex));
+        UIImage headerPanel = ui.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\4_header panel.png"))));
         headerPanel.position = Vector3.Zero;
         headerPanel.renderOrder = 52;
                 
-        DTXTexture footerPanelTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_footer panel.png")));
-        UIImage footerPanel = ui.AddChild(new UIImage(footerPanelTex));
+        UIImage footerPanel = ui.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\4_footer panel.png"))));
         footerPanel.position = new Vector3(0, 720 - footerPanel.Texture.Height, 0);
         footerPanel.renderOrder = 53;
     }
@@ -242,10 +235,11 @@ internal class CStageConfig : CStage
             ctDisplayWait.bReachedEndValue)
         {
             // 15SEP20 Increasing x position by 180 pixels (was 620)
-            Matrix mat = Matrix.Translation(800, 270, 0) * Matrix.Scaling(CDTXMania.renderScale);
+            Matrix4x4 mat = Matrix4x4.CreateTranslation(800, 270, 0) * Matrix4x4.CreateScale(CDTXMania.renderScale);
             Vector2 size = new(txDescriptionPanel.szImageSize.Width, txDescriptionPanel.szImageSize.Height);
             size *= 1 / CDTXMania.renderScale;
-            txDescriptionPanel.tDraw2DMatrix(CDTXMania.app.Device, mat, size);
+            //todo COMMENTED OUT tDraw2DMatrix
+            //txDescriptionPanel.tDraw2DMatrix(CDTXMania.app.Device, mat, size);
             //---------------------
         }
 

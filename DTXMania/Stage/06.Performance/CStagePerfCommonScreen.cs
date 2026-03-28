@@ -4850,8 +4850,9 @@ internal abstract class CStagePerfCommonScreen : CStage
         
         if (txBackground != null)
         {
-            DTXTexture texture = new(txBackground);
-            background = ui.AddChild(new UIImage(texture));
+            //DTXTexture texture = new(txBackground);
+            //background = ui.AddChild(new UIImage(texture));
+            //todo: add background
         }
     }
 

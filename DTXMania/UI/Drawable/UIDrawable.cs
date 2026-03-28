@@ -1,36 +1,30 @@
-﻿using System.Numerics;
-using DTXUIRenderer;
+using System.Numerics;
 using Hexa.NET.ImGui;
 using Hexa.NET.ImGuizmo;
 using Newtonsoft.Json;
-using SharpDX;
-using Quaternion = SharpDX.Quaternion;
-using Vector2 = SharpDX.Vector2;
-using Vector3 = SharpDX.Vector3;
 
 namespace DTXMania.UI.Drawable;
 
 public abstract class UIDrawable : IDisposable
 {
     public string id;
-    public string type => GetType().FullName;
+    public string type => GetType().FullName ?? GetType().Name;
     public int renderOrder = 0;
     public Vector3 position = Vector3.Zero;
-    public Vector2 anchor = Vector2.Zero; //pivot in 2D space
-    public Vector2 size = Vector2.One;    //scale in 3D space
+    public Vector2 anchor = Vector2.Zero;
+    public Vector2 size = Vector2.One;
     public Vector3 scale = Vector3.One;
-    public Vector3 rotation = Vector3.Zero; //euler angles in radians (X = pitch, Y = yaw, Z = roll)
-
-    public string name = "";
+    public Vector3 rotation = Vector3.Zero;
+    public string name = string.Empty;
     public bool isVisible = true;
-        
-    protected Matrix localTransformMatrix = Matrix.Identity;
-
     public bool dontSerialize = false;
-    
-    [JsonIgnore] public UIGroup? parent { get; private set; } = null;
 
-    public UIDrawable()
+    protected Matrix4x4 localTransformMatrix = Matrix4x4.Identity;
+
+    [JsonIgnore]
+    public UIGroup? parent { get; private set; }
+
+    protected UIDrawable()
     {
         id = Guid.NewGuid().ToString();
         DrawableTracker.Register(this);
@@ -38,14 +32,11 @@ public abstract class UIDrawable : IDisposable
 
     public void UpdateLocalTransformMatrix()
     {
-        Vector3 anchorOffset = new(-anchor.X * size.X, -anchor.Y * size.Y, 0);
-            
-        Matrix translationMatrix = Matrix.Translation(position);
-        Matrix rotationMatrix = Matrix.RotationYawPitchRoll(rotation.Y, rotation.X, rotation.Z);
-        Matrix scaleMatrix = Matrix.Scaling(scale);
-        Matrix anchorMatrix = Matrix.Translation(anchorOffset * scale);
-
-        //combine transformations: anchor * scale * rotation * translation
+        Vector3 anchorOffset = new(-anchor.X * size.X, -anchor.Y * size.Y, 0f);
+        Matrix4x4 translationMatrix = Matrix4x4.CreateTranslation(position);
+        Matrix4x4 rotationMatrix = Matrix4x4.CreateFromYawPitchRoll(rotation.Y, rotation.X, rotation.Z);
+        Matrix4x4 scaleMatrix = Matrix4x4.CreateScale(scale);
+        Matrix4x4 anchorMatrix = Matrix4x4.CreateTranslation(anchorOffset * scale);
         localTransformMatrix = scaleMatrix * anchorMatrix * rotationMatrix * translationMatrix;
     }
 
@@ -60,7 +51,7 @@ public abstract class UIDrawable : IDisposable
         parent = newParent;
     }
 
-    public abstract void Draw(Matrix parentMatrix);
+    public abstract void Draw(Matrix4x4 parentMatrix);
 
     public virtual void Dispose()
     {
@@ -72,14 +63,15 @@ public abstract class UIDrawable : IDisposable
         DrawableTracker.Register(this);
     }
 
-    public Matrix GetFullTransformMatrix()
+    public Matrix4x4 GetFullTransformMatrix()
     {
-        Matrix combined = localTransformMatrix;
+        Matrix4x4 combined = localTransformMatrix;
         UIGroup? currentParent = parent;
         int iterations = 0;
+
         while (currentParent != null && iterations < 100)
         {
-            combined *= currentParent.localTransformMatrix; // LOCAL * PARENT
+            combined *= currentParent.localTransformMatrix;
             currentParent = currentParent.parent;
             iterations++;
         }
@@ -96,7 +88,7 @@ public abstract class UIDrawable : IDisposable
         {
             ImGui.OpenPopup(renameId);
         }
-        
+
         if (ImGui.BeginPopup(renameId))
         {
             ImGui.InputText("Name", ref name, 256);
@@ -104,9 +96,10 @@ public abstract class UIDrawable : IDisposable
             {
                 ImGui.CloseCurrentPopup();
             }
+
             ImGui.EndPopup();
         }
-        
+
         ImGui.InputInt("Render Order", ref renderOrder);
         Inspector.Inspector.Inspect("Position", ref position);
         Inspector.Inspector.Inspect("Anchor", ref anchor);
@@ -114,87 +107,66 @@ public abstract class UIDrawable : IDisposable
         Inspector.Inspector.Inspect("Scale", ref scale);
         Inspector.Inspector.Inspect("Rotation", ref rotation);
         ImGui.Checkbox("Is Visible", ref isVisible);
-        
-        DrawTransformGizmo();
-        
+    }
+
+    public void DrawTransformGizmo()
+    {
         var gizmoRect = InspectorManager.gizmoRect;
-        
-        // Get the view matrix (camera transform) from GameWindow
-        Matrix4x4 view = InspectorManager.GetViewMatrix();
-        
-        view *= Matrix4x4.CreateScale(1, -1, 1); // flip Y axis
-        
-        Matrix4x4 screenOffset = Matrix4x4.CreateTranslation(new System.Numerics.Vector3(-gizmoRect.Width / 2.0f, gizmoRect.Height / 2.0f, 0));
-        view *= screenOffset;
-        
-        // Center-origin orthographic projection
-        float width = gizmoRect.Width;
-        float height = gizmoRect.Height;
-        Matrix4x4 projection = Matrix4x4.CreateOrthographic(width, height, -1f, 1f);
-        
-        //construct transform matrix
-        Matrix translationMatrix = Matrix.Translation(position);
-        Matrix rotationMatrix = Matrix.RotationYawPitchRoll(rotation.Y, rotation.X, rotation.Z);
-        Matrix scaleMatrix = Matrix.Scaling(scale);
-        Matrix anchorMatrix = Matrix.Identity; //Matrix.Translation(anchorOffset);
-
-        //combine transformations (but skip anchor, since we don't want it to affect the gizmo)
-        Matrix transform = (scaleMatrix * rotationMatrix * anchorMatrix * translationMatrix);
-        
-        //construct parent matrix
-        Matrix parentMatrix = parent?.GetFullTransformMatrix() ?? Matrix.Identity;
-        
-        Matrix combined = transform * parentMatrix;
-        Matrix4x4 transform4x4 = combined.ToMatrix4x4();
-        
-        Matrix4x4 deltaMatrix = Matrix4x4.Identity;
-
-        ImGuizmoOperation operations = ImGuizmoOperation.TranslateX | ImGuizmoOperation.TranslateY |
-                                       ImGuizmoOperation.RotateZ | 
-                                       ImGuizmoOperation.ScaleX | ImGuizmoOperation.ScaleY;
-        
-        if (ImGuizmo.Manipulate(ref view, ref projection, operations, ImGuizmoMode.World, ref transform4x4, ref deltaMatrix))
+        if (gizmoRect.Width <= 0 || gizmoRect.Height <= 0)
         {
-            var mat = (transform4x4);// * inverseScreenSpaceTransform);
-            
-            //remove parent transform
-            parentMatrix.Invert();
-            
-            //update local transform matrix
-            localTransformMatrix = mat.ToMatrix() * parentMatrix;
-            
-            localTransformMatrix.Decompose(out scale, out Quaternion rot, out position);
-            
-            //update rotation: convert quaternion to euler angles
-            //for now we only care about z
-            rotation.Z = MathF.Atan2(2 * (rot.W * rot.Z + rot.X * rot.Y), 1 - 2 * (rot.Y * rot.Y + rot.Z * rot.Z));
+            return;
         }
 
-        if (ImGuizmo.IsUsing())
+        DrawBoundsGizmo();
+
+        Matrix4x4 viewMatrix = InspectorManager.GetViewMatrix();
+        Matrix4x4 projectionMatrix = Matrix4x4.CreateOrthographicOffCenter(0, gizmoRect.Width, gizmoRect.Height, 0, -1f, 1f);
+
+        Matrix4x4 localWithoutAnchor =
+            Matrix4x4.CreateScale(scale) *
+            Matrix4x4.CreateFromYawPitchRoll(rotation.Y, rotation.X, rotation.Z) *
+            Matrix4x4.CreateTranslation(position);
+
+        Matrix4x4 parentMatrix = parent?.GetFullTransformMatrix() ?? Matrix4x4.Identity;
+        Matrix4x4 worldMatrix = localWithoutAnchor * parentMatrix;
+        Matrix4x4 deltaMatrix = Matrix4x4.Identity;
+
+        ImGuizmoOperation operations =
+            ImGuizmoOperation.TranslateX | ImGuizmoOperation.TranslateY |
+            ImGuizmoOperation.RotateZ |
+            ImGuizmoOperation.ScaleX | ImGuizmoOperation.ScaleY;
+
+        if (ImGuizmo.Manipulate(ref viewMatrix, ref projectionMatrix, operations, ImGuizmoMode.World, ref worldMatrix, ref deltaMatrix))
         {
-            //mutliply with inverse
-            localTransformMatrix *= (deltaMatrix).ToMatrix();
+            if (!Matrix4x4.Invert(parentMatrix, out Matrix4x4 inverseParent))
+            {
+                inverseParent = Matrix4x4.Identity;
+            }
+
+            Matrix4x4 localMatrix = worldMatrix * inverseParent;
+            if (Matrix4x4.Decompose(localMatrix, out Vector3 newScale, out Quaternion newRotation, out Vector3 newPosition))
+            {
+                scale = newScale;
+                position = newPosition;
+                rotation = QuaternionToEuler(newRotation);
+            }
         }
     }
 
-    private void DrawTransformGizmo()
+    private void DrawBoundsGizmo()
     {
-        // Create a quad in local 3D space (Z=0)
         Vector3 quadTopLeft = new(0, 0, 0);
         Vector3 quadTopRight = new(size.X, 0, 0);
         Vector3 quadBottomLeft = new(0, size.Y, 0);
         Vector3 quadBottomRight = new(size.X, size.Y, 0);
 
-        // Full world transform
-        Matrix t = GetFullTransformMatrix();
+        Matrix4x4 transform = GetFullTransformMatrix();
 
-        // Transform points using full matrix
-        Vector3.TransformCoordinate(ref quadTopLeft, ref t, out Vector3 worldTopLeft);
-        Vector3.TransformCoordinate(ref quadTopRight, ref t, out Vector3 worldTopRight);
-        Vector3.TransformCoordinate(ref quadBottomLeft, ref t, out Vector3 worldBottomLeft);
-        Vector3.TransformCoordinate(ref quadBottomRight, ref t, out Vector3 worldBottomRight);
+        Vector3 worldTopLeft = Vector3.Transform(quadTopLeft, transform);
+        Vector3 worldTopRight = Vector3.Transform(quadTopRight, transform);
+        Vector3 worldBottomLeft = Vector3.Transform(quadBottomLeft, transform);
+        Vector3 worldBottomRight = Vector3.Transform(quadBottomRight, transform);
 
-        // Draw the quad in 2D screen space (ignore Z after transformation)
         InspectorManager.DrawGizmoQuad(
             new Vector2(worldTopLeft.X, worldTopLeft.Y),
             new Vector2(worldTopRight.X, worldTopRight.Y),
@@ -202,14 +174,30 @@ public abstract class UIDrawable : IDisposable
             new Vector2(worldBottomRight.X, worldBottomRight.Y),
             0xFF00FF00);
 
-        // Draw the center point
-        Vector3 center = (quadTopLeft + quadTopRight + quadBottomLeft + quadBottomRight) / 4;
-        Vector3.TransformCoordinate(ref center, ref t, out Vector3 transformedCenter);
+        Vector3 center = (quadTopLeft + quadTopRight + quadBottomLeft + quadBottomRight) / 4f;
+        Vector3 transformedCenter = Vector3.Transform(center, transform);
         InspectorManager.DrawGizmoPoint(new Vector2(transformedCenter.X, transformedCenter.Y), 15, 0xFFFF0000, 2.5f);
 
-        // Draw anchor point
-        Vector3 anchorPoint = new(anchor.X * size.X, anchor.Y * size.Y, 0);
-        Vector3.TransformCoordinate(ref anchorPoint, ref t, out Vector3 transformedAnchor);
+        Vector3 anchorPoint = new(anchor.X * size.X, anchor.Y * size.Y, 0f);
+        Vector3 transformedAnchor = Vector3.Transform(anchorPoint, transform);
         InspectorManager.DrawGizmoPoint(new Vector2(transformedAnchor.X, transformedAnchor.Y), 20, 0xFF0000FF, 2.5f);
+    }
+
+    private static Vector3 QuaternionToEuler(Quaternion quaternion)
+    {
+        Vector3 angles = Vector3.Zero;
+
+        float sinrCosp = 2f * (quaternion.W * quaternion.X + quaternion.Y * quaternion.Z);
+        float cosrCosp = 1f - 2f * (quaternion.X * quaternion.X + quaternion.Y * quaternion.Y);
+        angles.X = MathF.Atan2(sinrCosp, cosrCosp);
+
+        float sinp = 2f * (quaternion.W * quaternion.Y - quaternion.Z * quaternion.X);
+        angles.Y = MathF.Abs(sinp) >= 1f ? MathF.CopySign(MathF.PI / 2f, sinp) : MathF.Asin(sinp);
+
+        float sinyCosp = 2f * (quaternion.W * quaternion.Z + quaternion.X * quaternion.Y);
+        float cosyCosp = 1f - 2f * (quaternion.Y * quaternion.Y + quaternion.Z * quaternion.Z);
+        angles.Z = MathF.Atan2(sinyCosp, cosyCosp);
+
+        return angles;
     }
 }

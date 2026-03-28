@@ -1,11 +1,11 @@
 ﻿using System.Diagnostics;
+using System.Numerics;
 using DiscordRPC;
 using DTXMania.Core;
 using DTXMania.SongDb;
 using DTXMania.SongDb.Sorting;
 using DTXMania.UI;
 using DTXMania.UI.Drawable;
-using SharpDX;
 
 namespace DTXMania;
 
@@ -90,7 +90,7 @@ public class CStageSongSelectionNew : CStage
 
     public override void InitializeDefaultUI()
     {
-        DTXTexture bgTex = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_background.jpg"));
+        BaseTexture bgTex = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\5_background.jpg"));
         UIImage bg = ui.AddChild(new UIImage(bgTex));
         bg.renderOrder = -100;
         bg.position = Vector3.Zero;
@@ -101,13 +101,13 @@ public class CStageSongSelectionNew : CStage
         backgroundVideo.name = "BackgroundVideo";
         
         //create panel elements
-        var back1 = ui.AddChild(new UIImage(DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\SongSelect\back1.png"))));
+        var back1 = ui.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\SongSelect\back1.png"))));
         back1.renderOrder = 1;
         back1.position = new Vector3(174, 393, 0);
         back1.rotation = new Vector3(0, 0, 1.63f);
         back1.name = "Back1";
         
-        var back2 = ui.AddChild(new UIImage(DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\SongSelect\back2.png"))));
+        var back2 = ui.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\SongSelect\back2.png"))));
         back2.renderOrder = 2;
         back2.position = new Vector3(126, 336, 0);
         back2.rotation = new Vector3(0, 0, -0.06f);
@@ -118,7 +118,7 @@ public class CStageSongSelectionNew : CStage
         densityGraph1.renderOrder = 4;
         densityGraph1.name = "DensityGraph";
         
-        var topBar = ui.AddChild(new UIImage(DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\SongSelect\top_bar.png"))));
+        var topBar = ui.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\SongSelect\top_bar.png"))));
         topBar.renderOrder = 12;
         topBar.name = "TopBar";
         topBar.size.X = 1280;

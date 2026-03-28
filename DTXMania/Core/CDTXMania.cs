@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Drawing;
+using System.Numerics;
 using System.Reflection;
 using System.Runtime;
 using System.Text;
@@ -13,7 +14,6 @@ using Hexa.NET.ImGuizmo;
 using SampleFramework;
 using SharpDX;
 using SharpDX.Direct3D9;
-using ImGui = Hexa.NET.ImGui.ImGui;
 using Point = System.Drawing.Point;
 using ResourceManager = DTXMania.UI.ResourceManager;
 using Vector2 = System.Numerics.Vector2;
@@ -25,10 +25,10 @@ using DTXMania.UI.Inspector;
 //#endif
 
 using DTXMania.UI.Skin;
-using Microsoft.VisualBasic.Logging;
 using Color = System.Drawing.Color;
 using Font = System.Drawing.Font;
 using RectangleF = SharpDX.RectangleF;
+using Vector3 = SharpDX.Vector3;
 
 namespace DTXMania.Core;
 
@@ -38,9 +38,7 @@ internal class CDTXMania : Game
     //these get set when initializing the game
     public static string VERSION_DISPLAY; // = "DTX:NX:A:A:2024051900";
     public static string VERSION; // = "v1.4.2 20240519";
-
-    public const string D3DXDLL = "d3dx9_43.dll"; // June 2010
-
+    
     public static CDTXMania app { get; private set; }
 
     public static CCharacterConsole actDisplayString // act文字コンソール
@@ -195,7 +193,6 @@ internal class CDTXMania : Game
     }
 
     //		public static CTimer ct;
-    public IntPtr WindowHandle => Window.Handle; // 2012.10.24 yyagi; to add ASIO support
     public static CDTXVmode DTXVmode; // #28821 2014.1.23 yyagi
     public static CDTX2WAVmode DTX2WAVmode;
 
@@ -593,92 +590,89 @@ internal class CDTXMania : Game
 
         #endregion
         
-        #region [ Initialize window ]
+        // #region [ Initialize window ]
+        //
+        // //---------------------
+        // strWindowTitle = appName + " " + VERSION;
+        // Window.StartPosition = FormStartPosition.Manual; // #30675 2013.02.04 ikanick add
+        // Window.Location = new Point(ConfigIni.nInitialWindowXPosition, ConfigIni.nInitialWindowYPosition); // #30675 2013.02.04 ikanick add
+        //
+        // Window.Text = strWindowTitle;
+        // Window.ClientSize = new Size(ConfigIni.nWindowWidth, ConfigIni.nWindowHeight); // #34510 yyagi 2010.10.31 to change window size got from Config.ini
+        // if (!ConfigIni.bFullScreenExclusive ||
+        //     ConfigIni.bFullScreenMode) // #23510 2010.11.02 yyagi: add; to recover window size in case bootup with fullscreen mode
+        // {
+        //     currentClientSize = new Size(ConfigIni.nWindowWidth, ConfigIni.nWindowHeight);
+        // }
+        //
+        // Window.MaximizeBox = true; // #23510 2010.11.04 yyagi: to support maximizing window
+        // Window.FormBorderStyle = FormBorderStyle.Sizable; // #23510 2010.10.27 yyagi: changed from FixedDialog to Sizable, to support window resize
+        // Window.ShowIcon = true;
+        // base.Window.Icon = Properties.Resources.dtx;
+        // Window.KeyDown += Window_KeyDown;
+        // Window.KeyUp += Window_KeyUp;
+        // Window.KeyPress += Window_KeyPress;
+        // Window.MouseMove += Window_MouseMove;
+        // Window.MouseDown += Window_MouseDown;
+        // Window.MouseUp += Window_MouseUp;
+        // Window.MouseWheel += Window_MouseWheel;
+        // Window.MouseDoubleClick += Window_MouseDoubleClick; // #23510 2010.11.13 yyagi: to go fullscreen mode
+        // Window.ResizeEnd += Window_ResizeEnd; // #23510 2010.11.20 yyagi: to set resized window size in Config.ini
+        // Window.ApplicationActivated += Window_ApplicationActivated;
+        // Window.ApplicationDeactivated += Window_ApplicationDeactivated;
+        // //Add CIMEHook
+        // Window.Controls.Add(cIMEHook = new CIMEHook());
+        // //---------------------
+        //
+        // #endregion
 
-        //---------------------
-        strWindowTitle = appName + " " + VERSION;
-        Window.StartPosition = FormStartPosition.Manual; // #30675 2013.02.04 ikanick add
-        Window.Location = new Point(ConfigIni.nInitialWindowXPosition, ConfigIni.nInitialWindowYPosition); // #30675 2013.02.04 ikanick add
-
-        Window.Text = strWindowTitle;
-        Window.ClientSize = new Size(ConfigIni.nWindowWidth, ConfigIni.nWindowHeight); // #34510 yyagi 2010.10.31 to change window size got from Config.ini
-        if (!ConfigIni.bFullScreenExclusive ||
-            ConfigIni.bFullScreenMode) // #23510 2010.11.02 yyagi: add; to recover window size in case bootup with fullscreen mode
-        {
-            currentClientSize = new Size(ConfigIni.nWindowWidth, ConfigIni.nWindowHeight);
-        }
-
-        Window.MaximizeBox = true; // #23510 2010.11.04 yyagi: to support maximizing window
-        Window.FormBorderStyle = FormBorderStyle.Sizable; // #23510 2010.10.27 yyagi: changed from FixedDialog to Sizable, to support window resize
-        Window.ShowIcon = true;
-        base.Window.Icon = Properties.Resources.dtx;
-        Window.KeyDown += Window_KeyDown;
-        Window.KeyUp += Window_KeyUp;
-        Window.KeyPress += Window_KeyPress;
-        Window.MouseMove += Window_MouseMove;
-        Window.MouseDown += Window_MouseDown;
-        Window.MouseUp += Window_MouseUp;
-        Window.MouseWheel += Window_MouseWheel;
-        Window.MouseDoubleClick += Window_MouseDoubleClick; // #23510 2010.11.13 yyagi: to go fullscreen mode
-        Window.ResizeEnd += Window_ResizeEnd; // #23510 2010.11.20 yyagi: to set resized window size in Config.ini
-        Window.ApplicationActivated += Window_ApplicationActivated;
-        Window.ApplicationDeactivated += Window_ApplicationDeactivated;
-        //Add CIMEHook
-        Window.Controls.Add(cIMEHook = new CIMEHook());
-        //---------------------
-
-        #endregion
-
-        //Init DX9
-        SafeInitialize("DX9", () =>
-        {
-            DeviceSettings settings = new();
-            if (ConfigIni.bFullScreenExclusive)
-            {
-                settings.Windowed = ConfigIni.bWindowMode;
-            }
-            else
-            {
-                settings.Windowed = true; // #30666 2013.2.2 yyagi: Fullscreenmode is "Maximized window" mode
-            }
-
-            settings.BackBufferWidth = GameWindowSize.Width;
-            settings.BackBufferHeight = GameWindowSize.Height;
-
-            settings.EnableVSync = ConfigIni.bVerticalSyncWait;
-
-            if (ConfigIni.bWindowMode)
-            {
-                settings.BackBufferWidth = ConfigIni.nWindowWidth;
-                settings.BackBufferHeight = ConfigIni.nWindowHeight;
-            }
-            else
-            {
-                if (ConfigIni.bFullScreenExclusive)
-                {
-                    settings.BackBufferWidth = Screen.PrimaryScreen.Bounds.Width;
-                    settings.BackBufferHeight = Screen.PrimaryScreen.Bounds.Height;
-                }
-            }
-
-            GraphicsDeviceManager.ChangeDevice(settings);
-            
-            IsFixedTimeStep = false;
-            Window.ClientSize = new Size(ConfigIni.nWindowWidth, ConfigIni.nWindowHeight);
-            InactiveSleepTime = TimeSpan.FromMilliseconds((float)(ConfigIni.n非フォーカス時スリープms));
-
-            // #23568 2010.11.4 ikanick changed ( 1 -> ConfigIni )
-            if (!ConfigIni.bFullScreenExclusive)
-            {
-                tSwitchFullScreenMode(); // #30666 2013.2.2 yyagi: finalize settings for "Maximized window mode"
-            }
-
-            actFlushGPU = new CActFlushGPU();
-        });
+        // //Init DX9
+        // SafeInitialize("DX9", () =>
+        // {
+        //     DeviceSettings settings = new();
+        //     if (ConfigIni.bFullScreenExclusive)
+        //     {
+        //         settings.Windowed = ConfigIni.bWindowMode;
+        //     }
+        //     else
+        //     {
+        //         settings.Windowed = true; // #30666 2013.2.2 yyagi: Fullscreenmode is "Maximized window" mode
+        //     }
+        //
+        //     settings.BackBufferWidth = GameWindowSize.Width;
+        //     settings.BackBufferHeight = GameWindowSize.Height;
+        //
+        //     settings.EnableVSync = ConfigIni.bVerticalSyncWait;
+        //
+        //     if (ConfigIni.bWindowMode)
+        //     {
+        //         settings.BackBufferWidth = ConfigIni.nWindowWidth;
+        //         settings.BackBufferHeight = ConfigIni.nWindowHeight;
+        //     }
+        //     else
+        //     {
+        //         if (ConfigIni.bFullScreenExclusive)
+        //         {
+        //             settings.BackBufferWidth = Screen.PrimaryScreen.Bounds.Width;
+        //             settings.BackBufferHeight = Screen.PrimaryScreen.Bounds.Height;
+        //         }
+        //     }
+        //
+        //     GraphicsDeviceManager.ChangeDevice(settings);
+        //     
+        //     IsFixedTimeStep = false;
+        //     Window.ClientSize = new Size(ConfigIni.nWindowWidth, ConfigIni.nWindowHeight);
+        //     InactiveSleepTime = TimeSpan.FromMilliseconds((float)(ConfigIni.n非フォーカス時スリープms));
+        //
+        //     // #23568 2010.11.4 ikanick changed ( 1 -> ConfigIni )
+        //     if (!ConfigIni.bFullScreenExclusive)
+        //     {
+        //         tSwitchFullScreenMode(); // #30666 2013.2.2 yyagi: finalize settings for "Maximized window mode"
+        //     }
+        //
+        //     actFlushGPU = new CActFlushGPU();
+        // });
         
-        UpdateFallback();
-        DTXTexture.UpdateFallback();
-
         DTX = null;
 
         Resources = new ResourceManager();
@@ -804,8 +798,8 @@ internal class CDTXMania : Game
         #endregion
         
         SongDBStatus songDbStatus = persistentUIGroup.AddChild(new SongDBStatus());
-        songDbStatus.position = new Vector3(0, 720, 0);
-        songDbStatus.anchor = new SharpDX.Vector2(0.0f, 1.0f);
+        songDbStatus.position = new System.Numerics.Vector3(0, 720, 0);
+        songDbStatus.anchor = new Vector2(0.0f, 1.0f);
         
         gitadoraTransition = persistentUIGroup.AddChild(new GitaDoraTransition());
         
@@ -982,8 +976,8 @@ internal class CDTXMania : Game
 
         unsafe
         {
-            var font = ImGui.GetIO().Fonts.AddFontFromFileTTF(Path.Combine(executableDirectory, "Fonts", "NotoSansCJKjp-Regular.otf"), 20f, ImGui.GetIO().Fonts.GetGlyphRangesJapanese()); 
-            ImGui.GetIO().Fonts.Build();
+            //var font = ImGui.GetIO().Fonts.AddFontFromFileTTF(Path.Combine(executableDirectory, "Fonts", "NotoSansCJKjp-Regular.otf"), 20f, ImGui.GetIO().Fonts.GetGlyphRangesJapanese()); 
+            // ImGui.GetIO().Fonts.Build();
         }
 
         var settings = app.GraphicsDeviceManager.CurrentSettings;
@@ -1064,6 +1058,11 @@ internal class CDTXMania : Game
 
     protected override void Draw(GameTime gameTime)
     {
+        Draw();
+    }
+
+    public void Draw()
+    {
         float delta = (Timer.nCurrentTime - lastDrawTime) / 1000.0f;
         lastDrawTime = Timer.nCurrentTime;
         GameStatus.UpdatePerformanceGraph(delta);
@@ -1100,8 +1099,8 @@ internal class CDTXMania : Game
         if (FPS != null)
             FPS.tUpdateCounter();
 
-        if (Device == null)
-            return;
+        // if (Device == null)
+        //     return;
 
         if (bApplicationActive) // DTXMania本体起動中の本体/モニタの省電力モード移行を抑止
             CPowerManagement.tDisableMonitorSuspend();
@@ -1117,115 +1116,113 @@ internal class CDTXMania : Game
 
         #endregion
 
-        ProcessWindowMessages();
+        //ProcessWindowMessages();
 
-        bool forceFrameBufferRenderer = StageManager.rCurrentStage.eStageID is CStage.EStage.Performance_6 or CStage.EStage.Result_7;
-        
+//         bool forceFrameBufferRenderer = StageManager.rCurrentStage.eStageID is CStage.EStage.Performance_6 or CStage.EStage.Result_7;
+//         
+// //#if INSPECTOR
+//         //cache this value to prevent it from changing during the frame
+//         bool renderGameToWindow = renderGameToSurface;
+//
+//         if (renderGameToWindow || forceFrameBufferRenderer)
+//         {
+//             Device.SetRenderTarget(0, gameRenderTargetSurface);
+//         }
+// //#endif
+//
+//         Device.Clear(ClearFlags.ZBuffer | ClearFlags.Target, SharpDX.Color.Black, 1f, 0);
+//         Device.BeginScene();
+
 //#if INSPECTOR
-        //cache this value to prevent it from changing during the frame
-        bool renderGameToWindow = renderGameToSurface;
+        // ImGui.SetCurrentContext(context);
+        // ImGuizmo.SetImGuiContext(context);
+        // ImGuiImplD3D9.SetCurrentContext(context);
+        //
+        // ImGuiImplD3D9.NewFrame();
+        // ImGui.NewFrame();
+        //
+        // ImGuizmo.BeginFrame();
+        //
+        // ImGuizmo.Enable(true);
+        // ImGuizmo.SetOrthographic(true);
 
-        if (renderGameToWindow || forceFrameBufferRenderer)
-        {
-            Device.SetRenderTarget(0, gameRenderTargetSurface);
-        }
-//#endif
-
-        Device.Clear(ClearFlags.ZBuffer | ClearFlags.Target, SharpDX.Color.Black, 1f, 0);
-        Device.BeginScene();
-
-//#if INSPECTOR
-        ImGui.SetCurrentContext(context);
-        ImGuizmo.SetImGuiContext(context);
-        ImGuiImplD3D9.SetCurrentContext(context);
-
-        ImGuiImplD3D9.NewFrame();
-        ImGui.NewFrame();
-
-        ImGuizmo.BeginFrame();
-
-        ImGuizmo.Enable(true);
-        ImGuizmo.SetOrthographic(true);
-
-        if (!renderGameToWindow && !forceFrameBufferRenderer)
-        {
-            ImGuiIOPtr io = ImGui.GetIO();
-            ImGuizmo.SetRect(0, 0, io.DisplaySize.X, io.DisplaySize.Y);
-            ImGuizmo.SetDrawlist(ImGui.GetBackgroundDrawList());
-        }
-//#endif
-
-        renderScale = forceFrameBufferRenderer ? 1.0f : physicalRenderScale;
+//         if (!renderGameToWindow && !forceFrameBufferRenderer)
+//         {
+//             ImGuiIOPtr io = ImGui.GetIO();
+//             ImGuizmo.SetRect(0, 0, io.DisplaySize.X, io.DisplaySize.Y);
+//             ImGuizmo.SetDrawlist(ImGui.GetBackgroundDrawList());
+//         }
+// //#endif
+//
+//         renderScale = forceFrameBufferRenderer ? 1.0f : physicalRenderScale;
         StageManager.DrawStage();
         
         persistentUIGroup.scale.X = renderScale;
         persistentUIGroup.scale.Y = renderScale;
-        persistentUIGroup.Draw(Matrix.Identity);
+        persistentUIGroup.Draw(Matrix4x4.Identity);
         renderScale = physicalRenderScale;
 
         StageManager.HandleStageChanges();
 
 //#if INSPECTOR
-        if (renderGameToWindow || forceFrameBufferRenderer)
-        {
-            Device.SetRenderTarget(0, mainRenderTarget);
-            Device.Clear(ClearFlags.ZBuffer | ClearFlags.Target, SharpDX.Color.Black, 1f, 0);
-        }
+        // if (renderGameToWindow || forceFrameBufferRenderer)
+        // {
+        //     Device.SetRenderTarget(0, mainRenderTarget);
+        //     Device.Clear(ClearFlags.ZBuffer | ClearFlags.Target, SharpDX.Color.Black, 1f, 0);
+        // }
+        //
+        // if (forceFrameBufferRenderer)
+        // {
+        //     CTexture.tDraw2DMatrix(app.Device, gameRenderTargetTexture, Matrix.Scaling(physicalRenderScale), new SharpDX.Vector2(GameFramebufferSize.Width, GameFramebufferSize.Height), new RectangleF(0, 0, GameFramebufferSize.Width, GameFramebufferSize.Height));
+        // }
         
-        if (forceFrameBufferRenderer)
-        {
-            CTexture.tDraw2DMatrix(app.Device, gameRenderTargetTexture, Matrix.Scaling(physicalRenderScale), new SharpDX.Vector2(GameFramebufferSize.Width, GameFramebufferSize.Height), new RectangleF(0, 0, GameFramebufferSize.Width, GameFramebufferSize.Height));
-        }
-
-        InspectorManager.Draw(renderGameToWindow, gameRenderTargetTexture);
-        
-        Device.EndScene();
-
-        ImGui.EndFrame();
-        ImGui.Render();
-        ImGuiImplD3D9.RenderDrawData(ImGui.GetDrawData());
+        // Device.EndScene();
+        //
+        // ImGui.EndFrame();
+        // ImGui.Render();
+        // ImGuiImplD3D9.RenderDrawData(ImGui.GetDrawData());
 //#else
 // Device.EndScene();
 //#endif
 
         // Present()は game.csのOnFrameEnd()に登録された、GraphicsDeviceManager.game_FrameEnd() 内で実行されるので不要
         // (つまり、Present()は、Draw()完了後に実行される)
-        actFlushGPU.OnUpdateAndDraw(); // Flush GPU	// EndScene()～Present()間 (つまりVSync前) でFlush実行
+        //actFlushGPU.OnUpdateAndDraw(); // Flush GPU	// EndScene()～Present()間 (つまりVSync前) でFlush実行
 
-        #region [ Fullscreen mode switching ]
-
-        if (changeFullscreenModeOnNextFrame)
-        {
-            ConfigIni.bFullScreenMode = !ConfigIni.bFullScreenMode;
-            app.tSwitchFullScreenMode();
-            changeFullscreenModeOnNextFrame = false;
-        }
-
-        #endregion
-
-        #region [ VSync switching ]
-
-        if (changeVSyncModeOnNextFrame)
-        {
-            bool bIsMaximized =
-                Window.IsMaximized; // #23510 2010.11.3 yyagi: to backup current window mode before changing VSyncWait
-            currentClientSize =
-                Window.ClientSize; // #23510 2010.11.3 yyagi: to backup current window size before changing VSyncWait
-            DeviceSettings currentSettings = app.GraphicsDeviceManager.CurrentSettings;
-            currentSettings.EnableVSync = ConfigIni.bVerticalSyncWait;
-            app.GraphicsDeviceManager.ChangeDevice(currentSettings);
-            changeVSyncModeOnNextFrame = false;
-            Window.ClientSize =
-                new Size(currentClientSize.Width,
-                    currentClientSize.Height); // #23510 2010.11.3 yyagi: to resume window size after changing VSyncWait
-            if (bIsMaximized)
-            {
-                Window.WindowState =
-                    FormWindowState.Maximized; // #23510 2010.11.3 yyagi: to resume window mode after changing VSyncWait
-            }
-        }
-
-        #endregion
+        // #region [ Fullscreen mode switching ]
+        //
+        // if (changeFullscreenModeOnNextFrame)
+        // {
+        //     ConfigIni.bFullScreenMode = !ConfigIni.bFullScreenMode;
+        //     app.tSwitchFullScreenMode();
+        //     changeFullscreenModeOnNextFrame = false;
+        // }
+        //
+        // #endregion
+        //
+        // #region [ VSync switching ]
+        //
+        // if (changeVSyncModeOnNextFrame)
+        // {
+        //     bool bIsMaximized =
+        //         Window.IsMaximized; // #23510 2010.11.3 yyagi: to backup current window mode before changing VSyncWait
+        //     currentClientSize =
+        //         Window.ClientSize; // #23510 2010.11.3 yyagi: to backup current window size before changing VSyncWait
+        //     DeviceSettings currentSettings = app.GraphicsDeviceManager.CurrentSettings;
+        //     currentSettings.EnableVSync = ConfigIni.bVerticalSyncWait;
+        //     app.GraphicsDeviceManager.ChangeDevice(currentSettings);
+        //     changeVSyncModeOnNextFrame = false;
+        //     Window.ClientSize =
+        //         new Size(currentClientSize.Width,
+        //             currentClientSize.Height); // #23510 2010.11.3 yyagi: to resume window size after changing VSyncWait
+        //     if (bIsMaximized)
+        //     {
+        //         Window.WindowState =
+        //             FormWindowState.Maximized; // #23510 2010.11.3 yyagi: to resume window mode after changing VSyncWait
+        //     }
+        // }
+        //
+        // #endregion
     }
 
     private void ProcessWindowMessages()
@@ -1299,33 +1296,6 @@ internal class CDTXMania : Game
     // Other
 
     #region [ Texture Creation / Disposal (why is this in the main game class??) ]
-
-    private static CTexture fallbackTexture;
-    public static CTexture FallbackTexture => fallbackTexture;
-    
-    public static void UpdateFallback()
-    {
-        if (fallbackTexture != null)
-        {
-            tReleaseTexture(ref fallbackTexture);
-        }
-
-        Font fallbackFont = new("MS PGothic", 16f, GraphicsUnit.Pixel);
-        Bitmap bitmap = new(64, 64);
-        
-        Graphics graphics = Graphics.FromImage(bitmap);
-        
-        //fill with black
-        graphics.Clear(Color.Black);
-        graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
-        graphics.DrawString("ERROR ERROR ERROR ERROR ERROR", fallbackFont, Brushes.White, 0f, 0f);
-        graphics.DrawString("ERROR ERROR ERROR ERROR ERROR", fallbackFont, Brushes.White, 0f, 16f);
-        graphics.DrawString("ERROR ERROR ERROR ERROR ERROR", fallbackFont, Brushes.White, 0f, 32f);
-        graphics.DrawString("ERROR ERROR ERROR ERROR ERROR", fallbackFont, Brushes.White, 0f, 48f);
-        graphics.Dispose();
-        fallbackTexture = new CTexture(app.Device, bitmap, TextureFormat, false);
-        bitmap.Dispose();
-    }
     
     public static CTexture tGenerateTexture(string fileName)
     {
@@ -1336,7 +1306,7 @@ internal class CDTXMania : Game
     {
         if (app == null)
         {
-            return fallbackTexture;
+            return null;
         }
 
         try
@@ -1346,18 +1316,18 @@ internal class CDTXMania : Game
         catch (CTextureCreateFailedException e)
         {
             Trace.TraceError($"Couldn't create texture: ({fileName}) {e.Message}");
-            return fallbackTexture;
+            return null;
         }
         catch (FileNotFoundException e)
         {
             Trace.TraceError($"Couldn't find texture file: ({fileName}) {e.Message}");
-            return fallbackTexture;
+            return null;
         }
     }
 
     public static void tReleaseTexture(ref CTexture? tx)
     {
-        if (tx != null && tx != fallbackTexture)
+        if (tx != null)
         {
             //Trace.WriteLine( "CTextureを解放 Size W:" + tx.szImageSize.Width + " H:" + tx.szImageSize.Height );
             tx.Dispose();
@@ -1606,11 +1576,6 @@ internal class CDTXMania : Game
                     Skin.tSaveSkinConfig();
                     Skin.Dispose();
                     Skin = null;
-                }
-                
-                if (fallbackTexture != null)
-                {
-                    tDisposeSafely(ref fallbackTexture);
                 }
             });
             SafeTerminate("SoundManager", () => { SoundManager.Dispose(); });

@@ -27,7 +27,7 @@ internal class CStageEnd : CStage
 
 	public override void InitializeDefaultUI()
 	{
-		ui.AddChild(new UIImage(DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\9_background.jpg"))));
+		ui.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\9_background.jpg"))));
 	}
 	
 	public override void OnActivate()

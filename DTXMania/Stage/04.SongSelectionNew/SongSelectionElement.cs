@@ -1,14 +1,14 @@
 ﻿using System.Diagnostics;
 using System.Drawing;
+using System.Numerics;
 using DTXMania.Core;
 using DTXMania.SongDb;
 using DTXMania.UI;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.Inspector;
+using DTXMania.UI.Text;
 using Hexa.NET.ImGui;
-using SharpDX;
 using Color = System.Drawing.Color;
-using RectangleF = SharpDX.RectangleF;
 
 namespace DTXMania;
 
@@ -28,19 +28,19 @@ public class SongSelectionElement : UIGroup
 
     public static void LoadSongSelectElementAssets()
     {
-        bar = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_bar.png"));
-        boxClosed = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_box_closed.png"));
-        boxOpen = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_box_open.png"));
-        skillBarTex = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_skillbar.png"));
-        skillBarFillTex = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_skillbar_fill.png"));
+        bar = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\5_bar.png"));
+        boxClosed = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\5_box_closed.png"));
+        boxOpen = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\5_box_open.png"));
+        skillBarTex = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\5_skillbar.png"));
+        skillBarFillTex = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\5_skillbar_fill.png"));
         
         //load lamp textures
-        lampTextures = new DTXTexture[6];
+        lampTextures = new BaseTexture[6];
         for (int i = 0; i < 6; i++)
         {
-            lampTextures[i] = DTXTexture.LoadFromPath(CSkin.Path($@"Graphics\Lamp\{i:00}.png"));
+            lampTextures[i] = BaseTexture.LoadFromPath(CSkin.Path($@"Graphics\Lamp\{i:00}.png"));
         }
-        lampGlow = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\Lamp\GLOW.png"));
+        lampGlow = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\Lamp\GLOW.png"));
     }
 
     public static void DisposeSongSelectElementAssets()
@@ -81,8 +81,8 @@ public class SongSelectionElement : UIGroup
         FontFamily family = new(CDTXMania.ConfigIni.songListFont);
         
         songTitleText = AddChild(new HorizontallyScrollingText(family, 18));
-        songTitleText.fontColor = Color.Black;
-        songTitleText.edgeColor = Color.White;
+        songTitleText.fillColor = Color4.FromColor(Color.Black);
+        songTitleText.outlineColor = Color4.FromColor(Color.White);
         songTitleText.position = new Vector3(78, 38, 0);
         songTitleText.anchor = new Vector2(0, 0.5f);
         songTitleText.renderOrder = 1;
@@ -92,8 +92,8 @@ public class SongSelectionElement : UIGroup
         
         songArtistText = AddChild(new HorizontallyScrollingText(family, 12));
         songArtistText.position = new Vector3(80, 60, 0);
-        songArtistText.fontColor = Color.Black;
-        songArtistText.edgeColor = Color.White;
+        songArtistText.fillColor = Color4.FromColor(Color.Black);
+        songArtistText.outlineColor = Color4.FromColor(Color.White);
         songArtistText.anchor = new Vector2(0, 0.5f);
         songArtistText.renderOrder = 1;
         songArtistText.name = "artist";
@@ -115,12 +115,10 @@ public class SongSelectionElement : UIGroup
         skillbarFill.renderOrder = 1;
         skillbarFill.isVisible = false;
         
-        skillText = AddChild(new UIText(family, 12));
+        skillText = AddChild(new UIText("", 12));
         skillText.position = new Vector3(105.0f, 16.0f, 0.0f);
-        skillText.fontColor = Color.White;
-        skillText.drawMode = CPrivateFont.DrawMode.Normal;
-        skillText.fontStyle = FontStyle.Italic;
-        skillText.UpdateFont();
+        skillText.fillColor = Color4.FromColor(Color.White);
+        skillText.style = UiTextStyle.Italic;
         skillText.anchor = new Vector2(0, 0.5f);
         skillText.name = "skilltext";
         skillText.renderOrder = 2;
@@ -143,14 +141,14 @@ public class SongSelectionElement : UIGroup
     private UIText skillText;
     private UIImage lamp;
 
-    private static DTXTexture bar;
-    private static DTXTexture boxClosed;
-    private static DTXTexture boxOpen;
-    private static DTXTexture skillBarTex;
-    private static DTXTexture skillBarFillTex;
+    private static BaseTexture bar;
+    private static BaseTexture boxClosed;
+    private static BaseTexture boxOpen;
+    private static BaseTexture skillBarTex;
+    private static BaseTexture skillBarFillTex;
     
-    private static DTXTexture[] lampTextures = [];
-    private static DTXTexture lampGlow;
+    private static BaseTexture[] lampTextures = [];
+    private static BaseTexture lampGlow;
     
     public SongNode? node { get; private set; }
 
@@ -265,7 +263,7 @@ public class SongSelectionElement : UIGroup
         if (skillText.isVisible) skillText.RenderTexture();
     }
 
-    public void UpdateSongThumbnail(DTXTexture? tex)
+    public void UpdateSongThumbnail(BaseTexture? tex)
     {
         tex ??= SongSelectionContainer.fallbackPreImage;
         

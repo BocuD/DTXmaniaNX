@@ -1,17 +1,14 @@
 ﻿using System.Runtime.InteropServices;
 using System.Diagnostics;
 using FDK;
-using SharpDX;
-using Rectangle = System.Drawing.Rectangle;
 using SlimDXKey = SlimDX.DirectInput.Key;
 using System.Drawing;
+using System.Numerics;
 using DTXMania.Core;
 using DTXMania.Core.Video;
 using DTXMania.UI;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.DynamicElements;
-using SharpDX.Direct3D9;
-using RectangleF = SharpDX.RectangleF;
 
 namespace DTXMania;
 
@@ -44,10 +41,10 @@ internal class CStageTitle : CStage
 
 	public override void InitializeDefaultUI()
 	{
-		var family = new FontFamily(CDTXMania.ConfigIni.songListFont);
-		ui.AddChild(new UIText(family, 12, CDTXMania.VERSION_DISPLAY));
+		//var family = new FontFamily(CDTXMania.ConfigIni.songListFont);
+		ui.AddChild(new UIText(CDTXMania.VERSION_DISPLAY, 12));
 
-		DTXTexture bgTex = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\2_background.png"));
+		BaseTexture bgTex = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\2_background.png"));
 		UIImage bg = ui.AddChild(new UIImage(bgTex));
 		bg.renderOrder = -99;
 		bg.position = Vector3.Zero;
@@ -145,7 +142,7 @@ internal class CStageTitle : CStage
 		
 		base.OnUpdateAndDraw();
 
-		Matrix scaleMatrix = Matrix.Scaling(CDTXMania.renderScale);
+		Matrix4x4 scaleMatrix = Matrix4x4.CreateScale(CDTXMania.renderScale);
 		
 		// 進行
 
@@ -236,31 +233,36 @@ internal class CStageTitle : CStage
 				float nMag = (float)(1.0 + ctCursorFlash.nCurrentValue / 100.0 * 0.5);
 
 				// Apply scale and center pivot offset
-				Matrix scaleEffectMatrix = Matrix.Scaling(nMag, nMag, 1.0f);
-				Matrix translateMatrix = Matrix.Translation(
+				Matrix4x4 scaleEffectMatrix = Matrix4x4.CreateScale(nMag, nMag, 1.0f);
+				Matrix4x4 translateMatrix = Matrix4x4.CreateTranslation(
 					x + (MENU_W * (1.0f - nMag) / 2.0f),
 					y + (MENU_H * (1.0f - nMag) / 2.0f),
 					0.0f
 				);
-				Matrix finalMatrix = scaleEffectMatrix * translateMatrix * scaleMatrix;
+				Matrix4x4 finalMatrix = scaleEffectMatrix * translateMatrix * scaleMatrix;
 
 				Color4 col = Color4.White;
 				col.Alpha = (float) (1.0 - ctCursorFlash.nCurrentValue / 100.0 );
-				txMenu.tDraw2DMatrix(CDTXMania.app.Device, finalMatrix, new Vector2(MENU_W, MENU_H), new RectangleF(0, MENU_H * 5, MENU_W, MENU_H), col);
+				//todo COMMENTED OUT tDraw2DMatrix
+				//txMenu.tDraw2DMatrix(CDTXMania.app.Device, finalMatrix, new Vector2(MENU_W, MENU_H), new RectangleF(0, MENU_H * 5, MENU_W, MENU_H), col);
 			}
 			txMenu.vcScaleRatio.X = 1f;
 			txMenu.vcScaleRatio.Y = 1f;
 			txMenu.nTransparency = 0xff;
 			
-			Matrix mat2 = Matrix.Translation(x, y, 0f) * scaleMatrix;
-			txMenu.tDraw2DMatrix( CDTXMania.app.Device, mat2, new Vector2(MENU_W, MENU_H), new RectangleF( 0, MENU_H * 4, MENU_W, MENU_H ));
+			Matrix4x4 mat2 = Matrix4x4.CreateTranslation(x, y, 0f) * scaleMatrix;
+			//todo COMMENTED OUT tDraw2DMatrix
+			//txMenu.tDraw2DMatrix( CDTXMania.app.Device, mat2, new Vector2(MENU_W, MENU_H), new RectangleF( 0, MENU_H * 4, MENU_W, MENU_H ));
 		}
 		if( txMenu != null )
 		{
-			Matrix mat = Matrix.Translation(MENU_X, MENU_Y, 0) * scaleMatrix;
-			Matrix mat2 = Matrix.Translation(MENU_X, MENU_Y + MENU_H, 0) * scaleMatrix;
-			txMenu.tDraw2DMatrix( CDTXMania.app.Device, mat, new Vector2(MENU_W, MENU_H), new RectangleF( 0, 0, MENU_W, MENU_H ));
-			txMenu.tDraw2DMatrix( CDTXMania.app.Device, mat2, new Vector2(MENU_W, MENU_H * 2), new RectangleF( 0, MENU_H * 2, MENU_W, MENU_H * 2 ));
+			Matrix4x4 mat = Matrix4x4.CreateTranslation(MENU_X, MENU_Y, 0) * scaleMatrix;
+			Matrix4x4 mat2 = Matrix4x4.CreateTranslation(MENU_X, MENU_Y + MENU_H, 0) * scaleMatrix;
+			
+			//todo COMMENTED OUT tDraw2DMatrix
+			//txMenu.tDraw2DMatrix( CDTXMania.app.Device, mat, new Vector2(MENU_W, MENU_H), new RectangleF( 0, 0, MENU_W, MENU_H ));
+			//todo COMMENTED OUT tDraw2DMatrix
+			//txMenu.tDraw2DMatrix( CDTXMania.app.Device, mat2, new Vector2(MENU_W, MENU_H * 2), new RectangleF( 0, MENU_H * 2, MENU_W, MENU_H * 2 ));
 		}
 				
 		EPhase ePhaseId = ePhaseID;

@@ -1,11 +1,9 @@
 ﻿using System.Diagnostics;
+using System.Numerics;
 using DTXMania.Core;
-using DTXMania.SongDb;
 using DTXMania.SongDb.Sorting;
-using DTXMania.UI;
 using DTXMania.UI.Drawable;
 using Hexa.NET.ImGui;
-using SharpDX;
 using SlimDX.DirectInput;
 
 namespace DTXMania;
@@ -27,7 +25,7 @@ public class SortMenuContainer : UIGroup
         size = new Vector2(662, 92);
         anchor = new Vector2(1.0f, 0.0f);
         
-        var backgroundImage = AddChild(new UIImage(DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_sortmenu_bg.png"))));
+        var backgroundImage = AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\5_sortmenu_bg.png"))));
         
         sortMenuElements = new SortMenuElement[sorters.Length];
         
@@ -48,7 +46,7 @@ public class SortMenuContainer : UIGroup
     //animation
     private float offsetRange = 90;
     private float offsetDistance = 18;
-    public override void Draw(Matrix parentMatrix)
+    public override void Draw(Matrix4x4 parentMatrix)
     {
         float delta = (CDTXMania.Timer.nCurrentTime - lastDrawTime) / 1000.0f;
         lastDrawTime = CDTXMania.Timer.nCurrentTime;

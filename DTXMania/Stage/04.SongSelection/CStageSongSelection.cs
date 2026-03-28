@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using System.Drawing;
 using System.Diagnostics;
 using System.Globalization;
+using System.Numerics;
 using FDK;
 using DiscordRPC;
 using DTXMania.Core;
@@ -225,40 +226,37 @@ internal class CStageSongSelection : CStage
 	
 	public override void InitializeDefaultUI()
 	{
-		DTXTexture bgTex = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_background.jpg"));
-		UIImage bg = ui.AddChild(new UIImage(bgTex));
+		UIImage bg = ui.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\5_background.jpg"))));
 		bg.renderOrder = -100;
-		bg.position = SharpDX.Vector3.Zero;
+		bg.position = Vector3.Zero;
 		bg.name = "Background";
-		
-		DTXTexture topPanelTex = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_header panel.png"));
-		topPanel = ui.AddChild(new UIImage(topPanelTex));
-		topPanel.position = new SharpDX.Vector3(0, 0, 0);
+
+		topPanel = ui.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\5_header panel.png"))));
+		topPanel.position = new Vector3(0, 0, 0);
 		topPanel.name = "TopPanel";
 		topPanel.renderOrder = 4;
 		
-		DTXTexture bottomPanelTex = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_footer panel.png"));
+		BaseTexture bottomPanelTex = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\5_footer panel.png"));
 		UIImage bottomPanel = ui.AddChild(new UIImage(bottomPanelTex));
-		bottomPanel.position = new SharpDX.Vector3(0, 720 - bottomPanelTex.Height, 0);
+		bottomPanel.position = new Vector3(0, 720 - bottomPanelTex.Height, 0);
 		bottomPanel.name = "BottomPanel";
 		bottomPanel.renderOrder = 4;
 		
-		DTXTexture bpmLabelTex = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_BPM.png"));
+		BaseTexture bpmLabelTex = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\5_BPM.png"));
 		UIImage bpmLabel = ui.AddChild(new UIImage(bpmLabelTex));
-		bpmLabel.position = new SharpDX.Vector3(32, 258, 0);
+		bpmLabel.position = new Vector3(32, 258, 0);
 		bpmLabel.name = "BPMLabel";
 
 		UIGroup? songList = ui.GetChild<UIGroup>("SongList");
 
 		if (songList != null)
 		{
-			DTXTexture songListTopPanelTex = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_header song list.png"));
-			songListTopPanel = songList.AddChild(new UIImage(songListTopPanelTex));
+			songListTopPanel = songList.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\5_header song list.png"))));
 			songListTopPanel.name = "SongListTopPanel";
 
-			DTXTexture songListBottomPanelTex = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_footer song list.png"));
+			BaseTexture songListBottomPanelTex = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\5_footer song list.png"));
 			songListBottomPanel = songList.AddChild(new UIImage(songListBottomPanelTex));
-			songListBottomPanel.position = new SharpDX.Vector3(0, 720 - songListBottomPanelTex.Height, 0);
+			songListBottomPanel.position = new Vector3(0, 720 - songListBottomPanelTex.Height, 0);
 			songListBottomPanel.name = "SongListBottomPanel";
 		}
 	}

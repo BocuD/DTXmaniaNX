@@ -1,6 +1,6 @@
 ﻿using System.Drawing;
-using DTXMania.Core;
-using SharpDX;
+using System.Numerics;
+using DTXMania.UI.Text;
 using Color = System.Drawing.Color;
 
 namespace DTXMania.UI.Drawable;
@@ -15,16 +15,16 @@ public class UIBasicButton : UIGroup, IUISelectable
     {
         this.action = action;
             
-        normalText = AddChild(new UIText(font, size));
-        normalText.SetText(text);
+        normalText = AddChild(new UIText(text, size));
         normalText.RenderTexture();
         normalText.anchor = new Vector2(0.5f, 0f);
             
-        selectedText = AddChild(new UIText(font, size));
-        selectedText.SetText(text);
-        selectedText.gradationTopColor = Color.Yellow;
-        selectedText.gradationBottomColor = Color.OrangeRed;
-        selectedText.drawMode = CPrivateFont.DrawMode.Edge | CPrivateFont.DrawMode.Gradation;
+        selectedText = AddChild(new UIText(text, size));
+        selectedText.fillGradientMode = UiTextGradientMode.Vertical;
+        Color4 topColor = new Color4(1, 1, 0); //FFFF00
+        Color4 bottomColor = new Color4(1, 0.27f, 0);//FF4500
+        selectedText.fillGradientTopColor = topColor;
+        selectedText.fillGradientBottomColor = bottomColor;
         selectedText.RenderTexture();
         selectedText.anchor = new Vector2(0.5f, 0f);
         selectedText.isVisible = false;

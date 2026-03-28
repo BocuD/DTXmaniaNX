@@ -1,5 +1,5 @@
-﻿using Hexa.NET.ImGui;
-using SharpDX;
+﻿using System.Numerics;
+using Hexa.NET.ImGui;
 
 namespace DTXMania.UI.Drawable;
 
@@ -13,7 +13,7 @@ public class LegacyDrawable : UIDrawable
         dontSerialize = true;
     }
     
-    public override void Draw(Matrix parentMatrix)
+    public override void Draw(Matrix4x4 parentMatrix)
     {
         drawAction();
     }
