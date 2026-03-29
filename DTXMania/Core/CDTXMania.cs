@@ -437,7 +437,7 @@ internal class CDTXMania : Game
 
         SafeInitialize("Input Manager (DirectInput, MIDI)", () =>
         {
-            InputManager = new CInputManager(Window.Handle);
+            InputManager = new CInputManager(maniaGl.host.GetWindowHandle());
             foreach (IInputDevice device in InputManager.listInputDevices)
             {
                 if (device.eInputDeviceType == EInputDeviceType.Joystick &&
