@@ -144,12 +144,6 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 
 		ePhaseID = EPhase.Common_FadeIn;
 		actFI.tStartFadeIn();
-
-		if (CDTXMania.DTXVmode.Enabled)
-		{
-			tSetSettingsForDTXV();
-			tJumpInSongToBar(CDTXMania.DTXVmode.nStartBar + 1);
-		}
 		
 		// display presence now that the initial timer reset has been performed
 		tDisplayPresence();
@@ -220,23 +214,9 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		bIsFinishedFadeout = tUpdateAndDraw_FadeIn_Out();
 		if (bIsFinishedPlaying && (ePhaseID == EPhase.Common_DefaultState))
 		{
-			//Pause the timer when finished playing in DTXVMode
-			if (CDTXMania.DTXVmode.Enabled)
-			{
-				if (CDTXMania.Timer.b停止していない)
-				{
-					CDTXMania.Timer.tPause();
-				}
-
-				Thread.Sleep(5);
-				// Keep waiting for next message from DTX Creator
-			}
-			else
-			{
-				eReturnValueAfterFadeOut = EPerfScreenReturnValue.StageClear;
-				ePhaseID = EPhase.PERFORMANCE_STAGE_CLEAR_FadeOut;
-				actFOStageClear.tStartFadeOut();
-			}
+			eReturnValueAfterFadeOut = EPerfScreenReturnValue.StageClear;
+			ePhaseID = EPhase.PERFORMANCE_STAGE_CLEAR_FadeOut;
+			actFOStageClear.tStartFadeOut();
 		}
 
 		if (bIsFinishedFadeout)

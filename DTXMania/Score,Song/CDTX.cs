@@ -3726,13 +3726,6 @@ public class CDTX : CActivity
 
     private void tProcessChartData(int nBGMAdjust)
     {
-        //For DTXVMode, always overwrite Config PlaySpeed with DTXVPlaySpeed
-        if (CDTXMania.DTXVmode.Enabled)
-        {
-            Trace.TraceInformation("DTXVMode Enabled. Set PlaySpeed to {0}", dbDTXVPlaySpeed);
-            CDTXMania.ConfigIni.nPlaySpeed = (int)(dbDTXVPlaySpeed * 20.0);
-        }
-
         n無限管理WAV = null;
         n無限管理BPM = null;
         n無限管理VOL = null;

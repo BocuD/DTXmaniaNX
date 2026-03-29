@@ -28,7 +28,7 @@ internal class CActPerfDrumsGauge : CActPerfCommonGauge
     }
     public override void OnManagedCreateResources()
     {
-        if (bActivated && !CDTXMania.DTXVmode.Enabled && !CDTXMania.DTX2WAVmode.Enabled)
+        if (bActivated)
         {
             txフレーム.Drums = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_Gauge.png"));
             txゲージ = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_gauge_bar.png"));
@@ -43,7 +43,7 @@ internal class CActPerfDrumsGauge : CActPerfCommonGauge
     }
     public override void OnManagedReleaseResources()
     {
-        if (bActivated && !CDTXMania.DTXVmode.Enabled && !CDTXMania.DTX2WAVmode.Enabled)
+        if (bActivated)
         {
             CDTXMania.tReleaseTexture(ref txフレーム.Drums);
             CDTXMania.tReleaseTexture(ref txゲージ);

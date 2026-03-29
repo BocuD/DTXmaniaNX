@@ -133,7 +133,7 @@ internal class CActPerfCommonScore : CActivity
 	}
 	public override void OnManagedCreateResources()
 	{
-		if( bActivated && !CDTXMania.DTXVmode.Enabled && !CDTXMania.DTX2WAVmode.Enabled)
+		if (bActivated)
 		{
 			txScore = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_score numbersGD.png"));
 			base.OnManagedCreateResources();
@@ -141,7 +141,7 @@ internal class CActPerfCommonScore : CActivity
 	}
 	public override void OnManagedReleaseResources()
 	{
-		if( bActivated && !CDTXMania.DTXVmode.Enabled && !CDTXMania.DTX2WAVmode.Enabled)
+		if (bActivated)
 		{
 			CDTXMania.tReleaseTexture( ref txScore );
 			base.OnManagedReleaseResources();

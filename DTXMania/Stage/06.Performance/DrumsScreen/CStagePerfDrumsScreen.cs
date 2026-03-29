@@ -172,12 +172,6 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
 
         actFI.tStartFadeIn();
         ct登場用.tUpdate();
-
-        if (CDTXMania.DTXVmode.Enabled)
-        {
-            tSetSettingsForDTXV();
-            tJumpInSongToBar(CDTXMania.DTXVmode.nStartBar + 1);
-        }
         
         // display presence now that the initial timer reset has been performed
         tDisplayPresence();
@@ -310,17 +304,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         bIsFinishedFadeout = tUpdateAndDraw_FadeIn_Out();
         if (bIsFinishedPlaying && (ePhaseID == EPhase.Common_DefaultState))
         {
-            if (CDTXMania.DTXVmode.Enabled)
-            {
-                if (CDTXMania.Timer.b停止していない)
-                {
-                    CDTXMania.Timer.tPause();
-                }
-
-                Thread.Sleep(5);
-                // Keep waiting for next message from DTX Creator
-            }
-            else if ((actGauge.IsFailed(EInstrumentPart.DRUMS)) && (ePhaseID == EPhase.Common_DefaultState))
+            if ((actGauge.IsFailed(EInstrumentPart.DRUMS)) && (ePhaseID == EPhase.Common_DefaultState))
             {
                 actStageFailed.Start();
                 CDTXMania.DTX.tStopPlayingAllChips();

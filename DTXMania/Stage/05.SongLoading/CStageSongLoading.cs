@@ -202,9 +202,7 @@ internal class CStageSongLoading : CStage
                 strSongTitle = cdtx.TITLE;
 
             strArtistName = cdtx.ARTIST;
-            if (cdtx.SOUND_NOWLOADING is { Length: > 0 } && File.Exists(cdtx.strFolderName + cdtx.SOUND_NOWLOADING)
-                                                         && (!CDTXMania.DTXVmode.Enabled)
-                                                         && (!CDTXMania.DTX2WAVmode.Enabled))
+            if (cdtx.SOUND_NOWLOADING is { Length: > 0 } && File.Exists(cdtx.strFolderName + cdtx.SOUND_NOWLOADING))
             {
                 string currentlyLoadingSoundFilePath = cdtx.strFolderName + cdtx.SOUND_NOWLOADING;
                 try
@@ -279,10 +277,10 @@ internal class CStageSongLoading : CStage
 
             cdtx.OnDeactivate();
             base.OnActivate();
-            if (!CDTXMania.bCompactMode && !CDTXMania.DTXVmode.Enabled && !CDTXMania.DTX2WAVmode.Enabled)
-                tDetermineStatusLabelFromLabelName(
-                    CDTXMania.confirmedSong.difficultyLabel[
-                        CDTXMania.confirmedSongDifficulty]);
+
+            tDetermineStatusLabelFromLabelName(
+                CDTXMania.confirmedSong.difficultyLabel[
+                    CDTXMania.confirmedSongDifficulty]);
             
             //add difficulty panel to ui here
             //todo: this should be moved when chart loading is moved
@@ -402,12 +400,10 @@ internal class CStageSongLoading : CStage
             nBGMPlayStartTime = CSoundManager.rcPerformanceTimer.nCurrentTime;
             nBGMTotalPlayTimeMs = sdLoadingSound.nTotalPlayTimeMs;
         }
-        else if (!CDTXMania.DTXVmode.Enabled && !CDTXMania.DTX2WAVmode.Enabled)
-        {
-            CDTXMania.Skin.soundNowLoading.tPlay();
-            nBGMPlayStartTime = CSoundManager.rcPerformanceTimer.nCurrentTime;
-            nBGMTotalPlayTimeMs = CDTXMania.Skin.soundNowLoading.nLength_CurrentSound;
-        }
+        
+        CDTXMania.Skin.soundNowLoading.tPlay();
+        nBGMPlayStartTime = CSoundManager.rcPerformanceTimer.nCurrentTime;
+        nBGMTotalPlayTimeMs = CDTXMania.Skin.soundNowLoading.nLength_CurrentSound;
 
         ePhaseID = EPhase.Common_FadeIn;
             
@@ -837,10 +833,9 @@ internal class CStageSongLoading : CStage
                     }
 
                     //this.txJacket.Dispose();
-                    if (!CDTXMania.bCompactMode && !CDTXMania.DTXVmode.Enabled && !CDTXMania.DTX2WAVmode.Enabled)
-                        tDrawDifficultyPanel(
-                            CDTXMania.confirmedSong.difficultyLabel[
-                                CDTXMania.confirmedSongDifficulty], 191 + k, 102);
+                    tDrawDifficultyPanel(
+                        CDTXMania.confirmedSong.difficultyLabel[
+                            CDTXMania.confirmedSongDifficulty], 191 + k, 102);
         
                     k = 700;
                 }

@@ -18,7 +18,7 @@ internal class CActPerfDrumsScore : CActPerfCommonScore
 
     public override unsafe int OnUpdateAndDraw()
     {
-        if (bActivated && !CDTXMania.DTXVmode.Enabled && !CDTXMania.DTX2WAVmode.Enabled)
+        if (bActivated)
         {
             if (bJustStartedUpdate)
             {

@@ -1395,11 +1395,7 @@ internal abstract class CStagePerfCommonScreen : CStage
     }
     protected void tSetStatusPanel()  // tステータスパネルの選択
     {
-        if( CDTXMania.bCompactMode || CDTXMania.DTXVmode.Enabled || CDTXMania.DTX2WAVmode.Enabled)
-        {
-            //this.actStatusPanel.tSetDifficultyLabelFromScript( CDTXMania.stageSongSelection.rConfirmedSong.arDifficultyLabel[ CDTXMania.stageSongSelection.nConfirmedSongDifficulty ] );
-        }
-        else if( CDTXMania.confirmedSong != null )
+        if( CDTXMania.confirmedSong != null )
         {
             actStatusPanel.tSetDifficultyLabelFromScript( CDTXMania.confirmedSong.difficultyLabel[ CDTXMania.confirmedSongDifficulty ] );
         }
@@ -2401,7 +2397,7 @@ internal abstract class CStagePerfCommonScreen : CStage
         {
             ChangeInputAdjustTimeInPlaying(keyboard, +1);
         }
-        else if (!bPAUSE && (ePhaseID == EPhase.Common_DefaultState) && !CDTXMania.DTXVmode.Enabled && (keyboard.bKeyPressed(SlimDXKey.Escape)))
+        else if (!bPAUSE && (ePhaseID == EPhase.Common_DefaultState) && (keyboard.bKeyPressed(SlimDXKey.Escape)))
         {	// escape (exit)
             GitaDoraTransition.Close();
             ePhaseID = EPhase.Common_FadeOut;
@@ -5777,43 +5773,6 @@ internal abstract class CStagePerfCommonScreen : CStage
             bmpModifiedPlaySpeed.Dispose();
             pfModifiedPlaySpeed.Dispose();
         }
-    }
-
-    protected void tSetSettingsForDTXV()
-    {
-        for (int i = 0; i < (int)ELane.MAX; i++)
-        {
-            CDTXMania.ConfigIni.bAutoPlay[i] = true;
-        }
-        CDTXMania.ConfigIni.bAVIEnabled = true;
-        CDTXMania.ConfigIni.nMovieMode = 2;
-        CDTXMania.ConfigIni.bBGAEnabled = true;
-        for (int i = 0; i < 3; i++)
-        {
-            CDTXMania.ConfigIni.bGraph有効[i] = false;
-            CDTXMania.ConfigIni.nHidSud[i] = 0; // ESudHidInv.Off;
-            CDTXMania.ConfigIni.bLight[i] = false;
-            CDTXMania.ConfigIni.bReverse[i] = false;
-            CDTXMania.ConfigIni.eRandom[i] = ERandomMode.OFF;
-            CDTXMania.ConfigIni.n表示可能な最小コンボ数[i] = 65535;
-            CDTXMania.ConfigIni.bDisplayJudge[i] = false;
-        }
-        CDTXMania.ConfigIni.bドラムコンボ文字の表示 = false;
-        CDTXMania.ConfigIni.eDark = EDarkMode.OFF;
-        //TODO add this option: CDTXMania.ConfigIni.bDebugInfo = CDTXMania.ConfigIni.bViewerShowDebugStatus;
-        CDTXMania.ConfigIni.bHidePerformanceInformation = false;
-        CDTXMania.ConfigIni.bFillInEnabled = true;
-        CDTXMania.ConfigIni.bScoreIniを出力する = false;
-        CDTXMania.ConfigIni.bSTAGEFAILEDEnabled = false;
-        CDTXMania.ConfigIni.bTight = false;
-        CDTXMania.ConfigIni.bストイックモード = false;
-        CDTXMania.ConfigIni.bドラム打音を発声する = true;
-        CDTXMania.ConfigIni.bBGM音を発声する = true;
-        CDTXMania.ConfigIni.nRisky = 0;
-        CDTXMania.ConfigIni.nShowLagType = (int)EShowLagType.OFF;
-        CDTXMania.ConfigIni.bShowLagHitCount = false;
-        //CDTXMania.ConfigIni.bForceScalingAVI = false;		// DTXVモード時の各種表示要素の表示座標を「譜面制作者のカスタマイズ状態」にするか「DTXMania初期状態」にするかで
-        // 悩みました。
     }
 
     public void t再読込()
