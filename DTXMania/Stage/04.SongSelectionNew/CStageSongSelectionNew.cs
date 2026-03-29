@@ -16,7 +16,7 @@ public class CStageSongSelectionNew : CStage
     private UIImage bigAlbumArt;
     private CActSelectPresound actPresound;
     private StatusPanel statusPanel;
-    private CActSelectBackgroundAVI actBackgroundVideoAVI;
+    //private CActSelectBackgroundAVI actBackgroundVideoAVI;
     private CAVI cAviBackgroundVideo;
 
     private SongSelectionContainer currentSelectionContainer;
@@ -45,7 +45,7 @@ public class CStageSongSelectionNew : CStage
         eStageID = EStage.SongSelection_4;
         
         listChildActivities.Add(actPresound = new CActSelectPresound());
-        listChildActivities.Add(actBackgroundVideoAVI = new CActSelectBackgroundAVI());
+        //listChildActivities.Add(actBackgroundVideoAVI = new CActSelectBackgroundAVI());
         
         currentSort = sorters[0];
     }
@@ -96,9 +96,9 @@ public class CStageSongSelectionNew : CStage
         bg.position = Vector3.Zero;
         bg.name = "Background";
         
-        LegacyDrawable backgroundVideo = ui.AddChild(new LegacyDrawable(() => actBackgroundVideoAVI.tUpdateAndDraw()));
-        backgroundVideo.renderOrder = -99;
-        backgroundVideo.name = "BackgroundVideo";
+        //LegacyDrawable backgroundVideo = ui.AddChild(new LegacyDrawable(() => actBackgroundVideoAVI.tUpdateAndDraw()));
+        //backgroundVideo.renderOrder = -99;
+        //backgroundVideo.name = "BackgroundVideo";
         
         //create panel elements
         var back1 = ui.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\SongSelect\back1.png"))));
@@ -128,12 +128,12 @@ public class CStageSongSelectionNew : CStage
     {
         cAviBackgroundVideo = new CAVI(1290, CSkin.Path(@"Graphics\5_background.mp4"), "", 20.0);
         cAviBackgroundVideo.OnDeviceCreated();
-        if (cAviBackgroundVideo.avi != null)
-        {
-            actBackgroundVideoAVI.bLoop = true;
-            actBackgroundVideoAVI.Start(EChannel.MovieFull, cAviBackgroundVideo, 0, -1);
-            Trace.TraceInformation("Started song select background video");
-        }
+        // if (cAviBackgroundVideo.avi != null)
+        // {
+        //     actBackgroundVideoAVI.bLoop = true;
+        //     actBackgroundVideoAVI.Start(EChannel.MovieFull, cAviBackgroundVideo, 0, -1);
+        //     Trace.TraceInformation("Started song select background video");
+        // }
         
         SongSelectionElement.LoadSongSelectElementAssets();
         
@@ -147,7 +147,7 @@ public class CStageSongSelectionNew : CStage
             cAviBackgroundVideo.Dispose();
             cAviBackgroundVideo = null;
         }
-        actBackgroundVideoAVI.Stop();
+        //actBackgroundVideoAVI.Stop();
         
         base.OnManagedReleaseResources();
     }

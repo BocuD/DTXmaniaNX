@@ -2,7 +2,7 @@ using Silk.NET.OpenGL;
 
 namespace OpenGLTest;
 
-internal abstract class OpenGlGame : IDisposable
+internal abstract class OpenGlGame : BaseWindow, IDisposable
 {
     protected GL Gl { get; private set; } = null!;
     private bool _sharedResourcesCreated;
@@ -32,7 +32,7 @@ internal abstract class OpenGlGame : IDisposable
     public abstract void Update(float deltaTime, double totalTime);
 
     public abstract void Render(int framebufferWidth, int framebufferHeight, double totalTime);
-
+    
     public void ReleaseContextResources()
     {
         if (!_contextResourcesCreated)

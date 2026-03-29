@@ -1,6 +1,6 @@
 using System.Numerics;
-using DTXMania.UI;
 using DTXMania.UI.Drawable;
+using Hexa.NET.GLFW;
 using Silk.NET.OpenGL;
 
 namespace OpenGLTest;
@@ -229,5 +229,15 @@ internal sealed unsafe class CubeRenderer : OpenGlGame
         }
 
         return shader;
+    }
+
+    public override void KeyDown(GlfwKey key, GlfwMod mods)
+    {
+        
+    }
+
+    public override void KeyUp(GlfwKey key, GlfwMod mods)
+    {
+        
     }
 }

@@ -1,7 +1,6 @@
-using System.Numerics;
 using DTXMania.Core;
-using DTXMania.UI.Drawable;
 using DTXMania.UI.Inspector;
+using Hexa.NET.GLFW;
 using Silk.NET.OpenGL;
 
 namespace OpenGLTest;
@@ -12,7 +11,7 @@ internal sealed unsafe class DTXManiaGL : OpenGlGame
     
     public override void Init()
     {
-        mania = new CDTXMania();
+        mania = new CDTXMania(this);
     }
 
     protected override void CreateSharedResources()
@@ -49,6 +48,25 @@ internal sealed unsafe class DTXManiaGL : OpenGlGame
     }
 
     protected override void DestroySharedResources()
+    {
+        
+    }
+
+    public override void KeyDown(GlfwKey key, GlfwMod mods)
+    {
+        //check for alt + enter
+        if (key == GlfwKey.Enter && mods == GlfwMod.Alt)
+        {
+            //toggle fullscreen
+            host.RequestFullscreenMode(host.fullscreenMode == FullscreenMode.Windowed
+                ? FullscreenMode.ExclusiveFullscreen
+                : FullscreenMode.Windowed);
+        }
+        
+        mania.KeyPress(key, mods);
+    }
+
+    public override void KeyUp(GlfwKey key, GlfwMod mods)
     {
         
     }

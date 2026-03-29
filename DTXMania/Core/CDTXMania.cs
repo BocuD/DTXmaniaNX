@@ -25,6 +25,8 @@ using DTXMania.UI.Inspector;
 //#endif
 
 using DTXMania.UI.Skin;
+using Hexa.NET.GLFW;
+using OpenGLTest;
 using Color = System.Drawing.Color;
 using Font = System.Drawing.Font;
 using RectangleF = SharpDX.RectangleF;
@@ -38,6 +40,8 @@ internal class CDTXMania : Game
     //these get set when initializing the game
     public static string VERSION_DISPLAY; // = "DTX:NX:A:A:2024051900";
     public static string VERSION; // = "v1.4.2 20240519";
+
+    public DTXManiaGL maniaGl;
     
     public static CDTXMania app { get; private set; }
 
@@ -178,7 +182,9 @@ internal class CDTXMania : Game
     public static string strCompactModeFile { get; private set; }
     public static CTimer Timer { get; private set; }
     public static Format TextureFormat = Format.A8R8G8B8;
-    public bool bApplicationActive { get; private set; }
+
+    public bool bApplicationActive => maniaGl.isFocused;
+
     public bool changeVSyncModeOnNextFrame { get; set; }
     public bool changeFullscreenModeOnNextFrame { get; set; }
 
@@ -213,8 +219,9 @@ internal class CDTXMania : Game
     public static LogWindow logWindow { get; private set; }
 
     // Constructor
-    public CDTXMania()
+    public CDTXMania(DTXManiaGL dtxManiaGl)
     {
+        maniaGl = dtxManiaGl;
         app = this;
 
         void SafeInitialize(string name, Action action)
@@ -1284,193 +1291,21 @@ internal class CDTXMania : Game
     #region [ Windowイベント処理 ]
 
     //-----------------
-    private void Window_ApplicationActivated(object? sender, EventArgs e)
+
+    public void KeyPress(GlfwKey key, GlfwMod mods)
     {
-        bApplicationActive = true;
-    }
-
-    private void Window_ApplicationDeactivated(object? sender, EventArgs e)
-    {
-        bApplicationActive = false;
-    }
-
-    private void Window_KeyDown(object? sender, KeyEventArgs e)
-    {
-        ImGuiKey keyCode = WindowsKeyCodeToImGui(e.KeyCode);
-
-        //update key state
-        if (keyCode != ImGuiKey.None)
+        SlimDX.DirectInput.Key dxKey = Glue.SlimDXGLFWGlue.GLFWKeyToSlimDXKey(key);
+        for (int i = 0; i < 0x10; i++)
         {
-            ImGui.GetIO().AddKeyEvent(keyCode, true);
-        }
+            var captureCode = (SlimDX.DirectInput.Key)ConfigIni.KeyAssign.System[(int)EKeyConfigPad.Capture][i].Code;
 
-        if (ImGui.GetIO().WantCaptureKeyboard)
-        {
-            return;
-        }
-
-        if (e.KeyCode == Keys.Menu)
-        {
-            e.Handled = true;
-            e.SuppressKeyPress = true;
-        }
-        else if ((e.KeyCode == Keys.Return) && e.Alt)
-        {
-            if (ConfigIni != null)
+            if ((int)captureCode > 0 && dxKey == captureCode)
             {
-                ConfigIni.bWindowMode = !ConfigIni.bWindowMode;
-                tSwitchFullScreenMode();
-            }
-
-            e.Handled = true;
-            e.SuppressKeyPress = true;
-        }
-        else
-        {
-            for (int i = 0; i < 0x10; i++)
-            {
-                var captureCode =
-                    (SlimDX.DirectInput.Key)ConfigIni.KeyAssign.System[(int)EKeyConfigPad.Capture][i].Code;
-
-                if ((int)captureCode > 0 && e.KeyCode == DeviceConstantConverter.KeyToKeys(captureCode))
-                {
-                    string strFullPath = Path.Combine(executableDirectory, "Capture_img");
-                    strFullPath = Path.Combine(strFullPath, DateTime.Now.ToString("yyyyMMddHHmmss") + ".png");
-                    SaveResultScreen(strFullPath);
-                }
+                string strFullPath = Path.Combine(executableDirectory, "Capture_img");
+                strFullPath = Path.Combine(strFullPath, DateTime.Now.ToString("yyyyMMddHHmmss") + ".png");
+                SaveResultScreen(strFullPath);
             }
         }
-    }
-
-    private void Window_KeyPress(object? sender, KeyPressEventArgs e)
-    {
-        if (ImGui.GetIO().WantCaptureKeyboard)
-        {
-            ImGui.GetIO().AddInputCharacter(e.KeyChar);
-            e.Handled = true;
-        }
-    }
-
-    private void Window_KeyUp(object? sender, KeyEventArgs e)
-    {
-        //update key state
-        ImGuiKey keyCode = WindowsKeyCodeToImGui(e.KeyCode);
-        if (keyCode != ImGuiKey.None)
-        {
-            ImGui.GetIO().AddKeyEvent(keyCode, false);
-        }
-    }
-
-    private ImGuiKey WindowsKeyCodeToImGui(Keys keyCode)
-    {
-        return keyCode switch
-        {
-            Keys.Back => ImGuiKey.Backspace,
-            Keys.Tab => ImGuiKey.Tab,
-            Keys.Enter => ImGuiKey.Enter,
-            Keys.Pause => ImGuiKey.Pause,
-            Keys.Escape => ImGuiKey.Escape,
-            Keys.Space => ImGuiKey.Space,
-            Keys.End => ImGuiKey.End,
-            Keys.Home => ImGuiKey.Home,
-            Keys.Left => ImGuiKey.LeftArrow,
-            Keys.Up => ImGuiKey.UpArrow,
-            Keys.Right => ImGuiKey.RightArrow,
-            Keys.Down => ImGuiKey.DownArrow,
-            Keys.PageUp => ImGuiKey.PageUp,
-            Keys.PageDown => ImGuiKey.PageDown,
-            Keys.Insert => ImGuiKey.Insert,
-            Keys.Delete => ImGuiKey.Delete,
-            Keys.LShiftKey => ImGuiKey.LeftShift,
-            Keys.RShiftKey => ImGuiKey.RightShift,
-            Keys.LControlKey => ImGuiKey.LeftCtrl,
-            Keys.RControlKey => ImGuiKey.RightCtrl,
-            Keys.LMenu => ImGuiKey.LeftAlt,
-            Keys.RMenu => ImGuiKey.RightAlt,
-            Keys.OemSemicolon => ImGuiKey.Semicolon,
-            >= Keys.D0 and <= Keys.D9 => ImGuiKey.Key0 + (keyCode - Keys.D0),
-            >= Keys.A and <= Keys.Z => ImGuiKey.A + (keyCode - Keys.A),
-            >= Keys.F1 and <= Keys.F12 => ImGuiKey.F1 + (keyCode - Keys.F1),
-            >= Keys.NumPad0 and <= Keys.NumPad9 => ImGuiKey.Keypad0 + (keyCode - Keys.NumPad0),
-            _ => ImGuiKey.None
-        };
-    }
-
-    private void Window_MouseMove(object? sender, MouseEventArgs e)
-    {
-        var pos = e.Location;
-
-        // //take window scale into account (since the render resolution for imgui is fixed 1280x720)
-        // var windowScale = new Vector2((float)Window.ClientSize.Width / GameWindowSize.Width,
-        //     (float)Window.ClientSize.Height / GameWindowSize.Height);
-        // pos.X = (int)(pos.X / windowScale.X);
-        // pos.Y = (int)(pos.Y / windowScale.Y);
-
-        ImGui.GetIO().MousePos = new Vector2(pos.X, pos.Y);
-    }
-
-    private void Window_MouseDown(object? sender, MouseEventArgs e)
-    {
-        switch (e.Button)
-        {
-            case MouseButtons.Left:
-                ImGui.GetIO().MouseDown[(int)ImGuiMouseButton.Left] = true;
-                break;
-
-            case MouseButtons.Middle:
-                ImGui.GetIO().MouseDown[(int)ImGuiMouseButton.Middle] = true;
-                break;
-
-            case MouseButtons.Right:
-                ImGui.GetIO().MouseDown[(int)ImGuiMouseButton.Right] = true;
-                break;
-        }
-    }
-
-    private void Window_MouseUp(object? sender, MouseEventArgs e)
-    {
-        mb = e.Button;
-
-        switch (e.Button)
-        {
-            case MouseButtons.Left:
-                ImGui.GetIO().MouseDown[(int)ImGuiMouseButton.Left] = false;
-                break;
-
-            case MouseButtons.Middle:
-                ImGui.GetIO().MouseDown[(int)ImGuiMouseButton.Middle] = false;
-                break;
-
-            case MouseButtons.Right:
-                ImGui.GetIO().MouseDown[(int)ImGuiMouseButton.Right] = false;
-                break;
-        }
-    }
-
-    private void Window_MouseWheel(object? sender, MouseEventArgs e)
-    {
-        ImGui.GetIO().MouseWheel = e.Delta / 120.0f;
-    }
-
-    private void Window_MouseDoubleClick(object? sender, MouseEventArgs e) // #23510 2010.11.13 yyagi: to go full screen mode
-    {
-        if (mb.Equals(MouseButtons.Left) && ConfigIni.bIsAllowedDoubleClickFullscreen) // #26752 2011.11.27 yyagi
-        {
-            ConfigIni.bWindowMode = false;
-            tSwitchFullScreenMode();
-        }
-    }
-
-    private void Window_ResizeEnd(object? sender, EventArgs e) // #23510 2010.11.20 yyagi: to get resized window size
-    {
-        if (ConfigIni.bWindowMode)
-        {
-            ConfigIni.nInitialWindowXPosition = Window.Location.X; // #30675 2013.02.04 ikanick add
-            ConfigIni.nInitialWindowYPosition = Window.Location.Y; //
-        }
-
-        ConfigIni.nWindowWidth = (ConfigIni.bWindowMode) ? Window.ClientSize.Width : currentClientSize.Width; // #23510 2010.10.31 yyagi add
-        ConfigIni.nWindowHeight = (ConfigIni.bWindowMode) ? Window.ClientSize.Height : currentClientSize.Height;
     }
 
     #endregion

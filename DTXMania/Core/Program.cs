@@ -178,6 +178,7 @@ internal class Program
 			//  	mania.Run();
 			
 			DTXManiaGL game = new();
+			//CubeRenderer game = new();
 			GlfwOpenGlHost host = new(game);
 			host.Run();
 

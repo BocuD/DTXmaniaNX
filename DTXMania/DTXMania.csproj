@@ -83,8 +83,4 @@
       </EmbeddedResource>
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Core\GL\" />
-    </ItemGroup>
-
 </Project>

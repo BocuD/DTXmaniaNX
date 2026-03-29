@@ -1,6 +1,8 @@
 using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using DTXMania.Core.Framework;
 using DTXMania.UI;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.Inspector;
@@ -10,10 +12,12 @@ using Hexa.NET.ImGui;
 using Hexa.NET.ImGui.Backends.GLFW;
 using Hexa.NET.ImGui.Backends.OpenGL3;
 using Silk.NET.OpenGL;
+using GLFWwindow = Hexa.NET.GLFW.GLFWwindow;
+using GLFWwindowPtr = Hexa.NET.GLFW.GLFWwindowPtr;
 
 namespace OpenGLTest;
 
-internal sealed unsafe class GlfwOpenGlHost : IDisposable
+internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
 {
     private const int GlfwTrue = 1;
     private const int GlfwFalse = 0;
@@ -31,13 +35,13 @@ internal sealed unsafe class GlfwOpenGlHost : IDisposable
     private readonly OpenGlTextureFactory _textureFactory = new();
     private readonly Stopwatch _stopwatch = Stopwatch.StartNew();
 
-    private Hexa.NET.GLFW.GLFWwindowPtr _window;
+    private GLFWwindowPtr _window;
     private GlfwNativeContext? _nativeContext;
     private GL? _gl;
     private ImGuiContextPtr _imguiContext;
 
     private bool _vsyncEnabled = true;
-    private FullscreenMode _fullscreenMode = FullscreenMode.Windowed;
+    public FullscreenMode fullscreenMode { get; private set; } = FullscreenMode.Windowed;
     private bool _renderInGameWindow;
     private int _windowedX = 80;
     private int _windowedY = 80;
@@ -62,13 +66,17 @@ internal sealed unsafe class GlfwOpenGlHost : IDisposable
     private bool? _pendingVsyncEnabled;
     private FullscreenMode? _pendingFullscreenMode;
 
+    [DllImport("glfw3", EntryPoint = "glfwGetWin32Window")]
+    private static extern IntPtr glfwGetWin32Window(IntPtr window);
+
     public GlfwOpenGlHost(OpenGlGame game)
     {
         _game = game;
+        _game.host = this;
     }
 
     public bool VsyncEnabled => _vsyncEnabled;
-    public FullscreenMode FullscreenMode => _fullscreenMode;
+    public FullscreenMode FullscreenMode => fullscreenMode;
     public bool RenderInGameWindow
     {
         get => _renderInGameWindow;
@@ -93,6 +101,25 @@ internal sealed unsafe class GlfwOpenGlHost : IDisposable
     public void RequestFullscreenMode(FullscreenMode fullscreenMode)
     {
         _pendingFullscreenMode = fullscreenMode;
+    }
+    
+    public IntPtr GetWindowHandle()
+    {
+        // Return the native Windows HWND for the GLFW window when running on Windows.
+        // If the window isn't created yet or the platform isn't Windows, return IntPtr.Zero.
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            return IntPtr.Zero;
+        }
+
+        if (_window.Handle == null)
+        {
+            return IntPtr.Zero;
+        }
+
+        // Convert the GLFW window handle to IntPtr and call the native glfw function.
+        // _window.Handle may be an IntPtr or an unmanaged pointer type; casting to IntPtr is allowed in unsafe context.
+        return glfwGetWin32Window((IntPtr)_window.Handle);
     }
 
     public void Run()
@@ -157,7 +184,7 @@ internal sealed unsafe class GlfwOpenGlHost : IDisposable
         InitializeImGui();
     }
 
-    private Hexa.NET.GLFW.GLFWwindowPtr CreateWindow(Hexa.NET.GLFW.GLFWwindowPtr shareWindow)
+    private GLFWwindowPtr CreateWindow(GLFWwindowPtr shareWindow)
     {
         GLFW.DefaultWindowHints();
         GLFW.WindowHint(GlfwContextVersionMajor, 3);
@@ -171,14 +198,15 @@ internal sealed unsafe class GlfwOpenGlHost : IDisposable
 
         Hexa.NET.GLFW.GLFWmonitorPtr primaryMonitor = GLFW.GetPrimaryMonitor();
         GLFWvidmodePtr videoMode = primaryMonitor.Handle != null ? GLFW.GetVideoMode(primaryMonitor) : default;
-        Hexa.NET.GLFW.GLFWwindowPtr window;
+        GLFWwindowPtr window;
 
-        switch (_fullscreenMode)
+        switch (fullscreenMode)
         {
             case FullscreenMode.Windowed:
                 GLFW.WindowHint(GlfwDecorated, GlfwTrue);
                 window = GLFW.CreateWindow(_windowedWidth, _windowedHeight, "OpenGLTest", default, shareWindow);
                 break;
+            
             case FullscreenMode.BorderlessFullscreen:
                 if (primaryMonitor.Handle == null || videoMode.Handle == null)
                 {
@@ -188,6 +216,7 @@ internal sealed unsafe class GlfwOpenGlHost : IDisposable
                 GLFW.WindowHint(GlfwDecorated, GlfwFalse);
                 window = GLFW.CreateWindow(videoMode.Width, videoMode.Height, "OpenGLTest", default, shareWindow);
                 break;
+            
             case FullscreenMode.ExclusiveFullscreen:
                 if (primaryMonitor.Handle == null || videoMode.Handle == null)
                 {
@@ -196,6 +225,7 @@ internal sealed unsafe class GlfwOpenGlHost : IDisposable
 
                 window = GLFW.CreateWindow(videoMode.Width, videoMode.Height, "OpenGLTest", primaryMonitor, shareWindow);
                 break;
+            
             default:
                 throw new ArgumentOutOfRangeException();
         }
@@ -207,20 +237,54 @@ internal sealed unsafe class GlfwOpenGlHost : IDisposable
 
         GLFW.MakeContextCurrent(window);
 
-        if (_fullscreenMode == FullscreenMode.Windowed)
+        if (fullscreenMode == FullscreenMode.Windowed)
         {
             GLFW.SetWindowPos(window, _windowedX, _windowedY);
         }
-        else if (_fullscreenMode == FullscreenMode.BorderlessFullscreen)
+        else if (fullscreenMode == FullscreenMode.BorderlessFullscreen)
         {
             int monitorX = 0;
             int monitorY = 0;
             GLFW.GetMonitorPos(primaryMonitor, ref monitorX, ref monitorY);
             GLFW.SetWindowPos(window, monitorX, monitorY);
         }
+        
+        SetCallbacks(window);
 
         GLFW.SwapInterval(_vsyncEnabled ? 1 : 0);
         return window;
+    }
+    
+    private GLFWkeyfun keyCallback;
+    private GLFWwindowfocusfun focusCallback;
+    private GLFWwindowposfun windowPosCallback;
+    private GLFWwindowsizefun windowSizeCallback;
+
+    private void SetCallbacks(GLFWwindowPtr window)
+    {
+        keyCallback = (_, key, _, action, mods) =>
+        {
+            switch (action)
+            {
+                case GLFW.GLFW_PRESS:
+                    _game.KeyDown((GlfwKey)key, (GlfwMod)mods);
+                    break;
+
+                case GLFW.GLFW_RELEASE:
+                    _game.KeyUp((GlfwKey)key, (GlfwMod)mods);
+                    break;
+            }
+        };
+        
+        focusCallback = (_, focused) => _game.isFocused = focused != 0;
+        windowPosCallback = (_, xpos, ypos) => _game.windowPosition = new Vector2(xpos, ypos);
+        windowSizeCallback = (_, width, height) => _game.windowSize = new Vector2(width, height);
+        
+        //set key callbacks
+        GLFW.SetKeyCallback(window, keyCallback);
+        GLFW.SetWindowFocusCallback(window, focusCallback);
+        GLFW.SetWindowPosCallback(window, windowPosCallback);
+        GLFW.SetWindowSizeCallback(window, windowSizeCallback);
     }
 
     private void InitializeImGui()
@@ -237,7 +301,7 @@ internal sealed unsafe class GlfwOpenGlHost : IDisposable
         ImGuiImplGLFW.SetCurrentContext(_imguiContext);
         ImGuiImplOpenGL3.SetCurrentContext(_imguiContext);
 
-        var backendWindow = Unsafe.BitCast<Hexa.NET.GLFW.GLFWwindowPtr, Hexa.NET.ImGui.Backends.GLFW.GLFWwindowPtr>(_window);
+        var backendWindow = Unsafe.BitCast<GLFWwindowPtr, Hexa.NET.ImGui.Backends.GLFW.GLFWwindowPtr>(_window);
         if (!ImGuiImplGLFW.InitForOpenGL(backendWindow, true))
         {
             throw new InvalidOperationException("Failed to initialize Hexa.NET ImGui GLFW backend.");
@@ -260,17 +324,14 @@ internal sealed unsafe class GlfwOpenGlHost : IDisposable
             return;
         }
 
-        unsafe
+        ImFontPtr font = ImGui.AddFontFromFileTTF(io.Fonts, defaultFontPath, 18f);
+        if (font.Handle == null)
         {
-            ImFontPtr font = ImGui.AddFontFromFileTTF(io.Fonts, defaultFontPath, 18f);
-            if (font.Handle == null)
-            {
-                io.Fonts.AddFontDefault();
-                return;
-            }
-
-            io.FontDefault = font;
+            io.Fonts.AddFontDefault();
+            return;
         }
+
+        io.FontDefault = font;
     }
 
     private void ShutdownImGui()
@@ -304,13 +365,13 @@ internal sealed unsafe class GlfwOpenGlHost : IDisposable
             GLFW.GetWindowSize(_window, ref _windowedWidth, ref _windowedHeight);
         }
 
-        Hexa.NET.GLFW.GLFWwindowPtr oldWindow = _window;
+        GLFWwindowPtr oldWindow = _window;
         _game.ReleaseContextResources();
         _gameRenderTarget.ReleaseContextResources();
         _uiRenderer.ReleaseContextResources();
         ShutdownImGui();
         
-        Hexa.NET.GLFW.GLFWwindowPtr newWindow = CreateWindow(oldWindow);
+        GLFWwindowPtr newWindow = CreateWindow(oldWindow);
         _window = newWindow;
         _game.AttachGraphics(_gl!);
         _gameRenderTarget.AttachGraphics(_gl!);
@@ -437,10 +498,10 @@ internal sealed unsafe class GlfwOpenGlHost : IDisposable
 
     private void ApplyPendingDisplayChanges()
     {
-        if (_pendingFullscreenMode is { } fullscreenMode && fullscreenMode != _fullscreenMode)
+        if (_pendingFullscreenMode is { } fullscreenMode && fullscreenMode != this.fullscreenMode)
         {
-            FullscreenMode previousMode = _fullscreenMode;
-            _fullscreenMode = fullscreenMode;
+            FullscreenMode previousMode = this.fullscreenMode;
+            this.fullscreenMode = fullscreenMode;
             RecreateWindow(previousMode);
             _pendingFullscreenMode = null;
             _pendingVsyncEnabled = null;
@@ -450,7 +511,7 @@ internal sealed unsafe class GlfwOpenGlHost : IDisposable
         if (_pendingVsyncEnabled is { } vsyncEnabled && vsyncEnabled != _vsyncEnabled)
         {
             _vsyncEnabled = vsyncEnabled;
-            RecreateWindow(_fullscreenMode);
+            RecreateWindow(this.fullscreenMode);
         }
 
         _pendingVsyncEnabled = null;

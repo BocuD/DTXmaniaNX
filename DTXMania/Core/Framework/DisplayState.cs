@@ -1,6 +1,6 @@
 namespace OpenGLTest;
 
-internal enum FullscreenMode
+public enum FullscreenMode
 {
     Windowed,
     BorderlessFullscreen,
