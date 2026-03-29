@@ -23,6 +23,11 @@ public class CInputMIDI : IInputDevice, IDisposable
 		strDeviceName = "";    // CInput管理で初期化する
 	}
 
+	public void UpdateWindowHandle(System.IntPtr hWnd)
+	{
+		// MIDI input doesn't rely on the window handle for DirectMusic style input; nothing to do.
+	}
+
 
 	// メソッド
 

@@ -30,4 +30,6 @@ public interface IInputDevice : IDisposable
 	bool bKeyPressing(int nKey);  // bキーが押されている
 	bool bKeyReleased( int nKey );  // bキーが離された
 	bool bKeyReleasing( int nKey );  // bキーが離されている
+
+	void UpdateWindowHandle(IntPtr hWnd);
 }

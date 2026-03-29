@@ -12,7 +12,6 @@ using Hexa.NET.ImGui;
 using Hexa.NET.ImGui.Backends.GLFW;
 using Hexa.NET.ImGui.Backends.OpenGL3;
 using Silk.NET.OpenGL;
-using GLFWwindow = Hexa.NET.GLFW.GLFWwindow;
 using GLFWwindowPtr = Hexa.NET.GLFW.GLFWwindowPtr;
 
 namespace OpenGLTest;
@@ -377,6 +376,8 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
         _gameRenderTarget.AttachGraphics(_gl!);
         _uiRenderer.AttachGraphics(_gl!);
         InitializeImGui();
+
+        _game.WindowHandleUpdated(GetWindowHandle());
 
         if (oldWindow.Handle != null)
         {

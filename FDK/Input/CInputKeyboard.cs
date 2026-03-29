@@ -49,6 +49,21 @@ public class CInputKeyboard : IInputDevice, IDisposable
 		// this.ct = new CTimer( CTimer.E種別.PerformanceCounter );
 	}
 
+	public void UpdateWindowHandle(IntPtr hWnd)
+	{
+		if (devKeyboard != null)
+		{
+			try
+			{
+				devKeyboard.SetCooperativeLevel(hWnd, CooperativeLevel.NoWinKey | CooperativeLevel.Foreground | CooperativeLevel.NonExclusive);
+				devKeyboard.Acquire();
+			}
+			catch
+			{
+			}
+		}
+	}
+
 
 	// メソッド
 

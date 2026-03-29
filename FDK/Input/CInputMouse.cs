@@ -51,6 +51,21 @@ public class CInputMouse : IInputDevice, IDisposable
 		listInputEvent = new List<STInputEvent>(32);
 	}
 
+	public void UpdateWindowHandle(IntPtr hWnd)
+	{
+		if (devMouse != null)
+		{
+			try
+			{
+				devMouse.SetCooperativeLevel(hWnd, CooperativeLevel.Foreground | CooperativeLevel.NonExclusive);
+				devMouse.Acquire();
+			}
+			catch
+			{
+			}
+		}
+	}
+
 
 	// メソッド
 

@@ -58,6 +58,21 @@ public class CInputJoystick : IInputDevice, IDisposable
 		listInputEvent = new List<STInputEvent>(32);
 	}
 
+	public void UpdateWindowHandle(IntPtr hWnd)
+	{
+		if (devJoystick != null)
+		{
+			try
+			{
+				devJoystick.SetCooperativeLevel(hWnd, CooperativeLevel.Foreground | CooperativeLevel.Exclusive);
+				devJoystick.Acquire();
+			}
+			catch
+			{
+			}
+		}
+	}
+
 
 	// メソッド
 

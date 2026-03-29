@@ -16,4 +16,6 @@ public abstract class BaseWindow
 
     public abstract void KeyDown(GlfwKey key, GlfwMod mods);
     public abstract void KeyUp(GlfwKey key, GlfwMod mods);
+
+    public virtual void WindowHandleUpdated(IntPtr newHandle) {}
 }

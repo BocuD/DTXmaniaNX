@@ -70,4 +70,9 @@ internal sealed unsafe class DTXManiaGL : OpenGlGame
     {
         
     }
+
+    public override void WindowHandleUpdated(IntPtr newHandle)
+    {
+        CDTXMania.InputManager?.UpdateWindowHandle(newHandle);
+    }
 }

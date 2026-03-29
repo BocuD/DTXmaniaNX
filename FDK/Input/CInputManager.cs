@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Linq;
 using SharpDX.DirectInput;
 
 namespace FDK;
@@ -62,6 +63,30 @@ public class CInputManager : IDisposable // CInput管理
 	public CInputManager(IntPtr hWnd, bool bUseMidiIn = true)
 	{
 		InitializeInputManager(hWnd, bUseMidiIn);
+		_initialHwnd = hWnd;
+	}
+
+	private IntPtr _initialHwnd;
+
+	/// <summary>
+	/// Call this when the native window handle has changed (for example when the GLFW window is recreated)
+	/// so that all DirectInput devices update their cooperative level to the new window.
+	/// </summary>
+	public void UpdateWindowHandle(IntPtr newHwnd)
+	{
+		_initialHwnd = newHwnd;
+		Trace.TraceInformation($"CInputManager: updating window handle to 0x{newHwnd.ToInt64():X}");
+		foreach (IInputDevice device in listInputDevices ?? Enumerable.Empty<IInputDevice>())
+		{
+			try
+			{
+				device.UpdateWindowHandle(newHwnd);
+			}
+			catch (Exception e)
+			{
+				Trace.TraceError("Failed to update device window handle: {0}", e.Message);
+			}
+		}
 	}
 
 	private void InitializeInputManager(IntPtr hWnd, bool bUseMidiIn)
