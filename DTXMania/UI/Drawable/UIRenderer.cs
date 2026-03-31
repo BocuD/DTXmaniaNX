@@ -1,6 +1,7 @@
 using System.Drawing;
 using System.Numerics;
 using DTXMania.UI;
+using DTXMania.UI.Text;
 using Hexa.NET.ImGui;
 
 namespace DTXMania.UI.Drawable;
@@ -8,7 +9,8 @@ namespace DTXMania.UI.Drawable;
 public abstract class BaseTexture : IDisposable
 {
     public static BaseTexture None { get; } = new NoneTexture();
-    public static BaseTextureFactory? Factory { get; set; }
+    public static BaseTextureFactory Factory { get; set; }
+    public static IUiTextRenderer SkiaTextRenderer { get; set; }
 
     public abstract float Width { get; }
     public abstract float Height { get; }
@@ -29,6 +31,21 @@ public abstract class BaseTexture : IDisposable
         return EnsureFactoryConfigured().CreateEmpty(width, height, name);
     }
 
+    public void tDraw2DMatrix(Matrix4x4 transformMatrix)
+    {
+        tDraw2DMatrix(transformMatrix, new Vector2(Width, Height), new RectangleF(0, 0, Width, Height), Color4.White);
+    }
+
+    public void tDraw2DMatrix(Matrix4x4 transformMatrix, Vector2 size)
+    {
+        tDraw2DMatrix(transformMatrix, size, new RectangleF(0, 0, Width, Height), Color4.White);
+    }
+    
+    public void tDraw2DMatrix(Matrix4x4 transformMatrix, Vector2 size, RectangleF clipRect)
+    {
+        tDraw2DMatrix(transformMatrix, size, clipRect, Color4.White);
+    }
+    
     public abstract void tDraw2DMatrix(Matrix4x4 transformMatrix, Vector2 size, RectangleF clipRect, Color4 color);
     public abstract void tDraw2DMatrixSliced(Matrix4x4 transformMatrix, Vector2 size, RectangleF clipRect, Color4 color, RectangleF sliceRect);
 

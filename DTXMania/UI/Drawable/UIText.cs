@@ -25,7 +25,7 @@ public class UIText : UITexture
     public string fontFamily = string.Empty;
     public float fontSize = DefaultFontSize;
     public float outlineWidth = 3f;
-    public float texturePadding = 12f;
+    public float texturePadding = 0f;
     public float lineSpacing = 1f;
     public bool antialias = true;
     public bool subpixelText = true;
@@ -114,7 +114,7 @@ public class UIText : UITexture
 
         BaseTexture renderedTexture = renderBackend switch
         {
-            UiTextRenderBackend.Skia when OpenGlUi.SkiaTextRenderer != null => OpenGlUi.SkiaTextRenderer.Render(CreateRenderRequest()),
+            UiTextRenderBackend.Skia when BaseTexture.SkiaTextRenderer != null => BaseTexture.SkiaTextRenderer.Render(CreateRenderRequest()),
             UiTextRenderBackend.Skia => throw new InvalidOperationException("Skia text renderer is not available."),
             _ => throw new ArgumentOutOfRangeException()
         };

@@ -164,7 +164,7 @@ public class SongSelectionElement : UIGroup
                     songTitleText.SetText(node.title);
                     CScore chart = node.charts.FirstOrDefault(x => x != null);
                     songArtistText.SetText(chart != null ? chart.SongInformation.ArtistName : "");
-                    backgroundImage.SetTexture(bar);
+                    backgroundImage.SetTexture(bar, false, false);
                     
                     //some dirty hacks to fix clipping issues with a bad texture (?)
                     backgroundImage.clipRect.X = 0;
@@ -176,7 +176,7 @@ public class SongSelectionElement : UIGroup
                     songArtistText.SetText(node.childNodes.Count > 1
                         ? $"{node.childNodes.Count - 1} songs"
                         : "Empty collection");
-                    backgroundImage.SetTexture(boxClosed);
+                    backgroundImage.SetTexture(boxClosed, false, false);
                     
                     //some dirty hacks to fix clipping issues with a bad texture (?)
                     backgroundImage.clipRect.X = 1;
@@ -186,7 +186,7 @@ public class SongSelectionElement : UIGroup
                 case SongNode.ENodeType.BACKBOX:
                     songTitleText.SetText("<< BACK");
                     songArtistText.SetText(CDTXMania.isJapanese ? "BOX を出ます。" : "Exit from the BOX.");
-                    backgroundImage.SetTexture(boxOpen);
+                    backgroundImage.SetTexture(boxOpen, false, false);
                     
                     //some dirty hacks to fix clipping issues with a bad texture (?)
                     backgroundImage.clipRect.X = 1;
@@ -251,7 +251,7 @@ public class SongSelectionElement : UIGroup
             }
         }
         
-        lamp.SetTexture(lampTextures[bestLamp], false);
+        lamp.SetTexture(lampTextures[bestLamp], false, false);
         lamp.isVisible = true;
     }
 
@@ -267,7 +267,7 @@ public class SongSelectionElement : UIGroup
     {
         tex ??= SongSelectionContainer.fallbackPreImage;
         
-        albumArtImage.SetTexture(tex, false);
+        albumArtImage.SetTexture(tex, false, false);
         albumArtImage.clipRect = new RectangleF(0, 0, tex.Width, tex.Height);
     }
     

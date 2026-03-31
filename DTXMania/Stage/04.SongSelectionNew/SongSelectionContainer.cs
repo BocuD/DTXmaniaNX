@@ -192,7 +192,7 @@ public class SongSelectionContainer : UIGroup
             tex = fallbackPreImage;
         }
 
-        albumArt.SetTexture(tex, false);
+        albumArt.SetTexture(tex, false, false);
         albumArt.clipRect = new RectangleF(0, 0, tex.Width, tex.Height);
     }
 

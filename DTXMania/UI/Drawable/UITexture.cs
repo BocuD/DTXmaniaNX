@@ -17,12 +17,16 @@ public abstract class UITexture : UIDrawable
 
     public BaseTexture Texture => texture;
 
-    public void SetTexture(BaseTexture t)
+    public void SetTexture(BaseTexture t, bool updateSize = true)
     {
         if (t.isValid())
         {
             texture = t;
-            size = new Vector2(t.Width, t.Height);
+
+            if (updateSize)
+            {
+                size = new Vector2(t.Width, t.Height);
+            }
         }
         else
         {

@@ -54,9 +54,9 @@ public class UIImage : UITexture
         texture.tDraw2DMatrix(combinedMatrix, size, clipRect, color);
     }
 
-    public void SetTexture(BaseTexture newTexture, bool updateRects = true)
+    public void SetTexture(BaseTexture newTexture, bool updateRects = true, bool updateSize = true)
     {
-        base.SetTexture(newTexture);
+        base.SetTexture(newTexture, updateSize);
 
         if (updateRects && texture.isValid())
         {

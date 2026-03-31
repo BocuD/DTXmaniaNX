@@ -98,7 +98,7 @@ public class StatusPane : UIGroup
                 int rank = song.charts[c].SongInformation.BestRank[(int)instrument];
                 if (rank != (int)CScoreIni.ERANK.UNKNOWN)
                 {
-                    rankIconHolders[c].SetTexture(rankIcons[rank], false);
+                    rankIconHolders[c].SetTexture(rankIcons[rank], false, false);
                     rankIconHolders[c].isVisible = true;
 
                     skillIconHolders[c].isVisible = song.charts[c].countSkill;
