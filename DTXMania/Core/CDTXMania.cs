@@ -242,6 +242,7 @@ internal class CDTXMania : Game
         //Update version information
         Assembly assembly = Assembly.GetExecutingAssembly();
         DateTime? buildDate = GetAssemblyBuildDateTime() ?? DateTime.UnixEpoch;
+        string appName = "DTXManiaNX";
         VERSION = $"v{assembly.GetName().Version.ToString().Substring(0, 5)} Beta ({buildDate:yyyyMMdd})";
         VERSION_DISPLAY = $"DTX:NX:A:A:{buildDate:yyyyMMdd}00 Beta";
 
@@ -322,10 +323,11 @@ internal class CDTXMania : Game
 
         #endregion
         
+        strWindowTitle = appName + " " + VERSION;
+
         // #region [ Initialize window ]
         //
         // //---------------------
-        // strWindowTitle = appName + " " + VERSION;
         // Window.StartPosition = FormStartPosition.Manual; // #30675 2013.02.04 ikanick add
         // Window.Location = new Point(ConfigIni.nInitialWindowXPosition, ConfigIni.nInitialWindowYPosition); // #30675 2013.02.04 ikanick add
         //
@@ -665,90 +667,90 @@ internal class CDTXMania : Game
     public static float physicalRenderScale = 1.0f;
     public static float renderScale = 1.0f;
     
-    protected override void LoadContent()
-    {
-        Trace.TraceInformation("CDTXMania.LoadContent()");
-        DeviceResetManager.NotifyDeviceReset();
+    // protected override void LoadContent()
+    // {
+    //     Trace.TraceInformation("CDTXMania.LoadContent()");
+    //     DeviceResetManager.NotifyDeviceReset();
+    //
+    //     UpdateCursorState();
+    //
+    //     Device.SetTransform(TransformState.View,
+    //         Matrix.LookAtLH(new Vector3(0f, 0f, (float)(-GameFramebufferSize.Height / 2 * Math.Sqrt(3.0))),
+    //             new Vector3(0f, 0f, 0f), new Vector3(0f, 1f, 0f)));
+    //     Device.SetTransform(TransformState.Projection,
+    //         Matrix.PerspectiveFovLH(CConversion.DegreeToRadian((float)60f),
+    //             ((float)Device.Viewport.Width) / ((float)Device.Viewport.Height), -100f, 100f));
+    //     Device.SetRenderState(RenderState.Lighting, false);
+    //     Device.SetRenderState(RenderState.ZEnable, false);
+    //     Device.SetRenderState(RenderState.AntialiasedLineEnable, false);
+    //     Device.SetRenderState(RenderState.AlphaTestEnable, true);
+    //     Device.SetRenderState(RenderState.AlphaRef, 10);
+    //
+    //     Device.SetRenderState(RenderState.MultisampleAntialias, true);
+    //     Device.SetSamplerState(0, SamplerState.MinFilter, TextureFilter.Linear);
+    //     Device.SetSamplerState(0, SamplerState.MagFilter, TextureFilter.Linear);
+    //
+    //     Device.SetRenderState(RenderState.AlphaFunc, Compare.Greater);
+    //     Device.SetRenderState(RenderState.AlphaBlendEnable, true);
+    //     Device.SetRenderState(RenderState.SourceBlend, Blend.SourceAlpha);
+    //     Device.SetRenderState(RenderState.DestinationBlend, Blend.InverseSourceAlpha);
+    //     Device.SetTextureStageState(0, TextureStage.AlphaOperation, TextureOperation.Modulate);
+    //     Device.SetTextureStageState(0, TextureStage.AlphaArg1, 2);
+    //     Device.SetTextureStageState(0, TextureStage.AlphaArg2, 1);
+    //
+    //     //init imgui
+    //     context = ImGui.CreateContext();
+    //
+    //     ImGui.SetCurrentContext(context);
+    //     ImGuiImplD3D9.SetCurrentContext(context);
+    //
+    //     var io = ImGui.GetIO();
+    //
+    //     ImGui.StyleColorsDark();
+    //
+    //     unsafe
+    //     {
+    //         //var font = ImGui.GetIO().Fonts.AddFontFromFileTTF(Path.Combine(executableDirectory, "Fonts", "NotoSansCJKjp-Regular.otf"), 20f, ImGui.GetIO().Fonts.GetGlyphRangesJapanese()); 
+    //         // ImGui.GetIO().Fonts.Build();
+    //     }
+    //
+    //     var settings = app.GraphicsDeviceManager.CurrentSettings;
+    //     io.DisplaySize = new Vector2(settings.BackBufferWidth, settings.BackBufferHeight);
+    //     io.DisplayFramebufferScale = new Vector2(1, 1);
+    //     ImGuizmo.SetRect(0, 0, io.DisplaySize.X, io.DisplaySize.Y);
+    //
+    //     renderScale = settings.BackBufferWidth / (float)GameFramebufferSize.Width;
+    //     physicalRenderScale = renderScale;
+    //
+    //     io.ConfigFlags |= ImGuiConfigFlags.DockingEnable;
+    //
+    //     unsafe
+    //     {
+    //         ImGuiImplD3D9.Init(new IDirect3DDevice9Ptr((IDirect3DDevice9*)app.Device.NativePointer));
+    //     }
+    //
+    //     ImGuizmo.SetImGuiContext(context);
+    //
+    //     gameRenderTargetTexture = new Texture(Device, 1280, 720, 1, Usage.RenderTarget, Format.A8R8G8B8, Pool.Default);
+    //     gameRenderTargetSurface = gameRenderTargetTexture.GetSurfaceLevel(0);
+    //
+    //     mainRenderTarget = Device.GetRenderTarget(0);
+    // }
 
-        UpdateCursorState();
-
-        Device.SetTransform(TransformState.View,
-            Matrix.LookAtLH(new Vector3(0f, 0f, (float)(-GameFramebufferSize.Height / 2 * Math.Sqrt(3.0))),
-                new Vector3(0f, 0f, 0f), new Vector3(0f, 1f, 0f)));
-        Device.SetTransform(TransformState.Projection,
-            Matrix.PerspectiveFovLH(CConversion.DegreeToRadian((float)60f),
-                ((float)Device.Viewport.Width) / ((float)Device.Viewport.Height), -100f, 100f));
-        Device.SetRenderState(RenderState.Lighting, false);
-        Device.SetRenderState(RenderState.ZEnable, false);
-        Device.SetRenderState(RenderState.AntialiasedLineEnable, false);
-        Device.SetRenderState(RenderState.AlphaTestEnable, true);
-        Device.SetRenderState(RenderState.AlphaRef, 10);
-
-        Device.SetRenderState(RenderState.MultisampleAntialias, true);
-        Device.SetSamplerState(0, SamplerState.MinFilter, TextureFilter.Linear);
-        Device.SetSamplerState(0, SamplerState.MagFilter, TextureFilter.Linear);
-
-        Device.SetRenderState(RenderState.AlphaFunc, Compare.Greater);
-        Device.SetRenderState(RenderState.AlphaBlendEnable, true);
-        Device.SetRenderState(RenderState.SourceBlend, Blend.SourceAlpha);
-        Device.SetRenderState(RenderState.DestinationBlend, Blend.InverseSourceAlpha);
-        Device.SetTextureStageState(0, TextureStage.AlphaOperation, TextureOperation.Modulate);
-        Device.SetTextureStageState(0, TextureStage.AlphaArg1, 2);
-        Device.SetTextureStageState(0, TextureStage.AlphaArg2, 1);
-
-        //init imgui
-        context = ImGui.CreateContext();
-
-        ImGui.SetCurrentContext(context);
-        ImGuiImplD3D9.SetCurrentContext(context);
-
-        var io = ImGui.GetIO();
-
-        ImGui.StyleColorsDark();
-
-        unsafe
-        {
-            //var font = ImGui.GetIO().Fonts.AddFontFromFileTTF(Path.Combine(executableDirectory, "Fonts", "NotoSansCJKjp-Regular.otf"), 20f, ImGui.GetIO().Fonts.GetGlyphRangesJapanese()); 
-            // ImGui.GetIO().Fonts.Build();
-        }
-
-        var settings = app.GraphicsDeviceManager.CurrentSettings;
-        io.DisplaySize = new Vector2(settings.BackBufferWidth, settings.BackBufferHeight);
-        io.DisplayFramebufferScale = new Vector2(1, 1);
-        ImGuizmo.SetRect(0, 0, io.DisplaySize.X, io.DisplaySize.Y);
-
-        renderScale = settings.BackBufferWidth / (float)GameFramebufferSize.Width;
-        physicalRenderScale = renderScale;
-
-        io.ConfigFlags |= ImGuiConfigFlags.DockingEnable;
-
-        unsafe
-        {
-            ImGuiImplD3D9.Init(new IDirect3DDevice9Ptr((IDirect3DDevice9*)app.Device.NativePointer));
-        }
-
-        ImGuizmo.SetImGuiContext(context);
-
-        gameRenderTargetTexture = new Texture(Device, 1280, 720, 1, Usage.RenderTarget, Format.A8R8G8B8, Pool.Default);
-        gameRenderTargetSurface = gameRenderTargetTexture.GetSurfaceLevel(0);
-
-        mainRenderTarget = Device.GetRenderTarget(0);
-    }
-
-    protected override void UnloadContent()
-    {
-        Trace.TraceInformation("CDTXMania.UnloadContent()");
-        DeviceResetManager.NotifyDeviceLost();
-
-        gameRenderTargetSurface.Dispose();
-        gameRenderTargetTexture.Dispose();
-        mainRenderTarget.Dispose();
-
-        ImGuiImplD3D9.InvalidateDeviceObjects();
-        ImGuiImplD3D9.Shutdown();
-
-        ImGui.DestroyContext();
-    }
+    // protected override void UnloadContent()
+    // {
+    //     Trace.TraceInformation("CDTXMania.UnloadContent()");
+    //     DeviceResetManager.NotifyDeviceLost();
+    //
+    //     gameRenderTargetSurface.Dispose();
+    //     gameRenderTargetTexture.Dispose();
+    //     mainRenderTarget.Dispose();
+    //
+    //     ImGuiImplD3D9.InvalidateDeviceObjects();
+    //     ImGuiImplD3D9.Shutdown();
+    //
+    //     ImGui.DestroyContext();
+    // }
 
     protected override void OnExiting(EventArgs e)
     {
@@ -782,7 +784,7 @@ internal class CDTXMania : Game
         }
     }
 
-    protected override void Update(GameTime gameTime)
+    public void Update()
     {
     }
 
@@ -797,7 +799,6 @@ internal class CDTXMania : Game
     {
         float delta = (Timer.nCurrentTime - lastDrawTime) / 1000.0f;
         lastDrawTime = Timer.nCurrentTime;
-        GameStatus.UpdatePerformanceGraph(delta);
         
         //....????
         if (SoundManager == null)
@@ -1179,8 +1180,7 @@ internal class CDTXMania : Game
         {
             delay = "(" + SoundManager.GetSoundDelay() + "ms)";
         }
-
-        Window.Text = strWindowTitle + " (" + SoundManager.GetCurrentSoundDeviceType() + delay + ")";
+        maniaGl.SetWindowTitle(strWindowTitle + " (" + SoundManager.GetCurrentSoundDeviceType() + delay + ")");
     }
     
     public static SongNode confirmedSong { get; private set; }
