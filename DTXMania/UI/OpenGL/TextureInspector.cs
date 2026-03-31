@@ -10,13 +10,13 @@ namespace DTXMania.UI.OpenGL
             public string? Name { get; init; }
         }
 
-        private readonly OpenGlUiRenderer _renderer;
+        private readonly OpenGlRenderer _renderer;
         private readonly Dictionary<uint, TextureEntry> _entries = new();
 
         private string _filter = string.Empty;
         private uint? _selectedId;
         
-        public TextureInspector(OpenGlUiRenderer renderer, IEnumerable<OpenGlUiRenderer.TextureInfo>? initialSnapshot = null)
+        public TextureInspector(OpenGlRenderer renderer, IEnumerable<OpenGlRenderer.TextureInfo>? initialSnapshot = null)
         {
             _renderer = renderer ?? throw new ArgumentNullException(nameof(renderer));
 

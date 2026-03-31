@@ -1,11 +1,14 @@
 using System.Drawing;
 using System.Numerics;
+using DTXMania.Core.Framework;
 using Silk.NET.OpenGL;
 
 namespace DTXMania.UI.OpenGL;
 
-public sealed unsafe class OpenGlUiRenderer : IDisposable
+public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
 {
+    public override string name => "OpenGL";
+    
     private readonly uint[] _indices = [0, 1, 2, 2, 3, 0];
 
     private GL? _gl;

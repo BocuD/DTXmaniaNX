@@ -9,7 +9,7 @@ namespace DTXMania.UI.OpenGL;
 
 internal sealed class OpenGlTexture : BaseTexture
 {
-    private readonly OpenGlUiRenderer _renderer;
+    private readonly OpenGlRenderer _renderer;
     private readonly bool _ownsTexture;
     private uint _textureId;
 
@@ -17,7 +17,7 @@ internal sealed class OpenGlTexture : BaseTexture
     public override float Height { get; }
     public override string name { get; }
 
-    public OpenGlTexture(OpenGlUiRenderer renderer, uint textureId, int width, int height, string name, bool ownsTexture = true)
+    public OpenGlTexture(OpenGlRenderer renderer, uint textureId, int width, int height, string name, bool ownsTexture = true)
     {
         _renderer = renderer;
         _textureId = textureId;
@@ -27,13 +27,13 @@ internal sealed class OpenGlTexture : BaseTexture
         _ownsTexture = ownsTexture;
     }
 
-    public static OpenGlTexture CreateFromRgba32(OpenGlUiRenderer renderer, ReadOnlySpan<byte> rgbaPixels, int width, int height, string name = "OpenGLTexture")
+    public static OpenGlTexture CreateFromRgba32(OpenGlRenderer renderer, ReadOnlySpan<byte> rgbaPixels, int width, int height, string name = "OpenGLTexture")
     {
         uint textureId = renderer.CreateTexture(width, height, rgbaPixels);
         return new OpenGlTexture(renderer, textureId, width, height, name);
     }
 
-    public static OpenGlTexture CreateEmpty(OpenGlUiRenderer renderer, int width, int height, string name = "DynamicTexture")
+    public static OpenGlTexture CreateEmpty(OpenGlRenderer renderer, int width, int height, string name = "DynamicTexture")
     {
         uint textureId = renderer.CreateTextureEmpty(width, height);
         return new OpenGlTexture(renderer, textureId, width, height, name);
@@ -51,7 +51,7 @@ internal sealed class OpenGlTexture : BaseTexture
         return CreateFromRgba32(OpenGlUi.Renderer, image.Data, image.Width, image.Height, Path.GetFileName(texturePath));
     }
 
-    public static OpenGlTexture CreateSolidColor(OpenGlUiRenderer renderer, Color4 color, string name = "Solid")
+    public static OpenGlTexture CreateSolidColor(OpenGlRenderer renderer, Color4 color, string name = "Solid")
     {
         byte[] pixels =
         [

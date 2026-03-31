@@ -9,7 +9,7 @@ internal static class PrototypeControlsWindow
     {
         ImGui.SetNextWindowSize(new Vector2(320, 240), ImGuiCond.FirstUseEver);
         ImGui.Begin("Display Controls");
-        ImGui.Text(host.RenderInGameWindow ? "Cube viewport renders in Game Window." : "Cube viewport renders behind this window.");
+        ImGui.Text($"Renderer: {host.Renderer.name}");
         ImGui.Text($"FPS: {host.Fps:F1}");
         ImGui.Text($"Frame time: {host.FrameTimeMs:F2} ms");
         ImGui.Text($"Window: {host.WindowWidth} x {host.WindowHeight}");

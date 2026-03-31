@@ -18,6 +18,8 @@ namespace OpenGLTest;
 
 internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
 {
+    public IRenderer Renderer => renderer;
+
     private const int GlfwTrue = 1;
     private const int GlfwFalse = 0;
     private const int GlfwDecorated = 0x00020005;
@@ -29,7 +31,7 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
 
     private readonly OpenGlGame _game;
     private readonly GameRenderTarget _gameRenderTarget = new();
-    private readonly OpenGlUiRenderer _uiRenderer = new();
+    private readonly OpenGlRenderer renderer = new();
     private readonly OpenGlSkiaTextRenderer _skiaTextRenderer = new();
     private readonly OpenGlTextureFactory _textureFactory = new();
     private readonly Stopwatch _stopwatch = Stopwatch.StartNew();
@@ -174,7 +176,7 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
         }
 
         ShutdownImGui();
-        _uiRenderer.Dispose();
+        renderer.Dispose();
         OpenGlUi.Renderer = null;
         OpenGlUi.TextureFactory = null;
         BaseTexture.SkiaTextRenderer = null;
@@ -202,8 +204,8 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
         _gl = GL.GetApi(_nativeContext);
         _game.AttachGraphics(_gl);
         _gameRenderTarget.AttachGraphics(_gl);
-        _uiRenderer.AttachGraphics(_gl);
-        OpenGlUi.Renderer = _uiRenderer;
+        renderer.AttachGraphics(_gl);
+        OpenGlUi.Renderer = renderer;
         OpenGlUi.TextureFactory = _textureFactory;
         
         BaseTexture.SkiaTextRenderer = _skiaTextRenderer;
@@ -395,7 +397,7 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
         GLFWwindowPtr oldWindow = _window;
         _game.ReleaseContextResources();
         _gameRenderTarget.ReleaseContextResources();
-        _uiRenderer.ReleaseContextResources();
+        renderer.ReleaseContextResources();
         ShutdownImGui();
         
         GLFWwindowPtr newWindow = CreateWindow(oldWindow);
@@ -403,7 +405,7 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
         _game.AttachGraphics(_gl!);
         _game.windowSize = new Vector2(_windowWidth, _windowHeight);
         _gameRenderTarget.AttachGraphics(_gl!);
-        _uiRenderer.AttachGraphics(_gl!);
+        renderer.AttachGraphics(_gl!);
         GLFW.SetWindowTitle(newWindow, _windowTitle);
         InitializeImGui();
 
@@ -455,7 +457,7 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
             }
 
             _gameRenderTarget.Resize(targetWidth, targetHeight);
-            _uiRenderer.BeginFrame(targetWidth, targetHeight);
+            renderer.BeginFrame(targetWidth, targetHeight);
             _gameRenderTarget.BindForRendering();
             _game.Update(_deltaTime, _stopwatch.Elapsed.TotalSeconds);
             _game.Render(targetWidth, targetHeight, _stopwatch.Elapsed.TotalSeconds);
