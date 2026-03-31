@@ -57,7 +57,7 @@ internal class CStageConfig : CStage
         //left menu
         UIGroup leftMenu = ui.AddChild(new UIGroup("Left Options Menu"));
         leftMenu.position = new Vector3(245, 140, 0);
-        leftMenu.renderOrder = 50;
+        leftMenu.renderOrder = 30;
         leftMenu.dontSerialize = true;
         
         UIImage menuPanel = leftMenu.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\4_menu panel.png"))));
@@ -101,7 +101,7 @@ internal class CStageConfig : CStage
                     break;
             }
         }));
-        drawList.renderOrder = 25;
+        drawList.renderOrder = 40;
         
         descriptionPanel = ui.AddChild(new UIText("", 17));
         descriptionPanel.name = "DescriptionPanel";
