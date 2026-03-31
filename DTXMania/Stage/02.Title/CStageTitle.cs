@@ -105,18 +105,8 @@ internal class CStageTitle : CStage
 	{
 		if( bActivated )
 		{
-			txMenu = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\2_menu.png" ), false );
-			
+			txMenu = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\2_menu.png" ) );
 			base.OnManagedCreateResources();
-		}
-	}
-	public override void OnManagedReleaseResources()
-	{
-		if( bActivated )
-		{
-			CDTXMania.tReleaseTexture( ref txMenu );
-			
-			base.OnManagedReleaseResources();
 		}
 	}
 
@@ -243,15 +233,13 @@ internal class CStageTitle : CStage
 
 				Color4 col = Color4.White;
 				col.Alpha = (float) (1.0 - ctCursorFlash.nCurrentValue / 100.0 );
-				//todo COMMENTED OUT tDraw2DMatrix
-				//txMenu.tDraw2DMatrix(CDTXMania.app.Device, finalMatrix, new Vector2(MENU_W, MENU_H), new RectangleF(0, MENU_H * 5, MENU_W, MENU_H), col);
+				
+				txMenu.tDraw2DMatrix(finalMatrix, new Vector2(MENU_W, MENU_H), new RectangleF(0, MENU_H * 5, MENU_W, MENU_H), col);
 			}
-			txMenu.vcScaleRatio.X = 1f;
-			txMenu.vcScaleRatio.Y = 1f;
-			txMenu.nTransparency = 0xff;
 			
 			Matrix4x4 mat2 = Matrix4x4.CreateTranslation(x, y, 0f) * scaleMatrix;
-			//todo COMMENTED OUT tDraw2DMatrix
+
+			txMenu.tDraw2DMatrix( mat2, new Vector2(MENU_W, MENU_H), new RectangleF( 0, MENU_H * 4, MENU_W, MENU_H ));
 			//txMenu.tDraw2DMatrix( CDTXMania.app.Device, mat2, new Vector2(MENU_W, MENU_H), new RectangleF( 0, MENU_H * 4, MENU_W, MENU_H ));
 		}
 		if( txMenu != null )
@@ -259,10 +247,8 @@ internal class CStageTitle : CStage
 			Matrix4x4 mat = Matrix4x4.CreateTranslation(MENU_X, MENU_Y, 0) * scaleMatrix;
 			Matrix4x4 mat2 = Matrix4x4.CreateTranslation(MENU_X, MENU_Y + MENU_H, 0) * scaleMatrix;
 			
-			//todo COMMENTED OUT tDraw2DMatrix
-			//txMenu.tDraw2DMatrix( CDTXMania.app.Device, mat, new Vector2(MENU_W, MENU_H), new RectangleF( 0, 0, MENU_W, MENU_H ));
-			//todo COMMENTED OUT tDraw2DMatrix
-			//txMenu.tDraw2DMatrix( CDTXMania.app.Device, mat2, new Vector2(MENU_W, MENU_H * 2), new RectangleF( 0, MENU_H * 2, MENU_W, MENU_H * 2 ));
+			txMenu.tDraw2DMatrix(mat, new Vector2(MENU_W, MENU_H), new RectangleF( 0, 0, MENU_W, MENU_H ));
+			txMenu.tDraw2DMatrix(mat2, new Vector2(MENU_W, MENU_H * 2), new RectangleF( 0, MENU_H * 2, MENU_W, MENU_H * 2 ));
 		}
 				
 		EPhase ePhaseId = ePhaseID;
@@ -381,7 +367,8 @@ internal class CStageTitle : CStage
 	private const int MENU_X = 0x1fa;
 	private const int MENU_Y = 0x201;
 	private int nCurrentCursorPosition;
-	private CTexture txMenu;
+	//private CTexture txMenu;
+	private BaseTexture txMenu;
 	
 	private void tMoveCursorDown()
 	{
