@@ -46,6 +46,7 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
     private int _windowedY = 80;
     private int _windowedWidth = 1280;
     private int _windowedHeight = 720;
+    private string _windowTitle = "";
 
     private double _lastFrameTime;
     private double _fpsAccumulatedTime;
@@ -123,6 +124,8 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
 
     public void SetWindowTitle(string newTitle)
     {
+        _windowTitle = newTitle;
+        
         if (_window.Handle != null)
         {
             GLFW.SetWindowTitle(_window, newTitle);
@@ -388,7 +391,7 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
             GLFW.GetWindowPos(_window, ref _windowedX, ref _windowedY);
             GLFW.GetWindowSize(_window, ref _windowedWidth, ref _windowedHeight);
         }
-
+        
         GLFWwindowPtr oldWindow = _window;
         _game.ReleaseContextResources();
         _gameRenderTarget.ReleaseContextResources();
@@ -401,6 +404,7 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
         _game.windowSize = new Vector2(_windowWidth, _windowHeight);
         _gameRenderTarget.AttachGraphics(_gl!);
         _uiRenderer.AttachGraphics(_gl!);
+        GLFW.SetWindowTitle(newWindow, _windowTitle);
         InitializeImGui();
 
         _game.WindowHandleUpdated(GetWindowHandle());
