@@ -53,14 +53,14 @@ public class CStageSongSelectionNew : CStage
     private readonly SongDbSort[] sorters =
     [
         new SortDefault(),
-        //new SortByBox(),
-        //new SortByTitle(),
-        //new SortByArtist(),
-        //new SortByDifficulty(),
-        //new SortByLevel(),
-        //new SortByPlayer(),
-        //new SortByAllSongs(),
-        //new SortBySkill()
+        new SortByBox(),
+        new SortByTitle(),
+        new SortByArtist(),
+        new SortByDifficulty(),
+        new SortByLevel(),
+        new SortByPlayer(),
+        new SortByAllSongs(),
+        new SortBySkill()
     ];
     
     public override void InitializeBaseUI()
