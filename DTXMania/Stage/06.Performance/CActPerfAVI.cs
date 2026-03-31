@@ -364,15 +364,15 @@ internal class CActPerfAVI : CActivity
             //this.txドラム = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_Drums.png"));
             if (CDTXMania.ConfigIni.bGuitarEnabled)
             {
-                txクリップパネル = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_ClipPanelC.png"));
+                txクリップパネル = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_ClipPanelC.png"));
             }
             else if (CDTXMania.ConfigIni.bGraph有効.Drums && CDTXMania.ConfigIni.bDrumsEnabled)
             {
-                txクリップパネル = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_ClipPanelB.png"));
+                txクリップパネル = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_ClipPanelB.png"));
             }
             else
             {
-                txクリップパネル = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_ClipPanel.png"));
+                txクリップパネル = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_ClipPanel.png"));
             }
             txDShow汎用 = new CTexture(CDTXMania.app.Device, 1280, 720, CDTXMania.app.GraphicsDeviceManager.CurrentSettings.BackBufferFormat, Pool.Managed);
 
@@ -382,7 +382,7 @@ internal class CActPerfAVI : CActivity
                 stFillIn[i].ctUpdate = new CCounter(0, 30, 30, CDTXMania.Timer);
                 stFillIn[i].bInUse = false;
             }
-            txフィルインエフェクト = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\7_Fillin Effect.png" ) );
+            txフィルインエフェクト = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\7_Fillin Effect.png" ) );
 
             //this.txフィルインエフェクト = new CTexture[ 31 ];
             //for( int fill = 0; fill < 31; fill++ )
@@ -610,10 +610,10 @@ internal class CActPerfAVI : CActivity
             {
                 if (CDTXMania.DTX != null && CDTXMania.DTX.listBMP.Count >= 1 && CDTXMania.ConfigIni.bBGAEnabled == true)
                 {
-                    if (CDTXMania.ConfigIni.bDrumsEnabled)
-                        CDTXMania.stagePerfDrumsScreen.actBGA.tUpdateAndDraw(980, 0);
-                    else
-                        CDTXMania.stagePerfGuitarScreen.actBGA.tUpdateAndDraw(501, 0);
+                    // if (CDTXMania.ConfigIni.bDrumsEnabled)
+                        // CDTXMania.stagePerfDrumsScreen.actBGA.tUpdateAndDraw(980, 0);
+                    // else
+                        // CDTXMania.stagePerfGuitarScreen.actBGA.tUpdateAndDraw(501, 0);
                 }
             }
 

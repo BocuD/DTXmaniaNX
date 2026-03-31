@@ -19,9 +19,9 @@ internal class CActPerfGuitarLaneFlushGB : CActPerfCommonLaneFlushGB
 
 	public override void OnManagedCreateResources()
 	{
-		txLane = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_Paret_Guitar.png"));
-		txLaneDark = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_Paret_Guitar_Dark.png"));
-		txLaneFlush = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_guitar line.png"));
+		txLane = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_Paret_Guitar.png"));
+		txLaneDark = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_Paret_Guitar_Dark.png"));
+		txLaneFlush = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_guitar line.png"));
 
 		base.OnManagedCreateResources();
 	}

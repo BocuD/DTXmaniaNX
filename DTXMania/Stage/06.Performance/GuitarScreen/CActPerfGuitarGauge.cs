@@ -35,14 +35,14 @@ internal class CActPerfGuitarGauge : CActPerfCommonGauge
     {
         if (bActivated)
         {
-            txフレーム.Guitar = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_Gauge_Guitar.png"));
-            txフレーム.Bass = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_Gauge_Bass.png"));
-            txフルゲージ = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_gauge_bar.jpg"));
-            txゲージ = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_gauge_bar.png"));
+            txフレーム.Guitar = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_Gauge_Guitar.png"));
+            txフレーム.Bass = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_Gauge_Bass.png"));
+            txフルゲージ = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_gauge_bar.jpg"));
+            txゲージ = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_gauge_bar.png"));
 
             //this.txマスクF = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_Dummy.png"));
             //this.txマスクD = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_Dummy.png"));
-            txハイスピ = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_Panel_icons.jpg"));
+            txハイスピ = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_Panel_icons.jpg"));
 
             base.OnManagedCreateResources();
         }

@@ -51,8 +51,8 @@ internal class CActPerfCommonRGB : CActivity
 	{
 		if( bActivated )
 		{
-			txRGB = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_RGB buttons.png"));
-			txShutter = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_shutter_GB.png"));
+			txRGB = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_RGB buttons.png"));
+			txShutter = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_shutter_GB.png"));
 			base.OnManagedCreateResources();
 		}
 	}

@@ -142,8 +142,8 @@ internal class CActPerfProgressBar : CActivity
 				tx青 = CDTXMania.tGenerateTexture(bitmap3);
 			}
 
-			txProgressBarBackgroundDrums = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_Drum_Progress_bg.png"));
-			txProgressBarBackgroundGuitar = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_Guitar_Progress_bg.png"));
+			txProgressBarBackgroundDrums = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_Drum_Progress_bg.png"));
+			txProgressBarBackgroundGuitar = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_Guitar_Progress_bg.png"));
 				
 			base.OnManagedCreateResources();
 		}				

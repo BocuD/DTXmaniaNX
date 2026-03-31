@@ -125,9 +125,9 @@ internal class CActPerfDrumsPad : CActivity
     {
         if (bActivated)
         {
-            txパッド = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_pads.png"));
-            tx光るパッド = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\ScreenPlayDrums pads flush.png"));
-            txボーナス文字 = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_Bonus.png"));
+            txパッド = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_pads.png"));
+            tx光るパッド = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\ScreenPlayDrums pads flush.png"));
+            txボーナス文字 = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_Bonus.png"));
             base.OnManagedCreateResources();
         }
     }

@@ -35,8 +35,8 @@ internal abstract class CActPerfCommonWailingBonus : CActivity
 	{
 		if ( bActivated )
 		{
-			txWailingBonus = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlay wailing bonus.png" ) );
-			txWailingFlush = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\7_WailingFlush.png" ) );
+			txWailingBonus = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay wailing bonus.png" ) );
+			txWailingFlush = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\7_WailingFlush.png" ) );
 			txWailingFire = CDTXMania.tテクスチャの生成Af( CSkin.Path( @"Graphics\7_WailingFire.png" ) );
 			base.OnManagedCreateResources();
 		}

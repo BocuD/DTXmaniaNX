@@ -101,43 +101,43 @@ internal class CActResultRank : CActivity
         if (bActivated)
         {
 
-            txStageCleared = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\ScreenResult StageCleared.png"));
-            txFullCombo = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\ScreenResult fullcombo.png"));
-            txExcellent = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\ScreenResult Excellent.png"));
+            txStageCleared = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\ScreenResult StageCleared.png"));
+            txFullCombo = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\ScreenResult fullcombo.png"));
+            txExcellent = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\ScreenResult Excellent.png"));
 
             for (int j = 0; j < 3; j++)
             {
                 switch (stageResult.nRankValue[j])
                 {
                     case 0:
-                        txランク文字[j] = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_rankSS.png"));
+                        txランク文字[j] = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\8_rankSS.png"));
                         break;
 
                     case 1:
-                        txランク文字[j] = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_rankS.png"));
+                        txランク文字[j] = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\8_rankS.png"));
                         break;
 
                     case 2:
-                        txランク文字[j] = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_rankA.png"));
+                        txランク文字[j] = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\8_rankA.png"));
                         break;
 
                     case 3:
-                        txランク文字[j] = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_rankB.png"));
+                        txランク文字[j] = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\8_rankB.png"));
                         break;
 
                     case 4:
-                        txランク文字[j] = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_rankC.png"));
+                        txランク文字[j] = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\8_rankC.png"));
                         break;
 
                     case 5:
-                        txランク文字[j] = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_rankD.png"));
+                        txランク文字[j] = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\8_rankD.png"));
                         break;
 
                     case 6:
                     case 99:	// #23534 2010.10.28 yyagi: 演奏チップが0個のときは、rankEと見なす
-                        txランク文字[j] = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_rankE.png"));
+                        txランク文字[j] = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\8_rankE.png"));
                         if (b全オート[j])
-                            txランク文字[j] = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_rankSS.png"));
+                            txランク文字[j] = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\8_rankSS.png"));
                         break;
 
                     default:

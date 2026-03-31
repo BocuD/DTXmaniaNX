@@ -82,8 +82,8 @@ internal class CCharacterConsole : CActivity
 	{
 		if( bActivated )
 		{
-			txフォント8x16[ 0 ] = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\Console font 8x16.png" ) );
-			txフォント8x16[ 1 ] = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\Console font 2 8x16.png" ) );
+			txフォント8x16[ 0 ] = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\Console font 8x16.png" ) );
+			txフォント8x16[ 1 ] = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\Console font 2 8x16.png" ) );
 			base.OnManagedCreateResources();
 		}
 	}

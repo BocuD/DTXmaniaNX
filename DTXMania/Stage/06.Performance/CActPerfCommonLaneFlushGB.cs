@@ -53,17 +53,17 @@ internal class CActPerfCommonLaneFlushGB : CActivity
 	{
 		if( bActivated )
 		{
-			txFlush[ 0 ] = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlay lane flush red.png" ) );
-			txFlush[ 1 ] = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlay lane flush green.png" ) );
-			txFlush[ 2 ] = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlay lane flush blue.png" ) );
-			txFlush[ 3 ] = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlay lane flush yellow.png" ) );
-			txFlush[ 4 ] = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlay lane flush purple.png" ) );
+			txFlush[ 0 ] = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay lane flush red.png" ) );
+			txFlush[ 1 ] = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay lane flush green.png" ) );
+			txFlush[ 2 ] = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay lane flush blue.png" ) );
+			txFlush[ 3 ] = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay lane flush yellow.png" ) );
+			txFlush[ 4 ] = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay lane flush purple.png" ) );
 
-			txFlush[ 5 ] = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlay lane flush red reverse.png" ) );
-			txFlush[ 6 ] = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlay lane flush green reverse.png" ) );
-			txFlush[ 7 ] = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlay lane flush blue reverse.png" ) );
-			txFlush[ 8 ] = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlay lane flush yellow reverse.png" ) );
-			txFlush[ 9 ] = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlay lane flush purple reverse.png" ) );
+			txFlush[ 5 ] = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay lane flush red reverse.png" ) );
+			txFlush[ 6 ] = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay lane flush green reverse.png" ) );
+			txFlush[ 7 ] = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay lane flush blue reverse.png" ) );
+			txFlush[ 8 ] = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay lane flush yellow reverse.png" ) );
+			txFlush[ 9 ] = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay lane flush purple reverse.png" ) );
 			base.OnManagedCreateResources();
 		}
 	}

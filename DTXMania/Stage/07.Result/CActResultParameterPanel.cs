@@ -428,24 +428,24 @@ internal class CActResultParameterPanel : CActivity
     {
         if (bActivated)
         {
-            txCharacter[0] = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_Ratenumber_s.png"));
-            txCharacter[1] = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_Ratenumber_l.png"));
-            txCharacter[2] = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_numbers_large.png"));
-            txNewRecord = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_New Record.png"));
+            txCharacter[0] = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_Ratenumber_s.png"));
+            txCharacter[1] = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_Ratenumber_l.png"));
+            txCharacter[2] = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\8_numbers_large.png"));
+            txNewRecord = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\8_New Record.png"));
             txExciteGauge = new CTexture[3];
-            txExciteGauge[0] = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_Gauge.png"));
-            txExciteGauge[1] = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_gauge_bar.png"));
-            txExciteGauge[2] = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_gauge_bar.jpg"));
-            txScore = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_score numbersGD.png"));
-            txSkillPanel = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_SkillPanel.png"));
-            tx難易度パネル = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_Difficulty.png"));
-            tx難易度用数字 = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_LevelNumber.png"));
+            txExciteGauge[0] = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_Gauge.png"));
+            txExciteGauge[1] = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_gauge_bar.png"));
+            txExciteGauge[2] = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_gauge_bar.jpg"));
+            txScore = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_score numbersGD.png"));
+            txSkillPanel = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_SkillPanel.png"));
+            tx難易度パネル = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_Difficulty.png"));
+            tx難易度用数字 = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_LevelNumber.png"));
             //Load new textures
-            txPercent = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_RatePercent_l.png"));
-            txSkillMax = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_skill max.png"));
+            txPercent = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_RatePercent_l.png"));
+            txSkillMax = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_skill max.png"));
             //
-            txProgressBarPanel = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_progress_bar_panel.png"));
-            txLagHitCount = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_lag numbers.png"));
+            txProgressBarPanel = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\8_progress_bar_panel.png"));
+            txLagHitCount = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_lag numbers.png"));
             for ( int i = 0; i < 3; i++ )
             {
                 strPlayerName = string.IsNullOrEmpty( CDTXMania.ConfigIni.strCardName[ i ] ) ? "GUEST" : CDTXMania.ConfigIni.strCardName[ i ];

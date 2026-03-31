@@ -10,7 +10,7 @@ internal class CActPerfGuitarDanger : CActPerfCommonDanger
 	{
 		if ( bActivated )
 		{
-			txDANGER = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlayGuitar danger.png" ) );
+			txDANGER = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayGuitar danger.png" ) );
 			base.OnManagedCreateResources();
 		}
 	}

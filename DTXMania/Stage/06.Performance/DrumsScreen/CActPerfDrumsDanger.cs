@@ -10,7 +10,7 @@ internal class CActPerfDrumsDanger : CActPerfCommonDanger
 	{
 		if( bActivated )
 		{
-			tx黒 = CDTXMania.tGenerateTexture(CSkin.Path( @"Graphics\7_Danger.png" ) );
+			tx黒 = CDTXMania.LoadFromPath(CSkin.Path( @"Graphics\7_Danger.png" ) );
 			base.OnManagedCreateResources();
 		}
 	}

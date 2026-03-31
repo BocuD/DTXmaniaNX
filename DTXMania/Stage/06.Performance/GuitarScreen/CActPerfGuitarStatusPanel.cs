@@ -277,15 +277,15 @@ internal class CActPerfGuitarStatusPanel : CActPerfCommonStatusPanel
         {
             prv表示用フォント = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.str曲名表示フォント), 20, FontStyle.Regular);
             prv称号フォント = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.str曲名表示フォント), 12, FontStyle.Regular);
-            txスキルパネル = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_SkillPanel.png"));
-            txパネル文字[0] = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_Ratenumber_s.png"));
-            txパネル文字[1] = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_Ratenumber_l.png"));
-            tx難易度パネル = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_Difficulty.png"));
-            tx難易度用数字 = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_LevelNumber.png"));
+            txスキルパネル = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_SkillPanel.png"));
+            txパネル文字[0] = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_Ratenumber_s.png"));
+            txパネル文字[1] = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_Ratenumber_l.png"));
+            tx難易度パネル = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_Difficulty.png"));
+            tx難易度用数字 = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_LevelNumber.png"));
             //Load new textures
-            txPercent = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_RatePercent_l.png"));
-            txSkillMax = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_skill max.png"));
-            txLagHitCount = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_lag numbers.png"));
+            txPercent = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_RatePercent_l.png"));
+            txSkillMax = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_skill max.png"));
+            txLagHitCount = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_lag numbers.png"));
 
             txネームプレート用文字 = new CTexture[ 2 ];
             strPlayerName[ 0 ] = string.IsNullOrEmpty( CDTXMania.ConfigIni.strCardName[ 1 ] ) ? "GUEST" : CDTXMania.ConfigIni.strCardName[ 1 ];

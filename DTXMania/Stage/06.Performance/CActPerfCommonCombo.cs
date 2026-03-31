@@ -633,12 +633,12 @@ internal class CActPerfCommonCombo : CActivity
         if (!bActivated)
             return;
 
-        txCOMBOドラム = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlayDrums combo.png" ) );
-        txCOMBOドラム1000 = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlayDrums combo_2.png" ) );
-        txComboBom = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\7_Combobomb.png" ) );
+        txCOMBOドラム = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums combo.png" ) );
+        txCOMBOドラム1000 = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums combo_2.png" ) );
+        txComboBom = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\7_Combobomb.png" ) );
         if( txComboBom != null )
             txComboBom.bAdditiveBlending = true;
-        txCOMBOギター = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlayGuitar combo.png" ) );
+        txCOMBOギター = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayGuitar combo.png" ) );
         base.OnManagedCreateResources();
     }
     public override void OnManagedReleaseResources()

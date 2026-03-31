@@ -31,7 +31,7 @@ internal class CActPerfGuitarBonus : CActivity
     {
         if (bActivated)
         {
-            txBonus100 = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_Bonus_100.png"));
+            txBonus100 = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_Bonus_100.png"));
             base.OnManagedCreateResources();
         }
     }

@@ -379,128 +379,128 @@ internal class CActPerfDrumsChipFireD : CActivity
 		{
 			if (CDTXMania.ConfigIni.nExplosionFrames >= 2)
 			{
-				tx火花2 = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\ScreenPlayDrums chip fire.png"));
+				tx火花2 = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\ScreenPlayDrums chip fire.png"));
 				if (tx火花2 != null)
 				{
 					tx火花2.bAdditiveBlending = true;
 				}
 			}
-			tx火花[0] = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\ScreenPlayDrums chip fire_LC.png"));
+			tx火花[0] = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\ScreenPlayDrums chip fire_LC.png"));
 			if (tx火花[0] != null)
 			{
 				tx火花[0].bAdditiveBlending = true;
 			}
-			tx火花[1] = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlayDrums chip fire_HH.png" ) );
+			tx火花[1] = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums chip fire_HH.png" ) );
 			if( tx火花[1] != null )
 			{
 				tx火花[1].bAdditiveBlending = true;
 			}
-			tx火花[2] = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\ScreenPlayDrums chip fire_SD.png"));
+			tx火花[2] = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\ScreenPlayDrums chip fire_SD.png"));
 			if (tx火花[2] != null)
 			{
 				tx火花[2].bAdditiveBlending = true;
 			}
-			tx火花[3] = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\ScreenPlayDrums chip fire_BD.png"));
+			tx火花[3] = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\ScreenPlayDrums chip fire_BD.png"));
 			if (tx火花[3] != null)
 			{
 				tx火花[3].bAdditiveBlending = true;
 			}
-			tx火花[4] = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\ScreenPlayDrums chip fire_HT.png"));
+			tx火花[4] = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\ScreenPlayDrums chip fire_HT.png"));
 			if (tx火花[4] != null)
 			{
 				tx火花[4].bAdditiveBlending = true;
 			}
-			tx火花[5] = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\ScreenPlayDrums chip fire_LT.png"));
+			tx火花[5] = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\ScreenPlayDrums chip fire_LT.png"));
 			if (tx火花[5] != null)
 			{
 				tx火花[5].bAdditiveBlending = true;
 			}
-			tx火花[6] = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\ScreenPlayDrums chip fire_FT.png"));
+			tx火花[6] = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\ScreenPlayDrums chip fire_FT.png"));
 			if (tx火花[6] != null)
 			{
 				tx火花[6].bAdditiveBlending = true;
 			}
-			tx火花[7] = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\ScreenPlayDrums chip fire_CY.png"));
+			tx火花[7] = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\ScreenPlayDrums chip fire_CY.png"));
 			if (tx火花[7] != null)
 			{
 				tx火花[7].bAdditiveBlending = true;
 			}
-			tx火花[8] = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\ScreenPlayDrums chip fire_LP.png"));
+			tx火花[8] = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\ScreenPlayDrums chip fire_LP.png"));
 			if (tx火花[8] != null)
 			{
 				tx火花[8].bAdditiveBlending = true;
 			}
-			tx火花[9] = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\ScreenPlayDrums chip fire_RD.png"));
+			tx火花[9] = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\ScreenPlayDrums chip fire_RD.png"));
 			if (tx火花[9] != null)
 			{
 				tx火花[9].bAdditiveBlending = true;
 			}
-			tx青い星[0] = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlayDrums chip star_LC.png" ) );
+			tx青い星[0] = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums chip star_LC.png" ) );
 			if( tx青い星[0] != null )
 			{
 				tx青い星[0].bAdditiveBlending = true;
 			}
-			tx青い星[1] = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlayDrums chip star_HH.png" ) );
+			tx青い星[1] = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums chip star_HH.png" ) );
 			if( tx青い星[1] != null )
 			{
 				tx青い星[1].bAdditiveBlending = true;
 			}
-			tx青い星[2] = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlayDrums chip star_SD.png" ) );
+			tx青い星[2] = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums chip star_SD.png" ) );
 			if( tx青い星[2] != null )
 			{
 				tx青い星[2].bAdditiveBlending = true;
 			}
-			tx青い星[3] = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlayDrums chip star_BD.png" ) );
+			tx青い星[3] = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums chip star_BD.png" ) );
 			if( tx青い星[3] != null )
 			{
 				tx青い星[3].bAdditiveBlending = true;
 			}
-			tx青い星[4] = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlayDrums chip star_HT.png" ) );
+			tx青い星[4] = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums chip star_HT.png" ) );
 			if( tx青い星[4] != null )
 			{
 				tx青い星[4].bAdditiveBlending = true;
 			}
-			tx青い星[5] = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlayDrums chip star_LT.png" ) );
+			tx青い星[5] = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums chip star_LT.png" ) );
 			if( tx青い星[5] != null )
 			{
 				tx青い星[5].bAdditiveBlending = true;
 			}
-			tx青い星[6] = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlayDrums chip star_FT.png" ) );
+			tx青い星[6] = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums chip star_FT.png" ) );
 			if( tx青い星[6] != null )
 			{
 				tx青い星[6].bAdditiveBlending = true;
 			}
-			tx青い星[7] = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlayDrums chip star_CY.png" ) );
+			tx青い星[7] = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums chip star_CY.png" ) );
 			if( tx青い星[7] != null )
 			{
 				tx青い星[7].bAdditiveBlending = true;
 			}
-			tx青い星[8] = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlayDrums chip star_LP.png" ) );
+			tx青い星[8] = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums chip star_LP.png" ) );
 			if( tx青い星[8] != null )
 			{
 				tx青い星[8].bAdditiveBlending = true;
 			}
-			tx青い星[9] = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlayDrums chip star_RD.png" ) );
+			tx青い星[9] = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums chip star_RD.png" ) );
 			if( tx青い星[9] != null )
 			{
 				tx青い星[9].bAdditiveBlending = true;
 			}
-			tx大波 = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlayDrums chip wave.png" ) );
+			tx大波 = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums chip wave.png" ) );
 			if( tx大波 != null )
 			{
 				tx大波.bAdditiveBlending = true;
 			}
-			tx細波 = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlayDrums chip wave2.png" ) );
+			tx細波 = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums chip wave2.png" ) );
 			if( tx細波 != null )
 			{
 				tx細波.bAdditiveBlending = true;
 			}
-			txボーナス花火 = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\ScreenPlayDrums chip fire_Bonus.png"));
+			txボーナス花火 = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\ScreenPlayDrums chip fire_Bonus.png"));
 			if (txボーナス花火 != null)
 			{
 				txボーナス花火.bAdditiveBlending = true;
 			}
-			txNotes = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_Chips_drums.png"));
+			txNotes = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_Chips_drums.png"));
 			if (txNotes != null)
 			{
 				txNotes.nTransparency = 120;

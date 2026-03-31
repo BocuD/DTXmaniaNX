@@ -123,20 +123,20 @@ internal class CActPerfDrumsLaneFlushD : CActivity
         {
             if (CDTXMania.ConfigIni.nLaneDisp.Drums == 0 || CDTXMania.ConfigIni.nLaneDisp.Drums == 2)
             {
-                txLine = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_Paret.png"));
-                txBass = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_Paret.png"));
-                txHitom = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_Paret.png"));
+                txLine = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_Paret.png"));
+                txBass = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_Paret.png"));
+                txHitom = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_Paret.png"));
             }
             else
             {
-                txLine = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_Paret_Dark.png"));
-                txBass = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_Paret_Dark.png"));
-                txHitom = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_Paret_Dark.png"));
+                txLine = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_Paret_Dark.png"));
+                txBass = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_Paret_Dark.png"));
+                txHitom = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_Paret_Dark.png"));
             }
 
             for( int i = 0; i < 22; i++ )
             {
-                txFlush[ i ] = CDTXMania.tGenerateTexture( CSkin.Path( strファイル名[ i ] ) );
+                txFlush[ i ] = CDTXMania.LoadFromPath( CSkin.Path( strファイル名[ i ] ) );
             }
             base.OnManagedCreateResources();
         }

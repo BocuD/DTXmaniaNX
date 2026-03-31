@@ -58,11 +58,11 @@ internal class CActFIFOBlackStart : CActivity
 				if (!File.Exists(path))
 				{
 					//Trace.TraceWarning("File doesn't exist!({0})", new object[] { path });
-					txジャケット = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\\5_preimage default.png"));
+					txジャケット = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\\5_preimage default.png"));
 				}
 				else
 				{
-					txジャケット = CDTXMania.tGenerateTexture(path);
+					txジャケット = CDTXMania.LoadFromPath(path);
 				}
 			}
 

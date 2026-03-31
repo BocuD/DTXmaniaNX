@@ -316,9 +316,9 @@ internal class CStageSongLoading : CStage
     {
         if (bActivated)
         {
-            txLevel = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\6_LevelNumber.png"));
-            txDifficultyPanel = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\6_Difficulty.png"));
-            txPartPanel = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\6_Part.png"));
+            txLevel = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\6_LevelNumber.png"));
+            txDifficultyPanel = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\6_Difficulty.png"));
+            txPartPanel = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\6_Part.png"));
 
             #region[ 曲名、アーティスト名テクスチャの生成 ]
 
@@ -415,7 +415,7 @@ internal class CStageSongLoading : CStage
 
             if (txJacket == null) // 2019.04.26 kairera0467
             {
-                txJacket = CDTXMania.tGenerateTexture(!File.Exists(path) ? CSkin.Path(@"Graphics\5_preimage default.png") : path);
+                txJacket = CDTXMania.LoadFromPath(!File.Exists(path) ? CSkin.Path(@"Graphics\5_preimage default.png") : path);
             }
         }
         catch (Exception ex)

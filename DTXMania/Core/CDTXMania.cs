@@ -975,7 +975,7 @@ internal class CDTXMania : Game
 
     #region [ Texture Creation / Disposal (why is this in the main game class??) ]
     
-    public static CTexture tGenerateTexture(string fileName)
+    public static CTexture LoadFromPath(string fileName)
     {
         return tGenerateTexture(fileName, false);
     }

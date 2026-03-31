@@ -53,32 +53,32 @@ internal abstract class CActPerfChipFireGB : CActivity
 	{
 		if( bActivated )
 		{
-			tx火花[ 0 ] = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlay chip fire red.png" ) );
+			tx火花[ 0 ] = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay chip fire red.png" ) );
 			if( tx火花[ 0 ] != null )
 			{
 				tx火花[ 0 ].bAdditiveBlending = true;
 			}
-			tx火花[ 1 ] = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlay chip fire green.png" ) );
+			tx火花[ 1 ] = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay chip fire green.png" ) );
 			if( tx火花[ 1 ] != null )
 			{
 				tx火花[ 1 ].bAdditiveBlending = true;
 			}
-			tx火花[ 2 ] = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlay chip fire blue.png" ) );
+			tx火花[ 2 ] = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay chip fire blue.png" ) );
 			if( tx火花[ 2 ] != null )
 			{
 				tx火花[ 2 ].bAdditiveBlending = true;
 			}
-			tx火花[ 3 ] = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlay chip fire yellow.png" ) );
+			tx火花[ 3 ] = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay chip fire yellow.png" ) );
 			if( tx火花[ 3 ] != null )
 			{
 				tx火花[ 3 ].bAdditiveBlending = true;
 			}
-			tx火花[ 4 ] = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlay chip fire purple.png" ) );
+			tx火花[ 4 ] = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay chip fire purple.png" ) );
 			if( tx火花[ 4 ] != null )
 			{
 				tx火花[ 4 ].bAdditiveBlending = true;
 			}
-			txレーンの線 = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_guitar line.png"));
+			txレーンの線 = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_guitar line.png"));
 			base.OnManagedCreateResources();
 		}
 	}

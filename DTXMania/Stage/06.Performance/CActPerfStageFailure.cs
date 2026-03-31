@@ -45,7 +45,7 @@ internal class CActPerfStageFailure : CActivity
     {
         if (bActivated)
         {
-            txStageFailed = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_stage_failed.jpg"));
+            txStageFailed = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_stage_failed.jpg"));
             base.OnManagedCreateResources();
         }
     }

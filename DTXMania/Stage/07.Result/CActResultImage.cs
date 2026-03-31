@@ -52,9 +52,9 @@ internal class CActResultImage : CActivity
         {
             ftSongDifficultyFont = new Font("Impact", 15f, FontStyle.Regular);
             iDrumSpeed = Image.FromFile(CSkin.Path(@"Graphics\7_panel_icons.jpg"));
-            txジャケットパネル = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_JacketPanel.png"));
+            txジャケットパネル = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_JacketPanel.png"));
 
-            txリザルト画像がないときの画像 = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\5_preimage default.png"));
+            txリザルト画像がないときの画像 = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\5_preimage default.png"));
             if (CDTXMania.ConfigIni.bストイックモード)
             {
                 txリザルト画像 = txリザルト画像がないときの画像;
@@ -306,7 +306,7 @@ internal class CActResultImage : CActivity
             Trace.TraceWarning("File doesn't exist!({0})", new object[] { path });
             return false;
         }
-        txリザルト画像 = CDTXMania.tGenerateTexture(path);
+        txリザルト画像 = CDTXMania.LoadFromPath(path);
         r表示するリザルト画像 = txリザルト画像;
         return (r表示するリザルト画像 != null);
     }
@@ -329,7 +329,7 @@ internal class CActResultImage : CActivity
             Trace.TraceWarning("File doesn't exist!({0})", new object[] { path });
             return false;
         }
-        txリザルト画像 = CDTXMania.tGenerateTexture(path);
+        txリザルト画像 = CDTXMania.LoadFromPath(path);
         r表示するリザルト画像 = txリザルト画像;
         return (r表示するリザルト画像 != null);
     }

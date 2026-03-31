@@ -62,8 +62,8 @@ internal class CActPerfSkillMeter : CActivity
 	{
 		if( bActivated )
 		{
-			txグラフ = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\7_Graph_Main.png" ) );
-			txグラフ_ゲージ = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\7_Graph_Gauge.png" ) );
+			txグラフ = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\7_Graph_Main.png" ) );
+			txグラフ_ゲージ = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\7_Graph_Gauge.png" ) );
 			
 			base.OnManagedCreateResources();
 		}

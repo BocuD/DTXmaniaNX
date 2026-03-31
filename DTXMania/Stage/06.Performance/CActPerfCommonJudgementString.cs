@@ -241,12 +241,12 @@ internal class CActPerfCommonJudgementString : CActivity
 			}
 			else
 			{
-				tx判定文字列[0] = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\ScreenPlay judge strings 1.png"));
-				tx判定文字列[1] = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\ScreenPlay judge strings 2.png"));
-				tx判定文字列[2] = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\ScreenPlay judge strings 3.png"));
+				tx判定文字列[0] = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\ScreenPlay judge strings 1.png"));
+				tx判定文字列[1] = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\ScreenPlay judge strings 2.png"));
+				tx判定文字列[2] = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\ScreenPlay judge strings 3.png"));
 			}
 
-			txlag数値 = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_lag numbers.png"));
+			txlag数値 = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_lag numbers.png"));
 			base.OnManagedCreateResources();
 		}
 	}

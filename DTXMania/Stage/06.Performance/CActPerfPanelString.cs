@@ -76,15 +76,15 @@ internal class CActPerfPanelString : CActivity
     {
         if (bActivated)
         {
-            txジャケットパネル = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_JacketPanel.png"));
+            txジャケットパネル = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_JacketPanel.png"));
             string path = CDTXMania.DTX.strFolderName + CDTXMania.DTX.PREIMAGE;
             if (!File.Exists(path))
             {
-                txジャケット画像 = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\5_preimage default.png"));
+                txジャケット画像 = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\5_preimage default.png"));
             }
             else
             {
-                txジャケット画像 = CDTXMania.tGenerateTexture(path);
+                txジャケット画像 = CDTXMania.LoadFromPath(path);
             }
 
 //              this.SetPanelString(this.strパネル文字列);

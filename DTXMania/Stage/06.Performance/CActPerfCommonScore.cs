@@ -135,7 +135,7 @@ internal class CActPerfCommonScore : CActivity
 	{
 		if (bActivated)
 		{
-			txScore = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_score numbersGD.png"));
+			txScore = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_score numbersGD.png"));
 			base.OnManagedCreateResources();
 		}
 	}

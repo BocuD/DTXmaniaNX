@@ -30,13 +30,13 @@ internal class CActPerfDrumsGauge : CActPerfCommonGauge
     {
         if (bActivated)
         {
-            txフレーム.Drums = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_Gauge.png"));
-            txゲージ = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_gauge_bar.png"));
-            txフルゲージ = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_gauge_bar.jpg"));
+            txフレーム.Drums = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_Gauge.png"));
+            txゲージ = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_gauge_bar.png"));
+            txフルゲージ = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_gauge_bar.jpg"));
 
             //this.txマスクF = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_Dummy.png"));
             //this.txマスクD = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_Dummy.png"));
-            txハイスピ = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_Panel_icons.jpg"));
+            txハイスピ = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_Panel_icons.jpg"));
 
             base.OnManagedCreateResources();
         }

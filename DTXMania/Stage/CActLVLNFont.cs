@@ -72,7 +72,7 @@ public class CActLVLNFont : CActivity
 	{
 		if (bActivated)
 		{
-			tx数値 = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\ScreenSelect level numbers.png"));
+			tx数値 = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\ScreenSelect level numbers.png"));
 			base.OnManagedCreateResources();
 		}
 	}

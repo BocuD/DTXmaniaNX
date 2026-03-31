@@ -193,17 +193,17 @@ internal class CActSelectStatusPanel : CActivity
     {
         if (bActivated)
         {
-            txパネル本体 = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\5_status panel.png"));
-            tx難易度パネル = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\5_difficulty panel.png"));
-            tx難易度枠 = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\5_difficulty frame.png"));
-            txランク = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\5_skill icon.png"));
-            tx達成率MAX = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\5_skill max.png"));
-            txDifficultyNumber = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\5_level number.png"));
-            txAchievementRateNumber = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\5_skill number.png"));
-            txBPM数字 = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\5_bpm font.png"));
-            txDrumsGraphPanel = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\5_graph panel drums.png"));
-            txGuitarBassGraphPanel = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\5_graph panel guitar bass.png"));
-            txSkillPointPanel = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\5_skill point panel.png"));
+            txパネル本体 = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\5_status panel.png"));
+            tx難易度パネル = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\5_difficulty panel.png"));
+            tx難易度枠 = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\5_difficulty frame.png"));
+            txランク = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\5_skill icon.png"));
+            tx達成率MAX = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\5_skill max.png"));
+            txDifficultyNumber = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\5_level number.png"));
+            txAchievementRateNumber = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\5_skill number.png"));
+            txBPM数字 = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\5_bpm font.png"));
+            txDrumsGraphPanel = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\5_graph panel drums.png"));
+            txGuitarBassGraphPanel = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\5_graph panel guitar bass.png"));
+            txSkillPointPanel = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\5_skill point panel.png"));
             txGenerateGraphBarLine();
             txGenerateProgressBarLine("");
             base.OnManagedCreateResources();
