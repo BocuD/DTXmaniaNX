@@ -4,7 +4,7 @@ using Silk.NET.OpenGL;
 
 namespace DTXMania.UI.OpenGL;
 
-internal sealed unsafe class OpenGlUiRenderer : IDisposable
+public sealed unsafe class OpenGlUiRenderer : IDisposable
 {
     private readonly uint[] _indices = [0, 1, 2, 2, 3, 0];
 
@@ -19,6 +19,16 @@ internal sealed unsafe class OpenGlUiRenderer : IDisposable
     private int _transformLocation;
     private int _colorLocation;
     private Matrix4x4 _projection = Matrix4x4.Identity;
+
+    // Events to notify external observers (e.g. an inspector) about texture lifecycle
+    internal event Action<uint, int, int>? TextureCreated;
+    internal event Action<uint>? TextureDeleted;
+    internal event Action? RendererDisposed;
+
+    // Internal tracking of textures so external inspectors can query existing textures
+    private readonly Dictionary<uint, (int Width, int Height)> _trackedTextures = new();
+
+    public readonly record struct TextureInfo(uint Id, int Width, int Height);
 
     public void AttachGraphics(GL gl)
     {
@@ -120,6 +130,9 @@ internal sealed unsafe class OpenGlUiRenderer : IDisposable
     {
         ReleaseContextResources();
 
+        // Notify observers that the renderer is being disposed so they can drop references
+        RendererDisposed?.Invoke();
+
         if (!_sharedResourcesCreated || _gl == null)
         {
             return;
@@ -144,6 +157,9 @@ internal sealed unsafe class OpenGlUiRenderer : IDisposable
         }
 
         _sharedResourcesCreated = false;
+
+        // Clear tracked textures - they are no longer valid after dispose
+        _trackedTextures.Clear();
     }
 
     internal void DeleteTexture(uint textureId)
@@ -151,6 +167,9 @@ internal sealed unsafe class OpenGlUiRenderer : IDisposable
         if (_gl != null && textureId != 0)
         {
             _gl.DeleteTexture(textureId);
+            // Update internal tracking before notifying observers
+            _trackedTextures.Remove(textureId);
+            TextureDeleted?.Invoke(textureId);
         }
     }
 
@@ -180,6 +199,9 @@ internal sealed unsafe class OpenGlUiRenderer : IDisposable
         }
 
         _gl.BindTexture(TextureTarget.Texture2D, 0);
+        // Update internal tracking and notify observers
+        _trackedTextures[textureId] = (width, height);
+        TextureCreated?.Invoke(textureId, width, height);
         return textureId;
     }
 
@@ -202,7 +224,19 @@ internal sealed unsafe class OpenGlUiRenderer : IDisposable
         _gl.TexImage2D(TextureTarget.Texture2D, 0, (int)InternalFormat.Rgba8, (uint)width, (uint)height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, null);
 
         _gl.BindTexture(TextureTarget.Texture2D, 0);
+        // Update internal tracking and notify observers
+        _trackedTextures[textureId] = (width, height);
+        TextureCreated?.Invoke(textureId, width, height);
         return textureId;
+    }
+
+    // Returns a snapshot of currently tracked textures. Safe to call from any thread; returns a copy.
+    internal IReadOnlyCollection<TextureInfo> GetTrackedTextures()
+    {
+        lock (_trackedTextures)
+        {
+            return _trackedTextures.Select(kvp => new TextureInfo(kvp.Key, kvp.Value.Width, kvp.Value.Height)).ToArray();
+        }
     }
 
     internal void UpdateTexture(uint textureId, ReadOnlySpan<byte> rgbaPixels, int width, int height, int dstX = 0, int dstY = 0)

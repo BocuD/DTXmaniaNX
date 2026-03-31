@@ -1,4 +1,5 @@
-﻿using OpenGLTest;
+﻿using System.Numerics;
+using OpenGLTest;
 
 namespace DTXMania.Core.Framework;
 
@@ -9,4 +10,7 @@ public interface IGameHost
     public void RequestFullscreenMode(FullscreenMode fullscreenMode);
     
     IntPtr GetWindowHandle();
+    void SetWindowTitle(string newTitle);
+    void SetWindowSize(Vector2 value);
+    void SetWindowPosition(Vector2 value);
 }

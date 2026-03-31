@@ -1,17 +1,20 @@
 using DTXMania.Core;
 using DTXMania.UI.Inspector;
 using Hexa.NET.GLFW;
+using SampleFramework;
 using Silk.NET.OpenGL;
 
 namespace OpenGLTest;
 
-internal sealed unsafe class DTXManiaGL : OpenGlGame
+public sealed unsafe class DTXManiaGL : OpenGlGame
 {
+    public static DTXManiaGL instance;
     private CDTXMania mania;
     
     public override void Init()
     {
         mania = new CDTXMania(this);
+        instance = this;
     }
 
     protected override void CreateSharedResources()
@@ -26,7 +29,8 @@ internal sealed unsafe class DTXManiaGL : OpenGlGame
 
     public override void Update(float deltaTime, double totalTime)
     {
-        
+        mania.Update();
+        GameStatus.UpdatePerformanceGraph(deltaTime);
     }
 
     public override void Render(int width, int height, double totalTime)
@@ -38,6 +42,7 @@ internal sealed unsafe class DTXManiaGL : OpenGlGame
 
         float aspectRatio = width / (float)Math.Max(height, 1);
 
+        CDTXMania.physicalRenderScale = windowSize.X / GameWindowSize.Width;
         mania.Draw();
         GameStatus.Draw();
     }

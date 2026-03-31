@@ -2,7 +2,7 @@ using Silk.NET.OpenGL;
 
 namespace OpenGLTest;
 
-internal abstract class OpenGlGame : BaseWindow, IDisposable
+public abstract class OpenGlGame : BaseGame, IDisposable
 {
     protected GL Gl { get; private set; } = null!;
     private bool _sharedResourcesCreated;

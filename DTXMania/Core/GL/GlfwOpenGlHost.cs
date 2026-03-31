@@ -121,6 +121,30 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
         return glfwGetWin32Window((IntPtr)_window.Handle);
     }
 
+    public void SetWindowTitle(string newTitle)
+    {
+        if (_window.Handle != null)
+        {
+            GLFW.SetWindowTitle(_window, newTitle);
+        }
+    }
+
+    public void SetWindowSize(Vector2 value)
+    {
+        if (_window.Handle != null)
+        {
+            GLFW.SetWindowSize(_window, (int)value.X, (int)value.Y);
+        }
+    }
+
+    public void SetWindowPosition(Vector2 value)
+    {
+        if (_window.Handle != null)
+        {
+            GLFW.SetWindowPos(_window, (int)value.X, (int)value.Y);
+        }
+    }
+
     public void Run()
     {
         if (GLFW.Init() == 0)
@@ -149,8 +173,8 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
         ShutdownImGui();
         _uiRenderer.Dispose();
         OpenGlUi.Renderer = null;
-        OpenGlUi.SkiaTextRenderer = null;
         OpenGlUi.TextureFactory = null;
+        BaseTexture.SkiaTextRenderer = null;
         BaseTexture.Factory = null;
         _gameRenderTarget.Dispose();
         _game.Dispose();
@@ -177,8 +201,9 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
         _gameRenderTarget.AttachGraphics(_gl);
         _uiRenderer.AttachGraphics(_gl);
         OpenGlUi.Renderer = _uiRenderer;
-        OpenGlUi.SkiaTextRenderer = _skiaTextRenderer;
         OpenGlUi.TextureFactory = _textureFactory;
+        
+        BaseTexture.SkiaTextRenderer = _skiaTextRenderer;
         BaseTexture.Factory = _textureFactory;
         InitializeImGui();
     }
@@ -373,6 +398,7 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
         GLFWwindowPtr newWindow = CreateWindow(oldWindow);
         _window = newWindow;
         _game.AttachGraphics(_gl!);
+        _game.windowSize = new Vector2(_windowWidth, _windowHeight);
         _gameRenderTarget.AttachGraphics(_gl!);
         _uiRenderer.AttachGraphics(_gl!);
         InitializeImGui();
