@@ -44,7 +44,7 @@ internal class CStageResult : CStage
 		eStageID = EStage.Result_7;
 		ePhaseID = EPhase.Common_DefaultState;
 		bActivated = false;
-		listChildActivities.Add( actResultImage = new CActResultImage(this) );
+		//listChildActivities.Add( actResultImage = new CActResultImage(this) );
 		listChildActivities.Add( actParameterPanel = new CActResultParameterPanel(this) );
 		listChildActivities.Add( actRank = new CActResultRank(this) );
 		listChildActivities.Add( new CActResultSongBar() );
@@ -584,10 +584,10 @@ internal class CStageResult : CStage
 		// 描画
 		background.isVisible = rBackgroundVideoAVI.avi == null;
 		
-		if( actResultImage.OnUpdateAndDraw() == 0 )
-		{
-			bAnimationComplete = false;
-		}
+		// if( actResultImage.OnUpdateAndDraw() == 0 )
+		// {
+		// 	bAnimationComplete = false;
+		// }
 		if ( actParameterPanel.OnUpdateAndDraw() == 0 )
 		{
 			bAnimationComplete = false;
@@ -687,7 +687,7 @@ internal class CStageResult : CStage
 		if (CDTXMania.Input.ActionDecide())
 		{
 			actFI.tフェードイン完了();					// #25406 2011.6.9 yyagi
-			actResultImage.tアニメを完了させる();
+			//actResultImage.tアニメを完了させる();
 			actParameterPanel.tアニメを完了させる();
 			actRank.tアニメを完了させる();
 		}
@@ -747,7 +747,7 @@ internal class CStageResult : CStage
 	private CActFIFOBlack actFO;
 	private CActResultParameterPanel actParameterPanel;
 	private CActResultRank actRank;
-	private CActResultImage actResultImage;
+	//private CActResultImage actResultImage;
 
 	//private CActPerfProgressBar actProgressBar;
 	private bool bAnimationComplete;  // bアニメが完了
