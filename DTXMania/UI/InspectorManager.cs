@@ -2,6 +2,7 @@ using System.Drawing;
 using System.Numerics;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.Inspector;
+using DTXMania.UI.OpenGL;
 using Hexa.NET.ImGui;
 using Hexa.NET.ImGuizmo;
 using Vector2 = System.Numerics.Vector2;
@@ -12,6 +13,7 @@ public static class InspectorManager
 {
     public static Inspector.Inspector inspector { get; private set; }
     public static HierarchyWindow hierarchyWindow { get; private set; }
+    public static TextureInspector textureInspector { get; private set; }
 
     public static bool inspectorEnabled = true;
     public static bool logWindowEnabled = true;
@@ -46,6 +48,11 @@ public static class InspectorManager
 
             toRemoveDrawable?.Dispose();
             toRemove = string.Empty;
+        }
+
+        if (textureInspector == null)
+        {
+            textureInspector = new TextureInspector(OpenGlUi.Renderer, OpenGlUi.Renderer.GetTrackedTextures());
         }
 
         ImGuiDockNodeFlags flags = ImGuiDockNodeFlags.PassthruCentralNode;
@@ -88,6 +95,8 @@ public static class InspectorManager
             inspector.Draw();
             hierarchyWindow.Draw();
             DrawableTracker.DrawWindow();
+            var test = true;
+            textureInspector.DrawWindow(ref test);
         }
 
         selectedDrawable?.DrawTransformGizmo();
