@@ -71,7 +71,7 @@ internal class CActSelectPerfHistoryPanel : CActivity
 	{
 		if( bActivated )
 		{
-			txパネル本体 = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\5_play history panel.png" ), true );
+			txパネル本体 = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\5_play history panel.png" ), true );
 			t選択曲が変更された();
 			base.OnManagedCreateResources();
 		}

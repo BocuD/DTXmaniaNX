@@ -1,6 +1,7 @@
-﻿using DTXMania.Core;
+﻿using System.Drawing;
+using DTXMania.Core;
+using DTXMania.UI.Drawable;
 using FDK;
-using SharpDX;
 
 namespace DTXMania;
 
@@ -19,18 +20,11 @@ internal class CActPerfGuitarLaneFlushGB : CActPerfCommonLaneFlushGB
 
 	public override void OnManagedCreateResources()
 	{
-		txLane = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_Paret_Guitar.png"));
-		txLaneDark = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_Paret_Guitar_Dark.png"));
-		txLaneFlush = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_guitar line.png"));
+		txLane = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_Paret_Guitar.png"));
+		txLaneDark = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_Paret_Guitar_Dark.png"));
+		txLaneFlush = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_guitar line.png"));
 
 		base.OnManagedCreateResources();
-	}
-	public override void OnManagedReleaseResources()
-	{
-		CDTXMania.tReleaseTexture( ref txLane );
-		CDTXMania.tReleaseTexture( ref txLaneDark );
-		CDTXMania.tReleaseTexture( ref txLaneFlush );
-		base.OnManagedReleaseResources();
 	}
 
 	public override int OnUpdateAndDraw()
@@ -62,7 +56,7 @@ internal class CActPerfGuitarLaneFlushGB : CActPerfCommonLaneFlushGB
 				if( !ctUpdate[ i ].bStopped )
 				{
 					EInstrumentPart e楽器パート = ( i < 5 ) ? EInstrumentPart.GUITAR : EInstrumentPart.BASS;
-					CTexture texture = CDTXMania.ConfigIni.bReverse[ (int) e楽器パート ] ? txFlush[ ( i % 5 ) + 5 ] : txFlush[ i % 5 ];
+					BaseTexture texture = CDTXMania.ConfigIni.bReverse[ (int) e楽器パート ] ? txFlush[ ( i % 5 ) + 5 ] : txFlush[ i % 5 ];
 					int num2 = CDTXMania.ConfigIni.bLeft[ (int) e楽器パート ] ? 1 : 0;
 					//int x = ( ( ( i < 5 ) ? 88 : 480 ) + this.nRGBのX座標[ num2, i ] ) + ( ( 37 * base.ctUpdate[ i ].nCurrentValue ) / 100 );
 					int x = (((i < 5) ? 88 : 958) + nRGBのX座標[num2, i] + ( ( 19 * ctUpdate[ i ].nCurrentValue ) / 70 ));
@@ -136,9 +130,9 @@ internal class CActPerfGuitarLaneFlushGB : CActPerfCommonLaneFlushGB
 	//-----------------
 	private readonly int[,] nRGBのX座標 = new int[ , ] { { 0, 39, 78, 117, 156, 0, 39, 78, 117, 156 }, { 156, 117, 78, 39, 0, 156, 117, 78, 39, 0 } };
 
-	private CTexture txLane;
-	private CTexture txLaneDark;
-	private CTexture txLaneFlush;
+	private BaseTexture txLane;
+	private BaseTexture txLaneDark;
+	private BaseTexture txLaneFlush;
 	//-----------------
 	#endregion
 }

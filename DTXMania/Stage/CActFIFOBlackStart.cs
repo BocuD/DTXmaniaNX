@@ -35,8 +35,8 @@ internal class CActFIFOBlackStart : CActivity
 	{
 		if( bActivated )
 		{
-			tx黒タイル64x64 = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\Tile black 64x64.png" ), false );
-			tx黒幕 = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\6_FadeOut.jpg"), false);
+			tx黒タイル64x64 = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\Tile black 64x64.png" ), false );
+			tx黒幕 = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\6_FadeOut.jpg"), false);
 			base.OnManagedCreateResources();
 		}
 	}

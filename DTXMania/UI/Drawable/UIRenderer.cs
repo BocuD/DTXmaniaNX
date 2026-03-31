@@ -31,7 +31,13 @@ public abstract class BaseTexture : IDisposable
         return EnsureFactoryConfigured().CreateEmpty(width, height, name);
     }
 
-    public void tDraw2D(Device device, int x, int y)
+    public void tDraw2D(Device device, float x, float y)
+    {
+        Matrix4x4 transformMatrix = Matrix4x4.CreateTranslation(x, y, 0);
+        tDraw2DMatrix(transformMatrix);
+    }
+    
+    public void tDraw2D(Device device, float x, float y, RectangleF clipRect)
     {
         Matrix4x4 transformMatrix = Matrix4x4.CreateTranslation(x, y, 0);
         tDraw2DMatrix(transformMatrix);

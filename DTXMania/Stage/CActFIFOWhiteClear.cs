@@ -40,8 +40,8 @@ internal class CActFIFOWhiteClear : CActivity
 		if( bActivated )
 		{
                 
-			tx白タイル64x64 = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\Tile white 64x64.png" ), false );
-			txリザルト画像 = CDTXMania.tGenerateTexture( CSkin.Path(@"Graphics\8_background.jpg"), false );
+			tx白タイル64x64 = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\Tile white 64x64.png" ), false );
+			txリザルト画像 = CDTXMania.LoadFromPath( CSkin.Path(@"Graphics\8_background.jpg"), false );
 			txFullCombo = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\\7_FullCombo.png"));
 			txExcellent = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\\7_Excellent.png"));
 			tx黒幕 = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\\7_Drums_black.png"));

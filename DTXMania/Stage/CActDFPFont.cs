@@ -558,8 +558,8 @@ public class CActDFPFont : CActivity
 	{
 		if( bActivated )
 		{
-			txCharacterMap = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\Screen font dfp.png" ), false );
-			txHighlightCharacterMap = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\Screen font dfp em.png" ), false );
+			txCharacterMap = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\Screen font dfp.png" ), false );
+			txHighlightCharacterMap = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\Screen font dfp em.png" ), false );
 			base.OnManagedCreateResources();
 		}
 	}

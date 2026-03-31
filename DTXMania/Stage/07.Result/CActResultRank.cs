@@ -1,7 +1,7 @@
-﻿using DTXMania.Core;
+﻿using System.Drawing;
+using DTXMania.Core;
+using DTXMania.UI.Drawable;
 using FDK;
-using SharpDX;
-using Rectangle = System.Drawing.Rectangle;
 
 namespace DTXMania;
 
@@ -101,43 +101,43 @@ internal class CActResultRank : CActivity
         if (bActivated)
         {
 
-            txStageCleared = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\ScreenResult StageCleared.png"));
-            txFullCombo = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\ScreenResult fullcombo.png"));
-            txExcellent = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\ScreenResult Excellent.png"));
+            txStageCleared = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\ScreenResult StageCleared.png"));
+            txFullCombo = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\ScreenResult fullcombo.png"));
+            txExcellent = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\ScreenResult Excellent.png"));
 
             for (int j = 0; j < 3; j++)
             {
                 switch (stageResult.nRankValue[j])
                 {
                     case 0:
-                        txランク文字[j] = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\8_rankSS.png"));
+                        txランク文字[j] = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_rankSS.png"));
                         break;
 
                     case 1:
-                        txランク文字[j] = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\8_rankS.png"));
+                        txランク文字[j] = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_rankS.png"));
                         break;
 
                     case 2:
-                        txランク文字[j] = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\8_rankA.png"));
+                        txランク文字[j] = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_rankA.png"));
                         break;
 
                     case 3:
-                        txランク文字[j] = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\8_rankB.png"));
+                        txランク文字[j] = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_rankB.png"));
                         break;
 
                     case 4:
-                        txランク文字[j] = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\8_rankC.png"));
+                        txランク文字[j] = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_rankC.png"));
                         break;
 
                     case 5:
-                        txランク文字[j] = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\8_rankD.png"));
+                        txランク文字[j] = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_rankD.png"));
                         break;
 
                     case 6:
                     case 99:	// #23534 2010.10.28 yyagi: 演奏チップが0個のときは、rankEと見なす
-                        txランク文字[j] = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\8_rankE.png"));
+                        txランク文字[j] = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_rankE.png"));
                         if (b全オート[j])
-                            txランク文字[j] = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\8_rankSS.png"));
+                            txランク文字[j] = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_rankSS.png"));
                         break;
 
                     default:
@@ -152,10 +152,6 @@ internal class CActResultRank : CActivity
     {
         if (bActivated)
         {
-            CDTXMania.tReleaseTexture(ref txStageCleared);
-            CDTXMania.tReleaseTexture(ref txFullCombo);
-            CDTXMania.tReleaseTexture(ref txExcellent);
-            CDTXMania.tDisposeSafely(ref txランク文字);
             base.OnManagedReleaseResources();
         }
     }
@@ -182,7 +178,7 @@ internal class CActResultRank : CActivity
                     double num2 = ((double)ctランク表示.nCurrentValue - 200.0) / 300.0;
 
                     if (ctランク表示.nCurrentValue >= 200.0)
-                        txランク文字[j].tDraw2D(CDTXMania.app.Device, n本体X[j], n本体Y[j] + ((int)((double)txランク文字[j].szImageSize.Height * (1.0 - num2))), new RectangleF(0, 0, txランク文字[j].szImageSize.Width, (int)((double)txランク文字[j].szImageSize.Height * num2)));
+                        txランク文字[j].tDraw2D(CDTXMania.app.Device, n本体X[j], n本体Y[j] + ((int)((double)txランク文字[j].Height * (1.0 - num2))), new RectangleF(0, 0, txランク文字[j].Width, (int)((double)txランク文字[j].Height * num2)));
                 }
                 #endregion
 
@@ -225,10 +221,10 @@ internal class CActResultRank : CActivity
     private STDGBVALUE<int> n本体X;
     private STDGBVALUE<int> n本体Y;
     private STDGBVALUE<bool> b全オート;
-    private STDGBVALUE<CTexture> txランク文字;
-    private CTexture txStageCleared;
-    private CTexture txFullCombo;
-    private CTexture txExcellent;
+    private STDGBVALUE<BaseTexture> txランク文字;
+    private BaseTexture txStageCleared;
+    private BaseTexture txFullCombo;
+    private BaseTexture txExcellent;
     //-----------------
     #endregion
 }

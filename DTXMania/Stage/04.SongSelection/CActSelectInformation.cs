@@ -37,7 +37,7 @@ internal class CActSelectInformation : CActivity
 				@"Graphics\5_informatione.png"
 			};
 			int c = CDTXMania.isJapanese ? 0 : 1; 
-			txInfo = CDTXMania.tGenerateTexture( CSkin.Path( infofiles[ c ] ), false );
+			txInfo = CDTXMania.LoadFromPath( CSkin.Path( infofiles[ c ] ), false );
 			base.OnManagedCreateResources();
 		}
 	}

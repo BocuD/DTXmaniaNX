@@ -21,7 +21,7 @@ internal class CActOptionPanel : CActivity
     {
         if (bActivated)
         {
-            txOptionPanel = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\Screen option panels.png"), false);
+            txOptionPanel = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\Screen option panels.png"), false);
             base.OnManagedCreateResources();
         }
     }

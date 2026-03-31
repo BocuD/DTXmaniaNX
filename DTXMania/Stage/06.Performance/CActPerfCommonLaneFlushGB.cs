@@ -1,4 +1,5 @@
 ﻿using DTXMania.Core;
+using DTXMania.UI.Drawable;
 using FDK;
 
 namespace DTXMania;
@@ -8,7 +9,7 @@ internal class CActPerfCommonLaneFlushGB : CActivity
 	// プロパティ
 
 	protected CCounter[] ctUpdate = new CCounter[ 10 ];
-	protected CTexture[] txFlush = new CTexture[ 10 ];
+	protected BaseTexture[] txFlush = new BaseTexture[ 10 ];
 
 
 	// コンストラクタ
@@ -53,29 +54,18 @@ internal class CActPerfCommonLaneFlushGB : CActivity
 	{
 		if( bActivated )
 		{
-			txFlush[ 0 ] = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay lane flush red.png" ) );
-			txFlush[ 1 ] = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay lane flush green.png" ) );
-			txFlush[ 2 ] = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay lane flush blue.png" ) );
-			txFlush[ 3 ] = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay lane flush yellow.png" ) );
-			txFlush[ 4 ] = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay lane flush purple.png" ) );
+			txFlush[ 0 ] = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay lane flush red.png" ) );
+			txFlush[ 1 ] = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay lane flush green.png" ) );
+			txFlush[ 2 ] = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay lane flush blue.png" ) );
+			txFlush[ 3 ] = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay lane flush yellow.png" ) );
+			txFlush[ 4 ] = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay lane flush purple.png" ) );
 
-			txFlush[ 5 ] = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay lane flush red reverse.png" ) );
-			txFlush[ 6 ] = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay lane flush green reverse.png" ) );
-			txFlush[ 7 ] = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay lane flush blue reverse.png" ) );
-			txFlush[ 8 ] = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay lane flush yellow reverse.png" ) );
-			txFlush[ 9 ] = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay lane flush purple reverse.png" ) );
+			txFlush[ 5 ] = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay lane flush red reverse.png" ) );
+			txFlush[ 6 ] = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay lane flush green reverse.png" ) );
+			txFlush[ 7 ] = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay lane flush blue reverse.png" ) );
+			txFlush[ 8 ] = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay lane flush yellow reverse.png" ) );
+			txFlush[ 9 ] = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay lane flush purple reverse.png" ) );
 			base.OnManagedCreateResources();
-		}
-	}
-	public override void OnManagedReleaseResources()
-	{
-		if( bActivated )
-		{
-			for( int i = 0; i < 10; i++ )
-			{
-				CDTXMania.tReleaseTexture( ref txFlush[ i ] );
-			}
-			base.OnManagedReleaseResources();
 		}
 	}
 }

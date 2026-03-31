@@ -2,12 +2,12 @@
 using System.Runtime.InteropServices;
 using System.Drawing;
 using DTXMania.Core;
+using DTXMania.UI.Drawable;
 using FDK;
 
 using Point = System.Drawing.Point;
 using Rectangle = System.Drawing.Rectangle;
 using Color = System.Drawing.Color;
-using RectangleF = SharpDX.RectangleF;
 
 namespace DTXMania;
 
@@ -19,7 +19,7 @@ internal class CActResultParameterPanel : CActivity
     {
         stageResult = cStageResult;
         
-        txCharacter = new CTexture[3];
+        txCharacter = new BaseTexture[3];
         ST文字位置[] st文字位置Array = new ST文字位置[11];
         ST文字位置 st文字位置 = new()
         {
@@ -428,24 +428,24 @@ internal class CActResultParameterPanel : CActivity
     {
         if (bActivated)
         {
-            txCharacter[0] = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_Ratenumber_s.png"));
-            txCharacter[1] = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_Ratenumber_l.png"));
-            txCharacter[2] = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\8_numbers_large.png"));
-            txNewRecord = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\8_New Record.png"));
-            txExciteGauge = new CTexture[3];
-            txExciteGauge[0] = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_Gauge.png"));
-            txExciteGauge[1] = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_gauge_bar.png"));
-            txExciteGauge[2] = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_gauge_bar.jpg"));
-            txScore = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_score numbersGD.png"));
-            txSkillPanel = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_SkillPanel.png"));
-            tx難易度パネル = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_Difficulty.png"));
-            tx難易度用数字 = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_LevelNumber.png"));
+            txCharacter[0] = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_Ratenumber_s.png"));
+            txCharacter[1] = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_Ratenumber_l.png"));
+            txCharacter[2] = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_numbers_large.png"));
+            txNewRecord = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_New Record.png"));
+            txExciteGauge = new BaseTexture[3];
+            txExciteGauge[0] = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_Gauge.png"));
+            txExciteGauge[1] = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_gauge_bar.png"));
+            txExciteGauge[2] = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_gauge_bar.jpg"));
+            txScore = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_score numbersGD.png"));
+            txSkillPanel = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_SkillPanel.png"));
+            tx難易度パネル = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_Difficulty.png"));
+            tx難易度用数字 = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_LevelNumber.png"));
             //Load new textures
-            txPercent = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_RatePercent_l.png"));
-            txSkillMax = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_skill max.png"));
+            txPercent = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_RatePercent_l.png"));
+            txSkillMax = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_skill max.png"));
             //
-            txProgressBarPanel = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\8_progress_bar_panel.png"));
-            txLagHitCount = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_lag numbers.png"));
+            txProgressBarPanel = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_progress_bar_panel.png"));
+            txLagHitCount = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_lag numbers.png"));
             for ( int i = 0; i < 3; i++ )
             {
                 strPlayerName = string.IsNullOrEmpty( CDTXMania.ConfigIni.strCardName[ i ] ) ? "GUEST" : CDTXMania.ConfigIni.strCardName[ i ];
@@ -542,8 +542,9 @@ internal class CActResultParameterPanel : CActivity
                 graネームプレート用.DrawImage( bmpTitleName, 6f, 8f );
                 #endregion
                 CDTXMania.tDisposeSafely( ref bmpCardName );
-                CDTXMania.tDisposeSafely( ref bmpTitleName );
-                txネームプレート用文字[ i ] = new CTexture( CDTXMania.app.Device, image2, CDTXMania.TextureFormat, false );
+                CDTXMania.tDisposeSafely(ref bmpTitleName);
+                //todo: create modular nameplate element to avoid this shit
+                //txネームプレート用文字[ i ] = new CTexture( CDTXMania.app.Device, image2, CDTXMania.TextureFormat, false );
                 CDTXMania.tDisposeSafely( ref image2 );
 
                 CDTXMania.tDisposeSafely( ref graネームプレート用 );
@@ -582,24 +583,6 @@ internal class CActResultParameterPanel : CActivity
     {
         if (bActivated)
         {
-            CDTXMania.tReleaseTexture( ref txパネル本体 );
-            CDTXMania.tReleaseTexture( ref txNewRecord );
-            CDTXMania.tReleaseTexture( ref txSkillPanel );
-            CDTXMania.tReleaseTexture( ref txScore );
-            CDTXMania.tReleaseTexture( ref tx難易度パネル );
-            CDTXMania.tReleaseTexture( ref tx難易度用数字 );
-            //Free new texture
-            CDTXMania.tReleaseTexture(ref txPercent);
-            CDTXMania.tReleaseTexture(ref txSkillMax);
-            CDTXMania.tReleaseTexture(ref txProgressBarPanel);
-            for ( int i = 0; i < 3; i++ )
-            {
-                CDTXMania.tReleaseTexture( ref txネームプレート用文字[ i ] );
-                CDTXMania.tReleaseTexture( ref txExciteGauge[ i ] );
-                CDTXMania.tReleaseTexture( ref txCharacter[ i ] );
-            }
-            CDTXMania.tReleaseTexture(ref txLagHitCount);
-            //
             CDTXMania.tReleaseTexture(ref txPreviousBestProgressBar.Drums);
             CDTXMania.tReleaseTexture(ref txPreviousBestProgressBar.Guitar);
             CDTXMania.tReleaseTexture(ref txPreviousBestProgressBar.Bass);
@@ -780,30 +763,30 @@ internal class CActResultParameterPanel : CActivity
     private readonly ST文字位置[] stLargeStringPosition;
     private readonly ST文字位置[] st特大文字位置;
     private readonly ST文字位置[] st難易度数字位置;
-    private CTexture txNewRecord;
-    private CTexture txパネル本体;
-    private CTexture[] txCharacter;
-    private CTexture[] txExciteGauge;
-    private CTexture txSkillPanel;
-    private CTexture txScore;
-    private CTexture[] txネームプレート用文字 = new CTexture[ 3 ];
+    private BaseTexture txNewRecord;
+    private BaseTexture txパネル本体;
+    private BaseTexture[] txCharacter;
+    private BaseTexture[] txExciteGauge;
+    private BaseTexture txSkillPanel;
+    private BaseTexture txScore;
+    private BaseTexture[] txネームプレート用文字 = new BaseTexture[ 3 ];
     private string strPlayerName;
     private string strTitleName;
     private CPrivateFastFont prv表示用フォント;
     private CPrivateFastFont prv称号フォント;
 
-    private CTexture tx難易度パネル;
-    private CTexture tx難易度用数字;
+    private BaseTexture tx難易度パネル;
+    private BaseTexture tx難易度用数字;
     protected Rectangle rectDiffPanelPoint;
     //New texture % and MAX
-    private CTexture txPercent;
-    private CTexture txSkillMax;
+    private BaseTexture txPercent;
+    private BaseTexture txSkillMax;
     //
     private STDGBVALUE<CTexture> txPreviousBestProgressBar;
     private STDGBVALUE<CTexture> txCurrentProgressBar;
     //
-    private CTexture txProgressBarPanel;
-    private CTexture txLagHitCount;
+    private BaseTexture txProgressBarPanel;
+    private BaseTexture txLagHitCount;
 
     private readonly ST文字位置Ex[] stLagCountBlueText;//15x19 start at 0,0
     private readonly ST文字位置Ex[] stLagCountRedText;//15x19 start at 64,64

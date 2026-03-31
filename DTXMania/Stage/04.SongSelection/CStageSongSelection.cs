@@ -267,7 +267,7 @@ internal class CStageSongSelection : CStage
 		{
 			prvFontSearchInputNotification = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.songListFont), 14, FontStyle.Regular);
 			//this.dsBackgroundVideo = CDTXMania.t失敗してもスキップ可能なDirectShowを生成する(CSkin.Path(@"Graphics\5_background.mp4"), CDTXMania.app.WindowHandle, true);
-			txBPMLabel = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\5_BPM.png"), false);
+			txBPMLabel = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\5_BPM.png"), false);
 
 			//
 			rBackgroundVideoAVI = new CAVI(1290, CSkin.Path(@"Graphics\5_background.mp4"), "", 20.0);

@@ -97,9 +97,9 @@ internal class CActConfigKeyAssign : CActivity
 	{
 		if (bActivated)
 		{
-			txCursor = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\ScreenConfig menu cursor.png"), false);
+			txCursor = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\ScreenConfig menu cursor.png"), false);
 			txHitKeyDialog =
-				CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\ScreenConfig hit key to assign dialog.png"), false);
+				CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\ScreenConfig hit key to assign dialog.png"), false);
 			base.OnManagedCreateResources();
 		}
 	}

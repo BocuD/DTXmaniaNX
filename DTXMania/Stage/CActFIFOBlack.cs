@@ -37,7 +37,7 @@ internal class CActFIFOBlack : CActivity
 	{
 		if( bActivated )
 		{
-			tx黒タイル64x64 = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\Tile black 64x64.png" ), false );
+			tx黒タイル64x64 = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\Tile black 64x64.png" ), false );
 			base.OnManagedCreateResources();
 		}
 	}

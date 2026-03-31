@@ -977,11 +977,13 @@ internal class CDTXMania : Game
     
     public static CTexture LoadFromPath(string fileName)
     {
-        return tGenerateTexture(fileName, false);
+        return new CTexture();
+        return LoadFromPath(fileName, false);
     }
 
-    public static CTexture tGenerateTexture(string fileName, bool b黒を透過する)
+    public static CTexture LoadFromPath(string fileName, bool b黒を透過する)
     {
+        return new CTexture();
         if (app == null)
         {
             return null;
@@ -1033,6 +1035,7 @@ internal class CDTXMania : Game
 
     public static CTexture tGenerateTexture(Bitmap bitmap)
     {
+        return new CTexture();
         return tGenerateTexture(bitmap, false);
     }
 

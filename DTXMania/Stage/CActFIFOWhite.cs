@@ -44,7 +44,7 @@ internal class CActFIFOWhite : CActivity
 	{
 		if( bActivated )
 		{
-			tx白タイル64x64 = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\Tile white 64x64.png" ), false );
+			tx白タイル64x64 = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\Tile white 64x64.png" ), false );
 			base.OnManagedCreateResources();
 		}
 	}
