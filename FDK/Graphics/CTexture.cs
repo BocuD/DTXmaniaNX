@@ -326,6 +326,8 @@ public class CTexture : IDisposable
 
 	public void tDraw2D(Device device, float x, float y, float depth, SharpDX.RectangleF rcClipRect)
 	{
+		if (device == null) 
+			return;
 		if (texture == null)
 			return;
 
@@ -468,7 +470,10 @@ public class CTexture : IDisposable
 	{
 		if (texture == null)
 			throw new InvalidOperationException("テクスチャは生成されていません。");
-
+		
+		if (device == null) 
+			return;
+		
 		tRenderStateSettings(device);
 
 		float fx = x * fScreenRatio + rcPhysicalScreenDrawingArea.X - 0.5f; // -0.5 は座標とピクセルの誤差を吸収するための座標補正値。(MSDN参照)
@@ -531,6 +536,9 @@ public class CTexture : IDisposable
 	{
 		if (texture == null) return;
 
+		if (device == null) 
+			return;
+		
 		//texture dimensions
 		float texWidth = size.X;
 		float texHeight = size.Y;
@@ -588,6 +596,8 @@ public class CTexture : IDisposable
 	public void tDraw2DMatrix(Device device, Matrix transformMatrix, Vector2 size, SharpDX.RectangleF clipRect, Color4 color)
 	{
 		if (texture == null) return;
+		if (device == null) 
+			return;
 
 		tRenderStateSettings(device);
 		
@@ -640,6 +650,8 @@ public class CTexture : IDisposable
 	public void tDraw2DMatrixSliced(Device device, Matrix transformMatrix, Vector2 size, SharpDX.RectangleF clipRect, Color4 color, SharpDX.RectangleF sliceRect)
 	{
 		if (texture == null) return;
+		if (device == null) 
+			return;
 			
 		tRenderStateSettings(device);
 
@@ -757,6 +769,8 @@ public class CTexture : IDisposable
 	{
 		if (texture == null)
 			return;
+		if (device == null) 
+			return;
 
 		float x = rcClipRect.Width / 2f;
 		float y = rcClipRect.Height / 2f;
@@ -824,6 +838,8 @@ public class CTexture : IDisposable
 	{
 		//とりあえず補正値などは無し。にしても使う機会少なさそうだなー____
 		if (texture == null)
+			return;
+		if (device == null) 
 			return;
 
 		float x = 0.0f;
