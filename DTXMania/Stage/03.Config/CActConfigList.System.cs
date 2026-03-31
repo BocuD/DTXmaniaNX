@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using DTXMania.Core;
 using DTXMania.SongDb;
+using DTXMania.UI.Drawable;
 using DTXMania.UI.Item;
 using FDK;
 using SampleFramework;
@@ -15,7 +16,7 @@ internal partial class CActConfigList
         
     private CItemList iSystemSkinSubfolder;
         
-    private CTexture? txSkinSample;				// #28195 2012.5.2 yyagi
+    private BaseTexture? txSkinSample;				// #28195 2012.5.2 yyagi
     
     private void tGenerateSkinSample()
     {
@@ -24,23 +25,10 @@ internal partial class CActConfigList
         {
             string path = skinSubFolders[nSkinIndex];
             path = Path.Combine(path, @"Graphics\2_background.jpg");
-            Bitmap bmSrc = new(path);
-            Bitmap bmDest = new(GameFramebufferSize.Width, GameFramebufferSize.Height);
-            Graphics g = Graphics.FromImage(bmDest);
-            g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-            g.DrawImage(bmSrc,
-                new Rectangle(60, 106, (int)(GameFramebufferSize.Width * 0.1984),
-                    (int)(GameFramebufferSize.Height * 0.1984)),
-                0, 0, 1280, 720, GraphicsUnit.Pixel);
-            if (txSkinSample != null)
-            {
-                CDTXMania.tReleaseTexture(ref txSkinSample);
-            }
-
-            txSkinSample = CDTXMania.tGenerateTexture(bmDest, false);
-            g.Dispose();
-            bmDest.Dispose();
-            bmSrc.Dispose();
+            
+            //todo: Change resolution to proper size (will we even keep this system in place??? lol)
+            //254 * 143
+            txSkinSample = BaseTexture.LoadFromPath(path);
             nSkinSampleIndex = nSkinIndex;
         }
     }

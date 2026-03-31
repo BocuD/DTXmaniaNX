@@ -7,6 +7,7 @@ using DTXMania.UI;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.Item;
 using FDK;
+using SkiaSharp;
 using SlimDXKey = SlimDX.DirectInput.Key;
 
 namespace DTXMania;
@@ -27,7 +28,7 @@ internal class CStageConfig : CStage
         actFont = font = new CActDFPFont();
         listChildActivities.Add(font);
         listChildActivities.Add(actFIFO = new CActFIFOWhite());
-        listChildActivities.Add(actList = new CActConfigList(this));
+        listChildActivities.Add(actList = new CActConfigList(this, ui));
         listChildActivities.Add(actKeyAssign = new CActConfigKeyAssign(this));
         bActivated = false;
     }
@@ -86,6 +87,27 @@ internal class CStageConfig : CStage
         configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(family, 18, "Exit", () => { actList.tSetupItemList_Exit(); }));
         configLeftOptionsMenu.UpdateLayout();
         configLeftOptionsMenu.SetSelectedIndex(0);
+
+        var drawList = ui.AddChild(new LegacyDrawable(() =>
+        {
+            switch (eItemPanelMode)
+            {
+                case EItemPanelMode.PadList:
+                    actList.tUpdateAndDraw(!bFocusIsOnMenu);
+                    break;
+
+                case EItemPanelMode.KeyCodeList:
+                    actKeyAssign.OnUpdateAndDraw();
+                    break;
+            }
+        }));
+        drawList.renderOrder = 25;
+        
+        descriptionPanel = ui.AddChild(new UIText("", 17));
+        descriptionPanel.name = "DescriptionPanel";
+        descriptionPanel.position = new Vector3(800, 270, 0);
+        descriptionPanel.renderOrder = 50;
+        descriptionPanel.isVisible = false;
         
         if (bFocusIsOnMenu)
         {
@@ -124,7 +146,6 @@ internal class CStageConfig : CStage
         try
         {
             configLeftOptionsMenu?.SetSelectedIndex(0);
-            ftFont = new Font("MS PGothic", 17f * CDTXMania.renderScale, FontStyle.Regular, GraphicsUnit.Pixel);
             for (int i = 0; i < 4; i++)
             {
                 ctKeyRepetition[i] = new CCounter(0, 0, 0, CDTXMania.Timer);
@@ -147,11 +168,6 @@ internal class CStageConfig : CStage
         try
         {
             CDTXMania.ConfigIni.tWrite(CDTXMania.executableDirectory + "Config.ini");	// CONFIGだけ
-            if (ftFont != null)													// 以下OPTIONと共通
-            {
-                ftFont.Dispose();
-                ftFont = null;
-            }
             for (int i = 0; i < 4; i++)
             {
                 ctKeyRepetition[i] = null;
@@ -176,21 +192,12 @@ internal class CStageConfig : CStage
 
     private UISelectList configLeftOptionsMenu;
     private UIImage menuCursor;
-    
-    public override void OnManagedReleaseResources()											// OPTIONと同じ(COnfig.iniの書き出しタイミングのみ異なるが、無視して良い)
-    {
-        if (bActivated)
-        {
-            CDTXMania.tReleaseTexture(ref txDescriptionPanel);
-            
-            base.OnManagedReleaseResources();
-        }
-    }
+    private UIText descriptionPanel;
 
     public override void FirstUpdate()
     {
         ePhaseID = EPhase.Common_FadeIn;
-        //actFIFO.tStartFadeIn();
+
         GitaDoraTransition.Open(2, () =>
         {
             CDTXMania.Skin.bgmコンフィグ画面.tPlay();
@@ -213,16 +220,7 @@ internal class CStageConfig : CStage
         #region [ アイテム ]
 
         //---------------------
-        switch (eItemPanelMode)
-        {
-            case EItemPanelMode.PadList:
-                actList.tUpdateAndDraw(!bFocusIsOnMenu);
-                break;
-
-            case EItemPanelMode.KeyCodeList:
-                actKeyAssign.OnUpdateAndDraw();
-                break;
-        }
+        
 
         //---------------------
 
@@ -231,16 +229,14 @@ internal class CStageConfig : CStage
         #region [ Description panel ]
 
         //---------------------
-        if (txDescriptionPanel != null && !bFocusIsOnMenu && actList.nTargetScrollCounter == 0 &&
+        if (!bFocusIsOnMenu && actList.nTargetScrollCounter == 0 &&
             ctDisplayWait.bReachedEndValue)
         {
-            // 15SEP20 Increasing x position by 180 pixels (was 620)
-            Matrix4x4 mat = Matrix4x4.CreateTranslation(800, 270, 0) * Matrix4x4.CreateScale(CDTXMania.renderScale);
-            Vector2 size = new(txDescriptionPanel.szImageSize.Width, txDescriptionPanel.szImageSize.Height);
-            size *= 1 / CDTXMania.renderScale;
-            //todo COMMENTED OUT tDraw2DMatrix
-            //txDescriptionPanel.tDraw2DMatrix(CDTXMania.app.Device, mat, size);
-            //---------------------
+            descriptionPanel.isVisible = true;
+        }
+        else
+        {
+            descriptionPanel.isVisible = false;
         }
 
         #endregion
@@ -445,9 +441,7 @@ internal class CStageConfig : CStage
     private bool bFocusIsOnMenu;
     private STKeyRepetitionCounter ctKeyRepetition;
     private EItemPanelMode eItemPanelMode;
-    private Font ftFont;
         
-    private CTexture txDescriptionPanel;
     public CCounter ctDisplayWait;
         
     private void tMoveCursorDown()
@@ -504,108 +498,50 @@ internal class CStageConfig : CStage
     }
     private void tDrawSelectedMenuDescriptionInDescriptionPanel()
     {
-        try
+        string explanation = "";
+        
+        switch (configLeftOptionsMenu.currentlySelectedIndex)
         {
-            Bitmap image = new((int)(440 * CDTXMania.renderScale), (int)(384 * CDTXMania.renderScale)); // 説明文領域サイズの縦横 2 倍。（描画時に 0.5 倍で表示する。）
-            Graphics graphics = Graphics.FromImage(image);
-            graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
+            case 0: //system
+                explanation = CDTXMania.isJapanese 
+                    ? "システムに関係する項目を設定します。" 
+                    : "Settings for an overall systems.";
+                break;
 
-            string[,] str = new string[2, 2];
-            switch (configLeftOptionsMenu.currentlySelectedIndex)
-            {
-                case 0: //system
-                    str[0, 0] = "システムに関係する項目を設定します。";
-                    str[0, 1] = "";
-                    str[1, 0] = "Settings for an overall systems.";
-                    break;
+            case 1: //drums
+                explanation = CDTXMania.isJapanese
+                    ? "ドラムの演奏に関する項目を設定します。"
+                    : "Settings to play the drums.";
+                break;
 
-                case 1: //drums
-                    str[0, 0] = "ドラムの演奏に関する項目を設定します。";
-                    str[0, 1] = "";
-                    str[1, 0] = "Settings to play the drums.";
-                    str[1, 1] = "";
-                    break;
+            case 2: //guitar
+                explanation = CDTXMania.isJapanese
+                    ? "ギターの演奏に関する項目を設定します。"
+                    : "Settings to play the guitar.";
+                break;
 
-                case 2: //guitar
-                    str[0, 0] = "ギターの演奏に関する項目を設定します。";
-                    str[0, 1] = "";
-                    str[1, 0] = "Settings to play the guitar.";
-                    str[1, 1] = "";
-                    break;
+            case 3: //bass
+                explanation = CDTXMania.isJapanese
+                    ? "ベースの演奏に関する項目を設定します。"
+                    : "Settings to play the bass.";
+                break;
 
-                case 3: //bass
-                    str[0, 0] = "ベースの演奏に関する項目を設定します。";
-                    str[0, 1] = "";
-                    str[1, 0] = "Settings to play the bass.";
-                    str[1, 1] = "";
-                    break;
-
-                case 4: //exit
-                    str[0, 0] = "設定を保存し、コンフィグ画面を終了します。";
-                    str[0, 1] = "";
-                    str[1, 0] = "Save the settings and exit from\nCONFIGURATION menu.";
-                    str[1, 1] = "";
-                    break;
-            }
-
-            int c = CDTXMania.isJapanese ? 0 : 1;
-            for (int i = 0; i < 2; i++)
-            {
-                graphics.DrawString(str[c, i], ftFont, Brushes.Black, new PointF(4f, (i * 30)));
-            }
-
-            graphics.Dispose();
-            if (txDescriptionPanel != null)
-            {
-                txDescriptionPanel.Dispose();
-            }
-
-            //this.txDescriptionPanel = new CTexture( CDTXMania.app.Device, image, CDTXMania.TextureFormat );
-            // this.txDescriptionPanel.vcScaleRatio.X = 0.5f;
-            // this.txDescriptionPanel.vcScaleRatio.Y = 0.5f;
-            image.Dispose();
+            case 4: //exit
+                explanation = CDTXMania.isJapanese
+                    ? "設定を保存し、コンフィグ画面を終了します。"
+                    : "Save the settings and exit from\nCONFIGURATION menu.";
+                break;
         }
-        catch (CTextureCreateFailedException)
-        {
-            Trace.TraceError("説明文テクスチャの作成に失敗しました。");
-            txDescriptionPanel = null;
-        }
-        catch (Exception e)
-        {
-            Trace.TraceError(e.Message + "\nTrace: " + e.StackTrace);
-        }
+        
+        descriptionPanel.SetText(explanation);
     }
     private void tDrawSelectedItemDescriptionInDescriptionPanel()
     {
-        try
+        CItemBase item = actList.ibCurrentSelection;
+        if (item.strDescription is {Length: > 0})
         {
-            Bitmap image = new((int)(400 * CDTXMania.renderScale),
-                (int)(192 * CDTXMania.renderScale)); // 説明文領域サイズの縦横 2 倍。（描画時に 0.5 倍で表示する___のは中止。処理速度向上のため。）
-            Graphics graphics = Graphics.FromImage(image);
-            graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
-
-            CItemBase item = actList.ibCurrentSelection;
-            if (item.strDescription is { Length: > 0 })
-            {
-                graphics.DrawString(item.strDescription, ftFont, Brushes.Black,
-                    new System.Drawing.RectangleF(4f, (float)0, 230 * CDTXMania.renderScale, 430 * CDTXMania.renderScale));
-            }
-
-            graphics.Dispose();
-            if (txDescriptionPanel != null)
-            {
-                txDescriptionPanel.Dispose();
-            }
-
-            txDescriptionPanel = new CTexture(CDTXMania.app.Device, image, CDTXMania.TextureFormat, false);
-            image.Dispose();
-        }
-        catch (CTextureCreateFailedException)
-        {
-            Trace.TraceError("説明文パネルテクスチャの作成に失敗しました。");
-            txDescriptionPanel = null;
+            descriptionPanel.SetText(item.strDescription);
         }
     }
-    //-----------------
     #endregion
 }
