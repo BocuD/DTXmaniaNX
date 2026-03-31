@@ -35,4 +35,10 @@ public struct Color4
     {
         return new Vector4(Red, Green, Blue, Alpha);
     }
+    
+    //implicit convert from System.Drawing.Color
+    public static implicit operator Color4(Color color)
+    {
+        return FromColor(color);
+    }
 }

@@ -26,8 +26,8 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         listChildActivities.Add( actScore = new CActPerfDrumsScore() );
         listChildActivities.Add( actStatusPanel = new CActPerfDrumsStatusPanel() );
         listChildActivities.Add( actScrollSpeed = new CActPerfScrollSpeed() );
-        listChildActivities.Add( actAVI = new CActPerfAVI() );
-        listChildActivities.Add( actBGA = new CActPerfBGA() );
+        //listChildActivities.Add( actAVI = new CActPerfAVI() );
+        // listChildActivities.Add( actBGA = new CActPerfBGA() );
 //			base.listChildActivities.Add( this.actPanel = new CActPerfPanelString() );
         listChildActivities.Add( actStageFailed = new CActPerfStageFailure() );
         listChildActivities.Add( actPlayInfo = new CActPerformanceInformation() );
@@ -113,10 +113,10 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         {
             bChorusSection = false;
             bBonus = false;
-            txChip = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_chips_drums.png"));
-            txHitBar = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlayDrums hit-bar.png" ) );
-            txシャッター = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\7_shutter.png" ) );
-            txLaneCover = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_lanes_Cover_cls.png"));
+            txChip = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_chips_drums.png"));
+            txHitBar = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums hit-bar.png" ) );
+            txシャッター = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\7_shutter.png" ) );
+            txLaneCover = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_lanes_Cover_cls.png"));
 
             /*
             this.txヒットバーGB = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlayDrums hit-bar guitar.png" ) );
@@ -200,7 +200,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
 
         tUpdateAndDraw_Background();
         tUpdateAndDraw_MIDIBGM();
-        tUpdateAndDraw_AVI();
+        //tUpdateAndDraw_AVI();
         tUpdateAndDraw_LaneFlushD();
         tUpdateAndDraw_ScrollSpeed();
         tUpdateAndDraw_ChipAnimation();
@@ -3593,7 +3593,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                     }
                     if (((actCombo.nCurrentCombo.Drums > 0) || configIni.bAllDrumsAreAutoPlay) && configIni.b歓声を発声する)
                     {
-                        actAVI.Start(bInFillIn);
+                        //actAVI.Start(bInFillIn);
                         if (r現在の歓声Chip.Drums != null)
                         {
                             dTX.tPlayChip(r現在の歓声Chip.Drums, CSoundManager.rcPerformanceTimer.nシステム時刻, (int)ELane.BGM, dTX.nモニタを考慮した音量(EInstrumentPart.UNKNOWN));
@@ -3620,7 +3620,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                     }
                     if (((actCombo.nCurrentCombo.Drums > 0) || configIni.bAllDrumsAreAutoPlay) && configIni.b歓声を発声する && configIni.DisplayBonusEffects)
                     {
-                        actAVI.Start(true);
+                        //actAVI.Start(true);
                         if (r現在の歓声Chip.Drums != null)
                         {
                             dTX.tPlayChip(r現在の歓声Chip.Drums, CSoundManager.rcPerformanceTimer.nシステム時刻, (int)ELane.BGM, dTX.nモニタを考慮した音量(EInstrumentPart.UNKNOWN));
@@ -3639,7 +3639,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                     }
                     if (((actCombo.nCurrentCombo.Drums > 0) || configIni.bAllDrumsAreAutoPlay) && configIni.b歓声を発声する && configIni.DisplayBonusEffects)
                     {
-                        actAVI.Start(true);
+                        //actAVI.Start(true);
                         if (r現在の歓声Chip.Drums != null)
                         {
                             dTX.tPlayChip(r現在の歓声Chip.Drums, CSoundManager.rcPerformanceTimer.nシステム時刻, (int)ELane.BGM, dTX.nモニタを考慮した音量(EInstrumentPart.UNKNOWN));
@@ -3757,7 +3757,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
             }
             if( configIni.DisplayBonusEffects )
             {
-                actAVI.Start( true );
+                //actAVI.Start( true );
                 CDTXMania.Skin.soundAudience.tPlay();
                 CDTXMania.Skin.soundAudience.n位置_次に鳴るサウンド = 0;
             }

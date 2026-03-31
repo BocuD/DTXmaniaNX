@@ -17,8 +17,8 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		bActivated = false;
 		listChildActivities.Add( actStageFailed = new CActPerfStageFailure() );
 		listChildActivities.Add( actDANGER = new CActPerfGuitarDanger() );
-		listChildActivities.Add( actAVI = new CActPerfAVI() );
-		listChildActivities.Add( actBGA = new CActPerfBGA() );
+		//listChildActivities.Add( actAVI = new CActPerfAVI() );
+		// listChildActivities.Add( actBGA = new CActPerfBGA() );
 		listChildActivities.Add( actGraph = new CActPerfSkillMeter() );
 		listChildActivities.Add(actGuitarBonus = new CActPerfGuitarBonus());
 //			base.listChildActivities.Add( this.actPanel = new CActPerfPanelString() );
@@ -101,9 +101,9 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		{
 			bサビ区間 = false;
 			//this.tGenerateBackgroundTexture();
-			txChip = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\7_Chips_Guitar.png" ) );
-			txLane = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\7_lanes_Guitar.png") );
-			txHitBar = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\\ScreenPlayDrums hit-bar.png"));
+			txChip = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\7_Chips_Guitar.png" ) );
+			txLane = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\7_lanes_Guitar.png") );
+			txHitBar = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\\ScreenPlayDrums hit-bar.png"));
 			//this.txWailingFrame = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlay wailing cursor.png" ) );
 			base.OnManagedCreateResources();
 		}
@@ -176,7 +176,7 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		}
 
 		tUpdateAndDraw_Background();
-		tUpdateAndDraw_AVI();
+		//tUpdateAndDraw_AVI();
 		tUpdateAndDraw_MIDIBGM();
 
 //                if (CDTXMania.ConfigIni.bShowMusicInfo)

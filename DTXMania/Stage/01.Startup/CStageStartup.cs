@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using DTXMania.Core;
+using DTXMania.UI.Drawable;
 using DTXMania.UI.DynamicElements;
 using FDK;
 
@@ -67,7 +68,7 @@ internal class CStageStartup : CStage
 	{
 		if(bActivated)
 		{
-			txBackground = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\1_background.jpg"), false);
+			txBackground = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\1_background.jpg"));
 			base.OnManagedCreateResources();
 		}
 	}
@@ -75,7 +76,6 @@ internal class CStageStartup : CStage
 	{
 		if(bActivated)
 		{
-			CDTXMania.tReleaseTexture(ref txBackground);
 			base.OnManagedReleaseResources();
 		}
 	}
@@ -154,6 +154,6 @@ internal class CStageStartup : CStage
 	#region [ private ]
 	//-----------------
 	private string str現在進行中 = "";
-	private CTexture? txBackground;
+	private BaseTexture? txBackground;
 	#endregion
 }

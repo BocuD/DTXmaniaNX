@@ -1,8 +1,8 @@
 using System.Drawing;
 using System.Numerics;
-using DTXMania.UI;
 using DTXMania.UI.Text;
 using Hexa.NET.ImGui;
+using SharpDX.Direct3D9;
 
 namespace DTXMania.UI.Drawable;
 
@@ -31,6 +31,12 @@ public abstract class BaseTexture : IDisposable
         return EnsureFactoryConfigured().CreateEmpty(width, height, name);
     }
 
+    public void tDraw2D(Device device, int x, int y)
+    {
+        Matrix4x4 transformMatrix = Matrix4x4.CreateTranslation(x, y, 0);
+        tDraw2DMatrix(transformMatrix);
+    }
+    
     public void tDraw2DMatrix(Matrix4x4 transformMatrix)
     {
         tDraw2DMatrix(transformMatrix, new Vector2(Width, Height), new RectangleF(0, 0, Width, Height), Color4.White);
