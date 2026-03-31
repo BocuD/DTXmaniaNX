@@ -5,7 +5,8 @@ namespace DTXMania.UI;
 
 public struct Color4
 {
-    public static Color4 White = new(1f, 1f, 1f, 1f);
+    public static Color4 White = new(1f, 1f, 1f);
+    public static Color4 Black = new(0f, 0f, 0f);
 
     public float Red;
     public float Green;
@@ -19,7 +20,7 @@ public struct Color4
         Blue = blue;
         Alpha = alpha;
     }
-
+    
     public static Color4 FromColor(Color color)
     {
         return new Color4(
