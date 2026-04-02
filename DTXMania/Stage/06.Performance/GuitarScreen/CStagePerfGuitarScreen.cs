@@ -1,8 +1,8 @@
 ﻿using System.Drawing;
 using System.Diagnostics;
 using DTXMania.Core;
+using DTXMania.UI.Drawable;
 using FDK;
-using RectangleF = SharpDX.RectangleF;
 
 namespace DTXMania;
 
@@ -101,23 +101,11 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		{
 			bサビ区間 = false;
 			//this.tGenerateBackgroundTexture();
-			txChip = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\7_Chips_Guitar.png" ) );
-			txLane = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\7_lanes_Guitar.png") );
-			txHitBar = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\\ScreenPlayDrums hit-bar.png"));
+			txChip = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\7_Chips_Guitar.png" ) );
+			txLane = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\7_lanes_Guitar.png") );
+			txHitBar = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\\ScreenPlayDrums hit-bar.png"));
 			//this.txWailingFrame = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlay wailing cursor.png" ) );
 			base.OnManagedCreateResources();
-		}
-	}
-	public override void OnManagedReleaseResources()
-	{
-		if( bActivated )
-		{
-			//CDTXMania.tReleaseTexture( ref this.txBackground );
-			CDTXMania.tReleaseTexture( ref txChip );
-			CDTXMania.tReleaseTexture( ref txLane );
-			CDTXMania.tReleaseTexture( ref txHitBar );
-			//CDTXMania.tReleaseTexture( ref this.txWailingFrame );
-			base.OnManagedReleaseResources();
 		}
 	}
 
@@ -342,7 +330,7 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 
 	#region [ private ]
 	//-----------------
-	private CTexture txLane;
+	private BaseTexture txLane;
 	public bool bサビ区間;
 	public double UnitTime;
 
@@ -717,7 +705,8 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 					}
 					if ( ( rect.Bottom > rect.Top ) && ( txChip != null ) )
 					{
-						txChip.vcScaleRatio.Y = 1f;
+						//todo: what the fuck is vcScaleRatio
+						//txChip.vcScaleRatio.Y = 1f;
 						txChip.tDraw2D( CDTXMania.app.Device, drawX, ( y - numA ) + numC, rect );
 					}
 				}
@@ -914,7 +903,8 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 					}
 					if ( ( rect.Bottom > rect.Top ) && ( txChip != null ) )
 					{
-						txChip.vcScaleRatio.Y = 1.0f;
+						//todo: what the fuck is vcScaleRatio
+						//txChip.vcScaleRatio.Y = 1.0f;
 						txChip.tDraw2D(CDTXMania.app.Device, drawX, (y - numA) + numC, rect);
 					}
 				}
@@ -959,7 +949,8 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 			{
 				if (CDTXMania.ConfigIni.nLaneDisp.Guitar == 0 || CDTXMania.ConfigIni.nLaneDisp.Guitar == 1)
 				{
-					txChip.vcScaleRatio.Y = 1f;
+					//todo: what the fuck is vcScaleRatio
+					//txChip.vcScaleRatio.Y = 1f;
 					txChip.tDraw2D(CDTXMania.app.Device, 88, y, new RectangleF(0, 20, 193, 2));
 				}
 				if ( configIni.bShowPerformanceInformation )
@@ -973,7 +964,8 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 			{
 				if( CDTXMania.ConfigIni.nLaneDisp.Bass == 0 || CDTXMania.ConfigIni.nLaneDisp.Bass == 1 )
 				{
-					txChip.vcScaleRatio.Y = 1f;
+					//todo: what the fuck is vcScaleRatio
+					//txChip.vcScaleRatio.Y = 1f;
 					txChip.tDraw2D(CDTXMania.app.Device, 959, y, new RectangleF(0, 20, 193, 2));
 				}
 					    
@@ -1007,7 +999,8 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 
 				if (CDTXMania.ConfigIni.nLaneDisp.Guitar == 0 || CDTXMania.ConfigIni.nLaneDisp.Guitar == 1)
 				{
-					txChip.vcScaleRatio.Y = 1.0f;
+					//todo: what the fuck is vcScaleRatio
+					//txChip.vcScaleRatio.Y = 1.0f;
 					txChip.tDraw2D(CDTXMania.app.Device, 88, y - 1, new RectangleF(0, 20, 193, 2));
 					txChip.tDraw2D(CDTXMania.app.Device, 88, y + 1, new RectangleF(0, 20, 193, 2));
 				}
@@ -1020,7 +1013,8 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 
 				if (CDTXMania.ConfigIni.nLaneDisp.Bass == 0 || CDTXMania.ConfigIni.nLaneDisp.Bass == 1)
 				{
-					txChip.vcScaleRatio.Y = 1.0f;
+					//todo: what the fuck is vcScaleRatio
+					//txChip.vcScaleRatio.Y = 1.0f;
 					txChip.tDraw2D(CDTXMania.app.Device, 959, y - 1, new RectangleF(0, 20, 193, 2));
 					txChip.tDraw2D(CDTXMania.app.Device, 959, y + 1, new RectangleF(0, 20, 193, 2));
 				}

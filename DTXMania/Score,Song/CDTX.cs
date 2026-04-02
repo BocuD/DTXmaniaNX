@@ -3215,7 +3215,7 @@ public class CDTX : CActivity
                                ((part == EInstrumentPart.BASS) &&
                                 bHasChips.OpenBass); // #23546 2010.10.28 yyagi fixed (bチップがある.Bass→bチップがある.OpenBass)
                         //New: Set flag to false (disable Open) when chip has long note
-                        if (chip.bロングノートである)
+                        if (chip.bIsLongNote)
                         {
                             flag = false;
                         }

@@ -418,7 +418,7 @@ public class CChip : IComparable<CChip>, ICloneable
 
 	//Long Notes Data members
 	public CChip chipロングノート終端 { get; set; }
-	public bool bロングノートである => chipロングノート終端 != null;
+	public bool bIsLongNote => chipロングノート終端 != null;
 	public bool bロングノートHit中 { get; set; }
 
 	//New property for empty chip
@@ -581,7 +581,7 @@ public class CChip : IComparable<CChip>, ICloneable
 		nDistanceFromBar.Bass = (int)((nPlaybackTimeMs - nCurrentTime) * ScrollSpeedBass);
 
 		//New: Compute Distance for End of Long Note chip
-		if(bロングノートである)
+		if(bIsLongNote)
 		{
 			chipロングノート終端.ComputeDistanceFromBar(nCurrentTime, dbPerformanceScrollSpeed);
 		}

@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Numerics;
@@ -46,9 +47,21 @@ internal sealed class OpenGlTexture : BaseTexture
             throw new InvalidOperationException("OpenGL UI renderer is not available.");
         }
 
-        byte[] fileBytes = File.ReadAllBytes(texturePath);
-        ImageResult image = ImageResult.FromMemory(fileBytes, ColorComponents.RedGreenBlueAlpha);
-        return CreateFromRgba32(OpenGlUi.Renderer, image.Data, image.Width, image.Height, Path.GetFileName(texturePath));
+        try
+        {
+            byte[] fileBytes = File.ReadAllBytes(texturePath);
+            ImageResult image = ImageResult.FromMemory(fileBytes, ColorComponents.RedGreenBlueAlpha);
+            return CreateFromRgba32(OpenGlUi.Renderer, image.Data, image.Width, image.Height,
+                Path.GetFileName(texturePath));
+        }
+        catch (FileNotFoundException e)
+        {
+            Trace.WriteLine($"Texture file not found: {texturePath}");
+        }
+
+        var notFound = CreateSolidColor(OpenGlUi.Renderer, new Color4(1, 0, 1, 1), $"Missing:{Path.GetFileName(texturePath)}");
+        notFound.notFound = true;
+        return notFound;
     }
 
     public static OpenGlTexture CreateSolidColor(OpenGlRenderer renderer, Color4 color, string name = "Solid")

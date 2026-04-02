@@ -1,7 +1,9 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Drawing;
+using System.Runtime.InteropServices;
 using DTXMania.Core;
+using DTXMania.UI;
+using DTXMania.UI.Drawable;
 using FDK;
-using SharpDX;
 
 namespace DTXMania;
 
@@ -14,73 +16,93 @@ internal class CActPerfDrumsPad : CActivity
         ST基本位置[] st基本位置Array = new ST基本位置[10];
 
         //LC
-        ST基本位置 st基本位置 = new ST基本位置();
-        st基本位置.x = 263;
-        st基本位置.y = 10;
-        st基本位置.rc = new RectangleF(0, 0, 0x60, 0x60);
+        ST基本位置 st基本位置 = new()
+        {
+            x = 263,
+            y = 10,
+            rc = new RectangleF(0, 0, 0x60, 0x60)
+        };
         st基本位置Array[0] = st基本位置;
 
         //HH
-        ST基本位置 st基本位置2 = new ST基本位置();
-        st基本位置2.x = 336;
-        st基本位置2.y = 10;
-        st基本位置2.rc = new RectangleF(0x60, 0, 0x60, 0x60);
+        ST基本位置 st基本位置2 = new()
+        {
+            x = 336,
+            y = 10,
+            rc = new RectangleF(0x60, 0, 0x60, 0x60)
+        };
         st基本位置Array[1] = st基本位置2;
 
         //SD
-        ST基本位置 st基本位置3 = new ST基本位置();
-        st基本位置3.x = 446;
-        st基本位置3.y = 10;
-        st基本位置3.rc = new RectangleF(0, 0x60, 0x60, 0x60);
+        ST基本位置 st基本位置3 = new()
+        {
+            x = 446,
+            y = 10,
+            rc = new RectangleF(0, 0x60, 0x60, 0x60)
+        };
         st基本位置Array[2] = st基本位置3;
 
         //BD
-        ST基本位置 st基本位置4 = new ST基本位置();
-        st基本位置4.x = 565;
-        st基本位置4.y = 10;
-        st基本位置4.rc = new RectangleF(0, 0xc0, 0x60, 0x60);
+        ST基本位置 st基本位置4 = new()
+        {
+            x = 565,
+            y = 10,
+            rc = new RectangleF(0, 0xc0, 0x60, 0x60)
+        };
         st基本位置Array[3] = st基本位置4;
 
         //HT
-        ST基本位置 st基本位置5 = new ST基本位置();
-        st基本位置5.x = 510;
-        st基本位置5.y = 10;
-        st基本位置5.rc = new RectangleF(0x60, 0x60, 0x60, 0x60);
+        ST基本位置 st基本位置5 = new()
+        {
+            x = 510,
+            y = 10,
+            rc = new RectangleF(0x60, 0x60, 0x60, 0x60)
+        };
         st基本位置Array[4] = st基本位置5;
 
         //LT
-        ST基本位置 st基本位置6 = new ST基本位置();
-        st基本位置6.x = 622;
-        st基本位置6.y = 10;
-        st基本位置6.rc = new RectangleF(0xc0, 0x60, 0x60, 0x60);
+        ST基本位置 st基本位置6 = new()
+        {
+            x = 622,
+            y = 10,
+            rc = new RectangleF(0xc0, 0x60, 0x60, 0x60)
+        };
         st基本位置Array[5] = st基本位置6;
 
         //FT
-        ST基本位置 st基本位置7 = new ST基本位置();
-        st基本位置7.x = 672;
-        st基本位置7.y = 10;
-        st基本位置7.rc = new RectangleF(288, 0x60, 0x60, 0x60);
+        ST基本位置 st基本位置7 = new()
+        {
+            x = 672,
+            y = 10,
+            rc = new RectangleF(288, 0x60, 0x60, 0x60)
+        };
         st基本位置Array[6] = st基本位置7;
 
         //CY
-        ST基本位置 st基本位置8 = new ST基本位置();
-        st基本位置8.x = 0x2df;
-        st基本位置8.y = 10;
-        st基本位置8.rc = new RectangleF(0xc0, 0, 0x60, 0x60);
+        ST基本位置 st基本位置8 = new()
+        {
+            x = 0x2df,
+            y = 10,
+            rc = new RectangleF(0xc0, 0, 0x60, 0x60)
+        };
         st基本位置Array[7] = st基本位置8;
 
         //RD
-        ST基本位置 st基本位置9 = new ST基本位置();
-        st基本位置9.x = 0x317;
-        st基本位置9.y = 10;
-        st基本位置9.rc = new RectangleF(288, 0, 0x60, 0x60);
+        ST基本位置 st基本位置9 = new()
+        {
+            x = 0x317,
+            y = 10,
+            rc = new RectangleF(288, 0, 0x60, 0x60)
+        };
         st基本位置Array[8] = st基本位置9;
 
         //LP
-        ST基本位置 st基本位置10 = new ST基本位置();
-        st基本位置10.x = 0x18c;
-        st基本位置10.y = 10;
-        st基本位置10.rc = new RectangleF(0x60, 0xc0, 0x60, 0x60);
+        ST基本位置 st基本位置10 = new()
+        {
+            x = 0x18c,
+            y = 10,
+            rc = new RectangleF(0x60, 0xc0, 0x60, 0x60)
+        };
         st基本位置Array[9] = st基本位置10;
 
         this.st基本位置 = st基本位置Array;
@@ -97,11 +119,6 @@ internal class CActPerfDrumsPad : CActivity
         stパッド状態[nLane].nY座標加速度dot2 = 2;
     }
 
-    public override void OnDeactivate()
-    {
-
-        base.OnDeactivate();
-    }
     // CActivity 実装
 
     public override void OnActivate()
@@ -110,7 +127,7 @@ internal class CActPerfDrumsPad : CActivity
         nY座標制御タイマ = -1L;
         for (int i = 0; i < 10; i++)
         {
-            STパッド状態 stパッド状態2 = new STパッド状態();
+            STパッド状態 stパッド状態2 = new();
             STパッド状態 stパッド状態 = stパッド状態2;
             stパッド状態.nY座標オフセットdot = 0;
             stパッド状態.nY座標加速度dot = 0;
@@ -125,22 +142,13 @@ internal class CActPerfDrumsPad : CActivity
     {
         if (bActivated)
         {
-            txパッド = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_pads.png"));
-            tx光るパッド = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\ScreenPlayDrums pads flush.png"));
-            txボーナス文字 = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_Bonus.png"));
+            txPad = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_pads.png"));
+            txPadFlush = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\ScreenPlayDrums pads flush.png"));
+            txBonus = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_Bonus.png"));
             base.OnManagedCreateResources();
         }
     }
-    public override void OnManagedReleaseResources()
-    {
-        if (bActivated)
-        {
-            CDTXMania.tReleaseTexture(ref txパッド);
-            CDTXMania.tReleaseTexture(ref tx光るパッド);
-            CDTXMania.tReleaseTexture(ref txボーナス文字);
-            base.OnManagedReleaseResources();
-        }
-    }
+
     public override int OnUpdateAndDraw()
     {
         if (bActivated)
@@ -326,9 +334,9 @@ internal class CActPerfDrumsPad : CActivity
                     {
                         x = st基本位置[8].x - 15;
                     }
-                    if (txパッド != null)
+                    if (txPad != null)
                     {
-                        txパッド.tDraw2D(CDTXMania.app.Device, x, y, st基本位置[index].rc);
+                        txPad.tDraw2D(CDTXMania.app.Device, x, y, st基本位置[index].rc);
 
                         //if (CDTXMania.ConfigIni.eNumOfLanes.Drums == EType.B && index == 8)
                         //{
@@ -340,10 +348,12 @@ internal class CActPerfDrumsPad : CActivity
                         //}
 
                     }
-                    if (tx光るパッド != null)
+                    if (txPadFlush != null)
                     {
-                        tx光るパッド.nTransparency = (stパッド状態[index].n明るさ * 50) + 0;
-                        tx光るパッド.tDraw2D(CDTXMania.app.Device, x, y, st基本位置[index].rc);
+                        //txPadFlush.nTransparency = (stパッド状態[index].n明るさ * 50) + 0;
+                        Color4 color = Color4.White;
+                        color.Alpha = ((stパッド状態[index].n明るさ * 50) + 0 / 255.0f);
+                        txPadFlush.tDraw2D(CDTXMania.app.Device, x, y, st基本位置[index].rc, color);
 
                         //if (CDTXMania.ConfigIni.eNumOfLanes.Drums == EType.B && index == 8)
                         //{
@@ -373,9 +383,9 @@ internal class CActPerfDrumsPad : CActivity
                         stボーナス[i].ct進行.tStop();
                         stボーナス[i].b使用中 = false;
                     }
-                    if (txボーナス文字 != null && CDTXMania.ConfigIni.bShowScore)
+                    if (txBonus != null && CDTXMania.ConfigIni.bShowScore)
                     {
-                        txボーナス文字.tDraw2D(CDTXMania.app.Device, 160, 80);
+                        txBonus.tDraw2D(CDTXMania.app.Device, 160, 80);
                         //if (this.stボーナス[i].ctUpdate.nCurrentValue >= 765)
                         //{
                         //    int n = this.stボーナス[i].ctUpdate.nCurrentValue - 765;
@@ -479,9 +489,9 @@ internal class CActPerfDrumsPad : CActivity
     private readonly int[,] nDrawFlags = new int[3, 10] { { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, { 1, 1, 1, 1, 1, 1, 1, 1, 0, 1 }, { 0, 1, 1, 1, 1, 1, 0, 1, 0, 0 } };
     public STパッド状態[] stパッド状態 = new STパッド状態[ 0x13 ];
     public readonly ST基本位置[] st基本位置;
-    private CTexture txパッド;
-    private CTexture tx光るパッド;
-    private CTexture txボーナス文字;
+    private BaseTexture txPad;
+    private BaseTexture txPadFlush;
+    private BaseTexture txBonus;
     public bool[] bボーナス文字 = new bool[10];
     public STボーナス[] stボーナス = new STボーナス[4];
     //-----------------

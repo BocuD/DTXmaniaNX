@@ -1,8 +1,8 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Drawing;
+using System.Runtime.InteropServices;
 using DTXMania.Core;
+using DTXMania.UI.Drawable;
 using FDK;
-using SharpDX;
-using Rectangle = System.Drawing.Rectangle;
 
 namespace DTXMania;
 
@@ -56,8 +56,8 @@ internal class CActPerfCommonJudgementString : CActivity
 		public RectangleF rc;
 	}
 
-	protected CTexture[] tx判定文字列 = new CTexture[ 3 ];
-	protected CTexture txlag数値 = new CTexture();		// #25370 2011.2.1 yyagi
+	protected BaseTexture[] tx判定文字列 = new BaseTexture[ 3 ];
+	protected BaseTexture txlag数値;		// #25370 2011.2.1 yyagi
 
 	public int nShowLagType							// #25370 2011.6.3 yyagi
 	{
@@ -66,13 +66,13 @@ internal class CActPerfCommonJudgementString : CActivity
 	}
 
 	[StructLayout(LayoutKind.Sequential)]
-	protected struct STレーンサイズ
+	protected struct STLaneSize
 	{
 		public int x;
 		public int w;
 	}
 
-	protected STレーンサイズ[] stレーンサイズ;
+	protected STLaneSize[] stLaneSize;
 	// コンストラクタ
 
 	public CActPerfCommonJudgementString()
@@ -169,8 +169,8 @@ internal class CActPerfCommonJudgementString : CActivity
 			}
 		}
 
-		this.stレーンサイズ = new STレーンサイズ[15];
-		STレーンサイズ stレーンサイズ = new STレーンサイズ();
+		this.stLaneSize = new STLaneSize[15];
+		STLaneSize stレーンサイズ = new STLaneSize();
 		//                                LC          HH          SD            BD          HT           LT           FT            CY          LP             RD
 		int[,] sizeXW = new int[,] { { 290, 80 }, { 367, 46 }, { 470, 54 }, { 582, 60 }, { 528, 46 }, { 645, 46 }, { 694, 46 }, { 748, 64 }, { 419, 46 }, { 815, 80 }, { 815, 80 }, { 815, 80 }, { 815, 80 }, { 815, 80 }, { 815, 80 }, };
 		int[,] sizeXW_B = new int[,] { { 290, 80 }, { 367, 46 }, { 419, 54 }, { 534, 60 }, { 590, 46 }, { 645, 46 }, { 694, 46 }, { 748, 64 }, { 478, 46 }, { 815, 64 }, { 815, 80 }, { 507, 80 }, { 815, 80 }, { 815, 80 }, { 815, 80 }, };
@@ -179,37 +179,37 @@ internal class CActPerfCommonJudgementString : CActivity
 
 		for (int i = 0; i < 15; i++)
 		{
-			this.stレーンサイズ[i] = new STレーンサイズ();
+			this.stLaneSize[i] = new STLaneSize();
 			if( CDTXMania.ConfigIni.bDrumsEnabled )
 			{
-				this.stレーンサイズ[i] = default(STレーンサイズ);
+				this.stLaneSize[i] = default(STLaneSize);
 				switch ( CDTXMania.ConfigIni.eLaneType.Drums )
 				{
 					case EType.A:
-						this.stレーンサイズ[i].x = sizeXW[i, 0];
-						this.stレーンサイズ[i].w = sizeXW[i, 1];
+						this.stLaneSize[i].x = sizeXW[i, 0];
+						this.stLaneSize[i].w = sizeXW[i, 1];
 						goto IL_19F;
 					case EType.B:
-						this.stレーンサイズ[i].x = sizeXW_B[i, 0];
-						this.stレーンサイズ[i].w = sizeXW_B[i, 1];
+						this.stLaneSize[i].x = sizeXW_B[i, 0];
+						this.stLaneSize[i].w = sizeXW_B[i, 1];
 						goto IL_19F;
 					case EType.C:
-						this.stレーンサイズ[i].x = sizeXW_C[i, 0];
-						this.stレーンサイズ[i].w = sizeXW_C[i, 1];
+						this.stLaneSize[i].x = sizeXW_C[i, 0];
+						this.stLaneSize[i].w = sizeXW_C[i, 1];
 						goto IL_19F;
 					case EType.D:
-						this.stレーンサイズ[i].x = sizeXW_D[i, 0];
-						this.stレーンサイズ[i].w = sizeXW_D[i, 1];
+						this.stLaneSize[i].x = sizeXW_D[i, 0];
+						this.stLaneSize[i].w = sizeXW_D[i, 1];
 						goto IL_19F;
 				}
 				IL_19F:
 				if (i == 7 && CDTXMania.ConfigIni.eRDPosition == ERDPosition.RDRC)
 				{
-					this.stレーンサイズ[i].x = sizeXW[9, 0] - 24;
+					this.stLaneSize[i].x = sizeXW[9, 0] - 24;
 				}
 				if (i == 9 && CDTXMania.ConfigIni.eRDPosition == ERDPosition.RDRC)
 				{
-					this.stレーンサイズ[i].x = sizeXW[7, 0] - 18;
+					this.stLaneSize[i].x = sizeXW[7, 0] - 18;
 				}
 			}
 		}
@@ -241,24 +241,13 @@ internal class CActPerfCommonJudgementString : CActivity
 			}
 			else
 			{
-				tx判定文字列[0] = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\ScreenPlay judge strings 1.png"));
-				tx判定文字列[1] = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\ScreenPlay judge strings 2.png"));
-				tx判定文字列[2] = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\ScreenPlay judge strings 3.png"));
+				tx判定文字列[0] = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\ScreenPlay judge strings 1.png"));
+				tx判定文字列[1] = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\ScreenPlay judge strings 2.png"));
+				tx判定文字列[2] = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\ScreenPlay judge strings 3.png"));
 			}
 
-			txlag数値 = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_lag numbers.png"));
+			txlag数値 = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_lag numbers.png"));
 			base.OnManagedCreateResources();
-		}
-	}
-	public override void OnManagedReleaseResources()
-	{
-		if( bActivated )
-		{
-			CDTXMania.tReleaseTexture( ref tx判定文字列[ 0 ] );
-			CDTXMania.tReleaseTexture( ref tx判定文字列[ 1 ] );
-			CDTXMania.tReleaseTexture( ref tx判定文字列[ 2 ] );
-			CDTXMania.tReleaseTexture( ref txlag数値 );
-			base.OnManagedReleaseResources();
 		}
 	}
 }

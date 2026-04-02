@@ -5,11 +5,9 @@ using DTXMania.Core;
 using DTXMania.UI;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.Text;
-using FDK;
 
 using Point = System.Drawing.Point;
 using Color = System.Drawing.Color;
-using RectangleF = SharpDX.RectangleF;
 
 namespace DTXMania;
 
@@ -18,7 +16,7 @@ internal class CActPerfDrumsStatusPanel : CActPerfCommonStatusPanel
 
     public CActPerfDrumsStatusPanel()
     {
-        txパネル文字 = new CTexture[2];
+        txパネル文字 = new BaseTexture[2];
         ST文字位置[] st文字位置Array = new ST文字位置[11];
         ST文字位置 st文字位置 = new()
         {
@@ -253,29 +251,33 @@ internal class CActPerfDrumsStatusPanel : CActPerfCommonStatusPanel
 
     public override void OnManagedCreateResources()
     {
-        if( bActivated )
+        if (bActivated)
         {
-            nameFont = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.str曲名表示フォント), 20, FontStyle.Regular);
-            titleFont = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.str曲名表示フォント), 12, FontStyle.Regular);
+            // nameFont = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.str曲名表示フォント), 20, FontStyle.Regular);
+            // titleFont = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.str曲名表示フォント), 12, FontStyle.Regular);
             txSkillPanel = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_SkillPanel.png"));
-            txパネル文字[0] = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_Ratenumber_s.png"));
-            txパネル文字[1] = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_Ratenumber_l.png"));
-            tx難易度パネル = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_Difficulty.png"));
-            tx難易度用数字 = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_LevelNumber.png"));
+            txパネル文字[0] = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_Ratenumber_s.png"));
+            txパネル文字[1] = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_Ratenumber_l.png"));
+            tx難易度パネル = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_Difficulty.png"));
+            tx難易度用数字 = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_LevelNumber.png"));
             //Load new textures
-            txPercent = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_RatePercent_l.png"));
-            txSkillMax = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_skill max.png"));
-            txLagHitCount = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_lag numbers.png"));
+            txPercent = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_RatePercent_l.png"));
+            txSkillMax = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_skill max.png"));
+            txLagHitCount = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_lag numbers.png"));
 
-            strPlayerName = string.IsNullOrEmpty( CDTXMania.ConfigIni.strCardName[ 0 ] ) ? "GUEST" : CDTXMania.ConfigIni.strCardName[ 0 ];
-            strTitleName = string.IsNullOrEmpty( CDTXMania.ConfigIni.strGroupName[ 0 ] ) ? "" : CDTXMania.ConfigIni.strGroupName[ 0 ];
+            strPlayerName = string.IsNullOrEmpty(CDTXMania.ConfigIni.strCardName[0])
+                ? "GUEST"
+                : CDTXMania.ConfigIni.strCardName[0];
+            strTitleName = string.IsNullOrEmpty(CDTXMania.ConfigIni.strGroupName[0])
+                ? ""
+                : CDTXMania.ConfigIni.strGroupName[0];
 
             #region[ ネームカラー ]
-            
+
             //--------------------
             Color clNameColor = Color.White;
             Color clNameColorLower = Color.White;
-            switch( CDTXMania.ConfigIni.nNameColor[ 0 ] )
+            switch (CDTXMania.ConfigIni.nNameColor[0])
             {
                 case 0:
                     clNameColor = Color.White;
@@ -348,14 +350,16 @@ internal class CActPerfDrumsStatusPanel : CActPerfCommonStatusPanel
                     clNameColorLower = Color.FromArgb(255, 255, 241, 200);
                     break;
             }
-            
+
             var nameRequest = new UiTextRenderRequest
             {
                 Name = strPlayerName,
                 Text = strPlayerName,
                 FontPath = UiFontDefaults.TryGetDefaultUiFontPath() ?? "",
                 FontSize = 20,
-                OutlineGradientMode = CDTXMania.ConfigIni.nNameColor[ 0 ] > 11 ? UiTextGradientMode.Vertical : UiTextGradientMode.None,
+                OutlineGradientMode = CDTXMania.ConfigIni.nNameColor[0] > 11
+                    ? UiTextGradientMode.Vertical
+                    : UiTextGradientMode.None,
                 OutlineColor = clNameColor,
                 OutlineGradientTopColor = clNameColor,
                 OutlineGradientBottomColor = clNameColorLower,
@@ -372,33 +376,15 @@ internal class CActPerfDrumsStatusPanel : CActPerfCommonStatusPanel
                 FillColor = Color.White,
                 Backend = UiTextRenderBackend.Skia
             };
-            
+
             //--------------------
+
             #endregion
 
             txNameplateText = BaseTexture.SkiaTextRenderer.Render(nameRequest);
             txTitleText = BaseTexture.SkiaTextRenderer.Render(titleRequest);
 
             base.OnManagedCreateResources();
-        }
-    }
-    public override void OnManagedReleaseResources()
-    {
-        if( bActivated )
-        {
-            CDTXMania.tDisposeSafely(ref nameFont);
-            CDTXMania.tDisposeSafely(ref titleFont);
-            
-            CDTXMania.tReleaseTexture(ref txパネル文字[0]);
-            CDTXMania.tReleaseTexture(ref txパネル文字[1]);
-            CDTXMania.tReleaseTexture(ref tx難易度パネル);
-            CDTXMania.tReleaseTexture(ref tx難易度用数字);
-            //Free new texture
-            CDTXMania.tReleaseTexture(ref txPercent);
-            CDTXMania.tReleaseTexture(ref txSkillMax);
-            CDTXMania.tReleaseTexture(ref txLagHitCount);
-            
-            base.OnManagedReleaseResources();
         }
     }
 
@@ -430,14 +416,16 @@ internal class CActPerfDrumsStatusPanel : CActPerfCommonStatusPanel
                 bCLASSIC = true;
             }
             
+            Matrix4x4 scaleMatrix = Matrix4x4.CreateScale(CDTXMania.renderScale);
+            
             Matrix4x4 skillPanelMat = Matrix4x4.CreateTranslation(nBodyX[i], nBodyY, 0f);
-            txSkillPanel.tDraw2DMatrix(skillPanelMat);
+            txSkillPanel.tDraw2DMatrix(skillPanelMat * scaleMatrix);
             
             Matrix4x4 matBase = Matrix4x4.CreateTranslation(nBodyX[i], nBodyY, 0f);
             Matrix4x4 matName = matBase * Matrix4x4.CreateTranslation(-2f, 26f, 0f);
             Matrix4x4 matPlate  = matBase * Matrix4x4.CreateTranslation(6f, 8f, 0f);
-            txNameplateText.tDraw2DMatrix(matName);
-            txTitleText.tDraw2DMatrix(matPlate);
+            txNameplateText.tDraw2DMatrix(matName * scaleMatrix);
+            txTitleText.tDraw2DMatrix(matPlate * scaleMatrix);
 
             t小文字表示(80 + nBodyX[i], 72 + nBodyY, $"{CDTXMania.stagePerfDrumsScreen.nHitCount_ExclAuto[i].Perfect,4:###0}");
             t小文字表示(80 + nBodyX[i], 102 + nBodyY, $"{CDTXMania.stagePerfDrumsScreen.nHitCount_ExclAuto[i].Great,4:###0}");
@@ -546,19 +534,18 @@ internal class CActPerfDrumsStatusPanel : CActPerfCommonStatusPanel
     private readonly ST文字位置[] st大文字位置;
     private readonly ST文字位置[] st難易度数字位置;
     private BaseTexture txSkillPanel;
-    private CTexture[] txパネル文字;
-    private CPrivateFastFont nameFont;
-    private CPrivateFastFont titleFont;
+    private BaseTexture[] txパネル文字;
+    
     private string strPlayerName;
     private string strTitleName;
     private BaseTexture txNameplateText;
     private BaseTexture txTitleText;
-    private CTexture tx難易度パネル;
-    private CTexture tx難易度用数字;
+    private BaseTexture tx難易度パネル;
+    private BaseTexture tx難易度用数字;
     //New texture % and MAX
-    private CTexture txPercent;
-    private CTexture txSkillMax;
-    private CTexture txLagHitCount;
+    private BaseTexture txPercent;
+    private BaseTexture txSkillMax;
+    private BaseTexture txLagHitCount;
 
     private void t小文字表示(int x, int y, string str)
     {

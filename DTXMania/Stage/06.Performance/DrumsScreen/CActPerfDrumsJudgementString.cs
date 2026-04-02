@@ -1,5 +1,7 @@
-﻿using DTXMania.Core;
-using SharpDX;
+﻿using System.Drawing;
+using System.Numerics;
+using DTXMania.Core;
+using DTXMania.UI;
 using FDK;
 
 namespace DTXMania;
@@ -1255,7 +1257,7 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                         int num6 = 0;
                         if (j < 10)
                         {
-                            num5 = stレーンサイズ[j].x;
+                            num5 = stLaneSize[j].x;
                             if( CDTXMania.ConfigIni.JudgementStringPosition.Drums == EType.A )
                             {
                                 num6 = CDTXMania.ConfigIni.bReverse.Drums ? 348 + -(n文字の縦表示位置[j] * 0x20) : (348 + n文字の縦表示位置[j] * 0x20);
@@ -1269,7 +1271,7 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                         int nRectX = CDTXMania.ConfigIni.nJudgeWidgh;
                         int nRectY = CDTXMania.ConfigIni.nJudgeHeight;
 
-                        int xc = (num5 + st状態[j].n相対X座標) + (stレーンサイズ[j].w / 2);
+                        int xc = (num5 + st状態[j].n相対X座標) + (stLaneSize[j].w / 2);
                         int x = (xc - ((int)((110f * st状態[j].fX方向拡大率)))) - ((nRectX - 225) / 2);
                         int y = ((num6 + st状態[j].n相対Y座標) - ((int)(((140f * st状態[j].fY方向拡大率)) / 2.0))) - ((nRectY - 135) / 2);
 
@@ -1279,33 +1281,33 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                             {
                                 if (st状態[j].judge == EJudgement.Perfect)
                                 {
-                                    //base.tx判定文字列[num4].tDraw2D(CDTXMania.app.Device, x, y, new  SharpDX.RectangleF(0, nRectY * base.st状態[j].nRect, nRectX, nRectY));
-                                    CDTXMania.stagePerfDrumsScreen.tx判定画像anime.tDraw2D(CDTXMania.app.Device, x, y, new  SharpDX.RectangleF(0, nRectY * st状態[j].nRect, nRectX, nRectY));
+                                    //base.tx判定文字列[num4].tDraw2D(CDTXMania.app.Device, x, y, new  RectangleF(0, nRectY * base.st状態[j].nRect, nRectX, nRectY));
+                                    CDTXMania.stagePerfDrumsScreen.tx判定画像anime.tDraw2D(CDTXMania.app.Device, x, y, new  RectangleF(0, nRectY * st状態[j].nRect, nRectX, nRectY));
                                 }
                                 if (st状態[j].judge == EJudgement.Great)
                                 {
-                                    //base.tx判定文字列[num4].tDraw2D(CDTXMania.app.Device, x, y, new  SharpDX.RectangleF(nRectX * 1, nRectY * base.st状態[j].nRect, nRectX, nRectY));
-                                    CDTXMania.stagePerfDrumsScreen.tx判定画像anime.tDraw2D(CDTXMania.app.Device, x, y, new  SharpDX.RectangleF(nRectX * 1, nRectY * st状態[j].nRect, nRectX, nRectY));
+                                    //base.tx判定文字列[num4].tDraw2D(CDTXMania.app.Device, x, y, new  RectangleF(nRectX * 1, nRectY * base.st状態[j].nRect, nRectX, nRectY));
+                                    CDTXMania.stagePerfDrumsScreen.tx判定画像anime.tDraw2D(CDTXMania.app.Device, x, y, new  RectangleF(nRectX * 1, nRectY * st状態[j].nRect, nRectX, nRectY));
                                 }
                                 if (st状態[j].judge == EJudgement.Good)
                                 {
-                                    //base.tx判定文字列[num4].tDraw2D(CDTXMania.app.Device, x, y, new  SharpDX.RectangleF(nRectX * 2, nRectY * base.st状態[j].nRect, nRectX, nRectY));
-                                    CDTXMania.stagePerfDrumsScreen.tx判定画像anime.tDraw2D(CDTXMania.app.Device, x, y, new  SharpDX.RectangleF(nRectX * 2, nRectY * st状態[j].nRect, nRectX, nRectY));
+                                    //base.tx判定文字列[num4].tDraw2D(CDTXMania.app.Device, x, y, new  RectangleF(nRectX * 2, nRectY * base.st状態[j].nRect, nRectX, nRectY));
+                                    CDTXMania.stagePerfDrumsScreen.tx判定画像anime.tDraw2D(CDTXMania.app.Device, x, y, new  RectangleF(nRectX * 2, nRectY * st状態[j].nRect, nRectX, nRectY));
                                 }
                                 if (st状態[j].judge == EJudgement.Poor)
                                 {
-                                    //base.tx判定文字列[num4].tDraw2D(CDTXMania.app.Device, x, y, new  SharpDX.RectangleF(nRectX * 3, nRectY * base.st状態[j].nRect, nRectX, nRectY));
-                                    CDTXMania.stagePerfDrumsScreen.tx判定画像anime.tDraw2D(CDTXMania.app.Device, x, y, new  SharpDX.RectangleF(nRectX * 3, nRectY * st状態[j].nRect, nRectX, nRectY));
+                                    //base.tx判定文字列[num4].tDraw2D(CDTXMania.app.Device, x, y, new  RectangleF(nRectX * 3, nRectY * base.st状態[j].nRect, nRectX, nRectY));
+                                    CDTXMania.stagePerfDrumsScreen.tx判定画像anime.tDraw2D(CDTXMania.app.Device, x, y, new  RectangleF(nRectX * 3, nRectY * st状態[j].nRect, nRectX, nRectY));
                                 }
                                 if (st状態[j].judge == EJudgement.Miss)
                                 {
-                                    //base.tx判定文字列[num4].tDraw2D(CDTXMania.app.Device, x, y, new  SharpDX.RectangleF(nRectX * 4, nRectY * base.st状態[j].nRect, nRectX, nRectY));
-                                    CDTXMania.stagePerfDrumsScreen.tx判定画像anime.tDraw2D(CDTXMania.app.Device, x, y, new  SharpDX.RectangleF(nRectX * 4, nRectY * st状態[j].nRect, nRectX, nRectY));
+                                    //base.tx判定文字列[num4].tDraw2D(CDTXMania.app.Device, x, y, new  RectangleF(nRectX * 4, nRectY * base.st状態[j].nRect, nRectX, nRectY));
+                                    CDTXMania.stagePerfDrumsScreen.tx判定画像anime.tDraw2D(CDTXMania.app.Device, x, y, new  RectangleF(nRectX * 4, nRectY * st状態[j].nRect, nRectX, nRectY));
                                 }
                                 if (st状態[j].judge == EJudgement.Auto)
                                 {
-                                    //base.tx判定文字列[num4].tDraw2D(CDTXMania.app.Device, x, y, new  SharpDX.RectangleF(nRectX * 5, nRectY * base.st状態[j].nRect, nRectX, nRectY));
-                                    CDTXMania.stagePerfDrumsScreen.tx判定画像anime.tDraw2D(CDTXMania.app.Device, x, y, new  SharpDX.RectangleF(nRectX * 5, nRectY * st状態[j].nRect, nRectX, nRectY));
+                                    //base.tx判定文字列[num4].tDraw2D(CDTXMania.app.Device, x, y, new  RectangleF(nRectX * 5, nRectY * base.st状態[j].nRect, nRectX, nRectY));
+                                    CDTXMania.stagePerfDrumsScreen.tx判定画像anime.tDraw2D(CDTXMania.app.Device, x, y, new  RectangleF(nRectX * 5, nRectY * st状態[j].nRect, nRectX, nRectY));
                                 }
                             }
                             else if (tx判定文字列[num4] != null)
@@ -1313,9 +1315,11 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                                 x = xc - ((int)((64f * st状態[j].fX方向拡大率)));
                                 y = (num6 + st状態[j].n相対Y座標) - ((int)(((43f * st状態[j].fY方向拡大率)) / 2.0));
 
-                                tx判定文字列[num4].nTransparency = st状態[j].n透明度;
-                                tx判定文字列[num4].vcScaleRatio = new Vector3(st状態[j].fX方向拡大率, st状態[j].fY方向拡大率, 1f);
-                                tx判定文字列[num4].tDraw2D(CDTXMania.app.Device, x, y, st判定文字列[(int)st状態[j].judge].rc);
+                                //tx判定文字列[num4].nTransparency = st状態[j].n透明度;
+                                Color4 col = Color4.White;
+                                col.Alpha = st状態[j].n透明度 / 255.0f;
+                                //tx判定文字列[num4].vcScaleRatio = new Vector3(st状態[j].fX方向拡大率, st状態[j].fY方向拡大率, 1f);
+                                tx判定文字列[num4].tDraw2D(CDTXMania.app.Device, x, y, st判定文字列[(int)st状態[j].judge].rc, col);
                             }
 
 
@@ -1353,7 +1357,7 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                         int num6 = 0;
                         if (j < 10)
                         {
-                            num5 = stレーンサイズ[j].x;
+                            num5 = stLaneSize[j].x;
                             if( CDTXMania.ConfigIni.JudgementStringPosition.Drums == EType.A )
                             {
                                 num6 = CDTXMania.ConfigIni.bReverse.Drums ? 348 + -(n文字の縦表示位置[j] * 0x20) : (348 + n文字の縦表示位置[j] * 0x20);
@@ -1367,14 +1371,14 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                         int nRectX = 85;
                         int nRectY = 35;
 
-                        int xc = ( num5 + st状態[j].n相対X座標 ) + ( stレーンサイズ[j].w / 2 );
+                        int xc = ( num5 + st状態[j].n相対X座標 ) + ( stLaneSize[j].w / 2 );
                         int yc = ( num6 + st状態[j].n相対Y座標 ) + ( num6 / 2 );
                         float fRot = st状態[j].fZ軸回転度;
                         int x = ( xc - ((int)(((nRectX * st状態[j].fX方向拡大率 ) / st状態[j].fX方向拡大率) * st状態[j].fX方向拡大率)) + (nRectX / 2));
                         int y = ( num6 + st状態[j].n相対Y座標 ) - ((int)((((nRectY) / 2) * st状態[j].fY方向拡大率)));
 
 
-                        int xc_棒 = ( num5 + st状態[j].n相対X座標_棒) + (stレーンサイズ[j].w / 2);
+                        int xc_棒 = ( num5 + st状態[j].n相対X座標_棒) + (stLaneSize[j].w / 2);
                         int yc_棒 = ( num6 + st状態[j].n相対Y座標_棒) + (num6 / 2);
                         float fRot_棒 = st状態[j].fZ軸回転度_棒;
                         int x_棒 = ( xc_棒 - ((int)(((nRectX * st状態[j].fX方向拡大率_棒) / st状態[j].fX方向拡大率_棒) * st状態[j].fX方向拡大率_棒)) + (nRectX / 2));
@@ -1385,59 +1389,65 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                             if (st状態[j].judge == EJudgement.Perfect)
                             {
                                     
-                                CDTXMania.stagePerfDrumsScreen.tx判定画像anime_2.vcScaleRatio = new Vector3(st状態[j].fX方向拡大率_棒, st状態[j].fY方向拡大率_棒, 1f  );
-                                CDTXMania.stagePerfDrumsScreen.tx判定画像anime_2.fZAxisRotation = st状態[j].fZ軸回転度_棒;
-                                CDTXMania.stagePerfDrumsScreen.tx判定画像anime_2.tDraw2D(CDTXMania.app.Device, x_棒, y_棒, new  SharpDX.RectangleF(0, 110, 210, 15));
+                                //CDTXMania.stagePerfDrumsScreen.tx判定画像anime_2.vcScaleRatio = new Vector3(st状態[j].fX方向拡大率_棒, st状態[j].fY方向拡大率_棒, 1f  );
+                                //CDTXMania.stagePerfDrumsScreen.tx判定画像anime_2.fZAxisRotation = st状態[j].fZ軸回転度_棒;
+                                CDTXMania.stagePerfDrumsScreen.tx判定画像anime_2.tDraw2D(CDTXMania.app.Device, x_棒, y_棒, new  RectangleF(0, 110, 210, 15));
 
-                                CDTXMania.stagePerfDrumsScreen.tx判定画像anime.vcScaleRatio = new Vector3(st状態[j].fX方向拡大率, st状態[j].fY方向拡大率, 1f);
-                                CDTXMania.stagePerfDrumsScreen.tx判定画像anime.fZAxisRotation = st状態[j].fZ軸回転度;
-                                CDTXMania.stagePerfDrumsScreen.tx判定画像anime.nTransparency = 255;
-                                CDTXMania.stagePerfDrumsScreen.tx判定画像anime.tDraw2D(CDTXMania.app.Device, x, y, new  SharpDX.RectangleF(0, 0, nRectX, nRectY));
+                                //CDTXMania.stagePerfDrumsScreen.tx判定画像anime.vcScaleRatio = new Vector3(st状態[j].fX方向拡大率, st状態[j].fY方向拡大率, 1f);
+                                //CDTXMania.stagePerfDrumsScreen.tx判定画像anime.fZAxisRotation = st状態[j].fZ軸回転度;
+                                //CDTXMania.stagePerfDrumsScreen.tx判定画像anime.nTransparency = 255;
+                                CDTXMania.stagePerfDrumsScreen.tx判定画像anime.tDraw2D(CDTXMania.app.Device, x, y, new  RectangleF(0, 0, nRectX, nRectY));
 
-                                CDTXMania.stagePerfDrumsScreen.tx判定画像anime_3.vcScaleRatio = new Vector3(st状態[j].fX方向拡大率B, st状態[j].fY方向拡大率B, 1f);
-                                CDTXMania.stagePerfDrumsScreen.tx判定画像anime_3.fZAxisRotation = st状態[j].fZ軸回転度;
-                                CDTXMania.stagePerfDrumsScreen.tx判定画像anime_3.nTransparency = st状態[j].n透明度B;
-                                CDTXMania.stagePerfDrumsScreen.tx判定画像anime_3.bAdditiveBlending = true;
-                                CDTXMania.stagePerfDrumsScreen.tx判定画像anime_3.tDraw2D(CDTXMania.app.Device, x, y, new  SharpDX.RectangleF(0, 0, nRectX, nRectY));
+                                //CDTXMania.stagePerfDrumsScreen.tx判定画像anime_3.vcScaleRatio = new Vector3(st状態[j].fX方向拡大率B, st状態[j].fY方向拡大率B, 1f);
+                                //CDTXMania.stagePerfDrumsScreen.tx判定画像anime_3.fZAxisRotation = st状態[j].fZ軸回転度;
+                                //CDTXMania.stagePerfDrumsScreen.tx判定画像anime_3.nTransparency = st状態[j].n透明度B;
+                                Color4 col = Color4.White;
+                                col.Alpha = st状態[j].n透明度B / 255.0f;
+                                //CDTXMania.stagePerfDrumsScreen.tx判定画像anime_3.bAdditiveBlending = true;
+                                CDTXMania.stagePerfDrumsScreen.tx判定画像anime_3.tDraw2D(CDTXMania.app.Device, x, y, new  RectangleF(0, 0, nRectX, nRectY), col);
                             }
                             if (st状態[j].judge == EJudgement.Great)
                             {
-                                CDTXMania.stagePerfDrumsScreen.tx判定画像anime_2.vcScaleRatio = new Vector3(st状態[j].fX方向拡大率_棒, st状態[j].fY方向拡大率_棒, 1f);
-                                CDTXMania.stagePerfDrumsScreen.tx判定画像anime_2.fZAxisRotation = st状態[j].fZ軸回転度_棒;
-                                CDTXMania.stagePerfDrumsScreen.tx判定画像anime_2.tDraw2D(CDTXMania.app.Device, x_棒, y_棒, new  SharpDX.RectangleF(0, 125, 210, 15));
+                                //CDTXMania.stagePerfDrumsScreen.tx判定画像anime_2.vcScaleRatio = new Vector3(st状態[j].fX方向拡大率_棒, st状態[j].fY方向拡大率_棒, 1f);
+                                //CDTXMania.stagePerfDrumsScreen.tx判定画像anime_2.fZAxisRotation = st状態[j].fZ軸回転度_棒;
+                                CDTXMania.stagePerfDrumsScreen.tx判定画像anime_2.tDraw2D(CDTXMania.app.Device, x_棒, y_棒, new  RectangleF(0, 125, 210, 15));
 
-                                CDTXMania.stagePerfDrumsScreen.tx判定画像anime.vcScaleRatio = new Vector3(st状態[j].fX方向拡大率, st状態[j].fY方向拡大率, 1f);
-                                CDTXMania.stagePerfDrumsScreen.tx判定画像anime.fZAxisRotation = st状態[j].fZ軸回転度;
-                                CDTXMania.stagePerfDrumsScreen.tx判定画像anime.nTransparency = 255;
-                                CDTXMania.stagePerfDrumsScreen.tx判定画像anime.tDraw2D(CDTXMania.app.Device, x, y, new  SharpDX.RectangleF(nRectX + 5, 0, nRectX, nRectY));
+                                //CDTXMania.stagePerfDrumsScreen.tx判定画像anime.vcScaleRatio = new Vector3(st状態[j].fX方向拡大率, st状態[j].fY方向拡大率, 1f);
+                                //CDTXMania.stagePerfDrumsScreen.tx判定画像anime.fZAxisRotation = st状態[j].fZ軸回転度;
+                                //CDTXMania.stagePerfDrumsScreen.tx判定画像anime.nTransparency = 255;
+                                CDTXMania.stagePerfDrumsScreen.tx判定画像anime.tDraw2D(CDTXMania.app.Device, x, y, new  RectangleF(nRectX + 5, 0, nRectX, nRectY));
                             }
                             if (st状態[j].judge == EJudgement.Good)
                             {
-                                CDTXMania.stagePerfDrumsScreen.tx判定画像anime.vcScaleRatio = new Vector3(st状態[j].fX方向拡大率, st状態[j].fY方向拡大率, 1f);
-                                CDTXMania.stagePerfDrumsScreen.tx判定画像anime.fZAxisRotation = 0;
-                                CDTXMania.stagePerfDrumsScreen.tx判定画像anime.nTransparency = 255;
-                                CDTXMania.stagePerfDrumsScreen.tx判定画像anime.tDraw2D(CDTXMania.app.Device, x, y, new  SharpDX.RectangleF(0, nRectY + 2, nRectX, nRectY));
+                                //CDTXMania.stagePerfDrumsScreen.tx判定画像anime.vcScaleRatio = new Vector3(st状態[j].fX方向拡大率, st状態[j].fY方向拡大率, 1f);
+                                //CDTXMania.stagePerfDrumsScreen.tx判定画像anime.fZAxisRotation = 0;
+                                //CDTXMania.stagePerfDrumsScreen.tx判定画像anime.nTransparency = 255;
+                                CDTXMania.stagePerfDrumsScreen.tx判定画像anime.tDraw2D(CDTXMania.app.Device, x, y, new  RectangleF(0, nRectY + 2, nRectX, nRectY));
                             }
                             if (st状態[j].judge == EJudgement.Poor)
                             {
-                                CDTXMania.stagePerfDrumsScreen.tx判定画像anime.vcScaleRatio = new Vector3(1f, 1f, 1f);
-                                CDTXMania.stagePerfDrumsScreen.tx判定画像anime.fZAxisRotation = st状態[j].fZ軸回転度;
-                                CDTXMania.stagePerfDrumsScreen.tx判定画像anime.nTransparency = st状態[j].n透明度;
-                                CDTXMania.stagePerfDrumsScreen.tx判定画像anime.tDraw2D(CDTXMania.app.Device, x, y, new  SharpDX.RectangleF(nRectX + 5, nRectY + 2, nRectX, nRectY));
+                                //CDTXMania.stagePerfDrumsScreen.tx判定画像anime.vcScaleRatio = new Vector3(1f, 1f, 1f);
+                                //CDTXMania.stagePerfDrumsScreen.tx判定画像anime.fZAxisRotation = st状態[j].fZ軸回転度;
+                                //CDTXMania.stagePerfDrumsScreen.tx判定画像anime.nTransparency = st状態[j].n透明度;
+                                Color4 col = Color4.White;
+                                col.Alpha = st状態[j].n透明度 / 255.0f;
+                                CDTXMania.stagePerfDrumsScreen.tx判定画像anime.tDraw2D(CDTXMania.app.Device, x, y, new  RectangleF(nRectX + 5, nRectY + 2, nRectX, nRectY), col);
                             }
                             if (st状態[j].judge == EJudgement.Miss)
                             {
-                                CDTXMania.stagePerfDrumsScreen.tx判定画像anime.vcScaleRatio = new Vector3(1f, 1f, 1f);
-                                CDTXMania.stagePerfDrumsScreen.tx判定画像anime.fZAxisRotation = st状態[j].fZ軸回転度;
-                                CDTXMania.stagePerfDrumsScreen.tx判定画像anime.nTransparency = st状態[j].n透明度;
-                                CDTXMania.stagePerfDrumsScreen.tx判定画像anime.tDraw2D(CDTXMania.app.Device, x, y, new  SharpDX.RectangleF(0, nRectY * 2 + 4, nRectX, nRectY));
+                                //CDTXMania.stagePerfDrumsScreen.tx判定画像anime.vcScaleRatio = new Vector3(1f, 1f, 1f);
+                                //CDTXMania.stagePerfDrumsScreen.tx判定画像anime.fZAxisRotation = st状態[j].fZ軸回転度;
+                                //CDTXMania.stagePerfDrumsScreen.tx判定画像anime.nTransparency = st状態[j].n透明度;
+                                Color4 col = Color4.White;
+                                col.Alpha = st状態[j].n透明度 / 255.0f;
+                                CDTXMania.stagePerfDrumsScreen.tx判定画像anime.tDraw2D(CDTXMania.app.Device, x, y, new  RectangleF(0, nRectY * 2 + 4, nRectX, nRectY), col);
                             }
                             if (st状態[j].judge == EJudgement.Auto)
                             {
-                                CDTXMania.stagePerfDrumsScreen.tx判定画像anime.vcScaleRatio = new Vector3(st状態[j].fX方向拡大率, st状態[j].fY方向拡大率, 1f);
-                                CDTXMania.stagePerfDrumsScreen.tx判定画像anime.fZAxisRotation = st状態[j].fZ軸回転度;
-                                CDTXMania.stagePerfDrumsScreen.tx判定画像anime.nTransparency = 255;
-                                CDTXMania.stagePerfDrumsScreen.tx判定画像anime.tDraw2D(CDTXMania.app.Device, x + 5, y, new  SharpDX.RectangleF(nRectX * 2 + 3, nRectY * 2 + 4, nRectX, nRectY));
+                                // CDTXMania.stagePerfDrumsScreen.tx判定画像anime.vcScaleRatio = new Vector3(st状態[j].fX方向拡大率, st状態[j].fY方向拡大率, 1f);
+                                // CDTXMania.stagePerfDrumsScreen.tx判定画像anime.fZAxisRotation = st状態[j].fZ軸回転度;
+                                // CDTXMania.stagePerfDrumsScreen.tx判定画像anime.nTransparency = 255;
+                                CDTXMania.stagePerfDrumsScreen.tx判定画像anime.tDraw2D(CDTXMania.app.Device, x + 5, y, new  RectangleF(nRectX * 2 + 3, nRectY * 2 + 4, nRectX, nRectY));
                             }
 
 
@@ -1454,7 +1464,7 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                                         minus = true;
                                     }
                                     //x = xc - strDispLag.Length * 15 / 2;
-                                    x = ( ( num5 ) + (stレーンサイズ[j].w / 2) ) - strDispLag.Length * 15 / 2;
+                                    x = ( ( num5 ) + (stLaneSize[j].w / 2) ) - strDispLag.Length * 15 / 2;
                                     for (int i = 0; i < strDispLag.Length; i++)
                                     {
                                         int p = (strDispLag[i] == '-') ? 11 : (int)(strDispLag[i] - '0');	//int.Parse(strDispLag[i]);

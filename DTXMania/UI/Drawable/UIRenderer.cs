@@ -1,5 +1,6 @@
 using System.Drawing;
 using System.Numerics;
+using DTXMania.Core;
 using DTXMania.UI.Text;
 using Hexa.NET.ImGui;
 using SharpDX.Direct3D9;
@@ -11,6 +12,8 @@ public abstract class BaseTexture : IDisposable
     public static BaseTexture None { get; } = new NoneTexture();
     public static BaseTextureFactory Factory { get; set; }
     public static IUiTextRenderer SkiaTextRenderer { get; set; }
+    
+    public bool notFound = false;
 
     public abstract float Width { get; }
     public abstract float Height { get; }
@@ -31,16 +34,38 @@ public abstract class BaseTexture : IDisposable
         return EnsureFactoryConfigured().CreateEmpty(width, height, name);
     }
 
+    //stubs for non recreated Device based render code
+    private Matrix4x4 scaleMatrix
+    {
+        get
+        {
+            float scale = CDTXMania.renderScale;
+            return Matrix4x4.CreateScale(scale);
+        }
+    }
+    
     public void tDraw2D(Device device, float x, float y)
     {
         Matrix4x4 transformMatrix = Matrix4x4.CreateTranslation(x, y, 0);
-        tDraw2DMatrix(transformMatrix);
+        tDraw2DMatrix(transformMatrix * scaleMatrix);
+    }
+    
+    public void tDraw2D(Device device, float x, float y, Color4 color)
+    {
+        Matrix4x4 transformMatrix = Matrix4x4.CreateTranslation(x, y, 0);
+        tDraw2DMatrix(transformMatrix * scaleMatrix, new Vector2(Width, Height), new RectangleF(0, 0, Width, Height), color);
     }
     
     public void tDraw2D(Device device, float x, float y, RectangleF clipRect)
     {
         Matrix4x4 transformMatrix = Matrix4x4.CreateTranslation(x, y, 0);
-        tDraw2DMatrix(transformMatrix);
+        tDraw2DMatrix(transformMatrix * scaleMatrix, new Vector2(clipRect.Width, clipRect.Height), clipRect);
+    }
+    
+    public void tDraw2D(Device device, float x, float y, RectangleF clipRect, Color4 color)
+    {
+        Matrix4x4 transformMatrix = Matrix4x4.CreateTranslation(x, y, 0);
+        tDraw2DMatrix(transformMatrix * scaleMatrix, new Vector2(clipRect.Width, clipRect.Height), clipRect, color);
     }
     
     public void tDraw2DMatrix(Matrix4x4 transformMatrix)
