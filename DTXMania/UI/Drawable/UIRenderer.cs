@@ -7,6 +7,12 @@ using SharpDX.Direct3D9;
 
 namespace DTXMania.UI.Drawable;
 
+public enum BlendMode
+{
+    Alpha,
+    Additive
+}
+
 public abstract class BaseTexture : IDisposable
 {
     public static BaseTexture None { get; } = new NoneTexture();
@@ -18,6 +24,10 @@ public abstract class BaseTexture : IDisposable
     public abstract float Width { get; }
     public abstract float Height { get; }
     public abstract string name { get; }
+    
+    public BlendMode blendMode = BlendMode.Alpha;
+    
+    public bool blackIsTransparency = false;
 
     public static BaseTexture LoadFromPath(string texturePath)
     {
@@ -72,10 +82,20 @@ public abstract class BaseTexture : IDisposable
     {
         tDraw2DMatrix(transformMatrix, new Vector2(Width, Height), new RectangleF(0, 0, Width, Height), Color4.White);
     }
+    
+    public void tDraw2DMatrix(Matrix4x4 transformMatrix, Color4 col)
+    {
+        tDraw2DMatrix(transformMatrix, new Vector2(Width, Height), new RectangleF(0, 0, Width, Height), col);
+    }
 
     public void tDraw2DMatrix(Matrix4x4 transformMatrix, Vector2 size)
     {
         tDraw2DMatrix(transformMatrix, size, new RectangleF(0, 0, Width, Height), Color4.White);
+    }
+    
+    public void tDraw2DMatrix(Matrix4x4 transformMatrix, RectangleF clipRect, Color4 col)
+    {
+        tDraw2DMatrix(transformMatrix, new Vector2(Width, Height), clipRect, col);
     }
     
     public void tDraw2DMatrix(Matrix4x4 transformMatrix, Vector2 size, RectangleF clipRect)

@@ -1,6 +1,7 @@
 using System.Drawing;
 using System.Numerics;
 using DTXMania.Core.Framework;
+using DTXMania.UI.Drawable;
 using Silk.NET.OpenGL;
 
 namespace DTXMania.UI.OpenGL;
@@ -75,12 +76,12 @@ public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
         _contextResourcesCreated = false;
     }
 
-    public void DrawTexture(uint textureId, float textureWidth, float textureHeight, Matrix4x4 transformMatrix, Vector2 size, RectangleF clipRect, Color4 color)
+    public void DrawTexture(uint textureId, float textureWidth, float textureHeight, Matrix4x4 transformMatrix, Vector2 size, RectangleF clipRect, Color4 color, BlendMode blendMode)
     {
-        DrawQuad(textureId, textureWidth, textureHeight, transformMatrix, size, clipRect, color);
+        DrawQuad(textureId, textureWidth, textureHeight, transformMatrix, size, clipRect, color, blendMode);
     }
 
-    public void DrawTextureSliced(uint textureId, float textureWidth, float textureHeight, Matrix4x4 transformMatrix, Vector2 size, RectangleF clipRect, Color4 color, RectangleF sliceRect)
+    public void DrawTextureSliced(uint textureId, float textureWidth, float textureHeight, Matrix4x4 transformMatrix, Vector2 size, RectangleF clipRect, Color4 color, RectangleF sliceRect, BlendMode blendMode)
     {
         float sourceRightBorder = MathF.Max(clipRect.Width - sliceRect.Right, 0f);
         float sourceBottomBorder = MathF.Max(clipRect.Height - sliceRect.Bottom, 0f);
@@ -124,7 +125,7 @@ public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
                 }
 
                 Matrix4x4 segmentTransform = Matrix4x4.CreateTranslation(destX[x], destY[y], 0f) * transformMatrix;
-                DrawQuad(textureId, textureWidth, textureHeight, segmentTransform, regionSize, region, color);
+                DrawQuad(textureId, textureWidth, textureHeight, segmentTransform, regionSize, region, color, blendMode);
             }
         }
     }
@@ -265,8 +266,8 @@ public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
 
         _gl.BindTexture(TextureTarget.Texture2D, 0);
     }
-
-    private void DrawQuad(uint textureId, float textureWidth, float textureHeight, Matrix4x4 transformMatrix, Vector2 size, RectangleF clipRect, Color4 color)
+    
+    private void DrawQuad(uint textureId, float textureWidth, float textureHeight, Matrix4x4 transformMatrix, Vector2 size, RectangleF clipRect, Color4 color, BlendMode blendMode)
     {
         if (_gl == null || !_sharedResourcesCreated || !_contextResourcesCreated)
         {
@@ -286,8 +287,19 @@ public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
             0f, size.Y, 0f, u0, v1
         ];
 
-        _gl.Enable(GLEnum.Blend);
-        _gl.BlendFunc(GLEnum.SrcAlpha, GLEnum.OneMinusSrcAlpha);
+        switch (blendMode)
+        {
+            case BlendMode.Additive:
+                _gl.Enable(GLEnum.Blend);
+                _gl.BlendFunc(GLEnum.SrcAlpha, GLEnum.One);
+                break;
+            case BlendMode.Alpha:
+                _gl.Enable(GLEnum.Blend);
+                _gl.BlendFunc(GLEnum.SrcAlpha, GLEnum.OneMinusSrcAlpha);
+                break;
+        }
+        // _gl.Enable(GLEnum.Blend);
+        // _gl.BlendFunc(GLEnum.SrcAlpha, GLEnum.OneMinusSrcAlpha);
         _gl.Disable(GLEnum.DepthTest);
         _gl.DepthMask(false);
         _gl.Disable(GLEnum.CullFace);

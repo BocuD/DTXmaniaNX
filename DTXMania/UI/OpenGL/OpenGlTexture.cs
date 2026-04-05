@@ -79,12 +79,12 @@ internal sealed class OpenGlTexture : BaseTexture
 
     public override void tDraw2DMatrix(Matrix4x4 transformMatrix, Vector2 size, RectangleF clipRect, Color4 color)
     {
-        _renderer.DrawTexture(_textureId, Width, Height, transformMatrix, size, clipRect, color);
+        _renderer.DrawTexture(_textureId, Width, Height, transformMatrix, size, clipRect, color, blendMode);
     }
 
     public override void tDraw2DMatrixSliced(Matrix4x4 transformMatrix, Vector2 size, RectangleF clipRect, Color4 color, RectangleF sliceRect)
     {
-        _renderer.DrawTextureSliced(_textureId, Width, Height, transformMatrix, size, clipRect, color, sliceRect);
+        _renderer.DrawTextureSliced(_textureId, Width, Height, transformMatrix, size, clipRect, color, sliceRect, blendMode);
     }
 
     public override void Dispose()
