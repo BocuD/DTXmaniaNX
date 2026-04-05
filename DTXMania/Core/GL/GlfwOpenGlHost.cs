@@ -421,7 +421,7 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
     {
         _game.Init();
         
-        while (GLFW.WindowShouldClose(_window) == 0)
+        while (GLFW.WindowShouldClose(_window) == 0 && !_game.isExiting)
         {
             GLFW.PollEvents();
 
