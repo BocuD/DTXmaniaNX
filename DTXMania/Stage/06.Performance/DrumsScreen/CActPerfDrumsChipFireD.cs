@@ -1,9 +1,10 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Drawing;
+using System.Numerics;
+using System.Runtime.InteropServices;
 using DTXMania.Core;
-using SharpDX;
+using DTXMania.UI;
+using DTXMania.UI.Drawable;
 using FDK;
-
-using Rectangle = System.Drawing.Rectangle;
 
 namespace DTXMania;
 
@@ -269,7 +270,7 @@ internal class CActPerfDrumsChipFireD : CActivity
 				}
 			}
 		}
-		if( b大波 && ( tx大波 != null ) )
+		if( b大波 && ( txBigWave != null ) )
 		{
 			for( int i = 0; i < 4; i++ )
 			{
@@ -293,7 +294,7 @@ internal class CActPerfDrumsChipFireD : CActivity
 				}
 			}
 		}
-		if( b細波 && ( tx細波 != null ) )
+		if( b細波 && ( txWave2 != null ) )
 		{
 			for( int i = 0; i < 1; i++ )
 			{
@@ -324,32 +325,42 @@ internal class CActPerfDrumsChipFireD : CActivity
 	{
 		for( int i = 0; i < FIRE_MAX; i++ )
 		{
-			st火花[ i ] = new ST火花();
-			st火花[ i ].b使用中 = false;
-			st火花[ i ].ct進行 = new CCounter();
+			st火花[ i ] = new ST火花
+			{
+				b使用中 = false,
+				ct進行 = new CCounter()
+			};
 		}
 		for( int i = 0; i < STAR_MAX; i++ )
 		{
-			st青い星[ i ] = new ST青い星();
-			st青い星[ i ].b使用中 = false;
-			st青い星[ i ].ct進行 = new CCounter();
+			st青い星[ i ] = new ST青い星
+			{
+				b使用中 = false,
+				ct進行 = new CCounter()
+			};
 		}
 		for (int i = 0; i < 8; i++)
 		{
-			st飛び散るチップ[i] = new ST飛び散るチップ();
-			st飛び散るチップ[i].b使用中 = false;
-			st飛び散るチップ[i].ct進行 = new CCounter();
+			st飛び散るチップ[i] = new ST飛び散るチップ
+			{
+				b使用中 = false,
+				ct進行 = new CCounter()
+			};
 		}
 		for( int i = 0; i < BIGWAVE_MAX; i++ )
 		{
-			st大波[ i ] = new ST大波();
-			st大波[ i ].b使用中 = false;
-			st大波[ i ].ct進行 = new CCounter();
-			st細波[ i ] = new ST細波();
-			st細波[ i ].b使用中 = false;
-			st細波[ i ].ct進行 = new CCounter();
+			st大波[ i ] = new ST大波
+			{
+				b使用中 = false,
+				ct進行 = new CCounter()
+			};
+			st細波[ i ] = new ST細波
+			{
+				b使用中 = false,
+				ct進行 = new CCounter()
+			};
 		}
-		int iPosY = 0x177;
+
 		base.OnActivate();
 	}
 	public override void OnDeactivate()
@@ -371,6 +382,7 @@ internal class CActPerfDrumsChipFireD : CActivity
 			st大波[ i ].ct進行 = null;
 			st細波[ i ].ct進行 = null;
 		}
+		
 		base.OnDeactivate();
 	}
 	public override void OnManagedCreateResources()
@@ -379,154 +391,137 @@ internal class CActPerfDrumsChipFireD : CActivity
 		{
 			if (CDTXMania.ConfigIni.nExplosionFrames >= 2)
 			{
-				tx火花2 = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\ScreenPlayDrums chip fire.png"));
-				if (tx火花2 != null)
+				txFire2 = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\ScreenPlayDrums chip fire.png"));
+				if (txFire2 != null)
 				{
-					tx火花2.bAdditiveBlending = true;
+					txFire2.blendMode = BlendMode.Additive;
 				}
 			}
-			tx火花[0] = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\ScreenPlayDrums chip fire_LC.png"));
+			tx火花[0] = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\ScreenPlayDrums chip fire_LC.png"));
 			if (tx火花[0] != null)
 			{
-				tx火花[0].bAdditiveBlending = true;
+				tx火花[0].blendMode = BlendMode.Additive;
 			}
-			tx火花[1] = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums chip fire_HH.png" ) );
+			tx火花[1] = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums chip fire_HH.png" ) );
 			if( tx火花[1] != null )
 			{
-				tx火花[1].bAdditiveBlending = true;
+				tx火花[1].blendMode = BlendMode.Additive;
 			}
-			tx火花[2] = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\ScreenPlayDrums chip fire_SD.png"));
+			tx火花[2] = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\ScreenPlayDrums chip fire_SD.png"));
 			if (tx火花[2] != null)
 			{
-				tx火花[2].bAdditiveBlending = true;
+				tx火花[2].blendMode = BlendMode.Additive;
 			}
-			tx火花[3] = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\ScreenPlayDrums chip fire_BD.png"));
+			tx火花[3] = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\ScreenPlayDrums chip fire_BD.png"));
 			if (tx火花[3] != null)
 			{
-				tx火花[3].bAdditiveBlending = true;
+				tx火花[3].blendMode = BlendMode.Additive;
 			}
-			tx火花[4] = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\ScreenPlayDrums chip fire_HT.png"));
+			tx火花[4] = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\ScreenPlayDrums chip fire_HT.png"));
 			if (tx火花[4] != null)
 			{
-				tx火花[4].bAdditiveBlending = true;
+				tx火花[4].blendMode = BlendMode.Additive;
 			}
-			tx火花[5] = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\ScreenPlayDrums chip fire_LT.png"));
+			tx火花[5] = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\ScreenPlayDrums chip fire_LT.png"));
 			if (tx火花[5] != null)
 			{
-				tx火花[5].bAdditiveBlending = true;
+				tx火花[5].blendMode = BlendMode.Additive;
 			}
-			tx火花[6] = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\ScreenPlayDrums chip fire_FT.png"));
+			tx火花[6] = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\ScreenPlayDrums chip fire_FT.png"));
 			if (tx火花[6] != null)
 			{
-				tx火花[6].bAdditiveBlending = true;
+				tx火花[6].blendMode = BlendMode.Additive;
 			}
-			tx火花[7] = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\ScreenPlayDrums chip fire_CY.png"));
+			tx火花[7] = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\ScreenPlayDrums chip fire_CY.png"));
 			if (tx火花[7] != null)
 			{
-				tx火花[7].bAdditiveBlending = true;
+				tx火花[7].blendMode = BlendMode.Additive;
 			}
-			tx火花[8] = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\ScreenPlayDrums chip fire_LP.png"));
+			tx火花[8] = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\ScreenPlayDrums chip fire_LP.png"));
 			if (tx火花[8] != null)
 			{
-				tx火花[8].bAdditiveBlending = true;
+				tx火花[8].blendMode = BlendMode.Additive;
 			}
-			tx火花[9] = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\ScreenPlayDrums chip fire_RD.png"));
+			tx火花[9] = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\ScreenPlayDrums chip fire_RD.png"));
 			if (tx火花[9] != null)
 			{
-				tx火花[9].bAdditiveBlending = true;
+				tx火花[9].blendMode = BlendMode.Additive;
 			}
-			tx青い星[0] = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums chip star_LC.png" ) );
+			tx青い星[0] = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums chip star_LC.png" ) );
 			if( tx青い星[0] != null )
 			{
-				tx青い星[0].bAdditiveBlending = true;
+				tx青い星[0].blendMode = BlendMode.Additive;
 			}
-			tx青い星[1] = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums chip star_HH.png" ) );
+			tx青い星[1] = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums chip star_HH.png" ) );
 			if( tx青い星[1] != null )
 			{
-				tx青い星[1].bAdditiveBlending = true;
+				tx青い星[1].blendMode = BlendMode.Additive;
 			}
-			tx青い星[2] = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums chip star_SD.png" ) );
+			tx青い星[2] = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums chip star_SD.png" ) );
 			if( tx青い星[2] != null )
 			{
-				tx青い星[2].bAdditiveBlending = true;
+				tx青い星[2].blendMode = BlendMode.Additive;
 			}
-			tx青い星[3] = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums chip star_BD.png" ) );
+			tx青い星[3] = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums chip star_BD.png" ) );
 			if( tx青い星[3] != null )
 			{
-				tx青い星[3].bAdditiveBlending = true;
+				tx青い星[3].blendMode = BlendMode.Additive;
 			}
-			tx青い星[4] = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums chip star_HT.png" ) );
+			tx青い星[4] = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums chip star_HT.png" ) );
 			if( tx青い星[4] != null )
 			{
-				tx青い星[4].bAdditiveBlending = true;
+				tx青い星[4].blendMode = BlendMode.Additive;
 			}
-			tx青い星[5] = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums chip star_LT.png" ) );
+			tx青い星[5] = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums chip star_LT.png" ) );
 			if( tx青い星[5] != null )
 			{
-				tx青い星[5].bAdditiveBlending = true;
+				tx青い星[5].blendMode = BlendMode.Additive;
 			}
-			tx青い星[6] = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums chip star_FT.png" ) );
+			tx青い星[6] = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums chip star_FT.png" ) );
 			if( tx青い星[6] != null )
 			{
-				tx青い星[6].bAdditiveBlending = true;
+				tx青い星[6].blendMode = BlendMode.Additive;
 			}
-			tx青い星[7] = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums chip star_CY.png" ) );
+			tx青い星[7] = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums chip star_CY.png" ) );
 			if( tx青い星[7] != null )
 			{
-				tx青い星[7].bAdditiveBlending = true;
+				tx青い星[7].blendMode = BlendMode.Additive;
 			}
-			tx青い星[8] = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums chip star_LP.png" ) );
+			tx青い星[8] = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums chip star_LP.png" ) );
 			if( tx青い星[8] != null )
 			{
-				tx青い星[8].bAdditiveBlending = true;
+				tx青い星[8].blendMode = BlendMode.Additive;
 			}
-			tx青い星[9] = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums chip star_RD.png" ) );
+			tx青い星[9] = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums chip star_RD.png" ) );
 			if( tx青い星[9] != null )
 			{
-				tx青い星[9].bAdditiveBlending = true;
+				tx青い星[9].blendMode = BlendMode.Additive;
 			}
-			tx大波 = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums chip wave.png" ) );
-			if( tx大波 != null )
+			txBigWave = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums chip wave.png" ) );
+			if( txBigWave != null )
 			{
-				tx大波.bAdditiveBlending = true;
+				txBigWave.blendMode = BlendMode.Additive;
 			}
-			tx細波 = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums chip wave2.png" ) );
-			if( tx細波 != null )
+			txWave2 = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums chip wave2.png" ) );
+			if( txWave2 != null )
 			{
-				tx細波.bAdditiveBlending = true;
+				txWave2.blendMode = BlendMode.Additive;
 			}
-			txボーナス花火 = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\ScreenPlayDrums chip fire_Bonus.png"));
-			if (txボーナス花火 != null)
+			txBonusFire = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\ScreenPlayDrums chip fire_Bonus.png"));
+			if (txBonusFire != null)
 			{
-				txボーナス花火.bAdditiveBlending = true;
+				txBonusFire.blendMode = BlendMode.Additive;
 			}
-			txNotes = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_Chips_drums.png"));
+			txNotes = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_Chips_drums.png"));
 			if (txNotes != null)
 			{
-				txNotes.nTransparency = 120;
-				txNotes.bAdditiveBlending = true;
+				// txNotes.nTransparency = 120;
+				txNotes.blendMode = BlendMode.Additive;
 			}
 			base.OnManagedCreateResources();
 		}
 	}
-	public override void OnManagedReleaseResources()
-	{
-		if( bActivated )
-		{
-			for (int tx1 = 0; tx1 < 10; tx1++)
-			{
-				CDTXMania.tReleaseTexture(ref tx火花[tx1]);
-				CDTXMania.tReleaseTexture(ref tx青い星[tx1]);
-			}
-			CDTXMania.tReleaseTexture( ref tx大波 );
-			CDTXMania.tReleaseTexture( ref tx細波 );
-			CDTXMania.tReleaseTexture( ref txNotes);
-			CDTXMania.tReleaseTexture( ref txボーナス花火 );
-			if (tx火花2 != null)
-				CDTXMania.tReleaseTexture( ref tx火花2 );
-			base.OnManagedReleaseResources();
-		}
-	}
+
 	public override int OnUpdateAndDraw()
 	{
 		if( bActivated )
@@ -550,15 +545,16 @@ internal class CActPerfDrumsChipFireD : CActivity
 						st青い星[i].f加速度Y *= st青い星[i].f加速度の加速度Y;
 						st青い星[i].f加速度Y -= st青い星[i].f重力加速度;
 					}
-					Matrix mat = Matrix.Identity;
+					Matrix4x4 mat = Matrix4x4.Identity;
 
 					float x = (float)(st青い星[i].f半径 * Math.Cos((Math.PI / 2 * st青い星[i].ct進行.nCurrentValue) / 100.0));
-					mat *= Matrix.Scaling(x, x, 1f);
-					mat *= Matrix.Translation(st青い星[i].fX - SampleFramework.GameFramebufferSize.Width / 2, -(st青い星[i].fY - SampleFramework.GameFramebufferSize.Height / 2), 0f);
+					mat *= Matrix4x4.CreateScale(x, x, 1f);
+					mat *= Matrix4x4.CreateTranslation(st青い星[i].fX - SampleFramework.GameWindowSize.Width / 2f, -(st青い星[i].fY - SampleFramework.GameWindowSize.Height / 2f), 0f);
 
 					if (tx青い星[ st青い星[i].nLane ] != null)
 					{
-						tx青い星[ st青い星[i].nLane ].tDraw3D(CDTXMania.app.Device, mat);
+						//tx青い星[ st青い星[i].nLane ].tDraw3D(CDTXMania.app.Device, mat);
+						tx青い星[ st青い星[i].nLane ].tDraw3D(mat);
 
 					}
 				}
@@ -628,20 +624,25 @@ internal class CActPerfDrumsChipFireD : CActivity
 
 
 
-						Matrix mat = Matrix.Identity;
-						Matrix mat2 = Matrix.Identity;
+						Matrix4x4 mat = Matrix4x4.Identity;
+						Matrix4x4 mat2 = Matrix4x4.Identity;
 
-						mat *= Matrix.RotationZ(0.09f * st飛び散るチップ[i].ct進行.nCurrentValue);
-						mat2 *= Matrix.RotationZ(-0.09f * st飛び散るチップ[i].ct進行.nCurrentValue);
+						mat *= Matrix4x4.CreateRotationZ(0.09f * st飛び散るチップ[i].ct進行.nCurrentValue);
+						mat2 *= Matrix4x4.CreateRotationZ(-0.09f * st飛び散るチップ[i].ct進行.nCurrentValue);
 
-						mat *= Matrix.Translation((st飛び散るチップ[i].fXL - 50f) - SampleFramework.GameFramebufferSize.Width / 2, -(st飛び散るチップ[i].fY + nJudgeLinePosY_delta_Drums - SampleFramework.GameFramebufferSize.Height / 2), 0f);
-						mat2 *= Matrix.Translation((st飛び散るチップ[i].fXR - 50f) - SampleFramework.GameFramebufferSize.Width / 2, -(st飛び散るチップ[i].fY + nJudgeLinePosY_delta_Drums - SampleFramework.GameFramebufferSize.Height / 2), 0f);
-						//mat *= Matrix.Translation(this.st飛び散るチップ[i].fX - SampleFramework.GameFramebufferSize.Width / 2, -(this.st青い星[i].fY - SampleFramework.GameFramebufferSize.Height / 2), 0f);
+						mat *= Matrix4x4.CreateTranslation((st飛び散るチップ[i].fXL - 50f) - SampleFramework.GameWindowSize.Width / 2f, -(st飛び散るチップ[i].fY + nJudgeLinePosY_delta_Drums - SampleFramework.GameWindowSize.Height / 2f), 0f);
+						mat2 *= Matrix4x4.CreateTranslation((st飛び散るチップ[i].fXR - 50f) - SampleFramework.GameWindowSize.Width / 2f, -(st飛び散るチップ[i].fY + nJudgeLinePosY_delta_Drums - SampleFramework.GameWindowSize.Height / 2f), 0f);
+						//mat *= Matrix4x4.CreateTranslation(this.st飛び散るチップ[i].fX - SampleFramework.GameWindowSize.Width / 2f, -(this.st青い星[i].fY - SampleFramework.GameWindowSize.Height / 2f), 0f);
 
 						if (txNotes != null)
 						{
-							txNotes.tDraw3D(CDTXMania.app.Device, mat, new RectangleF((nノーツの左上X座標[st飛び散るチップ[i].nLane]), 640, (nノーツの幅[st飛び散るチップ[i].nLane] + 10) / 2, 64));
-							txNotes.tDraw3D(CDTXMania.app.Device, mat2, new RectangleF((nノーツの左上X座標[st飛び散るチップ[i].nLane]), 640, (nノーツの幅[st飛び散るチップ[i].nLane] + 10) / 2, 64));
+							//txNotes.tDraw3D(CDTXMania.app.Device, mat, new RectangleF((nノーツの左上X座標[st飛び散るチップ[i].nLane]), 640, (nノーツの幅[st飛び散るチップ[i].nLane] + 10) / 2, 64));
+							//txNotes.tDraw3D(CDTXMania.app.Device, mat2, new RectangleF((nノーツの左上X座標[st飛び散るチップ[i].nLane]), 640, (nノーツの幅[st飛び散るチップ[i].nLane] + 10) / 2, 64));
+
+							Color4 col = Color4.White;
+							col.Alpha = 120 / 255.0f;
+							txNotes.tDraw3D(mat, new RectangleF((nノーツの左上X座標[st飛び散るチップ[i].nLane]), 640, (nノーツの幅[st飛び散るチップ[i].nLane] + 10) / 2, 64), col);
+							txNotes.tDraw3D(mat2, new RectangleF((nノーツの左上X座標[st飛び散るチップ[i].nLane]), 640, (nノーツの幅[st飛び散るチップ[i].nLane] + 10) / 2, 64), col);
 						}
 					}
 
@@ -660,120 +661,129 @@ internal class CActPerfDrumsChipFireD : CActivity
 					}
 					if (CDTXMania.ConfigIni.nExplosionFrames <= 1)
 					{
-						Matrix identity = Matrix.Identity;
+						Matrix4x4 identity = Matrix4x4.Identity;
 						float num2 = ((float)st火花[i].ct進行.nCurrentValue) / 70f;
 						float num3 = st火花[i].f回転単位 + (st火花[i].f回転方向 * CConversion.DegreeToRadian((float)(60f * num2)));
 						float num4 = ((float)(0.2 + (0.8 * Math.Cos((((double)st火花[i].ct進行.nCurrentValue) / 50.0) * 1.5707963267948966)))) * st火花[i].fサイズ;
-						identity *= Matrix.Scaling(0.2f + num4, 0.2f + num4, 1f);
-						//identity *= Matrix.RotationZ( num3 + ( (float) Math.PI / 2 ) );
+						identity *= Matrix4x4.CreateScale(0.2f + num4, 0.2f + num4, 1f);
+						//identity *= Matrix4x4.RotationZ( num3 + ( (float) Math.PI / 2 ) );
 						float num5 = ((float)(0.8 * Math.Sin(num2 * 1.5707963267948966))) * st火花[i].fサイズ;
 
 						if (CDTXMania.ConfigIni.eLaneType.Drums == EType.A)
 						{
 							if (CDTXMania.ConfigIni.eRDPosition == ERDPosition.RDRC)
 							{
-								identity *= Matrix.Translation((nレーンの中央X座標_改[st火花[i].nLane] + (((float)Math.Cos((double)num3)) * num5)) - 320f, -((((float)iPosY + nJudgeLinePosY_delta_Drums) + (((float)Math.Sin((double)num3)) * num5)) - 170f), 0f);
+								identity *= Matrix4x4.CreateTranslation((nレーンの中央X座標_改[st火花[i].nLane] + (((float)Math.Cos((double)num3)) * num5)) - 320f, -((((float)iPosY + nJudgeLinePosY_delta_Drums) + (((float)Math.Sin((double)num3)) * num5)) - 170f), 0f);
 							}
 							else
 							{
-								identity *= Matrix.Translation((nレーンの中央X座標[st火花[i].nLane] + (((float)Math.Cos((double)num3)) * num5)) - 320f, -((((float)iPosY + nJudgeLinePosY_delta_Drums) + (((float)Math.Sin((double)num3)) * num5)) - 170f), 0f);
+								identity *= Matrix4x4.CreateTranslation((nレーンの中央X座標[st火花[i].nLane] + (((float)Math.Cos((double)num3)) * num5)) - 320f, -((((float)iPosY + nJudgeLinePosY_delta_Drums) + (((float)Math.Sin((double)num3)) * num5)) - 170f), 0f);
 							}
 						}
 						else if (CDTXMania.ConfigIni.eLaneType.Drums == EType.B)
 						{
 							if (CDTXMania.ConfigIni.eRDPosition == ERDPosition.RDRC)
 							{
-								identity *= Matrix.Translation((nレーンの中央X座標B_改[st火花[i].nLane] + (((float)Math.Cos((double)num3)) * num5)) - 320f, -((((float)iPosY + nJudgeLinePosY_delta_Drums) + (((float)Math.Sin((double)num3)) * num5)) - 170f), 0f);
+								identity *= Matrix4x4.CreateTranslation((nレーンの中央X座標B_改[st火花[i].nLane] + (((float)Math.Cos((double)num3)) * num5)) - 320f, -((((float)iPosY + nJudgeLinePosY_delta_Drums) + (((float)Math.Sin((double)num3)) * num5)) - 170f), 0f);
 							}
 							else
 							{
-								identity *= Matrix.Translation((nレーンの中央X座標B[st火花[i].nLane] + (((float)Math.Cos((double)num3)) * num5)) - 320f, -((((float)iPosY + nJudgeLinePosY_delta_Drums) + (((float)Math.Sin((double)num3)) * num5)) - 170f), 0f);
+								identity *= Matrix4x4.CreateTranslation((nレーンの中央X座標B[st火花[i].nLane] + (((float)Math.Cos((double)num3)) * num5)) - 320f, -((((float)iPosY + nJudgeLinePosY_delta_Drums) + (((float)Math.Sin((double)num3)) * num5)) - 170f), 0f);
 							}
 						}
 						else if (CDTXMania.ConfigIni.eLaneType.Drums == EType.C)
 						{
 							if (CDTXMania.ConfigIni.eRDPosition == ERDPosition.RDRC)
 							{
-								identity *= Matrix.Translation((nレーンの中央X座標C_改[st火花[i].nLane] + (((float)Math.Cos((double)num3)) * num5)) - 320f, -((((float)iPosY + nJudgeLinePosY_delta_Drums) + (((float)Math.Sin((double)num3)) * num5)) - 170f), 0f);
+								identity *= Matrix4x4.CreateTranslation((nレーンの中央X座標C_改[st火花[i].nLane] + (((float)Math.Cos((double)num3)) * num5)) - 320f, -((((float)iPosY + nJudgeLinePosY_delta_Drums) + (((float)Math.Sin((double)num3)) * num5)) - 170f), 0f);
 							}
 							else
 							{
-								identity *= Matrix.Translation((nレーンの中央X座標C[st火花[i].nLane] + (((float)Math.Cos((double)num3)) * num5)) - 320f, -((((float)iPosY + nJudgeLinePosY_delta_Drums) + (((float)Math.Sin((double)num3)) * num5)) - 170f), 0f);
+								identity *= Matrix4x4.CreateTranslation((nレーンの中央X座標C[st火花[i].nLane] + (((float)Math.Cos((double)num3)) * num5)) - 320f, -((((float)iPosY + nJudgeLinePosY_delta_Drums) + (((float)Math.Sin((double)num3)) * num5)) - 170f), 0f);
 							}
 						}
 						else if (CDTXMania.ConfigIni.eLaneType.Drums == EType.D)
 						{
 							if (CDTXMania.ConfigIni.eRDPosition == ERDPosition.RDRC)
 							{
-								identity *= Matrix.Translation((nレーンの中央X座標D_改[st火花[i].nLane] + (((float)Math.Cos((double)num3)) * num5)) - 320f, -((((float)iPosY + nJudgeLinePosY_delta_Drums) + (((float)Math.Sin((double)num3)) * num5)) - 170f), 0f);
+								identity *= Matrix4x4.CreateTranslation((nレーンの中央X座標D_改[st火花[i].nLane] + (((float)Math.Cos((double)num3)) * num5)) - 320f, -((((float)iPosY + nJudgeLinePosY_delta_Drums) + (((float)Math.Sin((double)num3)) * num5)) - 170f), 0f);
 							}
 							else
 							{
-								identity *= Matrix.Translation((nレーンの中央X座標D[st火花[i].nLane] + (((float)Math.Cos((double)num3)) * num5)) - 320f, -((((float)iPosY + nJudgeLinePosY_delta_Drums) + (((float)Math.Sin((double)num3)) * num5)) - 170f), 0f);
+								identity *= Matrix4x4.CreateTranslation((nレーンの中央X座標D[st火花[i].nLane] + (((float)Math.Cos((double)num3)) * num5)) - 320f, -((((float)iPosY + nJudgeLinePosY_delta_Drums) + (((float)Math.Sin((double)num3)) * num5)) - 170f), 0f);
 							}
 						}
+
 						if (tx火花[st火花[i].nLane] != null)
 						{
-							tx火花[st火花[i].nLane].tDraw3D(CDTXMania.app.Device, identity);
-							if (CDTXMania.stagePerfDrumsScreen.bChorusSection == true && txボーナス花火 != null)
-								txボーナス花火.tDraw3D(CDTXMania.app.Device, identity);
+							//tx火花[st火花[i].nLane].tDraw3D(CDTXMania.app.Device, identity);
+							tx火花[st火花[i].nLane].tDraw3D(identity);
+							if (CDTXMania.stagePerfDrumsScreen.bChorusSection && txBonusFire != null)
+							{
+								//txBonusFire.tDraw3D(CDTXMania.app.Device, identity);
+								txBonusFire.tDraw3D(identity);
+							}
 						}
 					}
 					else
 					{
-						Matrix identity = Matrix.Identity;
+						Matrix4x4 identity = Matrix4x4.Identity;
 						if (CDTXMania.ConfigIni.eLaneType.Drums == EType.A)
 						{
 							if (CDTXMania.ConfigIni.eRDPosition == ERDPosition.RDRC)
 							{
-								identity *= Matrix.Translation(nレーンの中央X座標_改[st火花[i].nLane] - 320f, -(((float)iPosY + nJudgeLinePosY_delta_Drums) - 170f), 0f);
+								identity *= Matrix4x4.CreateTranslation(nレーンの中央X座標_改[st火花[i].nLane] - 320f, -(((float)iPosY + nJudgeLinePosY_delta_Drums) - 170f), 0f);
 							}
 							else
 							{
-								identity *= Matrix.Translation(nレーンの中央X座標[st火花[i].nLane] - 320f, -(((float)iPosY + nJudgeLinePosY_delta_Drums) - 170f), 0f);
+								identity *= Matrix4x4.CreateTranslation(nレーンの中央X座標[st火花[i].nLane] - 320f, -(((float)iPosY + nJudgeLinePosY_delta_Drums) - 170f), 0f);
 							}
 						}
 						else if (CDTXMania.ConfigIni.eLaneType.Drums == EType.B)
 						{
 							if (CDTXMania.ConfigIni.eRDPosition == ERDPosition.RDRC)
 							{
-								identity *= Matrix.Translation(nレーンの中央X座標B_改[st火花[i].nLane] - 320f, -(((float)iPosY + nJudgeLinePosY_delta_Drums) - 170f), 0f);
+								identity *= Matrix4x4.CreateTranslation(nレーンの中央X座標B_改[st火花[i].nLane] - 320f, -(((float)iPosY + nJudgeLinePosY_delta_Drums) - 170f), 0f);
 							}
 							else
 							{
-								identity *= Matrix.Translation((nレーンの中央X座標B[st火花[i].nLane]) - 320f, -(((float)iPosY + nJudgeLinePosY_delta_Drums) - 170f), 0f);
+								identity *= Matrix4x4.CreateTranslation((nレーンの中央X座標B[st火花[i].nLane]) - 320f, -(((float)iPosY + nJudgeLinePosY_delta_Drums) - 170f), 0f);
 							}
 						}
 						else if (CDTXMania.ConfigIni.eLaneType.Drums == EType.C)
 						{
 							if (CDTXMania.ConfigIni.eRDPosition == ERDPosition.RDRC)
 							{
-								identity *= Matrix.Translation(nレーンの中央X座標C_改[st火花[i].nLane] - 320f, -(((float)iPosY + nJudgeLinePosY_delta_Drums) - 170f), 0f);
+								identity *= Matrix4x4.CreateTranslation(nレーンの中央X座標C_改[st火花[i].nLane] - 320f, -(((float)iPosY + nJudgeLinePosY_delta_Drums) - 170f), 0f);
 							}
 							else
 							{
-								identity *= Matrix.Translation(nレーンの中央X座標C[st火花[i].nLane] - 320f, -(((float)iPosY + nJudgeLinePosY_delta_Drums) - 170f), 0f);
+								identity *= Matrix4x4.CreateTranslation(nレーンの中央X座標C[st火花[i].nLane] - 320f, -(((float)iPosY + nJudgeLinePosY_delta_Drums) - 170f), 0f);
 							}
 						}
 						else if (CDTXMania.ConfigIni.eLaneType.Drums == EType.D)
 						{
 							if (CDTXMania.ConfigIni.eRDPosition == ERDPosition.RDRC)
 							{
-								identity *= Matrix.Translation(nレーンの中央X座標D_改[st火花[i].nLane] - 320f, -(((float)iPosY + nJudgeLinePosY_delta_Drums) - 170f), 0f);
+								identity *= Matrix4x4.CreateTranslation(nレーンの中央X座標D_改[st火花[i].nLane] - 320f, -(((float)iPosY + nJudgeLinePosY_delta_Drums) - 170f), 0f);
 							}
 							else
 							{
-								identity *= Matrix.Translation(nレーンの中央X座標D[st火花[i].nLane] - 320f, -(((float)iPosY + nJudgeLinePosY_delta_Drums) - 170f), 0f);
+								identity *= Matrix4x4.CreateTranslation(nレーンの中央X座標D[st火花[i].nLane] - 320f, -(((float)iPosY + nJudgeLinePosY_delta_Drums) - 170f), 0f);
 							}
 						}
-						if (tx火花2 != null)
+						if (txFire2 != null)
 						{
 							int n幅 = CDTXMania.ConfigIni.nExplosionWidgh;
 							int n高さ = CDTXMania.ConfigIni.nExplosionHeight;
 
-							tx火花2.tDraw3D(CDTXMania.app.Device, identity, new RectangleF( n幅 * st火花[i].ct進行.nCurrentValue, st火花[i].nLane * n高さ, n幅, n高さ));
-							if (CDTXMania.stagePerfDrumsScreen.bChorusSection == true && txボーナス花火 != null)
-								tx火花2.tDraw3D(CDTXMania.app.Device, identity, new RectangleF(st火花[i].ct進行.nCurrentValue * n幅, 10 * n高さ, n幅, n高さ));
+							// txFire2.tDraw3D(CDTXMania.app.Device, identity, new RectangleF( n幅 * st火花[i].ct進行.nCurrentValue, st火花[i].nLane * n高さ, n幅, n高さ));
+							txFire2.tDraw3D(identity, new RectangleF( n幅 * st火花[i].ct進行.nCurrentValue, st火花[i].nLane * n高さ, n幅, n高さ), Color4.White);
+							if (CDTXMania.stagePerfDrumsScreen.bChorusSection && txBonusFire != null)
+							{
+								// txFire2.tDraw3D(CDTXMania.app.Device, identity, new RectangleF(st火花[i].ct進行.nCurrentValue * n幅, 10 * n高さ, n幅, n高さ));
+								txFire2.tDraw3D(identity, new RectangleF(st火花[i].ct進行.nCurrentValue * n幅, 10 * n高さ, n幅, n高さ), Color4.White);
+							}
 						}
 					}
 				}
@@ -790,7 +800,7 @@ internal class CActPerfDrumsChipFireD : CActivity
 					}
 					if( st大波[ i ].ct進行.nCurrentValue >= 0 )
 					{
-						Matrix matrix3 = Matrix.Identity;
+						Matrix4x4 matrix3 = Matrix4x4.Identity;
 						float num10 = ( (float) st大波[ i ].ct進行.nCurrentValue ) / 100f;
 						float angle = st大波[ i ].f回転単位 + ( st大波[ i ].f回転方向 * CConversion.DegreeToRadian( (float) ( 60f * num10 ) ) );
 						float num12 = 1f;
@@ -815,58 +825,61 @@ internal class CActPerfDrumsChipFireD : CActivity
 						{
 							num13 = (int) ( ( 55f * ( 1f - num10 ) ) / 0.25f );
 						}
-						matrix3 *= Matrix.Scaling( num12 * st大波[ i ].f半径, num12 * st大波[ i ].f半径, 1f );
-						matrix3 *= Matrix.RotationZ( angle );
-						matrix3 *= Matrix.RotationX( st大波[ i ].f角度X );
-						matrix3 *= Matrix.RotationY( st大波[ i ].f角度Y );
+						matrix3 *= Matrix4x4.CreateScale( num12 * st大波[ i ].f半径, num12 * st大波[ i ].f半径, 1f );
+						matrix3 *= Matrix4x4.CreateRotationZ( angle );
+						matrix3 *= Matrix4x4.CreateRotationX( st大波[ i ].f角度X );
+						matrix3 *= Matrix4x4.CreateRotationY( st大波[ i ].f角度Y );
 						if (CDTXMania.ConfigIni.eLaneType.Drums == EType.A)
 						{
 							if (CDTXMania.ConfigIni.eRDPosition == ERDPosition.RDRC)
 							{
-								matrix3 *= Matrix.Translation(nレーンの中央X座標_改[st大波[i].nLane] + 280 - SampleFramework.GameFramebufferSize.Width / 2, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameFramebufferSize.Height / 2), 0f);
+								matrix3 *= Matrix4x4.CreateTranslation(nレーンの中央X座標_改[st大波[i].nLane] + 280 - SampleFramework.GameWindowSize.Width / 2f, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameWindowSize.Height / 2f), 0f);
 							}
 							else
 							{
-								matrix3 *= Matrix.Translation(nレーンの中央X座標[st大波[i].nLane] + 280 - SampleFramework.GameFramebufferSize.Width / 2, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameFramebufferSize.Height / 2), 0f);
+								matrix3 *= Matrix4x4.CreateTranslation(nレーンの中央X座標[st大波[i].nLane] + 280 - SampleFramework.GameWindowSize.Width / 2f, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameWindowSize.Height / 2f), 0f);
 							}
 						}
 						else if (CDTXMania.ConfigIni.eLaneType.Drums == EType.B)
 						{
 							if (CDTXMania.ConfigIni.eRDPosition == ERDPosition.RDRC)
 							{
-								matrix3 *= Matrix.Translation(nレーンの中央X座標B_改[st大波[i].nLane] + 280 - SampleFramework.GameFramebufferSize.Width / 2, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameFramebufferSize.Height / 2), 0f);
+								matrix3 *= Matrix4x4.CreateTranslation(nレーンの中央X座標B_改[st大波[i].nLane] + 280 - SampleFramework.GameWindowSize.Width / 2f, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameWindowSize.Height / 2f), 0f);
 							}
 							else
 							{
-								matrix3 *= Matrix.Translation(nレーンの中央X座標B[st大波[i].nLane] + 280 - SampleFramework.GameFramebufferSize.Width / 2, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameFramebufferSize.Height / 2), 0f);
+								matrix3 *= Matrix4x4.CreateTranslation(nレーンの中央X座標B[st大波[i].nLane] + 280 - SampleFramework.GameWindowSize.Width / 2f, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameWindowSize.Height / 2f), 0f);
 							}
 						}
 						else if (CDTXMania.ConfigIni.eLaneType.Drums == EType.C)
 						{
 							if (CDTXMania.ConfigIni.eRDPosition == ERDPosition.RDRC)
 							{
-								matrix3 *= Matrix.Translation(nレーンの中央X座標C_改[st大波[i].nLane] + 280 - SampleFramework.GameFramebufferSize.Width / 2, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameFramebufferSize.Height / 2), 0f);
+								matrix3 *= Matrix4x4.CreateTranslation(nレーンの中央X座標C_改[st大波[i].nLane] + 280 - SampleFramework.GameWindowSize.Width / 2f, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameWindowSize.Height / 2f), 0f);
 							}
 							else
 							{
-								matrix3 *= Matrix.Translation(nレーンの中央X座標C[st大波[i].nLane] + 280 - SampleFramework.GameFramebufferSize.Width / 2, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameFramebufferSize.Height / 2), 0f);
+								matrix3 *= Matrix4x4.CreateTranslation(nレーンの中央X座標C[st大波[i].nLane] + 280 - SampleFramework.GameWindowSize.Width / 2f, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameWindowSize.Height / 2f), 0f);
 							}
 						}
 						else if (CDTXMania.ConfigIni.eLaneType.Drums == EType.D)
 						{
 							if (CDTXMania.ConfigIni.eRDPosition == ERDPosition.RDRC)
 							{
-								matrix3 *= Matrix.Translation(nレーンの中央X座標D_改[st大波[i].nLane] + 280 - SampleFramework.GameFramebufferSize.Width / 2, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameFramebufferSize.Height / 2), 0f);
+								matrix3 *= Matrix4x4.CreateTranslation(nレーンの中央X座標D_改[st大波[i].nLane] + 280 - SampleFramework.GameWindowSize.Width / 2f, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameWindowSize.Height / 2f), 0f);
 							}
 							else
 							{
-								matrix3 *= Matrix.Translation(nレーンの中央X座標D[st大波[i].nLane] + 280 - SampleFramework.GameFramebufferSize.Width / 2, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameFramebufferSize.Height / 2), 0f);
+								matrix3 *= Matrix4x4.CreateTranslation(nレーンの中央X座標D[st大波[i].nLane] + 280 - SampleFramework.GameWindowSize.Width / 2f, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameWindowSize.Height / 2f), 0f);
 							}
 						}
-						if( tx大波 != null )
+						if( txBigWave != null )
 						{
-							tx大波.nTransparency = num13;
-							tx大波.tDraw3D( CDTXMania.app.Device, matrix3 );
+							// txBigWave.nTransparency = num13;
+							Color4 col = Color4.White;
+							col.Alpha = num13 / 255.0f;
+							// txBigWave.tDraw3D( CDTXMania.app.Device, matrix3 );
+							txBigWave.tDraw3D(matrix3, col);
 						}
 					}
 				}
@@ -883,65 +896,69 @@ internal class CActPerfDrumsChipFireD : CActivity
 					}
 					if( st細波[ i ].ct進行.nCurrentValue >= 0 )
 					{
-						Matrix matrix4 = Matrix.Identity;
+						Matrix4x4 matrix4 = Matrix4x4.Identity;
 						float num15 = ( (float) st細波[ i ].ct進行.nCurrentValue ) / 100f;
 						float num16 = 14f * num15;
 						int num17 = ( num15 < 0.5f ) ? 155 : ( (int) ( ( 155f * ( 1f - num15 ) ) / 1f ) );
-						matrix4 *= Matrix.Scaling(
+						matrix4 *= Matrix4x4.CreateScale(
 							num16 * st細波[ i ].f半径,
 							num16 * st細波[ i ].f半径,
 							1f
 						);
-						matrix4 *= Matrix.RotationX( st細波[ i ].f角度X );
-						matrix4 *= Matrix.RotationY( st細波[ i ].f角度Y );
+						matrix4 *= Matrix4x4.CreateRotationX( st細波[ i ].f角度X );
+						matrix4 *= Matrix4x4.CreateRotationY( st細波[ i ].f角度Y );
 						if (CDTXMania.ConfigIni.eLaneType.Drums == EType.A)
 						{
 							if (CDTXMania.ConfigIni.eRDPosition == ERDPosition.RCRD)
 							{
-								matrix4 *= Matrix.Translation(nレーンの中央X座標[st細波[i].nLane] + 280 - SampleFramework.GameFramebufferSize.Width / 2, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameFramebufferSize.Height / 2), 0f);
+								matrix4 *= Matrix4x4.CreateTranslation(nレーンの中央X座標[st細波[i].nLane] + 280 - SampleFramework.GameWindowSize.Width / 2f, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameWindowSize.Height / 2f), 0f);
 							}
 							else
 							{
-								matrix4 *= Matrix.Translation(nレーンの中央X座標_改[st細波[i].nLane] + 280 - SampleFramework.GameFramebufferSize.Width / 2, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameFramebufferSize.Height / 2), 0f);
+								matrix4 *= Matrix4x4.CreateTranslation(nレーンの中央X座標_改[st細波[i].nLane] + 280 - SampleFramework.GameWindowSize.Width / 2f, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameWindowSize.Height / 2f), 0f);
 							}
 						}
 						else if (CDTXMania.ConfigIni.eLaneType.Drums == EType.B)
 						{
 							if (CDTXMania.ConfigIni.eRDPosition == ERDPosition.RCRD)
 							{
-								matrix4 *= Matrix.Translation(nレーンの中央X座標B[st細波[i].nLane] + 280 - SampleFramework.GameFramebufferSize.Width / 2, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameFramebufferSize.Height / 2), 0f);
+								matrix4 *= Matrix4x4.CreateTranslation(nレーンの中央X座標B[st細波[i].nLane] + 280 - SampleFramework.GameWindowSize.Width / 2f, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameWindowSize.Height / 2f), 0f);
 							}
 							else
 							{
-								matrix4 *= Matrix.Translation(nレーンの中央X座標B_改[st細波[i].nLane] + 280 - SampleFramework.GameFramebufferSize.Width / 2, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameFramebufferSize.Height / 2), 0f);
+								matrix4 *= Matrix4x4.CreateTranslation(nレーンの中央X座標B_改[st細波[i].nLane] + 280 - SampleFramework.GameWindowSize.Width / 2f, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameWindowSize.Height / 2f), 0f);
 							}
 						}
 						else if (CDTXMania.ConfigIni.eLaneType.Drums == EType.C)
 						{
 							if (CDTXMania.ConfigIni.eRDPosition == ERDPosition.RCRD)
 							{
-								matrix4 *= Matrix.Translation(nレーンの中央X座標C_改[st細波[i].nLane] + 280 - SampleFramework.GameFramebufferSize.Width / 2, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameFramebufferSize.Height / 2), 0f);
+								matrix4 *= Matrix4x4.CreateTranslation(nレーンの中央X座標C_改[st細波[i].nLane] + 280 - SampleFramework.GameWindowSize.Width / 2f, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameWindowSize.Height / 2f), 0f);
 							}
 							else
 							{
-								matrix4 *= Matrix.Translation(nレーンの中央X座標C[st細波[i].nLane] + 280 - SampleFramework.GameFramebufferSize.Width / 2, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameFramebufferSize.Height / 2), 0f);
+								matrix4 *= Matrix4x4.CreateTranslation(nレーンの中央X座標C[st細波[i].nLane] + 280 - SampleFramework.GameWindowSize.Width / 2f, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameWindowSize.Height / 2f), 0f);
 							}
 						}
 						else if (CDTXMania.ConfigIni.eLaneType.Drums == EType.D)
 						{
 							if (CDTXMania.ConfigIni.eRDPosition == ERDPosition.RDRC)
 							{
-								matrix4 *= Matrix.Translation(nレーンの中央X座標D_改[st細波[i].nLane] + 280 - SampleFramework.GameFramebufferSize.Width / 2, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameFramebufferSize.Height / 2), 0f);
+								matrix4 *= Matrix4x4.CreateTranslation(nレーンの中央X座標D_改[st細波[i].nLane] + 280 - SampleFramework.GameWindowSize.Width / 2f, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameWindowSize.Height / 2f), 0f);
 							}
 							else
 							{
-								matrix4 *= Matrix.Translation(nレーンの中央X座標D[st細波[i].nLane] + 280 - SampleFramework.GameFramebufferSize.Width / 2, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameFramebufferSize.Height / 2), 0f);
+								matrix4 *= Matrix4x4.CreateTranslation(nレーンの中央X座標D[st細波[i].nLane] + 280 - SampleFramework.GameWindowSize.Width / 2f, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameWindowSize.Height / 2f), 0f);
 							}
 						}
-						if (tx細波 != null)
+
+						if (txWave2 != null)
 						{
-							tx細波.nTransparency = num17;
-							tx細波.tDraw3D( CDTXMania.app.Device, matrix4 );
+							// tx細波.nTransparency = num17;
+							Color4 col = Color4.White;
+							col.Alpha = num17 / 255.0f;
+							// tx細波.tDraw3D( CDTXMania.app.Device, matrix4 );
+							txWave2.tDraw3D(matrix4, col);
 						}
 					}
 				}
@@ -1073,13 +1090,13 @@ internal class CActPerfDrumsChipFireD : CActivity
 	private ST細波[] st細波 = new ST細波[ BIGWAVE_MAX ];
 	private ST青い星[] st青い星 = new ST青い星[ STAR_MAX ];
 	private ST飛び散るチップ[] st飛び散るチップ = new ST飛び散るチップ[ 8 ];
-	private CTexture[] tx火花 = new CTexture[10];
-	private CTexture tx火花2;
-	private CTexture txボーナス花火;
-	private CTexture tx細波;
-	private CTexture[] tx青い星 = new CTexture[10];
-	private CTexture tx大波;
-	private CTexture txNotes;
+	private BaseTexture[] tx火花 = new BaseTexture[10];
+	private BaseTexture txFire2;
+	private BaseTexture txBonusFire;
+	private BaseTexture txWave2;
+	private BaseTexture[] tx青い星 = new BaseTexture[10];
+	private BaseTexture txBigWave;
+	private BaseTexture txNotes;
 	private int nJudgeLinePosY_delta_Drums;
 	//-----------------
 	#endregion
