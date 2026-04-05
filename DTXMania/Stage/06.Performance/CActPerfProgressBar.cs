@@ -10,7 +10,7 @@ internal class CActPerfProgressBar : CActivity
 		
 	public CActPerfProgressBar(bool bIsCalledFromOutsidePerformance = false)
 	{
-		b演奏画面以外からの呼び出し = bIsCalledFromOutsidePerformance;
+		this.bIsCalledFromOutsidePerformance = bIsCalledFromOutsidePerformance;
 		bActivated = false;
 	}
 
@@ -47,7 +47,7 @@ internal class CActPerfProgressBar : CActivity
 				{
 					listProgressSection[(int)ePart].Add(new CProgressSection());
 				}
-				if (!b演奏画面以外からの呼び出し && CDTXMania.ConfigIni.bInstrumentAvailable(ePart) && CDTXMania.DTX.bHasChips[(int)ePart])
+				if (!bIsCalledFromOutsidePerformance && CDTXMania.ConfigIni.bInstrumentAvailable(ePart) && CDTXMania.DTX.bHasChips[(int)ePart])
 				{
 					int x = pBarPosition[(int)ePart].X;//(int)CDTXMania.Instance.ConfigIni.cdInstX[ePart][CDTXMania.Instance.ConfigIni.eActiveInst] + CDTXMania.Instance.ConfigIni.n楽器W_チップ倍率反映済(ePart);
 					int y = 0;
@@ -60,7 +60,7 @@ internal class CActPerfProgressBar : CActivity
 			}
 
 			//Compute duration for each time-slice in L区間
-			if (!b演奏画面以外からの呼び出し)
+			if (!bIsCalledFromOutsidePerformance)
 			{					
 				nLastChipTime = CDTXMania.DTX.listChip[CDTXMania.DTX.listChip.Count - 1].nPlaybackTimeMs;
 				foreach (CChip item in CDTXMania.DTX.listChip)
@@ -154,7 +154,7 @@ internal class CActPerfProgressBar : CActivity
 		if (bActivated)
 		{
 			CDTXMania.tReleaseTexture(ref txパネル用);
-			CDTXMania.tReleaseTexture(ref tx背景);
+			CDTXMania.tReleaseTexture(ref txBackground);
 			CDTXMania.tReleaseTexture(ref tx縦線);
 			CDTXMania.tReleaseTexture(ref tx進捗);
 			CDTXMania.tReleaseTexture(ref tx灰);
@@ -183,7 +183,7 @@ internal class CActPerfProgressBar : CActivity
 			//}
 
 			//Put drawing code here
-			if (b演奏画面以外からの呼び出し)
+			if (bIsCalledFromOutsidePerformance)
 			{
 				if (bJustStartedUpdate)
 				{
@@ -198,21 +198,21 @@ internal class CActPerfProgressBar : CActivity
 			}
 			for (EInstrumentPart ePart = EInstrumentPart.DRUMS; ePart <= EInstrumentPart.BASS; ePart++)
 			{
-				if ((!b演奏画面以外からの呼び出し && (b演奏画面以外からの呼び出し || 
+				if ((!bIsCalledFromOutsidePerformance && (bIsCalledFromOutsidePerformance || 
 				                         !CDTXMania.ConfigIni.bInstrumentAvailable(ePart) || 
 				                         !CDTXMania.DTX.bHasChips[(int)ePart] || 
 				                         (EDarkMode)CDTXMania.ConfigIni.eDark == EDarkMode.FULL)) || 
-				    (b演奏画面以外からの呼び出し && epartプレイ楽器 != ePart && (epartプレイ楽器 != EInstrumentPart.UNKNOWN || ePart != 0)))
+				    (bIsCalledFromOutsidePerformance && epartプレイ楽器 != ePart && (epartプレイ楽器 != EInstrumentPart.UNKNOWN || ePart != 0)))
 				{
 					continue;
 				}
-				int num = p表示位置[(int)ePart].X + (b演奏画面以外からの呼び出し ? 20 : 0);
-				int num2 = p表示位置[(int)ePart].Y + (b演奏画面以外からの呼び出し ? 20 : 0) + pBarPosition[(int)ePart].Y;
-				if (b演奏画面以外からの呼び出し)
+				int num = p表示位置[(int)ePart].X + (bIsCalledFromOutsidePerformance ? 20 : 0);
+				int num2 = p表示位置[(int)ePart].Y + (bIsCalledFromOutsidePerformance ? 20 : 0) + pBarPosition[(int)ePart].Y;
+				if (bIsCalledFromOutsidePerformance)
 				{
 					num += (int)((double)(-60 - p表示位置[(int)ePart].X) * Math.Cos(Math.PI / 200.0 * (double)ct登場用.nCurrentValue));
 				}
-				if (b演奏画面以外からの呼び出し)
+				if (bIsCalledFromOutsidePerformance)
 				{
 					txパネル用.tDraw2D(CDTXMania.app.Device, num - 20, num2 - 20);
 				}
@@ -226,7 +226,7 @@ internal class CActPerfProgressBar : CActivity
 					txProgressBarBackgroundGuitar.tDraw2D(CDTXMania.app.Device, num-2, num2 - 70);
 				}
 
-				tx背景.tDraw2D(CDTXMania.app.Device, num, num2);
+				txBackground.tDraw2D(CDTXMania.app.Device, num, num2);
 					
 				//Draw Best Record
 				if (txBestProgressBarRecord[(int)ePart] != null)
@@ -237,7 +237,7 @@ internal class CActPerfProgressBar : CActivity
 				{
 					continue;
 				}
-				if (!b演奏画面以外からの呼び出し)
+				if (!bIsCalledFromOutsidePerformance)
 				{
 					tx縦線.tDraw2D(CDTXMania.app.Device, num + nWidth, num2);
 					int num3 = (int)((double)((CTimerBase)CDTXMania.Timer).n現在時刻ms / (double)nLastChipTime * nHeightFactor);
@@ -252,14 +252,14 @@ internal class CActPerfProgressBar : CActivity
 				for (int i = 0; i < nSectionIntervalCount; i++)
 				{
 					CProgressSection c区間 = listProgressSection[(int)ePart][i];
-					num2 = p表示位置[(int)ePart].Y + (b演奏画面以外からの呼び出し ? 20 : 0) + (int)c区間.rectDrawingFrame.Y + pBarPosition[(int)ePart].Y;
+					num2 = p表示位置[(int)ePart].Y + (bIsCalledFromOutsidePerformance ? 20 : 0) + (int)c区間.rectDrawingFrame.Y + pBarPosition[(int)ePart].Y;
 					//if (c区間.nChipCount <= 0)
 					//{
 					//	continue;
 					//}
-					if (!CDTXMania.ConfigIni.bIsAutoPlay(ePart) || b演奏画面以外からの呼び出し)
+					if (!CDTXMania.ConfigIni.bIsAutoPlay(ePart) || bIsCalledFromOutsidePerformance)
 					{
-						if ((i + 1) * nLastChipTime / nSectionIntervalCount - 1 > ((CTimerBase)CDTXMania.Timer).n現在時刻ms && !b演奏画面以外からの呼び出し)
+						if ((i + 1) * nLastChipTime / nSectionIntervalCount - 1 > ((CTimerBase)CDTXMania.Timer).n現在時刻ms && !bIsCalledFromOutsidePerformance)
 						{
 							tx灰.tDraw2D(CDTXMania.app.Device, num, num2, c区間.rectDrawingFrame);
 						}
@@ -430,7 +430,7 @@ internal class CActPerfProgressBar : CActivity
 	private void tサイズが絡むテクスチャの生成()
 	{
 		CDTXMania.tReleaseTexture(ref txパネル用);
-		if (b演奏画面以外からの呼び出し)
+		if (bIsCalledFromOutsidePerformance)
 		{
 			using (Bitmap bitmap = new Bitmap(nWidth + 40, nHeight + 40)) 
 			{
@@ -441,9 +441,9 @@ internal class CActPerfProgressBar : CActivity
 				txパネル用 = CDTXMania.tGenerateTexture(bitmap);
 			} 				
 		}
-		CDTXMania.tReleaseTexture(ref tx背景);
+		CDTXMania.tReleaseTexture(ref txBackground);
 		int num = 255; // (b演奏画面以外からの呼び出し ? 128 : ((int)CDTXMania.Instance.ConfigIni.nBGAlpha));
-		using (Bitmap bitmap3 = new Bitmap(nWidth + ((!b演奏画面以外からの呼び出し) ? 2 : 0), nHeight))
+		using (Bitmap bitmap3 = new Bitmap(nWidth + ((!bIsCalledFromOutsidePerformance) ? 2 : 0), nHeight))
 		{
 			using (Bitmap bitmap2 = new Bitmap(20, 20))
 			{
@@ -465,7 +465,7 @@ internal class CActPerfProgressBar : CActivity
 				} 
 					
 			}
-			tx背景 = CDTXMania.tGenerateTexture(bitmap3);
+			txBackground = CDTXMania.tGenerateTexture(bitmap3);
 		}
 		CDTXMania.tReleaseTexture(ref tx縦線);
 		using (Bitmap bitmap4 = new Bitmap(2, nHeight))
@@ -575,7 +575,7 @@ internal class CActPerfProgressBar : CActivity
 
 	private CTexture txパネル用;
 
-	private CTexture tx背景;
+	private CTexture txBackground;
 
 	private CTexture tx縦線;
 
@@ -604,7 +604,7 @@ internal class CActPerfProgressBar : CActivity
 	//This value must match value of nHeight
 	private readonly double nHeightFactor = 540.0;
 
-	private readonly bool b演奏画面以外からの呼び出し;
+	private readonly bool bIsCalledFromOutsidePerformance;
 
 	private EInstrumentPart epartプレイ楽器;
 
