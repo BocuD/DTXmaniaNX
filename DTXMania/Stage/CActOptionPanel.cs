@@ -1,27 +1,18 @@
 ﻿using System.Drawing;
 using DTXMania.Core;
-using SharpDX.Direct3D9;
 using FDK;
+using SharpDX.Direct3D9;
+using BaseTexture = DTXMania.UI.Drawable.BaseTexture;
 
 namespace DTXMania;
 
 internal class CActOptionPanel : CActivity
 {
-    // CActivity 実装
-
-    public override void OnDeactivate()
-    {
-        if (bActivated)
-        {
-            CDTXMania.tReleaseTexture(ref txOptionPanel);
-            base.OnDeactivate();
-        }
-    }
     public override void OnManagedCreateResources()
     {
         if (bActivated)
         {
-            txOptionPanel = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\Screen option panels.png"), false);
+            txOptionPanel = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\Screen option panels.png"));
             base.OnManagedCreateResources();
         }
     }
@@ -81,17 +72,17 @@ internal class CActOptionPanel : CActivity
 
     #region [ private ]
     //-----------------
-    private readonly SharpDX.RectangleF[] rcComboPos = [new(96, 108, 48, 18), new(96, 90, 48, 18), new(96, 72, 48, 18), new(48, 108, 48, 18)];
-    private readonly SharpDX.RectangleF[] rcDark = [new(48, 0, 48, 18), new(48, 18, 48, 18), new(48, 84, 48, 18)];
-    private readonly SharpDX.RectangleF[] rcHS = [new(0, 0, 48, 18), new(0, 18, 48, 18), new(0, 36, 48, 18), new(0, 54, 48, 18)];
-    private readonly SharpDX.RectangleF[] rcLeft = [new(192, 108, 48, 18), new(240, 108, 48, 18)];
-    private readonly SharpDX.RectangleF[] rcLight = [new(240, 72, 48, 18), new(240, 90, 48, 18)];
-    private readonly SharpDX.RectangleF[] rcPosition = [new(0, 72, 48, 18), new(0, 90, 48, 18), new(0, 108, 48, 18)];
-    private readonly SharpDX.RectangleF[] rcRandom = [new(144, 72, 48, 18), new(144, 90, 48, 18), new(144, 108, 48, 18), new(144, 126, 48, 182)];
-    private readonly SharpDX.RectangleF[] rcReverse = [new(48, 36, 48, 18), new(48, 54, 48, 18)];
-    private readonly SharpDX.RectangleF[] rcTight = [new(192, 72, 48, 18), new(192, 90, 48, 18)];
-    private readonly SharpDX.RectangleF[] rc譜面スピード = [new(96, 0, 48, 18), new(96, 18, 48, 18), new(96, 36, 48, 18), new(96, 54, 48, 18), new(144, 0, 48, 18), new(144, 18, 48, 18), new(144, 36, 48, 18), new(144, 54, 48, 18), new(192, 0, 48, 18), new(192, 18, 48, 18), new(192, 36, 48, 18), new(192, 54, 48, 18), new(240, 0, 48, 18), new(240, 18, 48, 18), new(240, 36, 48, 18), new(240, 54, 48, 18)];
-    private CTexture txOptionPanel;
+    private readonly RectangleF[] rcComboPos = [new(96, 108, 48, 18), new(96, 90, 48, 18), new(96, 72, 48, 18), new(48, 108, 48, 18)];
+    private readonly RectangleF[] rcDark = [new(48, 0, 48, 18), new(48, 18, 48, 18), new(48, 84, 48, 18)];
+    private readonly RectangleF[] rcHS = [new(0, 0, 48, 18), new(0, 18, 48, 18), new(0, 36, 48, 18), new(0, 54, 48, 18)];
+    private readonly RectangleF[] rcLeft = [new(192, 108, 48, 18), new(240, 108, 48, 18)];
+    private readonly RectangleF[] rcLight = [new(240, 72, 48, 18), new(240, 90, 48, 18)];
+    private readonly RectangleF[] rcPosition = [new(0, 72, 48, 18), new(0, 90, 48, 18), new(0, 108, 48, 18)];
+    private readonly RectangleF[] rcRandom = [new(144, 72, 48, 18), new(144, 90, 48, 18), new(144, 108, 48, 18), new(144, 126, 48, 182)];
+    private readonly RectangleF[] rcReverse = [new(48, 36, 48, 18), new(48, 54, 48, 18)];
+    private readonly RectangleF[] rcTight = [new(192, 72, 48, 18), new(192, 90, 48, 18)];
+    private readonly RectangleF[] rc譜面スピード = [new(96, 0, 48, 18), new(96, 18, 48, 18), new(96, 36, 48, 18), new(96, 54, 48, 18), new(144, 0, 48, 18), new(144, 18, 48, 18), new(144, 36, 48, 18), new(144, 54, 48, 18), new(192, 0, 48, 18), new(192, 18, 48, 18), new(192, 36, 48, 18), new(192, 54, 48, 18), new(240, 0, 48, 18), new(240, 18, 48, 18), new(240, 36, 48, 18), new(240, 54, 48, 18)];
+    private BaseTexture txOptionPanel;
     //-----------------
     #endregion
 }

@@ -1,8 +1,9 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Drawing;
+using System.Numerics;
+using System.Runtime.InteropServices;
 using DTXMania.Core;
-using SharpDX;
+using DTXMania.UI.Drawable;
 using FDK;
-using RectangleF = SharpDX.RectangleF;
 
 namespace DTXMania;
 
@@ -13,7 +14,7 @@ public class CActDFPFont : CActivity
 	public CActDFPFont()
 	{
 		STCharacterMap[] st文字領域Array = new STCharacterMap[ 0x5d+2 ];
-		STCharacterMap st文字領域94 = new STCharacterMap();
+		STCharacterMap st文字領域94 = new();
 		STCharacterMap st文字領域 = st文字領域94;
 		st文字領域.ch = ' ';
 		st文字領域.rc = new RectangleF( 10, 3, 13, 0x1b );
@@ -517,16 +518,16 @@ public class CActDFPFont : CActivity
 		return num;
 	}
 	
-	public void t文字列描画( Matrix matrix, string str, bool bHighlight, float fScale )
+	public void t文字列描画( Matrix4x4 matrix, string str, bool bHighlight, float fScale )
 	{
 		if (!bActivated || string.IsNullOrEmpty(str)) return;
 
 		float x = 0;
 		
-		CTexture texture = bHighlight ? txHighlightCharacterMap : txCharacterMap;
+		BaseTexture texture = bHighlight ? txHighlightCharacterMap : txCharacterMap;
 		if( texture != null )
 		{
-			texture.vcScaleRatio = new Vector3( fScale, fScale, 1f );
+			Matrix4x4 scale = Matrix4x4.CreateScale(fScale);
 			foreach( char ch in str )
 			{
 				foreach( STCharacterMap st文字領域 in stCharacterRects )
@@ -541,8 +542,9 @@ public class CActDFPFont : CActivity
 							Height = st文字領域.rc.Height
 						};
 						Vector2 size = new( rect.Width, rect.Height );
-						Matrix mat = Matrix.Translation(x, 0, 0);
-						texture.tDraw2DMatrix(CDTXMania.app.Device, mat * matrix, size, rect);
+						Matrix4x4 mat = Matrix4x4.CreateTranslation(x, 0, 0);
+						mat = scale * mat;
+						texture.tDraw2DMatrix(mat * matrix, size, rect);
 						x += st文字領域.rc.Width * fScale;
 						break;
 					}
@@ -558,8 +560,8 @@ public class CActDFPFont : CActivity
 	{
 		if( bActivated )
 		{
-			txCharacterMap = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\Screen font dfp.png" ), false );
-			txHighlightCharacterMap = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\Screen font dfp em.png" ), false );
+			txCharacterMap = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\Screen font dfp.png" ));
+			txHighlightCharacterMap = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\Screen font dfp em.png" ));
 			base.OnManagedCreateResources();
 		}
 	}
@@ -594,8 +596,8 @@ public class CActDFPFont : CActivity
 	}
 
 	internal readonly STCharacterMap[] stCharacterRects;
-	internal CTexture txHighlightCharacterMap;
-	internal CTexture txCharacterMap;
+	internal BaseTexture txHighlightCharacterMap;
+	internal BaseTexture txCharacterMap;
 	//-----------------
 	#endregion
 }

@@ -44,7 +44,7 @@ public class UIDFPText : UIDrawable
         
     public override void Draw(Matrix4x4 parentMatrix)
     {
-        CTexture texture = isHighlighted ? font.txHighlightCharacterMap : font.txCharacterMap;
+        BaseTexture texture = isHighlighted ? font.txHighlightCharacterMap : font.txCharacterMap;
             
         if( texture != null )
         {
@@ -60,8 +60,7 @@ public class UIDFPText : UIDrawable
                     {
                         var characterOffset = Matrix4x4.CreateTranslation(new Vector3(x, 0, 0));
                         Vector2 sz = new Vector2(charcterRect.rc.Width, charcterRect.rc.Height);
-                        //todo COMMENTED OUT tDraw2DMatrix
-                        //texture.tDraw2DMatrix(CDTXMania.app.Device, characterOffset * localTransformMatrix * parentMatrix, sz, charcterRect.rc);
+                        texture.tDraw2DMatrix(characterOffset * localTransformMatrix * parentMatrix, sz, charcterRect.rc);
                         x += charcterRect.rc.Width - 5;
                         break;
                     }
