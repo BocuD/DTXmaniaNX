@@ -632,7 +632,6 @@ internal class CActPerfDrumsChipFireD : CActivity
 
 						mat *= Matrix4x4.CreateTranslation((st飛び散るチップ[i].fXL - 50f) - SampleFramework.GameWindowSize.Width / 2f, -(st飛び散るチップ[i].fY + nJudgeLinePosY_delta_Drums - SampleFramework.GameWindowSize.Height / 2f), 0f);
 						mat2 *= Matrix4x4.CreateTranslation((st飛び散るチップ[i].fXR - 50f) - SampleFramework.GameWindowSize.Width / 2f, -(st飛び散るチップ[i].fY + nJudgeLinePosY_delta_Drums - SampleFramework.GameWindowSize.Height / 2f), 0f);
-						//mat *= Matrix4x4.CreateTranslation(this.st飛び散るチップ[i].fX - SampleFramework.GameWindowSize.Width / 2f, -(this.st青い星[i].fY - SampleFramework.GameWindowSize.Height / 2f), 0f);
 
 						if (txNotes != null)
 						{

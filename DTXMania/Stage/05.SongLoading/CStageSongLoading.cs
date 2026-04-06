@@ -316,9 +316,9 @@ internal class CStageSongLoading : CStage
     {
         if (bActivated)
         {
-            txLevel = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\6_LevelNumber.png"));
-            txDifficultyPanel = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\6_Difficulty.png"));
-            txPartPanel = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\6_Part.png"));
+            txLevel = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\6_LevelNumber.png"));
+            txDifficultyPanel = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\6_Difficulty.png"));
+            txPartPanel = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\6_Part.png"));
 
             #region[ 曲名、アーティスト名テクスチャの生成 ]
 
@@ -376,12 +376,8 @@ internal class CStageSongLoading : CStage
         {
             //テクスチャ11枚
             //2018.03.15 kairera0467 PrivateFontが抜けていた＆フォント生成直後に解放するようにしてみる
-            CDTXMania.tReleaseTexture(ref txJacket);
             CDTXMania.tReleaseTexture(ref txTitle);
             CDTXMania.tReleaseTexture(ref txArtist);
-            CDTXMania.tReleaseTexture(ref txDifficultyPanel);
-            CDTXMania.tReleaseTexture(ref txPartPanel);
-            CDTXMania.tReleaseTexture(ref txLevel);
             base.OnManagedReleaseResources();
         }
     }
@@ -415,7 +411,7 @@ internal class CStageSongLoading : CStage
 
             if (txJacket == null) // 2019.04.26 kairera0467
             {
-                txJacket = CDTXMania.LoadFromPath(!File.Exists(path) ? CSkin.Path(@"Graphics\5_preimage default.png") : path);
+                txJacket = BaseTexture.LoadFromPath(!File.Exists(path) ? CSkin.Path(@"Graphics\5_preimage default.png") : path);
             }
         }
         catch (Exception ex)
@@ -745,20 +741,19 @@ internal class CStageSongLoading : CStage
             float fScalingFactor;
             float jacketOnScreenSize = 384.0f;
             //Maintain aspect ratio by scaling only to the smaller scalingFactor
-            if (jacketOnScreenSize / txJacket.szImageSize.Width > jacketOnScreenSize / txJacket.szImageSize.Height)
+            if (jacketOnScreenSize / txJacket.Width > jacketOnScreenSize / txJacket.Height)
             {
-                fScalingFactor = jacketOnScreenSize / txJacket.szImageSize.Height;
+                fScalingFactor = jacketOnScreenSize / txJacket.Height;
             }
             else
             {
-                fScalingFactor = jacketOnScreenSize / txJacket.szImageSize.Width;
+                fScalingFactor = jacketOnScreenSize / txJacket.Width;
             }
         
             mat *= Matrix4x4.CreateScale(fScalingFactor, fScalingFactor, 1f);
             mat *= Matrix4x4.CreateTranslation(-348, 84f, 0f);
         
-            //todo: COMMENTED OUT tDraw2DMatrix
-            //txJacket.tDraw3D(CDTXMania.app.Device, mat);
+            txJacket.tDraw3D(mat);
         }
         
         if (txTitle != null)
@@ -820,16 +815,14 @@ internal class CStageSongLoading : CStage
                             DTXLevelDeci = ((cdtx.LEVEL[j] - DTXLevel * 10) * 10) + cdtx.LEVELDEC[j];
                         }
         
-                        //todo: COMMENTED OUT tDraw2D
-                        //txLevel.tDraw2D(CDTXMania.app.Device, 282 + k, 243, new RectangleF(1000, 92, 30, 38));
+                        txLevel.tDraw2D(CDTXMania.app.Device, 282 + k, 243, new RectangleF(1000, 92, 30, 38));
                         tDrawStringLarge(187 + k, 152, $"{DTXLevel:0}");
                         tDrawStringLarge(307 + k, 152, $"{DTXLevelDeci:00}");
                     }
 
                     if (txPartPanel != null)
                     {
-                        //todo: COMMENTED OUT tDraw2D
-                        //txPartPanel.tDraw2D(CDTXMania.app.Device, 191 + k, 52, new RectangleF(0, j * 50, 262, 50));
+                        txPartPanel.tDraw2D(CDTXMania.app.Device, 191 + k, 52, new RectangleF(0, j * 50, 262, 50));
                     }
 
                     //this.txJacket.Dispose();
@@ -904,9 +897,9 @@ internal class CStageSongLoading : CStage
     private string strArtistName;
     private CTexture? txTitle;
     private CTexture? txArtist;
-    private CTexture? txJacket;
-    private CTexture? txDifficultyPanel;
-    private CTexture? txPartPanel;
+    private BaseTexture? txJacket;
+    private BaseTexture? txDifficultyPanel;
+    private BaseTexture? txPartPanel;
 
     private CPrivateFastFont titleFont;
     private CPrivateFastFont artistNameFont;
@@ -921,7 +914,7 @@ internal class CStageSongLoading : CStage
     private DateTime timeBeginLoad;
     private DateTime timeBeginLoadWAV;
     private int nWAVcount;
-    private CTexture txLevel;
+    private BaseTexture txLevel;
 
     [StructLayout(LayoutKind.Sequential)]
     private struct STATUSPANEL
@@ -1069,8 +1062,7 @@ internal class CStageSongLoading : CStage
                 RectangleF rc画像内の描画領域 = new(st大文字位置[j].pt.X, st大文字位置[j].pt.Y, 100, 130);
                 if (txLevel != null)
                 {
-                    //todo: COMMENTED OUT tDraw2D
-                    //txLevel.tDraw2D(CDTXMania.app.Device, x, y, rc画像内の描画領域);
+                    txLevel.tDraw2D(CDTXMania.app.Device, x, y, rc画像内の描画領域);
                 }
 
                 break;
@@ -1144,8 +1136,7 @@ internal class CStageSongLoading : CStage
 
         if (txDifficultyPanel != null)
         {
-            //todo: COMMENTED OUT tDraw2D
-            //txDifficultyPanel.tDraw2D(CDTXMania.app.Device, nX, nY, rect);
+            txDifficultyPanel.tDraw2D(CDTXMania.app.Device, nX, nY, rect);
         }
     }
 
