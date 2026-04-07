@@ -10,7 +10,7 @@ internal class StageManager
     public CStageStartup stageStartup { get; }
     public CStageTitle stageTitle { get; }
     public CStageConfig stageConfig { get; }
-    public CStageSongSelection stageSongSelection { get; }
+    //public CStageSongSelection stageSongSelection { get; }
     public CStageSongSelectionNew stageSongSelectionNew { get; }
     public CStageSongLoading stageSongLoading { get; }
     public CStagePerfGuitarScreen stagePerfGuitarScreen { get; }
