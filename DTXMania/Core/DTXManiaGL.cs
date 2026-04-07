@@ -6,7 +6,7 @@ using Silk.NET.OpenGL;
 
 namespace OpenGLTest;
 
-public sealed unsafe class DTXManiaGL : OpenGlGame
+public sealed class DTXManiaGL : OpenGlGame
 {
     public static DTXManiaGL instance;
     private CDTXMania mania;
@@ -42,7 +42,7 @@ public sealed unsafe class DTXManiaGL : OpenGlGame
 
         float aspectRatio = width / (float)Math.Max(height, 1);
 
-        CDTXMania.physicalRenderScale = windowSize.X / GameWindowSize.Width;
+        CDTXMania.renderScale = windowSize.X / GameWindowSize.Width;
         mania.Draw();
         GameStatus.Draw();
     }

@@ -64,8 +64,6 @@ public class GameStatus
             ImGui.Text("Current Stage: " + CDTXMania.StageManager.rCurrentStage.GetType());
             
             ImGui.Checkbox("Prevent game keyboard input", ref preventGameKeyboardInput);
-
-            ImGui.Checkbox("Render game viewport to window", ref CDTXMania.renderGameToSurface);
             
             ImGui.Checkbox("Prevent stage transitions", ref StageManager.preventStageChanges);
         }

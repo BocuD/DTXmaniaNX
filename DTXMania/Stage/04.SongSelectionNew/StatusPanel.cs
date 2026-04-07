@@ -20,7 +20,7 @@ public class StatusPanel : UIGroup
 
 		instruments = [drums, guitar, bass];
 		
-		CommandHistory = new CStageSongSelection.CCommandHistory();
+		CommandHistory = new CCommandHistory();
 	}
 
 	public void SelectionChanged(SongNode? song, CScore? chart)
@@ -46,7 +46,7 @@ public class StatusPanel : UIGroup
 		base.Draw(parentMatrix);
 	}
 
-	private CStageSongSelection.CCommandHistory CommandHistory;
+	private CCommandHistory CommandHistory;
 
 	public void HandleNavigation()
 	{

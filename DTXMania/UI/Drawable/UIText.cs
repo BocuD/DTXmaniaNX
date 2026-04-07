@@ -1,5 +1,6 @@
 using System.Drawing;
 using System.Numerics;
+using DTXMania.Core;
 using DTXMania.UI.Inspector;
 using DTXMania.UI.OpenGL;
 using DTXMania.UI.Text;
@@ -7,6 +8,12 @@ using Hexa.NET.ImGui;
 using NativeFileDialog.Extended;
 
 namespace DTXMania.UI.Drawable;
+
+public enum TextSource
+{
+    String,
+    Dynamic
+}
 
 public enum UiTextAlignment
 {
@@ -41,6 +48,9 @@ public class UIText : UITexture
     public Color4 outlineGradientTopColor = new(0f, 0f, 0f, 1f);
     public Color4 outlineGradientBottomColor = new(0f, 0f, 0f, 1f);
 
+    public TextSource textSource = TextSource.String;
+    public string dynamicSource = "Not Set";
+    
     [AddChildMenu]
     public static UIDrawable Create()
     {
@@ -76,6 +86,11 @@ public class UIText : UITexture
         {
             return;
         }
+        
+        if (textSource == TextSource.Dynamic)
+        {
+            UpdateDynamicText();
+        }
 
         if (_dirty)
         {
@@ -90,6 +105,19 @@ public class UIText : UITexture
         UpdateLocalTransformMatrix();
         Matrix4x4 combinedMatrix = localTransformMatrix * parentMatrix;
         texture.tDraw2DMatrix(combinedMatrix, size, new RectangleF(0, 0, texture.Width, texture.Height), Color4.White);
+    }
+    
+    private void UpdateDynamicText()
+    {
+        CDTXMania.StageManager.rCurrentStage.dynamicStringSources.TryGetValue(dynamicSource, out var source);
+        if (source != null)
+        {
+            SetText(source.GetString());
+        }
+        else
+        {
+            SetText($"Dynamic source: {dynamicSource} not found");
+        }
     }
 
     public void RenderTexture()
@@ -138,9 +166,33 @@ public class UIText : UITexture
             return;
         }
 
-        if (ImGui.InputTextMultiline("Text", ref text, 4096))
+        if (Inspector.Inspector.Inspect("Text Source", ref textSource))
         {
             _dirty = true;
+        }
+
+        switch (textSource)
+        {
+            case TextSource.String:
+            {
+                if (ImGui.InputTextMultiline("String", ref text, 256))
+                {
+                    _dirty = true;
+                }
+
+                break;
+            }
+            case TextSource.Dynamic:
+            {
+                string[] sources = CDTXMania.StageManager.rCurrentStage.dynamicStringSources.Keys.ToArray();
+                int selectedIndex = Array.IndexOf(sources, dynamicSource);
+                if (ImGui.Combo("Dynamic Source", ref selectedIndex, sources, sources.Length))
+                {
+                    dynamicSource = sources[selectedIndex];
+                    _dirty = true;
+                }
+                break;
+            }
         }
 
         if (ImGui.InputText("Font Path", ref fontPath, 1024))

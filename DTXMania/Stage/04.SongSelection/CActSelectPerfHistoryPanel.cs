@@ -17,8 +17,8 @@ internal class CActSelectPerfHistoryPanel : CActivity
 	}
 	public void t選択曲が変更された()
 	{
-		CScore cスコア = CDTXMania.stageSongSelection.rSelectedScore;
-		if( ( cスコア != null ) && !CDTXMania.stageSongSelection.bScrolling )
+		CScore cスコア = CDTXMania.StageManager.stageSongSelection.rSelectedScore;
+		if( ( cスコア != null ) && !CDTXMania.StageManager.stageSongSelection.bScrolling )
 		{
 			try
 			{

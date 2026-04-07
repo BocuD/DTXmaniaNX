@@ -902,7 +902,7 @@ internal class CSongManager
 		cスコア.SongInformation.bScoreExists.Bass = br.ReadBoolean();
 		cスコア.SongInformation.SongType = (CDTX.EType) br.ReadInt32();
 		cスコア.SongInformation.Bpm = br.ReadDouble();
-		cスコア.SongInformation.Duration = br.ReadInt32();
+		cスコア.SongInformation.DurationMs = br.ReadInt32();
 		//Read Progress after Duration
 		cスコア.SongInformation.progress.Drums = br.ReadString();
 		cスコア.SongInformation.progress.Guitar = br.ReadString();
@@ -1081,7 +1081,7 @@ internal class CSongManager
 				score.SongInformation.bScoreExists.Bass = cdtx.bHasChips.Bass;
 				score.SongInformation.SongType = cdtx.eFileType;
 				score.SongInformation.Bpm = cdtx.BPM;
-				score.SongInformation.Duration = (cdtx.listChip == null) ? 0 : cdtx.listChip[cdtx.listChip.Count - 1].nPlaybackTimeMs;
+				score.SongInformation.DurationMs = (cdtx.listChip == null) ? 0 : cdtx.listChip[cdtx.listChip.Count - 1].nPlaybackTimeMs;
 					
 				score.SongInformation.chipCountByInstrument.Drums = cdtx.nVisibleChipsCount.Drums;
 				{
@@ -1414,7 +1414,7 @@ internal class CSongManager
 				bw.Write( node.arScore[ i ].SongInformation.bScoreExists.Bass );
 				bw.Write( (int) node.arScore[ i ].SongInformation.SongType );
 				bw.Write( node.arScore[ i ].SongInformation.Bpm );
-				bw.Write( node.arScore[ i ].SongInformation.Duration );
+				bw.Write( node.arScore[ i ].SongInformation.DurationMs );
 				//Write to Progress here
 				bw.Write(node.arScore[i].SongInformation.progress.Drums);
 				bw.Write(node.arScore[i].SongInformation.progress.Guitar);

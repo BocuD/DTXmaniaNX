@@ -305,7 +305,7 @@ public class SongSelectionContainer : UIGroup
             int randomIndex = random.Next(0, currentRoot.childNodes.Count);
             var randomNode = currentRoot.childNodes[randomIndex];
             UpdateSelection(randomNode);
-            return 0;
+            return (int) CStageSongSelectionNew.EReturnValue.Continue;
         }
         
         ctKeyRepeat.Up.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(Key.UpArrow),
@@ -331,7 +331,7 @@ public class SongSelectionContainer : UIGroup
         if (CDTXMania.Input.ActionDecide())
         {
             if (ActionDecide()) //returns true on song select
-                return (int)CStageSongSelection.EReturnValue.Selected;
+                return (int)CStageSongSelectionNew.EReturnValue.Selected;
         }
         
         if (CDTXMania.Input.ActionCancel())
@@ -344,11 +344,11 @@ public class SongSelectionContainer : UIGroup
             else
             {
                 CDTXMania.Skin.soundCancel.tPlay();
-                return (int)CStageSongSelection.EReturnValue.ReturnToTitle;
+                return (int)CStageSongSelectionNew.EReturnValue.ReturnToTitle;
             }
         }
 
-        return 0;
+        return (int) CStageSongSelectionNew.EReturnValue.Continue;
     }
     
     private void MoveUp()

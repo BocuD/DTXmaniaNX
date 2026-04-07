@@ -27,7 +27,7 @@ internal class StageManager
         stageStartup = new CStageStartup();
         stageTitle = new CStageTitle();
         stageConfig = new CStageConfig();
-        stageSongSelection = new CStageSongSelection();
+        // stageSongSelection = new CStageSongSelection();
         stageSongSelectionNew = new CStageSongSelectionNew();
         stageSongLoading = new CStageSongLoading();
         stagePerfDrumsScreen = new CStagePerfDrumsScreen();
@@ -124,19 +124,19 @@ internal class StageManager
                 //-----------------------------
                 switch (nUpdateAndDrawReturnValue)
                 {
-                    case (int)CStageSongSelection.EReturnValue.ReturnToTitle:
+                    case (int)CStageSongSelectionNew.EReturnValue.ReturnToTitle:
                         tChangeStage(stageTitle);
                         break;
 
-                    case (int)CStageSongSelection.EReturnValue.Selected:
+                    case (int)CStageSongSelectionNew.EReturnValue.Selected:
                         tChangeStage(stageSongLoading);
                         break;
 
-                    case (int)CStageSongSelection.EReturnValue.CallConfig:
+                    case (int)CStageSongSelectionNew.EReturnValue.CallConfig:
                         tChangeStage(stageConfig);
                         break;
 
-                    case (int)CStageSongSelection.EReturnValue.ChangeSking:
+                    case (int)CStageSongSelectionNew.EReturnValue.ChangeSking:
                         tChangeStage(stageChangeSkin);
                         break;
                 }
@@ -205,7 +205,7 @@ internal class StageManager
 
                         #region [ Cancel performance ]
 
-                        scoreIni = CDTXMania.tScoreIniへBGMAdjustとHistoryとPlayCountを更新("Play cancelled");
+                        scoreIni = CDTXMania.UpdateBGMAdjustHistoryPlayCountIntScoreIni("Play cancelled");
 
                         CDTXMania.DTX.tStopPlayingAllChips();
                         CDTXMania.DTX.OnDeactivate();
@@ -316,7 +316,7 @@ internal class StageManager
 
                                 str = $"Stage failed{strInstrument} {strSpeed}";
 
-                                scoreIni = CDTXMania.tScoreIniへBGMAdjustとHistoryとPlayCountを更新(str);
+                                scoreIni = CDTXMania.UpdateBGMAdjustHistoryPlayCountIntScoreIni(str);
 
                                 CScore cScore = CDTXMania.confirmedChart;
 
@@ -495,7 +495,7 @@ internal class StageManager
                                 str = $"Cleared{strInstrument} ({Enum.GetName(typeof(CScoreIni.ERANK), nRank)}:{strPerfSkill}{strSpeed})";
                             }
 
-                            scoreIni = CDTXMania.tScoreIniへBGMAdjustとHistoryとPlayCountを更新(str);
+                            scoreIni = CDTXMania.UpdateBGMAdjustHistoryPlayCountIntScoreIni(str);
                         }
 
                         stageResult.stPerformanceEntry.Drums = cPerfEntry_Drums;

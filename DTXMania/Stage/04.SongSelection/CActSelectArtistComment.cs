@@ -19,7 +19,7 @@ internal class CActSelectArtistComment : CActivity
 	}
 	public void t選択曲が変更された()
 	{
-		CScore cスコア = CDTXMania.stageSongSelection.rSelectedScore;
+		CScore cスコア = CDTXMania.StageManager.stageSongSelection.rSelectedScore;
 		if( cスコア != null )
 		{
 			Bitmap image = new Bitmap( 1, 1 );

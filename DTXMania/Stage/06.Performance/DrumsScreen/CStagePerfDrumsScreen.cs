@@ -35,8 +35,6 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         listChildActivities.Add( actPlayInfo = new CActPerformanceInformation() );
         listChildActivities.Add( actFI = new CActFIFOBlackStart() );
         listChildActivities.Add( actFO = new CActFIFOBlack() );
-        listChildActivities.Add( actFOClear = new CActFIFOWhite() );
-        listChildActivities.Add( actFOStageClear = new CActFIFOWhiteClear());
         listChildActivities.Add( actFillin = new CActPerfDrumsFillingEffect() );
         listChildActivities.Add( actLVFont = new CActLVLNFont() );
         listChildActivities.Add( actProgressBar = new CActPerfProgressBar());
@@ -298,7 +296,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
             else
             {
                 eReturnValueAfterFadeOut = EPerfScreenReturnValue.StageClear;
-                ePhaseID = EPhase.PERFORMANCE_STAGE_CLEAR_FadeOut;
+                ePhaseID = EPhase.PERFORMANCE_STAGE_CLEAR;
                 if (nHitCount_ExclAuto.Drums.Miss + nHitCount_ExclAuto.Drums.Poor == 0)
                 {
                     nNumberPerfects = CDTXMania.ConfigIni.bAllDrumsAreAutoPlay
@@ -326,8 +324,6 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                 {
 
                 }
-
-                actFOStageClear.tStartFadeOut();
             }
         }
 
@@ -513,15 +509,6 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
     public BaseTexture txShutter;
     private BaseTexture txLaneCover;
     //-----------------
-
-    private void tFadeOut()
-    {
-        eReturnValueAfterFadeOut = EPerfScreenReturnValue.StageClear;
-        ePhaseID = EPhase.PERFORMANCE_STAGE_CLEAR_FadeOut;
-
-        actFOStageClear.tStartFadeOut();
-    }
-
     private bool bフィルイン区間の最後のChipである( CChip pChip )
     {
         if( pChip == null )

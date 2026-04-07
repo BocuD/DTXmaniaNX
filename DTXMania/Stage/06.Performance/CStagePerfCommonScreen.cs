@@ -772,8 +772,6 @@ internal abstract class CStagePerfCommonScreen : CStage
     protected CActPerfCommonDanger actDANGER;
     protected CActFIFOBlackStart actFI;
     protected CActFIFOBlack actFO;
-    protected CActFIFOWhite actFOClear;
-    public CActFIFOWhiteClear actFOStageClear;
     //protected CActPerfStageClear actStageClear;
     public CActPerfCommonGauge actGauge;
     public CActPerfDrumsFillingEffect actFillin;
@@ -4668,11 +4666,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                 }
                 break;
 
-            case EPhase.PERFORMANCE_STAGE_CLEAR_FadeOut:
-                if (actFOStageClear.OnUpdateAndDraw() == 0)
-                {
-                    break;
-                }
+            case EPhase.PERFORMANCE_STAGE_CLEAR:
                 return true;
 
         }

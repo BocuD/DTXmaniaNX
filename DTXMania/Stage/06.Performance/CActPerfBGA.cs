@@ -71,16 +71,16 @@ internal class CActPerfBGA : CActivity
 			switch( chip.eBGA種別 )
 			{
 				case EBGAType.BMP:
-					if( ( chip.rBMP != null ) && ( chip.rBMP.tx画像 != null ) )
+					if( ( chip.rBMP != null ) && ( chip.rBMP.txImage != null ) )
 					{
 						Start( chip.nChannelNumber, chip.rBMP, null, chip.rBMP.n幅, chip.rBMP.n高さ, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, chip.nPlaybackTimeMs );
 					}
 					break;
 
 				case EBGAType.BMPTEX:
-					if( ( chip.rBMPTEX != null ) && ( chip.rBMPTEX.tx画像 != null ) )
+					if( ( chip.rBMPTEX != null ) && ( chip.rBMPTEX.txImage != null ) )
 					{
-						Start( chip.nChannelNumber, null, chip.rBMPTEX, chip.rBMPTEX.tx画像.szImageSize.Width, chip.rBMPTEX.tx画像.szImageSize.Height, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, chip.nPlaybackTimeMs );
+						Start( chip.nChannelNumber, null, chip.rBMPTEX, chip.rBMPTEX.txImage.szImageSize.Width, chip.rBMPTEX.txImage.szImageSize.Height, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, chip.nPlaybackTimeMs );
 					}
 					break;
 
@@ -160,7 +160,7 @@ internal class CActPerfBGA : CActivity
 			txBGAバックパネル.tDraw2D(CDTXMania.app.Device, 980, 0);
 			for( int i = 0; i < 8; i++ )
 			{
-				if( ( ( stLayer[ i ].n移動開始時刻ms != -1 ) && ( ( stLayer[ i ].rBMP != null ) || ( stLayer[ i ].rBMPTEX != null ) ) ) && ( ( ( stLayer[ i ].rBMP == null ) || ( stLayer[ i ].rBMP.bUse && ( stLayer[ i ].rBMP.tx画像 != null ) ) ) && ( ( stLayer[ i ].rBMPTEX == null ) || ( stLayer[ i ].rBMPTEX.bUse && ( stLayer[ i ].rBMPTEX.tx画像 != null ) ) ) ) )
+				if( ( ( stLayer[ i ].n移動開始時刻ms != -1 ) && ( ( stLayer[ i ].rBMP != null ) || ( stLayer[ i ].rBMPTEX != null ) ) ) && ( ( ( stLayer[ i ].rBMP == null ) || ( stLayer[ i ].rBMP.bUse && ( stLayer[ i ].rBMP.txImage != null ) ) ) && ( ( stLayer[ i ].rBMPTEX == null ) || ( stLayer[ i ].rBMPTEX.bUse && ( stLayer[ i ].rBMPTEX.txImage != null ) ) ) ) )
 				{
 					Size size = stLayer[ i ].sz開始サイズ;
 					Size size2 = stLayer[ i ].sz終了サイズ;
@@ -175,7 +175,7 @@ internal class CActPerfBGA : CActivity
 						num3 = CDTXMania.Timer.nCurrentTime;
 					}
 					Size size3 = new Size( 0x116, 0x163 );
-					Size size4 = new Size( ( stLayer[ i ].rBMP != null ) ? stLayer[ i ].rBMP.n幅 : stLayer[ i ].rBMPTEX.tx画像.szImageSize.Width, ( stLayer[ i ].rBMP != null ) ? stLayer[ i ].rBMP.n高さ : stLayer[ i ].rBMPTEX.tx画像.szImageSize.Height );
+					Size size4 = new Size( ( stLayer[ i ].rBMP != null ) ? stLayer[ i ].rBMP.n幅 : stLayer[ i ].rBMPTEX.txImage.szImageSize.Width, ( stLayer[ i ].rBMP != null ) ? stLayer[ i ].rBMP.n高さ : stLayer[ i ].rBMPTEX.txImage.szImageSize.Height );
 					int num4 = (int) ( ( CDTXMania.Timer.nCurrentTime - num3 ) * ( ( (double) CDTXMania.ConfigIni.nPlaySpeed ) / 20.0 ) );
 					if( ( num2 != 0 ) && ( num2 < num4 ) )
 					{
@@ -262,13 +262,13 @@ internal class CActPerfBGA : CActivity
 						}
 						if( ( ( ( ( rectangle.Left < rectangle.Right ) && ( rectangle.Top < rectangle.Bottom ) ) && ( ( rectangle2.Left < rectangle2.Right ) && ( rectangle2.Top < rectangle2.Bottom ) ) ) && ( ( ( rectangle.Right >= 0 ) && ( rectangle.Bottom >= 0 ) ) && ( ( rectangle.Left <= size4.Width ) && ( rectangle.Top <= size4.Height ) ) ) ) && ( ( ( rectangle2.Right >= 0 ) && ( rectangle2.Bottom >= 0 ) ) && ( ( rectangle2.Left <= size3.Width ) && ( rectangle2.Top <= size3.Height ) ) ) )
 						{
-							if( ( stLayer[ i ].rBMP != null ) && ( stLayer[ i ].rBMP.tx画像 != null ) )
+							if( ( stLayer[ i ].rBMP != null ) && ( stLayer[ i ].rBMP.txImage != null ) )
 							{
-								stLayer[ i ].rBMP.tx画像.tDraw2DFloat( CDTXMania.app.Device, x + rectangle2.X, y + rectangle2.Y, rectangle );
+								stLayer[ i ].rBMP.txImage.tDraw2DFloat( CDTXMania.app.Device, x + rectangle2.X, y + rectangle2.Y, rectangle );
 							}
-							else if( ( stLayer[ i ].rBMPTEX != null ) && ( stLayer[ i ].rBMPTEX.tx画像 != null ) )
+							else if( ( stLayer[ i ].rBMPTEX != null ) && ( stLayer[ i ].rBMPTEX.txImage != null ) )
 							{
-								stLayer[ i ].rBMPTEX.tx画像.tDraw2DFloat( CDTXMania.app.Device, x + rectangle2.X, y + rectangle2.Y, rectangle );
+								stLayer[ i ].rBMPTEX.txImage.tDraw2DFloat( CDTXMania.app.Device, x + rectangle2.X, y + rectangle2.Y, rectangle );
 							}
 						}
 					}

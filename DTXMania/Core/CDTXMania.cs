@@ -9,28 +9,14 @@ using DTXMania.Core.Video;
 using DTXMania.SongDb;
 using FDK;
 using Hexa.NET.ImGui;
-using Hexa.NET.ImGui.Backends.D3D9;
-using Hexa.NET.ImGuizmo;
 using SampleFramework;
-using SharpDX;
 using SharpDX.Direct3D9;
-using Point = System.Drawing.Point;
 using ResourceManager = DTXMania.UI.ResourceManager;
 using Vector2 = System.Numerics.Vector2;
-
-//#if INSPECTOR
-using DTXMania.UI;
 using DTXMania.UI.Drawable;
-using DTXMania.UI.Inspector;
-//#endif
-
 using DTXMania.UI.Skin;
 using Hexa.NET.GLFW;
 using OpenGLTest;
-using Color = System.Drawing.Color;
-using Font = System.Drawing.Font;
-using RectangleF = SharpDX.RectangleF;
-using Vector3 = SharpDX.Vector3;
 
 namespace DTXMania.Core;
 
@@ -158,7 +144,6 @@ internal class CDTXMania : Game
     public static Random Random { get; private set; }
     public static CSkin Skin { get; private set; }
     
-    public static CStageSongSelection stageSongSelection => StageManager.stageSongSelection;
     public static CStagePerfGuitarScreen stagePerfGuitarScreen => StageManager.stagePerfGuitarScreen;
     public static CStagePerfDrumsScreen stagePerfDrumsScreen => StageManager.stagePerfDrumsScreen;
     
@@ -175,7 +160,6 @@ internal class CDTXMania : Game
 
     public static SongDb.SongDb SongDb { get; private set; }
 
-    public static CActFlushGPU actFlushGPU { get; private set; }
     public static CSoundManager SoundManager { get; private set; }
 
     public static string executableDirectory { get; private set; }
@@ -192,31 +176,15 @@ internal class CDTXMania : Game
 
     public Device Device => GraphicsDeviceManager.Direct3D9.Device;
 
-    private static Size currentClientSize // #23510 2010.10.27 add yyagi to keep current window size
-    {
-        get;
-        set;
-    }
-
-    //		public static CTimer ct;
-    
     //fork
     public static STDGBVALUE<List<int>> listAutoGhostLag = new();
     public static STDGBVALUE<List<int>> listTargetGhsotLag = new();
 
     public static STDGBVALUE<CScoreIni.CPerformanceEntry> listTargetGhostScoreData = new();
-
-
-    //stuff to render game inside window
-    private Texture gameRenderTargetTexture;
-    private Surface gameRenderTargetSurface;
-    private Surface mainRenderTarget;
-    public static bool renderGameToSurface = false;
     
     //new
     public static UIGroup persistentUIGroup { get; private set; } = new("PersistentUIGroup");
     public static GitaDoraTransition gitadoraTransition { get; private set; }
-    public static LogWindow logWindow { get; private set; }
 
     // Constructor
     public CDTXMania(DTXManiaGL dtxManiaGl)
@@ -294,8 +262,6 @@ internal class CDTXMania : Game
             try
             {
                 Trace.Listeners.Add(new CTraceLogListener(new StreamWriter("DTXManiaLog.txt", false, Encoding.Unicode)));
-                logWindow = new LogWindow();
-                Trace.Listeners.Add(logWindow);
             }
             catch (UnauthorizedAccessException) // #24481 2011.2.20 yyagi
             {
@@ -324,88 +290,6 @@ internal class CDTXMania : Game
         #endregion
         
         strWindowTitle = appName + " " + VERSION;
-
-        // #region [ Initialize window ]
-        //
-        // //---------------------
-        // Window.StartPosition = FormStartPosition.Manual; // #30675 2013.02.04 ikanick add
-        // Window.Location = new Point(ConfigIni.nInitialWindowXPosition, ConfigIni.nInitialWindowYPosition); // #30675 2013.02.04 ikanick add
-        //
-        // Window.Text = strWindowTitle;
-        // Window.ClientSize = new Size(ConfigIni.nWindowWidth, ConfigIni.nWindowHeight); // #34510 yyagi 2010.10.31 to change window size got from Config.ini
-        // if (!ConfigIni.bFullScreenExclusive ||
-        //     ConfigIni.bFullScreenMode) // #23510 2010.11.02 yyagi: add; to recover window size in case bootup with fullscreen mode
-        // {
-        //     currentClientSize = new Size(ConfigIni.nWindowWidth, ConfigIni.nWindowHeight);
-        // }
-        //
-        // Window.MaximizeBox = true; // #23510 2010.11.04 yyagi: to support maximizing window
-        // Window.FormBorderStyle = FormBorderStyle.Sizable; // #23510 2010.10.27 yyagi: changed from FixedDialog to Sizable, to support window resize
-        // Window.ShowIcon = true;
-        // base.Window.Icon = Properties.Resources.dtx;
-        // Window.KeyDown += Window_KeyDown;
-        // Window.KeyUp += Window_KeyUp;
-        // Window.KeyPress += Window_KeyPress;
-        // Window.MouseMove += Window_MouseMove;
-        // Window.MouseDown += Window_MouseDown;
-        // Window.MouseUp += Window_MouseUp;
-        // Window.MouseWheel += Window_MouseWheel;
-        // Window.MouseDoubleClick += Window_MouseDoubleClick; // #23510 2010.11.13 yyagi: to go fullscreen mode
-        // Window.ResizeEnd += Window_ResizeEnd; // #23510 2010.11.20 yyagi: to set resized window size in Config.ini
-        // Window.ApplicationActivated += Window_ApplicationActivated;
-        // Window.ApplicationDeactivated += Window_ApplicationDeactivated;
-        // //Add CIMEHook
-        // Window.Controls.Add(cIMEHook = new CIMEHook());
-        // //---------------------
-        //
-        // #endregion
-
-        // //Init DX9
-        // SafeInitialize("DX9", () =>
-        // {
-        //     DeviceSettings settings = new();
-        //     if (ConfigIni.bFullScreenExclusive)
-        //     {
-        //         settings.Windowed = ConfigIni.bWindowMode;
-        //     }
-        //     else
-        //     {
-        //         settings.Windowed = true; // #30666 2013.2.2 yyagi: Fullscreenmode is "Maximized window" mode
-        //     }
-        //
-        //     settings.BackBufferWidth = GameWindowSize.Width;
-        //     settings.BackBufferHeight = GameWindowSize.Height;
-        //
-        //     settings.EnableVSync = ConfigIni.bVerticalSyncWait;
-        //
-        //     if (ConfigIni.bWindowMode)
-        //     {
-        //         settings.BackBufferWidth = ConfigIni.nWindowWidth;
-        //         settings.BackBufferHeight = ConfigIni.nWindowHeight;
-        //     }
-        //     else
-        //     {
-        //         if (ConfigIni.bFullScreenExclusive)
-        //         {
-        //             settings.BackBufferWidth = Screen.PrimaryScreen.Bounds.Width;
-        //             settings.BackBufferHeight = Screen.PrimaryScreen.Bounds.Height;
-        //         }
-        //     }
-        //
-        //     GraphicsDeviceManager.ChangeDevice(settings);
-        //     
-        //     IsFixedTimeStep = false;
-        //     Window.ClientSize = new Size(ConfigIni.nWindowWidth, ConfigIni.nWindowHeight);
-        //     InactiveSleepTime = TimeSpan.FromMilliseconds((float)(ConfigIni.n非フォーカス時スリープms));
-        //
-        //     // #23568 2010.11.4 ikanick changed ( 1 -> ConfigIni )
-        //     if (!ConfigIni.bFullScreenExclusive)
-        //     {
-        //         tSwitchFullScreenMode(); // #30666 2013.2.2 yyagi: finalize settings for "Maximized window mode"
-        //     }
-        //
-        //     actFlushGPU = new CActFlushGPU();
-        // });
         
         DTX = null;
 
@@ -509,15 +393,13 @@ internal class CDTXMania : Game
             StageManager.stageStartup,
             StageManager.stageTitle,
             StageManager.stageConfig,
-            StageManager.stageSongSelection,
+            // StageManager.stageSongSelection,
             StageManager.stageSongLoading,
             StageManager.stagePerfDrumsScreen,
             StageManager.stagePerfGuitarScreen,
             StageManager.stageResult,
             StageManager.stageChangeSkin,
             StageManager.stageEnd,
-
-            actFlushGPU
         ];
 
         #endregion
@@ -554,72 +436,6 @@ internal class CDTXMania : Game
 
     // Methods
 
-    public void tSwitchFullScreenMode()
-    {
-        if (ConfigIni != null)
-        {
-            if (ConfigIni.bFullScreenMode) // #23510 2010.10.27 yyagi: backup current window size before going fullscreen mode
-            {
-                currentClientSize = Window.ClientSize;
-                ConfigIni.nWindowWidth = Window.ClientSize.Width;
-                ConfigIni.nWindowHeight = Window.ClientSize.Height;
-                //FDK.CTaskBar.ShowTaskBar( false );
-            }
-
-            if (ConfigIni.bFullScreenExclusive)
-            {
-                // Full screen uses DirectX Exclusive mode
-                DeviceSettings settings = GraphicsDeviceManager.CurrentSettings.Clone();
-                if (ConfigIni.bWindowMode != settings.Windowed)
-                {
-                    settings.Windowed = ConfigIni.bWindowMode;
-                    
-                    //get monitor resolution
-                    if (ConfigIni.bWindowMode)
-                    {
-                        // #30666 2013.2.2 yyagi: Fullscreen mode is "Maximized window" mode
-                        settings.BackBufferWidth = currentClientSize.Width;
-                        settings.BackBufferHeight = currentClientSize.Height;
-                    }
-                    else
-                    {
-                        settings.BackBufferWidth = Screen.PrimaryScreen.Bounds.Width;
-                        settings.BackBufferHeight = Screen.PrimaryScreen.Bounds.Height;
-                    }
-                    
-                    GraphicsDeviceManager.ChangeDevice(settings);
-                    if (ConfigIni.bWindowMode) // #23510 2010.10.27 yyagi: to resume window size from backuped value
-                    {
-                        Window.ClientSize = new Size(currentClientSize.Width, currentClientSize.Height);
-                    }
-                }
-            }
-            else
-            {
-                // Only use windows maximized/restored sizes
-                if (ConfigIni.bWindowMode) // #23510 2010.10.27 yyagi: to resume window size from backuped value
-                {
-                    // #30666 2013.2.2 yyagi Don't use Fullscreen mode becasue NVIDIA GeForce is
-                    // tend to delay drawing on Fullscreen mode. So DTXMania uses Maximized window
-                    // in spite of using fullscreen mode.
-                    app.Window.WindowState = FormWindowState.Normal;
-                    app.Window.FormBorderStyle = FormBorderStyle.Sizable;
-                    app.Window.WindowState = FormWindowState.Normal;
-                    Window.ClientSize = new Size(currentClientSize.Width, currentClientSize.Height);
-                    //FDK.CTaskBar.ShowTaskBar( true );
-                }
-                else
-                {
-                    app.Window.WindowState = FormWindowState.Normal;
-                    app.Window.FormBorderStyle = FormBorderStyle.None;
-                    app.Window.WindowState = FormWindowState.Maximized;
-                }
-
-                UpdateCursorState();
-            }
-        }
-    }
-    
     #region [ #24609 リザルト画像をpngで保存する ] // #24609 2011.3.14 yyagi; to save result screen in case BestRank or HiSkill.
 
     /// <summary>
@@ -628,6 +444,9 @@ internal class CDTXMania : Game
     /// <param name="strFilename">保存するファイル名(フルパス)</param>
     public bool SaveResultScreen(string strFullPath)
     {
+        Trace.TraceInformation($"Saving result screen to {strFullPath}");
+        Trace.TraceError("Saving result screen is currently disabled because of moving to OpenGL.");
+        return false;
         string strSavePath = Path.GetDirectoryName(strFullPath);
         if (!Directory.Exists(strSavePath))
         {
@@ -664,93 +483,7 @@ internal class CDTXMania : Game
         }
     }
 
-    public static float physicalRenderScale = 1.0f;
     public static float renderScale = 1.0f;
-    
-    // protected override void LoadContent()
-    // {
-    //     Trace.TraceInformation("CDTXMania.LoadContent()");
-    //     DeviceResetManager.NotifyDeviceReset();
-    //
-    //     UpdateCursorState();
-    //
-    //     Device.SetTransform(TransformState.View,
-    //         Matrix.LookAtLH(new Vector3(0f, 0f, (float)(-GameFramebufferSize.Height / 2 * Math.Sqrt(3.0))),
-    //             new Vector3(0f, 0f, 0f), new Vector3(0f, 1f, 0f)));
-    //     Device.SetTransform(TransformState.Projection,
-    //         Matrix.PerspectiveFovLH(CConversion.DegreeToRadian((float)60f),
-    //             ((float)Device.Viewport.Width) / ((float)Device.Viewport.Height), -100f, 100f));
-    //     Device.SetRenderState(RenderState.Lighting, false);
-    //     Device.SetRenderState(RenderState.ZEnable, false);
-    //     Device.SetRenderState(RenderState.AntialiasedLineEnable, false);
-    //     Device.SetRenderState(RenderState.AlphaTestEnable, true);
-    //     Device.SetRenderState(RenderState.AlphaRef, 10);
-    //
-    //     Device.SetRenderState(RenderState.MultisampleAntialias, true);
-    //     Device.SetSamplerState(0, SamplerState.MinFilter, TextureFilter.Linear);
-    //     Device.SetSamplerState(0, SamplerState.MagFilter, TextureFilter.Linear);
-    //
-    //     Device.SetRenderState(RenderState.AlphaFunc, Compare.Greater);
-    //     Device.SetRenderState(RenderState.AlphaBlendEnable, true);
-    //     Device.SetRenderState(RenderState.SourceBlend, Blend.SourceAlpha);
-    //     Device.SetRenderState(RenderState.DestinationBlend, Blend.InverseSourceAlpha);
-    //     Device.SetTextureStageState(0, TextureStage.AlphaOperation, TextureOperation.Modulate);
-    //     Device.SetTextureStageState(0, TextureStage.AlphaArg1, 2);
-    //     Device.SetTextureStageState(0, TextureStage.AlphaArg2, 1);
-    //
-    //     //init imgui
-    //     context = ImGui.CreateContext();
-    //
-    //     ImGui.SetCurrentContext(context);
-    //     ImGuiImplD3D9.SetCurrentContext(context);
-    //
-    //     var io = ImGui.GetIO();
-    //
-    //     ImGui.StyleColorsDark();
-    //
-    //     unsafe
-    //     {
-    //         //var font = ImGui.GetIO().Fonts.AddFontFromFileTTF(Path.Combine(executableDirectory, "Fonts", "NotoSansCJKjp-Regular.otf"), 20f, ImGui.GetIO().Fonts.GetGlyphRangesJapanese()); 
-    //         // ImGui.GetIO().Fonts.Build();
-    //     }
-    //
-    //     var settings = app.GraphicsDeviceManager.CurrentSettings;
-    //     io.DisplaySize = new Vector2(settings.BackBufferWidth, settings.BackBufferHeight);
-    //     io.DisplayFramebufferScale = new Vector2(1, 1);
-    //     ImGuizmo.SetRect(0, 0, io.DisplaySize.X, io.DisplaySize.Y);
-    //
-    //     renderScale = settings.BackBufferWidth / (float)GameFramebufferSize.Width;
-    //     physicalRenderScale = renderScale;
-    //
-    //     io.ConfigFlags |= ImGuiConfigFlags.DockingEnable;
-    //
-    //     unsafe
-    //     {
-    //         ImGuiImplD3D9.Init(new IDirect3DDevice9Ptr((IDirect3DDevice9*)app.Device.NativePointer));
-    //     }
-    //
-    //     ImGuizmo.SetImGuiContext(context);
-    //
-    //     gameRenderTargetTexture = new Texture(Device, 1280, 720, 1, Usage.RenderTarget, Format.A8R8G8B8, Pool.Default);
-    //     gameRenderTargetSurface = gameRenderTargetTexture.GetSurfaceLevel(0);
-    //
-    //     mainRenderTarget = Device.GetRenderTarget(0);
-    // }
-
-    // protected override void UnloadContent()
-    // {
-    //     Trace.TraceInformation("CDTXMania.UnloadContent()");
-    //     DeviceResetManager.NotifyDeviceLost();
-    //
-    //     gameRenderTargetSurface.Dispose();
-    //     gameRenderTargetTexture.Dispose();
-    //     mainRenderTarget.Dispose();
-    //
-    //     ImGuiImplD3D9.InvalidateDeviceObjects();
-    //     ImGuiImplD3D9.Shutdown();
-    //
-    //     ImGui.DestroyContext();
-    // }
 
     protected override void OnExiting(EventArgs e)
     {
@@ -759,37 +492,10 @@ internal class CDTXMania : Game
         base.OnExiting(e);
     }
 
-    public static void UpdateCursorState()
-    {
-        if (InspectorManager.inspectorEnabled || InspectorManager.logWindowEnabled)
-        {
-            if (!bMouseCursorShown)
-            {
-                Cursor.Show();
-                bMouseCursorShown = true;
-            }
-        }
-        else if (ConfigIni.bWindowMode)
-        {
-            if (!bMouseCursorShown)
-            {
-                Cursor.Show();
-                bMouseCursorShown = true;
-            }
-        }
-        else if (bMouseCursorShown)
-        {
-            Cursor.Hide();
-            bMouseCursorShown = false;
-        }
-    }
-
     public void Update()
     {
     }
-
-    private long lastDrawTime;
-
+    
     protected override void Draw(GameTime gameTime)
     {
         Draw();
@@ -797,9 +503,6 @@ internal class CDTXMania : Game
 
     public void Draw()
     {
-        float delta = (Timer.nCurrentTime - lastDrawTime) / 1000.0f;
-        lastDrawTime = Timer.nCurrentTime;
-        
         //....????
         if (SoundManager == null)
         {
@@ -808,154 +511,43 @@ internal class CDTXMania : Game
 
         SoundManager.t再生中の処理をする();
 
-        if (Timer != null)
-            Timer.tUpdate();
-        if (CSoundManager.rcPerformanceTimer != null)
-            CSoundManager.rcPerformanceTimer.tUpdate();
-
-        if (InputManager != null)
+        Timer.tUpdate();
+        CSoundManager.rcPerformanceTimer.tUpdate();
+        
+        //don't constantly scan unless we lost a midi device
+        if (StageManager.rCurrentStage.eStageID == CStage.EStage.Performance_6)
         {
-            if (StageManager.rCurrentStage.eStageID == CStage.EStage.Performance_6)
-            {
-                if (InputManager.lostMidiDevice)
-                {
-                    InputManager.ScanDevices();
-                }
-            }
-            else
+            if (InputManager.lostMidiDevice)
             {
                 InputManager.ScanDevices();
             }
-            InputManager.tPolling(bApplicationActive, ConfigIni.bBufferedInput);
         }
-
-        if (FPS != null)
-            FPS.tUpdateCounter();
-
-        // if (Device == null)
-        //     return;
-
+        else
+        {
+            InputManager.ScanDevices();
+        }
+        
+        //poll input
+        InputManager.tPolling(bApplicationActive, ConfigIni.bBufferedInput);
+        
+        //todo: replace
+        FPS.tUpdateCounter();
+        
         if (bApplicationActive) // DTXMania本体起動中の本体/モニタの省電力モード移行を抑止
             CPowerManagement.tDisableMonitorSuspend();
-
-        // #xxxxx 2013.4.8 yyagi; sleepの挿入位置を、EndScnene～Present間から、BeginScene前に移動。描画遅延を小さくするため。
-
-        #region [ スリープ ]
-
-        if (ConfigIni.nフレーム毎スリープms >= 0) // #xxxxx 2011.11.27 yyagi
+        
+        if (ConfigIni.nSleepNMsEveryFrame >= 0) // #xxxxx 2011.11.27 yyagi
         {
-            Thread.Sleep(ConfigIni.nフレーム毎スリープms);
+            Thread.Sleep(ConfigIni.nSleepNMsEveryFrame); ///?????
         }
-
-        #endregion
-
-        //ProcessWindowMessages();
-
-//         bool forceFrameBufferRenderer = StageManager.rCurrentStage.eStageID is CStage.EStage.Performance_6 or CStage.EStage.Result_7;
-//         
-// //#if INSPECTOR
-//         //cache this value to prevent it from changing during the frame
-//         bool renderGameToWindow = renderGameToSurface;
-//
-//         if (renderGameToWindow || forceFrameBufferRenderer)
-//         {
-//             Device.SetRenderTarget(0, gameRenderTargetSurface);
-//         }
-// //#endif
-//
-//         Device.Clear(ClearFlags.ZBuffer | ClearFlags.Target, SharpDX.Color.Black, 1f, 0);
-//         Device.BeginScene();
-
-//#if INSPECTOR
-        // ImGui.SetCurrentContext(context);
-        // ImGuizmo.SetImGuiContext(context);
-        // ImGuiImplD3D9.SetCurrentContext(context);
-        //
-        // ImGuiImplD3D9.NewFrame();
-        // ImGui.NewFrame();
-        //
-        // ImGuizmo.BeginFrame();
-        //
-        // ImGuizmo.Enable(true);
-        // ImGuizmo.SetOrthographic(true);
-
-//         if (!renderGameToWindow && !forceFrameBufferRenderer)
-//         {
-//             ImGuiIOPtr io = ImGui.GetIO();
-//             ImGuizmo.SetRect(0, 0, io.DisplaySize.X, io.DisplaySize.Y);
-//             ImGuizmo.SetDrawlist(ImGui.GetBackgroundDrawList());
-//         }
-// //#endif
-//
-//         renderScale = forceFrameBufferRenderer ? 1.0f : physicalRenderScale;
+        
         StageManager.DrawStage();
         
         persistentUIGroup.scale.X = renderScale;
         persistentUIGroup.scale.Y = renderScale;
         persistentUIGroup.Draw(Matrix4x4.Identity);
-        renderScale = physicalRenderScale;
 
         StageManager.HandleStageChanges();
-
-//#if INSPECTOR
-        // if (renderGameToWindow || forceFrameBufferRenderer)
-        // {
-        //     Device.SetRenderTarget(0, mainRenderTarget);
-        //     Device.Clear(ClearFlags.ZBuffer | ClearFlags.Target, SharpDX.Color.Black, 1f, 0);
-        // }
-        //
-        // if (forceFrameBufferRenderer)
-        // {
-        //     CTexture.tDraw2DMatrix(app.Device, gameRenderTargetTexture, Matrix.Scaling(physicalRenderScale), new SharpDX.Vector2(GameFramebufferSize.Width, GameFramebufferSize.Height), new RectangleF(0, 0, GameFramebufferSize.Width, GameFramebufferSize.Height));
-        // }
-        
-        // Device.EndScene();
-        //
-        // ImGui.EndFrame();
-        // ImGui.Render();
-        // ImGuiImplD3D9.RenderDrawData(ImGui.GetDrawData());
-//#else
-// Device.EndScene();
-//#endif
-
-        // Present()は game.csのOnFrameEnd()に登録された、GraphicsDeviceManager.game_FrameEnd() 内で実行されるので不要
-        // (つまり、Present()は、Draw()完了後に実行される)
-        //actFlushGPU.OnUpdateAndDraw(); // Flush GPU	// EndScene()～Present()間 (つまりVSync前) でFlush実行
-
-        // #region [ Fullscreen mode switching ]
-        //
-        // if (changeFullscreenModeOnNextFrame)
-        // {
-        //     ConfigIni.bFullScreenMode = !ConfigIni.bFullScreenMode;
-        //     app.tSwitchFullScreenMode();
-        //     changeFullscreenModeOnNextFrame = false;
-        // }
-        //
-        // #endregion
-        //
-        // #region [ VSync switching ]
-        //
-        // if (changeVSyncModeOnNextFrame)
-        // {
-        //     bool bIsMaximized =
-        //         Window.IsMaximized; // #23510 2010.11.3 yyagi: to backup current window mode before changing VSyncWait
-        //     currentClientSize =
-        //         Window.ClientSize; // #23510 2010.11.3 yyagi: to backup current window size before changing VSyncWait
-        //     DeviceSettings currentSettings = app.GraphicsDeviceManager.CurrentSettings;
-        //     currentSettings.EnableVSync = ConfigIni.bVerticalSyncWait;
-        //     app.GraphicsDeviceManager.ChangeDevice(currentSettings);
-        //     changeVSyncModeOnNextFrame = false;
-        //     Window.ClientSize =
-        //         new Size(currentClientSize.Width,
-        //             currentClientSize.Height); // #23510 2010.11.3 yyagi: to resume window size after changing VSyncWait
-        //     if (bIsMaximized)
-        //     {
-        //         Window.WindowState =
-        //             FormWindowState.Maximized; // #23510 2010.11.3 yyagi: to resume window mode after changing VSyncWait
-        //     }
-        // }
-        //
-        // #endregion
     }
 
     public static void tRunGarbageCollector()
@@ -974,14 +566,8 @@ internal class CDTXMania : Game
     // Other
 
     #region [ Texture Creation / Disposal (why is this in the main game class??) ]
-    
-    public static CTexture LoadFromPath(string fileName)
-    {
-        return new CTexture();
-        return LoadFromPath(fileName, false);
-    }
 
-    public static CTexture LoadFromPath(string fileName, bool b黒を透過する)
+    public static CTexture LoadFromPath(string fileName, bool b黒を透過する = false)
     {
         return new CTexture();
         if (app == null)
@@ -1012,24 +598,6 @@ internal class CDTXMania : Game
             //Trace.WriteLine( "CTextureを解放 Size W:" + tx.szImageSize.Width + " H:" + tx.szImageSize.Height );
             tx.Dispose();
             tx = null;
-        }
-    }
-
-    public static CTexture tGenerateTexture(byte[] txData, bool b黒を透過する)
-    {
-        if (app == null)
-        {
-            return null;
-        }
-
-        try
-        {
-            return new CTexture(app.Device, txData, TextureFormat, b黒を透過する);
-        }
-        catch (CTextureCreateFailedException)
-        {
-            Trace.TraceError("テクスチャの生成に失敗しました。(txData)");
-            return null;
         }
     }
 
@@ -1097,7 +665,7 @@ internal class CDTXMania : Game
 
     //-----------------
 
-    public static CScoreIni tScoreIniへBGMAdjustとHistoryとPlayCountを更新(string strNewHistoryLine)
+    public static CScoreIni UpdateBGMAdjustHistoryPlayCountIntScoreIni(string strNewHistoryLine)
     {
         string strFilename = DTX.strFileNameFullPath + ".score.ini";
         CScoreIni ini = new(strFilename);
@@ -1200,18 +768,11 @@ internal class CDTXMania : Game
     #region [ private ]
 
     //-----------------
-    private static bool bMouseCursorShown = true;
     private bool bTerminated;
     private static CDTX dtx;
     private List<CActivity> mainActivities;
-    private MouseButtons mb = MouseButtons.Left;
     private string strWindowTitle = "";
-
-    //
-    public CIMEHook cIMEHook;
-    public CActSearchBox textboxテキスト入力中;
-    public bool bテキスト入力中 => textboxテキスト入力中 != null;
-
+    
     private void tTerminate() // t終了処理
     {
         if (!bTerminated)

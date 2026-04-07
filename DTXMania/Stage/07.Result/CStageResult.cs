@@ -686,7 +686,7 @@ internal class CStageResult : CStage
 		}
 		if (CDTXMania.Input.ActionDecide())
 		{
-			actFI.tフェードイン完了();					// #25406 2011.6.9 yyagi
+			actFI.tFinishFadeOut();					// #25406 2011.6.9 yyagi
 			//actResultImage.tアニメを完了させる();
 			actParameterPanel.tアニメを完了させる();
 			actRank.tアニメを完了させる();

@@ -3,20 +3,19 @@ using Hexa.NET.ImGui;
 
 namespace OpenGLTest;
 
-internal static class PrototypeControlsWindow
+internal static class DisplayControlsWindow
 {
     public static void Draw(GlfwOpenGlHost host)
     {
         ImGui.SetNextWindowSize(new Vector2(320, 240), ImGuiCond.FirstUseEver);
         ImGui.Begin("Display Controls");
+        
         ImGui.Text($"Renderer: {host.Renderer.name}");
         ImGui.Text($"FPS: {host.Fps:F1}");
         ImGui.Text($"Frame time: {host.FrameTimeMs:F2} ms");
         ImGui.Text($"Window: {host.WindowWidth} x {host.WindowHeight}");
         ImGui.Text($"Framebuffer: {host.FramebufferWidth} x {host.FramebufferHeight}");
-        ImGui.Text($"Working set: {host.WorkingSetMb:F1} MB");
-        ImGui.Text($"Private bytes: {host.PrivateMb:F1} MB");
-        ImGui.Text($"Managed heap: {host.ManagedMb:F1} MB");
+
         ImGui.Separator();
 
         bool vsyncEnabled = host.VsyncEnabled;

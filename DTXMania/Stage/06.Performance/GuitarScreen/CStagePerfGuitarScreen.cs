@@ -35,8 +35,6 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		listChildActivities.Add( actPlayInfo = new CActPerformanceInformation() );
 		listChildActivities.Add( actFI = new CActFIFOBlackStart() );
 		listChildActivities.Add( actFO = new CActFIFOBlack() );
-		listChildActivities.Add( actFOClear = new CActFIFOWhite() );
-		listChildActivities.Add( actFOStageClear = new CActFIFOWhiteClear());
 		listChildActivities.Add( actProgressBar = new CActPerfProgressBar());
 		listChildActivities.Add( actBackgroundAVI = new CActSelectBackgroundAVI());
 	}
@@ -203,8 +201,7 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		if (bIsFinishedPlaying && (ePhaseID == EPhase.Common_DefaultState))
 		{
 			eReturnValueAfterFadeOut = EPerfScreenReturnValue.StageClear;
-			ePhaseID = EPhase.PERFORMANCE_STAGE_CLEAR_FadeOut;
-			actFOStageClear.tStartFadeOut();
+			ePhaseID = EPhase.PERFORMANCE_STAGE_CLEAR;
 		}
 
 		if (bIsFinishedFadeout)

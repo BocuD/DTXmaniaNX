@@ -80,7 +80,7 @@ public class CScore
         public bool bHiddenLevel;
         public CDTX.EType SongType;
         public double Bpm;
-        public int Duration;
+        public int DurationMs;
         public STDGBVALUE<bool> bIsClassicChart;
 
         public STDGBVALUE<bool> bScoreExists;
@@ -328,7 +328,7 @@ public class CScore
             HighSongSkill = new STMusicInformation.STSKILL(),
             SongType = CDTX.EType.DTX,
             Bpm = 120.0,
-            Duration = 0,
+            DurationMs = 0,
             bIsClassicChart = new STDGBVALUE<bool>()
             {
                 Drums = false,

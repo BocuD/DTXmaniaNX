@@ -67,9 +67,9 @@ namespace DTXMania.UI.OpenGL
             _renderer.RendererDisposed -= OnRendererDisposedEvent;
         }
         
-        public void DrawWindow(ref bool open)
+        public void DrawWindow()
         {
-            if (!ImGui.Begin("Texture Inspector", ref open))
+            if (!ImGui.Begin("Texture Inspector"))
             {
                 ImGui.End();
                 return;

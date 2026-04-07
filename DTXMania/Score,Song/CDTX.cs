@@ -164,8 +164,8 @@ public class CDTX : CActivity
         public override void PutLog(string strテクスチャファイル名)
         {
             Trace.TraceInformation("テクスチャを生成しました。({0})({1})(Gr:{2}x{3})(Tx:{4}x{5})", strコメント文, strテクスチャファイル名,
-                tx画像.szImageSize.Width, tx画像.szImageSize.Height, tx画像.szTextureSize.Width,
-                tx画像.szTextureSize.Height);
+                txImage.szImageSize.Width, txImage.szImageSize.Height, txImage.szTextureSize.Width,
+                txImage.szTextureSize.Height);
         }
 
         public override string ToString()
@@ -180,10 +180,10 @@ public class CDTX : CActivity
         public int n番号;
         public string strコメント文 = "";
         public string strファイル名 = "";
-        public CTexture tx画像;
-        public int n高さ => tx画像.szImageSize.Height;
+        public CTexture txImage;
+        public int n高さ => txImage.szImageSize.Height;
 
-        public int n幅 => tx画像.szImageSize.Width;
+        public int n幅 => txImage.szImageSize.Width;
         public bool b黒を透過する;
         public Bitmap bitmap;
 
@@ -214,27 +214,25 @@ public class CDTX : CActivity
             if (!File.Exists(strテクスチャファイル名))
             {
                 Trace.TraceWarning("File doesn't exist!({0})({1})", strコメント文, strテクスチャファイル名);
-                tx画像 = null;
+                txImage = null;
                 return;
             }
 
             // テクスチャを作成。
-            byte[] txData = File.ReadAllBytes(strテクスチャファイル名);
-            tx画像 = CDTXMania.tGenerateTexture(txData, b黒を透過する);
+            txImage = CDTXMania.LoadFromPath(strテクスチャファイル名, b黒を透過する);
 
-            if (tx画像 != null)
+            if (txImage != null)
             {
                 // 作成成功。
                 if (CDTXMania.ConfigIni.bLog作成解放ログ出力)
                     PutLog(strテクスチャファイル名);
-                txData = null;
                 bUse = true;
             }
             else
             {
                 // 作成失敗。
                 Trace.TraceError("テクスチャの生成に失敗しました。({0})({1})", strコメント文, strテクスチャファイル名);
-                tx画像 = null;
+                txImage = null;
             }
         }
 
@@ -250,9 +248,9 @@ public class CDTX : CActivity
                 bitmap.MakeTransparent(Color.Black); // 黒を透過色にする
             }
 
-            tx画像 = CDTXMania.tGenerateTexture(bitmap, b黒を透過する);
+            txImage = CDTXMania.tGenerateTexture(bitmap, b黒を透過する);
 
-            if (tx画像 != null)
+            if (txImage != null)
             {
                 // 作成成功。
                 if (CDTXMania.ConfigIni.bLog作成解放ログ出力)
@@ -263,7 +261,7 @@ public class CDTX : CActivity
             {
                 // 作成失敗。
                 Trace.TraceError("テクスチャの生成に失敗しました。({0})({1})", strコメント文, strテクスチャファイル名);
-                tx画像 = null;
+                txImage = null;
             }
 
             if (bitmap != null)
@@ -284,7 +282,7 @@ public class CDTX : CActivity
             if (bDisposed済み)
                 return;
 
-            if (tx画像 != null)
+            if (txImage != null)
             {
                 #region [ strテクスチャファイル名 を作成。]
 
@@ -298,7 +296,7 @@ public class CDTX : CActivity
 
                 #endregion
 
-                CDTXMania.tReleaseTexture(ref tx画像);
+                CDTXMania.tReleaseTexture(ref txImage);
 
                 if (CDTXMania.ConfigIni.bLog作成解放ログ出力)
                     Trace.TraceInformation("テクスチャを解放しました。({0})({1})", strコメント文, strテクスチャファイル名);

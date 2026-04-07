@@ -2,7 +2,6 @@
 using System.Numerics;
 using System.Runtime.InteropServices;
 using DTXMania.Core;
-using DTXMania.UI;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.Item;
 using FDK;
@@ -212,7 +211,7 @@ internal class CActSelectPopupMenu : CActivity
     {
         if (bActivated)
         {
-            ui = CDTXMania.stageSongSelection.ui.AddChild(new UIGroup("Popup Menu"));
+            ui = CDTXMania.StageManager.stageSongSelection.ui.AddChild(new UIGroup("Popup Menu"));
             ui.position = new Vector3(1280.0f/2.0f, 720.0f/2.0f + 20.0f, 0); 
             ui.anchor = new Vector2(0.5f, 0.5f);
             ui.renderOrder = 100;

@@ -1,11 +1,12 @@
 ﻿using System.Diagnostics;
+using System.Globalization;
 using System.Numerics;
 using DiscordRPC;
 using DTXMania.Core;
 using DTXMania.SongDb;
 using DTXMania.SongDb.Sorting;
-using DTXMania.UI;
 using DTXMania.UI.Drawable;
+using DTXMania.UI.DynamicElements;
 
 namespace DTXMania;
 
@@ -32,6 +33,15 @@ public class CStageSongSelectionNew : CStage
         CacheThumbnails,
         ReadyToOpen,
         Complete
+    }
+    
+    public enum EReturnValue : int  // E戻り値
+    {
+        Continue,      // 継続
+        ReturnToTitle, // タイトルに戻る
+        Selected,      // 選曲した
+        CallConfig,    // コンフィグ呼び出し
+        ChangeSking    // スキン変更
     }
     
     protected override RichPresence Presence => new CDTXRichPresence
@@ -86,6 +96,16 @@ public class CStageSongSelectionNew : CStage
             container.position = new Vector3(765, 320, 0);
             selectionContainers[sorter] = container;
         }
+        
+        dynamicStringSources["SongName"] = new DynamicStringSource(() => selectedChart?.SongInformation.Title ?? "");
+        dynamicStringSources["SongArtist"] = new DynamicStringSource(() => selectedChart?.SongInformation.ArtistName ?? "");
+        dynamicStringSources["SongGenre"] = new DynamicStringSource(() => selectedChart?.SongInformation.Genre ?? "");
+        dynamicStringSources["SongBPM"] = new DynamicStringSource(() => selectedChart?.SongInformation.Bpm.ToString(CultureInfo.InvariantCulture) ?? "");
+        dynamicStringSources["SongDuration"] = new DynamicStringSource(() =>
+        {
+            int? ms = selectedChart?.SongInformation.DurationMs;
+            return ms != null ? TimeSpan.FromMilliseconds(ms.Value).ToString(@"m\:ss") : "";
+        });
     }
 
     public override void InitializeDefaultUI()

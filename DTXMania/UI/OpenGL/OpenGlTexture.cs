@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using System.Drawing;
-using System.IO;
 using System.Numerics;
 using Hexa.NET.ImGui;
 using DTXMania.UI.Drawable;

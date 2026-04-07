@@ -536,7 +536,7 @@ internal class CConfigIni
 	public int nPedalLagTime;   //#xxxxx 2013.07.11 kairera0467
 
 	public int n非フォーカス時スリープms;       // #23568 2010.11.04 ikanick add
-	public int nフレーム毎スリープms;			// #xxxxx 2011.11.27 yyagi add
+	public int nSleepNMsEveryFrame;			// #xxxxx 2011.11.27 yyagi add
 	public int nPlaySpeed;
 	public bool bSaveScoreIfModifiedPlaySpeed;
 	public int nSongSelectSoundPreviewWaitTimeMs;
@@ -1023,7 +1023,7 @@ internal class CConfigIni
 		nShutterInSide.Drums = 0;
 		nShutterOutSide = new STDGBVALUE<int>();
 		nShutterOutSide.Drums = 0;
-		nフレーム毎スリープms = -1;			// #xxxxx 2011.11.27 yyagi add
+		nSleepNMsEveryFrame = -1;			// #xxxxx 2011.11.27 yyagi add
 		n非フォーカス時スリープms = 1;			// #23568 2010.11.04 ikanick add
 		_bGuitar有効 = false;
 		_bDrums有効 = true;
@@ -1435,7 +1435,7 @@ internal class CConfigIni
 		sw.WriteLine();
 		sw.WriteLine("; フレーム毎のsleep値[ms] (-1でスリープ無し, 0以上で毎フレームスリープ。動画キャプチャ等で活用下さい)");	// #xxxxx 2011.11.27 yyagi add
 		sw.WriteLine("; A sleep time[ms] per frame.");							//
-		sw.WriteLine("SleepTimePerFrame={0}", nフレーム毎スリープms); //
+		sw.WriteLine("SleepTimePerFrame={0}", nSleepNMsEveryFrame); //
 		sw.WriteLine();											        			//
 		#endregion
 		#region [ WASAPI/ASIO関連 ]
@@ -2622,7 +2622,7 @@ internal class CConfigIni
 									}
 									else if (str3.Equals("SleepTimePerFrame"))		// #23568 2011.11.27 yyagi
 									{
-										nフレーム毎スリープms = CConversion.nRoundToRange(str4, -1, 50, nフレーム毎スリープms);
+										nSleepNMsEveryFrame = CConversion.nRoundToRange(str4, -1, 50, nSleepNMsEveryFrame);
 									}
 									else if (str3.Equals("Guitar"))
 									{

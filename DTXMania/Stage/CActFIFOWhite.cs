@@ -25,7 +25,7 @@ internal class CActFIFOWhite : CActivity
 		bテクスチャを描画する = bテクスチャの描画;
 		counter = new CCounter(0, 100, 5, CDTXMania.Timer);
 	}
-	public void tフェードイン完了()		// #25406 2011.6.9 yyagi
+	public void tFinishFadeOut()		// #25406 2011.6.9 yyagi
 	{
 		counter.nCurrentValue = counter.nEndValue;
 	}

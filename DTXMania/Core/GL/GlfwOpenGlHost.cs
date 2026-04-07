@@ -55,10 +55,7 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
     private int _fpsFrameCount;
     private float _displayedFps;
     private float _displayedFrameTimeMs;
-    private double _memorySampleAccumulator;
-    private float _workingSetMb;
-    private float _privateMb;
-    private float _managedMb;
+
     private float _deltaTime;
     private int _windowWidth;
     private int _windowHeight;
@@ -91,9 +88,6 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
     public int WindowHeight => _windowHeight;
     public int FramebufferWidth => _framebufferWidth;
     public int FramebufferHeight => _framebufferHeight;
-    public float WorkingSetMb => _workingSetMb;
-    public float PrivateMb => _privateMb;
-    public float ManagedMb => _managedMb;
 
     public void RequestVsync(bool enabled)
     {
@@ -152,6 +146,8 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
 
     public void Run()
     {
+        Trace.Listeners.Add(InspectorManager.logWindow);
+
         if (GLFW.Init() == 0)
         {
             throw new InvalidOperationException("GLFW initialization failed.");
@@ -463,7 +459,7 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
             _game.Render(targetWidth, targetHeight, _stopwatch.Elapsed.TotalSeconds);
             _gameRenderTarget.BindDefaultFramebuffer(Math.Max(_framebufferWidth, 1), Math.Max(_framebufferHeight, 1));
 
-            PrototypeControlsWindow.Draw(this);
+            DisplayControlsWindow.Draw(this);
             InspectorManager.Draw(_renderInGameWindow, _gameRenderTarget.TextureId, new Vector2(_gameRenderTarget.Width, _gameRenderTarget.Height));
             
             ImGui.Render();
@@ -495,7 +491,6 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
         _lastFrameTime = currentTime;
 
         UpdateFrameStats(_deltaTime);
-        UpdateMemoryStats(_deltaTime);
     }
 
     private void UpdateFrameStats(float deltaTime)
@@ -512,21 +507,6 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
         _displayedFrameTimeMs = 1000f / Math.Max(_displayedFps, 0.0001f);
         _fpsAccumulatedTime = 0;
         _fpsFrameCount = 0;
-    }
-
-    private void UpdateMemoryStats(float deltaTime)
-    {
-        _memorySampleAccumulator += deltaTime;
-        if (_memorySampleAccumulator < 0.5)
-        {
-            return;
-        }
-
-        using Process process = Process.GetCurrentProcess();
-        _workingSetMb = process.WorkingSet64 / (1024f * 1024f);
-        _privateMb = process.PrivateMemorySize64 / (1024f * 1024f);
-        _managedMb = GC.GetTotalMemory(false) / (1024f * 1024f);
-        _memorySampleAccumulator = 0;
     }
 
     private void ApplyPendingDisplayChanges()

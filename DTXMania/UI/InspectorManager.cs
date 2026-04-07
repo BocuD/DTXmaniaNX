@@ -14,9 +14,10 @@ public static class InspectorManager
     public static Inspector.Inspector inspector { get; private set; }
     public static HierarchyWindow hierarchyWindow { get; private set; }
     public static TextureInspector textureInspector { get; private set; }
+    public static LogWindow logWindow { get; } = new();
 
-    public static bool inspectorEnabled = true;
-    public static bool logWindowEnabled = true;
+    public static bool inspectorEnabled = false;
+    public static bool logWindowEnabled = false;
 
     public static ImDrawListPtr gizmoDrawList;
     public static Rectangle gizmoRect;
@@ -26,10 +27,24 @@ public static class InspectorManager
     public static string toRemove = string.Empty;
     public static UIDrawable? toRemoveDrawable => DrawableTracker.GetDrawable(toRemove);
 
+    private class Window(string name, Action draw)
+    {
+        public string name = name;
+        public bool enabled = true;
+        public Action draw = draw;
+    }
+    
+    private static readonly List<Window> windows = [];
+    
     static InspectorManager()
     {
         inspector = new Inspector.Inspector();
         hierarchyWindow = new HierarchyWindow();
+        
+        windows.Add(new Window("Inspector", () => inspector.Draw()));
+        windows.Add(new Window("Hierarchy", () => hierarchyWindow.Draw()));
+        windows.Add(new Window("Drawable Tracker", () => DrawableTracker.DrawWindow()));
+        windows.Add(new Window("Textures", () => textureInspector.DrawWindow()));
     }
 
     public static void Draw(bool drawGameWindow, ImTextureID? gameTextureId, Vector2 gameTextureSize)
@@ -53,6 +68,16 @@ public static class InspectorManager
         if (textureInspector == null)
         {
             textureInspector = new TextureInspector(OpenGlUi.Renderer, OpenGlUi.Renderer.GetTrackedTextures());
+        }
+        
+        if (ImGui.GetIO().KeyCtrl && ImGui.IsKeyPressed(ImGuiKey.I))
+        {
+            inspectorEnabled = !inspectorEnabled;
+        }
+        
+        if (ImGui.GetIO().KeyCtrl && ImGui.IsKeyPressed(ImGuiKey.L))
+        {
+            logWindowEnabled = !logWindowEnabled;
         }
 
         ImGuiDockNodeFlags flags = ImGuiDockNodeFlags.PassthruCentralNode;
@@ -92,14 +117,45 @@ public static class InspectorManager
 
         if (inspectorEnabled)
         {
-            inspector.Draw();
-            hierarchyWindow.Draw();
-            DrawableTracker.DrawWindow();
-            var test = true;
-            textureInspector.DrawWindow(ref test);
+            DrawMenuBar();
+
+            foreach (var window in windows)
+            {
+                if (window.enabled)
+                {
+                    window.draw();
+                }
+            }
+        }
+
+        if (logWindowEnabled)
+        {
+            logWindow.DrawWindow();
         }
 
         selectedDrawable?.DrawTransformGizmo();
+    }
+
+    private static void DrawMenuBar()
+    {
+        //draw menu bar
+        ImGui.BeginMainMenuBar();
+
+        if (ImGui.BeginMenu("Window"))
+        {
+            for (int index = 0; index < windows.Count; index++)
+            {
+                Window window = windows[index];
+                if (ImGui.MenuItem(window.name, window.enabled))
+                {
+                    window.enabled = !window.enabled;
+                }
+            }
+
+            ImGui.EndMenu();
+        }
+        
+        ImGui.EndMainMenuBar();
     }
 
     public static void DrawGizmoPoint(Vector2 point, float radius, uint color, float thickness = 1.0f)
