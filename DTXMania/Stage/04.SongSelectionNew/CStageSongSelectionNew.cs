@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Numerics;
 using DiscordRPC;
 using DTXMania.Core;
+using DTXMania.Core.Video;
 using DTXMania.SongDb;
 using DTXMania.SongDb.Sorting;
 using DTXMania.UI.Drawable;
@@ -108,6 +109,8 @@ public class CStageSongSelectionNew : CStage
         });
     }
 
+    private FFmpegVideoPlayer videoPlayer;
+
     public override void InitializeDefaultUI()
     {
         BaseTexture bgTex = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\5_background.jpg"));
@@ -115,6 +118,14 @@ public class CStageSongSelectionNew : CStage
         bg.renderOrder = -100;
         bg.position = Vector3.Zero;
         bg.name = "Background";
+        
+        videoPlayer = new SoftwareVideoPlayer();
+		
+        if (videoPlayer.Open(CSkin.Path(@"Graphics\5_background.mp4")))
+        {
+            VideoPlayer player = ui.AddChild(new VideoPlayer(videoPlayer));
+            player.renderOrder = -99;
+        }
         
         //LegacyDrawable backgroundVideo = ui.AddChild(new LegacyDrawable(() => actBackgroundVideoAVI.tUpdateAndDraw()));
         //backgroundVideo.renderOrder = -99;

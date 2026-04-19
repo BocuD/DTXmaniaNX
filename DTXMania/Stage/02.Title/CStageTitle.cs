@@ -16,8 +16,7 @@ internal class CStageTitle : CStage
 {		
 	// コンストラクタ
 
-	private FFmpegVideoPlayer videoPlayerTest;
-	private bool videoLoaded = false;
+	private FFmpegVideoPlayer videoPlayer;
 
 	public CStageTitle()
 	{
@@ -26,9 +25,6 @@ internal class CStageTitle : CStage
 		listChildActivities.Add(actFIfromSetup = new CActFIFOWhite());
 		listChildActivities.Add(actFI = new CActFIFOWhite());
 		listChildActivities.Add(actFO = new CActFIFOWhite());
-
-		videoPlayerTest = new SoftwareVideoPlayer();
-		videoLoaded = videoPlayerTest.Open(CSkin.Path(@"Graphics\2_background.mp4"));
 	}
 
 
@@ -49,10 +45,12 @@ internal class CStageTitle : CStage
 		bg.renderOrder = -99;
 		bg.position = Vector3.Zero;
 
-		if (videoLoaded)
+		videoPlayer = new SoftwareVideoPlayer();
+		
+		if (videoPlayer.Open(CSkin.Path(@"Graphics\2_background.mp4")))
 		{
-			VideoPlayer videoPlayer = ui.AddChild(new VideoPlayer(videoPlayerTest));
-			videoPlayer.renderOrder = -100;
+			VideoPlayer player = ui.AddChild(new VideoPlayer(this.videoPlayer));
+			player.renderOrder = -100;
 		}
 	}
 
