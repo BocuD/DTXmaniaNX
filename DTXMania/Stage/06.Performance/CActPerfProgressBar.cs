@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Drawing;
 using DTXMania.Core;
+using DTXMania.UI.Drawable;
 using FDK;
 
 namespace DTXMania;
@@ -142,8 +143,8 @@ internal class CActPerfProgressBar : CActivity
 				tx青 = CDTXMania.tGenerateTexture(bitmap3);
 			}
 
-			txProgressBarBackgroundDrums = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_Drum_Progress_bg.png"));
-			txProgressBarBackgroundGuitar = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_Guitar_Progress_bg.png"));
+			txProgressBarBackgroundDrums = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_Drum_Progress_bg.png"));
+			txProgressBarBackgroundGuitar = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_Guitar_Progress_bg.png"));
 				
 			base.OnManagedCreateResources();
 		}				
@@ -164,10 +165,7 @@ internal class CActPerfProgressBar : CActivity
 			CDTXMania.tReleaseTexture(ref txBestProgressBarRecord.Drums);
 			CDTXMania.tReleaseTexture(ref txBestProgressBarRecord.Guitar);
 			CDTXMania.tReleaseTexture(ref txBestProgressBarRecord.Bass);
-
-			CDTXMania.tReleaseTexture(ref txProgressBarBackgroundDrums);
-			CDTXMania.tReleaseTexture(ref txProgressBarBackgroundGuitar);
-
+			
 			base.OnManagedReleaseResources();
 		}				
 	}
@@ -589,9 +587,9 @@ internal class CActPerfProgressBar : CActivity
 
 	private STDGBVALUE<CTexture> txBestProgressBarRecord;
 
-	private CTexture txProgressBarBackgroundDrums;
+	private BaseTexture txProgressBarBackgroundDrums;
 
-	private CTexture txProgressBarBackgroundGuitar;
+	private BaseTexture txProgressBarBackgroundGuitar;
 
 	private STDGBVALUE<Point> p表示位置;
 

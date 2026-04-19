@@ -1,7 +1,8 @@
 ﻿using DTXMania.Core;
+using DTXMania.UI.Drawable;
 using SharpDX;
 using FDK;
-
+using Color4 = DTXMania.UI.Color4;
 using Point = System.Drawing.Point;
 
 namespace DTXMania;
@@ -53,48 +54,36 @@ internal abstract class CActPerfChipFireGB : CActivity
 	{
 		if( bActivated )
 		{
-			tx火花[ 0 ] = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay chip fire red.png" ) );
+			tx火花[ 0 ] = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay chip fire red.png" ) );
 			if( tx火花[ 0 ] != null )
 			{
-				tx火花[ 0 ].bAdditiveBlending = true;
+				tx火花[0].blendMode = BlendMode.Additive;
 			}
-			tx火花[ 1 ] = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay chip fire green.png" ) );
+			tx火花[ 1 ] = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay chip fire green.png" ) );
 			if( tx火花[ 1 ] != null )
 			{
-				tx火花[ 1 ].bAdditiveBlending = true;
+				tx火花[1].blendMode = BlendMode.Additive;
 			}
-			tx火花[ 2 ] = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay chip fire blue.png" ) );
+			tx火花[ 2 ] = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay chip fire blue.png" ) );
 			if( tx火花[ 2 ] != null )
 			{
-				tx火花[ 2 ].bAdditiveBlending = true;
+				tx火花[2].blendMode = BlendMode.Additive;
 			}
-			tx火花[ 3 ] = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay chip fire yellow.png" ) );
+			tx火花[ 3 ] = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay chip fire yellow.png" ) );
 			if( tx火花[ 3 ] != null )
 			{
-				tx火花[ 3 ].bAdditiveBlending = true;
+				tx火花[3].blendMode = BlendMode.Additive;
 			}
-			tx火花[ 4 ] = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay chip fire purple.png" ) );
+			tx火花[ 4 ] = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay chip fire purple.png" ) );
 			if( tx火花[ 4 ] != null )
 			{
-				tx火花[ 4 ].bAdditiveBlending = true;
+				tx火花[ 4 ].blendMode = BlendMode.Additive;
 			}
-			txレーンの線 = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_guitar line.png"));
+			txレーンの線 = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_guitar line.png"));
 			base.OnManagedCreateResources();
 		}
 	}
-	public override void OnManagedReleaseResources()
-	{
-		if( bActivated )
-		{
-			CDTXMania.tReleaseTexture( ref tx火花[ 0 ] );
-			CDTXMania.tReleaseTexture( ref tx火花[ 1 ] );
-			CDTXMania.tReleaseTexture( ref tx火花[ 2 ] );
-			CDTXMania.tReleaseTexture( ref tx火花[ 3 ] );
-			CDTXMania.tReleaseTexture( ref tx火花[ 4 ] );
-			CDTXMania.tReleaseTexture( ref txレーンの線 );
-			base.OnManagedReleaseResources();
-		}
-	}
+
 	public override int OnUpdateAndDraw()
 	{
 		if( bActivated )
@@ -112,11 +101,15 @@ internal abstract class CActPerfChipFireGB : CActivity
 				if( ( ct進行[ j ].nCurrentElapsedTimeMs != -1 ) && ( tx火花[ j % 5 ] != null ) )
 				{
 					float scale = (float) ( 3.0 * Math.Cos( ( Math.PI * ( 90.0 - ( 90.0 * ( ( (double) ct進行[ j ].nCurrentValue ) / 56.0 ) ) ) ) / 180.0 ) );
-					int x = pt中央位置[ j ].X - ( (int) ( ( tx火花[ j % 3 ].szImageSize.Width * scale ) / 2f ) );
-					int y = pt中央位置[ j ].Y - ( (int) ( ( tx火花[ j % 3 ].szImageSize.Height * scale ) / 2f ) );
-					tx火花[ j % 5 ].nTransparency = ( ct進行[ j ].nCurrentValue < 0x1c ) ? 0xff : ( 0xff - ( (int) ( 255.0 * Math.Cos( ( Math.PI * ( 90.0 - ( 90.0 * ( ( (double) ( ct進行[ j ].nCurrentValue - 0x1c ) ) / 28.0 ) ) ) ) / 180.0 ) ) ) );
-					tx火花[ j % 5 ].vcScaleRatio = new Vector3( scale, scale, 1f );
-					tx火花[ j % 5 ].tDraw2D( CDTXMania.app.Device, x, y );
+					int x = pt中央位置[ j ].X - ( (int) ( ( tx火花[ j % 3 ].Width * scale ) / 2f ) );
+					int y = pt中央位置[ j ].Y - ( (int) ( ( tx火花[ j % 3 ].Height * scale ) / 2f ) );
+
+					int transparency = ( ct進行[ j ].nCurrentValue < 0x1c ) ? 0xff : ( 0xff - ( (int) ( 255.0 * Math.Cos( ( Math.PI * ( 90.0 - ( 90.0 * ( ( (double) ( ct進行[ j ].nCurrentValue - 0x1c ) ) / 28.0 ) ) ) ) / 180.0 ) ) ) );
+					Color4 col = Color4.White;
+					col.Alpha = transparency / 255.0f;
+					//todo: commented out vcscaleratio
+					//tx火花[ j % 5 ].vcScaleRatio = new Vector3( scale, scale, 1f );
+					tx火花[ j % 5 ].tDraw2D(CDTXMania.app.Device, x, y, col);
 				}
 			}
 		}
@@ -130,8 +123,8 @@ internal abstract class CActPerfChipFireGB : CActivity
 	//-----------------
 	private CCounter[] ct進行 = new CCounter[ 10 ];
 	private Point[] pt中央位置 = new Point[ 10 ];
-	private CTexture[] tx火花 = new CTexture[ 5 ];
-	private CTexture txレーンの線;
+	private BaseTexture[] tx火花 = new BaseTexture[ 5 ];
+	private BaseTexture txレーンの線;
 	//-----------------
 	#endregion
 }

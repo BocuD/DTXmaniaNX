@@ -46,6 +46,12 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         //          base.listChildActivities.Add( this.actStageCleared = new CAct演奏ステージクリア());
     }
 
+    public override void InitializeBaseUI()
+    {
+        base.InitializeBaseUI();
+        
+        actStatusPanel.InitUI(ui);
+    }
 
     // Methods
 

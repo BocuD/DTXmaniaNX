@@ -1370,32 +1370,26 @@ internal class CActPerfGuitarJudgementString : CActPerfCommonJudgementString
                             {
                                 if (st状態[j].judge == EJudgement.Perfect)
                                 {
-                                    //base.tx判定文字列[num4].tDraw2D(CDTXMania.app.Device, x, y, new Rectangle(0, nRectY * base.st状態[j].nRect, nRectX, nRectY));
                                     CDTXMania.stagePerfGuitarScreen.tx判定画像anime.tDraw2D(CDTXMania.app.Device, x, y, new RectangleF(0, nRectY * st状態[j].nRect, nRectX, nRectY));
                                 }
                                 if (st状態[j].judge == EJudgement.Great)
                                 {
-                                    //base.tx判定文字列[num4].tDraw2D(CDTXMania.app.Device, x, y, new RectangleF(nRectX * 1, nRectY * base.st状態[j].nRect, nRectX, nRectY));
                                     CDTXMania.stagePerfGuitarScreen.tx判定画像anime.tDraw2D(CDTXMania.app.Device, x, y, new RectangleF(nRectX * 1, nRectY * st状態[j].nRect, nRectX, nRectY));
                                 }
                                 if (st状態[j].judge == EJudgement.Good)
                                 {
-                                    //base.tx判定文字列[num4].tDraw2D(CDTXMania.app.Device, x, y, new RectangleF(nRectX * 2, nRectY * base.st状態[j].nRect, nRectX, nRectY));
                                     CDTXMania.stagePerfGuitarScreen.tx判定画像anime.tDraw2D(CDTXMania.app.Device, x, y, new RectangleF(nRectX * 2, nRectY * st状態[j].nRect, nRectX, nRectY));
                                 }
                                 if (st状態[j].judge == EJudgement.Poor)
                                 {
-                                    //base.tx判定文字列[num4].tDraw2D(CDTXMania.app.Device, x, y, new RectangleF(nRectX * 3, nRectY * base.st状態[j].nRect, nRectX, nRectY));
                                     CDTXMania.stagePerfGuitarScreen.tx判定画像anime.tDraw2D(CDTXMania.app.Device, x, y, new RectangleF(nRectX * 3, nRectY * st状態[j].nRect, nRectX, nRectY));
                                 }
                                 if (st状態[j].judge == EJudgement.Miss)
                                 {
-                                    //base.tx判定文字列[num4].tDraw2D(CDTXMania.app.Device, x, y, new RectangleF(nRectX * 4, nRectY * base.st状態[j].nRect, nRectX, nRectY));
                                     CDTXMania.stagePerfGuitarScreen.tx判定画像anime.tDraw2D(CDTXMania.app.Device, x, y, new RectangleF(nRectX * 4, nRectY * st状態[j].nRect, nRectX, nRectY));
                                 }
                                 if (st状態[j].judge == EJudgement.Auto)
                                 {
-                                    //base.tx判定文字列[num4].tDraw2D(CDTXMania.app.Device, x, y, new RectangleF(nRectX * 5, nRectY * base.st状態[j].nRect, nRectX, nRectY));
                                     CDTXMania.stagePerfGuitarScreen.tx判定画像anime.tDraw2D(CDTXMania.app.Device, x, y, new RectangleF(nRectX * 5, nRectY * st状態[j].nRect, nRectX, nRectY));
                                 }
                             }
@@ -1404,7 +1398,6 @@ internal class CActPerfGuitarJudgementString : CActPerfCommonJudgementString
                                 x = xc - ((int)((64f * st状態[j].fX方向拡大率)));
                                 y = (num6 + st状態[j].n相対Y座標) - ((int)(((43f * st状態[j].fY方向拡大率)) / 2.0));
 
-                                //tx判定文字列[num4].nTransparency = st状態[j].n透明度;
                                 Color4 color = Color4.White;
                                 color.Alpha = st状態[j].n透明度 / 255.0f;
                                 //todo: what the fuck is vcScaleRatio

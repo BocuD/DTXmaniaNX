@@ -39,6 +39,13 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		listChildActivities.Add( actBackgroundAVI = new CActSelectBackgroundAVI());
 	}
 
+	public override void InitializeBaseUI()
+	{
+		base.InitializeBaseUI();
+
+		actStatusPanel.InitUI(ui);
+	}
+
 
 	// メソッド
 

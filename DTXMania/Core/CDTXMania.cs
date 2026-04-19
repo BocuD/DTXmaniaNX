@@ -609,6 +609,8 @@ internal class CDTXMania : Game
 
     public static CTexture tGenerateTexture(Bitmap bitmap, bool b黒を透過する)
     {
+        return new CTexture();
+
         if (app == null)
         {
             return null;
@@ -626,8 +628,10 @@ internal class CDTXMania : Game
         }
     }
 
-    public static CTextureAf tテクスチャの生成Af(string fileName)
+    public static CTextureAf tCreateTextureAf(string fileName)
     {
+        return null;
+        
         if (app == null)
         {
             return null;
