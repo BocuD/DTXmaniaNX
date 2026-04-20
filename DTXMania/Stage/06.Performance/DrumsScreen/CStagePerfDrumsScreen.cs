@@ -51,6 +51,8 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         base.InitializeBaseUI();
         
         actStatusPanel.InitUI(ui);
+        
+        ui.AddChild(new LegacyDrawable("", () => tDisplayPresence()));
     }
 
     // Methods
@@ -203,13 +205,13 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
 
         //シャッターを使うのはLC、LP、FT、RDレーンのみ。その他のレーンでは一切使用しない。
         //If Skill Mode is CLASSIC, always display lvl as Classic Style
-        if (CDTXMania.ConfigIni.nSkillMode == 0 || ((CDTXMania.ConfigIni.bClassicScoreDisplay == true) &&
-                                                    ((CDTXMania.DTX.bHasChips.LeftCymbal == false) &&
-                                                     (CDTXMania.DTX.bHasChips.FT == false) &&
-                                                     (CDTXMania.DTX.bHasChips.Ride == false) &&
-                                                     (CDTXMania.DTX.bHasChips.LP == false) &&
-                                                     (CDTXMania.DTX.bHasChips.LBD == false) &&
-                                                     (CDTXMania.DTX.bForceXGChart == false))))
+        if (CDTXMania.ConfigIni.nSkillMode == 0 || (CDTXMania.ConfigIni.bClassicScoreDisplay &&
+                                                    (!CDTXMania.DTX.bHasChips.LeftCymbal &&
+                                                     !CDTXMania.DTX.bHasChips.FT &&
+                                                     !CDTXMania.DTX.bHasChips.Ride &&
+                                                     !CDTXMania.DTX.bHasChips.LP &&
+                                                     !CDTXMania.DTX.bHasChips.LBD &&
+                                                     !CDTXMania.DTX.bForceXGChart)))
         {
             if (txLaneCover != null)
             {
@@ -351,6 +353,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         //
 
         tUpdateAndDraw_STAGEFAILED();
+        
         bすべてのチップが判定された = true;
         if (bIsFinishedFadeout)
         {

@@ -105,14 +105,6 @@ public abstract class CStage : CActivity
 			bJustStartedUpdate = false;
 		}
 		
-		// //set texture filtering to linear
-		// var device = CDTXMania.app.Device;
-		// device.SetSamplerState(0, SamplerState.MinFilter, TextureFilter.Linear);
-		// device.SetSamplerState(0, SamplerState.MagFilter, TextureFilter.Linear);
-		// device.SetSamplerState(0, SamplerState.MipFilter, TextureFilter.Linear);
-		// device.SetSamplerState(0, SamplerState.AddressU, TextureAddress.Clamp);
-		// device.SetSamplerState(0, SamplerState.AddressV, TextureAddress.Clamp);
-		
 		//scale by CDTXMania.renderScale;
 		ui.scale.X = CDTXMania.renderScale;
 		ui.scale.Y = CDTXMania.renderScale;
