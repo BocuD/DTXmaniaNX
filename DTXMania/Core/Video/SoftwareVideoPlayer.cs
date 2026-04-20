@@ -9,10 +9,16 @@ public unsafe class SoftwareVideoPlayer : FFmpegVideoPlayer
 {
     private SwsContext* swsContext;
     private AVFrame* rgbaFrame;
-    private bool hasLoopedAfterEof;
+    private AVPacket* packet;
+    private double fallbackFrameDurationSeconds = 1.0 / 30.0;
+    private double timelineOriginPtsSeconds = double.NaN;
+    private double lastDecodedPtsSeconds = double.NaN;
+    private byte[] stagedFrameBuffer = [];
+    private int stagedFrameLength;
 
     private BaseTexture texture = BaseTexture.None;
-    private byte[] uploadBuffer = [];
+
+    protected override int MaxFramesToDecodePerUpdate => 1;
 
     public SoftwareVideoPlayer(bool loopOnEof = true)
     {
@@ -25,6 +31,13 @@ public unsafe class SoftwareVideoPlayer : FFmpegVideoPlayer
         if (rgbaFrame == null)
         {
             Trace.TraceError("Failed to allocate RGBA frame.");
+            return false;
+        }
+
+        packet = ffmpeg.av_packet_alloc();
+        if (packet == null)
+        {
+            Trace.TraceError("Failed to allocate packet for video decoding.");
             return false;
         }
 
@@ -62,147 +75,170 @@ public unsafe class SoftwareVideoPlayer : FFmpegVideoPlayer
             return false;
         }
 
-        uploadBuffer = new byte[codecContext->width * codecContext->height * 4];
-        return true;
-    }
+        stagedFrameBuffer = [];
+        stagedFrameLength = 0;
+        timelineOriginPtsSeconds = double.NaN;
+        lastDecodedPtsSeconds = double.NaN;
 
-    public override BaseTexture GetUpdatedTexture()
-    {
-        if (!texture.isValid())
+        AVStream* videoStream = formatContext->streams[videoStreamIndex];
+        if (videoStream != null)
         {
-            return BaseTexture.None;
-        }
-
-        if (TryDecodeNextFrame(out byte[] frameData))
-        {
-            texture.UpdateRgba32(frameData, codecContext->width, codecContext->height);
-        }
-
-        return texture;
-    }
-
-    public bool TryDecodeNextFrame(out byte[] rgbaFrameData)
-    {
-        AVPacket* packet = ffmpeg.av_packet_alloc();
-        if (packet == null)
-        {
-            rgbaFrameData = [];
-            return false;
-        }
-
-        try
-        {
-            while (true)
+            AVRational frameRate = videoStream->avg_frame_rate;
+            if (frameRate.num <= 0 || frameRate.den <= 0)
             {
-                int readResult = ffmpeg.av_read_frame(formatContext, packet);
-                if (readResult < 0)
-                {
-                    if (LoopOnEof && !hasLoopedAfterEof && TryRestartFromBeginning())
-                    {
-                        hasLoopedAfterEof = true;
-                        continue;
-                    }
+                frameRate = videoStream->r_frame_rate;
+            }
 
-                    rgbaFrameData = [];
-                    return false;
-                }
-
-                if (packet->stream_index != videoStreamIndex)
-                {
-                    ffmpeg.av_packet_unref(packet);
-                    continue;
-                }
-
-                int send = ffmpeg.avcodec_send_packet(codecContext, packet);
-                ffmpeg.av_packet_unref(packet);
-                if (send < 0)
-                {
-                    continue;
-                }
-
-                int receive = ffmpeg.avcodec_receive_frame(codecContext, frame);
-                if (receive != 0)
-                {
-                    continue;
-                }
-
-                if (ffmpeg.av_frame_make_writable(rgbaFrame) < 0)
-                {
-                    rgbaFrameData = [];
-                    return false;
-                }
-
-                ffmpeg.sws_scale(
-                    swsContext,
-                    frame->data,
-                    frame->linesize,
-                    0,
-                    codecContext->height,
-                    rgbaFrame->data,
-                    rgbaFrame->linesize
-                );
-
-                int width = codecContext->width;
-                int height = codecContext->height;
-                int rowBytes = width * 4;
-                int stride = rgbaFrame->linesize[0];
-                int packedSize = rowBytes * height;
-
-                if (uploadBuffer.Length != packedSize)
-                {
-                    uploadBuffer = new byte[packedSize];
-                }
-
-                IntPtr src = (IntPtr)rgbaFrame->data[0];
-                if (stride == rowBytes)
-                {
-                    Marshal.Copy(src, uploadBuffer, 0, packedSize);
-                }
-                else
-                {
-                    for (int y = 0; y < height; y++)
-                    {
-                        IntPtr srcRow = src + (y * stride);
-                        Marshal.Copy(srcRow, uploadBuffer, y * rowBytes, rowBytes);
-                    }
-                }
-
-                rgbaFrameData = uploadBuffer;
-                hasLoopedAfterEof = false;
-                return true;
+            if (frameRate.num > 0 && frameRate.den > 0)
+            {
+                fallbackFrameDurationSeconds = (double)frameRate.den / frameRate.num;
             }
         }
-        finally
-        {
-            ffmpeg.av_packet_free(&packet);
-        }
+
+        return true;
     }
 
-    private bool TryRestartFromBeginning()
+    protected override BaseTexture OutputTexture => texture;
+
+    protected override bool TryDecodeAndStageFrame(out double framePtsSeconds, out bool reachedEndOfStream)
     {
-        ffmpeg.avcodec_flush_buffers(codecContext);
-
-        long seekTarget = 0;
-        AVStream* videoStream = formatContext->streams[videoStreamIndex];
-        if (videoStream != null && videoStream->start_time != ffmpeg.AV_NOPTS_VALUE)
+        if (packet == null)
         {
-            seekTarget = videoStream->start_time;
-        }
-
-        int seekResult = ffmpeg.av_seek_frame(formatContext, videoStreamIndex, seekTarget, ffmpeg.AVSEEK_FLAG_BACKWARD);
-        if (seekResult < 0)
-        {
-            seekResult = ffmpeg.avformat_seek_file(formatContext, videoStreamIndex, long.MinValue, seekTarget, long.MaxValue, ffmpeg.AVSEEK_FLAG_BACKWARD);
-        }
-
-        if (seekResult < 0)
-        {
-            Trace.TraceError($"Failed to loop video playback: {FFmpegCore.AV_StrError(seekResult)}");
+            reachedEndOfStream = false;
+            framePtsSeconds = 0;
             return false;
         }
 
-        ffmpeg.avcodec_flush_buffers(codecContext);
-        return true;
+        reachedEndOfStream = false;
+
+        while (true)
+        {
+            int readResult = ffmpeg.av_read_frame(formatContext, packet);
+            if (readResult < 0)
+            {
+                reachedEndOfStream = true;
+                framePtsSeconds = 0;
+                return false;
+            }
+
+            if (packet->stream_index != videoStreamIndex)
+            {
+                ffmpeg.av_packet_unref(packet);
+                continue;
+            }
+
+            int send = ffmpeg.avcodec_send_packet(codecContext, packet);
+            ffmpeg.av_packet_unref(packet);
+            if (send < 0)
+            {
+                continue;
+            }
+
+            int receive = ffmpeg.avcodec_receive_frame(codecContext, frame);
+            if (receive != 0)
+            {
+                continue;
+            }
+
+            if (ffmpeg.av_frame_make_writable(rgbaFrame) < 0)
+            {
+                framePtsSeconds = 0;
+                return false;
+            }
+
+            ffmpeg.sws_scale(
+                swsContext,
+                frame->data,
+                frame->linesize,
+                0,
+                codecContext->height,
+                rgbaFrame->data,
+                rgbaFrame->linesize
+            );
+
+            int width = codecContext->width;
+            int height = codecContext->height;
+            int rowBytes = width * 4;
+            int stride = rgbaFrame->linesize[0];
+            int packedSize = rowBytes * height;
+
+            if (stagedFrameBuffer.Length != packedSize)
+            {
+                stagedFrameBuffer = new byte[packedSize];
+            }
+
+            IntPtr src = (IntPtr)rgbaFrame->data[0];
+            if (stride == rowBytes)
+            {
+                Marshal.Copy(src, stagedFrameBuffer, 0, packedSize);
+            }
+            else
+            {
+                for (int y = 0; y < height; y++)
+                {
+                    IntPtr srcRow = src + (y * stride);
+                    Marshal.Copy(srcRow, stagedFrameBuffer, y * rowBytes, rowBytes);
+                }
+            }
+
+            framePtsSeconds = ResolveFrameTimestampSeconds();
+            stagedFrameLength = packedSize;
+            return true;
+        }
+    }
+
+    protected override void PresentStagedFrame()
+    {
+        if (stagedFrameLength <= 0 || !texture.isValid())
+        {
+            return;
+        }
+
+        texture.UpdateRgba32(stagedFrameBuffer, codecContext->width, codecContext->height);
+    }
+
+    private double ResolveFrameTimestampSeconds()
+    {
+        AVStream* videoStream = formatContext->streams[videoStreamIndex];
+        long bestEffortTimestamp = frame->best_effort_timestamp;
+
+        if (videoStream != null && bestEffortTimestamp != ffmpeg.AV_NOPTS_VALUE)
+        {
+            double rawPtsSeconds = StreamTimestampToSeconds(videoStream, bestEffortTimestamp);
+            if (!double.IsNaN(rawPtsSeconds) && !double.IsInfinity(rawPtsSeconds))
+            {
+                if (double.IsNaN(timelineOriginPtsSeconds))
+                {
+                    timelineOriginPtsSeconds = rawPtsSeconds;
+                }
+
+                double relativePtsSeconds = Math.Max(0, rawPtsSeconds - timelineOriginPtsSeconds);
+                if (!double.IsNaN(lastDecodedPtsSeconds) && relativePtsSeconds < lastDecodedPtsSeconds)
+                {
+                    // Avoid running too fast on jittery/non-monotonic streams.
+                    relativePtsSeconds = lastDecodedPtsSeconds;
+                }
+
+                lastDecodedPtsSeconds = relativePtsSeconds;
+                return relativePtsSeconds;
+            }
+        }
+
+        if (double.IsNaN(lastDecodedPtsSeconds))
+        {
+            lastDecodedPtsSeconds = 0;
+            return 0;
+        }
+
+        lastDecodedPtsSeconds += fallbackFrameDurationSeconds;
+        return lastDecodedPtsSeconds;
+    }
+
+    protected override void OnPlaybackReset()
+    {
+        stagedFrameLength = 0;
+        timelineOriginPtsSeconds = double.NaN;
+        lastDecodedPtsSeconds = double.NaN;
     }
 
     public override void Dispose()
@@ -214,6 +250,13 @@ public unsafe class SoftwareVideoPlayer : FFmpegVideoPlayer
             rgbaFrame = null;
         }
 
+        if (packet != null)
+        {
+            AVPacket* tmp = packet;
+            ffmpeg.av_packet_free(&tmp);
+            packet = null;
+        }
+
         if (swsContext != null)
         {
             ffmpeg.sws_freeContext(swsContext);
@@ -222,6 +265,8 @@ public unsafe class SoftwareVideoPlayer : FFmpegVideoPlayer
 
         texture.Dispose();
         texture = BaseTexture.None;
+        stagedFrameBuffer = [];
+        stagedFrameLength = 0;
 
         base.Dispose();
     }

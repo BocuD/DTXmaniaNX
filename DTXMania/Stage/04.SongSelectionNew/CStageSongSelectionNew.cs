@@ -109,8 +109,6 @@ public class CStageSongSelectionNew : CStage
         });
     }
 
-    private FFmpegVideoPlayer videoPlayer;
-
     public override void InitializeDefaultUI()
     {
         BaseTexture bgTex = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\5_background.jpg"));
@@ -119,12 +117,17 @@ public class CStageSongSelectionNew : CStage
         bg.position = Vector3.Zero;
         bg.name = "Background";
         
-        videoPlayer = new SoftwareVideoPlayer();
+        string videoPath = CSkin.Path(@"Graphics\5_background.mp4");
+        FFmpegVideoPlayer videoPlayer = new ThreadedSoftwareVideoPlayer();
 		
-        if (videoPlayer.Open(CSkin.Path(@"Graphics\5_background.mp4")))
+        if (videoPlayer.Open(videoPath))
         {
-            VideoPlayer player = ui.AddChild(new VideoPlayer(videoPlayer));
-            player.renderOrder = -99;
+            UIVideoRenderer renderer = ui.AddChild(new UIVideoRenderer(videoPlayer, videoPath));
+            renderer.renderOrder = -99;
+        }
+        else
+        {
+            videoPlayer.Dispose();
         }
         
         //LegacyDrawable backgroundVideo = ui.AddChild(new LegacyDrawable(() => actBackgroundVideoAVI.tUpdateAndDraw()));

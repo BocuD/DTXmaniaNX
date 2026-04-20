@@ -16,8 +16,6 @@ internal class CStageTitle : CStage
 {		
 	// コンストラクタ
 
-	private FFmpegVideoPlayer videoPlayer;
-
 	public CStageTitle()
 	{
 		eStageID = EStage.Title_2;
@@ -45,12 +43,17 @@ internal class CStageTitle : CStage
 		bg.renderOrder = -99;
 		bg.position = Vector3.Zero;
 
-		videoPlayer = new SoftwareVideoPlayer();
+		string videoPath = CSkin.Path(@"Graphics\2_background.mp4");
+		FFmpegVideoPlayer videoPlayer = new ThreadedSoftwareVideoPlayer();
 		
-		if (videoPlayer.Open(CSkin.Path(@"Graphics\2_background.mp4")))
+		if (videoPlayer.Open(videoPath))
 		{
-			VideoPlayer player = ui.AddChild(new VideoPlayer(this.videoPlayer));
-			player.renderOrder = -100;
+			UIVideoRenderer renderer = ui.AddChild(new UIVideoRenderer(videoPlayer, videoPath));
+			renderer.renderOrder = -100;
+		}
+		else
+		{
+			videoPlayer.Dispose();
 		}
 	}
 
