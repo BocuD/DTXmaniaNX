@@ -17,11 +17,10 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		bActivated = false;
 		listChildActivities.Add( actStageFailed = new CActPerfStageFailure() );
 		listChildActivities.Add( actDANGER = new CActPerfGuitarDanger() );
-		//listChildActivities.Add( actAVI = new CActPerfAVI() );
-		// listChildActivities.Add( actBGA = new CActPerfBGA() );
+		listChildActivities.Add( actAVI = new CActPerfAVI() );
+		listChildActivities.Add( actBGA = new CActPerfBGA() );
 		listChildActivities.Add( actGraph = new CActPerfSkillMeter() );
 		listChildActivities.Add(actGuitarBonus = new CActPerfGuitarBonus());
-//			base.listChildActivities.Add( this.actPanel = new CActPerfPanelString() );
 		listChildActivities.Add( actScrollSpeed = new CActPerfScrollSpeed() );
 		listChildActivities.Add( actStatusPanel = new CActPerfGuitarStatusPanel() );
 		listChildActivities.Add( actWailingBonus = new CActPerfGuitarWailingBonus() );

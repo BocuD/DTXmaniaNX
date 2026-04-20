@@ -8,43 +8,6 @@ namespace DTXMania;
 
 internal class CActPerfPanelString : CActivity
 {
-    // メソッド
-
-    /*
-    public void SetPanelString(string str)
-    {
-        this.strパネル文字列 = str;
-        if (base.bActivated)
-        {
-            CDTXMania.tReleaseTexture(ref this.txPanel);
-            if ((this.strパネル文字列 != null) && (this.strパネル文字列.Length > 0))
-            {
-                Bitmap image = new Bitmap(1, 1);
-                Graphics graphics = Graphics.FromImage(image);
-                graphics.PageUnit = GraphicsUnit.Pixel;
-                this.n文字列の長さdot = (int)graphics.MeasureString(this.strパネル文字列, this.ft表示用フォント).Width;
-                graphics.Dispose();
-                try
-                {
-                    Bitmap bitmap2 = new Bitmap(this.n文字列の長さdot, (int)this.ft表示用フォント.Size);
-                    graphics = Graphics.FromImage(bitmap2);
-                    graphics.DrawString(this.strパネル文字列, this.ft表示用フォント, Brushes.White, (float)0f, (float)0f);
-                    graphics.Dispose();
-                    this.txPanel = new CTexture(CDTXMania.app.Device, bitmap2, CDTXMania.TextureFormat);
-                    this.txPanel.vcScaleRatio = new Vector3(0.5f, 0.5f, 1f);
-                    bitmap2.Dispose();
-                }
-                catch (CTextureCreateFailedException)
-                {
-                    Trace.TraceError("パネル文字列テクスチャの生成に失敗しました。");
-                    this.txPanel = null;
-                }
-                this.ct進行用 = new CCounter(-278, this.n文字列の長さdot / 2, 8, CDTXMania.Timer);
-            }
-        }
-    }
-     */
-
     // CActivity 実装
 
     public override void OnActivate()
@@ -52,13 +15,13 @@ internal class CActPerfPanelString : CActivity
 
         if (CDTXMania.ConfigIni.bDrumsEnabled)
         {
-            n曲名X = 950;
-            n曲名Y = 630;
+            nSongNameX = 950;
+            nSongNameY = 630;
         }
         else if (CDTXMania.ConfigIni.bGuitarEnabled)
         {
-            n曲名X = 500;
-            n曲名Y = 630;
+            nSongNameX = 500;
+            nSongNameY = 630;
         }
 
 //          this.n文字列の長さdot = 0;
@@ -76,15 +39,15 @@ internal class CActPerfPanelString : CActivity
     {
         if (bActivated)
         {
-            txジャケットパネル = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_JacketPanel.png"));
+            txJacketPanel = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_JacketPanel.png"));
             string path = CDTXMania.DTX.strFolderName + CDTXMania.DTX.PREIMAGE;
             if (!File.Exists(path))
             {
-                txジャケット画像 = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\5_preimage default.png"));
+                txAlbumArt = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\5_preimage default.png"));
             }
             else
             {
-                txジャケット画像 = CDTXMania.LoadFromPath(path);
+                txAlbumArt = CDTXMania.LoadFromPath(path);
             }
 
 //              this.SetPanelString(this.strパネル文字列);
@@ -96,13 +59,13 @@ internal class CActPerfPanelString : CActivity
                 strSongName = CDTXMania.DTX.TITLE;
 
             pfタイトル = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.songListFont), 20, FontStyle.Regular);
-            Bitmap bmpSongName = new Bitmap(1, 1);
+            Bitmap bmpSongName = new(1, 1);
             bmpSongName = pfタイトル.DrawPrivateFont(strSongName, CPrivateFont.DrawMode.Edge, Color.Black, Color.Black, clGITADORAgradationTopColor, clGITADORAgradationBottomColor, true);
             txSongName = CDTXMania.tGenerateTexture(bmpSongName, false);
             bmpSongName.Dispose();
 
             pfアーティスト = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.songListFont), 15, FontStyle.Regular);
-            Bitmap bmpArtistName = new Bitmap(1, 1);
+            Bitmap bmpArtistName = new(1, 1);
             bmpArtistName = pfアーティスト.DrawPrivateFont(CDTXMania.DTX.ARTIST, CPrivateFont.DrawMode.Edge, Color.Black, Color.Black, clGITADORAgradationTopColor, clGITADORAgradationBottomColor, true);
             txArtistName = CDTXMania.tGenerateTexture(bmpArtistName, false);
             bmpArtistName.Dispose();
@@ -118,8 +81,8 @@ internal class CActPerfPanelString : CActivity
 //              CDTXMania.tReleaseTexture( ref this.txPanel );
             CDTXMania.tReleaseTexture( ref txSongName );
             CDTXMania.tReleaseTexture( ref txArtistName );
-            CDTXMania.tReleaseTexture( ref txジャケットパネル );
-            CDTXMania.tReleaseTexture( ref txジャケット画像 );
+            CDTXMania.tReleaseTexture( ref txJacketPanel );
+            CDTXMania.tReleaseTexture( ref txAlbumArt );
             CDTXMania.tDisposeSafely( ref pfタイトル );
             CDTXMania.tDisposeSafely( ref pfアーティスト );
             base.OnManagedReleaseResources();
@@ -159,13 +122,13 @@ internal class CActPerfPanelString : CActivity
             float fScalingFactor;
             float jacketOnScreenSize = 245.0f;
             //Maintain aspect ratio by scaling only to the smaller scalingFactor
-            if (jacketOnScreenSize / txジャケット画像.szImageSize.Width > jacketOnScreenSize / txジャケット画像.szImageSize.Height)
+            if (jacketOnScreenSize / txAlbumArt.szImageSize.Width > jacketOnScreenSize / txAlbumArt.szImageSize.Height)
             {
-                fScalingFactor = jacketOnScreenSize / txジャケット画像.szImageSize.Height;
+                fScalingFactor = jacketOnScreenSize / txAlbumArt.szImageSize.Height;
             }
             else
             {
-                fScalingFactor = jacketOnScreenSize / txジャケット画像.szImageSize.Width;
+                fScalingFactor = jacketOnScreenSize / txAlbumArt.szImageSize.Width;
             }
 
             if (CDTXMania.ConfigIni.bDrumsEnabled)
@@ -186,11 +149,11 @@ internal class CActPerfPanelString : CActivity
                 mat *= SharpDX.Matrix.Translation(-28f, -94.5f, 0f);
             }
 
-            if (txジャケットパネル != null)
-                txジャケットパネル.tDraw2D(CDTXMania.app.Device, nジャケットX, nジャケットY);
+            if (txJacketPanel != null)
+                txJacketPanel.tDraw2D(CDTXMania.app.Device, nジャケットX, nジャケットY);
 
-            if (txジャケット画像 != null)
-                txジャケット画像.tDraw3D(CDTXMania.app.Device, mat);
+            if (txAlbumArt != null)
+                txAlbumArt.tDraw3D(CDTXMania.app.Device, mat);
 
             if (txSongName.szImageSize.Width > 320)
                 txSongName.vcScaleRatio.X = 320f / txSongName.szImageSize.Width;
@@ -198,8 +161,8 @@ internal class CActPerfPanelString : CActivity
             if (txArtistName.szImageSize.Width > 320)
                 txArtistName.vcScaleRatio.X = 320f / txArtistName.szImageSize.Width;
 
-            txSongName.tDraw2D(CDTXMania.app.Device, n曲名X, n曲名Y);
-            txArtistName.tDraw2D(CDTXMania.app.Device, n曲名X, n曲名Y + 35);
+            txSongName.tDraw2D(CDTXMania.app.Device, nSongNameX, nSongNameY);
+            txArtistName.tDraw2D(CDTXMania.app.Device, nSongNameX, nSongNameY + 35);
         }
         return 0;
     }
@@ -211,15 +174,15 @@ internal class CActPerfPanelString : CActivity
     //-----------------
     private CCounter ct進行用;
 //      private int n文字列の長さdot;
-    private int n曲名X;
-    private int n曲名Y;
+    private int nSongNameX;
+    private int nSongNameY;
     private int nジャケットX;
     private int nジャケットY;
 //      private string strパネル文字列;
     private string strSongName;
 //      private CTexture txPanel;
-    private CTexture txジャケットパネル;
-    private CTexture txジャケット画像;
+    private CTexture txJacketPanel;
+    private CTexture txAlbumArt;
     private CTexture txSongName;
     private CTexture txArtistName;
 

@@ -763,8 +763,8 @@ internal abstract class CStagePerfCommonScreen : CStage
     }
 
     //todo: reintroduce background video and art
-    //public CActPerfAVI actAVI;
-    //public CActPerfBGA actBGA;
+    public CActPerfAVI actAVI;
+    public CActPerfBGA actBGA;
 
     protected CActLVLNFont actLVFont;
     protected CActPerfChipFireGB actChipFireGB;
@@ -2663,7 +2663,7 @@ internal abstract class CStagePerfCommonScreen : CStage
             {
                 CDTXMania.ConfigIni.nMovieMode = 0;
             }
-            //actAVI.MovieMode();
+            actAVI.MovieMode();
         }
         if (keyboard.bKeyPressed(SlimDXKey.F6))
         {
@@ -2696,14 +2696,13 @@ internal abstract class CStagePerfCommonScreen : CStage
         }
     }
 
-    //      protected abstract void tUpdateAndDraw_AVI();
-    // protected void tUpdateAndDraw_AVI()
-    // {
-    //     if (((ePhaseID != EPhase.PERFORMANCE_STAGE_FAILED) && (ePhaseID != EPhase.PERFORMANCE_STAGE_FAILED_FADEOUT)) && (!CDTXMania.ConfigIni.bストイックモード))
-    //     {
-    //         actAVI.tUpdateAndDraw(0, 0);
-    //     }
-    // }
+    protected void tUpdateAndDraw_AVI()
+    {
+        if (((ePhaseID != EPhase.PERFORMANCE_STAGE_FAILED) && (ePhaseID != EPhase.PERFORMANCE_STAGE_FAILED_FADEOUT)) && (!CDTXMania.ConfigIni.bストイックモード))
+        {
+            actAVI.tUpdateAndDraw(0, 0);
+        }
+    }
     /*
     protected abstract void t進行描画_BGA();
     protected void t進行描画_BGA(int x, int y)
@@ -3011,28 +3010,28 @@ internal abstract class CStagePerfCommonScreen : CStage
                                 case EBGAType.BMPTEX:
                                     if (pChip.rBMPTEX != null)
                                     {
-                                        // actBGA.Start(pChip.nChannelNumber, null, pChip.rBMPTEX, pChip.rBMPTEX.tx画像.szImageSize.Width, pChip.rBMPTEX.tx画像.szImageSize.Height, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+                                        actBGA.Start(pChip.nChannelNumber, null, pChip.rBMPTEX, pChip.rBMPTEX.txImage.szImageSize.Width, pChip.rBMPTEX.txImage.szImageSize.Height, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
                                     }
                                     break;
 
                                 case EBGAType.BGA:
                                     if ((pChip.rBGA != null) && ((pChip.rBMP != null) || (pChip.rBMPTEX != null)))
                                     {
-                                        // actBGA.Start(pChip.nChannelNumber, pChip.rBMP, pChip.rBMPTEX, pChip.rBGA.pt画像側右下座標.X - pChip.rBGA.pt画像側左上座標.X, pChip.rBGA.pt画像側右下座標.Y - pChip.rBGA.pt画像側左上座標.Y, 0, 0, pChip.rBGA.pt画像側左上座標.X, pChip.rBGA.pt画像側左上座標.Y, 0, 0, pChip.rBGA.pt表示座標.X, pChip.rBGA.pt表示座標.Y, 0, 0, 0);
+                                        actBGA.Start(pChip.nChannelNumber, pChip.rBMP, pChip.rBMPTEX, pChip.rBGA.pt画像側右下座標.X - pChip.rBGA.pt画像側左上座標.X, pChip.rBGA.pt画像側右下座標.Y - pChip.rBGA.pt画像側左上座標.Y, 0, 0, pChip.rBGA.pt画像側左上座標.X, pChip.rBGA.pt画像側左上座標.Y, 0, 0, pChip.rBGA.pt表示座標.X, pChip.rBGA.pt表示座標.Y, 0, 0, 0);
                                     }
                                     break;
 
                                 case EBGAType.BGAPAN:
                                     if ((pChip.rBGAPan != null) && ((pChip.rBMP != null) || (pChip.rBMPTEX != null)))
                                     {
-                                        // actBGA.Start(pChip.nChannelNumber, pChip.rBMP, pChip.rBMPTEX, pChip.rBGAPan.sz開始サイズ.Width, pChip.rBGAPan.sz開始サイズ.Height, pChip.rBGAPan.sz終了サイズ.Width, pChip.rBGAPan.sz終了サイズ.Height, pChip.rBGAPan.pt画像側開始位置.X, pChip.rBGAPan.pt画像側開始位置.Y, pChip.rBGAPan.pt画像側終了位置.X, pChip.rBGAPan.pt画像側終了位置.Y, pChip.rBGAPan.pt表示側開始位置.X, pChip.rBGAPan.pt表示側開始位置.Y, pChip.rBGAPan.pt表示側終了位置.X, pChip.rBGAPan.pt表示側終了位置.Y, pChip.n総移動時間);
+                                        actBGA.Start(pChip.nChannelNumber, pChip.rBMP, pChip.rBMPTEX, pChip.rBGAPan.sz開始サイズ.Width, pChip.rBGAPan.sz開始サイズ.Height, pChip.rBGAPan.sz終了サイズ.Width, pChip.rBGAPan.sz終了サイズ.Height, pChip.rBGAPan.pt画像側開始位置.X, pChip.rBGAPan.pt画像側開始位置.Y, pChip.rBGAPan.pt画像側終了位置.X, pChip.rBGAPan.pt画像側終了位置.Y, pChip.rBGAPan.pt表示側開始位置.X, pChip.rBGAPan.pt表示側開始位置.Y, pChip.rBGAPan.pt表示側終了位置.X, pChip.rBGAPan.pt表示側終了位置.Y, pChip.n総移動時間);
                                     }
                                     break;
 
                                 default:
                                     if (pChip.rBMP != null)
                                     {
-                                        // actBGA.Start(pChip.nChannelNumber, pChip.rBMP, null, pChip.rBMP.n幅, pChip.rBMP.n高さ, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+                                        actBGA.Start(pChip.nChannelNumber, pChip.rBMP, null, pChip.rBMP.n幅, pChip.rBMP.n高さ, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
                                     }
                                     break;
                             }
@@ -3184,16 +3183,16 @@ internal abstract class CStagePerfCommonScreen : CStage
                                 case EAVIType.AVI:
                                     if (pChip.rAVI != null)
                                     {
-                                        //actAVI.bLoop = false;
-                                        //actAVI.Start(pChip.nChannelNumber, pChip.rAVI, 278, 355, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, pChip.nPlaybackTimeMs);
+                                        actAVI.bLoop = false;
+                                        actAVI.Start(pChip.nChannelNumber, pChip.rAVI, 278, 355, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, pChip.nPlaybackTimeMs);
                                     }                                        
                                     break;
 
                                 case EAVIType.AVIPAN:
                                     if (pChip.rAVIPan != null)
                                     {
-                                        //actAVI.bLoop = false;
-                                        //actAVI.Start(pChip.nChannelNumber, pChip.rAVI, pChip.rAVIPan.sz開始サイズ.Width, pChip.rAVIPan.sz開始サイズ.Height, pChip.rAVIPan.sz終了サイズ.Width, pChip.rAVIPan.sz終了サイズ.Height, pChip.rAVIPan.pt動画側開始位置.X, pChip.rAVIPan.pt動画側開始位置.Y, pChip.rAVIPan.pt動画側終了位置.X, pChip.rAVIPan.pt動画側終了位置.Y, pChip.rAVIPan.pt表示側開始位置.X, pChip.rAVIPan.pt表示側開始位置.Y, pChip.rAVIPan.pt表示側終了位置.X, pChip.rAVIPan.pt表示側終了位置.Y, pChip.n総移動時間, pChip.nPlaybackTimeMs);
+                                        actAVI.bLoop = false;
+                                        actAVI.Start(pChip.nChannelNumber, pChip.rAVI, pChip.rAVIPan.sz開始サイズ.Width, pChip.rAVIPan.sz開始サイズ.Height, pChip.rAVIPan.sz終了サイズ.Width, pChip.rAVIPan.sz終了サイズ.Height, pChip.rAVIPan.pt動画側開始位置.X, pChip.rAVIPan.pt動画側開始位置.Y, pChip.rAVIPan.pt動画側終了位置.X, pChip.rAVIPan.pt動画側終了位置.Y, pChip.rAVIPan.pt表示側開始位置.X, pChip.rAVIPan.pt表示側開始位置.Y, pChip.rAVIPan.pt表示側終了位置.X, pChip.rAVIPan.pt表示側終了位置.Y, pChip.n総移動時間, pChip.nPlaybackTimeMs);
                                     }                                        
                                     break;
                             }
@@ -3418,7 +3417,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                             {
                                 if (nBGAスコープチャンネルマップ[0, i] == pChip.nChannelNumber)
                                 {
-                                    // actBGA.ChangeScope(nBGAスコープチャンネルマップ[1, i], pChip.rBMP, pChip.rBMPTEX);
+                                    actBGA.ChangeScope(nBGAスコープチャンネルマップ[1, i], pChip.rBMP, pChip.rBMPTEX);
                                 }
                             }
                         }
@@ -4699,7 +4698,8 @@ internal abstract class CStagePerfCommonScreen : CStage
     protected void tUpdateAndDraw_Background()
     {
         //Draw either Background image or video
-        if (bGenericVideoEnabled) {
+        if (bGenericVideoEnabled)
+        {
             actBackgroundAVI.tUpdateAndDraw();
             background.isVisible = false;
         }
@@ -4707,7 +4707,6 @@ internal abstract class CStagePerfCommonScreen : CStage
         {
             background.isVisible = true;
         }
-        //CDTXMania.app.Device.Clear( ClearFlags.ZBuffer | ClearFlags.Target, Color.Black, 0f, 0 );
     }
 
     protected void tUpdateAndDraw_JudgementLine()  // t進行描画_判定ライン
@@ -5625,8 +5624,8 @@ internal abstract class CStagePerfCommonScreen : CStage
         CDTXMania.Timer.nCurrentTime = nNewPosition;
 
         //Stop any AVI and BGA
-        //actAVI.Stop();
-        // actBGA.Stop();
+        actAVI.Stop();
+        actBGA.Stop();
         //Reset Hold note cache
         chipロングノートHit中 = default;
         nロングノートPart = default;
@@ -5712,8 +5711,8 @@ internal abstract class CStagePerfCommonScreen : CStage
         #endregion
         #region [ 演奏開始時点で既に表示されているBGAとAVIの、シークと再生 ]
         //Re-enable SkipStart now that we have migrated to AVI renderer 
-        // actBGA.SkipStart((int)nNewPosition);
-        //actAVI.SkipStart((int)nNewPosition);
+        actBGA.SkipStart((int)nNewPosition); 
+        actAVI.SkipStart((int)nNewPosition);
         #endregion
         #region [ PAUSEしていたサウンドを一斉に再生再開する(ただしタイマを止めているので、ここではまだ再生開始しない) ]
         foreach (CSound cs in pausedCSound)
@@ -5801,8 +5800,8 @@ internal abstract class CStagePerfCommonScreen : CStage
     {
         Trace.TraceInformation("Stop command received");
         CDTXMania.DTX.tStopPlayingAllChips();
-        //actAVI.Stop();
-        // actBGA.Stop();
+        actAVI.Stop();
+        actBGA.Stop();
         //this.perfpanel.Stop();               // PANEL表示停止
         CDTXMania.Timer.tPause();       // 再生時刻カウンタ停止
 

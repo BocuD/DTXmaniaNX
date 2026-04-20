@@ -2,13 +2,14 @@ using System.Runtime.InteropServices;
 using System.Drawing;
 using System.Diagnostics;
 using DTXMania.Core;
+using DTXMania.UI.Drawable;
 using SharpDX;
 using SharpDX.Direct3D9;
 using FDK;
 
 using Rectangle = System.Drawing.Rectangle;
 using Point = System.Drawing.Point;
-using RectangleF = SharpDX.RectangleF;
+using RectangleF = System.Drawing.RectangleF;
 
 namespace DTXMania;
 
@@ -353,10 +354,7 @@ internal class CActPerfAVI : CActivity
             
         base.OnActivate();
     }
-    public override void OnDeactivate()
-    {            
-        base.OnDeactivate();
-    }
+
     public override void OnManagedCreateResources()
     {
         if (bActivated)
@@ -374,7 +372,8 @@ internal class CActPerfAVI : CActivity
             {
                 txクリップパネル = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\7_ClipPanel.png"));
             }
-            txDShow汎用 = new CTexture(CDTXMania.app.Device, 1280, 720, CDTXMania.app.GraphicsDeviceManager.CurrentSettings.BackBufferFormat, Pool.Managed);
+            
+            // txDShow汎用 = new CTexture(CDTXMania.app.Device, 1280, 720, CDTXMania.app.GraphicsDeviceManager.CurrentSettings.BackBufferFormat, Pool.Managed);
 
             for (int i = 0; i < 1; i++)
             {
@@ -413,11 +412,11 @@ internal class CActPerfAVI : CActivity
                 tx描画用2.Dispose();
                 tx描画用2 = null;
             }
-            if (txDShow汎用 != null)
-            {
-                txDShow汎用.Dispose();
-                txDShow汎用 = null;
-            }
+            // if (txDShow汎用 != null)
+            // {
+            //     txDShow汎用.Dispose();
+            //     txDShow汎用 = null;
+            // }
             if (txlanes != null)
             {
                 txlanes.Dispose();
@@ -642,9 +641,10 @@ internal class CActPerfAVI : CActivity
                             //this.txフィルインエフェクト.tDraw2D(CDTXMania.app.Device, 0, -2, new Rectangle(0, 0 + (360 * numf), 640, 360));
                             if( CDTXMania.ConfigIni.bDrumsEnabled && stageDrum.txBonusEffect != null)
                             {
-                                stageDrum.txBonusEffect.vcScaleRatio = new Vector3( 2.0f, 2.0f, 1.0f );
-                                stageDrum.txBonusEffect.bAdditiveBlending = true;
-                                stageDrum.txBonusEffect.tDraw2D( CDTXMania.app.Device, 0, -2, new RectangleF(0, 0 + ( 360 * numf ), 640, 360 )) ;
+                                //todo: removed vcscaleratio
+                                //stageDrum.txBonusEffect.vcScaleRatio = new Vector3( 2.0f, 2.0f, 1.0f );
+                                stageDrum.txBonusEffect.blendMode = BlendMode.Additive;
+                                stageDrum.txBonusEffect.tDraw2D(CDTXMania.app.Device, 0, -2, new RectangleF(0, 0 + ( 360 * numf ), 640, 360 ));
                                 try
                                 {
                                     //if( this.txフィルインエフェクト[ this.stFillIn[ i ].ctUpdate.nCurrentValue ] != null )
@@ -901,7 +901,7 @@ internal class CActPerfAVI : CActivity
     private CTexture txフィルインエフェクト;
     private CTexture tx描画用;
     private CTexture tx描画用2;
-    private CTexture txDShow汎用;
+    // private CTexture txDShow汎用;
 
     private float ratio1;
     private float ratio2;

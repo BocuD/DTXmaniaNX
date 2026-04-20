@@ -17,33 +17,27 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         eStageID = EStage.Performance_6;
         ePhaseID = EPhase.Common_DefaultState;
         bActivated = false;
-        listChildActivities.Add( actPad = new CActPerfDrumsPad() );
-        listChildActivities.Add( actCombo = new CActPerfDrumsComboDGB() );
-        listChildActivities.Add( actDANGER = new CActPerfDrumsDanger() );
-        listChildActivities.Add( actChipFireD = new CActPerfDrumsChipFireD() );
-        listChildActivities.Add( actGauge = new CActPerfDrumsGauge() );
-        listChildActivities.Add( actGraph = new CActPerfSkillMeter() ); // #24074 2011.01.23 add ikanick
-        listChildActivities.Add( actJudgeString = new CActPerfDrumsJudgementString() );
-        listChildActivities.Add( actLaneFlushD = new CActPerfDrumsLaneFlushD() );
-        listChildActivities.Add( actScore = new CActPerfDrumsScore() );
-        listChildActivities.Add( actStatusPanel = new CActPerfDrumsStatusPanel() );
-        listChildActivities.Add( actScrollSpeed = new CActPerfScrollSpeed() );
-        //listChildActivities.Add( actAVI = new CActPerfAVI() );
-        // listChildActivities.Add( actBGA = new CActPerfBGA() );
-//			base.listChildActivities.Add( this.actPanel = new CActPerfPanelString() );
-        listChildActivities.Add( actStageFailed = new CActPerfStageFailure() );
-        listChildActivities.Add( actPlayInfo = new CActPerformanceInformation() );
-        listChildActivities.Add( actFI = new CActFIFOBlackStart() );
-        listChildActivities.Add( actFO = new CActFIFOBlack() );
-        listChildActivities.Add( actFillin = new CActPerfDrumsFillingEffect() );
-        listChildActivities.Add( actLVFont = new CActLVLNFont() );
-        listChildActivities.Add( actProgressBar = new CActPerfProgressBar());
+        listChildActivities.Add(actPad = new CActPerfDrumsPad());
+        listChildActivities.Add(actCombo = new CActPerfDrumsComboDGB());
+        listChildActivities.Add(actDANGER = new CActPerfDrumsDanger());
+        listChildActivities.Add(actChipFireD = new CActPerfDrumsChipFireD());
+        listChildActivities.Add(actGauge = new CActPerfDrumsGauge());
+        listChildActivities.Add(actGraph = new CActPerfSkillMeter());
+        listChildActivities.Add(actJudgeString = new CActPerfDrumsJudgementString());
+        listChildActivities.Add(actLaneFlushD = new CActPerfDrumsLaneFlushD());
+        listChildActivities.Add(actScore = new CActPerfDrumsScore());
+        listChildActivities.Add(actStatusPanel = new CActPerfDrumsStatusPanel());
+        listChildActivities.Add(actScrollSpeed = new CActPerfScrollSpeed());
+        listChildActivities.Add(actAVI = new CActPerfAVI());
+        listChildActivities.Add(actBGA = new CActPerfBGA());
+        listChildActivities.Add(actStageFailed = new CActPerfStageFailure());
+        listChildActivities.Add(actPlayInfo = new CActPerformanceInformation());
+        listChildActivities.Add(actFI = new CActFIFOBlackStart());
+        listChildActivities.Add(actFO = new CActFIFOBlack());
+        listChildActivities.Add(actFillin = new CActPerfDrumsFillingEffect());
+        listChildActivities.Add(actLVFont = new CActLVLNFont());
+        listChildActivities.Add(actProgressBar = new CActPerfProgressBar());
         listChildActivities.Add(actBackgroundAVI = new CActSelectBackgroundAVI());
-        //          base.listChildActivities.Add( this.actChipFireGB = new CActPerfDrumsChipFireGB());
-        //			base.listChildActivities.Add( this.actLaneFlushGB = new CActPerfDrumsLaneFlushGB() );
-        //			base.listChildActivities.Add( this.actRGB = new CActPerfDrumsRGB() );
-        //			base.listChildActivities.Add( this.actWailingBonus = new CActPerfDrumsWailingBonus() );
-        //          base.listChildActivities.Add( this.actStageCleared = new CAct演奏ステージクリア());
     }
 
     public override void InitializeBaseUI()
@@ -191,7 +185,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
 
         tUpdateAndDraw_Background();
         tUpdateAndDraw_MIDIBGM();
-        //tUpdateAndDraw_AVI();
+        tUpdateAndDraw_AVI();
         tUpdateAndDraw_LaneFlushD();
         tUpdateAndDraw_ScrollSpeed();
         tUpdateAndDraw_ChipAnimation();
@@ -201,97 +195,11 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         bIsFinishedPlaying = tUpdateAndDraw_Chips(EInstrumentPart.DRUMS);
         actProgressBar.OnUpdateAndDraw();
 
-        #region[ シャッター ]
-
-        //シャッターを使うのはLC、LP、FT、RDレーンのみ。その他のレーンでは一切使用しない。
-        //If Skill Mode is CLASSIC, always display lvl as Classic Style
-        if (CDTXMania.ConfigIni.nSkillMode == 0 || (CDTXMania.ConfigIni.bClassicScoreDisplay &&
-                                                    (!CDTXMania.DTX.bHasChips.LeftCymbal &&
-                                                     !CDTXMania.DTX.bHasChips.FT &&
-                                                     !CDTXMania.DTX.bHasChips.Ride &&
-                                                     !CDTXMania.DTX.bHasChips.LP &&
-                                                     !CDTXMania.DTX.bHasChips.LBD &&
-                                                     !CDTXMania.DTX.bForceXGChart)))
-        {
-            if (txLaneCover != null)
-            {
-                //旧画像
-                //this.txLaneCover.tDraw2D(CDTXMania.app.Device, 295, 0);
-                //if (CDTXMania.DTX.bチップがある.LeftCymbal == false)
-                {
-                    txLaneCover.tDraw2D(CDTXMania.app.Device, 295, 0, new RectangleF(0, 0, 70, 720));
-                }
-                //if ((CDTXMania.DTX.bチップがある.LP == false) && (CDTXMania.DTX.bチップがある.LBD == false))
-                {
-                    //レーンタイプでの入れ替わりあり
-                    if (CDTXMania.ConfigIni.eLaneType.Drums == EType.A ||
-                        CDTXMania.ConfigIni.eLaneType.Drums == EType.C)
-                    {
-                        txLaneCover.tDraw2D(CDTXMania.app.Device, 416, 0, new RectangleF(124, 0, 54, 720));
-                    }
-                    else if (CDTXMania.ConfigIni.eLaneType.Drums == EType.B)
-                    {
-                        txLaneCover.tDraw2D(CDTXMania.app.Device, 470, 0, new RectangleF(124, 0, 54, 720));
-                    }
-                    else if (CDTXMania.ConfigIni.eLaneType.Drums == EType.D)
-                    {
-                        txLaneCover.tDraw2D(CDTXMania.app.Device, 522, 0, new RectangleF(124, 0, 54, 720));
-                    }
-                }
-                //if (CDTXMania.DTX.bチップがある.FT == false)
-                {
-                    txLaneCover.tDraw2D(CDTXMania.app.Device, 690, 0, new RectangleF(71, 0, 52, 720));
-                }
-                //if (CDTXMania.DTX.bチップがある.Ride == false)
-                {
-                    //RDPositionで入れ替わり
-                    if (CDTXMania.ConfigIni.eRDPosition == ERDPosition.RCRD)
-                    {
-                        txLaneCover.tDraw2D(CDTXMania.app.Device, 815, 0, new RectangleF(178, 0, 38, 720));
-                    }
-                    else if (CDTXMania.ConfigIni.eRDPosition == ERDPosition.RDRC)
-                    {
-                        txLaneCover.tDraw2D(CDTXMania.app.Device, 743, 0, new RectangleF(178, 0, 38, 720));
-                    }
-                }
-            }
-        }
-
-        double db倍率 = 7.2;
-        double dbシャッターIN = (nShutterInPosY.Drums * db倍率);
-        double dbシャッターOUT = 720 - (nShutterOutPosY.Drums * db倍率);
-
-        if (CDTXMania.ConfigIni.bReverse.Drums)
-        {
-            dbシャッターIN = (nShutterOutPosY.Drums * db倍率);
-            txShutter.tDraw2D(CDTXMania.app.Device, 295, (int)(-720 + dbシャッターIN));
-
-            if (CDTXMania.ConfigIni.bShowPerformanceInformation)
-                actLVFont.tDrawString(564, (int)dbシャッターIN - 20, CDTXMania.ConfigIni.nShutterOutSide.Drums.ToString());
-
-            dbシャッターOUT = 720 - (nShutterInPosY.Drums * db倍率);
-            txShutter.tDraw2D(CDTXMania.app.Device, 295, (int)dbシャッターOUT);
-
-            if (CDTXMania.ConfigIni.bShowPerformanceInformation)
-                actLVFont.tDrawString(564, (int)dbシャッターOUT + 2, CDTXMania.ConfigIni.nShutterInSide.Drums.ToString());
-        }
-        else
-        {
-            txShutter.tDraw2D(CDTXMania.app.Device, 295, (int)(-720 + dbシャッターIN));
-
-            if (CDTXMania.ConfigIni.bShowPerformanceInformation)
-                actLVFont.tDrawString(564, (int)dbシャッターIN - 20, CDTXMania.ConfigIni.nShutterInSide.Drums.ToString());
-
-            txShutter.tDraw2D(CDTXMania.app.Device, 295, (int)dbシャッターOUT);
-
-            if (CDTXMania.ConfigIni.bShowPerformanceInformation)
-                actLVFont.tDrawString(564, (int)dbシャッターOUT + 2, CDTXMania.ConfigIni.nShutterOutSide.Drums.ToString());
-        }
-
-        #endregion
+        DrawLaneCover();
 
         tUpdateAndDraw_JudgementLine();
         tUpdateAndDraw_DrumPad();
+        
         bIsFinishedFadeout = tUpdateAndDraw_FadeIn_Out();
         if (bIsFinishedPlaying && (ePhaseID == EPhase.Common_DefaultState))
         {
@@ -305,43 +213,15 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
             {
                 eReturnValueAfterFadeOut = EPerfScreenReturnValue.StageClear;
                 ePhaseID = EPhase.PERFORMANCE_STAGE_CLEAR;
-                if (nHitCount_ExclAuto.Drums.Miss + nHitCount_ExclAuto.Drums.Poor == 0)
-                {
-                    nNumberPerfects = CDTXMania.ConfigIni.bAllDrumsAreAutoPlay
-                        ? nNumberPerfects = nHitCount_IncAuto.Drums.Perfect
-                        : nHitCount_ExclAuto.Drums.Perfect;
-                    if (nNumberPerfects == CDTXMania.DTX.nVisibleChipsCount.Drums)
-
-                        #region[ エクセ ]
-
-                    {
-                    }
-
-                    #endregion
-
-                    else
-
-                        #region[ フルコン ]
-
-                    {
-                    }
-
-                    #endregion
-                }
-                else
-                {
-
-                }
             }
         }
 
         if (CDTXMania.ConfigIni.bShowScore)
             tUpdateAndDraw_Score();
-//              if( CDTXMania.ConfigIni.bShowMusicInfo )
-//                  this.t進行描画_パネル文字列();
+
         if (CDTXMania.ConfigIni.nInfoType == 1)
             tUpdateAndDraw_StatusPanel();
-        //this.actProgressBar.OnUpdateAndDraw();
+
         tUpdateAndDraw_Gauge();
         tUpdateAndDraw_Combo();
         tUpdateAndDraw_Graph();
@@ -350,8 +230,6 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         tUpdateAndDraw_JudgementString2_ForPositionOnJudgementLine();
         tUpdateAndDraw_ChipFireD();
         tUpdateAndDraw_PlaySpeed();
-        //
-
         tUpdateAndDraw_STAGEFAILED();
         
         bすべてのチップが判定された = true;
@@ -464,7 +342,93 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         return 0;
     }
 
+    private void DrawLaneCover()
+    {
+        //シャッターを使うのはLC、LP、FT、RDレーンのみ。その他のレーンでは一切使用しない。
+        //If Skill Mode is CLASSIC, always display lvl as Classic Style
+        if (CDTXMania.ConfigIni.nSkillMode == 0 || (CDTXMania.ConfigIni.bClassicScoreDisplay &&
+                                                    (!CDTXMania.DTX.bHasChips.LeftCymbal &&
+                                                     !CDTXMania.DTX.bHasChips.FT &&
+                                                     !CDTXMania.DTX.bHasChips.Ride &&
+                                                     !CDTXMania.DTX.bHasChips.LP &&
+                                                     !CDTXMania.DTX.bHasChips.LBD &&
+                                                     !CDTXMania.DTX.bForceXGChart)))
+        {
+            if (txLaneCover != null)
+            {
+                //旧画像
+                //this.txLaneCover.tDraw2D(CDTXMania.app.Device, 295, 0);
+                //if (CDTXMania.DTX.bチップがある.LeftCymbal == false)
+                {
+                    txLaneCover.tDraw2D(CDTXMania.app.Device, 295, 0, new RectangleF(0, 0, 70, 720));
+                }
+                //if ((CDTXMania.DTX.bチップがある.LP == false) && (CDTXMania.DTX.bチップがある.LBD == false))
+                {
+                    //レーンタイプでの入れ替わりあり
+                    if (CDTXMania.ConfigIni.eLaneType.Drums == EType.A ||
+                        CDTXMania.ConfigIni.eLaneType.Drums == EType.C)
+                    {
+                        txLaneCover.tDraw2D(CDTXMania.app.Device, 416, 0, new RectangleF(124, 0, 54, 720));
+                    }
+                    else if (CDTXMania.ConfigIni.eLaneType.Drums == EType.B)
+                    {
+                        txLaneCover.tDraw2D(CDTXMania.app.Device, 470, 0, new RectangleF(124, 0, 54, 720));
+                    }
+                    else if (CDTXMania.ConfigIni.eLaneType.Drums == EType.D)
+                    {
+                        txLaneCover.tDraw2D(CDTXMania.app.Device, 522, 0, new RectangleF(124, 0, 54, 720));
+                    }
+                }
+                //if (CDTXMania.DTX.bチップがある.FT == false)
+                {
+                    txLaneCover.tDraw2D(CDTXMania.app.Device, 690, 0, new RectangleF(71, 0, 52, 720));
+                }
+                //if (CDTXMania.DTX.bチップがある.Ride == false)
+                {
+                    //RDPositionで入れ替わり
+                    if (CDTXMania.ConfigIni.eRDPosition == ERDPosition.RCRD)
+                    {
+                        txLaneCover.tDraw2D(CDTXMania.app.Device, 815, 0, new RectangleF(178, 0, 38, 720));
+                    }
+                    else if (CDTXMania.ConfigIni.eRDPosition == ERDPosition.RDRC)
+                    {
+                        txLaneCover.tDraw2D(CDTXMania.app.Device, 743, 0, new RectangleF(178, 0, 38, 720));
+                    }
+                }
+            }
+        }
 
+        double db倍率 = 7.2;
+        double dbシャッターIN = (nShutterInPosY.Drums * db倍率);
+        double dbシャッターOUT = 720 - (nShutterOutPosY.Drums * db倍率);
+
+        if (CDTXMania.ConfigIni.bReverse.Drums)
+        {
+            dbシャッターIN = (nShutterOutPosY.Drums * db倍率);
+            txShutter.tDraw2D(CDTXMania.app.Device, 295, (int)(-720 + dbシャッターIN));
+
+            if (CDTXMania.ConfigIni.bShowPerformanceInformation)
+                actLVFont.tDrawString(564, (int)dbシャッターIN - 20, CDTXMania.ConfigIni.nShutterOutSide.Drums.ToString());
+
+            dbシャッターOUT = 720 - (nShutterInPosY.Drums * db倍率);
+            txShutter.tDraw2D(CDTXMania.app.Device, 295, (int)dbシャッターOUT);
+
+            if (CDTXMania.ConfigIni.bShowPerformanceInformation)
+                actLVFont.tDrawString(564, (int)dbシャッターOUT + 2, CDTXMania.ConfigIni.nShutterInSide.Drums.ToString());
+        }
+        else
+        {
+            txShutter.tDraw2D(CDTXMania.app.Device, 295, (int)(-720 + dbシャッターIN));
+
+            if (CDTXMania.ConfigIni.bShowPerformanceInformation)
+                actLVFont.tDrawString(564, (int)dbシャッターIN - 20, CDTXMania.ConfigIni.nShutterInSide.Drums.ToString());
+
+            txShutter.tDraw2D(CDTXMania.app.Device, 295, (int)dbシャッターOUT);
+
+            if (CDTXMania.ConfigIni.bShowPerformanceInformation)
+                actLVFont.tDrawString(564, (int)dbシャッターOUT + 2, CDTXMania.ConfigIni.nShutterOutSide.Drums.ToString());
+        }
+    }
 
 
     // Other
@@ -678,17 +642,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
     {
         CDTXMania.ConfigIni.nScrollSpeed.Drums = Math.Max( CDTXMania.ConfigIni.nScrollSpeed.Drums - 1, 0 );
     }
-	
-    /*
-    protected override void tUpdateAndDraw_AVI()
-    {
-        base.tUpdateAndDraw_AVI( 0, 0 );
-    }
-    protected override void t進行描画_BGA()
-    {
-        base.t進行描画_BGA( 990, 0 );
-    }
-     */
+    
     protected override void tUpdateAndDraw_DANGER()
     {
         actDANGER.tUpdateAndDraw( actGauge.IsDanger(EInstrumentPart.DRUMS), false, false );
@@ -3582,7 +3536,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                     }
                     if (((actCombo.nCurrentCombo.Drums > 0) || configIni.bAllDrumsAreAutoPlay) && configIni.b歓声を発声する)
                     {
-                        //actAVI.Start(bInFillIn);
+                        actAVI.Start(bInFillIn);
                         if (r現在の歓声Chip.Drums != null)
                         {
                             dTX.tPlayChip(r現在の歓声Chip.Drums, CSoundManager.rcPerformanceTimer.nシステム時刻, (int)ELane.BGM, dTX.nモニタを考慮した音量(EInstrumentPart.UNKNOWN));

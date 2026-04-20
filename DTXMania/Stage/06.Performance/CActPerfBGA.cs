@@ -128,11 +128,11 @@ internal class CActPerfBGA : CActivity
 	{
 		if( bActivated )
 		{
-			txBGAバックパネル = new CTexture(CDTXMania.app.Device, 278, 355, CDTXMania.app.GraphicsDeviceManager.CurrentSettings.BackBufferFormat, Pool.Managed);
-			using( Surface surface = CDTXMania.app.Device.GetBackBuffer( 0, 0 ) )
-			{
-				sfBackBuffer = Surface.CreateOffscreenPlain( CDTXMania.app.Device, surface.Description.Width, surface.Description.Height, surface.Description.Format, Pool.SystemMemory );
-			}
+			// txBGAバックパネル = new CTexture(CDTXMania.app.Device, 278, 355, CDTXMania.app.GraphicsDeviceManager.CurrentSettings.BackBufferFormat, Pool.Managed);
+			// using( Surface surface = CDTXMania.app.Device.GetBackBuffer( 0, 0 ) )
+			// {
+			// 	sfBackBuffer = Surface.CreateOffscreenPlain( CDTXMania.app.Device, surface.Description.Width, surface.Description.Height, surface.Description.Format, Pool.SystemMemory );
+			// }
 			base.OnManagedCreateResources();
 		}
 	}
@@ -140,12 +140,12 @@ internal class CActPerfBGA : CActivity
 	{
 		if( bActivated )
 		{
-			CDTXMania.tReleaseTexture( ref txBGAバックパネル );
-			if( sfBackBuffer != null )
-			{
-				sfBackBuffer.Dispose();
-				sfBackBuffer = null;
-			}
+			// CDTXMania.tReleaseTexture( ref txBGAバックパネル );
+			// if( sfBackBuffer != null )
+			// {
+			// 	sfBackBuffer.Dispose();
+			// 	sfBackBuffer = null;
+			// }
 			base.OnManagedReleaseResources();
 		}
 	}
@@ -157,7 +157,7 @@ internal class CActPerfBGA : CActivity
 	{
 		if( bActivated )
 		{
-			txBGAバックパネル.tDraw2D(CDTXMania.app.Device, 980, 0);
+			// txBGAバックパネル.tDraw2D(CDTXMania.app.Device, 980, 0);
 			for( int i = 0; i < 8; i++ )
 			{
 				if( ( ( stLayer[ i ].n移動開始時刻ms != -1 ) && ( ( stLayer[ i ].rBMP != null ) || ( stLayer[ i ].rBMPTEX != null ) ) ) && ( ( ( stLayer[ i ].rBMP == null ) || ( stLayer[ i ].rBMP.bUse && ( stLayer[ i ].rBMP.txImage != null ) ) ) && ( ( stLayer[ i ].rBMPTEX == null ) || ( stLayer[ i ].rBMPTEX.bUse && ( stLayer[ i ].rBMPTEX.txImage != null ) ) ) ) )
@@ -298,9 +298,9 @@ internal class CActPerfBGA : CActivity
 		public long n移動開始時刻ms;
 	}
 
-	private CTexture txBGAバックパネル;
+	// private CTexture txBGAバックパネル;
 	private readonly EChannel[] nChannel = new EChannel[] { EChannel.BGALayer1, EChannel.BGALayer2, EChannel.BGALayer3, EChannel.BGALayer4, EChannel.BGALayer5, EChannel.BGALayer6, EChannel.BGALayer7, EChannel.BGALayer8 };
-	private Surface sfBackBuffer;
+	// private Surface sfBackBuffer;
 	private STLAYER[] stLayer = new STLAYER[ 8 ];
 	//-----------------
 	#endregion
