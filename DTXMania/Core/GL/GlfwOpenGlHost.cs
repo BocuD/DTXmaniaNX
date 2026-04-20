@@ -342,7 +342,7 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
     {
         io.Fonts.Clear();
 
-        string? defaultFontPath = UiFontDefaults.TryGetDefaultUiFontPath();
+        string? defaultFontPath = UIFonts.FallbackFont;
         if (string.IsNullOrWhiteSpace(defaultFontPath) || !File.Exists(defaultFontPath))
         {
             io.Fonts.AddFontDefault();

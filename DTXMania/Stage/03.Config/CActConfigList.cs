@@ -561,18 +561,16 @@ internal partial class CActConfigList : CActivity
 
         if (isHighlighted)
         {
-            //TODO commented out important stuff maybe
+            var tex = RenderText(strParam, 15, Color4.White, Color.OrangeRed);
             
             // Bitmap bmpStr = prvFont.DrawPrivateFont(strParam, Color.White, Color.Black, Color.Yellow, Color.OrangeRed);
             // CTexture txStr = CDTXMania.tGenerateTexture(bmpStr, false);
             //
-            // Matrix4x4 highlightMatrix = Matrix4x4.CreateTranslation(n新項目パネルX + 265, y + 20, 0) * parentMatrix;
-            // Vector2 size = new(txStr.szImageSize.Width, txStr.szImageSize.Height);
-            // size *= 1 / CDTXMania.renderScale;
-            // txStr.tDraw2DMatrix(highlightMatrix, size);
-            //
-            // bmpStr.Dispose();
-            // txStr.Dispose();
+            Matrix4x4 highlightMatrix = Matrix4x4.CreateTranslation(n新項目パネルX + 265, y + 20, 0) * parentMatrix;
+            Vector2 size = new(tex.Width, tex.Height);
+            size *= 1 / CDTXMania.renderScale;
+            tex.tDraw2DMatrix(highlightMatrix, size);
+            tex.Dispose(); //todo this is pretty ugly
         }
         else
         {
@@ -760,7 +758,7 @@ internal partial class CActConfigList : CActivity
             Name = text.Substring(0, Math.Min(20, text.Length)), // Use a substring of the text as the name to avoid excessively long names
             Text = text,
             FillColor = color,
-            FontPath = UiFontDefaults.TryGetDefaultUiFontPath() ?? string.Empty,
+            FontPath = UIFonts.FallbackFont,
             OutlineColor = outline ?? Color4.Black,
             OutlineWidth = outline.HasValue ? (size * CDTXMania.renderScale) / 4 : 0,
             Backend = UiTextRenderBackend.Skia,

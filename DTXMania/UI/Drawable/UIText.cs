@@ -28,7 +28,7 @@ public class UIText : UITexture
     private bool _dirty = true;
 
     public string text = "New UIText";
-    public string fontPath = UiFontDefaults.TryGetDefaultUiFontPath() ?? string.Empty;
+    public string fontPath = UIFonts.FallbackFont;
     public string fontFamily = string.Empty;
     public float fontSize = DefaultFontSize;
     public float outlineWidth = 3f;
