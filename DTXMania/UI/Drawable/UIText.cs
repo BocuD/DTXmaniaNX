@@ -340,13 +340,17 @@ public class UIText : UITexture
 
     private UiTextRenderRequest CreateRenderRequest()
     {
+        //determine renderscale
+        float renderSize = fontSize * CDTXMania.renderScale;
+        scale = new Vector3(1 / CDTXMania.renderScale);
+        
         return new UiTextRenderRequest
         {
             Name = name,
             Text = text,
             FontPath = fontPath,
             FontFamily = fontFamily,
-            FontSize = fontSize,
+            FontSize = renderSize,
             OutlineWidth = outlineWidth,
             TexturePadding = texturePadding,
             LineSpacing = lineSpacing,
