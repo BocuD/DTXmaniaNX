@@ -642,9 +642,9 @@ internal class CActPerfCommonCombo : CActivity
         txCOMBOドラム = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums combo.png" ) );
         txCOMBOドラム1000 = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums combo_2.png" ) );
         txComboBom = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\7_Combobomb.png" ) );
-        // if( txComboBom != null )
-            //todo: additive blending
-            //txComboBom.bAdditiveBlending = true;
+        if( txComboBom != null )
+            txComboBom.blendMode = BlendMode.Additive;
+        
         txCOMBOギター = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayGuitar combo.png" ) );
         base.OnManagedCreateResources();
     }
