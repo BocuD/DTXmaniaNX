@@ -8,19 +8,20 @@ Visit [releases](https://github.com/BocuD/DTXmaniaNX/releases) for automated bui
 
 ## Some of the changes made from upstream DTXManiaNX:
 
-- Newly written UI rendering framework
+- Newly written renderer
+  - Uses an abstracted architecture allowing arbitrary graphics backends
+    - Currently uses OpenGL (instead of DirectX9)
   - Supports translating, rotating, and scaling elements according to a hierarchy
   - Fully serializable and skinnable
   - Resolution independent
 
 - New theming engine
-  - Written on top of new UI framework
+  - Written on top of new renderer
   - Doesn't affect old UI elements (for now)
  
 - Support for arbitrary resolutions such as 1080p or 2160p (4K)
   - Currently restricted to 16:9
   - UI scales gracefully, independent of resolution
-  - Gameplay is still fixed at 720p
 
 - Rewritten song database
   - ~4-8x performance speedup
@@ -123,9 +124,11 @@ https://osdn.net/projects/dtxmaniaxg-verk
 ## Installation
 1. Download the [latest release](https://github.com/BocuD/DTXmaniaNX/releases) of DTXMania and extract it to a location of your choice
 
-2. Download and install the [.NET 6.0 Runtime](https://dotnet.microsoft.com/en-us/download/dotnet/6.0) (if prompted)
+2. Download and install the [.NET 8.0 Runtime](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) (if prompted)
 
 3. Download and install the [DirectX End-User Runtime (DirectX v9.0c)](https://www.microsoft.com/en-us/download/details.aspx?displaylang=en&id=35)
+
+4. Run DTXManiaNX.exe
 
 ## Community Support
 For additional help or support, ask away in DTXMania on Discord! 
