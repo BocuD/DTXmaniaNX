@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Diagnostics;
 using DTXMania.Core;
+using DTXMania.Core.Video;
 using DTXMania.UI;
 using DTXMania.UI.Drawable;
 using FDK;
@@ -288,7 +289,21 @@ internal abstract class CStagePerfCommonScreen : CStage
 
     public override void InitializeDefaultUI()
     {
-        
+        string videoPath = CSkin.Path(@"Graphics\7_Movie.mp4");
+        FFmpegVideoPlayer videoPlayer = new ThreadedSoftwareVideoPlayer();
+        videoPlayer.LoopOnEof = true;
+        if (videoPlayer.Open(videoPath))
+        {
+            Trace.TraceInformation("Performance screen: generic background video loaded successfully");
+            UIVideoRenderer renderer = ui.AddChild(new UIVideoRenderer(videoPlayer, videoPath));
+            renderer.renderOrder = -100;
+            bGenericVideoEnabled = true;
+        }
+        else
+        {
+            videoPlayer.Dispose();
+            bGenericVideoEnabled = false;
+        }
     }
 
     // CStage 実装
@@ -451,34 +466,12 @@ internal abstract class CStagePerfCommonScreen : CStage
         queueMixerSound.Clear();
         queueMixerSound = null;
         //          GCSettings.LatencyMode = this.gclatencymode;
-        if (caviGenericBackgroundVideo != null)
-        {
-            caviGenericBackgroundVideo.Dispose();
-            caviGenericBackgroundVideo = null;
-        }
-
         base.OnDeactivate();
     }
     public override void OnManagedCreateResources()
     {
         if (bActivated)
         {
-            ui = new UIGroup("Performance Common Screen");
-            
-            //
-            caviGenericBackgroundVideo = new CAVI(1290, CSkin.Path(@"Graphics\7_Movie.mp4"), "", 20.0);
-            caviGenericBackgroundVideo.OnDeviceCreated();
-            if (caviGenericBackgroundVideo.avi != null)
-            {
-                Trace.TraceInformation("Generic Background video loaded successfully");
-                actBackgroundAVI.bLoop = true;
-                actBackgroundAVI.Start(EChannel.MovieFull, caviGenericBackgroundVideo, 0, -1);
-                bGenericVideoEnabled = true;
-            }
-            else
-            {
-                bGenericVideoEnabled = false;
-            }
             tGenerateBackgroundTexture();
 
             txWailingFrame = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay wailing cursor.png" ) );
@@ -503,8 +496,6 @@ internal abstract class CStagePerfCommonScreen : CStage
     {
         if (bActivated)
         {
-            actBackgroundAVI.Stop();
-
             base.OnManagedReleaseResources();
         }
     }
@@ -789,7 +780,6 @@ internal abstract class CStagePerfCommonScreen : CStage
     protected CActPerfSkillMeter actGraph;
     protected CActPerfGuitarBonus actGuitarBonus;
     protected CActPerfProgressBar actProgressBar;
-    protected CActSelectBackgroundAVI actBackgroundAVI;
     protected bool bPAUSE;
     protected STDGBVALUE<bool> bMIDIUsed;
     protected STDGBVALUE<bool> bKeyboardUsed;
@@ -882,8 +872,7 @@ internal abstract class CStagePerfCommonScreen : CStage
     protected long LoopBeginMs;
     protected long LoopEndMs;
 
-    //Generic video object
-    private CAVI caviGenericBackgroundVideo;
+    // Tracks whether a generic background video was successfully loaded
     private bool bGenericVideoEnabled;
 
     // Use a property instead of a field to automatically set training mode on the graph too
@@ -4697,15 +4686,11 @@ internal abstract class CStagePerfCommonScreen : CStage
     protected UIImage background;
     protected void tUpdateAndDraw_Background()
     {
-        //Draw either Background image or video
-        if (bGenericVideoEnabled)
+        // The background video (if loaded) renders automatically as part of the ui group.
+        // Show or hide the static background image depending on whether a video is active.
+        if (background != null)
         {
-            actBackgroundAVI.tUpdateAndDraw();
-            background.isVisible = false;
-        }
-        else if (background != null)
-        {
-            background.isVisible = true;
+            background.isVisible = !bGenericVideoEnabled;
         }
     }
 
