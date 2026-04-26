@@ -28,8 +28,6 @@ internal class CStageSongLoading : CStage
         eStageID = EStage.SongLoading_5;
         ePhaseID = EPhase.Common_DefaultState;
         bActivated = false;
-        //			base.listChildActivities.Add( this.actFI = new CActFIFOBlack() );	// #27787 2012.3.10 yyagi 曲読み込み画面のフェードインの省略
-        listChildActivities.Add(actFO = new CActFIFOBlackStart());
 
         #region[ 難易度数字 ]
         //大文字
@@ -712,7 +710,6 @@ internal class CStageSongLoading : CStage
                 
                 if ((nCurrentTime - nBGMPlayStartTime) > (nBGMTotalPlayTimeMs)) // #27787 2012.3.10 yyagi 1000ms == フェードイン分の時間
                 {
-                    actFO.tStartFadeOut();
                     ePhaseID = EPhase.Common_FadeOut;
                 }
 
@@ -885,10 +882,7 @@ internal class CStageSongLoading : CStage
         public char ch;
         public Point pt;
     }
-
-    //		private CActFIFOBlack actFI;
-    private CActFIFOBlackStart actFO;
-
+    
     private readonly STCharacterPosition[] st大文字位置;
     private int nCurrentInst;
     private long nBGMTotalPlayTimeMs;

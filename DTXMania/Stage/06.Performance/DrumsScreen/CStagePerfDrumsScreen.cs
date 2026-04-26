@@ -32,8 +32,6 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         listChildActivities.Add(actBGA = new CActPerfBGA());
         listChildActivities.Add(actStageFailed = new CActPerfStageFailure());
         listChildActivities.Add(actPlayInfo = new CActPerformanceInformation());
-        listChildActivities.Add(actFI = new CActFIFOBlackStart());
-        listChildActivities.Add(actFO = new CActFIFOBlack());
         listChildActivities.Add(actFillin = new CActPerfDrumsFillingEffect());
         listChildActivities.Add(actLVFont = new CActLVLNFont());
         listChildActivities.Add(actProgressBar = new CActPerfProgressBar());
@@ -155,7 +153,6 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
             txBonusEffect.tDraw2D(CDTXMania.app.Device, 1280, 720);
         }
 
-        actFI.tStartFadeIn();
         ct登場用.tUpdate();
         
         // display presence now that the initial timer reset has been performed

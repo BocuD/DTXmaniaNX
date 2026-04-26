@@ -770,8 +770,6 @@ internal abstract class CStagePerfCommonScreen : CStage
     protected CActPerfChipFireGB actChipFireGB;
     public CActPerfCommonCombo actCombo;
     protected CActPerfCommonDanger actDANGER;
-    protected CActFIFOBlackStart actFI;
-    protected CActFIFOBlack actFO;
     //protected CActPerfStageClear actStageClear;
     public CActPerfCommonGauge actGauge;
     public CActPerfDrumsFillingEffect actFillin;
@@ -2732,7 +2730,6 @@ internal abstract class CStagePerfCommonScreen : CStage
             eReturnValueAfterFadeOut = EPerfScreenReturnValue.StageFailure;
             ePhaseID = EPhase.PERFORMANCE_STAGE_FAILED_FADEOUT;
             CDTXMania.DTX.tStopPlayingAllChips();
-            actFO.tStartFadeOut();
         }
     }
     protected void tUpdateAndDraw_WailingBonus()
@@ -4646,19 +4643,11 @@ internal abstract class CStagePerfCommonScreen : CStage
         switch (ePhaseID)
         {
             case EPhase.Common_FadeIn:
-                if (actFI.OnUpdateAndDraw() != 0)
-                {
-                    ePhaseID = EPhase.Common_DefaultState;
-                }
+                ePhaseID = EPhase.Common_DefaultState;
                 break;
 
             case EPhase.Common_FadeOut:
             case EPhase.PERFORMANCE_STAGE_FAILED_FADEOUT:
-                if (actFO.OnUpdateAndDraw() != 0)
-                {
-                    return true;
-                }
-
                 if (!GitaDoraTransition.isAnimating)
                 {
                     return true;

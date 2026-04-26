@@ -32,8 +32,6 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		listChildActivities.Add( actCombo = new CActPerfGuitarCombo() );
 		listChildActivities.Add( actChipFireGB = new CActPerfGuitarChipFire() );
 		listChildActivities.Add( actPlayInfo = new CActPerformanceInformation() );
-		listChildActivities.Add( actFI = new CActFIFOBlackStart() );
-		listChildActivities.Add( actFO = new CActFIFOBlack() );
 		listChildActivities.Add( actProgressBar = new CActPerfProgressBar());
 		listChildActivities.Add( actBackgroundAVI = new CActSelectBackgroundAVI());
 	}
@@ -135,7 +133,6 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		}
 
 		ePhaseID = EPhase.Common_FadeIn;
-		actFI.tStartFadeIn();
 		
 		// display presence now that the initial timer reset has been performed
 		tDisplayPresence();

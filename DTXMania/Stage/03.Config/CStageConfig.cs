@@ -27,7 +27,6 @@ internal class CStageConfig : CStage
         ePhaseID = EPhase.Common_DefaultState;
         actFont = font = new CActDFPFont();
         listChildActivities.Add(font);
-        listChildActivities.Add(actFIFO = new CActFIFOWhite());
         listChildActivities.Add(actList = new CActConfigList(this, ui));
         listChildActivities.Add(actKeyAssign = new CActConfigKeyAssign(this));
         bActivated = false;
@@ -247,20 +246,11 @@ internal class CStageConfig : CStage
         switch (ePhaseID)
         {
             case EPhase.Common_FadeIn:
-                if (actFIFO.OnUpdateAndDraw() != 0)
-                {
-                    CDTXMania.Skin.bgmコンフィグ画面.tPlay();
-                    ePhaseID = EPhase.Common_DefaultState;
-                }
-
+                CDTXMania.Skin.bgmコンフィグ画面.tPlay();
+                ePhaseID = EPhase.Common_DefaultState;
                 break;
 
             case EPhase.Common_FadeOut:
-                // if (actFIFO.OnUpdateAndDraw() == 0)
-                // {
-                //     break;
-                // }
-
                 if (GitaDoraTransition.isAnimating) break;
                 return 1;
         }
@@ -297,7 +287,6 @@ internal class CStageConfig : CStage
             }
             else
             {
-                //actFIFO.tStartFadeOut();
                 GitaDoraTransition.Close(0, async () =>
                 {
                     await Task.Delay(150);
@@ -311,7 +300,6 @@ internal class CStageConfig : CStage
             if (configLeftOptionsMenu.currentlySelectedIndex == 4)
             {
                 CDTXMania.Skin.soundDecide.tPlay();
-                //actFIFO.tStartFadeOut();
                 GitaDoraTransition.Close(0, async () =>
                 {
                     await Task.Delay(500);
@@ -434,7 +422,6 @@ internal class CStageConfig : CStage
         }
     }
 
-    private CActFIFOWhite actFIFO;
     private CActConfigKeyAssign actKeyAssign;
     private CActConfigList actList;
     

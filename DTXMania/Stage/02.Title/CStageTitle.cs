@@ -20,9 +20,6 @@ internal class CStageTitle : CStage
 	{
 		eStageID = EStage.Title_2;
 		bActivated = false;
-		listChildActivities.Add(actFIfromSetup = new CActFIFOWhite());
-		listChildActivities.Add(actFI = new CActFIFOWhite());
-		listChildActivities.Add(actFO = new CActFIFOWhite());
 	}
 
 
@@ -113,16 +110,9 @@ internal class CStageTitle : CStage
 
 	public override void FirstUpdate()
 	{
-		if (CDTXMania.StageManager.rPreviousStage == CDTXMania.StageManager.stageStartup )
-		{
-			actFIfromSetup.tStartFadeIn();
-			ePhaseID = EPhase.タイトル_起動画面からのフェードイン;
-		}
-		else
-		{
-			actFI.tStartFadeIn();
-			ePhaseID = EPhase.Common_FadeIn;
-		}
+		CDTXMania.Skin.soundTitle.tPlay();
+		ePhaseID = EPhase.Common_DefaultState;
+		
 		ctCursorFlash.tStart( 0, 700, 5, CDTXMania.Timer );
 		ctCursorFlash.nCurrentValue = 100;
 	}
@@ -202,7 +192,6 @@ internal class CStageTitle : CStage
 				}
 				GitaDoraTransition.Close();
 				CDTXMania.Skin.soundTitle.tStop();
-				//actFO.tStartFadeOut();
 				ePhaseID = EPhase.Common_FadeOut;
 			}
 		}
@@ -255,14 +244,6 @@ internal class CStageTitle : CStage
 		EPhase ePhaseId = ePhaseID;
 		switch( ePhaseId )
 		{
-			case EPhase.Common_FadeIn:
-				if( actFI.OnUpdateAndDraw() != 0 )
-				{
-					CDTXMania.Skin.soundTitle.tPlay();
-					ePhaseID = EPhase.Common_DefaultState;
-				}
-				break;
-
 			case EPhase.Common_FadeOut:
 				if (GitaDoraTransition.isAnimating) break;
 				
@@ -282,14 +263,6 @@ internal class CStageTitle : CStage
 
 					case (int)EReturnResult.EXIT - 1:
 						return (int) EReturnResult.EXIT;
-				}
-				break;
-
-			case EPhase.タイトル_起動画面からのフェードイン:
-				if( actFIfromSetup.OnUpdateAndDraw() != 0 )
-				{
-					CDTXMania.Skin.soundTitle.tPlay();
-					ePhaseID = EPhase.Common_DefaultState;
 				}
 				break;
 		}
@@ -360,9 +333,6 @@ internal class CStageTitle : CStage
 		}
 	}
 
-	private CActFIFOWhite actFI;
-	private CActFIFOWhite actFIfromSetup;
-	private CActFIFOWhite actFO;
 	private CCounter ctCursorFlash;
 	private STキー反復用カウンタ ctキー反復用;
 	private CCounter ct下移動用;

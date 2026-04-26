@@ -631,31 +631,6 @@ internal class CDTXMania : Game
         }
     }
 
-    public static CTextureAf tCreateTextureAf(string fileName)
-    {
-        return null;
-        
-        if (app == null)
-        {
-            return null;
-        }
-
-        try
-        {
-            return new CTextureAf(app.Device, fileName, TextureFormat, false);
-        }
-        catch (CTextureCreateFailedException)
-        {
-            Trace.TraceError("テクスチャの生成に失敗しました。({0})", fileName);
-            return null;
-        }
-        catch (FileNotFoundException)
-        {
-            Trace.TraceError("テクスチャファイルが見つかりませんでした。({0})", fileName);
-            return null;
-        }
-    }
-    
     #endregion
 
     /// <summary>プロパティ、インデクサには ref は使用できないので注意。</summary>

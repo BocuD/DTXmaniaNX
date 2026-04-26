@@ -48,8 +48,6 @@ internal class CStageResult : CStage
 		listChildActivities.Add( actParameterPanel = new CActResultParameterPanel(this) );
 		listChildActivities.Add( actRank = new CActResultRank(this) );
 		listChildActivities.Add( new CActResultSongBar() );
-		listChildActivities.Add( actFI = new CActFIFOWhite() );
-		listChildActivities.Add( actFO = new CActFIFOBlack() );
 		listChildActivities.Add(actBackgroundVideoAVI = new CActSelectBackgroundAVI());
 	}
 
@@ -535,8 +533,7 @@ internal class CStageResult : CStage
 			ctPlayNewRecord = new CCounter(0, 150, 10, CDTXMania.Timer);
 		}
 						
-		actFI.tStartFadeIn(false);
-		ePhaseID = EPhase.Common_FadeIn;
+		ePhaseID = EPhase.Common_DefaultState;
 	}
 
 	public override int OnUpdateAndDraw()
@@ -595,13 +592,6 @@ internal class CStageResult : CStage
 		if (actRank.OnUpdateAndDraw() == 0)
 		{
 			bAnimationComplete = false;
-		}
-		if( ePhaseID == EPhase.Common_FadeIn )
-		{
-			if( actFI.OnUpdateAndDraw() != 0 )
-			{
-				ePhaseID = EPhase.Common_DefaultState;
-			}
 		}
 		#region [ #24609 2011.3.14 yyagi ランク更新or演奏型スキル更新時、リザルト画像をpngで保存する ]
 		if ( bAnimationComplete && bIsCheckedWhetherResultScreenShouldSaveOrNot == false	// #24609 2011.3.14 yyagi; to save result screen in case BestRank or HiSkill.
@@ -686,8 +676,6 @@ internal class CStageResult : CStage
 		}
 		if (CDTXMania.Input.ActionDecide())
 		{
-			actFI.tFinishFadeOut();					// #25406 2011.6.9 yyagi
-			//actResultImage.tアニメを完了させる();
 			actParameterPanel.tアニメを完了させる();
 			actRank.tアニメを完了させる();
 		}
@@ -743,8 +731,6 @@ internal class CStageResult : CStage
 	//New Counter
 	private CCounter ctPlayNewRecord;
 	private EReturnValue eReturnValueWhenFadeOutCompleted;  // eフェードアウト完了時の戻り値
-	private CActFIFOWhite actFI;
-	private CActFIFOBlack actFO;
 	private CActResultParameterPanel actParameterPanel;
 	private CActResultRank actRank;
 	//private CActResultImage actResultImage;
