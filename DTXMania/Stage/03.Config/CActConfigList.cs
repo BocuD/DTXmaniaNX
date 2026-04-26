@@ -154,9 +154,7 @@ internal partial class CActConfigList : CActivity
 
         ScanSkinFolders();
         ScanNewSkinData();
-
-        prvFont = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.songListFont), 15 * CDTXMania.renderScale); // t項目リストの設定 の前に必要
-
+        
         tSetupItemList_Bass(); // #27795 2012.3.11 yyagi; System設定の中でDrumsの設定を参照しているため、
         tSetupItemList_Guitar(); // 活性化の時点でDrumsの設定も入れ込んでおかないと、System設定中に例外発生することがある。
         tSetupItemList_Drums(); // 
@@ -182,7 +180,6 @@ internal partial class CActConfigList : CActivity
         ctTriangleArrowAnimation = null;
 
         ReleaseList();
-        prvFont.Dispose();
 
         base.OnDeactivate();
 
@@ -227,8 +224,6 @@ internal partial class CActConfigList : CActivity
         
         tGenerateSkinSample();
         
-        prvFontForToastMessage =
-            new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.songListFont), 14, FontStyle.Regular);
         base.OnManagedCreateResources();
     }
 
@@ -237,7 +232,6 @@ internal partial class CActConfigList : CActivity
         if (!bActivated)
             return;
         
-        CDTXMania.tDisposeSafely(ref prvFontForToastMessage);
         base.OnManagedReleaseResources();
     }
 
@@ -654,11 +648,8 @@ internal partial class CActConfigList : CActivity
     private BaseTexture txItemBoxCursor;
     private BaseTexture txDescriptionPanel;
     private BaseTexture txToastMessage;
-    private CPrivateFastFont prvFontForToastMessage;
     private CCounter ctToastMessageCounter;
-
-    private CPrivateFastFont prvFont;
-
+    
     //private List<string> list項目リスト_str最終描画名;
     private struct stMenuItemRight
     {
@@ -758,7 +749,7 @@ internal partial class CActConfigList : CActivity
             Name = text.Substring(0, Math.Min(20, text.Length)), // Use a substring of the text as the name to avoid excessively long names
             Text = text,
             FillColor = color,
-            FontPath = UIFonts.FallbackFont,
+            FontPath = UIFonts.DefaultUiFontFileName,
             OutlineColor = outline ?? Color4.Black,
             OutlineWidth = outline.HasValue ? (size * CDTXMania.renderScale) / 4 : 0,
             Backend = UiTextRenderBackend.Skia,
