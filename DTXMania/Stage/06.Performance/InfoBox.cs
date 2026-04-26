@@ -44,7 +44,7 @@ internal class InfoBox : UIGroup
         artistName = CDTXMania.DTX.ARTIST;
         
         //add UIText for stage, songname and artist name
-        var stageText = AddChild(new UIText("1st STAGE", 15));
+        var stageText = AddChild(new UIText(GetStageNumberText(), 15));
         stageText.name = "Stage";
         stageText.position = new Vector3(77, 7, 0);
         stageText.fillColor = new Color4(0.5f, 0.5f, 0.5f);
@@ -61,6 +61,19 @@ internal class InfoBox : UIGroup
         artistNameText.position = new Vector3(83, 53, 0);
         artistNameText.fillColor = Color4.Black;
         artistNameText.outlineColor = Color4.White;
+    }
+
+    private string GetStageNumberText()
+    {
+        if (CDTXMania.nStageNumber == 1)
+            return "1st STAGE";
+        if (CDTXMania.nStageNumber == 2)
+            return "2nd STAGE";
+        if (CDTXMania.nStageNumber == 3)
+            return "3rd STAGE";
+        if (CDTXMania.nStageNumber > 3)
+            return $"{CDTXMania.nStageNumber}th STAGE";
+        return "EXTRA STAGE";
     }
 
     public override void Draw(Matrix4x4 parentMatrix)

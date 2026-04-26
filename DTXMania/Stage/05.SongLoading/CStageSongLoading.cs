@@ -724,6 +724,8 @@ internal class CStageSongLoading : CStage
                 {
                     sdLoadingSound.tRelease();
                 }
+
+                CDTXMania.nStageNumber++;
                 return (int)ESongLoadingScreenReturnValue.LoadingComplete;
         }
 

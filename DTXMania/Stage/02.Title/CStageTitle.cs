@@ -269,10 +269,14 @@ internal class CStageTitle : CStage
 				ePhaseID = EPhase.Common_EndStatus;
 				
 				switch ( nCurrentCursorPosition )
-				{ 
+				{
 					case (int)EReturnResult.GAMESTART - 1:
+					{
+						//reset stage count when we start playing
+						CDTXMania.nStageNumber = 0;
 						return (int)EReturnResult.GAMESTART;
-
+					}
+					
 					case (int) EReturnResult.CONFIG - 1:
 						return (int) EReturnResult.CONFIG;
 

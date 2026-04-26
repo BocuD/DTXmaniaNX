@@ -186,6 +186,9 @@ internal class CDTXMania : Game
     public static UIGroup persistentUIGroup { get; private set; } = new("PersistentUIGroup");
     public static GitaDoraTransition gitadoraTransition { get; private set; }
 
+    //how many songs have we played, gets incremented whenever we transition from StageLoading to StagePerformance
+    public static int nStageNumber = 0;
+    
     // Constructor
     public CDTXMania(DTXManiaGL dtxManiaGl)
     {
