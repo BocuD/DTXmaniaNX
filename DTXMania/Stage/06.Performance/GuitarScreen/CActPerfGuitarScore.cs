@@ -1,6 +1,5 @@
 ﻿using System.Drawing;
 using DTXMania.Core;
-using RectangleF = SharpDX.RectangleF;
 
 namespace DTXMania;
 

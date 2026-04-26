@@ -1,10 +1,10 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Drawing;
+using System.Runtime.InteropServices;
 using DTXMania.Core;
-using SharpDX;
+using DTXMania.UI.Drawable;
 using FDK;
 
 using Point = System.Drawing.Point;
-using Rectangle = System.Drawing.Rectangle;
 
 namespace DTXMania;
 
@@ -62,22 +62,13 @@ internal class CActPerfSkillMeter : CActivity
 	{
 		if( bActivated )
 		{
-			txグラフ = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\7_Graph_Main.png" ) );
-			txグラフ_ゲージ = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\7_Graph_Gauge.png" ) );
+			txグラフ = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\7_Graph_Main.png" ) );
+			txグラフ_ゲージ = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\7_Graph_Gauge.png" ) );
 			
 			base.OnManagedCreateResources();
 		}
 	}
-	public override void OnManagedReleaseResources()
-	{
-		if( bActivated )
-		{
-			CDTXMania.tReleaseTexture( ref txグラフ );
-			CDTXMania.tReleaseTexture( ref txグラフ_ゲージ );
-			CDTXMania.tReleaseTexture( ref txグラフ値自己ベストライン );
-			base.OnManagedReleaseResources();
-		}
-	}
+
 	public override int OnUpdateAndDraw()
 	{
 		if( bActivated )
@@ -137,7 +128,8 @@ internal class CActPerfSkillMeter : CActivity
 			if ( txグラフ != null )
 			{
 				//背景
-				txグラフ.vcScaleRatio = new Vector3( 1f, 1f, 1f );
+				//todo: vcscaleratio
+				//txグラフ.vcScaleRatio = new Vector3( 1f, 1f, 1f );
 				if (CDTXMania.ConfigIni.bSmallGraph)
 				{
 					txグラフ.tDraw2D(CDTXMania.app.Device, nGraphBG_XPos[nGraphUsePart], nGraphBG_YPos, new RectangleF(448, 2, 111, 584));
@@ -166,14 +158,14 @@ internal class CActPerfSkillMeter : CActivity
 				int nPosY = nGraphUsePart == 0 ? 527 - nGaugeSize : 587 - nGaugeSize;
 				if (!bIsTrainingMode)
 				{
-					txグラフ_ゲージ.nTransparency = 255;
+					//txグラフ_ゲージ.nTransparency = 255;
 					txグラフ_ゲージ.tDraw2D(CDTXMania.app.Device, nGraphBG_XPos[nGraphUsePart] + 45 + nGraphSizeOffset, nPosY, new RectangleF(2, 2, 30, nGaugeSize));
 				}
 				//ゲージ比較
 				int nTargetGaugeSize = (int)( 434.0f * ( (float)dbGraphValue_Goal / 100.0f ) );
 				int nTargetGaugePosY = nGraphUsePart == 0 ? 527 - nTargetGaugeSize : 587 - nTargetGaugeSize;
 				int nTargetGaugeRectX = dbグラフ値現在_渡 > dbGraphValue_Goal ? 38 : 74;
-				txグラフ_ゲージ.nTransparency = 255;
+				//txグラフ_ゲージ.nTransparency = 255;
 				txグラフ_ゲージ.tDraw2D( CDTXMania.app.Device, nGraphBG_XPos[ nGraphUsePart ] + 75 + nGraphSizeOffset, nTargetGaugePosY, new RectangleF( nTargetGaugeRectX, 2, 30, nTargetGaugeSize ) );
 				if( txグラフ != null )
 				{
@@ -214,9 +206,9 @@ internal class CActPerfSkillMeter : CActivity
 	private double dbグラフ値現在_表示;
 	public double dbGraphValue_PersonalBest;
 
-	private CTexture txグラフ;
-	private CTexture txグラフ_ゲージ;
-	private CTexture txグラフ値自己ベストライン;
+	private BaseTexture txグラフ;
+	private BaseTexture txグラフ_ゲージ;
+	private BaseTexture txグラフ値自己ベストライン;
 
 	private CPrivateFastFont pfNameFont;
 
@@ -276,7 +268,7 @@ internal class CActPerfSkillMeter : CActivity
 					RectangleF rectangle = new( 260 + st比較数字位置[ i ].pt.X, 162, RectX, 10 );
 					if( txグラフ != null )
 					{
-						txグラフ.nTransparency = 255;
+						//txグラフ.nTransparency = 255;
 						txグラフ.tDraw2D( CDTXMania.app.Device, x, y, rectangle );
 					}
 					break;
@@ -299,7 +291,7 @@ internal class CActPerfSkillMeter : CActivity
 					RectangleF rectangle = new( 260 + st達成率数字位置[ i ].pt.X, 128, RectX, 28 );
 					if( txグラフ != null )
 					{
-						txグラフ.nTransparency = 255;
+						//txグラフ.nTransparency = 255;
 						txグラフ.tDraw2D( CDTXMania.app.Device, x, y, rectangle );
 					}
 					break;

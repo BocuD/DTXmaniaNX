@@ -1,6 +1,5 @@
-﻿using DTXMania.Core;
-using SharpDX;
-using Rectangle = System.Drawing.Rectangle;
+﻿using System.Drawing;
+using DTXMania.Core;
 
 namespace DTXMania;
 
