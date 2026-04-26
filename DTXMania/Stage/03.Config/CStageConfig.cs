@@ -128,7 +128,7 @@ internal class CStageConfig : CStage
                 
         UIImage itemBar = ui.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\4_item bar.png"))));
         itemBar.position = new Vector3(400, 0, 0);
-        itemBar.renderOrder = 50;
+        itemBar.renderOrder = 20;
                 
         UIImage headerPanel = ui.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\4_header panel.png"))));
         headerPanel.position = Vector3.Zero;
