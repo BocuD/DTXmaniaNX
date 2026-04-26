@@ -160,10 +160,10 @@ internal partial class CActConfigList
         listItems.Add(iSystemReloadDTX);
         
         int nDGmode = CDTXMania.ConfigIni.bDrumsEnabled ? 0 : 1;
-        iSystemGRmode = new CItemList("Drums & GR ", CItemBase.EPanelType.Normal, nDGmode,
-            "使用楽器の選択：\nDrOnly: ドラムのみ有効にします。\nGROnly: ギター/ベースのみの専用画面を\n用います。",
-            "Instrument selection:\nDrOnly: Activate Drums screen.\nGROnly: Activate single screen for Guitar and Bass.\n",
-            ["DrOnly", "GROnly"]);
+        iSystemGRmode = new CItemList("Game Selection", CItemBase.EPanelType.Normal, nDGmode,
+            "使用楽器の選択：\nDrumMania: ドラムのみ有効にします。\nGuitarFreaks: ギター/ベースのみの専用画面を\n用います。",
+            "Instrument selection:\nDrumMania: Play the drums.\nGuitarFreaks: Play guitar.\n",
+            ["DrumMania", "GuitarFreaks"]);
         iSystemGRmode.BindConfig(
             () => iSystemGRmode.nCurrentlySelectedIndex = nDGmode, 
             () => { } );
