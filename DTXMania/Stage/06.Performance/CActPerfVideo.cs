@@ -9,17 +9,13 @@ using FDK;
 
 namespace DTXMania;
 
-internal class CActPerfAVI : CActivity
+internal class CActPerfVideo : CActivity
 {
     #region Constructor
 
-    public CActPerfAVI(bool isDuringPerformance = true)
+    public CActPerfVideo()
     {
-        this.isDuringPerformance = isDuringPerformance;
-        if (this.isDuringPerformance)
-        {
-            listChildActivities.Add(panelString = new CActPerfPanelString());
-        }
+        listChildActivities.Add(panelString = new CActPerfPanelString());
 
         bActivated = false;
     }
@@ -45,6 +41,9 @@ internal class CActPerfAVI : CActivity
             aspectRatio = (float)frameWidth / (float)frameHeight;
 
             CreateVideoPlayer(avi.strFileName);
+
+            //frame dimensions are known now, so we can lay out the renderers.
+            ApplyLayout();
         }
     }
 
@@ -102,6 +101,11 @@ internal class CActPerfAVI : CActivity
         currentMovieMode = CDTXMania.ConfigIni.nMovieMode;
         isFullScreen = (currentMovieMode == 1) || (currentMovieMode == 3);
         isWindowed = (currentMovieMode == 2) || (currentMovieMode == 3);
+
+        //if a video is already loaded, re-apply layout for the new mode.
+        //during OnActivate() this is a no-op since frame dimensions aren't known yet.
+        if (frameWidth > 0 && frameHeight > 0)
+            ApplyLayout();
     }
 
     public void Cont(int resumeTimeMs)
@@ -111,6 +115,7 @@ internal class CActPerfAVI : CActivity
 
     public void Start(bool fillIn)
     {
+        //stop any running fill-in effects, then start a fresh one in slot 0.
         for (int i = 0; i < fillInEffects.Length; i++)
         {
             if (fillInEffects[i].isInUse)
@@ -120,15 +125,8 @@ internal class CActPerfAVI : CActivity
             }
         }
 
-        for (int i = 0; i < fillInEffects.Length; i++)
-        {
-            if (!fillInEffects[i].isInUse)
-            {
-                fillInEffects[i].isInUse = true;
-                fillInEffects[i].counter = new CCounter(0, 30, 30, CDTXMania.Timer);
-                break;
-            }
-        }
+        fillInEffects[0].isInUse = true;
+        fillInEffects[0].counter = new CCounter(0, 30, 30, CDTXMania.Timer);
     }
 
     public void IntegrateUI(UIGroup parentGroup)
@@ -136,12 +134,13 @@ internal class CActPerfAVI : CActivity
         if (parentGroup == null)
             return;
 
-        // Create UI group for this activity
         uiGroup = new UIGroup("CActPerfAVI UI");
 
-        // Load clip panel texture and create UIImage
-        string clipPanelPath = CDTXMania.ConfigIni.bGuitarEnabled ? @"Graphics\7_ClipPanelC.png" :
-                              CDTXMania.ConfigIni.bGraph有効.Drums && CDTXMania.ConfigIni.bDrumsEnabled ?
+        //load clip panel texture (drums uses skill-meter-aware variants; guitar/bass use the C variant).
+        bool isDrums = CDTXMania.GetCurrentInstrument() == 0;
+
+        string clipPanelPath = !isDrums ? @"Graphics\7_ClipPanelC.png" :
+                              CDTXMania.ConfigIni.bGraph有効.Drums ?
                               @"Graphics\7_ClipPanelB.png" : @"Graphics\7_ClipPanel.png";
 
         clipPanelTexture = BaseTexture.LoadFromPath(CSkin.Path(clipPanelPath));
@@ -153,11 +152,7 @@ internal class CActPerfAVI : CActivity
             clipPanelImage.renderOrder = 1;
             uiGroup.AddChild(clipPanelImage);
         }
-
-        // Load fill-in effect texture
-        fillInTexture = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_Fillin Effect.png"));
-
-        // Initialize fill-in effects
+        
         for (int i = 0; i < fillInEffects.Length; i++)
         {
             fillInEffects[i] = new FillInEffect();
@@ -165,7 +160,6 @@ internal class CActPerfAVI : CActivity
             fillInEffects[i].isInUse = false;
         }
 
-        // Add this activity's UI group to the parent
         parentGroup.AddChild(uiGroup);
     }
 
@@ -180,18 +174,6 @@ internal class CActPerfAVI : CActivity
         MovieMode();
 
         base.OnActivate();
-    }
-
-    public override void OnManagedCreateResources()
-    {
-        // UI resources are created in IntegrateUI() instead
-        base.OnManagedCreateResources();
-    }
-
-    public override void OnManagedReleaseResources()
-    {
-        // UI cleanup is handled by GC
-        base.OnManagedReleaseResources();
     }
 
     public int tUpdateAndDraw(int x, int y)
@@ -213,27 +195,71 @@ internal class CActPerfAVI : CActivity
 
     #region Private Methods
 
+    /// <summary>
+    /// Returns true when the active instrument is guitar or bass.
+    /// In DTXMania the perf screen treats them identically (the original used
+    /// bGuitarEnabled which covered both); only drums has a distinct layout.
+    /// </summary>
+    private static bool IsGuitarOrBass()
+    {
+        int inst = CDTXMania.GetCurrentInstrument();
+        return inst is 1 or 2;
+    }
+
+    private static bool IsDrums()
+    {
+        return CDTXMania.GetCurrentInstrument() == 0;
+    }
+
     private void CreateVideoPlayer(string videoFileName)
     {
-        // Create video player
         videoPlayer = new ThreadedSoftwareVideoPlayer();
 
-        // Open video file
         string videoPath = GetVideoPath(videoFileName);
         if (File.Exists(videoPath) && videoPlayer.Open(videoPath))
         {
             videoPlayer.LoopOnEof = loop;
 
-            // Create windowed video renderer
+            //both renderers share the same player
             windowedRenderer = new UIVideoRenderer(videoPlayer, videoPath);
-            windowedRenderer.isVisible = true;
+            windowedRenderer.isVisible = false;
             windowedRenderer.renderOrder = 2;
+            windowedRenderer.name = "WindowedVideo";
             uiGroup.AddChild(windowedRenderer);
 
-            // Create fullscreen video renderer (same video player)
             fullscreenRenderer = new UIVideoRenderer(videoPlayer, videoPath);
-            fullscreenRenderer.isVisible = true;
+            fullscreenRenderer.isVisible = false;
+            fullscreenRenderer.name = "FullscreenVideo";
             uiGroup.AddChild(fullscreenRenderer);
+        }
+    }
+
+    /// <summary>
+    /// Computes positions and sizes for both renderers and the clip panel,
+    /// and pushes them onto the UI elements. Called once after the video opens
+    /// and again whenever MovieMode() changes the mode. Visibility is left to
+    /// UpdateVideoVisibility() per frame.
+    /// </summary>
+    private void ApplyLayout()
+    {
+        if (avi == null || frameWidth == 0 || frameHeight == 0)
+            return;
+
+        //windowed layout (clip panel + small video).
+        if (windowedRenderer != null && clipPanelImage != null)
+        {
+            var (panelX, panelY, scale, videoX, videoY) = CalculateWindowedPosition();
+            clipPanelImage.position = new Vector3(panelX, panelY, 0);
+            windowedRenderer.position = new Vector3(videoX, videoY, 0);
+            windowedRenderer.size = new Vector2(frameWidth * scale, frameHeight * scale);
+        }
+
+        //fullscreen layout (large video, no panel).
+        if (fullscreenRenderer != null)
+        {
+            var (positionX, positionY, scaleX, scaleY) = CalculateFullscreenPosition();
+            fullscreenRenderer.position = new Vector3(positionX, positionY, 0);
+            fullscreenRenderer.size = new Vector2(frameWidth * scaleX, frameHeight * scaleY);
         }
     }
 
@@ -256,28 +282,23 @@ internal class CActPerfAVI : CActivity
         if (videoStartTime == -1 || currentGameTime < videoStartTime)
             return;
 
-        // Calculate expected video time
         long videoPlayTimeMs = currentGameTime - videoStartTime;
-
-        // Get current video time
         TimeSpan currentVideoTime = videoPlayer.CurrentTime;
         long currentVideoTimeMs = (long)currentVideoTime.TotalMilliseconds;
 
-        // Sync if out of sync by more than 100ms
-        long timeDelta = Math.Abs(videoPlayTimeMs - currentVideoTimeMs);
-        if (timeDelta > 100)
+        //resync if drift exceeds 100ms.
+        if (Math.Abs(videoPlayTimeMs - currentVideoTimeMs) > 100)
         {
             videoPlayer.Seek(TimeSpan.FromMilliseconds(videoPlayTimeMs));
         }
 
-        // Handle looping
+        //handle end-of-clip: stop or loop.
         TimeSpan duration = videoPlayer.Duration;
         if (duration > TimeSpan.Zero && currentVideoTime >= duration)
         {
             if (!isPreviewMovie && !loop)
             {
                 moveStartTimeMs = -1;
-                SetVideoVisibility(false);
             }
             else
             {
@@ -308,7 +329,7 @@ internal class CActPerfAVI : CActivity
 
             CStagePerfDrumsScreen stageDrum = CDTXMania.stagePerfDrumsScreen;
 
-            if (CDTXMania.ConfigIni.bDrumsEnabled && stageDrum.txBonusEffect != null)
+            if (IsDrums() && stageDrum.txBonusEffect != null)
             {
                 stageDrum.txBonusEffect.blendMode = BlendMode.Additive;
                 stageDrum.txBonusEffect.tDraw2D(CDTXMania.app.Device, 0, -2,
@@ -319,109 +340,24 @@ internal class CActPerfAVI : CActivity
 
     private void UpdatePanelString()
     {
-        if (CDTXMania.ConfigIni.bShowMusicInfo && isDuringPerformance)
+        if (CDTXMania.ConfigIni.bShowMusicInfo)
             panelString.tUpdateAndDraw();
     }
 
     private void UpdateVideoVisibility()
     {
-        if (!CDTXMania.ConfigIni.bAVIEnabled ||
-            (windowedRenderer == null && fullscreenRenderer == null))
-        {
-            HideAllVideo();
-            return;
-        }
+        bool haveRenderers = windowedRenderer != null || fullscreenRenderer != null;
+        bool shouldShow = CDTXMania.ConfigIni.bAVIEnabled
+                          && haveRenderers
+                          && moveStartTimeMs != -1
+                          && CSoundManager.rcPerformanceTimer.nCurrentTime >= moveStartTimeMs;
 
-        bool shouldShowVideo = (moveStartTimeMs != -1) &&
-                              (CSoundManager.rcPerformanceTimer.nCurrentTime >= moveStartTimeMs);
-
-        // Handle all 4 movie modes
-        // Mode 0: none (isFullScreen=false, isWindowed=false)
-        // Mode 1: fullscreen only (isFullScreen=true, isWindowed=false)
-        // Mode 2: windowed only (isFullScreen=false, isWindowed=true)
-        // Mode 3: both (isFullScreen=true, isWindowed=true)
-
-        if (isWindowed && isFullScreen)
-        {
-            // Mode 3: both
-            UpdateWindowedVideo(shouldShowVideo);
-            UpdateFullscreenVideo(shouldShowVideo);
-        }
-        else if (isWindowed)
-        {
-            // Mode 2: windowed only
-            UpdateWindowedVideo(shouldShowVideo);
-            if (fullscreenRenderer != null)
-                fullscreenRenderer.isVisible = false;
-        }
-        else if (isFullScreen)
-        {
-            // Mode 1: fullscreen only
-            UpdateFullscreenVideo(shouldShowVideo);
-            if (windowedRenderer != null)
-                windowedRenderer.isVisible = false;
-        }
-        else
-        {
-            // Mode 0: none
-            HideAllVideo();
-        }
-
-        // Update clip panel visibility
+        if (windowedRenderer != null)
+            windowedRenderer.isVisible = shouldShow && isWindowed;
+        if (fullscreenRenderer != null)
+            fullscreenRenderer.isVisible = shouldShow && isFullScreen;
         if (clipPanelImage != null)
-        {
-            clipPanelImage.isVisible = isWindowed && shouldShowVideo;
-        }
-    }
-
-    private void UpdateWindowedVideo(bool shouldShow)
-    {
-        if (windowedRenderer == null || clipPanelImage == null)
-            return;
-
-        if (!shouldShow)
-        {
-            windowedRenderer.isVisible = false;
-            return;
-        }
-
-        // Calculate windowed positioning
-        var (panelX, panelY, scale, videoX, videoY) = CalculateWindowedPosition();
-
-        // Update clip panel
-        clipPanelImage.isVisible = true;
-        clipPanelImage.position = new Vector3(panelX, panelY, 0);
-
-        // Update video renderer
-        if (avi != null)
-        {
-            windowedRenderer.position = new Vector3(videoX, videoY, 0);
-            windowedRenderer.size = new Vector2(frameWidth * scale, frameHeight * scale);
-            windowedRenderer.isVisible = true;
-        }
-        else
-        {
-            windowedRenderer.isVisible = false;
-        }
-    }
-
-    private void UpdateFullscreenVideo(bool shouldShow)
-    {
-        if (fullscreenRenderer == null)
-            return;
-
-        if (!shouldShow)
-        {
-            fullscreenRenderer.isVisible = false;
-            return;
-        }
-
-        // Calculate fullscreen positioning based on aspect ratio
-        var (positionX, positionY, scaleX, scaleY) = CalculateFullscreenPosition();
-
-        fullscreenRenderer.position = new Vector3(positionX, positionY, 0);
-        fullscreenRenderer.size = new Vector2(frameWidth * scaleX, frameHeight * scaleY);
-        fullscreenRenderer.isVisible = true;
+            clipPanelImage.isVisible = shouldShow && isWindowed;
     }
 
     private (int panelX, int panelY, float scale, int videoX, int videoY) CalculateWindowedPosition()
@@ -430,11 +366,11 @@ internal class CActPerfAVI : CActivity
         float scale = 1.0f;
         int videoX = 0, videoY = 0;
 
-        if (CDTXMania.ConfigIni.bDrumsEnabled)
+        if (IsDrums())
         {
             if (CDTXMania.ConfigIni.bGraph有効.Drums)
             {
-                // Skill meter enabled
+                //drums + skill meter enabled.
                 panelX = 2;
                 panelY = 402;
 
@@ -453,7 +389,7 @@ internal class CActPerfAVI : CActivity
             }
             else
             {
-                // Skill meter disabled
+                //drums + skill meter disabled.
                 panelX = 854;
                 panelY = 142;
 
@@ -471,13 +407,17 @@ internal class CActPerfAVI : CActivity
                 }
             }
         }
-        else if (CDTXMania.ConfigIni.bGuitarEnabled)
+        else if (IsGuitarOrBass())
         {
-            // Guitar mode
+            //guitar / bass mode.
             panelX = 380;
             panelY = 50;
-            int graphOffset = 267;
+            const int graphOffset = 267;
 
+            //shift the panel right when the bass graph slot is enabled but
+            //bass has no chips (so its graph isn't being drawn), and shift
+            //left when the guitar graph slot is enabled but guitar has no
+            //chips. Independent of which part the user is currently playing.
             if (CDTXMania.ConfigIni.bGraph有効.Bass && CDTXMania.DTX != null && !CDTXMania.DTX.bHasChips.Bass)
                 panelX += graphOffset;
             if (CDTXMania.ConfigIni.bGraph有効.Guitar && CDTXMania.DTX != null && !CDTXMania.DTX.bHasChips.Guitar)
@@ -485,15 +425,19 @@ internal class CActPerfAVI : CActivity
 
             if (aspectRatio > 1.77f)
             {
+                //wide clip: scale to 460px width, center vertically inside the 258px slot.
+                //X gets the simple +30 inset; Y gets the centering math + 5 inset.
                 scale = 460f / frameWidth;
                 videoX = panelX + 30;
                 videoY = panelY + 5 + (int)((258f - (frameHeight * scale)) / 2f);
             }
             else
             {
+                //narrow clip: scale to 258px height, center horizontally inside the 460px slot.
+                //X gets the centering math + 30 inset; Y gets the simple +5 inset.
                 scale = 258f / frameHeight;
-                videoX = panelX + 5 + (int)((460 - (frameWidth * scale)) / 2f);
-                videoY = panelY + 30;
+                videoX = panelX + 30 + (int)((460f - (frameWidth * scale)) / 2f);
+                videoY = panelY + 5;
             }
         }
 
@@ -507,7 +451,7 @@ internal class CActPerfAVI : CActivity
 
         if (aspectRatio > 1.77f)
         {
-            // Widescreen video - scale to fit width, center vertically
+            //widescreen video: scale to fit width, center vertically.
             scaleX = 1280f / frameWidth;
             scaleY = scaleX;
             positionY = (int)((720f - (frameHeight * scaleY)) / 2f);
@@ -515,26 +459,18 @@ internal class CActPerfAVI : CActivity
         }
         else
         {
-            // Old format video - position in top-right area
-            if (CDTXMania.ConfigIni.bDrumsEnabled)
+            //old-format video: position depends on instrument.
+            if (IsDrums())
             {
-                // Drums: position at x=882, scale by 1.42f
+                //drums: position at x=882, scale by 1.42f (matches original "vclip").
                 scaleX = 1.42f;
                 scaleY = 1.42f;
                 positionX = 882;
                 positionY = 0;
             }
-            else if (CDTXMania.ConfigIni.bGuitarEnabled)
-            {
-                // Guitar: center horizontally, scale by 1.0f
-                scaleX = 1.0f;
-                scaleY = 1.0f;
-                positionX = (int)((1280f - frameWidth) / 2f);
-                positionY = 0;
-            }
             else
             {
-                // Default: center horizontally
+                //guitar / bass: center horizontally, no scaling.
                 scaleX = 1.0f;
                 scaleY = 1.0f;
                 positionX = (int)((1280f - frameWidth) / 2f);
@@ -545,39 +481,13 @@ internal class CActPerfAVI : CActivity
         return (positionX, positionY, scaleX, scaleY);
     }
 
-    private void SetVideoVisibility(bool visible)
-    {
-        if (windowedRenderer != null)
-            windowedRenderer.isVisible = visible;
-        if (fullscreenRenderer != null)
-            fullscreenRenderer.isVisible = visible;
-    }
-
-    private void HideAllVideo()
-    {
-        if (windowedRenderer != null)
-            windowedRenderer.isVisible = false;
-        if (fullscreenRenderer != null)
-            fullscreenRenderer.isVisible = false;
-        if (clipPanelImage != null)
-            clipPanelImage.isVisible = false;
-    }
-
     private void HandlePauseToggle()
     {
         if (!CDTXMania.Pad.bPressed(EInstrumentPart.BASS, EPad.Help))
             return;
 
-        if (isPaused == false)
-        {
-            // Pause functionality would need to be added to FFmpegVideoPlayer
-            isPaused = true;
-        }
-        else if (isPaused == true)
-        {
-            // Resume functionality would need to be added to FFmpegVideoPlayer
-            isPaused = false;
-        }
+        //pause/resume needs support from FFmpegVideoPlayer; this just toggles state for now.
+        isPaused = !isPaused;
     }
 
     private string GetVideoPath(string filename)
@@ -587,34 +497,31 @@ internal class CActPerfAVI : CActivity
 
         if (!string.IsNullOrEmpty(CDTXMania.DTX.PATH_WAV))
             return CDTXMania.DTX.PATH_WAV + filename;
-        else
-            return CDTXMania.DTX.strFolderName + CDTXMania.DTX.PATH + filename;
+        return CDTXMania.DTX.strFolderName + CDTXMania.DTX.PATH + filename;
     }
 
     #endregion
 
     #region Private Fields
 
-    // UI components
+    //ui components
     public UIGroup uiGroup;
     private UIImage clipPanelImage;
 
-    // Video renderers (both share the same videoPlayer)
+    //video renderers (both share the same videoPlayer)
     private UIVideoRenderer windowedRenderer;
     private UIVideoRenderer fullscreenRenderer;
 
-    // Video player
+    //video player
     private FFmpegVideoPlayer videoPlayer;
 
-    // Textures
+    //textures
     private BaseTexture clipPanelTexture;
-    private BaseTexture fillInTexture;
 
-    // Activity components
+    //activity components
     public CActPerfPanelString panelString;
-    public bool isDuringPerformance = true;
 
-    // State
+    //state
     private bool isFullScreen;
     public bool isWindowed;
     private bool isPaused;
@@ -624,12 +531,12 @@ internal class CActPerfAVI : CActivity
     private int currentMovieMode;
     private long moveStartTimeMs;
 
-    // Video reference
+    //video reference
     private CAVI avi;
     public bool isPreviewMovie { get; set; }
     public bool loop { get; set; }
 
-    // Fill-in effects
+    //fill-in effects
     [StructLayout(LayoutKind.Sequential)]
     public struct FillInEffect
     {

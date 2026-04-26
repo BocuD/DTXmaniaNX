@@ -283,7 +283,7 @@ internal abstract class CStagePerfCommonScreen : CStage
 
     public override void InitializeBaseUI()
     {
-        actAVI.IntegrateUI(ui);
+        video.IntegrateUI(ui);
     }
 
     public override void InitializeDefaultUI()
@@ -761,7 +761,7 @@ internal abstract class CStagePerfCommonScreen : CStage
     }
 
     //todo: reintroduce background video and art
-    public CActPerfAVI actAVI;
+    public CActPerfVideo video;
     public CActPerfBGA actBGA;
 
     protected CActLVLNFont actLVFont;
@@ -2661,7 +2661,7 @@ internal abstract class CStagePerfCommonScreen : CStage
             {
                 CDTXMania.ConfigIni.nMovieMode = 0;
             }
-            actAVI.MovieMode();
+            video.MovieMode();
         }
         if (keyboard.bKeyPressed(SlimDXKey.F6))
         {
@@ -2698,7 +2698,7 @@ internal abstract class CStagePerfCommonScreen : CStage
     {
         if (((ePhaseID != EPhase.PERFORMANCE_STAGE_FAILED) && (ePhaseID != EPhase.PERFORMANCE_STAGE_FAILED_FADEOUT)) && (!CDTXMania.ConfigIni.bストイックモード))
         {
-            actAVI.tUpdateAndDraw(0, 0);
+            video.tUpdateAndDraw(0, 0);
         }
     }
     /*
@@ -3182,7 +3182,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                                     if (pChip.rAVI != null)
                                     {
                                         //actAVI.bLoop = false;
-                                        actAVI.Start(pChip.nChannelNumber, pChip.rAVI, 278, 355, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, pChip.nPlaybackTimeMs);
+                                        video.Start(pChip.nChannelNumber, pChip.rAVI, 278, 355, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, pChip.nPlaybackTimeMs);
                                     }                                        
                                     break;
 
@@ -3190,7 +3190,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                                     if (pChip.rAVIPan != null)
                                     {
                                         //actAVI.bLoop = false;
-                                        actAVI.Start(pChip.nChannelNumber, pChip.rAVI, pChip.rAVIPan.sz開始サイズ.Width, pChip.rAVIPan.sz開始サイズ.Height, pChip.rAVIPan.sz終了サイズ.Width, pChip.rAVIPan.sz終了サイズ.Height, pChip.rAVIPan.pt動画側開始位置.X, pChip.rAVIPan.pt動画側開始位置.Y, pChip.rAVIPan.pt動画側終了位置.X, pChip.rAVIPan.pt動画側終了位置.Y, pChip.rAVIPan.pt表示側開始位置.X, pChip.rAVIPan.pt表示側開始位置.Y, pChip.rAVIPan.pt表示側終了位置.X, pChip.rAVIPan.pt表示側終了位置.Y, pChip.n総移動時間, pChip.nPlaybackTimeMs);
+                                        video.Start(pChip.nChannelNumber, pChip.rAVI, pChip.rAVIPan.sz開始サイズ.Width, pChip.rAVIPan.sz開始サイズ.Height, pChip.rAVIPan.sz終了サイズ.Width, pChip.rAVIPan.sz終了サイズ.Height, pChip.rAVIPan.pt動画側開始位置.X, pChip.rAVIPan.pt動画側開始位置.Y, pChip.rAVIPan.pt動画側終了位置.X, pChip.rAVIPan.pt動画側終了位置.Y, pChip.rAVIPan.pt表示側開始位置.X, pChip.rAVIPan.pt表示側開始位置.Y, pChip.rAVIPan.pt表示側終了位置.X, pChip.rAVIPan.pt表示側終了位置.Y, pChip.n総移動時間, pChip.nPlaybackTimeMs);
                                     }                                        
                                     break;
                             }
@@ -5662,7 +5662,7 @@ internal abstract class CStagePerfCommonScreen : CStage
         CDTXMania.Timer.nCurrentTime = nNewPosition;
 
         //Stop any AVI and BGA
-        actAVI.Stop();
+        video.Stop();
         actBGA.Stop();
         //Reset Hold note cache
         chipロングノートHit中 = default;
@@ -5750,7 +5750,7 @@ internal abstract class CStagePerfCommonScreen : CStage
         #region [ 演奏開始時点で既に表示されているBGAとAVIの、シークと再生 ]
         //Re-enable SkipStart now that we have migrated to AVI renderer 
         actBGA.SkipStart((int)nNewPosition); 
-        actAVI.SkipStart((int)nNewPosition);
+        video.SkipStart((int)nNewPosition);
         #endregion
         #region [ PAUSEしていたサウンドを一斉に再生再開する(ただしタイマを止めているので、ここではまだ再生開始しない) ]
         foreach (CSound cs in pausedCSound)
@@ -5838,7 +5838,7 @@ internal abstract class CStagePerfCommonScreen : CStage
     {
         Trace.TraceInformation("Stop command received");
         CDTXMania.DTX.tStopPlayingAllChips();
-        actAVI.Stop();
+        video.Stop();
         actBGA.Stop();
         //this.perfpanel.Stop();               // PANEL表示停止
         CDTXMania.Timer.tPause();       // 再生時刻カウンタ停止

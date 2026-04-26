@@ -28,7 +28,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         listChildActivities.Add(actScore = new CActPerfDrumsScore());
         listChildActivities.Add(actStatusPanel = new CActPerfDrumsStatusPanel());
         listChildActivities.Add(actScrollSpeed = new CActPerfScrollSpeed());
-        listChildActivities.Add(actAVI = new CActPerfAVI());
+        listChildActivities.Add(video = new CActPerfVideo());
         listChildActivities.Add(actBGA = new CActPerfBGA());
         listChildActivities.Add(actStageFailed = new CActPerfStageFailure());
         listChildActivities.Add(actPlayInfo = new CActPerformanceInformation());
@@ -3520,7 +3520,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                     }
                     if (((actCombo.nCurrentCombo.Drums > 0) || configIni.bAllDrumsAreAutoPlay) && configIni.b歓声を発声する)
                     {
-                        actAVI.Start(bInFillIn);
+                        video.Start(bInFillIn);
                         if (r現在の歓声Chip.Drums != null)
                         {
                             dTX.tPlayChip(r現在の歓声Chip.Drums, CSoundManager.rcPerformanceTimer.nシステム時刻, (int)ELane.BGM, dTX.nモニタを考慮した音量(EInstrumentPart.UNKNOWN));

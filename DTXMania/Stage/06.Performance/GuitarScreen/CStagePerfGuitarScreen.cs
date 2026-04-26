@@ -17,7 +17,7 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		bActivated = false;
 		listChildActivities.Add( actStageFailed = new CActPerfStageFailure() );
 		listChildActivities.Add( actDANGER = new CActPerfGuitarDanger() );
-		listChildActivities.Add( actAVI = new CActPerfAVI() );
+		listChildActivities.Add( video = new CActPerfVideo() );
 		listChildActivities.Add( actBGA = new CActPerfBGA() );
 		listChildActivities.Add( actGraph = new CActPerfSkillMeter() );
 		listChildActivities.Add(actGuitarBonus = new CActPerfGuitarBonus());
@@ -168,7 +168,7 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		}
 
 		tUpdateAndDraw_Background();
-		//tUpdateAndDraw_AVI();
+		tUpdateAndDraw_AVI();
 		tUpdateAndDraw_MIDIBGM();
 
 //                if (CDTXMania.ConfigIni.bShowMusicInfo)
