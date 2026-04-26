@@ -1,5 +1,5 @@
-﻿using DTXMania.Core;
-using SharpDX;
+﻿using System.Drawing;
+using DTXMania.Core;
 
 namespace DTXMania;
 
@@ -82,7 +82,7 @@ internal class CActPerfGuitarRGB : CActPerfCommonRGB
                     nシャッター下.Guitar = CDTXMania.ConfigIni.nShutterInSide.Guitar;
                 }
 
-                dbAboveShutter.Guitar = 108 - txShutter.szImageSize.Height + (nシャッター上.Guitar * db倍率);
+                dbAboveShutter.Guitar = 108 - txShutter.Height + (nシャッター上.Guitar * db倍率);
                 dbUnderShutter.Guitar = 720 - 50 - (nシャッター下.Guitar * db倍率);
 
                 nシャッター上.Bass = CDTXMania.ConfigIni.nShutterInSide.Bass;
@@ -94,7 +94,7 @@ internal class CActPerfGuitarRGB : CActPerfCommonRGB
                     nシャッター下.Bass = CDTXMania.ConfigIni.nShutterInSide.Bass;
                 }
 
-                dbAboveShutter.Bass = 108 - txShutter.szImageSize.Height + (nシャッター上.Bass * db倍率);
+                dbAboveShutter.Bass = 108 - txShutter.Height + (nシャッター上.Bass * db倍率);
                 dbUnderShutter.Bass = 720 - 50 - (nシャッター下.Bass * db倍率);
             }
             #endregion
@@ -141,7 +141,7 @@ internal class CActPerfGuitarRGB : CActPerfCommonRGB
                         txShutter.tDraw2D(CDTXMania.app.Device, 80, (int)dbAboveShutter.Guitar);
 
                         if (CDTXMania.ConfigIni.bShowPerformanceInformation)
-                            actLVFont.tDrawString(195, (int)dbAboveShutter.Guitar - 25 + txShutter.szImageSize.Height, nシャッター上.Guitar.ToString());
+                            actLVFont.tDrawString(195, (int)(dbAboveShutter.Guitar - 25 + txShutter.Height), nシャッター上.Guitar.ToString());
                     }
                 }
             }
@@ -188,7 +188,7 @@ internal class CActPerfGuitarRGB : CActPerfCommonRGB
                         txShutter.tDraw2D(CDTXMania.app.Device, 950, (int)dbAboveShutter.Bass);
 
                         if (CDTXMania.ConfigIni.bShowPerformanceInformation)
-                            actLVFont.tDrawString(1065, (int)dbAboveShutter.Bass - 25 + txShutter.szImageSize.Height, nシャッター上.Bass.ToString());
+                            actLVFont.tDrawString(1065, (int)(dbAboveShutter.Bass - 25 + txShutter.Height), nシャッター上.Bass.ToString());
                     }
                 }
             }

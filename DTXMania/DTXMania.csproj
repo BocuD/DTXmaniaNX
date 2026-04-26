@@ -43,6 +43,7 @@
         <DependentUpon>Resources.resx</DependentUpon>
       </Compile>
       <Compile Remove="Stage\04.SongSelection\**" />
+      <Compile Remove="Stage\06.Performance\CActPerfAVI.old.cs" />
     </ItemGroup>
 
     <ItemGroup>
