@@ -283,7 +283,7 @@ internal abstract class CStagePerfCommonScreen : CStage
 
     public override void InitializeBaseUI()
     {
-        
+        actAVI.IntegrateUI(ui);
     }
 
     public override void InitializeDefaultUI()
@@ -463,8 +463,8 @@ internal abstract class CStagePerfCommonScreen : CStage
     {
         if (bActivated)
         {
-            ui = new UIGroup("Performance Common Screen");
-            
+            base.OnManagedCreateResources();
+
             //
             caviGenericBackgroundVideo = new CAVI(1290, CSkin.Path(@"Graphics\7_Movie.mp4"), "", 20.0);
             caviGenericBackgroundVideo.OnDeviceCreated();
@@ -495,8 +495,6 @@ internal abstract class CStagePerfCommonScreen : CStage
             {
                 tGeneratePlaySpeedTexture();
             }
-
-            base.OnManagedCreateResources();
         }
     }
     public override void OnManagedReleaseResources()
@@ -3183,7 +3181,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                                 case EAVIType.AVI:
                                     if (pChip.rAVI != null)
                                     {
-                                        actAVI.bLoop = false;
+                                        //actAVI.bLoop = false;
                                         actAVI.Start(pChip.nChannelNumber, pChip.rAVI, 278, 355, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, pChip.nPlaybackTimeMs);
                                     }                                        
                                     break;
@@ -3191,7 +3189,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                                 case EAVIType.AVIPAN:
                                     if (pChip.rAVIPan != null)
                                     {
-                                        actAVI.bLoop = false;
+                                        //actAVI.bLoop = false;
                                         actAVI.Start(pChip.nChannelNumber, pChip.rAVI, pChip.rAVIPan.sz開始サイズ.Width, pChip.rAVIPan.sz開始サイズ.Height, pChip.rAVIPan.sz終了サイズ.Width, pChip.rAVIPan.sz終了サイズ.Height, pChip.rAVIPan.pt動画側開始位置.X, pChip.rAVIPan.pt動画側開始位置.Y, pChip.rAVIPan.pt動画側終了位置.X, pChip.rAVIPan.pt動画側終了位置.Y, pChip.rAVIPan.pt表示側開始位置.X, pChip.rAVIPan.pt表示側開始位置.Y, pChip.rAVIPan.pt表示側終了位置.X, pChip.rAVIPan.pt表示側終了位置.Y, pChip.n総移動時間, pChip.nPlaybackTimeMs);
                                     }                                        
                                     break;
