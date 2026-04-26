@@ -57,6 +57,10 @@ internal sealed class OpenGlTexture : BaseTexture
         {
             Trace.WriteLine($"Texture file not found: {texturePath}");
         }
+        catch (DirectoryNotFoundException e)
+        {
+            Trace.WriteLine($"Texture file not found: {texturePath}");
+        }
 
         var notFound = CreateSolidColor(OpenGlUi.Renderer, new Color4(1, 0, 1, 1), $"Missing:{Path.GetFileName(texturePath)}");
         notFound.notFound = true;
