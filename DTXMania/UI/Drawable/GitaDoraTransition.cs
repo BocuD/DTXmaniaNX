@@ -187,7 +187,7 @@ public class GitaDoraTransition : UIGroup
     public static void Open(int delayFrames = 5, Action? action = null)
     {
         state.animate = true;
-        state.animationProgress = 0.0f;
+        state.animationProgress = -1.0f;
         state.animationTarget = 2.0f;
         state.animationDirection = 1.0f;
         state.onComplete = action;
