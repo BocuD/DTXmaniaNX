@@ -2759,22 +2759,6 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         }
     }
 
-    protected override void tGenerateBackgroundTexture()
-    {
-        System.Drawing.Rectangle bgrect = new (980, 0, 0, 0);
-        if (CDTXMania.ConfigIni.bBGAEnabled)
-        {
-            bgrect = new(980, 0, 278, 355);
-        }
-        string DefaultBgFilename = @"Graphics\7_background.jpg";
-        string BgFilename = "";
-        if ( ( ( CDTXMania.DTX.BACKGROUND != null ) && ( CDTXMania.DTX.BACKGROUND.Length > 0 ) ) && !CDTXMania.ConfigIni.bストイックモード )
-        {
-            BgFilename = CDTXMania.DTX.strFolderName + CDTXMania.DTX.BACKGROUND;
-        }
-        base.tGenerateBackgroundTexture( DefaultBgFilename, bgrect, BgFilename );
-    }
-
     protected override void tUpdateAndDraw_Chip_PatternOnly_Drums(CConfigIni configIni, ref CDTX dTX, ref CChip pChip)  // t進行描画_チップ_模様のみ_ドラムス
     {
         if (configIni.bDrumsEnabled)

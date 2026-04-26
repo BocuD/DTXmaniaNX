@@ -504,27 +504,7 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 	{
 		// ギタレボモードでは何もしない
 	}
-
-	protected override void tGenerateBackgroundTexture()
-	{
-		Rectangle bgrect = new( 0, 0, 1280, 720 );
-		string DefaultBgFilename = @"Graphics\7_background_Guitar.jpg";
-		string BgFilename = "";
-		string BACKGROUND = null;
-		if ( ( CDTXMania.DTX.BACKGROUND_GR != null ) && ( CDTXMania.DTX.BACKGROUND_GR.Length > 0 ) )
-		{
-			BACKGROUND = CDTXMania.DTX.BACKGROUND_GR;
-		}
-		else if ( ( CDTXMania.DTX.BACKGROUND != null ) && ( CDTXMania.DTX.BACKGROUND.Length > 0 ) )
-		{
-			BACKGROUND = CDTXMania.DTX.BACKGROUND;
-		}
-		if ( ( BACKGROUND != null ) && ( BACKGROUND.Length > 0 ) )
-		{
-			BgFilename = CDTXMania.DTX.strFolderName + BACKGROUND;
-		}
-		base.tGenerateBackgroundTexture( DefaultBgFilename, bgrect, BgFilename );
-	}
+	
 	protected override void tUpdateAndDraw_Chip_PatternOnly_Drums(CConfigIni configIni, ref CDTX dTX, ref CChip pChip)
 	{
 		// int indexSevenLanes = this.nチャンネル0Atoレーン07[ pChip.nChannelNumber - 0x11 ];

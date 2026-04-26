@@ -4760,10 +4760,52 @@ internal abstract class CStagePerfCommonScreen : CStage
         actScrollSpeed.OnUpdateAndDraw();
     }
 
-    protected abstract void tGenerateBackgroundTexture();
+    protected void tGenerateBackgroundTexture()
+    {
+        Rectangle bgrect;
+        string DefaultBgFilename;
+        
+        //drums
+        if (CDTXMania.GetCurrentInstrument() == 0)
+        {
+            bgrect = new (980, 0, 0, 0);
 
-
-
+            if (CDTXMania.ConfigIni.bBGAEnabled)
+            {
+                bgrect = new(980, 0, 278, 355);
+            }
+            
+            DefaultBgFilename = CSkin.Path(@"Graphics\7_background.jpg");
+        }
+        else //guitar
+        {
+            bgrect = new( 0, 0, 1280, 720 );
+            DefaultBgFilename = CSkin.Path(@"Graphics\7_background_Guitar.jpg");
+        }
+         
+        string BgFilename = "";
+        string BACKGROUND = null;
+        if ( ( CDTXMania.DTX.BACKGROUND_GR != null ) && ( CDTXMania.DTX.BACKGROUND_GR.Length > 0 ) )
+        {
+            BACKGROUND = CDTXMania.DTX.BACKGROUND_GR;
+        }
+        else if ( ( CDTXMania.DTX.BACKGROUND != null ) && ( CDTXMania.DTX.BACKGROUND.Length > 0 ) )
+        {
+            BACKGROUND = CDTXMania.DTX.BACKGROUND;
+        }
+        if ( ( BACKGROUND != null ) && ( BACKGROUND.Length > 0 ) )
+        {
+            BgFilename = CDTXMania.DTX.strFolderName + BACKGROUND;
+        }
+		
+        BaseTexture texture = BaseTexture.LoadFromPath(string.IsNullOrEmpty(BgFilename) ? DefaultBgFilename : BgFilename);
+        background = ui.AddChild(new UIImage(texture));
+        background.name = "Static Background";
+        background.renderOrder = -1;
+        
+        //todo: maybe reimplement the more complex background texture behaviour
+        //tGenerateBackgroundTexture( DefaultBgFilename, bgrect, BgFilename );
+    }
     
     protected void tGenerateBackgroundTexture(string DefaultBgFilename, Rectangle bgrect, string bgfilename)
     {
@@ -4850,9 +4892,7 @@ internal abstract class CStagePerfCommonScreen : CStage
         
         if (txBackground != null)
         {
-            //DTXTexture texture = new(txBackground);
-            //background = ui.AddChild(new UIImage(texture));
-            //todo: add background
+            
         }
     }
 
