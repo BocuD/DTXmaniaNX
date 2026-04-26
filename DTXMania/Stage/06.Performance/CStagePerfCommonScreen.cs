@@ -284,6 +284,8 @@ internal abstract class CStagePerfCommonScreen : CStage
     public override void InitializeBaseUI()
     {
         video.IntegrateUI(ui);
+
+        ui.AddChild(new InfoBox());
     }
 
     public override void InitializeDefaultUI()
@@ -763,7 +765,7 @@ internal abstract class CStagePerfCommonScreen : CStage
     //todo: reintroduce background video and art
     public CActPerfVideo video;
     public CActPerfBGA actBGA;
-
+    
     protected CActLVLNFont actLVFont;
     protected CActPerfChipFireGB actChipFireGB;
     public CActPerfCommonCombo actCombo;

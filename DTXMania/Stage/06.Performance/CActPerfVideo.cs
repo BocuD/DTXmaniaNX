@@ -11,17 +11,6 @@ namespace DTXMania;
 
 internal class CActPerfVideo : CActivity
 {
-    #region Constructor
-
-    public CActPerfVideo()
-    {
-        listChildActivities.Add(panelString = new CActPerfPanelString());
-
-        bActivated = false;
-    }
-
-    #endregion
-
     #region Public Methods
 
     public void Start(EChannel channel, CAVI avi, int startSizeW, int startSizeH, int endSizeW, int endSizeH,
@@ -183,7 +172,6 @@ internal class CActPerfVideo : CActivity
 
         UpdateVideoSync();
         UpdateFillInEffects();
-        UpdatePanelString();
         UpdateVideoVisibility();
 
         HandlePauseToggle();
@@ -336,12 +324,6 @@ internal class CActPerfVideo : CActivity
                     new RectangleF(0, 0 + (360 * frame), 640, 360));
             }
         }
-    }
-
-    private void UpdatePanelString()
-    {
-        if (CDTXMania.ConfigIni.bShowMusicInfo)
-            panelString.tUpdateAndDraw();
     }
 
     private void UpdateVideoVisibility()
@@ -517,10 +499,7 @@ internal class CActPerfVideo : CActivity
 
     //textures
     private BaseTexture clipPanelTexture;
-
-    //activity components
-    public CActPerfPanelString panelString;
-
+    
     //state
     private bool isFullScreen;
     public bool isWindowed;
