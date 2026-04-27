@@ -36,6 +36,7 @@ public class SortMenuContainer : UIGroup
         {
             sortMenuElements[i] = elementsContainer.AddChild(new SortMenuElement(songDb, sorters[i]));
             sortMenuElements[i].position = new Vector3(i * elementSpacing, 0, 0);
+            sortMenuElements[i].dontSerialize = true;
         }
     }
 
