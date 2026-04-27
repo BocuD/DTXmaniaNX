@@ -35,7 +35,6 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         listChildActivities.Add(actFillin = new CActPerfDrumsFillingEffect());
         listChildActivities.Add(actLVFont = new CActLVLNFont());
         listChildActivities.Add(actProgressBar = new CActPerfProgressBar());
-        listChildActivities.Add(actBackgroundAVI = new CActSelectBackgroundAVI());
     }
 
     public override void InitializeBaseUI()
@@ -180,7 +179,6 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
             ePhaseID = EPhase.PERFORMANCE_STAGE_FAILED;
         }
 
-        tUpdateAndDraw_Background();
         tUpdateAndDraw_MIDIBGM();
         tUpdateAndDraw_AVI();
         tUpdateAndDraw_LaneFlushD();

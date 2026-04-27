@@ -452,13 +452,7 @@ internal abstract class CStagePerfCommonScreen : CStage
         listChip = null;
         queueMixerSound.Clear();
         queueMixerSound = null;
-        //          GCSettings.LatencyMode = this.gclatencymode;
-        if (caviGenericBackgroundVideo != null)
-        {
-            caviGenericBackgroundVideo.Dispose();
-            caviGenericBackgroundVideo = null;
-        }
-
+        
         base.OnDeactivate();
     }
     public override void OnManagedCreateResources()
@@ -467,20 +461,6 @@ internal abstract class CStagePerfCommonScreen : CStage
         {
             base.OnManagedCreateResources();
 
-            //
-            caviGenericBackgroundVideo = new CAVI(1290, CSkin.Path(@"Graphics\7_Movie.mp4"), "", 20.0);
-            caviGenericBackgroundVideo.OnDeviceCreated();
-            if (caviGenericBackgroundVideo.avi != null)
-            {
-                Trace.TraceInformation("Generic Background video loaded successfully");
-                actBackgroundAVI.bLoop = true;
-                actBackgroundAVI.Start(EChannel.MovieFull, caviGenericBackgroundVideo, 0, -1);
-                bGenericVideoEnabled = true;
-            }
-            else
-            {
-                bGenericVideoEnabled = false;
-            }
             tGenerateBackgroundTexture();
 
             txWailingFrame = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay wailing cursor.png" ) );
@@ -497,15 +477,6 @@ internal abstract class CStagePerfCommonScreen : CStage
             {
                 tGeneratePlaySpeedTexture();
             }
-        }
-    }
-    public override void OnManagedReleaseResources()
-    {
-        if (bActivated)
-        {
-            actBackgroundAVI.Stop();
-
-            base.OnManagedReleaseResources();
         }
     }
 
@@ -787,7 +758,6 @@ internal abstract class CStagePerfCommonScreen : CStage
     protected CActPerfSkillMeter actGraph;
     protected CActPerfGuitarBonus actGuitarBonus;
     protected CActPerfProgressBar actProgressBar;
-    protected CActSelectBackgroundAVI actBackgroundAVI;
     protected bool bPAUSE;
     protected STDGBVALUE<bool> bMIDIUsed;
     protected STDGBVALUE<bool> bKeyboardUsed;
@@ -879,11 +849,7 @@ internal abstract class CStagePerfCommonScreen : CStage
 
     protected long LoopBeginMs;
     protected long LoopEndMs;
-
-    //Generic video object
-    private CAVI caviGenericBackgroundVideo;
-    private bool bGenericVideoEnabled;
-
+    
     // Use a property instead of a field to automatically set training mode on the graph too
     private bool _bIsTrainingMode;
     public bool bIsTrainingMode
@@ -4686,13 +4652,7 @@ internal abstract class CStagePerfCommonScreen : CStage
     protected UIImage background;
     protected void tUpdateAndDraw_Background()
     {
-        //Draw either Background image or video
-        if (bGenericVideoEnabled)
-        {
-            actBackgroundAVI.tUpdateAndDraw();
-            background.isVisible = false;
-        }
-        else if (background != null)
+        if (background != null)
         {
             background.isVisible = true;
         }
@@ -4791,7 +4751,8 @@ internal abstract class CStagePerfCommonScreen : CStage
         background = ui.AddChild(new UIImage(texture));
         background.name = "Static Background";
         background.renderOrder = -1;
-        
+        background.isVisible = true;
+
         //todo: maybe reimplement the more complex background texture behaviour
         //tGenerateBackgroundTexture( DefaultBgFilename, bgrect, BgFilename );
     }

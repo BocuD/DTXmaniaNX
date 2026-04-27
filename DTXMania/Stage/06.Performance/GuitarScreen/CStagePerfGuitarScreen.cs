@@ -33,7 +33,6 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		listChildActivities.Add( actChipFireGB = new CActPerfGuitarChipFire() );
 		listChildActivities.Add( actPlayInfo = new CActPerformanceInformation() );
 		listChildActivities.Add( actProgressBar = new CActPerfProgressBar());
-		listChildActivities.Add( actBackgroundAVI = new CActSelectBackgroundAVI());
 	}
 
 	public override void InitializeBaseUI()

@@ -18,8 +18,6 @@ public class CStageSongSelectionNew : CStage
     private UIImage bigAlbumArt;
     private CActSelectPresound actPresound;
     private StatusPanel statusPanel;
-    //private CActSelectBackgroundAVI actBackgroundVideoAVI;
-    private CAVI cAviBackgroundVideo;
 
     private SongSelectionContainer currentSelectionContainer;
     private DensityGraph densityGraph1;
@@ -89,12 +87,14 @@ public class CStageSongSelectionNew : CStage
         statusPanel = ui.AddChild(new StatusPanel());
         statusPanel.renderOrder = 6;
 
+        var selectionContainerGroup = ui.AddChild(new UIGroup("Selection Containers"));
+        selectionContainerGroup.position = new Vector3(765, 320, 0);
+        
         //create songselectioncontainer for each sorter
         foreach (SongDbSort sorter in sorters)
         {
-            SongSelectionContainer container = ui.AddChild(new SongSelectionContainer(songDb, bigAlbumArt));
+            SongSelectionContainer container = selectionContainerGroup.AddChild(new SongSelectionContainer(songDb, bigAlbumArt));
             container.name = "SongSelect " + sorter.Name;
-            container.position = new Vector3(765, 320, 0);
             selectionContainers[sorter] = container;
         }
         
@@ -130,10 +130,6 @@ public class CStageSongSelectionNew : CStage
             videoPlayer.Dispose();
         }
         
-        //LegacyDrawable backgroundVideo = ui.AddChild(new LegacyDrawable(() => actBackgroundVideoAVI.tUpdateAndDraw()));
-        //backgroundVideo.renderOrder = -99;
-        //backgroundVideo.name = "BackgroundVideo";
-        
         //create panel elements
         var back1 = ui.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\SongSelect\back1.png"))));
         back1.renderOrder = 1;
@@ -156,33 +152,6 @@ public class CStageSongSelectionNew : CStage
         topBar.renderOrder = 12;
         topBar.name = "TopBar";
         topBar.size.X = 1280;
-    }
-
-    public override void OnManagedCreateResources()
-    {
-        cAviBackgroundVideo = new CAVI(1290, CSkin.Path(@"Graphics\5_background.mp4"), "", 20.0);
-        cAviBackgroundVideo.OnDeviceCreated();
-        // if (cAviBackgroundVideo.avi != null)
-        // {
-        //     actBackgroundVideoAVI.bLoop = true;
-        //     actBackgroundVideoAVI.Start(EChannel.MovieFull, cAviBackgroundVideo, 0, -1);
-        //     Trace.TraceInformation("Started song select background video");
-        // }
-        
-        
-        base.OnManagedCreateResources();
-    }
-
-    public override void OnManagedReleaseResources()
-    {
-        if (cAviBackgroundVideo != null)
-        {
-            cAviBackgroundVideo.Dispose();
-            cAviBackgroundVideo = null;
-        }
-        //actBackgroundVideoAVI.Stop();
-        
-        base.OnManagedReleaseResources();
     }
 
     public override void FirstUpdate()

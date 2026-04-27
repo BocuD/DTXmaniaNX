@@ -48,7 +48,6 @@ internal class CStageResult : CStage
 		listChildActivities.Add( actParameterPanel = new CActResultParameterPanel(this) );
 		listChildActivities.Add( actRank = new CActResultRank(this) );
 		listChildActivities.Add( new CActResultSongBar() );
-		listChildActivities.Add(actBackgroundVideoAVI = new CActSelectBackgroundAVI());
 	}
 
 		
@@ -61,15 +60,6 @@ internal class CStageResult : CStage
 
 	public override void InitializeDefaultUI()
 	{
-		rBackgroundVideoAVI = new CAVI(1290, CSkin.Path(@"Graphics\8_background.mp4"), "", 20.0);
-		rBackgroundVideoAVI.OnDeviceCreated();
-		if (rBackgroundVideoAVI.avi != null)
-		{					
-			actBackgroundVideoAVI.bLoop = true;
-			actBackgroundVideoAVI.Start(EChannel.MovieFull, rBackgroundVideoAVI, 0, -1);
-			Trace.TraceInformation("Playing Background video for Result Screen");
-		}
-
 		BaseTexture txBackground = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\8_background.jpg" ) );
 		
 		switch (nResultRank)
@@ -121,6 +111,7 @@ internal class CStageResult : CStage
 
 		background = ui.AddChild(new UIImage(txBackground));
 		background.renderOrder = -100;
+		background.isVisible = true;
 	}
 
 	public override void OnActivate()
@@ -451,13 +442,7 @@ internal class CStageResult : CStage
 			CDTXMania.SoundManager.tDiscard( rResultSound );
 			rResultSound = null;
 		}
-
-		if (rBackgroundVideoAVI != null)
-		{
-			rBackgroundVideoAVI.Dispose();
-			rBackgroundVideoAVI = null;
-		}
-
+		
 		base.OnDeactivate();
 	}
 	public override void OnManagedCreateResources()
@@ -475,9 +460,7 @@ internal class CStageResult : CStage
 			{
 				ctPlayNewRecord = null;
 			}
-
-			actBackgroundVideoAVI.Stop();
-
+			
 			//CDTXMania.t安全にDisposeする( ref this.ds背景動画 );t
 			base.OnManagedReleaseResources();
 		}
@@ -542,29 +525,6 @@ internal class CStageResult : CStage
 		
 		base.OnUpdateAndDraw();
 
-		int num;
-				
-		//Draw Background video  via CActPerfAVI methods
-		actBackgroundVideoAVI.tUpdateAndDraw();
-
-		//if ( this.ds背景動画 != null )
-		//            {
-		//                this.ds背景動画.t再生開始();
-		//                this.ds背景動画.MediaSeeking.GetPositions(out this.lDshowPosition, out this.lStopPosition);
-		//                this.ds背景動画.bループ再生 = true;
-                    
-		//                if (this.lDshowPosition == this.lStopPosition)
-		//                {
-		//                    this.ds背景動画.MediaSeeking.SetPositions(
-		//                    DsLong.FromInt64((long)(0)),
-		//                    AMSeekingSeekingFlags.AbsolutePositioning,
-		//                    0,
-		//                    AMSeekingSeekingFlags.NoPositioning);
-		//                }
-                    
-		//                this.ds背景動画.t現時点における最新のスナップイメージをTextureに転写する( this.txBackground );
-		//            }
-
 		bAnimationComplete = true;
 
 		//Play new record if available
@@ -577,9 +537,6 @@ internal class CStageResult : CStage
 				ctPlayNewRecord.tStop();
 			}
 		}
-
-		// 描画
-		background.isVisible = rBackgroundVideoAVI.avi == null;
 		
 		// if( actResultImage.OnUpdateAndDraw() == 0 )
 		// {
@@ -749,9 +706,6 @@ internal class CStageResult : CStage
 	//private CDirectShow ds背景動画;
 	private long lDshowPosition;
 	private long lStopPosition;
-
-	private readonly CActSelectBackgroundAVI actBackgroundVideoAVI;
-	private CAVI rBackgroundVideoAVI;
 
 	#region [ #24609 リザルト画像をpngで保存する ]		// #24609 2011.3.14 yyagi; to save result screen in case BestRank or HiSkill.
 	/// <summary>
