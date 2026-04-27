@@ -405,9 +405,6 @@ internal class CActResultParameterPanel : CActivity
         }
         #endregion
 
-        prv表示用フォント = new CPrivateFastFont( new FontFamily( CDTXMania.ConfigIni.str曲名表示フォント ), 20, FontStyle.Regular );
-        prv称号フォント = new CPrivateFastFont( new FontFamily( CDTXMania.ConfigIni.str曲名表示フォント ), 12, FontStyle.Regular );
-
         sdDTXで指定されたフルコンボ音 = null;
         base.OnActivate();
     }
@@ -446,111 +443,6 @@ internal class CActResultParameterPanel : CActivity
             //
             txProgressBarPanel = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_progress_bar_panel.png"));
             txLagHitCount = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_lag numbers.png"));
-            for ( int i = 0; i < 3; i++ )
-            {
-                strPlayerName = string.IsNullOrEmpty( CDTXMania.ConfigIni.strCardName[ i ] ) ? "GUEST" : CDTXMania.ConfigIni.strCardName[ i ];
-                strTitleName = string.IsNullOrEmpty( CDTXMania.ConfigIni.strGroupName[ i ] ) ? "" : CDTXMania.ConfigIni.strGroupName[ i ];
-                Bitmap image2 = new Bitmap( 257, 100 );
-                Graphics graネームプレート用 = Graphics.FromImage( image2 );
-
-                #region[ ネームカラー ]
-                //--------------------
-                Color clNameColor = Color.White;
-                Color clNameColorLower = Color.White;
-                switch( CDTXMania.ConfigIni.nNameColor[ i ] )
-                {
-                    case 0:
-                        clNameColor = Color.White;
-                        break;
-                    case 1:
-                        clNameColor = Color.LightYellow;
-                        break;
-                    case 2:
-                        clNameColor = Color.Yellow;
-                        break;
-                    case 3:
-                        clNameColor = Color.Green;
-                        break;
-                    case 4:
-                        clNameColor = Color.Blue;
-                        break;
-                    case 5:
-                        clNameColor = Color.Purple;
-                        break;
-                    case 6:
-                        clNameColor = Color.Red;
-                        break;
-                    case 7:
-                        clNameColor = Color.Brown;
-                        break;
-                    case 8:
-                        clNameColor = Color.Silver;
-                        break;
-                    case 9:
-                        clNameColor = Color.Gold;
-                        break;
-
-                    case 10:
-                        clNameColor = Color.White;
-                        break;
-                    case 11:
-                        clNameColor = Color.LightYellow;
-                        clNameColorLower = Color.White;
-                        break;
-                    case 12:
-                        clNameColor = Color.Yellow;
-                        clNameColorLower = Color.White;
-                        break;
-                    case 13:
-                        clNameColor = Color.FromArgb(0, 255, 33);
-                        clNameColorLower = Color.White;
-                        break;
-                    case 14:
-                        clNameColor = Color.FromArgb(0, 38, 255);
-                        clNameColorLower = Color.White;
-                        break;
-                    case 15:
-                        clNameColor = Color.FromArgb(72, 0, 255);
-                        clNameColorLower = Color.White;
-                        break;
-                    case 16:
-                        clNameColor = Color.FromArgb(255, 255, 0, 0);
-                        clNameColorLower = Color.White;
-                        break;
-                    case 17:
-                        clNameColor = Color.FromArgb(255, 232, 182, 149);
-                        clNameColorLower = Color.FromArgb(255, 122, 69, 26);
-                        break;
-                    case 18:
-                        clNameColor = Color.FromArgb(246, 245, 255);
-                        clNameColorLower = Color.FromArgb(125, 128, 137);
-                        break;
-                    case 19:
-                        clNameColor = Color.FromArgb(255, 238, 196, 85);
-                        clNameColorLower = Color.FromArgb(255, 255, 241, 200);
-                        break;
-                }
-                //--------------------
-                #endregion
-                #region[ 名前とか ]
-                Bitmap bmpCardName = new Bitmap(1, 1);
-                bmpCardName = prv表示用フォント.DrawPrivateFont( strPlayerName, Color.White, Color.Transparent, clNameColor, ( CDTXMania.ConfigIni.nNameColor[ i ] > 11 ? clNameColorLower : clNameColor ) );
-                Bitmap bmpTitleName = new Bitmap(1, 1);
-                bmpTitleName = prv称号フォント.DrawPrivateFont( strTitleName, Color.White, Color.Transparent );
-
-                graネームプレート用.DrawImage( bmpCardName, -2f, 26f );
-                graネームプレート用.DrawImage( bmpTitleName, 6f, 8f );
-                #endregion
-                CDTXMania.tDisposeSafely( ref bmpCardName );
-                CDTXMania.tDisposeSafely(ref bmpTitleName);
-                //todo: create modular nameplate element to avoid this shit
-                //txネームプレート用文字[ i ] = new CTexture( CDTXMania.app.Device, image2, CDTXMania.TextureFormat, false );
-                CDTXMania.tDisposeSafely( ref image2 );
-
-                CDTXMania.tDisposeSafely( ref graネームプレート用 );
-            }
-            prv表示用フォント.Dispose();
-            prv称号フォント.Dispose();
 
             tGetDifficultyLabelFromScript( CDTXMania.confirmedSong.difficultyLabel[ CDTXMania.confirmedSongDifficulty ] );
 
@@ -626,7 +518,6 @@ internal class CActResultParameterPanel : CActivity
                 }
                     
                 txSkillPanel.tDraw2D(CDTXMania.app.Device, n本体X[j], n本体Y);
-                //txネームプレート用文字[ j ].tDraw2D(CDTXMania.app.Device, n本体X[j], n本体Y);
 
                 tDrawStringSmall(80 + n本体X[j], 72 + n本体Y, string.Format("{0,4:###0}", stageResult.stPerformanceEntry[j].nPerfectCount_ExclAuto));
                 tDrawStringSmall(80 + n本体X[j], 102 + n本体Y, string.Format("{0,4:###0}", stageResult.stPerformanceEntry[j].nGreatCount_ExclAuto));
@@ -769,11 +660,6 @@ internal class CActResultParameterPanel : CActivity
     private BaseTexture[] txExciteGauge;
     private BaseTexture txSkillPanel;
     private BaseTexture txScore;
-    private BaseTexture[] txネームプレート用文字 = new BaseTexture[ 3 ];
-    private string strPlayerName;
-    private string strTitleName;
-    private CPrivateFastFont prv表示用フォント;
-    private CPrivateFastFont prv称号フォント;
 
     private BaseTexture tx難易度パネル;
     private BaseTexture tx難易度用数字;

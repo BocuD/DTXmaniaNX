@@ -6,7 +6,6 @@ using DTXMania.UI.Drawable;
 using DTXMania.UI.Skin;
 using Hexa.NET.ImGui;
 using NativeFileDialog.Extended;
-using OpenGLTest;
 
 namespace DTXMania.UI.Inspector;
 

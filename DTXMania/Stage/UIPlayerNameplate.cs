@@ -42,10 +42,10 @@ public class UIPlayerNameplate : UIGroup
 
         string strPlayerName = string.IsNullOrEmpty(CDTXMania.ConfigIni.strCardName[instrument])
             ? "GUEST"
-            : CDTXMania.ConfigIni.strCardName[0];
+            : CDTXMania.ConfigIni.strCardName[instrument];
         string strTitleName = string.IsNullOrEmpty(CDTXMania.ConfigIni.strGroupName[instrument])
             ? ""
-            : CDTXMania.ConfigIni.strGroupName[0];
+            : CDTXMania.ConfigIni.strGroupName[instrument];
 
         Color clNameColor = Color.White;
         Color clNameColorLower = Color.White;

@@ -1,6 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using System.Drawing;
 using DTXMania.Core;
+using DTXMania.UI.Drawable;
 using FDK;
 
 namespace DTXMania;
@@ -21,7 +22,7 @@ public class CActLVLNFont : CActivity
 			for (int i = 0; i < 12; i++)
 			{
 				st数字[i, j].ch = numChars[i];
-				st数字[i, j].rc = new SharpDX.RectangleF(
+				st数字[i, j].rc = new RectangleF(
 					(i % 4) * numWidth + (j % 2) * 64,
 					(i / 4.0f) * numHeight + (j / 2.0f) * 64,
 					numWidth,
@@ -58,7 +59,7 @@ public class CActLVLNFont : CActivity
 					ST数字 s = st数字[p, (int)efc];
 					float sw = s.rc.Width;
 					float delta = bRightAlign ? 0 : -sw;
-					tx数値.tDraw2DFloat(CDTXMania.app.Device, x + delta, y, s.rc);
+					tx数値.tDraw2D(CDTXMania.app.Device, x + delta, y, s.rc);
 					x += bRightAlign ? -sw : sw;
 				}
 			}
@@ -72,7 +73,7 @@ public class CActLVLNFont : CActivity
 	{
 		if (bActivated)
 		{
-			tx数値 = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\ScreenSelect level numbers.png"));
+			tx数値 = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\ScreenSelect level numbers.png"));
 			base.OnManagedCreateResources();
 		}
 	}
@@ -98,7 +99,7 @@ public class CActLVLNFont : CActivity
 	private struct ST数字
 	{
 		public char ch;
-		public SharpDX.RectangleF rc;
+		public RectangleF rc;
 	}
 
 	public enum EFontColor
@@ -114,7 +115,7 @@ public class CActLVLNFont : CActivity
 		Right
 	}
 	private ST数字[,] st数字;
-	private CTexture tx数値;
+	private BaseTexture tx数値;
 	//-----------------
 	#endregion
 }

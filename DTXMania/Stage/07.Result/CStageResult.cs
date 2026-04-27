@@ -60,8 +60,8 @@ internal class CStageResult : CStage
 
 	public override void InitializeDefaultUI()
 	{
-		BaseTexture txBackground = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\8_background.jpg" ) );
-		
+		BaseTexture txBackground = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_background.jpg"));
+
 		switch (nResultRank)
 		{
 			case 0:
@@ -69,36 +69,42 @@ internal class CStageResult : CStage
 				{
 					txBackground = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_background rankSS.png"));
 				}
+
 				break;
 			case 1:
 				if (File.Exists(CSkin.Path(@"Graphics\8_background rankS.png")))
 				{
 					txBackground = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_background rankS.png"));
 				}
+
 				break;
 			case 2:
 				if (File.Exists(CSkin.Path(@"Graphics\8_background rankA.png")))
 				{
 					txBackground = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_background rankA.png"));
 				}
+
 				break;
 			case 3:
 				if (File.Exists(CSkin.Path(@"Graphics\8_background rankB.png")))
 				{
 					txBackground = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_background rankB.png"));
 				}
+
 				break;
 			case 4:
 				if (File.Exists(CSkin.Path(@"Graphics\8_background rankC.png")))
 				{
 					txBackground = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_background rankC.png"));
 				}
+
 				break;
 			case 5:
 				if (File.Exists(CSkin.Path(@"Graphics\8_background rankD.png")))
 				{
 					txBackground = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_background rankD.png"));
 				}
+
 				break;
 			case 6:
 			case 99:
@@ -106,12 +112,25 @@ internal class CStageResult : CStage
 				{
 					txBackground = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_background rankE.png"));
 				}
+
 				break;
 		}
 
 		background = ui.AddChild(new UIImage(txBackground));
 		background.renderOrder = -100;
 		background.isVisible = true;
+
+
+		//todo: position these
+		if (CDTXMania.GetCurrentInstrument() == 0)
+		{
+			ui.AddChild(new UIPlayerNameplate(0));
+		}
+		else
+		{
+			ui.AddChild(new UIPlayerNameplate(1));
+			ui.AddChild(new UIPlayerNameplate(2));
+		}
 	}
 
 	public override void OnActivate()

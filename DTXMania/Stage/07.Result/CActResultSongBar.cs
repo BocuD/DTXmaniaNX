@@ -76,7 +76,6 @@ internal class CActResultSongBar : CActivity
 	{
 		if( bActivated )
 		{
-			CDTXMania.tReleaseTexture( ref txバー );
 			CDTXMania.tReleaseTexture( ref tx曲名 );
 			base.OnManagedReleaseResources();
 		}
@@ -153,7 +152,6 @@ internal class CActResultSongBar : CActivity
 	private Font ft曲名用フォント;
 	private int n本体X;
 	private int n本体Y;
-	private CTexture txバー;
 	private CTexture tx曲名;
 	//-----------------
 	#endregion
