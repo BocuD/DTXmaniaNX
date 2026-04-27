@@ -7,16 +7,17 @@ namespace DTXMania.UI.Inspector;
 
 public class LogWindow : TraceListener
 {
-    private readonly List<LogEntry> logMessages = new();
+    private const int MaxLogLines = 200_000;
+
+    private readonly RingBuffer<LogLine> logLines = new(MaxLogLines);
     private readonly object logLock = new();
 
     private bool autoScroll = true;
     private readonly StringBuilder messageBuffer = new();
 
-    private struct LogEntry
+    private struct LogLine
     {
-        public string Message;
-        public DateTime Timestamp;
+        public string Text;
         public TraceEventType Level;
     }
 
@@ -40,12 +41,7 @@ public class LogWindow : TraceListener
             string fullMessage = messageBuffer.ToString().TrimEnd('\n', '\r');
             messageBuffer.Clear();
 
-            logMessages.Add(new LogEntry
-            {
-                Message = fullMessage,
-                Timestamp = DateTime.Now,
-                Level = TraceEventType.Information // Fallback
-            });
+            AppendMessageLocked(fullMessage, TraceEventType.Information);
         }
     }
 
@@ -55,12 +51,24 @@ public class LogWindow : TraceListener
 
         lock (logLock)
         {
-            logMessages.Add(new LogEntry
-            {
-                Message = message,
-                Timestamp = DateTime.Now,
-                Level = eventType
-            });
+            AppendMessageLocked(message, eventType);
+        }
+    }
+
+    private void AppendMessageLocked(string message, TraceEventType level)
+    {
+        string prefix = $"[{DateTime.Now:HH:mm:ss.fff}] [{level}] ";
+
+        if (string.IsNullOrEmpty(message))
+        {
+            logLines.Add(new LogLine { Text = prefix, Level = level });
+            return;
+        }
+
+        string[] lines = message.Replace("\r\n", "\n").Replace('\r', '\n').Split('\n');
+        foreach (string line in lines)
+        {
+            logLines.Add(new LogLine { Text = prefix + line, Level = level });
         }
     }
 
@@ -72,7 +80,8 @@ public class LogWindow : TraceListener
         {
             lock (logLock)
             {
-                logMessages.Clear();
+                logLines.Clear();
+                messageBuffer.Clear();
             }
         }
 
@@ -81,9 +90,12 @@ public class LogWindow : TraceListener
 
         ImGui.BeginChild("LogRegion", new Vector2(0, 0), ImGuiWindowFlags.HorizontalScrollbar);
 
+        // Determine bottom state before adding this frame's content.
+        bool wasNearBottom = ImGui.GetScrollY() >= ImGui.GetScrollMaxY() - 10f;
+
         lock (logLock)
         {
-            int count = logMessages.Count;
+            int count = logLines.Count;
             if (count > 0)
             {
                 var clipper = new ImGuiListClipper();
@@ -93,25 +105,77 @@ public class LogWindow : TraceListener
                 {
                     for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++)
                     {
-                        var entry = logMessages[i];
-                        var timestamp = entry.Timestamp.ToString("HH:mm:ss.fff");
-                        var color = GetColorForLevel(entry.Level);
+                        LogLine line = logLines[i];
+                        Vector4 color = GetColorForLevel(line.Level);
 
                         ImGui.PushStyleColor(ImGuiCol.Text, color);
-                        ImGui.TextUnformatted($"[{timestamp}] [{entry.Level}] {entry.Message}");
+                        ImGui.TextUnformatted(line.Text);
                         ImGui.PopStyleColor();
                     }
                 }
-            }
 
-            if (autoScroll && ImGui.GetScrollY() >= ImGui.GetScrollMaxY() - 10)
-            {
-                ImGui.SetScrollHereY(1.0f);
+                clipper.End();
             }
+        }
+
+        if (autoScroll && wasNearBottom)
+        {
+            ImGui.SetScrollHereY(1.0f);
         }
 
         ImGui.EndChild();
         ImGui.End();
+    }
+
+    private sealed class RingBuffer<T>
+    {
+        private readonly T[] buffer;
+        private int start;
+        private int count;
+
+        public RingBuffer(int capacity)
+        {
+            if (capacity <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(capacity));
+            }
+
+            buffer = new T[capacity];
+        }
+
+        public int Count => count;
+
+        public T this[int index]
+        {
+            get
+            {
+                if ((uint)index >= (uint)count)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(index));
+                }
+
+                return buffer[(start + index) % buffer.Length];
+            }
+        }
+
+        public void Add(T item)
+        {
+            if (count < buffer.Length)
+            {
+                buffer[(start + count) % buffer.Length] = item;
+                count++;
+                return;
+            }
+
+            buffer[start] = item;
+            start = (start + 1) % buffer.Length;
+        }
+
+        public void Clear()
+        {
+            start = 0;
+            count = 0;
+        }
     }
 
     private static Vector4 GetColorForLevel(TraceEventType level) => level switch
