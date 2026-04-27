@@ -44,7 +44,7 @@ public class DensityGraph : UIGroup
         }
     }
     
-    private CTexture[] txDrumChipsBarLine = new CTexture[9];
+    private BaseTexture[] txDrumChipsBarLine = new BaseTexture[9];
     private Color[] clDrumChipsBarColors =
     [
         Color.PaleVioletRed,
@@ -57,7 +57,7 @@ public class DensityGraph : UIGroup
         Color.Orange,
         Color.DeepSkyBlue
     ];
-    private CTexture[] txGBChipsBarLine = new CTexture[6];
+    private BaseTexture[] txGBChipsBarLine = new BaseTexture[6];
     private Color[] clGBChipsBarColors =
     [
         Color.Red,

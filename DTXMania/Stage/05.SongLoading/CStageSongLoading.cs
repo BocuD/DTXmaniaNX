@@ -5,7 +5,6 @@ using System.Runtime.InteropServices;
 using System.Drawing;
 using System.Numerics;
 using DTXMania.Core;
-using DTXMania.UI;
 using DTXMania.UI.Drawable;
 using FDK;
 using Color = System.Drawing.Color;

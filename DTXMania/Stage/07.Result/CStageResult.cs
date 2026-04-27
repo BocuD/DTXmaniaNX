@@ -742,8 +742,6 @@ internal class CStageResult : CStage
 	private int n最後に再生したHHのWAV番号;
 	private EChannel n最後に再生したHHのチャンネル番号;
 	private CSound rResultSound;
-	private CTexture txBottomPanel;  // tx下部パネル
-	private CTexture txTopPanel;  // tx上部パネル
 	private UIImage background;  // tx背景
 	//Copy from CStagePerfCommonScreen
 	public STDGBVALUE<CStagePerfCommonScreen.CLAGTIMINGHITCOUNT> nTimingHitCount;
