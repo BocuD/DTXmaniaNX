@@ -310,6 +310,12 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
         GLFW.SetWindowFocusCallback(window, focusCallback);
         GLFW.SetWindowPosCallback(window, windowPosCallback);
         GLFW.SetWindowSizeCallback(window, windowSizeCallback);
+        
+        //initial update pos and size
+        GLFW.GetWindowPos(window, ref _windowedX, ref _windowedY);
+        GLFW.GetWindowSize(window, ref _windowedWidth, ref _windowedHeight);
+        _game.windowPosition  = new Vector2(_windowedX, _windowedY);
+        _game.windowSize    = new Vector2(_windowedWidth, _windowedHeight);
     }
 
     private void InitializeImGui()
