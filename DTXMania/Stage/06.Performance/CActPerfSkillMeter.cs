@@ -209,9 +209,7 @@ internal class CActPerfSkillMeter : CActivity
 	private BaseTexture txグラフ;
 	private BaseTexture txグラフ_ゲージ;
 	private BaseTexture txグラフ値自己ベストライン;
-
-	private CPrivateFastFont pfNameFont;
-
+	
 	[StructLayout(LayoutKind.Sequential)]
 	private struct ST文字位置
 	{
