@@ -749,7 +749,7 @@ internal partial class CActConfigList : CActivity
             Name = text.Substring(0, Math.Min(20, text.Length)), // Use a substring of the text as the name to avoid excessively long names
             Text = text,
             FillColor = color,
-            FontPath = UIFonts.DefaultUiFontFileName,
+            FontPath = UIFonts.FallbackFontPath,
             OutlineColor = outline ?? Color4.Black,
             OutlineWidth = outline.HasValue ? (size * CDTXMania.renderScale) / 4 : 0,
             Backend = UiTextRenderBackend.Skia,

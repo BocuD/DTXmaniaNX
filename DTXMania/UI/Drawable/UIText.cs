@@ -3,6 +3,7 @@ using System.Numerics;
 using DTXMania.Core;
 using DTXMania.UI.Inspector;
 using DTXMania.UI.OpenGL;
+using DTXMania.UI.Skin;
 using DTXMania.UI.Text;
 using Hexa.NET.ImGui;
 using NativeFileDialog.Extended;
@@ -28,7 +29,8 @@ public class UIText : UITexture
     private bool _dirty = true;
 
     [Themable] public string text = "New UIText";
-    [Themable] public string fontPath = UIFonts.FallbackFont;
+    [Themable] public FontSource fontSource = FontSource.System;
+    [Themable] public string font = UIFonts.FallbackFont;
     [Themable] public string fontFamily = string.Empty;
     [Themable] public float fontSize = DefaultFontSize;
     [Themable] public float outlineWidth = 3f;
@@ -195,25 +197,95 @@ public class UIText : UITexture
             }
         }
 
-        if (ImGui.InputText("Font Path", ref fontPath, 1024))
+        //dropdown for font source
+        Inspector.Inspector.Inspect("Font Location", ref fontSource);
+        switch (fontSource)
+        {
+            case FontSource.Resource:
+            {
+                ImGui.LabelText("Resource", font);
+
+                string[] resourceFonts = UIFonts.GetAvailableResourceFonts();
+                int selectedIndex = Array.IndexOf(resourceFonts, font);
+                if (ImGui.Combo("Resource", ref selectedIndex, resourceFonts, resourceFonts.Length))
+                {
+                    font = resourceFonts[selectedIndex];
+                    _dirty = true;
+                }
+
+                ImGui.SameLine();
+
+                if (ImGui.Button("Refresh List"))
+                {
+                    UIFonts.GetAvailableResourceFonts(true);
+                }
+
+                ImGui.BeginDisabled(CDTXMania.SkinManager.currentSkin == null);
+                if (ImGui.Button("Add new Font Resource"))
+                {
+                    Dictionary<string, string> filterList = new()
+                    {
+                        { "Fonts", "ttf,otf" }
+                    };
+
+                    string path = NFD.OpenDialog("", filterList);
+
+                    if (!string.IsNullOrWhiteSpace(path) && File.Exists(path))
+                    {
+                        var currentSkin = CDTXMania.SkinManager.currentSkin;
+
+                        if (currentSkin != null)
+                        {
+                            string resourcePath = currentSkin.AddResource(SkinDescriptor.ResourceType.Font, path);
+                            font = resourcePath;
+                            _dirty = true;
+                        }
+                    }
+                }
+
+                ImGui.EndDisabled();
+                break;
+            }
+
+            case FontSource.System:
+            {
+                string[] systemFonts = UIFonts.GetAvailableSystemFonts();
+                int selectedIndex = Array.IndexOf(systemFonts, font);
+                if (ImGui.Combo("System Font", ref selectedIndex, systemFonts, systemFonts.Length))
+                {
+                    font = systemFonts[selectedIndex];
+                    _dirty = true;
+                }
+                
+                ImGui.SameLine();
+                
+                if (ImGui.Button("Refresh List"))
+                {
+                    UIFonts.GetAvailableSystemFonts(true);
+                }
+                break;
+            }
+        }
+
+        if (ImGui.InputText("Font Path", ref font, 1024))
         {
             _dirty = true;
         }
 
-        if (ImGui.Button("Browse Font"))
-        {
-            Dictionary<string, string> filterList = new()
-            {
-                { "Fonts", "ttf,otf,ttc,woff,woff2" }
-            };
-
-            string path = NFD.OpenDialog("", filterList);
-            if (!string.IsNullOrWhiteSpace(path) && File.Exists(path))
-            {
-                fontPath = path;
-                _dirty = true;
-            }
-        }
+        // if (ImGui.Button("Browse Font"))
+        // {
+        //     Dictionary<string, string> filterList = new()
+        //     {
+        //         { "Fonts", "ttf,otf,ttc,woff,woff2" }
+        //     };
+        //
+        //     string path = NFD.OpenDialog("", filterList);
+        //     if (!string.IsNullOrWhiteSpace(path) && File.Exists(path))
+        //     {
+        //         font = path;
+        //         _dirty = true;
+        //     }
+        // }
 
         if (ImGui.InputText("Fallback Family", ref fontFamily, 256))
         {
@@ -348,7 +420,7 @@ public class UIText : UITexture
         {
             Name = name,
             Text = text,
-            FontPath = fontPath,
+            FontPath = UIFonts.ResolveFontPath(fontSource, font),
             FontFamily = fontFamily,
             FontSize = renderSize,
             OutlineWidth = outlineWidth,

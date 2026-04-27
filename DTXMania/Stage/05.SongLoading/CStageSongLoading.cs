@@ -175,7 +175,7 @@ internal class CStageSongLoading : CStage
             songNameText.fillColor = Color4.Black;
             songNameText.outlineColor = Color4.White;
             songNameText.name = "SongName";
-            songNameText.fontPath = UIFonts.FallbackFont;
+            songNameText.font = UIFonts.FallbackFont;
             songNameText.position = new Vector3(500, 285, 0);
         }
 
@@ -185,7 +185,7 @@ internal class CStageSongLoading : CStage
             artistNameText.fillColor = Color4.Black;
             artistNameText.outlineColor = Color4.White;
             artistNameText.name = "ArtistName";
-            artistNameText.fontPath = UIFonts.FallbackFont;
+            artistNameText.font = UIFonts.FallbackFont;
             artistNameText.position = new Vector3(500, 360, 0);
         }
     }

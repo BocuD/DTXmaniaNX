@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Numerics;
 using DTXMania.Core;
 using DTXMania.UI.Inspector;
+using DTXMania.UI.Skin;
 using Hexa.NET.ImGui;
 using NativeFileDialog.Extended;
 
@@ -79,7 +80,7 @@ public class UIImage : UITexture
         if (imageSource == ImageSource.Resource)
         {
             Trace.TraceInformation("Updating resource for " + id);
-            string? fullPath = CDTXMania.SkinManager.currentSkin?.GetResource(resource);
+            string? fullPath = CDTXMania.SkinManager.currentSkin?.GetResource(SkinDescriptor.ResourceType.Image, resource);
             if (string.IsNullOrWhiteSpace(fullPath))
             {
                 Trace.TraceError($"Resource {resource} not found in current skin.");
@@ -130,7 +131,7 @@ public class UIImage : UITexture
                     
                 if (currentSkin != null)
                 {
-                    string resourcePath = currentSkin.AddResource(path);
+                    string resourcePath = currentSkin.AddResource(SkinDescriptor.ResourceType.Image, path);
                     imageSource = ImageSource.Resource;
                     resource = resourcePath;
                     LoadResource(true);

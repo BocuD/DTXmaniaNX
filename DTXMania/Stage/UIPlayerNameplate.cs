@@ -124,12 +124,12 @@ public class UIPlayerNameplate : UIGroup
                 break;
         }
 
-        titleText.fontPath = UIFonts.FallbackFont;
+        titleText.font = UIFonts.FallbackFont;
         titleText.fontSize = 12;
         titleText.fillColor = Color.White;
         titleText.SetText(strTitleName);
 
-        playerNameText.fontPath = UIFonts.FallbackFont;
+        playerNameText.font = UIFonts.FallbackFont;
         playerNameText.fontSize = 20;
         playerNameText.outlineWidth = 0;
         playerNameText.fillGradientMode = colorIndex > 11
