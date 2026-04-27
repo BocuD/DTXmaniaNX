@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 using DTXMania.Core;
 using DTXMania.UI.Drawable;
-using Newtonsoft.Json;
 
 namespace DTXMania.UI.Skin;
 
@@ -59,12 +58,12 @@ public class SkinManager
         foreach (CStage.EStage stage in Enum.GetValues<CStage.EStage>())
         {
             if (stage == CStage.EStage.DoNothing_0) continue;
-            
+
             UIGroup stageGroup = new(stage.ToString());
-            
+
             string path = Path.Combine(newSkinPath, $"{stage}.json");
-            File.WriteAllText(path, JsonConvert.SerializeObject(stageGroup, Formatting.Indented));
-            
+            File.WriteAllText(path, SkinHierarchySerializer.SerializeToJson(stageGroup));
+
             newSkin.stageSkins[stage] = $"{stage}.json";
         }
 
@@ -101,7 +100,7 @@ public class SkinManager
     {
         UIGroup? loadedSkin = CDTXMania.SkinManager.LoadStageSkin(eStageID);
 
-        //loadedSkin is a UIGroup that was deserialized from the skin file, we need to apply its properties to the target UIGroup and its children
-        target.ApplySkin(loadedSkin);
+        // loadedSkin is a UIGroup that was deserialized from the skin file; apply it to the target hierarchy.
+        SkinHierarchyMerger.ApplySkin(target, loadedSkin);
     }
 }

@@ -99,6 +99,10 @@ public abstract class UIDrawable : IDisposable
 
             ImGui.EndPopup();
         }
+        
+        ImGui.BeginDisabled(true);
+        ImGui.Text(id);
+        ImGui.EndDisabled();
 
         ImGui.InputInt("Render Order", ref renderOrder);
         Inspector.Inspector.Inspect("Position", ref position);

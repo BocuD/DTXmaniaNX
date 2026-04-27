@@ -65,6 +65,7 @@ public class StatusPane : UIGroup
     private float verticalSpacing = 74;
     private Vector3 textOffset = new(125, -41, 0);
     
+    [SkinNonSerialized]
     public SongNode? song;
 
     public override void Draw(Matrix4x4 parentMatrix)

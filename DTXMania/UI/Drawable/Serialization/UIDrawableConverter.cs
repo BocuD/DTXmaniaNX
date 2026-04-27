@@ -1,8 +1,8 @@
-﻿using System.Collections;
-using System.Collections.Concurrent;
+﻿using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using DTXMania.UI;
+using System.Collections;
+using DTXMania.UI.Inspector;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -10,10 +10,6 @@ namespace DTXMania.UI.Drawable.Serialization;
 
 public class UIDrawableConverter : JsonConverter
 {
-    private static readonly ConcurrentDictionary<Type, List<FieldInfo>> ThemableFieldsCache = new();
-    private static readonly ConcurrentDictionary<Type, List<PropertyInfo>> ThemablePropertiesCache = new();
-    private static readonly ConcurrentDictionary<Type, HashSet<string>> DeserializableNamesCache = new();
-
     public override bool CanConvert(Type objectType)
     {
         return typeof(UIDrawable).IsAssignableFrom(objectType);
@@ -43,14 +39,12 @@ public class UIDrawableConverter : JsonConverter
             throw new JsonSerializationException($"Type {typeName} not found.");
         }
 
-        FilterNonThemableProperties(jObject, targetType);
+        FilterUnsupportedProperties(jObject, targetType);
 
         // Construct instance first to keep non-themable default values intact.
         object result = CreateDeserializationInstance(targetType);
         serializer.Populate(jObject.CreateReader(), result);
 
-        UIDrawable drawable = (UIDrawable)result;
-        drawable.OnDeserialize();
         return result;
     }
 
@@ -69,13 +63,25 @@ public class UIDrawableConverter : JsonConverter
         writer.WriteValue(drawable.id);
 
         Type drawableType = drawable.GetType();
-        HashSet<string> writtenNames = new(StringComparer.Ordinal);
-
-        foreach (FieldInfo field in GetThemableFields(drawableType))
+        HashSet<string> writtenNames = new(StringComparer.Ordinal)
         {
-            object? fieldValue = field.GetValue(drawable);
-            if (ShouldSkipValue(fieldValue))
+            "type",
+            nameof(UIDrawable.id),
+            nameof(UIGroup.children)
+        };
+
+        foreach (FieldInfo field in drawableType.GetFields(BindingFlags.Instance | BindingFlags.Public))
+        {
+            if (TryGetFieldSkipReason(field, out string fieldSkipReason))
             {
+                LogSerializationDecision($"[SkinSerialize] Skip write field {drawableType.Name}.{field.Name}: {fieldSkipReason}");
+                continue;
+            }
+
+            object? fieldValue = field.GetValue(drawable);
+            if (TryGetValueSkipReason(fieldValue, out string valueSkipReason))
+            {
+                LogSerializationDecision($"[SkinSerialize] Skip write field value {drawableType.Name}.{field.Name}: {valueSkipReason}");
                 continue;
             }
 
@@ -84,10 +90,16 @@ public class UIDrawableConverter : JsonConverter
             writtenNames.Add(field.Name);
         }
 
-        foreach (PropertyInfo property in GetThemableProperties(drawableType))
+        foreach (PropertyInfo property in drawableType.GetProperties(BindingFlags.Instance | BindingFlags.Public))
         {
             if (writtenNames.Contains(property.Name))
             {
+                continue;
+            }
+
+            if (TryGetPropertySkipReason(property, out string propertySkipReason))
+            {
+                LogSerializationDecision($"[SkinSerialize] Skip write property {drawableType.Name}.{property.Name}: {propertySkipReason}");
                 continue;
             }
 
@@ -98,11 +110,13 @@ public class UIDrawableConverter : JsonConverter
             }
             catch
             {
+                LogSerializationDecision($"[SkinSerialize] Skip write property {drawableType.Name}.{property.Name}: getter threw exception");
                 continue;
             }
 
-            if (ShouldSkipValue(propertyValue))
+            if (TryGetValueSkipReason(propertyValue, out string valueSkipReason))
             {
+                LogSerializationDecision($"[SkinSerialize] Skip write property value {drawableType.Name}.{property.Name}: {valueSkipReason}");
                 continue;
             }
 
@@ -118,6 +132,7 @@ public class UIDrawableConverter : JsonConverter
             {
                 if (child.dontSerialize)
                 {
+                    LogSerializationDecision($"[SkinSerialize] Skip write child {child.GetType().Name} '{child.name}': dontSerialize=true");
                     continue;
                 }
 
@@ -130,128 +145,262 @@ public class UIDrawableConverter : JsonConverter
         writer.WriteEndObject();
     }
 
-    private static void FilterNonThemableProperties(JObject jObject, Type targetType)
+    private static bool TryGetFieldSkipReason(FieldInfo field, out string reason)
     {
-        HashSet<string> allowedNames = GetDeserializableNames(targetType);
+        if (field.IsStatic)
+        {
+            reason = "static field";
+            return true;
+        }
+
+        if (field.Name == nameof(UIGroup.children))
+        {
+            reason = "children are serialized explicitly on UIGroup";
+            return true;
+        }
+
+        if (field.GetCustomAttribute<JsonIgnoreAttribute>() != null ||
+            field.GetCustomAttribute<SkinNonSerializedAttribute>() != null ||
+            field.GetCustomAttribute<NonSerializedAttribute>() != null)
+        {
+            reason = "explicit non-serialized attribute";
+            return true;
+        }
+
+        if (!IsSafeSerializableType(field.FieldType) && !HasSkinSerializeOverride(field, field.FieldType))
+        {
+            reason = $"unsafe type '{field.FieldType.FullName}' without [SkinSerialize] override";
+            return true;
+        }
+
+        reason = string.Empty;
+        return false;
+    }
+
+    private static bool TryGetPropertySkipReason(PropertyInfo property, out string reason)
+    {
+        if (!property.CanRead || !property.CanWrite || property.GetIndexParameters().Length > 0)
+        {
+            reason = "property must be readable/writable and non-indexer";
+            return true;
+        }
+
+        if (property.Name is "type" or nameof(UIDrawable.parent))
+        {
+            reason = "runtime metadata/reference property";
+            return true;
+        }
+
+        if (property.GetCustomAttribute<JsonIgnoreAttribute>() != null ||
+            property.GetCustomAttribute<SkinNonSerializedAttribute>() != null)
+        {
+            reason = "explicit non-serialized attribute";
+            return true;
+        }
+
+        if (!IsSafeSerializableType(property.PropertyType) && !HasSkinSerializeOverride(property, property.PropertyType))
+        {
+            reason = $"unsafe type '{property.PropertyType.FullName}' without [SkinSerialize] override";
+            return true;
+        }
+
+        reason = string.Empty;
+        return false;
+    }
+
+    private static bool TryGetValueSkipReason(object? value, out string reason)
+    {
+        if (value == null)
+        {
+            reason = string.Empty;
+            return false;
+        }
+
+        switch (value)
+        {
+            case UIDrawable:
+                reason = "direct UIDrawable reference";
+                return true;
+            case IEnumerable<UIDrawable>:
+                reason = "UIDrawable collection reference";
+                return true;
+            case Delegate:
+                reason = "delegate";
+                return true;
+            case IntPtr:
+                reason = "IntPtr";
+                return true;
+            case UIntPtr:
+                reason = "UIntPtr";
+                return true;
+            default:
+                reason = string.Empty;
+                return false;
+        }
+    }
+
+    private static void FilterUnsupportedProperties(JObject jObject, Type drawableType)
+    {
+        HashSet<string> allowed = new(StringComparer.Ordinal)
+        {
+            "type",
+            nameof(UIDrawable.id),
+            nameof(UIGroup.children)
+        };
+
+        foreach (FieldInfo field in drawableType.GetFields(BindingFlags.Instance | BindingFlags.Public))
+        {
+            if (!TryGetFieldSkipReason(field, out _))
+            {
+                allowed.Add(field.Name);
+            }
+        }
+
+        foreach (PropertyInfo property in drawableType.GetProperties(BindingFlags.Instance | BindingFlags.Public))
+        {
+            if (!TryGetPropertySkipReason(property, out _))
+            {
+                allowed.Add(property.Name);
+            }
+        }
+
+        Dictionary<string, FieldInfo> fieldsByName = drawableType
+            .GetFields(BindingFlags.Instance | BindingFlags.Public)
+            .ToDictionary(field => field.Name, StringComparer.Ordinal);
+
+        Dictionary<string, PropertyInfo> propertiesByName = drawableType
+            .GetProperties(BindingFlags.Instance | BindingFlags.Public)
+            .ToDictionary(property => property.Name, StringComparer.Ordinal);
+
         foreach (JProperty property in jObject.Properties().ToList())
         {
-            if (!allowedNames.Contains(property.Name))
+            if (!allowed.Contains(property.Name))
             {
+                string reason = "unknown member";
+                if (fieldsByName.TryGetValue(property.Name, out FieldInfo? field) && TryGetFieldSkipReason(field, out string fieldReason))
+                {
+                    reason = fieldReason;
+                }
+                else if (propertiesByName.TryGetValue(property.Name, out PropertyInfo? reflectedProperty) && TryGetPropertySkipReason(reflectedProperty, out string propertyReason))
+                {
+                    reason = propertyReason;
+                }
+
+                LogSerializationDecision($"[SkinSerialize] Drop read property {drawableType.Name}.{property.Name}: {reason}");
                 property.Remove();
             }
         }
     }
 
-    private static HashSet<string> GetDeserializableNames(Type type)
+    private static bool IsSafeSerializableType(Type type)
     {
-        return DeserializableNamesCache.GetOrAdd(type, static targetType =>
-        {
-            HashSet<string> names = new(StringComparer.Ordinal)
-            {
-                "type",
-                nameof(UIDrawable.id),
-                nameof(UIGroup.children)
-            };
-
-            foreach (FieldInfo field in GetThemableFields(targetType))
-            {
-                names.Add(field.Name);
-            }
-
-            foreach (PropertyInfo property in GetThemableProperties(targetType))
-            {
-                if (property.CanWrite)
-                {
-                    names.Add(property.Name);
-                }
-            }
-
-            return names;
-        });
-    }
-
-    private static List<FieldInfo> GetThemableFields(Type type)
-    {
-        return ThemableFieldsCache.GetOrAdd(type, static targetType =>
-        {
-            const BindingFlags flags = BindingFlags.Instance | BindingFlags.Public;
-            return targetType
-                .GetFields(flags)
-                .Where(field =>
-                    !field.IsStatic &&
-                    field.GetCustomAttribute<JsonIgnoreAttribute>() == null &&
-                    field.GetCustomAttribute<ThemableAttribute>() != null &&
-                    !IsDrawableReferenceType(field.FieldType))
-                .ToList();
-        });
-    }
-
-    private static List<PropertyInfo> GetThemableProperties(Type type)
-    {
-        return ThemablePropertiesCache.GetOrAdd(type, static targetType =>
-        {
-            const BindingFlags flags = BindingFlags.Instance | BindingFlags.Public;
-            return targetType
-                .GetProperties(flags)
-                .Where(property =>
-                    property.CanRead &&
-                    property.GetIndexParameters().Length == 0 &&
-                    property.GetCustomAttribute<JsonIgnoreAttribute>() == null &&
-                    property.GetCustomAttribute<ThemableAttribute>() != null &&
-                    !IsDrawableReferenceType(property.PropertyType))
-                .ToList();
-        });
-    }
-
-    private static bool ShouldSkipValue(object? value)
-    {
-        if (value == null)
+        if (IsDrawableReferenceType(type))
         {
             return false;
         }
 
-        return value switch
+        if (typeof(Delegate).IsAssignableFrom(type) || type == typeof(IntPtr) || type == typeof(UIntPtr))
         {
-            UIDrawable => true,
-            IEnumerable<UIDrawable> => true,
-            Delegate => true,
-            IntPtr => true,
-            UIntPtr => true,
-            _ => false
-        };
-    }
+            return false;
+        }
 
-    private static bool IsDrawableReferenceType(Type type)
-    {
-        if (typeof(UIDrawable).IsAssignableFrom(type))
+        Type actualType = Nullable.GetUnderlyingType(type) ?? type;
+
+        if (actualType.IsEnum || actualType.IsPrimitive)
         {
             return true;
         }
 
-        if (type == typeof(string))
+        if (actualType == typeof(string) ||
+            actualType == typeof(decimal) ||
+            actualType == typeof(Guid) ||
+            actualType == typeof(DateTime) ||
+            actualType == typeof(DateTimeOffset) ||
+            actualType == typeof(TimeSpan))
+        {
+            return true;
+        }
+
+        if (actualType.IsValueType)
+        {
+            return true;
+        }
+
+        if (actualType.IsArray)
+        {
+            Type? elementType = actualType.GetElementType();
+            return elementType != null && IsSafeSerializableType(elementType);
+        }
+
+        if (actualType.IsGenericType)
+        {
+            Type genericDefinition = actualType.GetGenericTypeDefinition();
+            if (typeof(IDictionary).IsAssignableFrom(actualType) || genericDefinition == typeof(Dictionary<,>))
+            {
+                Type[] args = actualType.GetGenericArguments();
+                return args.Length == 2 && IsSafeSerializableType(args[0]) && IsSafeSerializableType(args[1]);
+            }
+
+            if (typeof(IEnumerable).IsAssignableFrom(actualType))
+            {
+                Type[] args = actualType.GetGenericArguments();
+                return args.Length == 1 && IsSafeSerializableType(args[0]);
+            }
+        }
+
+        return false;
+    }
+
+    private static bool HasSkinSerializeOverride(MemberInfo member, Type type)
+    {
+        return member.GetCustomAttribute<SkinSerializeAttribute>() != null ||
+               type.GetCustomAttribute<SkinSerializeAttribute>() != null;
+    }
+
+    private static bool IsDrawableReferenceType(Type type)
+    {
+        Type actualType = Nullable.GetUnderlyingType(type) ?? type;
+
+        if (typeof(UIDrawable).IsAssignableFrom(actualType))
+        {
+            return true;
+        }
+
+        if (actualType == typeof(string))
         {
             return false;
         }
 
-        if (!typeof(IEnumerable).IsAssignableFrom(type))
+        if (!typeof(IEnumerable).IsAssignableFrom(actualType))
         {
             return false;
         }
 
-        if (type.IsArray)
+        if (actualType.IsArray)
         {
-            Type? elementType = type.GetElementType();
+            Type? elementType = actualType.GetElementType();
             return elementType != null && typeof(UIDrawable).IsAssignableFrom(elementType);
         }
 
-        if (!type.IsGenericType)
+        if (!actualType.IsGenericType)
         {
             return false;
         }
 
-        Type[] genericArgs = type.GetGenericArguments();
+        Type[] genericArgs = actualType.GetGenericArguments();
         return genericArgs.Length == 1 && typeof(UIDrawable).IsAssignableFrom(genericArgs[0]);
     }
+
+    private static void LogSerializationDecision(string message)
+    {
+        if (!GameStatus.logThemeApplyDetails)
+        {
+            return;
+        }
+
+        Trace.TraceInformation(message);
+    }
+
 
     private static object CreateDeserializationInstance(Type targetType)
     {

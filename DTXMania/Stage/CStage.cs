@@ -121,6 +121,7 @@ public abstract class CStage : CActivity
 		if (bActivated)
 		{
 			ui.Dispose();
+			ui = null;
 		}
 		
 		base.OnManagedReleaseResources();

@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Drawing;
 using System.Numerics;
 using DTXMania.Core;
@@ -77,9 +78,17 @@ public class UIImage : UITexture
     {
         if (imageSource == ImageSource.Resource)
         {
+            Trace.TraceInformation("Updating resource for " + id);
             string? fullPath = CDTXMania.SkinManager.currentSkin?.GetResource(resource);
-            if (string.IsNullOrWhiteSpace(fullPath) || !File.Exists(fullPath))
+            if (string.IsNullOrWhiteSpace(fullPath))
             {
+                Trace.TraceError($"Resource {resource} not found in current skin.");
+                SetTexture(BaseTexture.None);
+                return;
+            }
+            if (!File.Exists(fullPath))
+            {
+                Trace.TraceError($"Resource file {fullPath} does not exist.");
                 SetTexture(BaseTexture.None);
                 return;
             }
@@ -98,15 +107,13 @@ public class UIImage : UITexture
         }
 
         Inspector.Inspector.Inspect("Image Source", ref imageSource);
+        if (imageSource == ImageSource.Resource)
+        {
+            ImGui.LabelText("Resource", resource);
+        }
         Inspector.Inspector.Inspect("Clip Rect", ref clipRect);
         Inspector.Inspector.Inspect("Render Mode", ref renderMode);
         Inspector.Inspector.Inspect("Color", ref color);
-
-        if (imageSource == ImageSource.Resource)
-        {
-            ImGui.SameLine();
-            ImGui.LabelText("Resource: ", resource);
-        }
 
         if (ImGui.Button("Load New Texture"))
         {

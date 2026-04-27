@@ -179,7 +179,11 @@ public class UIVideoRenderer : UIDrawable
 
     public override void Dispose()
     {
-        player.Dispose();
+        if (player != null)
+        {
+            player.Dispose();
+        }
+
         lastRenderedTexture = BaseTexture.None;
         base.Dispose();
     }

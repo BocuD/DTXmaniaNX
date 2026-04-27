@@ -3,6 +3,7 @@ using System.Numerics;
 using System.Reflection;
 using DTXMania.Core;
 using DTXMania.UI.Drawable;
+using DTXMania.UI.Skin;
 using Hexa.NET.ImGui;
 using NativeFileDialog.Extended;
 using OpenGLTest;
@@ -361,7 +362,7 @@ public class HierarchyWindow
                     if (!string.IsNullOrEmpty(path))
                     {
                         string json = File.ReadAllText(path);
-                        UIGroup? loadedGroup = UIGroup.DeserializeFromJSON(json);
+                        UIGroup? loadedGroup = SkinHierarchySerializer.DeserializeFromJson(json);
                         if (loadedGroup != null)
                         {
                             //add loaded group as child
@@ -386,7 +387,7 @@ public class HierarchyWindow
                 if (!string.IsNullOrEmpty(path))
                 {
                     //serialize group to json
-                    string json = group.SerializeToJSON();
+                    string json = SkinHierarchySerializer.SerializeToJson(group);
                     File.WriteAllText(path, json);
                 }
             }

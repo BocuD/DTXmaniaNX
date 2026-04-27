@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 using DTXMania.Core;
 using DTXMania.UI.Drawable;
-using DTXMania.UI.Drawable.Serialization;
 using Hexa.NET.ImGui;
 using Newtonsoft.Json;
 
@@ -67,7 +66,7 @@ public class SkinDescriptor
             
             if (stageGroup == null) continue;
 
-            string json = stageGroup.SerializeToJSON();
+            string json = SkinHierarchySerializer.SerializeToJson(stageGroup);
 
             if (!string.IsNullOrWhiteSpace(json))
             {
@@ -95,7 +94,7 @@ public class SkinDescriptor
             }
             
             string json = File.ReadAllText(path);
-            UIGroup? loadedGroup = UIGroup.DeserializeFromJSON(json);
+            UIGroup? loadedGroup = SkinHierarchySerializer.DeserializeFromJson(json, invokeDeserializeCallbacks: false);
             if (loadedGroup != null)
             {
                 return loadedGroup;
