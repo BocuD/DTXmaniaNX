@@ -32,7 +32,7 @@ internal class CStageTitle : CStage
 
 	public override void InitializeDefaultUI()
 	{
-		var text = ui.AddChild(new UIText(CDTXMania.VERSION_DISPLAY, 12));
+		var text = ui.AddChild(new UIText(CDTXMania.VERSION_DISPLAY, 15));
 		text.name = "VersionText";
 
 		BaseTexture bgTex = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\2_background.png"));
