@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using System.Drawing;
 using System.Numerics;
 using DTXMania.Core;
+using DTXMania.UI;
 using DTXMania.UI.Drawable;
 using FDK;
 using Color = System.Drawing.Color;
@@ -167,6 +168,26 @@ internal class CStageSongLoading : CStage
     {
         UIImage bg = ui.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\6_background.jpg"))));
         bg.renderOrder = -100;
+        
+        if (!string.IsNullOrWhiteSpace(strSongTitle))
+        {
+            UIText songNameText = ui.AddChild(new UIText(strSongTitle, 40));
+            songNameText.fillColor = Color4.Black;
+            songNameText.outlineColor = Color4.White;
+            songNameText.name = "SongName";
+            songNameText.fontPath = UIFonts.FallbackFont;
+            songNameText.position = new Vector3(500, 285, 0);
+        }
+
+        if (!string.IsNullOrWhiteSpace(strArtistName))
+        {
+            UIText artistNameText = ui.AddChild(new UIText(strArtistName, 30));
+            artistNameText.fillColor = Color4.Black;
+            artistNameText.outlineColor = Color4.White;
+            artistNameText.name = "ArtistName";
+            artistNameText.fontPath = UIFonts.FallbackFont;
+            artistNameText.position = new Vector3(500, 360, 0);
+        }
     }
 
     public override void OnActivate()
@@ -177,7 +198,6 @@ internal class CStageSongLoading : CStage
         {
             strSongTitle = "";
             strArtistName = "";
-            strSTAGEFILE = "";
 
             nBGMPlayStartTime = -1L;
             nBGMTotalPlayTimeMs = 0;
@@ -317,65 +337,7 @@ internal class CStageSongLoading : CStage
             txDifficultyPanel = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\6_Difficulty.png"));
             txPartPanel = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\6_Part.png"));
 
-            #region[ 曲名、アーティスト名テクスチャの生成 ]
-
-            try
-            {
-                #region[ 曲名、アーティスト名テクスチャの生成 ]
-
-                if (!string.IsNullOrWhiteSpace(strSongTitle))
-                {
-                    titleFont = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.songListFont), 40 * CDTXMania.renderScale,
-                        FontStyle.Regular);
-                     Bitmap bmpSongName = titleFont.DrawPrivateFont(strSongTitle, CPrivateFont.DrawMode.Edge, Color.Black,
-                        Color.Black, clGITADORAgradationTopColor, clGITADORAgradationBottomColor, true);
-                    txTitle = CDTXMania.tGenerateTexture(bmpSongName, false);
-                    CDTXMania.tDisposeSafely(ref bmpSongName);
-                    CDTXMania.tDisposeSafely(ref titleFont);
-                }
-                else
-                {
-                    txTitle = null;
-                }
-
-                if (!string.IsNullOrWhiteSpace(strArtistName))
-                {
-                    artistNameFont = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.songListFont), 30 * CDTXMania.renderScale,
-                        FontStyle.Regular);
-                    Bitmap bmpArtistName = artistNameFont.DrawPrivateFont(strArtistName, CPrivateFont.DrawMode.Edge, Color.Black,
-                        Color.Black, clGITADORAgradationTopColor, clGITADORAgradationBottomColor, true);
-                    txArtist = CDTXMania.tGenerateTexture(bmpArtistName, false);
-                    CDTXMania.tDisposeSafely(ref bmpArtistName);
-                    CDTXMania.tDisposeSafely(ref artistNameFont);
-                }
-                else
-                {
-                    txArtist = null;
-                }
-
-                #endregion
-            }
-            catch (CTextureCreateFailedException)
-            {
-                Trace.TraceError("テクスチャの生成に失敗しました。({0})", strSTAGEFILE);
-                txTitle = null;
-            }
-
-            #endregion
-            
             base.OnManagedCreateResources();
-        }
-    }
-
-    public override void OnManagedReleaseResources()
-    {
-        if (bActivated)
-        {
-            //テクスチャ11枚
-            //2018.03.15 kairera0467 PrivateFontが抜けていた＆フォント生成直後に解放するようにしてみる
-            CDTXMania.tReleaseTexture(ref txTitle);
-            CDTXMania.tReleaseTexture(ref txArtist);
-            base.OnManagedReleaseResources();
         }
     }
 
@@ -753,31 +715,7 @@ internal class CStageSongLoading : CStage
         
             txJacket.tDraw3D(mat);
         }
-        
-        if (txTitle != null)
-        {
-            if (txTitle.szImageSize.Width > 625)
-                txTitle.vcScaleRatio.X = 625f / txTitle.szImageSize.Width;
 
-            Matrix4x4 mat = Matrix4x4.CreateTranslation(500, 285, 0) * scaling;
-            Vector2 size = new(txTitle.szImageSize.Width, txTitle.szImageSize.Height);
-            size *= 1 / CDTXMania.renderScale;
-            //todo: COMMENTED OUT tDraw2DMatrix
-            //txTitle.tDraw2DMatrix(CDTXMania.app.Device, mat, size);
-        }
-        
-        if (txArtist != null)
-        {
-            if (txArtist.szImageSize.Width > 625)
-                txArtist.vcScaleRatio.X = 625f / txArtist.szImageSize.Width;
-        
-            Matrix4x4 mat = Matrix4x4.CreateTranslation(500, 360, 0) * scaling;
-            Vector2 size = new(txArtist.szImageSize.Width, txArtist.szImageSize.Height);
-            size *= 1 / CDTXMania.renderScale;
-            //todo: COMMENTED OUT tDraw2DMatrix
-            //txArtist.tDraw2DMatrix(CDTXMania.app.Device, mat, size);
-        }
-        
         int[] iPart = [0, CDTXMania.ConfigIni.bIsSwappedGuitarBass ? 2 : 1, CDTXMania.ConfigIni.bIsSwappedGuitarBass ? 1 : 2];
 
         int k = 0;
@@ -886,26 +824,15 @@ internal class CStageSongLoading : CStage
     private int nCurrentInst;
     private long nBGMTotalPlayTimeMs;
     private long nBGMPlayStartTime;
-    private CSound sdLoadingSound;
-    private string strSTAGEFILE;
+    private CSound sdLoadingSound; 
+    
     private string strSongTitle;
     private string strArtistName;
-    private CTexture? txTitle;
-    private CTexture? txArtist;
+    
     private BaseTexture? txJacket;
     private BaseTexture? txDifficultyPanel;
     private BaseTexture? txPartPanel;
-
-    private CPrivateFastFont titleFont;
-    private CPrivateFastFont artistNameFont;
-
-    //2014.04.05.kairera0467 GITADORAグラデーションの色。
-    //本当は共通のクラスに設置してそれを参照する形にしたかったが、なかなかいいメソッドが無いため、とりあえず個別に設置。
-    //private Color clGITADORAgradationTopColor = Color.FromArgb(0, 220, 200);
-    //private Color clGITADORAgradationBottomColor = Color.FromArgb(255, 250, 40);
-    private Color clGITADORAgradationTopColor = Color.FromArgb(255, 255, 255);
-    private Color clGITADORAgradationBottomColor = Color.FromArgb(255, 255, 255);
-
+    
     private DateTime timeBeginLoad;
     private DateTime timeBeginLoadWAV;
     private int nWAVcount;
