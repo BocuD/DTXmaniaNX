@@ -36,6 +36,8 @@ public class SongSelectionContainer : UIGroup
         this.songDb = songDb;
         this.albumArt = albumArt;
         
+        SongSelectionElement.LoadSongSelectElementAssets();
+        
         currentRoot = songDb.songNodeRoot;
         dontSerialize = true;
 

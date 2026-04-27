@@ -169,7 +169,6 @@ public class CStageSongSelectionNew : CStage
         //     Trace.TraceInformation("Started song select background video");
         // }
         
-        SongSelectionElement.LoadSongSelectElementAssets();
         
         base.OnManagedCreateResources();
     }
