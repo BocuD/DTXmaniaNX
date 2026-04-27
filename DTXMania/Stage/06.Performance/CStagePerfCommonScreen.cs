@@ -4757,94 +4757,94 @@ internal abstract class CStagePerfCommonScreen : CStage
         //tGenerateBackgroundTexture( DefaultBgFilename, bgrect, BgFilename );
     }
     
-    protected void tGenerateBackgroundTexture(string DefaultBgFilename, Rectangle bgrect, string bgfilename)
-    {
-        Bitmap image = null;
-        bool flag = true;
-        
-        CTexture txBackground = null;
-
-        if (bgfilename != null && File.Exists(bgfilename))
-        {
-            try
-            {
-                Bitmap bitmap2 = null;
-                bitmap2 = new Bitmap(bgfilename);
-                if ((bitmap2.Size.Width == 0) && (bitmap2.Size.Height == 0))
-                {
-                    txBackground = null;
-                    return;
-                }
-                Bitmap bitmap3 = new(SampleFramework.GameFramebufferSize.Width, SampleFramework.GameFramebufferSize.Height);
-                Graphics graphics = Graphics.FromImage(bitmap3);
-                for (int i = 0; i < SampleFramework.GameFramebufferSize.Height; i += bitmap2.Size.Height)
-                {
-                    for (int j = 0; j < SampleFramework.GameFramebufferSize.Width; j += bitmap2.Size.Width)
-                    {
-                        graphics.DrawImage(bitmap2, j, i, bitmap2.Width, bitmap2.Height);
-                    }
-                }
-                graphics.Dispose();
-                bitmap2.Dispose();
-                image = new Bitmap(CSkin.Path(DefaultBgFilename));
-                graphics = Graphics.FromImage(image);
-                ColorMatrix matrix2 = new();
-                matrix2.Matrix00 = 1f;
-                matrix2.Matrix11 = 1f;
-                matrix2.Matrix22 = 1f;
-                matrix2.Matrix33 = CDTXMania.ConfigIni.nBackgroundTransparency / 255f;
-                matrix2.Matrix44 = 1f;
-                ColorMatrix newColorMatrix = matrix2;
-                ImageAttributes imageAttr = new();
-                imageAttr.SetColorMatrix(newColorMatrix);
-                graphics.DrawImage(bitmap3, new Rectangle(0, 0, SampleFramework.GameFramebufferSize.Width, SampleFramework.GameFramebufferSize.Height), 0, 0, SampleFramework.GameFramebufferSize.Width, SampleFramework.GameFramebufferSize.Height, GraphicsUnit.Pixel, imageAttr);
-                imageAttr.Dispose();
-                graphics.DrawImage(bitmap3, bgrect, bgrect.X, bgrect.Y, bgrect.Width, bgrect.Height, GraphicsUnit.Pixel);
-                graphics.Dispose();
-                bitmap3.Dispose();
-                flag = false;
-            }
-            catch
-            {
-                Trace.TraceError("背景画像の読み込みに失敗しました。({0})", new object[] { bgfilename });
-            }
-        }
-        if (flag)
-        {
-            bgfilename = CSkin.Path(DefaultBgFilename);
-            try
-            {
-                image = new Bitmap(bgfilename);
-            }
-            catch
-            {
-                Trace.TraceError("背景画像の読み込みに失敗しました。({0})", new object[] { bgfilename });
-                txBackground = null;
-                return;
-            }
-        }
-        if ((CDTXMania.DTX.listBMP.Count > 0) || (CDTXMania.DTX.listBMPTEX.Count > 0))
-        {
-            Graphics graphics2 = Graphics.FromImage(image);
-            graphics2.FillRectangle(Brushes.Black, bgrect.X, bgrect.Y, bgrect.Width, bgrect.Height);
-            graphics2.Dispose();
-        }
-        try
-        {
-            txBackground = new CTexture(CDTXMania.app.Device, image, CDTXMania.TextureFormat);
-        }
-        catch (CTextureCreateFailedException)
-        {
-            Trace.TraceError("背景テクスチャの生成に失敗しました。");
-            txBackground = null;
-        }
-        image.Dispose();
-        
-        if (txBackground != null)
-        {
-            
-        }
-    }
+    // protected void tGenerateBackgroundTexture(string DefaultBgFilename, Rectangle bgrect, string bgfilename)
+    // {
+    //     Bitmap image = null;
+    //     bool flag = true;
+    //     
+    //     CTexture txBackground = null;
+    //
+    //     if (bgfilename != null && File.Exists(bgfilename))
+    //     {
+    //         try
+    //         {
+    //             Bitmap bitmap2 = null;
+    //             bitmap2 = new Bitmap(bgfilename);
+    //             if ((bitmap2.Size.Width == 0) && (bitmap2.Size.Height == 0))
+    //             {
+    //                 txBackground = null;
+    //                 return;
+    //             }
+    //             Bitmap bitmap3 = new(SampleFramework.GameFramebufferSize.Width, SampleFramework.GameFramebufferSize.Height);
+    //             Graphics graphics = Graphics.FromImage(bitmap3);
+    //             for (int i = 0; i < SampleFramework.GameFramebufferSize.Height; i += bitmap2.Size.Height)
+    //             {
+    //                 for (int j = 0; j < SampleFramework.GameFramebufferSize.Width; j += bitmap2.Size.Width)
+    //                 {
+    //                     graphics.DrawImage(bitmap2, j, i, bitmap2.Width, bitmap2.Height);
+    //                 }
+    //             }
+    //             graphics.Dispose();
+    //             bitmap2.Dispose();
+    //             image = new Bitmap(CSkin.Path(DefaultBgFilename));
+    //             graphics = Graphics.FromImage(image);
+    //             ColorMatrix matrix2 = new();
+    //             matrix2.Matrix00 = 1f;
+    //             matrix2.Matrix11 = 1f;
+    //             matrix2.Matrix22 = 1f;
+    //             matrix2.Matrix33 = CDTXMania.ConfigIni.nBackgroundTransparency / 255f;
+    //             matrix2.Matrix44 = 1f;
+    //             ColorMatrix newColorMatrix = matrix2;
+    //             ImageAttributes imageAttr = new();
+    //             imageAttr.SetColorMatrix(newColorMatrix);
+    //             graphics.DrawImage(bitmap3, new Rectangle(0, 0, SampleFramework.GameFramebufferSize.Width, SampleFramework.GameFramebufferSize.Height), 0, 0, SampleFramework.GameFramebufferSize.Width, SampleFramework.GameFramebufferSize.Height, GraphicsUnit.Pixel, imageAttr);
+    //             imageAttr.Dispose();
+    //             graphics.DrawImage(bitmap3, bgrect, bgrect.X, bgrect.Y, bgrect.Width, bgrect.Height, GraphicsUnit.Pixel);
+    //             graphics.Dispose();
+    //             bitmap3.Dispose();
+    //             flag = false;
+    //         }
+    //         catch
+    //         {
+    //             Trace.TraceError("背景画像の読み込みに失敗しました。({0})", new object[] { bgfilename });
+    //         }
+    //     }
+    //     if (flag)
+    //     {
+    //         bgfilename = CSkin.Path(DefaultBgFilename);
+    //         try
+    //         {
+    //             image = new Bitmap(bgfilename);
+    //         }
+    //         catch
+    //         {
+    //             Trace.TraceError("背景画像の読み込みに失敗しました。({0})", new object[] { bgfilename });
+    //             txBackground = null;
+    //             return;
+    //         }
+    //     }
+    //     if ((CDTXMania.DTX.listBMP.Count > 0) || (CDTXMania.DTX.listBMPTEX.Count > 0))
+    //     {
+    //         Graphics graphics2 = Graphics.FromImage(image);
+    //         graphics2.FillRectangle(Brushes.Black, bgrect.X, bgrect.Y, bgrect.Width, bgrect.Height);
+    //         graphics2.Dispose();
+    //     }
+    //     try
+    //     {
+    //         txBackground = new CTexture(CDTXMania.app.Device, image, CDTXMania.TextureFormat);
+    //     }
+    //     catch (CTextureCreateFailedException)
+    //     {
+    //         Trace.TraceError("背景テクスチャの生成に失敗しました。");
+    //         txBackground = null;
+    //     }
+    //     image.Dispose();
+    //     
+    //     if (txBackground != null)
+    //     {
+    //         
+    //     }
+    // }
 
     protected virtual void tHandleInput_Guitar()
     {
