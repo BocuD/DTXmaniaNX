@@ -161,7 +161,12 @@ public class GameStatus
                     CDTXMania.tRunGarbageCollector();
                 
                     //load the skin again
-                    CDTXMania.StageManager.rCurrentStage.LoadUI();
+                    CDTXMania.StageManager.rCurrentStage.LoadUI(true);
+                }
+
+                if (ImGui.Button("Reset Current Stage"))
+                {
+                    CDTXMania.StageManager.rCurrentStage.LoadUI(false);
                 }
             }
             ImGui.TreePop();

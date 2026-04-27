@@ -4,7 +4,6 @@ using DTXMania.Core;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.DynamicElements;
 using FDK;
-using SharpDX.Direct3D9;
 
 namespace DTXMania;
 
@@ -65,27 +64,21 @@ public abstract class CStage : CActivity
 
 	public Dictionary<string, DynamicStringSource> dynamicStringSources = new();
 	
-	public void LoadUI()
+	public void LoadUI(bool loadSkin = true)
 	{
 		//remove old ui
 		if (ui != null)
 		{
 			ui.Dispose();
 		}
-		
-		//try to get the skin for this stage
-		UIGroup? stageUI = CDTXMania.SkinManager.LoadStageSkin(eStageID);
-		
-		if (stageUI == null)
+
+		ui = new UIGroup(GetType().ToString());
+		InitializeBaseUI();
+		InitializeDefaultUI();
+
+		if (loadSkin)
 		{
-			ui = new UIGroup(GetType().ToString());
-			InitializeBaseUI();
-			InitializeDefaultUI();
-		}
-		else
-		{
-			ui = stageUI;
-			InitializeBaseUI();
+			CDTXMania.SkinManager.ApplySkin(ui, eStageID);
 		}
 	}
 

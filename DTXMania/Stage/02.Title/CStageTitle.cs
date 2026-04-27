@@ -32,13 +32,14 @@ internal class CStageTitle : CStage
 
 	public override void InitializeDefaultUI()
 	{
-		//var family = new FontFamily(CDTXMania.ConfigIni.songListFont);
-		ui.AddChild(new UIText(CDTXMania.VERSION_DISPLAY, 12));
+		var text = ui.AddChild(new UIText(CDTXMania.VERSION_DISPLAY, 12));
+		text.name = "VersionText";
 
 		BaseTexture bgTex = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\2_background.png"));
 		UIImage bg = ui.AddChild(new UIImage(bgTex));
 		bg.renderOrder = -99;
 		bg.position = Vector3.Zero;
+		bg.name = "Background";
 
 		string videoPath = CSkin.Path(@"Graphics\2_background.mp4");
 		FFmpegVideoPlayer videoPlayer = new ThreadedSoftwareVideoPlayer();
@@ -47,6 +48,7 @@ internal class CStageTitle : CStage
 		{
 			UIVideoRenderer renderer = ui.AddChild(new UIVideoRenderer(videoPlayer, videoPath));
 			renderer.renderOrder = -100;
+			renderer.name = "VideoPlayer";
 		}
 		else
 		{

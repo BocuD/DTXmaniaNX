@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Reflection;
 using System.Numerics;
 using DTXMania.UI.Drawable.Serialization;
 using DTXMania.UI.Inspector;
@@ -196,5 +197,118 @@ public class UIGroup : UIDrawable
     {
         base.DrawInspector();
         ImGui.Checkbox("Sort by Render Order", ref sortByRenderOrder);
+    }
+
+    //loadedSkin is a UIGroup that was deserialized from the skin file, we need to apply its properties to the target UIGroup and its children
+    internal void ApplySkin(UIGroup? loadedSkin)
+    {
+        if (loadedSkin == null)
+        {
+            return;
+        }
+
+        CopySkinStateFrom(this, loadedSkin);
+
+        foreach (UIDrawable targetChild in children)
+        {
+            if (string.IsNullOrWhiteSpace(targetChild.name))
+            {
+                continue;
+            }
+
+            UIDrawable? loadedChild = loadedSkin.children.FirstOrDefault(child =>
+                !string.IsNullOrWhiteSpace(child.name) &&
+                child.name == targetChild.name &&
+                child.GetType() == targetChild.GetType());
+
+            if (loadedChild == null)
+            {
+                continue;
+            }
+
+            if (targetChild is UIGroup targetGroup && loadedChild is UIGroup loadedGroup)
+            {
+                targetGroup.ApplySkin(loadedGroup);
+            }
+            else
+            {
+                CopySkinStateFrom(targetChild, loadedChild);
+            }
+        }
+    }
+
+    private static void CopySkinStateFrom(UIDrawable targetDrawable, UIDrawable loadedDrawable)
+    {
+        Type loadedType = loadedDrawable.GetType();
+        Type targetType = targetDrawable.GetType();
+
+        if (targetType != loadedType)
+        {
+            return;
+        }
+
+        const BindingFlags flags = BindingFlags.Instance | BindingFlags.Public;
+
+        foreach (FieldInfo sourceField in loadedType.GetFields(flags))
+        {
+            if (sourceField.IsStatic || sourceField.Name is "id" or "parent" or "children")
+            {
+                continue;
+            }
+
+            FieldInfo? targetField = targetType.GetField(sourceField.Name, flags);
+            if (targetField == null || targetField.IsInitOnly || targetField.IsLiteral)
+            {
+                continue;
+            }
+
+            if (!targetField.FieldType.IsAssignableFrom(sourceField.FieldType))
+            {
+                continue;
+            }
+
+            try
+            {
+                targetField.SetValue(targetDrawable, sourceField.GetValue(loadedDrawable));
+            }
+            catch (Exception e)
+            {
+                Trace.TraceError($"Failed to apply skin field {sourceField.Name} to {targetDrawable.name}: {e.Message}");
+            }
+        }
+
+        foreach (PropertyInfo sourceProperty in loadedType.GetProperties(flags))
+        {
+            if (!sourceProperty.CanRead || sourceProperty.GetIndexParameters().Length > 0 || sourceProperty.Name is "type" or "parent")
+            {
+                continue;
+            }
+
+            PropertyInfo? targetProperty = targetType.GetProperty(sourceProperty.Name, flags);
+            if (targetProperty == null || !targetProperty.CanWrite || targetProperty.GetIndexParameters().Length > 0)
+            {
+                continue;
+            }
+
+            MethodInfo? setMethod = targetProperty.GetSetMethod();
+            if (setMethod == null)
+            {
+                continue;
+            }
+
+            if (!targetProperty.PropertyType.IsAssignableFrom(sourceProperty.PropertyType))
+            {
+                continue;
+            }
+
+            try
+            {
+                targetProperty.SetValue(targetDrawable, sourceProperty.GetValue(loadedDrawable));
+            }
+            catch (Exception e)
+            {
+                Trace.TraceError($"Failed to apply skin property {sourceProperty.Name} to {targetDrawable.name}: {e.Message}");
+            }
+        }
     }
 }

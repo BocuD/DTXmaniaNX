@@ -96,4 +96,12 @@ public class SkinManager
     {
         return currentSkin?.LoadStageSkin(stageId);
     }
+
+    internal void ApplySkin(UIGroup target, CStage.EStage eStageID)
+    {
+        UIGroup? loadedSkin = CDTXMania.SkinManager.LoadStageSkin(eStageID);
+
+        //loadedSkin is a UIGroup that was deserialized from the skin file, we need to apply its properties to the target UIGroup and its children
+        target.ApplySkin(loadedSkin);
+    }
 }
