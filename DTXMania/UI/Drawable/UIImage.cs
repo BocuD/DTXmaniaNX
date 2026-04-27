@@ -1,5 +1,6 @@
 using System.Drawing;
 using System.Numerics;
+using DTXMania.Core;
 using DTXMania.UI.Inspector;
 using Hexa.NET.ImGui;
 using NativeFileDialog.Extended;
@@ -8,11 +9,11 @@ namespace DTXMania.UI.Drawable;
 
 public class UIImage : UITexture
 {
-    public RectangleF clipRect;
-    public RectangleF sliceRect;
-    public ERenderMode renderMode = ERenderMode.Stretched;
-    public ImageSource imageSource = ImageSource.File;
-    public string resource = string.Empty;
+    [Themable] public RectangleF clipRect;
+    [Themable] public RectangleF sliceRect;
+    [Themable] public ERenderMode renderMode = ERenderMode.Stretched;
+    [Themable] public ImageSource imageSource = ImageSource.File;
+    [Themable] public string resource = string.Empty;
 
     [AddChildMenu]
     public static UIDrawable Create()
@@ -64,6 +65,28 @@ public class UIImage : UITexture
             sliceRect = clipRect;
         }
     }
+    
+    public override void OnDeserialize()
+    {
+        base.OnDeserialize();
+        
+        LoadResource(false);
+    }
+    
+    public void LoadResource(bool updateRects)
+    {
+        if (imageSource == ImageSource.Resource)
+        {
+            string? fullPath = CDTXMania.SkinManager.currentSkin?.GetResource(resource);
+            if (string.IsNullOrWhiteSpace(fullPath) || !File.Exists(fullPath))
+            {
+                SetTexture(BaseTexture.None);
+                return;
+            }
+
+            SetTexture(BaseTexture.LoadFromPath(fullPath), updateRects);
+        }
+    }
 
     public override void DrawInspector()
     {
@@ -96,9 +119,19 @@ public class UIImage : UITexture
 
             if (!string.IsNullOrWhiteSpace(path) && File.Exists(path))
             {
-                SetTexture(BaseTexture.LoadFromPath(path), true);
-                imageSource = ImageSource.File;
-                resource = path;
+                var currentSkin = CDTXMania.SkinManager.currentSkin;
+                    
+                if (currentSkin != null)
+                {
+                    string resourcePath = currentSkin.AddResource(path);
+                    imageSource = ImageSource.Resource;
+                    resource = resourcePath;
+                    LoadResource(true);
+                }
+                else
+                {
+                    SetTexture(BaseTexture.LoadFromPath(path));
+                }
             }
         }
 

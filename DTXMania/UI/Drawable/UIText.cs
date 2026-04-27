@@ -27,29 +27,29 @@ public class UIText : UITexture
     private const float DefaultFontSize = 32f;
     private bool _dirty = true;
 
-    public string text = "New UIText";
-    public string fontPath = UIFonts.FallbackFont;
-    public string fontFamily = string.Empty;
-    public float fontSize = DefaultFontSize;
-    public float outlineWidth = 3f;
-    public float texturePadding = 0f;
-    public float lineSpacing = 1f;
-    public bool antialias = true;
-    public bool subpixelText = true;
-    public UiTextStyle style = UiTextStyle.Regular;
-    public UiTextAlignment alignment = UiTextAlignment.Left;
-    public UiTextRenderBackend renderBackend = UiTextRenderBackend.Skia;
-    public Color4 fillColor = Color4.White;
-    public Color4 outlineColor = new(0f, 0f, 0f, 1f);
-    public UiTextGradientMode fillGradientMode = UiTextGradientMode.None;
-    public Color4 fillGradientTopColor = Color4.White;
-    public Color4 fillGradientBottomColor = Color4.White;
-    public UiTextGradientMode outlineGradientMode = UiTextGradientMode.None;
-    public Color4 outlineGradientTopColor = new(0f, 0f, 0f, 1f);
-    public Color4 outlineGradientBottomColor = new(0f, 0f, 0f, 1f);
+    [Themable] public string text = "New UIText";
+    [Themable] public string fontPath = UIFonts.FallbackFont;
+    [Themable] public string fontFamily = string.Empty;
+    [Themable] public float fontSize = DefaultFontSize;
+    [Themable] public float outlineWidth = 3f;
+    [Themable] public float texturePadding = 0f;
+    [Themable] public float lineSpacing = 1f;
+    [Themable] public bool antialias = true;
+    [Themable] public bool subpixelText = true;
+    [Themable] public UiTextStyle style = UiTextStyle.Regular;
+    [Themable] public UiTextAlignment alignment = UiTextAlignment.Left;
+    [Themable] public UiTextRenderBackend renderBackend = UiTextRenderBackend.Skia;
+    [Themable] public Color4 fillColor = Color4.White;
+    [Themable] public Color4 outlineColor = new(0f, 0f, 0f, 1f);
+    [Themable] public UiTextGradientMode fillGradientMode = UiTextGradientMode.None;
+    [Themable] public Color4 fillGradientTopColor = Color4.White;
+    [Themable] public Color4 fillGradientBottomColor = Color4.White;
+    [Themable] public UiTextGradientMode outlineGradientMode = UiTextGradientMode.None;
+    [Themable] public Color4 outlineGradientTopColor = new(0f, 0f, 0f, 1f);
+    [Themable] public Color4 outlineGradientBottomColor = new(0f, 0f, 0f, 1f);
 
-    public TextSource textSource = TextSource.String;
-    public string dynamicSource = "Not Set";
+    [Themable] public TextSource textSource = TextSource.String;
+    [Themable] public string dynamicSource = "Not Set";
     
     [AddChildMenu]
     public static UIDrawable Create()

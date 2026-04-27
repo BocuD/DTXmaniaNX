@@ -9,6 +9,9 @@ public class GameStatus
 {
     private static bool demoWindowShown = false;
     private static bool preventGameKeyboardInput = false;
+   
+    //todo: move this somewhere else, maybe a debug class in the core
+    public static bool logThemeApplyDetails = false;
     
     //fps graph
     private const int BufferSize = 200;
@@ -27,7 +30,7 @@ public class GameStatus
 
         frametimes[index] = deltaTime;
 
-        // Maintain sum for rolling average
+        //maintain sum for rolling average
         if (filledSamples < BufferSize)
         {
             rollingSum += deltaTime;
@@ -38,7 +41,7 @@ public class GameStatus
             rollingSum += deltaTime - old;
         }
 
-        // Smoothed max as before
+        //smoothed max
         if (!(deltaTime > smoothedMax))
         {
             const float decayHalfLife = 1.0f;
@@ -75,7 +78,6 @@ public class GameStatus
 
         if (ImGui.CollapsingHeader("Other"))
         {
-            //put a button at the bottom of the window to open demo window
             if (ImGui.Button("Toggle Demo Window"))
             {
                 demoWindowShown = !demoWindowShown;
@@ -143,7 +145,9 @@ public class GameStatus
     private static void DrawSkinInspector()
     {
         var currentSkin = CDTXMania.SkinManager.currentSkin;
-        
+
+        ImGui.Checkbox("Debug Theme Serializer", ref logThemeApplyDetails);
+
         string skinName = currentSkin?.name ?? "No skin selected";
 
         if (ImGui.TreeNode("Currently loaded skin: " + skinName))
@@ -162,6 +166,14 @@ public class GameStatus
                 
                     //load the skin again
                     CDTXMania.StageManager.rCurrentStage.LoadUI(true);
+                }
+
+                if (ImGui.Button("Unload Skin"))
+                {
+                    CDTXMania.SkinManager.ChangeSkin(null);
+                    
+                    //run gc
+                    CDTXMania.tRunGarbageCollector();
                 }
 
                 if (ImGui.Button("Reset Current Stage"))

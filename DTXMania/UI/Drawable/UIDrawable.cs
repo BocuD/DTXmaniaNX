@@ -9,14 +9,14 @@ public abstract class UIDrawable : IDisposable
 {
     public string id;
     public string type => GetType().FullName ?? GetType().Name;
-    public int renderOrder = 0;
-    public Vector3 position = Vector3.Zero;
-    public Vector2 anchor = Vector2.Zero;
-    public Vector2 size = Vector2.One;
-    public Vector3 scale = Vector3.One;
-    public Vector3 rotation = Vector3.Zero;
-    public string name = string.Empty;
-    public bool isVisible = true;
+    [Themable] public int renderOrder = 0;
+    [Themable] public Vector3 position = Vector3.Zero;
+    [Themable] public Vector2 anchor = Vector2.Zero;
+    [Themable] public Vector2 size = Vector2.One;
+    [Themable] public Vector3 scale = Vector3.One;
+    [Themable] public Vector3 rotation = Vector3.Zero;
+    [Themable] public string name = string.Empty;
+    [Themable] public bool isVisible = true;
     public bool dontSerialize = false;
 
     protected Matrix4x4 localTransformMatrix = Matrix4x4.Identity;
@@ -107,6 +107,8 @@ public abstract class UIDrawable : IDisposable
         Inspector.Inspector.Inspect("Scale", ref scale);
         Inspector.Inspector.Inspect("Rotation", ref rotation);
         ImGui.Checkbox("Is Visible", ref isVisible);
+        ImGui.TextColored(new Vector4(1f, 0.5f, 0f, 1f), "Warning: Enabling 'NonSerialized' will prevent this drawable from being saved in the UI layout.");
+        ImGui.Checkbox("NonSerialized", ref dontSerialize);
     }
 
     public void DrawTransformGizmo()

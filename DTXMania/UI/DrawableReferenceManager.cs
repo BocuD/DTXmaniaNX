@@ -7,9 +7,26 @@ namespace DTXMania.UI;
 public class DrawableTracker
 {
     public static Dictionary<string, WeakReference<UIDrawable>> drawables = new();
+    private static int registrationSuppressionDepth;
+
+    public static IDisposable SuppressRegistration()
+    {
+        registrationSuppressionDepth++;
+        return new RegistrationSuppressionScope();
+    }
 
     public static void Register(UIDrawable drawable)
     {
+        if (registrationSuppressionDepth > 0)
+        {
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(drawable.id))
+        {
+            throw new InvalidOperationException($"Drawable id is missing for {drawable.GetType().FullName} during registration.");
+        }
+
         drawables[drawable.id] = new WeakReference<UIDrawable>(drawable);
     }
 
@@ -65,6 +82,14 @@ public class DrawableTracker
         }
 
         return null;
+    }
+
+    private sealed class RegistrationSuppressionScope : IDisposable
+    {
+        public void Dispose()
+        {
+            registrationSuppressionDepth = Math.Max(0, registrationSuppressionDepth - 1);
+        }
     }
 }
 

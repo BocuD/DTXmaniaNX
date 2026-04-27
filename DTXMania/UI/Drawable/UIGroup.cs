@@ -10,7 +10,7 @@ namespace DTXMania.UI.Drawable;
 
 public class UIGroup : UIDrawable
 {
-    public bool sortByRenderOrder = true;
+    [Themable] public bool sortByRenderOrder = true;
     public List<UIDrawable> children = [];
 
     [AddChildMenu]
@@ -152,18 +152,15 @@ public class UIGroup : UIDrawable
 
     public string SerializeToJSON()
     {
-        UIGroup groupCopy = new(name)
+        JsonSerializerSettings settings = new()
         {
-            children = new List<UIDrawable>(children)
+            Formatting = Formatting.Indented,
+            Converters = [new UIDrawableConverter()]
         };
-
-        groupCopy.children.RemoveAll(x => x.dontSerialize);
 
         try
         {
-            string json = JsonConvert.SerializeObject(groupCopy, Formatting.Indented);
-            groupCopy.Dispose();
-            return json;
+            return JsonConvert.SerializeObject(this, settings);
         }
         catch (Exception e)
         {
@@ -207,12 +204,21 @@ public class UIGroup : UIDrawable
             return;
         }
 
+        if (GameStatus.logThemeApplyDetails)
+        {
+            Trace.TraceInformation($"[ThemeApply] Applying {loadedSkin.GetType().Name} '{loadedSkin.name}' -> {GetType().Name} '{name}'");
+        }
+
         CopySkinStateFrom(this, loadedSkin);
 
         foreach (UIDrawable targetChild in children)
         {
             if (string.IsNullOrWhiteSpace(targetChild.name))
             {
+                if (GameStatus.logThemeApplyDetails)
+                {
+                    Trace.TraceInformation($"[ThemeApply] Skip child with empty name on target {GetType().Name} '{name}'");
+                }
                 continue;
             }
 
@@ -223,6 +229,10 @@ public class UIGroup : UIDrawable
 
             if (loadedChild == null)
             {
+                if (GameStatus.logThemeApplyDetails)
+                {
+                    Trace.TraceInformation($"[ThemeApply] No matching themed child for {targetChild.GetType().Name} '{targetChild.name}'");
+                }
                 continue;
             }
 
@@ -244,6 +254,10 @@ public class UIGroup : UIDrawable
 
         if (targetType != loadedType)
         {
+            if (GameStatus.logThemeApplyDetails)
+            {
+                Trace.TraceInformation($"[ThemeApply] Type mismatch skip: source {loadedType.FullName}, target {targetType.FullName}");
+            }
             return;
         }
 
@@ -251,25 +265,55 @@ public class UIGroup : UIDrawable
 
         foreach (FieldInfo sourceField in loadedType.GetFields(flags))
         {
-            if (sourceField.IsStatic || sourceField.Name is "id" or "parent" or "children")
+            if (sourceField.IsStatic || sourceField.GetCustomAttribute<ThemableAttribute>() == null)
             {
                 continue;
             }
 
             FieldInfo? targetField = targetType.GetField(sourceField.Name, flags);
-            if (targetField == null || targetField.IsInitOnly || targetField.IsLiteral)
+            if (targetField == null)
             {
+                if (GameStatus.logThemeApplyDetails)
+                {
+                    Trace.TraceInformation($"[ThemeApply] Skip field {targetType.Name}.{sourceField.Name}: missing target field");
+                }
+                continue;
+            }
+
+            if (targetField.IsInitOnly || targetField.IsLiteral)
+            {
+                if (GameStatus.logThemeApplyDetails)
+                {
+                    Trace.TraceInformation($"[ThemeApply] Skip field {targetType.Name}.{sourceField.Name}: readonly/const");
+                }
+                continue;
+            }
+
+            if (targetField.GetCustomAttribute<ThemableAttribute>() == null)
+            {
+                if (GameStatus.logThemeApplyDetails)
+                {
+                    Trace.TraceInformation($"[ThemeApply] Skip field {targetType.Name}.{sourceField.Name}: target not [Themable]");
+                }
                 continue;
             }
 
             if (!targetField.FieldType.IsAssignableFrom(sourceField.FieldType))
             {
+                if (GameStatus.logThemeApplyDetails)
+                {
+                    Trace.TraceInformation($"[ThemeApply] Skip field {targetType.Name}.{sourceField.Name}: incompatible types {sourceField.FieldType.Name} -> {targetField.FieldType.Name}");
+                }
                 continue;
             }
 
             try
             {
                 targetField.SetValue(targetDrawable, sourceField.GetValue(loadedDrawable));
+                if (GameStatus.logThemeApplyDetails)
+                {
+                    Trace.TraceInformation($"[ThemeApply] Applied field {targetType.Name}.{sourceField.Name} on '{targetDrawable.name}'");
+                }
             }
             catch (Exception e)
             {
@@ -279,31 +323,70 @@ public class UIGroup : UIDrawable
 
         foreach (PropertyInfo sourceProperty in loadedType.GetProperties(flags))
         {
-            if (!sourceProperty.CanRead || sourceProperty.GetIndexParameters().Length > 0 || sourceProperty.Name is "type" or "parent")
+            if (!sourceProperty.CanRead || sourceProperty.GetIndexParameters().Length > 0)
+            {
+                continue;
+            }
+
+            if (sourceProperty.GetCustomAttribute<ThemableAttribute>() == null)
             {
                 continue;
             }
 
             PropertyInfo? targetProperty = targetType.GetProperty(sourceProperty.Name, flags);
-            if (targetProperty == null || !targetProperty.CanWrite || targetProperty.GetIndexParameters().Length > 0)
+            if (targetProperty == null)
             {
+                if (GameStatus.logThemeApplyDetails)
+                {
+                    Trace.TraceInformation($"[ThemeApply] Skip property {targetType.Name}.{sourceProperty.Name}: missing target property");
+                }
+                continue;
+            }
+
+            if (!targetProperty.CanWrite || targetProperty.GetIndexParameters().Length > 0)
+            {
+                if (GameStatus.logThemeApplyDetails)
+                {
+                    Trace.TraceInformation($"[ThemeApply] Skip property {targetType.Name}.{sourceProperty.Name}: not writable/indexer");
+                }
+                continue;
+            }
+
+            if (targetProperty.GetCustomAttribute<ThemableAttribute>() == null)
+            {
+                if (GameStatus.logThemeApplyDetails)
+                {
+                    Trace.TraceInformation($"[ThemeApply] Skip property {targetType.Name}.{sourceProperty.Name}: target not [Themable]");
+                }
                 continue;
             }
 
             MethodInfo? setMethod = targetProperty.GetSetMethod();
             if (setMethod == null)
             {
+                if (GameStatus.logThemeApplyDetails)
+                {
+                    Trace.TraceInformation($"[ThemeApply] Skip property {targetType.Name}.{sourceProperty.Name}: missing setter");
+                }
                 continue;
             }
 
             if (!targetProperty.PropertyType.IsAssignableFrom(sourceProperty.PropertyType))
             {
+                if (GameStatus.logThemeApplyDetails)
+                {
+                    Trace.TraceInformation($"[ThemeApply] Skip property {targetType.Name}.{sourceProperty.Name}: incompatible types {sourceProperty.PropertyType.Name} -> {targetProperty.PropertyType.Name}");
+                }
                 continue;
             }
 
             try
             {
                 targetProperty.SetValue(targetDrawable, sourceProperty.GetValue(loadedDrawable));
+                if (GameStatus.logThemeApplyDetails)
+                {
+                    Trace.TraceInformation($"[ThemeApply] Applied property {targetType.Name}.{sourceProperty.Name} on '{targetDrawable.name}'");
+                }
             }
             catch (Exception e)
             {

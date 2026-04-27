@@ -7,7 +7,7 @@ namespace DTXMania.UI.Drawable;
 
 public abstract class UITexture : UIDrawable
 {
-    public Color4 color = Color4.White;
+    [Themable] public Color4 color = Color4.White;
     protected BaseTexture texture = BaseTexture.None;
 
     protected UITexture(BaseTexture texture)
