@@ -12,10 +12,8 @@ public class SongDBStatus : UIText
 
     public SongDBStatus()
     {
-        //fontFamily = new FontFamily(CDTXMania.ConfigIni.songListFont);
         fontSize = 18;
         renderOrder = 100;
-        //UpdateFont();
     }
 
     private SongDbScanStatus lastStatus;

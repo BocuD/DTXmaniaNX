@@ -1364,7 +1364,7 @@ public class CDTX : CActivity
             }
         }
 
-        if (!bHeaderOnly && b動画読み込み)
+        if (!bHeaderOnly && bLoadVideo)
         {
             foreach (CChip chip in listChip)
             {
@@ -3249,7 +3249,12 @@ public class CDTX : CActivity
     private void tRead(string strFileName, bool bHeaderOnly, double dbReplaySpeed = 1.0, int nBgmAdjust = 0)
     {
         this.bHeaderOnly = bHeaderOnly;
-        b動画読み込み = (CDTXMania.StageManager.rCurrentStage.eStageID == CStage.EStage.SongLoading_5);
+        
+        if (!bHeaderOnly)
+        {
+            bLoadVideo = (CDTXMania.StageManager.rCurrentStage.eStageID == CStage.EStage.SongLoading_5);
+        }
+
         strFileNameFullPath = Path.GetFullPath(strFileName);
         this.strFileName = Path.GetFileName(strFileNameFullPath);
         strFolderName = Path.GetDirectoryName(strFileNameFullPath) + @"\";
@@ -4718,7 +4723,7 @@ public class CDTX : CActivity
 
     private readonly STGDAPARAM[] stGDAParam;
     private bool bHeaderOnly;
-    private bool b動画読み込み;
+    private bool bLoadVideo;
     private Stack<bool> bstackIFからENDIFをスキップする;
 
     private int lineNumber;

@@ -9,7 +9,6 @@ using DTXMania.SongDb;
 using DTXMania.UI;
 using FDK;
 using Hexa.NET.ImGui;
-using SampleFramework;
 using SharpDX.Direct3D9;
 using ResourceManager = DTXMania.UI.ResourceManager;
 using Vector2 = System.Numerics.Vector2;
@@ -20,7 +19,7 @@ using Hexa.NET.GLFW;
 
 namespace DTXMania.Core;
 
-internal class CDTXMania : Game
+internal class CDTXMania
 {
     // プロパティ
     //these get set when initializing the game
@@ -168,9 +167,7 @@ internal class CDTXMania : Game
     public bool changeFullscreenModeOnNextFrame { get; set; }
 
     private ImGuiContextPtr context;
-
-    public Device Device => GraphicsDeviceManager.Direct3D9.Device;
-
+    
     //fork
     public static STDGBVALUE<List<int>> listAutoGhostLag = new();
     public static STDGBVALUE<List<int>> listTargetGhsotLag = new();
@@ -244,7 +241,6 @@ internal class CDTXMania : Game
             }
         }
 
-        Window.EnableSystemMenu = ConfigIni.bIsEnabledSystemMenu; // #28200 2011.5.1 yyagi
         // 2012.8.22 Config.iniが無いときに初期値が適用されるよう、この設定行をifブロック外に移動
 
         //---------------------
@@ -299,12 +295,6 @@ internal class CDTXMania : Game
             Skin = new CSkin(ConfigIni.strSystemSkinSubfolderFullName, ConfigIni.bUseBoxDefSkin);
             ConfigIni.strSystemSkinSubfolderFullName =
                 Skin.GetCurrentSkinSubfolderFullName(true); // 旧指定のSkinフォルダが消滅していた場合に備える
-        });
-        
-        SafeInitialize("SongDb", () =>
-        {
-            SongDb = new SongDb.SongDb();
-            SongDb.StartScan();
         });
 
         SafeInitialize("FFmpeg", FFmpegCore.Initialize);
@@ -362,7 +352,7 @@ internal class CDTXMania : Game
                 _ => ESoundDeviceType.Unknown
             };
 
-            SoundManager = new CSoundManager(Window.Handle,
+            SoundManager = new CSoundManager(maniaGl.host.GetWindowHandle(),
                 soundDeviceType,
                 ConfigIni.nWASAPIBufferSizeMs,
                 ConfigIni.bEventDrivenWASAPI,
@@ -395,6 +385,11 @@ internal class CDTXMania : Game
 
         #endregion
         
+        // SafeInitialize("SongDb", () =>
+        // {
+        SongDb = new SongDb.SongDb();
+        // });
+        
         SongDBStatus songDbStatus = persistentUIGroup.AddChild(new SongDBStatus());
         songDbStatus.position = new Vector3(0, 720, 0);
         songDbStatus.anchor = new Vector2(0.0f, 1.0f);
@@ -411,6 +406,8 @@ internal class CDTXMania : Game
 
         StageManager.LoadInitialStage();
         //---------------------
+        
+        SongDb.StartScan();
 
         #endregion
     }
@@ -429,26 +426,26 @@ internal class CDTXMania : Game
         Trace.TraceInformation($"Saving result screen to {strFullPath}");
         Trace.TraceError("Saving result screen is currently disabled because of moving to OpenGL.");
         return false;
-        string strSavePath = Path.GetDirectoryName(strFullPath);
-        if (!Directory.Exists(strSavePath))
-        {
-            try
-            {
-                Directory.CreateDirectory(strSavePath);
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
-        // http://www.gamedev.net/topic/594369-dx9slimdxati-incorrect-saving-surface-to-file/
-        using (Surface pSurface = app.Device.GetRenderTarget(0))
-        {
-            Surface.ToFile(pSurface, strFullPath, ImageFileFormat.Png);
-        }
-
-        return true;
+        // string strSavePath = Path.GetDirectoryName(strFullPath);
+        // if (!Directory.Exists(strSavePath))
+        // {
+        //     try
+        //     {
+        //         Directory.CreateDirectory(strSavePath);
+        //     }
+        //     catch
+        //     {
+        //         return false;
+        //     }
+        // }
+        //
+        // // http://www.gamedev.net/topic/594369-dx9slimdxati-incorrect-saving-surface-to-file/
+        // using (Surface pSurface = app.Device.GetRenderTarget(0))
+        // {
+        //     Surface.ToFile(pSurface, strFullPath, ImageFileFormat.Png);
+        // }
+        //
+        // return true;
     }
 
     #endregion

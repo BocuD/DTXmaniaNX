@@ -210,7 +210,7 @@ internal class StageManager
                         rCurrentStage.OnDeactivate();
                         if (CDTXMania.bCompactMode)
                         {
-                            CDTXMania.app.Window.Close();
+                            DTXManiaGL.instance.RequestExit();
                         }
                         else if (nUpdateAndDrawReturnValue == (int)EPerfScreenReturnValue.Restart)
                         {
@@ -381,7 +381,7 @@ internal class StageManager
                         CDTXMania.DTX.OnDeactivate();
                         if (CDTXMania.bCompactMode)
                         {
-                            CDTXMania.app.Window.Close();
+                            DTXManiaGL.instance.RequestExit();
                         }
                         else
                         {
@@ -537,7 +537,7 @@ internal class StageManager
                     }
                     else
                     {
-                        CDTXMania.app.Window.Close();
+                        DTXManiaGL.instance.RequestExit();
                     }
                 }
 

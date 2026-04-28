@@ -20,7 +20,6 @@ internal class CActOptionPanel : CActivity
     {
         if (bActivated)
         {
-            Device device = CDTXMania.app.Device;
             CConfigIni configIni = CDTXMania.ConfigIni;
             if (txOptionPanel != null)
             {
