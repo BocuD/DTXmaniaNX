@@ -1,12 +1,15 @@
 using System.Numerics;
-using DTXMania.UI;
+using DTXMania.Core.Framework;
+using DTXMania.Core.OpenGL;
 using Hexa.NET.ImGui;
 
-namespace OpenGLTest;
+namespace DTXMania.UI;
 
 internal static class DisplayControlsWindow
 {
-    public static void Draw(GlfwOpenGlHost host)
+    public static GlfwOpenGlHost host;
+    
+    public static void Draw()
     {
         ImGui.SetNextWindowSize(new Vector2(320, 240), ImGuiCond.FirstUseEver);
         ImGui.Begin("Display Controls", ImGuiWindowFlags.NoFocusOnAppearing);
@@ -32,17 +35,17 @@ internal static class DisplayControlsWindow
         }
 
         int fullscreenMode = (int)host.FullscreenMode;
-        if (ImGui.RadioButton("Windowed", ref fullscreenMode, (int)OpenGLTest.FullscreenMode.Windowed))
+        if (ImGui.RadioButton("Windowed", ref fullscreenMode, (int)FullscreenMode.Windowed))
         {
             host.RequestFullscreenMode((FullscreenMode)fullscreenMode);
         }
 
-        if (ImGui.RadioButton("Borderless fullscreen", ref fullscreenMode, (int)OpenGLTest.FullscreenMode.BorderlessFullscreen))
+        if (ImGui.RadioButton("Borderless fullscreen", ref fullscreenMode, (int)FullscreenMode.BorderlessFullscreen))
         {
             host.RequestFullscreenMode((FullscreenMode)fullscreenMode);
         }
 
-        if (ImGui.RadioButton("Exclusive fullscreen", ref fullscreenMode, (int)OpenGLTest.FullscreenMode.ExclusiveFullscreen))
+        if (ImGui.RadioButton("Exclusive fullscreen", ref fullscreenMode, (int)FullscreenMode.ExclusiveFullscreen))
         {
             host.RequestFullscreenMode((FullscreenMode)fullscreenMode);
         }

@@ -7,6 +7,7 @@ using System.Text;
 using System.Windows.Forms;
 using DTXMania.Core.Video;
 using DTXMania.SongDb;
+using DTXMania.UI;
 using FDK;
 using Hexa.NET.ImGui;
 using SampleFramework;
@@ -14,6 +15,7 @@ using SharpDX.Direct3D9;
 using ResourceManager = DTXMania.UI.ResourceManager;
 using Vector2 = System.Numerics.Vector2;
 using DTXMania.UI.Drawable;
+using DTXMania.UI.Inspector;
 using DTXMania.UI.Skin;
 using Hexa.NET.GLFW;
 
@@ -528,6 +530,8 @@ internal class CDTXMania : Game
         {
             InputManager.ScanDevices();
         }
+        
+        InputManager.Keyboard.preventKeyboardInput = InspectorManager.inspectorEnabled && (ImGui.GetIO().WantCaptureKeyboard || GameStatus.preventGameKeyboardInput);
         
         //poll input
         InputManager.tPolling(bApplicationActive, ConfigIni.bBufferedInput);

@@ -45,6 +45,8 @@ public static class InspectorManager
         windows.Add(new Window("Hierarchy", () => hierarchyWindow.Draw()));
         windows.Add(new Window("Drawable Tracker", () => DrawableTracker.DrawWindow()));
         windows.Add(new Window("Textures", () => textureInspector.DrawWindow()));
+        windows.Add(new Window("Game Status", () => GameStatus.Draw()));
+        windows.Add(new Window("Display Controls", () => DisplayControlsWindow.Draw()));
     }
 
     public static void Draw(bool drawGameWindow, ImTextureID? gameTextureId, Vector2 gameTextureSize)

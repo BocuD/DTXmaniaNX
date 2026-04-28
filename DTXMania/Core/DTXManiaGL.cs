@@ -53,8 +53,6 @@ public sealed class DTXManiaGL : OpenGlGame
             ImGui.SetWindowFocus((string?)null);
             clearImGuiFocusOnNextRender = false;
         }
-
-        GameStatus.Draw();
     }
 
     protected override void DestroyContextResources()

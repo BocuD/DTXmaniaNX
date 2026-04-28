@@ -8,7 +8,7 @@ namespace DTXMania.UI.Inspector;
 public class GameStatus
 {
     private static bool demoWindowShown = false;
-    private static bool preventGameKeyboardInput = false;
+    public static bool preventGameKeyboardInput = false;
    
     //todo: move this somewhere else, maybe a debug class in the core
     public static bool logThemeApplyDetails = false;
@@ -58,12 +58,7 @@ public class GameStatus
     public static void Draw()
     {
         ImGuiIOPtr io = ImGui.GetIO();
-
-        CDTXMania.InputManager.Keyboard.preventKeyboardInput =
-            io.WantCaptureKeyboard || preventGameKeyboardInput;
         
-        InspectorManager.hierarchyWindow.target = CDTXMania.StageManager.rCurrentStage.ui;
-
         ImGui.Begin("Game State", ImGuiWindowFlags.NoFocusOnAppearing);
 
         ImGui.Text("Capturing input: " + (io.WantCaptureMouse ? "Mouse " : "") + (io.WantCaptureKeyboard ? "Keyboard" : ""));

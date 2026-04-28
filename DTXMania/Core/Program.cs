@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 using DTXMania.Core.OpenGL;
+using DTXMania.UI;
 
 namespace DTXMania.Core;
 
@@ -180,6 +181,7 @@ internal class Program
 			DTXManiaGL game = new();
 			//CubeRenderer game = new();
 			GlfwOpenGlHost host = new(game);
+			DisplayControlsWindow.host = host;
 			host.Run();
 
 			Trace.WriteLine("");

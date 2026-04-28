@@ -26,6 +26,8 @@ public class HierarchyWindow
             
             ImGui.Separator();
             
+            target = CDTXMania.StageManager.rCurrentStage.ui;
+            
             if (target != null)
             {
                 DrawNode(target);
