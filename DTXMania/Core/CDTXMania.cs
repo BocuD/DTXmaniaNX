@@ -16,7 +16,6 @@ using Vector2 = System.Numerics.Vector2;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.Skin;
 using Hexa.NET.GLFW;
-using OpenGLTest;
 
 namespace DTXMania.Core;
 
@@ -604,12 +603,6 @@ internal class CDTXMania : Game
         }
     }
 
-    public static CTexture tGenerateTexture(Bitmap bitmap)
-    {
-        return new CTexture();
-        return tGenerateTexture(bitmap, false);
-    }
-
     public static CTexture tGenerateTexture(Bitmap bitmap, bool b黒を透過する)
     {
         return new CTexture();
@@ -631,19 +624,7 @@ internal class CDTXMania : Game
         }
     }
 
-    #endregion
-
-    /// <summary>プロパティ、インデクサには ref は使用できないので注意。</summary>
-    public static void tDisposeSafely<T>(ref T? obj)
-    {
-        if (obj == null)
-            return;
-
-        if (obj is IDisposable d)
-            d.Dispose();
-
-        obj = default;
-    }
+    #endregion`
 
     //-----------------
 
