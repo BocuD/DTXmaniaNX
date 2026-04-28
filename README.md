@@ -59,7 +59,14 @@ Visit [releases](https://github.com/BocuD/DTXmaniaNX/releases) for automated bui
 - Song database serialization
 - Song favourite filters
 - (fuzzy) song search
+  - Most of the work for this was already done, romanization for japanese is there
 - Play results screen rework
+- Create separate video rendering behaviour option for 4:3 videos to stretch
+- Load random videos from a folder for charts with missing videos
+- P4IO input support (arcade Gitadora hardware)
+- Configurable slow/fast
+- Configurable positions for judgement
+- Separate kick pedal offset (?)
 
 ## Building
 
