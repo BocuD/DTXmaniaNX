@@ -14,10 +14,12 @@ Visit [releases](https://github.com/BocuD/DTXmaniaNX/releases) for automated bui
   - Supports translating, rotating, and scaling elements according to a hierarchy
   - Fully serializable and skinnable
   - Resolution independent
+  - Font rendering currently handled by Skia
 
 - New theming engine
   - Written on top of new renderer
   - Doesn't affect old UI elements (for now)
+  - Any game element can be skinned or transformed
  
 - Support for arbitrary resolutions such as 1080p or 2160p (4K)
   - Currently restricted to 16:9
