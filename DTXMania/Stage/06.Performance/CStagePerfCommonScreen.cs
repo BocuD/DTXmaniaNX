@@ -3,9 +3,11 @@ using System.Runtime.InteropServices;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Diagnostics;
+using System.Numerics;
 using DTXMania.Core;
 using DTXMania.UI;
 using DTXMania.UI.Drawable;
+using DTXMania.UI.Text;
 using FDK;
 using Color = System.Drawing.Color;
 using Rectangle = System.Drawing.Rectangle;
@@ -281,11 +283,22 @@ internal abstract class CStagePerfCommonScreen : CStage
     }
     #endregion
 
+    private UIText playspeedText;
+    
     public override void InitializeBaseUI()
     {
         video.IntegrateUI(ui);
 
         ui.AddChild(new InfoBox());
+        
+        if (CDTXMania.ConfigIni.nShowPlaySpeed == (int)EShowPlaySpeed.ON
+            || CDTXMania.ConfigIni.nShowPlaySpeed == (int)EShowPlaySpeed.IF_CHANGED_IN_GAME)
+        {
+            //we need to clear this reference because when the stage gets
+            //unloaded the reference doesn't get cleared automatically
+            playspeedText = null;
+            tUpdatePlayspeedText();
+        }
     }
 
     public override void InitializeDefaultUI()
@@ -472,10 +485,6 @@ internal abstract class CStagePerfCommonScreen : CStage
                 tx判定画像anime = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\7_JudgeStrings_XG.png" ) );
                 tx判定画像anime_2 = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\7_JudgeStrings_XG.png" ) );
                 tx判定画像anime_3 = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\7_JudgeStrings_XG.png" ) );
-            }
-            if (CDTXMania.ConfigIni.nShowPlaySpeed == (int)EShowPlaySpeed.ON)
-            {
-                tGeneratePlaySpeedTexture();
             }
         }
     }
@@ -824,7 +833,7 @@ internal abstract class CStagePerfCommonScreen : CStage
     protected BaseTexture txWailingFrame;
     protected BaseTexture txChip;  // txチップ
     protected BaseTexture txHitBar;  // txヒットバー
-    protected CTexture txPlaySpeed;
+
     public BaseTexture tx判定画像anime;     //2013.8.2 kairera0467 アニメーションの場合はあらかじめこっちで読み込む。
     public BaseTexture tx判定画像anime_2;   //2014.3.16 kairera0467 棒とかで必要になる。
     public BaseTexture tx判定画像anime_3;
@@ -5747,25 +5756,42 @@ internal abstract class CStagePerfCommonScreen : CStage
         // Display new play speed
         if (CDTXMania.ConfigIni.nShowPlaySpeed == (int)EShowPlaySpeed.ON || CDTXMania.ConfigIni.nShowPlaySpeed == (int)EShowPlaySpeed.IF_CHANGED_IN_GAME)
         {
-            tGeneratePlaySpeedTexture();
+            tUpdatePlayspeedText();
         }
 
         // re-display presence with new timestamps
         tDisplayPresence();
     }
 
-    private void tGeneratePlaySpeedTexture()
+    private void tUpdatePlayspeedText()
     {
-        CDTXMania.tReleaseTexture(ref txPlaySpeed);
-        if (CDTXMania.ConfigIni.nPlaySpeed != 20)
+        if (playspeedText == null)
         {
-            double d = CDTXMania.ConfigIni.nPlaySpeed / 20.0;
-            String strModifiedPlaySpeed = "Play Speed: x" + d.ToString("0.000");
-            CPrivateFastFont pfModifiedPlaySpeed = new(new FontFamily(CDTXMania.ConfigIni.songListFont), 18, FontStyle.Regular);
-            Bitmap bmpModifiedPlaySpeed = pfModifiedPlaySpeed.DrawPrivateFont(strModifiedPlaySpeed, CPrivateFont.DrawMode.Edge, Color.White, Color.White, Color.Black, Color.Red, true);
-            txPlaySpeed = CDTXMania.tGenerateTexture(bmpModifiedPlaySpeed, false);
-            bmpModifiedPlaySpeed.Dispose();
-            pfModifiedPlaySpeed.Dispose();
+            playspeedText = ui.AddChild(new UIText("playspeed", 18));
+            playspeedText.fillColor = Color4.White;
+            playspeedText.outlineGradientTopColor = Color4.Black;
+            playspeedText.outlineGradientBottomColor = Color.Red;
+            playspeedText.outlineGradientMode = UiTextGradientMode.Vertical;
+            playspeedText.name = "PlaySpeedIndicator";
+        }
+
+        if (CDTXMania.GetCurrentInstrument() == 0)
+        {
+            playspeedText.position = new Vector3(25, 200, 0);
+        }
+        else
+        {
+            playspeedText.position = new Vector3(600, 687, 0);
+        }
+
+        bool showPlaySpeed = CDTXMania.ConfigIni.nShowPlaySpeed == (int)EShowPlaySpeed.ON
+                             || (CDTXMania.ConfigIni.nShowPlaySpeed == (int)EShowPlaySpeed.IF_CHANGED_IN_GAME
+                                 && CDTXMania.ConfigIni.nPlaySpeed != 20);
+        playspeedText.isVisible = showPlaySpeed;
+
+        if (showPlaySpeed)
+        {
+            playspeedText.text = "Play Speed: x" + (CDTXMania.ConfigIni.nPlaySpeed / 20.0).ToString("0.000");
         }
     }
 

@@ -224,7 +224,6 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         tUpdateAndDraw_JudgementString1_ForNormalPosition();
         tUpdateAndDraw_JudgementString2_ForPositionOnJudgementLine();
         tUpdateAndDraw_ChipFireD();
-        tUpdateAndDraw_PlaySpeed();
         tUpdateAndDraw_STAGEFAILED();
         
         bすべてのチップが判定された = true;
@@ -749,14 +748,6 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
     protected override void tUpdateAndDraw_PerformanceInformation()
     {
         base.tUpdateAndDraw_PerformanceInformation( 1000, 257 );
-    }
-
-    private void tUpdateAndDraw_PlaySpeed()
-    {
-        if (txPlaySpeed != null)
-        {
-            txPlaySpeed.tDraw2D(CDTXMania.app.Device, 25, 200);
-        }
     }
 
     protected override void tHandleInput_Drums()

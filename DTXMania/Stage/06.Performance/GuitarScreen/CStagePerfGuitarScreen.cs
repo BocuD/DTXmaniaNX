@@ -194,7 +194,6 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		tUpdateAndDraw_Combo();
 		tUpdateAndDraw_PerformanceInformation();
 		//this.tUpdateAndDraw_WailingFrame();
-		tUpdateAndDraw_PlaySpeed();
 
 		tUpdateAndDraw_ChipFireGB();
 		tUpdateAndDraw_GuitarBonus();
@@ -471,15 +470,7 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 
 	protected override void tUpdateAndDraw_PerformanceInformation()
 	{
-		base.tUpdateAndDraw_PerformanceInformation( 500, 257 );
-	}
-
-	private void tUpdateAndDraw_PlaySpeed()
-	{
-		if (txPlaySpeed != null)
-		{
-			txPlaySpeed.tDraw2D(CDTXMania.app.Device, 600, 687);
-		}
+		base.tUpdateAndDraw_PerformanceInformation(500, 257);
 	}
 
 	protected override void tJudgeLineMovingUpandDown()
