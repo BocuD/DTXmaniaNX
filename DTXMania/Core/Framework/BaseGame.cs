@@ -17,7 +17,7 @@ public abstract class BaseGame
     
     public bool isFocused { get; internal set; }
     
-    public string name { get; set; }
+    public abstract string name { get; }
 
     public abstract void KeyDown(GlfwKey key, GlfwMod mods);
     public abstract void KeyUp(GlfwKey key, GlfwMod mods);

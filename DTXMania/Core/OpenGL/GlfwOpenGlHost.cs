@@ -230,7 +230,7 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
         {
             case FullscreenMode.Windowed:
                 GLFW.WindowHint(GlfwDecorated, GlfwTrue);
-                window = GLFW.CreateWindow(_windowedWidth, _windowedHeight, "OpenGLTest", default, shareWindow);
+                window = GLFW.CreateWindow(_windowedWidth, _windowedHeight, _game.name, default, shareWindow);
                 break;
             
             case FullscreenMode.BorderlessFullscreen:
@@ -240,7 +240,7 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
                 }
 
                 GLFW.WindowHint(GlfwDecorated, GlfwFalse);
-                window = GLFW.CreateWindow(videoMode.Width, videoMode.Height, "OpenGLTest", default, shareWindow);
+                window = GLFW.CreateWindow(videoMode.Width, videoMode.Height, _game.name, default, shareWindow);
                 break;
             
             case FullscreenMode.ExclusiveFullscreen:
@@ -249,7 +249,7 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
                     throw new InvalidOperationException("Primary monitor unavailable.");
                 }
 
-                window = GLFW.CreateWindow(videoMode.Width, videoMode.Height, "OpenGLTest", primaryMonitor, shareWindow);
+                window = GLFW.CreateWindow(videoMode.Width, videoMode.Height, _game.name, primaryMonitor, shareWindow);
                 break;
             
             default:

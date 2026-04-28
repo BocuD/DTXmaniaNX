@@ -232,6 +232,8 @@ internal sealed unsafe class CubeRenderer : OpenGlGame
         return shader;
     }
 
+    public override string name => "CubeTest";
+
     public override void KeyDown(GlfwKey key, GlfwMod mods)
     {
         

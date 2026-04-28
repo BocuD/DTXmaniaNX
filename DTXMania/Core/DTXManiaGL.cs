@@ -64,6 +64,8 @@ public sealed class DTXManiaGL : OpenGlGame
         
     }
 
+    public override string name => "DTXManiaNX";
+
     public override void KeyDown(GlfwKey key, GlfwMod mods)
     {
         //check for alt + enter
