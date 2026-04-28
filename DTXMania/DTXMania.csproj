@@ -90,4 +90,8 @@
       <None Remove="Stage\04.SongSelection\**" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Core\FDK\" />
+    </ItemGroup>
+
 </Project>

@@ -550,7 +550,7 @@ internal class CActPerfDrumsChipFireD : CActivity
 
 					float x = (float)(st青い星[i].f半径 * Math.Cos((Math.PI / 2 * st青い星[i].ct進行.nCurrentValue) / 100.0));
 					mat *= Matrix4x4.CreateScale(x, x, 1f);
-					mat *= Matrix4x4.CreateTranslation(st青い星[i].fX - SampleFramework.GameWindowSize.Width / 2f, -(st青い星[i].fY - SampleFramework.GameWindowSize.Height / 2f), 0f);
+					mat *= Matrix4x4.CreateTranslation(st青い星[i].fX - GameWindowSize.Width / 2f, -(st青い星[i].fY - GameWindowSize.Height / 2f), 0f);
 
 					if (tx青い星[ st青い星[i].nLane ] != null)
 					{
@@ -631,8 +631,8 @@ internal class CActPerfDrumsChipFireD : CActivity
 						mat *= Matrix4x4.CreateRotationZ(0.09f * st飛び散るチップ[i].ct進行.nCurrentValue);
 						mat2 *= Matrix4x4.CreateRotationZ(-0.09f * st飛び散るチップ[i].ct進行.nCurrentValue);
 
-						mat *= Matrix4x4.CreateTranslation((st飛び散るチップ[i].fXL - 50f) - SampleFramework.GameWindowSize.Width / 2f, -(st飛び散るチップ[i].fY + nJudgeLinePosY_delta_Drums - SampleFramework.GameWindowSize.Height / 2f), 0f);
-						mat2 *= Matrix4x4.CreateTranslation((st飛び散るチップ[i].fXR - 50f) - SampleFramework.GameWindowSize.Width / 2f, -(st飛び散るチップ[i].fY + nJudgeLinePosY_delta_Drums - SampleFramework.GameWindowSize.Height / 2f), 0f);
+						mat *= Matrix4x4.CreateTranslation((st飛び散るチップ[i].fXL - 50f) - GameWindowSize.Width / 2f, -(st飛び散るチップ[i].fY + nJudgeLinePosY_delta_Drums - GameWindowSize.Height / 2f), 0f);
+						mat2 *= Matrix4x4.CreateTranslation((st飛び散るチップ[i].fXR - 50f) - GameWindowSize.Width / 2f, -(st飛び散るチップ[i].fY + nJudgeLinePosY_delta_Drums - GameWindowSize.Height / 2f), 0f);
 
 						if (txNotes != null)
 						{
@@ -833,44 +833,44 @@ internal class CActPerfDrumsChipFireD : CActivity
 						{
 							if (CDTXMania.ConfigIni.eRDPosition == ERDPosition.RDRC)
 							{
-								matrix3 *= Matrix4x4.CreateTranslation(nレーンの中央X座標_改[st大波[i].nLane] + 280 - SampleFramework.GameWindowSize.Width / 2f, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameWindowSize.Height / 2f), 0f);
+								matrix3 *= Matrix4x4.CreateTranslation(nレーンの中央X座標_改[st大波[i].nLane] + 280 - GameWindowSize.Width / 2f, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - GameWindowSize.Height / 2f), 0f);
 							}
 							else
 							{
-								matrix3 *= Matrix4x4.CreateTranslation(nレーンの中央X座標[st大波[i].nLane] + 280 - SampleFramework.GameWindowSize.Width / 2f, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameWindowSize.Height / 2f), 0f);
+								matrix3 *= Matrix4x4.CreateTranslation(nレーンの中央X座標[st大波[i].nLane] + 280 - GameWindowSize.Width / 2f, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - GameWindowSize.Height / 2f), 0f);
 							}
 						}
 						else if (CDTXMania.ConfigIni.eLaneType.Drums == EType.B)
 						{
 							if (CDTXMania.ConfigIni.eRDPosition == ERDPosition.RDRC)
 							{
-								matrix3 *= Matrix4x4.CreateTranslation(nレーンの中央X座標B_改[st大波[i].nLane] + 280 - SampleFramework.GameWindowSize.Width / 2f, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameWindowSize.Height / 2f), 0f);
+								matrix3 *= Matrix4x4.CreateTranslation(nレーンの中央X座標B_改[st大波[i].nLane] + 280 - GameWindowSize.Width / 2f, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - GameWindowSize.Height / 2f), 0f);
 							}
 							else
 							{
-								matrix3 *= Matrix4x4.CreateTranslation(nレーンの中央X座標B[st大波[i].nLane] + 280 - SampleFramework.GameWindowSize.Width / 2f, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameWindowSize.Height / 2f), 0f);
+								matrix3 *= Matrix4x4.CreateTranslation(nレーンの中央X座標B[st大波[i].nLane] + 280 - GameWindowSize.Width / 2f, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - GameWindowSize.Height / 2f), 0f);
 							}
 						}
 						else if (CDTXMania.ConfigIni.eLaneType.Drums == EType.C)
 						{
 							if (CDTXMania.ConfigIni.eRDPosition == ERDPosition.RDRC)
 							{
-								matrix3 *= Matrix4x4.CreateTranslation(nレーンの中央X座標C_改[st大波[i].nLane] + 280 - SampleFramework.GameWindowSize.Width / 2f, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameWindowSize.Height / 2f), 0f);
+								matrix3 *= Matrix4x4.CreateTranslation(nレーンの中央X座標C_改[st大波[i].nLane] + 280 - GameWindowSize.Width / 2f, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - GameWindowSize.Height / 2f), 0f);
 							}
 							else
 							{
-								matrix3 *= Matrix4x4.CreateTranslation(nレーンの中央X座標C[st大波[i].nLane] + 280 - SampleFramework.GameWindowSize.Width / 2f, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameWindowSize.Height / 2f), 0f);
+								matrix3 *= Matrix4x4.CreateTranslation(nレーンの中央X座標C[st大波[i].nLane] + 280 - GameWindowSize.Width / 2f, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - GameWindowSize.Height / 2f), 0f);
 							}
 						}
 						else if (CDTXMania.ConfigIni.eLaneType.Drums == EType.D)
 						{
 							if (CDTXMania.ConfigIni.eRDPosition == ERDPosition.RDRC)
 							{
-								matrix3 *= Matrix4x4.CreateTranslation(nレーンの中央X座標D_改[st大波[i].nLane] + 280 - SampleFramework.GameWindowSize.Width / 2f, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameWindowSize.Height / 2f), 0f);
+								matrix3 *= Matrix4x4.CreateTranslation(nレーンの中央X座標D_改[st大波[i].nLane] + 280 - GameWindowSize.Width / 2f, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - GameWindowSize.Height / 2f), 0f);
 							}
 							else
 							{
-								matrix3 *= Matrix4x4.CreateTranslation(nレーンの中央X座標D[st大波[i].nLane] + 280 - SampleFramework.GameWindowSize.Width / 2f, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameWindowSize.Height / 2f), 0f);
+								matrix3 *= Matrix4x4.CreateTranslation(nレーンの中央X座標D[st大波[i].nLane] + 280 - GameWindowSize.Width / 2f, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - GameWindowSize.Height / 2f), 0f);
 							}
 						}
 						if( txBigWave != null )
@@ -911,44 +911,44 @@ internal class CActPerfDrumsChipFireD : CActivity
 						{
 							if (CDTXMania.ConfigIni.eRDPosition == ERDPosition.RCRD)
 							{
-								matrix4 *= Matrix4x4.CreateTranslation(nレーンの中央X座標[st細波[i].nLane] + 280 - SampleFramework.GameWindowSize.Width / 2f, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameWindowSize.Height / 2f), 0f);
+								matrix4 *= Matrix4x4.CreateTranslation(nレーンの中央X座標[st細波[i].nLane] + 280 - GameWindowSize.Width / 2f, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - GameWindowSize.Height / 2f), 0f);
 							}
 							else
 							{
-								matrix4 *= Matrix4x4.CreateTranslation(nレーンの中央X座標_改[st細波[i].nLane] + 280 - SampleFramework.GameWindowSize.Width / 2f, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameWindowSize.Height / 2f), 0f);
+								matrix4 *= Matrix4x4.CreateTranslation(nレーンの中央X座標_改[st細波[i].nLane] + 280 - GameWindowSize.Width / 2f, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - GameWindowSize.Height / 2f), 0f);
 							}
 						}
 						else if (CDTXMania.ConfigIni.eLaneType.Drums == EType.B)
 						{
 							if (CDTXMania.ConfigIni.eRDPosition == ERDPosition.RCRD)
 							{
-								matrix4 *= Matrix4x4.CreateTranslation(nレーンの中央X座標B[st細波[i].nLane] + 280 - SampleFramework.GameWindowSize.Width / 2f, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameWindowSize.Height / 2f), 0f);
+								matrix4 *= Matrix4x4.CreateTranslation(nレーンの中央X座標B[st細波[i].nLane] + 280 - GameWindowSize.Width / 2f, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - GameWindowSize.Height / 2f), 0f);
 							}
 							else
 							{
-								matrix4 *= Matrix4x4.CreateTranslation(nレーンの中央X座標B_改[st細波[i].nLane] + 280 - SampleFramework.GameWindowSize.Width / 2f, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameWindowSize.Height / 2f), 0f);
+								matrix4 *= Matrix4x4.CreateTranslation(nレーンの中央X座標B_改[st細波[i].nLane] + 280 - GameWindowSize.Width / 2f, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - GameWindowSize.Height / 2f), 0f);
 							}
 						}
 						else if (CDTXMania.ConfigIni.eLaneType.Drums == EType.C)
 						{
 							if (CDTXMania.ConfigIni.eRDPosition == ERDPosition.RCRD)
 							{
-								matrix4 *= Matrix4x4.CreateTranslation(nレーンの中央X座標C_改[st細波[i].nLane] + 280 - SampleFramework.GameWindowSize.Width / 2f, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameWindowSize.Height / 2f), 0f);
+								matrix4 *= Matrix4x4.CreateTranslation(nレーンの中央X座標C_改[st細波[i].nLane] + 280 - GameWindowSize.Width / 2f, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - GameWindowSize.Height / 2f), 0f);
 							}
 							else
 							{
-								matrix4 *= Matrix4x4.CreateTranslation(nレーンの中央X座標C[st細波[i].nLane] + 280 - SampleFramework.GameWindowSize.Width / 2f, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameWindowSize.Height / 2f), 0f);
+								matrix4 *= Matrix4x4.CreateTranslation(nレーンの中央X座標C[st細波[i].nLane] + 280 - GameWindowSize.Width / 2f, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - GameWindowSize.Height / 2f), 0f);
 							}
 						}
 						else if (CDTXMania.ConfigIni.eLaneType.Drums == EType.D)
 						{
 							if (CDTXMania.ConfigIni.eRDPosition == ERDPosition.RDRC)
 							{
-								matrix4 *= Matrix4x4.CreateTranslation(nレーンの中央X座標D_改[st細波[i].nLane] + 280 - SampleFramework.GameWindowSize.Width / 2f, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameWindowSize.Height / 2f), 0f);
+								matrix4 *= Matrix4x4.CreateTranslation(nレーンの中央X座標D_改[st細波[i].nLane] + 280 - GameWindowSize.Width / 2f, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - GameWindowSize.Height / 2f), 0f);
 							}
 							else
 							{
-								matrix4 *= Matrix4x4.CreateTranslation(nレーンの中央X座標D[st細波[i].nLane] + 280 - SampleFramework.GameWindowSize.Width / 2f, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - SampleFramework.GameWindowSize.Height / 2f), 0f);
+								matrix4 *= Matrix4x4.CreateTranslation(nレーンの中央X座標D[st細波[i].nLane] + 280 - GameWindowSize.Width / 2f, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - GameWindowSize.Height / 2f), 0f);
 							}
 						}
 

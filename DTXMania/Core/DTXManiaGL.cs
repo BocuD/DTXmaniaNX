@@ -3,7 +3,6 @@ using DTXMania.Core.OpenGL;
 using DTXMania.UI.Inspector;
 using Hexa.NET.GLFW;
 using Hexa.NET.ImGui;
-using SampleFramework;
 using Silk.NET.OpenGL;
 
 namespace DTXMania.Core;

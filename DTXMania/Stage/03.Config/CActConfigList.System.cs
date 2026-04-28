@@ -6,7 +6,6 @@ using DTXMania.SongDb;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.Item;
 using FDK;
-using SampleFramework;
 
 namespace DTXMania;
 

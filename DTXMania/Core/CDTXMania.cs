@@ -385,10 +385,10 @@ internal class CDTXMania
 
         #endregion
         
-        // SafeInitialize("SongDb", () =>
-        // {
-        SongDb = new SongDb.SongDb();
-        // });
+        SafeInitialize("SongDb", () =>
+        {
+            SongDb = new SongDb.SongDb();
+        });
         
         SongDBStatus songDbStatus = persistentUIGroup.AddChild(new SongDBStatus());
         songDbStatus.position = new Vector3(0, 720, 0);

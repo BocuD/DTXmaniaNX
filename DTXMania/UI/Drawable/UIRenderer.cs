@@ -130,8 +130,8 @@ public abstract class BaseTexture : IDisposable
             Matrix4x4.CreateTranslation(-clipRect.Width / 2f, clipRect.Height / 2f, 0f);
 
         float renderScale = CDTXMania.renderScale <= 0f ? 1f : CDTXMania.renderScale;
-        float renderWidth = SampleFramework.GameWindowSize.Width * renderScale;
-        float renderHeight = SampleFramework.GameWindowSize.Height * renderScale;
+        float renderWidth = GameWindowSize.Width * renderScale;
+        float renderHeight = GameWindowSize.Height * renderScale;
 
         Matrix4x4 legacyWorldToScreen =
             Matrix4x4.CreateScale(renderScale, -renderScale, 1f) *
