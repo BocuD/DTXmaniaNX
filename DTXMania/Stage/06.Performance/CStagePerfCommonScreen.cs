@@ -2983,7 +2983,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                                 case EBGAType.BMPTEX:
                                     if (pChip.rBMPTEX != null)
                                     {
-                                        actBGA.Start(pChip.nChannelNumber, null, pChip.rBMPTEX, pChip.rBMPTEX.txImage.szImageSize.Width, pChip.rBMPTEX.txImage.szImageSize.Height, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+                                        actBGA.Start(pChip.nChannelNumber, null, pChip.rBMPTEX, pChip.rBMPTEX.txImage.Width, pChip.rBMPTEX.txImage.Height, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
                                     }
                                     break;
 
@@ -3004,7 +3004,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                                 default:
                                     if (pChip.rBMP != null)
                                     {
-                                        actBGA.Start(pChip.nChannelNumber, pChip.rBMP, null, pChip.rBMP.n幅, pChip.rBMP.n高さ, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+                                        actBGA.Start(pChip.nChannelNumber, pChip.rBMP, null, pChip.rBMP.nWidth, pChip.rBMP.nHeight, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
                                     }
                                     break;
                             }

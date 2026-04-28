@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Globalization;
 using DTXMania.Core;
+using DTXMania.UI.Drawable;
 using FDK;
 
 namespace DTXMania;
@@ -145,7 +146,7 @@ public class CDTX : CActivity
 
         public override void PutLog(string strテクスチャファイル名)
         {
-            Trace.TraceInformation("テクスチャを生成しました。({0})({1})({2}x{3})", strコメント文, strテクスチャファイル名, n幅, n高さ);
+            Trace.TraceInformation("テクスチャを生成しました。({0})({1})({2}x{3})", strコメント文, strテクスチャファイル名, nWidth, nHeight);
         }
 
         public override string ToString()
@@ -164,8 +165,8 @@ public class CDTX : CActivity
         public override void PutLog(string strテクスチャファイル名)
         {
             Trace.TraceInformation("テクスチャを生成しました。({0})({1})(Gr:{2}x{3})(Tx:{4}x{5})", strコメント文, strテクスチャファイル名,
-                txImage.szImageSize.Width, txImage.szImageSize.Height, txImage.szTextureSize.Width,
-                txImage.szTextureSize.Height);
+                txImage.Width, txImage.Height, txImage.Width,
+                txImage.Height);
         }
 
         public override string ToString()
@@ -180,10 +181,10 @@ public class CDTX : CActivity
         public int n番号;
         public string strコメント文 = "";
         public string strファイル名 = "";
-        public CTexture txImage;
-        public int n高さ => txImage.szImageSize.Height;
+        public BaseTexture txImage;
+        public int nHeight => (int)txImage.Height;
 
-        public int n幅 => txImage.szImageSize.Width;
+        public int nWidth => (int)txImage.Width;
         public bool b黒を透過する;
         public Bitmap bitmap;
 
@@ -205,68 +206,33 @@ public class CDTX : CActivity
 
         public void OnDeviceCreated()
         {
-            #region [ strテクスチャファイル名 を作成。]
-
-            string strテクスチャファイル名 = GetFullPathname;
-
-            #endregion
-
-            if (!File.Exists(strテクスチャファイル名))
+            string strTextureFilename = GetFullPathname;
+            
+            if (!File.Exists(strTextureFilename))
             {
-                Trace.TraceWarning("File doesn't exist!({0})({1})", strコメント文, strテクスチャファイル名);
+                Trace.TraceWarning("File doesn't exist!({0})({1})", strコメント文, strTextureFilename);
                 txImage = null;
                 return;
             }
 
+            txImage?.Dispose();
+
             // テクスチャを作成。
-            txImage = CDTXMania.LoadFromPath(strテクスチャファイル名, b黒を透過する);
+            // TODO: Reimplement black-to-transparency differently. For now both BMP and BMPTEX load directly.
+            txImage = BaseTexture.LoadFromPath(strTextureFilename);
 
             if (txImage != null)
             {
                 // 作成成功。
                 if (CDTXMania.ConfigIni.bLog作成解放ログ出力)
-                    PutLog(strテクスチャファイル名);
+                    PutLog(strTextureFilename);
                 bUse = true;
             }
             else
             {
                 // 作成失敗。
-                Trace.TraceError("テクスチャの生成に失敗しました。({0})({1})", strコメント文, strテクスチャファイル名);
+                Trace.TraceError("テクスチャの生成に失敗しました。({0})({1})", strコメント文, strTextureFilename);
                 txImage = null;
-            }
-        }
-
-        /// <summary>
-        /// BGA画像のデコードをTexture()に渡す前に行う、OnDeviceCreate()
-        /// </summary>
-        /// <param name="bitmap">テクスチャ画像</param>
-        /// <param name="strテクスチャファイル名">ファイル名</param>
-        public void OnDeviceCreated(Bitmap bitmap, string strテクスチャファイル名)
-        {
-            if (bitmap != null && b黒を透過する)
-            {
-                bitmap.MakeTransparent(Color.Black); // 黒を透過色にする
-            }
-
-            txImage = CDTXMania.tGenerateTexture(bitmap, b黒を透過する);
-
-            if (txImage != null)
-            {
-                // 作成成功。
-                if (CDTXMania.ConfigIni.bLog作成解放ログ出力)
-                    PutLog(strテクスチャファイル名);
-                bUse = true;
-            }
-            else
-            {
-                // 作成失敗。
-                Trace.TraceError("テクスチャの生成に失敗しました。({0})({1})", strコメント文, strテクスチャファイル名);
-                txImage = null;
-            }
-
-            if (bitmap != null)
-            {
-                bitmap.Dispose();
             }
         }
 
@@ -274,48 +240,11 @@ public class CDTX : CActivity
         {
         }
 
-        #region [ IDisposable 実装 ]
-
-        //-----------------
         public void Dispose()
         {
-            if (bDisposed済み)
-                return;
-
-            if (txImage != null)
-            {
-                #region [ strテクスチャファイル名 を作成。]
-
-                //-----------------
-                string strテクスチャファイル名 = GetFullPathname;
-                //if( !string.IsNullOrEmpty( CDTXMania.DTX.PATH_WAV ) )
-                //    strテクスチャファイル名 = CDTXMania.DTX.PATH_WAV + this.strFilename;
-                //else
-                //    strテクスチャファイル名 = CDTXMania.DTX.strFolderName + this.strFilename;
-                //-----------------
-
-                #endregion
-
-                CDTXMania.tReleaseTexture(ref txImage);
-
-                if (CDTXMania.ConfigIni.bLog作成解放ログ出力)
-                    Trace.TraceInformation("テクスチャを解放しました。({0})({1})", strコメント文, strテクスチャファイル名);
-            }
-
-            bUse = false;
-
-            bDisposed済み = true;
+            txImage?.Dispose();
+            bitmap?.Dispose();
         }
-
-        #endregion
-
-        #region [ private ]
-
-        //-----------------
-        private bool bDisposed済み;
-        //-----------------
-
-        #endregion
     }
 
     public class CBPM
@@ -1482,133 +1411,16 @@ public class CDTX : CActivity
         }
     }
 
-    #region [ BMP/BMPTEXの並列読み込み_デコード用メソッド ]
-
-    private static void LoadTexture(CBMPbase cbmp) // バックグラウンドスレッドで動作する、ファイル読み込み部
-    {
-        string filename = cbmp.GetFullPathname;
-        if (!File.Exists(filename))
-        {
-            Trace.TraceWarning("File doesn't exist! ({0})", filename);
-            cbmp.bitmap = null;
-            return;
-        }
-
-        cbmp.bitmap = new Bitmap(filename);
-    }
-
-    private static void BMPLoadAll(Dictionary<int, CBMP> listB) // バックグラウンドスレッドで、テクスチャファイルをひたすら読み込んではキューに追加する
-    {
-        try
-        {
-            //Trace.TraceInformation( "Back: ThreadID(BMPLoad)=" + Thread.CurrentThread.ManagedThreadId + ", listCount=" + listB.Count  );
-            foreach (CBMP cbmp in listB.Values)
-            {
-                LoadTexture(cbmp);
-                lock (lockQueue)
-                {
-                    queueCBMPbaseDone.Enqueue(cbmp);
-                    //  Trace.TraceInformation( "Back: Enqueued(" + queueCBMPbaseDone.Count + "): " + cbmp.strFilename );
-                }
-
-                if (queueCBMPbaseDone.Count > 8)
-                {
-                    Thread.Sleep(10);
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            Trace.TraceError($"Error in BMPLoadAll: {e.Message}");
-            Trace.TraceError($"Stack Trace: {e.StackTrace}");
-        }
-    }
-
-    private static void BMPTEXLoadAll(CDTX cdtx) // ダサい実装だが、Dictionary<>の中には手を出せず、妥協した
-    {
-        var listB = cdtx.listBMPTEX;
-
-        try
-        {
-            //Trace.TraceInformation( "Back: ThreadID(BMPLoad)=" + Thread.CurrentThread.ManagedThreadId + ", listCount=" + listB.Count  );
-            foreach (CBMPTEX cbmp in listB.Values)
-            {
-                LoadTexture(cbmp);
-                lock (lockQueue)
-                {
-                    queueCBMPbaseDone.Enqueue(cbmp);
-                    //  Trace.TraceInformation( "Back: Enqueued(" + queueCBMPbaseDone.Count + "): " + cbmp.strFilename );
-                }
-
-                if (queueCBMPbaseDone.Count > 8)
-                {
-                    Thread.Sleep(10);
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            Trace.TraceError($"Error in BMPTEXLoadAll: {e.Message} DTX File: {cdtx.strFileNameFullPath}");
-            Trace.TraceError($"Stack Trace: {e.StackTrace}");
-        }
-    }
-
-    private static Queue<CBMPbase> queueCBMPbaseDone = new();
-    private static object lockQueue = new();
-    private static int nLoadDone;
-
-    #endregion
-
+    //todo: figure out what is even the difference between DMPTEX and BMP
     public void tLoadBMP_BMPTEX()
     {
-        //todo: fix this so we can initialize textures on the main thread
-        return;
-        int nCPUCores = Environment.ProcessorCount;
-
         #region [ Read BMPs ]
 
         if (listBMP != null)
         {
-            if (nCPUCores <= 1)
+            foreach (CBMP cbmp in listBMP.Values)
             {
-                foreach (CBMP cbmp in listBMP.Values)
-                {
-                    cbmp.OnDeviceCreated();
-                }
-            }
-            else
-            {
-                //Initialize textures on main thread, load and decode on background thread
-
-                //Trace.TraceInformation( "Main: ThreadID(Main)=" + Thread.CurrentThread.ManagedThreadId + ", listCount=" + this.listBMP.Count );
-                nLoadDone = 0;
-                Task.Run(() => BMPLoadAll(listBMP));
-
-                // t.Priority = ThreadPriority.Lowest;
-                // t.Start( listBMP );
-                int c = listBMP.Count;
-                while (nLoadDone < c)
-                {
-                    if (queueCBMPbaseDone.Count > 0)
-                    {
-                        CBMP cbmp;
-                        //Trace.TraceInformation( "Main: Lock Begin for dequeue1." );
-                        lock (lockQueue)
-                        {
-                            cbmp = (CBMP)queueCBMPbaseDone.Dequeue();
-                            //  Trace.TraceInformation( "Main: Dequeued(" + queueCBMPbaseDone.Count + "): " + cbmp.strFilename );
-                        }
-
-                        cbmp.OnDeviceCreated(cbmp.bitmap, cbmp.GetFullPathname);
-                        nLoadDone++;
-                        //Trace.TraceInformation( "Main: OnDeviceCreated: " + cbmp.strFilename );
-                    }
-                    else
-                    {
-                        //Trace.TraceInformation( "Main: Sleeped.");
-                        Thread.Sleep(5); // WaitOneのイベント待ちにすると、メインスレッド処理中に2個以上イベント完了したときにそれを正しく検出できなくなるので、
-                    } // ポーリングに逃げてしまいました。
-                }
+                cbmp.OnDeviceCreated();
             }
         }
 
@@ -1618,49 +1430,9 @@ public class CDTX : CActivity
 
         if (listBMPTEX != null)
         {
-            if (nCPUCores <= 1)
+            foreach (CBMPTEX cbmptex in listBMPTEX.Values)
             {
-                #region [ シングルスレッドで逐次読み出し_デコード_テクスチャ定義 ]
-
-                foreach (CBMPTEX cbmptex in listBMPTEX.Values)
-                {
-                    cbmptex.OnDeviceCreated();
-                }
-
-                #endregion
-            }
-            else
-            {
-                #region [ メインスレッド(テクスチャ定義)とバックグラウンドスレッド(読み出し_デコード)を並列動作させ高速化 ]
-
-                //Trace.TraceInformation( "Main: ThreadID(Main)=" + Thread.CurrentThread.ManagedThreadId + ", listCount=" + this.listBMP.Count );
-                nLoadDone = 0;
-                Task.Run(() => BMPTEXLoadAll(this));
-                int c = listBMPTEX.Count;
-                while (nLoadDone < c)
-                {
-                    if (queueCBMPbaseDone.Count > 0)
-                    {
-                        CBMPTEX cbmptex;
-                        //Trace.TraceInformation( "Main: Lock Begin for dequeue1." );
-                        lock (lockQueue)
-                        {
-                            cbmptex = (CBMPTEX)queueCBMPbaseDone.Dequeue();
-                            //  Trace.TraceInformation( "Main: Dequeued(" + queueCBMPbaseDone.Count + "): " + cbmp.strFilename );
-                        }
-
-                        cbmptex.OnDeviceCreated(cbmptex.bitmap, cbmptex.GetFullPathname);
-                        nLoadDone++;
-                        //Trace.TraceInformation( "Main: OnDeviceCreated: " + cbmp.strFilename );
-                    }
-                    else
-                    {
-                        //Trace.TraceInformation( "Main: Sleeped.");
-                        Thread.Sleep(5); // WaitOneのイベント待ちにすると、メインスレッド処理中に2個以上イベント完了したときにそれを正しく検出できなくなるので、
-                    } // ポーリングに逃げてしまいました。
-                }
-
-                #endregion
+                cbmptex.OnDeviceCreated();
             }
         }
 
@@ -4850,6 +4622,7 @@ public class CDTX : CActivity
                 cbmp.Dispose();
             }
 
+            listBMP.Clear();
             listBMP = null;
         }
 
