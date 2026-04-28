@@ -19,7 +19,8 @@ public class UIBasicButton : UIGroup, IUISelectable
         normalText = AddChild(new UIText(text, size));
         normalText.RenderTexture();
         normalText.anchor = new Vector2(0.5f, 0f);
-            
+        normalText.position = new Vector3(-5, 2, 0);
+
         selectedText = AddChild(new UIText(text, size));
         selectedText.fillGradientMode = UiTextGradientMode.Vertical;
         Color4 topColor = new Color4(1, 1, 0); //FFFF00
@@ -29,6 +30,7 @@ public class UIBasicButton : UIGroup, IUISelectable
         selectedText.RenderTexture();
         selectedText.anchor = new Vector2(0.5f, 0f);
         selectedText.isVisible = false;
+        selectedText.position = new Vector3(-5, 2, 0);
     }
         
     public void SetSelected(bool selected)

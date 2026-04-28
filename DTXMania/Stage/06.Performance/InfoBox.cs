@@ -1,7 +1,6 @@
 ﻿using System.Numerics;
 using DTXMania.Core;
 using DTXMania.Core.Framework;
-using DTXMania.UI;
 using DTXMania.UI.Drawable;
 
 namespace DTXMania;
@@ -12,7 +11,7 @@ internal class InfoBox : UIGroup
     public InfoBox()
     {
         var background = AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\Performance\info_box.png"))));
-        size = background.size;
+        size = new Vector2(304, 84);
         anchor = new Vector2(1, 0);
         background.name = "Background";
         position = new Vector3(1270, 10, 0);

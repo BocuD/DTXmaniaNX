@@ -23,6 +23,7 @@ internal partial class CActConfigList : CActivity
                 or EMenuType.KeyAssignGuitar or EMenuType.KeyAssignSystem 
                 or EMenuType.SystemGraphics or EMenuType.SystemAudio 
                 or EMenuType.SystemGameplay or EMenuType.SystemMenu
+                or EMenuType.SystemSkin
                 or EMenuType.VelocityDrums)
             {
                 return true;
@@ -55,6 +56,7 @@ internal partial class CActConfigList : CActivity
         {
             case EMenuType.KeyAssignSystem:
             case EMenuType.SystemGraphics:
+            case EMenuType.SystemSkin:
             case EMenuType.SystemAudio:
             case EMenuType.SystemGameplay:
             case EMenuType.SystemMenu:
@@ -152,9 +154,6 @@ internal partial class CActConfigList : CActivity
 
         listItems = [];
         eMenuType = EMenuType.Unknown;
-
-        ScanSkinFolders();
-        ScanNewSkinData();
         
         tSetupItemList_Bass(); // #27795 2012.3.11 yyagi; System設定の中でDrumsの設定を参照しているため、
         tSetupItemList_Guitar(); // 活性化の時点でDrumsの設定も入れ込んでおかないと、System設定中に例外発生することがある。
@@ -222,8 +221,6 @@ internal partial class CActConfigList : CActivity
         txDescriptionPanel = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\4_Description Panel.png"));
         txArrow = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\4_Arrow.png"));
         txItemBoxCursor = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\4_itembox cursor.png"));
-        
-        tGenerateSkinSample();
         
         base.OnManagedCreateResources();
     }
@@ -430,12 +427,13 @@ internal partial class CActConfigList : CActivity
             // 15SEP20 Increasing x position by 180 pixels (was 601)
             Matrix4x4 explanationMatrix = Matrix4x4.CreateTranslation(781, 252, 0) * scaleMatrix;
             txDescriptionPanel.tDraw2DMatrix(explanationMatrix);
+            
             if (txSkinSample != null && nTargetScrollCounter == 0 &&
                 listItems[nCurrentSelection] == iSystemSkinSubfolder)
             {
                 // 15SEP20 Increasing x position by 180 pixels (was 615 - 60)
-                Matrix4x4 txSkinSampleMatrix = Matrix4x4.CreateTranslation(735, 442 - 106, 0) * scaleMatrix;
-                txSkinSample.tDraw2DMatrix(txSkinSampleMatrix);
+                Matrix4x4 txSkinSampleMatrix = Matrix4x4.CreateTranslation(796, 442, 0) * scaleMatrix;
+                txSkinSample.tDraw2DMatrix(txSkinSampleMatrix, new Vector2(250, 140));
             }
         }
         #endregion
@@ -509,20 +507,20 @@ internal partial class CActConfigList : CActivity
 
         #region [ Render Item Name ]
 
-        if (listMenu[nItem].txMenuItemRight == null)
+        if (listMenu[nItem].txItemName == null)
         {
-            listMenu[nItem].txMenuItemRight = RenderText(listItems[nItem].strItemName, 15, Color4.White);
+            listMenu[nItem].txItemName = RenderText(listItems[nItem].strItemName, 16, Color4.White);
         }
 
         {
-            Matrix4x4 textMatrix = Matrix4x4.CreateTranslation(n新項目パネルX + 25, y + 24, 0) * parentMatrix;
+            Matrix4x4 textMatrix = Matrix4x4.CreateTranslation(n新項目パネルX + 30, y + 30, 0) * parentMatrix;
 
-            if (listMenu[nItem].txMenuItemRight != null)
+            if (listMenu[nItem].txItemName != null)
             {
-                Vector2 size = new(listMenu[nItem].txMenuItemRight!.Width,
-                    listMenu[nItem].txMenuItemRight!.Height);
+                Vector2 size = new(listMenu[nItem].txItemName!.Width,
+                    listMenu[nItem].txItemName!.Height);
                 size *= 1 / CDTXMania.renderScale;
-                listMenu[nItem].txMenuItemRight?.tDraw2DMatrix(textMatrix, size);
+                listMenu[nItem].txItemName?.tDraw2DMatrix(textMatrix, size);
             }
         }
 
@@ -570,21 +568,21 @@ internal partial class CActConfigList : CActivity
         else
         {
             int nIndex = listItems[nItem].GetIndex();
-            if (listMenu[nItem].nParam != nIndex || listMenu[nItem].txParam == null)
+            if (listMenu[nItem].nParam != nIndex || listMenu[nItem].txItemParam == null)
             {
                 stMenuItemRight stm = listMenu[nItem];
                 stm.nParam = nIndex;
-                stm.txParam = RenderText(strParam, 15, Color4.Black);
+                stm.txItemParam = RenderText(strParam, 16, Color4.Black);
                 
                 listMenu[nItem] = stm;
             }
 
-            Matrix4x4 paramMatrix = Matrix4x4.CreateTranslation(n新項目パネルX + 265, y + 24, 0) * parentMatrix;
-            if (listMenu[nItem].txParam != null)
+            Matrix4x4 paramMatrix = Matrix4x4.CreateTranslation(n新項目パネルX + 265, y + 30, 0) * parentMatrix;
+            if (listMenu[nItem].txItemParam != null)
             {
-                Vector2 size = new(listMenu[nItem].txParam!.Width, listMenu[nItem].txParam!.Height);
+                Vector2 size = new(listMenu[nItem].txItemParam!.Width, listMenu[nItem].txItemParam!.Height);
                 size *= 1 / CDTXMania.renderScale;
-                listMenu[nItem].txParam?.tDraw2DMatrix(paramMatrix, size);
+                listMenu[nItem].txItemParam?.tDraw2DMatrix(paramMatrix, size);
             }
         }
 
@@ -612,6 +610,7 @@ internal partial class CActConfigList : CActivity
         SystemAudio,
         SystemGameplay,
         SystemMenu,
+        SystemSkin,
         KeyAssignDrums,
         VelocityDrums,
         KeyAssignGuitar,
@@ -655,14 +654,14 @@ internal partial class CActConfigList : CActivity
     private struct stMenuItemRight
     {
         //	public string strMenuItem;
-        public BaseTexture? txMenuItemRight;
+        public BaseTexture? txItemName;
         public int nParam;
-        public BaseTexture? txParam;
+        public BaseTexture? txItemParam;
         
         public void Dispose()
         {
-            txMenuItemRight?.Dispose();
-            txParam?.Dispose();
+            txItemName?.Dispose();
+            txItemParam?.Dispose();
         }
     }
 
@@ -719,7 +718,10 @@ internal partial class CActConfigList : CActivity
         {
             CDTXMania.ConfigIni.bGuitarEnabled = (((iSystemGRmode.nCurrentlySelectedIndex + 1) / 2) == 1);
             CDTXMania.ConfigIni.bDrumsEnabled = (((iSystemGRmode.nCurrentlySelectedIndex + 1) % 2) == 1);
+        }
 
+        if (eMenuType == EMenuType.SystemSkin)
+        {
             CDTXMania.ConfigIni.strSystemSkinSubfolderFullName = skinSubFolders[nSkinIndex]; // #28195 2012.5.2 yyagi
             CDTXMania.Skin.SetCurrentSkinSubfolderFullName(CDTXMania.ConfigIni.strSystemSkinSubfolderFullName, true);
         }

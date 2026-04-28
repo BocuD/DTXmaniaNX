@@ -79,11 +79,11 @@ internal class CStageConfig : CStage
         menuCursor.sliceRect = new RectangleF(16, 0, 32, 28);
 
         var family = new FontFamily(CDTXMania.ConfigIni.songListFont);
-        configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(family, 18, "System", () => { actList.tSetupItemList_System(); }));
-        configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(family, 18, "Drums", () => { actList.tSetupItemList_Drums(); }));
-        configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(family, 18, "Guitar P1", () => { actList.tSetupItemList_Guitar(); }));
-        configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(family, 18, "Guitar P2", () => { actList.tSetupItemList_Bass(); }));
-        configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(family, 18, "Exit", () => { actList.tSetupItemList_Exit(); }));
+        configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(family, 20, "System", () => { actList.tSetupItemList_System(); }));
+        configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(family, 20, "Drums", () => { actList.tSetupItemList_Drums(); }));
+        configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(family, 20, "Guitar P1", () => { actList.tSetupItemList_Guitar(); }));
+        configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(family, 20, "Guitar P2", () => { actList.tSetupItemList_Bass(); }));
+        configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(family, 20, "Exit", () => { actList.tSetupItemList_Exit(); }));
         configLeftOptionsMenu.UpdateLayout();
         configLeftOptionsMenu.SetSelectedIndex(0);
 
