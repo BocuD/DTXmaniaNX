@@ -232,7 +232,6 @@ internal class CStageTitle : CStage
 			Matrix4x4 mat2 = Matrix4x4.CreateTranslation(x, y, 0f) * scaleMatrix;
 
 			txMenu.tDraw2DMatrix( mat2, new Vector2(MENU_W, MENU_H), new RectangleF( 0, MENU_H * 4, MENU_W, MENU_H ));
-			//txMenu.tDraw2DMatrix( CDTXMania.app.Device, mat2, new Vector2(MENU_W, MENU_H), new RectangleF( 0, MENU_H * 4, MENU_W, MENU_H ));
 		}
 		if( txMenu != null )
 		{

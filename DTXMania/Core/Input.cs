@@ -10,13 +10,14 @@ public class Input
                CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.CY) ||
                CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.RD) ||
                (CDTXMania.Pad.bPressingGB(EPad.P) && CDTXMania.Pad.bPressedGB(EPad.Pick)) ||
-               CDTXMania.InputManager.Keyboard.bKeyPressed(SlimDXKey.Return);
+               CDTXMania.InputManager.Keyboard.bKeyPressed(SlimDXKey.Return) ||
+               CDTXMania.InputManager.Keyboard.bKeyPressed(SlimDXKey.NumberPadEnter);
     }
 
     public bool ActionCancel()
     {
-        return (CDTXMania.InputManager.Keyboard.bKeyPressed(SlimDXKey.Escape) || 
+        return CDTXMania.InputManager.Keyboard.bKeyPressed(SlimDXKey.Escape) || 
                 (CDTXMania.Pad.bPressingGB(EPad.Y) && CDTXMania.Pad.bPressedGB(EPad.Pick)) ||
-                CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.LC)) || CDTXMania.Pad.bPressedGB(EPad.Cancel);
+                CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.LC) || CDTXMania.Pad.bPressedGB(EPad.Cancel);
     }
 }
