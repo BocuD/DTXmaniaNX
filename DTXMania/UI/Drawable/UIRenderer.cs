@@ -22,8 +22,8 @@ public abstract class BaseTexture : IDisposable
     
     public bool notFound = false;
 
-    public abstract float Width { get; }
-    public abstract float Height { get; }
+    public abstract int Width { get; }
+    public abstract int Height { get; }
     public abstract string name { get; }
     
     public BlendMode blendMode = BlendMode.Alpha;
@@ -169,8 +169,8 @@ public abstract class BaseTexture : IDisposable
 
 public sealed class NoneTexture : BaseTexture
 {
-    public override float Width => 0;
-    public override float Height => 0;
+    public override int Width => 0;
+    public override int Height => 0;
     public override string name => "None";
 
     public override void tDraw2DMatrix(Matrix4x4 transformMatrix, Vector2 size, RectangleF clipRect, Color4 color)

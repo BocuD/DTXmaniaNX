@@ -14,8 +14,8 @@ internal sealed class OpenGlTexture : BaseTexture
     private readonly bool _ownsTexture;
     private uint _textureId;
 
-    public override float Width { get; }
-    public override float Height { get; }
+    public override int Width { get; }
+    public override int Height { get; }
     public override string name { get; }
 
     public OpenGlTexture(OpenGlRenderer renderer, uint textureId, int width, int height, string name, bool ownsTexture = true)
