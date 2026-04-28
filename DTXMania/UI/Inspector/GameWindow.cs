@@ -20,7 +20,7 @@ public class GameWindow
     public static unsafe (ImDrawListPtr drawList, Rectangle rect) Draw(ImTextureID? gameTextureId, Vector2 gameTextureSize)
     {
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, Vector2.Zero);
-        ImGui.Begin("Game Window");
+        ImGui.Begin("Game Window", ImGuiWindowFlags.NoFocusOnAppearing);
         Vector2 availableSize = ImGui.GetContentRegionAvail();
         availableSize = new Vector2(MathF.Max(availableSize.X, 1f), MathF.Max(availableSize.Y, 1f));
 

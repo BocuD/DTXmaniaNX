@@ -17,7 +17,7 @@ public class Inspector
     {
         try
         {
-            ImGui.Begin("Inspector");
+            ImGui.Begin("Inspector", ImGuiWindowFlags.NoFocusOnAppearing);
 
             if (!string.IsNullOrEmpty(inspectorTarget))
             {

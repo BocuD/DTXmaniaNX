@@ -69,7 +69,7 @@ namespace DTXMania.UI.OpenGL
         
         public void DrawWindow()
         {
-            if (!ImGui.Begin("Texture Inspector"))
+            if (!ImGui.Begin("Texture Inspector", ImGuiWindowFlags.NoFocusOnAppearing))
             {
                 ImGui.End();
                 return;

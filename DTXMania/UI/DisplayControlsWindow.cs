@@ -1,4 +1,5 @@
 using System.Numerics;
+using DTXMania.UI;
 using Hexa.NET.ImGui;
 
 namespace OpenGLTest;
@@ -8,7 +9,7 @@ internal static class DisplayControlsWindow
     public static void Draw(GlfwOpenGlHost host)
     {
         ImGui.SetNextWindowSize(new Vector2(320, 240), ImGuiCond.FirstUseEver);
-        ImGui.Begin("Display Controls");
+        ImGui.Begin("Display Controls", ImGuiWindowFlags.NoFocusOnAppearing);
         
         ImGui.Text($"Renderer: {host.Renderer.name}");
         ImGui.Text($"FPS: {host.Fps:F1}");

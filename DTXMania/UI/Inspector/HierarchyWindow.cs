@@ -20,7 +20,7 @@ public class HierarchyWindow
     {
         try
         {
-            ImGui.Begin("Hierarchy");
+            ImGui.Begin("Hierarchy", ImGuiWindowFlags.NoFocusOnAppearing);
             
             DrawNode(CDTXMania.persistentUIGroup);
             

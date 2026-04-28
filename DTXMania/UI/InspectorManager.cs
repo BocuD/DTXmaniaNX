@@ -80,8 +80,11 @@ public static class InspectorManager
             logWindowEnabled = !logWindowEnabled;
         }
 
-        ImGuiDockNodeFlags flags = ImGuiDockNodeFlags.PassthruCentralNode;
-        ImGui.DockSpaceOverViewport(ImGui.GetMainViewport(), flags);
+        if (inspectorEnabled)
+        {
+            ImGuiDockNodeFlags flags = ImGuiDockNodeFlags.PassthruCentralNode;
+            ImGui.DockSpaceOverViewport(ImGui.GetMainViewport(), flags);
+        }
 
         UIDrawable? selectedDrawable = null;
         if (!string.IsNullOrEmpty(Inspector.Inspector.inspectorTarget))

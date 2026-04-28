@@ -57,11 +57,17 @@ public class GameStatus
     
     public static void Draw()
     {
-        CDTXMania.InputManager.Keyboard.preventKeyboardInput = ImGui.GetIO().WantCaptureKeyboard || preventGameKeyboardInput;
+        ImGuiIOPtr io = ImGui.GetIO();
+
+        CDTXMania.InputManager.Keyboard.preventKeyboardInput =
+            io.WantCaptureKeyboard || preventGameKeyboardInput;
         
         InspectorManager.hierarchyWindow.target = CDTXMania.StageManager.rCurrentStage.ui;
 
-        ImGui.Begin("Game State");
+        ImGui.Begin("Game State", ImGuiWindowFlags.NoFocusOnAppearing);
+
+        ImGui.Text("Capturing input: " + (io.WantCaptureMouse ? "Mouse " : "") + (io.WantCaptureKeyboard ? "Keyboard" : ""));
+
         if (ImGui.CollapsingHeader("Game State"))
         {
             ImGui.Text("Current Stage: " + CDTXMania.StageManager.rCurrentStage.GetType());

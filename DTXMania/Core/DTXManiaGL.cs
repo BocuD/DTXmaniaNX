@@ -1,6 +1,7 @@
 using DTXMania.Core;
 using DTXMania.UI.Inspector;
 using Hexa.NET.GLFW;
+using Hexa.NET.ImGui;
 using SampleFramework;
 using Silk.NET.OpenGL;
 
@@ -10,6 +11,7 @@ public sealed class DTXManiaGL : OpenGlGame
 {
     public static DTXManiaGL instance;
     private CDTXMania mania;
+    private bool clearImGuiFocusOnNextRender = true;
     
     public override void Init()
     {
@@ -44,6 +46,13 @@ public sealed class DTXManiaGL : OpenGlGame
 
         CDTXMania.renderScale = windowSize.X / GameWindowSize.Width;
         mania.Draw();
+
+        if (clearImGuiFocusOnNextRender)
+        {
+            ImGui.SetWindowFocus((string?)null);
+            clearImGuiFocusOnNextRender = false;
+        }
+
         GameStatus.Draw();
     }
 
@@ -79,5 +88,6 @@ public sealed class DTXManiaGL : OpenGlGame
     public override void WindowHandleUpdated(IntPtr newHandle)
     {
         CDTXMania.InputManager?.UpdateWindowHandle(newHandle);
+        clearImGuiFocusOnNextRender = true;
     }
 }

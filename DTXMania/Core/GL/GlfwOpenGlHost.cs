@@ -49,6 +49,7 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
     private int _windowedWidth = 1280;
     private int _windowedHeight = 720;
     private string _windowTitle = "";
+    private bool _clearImGuiFocusOnNextFrame = true;
 
     private double _lastFrameTime;
     private double _fpsAccumulatedTime;
@@ -175,8 +176,8 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
         renderer.Dispose();
         OpenGlUi.Renderer = null;
         OpenGlUi.TextureFactory = null;
-        BaseTexture.SkiaTextRenderer = null;
-        BaseTexture.Factory = null;
+        BaseTexture.SkiaTextRenderer = null!;
+        BaseTexture.Factory = null!;
         _gameRenderTarget.Dispose();
         _game.Dispose();
 
@@ -276,14 +277,17 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
         
         SetCallbacks(window);
 
+        // Ensure the newly created window receives focus so input starts immediately.
+        GLFW.FocusWindow(window);
+
         GLFW.SwapInterval(_vsyncEnabled ? 1 : 0);
         return window;
     }
     
-    private GLFWkeyfun keyCallback;
-    private GLFWwindowfocusfun focusCallback;
-    private GLFWwindowposfun windowPosCallback;
-    private GLFWwindowsizefun windowSizeCallback;
+    private GLFWkeyfun? keyCallback;
+    private GLFWwindowfocusfun? focusCallback;
+    private GLFWwindowposfun? windowPosCallback;
+    private GLFWwindowsizefun? windowSizeCallback;
 
     private void SetCallbacks(GLFWwindowPtr window)
     {
@@ -316,6 +320,10 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
         GLFW.GetWindowSize(window, ref _windowedWidth, ref _windowedHeight);
         _game.windowPosition  = new Vector2(_windowedX, _windowedY);
         _game.windowSize    = new Vector2(_windowedWidth, _windowedHeight);
+
+        // Focus callbacks may not fire when a window starts already focused.
+        // Seed this state so input polling is enabled immediately on startup/recreate.
+        _game.isFocused = true;
     }
 
     private void InitializeImGui()
@@ -410,6 +418,7 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
         renderer.AttachGraphics(_gl!);
         GLFW.SetWindowTitle(newWindow, _windowTitle);
         InitializeImGui();
+        _clearImGuiFocusOnNextFrame = true;
 
         _game.WindowHandleUpdated(GetWindowHandle());
 
@@ -443,6 +452,12 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
             ImGuiImplOpenGL3.NewFrame();
             ImGuiImplGLFW.NewFrame();
             ImGui.NewFrame();
+
+            if (_clearImGuiFocusOnNextFrame)
+            {
+                ImGui.SetWindowFocus((string?)null);
+                _clearImGuiFocusOnNextFrame = false;
+            }
 
             int targetWidth;
             int targetHeight;

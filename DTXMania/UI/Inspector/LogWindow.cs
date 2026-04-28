@@ -74,7 +74,7 @@ public class LogWindow : TraceListener
 
     public void DrawWindow()
     {
-        ImGui.Begin("Log Window");
+        ImGui.Begin("Log Window", ImGuiWindowFlags.NoFocusOnAppearing);
 
         if (ImGui.Button("Clear"))
         {

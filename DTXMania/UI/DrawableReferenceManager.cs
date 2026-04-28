@@ -37,7 +37,7 @@ public class DrawableTracker
 
     public static void DrawWindow()
     {
-        if (ImGui.Begin("Drawables"))
+        if (ImGui.Begin("Drawables", ImGuiWindowFlags.NoFocusOnAppearing))
         {
             ImGui.Text($"Count: {drawables.Count}");
             ImGui.SameLine();
