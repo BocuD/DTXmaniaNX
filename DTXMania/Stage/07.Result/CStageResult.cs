@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Numerics;
 using DTXMania.Core;
+using DTXMania.Core.Framework;
 using DTXMania.UI;
 using DTXMania.UI.Drawable;
 using FDK;
@@ -130,22 +131,22 @@ internal class CStageResult : CStage
 		
 		if (!string.IsNullOrWhiteSpace(strSongTitle))
 		{
-			UIText songNameText = ui.AddChild(new UIText(strSongTitle, 35));
+			UIText songNameText = ui.AddChild(new UIText(strSongTitle, 30));
 			songNameText.fillColor = Color4.Black;
 			songNameText.outlineColor = Color4.White;
 			songNameText.name = "SongName";
 			songNameText.font = UIFonts.FallbackFont;
-			songNameText.position = new Vector3(435, 600, 0);
+			songNameText.position = new Vector3(490, 600, 0);
 		}
 
 		if (!string.IsNullOrWhiteSpace(strArtistName))
 		{
-			UIText artistNameText = ui.AddChild(new UIText(strArtistName, 25));
+			UIText artistNameText = ui.AddChild(new UIText(strArtistName, 20));
 			artistNameText.fillColor = Color4.Black;
 			artistNameText.outlineColor = Color4.White;
 			artistNameText.name = "ArtistName";
 			artistNameText.font = UIFonts.FallbackFont;
-			artistNameText.position = new Vector3(435, 650, 0);
+			artistNameText.position = new Vector3(490, 640, 0);
 		}
 		
 		string path = CDTXMania.DTX.strFolderName + CDTXMania.DTX.PREIMAGE;
@@ -160,7 +161,7 @@ internal class CStageResult : CStage
 		if (CDTXMania.GetCurrentInstrument() == 0)
 		{
 			var drums = ui.AddChild(new UIPlayerNameplate(0));
-			drums.position = new Vector3(148, 272, 0);
+			drums.position = new Vector3(191, 272, 0);
 		}
 		else
 		{
