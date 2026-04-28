@@ -55,7 +55,7 @@ internal class CActPerfDrumsDanger : CActPerfCommonDanger
 			col.Alpha = num / 255.0f;　　//
 			for (int i = 0; i < 2; i++)
 			{
-				tx黒.tDraw2D(CDTXMania.app.Device, 0, 0, col);
+				tx黒.tDraw2D(0, 0, col);
 			}
                 
 		}

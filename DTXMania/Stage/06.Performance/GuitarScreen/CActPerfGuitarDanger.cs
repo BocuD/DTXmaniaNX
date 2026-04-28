@@ -56,7 +56,7 @@ internal class CActPerfGuitarDanger : CActPerfCommonDanger
 						int nTransparency = n透明度MIN + ( ( d < n波長 / 2 ) ? ( n透明度MAX - n透明度MIN ) * d / ( n波長 / 2 ) : ( n透明度MAX - n透明度MIN ) * ( n波長 - d ) / ( n波長 / 2 ) );		// 60-200
 						Color4 col = Color4.White;
 						col.Alpha = nTransparency / 255.0f;
-						txDANGER.tDraw2D( CDTXMania.app.Device, nGaugeX[ nPart ], 0 );
+						txDANGER.tDraw2D(nGaugeX[ nPart ], 0 );
 					}
 				}
 			}

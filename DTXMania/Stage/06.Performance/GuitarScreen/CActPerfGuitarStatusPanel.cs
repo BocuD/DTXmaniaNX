@@ -98,7 +98,7 @@ internal class CActPerfGuitarStatusPanel : CActPerfCommonStatusPanel
                         bCLASSIC = true;
                     }
 
-                    txSkillPanel.tDraw2D(CDTXMania.app.Device, nBodyX[i], nBodyY);
+                    txSkillPanel.tDraw2D(nBodyX[i], nBodyY);
 
                     tDrawSmallNumber(80 + nBodyX[i], 72 + nBodyY,
                         $"{CDTXMania.stagePerfGuitarScreen.nHitCount_ExclAuto[i].Perfect,4:###0}");
@@ -164,14 +164,14 @@ internal class CActPerfGuitarStatusPanel : CActPerfCommonStatusPanel
                     //Draw achievement rate
                     if (txSkillMax != null && CDTXMania.stagePerfGuitarScreen.actStatusPanel.db現在の達成率[i] >= 100.0)
                     {
-                        txSkillMax.tDraw2D(CDTXMania.app.Device, 127 + nBodyX[i], 277 + nBodyY);
+                        txSkillMax.tDraw2D(127 + nBodyX[i], 277 + nBodyY);
                     }
                     else
                     {
                         tDrawLargeNumber(58 + nBodyX[i], 277 + nBodyY,
                             $"{CDTXMania.stagePerfGuitarScreen.actStatusPanel.db現在の達成率[i],6:##0.00}");
                         if (txPercent != null)
-                            txPercent.tDraw2D(CDTXMania.app.Device, 217 + nBodyX[i], 287 + nBodyY);
+                            txPercent.tDraw2D(217 + nBodyX[i], 287 + nBodyY);
                     }
 
                     //Draw Lag Counters if Lag Display is on
@@ -205,7 +205,7 @@ internal class CActPerfGuitarStatusPanel : CActPerfCommonStatusPanel
 
 
                     if (txDifficultyBadge != null)
-                        txDifficultyBadge.tDraw2D(CDTXMania.app.Device, 14 + nBodyX[i], 266 + nBodyY,
+                        txDifficultyBadge.tDraw2D(14 + nBodyX[i], 266 + nBodyY,
                             new RectangleF(rectDiffPanelPoint.X, rectDiffPanelPoint.Y, 60, 60));
                     tDisplayLevelNumber((bCLASSIC == true ? 26 : 18) + nBodyX[i], 290 + nBodyY, str);
                 }

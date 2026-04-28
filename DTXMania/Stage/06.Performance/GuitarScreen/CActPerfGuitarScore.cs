@@ -95,12 +95,12 @@ internal class CActPerfGuitarScore : CActPerfCommonScore
                         }
                         if (txScore != null)
                         {
-                            txScore.tDraw2D(CDTXMania.app.Device, n本体X[j] + (i * 34), 28 + n本体Y, rectangle);
+                            txScore.tDraw2D(n本体X[j] + (i * 34), 28 + n本体Y, rectangle);
                         }
                     }
                     if (txScore != null)
                     {
-                        txScore.tDraw2D(CDTXMania.app.Device, n本体X[j], n本体Y, new RectangleF(0, 50, 86, 28));
+                        txScore.tDraw2D(n本体X[j], n本体Y, new RectangleF(0, 50, 86, 28));
                     }
                 }
             }

@@ -2730,11 +2730,11 @@ internal abstract class CStagePerfCommonScreen : CStage
         {
             if (CDTXMania.DTX.bHasChips.Guitar)
             {
-                txWailingFrame.tDraw2D(CDTXMania.app.Device, GtWailingFrameX, GtWailingFrameY);
+                txWailingFrame.tDraw2D(GtWailingFrameX, GtWailingFrameY);
             }
             if (CDTXMania.DTX.bHasChips.Bass)
             {
-                txWailingFrame.tDraw2D(CDTXMania.app.Device, BsWailingFrameX, BsWailingFrameY);
+                txWailingFrame.tDraw2D(BsWailingFrameX, BsWailingFrameY);
             }
         }
     }
@@ -3548,7 +3548,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                         
                         //todo: what the fuck is vcScaleRatio
                         //txChip.vcScaleRatio.Y = 1f;
-                        txChip.tDraw2D(CDTXMania.app.Device, 0x127 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + pChip.nDistanceFromBar.Drums) - 1) : ((nJudgeLinePosY.Drums - pChip.nDistanceFromBar.Drums) - 1), new RectangleF(0, 772, l_drumPanelWidth, 2));
+                        txChip.tDraw2D(0x127 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + pChip.nDistanceFromBar.Drums) - 1) : ((nJudgeLinePosY.Drums - pChip.nDistanceFromBar.Drums) - 1), new RectangleF(0, 772, l_drumPanelWidth, 2));
                     }
                     break;
                 #endregion
@@ -4155,7 +4155,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                             int xo = (inst == EInstrumentPart.GUITAR) ? 88 : 959;
                             Color4 col = Color4.White;
                             col.Alpha = pChip.nTransparency / 255.0f;
-                            txChip.tDraw2D(CDTXMania.app.Device, xo, y - 2, new RectangleF(0, 10, 196, 10), col);
+                            txChip.tDraw2D(xo, y - 2, new RectangleF(0, 10, 196, 10), col);
                         }
                         Rectangle rc = new(rectOpenOffsetX, chipHeight, chipWidth, 10);
                         int x;
@@ -4225,7 +4225,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                                         //txChip.nTransparency = pChip.nTransparency;
                                         Color4 color = Color4.White;
                                         color.Alpha = pChip.nTransparency / 255.0f;
-                                        txChip.tDraw2D(CDTXMania.app.Device, num8, y - chipHeight / 2, rect1, color);
+                                        txChip.tDraw2D(num8, y - chipHeight / 2, rect1, color);
                                     }
                                     if (pChip.bIsLongNote)
                                     {
@@ -4244,7 +4244,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                                         //txChip.vcScaleRatio.Y = 1f * num3 / rectangle2.Height;
                                         Color4 col = Color4.White;
                                         col.Alpha = 0.5f;
-                                        txChip.tDraw2D(CDTXMania.app.Device, num8, y - (CDTXMania.ConfigIni.bReverse[(int)inst] ? num3 : 0), rectangle2, col);
+                                        txChip.tDraw2D(num8, y - (CDTXMania.ConfigIni.bReverse[(int)inst] ? num3 : 0), rectangle2, col);
                                     }
                                 }
                             }
@@ -4688,7 +4688,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                     l_drumPanelWidth = 447;
                     l_xOffset = 72;
                 }
-                txHitBar.tDraw2D(CDTXMania.app.Device, 295 + l_xOffset, y, new RectangleF(0, 0, l_drumPanelWidth, 6));
+                txHitBar.tDraw2D(295 + l_xOffset, y, new RectangleF(0, 0, l_drumPanelWidth, 6));
             }
             if (CDTXMania.ConfigIni.bShowPerformanceInformation)
                 actLVFont.tDrawString(295, (CDTXMania.ConfigIni.bReverse.Drums ? y - 20 : y + 8), CDTXMania.ConfigIni.nJudgeLine.Drums.ToString());

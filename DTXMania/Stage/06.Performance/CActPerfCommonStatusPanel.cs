@@ -440,7 +440,7 @@ internal class CActPerfCommonStatusPanel : CActivity
                     }
                     if (txLevelNumber != null)
                     {
-                        txLevelNumber.tDraw2D(CDTXMania.app.Device, x, y, rectangle);
+                        txLevelNumber.tDraw2D(x, y, rectangle);
                     }
                     break;
                 }
@@ -462,7 +462,7 @@ internal class CActPerfCommonStatusPanel : CActivity
                     RectangleF rectangle = new(stSmallTextRects[i].pt.X, stSmallTextRects[i].pt.Y, 20, 26);
                     if (txNumberFontSheet[0] != null)
                     {
-                        txNumberFontSheet[0].tDraw2D(CDTXMania.app.Device, x, y, rectangle);
+                        txNumberFontSheet[0].tDraw2D(x, y, rectangle);
                     }
                     break;
                 }
@@ -486,7 +486,7 @@ internal class CActPerfCommonStatusPanel : CActivity
                     }
                     if (txNumberFontSheet[1] != null)
                     {
-                        txNumberFontSheet[1].tDraw2D(CDTXMania.app.Device, x, y, rectangle);
+                        txNumberFontSheet[1].tDraw2D(x, y, rectangle);
                     }
                     break;
                 }
@@ -517,7 +517,7 @@ internal class CActPerfCommonStatusPanel : CActivity
                         
                     if (txLagHitCount != null)
                     {
-                        txLagHitCount.tDraw2D(CDTXMania.app.Device, x - currTextPosStructArray[i].rect.Width, y, rectangle);
+                        txLagHitCount.tDraw2D(x - currTextPosStructArray[i].rect.Width, y, rectangle);
                     }
                     break;
                 }

@@ -517,7 +517,7 @@ internal class CActResultParameterPanel : CActivity
                     bCLASSIC = true;
                 }
                     
-                txSkillPanel.tDraw2D(CDTXMania.app.Device, n本体X[j], n本体Y);
+                txSkillPanel.tDraw2D(n本体X[j], n本体Y);
 
                 tDrawStringSmall(80 + n本体X[j], 72 + n本体Y, string.Format("{0,4:###0}", stageResult.stPerformanceEntry[j].nPerfectCount_ExclAuto));
                 tDrawStringSmall(80 + n本体X[j], 102 + n本体Y, string.Format("{0,4:###0}", stageResult.stPerformanceEntry[j].nGreatCount_ExclAuto));
@@ -538,30 +538,30 @@ internal class CActResultParameterPanel : CActivity
                 //Conditional checks for MAX
                 if(txSkillMax != null && stageResult.stPerformanceEntry[j].dbPerformanceSkill >= 100.0)
                 {
-                    txSkillMax.tDraw2D(CDTXMania.app.Device, 127 + n本体X[j], 277 + n本体Y);
+                    txSkillMax.tDraw2D(127 + n本体X[j], 277 + n本体Y);
                 }
                 else
                 {
                     tDrawStringLarge(58 + n本体X[j], 277 + n本体Y, string.Format("{0,6:##0.00}", stageResult.stPerformanceEntry[j].dbPerformanceSkill));
                     if(txPercent != null)
-                        txPercent.tDraw2D(CDTXMania.app.Device, 217 + n本体X[j], 287 + n本体Y);
+                        txPercent.tDraw2D(217 + n本体X[j], 287 + n本体Y);
                 }
 
                 tDrawStringLarge(88 + n本体X[j], 363 + n本体Y, $"{stageResult.stPerformanceEntry[j].dbGameSkill,6:##0.00}");
                     
                 if(tx難易度パネル != null)
-                    tx難易度パネル.tDraw2D(CDTXMania.app.Device, 14 + n本体X[j], 266 + n本体Y, new RectangleF( rectDiffPanelPoint.X, rectDiffPanelPoint.Y, 60, 60));
+                    tx難易度パネル.tDraw2D(14 + n本体X[j], 266 + n本体Y, new RectangleF( rectDiffPanelPoint.X, rectDiffPanelPoint.Y, 60, 60));
                 tレベル数字描画((bCLASSIC == true ? 26 : 18) + n本体X[j], 290 + n本体Y, str);
 
                 //Draw Progress Bar Panels first
                 if(txProgressBarPanel != null)
                 {
-                    txProgressBarPanel.tDraw2D(CDTXMania.app.Device, 255 + n本体X[j], 1 + n本体Y);
+                    txProgressBarPanel.tDraw2D(255 + n本体X[j], 1 + n本体Y);
                 }
 
                 //Draw Progress Bars
-                txCurrentProgressBar[j].tDraw2D(CDTXMania.app.Device, 256 + n本体X[j], 2 + n本体Y);
-                txPreviousBestProgressBar[j].tDraw2D(CDTXMania.app.Device, 270 + n本体X[j], 2 + n本体Y);
+                txCurrentProgressBar[j].tDraw2D(256 + n本体X[j], 2 + n本体Y);
+                txPreviousBestProgressBar[j].tDraw2D(270 + n本体X[j], 2 + n本体Y);
 
                 string strScore = string.Format("{0,7:######0}", stageResult.stPerformanceEntry[j].nScore);
                 for (int i = 0; i < 7; i++)
@@ -579,19 +579,19 @@ internal class CActResultParameterPanel : CActivity
                     }
                     if (txScore != null)
                     {
-                        txScore.tDraw2D(CDTXMania.app.Device, nスコアX[j] + (i * 34), 58, rectangle);
+                        txScore.tDraw2D(nスコアX[j] + (i * 34), 58, rectangle);
                     }
                 }
                 if (txScore != null)
                 {
-                    txScore.tDraw2D(CDTXMania.app.Device, nスコアX[j], 30, new RectangleF(0, 50, 86, 28));
+                    txScore.tDraw2D(nスコアX[j], 30, new RectangleF(0, 50, 86, 28));
                 }
 
                 for (int i = 0; i < 1; i++)
                 {
                     if (stageResult.bNewRecordSkill[i])
                     {
-                        txNewRecord.tDraw2D( CDTXMania.app.Device, 118 + n本体X[j], 322 + n本体Y );
+                        txNewRecord.tDraw2D(118 + n本体X[j], 322 + n本体Y );
                     }
                 }
                 if (ct表示用.nCurrentValue >= 900)
@@ -698,7 +698,7 @@ internal class CActResultParameterPanel : CActivity
                     RectangleF rectangle = new(stSmallStringPosition[i].pt.X, stSmallStringPosition[i].pt.Y, 20, 26);
                     if (txCharacter[0] != null)
                     {
-                        txCharacter[0].tDraw2D(CDTXMania.app.Device, x, y, rectangle);
+                        txCharacter[0].tDraw2D(x, y, rectangle);
                     }
                     break;
                 }
@@ -722,7 +722,7 @@ internal class CActResultParameterPanel : CActivity
                     }
                     if( txCharacter[ 0 ] != null )
                     {
-                        txCharacter[ 0 ].tDraw2D( CDTXMania.app.Device, x, y, rectangle );
+                        txCharacter[ 0 ].tDraw2D(x, y, rectangle );
                     }
                     break;
                 }
@@ -749,7 +749,7 @@ internal class CActResultParameterPanel : CActivity
                     }
                     if( txCharacter[ 1 ] != null )
                     {
-                        txCharacter[ 1 ].tDraw2D( CDTXMania.app.Device, x, y, rectangle );
+                        txCharacter[ 1 ].tDraw2D(x, y, rectangle );
                     }
                     break;
                 }
@@ -778,7 +778,7 @@ internal class CActResultParameterPanel : CActivity
 
                     if (txLagHitCount != null)
                     {
-                        txLagHitCount.tDraw2D(CDTXMania.app.Device, x - currTextPosStructArray[i].rect.Width, y, rectangle);
+                        txLagHitCount.tDraw2D(x - currTextPosStructArray[i].rect.Width, y, rectangle);
                     }
                     break;
                 }
@@ -848,7 +848,7 @@ internal class CActResultParameterPanel : CActivity
                     }
                     if (txCharacter[2] != null)
                     {
-                        txCharacter[2].tDraw2D(CDTXMania.app.Device, x, y, rc画像内の描画領域);
+                        txCharacter[2].tDraw2D(x, y, rc画像内の描画領域);
                     }
                     break;
                 }
@@ -894,7 +894,7 @@ internal class CActResultParameterPanel : CActivity
                     }
                     if (tx難易度用数字 != null)
                     {
-                        tx難易度用数字.tDraw2D(CDTXMania.app.Device, x, y, rectangle);
+                        tx難易度用数字.tDraw2D(x, y, rectangle);
                     }
                     break;
                 }

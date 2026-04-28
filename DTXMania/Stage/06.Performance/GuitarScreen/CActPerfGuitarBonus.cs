@@ -72,7 +72,7 @@ internal class CActPerfGuitarBonus : CActivity
             && txBonus100 != null)
         {
             int nCounterValue = ctBonusScoreAnimationCounter[(int)eInstrumentPart].nCurrentValue;                
-            txBonus100.tDraw2D(CDTXMania.app.Device, pt.X, pt.Y - nCounterValue / 25);
+            txBonus100.tDraw2D(pt.X, pt.Y - nCounterValue / 25);
         }
     }
 

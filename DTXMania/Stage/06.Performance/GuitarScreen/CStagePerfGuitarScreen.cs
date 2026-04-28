@@ -127,8 +127,8 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 
 		if (tx判定画像anime != null && txBonusEffect != null)
 		{
-			tx判定画像anime.tDraw2D(CDTXMania.app.Device, 1280, 720);
-			txBonusEffect.tDraw2D(CDTXMania.app.Device, 1280, 720);
+			tx判定画像anime.tDraw2D(1280, 720);
+			txBonusEffect.tDraw2D(1280, 720);
 		}
 
 		ePhaseID = EPhase.Common_FadeIn;
@@ -443,7 +443,7 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 				int y = CDTXMania.ConfigIni.bReverse.Guitar ? nJudgeLinePosY.Guitar : nJudgeLinePosY.Guitar - 1;
 
 				if ( txHitBar != null && CDTXMania.ConfigIni.bJudgeLineDisp.Guitar )
-					txHitBar.tDraw2D( CDTXMania.app.Device, 80, y, new RectangleF( 0, 0, 252, 6 ) );
+					txHitBar.tDraw2D(80, y, new RectangleF( 0, 0, 252, 6 ) );
 
 				if (CDTXMania.ConfigIni.bShowPerformanceInformation)
 					actLVFont.tDrawString(310, (CDTXMania.ConfigIni.bReverse.Guitar ? y + 8 : y - 20), CDTXMania.ConfigIni.nJudgeLine.Guitar.ToString());
@@ -453,7 +453,7 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 				int y = CDTXMania.ConfigIni.bReverse.Bass ? nJudgeLinePosY.Bass : nJudgeLinePosY.Bass - 1;
 
 				if ( txHitBar != null && CDTXMania.ConfigIni.bJudgeLineDisp.Bass )
-					txHitBar.tDraw2D(CDTXMania.app.Device, 950, y, new RectangleF(0, 0, 252, 6));
+					txHitBar.tDraw2D(950, y, new RectangleF(0, 0, 252, 6));
 
 				if (CDTXMania.ConfigIni.bShowPerformanceInformation)
 					actLVFont.tDrawString(1180, (CDTXMania.ConfigIni.bReverse.Bass ? y + 8 : y - 20), CDTXMania.ConfigIni.nJudgeLine.Bass.ToString());
@@ -677,7 +677,7 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 					{
 						//todo: what the fuck is vcScaleRatio
 						//txChip.vcScaleRatio.Y = 1f;
-						txChip.tDraw2D( CDTXMania.app.Device, drawX, ( y - numA ) + numC, rect );
+						txChip.tDraw2D(drawX, ( y - numA ) + numC, rect );
 					}
 				}
 			}
@@ -875,7 +875,7 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 					{
 						//todo: what the fuck is vcScaleRatio
 						//txChip.vcScaleRatio.Y = 1.0f;
-						txChip.tDraw2D(CDTXMania.app.Device, drawX, (y - numA) + numC, rect);
+						txChip.tDraw2D(drawX, (y - numA) + numC, rect);
 					}
 				}
 			}
@@ -921,7 +921,7 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 				{
 					//todo: what the fuck is vcScaleRatio
 					//txChip.vcScaleRatio.Y = 1f;
-					txChip.tDraw2D(CDTXMania.app.Device, 88, y, new RectangleF(0, 20, 193, 2));
+					txChip.tDraw2D(88, y, new RectangleF(0, 20, 193, 2));
 				}
 				if ( configIni.bShowPerformanceInformation )
 				{
@@ -936,7 +936,7 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 				{
 					//todo: what the fuck is vcScaleRatio
 					//txChip.vcScaleRatio.Y = 1f;
-					txChip.tDraw2D(CDTXMania.app.Device, 959, y, new RectangleF(0, 20, 193, 2));
+					txChip.tDraw2D(959, y, new RectangleF(0, 20, 193, 2));
 				}
 					    
 
@@ -971,8 +971,8 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 				{
 					//todo: what the fuck is vcScaleRatio
 					//txChip.vcScaleRatio.Y = 1.0f;
-					txChip.tDraw2D(CDTXMania.app.Device, 88, y - 1, new RectangleF(0, 20, 193, 2));
-					txChip.tDraw2D(CDTXMania.app.Device, 88, y + 1, new RectangleF(0, 20, 193, 2));
+					txChip.tDraw2D(88, y - 1, new RectangleF(0, 20, 193, 2));
+					txChip.tDraw2D(88, y + 1, new RectangleF(0, 20, 193, 2));
 				}
 			}
 			y = CDTXMania.ConfigIni.bReverse.Bass ? ((nJudgeLinePosY.Bass - nDistanceFromBarBass) + 0) : ((nJudgeLinePosY.Bass + nDistanceFromBarBass) + 9);
@@ -985,8 +985,8 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 				{
 					//todo: what the fuck is vcScaleRatio
 					//txChip.vcScaleRatio.Y = 1.0f;
-					txChip.tDraw2D(CDTXMania.app.Device, 959, y - 1, new RectangleF(0, 20, 193, 2));
-					txChip.tDraw2D(CDTXMania.app.Device, 959, y + 1, new RectangleF(0, 20, 193, 2));
+					txChip.tDraw2D(959, y - 1, new RectangleF(0, 20, 193, 2));
+					txChip.tDraw2D(959, y + 1, new RectangleF(0, 20, 193, 2));
 				}
 			}
 		}

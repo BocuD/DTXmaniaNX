@@ -109,7 +109,7 @@ internal abstract class CActPerfChipFireGB : CActivity
 					col.Alpha = transparency / 255.0f;
 					//todo: commented out vcscaleratio
 					//tx火花[ j % 5 ].vcScaleRatio = new Vector3( scale, scale, 1f );
-					tx火花[ j % 5 ].tDraw2D(CDTXMania.app.Device, x, y, col);
+					tx火花[ j % 5 ].tDraw2D(x, y, col);
 				}
 			}
 		}

@@ -731,14 +731,14 @@ internal class CStageSongLoading : CStage
                             DTXLevelDeci = ((cdtx.LEVEL[j] - DTXLevel * 10) * 10) + cdtx.LEVELDEC[j];
                         }
         
-                        txLevel.tDraw2D(CDTXMania.app.Device, 282 + k, 243, new RectangleF(1000, 92, 30, 38));
+                        txLevel.tDraw2D(282 + k, 243, new RectangleF(1000, 92, 30, 38));
                         tDrawStringLarge(187 + k, 152, $"{DTXLevel:0}");
                         tDrawStringLarge(307 + k, 152, $"{DTXLevelDeci:00}");
                     }
 
                     if (txPartPanel != null)
                     {
-                        txPartPanel.tDraw2D(CDTXMania.app.Device, 191 + k, 52, new RectangleF(0, j * 50, 262, 50));
+                        txPartPanel.tDraw2D(191 + k, 52, new RectangleF(0, j * 50, 262, 50));
                     }
 
                     //this.txJacket.Dispose();
@@ -953,7 +953,7 @@ internal class CStageSongLoading : CStage
                 RectangleF rc画像内の描画領域 = new(st大文字位置[j].pt.X, st大文字位置[j].pt.Y, 100, 130);
                 if (txLevel != null)
                 {
-                    txLevel.tDraw2D(CDTXMania.app.Device, x, y, rc画像内の描画領域);
+                    txLevel.tDraw2D(x, y, rc画像内の描画領域);
                 }
 
                 break;
@@ -1027,7 +1027,7 @@ internal class CStageSongLoading : CStage
 
         if (txDifficultyPanel != null)
         {
-            txDifficultyPanel.tDraw2D(CDTXMania.app.Device, nX, nY, rect);
+            txDifficultyPanel.tDraw2D(nX, nY, rect);
         }
     }
 

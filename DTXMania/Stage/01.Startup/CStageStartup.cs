@@ -113,7 +113,7 @@ internal class CStageStartup : CStage
 
 		base.OnUpdateAndDraw();
 		
-		txBackground?.tDraw2D( CDTXMania.app.Device, 0, 0 );
+		txBackground?.tDraw2D(0, 0 );
 
 		#region [ this.str現在進行中 の決定 ]
 		//-----------------

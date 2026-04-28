@@ -337,7 +337,7 @@ internal class CActPerfDrumsPad : CActivity
                     }
                     if (txPad != null)
                     {
-                        txPad.tDraw2D(CDTXMania.app.Device, x, y, st基本位置[index].rc);
+                        txPad.tDraw2D(x, y, st基本位置[index].rc);
 
                         //if (CDTXMania.ConfigIni.eNumOfLanes.Drums == EType.B && index == 8)
                         //{
@@ -354,7 +354,7 @@ internal class CActPerfDrumsPad : CActivity
                         //txPadFlush.nTransparency = (stパッド状態[index].n明るさ * 50) + 0;
                         Color4 color = Color4.White;
                         color.Alpha = ((stパッド状態[index].n明るさ * 50) + 0 / 255.0f);
-                        txPadFlush.tDraw2D(CDTXMania.app.Device, x, y, st基本位置[index].rc, color);
+                        txPadFlush.tDraw2D(x, y, st基本位置[index].rc, color);
 
                         //if (CDTXMania.ConfigIni.eNumOfLanes.Drums == EType.B && index == 8)
                         //{
@@ -386,7 +386,7 @@ internal class CActPerfDrumsPad : CActivity
                     }
                     if (txBonus != null && CDTXMania.ConfigIni.bShowScore)
                     {
-                        txBonus.tDraw2D(CDTXMania.app.Device, 160, 80);
+                        txBonus.tDraw2D(160, 80);
                         //if (this.stボーナス[i].ctUpdate.nCurrentValue >= 765)
                         //{
                         //    int n = this.stボーナス[i].ctUpdate.nCurrentValue - 765;

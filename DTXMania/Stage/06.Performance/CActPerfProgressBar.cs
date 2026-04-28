@@ -176,23 +176,23 @@ internal class CActPerfProgressBar : CActivity
 			if (bIsCalledFromOutsidePerformance)
 			{
 				num += (int)((-60 - p表示位置[(int)ePart].X) * Math.Cos(Math.PI / 200.0 * ct登場用.nCurrentValue));
-				txパネル用.tDraw2D(CDTXMania.app.Device, num - 20, num2 - 20);
+				txパネル用.tDraw2D(num - 20, num2 - 20);
 			}
 
 			if (ePart == EInstrumentPart.DRUMS)
 			{
-				txProgressBarBackgroundDrums.tDraw2D(CDTXMania.app.Device, num - 2, num2 - 15);
+				txProgressBarBackgroundDrums.tDraw2D(num - 2, num2 - 15);
 			}
 			else
 			{
-				txProgressBarBackgroundGuitar.tDraw2D(CDTXMania.app.Device, num - 2, num2 - 70);
+				txProgressBarBackgroundGuitar.tDraw2D(num - 2, num2 - 70);
 			}
 
-			txBackground.tDraw2D(CDTXMania.app.Device, num, num2);
+			txBackground.tDraw2D(num, num2);
 
 			if (!ReferenceEquals(txBestProgressBarRecord[(int)ePart], BaseTexture.None))
 			{
-				txBestProgressBarRecord[(int)ePart].tDraw2D(CDTXMania.app.Device, num + 22, num2);
+				txBestProgressBarRecord[(int)ePart].tDraw2D(num + 22, num2);
 			}
 
 			if (epartプレイ楽器 == EInstrumentPart.UNKNOWN)
@@ -202,7 +202,7 @@ internal class CActPerfProgressBar : CActivity
 
 			if (!bIsCalledFromOutsidePerformance)
 			{
-				tx縦線.tDraw2D(CDTXMania.app.Device, num + nWidth, num2);
+				tx縦線.tDraw2D(num + nWidth, num2);
 				int num3 = (int)(((CTimerBase)CDTXMania.Timer).n現在時刻ms / (double)nLastChipTime * nHeightFactor);
 				if (num3 > nHeight)
 				{
@@ -211,7 +211,7 @@ internal class CActPerfProgressBar : CActivity
 
 				RectangleF rectangle = new(0, 0, tx進捗.Width, num3);
 				num2 = nHeight - num3 + pBarPosition[(int)ePart].Y;
-				tx進捗.tDraw2D(CDTXMania.app.Device, num, num2, rectangle);
+				tx進捗.tDraw2D(num, num2, rectangle);
 			}
 
 			for (int i = 0; i < nSectionIntervalCount; i++)
@@ -222,7 +222,7 @@ internal class CActPerfProgressBar : CActivity
 				{
 					if ((i + 1) * nLastChipTime / nSectionIntervalCount - 1 > ((CTimerBase)CDTXMania.Timer).n現在時刻ms && !bIsCalledFromOutsidePerformance)
 					{
-						tx灰.tDraw2D(CDTXMania.app.Device, num, num2, c区間.rectDrawingFrame);
+						tx灰.tDraw2D(num, num2, c区間.rectDrawingFrame);
 					}
 					else
 					{
@@ -235,18 +235,18 @@ internal class CActPerfProgressBar : CActivity
 						{
 							if (c区間.nHitCount == c区間.nChipCount)
 							{
-								tx黄.tDraw2D(CDTXMania.app.Device, num, num2, c区間.rectDrawingFrame);
+								tx黄.tDraw2D(num, num2, c区間.rectDrawingFrame);
 							}
 							else
 							{
-								tx青.tDraw2D(CDTXMania.app.Device, num, num2, c区間.rectDrawingFrame);
+								tx青.tDraw2D(num, num2, c区間.rectDrawingFrame);
 							}
 						}
 					}
 				}
 				else if (c区間.nChipCount > 0)
 				{
-					tx灰.tDraw2D(CDTXMania.app.Device, num, num2, c区間.rectDrawingFrame);
+					tx灰.tDraw2D(num, num2, c区間.rectDrawingFrame);
 				}
 			}
 		}

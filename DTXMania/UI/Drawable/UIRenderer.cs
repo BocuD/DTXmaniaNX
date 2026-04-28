@@ -4,7 +4,6 @@ using DTXMania.Core;
 using DTXMania.Core.Framework;
 using DTXMania.UI.Text;
 using Hexa.NET.ImGui;
-using SharpDX.Direct3D9;
 
 namespace DTXMania.UI.Drawable;
 
@@ -55,25 +54,25 @@ public abstract class BaseTexture : IDisposable
         }
     }
     
-    public void tDraw2D(Device device, float x, float y)
+    public void tDraw2D(float x, float y)
     {
         Matrix4x4 transformMatrix = Matrix4x4.CreateTranslation(x, y, 0);
         tDraw2DMatrix(transformMatrix * scaleMatrix);
     }
     
-    public void tDraw2D(Device device, float x, float y, Color4 color)
+    public void tDraw2D(float x, float y, Color4 color)
     {
         Matrix4x4 transformMatrix = Matrix4x4.CreateTranslation(x, y, 0);
         tDraw2DMatrix(transformMatrix * scaleMatrix, new Vector2(Width, Height), new RectangleF(0, 0, Width, Height), color);
     }
     
-    public void tDraw2D(Device device, float x, float y, RectangleF clipRect)
+    public void tDraw2D(float x, float y, RectangleF clipRect)
     {
         Matrix4x4 transformMatrix = Matrix4x4.CreateTranslation(x, y, 0);
         tDraw2DMatrix(transformMatrix * scaleMatrix, new Vector2(clipRect.Width, clipRect.Height), clipRect);
     }
     
-    public void tDraw2D(Device device, float x, float y, RectangleF clipRect, Color4 color)
+    public void tDraw2D(float x, float y, RectangleF clipRect, Color4 color)
     {
         Matrix4x4 transformMatrix = Matrix4x4.CreateTranslation(x, y, 0);
         tDraw2DMatrix(transformMatrix * scaleMatrix, new Vector2(clipRect.Width, clipRect.Height), clipRect, color);

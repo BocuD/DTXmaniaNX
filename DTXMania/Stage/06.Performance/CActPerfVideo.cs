@@ -320,7 +320,7 @@ internal class CActPerfVideo : CActivity
             if (IsDrums() && stageDrum.txBonusEffect != null)
             {
                 stageDrum.txBonusEffect.blendMode = BlendMode.Additive;
-                stageDrum.txBonusEffect.tDraw2D(CDTXMania.app.Device, 0, -2,
+                stageDrum.txBonusEffect.tDraw2D(0, -2,
                     new RectangleF(0, 0 + (360 * frame), 640, 360));
             }
         }

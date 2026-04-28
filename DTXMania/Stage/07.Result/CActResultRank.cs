@@ -178,7 +178,7 @@ internal class CActResultRank : CActivity
                     double num2 = ((double)ctランク表示.nCurrentValue - 200.0) / 300.0;
 
                     if (ctランク表示.nCurrentValue >= 200.0)
-                        txランク文字[j].tDraw2D(CDTXMania.app.Device, n本体X[j], n本体Y[j] + ((int)((double)txランク文字[j].Height * (1.0 - num2))), new RectangleF(0, 0, txランク文字[j].Width, (int)((double)txランク文字[j].Height * num2)));
+                        txランク文字[j].tDraw2D(n本体X[j], n本体Y[j] + ((int)((double)txランク文字[j].Height * (1.0 - num2))), new RectangleF(0, 0, txランク文字[j].Width, (int)((double)txランク文字[j].Height * num2)));
                 }
                 #endregion
 
@@ -189,17 +189,17 @@ internal class CActResultRank : CActivity
                 if (stageResult.stPerformanceEntry[j].nPerfectCount == stageResult.stPerformanceEntry[j].nTotalChipsCount)
                 {
                     if (txExcellent != null)
-                        txExcellent.tDraw2D(CDTXMania.app.Device, num14, num15);
+                        txExcellent.tDraw2D(num14, num15);
                 }
                 else if (stageResult.stPerformanceEntry[j].bIsFullCombo)
                 {
                     if (txFullCombo != null)
-                        txFullCombo.tDraw2D(CDTXMania.app.Device, num14, num15);
+                        txFullCombo.tDraw2D(num14, num15);
                 }
                 else
                 {
                     if (txStageCleared != null)
-                        txStageCleared.tDraw2D(CDTXMania.app.Device, num14, num15);
+                        txStageCleared.tDraw2D(num14, num15);
                 }
                 #endregion
             }

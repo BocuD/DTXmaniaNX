@@ -264,11 +264,11 @@ internal class CActPerfBGA : CActivity
 						{
 							if( ( stLayer[ i ].rBMP != null ) && ( stLayer[ i ].rBMP.txImage != null ) )
 							{
-								stLayer[ i ].rBMP.txImage.tDraw2D( CDTXMania.app.Device, x + rectangle2.X, y + rectangle2.Y, rectangle );
+								stLayer[ i ].rBMP.txImage.tDraw2D(x + rectangle2.X, y + rectangle2.Y, rectangle );
 							}
 							else if( ( stLayer[ i ].rBMPTEX != null ) && ( stLayer[ i ].rBMPTEX.txImage != null ) )
 							{
-								stLayer[ i ].rBMPTEX.txImage.tDraw2D( CDTXMania.app.Device, x + rectangle2.X, y + rectangle2.Y, rectangle );
+								stLayer[ i ].rBMPTEX.txImage.tDraw2D(x + rectangle2.X, y + rectangle2.Y, rectangle );
 							}
 						}
 					}

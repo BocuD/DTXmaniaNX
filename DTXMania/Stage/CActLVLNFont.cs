@@ -59,7 +59,7 @@ public class CActLVLNFont : CActivity
 					ST数字 s = st数字[p, (int)efc];
 					float sw = s.rc.Width;
 					float delta = bRightAlign ? 0 : -sw;
-					tx数値.tDraw2D(CDTXMania.app.Device, x + delta, y, s.rc);
+					tx数値.tDraw2D(x + delta, y, s.rc);
 					x += bRightAlign ? -sw : sw;
 				}
 			}

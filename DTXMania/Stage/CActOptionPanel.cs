@@ -29,39 +29,39 @@ internal class CActOptionPanel : CActivity
                 {
                     drums = 15;
                 }
-                txOptionPanel.tDraw2D(device, 738, 14, rc譜面スピード[drums]);
+                txOptionPanel.tDraw2D(738, 14, rc譜面スピード[drums]);
                 drums = configIni.nScrollSpeed.Guitar;
                 if (drums > 15)
                 {
                     drums = 15;
                 }
-                txOptionPanel.tDraw2D(device, 738, 32, rc譜面スピード[drums]);
+                txOptionPanel.tDraw2D(738, 32, rc譜面スピード[drums]);
                 drums = configIni.nScrollSpeed.Bass;
                 if (drums > 15)
                 {
                     drums = 15;
                 }
-                txOptionPanel.tDraw2D(device, 738, 50, rc譜面スピード[drums]);
-                txOptionPanel.tDraw2D(device, 786, 14, rcHS[(configIni.bHidden.Drums ? 1 : 0) + (configIni.bSudden.Drums ? 2 : 0)]);
-                txOptionPanel.tDraw2D(device, 786, 32, rcHS[(configIni.bHidden.Guitar ? 1 : 0) + (configIni.bSudden.Guitar ? 2 : 0)]);
-                txOptionPanel.tDraw2D(device, 786, 50, rcHS[(configIni.bHidden.Bass ? 1 : 0) + (configIni.bSudden.Bass ? 2 : 0)]);
-                txOptionPanel.tDraw2D(device, 834, 14, rcDark[(int)configIni.eDark]);
-                txOptionPanel.tDraw2D(device, 834, 32, rcDark[(int)configIni.eDark]);
-                txOptionPanel.tDraw2D(device, 834, 50, rcDark[(int)configIni.eDark]);
-                txOptionPanel.tDraw2D(device, 882, 14, rcReverse[configIni.bReverse.Drums ? 1 : 0]);
-                txOptionPanel.tDraw2D(device, 882, 32, rcReverse[configIni.bReverse.Guitar ? 1 : 0]);
-                txOptionPanel.tDraw2D(device, 882, 50, rcReverse[configIni.bReverse.Bass ? 1 : 0]);
-                txOptionPanel.tDraw2D(device, 930, 14, rcPosition[(int)configIni.JudgementStringPosition.Drums]);
-                txOptionPanel.tDraw2D(device, 930, 32, rcPosition[(int)configIni.JudgementStringPosition.Guitar]);
-                txOptionPanel.tDraw2D(device, 930, 50, rcPosition[(int)configIni.JudgementStringPosition.Bass]);
-                txOptionPanel.tDraw2D(device, 978, 14, rcTight[configIni.bTight ? 1 : 0]);
-                txOptionPanel.tDraw2D(device, 978, 32, rcRandom[(int)configIni.eRandom.Guitar]);
-                txOptionPanel.tDraw2D(device, 978, 50, rcRandom[(int)configIni.eRandom.Bass]);
-                txOptionPanel.tDraw2D(device, 1026, 14, rcComboPos[(int)configIni.ドラムコンボ文字の表示位置]);
-                txOptionPanel.tDraw2D(device, 1026, 32, rcLight[configIni.bLight.Guitar ? 1 : 0]);
-                txOptionPanel.tDraw2D(device, 1026, 50, rcLight[configIni.bLight.Bass ? 1 : 0]);
-                txOptionPanel.tDraw2D(device, 1074, 32, rcLeft[configIni.bLeft.Guitar ? 1 : 0]);
-                txOptionPanel.tDraw2D(device, 1074, 50, rcLeft[configIni.bLeft.Bass ? 1 : 0]);
+                txOptionPanel.tDraw2D(738, 50, rc譜面スピード[drums]);
+                txOptionPanel.tDraw2D(786, 14, rcHS[(configIni.bHidden.Drums ? 1 : 0) + (configIni.bSudden.Drums ? 2 : 0)]);
+                txOptionPanel.tDraw2D(786, 32, rcHS[(configIni.bHidden.Guitar ? 1 : 0) + (configIni.bSudden.Guitar ? 2 : 0)]);
+                txOptionPanel.tDraw2D(786, 50, rcHS[(configIni.bHidden.Bass ? 1 : 0) + (configIni.bSudden.Bass ? 2 : 0)]);
+                txOptionPanel.tDraw2D(834, 14, rcDark[(int)configIni.eDark]);
+                txOptionPanel.tDraw2D(834, 32, rcDark[(int)configIni.eDark]);
+                txOptionPanel.tDraw2D(834, 50, rcDark[(int)configIni.eDark]);
+                txOptionPanel.tDraw2D(882, 14, rcReverse[configIni.bReverse.Drums ? 1 : 0]);
+                txOptionPanel.tDraw2D(882, 32, rcReverse[configIni.bReverse.Guitar ? 1 : 0]);
+                txOptionPanel.tDraw2D(882, 50, rcReverse[configIni.bReverse.Bass ? 1 : 0]);
+                txOptionPanel.tDraw2D(930, 14, rcPosition[(int)configIni.JudgementStringPosition.Drums]);
+                txOptionPanel.tDraw2D(930, 32, rcPosition[(int)configIni.JudgementStringPosition.Guitar]);
+                txOptionPanel.tDraw2D(930, 50, rcPosition[(int)configIni.JudgementStringPosition.Bass]);
+                txOptionPanel.tDraw2D(978, 14, rcTight[configIni.bTight ? 1 : 0]);
+                txOptionPanel.tDraw2D(978, 32, rcRandom[(int)configIni.eRandom.Guitar]);
+                txOptionPanel.tDraw2D(978, 50, rcRandom[(int)configIni.eRandom.Bass]);
+                txOptionPanel.tDraw2D(1026, 14, rcComboPos[(int)configIni.ドラムコンボ文字の表示位置]);
+                txOptionPanel.tDraw2D(1026, 32, rcLight[configIni.bLight.Guitar ? 1 : 0]);
+                txOptionPanel.tDraw2D(1026, 50, rcLight[configIni.bLight.Bass ? 1 : 0]);
+                txOptionPanel.tDraw2D(1074, 32, rcLeft[configIni.bLeft.Guitar ? 1 : 0]);
+                txOptionPanel.tDraw2D(1074, 50, rcLeft[configIni.bLeft.Bass ? 1 : 0]);
             }
         }
         return 0;

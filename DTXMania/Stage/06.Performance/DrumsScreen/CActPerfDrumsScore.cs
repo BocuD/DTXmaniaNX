@@ -60,12 +60,12 @@ internal class CActPerfDrumsScore : CActPerfCommonScore
                 }
                 if( txScore != null )
                 {
-                    txScore.tDraw2D(CDTXMania.app.Device, n本体X[0] + (i * 34), 28 + n本体Y, rectangle);
+                    txScore.tDraw2D(n本体X[0] + (i * 34), 28 + n本体Y, rectangle);
                 }
             }
             if( txScore != null )
             {
-                txScore.tDraw2D(CDTXMania.app.Device, n本体X[0], n本体Y, new RectangleF(0, 50, 86, 28));
+                txScore.tDraw2D(n本体X[0], n本体Y, new RectangleF(0, 50, 86, 28));
             }
         }
         return 0;

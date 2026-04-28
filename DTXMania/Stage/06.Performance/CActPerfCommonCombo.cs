@@ -312,7 +312,7 @@ internal class CActPerfCommonCombo : CActivity
             //-----------------
             #endregion
 
-            txCOMBOドラム.tDraw2D(CDTXMania.app.Device, nコンボx, nコンボy + y動作差分, new RectangleF(0, 320, 250, 60));
+            txCOMBOドラム.tDraw2D(nコンボx, nコンボy + y動作差分, new RectangleF(0, 320, 250, 60));
         }
 
         // COMBO値を1の位から順に表示。
@@ -360,7 +360,7 @@ internal class CActPerfCommonCombo : CActivity
             {
                 if( txCOMBOドラム != null )
                 {
-                    txCOMBOドラム.tDraw2D(CDTXMania.app.Device, x, y + y動作差分,
+                    txCOMBOドラム.tDraw2D(x, y + y動作差分,
                         new RectangleF((n位の数[i] % 5) * nドラムコンボの幅, (n位の数[i] / 5) * nドラムコンボの高さ, nドラムコンボの幅, nドラムコンボの高さ));
                 }
             }
@@ -373,7 +373,7 @@ internal class CActPerfCommonCombo : CActivity
                 }
                 if( txCOMBOドラム1000 != null )
                 {
-                    txCOMBOドラム1000.tDraw2D(CDTXMania.app.Device, x, y + y動作差分,
+                    txCOMBOドラム1000.tDraw2D(x, y + y動作差分,
                         new RectangleF((n位の数[i] % 5) * 96, (n位の数[i] / 5) * 128, 96, 128));
                 }
             }
@@ -457,7 +457,7 @@ internal class CActPerfCommonCombo : CActivity
         //-----------------
         int x = nコンボx - 100; // -((int)((nギターコンボのCOMBO文字の幅 * f拡大率) / 2.0f));
 
-        txCOMBOギター.tDraw2D(CDTXMania.app.Device, x, y, new RectangleF(0, 230, 200, 64));
+        txCOMBOギター.tDraw2D(x, y, new RectangleF(0, 230, 200, 64));
         //-----------------
         #endregion
 
@@ -483,9 +483,7 @@ internal class CActPerfCommonCombo : CActivity
             }
             if (txCOMBOギター != null)
             {
-                txCOMBOギター.tDraw2D(
-                    CDTXMania.app.Device,
-                    x - ((int)((nギターコンボの幅) / 2.0f)),
+                txCOMBOギター.tDraw2D(x - ((int)((nギターコンボの幅) / 2.0f)),
                     y,
                     new RectangleF((n位の数[i] % 5) * nギターコンボの幅, (n位の数[i] / 5) * nギターコンボの高さ, nギターコンボの幅, nギターコンボの高さ));
             }
@@ -560,7 +558,7 @@ internal class CActPerfCommonCombo : CActivity
         //-----------------
         int x = nコンボx - 95; // -((int)((nギターコンボのCOMBO文字の幅 * f拡大率) / 2.0f));
 
-        txCOMBOギター.tDraw2D(CDTXMania.app.Device, x, y, new RectangleF(0, 230, 200, 64));
+        txCOMBOギター.tDraw2D(x, y, new RectangleF(0, 230, 200, 64));
         //-----------------
         #endregion
 
@@ -590,9 +588,7 @@ internal class CActPerfCommonCombo : CActivity
             }
             if (txCOMBOギター != null)
             {
-                txCOMBOギター.tDraw2D(
-                    CDTXMania.app.Device,
-                    x - ((int)((nギターコンボの幅) / 2.0f)),
+                txCOMBOギター.tDraw2D(x - ((int)((nギターコンボの幅) / 2.0f)),
                     y,
                     new RectangleF((n位の数[i] % 5) * nギターコンボの幅, (n位の数[i] / 5) * nギターコンボの高さ, nギターコンボの幅, nギターコンボの高さ));
             }
