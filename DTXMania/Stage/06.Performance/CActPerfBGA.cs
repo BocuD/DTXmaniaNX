@@ -1,7 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 using System.Drawing;
 using DTXMania.Core;
-using SharpDX.Direct3D9;
 using FDK;
 
 namespace DTXMania;

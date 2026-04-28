@@ -748,7 +748,7 @@ public class CSound : IDisposable, ICloneable
 			}
 		}
 
-		// すべてのファイルを DirectShow でデコードすると時間がかかるので、ファイルが WAV かつ PCM フォーマットでない場合のみ DirectShow でデコードする。
+		// すべてのファイルをデコードすると時間がかかるので、ファイルが WAV かつ PCM フォーマットでない場合のみデコードする。
 
 		byte[] byArrWAVファイルイメージ = null;
 		bool bファイルがWAVかつPCMフォーマットである = true;
@@ -797,9 +797,13 @@ public class CSound : IDisposable, ICloneable
 			}
 			else
 			{
-				#region [ DirectShow でデコード変換し、 byArrWAVファイルイメージへ格納。]
+				#region [ デコード変換し、 byArrWAVファイルイメージへ格納。]
 				//-----------------
-				CDStoWAVFileImage.t変換(strファイル名, out byArrWAVファイルイメージ);
+				int nPCMデータの先頭インデックス;
+				CWin32.WAVEFORMATEX wfx;
+				int totalPCMSize;
+				tオンメモリ方式でデコードする(strファイル名, out byArrWAVファイルイメージ,
+					out nPCMデータの先頭インデックス, out totalPCMSize, out wfx, true);
 				//-----------------
 				#endregion
 			}
@@ -1574,7 +1578,11 @@ public class CSound : IDisposable, ICloneable
 					Trace.TraceInformation(Path.GetFileName(strファイル名) + ": RIFF chunked Vorbis. Decode to raw Wave first, to avoid BASS.DLL troubles");
 					try
 					{
-						CDStoWAVFileImage.t変換(strファイル名, out byArrWAVファイルイメージ);
+						int nPCMデータの先頭インデックス;
+						CWin32.WAVEFORMATEX wfx;
+						int totalPCMSize;
+						tオンメモリ方式でデコードする(strファイル名, out byArrWAVファイルイメージ,
+							out nPCMデータの先頭インデックス, out totalPCMSize, out wfx, true);
 						bファイルにVorbisコンテナが含まれている = true;
 					}
 					catch
@@ -1798,17 +1806,9 @@ public class CSound : IDisposable, ICloneable
 		{
 			sounddecoder = new Cxa();
 		}
-		else if (String.Compare(Path.GetExtension(strファイル名), ".ogg", true) == 0)
-		{
-			sounddecoder = new Cmp3ogg();
-		}
-		else if (String.Compare(Path.GetExtension(strファイル名), ".mp3", true) == 0)
-		{
-			sounddecoder = new Cmp3ogg();
-		}
 		else
 		{
-			throw new NotImplementedException();
+			sounddecoder = new Cmp3ogg();
 		}
 
 		if (!File.Exists(strファイル名))

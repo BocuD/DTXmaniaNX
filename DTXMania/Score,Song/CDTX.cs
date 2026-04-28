@@ -1377,7 +1377,7 @@ public class CDTX : CActivity
                     if (listAVIPAN.ContainsKey(chip.nIntegerValue))
                     {
                         CAVIPAN cavipan = listAVIPAN[chip.nIntegerValue];
-                        if (listAVI.ContainsKey(cavipan.nAVI番号) && (listAVI[cavipan.nAVI番号].avi != null))
+                        if (listAVI.ContainsKey(cavipan.nAVI番号) && (listAVI[cavipan.nAVI番号].fileExists))
                         {
                             chip.eAVI種別 = EAVIType.AVIPAN;
                             chip.rAVI = listAVI[cavipan.nAVI番号];
@@ -1388,8 +1388,7 @@ public class CDTX : CActivity
                     }
 
                     if (listAVI.ContainsKey(chip.nIntegerValue) &&
-                        (listAVI[chip.nIntegerValue].avi !=
-                         null)
+                        (listAVI[chip.nIntegerValue].fileExists)
                        )
                     {
                         chip.eAVI種別 = EAVIType.AVI;

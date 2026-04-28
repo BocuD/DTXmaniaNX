@@ -129,10 +129,6 @@ internal class Program
 			"bass_fx.dll is not loaded. bass_fx.dll or bass.dll must not exist." + newLine +
 			"Please download DTXMania again.");
 
-		tCheckIfDllExists("dll\\DirectShowLib-2005.dll",
-			"DirectShowLib-2005.dll が存在しません。" + newLine + "DTXManiaをダウンロードしなおしてください。",
-			"DirectShowLib-2005.dll is not found." + newLine + "Please download DTXMania again.");
-
 		if (missingDll)
 		{
 			//show messagebox and ask if the user still wants to continue

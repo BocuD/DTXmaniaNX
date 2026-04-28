@@ -1,17 +1,22 @@
 ﻿using System.Diagnostics;
 using DTXMania.Core;
+using DTXMania.Core.Video;
 using FDK;
 
 namespace DTXMania;
 
+//todo: this class should be removed fully
 public class CAVI : IDisposable
     {
-        public CAviDS avi;
+        //public CAviDS avi;
         private bool bDispose済み;
         public int n番号;
         public string strComment = "";
         public string strFileName = "";
         public double dbPlaySpeed = 1.0;
+
+        public bool fileExists = false;
+        public TimeSpan duration = TimeSpan.Zero;
 
         public CAVI(int number, string filename, string comment, double playSpeed)
         {
@@ -19,7 +24,6 @@ public class CAVI : IDisposable
             strFileName = filename;
             strComment = comment;
             dbPlaySpeed = playSpeed;
-            //taskLoad = null;
         }
 
         public void OnDeviceCreated()
@@ -50,7 +54,7 @@ public class CAVI : IDisposable
             {
                 //Trace.TraceWarning( "File doesn't exist!({0})({1})", this.strコメント文, strAVIファイル名 );
                 Trace.TraceWarning("File does not exist. ({0})({1})", strComment, strAVIFileName);
-                avi = null;
+                fileExists = false;
                 return;
             }
 
@@ -58,14 +62,19 @@ public class CAVI : IDisposable
 
             try
             {
-                avi = new CAviDS(strAVIFileName, dbPlaySpeed);
-                Trace.TraceInformation("動画を生成しました。({0})({1})({2}msec)", strComment, strAVIFileName, avi.GetDuration());
+                SoftwareVideoPlayer player = new();
+                if (player.Open(strAVIFileName))
+                {
+                    duration = player.Duration;
+                    fileExists = true;
+                }
+                
+                player.Dispose();
             }
             catch (Exception e)
             {
                 Trace.TraceError(e.Message);
                 Trace.TraceError("動画の生成に失敗しました。({0})({1})", strComment, strAVIFileName);
-                avi = null;
             }
         }
 
@@ -82,13 +91,13 @@ public class CAVI : IDisposable
             if (bDispose済み)
                 return;
 
-            if (avi != null)
-            {
-                avi.Dispose();
-                avi = null;
-
-                Trace.TraceInformation("動画を解放しました。({0})({1})", strComment, strFileName);
-            }
+            // if (avi != null)
+            // {
+            //     avi.Dispose();
+            //     avi = null;
+            //
+            //     Trace.TraceInformation("動画を解放しました。({0})({1})", strComment, strFileName);
+            // }
 
             bDispose済み = true;
         }

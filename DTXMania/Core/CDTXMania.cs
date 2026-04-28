@@ -9,7 +9,6 @@ using DTXMania.SongDb;
 using DTXMania.UI;
 using FDK;
 using Hexa.NET.ImGui;
-using SharpDX.Direct3D9;
 using ResourceManager = DTXMania.UI.ResourceManager;
 using Vector2 = System.Numerics.Vector2;
 using DTXMania.UI.Drawable;
@@ -159,7 +158,6 @@ internal class CDTXMania
     public static string executableDirectory { get; private set; }
     public static string strCompactModeFile { get; private set; }
     public static CTimer Timer { get; private set; }
-    public static Format TextureFormat = Format.A8R8G8B8;
 
     public bool bApplicationActive => maniaGl.isFocused;
 

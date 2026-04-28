@@ -23,13 +23,13 @@ internal class CActPerfVideo : CActivity
         this.avi = avi;
         this.moveStartTimeMs = (moveStartTimeMs != -1) ? moveStartTimeMs : CSoundManager.rcPerformanceTimer.nCurrentTime;
 
-        if (avi != null && avi.avi != null)
+        if (avi != null)
         {
-            frameWidth = (uint)avi.avi.nフレーム幅;
-            frameHeight = (uint)avi.avi.nフレーム高さ;
-            aspectRatio = (float)frameWidth / (float)frameHeight;
-
             CreateVideoPlayer(avi.strFileName);
+
+            frameWidth = videoPlayer.Width;
+            frameHeight = videoPlayer.Height;
+            aspectRatio = (float)frameWidth / (float)frameHeight;
 
             //frame dimensions are known now, so we can lay out the renderers.
             ApplyLayout();
@@ -505,8 +505,8 @@ internal class CActPerfVideo : CActivity
     public bool isWindowed;
     private bool isPaused;
     public float aspectRatio;
-    private uint frameHeight;
-    private uint frameWidth;
+    private int frameHeight;
+    private int frameWidth;
     private int currentMovieMode;
     private long moveStartTimeMs;
 

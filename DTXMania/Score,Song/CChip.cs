@@ -553,12 +553,9 @@ public class CChip : IComparable<CChip>, ICloneable
 		}
 		else if (nChannelNumber == EChannel.Movie || nChannelNumber == EChannel.MovieFull)    // AVI
 		{
-			if (rAVI != null && rAVI.avi != null)
+			if (rAVI != null && rAVI.fileExists)
 			{
-				nDuration = rAVI.avi.GetDuration();
-				//int dwRate = (int)this.rAVI.avi.dwレート;
-				//int dwScale = (int)this.rAVI.avi.dwスケール;
-				//nDuration = (int)(1000.0f * dwScale / dwRate * this.rAVI.avi.GetMaxFrameCount());
+				nDuration = (int)rAVI.duration.TotalMilliseconds; 
 			}
 		}
 

@@ -1,7 +1,6 @@
 ﻿using System.Drawing;
 using DTXMania.Core;
 using FDK;
-using SharpDX.Direct3D9;
 using BaseTexture = DTXMania.UI.Drawable.BaseTexture;
 
 namespace DTXMania;

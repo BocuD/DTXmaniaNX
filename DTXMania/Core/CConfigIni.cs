@@ -1396,7 +1396,7 @@ internal class CConfigIni
 		sw.WriteLine( "; Screen mode. (0:Window, 1:Fullscreen)" );
 		sw.WriteLine( "FullScreen={0}", bFullScreenMode ? 1 : 0 );
 		sw.WriteLine();
-		sw.WriteLine("; Fullscreen mode uses DirectX exclusive mode instead of maximized window. (0:Maximized window, 1:Exclusive)");
+		sw.WriteLine("; Fullscreen mode uses exclusive mode instead of maximized window. (0:Maximized window, 1:Exclusive)");
 		sw.WriteLine("FullScreenExclusive={0}", bFullScreenExclusive ? 1 : 0);
 		sw.WriteLine();
 		sw.WriteLine("; ウインドウモード時の画面幅");				// #23510 2010.10.31 yyagi add
