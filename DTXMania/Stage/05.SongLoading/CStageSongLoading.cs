@@ -367,11 +367,12 @@ internal class CStageSongLoading : CStage
         try
         {
             string path = cdtx.strFolderName + cdtx.PREIMAGE;
+            
+            var txJacket = BaseTexture.LoadFromPath(!File.Exists(path) ? CSkin.Path(@"Graphics\5_preimage default.png") : path);
 
-            if (txJacket == null) // 2019.04.26 kairera0467
-            {
-                txJacket = BaseTexture.LoadFromPath(!File.Exists(path) ? CSkin.Path(@"Graphics\5_preimage default.png") : path);
-            }
+            var jacket = ui.AddChild(new UIImage(txJacket));
+            jacket.size = new Vector2(384, 384);
+            jacket.position = new Vector3(100, 85, 0);
         }
         catch (Exception ex)
         {
@@ -692,29 +693,7 @@ internal class CStageSongLoading : CStage
     
     private void DrawLoadingScreenUI()
     {
-        Matrix4x4 scaling = Matrix4x4.CreateScale(CDTXMania.renderScale);
         int y = 184;
-        
-        if (txJacket != null)
-        {
-            Matrix4x4 mat = Matrix4x4.Identity;
-            float fScalingFactor;
-            float jacketOnScreenSize = 384.0f;
-            //Maintain aspect ratio by scaling only to the smaller scalingFactor
-            if (jacketOnScreenSize / txJacket.Width > jacketOnScreenSize / txJacket.Height)
-            {
-                fScalingFactor = jacketOnScreenSize / txJacket.Height;
-            }
-            else
-            {
-                fScalingFactor = jacketOnScreenSize / txJacket.Width;
-            }
-        
-            mat *= Matrix4x4.CreateScale(fScalingFactor, fScalingFactor, 1f);
-            mat *= Matrix4x4.CreateTranslation(-348, 84f, 0f);
-        
-            txJacket.tDraw3D(mat);
-        }
 
         int[] iPart = [0, CDTXMania.ConfigIni.bIsSwappedGuitarBass ? 2 : 1, CDTXMania.ConfigIni.bIsSwappedGuitarBass ? 1 : 2];
 
@@ -769,16 +748,6 @@ internal class CStageSongLoading : CStage
                     k = 700;
                 }
             }
-        
-            // //second guitar... ?????
-            // if (instrument == 2 && k == 0)
-            // {
-            //     if (txPartPanel != null && CDTXMania.ConfigIni.bDrumsEnabled)
-            //         txPartPanel.tDraw2D(CDTXMania.app.Device, 191, 52, new Rectangle(0, 0, 262, 50));
-            //
-            //     if (txDifficultyPanel != null)
-            //         txDifficultyPanel.tDraw2D(CDTXMania.app.Device, 191, 102, new Rectangle(0, nIndex * 50, 262, 50));
-            // }
         }
     }
 
@@ -829,7 +798,6 @@ internal class CStageSongLoading : CStage
     private string strSongTitle;
     private string strArtistName;
     
-    private BaseTexture? txJacket;
     private BaseTexture? txDifficultyPanel;
     private BaseTexture? txPartPanel;
     

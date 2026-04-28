@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Numerics;
 using DTXMania.Core;
 using DTXMania.UI;
 using DTXMania.UI.Drawable;
@@ -47,7 +48,6 @@ internal class CStageResult : CStage
 		//listChildActivities.Add( actResultImage = new CActResultImage(this) );
 		listChildActivities.Add( actParameterPanel = new CActResultParameterPanel(this) );
 		listChildActivities.Add( actRank = new CActResultRank(this) );
-		listChildActivities.Add( new CActResultSongBar() );
 	}
 
 		
@@ -119,17 +119,55 @@ internal class CStageResult : CStage
 		background = ui.AddChild(new UIImage(txBackground));
 		background.renderOrder = -100;
 		background.isVisible = true;
+		
+		string strSongTitle;
+		if (!CDTXMania.bCompactMode && CDTXMania.ConfigIni.b曲名表示をdefのものにする)
+			strSongTitle = CDTXMania.confirmedSong.title;
+		else
+			strSongTitle = CDTXMania.DTX.TITLE;
 
+		string strArtistName = CDTXMania.DTX.ARTIST;
+		
+		if (!string.IsNullOrWhiteSpace(strSongTitle))
+		{
+			UIText songNameText = ui.AddChild(new UIText(strSongTitle, 35));
+			songNameText.fillColor = Color4.Black;
+			songNameText.outlineColor = Color4.White;
+			songNameText.name = "SongName";
+			songNameText.font = UIFonts.FallbackFont;
+			songNameText.position = new Vector3(435, 600, 0);
+		}
+
+		if (!string.IsNullOrWhiteSpace(strArtistName))
+		{
+			UIText artistNameText = ui.AddChild(new UIText(strArtistName, 25));
+			artistNameText.fillColor = Color4.Black;
+			artistNameText.outlineColor = Color4.White;
+			artistNameText.name = "ArtistName";
+			artistNameText.font = UIFonts.FallbackFont;
+			artistNameText.position = new Vector3(435, 650, 0);
+		}
+		
+		string path = CDTXMania.DTX.strFolderName + CDTXMania.DTX.PREIMAGE;
+		var txJacket = BaseTexture.LoadFromPath(!File.Exists(path) ? CSkin.Path(@"Graphics\5_preimage default.png") : path);
+		var jacket = ui.AddChild(new UIImage(txJacket));
+		jacket.size = new Vector2(300, 300);
+		jacket.position = new Vector3(640, 290, 0);
+		jacket.name = "AlbumArt";
+		jacket.anchor.X = 0.5f;
 
 		//todo: position these
 		if (CDTXMania.GetCurrentInstrument() == 0)
 		{
-			ui.AddChild(new UIPlayerNameplate(0));
+			var drums = ui.AddChild(new UIPlayerNameplate(0));
+			drums.position = new Vector3(148, 272, 0);
 		}
 		else
 		{
-			ui.AddChild(new UIPlayerNameplate(1));
-			ui.AddChild(new UIPlayerNameplate(2));
+			var guitar1 = ui.AddChild(new UIPlayerNameplate(1));
+			guitar1.position = new Vector3(148, 272, 0);
+			var guitar2 = ui.AddChild(new UIPlayerNameplate(2));
+			guitar2.position = new Vector3(853, 272, 0);
 		}
 	}
 
