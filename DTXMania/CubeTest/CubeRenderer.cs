@@ -1,9 +1,10 @@
 using System.Numerics;
+using DTXMania.Core.OpenGL;
 using DTXMania.UI.Drawable;
 using Hexa.NET.GLFW;
 using Silk.NET.OpenGL;
 
-namespace OpenGLTest;
+namespace DTXMania.CubeTest;
 
 internal sealed unsafe class CubeRenderer : OpenGlGame
 {

@@ -1,6 +1,6 @@
 using Hexa.NET.GLFW;
 
-namespace OpenGLTest;
+namespace DTXMania.Core;
 
 internal sealed unsafe class GlfwNativeContext : Silk.NET.Core.Contexts.INativeContext, HexaGen.Runtime.INativeContext
 {

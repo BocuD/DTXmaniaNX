@@ -1,11 +1,12 @@
-using DTXMania.Core;
+using DTXMania.Core.Framework;
+using DTXMania.Core.OpenGL;
 using DTXMania.UI.Inspector;
 using Hexa.NET.GLFW;
 using Hexa.NET.ImGui;
 using SampleFramework;
 using Silk.NET.OpenGL;
 
-namespace OpenGLTest;
+namespace DTXMania.Core;
 
 public sealed class DTXManiaGL : OpenGlGame
 {

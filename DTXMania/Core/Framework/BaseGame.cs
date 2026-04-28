@@ -1,8 +1,7 @@
 ﻿using System.Numerics;
-using DTXMania.Core.Framework;
 using Hexa.NET.GLFW;
 
-namespace OpenGLTest;
+namespace DTXMania.Core.Framework;
 
 public abstract class BaseGame
 {

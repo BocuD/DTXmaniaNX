@@ -1,7 +1,5 @@
 ﻿using System.Diagnostics;
 using DTXMania.UI.Drawable;
-using FDK;
-using OpenGLTest;
 
 namespace DTXMania.Core;
 

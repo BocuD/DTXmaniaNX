@@ -5,6 +5,7 @@ using System.Drawing.Imaging;
 using System.Diagnostics;
 using System.Numerics;
 using DTXMania.Core;
+using DTXMania.Core.Framework;
 using DTXMania.UI;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.Text;

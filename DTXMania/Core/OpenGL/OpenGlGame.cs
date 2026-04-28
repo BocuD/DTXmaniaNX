@@ -1,14 +1,14 @@
-using Silk.NET.OpenGL;
+using DTXMania.Core.Framework;
 
-namespace OpenGLTest;
+namespace DTXMania.Core.OpenGL;
 
 public abstract class OpenGlGame : BaseGame, IDisposable
 {
-    protected GL Gl { get; private set; } = null!;
+    protected Silk.NET.OpenGL.GL Gl { get; private set; } = null!;
     private bool _sharedResourcesCreated;
     private bool _contextResourcesCreated;
 
-    public void AttachGraphics(GL gl)
+    public void AttachGraphics(Silk.NET.OpenGL.GL gl)
     {
         Gl = gl;
 

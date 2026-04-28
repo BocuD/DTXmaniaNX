@@ -1,6 +1,7 @@
 using System.Drawing;
 using System.Numerics;
 using DTXMania.Core;
+using DTXMania.Core.Framework;
 using DTXMania.UI.Text;
 using Hexa.NET.ImGui;
 using SharpDX.Direct3D9;

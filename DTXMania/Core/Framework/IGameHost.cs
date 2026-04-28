@@ -1,5 +1,4 @@
 ﻿using System.Numerics;
-using OpenGLTest;
 
 namespace DTXMania.Core.Framework;
 

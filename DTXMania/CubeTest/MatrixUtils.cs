@@ -1,4 +1,4 @@
-namespace OpenGLTest;
+namespace DTXMania.CubeTest;
 
 internal static class MatrixUtils
 {

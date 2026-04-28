@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Drawing;
 using System.Numerics;
+using DTXMania.Core.Framework;
 using Hexa.NET.ImGui;
 using DTXMania.UI.Drawable;
 using StbImageSharp;

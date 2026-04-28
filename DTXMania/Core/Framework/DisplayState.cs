@@ -1,4 +1,4 @@
-namespace OpenGLTest;
+namespace DTXMania.Core.Framework;
 
 public enum FullscreenMode
 {

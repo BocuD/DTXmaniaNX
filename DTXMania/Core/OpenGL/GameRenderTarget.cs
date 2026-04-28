@@ -1,7 +1,7 @@
 using Hexa.NET.ImGui;
 using Silk.NET.OpenGL;
 
-namespace OpenGLTest;
+namespace DTXMania.Core.OpenGL;
 
 internal sealed unsafe class GameRenderTarget : IDisposable
 {
@@ -16,7 +16,7 @@ internal sealed unsafe class GameRenderTarget : IDisposable
     public int Height { get; private set; }
     public ImTextureID? TextureId => _colorTexture == 0 ? null : new ImTextureID((nint)_colorTexture);
 
-    public void AttachGraphics(GL gl)
+    public void AttachGraphics(Silk.NET.OpenGL.GL gl)
     {
         _gl = gl;
 

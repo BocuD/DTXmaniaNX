@@ -1,7 +1,7 @@
 using System.Drawing;
 using System.Numerics;
 
-namespace DTXMania.UI;
+namespace DTXMania.Core.Framework;
 
 public struct Color4
 {

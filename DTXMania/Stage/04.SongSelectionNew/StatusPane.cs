@@ -1,6 +1,7 @@
 ﻿using System.Drawing;
 using System.Numerics;
 using DTXMania.Core;
+using DTXMania.Core.Framework;
 using DTXMania.SongDb;
 using DTXMania.UI;
 using DTXMania.UI.Drawable;

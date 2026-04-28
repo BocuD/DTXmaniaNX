@@ -1,3 +1,4 @@
+using DTXMania.Core.Framework;
 using DTXMania.UI.Drawable;
 
 namespace DTXMania.UI.Text;

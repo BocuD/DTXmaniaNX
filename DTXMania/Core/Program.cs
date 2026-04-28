@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
-using OpenGLTest;
+using DTXMania.Core.OpenGL;
 
 namespace DTXMania.Core;
 

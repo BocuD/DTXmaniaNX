@@ -11,10 +11,10 @@ using Hexa.NET.GLFW;
 using Hexa.NET.ImGui;
 using Hexa.NET.ImGui.Backends.GLFW;
 using Hexa.NET.ImGui.Backends.OpenGL3;
-using Silk.NET.OpenGL;
+
 using GLFWwindowPtr = Hexa.NET.GLFW.GLFWwindowPtr;
 
-namespace OpenGLTest;
+namespace DTXMania.Core.OpenGL;
 
 internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
 {
@@ -38,7 +38,7 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
 
     private GLFWwindowPtr _window;
     private GlfwNativeContext? _nativeContext;
-    private GL? _gl;
+    private Silk.NET.OpenGL.GL? _gl;
     private ImGuiContextPtr _imguiContext;
 
     private bool _vsyncEnabled = true;
@@ -198,7 +198,7 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
     {
         _window = CreateWindow(default);
         _nativeContext = new GlfwNativeContext();
-        _gl = GL.GetApi(_nativeContext);
+        _gl = Silk.NET.OpenGL.GL.GetApi(_nativeContext);
         _game.AttachGraphics(_gl);
         _gameRenderTarget.AttachGraphics(_gl);
         renderer.AttachGraphics(_gl);
@@ -480,7 +480,6 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
             _game.Render(targetWidth, targetHeight, _stopwatch.Elapsed.TotalSeconds);
             _gameRenderTarget.BindDefaultFramebuffer(Math.Max(_framebufferWidth, 1), Math.Max(_framebufferHeight, 1));
 
-            DisplayControlsWindow.Draw(this);
             InspectorManager.Draw(_renderInGameWindow, _gameRenderTarget.TextureId, new Vector2(_gameRenderTarget.Width, _gameRenderTarget.Height));
             
             ImGui.Render();
