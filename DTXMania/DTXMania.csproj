@@ -62,7 +62,6 @@
       <PackageReference Include="Kawazu" Version="1.1.4" />
       <PackageReference Include="NativeFileDialog.Extended" Version="1.2.0" />
       <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-      <PackageReference Include="SharpDX.Mathematics" Version="4.2.0" />
       <PackageReference Include="Silk.NET.OpenGL" Version="2.23.0" />
       <PackageReference Include="SkiaSharp" Version="3.119.2" />
       <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="3.119.2" />
@@ -88,10 +87,6 @@
 
     <ItemGroup>
       <None Remove="Stage\04.SongSelection\**" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Core\FDK\" />
     </ItemGroup>
 
 </Project>
