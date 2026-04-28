@@ -126,22 +126,6 @@ public class CAviDS : IDisposable
 		}
 	}
 
-	public void tGetBitmap(Device device, CTexture ctex, int timeMs, bool bCopyToCTex = true)
-	{
-		int pBufferSize = 0;
-		DsError.ThrowExceptionForHR(grabber.GetCurrentBuffer(ref pBufferSize, IntPtr.Zero));
-		if (samplePtr == IntPtr.Zero)
-		{
-			samplePtr = Marshal.AllocHGlobal(pBufferSize);
-		}
-		if (bCopyToCTex && ctex != null)
-		{
-			DataRectangle dataRectangle = ctex.texture.LockRectangle(0, LockFlags.None);
-			DsError.ThrowExceptionForHR(grabber.GetCurrentBuffer(ref pBufferSize, dataRectangle.DataPointer));
-			ctex.texture.UnlockRectangle(0);
-		}
-	}
-
 	public void Dispose()
 	{
 		if (bDisposed)

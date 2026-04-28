@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Drawing;
 using System.Numerics;
 using System.Reflection;
 using System.Runtime;
@@ -568,69 +567,6 @@ internal class CDTXMania : Game
         //通常通り、LOHへのGCを抑制
         GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.Default;
     }
-
-    // Other
-
-    #region [ Texture Creation / Disposal (why is this in the main game class??) ]
-
-    public static CTexture LoadFromPath(string fileName, bool b黒を透過する = false)
-    {
-        return new CTexture();
-        if (app == null)
-        {
-            return null;
-        }
-
-        try
-        {
-            return new CTexture(app.Device, fileName, TextureFormat, b黒を透過する);
-        }
-        catch (CTextureCreateFailedException e)
-        {
-            Trace.TraceError($"Couldn't create texture: ({fileName}) {e.Message}");
-            return null;
-        }
-        catch (FileNotFoundException e)
-        {
-            Trace.TraceError($"Couldn't find texture file: ({fileName}) {e.Message}");
-            return null;
-        }
-    }
-
-    public static void tReleaseTexture(ref CTexture? tx)
-    {
-        if (tx != null)
-        {
-            //Trace.WriteLine( "CTextureを解放 Size W:" + tx.szImageSize.Width + " H:" + tx.szImageSize.Height );
-            tx.Dispose();
-            tx = null;
-        }
-    }
-
-    public static CTexture tGenerateTexture(Bitmap bitmap, bool b黒を透過する)
-    {
-        return new CTexture();
-
-        if (app == null)
-        {
-            return null;
-        }
-
-        try
-        {
-            //Trace.WriteLine( "CTextureをBitmapから生成" );
-            return new CTexture(app.Device, bitmap, TextureFormat, b黒を透過する);
-        }
-        catch (CTextureCreateFailedException)
-        {
-            Trace.TraceError("テクスチャの生成に失敗しました。(txData)");
-            return null;
-        }
-    }
-
-    #endregion`
-
-    //-----------------
 
     public static CScoreIni UpdateBGMAdjustHistoryPlayCountIntScoreIni(string strNewHistoryLine)
     {
