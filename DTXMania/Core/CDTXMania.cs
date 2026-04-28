@@ -63,14 +63,9 @@ internal class CDTXMania : Game
             if ((dtx != null) && (app != null))
             {
                 dtx.OnDeactivate();
-                app.mainActivities.Remove(dtx);
             }
 
             dtx = value;
-            if ((dtx != null) && (app != null))
-            {
-                app.mainActivities.Add(dtx);
-            }
         }
     }
 
@@ -389,22 +384,6 @@ internal class CDTXMania : Game
 
         StageManager = new StageManager();
 
-        mainActivities =
-        [
-            actDisplayString,
-
-            StageManager.stageStartup,
-            StageManager.stageTitle,
-            StageManager.stageConfig,
-            // StageManager.stageSongSelection,
-            StageManager.stageSongLoading,
-            StageManager.stagePerfDrumsScreen,
-            StageManager.stagePerfGuitarScreen,
-            StageManager.stageResult,
-            StageManager.stageChangeSkin,
-            StageManager.stageEnd,
-        ];
-
         #endregion
 
         Input = new Input();
@@ -417,7 +396,7 @@ internal class CDTXMania : Game
         #endregion
         
         SongDBStatus songDbStatus = persistentUIGroup.AddChild(new SongDBStatus());
-        songDbStatus.position = new System.Numerics.Vector3(0, 720, 0);
+        songDbStatus.position = new Vector3(0, 720, 0);
         songDbStatus.anchor = new Vector2(0.0f, 1.0f);
         
         gitadoraTransition = persistentUIGroup.AddChild(new GitaDoraTransition());
@@ -474,34 +453,10 @@ internal class CDTXMania : Game
 
     #endregion
 
-    // Game 実装
-    protected override void Initialize()
-    {
-        if (mainActivities != null)
-        {
-            foreach (CActivity activity in mainActivities)
-            {
-                activity.OnManagedCreateResources();
-            }
-        }
-    }
-
     public static float renderScale = 1.0f;
-
-    protected override void OnExiting(EventArgs e)
-    {
-        CPowerManagement.tEnableMonitorSuspend(); // スリープ抑止状態を解除
-        tTerminate();
-        base.OnExiting(e);
-    }
 
     public void Update()
     {
-    }
-    
-    protected override void Draw(GameTime gameTime)
-    {
-        Draw();
     }
 
     public void Draw()
@@ -673,78 +628,78 @@ internal class CDTXMania : Game
     //-----------------
     private bool bTerminated;
     private static CDTX dtx;
-    private List<CActivity> mainActivities;
     private string strWindowTitle = "";
-    
-    private void tTerminate() // t終了処理
+
+    public void tTerminate() // t終了処理
     {
-        if (!bTerminated)
+        if (bTerminated) return;
+        
+        CPowerManagement.tEnableMonitorSuspend();
+
+        void SafeTerminate(string name, Action action)
         {
-            void SafeTerminate(string name, Action action)
+            Trace.TraceInformation($"Cleaning up {name}");
+            try
             {
-                Trace.TraceInformation($"Cleaning up {name}");
-                try
-                {
-                    action();
-                }
-                catch (Exception e)
-                {
-                    Trace.TraceError(e.Message);
-                }
+                action();
+            }
+            catch (Exception e)
+            {
+                Trace.TraceError(e.Message);
+            }
+        }
+
+        Trace.TraceInformation("Shutting down application");
+
+        SafeTerminate("Persistent UI Group", () =>
+        {
+            if (persistentUIGroup != null)
+            {
+                persistentUIGroup.Dispose();
+            }
+        });
+            
+        SafeTerminate("Current Stage", () =>
+        {
+            if (StageManager.rCurrentStage is { bActivated: true })
+                StageManager.rCurrentStage.OnDeactivate();
+        });
+        SafeTerminate("SongManager", () => { SongManager = null; });
+        SafeTerminate("SongDb", () =>
+        {
+            SongDb = null;
+        });
+        SafeTerminate("Skin", () =>
+        {
+            if (Skin != null)
+            {
+                Skin.tSaveSkinConfig();
+                Skin.Dispose();
+                Skin = null;
+            }
+        });
+        SafeTerminate("SoundManager", () => { SoundManager.Dispose(); });
+        SafeTerminate("Pad", () => { Pad = null; });
+        SafeTerminate("InputManager", () => { InputManager.Dispose(); });
+        SafeTerminate("ActDisplayString", () => { actDisplayString.OnDeactivate(); });
+        SafeTerminate("FPS Counter", () => { FPS = null; });
+        SafeTerminate("Timer", () => { Timer?.Dispose(); });
+        SafeTerminate("Config.ini (and writing it to disk)", () =>
+        {
+            if (ConfigIni.bIsSwappedGuitarBass_AutoFlagsAreSwapped)
+            {
+                ConfigIni.SwapGuitarBassInfos_AutoFlags();
             }
 
-            Trace.TraceInformation("Shutting down application");
-
-            SafeTerminate("Persistent UI Group", () =>
-            {
-                if (persistentUIGroup != null)
-                {
-                    persistentUIGroup.Dispose();
-                }
-            });
-            
-            SafeTerminate("Current Stage", () =>
-            {
-                if (StageManager.rCurrentStage is { bActivated: true })
-                    StageManager.rCurrentStage.OnDeactivate();
-            });
-            SafeTerminate("SongManager", () => { SongManager = null; });
-            SafeTerminate("SongDb", () =>
-            {
-                SongDb = null;
-            });
-            SafeTerminate("Skin", () =>
-            {
-                if (Skin != null)
-                {
-                    Skin.tSaveSkinConfig();
-                    Skin.Dispose();
-                    Skin = null;
-                }
-            });
-            SafeTerminate("SoundManager", () => { SoundManager.Dispose(); });
-            SafeTerminate("Pad", () => { Pad = null; });
-            SafeTerminate("InputManager", () => { InputManager.Dispose(); });
-            SafeTerminate("ActDisplayString", () => { actDisplayString.OnDeactivate(); });
-            SafeTerminate("FPS Counter", () => { FPS = null; });
-            SafeTerminate("Timer", () => { Timer?.Dispose(); });
-            SafeTerminate("Config.ini (and writing it to disk)", () =>
-            {
-                if (ConfigIni.bIsSwappedGuitarBass_AutoFlagsAreSwapped)
-                {
-                    ConfigIni.SwapGuitarBassInfos_AutoFlags();
-                }
-
-                string path = executableDirectory + "Config.ini";
+            string path = executableDirectory + "Config.ini";
                 
-                ConfigIni.tWrite(path);
-                Trace.TraceInformation("保存しました。({0})", path);
-            });
-            SafeTerminate("ResourceManager", () => { Resources.Dispose(); });
-            SafeTerminate("Discord Rich Presence", () => { DiscordRichPresence?.Dispose(); });
-            Trace.TraceInformation("Finished shutting down application");
-            bTerminated = true;
-        }
+            ConfigIni.tWrite(path);
+            Trace.TraceInformation("保存しました。({0})", path);
+        });
+        SafeTerminate("ResourceManager", () => { Resources.Dispose(); });
+        SafeTerminate("Discord Rich Presence", () => { DiscordRichPresence?.Dispose(); });
+        Trace.TraceInformation("Finished shutting down application");
+        bTerminated = true;
     }
     
     //https://stackoverflow.com/questions/1600962/displaying-the-build-date

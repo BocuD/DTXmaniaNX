@@ -1142,7 +1142,6 @@ public class CDTX : CActivity
 
     public Dictionary<int, CAVI> listAVI;
 
-    //public Dictionary<int, CDirectShow> listDS;
     public Dictionary<int, CAVIPAN> listAVIPAN;
     public Dictionary<int, CBGA> listBGA;
     public Dictionary<int, CBGAPAN> listBGAPAN;
@@ -1365,13 +1364,6 @@ public class CDTX : CActivity
             }
         }
 
-        //if( this.listDS != null && CDTXMania.ConfigIni.bDirectShowMode == true)
-        //{
-        //    foreach( CDirectShow cds in this.listDS.Values)
-        //    {
-        //        cds.OnDeviceCreated();
-        //    }
-        //}
         if (!bHeaderOnly && b動画読み込み)
         {
             foreach (CChip chip in listChip)
@@ -1380,7 +1372,7 @@ public class CDTX : CActivity
                 {
                     chip.eAVI種別 = EAVIType.Unknown;
                     chip.rAVI = null;
-                    //chip.rDShow = null;
+                    
                     chip.rAVIPan = null;
                     if (listAVIPAN.ContainsKey(chip.nIntegerValue))
                     {
@@ -1389,8 +1381,7 @@ public class CDTX : CActivity
                         {
                             chip.eAVI種別 = EAVIType.AVIPAN;
                             chip.rAVI = listAVI[cavipan.nAVI番号];
-                            //if(CDTXMania.ConfigIni.bDirectShowMode == true)
-                            //    chip.rDShow = this.listDS[ cavipan.nAVI番号 ];
+                            
                             chip.rAVIPan = cavipan;
                             continue;
                         }
@@ -1398,13 +1389,11 @@ public class CDTX : CActivity
 
                     if (listAVI.ContainsKey(chip.nIntegerValue) &&
                         (listAVI[chip.nIntegerValue].avi !=
-                         null) /*|| ( this.listDS.ContainsKey( chip.nIntegerValue ) && ( this.listDS[ chip.nIntegerValue ].dshow != null ) )*/
+                         null)
                        )
                     {
                         chip.eAVI種別 = EAVIType.AVI;
                         chip.rAVI = listAVI[chip.nIntegerValue];
-                        //if( CDTXMania.ConfigIni.bDirectShowMode == true )
-                        //    chip.rDShow = this.listDS[ chip.nIntegerValue ];
                     }
                 }
             }
@@ -4048,10 +4037,6 @@ public class CDTX : CActivity
                     Trace.TraceInformation(cavi.ToString());
                 }
 
-                //foreach ( CDirectShow cds in this.listDS.Values)
-                //{
-                //    Trace.TraceInformation( cds.ToString());
-                //}
                 foreach (CAVIPAN cavipan in listAVIPAN.Values)
                 {
                     Trace.TraceInformation(cavipan.ToString());
@@ -4598,7 +4583,6 @@ public class CDTX : CActivity
         listBGA = new Dictionary<int, CBGA>();
         listAVIPAN = new Dictionary<int, CAVIPAN>();
         listAVI = new Dictionary<int, CAVI>();
-        //this.listDS = new Dictionary<int, CDirectShow>();
         listChip = new List<CChip>();
         base.OnActivate();
     }
@@ -4646,14 +4630,6 @@ public class CDTX : CActivity
             listAVI = null;
         }
 
-        //if (this.listDS != null)
-        //{
-        //    foreach (CDirectShow cds in this.listDS.Values)
-        //    {
-        //        cds.Dispose();
-        //    }
-        //    this.listDS= null;
-        //}
         if (listBPM != null)
         {
             listBPM.Clear();
@@ -4685,17 +4661,7 @@ public class CDTX : CActivity
 
         base.OnDeactivate();
     }
-
-    public override void OnManagedCreateResources()
-    {
-        if (bActivated)
-        {
-            tLoadBMP_BMPTEX();
-            tLoadAVI();
-            base.OnManagedCreateResources();
-        }
-    }
-
+    
     public override void OnManagedReleaseResources()
     {
         if (bActivated)
@@ -4724,13 +4690,6 @@ public class CDTX : CActivity
                 }
             }
 
-            //if (this.listDS != null)
-            //{
-            //    foreach (CDirectShow cds in this.listDS.Values)
-            //    {
-            //        cds.Dispose();
-            //    }
-            //}
             base.OnManagedReleaseResources();
         }
     }
@@ -5239,20 +5198,8 @@ public class CDTX : CActivity
             listAVI.Remove(zz);
 
         listAVI.Add(zz, avi);
-
-        //var ds = new CDirectShow()
-        //{
-        //    n番号 = zz,
-        //    strファイル名 = strパラメータ,
-        //    strコメント文 = strコメント,
-        //};
-
-        //if (this.listDS.ContainsKey(zz))	// 既にリスト中に存在しているなら削除。後のものが有効。
-        //    this.listDS.Remove(zz);
-
-        //this.listDS.Add(zz, ds);
-        //-----------------
-
+        
+        
         #endregion
 
         return true;

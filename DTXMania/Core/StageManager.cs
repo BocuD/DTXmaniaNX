@@ -570,6 +570,7 @@ internal class StageManager
                 //-----------------------------
                 if (nUpdateAndDrawReturnValue != 0)
                 {
+                    CDTXMania.app.tTerminate();
                     DTXManiaGL.instance.RequestExit();
                 }
 
