@@ -450,8 +450,8 @@ internal class CActResultParameterPanel : CActivity
             for (int i = 0; i < 3; i++)
             {
                 //Best Record (Previous)
-                CTexture bestRecordProgressBarTexture = txPreviousBestProgressBar[i];
-                CDTXMania.tReleaseTexture(ref bestRecordProgressBarTexture);
+                BaseTexture bestRecordProgressBarTexture = txPreviousBestProgressBar[i];
+                ReleaseProgressBarTexture(ref bestRecordProgressBarTexture);
                 CActPerfProgressBar.txGenerateProgressBarHelper(
                     ref bestRecordProgressBarTexture,
                     stageResult.strBestProgressBarRecord[i], 4, 425,
@@ -459,8 +459,8 @@ internal class CActResultParameterPanel : CActivity
                 txPreviousBestProgressBar[i] = bestRecordProgressBarTexture;
 
                 //Current Progress Bar
-                CTexture currProgressBarTexture = txCurrentProgressBar[i];
-                CDTXMania.tReleaseTexture(ref currProgressBarTexture);
+                BaseTexture currProgressBarTexture = txCurrentProgressBar[i];
+                ReleaseProgressBarTexture(ref currProgressBarTexture);
                 CActPerfProgressBar.txGenerateProgressBarHelper(
                     ref currProgressBarTexture,
                     stageResult.strCurrProgressBarRecord[i], 12, 425, 
@@ -475,12 +475,12 @@ internal class CActResultParameterPanel : CActivity
     {
         if (bActivated)
         {
-            CDTXMania.tReleaseTexture(ref txPreviousBestProgressBar.Drums);
-            CDTXMania.tReleaseTexture(ref txPreviousBestProgressBar.Guitar);
-            CDTXMania.tReleaseTexture(ref txPreviousBestProgressBar.Bass);
-            CDTXMania.tReleaseTexture(ref txCurrentProgressBar.Drums);
-            CDTXMania.tReleaseTexture(ref txCurrentProgressBar.Guitar);
-            CDTXMania.tReleaseTexture(ref txCurrentProgressBar.Bass);
+            ReleaseProgressBarTexture(ref txPreviousBestProgressBar.Drums);
+            ReleaseProgressBarTexture(ref txPreviousBestProgressBar.Guitar);
+            ReleaseProgressBarTexture(ref txPreviousBestProgressBar.Bass);
+            ReleaseProgressBarTexture(ref txCurrentProgressBar.Drums);
+            ReleaseProgressBarTexture(ref txCurrentProgressBar.Guitar);
+            ReleaseProgressBarTexture(ref txCurrentProgressBar.Bass);
             base.OnManagedReleaseResources();
         }
     }
@@ -668,14 +668,24 @@ internal class CActResultParameterPanel : CActivity
     private BaseTexture txPercent;
     private BaseTexture txSkillMax;
     //
-    private STDGBVALUE<CTexture> txPreviousBestProgressBar;
-    private STDGBVALUE<CTexture> txCurrentProgressBar;
+    private STDGBVALUE<BaseTexture> txPreviousBestProgressBar;
+    private STDGBVALUE<BaseTexture> txCurrentProgressBar;
     //
     private BaseTexture txProgressBarPanel;
     private BaseTexture txLagHitCount;
 
     private readonly ST文字位置Ex[] stLagCountBlueText;//15x19 start at 0,0
     private readonly ST文字位置Ex[] stLagCountRedText;//15x19 start at 64,64
+
+    private static void ReleaseProgressBarTexture(ref BaseTexture texture)
+    {
+        if (texture != null && !ReferenceEquals(texture, BaseTexture.None))
+        {
+            texture.Dispose();
+        }
+
+        texture = BaseTexture.None;
+    }
 
     private void tDrawStringSmall(int x, int y, string str)
     {

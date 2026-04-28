@@ -40,10 +40,7 @@ internal class CActPerformanceInformation : CActivity
 		nMISS数 = 0;
 		base.OnActivate();
 	}
-	public override int OnUpdateAndDraw()
-	{
-		throw new InvalidOperationException( "tUpdateAndDraw(int x, int y) のほうを使用してください。" );
-	}
+
 	public void tUpdateAndDraw( int x, int y)  // t進行描画
 	{
 		if( bActivated )
