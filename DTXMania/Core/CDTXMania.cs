@@ -341,7 +341,7 @@ internal class CDTXMania
 
         SafeInitialize("Sound Manager", () =>
         {
-            ESoundDeviceType soundDeviceType = ConfigIni.nSoundDeviceType switch
+            ESoundDeviceType soundDeviceType = ConfigIni.nSoundDriverType switch
             {
                 0 => ESoundDeviceType.DirectSound,
                 1 => ESoundDeviceType.ASIO,

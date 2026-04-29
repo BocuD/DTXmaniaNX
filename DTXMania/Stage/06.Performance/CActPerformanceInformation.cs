@@ -61,7 +61,7 @@ internal class CActPerformanceInformation : CActivity
 			CDTXMania.actDisplayString.tPrint(x, y, CCharacterConsole.EFontType.White, string.Format("Frame:         {0:####0} fps", CDTXMania.FPS.nCurrentFPS));
 			y -= 0x10;
                     
-			if (CDTXMania.ConfigIni.nSoundDeviceType != 0)
+			if (CDTXMania.ConfigIni.nSoundDriverType != 0)
 			{
 				CDTXMania.actDisplayString.tPrint(x, y, CCharacterConsole.EFontType.White, string.Format("Sound CPU : {0:####0.00}%", CDTXMania.SoundManager.GetCPUusage()));
 				y -= 0x10;

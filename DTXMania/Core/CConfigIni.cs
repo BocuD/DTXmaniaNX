@@ -492,7 +492,7 @@ internal class CConfigIni
 	public int nWindowHeight;				// #23510 2010.10.31 yyagi add
 	public bool DisplayBonusEffects;
 	public bool bHAZARD;
-	public int nSoundDeviceType; // #24820 2012.12.23 yyagi 出力サウンドデバイス(0=ACM(にしたいが設計がきつそうならDirectShow), 1=ASIO, 2=WASAPI)
+	public int nSoundDriverType; // #24820 2012.12.23 yyagi 出力サウンドデバイス(0=ACM(にしたいが設計がきつそうならDirectShow), 1=ASIO, 2=WASAPI)
 	public int nWASAPIBufferSizeMs; // #24820 2013.1.15 yyagi WASAPIのバッファサイズ
 	//public int nASIOBufferSizeMs; // #24820 2012.12.28 yyagi ASIOのバッファサイズ
 	public int nASIODevice; // #24820 2013.1.17 yyagi ASIOデバイス
@@ -1257,7 +1257,7 @@ internal class CConfigIni
 		strSystemSkinSubfolderFullName = "";	// #28195 2012.5.2 yyagi 使用中のSkinサブフォルダ名
 		bUseBoxDefSkin = true;					// #28195 2012.5.6 yyagi box.defによるスキン切替機能を使用するか否か
 		bTight = false;                        // #29500 2012.9.11 kairera0467
-		nSoundDeviceType = (int)ESoundDeviceTypeForConfig.ACM; // #24820 2012.12.23 yyagi 初期値はACM
+		nSoundDriverType = (int)ESoundDeviceTypeForConfig.ACM; // #24820 2012.12.23 yyagi 初期値はACM
 		nWASAPIBufferSizeMs = 0;               // #24820 2013.1.15 yyagi 初期値は0(自動設定)
 		nASIODevice = 0;                       // #24820 2013.1.17 yyagi
 //          this.nASIOBufferSizeMs = 0;                 // #24820 2012.12.25 yyagi 初期値は0(自動設定)
@@ -1445,7 +1445,7 @@ internal class CConfigIni
 		sw.WriteLine("; Sound device type(0=ACM, 1=ASIO, 2=WASAPI Exclusive, 3=WASAPI Shared)");
 		sw.WriteLine("; WASAPI can use on Vista or later OSs.");
 		sw.WriteLine("; If WASAPI is not available, DTXMania try to use ASIO. If ASIO can't be used, ACM is used.");
-		sw.WriteLine("SoundDeviceType={0}", (int)nSoundDeviceType);
+		sw.WriteLine("SoundDeviceType={0}", (int)nSoundDriverType);
 		sw.WriteLine();
 
 		sw.WriteLine("; WASAPI使用時のサウンドバッファサイズ");
@@ -2573,7 +2573,7 @@ internal class CConfigIni
 									}
 									else if (str3.Equals("SoundDeviceType"))
 									{
-										nSoundDeviceType = CConversion.nGetNumberIfInRange(str4, 0, 3, nSoundDeviceType);
+										nSoundDriverType = CConversion.nGetNumberIfInRange(str4, 0, 3, nSoundDriverType);
 									}
 									else if (str3.Equals("WASAPIBufferSizeMs"))
 									{

@@ -21,9 +21,9 @@ internal partial class CActConfigList : CActivity
             EMenuType e = eMenuType;
             if (e is EMenuType.KeyAssignBass or EMenuType.KeyAssignDrums 
                 or EMenuType.KeyAssignGuitar or EMenuType.KeyAssignSystem 
-                or EMenuType.SystemGraphics or EMenuType.SystemAudio 
-                or EMenuType.SystemGameplay or EMenuType.SystemMenu
-                or EMenuType.SystemSkin
+                or EMenuType.SystemGraphics or EMenuType.SystemGameplay
+                or EMenuType.SystemMenu or EMenuType.SystemSkin
+                or EMenuType.SystemAudio or EMenuType.SystemAudioDriver
                 or EMenuType.VelocityDrums)
             {
                 return true;
@@ -61,6 +61,10 @@ internal partial class CActConfigList : CActivity
             case EMenuType.SystemGameplay:
             case EMenuType.SystemMenu:
                 tSetupItemList_System();
+                break;
+            
+            case EMenuType.SystemAudioDriver:
+                tSetupItemList_Audio();
                 break;
 
             case EMenuType.KeyAssignDrums:
@@ -602,9 +606,10 @@ internal partial class CActConfigList : CActivity
         Drums,
         Guitar,
         Bass,
-        KeyAssignSystem, // #24609 2011.4.12 yyagi: 画面キャプチャキーのアサイン
+        KeyAssignSystem,
         SystemGraphics,
         SystemAudio,
+        SystemAudioDriver,
         SystemGameplay,
         SystemMenu,
         SystemSkin,
