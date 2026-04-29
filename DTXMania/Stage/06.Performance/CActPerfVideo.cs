@@ -134,7 +134,7 @@ internal class CActPerfVideo : CActivity
 
         clipPanelTexture = BaseTexture.LoadFromPath(CSkin.Path(clipPanelPath));
 
-        if (clipPanelTexture.isValid())
+        if (clipPanelTexture.IsValid())
         {
             clipPanelImage = new UIImage(clipPanelTexture);
             clipPanelImage.isVisible = false;

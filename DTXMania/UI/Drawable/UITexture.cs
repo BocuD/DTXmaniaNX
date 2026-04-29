@@ -20,7 +20,7 @@ public abstract class UITexture : UIDrawable
 
     public void SetTexture(BaseTexture t, bool updateSize = true)
     {
-        if (t.isValid())
+        if (t.IsValid())
         {
             texture = t;
 
@@ -63,7 +63,7 @@ public abstract class UITexture : UIDrawable
             return;
         }
 
-        if (!texture.isValid())
+        if (!texture.IsValid())
         {
             ImGui.Text("No texture");
             return;

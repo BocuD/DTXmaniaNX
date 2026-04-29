@@ -45,7 +45,7 @@ public class UIVideoRenderer : UIDrawable
 
         BaseTexture tex = player.GetUpdatedTexture();
         lastRenderedTexture = tex;
-        if (!tex.isValid())
+        if (!tex.IsValid())
         {
             return;
         }
@@ -148,7 +148,7 @@ public class UIVideoRenderer : UIDrawable
         }
 
         BaseTexture texture = lastRenderedTexture;
-        if (!texture.isValid())
+        if (!texture.IsValid())
         {
             ImGui.Text("No video frame available.");
             ImGui.PopID();

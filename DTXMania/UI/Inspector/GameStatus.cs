@@ -1,5 +1,6 @@
 ﻿using System.Numerics;
 using DTXMania.Core;
+using DTXMania.UI.OpenGL;
 using DTXMania.UI.Skin;
 using Hexa.NET.ImGui;
 
@@ -86,7 +87,7 @@ public class GameStatus
         }
 
         DrawFPSGraph();
-
+        
         ImGui.End();
         
         if (demoWindowShown)

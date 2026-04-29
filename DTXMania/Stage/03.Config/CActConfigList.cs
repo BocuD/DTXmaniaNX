@@ -556,9 +556,6 @@ internal partial class CActConfigList : CActivity
         {
             var tex = RenderText(strParam, 15, Color4.White, Color.OrangeRed);
             
-            // Bitmap bmpStr = prvFont.DrawPrivateFont(strParam, Color.White, Color.Black, Color.Yellow, Color.OrangeRed);
-            // CTexture txStr = CDTXMania.tGenerateTexture(bmpStr, false);
-            //
             Matrix4x4 highlightMatrix = Matrix4x4.CreateTranslation(n新項目パネルX + 265, y + 20, 0) * parentMatrix;
             Vector2 size = new(tex.Width, tex.Height);
             size *= 1 / CDTXMania.renderScale;

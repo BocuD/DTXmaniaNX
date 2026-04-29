@@ -73,6 +73,7 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
     {
         _game = game;
         _game.host = this;
+        RendererInfo.host = this;
     }
 
     public bool VsyncEnabled => _vsyncEnabled;
@@ -174,8 +175,7 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
 
         ShutdownImGui();
         renderer.Dispose();
-        OpenGlUi.Renderer = null;
-        OpenGlUi.TextureFactory = null;
+        OpenGlRenderer.Instance = null;
         BaseTexture.SkiaTextRenderer = null!;
         BaseTexture.Factory = null!;
         _gameRenderTarget.Dispose();
@@ -202,8 +202,7 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
         _game.AttachGraphics(_gl);
         _gameRenderTarget.AttachGraphics(_gl);
         renderer.AttachGraphics(_gl);
-        OpenGlUi.Renderer = renderer;
-        OpenGlUi.TextureFactory = _textureFactory;
+        OpenGlRenderer.Instance = renderer;
         
         BaseTexture.SkiaTextRenderer = _skiaTextRenderer;
         BaseTexture.Factory = _textureFactory;

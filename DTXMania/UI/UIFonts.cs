@@ -104,7 +104,7 @@ public static class UIFonts
         
         if (CDTXMania.SkinManager.currentSkin != null)
         {
-            string resourceFolder = Path.Combine(CDTXMania.SkinManager.currentSkin.basePath, SkinDescriptor.GetResourceFolder(SkinDescriptor.ResourceType.Font));
+            string resourceFolder = Path.Combine(CDTXMania.SkinManager.currentSkin.basePath, SkinDescriptor.GetResourceFolder(ResourceType.Font));
             if (Directory.Exists(resourceFolder))
             {
                 string[] files = Directory.GetFiles(resourceFolder);
@@ -133,7 +133,7 @@ public static class UIFonts
         switch (source)
         {
             case FontSource.Resource:
-                string? resolvedPath = CDTXMania.SkinManager.currentSkin?.GetResource(SkinDescriptor.ResourceType.Font, fontName);
+                string? resolvedPath = CDTXMania.SkinManager.currentSkin?.GetResource(ResourceType.Font, fontName);
                 if (string.IsNullOrWhiteSpace(resolvedPath))
                 {
                     return FallbackFontPath;

@@ -8,6 +8,8 @@ namespace DTXMania.UI.OpenGL;
 
 public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
 {
+    public static OpenGlRenderer? Instance { get; set; }
+    
     public override string name => "OpenGL";
     
     private readonly uint[] _indices = [0, 1, 2, 2, 3, 0];
@@ -23,6 +25,11 @@ public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
     private int _transformLocation;
     private int _colorLocation;
     private Matrix4x4 _projection = Matrix4x4.Identity;
+
+    public override int lastFrameDrawCalls => _lastFrameDrawCalls;
+
+    private int drawCalls;
+    private int _lastFrameDrawCalls;
 
     // Events to notify external observers (e.g. an inspector) about texture lifecycle
     internal event Action<uint, int, int>? TextureCreated;
@@ -58,6 +65,9 @@ public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
             0f,
             -1f,
             1f);
+
+        _lastFrameDrawCalls = drawCalls;
+        drawCalls = 0;
     }
 
     public void ReleaseContextResources()
@@ -80,7 +90,8 @@ public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
     {
         DrawQuad(textureId, textureWidth, textureHeight, transformMatrix, size, clipRect, color, blendMode);
     }
-
+    
+    //todo: make this a single drawcall
     public void DrawTextureSliced(uint textureId, float textureWidth, float textureHeight, Matrix4x4 transformMatrix, Vector2 size, RectangleF clipRect, Color4 color, RectangleF sliceRect, BlendMode blendMode)
     {
         float sourceRightBorder = MathF.Max(clipRect.Width - sliceRect.Right, 0f);
@@ -274,6 +285,8 @@ public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
             throw new InvalidOperationException("OpenGL UI renderer is not initialized.");
         }
 
+        drawCalls++;
+
         float u0 = clipRect.Left / textureWidth;
         float v0 = clipRect.Top / textureHeight;
         float u1 = clipRect.Right / textureWidth;
@@ -298,8 +311,7 @@ public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
                 _gl.BlendFunc(GLEnum.SrcAlpha, GLEnum.OneMinusSrcAlpha);
                 break;
         }
-        // _gl.Enable(GLEnum.Blend);
-        // _gl.BlendFunc(GLEnum.SrcAlpha, GLEnum.OneMinusSrcAlpha);
+        
         _gl.Disable(GLEnum.DepthTest);
         _gl.DepthMask(false);
         _gl.Disable(GLEnum.CullFace);

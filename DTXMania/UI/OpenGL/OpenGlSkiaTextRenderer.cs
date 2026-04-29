@@ -10,7 +10,7 @@ internal sealed class OpenGlSkiaTextRenderer : IUiTextRenderer
 {
     public BaseTexture Render(UiTextRenderRequest request)
     {
-        if (OpenGlUi.Renderer == null)
+        if (OpenGlRenderer.Instance == null)
         {
             throw new InvalidOperationException("OpenGL UI renderer is not available.");
         }
@@ -81,7 +81,7 @@ internal sealed class OpenGlSkiaTextRenderer : IUiTextRenderer
 
         byte[] encodedBytes = encoded.ToArray();
         ImageResult decoded = ImageResult.FromMemory(encodedBytes, ColorComponents.RedGreenBlueAlpha);
-        return OpenGlTexture.CreateFromRgba32(OpenGlUi.Renderer, decoded.Data, decoded.Width, decoded.Height, $"Text:{request.Name}");
+        return OpenGlTexture.CreateFromRgba32(OpenGlRenderer.Instance, decoded.Data, decoded.Width, decoded.Height, $"Text:{request.Name}");
     }
 
     private static string[] NormalizeLines(string value)

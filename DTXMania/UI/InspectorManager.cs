@@ -46,7 +46,7 @@ public static class InspectorManager
         windows.Add(new Window("Drawable Tracker", () => DrawableTracker.DrawWindow()));
         windows.Add(new Window("Textures", () => textureInspector.DrawWindow()));
         windows.Add(new Window("Game Status", () => GameStatus.Draw()));
-        windows.Add(new Window("Display Controls", () => DisplayControlsWindow.Draw()));
+        windows.Add(new Window("Display Controls", () => RendererInfo.Draw()));
     }
 
     public static void Draw(bool drawGameWindow, ImTextureID? gameTextureId, Vector2 gameTextureSize)
@@ -69,7 +69,7 @@ public static class InspectorManager
 
         if (textureInspector == null)
         {
-            textureInspector = new TextureInspector(OpenGlUi.Renderer, OpenGlUi.Renderer.GetTrackedTextures());
+            textureInspector = new TextureInspector(OpenGlRenderer.Instance, OpenGlRenderer.Instance.GetTrackedTextures());
         }
         
         if (ImGui.GetIO().KeyCtrl && ImGui.IsKeyPressed(ImGuiKey.I))

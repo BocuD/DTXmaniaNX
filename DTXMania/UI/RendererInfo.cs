@@ -5,7 +5,7 @@ using Hexa.NET.ImGui;
 
 namespace DTXMania.UI;
 
-internal static class DisplayControlsWindow
+internal static class RendererInfo
 {
     public static GlfwOpenGlHost host;
     
@@ -16,6 +16,7 @@ internal static class DisplayControlsWindow
         
         ImGui.Text($"Renderer: {host.Renderer.name}");
         ImGui.Text($"FPS: {host.Fps:F1}");
+        ImGui.Text($"Draw calls: {host.Renderer.lastFrameDrawCalls}");
         ImGui.Text($"Frame time: {host.FrameTimeMs:F2} ms");
         ImGui.Text($"Window: {host.WindowWidth} x {host.WindowHeight}");
         ImGui.Text($"Framebuffer: {host.FramebufferWidth} x {host.FramebufferHeight}");

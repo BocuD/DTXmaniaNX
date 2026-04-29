@@ -69,7 +69,7 @@ public unsafe class SoftwareVideoPlayer : FFmpegVideoPlayer
         }
 
         texture = BaseTexture.CreateEmpty(codecContext->width, codecContext->height, "VideoFrameTexture");
-        if (!texture.isValid())
+        if (!texture.IsValid())
         {
             Trace.TraceError("Failed to create BaseTexture for video playback.");
             return false;
@@ -189,7 +189,7 @@ public unsafe class SoftwareVideoPlayer : FFmpegVideoPlayer
 
     protected override void PresentStagedFrame()
     {
-        if (stagedFrameLength <= 0 || !texture.isValid())
+        if (stagedFrameLength <= 0 || !texture.IsValid())
         {
             return;
         }

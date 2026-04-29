@@ -177,7 +177,6 @@ internal class Program
 			DTXManiaGL game = new();
 			//CubeRenderer game = new();
 			GlfwOpenGlHost host = new(game);
-			DisplayControlsWindow.host = host;
 			host.Run();
 
 			Trace.WriteLine("");

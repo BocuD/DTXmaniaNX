@@ -1,6 +1,7 @@
 ﻿using System.Drawing;
 using System.Numerics;
 using DTXMania.Core;
+using DTXMania.Core.Framework;
 using DTXMania.UI.Inspector;
 using DTXMania.UI.OpenGL;
 using FDK;
@@ -31,16 +32,8 @@ public class GitaDoraTransition : UIGroup
         // CTexture blackTexture = new(CDTXMania.app.Device, bitmap, CDTXMania.TextureFormat, false);
         // bitmap.Dispose();
         
-        //create a black texture (with SKIA instead of System.Drawing)
-        using var bitmap = new SKBitmap(32, 32);
-        using var canvas = new SKCanvas(bitmap);
-        canvas.Clear(SKColors.Black);
-        using var image = SKImage.FromBitmap(bitmap);
-        //dear god
-        using SKData encoded = image.Encode(SKEncodedImageFormat.Png, 100);
-        byte[] encodedBytes = encoded.ToArray();
-        ImageResult decoded = ImageResult.FromMemory(encodedBytes, ColorComponents.RedGreenBlueAlpha);
-        var texture = OpenGlTexture.CreateFromRgba32(OpenGlUi.Renderer, decoded.Data, decoded.Width, decoded.Height, $"black");
+        //create a black texture
+        var texture = BaseTexture.CreateSolidColor(new Color4(0, 0, 0, 255));
         
         //create childContainer
         childContainer = AddChild(new UIGroup("covers"));

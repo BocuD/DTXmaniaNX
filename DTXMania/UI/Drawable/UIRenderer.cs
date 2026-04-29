@@ -43,6 +43,11 @@ public abstract class BaseTexture : IDisposable
     {
         return EnsureFactoryConfigured().CreateEmpty(width, height, name);
     }
+    
+    public static BaseTexture CreateSolidColor(Color4 color)
+    {
+        return EnsureFactoryConfigured().CreateSolidColor(color);
+    }
 
     //stubs for non recreated Device based render code
     private Matrix4x4 scaleMatrix
@@ -103,9 +108,6 @@ public abstract class BaseTexture : IDisposable
         tDraw2DMatrix(transformMatrix, size, clipRect, Color4.White);
     }
     
-    public abstract void tDraw2DMatrix(Matrix4x4 transformMatrix, Vector2 size, RectangleF clipRect, Color4 color);
-    public abstract void tDraw2DMatrixSliced(Matrix4x4 transformMatrix, Vector2 size, RectangleF clipRect, Color4 color, RectangleF sliceRect);
-
     public void tDraw3D(Matrix4x4 mat)
     {
         tDraw3D(mat, new RectangleF(0, 0, Width, Height), Color4.White);
@@ -140,20 +142,18 @@ public abstract class BaseTexture : IDisposable
         Matrix4x4 convertedMatrix = localToLegacyCentered * transformMatrix * legacyWorldToScreen;
         tDraw2DMatrix(convertedMatrix, new Vector2(clipRect.Width, clipRect.Height), clipRect, color);
     }
+    
+    public abstract void UpdateRgba32(ReadOnlySpan<byte> rgbaPixels, int width, int height, int dstX = 0, int dstY = 0);
+    public abstract void tDraw2DMatrix(Matrix4x4 transformMatrix, Vector2 size, RectangleF clipRect, Color4 color);
+    public abstract void tDraw2DMatrixSliced(Matrix4x4 transformMatrix, Vector2 size, RectangleF clipRect, Color4 color, RectangleF sliceRect);
 
+    public abstract bool IsValid();
+
+    public abstract ImTextureID? GetImTextureID();
     
     public virtual void Dispose()
     {
     }
-
-    public virtual void UpdateRgba32(ReadOnlySpan<byte> rgbaPixels, int width, int height, int dstX = 0, int dstY = 0)
-    {
-        throw new NotSupportedException($"Texture '{name}' does not support CPU-side updates.");
-    }
-
-    public abstract bool isValid();
-
-    public abstract ImTextureID? GetImTextureID();
 
     private static BaseTextureFactory EnsureFactoryConfigured()
     {
@@ -180,7 +180,11 @@ public sealed class NoneTexture : BaseTexture
     {
     }
 
-    public override bool isValid()
+    public override void UpdateRgba32(ReadOnlySpan<byte> rgbaPixels, int width, int height, int dstX = 0, int dstY = 0)
+    {
+    }
+
+    public override bool IsValid()
     {
         return false;
     }
@@ -196,4 +200,5 @@ public abstract class BaseTextureFactory
     public abstract BaseTexture LoadFromPath(string texturePath);
     public abstract BaseTexture LoadFromMemory(ReadOnlySpan<byte> rgbaPixels, int width, int height, string name = "Texture");
     public abstract BaseTexture CreateEmpty(int width, int height, string name = "DynamicTexture");
+    public abstract BaseTexture CreateSolidColor(Color4 color);
 }

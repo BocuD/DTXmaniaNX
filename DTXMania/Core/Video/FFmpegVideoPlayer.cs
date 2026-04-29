@@ -251,7 +251,7 @@ public abstract unsafe class FFmpegVideoPlayer : IDisposable
         StartPlaybackClockIfNeeded();
 
         BaseTexture outputTexture = OutputTexture;
-        if (!outputTexture.isValid())
+        if (!outputTexture.IsValid())
         {
             return BaseTexture.None;
         }

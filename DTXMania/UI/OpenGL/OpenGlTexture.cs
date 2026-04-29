@@ -39,19 +39,14 @@ internal sealed class OpenGlTexture : BaseTexture
         uint textureId = renderer.CreateTextureEmpty(width, height);
         return new OpenGlTexture(renderer, textureId, width, height, name);
     }
-
-    public new static OpenGlTexture LoadFromPath(string texturePath)
+    
+    public static OpenGlTexture LoadFromPath(OpenGlRenderer renderer, string texturePath)
     {
-        if (OpenGlUi.Renderer == null)
-        {
-            throw new InvalidOperationException("OpenGL UI renderer is not available.");
-        }
-
         try
         {
             byte[] fileBytes = File.ReadAllBytes(texturePath);
             ImageResult image = ImageResult.FromMemory(fileBytes, ColorComponents.RedGreenBlueAlpha);
-            return CreateFromRgba32(OpenGlUi.Renderer, image.Data, image.Width, image.Height,
+            return CreateFromRgba32(renderer, image.Data, image.Width, image.Height,
                 Path.GetFileName(texturePath));
         }
         catch (FileNotFoundException e)
@@ -63,7 +58,7 @@ internal sealed class OpenGlTexture : BaseTexture
             Trace.WriteLine($"Texture file not found: {texturePath}");
         }
 
-        var notFound = CreateSolidColor(OpenGlUi.Renderer, new Color4(1, 0, 1, 1), $"Missing:{Path.GetFileName(texturePath)}");
+        var notFound = CreateSolidColor(renderer, new Color4(1, 0, 1, 1), $"Missing:{Path.GetFileName(texturePath)}");
         notFound.notFound = true;
         return notFound;
     }
@@ -122,7 +117,7 @@ internal sealed class OpenGlTexture : BaseTexture
         _renderer.UpdateTexture(_textureId, rgbaPixels, width, height, dstX, dstY);
     }
 
-    public override bool isValid()
+    public override bool IsValid()
     {
         return _textureId != 0;
     }
@@ -137,26 +132,41 @@ internal sealed class OpenGlTextureFactory : BaseTextureFactory
 {
     public override BaseTexture LoadFromPath(string texturePath)
     {
-        return OpenGlTexture.LoadFromPath(texturePath);
+        if (OpenGlRenderer.Instance == null)
+        {
+            throw new InvalidOperationException("OpenGL UI renderer is not available.");
+        }
+        
+        return OpenGlTexture.LoadFromPath(OpenGlRenderer.Instance, texturePath);
     }
 
     public override BaseTexture LoadFromMemory(ReadOnlySpan<byte> rgbaPixels, int width, int height, string name = "Texture")
     {
-        if (OpenGlUi.Renderer == null)
+        if (OpenGlRenderer.Instance == null)
         {
             throw new InvalidOperationException("OpenGL UI renderer is not available.");
         }
 
-        return OpenGlTexture.CreateFromRgba32(OpenGlUi.Renderer, rgbaPixels, width, height, name);
+        return OpenGlTexture.CreateFromRgba32(OpenGlRenderer.Instance, rgbaPixels, width, height, name);
     }
 
     public override BaseTexture CreateEmpty(int width, int height, string name = "DynamicTexture")
     {
-        if (OpenGlUi.Renderer == null)
+        if (OpenGlRenderer.Instance == null)
         {
             throw new InvalidOperationException("OpenGL UI renderer is not available.");
         }
 
-        return OpenGlTexture.CreateEmpty(OpenGlUi.Renderer, width, height, name);
+        return OpenGlTexture.CreateEmpty(OpenGlRenderer.Instance, width, height, name);
+    }
+
+    public override BaseTexture CreateSolidColor(Color4 color)
+    {
+        if (OpenGlRenderer.Instance == null)
+        {
+            throw new InvalidOperationException("OpenGL UI renderer is not available.");
+        }
+        
+        return OpenGlTexture.CreateSolidColor(OpenGlRenderer.Instance, color);
     }
 }

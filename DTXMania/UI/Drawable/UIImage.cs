@@ -4,12 +4,24 @@ using System.Numerics;
 using DTXMania.Core;
 using DTXMania.UI.Inspector;
 using DTXMania.UI.Skin;
-using Hexa.NET.ImGui;
-using NativeFileDialog.Extended;
 
 namespace DTXMania.UI.Drawable;
 
-public class UIImage : UITexture
+public enum ERenderMode
+{
+    Stretched,
+    Sliced
+}
+
+public enum ImageSource
+{
+    File,
+    Resource,
+    Dynamic
+}
+
+
+public partial class UIImage : UITexture
 {
     [Themable] public RectangleF clipRect;
     [Themable] public RectangleF sliceRect;
@@ -31,7 +43,7 @@ public class UIImage : UITexture
     public UIImage(BaseTexture texture)
         : base(texture)
     {
-        if (texture.isValid())
+        if (texture.IsValid())
         {
             clipRect = new RectangleF(0, 0, texture.Width, texture.Height);
             sliceRect = clipRect;
@@ -40,7 +52,7 @@ public class UIImage : UITexture
 
     public override void Draw(Matrix4x4 parentMatrix)
     {
-        if (!isVisible || !texture.isValid())
+        if (!isVisible || !texture.IsValid())
         {
             return;
         }
@@ -61,7 +73,7 @@ public class UIImage : UITexture
     {
         base.SetTexture(newTexture, updateSize);
 
-        if (updateRects && texture.isValid())
+        if (updateRects && texture.IsValid())
         {
             clipRect = new RectangleF(0, 0, texture.Width, texture.Height);
             sliceRect = clipRect;
@@ -80,7 +92,7 @@ public class UIImage : UITexture
         if (imageSource == ImageSource.Resource)
         {
             Trace.TraceInformation("Updating resource for " + id);
-            string? fullPath = CDTXMania.SkinManager.currentSkin?.GetResource(SkinDescriptor.ResourceType.Image, resource);
+            string? fullPath = CDTXMania.SkinManager.currentSkin?.GetResource(ResourceType.Image, resource);
             if (string.IsNullOrWhiteSpace(fullPath))
             {
                 Trace.TraceError($"Resource {resource} not found in current skin.");
@@ -97,68 +109,4 @@ public class UIImage : UITexture
             SetTexture(BaseTexture.LoadFromPath(fullPath), updateRects);
         }
     }
-
-    public override void DrawInspector()
-    {
-        base.DrawInspector();
-
-        if (!ImGui.CollapsingHeader("Image"))
-        {
-            return;
-        }
-
-        Inspector.Inspector.Inspect("Image Source", ref imageSource);
-        if (imageSource == ImageSource.Resource)
-        {
-            ImGui.LabelText("Resource", resource);
-        }
-        Inspector.Inspector.Inspect("Clip Rect", ref clipRect);
-        Inspector.Inspector.Inspect("Render Mode", ref renderMode);
-        Inspector.Inspector.Inspect("Color", ref color);
-
-        if (ImGui.Button("Load New Texture"))
-        {
-            Dictionary<string, string> filterList = new()
-            {
-                { "Images", "png,jpg,jpeg,bmp,tga,gif" }
-            };
-
-            string path = NFD.OpenDialog("", filterList);
-
-            if (!string.IsNullOrWhiteSpace(path) && File.Exists(path))
-            {
-                var currentSkin = CDTXMania.SkinManager.currentSkin;
-                    
-                if (currentSkin != null)
-                {
-                    string resourcePath = currentSkin.AddResource(SkinDescriptor.ResourceType.Image, path);
-                    imageSource = ImageSource.Resource;
-                    resource = resourcePath;
-                    LoadResource(true);
-                }
-                else
-                {
-                    SetTexture(BaseTexture.LoadFromPath(path));
-                }
-            }
-        }
-
-        if (renderMode == ERenderMode.Sliced)
-        {
-            Inspector.Inspector.Inspect("Slice Rect", ref sliceRect);
-        }
-    }
-}
-
-public enum ERenderMode
-{
-    Stretched,
-    Sliced
-}
-
-public enum ImageSource
-{
-    File,
-    Resource,
-    Dynamic
 }
