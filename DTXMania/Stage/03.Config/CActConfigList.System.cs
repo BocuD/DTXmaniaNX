@@ -75,9 +75,9 @@ internal partial class CActConfigList
         
         int nDGmode = CDTXMania.ConfigIni.bDrumsEnabled ? 0 : 1;
         iSystemGRmode = new CItemList("Game Selection", CItemBase.EPanelType.Normal, nDGmode,
-            "使用楽器の選択：\nDrumMania: ドラムのみ有効にします。\nGuitarFreaks: ギター/ベースのみの専用画面を\n用います。",
-            "Instrument selection:\nDrumMania: Play the drums.\nGuitarFreaks: Play guitar.\n",
-            ["DrumMania", "GuitarFreaks"]);
+            "使用楽器の選択：\nDrums: ドラムのみ有効にします。\nGuitar: ギター/ベースのみの専用画面を\n用います。",
+            "Instrument selection:\nDrums: Play the drums.\nGuitar: Play guitar.\n",
+            ["Drums", "Guitar"]);
         iSystemGRmode.BindConfig(
             () => iSystemGRmode.nCurrentlySelectedIndex = nDGmode, 
             () => { } );
@@ -187,9 +187,11 @@ internal partial class CActConfigList
                     {
                         CConfigIni newConfig = new(filePath);
                         CDTXMania.ConfigIni = newConfig;
-                        //Update the display values in config page to ensure UI is in-sync
+                        
+                        //update the display values in config page to ensure UI is in-sync
                         tUpdateDisplayValuesFromConfigIni();
-                        //Update Toast Message
+                        
+                        //update Toast Message
                         string fileName = filePath.Substring(filePath.LastIndexOf("\\") + 1);
                         tUpdateToastMessage($"Imported {fileName} successfully.");
                         ctToastMessageCounter.tStart(0, 1, 10000, CDTXMania.Timer);
