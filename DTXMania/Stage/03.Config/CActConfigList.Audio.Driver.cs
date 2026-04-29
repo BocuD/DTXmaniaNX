@@ -120,9 +120,7 @@ internal partial class CActConfigList
         }
 
         tAddReturnToMenuItem(tSetupItemList_Audio);
-
-        CacheCurrentSoundDevices();
-
+        
         InitializeList();
         nCurrentSelection = 0;
         eMenuType = EMenuType.SystemAudioDriver;

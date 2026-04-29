@@ -164,8 +164,24 @@ public class CSoundDeviceASIO : ISoundDevice
 
 		int nDevice = 0;      // 0:"no device" … BASS からはデバイスへアクセスさせない。アクセスは BASSASIO アドオンから行う。
 		int nFrequency = 44100;   // 仮決め。最終的な周波数はデバイス（≠ドライバ）が決める。
+		Trace.TraceInformation("Attempting BASS_Init (Device: {0}, Frequency: {1})", nDevice, nFrequency);
 		if (!Bass.BASS_Init(nDevice, nFrequency, BASSInit.BASS_DEVICE_DEFAULT, IntPtr.Zero))
-			throw new Exception($"BASS Initialization failed. (BASS_Init)[{Bass.BASS_ErrorGetCode().ToString()}]");
+		{
+			BASSError err = Bass.BASS_ErrorGetCode();
+			if (err != BASSError.BASS_ERROR_ALREADY)
+			{
+				Trace.TraceError("BASS_Init failed (ASIO). Error: {0}", err.ToString());
+				throw new Exception($"BASS Initialization failed. (BASS_Init)[{err.ToString()}]");
+			}
+			else
+			{
+				Trace.TraceInformation("BASS_Init: BASS is already initialized.");
+			}
+		}
+		else
+		{
+			Trace.TraceInformation("BASS_Init successful.");
+		}
 
 		//Debug.WriteLine( "BASS_Init()完了。" );
 		#region [ デバッグ用: ASIOデバイスのenumerateと、ログ出力 ]
@@ -182,9 +198,10 @@ public class CSoundDeviceASIO : ISoundDevice
 
 		// BASS ASIO の初期化。
 		BASS_ASIO_INFO asioInfo = null;
+		Trace.TraceInformation("Attempting BASS_ASIO_Init (Device Index: {0})", nASIODevice);
 		if (BassAsio.BASS_ASIO_Init(nASIODevice, BASSASIOInit.BASS_ASIO_THREAD))    // 専用スレッドにて起動
 		{
-			#region [ ASIO の初期化に成功。]
+			#region [ ASIO Initialization Successful ]
 			//-----------------
 			eOutputDevice = ESoundDeviceType.ASIO;
 			asioInfo = BassAsio.BASS_ASIO_GetInfo();
@@ -192,7 +209,7 @@ public class CSoundDeviceASIO : ISoundDevice
 			db周波数 = BassAsio.BASS_ASIO_GetRate();
 			fmtASIOデバイスフォーマット = BassAsio.BASS_ASIO_ChannelGetFormat(false, 0);
 
-			Trace.TraceInformation("BASS を初期化しました。(ASIO, デバイス:\"{0}\", 入力{1}, 出力{2}, {3}Hz, バッファ{4}～{6}sample ({5:0.###}～{7:0.###}ms), デバイスフォーマット:{8})",
+			Trace.TraceInformation("BASS ASIO Initialized (Device: \"{0}\", Inputs: {1}, Outputs: {2}, Rate: {3}Hz, Buffer: {4} to {6} samples ({5:0.###} to {7:0.###}ms), Format: {8})",
 				asioInfo.name,
 				asioInfo.inputs,
 				asioInfo.outputs,
@@ -218,17 +235,18 @@ public class CSoundDeviceASIO : ISoundDevice
 		}
 		else
 		{
-			#region [ ASIO の初期化に失敗。]
+			#region [ ASIO Initialization Failed ]
 			//-----------------
 			BASSError errcode = Bass.BASS_ErrorGetCode();
 			string errmes = errcode.ToString();
 			if (errcode == BASSError.BASS_OK)
 			{
-				errmes = "BASS_OK; The device may be dissconnected";
+				errmes = "BASS_OK; The device may be disconnected";
 			}
+			Trace.TraceError("BASS_ASIO_Init failed. Error: {0}", errmes);
 			Bass.BASS_Free();
 			bIsBASSFree = true;
-			throw new Exception($"BASS (ASIO) の初期化に失敗しました。(BASS_ASIO_Init)[{errmes}]");
+			throw new Exception($"BASS (ASIO) initialization failed. (BASS_ASIO_Init)[{errmes}]");
 			//-----------------
 			#endregion
 		}
