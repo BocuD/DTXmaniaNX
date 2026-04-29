@@ -181,7 +181,6 @@ internal partial class CActConfigList
         tAddReturnToMenuItem(tSetupItemList_System);
 
         audioMenuOpened = true;
-        CacheCurrentSoundDevices();
         
         InitializeList();
         nCurrentSelection = 0;

@@ -171,6 +171,8 @@ internal partial class CActConfigList : CActivity
         ctTriangleArrowAnimation = new CCounter();
         ctToastMessageCounter = new CCounter(0, 1, 10000, CDTXMania.Timer);
 
+        CacheCurrentSoundDevices();
+
         base.OnActivate();
     }
 
