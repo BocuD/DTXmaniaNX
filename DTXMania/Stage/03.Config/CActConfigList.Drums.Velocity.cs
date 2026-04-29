@@ -20,6 +20,7 @@ internal partial class CActConfigList
      */
     public void tSetupItemList_DrumsVelocity()
     {
+	    tRecordToConfigIni();
         listItems.Clear();
 
         CItemBase iVelocityDrumsReturnToMenu = new("<< ReturnTo Menu", CItemBase.EPanelType.Other,

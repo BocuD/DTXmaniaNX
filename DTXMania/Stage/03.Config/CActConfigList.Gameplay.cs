@@ -7,6 +7,7 @@ internal partial class CActConfigList
 { 
     private void tSetupItemList_Gameplay()
     {
+        tRecordToConfigIni();
         listItems.Clear();
         
         CItemInteger iSystemRisky = new("Risky", 0, 10, CDTXMania.ConfigIni.nRisky,

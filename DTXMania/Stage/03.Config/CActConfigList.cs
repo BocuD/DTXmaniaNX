@@ -199,12 +199,6 @@ internal partial class CActConfigList : CActivity
         #endregion
 
         HandleSoundDeviceChanges();
-
-        #region [ サウンドのタイムストレッチモード変更 ]
-
-        CSoundManager.bIsTimeStretch = iSystemTimeStretch.bON;
-
-        #endregion
     }
 
     public override void OnManagedCreateResources()
@@ -221,7 +215,7 @@ internal partial class CActConfigList : CActivity
         }
         
         txItemBoxOther = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\4_itembox other.png"));
-        txTriangleArrow = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\4_triangle arrow.png"));
+        BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\4_triangle arrow.png"));
         txDescriptionPanel = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\4_Description Panel.png"));
         txArrow = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\4_Arrow.png"));
         txItemBoxCursor = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\4_itembox cursor.png"));
@@ -643,7 +637,6 @@ internal partial class CActConfigList : CActivity
     ];
 
     private BaseTexture txItemBoxOther;
-    private BaseTexture txTriangleArrow;
     private BaseTexture txArrow;
     private BaseTexture txItemBoxNormal;
     private BaseTexture txItemBoxFolder;

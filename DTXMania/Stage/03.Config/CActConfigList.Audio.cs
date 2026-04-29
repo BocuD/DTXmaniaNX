@@ -9,24 +9,20 @@ internal partial class CActConfigList
     private int iSystemSoundType_initial;
     private int iSystemWASAPIBufferSizeMs_initial;
     private int iSystemASIODevice_initial;
-    private int iSystemSoundTimerType_initial;
+    private bool bSystemSoundTimerType_initial;
     private CItemInteger iSystemMasterVolume;
     private CItemToggle iSystemTimeStretch;
-        
-    private CItemList iSystemAudioDriver;
-    private CItemInteger iSystemWASAPIBufferSizeMs;
-    private CItemList iSystemASIODevice;
-    private CItemToggle iSystemSoundTimerType;
-    private CItemToggle iSystemWASAPIEventDriven;
 
     private bool audioMenuOpened;
-        
+    
+    private CItemList iSystemAudioDriver;
+
     private void CacheCurrentSoundDevices()
     {
-        iSystemSoundType_initial = iSystemAudioDriver.nCurrentlySelectedIndex; // CONFIGに入ったときの値を保持しておく
-        iSystemWASAPIBufferSizeMs_initial = iSystemWASAPIBufferSizeMs.nCurrentValue; // CONFIG脱出時にこの値から変更されているようなら
-        iSystemASIODevice_initial = iSystemASIODevice.nCurrentlySelectedIndex;
-        iSystemSoundTimerType_initial = iSystemSoundTimerType.GetIndex();
+        iSystemSoundType_initial = CDTXMania.ConfigIni.nSoundDriverType; // CONFIGに入ったときの値を保持しておく
+        iSystemWASAPIBufferSizeMs_initial = CDTXMania.ConfigIni.nWASAPIBufferSizeMs; // CONFIG脱出時にこの値から変更されているようなら
+        iSystemASIODevice_initial = CDTXMania.ConfigIni.nASIODevice;
+        bSystemSoundTimerType_initial = CDTXMania.ConfigIni.bUseOSTimer;
     }
     
     private void HandleSoundDeviceChanges()
@@ -39,13 +35,13 @@ internal partial class CActConfigList
         //reset for next load
         audioMenuOpened = false;
 
-        if (iSystemSoundType_initial != iSystemAudioDriver.nCurrentlySelectedIndex ||
-            iSystemWASAPIBufferSizeMs_initial != iSystemWASAPIBufferSizeMs.nCurrentValue ||
-            iSystemASIODevice_initial != iSystemASIODevice.nCurrentlySelectedIndex ||
-            iSystemSoundTimerType_initial != iSystemSoundTimerType.GetIndex())
+        if (iSystemSoundType_initial != CDTXMania.ConfigIni.nSoundDriverType ||
+            iSystemWASAPIBufferSizeMs_initial != CDTXMania.ConfigIni.nWASAPIBufferSizeMs ||
+            iSystemASIODevice_initial != CDTXMania.ConfigIni.nASIODevice ||
+            bSystemSoundTimerType_initial != CDTXMania.ConfigIni.bUseOSTimer)
         {
             ESoundDeviceType soundDeviceType;
-            switch (iSystemAudioDriver.nCurrentlySelectedIndex)
+            switch (CDTXMania.ConfigIni.nSoundDriverType)
             {
                 case 0:
                     soundDeviceType = ESoundDeviceType.DirectSound;
@@ -65,18 +61,21 @@ internal partial class CActConfigList
             }
 
             CDTXMania.SoundManager.tInitialize(soundDeviceType,
-                iSystemWASAPIBufferSizeMs.nCurrentValue,
+                CDTXMania.ConfigIni.nWASAPIBufferSizeMs,
                 false,
                 0,
-                iSystemASIODevice.nCurrentlySelectedIndex,
-                iSystemSoundTimerType.bON);
-            //CDTXMania.app.ShowWindowTitleWithSoundType();   //XGオプション
-            CDTXMania.app.AddSoundTypeToWindowTitle();    //GDオプション
+                CDTXMania.ConfigIni.nASIODevice,
+                CDTXMania.ConfigIni.bUseOSTimer);
+
+            CDTXMania.app.AddSoundTypeToWindowTitle();
         }
+        
+        CSoundManager.bIsTimeStretch = iSystemTimeStretch.bON;
     }
     
     private void tSetupItemList_Audio()
     {
+        tRecordToConfigIni();
         listItems.Clear();
 
         // #33700 2013.1.3 yyagi

@@ -80,6 +80,8 @@ internal partial class CActConfigList
     
     private void ApplySkinChanges()
     {
+        if (iNewSkinSelector == null) return;
+        
         //Apply skin changes
         if (iNewSkinSelector.nCurrentlySelectedIndex != 0) //0 is none
         {
@@ -94,6 +96,7 @@ internal partial class CActConfigList
     
     private void tSetupItemList_Skin()
     {
+        tRecordToConfigIni();
         listItems.Clear();
 
         ScanSkinFolders();

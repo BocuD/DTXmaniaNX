@@ -7,6 +7,7 @@ internal partial class CActConfigList
 {
     private void tSetupItemList_Graphics()
     {
+        tRecordToConfigIni();
         listItems.Clear();
 
         CItemToggle iSystemAVI = new("AVI", CDTXMania.ConfigIni.bAVIEnabled,

@@ -23,7 +23,7 @@ internal partial class CActConfigList
             () => CDTXMania.ConfigIni.bWave再生位置自動調整機能有効 = iSystemAdjustWaves.bON);
         
         string[] asiodevs = CEnumerateAllAsioDevices.GetAllASIODevices();
-        iSystemASIODevice = new CItemList("ASIO device", CItemBase.EPanelType.Normal, CDTXMania.ConfigIni.nASIODevice,
+        var iSystemASIODevice = new CItemList("ASIO device", CItemBase.EPanelType.Normal, CDTXMania.ConfigIni.nASIODevice,
             "ASIOデバイス:\n" +
             "ASIO使用時の\n" +
             "サウンドデバイスを選択\n"+
@@ -38,7 +38,7 @@ internal partial class CActConfigList
             () => CDTXMania.ConfigIni.nASIODevice = iSystemASIODevice.nCurrentlySelectedIndex);
 
         // #24820 2013.1.15 yyagi
-        iSystemWASAPIBufferSizeMs = new CItemInteger("WASAPIBufSize", 0, 99999, CDTXMania.ConfigIni.nWASAPIBufferSizeMs,
+        var iSystemWASAPIBufferSizeMs = new CItemInteger("WASAPIBufSize", 0, 99999, CDTXMania.ConfigIni.nWASAPIBufferSizeMs,
             "WASAPI時のバッファサイズ:\n" +
             "0～99999msを指定できます。\n" +
             "0を指定すると、OSがサイズを\n" +
@@ -54,7 +54,7 @@ internal partial class CActConfigList
             () => iSystemWASAPIBufferSizeMs.nCurrentValue = CDTXMania.ConfigIni.nWASAPIBufferSizeMs,
             () => CDTXMania.ConfigIni.nWASAPIBufferSizeMs = iSystemWASAPIBufferSizeMs.nCurrentValue);
         
-        iSystemWASAPIEventDriven = new CItemToggle("WASAPIEventDriven", CDTXMania.ConfigIni.bEventDrivenWASAPI,
+        var iSystemWASAPIEventDriven = new CItemToggle("WASAPIEventDriven", CDTXMania.ConfigIni.bEventDrivenWASAPI,
             "WASAPIをEvent Drivenモードで使用します。\n" +
             "これを使うと、サウンド出力の遅延をより小さくできますが、システム負荷は上昇します。",
             "Use WASAPI Event Driven mode.\n" +
@@ -63,7 +63,7 @@ internal partial class CActConfigList
             () => iSystemWASAPIEventDriven.bON = CDTXMania.ConfigIni.bEventDrivenWASAPI,
             () => CDTXMania.ConfigIni.bEventDrivenWASAPI = iSystemWASAPIEventDriven.bON);
         
-        iSystemSoundTimerType = new CItemToggle("UseOSTimer", CDTXMania.ConfigIni.bUseOSTimer,
+        var iSystemSoundTimerType = new CItemToggle("UseOSTimer", CDTXMania.ConfigIni.bUseOSTimer,
             "OSタイマーを使用するかどうか:\n" +
             "演奏タイマーとして、DTXMania独自のタイマーを使うか\n" +
             "OS標準のタイマーを使うかを選択します。\n" +
@@ -85,6 +85,7 @@ internal partial class CActConfigList
             () => iSystemSoundTimerType.bON = CDTXMania.ConfigIni.bUseOSTimer,
             () => CDTXMania.ConfigIni.bUseOSTimer = iSystemSoundTimerType.bON);
         
+        tRecordToConfigIni();
         listItems.Clear();
 
         int audioDriver = iSystemAudioDriver.GetIndex();

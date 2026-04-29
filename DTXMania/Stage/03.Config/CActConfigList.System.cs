@@ -256,6 +256,7 @@ internal partial class CActConfigList
 
     private void tSetupItemList_KeyAssignSystem()
     {
+        tRecordToConfigIni();
         listItems.Clear();
             
         CItemBase iKeyAssignSystemReturnToMenu = new("<< Return To Menu", CItemBase.EPanelType.Other,
