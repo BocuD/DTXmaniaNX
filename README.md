@@ -56,6 +56,7 @@ Visit [releases](https://github.com/BocuD/DTXmaniaNX/releases) for automated bui
  
 ## Current roadmap (in no particular order)
 
+- Rework guitar gameplay stage
 - Feature parity on song select screen with upstream DTXManiaNX
 - Lane swapping (similar to DTXMania AL)
 - Song database serialization
