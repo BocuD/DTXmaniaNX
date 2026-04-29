@@ -55,6 +55,43 @@ public class LogWindow : TraceListener
         }
     }
 
+    public override void TraceEvent(TraceEventCache? eventCache, string? source, TraceEventType eventType, int id, string? format, params object?[]? args)
+    {
+        if (format == null) return;
+
+        lock (logLock)
+        {
+            string message = args == null ? format : string.Format(format, args);
+            AppendMessageLocked(message, eventType);
+        }
+    }
+
+    public override void TraceData(TraceEventCache? eventCache, string? source, TraceEventType eventType, int id, object? data)
+    {
+        if (data == null) return;
+
+        lock (logLock)
+        {
+            AppendMessageLocked(data.ToString() ?? string.Empty, eventType);
+        }
+    }
+
+    public override void TraceData(TraceEventCache? eventCache, string? source, TraceEventType eventType, int id, params object?[]? data)
+    {
+        if (data == null) return;
+
+        lock (logLock)
+        {
+            StringBuilder sb = new();
+            for (int i = 0; i < data.Length; i++)
+            {
+                if (i > 0) sb.Append(", ");
+                sb.Append(data[i]?.ToString());
+            }
+            AppendMessageLocked(sb.ToString(), eventType);
+        }
+    }
+
     private void AppendMessageLocked(string message, TraceEventType level)
     {
         string prefix = $"[{DateTime.Now:HH:mm:ss.fff}] [{level}] ";
@@ -71,7 +108,7 @@ public class LogWindow : TraceListener
             logLines.Add(new LogLine { Text = prefix + line, Level = level });
         }
     }
-
+    
     public void DrawWindow()
     {
         ImGui.Begin("Log Window", ImGuiWindowFlags.NoFocusOnAppearing);
