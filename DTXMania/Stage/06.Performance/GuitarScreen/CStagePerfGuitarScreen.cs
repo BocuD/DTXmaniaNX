@@ -1,8 +1,8 @@
 ﻿using System.Drawing;
 using System.Diagnostics;
 using DTXMania.Core;
+using DTXMania.UI.Drawable;
 using FDK;
-using RectangleF = SharpDX.RectangleF;
 
 namespace DTXMania;
 
@@ -17,11 +17,10 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		bActivated = false;
 		listChildActivities.Add( actStageFailed = new CActPerfStageFailure() );
 		listChildActivities.Add( actDANGER = new CActPerfGuitarDanger() );
-		listChildActivities.Add( actAVI = new CActPerfAVI() );
+		listChildActivities.Add( video = new CActPerfVideo() );
 		listChildActivities.Add( actBGA = new CActPerfBGA() );
 		listChildActivities.Add( actGraph = new CActPerfSkillMeter() );
 		listChildActivities.Add(actGuitarBonus = new CActPerfGuitarBonus());
-//			base.listChildActivities.Add( this.actPanel = new CActPerfPanelString() );
 		listChildActivities.Add( actScrollSpeed = new CActPerfScrollSpeed() );
 		listChildActivities.Add( actStatusPanel = new CActPerfGuitarStatusPanel() );
 		listChildActivities.Add( actWailingBonus = new CActPerfGuitarWailingBonus() );
@@ -33,12 +32,14 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		listChildActivities.Add( actCombo = new CActPerfGuitarCombo() );
 		listChildActivities.Add( actChipFireGB = new CActPerfGuitarChipFire() );
 		listChildActivities.Add( actPlayInfo = new CActPerformanceInformation() );
-		listChildActivities.Add( actFI = new CActFIFOBlackStart() );
-		listChildActivities.Add( actFO = new CActFIFOBlack() );
-		listChildActivities.Add( actFOClear = new CActFIFOWhite() );
-		listChildActivities.Add( actFOStageClear = new CActFIFOWhiteClear());
 		listChildActivities.Add( actProgressBar = new CActPerfProgressBar());
-		listChildActivities.Add( actBackgroundAVI = new CActSelectBackgroundAVI());
+	}
+
+	public override void InitializeBaseUI()
+	{
+		base.InitializeBaseUI();
+
+		actStatusPanel.InitUI(ui);
 	}
 
 
@@ -101,23 +102,11 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		{
 			bサビ区間 = false;
 			//this.tGenerateBackgroundTexture();
-			txChip = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\7_Chips_Guitar.png" ) );
-			txLane = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\7_lanes_Guitar.png") );
-			txHitBar = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\\ScreenPlayDrums hit-bar.png"));
+			txChip = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\7_Chips_Guitar.png" ) );
+			txLane = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\7_lanes_Guitar.png") );
+			txHitBar = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\\ScreenPlayDrums hit-bar.png"));
 			//this.txWailingFrame = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlay wailing cursor.png" ) );
 			base.OnManagedCreateResources();
-		}
-	}
-	public override void OnManagedReleaseResources()
-	{
-		if( bActivated )
-		{
-			//CDTXMania.tReleaseTexture( ref this.txBackground );
-			CDTXMania.tReleaseTexture( ref txChip );
-			CDTXMania.tReleaseTexture( ref txLane );
-			CDTXMania.tReleaseTexture( ref txHitBar );
-			//CDTXMania.tReleaseTexture( ref this.txWailingFrame );
-			base.OnManagedReleaseResources();
 		}
 	}
 
@@ -138,18 +127,11 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 
 		if (tx判定画像anime != null && txBonusEffect != null)
 		{
-			tx判定画像anime.tDraw2D(CDTXMania.app.Device, 1280, 720);
-			txBonusEffect.tDraw2D(CDTXMania.app.Device, 1280, 720);
+			tx判定画像anime.tDraw2D(1280, 720);
+			txBonusEffect.tDraw2D(1280, 720);
 		}
 
 		ePhaseID = EPhase.Common_FadeIn;
-		actFI.tStartFadeIn();
-
-		if (CDTXMania.DTXVmode.Enabled)
-		{
-			tSetSettingsForDTXV();
-			tJumpInSongToBar(CDTXMania.DTXVmode.nStartBar + 1);
-		}
 		
 		// display presence now that the initial timer reset has been performed
 		tDisplayPresence();
@@ -212,7 +194,6 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		tUpdateAndDraw_Combo();
 		tUpdateAndDraw_PerformanceInformation();
 		//this.tUpdateAndDraw_WailingFrame();
-		tUpdateAndDraw_PlaySpeed();
 
 		tUpdateAndDraw_ChipFireGB();
 		tUpdateAndDraw_GuitarBonus();
@@ -220,23 +201,8 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		bIsFinishedFadeout = tUpdateAndDraw_FadeIn_Out();
 		if (bIsFinishedPlaying && (ePhaseID == EPhase.Common_DefaultState))
 		{
-			//Pause the timer when finished playing in DTXVMode
-			if (CDTXMania.DTXVmode.Enabled)
-			{
-				if (CDTXMania.Timer.b停止していない)
-				{
-					CDTXMania.Timer.tPause();
-				}
-
-				Thread.Sleep(5);
-				// Keep waiting for next message from DTX Creator
-			}
-			else
-			{
-				eReturnValueAfterFadeOut = EPerfScreenReturnValue.StageClear;
-				ePhaseID = EPhase.PERFORMANCE_STAGE_CLEAR_FadeOut;
-				actFOStageClear.tStartFadeOut();
-			}
+			eReturnValueAfterFadeOut = EPerfScreenReturnValue.StageClear;
+			ePhaseID = EPhase.PERFORMANCE_STAGE_CLEAR;
 		}
 
 		if (bIsFinishedFadeout)
@@ -362,7 +328,7 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 
 	#region [ private ]
 	//-----------------
-	private CTexture txLane;
+	private BaseTexture txLane;
 	public bool bサビ区間;
 	public double UnitTime;
 
@@ -477,7 +443,7 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 				int y = CDTXMania.ConfigIni.bReverse.Guitar ? nJudgeLinePosY.Guitar : nJudgeLinePosY.Guitar - 1;
 
 				if ( txHitBar != null && CDTXMania.ConfigIni.bJudgeLineDisp.Guitar )
-					txHitBar.tDraw2D( CDTXMania.app.Device, 80, y, new RectangleF( 0, 0, 252, 6 ) );
+					txHitBar.tDraw2D(80, y, new RectangleF( 0, 0, 252, 6 ) );
 
 				if (CDTXMania.ConfigIni.bShowPerformanceInformation)
 					actLVFont.tDrawString(310, (CDTXMania.ConfigIni.bReverse.Guitar ? y + 8 : y - 20), CDTXMania.ConfigIni.nJudgeLine.Guitar.ToString());
@@ -487,7 +453,7 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 				int y = CDTXMania.ConfigIni.bReverse.Bass ? nJudgeLinePosY.Bass : nJudgeLinePosY.Bass - 1;
 
 				if ( txHitBar != null && CDTXMania.ConfigIni.bJudgeLineDisp.Bass )
-					txHitBar.tDraw2D(CDTXMania.app.Device, 950, y, new RectangleF(0, 0, 252, 6));
+					txHitBar.tDraw2D(950, y, new RectangleF(0, 0, 252, 6));
 
 				if (CDTXMania.ConfigIni.bShowPerformanceInformation)
 					actLVFont.tDrawString(1180, (CDTXMania.ConfigIni.bReverse.Bass ? y + 8 : y - 20), CDTXMania.ConfigIni.nJudgeLine.Bass.ToString());
@@ -504,15 +470,7 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 
 	protected override void tUpdateAndDraw_PerformanceInformation()
 	{
-		base.tUpdateAndDraw_PerformanceInformation( 500, 257 );
-	}
-
-	private void tUpdateAndDraw_PlaySpeed()
-	{
-		if (txPlaySpeed != null)
-		{
-			txPlaySpeed.tDraw2D(CDTXMania.app.Device, 600, 687);
-		}
+		base.tUpdateAndDraw_PerformanceInformation(500, 257);
 	}
 
 	protected override void tJudgeLineMovingUpandDown()
@@ -533,27 +491,7 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 	{
 		// ギタレボモードでは何もしない
 	}
-
-	protected override void tGenerateBackgroundTexture()
-	{
-		Rectangle bgrect = new( 0, 0, 1280, 720 );
-		string DefaultBgFilename = @"Graphics\7_background_Guitar.jpg";
-		string BgFilename = "";
-		string BACKGROUND = null;
-		if ( ( CDTXMania.DTX.BACKGROUND_GR != null ) && ( CDTXMania.DTX.BACKGROUND_GR.Length > 0 ) )
-		{
-			BACKGROUND = CDTXMania.DTX.BACKGROUND_GR;
-		}
-		else if ( ( CDTXMania.DTX.BACKGROUND != null ) && ( CDTXMania.DTX.BACKGROUND.Length > 0 ) )
-		{
-			BACKGROUND = CDTXMania.DTX.BACKGROUND;
-		}
-		if ( ( BACKGROUND != null ) && ( BACKGROUND.Length > 0 ) )
-		{
-			BgFilename = CDTXMania.DTX.strFolderName + BACKGROUND;
-		}
-		base.tGenerateBackgroundTexture( DefaultBgFilename, bgrect, BgFilename );
-	}
+	
 	protected override void tUpdateAndDraw_Chip_PatternOnly_Drums(CConfigIni configIni, ref CDTX dTX, ref CChip pChip)
 	{
 		// int indexSevenLanes = this.nチャンネル0Atoレーン07[ pChip.nChannelNumber - 0x11 ];
@@ -737,8 +675,9 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 					}
 					if ( ( rect.Bottom > rect.Top ) && ( txChip != null ) )
 					{
-						txChip.vcScaleRatio.Y = 1f;
-						txChip.tDraw2D( CDTXMania.app.Device, drawX, ( y - numA ) + numC, rect );
+						//todo: what the fuck is vcScaleRatio
+						//txChip.vcScaleRatio.Y = 1f;
+						txChip.tDraw2D(drawX, ( y - numA ) + numC, rect );
 					}
 				}
 			}
@@ -934,8 +873,9 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 					}
 					if ( ( rect.Bottom > rect.Top ) && ( txChip != null ) )
 					{
-						txChip.vcScaleRatio.Y = 1.0f;
-						txChip.tDraw2D(CDTXMania.app.Device, drawX, (y - numA) + numC, rect);
+						//todo: what the fuck is vcScaleRatio
+						//txChip.vcScaleRatio.Y = 1.0f;
+						txChip.tDraw2D(drawX, (y - numA) + numC, rect);
 					}
 				}
 			}
@@ -979,8 +919,9 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 			{
 				if (CDTXMania.ConfigIni.nLaneDisp.Guitar == 0 || CDTXMania.ConfigIni.nLaneDisp.Guitar == 1)
 				{
-					txChip.vcScaleRatio.Y = 1f;
-					txChip.tDraw2D(CDTXMania.app.Device, 88, y, new RectangleF(0, 20, 193, 2));
+					//todo: what the fuck is vcScaleRatio
+					//txChip.vcScaleRatio.Y = 1f;
+					txChip.tDraw2D(88, y, new RectangleF(0, 20, 193, 2));
 				}
 				if ( configIni.bShowPerformanceInformation )
 				{
@@ -993,8 +934,9 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 			{
 				if( CDTXMania.ConfigIni.nLaneDisp.Bass == 0 || CDTXMania.ConfigIni.nLaneDisp.Bass == 1 )
 				{
-					txChip.vcScaleRatio.Y = 1f;
-					txChip.tDraw2D(CDTXMania.app.Device, 959, y, new RectangleF(0, 20, 193, 2));
+					//todo: what the fuck is vcScaleRatio
+					//txChip.vcScaleRatio.Y = 1f;
+					txChip.tDraw2D(959, y, new RectangleF(0, 20, 193, 2));
 				}
 					    
 
@@ -1027,9 +969,10 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 
 				if (CDTXMania.ConfigIni.nLaneDisp.Guitar == 0 || CDTXMania.ConfigIni.nLaneDisp.Guitar == 1)
 				{
-					txChip.vcScaleRatio.Y = 1.0f;
-					txChip.tDraw2D(CDTXMania.app.Device, 88, y - 1, new RectangleF(0, 20, 193, 2));
-					txChip.tDraw2D(CDTXMania.app.Device, 88, y + 1, new RectangleF(0, 20, 193, 2));
+					//todo: what the fuck is vcScaleRatio
+					//txChip.vcScaleRatio.Y = 1.0f;
+					txChip.tDraw2D(88, y - 1, new RectangleF(0, 20, 193, 2));
+					txChip.tDraw2D(88, y + 1, new RectangleF(0, 20, 193, 2));
 				}
 			}
 			y = CDTXMania.ConfigIni.bReverse.Bass ? ((nJudgeLinePosY.Bass - nDistanceFromBarBass) + 0) : ((nJudgeLinePosY.Bass + nDistanceFromBarBass) + 9);
@@ -1040,9 +983,10 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 
 				if (CDTXMania.ConfigIni.nLaneDisp.Bass == 0 || CDTXMania.ConfigIni.nLaneDisp.Bass == 1)
 				{
-					txChip.vcScaleRatio.Y = 1.0f;
-					txChip.tDraw2D(CDTXMania.app.Device, 959, y - 1, new RectangleF(0, 20, 193, 2));
-					txChip.tDraw2D(CDTXMania.app.Device, 959, y + 1, new RectangleF(0, 20, 193, 2));
+					//todo: what the fuck is vcScaleRatio
+					//txChip.vcScaleRatio.Y = 1.0f;
+					txChip.tDraw2D(959, y - 1, new RectangleF(0, 20, 193, 2));
+					txChip.tDraw2D(959, y + 1, new RectangleF(0, 20, 193, 2));
 				}
 			}
 		}

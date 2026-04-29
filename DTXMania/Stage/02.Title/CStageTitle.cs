@@ -1,17 +1,15 @@
 ﻿using System.Runtime.InteropServices;
 using System.Diagnostics;
 using FDK;
-using SharpDX;
-using Rectangle = System.Drawing.Rectangle;
 using SlimDXKey = SlimDX.DirectInput.Key;
 using System.Drawing;
+using System.Numerics;
 using DTXMania.Core;
+using DTXMania.Core.Framework;
 using DTXMania.Core.Video;
 using DTXMania.UI;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.DynamicElements;
-using SharpDX.Direct3D9;
-using RectangleF = SharpDX.RectangleF;
 
 namespace DTXMania;
 
@@ -19,19 +17,10 @@ internal class CStageTitle : CStage
 {		
 	// コンストラクタ
 
-	private FFmpegVideoPlayer videoPlayerTest;
-	private bool videoLoaded = false;
-
 	public CStageTitle()
 	{
 		eStageID = EStage.Title_2;
 		bActivated = false;
-		listChildActivities.Add(actFIfromSetup = new CActFIFOWhite());
-		listChildActivities.Add(actFI = new CActFIFOWhite());
-		listChildActivities.Add(actFO = new CActFIFOWhite());
-
-		videoPlayerTest = new SoftwareVideoPlayer();
-		videoLoaded = videoPlayerTest.Open(CSkin.Path(@"Graphics\2_background.mp4"));
 	}
 
 
@@ -44,18 +33,27 @@ internal class CStageTitle : CStage
 
 	public override void InitializeDefaultUI()
 	{
-		var family = new FontFamily(CDTXMania.ConfigIni.songListFont);
-		ui.AddChild(new UIText(family, 12, CDTXMania.VERSION_DISPLAY));
+		var text = ui.AddChild(new UIText(CDTXMania.VERSION_DISPLAY, 15));
+		text.name = "VersionText";
 
-		DTXTexture bgTex = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\2_background.png"));
+		BaseTexture bgTex = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\2_background.png"));
 		UIImage bg = ui.AddChild(new UIImage(bgTex));
 		bg.renderOrder = -99;
 		bg.position = Vector3.Zero;
+		bg.name = "Background";
 
-		if (videoLoaded)
+		string videoPath = CSkin.Path(@"Graphics\2_background.mp4");
+		FFmpegVideoPlayer videoPlayer = new ThreadedSoftwareVideoPlayer();
+		
+		if (videoPlayer.Open(videoPath))
 		{
-			VideoPlayer videoPlayer = ui.AddChild(new VideoPlayer(videoPlayerTest));
-			videoPlayer.renderOrder = -100;
+			UIVideoRenderer renderer = ui.AddChild(new UIVideoRenderer(videoPlayer, videoPath));
+			renderer.renderOrder = -100;
+			renderer.name = "VideoPlayer";
+		}
+		else
+		{
+			videoPlayer.Dispose();
 		}
 	}
 
@@ -108,33 +106,16 @@ internal class CStageTitle : CStage
 	{
 		if( bActivated )
 		{
-			txMenu = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\2_menu.png" ), false );
-			
+			txMenu = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\2_menu.png" ) );
 			base.OnManagedCreateResources();
-		}
-	}
-	public override void OnManagedReleaseResources()
-	{
-		if( bActivated )
-		{
-			CDTXMania.tReleaseTexture( ref txMenu );
-			
-			base.OnManagedReleaseResources();
 		}
 	}
 
 	public override void FirstUpdate()
 	{
-		if (CDTXMania.StageManager.rPreviousStage == CDTXMania.StageManager.stageStartup )
-		{
-			actFIfromSetup.tStartFadeIn();
-			ePhaseID = EPhase.タイトル_起動画面からのフェードイン;
-		}
-		else
-		{
-			actFI.tStartFadeIn();
-			ePhaseID = EPhase.Common_FadeIn;
-		}
+		CDTXMania.Skin.soundTitle.tPlay();
+		ePhaseID = EPhase.Common_DefaultState;
+		
 		ctCursorFlash.tStart( 0, 700, 5, CDTXMania.Timer );
 		ctCursorFlash.nCurrentValue = 100;
 	}
@@ -145,7 +126,7 @@ internal class CStageTitle : CStage
 		
 		base.OnUpdateAndDraw();
 
-		Matrix scaleMatrix = Matrix.Scaling(CDTXMania.renderScale);
+		Matrix4x4 scaleMatrix = Matrix4x4.CreateScale(CDTXMania.renderScale);
 		
 		// 進行
 
@@ -214,7 +195,6 @@ internal class CStageTitle : CStage
 				}
 				GitaDoraTransition.Close();
 				CDTXMania.Skin.soundTitle.tStop();
-				//actFO.tStartFadeOut();
 				ePhaseID = EPhase.Common_FadeOut;
 			}
 		}
@@ -236,67 +216,55 @@ internal class CStageTitle : CStage
 				float nMag = (float)(1.0 + ctCursorFlash.nCurrentValue / 100.0 * 0.5);
 
 				// Apply scale and center pivot offset
-				Matrix scaleEffectMatrix = Matrix.Scaling(nMag, nMag, 1.0f);
-				Matrix translateMatrix = Matrix.Translation(
+				Matrix4x4 scaleEffectMatrix = Matrix4x4.CreateScale(nMag, nMag, 1.0f);
+				Matrix4x4 translateMatrix = Matrix4x4.CreateTranslation(
 					x + (MENU_W * (1.0f - nMag) / 2.0f),
 					y + (MENU_H * (1.0f - nMag) / 2.0f),
 					0.0f
 				);
-				Matrix finalMatrix = scaleEffectMatrix * translateMatrix * scaleMatrix;
+				Matrix4x4 finalMatrix = scaleEffectMatrix * translateMatrix * scaleMatrix;
 
 				Color4 col = Color4.White;
 				col.Alpha = (float) (1.0 - ctCursorFlash.nCurrentValue / 100.0 );
-				txMenu.tDraw2DMatrix(CDTXMania.app.Device, finalMatrix, new Vector2(MENU_W, MENU_H), new RectangleF(0, MENU_H * 5, MENU_W, MENU_H), col);
+				
+				txMenu.tDraw2DMatrix(finalMatrix, new Vector2(MENU_W, MENU_H), new RectangleF(0, MENU_H * 5, MENU_W, MENU_H), col);
 			}
-			txMenu.vcScaleRatio.X = 1f;
-			txMenu.vcScaleRatio.Y = 1f;
-			txMenu.nTransparency = 0xff;
 			
-			Matrix mat2 = Matrix.Translation(x, y, 0f) * scaleMatrix;
-			txMenu.tDraw2DMatrix( CDTXMania.app.Device, mat2, new Vector2(MENU_W, MENU_H), new RectangleF( 0, MENU_H * 4, MENU_W, MENU_H ));
+			Matrix4x4 mat2 = Matrix4x4.CreateTranslation(x, y, 0f) * scaleMatrix;
+
+			txMenu.tDraw2DMatrix( mat2, new Vector2(MENU_W, MENU_H), new RectangleF( 0, MENU_H * 4, MENU_W, MENU_H ));
 		}
 		if( txMenu != null )
 		{
-			Matrix mat = Matrix.Translation(MENU_X, MENU_Y, 0) * scaleMatrix;
-			Matrix mat2 = Matrix.Translation(MENU_X, MENU_Y + MENU_H, 0) * scaleMatrix;
-			txMenu.tDraw2DMatrix( CDTXMania.app.Device, mat, new Vector2(MENU_W, MENU_H), new RectangleF( 0, 0, MENU_W, MENU_H ));
-			txMenu.tDraw2DMatrix( CDTXMania.app.Device, mat2, new Vector2(MENU_W, MENU_H * 2), new RectangleF( 0, MENU_H * 2, MENU_W, MENU_H * 2 ));
+			Matrix4x4 mat = Matrix4x4.CreateTranslation(MENU_X, MENU_Y, 0) * scaleMatrix;
+			Matrix4x4 mat2 = Matrix4x4.CreateTranslation(MENU_X, MENU_Y + MENU_H, 0) * scaleMatrix;
+			
+			txMenu.tDraw2DMatrix(mat, new Vector2(MENU_W, MENU_H), new RectangleF( 0, 0, MENU_W, MENU_H ));
+			txMenu.tDraw2DMatrix(mat2, new Vector2(MENU_W, MENU_H * 2), new RectangleF( 0, MENU_H * 2, MENU_W, MENU_H * 2 ));
 		}
 				
 		EPhase ePhaseId = ePhaseID;
 		switch( ePhaseId )
 		{
-			case EPhase.Common_FadeIn:
-				if( actFI.OnUpdateAndDraw() != 0 )
-				{
-					CDTXMania.Skin.soundTitle.tPlay();
-					ePhaseID = EPhase.Common_DefaultState;
-				}
-				break;
-
 			case EPhase.Common_FadeOut:
 				if (GitaDoraTransition.isAnimating) break;
 				
 				ePhaseID = EPhase.Common_EndStatus;
 				
 				switch ( nCurrentCursorPosition )
-				{ 
+				{
 					case (int)EReturnResult.GAMESTART - 1:
+					{
+						//reset stage count when we start playing
+						CDTXMania.nStageNumber = 0;
 						return (int)EReturnResult.GAMESTART;
-
+					}
+					
 					case (int) EReturnResult.CONFIG - 1:
 						return (int) EReturnResult.CONFIG;
 
 					case (int)EReturnResult.EXIT - 1:
 						return (int) EReturnResult.EXIT;
-				}
-				break;
-
-			case EPhase.タイトル_起動画面からのフェードイン:
-				if( actFIfromSetup.OnUpdateAndDraw() != 0 )
-				{
-					CDTXMania.Skin.soundTitle.tPlay();
-					ePhaseID = EPhase.Common_DefaultState;
 				}
 				break;
 		}
@@ -367,9 +335,6 @@ internal class CStageTitle : CStage
 		}
 	}
 
-	private CActFIFOWhite actFI;
-	private CActFIFOWhite actFIfromSetup;
-	private CActFIFOWhite actFO;
 	private CCounter ctCursorFlash;
 	private STキー反復用カウンタ ctキー反復用;
 	private CCounter ct下移動用;
@@ -379,7 +344,8 @@ internal class CStageTitle : CStage
 	private const int MENU_X = 0x1fa;
 	private const int MENU_Y = 0x201;
 	private int nCurrentCursorPosition;
-	private CTexture txMenu;
+	//private CTexture txMenu;
+	private BaseTexture txMenu;
 	
 	private void tMoveCursorDown()
 	{

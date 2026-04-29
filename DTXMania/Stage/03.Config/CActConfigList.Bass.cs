@@ -333,6 +333,7 @@ internal partial class CActConfigList
 
     private void tSetupItemList_KeyAssignBass()
     {
+        tRecordToConfigIni();
         listItems.Clear();
             
         CItemBase iKeyAssignBassReturnToMenu = new("<< Return To Menu", CItemBase.EPanelType.Other,

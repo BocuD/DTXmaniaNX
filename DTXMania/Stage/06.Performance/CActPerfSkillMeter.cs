@@ -1,10 +1,10 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Drawing;
+using System.Runtime.InteropServices;
 using DTXMania.Core;
-using SharpDX;
+using DTXMania.UI.Drawable;
 using FDK;
 
 using Point = System.Drawing.Point;
-using Rectangle = System.Drawing.Rectangle;
 
 namespace DTXMania;
 
@@ -62,22 +62,13 @@ internal class CActPerfSkillMeter : CActivity
 	{
 		if( bActivated )
 		{
-			txグラフ = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\7_Graph_Main.png" ) );
-			txグラフ_ゲージ = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\7_Graph_Gauge.png" ) );
+			txグラフ = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\7_Graph_Main.png" ) );
+			txグラフ_ゲージ = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\7_Graph_Gauge.png" ) );
 			
 			base.OnManagedCreateResources();
 		}
 	}
-	public override void OnManagedReleaseResources()
-	{
-		if( bActivated )
-		{
-			CDTXMania.tReleaseTexture( ref txグラフ );
-			CDTXMania.tReleaseTexture( ref txグラフ_ゲージ );
-			CDTXMania.tReleaseTexture( ref txグラフ値自己ベストライン );
-			base.OnManagedReleaseResources();
-		}
-	}
+
 	public override int OnUpdateAndDraw()
 	{
 		if( bActivated )
@@ -137,14 +128,15 @@ internal class CActPerfSkillMeter : CActivity
 			if ( txグラフ != null )
 			{
 				//背景
-				txグラフ.vcScaleRatio = new Vector3( 1f, 1f, 1f );
+				//todo: vcscaleratio
+				//txグラフ.vcScaleRatio = new Vector3( 1f, 1f, 1f );
 				if (CDTXMania.ConfigIni.bSmallGraph)
 				{
-					txグラフ.tDraw2D(CDTXMania.app.Device, nGraphBG_XPos[nGraphUsePart], nGraphBG_YPos, new RectangleF(448, 2, 111, 584));
+					txグラフ.tDraw2D(nGraphBG_XPos[nGraphUsePart], nGraphBG_YPos, new RectangleF(448, 2, 111, 584));
 				}
 				else
 				{
-					txグラフ.tDraw2D(CDTXMania.app.Device, nGraphBG_XPos[nGraphUsePart], nGraphBG_YPos, new RectangleF(2, 2, 251, 584));
+					txグラフ.tDraw2D(nGraphBG_XPos[nGraphUsePart], nGraphBG_YPos, new RectangleF(2, 2, 251, 584));
 				}
 
 				//自己ベスト数値表示
@@ -166,34 +158,34 @@ internal class CActPerfSkillMeter : CActivity
 				int nPosY = nGraphUsePart == 0 ? 527 - nGaugeSize : 587 - nGaugeSize;
 				if (!bIsTrainingMode)
 				{
-					txグラフ_ゲージ.nTransparency = 255;
-					txグラフ_ゲージ.tDraw2D(CDTXMania.app.Device, nGraphBG_XPos[nGraphUsePart] + 45 + nGraphSizeOffset, nPosY, new RectangleF(2, 2, 30, nGaugeSize));
+					//txグラフ_ゲージ.nTransparency = 255;
+					txグラフ_ゲージ.tDraw2D(nGraphBG_XPos[nGraphUsePart] + 45 + nGraphSizeOffset, nPosY, new RectangleF(2, 2, 30, nGaugeSize));
 				}
 				//ゲージ比較
 				int nTargetGaugeSize = (int)( 434.0f * ( (float)dbGraphValue_Goal / 100.0f ) );
 				int nTargetGaugePosY = nGraphUsePart == 0 ? 527 - nTargetGaugeSize : 587 - nTargetGaugeSize;
 				int nTargetGaugeRectX = dbグラフ値現在_渡 > dbGraphValue_Goal ? 38 : 74;
-				txグラフ_ゲージ.nTransparency = 255;
-				txグラフ_ゲージ.tDraw2D( CDTXMania.app.Device, nGraphBG_XPos[ nGraphUsePart ] + 75 + nGraphSizeOffset, nTargetGaugePosY, new RectangleF( nTargetGaugeRectX, 2, 30, nTargetGaugeSize ) );
+				//txグラフ_ゲージ.nTransparency = 255;
+				txグラフ_ゲージ.tDraw2D(nGraphBG_XPos[ nGraphUsePart ] + 75 + nGraphSizeOffset, nTargetGaugePosY, new RectangleF( nTargetGaugeRectX, 2, 30, nTargetGaugeSize ) );
 				if( txグラフ != null )
 				{
 					//ターゲット達成率数値
 
 					//ターゲット名
 					//現在
-					txグラフ.tDraw2D( CDTXMania.app.Device, nGraphBG_XPos[ nGraphUsePart ] + 45 + nGraphSizeOffset, nGraphBG_YPos + 357, new RectangleF( 260, 2, 30, 120 ) );
+					txグラフ.tDraw2D(nGraphBG_XPos[ nGraphUsePart ] + 45 + nGraphSizeOffset, nGraphBG_YPos + 357, new RectangleF( 260, 2, 30, 120 ) );
 					//比較対象
-					txグラフ.tDraw2D( CDTXMania.app.Device, nGraphBG_XPos[ nGraphUsePart ] + 75 + nGraphSizeOffset, nGraphBG_YPos + 357, new RectangleF( 260 + ( 30 * ( (int)CDTXMania.ConfigIni.eTargetGhost[ nGraphUsePart ] ) ), 2, 30, 120 ) );
+					txグラフ.tDraw2D(nGraphBG_XPos[ nGraphUsePart ] + 75 + nGraphSizeOffset, nGraphBG_YPos + 357, new RectangleF( 260 + ( 30 * ( (int)CDTXMania.ConfigIni.eTargetGhost[ nGraphUsePart ] ) ), 2, 30, 120 ) );
 
 					//以下使用予定
 					if (!CDTXMania.ConfigIni.bSmallGraph)
 					{
 						//最終プレイ
-						txグラフ.tDraw2D(CDTXMania.app.Device, nGraphBG_XPos[nGraphUsePart] + 106, nGraphBG_YPos + 357, new RectangleF(260 + 60, 2, 30, 120));
+						txグラフ.tDraw2D(nGraphBG_XPos[nGraphUsePart] + 106, nGraphBG_YPos + 357, new RectangleF(260 + 60, 2, 30, 120));
 						//自己ベスト
-						txグラフ.tDraw2D(CDTXMania.app.Device, nGraphBG_XPos[nGraphUsePart] + 136, nGraphBG_YPos + 357, new RectangleF(260 + 90, 2, 30, 120));
+						txグラフ.tDraw2D(nGraphBG_XPos[nGraphUsePart] + 136, nGraphBG_YPos + 357, new RectangleF(260 + 90, 2, 30, 120));
 						//最高スコア
-						txグラフ.tDraw2D(CDTXMania.app.Device, nGraphBG_XPos[nGraphUsePart] + 164, nGraphBG_YPos + 357, new RectangleF(260 + 120, 2, 30, 120));
+						txグラフ.tDraw2D(nGraphBG_XPos[nGraphUsePart] + 164, nGraphBG_YPos + 357, new RectangleF(260 + 120, 2, 30, 120));
 					}
 				}
 				t比較文字表示( nGraphBG_XPos[ nGraphUsePart ] + 44 + nGraphSizeOffset, nPosY - 10, string.Format( "{0,5:##0.00}", Math.Abs( dbグラフ値現在_渡 ) ) );
@@ -214,12 +206,10 @@ internal class CActPerfSkillMeter : CActivity
 	private double dbグラフ値現在_表示;
 	public double dbGraphValue_PersonalBest;
 
-	private CTexture txグラフ;
-	private CTexture txグラフ_ゲージ;
-	private CTexture txグラフ値自己ベストライン;
-
-	private CPrivateFastFont pfNameFont;
-
+	private BaseTexture txグラフ;
+	private BaseTexture txグラフ_ゲージ;
+	private BaseTexture txグラフ値自己ベストライン;
+	
 	[StructLayout(LayoutKind.Sequential)]
 	private struct ST文字位置
 	{
@@ -276,8 +266,8 @@ internal class CActPerfSkillMeter : CActivity
 					RectangleF rectangle = new( 260 + st比較数字位置[ i ].pt.X, 162, RectX, 10 );
 					if( txグラフ != null )
 					{
-						txグラフ.nTransparency = 255;
-						txグラフ.tDraw2D( CDTXMania.app.Device, x, y, rectangle );
+						//txグラフ.nTransparency = 255;
+						txグラフ.tDraw2D(x, y, rectangle );
 					}
 					break;
 				}
@@ -299,8 +289,8 @@ internal class CActPerfSkillMeter : CActivity
 					RectangleF rectangle = new( 260 + st達成率数字位置[ i ].pt.X, 128, RectX, 28 );
 					if( txグラフ != null )
 					{
-						txグラフ.nTransparency = 255;
-						txグラフ.tDraw2D( CDTXMania.app.Device, x, y, rectangle );
+						//txグラフ.nTransparency = 255;
+						txグラフ.tDraw2D(x, y, rectangle );
 					}
 					break;
 				}

@@ -761,6 +761,7 @@ internal partial class CActConfigList
         
     public void tSetupItemList_KeyAssignDrums()
     {
+        tRecordToConfigIni();
         listItems.Clear();
 
         CItemBase iKeyAssignDrumsReturnToMenu = new("<< Return To Menu", CItemBase.EPanelType.Other,

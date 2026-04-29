@@ -1,10 +1,10 @@
 ﻿using System.Diagnostics;
 using System.Drawing;
+using System.Numerics;
 using DTXMania.Core;
 using DTXMania.UI;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.Item;
-using SharpDX;
 using FDK;
 
 namespace DTXMania;
@@ -472,7 +472,7 @@ internal class CActSelectQuickConfig : CActSelectPopupMenu
                 txAutoStatus.Dispose();
             }
             txAutoStatus = new CTexture(CDTXMania.app.Device, image, CDTXMania.TextureFormat);
-            txAutoStatus.vcScaleRatio = new Vector3(1f, 1f, 1f);
+            txAutoStatus.vcScaleRatio = new SharpDX.Vector3(1f, 1f, 1f);
             image.Dispose();
         }
         catch (CTextureCreateFailedException)
@@ -480,8 +480,9 @@ internal class CActSelectQuickConfig : CActSelectPopupMenu
             Trace.TraceError("演奏履歴文字列テクスチャの作成に失敗しました。");
             txAutoStatus = null;
         }
-            
-        autoStatus.SetTexture(new DTXTexture(txAutoStatus));
+        
+        //todo COMMENTED OUT DTXTEXTURE
+        //autoStatus.SetTexture(new DTXTexture(txAutoStatus));
     }
 
     public override void tPressEnterMain()
@@ -641,13 +642,14 @@ internal class CActSelectQuickConfig : CActSelectPopupMenu
             subMenu.renderOrder = 100;
             subMenu.anchor = new Vector2(0.5f, 0.5f);
 
-            var popupTex = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\ScreenSelect popup auto settings.png"));
+            var popupTex = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\ScreenSelect popup auto settings.png"));
             var popup = new UIImage(popupTex);
             subMenu.AddChild(popup);
             subMenu.size = popup.size;
-                
-            var autoStatusTex = new DTXTexture(txAutoStatus);
-            autoStatus = subMenu.AddChild(new UIImage(autoStatusTex));
+            
+            //todo COMMENTED OUT DTXTEXTURE
+            //var autoStatusTex = new DTXTexture(txAutoStatus);
+            //autoStatus = subMenu.AddChild(new UIImage(autoStatusTex));
             MakeAutoPanel();
                 
             //ui gets created here, we can add the subMenu to the ui afterwards

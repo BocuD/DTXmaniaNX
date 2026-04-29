@@ -1,10 +1,9 @@
+using System.Drawing;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using DTXMania.Core;
-using SharpDX;
+using DTXMania.UI.Drawable;
 using FDK;
-
-using Rectangle = System.Drawing.Rectangle;
-
 namespace DTXMania;
 
 internal class CActPerfCommonCombo : CActivity
@@ -115,10 +114,10 @@ internal class CActPerfCommonCombo : CActivity
     protected const int nドラムコンボの文字間隔 = -6;
     protected int[] nジャンプ差分値 = new int[180];
     protected CSTATUS status;
-    protected CTexture txCOMBOギター;
-    protected CTexture txCOMBOドラム;
-    protected CTexture txCOMBOドラム1000;
-    protected CTexture txComboBom;
+    protected BaseTexture txCOMBOギター;
+    protected BaseTexture txCOMBOドラム;
+    protected BaseTexture txCOMBOドラム1000;
+    protected BaseTexture txComboBom;
     public float nUnitTime;
     public CCounter ctコンボ;
     public CCounter ctAnimation;
@@ -296,7 +295,8 @@ internal class CActPerfCommonCombo : CActivity
             {
                 f拡大率 = 1.22f - (((float)nジャンプ差分値[nジャンプインデックス]) / 180.0f);		// f拡大率 = 1.0 → 1.3333... → 1.0
             }
-            txCOMBOドラム.vcScaleRatio = new Vector3(f拡大率, f拡大率, 1.0f);
+            //todo: vcscaleratio
+            // txCOMBOドラム.vcScaleRatio = new Vector3(f拡大率, f拡大率, 1.0f);
             //-----------------
             #endregion
             #region [ "COMBO" 文字を表示。]
@@ -312,7 +312,7 @@ internal class CActPerfCommonCombo : CActivity
             //-----------------
             #endregion
 
-            txCOMBOドラム.tDraw2D(CDTXMania.app.Device, nコンボx, nコンボy + y動作差分, new RectangleF(0, 320, 250, 60));
+            txCOMBOドラム.tDraw2D(nコンボx, nコンボy + y動作差分, new RectangleF(0, 320, 250, 60));
         }
 
         // COMBO値を1の位から順に表示。
@@ -329,7 +329,8 @@ internal class CActPerfCommonCombo : CActivity
                 else
                 {
                     x -= nドラムコンボの幅 + nドラムコンボの文字間隔;
-                    txCOMBOドラム.vcScaleRatio = new Vector3(1.0f, 1.0f, 1.0f);
+                    //todo: vcscaleratio
+                    // txCOMBOドラム.vcScaleRatio = new Vector3(1.0f, 1.0f, 1.0f);
                 }
             }
             else if( n桁数 >= 4 )
@@ -341,7 +342,8 @@ internal class CActPerfCommonCombo : CActivity
                 else
                 {
                     x -= 96 + nドラムコンボの文字間隔;
-                    txCOMBOドラム.vcScaleRatio = new Vector3(1.0f, 1.0f, 1.0f);
+                    //todo: vcscaleratio
+                    // txCOMBOドラム.vcScaleRatio = new Vector3(1.0f, 1.0f, 1.0f);
                 }
             }
 
@@ -358,7 +360,7 @@ internal class CActPerfCommonCombo : CActivity
             {
                 if( txCOMBOドラム != null )
                 {
-                    txCOMBOドラム.tDraw2D(CDTXMania.app.Device, x, y + y動作差分,
+                    txCOMBOドラム.tDraw2D(x, y + y動作差分,
                         new RectangleF((n位の数[i] % 5) * nドラムコンボの幅, (n位の数[i] / 5) * nドラムコンボの高さ, nドラムコンボの幅, nドラムコンボの高さ));
                 }
             }
@@ -371,7 +373,7 @@ internal class CActPerfCommonCombo : CActivity
                 }
                 if( txCOMBOドラム1000 != null )
                 {
-                    txCOMBOドラム1000.tDraw2D(CDTXMania.app.Device, x, y + y動作差分,
+                    txCOMBOドラム1000.tDraw2D(x, y + y動作差分,
                         new RectangleF((n位の数[i] % 5) * 96, (n位の数[i] / 5) * 128, 96, 128));
                 }
             }
@@ -445,8 +447,9 @@ internal class CActPerfCommonCombo : CActivity
         if (nジャンプインデックス >= 0 && nジャンプインデックス < 180)
             f拡大率 = 1.0f - (((float)nジャンプ差分値[nジャンプインデックス]) / 45.0f);		// f拡大率 = 1.0 → 1.3333... → 1.0
 
-        if (txCOMBOギター != null)
-            txCOMBOギター.vcScaleRatio = new Vector3(1.0f, 1.0f, 0.5f);
+        // if (txCOMBOギター != null)
+            //todo: vcscaleratio
+            // txCOMBOギター.vcScaleRatio = new Vector3(1.0f, 1.0f, 0.5f);
 
         //-----------------
         #endregion
@@ -454,7 +457,7 @@ internal class CActPerfCommonCombo : CActivity
         //-----------------
         int x = nコンボx - 100; // -((int)((nギターコンボのCOMBO文字の幅 * f拡大率) / 2.0f));
 
-        txCOMBOギター.tDraw2D(CDTXMania.app.Device, x, y, new RectangleF(0, 230, 200, 64));
+        txCOMBOギター.tDraw2D(x, y, new RectangleF(0, 230, 200, 64));
         //-----------------
         #endregion
 
@@ -463,8 +466,9 @@ internal class CActPerfCommonCombo : CActivity
         {
             #region [ 数字の拡大率を設定。]
             //-----------------
-            if (txCOMBOドラム != null)
-                txCOMBOドラム.vcScaleRatio = new Vector3(1.0f, 1.0f, 1.0f);
+            //todo: vcscaleRatio
+            // if (txCOMBOドラム != null)
+                // txCOMBOドラム.vcScaleRatio = new Vector3(1.0f, 1.0f, 1.0f);
             //-----------------
             #endregion
             #region [ 数字を1桁表示。]
@@ -479,9 +483,7 @@ internal class CActPerfCommonCombo : CActivity
             }
             if (txCOMBOギター != null)
             {
-                txCOMBOギター.tDraw2D(
-                    CDTXMania.app.Device,
-                    x - ((int)((nギターコンボの幅) / 2.0f)),
+                txCOMBOギター.tDraw2D(x - ((int)((nギターコンボの幅) / 2.0f)),
                     y,
                     new RectangleF((n位の数[i] % 5) * nギターコンボの幅, (n位の数[i] / 5) * nギターコンボの高さ, nギターコンボの幅, nギターコンボの高さ));
             }
@@ -547,15 +549,16 @@ internal class CActPerfCommonCombo : CActivity
         if (nジャンプインデックス >= 0 && nジャンプインデックス < 180)
             f拡大率 = 1.0f - (((float)nジャンプ差分値[nジャンプインデックス]) / 45.0f);		// f拡大率 = 1.0 → 1.3333... → 1.0
 
-        if (txCOMBOギター != null)
-            txCOMBOギター.vcScaleRatio = new Vector3(1.0f, 1.0f, 1.0f);
+        //todo: vcscaleratio
+        // if (txCOMBOギター != null)
+            // txCOMBOギター.vcScaleRatio = new Vector3(1.0f, 1.0f, 1.0f);
         //-----------------
         #endregion
         #region [ "COMBO" 文字を表示。]
         //-----------------
         int x = nコンボx - 95; // -((int)((nギターコンボのCOMBO文字の幅 * f拡大率) / 2.0f));
 
-        txCOMBOギター.tDraw2D(CDTXMania.app.Device, x, y, new RectangleF(0, 230, 200, 64));
+        txCOMBOギター.tDraw2D(x, y, new RectangleF(0, 230, 200, 64));
         //-----------------
         #endregion
 
@@ -568,8 +571,9 @@ internal class CActPerfCommonCombo : CActivity
             if (nジャンプインデックス >= 0 && nジャンプインデックス < 180)
                 f拡大率 = 1.0f - (((float)nジャンプ差分値[nジャンプインデックス]) / 45f);		// f拡大率 = 1.0 → 1.3333... → 1.0
 
-            if (txCOMBOギター != null)
-                txCOMBOギター.vcScaleRatio = new Vector3(1.0f, 1.0f, 1.0f);
+            //todo: vcscaleratio
+            // if (txCOMBOギター != null)
+                // txCOMBOギター.vcScaleRatio = new Vector3(1.0f, 1.0f, 1.0f);
             //-----------------
             #endregion
             #region [ 数字を1桁表示。]
@@ -584,9 +588,7 @@ internal class CActPerfCommonCombo : CActivity
             }
             if (txCOMBOギター != null)
             {
-                txCOMBOギター.tDraw2D(
-                    CDTXMania.app.Device,
-                    x - ((int)((nギターコンボの幅) / 2.0f)),
+                txCOMBOギター.tDraw2D(x - ((int)((nギターコンボの幅) / 2.0f)),
                     y,
                     new RectangleF((n位の数[i] % 5) * nギターコンボの幅, (n位の数[i] / 5) * nギターコンボの高さ, nギターコンボの幅, nギターコンボの高さ));
             }
@@ -633,26 +635,16 @@ internal class CActPerfCommonCombo : CActivity
         if (!bActivated)
             return;
 
-        txCOMBOドラム = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlayDrums combo.png" ) );
-        txCOMBOドラム1000 = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlayDrums combo_2.png" ) );
-        txComboBom = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\7_Combobomb.png" ) );
+        txCOMBOドラム = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums combo.png" ) );
+        txCOMBOドラム1000 = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums combo_2.png" ) );
+        txComboBom = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\7_Combobomb.png" ) );
         if( txComboBom != null )
-            txComboBom.bAdditiveBlending = true;
-        txCOMBOギター = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlayGuitar combo.png" ) );
+            txComboBom.blendMode = BlendMode.Additive;
+        
+        txCOMBOギター = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayGuitar combo.png" ) );
         base.OnManagedCreateResources();
     }
-    public override void OnManagedReleaseResources()
-    {
-        if (!bActivated)
-            return;
 
-        CDTXMania.tReleaseTexture( ref txCOMBOドラム );
-        CDTXMania.tReleaseTexture( ref txCOMBOドラム1000 );
-        CDTXMania.tReleaseTexture( ref txCOMBOギター );
-        CDTXMania.tReleaseTexture( ref txComboBom );
-
-        base.OnManagedReleaseResources();
-    }
     public override int OnUpdateAndDraw()
     {
         if (!bActivated)

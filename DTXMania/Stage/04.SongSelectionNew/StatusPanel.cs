@@ -1,8 +1,7 @@
-﻿using DTXMania.Core;
+﻿using System.Numerics;
+using DTXMania.Core;
 using DTXMania.SongDb;
-using DTXMania.UI;
 using DTXMania.UI.Drawable;
-using SharpDX;
 
 namespace DTXMania;
 
@@ -21,7 +20,7 @@ public class StatusPanel : UIGroup
 
 		instruments = [drums, guitar, bass];
 		
-		CommandHistory = new CStageSongSelection.CCommandHistory();
+		CommandHistory = new CCommandHistory();
 	}
 
 	public void SelectionChanged(SongNode? song, CScore? chart)
@@ -38,7 +37,7 @@ public class StatusPanel : UIGroup
 
 	private StatusPane[] instruments;
 
-	public override void Draw(Matrix parentMatrix)
+	public override void Draw(Matrix4x4 parentMatrix)
 	{
 		drums.isVisible = CDTXMania.ConfigIni.bDrumsEnabled;
 		guitar.isVisible = !CDTXMania.ConfigIni.bDrumsEnabled;
@@ -47,7 +46,7 @@ public class StatusPanel : UIGroup
 		base.Draw(parentMatrix);
 	}
 
-	private CStageSongSelection.CCommandHistory CommandHistory;
+	private CCommandHistory CommandHistory;
 
 	public void HandleNavigation()
 	{

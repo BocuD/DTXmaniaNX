@@ -16,7 +16,11 @@
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-      <DefineConstants>TRACE;INSPECTOR</DefineConstants>
+      <DefineConstants>TRACE;INSPECTOR;GL</DefineConstants>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <DefineConstants>TRACE;GL</DefineConstants>
     </PropertyGroup>
 
     <ItemGroup>
@@ -38,6 +42,8 @@
         <AutoGen>True</AutoGen>
         <DependentUpon>Resources.resx</DependentUpon>
       </Compile>
+      <Compile Remove="Stage\04.SongSelection\**" />
+      <Compile Remove="Stage\06.Performance\CActPerfAVI.old.cs" />
     </ItemGroup>
 
     <ItemGroup>
@@ -48,13 +54,19 @@
       <PackageReference Include="Accessibility" Version="4.6.0-preview3-27504-2" />
       <PackageReference Include="DiscordRichPresence" Version="1.0.169" />
       <PackageReference Include="FFmpeg.AutoGen.Bindings.DynamicallyLoaded" Version="7.1.1" />
-      <PackageReference Include="Hexa.NET.ImGui" Version="2.2.7" />
-      <PackageReference Include="Hexa.NET.ImGui.Backends" Version="1.0.15" />
-      <PackageReference Include="Hexa.NET.ImGuizmo" Version="2.2.7" />
+      <PackageReference Include="Hexa.NET.GLFW" Version="1.0.5" />
+      <PackageReference Include="Hexa.NET.ImGui" Version="2.2.9" />
+      <PackageReference Include="Hexa.NET.ImGui.Backends" Version="1.0.18" />
+      <PackageReference Include="Hexa.NET.ImGui.Backends.GLFW" Version="1.0.18" />
+      <PackageReference Include="Hexa.NET.ImGuizmo" Version="2.2.9" />
       <PackageReference Include="Kawazu" Version="1.1.4" />
       <PackageReference Include="NativeFileDialog.Extended" Version="1.2.0" />
       <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-      <PackageReference Include="SharpDX.Mathematics" Version="4.2.0" />
+      <PackageReference Include="Silk.NET.OpenGL" Version="2.23.0" />
+      <PackageReference Include="SkiaSharp" Version="3.119.2" />
+      <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="3.119.2" />
+      <PackageReference Include="SkiaSharp.NativeAssets.Win32" Version="3.119.2" />
+      <PackageReference Include="StbImageSharp" Version="2.30.15" />
       <PackageReference Include="System.Configuration.ConfigurationManager" Version="6.0.2" />
       <PackageReference Include="System.Text.Encoding.CodePages" Version="6.0.1" />
     </ItemGroup>
@@ -70,6 +82,11 @@
         <Generator>ResXFileCodeGenerator</Generator>
         <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       </EmbeddedResource>
+      <EmbeddedResource Remove="Stage\04.SongSelection\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Stage\04.SongSelection\**" />
     </ItemGroup>
 
 </Project>

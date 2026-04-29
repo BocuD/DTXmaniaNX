@@ -174,7 +174,7 @@ public class CSoundDeviceDirectSound : ISoundDevice
 			ms = null;
 			bw = null;
 			sd経過時間計測用サウンドバッファ = tサウンドを作成する(byArrWaveFleImage);
-			CSound.listインスタンス.Remove(sd経過時間計測用サウンドバッファ);   // 特殊用途なのでインスタンスリストからは除外する。
+			CSound.audioClips.Remove(sd経過時間計測用サウンドバッファ);   // 特殊用途なのでインスタンスリストからは除外する。
 
 			// サウンドのループ再生開始。
 
@@ -210,7 +210,7 @@ public class CSoundDeviceDirectSound : ISoundDevice
 	public CSound tサウンドを作成する(string strファイル名, CSound.EInstType eInstType)
 	{
 		var sound = new CSound();
-		sound.tDirectSoundサウンドを作成する(strファイル名, DirectSound, eInstType);
+		sound.tCreateDirectSoundAudioClip(strファイル名, DirectSound, eInstType);
 		return sound;
 	}
 	public CSound tサウンドを作成する(byte[] byArrWAVファイルイメージ)
@@ -220,22 +220,22 @@ public class CSoundDeviceDirectSound : ISoundDevice
 	public CSound tサウンドを作成する(byte[] byArrWAVファイルイメージ, CSound.EInstType eInstType)
 	{
 		var sound = new CSound();
-		sound.tDirectSoundサウンドを作成する(byArrWAVファイルイメージ, DirectSound, eInstType);
+		sound.tCreateDirectSoundAudioClip(byArrWAVファイルイメージ, DirectSound, eInstType);
 		return sound;
 	}
 
 	// 既存のインスタンス（生成直後 or Dispose済み）に対してサウンドを生成する。
 	public void tサウンドを作成する(string strファイル名, ref CSound sound, CSound.EInstType eInstType)
 	{
-		sound.tDirectSoundサウンドを作成する(strファイル名, DirectSound, eInstType);
+		sound.tCreateDirectSoundAudioClip(strファイル名, DirectSound, eInstType);
 	}
 	public void tサウンドを作成する(byte[] byArrWAVファイルイメージ, ref CSound sound, CSound.EInstType eInstType)
 	{
-		sound.tDirectSoundサウンドを作成する(byArrWAVファイルイメージ, DirectSound, eInstType);
+		sound.tCreateDirectSoundAudioClip(byArrWAVファイルイメージ, DirectSound, eInstType);
 	}
 	public void tサウンドを作成する(byte[] byArrWAVファイルイメージ, BufferFlags flags, ref CSound sound, CSound.EInstType eInstType)
 	{
-		sound.tDirectSoundサウンドを作成する(byArrWAVファイルイメージ, DirectSound, flags, eInstType);
+		sound.tCreateDirectSoundAudioClip(byArrWAVファイルイメージ, DirectSound, flags, eInstType);
 	}
 	#endregion
 

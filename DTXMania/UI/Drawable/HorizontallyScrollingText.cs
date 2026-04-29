@@ -1,8 +1,7 @@
 ﻿using System.Drawing;
+using System.Numerics;
 using DTXMania.Core;
 using Hexa.NET.ImGui;
-using SharpDX;
-using RectangleF = SharpDX.RectangleF;
 
 namespace DTXMania.UI.Drawable;
 
@@ -13,48 +12,48 @@ public class HorizontallyScrollingText : UIText
     private float maximumRenderWidth => maximumWidth * CDTXMania.renderScale;
     public float scrollSpeed = 50.0f;
 
-    public HorizontallyScrollingText(FontFamily family, int size) : base(family, size)
+    public HorizontallyScrollingText(FontFamily family, int size) : base("", size)
     {
         
     }
         
     private long lastDrawTime;
     
-    public override void Draw(Matrix parentMatrix)
+    public override void Draw(Matrix4x4 parentMatrix)
     {
         float delta = (CDTXMania.Timer.nCurrentTime - lastDrawTime) / 1000.0f;
         lastDrawTime = CDTXMania.Timer.nCurrentTime;
         
-        //scroll text
-        if (scrollingEnabled)
-        {
-            overrideClipRect.X += scrollSpeed * delta;
-            if (overrideClipRect.X > texture.Width * 2)
-                overrideClipRect.X = 0;
-        }
-        else
-        {
-            overrideClipRect.X = 0;
-        }
+        // //scroll text
+        // if (scrollingEnabled)
+        // {
+        //     overrideClipRect.X += scrollSpeed * delta;
+        //     if (overrideClipRect.X > texture.Width * 2)
+        //         overrideClipRect.X = 0;
+        // }
+        // else
+        // {
+        //     overrideClipRect.X = 0;
+        // }
         
         base.Draw(parentMatrix);
     }
 
-    public override void RenderTexture()
-    {
-        base.RenderTexture();
-
-        if (size.X > maximumRenderWidth)
-        {
-            size.X = maximumRenderWidth;
-            overrideClipRect = new RectangleF(0, 0, maximumRenderWidth, size.Y);
-            customClipRect = true;
-        }
-        else
-        {
-            customClipRect = false;
-        }
-    }
+    // public override void RenderTexture()
+    // {
+    //     base.RenderTexture();
+    //
+    //     if (size.X > maximumRenderWidth)
+    //     {
+    //         size.X = maximumRenderWidth;
+    //         overrideClipRect = new RectangleF(0, 0, maximumRenderWidth, size.Y);
+    //         customClipRect = true;
+    //     }
+    //     else
+    //     {
+    //         customClipRect = false;
+    //     }
+    // }
 
     public override void DrawInspector()
     {

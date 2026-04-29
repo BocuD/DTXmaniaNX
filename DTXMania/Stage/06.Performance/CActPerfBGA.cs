@@ -1,7 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 using System.Drawing;
 using DTXMania.Core;
-using SharpDX.Direct3D9;
 using FDK;
 
 namespace DTXMania;
@@ -71,16 +70,16 @@ internal class CActPerfBGA : CActivity
 			switch( chip.eBGA種別 )
 			{
 				case EBGAType.BMP:
-					if( ( chip.rBMP != null ) && ( chip.rBMP.tx画像 != null ) )
+					if( ( chip.rBMP != null ) && ( chip.rBMP.txImage != null ) )
 					{
-						Start( chip.nChannelNumber, chip.rBMP, null, chip.rBMP.n幅, chip.rBMP.n高さ, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, chip.nPlaybackTimeMs );
+						Start( chip.nChannelNumber, chip.rBMP, null, chip.rBMP.nWidth, chip.rBMP.nHeight, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, chip.nPlaybackTimeMs );
 					}
 					break;
 
 				case EBGAType.BMPTEX:
-					if( ( chip.rBMPTEX != null ) && ( chip.rBMPTEX.tx画像 != null ) )
+					if( ( chip.rBMPTEX != null ) && ( chip.rBMPTEX.txImage != null ) )
 					{
-						Start( chip.nChannelNumber, null, chip.rBMPTEX, chip.rBMPTEX.tx画像.szImageSize.Width, chip.rBMPTEX.tx画像.szImageSize.Height, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, chip.nPlaybackTimeMs );
+						Start( chip.nChannelNumber, null, chip.rBMPTEX, chip.rBMPTEX.txImage.Width, chip.rBMPTEX.txImage.Height, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, chip.nPlaybackTimeMs );
 					}
 					break;
 
@@ -128,11 +127,11 @@ internal class CActPerfBGA : CActivity
 	{
 		if( bActivated )
 		{
-			txBGAバックパネル = new CTexture(CDTXMania.app.Device, 278, 355, CDTXMania.app.GraphicsDeviceManager.CurrentSettings.BackBufferFormat, Pool.Managed);
-			using( Surface surface = CDTXMania.app.Device.GetBackBuffer( 0, 0 ) )
-			{
-				sfBackBuffer = Surface.CreateOffscreenPlain( CDTXMania.app.Device, surface.Description.Width, surface.Description.Height, surface.Description.Format, Pool.SystemMemory );
-			}
+			// txBGAバックパネル = new CTexture(CDTXMania.app.Device, 278, 355, CDTXMania.app.GraphicsDeviceManager.CurrentSettings.BackBufferFormat, Pool.Managed);
+			// using( Surface surface = CDTXMania.app.Device.GetBackBuffer( 0, 0 ) )
+			// {
+			// 	sfBackBuffer = Surface.CreateOffscreenPlain( CDTXMania.app.Device, surface.Description.Width, surface.Description.Height, surface.Description.Format, Pool.SystemMemory );
+			// }
 			base.OnManagedCreateResources();
 		}
 	}
@@ -140,12 +139,12 @@ internal class CActPerfBGA : CActivity
 	{
 		if( bActivated )
 		{
-			CDTXMania.tReleaseTexture( ref txBGAバックパネル );
-			if( sfBackBuffer != null )
-			{
-				sfBackBuffer.Dispose();
-				sfBackBuffer = null;
-			}
+			// CDTXMania.tReleaseTexture( ref txBGAバックパネル );
+			// if( sfBackBuffer != null )
+			// {
+			// 	sfBackBuffer.Dispose();
+			// 	sfBackBuffer = null;
+			// }
 			base.OnManagedReleaseResources();
 		}
 	}
@@ -157,10 +156,10 @@ internal class CActPerfBGA : CActivity
 	{
 		if( bActivated )
 		{
-			txBGAバックパネル.tDraw2D(CDTXMania.app.Device, 980, 0);
+			// txBGAバックパネル.tDraw2D(CDTXMania.app.Device, 980, 0);
 			for( int i = 0; i < 8; i++ )
 			{
-				if( ( ( stLayer[ i ].n移動開始時刻ms != -1 ) && ( ( stLayer[ i ].rBMP != null ) || ( stLayer[ i ].rBMPTEX != null ) ) ) && ( ( ( stLayer[ i ].rBMP == null ) || ( stLayer[ i ].rBMP.bUse && ( stLayer[ i ].rBMP.tx画像 != null ) ) ) && ( ( stLayer[ i ].rBMPTEX == null ) || ( stLayer[ i ].rBMPTEX.bUse && ( stLayer[ i ].rBMPTEX.tx画像 != null ) ) ) ) )
+				if( ( ( stLayer[ i ].n移動開始時刻ms != -1 ) && ( ( stLayer[ i ].rBMP != null ) || ( stLayer[ i ].rBMPTEX != null ) ) ) && ( ( ( stLayer[ i ].rBMP == null ) || ( stLayer[ i ].rBMP.bUse && ( stLayer[ i ].rBMP.txImage != null ) ) ) && ( ( stLayer[ i ].rBMPTEX == null ) || ( stLayer[ i ].rBMPTEX.bUse && ( stLayer[ i ].rBMPTEX.txImage != null ) ) ) ) )
 				{
 					Size size = stLayer[ i ].sz開始サイズ;
 					Size size2 = stLayer[ i ].sz終了サイズ;
@@ -175,7 +174,7 @@ internal class CActPerfBGA : CActivity
 						num3 = CDTXMania.Timer.nCurrentTime;
 					}
 					Size size3 = new Size( 0x116, 0x163 );
-					Size size4 = new Size( ( stLayer[ i ].rBMP != null ) ? stLayer[ i ].rBMP.n幅 : stLayer[ i ].rBMPTEX.tx画像.szImageSize.Width, ( stLayer[ i ].rBMP != null ) ? stLayer[ i ].rBMP.n高さ : stLayer[ i ].rBMPTEX.tx画像.szImageSize.Height );
+					Size size4 = new Size( ( stLayer[ i ].rBMP != null ) ? stLayer[ i ].rBMP.nWidth : stLayer[ i ].rBMPTEX.txImage.Width, ( stLayer[ i ].rBMP != null ) ? stLayer[ i ].rBMP.nHeight : stLayer[ i ].rBMPTEX.txImage.Height );
 					int num4 = (int) ( ( CDTXMania.Timer.nCurrentTime - num3 ) * ( ( (double) CDTXMania.ConfigIni.nPlaySpeed ) / 20.0 ) );
 					if( ( num2 != 0 ) && ( num2 < num4 ) )
 					{
@@ -184,8 +183,8 @@ internal class CActPerfBGA : CActivity
 						stLayer[ i ].sz開始サイズ = size = size2;
 						stLayer[ i ].n総移動時間ms = num2 = 0;
 					}
-					SharpDX.RectangleF rectangle = new();
-					SharpDX.RectangleF rectangle2 = new();
+					RectangleF rectangle = new();
+					RectangleF rectangle2 = new();
 					if( num2 == 0 )
 					{
 						rectangle.X = point.X;
@@ -262,13 +261,13 @@ internal class CActPerfBGA : CActivity
 						}
 						if( ( ( ( ( rectangle.Left < rectangle.Right ) && ( rectangle.Top < rectangle.Bottom ) ) && ( ( rectangle2.Left < rectangle2.Right ) && ( rectangle2.Top < rectangle2.Bottom ) ) ) && ( ( ( rectangle.Right >= 0 ) && ( rectangle.Bottom >= 0 ) ) && ( ( rectangle.Left <= size4.Width ) && ( rectangle.Top <= size4.Height ) ) ) ) && ( ( ( rectangle2.Right >= 0 ) && ( rectangle2.Bottom >= 0 ) ) && ( ( rectangle2.Left <= size3.Width ) && ( rectangle2.Top <= size3.Height ) ) ) )
 						{
-							if( ( stLayer[ i ].rBMP != null ) && ( stLayer[ i ].rBMP.tx画像 != null ) )
+							if( ( stLayer[ i ].rBMP != null ) && ( stLayer[ i ].rBMP.txImage != null ) )
 							{
-								stLayer[ i ].rBMP.tx画像.tDraw2DFloat( CDTXMania.app.Device, x + rectangle2.X, y + rectangle2.Y, rectangle );
+								stLayer[ i ].rBMP.txImage.tDraw2D(x + rectangle2.X, y + rectangle2.Y, rectangle );
 							}
-							else if( ( stLayer[ i ].rBMPTEX != null ) && ( stLayer[ i ].rBMPTEX.tx画像 != null ) )
+							else if( ( stLayer[ i ].rBMPTEX != null ) && ( stLayer[ i ].rBMPTEX.txImage != null ) )
 							{
-								stLayer[ i ].rBMPTEX.tx画像.tDraw2DFloat( CDTXMania.app.Device, x + rectangle2.X, y + rectangle2.Y, rectangle );
+								stLayer[ i ].rBMPTEX.txImage.tDraw2D(x + rectangle2.X, y + rectangle2.Y, rectangle );
 							}
 						}
 					}
@@ -298,9 +297,9 @@ internal class CActPerfBGA : CActivity
 		public long n移動開始時刻ms;
 	}
 
-	private CTexture txBGAバックパネル;
+	// private CTexture txBGAバックパネル;
 	private readonly EChannel[] nChannel = new EChannel[] { EChannel.BGALayer1, EChannel.BGALayer2, EChannel.BGALayer3, EChannel.BGALayer4, EChannel.BGALayer5, EChannel.BGALayer6, EChannel.BGALayer7, EChannel.BGALayer8 };
-	private Surface sfBackBuffer;
+	// private Surface sfBackBuffer;
 	private STLAYER[] stLayer = new STLAYER[ 8 ];
 	//-----------------
 	#endregion

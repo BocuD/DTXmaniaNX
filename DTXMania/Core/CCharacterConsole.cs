@@ -1,5 +1,6 @@
-﻿using FDK;
-using SharpDX;
+﻿using System.Drawing;
+using DTXMania.UI.Drawable;
+using FDK;
 
 namespace DTXMania.Core;
 
@@ -43,7 +44,7 @@ internal class CCharacterConsole : CActivity
 					{
 						if( txフォント8x16[ (int) font / (int) EFontType.WhiteThin ] != null )
 						{
-							txフォント8x16[ (int) font / (int) EFontType.WhiteThin ].tDraw2D( CDTXMania.app.Device, x, y, rc文字の矩形領域[ (int) font % (int) EFontType.WhiteThin, index ] );
+							txフォント8x16[ (int) font / (int) EFontType.WhiteThin ].tDraw2D(x, y, rc文字の矩形領域[ (int) font % (int) EFontType.WhiteThin, index ] );
 						}
 						x += nFontWidth;
 					}
@@ -82,8 +83,8 @@ internal class CCharacterConsole : CActivity
 	{
 		if( bActivated )
 		{
-			txフォント8x16[ 0 ] = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\Console font 8x16.png" ) );
-			txフォント8x16[ 1 ] = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\Console font 2 8x16.png" ) );
+			txフォント8x16[ 0 ] = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\Console font 8x16.png" ) );
+			txフォント8x16[ 1 ] = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\Console font 2 8x16.png" ) );
 			base.OnManagedCreateResources();
 		}
 	}
@@ -111,7 +112,7 @@ internal class CCharacterConsole : CActivity
 	private RectangleF[,] rc文字の矩形領域;
 	private const string str表記可能文字 = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~ ";
 	private const int nFontWidth = 8, nFontHeight = 16;
-	private CTexture[] txフォント8x16 = new CTexture[ 2 ];
+	private BaseTexture[] txフォント8x16 = new BaseTexture[ 2 ];
 	//-----------------
 	#endregion
 }

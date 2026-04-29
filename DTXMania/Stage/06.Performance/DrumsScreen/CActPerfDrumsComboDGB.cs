@@ -98,8 +98,9 @@ internal class CActPerfDrumsComboDGB : CActPerfCommonCombo
                     }
                     if ( txComboBom != null && CDTXMania.ConfigIni.bドラムコンボ文字の表示 != false )
                     {
-                        txComboBom.tDraw2D(CDTXMania.app.Device, x, y, new SharpDX.RectangleF(0, (340 * num1), 360, 340));
-                        txComboBom.vcScaleRatio = new SharpDX.Vector3(1.5f, 1.5f, 1f);
+                        txComboBom.tDraw2D(x, y, new RectangleF(0, (340 * num1), 360, 340));
+                        //todo: vcscaleratio
+                        //txComboBom.vcScaleRatio = new SharpDX.Vector3(1.5f, 1.5f, 1f);
                     }
                 }
             }

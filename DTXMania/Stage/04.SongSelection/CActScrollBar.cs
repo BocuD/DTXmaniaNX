@@ -21,7 +21,7 @@ internal class CActScrollBar : CActivity
 	{
 		if ( bActivated )
 		{
-			txScrollBar = CDTXMania.tGenerateTexture( CSkin.Path(@"Graphics\5_scrollbar.png"), false );
+			txScrollBar = CDTXMania.LoadFromPath( CSkin.Path(@"Graphics\5_scrollbar.png"), false );
 			base.OnManagedCreateResources();
 		}
 	}

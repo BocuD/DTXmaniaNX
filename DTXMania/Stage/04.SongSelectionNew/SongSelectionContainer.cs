@@ -1,11 +1,11 @@
 ﻿using System.Diagnostics;
+using System.Drawing;
+using System.Numerics;
 using DTXMania.Core;
 using DTXMania.SongDb;
-using DTXMania.UI;
 using DTXMania.UI.Drawable;
 using FDK;
 using Hexa.NET.ImGui;
-using SharpDX;
 using SlimDX.DirectInput;
 
 namespace DTXMania;
@@ -19,7 +19,7 @@ public class SongSelectionContainer : UIGroup
     public SongNode CurrentRoot => currentRoot;
     private SongNode currentRoot;
     
-    public static DTXTexture fallbackPreImage;
+    public static BaseTexture fallbackPreImage;
     
     private SongSelectionElement[] songSelectionElements = new SongSelectionElement[20];
     private int bufferStartIndex = 0;
@@ -35,6 +35,8 @@ public class SongSelectionContainer : UIGroup
 
         this.songDb = songDb;
         this.albumArt = albumArt;
+        
+        SongSelectionElement.LoadSongSelectElementAssets();
         
         currentRoot = songDb.songNodeRoot;
         dontSerialize = true;
@@ -68,7 +70,7 @@ public class SongSelectionContainer : UIGroup
         DateTime start = DateTime.Now;
         
         //make sure the fallback is loaded
-        fallbackPreImage = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_preimage default.png"));
+        fallbackPreImage = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\5_preimage default.png"));
 
         currentRoot = newRoot ?? songDb.songNodeRoot;
         SongNode node = currentRoot.CurrentSelection;
@@ -76,7 +78,7 @@ public class SongSelectionContainer : UIGroup
         bufferStartIndex = 0;
         
         //clear image cache
-        foreach (KeyValuePair<SongNode, DTXTexture> element in preImageCache)
+        foreach (KeyValuePair<SongNode, BaseTexture> element in preImageCache)
         {
             RemoveFromCache(element.Key);
         }
@@ -185,21 +187,21 @@ public class SongSelectionContainer : UIGroup
 
     private void UpdateSelectedSongAlbumArt()
     {
-        preImageCache.TryGetValue(currentSelection, out DTXTexture? tex);
+        preImageCache.TryGetValue(currentSelection, out BaseTexture? tex);
 
         if (tex == null)
         {
             tex = fallbackPreImage;
         }
 
-        albumArt.SetTexture(tex, false);
+        albumArt.SetTexture(tex, false, false);
         albumArt.clipRect = new RectangleF(0, 0, tex.Width, tex.Height);
     }
 
     private long lastDrawTime;
     private float targetY; //used for smooth scrolling
     
-    public override void Draw(Matrix parentMatrix)
+    public override void Draw(Matrix4x4 parentMatrix)
     {
         if (updateRootRequested)
         {
@@ -305,7 +307,7 @@ public class SongSelectionContainer : UIGroup
             int randomIndex = random.Next(0, currentRoot.childNodes.Count);
             var randomNode = currentRoot.childNodes[randomIndex];
             UpdateSelection(randomNode);
-            return 0;
+            return (int) CStageSongSelectionNew.EReturnValue.Continue;
         }
         
         ctKeyRepeat.Up.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(Key.UpArrow),
@@ -331,7 +333,7 @@ public class SongSelectionContainer : UIGroup
         if (CDTXMania.Input.ActionDecide())
         {
             if (ActionDecide()) //returns true on song select
-                return (int)CStageSongSelection.EReturnValue.Selected;
+                return (int)CStageSongSelectionNew.EReturnValue.Selected;
         }
         
         if (CDTXMania.Input.ActionCancel())
@@ -344,11 +346,11 @@ public class SongSelectionContainer : UIGroup
             else
             {
                 CDTXMania.Skin.soundCancel.tPlay();
-                return (int)CStageSongSelection.EReturnValue.ReturnToTitle;
+                return (int)CStageSongSelectionNew.EReturnValue.ReturnToTitle;
             }
         }
 
-        return 0;
+        return (int) CStageSongSelectionNew.EReturnValue.Continue;
     }
     
     private void MoveUp()
@@ -502,13 +504,13 @@ public class SongSelectionContainer : UIGroup
     #region PreImage cache
 
     private readonly List<SongNode> toBeCached = [];
-    private readonly Dictionary<SongNode, DTXTexture> preImageCache = new();
+    private readonly Dictionary<SongNode, BaseTexture> preImageCache = new();
     
     public bool isScrolling => MathF.Abs(targetY) > 2.0f;
 
-    private DTXTexture? CachePreImage(SongNode node)
+    private BaseTexture? CachePreImage(SongNode node)
     {
-        if (!preImageCache.TryGetValue(node, out DTXTexture? preImage))
+        if (!preImageCache.TryGetValue(node, out BaseTexture? preImage))
         {
             string imagePath = node.nodeType != SongNode.ENodeType.BACKBOX 
                 ? node.GetImagePath()
@@ -516,7 +518,7 @@ public class SongSelectionContainer : UIGroup
             
             if (!string.IsNullOrEmpty(imagePath) && File.Exists(imagePath))
             {
-                preImage = DTXTexture.LoadFromPath(imagePath);
+                preImage = BaseTexture.LoadFromPath(imagePath);
             }
         }
 
@@ -530,7 +532,7 @@ public class SongSelectionContainer : UIGroup
 
     private void RemoveFromCache(SongNode node)
     {
-        if (preImageCache.TryGetValue(node, out DTXTexture? tex))
+        if (preImageCache.TryGetValue(node, out BaseTexture? tex))
         {
             tex.Dispose();
             preImageCache.Remove(node);
@@ -548,7 +550,7 @@ public class SongSelectionContainer : UIGroup
                 SongNode toCache = toBeCached.First();
                 toBeCached.RemoveAt(0);
 
-                DTXTexture? preImage = CachePreImage(toCache);
+                BaseTexture? preImage = CachePreImage(toCache);
 
                 foreach (SongSelectionElement element in songSelectionElements)
                 {

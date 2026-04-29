@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using DTXMania.UI.Drawable;
-using FDK;
 
 namespace DTXMania.Core;
 
@@ -9,7 +8,7 @@ internal class StageManager
     public CStageStartup stageStartup { get; }
     public CStageTitle stageTitle { get; }
     public CStageConfig stageConfig { get; }
-    public CStageSongSelection stageSongSelection { get; }
+    //public CStageSongSelection stageSongSelection { get; }
     public CStageSongSelectionNew stageSongSelectionNew { get; }
     public CStageSongLoading stageSongLoading { get; }
     public CStagePerfGuitarScreen stagePerfGuitarScreen { get; }
@@ -26,7 +25,7 @@ internal class StageManager
         stageStartup = new CStageStartup();
         stageTitle = new CStageTitle();
         stageConfig = new CStageConfig();
-        stageSongSelection = new CStageSongSelection();
+        // stageSongSelection = new CStageSongSelection();
         stageSongSelectionNew = new CStageSongSelectionNew();
         stageSongLoading = new CStageSongLoading();
         stagePerfDrumsScreen = new CStagePerfDrumsScreen();
@@ -123,19 +122,19 @@ internal class StageManager
                 //-----------------------------
                 switch (nUpdateAndDrawReturnValue)
                 {
-                    case (int)CStageSongSelection.EReturnValue.ReturnToTitle:
+                    case (int)CStageSongSelectionNew.EReturnValue.ReturnToTitle:
                         tChangeStage(stageTitle);
                         break;
 
-                    case (int)CStageSongSelection.EReturnValue.Selected:
+                    case (int)CStageSongSelectionNew.EReturnValue.Selected:
                         tChangeStage(stageSongLoading);
                         break;
 
-                    case (int)CStageSongSelection.EReturnValue.CallConfig:
+                    case (int)CStageSongSelectionNew.EReturnValue.CallConfig:
                         tChangeStage(stageConfig);
                         break;
 
-                    case (int)CStageSongSelection.EReturnValue.ChangeSking:
+                    case (int)CStageSongSelectionNew.EReturnValue.ChangeSking:
                         tChangeStage(stageChangeSkin);
                         break;
                 }
@@ -192,58 +191,7 @@ internal class StageManager
                 #region [ *** ]
 
                 //-----------------------------
-
-                #region [ DTXVモード中にDTXCreatorから指示を受けた場合の処理 ]
-
-                if (CDTXMania.DTXVmode.Enabled && CDTXMania.DTXVmode.Refreshed)
-                {
-                    CDTXMania.DTXVmode.Refreshed = false;
-
-                    if (CDTXMania.DTXVmode.Command == CDTXVmode.ECommand.Stop)
-                    {
-                        ((CStagePerfCommonScreen)rCurrentStage).t停止();
-
-                        //if (previewSound != null)
-                        //{
-                        //    this.previewSound.tサウンドを停止する();
-                        //    this.previewSound.Dispose();
-                        //    this.previewSound = null;
-                        //}
-                    }
-                    else if (CDTXMania.DTXVmode.Command == CDTXVmode.ECommand.Play)
-                    {
-                        if (CDTXMania.DTXVmode.NeedReload)
-                        {
-                            ((CStagePerfCommonScreen)rCurrentStage).t再読込();
-                            if (CDTXMania.DTXVmode.GRmode)
-                            {
-                                CDTXMania.ConfigIni.bDrumsEnabled = false;
-                                CDTXMania.ConfigIni.bGuitarEnabled = true;
-                            }
-                            else
-                            {
-                                //Both in Original DTXMania, but we don't support that
-                                CDTXMania.ConfigIni.bDrumsEnabled = true;
-                                CDTXMania.ConfigIni.bGuitarEnabled = false;
-                            }
-
-                            CDTXMania.ConfigIni.bTimeStretch = CDTXMania.DTXVmode.TimeStretch;
-                            CSoundManager.bIsTimeStretch = CDTXMania.DTXVmode.TimeStretch;
-                            if (CDTXMania.ConfigIni.bVerticalSyncWait != CDTXMania.DTXVmode.VSyncWait)
-                            {
-                                CDTXMania.ConfigIni.bVerticalSyncWait = CDTXMania.DTXVmode.VSyncWait;
-                                //CDTXMania.b次のタイミングで垂直帰線同期切り替えを行う = true;
-                            }
-                        }
-                        else
-                        {
-                            ((CStagePerfCommonScreen)rCurrentStage).tJumpInSongToBar(CDTXMania.DTXVmode.nStartBar);
-                        }
-                    }
-                }
-
-                #endregion
-
+                
                 CScoreIni scoreIni = null;
                 switch (nUpdateAndDrawReturnValue)
                 {
@@ -255,18 +203,14 @@ internal class StageManager
 
                         #region [ Cancel performance ]
 
-                        //-----------------------------
-                        if (!CDTXMania.DTXVmode.Enabled && !CDTXMania.DTX2WAVmode.Enabled)
-                        {
-                            scoreIni = CDTXMania.tScoreIniへBGMAdjustとHistoryとPlayCountを更新("Play cancelled");
-                        }
+                        scoreIni = CDTXMania.UpdateBGMAdjustHistoryPlayCountIntScoreIni("Play cancelled");
 
                         CDTXMania.DTX.tStopPlayingAllChips();
                         CDTXMania.DTX.OnDeactivate();
                         rCurrentStage.OnDeactivate();
-                        if (CDTXMania.bCompactMode && !CDTXMania.DTXVmode.Enabled && !CDTXMania.DTX2WAVmode.Enabled)
+                        if (CDTXMania.bCompactMode)
                         {
-                            CDTXMania.app.Window.Close();
+                            DTXManiaGL.instance.RequestExit();
                         }
                         else if (nUpdateAndDrawReturnValue == (int)EPerfScreenReturnValue.Restart)
                         {
@@ -370,7 +314,7 @@ internal class StageManager
 
                                 str = $"Stage failed{strInstrument} {strSpeed}";
 
-                                scoreIni = CDTXMania.tScoreIniへBGMAdjustとHistoryとPlayCountを更新(str);
+                                scoreIni = CDTXMania.UpdateBGMAdjustHistoryPlayCountIntScoreIni(str);
 
                                 CScore cScore = CDTXMania.confirmedChart;
 
@@ -437,7 +381,7 @@ internal class StageManager
                         CDTXMania.DTX.OnDeactivate();
                         if (CDTXMania.bCompactMode)
                         {
-                            CDTXMania.app.Window.Close();
+                            DTXManiaGL.instance.RequestExit();
                         }
                         else
                         {
@@ -549,7 +493,7 @@ internal class StageManager
                                 str = $"Cleared{strInstrument} ({Enum.GetName(typeof(CScoreIni.ERANK), nRank)}:{strPerfSkill}{strSpeed})";
                             }
 
-                            scoreIni = CDTXMania.tScoreIniへBGMAdjustとHistoryとPlayCountを更新(str);
+                            scoreIni = CDTXMania.UpdateBGMAdjustHistoryPlayCountIntScoreIni(str);
                         }
 
                         stageResult.stPerformanceEntry.Drums = cPerfEntry_Drums;
@@ -593,7 +537,7 @@ internal class StageManager
                     }
                     else
                     {
-                        CDTXMania.app.Window.Close();
+                        DTXManiaGL.instance.RequestExit();
                     }
                 }
 
@@ -626,7 +570,8 @@ internal class StageManager
                 //-----------------------------
                 if (nUpdateAndDrawReturnValue != 0)
                 {
-                    CDTXMania.app.Exit();
+                    CDTXMania.app.tTerminate();
+                    DTXManiaGL.instance.RequestExit();
                 }
 
                 //-----------------------------

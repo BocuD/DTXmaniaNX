@@ -1,8 +1,9 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Drawing;
+using System.Numerics;
+using System.Runtime.InteropServices;
 using DTXMania.Core;
+using DTXMania.UI.Drawable;
 using FDK;
-using SharpDX;
-using Rectangle = System.Drawing.Rectangle;
 using SlimDXKey = SlimDX.DirectInput.Key;
 
 namespace DTXMania;
@@ -83,23 +84,12 @@ internal class CActConfigKeyAssign : CActivity
 		base.OnActivate();
 	}
 
-	public override void OnDeactivate()
-	{
-		if (bActivated)
-		{
-			CDTXMania.tReleaseTexture(ref txCursor);
-			CDTXMania.tReleaseTexture(ref txHitKeyDialog);
-			base.OnDeactivate();
-		}
-	}
-
 	public override void OnManagedCreateResources()
 	{
 		if (bActivated)
 		{
-			txCursor = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\ScreenConfig menu cursor.png"), false);
-			txHitKeyDialog =
-				CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\ScreenConfig hit key to assign dialog.png"), false);
+			txCursor = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\ScreenConfig menu cursor.png"));
+			txHitKeyDialog = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\ScreenConfig hit key to assign dialog.png"));
 			base.OnManagedCreateResources();
 		}
 	}
@@ -108,8 +98,8 @@ internal class CActConfigKeyAssign : CActivity
 	{
 		if (!bActivated) return 0;
 		
-		Matrix scaleMatrix = Matrix.Scaling(CDTXMania.renderScale);
-		Matrix mat = Matrix.Identity;
+		Matrix4x4 scaleMatrix = Matrix4x4.CreateScale(CDTXMania.renderScale);
+		Matrix4x4 mat = Matrix4x4.Identity;
 		
 		if (bWaitingForKeyInput)
 		{
@@ -140,19 +130,19 @@ internal class CActConfigKeyAssign : CActivity
 			int num = 20;
 			int cursPosX = 444;
 			int cursPosY = 62 + num * (nSelectedRow + 1);
-			mat = Matrix.Translation(cursPosX, cursPosY, 0); 
-			txCursor.tDraw2DMatrix(CDTXMania.app.Device, mat * scaleMatrix, new Vector2(16, 32), new RectangleF(0, 0, 16, 32));
+			mat = Matrix4x4.CreateTranslation(cursPosX, cursPosY, 0); 
+			txCursor.tDraw2DMatrix(mat * scaleMatrix, new Vector2(16, 32), new RectangleF(0, 0, 16, 32));
 			cursPosX += 16;
 			RectangleF rectangle = new(8, 0, 16, 32);
 			for (int j = 0; j < 14; j++)
 			{
-				mat = Matrix.Translation(cursPosX, cursPosY, 0);
-				txCursor.tDraw2DMatrix(CDTXMania.app.Device, mat * scaleMatrix, new Vector2(16, 32), rectangle);
+				mat = Matrix4x4.CreateTranslation(cursPosX, cursPosY, 0);
+				txCursor.tDraw2DMatrix(mat * scaleMatrix, new Vector2(16, 32), rectangle);
 				cursPosX += 16;
 			}
 
-			mat = Matrix.Translation(cursPosX, cursPosY, 0);
-			txCursor.tDraw2DMatrix(CDTXMania.app.Device, mat * scaleMatrix, new Vector2(16, 32), new RectangleF(16, 0, 16, 32));
+			mat = Matrix4x4.CreateTranslation(cursPosX, cursPosY, 0);
+			txCursor.tDraw2DMatrix(mat * scaleMatrix, new Vector2(16, 32), new RectangleF(16, 0, 16, 32));
 		}
 
 		int num5 = 20;
@@ -160,7 +150,7 @@ internal class CActConfigKeyAssign : CActivity
 		int x = 428;
 		int y = 64;
 		
-		mat = Matrix.Translation(x, y, 0);
+		mat = Matrix4x4.CreateTranslation(x, y, 0);
 		stageConfig.actFont.t文字列描画(mat * scaleMatrix, strPadName, false, 0.75f);
 		y += num5;
 		CConfigIni.CKeyAssign.STKEYASSIGN[] stkeyassignArray = CDTXMania.ConfigIni.KeyAssign[(int)part][(int)pad];
@@ -189,7 +179,7 @@ internal class CActConfigKeyAssign : CActivity
 					break;
 
 				default:
-					mat = Matrix.Translation(x + 20, y, 0);
+					mat = Matrix4x4.CreateTranslation(x + 20, y, 0);
 					stageConfig.actFont.t文字列描画(mat * scaleMatrix, $"{i + 1,2}.", nSelectedRow == i, 0.75f);
 					break;
 			}
@@ -197,18 +187,18 @@ internal class CActConfigKeyAssign : CActivity
 			y += num5;
 		}
 
-		mat = Matrix.Translation(x + 20, y, 0);
+		mat = Matrix4x4.CreateTranslation(x + 20, y, 0);
 		stageConfig.actFont.t文字列描画(mat * scaleMatrix, "Reset", nSelectedRow == 16, 0.75f);
 		y += num5;
-		mat = Matrix.Translation(x + 20, y, 0);
+		mat = Matrix4x4.CreateTranslation(x + 20, y, 0);
 		stageConfig.actFont.t文字列描画(mat * scaleMatrix, "<< Return to List", nSelectedRow == 17, 0.75f);
 		y += num5;
 		
 		if (bWaitingForKeyInput && txHitKeyDialog != null)
 		{
-			mat = Matrix.Translation(509, 215, 0);
+			mat = Matrix4x4.CreateTranslation(509, 215, 0);
 			// 15SEP20 Increasing x position by 120 pixels (was 0x185)
-			txHitKeyDialog.tDraw2DMatrix(CDTXMania.app.Device, mat * scaleMatrix);
+			txHitKeyDialog.tDraw2DMatrix(mat * scaleMatrix);
 		}
 
 		return 0;
@@ -376,8 +366,8 @@ internal class CActConfigKeyAssign : CActivity
 	private EKeyConfigPart part;
 	private CConfigIni.CKeyAssign.STKEYASSIGN[] structReset用KeyAssign;
 	private string strPadName;
-	private CTexture txHitKeyDialog;
-	private CTexture txCursor;
+	private BaseTexture txHitKeyDialog;
+	private BaseTexture txCursor;
 
 	private CStageConfig stageConfig;
 
@@ -436,8 +426,8 @@ internal class CActConfigKeyAssign : CActivity
 				break;
 		}
 		
-		Matrix translation = Matrix.Translation(x, y, 0);
-		translation *= Matrix.Scaling(CDTXMania.renderScale);
+		Matrix4x4 translation = Matrix4x4.CreateTranslation(x, y, 0);
+		translation *= Matrix4x4.CreateScale(CDTXMania.renderScale);
 		stageConfig.actFont.t文字列描画(translation, $"{line,2}. Joypad #{nID} " + str, b強調, 0.75f);
 	}
 
@@ -458,22 +448,22 @@ internal class CActConfigKeyAssign : CActivity
 			str = $"{line,2}. Key 0x{nCode:X2}";
 		}
 
-		Matrix translation = Matrix.Translation(x, y, 0);
-		translation *= Matrix.Scaling(CDTXMania.renderScale);
+		Matrix4x4 translation = Matrix4x4.CreateTranslation(x, y, 0);
+		translation *= Matrix4x4.CreateScale(CDTXMania.renderScale);
 		stageConfig.actFont.t文字列描画(translation, str, b強調, 0.75f);
 	}
 
 	private void tDrawAssignedCodeMidiIn(int line, int x, int y, int nID, int nCode, bool b強調)
 	{
-		Matrix translation = Matrix.Translation(x, y, 0);
-		translation *= Matrix.Scaling(CDTXMania.renderScale);
+		Matrix4x4 translation = Matrix4x4.CreateTranslation(x, y, 0);
+		translation *= Matrix4x4.CreateScale(CDTXMania.renderScale);
 		stageConfig.actFont.t文字列描画(translation, $"{line,2}. MidiIn #{nID} code.{nCode}", b強調, 0.75f);
 	}
 
 	private void tDrawAssignedCodeMouse(int line, int x, int y, int nID, int nCode, bool b強調)
 	{
-		Matrix translation = Matrix.Translation(x, y, 0);
-		translation *= Matrix.Scaling(CDTXMania.renderScale);
+		Matrix4x4 translation = Matrix4x4.CreateTranslation(x, y, 0);
+		translation *= Matrix4x4.CreateScale(CDTXMania.renderScale);
 		stageConfig.actFont.t文字列描画(translation, $"{line,2}. Mouse Button{nCode}", b強調, 0.75f);
 	}
 

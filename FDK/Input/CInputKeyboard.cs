@@ -49,6 +49,21 @@ public class CInputKeyboard : IInputDevice, IDisposable
 		// this.ct = new CTimer( CTimer.E種別.PerformanceCounter );
 	}
 
+	public void UpdateWindowHandle(IntPtr hWnd)
+	{
+		if (devKeyboard != null)
+		{
+			try
+			{
+				devKeyboard.SetCooperativeLevel(hWnd, CooperativeLevel.NoWinKey | CooperativeLevel.Foreground | CooperativeLevel.NonExclusive);
+				devKeyboard.Acquire();
+			}
+			catch
+			{
+			}
+		}
+	}
+
 
 	// メソッド
 
@@ -72,6 +87,9 @@ public class CInputKeyboard : IInputDevice, IDisposable
 		{
 			devKeyboard.Acquire();
 			devKeyboard.Poll();
+
+			KeyboardState modifierState = devKeyboard.GetCurrentState();
+			bool isAltPressed = modifierState.IsPressed(SharpDXKey.LeftAlt) || modifierState.IsPressed(SharpDXKey.RightAlt);
 
 			//this.list入力イベント = new List<STInputEvent>( 32 );
 			listInputEvent.Clear();            // #xxxxx 2012.6.11 yyagi; To optimize, I removed new();
@@ -99,7 +117,7 @@ public class CInputKeyboard : IInputDevice, IDisposable
 							// it doesn't affect to DirectInput (ALT+ENTER does not remove)
 							// So we ignore ENTER input in ALT+ENTER combination here.
 							// Note: ENTER will be alived if you keyup ALT after ALT+ENTER.
-							if (key != SlimDXKey.Return || (bKeyState[(int)SlimDXKey.LeftAlt] == false && bKeyState[(int)SlimDXKey.RightAlt] == false))
+							if ((key != SlimDXKey.Return && key != SlimDXKey.NumberPadEnter) || !isAltPressed)
 							{
 								STInputEvent item = new STInputEvent()
 								{
@@ -156,7 +174,7 @@ public class CInputKeyboard : IInputDevice, IDisposable
 
 						if (bKeyState[(int)key] == false)
 						{
-							if (key != SlimDXKey.Return || (bKeyState[(int)SlimDXKey.LeftAlt] == false && bKeyState[(int)SlimDXKey.RightAlt] == false))    // #23708 2016.3.19 yyagi
+							if ((key != SlimDXKey.Return && key != SlimDXKey.NumberPadEnter) || !isAltPressed)    // #23708 2016.3.19 yyagi
 							{
 								var ev = new STInputEvent()
 								{

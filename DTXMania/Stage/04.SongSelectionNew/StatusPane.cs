@@ -1,8 +1,10 @@
-﻿using DTXMania.Core;
+﻿using System.Drawing;
+using System.Numerics;
+using DTXMania.Core;
+using DTXMania.Core.Framework;
 using DTXMania.SongDb;
 using DTXMania.UI;
 using DTXMania.UI.Drawable;
-using SharpDX;
 
 namespace DTXMania;
 
@@ -13,20 +15,20 @@ public class StatusPane : UIGroup
         this.instrument = instrument;
         name = instrument.ToString();
         
-        UIImage background = AddChild(new UIImage(DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_difficulty_panel.png"))));
+        UIImage background = AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\5_difficulty_panel.png"))));
         background.anchor = new Vector2(0.0f, 1.0f);
         
-        txLevelNumber = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_level number.png"));
+        txLevelNumber = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\5_level number.png"));
 
-        difficultyFrame = AddChild(new UIImage(DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_difficultyframe.png"))));
+        difficultyFrame = AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\5_difficultyframe.png"))));
         difficultyFrame.anchor = new Vector2(0.0f, 1.0f);
         difficultyFrame.position = new Vector3(-7.0f, 5.0f, 0.0f);
         
-        skillIcon = DTXTexture.LoadFromPath(CSkin.Path($@"Graphics\Rank\skill.png"));
-        rankIcons = new DTXTexture[7];
+        skillIcon = BaseTexture.LoadFromPath(CSkin.Path($@"Graphics\Rank\skill.png"));
+        rankIcons = new BaseTexture[7];
         for (int i = 0; i < rankIcons.Length; i++) 
         {
-            rankIcons[i] = DTXTexture.LoadFromPath(CSkin.Path($@"Graphics\Rank\rank_{i}.png"));
+            rankIcons[i] = BaseTexture.LoadFromPath(CSkin.Path($@"Graphics\Rank\rank_{i}.png"));
         }
         
         //create image holders for left/right icons
@@ -51,9 +53,9 @@ public class StatusPane : UIGroup
         }
     }
 
-    private DTXTexture skillIcon;
-    private DTXTexture[] rankIcons;
-    private DTXTexture txLevelNumber;
+    private BaseTexture skillIcon;
+    private BaseTexture[] rankIcons;
+    private BaseTexture txLevelNumber;
     
     private UIImage difficultyFrame;
     private UIImage[] skillIconHolders;
@@ -64,13 +66,14 @@ public class StatusPane : UIGroup
     private float verticalSpacing = 74;
     private Vector3 textOffset = new(125, -41, 0);
     
+    [SkinNonSerialized]
     public SongNode? song;
 
-    public override void Draw(Matrix parentMatrix)
+    public override void Draw(Matrix4x4 parentMatrix)
     {
         base.Draw(parentMatrix);
 
-        Matrix textTranslation = Matrix.Translation(textOffset) * localTransformMatrix * parentMatrix;
+        Matrix4x4 textTranslation = Matrix4x4.CreateTranslation(textOffset) * localTransformMatrix * parentMatrix;
         
         difficultyFrame.position = new Vector3(-7.0f, 5.0f - verticalSpacing * CDTXMania.StageManager.stageSongSelectionNew.GetClosestLevelToTargetForSong(song), 0.0f);
 
@@ -97,7 +100,7 @@ public class StatusPane : UIGroup
                 int rank = song.charts[c].SongInformation.BestRank[(int)instrument];
                 if (rank != (int)CScoreIni.ERANK.UNKNOWN)
                 {
-                    rankIconHolders[c].SetTexture(rankIcons[rank], false);
+                    rankIconHolders[c].SetTexture(rankIcons[rank], false, false);
                     rankIconHolders[c].isVisible = true;
 
                     skillIconHolders[c].isVisible = song.charts[c].countSkill;
@@ -105,7 +108,7 @@ public class StatusPane : UIGroup
                     //get score as well
                     double score = song.charts[c].SongInformation.HighCompletionRate[(int)instrument];
                     
-                    var completionRate = textTranslation * Matrix.Translation(-102 * CDTXMania.renderScale, 11 * CDTXMania.renderScale, 0);
+                    var completionRate = textTranslation * Matrix4x4.CreateTranslation(-102 * CDTXMania.renderScale, 11 * CDTXMania.renderScale, 0);
                     tDrawDifficulty(completionRate, txLevelNumber, 0.6f, $"{score:0.00}%");
                 }
                 else
@@ -115,18 +118,18 @@ public class StatusPane : UIGroup
                 }
             }
 
-            textTranslation *= Matrix.Translation(0, -verticalSpacing * CDTXMania.renderScale, 0);
+            textTranslation *= Matrix4x4.CreateTranslation(0, -verticalSpacing * CDTXMania.renderScale, 0);
         }
     }
     
-    private static void tDrawDifficulty(Matrix textTranslation, DTXTexture txLevelNumber, float scale, string str)
+    private static void tDrawDifficulty(Matrix4x4 textTranslation, BaseTexture txLevelNumber, float scale, string str)
     {
         //compensate for actual size of texture
         float multiplier = txLevelNumber.Height / 28.0f;
 
         bool foundDecimal = false;
         
-        Matrix characterTranslation = Matrix.Identity;
+        Matrix4x4 characterTranslation = Matrix4x4.Identity;
         for (int index = 0; index < str.Length; index++)
         {
             char c = str[index];
@@ -147,19 +150,19 @@ public class StatusPane : UIGroup
                 );
 
                 //translate matrix by x/y
-                Matrix matrix = textTranslation * characterTranslation;
+                Matrix4x4 matrix = textTranslation * characterTranslation;
                 
                 //calculate if we need to vertically offset upwards to compensate for larger first character
                 if (!foundDecimal)
                 {
                     float offsetY = (rectangle.Height * characterScale - rectangle.Height * scale);
                     offsetY *= 111.0f / 128.0f; //character is about 111/128 as tall as the texture height
-                    matrix *= Matrix.Translation(0, -offsetY * CDTXMania.renderScale, 0);
+                    matrix *= Matrix4x4.CreateTranslation(0, -offsetY * CDTXMania.renderScale, 0);
                 }
                 txLevelNumber.tDraw2DMatrix(matrix, new Vector2(rectangle.Width, rectangle.Height) * characterScale, scaledRect, Color4.White);
             }
 
-            characterTranslation *= Matrix.Translation(rectangle.Width * CDTXMania.renderScale * characterScale, 0, 0);
+            characterTranslation *= Matrix4x4.CreateTranslation(rectangle.Width * CDTXMania.renderScale * characterScale, 0, 0);
         }
     }
 	

@@ -1,10 +1,9 @@
-﻿using DiscordRPC;
+﻿using System.Numerics;
+using DiscordRPC;
 using DTXMania.Core;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.DynamicElements;
 using FDK;
-using SharpDX;
-using SharpDX.Direct3D9;
 
 namespace DTXMania;
 
@@ -60,33 +59,26 @@ public abstract class CStage : CActivity
 		PERFORMANCE_STAGE_FAILED,
 		PERFORMANCE_STAGE_FAILED_FADEOUT,
 		PERFORMANCE_STAGE_CLEAR,
-		PERFORMANCE_STAGE_CLEAR_FadeOut,
 		PERFORMANCE_STAGE_RESTART
 	}
 
 	public Dictionary<string, DynamicStringSource> dynamicStringSources = new();
 	
-	public void LoadUI()
+	public void LoadUI(bool loadSkin = true)
 	{
 		//remove old ui
 		if (ui != null)
 		{
 			ui.Dispose();
 		}
-		
-		//try to get the skin for this stage
-		UIGroup? stageUI = CDTXMania.SkinManager.LoadStageSkin(eStageID);
-		
-		if (stageUI == null)
+
+		ui = new UIGroup(GetType().ToString());
+		InitializeBaseUI();
+		InitializeDefaultUI();
+
+		if (loadSkin)
 		{
-			ui = new UIGroup(GetType().ToString());
-			InitializeBaseUI();
-			InitializeDefaultUI();
-		}
-		else
-		{
-			ui = stageUI;
-			InitializeBaseUI();
+			CDTXMania.SkinManager.ApplySkin(ui, eStageID);
 		}
 	}
 
@@ -106,18 +98,10 @@ public abstract class CStage : CActivity
 			bJustStartedUpdate = false;
 		}
 		
-		//set texture filtering to linear
-		var device = CDTXMania.app.Device;
-		device.SetSamplerState(0, SamplerState.MinFilter, TextureFilter.Linear);
-		device.SetSamplerState(0, SamplerState.MagFilter, TextureFilter.Linear);
-		device.SetSamplerState(0, SamplerState.MipFilter, TextureFilter.Linear);
-		device.SetSamplerState(0, SamplerState.AddressU, TextureAddress.Clamp);
-		device.SetSamplerState(0, SamplerState.AddressV, TextureAddress.Clamp);
-		
 		//scale by CDTXMania.renderScale;
 		ui.scale.X = CDTXMania.renderScale;
 		ui.scale.Y = CDTXMania.renderScale;
-		ui.Draw(Matrix.Identity);
+		ui.Draw(Matrix4x4.Identity);
 		
 		return base.OnUpdateAndDraw();
 	}
@@ -137,6 +121,7 @@ public abstract class CStage : CActivity
 		if (bActivated)
 		{
 			ui.Dispose();
+			ui = null;
 		}
 		
 		base.OnManagedReleaseResources();

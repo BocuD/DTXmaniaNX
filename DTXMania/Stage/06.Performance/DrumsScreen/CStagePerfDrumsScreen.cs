@@ -1,9 +1,12 @@
 ﻿using System.Diagnostics;
+using System.Drawing;
+using System.Numerics;
 using DTXMania.Core;
-using SharpDX;
+using DTXMania.Core.Framework;
+using DTXMania.UI;
+using DTXMania.UI.Drawable;
 using FDK;
 
-using RectangleF = SharpDX.RectangleF;
 namespace DTXMania;
 
 internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
@@ -15,37 +18,34 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         eStageID = EStage.Performance_6;
         ePhaseID = EPhase.Common_DefaultState;
         bActivated = false;
-        listChildActivities.Add( actPad = new CActPerfDrumsPad() );
-        listChildActivities.Add( actCombo = new CActPerfDrumsComboDGB() );
-        listChildActivities.Add( actDANGER = new CActPerfDrumsDanger() );
-        listChildActivities.Add( actChipFireD = new CActPerfDrumsChipFireD() );
-        listChildActivities.Add( actGauge = new CActPerfDrumsGauge() );
-        listChildActivities.Add( actGraph = new CActPerfSkillMeter() ); // #24074 2011.01.23 add ikanick
-        listChildActivities.Add( actJudgeString = new CActPerfDrumsJudgementString() );
-        listChildActivities.Add( actLaneFlushD = new CActPerfDrumsLaneFlushD() );
-        listChildActivities.Add( actScore = new CActPerfDrumsScore() );
-        listChildActivities.Add( actStatusPanel = new CActPerfDrumsStatusPanel() );
-        listChildActivities.Add( actScrollSpeed = new CActPerfScrollSpeed() );
-        listChildActivities.Add( actAVI = new CActPerfAVI() );
-        listChildActivities.Add( actBGA = new CActPerfBGA() );
-//			base.listChildActivities.Add( this.actPanel = new CActPerfPanelString() );
-        listChildActivities.Add( actStageFailed = new CActPerfStageFailure() );
-        listChildActivities.Add( actPlayInfo = new CActPerformanceInformation() );
-        listChildActivities.Add( actFI = new CActFIFOBlackStart() );
-        listChildActivities.Add( actFO = new CActFIFOBlack() );
-        listChildActivities.Add( actFOClear = new CActFIFOWhite() );
-        listChildActivities.Add( actFOStageClear = new CActFIFOWhiteClear());
-        listChildActivities.Add( actFillin = new CActPerfDrumsFillingEffect() );
-        listChildActivities.Add( actLVFont = new CActLVLNFont() );
-        listChildActivities.Add( actProgressBar = new CActPerfProgressBar());
-        listChildActivities.Add(actBackgroundAVI = new CActSelectBackgroundAVI());
-        //          base.listChildActivities.Add( this.actChipFireGB = new CActPerfDrumsChipFireGB());
-        //			base.listChildActivities.Add( this.actLaneFlushGB = new CActPerfDrumsLaneFlushGB() );
-        //			base.listChildActivities.Add( this.actRGB = new CActPerfDrumsRGB() );
-        //			base.listChildActivities.Add( this.actWailingBonus = new CActPerfDrumsWailingBonus() );
-        //          base.listChildActivities.Add( this.actStageCleared = new CAct演奏ステージクリア());
+        listChildActivities.Add(actPad = new CActPerfDrumsPad());
+        listChildActivities.Add(actCombo = new CActPerfDrumsComboDGB());
+        listChildActivities.Add(actDANGER = new CActPerfDrumsDanger());
+        listChildActivities.Add(actChipFireD = new CActPerfDrumsChipFireD());
+        listChildActivities.Add(actGauge = new CActPerfDrumsGauge());
+        listChildActivities.Add(actGraph = new CActPerfSkillMeter());
+        listChildActivities.Add(actJudgeString = new CActPerfDrumsJudgementString());
+        listChildActivities.Add(actLaneFlushD = new CActPerfDrumsLaneFlushD());
+        listChildActivities.Add(actScore = new CActPerfDrumsScore());
+        listChildActivities.Add(actStatusPanel = new CActPerfDrumsStatusPanel());
+        listChildActivities.Add(actScrollSpeed = new CActPerfScrollSpeed());
+        listChildActivities.Add(video = new CActPerfVideo());
+        listChildActivities.Add(actBGA = new CActPerfBGA());
+        listChildActivities.Add(actStageFailed = new CActPerfStageFailure());
+        listChildActivities.Add(actPlayInfo = new CActPerformanceInformation());
+        listChildActivities.Add(actFillin = new CActPerfDrumsFillingEffect());
+        listChildActivities.Add(actLVFont = new CActLVLNFont());
+        listChildActivities.Add(actProgressBar = new CActPerfProgressBar());
     }
 
+    public override void InitializeBaseUI()
+    {
+        base.InitializeBaseUI();
+        
+        actStatusPanel.InitUI(ui);
+        
+        ui.AddChild(new LegacyDrawable("", () => tDisplayPresence()));
+    }
 
     // Methods
 
@@ -103,20 +103,17 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         }
         dtLastQueueOperation = DateTime.MinValue;
     }
-    public override void OnDeactivate()
-    {
-        base.OnDeactivate();
-    }
+    
     public override void OnManagedCreateResources()
     {
         if( bActivated )
         {
             bChorusSection = false;
             bBonus = false;
-            txChip = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_chips_drums.png"));
-            txHitBar = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlayDrums hit-bar.png" ) );
-            txシャッター = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\7_shutter.png" ) );
-            txLaneCover = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_lanes_Cover_cls.png"));
+            txChip = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_chips_drums.png"));
+            txHitBar = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums hit-bar.png" ) );
+            txShutter = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\7_shutter.png" ) );
+            txLaneCover = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_lanes_Cover_cls.png"));
 
             /*
             this.txヒットバーGB = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlayDrums hit-bar guitar.png" ) );
@@ -128,20 +125,6 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
              */
 
             base.OnManagedCreateResources();
-        }
-    }
-    public override void OnManagedReleaseResources()
-    {
-        if( bActivated )
-        {
-            CDTXMania.tReleaseTexture( ref txHitBar );
-            CDTXMania.tReleaseTexture( ref txChip );
-            CDTXMania.tReleaseTexture( ref txLaneCover );
-            CDTXMania.tReleaseTexture( ref txシャッター );
-//				CDTXMania.tReleaseTexture( ref this.txヒットバーGB );
-//				CDTXMania.tReleaseTexture( ref this.txレーンフレームGB );
-                
-            base.OnManagedReleaseResources();
         }
     }
 
@@ -166,18 +149,11 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
 
         if (tx判定画像anime != null && txBonusEffect != null)
         {
-            tx判定画像anime.tDraw2D(CDTXMania.app.Device, 1280, 720);
-            txBonusEffect.tDraw2D(CDTXMania.app.Device, 1280, 720);
+            tx判定画像anime.tDraw2D(1280, 720);
+            txBonusEffect.tDraw2D(1280, 720);
         }
 
-        actFI.tStartFadeIn();
         ct登場用.tUpdate();
-
-        if (CDTXMania.DTXVmode.Enabled)
-        {
-            tSetSettingsForDTXV();
-            tJumpInSongToBar(CDTXMania.DTXVmode.nStartBar + 1);
-        }
         
         // display presence now that the initial timer reset has been performed
         tDisplayPresence();
@@ -204,7 +180,6 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
             ePhaseID = EPhase.PERFORMANCE_STAGE_FAILED;
         }
 
-        tUpdateAndDraw_Background();
         tUpdateAndDraw_MIDIBGM();
         tUpdateAndDraw_AVI();
         tUpdateAndDraw_LaneFlushD();
@@ -216,111 +191,15 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         bIsFinishedPlaying = tUpdateAndDraw_Chips(EInstrumentPart.DRUMS);
         actProgressBar.OnUpdateAndDraw();
 
-        #region[ シャッター ]
-
-        //シャッターを使うのはLC、LP、FT、RDレーンのみ。その他のレーンでは一切使用しない。
-        //If Skill Mode is CLASSIC, always display lvl as Classic Style
-        if (CDTXMania.ConfigIni.nSkillMode == 0 || ((CDTXMania.ConfigIni.bClassicScoreDisplay == true) &&
-                                                    ((CDTXMania.DTX.bHasChips.LeftCymbal == false) &&
-                                                     (CDTXMania.DTX.bHasChips.FT == false) &&
-                                                     (CDTXMania.DTX.bHasChips.Ride == false) &&
-                                                     (CDTXMania.DTX.bHasChips.LP == false) &&
-                                                     (CDTXMania.DTX.bHasChips.LBD == false) &&
-                                                     (CDTXMania.DTX.bForceXGChart == false))))
-        {
-            if (txLaneCover != null)
-            {
-                //旧画像
-                //this.txLaneCover.tDraw2D(CDTXMania.app.Device, 295, 0);
-                //if (CDTXMania.DTX.bチップがある.LeftCymbal == false)
-                {
-                    txLaneCover.tDraw2D(CDTXMania.app.Device, 295, 0, new RectangleF(0, 0, 70, 720));
-                }
-                //if ((CDTXMania.DTX.bチップがある.LP == false) && (CDTXMania.DTX.bチップがある.LBD == false))
-                {
-                    //レーンタイプでの入れ替わりあり
-                    if (CDTXMania.ConfigIni.eLaneType.Drums == EType.A ||
-                        CDTXMania.ConfigIni.eLaneType.Drums == EType.C)
-                    {
-                        txLaneCover.tDraw2D(CDTXMania.app.Device, 416, 0, new RectangleF(124, 0, 54, 720));
-                    }
-                    else if (CDTXMania.ConfigIni.eLaneType.Drums == EType.B)
-                    {
-                        txLaneCover.tDraw2D(CDTXMania.app.Device, 470, 0, new RectangleF(124, 0, 54, 720));
-                    }
-                    else if (CDTXMania.ConfigIni.eLaneType.Drums == EType.D)
-                    {
-                        txLaneCover.tDraw2D(CDTXMania.app.Device, 522, 0, new RectangleF(124, 0, 54, 720));
-                    }
-                }
-                //if (CDTXMania.DTX.bチップがある.FT == false)
-                {
-                    txLaneCover.tDraw2D(CDTXMania.app.Device, 690, 0, new RectangleF(71, 0, 52, 720));
-                }
-                //if (CDTXMania.DTX.bチップがある.Ride == false)
-                {
-                    //RDPositionで入れ替わり
-                    if (CDTXMania.ConfigIni.eRDPosition == ERDPosition.RCRD)
-                    {
-                        txLaneCover.tDraw2D(CDTXMania.app.Device, 815, 0, new RectangleF(178, 0, 38, 720));
-                    }
-                    else if (CDTXMania.ConfigIni.eRDPosition == ERDPosition.RDRC)
-                    {
-                        txLaneCover.tDraw2D(CDTXMania.app.Device, 743, 0, new RectangleF(178, 0, 38, 720));
-                    }
-                }
-            }
-        }
-
-        double db倍率 = 7.2;
-        double dbシャッターIN = (nShutterInPosY.Drums * db倍率);
-        double dbシャッターOUT = 720 - (nShutterOutPosY.Drums * db倍率);
-
-        if (CDTXMania.ConfigIni.bReverse.Drums)
-        {
-            dbシャッターIN = (nShutterOutPosY.Drums * db倍率);
-            txシャッター.tDraw2D(CDTXMania.app.Device, 295, (int)(-720 + dbシャッターIN));
-
-            if (CDTXMania.ConfigIni.bShowPerformanceInformation)
-                actLVFont.tDrawString(564, (int)dbシャッターIN - 20, CDTXMania.ConfigIni.nShutterOutSide.Drums.ToString());
-
-            dbシャッターOUT = 720 - (nShutterInPosY.Drums * db倍率);
-            txシャッター.tDraw2D(CDTXMania.app.Device, 295, (int)dbシャッターOUT);
-
-            if (CDTXMania.ConfigIni.bShowPerformanceInformation)
-                actLVFont.tDrawString(564, (int)dbシャッターOUT + 2, CDTXMania.ConfigIni.nShutterInSide.Drums.ToString());
-        }
-        else
-        {
-            txシャッター.tDraw2D(CDTXMania.app.Device, 295, (int)(-720 + dbシャッターIN));
-
-            if (CDTXMania.ConfigIni.bShowPerformanceInformation)
-                actLVFont.tDrawString(564, (int)dbシャッターIN - 20, CDTXMania.ConfigIni.nShutterInSide.Drums.ToString());
-
-            txシャッター.tDraw2D(CDTXMania.app.Device, 295, (int)dbシャッターOUT);
-
-            if (CDTXMania.ConfigIni.bShowPerformanceInformation)
-                actLVFont.tDrawString(564, (int)dbシャッターOUT + 2, CDTXMania.ConfigIni.nShutterOutSide.Drums.ToString());
-        }
-
-        #endregion
+        DrawLaneCover();
 
         tUpdateAndDraw_JudgementLine();
         tUpdateAndDraw_DrumPad();
+        
         bIsFinishedFadeout = tUpdateAndDraw_FadeIn_Out();
         if (bIsFinishedPlaying && (ePhaseID == EPhase.Common_DefaultState))
         {
-            if (CDTXMania.DTXVmode.Enabled)
-            {
-                if (CDTXMania.Timer.b停止していない)
-                {
-                    CDTXMania.Timer.tPause();
-                }
-
-                Thread.Sleep(5);
-                // Keep waiting for next message from DTX Creator
-            }
-            else if ((actGauge.IsFailed(EInstrumentPart.DRUMS)) && (ePhaseID == EPhase.Common_DefaultState))
+            if ((actGauge.IsFailed(EInstrumentPart.DRUMS)) && (ePhaseID == EPhase.Common_DefaultState))
             {
                 actStageFailed.Start();
                 CDTXMania.DTX.tStopPlayingAllChips();
@@ -329,46 +208,16 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
             else
             {
                 eReturnValueAfterFadeOut = EPerfScreenReturnValue.StageClear;
-                ePhaseID = EPhase.PERFORMANCE_STAGE_CLEAR_FadeOut;
-                if (nHitCount_ExclAuto.Drums.Miss + nHitCount_ExclAuto.Drums.Poor == 0)
-                {
-                    nNumberPerfects = CDTXMania.ConfigIni.bAllDrumsAreAutoPlay
-                        ? nNumberPerfects = nHitCount_IncAuto.Drums.Perfect
-                        : nHitCount_ExclAuto.Drums.Perfect;
-                    if (nNumberPerfects == CDTXMania.DTX.nVisibleChipsCount.Drums)
-
-                        #region[ エクセ ]
-
-                    {
-                    }
-
-                    #endregion
-
-                    else
-
-                        #region[ フルコン ]
-
-                    {
-                    }
-
-                    #endregion
-                }
-                else
-                {
-
-                }
-
-                actFOStageClear.tStartFadeOut();
+                ePhaseID = EPhase.PERFORMANCE_STAGE_CLEAR;
             }
         }
 
         if (CDTXMania.ConfigIni.bShowScore)
             tUpdateAndDraw_Score();
-//              if( CDTXMania.ConfigIni.bShowMusicInfo )
-//                  this.t進行描画_パネル文字列();
+
         if (CDTXMania.ConfigIni.nInfoType == 1)
             tUpdateAndDraw_StatusPanel();
-        //this.actProgressBar.OnUpdateAndDraw();
+
         tUpdateAndDraw_Gauge();
         tUpdateAndDraw_Combo();
         tUpdateAndDraw_Graph();
@@ -376,10 +225,8 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         tUpdateAndDraw_JudgementString1_ForNormalPosition();
         tUpdateAndDraw_JudgementString2_ForPositionOnJudgementLine();
         tUpdateAndDraw_ChipFireD();
-        tUpdateAndDraw_PlaySpeed();
-        //
-
         tUpdateAndDraw_STAGEFAILED();
+        
         bすべてのチップが判定された = true;
         if (bIsFinishedFadeout)
         {
@@ -490,7 +337,93 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         return 0;
     }
 
+    private void DrawLaneCover()
+    {
+        //シャッターを使うのはLC、LP、FT、RDレーンのみ。その他のレーンでは一切使用しない。
+        //If Skill Mode is CLASSIC, always display lvl as Classic Style
+        if (CDTXMania.ConfigIni.nSkillMode == 0 || (CDTXMania.ConfigIni.bClassicScoreDisplay &&
+                                                    (!CDTXMania.DTX.bHasChips.LeftCymbal &&
+                                                     !CDTXMania.DTX.bHasChips.FT &&
+                                                     !CDTXMania.DTX.bHasChips.Ride &&
+                                                     !CDTXMania.DTX.bHasChips.LP &&
+                                                     !CDTXMania.DTX.bHasChips.LBD &&
+                                                     !CDTXMania.DTX.bForceXGChart)))
+        {
+            if (txLaneCover != null)
+            {
+                //旧画像
+                //this.txLaneCover.tDraw2D(CDTXMania.app.Device, 295, 0);
+                //if (CDTXMania.DTX.bチップがある.LeftCymbal == false)
+                {
+                    txLaneCover.tDraw2D(295, 0, new RectangleF(0, 0, 70, 720));
+                }
+                //if ((CDTXMania.DTX.bチップがある.LP == false) && (CDTXMania.DTX.bチップがある.LBD == false))
+                {
+                    //レーンタイプでの入れ替わりあり
+                    if (CDTXMania.ConfigIni.eLaneType.Drums == EType.A ||
+                        CDTXMania.ConfigIni.eLaneType.Drums == EType.C)
+                    {
+                        txLaneCover.tDraw2D(416, 0, new RectangleF(124, 0, 54, 720));
+                    }
+                    else if (CDTXMania.ConfigIni.eLaneType.Drums == EType.B)
+                    {
+                        txLaneCover.tDraw2D(470, 0, new RectangleF(124, 0, 54, 720));
+                    }
+                    else if (CDTXMania.ConfigIni.eLaneType.Drums == EType.D)
+                    {
+                        txLaneCover.tDraw2D(522, 0, new RectangleF(124, 0, 54, 720));
+                    }
+                }
+                //if (CDTXMania.DTX.bチップがある.FT == false)
+                {
+                    txLaneCover.tDraw2D(690, 0, new RectangleF(71, 0, 52, 720));
+                }
+                //if (CDTXMania.DTX.bチップがある.Ride == false)
+                {
+                    //RDPositionで入れ替わり
+                    if (CDTXMania.ConfigIni.eRDPosition == ERDPosition.RCRD)
+                    {
+                        txLaneCover.tDraw2D(815, 0, new RectangleF(178, 0, 38, 720));
+                    }
+                    else if (CDTXMania.ConfigIni.eRDPosition == ERDPosition.RDRC)
+                    {
+                        txLaneCover.tDraw2D(743, 0, new RectangleF(178, 0, 38, 720));
+                    }
+                }
+            }
+        }
 
+        double db倍率 = 7.2;
+        double dbシャッターIN = (nShutterInPosY.Drums * db倍率);
+        double dbシャッターOUT = 720 - (nShutterOutPosY.Drums * db倍率);
+
+        if (CDTXMania.ConfigIni.bReverse.Drums)
+        {
+            dbシャッターIN = (nShutterOutPosY.Drums * db倍率);
+            txShutter.tDraw2D(295, (int)(-720 + dbシャッターIN));
+
+            if (CDTXMania.ConfigIni.bShowPerformanceInformation)
+                actLVFont.tDrawString(564, (int)dbシャッターIN - 20, CDTXMania.ConfigIni.nShutterOutSide.Drums.ToString());
+
+            dbシャッターOUT = 720 - (nShutterInPosY.Drums * db倍率);
+            txShutter.tDraw2D(295, (int)dbシャッターOUT);
+
+            if (CDTXMania.ConfigIni.bShowPerformanceInformation)
+                actLVFont.tDrawString(564, (int)dbシャッターOUT + 2, CDTXMania.ConfigIni.nShutterInSide.Drums.ToString());
+        }
+        else
+        {
+            txShutter.tDraw2D(295, (int)(-720 + dbシャッターIN));
+
+            if (CDTXMania.ConfigIni.bShowPerformanceInformation)
+                actLVFont.tDrawString(564, (int)dbシャッターIN - 20, CDTXMania.ConfigIni.nShutterInSide.Drums.ToString());
+
+            txShutter.tDraw2D(295, (int)dbシャッターOUT);
+
+            if (CDTXMania.ConfigIni.bShowPerformanceInformation)
+                actLVFont.tDrawString(564, (int)dbシャッターOUT + 2, CDTXMania.ConfigIni.nShutterOutSide.Drums.ToString());
+        }
+    }
 
 
     // Other
@@ -541,18 +474,9 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
     public double UnitTime;
 //		private CTexture txヒットバーGB;
 //		private CTexture txレーンフレームGB;
-    public CTexture txシャッター;
-    private CTexture txLaneCover;
+    public BaseTexture txShutter;
+    private BaseTexture txLaneCover;
     //-----------------
-
-    private void tFadeOut()
-    {
-        eReturnValueAfterFadeOut = EPerfScreenReturnValue.StageClear;
-        ePhaseID = EPhase.PERFORMANCE_STAGE_CLEAR_FadeOut;
-
-        actFOStageClear.tStartFadeOut();
-    }
-
     private bool bフィルイン区間の最後のChipである( CChip pChip )
     {
         if( pChip == null )
@@ -713,17 +637,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
     {
         CDTXMania.ConfigIni.nScrollSpeed.Drums = Math.Max( CDTXMania.ConfigIni.nScrollSpeed.Drums - 1, 0 );
     }
-	
-    /*
-    protected override void tUpdateAndDraw_AVI()
-    {
-        base.tUpdateAndDraw_AVI( 0, 0 );
-    }
-    protected override void t進行描画_BGA()
-    {
-        base.t進行描画_BGA( 990, 0 );
-    }
-     */
+    
     protected override void tUpdateAndDraw_DANGER()
     {
         actDANGER.tUpdateAndDraw( actGauge.IsDanger(EInstrumentPart.DRUMS), false, false );
@@ -732,8 +646,8 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
     protected override void tUpdateAndDraw_WailingFrame()
     {
         base.tUpdateAndDraw_WailingFrame( 587, 478,
-            CDTXMania.ConfigIni.bReverse.Guitar ? ( 400 - txWailingFrame.szImageSize.Height ) : 69,
-            CDTXMania.ConfigIni.bReverse.Bass ? ( 400 - txWailingFrame.szImageSize.Height ) : 69
+            (int)(CDTXMania.ConfigIni.bReverse.Guitar ? ( 400 - txWailingFrame.Height ) : 69),
+            (int)(CDTXMania.ConfigIni.bReverse.Bass ? ( 400 - txWailingFrame.Height ) : 69)
         );
     }
 
@@ -835,14 +749,6 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
     protected override void tUpdateAndDraw_PerformanceInformation()
     {
         base.tUpdateAndDraw_PerformanceInformation( 1000, 257 );
-    }
-
-    private void tUpdateAndDraw_PlaySpeed()
-    {
-        if (txPlaySpeed != null)
-        {
-            txPlaySpeed.tDraw2D(CDTXMania.app.Device, 25, 200);
-        }
     }
 
     protected override void tHandleInput_Drums()
@@ -2840,22 +2746,6 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         }
     }
 
-    protected override void tGenerateBackgroundTexture()
-    {
-        System.Drawing.Rectangle bgrect = new (980, 0, 0, 0);
-        if (CDTXMania.ConfigIni.bBGAEnabled)
-        {
-            bgrect = new(980, 0, 278, 355);
-        }
-        string DefaultBgFilename = @"Graphics\7_background.jpg";
-        string BgFilename = "";
-        if ( ( ( CDTXMania.DTX.BACKGROUND != null ) && ( CDTXMania.DTX.BACKGROUND.Length > 0 ) ) && !CDTXMania.ConfigIni.bストイックモード )
-        {
-            BgFilename = CDTXMania.DTX.strFolderName + CDTXMania.DTX.BACKGROUND;
-        }
-        base.tGenerateBackgroundTexture( DefaultBgFilename, bgrect, BgFilename );
-    }
-
     protected override void tUpdateAndDraw_Chip_PatternOnly_Drums(CConfigIni configIni, ref CDTX dTX, ref CChip pChip)  // t進行描画_チップ_模様のみ_ドラムス
     {
         if (configIni.bDrumsEnabled)
@@ -2902,9 +2792,11 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
             #endregion
             if (!pChip.bHit && pChip.bVisible)
             {
+                Color4 col = Color4.White;
                 if (txChip != null)
                 {
-                    txChip.nTransparency = pChip.nTransparency;
+                    col.Alpha = pChip.nTransparency / 255.0f;
+                    //txChip.nTransparency = pChip.nTransparency;
                 }
                 int x = nチャンネルtoX座標[pChip.nChannelNumber - EChannel.HiHatClose];
 
@@ -2968,7 +2860,8 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                 int y = configIni.bReverse.Drums ? (nJudgeLinePosY.Drums + pChip.nDistanceFromBar.Drums) : (nJudgeLinePosY.Drums - pChip.nDistanceFromBar.Drums);
                 if (txChip != null)
                 {
-                    txChip.vcScaleRatio = new Vector3((float)pChip.dbChipSizeRatio, (float)pChip.dbChipSizeRatio, 1f);
+                    //what the fuck is vcScaleRatio
+                    //txChip.vcScaleRatio = new Vector3((float)pChip.dbChipSizeRatio, (float)pChip.dbChipSizeRatio, 1f);
                 }
                 int num9 = ctChipPatternAnimation.Drums.nCurrentValue;
 
@@ -2978,7 +2871,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                         x = (x + 0x10) - ((int)((32.0 * pChip.dbChipSizeRatio) / 2.0));
                         if (txChip != null)
                         {
-                            txChip.tDraw2D(CDTXMania.app.Device, x - 5, y - 0x20, new RectangleF(60 + 10, 128 + (num9 * 64), 0x2e + 10, 64));
+                            txChip.tDraw2D(x - 5, y - 0x20, new RectangleF(60 + 10, 128 + (num9 * 64), 0x2e + 10, 64), col);
                         }
                         break;
 
@@ -2986,7 +2879,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                         x = (x + 0x10) - ((int)((32.0 * pChip.dbChipSizeRatio) / 2.0));
                         if (txChip != null)
                         {
-                            txChip.tDraw2D(CDTXMania.app.Device, x - 5, y - 32, new RectangleF(0x6a + 20, 128 + (num9 * 64), 0x36 + 10, 64));
+                            txChip.tDraw2D(x - 5, y - 32, new RectangleF(0x6a + 20, 128 + (num9 * 64), 0x36 + 10, 64), col);
                         }
                         break;
 
@@ -2994,7 +2887,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                         x = (x + 0x16) - ((int)((44.0 * pChip.dbChipSizeRatio) / 2.0));
                         if (txChip != null)
                         {
-                            txChip.tDraw2D(CDTXMania.app.Device, x - 5, y - 0x20, new RectangleF(0, 128 + (num9 * 0x40), 60 + 10, 0x40));
+                            txChip.tDraw2D(x - 5, y - 0x20, new RectangleF(0, 128 + (num9 * 0x40), 60 + 10, 0x40), col);
                         }
                         break;
 
@@ -3002,7 +2895,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                         x = (x + 0x10) - ((int)((32.0 * pChip.dbChipSizeRatio) / 2.0));
                         if (txChip != null)
                         {
-                            txChip.tDraw2D(CDTXMania.app.Device, x - 5, y - 32, new RectangleF(160 + 30, 128 + (num9 * 0x40), 0x2e + 10, 64));
+                            txChip.tDraw2D(x - 5, y - 32, new RectangleF(160 + 30, 128 + (num9 * 0x40), 0x2e + 10, 64), col);
                         }
                         break;
 
@@ -3010,7 +2903,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                         x = (x + 0x10) - ((int)((32.0 * pChip.dbChipSizeRatio) / 2.0));
                         if (txChip != null)
                         {
-                            txChip.tDraw2D(CDTXMania.app.Device, x - 5, y - 32, new RectangleF(0xce + 40, 128 + (num9 * 0x40), 0x2e + 10, 64));
+                            txChip.tDraw2D(x - 5, y - 32, new RectangleF(0xce + 40, 128 + (num9 * 0x40), 0x2e + 10, 64), col);
                         }
                         break;
 
@@ -3018,7 +2911,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                         x = (x + 19) - ((int)((38.0 * pChip.dbChipSizeRatio) / 2.0));
                         if (txChip != null)
                         {
-                            txChip.tDraw2D(CDTXMania.app.Device, x - 5, y - 0x20, new RectangleF(298 + 60, 128 + (num9 * 64), 64 + 10, 64));
+                            txChip.tDraw2D(x - 5, y - 0x20, new RectangleF(298 + 60, 128 + (num9 * 64), 64 + 10, 64), col);
                         }
                         break;
 
@@ -3026,7 +2919,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                         x = (x + 0x10) - ((int)((32.0 * pChip.dbChipSizeRatio) / 2.0));
                         if (txChip != null)
                         {
-                            txChip.tDraw2D(CDTXMania.app.Device, x - 5, y - 0x20, new RectangleF(0xfc + 50, 128 + (num9 * 64), 0x2e + 10, 0x40));
+                            txChip.tDraw2D(x - 5, y - 0x20, new RectangleF(0xfc + 50, 128 + (num9 * 64), 0x2e + 10, 0x40), col);
                         }
                         break;
 
@@ -3038,7 +2931,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                             {
                                 case EType.A:
                                     x = (x + 14) - ((int)((26.0 * pChip.dbChipSizeRatio) / 2.0));
-                                    txChip.tDraw2D(CDTXMania.app.Device, x - 5, y - 0x20, new RectangleF(0x200 + 100, 128 + (num9 * 64), 0x26 + 10, 64));
+                                    txChip.tDraw2D(x - 5, y - 0x20, new RectangleF(0x200 + 100, 128 + (num9 * 64), 0x26 + 10, 64), col);
                                     break;
 
                                 /*
@@ -3050,7 +2943,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
 
                                 case EType.C:
                                     x = (x + 13) - ((int)((32.0 * pChip.dbChipSizeRatio) / 2.0));
-                                    txChip.tDraw2D(CDTXMania.app.Device, x - 5, y - 0x20, new RectangleF(60 + 10, 128 + (num9 * 64), 0x2e + 10, 64));
+                                    txChip.tDraw2D(x - 5, y - 0x20, new RectangleF(60 + 10, 128 + (num9 * 64), 0x2e + 10, 64), col);
                                     break;
                             }
                         }
@@ -3060,7 +2953,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                         x = (x + 13) - ((int)((26.0 * pChip.dbChipSizeRatio) / 2.0));
                         if (txChip != null)
                         {
-                            txChip.tDraw2D(CDTXMania.app.Device, x - 5, y - 0x20, new RectangleF(0x16a + 70, 128 + (num9 * 64), 0x26 + 10, 0x40));
+                            txChip.tDraw2D(x - 5, y - 0x20, new RectangleF(0x16a + 70, 128 + (num9 * 64), 0x26 + 10, 0x40), col);
                         }
                         break;
 
@@ -3068,7 +2961,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                         x = (x + 0x13) - ((int)((38.0 * pChip.dbChipSizeRatio) / 2.0));
                         if (txChip != null)
                         {
-                            txChip.tDraw2D(CDTXMania.app.Device, x - 5, y - 0x20, new RectangleF(448 + 90, 128 + (num9 * 64), 64 + 10, 64));
+                            txChip.tDraw2D(x - 5, y - 0x20, new RectangleF(448 + 90, 128 + (num9 * 64), 64 + 10, 64), col);
                         }
                         break;
 
@@ -3076,7 +2969,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                         x = (x + 0x13) - ((int)((38.0 * pChip.dbChipSizeRatio) / 2.0));
                         if (txChip != null)
                         {
-                            txChip.tDraw2D(CDTXMania.app.Device, x - 5, y - 0x20, new RectangleF(550 + 110, 128 + (num9 * 64), 0x30 + 10, 64));
+                            txChip.tDraw2D(x - 5, y - 0x20, new RectangleF(550 + 110, 128 + (num9 * 64), 0x30 + 10, 64), col);
                         }
                         break;
 
@@ -3087,19 +2980,20 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
 
                             if (configIni.eLBDGraphics.Drums == EType.A)
                             {
-                                txChip.tDraw2D(CDTXMania.app.Device, x - 5, y - 0x20, new RectangleF(550 + 110, 128 + (num9 * 64), 0x30, 0x40));
+                                txChip.tDraw2D(x - 5, y - 0x20, new RectangleF(550 + 110, 128 + (num9 * 64), 0x30, 0x40), col);
                             }
                             else if (configIni.eLBDGraphics.Drums == EType.B)
                             {
-                                txChip.tDraw2D(CDTXMania.app.Device, x - 5, y - 0x20, new RectangleF(400 + 80, 128 + (num9 * 64), 0x30 + 10, 0x40));
+                                txChip.tDraw2D(x - 5, y - 0x20, new RectangleF(400 + 80, 128 + (num9 * 64), 0x30 + 10, 0x40), col);
                             }
                         }
                         break;
                 }
                 if (txChip != null)
                 {
-                    txChip.vcScaleRatio = new Vector3(1f, 1f, 1f);
-                    txChip.nTransparency = 0xff;
+                    //todo what the fuck is vcscaleratio
+                    //txChip.vcScaleRatio = new Vector3(1f, 1f, 1f);
+                    //txChip.nTransparency = 0xff;
                 }
             }
 
@@ -3173,9 +3067,11 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
             #endregion
             if( !pChip.bHit && pChip.bVisible )
             {
+                Color4 col = Color4.White;
                 if( txChip != null )
                 {
-                    txChip.nTransparency = pChip.nTransparency;
+                    col.Alpha = pChip.nTransparency / 255.0f;
+                    //txChip.nTransparency = pChip.nTransparency;
                 }
                 int x = nチャンネルtoX座標[ pChip.nChannelNumber - EChannel.HiHatClose];
 
@@ -3239,7 +3135,8 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                 int y = configIni.bReverse.Drums ? ( nJudgeLinePosY.Drums + pChip.nDistanceFromBar.Drums ) : ( nJudgeLinePosY.Drums - pChip.nDistanceFromBar.Drums );
                 if( txChip != null )
                 {
-                    txChip.vcScaleRatio = new Vector3( ( float )pChip.dbChipSizeRatio, ( float )pChip.dbChipSizeRatio, 1f );
+                    //todo: what the fuck is vcscaleratio
+                    //txChip.vcScaleRatio = new Vector3( ( float )pChip.dbChipSizeRatio, ( float )pChip.dbChipSizeRatio, 1f );
                 }
                 int num9 = ctChipPatternAnimation.Drums.nCurrentValue;
 
@@ -3249,10 +3146,10 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                         x = ( x + 0x10 ) - ( ( int )( ( 32.0 * pChip.dbChipSizeRatio ) / 2.0 ) );
                         if( txChip != null )
                         {
-                            txChip.tDraw2D( CDTXMania.app.Device, x - 5, y - 32, new RectangleF( 60 + 10, 0, 0x2e + 10, 64 ) );
+                            txChip.tDraw2D(x - 5, y - 32, new RectangleF( 60 + 10, 0, 0x2e + 10, 64 ), col);
 
                             if( pChip.bBonusChip )
-                                txChip.tDraw2D( CDTXMania.app.Device, x - 5, y - 32, new RectangleF( 60 + 10, 64, 0x2e + 10, 64 ) );
+                                txChip.tDraw2D(x - 5, y - 32, new RectangleF( 60 + 10, 64, 0x2e + 10, 64 ), col);
                         }
                         break;
 
@@ -3260,10 +3157,10 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                         x = ( x + 0x10 ) - ( ( int )( ( 32.0 * pChip.dbChipSizeRatio ) / 2.0 ) );
                         if (txChip != null)
                         {
-                            txChip.tDraw2D(CDTXMania.app.Device, x - 5, y - 32, new RectangleF( 0x6a + 20, 0, 0x36 +10, 64 ) );
+                            txChip.tDraw2D(x - 5, y - 32, new RectangleF( 0x6a + 20, 0, 0x36 +10, 64 ), col);
 
                             if( pChip.bBonusChip )
-                                txChip.tDraw2D( CDTXMania.app.Device, x - 5, y - 32, new RectangleF( 0x6a + 20, 64, 0x36 + 10, 64 ) );
+                                txChip.tDraw2D(x - 5, y - 32, new RectangleF( 0x6a + 20, 64, 0x36 + 10, 64 ), col);
                         }
                         break;
 
@@ -3271,10 +3168,10 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                         x = ( x + 0x16 ) - ( ( int )( ( 44.0 * pChip.dbChipSizeRatio ) / 2.0 ) );
                         if( txChip != null )
                         {
-                            txChip.tDraw2D( CDTXMania.app.Device, x - 5, y - 32, new RectangleF( 0, 0, 60 + 10, 64 ) );
+                            txChip.tDraw2D(x - 5, y - 32, new RectangleF( 0, 0, 60 + 10, 64 ), col);
 
                             if( pChip.bBonusChip )
-                                txChip.tDraw2D( CDTXMania.app.Device, x - 5, y - 32, new RectangleF( 0, 64, 60 + 10, 64 ) );
+                                txChip.tDraw2D(x - 5, y - 32, new RectangleF( 0, 64, 60 + 10, 64 ), col);
                         }
                         break;
 
@@ -3282,10 +3179,10 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                         x = ( x + 0x10 ) - ( ( int )( ( 32.0 * pChip.dbChipSizeRatio ) / 2.0 ) );
                         if( txChip != null )
                         {
-                            txChip.tDraw2D( CDTXMania.app.Device, x - 5, y - 32, new RectangleF( 160 + 30, 0, 0x2e + 10, 64 ) );
+                            txChip.tDraw2D(x - 5, y - 32, new RectangleF( 160 + 30, 0, 0x2e + 10, 64 ), col);
 
                             if( pChip.bBonusChip )
-                                txChip.tDraw2D( CDTXMania.app.Device, x - 5, y - 32, new RectangleF( 160 + 30, 64, 0x2e + 10, 64 ) );
+                                txChip.tDraw2D(x - 5, y - 32, new RectangleF( 160 + 30, 64, 0x2e + 10, 64 ), col);
                         }
                         break;
 
@@ -3293,10 +3190,10 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                         x = ( x + 0x10 ) - ( ( int )( ( 32.0 * pChip.dbChipSizeRatio ) / 2.0 ) );
                         if (txChip != null)
                         {
-                            txChip.tDraw2D( CDTXMania.app.Device, x - 5, y - 32, new RectangleF( 0xce + 40, 0, 0x2e + 10, 64 ) );
+                            txChip.tDraw2D(x - 5, y - 32, new RectangleF( 0xce + 40, 0, 0x2e + 10, 64 ), col);
 
                             if( pChip.bBonusChip )
-                                txChip.tDraw2D( CDTXMania.app.Device, x - 5, y - 32, new RectangleF( 0xce + 40, 64, 0x2e + 10, 64 ) );
+                                txChip.tDraw2D(x - 5, y - 32, new RectangleF( 0xce + 40, 64, 0x2e + 10, 64 ), col);
                         }
                         break;
 
@@ -3304,10 +3201,10 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                         x = ( x + 19 ) - ( ( int )( ( 38.0 * pChip.dbChipSizeRatio ) / 2.0 ) );
                         if( txChip != null )
                         {
-                            txChip.tDraw2D( CDTXMania.app.Device, x - 5, y - 32, new RectangleF( 298 + 60, 0, 0x40 + 10, 64 ) );
+                            txChip.tDraw2D(x - 5, y - 32, new RectangleF( 298 + 60, 0, 0x40 + 10, 64 ), col);
 
                             if( pChip.bBonusChip )
-                                txChip.tDraw2D( CDTXMania.app.Device, x - 5, y - 32, new RectangleF( 298 + 60, 64, 0x40 + 10, 64 ) );
+                                txChip.tDraw2D(x - 5, y - 32, new RectangleF( 298 + 60, 64, 0x40 + 10, 64 ), col);
                         }
                         break;
 
@@ -3315,10 +3212,10 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                         x = ( x + 0x10 ) - ( ( int )( ( 32.0 * pChip.dbChipSizeRatio ) / 2.0 ) );
                         if( txChip != null )
                         {
-                            txChip.tDraw2D( CDTXMania.app.Device, x - 5, y - 32, new RectangleF( 0xfc + 50, 0, 0x2e + 10, 64 ) );
+                            txChip.tDraw2D(x - 5, y - 32, new RectangleF( 0xfc + 50, 0, 0x2e + 10, 64 ), col);
 
                             if( pChip.bBonusChip )
-                                txChip.tDraw2D( CDTXMania.app.Device, x - 5, y - 32, new RectangleF( 0xfc + 50, 64, 0x2e + 10, 64 ) );
+                                txChip.tDraw2D(x - 5, y - 32, new RectangleF( 0xfc + 50, 64, 0x2e + 10, 64 ), col);
                         }
                         break;
 
@@ -3330,23 +3227,23 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                             {
                                 case EType.A:
                                     x = ( x + 14 ) - ( ( int )( ( 26.0 * pChip.dbChipSizeRatio ) / 2.0 ) );
-                                    txChip.tDraw2D( CDTXMania.app.Device, x - 5, y - 32, new RectangleF( 0x200 + 100, 0, 0x26 + 10, 64 ) );
+                                    txChip.tDraw2D(x - 5, y - 32, new RectangleF( 0x200 + 100, 0, 0x26 + 10, 64 ), col);
                                     if( pChip.bBonusChip )
-                                        txChip.tDraw2D( CDTXMania.app.Device, x - 5, y - 32, new RectangleF( 0x200 + 100, 64, 0x26 + 10, 64 ) );
+                                        txChip.tDraw2D(x - 5, y - 32, new RectangleF( 0x200 + 100, 64, 0x26 + 10, 64 ), col);
                                     break;
 
                                 case EType.B:
                                     x = ( x + 14 ) - ( ( int )( ( 26.0 * pChip.dbChipSizeRatio ) / 2.0 ) );
-                                    txChip.tDraw2D( CDTXMania.app.Device, x - 5, y - 32, new RectangleF( 0x200 + 100, 0, 0x26 + 10, 64 ) );
+                                    txChip.tDraw2D(x - 5, y - 32, new RectangleF( 0x200 + 100, 0, 0x26 + 10, 64 ), col);
                                     if( pChip.bBonusChip )
-                                        txChip.tDraw2D( CDTXMania.app.Device, x - 5, y - 32, new RectangleF( 0x200 + 100, 64, 0x26 + 10, 64 ) );
+                                        txChip.tDraw2D(x - 5, y - 32, new RectangleF( 0x200 + 100, 64, 0x26 + 10, 64 ), col);
                                     break;
 
                                 case EType.C:
                                     x = ( x + 13 ) - ( ( int )( ( 32.0 * pChip.dbChipSizeRatio ) / 2.0 ) );
-                                    txChip.tDraw2D( CDTXMania.app.Device, x - 5, y - 32, new RectangleF( 60 + 10, 0, 0x2e + 10, 64 ) );
+                                    txChip.tDraw2D(x - 5, y - 32, new RectangleF( 60 + 10, 0, 0x2e + 10, 64 ), col);
                                     if( pChip.bBonusChip )
-                                        txChip.tDraw2D( CDTXMania.app.Device, x - 5, y - 32, new RectangleF( 60 + 100, 64, 0x2e + 10, 64 ) );
+                                        txChip.tDraw2D(x - 5, y - 32, new RectangleF( 60 + 100, 64, 0x2e + 10, 64 ), col);
                                     break;
                             }
                         }
@@ -3356,10 +3253,10 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                         x = ( x + 13 ) - ( ( int )( ( 26.0 * pChip.dbChipSizeRatio ) / 2.0 ) );
                         if( txChip != null )
                         {
-                            txChip.tDraw2D( CDTXMania.app.Device, x - 5, y - 32, new RectangleF( 0x16a + 70, 0, 0x26 + 10, 64 ) );
+                            txChip.tDraw2D(x - 5, y - 32, new RectangleF( 0x16a + 70, 0, 0x26 + 10, 64 ), col);
 
                             if( pChip.bBonusChip )
-                                txChip.tDraw2D( CDTXMania.app.Device, x - 5, y - 0x20, new RectangleF( 0x16a + 70, 64, 0x26 + 10, 0x40 ) );
+                                txChip.tDraw2D(x - 5, y - 0x20, new RectangleF( 0x16a + 70, 64, 0x26 + 10, 0x40 ), col);
                         }
                         break;
 
@@ -3367,10 +3264,10 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                         x = ( x + 0x13 ) - ( ( int )( ( 38.0 * pChip.dbChipSizeRatio ) / 2.0 ) );
                         if (txChip != null)
                         {
-                            txChip.tDraw2D( CDTXMania.app.Device, x - 5, y - 32, new RectangleF( 448 + 90, 0, 64 + 10, 64 ) );
+                            txChip.tDraw2D(x - 5, y - 32, new RectangleF( 448 + 90, 0, 64 + 10, 64 ), col);
 
                             if( pChip.bBonusChip )
-                                txChip.tDraw2D( CDTXMania.app.Device, x - 5, y - 0x20, new RectangleF( 448 + 90, 64, 64 + 10, 64 ) );
+                                txChip.tDraw2D(x - 5, y - 0x20, new RectangleF( 448 + 90, 64, 64 + 10, 64 ), col);
                         }
                         break;
 
@@ -3378,10 +3275,10 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                         x = ( x + 0x13 ) - ( ( int )( ( 38.0 * pChip.dbChipSizeRatio ) / 2.0 ) );
                         if (txChip != null)
                         {
-                            txChip.tDraw2D( CDTXMania.app.Device, x - 5, y - 32, new RectangleF( 550 + 110, 0, 0x30 + 10, 64 ) );
+                            txChip.tDraw2D(x - 5, y - 32, new RectangleF( 550 + 110, 0, 0x30 + 10, 64 ), col);
                                 
                             if( pChip.bBonusChip )
-                                txChip.tDraw2D( CDTXMania.app.Device, x - 5, y - 32, new RectangleF( 550 + 110, 64, 0x30 + 10, 64 ) );
+                                txChip.tDraw2D(x - 5, y - 32, new RectangleF( 550 + 110, 64, 0x30 + 10, 64 ), col);
                         }
                         break;
 
@@ -3391,23 +3288,24 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                         {
                             if( configIni.eLBDGraphics.Drums == EType.A )
                             {
-                                txChip.tDraw2D( CDTXMania.app.Device, x - 5, y - 32, new RectangleF( 550 + 110, 0, 0x30 + 10, 64 ) );
+                                txChip.tDraw2D(x - 5, y - 32, new RectangleF( 550 + 110, 0, 0x30 + 10, 64 ), col);
                                 if( pChip.bBonusChip )
-                                    txChip.tDraw2D( CDTXMania.app.Device, x - 5, y - 32, new RectangleF( 550 + 110, 64, 0x30 + 10, 64 ) );
+                                    txChip.tDraw2D(x - 5, y - 32, new RectangleF( 550 + 110, 64, 0x30 + 10, 64 ), col);
                             }
                             else if( configIni.eLBDGraphics.Drums == EType.B )
                             {
-                                txChip.tDraw2D( CDTXMania.app.Device, x - 5, y - 32, new RectangleF( 400 + 80, 0, 0x30 + 10, 64 ) );
+                                txChip.tDraw2D(x - 5, y - 32, new RectangleF( 400 + 80, 0, 0x30 + 10, 64 ), col);
                                 if( pChip.bBonusChip )
-                                    txChip.tDraw2D( CDTXMania.app.Device, x - 5, y - 32, new RectangleF( 400 + 80, 64, 0x30 + 10, 64 ) );
+                                    txChip.tDraw2D(x - 5, y - 32, new RectangleF( 400 + 80, 64, 0x30 + 10, 64 ), col);
                             }
                         }
                         break;
                 }
                 if( txChip != null )
                 {
-                    txChip.vcScaleRatio = new Vector3( 1f, 1f, 1f );
-                    txChip.nTransparency = 0xff;
+                    //todo: what the fuck is vcScaleRatio
+                    //txChip.vcScaleRatio = new Vector3( 1f, 1f, 1f );
+                    //txChip.nTransparency = 0xff;
                 }
             }
 
@@ -3609,7 +3507,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                     }
                     if (((actCombo.nCurrentCombo.Drums > 0) || configIni.bAllDrumsAreAutoPlay) && configIni.b歓声を発声する)
                     {
-                        actAVI.Start(bInFillIn);
+                        video.Start(bInFillIn);
                         if (r現在の歓声Chip.Drums != null)
                         {
                             dTX.tPlayChip(r現在の歓声Chip.Drums, CSoundManager.rcPerformanceTimer.nシステム時刻, (int)ELane.BGM, dTX.nモニタを考慮した音量(EInstrumentPart.UNKNOWN));
@@ -3636,7 +3534,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                     }
                     if (((actCombo.nCurrentCombo.Drums > 0) || configIni.bAllDrumsAreAutoPlay) && configIni.b歓声を発声する && configIni.DisplayBonusEffects)
                     {
-                        actAVI.Start(true);
+                        //actAVI.Start(true);
                         if (r現在の歓声Chip.Drums != null)
                         {
                             dTX.tPlayChip(r現在の歓声Chip.Drums, CSoundManager.rcPerformanceTimer.nシステム時刻, (int)ELane.BGM, dTX.nモニタを考慮した音量(EInstrumentPart.UNKNOWN));
@@ -3655,7 +3553,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                     }
                     if (((actCombo.nCurrentCombo.Drums > 0) || configIni.bAllDrumsAreAutoPlay) && configIni.b歓声を発声する && configIni.DisplayBonusEffects)
                     {
-                        actAVI.Start(true);
+                        //actAVI.Start(true);
                         if (r現在の歓声Chip.Drums != null)
                         {
                             dTX.tPlayChip(r現在の歓声Chip.Drums, CSoundManager.rcPerformanceTimer.nシステム時刻, (int)ELane.BGM, dTX.nモニタを考慮した音量(EInstrumentPart.UNKNOWN));
@@ -3773,7 +3671,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
             }
             if( configIni.DisplayBonusEffects )
             {
-                actAVI.Start( true );
+                //actAVI.Start( true );
                 CDTXMania.Skin.soundAudience.tPlay();
                 CDTXMania.Skin.soundAudience.n位置_次に鳴るサウンド = 0;
             }
@@ -3911,7 +3809,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                 l_xOffset = 72;
             }
 
-            txChip.tDraw2D(CDTXMania.app.Device, 295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + pChip.nDistanceFromBar.Drums) - 1) : ((nJudgeLinePosY.Drums - pChip.nDistanceFromBar.Drums) - 1), new RectangleF(0, 769, l_drumPanelWidth, 2));
+            txChip.tDraw2D(295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + pChip.nDistanceFromBar.Drums) - 1) : ((nJudgeLinePosY.Drums - pChip.nDistanceFromBar.Drums) - 1), new RectangleF(0, 769, l_drumPanelWidth, 2));
         }
               
         /*
@@ -3957,23 +3855,23 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
 
             if (bIsEnd)
             {
-                txChip.tDraw2D(CDTXMania.app.Device, 295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + nDistanceFromBar) - 1) : ((nJudgeLinePosY.Drums - nDistanceFromBar) - 1), new RectangleF(0, 769, l_drumPanelWidth, 2));
-                txChip.tDraw2D(CDTXMania.app.Device, 295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + nDistanceFromBar) + 1) : ((nJudgeLinePosY.Drums - nDistanceFromBar) - 3), new RectangleF(0, 769, l_drumPanelWidth, 2));
-                txChip.tDraw2D(CDTXMania.app.Device, 295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + nDistanceFromBar) + 3) : ((nJudgeLinePosY.Drums - nDistanceFromBar) - 5), new RectangleF(0, 769, l_drumPanelWidth, 2));
-                txChip.tDraw2D(CDTXMania.app.Device, 295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + nDistanceFromBar) + 9) : ((nJudgeLinePosY.Drums - nDistanceFromBar) - 11), new RectangleF(0, 769, l_drumPanelWidth, 2));
-                txChip.tDraw2D(CDTXMania.app.Device, 295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + nDistanceFromBar) + 11) : ((nJudgeLinePosY.Drums - nDistanceFromBar) - 13), new RectangleF(0, 769, l_drumPanelWidth, 2));
-                txChip.tDraw2D(CDTXMania.app.Device, 295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + nDistanceFromBar) + 17) : ((nJudgeLinePosY.Drums - nDistanceFromBar) - 19), new RectangleF(0, 769, l_drumPanelWidth, 2));
-                txChip.tDraw2D(CDTXMania.app.Device, 295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + nDistanceFromBar) + 23) : ((nJudgeLinePosY.Drums - nDistanceFromBar) - 25), new RectangleF(0, 769, l_drumPanelWidth, 2));
+                txChip.tDraw2D(295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + nDistanceFromBar) - 1) : ((nJudgeLinePosY.Drums - nDistanceFromBar) - 1), new RectangleF(0, 769, l_drumPanelWidth, 2));
+                txChip.tDraw2D(295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + nDistanceFromBar) + 1) : ((nJudgeLinePosY.Drums - nDistanceFromBar) - 3), new RectangleF(0, 769, l_drumPanelWidth, 2));
+                txChip.tDraw2D(295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + nDistanceFromBar) + 3) : ((nJudgeLinePosY.Drums - nDistanceFromBar) - 5), new RectangleF(0, 769, l_drumPanelWidth, 2));
+                txChip.tDraw2D(295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + nDistanceFromBar) + 9) : ((nJudgeLinePosY.Drums - nDistanceFromBar) - 11), new RectangleF(0, 769, l_drumPanelWidth, 2));
+                txChip.tDraw2D(295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + nDistanceFromBar) + 11) : ((nJudgeLinePosY.Drums - nDistanceFromBar) - 13), new RectangleF(0, 769, l_drumPanelWidth, 2));
+                txChip.tDraw2D(295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + nDistanceFromBar) + 17) : ((nJudgeLinePosY.Drums - nDistanceFromBar) - 19), new RectangleF(0, 769, l_drumPanelWidth, 2));
+                txChip.tDraw2D(295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + nDistanceFromBar) + 23) : ((nJudgeLinePosY.Drums - nDistanceFromBar) - 25), new RectangleF(0, 769, l_drumPanelWidth, 2));
             }
             else
             {
-                txChip.tDraw2D(CDTXMania.app.Device, 295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + nDistanceFromBar) - 1) : ((nJudgeLinePosY.Drums - nDistanceFromBar) - 1), new RectangleF(0, 769, l_drumPanelWidth, 2));
-                txChip.tDraw2D(CDTXMania.app.Device, 295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + nDistanceFromBar) - 3) : ((nJudgeLinePosY.Drums - nDistanceFromBar) + 1), new RectangleF(0, 769, l_drumPanelWidth, 2));
-                txChip.tDraw2D(CDTXMania.app.Device, 295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + nDistanceFromBar) - 5) : ((nJudgeLinePosY.Drums - nDistanceFromBar) + 3), new RectangleF(0, 769, l_drumPanelWidth, 2));
-                txChip.tDraw2D(CDTXMania.app.Device, 295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + nDistanceFromBar) - 11) : ((nJudgeLinePosY.Drums - nDistanceFromBar) + 9), new RectangleF(0, 769, l_drumPanelWidth, 2));
-                txChip.tDraw2D(CDTXMania.app.Device, 295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + nDistanceFromBar) - 13) : ((nJudgeLinePosY.Drums - nDistanceFromBar) + 11), new RectangleF(0, 769, l_drumPanelWidth, 2));
-                txChip.tDraw2D(CDTXMania.app.Device, 295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + nDistanceFromBar) - 19) : ((nJudgeLinePosY.Drums - nDistanceFromBar) + 17), new RectangleF(0, 769, l_drumPanelWidth, 2));
-                txChip.tDraw2D(CDTXMania.app.Device, 295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + nDistanceFromBar) - 25) : ((nJudgeLinePosY.Drums - nDistanceFromBar) + 23), new RectangleF(0, 769, l_drumPanelWidth, 2));
+                txChip.tDraw2D(295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + nDistanceFromBar) - 1) : ((nJudgeLinePosY.Drums - nDistanceFromBar) - 1), new RectangleF(0, 769, l_drumPanelWidth, 2));
+                txChip.tDraw2D(295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + nDistanceFromBar) - 3) : ((nJudgeLinePosY.Drums - nDistanceFromBar) + 1), new RectangleF(0, 769, l_drumPanelWidth, 2));
+                txChip.tDraw2D(295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + nDistanceFromBar) - 5) : ((nJudgeLinePosY.Drums - nDistanceFromBar) + 3), new RectangleF(0, 769, l_drumPanelWidth, 2));
+                txChip.tDraw2D(295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + nDistanceFromBar) - 11) : ((nJudgeLinePosY.Drums - nDistanceFromBar) + 9), new RectangleF(0, 769, l_drumPanelWidth, 2));
+                txChip.tDraw2D(295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + nDistanceFromBar) - 13) : ((nJudgeLinePosY.Drums - nDistanceFromBar) + 11), new RectangleF(0, 769, l_drumPanelWidth, 2));
+                txChip.tDraw2D(295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + nDistanceFromBar) - 19) : ((nJudgeLinePosY.Drums - nDistanceFromBar) + 17), new RectangleF(0, 769, l_drumPanelWidth, 2));
+                txChip.tDraw2D(295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + nDistanceFromBar) - 25) : ((nJudgeLinePosY.Drums - nDistanceFromBar) + 23), new RectangleF(0, 769, l_drumPanelWidth, 2));
             }
         }
     }

@@ -1,4 +1,5 @@
 ﻿using DTXMania.Core;
+using DTXMania.UI.Drawable;
 using FDK;
 
 namespace DTXMania;
@@ -14,7 +15,7 @@ internal class CActPerfCommonScore : CActivity
 	public STDGBVALUE<int> n本体X;
 	public int n本体Y;
 	public long n進行用タイマ;
-	protected CTexture txScore;
+	protected BaseTexture txScore;
 
 		
 	// コンストラクタ
@@ -133,18 +134,10 @@ internal class CActPerfCommonScore : CActivity
 	}
 	public override void OnManagedCreateResources()
 	{
-		if( bActivated && !CDTXMania.DTXVmode.Enabled && !CDTXMania.DTX2WAVmode.Enabled)
+		if (bActivated)
 		{
-			txScore = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_score numbersGD.png"));
+			txScore = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_score numbersGD.png"));
 			base.OnManagedCreateResources();
-		}
-	}
-	public override void OnManagedReleaseResources()
-	{
-		if( bActivated && !CDTXMania.DTXVmode.Enabled && !CDTXMania.DTX2WAVmode.Enabled)
-		{
-			CDTXMania.tReleaseTexture( ref txScore );
-			base.OnManagedReleaseResources();
 		}
 	}
 }

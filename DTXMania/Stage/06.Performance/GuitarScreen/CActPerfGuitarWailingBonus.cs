@@ -1,6 +1,8 @@
-﻿using DTXMania.Core;
+﻿using System.Drawing;
+using DTXMania.Core;
+using DTXMania.Core.Framework;
+using DTXMania.UI;
 using FDK;
-using SharpDX;
 
 namespace DTXMania;
 
@@ -43,7 +45,6 @@ internal class CActPerfGuitarWailingBonus : CActPerfCommonWailingBonus
 						}
 						CDTXMania.Skin.soundAudience.n位置_次に鳴るサウンド = ( part == EInstrumentPart.GUITAR ) ? -50 : 50;
 						CDTXMania.Skin.soundAudience.tPlay();
-						return;
 					}
 					break;
 				}
@@ -64,7 +65,6 @@ internal class CActPerfGuitarWailingBonus : CActPerfCommonWailingBonus
 				ctWailing炎[ i, j  ] = null;
 			}
 		}
-		base.OnActivate();
 	}
 	public override int OnUpdateAndDraw()
 	{
@@ -101,6 +101,7 @@ internal class CActPerfGuitarWailingBonus : CActPerfCommonWailingBonus
 
 				}
 			}
+			
 			for( int j = 0; j < 2; j++ )
 			{
 				EInstrumentPart e楽器パート2 = ( j == 0 ) ? EInstrumentPart.GUITAR : EInstrumentPart.BASS;
@@ -146,7 +147,7 @@ internal class CActPerfGuitarWailingBonus : CActPerfCommonWailingBonus
 						}
 						if( ( rectangle.Top < rectangle.Bottom ) && ( txWailingBonus != null ) )
 						{
-							txWailingBonus.tDraw2D( CDTXMania.app.Device, x, num6 + num7, rectangle );
+							txWailingBonus.tDraw2D(x, num6 + num7, rectangle );
 						}
 						num7 = 0;
 						rectangle = new RectangleF( 26, 0, 26, 122 );
@@ -162,18 +163,19 @@ internal class CActPerfGuitarWailingBonus : CActPerfCommonWailingBonus
 						}
 						if( ( rectangle.Top < rectangle.Bottom ) && ( txWailingBonus != null ) && CDTXMania.ConfigIni.nWailingFireFrames == 0 )
 						{
-							txWailingBonus.tDraw2D( CDTXMania.app.Device, x, ( num6 + num7 ) + 122, rectangle );
+							txWailingBonus.tDraw2D(x, ( num6 + num7 ) + 122, rectangle );
 						}
 
 						if( txWailingFlush != null && CDTXMania.ConfigIni.nWailingFireFrames == 0 )
 						{
+							Color4 col = Color4.White;
+							int count = ct進行用[ (int)e楽器パート2, m ].nCurrentValue;
+							col.Alpha = ( count <= 55 ? 255 : 255 - count ) / 255.0f;
+							
 							for( int i = 0; i <= 12; i++ )
 							{
-								txWailingFlush.tDraw2D( CDTXMania.app.Device, ( e楽器パート2 == EInstrumentPart.GUITAR ) ? 283 : 1153, 64 * i, new RectangleF( 0, 0, 42, 64 ) );
+								txWailingFlush.tDraw2D(( e楽器パート2 == EInstrumentPart.GUITAR ) ? 283 : 1153, 64 * i, new RectangleF( 0, 0, 42, 64 ), col);
 							}
-
-							int count = ct進行用[ (int)e楽器パート2, m ].nCurrentValue;
-							txWailingFlush.nTransparency = ( count <= 55 ? 255 : 255 - count );
 						}
 					}
 
@@ -181,13 +183,14 @@ internal class CActPerfGuitarWailingBonus : CActPerfCommonWailingBonus
 					{
 						if( txWailingFire != null )
 						{
+							RectangleF fireFrame = new( rectW * ctWailing炎[ (int) e楽器パート2, m ].nCurrentValue, 0, rectW, rectH );
 							if( e楽器パート2 == EInstrumentPart.GUITAR )
 							{
-								txWailingFire.t2D描画( CDTXMania.app.Device, posXGuitar, posY, new System.Drawing.Rectangle( rectW * ctWailing炎[ (int) e楽器パート2, m ].nCurrentValue, 0, rectW, rectH ) );
+								txWailingFire.tDraw2D(posXGuitar, posY, fireFrame );
 							}
 							if( e楽器パート2 == EInstrumentPart.BASS )
 							{
-								txWailingFire.t2D描画( CDTXMania.app.Device, posXBass, posY, new System.Drawing.Rectangle( rectW * ctWailing炎[ (int) e楽器パート2, m ].nCurrentValue, 0, rectW, rectH ) );
+								txWailingFire.tDraw2D(posXBass, posY, fireFrame );
 							}
 						}
 					}

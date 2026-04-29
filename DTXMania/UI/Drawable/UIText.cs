@@ -1,11 +1,13 @@
-﻿using System.Drawing;
+using System.Drawing;
+using System.Numerics;
 using DTXMania.Core;
+using DTXMania.Core.Framework;
 using DTXMania.UI.Inspector;
+using DTXMania.UI.OpenGL;
+using DTXMania.UI.Skin;
+using DTXMania.UI.Text;
 using Hexa.NET.ImGui;
-using Newtonsoft.Json;
-using SharpDX;
-using Color = System.Drawing.Color;
-using RectangleF = SharpDX.RectangleF;
+using NativeFileDialog.Extended;
 
 namespace DTXMania.UI.Drawable;
 
@@ -15,102 +17,97 @@ public enum TextSource
     Dynamic
 }
 
-public class UIText : UITexture
+public enum UiTextAlignment
 {
-    private bool dirty = true;
-    public string text = "";
+    Left,
+    Center,
+    Right
+}
+
+public partial class UIText : UITexture
+{
+    private const float DefaultFontSize = 32f;
+    private bool _dirty = true;
+
+    [Themable] public string text = "New UIText";
+    [Themable] public FontSource fontSource = FontSource.System;
+    [Themable] public string font = UIFonts.FallbackFont;
+    [Themable] public string fontFamily = string.Empty;
+    [Themable] public float fontSize = DefaultFontSize;
+    [Themable] public float outlineWidth = 3f;
+    [Themable] public float texturePadding = 0f;
+    [Themable] public float lineSpacing = 1f;
+    [Themable] public bool antialias = true;
+    [Themable] public bool subpixelText = true;
+    [Themable] public UiTextStyle style = UiTextStyle.Regular;
+    [Themable] public UiTextAlignment alignment = UiTextAlignment.Left;
+    [Themable] public UiTextRenderBackend renderBackend = UiTextRenderBackend.Skia;
+    [Themable] public Color4 fillColor = Color4.White;
+    [Themable] public Color4 outlineColor = new(0f, 0f, 0f, 1f);
+    [Themable] public UiTextGradientMode fillGradientMode = UiTextGradientMode.None;
+    [Themable] public Color4 fillGradientTopColor = Color4.White;
+    [Themable] public Color4 fillGradientBottomColor = Color4.White;
+    [Themable] public UiTextGradientMode outlineGradientMode = UiTextGradientMode.None;
+    [Themable] public Color4 outlineGradientTopColor = new(0f, 0f, 0f, 1f);
+    [Themable] public Color4 outlineGradientBottomColor = new(0f, 0f, 0f, 1f);
+
+    [Themable] public TextSource textSource = TextSource.String;
+    [Themable] public string dynamicSource = "Not Set";
     
-    public Color fontColor = Color.White;
-    public Color edgeColor = Color.Black;
-    public Color gradationTopColor = Color.White;
-    public Color gradationBottomColor = Color.White;
-
-    private bool fontDirty = true;
-    private CPrivateFastFont font;
-    public CPrivateFont.DrawMode drawMode = CPrivateFont.DrawMode.Edge;
-    [JsonIgnore] public FontFamily fontFamily;
-
-    public string serializedFont
-    {
-        get => fontFamily.Name;
-        set => fontFamily = new FontFamily(value);
-    }
-    
-    public int fontSize;
-    public FontStyle fontStyle;
-    public TextSource textSource = TextSource.String;
-    public string dynamicSource = "Not Set";
-
     [AddChildMenu]
     public static UIDrawable Create()
     {
-        var text = new UIText();
-        
-        text.fontFamily = new FontFamily(CDTXMania.ConfigIni.songListFont);
-        text.fontSize = 20;
-        text.fontStyle = FontStyle.Regular;
-        text.text = "New UIText";
-        
-        text.UpdateFont();
-        text.RenderTexture();
-        
-        return text;
-    }
-    
-    public UIText() : base(BaseTexture.None)
-    {
-        
-    }
-    
-    public UIText(FontFamily font, int size) : base(BaseTexture.None)
-    {
-        fontFamily = font;
-        fontSize = size;
-        
-        UpdateFont();
-    }
-        
-    public UIText(FontFamily font, int size, string text) : base(BaseTexture.None)
-    {
-        fontFamily = font;
-        fontSize = size;
-        
-        SetText(text);
-        
-        UpdateFont();
-        RenderTexture();
-    }
-        
-    public void SetText(string text)
-    {
-        this.text = text;
-        dirty = true;
+        return new UIText();
     }
 
-    public bool customClipRect = false;
-    public RectangleF overrideClipRect;
-        
-    public override void Draw(Matrix parentMatrix)
+    public UIText()
+        : base(BaseTexture.None)
     {
+    }
+
+    public UIText(string textValue, float size = DefaultFontSize)
+        : base(BaseTexture.None)
+    {
+        text = textValue;
+        fontSize = size;
+    }
+
+    public void SetText(string newText)
+    {
+        if (text == newText)
+        {
+            return;
+        }
+
+        text = newText;
+        _dirty = true;
+    }
+
+    public override void Draw(Matrix4x4 parentMatrix)
+    {
+        if (!isVisible)
+        {
+            return;
+        }
+        
         if (textSource == TextSource.Dynamic)
         {
             UpdateDynamicText();
         }
-        
-        if (fontDirty)
-        {
-            UpdateFont();
-        }
-        
-        if (dirty)
+
+        if (_dirty)
         {
             RenderTexture();
         }
-        
+
+        if (!texture.IsValid())
+        {
+            return;
+        }
+
         UpdateLocalTransformMatrix();
-        
-        Matrix combinedMatrix = localTransformMatrix * parentMatrix;
-        texture.tDraw2DMatrix(combinedMatrix, size, customClipRect ? overrideClipRect : new RectangleF(0, 0, texture.Width, texture.Height), Color4.White);
+        Matrix4x4 combinedMatrix = localTransformMatrix * parentMatrix;
+        texture.tDraw2DMatrix(combinedMatrix, size, new RectangleF(0, 0, texture.Width, texture.Height), Color4.White);
     }
     
     private void UpdateDynamicText()
@@ -126,131 +123,72 @@ public class UIText : UITexture
         }
     }
 
-    public void UpdateFont()
+    public void RenderTexture()
     {
-        if (font != null)
-        {
-            font.Dispose();
-        }
-
-        font = new CPrivateFastFont(fontFamily, fontSize * CDTXMania.renderScale, fontStyle);
-        scale = new Vector3(1 / CDTXMania.renderScale);
-        fontDirty = false;
-    }
-
-    public virtual void RenderTexture()
-    {
-        if (texture.isValid())
+        if (texture.IsValid())
         {
             texture.Dispose();
+            SetTexture(BaseTexture.None);
         }
 
-        bool gradationEdge = drawMode == CPrivateFont.DrawMode.Gradation;
-        
-        var bmp = font.DrawPrivateFont(text, drawMode, fontColor, edgeColor, gradationTopColor, gradationBottomColor, gradationEdge);
-        texture = new DTXTexture(CDTXMania.tGenerateTexture(bmp, false));
-        size = new Vector2(texture.Width, texture.Height);
-        bmp.Dispose();
-        dirty = false;
+        if (OpenGlRenderer.Instance == null)
+        {
+            _dirty = true;
+            return;
+        }
+
+        if (string.IsNullOrEmpty(text))
+        {
+            _dirty = false;
+            return;
+        }
+
+        BaseTexture renderedTexture = renderBackend switch
+        {
+            UiTextRenderBackend.Skia when BaseTexture.SkiaTextRenderer != null => BaseTexture.SkiaTextRenderer.Render(CreateRenderRequest()),
+            UiTextRenderBackend.Skia => throw new InvalidOperationException("Skia text renderer is not available."),
+            _ => throw new ArgumentOutOfRangeException()
+        };
+
+        SetTexture(renderedTexture);
+        _dirty = false;
     }
 
     public override void OnDeserialize()
     {
         base.OnDeserialize();
-        
-        UpdateFont();
-        RenderTexture();
+        _dirty = true;
     }
 
-    public override void DrawInspector()
+    private UiTextRenderRequest CreateRenderRequest()
     {
-        base.DrawInspector();
+        //determine renderscale
+        float renderSize = fontSize * CDTXMania.renderScale;
+        scale = new Vector3(1 / CDTXMania.renderScale);
         
-        if (ImGui.CollapsingHeader("UIText"))
+        return new UiTextRenderRequest
         {
-            if (Inspector.Inspector.Inspect("Text Color", ref fontColor))
-            {
-                dirty = true;
-            }
-
-            if (Inspector.Inspector.Inspect("Edge Color", ref edgeColor))
-            {
-                dirty = true;
-            }
-
-            if (Inspector.Inspector.Inspect("Gradation Top Color", ref gradationTopColor))
-            {
-                dirty = true;
-            }
-
-            if (Inspector.Inspector.Inspect("Gradation Bottom Color", ref gradationBottomColor))
-            {
-                dirty = true;
-            }
-            
-            if (Inspector.Inspector.Inspect("Draw Mode", ref drawMode))
-            {
-                dirty = true;
-            }
-
-            if (Inspector.Inspector.Inspect("Text Source", ref textSource))
-            {
-                dirty = true;
-            }
-
-            switch (textSource)
-            {
-                case TextSource.String:
-                {
-                    if (ImGui.InputTextMultiline("String", ref text, 256))
-                    {
-                        dirty = true;
-                    }
-
-                    break;
-                }
-                case TextSource.Dynamic:
-                {
-                    string[] sources = CDTXMania.StageManager.rCurrentStage.dynamicStringSources.Keys.ToArray();
-                    int selectedIndex = Array.IndexOf(sources, dynamicSource);
-                    if (ImGui.Combo("Dynamic Source", ref selectedIndex, sources, sources.Length))
-                    {
-                        dynamicSource = sources[selectedIndex];
-                        dirty = true;
-                    }
-                    break;
-                }
-            }
-
-            //dropdown
-            if (ImGui.TreeNode("Font"))
-            {
-                ImGui.LabelText("Font Family", fontFamily.ToString());
-                
-                if (ImGui.InputInt("Font Size", ref fontSize))
-                {
-                    if (fontSize <= 0) fontSize = 1;
-                    fontDirty = true;
-                    dirty = true;
-                }
-
-                if(Inspector.Inspector.Inspect("Font Style", ref fontStyle))
-                {
-                    fontDirty = true;
-                    dirty = true;
-                }
-
-                if (fontDirty)
-                {
-                    UpdateFont();
-                    RenderTexture();
-                }
-                else if (dirty)
-                {
-                    RenderTexture();
-                }
-                ImGui.TreePop();
-            }
-        }
+            Name = name,
+            Text = text,
+            FontPath = UIFonts.ResolveFontPath(fontSource, font),
+            FontFamily = fontFamily,
+            FontSize = renderSize,
+            OutlineWidth = outlineWidth,
+            TexturePadding = texturePadding,
+            LineSpacing = lineSpacing,
+            Antialias = antialias,
+            SubpixelText = subpixelText,
+            Style = style,
+            Alignment = alignment,
+            FillColor = fillColor,
+            OutlineColor = outlineColor,
+            FillGradientMode = fillGradientMode,
+            FillGradientTopColor = fillGradientTopColor,
+            FillGradientBottomColor = fillGradientBottomColor,
+            OutlineGradientMode = outlineGradientMode,
+            OutlineGradientTopColor = outlineGradientTopColor,
+            OutlineGradientBottomColor = outlineGradientBottomColor,
+            Backend = renderBackend
+        };
     }
 }

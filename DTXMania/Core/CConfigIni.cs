@@ -492,7 +492,7 @@ internal class CConfigIni
 	public int nWindowHeight;				// #23510 2010.10.31 yyagi add
 	public bool DisplayBonusEffects;
 	public bool bHAZARD;
-	public int nSoundDeviceType; // #24820 2012.12.23 yyagi 出力サウンドデバイス(0=ACM(にしたいが設計がきつそうならDirectShow), 1=ASIO, 2=WASAPI)
+	public int nSoundDriverType; // #24820 2012.12.23 yyagi 出力サウンドデバイス(0=ACM(にしたいが設計がきつそうならDirectShow), 1=ASIO, 2=WASAPI)
 	public int nWASAPIBufferSizeMs; // #24820 2013.1.15 yyagi WASAPIのバッファサイズ
 	//public int nASIOBufferSizeMs; // #24820 2012.12.28 yyagi ASIOのバッファサイズ
 	public int nASIODevice; // #24820 2013.1.17 yyagi ASIOデバイス
@@ -536,7 +536,7 @@ internal class CConfigIni
 	public int nPedalLagTime;   //#xxxxx 2013.07.11 kairera0467
 
 	public int n非フォーカス時スリープms;       // #23568 2010.11.04 ikanick add
-	public int nフレーム毎スリープms;			// #xxxxx 2011.11.27 yyagi add
+	public int nSleepNMsEveryFrame;			// #xxxxx 2011.11.27 yyagi add
 	public int nPlaySpeed;
 	public bool bSaveScoreIfModifiedPlaySpeed;
 	public int nSongSelectSoundPreviewWaitTimeMs;
@@ -1012,8 +1012,8 @@ internal class CConfigIni
 		nInitialWindowXPosition = 0; // #30675 2013.02.04 ikanick add
 		nInitialWindowYPosition = 0;
 		//this.bDirectShowMode = true;
-		nWindowWidth = SampleFramework.GameFramebufferSize.Width;			// #23510 2010.10.31 yyagi add
-		nWindowHeight = SampleFramework.GameFramebufferSize.Height;			// 
+		nWindowWidth = GameWindowSize.Width;			// #23510 2010.10.31 yyagi add
+		nWindowHeight = GameWindowSize.Height;			// 
 		nMovieMode = 1;
 		nMovieAlpha = 0;
 		nJudgeLine.Drums = 0;
@@ -1023,7 +1023,7 @@ internal class CConfigIni
 		nShutterInSide.Drums = 0;
 		nShutterOutSide = new STDGBVALUE<int>();
 		nShutterOutSide.Drums = 0;
-		nフレーム毎スリープms = -1;			// #xxxxx 2011.11.27 yyagi add
+		nSleepNMsEveryFrame = -1;			// #xxxxx 2011.11.27 yyagi add
 		n非フォーカス時スリープms = 1;			// #23568 2010.11.04 ikanick add
 		_bGuitar有効 = false;
 		_bDrums有効 = true;
@@ -1257,7 +1257,7 @@ internal class CConfigIni
 		strSystemSkinSubfolderFullName = "";	// #28195 2012.5.2 yyagi 使用中のSkinサブフォルダ名
 		bUseBoxDefSkin = true;					// #28195 2012.5.6 yyagi box.defによるスキン切替機能を使用するか否か
 		bTight = false;                        // #29500 2012.9.11 kairera0467
-		nSoundDeviceType = (int)ESoundDeviceTypeForConfig.ACM; // #24820 2012.12.23 yyagi 初期値はACM
+		nSoundDriverType = (int)ESoundDeviceTypeForConfig.ACM; // #24820 2012.12.23 yyagi 初期値はACM
 		nWASAPIBufferSizeMs = 0;               // #24820 2013.1.15 yyagi 初期値は0(自動設定)
 		nASIODevice = 0;                       // #24820 2013.1.17 yyagi
 //          this.nASIOBufferSizeMs = 0;                 // #24820 2012.12.25 yyagi 初期値は0(自動設定)
@@ -1396,7 +1396,7 @@ internal class CConfigIni
 		sw.WriteLine( "; Screen mode. (0:Window, 1:Fullscreen)" );
 		sw.WriteLine( "FullScreen={0}", bFullScreenMode ? 1 : 0 );
 		sw.WriteLine();
-		sw.WriteLine("; Fullscreen mode uses DirectX exclusive mode instead of maximized window. (0:Maximized window, 1:Exclusive)");
+		sw.WriteLine("; Fullscreen mode uses exclusive mode instead of maximized window. (0:Maximized window, 1:Exclusive)");
 		sw.WriteLine("FullScreenExclusive={0}", bFullScreenExclusive ? 1 : 0);
 		sw.WriteLine();
 		sw.WriteLine("; ウインドウモード時の画面幅");				// #23510 2010.10.31 yyagi add
@@ -1435,7 +1435,7 @@ internal class CConfigIni
 		sw.WriteLine();
 		sw.WriteLine("; フレーム毎のsleep値[ms] (-1でスリープ無し, 0以上で毎フレームスリープ。動画キャプチャ等で活用下さい)");	// #xxxxx 2011.11.27 yyagi add
 		sw.WriteLine("; A sleep time[ms] per frame.");							//
-		sw.WriteLine("SleepTimePerFrame={0}", nフレーム毎スリープms); //
+		sw.WriteLine("SleepTimePerFrame={0}", nSleepNMsEveryFrame); //
 		sw.WriteLine();											        			//
 		#endregion
 		#region [ WASAPI/ASIO関連 ]
@@ -1445,7 +1445,7 @@ internal class CConfigIni
 		sw.WriteLine("; Sound device type(0=ACM, 1=ASIO, 2=WASAPI Exclusive, 3=WASAPI Shared)");
 		sw.WriteLine("; WASAPI can use on Vista or later OSs.");
 		sw.WriteLine("; If WASAPI is not available, DTXMania try to use ASIO. If ASIO can't be used, ACM is used.");
-		sw.WriteLine("SoundDeviceType={0}", (int)nSoundDeviceType);
+		sw.WriteLine("SoundDeviceType={0}", (int)nSoundDriverType);
 		sw.WriteLine();
 
 		sw.WriteLine("; WASAPI使用時のサウンドバッファサイズ");
@@ -2522,7 +2522,7 @@ internal class CConfigIni
 										nWindowWidth = CConversion.nGetNumberIfInRange(str4, 1, 65535, nWindowWidth);
 										if (nWindowWidth <= 0)
 										{
-											nWindowWidth = SampleFramework.GameFramebufferSize.Width;
+											nWindowWidth = GameWindowSize.Width;
 										}
 									}
 									else if (str3.Equals("WindowHeight"))		// #23510 2010.10.31 yyagi add
@@ -2530,7 +2530,7 @@ internal class CConfigIni
 										nWindowHeight = CConversion.nGetNumberIfInRange(str4, 1, 65535, nWindowHeight);
 										if (nWindowHeight <= 0)
 										{
-											nWindowHeight = SampleFramework.GameFramebufferSize.Height;
+											nWindowHeight = GameWindowSize.Height;
 										}
 									}
 									else if (str3.Equals("WindowX"))		// #30675 2013.02.04 ikanick add
@@ -2573,7 +2573,7 @@ internal class CConfigIni
 									}
 									else if (str3.Equals("SoundDeviceType"))
 									{
-										nSoundDeviceType = CConversion.nGetNumberIfInRange(str4, 0, 3, nSoundDeviceType);
+										nSoundDriverType = CConversion.nGetNumberIfInRange(str4, 0, 3, nSoundDriverType);
 									}
 									else if (str3.Equals("WASAPIBufferSizeMs"))
 									{
@@ -2622,7 +2622,7 @@ internal class CConfigIni
 									}
 									else if (str3.Equals("SleepTimePerFrame"))		// #23568 2011.11.27 yyagi
 									{
-										nフレーム毎スリープms = CConversion.nRoundToRange(str4, -1, 50, nフレーム毎スリープms);
+										nSleepNMsEveryFrame = CConversion.nRoundToRange(str4, -1, 50, nSleepNMsEveryFrame);
 									}
 									else if (str3.Equals("Guitar"))
 									{

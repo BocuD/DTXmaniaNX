@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using System.Drawing;
 using System.Diagnostics;
 using System.Globalization;
+using System.Numerics;
 using FDK;
 using DiscordRPC;
 using DTXMania.Core;
@@ -69,8 +70,6 @@ internal class CStageSongSelection : CStage
 		listChildActivities.Add(actBackgroundVideoAVI = new CActSelectBackgroundAVI());
 		listChildActivities.Add(actQuickConfig = new CActSelectQuickConfig());
 		
-		listChildActivities.Add(actSearchBox = new CActSearchBox());
-
 		CommandHistory = new CCommandHistory(); // #24063 2011.1.16 yyagi
 		bCheckDrumsEnabled = CDTXMania.ConfigIni.bDrumsEnabled;
 		bCheckRandSubBox = CDTXMania.ConfigIni.bランダムセレクトで子BOXを検索対象とする;
@@ -114,7 +113,6 @@ internal class CStageSongSelection : CStage
 
 			base.OnActivate();
 
-			actSearchBox.t検索説明文を表示する設定にする();
 			actStatusPanel.tSelectedSongChanged(); // 最大ランクを更新
 
 			//Reset random list upon reactivation only when a change in config for drumsEnabled or RandSubBox is detected
@@ -140,6 +138,7 @@ internal class CStageSongSelection : CStage
 			dynamicStringSources["SongArtist"] = new DynamicStringSource(() => actSongList.rSelectedScore.SongInformation.ArtistName ?? "");
 			dynamicStringSources["SongGenre"] = new DynamicStringSource(() => actSongList.rSelectedScore.SongInformation.Genre ?? "");
 			dynamicStringSources["SongBPM"] = new DynamicStringSource(() => actSongList.rSelectedScore.SongInformation.Bpm.ToString(CultureInfo.InvariantCulture));
+			dynamicStringSources["SongDuration"] = new DynamicStringSource(() => actSongList.rSelectedScore.SongInformation.DurationMs.ToString("mm\\:ss"));
 		}
 		finally
 		{
@@ -225,40 +224,37 @@ internal class CStageSongSelection : CStage
 	
 	public override void InitializeDefaultUI()
 	{
-		DTXTexture bgTex = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_background.jpg"));
-		UIImage bg = ui.AddChild(new UIImage(bgTex));
+		UIImage bg = ui.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\5_background.jpg"))));
 		bg.renderOrder = -100;
-		bg.position = SharpDX.Vector3.Zero;
+		bg.position = Vector3.Zero;
 		bg.name = "Background";
-		
-		DTXTexture topPanelTex = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_header panel.png"));
-		topPanel = ui.AddChild(new UIImage(topPanelTex));
-		topPanel.position = new SharpDX.Vector3(0, 0, 0);
+
+		topPanel = ui.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\5_header panel.png"))));
+		topPanel.position = new Vector3(0, 0, 0);
 		topPanel.name = "TopPanel";
 		topPanel.renderOrder = 4;
 		
-		DTXTexture bottomPanelTex = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_footer panel.png"));
+		BaseTexture bottomPanelTex = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\5_footer panel.png"));
 		UIImage bottomPanel = ui.AddChild(new UIImage(bottomPanelTex));
-		bottomPanel.position = new SharpDX.Vector3(0, 720 - bottomPanelTex.Height, 0);
+		bottomPanel.position = new Vector3(0, 720 - bottomPanelTex.Height, 0);
 		bottomPanel.name = "BottomPanel";
 		bottomPanel.renderOrder = 4;
 		
-		DTXTexture bpmLabelTex = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_BPM.png"));
+		BaseTexture bpmLabelTex = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\5_BPM.png"));
 		UIImage bpmLabel = ui.AddChild(new UIImage(bpmLabelTex));
-		bpmLabel.position = new SharpDX.Vector3(32, 258, 0);
+		bpmLabel.position = new Vector3(32, 258, 0);
 		bpmLabel.name = "BPMLabel";
 
 		UIGroup? songList = ui.GetChild<UIGroup>("SongList");
 
 		if (songList != null)
 		{
-			DTXTexture songListTopPanelTex = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_header song list.png"));
-			songListTopPanel = songList.AddChild(new UIImage(songListTopPanelTex));
+			songListTopPanel = songList.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\5_header song list.png"))));
 			songListTopPanel.name = "SongListTopPanel";
 
-			DTXTexture songListBottomPanelTex = DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\5_footer song list.png"));
+			BaseTexture songListBottomPanelTex = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\5_footer song list.png"));
 			songListBottomPanel = songList.AddChild(new UIImage(songListBottomPanelTex));
-			songListBottomPanel.position = new SharpDX.Vector3(0, 720 - songListBottomPanelTex.Height, 0);
+			songListBottomPanel.position = new Vector3(0, 720 - songListBottomPanelTex.Height, 0);
 			songListBottomPanel.name = "SongListBottomPanel";
 		}
 	}
@@ -269,7 +265,7 @@ internal class CStageSongSelection : CStage
 		{
 			prvFontSearchInputNotification = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.songListFont), 14, FontStyle.Regular);
 			//this.dsBackgroundVideo = CDTXMania.t失敗してもスキップ可能なDirectShowを生成する(CSkin.Path(@"Graphics\5_background.mp4"), CDTXMania.app.WindowHandle, true);
-			txBPMLabel = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\5_BPM.png"), false);
+			txBPMLabel = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\5_BPM.png"), false);
 
 			//
 			rBackgroundVideoAVI = new CAVI(1290, CSkin.Path(@"Graphics\5_background.mp4"), "", 20.0);
@@ -406,7 +402,7 @@ internal class CStageSongSelection : CStage
 				return 0;
 			}
 			#endregion
-			if ( !actSortSongs.bIsActivePopupMenu && !actQuickConfig.bIsActivePopupMenu && !CDTXMania.app.bテキスト入力中)
+			if ( !actSortSongs.bIsActivePopupMenu && !actQuickConfig.bIsActivePopupMenu)
 			{
 				#region [ ESC ]
 				if (CDTXMania.Input.ActionCancel())
@@ -653,76 +649,8 @@ internal class CStageSongSelection : CStage
 				}
 			}
 
-			#region [Test text field]
-			if (!CDTXMania.app.bテキスト入力中 && CDTXMania.Pad.bPressed(EKeyConfigPart.SYSTEM, EKeyConfigPad.Search))
-			{
-				CDTXMania.Skin.soundDecide.tPlay();
-				actSearchBox.t表示();
-				actSearchBox.t入力を開始();
-			}
-			#endregion
-
 			actSortSongs.tUpdateAndDraw();
 			actQuickConfig.tUpdateAndDraw();
-			actSearchBox.OnUpdateAndDraw();
-			
-			if (actSearchBox.b入力が終了した)
-			{
-				strSearchString = actSearchBox.str確定文字列を返す();
-				if(strSearchString != "" && strSearchString != CSongSearch.ExitSwitch)
-				{
-					string searchOutcome = "Search Input: " + strSearchString;
-					Trace.TraceInformation("Search Input: " + strSearchString);
-					if(CDTXMania.SongManager.listSongBeforeSearch == null)
-					{
-						CDTXMania.SongManager.listSongBeforeSearch = CDTXMania.SongManager.listSongRoot;
-					}
-
-					List<CSongListNode> searchOutputList = CSongSearch.tSearchForSongs(CDTXMania.SongManager.listSongBeforeSearch, strSearchString);
-					if(searchOutputList.Count == 0)
-					{
-						Trace.TraceInformation("No songs found!");
-						//To print a outcome message
-						searchOutcome += "\r\nNo songs found";
-					}
-					else
-					{
-						CDTXMania.SongManager.listSongRoot = searchOutputList;
-
-						//
-						actSongList.SearchUpdate();
-						//this.actSongList.Refresh(CDTXMania.SongManager, true);
-					}
-
-					tUpdateSearchNotification(searchOutcome);
-					ctSearchInputDisplayCounter.tStart(0, 1, 10000, CDTXMania.Timer);
-					CDTXMania.Skin.soundDecide.tPlay();
-				}
-				else if(strSearchString == CSongSearch.ExitSwitch)
-				{
-					if(CDTXMania.SongManager.listSongBeforeSearch != null)
-					{
-						CDTXMania.SongManager.listSongRoot = CDTXMania.SongManager.listSongBeforeSearch;
-						CDTXMania.SongManager.listSongBeforeSearch = null;
-						actSongList.SearchUpdate();
-						tUpdateSearchNotification("Exit Search Mode");
-						ctSearchInputDisplayCounter.tStart(0, 1, 10000, CDTXMania.Timer);
-						CDTXMania.Skin.soundDecide.tPlay();
-					}
-					else
-					{
-						//Play cancel sound if input has no effect
-						CDTXMania.Skin.soundCancel.tPlay(); 
-					}
-				}
-				else
-				{
-					//Play cancel sound if input has no effect
-					CDTXMania.Skin.soundCancel.tPlay();
-				}						
-						
-				actSearchBox.tHide();
-			}
 
 			if(txSearchInputNotification != null)
 			{
@@ -814,7 +742,6 @@ internal class CStageSongSelection : CStage
 	private CActSelectQuickConfig actQuickConfig;
 
 	//
-	private CActSearchBox actSearchBox;
 	private string strSearchString;
 	private bool bBGMPlayed;  // bBGM再生済み
 	private STKeyRepeatCounter ctKeyRepeat;  // ctキー反復用

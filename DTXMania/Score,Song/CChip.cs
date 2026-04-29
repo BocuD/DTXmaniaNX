@@ -418,7 +418,7 @@ public class CChip : IComparable<CChip>, ICloneable
 
 	//Long Notes Data members
 	public CChip chipロングノート終端 { get; set; }
-	public bool bロングノートである => chipロングノート終端 != null;
+	public bool bIsLongNote => chipロングノート終端 != null;
 	public bool bロングノートHit中 { get; set; }
 
 	//New property for empty chip
@@ -553,12 +553,9 @@ public class CChip : IComparable<CChip>, ICloneable
 		}
 		else if (nChannelNumber == EChannel.Movie || nChannelNumber == EChannel.MovieFull)    // AVI
 		{
-			if (rAVI != null && rAVI.avi != null)
+			if (rAVI != null && rAVI.fileExists)
 			{
-				nDuration = rAVI.avi.GetDuration();
-				//int dwRate = (int)this.rAVI.avi.dwレート;
-				//int dwScale = (int)this.rAVI.avi.dwスケール;
-				//nDuration = (int)(1000.0f * dwScale / dwRate * this.rAVI.avi.GetMaxFrameCount());
+				nDuration = (int)rAVI.duration.TotalMilliseconds; 
 			}
 		}
 
@@ -581,7 +578,7 @@ public class CChip : IComparable<CChip>, ICloneable
 		nDistanceFromBar.Bass = (int)((nPlaybackTimeMs - nCurrentTime) * ScrollSpeedBass);
 
 		//New: Compute Distance for End of Long Note chip
-		if(bロングノートである)
+		if(bIsLongNote)
 		{
 			chipロングノート終端.ComputeDistanceFromBar(nCurrentTime, dbPerformanceScrollSpeed);
 		}

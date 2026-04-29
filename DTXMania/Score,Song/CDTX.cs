@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Globalization;
 using DTXMania.Core;
+using DTXMania.UI.Drawable;
 using FDK;
 
 namespace DTXMania;
@@ -145,7 +146,7 @@ public class CDTX : CActivity
 
         public override void PutLog(string strテクスチャファイル名)
         {
-            Trace.TraceInformation("テクスチャを生成しました。({0})({1})({2}x{3})", strコメント文, strテクスチャファイル名, n幅, n高さ);
+            Trace.TraceInformation("テクスチャを生成しました。({0})({1})({2}x{3})", strコメント文, strテクスチャファイル名, nWidth, nHeight);
         }
 
         public override string ToString()
@@ -164,8 +165,8 @@ public class CDTX : CActivity
         public override void PutLog(string strテクスチャファイル名)
         {
             Trace.TraceInformation("テクスチャを生成しました。({0})({1})(Gr:{2}x{3})(Tx:{4}x{5})", strコメント文, strテクスチャファイル名,
-                tx画像.szImageSize.Width, tx画像.szImageSize.Height, tx画像.szTextureSize.Width,
-                tx画像.szTextureSize.Height);
+                txImage.Width, txImage.Height, txImage.Width,
+                txImage.Height);
         }
 
         public override string ToString()
@@ -180,10 +181,10 @@ public class CDTX : CActivity
         public int n番号;
         public string strコメント文 = "";
         public string strファイル名 = "";
-        public CTexture tx画像;
-        public int n高さ => tx画像.szImageSize.Height;
+        public BaseTexture txImage;
+        public int nHeight => (int)txImage.Height;
 
-        public int n幅 => tx画像.szImageSize.Width;
+        public int nWidth => (int)txImage.Width;
         public bool b黒を透過する;
         public Bitmap bitmap;
 
@@ -205,70 +206,33 @@ public class CDTX : CActivity
 
         public void OnDeviceCreated()
         {
-            #region [ strテクスチャファイル名 を作成。]
-
-            string strテクスチャファイル名 = GetFullPathname;
-
-            #endregion
-
-            if (!File.Exists(strテクスチャファイル名))
+            string strTextureFilename = GetFullPathname;
+            
+            if (!File.Exists(strTextureFilename))
             {
-                Trace.TraceWarning("File doesn't exist!({0})({1})", strコメント文, strテクスチャファイル名);
-                tx画像 = null;
+                Trace.TraceWarning("File doesn't exist!({0})({1})", strコメント文, strTextureFilename);
+                txImage = null;
                 return;
             }
 
+            txImage?.Dispose();
+
             // テクスチャを作成。
-            byte[] txData = File.ReadAllBytes(strテクスチャファイル名);
-            tx画像 = CDTXMania.tGenerateTexture(txData, b黒を透過する);
+            // TODO: Reimplement black-to-transparency differently. For now both BMP and BMPTEX load directly.
+            txImage = BaseTexture.LoadFromPath(strTextureFilename);
 
-            if (tx画像 != null)
+            if (txImage != null)
             {
                 // 作成成功。
                 if (CDTXMania.ConfigIni.bLog作成解放ログ出力)
-                    PutLog(strテクスチャファイル名);
-                txData = null;
+                    PutLog(strTextureFilename);
                 bUse = true;
             }
             else
             {
                 // 作成失敗。
-                Trace.TraceError("テクスチャの生成に失敗しました。({0})({1})", strコメント文, strテクスチャファイル名);
-                tx画像 = null;
-            }
-        }
-
-        /// <summary>
-        /// BGA画像のデコードをTexture()に渡す前に行う、OnDeviceCreate()
-        /// </summary>
-        /// <param name="bitmap">テクスチャ画像</param>
-        /// <param name="strテクスチャファイル名">ファイル名</param>
-        public void OnDeviceCreated(Bitmap bitmap, string strテクスチャファイル名)
-        {
-            if (bitmap != null && b黒を透過する)
-            {
-                bitmap.MakeTransparent(Color.Black); // 黒を透過色にする
-            }
-
-            tx画像 = CDTXMania.tGenerateTexture(bitmap, b黒を透過する);
-
-            if (tx画像 != null)
-            {
-                // 作成成功。
-                if (CDTXMania.ConfigIni.bLog作成解放ログ出力)
-                    PutLog(strテクスチャファイル名);
-                bUse = true;
-            }
-            else
-            {
-                // 作成失敗。
-                Trace.TraceError("テクスチャの生成に失敗しました。({0})({1})", strコメント文, strテクスチャファイル名);
-                tx画像 = null;
-            }
-
-            if (bitmap != null)
-            {
-                bitmap.Dispose();
+                Trace.TraceError("テクスチャの生成に失敗しました。({0})({1})", strコメント文, strTextureFilename);
+                txImage = null;
             }
         }
 
@@ -276,48 +240,11 @@ public class CDTX : CActivity
         {
         }
 
-        #region [ IDisposable 実装 ]
-
-        //-----------------
         public void Dispose()
         {
-            if (bDisposed済み)
-                return;
-
-            if (tx画像 != null)
-            {
-                #region [ strテクスチャファイル名 を作成。]
-
-                //-----------------
-                string strテクスチャファイル名 = GetFullPathname;
-                //if( !string.IsNullOrEmpty( CDTXMania.DTX.PATH_WAV ) )
-                //    strテクスチャファイル名 = CDTXMania.DTX.PATH_WAV + this.strFilename;
-                //else
-                //    strテクスチャファイル名 = CDTXMania.DTX.strFolderName + this.strFilename;
-                //-----------------
-
-                #endregion
-
-                CDTXMania.tReleaseTexture(ref tx画像);
-
-                if (CDTXMania.ConfigIni.bLog作成解放ログ出力)
-                    Trace.TraceInformation("テクスチャを解放しました。({0})({1})", strコメント文, strテクスチャファイル名);
-            }
-
-            bUse = false;
-
-            bDisposed済み = true;
+            txImage?.Dispose();
+            bitmap?.Dispose();
         }
-
-        #endregion
-
-        #region [ private ]
-
-        //-----------------
-        private bool bDisposed済み;
-        //-----------------
-
-        #endregion
     }
 
     public class CBPM
@@ -1215,7 +1142,6 @@ public class CDTX : CActivity
 
     public Dictionary<int, CAVI> listAVI;
 
-    //public Dictionary<int, CDirectShow> listDS;
     public Dictionary<int, CAVIPAN> listAVIPAN;
     public Dictionary<int, CBGA> listBGA;
     public Dictionary<int, CBGAPAN> listBGAPAN;
@@ -1438,14 +1364,7 @@ public class CDTX : CActivity
             }
         }
 
-        //if( this.listDS != null && CDTXMania.ConfigIni.bDirectShowMode == true)
-        //{
-        //    foreach( CDirectShow cds in this.listDS.Values)
-        //    {
-        //        cds.OnDeviceCreated();
-        //    }
-        //}
-        if (!bHeaderOnly && b動画読み込み)
+        if (!bHeaderOnly && bLoadVideo)
         {
             foreach (CChip chip in listChip)
             {
@@ -1453,164 +1372,43 @@ public class CDTX : CActivity
                 {
                     chip.eAVI種別 = EAVIType.Unknown;
                     chip.rAVI = null;
-                    //chip.rDShow = null;
+                    
                     chip.rAVIPan = null;
                     if (listAVIPAN.ContainsKey(chip.nIntegerValue))
                     {
                         CAVIPAN cavipan = listAVIPAN[chip.nIntegerValue];
-                        if (listAVI.ContainsKey(cavipan.nAVI番号) && (listAVI[cavipan.nAVI番号].avi != null))
+                        if (listAVI.ContainsKey(cavipan.nAVI番号) && (listAVI[cavipan.nAVI番号].fileExists))
                         {
                             chip.eAVI種別 = EAVIType.AVIPAN;
                             chip.rAVI = listAVI[cavipan.nAVI番号];
-                            //if(CDTXMania.ConfigIni.bDirectShowMode == true)
-                            //    chip.rDShow = this.listDS[ cavipan.nAVI番号 ];
+                            
                             chip.rAVIPan = cavipan;
                             continue;
                         }
                     }
 
                     if (listAVI.ContainsKey(chip.nIntegerValue) &&
-                        (listAVI[chip.nIntegerValue].avi !=
-                         null) /*|| ( this.listDS.ContainsKey( chip.nIntegerValue ) && ( this.listDS[ chip.nIntegerValue ].dshow != null ) )*/
+                        (listAVI[chip.nIntegerValue].fileExists)
                        )
                     {
                         chip.eAVI種別 = EAVIType.AVI;
                         chip.rAVI = listAVI[chip.nIntegerValue];
-                        //if( CDTXMania.ConfigIni.bDirectShowMode == true )
-                        //    chip.rDShow = this.listDS[ chip.nIntegerValue ];
                     }
                 }
             }
         }
     }
 
-    #region [ BMP/BMPTEXの並列読み込み_デコード用メソッド ]
-
-    private static void LoadTexture(CBMPbase cbmp) // バックグラウンドスレッドで動作する、ファイル読み込み部
-    {
-        string filename = cbmp.GetFullPathname;
-        if (!File.Exists(filename))
-        {
-            Trace.TraceWarning("File doesn't exist! ({0})", filename);
-            cbmp.bitmap = null;
-            return;
-        }
-
-        cbmp.bitmap = new Bitmap(filename);
-    }
-
-    private static void BMPLoadAll(Dictionary<int, CBMP> listB) // バックグラウンドスレッドで、テクスチャファイルをひたすら読み込んではキューに追加する
-    {
-        try
-        {
-            //Trace.TraceInformation( "Back: ThreadID(BMPLoad)=" + Thread.CurrentThread.ManagedThreadId + ", listCount=" + listB.Count  );
-            foreach (CBMP cbmp in listB.Values)
-            {
-                LoadTexture(cbmp);
-                lock (lockQueue)
-                {
-                    queueCBMPbaseDone.Enqueue(cbmp);
-                    //  Trace.TraceInformation( "Back: Enqueued(" + queueCBMPbaseDone.Count + "): " + cbmp.strFilename );
-                }
-
-                if (queueCBMPbaseDone.Count > 8)
-                {
-                    Thread.Sleep(10);
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            Trace.TraceError($"Error in BMPLoadAll: {e.Message}");
-            Trace.TraceError($"Stack Trace: {e.StackTrace}");
-        }
-    }
-
-    private static void BMPTEXLoadAll(CDTX cdtx) // ダサい実装だが、Dictionary<>の中には手を出せず、妥協した
-    {
-        var listB = cdtx.listBMPTEX;
-
-        try
-        {
-            //Trace.TraceInformation( "Back: ThreadID(BMPLoad)=" + Thread.CurrentThread.ManagedThreadId + ", listCount=" + listB.Count  );
-            foreach (CBMPTEX cbmp in listB.Values)
-            {
-                LoadTexture(cbmp);
-                lock (lockQueue)
-                {
-                    queueCBMPbaseDone.Enqueue(cbmp);
-                    //  Trace.TraceInformation( "Back: Enqueued(" + queueCBMPbaseDone.Count + "): " + cbmp.strFilename );
-                }
-
-                if (queueCBMPbaseDone.Count > 8)
-                {
-                    Thread.Sleep(10);
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            Trace.TraceError($"Error in BMPTEXLoadAll: {e.Message} DTX File: {cdtx.strFileNameFullPath}");
-            Trace.TraceError($"Stack Trace: {e.StackTrace}");
-        }
-    }
-
-    private static Queue<CBMPbase> queueCBMPbaseDone = new();
-    private static object lockQueue = new();
-    private static int nLoadDone;
-
-    #endregion
-
+    //todo: figure out what is even the difference between DMPTEX and BMP
     public void tLoadBMP_BMPTEX()
     {
-        //todo: fix this so we can initialize textures on the main thread
-        return;
-        int nCPUCores = Environment.ProcessorCount;
-
         #region [ Read BMPs ]
 
         if (listBMP != null)
         {
-            if (nCPUCores <= 1)
+            foreach (CBMP cbmp in listBMP.Values)
             {
-                foreach (CBMP cbmp in listBMP.Values)
-                {
-                    cbmp.OnDeviceCreated();
-                }
-            }
-            else
-            {
-                //Initialize textures on main thread, load and decode on background thread
-
-                //Trace.TraceInformation( "Main: ThreadID(Main)=" + Thread.CurrentThread.ManagedThreadId + ", listCount=" + this.listBMP.Count );
-                nLoadDone = 0;
-                Task.Run(() => BMPLoadAll(listBMP));
-
-                // t.Priority = ThreadPriority.Lowest;
-                // t.Start( listBMP );
-                int c = listBMP.Count;
-                while (nLoadDone < c)
-                {
-                    if (queueCBMPbaseDone.Count > 0)
-                    {
-                        CBMP cbmp;
-                        //Trace.TraceInformation( "Main: Lock Begin for dequeue1." );
-                        lock (lockQueue)
-                        {
-                            cbmp = (CBMP)queueCBMPbaseDone.Dequeue();
-                            //  Trace.TraceInformation( "Main: Dequeued(" + queueCBMPbaseDone.Count + "): " + cbmp.strFilename );
-                        }
-
-                        cbmp.OnDeviceCreated(cbmp.bitmap, cbmp.GetFullPathname);
-                        nLoadDone++;
-                        //Trace.TraceInformation( "Main: OnDeviceCreated: " + cbmp.strFilename );
-                    }
-                    else
-                    {
-                        //Trace.TraceInformation( "Main: Sleeped.");
-                        Thread.Sleep(5); // WaitOneのイベント待ちにすると、メインスレッド処理中に2個以上イベント完了したときにそれを正しく検出できなくなるので、
-                    } // ポーリングに逃げてしまいました。
-                }
+                cbmp.OnDeviceCreated();
             }
         }
 
@@ -1620,49 +1418,9 @@ public class CDTX : CActivity
 
         if (listBMPTEX != null)
         {
-            if (nCPUCores <= 1)
+            foreach (CBMPTEX cbmptex in listBMPTEX.Values)
             {
-                #region [ シングルスレッドで逐次読み出し_デコード_テクスチャ定義 ]
-
-                foreach (CBMPTEX cbmptex in listBMPTEX.Values)
-                {
-                    cbmptex.OnDeviceCreated();
-                }
-
-                #endregion
-            }
-            else
-            {
-                #region [ メインスレッド(テクスチャ定義)とバックグラウンドスレッド(読み出し_デコード)を並列動作させ高速化 ]
-
-                //Trace.TraceInformation( "Main: ThreadID(Main)=" + Thread.CurrentThread.ManagedThreadId + ", listCount=" + this.listBMP.Count );
-                nLoadDone = 0;
-                Task.Run(() => BMPTEXLoadAll(this));
-                int c = listBMPTEX.Count;
-                while (nLoadDone < c)
-                {
-                    if (queueCBMPbaseDone.Count > 0)
-                    {
-                        CBMPTEX cbmptex;
-                        //Trace.TraceInformation( "Main: Lock Begin for dequeue1." );
-                        lock (lockQueue)
-                        {
-                            cbmptex = (CBMPTEX)queueCBMPbaseDone.Dequeue();
-                            //  Trace.TraceInformation( "Main: Dequeued(" + queueCBMPbaseDone.Count + "): " + cbmp.strFilename );
-                        }
-
-                        cbmptex.OnDeviceCreated(cbmptex.bitmap, cbmptex.GetFullPathname);
-                        nLoadDone++;
-                        //Trace.TraceInformation( "Main: OnDeviceCreated: " + cbmp.strFilename );
-                    }
-                    else
-                    {
-                        //Trace.TraceInformation( "Main: Sleeped.");
-                        Thread.Sleep(5); // WaitOneのイベント待ちにすると、メインスレッド処理中に2個以上イベント完了したときにそれを正しく検出できなくなるので、
-                    } // ポーリングに逃げてしまいました。
-                }
-
-                #endregion
+                cbmptex.OnDeviceCreated();
             }
         }
 
@@ -3215,7 +2973,7 @@ public class CDTX : CActivity
                                ((part == EInstrumentPart.BASS) &&
                                 bHasChips.OpenBass); // #23546 2010.10.28 yyagi fixed (bチップがある.Bass→bチップがある.OpenBass)
                         //New: Set flag to false (disable Open) when chip has long note
-                        if (chip.bロングノートである)
+                        if (chip.bIsLongNote)
                         {
                             flag = false;
                         }
@@ -3490,7 +3248,12 @@ public class CDTX : CActivity
     private void tRead(string strFileName, bool bHeaderOnly, double dbReplaySpeed = 1.0, int nBgmAdjust = 0)
     {
         this.bHeaderOnly = bHeaderOnly;
-        b動画読み込み = (CDTXMania.StageManager.rCurrentStage.eStageID == CStage.EStage.SongLoading_5);
+        
+        if (!bHeaderOnly)
+        {
+            bLoadVideo = (CDTXMania.StageManager.rCurrentStage.eStageID == CStage.EStage.SongLoading_5);
+        }
+
         strFileNameFullPath = Path.GetFullPath(strFileName);
         this.strFileName = Path.GetFileName(strFileNameFullPath);
         strFolderName = Path.GetDirectoryName(strFileNameFullPath) + @"\";
@@ -3726,13 +3489,6 @@ public class CDTX : CActivity
 
     private void tProcessChartData(int nBGMAdjust)
     {
-        //For DTXVMode, always overwrite Config PlaySpeed with DTXVPlaySpeed
-        if (CDTXMania.DTXVmode.Enabled)
-        {
-            Trace.TraceInformation("DTXVMode Enabled. Set PlaySpeed to {0}", dbDTXVPlaySpeed);
-            CDTXMania.ConfigIni.nPlaySpeed = (int)(dbDTXVPlaySpeed * 20.0);
-        }
-
         n無限管理WAV = null;
         n無限管理BPM = null;
         n無限管理VOL = null;
@@ -4285,10 +4041,6 @@ public class CDTX : CActivity
                     Trace.TraceInformation(cavi.ToString());
                 }
 
-                //foreach ( CDirectShow cds in this.listDS.Values)
-                //{
-                //    Trace.TraceInformation( cds.ToString());
-                //}
                 foreach (CAVIPAN cavipan in listAVIPAN.Values)
                 {
                     Trace.TraceInformation(cavipan.ToString());
@@ -4835,7 +4587,6 @@ public class CDTX : CActivity
         listBGA = new Dictionary<int, CBGA>();
         listAVIPAN = new Dictionary<int, CAVIPAN>();
         listAVI = new Dictionary<int, CAVI>();
-        //this.listDS = new Dictionary<int, CDirectShow>();
         listChip = new List<CChip>();
         base.OnActivate();
     }
@@ -4859,6 +4610,7 @@ public class CDTX : CActivity
                 cbmp.Dispose();
             }
 
+            listBMP.Clear();
             listBMP = null;
         }
 
@@ -4882,14 +4634,6 @@ public class CDTX : CActivity
             listAVI = null;
         }
 
-        //if (this.listDS != null)
-        //{
-        //    foreach (CDirectShow cds in this.listDS.Values)
-        //    {
-        //        cds.Dispose();
-        //    }
-        //    this.listDS= null;
-        //}
         if (listBPM != null)
         {
             listBPM.Clear();
@@ -4921,17 +4665,7 @@ public class CDTX : CActivity
 
         base.OnDeactivate();
     }
-
-    public override void OnManagedCreateResources()
-    {
-        if (bActivated)
-        {
-            tLoadBMP_BMPTEX();
-            tLoadAVI();
-            base.OnManagedCreateResources();
-        }
-    }
-
+    
     public override void OnManagedReleaseResources()
     {
         if (bActivated)
@@ -4960,13 +4694,6 @@ public class CDTX : CActivity
                 }
             }
 
-            //if (this.listDS != null)
-            //{
-            //    foreach (CDirectShow cds in this.listDS.Values)
-            //    {
-            //        cds.Dispose();
-            //    }
-            //}
             base.OnManagedReleaseResources();
         }
     }
@@ -4995,7 +4722,7 @@ public class CDTX : CActivity
 
     private readonly STGDAPARAM[] stGDAParam;
     private bool bHeaderOnly;
-    private bool b動画読み込み;
+    private bool bLoadVideo;
     private Stack<bool> bstackIFからENDIFをスキップする;
 
     private int lineNumber;
@@ -5475,20 +5202,8 @@ public class CDTX : CActivity
             listAVI.Remove(zz);
 
         listAVI.Add(zz, avi);
-
-        //var ds = new CDirectShow()
-        //{
-        //    n番号 = zz,
-        //    strファイル名 = strパラメータ,
-        //    strコメント文 = strコメント,
-        //};
-
-        //if (this.listDS.ContainsKey(zz))	// 既にリスト中に存在しているなら削除。後のものが有効。
-        //    this.listDS.Remove(zz);
-
-        //this.listDS.Add(zz, ds);
-        //-----------------
-
+        
+        
         #endregion
 
         return true;

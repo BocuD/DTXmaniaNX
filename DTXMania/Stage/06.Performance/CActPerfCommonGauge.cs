@@ -1,4 +1,5 @@
 ﻿using DTXMania.Core;
+using DTXMania.UI.Drawable;
 using FDK;
 
 namespace DTXMania;
@@ -289,8 +290,8 @@ internal class CActPerfCommonGauge : CActivity
 	protected CCounter ct本体振動;
 	//protected CTexture txマスクF;
 	//protected CTexture txマスクD;
-	protected CTexture txゲージ;
-	protected CTexture txフルゲージ;
-	protected STDGBVALUE<CTexture> txフレーム;
-	protected CTexture txハイスピ;
+	protected BaseTexture txゲージ;
+	protected BaseTexture txフルゲージ;
+	protected STDGBVALUE<BaseTexture> txフレーム;
+	protected BaseTexture txハイスピ;
 }

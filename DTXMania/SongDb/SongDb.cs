@@ -679,7 +679,7 @@ public class SongDb
 						score.SongInformation.bScoreExists.Bass = cdtx.bHasChips.Bass;
 						score.SongInformation.SongType = cdtx.eFileType;
 						score.SongInformation.Bpm = cdtx.BPM;
-						score.SongInformation.Duration = (cdtx.listChip == null)
+						score.SongInformation.DurationMs = (cdtx.listChip == null)
 							? 0
 							: cdtx.listChip[cdtx.listChip.Count - 1].nPlaybackTimeMs;
 

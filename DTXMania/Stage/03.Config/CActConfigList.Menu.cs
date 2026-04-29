@@ -7,6 +7,7 @@ internal partial class CActConfigList
 {
     private void tSetupItemList_Menu()
     {
+        tRecordToConfigIni();
         listItems.Clear();
         
         CItemToggle iSystemMusicNameDispDef = new("MusicNameDispDEF", CDTXMania.ConfigIni.b曲名表示をdefのものにする,

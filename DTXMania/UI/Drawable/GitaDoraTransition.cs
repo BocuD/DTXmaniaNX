@@ -1,10 +1,13 @@
-﻿using System.Diagnostics;
-using System.Drawing;
+﻿using System.Drawing;
+using System.Numerics;
 using DTXMania.Core;
+using DTXMania.Core.Framework;
 using DTXMania.UI.Inspector;
+using DTXMania.UI.OpenGL;
 using FDK;
 using Hexa.NET.ImGui;
-using SharpDX;
+using SkiaSharp;
+using StbImageSharp;
 using Color = System.Drawing.Color;
 using Rectangle = System.Drawing.Rectangle;
 
@@ -21,13 +24,16 @@ public class GitaDoraTransition : UIGroup
     public GitaDoraTransition() : base("GITADORA Transition")
     {
         //create a black texture
-        Bitmap bitmap = new(32, 32);
-        Graphics graphics = Graphics.FromImage(bitmap);
-        Color black = Color.FromArgb(255, Color.Black);
-        graphics.FillRectangle(new SolidBrush(black), new Rectangle(0, 0, bitmap.Width, bitmap.Height));
-        graphics.Dispose();
-        CTexture blackTexture = new(CDTXMania.app.Device, bitmap, CDTXMania.TextureFormat, false);
-        bitmap.Dispose();
+        // Bitmap bitmap = new(32, 32);
+        // Graphics graphics = Graphics.FromImage(bitmap);
+        // Color black = Color.FromArgb(255, Color.Black);
+        // graphics.FillRectangle(new SolidBrush(black), new Rectangle(0, 0, bitmap.Width, bitmap.Height));
+        // graphics.Dispose();
+        // CTexture blackTexture = new(CDTXMania.app.Device, bitmap, CDTXMania.TextureFormat, false);
+        // bitmap.Dispose();
+        
+        //create a black texture
+        var texture = BaseTexture.CreateSolidColor(new Color4(0, 0, 0, 255));
         
         //create childContainer
         childContainer = AddChild(new UIGroup("covers"));
@@ -35,17 +41,17 @@ public class GitaDoraTransition : UIGroup
         childContainer.position = new Vector3(640, 360, 0);
         childContainer.anchor = new Vector2(0.5f, 0.5f);
         
-        top = childContainer.AddChild(new UIImage(new DTXTexture(blackTexture)));
+        top = childContainer.AddChild(new UIImage(texture));
         top.size = new Vector2(3000, 1000);
         top.anchor = new Vector2(0.5f, 1.0f);
         top.position = new Vector3(640, 0, 0);
         
-        bottom = childContainer.AddChild(new UIImage(new DTXTexture(blackTexture)));
+        bottom = childContainer.AddChild(new UIImage(texture));
         bottom.size = new Vector2(3000, 1000);
         bottom.anchor = new Vector2(0.5f, 0.0f);
         bottom.position = new Vector3(640, 720, 0);
 
-        logo = AddChild(new UIImage(DTXTexture.LoadFromPath(CSkin.Path("Graphics/logo_small.png"))));
+        logo = AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path("Graphics/logo_small.png"))));
         logo.position = new Vector3(870, 572, 0);
         logo.size = new Vector2(412, 71);
     }
@@ -84,7 +90,7 @@ public class GitaDoraTransition : UIGroup
     private const float logoStartX = 635;
     private const float logoFinalX = 815;
     
-    public override void Draw(Matrix parentMatrix)
+    public override void Draw(Matrix4x4 parentMatrix)
     {
         //cursed way to ensure we don't stop animating when the animation isn't completed yet
         if (state.finishOnNextFrame)
@@ -174,7 +180,7 @@ public class GitaDoraTransition : UIGroup
     public static void Open(int delayFrames = 5, Action? action = null)
     {
         state.animate = true;
-        state.animationProgress = 0.0f;
+        state.animationProgress = -1.0f;
         state.animationTarget = 2.0f;
         state.animationDirection = 1.0f;
         state.onComplete = action;

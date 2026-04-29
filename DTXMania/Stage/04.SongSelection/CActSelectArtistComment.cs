@@ -19,7 +19,7 @@ internal class CActSelectArtistComment : CActivity
 	}
 	public void t選択曲が変更された()
 	{
-		CScore cスコア = CDTXMania.stageSongSelection.rSelectedScore;
+		CScore cスコア = CDTXMania.StageManager.stageSongSelection.rSelectedScore;
 		if( cスコア != null )
 		{
 			Bitmap image = new Bitmap( 1, 1 );
@@ -158,7 +158,7 @@ internal class CActSelectArtistComment : CActivity
 	{
 		if( bActivated )
 		{
-			txコメントバー = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\5_comment bar.png"), true);
+			txコメントバー = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\5_comment bar.png"), true);
 			t選択曲が変更された();
 			base.OnManagedCreateResources();
 		}

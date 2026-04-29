@@ -1,10 +1,12 @@
 ﻿using System.Drawing;
+using System.Numerics;
 using DTXMania.Core;
+using DTXMania.Core.Framework;
+using DTXMania.UI;
+using DTXMania.UI.Drawable;
 using DTXMania.UI.Item;
+using DTXMania.UI.Text;
 using FDK;
-using SharpDX;
-using Color = System.Drawing.Color;
-using Rectangle = System.Drawing.Rectangle;
 using Point = System.Drawing.Point;
 
 namespace DTXMania;
@@ -19,8 +21,9 @@ internal partial class CActConfigList : CActivity
             EMenuType e = eMenuType;
             if (e is EMenuType.KeyAssignBass or EMenuType.KeyAssignDrums 
                 or EMenuType.KeyAssignGuitar or EMenuType.KeyAssignSystem 
-                or EMenuType.SystemGraphics or EMenuType.SystemAudio 
-                or EMenuType.SystemGameplay or EMenuType.SystemMenu
+                or EMenuType.SystemGraphics or EMenuType.SystemGameplay
+                or EMenuType.SystemMenu or EMenuType.SystemSkin
+                or EMenuType.SystemAudio or EMenuType.SystemAudioDriver
                 or EMenuType.VelocityDrums)
             {
                 return true;
@@ -53,10 +56,15 @@ internal partial class CActConfigList : CActivity
         {
             case EMenuType.KeyAssignSystem:
             case EMenuType.SystemGraphics:
+            case EMenuType.SystemSkin:
             case EMenuType.SystemAudio:
             case EMenuType.SystemGameplay:
             case EMenuType.SystemMenu:
                 tSetupItemList_System();
+                break;
+            
+            case EMenuType.SystemAudioDriver:
+                tSetupItemList_Audio();
                 break;
 
             case EMenuType.KeyAssignDrums:
@@ -150,12 +158,7 @@ internal partial class CActConfigList : CActivity
 
         listItems = [];
         eMenuType = EMenuType.Unknown;
-
-        ScanSkinFolders();
-        ScanNewSkinData();
-
-        prvFont = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.songListFont), 15 * CDTXMania.renderScale); // t項目リストの設定 の前に必要
-
+        
         tSetupItemList_Bass(); // #27795 2012.3.11 yyagi; System設定の中でDrumsの設定を参照しているため、
         tSetupItemList_Guitar(); // 活性化の時点でDrumsの設定も入れ込んでおかないと、System設定中に例外発生することがある。
         tSetupItemList_Drums(); // 
@@ -167,6 +170,8 @@ internal partial class CActConfigList : CActivity
         scrollTimerValue = -1;
         ctTriangleArrowAnimation = new CCounter();
         ctToastMessageCounter = new CCounter(0, 1, 10000, CDTXMania.Timer);
+
+        CacheCurrentSoundDevices();
 
         base.OnActivate();
     }
@@ -181,7 +186,6 @@ internal partial class CActConfigList : CActivity
         ctTriangleArrowAnimation = null;
 
         ReleaseList();
-        prvFont.Dispose();
 
         base.OnDeactivate();
 
@@ -197,12 +201,6 @@ internal partial class CActConfigList : CActivity
         #endregion
 
         HandleSoundDeviceChanges();
-
-        #region [ サウンドのタイムストレッチモード変更 ]
-
-        CSoundManager.bIsTimeStretch = iSystemTimeStretch.bON;
-
-        #endregion
     }
 
     public override void OnManagedCreateResources()
@@ -210,24 +208,20 @@ internal partial class CActConfigList : CActivity
         if (!bActivated)
             return;
 
-        txItemBoxNormal = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_itembox.png"), false);
-        txItemBoxFolder = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_itembox folder.png"), false);
+        txItemBoxNormal = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\4_itembox.png"));
+        txItemBoxFolder = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\4_itembox folder.png"));
         
         if (txItemBoxFolder == null)
         {
-            txItemBoxFolder = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_itembox.png"), false);
+            txItemBoxFolder = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\4_itembox.png"));
         }
         
-        txItemBoxOther = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_itembox other.png"), false);
-        txTriangleArrow = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_triangle arrow.png"), false);
-        txDescriptionPanel = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_Description Panel.png"));
-        txArrow = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_Arrow.png"));
-        txItemBoxCursor = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\4_itembox cursor.png"));
+        txItemBoxOther = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\4_itembox other.png"));
+        BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\4_triangle arrow.png"));
+        txDescriptionPanel = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\4_Description Panel.png"));
+        txArrow = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\4_Arrow.png"));
+        txItemBoxCursor = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\4_itembox cursor.png"));
         
-        tGenerateSkinSample();
-        
-        prvFontForToastMessage =
-            new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.songListFont), 14, FontStyle.Regular);
         base.OnManagedCreateResources();
     }
 
@@ -235,17 +229,7 @@ internal partial class CActConfigList : CActivity
     {
         if (!bActivated)
             return;
-
-        CDTXMania.tReleaseTexture(ref txSkinSample);
-        CDTXMania.tReleaseTexture(ref txItemBoxNormal);
-        CDTXMania.tReleaseTexture(ref txItemBoxFolder);
-        CDTXMania.tReleaseTexture(ref txItemBoxOther);
-        CDTXMania.tReleaseTexture(ref txTriangleArrow);
-        CDTXMania.tReleaseTexture(ref txDescriptionPanel);
-        CDTXMania.tReleaseTexture(ref txArrow);
-        CDTXMania.tReleaseTexture(ref txItemBoxCursor);
-        CDTXMania.tReleaseTexture(ref txToastMessage);
-        CDTXMania.tDisposeSafely(ref prvFontForToastMessage);
+        
         base.OnManagedReleaseResources();
     }
 
@@ -273,7 +257,7 @@ internal partial class CActConfigList : CActivity
         if (!bActivated)
             return 0;
 
-        Matrix scaleMatrix = Matrix.Scaling(CDTXMania.renderScale);
+        Matrix4x4 scaleMatrix = Matrix4x4.CreateScale(CDTXMania.renderScale);
         
         // 進行
 
@@ -432,8 +416,8 @@ internal partial class CActConfigList : CActivity
         #region[ Draw Cursor ]
         if (bFocusIsOnItemList)
         {
-            Matrix cursorMatrix = Matrix.Translation(413, 193, 0) * scaleMatrix;
-            txItemBoxCursor.tDraw2DMatrix(CDTXMania.app.Device, cursorMatrix);
+            Matrix4x4 cursorMatrix = Matrix4x4.CreateTranslation(413, 193, 0) * scaleMatrix;
+            txItemBoxCursor.tDraw2DMatrix(cursorMatrix);
         }
         #endregion
 
@@ -441,14 +425,15 @@ internal partial class CActConfigList : CActivity
         if (bFocusIsOnItemList && nTargetScrollCounter == 0 && stageConfig.ctDisplayWait.bReachedEndValue)
         {
             // 15SEP20 Increasing x position by 180 pixels (was 601)
-            Matrix explanationMatrix = Matrix.Translation(781, 252, 0) * scaleMatrix;
-            txDescriptionPanel.tDraw2DMatrix(CDTXMania.app.Device, explanationMatrix);
+            Matrix4x4 explanationMatrix = Matrix4x4.CreateTranslation(781, 252, 0) * scaleMatrix;
+            txDescriptionPanel.tDraw2DMatrix(explanationMatrix);
+            
             if (txSkinSample != null && nTargetScrollCounter == 0 &&
                 listItems[nCurrentSelection] == iSystemSkinSubfolder)
             {
                 // 15SEP20 Increasing x position by 180 pixels (was 615 - 60)
-                Matrix txSkinSampleMatrix = Matrix.Translation(735, 442 - 106, 0) * scaleMatrix;
-                txSkinSample.tDraw2DMatrix(CDTXMania.app.Device, txSkinSampleMatrix);
+                Matrix4x4 txSkinSampleMatrix = Matrix4x4.CreateTranslation(796, 442, 0) * scaleMatrix;
+                txSkinSample.tDraw2DMatrix(txSkinSampleMatrix, new Vector2(250, 140));
             }
         }
         #endregion
@@ -458,22 +443,21 @@ internal partial class CActConfigList : CActivity
         {
             const int nArrowPosX = 394;
             
-            Matrix arrowMatrix = Matrix.Translation(nArrowPosX, 174, 0) * scaleMatrix;
-            Matrix arrowMatrix2 = Matrix.Translation(nArrowPosX, 240, 0) * scaleMatrix;
+            Matrix4x4 arrowMatrix = Matrix4x4.CreateTranslation(nArrowPosX, 174, 0) * scaleMatrix;
+            Matrix4x4 arrowMatrix2 = Matrix4x4.CreateTranslation(nArrowPosX, 240, 0) * scaleMatrix;
             Vector2 size = new(40, 40);
-            txArrow?.tDraw2DMatrix(CDTXMania.app.Device, arrowMatrix, size, new SharpDX.RectangleF(0, 0, 40, 40));
-            txArrow?.tDraw2DMatrix(CDTXMania.app.Device, arrowMatrix2, size, new SharpDX.RectangleF(0, 40, 40, 40));
+            txArrow?.tDraw2DMatrix(arrowMatrix, size, new RectangleF(0, 0, 40, 40));
+            txArrow?.tDraw2DMatrix(arrowMatrix2, size, new RectangleF(0, 40, 40, 40));
         }
         #endregion
 
-        //draw toasat
-        Matrix toastMatrix = Matrix.Translation(15, 325, 0) * scaleMatrix;
-        txToastMessage?.tDraw2DMatrix(CDTXMania.app.Device, toastMatrix);
-
+        //draw toast
+        Matrix4x4 toastMatrix = Matrix4x4.CreateTranslation(15, 325, 0) * scaleMatrix;
+        txToastMessage?.tDraw2DMatrix(toastMatrix);
         return 0;
     }
 
-    private int DrawListElement(int rowIndex, int nItem, Matrix parentMatrix)
+    private int DrawListElement(int rowIndex, int nItem, Matrix4x4 parentMatrix)
     {
         #region [ Skip Offscreen Item Panels ]
 
@@ -498,24 +482,24 @@ internal partial class CActConfigList : CActivity
 
         int n新項目パネルX = 420;
 
-        Matrix localMatrix = Matrix.Translation(n新項目パネルX, y, 0);
-        Matrix finalMatrix = localMatrix * parentMatrix;
+        Matrix4x4 localMatrix = Matrix4x4.CreateTranslation(n新項目パネルX, y, 0);
+        Matrix4x4 finalMatrix = localMatrix * parentMatrix;
         
         #region [ Render Row Panel Frame ]
 
         switch (listItems[nItem].ePanelType)
         {
             case CItemBase.EPanelType.Normal:
-                txItemBoxNormal?.tDraw2DMatrix(CDTXMania.app.Device, finalMatrix);
+                txItemBoxNormal?.tDraw2DMatrix(finalMatrix);
                 break;
 
             case CItemBase.EPanelType.Folder:
-                txItemBoxFolder?.tDraw2DMatrix(CDTXMania.app.Device, finalMatrix);
+                txItemBoxFolder?.tDraw2DMatrix(finalMatrix);
                 break;
 
             case CItemBase.EPanelType.Other:
             case CItemBase.EPanelType.Return:
-                txItemBoxOther?.tDraw2DMatrix(CDTXMania.app.Device, finalMatrix);
+                txItemBoxOther?.tDraw2DMatrix(finalMatrix);
                 break;
         }
 
@@ -523,22 +507,20 @@ internal partial class CActConfigList : CActivity
 
         #region [ Render Item Name ]
 
-        if (listMenu[nItem].txMenuItemRight == null)
+        if (listMenu[nItem].txItemName == null)
         {
-            Bitmap bmpItem = prvFont.DrawPrivateFont(listItems[nItem].strItemName, Color.White, Color.Transparent);
-            listMenu[nItem].txMenuItemRight = CDTXMania.tGenerateTexture(bmpItem);
-            bmpItem.Dispose();
+            listMenu[nItem].txItemName = RenderText(listItems[nItem].strItemName, 16, Color4.White);
         }
 
         {
-            Matrix textMatrix = Matrix.Translation(n新項目パネルX + 25, y + 24, 0) * parentMatrix;
+            Matrix4x4 textMatrix = Matrix4x4.CreateTranslation(n新項目パネルX + 30, y + 30, 0) * parentMatrix;
 
-            if (listMenu[nItem].txMenuItemRight != null)
+            if (listMenu[nItem].txItemName != null)
             {
-                Vector2 size = new(listMenu[nItem].txMenuItemRight!.szImageSize.Width,
-                    listMenu[nItem].txMenuItemRight!.szImageSize.Height);
+                Vector2 size = new(listMenu[nItem].txItemName!.Width,
+                    listMenu[nItem].txItemName!.Height);
                 size *= 1 / CDTXMania.renderScale;
-                listMenu[nItem].txMenuItemRight?.tDraw2DMatrix(CDTXMania.app.Device, textMatrix, size);
+                listMenu[nItem].txItemName?.tDraw2DMatrix(textMatrix, size);
             }
         }
 
@@ -572,38 +554,32 @@ internal partial class CActConfigList : CActivity
 
         if (isHighlighted)
         {
-            Bitmap bmpStr = prvFont.DrawPrivateFont(strParam, Color.White, Color.Black, Color.Yellow, Color.OrangeRed);
-            CTexture txStr = CDTXMania.tGenerateTexture(bmpStr, false);
-
-            Matrix highlightMatrix = Matrix.Translation(n新項目パネルX + 265, y + 20, 0) * parentMatrix;
-            Vector2 size = new(txStr.szImageSize.Width, txStr.szImageSize.Height);
+            var tex = RenderText(strParam, 15, Color4.White, Color.OrangeRed);
+            
+            Matrix4x4 highlightMatrix = Matrix4x4.CreateTranslation(n新項目パネルX + 265, y + 20, 0) * parentMatrix;
+            Vector2 size = new(tex.Width, tex.Height);
             size *= 1 / CDTXMania.renderScale;
-            txStr.tDraw2DMatrix(CDTXMania.app.Device, highlightMatrix, size);
-
-            bmpStr.Dispose();
-            txStr.Dispose();
+            tex.tDraw2DMatrix(highlightMatrix, size);
+            tex.Dispose(); //todo this is pretty ugly
         }
         else
         {
             int nIndex = listItems[nItem].GetIndex();
-            if (listMenu[nItem].nParam != nIndex || listMenu[nItem].txParam == null)
+            if (listMenu[nItem].nParam != nIndex || listMenu[nItem].txItemParam == null)
             {
                 stMenuItemRight stm = listMenu[nItem];
                 stm.nParam = nIndex;
-
-                Bitmap bmpStr = prvFont.DrawPrivateFont(strParam, Color.Black, Color.Transparent);
-                stm.txParam = CDTXMania.tGenerateTexture(bmpStr, false);
-                bmpStr.Dispose();
-
+                stm.txItemParam = RenderText(strParam, 16, Color4.Black);
+                
                 listMenu[nItem] = stm;
             }
 
-            Matrix paramMatrix = Matrix.Translation(n新項目パネルX + 265, y + 24, 0) * parentMatrix;
-            if (listMenu[nItem].txParam != null)
+            Matrix4x4 paramMatrix = Matrix4x4.CreateTranslation(n新項目パネルX + 265, y + 30, 0) * parentMatrix;
+            if (listMenu[nItem].txItemParam != null)
             {
-                Vector2 size = new(listMenu[nItem].txParam!.szImageSize.Width, listMenu[nItem].txParam!.szImageSize.Height);
+                Vector2 size = new(listMenu[nItem].txItemParam!.Width, listMenu[nItem].txItemParam!.Height);
                 size *= 1 / CDTXMania.renderScale;
-                listMenu[nItem].txParam?.tDraw2DMatrix(CDTXMania.app.Device, paramMatrix, size);
+                listMenu[nItem].txItemParam?.tDraw2DMatrix(paramMatrix, size);
             }
         }
 
@@ -626,11 +602,13 @@ internal partial class CActConfigList : CActivity
         Drums,
         Guitar,
         Bass,
-        KeyAssignSystem, // #24609 2011.4.12 yyagi: 画面キャプチャキーのアサイン
+        KeyAssignSystem,
         SystemGraphics,
         SystemAudio,
+        SystemAudioDriver,
         SystemGameplay,
         SystemMenu,
+        SystemSkin,
         KeyAssignDrums,
         VelocityDrums,
         KeyAssignGuitar,
@@ -660,31 +638,27 @@ internal partial class CActConfigList : CActivity
         new(602, 390), new(602, 457), new(602, 524), new(602, 591), new(602, 658), new(602, 725), new(602, 792)
     ];
 
-    private CTexture txItemBoxOther;
-    private CTexture txTriangleArrow;
-    private CTexture txArrow;
-    private CTexture txItemBoxNormal;
-    private CTexture txItemBoxFolder;
-    private CTexture txItemBoxCursor;
-    private CTexture txDescriptionPanel;
-    private CTexture txToastMessage;
-    private CPrivateFastFont prvFontForToastMessage;
+    private BaseTexture txItemBoxOther;
+    private BaseTexture txArrow;
+    private BaseTexture txItemBoxNormal;
+    private BaseTexture txItemBoxFolder;
+    private BaseTexture txItemBoxCursor;
+    private BaseTexture txDescriptionPanel;
+    private BaseTexture txToastMessage;
     private CCounter ctToastMessageCounter;
-
-    private CPrivateFastFont prvFont;
-
+    
     //private List<string> list項目リスト_str最終描画名;
     private struct stMenuItemRight
     {
         //	public string strMenuItem;
-        public CTexture? txMenuItemRight;
+        public BaseTexture? txItemName;
         public int nParam;
-        public CTexture? txParam;
+        public BaseTexture? txItemParam;
         
         public void Dispose()
         {
-            txMenuItemRight?.Dispose();
-            txParam?.Dispose();
+            txItemName?.Dispose();
+            txItemParam?.Dispose();
         }
     }
 
@@ -694,10 +668,12 @@ internal partial class CActConfigList : CActivity
     private CItemInteger iCommonPlaySpeed;
 
     private CStageConfig stageConfig;
+    private UIGroup parent;
 
-    public CActConfigList(CStageConfig cStageConfig)
+    public CActConfigList(CStageConfig cStageConfig, UIGroup parent)
     {
         stageConfig = cStageConfig;
+        this.parent = parent;
     }
 
     private int tPreviousItem(int nItem)
@@ -739,7 +715,10 @@ internal partial class CActConfigList : CActivity
         {
             CDTXMania.ConfigIni.bGuitarEnabled = (((iSystemGRmode.nCurrentlySelectedIndex + 1) / 2) == 1);
             CDTXMania.ConfigIni.bDrumsEnabled = (((iSystemGRmode.nCurrentlySelectedIndex + 1) % 2) == 1);
+        }
 
+        if (eMenuType == EMenuType.SystemSkin)
+        {
             CDTXMania.ConfigIni.strSystemSkinSubfolderFullName = skinSubFolders[nSkinIndex]; // #28195 2012.5.2 yyagi
             CDTXMania.Skin.SetCurrentSkinSubfolderFullName(CDTXMania.ConfigIni.strSystemSkinSubfolderFullName, true);
         }
@@ -747,18 +726,9 @@ internal partial class CActConfigList : CActivity
 
     private void tUpdateToastMessage(string strMessage)
     {
-        CDTXMania.tReleaseTexture(ref txToastMessage);
+        if (string.IsNullOrWhiteSpace(strMessage)) return;
 
-        if (strMessage != "" && prvFontForToastMessage != null)
-        {
-            Bitmap bmpItem = prvFontForToastMessage.DrawPrivateFont(strMessage, Color.White, Color.Black);
-            txToastMessage = CDTXMania.tGenerateTexture(bmpItem);
-            CDTXMania.tDisposeSafely(ref bmpItem);
-        }
-        else
-        {
-            txToastMessage = null;
-        }
+        txToastMessage = RenderText(strMessage, 14, Color4.White, Color4.Black);
     }
 
     private void tAddReturnToMenuItem(Action? action = null)
@@ -770,6 +740,23 @@ internal partial class CActConfigList : CActivity
             action = action
         };
         listItems.Add(returnToMenuButton);
+    }
+
+    private BaseTexture RenderText(string text, int size, Color4 color, Color4? outline = null)
+    {
+        UiTextRenderRequest request = new()
+        {
+            Name = text.Substring(0, Math.Min(20, text.Length)), // Use a substring of the text as the name to avoid excessively long names
+            Text = text,
+            FillColor = color,
+            FontPath = UIFonts.FallbackFontPath,
+            OutlineColor = outline ?? Color4.Black,
+            OutlineWidth = outline.HasValue ? (size * CDTXMania.renderScale) / 4 : 0,
+            Backend = UiTextRenderBackend.Skia,
+            FontSize = size * CDTXMania.renderScale
+        };
+        
+        return BaseTexture.SkiaTextRenderer.Render(request);
     }
 
     #endregion

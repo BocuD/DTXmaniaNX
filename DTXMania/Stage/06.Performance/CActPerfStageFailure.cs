@@ -1,5 +1,6 @@
 ﻿using System.Drawing;
 using DTXMania.Core;
+using DTXMania.UI.Drawable;
 using FDK;
 
 namespace DTXMania;
@@ -41,22 +42,16 @@ internal class CActPerfStageFailure : CActivity
         }
         base.OnDeactivate();
     }
+
     public override void OnManagedCreateResources()
     {
         if (bActivated)
         {
-            txStageFailed = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_stage_failed.jpg"));
+            txStageFailed = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_stage_failed.jpg"));
             base.OnManagedCreateResources();
         }
     }
-    public override void OnManagedReleaseResources()
-    {
-        if (bActivated)
-        {
-            CDTXMania.tReleaseTexture(ref txStageFailed);
-            base.OnManagedReleaseResources();
-        }
-    }
+
     public override int OnUpdateAndDraw()
     {
         if (!bActivated)
@@ -73,15 +68,15 @@ internal class CActPerfStageFailure : CActivity
             int x = (int)(640.0 * Math.Cos((Math.PI / 2 * ct進行.nCurrentValue) / 100.0));
             if ((x != 1280) && (txStageFailed != null))
             {
-                txStageFailed.tDraw2D(CDTXMania.app.Device, 0, 0, new SharpDX.RectangleF(x, 0, 640 - x, 720));
-                txStageFailed.tDraw2D(CDTXMania.app.Device, 640 + x, 0, new SharpDX.RectangleF(640, 0, 640 - x, 720));
+                txStageFailed.tDraw2D(0, 0, new RectangleF(x, 0, 640 - x, 720));
+                txStageFailed.tDraw2D(640 + x, 0, new RectangleF(640, 0, 640 - x, 720));
             }
         }
         else
         {
             if (txStageFailed != null)
             {
-                txStageFailed.tDraw2D(CDTXMania.app.Device, 0, 0);
+                txStageFailed.tDraw2D(0, 0);
             }
             if (!b効果音再生済み)
             {
@@ -123,7 +118,7 @@ internal class CActPerfStageFailure : CActivity
     private bool b効果音再生済み;
     private CCounter ct進行;
     private CSound sd効果音;
-    private CTexture txStageFailed;
+    private BaseTexture txStageFailed;
     //-----------------
     #endregion
 }

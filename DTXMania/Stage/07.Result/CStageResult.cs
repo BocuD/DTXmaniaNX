@@ -1,5 +1,7 @@
 ﻿using System.Diagnostics;
+using System.Numerics;
 using DTXMania.Core;
+using DTXMania.Core.Framework;
 using DTXMania.UI;
 using DTXMania.UI.Drawable;
 using FDK;
@@ -44,13 +46,9 @@ internal class CStageResult : CStage
 		eStageID = EStage.Result_7;
 		ePhaseID = EPhase.Common_DefaultState;
 		bActivated = false;
-		listChildActivities.Add( actResultImage = new CActResultImage(this) );
+		//listChildActivities.Add( actResultImage = new CActResultImage(this) );
 		listChildActivities.Add( actParameterPanel = new CActResultParameterPanel(this) );
 		listChildActivities.Add( actRank = new CActResultRank(this) );
-		listChildActivities.Add( new CActResultSongBar() );
-		listChildActivities.Add( actFI = new CActFIFOWhite() );
-		listChildActivities.Add( actFO = new CActFIFOBlack() );
-		listChildActivities.Add(actBackgroundVideoAVI = new CActSelectBackgroundAVI());
 	}
 
 		
@@ -63,67 +61,115 @@ internal class CStageResult : CStage
 
 	public override void InitializeDefaultUI()
 	{
-		rBackgroundVideoAVI = new CAVI(1290, CSkin.Path(@"Graphics\8_background.mp4"), "", 20.0);
-		rBackgroundVideoAVI.OnDeviceCreated();
-		if (rBackgroundVideoAVI.avi != null)
-		{					
-			actBackgroundVideoAVI.bLoop = true;
-			actBackgroundVideoAVI.Start(EChannel.MovieFull, rBackgroundVideoAVI, 0, -1);
-			Trace.TraceInformation("Playing Background video for Result Screen");
-		}
+		BaseTexture txBackground = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_background.jpg"));
 
-		var txBackground = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\8_background.jpg" ) );
-		
 		switch (nResultRank)
 		{
 			case 0:
 				if (File.Exists(CSkin.Path(@"Graphics\8_background rankSS.png")))
 				{
-					txBackground = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_background rankSS.png"));
+					txBackground = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_background rankSS.png"));
 				}
+
 				break;
 			case 1:
 				if (File.Exists(CSkin.Path(@"Graphics\8_background rankS.png")))
 				{
-					txBackground = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_background rankS.png"));
+					txBackground = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_background rankS.png"));
 				}
+
 				break;
 			case 2:
 				if (File.Exists(CSkin.Path(@"Graphics\8_background rankA.png")))
 				{
-					txBackground = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_background rankA.png"));
+					txBackground = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_background rankA.png"));
 				}
+
 				break;
 			case 3:
 				if (File.Exists(CSkin.Path(@"Graphics\8_background rankB.png")))
 				{
-					txBackground = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_background rankB.png"));
+					txBackground = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_background rankB.png"));
 				}
+
 				break;
 			case 4:
 				if (File.Exists(CSkin.Path(@"Graphics\8_background rankC.png")))
 				{
-					txBackground = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_background rankC.png"));
+					txBackground = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_background rankC.png"));
 				}
+
 				break;
 			case 5:
 				if (File.Exists(CSkin.Path(@"Graphics\8_background rankD.png")))
 				{
-					txBackground = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_background rankD.png"));
+					txBackground = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_background rankD.png"));
 				}
+
 				break;
 			case 6:
 			case 99:
 				if (File.Exists(CSkin.Path(@"Graphics\8_background rankE.png")))
 				{
-					txBackground = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\8_background rankE.png"));
+					txBackground = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_background rankE.png"));
 				}
+
 				break;
 		}
 
-		DTXTexture dtxTex = new(txBackground);
-		background = ui.AddChild(new UIImage(dtxTex));
+		background = ui.AddChild(new UIImage(txBackground));
 		background.renderOrder = -100;
+		background.isVisible = true;
+		
+		string strSongTitle;
+		if (!CDTXMania.bCompactMode && CDTXMania.ConfigIni.b曲名表示をdefのものにする)
+			strSongTitle = CDTXMania.confirmedSong.title;
+		else
+			strSongTitle = CDTXMania.DTX.TITLE;
+
+		string strArtistName = CDTXMania.DTX.ARTIST;
+		
+		if (!string.IsNullOrWhiteSpace(strSongTitle))
+		{
+			UIText songNameText = ui.AddChild(new UIText(strSongTitle, 30));
+			songNameText.fillColor = Color4.Black;
+			songNameText.outlineColor = Color4.White;
+			songNameText.name = "SongName";
+			songNameText.font = UIFonts.FallbackFont;
+			songNameText.position = new Vector3(490, 600, 0);
+		}
+
+		if (!string.IsNullOrWhiteSpace(strArtistName))
+		{
+			UIText artistNameText = ui.AddChild(new UIText(strArtistName, 20));
+			artistNameText.fillColor = Color4.Black;
+			artistNameText.outlineColor = Color4.White;
+			artistNameText.name = "ArtistName";
+			artistNameText.font = UIFonts.FallbackFont;
+			artistNameText.position = new Vector3(490, 640, 0);
+		}
+		
+		string path = CDTXMania.DTX.strFolderName + CDTXMania.DTX.PREIMAGE;
+		var txJacket = BaseTexture.LoadFromPath(!File.Exists(path) ? CSkin.Path(@"Graphics\5_preimage default.png") : path);
+		var jacket = ui.AddChild(new UIImage(txJacket));
+		jacket.size = new Vector2(300, 300);
+		jacket.position = new Vector3(640, 290, 0);
+		jacket.name = "AlbumArt";
+		jacket.anchor.X = 0.5f;
+
+		//todo: position these
+		if (CDTXMania.GetCurrentInstrument() == 0)
+		{
+			var drums = ui.AddChild(new UIPlayerNameplate(0));
+			drums.position = new Vector3(191, 272, 0);
+		}
+		else
+		{
+			var guitar1 = ui.AddChild(new UIPlayerNameplate(1));
+			guitar1.position = new Vector3(148, 272, 0);
+			var guitar2 = ui.AddChild(new UIPlayerNameplate(2));
+			guitar2.position = new Vector3(853, 272, 0);
+		}
 	}
 
 	public override void OnActivate()
@@ -454,13 +500,7 @@ internal class CStageResult : CStage
 			CDTXMania.SoundManager.tDiscard( rResultSound );
 			rResultSound = null;
 		}
-
-		if (rBackgroundVideoAVI != null)
-		{
-			rBackgroundVideoAVI.Dispose();
-			rBackgroundVideoAVI = null;
-		}
-
+		
 		base.OnDeactivate();
 	}
 	public override void OnManagedCreateResources()
@@ -478,9 +518,7 @@ internal class CStageResult : CStage
 			{
 				ctPlayNewRecord = null;
 			}
-
-			actBackgroundVideoAVI.Stop();
-
+			
 			//CDTXMania.t安全にDisposeする( ref this.ds背景動画 );t
 			base.OnManagedReleaseResources();
 		}
@@ -536,8 +574,7 @@ internal class CStageResult : CStage
 			ctPlayNewRecord = new CCounter(0, 150, 10, CDTXMania.Timer);
 		}
 						
-		actFI.tStartFadeIn(false);
-		ePhaseID = EPhase.Common_FadeIn;
+		ePhaseID = EPhase.Common_DefaultState;
 	}
 
 	public override int OnUpdateAndDraw()
@@ -545,29 +582,6 @@ internal class CStageResult : CStage
 		if (!bActivated) return 0;
 		
 		base.OnUpdateAndDraw();
-
-		int num;
-				
-		//Draw Background video  via CActPerfAVI methods
-		actBackgroundVideoAVI.tUpdateAndDraw();
-
-		//if ( this.ds背景動画 != null )
-		//            {
-		//                this.ds背景動画.t再生開始();
-		//                this.ds背景動画.MediaSeeking.GetPositions(out this.lDshowPosition, out this.lStopPosition);
-		//                this.ds背景動画.bループ再生 = true;
-                    
-		//                if (this.lDshowPosition == this.lStopPosition)
-		//                {
-		//                    this.ds背景動画.MediaSeeking.SetPositions(
-		//                    DsLong.FromInt64((long)(0)),
-		//                    AMSeekingSeekingFlags.AbsolutePositioning,
-		//                    0,
-		//                    AMSeekingSeekingFlags.NoPositioning);
-		//                }
-                    
-		//                this.ds背景動画.t現時点における最新のスナップイメージをTextureに転写する( this.txBackground );
-		//            }
 
 		bAnimationComplete = true;
 
@@ -581,14 +595,11 @@ internal class CStageResult : CStage
 				ctPlayNewRecord.tStop();
 			}
 		}
-
-		// 描画
-		background.isVisible = rBackgroundVideoAVI.avi == null;
 		
-		if( actResultImage.OnUpdateAndDraw() == 0 )
-		{
-			bAnimationComplete = false;
-		}
+		// if( actResultImage.OnUpdateAndDraw() == 0 )
+		// {
+		// 	bAnimationComplete = false;
+		// }
 		if ( actParameterPanel.OnUpdateAndDraw() == 0 )
 		{
 			bAnimationComplete = false;
@@ -596,13 +607,6 @@ internal class CStageResult : CStage
 		if (actRank.OnUpdateAndDraw() == 0)
 		{
 			bAnimationComplete = false;
-		}
-		if( ePhaseID == EPhase.Common_FadeIn )
-		{
-			if( actFI.OnUpdateAndDraw() != 0 )
-			{
-				ePhaseID = EPhase.Common_DefaultState;
-			}
 		}
 		#region [ #24609 2011.3.14 yyagi ランク更新or演奏型スキル更新時、リザルト画像をpngで保存する ]
 		if ( bAnimationComplete && bIsCheckedWhetherResultScreenShouldSaveOrNot == false	// #24609 2011.3.14 yyagi; to save result screen in case BestRank or HiSkill.
@@ -687,8 +691,6 @@ internal class CStageResult : CStage
 		}
 		if (CDTXMania.Input.ActionDecide())
 		{
-			actFI.tフェードイン完了();					// #25406 2011.6.9 yyagi
-			actResultImage.tアニメを完了させる();
 			actParameterPanel.tアニメを完了させる();
 			actRank.tアニメを完了させる();
 		}
@@ -744,11 +746,9 @@ internal class CStageResult : CStage
 	//New Counter
 	private CCounter ctPlayNewRecord;
 	private EReturnValue eReturnValueWhenFadeOutCompleted;  // eフェードアウト完了時の戻り値
-	private CActFIFOWhite actFI;
-	private CActFIFOBlack actFO;
 	private CActResultParameterPanel actParameterPanel;
 	private CActResultRank actRank;
-	private CActResultImage actResultImage;
+	//private CActResultImage actResultImage;
 
 	//private CActPerfProgressBar actProgressBar;
 	private bool bAnimationComplete;  // bアニメが完了
@@ -757,8 +757,6 @@ internal class CStageResult : CStage
 	private int n最後に再生したHHのWAV番号;
 	private EChannel n最後に再生したHHのチャンネル番号;
 	private CSound rResultSound;
-	private CTexture txBottomPanel;  // tx下部パネル
-	private CTexture txTopPanel;  // tx上部パネル
 	private UIImage background;  // tx背景
 	//Copy from CStagePerfCommonScreen
 	public STDGBVALUE<CStagePerfCommonScreen.CLAGTIMINGHITCOUNT> nTimingHitCount;
@@ -766,9 +764,6 @@ internal class CStageResult : CStage
 	//private CDirectShow ds背景動画;
 	private long lDshowPosition;
 	private long lStopPosition;
-
-	private readonly CActSelectBackgroundAVI actBackgroundVideoAVI;
-	private CAVI rBackgroundVideoAVI;
 
 	#region [ #24609 リザルト画像をpngで保存する ]		// #24609 2011.3.14 yyagi; to save result screen in case BestRank or HiSkill.
 	/// <summary>

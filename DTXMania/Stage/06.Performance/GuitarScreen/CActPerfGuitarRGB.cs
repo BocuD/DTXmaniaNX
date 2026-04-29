@@ -1,5 +1,5 @@
-﻿using DTXMania.Core;
-using SharpDX;
+﻿using System.Drawing;
+using DTXMania.Core;
 
 namespace DTXMania;
 
@@ -82,7 +82,7 @@ internal class CActPerfGuitarRGB : CActPerfCommonRGB
                     nシャッター下.Guitar = CDTXMania.ConfigIni.nShutterInSide.Guitar;
                 }
 
-                dbAboveShutter.Guitar = 108 - txShutter.szImageSize.Height + (nシャッター上.Guitar * db倍率);
+                dbAboveShutter.Guitar = 108 - txShutter.Height + (nシャッター上.Guitar * db倍率);
                 dbUnderShutter.Guitar = 720 - 50 - (nシャッター下.Guitar * db倍率);
 
                 nシャッター上.Bass = CDTXMania.ConfigIni.nShutterInSide.Bass;
@@ -94,7 +94,7 @@ internal class CActPerfGuitarRGB : CActPerfCommonRGB
                     nシャッター下.Bass = CDTXMania.ConfigIni.nShutterInSide.Bass;
                 }
 
-                dbAboveShutter.Bass = 108 - txShutter.szImageSize.Height + (nシャッター上.Bass * db倍率);
+                dbAboveShutter.Bass = 108 - txShutter.Height + (nシャッター上.Bass * db倍率);
                 dbUnderShutter.Bass = 720 - 50 - (nシャッター下.Bass * db倍率);
             }
             #endregion
@@ -121,27 +121,27 @@ internal class CActPerfGuitarRGB : CActPerfCommonRGB
                 if (txRGB != null)
                 {
                     if (nシャッター下.Guitar == 0)
-                        txRGB.tDraw2D(CDTXMania.app.Device, 67, 670, new RectangleF(0, 128, 277, 50));
+                        txRGB.tDraw2D(67, 670, new RectangleF(0, 128, 277, 50));
 
                     if (nシャッター上.Guitar == 0)
-                        txRGB.tDraw2D(CDTXMania.app.Device, 67, 42, new RectangleF(0, (CDTXMania.ConfigIni.bLeft.Guitar ? 64 : 0), 277, 64));
+                        txRGB.tDraw2D(67, 42, new RectangleF(0, (CDTXMania.ConfigIni.bLeft.Guitar ? 64 : 0), 277, 64));
                 }
 
                 if (txShutter != null)
                 {
                     if (nシャッター下.Guitar != 0)
                     {
-                        txShutter.tDraw2D(CDTXMania.app.Device, 80, (int)dbUnderShutter.Guitar);
+                        txShutter.tDraw2D(80, (int)dbUnderShutter.Guitar);
 
                         if (CDTXMania.ConfigIni.bShowPerformanceInformation)
                             actLVFont.tDrawString(195, (int)dbUnderShutter.Guitar + 5, nシャッター下.Guitar.ToString());
                     }
                     if (nシャッター上.Guitar != 0)
                     {
-                        txShutter.tDraw2D(CDTXMania.app.Device, 80, (int)dbAboveShutter.Guitar);
+                        txShutter.tDraw2D(80, (int)dbAboveShutter.Guitar);
 
                         if (CDTXMania.ConfigIni.bShowPerformanceInformation)
-                            actLVFont.tDrawString(195, (int)dbAboveShutter.Guitar - 25 + txShutter.szImageSize.Height, nシャッター上.Guitar.ToString());
+                            actLVFont.tDrawString(195, (int)(dbAboveShutter.Guitar - 25 + txShutter.Height), nシャッター上.Guitar.ToString());
                     }
                 }
             }
@@ -168,27 +168,27 @@ internal class CActPerfGuitarRGB : CActPerfCommonRGB
                 if (txRGB != null)
                 {
                     if (nシャッター下.Bass == 0)
-                        txRGB.tDraw2D(CDTXMania.app.Device, 937, 670, new RectangleF(0, 128, 277, 50));
+                        txRGB.tDraw2D(937, 670, new RectangleF(0, 128, 277, 50));
 
                     if (nシャッター上.Bass == 0)
-                        txRGB.tDraw2D(CDTXMania.app.Device, 937, 42, new RectangleF(0, (CDTXMania.ConfigIni.bLeft.Bass ? 64 : 0), 277, 64));
+                        txRGB.tDraw2D(937, 42, new RectangleF(0, (CDTXMania.ConfigIni.bLeft.Bass ? 64 : 0), 277, 64));
                 }
 
                 if (txShutter != null)
                 {
                     if (nシャッター下.Bass != 0)
                     {
-                        txShutter.tDraw2D(CDTXMania.app.Device, 950, (int)dbUnderShutter.Bass);
+                        txShutter.tDraw2D(950, (int)dbUnderShutter.Bass);
 
                         if (CDTXMania.ConfigIni.bShowPerformanceInformation)
                             actLVFont.tDrawString(1065, (int)dbUnderShutter.Bass + 5, nシャッター下.Bass.ToString());
                     }
                     if (nシャッター上.Bass != 0)
                     {
-                        txShutter.tDraw2D(CDTXMania.app.Device, 950, (int)dbAboveShutter.Bass);
+                        txShutter.tDraw2D(950, (int)dbAboveShutter.Bass);
 
                         if (CDTXMania.ConfigIni.bShowPerformanceInformation)
-                            actLVFont.tDrawString(1065, (int)dbAboveShutter.Bass - 25 + txShutter.szImageSize.Height, nシャッター上.Bass.ToString());
+                            actLVFont.tDrawString(1065, (int)(dbAboveShutter.Bass - 25 + txShutter.Height), nシャッター上.Bass.ToString());
                     }
                 }
             }

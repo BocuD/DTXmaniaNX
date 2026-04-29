@@ -54,9 +54,9 @@ internal class CActSelectPreimagePanel : CActivity
 	{
 		if( bActivated )
 		{
-			txパネル本体 = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\5_preimage panel.png" ), false );
+			txパネル本体 = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\5_preimage panel.png" ), false );
 			txプレビュー画像 = null;
-			txプレビュー画像がないときの画像 = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\5_preimage default.png" ), false );
+			txプレビュー画像がないときの画像 = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\5_preimage default.png" ), false );
 			sfAVI画像 = Surface.CreateOffscreenPlain( CDTXMania.app.Device, 0xcc, 0x10d, CDTXMania.app.GraphicsDeviceManager.CurrentSettings.BackBufferFormat, Pool.SystemMemory );
 			nAVI再生開始時刻 = -1L;
 			n前回描画したフレーム番号 = -1;
@@ -244,7 +244,7 @@ internal class CActSelectPreimagePanel : CActivity
 				Trace.TraceWarning( "File doesn't exist!({0})", new object[] { str現在のファイル名 } );
 				return false;
 			}
-			txプレビュー画像 = CDTXMania.tGenerateTexture( str現在のファイル名, false );
+			txプレビュー画像 = CDTXMania.LoadFromPath( str現在のファイル名, false );
 			if( txプレビュー画像 != null )
 			{
 				r表示するプレビュー画像 = txプレビュー画像;

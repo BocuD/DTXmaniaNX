@@ -31,7 +31,11 @@ public class UISelectList : UIGroup
         
     public void RemoveSelectableChild(IUISelectable child)
     {
-        children.Remove(child as UIDrawable);
+        if (child is UIDrawable drawable)
+        {
+            children.Remove(drawable);
+        }
+
         selectableChildren.Remove(child);
     }
         

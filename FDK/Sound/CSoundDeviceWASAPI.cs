@@ -185,33 +185,28 @@ public class CSoundDeviceWASAPI : ISoundDevice
 		//	throw new Exception( string.Format( "BASS (WASAPI) の初期化に失敗しました。(BASS_Init)[{0}]", Bass.BASS_ErrorGetCode().ToString() ) );
 
 
-		#region [ デバッグ用: サウンドデバイスのenumerateと、ログ出力 ]
-		//(デバッグ用)
-		Trace.TraceInformation("サウンドデバイス一覧:");
-		int a;
+		#region [ Determine Default Sound Device ]
 		string strDefaultSoundDeviceName = null;
-		BASS_DEVICEINFO[] bassDevInfos = Bass.BASS_GetDeviceInfos();
-		for (a = 0; a < bassDevInfos.GetLength(0); a++)
+		BASS_DEVICEINFO bdi;
+		for (int n = 0; (bdi = Bass.BASS_GetDeviceInfo(n)) != null; n++)
 		{
+			if (bdi.IsEnabled)
 			{
-				Trace.TraceInformation("Sound Device #{0}: {1}: IsDefault={2}, isEnabled={3}, flags={4}, id={5}",
-					a,
-					bassDevInfos[a].name,
-					bassDevInfos[a].IsDefault,
-					bassDevInfos[a].IsEnabled,
-					bassDevInfos[a].flags,
-					bassDevInfos[a].id
-				);
-				if (bassDevInfos[a].IsDefault)
-				{
-					// これはOS標準のdefault device。後でWASAPIのdefault deviceと比較する。
-					strDefaultSoundDeviceName = bassDevInfos[a].name;
+				Trace.TraceInformation("Sound Device #{0}: {1} (Default={2}, Flags={3}, ID={4})",
+					n, bdi.name, bdi.IsDefault, bdi.flags, bdi.id);
 
-					// 以下はOS標準 default deviceのbus type (PNPIDの頭の文字列)。上位側で使用する。
-					string[] s = bassDevInfos[a].id.ToString().ToUpper().Split(new char[] { '#' });
-					if (s != null && s[0] != null)
+				if (bdi.IsDefault)
+				{
+					strDefaultSoundDeviceName = bdi.name;
+
+					// Bus type (PNPID prefix) for upper layers
+					if (bdi.id != null)
 					{
-						strDefaultSoundDeviceBusType = s[0];
+						string[] s = bdi.id.ToString().ToUpper().Split('#');
+						if (s.Length > 0 && !string.IsNullOrEmpty(s[0]))
+						{
+							strDefaultSoundDeviceBusType = s[0];
+						}
 					}
 				}
 			}
@@ -227,32 +222,67 @@ public class CSoundDeviceWASAPI : ISoundDevice
 		// WASAPIの更新間隔(period)は、バッファサイズにも影響を与える。
 		// 更新間隔を最小にするには、BassWasapi.BASS_WASAPI_GetDeviceInfo( ndevNo ).minperiod の値を使えばよい。
 		// これをやらないと、更新間隔ms=6ms となり、バッファサイズを 6ms x 4 = 24msより小さくできない。
-		#region [ 既定の出力デバイスと設定されているWASAPIデバイスを検索し、更新間隔msを設定できる最小値にする ]
+		#region [ Search for WASAPI device matching default sound device ]
 		int nDevNo = -1;
-		BASS_WASAPI_DEVICEINFO deviceInfo;
-		for (int n = 0; (deviceInfo = BassWasapi.BASS_WASAPI_GetDeviceInfo(n)) != null; n++)
+		Trace.TraceInformation("Searching for WASAPI device matching default sound device: \"{0}\"", strDefaultSoundDeviceName);
+		BASS_WASAPI_DEVICEINFO deviceInfo = null;
+		for (int n = 0; ; n++)
 		{
-			// BASS_DEVICEINFOとBASS_WASAPI_DEVICEINFOで、IsDefaultとなっているデバイスが異なる場合がある。
-			// (WASAPIでIsDefaultとなっているデバイスが正しくない場合がある)
-			// そのため、BASS_DEVICEでIsDefaultとなっているものを探し、それと同じ名前のWASAPIデバイスを使用する。
-			//if ( deviceInfo.IsDefault )
-			if (deviceInfo.name == strDefaultSoundDeviceName)
+			var wasapiDeviceInfo = BassWasapi.BASS_WASAPI_GetDeviceInfo(n);
+			if (wasapiDeviceInfo == null) break;
+
+			bool isInput = (wasapiDeviceInfo.flags & BASSWASAPIDeviceInfo.BASS_DEVICE_INPUT) != 0;
+			bool isEnabled = (wasapiDeviceInfo.flags & BASSWASAPIDeviceInfo.BASS_DEVICE_ENABLED) != 0;
+
+			if (!isEnabled) continue; // Skip disabled/disconnected devices
+
+			// (Log enabled devices to help debug index mismatches)
+			Trace.TraceInformation("WASAPI Device #{0}: {1} (Input={2}, Default={3})", 
+				n, wasapiDeviceInfo.name, isInput, wasapiDeviceInfo.IsDefault);
+
+			if (wasapiDeviceInfo.name == strDefaultSoundDeviceName && !isInput)
 			{
-				nDevNo = n;
-				#region [ 既定の出力デバイスの情報を表示 ]
-				Trace.TraceInformation("WASAPI Device #{0}: {1}: IsDefault={2}, defPeriod={3}s, minperiod={4}s, mixchans={5}, mixfreq={6}",
-					n,
-					deviceInfo.name,
-					deviceInfo.IsDefault, deviceInfo.defperiod, deviceInfo.minperiod, deviceInfo.mixchans, deviceInfo.mixfreq);
-				#endregion
-				break;
+				if (nDevNo == -1 || wasapiDeviceInfo.IsDefault)
+				{
+					nDevNo = n;
+					deviceInfo = wasapiDeviceInfo;
+					if (wasapiDeviceInfo.IsDefault)
+					{
+						Trace.TraceInformation("Found best match WASAPI Device #{0} (Default).", n);
+						// We found the best match, but keep logging other enabled devices for diagnostics.
+					}
+				}
 			}
 		}
 		if (nDevNo != -1)
 		{
-			Trace.TraceInformation("Start Bass_Init(device=0(fixed value: no sound), deviceInfo.mixfreq=" + deviceInfo.mixfreq + ", BASS_DEVICE_DEFAULT, Zero)");
-			if (!Bass.BASS_Init(0, deviceInfo.mixfreq, BASSInit.BASS_DEVICE_DEFAULT, IntPtr.Zero))  // device = 0:"no device": BASS からはデバイスへアクセスさせない。アクセスは BASSWASAPI アドオンから行う。
-				throw new Exception(string.Format("BASS (WASAPI{0}) の初期化に失敗しました。(BASS_Init)[{1}]", mode.ToString(), Bass.BASS_ErrorGetCode().ToString()));
+			Trace.TraceInformation("Matched WASAPI Device #{0} to default sound device.", nDevNo);
+			// deviceInfo is already set to the matched device.
+			#region [ 既定の出力デバイスの情報を表示 ]
+			Trace.TraceInformation("Selected WASAPI Device #{0}: {1}: IsDefault={2}, defPeriod={3}s, minperiod={4}s, mixchans={5}, mixfreq={6}",
+				nDevNo,
+				deviceInfo.name,
+				deviceInfo.IsDefault, deviceInfo.defperiod, deviceInfo.minperiod, deviceInfo.mixchans, deviceInfo.mixfreq);
+			#endregion
+			int nFrequency = (deviceInfo.mixfreq > 0) ? deviceInfo.mixfreq : 44100;
+			Trace.TraceInformation("Attempting BASS_Init (Device: 0 (No Sound), Frequency: {0})", nFrequency);
+			if (!Bass.BASS_Init(0, nFrequency, BASSInit.BASS_DEVICE_DEFAULT, IntPtr.Zero))
+			{
+				BASSError err = Bass.BASS_ErrorGetCode();
+				if (err != BASSError.BASS_ERROR_ALREADY)
+				{
+					Trace.TraceError("BASS_Init failed (WASAPI {0}). Error: {1}", mode.ToString(), err.ToString());
+					throw new Exception(string.Format("BASS (WASAPI {0}) initialization failed. (BASS_Init)[{1}]", mode.ToString(), err.ToString()));
+				}
+				else
+				{
+					Trace.TraceInformation("BASS_Init: BASS is already initialized.");
+				}
+			}
+			else
+			{
+				Trace.TraceInformation("BASS_Init successful.");
+			}
 
 			// Trace.TraceInformation( "Selected Default WASAPI Device: {0}", deviceInfo.name );
 			// Trace.TraceInformation( "MinPeriod={0}, DefaultPeriod={1}", deviceInfo.minperiod, deviceInfo.defperiod );
@@ -272,23 +302,6 @@ public class CSoundDeviceWASAPI : ISoundDevice
 		}
 		#endregion
 
-		#region [ デバッグ用: WASAPIデバイスのenumerateと、ログ出力 ]
-		//(デバッグ用)
-		Trace.TraceInformation("WASAPIデバイス一覧:");
-		//int a, count = 0;
-		BASS_WASAPI_DEVICEINFO wasapiDevInfo;
-		for (a = 0; (wasapiDevInfo = BassWasapi.BASS_WASAPI_GetDeviceInfo(a)) != null; a++)
-		{
-			if ((wasapiDevInfo.flags & BASSWASAPIDeviceInfo.BASS_DEVICE_INPUT) == 0 // device is an output device (not input)
-			    && (wasapiDevInfo.flags & BASSWASAPIDeviceInfo.BASS_DEVICE_ENABLED) != 0) // and it is enabled
-			{
-				Trace.TraceInformation("WASAPI Device #{0}: {1}: IsDefault={2}, defPeriod={3}s, minperiod={4}s, mixchans={5}, mixfreq={6}",
-					a,
-					wasapiDevInfo.name,
-					wasapiDevInfo.IsDefault, wasapiDevInfo.defperiod, wasapiDevInfo.minperiod, wasapiDevInfo.mixchans, wasapiDevInfo.mixfreq);
-			}
-		}
-		#endregion
 
 		Retry:
 		var flags = (mode == Eデバイスモード.排他) ?
@@ -305,9 +318,9 @@ public class CSoundDeviceWASAPI : ISoundDevice
 		// (Win10のlow latency modeではない前提でまずは設定値を決める)
 		float fPeriod = (mode == Eデバイスモード.排他) ? deviceInfo.minperiod : deviceInfo.defperiod;
 
-		Trace.TraceInformation("arg: n希望バッファサイズms=" + n希望バッファサイズms);
-		Trace.TraceInformation("arg: n更新間隔ms=" + n更新間隔ms);
-		Trace.TraceInformation("fPeriod = " + fPeriod + " (排他時: minperiod, 共有時: defperiod。Win10 low latency audio考慮前)");
+		Trace.TraceInformation("Requested Buffer Size (ms): " + n希望バッファサイズms);
+		Trace.TraceInformation("Requested Update Period (ms): " + n更新間隔ms);
+		Trace.TraceInformation("fPeriod = " + fPeriod + " (Exclusive: minperiod, Shared: defperiod. Before Win10 low latency audio considerations)");
 
 		float f更新間隔sec = (n更新間隔ms > 0) ? (n更新間隔ms / 1000.0f) : fPeriod;
 		if (f更新間隔sec < fPeriod)
@@ -355,15 +368,48 @@ public class CSoundDeviceWASAPI : ISoundDevice
 		//	f希望バッファサイズsec = 0.0f;
 		//}
 
-		Trace.TraceInformation("f希望バッファサイズsec=" + f希望バッファサイズsec + ", f更新間隔sec=" + f更新間隔sec + ": Win10 low latency audio 考慮後");
+		Trace.TraceInformation("f希望バッファサイズsec=" + f希望バッファサイズsec + ", f更新間隔sec=" + f更新間隔sec + ": After Win10 low latency audio considerations");
 
-		Trace.TraceInformation("Start Bass_Wasapi_Init(device=" + nDevNo + ", freq=" + n周波数 + ", nchans=" + nチャンネル数 + ", flags=" + flags + "," +
-		                       " buffer=" + f希望バッファサイズsec + ", period=" + f更新間隔sec + ")");
-		if (BassWasapi.BASS_WASAPI_Init(nDevNo, n周波数, nチャンネル数, flags, f希望バッファサイズsec, f更新間隔sec, tWasapiProc, IntPtr.Zero))
+		Trace.TraceInformation("Attempting BASS_WASAPI_Init (Device: {0}, Frequency: {1}, Channels: {2}, Flags: {3}, Buffer: {4}, Period: {5})",
+			nDevNo, n周波数, nチャンネル数, flags, f希望バッファサイズsec, f更新間隔sec);
+		
+		bool bSuccess = BassWasapi.BASS_WASAPI_Init(nDevNo, n周波数, nチャンネル数, flags, f希望バッファサイズsec, f更新間隔sec, tWasapiProc, IntPtr.Zero);
+
+		if (!bSuccess)
+		{
+			BASSError err = Bass.BASS_ErrorGetCode();
+			if (err == BASSError.BASS_ERROR_DRIVER || err == BASSError.BASS_ERROR_FORMAT)
+			{
+				int[] fallbackFrequencies = [deviceInfo.mixfreq, 48000, 44100];
+				int[] fallbackChannels = [deviceInfo.mixchans, 2];
+
+				foreach (int freq in fallbackFrequencies)
+				{
+					if (freq <= 0) continue;
+					foreach (int chans in fallbackChannels)
+					{
+						if (chans <= 0) continue;
+						if (freq == n周波数 && chans == nチャンネル数) continue;
+
+						Trace.TraceWarning("BASS_WASAPI_Init failed with {0}. Retrying with explicit frequency ({1}) and channels ({2}).", err, freq, chans);
+						if (BassWasapi.BASS_WASAPI_Init(nDevNo, freq, chans, flags, f希望バッファサイズsec, f更新間隔sec, tWasapiProc, IntPtr.Zero))
+						{
+							bSuccess = true;
+							goto Success;
+						}
+						err = Bass.BASS_ErrorGetCode(); // Update error for next iteration or final failure
+					}
+				}
+			}
+		}
+
+		Success:
+
+		if (bSuccess)
 		{
 			if (mode == Eデバイスモード.排他)
 			{
-				#region [ 排他モードで作成成功。]
+				#region [ Exclusive Mode Successful ]
 				//-----------------
 				eOutputDevice = ESoundDeviceType.ExclusiveWASAPI;
 
@@ -371,7 +417,7 @@ public class CSoundDeviceWASAPI : ISoundDevice
 				deviceInfo = BassWasapi.BASS_WASAPI_GetDeviceInfo(nDevNo);
 				var wasapiInfo = BassWasapi.BASS_WASAPI_GetInfo();
 				int n1サンプルのバイト数 = 2 * wasapiInfo.chans; // default;
-				switch (wasapiInfo.format)      // BASS WASAPI で扱うサンプルはすべて 32bit float で固定されているが、デバイスはそうとは限らない。
+				switch (wasapiInfo.format)      // BASS WASAPI always uses 32bit float for internal processing, but the device might not.
 				{
 					case BASSWASAPIFormat.BASS_WASAPI_FORMAT_8BIT: n1サンプルのバイト数 = 1 * wasapiInfo.chans; break;
 					case BASSWASAPIFormat.BASS_WASAPI_FORMAT_16BIT: n1サンプルのバイト数 = 2 * wasapiInfo.chans; break;
@@ -381,9 +427,9 @@ public class CSoundDeviceWASAPI : ISoundDevice
 				}
 				int n1秒のバイト数 = n1サンプルのバイト数 * wasapiInfo.freq;
 				n実バッファサイズms = (long)(wasapiInfo.buflen * 1000.0f / n1秒のバイト数);
-				n実出力遅延ms = 0;  // 初期値はゼロ
-				Trace.TraceInformation("使用デバイス: #" + nDevNo + " : " + deviceInfo.name + ", flags=" + deviceInfo.flags);
-				Trace.TraceInformation("BASS を初期化しました。(WASAPI排他モード, {0}Hz, {1}ch, フォーマット:{2}, バッファ{3}bytes [{4}ms(希望{5}ms)], 更新間隔{6}ms)",
+				n実出力遅延ms = 0;  // Initial value is zero
+				Trace.TraceInformation("Using Device: #{0} : {1}, flags={2}", nDevNo, deviceInfo.name, deviceInfo.flags);
+				Trace.TraceInformation("BASS WASAPI Initialized (Exclusive Mode, {0}Hz, {1}ch, Format: {2}, Buffer: {3} bytes [{4}ms (Requested: {5}ms)], Update Period: {6}ms)",
 					wasapiInfo.freq,
 					wasapiInfo.chans,
 					wasapiInfo.format.ToString(),
@@ -392,14 +438,14 @@ public class CSoundDeviceWASAPI : ISoundDevice
 					(f希望バッファサイズsec * 1000).ToString(),  //n希望バッファサイズms.ToString(),
 					(f更新間隔sec * 1000).ToString()            //n更新間隔ms.ToString()
 				);
-				Trace.TraceInformation("デバイスの最小更新時間={0}ms, 既定の更新時間={1}ms", deviceInfo.minperiod * 1000, deviceInfo.defperiod * 1000);
+				Trace.TraceInformation("Device Min Update Period: {0}ms, Default Update Period: {1}ms", deviceInfo.minperiod * 1000, deviceInfo.defperiod * 1000);
 				bIsBASSFree = false;
 				//-----------------
 				#endregion
 			}
 			else
 			{
-				#region [ 共有モードで作成成功。]
+				#region [ Shared Mode Successful ]
 				//-----------------
 				eOutputDevice = ESoundDeviceType.SharedWASAPI;
 
@@ -407,11 +453,10 @@ public class CSoundDeviceWASAPI : ISoundDevice
 				int n1サンプルのバイト数 = 2 * wasapiInfo.chans; // default;
 				int n1秒のバイト数 = n1サンプルのバイト数 * wasapiInfo.freq;
 				n実バッファサイズms = (long)(wasapiInfo.buflen * 1000.0f / n1秒のバイト数);
-				n実出力遅延ms = 0;  // 初期値はゼロ
-				var devInfo = BassWasapi.BASS_WASAPI_GetDeviceInfo(BassWasapi.BASS_WASAPI_GetDevice()); // 共有モードの場合、更新間隔はデバイスのデフォルト値に固定される。
-				//Trace.TraceInformation( "BASS を初期化しました。(WASAPI共有モード, 希望バッファサイズ={0}ms, 更新間隔{1}ms)", n希望バッファサイズms, devInfo.defperiod * 1000.0f );
-				Trace.TraceInformation("使用デバイス: #" + nDevNo + " : " + deviceInfo.name + ", flags=" + deviceInfo.flags);
-				Trace.TraceInformation("BASS を初期化しました。(WASAPI共有モード, {0}Hz, {1}ch, フォーマット:{2}, バッファ{3}bytes [{4}ms(希望{5}ms)], 更新間隔{6}ms)",
+				n実出力遅延ms = 0;  // Initial value is zero
+				var devInfo = BassWasapi.BASS_WASAPI_GetDeviceInfo(BassWasapi.BASS_WASAPI_GetDevice()); // In shared mode, update period is fixed to device's default.
+				Trace.TraceInformation("Using Device: #{0} : {1}, flags={2}", nDevNo, deviceInfo.name, deviceInfo.flags);
+				Trace.TraceInformation("BASS WASAPI Initialized (Shared Mode, {0}Hz, {1}ch, Format: {2}, Buffer: {3} bytes [{4}ms (Requested: {5}ms)], Update Period: {6}ms)",
 					wasapiInfo.freq,
 					wasapiInfo.chans,
 					wasapiInfo.format.ToString(),
@@ -420,38 +465,27 @@ public class CSoundDeviceWASAPI : ISoundDevice
 					(f希望バッファサイズsec * 1000).ToString(),  //n希望バッファサイズms.ToString(),
 					(f更新間隔sec * 1000).ToString()            //n更新間隔ms.ToString()
 				);
-				Trace.TraceInformation("デバイスの最小更新時間={0}ms, 既定の更新時間={1}ms", deviceInfo.minperiod * 1000, deviceInfo.defperiod * 1000);
+				Trace.TraceInformation("Device Min Update Period: {0}ms, Default Update Period: {1}ms", deviceInfo.minperiod * 1000, deviceInfo.defperiod * 1000);
 				bIsBASSFree = false;
 				//-----------------
 				#endregion
 			}
 		}
-		#region [ #31737 WASAPI排他モードのみ利用可能とし、WASAPI共有モードは使用できないようにするために、WASAPI共有モードでの初期化フローを削除する。 ]
 		else if (mode == Eデバイスモード.排他)
 		{
 			BASSError errcode = Bass.BASS_ErrorGetCode();
-			Trace.TraceInformation("Failed to initialize setting BASS_WASAPI_Init (WASAPI{0}): [{1}]", mode.ToString(), errcode);
-			#region [ 排他モードに失敗したのなら共有モードでリトライ。]
-			//-----------------
-			//	mode = Eデバイスモード.共有;
-			//	goto Retry;
-			//-----------------
+			Trace.TraceError("BASS_WASAPI_Init failed (WASAPI {0}). Error: {1}", mode.ToString(), errcode);
 			Bass.BASS_Free();
 			bIsBASSFree = true;
-			throw new Exception(string.Format("BASS (WASAPI{0}) の初期化に失敗しました。(BASS_WASAPI_Init)[{1}]", mode.ToString(), errcode));
-			#endregion
+			throw new Exception(string.Format("BASS (WASAPI {0}) initialization failed. (BASS_WASAPI_Init)[{1}]", mode.ToString(), errcode));
 		}
-		#endregion
 		else
 		{
-			#region [ それでも失敗したら例外発生。]
-			//-----------------
 			BASSError errcode = Bass.BASS_ErrorGetCode();
+			Trace.TraceError("BASS_WASAPI_Init failed (WASAPI {0}). Error: {1}", mode.ToString(), errcode);
 			Bass.BASS_Free();
 			bIsBASSFree = true;
-			throw new Exception(string.Format("BASS (WASAPI{0}) の初期化に失敗しました。(BASS_WASAPI_Init)[{1}]", mode.ToString(), errcode));
-			//-----------------
-			#endregion
+			throw new Exception(string.Format("BASS (WASAPI {0}) initialization failed. (BASS_WASAPI_Init)[{1}]", mode.ToString(), errcode));
 		}
 #if TEST_MultiThreadedMixer
 			//LoadLibraryに失敗する・・・
@@ -644,7 +678,7 @@ public class CSoundDeviceWASAPI : ISoundDevice
 #else
 		int hmixer = hMixer_Chips[(int)eInstType];
 #endif
-		sound.tWASAPIサウンドを作成する(strファイル名, hmixer, eOutputDevice, eInstType);
+		sound.tCreateWasapiAudioClip(strファイル名, hmixer, eOutputDevice, eInstType);
 		return sound;
 	}
 	public void tサウンドを作成する(string strファイル名, ref CSound sound, CSound.EInstType eInstType)
@@ -654,7 +688,7 @@ public class CSoundDeviceWASAPI : ISoundDevice
 #else
 		int hmixer = hMixer_Chips[(int)eInstType];
 #endif
-		sound.tWASAPIサウンドを作成する(strファイル名, hmixer, eOutputDevice, eInstType);
+		sound.tCreateWasapiAudioClip(strファイル名, hmixer, eOutputDevice, eInstType);
 	}
 	public void tサウンドを作成する(byte[] byArrWAVファイルイメージ, ref CSound sound, CSound.EInstType eInstType)
 	{
@@ -663,7 +697,7 @@ public class CSoundDeviceWASAPI : ISoundDevice
 #else
 		int hmixer = hMixer_Chips[(int)eInstType];
 #endif
-		sound.tWASAPIサウンドを作成する(byArrWAVファイルイメージ, hmixer, eOutputDevice, eInstType);
+		sound.tCreateWasapiAudioClip(byArrWAVファイルイメージ, hmixer, eOutputDevice, eInstType);
 	}
 	#endregion
 

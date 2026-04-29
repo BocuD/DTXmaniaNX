@@ -16,7 +16,7 @@ public class SortByAllSongs : SongDbSort
         {
             SongNode.Clone(node, root);
         }
-
+        
         return Task.FromResult(root);
     }
 }

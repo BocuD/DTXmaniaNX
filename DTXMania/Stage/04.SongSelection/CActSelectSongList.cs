@@ -520,13 +520,13 @@ internal class CActSelectSongList : CActivity
 			return;
 
 		strDefaultPreImage = CSkin.Path(@"Graphics\5_preimage default.png");
-		txSongNameBar.Score = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\5_bar score.png" ), false );
-		txSongNameBar.Box = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\5_bar box.png" ), false );
-		txSongNameBar.Other = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\5_bar other.png" ), false );
-		txSongSelectionBar.Score = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\5_bar score selected.png" ), false );
-		txSongSelectionBar.Box = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\5_bar box selected.png" ), false );
-		txSongSelectionBar.Other = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\5_bar other selected.png" ), false );
-		txSkillNumbers = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\ScreenSelect skill number on list.png"), false);
+		txSongNameBar.Score = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\5_bar score.png" ), false );
+		txSongNameBar.Box = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\5_bar box.png" ), false );
+		txSongNameBar.Other = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\5_bar other.png" ), false );
+		txSongSelectionBar.Score = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\5_bar score selected.png" ), false );
+		txSongSelectionBar.Box = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\5_bar box selected.png" ), false );
+		txSongSelectionBar.Other = CDTXMania.LoadFromPath( CSkin.Path( @"Graphics\5_bar other selected.png" ), false );
+		txSkillNumbers = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\ScreenSelect skill number on list.png"), false);
 		
 		prvFont = new CPrivateFastFont( new FontFamily( CDTXMania.ConfigIni.songListFont ), 30, FontStyle.Regular );
 		prvFontSmall = new CPrivateFastFont( new FontFamily( CDTXMania.ConfigIni.songListFont ), 15, FontStyle.Regular );
@@ -593,7 +593,7 @@ internal class CActSelectSongList : CActivity
 		}
 		#endregion
 		#region [ 曲数表示 ]
-		txItemNumbers = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\5_skill number on gauge etc.png"), false);
+		txItemNumbers = CDTXMania.LoadFromPath(CSkin.Path(@"Graphics\5_skill number on gauge etc.png"), false);
 		#endregion
 		base.OnManagedCreateResources();
 	}

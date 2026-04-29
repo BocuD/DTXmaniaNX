@@ -1,7 +1,7 @@
-﻿using DTXMania.Core;
+﻿using System.Numerics;
+using DTXMania.Core;
 using FDK;
 using Hexa.NET.ImGui;
-using SharpDX;
 
 namespace DTXMania.UI.Drawable;
 
@@ -42,9 +42,9 @@ public class UIDFPText : UIDrawable
         }
     }
         
-    public override void Draw(Matrix parentMatrix)
+    public override void Draw(Matrix4x4 parentMatrix)
     {
-        CTexture texture = isHighlighted ? font.txHighlightCharacterMap : font.txCharacterMap;
+        BaseTexture texture = isHighlighted ? font.txHighlightCharacterMap : font.txCharacterMap;
             
         if( texture != null )
         {
@@ -58,9 +58,9 @@ public class UIDFPText : UIDrawable
                 {
                     if( charcterRect.ch == ch )
                     {
-                        var characterOffset = Matrix.Translation(new Vector3(x, 0, 0));
+                        var characterOffset = Matrix4x4.CreateTranslation(new Vector3(x, 0, 0));
                         Vector2 sz = new Vector2(charcterRect.rc.Width, charcterRect.rc.Height);
-                        texture.tDraw2DMatrix(CDTXMania.app.Device, characterOffset * localTransformMatrix * parentMatrix, sz, charcterRect.rc);
+                        texture.tDraw2DMatrix(characterOffset * localTransformMatrix * parentMatrix, sz, charcterRect.rc);
                         x += charcterRect.rc.Width - 5;
                         break;
                     }

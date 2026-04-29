@@ -345,6 +345,7 @@ internal partial class CActConfigList
         
     public void tSetupItemList_KeyAssignGuitar()
     { 
+        tRecordToConfigIni();
         listItems.Clear();
             
         CItemBase iKeyAssignGuitarReturnToMenu = new("<< Return To Menu", CItemBase.EPanelType.Other,

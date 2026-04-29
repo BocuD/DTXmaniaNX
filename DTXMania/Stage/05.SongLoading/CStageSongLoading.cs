@@ -3,14 +3,14 @@ using System.Text;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Drawing;
+using System.Numerics;
 using DTXMania.Core;
+using DTXMania.Core.Framework;
 using DTXMania.UI;
 using DTXMania.UI.Drawable;
-using SharpDX;
 using FDK;
 using Color = System.Drawing.Color;
 using Point = System.Drawing.Point;
-using RectangleF = SharpDX.RectangleF;
 using SlimDXKey = SlimDX.DirectInput.Key;
 
 namespace DTXMania;
@@ -29,8 +29,6 @@ internal class CStageSongLoading : CStage
         eStageID = EStage.SongLoading_5;
         ePhaseID = EPhase.Common_DefaultState;
         bActivated = false;
-        //			base.listChildActivities.Add( this.actFI = new CActFIFOBlack() );	// #27787 2012.3.10 yyagi 曲読み込み画面のフェードインの省略
-        listChildActivities.Add(actFO = new CActFIFOBlackStart());
 
         #region[ 難易度数字 ]
         //大文字
@@ -169,9 +167,28 @@ internal class CStageSongLoading : CStage
     
     public override void InitializeDefaultUI()
     {
-        DTXTexture bgTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\6_background.jpg")));
-        UIImage bg = ui.AddChild(new UIImage(bgTex));
+        UIImage bg = ui.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\6_background.jpg"))));
         bg.renderOrder = -100;
+        
+        if (!string.IsNullOrWhiteSpace(strSongTitle))
+        {
+            UIText songNameText = ui.AddChild(new UIText(strSongTitle, 40));
+            songNameText.fillColor = Color4.Black;
+            songNameText.outlineColor = Color4.White;
+            songNameText.name = "SongName";
+            songNameText.font = UIFonts.FallbackFont;
+            songNameText.position = new Vector3(500, 285, 0);
+        }
+
+        if (!string.IsNullOrWhiteSpace(strArtistName))
+        {
+            UIText artistNameText = ui.AddChild(new UIText(strArtistName, 30));
+            artistNameText.fillColor = Color4.Black;
+            artistNameText.outlineColor = Color4.White;
+            artistNameText.name = "ArtistName";
+            artistNameText.font = UIFonts.FallbackFont;
+            artistNameText.position = new Vector3(500, 360, 0);
+        }
     }
 
     public override void OnActivate()
@@ -182,7 +199,6 @@ internal class CStageSongLoading : CStage
         {
             strSongTitle = "";
             strArtistName = "";
-            strSTAGEFILE = "";
 
             nBGMPlayStartTime = -1L;
             nBGMTotalPlayTimeMs = 0;
@@ -204,9 +220,7 @@ internal class CStageSongLoading : CStage
                 strSongTitle = cdtx.TITLE;
 
             strArtistName = cdtx.ARTIST;
-            if (cdtx.SOUND_NOWLOADING is { Length: > 0 } && File.Exists(cdtx.strFolderName + cdtx.SOUND_NOWLOADING)
-                                                         && (!CDTXMania.DTXVmode.Enabled)
-                                                         && (!CDTXMania.DTX2WAVmode.Enabled))
+            if (cdtx.SOUND_NOWLOADING is { Length: > 0 } && File.Exists(cdtx.strFolderName + cdtx.SOUND_NOWLOADING))
             {
                 string currentlyLoadingSoundFilePath = cdtx.strFolderName + cdtx.SOUND_NOWLOADING;
                 try
@@ -281,15 +295,14 @@ internal class CStageSongLoading : CStage
 
             cdtx.OnDeactivate();
             base.OnActivate();
-            if (!CDTXMania.bCompactMode && !CDTXMania.DTXVmode.Enabled && !CDTXMania.DTX2WAVmode.Enabled)
-                tDetermineStatusLabelFromLabelName(
-                    CDTXMania.confirmedSong.difficultyLabel[
-                        CDTXMania.confirmedSongDifficulty]);
+
+            tDetermineStatusLabelFromLabelName(
+                CDTXMania.confirmedSong.difficultyLabel[
+                    CDTXMania.confirmedSongDifficulty]);
             
             //add difficulty panel to ui here
             //todo: this should be moved when chart loading is moved
-            DTXTexture difficultyPanelTex = new(CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\6_Difficulty.png")));
-            UIImage difficultyPanel = ui.AddChild(new UIImage(difficultyPanelTex));
+            UIImage difficultyPanel = ui.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\6_Difficulty.png"))));
             difficultyPanel.renderMode = ERenderMode.Sliced;
             difficultyPanel.position = new Vector3(191, 102, 0);
             difficultyPanel.clipRect = new RectangleF(0, nIndex * 50, 262, 50);
@@ -321,73 +334,11 @@ internal class CStageSongLoading : CStage
     {
         if (bActivated)
         {
-            txLevel = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\6_LevelNumber.png"));
-            txDifficultyPanel = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\6_Difficulty.png"));
-            txPartPanel = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\6_Part.png"));
+            txLevel = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\6_LevelNumber.png"));
+            txDifficultyPanel = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\6_Difficulty.png"));
+            txPartPanel = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\6_Part.png"));
 
-            #region[ 曲名、アーティスト名テクスチャの生成 ]
-
-            try
-            {
-                #region[ 曲名、アーティスト名テクスチャの生成 ]
-
-                if (!string.IsNullOrWhiteSpace(strSongTitle))
-                {
-                    titleFont = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.songListFont), 40 * CDTXMania.renderScale,
-                        FontStyle.Regular);
-                     Bitmap bmpSongName = titleFont.DrawPrivateFont(strSongTitle, CPrivateFont.DrawMode.Edge, Color.Black,
-                        Color.Black, clGITADORAgradationTopColor, clGITADORAgradationBottomColor, true);
-                    txTitle = CDTXMania.tGenerateTexture(bmpSongName, false);
-                    CDTXMania.tDisposeSafely(ref bmpSongName);
-                    CDTXMania.tDisposeSafely(ref titleFont);
-                }
-                else
-                {
-                    txTitle = null;
-                }
-
-                if (!string.IsNullOrWhiteSpace(strArtistName))
-                {
-                    artistNameFont = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.songListFont), 30 * CDTXMania.renderScale,
-                        FontStyle.Regular);
-                    Bitmap bmpArtistName = artistNameFont.DrawPrivateFont(strArtistName, CPrivateFont.DrawMode.Edge, Color.Black,
-                        Color.Black, clGITADORAgradationTopColor, clGITADORAgradationBottomColor, true);
-                    txArtist = CDTXMania.tGenerateTexture(bmpArtistName, false);
-                    CDTXMania.tDisposeSafely(ref bmpArtistName);
-                    CDTXMania.tDisposeSafely(ref artistNameFont);
-                }
-                else
-                {
-                    txArtist = null;
-                }
-
-                #endregion
-            }
-            catch (CTextureCreateFailedException)
-            {
-                Trace.TraceError("テクスチャの生成に失敗しました。({0})", strSTAGEFILE);
-                txTitle = null;
-            }
-
-            #endregion
-            
             base.OnManagedCreateResources();
-        }
-    }
-
-    public override void OnManagedReleaseResources()
-    {
-        if (bActivated)
-        {
-            //テクスチャ11枚
-            //2018.03.15 kairera0467 PrivateFontが抜けていた＆フォント生成直後に解放するようにしてみる
-            CDTXMania.tReleaseTexture(ref txJacket);
-            CDTXMania.tReleaseTexture(ref txTitle);
-            CDTXMania.tReleaseTexture(ref txArtist);
-            CDTXMania.tReleaseTexture(ref txDifficultyPanel);
-            CDTXMania.tReleaseTexture(ref txPartPanel);
-            CDTXMania.tReleaseTexture(ref txLevel);
-            base.OnManagedReleaseResources();
         }
     }
 
@@ -405,12 +356,10 @@ internal class CStageSongLoading : CStage
             nBGMPlayStartTime = CSoundManager.rcPerformanceTimer.nCurrentTime;
             nBGMTotalPlayTimeMs = sdLoadingSound.nTotalPlayTimeMs;
         }
-        else if (!CDTXMania.DTXVmode.Enabled && !CDTXMania.DTX2WAVmode.Enabled)
-        {
-            CDTXMania.Skin.soundNowLoading.tPlay();
-            nBGMPlayStartTime = CSoundManager.rcPerformanceTimer.nCurrentTime;
-            nBGMTotalPlayTimeMs = CDTXMania.Skin.soundNowLoading.nLength_CurrentSound;
-        }
+        
+        CDTXMania.Skin.soundNowLoading.tPlay();
+        nBGMPlayStartTime = CSoundManager.rcPerformanceTimer.nCurrentTime;
+        nBGMTotalPlayTimeMs = CDTXMania.Skin.soundNowLoading.nLength_CurrentSound;
 
         ePhaseID = EPhase.Common_FadeIn;
             
@@ -419,11 +368,12 @@ internal class CStageSongLoading : CStage
         try
         {
             string path = cdtx.strFolderName + cdtx.PREIMAGE;
+            
+            var txJacket = BaseTexture.LoadFromPath(!File.Exists(path) ? CSkin.Path(@"Graphics\5_preimage default.png") : path);
 
-            if (txJacket == null) // 2019.04.26 kairera0467
-            {
-                txJacket = CDTXMania.tGenerateTexture(!File.Exists(path) ? CSkin.Path(@"Graphics\5_preimage default.png") : path);
-            }
+            var jacket = ui.AddChild(new UIImage(txJacket));
+            jacket.size = new Vector2(384, 384);
+            jacket.position = new Vector3(100, 85, 0);
         }
         catch (Exception ex)
         {
@@ -723,7 +673,6 @@ internal class CStageSongLoading : CStage
                 
                 if ((nCurrentTime - nBGMPlayStartTime) > (nBGMTotalPlayTimeMs)) // #27787 2012.3.10 yyagi 1000ms == フェードイン分の時間
                 {
-                    actFO.tStartFadeOut();
                     ePhaseID = EPhase.Common_FadeOut;
                 }
 
@@ -735,6 +684,8 @@ internal class CStageSongLoading : CStage
                 {
                     sdLoadingSound.tRelease();
                 }
+
+                CDTXMania.nStageNumber++;
                 return (int)ESongLoadingScreenReturnValue.LoadingComplete;
         }
 
@@ -743,52 +694,8 @@ internal class CStageSongLoading : CStage
     
     private void DrawLoadingScreenUI()
     {
-        Matrix scaling = Matrix.Scaling(CDTXMania.renderScale);
         int y = 184;
-        
-        if (txJacket != null)
-        {
-            Matrix mat = Matrix.Identity;
-            float fScalingFactor;
-            float jacketOnScreenSize = 384.0f;
-            //Maintain aspect ratio by scaling only to the smaller scalingFactor
-            if (jacketOnScreenSize / txJacket.szImageSize.Width > jacketOnScreenSize / txJacket.szImageSize.Height)
-            {
-                fScalingFactor = jacketOnScreenSize / txJacket.szImageSize.Height;
-            }
-            else
-            {
-                fScalingFactor = jacketOnScreenSize / txJacket.szImageSize.Width;
-            }
-        
-            mat *= Matrix.Scaling(fScalingFactor, fScalingFactor, 1f);
-            mat *= Matrix.Translation(-348, 84f, 0f);
-        
-            txJacket.tDraw3D(CDTXMania.app.Device, mat);
-        }
-        
-        if (txTitle != null)
-        {
-            if (txTitle.szImageSize.Width > 625)
-                txTitle.vcScaleRatio.X = 625f / txTitle.szImageSize.Width;
 
-            Matrix mat = Matrix.Translation(500, 285, 0) * scaling;
-            Vector2 size = new(txTitle.szImageSize.Width, txTitle.szImageSize.Height);
-            size *= 1 / CDTXMania.renderScale;
-            txTitle.tDraw2DMatrix(CDTXMania.app.Device, mat, size);
-        }
-        
-        if (txArtist != null)
-        {
-            if (txArtist.szImageSize.Width > 625)
-                txArtist.vcScaleRatio.X = 625f / txArtist.szImageSize.Width;
-        
-            Matrix mat = Matrix.Translation(500, 360, 0) * scaling;
-            Vector2 size = new(txArtist.szImageSize.Width, txArtist.szImageSize.Height);
-            size *= 1 / CDTXMania.renderScale;
-            txArtist.tDraw2DMatrix(CDTXMania.app.Device, mat, size);
-        }
-        
         int[] iPart = [0, CDTXMania.ConfigIni.bIsSwappedGuitarBass ? 2 : 1, CDTXMania.ConfigIni.bIsSwappedGuitarBass ? 1 : 2];
 
         int k = 0;
@@ -824,33 +731,24 @@ internal class CStageSongLoading : CStage
                             DTXLevelDeci = ((cdtx.LEVEL[j] - DTXLevel * 10) * 10) + cdtx.LEVELDEC[j];
                         }
         
-                        txLevel.tDraw2D(CDTXMania.app.Device, 282 + k, 243, new RectangleF(1000, 92, 30, 38));
+                        txLevel.tDraw2D(282 + k, 243, new RectangleF(1000, 92, 30, 38));
                         tDrawStringLarge(187 + k, 152, $"{DTXLevel:0}");
                         tDrawStringLarge(307 + k, 152, $"{DTXLevelDeci:00}");
                     }
-        
+
                     if (txPartPanel != null)
-                        txPartPanel.tDraw2D(CDTXMania.app.Device, 191 + k, 52, new RectangleF(0, j * 50, 262, 50));
-        
+                    {
+                        txPartPanel.tDraw2D(191 + k, 52, new RectangleF(0, j * 50, 262, 50));
+                    }
+
                     //this.txJacket.Dispose();
-                    if (!CDTXMania.bCompactMode && !CDTXMania.DTXVmode.Enabled && !CDTXMania.DTX2WAVmode.Enabled)
-                        tDrawDifficultyPanel(
-                            CDTXMania.confirmedSong.difficultyLabel[
-                                CDTXMania.confirmedSongDifficulty], 191 + k, 102);
+                    tDrawDifficultyPanel(
+                        CDTXMania.confirmedSong.difficultyLabel[
+                            CDTXMania.confirmedSongDifficulty], 191 + k, 102);
         
                     k = 700;
                 }
             }
-        
-            // //second guitar... ?????
-            // if (instrument == 2 && k == 0)
-            // {
-            //     if (txPartPanel != null && CDTXMania.ConfigIni.bDrumsEnabled)
-            //         txPartPanel.tDraw2D(CDTXMania.app.Device, 191, 52, new Rectangle(0, 0, 262, 50));
-            //
-            //     if (txDifficultyPanel != null)
-            //         txDifficultyPanel.tDraw2D(CDTXMania.app.Device, 191, 102, new Rectangle(0, nIndex * 50, 262, 50));
-            // }
         }
     }
 
@@ -891,38 +789,23 @@ internal class CStageSongLoading : CStage
         public char ch;
         public Point pt;
     }
-
-    //		private CActFIFOBlack actFI;
-    private CActFIFOBlackStart actFO;
-
+    
     private readonly STCharacterPosition[] st大文字位置;
     private int nCurrentInst;
     private long nBGMTotalPlayTimeMs;
     private long nBGMPlayStartTime;
-    private CSound sdLoadingSound;
-    private string strSTAGEFILE;
+    private CSound sdLoadingSound; 
+    
     private string strSongTitle;
     private string strArtistName;
-    private CTexture? txTitle;
-    private CTexture? txArtist;
-    private CTexture? txJacket;
-    private CTexture? txDifficultyPanel;
-    private CTexture? txPartPanel;
-
-    private CPrivateFastFont titleFont;
-    private CPrivateFastFont artistNameFont;
-
-    //2014.04.05.kairera0467 GITADORAグラデーションの色。
-    //本当は共通のクラスに設置してそれを参照する形にしたかったが、なかなかいいメソッドが無いため、とりあえず個別に設置。
-    //private Color clGITADORAgradationTopColor = Color.FromArgb(0, 220, 200);
-    //private Color clGITADORAgradationBottomColor = Color.FromArgb(255, 250, 40);
-    private Color clGITADORAgradationTopColor = Color.FromArgb(255, 255, 255);
-    private Color clGITADORAgradationBottomColor = Color.FromArgb(255, 255, 255);
-
+    
+    private BaseTexture? txDifficultyPanel;
+    private BaseTexture? txPartPanel;
+    
     private DateTime timeBeginLoad;
     private DateTime timeBeginLoadWAV;
     private int nWAVcount;
-    private CTexture txLevel;
+    private BaseTexture txLevel;
 
     [StructLayout(LayoutKind.Sequential)]
     private struct STATUSPANEL
@@ -1070,7 +953,7 @@ internal class CStageSongLoading : CStage
                 RectangleF rc画像内の描画領域 = new(st大文字位置[j].pt.X, st大文字位置[j].pt.Y, 100, 130);
                 if (txLevel != null)
                 {
-                    txLevel.tDraw2D(CDTXMania.app.Device, x, y, rc画像内の描画領域);
+                    txLevel.tDraw2D(x, y, rc画像内の描画領域);
                 }
 
                 break;
@@ -1143,7 +1026,9 @@ internal class CStageSongLoading : CStage
         }
 
         if (txDifficultyPanel != null)
-            txDifficultyPanel.tDraw2D(CDTXMania.app.Device, nX, nY, rect);
+        {
+            txDifficultyPanel.tDraw2D(nX, nY, rect);
+        }
     }
 
     #endregion

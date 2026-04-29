@@ -1,4 +1,7 @@
 ﻿using DTXMania.Core;
+using DTXMania.Core.Framework;
+using DTXMania.UI;
+using DTXMania.UI.Drawable;
 using FDK;
 
 namespace DTXMania;
@@ -10,18 +13,11 @@ internal class CActPerfGuitarDanger : CActPerfCommonDanger
 	{
 		if ( bActivated )
 		{
-			txDANGER = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlayGuitar danger.png" ) );
+			txDANGER = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayGuitar danger.png" ) );
 			base.OnManagedCreateResources();
 		}
 	}
-	public override void OnManagedReleaseResources()
-	{
-		if ( bActivated )
-		{
-			CDTXMania.tReleaseTexture( ref txDANGER );
-			base.OnManagedReleaseResources();
-		}
-	}
+
 	public override int OnUpdateAndDraw()
 	{
 		throw new InvalidOperationException( "tUpdateAndDraw(bool)のほうを使用してください。" );
@@ -57,8 +53,10 @@ internal class CActPerfGuitarDanger : CActPerfCommonDanger
 					if ( txDANGER != null )
 					{
 						int d = ct透明度用.nCurrentValue;
-						txDANGER.nTransparency = n透明度MIN + ( ( d < n波長 / 2 ) ? ( n透明度MAX - n透明度MIN ) * d / ( n波長 / 2 ) : ( n透明度MAX - n透明度MIN ) * ( n波長 - d ) / ( n波長 / 2 ) );		// 60-200
-						txDANGER.tDraw2D( CDTXMania.app.Device, nGaugeX[ nPart ], 0 );
+						int nTransparency = n透明度MIN + ( ( d < n波長 / 2 ) ? ( n透明度MAX - n透明度MIN ) * d / ( n波長 / 2 ) : ( n透明度MAX - n透明度MIN ) * ( n波長 - d ) / ( n波長 / 2 ) );		// 60-200
+						Color4 col = Color4.White;
+						col.Alpha = nTransparency / 255.0f;
+						txDANGER.tDraw2D(nGaugeX[ nPart ], 0 );
 					}
 				}
 			}
@@ -76,7 +74,7 @@ internal class CActPerfGuitarDanger : CActPerfCommonDanger
 	private const int n透明度MIN = 20;
 	private readonly int[] nGaugeX = { 0, 168, 328 };
 //		private readonly Rectangle[] rc領域 = new Rectangle[] { new Rectangle( 0, 0, 0x20, 0x40 ), new Rectangle( 0x20, 0, 0x20, 0x40 ) };
-	private CTexture txDANGER;
+	private BaseTexture txDANGER;
 	//-----------------
 	#endregion
 }

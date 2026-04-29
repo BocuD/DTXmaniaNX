@@ -1,13 +1,12 @@
 ﻿using System.Diagnostics;
 using DTXMania.Core;
 using DTXMania.UI.Drawable;
-using DTXMania.UI.Drawable.Serialization;
 using Hexa.NET.ImGui;
 using Newtonsoft.Json;
 
 namespace DTXMania.UI.Skin;
 
-public class SkinDescriptor
+public partial class SkinDescriptor
 {
     public string name { get; set; } = "New skin";
     public string author { get; set; } = "Unknown Author";
@@ -67,7 +66,7 @@ public class SkinDescriptor
             
             if (stageGroup == null) continue;
 
-            string json = stageGroup.SerializeToJSON();
+            string json = SkinHierarchySerializer.SerializeToJson(stageGroup);
 
             if (!string.IsNullOrWhiteSpace(json))
             {
@@ -95,7 +94,7 @@ public class SkinDescriptor
             }
             
             string json = File.ReadAllText(path);
-            UIGroup? loadedGroup = UIGroup.DeserializeFromJSON(json);
+            UIGroup? loadedGroup = SkinHierarchySerializer.DeserializeFromJson(json, invokeDeserializeCallbacks: false);
             if (loadedGroup != null)
             {
                 return loadedGroup;
@@ -113,39 +112,5 @@ public class SkinDescriptor
             ImGui.SameLine();
             ImGui.Text(stage.Value);
         }
-    }
-
-    public string AddResource(string path)
-    {
-        //copy the file into the skin directory
-        string fileName = Path.GetFileName(path);
-        string targetPath = Path.Combine(basePath, "Resources", fileName);
-        
-        if (File.Exists(targetPath))
-        {
-            return targetPath;
-        }
-        
-        if (!Directory.Exists(Path.GetDirectoryName(targetPath)))
-        {
-            Directory.CreateDirectory(Path.GetDirectoryName(targetPath)!);
-        }
-        
-        File.Copy(path, targetPath, true);
-        return fileName;
-    }
-
-    public string GetResource(string fileName)
-    {
-        if (string.IsNullOrWhiteSpace(fileName)) return "";
-        
-        string targetPath = Path.Combine(basePath, "Resources", fileName);
-        if (File.Exists(targetPath))
-        {
-            return targetPath;
-        }
-        
-        //if the file does not exist, return empty string
-        return "";
     }
 }

@@ -3,9 +3,12 @@ using System.Runtime.InteropServices;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Diagnostics;
+using System.Numerics;
 using DTXMania.Core;
+using DTXMania.Core.Framework;
 using DTXMania.UI;
 using DTXMania.UI.Drawable;
+using DTXMania.UI.Text;
 using FDK;
 using Color = System.Drawing.Color;
 using Rectangle = System.Drawing.Rectangle;
@@ -281,9 +284,22 @@ internal abstract class CStagePerfCommonScreen : CStage
     }
     #endregion
 
+    private UIText playspeedText;
+    
     public override void InitializeBaseUI()
     {
+        video.IntegrateUI(ui);
+
+        ui.AddChild(new InfoBox());
         
+        if (CDTXMania.ConfigIni.nShowPlaySpeed == (int)EShowPlaySpeed.ON
+            || CDTXMania.ConfigIni.nShowPlaySpeed == (int)EShowPlaySpeed.IF_CHANGED_IN_GAME)
+        {
+            //we need to clear this reference because when the stage gets
+            //unloaded the reference doesn't get cleared automatically
+            playspeedText = null;
+            tUpdatePlayspeedText();
+        }
     }
 
     public override void InitializeDefaultUI()
@@ -450,68 +466,27 @@ internal abstract class CStagePerfCommonScreen : CStage
         listChip = null;
         queueMixerSound.Clear();
         queueMixerSound = null;
-        //          GCSettings.LatencyMode = this.gclatencymode;
-        if (caviGenericBackgroundVideo != null)
-        {
-            caviGenericBackgroundVideo.Dispose();
-            caviGenericBackgroundVideo = null;
-        }
-
+        
         base.OnDeactivate();
     }
     public override void OnManagedCreateResources()
     {
         if (bActivated)
         {
-            ui = new UIGroup("Performance Common Screen");
-            
-            //
-            caviGenericBackgroundVideo = new CAVI(1290, CSkin.Path(@"Graphics\7_Movie.mp4"), "", 20.0);
-            caviGenericBackgroundVideo.OnDeviceCreated();
-            if (caviGenericBackgroundVideo.avi != null)
-            {
-                Trace.TraceInformation("Generic Background video loaded successfully");
-                actBackgroundAVI.bLoop = true;
-                actBackgroundAVI.Start(EChannel.MovieFull, caviGenericBackgroundVideo, 0, -1);
-                bGenericVideoEnabled = true;
-            }
-            else
-            {
-                bGenericVideoEnabled = false;
-            }
+            base.OnManagedCreateResources();
+
             tGenerateBackgroundTexture();
 
-            txWailingFrame = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlay wailing cursor.png" ) );
-            txBonusEffect = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\7_Fillin Effect.png" ) );
+            txWailingFrame = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay wailing cursor.png" ) );
+            txBonusEffect = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\7_Fillin Effect.png" ) );
             if( CDTXMania.ConfigIni.nJudgeAnimeType == 1 )
-                tx判定画像anime = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\7_judge strings.png" ) );
+                tx判定画像anime = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\7_judge strings.png" ) );
             else if( CDTXMania.ConfigIni.nJudgeAnimeType == 2 )
             {
-                tx判定画像anime = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\7_JudgeStrings_XG.png" ) );
-                tx判定画像anime_2 = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\7_JudgeStrings_XG.png" ) );
-                tx判定画像anime_3 = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\7_JudgeStrings_XG.png" ) );
+                tx判定画像anime = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\7_JudgeStrings_XG.png" ) );
+                tx判定画像anime_2 = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\7_JudgeStrings_XG.png" ) );
+                tx判定画像anime_3 = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\7_JudgeStrings_XG.png" ) );
             }
-            if (CDTXMania.ConfigIni.nShowPlaySpeed == (int)EShowPlaySpeed.ON)
-            {
-                tGeneratePlaySpeedTexture();
-            }
-
-            base.OnManagedCreateResources();
-        }
-    }
-    public override void OnManagedReleaseResources()
-    {
-        if (bActivated)
-        {
-            actBackgroundAVI.Stop();
-
-            CDTXMania.tReleaseTexture(ref txWailingFrame);
-            CDTXMania.tReleaseTexture(ref tx判定画像anime);
-            CDTXMania.tReleaseTexture(ref tx判定画像anime_2);
-            CDTXMania.tReleaseTexture(ref tx判定画像anime_3);
-            CDTXMania.tReleaseTexture(ref txBonusEffect);
-            CDTXMania.tReleaseTexture(ref txPlaySpeed);
-            base.OnManagedReleaseResources();
         }
     }
 
@@ -768,17 +743,14 @@ internal abstract class CStagePerfCommonScreen : CStage
         DontCare
     }
 
-    public CActPerfAVI actAVI;
+    //todo: reintroduce background video and art
+    public CActPerfVideo video;
     public CActPerfBGA actBGA;
-
+    
     protected CActLVLNFont actLVFont;
     protected CActPerfChipFireGB actChipFireGB;
     public CActPerfCommonCombo actCombo;
     protected CActPerfCommonDanger actDANGER;
-    protected CActFIFOBlackStart actFI;
-    protected CActFIFOBlack actFO;
-    protected CActFIFOWhite actFOClear;
-    public CActFIFOWhiteClear actFOStageClear;
     //protected CActPerfStageClear actStageClear;
     public CActPerfCommonGauge actGauge;
     public CActPerfDrumsFillingEffect actFillin;
@@ -796,7 +768,6 @@ internal abstract class CStagePerfCommonScreen : CStage
     protected CActPerfSkillMeter actGraph;
     protected CActPerfGuitarBonus actGuitarBonus;
     protected CActPerfProgressBar actProgressBar;
-    protected CActSelectBackgroundAVI actBackgroundAVI;
     protected bool bPAUSE;
     protected STDGBVALUE<bool> bMIDIUsed;
     protected STDGBVALUE<bool> bKeyboardUsed;
@@ -810,20 +781,20 @@ internal abstract class CStagePerfCommonScreen : CStage
     protected STDGBVALUE<CCounter> ctChipPatternAnimation;
     protected abstract void tJudgeLineMovingUpandDown();
     protected EPerfScreenReturnValue eReturnValueAfterFadeOut;
-    protected readonly EChannel[,] nBGAスコープチャンネルマップ = new EChannel[,] { { EChannel.BGALayer1_Swap, EChannel.BGALayer2_Swap, EChannel.BGALayer3_Swap, EChannel.BGALayer4_Swap, EChannel.BGALayer5_Swap, EChannel.BGALayer6_Swap, EChannel.BGALayer7_Swap, EChannel.BGALayer8_Swap }, { EChannel.BGALayer1, EChannel.BGALayer2, EChannel.BGALayer3, EChannel.BGALayer4, EChannel.BGALayer5, EChannel.BGALayer6, EChannel.BGALayer7, EChannel.BGALayer8 } };
-    protected readonly int[] nチャンネル0Atoパッド08 = new int[] { 1, 2, 3, 4, 5, 7, 6, 1, 8, 0, 9, 9 };
-    protected readonly int[] nチャンネル0Atoレーン07 = new int[] { 1, 2, 3, 4, 5, 7, 6, 1, 9, 0, 8, 8 };
+    protected readonly EChannel[,] nBGAスコープチャンネルマップ = new[,] { { EChannel.BGALayer1_Swap, EChannel.BGALayer2_Swap, EChannel.BGALayer3_Swap, EChannel.BGALayer4_Swap, EChannel.BGALayer5_Swap, EChannel.BGALayer6_Swap, EChannel.BGALayer7_Swap, EChannel.BGALayer8_Swap }, { EChannel.BGALayer1, EChannel.BGALayer2, EChannel.BGALayer3, EChannel.BGALayer4, EChannel.BGALayer5, EChannel.BGALayer6, EChannel.BGALayer7, EChannel.BGALayer8 } };
+    protected readonly int[] nチャンネル0Atoパッド08 = [1, 2, 3, 4, 5, 7, 6, 1, 8, 0, 9, 9];
+    protected readonly int[] nチャンネル0Atoレーン07 = [1, 2, 3, 4, 5, 7, 6, 1, 9, 0, 8, 8];
     //                         RD LC  LP  RD
-    protected readonly int[] nパッド0Atoチャンネル0A = new int[] { 0x11, 0x12, 0x13, 0x14, 0x15, 0x17, 0x16, 0x18, 0x19, 0x1a, 0x1b, 0x1c };
-    protected readonly int[] nパッド0Atoパッド08 = new int[] { 1, 2, 3, 4, 5, 6, 7, 1, 8, 0, 9, 9 };// パッド画像のヒット処理用
+    protected readonly int[] nパッド0Atoチャンネル0A = [0x11, 0x12, 0x13, 0x14, 0x15, 0x17, 0x16, 0x18, 0x19, 0x1a, 0x1b, 0x1c];
+    protected readonly int[] nパッド0Atoパッド08 = [1, 2, 3, 4, 5, 6, 7, 1, 8, 0, 9, 9];// パッド画像のヒット処理用
     //   HH SD BD HT LT FT CY HHO RD LC LP LBD
-    protected readonly int[] nパッド0Atoレーン07 = new int[] { 1, 2, 3, 4, 5, 6, 7, 1, 9, 0, 8, 8 };
-    protected readonly float[,] fDamageGaugeDelta = new float[,] { { 0.004f, 0.006f, 0.006f }, { 0.002f, 0.003f, 0.003f }, { 0f, 0f, 0f }, { -0.02f, -0.03f, -0.03f }, { -0.05f, -0.05f, -0.05f } };
-    protected readonly float[] fDamageLevelFactor = new float[] { 0.25f, 0.5f, 0.75f }; //Original: 0.5f, 1f, 1.5f
+    protected readonly int[] nパッド0Atoレーン07 = [1, 2, 3, 4, 5, 6, 7, 1, 9, 0, 8, 8];
+    protected readonly float[,] fDamageGaugeDelta = new[,] { { 0.004f, 0.006f, 0.006f }, { 0.002f, 0.003f, 0.003f }, { 0f, 0f, 0f }, { -0.02f, -0.03f, -0.03f }, { -0.05f, -0.05f, -0.05f } };
+    protected readonly float[] fDamageLevelFactor = [0.25f, 0.5f, 0.75f]; //Original: 0.5f, 1f, 1.5f
 
-    public STDGBVALUE<int> nJudgeLinePosY = new STDGBVALUE<int>();//(CDTXMania.ConfigIni.bReverse.Drums ? 159 : 561);
-    public STDGBVALUE<int> nShutterInPosY = new STDGBVALUE<int>();
-    public STDGBVALUE<int> nShutterOutPosY = new STDGBVALUE<int>();
+    public STDGBVALUE<int> nJudgeLinePosY;//(CDTXMania.ConfigIni.bReverse.Drums ? 159 : 561);
+    public STDGBVALUE<int> nShutterInPosY;
+    public STDGBVALUE<int> nShutterOutPosY;
     public long n現在のスコア = 0;
     public STDGBVALUE<CHITCOUNTOFRANK> nHitCount_ExclAuto;
     public STDGBVALUE<CHITCOUNTOFRANK> nHitCount_IncAuto;
@@ -851,7 +822,7 @@ internal abstract class CStagePerfCommonScreen : CStage
     protected STDGBVALUE<int> nJudgeLinePosY_delta; // #31602 2013.6.23 yyagi 表示遅延対策として、判定ラインの表示位置をずらす機能を追加する
 
     private CCounter[] ctTimer = new CCounter[3];
-    public bool bブーストボーナス = false;
+    public bool bブーストボーナス;
 
     protected STDGBVALUE<Queue<CChip>> queWailing;
     protected STDGBVALUE<CChip> r現在の歓声Chip;
@@ -860,14 +831,14 @@ internal abstract class CStagePerfCommonScreen : CStage
     protected CChip r現在の空うちベースChip;
     protected CChip rNextGuitarChip;
     protected CChip rNextBassChip;
-    protected CTexture txWailingFrame;
-    protected CTexture txChip;  // txチップ
-    protected CTexture txHitBar;  // txヒットバー
-    protected CTexture txPlaySpeed;
-    public CTexture tx判定画像anime;     //2013.8.2 kairera0467 アニメーションの場合はあらかじめこっちで読み込む。
-    public CTexture tx判定画像anime_2;   //2014.3.16 kairera0467 棒とかで必要になる。
-    public CTexture tx判定画像anime_3;
-    public CTexture txBonusEffect;
+    protected BaseTexture txWailingFrame;
+    protected BaseTexture txChip;  // txチップ
+    protected BaseTexture txHitBar;  // txヒットバー
+
+    public BaseTexture tx判定画像anime;     //2013.8.2 kairera0467 アニメーションの場合はあらかじめこっちで読み込む。
+    public BaseTexture tx判定画像anime_2;   //2014.3.16 kairera0467 棒とかで必要になる。
+    public BaseTexture tx判定画像anime_3;
+    public BaseTexture txBonusEffect;
 
     //fork
     protected STDGBVALUE<CHITCOUNTOFRANK> nヒット数_TargetGhost; // #35411 2015.08.21 chnmr0 add
@@ -888,11 +859,7 @@ internal abstract class CStagePerfCommonScreen : CStage
 
     protected long LoopBeginMs;
     protected long LoopEndMs;
-
-    //Generic video object
-    private CAVI caviGenericBackgroundVideo;
-    private bool bGenericVideoEnabled;
-
+    
     // Use a property instead of a field to automatically set training mode on the graph too
     private bool _bIsTrainingMode;
     public bool bIsTrainingMode
@@ -919,7 +886,7 @@ internal abstract class CStagePerfCommonScreen : CStage
 
     public void AddMixer(CSound cs, bool _b演奏終了後も再生が続くチップである)
     {
-        stmixer stm = new stmixer()
+        stmixer stm = new()
         {
             bIsAdd = true,
             csound = cs,
@@ -930,7 +897,7 @@ internal abstract class CStagePerfCommonScreen : CStage
     }
     public void RemoveMixer(CSound cs)
     {
-        stmixer stm = new stmixer()
+        stmixer stm = new()
         {
             bIsAdd = false,
             csound = cs,
@@ -1331,7 +1298,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                     else if ((EChannel.SE25 <= index) && (index <= EChannel.SE27))	// 仮に今だけ追加
                     {
                         //            CY    RD    LC
-                        EChannel[] ch = { EChannel.Cymbal, EChannel.RideCymbal, EChannel.LeftCymbal };
+                        EChannel[] ch = [EChannel.Cymbal, EChannel.RideCymbal, EChannel.LeftCymbal];
                         pChip.nChannelNumber = ch[pChip.nChannelNumber - EChannel.SE25];
                         index = (EChannel)(pChip.nChannelNumber - EChannel.HiHatClose);
                         overwrite = true;
@@ -1395,11 +1362,7 @@ internal abstract class CStagePerfCommonScreen : CStage
     }
     protected void tSetStatusPanel()  // tステータスパネルの選択
     {
-        if( CDTXMania.bCompactMode || CDTXMania.DTXVmode.Enabled || CDTXMania.DTX2WAVmode.Enabled)
-        {
-            //this.actStatusPanel.tSetDifficultyLabelFromScript( CDTXMania.stageSongSelection.rConfirmedSong.arDifficultyLabel[ CDTXMania.stageSongSelection.nConfirmedSongDifficulty ] );
-        }
-        else if( CDTXMania.confirmedSong != null )
+        if( CDTXMania.confirmedSong != null )
         {
             actStatusPanel.tSetDifficultyLabelFromScript( CDTXMania.confirmedSong.difficultyLabel[ CDTXMania.confirmedSongDifficulty ] );
         }
@@ -1417,7 +1380,7 @@ internal abstract class CStagePerfCommonScreen : CStage
     {
         pChip.bHit = true;
         //Start of Long Note
-        if (pChip.bロングノートである)
+        if (pChip.bIsLongNote)
         {
             pChip.bロングノートHit中 = true;
             chipロングノートHit中[(int)pChip.eInstrumentPart] = pChip;
@@ -1470,7 +1433,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                 break;
         }
 
-        if (CDTXMania.ConfigIni.bAutoAddGage == false)
+        if (!CDTXMania.ConfigIni.bAutoAddGage)
         {
             if (!bPChipIsAutoPlay && (pChip.eInstrumentPart != EInstrumentPart.UNKNOWN))
             {
@@ -1478,7 +1441,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                 actGauge.Damage(screenmode, pChip.eInstrumentPart, eJudgeResult);
             }
         }
-        else if (CDTXMania.ConfigIni.bAutoAddGage == true)
+        else if (CDTXMania.ConfigIni.bAutoAddGage)
         {
             if ((pChip.eInstrumentPart != EInstrumentPart.UNKNOWN))
             {
@@ -1651,8 +1614,8 @@ internal abstract class CStagePerfCommonScreen : CStage
         //!bPChipIsAutoPlayを入れるとオート時にスコアを加算しなくなる。
         if (CDTXMania.ConfigIni.nSkillMode == 1)
         {
-            int nRate = bブーストボーナス == true ? 2 : 1;
-            if (CDTXMania.ConfigIni.bAutoAddGage == true)
+            int nRate = bブーストボーナス ? 2 : 1;
+            if (CDTXMania.ConfigIni.bAutoAddGage)
             {
                 if (((pChip.eInstrumentPart == EInstrumentPart.DRUMS)) && (eJudgeResult != EJudgement.Miss) && (eJudgeResult != EJudgement.Bad))
                 {
@@ -1867,7 +1830,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                 {
                     int nCombos = actCombo.nCurrentCombo[(int)pChip.eInstrumentPart];
                     float nScoreDelta = 0;
-                    long[] nComboScoreDelta = new long[] { 350L, 200L, 50L, 0L };
+                    long[] nComboScoreDelta = [350L, 200L, 50L, 0L];
                     if ((nCombos <= 500) || (eJudgeResult == EJudgement.Good))
                     {
                         nScoreDelta = nComboScoreDelta[(int)eJudgeResult] * nCombos;
@@ -1886,7 +1849,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                 {
                     int nCombos = actCombo.nCurrentCombo[(int)pChip.eInstrumentPart];
                     float nScoreDelta = 0;
-                    long[] nComboScoreDelta = new long[] { 350L, 200L, 50L, 0L };
+                    long[] nComboScoreDelta = [350L, 200L, 50L, 0L];
                     if ((nCombos <= 500) || (eJudgeResult == EJudgement.Good))
                     {
                         nScoreDelta = nComboScoreDelta[(int)eJudgeResult] * nCombos;
@@ -2401,7 +2364,7 @@ internal abstract class CStagePerfCommonScreen : CStage
         {
             ChangeInputAdjustTimeInPlaying(keyboard, +1);
         }
-        else if (!bPAUSE && (ePhaseID == EPhase.Common_DefaultState) && !CDTXMania.DTXVmode.Enabled && (keyboard.bKeyPressed(SlimDXKey.Escape)))
+        else if (!bPAUSE && (ePhaseID == EPhase.Common_DefaultState) && (keyboard.bKeyPressed(SlimDXKey.Escape)))
         {	// escape (exit)
             GitaDoraTransition.Close();
             ePhaseID = EPhase.Common_FadeOut;
@@ -2674,7 +2637,7 @@ internal abstract class CStagePerfCommonScreen : CStage
             {
                 CDTXMania.ConfigIni.nMovieMode = 0;
             }
-            actAVI.MovieMode();
+            video.MovieMode();
         }
         if (keyboard.bKeyPressed(SlimDXKey.F6))
         {
@@ -2707,12 +2670,11 @@ internal abstract class CStagePerfCommonScreen : CStage
         }
     }
 
-    //      protected abstract void tUpdateAndDraw_AVI();
     protected void tUpdateAndDraw_AVI()
     {
         if (((ePhaseID != EPhase.PERFORMANCE_STAGE_FAILED) && (ePhaseID != EPhase.PERFORMANCE_STAGE_FAILED_FADEOUT)) && (!CDTXMania.ConfigIni.bストイックモード))
         {
-            actAVI.tUpdateAndDraw(0, 0);
+            video.tUpdateAndDraw(0, 0);
         }
     }
     /*
@@ -2744,7 +2706,6 @@ internal abstract class CStagePerfCommonScreen : CStage
             eReturnValueAfterFadeOut = EPerfScreenReturnValue.StageFailure;
             ePhaseID = EPhase.PERFORMANCE_STAGE_FAILED_FADEOUT;
             CDTXMania.DTX.tStopPlayingAllChips();
-            actFO.tStartFadeOut();
         }
     }
     protected void tUpdateAndDraw_WailingBonus()
@@ -2769,11 +2730,11 @@ internal abstract class CStagePerfCommonScreen : CStage
         {
             if (CDTXMania.DTX.bHasChips.Guitar)
             {
-                txWailingFrame.tDraw2D(CDTXMania.app.Device, GtWailingFrameX, GtWailingFrameY);
+                txWailingFrame.tDraw2D(GtWailingFrameX, GtWailingFrameY);
             }
             if (CDTXMania.DTX.bHasChips.Bass)
             {
-                txWailingFrame.tDraw2D(CDTXMania.app.Device, BsWailingFrameX, BsWailingFrameY);
+                txWailingFrame.tDraw2D(BsWailingFrameX, BsWailingFrameY);
             }
         }
     }
@@ -2836,7 +2797,7 @@ internal abstract class CStagePerfCommonScreen : CStage
         CChip cChip = CDTXMania.DTX.listChip[this.nCurrentTopChip];
         if (cChip.bHit && cChip.nDistanceFromBar.Drums < -200 && cChip.nDistanceFromBar.Guitar < -200 && cChip.nDistanceFromBar.Bass < -200)
         {
-            if (cChip.bロングノートである)
+            if (cChip.bIsLongNote)
             {
                 CChip chipロングノート終端 = cChip.chipロングノート終端;
                 if (chipロングノート終端.bHit && chipロングノート終端.nDistanceFromBar.Drums < -200 && chipロングノート終端.nDistanceFromBar.Guitar < -200 && chipロングノート終端.nDistanceFromBar.Bass < -200)
@@ -2878,7 +2839,7 @@ internal abstract class CStagePerfCommonScreen : CStage
             {
                 //					nCurrentTopChip = ++this.nCurrentTopChip;
 
-                if (dTX.listChip[this.nCurrentTopChip].bロングノートである)
+                if (dTX.listChip[this.nCurrentTopChip].bIsLongNote)
                 {
                     CChip chipロングノート終端 = dTX.listChip[this.nCurrentTopChip].chipロングノート終端;
                     if (chipロングノート終端.bHit && chipロングノート終端.nDistanceFromBar.Drums < -65)
@@ -3022,7 +2983,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                                 case EBGAType.BMPTEX:
                                     if (pChip.rBMPTEX != null)
                                     {
-                                        actBGA.Start(pChip.nChannelNumber, null, pChip.rBMPTEX, pChip.rBMPTEX.tx画像.szImageSize.Width, pChip.rBMPTEX.tx画像.szImageSize.Height, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+                                        actBGA.Start(pChip.nChannelNumber, null, pChip.rBMPTEX, pChip.rBMPTEX.txImage.Width, pChip.rBMPTEX.txImage.Height, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
                                     }
                                     break;
 
@@ -3043,7 +3004,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                                 default:
                                     if (pChip.rBMP != null)
                                     {
-                                        actBGA.Start(pChip.nChannelNumber, pChip.rBMP, null, pChip.rBMP.n幅, pChip.rBMP.n高さ, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+                                        actBGA.Start(pChip.nChannelNumber, pChip.rBMP, null, pChip.rBMP.nWidth, pChip.rBMP.nHeight, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
                                     }
                                     break;
                             }
@@ -3195,16 +3156,16 @@ internal abstract class CStagePerfCommonScreen : CStage
                                 case EAVIType.AVI:
                                     if (pChip.rAVI != null)
                                     {
-                                        actAVI.bLoop = false;
-                                        actAVI.Start(pChip.nChannelNumber, pChip.rAVI, 278, 355, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, pChip.nPlaybackTimeMs);
+                                        //actAVI.bLoop = false;
+                                        video.Start(pChip.nChannelNumber, pChip.rAVI, 278, 355, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, pChip.nPlaybackTimeMs);
                                     }                                        
                                     break;
 
                                 case EAVIType.AVIPAN:
                                     if (pChip.rAVIPan != null)
                                     {
-                                        actAVI.bLoop = false;
-                                        actAVI.Start(pChip.nChannelNumber, pChip.rAVI, pChip.rAVIPan.sz開始サイズ.Width, pChip.rAVIPan.sz開始サイズ.Height, pChip.rAVIPan.sz終了サイズ.Width, pChip.rAVIPan.sz終了サイズ.Height, pChip.rAVIPan.pt動画側開始位置.X, pChip.rAVIPan.pt動画側開始位置.Y, pChip.rAVIPan.pt動画側終了位置.X, pChip.rAVIPan.pt動画側終了位置.Y, pChip.rAVIPan.pt表示側開始位置.X, pChip.rAVIPan.pt表示側開始位置.Y, pChip.rAVIPan.pt表示側終了位置.X, pChip.rAVIPan.pt表示側終了位置.Y, pChip.n総移動時間, pChip.nPlaybackTimeMs);
+                                        //actAVI.bLoop = false;
+                                        video.Start(pChip.nChannelNumber, pChip.rAVI, pChip.rAVIPan.sz開始サイズ.Width, pChip.rAVIPan.sz開始サイズ.Height, pChip.rAVIPan.sz終了サイズ.Width, pChip.rAVIPan.sz終了サイズ.Height, pChip.rAVIPan.pt動画側開始位置.X, pChip.rAVIPan.pt動画側開始位置.Y, pChip.rAVIPan.pt動画側終了位置.X, pChip.rAVIPan.pt動画側終了位置.Y, pChip.rAVIPan.pt表示側開始位置.X, pChip.rAVIPan.pt表示側開始位置.Y, pChip.rAVIPan.pt表示側終了位置.X, pChip.rAVIPan.pt表示側終了位置.Y, pChip.n総移動時間, pChip.nPlaybackTimeMs);
                                     }                                        
                                     break;
                             }
@@ -3288,7 +3249,8 @@ internal abstract class CStagePerfCommonScreen : CStage
                     if (!pChip.bHit && (pChip.nDistanceFromBar.Drums < 0))
                     {
                         pChip.bHit = true;
-                        EInstrumentPart[] p = { EInstrumentPart.DRUMS, EInstrumentPart.DRUMS, EInstrumentPart.DRUMS, EInstrumentPart.DRUMS, EInstrumentPart.GUITAR, EInstrumentPart.BASS };
+                        EInstrumentPart[] p = [EInstrumentPart.DRUMS, EInstrumentPart.DRUMS, EInstrumentPart.DRUMS, EInstrumentPart.DRUMS, EInstrumentPart.GUITAR, EInstrumentPart.BASS
+                        ];
 
                         EInstrumentPart pp = p[pChip.nChannelNumber - EChannel.SE24];
 
@@ -3530,7 +3492,7 @@ internal abstract class CStagePerfCommonScreen : CStage
             if ((dTX.listChip[this.nCurrentTopChip].nDistanceFromBar.Drums < -65) && dTX.listChip[this.nCurrentTopChip].bHit)
             {
                 //					nCurrentTopChip = ++this.nCurrentTopChip;
-                if (dTX.listChip[this.nCurrentTopChip].bロングノートである)
+                if (dTX.listChip[this.nCurrentTopChip].bIsLongNote)
                 {
                     CChip chipロングノート終端 = dTX.listChip[this.nCurrentTopChip].chipロングノート終端;
                     if (chipロングノート終端.bHit && chipロングノート終端.nDistanceFromBar.Drums < -65)
@@ -3583,8 +3545,10 @@ internal abstract class CStagePerfCommonScreen : CStage
                             l_drumPanelWidth = 447;
                             l_xOffset = 72;
                         }
-                        txChip.vcScaleRatio.Y = 1f;
-                        txChip.tDraw2D(CDTXMania.app.Device, 0x127 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + pChip.nDistanceFromBar.Drums) - 1) : ((nJudgeLinePosY.Drums - pChip.nDistanceFromBar.Drums) - 1), new SharpDX.RectangleF(0, 772, l_drumPanelWidth, 2));
+                        
+                        //todo: what the fuck is vcScaleRatio
+                        //txChip.vcScaleRatio.Y = 1f;
+                        txChip.tDraw2D(0x127 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + pChip.nDistanceFromBar.Drums) - 1) : ((nJudgeLinePosY.Drums - pChip.nDistanceFromBar.Drums) - 1), new RectangleF(0, 772, l_drumPanelWidth, 2));
                     }
                     break;
                 #endregion
@@ -3656,7 +3620,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                 //    }
                 //}
 
-                if (dTX.listChip[this.nCurrentTopChip].bロングノートである)
+                if (dTX.listChip[this.nCurrentTopChip].bIsLongNote)
                 {
                     CChip chipロングノート終端 = dTX.listChip[this.nCurrentTopChip].chipロングノート終端;
                     if (chipロングノート終端.bHit && chipロングノート終端.nDistanceFromBar.Drums < -65)
@@ -3717,7 +3681,7 @@ internal abstract class CStagePerfCommonScreen : CStage
             int offsetIndex = pChip.nChannelNumber - EChannel.HiHatClose;
             if (offsetIndex >= 0 && offsetIndex < nチャンネル0Atoレーン07.Length)
             {
-                if (bIsAutoPlay[nチャンネル0Atoレーン07[offsetIndex]] == false)
+                if (!bIsAutoPlay[nチャンネル0Atoレーン07[offsetIndex]])
                 {
                     bPChipIsAutoPlay = false;
                 }
@@ -3735,17 +3699,17 @@ internal abstract class CStagePerfCommonScreen : CStage
                 //Trace.TraceInformation( "chip:{0}{1}{2} ", bGtBsR, bGtBsG, bGtBsB );
                 //Trace.TraceInformation( "auto:{0}{1}{2} ", bIsAutoPlay[ (int) ELane.GtR ], bIsAutoPlay[ (int) ELane.GtG ], bIsAutoPlay[ (int) ELane.GtB ]);
                 bPChipIsAutoPlay = true;
-                if (bIsAutoPlay[(int)ELane.GtPick] == false) bPChipIsAutoPlay = false;
+                if (!bIsAutoPlay[(int)ELane.GtPick]) bPChipIsAutoPlay = false;
                 else
                 {
-                    if (bChipHasButtonArray[0] == true && bIsAutoPlay[(int)ELane.GtR] == false) bPChipIsAutoPlay = false;
-                    else if (bChipHasButtonArray[1] == true && bIsAutoPlay[(int)ELane.GtG] == false) bPChipIsAutoPlay = false;
-                    else if (bChipHasButtonArray[2] == true && bIsAutoPlay[(int)ELane.GtB] == false) bPChipIsAutoPlay = false;
-                    else if (bChipHasButtonArray[3] == true && bIsAutoPlay[(int)ELane.GtY] == false) bPChipIsAutoPlay = false;
-                    else if (bChipHasButtonArray[4] == true && bIsAutoPlay[(int)ELane.GtP] == false) bPChipIsAutoPlay = false;
-                    else if (bGtBsW == true && bIsAutoPlay[(int)ELane.GtW] == false) bPChipIsAutoPlay = false;
-                    else if (bGtBsO == true &&
-                             (bIsAutoPlay[(int)ELane.GtR] == false || bIsAutoPlay[(int)ELane.GtG] == false || bIsAutoPlay[(int)ELane.GtB] == false || bIsAutoPlay[(int)ELane.GtY] == false || bIsAutoPlay[(int)ELane.GtP] == false))
+                    if (bChipHasButtonArray[0] && !bIsAutoPlay[(int)ELane.GtR]) bPChipIsAutoPlay = false;
+                    else if (bChipHasButtonArray[1] && !bIsAutoPlay[(int)ELane.GtG]) bPChipIsAutoPlay = false;
+                    else if (bChipHasButtonArray[2] && !bIsAutoPlay[(int)ELane.GtB]) bPChipIsAutoPlay = false;
+                    else if (bChipHasButtonArray[3] && !bIsAutoPlay[(int)ELane.GtY]) bPChipIsAutoPlay = false;
+                    else if (bChipHasButtonArray[4] && !bIsAutoPlay[(int)ELane.GtP]) bPChipIsAutoPlay = false;
+                    else if (bGtBsW && !bIsAutoPlay[(int)ELane.GtW]) bPChipIsAutoPlay = false;
+                    else if (bGtBsO &&
+                             (!bIsAutoPlay[(int)ELane.GtR] || !bIsAutoPlay[(int)ELane.GtG] || !bIsAutoPlay[(int)ELane.GtB] || !bIsAutoPlay[(int)ELane.GtY] || !bIsAutoPlay[(int)ELane.GtP]))
                         bPChipIsAutoPlay = false;
                 }
                 //Trace.TraceInformation( "{0:x2}: {1}", pChip.nChannelNumber, bPChipIsAutoPlay.ToString() );
@@ -3753,17 +3717,17 @@ internal abstract class CStagePerfCommonScreen : CStage
             else if (pChip.eInstrumentPart == EInstrumentPart.BASS)
             {
                 bPChipIsAutoPlay = true;
-                if (bIsAutoPlay[(int)ELane.BsPick] == false) bPChipIsAutoPlay = false;
+                if (!bIsAutoPlay[(int)ELane.BsPick]) bPChipIsAutoPlay = false;
                 else
                 {
-                    if (bChipHasButtonArray[0] == true && bIsAutoPlay[(int)ELane.BsR] == false) bPChipIsAutoPlay = false;
-                    else if (bChipHasButtonArray[1] == true && bIsAutoPlay[(int)ELane.BsG] == false) bPChipIsAutoPlay = false;
-                    else if (bChipHasButtonArray[2] == true && bIsAutoPlay[(int)ELane.BsB] == false) bPChipIsAutoPlay = false;                       
-                    else if (bChipHasButtonArray[3] == true && bIsAutoPlay[(int)ELane.BsY] == false) bPChipIsAutoPlay = false;
-                    else if (bChipHasButtonArray[4] == true && bIsAutoPlay[(int)ELane.BsP] == false) bPChipIsAutoPlay = false;
-                    else if (bGtBsW == true && bIsAutoPlay[(int)ELane.BsW] == false) bPChipIsAutoPlay = false;
-                    else if (bGtBsO == true &&
-                             (bIsAutoPlay[(int)ELane.BsR] == false || bIsAutoPlay[(int)ELane.BsG] == false || bIsAutoPlay[(int)ELane.BsB] == false || bIsAutoPlay[(int)ELane.BsY] == false || bIsAutoPlay[(int)ELane.BsP] == false))
+                    if (bChipHasButtonArray[0] && !bIsAutoPlay[(int)ELane.BsR]) bPChipIsAutoPlay = false;
+                    else if (bChipHasButtonArray[1] && !bIsAutoPlay[(int)ELane.BsG]) bPChipIsAutoPlay = false;
+                    else if (bChipHasButtonArray[2] && !bIsAutoPlay[(int)ELane.BsB]) bPChipIsAutoPlay = false;                       
+                    else if (bChipHasButtonArray[3] && !bIsAutoPlay[(int)ELane.BsY]) bPChipIsAutoPlay = false;
+                    else if (bChipHasButtonArray[4] && !bIsAutoPlay[(int)ELane.BsP]) bPChipIsAutoPlay = false;
+                    else if (bGtBsW && !bIsAutoPlay[(int)ELane.BsW]) bPChipIsAutoPlay = false;
+                    else if (bGtBsO &&
+                             (!bIsAutoPlay[(int)ELane.BsR] || !bIsAutoPlay[(int)ELane.BsG] || !bIsAutoPlay[(int)ELane.BsB] || !bIsAutoPlay[(int)ELane.BsY] || !bIsAutoPlay[(int)ELane.BsP]))
                         bPChipIsAutoPlay = false;
                 }
             }
@@ -3828,7 +3792,7 @@ internal abstract class CStagePerfCommonScreen : CStage
             }
             if (txChip != null)
             {
-                txChip.nTransparency = pChip.nTransparency;
+                //txChip.nTransparency = pChip.nTransparency;
             }
             #endregion
             #endregion
@@ -3840,9 +3804,9 @@ internal abstract class CStagePerfCommonScreen : CStage
             bool bChipHasP = false;
             bool bChipHasW = false;
             bool bChipIsO = false;
-            EChannel nチャンネル番号 = pChip.nChannelNumber;
+            EChannel nChannelNumber = pChip.nChannelNumber;
 
-            switch (nチャンネル番号)
+            switch (nChannelNumber)
             {
                 case EChannel.Guitar_Open:
                     bChipIsO = true;
@@ -3877,7 +3841,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                     bChipHasW = true;
                     break;
                 default:
-                    switch (nチャンネル番号)
+                    switch (nChannelNumber)
                     {
                         case EChannel.Guitar_xxxYx:
                             bChipHasY = true;
@@ -4157,14 +4121,14 @@ internal abstract class CStagePerfCommonScreen : CStage
             #region [ chip描画 ]
             int OPEN = (inst == EInstrumentPart.GUITAR) ? 10 : 10;
             //if (!pChip.bHit && pChip.bVisible)
-            if ((!pChip.bHit || pChip.bロングノートである) && pChip.bVisible)
+            if ((!pChip.bHit || pChip.bIsLongNote) && pChip.bVisible)
             {
                 int yBarPos = configIni.bReverse[instIndex] ? barYReverse : barYNormal;
                 int y = configIni.bReverse[instIndex] ? (barYReverse - pChip.nDistanceFromBar[instIndex]) : (barYNormal + pChip.nDistanceFromBar[instIndex]);
 
                 //
                 int num3 = 0;
-                if (pChip.bロングノートである)
+                if (pChip.bIsLongNote)
                 {
                     if (pChip.chipロングノート終端.nDistanceFromBar[(int)inst] <= 0)
                     {
@@ -4186,11 +4150,14 @@ internal abstract class CStagePerfCommonScreen : CStage
                         int nアニメカウンタ現在の値 = ctChipPatternAnimation[instIndex].nCurrentValue;
                         if (bChipIsO)
                         {
-                            txChip.vcScaleRatio.Y = 1f;
+                            //todo: what the fuck is vcScaleRatio
+                            //txChip.vcScaleRatio.Y = 1f;
                             int xo = (inst == EInstrumentPart.GUITAR) ? 88 : 959;
-                            txChip.tDraw2D(CDTXMania.app.Device, xo, y - 2, new SharpDX.RectangleF(0, 10, 196, 10));
+                            Color4 col = Color4.White;
+                            col.Alpha = pChip.nTransparency / 255.0f;
+                            txChip.tDraw2D(xo, y - 2, new RectangleF(0, 10, 196, 10), col);
                         }
-                        Rectangle rc = new Rectangle(rectOpenOffsetX, chipHeight, chipWidth, 10);
+                        Rectangle rc = new(rectOpenOffsetX, chipHeight, chipWidth, 10);
                         int x;
                         if (inst == EInstrumentPart.GUITAR)
                         {
@@ -4205,13 +4172,14 @@ internal abstract class CStagePerfCommonScreen : CStage
                             
 
                         //Refactored code for drawing
-                        int[] nChipXPos = {
+                        int[] nChipXPos =
+                        [
                             inst == EInstrumentPart.GUITAR ? 88 : 959,
                             inst == EInstrumentPart.GUITAR ? 127 : 998,
                             inst == EInstrumentPart.GUITAR ? 166 : 1036,
                             inst == EInstrumentPart.GUITAR ? 205 : 1076,
                             inst == EInstrumentPart.GUITAR ? 244 : 1115
-                        };
+                        ];
                             
                         if(inst == EInstrumentPart.GUITAR && CDTXMania.ConfigIni.bLeft.Guitar)
                         {
@@ -4223,21 +4191,23 @@ internal abstract class CStagePerfCommonScreen : CStage
                             Array.Reverse(nChipXPos);
                         }
 
-                        SharpDX.RectangleF[] rChipTxRectArray = {
+                        RectangleF[] rChipTxRectArray =
+                        [
                             new(0, 0, 38, 10),
                             new(38, 0, 38, 10),
                             new(76, 0, 38, 10),
                             new(114, 0, 38, 10),
                             new(152, 0, 38, 10)
-                        };
+                        ];
 
-                        bool[] bChipColorFlags = {
+                        bool[] bChipColorFlags =
+                        [
                             bChipHasR,
                             bChipHasG,
                             bChipHasB,
                             bChipHasY,
                             bChipHasP
-                        };
+                        ];
 
                         for (int i = 0; i < bChipColorFlags.Length; i++)
                         {
@@ -4246,28 +4216,35 @@ internal abstract class CStagePerfCommonScreen : CStage
                                 if(inst == EInstrumentPart.GUITAR || inst == EInstrumentPart.BASS)
                                 {
                                     int num8 = nChipXPos[i];
-                                    SharpDX.RectangleF rect1 = rChipTxRectArray[i];
+                                    RectangleF rect1 = rChipTxRectArray[i];
                                     //this.txChip.tDraw2D(CDTXMania.app.Device, num8, y - chipHeight / 2, rect1);
-                                    txChip.vcScaleRatio.Y = 1f;
+                                    //todo: what the fuck is vcScaleRatio
+                                    //txChip.vcScaleRatio.Y = 1f;
                                     if (!pChip.bHit)
                                     {
-                                        txChip.nTransparency = pChip.nTransparency;
-                                        txChip.tDraw2D(CDTXMania.app.Device, num8, y - chipHeight / 2, rect1);
+                                        //txChip.nTransparency = pChip.nTransparency;
+                                        Color4 color = Color4.White;
+                                        color.Alpha = pChip.nTransparency / 255.0f;
+                                        txChip.tDraw2D(num8, y - chipHeight / 2, rect1, color);
                                     }
-                                    if (pChip.bロングノートである)
+                                    if (pChip.bIsLongNote)
                                     {
                                         //_ = (bool)CDTXMania.Instance.ConfigIni.bReverse[inst];
-                                        SharpDX.RectangleF rectangle2 = rect1;
+                                        RectangleF rectangle2 = rect1;
                                         rectangle2.Y += 3;
                                         rectangle2.Height = 5;
-                                        txChip.nTransparency = 128;
-                                        if (pChip.bHit && !pChip.bロングノートHit中)                                            
-                                        {
-                                            CTexture obj = txChip;
-                                            obj.nTransparency = obj.nTransparency / 2;
-                                        }
-                                        txChip.vcScaleRatio.Y = 1f * num3 / rectangle2.Height;
-                                        txChip.tDraw2D(CDTXMania.app.Device, num8, y - (CDTXMania.ConfigIni.bReverse[(int)inst] ? num3 : 0), rectangle2);
+                                        //txChip.nTransparency = 128;
+                                        //todo what
+                                        // if (pChip.bHit && !pChip.bロングノートHit中)                                            
+                                        // {
+                                        //     CTexture obj = txChip;
+                                        //     obj.nTransparency = obj.nTransparency / 2;
+                                        // }
+                                        //todo what the fuck is vcscaleratio
+                                        //txChip.vcScaleRatio.Y = 1f * num3 / rectangle2.Height;
+                                        Color4 col = Color4.White;
+                                        col.Alpha = 0.5f;
+                                        txChip.tDraw2D(num8, y - (CDTXMania.ConfigIni.bReverse[(int)inst] ? num3 : 0), rectangle2, col);
                                     }
                                 }
                             }
@@ -4371,7 +4348,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                     {
                         bMiss = false;
                     }
-                    else if ( ( ( bChipIsO == true ) && ( !pushingR | autoR ) && ( !pushingG | autoG ) && ( !pushingB | autoB ) && ( !pushingY | autoY) && ( !pushingP | autoP) ) )	// OPEN時
+                    else if ( ( bChipIsO && ( !pushingR | autoR ) && ( !pushingG | autoG ) && ( !pushingB | autoB ) && ( !pushingY | autoY) && ( !pushingP | autoP) ) )	// OPEN時
                     {
                         bMiss = false;
                     }
@@ -4568,7 +4545,7 @@ internal abstract class CStagePerfCommonScreen : CStage
             }
             if (txChip != null)
             {
-                txChip.nTransparency = pChip.nTransparency;
+                //txChip.nTransparency = pChip.nTransparency;
             }
             #endregion
             #endregion
@@ -4642,30 +4619,18 @@ internal abstract class CStagePerfCommonScreen : CStage
         switch (ePhaseID)
         {
             case EPhase.Common_FadeIn:
-                if (actFI.OnUpdateAndDraw() != 0)
-                {
-                    ePhaseID = EPhase.Common_DefaultState;
-                }
+                ePhaseID = EPhase.Common_DefaultState;
                 break;
 
             case EPhase.Common_FadeOut:
             case EPhase.PERFORMANCE_STAGE_FAILED_FADEOUT:
-                if (actFO.OnUpdateAndDraw() != 0)
-                {
-                    return true;
-                }
-
                 if (!GitaDoraTransition.isAnimating)
                 {
                     return true;
                 }
                 break;
 
-            case EPhase.PERFORMANCE_STAGE_CLEAR_FadeOut:
-                if (actFOStageClear.OnUpdateAndDraw() == 0)
-                {
-                    break;
-                }
+            case EPhase.PERFORMANCE_STAGE_CLEAR:
                 return true;
 
         }
@@ -4697,16 +4662,10 @@ internal abstract class CStagePerfCommonScreen : CStage
     protected UIImage background;
     protected void tUpdateAndDraw_Background()
     {
-        //Draw either Background image or video
-        if (bGenericVideoEnabled) {
-            actBackgroundAVI.tUpdateAndDraw();
-            background.isVisible = false;
-        }
-        else if (background != null)
+        if (background != null)
         {
             background.isVisible = true;
         }
-        //CDTXMania.app.Device.Clear( ClearFlags.ZBuffer | ClearFlags.Target, Color.Black, 0f, 0 );
     }
 
     protected void tUpdateAndDraw_JudgementLine()  // t進行描画_判定ライン
@@ -4729,7 +4688,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                     l_drumPanelWidth = 447;
                     l_xOffset = 72;
                 }
-                txHitBar.tDraw2D(CDTXMania.app.Device, 295 + l_xOffset, y, new SharpDX.RectangleF(0, 0, l_drumPanelWidth, 6));
+                txHitBar.tDraw2D(295 + l_xOffset, y, new RectangleF(0, 0, l_drumPanelWidth, 6));
             }
             if (CDTXMania.ConfigIni.bShowPerformanceInformation)
                 actLVFont.tDrawString(295, (CDTXMania.ConfigIni.bReverse.Drums ? y - 20 : y + 8), CDTXMania.ConfigIni.nJudgeLine.Drums.ToString());
@@ -4760,100 +4719,142 @@ internal abstract class CStagePerfCommonScreen : CStage
         actScrollSpeed.OnUpdateAndDraw();
     }
 
-    protected abstract void tGenerateBackgroundTexture();
-
-
-
-    
-    protected void tGenerateBackgroundTexture(string DefaultBgFilename, Rectangle bgrect, string bgfilename)
+    protected void tGenerateBackgroundTexture()
     {
-        Bitmap image = null;
-        bool flag = true;
+        Rectangle bgrect;
+        string DefaultBgFilename;
         
-        CTexture txBackground = null;
+        //drums
+        if (CDTXMania.GetCurrentInstrument() == 0)
+        {
+            bgrect = new (980, 0, 0, 0);
 
-        if (bgfilename != null && File.Exists(bgfilename))
-        {
-            try
+            if (CDTXMania.ConfigIni.bBGAEnabled)
             {
-                Bitmap bitmap2 = null;
-                bitmap2 = new Bitmap(bgfilename);
-                if ((bitmap2.Size.Width == 0) && (bitmap2.Size.Height == 0))
-                {
-                    txBackground = null;
-                    return;
-                }
-                Bitmap bitmap3 = new Bitmap(SampleFramework.GameFramebufferSize.Width, SampleFramework.GameFramebufferSize.Height);
-                Graphics graphics = Graphics.FromImage(bitmap3);
-                for (int i = 0; i < SampleFramework.GameFramebufferSize.Height; i += bitmap2.Size.Height)
-                {
-                    for (int j = 0; j < SampleFramework.GameFramebufferSize.Width; j += bitmap2.Size.Width)
-                    {
-                        graphics.DrawImage(bitmap2, j, i, bitmap2.Width, bitmap2.Height);
-                    }
-                }
-                graphics.Dispose();
-                bitmap2.Dispose();
-                image = new Bitmap(CSkin.Path(DefaultBgFilename));
-                graphics = Graphics.FromImage(image);
-                ColorMatrix matrix2 = new ColorMatrix();
-                matrix2.Matrix00 = 1f;
-                matrix2.Matrix11 = 1f;
-                matrix2.Matrix22 = 1f;
-                matrix2.Matrix33 = CDTXMania.ConfigIni.nBackgroundTransparency / 255f;
-                matrix2.Matrix44 = 1f;
-                ColorMatrix newColorMatrix = matrix2;
-                ImageAttributes imageAttr = new ImageAttributes();
-                imageAttr.SetColorMatrix(newColorMatrix);
-                graphics.DrawImage(bitmap3, new Rectangle(0, 0, SampleFramework.GameFramebufferSize.Width, SampleFramework.GameFramebufferSize.Height), 0, 0, SampleFramework.GameFramebufferSize.Width, SampleFramework.GameFramebufferSize.Height, GraphicsUnit.Pixel, imageAttr);
-                imageAttr.Dispose();
-                graphics.DrawImage(bitmap3, bgrect, bgrect.X, bgrect.Y, bgrect.Width, bgrect.Height, GraphicsUnit.Pixel);
-                graphics.Dispose();
-                bitmap3.Dispose();
-                flag = false;
+                bgrect = new(980, 0, 278, 355);
             }
-            catch
-            {
-                Trace.TraceError("背景画像の読み込みに失敗しました。({0})", new object[] { bgfilename });
-            }
+            
+            DefaultBgFilename = CSkin.Path(@"Graphics\7_background.jpg");
         }
-        if (flag)
+        else //guitar
         {
-            bgfilename = CSkin.Path(DefaultBgFilename);
-            try
-            {
-                image = new Bitmap(bgfilename);
-            }
-            catch
-            {
-                Trace.TraceError("背景画像の読み込みに失敗しました。({0})", new object[] { bgfilename });
-                txBackground = null;
-                return;
-            }
+            bgrect = new( 0, 0, 1280, 720 );
+            DefaultBgFilename = CSkin.Path(@"Graphics\7_background_Guitar.jpg");
         }
-        if ((CDTXMania.DTX.listBMP.Count > 0) || (CDTXMania.DTX.listBMPTEX.Count > 0))
+         
+        string BgFilename = "";
+        string BACKGROUND = null;
+        if ( ( CDTXMania.DTX.BACKGROUND_GR != null ) && ( CDTXMania.DTX.BACKGROUND_GR.Length > 0 ) )
         {
-            Graphics graphics2 = Graphics.FromImage(image);
-            graphics2.FillRectangle(Brushes.Black, bgrect.X, bgrect.Y, bgrect.Width, bgrect.Height);
-            graphics2.Dispose();
+            BACKGROUND = CDTXMania.DTX.BACKGROUND_GR;
         }
-        try
+        else if ( ( CDTXMania.DTX.BACKGROUND != null ) && ( CDTXMania.DTX.BACKGROUND.Length > 0 ) )
         {
-            txBackground = new CTexture(CDTXMania.app.Device, image, CDTXMania.TextureFormat);
+            BACKGROUND = CDTXMania.DTX.BACKGROUND;
         }
-        catch (CTextureCreateFailedException)
+        if ( ( BACKGROUND != null ) && ( BACKGROUND.Length > 0 ) )
         {
-            Trace.TraceError("背景テクスチャの生成に失敗しました。");
-            txBackground = null;
+            BgFilename = CDTXMania.DTX.strFolderName + BACKGROUND;
         }
-        image.Dispose();
-        
-        if (txBackground != null)
-        {
-            DTXTexture texture = new(txBackground);
-            background = ui.AddChild(new UIImage(texture));
-        }
+		
+        BaseTexture texture = BaseTexture.LoadFromPath(string.IsNullOrEmpty(BgFilename) ? DefaultBgFilename : BgFilename);
+        background = ui.AddChild(new UIImage(texture));
+        background.name = "Static Background";
+        background.renderOrder = -1;
+        background.isVisible = true;
+
+        //todo: maybe reimplement the more complex background texture behaviour
+        //tGenerateBackgroundTexture( DefaultBgFilename, bgrect, BgFilename );
     }
+    
+    // protected void tGenerateBackgroundTexture(string DefaultBgFilename, Rectangle bgrect, string bgfilename)
+    // {
+    //     Bitmap image = null;
+    //     bool flag = true;
+    //     
+    //     CTexture txBackground = null;
+    //
+    //     if (bgfilename != null && File.Exists(bgfilename))
+    //     {
+    //         try
+    //         {
+    //             Bitmap bitmap2 = null;
+    //             bitmap2 = new Bitmap(bgfilename);
+    //             if ((bitmap2.Size.Width == 0) && (bitmap2.Size.Height == 0))
+    //             {
+    //                 txBackground = null;
+    //                 return;
+    //             }
+    //             Bitmap bitmap3 = new(SampleFramework.GameFramebufferSize.Width, SampleFramework.GameFramebufferSize.Height);
+    //             Graphics graphics = Graphics.FromImage(bitmap3);
+    //             for (int i = 0; i < SampleFramework.GameFramebufferSize.Height; i += bitmap2.Size.Height)
+    //             {
+    //                 for (int j = 0; j < SampleFramework.GameFramebufferSize.Width; j += bitmap2.Size.Width)
+    //                 {
+    //                     graphics.DrawImage(bitmap2, j, i, bitmap2.Width, bitmap2.Height);
+    //                 }
+    //             }
+    //             graphics.Dispose();
+    //             bitmap2.Dispose();
+    //             image = new Bitmap(CSkin.Path(DefaultBgFilename));
+    //             graphics = Graphics.FromImage(image);
+    //             ColorMatrix matrix2 = new();
+    //             matrix2.Matrix00 = 1f;
+    //             matrix2.Matrix11 = 1f;
+    //             matrix2.Matrix22 = 1f;
+    //             matrix2.Matrix33 = CDTXMania.ConfigIni.nBackgroundTransparency / 255f;
+    //             matrix2.Matrix44 = 1f;
+    //             ColorMatrix newColorMatrix = matrix2;
+    //             ImageAttributes imageAttr = new();
+    //             imageAttr.SetColorMatrix(newColorMatrix);
+    //             graphics.DrawImage(bitmap3, new Rectangle(0, 0, SampleFramework.GameFramebufferSize.Width, SampleFramework.GameFramebufferSize.Height), 0, 0, SampleFramework.GameFramebufferSize.Width, SampleFramework.GameFramebufferSize.Height, GraphicsUnit.Pixel, imageAttr);
+    //             imageAttr.Dispose();
+    //             graphics.DrawImage(bitmap3, bgrect, bgrect.X, bgrect.Y, bgrect.Width, bgrect.Height, GraphicsUnit.Pixel);
+    //             graphics.Dispose();
+    //             bitmap3.Dispose();
+    //             flag = false;
+    //         }
+    //         catch
+    //         {
+    //             Trace.TraceError("背景画像の読み込みに失敗しました。({0})", new object[] { bgfilename });
+    //         }
+    //     }
+    //     if (flag)
+    //     {
+    //         bgfilename = CSkin.Path(DefaultBgFilename);
+    //         try
+    //         {
+    //             image = new Bitmap(bgfilename);
+    //         }
+    //         catch
+    //         {
+    //             Trace.TraceError("背景画像の読み込みに失敗しました。({0})", new object[] { bgfilename });
+    //             txBackground = null;
+    //             return;
+    //         }
+    //     }
+    //     if ((CDTXMania.DTX.listBMP.Count > 0) || (CDTXMania.DTX.listBMPTEX.Count > 0))
+    //     {
+    //         Graphics graphics2 = Graphics.FromImage(image);
+    //         graphics2.FillRectangle(Brushes.Black, bgrect.X, bgrect.Y, bgrect.Width, bgrect.Height);
+    //         graphics2.Dispose();
+    //     }
+    //     try
+    //     {
+    //         txBackground = new CTexture(CDTXMania.app.Device, image, CDTXMania.TextureFormat);
+    //     }
+    //     catch (CTextureCreateFailedException)
+    //     {
+    //         Trace.TraceError("背景テクスチャの生成に失敗しました。");
+    //         txBackground = null;
+    //     }
+    //     image.Dispose();
+    //     
+    //     if (txBackground != null)
+    //     {
+    //         
+    //     }
+    // }
 
     protected virtual void tHandleInput_Guitar()
     {
@@ -5311,14 +5312,14 @@ internal abstract class CStagePerfCommonScreen : CStage
         {
             //オートさん以外
             //
-            bool[] buttonPressArray = new bool[5]
-            {
+            bool[] buttonPressArray =
+            [
                 CDTXMania.Pad.bPressing(inst, EPad.R),
                 CDTXMania.Pad.bPressing(inst, EPad.G),
                 CDTXMania.Pad.bPressing(inst, EPad.B),
                 CDTXMania.Pad.bPressing(inst, EPad.Y),
                 CDTXMania.Pad.bPressing(inst, EPad.P)
-            };
+            ];
                 
             int pushingR = buttonPressArray[0] ? 4 : 0;
             tSaveInputMethod(inst);
@@ -5623,7 +5624,7 @@ internal abstract class CStagePerfCommonScreen : CStage
         CDTXMania.Timer.nCurrentTime = nNewPosition;
 
         //Stop any AVI and BGA
-        actAVI.Stop();
+        video.Stop();
         actBGA.Stop();
         //Reset Hold note cache
         chipロングノートHit中 = default;
@@ -5710,8 +5711,8 @@ internal abstract class CStagePerfCommonScreen : CStage
         #endregion
         #region [ 演奏開始時点で既に表示されているBGAとAVIの、シークと再生 ]
         //Re-enable SkipStart now that we have migrated to AVI renderer 
-        actBGA.SkipStart((int)nNewPosition);
-        actAVI.SkipStart((int)nNewPosition);
+        actBGA.SkipStart((int)nNewPosition); 
+        video.SkipStart((int)nNewPosition);
         #endregion
         #region [ PAUSEしていたサウンドを一斉に再生再開する(ただしタイマを止めているので、ここではまだ再生開始しない) ]
         foreach (CSound cs in pausedCSound)
@@ -5756,63 +5757,43 @@ internal abstract class CStagePerfCommonScreen : CStage
         // Display new play speed
         if (CDTXMania.ConfigIni.nShowPlaySpeed == (int)EShowPlaySpeed.ON || CDTXMania.ConfigIni.nShowPlaySpeed == (int)EShowPlaySpeed.IF_CHANGED_IN_GAME)
         {
-            tGeneratePlaySpeedTexture();
+            tUpdatePlayspeedText();
         }
 
         // re-display presence with new timestamps
         tDisplayPresence();
     }
 
-    private void tGeneratePlaySpeedTexture()
+    private void tUpdatePlayspeedText()
     {
-        CDTXMania.tReleaseTexture(ref txPlaySpeed);
-        if (CDTXMania.ConfigIni.nPlaySpeed != 20)
+        if (playspeedText == null)
         {
-            double d = CDTXMania.ConfigIni.nPlaySpeed / 20.0;
-            String strModifiedPlaySpeed = "Play Speed: x" + d.ToString("0.000");
-            CPrivateFastFont pfModifiedPlaySpeed = new CPrivateFastFont(new FontFamily(CDTXMania.ConfigIni.songListFont), 18, FontStyle.Regular);
-            Bitmap bmpModifiedPlaySpeed = pfModifiedPlaySpeed.DrawPrivateFont(strModifiedPlaySpeed, CPrivateFont.DrawMode.Edge, Color.White, Color.White, Color.Black, Color.Red, true);
-            txPlaySpeed = CDTXMania.tGenerateTexture(bmpModifiedPlaySpeed, false);
-            bmpModifiedPlaySpeed.Dispose();
-            pfModifiedPlaySpeed.Dispose();
+            playspeedText = ui.AddChild(new UIText("playspeed", 18));
+            playspeedText.fillColor = Color4.White;
+            playspeedText.outlineGradientTopColor = Color4.Black;
+            playspeedText.outlineGradientBottomColor = Color.Red;
+            playspeedText.outlineGradientMode = UiTextGradientMode.Vertical;
+            playspeedText.name = "PlaySpeedIndicator";
         }
-    }
 
-    protected void tSetSettingsForDTXV()
-    {
-        for (int i = 0; i < (int)ELane.MAX; i++)
+        if (CDTXMania.GetCurrentInstrument() == 0)
         {
-            CDTXMania.ConfigIni.bAutoPlay[i] = true;
+            playspeedText.position = new Vector3(25, 200, 0);
         }
-        CDTXMania.ConfigIni.bAVIEnabled = true;
-        CDTXMania.ConfigIni.nMovieMode = 2;
-        CDTXMania.ConfigIni.bBGAEnabled = true;
-        for (int i = 0; i < 3; i++)
+        else
         {
-            CDTXMania.ConfigIni.bGraph有効[i] = false;
-            CDTXMania.ConfigIni.nHidSud[i] = 0; // ESudHidInv.Off;
-            CDTXMania.ConfigIni.bLight[i] = false;
-            CDTXMania.ConfigIni.bReverse[i] = false;
-            CDTXMania.ConfigIni.eRandom[i] = ERandomMode.OFF;
-            CDTXMania.ConfigIni.n表示可能な最小コンボ数[i] = 65535;
-            CDTXMania.ConfigIni.bDisplayJudge[i] = false;
+            playspeedText.position = new Vector3(600, 687, 0);
         }
-        CDTXMania.ConfigIni.bドラムコンボ文字の表示 = false;
-        CDTXMania.ConfigIni.eDark = EDarkMode.OFF;
-        //TODO add this option: CDTXMania.ConfigIni.bDebugInfo = CDTXMania.ConfigIni.bViewerShowDebugStatus;
-        CDTXMania.ConfigIni.bHidePerformanceInformation = false;
-        CDTXMania.ConfigIni.bFillInEnabled = true;
-        CDTXMania.ConfigIni.bScoreIniを出力する = false;
-        CDTXMania.ConfigIni.bSTAGEFAILEDEnabled = false;
-        CDTXMania.ConfigIni.bTight = false;
-        CDTXMania.ConfigIni.bストイックモード = false;
-        CDTXMania.ConfigIni.bドラム打音を発声する = true;
-        CDTXMania.ConfigIni.bBGM音を発声する = true;
-        CDTXMania.ConfigIni.nRisky = 0;
-        CDTXMania.ConfigIni.nShowLagType = (int)EShowLagType.OFF;
-        CDTXMania.ConfigIni.bShowLagHitCount = false;
-        //CDTXMania.ConfigIni.bForceScalingAVI = false;		// DTXVモード時の各種表示要素の表示座標を「譜面制作者のカスタマイズ状態」にするか「DTXMania初期状態」にするかで
-        // 悩みました。
+
+        bool showPlaySpeed = CDTXMania.ConfigIni.nShowPlaySpeed == (int)EShowPlaySpeed.ON
+                             || (CDTXMania.ConfigIni.nShowPlaySpeed == (int)EShowPlaySpeed.IF_CHANGED_IN_GAME
+                                 && CDTXMania.ConfigIni.nPlaySpeed != 20);
+        playspeedText.isVisible = showPlaySpeed;
+
+        if (showPlaySpeed)
+        {
+            playspeedText.text = "Play Speed: x" + (CDTXMania.ConfigIni.nPlaySpeed / 20.0).ToString("0.000");
+        }
     }
 
     public void t再読込()
@@ -5836,7 +5817,7 @@ internal abstract class CStagePerfCommonScreen : CStage
     {
         Trace.TraceInformation("Stop command received");
         CDTXMania.DTX.tStopPlayingAllChips();
-        actAVI.Stop();
+        video.Stop();
         actBGA.Stop();
         //this.perfpanel.Stop();               // PANEL表示停止
         CDTXMania.Timer.tPause();       // 再生時刻カウンタ停止

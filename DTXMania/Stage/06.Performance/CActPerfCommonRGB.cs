@@ -1,4 +1,5 @@
 ﻿using DTXMania.Core;
+using DTXMania.UI.Drawable;
 using FDK;
 
 namespace DTXMania;
@@ -16,8 +17,8 @@ internal class CActPerfCommonRGB : CActivity
 	protected STDGBVALUE<double> dbAboveShutter;
 	protected STDGBVALUE<double> dbUnderShutter;
 	protected double db倍率 = 6.14;
-	protected CTexture txRGB;
-	protected CTexture txShutter;
+	protected BaseTexture txRGB;
+	protected BaseTexture txShutter;
 	protected CActLVLNFont actLVFont;
 
 	// コンストラクタ
@@ -51,18 +52,9 @@ internal class CActPerfCommonRGB : CActivity
 	{
 		if( bActivated )
 		{
-			txRGB = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_RGB buttons.png"));
-			txShutter = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_shutter_GB.png"));
+			txRGB = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_RGB buttons.png"));
+			txShutter = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_shutter_GB.png"));
 			base.OnManagedCreateResources();
-		}
-	}
-	public override void OnManagedReleaseResources()
-	{
-		if( bActivated )
-		{
-			CDTXMania.tReleaseTexture( ref txRGB );
-			CDTXMania.tReleaseTexture(ref txShutter);
-			base.OnManagedReleaseResources();
 		}
 	}
 }

@@ -1,5 +1,6 @@
 ﻿using System.Drawing;
 using DTXMania.Core;
+using DTXMania.UI.Drawable;
 using FDK;
 
 namespace DTXMania;
@@ -31,17 +32,8 @@ internal class CActPerfGuitarBonus : CActivity
     {
         if (bActivated)
         {
-            txBonus100 = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_Bonus_100.png"));
+            txBonus100 = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_Bonus_100.png"));
             base.OnManagedCreateResources();
-        }
-    }
-
-    public override void OnManagedReleaseResources()
-    {
-        if (bActivated)
-        {
-            CDTXMania.tReleaseTexture(ref txBonus100);
-            base.OnManagedReleaseResources();
         }
     }
 
@@ -80,7 +72,7 @@ internal class CActPerfGuitarBonus : CActivity
             && txBonus100 != null)
         {
             int nCounterValue = ctBonusScoreAnimationCounter[(int)eInstrumentPart].nCurrentValue;                
-            txBonus100.tDraw2D(CDTXMania.app.Device, pt.X, pt.Y - nCounterValue / 25);
+            txBonus100.tDraw2D(pt.X, pt.Y - nCounterValue / 25);
         }
     }
 
@@ -88,7 +80,7 @@ internal class CActPerfGuitarBonus : CActivity
 
     #region [ private ]
     //-----------------
-    private CTexture txBonus100;
+    private BaseTexture txBonus100;
     private STDGBVALUE<CCounter> ctBonusScoreAnimationCounter;
     //-----------------
     #endregion

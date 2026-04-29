@@ -1,151 +1,260 @@
 ﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
-using FDK;
 using FFmpeg.AutoGen.Abstractions;
-using SharpDX;
-using SharpDX.Direct3D9;
+using DTXMania.UI.Drawable;
 
 namespace DTXMania.Core.Video;
 
-public unsafe class SoftwareVideoPlayer : FFmpegVideoPlayer, IDeviceResettable
+public unsafe class SoftwareVideoPlayer : FFmpegVideoPlayer
 {
     private SwsContext* swsContext;
-    private AVFrame* bgraFrame;
-    
-    private Texture? texture;
+    private AVFrame* rgbaFrame;
+    private AVPacket* packet;
+    private double fallbackFrameDurationSeconds = 1.0 / 30.0;
+    private double timelineOriginPtsSeconds = double.NaN;
+    private double lastDecodedPtsSeconds = double.NaN;
+    private byte[] stagedFrameBuffer = [];
+    private int stagedFrameLength;
 
-    public SoftwareVideoPlayer()
+    private BaseTexture texture = BaseTexture.None;
+
+    protected override int MaxFramesToDecodePerUpdate => 1;
+
+    public SoftwareVideoPlayer(bool loopOnEof = true)
     {
-        DeviceResetManager.Register(this);
+        LoopOnEof = loopOnEof;
     }
 
     protected override bool CreateResources()
     {
-        bgraFrame = ffmpeg.av_frame_alloc();
-        
-        //setup bgraFrame
-        bgraFrame->format = (int)AVPixelFormat.AV_PIX_FMT_BGRA;
-        bgraFrame->width = codecContext->width;
-        bgraFrame->height = codecContext->height;
-        if (ffmpeg.av_frame_get_buffer(bgraFrame, 0) < 0)
+        rgbaFrame = ffmpeg.av_frame_alloc();
+        if (rgbaFrame == null)
         {
-            Trace.TraceError("Failed to allocate frame buffer for BGRA frame.");
+            Trace.TraceError("Failed to allocate RGBA frame.");
             return false;
         }
-        
+
+        packet = ffmpeg.av_packet_alloc();
+        if (packet == null)
+        {
+            Trace.TraceError("Failed to allocate packet for video decoding.");
+            return false;
+        }
+
+        rgbaFrame->format = (int)AVPixelFormat.AV_PIX_FMT_RGBA;
+        rgbaFrame->width = codecContext->width;
+        rgbaFrame->height = codecContext->height;
+
+        if (ffmpeg.av_frame_get_buffer(rgbaFrame, 0) < 0)
+        {
+            Trace.TraceError("Failed to allocate frame buffer for RGBA frame.");
+            return false;
+        }
+
         swsContext = ffmpeg.sws_getContext(
             codecContext->width,
             codecContext->height,
             codecContext->pix_fmt,
             codecContext->width,
             codecContext->height,
-            AVPixelFormat.AV_PIX_FMT_BGRA,
+            AVPixelFormat.AV_PIX_FMT_RGBA,
             ffmpeg.SWS_BILINEAR,
             null, null, null
         );
+
         if (swsContext == null)
         {
             Trace.TraceError("Failed to create swsContext for video conversion.");
             return false;
         }
-        
-        //allocate memory for the BGRA frame data
-        int numBytes = ffmpeg.av_image_get_buffer_size(AVPixelFormat.AV_PIX_FMT_BGRA, codecContext->width, codecContext->height, 1);
-        byte* rgbBuffer = (byte*)ffmpeg.av_malloc((ulong)numBytes);
-        byte_ptr8 data_ptr8 = bgraFrame->data;
-        int8 linesize8 = bgraFrame->linesize;
-        var data = *(byte_ptr4*) &data_ptr8;
-        var linesize = *(int4*) &linesize8;
-        ffmpeg.av_image_fill_arrays(ref data, ref linesize, rgbBuffer, AVPixelFormat.AV_PIX_FMT_BGRA, codecContext->width, codecContext->height, 1);
-        
-        texture = new Texture(CDTXMania.app.Device, codecContext->width, codecContext->height, 1, Usage.Dynamic, Format.A8R8G8B8, Pool.Default);
-        if (texture == null)
+
+        texture = BaseTexture.CreateEmpty(codecContext->width, codecContext->height, "VideoFrameTexture");
+        if (!texture.IsValid())
         {
-            Trace.TraceError("Failed to create Direct3D9 texture for video playback!");
+            Trace.TraceError("Failed to create BaseTexture for video playback.");
+            return false;
         }
+
+        stagedFrameBuffer = [];
+        stagedFrameLength = 0;
+        timelineOriginPtsSeconds = double.NaN;
+        lastDecodedPtsSeconds = double.NaN;
+
+        AVStream* videoStream = formatContext->streams[videoStreamIndex];
+        if (videoStream != null)
+        {
+            AVRational frameRate = videoStream->avg_frame_rate;
+            if (frameRate.num <= 0 || frameRate.den <= 0)
+            {
+                frameRate = videoStream->r_frame_rate;
+            }
+
+            if (frameRate.num > 0 && frameRate.den > 0)
+            {
+                fallbackFrameDurationSeconds = (double)frameRate.den / frameRate.num;
+            }
+        }
+
         return true;
     }
 
-    public override Texture GetUpdatedTexture()
+    protected override BaseTexture OutputTexture => texture;
+
+    protected override bool TryDecodeAndStageFrame(out double framePtsSeconds, out bool reachedEndOfStream)
     {
-        if (texture == null)
+        if (packet == null)
         {
-            return CDTXMania.FallbackTexture.texture;
-        }
-        
-        if (TryDecodeNextFrame(out byte[] frameData))
-        {
-            UploadToD3D9Texture(texture, frameData);
+            reachedEndOfStream = false;
+            framePtsSeconds = 0;
+            return false;
         }
 
-        return texture;
-    }
-    
-    public bool TryDecodeNextFrame(out byte[] bgraFrameData)
-    {
-        AVPacket* packet = ffmpeg.av_packet_alloc();
+        reachedEndOfStream = false;
 
-        while (ffmpeg.av_read_frame(formatContext, packet) >= 0)
+        while (true)
         {
-            if (packet->stream_index == videoStreamIndex)
+            int readResult = ffmpeg.av_read_frame(formatContext, packet);
+            if (readResult < 0)
             {
-                int send = ffmpeg.avcodec_send_packet(codecContext, packet);
-                if (send < 0)
+                reachedEndOfStream = true;
+                framePtsSeconds = 0;
+                return false;
+            }
+
+            if (packet->stream_index != videoStreamIndex)
+            {
+                ffmpeg.av_packet_unref(packet);
+                continue;
+            }
+
+            int send = ffmpeg.avcodec_send_packet(codecContext, packet);
+            ffmpeg.av_packet_unref(packet);
+            if (send < 0)
+            {
+                continue;
+            }
+
+            int receive = ffmpeg.avcodec_receive_frame(codecContext, frame);
+            if (receive != 0)
+            {
+                continue;
+            }
+
+            if (ffmpeg.av_frame_make_writable(rgbaFrame) < 0)
+            {
+                framePtsSeconds = 0;
+                return false;
+            }
+
+            ffmpeg.sws_scale(
+                swsContext,
+                frame->data,
+                frame->linesize,
+                0,
+                codecContext->height,
+                rgbaFrame->data,
+                rgbaFrame->linesize
+            );
+
+            int width = codecContext->width;
+            int height = codecContext->height;
+            int rowBytes = width * 4;
+            int stride = rgbaFrame->linesize[0];
+            int packedSize = rowBytes * height;
+
+            if (stagedFrameBuffer.Length != packedSize)
+            {
+                stagedFrameBuffer = new byte[packedSize];
+            }
+
+            IntPtr src = (IntPtr)rgbaFrame->data[0];
+            if (stride == rowBytes)
+            {
+                Marshal.Copy(src, stagedFrameBuffer, 0, packedSize);
+            }
+            else
+            {
+                for (int y = 0; y < height; y++)
                 {
-                    ffmpeg.av_packet_unref(packet);
-                    continue;
-                }
-
-                int receive = ffmpeg.avcodec_receive_frame(codecContext, frame);
-                
-                if (receive == 0)
-                {
-                    // Convert to BGRA
-                    ffmpeg.sws_scale(
-                        swsContext,
-                        frame->data,
-                        frame->linesize,
-                        0,
-                        codecContext->height,
-                        bgraFrame->data,
-                        bgraFrame->linesize
-                    );
-
-                    int stride = bgraFrame->linesize[0];
-                    int height = codecContext->height;
-                    int dataSize = stride * height;
-
-                    bgraFrameData = new byte[dataSize];
-                    Marshal.Copy((IntPtr)bgraFrame->data[0], bgraFrameData, 0, dataSize);
-
-                    ffmpeg.av_packet_unref(packet);
-                    return true;
+                    IntPtr srcRow = src + (y * stride);
+                    Marshal.Copy(srcRow, stagedFrameBuffer, y * rowBytes, rowBytes);
                 }
             }
 
-            ffmpeg.av_packet_unref(packet);
+            framePtsSeconds = ResolveFrameTimestampSeconds();
+            stagedFrameLength = packedSize;
+            return true;
+        }
+    }
+
+    protected override void PresentStagedFrame()
+    {
+        if (stagedFrameLength <= 0 || !texture.IsValid())
+        {
+            return;
         }
 
-        bgraFrameData = [];
-        return false;
+        texture.UpdateRgba32(stagedFrameBuffer, codecContext->width, codecContext->height);
     }
-    
-    public static void UploadToD3D9Texture(Texture tex, byte[] data)
+
+    private double ResolveFrameTimestampSeconds()
     {
-        DataRectangle rect = tex.LockRectangle(0, LockFlags.Discard);
-        Marshal.Copy(data, 0, rect.DataPointer, data.Length);
-        tex.UnlockRectangle(0);
+        AVStream* videoStream = formatContext->streams[videoStreamIndex];
+        long bestEffortTimestamp = frame->best_effort_timestamp;
+
+        if (videoStream != null && bestEffortTimestamp != ffmpeg.AV_NOPTS_VALUE)
+        {
+            double rawPtsSeconds = StreamTimestampToSeconds(videoStream, bestEffortTimestamp);
+            if (!double.IsNaN(rawPtsSeconds) && !double.IsInfinity(rawPtsSeconds))
+            {
+                if (double.IsNaN(timelineOriginPtsSeconds))
+                {
+                    timelineOriginPtsSeconds = rawPtsSeconds;
+                }
+
+                double relativePtsSeconds = Math.Max(0, rawPtsSeconds - timelineOriginPtsSeconds);
+                if (!double.IsNaN(lastDecodedPtsSeconds) && relativePtsSeconds < lastDecodedPtsSeconds)
+                {
+                    // Avoid running too fast on jittery/non-monotonic streams.
+                    relativePtsSeconds = lastDecodedPtsSeconds;
+                }
+
+                lastDecodedPtsSeconds = relativePtsSeconds;
+                return relativePtsSeconds;
+            }
+        }
+
+        if (double.IsNaN(lastDecodedPtsSeconds))
+        {
+            lastDecodedPtsSeconds = 0;
+            return 0;
+        }
+
+        lastDecodedPtsSeconds += fallbackFrameDurationSeconds;
+        return lastDecodedPtsSeconds;
+    }
+
+    protected override void OnPlaybackReset()
+    {
+        stagedFrameLength = 0;
+        timelineOriginPtsSeconds = double.NaN;
+        lastDecodedPtsSeconds = double.NaN;
     }
 
     public override void Dispose()
     {
-        DeviceResetManager.Unregister(this);
-        
-        if (bgraFrame != null)
+        if (rgbaFrame != null)
         {
-            AVFrame* tmp = bgraFrame;
+            AVFrame* tmp = rgbaFrame;
             ffmpeg.av_frame_free(&tmp);
-            bgraFrame = null;
+            rgbaFrame = null;
+        }
+
+        if (packet != null)
+        {
+            AVPacket* tmp = packet;
+            ffmpeg.av_packet_free(&tmp);
+            packet = null;
         }
 
         if (swsContext != null)
@@ -153,28 +262,12 @@ public unsafe class SoftwareVideoPlayer : FFmpegVideoPlayer, IDeviceResettable
             ffmpeg.sws_freeContext(swsContext);
             swsContext = null;
         }
-        
-        if (texture != null)
-        {
-            texture.Dispose();
-            texture = null;
-        }
-        
+
+        texture.Dispose();
+        texture = BaseTexture.None;
+        stagedFrameBuffer = [];
+        stagedFrameLength = 0;
+
         base.Dispose();
-    }
-
-    public void OnDeviceLost()
-    {
-        texture?.Dispose();
-        texture = null;
-    }
-
-    public void OnDeviceReset()
-    {
-        texture = new Texture(CDTXMania.app.Device, codecContext->width, codecContext->height, 1, Usage.Dynamic, Format.A8R8G8B8, Pool.Default);
-        if (texture == null)
-        {
-            Trace.TraceError("Failed to create Direct3D9 texture for video playback!");
-        }
     }
 }

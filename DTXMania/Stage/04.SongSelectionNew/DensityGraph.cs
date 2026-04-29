@@ -1,9 +1,9 @@
-﻿using DTXMania.Core;
+﻿using System.Drawing;
+using System.Numerics;
+using DTXMania.Core;
 using DTXMania.SongDb;
-using DTXMania.UI;
 using DTXMania.UI.Drawable;
 using FDK;
-using SharpDX;
 
 namespace DTXMania;
 
@@ -18,12 +18,12 @@ public class DensityGraph : UIGroup
         switch (this.inst)
         {
             case EInstrumentPart.DRUMS:
-                var graphPanel = AddChild(new UIImage(DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\SongSelect\graph_panel_drums.png"))));
+                var graphPanel = AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\SongSelect\graph_panel_drums.png"))));
                 graphPanel.position = new Vector3(0, 0, 0);
                 graphPanel.renderOrder = 4;
                 graphPanel.name = "GraphPanel";
         
-                var graphFg = AddChild(new UIImage(DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\SongSelect\graph_fg_drums.png"))));
+                var graphFg = AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\SongSelect\graph_fg_drums.png"))));
                 graphFg.position = new Vector3(30, 15, 0);
                 graphFg.renderOrder = 5;
                 graphFg.name = "GraphFg";
@@ -31,12 +31,12 @@ public class DensityGraph : UIGroup
             
             case EInstrumentPart.GUITAR:
             case EInstrumentPart.BASS:
-                var graphPanelGb = AddChild(new UIImage(DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\SongSelect\graph_panel_guitarbass.png"))));
+                var graphPanelGb = AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\SongSelect\graph_panel_guitarbass.png"))));
                 graphPanelGb.position = new Vector3(0, 0, 0);
                 graphPanelGb.renderOrder = 4;
                 graphPanelGb.name = "GraphPanel";
         
-                var graphFgGb = AddChild(new UIImage(DTXTexture.LoadFromPath(CSkin.Path(@"Graphics\SongSelect\graph_fg_guitarbass.png"))));
+                var graphFgGb = AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\SongSelect\graph_fg_guitarbass.png"))));
                 graphFgGb.position = new Vector3(30, 15, 0);
                 graphFgGb.renderOrder = 5;
                 graphFgGb.name = "GraphFg";
@@ -44,7 +44,7 @@ public class DensityGraph : UIGroup
         }
     }
     
-    private CTexture[] txDrumChipsBarLine = new CTexture[9];
+    private BaseTexture[] txDrumChipsBarLine = new BaseTexture[9];
     private Color[] clDrumChipsBarColors =
     [
         Color.PaleVioletRed,
@@ -57,7 +57,7 @@ public class DensityGraph : UIGroup
         Color.Orange,
         Color.DeepSkyBlue
     ];
-    private CTexture[] txGBChipsBarLine = new CTexture[6];
+    private BaseTexture[] txGBChipsBarLine = new BaseTexture[6];
     private Color[] clGBChipsBarColors =
     [
         Color.Red,

@@ -1,4 +1,5 @@
 ﻿using System.Drawing;
+using System.Numerics;
 using DTXMania.Core;
 using DTXMania.UI.Drawable;
 using SharpDX;
@@ -11,14 +12,12 @@ public class SongDBStatus : UIText
 
     public SongDBStatus()
     {
-        fontFamily = new FontFamily(CDTXMania.ConfigIni.songListFont);
         fontSize = 18;
         renderOrder = 100;
-        UpdateFont();
     }
 
     private SongDbScanStatus lastStatus;
-    public override void Draw(Matrix parentMatrix)
+    public override void Draw(Matrix4x4 parentMatrix)
     {
         bool statusChanged = lastStatus != songDb.status;
         switch (songDb.status)
