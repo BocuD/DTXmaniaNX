@@ -93,8 +93,7 @@ jobs:
           ### Installation
           1. Download and extract the zip file
           2. Install [.NET 8.0 Runtime](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) if not already installed
-          3. Install [DirectX End-User Runtime](https://www.microsoft.com/en-us/download/details.aspx?displaylang=en&id=35)
-          4. Run DTXManiaNX.exe
+          3. Run DTXManiaNX.exe
           
           ### Changes
           See commit history for details: ${{ github.event.head_commit.url }}
