@@ -247,7 +247,7 @@ public class CSoundDeviceWASAPI : ISoundDevice
 				#endregion
 				break;
 			}
-		}
+		}	
 		if (nDevNo != -1)
 		{
 			Trace.TraceInformation("Start Bass_Init(device=0(fixed value: no sound), deviceInfo.mixfreq=" + deviceInfo.mixfreq + ", BASS_DEVICE_DEFAULT, Zero)");
@@ -644,7 +644,7 @@ public class CSoundDeviceWASAPI : ISoundDevice
 #else
 		int hmixer = hMixer_Chips[(int)eInstType];
 #endif
-		sound.tWASAPIサウンドを作成する(strファイル名, hmixer, eOutputDevice, eInstType);
+		sound.tCreateWasapiAudioClip(strファイル名, hmixer, eOutputDevice, eInstType);
 		return sound;
 	}
 	public void tサウンドを作成する(string strファイル名, ref CSound sound, CSound.EInstType eInstType)
@@ -654,7 +654,7 @@ public class CSoundDeviceWASAPI : ISoundDevice
 #else
 		int hmixer = hMixer_Chips[(int)eInstType];
 #endif
-		sound.tWASAPIサウンドを作成する(strファイル名, hmixer, eOutputDevice, eInstType);
+		sound.tCreateWasapiAudioClip(strファイル名, hmixer, eOutputDevice, eInstType);
 	}
 	public void tサウンドを作成する(byte[] byArrWAVファイルイメージ, ref CSound sound, CSound.EInstType eInstType)
 	{
@@ -663,7 +663,7 @@ public class CSoundDeviceWASAPI : ISoundDevice
 #else
 		int hmixer = hMixer_Chips[(int)eInstType];
 #endif
-		sound.tWASAPIサウンドを作成する(byArrWAVファイルイメージ, hmixer, eOutputDevice, eInstType);
+		sound.tCreateWasapiAudioClip(byArrWAVファイルイメージ, hmixer, eOutputDevice, eInstType);
 	}
 	#endregion
 

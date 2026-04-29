@@ -198,7 +198,6 @@ public class CSoundManager   // CSound管理
 		int _nSoundDelayASIO, int _nASIODevice,
 		bool _bUseOSTimer)
 	{
-		//SoundDevice = null;						// 後で再初期化することがあるので、null初期化はコンストラクタに回す
 		rcPerformanceTimer = null;                        // Global.Bass 依存（つまりユーザ依存）
 		nMixing = 0;
 		SoundDelayExclusiveWASAPI = _nSoundDelayExclusiveWASAPI;
@@ -217,26 +216,26 @@ public class CSoundManager   // CSound管理
 			ESoundDeviceType.Unknown
 		];
 
-		int n初期デバイス;    // = (int) soundDeviceType;
+		int nInitialDevice;    // = (int) soundDeviceType;
 		switch (soundDeviceType)
 		{
 			case ESoundDeviceType.ExclusiveWASAPI:
-				n初期デバイス = 1;
+				nInitialDevice = 1;
 				break;
 			case ESoundDeviceType.ASIO:
-				n初期デバイス = 0;
+				nInitialDevice = 0;
 				break;
 			case ESoundDeviceType.SharedWASAPI:
-				n初期デバイス = 2;
+				nInitialDevice = 2;
 				break;
 			case ESoundDeviceType.DirectSound:
-				n初期デバイス = 3;
+				nInitialDevice = 3;
 				break;
 			default:
-				n初期デバイス = 4;
+				nInitialDevice = 4;
 				break;
 		}
-		for (SoundDeviceType = ESoundDeviceTypes[n初期デバイス]; ; SoundDeviceType = ESoundDeviceTypes[++n初期デバイス])
+		for (SoundDeviceType = ESoundDeviceTypes[nInitialDevice]; ; SoundDeviceType = ESoundDeviceTypes[++nInitialDevice])
 		{
 			try
 			{
@@ -245,8 +244,9 @@ public class CSoundManager   // CSound管理
 			}
 			catch (Exception e)
 			{
-				Trace.TraceInformation(e.Message);
-				if (ESoundDeviceTypes[n初期デバイス] == ESoundDeviceType.Unknown)
+				Trace.TraceError(e.Message);
+				Trace.TraceError(e.StackTrace);
+				if (ESoundDeviceTypes[nInitialDevice] == ESoundDeviceType.Unknown)
 				{
 					Trace.TraceError("サウンドデバイスの初期化に失敗しました。");
 					break;
@@ -261,7 +261,7 @@ public class CSoundManager   // CSound管理
 		if (soundDeviceType == ESoundDeviceType.ExclusiveWASAPI || soundDeviceType == ESoundDeviceType.ASIO || soundDeviceType == ESoundDeviceType.SharedWASAPI)
 		{
 			#region [ CPU論理コア数の取得 (HT含む) ]
-			CWin32.SYSTEM_INFO sysInfo = new CWin32.SYSTEM_INFO();
+			CWin32.SYSTEM_INFO sysInfo = new();
 			CWin32.GetSystemInfo(out sysInfo);
 			int nCPUCores = (int)sysInfo.dwNumberOfProcessors;
 			#endregion
@@ -273,24 +273,13 @@ public class CSoundManager   // CSound管理
 			Trace.TraceInformation("BASS_CONFIG_UpdateThreads=" + Bass.BASS_GetConfig(BASSConfig.BASS_CONFIG_UPDATETHREADS));
 		}
 	}
-
-	public void tDisableUpdateBufferAutomatically()
-	{
-		//Bass.BASS_SetConfig( BASSConfig.BASS_CONFIG_UPDATETHREADS, 0 );
-		//Bass.BASS_SetConfig( BASSConfig.BASS_CONFIG_UPDATEPERIOD, 0 );
-
-		//Trace.TraceInformation( "BASS_CONFIG_UpdatePeriod=" + Bass.BASS_GetConfig( BASSConfig.BASS_CONFIG_UPDATEPERIOD ) );
-		//Trace.TraceInformation( "BASS_CONFIG_UpdateThreads=" + Bass.BASS_GetConfig( BASSConfig.BASS_CONFIG_UPDATETHREADS ) );
-	}
-
-
+	
 	public static void t終了()
 	{
 		CCommon.tDispose(SoundDevice); SoundDevice = null;
 		CCommon.tDispose(ref rcPerformanceTimer);   // Global.Bass を解放した後に解放すること。（Global.Bass で参照されているため）
 	}
-
-
+	
 	public static void t現在のユーザConfigに従ってサウンドデバイスとすべての既存サウンドを再構築する()
 	{
 		#region [ すでにサウンドデバイスと演奏タイマが構築されていれば解放する。]
@@ -299,7 +288,7 @@ public class CSoundManager   // CSound管理
 		{
 			// すでに生成済みのサウンドがあれば初期状態に戻す。
 
-			CSound.tすべてのサウンドを初期状態に戻す();     // リソースは解放するが、CSoundのインスタンスは残す。
+			CSound.tReleaseAllSounds();     // リソースは解放するが、CSoundのインスタンスは残す。
 
 
 			// サウンドデバイスと演奏タイマを解放する。
@@ -674,7 +663,7 @@ public class CSound : IDisposable, ICloneable
 	/// <para>全インスタンスリスト。</para>
 	/// <para>～を作成する() で追加され、t解放する() or Dispose() で解放される。</para>
 	/// </summary>
-	public static List<CSound> listインスタンス = [];
+	public static List<CSound> audioClips = [];
 
 	public CSound()
 	{
@@ -698,51 +687,51 @@ public class CSound : IDisposable, ICloneable
 		CSound clone = (CSound)MemberwiseClone();   // これだけだとCY連打が途切れる＆タイトルに戻る際にNullRef例外発生
 		clone.Buffer = DirectSound.DuplicateSoundBuffer(Buffer);
 
-		listインスタンス.Add(clone);          // インスタンスリストに登録。
+		audioClips.Add(clone);          // インスタンスリストに登録。
 
 		return clone;
 	}
-	public void tASIOサウンドを作成する(string strファイル名, int hMixer, EInstType _eInstType)
+	public void tCreateASIOAudioClip(string strFileName, int hMixer, EInstType _eInstType)
 	{
-		tBASSサウンドを作成する(strファイル名, hMixer, BASSFlag.BASS_STREAM_DECODE);
+		tCreateBASSAudioClip(strFileName, hMixer, BASSFlag.BASS_STREAM_DECODE);
 		eデバイス種別 = ESoundDeviceType.ASIO;       // 作成後に設定する。（作成に失敗してると例外発出されてここは実行されない）
 		eInstType = _eInstType;
 	}
-	public void tASIOサウンドを作成する(byte[] byArrWAVファイルイメージ, int hMixer, EInstType _eInstType)
+	public void tCreateASIOAudioClip(byte[] byArrWAVファイルイメージ, int hMixer, EInstType _eInstType)
 	{
-		tBASSサウンドを作成する(byArrWAVファイルイメージ, hMixer, BASSFlag.BASS_STREAM_DECODE);
+		tCreateBASSAudioClip(byArrWAVファイルイメージ, hMixer, BASSFlag.BASS_STREAM_DECODE);
 		eデバイス種別 = ESoundDeviceType.ASIO;       // 作成後に設定する。（作成に失敗してると例外発出されてここは実行されない）
 		eInstType = _eInstType;
 	}
-	public void tWASAPIサウンドを作成する(string strファイル名, int hMixer, ESoundDeviceType eデバイス種別, EInstType _eInstType)
+	public void tCreateWasapiAudioClip(string strFileName, int hMixer, ESoundDeviceType eDeviceType, EInstType _eInstType)
 	{
-		tBASSサウンドを作成する(strファイル名, hMixer, BASSFlag.BASS_STREAM_DECODE | BASSFlag.BASS_SAMPLE_FLOAT);
-		this.eデバイス種別 = eデバイス種別;     // 作成後に設定する。（作成に失敗してると例外発出されてここは実行されない）
+		tCreateBASSAudioClip(strFileName, hMixer, BASSFlag.BASS_STREAM_DECODE | BASSFlag.BASS_SAMPLE_FLOAT);
+		this.eデバイス種別 = eDeviceType;     // 作成後に設定する。（作成に失敗してると例外発出されてここは実行されない）
 		eInstType = _eInstType;
 	}
-	public void tWASAPIサウンドを作成する(byte[] byArrWAVファイルイメージ, int hMixer, ESoundDeviceType eデバイス種別, EInstType _eInstType)
+	public void tCreateWasapiAudioClip(byte[] byArrWAVファイルイメージ, int hMixer, ESoundDeviceType eDeviceType, EInstType _eInstType)
 	{
-		tBASSサウンドを作成する(byArrWAVファイルイメージ, hMixer, BASSFlag.BASS_STREAM_DECODE | BASSFlag.BASS_SAMPLE_FLOAT);
-		this.eデバイス種別 = eデバイス種別;     // 作成後に設定する。（作成に失敗してると例外発出されてここは実行されない）
+		tCreateBASSAudioClip(byArrWAVファイルイメージ, hMixer, BASSFlag.BASS_STREAM_DECODE | BASSFlag.BASS_SAMPLE_FLOAT);
+		this.eデバイス種別 = eDeviceType;     // 作成後に設定する。（作成に失敗してると例外発出されてここは実行されない）
 		eInstType = _eInstType;
 	}
-	public void tDirectSoundサウンドを作成する(string strファイル名, DirectSound DirectSound, EInstType _eInstType)
+	public void tCreateDirectSoundAudioClip(string strFileName, DirectSound DirectSound, EInstType _eInstType)
 	{
 		e作成方法 = E作成方法.ファイルから;
-		this.strファイル名 = strファイル名;
-		if (String.Compare(Path.GetExtension(strファイル名), ".xa", true) == 0 ||
-		    String.Compare(Path.GetExtension(strファイル名), ".mp3", true) == 0 ||
-		    String.Compare(Path.GetExtension(strファイル名), ".ogg", true) == 0)   // caselessで文字列比較
+		this.strFileName = strFileName;
+		if (String.Compare(Path.GetExtension(strFileName), ".xa", true) == 0 ||
+		    String.Compare(Path.GetExtension(strFileName), ".mp3", true) == 0 ||
+		    String.Compare(Path.GetExtension(strFileName), ".ogg", true) == 0)   // caselessで文字列比較
 		{
 			try
 			{
-				tDirectSoundサウンドを作成するXaOggMp3(strファイル名, DirectSound);
+				tCreateDirectSoundAudioClipXaOggMp3(strFileName, DirectSound);
 				eInstType = _eInstType;
 				return;
 			}
 			catch (Exception e)
 			{
-				string s = Path.GetFileName(strファイル名);
+				string s = Path.GetFileName(strFileName);
 				Trace.TraceWarning($"directsoundサウンドの作成に失敗しました。({s}: {e.Message})");
 				Trace.TraceWarning("続けて、他のデコーダでの作成を試みます。");
 			}
@@ -759,7 +748,7 @@ public class CSound : IDisposable, ICloneable
 			SoundStream ws = null;
 			try
 			{
-				using (ws = new SoundStream(new FileStream(strファイル名, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+				using (ws = new SoundStream(new FileStream(strFileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
 				{
 					if (ws.Format.Encoding != WaveFormatEncoding.Pcm)
 						bファイルがWAVかつPCMフォーマットである = false;
@@ -784,7 +773,7 @@ public class CSound : IDisposable, ICloneable
 			{
 				#region [ ファイルを読み込んで byArrWAVファイルイメージへ格納。]
 				//-----------------
-				var fs = File.Open(strファイル名, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+				var fs = File.Open(strFileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
 				var br = new BinaryReader(fs);
 
 				byArrWAVファイルイメージ = new byte[fs.Length];
@@ -802,7 +791,7 @@ public class CSound : IDisposable, ICloneable
 				int nPCMデータの先頭インデックス;
 				CWin32.WAVEFORMATEX wfx;
 				int totalPCMSize;
-				tオンメモリ方式でデコードする(strファイル名, out byArrWAVファイルイメージ,
+				tオンメモリ方式でデコードする(strFileName, out byArrWAVファイルイメージ,
 					out nPCMデータの先頭インデックス, out totalPCMSize, out wfx, true);
 				//-----------------
 				#endregion
@@ -811,12 +800,12 @@ public class CSound : IDisposable, ICloneable
 
 		// あとはあちらで。
 
-		tDirectSoundサウンドを作成する(byArrWAVファイルイメージ, DirectSound, _eInstType);
+		tCreateDirectSoundAudioClip(byArrWAVファイルイメージ, DirectSound, _eInstType);
 	}
-	public void tDirectSoundサウンドを作成するXaOggMp3(string strファイル名, DirectSound DirectSound)
+	public void tCreateDirectSoundAudioClipXaOggMp3(string strファイル名, DirectSound DirectSound)
 	{
 		e作成方法 = E作成方法.ファイルから;
-		this.strファイル名 = strファイル名;
+		this.strFileName = strファイル名;
 
 
 		int nPCMデータの先頭インデックス = 0;
@@ -834,11 +823,11 @@ public class CSound : IDisposable, ICloneable
 			nPCMサイズbyte, nPCMデータの先頭インデックス);
 	}
 
-	public void tDirectSoundサウンドを作成する(byte[] byArrWAVファイルイメージ, DirectSound DirectSound, EInstType _eInstType)
+	public void tCreateDirectSoundAudioClip(byte[] byArrWAVファイルイメージ, DirectSound DirectSound, EInstType _eInstType)
 	{
-		tDirectSoundサウンドを作成する(byArrWAVファイルイメージ, DirectSound, CSoundDeviceDirectSound.DefaultFlags, _eInstType);
+		tCreateDirectSoundAudioClip(byArrWAVファイルイメージ, DirectSound, CSoundDeviceDirectSound.DefaultFlags, _eInstType);
 	}
-	public void tDirectSoundサウンドを作成する(byte[] byArrWAVファイルイメージ, DirectSound DirectSound, BufferFlags flags, EInstType _eInstType)
+	public void tCreateDirectSoundAudioClip(byte[] byArrWAVファイルイメージ, DirectSound DirectSound, BufferFlags flags, EInstType _eInstType)
 	{
 		if (e作成方法 == E作成方法.Unknown)
 			e作成方法 = E作成方法.WAVファイルイメージから;
@@ -984,12 +973,12 @@ public class CSound : IDisposable, ICloneable
 		nTotalPlayTimeMs = (int)(((double)nPCMサイズbyte) / (_Format.AverageBytesPerSecond * 0.001));
 
 		// インスタンスリストに登録。
-		listインスタンス.Add(this);
+		audioClips.Add(this);
 	}
 
 	#region [ DTXMania用の変換 ]
 
-	public void tサウンドを破棄する(CSound cs)
+	public void tDiscardAudioClip(CSound cs)
 	{
 		cs.tRelease();
 	}
@@ -998,11 +987,11 @@ public class CSound : IDisposable, ICloneable
 		tSetPlaybackPositionToBeginning();
 		tPlaySound();
 	}
-	public void tStartPlaying(bool bループする)  // t再生を開始する
+	public void tStartPlaying(bool bLoop)  // t再生を開始する
 	{
 		if (bIsBASS)
 		{
-			if (bループする)
+			if (bLoop)
 			{
 				Bass.BASS_ChannelFlags(hBassStream, BASSFlag.BASS_SAMPLE_LOOP, BASSFlag.BASS_SAMPLE_LOOP);
 			}
@@ -1012,7 +1001,7 @@ public class CSound : IDisposable, ICloneable
 			}
 		}
 		tSetPlaybackPositionToBeginning();
-		tPlaySound(bループする);
+		tPlaySound(bLoop);
 	}
 	public void tStopPlayback()  // t再生を停止する
 	{
@@ -1112,7 +1101,7 @@ public class CSound : IDisposable, ICloneable
 				bool bb = tBASSAddSoundToMixer();
 				if (!bb)
 				{
-					Debug.WriteLine("Mixerへの登録に失敗: " + Path.GetFileName(strファイル名) + ", ErrCode=" + Bass.BASS_ErrorGetCode());
+					Debug.WriteLine("Mixerへの登録に失敗: " + Path.GetFileName(strFileName) + ", ErrCode=" + Bass.BASS_ErrorGetCode());
 				}
 				else
 				{
@@ -1123,7 +1112,7 @@ public class CSound : IDisposable, ICloneable
 				bool bbb = BassMix.BASS_Mixer_ChannelPlay(hBassStream);
 				if (!bbb)
 				{
-					Debug.WriteLine("更に再生に失敗: " + Path.GetFileName(strファイル名) + ", ErrCode=" + Bass.BASS_ErrorGetCode());
+					Debug.WriteLine("更に再生に失敗: " + Path.GetFileName(strFileName) + ", ErrCode=" + Bass.BASS_ErrorGetCode());
 				}
 				else
 				{
@@ -1207,14 +1196,14 @@ public class CSound : IDisposable, ICloneable
 			}
 			catch (Exception e)
 			{
-				Trace.TraceInformation(Path.GetFileName(strファイル名) + ": Seek error: " + e.ToString() + ": " + n位置ms + "ms");
+				Trace.TraceInformation(Path.GetFileName(strFileName) + ": Seek error: " + e.ToString() + ": " + n位置ms + "ms");
 			}
 			finally
 			{
 				if (!b)
 				{
 					BASSError be = Bass.BASS_ErrorGetCode();
-					Trace.TraceInformation(Path.GetFileName(strファイル名) + ": Seek error: " + be.ToString() + ": " + n位置ms + "MS");
+					Trace.TraceInformation(Path.GetFileName(strFileName) + ": Seek error: " + be.ToString() + ": " + n位置ms + "MS");
 				}
 			}
 			//if ( this.n総演奏時間ms > 5000 )
@@ -1231,7 +1220,7 @@ public class CSound : IDisposable, ICloneable
 			}
 			catch (Exception e)
 			{
-				Trace.TraceError("{0}: Seek error: {1}", Path.GetFileName(strファイル名), n位置ms, e.Message);
+				Trace.TraceError("{0}: Seek error: {1}", Path.GetFileName(strFileName), n位置ms, e.Message);
 			}
 			//if ( this.n総演奏時間ms > 5000 )
 			//{
@@ -1265,23 +1254,23 @@ public class CSound : IDisposable, ICloneable
 	}
 
 
-	public static void tすべてのサウンドを初期状態に戻す()
+	public static void tReleaseAllSounds()
 	{
-		foreach (var sound in listインスタンス)
+		foreach (var sound in audioClips)
 		{
 			sound.tRelease(false);
 		}
 	}
 	public static void tすべてのサウンドを再構築する(ISoundDevice device)
 	{
-		if (listインスタンス.Count == 0)
+		if (audioClips.Count == 0)
 			return;
 
 
 		// サウンドを再生する際にインスタンスリストも更新されるので、配列にコピーを取っておき、リストはクリアする。
 
-		var sounds = listインスタンス.ToArray();
-		listインスタンス.Clear();
+		var sounds = audioClips.ToArray();
+		audioClips.Clear();
 
 
 		// 配列に基づいて個々のサウンドを作成する。
@@ -1293,7 +1282,7 @@ public class CSound : IDisposable, ICloneable
 				#region [ ファイルから ]
 				case E作成方法.ファイルから:
 				{
-					string strファイル名 = sounds[i].strファイル名;
+					string strファイル名 = sounds[i].strFileName;
 					EInstType eInstType = sounds[i].eInstType;
 					sounds[i].Dispose(true, false);
 					device.tサウンドを作成する(strファイル名, ref sounds[i], eInstType);
@@ -1407,10 +1396,10 @@ public class CSound : IDisposable, ICloneable
 				//{
 				//    Debug.WriteLine( "FAILED to remove CSound.listインスタンス: Count=" + CSound.listインスタンス.Count + ", filename=" + Path.GetFileName( this.strファイル名 ) );
 				//}
-				bool b = listインスタンス.Remove(this);    // これだと、Clone()したサウンドのremoveに失敗する
+				bool b = audioClips.Remove(this);    // これだと、Clone()したサウンドのremoveに失敗する
 				if (!b)
 				{
-					Debug.WriteLine("FAILED to remove CSound.listインスタンス: Count=" + listインスタンス.Count + ", filename=" + Path.GetFileName(strファイル名));
+					Debug.WriteLine("FAILED to remove CSound.listインスタンス: Count=" + audioClips.Count + ", filename=" + Path.GetFileName(strFileName));
 				}
 
 			}
@@ -1428,7 +1417,7 @@ public class CSound : IDisposable, ICloneable
 	protected enum E作成方法 { ファイルから, WAVファイルイメージから, Unknown }
 	protected E作成方法 e作成方法 = E作成方法.Unknown;
 	protected ESoundDeviceType eデバイス種別 = ESoundDeviceType.Unknown;
-	public string strファイル名 = null;
+	public string strFileName = null;
 	protected byte[] byArrWAVファイルイメージ = null;   // WAVファイルイメージ、もしくはchunkのDATA部のみ
 	protected GCHandle hGC;
 	protected int _hTempoStream = 0;
@@ -1481,7 +1470,7 @@ public class CSound : IDisposable, ICloneable
 	private bool bIs1倍速再生 = true;
 	private WaveFormat _Format;
 
-	private void tBASSサウンドを作成する(string strファイル名, int hMixer, BASSFlag flags)
+	private void tCreateBASSAudioClip(string strファイル名, int hMixer, BASSFlag flags)
 	{
 		#region [ xaとwav(RIFF chunked vorbis)に対しては専用の処理をする ]
 		switch (Path.GetExtension(strファイル名).ToLower())
@@ -1503,7 +1492,7 @@ public class CSound : IDisposable, ICloneable
 				// さもなければ、switchの外でbassに任せてデコード。
 				if (tRIFFchunkedVorbisならDirectShowでDecodeする(strファイル名, ref byArrWAVファイルイメージ))
 				{
-					tBASSサウンドを作成する(byArrWAVファイルイメージ, hMixer, flags);
+					tCreateBASSAudioClip(byArrWAVファイルイメージ, hMixer, flags);
 					return;
 				}
 				break;
@@ -1512,7 +1501,7 @@ public class CSound : IDisposable, ICloneable
 				if (tRIFFchunkedVorbisならDirectShowでDecodeする(strファイル名, ref byArrWAVファイルイメージ))
 				{
 					//tBASSサウンドを作成する( byArrWAVファイルイメージ, hMixer, flags );
-					tBASSサウンドを作成する(strファイル名, hMixer, flags);
+					tCreateBASSAudioClip(strファイル名, hMixer, flags);
 					return;
 				}
 				break;
@@ -1523,7 +1512,7 @@ public class CSound : IDisposable, ICloneable
 		#endregion
 
 		e作成方法 = E作成方法.ファイルから;
-		this.strファイル名 = strファイル名;
+		this.strFileName = strファイル名;
 
 
 		// BASSファイルストリームを作成。
@@ -1536,7 +1525,7 @@ public class CSound : IDisposable, ICloneable
 
 		tBASSサウンドを作成する_ストリーム生成後の共通処理(hMixer);
 	}
-	private void tBASSサウンドを作成する(byte[] byArrWAVファイルイメージ, int hMixer, BASSFlag flags)
+	private void tCreateBASSAudioClip(byte[] byArrWAVファイルイメージ, int hMixer, BASSFlag flags)
 	{
 		e作成方法 = E作成方法.WAVファイルイメージから;
 		this.byArrWAVファイルイメージ = byArrWAVファイルイメージ;
@@ -1625,7 +1614,7 @@ public class CSound : IDisposable, ICloneable
 		nBytes = totalPCMSize;
 
 		e作成方法 = E作成方法.WAVファイルイメージから;       //.ファイルから;	// 再構築時はデコード後のイメージを流用する&Dispose時にhGCを解放する
-		this.strファイル名 = strファイル名;
+		this.strFileName = strファイル名;
 		hGC = GCHandle.Alloc(byArrWAVファイルイメージ, GCHandleType.Pinned);      // byte[] をピン留め
 
 		//_cbStreamXA = new STREAMPROC( CallbackPlayingXA );
@@ -1687,7 +1676,7 @@ public class CSound : IDisposable, ICloneable
 
 		// インスタンスリストに登録。
 
-		listインスタンス.Add(this);
+		audioClips.Add(this);
 
 		// n総演奏時間の取得; DTXMania用に追加。
 		double seconds = Bass.BASS_ChannelBytes2Seconds(_hBassStream, nBytes);

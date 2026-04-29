@@ -369,16 +369,16 @@ public class CSoundDeviceASIO : ISoundDevice
 	public CSound tサウンドを作成する(string strファイル名, CSound.EInstType eInstType)
 	{
 		var sound = new CSound();
-		sound.tASIOサウンドを作成する(strファイル名, hMixer, eInstType);
+		sound.tCreateASIOAudioClip(strファイル名, hMixer, eInstType);
 		return sound;
 	}
 	public void tサウンドを作成する(string strファイル名, ref CSound sound, CSound.EInstType eInstType)
 	{
-		sound.tASIOサウンドを作成する(strファイル名, hMixer, eInstType);
+		sound.tCreateASIOAudioClip(strファイル名, hMixer, eInstType);
 	}
 	public void tサウンドを作成する(byte[] byArrWAVファイルイメージ, ref CSound sound, CSound.EInstType eInstType)
 	{
-		sound.tASIOサウンドを作成する(byArrWAVファイルイメージ, hMixer, eInstType);
+		sound.tCreateASIOAudioClip(byArrWAVファイルイメージ, hMixer, eInstType);
 	}
 	#endregion
 
