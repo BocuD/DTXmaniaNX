@@ -45,6 +45,15 @@ public sealed class DTXManiaGL : OpenGlGame
         float aspectRatio = width / (float)Math.Max(height, 1);
 
         CDTXMania.renderScale = windowSize.X / GameWindowSize.Width;
+
+        if (host.fullscreenMode == FullscreenMode.Windowed)
+        {
+            CDTXMania.ConfigIni.nWindowWidth = (int)windowSize.X;
+            CDTXMania.ConfigIni.nWindowHeight = (int)windowSize.Y;
+            CDTXMania.ConfigIni.nInitialWindowXPosition = (int)windowPosition.X;
+            CDTXMania.ConfigIni.nInitialWindowYPosition = (int)windowPosition.Y;
+        }
+
         mania.Draw();
 
         if (clearImGuiFocusOnNextRender)
@@ -71,9 +80,14 @@ public sealed class DTXManiaGL : OpenGlGame
         //check for alt + enter
         if (key == GlfwKey.Enter && mods == GlfwMod.Alt)
         {
-            //toggle fullscreen
-            host.RequestFullscreenMode(host.fullscreenMode == FullscreenMode.Windowed
+            CDTXMania.ConfigIni.bFullScreenMode = !CDTXMania.ConfigIni.bFullScreenMode;
+            var targetFullscreenMode = CDTXMania.ConfigIni.bFullScreenExclusive
                 ? FullscreenMode.ExclusiveFullscreen
+                : FullscreenMode.BorderlessFullscreen;
+            
+            //toggle fullscreen
+            host.RequestFullscreenMode(CDTXMania.ConfigIni.bFullScreenMode
+                ? targetFullscreenMode
                 : FullscreenMode.Windowed);
         }
         

@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Runtime;
 using System.Text;
 using System.Windows.Forms;
+using DTXMania.Core.Framework;
 using DTXMania.Core.Video;
 using DTXMania.SongDb;
 using DTXMania.UI;
@@ -161,9 +162,6 @@ internal class CDTXMania
 
     public bool bApplicationActive => maniaGl.isFocused;
 
-    public bool changeVSyncModeOnNextFrame { get; set; }
-    public bool changeFullscreenModeOnNextFrame { get; set; }
-
     private ImGuiContextPtr context;
     
     //fork
@@ -287,6 +285,9 @@ internal class CDTXMania
 
         Resources = new ResourceManager();
         SkinManager = new SkinManager();
+        
+        ConfigIni.SyncGraphicsSettings(maniaGl.host);
+        maniaGl.host.InitializeGraphics();
 
         SafeInitialize("Skin", () =>
         {
