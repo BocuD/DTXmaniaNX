@@ -19,7 +19,7 @@ internal class CSongListNode
 		UNKNOWN
 	}
 	public int nID { get; private set; }
-	public CScore[] arScore = new CScore[ 5 ];
+	public CChartData[] arScore = new CChartData[ 5 ];
 	public string[] arDifficultyLabel = new string[ 5 ];
 	public bool bDTXFilesで始まるフォルダ名のBOXである;
 	public bool bBoxDefで作成されたBOXである
@@ -30,15 +30,15 @@ internal class CSongListNode
 	public Color col文字色 = Color.White;
 	public List<CSongListNode> listランダム用ノードリスト;
 	public List<CSongListNode> listChildNodes;
-	public STHitRanges stDrumHitRanges = new STHitRanges(nDefaultSizeMs: -1);
-	public STHitRanges stDrumPedalHitRanges = new STHitRanges(nDefaultSizeMs: -1);
-	public STHitRanges stGuitarHitRanges = new STHitRanges(nDefaultSizeMs: -1);
-	public STHitRanges stBassHitRanges = new STHitRanges(nDefaultSizeMs: -1);
-	public int nスコア数;
+	public STHitRanges stDrumHitRanges = new(nDefaultSizeMs: -1);
+	public STHitRanges stDrumPedalHitRanges = new(nDefaultSizeMs: -1);
+	public STHitRanges stGuitarHitRanges = new(nDefaultSizeMs: -1);
+	public STHitRanges stBassHitRanges = new(nDefaultSizeMs: -1);
+	public int nChartCount;
 	public string pathSetDefPath = "";
 	public CSongListNode parentNode;
 	public int SetDefBlockNumber;
-	public Stack<int> stackRandomPerformanceNumber = new Stack<int>();
+	public Stack<int> stackRandomPerformanceNumber = new();
 	public string strGenre = "";
 	public string strTitle = "";
 	public string strBreadcrumbs = "";		// #27060 2011.2.27 yyagi; MUSIC BOXのパンくずリスト (曲リスト構造内の絶対位置捕捉のために使う)
@@ -55,7 +55,7 @@ internal class CSongListNode
 	//
 	public CSongListNode ShallowCopyOfSelf()
 	{
-		CSongListNode newNode = new CSongListNode();
+		CSongListNode newNode = new();
 		newNode.eNodeType = eNodeType;
 		newNode.nID = nID;
 		newNode.arDifficultyLabel = arDifficultyLabel;
@@ -69,7 +69,7 @@ internal class CSongListNode
 		newNode.stDrumPedalHitRanges = stDrumPedalHitRanges;
 		newNode.stGuitarHitRanges = stGuitarHitRanges;
 		newNode.stBassHitRanges = stBassHitRanges;
-		newNode.nスコア数 = nスコア数;
+		newNode.nChartCount = nChartCount;
 		newNode.pathSetDefPath = pathSetDefPath;
 		newNode.parentNode = parentNode;
 		newNode.SetDefBlockNumber = SetDefBlockNumber;

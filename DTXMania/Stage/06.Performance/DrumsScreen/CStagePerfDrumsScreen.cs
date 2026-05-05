@@ -74,7 +74,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
     {
         bInFillIn = false;
         base.OnActivate();
-        CScore cScore = CDTXMania.confirmedChart;
+        CChartData cChartData = CDTXMania.chosenChartData;
         ct登場用 = new CCounter(0, 12, 16, CDTXMania.Timer);
 
         actChipFireD.iPosY = (CDTXMania.ConfigIni.bReverse.Drums ? nJudgeLinePosY.Drums - 183 : nJudgeLinePosY.Drums - 186);
@@ -82,14 +82,13 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
 
         if( CDTXMania.bCompactMode )
         {
-            var score = new CScore();
-            CDTXMania.SongManager.tReadScoreIniAndSetScoreInformation( CDTXMania.strCompactModeFile + ".score.ini", ref score );
+            var score = new CChartData();
             actGraph.dbGraphValue_Goal = score.SongInformation.HighCompletionRate[ 0 ];
         }
         else
         {
-            actGraph.dbGraphValue_Goal = CDTXMania.confirmedChart.SongInformation.HighCompletionRate[ 0 ];	// #24074 2011.01.23 add ikanick
-            actGraph.dbGraphValue_PersonalBest = CDTXMania.confirmedChart.SongInformation.HighCompletionRate[ 0 ];
+            actGraph.dbGraphValue_Goal = CDTXMania.chosenChartData.SongInformation.HighCompletionRate[ 0 ];	// #24074 2011.01.23 add ikanick
+            actGraph.dbGraphValue_PersonalBest = CDTXMania.chosenChartData.SongInformation.HighCompletionRate[ 0 ];
 
             // #35411 2015.08.21 chnmr0 add
             // ゴースト利用可のなとき、0で初期化

@@ -37,7 +37,7 @@ internal class InfoBox : UIGroup
         string artistName = "artist name";
         
         if (string.IsNullOrEmpty(CDTXMania.DTX.TITLE) || (!CDTXMania.bCompactMode && CDTXMania.ConfigIni.b曲名表示をdefのものにする))
-            songName = CDTXMania.confirmedSong.title;
+            songName = CDTXMania.chosenSong.title;
         else
             songName = CDTXMania.DTX.TITLE;
 

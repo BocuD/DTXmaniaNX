@@ -421,7 +421,6 @@ public class SongSelectionContainer : UIGroup
         toBeCached.Add(newNode);
         
         //update the overwritten slot
-        //overwriteElement.UpdateSongNode(newNode, newTex);
         overwriteElement.position.Y = songSelectionElements[bottomIndex].position.Y + elementSpacing;
         songSelectionElements[overwriteIndex] = overwriteElement;
 
@@ -457,16 +456,15 @@ public class SongSelectionContainer : UIGroup
         switch (currentSelection.nodeType)
         {
             case SongNode.ENodeType.SONG:
-                var confirmedSong = currentSelection;
+                var selectedSong = currentSelection;
                 var confirmedSongDifficulty = CDTXMania.StageManager.stageSongSelectionNew.GetClosestLevelToTargetForSong(currentSelection);
-                var confirmedChart = confirmedSong.charts[confirmedSongDifficulty];
+                var selectedChart = selectedSong.charts[confirmedSongDifficulty];
 
-                if (confirmedSong != null && confirmedChart != null)
+                if (selectedSong != null && selectedChart != null)
                 {
-                    if (confirmedChart.HasChartForCurrentMode())
+                    if (selectedChart.HasChartForCurrentMode())
                     {
-                        CDTXMania.UpdateSelection(confirmedSong, confirmedChart,
-                            confirmedSongDifficulty);
+                        CDTXMania.UpdateSelection(selectedSong, selectedChart, confirmedSongDifficulty);
                         return true;
                     }
                 }

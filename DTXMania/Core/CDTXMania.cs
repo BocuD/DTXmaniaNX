@@ -20,7 +20,6 @@ namespace DTXMania.Core;
 
 internal class CDTXMania
 {
-    // プロパティ
     //these get set when initializing the game
     public static string VERSION_DISPLAY; // = "DTX:NX:A:A:2024051900";
     public static string VERSION; // = "v1.4.2 20240519";
@@ -78,7 +77,7 @@ internal class CDTXMania
     {
         get
         {
-            SongNode parentNode = confirmedSong?.parent;
+            SongNode parentNode = chosenSong?.parent;
             if (parentNode?.nodeType == SongNode.ENodeType.BOX)
                 return STHitRanges.tCompose(parentNode.stDrumHitRanges, ConfigIni.stDrumHitRanges);
 
@@ -93,7 +92,7 @@ internal class CDTXMania
     {
         get
         {
-            SongNode parentNode = confirmedSong?.parent;
+            SongNode parentNode = chosenSong?.parent;
             if (parentNode?.nodeType == SongNode.ENodeType.BOX)
                 return STHitRanges.tCompose(parentNode.stDrumPedalHitRanges, ConfigIni.stDrumPedalHitRanges);
 
@@ -108,7 +107,7 @@ internal class CDTXMania
     {
         get
         {
-            SongNode parentNode = confirmedSong?.parent;
+            SongNode parentNode = chosenSong?.parent;
             if (parentNode?.nodeType == SongNode.ENodeType.BOX)
                 return STHitRanges.tCompose(parentNode.stGuitarHitRanges, ConfigIni.stGuitarHitRanges);
 
@@ -123,7 +122,7 @@ internal class CDTXMania
     {
         get
         {
-            SongNode parentNode = confirmedSong?.parent;
+            SongNode parentNode = chosenSong?.parent;
             if (parentNode?.nodeType == SongNode.ENodeType.BOX)
                 return STHitRanges.tCompose(parentNode.stBassHitRanges, ConfigIni.stBassHitRanges);
 
@@ -144,12 +143,6 @@ internal class CDTXMania
     public static SkinManager SkinManager { get; private set; }
 
     public static ResourceManager Resources { get; private set; }
-
-    public static CSongManager SongManager
-    {
-        get;
-        set; // 2012.1.26 yyagi private解除 CStage起動でのdesirialize読み込みのため
-    }
 
     public static SongDb.SongDb SongDb { get; private set; }
 
@@ -575,15 +568,15 @@ internal class CDTXMania
             ini.tAddHistory(strNewHistoryLine);
             if (!bCompactMode)
             {
-                confirmedChart.SongInformation.NbPerformances.Drums =
+                chosenChartData.SongInformation.NbPerformances.Drums =
                     ini.stFile.PlayCountDrums;
-                confirmedChart.SongInformation.NbPerformances.Guitar =
+                chosenChartData.SongInformation.NbPerformances.Guitar =
                     ini.stFile.PlayCountGuitar;
-                confirmedChart.SongInformation.NbPerformances.Bass =
+                chosenChartData.SongInformation.NbPerformances.Bass =
                     ini.stFile.PlayCountBass;
                 for (int j = 0; j < ini.stFile.History.Length; j++)
                 {
-                    confirmedChart.SongInformation.PerformanceHistory[j] =
+                    chosenChartData.SongInformation.PerformanceHistory[j] =
                         ini.stFile.History[j];
                 }
             }
@@ -607,14 +600,14 @@ internal class CDTXMania
         maniaGl.SetWindowTitle(strWindowTitle + " (" + SoundManager.GetCurrentSoundDeviceType() + delay + ")");
     }
     
-    public static SongNode confirmedSong { get; private set; }
-    public static CScore confirmedChart { get; private set; }
+    public static SongNode chosenSong { get; private set; }
+    public static CChartData chosenChartData { get; private set; }
     public static int confirmedSongDifficulty { get; private set; }
     
-    public static void UpdateSelection(SongNode song, CScore chart, int difficulty)
+    public static void UpdateSelection(SongNode song, CChartData chartData, int difficulty)
     {
-        confirmedSong = song;
-        confirmedChart = chart;
+        chosenSong = song;
+        chosenChartData = chartData;
         confirmedSongDifficulty = difficulty;
     }
 
@@ -659,7 +652,6 @@ internal class CDTXMania
             if (StageManager.rCurrentStage is { bActivated: true })
                 StageManager.rCurrentStage.OnDeactivate();
         });
-        SafeTerminate("SongManager", () => { SongManager = null; });
         SafeTerminate("SongDb", () =>
         {
             SongDb = null;

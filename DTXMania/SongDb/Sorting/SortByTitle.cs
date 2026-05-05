@@ -98,22 +98,22 @@ public class SortByTitle : SongDbSort
     protected virtual char GetSortKey(SongNode song)
     {
         //get song title
-        CScore chart = song.charts.FirstOrDefault(x => x != null);
+        CChartData chartData = song.charts.FirstOrDefault(x => x != null);
 
-        if (string.IsNullOrWhiteSpace(chart.SongInformation.TitleRoman))
+        if (string.IsNullOrWhiteSpace(chartData.SongInformation.TitleRoman))
         {
             return '-';
         }
         
-        if (Utilities.IsJapanese(chart.SongInformation.Title[0]))
+        if (Utilities.IsJapanese(chartData.SongInformation.Title[0]))
         {
-            return ConvertKanaToSortKana(chart.SongInformation.TitleKana[0]);
+            return ConvertKanaToSortKana(chartData.SongInformation.TitleKana[0]);
         }
         
         //returning '-' for no data, this will force it into other
-        if (chart.SongInformation.TitleRoman[0] == '-') return '#';
+        if (chartData.SongInformation.TitleRoman[0] == '-') return '#';
 
-        return chart.SongInformation.TitleRoman[0];
+        return chartData.SongInformation.TitleRoman[0];
     }
     
     protected virtual void PostInitialSort(SongNode root)
@@ -125,19 +125,19 @@ public class SortByTitle : SongDbSort
             {
                 node.childNodes.Sort((a, b) =>
                 {
-                    CScore chartA = a.charts.FirstOrDefault(x => x != null);
-                    CScore chartB = b.charts.FirstOrDefault(x => x != null);
+                    CChartData chartDataA = a.charts.FirstOrDefault(x => x != null);
+                    CChartData chartDataB = b.charts.FirstOrDefault(x => x != null);
 
-                    if (chartA == null && chartB == null) return 0; //both null
-                    if (chartA == null) return 1; //a is null, b is not, b comes first
-                    if (chartB == null) return -1; //b is null, a is not, a comes first
+                    if (chartDataA == null && chartDataB == null) return 0; //both null
+                    if (chartDataA == null) return 1; //a is null, b is not, b comes first
+                    if (chartDataB == null) return -1; //b is null, a is not, a comes first
                     
-                    if (chartA.SongInformation.TitleHasJapanese && chartB.SongInformation.TitleHasJapanese)
+                    if (chartDataA.SongInformation.TitleHasJapanese && chartDataB.SongInformation.TitleHasJapanese)
                     {
-                        return string.Compare(chartA.SongInformation.TitleKana, chartB.SongInformation.TitleKana, StringComparison.OrdinalIgnoreCase);
+                        return string.Compare(chartDataA.SongInformation.TitleKana, chartDataB.SongInformation.TitleKana, StringComparison.OrdinalIgnoreCase);
                     }
                     
-                    return string.Compare(chartA.SongInformation.TitleRoman, chartB.SongInformation.TitleRoman, StringComparison.OrdinalIgnoreCase);
+                    return string.Compare(chartDataA.SongInformation.TitleRoman, chartDataB.SongInformation.TitleRoman, StringComparison.OrdinalIgnoreCase);
                 });
             }
         }

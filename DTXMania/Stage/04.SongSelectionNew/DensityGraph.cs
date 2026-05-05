@@ -68,7 +68,7 @@ public class DensityGraph : UIGroup
         Color.White
     ];
 
-    public void SelectionChanged(SongNode? song, CScore? chart)
+    public void SelectionChanged(SongNode? song, CChartData? chart)
     {
         
     }

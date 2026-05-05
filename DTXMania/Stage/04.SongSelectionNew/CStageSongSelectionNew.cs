@@ -169,7 +169,7 @@ public class CStageSongSelectionNew : CStage
         //backup our current selection
         SongNode? selectedRootBackup = currentSelectionContainer?.CurrentRoot;
         SongNode? selectedNodeBackup = selectedNode;
-        CScore? selectedChartBackup = selectedChart;
+        CChartData? selectedChartBackup = selectedChart;
         
         //determine if we need to rebuild sort cache or not
         if (CDTXMania.GetCurrentInstrument() != lastInstrument)
@@ -232,7 +232,7 @@ public class CStageSongSelectionNew : CStage
         loadPhase = ELoadPhase.CacheThumbnails;
     }
 
-    private void RestoreSelection(SongNode selectedRootBackup, SongNode selectedNodeBackup, CScore selectedChartBackup)
+    private void RestoreSelection(SongNode selectedRootBackup, SongNode selectedNodeBackup, CChartData selectedChartDataBackup)
     {
         //walk down the tree recursively to find the node
         SongNode currentRoot = currentSelectionContainer.CurrentRoot;
@@ -322,8 +322,8 @@ public class CStageSongSelectionNew : CStage
     }
     
     public SongNode? selectedNode { get; private set; }
-    public CScore? selectedChart { get; private set; }
-    public void ChangeSelection(SongNode? node, CScore? chart)
+    public CChartData? selectedChart { get; private set; }
+    public void ChangeSelection(SongNode? node, CChartData? chart)
     {
         selectedNode = node;
         selectedChart = chart;
@@ -480,7 +480,7 @@ public class CStageSongSelectionNew : CStage
         
         SongNode newSelection = currentSelectionContainer.currentSelection;
         int closestLevelToTarget = GetClosestLevelToTargetForSong(currentSelectionContainer.currentSelection);
-        CScore? chart = null;
+        CChartData? chart = null;
         
         //check if the closest level is valid
         chart = closestLevelToTarget > newSelection.charts.Length - 1 

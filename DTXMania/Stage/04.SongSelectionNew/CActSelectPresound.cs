@@ -21,7 +21,7 @@ internal class CActSelectPresound : CActivity
 		}
 	}
 
-	public void tSelectionChanged(CScore? chart)
+	public void tSelectionChanged(CChartData? chart)
 	{
 		if (chart != null &&
 		    (!(chart.FileInformation.AbsoluteFolderPath + chart.SongInformation.Presound).Equals(strCurrentlyPlayingAudioPath) ||
@@ -134,7 +134,7 @@ internal class CActSelectPresound : CActivity
 		};
 	}
 
-	private CScore? selectedChart;
+	private CChartData? selectedChart;
 	private void tLoadPreviewSound()
 	{
 		if (selectedChart != null && !string.IsNullOrEmpty(selectedChart.SongInformation.Presound))

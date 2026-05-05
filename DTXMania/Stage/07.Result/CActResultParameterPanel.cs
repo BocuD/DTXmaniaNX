@@ -444,7 +444,7 @@ internal class CActResultParameterPanel : CActivity
             txProgressBarPanel = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_progress_bar_panel.png"));
             txLagHitCount = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_lag numbers.png"));
 
-            tGetDifficultyLabelFromScript( CDTXMania.confirmedSong.difficultyLabel[ CDTXMania.confirmedSongDifficulty ] );
+            tGetDifficultyLabelFromScript( CDTXMania.chosenSong.difficultyLabel[ CDTXMania.confirmedSongDifficulty ] );
 
             //Progress Bars
             for (int i = 0; i < 3; i++)

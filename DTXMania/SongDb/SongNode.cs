@@ -42,7 +42,7 @@ public class SongNode
     private SongNode? currentSelection = null;
 
     public int chartCount;
-    public CScore[] charts = new CScore[5];
+    public CChartData[] charts = new CChartData[5];
     public string[] difficultyLabel = new string[5];
     
     public STHitRanges stDrumHitRanges = new(nDefaultSizeMs: -1);
@@ -71,7 +71,7 @@ public class SongNode
             case ENodeType.BACKBOX:
                 charts =
                 [
-                    new CScore()
+                    new CChartData()
                 ];
                 break;
             
@@ -175,13 +175,13 @@ public class SongNode
     }
 
     //loop over all charts on this node. find the one that has the highest skill points (if any)
-    public (CScore chart, double skillPoints, double maxSkillPoints, int instrument) GetTopSkillPoints()
+    public (CChartData chart, double skillPoints, double maxSkillPoints, int instrument) GetTopSkillPoints()
     {
         double skill = 0;
         double maxSkill = 0;
         int inst = 0;
-        CScore skillChart = null;
-        foreach (CScore chart in charts)
+        CChartData skillChartData = null;
+        foreach (CChartData chart in charts)
         {
             if (chart == null) continue;
             if (!chart.HasChartForCurrentMode()) continue;
@@ -201,12 +201,12 @@ public class SongNode
                 {
                     skill = chartSkill;
                     maxSkill = chart.SongInformation.GetMaxSkill(instrument);
-                    skillChart = chart;
+                    skillChartData = chart;
                     inst = instrument;
                 }
             }
         }
 
-        return (skillChart, skill, maxSkill, inst);
+        return (skillChartData, skill, maxSkill, inst);
     }
 }

@@ -123,7 +123,7 @@ internal class CStageResult : CStage
 		
 		string strSongTitle;
 		if (!CDTXMania.bCompactMode && CDTXMania.ConfigIni.b曲名表示をdefのものにする)
-			strSongTitle = CDTXMania.confirmedSong.title;
+			strSongTitle = CDTXMania.chosenSong.title;
 		else
 			strSongTitle = CDTXMania.DTX.TITLE;
 
@@ -245,8 +245,8 @@ internal class CStageResult : CStage
 						}
 
 						//Save progress bar records
-						CScore cScore = CDTXMania.confirmedChart;
-						strBestProgressBarRecord[i] = cScore.SongInformation.progress[i];
+						CChartData cChartData = CDTXMania.chosenChartData;
+						strBestProgressBarRecord[i] = cChartData.SongInformation.progress[i];
 						
 						//May not need to save this...
 						strCurrProgressBarRecord[i] = stPerformanceEntry[i].strProgress;
@@ -334,7 +334,7 @@ internal class CStageResult : CStage
 				//---------------------
 				if (!CDTXMania.bCompactMode)
 				{
-					CScore cScore = CDTXMania.confirmedChart;
+					CChartData cChartData = CDTXMania.chosenChartData;
 					STDGBVALUE<bool> isUpdateNeeded = CScoreIni.tGetIsUpdateNeeded();
 					for (int instrument = 0; instrument < 3; instrument++)
 					{
@@ -342,24 +342,24 @@ internal class CStageResult : CStage
 						{
 							// FullCombo した記録を FullCombo なしで超えた場合、FullCombo マークが消えてしまう。
 							// → FullCombo は、最新記録と関係なく、一度達成したらずっとつくようにする。(2010.9.11)
-							cScore.SongInformation.FullCombo[instrument] = stPerformanceEntry[instrument].bIsFullCombo | bExistingFullCombo[instrument];
+							cChartData.SongInformation.FullCombo[instrument] = stPerformanceEntry[instrument].bIsFullCombo | bExistingFullCombo[instrument];
 
 							if (bNewRecordSkill[instrument])
 							{
-								cScore.SongInformation.HighCompletionRate[instrument] = stPerformanceEntry[instrument].dbPerformanceSkill;
+								cChartData.SongInformation.HighCompletionRate[instrument] = stPerformanceEntry[instrument].dbPerformanceSkill;
 								// New Song Progress for new skill record
-								cScore.SongInformation.progress[instrument] = stPerformanceEntry[instrument].strProgress;
+								cChartData.SongInformation.progress[instrument] = stPerformanceEntry[instrument].strProgress;
 							}
 
 							if (bNewRecordRank[instrument])
 							{
-								cScore.SongInformation.BestRank[instrument] = nRankValue[instrument];
+								cChartData.SongInformation.BestRank[instrument] = nRankValue[instrument];
 							}
 
 							//Check if Progress record existed or not; if not, update anyway
-							if(CScoreIni.tProgressBarLength(cScore.SongInformation.progress[instrument]) == 0)
+							if(CScoreIni.tProgressBarLength(cChartData.SongInformation.progress[instrument]) == 0)
 							{
-								cScore.SongInformation.progress[instrument] = stPerformanceEntry[instrument].strProgress;
+								cChartData.SongInformation.progress[instrument] = stPerformanceEntry[instrument].strProgress;
 							}
 						}
 					}

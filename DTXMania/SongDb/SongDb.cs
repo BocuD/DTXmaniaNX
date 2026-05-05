@@ -32,7 +32,7 @@ public class SongDb
 
 	public List<SongNode> flattenedSongList { get; private set; }  = [];
 	
-	public List<(SongNode node, CScore chart, double skill, int inst)> skillSongs = [];
+	public List<(SongNode node, CChartData chart, double skill, int inst)> skillSongs = [];
 	
 	public bool hasEverScanned { get; private set; }
 	public int totalSongs { get; private set; } = 0;
@@ -144,18 +144,18 @@ public class SongDb
 		skillSongs = CalculateSkill(flattenedSongList, out double totalSkill);
 	}
 	
-	private static List<(SongNode node, CScore chart, double skill, int inst)> CalculateSkill(List<SongNode> songList, out double totalSkill)
+	private static List<(SongNode node, CChartData chart, double skill, int inst)> CalculateSkill(List<SongNode> songList, out double totalSkill)
 	{
 		DateTime start = DateTime.Now;
 		
 		//calculate skill
 		Trace.TraceInformation("Calculating skill songs and total skill...");
 
-		List<(SongNode node, CScore chart, double skill, int inst)> tempSkillSongs = [];
+		List<(SongNode node, CChartData chart, double skill, int inst)> tempSkillSongs = [];
 
 		foreach (SongNode node in songList)
 		{
-			(CScore chart, double skill, double max, int inst) = node.GetTopSkillPoints();
+			(CChartData chart, double skill, double max, int inst) = node.GetTopSkillPoints();
 			if (skill > 0)
 			{
 				tempSkillSongs.Add((node, chart, skill, inst));
@@ -293,13 +293,13 @@ public class SongDb
 						skinPath = parent.skinPath,
 						charts =
 						[
-							new CScore
+							new CChartData
 							{
-								FileInformation = new CScore.STFileInformation
+								FileInformation = new CChartData.STFileInformation
 								{
 									AbsoluteFolderPath = infoDir.FullName + @"\"
 								},
-								SongInformation = new CScore.STMusicInformation
+								SongInformation = new CChartData.STMusicInformation
 								{
 									Title = infoDir.Name.Substring(9),
 									Comment = CDTXMania.isJapanese ? "BOX に移動します。" : "Enter into the BOX."
@@ -320,7 +320,7 @@ public class SongDb
 						chartCount = 1,
 						charts =
 						[
-							new CScore()
+							new CChartData()
 						]
 					};
 
@@ -483,7 +483,7 @@ public class SongDb
 						
 					song.difficultyLabel[j] = block.Label[j];
 							
-					song.charts[j] = new CScore();
+					song.charts[j] = new CChartData();
 					song.charts[j].FileInformation.AbsoluteFilePath = chartPath;
 					song.charts[j].FileInformation.AbsoluteFolderPath = Path.GetFullPath(Path.GetDirectoryName(chartPath)!) + @"\";
 							
@@ -528,9 +528,9 @@ public class SongDb
 			path = fileinfo.FullName + @"\",
 			charts =
 			{
-				[0] = new CScore
+				[0] = new CChartData
 				{
-					FileInformation = new CScore.STFileInformation
+					FileInformation = new CChartData.STFileInformation
 					{
 						AbsoluteFilePath = fileinfo.FullName,
 						AbsoluteFolderPath = Path.GetFullPath(Path.GetDirectoryName(fileinfo.FullName)!) + @"\",
@@ -611,129 +611,129 @@ public class SongDb
 			{
 				if (node.charts[i] == null || node.charts[i].bHadACacheInSongDB) continue;
 
-				CScore score = node.charts[i];
-				string path = score.FileInformation.AbsoluteFilePath;
+				CChartData chartData = node.charts[i];
+				string path = chartData.FileInformation.AbsoluteFilePath;
 
 				if (File.Exists(path))
 				{
 					try
 					{
 						processSongDataPath = path;
-						CDTX cdtx = new(score.FileInformation.AbsoluteFilePath, false);
+						CDTX cdtx = new(chartData.FileInformation.AbsoluteFilePath, false);
 
 						if (string.IsNullOrWhiteSpace(node.title))
 						{
 							node.title = cdtx.TITLE;
 						}
 
-						score.SongInformation.Title = cdtx.TITLE;
-						score.SongInformation.ArtistName = cdtx.ARTIST;
+						chartData.SongInformation.Title = cdtx.TITLE;
+						chartData.SongInformation.ArtistName = cdtx.ARTIST;
 
-						if (Utilities.HasJapanese(score.SongInformation.Title))
+						if (Utilities.HasJapanese(chartData.SongInformation.Title))
 						{
-							score.SongInformation.TitleHasJapanese = true;
-							score.SongInformation.TitleKana = await jpConverter.Convert(score.SongInformation.Title);
-							score.SongInformation.TitleRoman =
-								await jpConverter.Convert(score.SongInformation.Title, To.Romaji);
+							chartData.SongInformation.TitleHasJapanese = true;
+							chartData.SongInformation.TitleKana = await jpConverter.Convert(chartData.SongInformation.Title);
+							chartData.SongInformation.TitleRoman =
+								await jpConverter.Convert(chartData.SongInformation.Title, To.Romaji);
 						}
 						else
 						{
-							score.SongInformation.TitleKana = score.SongInformation.Title;
-							score.SongInformation.TitleRoman = score.SongInformation.Title.ToLowerInvariant();
+							chartData.SongInformation.TitleKana = chartData.SongInformation.Title;
+							chartData.SongInformation.TitleRoman = chartData.SongInformation.Title.ToLowerInvariant();
 						}
 
-						if (Utilities.HasJapanese(score.SongInformation.ArtistName))
+						if (Utilities.HasJapanese(chartData.SongInformation.ArtistName))
 						{
-							score.SongInformation.ArtistNameHasJapanese = true;
-							score.SongInformation.ArtistNameKana =
-								await jpConverter.Convert(score.SongInformation.ArtistName);
-							score.SongInformation.ArtistNameRoman =
-								await jpConverter.Convert(score.SongInformation.ArtistName, To.Romaji);
+							chartData.SongInformation.ArtistNameHasJapanese = true;
+							chartData.SongInformation.ArtistNameKana =
+								await jpConverter.Convert(chartData.SongInformation.ArtistName);
+							chartData.SongInformation.ArtistNameRoman =
+								await jpConverter.Convert(chartData.SongInformation.ArtistName, To.Romaji);
 						}
 						else
 						{
-							score.SongInformation.ArtistNameKana = score.SongInformation.ArtistName;
-							score.SongInformation.ArtistNameRoman = score.SongInformation.ArtistName.ToLowerInvariant();
+							chartData.SongInformation.ArtistNameKana = chartData.SongInformation.ArtistName;
+							chartData.SongInformation.ArtistNameRoman = chartData.SongInformation.ArtistName.ToLowerInvariant();
 						}
 
-						score.SongInformation.Comment = cdtx.COMMENT;
-						score.SongInformation.Genre = cdtx.GENRE;
-						score.SongInformation.Preimage = cdtx.PREIMAGE;
-						score.SongInformation.Premovie = cdtx.PREMOVIE;
-						score.SongInformation.Presound = cdtx.PREVIEW;
-						score.SongInformation.Backgound =
+						chartData.SongInformation.Comment = cdtx.COMMENT;
+						chartData.SongInformation.Genre = cdtx.GENRE;
+						chartData.SongInformation.Preimage = cdtx.PREIMAGE;
+						chartData.SongInformation.Premovie = cdtx.PREMOVIE;
+						chartData.SongInformation.Presound = cdtx.PREVIEW;
+						chartData.SongInformation.Backgound =
 							cdtx.BACKGROUND is { Length: > 0 } ? cdtx.BACKGROUND : cdtx.BACKGROUND_GR;
-						score.SongInformation.Level.Drums = cdtx.LEVEL.Drums;
-						score.SongInformation.Level.Guitar = cdtx.LEVEL.Guitar;
-						score.SongInformation.Level.Bass = cdtx.LEVEL.Bass;
-						score.SongInformation.LevelDec.Drums = cdtx.LEVELDEC.Drums;
-						score.SongInformation.LevelDec.Guitar = cdtx.LEVELDEC.Guitar;
-						score.SongInformation.LevelDec.Bass = cdtx.LEVELDEC.Bass;
-						score.SongInformation.bHiddenLevel = cdtx.HIDDENLEVEL;
-						score.SongInformation.bIsClassicChart.Drums = cdtx.bHasChips is
+						chartData.SongInformation.Level.Drums = cdtx.LEVEL.Drums;
+						chartData.SongInformation.Level.Guitar = cdtx.LEVEL.Guitar;
+						chartData.SongInformation.Level.Bass = cdtx.LEVEL.Bass;
+						chartData.SongInformation.LevelDec.Drums = cdtx.LEVELDEC.Drums;
+						chartData.SongInformation.LevelDec.Guitar = cdtx.LEVELDEC.Guitar;
+						chartData.SongInformation.LevelDec.Bass = cdtx.LEVELDEC.Bass;
+						chartData.SongInformation.bHiddenLevel = cdtx.HIDDENLEVEL;
+						chartData.SongInformation.bIsClassicChart.Drums = cdtx.bHasChips is
 							{ LeftCymbal: false, LP: false, LBD: false, FT: false, Ride: false };
-						score.SongInformation.bIsClassicChart.Guitar = !cdtx.bHasChips.YPGuitar;
-						score.SongInformation.bIsClassicChart.Bass = !cdtx.bHasChips.YPBass;
-						score.SongInformation.bScoreExists.Drums = cdtx.bHasChips.Drums;
-						score.SongInformation.bScoreExists.Guitar = cdtx.bHasChips.Guitar;
-						score.SongInformation.bScoreExists.Bass = cdtx.bHasChips.Bass;
-						score.SongInformation.SongType = cdtx.eFileType;
-						score.SongInformation.Bpm = cdtx.BPM;
-						score.SongInformation.DurationMs = (cdtx.listChip == null)
+						chartData.SongInformation.bIsClassicChart.Guitar = !cdtx.bHasChips.YPGuitar;
+						chartData.SongInformation.bIsClassicChart.Bass = !cdtx.bHasChips.YPBass;
+						chartData.SongInformation.bScoreExists.Drums = cdtx.bHasChips.Drums;
+						chartData.SongInformation.bScoreExists.Guitar = cdtx.bHasChips.Guitar;
+						chartData.SongInformation.bScoreExists.Bass = cdtx.bHasChips.Bass;
+						chartData.SongInformation.SongType = cdtx.eFileType;
+						chartData.SongInformation.Bpm = cdtx.BPM;
+						chartData.SongInformation.DurationMs = (cdtx.listChip == null)
 							? 0
 							: cdtx.listChip[cdtx.listChip.Count - 1].nPlaybackTimeMs;
 
-						score.SongInformation.chipCountByInstrument.Drums = cdtx.nVisibleChipsCount.Drums;
+						chartData.SongInformation.chipCountByInstrument.Drums = cdtx.nVisibleChipsCount.Drums;
 						{
-							score.SongInformation.chipCountByLane[ELane.LC] =
+							chartData.SongInformation.chipCountByLane[ELane.LC] =
 								cdtx.nVisibleChipsCount.chipCountInLane(ELane.LC);
-							score.SongInformation.chipCountByLane[ELane.HH] =
+							chartData.SongInformation.chipCountByLane[ELane.HH] =
 								cdtx.nVisibleChipsCount.chipCountInLane(ELane.HH);
-							score.SongInformation.chipCountByLane[ELane.SD] =
+							chartData.SongInformation.chipCountByLane[ELane.SD] =
 								cdtx.nVisibleChipsCount.chipCountInLane(ELane.SD);
-							score.SongInformation.chipCountByLane[ELane.LP] =
+							chartData.SongInformation.chipCountByLane[ELane.LP] =
 								cdtx.nVisibleChipsCount.chipCountInLane(ELane.LP);
-							score.SongInformation.chipCountByLane[ELane.HT] =
+							chartData.SongInformation.chipCountByLane[ELane.HT] =
 								cdtx.nVisibleChipsCount.chipCountInLane(ELane.HT);
-							score.SongInformation.chipCountByLane[ELane.BD] =
+							chartData.SongInformation.chipCountByLane[ELane.BD] =
 								cdtx.nVisibleChipsCount.chipCountInLane(ELane.BD);
-							score.SongInformation.chipCountByLane[ELane.LT] =
+							chartData.SongInformation.chipCountByLane[ELane.LT] =
 								cdtx.nVisibleChipsCount.chipCountInLane(ELane.LT);
-							score.SongInformation.chipCountByLane[ELane.FT] =
+							chartData.SongInformation.chipCountByLane[ELane.FT] =
 								cdtx.nVisibleChipsCount.chipCountInLane(ELane.FT);
-							score.SongInformation.chipCountByLane[ELane.CY] =
+							chartData.SongInformation.chipCountByLane[ELane.CY] =
 								cdtx.nVisibleChipsCount.chipCountInLane(ELane.CY);
 						}
 
-						score.SongInformation.chipCountByInstrument.Guitar = cdtx.nVisibleChipsCount.Guitar;
+						chartData.SongInformation.chipCountByInstrument.Guitar = cdtx.nVisibleChipsCount.Guitar;
 						{
-							score.SongInformation.chipCountByLane[ELane.GtR] =
+							chartData.SongInformation.chipCountByLane[ELane.GtR] =
 								cdtx.nVisibleChipsCount.chipCountInLane(ELane.GtR);
-							score.SongInformation.chipCountByLane[ELane.GtG] =
+							chartData.SongInformation.chipCountByLane[ELane.GtG] =
 								cdtx.nVisibleChipsCount.chipCountInLane(ELane.GtG);
-							score.SongInformation.chipCountByLane[ELane.GtB] =
+							chartData.SongInformation.chipCountByLane[ELane.GtB] =
 								cdtx.nVisibleChipsCount.chipCountInLane(ELane.GtB);
-							score.SongInformation.chipCountByLane[ELane.GtY] =
+							chartData.SongInformation.chipCountByLane[ELane.GtY] =
 								cdtx.nVisibleChipsCount.chipCountInLane(ELane.GtY);
-							score.SongInformation.chipCountByLane[ELane.GtP] =
+							chartData.SongInformation.chipCountByLane[ELane.GtP] =
 								cdtx.nVisibleChipsCount.chipCountInLane(ELane.GtP);
-							score.SongInformation.chipCountByLane[ELane.GtPick] =
+							chartData.SongInformation.chipCountByLane[ELane.GtPick] =
 								cdtx.nVisibleChipsCount.chipCountInLane(ELane.GtPick);
 						}
 
-						score.SongInformation.chipCountByInstrument.Bass = cdtx.nVisibleChipsCount.Bass;
+						chartData.SongInformation.chipCountByInstrument.Bass = cdtx.nVisibleChipsCount.Bass;
 						{
-							score.SongInformation.chipCountByLane[ELane.BsR] =
+							chartData.SongInformation.chipCountByLane[ELane.BsR] =
 								cdtx.nVisibleChipsCount.chipCountInLane(ELane.BsR);
-							score.SongInformation.chipCountByLane[ELane.BsG] =
+							chartData.SongInformation.chipCountByLane[ELane.BsG] =
 								cdtx.nVisibleChipsCount.chipCountInLane(ELane.BsG);
-							score.SongInformation.chipCountByLane[ELane.BsB] =
+							chartData.SongInformation.chipCountByLane[ELane.BsB] =
 								cdtx.nVisibleChipsCount.chipCountInLane(ELane.BsB);
-							score.SongInformation.chipCountByLane[ELane.BsY] =
+							chartData.SongInformation.chipCountByLane[ELane.BsY] =
 								cdtx.nVisibleChipsCount.chipCountInLane(ELane.BsY);
-							score.SongInformation.chipCountByLane[ELane.BsP] =
+							chartData.SongInformation.chipCountByLane[ELane.BsP] =
 								cdtx.nVisibleChipsCount.chipCountInLane(ELane.BsP);
-							score.SongInformation.chipCountByLane[ELane.BsPick] =
+							chartData.SongInformation.chipCountByLane[ELane.BsPick] =
 								cdtx.nVisibleChipsCount.chipCountInLane(ELane.BsPick);
 						}
 
@@ -754,14 +754,14 @@ public class SongDb
 					node.title = node.path;
 				}
 
-				LoadScoreFile(score.FileInformation.AbsoluteFilePath + ".score.ini", ref score);
+				LoadScoreFile(chartData.FileInformation.AbsoluteFilePath + ".score.ini", ref chartData);
 			}
 		}
 
 		processDoneCount++;
 	}
 
-	private void LoadScoreFile(string path, ref CScore score)
+	private void LoadScoreFile(string path, ref CChartData chartData)
 	{
 		if (!File.Exists(path))
 			return;
@@ -785,7 +785,7 @@ public class SongDb
 					// (A) 全オートじゃないようなので、演奏結果情報を有効としてランクを算出する。
 					if (CDTXMania.ConfigIni.nSkillMode == 0)
 					{
-						score.SongInformation.BestRank[nInstrumentNumber] =
+						chartData.SongInformation.BestRank[nInstrumentNumber] =
 							CScoreIni.tCalculateRankOld(
 								ini.stSection[n].nTotalChipsCount,
 								ini.stSection[n].nPerfectCount,
@@ -797,7 +797,7 @@ public class SongDb
 					}
 					else if (CDTXMania.ConfigIni.nSkillMode == 1)
 					{
-						score.SongInformation.BestRank[nInstrumentNumber] =
+						chartData.SongInformation.BestRank[nInstrumentNumber] =
 							CScoreIni.tCalculateRank(
 								ini.stSection[n].nTotalChipsCount,
 								ini.stSection[n].nPerfectCount,
@@ -812,34 +812,34 @@ public class SongDb
 				else
 				{
 					// (B) 全オートらしいので、ランクは無効とする。
-					score.SongInformation.BestRank[nInstrumentNumber] = (int)CScoreIni.ERANK.UNKNOWN;
+					chartData.SongInformation.BestRank[nInstrumentNumber] = (int)CScoreIni.ERANK.UNKNOWN;
 				}
 
 				//-----------------
 
 				#endregion
 
-				score.SongInformation.HighCompletionRate[nInstrumentNumber] = ini.stSection[n].dbPerformanceSkill;
-				score.SongInformation.HighSongSkill[nInstrumentNumber] = ini.stSection[n].dbGameSkill;
-				score.SongInformation.FullCombo[nInstrumentNumber] = ini.stSection[n].bIsFullCombo | ini.stSection[nInstrumentNumber * 2].bIsFullCombo;
+				chartData.SongInformation.HighCompletionRate[nInstrumentNumber] = ini.stSection[n].dbPerformanceSkill;
+				chartData.SongInformation.HighSongSkill[nInstrumentNumber] = ini.stSection[n].dbGameSkill;
+				chartData.SongInformation.FullCombo[nInstrumentNumber] = ini.stSection[n].bIsFullCombo | ini.stSection[nInstrumentNumber * 2].bIsFullCombo;
 				
 				//New for Progress
-				score.SongInformation.progress[nInstrumentNumber] = ini.stSection[n].strProgress;
-				if (score.SongInformation.progress[nInstrumentNumber] == "")
+				chartData.SongInformation.progress[nInstrumentNumber] = ini.stSection[n].strProgress;
+				if (chartData.SongInformation.progress[nInstrumentNumber] == "")
 				{
 					//TODO: Read from another file if progress string is empty
 					//Set a hard-coded 64 char string for now
-					score.SongInformation.progress[nInstrumentNumber] =
+					chartData.SongInformation.progress[nInstrumentNumber] =
 						"0000000000000000000000000000000000000000000000000000000000000000";
 				}
 			}
 
-			score.SongInformation.NbPerformances.Drums = ini.stFile.PlayCountDrums;
-			score.SongInformation.NbPerformances.Guitar = ini.stFile.PlayCountGuitar;
-			score.SongInformation.NbPerformances.Bass = ini.stFile.PlayCountBass;
+			chartData.SongInformation.NbPerformances.Drums = ini.stFile.PlayCountDrums;
+			chartData.SongInformation.NbPerformances.Guitar = ini.stFile.PlayCountGuitar;
+			chartData.SongInformation.NbPerformances.Bass = ini.stFile.PlayCountBass;
 			
 			for (int i = 0; i < 5; i++)
-				score.SongInformation.PerformanceHistory[i] = ini.stFile.History[i];
+				chartData.SongInformation.PerformanceHistory[i] = ini.stFile.History[i];
 		}
 		catch (Exception e)
 		{

@@ -210,12 +210,12 @@ internal class CStageSongLoading : CStage
 
             string strDTXFilePath = (CDTXMania.bCompactMode)
                 ? CDTXMania.strCompactModeFile
-                : CDTXMania.confirmedChart.FileInformation.AbsoluteFilePath;
+                : CDTXMania.chosenChartData.FileInformation.AbsoluteFilePath;
 
             cdtx = new(strDTXFilePath, true);
 
             if (!CDTXMania.bCompactMode && CDTXMania.ConfigIni.b曲名表示をdefのものにする)
-                strSongTitle = CDTXMania.confirmedSong.title;
+                strSongTitle = CDTXMania.chosenSong.title;
             else
                 strSongTitle = cdtx.TITLE;
 
@@ -297,7 +297,7 @@ internal class CStageSongLoading : CStage
             base.OnActivate();
 
             tDetermineStatusLabelFromLabelName(
-                CDTXMania.confirmedSong.difficultyLabel[
+                CDTXMania.chosenSong.difficultyLabel[
                     CDTXMania.confirmedSongDifficulty]);
             
             //add difficulty panel to ui here
@@ -417,7 +417,7 @@ internal class CStageSongLoading : CStage
             {
                 timeBeginLoad = DateTime.Now;
 
-                string songPath = !CDTXMania.bCompactMode ? CDTXMania.confirmedChart.FileInformation.AbsoluteFilePath : CDTXMania.strCompactModeFile;
+                string songPath = !CDTXMania.bCompactMode ? CDTXMania.chosenChartData.FileInformation.AbsoluteFilePath : CDTXMania.strCompactModeFile;
 
                 CScoreIni ini = new(songPath + ".score.ini");
 
@@ -713,7 +713,7 @@ internal class CStageSongLoading : CStage
                 {
                     //Always display CLASSIC style if Skill Mode is Classic
                     if (CDTXMania.ConfigIni.nSkillMode == 0 || (CDTXMania.ConfigIni.bClassicScoreDisplay &&
-                                                                CDTXMania.confirmedChart.SongInformation.bIsClassicChart[j] && 
+                                                                CDTXMania.chosenChartData.SongInformation.bIsClassicChart[j] && 
                                                                 !cdtx.bForceXGChart))
                     {
                         tDrawStringLarge(187 + k, 152, $"{DTXLevel:00}");
@@ -743,7 +743,7 @@ internal class CStageSongLoading : CStage
 
                     //this.txJacket.Dispose();
                     tDrawDifficultyPanel(
-                        CDTXMania.confirmedSong.difficultyLabel[
+                        CDTXMania.chosenSong.difficultyLabel[
                             CDTXMania.confirmedSongDifficulty], 191 + k, 102);
         
                     k = 700;

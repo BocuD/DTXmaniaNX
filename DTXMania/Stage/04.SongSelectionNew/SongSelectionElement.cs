@@ -21,8 +21,8 @@ public class SongSelectionElement : UIGroup
     {
         if (node?.nodeType == SongNode.ENodeType.SONG)
         {
-            CScore chart = node.charts.FirstOrDefault(x => x != null);
-            return chart?.SongInformation.ArtistName ?? "Unknown Artist";
+            CChartData chartData = node.charts.FirstOrDefault(x => x != null);
+            return chartData?.SongInformation.ArtistName ?? "Unknown Artist";
         }
         return "Unknown Artist";
     }
@@ -163,8 +163,8 @@ public class SongSelectionElement : UIGroup
             {
                 case SongNode.ENodeType.SONG:
                     songTitleText.SetText(node.title);
-                    CScore chart = node.charts.FirstOrDefault(x => x != null);
-                    songArtistText.SetText(chart != null ? chart.SongInformation.ArtistName : "");
+                    CChartData chartData = node.charts.FirstOrDefault(x => x != null);
+                    songArtistText.SetText(chartData != null ? chartData.SongInformation.ArtistName : "");
                     backgroundImage.SetTexture(bar, false, false);
                     
                     //some dirty hacks to fix clipping issues with a bad texture (?)
@@ -242,7 +242,7 @@ public class SongSelectionElement : UIGroup
         //get best lamp
         for (int index = 0; index < node.charts.Length; index++)
         {
-            CScore? child = node.charts[index];
+            CChartData? child = node.charts[index];
             if (child == null) continue;
             if (!child.HasChartForCurrentMode()) continue;
 
@@ -287,7 +287,7 @@ public class SongSelectionElement : UIGroup
         {
             if (node != null)
             {
-                CScore? chart = node.charts.FirstOrDefault(x => x != null);
+                CChartData? chart = node.charts.FirstOrDefault(x => x != null);
 
                 ImGui.Text($"Node Type: {node.nodeType}");
                 ImGui.Text($"Title: {node.title}");

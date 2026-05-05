@@ -23,7 +23,7 @@ public class StatusPanel : UIGroup
 		CommandHistory = new CCommandHistory();
 	}
 
-	public void SelectionChanged(SongNode? song, CScore? chart)
+	public void SelectionChanged(SongNode? song, CChartData? chart)
 	{
 		foreach (StatusPane pane in instruments)
 		{
