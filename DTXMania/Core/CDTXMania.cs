@@ -475,7 +475,9 @@ internal class CDTXMania
             InputManager.ScanDevices();
         }
         
-        InputManager.Keyboard.preventKeyboardInput = InspectorManager.inspectorEnabled && (ImGui.GetIO().WantCaptureKeyboard || GameStatus.preventGameKeyboardInput);
+        bool inspectorCapturingKeyboard = InspectorManager.inspectorEnabled && ImGui.GetIO().WantCaptureKeyboard;
+        bool textInputDrawableActive = UIImGuiTextInput.IsAnyInputActive;
+        InputManager.Keyboard.preventKeyboardInput = inspectorCapturingKeyboard || textInputDrawableActive || GameStatus.preventGameKeyboardInput;
         
         //poll input
         InputManager.tPolling(bApplicationActive, ConfigIni.bBufferedInput);

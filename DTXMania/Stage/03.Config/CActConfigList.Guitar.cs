@@ -14,6 +14,10 @@ internal partial class CActConfigList
         listItems.Clear();
             
         tAddReturnToMenuItem();
+        
+        //names
+        CreateCardNameInputItem(1);
+        CreateGroupNameInputItem(1);
 
         CItemThreeState iGuitarAutoPlayAll = new("AutoPlay (All)", CItemThreeState.EState.UNDEFINED,
             "全ネック/ピックの自動演奏の ON/OFF を\n" +

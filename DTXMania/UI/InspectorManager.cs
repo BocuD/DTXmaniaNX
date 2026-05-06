@@ -75,6 +75,11 @@ public static class InspectorManager
         if (ImGui.GetIO().KeyCtrl && ImGui.IsKeyPressed(ImGuiKey.I))
         {
             inspectorEnabled = !inspectorEnabled;
+
+            if (!inspectorEnabled)
+            {
+                Inspector.Inspector.inspectorTarget = string.Empty;
+            }
         }
         
         if (ImGui.GetIO().KeyCtrl && ImGui.IsKeyPressed(ImGuiKey.L))

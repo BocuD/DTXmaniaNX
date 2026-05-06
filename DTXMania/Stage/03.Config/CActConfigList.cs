@@ -575,11 +575,21 @@ internal partial class CActConfigList : CActivity
             }
 
             Matrix4x4 paramMatrix = Matrix4x4.CreateTranslation(n新項目パネルX + 265, y + 30, 0) * parentMatrix;
-            if (listMenu[nItem].txItemParam != null)
+
+            switch (listItems[nItem].eType)
             {
-                Vector2 size = new(listMenu[nItem].txItemParam!.Width, listMenu[nItem].txItemParam!.Height);
-                size *= 1 / CDTXMania.renderScale;
-                listMenu[nItem].txItemParam?.tDraw2DMatrix(paramMatrix, size);
+                case CItemBase.EType.TextInput:
+                    ((CItemTextInput) listItems[nItem]).drawableTextInput?.Draw(paramMatrix);
+                    break;
+                
+                default:
+                    if (listMenu[nItem].txItemParam != null)
+                    {
+                        Vector2 size = new(listMenu[nItem].txItemParam!.Width, listMenu[nItem].txItemParam!.Height);
+                        size *= 1 / CDTXMania.renderScale;
+                        listMenu[nItem].txItemParam?.tDraw2DMatrix(paramMatrix, size);
+                    }
+                    break;
             }
         }
 
@@ -588,13 +598,50 @@ internal partial class CActConfigList : CActivity
         nItem = tNextItem(nItem);
         return nItem;
     }
-
+    
 
 
     // Other
 
     #region [ private ]
 
+    private void CreateCardNameInputItem(int instrument)
+    {
+        string instrumentName = instrument switch
+        {
+            0 => "Drums",
+            1 => "Guitar",
+            2 => "Bass",
+            _ => "Unknown"
+        };
+
+        CItemTextInput iCardName = new ($"Card name ({instrumentName})", CDTXMania.ConfigIni.strCardName[instrument], 
+            "カード名を入力します。\n",
+            "Input your card name.\n");
+        iCardName.BindConfig(
+            () => iCardName.strCurrentValue = CDTXMania.ConfigIni.strCardName[instrument],
+            () => CDTXMania.ConfigIni.strCardName[instrument] = iCardName.strCurrentValue);
+        listItems.Add(iCardName);
+    }
+    
+    private void CreateGroupNameInputItem(int instrument)
+    {
+        string instrumentName = instrument switch
+        {
+            0 => "Drums",
+            1 => "Guitar",
+            2 => "Bass"
+        };
+
+        CItemTextInput iGroupName = new ($"Group name ({instrumentName})", CDTXMania.ConfigIni.strGroupName[instrument], 
+            "グループ名を入力します。\n",
+            "Input your Group name.\n");
+        iGroupName.BindConfig(
+            () => iGroupName.strCurrentValue = CDTXMania.ConfigIni.strGroupName[instrument],
+            () => CDTXMania.ConfigIni.strGroupName[instrument] = iGroupName.strCurrentValue);
+        listItems.Add(iGroupName);
+    }
+    
     //-----------------
     private enum EMenuType
     {

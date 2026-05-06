@@ -15,6 +15,10 @@ internal partial class CActConfigList
             
         tAddReturnToMenuItem();
 
+        //names
+        CreateCardNameInputItem(2);
+        CreateGroupNameInputItem(2);
+        
         CItemThreeState iBassAutoPlayAll = new("AutoPlay (All)", CItemThreeState.EState.UNDEFINED,
             "全ネック/ピックの自動演奏の ON/OFF を\n" +
             "まとめて切り替えます。",

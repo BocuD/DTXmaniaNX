@@ -27,7 +27,8 @@ internal class CItemBase
 		ONorOFForUndefined3State,
 		Integer,
 		List,
-		切替リスト
+		切替リスト,
+		TextInput
 	}
 
 	public string strItemName;
