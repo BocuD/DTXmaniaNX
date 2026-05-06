@@ -280,6 +280,7 @@ internal class CDTXMania
         SkinManager = new SkinManager();
         
         ConfigIni.SyncGraphicsSettings(maniaGl.host);
+        UpdateWindowTitle();
         maniaGl.host.InitializeGraphics();
 
         SafeInitialize("Skin", () =>
@@ -352,7 +353,7 @@ internal class CDTXMania
                 ConfigIni.nASIODevice,
                 ConfigIni.bUseOSTimer
             );
-            AddSoundTypeToWindowTitle();
+            UpdateWindowTitle();
             CSoundManager.bIsTimeStretch = ConfigIni.bTimeStretch;
             SoundManager.nMasterVolume = ConfigIni.nMasterVolume;
 
@@ -591,8 +592,14 @@ internal class CDTXMania
         return ini;
     }
     
-    public void AddSoundTypeToWindowTitle()
+    public void UpdateWindowTitle()
     {
+        if (SoundManager == null)
+        {
+            maniaGl.SetWindowTitle(strWindowTitle);
+            return;
+        }
+        
         string delay = "";
         if (SoundManager.GetCurrentSoundDeviceType() != "DirectSound")
         {
