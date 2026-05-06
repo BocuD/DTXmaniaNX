@@ -3,7 +3,6 @@ using System.Numerics;
 using DTXMania.Core;
 using DTXMania.SongDb;
 using DTXMania.UI.Drawable;
-using FDK;
 
 namespace DTXMania;
 

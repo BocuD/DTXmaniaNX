@@ -4,7 +4,6 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 using DTXMania.Core.OpenGL;
-using DTXMania.UI;
 
 namespace DTXMania.Core;
 

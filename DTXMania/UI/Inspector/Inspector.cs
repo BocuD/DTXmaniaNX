@@ -1,7 +1,6 @@
 using System.Drawing;
 using System.Numerics;
 using DTXMania.Core.Framework;
-using DTXMania.UI;
 using DTXMania.UI.Drawable;
 using Hexa.NET.ImGui;
 using Color = System.Drawing.Color;

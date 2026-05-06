@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using DTXMania.Core;
-using DTXMania.UI;
 using DTXMania.UI.Drawable;
 using FDK;
 

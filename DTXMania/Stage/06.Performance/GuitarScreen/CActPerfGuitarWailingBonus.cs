@@ -1,7 +1,6 @@
 ﻿using System.Drawing;
 using DTXMania.Core;
 using DTXMania.Core.Framework;
-using DTXMania.UI;
 using FDK;
 
 namespace DTXMania;

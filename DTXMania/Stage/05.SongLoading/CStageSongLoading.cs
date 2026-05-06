@@ -9,7 +9,6 @@ using DTXMania.Core.Framework;
 using DTXMania.UI;
 using DTXMania.UI.Drawable;
 using FDK;
-using Color = System.Drawing.Color;
 using Point = System.Drawing.Point;
 using SlimDXKey = SlimDX.DirectInput.Key;
 

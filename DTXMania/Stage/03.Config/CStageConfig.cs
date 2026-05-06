@@ -3,11 +3,9 @@ using System.Drawing;
 using System.Diagnostics;
 using System.Numerics;
 using DTXMania.Core;
-using DTXMania.UI;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.Item;
 using FDK;
-using SkiaSharp;
 using SlimDXKey = SlimDX.DirectInput.Key;
 
 namespace DTXMania;

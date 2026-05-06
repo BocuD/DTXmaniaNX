@@ -2,7 +2,6 @@
 using System.Numerics;
 using DTXMania.Core.Framework;
 using DTXMania.UI.Text;
-using Color = System.Drawing.Color;
 
 namespace DTXMania.UI.Drawable;
 

@@ -7,7 +7,6 @@ using FDK;
 
 using Point = System.Drawing.Point;
 using Rectangle = System.Drawing.Rectangle;
-using Color = System.Drawing.Color;
 
 namespace DTXMania;
 

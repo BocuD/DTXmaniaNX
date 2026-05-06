@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 using DTXMania.Core;
 using DTXMania.Core.Video;
-using FDK;
 
 namespace DTXMania;
 
