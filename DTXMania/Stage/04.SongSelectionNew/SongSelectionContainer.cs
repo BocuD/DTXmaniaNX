@@ -15,7 +15,7 @@ public class SongSelectionContainer : UIGroup
     private SongDb.SongDb songDb;
     private UIImage albumArt;
     private UIGroup elementsContainer;
-    
+
     public SongNode CurrentRoot => currentRoot;
     private SongNode currentRoot;
     
@@ -56,15 +56,19 @@ public class SongSelectionContainer : UIGroup
     public SongNode currentSelection => songSelectionElements[WrapIndex(bufferStartIndex + selectionIndex)].node;
     
     private bool updateRootRequested;
+    private bool requestIsFiltered;
     private SongNode? newSongRoot;
     
-    public void RequestUpdateRoot(SongNode newRoot)
+    public void RequestUpdateRoot(SongNode newRoot, bool isFiltered = false)
     {
         updateRootRequested = true;
         newSongRoot = newRoot;
+        requestIsFiltered = isFiltered;
     }
     
-    public void UpdateRoot(SongNode? newRoot = null, bool preLoadImages = true)
+    public SongNode UnfilteredRoot;
+    
+    public void UpdateRoot(SongNode? newRoot = null, bool preLoadImages = true, bool isFiltered = false)
     {
         Trace.TraceInformation("Updating song selection root to {0}", newRoot?.title ?? "default root");
         DateTime start = DateTime.Now;
@@ -74,6 +78,11 @@ public class SongSelectionContainer : UIGroup
 
         currentRoot = newRoot ?? songDb.songNodeRoot;
         SongNode node = currentRoot.CurrentSelection;
+
+        if (!isFiltered)
+        {
+            UnfilteredRoot = currentRoot;
+        }
 
         bufferStartIndex = 0;
         
@@ -187,7 +196,11 @@ public class SongSelectionContainer : UIGroup
 
     private void UpdateSelectedSongAlbumArt()
     {
-        preImageCache.TryGetValue(currentSelection, out BaseTexture? tex);
+        BaseTexture? tex = null;
+        if (currentSelection != null)
+        {
+            preImageCache.TryGetValue(currentSelection, out tex);
+        }
 
         if (tex == null)
         {
@@ -205,7 +218,7 @@ public class SongSelectionContainer : UIGroup
     {
         if (updateRootRequested)
         {
-            UpdateRoot(newSongRoot, false);
+            UpdateRoot(newSongRoot, false, requestIsFiltered);
             updateRootRequested = false;
         }
         
@@ -506,8 +519,10 @@ public class SongSelectionContainer : UIGroup
     
     public bool isScrolling => MathF.Abs(targetY) > 2.0f;
 
-    private BaseTexture? CachePreImage(SongNode node)
+    private BaseTexture? CachePreImage(SongNode? node)
     {
+        if (node == null) return null;
+        
         if (!preImageCache.TryGetValue(node, out BaseTexture? preImage))
         {
             string imagePath = node.nodeType != SongNode.ENodeType.BACKBOX 
@@ -569,4 +584,6 @@ public class SongSelectionContainer : UIGroup
         
         SongSelectionElement.DisposeSongSelectElementAssets();
     }
+
+  
 }

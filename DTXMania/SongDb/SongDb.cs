@@ -628,6 +628,7 @@ public class SongDb
 
 						chartData.SongInformation.Title = cdtx.TITLE;
 						chartData.SongInformation.ArtistName = cdtx.ARTIST;
+						chartData.SongInformation.Comment = cdtx.COMMENT;
 
 						if (Utilities.HasJapanese(chartData.SongInformation.Title))
 						{
@@ -655,8 +656,21 @@ public class SongDb
 							chartData.SongInformation.ArtistNameKana = chartData.SongInformation.ArtistName;
 							chartData.SongInformation.ArtistNameRoman = chartData.SongInformation.ArtistName.ToLowerInvariant();
 						}
+						
+						if (Utilities.HasJapanese(chartData.SongInformation.Comment))
+						{
+							chartData.SongInformation.CommentHasJapanese = true;
+							chartData.SongInformation.CommentKana =
+								await jpConverter.Convert(chartData.SongInformation.Comment);
+							chartData.SongInformation.CommentRoman =
+								await jpConverter.Convert(chartData.SongInformation.Comment, To.Romaji);
+						}
+						else
+						{
+							chartData.SongInformation.CommentKana = chartData.SongInformation.Comment;
+							chartData.SongInformation.CommentRoman = chartData.SongInformation.Comment.ToLowerInvariant();
+						}
 
-						chartData.SongInformation.Comment = cdtx.COMMENT;
 						chartData.SongInformation.Genre = cdtx.GENRE;
 						chartData.SongInformation.Preimage = cdtx.PREIMAGE;
 						chartData.SongInformation.Premovie = cdtx.PREMOVIE;

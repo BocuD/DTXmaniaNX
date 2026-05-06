@@ -18,6 +18,8 @@ public class CStageSongSelectionNew : CStage
     private UIImage bigAlbumArt;
     private CActSelectPresound actPresound;
     private StatusPanel statusPanel;
+    private SongSearchMenu songSearchMenu;
+    private UIText commentText;
 
     private SongSelectionContainer currentSelectionContainer;
     private DensityGraph densityGraph1;
@@ -54,7 +56,6 @@ public class CStageSongSelectionNew : CStage
         eStageID = EStage.SongSelection_4;
         
         listChildActivities.Add(actPresound = new CActSelectPresound());
-        //listChildActivities.Add(actBackgroundVideoAVI = new CActSelectBackgroundAVI());
         
         currentSort = sorters[0];
     }
@@ -86,6 +87,18 @@ public class CStageSongSelectionNew : CStage
 
         statusPanel = ui.AddChild(new StatusPanel());
         statusPanel.renderOrder = 6;
+        
+        commentText = ui.AddChild(new UIText("", 18));
+        commentText.renderOrder = 11;
+        commentText.position = new Vector3(0, 35, 0);
+        commentText.textSource = TextSource.Dynamic;
+        commentText.dynamicSource = "SongComment";
+        
+        songSearchMenu = ui.AddChild(new SongSearchMenu());
+        songSearchMenu.renderOrder = 15;
+        songSearchMenu.isVisible = false;
+        songSearchMenu.anchor = new Vector2(0.5f, 0.5f);
+        songSearchMenu.position = new Vector3(1280 / 2.0f, 720 / 2.0f, 0);
 
         var selectionContainerGroup = ui.AddChild(new UIGroup("Selection Containers"));
         selectionContainerGroup.position = new Vector3(765, 320, 0);
@@ -107,6 +120,7 @@ public class CStageSongSelectionNew : CStage
             int? ms = selectedChart?.SongInformation.DurationMs;
             return ms != null ? TimeSpan.FromMilliseconds(ms.Value).ToString(@"m\:ss") : "";
         });
+        dynamicStringSources["SongComment"] = new DynamicStringSource(() => selectedChart?.SongInformation.Comment ?? "");
     }
 
     public override void InitializeDefaultUI()
@@ -316,8 +330,10 @@ public class CStageSongSelectionNew : CStage
         }
         
         actPresound.OnUpdateAndDraw();
+        
         sortMenuContainer.HandleNavigation();
         statusPanel.HandleNavigation();
+        songSearchMenu.HandleNavigation();
         return currentSelectionContainer.HandleNavigation();
     }
     
@@ -496,5 +512,31 @@ public class CStageSongSelectionNew : CStage
         sortCache.Clear();
         PrepareSelectionContainers();
         ApplySort(currentSort);
+    }
+
+    public int UpdateSearch(string searchQuery)
+    {
+        if (string.IsNullOrWhiteSpace(searchQuery))
+        {
+            //if search query is empty, reset to current sort
+            currentSelectionContainer.RequestUpdateRoot(currentSelectionContainer.UnfilteredRoot);
+            return 0;
+        }
+        
+        SongNode? searchResult = currentSelectionContainer.UnfilteredRoot.GetSearchResult(searchQuery);
+        if (searchResult != null)
+        {
+            if (searchResult.childNodes.Count > 0)
+            {
+                currentSelectionContainer.RequestUpdateRoot(searchResult, true);
+            }
+            else
+            {
+                Trace.TraceInformation("No search results found for query: " + searchQuery);
+            }
+            return searchResult.childNodes.Count;
+        }
+
+        return -1;
     }
 }

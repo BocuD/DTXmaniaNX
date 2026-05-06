@@ -51,9 +51,11 @@ public class CChartData
     {
         public string Title;
         public string ArtistName;
+        public string Comment;
 
         public bool TitleHasJapanese;
         public bool ArtistNameHasJapanese;
+        public bool CommentHasJapanese;
 
         public string TitleKana;
         public string ArtistNameKana;
@@ -61,7 +63,9 @@ public class CChartData
         public string TitleRoman;
         public string ArtistNameRoman;
         
-        public string Comment;
+        public string CommentKana;
+        public string CommentRoman;
+        
         public string Genre;
         public string Preimage;
         public string Premovie;

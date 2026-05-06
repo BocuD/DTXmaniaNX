@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Drawing;
 using DTXMania.Core;
+using Kawazu;
 
 namespace DTXMania.SongDb;
 
@@ -144,8 +145,9 @@ public class SongNode
         return imagePath;
     }
 
-    public static SongNode rNextSong(SongNode song)
+    public static SongNode? rNextSong(SongNode? song)
     {
+        if (song == null) return null;
         List<SongNode> list = song.parent.childNodes;
 
         int index = list.IndexOf(song);
@@ -159,8 +161,9 @@ public class SongNode
         return list[index + 1];
     }
 
-    public static SongNode rPreviousSong(SongNode song)
+    public static SongNode? rPreviousSong(SongNode? song)
     {
+        if (song == null) return null;
         List<SongNode> list = song.parent.childNodes;
 
         int index = list.IndexOf(song);
@@ -208,5 +211,64 @@ public class SongNode
         }
 
         return (skillChartData, skill, maxSkill, inst);
+    }
+
+    public SongNode? GetSearchResult(string searchQuery)
+    {
+        SongNode root = new(null, ENodeType.ROOT)
+        {
+            title = "Search result"
+        };
+
+        string[] queries;
+        
+        if (Utilities.HasJapanese(searchQuery))
+        {
+            KawazuConverter jpConverter = new();
+            string queryKana = jpConverter.Convert(searchQuery).Result;
+            string queryRoman = jpConverter.Convert(searchQuery, To.Romaji).Result;
+            
+            queries = [searchQuery, searchQuery.Replace(" ", ""), queryKana, queryRoman];
+        }
+        else
+        {
+            queries = [searchQuery, searchQuery.Replace(" ", "")];
+        }
+        
+        foreach (SongNode node in childNodes.Where(node => node.nodeType == ENodeType.SONG))
+        {
+            //the actual comparison
+            bool match = false;
+            
+            var metadata = node.charts.FirstOrDefault(x => x != null);
+
+            void Match(string input)
+            {
+                if (queries.Any(query => input.Contains(query, StringComparison.InvariantCultureIgnoreCase)))
+                {
+                    match = true;
+                }
+            }
+            
+            Match(node.title);
+            if (metadata != null)
+            {
+                Match(metadata.SongInformation.Title);
+                Match(metadata.SongInformation.TitleRoman);
+                
+                Match(metadata.SongInformation.ArtistName);
+                Match(metadata.SongInformation.ArtistNameRoman);
+                
+                Match(metadata.SongInformation.Comment);
+                Match(metadata.SongInformation.CommentRoman);
+            }
+            
+            if (match)
+            {
+                SongNode.Clone(node, root);
+            }
+        }
+
+        return root;
     }
 }

@@ -17,6 +17,7 @@ public class UIImGuiTextInput : UIText
     [Themable] public bool autoSelectAllOnFocus = true;
     [Themable] public float placeholderOpacity = 0.45f;
     [Themable] public bool enableImGuiTextRendering;
+    [Themable] public bool keepFocusEachFrame;
 
     private bool _isActive;
     private bool _requestKeyboardFocus;
@@ -112,11 +113,12 @@ public class UIImGuiTextInput : UIText
         Matrix4x4 combinedMatrix = localTransformMatrix * parentMatrix;
 
         Vector2 screenPosition = new(combinedMatrix.M41, combinedMatrix.M42);
+        
         // compute a more accurate desired height so IME/cursor positioning and input area
         // match the UIText font size and the UI render scale
         float desiredHeight = MathF.Max(size.Y, fontSize * CDTXMania.renderScale);
         desiredHeight = MathF.Max(desiredHeight, ImGui.GetFrameHeight());
-        Vector2 windowSize = new(MathF.Max(size.X, 120f), desiredHeight);
+        Vector2 windowSize = new(MathF.Max(size.X + 100f, 120f), desiredHeight);
 
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, Vector2.Zero);
         ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, Vector2.Zero);
@@ -153,7 +155,9 @@ public class UIImGuiTextInput : UIText
 
         try
         {
-            ImGui.SetNextWindowPos(screenPosition, ImGuiCond.Always);
+            Vector2 outlineOffset = new(outlineWidth);
+            Vector2 offset = new(3, 3);
+            ImGui.SetNextWindowPos(screenPosition + offset + outlineOffset, ImGuiCond.Always);
             ImGui.SetNextWindowSize(windowSize, ImGuiCond.Always);
             ImGui.SetNextWindowBgAlpha(0f);
 
@@ -174,6 +178,12 @@ public class UIImGuiTextInput : UIText
             {
                 ImGui.SetKeyboardFocusHere();
                 _requestKeyboardFocus = false;
+            }
+
+            // Keep focus on this element every frame if the option is enabled
+            if (keepFocusEachFrame)
+            {
+                ImGui.SetKeyboardFocusHere();
             }
 
             ImGui.SetNextItemWidth(windowSize.X);
@@ -250,6 +260,7 @@ public class UIImGuiTextInput : UIText
         ImGui.InputInt("Max Length", ref maxLength);
         maxLength = Math.Max(maxLength, 1);
         ImGui.Checkbox("Auto Select All On Focus", ref autoSelectAllOnFocus);
+        ImGui.Checkbox("Keep Focus Each Frame", ref keepFocusEachFrame);
         ImGui.InputFloat("Placeholder Opacity", ref placeholderOpacity, 0.05f, 0.1f, "%.2f");
         placeholderOpacity = Math.Clamp(placeholderOpacity, 0f, 1f);
 
@@ -293,6 +304,7 @@ public class UIImGuiTextInput : UIText
 
         Action<string>? onCommit = _onCommit;
         DisposeScaledFont();
+        RestorePreviousFocus();
         ClearCallbacks();
         if (_activeInput == this)
         {
@@ -310,6 +322,7 @@ public class UIImGuiTextInput : UIText
 
         Action? onCancel = _onCancel;
         DisposeScaledFont();
+        RestorePreviousFocus();
         ClearCallbacks();
         if (_activeInput == this)
         {
@@ -327,6 +340,13 @@ public class UIImGuiTextInput : UIText
     {
         _onCommit = null;
         _onCancel = null;
+    }
+
+    private void RestorePreviousFocus()
+    {
+        // Clear ImGui focus to prevent capturing game input when inspector is not active.
+        // This returns input control to the game layer.
+        ImGui.SetWindowFocus((string?)null);
     }
 
     private void CreateScaledFont()
@@ -358,8 +378,9 @@ public class UIImGuiTextInput : UIText
     {
         if (!_scaledFont.IsNull && _scaledFontOwned)
         {
-            //note: ImGui font atlas owns the fonts, so we don't manually delete.
-            //just clear our reference.
+            // Remove the font from the ImGui font atlas (ImGui 1.92+).
+            // This properly cleans up the font without leaving a dangling reference.
+            ImGui.RemoveFont(ImGui.GetIO().Fonts, _scaledFont);
             _scaledFont = default;
             _scaledFontOwned = false;
         }

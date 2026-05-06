@@ -157,7 +157,17 @@ public class SongSelectionElement : UIGroup
         if (node != newNode)
         {
             node = newNode;
-            
+
+            if (newNode == null)
+            {
+                songTitleText.SetText("");
+                songArtistText.SetText("");
+                backgroundImage.SetTexture(bar, false, false);
+                UpdateSkillbar();
+                UpdateLamp();
+                return;
+            }
+
             switch (newNode.nodeType)
             {
                 case SongNode.ENodeType.SONG:
@@ -204,7 +214,7 @@ public class SongSelectionElement : UIGroup
 
     private void UpdateSkillbar()
     {
-        if (node.nodeType == SongNode.ENodeType.SONG)
+        if (node != null && node.nodeType == SongNode.ENodeType.SONG)
         {
             var skill = node.GetTopSkillPoints();
 
@@ -230,7 +240,7 @@ public class SongSelectionElement : UIGroup
 
     private void UpdateLamp()
     {
-        if (node.nodeType != SongNode.ENodeType.SONG)
+        if (node == null || node.nodeType != SongNode.ENodeType.SONG)
         {
             lamp.isVisible = false;
             return;
