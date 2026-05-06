@@ -1,4 +1,5 @@
-﻿using DTXMania.Core;
+﻿using System.Diagnostics;
+using DTXMania.Core;
 using DTXMania.UI.Item;
 
 namespace DTXMania;
@@ -59,27 +60,20 @@ internal partial class CActConfigList
         
         CItemToggle iSystemFullscreen = new("Fullscreen", CDTXMania.ConfigIni.bFullScreenMode,
             "画面モード設定：\n ON で全画面モード、\n OFF でウィンドウモードになります。",
-            "Fullscreen mode or window mode.")
-        {
-            action = () => CDTXMania.app.changeFullscreenModeOnNextFrame = true
-        };
+            "Screen mode: ON for fullscreen, OFF for windowed mode.");
         iSystemFullscreen.BindConfig(
-            () =>
-            {
-                if (iSystemFullscreen.bON != CDTXMania.ConfigIni.bFullScreenMode)
-                {
-                    //NOTE: The assignment is done in reverse because ConfigIni.bFullScreenMode will be toggled by the Draw method once the update flag is set to true
-                    CDTXMania.ConfigIni.bFullScreenMode = iSystemFullscreen.bON;
-                    CDTXMania.app.changeFullscreenModeOnNextFrame = true;
-                    //Since actual value has changed, the UI should also reflect this
-                    iSystemFullscreen.bON = !iSystemFullscreen.bON;
-                }
-            },
             () => iSystemFullscreen.bON = CDTXMania.ConfigIni.bFullScreenMode);
-            
         listItems.Add(iSystemFullscreen);
+
+        CItemToggle iSystemExclusiveFullscreen = new("Exclusive Fullscreen", CDTXMania.ConfigIni.bFullScreenMode,
+            "ONにすると排他的フルスクリーン\nOFFにするとボーダーレスフルスクリーンになります。\n低遅延を実現するには排他的フルスクリーンをおすすめします。",
+            "Turn ON for exclusive fullscreen\nOFF for borderless fullscreen.\n" +
+            "Exclusive fullscreen is recommended for the lowest latency.");
+        iSystemExclusiveFullscreen.BindConfig(
+            () => iSystemExclusiveFullscreen.bON = CDTXMania.ConfigIni.bFullScreenExclusive);
+        listItems.Add(iSystemExclusiveFullscreen);
         
-        CItemToggle iSystemVSyncWait = new("VSyncWait", CDTXMania.ConfigIni.bVerticalSyncWait,
+        CItemToggle iSystemVSyncWait = new("Vertical Sync", CDTXMania.ConfigIni.bVerticalSyncWait,
             "垂直帰線同期：\n" +
             "画面の描画をディスプレイの\n" +
             "垂直帰線中に行なう場合には\n" +
@@ -87,21 +81,34 @@ internal partial class CActConfigList
             "ONにすると、ガタつきのない\n" +
             "滑らかな画面描画が実現されます。",
             "Turn ON to wait VSync (Vertical Synchronizing signal) at every drawing (so FPS becomes 60)\nIf you have enough CPU/GPU power, the scrolling would become smooth.");
-        iSystemVSyncWait.action = () =>
-        {
-            CDTXMania.ConfigIni.bVerticalSyncWait = iSystemVSyncWait.bON;
-            CDTXMania.app.changeVSyncModeOnNextFrame = true;
-        };
         iSystemVSyncWait.BindConfig(
-            () =>
-            {
-                if (iSystemVSyncWait.bON != CDTXMania.ConfigIni.bVerticalSyncWait) {
-                    CDTXMania.app.changeVSyncModeOnNextFrame = true;
-                }            
-                iSystemVSyncWait.bON = CDTXMania.ConfigIni.bVerticalSyncWait;
-            }, 
-            () => CDTXMania.ConfigIni.bVerticalSyncWait = iSystemVSyncWait.bON);
+            () => iSystemVSyncWait.bON = CDTXMania.ConfigIni.bVerticalSyncWait);
         listItems.Add(iSystemVSyncWait);
+        
+        CItemBase iApplyChanges = new("Apply Changes", CItemBase.EPanelType.Normal,
+            "グラフィックの変更を適用する",
+            "Apply graphics changes")
+        {
+            action = () =>
+            {
+                CDTXMania.ConfigIni.bFullScreenMode = iSystemFullscreen.bON;
+                CDTXMania.ConfigIni.bFullScreenExclusive = iSystemExclusiveFullscreen.bON;
+                CDTXMania.ConfigIni.bVerticalSyncWait = iSystemVSyncWait.bON;
+                
+                CDTXMania.ConfigIni.SyncGraphicsSettings(CDTXMania.app.maniaGl.host);
+                
+                //force redrawing all text at the new resolution
+                for (int index = 0; index < listMenu.Length; index++)
+                {
+                    listMenu[index].txItemName?.Dispose();
+                    listMenu[index].txItemName = null;
+                    
+                    listMenu[index].txItemParam?.Dispose();
+                    listMenu[index].txItemParam = null;
+                }
+            }
+        };
+        listItems.Add(iApplyChanges);
        
         tAddReturnToMenuItem(tSetupItemList_System);
 

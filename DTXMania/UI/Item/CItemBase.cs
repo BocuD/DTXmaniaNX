@@ -55,7 +55,7 @@ internal class CItemBase
 	// メソッド；子クラスで実装する
 		
 	//This will allow simplifying the code inside CActConfigList.cs
-	public Action action;
+	public Action? action;
 
 	public void RunAction()
 	{
@@ -92,13 +92,13 @@ internal class CItemBase
 	{
 	}
 
-	private Action _readFromConfig;
+	private Action? _readFromConfig;
 	public virtual void ReadFromConfig()
 	{
 		_readFromConfig?.Invoke();
 	}
 
-	private Action _writeToConfig;
+	private Action? _writeToConfig;
 	public void WriteToConfig()
 	{
 		_writeToConfig?.Invoke();
@@ -108,6 +108,11 @@ internal class CItemBase
 	{
 		_readFromConfig = readFromConfig;
 		_writeToConfig = writeToConfig;
+	}
+	
+	public void BindConfig(Action readFromConfig)
+	{
+		_readFromConfig = readFromConfig;
 	}
 
 	public virtual string GetStringValue()
