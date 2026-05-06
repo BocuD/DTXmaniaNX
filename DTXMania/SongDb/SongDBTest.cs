@@ -60,20 +60,20 @@ public class SongDBTester
         {
             ImGui.Separator();
 
-            CScore chart = selectedNode.charts.FirstOrDefault(x => x != null);
-            if (chart != null)
+            CChartData chartData = selectedNode.charts.FirstOrDefault(x => x != null);
+            if (chartData != null)
             {
                 ImGui.Text("Selected Node: " + selectedNode.title);
                 ImGui.Text("Path: " + selectedNode.path);
-                ImGui.Text("Title: " + chart.SongInformation.Title);
-                ImGui.Text("Title has japanese: " + chart.SongInformation.TitleHasJapanese);
-                ImGui.Text("Title (kana): " + chart.SongInformation.TitleKana);
-                ImGui.Text("Title (roman): " + chart.SongInformation.TitleRoman);
-                ImGui.Text("Artist: " + chart.SongInformation.ArtistName);
-                ImGui.Text("Artist has japanese: " + chart.SongInformation.ArtistNameHasJapanese);
-                ImGui.Text("Artist (kana): " + chart.SongInformation.ArtistNameKana);
-                ImGui.Text("Artist (roman): " + chart.SongInformation.ArtistNameRoman);
-                ImGui.Text("Comment: " + chart.SongInformation.Comment);
+                ImGui.Text("Title: " + chartData.SongInformation.Title);
+                ImGui.Text("Title has japanese: " + chartData.SongInformation.TitleHasJapanese);
+                ImGui.Text("Title (kana): " + chartData.SongInformation.TitleKana);
+                ImGui.Text("Title (roman): " + chartData.SongInformation.TitleRoman);
+                ImGui.Text("Artist: " + chartData.SongInformation.ArtistName);
+                ImGui.Text("Artist has japanese: " + chartData.SongInformation.ArtistNameHasJapanese);
+                ImGui.Text("Artist (kana): " + chartData.SongInformation.ArtistNameKana);
+                ImGui.Text("Artist (roman): " + chartData.SongInformation.ArtistNameRoman);
+                ImGui.Text("Comment: " + chartData.SongInformation.Comment);
 
                 if (selectedNode.nodeType == SongNode.ENodeType.SONG)
                 {
@@ -275,7 +275,7 @@ public class SongDBTester
         {
             string title = node.title.Replace(",", " ");
             
-            CScore? chart = node.charts.FirstOrDefault(x => x != null);
+            CChartData? chart = node.charts.FirstOrDefault(x => x != null);
             if (chart == null)
             {
                 continue; // Skip nodes without valid charts

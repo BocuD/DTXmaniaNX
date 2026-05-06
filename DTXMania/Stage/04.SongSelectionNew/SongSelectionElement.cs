@@ -4,7 +4,6 @@ using System.Numerics;
 using DTXMania.Core;
 using DTXMania.Core.Framework;
 using DTXMania.SongDb;
-using DTXMania.UI;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.Inspector;
 using DTXMania.UI.Text;
@@ -21,8 +20,8 @@ public class SongSelectionElement : UIGroup
     {
         if (node?.nodeType == SongNode.ENodeType.SONG)
         {
-            CScore chart = node.charts.FirstOrDefault(x => x != null);
-            return chart?.SongInformation.ArtistName ?? "Unknown Artist";
+            CChartData chartData = node.charts.FirstOrDefault(x => x != null);
+            return chartData?.SongInformation.ArtistName ?? "Unknown Artist";
         }
         return "Unknown Artist";
     }
@@ -158,13 +157,23 @@ public class SongSelectionElement : UIGroup
         if (node != newNode)
         {
             node = newNode;
-            
+
+            if (newNode == null)
+            {
+                songTitleText.SetText("");
+                songArtistText.SetText("");
+                backgroundImage.SetTexture(bar, false, false);
+                UpdateSkillbar();
+                UpdateLamp();
+                return;
+            }
+
             switch (newNode.nodeType)
             {
                 case SongNode.ENodeType.SONG:
                     songTitleText.SetText(node.title);
-                    CScore chart = node.charts.FirstOrDefault(x => x != null);
-                    songArtistText.SetText(chart != null ? chart.SongInformation.ArtistName : "");
+                    CChartData chartData = node.charts.FirstOrDefault(x => x != null);
+                    songArtistText.SetText(chartData != null ? chartData.SongInformation.ArtistName : "");
                     backgroundImage.SetTexture(bar, false, false);
                     
                     //some dirty hacks to fix clipping issues with a bad texture (?)
@@ -205,7 +214,7 @@ public class SongSelectionElement : UIGroup
 
     private void UpdateSkillbar()
     {
-        if (node.nodeType == SongNode.ENodeType.SONG)
+        if (node != null && node.nodeType == SongNode.ENodeType.SONG)
         {
             var skill = node.GetTopSkillPoints();
 
@@ -231,7 +240,7 @@ public class SongSelectionElement : UIGroup
 
     private void UpdateLamp()
     {
-        if (node.nodeType != SongNode.ENodeType.SONG)
+        if (node == null || node.nodeType != SongNode.ENodeType.SONG)
         {
             lamp.isVisible = false;
             return;
@@ -242,7 +251,7 @@ public class SongSelectionElement : UIGroup
         //get best lamp
         for (int index = 0; index < node.charts.Length; index++)
         {
-            CScore? child = node.charts[index];
+            CChartData? child = node.charts[index];
             if (child == null) continue;
             if (!child.HasChartForCurrentMode()) continue;
 
@@ -287,7 +296,7 @@ public class SongSelectionElement : UIGroup
         {
             if (node != null)
             {
-                CScore? chart = node.charts.FirstOrDefault(x => x != null);
+                CChartData? chart = node.charts.FirstOrDefault(x => x != null);
 
                 ImGui.Text($"Node Type: {node.nodeType}");
                 ImGui.Text($"Title: {node.title}");

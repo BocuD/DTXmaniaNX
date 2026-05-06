@@ -1,7 +1,6 @@
 using System.Drawing;
 using System.Numerics;
 using DTXMania.Core.Framework;
-using DTXMania.UI;
 using Hexa.NET.ImGui;
 
 namespace DTXMania.UI.Drawable;

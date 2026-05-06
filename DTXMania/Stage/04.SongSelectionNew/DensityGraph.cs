@@ -3,7 +3,6 @@ using System.Numerics;
 using DTXMania.Core;
 using DTXMania.SongDb;
 using DTXMania.UI.Drawable;
-using FDK;
 
 namespace DTXMania;
 
@@ -68,7 +67,7 @@ public class DensityGraph : UIGroup
         Color.White
     ];
 
-    public void SelectionChanged(SongNode? song, CScore? chart)
+    public void SelectionChanged(SongNode? song, CChartData? chart)
     {
         
     }

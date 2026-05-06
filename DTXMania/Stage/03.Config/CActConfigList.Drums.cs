@@ -14,7 +14,11 @@ internal partial class CActConfigList
         listItems.Clear();
             
         tAddReturnToMenuItem();
-            
+        
+        //names
+        CreateCardNameInputItem(0);
+        CreateGroupNameInputItem(0);
+
         //----------AutoPlay----------
         CItemThreeState iDrumsAutoPlayAll = new("AutoPlay (All)", CItemThreeState.EState.UNDEFINED,
             "全パッドの自動演奏のON/OFFを\n" +
@@ -758,7 +762,7 @@ internal partial class CActConfigList
         nCurrentSelection = 0;
         eMenuType = EMenuType.Drums;
     }
-        
+
     public void tSetupItemList_KeyAssignDrums()
     {
         tRecordToConfigIni();

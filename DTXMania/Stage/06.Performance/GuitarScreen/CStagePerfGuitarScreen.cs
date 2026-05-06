@@ -75,14 +75,13 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		dtLastQueueOperation = DateTime.MinValue;
 		if( CDTXMania.bCompactMode )
 		{
-			var score = new CScore();
-			CDTXMania.SongManager.tReadScoreIniAndSetScoreInformation(CDTXMania.strCompactModeFile + ".score.ini", ref score);
+			var score = new CChartData();
 			actGraph.dbGraphValue_Goal = score.SongInformation.HighCompletionRate[ nGraphUsePart ];
 		}
 		else
 		{
-			actGraph.dbGraphValue_Goal = CDTXMania.confirmedChart.SongInformation.HighCompletionRate[ nGraphUsePart ];	// #24074 2011.01.23 add ikanick
-			actGraph.dbGraphValue_PersonalBest = CDTXMania.confirmedChart.SongInformation.HighCompletionRate[ nGraphUsePart ];
+			actGraph.dbGraphValue_Goal = CDTXMania.chosenChartData.SongInformation.HighCompletionRate[ nGraphUsePart ];	// #24074 2011.01.23 add ikanick
+			actGraph.dbGraphValue_PersonalBest = CDTXMania.chosenChartData.SongInformation.HighCompletionRate[ nGraphUsePart ];
 
 			// #35411 2015.08.21 chnmr0 add
 			// ゴースト利用可のなとき、0で初期化

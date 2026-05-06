@@ -115,7 +115,7 @@ internal class CActPerfProgressBar : CActivity
 			return;
 		}
 
-		tCreateBestProgressBarRecordTexture(CDTXMania.confirmedChart);
+		tCreateBestProgressBarRecordTexture(CDTXMania.chosenChartData);
 		tサイズが絡むテクスチャの生成();
 		tx灰 = CreateTextureFromSurface(64, 64, canvas =>
 		{
@@ -254,9 +254,9 @@ internal class CActPerfProgressBar : CActivity
 		return 0;
 	}
 
-	private void tCreateBestProgressBarRecordTexture(CScore cScore)
+	private void tCreateBestProgressBarRecordTexture(CChartData cChartData)
 	{
-		if (cScore == null)
+		if (cChartData == null)
 		{
 			return;
 		}
@@ -264,7 +264,7 @@ internal class CActPerfProgressBar : CActivity
 		for (EInstrumentPart ePart = EInstrumentPart.DRUMS; ePart <= EInstrumentPart.BASS; ePart++)
 		{
 			BaseTexture currTexture = txBestProgressBarRecord[(int)ePart];
-			txGenerateProgressBarLine(ref currTexture, cScore.SongInformation.progress[(int)CDTXMania.ConfigIni.GetFlipInst(ePart)]);
+			txGenerateProgressBarLine(ref currTexture, cChartData.SongInformation.progress[(int)CDTXMania.ConfigIni.GetFlipInst(ePart)]);
 			txBestProgressBarRecord[(int)ePart] = currTexture;
 		}
 	}

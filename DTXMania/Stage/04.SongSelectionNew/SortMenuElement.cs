@@ -1,5 +1,4 @@
-﻿using System.Drawing;
-using System.Numerics;
+﻿using System.Numerics;
 using DTXMania.Core;
 using DTXMania.SongDb.Sorting;
 using DTXMania.UI.Drawable;

@@ -13,11 +13,11 @@ internal class CItemToggle : CItemBase
 		eType = EType.ONorOFFToggle;
 		bON = false;
 	}
-	public CItemToggle(string strItemName, bool b初期状態, string strDescriptionJp, string strDescriptionEn)
+	public CItemToggle(string strItemName, bool bInitialState, string strDescriptionJp, string strDescriptionEn)
 		: this()
 	{
 		tInitialize(strItemName, EPanelType.Normal, strDescriptionJp, strDescriptionEn);
-		bON = b初期状態;
+		bON = bInitialState;
 	}
 
 	// CItemBase 実装

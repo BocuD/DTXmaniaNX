@@ -67,7 +67,7 @@ internal partial class CActConfigList
                 CDTXMania.ConfigIni.nASIODevice,
                 CDTXMania.ConfigIni.bUseOSTimer);
 
-            CDTXMania.app.AddSoundTypeToWindowTitle();
+            CDTXMania.app.UpdateWindowTitle();
         }
         
         CSoundManager.bIsTimeStretch = iSystemTimeStretch.bON;

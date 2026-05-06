@@ -316,14 +316,14 @@ internal class StageManager
 
                                 scoreIni = CDTXMania.UpdateBGMAdjustHistoryPlayCountIntScoreIni(str);
 
-                                CScore cScore = CDTXMania.confirmedChart;
+                                CChartData cChartData = CDTXMania.chosenChartData;
 
                                 if (bToSaveProgressBarRecord.Drums)
                                 {
                                     scoreIni.stSection.LastPlayDrums.strProgress = cPerf_Drums.strProgress;
 
                                     if (CScoreIni.tCheckIfUpdateProgressBarRecordOrNot(
-                                            cScore.SongInformation.progress.Drums, cPerf_Drums.strProgress))
+                                            cChartData.SongInformation.progress.Drums, cPerf_Drums.strProgress))
                                     {
                                         scoreIni.stSection.HiSkillDrums.strProgress = cPerf_Drums.strProgress;
                                         bNewProgressBarRecord.Drums = true;
@@ -334,7 +334,7 @@ internal class StageManager
                                 {
                                     scoreIni.stSection.LastPlayGuitar.strProgress = cPerf_Guitar.strProgress;
                                     if (CScoreIni.tCheckIfUpdateProgressBarRecordOrNot(
-                                            cScore.SongInformation.progress.Guitar, cPerf_Guitar.strProgress))
+                                            cChartData.SongInformation.progress.Guitar, cPerf_Guitar.strProgress))
                                     {
                                         scoreIni.stSection.HiSkillGuitar.strProgress = cPerf_Guitar.strProgress;
                                         bNewProgressBarRecord.Guitar = true;
@@ -345,7 +345,7 @@ internal class StageManager
                                 {
                                     scoreIni.stSection.LastPlayBass.strProgress = cPerf_Bass.strProgress;
                                     if (CScoreIni.tCheckIfUpdateProgressBarRecordOrNot(
-                                            cScore.SongInformation.progress.Bass, cPerf_Bass.strProgress))
+                                            cChartData.SongInformation.progress.Bass, cPerf_Bass.strProgress))
                                     {
                                         scoreIni.stSection.HiSkillBass.strProgress = cPerf_Bass.strProgress;
                                         bNewProgressBarRecord.Bass = true;
@@ -359,19 +359,19 @@ internal class StageManager
                                     if (bNewProgressBarRecord.Drums)
                                     {
                                         // New Song Progress
-                                        cScore.SongInformation.progress.Drums = cPerf_Drums.strProgress;
+                                        cChartData.SongInformation.progress.Drums = cPerf_Drums.strProgress;
                                     }
 
                                     if (bNewProgressBarRecord.Guitar)
                                     {
                                         // New Song Progress
-                                        cScore.SongInformation.progress.Guitar = cPerf_Guitar.strProgress;
+                                        cChartData.SongInformation.progress.Guitar = cPerf_Guitar.strProgress;
                                     }
 
                                     if (bNewProgressBarRecord.Bass)
                                     {
                                         // New Song Progress
-                                        cScore.SongInformation.progress.Bass = cPerf_Bass.strProgress;
+                                        cChartData.SongInformation.progress.Bass = cPerf_Bass.strProgress;
                                     }
                                 }
                             }

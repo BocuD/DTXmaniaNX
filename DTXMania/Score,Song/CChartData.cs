@@ -4,10 +4,8 @@ using DTXMania.Core;
 namespace DTXMania;
 
 [Serializable]
-public class CScore
+public class CChartData
 {
-    // プロパティ
-
     public STScoreIniInformation ScoreIniInformation;
 
     [Serializable]
@@ -17,10 +15,10 @@ public class CScore
         public DateTime LastModified;
         public long FileSize;
 
-        public STScoreIniInformation(DateTime 最終更新日時, long ファイルサイズ)
+        public STScoreIniInformation(DateTime lastModified, long fileSize)
         {
-            LastModified = 最終更新日時;
-            FileSize = ファイルサイズ;
+            LastModified = lastModified;
+            FileSize = fileSize;
         }
     }
 
@@ -53,9 +51,11 @@ public class CScore
     {
         public string Title;
         public string ArtistName;
+        public string Comment;
 
         public bool TitleHasJapanese;
         public bool ArtistNameHasJapanese;
+        public bool CommentHasJapanese;
 
         public string TitleKana;
         public string ArtistNameKana;
@@ -63,7 +63,9 @@ public class CScore
         public string TitleRoman;
         public string ArtistNameRoman;
         
-        public string Comment;
+        public string CommentKana;
+        public string CommentRoman;
+        
         public string Genre;
         public string Preimage;
         public string Premovie;
@@ -290,7 +292,7 @@ public class CScore
 
     // Constructor
 
-    public CScore()
+    public CChartData()
     {
         ScoreIniInformation = new STScoreIniInformation(DateTime.MinValue, 0L);
         bHadACacheInSongDB = false;
@@ -359,12 +361,12 @@ public class CScore
 
     public bool HasChartForCurrentMode()
     {
-        bool bScoreExistForMode = CDTXMania.ConfigIni.bDrumsEnabled && SongInformation.bScoreExists.Drums;
-        if (!bScoreExistForMode)
+        bool bChartExistForMode = CDTXMania.ConfigIni.bDrumsEnabled && SongInformation.bScoreExists.Drums;
+        if (!bChartExistForMode)
         {
-            bScoreExistForMode = CDTXMania.ConfigIni.bGuitarEnabled &&
+            bChartExistForMode = CDTXMania.ConfigIni.bGuitarEnabled &&
                                  (SongInformation.bScoreExists.Guitar || SongInformation.bScoreExists.Bass);
         }
-        return bScoreExistForMode;
+        return bChartExistForMode;
     }
 }

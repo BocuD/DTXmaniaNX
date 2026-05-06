@@ -1,8 +1,6 @@
-﻿using System.Drawing;
-using System.Numerics;
+﻿using System.Numerics;
 using DTXMania.Core;
 using DTXMania.UI.Drawable;
-using SharpDX;
 
 namespace DTXMania.SongDb;
 

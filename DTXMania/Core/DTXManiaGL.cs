@@ -41,9 +41,7 @@ public sealed class DTXManiaGL : OpenGlGame
         Gl.Viewport(0, 0, (uint)Math.Max(width, 1), (uint)Math.Max(height, 1));
         Gl.ClearColor(0.00f, 0.00f, 0.10f, 1f);
         Gl.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-
-        float aspectRatio = width / (float)Math.Max(height, 1);
-
+        
         CDTXMania.renderScale = windowSize.X / GameWindowSize.Width;
 
         if (host.fullscreenMode == FullscreenMode.Windowed)

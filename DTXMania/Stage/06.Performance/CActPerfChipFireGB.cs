@@ -1,6 +1,5 @@
 ﻿using DTXMania.Core;
 using DTXMania.UI.Drawable;
-using SharpDX;
 using FDK;
 using Color4 = DTXMania.Core.Framework.Color4;
 using Point = System.Drawing.Point;

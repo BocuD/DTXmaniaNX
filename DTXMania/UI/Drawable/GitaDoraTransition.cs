@@ -1,15 +1,8 @@
-﻿using System.Drawing;
-using System.Numerics;
+﻿using System.Numerics;
 using DTXMania.Core;
 using DTXMania.Core.Framework;
 using DTXMania.UI.Inspector;
-using DTXMania.UI.OpenGL;
-using FDK;
 using Hexa.NET.ImGui;
-using SkiaSharp;
-using StbImageSharp;
-using Color = System.Drawing.Color;
-using Rectangle = System.Drawing.Rectangle;
 
 namespace DTXMania.UI.Drawable;
 

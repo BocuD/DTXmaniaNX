@@ -50,7 +50,7 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
     private int _windowedWidth = 1280;
     private int _windowedHeight = 720;
     
-    private string _windowTitle = "";
+    private string _windowTitle = "GLFW Window";
     private bool _clearImGuiFocusOnNextFrame = true;
 
     private double _lastFrameTime;
@@ -247,7 +247,7 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
         {
             case FullscreenMode.Windowed:
                 GLFW.WindowHint(GlfwDecorated, GlfwTrue);
-                window = GLFW.CreateWindow(_windowedWidth, _windowedHeight, _game.name, default, shareWindow);
+                window = GLFW.CreateWindow(_windowedWidth, _windowedHeight, _windowTitle, default, shareWindow);
                 break;
             
             case FullscreenMode.BorderlessFullscreen:
@@ -257,7 +257,7 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
                 }
 
                 GLFW.WindowHint(GlfwDecorated, GlfwFalse);
-                window = GLFW.CreateWindow(videoMode.Width, videoMode.Height, _game.name, default, shareWindow);
+                window = GLFW.CreateWindow(videoMode.Width, videoMode.Height, _windowTitle, default, shareWindow);
                 break;
             
             case FullscreenMode.ExclusiveFullscreen:
@@ -266,7 +266,7 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
                     throw new InvalidOperationException("Primary monitor unavailable.");
                 }
 
-                window = GLFW.CreateWindow(videoMode.Width, videoMode.Height, _game.name, primaryMonitor, shareWindow);
+                window = GLFW.CreateWindow(videoMode.Width, videoMode.Height, _windowTitle, primaryMonitor, shareWindow);
                 break;
             
             default:

@@ -47,7 +47,7 @@ public class SortByPlayer : SongDbSort
         //go through songs and add them based on if they have a score, and if yes, the last played date
         foreach (SongNode songNode in songDb.flattenedSongList)
         {
-            CScore? lastPlayedChart = songNode.charts
+            CChartData? lastPlayedChart = songNode.charts
                 .Where(chart => chart != null && chart.ScoreIniInformation.FileSize != 0 && chart.HasChartForCurrentMode())
                 .OrderByDescending(chart => chart.ScoreIniInformation.LastModified)
                 .FirstOrDefault();
@@ -121,7 +121,7 @@ public class SortByPlayer : SongDbSort
         {
             for (int chartIndex = 0; chartIndex < songNode.charts.Length; chartIndex++)
             {
-                CScore? chart = songNode.charts[chartIndex];
+                CChartData? chart = songNode.charts[chartIndex];
                 if (chart == null || !chart.HasChartForCurrentMode()) continue;
 
                 for (int instrument = 0; instrument < 3; instrument++)

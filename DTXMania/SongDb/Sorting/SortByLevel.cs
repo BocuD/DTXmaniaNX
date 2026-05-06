@@ -35,7 +35,7 @@ public class SortByLevel : SongDbSort
 
             for (int chartIndex = 0; chartIndex < node.charts.Length; chartIndex++)
             {
-                CScore? chart = node.charts[chartIndex];
+                CChartData? chart = node.charts[chartIndex];
                 if (chart == null) continue;
 
                 for (int instrument = 0; instrument < 3; instrument++)

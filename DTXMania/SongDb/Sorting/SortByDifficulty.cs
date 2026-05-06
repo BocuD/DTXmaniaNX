@@ -46,43 +46,43 @@ public class SortByDifficulty : SongDbSort
         {
             for (int index = 0; index < songNode.charts.Length; index++)
             {
-                CScore chart = songNode.charts[index];
+                CChartData chartData = songNode.charts[index];
                 
-                if (chart == null)
+                if (chartData == null)
                 {
                     continue; // skip if no chart or difficulty name
                 }
                 
                 string difficultyName = difficultyLabels[index];
 
-                if (!chart.HasChartForCurrentMode()) continue;
+                if (!chartData.HasChartForCurrentMode()) continue;
 
                 if (CDTXMania.ConfigIni.bDrumsEnabled)
                 {
                     SongNode difficultyNode = difficultyNodes[difficultyName];
                     SongNode newNode = SongNode.Clone(songNode, difficultyNode, false);
-                    newNode.charts[index] = chart;
+                    newNode.charts[index] = chartData;
                     newNode.chartCount = 1;
                     newNode.filteredInstrumentPart = EInstrumentPart.DRUMS;
                 }
                 else
                 {
-                    if (chart.SongInformation.bScoreExists.Guitar)
+                    if (chartData.SongInformation.bScoreExists.Guitar)
                     {
                         SongNode difficultyNode = difficultyNodes[difficultyName];
                         SongNode newNode = SongNode.Clone(songNode, difficultyNode, false);
-                        newNode.charts[index] = chart;
+                        newNode.charts[index] = chartData;
                         newNode.chartCount = 1;
                         newNode.filteredInstrumentPart = EInstrumentPart.GUITAR;
                     }
                     
-                    if (chart.SongInformation.bScoreExists.Bass)
+                    if (chartData.SongInformation.bScoreExists.Bass)
                     {
                         difficultyName = "BASS " + difficultyName; // prefix for bass difficulties
                         
                         SongNode difficultyNode = difficultyNodes[difficultyName];
                         SongNode newNode = SongNode.Clone(songNode, difficultyNode, false);
-                        newNode.charts[index] = chart;
+                        newNode.charts[index] = chartData;
                         newNode.chartCount = 1;
                         newNode.filteredInstrumentPart = EInstrumentPart.BASS;
                     }

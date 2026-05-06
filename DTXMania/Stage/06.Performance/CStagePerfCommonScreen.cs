@@ -1,12 +1,10 @@
 using DiscordRPC;
 using System.Runtime.InteropServices;
 using System.Drawing;
-using System.Drawing.Imaging;
 using System.Diagnostics;
 using System.Numerics;
 using DTXMania.Core;
 using DTXMania.Core.Framework;
-using DTXMania.UI;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.Text;
 using FDK;
@@ -34,12 +32,12 @@ internal abstract class CStagePerfCommonScreen : CStage
             var nEndTimeMs = CDTXMania.DTX.listChip.OrderBy(c => c.nPlaybackTimeMs).LastOrDefault()?.nPlaybackTimeMs ?? 0;
 
             //Shorten details string to avoid hitting max of 128 bytes
-            string detailsString = $"{CDTXMania.confirmedSong.title}";
+            string detailsString = $"{CDTXMania.chosenSong.title}";
             if(detailsString.Length > 50)
             {
                 detailsString = detailsString.Substring(0, 50);
             }
-            detailsString += $" [{CDTXMania.confirmedSong.difficultyLabel[CDTXMania.confirmedSongDifficulty]}]";
+            detailsString += $" [{CDTXMania.chosenSong.difficultyLabel[CDTXMania.confirmedSongDifficulty]}]";
             return new CDTXRichPresence
             {
                 State = "In Game",
@@ -1362,9 +1360,9 @@ internal abstract class CStagePerfCommonScreen : CStage
     }
     protected void tSetStatusPanel()  // tステータスパネルの選択
     {
-        if( CDTXMania.confirmedSong != null )
+        if( CDTXMania.chosenSong != null )
         {
-            actStatusPanel.tSetDifficultyLabelFromScript( CDTXMania.confirmedSong.difficultyLabel[ CDTXMania.confirmedSongDifficulty ] );
+            actStatusPanel.tSetDifficultyLabelFromScript( CDTXMania.chosenSong.difficultyLabel[ CDTXMania.confirmedSongDifficulty ] );
         }
     }
     protected EJudgement tProcessChipHit(long nHitTime, CChip pChip)  // tチップのヒット処理

@@ -4,7 +4,6 @@ using System.Runtime.InteropServices;
 using System.Text;
 using DTXMania.Core.Framework;
 using FDK;
-using SlimDXKey = SlimDX.DirectInput.Key;
 
 namespace DTXMania.Core;
 
