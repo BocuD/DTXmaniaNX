@@ -1,6 +1,8 @@
 ﻿using System.Diagnostics;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
+using DTXMania.Core.Framework;
 using FDK;
 
 namespace DTXMania.Core;
@@ -4006,4 +4008,25 @@ Restart=K052
 	}
 	//-----------------
 	#endregion
+
+	public void SyncGraphicsSettings(IGameHost host)
+	{
+		Trace.TraceInformation("Applying graphics settings changes...");
+
+		//sync graphics options with game host
+		FullscreenMode targetMode = FullscreenMode.Windowed;
+		if (bFullScreenMode)
+		{
+			targetMode = bFullScreenExclusive 
+				? FullscreenMode.ExclusiveFullscreen 
+				: FullscreenMode.BorderlessFullscreen;
+		}
+
+		Trace.TraceInformation($"Requesting fullscreen mode: {targetMode}, vsync {(bVerticalSyncWait ? "enabled" : "disabled")}");
+		host.RequestFullscreenMode(targetMode);
+		host.RequestVsync(bVerticalSyncWait);
+		
+		host.SetWindowPosition(new Vector2(nInitialWindowXPosition, nInitialWindowYPosition));
+		host.SetWindowSize(new Vector2(nWindowWidth, nWindowHeight));
+	}
 }

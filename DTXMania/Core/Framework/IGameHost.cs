@@ -8,7 +8,8 @@ public interface IGameHost
     public void RequestVsync(bool enabled);
     public void RequestFullscreenMode(FullscreenMode fullscreenMode);
     public IRenderer Renderer { get; }
-
+    public void InitializeGraphics();
+    
     IntPtr GetWindowHandle();
     void SetWindowTitle(string newTitle);
     void SetWindowSize(Vector2 value);

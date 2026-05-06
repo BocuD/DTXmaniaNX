@@ -44,10 +44,12 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
     private bool _vsyncEnabled = true;
     public FullscreenMode fullscreenMode { get; private set; } = FullscreenMode.Windowed;
     private bool _renderInGameWindow;
+    
     private int _windowedX = 80;
     private int _windowedY = 80;
     private int _windowedWidth = 1280;
     private int _windowedHeight = 720;
+    
     private string _windowTitle = "";
     private bool _clearImGuiFocusOnNextFrame = true;
 
@@ -62,7 +64,7 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
     private int _windowHeight;
     private int _framebufferWidth;
     private int _framebufferHeight;
-
+    
     private bool? _pendingVsyncEnabled;
     private FullscreenMode? _pendingFullscreenMode;
 
@@ -136,6 +138,9 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
         {
             GLFW.SetWindowSize(_window, (int)value.X, (int)value.Y);
         }
+        
+        _windowedWidth = (int)value.X;
+        _windowedHeight = (int)value.Y;
     }
 
     public void SetWindowPosition(Vector2 value)
@@ -144,6 +149,9 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
         {
             GLFW.SetWindowPos(_window, (int)value.X, (int)value.Y);
         }
+        
+        _windowedX = (int)value.X;
+        _windowedY = (int)value.Y;
     }
 
     public void Run()
@@ -157,7 +165,7 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
 
         try
         {
-            CreateInitialWindowAndGraphics();
+            _game.Init();
             MainLoop();
         }
         finally
@@ -194,8 +202,18 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
         GLFW.Terminate();
     }
 
-    private void CreateInitialWindowAndGraphics()
+    public void InitializeGraphics()
     {
+        if (_pendingFullscreenMode != null)
+        {
+            fullscreenMode = _pendingFullscreenMode.Value;
+        }
+
+        if (_pendingVsyncEnabled != null)
+        {
+            _vsyncEnabled = _pendingVsyncEnabled.Value;
+        }
+        
         _window = CreateWindow(default);
         _nativeContext = new GlfwNativeContext();
         _gl = Silk.NET.OpenGL.GL.GetApi(_nativeContext);
@@ -315,10 +333,14 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
         GLFW.SetWindowSizeCallback(window, windowSizeCallback);
         
         //initial update pos and size
-        GLFW.GetWindowPos(window, ref _windowedX, ref _windowedY);
-        GLFW.GetWindowSize(window, ref _windowedWidth, ref _windowedHeight);
-        _game.windowPosition  = new Vector2(_windowedX, _windowedY);
-        _game.windowSize    = new Vector2(_windowedWidth, _windowedHeight);
+        GLFW.GetWindowSize(window, ref _windowWidth, ref _windowHeight);
+        _game.windowSize = new Vector2(_windowWidth, _windowHeight);
+
+        if (fullscreenMode == FullscreenMode.Windowed)
+        {
+            GLFW.GetWindowPos(window, ref _windowedX, ref _windowedY);
+            _game.windowPosition = new Vector2(_windowedX, _windowedY);
+        }
 
         // Focus callbacks may not fire when a window starts already focused.
         // Seed this state so input polling is enabled immediately on startup/recreate.
@@ -425,12 +447,22 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
         {
             GLFW.DestroyWindow(oldWindow);
         }
+        
+        //force update window size and position
+        GLFW.GetWindowSize(_window, ref _windowWidth, ref _windowHeight);
+        _game.windowSize = new Vector2(_windowWidth, _windowHeight);
+
+        if (fullscreenMode == FullscreenMode.Windowed)
+        {
+            GLFW.GetWindowPos(_window, ref _windowedX, ref _windowedY);
+            _game.windowPosition = new Vector2(_windowedX, _windowedY);
+        }
+
+        GLFW.FocusWindow(_window);
     }
 
     private void MainLoop()
-    {
-        _game.Init();
-        
+    {        
         while (GLFW.WindowShouldClose(_window) == 0 && !_game.isExiting)
         {
             GLFW.PollEvents();
@@ -530,10 +562,10 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
 
     private void ApplyPendingDisplayChanges()
     {
-        if (_pendingFullscreenMode is { } fullscreenMode && fullscreenMode != this.fullscreenMode)
+        if (_pendingFullscreenMode is { } newFullscreenMode && newFullscreenMode != fullscreenMode)
         {
-            FullscreenMode previousMode = this.fullscreenMode;
-            this.fullscreenMode = fullscreenMode;
+            FullscreenMode previousMode = fullscreenMode;
+            fullscreenMode = newFullscreenMode;
             RecreateWindow(previousMode);
             _pendingFullscreenMode = null;
             _pendingVsyncEnabled = null;
@@ -543,7 +575,7 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
         if (_pendingVsyncEnabled is { } vsyncEnabled && vsyncEnabled != _vsyncEnabled)
         {
             _vsyncEnabled = vsyncEnabled;
-            RecreateWindow(this.fullscreenMode);
+            RecreateWindow(fullscreenMode);
         }
 
         _pendingVsyncEnabled = null;
