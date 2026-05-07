@@ -21,17 +21,28 @@ public class UIPlayerNameplate : UIGroup
 
     private int instrument;
 
-    public UIPlayerNameplate(int instrument = 0) : base("Nameplate")
+    public UIPlayerNameplate(int instrument = 0, bool displaySkill = false) : base("Nameplate")
     {
         this.instrument = instrument;
         
         titleText = AddChild(new UIText());
         titleText.name = "TitleText";
-        titleText.position = new Vector3(6, 8, 0);
+        titleText.position = new Vector3(11, 10, 0);
 
         playerNameText = AddChild(new UIText());
         playerNameText.name = "PlayerNameText";
-        playerNameText.position = new Vector3(0, 26, 0);
+        playerNameText.position = new Vector3(13, 28, 0);
+
+        if (displaySkill)
+        {
+            var bg = AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path("Graphics/nameplate_bg.png"))));
+            bg.renderOrder = -1;
+            size = bg.size;
+
+            var skillText = AddChild(new UIText(SongDb.SongDb.totalSkill.ToString("0.00"), 24));
+            skillText.name = "SkillText";
+            skillText.position = new Vector3(159, 53, 0);
+        }
 
         UpdateNameplate();
     }

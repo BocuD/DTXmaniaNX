@@ -120,6 +120,11 @@ internal class CStageResult : CStage
 		background = ui.AddChild(new UIImage(txBackground));
 		background.renderOrder = -100;
 		background.isVisible = true;
+
+		var titleArtistBg = ui.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path("Graphics/Result/songname_bg.png"))));
+		titleArtistBg.anchor = new Vector2(0.5f, 0);
+		titleArtistBg.position = new Vector3(640, 529, 0);
+		titleArtistBg.renderOrder = 1;
 		
 		string strSongTitle;
 		if (!CDTXMania.bCompactMode && CDTXMania.ConfigIni.b曲名表示をdefのものにする)
@@ -131,12 +136,14 @@ internal class CStageResult : CStage
 		
 		if (!string.IsNullOrWhiteSpace(strSongTitle))
 		{
-			UIText songNameText = ui.AddChild(new UIText(strSongTitle, 30));
+			UIText songNameText = ui.AddChild(new UIText(strSongTitle, 29));
 			songNameText.fillColor = Color4.Black;
 			songNameText.outlineColor = Color4.White;
 			songNameText.name = "SongName";
 			songNameText.font = UIFonts.FallbackFont;
-			songNameText.position = new Vector3(490, 600, 0);
+			songNameText.position = new Vector3(464, 547, 0);
+			songNameText.outlineWidth = 2;
+			songNameText.renderOrder = 2;
 		}
 
 		if (!string.IsNullOrWhiteSpace(strArtistName))
@@ -146,30 +153,38 @@ internal class CStageResult : CStage
 			artistNameText.outlineColor = Color4.White;
 			artistNameText.name = "ArtistName";
 			artistNameText.font = UIFonts.FallbackFont;
-			artistNameText.position = new Vector3(490, 640, 0);
+			artistNameText.position = new Vector3(466, 589, 0);
+			artistNameText.outlineWidth = 2;
+			artistNameText.renderOrder = 2;
 		}
 		
 		string path = CDTXMania.DTX.strFolderName + CDTXMania.DTX.PREIMAGE;
 		var txJacket = BaseTexture.LoadFromPath(!File.Exists(path) ? CSkin.Path(@"Graphics\5_preimage default.png") : path);
 		var jacket = ui.AddChild(new UIImage(txJacket));
-		jacket.size = new Vector2(300, 300);
-		jacket.position = new Vector3(640, 290, 0);
+		jacket.size = new Vector2(380, 380);
+		jacket.position = new Vector3(640, 130, 0);
 		jacket.name = "AlbumArt";
 		jacket.anchor.X = 0.5f;
 
 		//todo: position these
 		if (CDTXMania.GetCurrentInstrument() == 0)
 		{
-			var drums = ui.AddChild(new UIPlayerNameplate(0));
-			drums.position = new Vector3(191, 272, 0);
+			var drums = ui.AddChild(new UIPlayerNameplate(0, true));
+			drums.position = new Vector3(989, 53, 0);
 		}
 		else
 		{
-			var guitar1 = ui.AddChild(new UIPlayerNameplate(1));
+			var guitar1 = ui.AddChild(new UIPlayerNameplate(1, true));
 			guitar1.position = new Vector3(148, 272, 0);
-			var guitar2 = ui.AddChild(new UIPlayerNameplate(2));
+			var guitar2 = ui.AddChild(new UIPlayerNameplate(2, true));
 			guitar2.position = new Vector3(853, 272, 0);
 		}
+
+		var infoPanel = ui.AddChild(new ResultInfoPanel());
+		infoPanel.position = new Vector3(830, 120, 0);
+		
+		var paramPanel = ui.AddChild(new ResultParameterPanel());
+		paramPanel.position = new Vector3(879, 479, 0);
 	}
 
 	public override void OnActivate()
@@ -573,7 +588,9 @@ internal class CStageResult : CStage
 		{
 			ctPlayNewRecord = new CCounter(0, 150, 10, CDTXMania.Timer);
 		}
-						
+		
+		CDTXMania.SongDb.RecalculateSkill();
+		
 		ePhaseID = EPhase.Common_DefaultState;
 	}
 
@@ -600,14 +617,14 @@ internal class CStageResult : CStage
 		// {
 		// 	bAnimationComplete = false;
 		// }
-		if ( actParameterPanel.OnUpdateAndDraw() == 0 )
-		{
-			bAnimationComplete = false;
-		}
-		if (actRank.OnUpdateAndDraw() == 0)
-		{
-			bAnimationComplete = false;
-		}
+		// if ( actParameterPanel.OnUpdateAndDraw() == 0 )
+		// {
+		// 	bAnimationComplete = false;
+		// }
+		// if (actRank.OnUpdateAndDraw() == 0)
+		// {
+		// 	bAnimationComplete = false;
+		// }
 		#region [ #24609 2011.3.14 yyagi ランク更新or演奏型スキル更新時、リザルト画像をpngで保存する ]
 		if ( bAnimationComplete && bIsCheckedWhetherResultScreenShouldSaveOrNot == false	// #24609 2011.3.14 yyagi; to save result screen in case BestRank or HiSkill.
 		                        && CDTXMania.ConfigIni.bScoreIniを出力する
@@ -691,8 +708,8 @@ internal class CStageResult : CStage
 		}
 		if (CDTXMania.Input.ActionDecide())
 		{
-			actParameterPanel.tアニメを完了させる();
-			actRank.tアニメを完了させる();
+			//actParameterPanel.tアニメを完了させる();
+			//actRank.tアニメを完了させる();
 		}
 		#region [ #24609 2011.4.7 yyagi リザルト画面で[F12]を押下すると、リザルト画像をpngで保存する機能は、CDTXManiaに移管。 ]
 //					if ( CDTXMania.InputManager.Keyboard.bKeyPressed( (int) SlimDXKey.F12 ) &&
