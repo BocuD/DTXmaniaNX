@@ -359,8 +359,19 @@ public class CChartData
         }
     }
 
-    public bool HasChartForCurrentMode()
+    public bool HasChartForCurrentMode(bool strict = false)
     {
+        if (strict)
+        {
+            return CDTXMania.GetCurrentInstrument() switch
+            {
+                0 => SongInformation.bScoreExists.Drums,
+                1 => SongInformation.bScoreExists.Guitar,
+                2 => SongInformation.bScoreExists.Bass,
+                _ => false
+            };
+        }
+        
         bool bChartExistForMode = CDTXMania.ConfigIni.bDrumsEnabled && SongInformation.bScoreExists.Drums;
         if (!bChartExistForMode)
         {

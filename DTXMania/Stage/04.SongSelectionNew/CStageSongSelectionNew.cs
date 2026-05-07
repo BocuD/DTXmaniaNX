@@ -8,6 +8,7 @@ using DTXMania.SongDb;
 using DTXMania.SongDb.Sorting;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.DynamicElements;
+using DTXMania.UI.Text;
 
 namespace DTXMania;
 
@@ -93,6 +94,7 @@ public class CStageSongSelectionNew : CStage
         commentText.position = new Vector3(0, 35, 0);
         commentText.textSource = TextSource.Dynamic;
         commentText.dynamicSource = "SongComment";
+        commentText.name = "CommentText";
         
         songSearchMenu = ui.AddChild(new SongSearchMenu());
         songSearchMenu.renderOrder = 15;
@@ -114,13 +116,24 @@ public class CStageSongSelectionNew : CStage
         dynamicStringSources["SongName"] = new DynamicStringSource(() => selectedChart?.SongInformation.Title ?? "");
         dynamicStringSources["SongArtist"] = new DynamicStringSource(() => selectedChart?.SongInformation.ArtistName ?? "");
         dynamicStringSources["SongGenre"] = new DynamicStringSource(() => selectedChart?.SongInformation.Genre ?? "");
-        dynamicStringSources["SongBPM"] = new DynamicStringSource(() => selectedChart?.SongInformation.Bpm.ToString(CultureInfo.InvariantCulture) ?? "");
+        dynamicStringSources["SongBPM"] = new DynamicStringSource(() => selectedChart?.SongInformation.Bpm.ToString("0.##", CultureInfo.InvariantCulture) ?? "");
         dynamicStringSources["SongDuration"] = new DynamicStringSource(() =>
         {
             int? ms = selectedChart?.SongInformation.DurationMs;
             return ms != null ? TimeSpan.FromMilliseconds(ms.Value).ToString(@"m\:ss") : "";
         });
         dynamicStringSources["SongComment"] = new DynamicStringSource(() => selectedChart?.SongInformation.Comment ?? "");
+        dynamicStringSources["SongSkill"] = new DynamicStringSource(() =>
+        {
+            double? points = selectedNode?.GetTopSkillPoints().skillPoints;
+
+            if (points != null && points > 0)
+            {
+                return points.Value.ToString("0.00");
+            }
+
+            return "";
+        });
     }
 
     public override void InitializeDefaultUI()
@@ -158,7 +171,7 @@ public class CStageSongSelectionNew : CStage
         back2.name = "Back2";
 
         densityGraph1 = ui.AddChild(new DensityGraph((EInstrumentPart)CDTXMania.GetCurrentInstrument()));
-        densityGraph1.position = new Vector3(CDTXMania.GetCurrentInstrument() == 0 ? 212 : 64, 355, 0);
+        densityGraph1.position = new Vector3(CDTXMania.GetCurrentInstrument() == 0 ? 212 : 64, 720, 0);
         densityGraph1.renderOrder = 4;
         densityGraph1.name = "DensityGraph";
         
@@ -166,6 +179,36 @@ public class CStageSongSelectionNew : CStage
         topBar.renderOrder = 12;
         topBar.name = "TopBar";
         topBar.size.X = 1280;
+        
+        var panelSkill = ui.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\SongSelect\panel_skill.png"))));
+        panelSkill.renderOrder = 9;
+        panelSkill.name = "PanelSkill";
+        panelSkill.position = new Vector3(96, 225, 0);
+        
+        var skillText = ui.AddChild(new UIText("", 48));
+        skillText.renderOrder = 11;
+        skillText.textSource = TextSource.Dynamic;
+        skillText.dynamicSource = "SongSkill";
+        skillText.outlineWidth = 0;
+        skillText.style = UiTextStyle.Italic;
+        skillText.anchor = new Vector2(1, 1);
+        skillText.position = new Vector3(315, 285, 0);
+        skillText.name = "SkillText";
+        
+        var panelBpm = ui.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\SongSelect\panel_bpm.png"))));
+        panelBpm.renderOrder = 9;
+        panelBpm.name = "PanelBpm";
+        panelBpm.position = new Vector3(96, 300, 0);
+        
+        var bpmText = ui.AddChild(new UIText("", 28));
+        bpmText.renderOrder = 11;
+        bpmText.textSource = TextSource.Dynamic;
+        bpmText.dynamicSource = "SongBPM";
+        bpmText.outlineWidth = 0;
+        bpmText.style = UiTextStyle.Italic;
+        bpmText.anchor = new Vector2(1, 1);
+        bpmText.position = new Vector3(315, 333, 0);
+        bpmText.name = "BPMText";
     }
 
     public override void FirstUpdate()
@@ -346,6 +389,8 @@ public class CStageSongSelectionNew : CStage
         
         actPresound.tSelectionChanged(chart);
         statusPanel.SelectionChanged(node, chart);
+        densityGraph1.SelectionChanged(node, chart);
+        //densityGraph2.SelectionChanged(node, chart);
     }
 
     public int targetDifficultyLevel { get; private set; } = 0;
@@ -374,6 +419,7 @@ public class CStageSongSelectionNew : CStage
 
                 if (chart.SongInformation.chipCountByInstrument[currentInstrument] > 0)
                 {
+                    ChangeSelection(selectedNode, chart);
                     nextAvailableLevel = newLevel;
                     break;
                 }
