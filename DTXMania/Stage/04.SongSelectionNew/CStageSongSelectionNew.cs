@@ -6,6 +6,7 @@ using DTXMania.Core;
 using DTXMania.Core.Video;
 using DTXMania.SongDb;
 using DTXMania.SongDb.Sorting;
+using DTXMania.UI;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.DynamicElements;
 using DTXMania.UI.Text;
@@ -191,8 +192,10 @@ public class CStageSongSelectionNew : CStage
         skillText.dynamicSource = "SongSkill";
         skillText.outlineWidth = 0;
         skillText.style = UiTextStyle.Italic;
+        skillText.fontSource = FontSource.System;
+        skillText.font = "Futura PT Medium.otf";
         skillText.anchor = new Vector2(1, 1);
-        skillText.position = new Vector3(315, 285, 0);
+        skillText.position = new Vector3(315, 291, 0);
         skillText.name = "SkillText";
         
         var panelBpm = ui.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\SongSelect\panel_bpm.png"))));
@@ -206,8 +209,10 @@ public class CStageSongSelectionNew : CStage
         bpmText.dynamicSource = "SongBPM";
         bpmText.outlineWidth = 0;
         bpmText.style = UiTextStyle.Italic;
+        bpmText.fontSource = FontSource.System;
+        bpmText.font = "Futura PT Medium.otf";
         bpmText.anchor = new Vector2(1, 1);
-        bpmText.position = new Vector3(315, 333, 0);
+        bpmText.position = new Vector3(315, 338, 0);
         bpmText.name = "BPMText";
     }
 
