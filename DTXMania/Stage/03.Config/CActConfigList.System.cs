@@ -54,7 +54,7 @@ internal partial class CActConfigList
             action = tSetupItemList_Menu
         };
         listItems.Add(iSystemGoToMenu);
-
+        
         CItemBase iSystemReloadDTX = new("Reload Songs", CItemBase.EPanelType.Normal,
             "曲データの一覧情報を\n"+
             "取得し直します。",
@@ -64,6 +64,7 @@ internal partial class CActConfigList
             {
                 if (CDTXMania.SongDb.status == SongDbScanStatus.Idle)
                 {
+                    CDTXMania.SongDb.ClearCache();
                     CDTXMania.SongDb.StartScan(() =>
                     {
                         CDTXMania.StageManager.stageSongSelectionNew.Reload();

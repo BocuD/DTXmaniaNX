@@ -14,12 +14,12 @@ public enum SongDbScanStatus
 	Processing
 }
 
-public class SongDb
+public class SongDb : IDisposable
 {
 	//public properties
 	public SongDbScanStatus status { get; private set; } = SongDbScanStatus.Idle;
 	
-	private KawazuConverter jpConverter = new();
+	private SongCacheSqlite songCache;
 
 	public Dictionary<SongDbScanStatus, TimeSpan> statusDuration { get; private set; } = new()
 	{
@@ -42,10 +42,29 @@ public class SongDb
 	public int processDoneCount { get; private set; } = 0;
 	public int processTotalCount { get; private set; } = 0;
 	
+	// Cache statistics
+	public int cacheHitCount { get; private set; } = 0;
+	public int cacheMissCount { get; private set; } = 0;
+	
 	private int tempCharts = 0;
 	private int tempSongs = 0;
 	private DateTime start;
 	private Task scanTask;
+
+	public SongDb()
+	{
+		try
+		{
+			songCache = new SongCacheSqlite();
+			songCache.Initialize();
+			Trace.TraceInformation("Song database cache initialized");
+		}
+		catch (Exception ex)
+		{
+			Trace.TraceWarning($"Failed to initialize song cache, continuing without cache: {ex.Message}");
+			songCache = null;
+		}
+	}
 
 	public void StartScan(Action? onComplete = null)
 	{
@@ -114,6 +133,13 @@ public class SongDb
 			Trace.TraceInformation($"Processed {tempSongs} songs and {tempCharts} charts");
 			Trace.TraceInformation($"Processed full song list in {statusDuration[SongDbScanStatus.Processing]} s");
 			
+			// Log cache statistics
+			if (songCache != null)
+			{
+				var cachedCharts = songCache.GetCacheSize();
+				Trace.TraceInformation($"Cache Statistics - Hits: {cacheHitCount}, Misses: {cacheMissCount}, Total Cached Charts: {cachedCharts}");
+			}
+			
 			var tempFlattenedSongList = await FlattenSongList(tempRoot.childNodes);
 			var tempSkillSongs = CalculateSkill(tempFlattenedSongList, out double totalSkill);
 			
@@ -140,6 +166,17 @@ public class SongDb
 	}
 
 	public static double totalSkill = 0;
+
+	public void ClearCache()
+	{
+		if (songCache != null)
+		{
+			songCache.ClearAllCache();
+			cacheHitCount = 0;
+			cacheMissCount = 0;
+			Trace.TraceInformation("Song database cache cleared by user request");
+		}
+	}
 
 	public void RecalculateSkill()
 	{
@@ -615,9 +652,27 @@ public class SongDb
 
 				CChartData chartData = node.charts[i];
 				string path = chartData.FileInformation.AbsoluteFilePath;
+				string scoreIniPath = path + ".score.ini";
 
 				if (File.Exists(path))
 				{
+					// Try to get from cache first
+					if (songCache != null && songCache.TryGetCachedChart(path, scoreIniPath, out var cachedData))
+					{
+						node.charts[i] = cachedData;
+						
+						if (string.IsNullOrWhiteSpace(node.title))
+						{
+							node.title = cachedData.SongInformation.Title;
+						}
+
+						cacheHitCount++;
+						processDoneCount++;
+						continue;
+					}
+
+					cacheMissCount++;
+
 					try
 					{
 						processSongDataPath = path;
@@ -635,9 +690,12 @@ public class SongDb
 						if (Utilities.HasJapanese(chartData.SongInformation.Title))
 						{
 							chartData.SongInformation.TitleHasJapanese = true;
-							chartData.SongInformation.TitleKana = await jpConverter.Convert(chartData.SongInformation.Title);
-							chartData.SongInformation.TitleRoman =
-								await jpConverter.Convert(chartData.SongInformation.Title, To.Romaji);
+							
+							// Use cache for Japanese conversions
+							var converted = TextConversionCache.GetOrCacheTextConversion(chartData.SongInformation.Title);
+							
+							chartData.SongInformation.TitleKana = converted.kana;
+							chartData.SongInformation.TitleRoman = converted.romaji;
 						}
 						else
 						{
@@ -648,10 +706,11 @@ public class SongDb
 						if (Utilities.HasJapanese(chartData.SongInformation.ArtistName))
 						{
 							chartData.SongInformation.ArtistNameHasJapanese = true;
-							chartData.SongInformation.ArtistNameKana =
-								await jpConverter.Convert(chartData.SongInformation.ArtistName);
-							chartData.SongInformation.ArtistNameRoman =
-								await jpConverter.Convert(chartData.SongInformation.ArtistName, To.Romaji);
+
+							var converted = TextConversionCache.GetOrCacheTextConversion(chartData.SongInformation.ArtistName);
+							
+							chartData.SongInformation.ArtistNameKana = converted.kana;
+							chartData.SongInformation.ArtistNameRoman = converted.romaji;
 						}
 						else
 						{
@@ -662,10 +721,11 @@ public class SongDb
 						if (Utilities.HasJapanese(chartData.SongInformation.Comment))
 						{
 							chartData.SongInformation.CommentHasJapanese = true;
-							chartData.SongInformation.CommentKana =
-								await jpConverter.Convert(chartData.SongInformation.Comment);
-							chartData.SongInformation.CommentRoman =
-								await jpConverter.Convert(chartData.SongInformation.Comment, To.Romaji);
+							
+							var converted = TextConversionCache.GetOrCacheTextConversion(chartData.SongInformation.Comment);
+							
+							chartData.SongInformation.CommentKana = converted.kana;
+							chartData.SongInformation.CommentRoman = converted.romaji;
 						}
 						else
 						{
@@ -754,6 +814,12 @@ public class SongDb
 						}
 
 						cdtx.OnDeactivate();
+
+						// Save to cache after successful processing
+						if (songCache != null)
+						{
+							songCache.SaveChartData(path, scoreIniPath, chartData);
+						}
 					}
 					catch (Exception exception)
 					{
@@ -761,6 +827,7 @@ public class SongDb
 						Trace.TraceError("" + exception.Message);
 						node.chartCount--;
 						tempCharts--;
+						processDoneCount++;
 						continue;
 					}
 				}
@@ -862,5 +929,10 @@ public class SongDb
 			Trace.TraceError("Failed to read score.ini file: " + path);
 			Trace.TraceError(e.Message);
 		}
+	}
+
+	public void Dispose()
+	{
+		songCache?.Dispose();
 	}
 }

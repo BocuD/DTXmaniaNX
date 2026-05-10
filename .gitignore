@@ -212,3 +212,5 @@ Runtime/DTXFiles/*
 /.vs
 Runtime/imgui.ini
 /Runtime/Skins
+*.db
+*.db-*
