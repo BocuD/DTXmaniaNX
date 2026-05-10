@@ -12,12 +12,15 @@ public class SongDBStatus : UIText
     {
         fontSize = 18;
         renderOrder = 100;
+        text = "";
     }
 
     private SongDbScanStatus lastStatus;
+    private DateTime lastFinishTime;
+
     public override void Draw(Matrix4x4 parentMatrix)
     {
-        bool statusChanged = lastStatus != songDb.status;
+        bool statusChanged = lastStatus != songDb.status || lastFinishTime != songDb.lastFinishTime;
         switch (songDb.status)
         {
             case SongDbScanStatus.Scanning:
@@ -35,11 +38,30 @@ public class SongDBStatus : UIText
             
             case SongDbScanStatus.Idle:
                 if (statusChanged)
+                {
+                    TimeSpan total = songDb.statusDuration[SongDbScanStatus.Scanning] +
+                                     songDb.statusDuration[SongDbScanStatus.Unpacking] +
+                                     songDb.statusDuration[SongDbScanStatus.Processing];
+                    
+                    if (total.TotalSeconds > 60)
+                    {
+                        SetText($"Song database scan completed in {(total.TotalSeconds / 60):F3} minutes");
+                    }
+                    else
+                    {
+                        SetText($"Song database scan completed in {(total.TotalMilliseconds / 1000):F3} seconds");
+                    }
+                }
+
+                if (DateTime.Now - songDb.lastFinishTime > TimeSpan.FromSeconds(5))
+                {
                     SetText("");
+                }
                 break;
         }
 
         lastStatus = songDb.status;
+        lastFinishTime = songDb.lastFinishTime;
         
         base.Draw(parentMatrix);
     }

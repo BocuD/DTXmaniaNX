@@ -21,10 +21,12 @@ public class SongDb : IDisposable
 	
 	private SongCacheSqlite songCache;
 
+	public DateTime lastFinishTime;
 	public Dictionary<SongDbScanStatus, TimeSpan> statusDuration { get; private set; } = new()
 	{
 		{ SongDbScanStatus.Idle, TimeSpan.Zero },
 		{ SongDbScanStatus.Scanning, TimeSpan.Zero },
+		{ SongDbScanStatus.Unpacking, TimeSpan.Zero },
 		{ SongDbScanStatus.Processing, TimeSpan.Zero }
 	};
 
@@ -82,30 +84,12 @@ public class SongDb : IDisposable
 		if (maxThreadCount < 2)
 			maxThreadCount = 2;
 		
-		try
-		{
+		// try
+		// {
 			SongNode tempRoot = await RunFullSongScan();
 			
-			int maxLoopCount = 5; //max number of times to loop through unpacking and rescanning
-			while (foundZipFiles.Count > 0 && maxLoopCount-- > 0)
-			{
-				status = SongDbScanStatus.Unpacking;
-				start = DateTime.Now;
-				processTotalCount = foundZipFiles.Count;
-				
-				await Parallel.ForEachAsync(foundZipFiles, new ParallelOptions { MaxDegreeOfParallelism = maxThreadCount },
-					async (info, cancellationToken) => await UnpackZipFile(info));
-				
-				//reset found zip files after unpacking
-				foundZipFiles.Clear();
-				
-				statusDuration[SongDbScanStatus.Unpacking] = DateTime.Now - start;
-				Trace.TraceInformation($"Unpacked {foundZipFiles.Count} zip files in {statusDuration[SongDbScanStatus.Unpacking]} s");
-				
-				Trace.TraceInformation($"Rescanning because ZIP files were unpacked");
-				tempRoot = await RunFullSongScan();
-			}
-			
+			tempRoot = await UnpackZipFiles(maxThreadCount, 5, tempRoot);
+
 			//flatten songs so we can process them all sequentially. Include boxes since we want to generate back boxes.
 			List<SongNode> flattened = await FlattenSongList(tempRoot.childNodes, true);
 			
@@ -151,18 +135,19 @@ public class SongDb : IDisposable
 			totalCharts = tempCharts;
 
 			hasEverScanned = true;
+			lastFinishTime = DateTime.Now;
 			
 			onComplete?.Invoke();
-		}
-		catch (Exception ex)
-		{
-			Trace.TraceError("An error occurred while scanning songs: " + ex.Message);
+		// }
+		// catch (Exception ex)
+		// {
+		// 	Trace.TraceError("An error occurred while scanning songs: " + ex.Message);
+		// 	status = SongDbScanStatus.Idle;
+		// }
+		// finally
+		// {
 			status = SongDbScanStatus.Idle;
-		}
-		finally
-		{
-			status = SongDbScanStatus.Idle;
-		}
+		// }
 	}
 
 	public static double totalSkill = 0;
@@ -380,8 +365,38 @@ public class SongDb : IDisposable
 			}
 		}
 	}
-
+	
 	private readonly List<FileInfo> foundZipFiles = [];
+	
+	private async Task<SongNode> UnpackZipFiles(int maxThreadCount, int maxLoopCount, SongNode tempRoot)
+	{
+		while (foundZipFiles.Count > 0 && maxLoopCount-- > 0)
+		{
+			status = SongDbScanStatus.Unpacking;
+			start = DateTime.Now;
+			processTotalCount = foundZipFiles.Count;
+			
+			Trace.TraceInformation($"Unpacking {foundZipFiles.Count} zip files...");
+				
+			await Parallel.ForEachAsync(foundZipFiles, new ParallelOptions { MaxDegreeOfParallelism = maxThreadCount },
+				async (info, cancellationToken) => await UnpackZipFile(info));
+				
+			//reset found zip files after unpacking
+			foundZipFiles.Clear();
+				
+			statusDuration[SongDbScanStatus.Unpacking] = DateTime.Now - start;
+			Trace.TraceInformation($"Unpacked {foundZipFiles.Count} zip files in {statusDuration[SongDbScanStatus.Unpacking]} s");
+				
+			Trace.TraceInformation($"Rescanning because ZIP files were unpacked");
+			tempRoot = await RunFullSongScan();
+		}
+		
+		//reset count after unzipping
+		processDoneCount = 0;
+		
+		return tempRoot;
+	}
+	
 	private async Task UnpackZipFile(FileInfo fileinfo)
 	{
 		Trace.TraceInformation("Found zip file in song database, unpacking: " + fileinfo.FullName);
@@ -657,7 +672,7 @@ public class SongDb : IDisposable
 				if (File.Exists(path))
 				{
 					// Try to get from cache first
-					if (songCache != null && songCache.TryGetCachedChart(path, scoreIniPath, out var cachedData))
+					if (songCache != null && songCache.TryGetCachedChart(path, scoreIniPath, out CChartData cachedData))
 					{
 						node.charts[i] = cachedData;
 						
@@ -665,6 +680,8 @@ public class SongDb : IDisposable
 						{
 							node.title = cachedData.SongInformation.Title;
 						}
+						
+						node.charts[i].LoadScoreFile();
 
 						cacheHitCount++;
 						processDoneCount++;
@@ -780,7 +797,7 @@ public class SongDb : IDisposable
 							chartData.SongInformation.chipCountByLane[ELane.CY] =
 								cdtx.nVisibleChipsCount.chipCountInLane(ELane.CY);
 						}
-
+						
 						chartData.SongInformation.chipCountByInstrument.Guitar = cdtx.nVisibleChipsCount.Guitar;
 						{
 							chartData.SongInformation.chipCountByLane[ELane.GtR] =
@@ -815,7 +832,7 @@ public class SongDb : IDisposable
 
 						cdtx.OnDeactivate();
 
-						// Save to cache after successful processing
+						//save to cache after successful processing
 						if (songCache != null)
 						{
 							songCache.SaveChartData(path, scoreIniPath, chartData);
@@ -837,98 +854,11 @@ public class SongDb : IDisposable
 					node.title = node.path;
 				}
 
-				LoadScoreFile(chartData.FileInformation.AbsoluteFilePath + ".score.ini", ref chartData);
+				chartData.LoadScoreFile();
 			}
 		}
 
 		processDoneCount++;
-	}
-
-	private void LoadScoreFile(string path, ref CChartData chartData)
-	{
-		if (!File.Exists(path))
-			return;
-
-		try
-		{
-			CScoreIni ini = new(path);
-
-			for (int nInstrumentNumber = 0; nInstrumentNumber < 3; nInstrumentNumber++)
-			{
-				int n = (nInstrumentNumber * 2) + 1; // n = 0～5
-
-				#region socre.譜面情報.最大ランク[ n楽器番号 ] = ...
-
-				//-----------------
-				if (ini.stSection[n].bMIDIUsed ||
-				    ini.stSection[n].bKeyboardUsed ||
-				    ini.stSection[n].bJoypadUsed ||
-				    ini.stSection[n].bMouseUsed)
-				{
-					// (A) 全オートじゃないようなので、演奏結果情報を有効としてランクを算出する。
-					if (CDTXMania.ConfigIni.nSkillMode == 0)
-					{
-						chartData.SongInformation.BestRank[nInstrumentNumber] =
-							CScoreIni.tCalculateRankOld(
-								ini.stSection[n].nTotalChipsCount,
-								ini.stSection[n].nPerfectCount,
-								ini.stSection[n].nGreatCount,
-								ini.stSection[n].nGoodCount,
-								ini.stSection[n].nPoorCount,
-								ini.stSection[n].nMissCount
-							);
-					}
-					else if (CDTXMania.ConfigIni.nSkillMode == 1)
-					{
-						chartData.SongInformation.BestRank[nInstrumentNumber] =
-							CScoreIni.tCalculateRank(
-								ini.stSection[n].nTotalChipsCount,
-								ini.stSection[n].nPerfectCount,
-								ini.stSection[n].nGreatCount,
-								ini.stSection[n].nGoodCount,
-								ini.stSection[n].nPoorCount,
-								ini.stSection[n].nMissCount,
-								ini.stSection[n].nMaxCombo
-							);
-					}
-				}
-				else
-				{
-					// (B) 全オートらしいので、ランクは無効とする。
-					chartData.SongInformation.BestRank[nInstrumentNumber] = (int)CScoreIni.ERANK.UNKNOWN;
-				}
-
-				//-----------------
-
-				#endregion
-
-				chartData.SongInformation.HighCompletionRate[nInstrumentNumber] = ini.stSection[n].dbPerformanceSkill;
-				chartData.SongInformation.HighSongSkill[nInstrumentNumber] = ini.stSection[n].dbGameSkill;
-				chartData.SongInformation.FullCombo[nInstrumentNumber] = ini.stSection[n].bIsFullCombo | ini.stSection[nInstrumentNumber * 2].bIsFullCombo;
-				
-				//New for Progress
-				chartData.SongInformation.progress[nInstrumentNumber] = ini.stSection[n].strProgress;
-				if (chartData.SongInformation.progress[nInstrumentNumber] == "")
-				{
-					//TODO: Read from another file if progress string is empty
-					//Set a hard-coded 64 char string for now
-					chartData.SongInformation.progress[nInstrumentNumber] =
-						"0000000000000000000000000000000000000000000000000000000000000000";
-				}
-			}
-
-			chartData.SongInformation.NbPerformances.Drums = ini.stFile.PlayCountDrums;
-			chartData.SongInformation.NbPerformances.Guitar = ini.stFile.PlayCountGuitar;
-			chartData.SongInformation.NbPerformances.Bass = ini.stFile.PlayCountBass;
-			
-			for (int i = 0; i < 5; i++)
-				chartData.SongInformation.PerformanceHistory[i] = ini.stFile.History[i];
-		}
-		catch (Exception e)
-		{
-			Trace.TraceError("Failed to read score.ini file: " + path);
-			Trace.TraceError(e.Message);
-		}
 	}
 
 	public void Dispose()

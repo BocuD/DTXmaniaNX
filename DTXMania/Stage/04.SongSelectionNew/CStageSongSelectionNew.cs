@@ -247,8 +247,8 @@ public class CStageSongSelectionNew : CStage
         
         foreach (SongDbSort sorter in sorters)
         {
-            try
-            {
+            // try
+            // {
                 if (!sortCache.TryGetValue(sorter, out SongNode? rootNode) || sorter.requireResort)
                 {
                     DateTime now = DateTime.Now;
@@ -270,11 +270,11 @@ public class CStageSongSelectionNew : CStage
                 container.isVisible = false;
 
                 Trace.TraceInformation($"Containers prepared for {sorter.Name}");
-            }
-            catch (Exception e)
-            {
-                Trace.TraceError($"Failed to prepare container for {sorter.Name}: {e.Message}");
-            }
+            // }
+            // catch (Exception e)
+            // {
+            //     Trace.TraceError($"Failed to prepare container for {sorter.Name}: {e.Message}");
+            // }
         }
         
         //enable the current sort
@@ -561,6 +561,9 @@ public class CStageSongSelectionNew : CStage
     public void Reload()
     {
         sortCache.Clear();
+        
+        //song selection stage might not have been loaded yet
+        if (ui == null) return;
         PrepareSelectionContainers();
         ApplySort(currentSort);
     }
