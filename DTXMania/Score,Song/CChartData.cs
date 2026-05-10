@@ -97,11 +97,11 @@ public class CChartData
         [StructLayout(LayoutKind.Sequential)]
         public struct STHISTORY
         {
-            public string 行1;
-            public string 行2;
-            public string 行3;
-            public string 行4;
-            public string 行5;
+            public string row1;
+            public string row2;
+            public string row3;
+            public string row4;
+            public string row5;
 
             public string this[int index]
             {
@@ -110,19 +110,19 @@ public class CChartData
                     switch (index)
                     {
                         case 0:
-                            return 行1;
+                            return row1;
 
                         case 1:
-                            return 行2;
+                            return row2;
 
                         case 2:
-                            return 行3;
+                            return row3;
 
                         case 3:
-                            return 行4;
+                            return row4;
 
                         case 4:
-                            return 行5;
+                            return row5;
                     }
 
                     throw new IndexOutOfRangeException();
@@ -132,23 +132,23 @@ public class CChartData
                     switch (index)
                     {
                         case 0:
-                            行1 = value;
+                            row1 = value;
                             return;
 
                         case 1:
-                            行2 = value;
+                            row2 = value;
                             return;
 
                         case 2:
-                            行3 = value;
+                            row3 = value;
                             return;
 
                         case 3:
-                            行4 = value;
+                            row4 = value;
                             return;
 
                         case 4:
-                            行5 = value;
+                            row5 = value;
                             return;
                     }
 
@@ -319,11 +319,11 @@ public class CChartData
             NbPerformances = new STDGBVALUE<int>(),
             PerformanceHistory = new STMusicInformation.STHISTORY
             {
-                行1 = "",
-                行2 = "",
-                行3 = "",
-                行4 = "",
-                行5 = ""
+                row1 = "",
+                row2 = "",
+                row3 = "",
+                row4 = "",
+                row5 = ""
             },
             bHiddenLevel = false,
             HighCompletionRate = new STMusicInformation.STSKILL(),
