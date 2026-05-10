@@ -17,7 +17,7 @@ public class ResultParameterPanel : UIGroup
         AddRow("Good", "0000");
         AddRow("Ok", "0000");
         AddRow("Miss", "0000");
-        AddRow("MaxCombo", "0000");
+        AddRow("Max Combo", "0000");
         AddRow("Score", "0000");
     }
     

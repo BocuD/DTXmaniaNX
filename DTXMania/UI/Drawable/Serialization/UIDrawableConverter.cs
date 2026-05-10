@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Collections;
 using DTXMania.UI.Inspector;
+using DTXMania.UI.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -245,7 +246,8 @@ public class UIDrawableConverter : JsonConverter
         {
             "type",
             nameof(UIDrawable.id),
-            nameof(UIGroup.children)
+            nameof(UIGroup.children),
+            nameof(UiTextParameters)
         };
 
         foreach (FieldInfo field in drawableType.GetFields(BindingFlags.Instance | BindingFlags.Public))

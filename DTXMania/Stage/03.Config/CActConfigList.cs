@@ -791,7 +791,7 @@ internal partial class CActConfigList : CActivity
 
     private BaseTexture RenderText(string text, int size, Color4 color, Color4? outline = null)
     {
-        UiTextRenderRequest request = new()
+        UiTextParameters request = new()
         {
             Name = text.Substring(0, Math.Min(20, text.Length)), // Use a substring of the text as the name to avoid excessively long names
             Text = text,

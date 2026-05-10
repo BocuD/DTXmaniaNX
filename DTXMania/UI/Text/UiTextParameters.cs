@@ -1,17 +1,20 @@
+using System.Numerics;
 using DTXMania.Core.Framework;
 using DTXMania.UI.Drawable;
 
 namespace DTXMania.UI.Text;
 
-public sealed class UiTextRenderRequest
+public sealed class UiTextParameters
 {
+    public UiTextParameters() { }
+
     public required string Name { get; init; }
     public required string Text { get; init; }
     public required string FontPath { get; init; }
     public string FontFamily { get; init; } = string.Empty;
     public float FontSize { get; init; } = 12;
     public float OutlineWidth { get; init; } = 0;
-    public float TexturePadding { get; init; } = 0;
+    public Vector2 TexturePadding { get; init; } = Vector2.Zero;
     public float LineSpacing { get; init; } = 1;
     public bool Antialias { get; init; } = true;
     public bool SubpixelText { get; init; } = true;

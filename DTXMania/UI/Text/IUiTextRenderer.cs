@@ -4,5 +4,5 @@ namespace DTXMania.UI.Text;
 
 public interface IUiTextRenderer
 {
-    BaseTexture Render(UiTextRenderRequest request);
+    BaseTexture Render(UiTextParameters request);
 }

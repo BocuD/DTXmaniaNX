@@ -1,3 +1,4 @@
+using System.Numerics;
 using DTXMania.Core.Framework;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.Text;
@@ -8,7 +9,7 @@ namespace DTXMania.UI.OpenGL;
 
 internal sealed class OpenGlSkiaTextRenderer : IUiTextRenderer
 {
-    public BaseTexture Render(UiTextRenderRequest request)
+    public BaseTexture Render(UiTextParameters request)
     {
         if (OpenGlRenderer.Instance == null)
         {
@@ -29,7 +30,7 @@ internal sealed class OpenGlSkiaTextRenderer : IUiTextRenderer
         float descent = metrics.Descent;
         float baseLineHeight = MathF.Max(font.Spacing, ascent + descent);
         float actualLineHeight = MathF.Max(baseLineHeight * request.LineSpacing, 1f);
-        float effectivePadding = MathF.Max(request.TexturePadding + request.OutlineWidth + 2f, 2f);
+        Vector2 effectivePadding = Vector2.Max(request.TexturePadding + new Vector2(request.OutlineWidth + 2f), new Vector2(2f));
 
         float maxLineWidth = 0f;
         foreach (string line in lines)
@@ -37,8 +38,8 @@ internal sealed class OpenGlSkiaTextRenderer : IUiTextRenderer
             maxLineWidth = MathF.Max(maxLineWidth, MeasureLineWidth(font, line));
         }
 
-        int bitmapWidth = Math.Max((int)MathF.Ceiling(maxLineWidth + effectivePadding * 2f), 1);
-        int bitmapHeight = Math.Max((int)MathF.Ceiling(lines.Length * actualLineHeight + effectivePadding * 2f), 1);
+        int bitmapWidth = Math.Max((int)MathF.Ceiling(maxLineWidth + effectivePadding.X * 2f), 1);
+        int bitmapHeight = Math.Max((int)MathF.Ceiling(lines.Length * actualLineHeight + effectivePadding.Y * 2f), 1);
 
         using SKSurface surface = SKSurface.Create(new SKImageInfo(bitmapWidth, bitmapHeight, SKColorType.Rgba8888, SKAlphaType.Premul));
         if (surface == null)
@@ -56,8 +57,8 @@ internal sealed class OpenGlSkiaTextRenderer : IUiTextRenderer
         {
             string line = lines[i];
             float lineWidth = MeasureLineWidth(font, line);
-            float drawX = effectivePadding + GetAlignedOffset(request.Alignment, bitmapWidth - effectivePadding * 2f, lineWidth);
-            float drawY = effectivePadding + ascent + i * actualLineHeight;
+            float drawX = effectivePadding.X + GetAlignedOffset(request.Alignment, bitmapWidth - effectivePadding.X * 2f, lineWidth);
+            float drawY = effectivePadding.Y + ascent + i * actualLineHeight;
 
             if (request.OutlineWidth > 0.01f)
             {
@@ -90,7 +91,7 @@ internal sealed class OpenGlSkiaTextRenderer : IUiTextRenderer
         return normalized.Split('\n');
     }
 
-    private static SKTypeface ResolveTypeface(UiTextRenderRequest request)
+    private static SKTypeface ResolveTypeface(UiTextParameters request)
     {
         if (!string.IsNullOrWhiteSpace(request.FontPath) && File.Exists(request.FontPath))
         {
@@ -113,7 +114,7 @@ internal sealed class OpenGlSkiaTextRenderer : IUiTextRenderer
         return SKTypeface.Default;
     }
 
-    private static SKFont CreateFont(SKTypeface typeface, UiTextRenderRequest request)
+    private static SKFont CreateFont(SKTypeface typeface, UiTextParameters request)
     {
         return new SKFont(typeface, request.FontSize)
         {
@@ -124,7 +125,7 @@ internal sealed class OpenGlSkiaTextRenderer : IUiTextRenderer
         };
     }
 
-    private static SKPaint CreateFillPaint(UiTextRenderRequest request, int bitmapHeight)
+    private static SKPaint CreateFillPaint(UiTextParameters request, int bitmapHeight)
     {
         SKPaint paint = new()
         {
@@ -143,7 +144,7 @@ internal sealed class OpenGlSkiaTextRenderer : IUiTextRenderer
         return paint;
     }
 
-    private static SKPaint CreateStrokePaint(UiTextRenderRequest request, int bitmapHeight)
+    private static SKPaint CreateStrokePaint(UiTextParameters request, int bitmapHeight)
     {
         SKPaint paint = new()
         {
@@ -207,7 +208,7 @@ internal sealed class OpenGlSkiaTextRenderer : IUiTextRenderer
         float lineWidth,
         SKFontMetrics metrics,
         SKPaint fillPaint,
-        UiTextRenderRequest request,
+        UiTextParameters request,
         int bitmapHeight)
     {
         float underlineOffset = metrics.UnderlinePosition ?? request.FontSize * 0.08f;
