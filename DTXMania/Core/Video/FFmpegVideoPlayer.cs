@@ -183,7 +183,7 @@ public abstract unsafe class FFmpegVideoPlayer : IDisposable
         return timestamp * ffmpeg.av_q2d(videoStream->time_base);
     }
 
-    public bool Open(string path)
+    public bool Open(string path, bool metadataOnly = false)
     {
         AVFormatContext* pFormatContext = ffmpeg.avformat_alloc_context();
 
@@ -227,13 +227,17 @@ public abstract unsafe class FFmpegVideoPlayer : IDisposable
             return false;
         }
 
-        if (!CreateResources())
+        if (!metadataOnly)
         {
-            Trace.TraceError($"Loading video file ({path}) failed: Couldn't create resources for player");
-            return false;
+            if (!CreateResources())
+            {
+                Trace.TraceError($"Loading video file ({path}) failed: Couldn't create resources for player");
+                return false;
+            }
+
+            ResetPlaybackState(0);
         }
 
-        ResetPlaybackState(0);
         return true;
     }
 

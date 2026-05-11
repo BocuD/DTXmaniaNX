@@ -17,9 +17,9 @@ namespace DTXMania;
 internal class CStageSongLoading : CStage
 {
     // retain presence from song select
-    protected override RichPresence Presence => null;
+    protected override RichPresence Presence => null!;
 
-    private CDTX cdtx;
+    private CDTX? cdtx;
     
     // コンストラクタ
 
@@ -199,8 +199,6 @@ internal class CStageSongLoading : CStage
             strSongTitle = "";
             strArtistName = "";
 
-            nBGMPlayStartTime = -1L;
-            nBGMTotalPlayTimeMs = 0;
             if (sdLoadingSound != null)
             {
                 CDTXMania.SoundManager.tDiscard(sdLoadingSound);
@@ -320,6 +318,7 @@ internal class CStageSongLoading : CStage
         Trace.Indent();
         try
         {
+            RequestCancelLoading();
             base.OnDeactivate();
         }
         finally
@@ -343,6 +342,23 @@ internal class CStageSongLoading : CStage
 
     public override void FirstUpdate()
     {
+        string songPath = !CDTXMania.bCompactMode
+            ? CDTXMania.chosenChartData.FileInformation.AbsoluteFilePath
+            : CDTXMania.strCompactModeFile;
+
+        CScoreIni ini = new(songPath + ".score.ini");
+
+        if ((CDTXMania.DTX != null) && CDTXMania.DTX.bActivated)
+            CDTXMania.DTX.OnDeactivate();
+
+        CDTXMania.DTX = new CDTX(songPath, false, CDTXMania.ConfigIni.nPlaySpeed / 20.0, ini.stFile.BGMAdjust);
+        Trace.TraceInformation("----曲情報-----------------");
+        Trace.TraceInformation("TITLE: {0}", CDTXMania.DTX.TITLE);
+        Trace.TraceInformation("FILE: {0}", CDTXMania.DTX.strFileNameFullPath);
+        Trace.TraceInformation("---------------------------");
+
+        StartLoadingTask();
+
         if (sdLoadingSound != null)
         {
             if (CDTXMania.Skin.soundNowLoading.bExclusive &&
@@ -352,22 +368,15 @@ internal class CStageSongLoading : CStage
             }
 
             sdLoadingSound.tStartPlaying();
-            nBGMPlayStartTime = CSoundManager.rcPerformanceTimer.nCurrentTime;
-            nBGMTotalPlayTimeMs = sdLoadingSound.nTotalPlayTimeMs;
         }
-        
-        CDTXMania.Skin.soundNowLoading.tPlay();
-        nBGMPlayStartTime = CSoundManager.rcPerformanceTimer.nCurrentTime;
-        nBGMTotalPlayTimeMs = CDTXMania.Skin.soundNowLoading.nLength_CurrentSound;
 
+        CDTXMania.Skin.soundNowLoading.tPlay();
         ePhaseID = EPhase.Common_FadeIn;
-            
-        nWAVcount = 1;
-            
+
         try
         {
             string path = cdtx.strFolderName + cdtx.PREIMAGE;
-            
+
             var txJacket = BaseTexture.LoadFromPath(!File.Exists(path) ? CSkin.Path(@"Graphics\5_preimage default.png") : path);
 
             var jacket = ui.AddChild(new UIImage(txJacket));
@@ -386,51 +395,120 @@ internal class CStageSongLoading : CStage
 
         base.OnUpdateAndDraw();
 
-        #region [ If escape is pressed, stop the loading ]
-
         if (tHandleKeyInput())
         {
-            if (sdLoadingSound != null)
-            {
-                sdLoadingSound.tStopSound();
-                sdLoadingSound.tRelease();
-            }
-
+            RequestCancelLoading();
             return (int)ESongLoadingScreenReturnValue.LoadingStopped;
         }
 
-        #endregion
-        
         DrawLoadingScreenUI();
 
-        switch (ePhaseID)
+        if (loadingTask == null)
         {
-            case EPhase.Common_FadeIn:
-                //if( this.actFI.OnUpdateAndDraw() != 0 )					// #27787 2012.3.10 yyagi 曲読み込み画面のフェードインの省略
-                // 必ず一度「CStaeg.EPhase.Common_FadeIn」フェーズを経由させること。
-                // さもないと、曲読み込みが完了するまで、曲読み込み画面が描画されない。
-                ePhaseID = EPhase.NOWLOADING_DTX_FILE_READING;
-                return (int)ESongLoadingScreenReturnValue.Continue;
+            return (int)ESongLoadingScreenReturnValue.Continue;
+        }
 
-            case EPhase.NOWLOADING_DTX_FILE_READING:
+        if (loadingTask.IsFaulted)
+        {
+            StopLoadingSounds();
+            return (int)ESongLoadingScreenReturnValue.LoadingStopped;
+        }
+
+        if (bCancelRequested)
+        {
+            return (int)ESongLoadingScreenReturnValue.LoadingStopped;
+        }
+
+
+        if (loadingTask.IsCompleted)
+        {
+            StopLoadingSounds();
+            CDTXMania.nStageNumber++;
+            return (int)ESongLoadingScreenReturnValue.LoadingComplete;
+        }
+
+        return (int)ESongLoadingScreenReturnValue.Continue;
+    }
+
+    private void StartLoadingTask()
+    {
+        loadingCancellationTokenSource?.Dispose();
+        loadingCancellationTokenSource = new CancellationTokenSource();
+        bCancelRequested = false;
+        loadingTask = LoadSongDataAsync(loadingCancellationTokenSource.Token);
+    }
+
+    private async Task LoadSongDataAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            await Task.Run(() =>
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 timeBeginLoad = DateTime.Now;
 
-                string songPath = !CDTXMania.bCompactMode ? CDTXMania.chosenChartData.FileInformation.AbsoluteFilePath : CDTXMania.strCompactModeFile;
-
-                CScoreIni ini = new(songPath + ".score.ini");
-
-                if ((CDTXMania.DTX != null) && CDTXMania.DTX.bActivated)
-                    CDTXMania.DTX.OnDeactivate();
-
-                CDTXMania.DTX = new CDTX(songPath, false, CDTXMania.ConfigIni.nPlaySpeed / 20.0,
-                    ini.stFile.BGMAdjust);
-                Trace.TraceInformation("----曲情報-----------------");
-                Trace.TraceInformation("TITLE: {0}", CDTXMania.DTX.TITLE);
-                Trace.TraceInformation("FILE: {0}", CDTXMania.DTX.strFileNameFullPath);
-                Trace.TraceInformation("---------------------------");
-
                 // #35411 2015.08.19 chnmr0 add ゴースト機能のためList chip 読み込み後楽器パート出現順インデックスを割り振る
+                stGhostLag = new();
+                string[] ghostInst = ["dr", "gt", "bs"];
+                if (CDTXMania.ConfigIni.bIsSwappedGuitarBass)
+                {
+                    ghostInst[1] = "bs";
+                    ghostInst[2] = "gt";
+                }
+
+                for (int instIndex = 0; instIndex < ghostInst.Length; ++instIndex)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    //break; //2016.01.03 kairera0467 以下封印。
+                    bool readAutoGhostCond = false;
+                    readAutoGhostCond |= instIndex == 0 && CDTXMania.ConfigIni.bAllDrumsAreAutoPlay;
+                    readAutoGhostCond |= instIndex == 1 && CDTXMania.ConfigIni.bAllGuitarsAreAutoPlay;
+                    readAutoGhostCond |= instIndex == 2 && CDTXMania.ConfigIni.bAllBassAreAutoPlay;
+
+                    CDTXMania.listTargetGhsotLag[instIndex] = null;
+                    CDTXMania.listAutoGhostLag[instIndex] = null;
+                    CDTXMania.listTargetGhostScoreData[instIndex] = null;
+                    nCurrentInst = instIndex;
+
+                    if (readAutoGhostCond)
+                    {
+                        string[] prefix = ["perfect", "lastplay", "hiskill", "hiscore", "online"];
+                        int indPrefix = (int)CDTXMania.ConfigIni.eAutoGhost[instIndex];
+                        string filename = CDTXMania.DTX.strFolderName + "\\" + CDTXMania.DTX.strFileName + "." + prefix[indPrefix] + "." +
+                                          ghostInst[instIndex] + ".ghost";
+                        if (File.Exists(filename))
+                        {
+                            CDTXMania.listAutoGhostLag[instIndex] = [];
+                            CDTXMania.listTargetGhostScoreData[instIndex] = new CScoreIni.CPerformanceEntry();
+                            ReadGhost(filename, CDTXMania.listAutoGhostLag[instIndex]);
+                        }
+                    }
+
+                    if (CDTXMania.ConfigIni.eTargetGhost[instIndex] != ETargetGhostData.NONE)
+                    {
+                        string[] prefix = ["none", "perfect", "lastplay", "hiskill", "hiscore", "online"];
+                        int indPrefix = (int)CDTXMania.ConfigIni.eTargetGhost[instIndex];
+                        string filename = CDTXMania.DTX.strFolderName + "\\" + CDTXMania.DTX.strFileName + "." + prefix[indPrefix] + "." +
+                                          ghostInst[instIndex] + ".ghost";
+                        if (File.Exists(filename))
+                        {
+                            CDTXMania.listTargetGhsotLag[instIndex] = [];
+                            CDTXMania.listTargetGhostScoreData[instIndex] = new CScoreIni.CPerformanceEntry();
+                            stGhostLag[instIndex] = [];
+                            ReadGhost(filename, CDTXMania.listTargetGhsotLag[instIndex]);
+                        }
+                        else if (CDTXMania.ConfigIni.eTargetGhost[instIndex] == ETargetGhostData.PERFECT)
+                        {
+                            // All perfect
+                            CDTXMania.listTargetGhsotLag[instIndex] = [];
+                        }
+                    }
+                }
+
+                cancellationToken.ThrowIfCancellationRequested();
+
                 int[] curCount = new int[(int)EInstrumentPart.UNKNOWN];
                 for (int i = 0; i < curCount.Length; ++i)
                 {
@@ -440,6 +518,8 @@ internal class CStageSongLoading : CStage
                 bool stopLoadingGhost = false;
                 foreach (CChip chip in CDTXMania.DTX.listChip.Where(chip => chip.eInstrumentPart != EInstrumentPart.UNKNOWN))
                 {
+                    cancellationToken.ThrowIfCancellationRequested();
+
                     chip.n楽器パートでの出現順 = curCount[(int)chip.eInstrumentPart]++;
                     if (!stopLoadingGhost && CDTXMania.listTargetGhsotLag[(int)chip.eInstrumentPart] != null)
                     {
@@ -464,23 +544,24 @@ internal class CStageSongLoading : CStage
                     }
                 }
 
-                string[] inst = ["dr", "gt", "bs"];
+                string[] reverseInst = ["dr", "gt", "bs"];
                 if (CDTXMania.ConfigIni.bIsSwappedGuitarBass)
                 {
-                    inst[1] = "bs";
-                    inst[2] = "gt";
+                    reverseInst[1] = "bs";
+                    reverseInst[2] = "gt";
                 }
 
                 //演奏記録をゴーストから逆生成
                 for (int i = 0; i < 3; i++)
                 {
+                    cancellationToken.ThrowIfCancellationRequested();
+
                     int nNowCombo = 0;
-                    int nMaxCombo = 0;
 
                     //2016.06.18 kairera0467 「.ghost.score」ファイルが無かった場合ghostファイルから逆算を行う形に変更。
                     string[] prefix = ["none", "perfect", "lastplay", "hiskill", "hiscore", "online"];
                     int indPrefix = (int)CDTXMania.ConfigIni.eTargetGhost[i];
-                    string filename = $"{cdtx.strFolderName}\\{cdtx.strFileName}.{prefix[indPrefix]}.{inst[i]}.ghost";
+                    string filename = $"{CDTXMania.DTX.strFolderName}\\{CDTXMania.DTX.strFileName}.{prefix[indPrefix]}.{reverseInst[i]}.ghost";
 
                     if (stGhostLag[i] == null || File.Exists(filename + ".score"))
                         continue;
@@ -488,9 +569,11 @@ internal class CStageSongLoading : CStage
 
                     for (int n = 0; n < stGhostLag[i].Count; n++)
                     {
+                        cancellationToken.ThrowIfCancellationRequested();
+
                         int ghostLag = 128;
                         ghostLag = stGhostLag[i][n].nLagTime;
-                        
+
                         // 上位８ビットが１ならコンボが途切れている（ギターBAD空打ちでコンボ数を再現するための措置）
                         if (ghostLag > 255)
                         {
@@ -549,7 +632,7 @@ internal class CStageSongLoading : CStage
                         2 => CDTXMania.DTX.nVisibleChipsCount.Bass,
                         _ => CDTXMania.DTX.nVisibleChipsCount.Drums
                     };
-                    
+
                     if (CDTXMania.ConfigIni.nSkillMode == 0)
                     {
                         CDTXMania.listTargetGhostScoreData[i].dbPerformanceSkill = CScoreIni.tCalculatePlayingSkillOld(
@@ -576,83 +659,49 @@ internal class CStageSongLoading : CStage
 
                 TimeSpan span = DateTime.Now - timeBeginLoad;
                 Trace.TraceInformation($"Time to load DTX file: {span}");
-                
+
                 CDTXMania.DTX.MIDIレベル = CDTXMania.bCompactMode ? 1 : 0;
 
-                ePhaseID = EPhase.NOWLOADING_WAV_FILE_READING;
                 timeBeginLoadWAV = DateTime.Now;
-                return (int)ESongLoadingScreenReturnValue.Continue;
-            }
+                for (int i = 1; i <= CDTXMania.DTX.listWAV.Count; i++)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
 
-            case EPhase.NOWLOADING_WAV_FILE_READING:
-            {
-                if (nWAVcount == 1 && CDTXMania.DTX.listWAV.Count > 0) // #28934 2012.7.7 yyagi (added checking Count)
-                {
-                    //ShowProgressByFilename(CDTXMania.DTX.listWAV[nWAVcount].strFilename);
-                }
-                
-                int looptime =
-                    (CDTXMania.ConfigIni.bVerticalSyncWait) ? 3 : 1; // VSyncWait=ON時は1frame(1/60s)あたり3つ読むようにする
-                for (int i = 0; i < looptime && nWAVcount <= CDTXMania.DTX.listWAV.Count; i++)
-                {
-                    if (CDTXMania.DTX.listWAV[nWAVcount].listこのWAVを使用するチャンネル番号の集合.Count > 0) // #28674 2012.5.8 yyagi
+                    if (CDTXMania.DTX.listWAV[i].listこのWAVを使用するチャンネル番号の集合.Count > 0)
                     {
-                        CDTXMania.DTX.tLoadWAV(CDTXMania.DTX.listWAV[nWAVcount]);
+                        CDTXMania.DTX.tLoadWAV(CDTXMania.DTX.listWAV[i]);
                     }
-
-                    nWAVcount++;
                 }
 
-                if (nWAVcount <= CDTXMania.DTX.listWAV.Count)
+                span = DateTime.Now - timeBeginLoadWAV;
+                Trace.TraceInformation($"WAV読込所要時間({CDTXMania.DTX.listWAV.Count, 4}):     {span.ToString()}");
+                timeBeginLoadWAV = DateTime.Now;
+
+                if (CDTXMania.ConfigIni.bDynamicBassMixerManagement)
                 {
-                    //ShowProgressByFilename(CDTXMania.DTX.listWAV[nWAVcount].strFilename);
+                    CDTXMania.DTX.PlanToAddMixerChannel();
                 }
 
-                if (nWAVcount > CDTXMania.DTX.listWAV.Count)
-                {
-                    TimeSpan span = DateTime.Now - timeBeginLoadWAV;
-                    
-                    Trace.TraceInformation($"WAV読込所要時間({CDTXMania.DTX.listWAV.Count, 4}):     {span.ToString()}");
-                    timeBeginLoadWAV = DateTime.Now;
+                CDTXMania.DTX.t旧仕様のドコドコチップを振り分ける(EInstrumentPart.DRUMS, CDTXMania.ConfigIni.bAssignToLBD.Drums);
+                CDTXMania.DTX.tドコドコ仕様変更(EInstrumentPart.DRUMS, CDTXMania.ConfigIni.eDkdkType.Drums);
+                CDTXMania.DTX.tドラムのランダム化(EInstrumentPart.DRUMS, CDTXMania.ConfigIni.eRandom.Drums);
+                CDTXMania.DTX.tRandomizeDrumPedal(EInstrumentPart.DRUMS, CDTXMania.ConfigIni.eRandomPedal.Drums);
+                CDTXMania.DTX.t譜面仕様変更(EInstrumentPart.DRUMS, CDTXMania.ConfigIni.eNumOfLanes.Drums);
+                CDTXMania.DTX.tRandomizeGuitarAndBass(EInstrumentPart.GUITAR, CDTXMania.ConfigIni.eRandom.Guitar);
+                CDTXMania.DTX.tRandomizeGuitarAndBass(EInstrumentPart.BASS, CDTXMania.ConfigIni.eRandom.Bass);
 
-                    if (CDTXMania.ConfigIni.bDynamicBassMixerManagement)
-                    {
-                        CDTXMania.DTX.PlanToAddMixerChannel();
-                    }
+                span = DateTime.Now - timeBeginLoadWAV;
+                Trace.TraceInformation("WAV/譜面後処理時間({0,4}):  {1}",
+                    CDTXMania.DTX.listBMP.Count + CDTXMania.DTX.listBMPTEX.Count + CDTXMania.DTX.listAVI.Count,
+                    span.ToString());
 
-                    CDTXMania.DTX.t旧仕様のドコドコチップを振り分ける(EInstrumentPart.DRUMS, CDTXMania.ConfigIni.bAssignToLBD.Drums);
-                    CDTXMania.DTX.tドコドコ仕様変更(EInstrumentPart.DRUMS, CDTXMania.ConfigIni.eDkdkType.Drums);
-                    CDTXMania.DTX.tドラムのランダム化(EInstrumentPart.DRUMS, CDTXMania.ConfigIni.eRandom.Drums);
-                    CDTXMania.DTX.tRandomizeDrumPedal(EInstrumentPart.DRUMS, CDTXMania.ConfigIni.eRandomPedal.Drums);
-                    CDTXMania.DTX.t譜面仕様変更(EInstrumentPart.DRUMS, CDTXMania.ConfigIni.eNumOfLanes.Drums);
-                    CDTXMania.DTX.tRandomizeGuitarAndBass(EInstrumentPart.GUITAR, CDTXMania.ConfigIni.eRandom.Guitar);
-                    CDTXMania.DTX.tRandomizeGuitarAndBass(EInstrumentPart.BASS, CDTXMania.ConfigIni.eRandom.Bass);
-
-                    // if (CDTXMania.ConfigIni.bGuitarRevolutionMode)
-                    //     CDTXMania.stagePerfGuitarScreen.OnActivate();
-                    // else
-                    //     CDTXMania.stagePerfDrumsScreen.OnActivate();
-
-                    span = DateTime.Now - timeBeginLoadWAV;
-                    Trace.TraceInformation("WAV/譜面後処理時間({0,4}):  {1}",
-                        CDTXMania.DTX.listBMP.Count + CDTXMania.DTX.listBMPTEX.Count + CDTXMania.DTX.listAVI.Count,
-                        span.ToString());
-
-                    ePhaseID = EPhase.NOWLOADING_BMP_FILE_READING;
-                }
-
-                return (int)ESongLoadingScreenReturnValue.Continue;
-            }
-
-            case EPhase.NOWLOADING_BMP_FILE_READING:
-            {
                 DateTime timeBeginLoadBMPAVI = DateTime.Now;
                 if (CDTXMania.ConfigIni.bBGAEnabled)
                     CDTXMania.DTX.tLoadBMP_BMPTEX();
 
                 if (CDTXMania.ConfigIni.bAVIEnabled)
                     CDTXMania.DTX.tLoadAVI();
-                TimeSpan span = DateTime.Now - timeBeginLoadBMPAVI;
+                span = DateTime.Now - timeBeginLoadBMPAVI;
                 Trace.TraceInformation("BMP/AVI読込所要時間({0,4}): {1}",
                     (CDTXMania.DTX.listBMP.Count + CDTXMania.DTX.listBMPTEX.Count + CDTXMania.DTX.listAVI.Count),
                     span.ToString());
@@ -660,40 +709,44 @@ internal class CStageSongLoading : CStage
                 span = DateTime.Now - timeBeginLoad;
                 Trace.TraceInformation("総読込時間:                {0}", span.ToString());
                 CDTXMania.Timer.tUpdate();
-                ePhaseID = EPhase.NOWLOADING_WAIT_BGM_SOUND_COMPLETION;
-                return (int)ESongLoadingScreenReturnValue.Continue;
-            }
+            }, cancellationToken).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException)
+        {
+            Trace.TraceInformation("曲読み込みを中止しました。");
+            throw;
+        }
+        catch (Exception ex)
+        {
+            Trace.TraceError(ex.ToString());
+            throw;
+        }
+    }
 
-            case EPhase.NOWLOADING_WAIT_BGM_SOUND_COMPLETION:
-            {
-                long nCurrentTime = CDTXMania.Timer.nCurrentTime;
-                if (nCurrentTime < nBGMPlayStartTime)
-                    nBGMPlayStartTime = nCurrentTime;
-                
-                if ((nCurrentTime - nBGMPlayStartTime) > (nBGMTotalPlayTimeMs)) // #27787 2012.3.10 yyagi 1000ms == フェードイン分の時間
-                {
-                    ePhaseID = EPhase.Common_FadeOut;
-                }
+    private void RequestCancelLoading()
+    {
+        if (bCancelRequested)
+            return;
 
-                return (int)ESongLoadingScreenReturnValue.Continue;
-            }
+        bCancelRequested = true;
+        loadingCancellationTokenSource?.Cancel();
+        StopLoadingSounds();
+    }
 
-            case EPhase.Common_FadeOut:
-                if (sdLoadingSound != null)
-                {
-                    sdLoadingSound.tRelease();
-                }
-
-                CDTXMania.nStageNumber++;
-                return (int)ESongLoadingScreenReturnValue.LoadingComplete;
+    private void StopLoadingSounds()
+    {
+        if (sdLoadingSound != null)
+        {
+            sdLoadingSound.tStopSound();
+            sdLoadingSound.tRelease();
+            sdLoadingSound = null;
         }
 
-        return (int)ESongLoadingScreenReturnValue.Continue;
+        CDTXMania.Skin.soundNowLoading.tStop();
     }
     
     private void DrawLoadingScreenUI()
     {
-        int y = 184;
 
         int[] iPart = [0, CDTXMania.ConfigIni.bIsSwappedGuitarBass ? 2 : 1, CDTXMania.ConfigIni.bIsSwappedGuitarBass ? 1 : 2];
 
@@ -791,9 +844,10 @@ internal class CStageSongLoading : CStage
     
     private readonly STCharacterPosition[] st大文字位置;
     private int nCurrentInst;
-    private long nBGMTotalPlayTimeMs;
-    private long nBGMPlayStartTime;
-    private CSound sdLoadingSound; 
+    private CSound? sdLoadingSound;
+    private Task? loadingTask;
+    private CancellationTokenSource? loadingCancellationTokenSource;
+    private bool bCancelRequested;
     
     private string strSongTitle;
     private string strArtistName;
@@ -803,7 +857,6 @@ internal class CStageSongLoading : CStage
     
     private DateTime timeBeginLoad;
     private DateTime timeBeginLoadWAV;
-    private int nWAVcount;
     private BaseTexture txLevel;
 
     [StructLayout(LayoutKind.Sequential)]
@@ -1000,7 +1053,7 @@ internal class CStageSongLoading : CStage
 
                 if (arScriptLine.Length == 4)
                 {
-                    if (String.Compare(arScriptLine[1], strLabelName, true) != 0)
+                        if (!string.Equals(arScriptLine[1], strLabelName, StringComparison.OrdinalIgnoreCase))
                         continue; //ラベル名が違うなら無視。大文字小文字区別しない
                 }
                 else if (arScriptLine.Length == 5)
@@ -1012,7 +1065,7 @@ internal class CStageSongLoading : CStage
                     }
                     else
                     {
-                        if (String.Compare(arScriptLine[1], strLabelName, true) != 0)
+                        if (!string.Equals(arScriptLine[1], strLabelName, StringComparison.OrdinalIgnoreCase))
                             continue; //ラベル名が違うなら無視。大文字小文字区別しない
                     }
                 }

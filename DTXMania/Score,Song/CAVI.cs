@@ -62,7 +62,7 @@ public class CAVI : IDisposable
             try
             {
                 SoftwareVideoPlayer player = new();
-                if (player.Open(strAVIFileName))
+                if (player.Open(strAVIFileName, true))
                 {
                     duration = player.Duration;
                     fileExists = true;
