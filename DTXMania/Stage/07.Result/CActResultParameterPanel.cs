@@ -501,7 +501,8 @@ internal class CActResultParameterPanel : CActivity
         {
             if ( n本体X[j] != 0 )
             {
-                string str = string.Format("{0:0.00}", ((float)CDTXMania.DTX.LEVEL[j]) / 10.0f + (CDTXMania.DTX.LEVELDEC[j] != 0 ? CDTXMania.DTX.LEVELDEC[j] / 100.0f : 0));
+                string str =
+                    $"{((float)CDTXMania.DTX.LEVEL[j]) / 10.0f + (CDTXMania.DTX.LEVELDEC[j] != 0 ? CDTXMania.DTX.LEVELDEC[j] / 100.0f : 0):0.00}";
                 bool bCLASSIC = false;
                 //If Skill Mode is CLASSIC, always display lvl as Classic Style
                 if (CDTXMania.ConfigIni.nSkillMode == 0 || (CDTXMania.ConfigIni.bClassicScoreDisplay &&
@@ -512,26 +513,31 @@ internal class CActResultParameterPanel : CActivity
                                                             (CDTXMania.DTX.bHasChips.Ride == false) &&
                                                             (CDTXMania.DTX.bForceXGChart == false)))
                 {
-                    str = string.Format("{0:00}", CDTXMania.DTX.LEVEL[j]);
+                    str = $"{CDTXMania.DTX.LEVEL[j]:00}";
                     bCLASSIC = true;
                 }
                     
                 txSkillPanel.tDraw2D(n本体X[j], n本体Y);
 
-                tDrawStringSmall(80 + n本体X[j], 72 + n本体Y, string.Format("{0,4:###0}", stageResult.stPerformanceEntry[j].nPerfectCount_ExclAuto));
-                tDrawStringSmall(80 + n本体X[j], 102 + n本体Y, string.Format("{0,4:###0}", stageResult.stPerformanceEntry[j].nGreatCount_ExclAuto));
-                tDrawStringSmall(80 + n本体X[j], 132 + n本体Y, string.Format("{0,4:###0}", stageResult.stPerformanceEntry[j].nGoodCount_ExclAuto));
-                tDrawStringSmall(80 + n本体X[j], 162 + n本体Y, string.Format("{0,4:###0}", stageResult.stPerformanceEntry[j].nPoorCount_ExclAuto));
-                tDrawStringSmall(80 + n本体X[j], 192 + n本体Y, string.Format("{0,4:###0}", stageResult.stPerformanceEntry[j].nMissCount_ExclAuto));
-                tDrawStringSmall(80 + n本体X[j], 222 + n本体Y, string.Format("{0,4:###0}", stageResult.stPerformanceEntry[j].nMaxCombo));
+                tDrawStringSmall(80 + n本体X[j], 72 + n本体Y,
+                    $"{stageResult.stPerformanceEntry[j].nPerfectCount_ExclAuto,4:###0}");
+                tDrawStringSmall(80 + n本体X[j], 102 + n本体Y,
+                    $"{stageResult.stPerformanceEntry[j].nGreatCount_ExclAuto,4:###0}");
+                tDrawStringSmall(80 + n本体X[j], 132 + n本体Y,
+                    $"{stageResult.stPerformanceEntry[j].nGoodCount_ExclAuto,4:###0}");
+                tDrawStringSmall(80 + n本体X[j], 162 + n本体Y,
+                    $"{stageResult.stPerformanceEntry[j].nPoorCount_ExclAuto,4:###0}");
+                tDrawStringSmall(80 + n本体X[j], 192 + n本体Y,
+                    $"{stageResult.stPerformanceEntry[j].nMissCount_ExclAuto,4:###0}");
+                tDrawStringSmall(80 + n本体X[j], 222 + n本体Y, $"{stageResult.stPerformanceEntry[j].nMaxCombo,4:###0}");
 
 
-                tDrawStringSmall(167 + n本体X[j], 72 + n本体Y, string.Format("{0,3:##0}%", (int)Math.Round(stageResult.fPerfectPercentage[j])));
-                tDrawStringSmall(167 + n本体X[j], 102 + n本体Y, string.Format("{0,3:##0}%", (int)Math.Round(stageResult.fGreatPercentage[j])));
-                tDrawStringSmall(167 + n本体X[j], 132 + n本体Y, string.Format("{0,3:##0}%", (int)Math.Round(stageResult.fGoodPercentage[j])));
-                tDrawStringSmall(167 + n本体X[j], 162 + n本体Y, string.Format("{0,3:##0}%", (int)Math.Round(stageResult.fPoorPercentage[j])));
-                tDrawStringSmall(167 + n本体X[j], 192 + n本体Y, string.Format("{0,3:##0}%", (int)Math.Round(stageResult.fMissPercentage[j])));
-                tDrawStringSmall(167 + n本体X[j], 222 + n本体Y, string.Format("{0,3:##0}%", (int)Math.Round((100.0 * stageResult.stPerformanceEntry[j].nMaxCombo / stageResult.stPerformanceEntry[j].nTotalChipsCount))));
+                tDrawStringSmall(167 + n本体X[j], 72 + n本体Y, $"{(int)Math.Round(stageResult.fPerfectPercentage[j]),3:##0}%");
+                tDrawStringSmall(167 + n本体X[j], 102 + n本体Y, $"{(int)Math.Round(stageResult.fGreatPercentage[j]),3:##0}%");
+                tDrawStringSmall(167 + n本体X[j], 132 + n本体Y, $"{(int)Math.Round(stageResult.fGoodPercentage[j]),3:##0}%");
+                tDrawStringSmall(167 + n本体X[j], 162 + n本体Y, $"{(int)Math.Round(stageResult.fPoorPercentage[j]),3:##0}%");
+                tDrawStringSmall(167 + n本体X[j], 192 + n本体Y, $"{(int)Math.Round(stageResult.fMissPercentage[j]),3:##0}%");
+                tDrawStringSmall(167 + n本体X[j], 222 + n本体Y, $"{(int)Math.Round((100.0 * stageResult.stPerformanceEntry[j].nMaxCombo / stageResult.stPerformanceEntry[j].nTotalChipsCount)),3:##0}%");
 
                 //this.tDrawStringLarge(58 + this.n本体X[j], 277 + this.n本体Y, string.Format("{0,6:##0.00}", stageResult.stPerformanceEntry[j].dbPerformanceSkill));
                 //Conditional checks for MAX
@@ -541,7 +547,8 @@ internal class CActResultParameterPanel : CActivity
                 }
                 else
                 {
-                    tDrawStringLarge(58 + n本体X[j], 277 + n本体Y, string.Format("{0,6:##0.00}", stageResult.stPerformanceEntry[j].dbPerformanceSkill));
+                    tDrawStringLarge(58 + n本体X[j], 277 + n本体Y,
+                        $"{stageResult.stPerformanceEntry[j].dbPerformanceSkill,6:##0.00}");
                     if(txPercent != null)
                         txPercent.tDraw2D(217 + n本体X[j], 287 + n本体Y);
                 }
@@ -562,7 +569,7 @@ internal class CActResultParameterPanel : CActivity
                 txCurrentProgressBar[j].tDraw2D(256 + n本体X[j], 2 + n本体Y);
                 txPreviousBestProgressBar[j].tDraw2D(270 + n本体X[j], 2 + n本体Y);
 
-                string strScore = string.Format("{0,7:######0}", stageResult.stPerformanceEntry[j].nScore);
+                string strScore = $"{stageResult.stPerformanceEntry[j].nScore,7:######0}";
                 for (int i = 0; i < 7; i++)
                 {
                     RectangleF rectangle;
@@ -612,9 +619,9 @@ internal class CActResultParameterPanel : CActivity
                     bool bTypeAColor = CDTXMania.ConfigIni.nShowLagTypeColor == 0;
 
                     tDrawLagCounterText(n本体X[j] + 170, n本体Y + 335,
-                        string.Format("{0,4:###0}", stageResult.nTimingHitCount[j].nEarly), !bTypeAColor);
+                        $"{stageResult.nTimingHitCount[j].nEarly,4:###0}", !bTypeAColor);
                     tDrawLagCounterText(n本体X[j] + 245, n本体Y + 335,
-                        string.Format("{0,4:###0}", stageResult.nTimingHitCount[j].nLate), bTypeAColor);
+                        $"{stageResult.nTimingHitCount[j].nLate,4:###0}", bTypeAColor);
                 }
             }
         }

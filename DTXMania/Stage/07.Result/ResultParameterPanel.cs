@@ -1,5 +1,5 @@
 ﻿using System.Numerics;
-using DTXMania.Core.Framework;
+using DTXMania.Core;
 using DTXMania.UI;
 using DTXMania.UI.Drawable;
 
@@ -7,22 +7,26 @@ namespace DTXMania;
 
 public class ResultParameterPanel : UIGroup
 {
-    public ResultParameterPanel()
+    public ResultParameterPanel(int instrument)
     {
         name = "ResultParameterPanel";
+        sortByRenderOrder = false;
         scale.X = 0.96f;
         
-        AddRow("Perfect", "0000");
-        AddRow("Great", "0000");
-        AddRow("Good", "0000");
-        AddRow("Ok", "0000");
-        AddRow("Miss", "0000");
-        AddRow("Max Combo", "0000");
-        AddRow("Score", "0000");
+        var stageResult = CDTXMania.StageManager.stageResult;
+        var performanceData = stageResult.stPerformanceEntry[instrument];
+        
+        AddRow("Perfect", performanceData.nPerfectCount.ToString("D4"), $"{(int)Math.Round(stageResult.fPerfectPercentage[instrument]),3:##0}%");
+        AddRow("Great", performanceData.nGreatCount.ToString("D4"), $"{(int)Math.Round(stageResult.fGreatPercentage[instrument]),3:##0}%");
+        AddRow("Good", performanceData.nGoodCount.ToString("D4"), $"{(int)Math.Round(stageResult.fGoodPercentage[instrument]),3:##0}%");
+        AddRow("Ok", performanceData.nPoorCount.ToString("D4"), $"{(int)Math.Round(stageResult.fPoorPercentage[instrument]),3:##0}%");
+        AddRow("Miss", performanceData.nMissCount.ToString("D4"), $"{(int)Math.Round(stageResult.fMissPercentage[instrument]),3:##0}%");
+        AddRow("Max Combo", performanceData.nMaxCombo.ToString("D4"), $"{(int)Math.Round((100.0 * stageResult.stPerformanceEntry[instrument].nMaxCombo / stageResult.stPerformanceEntry[instrument].nTotalChipsCount)),3:##0}%");
+        AddRow("Score", performanceData.nScore.ToString("D7"));
     }
     
     private float yPos;
-    public void AddRow(string name, string label = "")
+    public void AddRow(string name, string label = "", string percentage = "")
     {
         var text = AddChild(new UIText(name));
         text.name = name + "Label";
@@ -38,8 +42,18 @@ public class ResultParameterPanel : UIGroup
         numText.fontSize = 24;
         numText.fontSource = FontSource.System;
         numText.font = "Futura PT Medium.otf";
-        numText.position = new Vector3(107, yPos - 5, 0);
-        numText.fillColor = new Color4(0.31f, 0.31f, 0.31f);
+        numText.position = new Vector3(163, yPos - 5, 0);
+        numText.anchor = new Vector2(1, 0);
+        //numText.fillColor = new Color4(0.31f, 0.31f, 0.31f);
+        
+        var percentageText = AddChild(new UIText(percentage));
+        percentageText.name = name + "Percentage";
+        percentageText.outlineWidth = 0;
+        percentageText.fontSize = 22;
+        percentageText.fontSource = FontSource.System;
+        percentageText.font = "Futura PT Medium.otf";
+        percentageText.position = new Vector3(245, yPos - 4, 0);
+        percentageText.anchor = new Vector2(1, 0);
 
         yPos += 24.0f;
     }

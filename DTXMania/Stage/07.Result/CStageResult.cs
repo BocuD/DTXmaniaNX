@@ -4,6 +4,7 @@ using DTXMania.Core;
 using DTXMania.Core.Framework;
 using DTXMania.UI;
 using DTXMania.UI.Drawable;
+using DTXMania.UI.Text;
 using FDK;
 using SlimDXKey = SlimDX.DirectInput.Key;
 
@@ -120,11 +121,25 @@ internal class CStageResult : CStage
 		background = ui.AddChild(new UIImage(txBackground));
 		background.renderOrder = -100;
 		background.isVisible = true;
+		background.name = "Background";
+
+		var stageNumber = ui.AddChild(new UIText(InfoBox.GetStageNumberText(), 46));
+		stageNumber.name = "StageNumber";
+		stageNumber.position = new Vector3(640, 50, 0);
+		stageNumber.anchor = new Vector2(0.5f, 0);
+		stageNumber.fontSource = FontSource.System;
+		stageNumber.font = "Futura PT Book.otf";
+		stageNumber.style = UiTextStyle.Bold;
+		stageNumber.outlineWidth = 0;
 
 		var titleArtistBg = ui.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path("Graphics/Result/songname_bg.png"))));
 		titleArtistBg.anchor = new Vector2(0.5f, 0);
 		titleArtistBg.position = new Vector3(640, 529, 0);
 		titleArtistBg.renderOrder = 1;
+		titleArtistBg.name = "TitleArtistBg";
+		
+		var rankIcon = ui.AddChild(new ResultRankIcon(CDTXMania.GetCurrentInstrument()));
+		rankIcon.position = new Vector3(225, 360, 0);
 		
 		string strSongTitle;
 		if (!CDTXMania.bCompactMode && CDTXMania.ConfigIni.b曲名表示をdefのものにする)
@@ -180,10 +195,10 @@ internal class CStageResult : CStage
 			guitar2.position = new Vector3(853, 272, 0);
 		}
 
-		var infoPanel = ui.AddChild(new ResultInfoPanel());
+		var infoPanel = ui.AddChild(new ResultInfoPanel(CDTXMania.GetCurrentInstrument()));
 		infoPanel.position = new Vector3(830, 120, 0);
 		
-		var paramPanel = ui.AddChild(new ResultParameterPanel());
+		var paramPanel = ui.AddChild(new ResultParameterPanel(CDTXMania.GetCurrentInstrument()));
 		paramPanel.position = new Vector3(879, 479, 0);
 	}
 

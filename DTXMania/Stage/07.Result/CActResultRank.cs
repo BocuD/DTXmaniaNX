@@ -15,15 +15,6 @@ internal class CActResultRank : CActivity
         bActivated = false;
     }
 
-
-    // メソッド
-
-    public void tアニメを完了させる()
-    {
-        ctランク表示.nCurrentValue = ctランク表示.nEndValue;
-    }
-
-
     // CActivity 実装
 
     public override void OnActivate()
@@ -82,9 +73,9 @@ internal class CActResultRank : CActivity
         }
         #endregion
 
-        b全オート.Drums = CDTXMania.ConfigIni.bAllDrumsAreAutoPlay;
-        b全オート.Guitar = CDTXMania.ConfigIni.bAllGuitarsAreAutoPlay;
-        b全オート.Bass = CDTXMania.ConfigIni.bAllBassAreAutoPlay;
+        bAllAuto.Drums = CDTXMania.ConfigIni.bAllDrumsAreAutoPlay;
+        bAllAuto.Guitar = CDTXMania.ConfigIni.bAllGuitarsAreAutoPlay;
+        bAllAuto.Bass = CDTXMania.ConfigIni.bAllBassAreAutoPlay;
 
         base.OnActivate();
     }
@@ -100,7 +91,6 @@ internal class CActResultRank : CActivity
     {
         if (bActivated)
         {
-
             txStageCleared = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\ScreenResult StageCleared.png"));
             txFullCombo = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\ScreenResult fullcombo.png"));
             txExcellent = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\ScreenResult Excellent.png"));
@@ -110,38 +100,38 @@ internal class CActResultRank : CActivity
                 switch (stageResult.nRankValue[j])
                 {
                     case 0:
-                        txランク文字[j] = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_rankSS.png"));
+                        txRankIcon[j] = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_rankSS.png"));
                         break;
 
                     case 1:
-                        txランク文字[j] = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_rankS.png"));
+                        txRankIcon[j] = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_rankS.png"));
                         break;
 
                     case 2:
-                        txランク文字[j] = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_rankA.png"));
+                        txRankIcon[j] = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_rankA.png"));
                         break;
 
                     case 3:
-                        txランク文字[j] = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_rankB.png"));
+                        txRankIcon[j] = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_rankB.png"));
                         break;
 
                     case 4:
-                        txランク文字[j] = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_rankC.png"));
+                        txRankIcon[j] = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_rankC.png"));
                         break;
 
                     case 5:
-                        txランク文字[j] = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_rankD.png"));
+                        txRankIcon[j] = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_rankD.png"));
                         break;
 
                     case 6:
                     case 99:	// #23534 2010.10.28 yyagi: 演奏チップが0個のときは、rankEと見なす
-                        txランク文字[j] = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_rankE.png"));
-                        if (b全オート[j])
-                            txランク文字[j] = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_rankSS.png"));
+                        txRankIcon[j] = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_rankE.png"));
+                        if (bAllAuto[j])
+                            txRankIcon[j] = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_rankSS.png"));
                         break;
 
                     default:
-                        txランク文字[j] = null;
+                        txRankIcon[j] = null;
                         break;
                 }
             }
@@ -173,12 +163,9 @@ internal class CActResultRank : CActivity
             if (n本体X[j] != 0)
             {
                 #region [ ランク文字 ]
-                if (txランク文字[j] != null)
+                if (txRankIcon[j] != null)
                 {
-                    double num2 = ((double)ctランク表示.nCurrentValue - 200.0) / 300.0;
-
-                    if (ctランク表示.nCurrentValue >= 200.0)
-                        txランク文字[j].tDraw2D(n本体X[j], n本体Y[j] + ((int)((double)txランク文字[j].Height * (1.0 - num2))), new RectangleF(0, 0, txランク文字[j].Width, (int)((double)txランク文字[j].Height * num2)));
+                    txRankIcon[j].tDraw2D(n本体X[j], n本体Y[j] + ((int)((double)txRankIcon[j].Height * (1.0 - 1))), new RectangleF(0, 0, txRankIcon[j].Width, (int)((double)txRankIcon[j].Height * 1)));
                 }
                 #endregion
 
@@ -220,8 +207,8 @@ internal class CActResultRank : CActivity
     private CCounter ctランク表示;
     private STDGBVALUE<int> n本体X;
     private STDGBVALUE<int> n本体Y;
-    private STDGBVALUE<bool> b全オート;
-    private STDGBVALUE<BaseTexture> txランク文字;
+    private STDGBVALUE<bool> bAllAuto;
+    private STDGBVALUE<BaseTexture> txRankIcon;
     private BaseTexture txStageCleared;
     private BaseTexture txFullCombo;
     private BaseTexture txExcellent;
