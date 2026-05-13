@@ -33,7 +33,7 @@ public class CInputMIDI : IInputDevice, IDisposable
 
 	public void tメッセージからMIDI信号のみ受信( uint wMsg, int dwInstance, int dwParam1, int dwParam2, long n受信システム時刻 )
 	{
-		if( wMsg == CWin32.MIM_DATA )
+		if ( wMsg == CWin32.MIM_DATA )
 		{
 			int nMIDIevent = dwParam1 & 0xF0;
 			int nPara1 = ( dwParam1 >> 8 ) & 0xFF;
@@ -41,7 +41,7 @@ public class CInputMIDI : IInputDevice, IDisposable
 
 // Trace.TraceInformation( "MIDIevent={0:X2} para1={1:X2} para2={2:X2}", nMIDIevent, nPara1, nPara2 );
 			
-			if( ( nMIDIevent == 0x90 ) && ( nPara2 != 0 ) )
+			if ( ( nMIDIevent == 0x90 ) && ( nPara2 != 0 ) )
 			{
 				STInputEvent item = new STInputEvent();
 				item.nKey = nPara1;
@@ -75,7 +75,7 @@ public class CInputMIDI : IInputDevice, IDisposable
 	{
 		foreach( STInputEvent event2 in listInputEvent )
 		{
-			if( ( event2.nKey == nKey ) && event2.b押された )
+			if ( ( event2.nKey == nKey ) && event2.b押された )
 			{
 				return true;
 			}

@@ -499,7 +499,7 @@ public class CActDFPFont : CActivity
 	}
 	public int n文字列長dot( string str, float fScale )
 	{
-		if( string.IsNullOrEmpty( str ) )
+		if ( string.IsNullOrEmpty( str ) )
 		{
 			return 0;
 		}
@@ -508,7 +508,7 @@ public class CActDFPFont : CActivity
 		{
 			foreach( STCharacterMap st文字領域 in stCharacterRects )
 			{
-				if( st文字領域.ch == ch )
+				if ( st文字領域.ch == ch )
 				{
 					num += (int) ( ( st文字領域.rc.Width - 5 ) * fScale );
 					break;
@@ -525,14 +525,14 @@ public class CActDFPFont : CActivity
 		float x = 0;
 		
 		BaseTexture texture = bHighlight ? txHighlightCharacterMap : txCharacterMap;
-		if( texture != null )
+		if ( texture != null )
 		{
 			Matrix4x4 scale = Matrix4x4.CreateScale(fScale);
 			foreach( char ch in str )
 			{
 				foreach( STCharacterMap st文字領域 in stCharacterRects )
 				{
-					if( st文字領域.ch == ch )
+					if ( st文字領域.ch == ch )
 					{
 						RectangleF rect = new()
 						{
@@ -558,7 +558,7 @@ public class CActDFPFont : CActivity
 
 	public override void OnManagedCreateResources()
 	{
-		if( bActivated )
+		if ( bActivated )
 		{
 			txCharacterMap = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\Screen font dfp.png" ));
 			txHighlightCharacterMap = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\Screen font dfp em.png" ));
@@ -567,14 +567,14 @@ public class CActDFPFont : CActivity
 	}
 	public override void OnManagedReleaseResources()
 	{
-		if( bActivated )
+		if ( bActivated )
 		{
-			if( txHighlightCharacterMap != null )
+			if ( txHighlightCharacterMap != null )
 			{
 				txHighlightCharacterMap.Dispose();
 				txHighlightCharacterMap = null;
 			}
-			if( txCharacterMap != null )
+			if ( txCharacterMap != null )
 			{
 				txCharacterMap.Dispose();
 				txCharacterMap = null;

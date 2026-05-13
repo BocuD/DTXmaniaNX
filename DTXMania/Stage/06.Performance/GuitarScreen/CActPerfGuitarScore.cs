@@ -45,9 +45,9 @@ internal class CActPerfGuitarScore : CActPerfCommonScore
 
     public override unsafe int OnUpdateAndDraw()
     {
-        if( bActivated)
+        if ( bActivated)
         {
-            if( bJustStartedUpdate )
+            if ( bJustStartedUpdate )
             {
                 n進行用タイマ = CDTXMania.Timer.nCurrentTime;
                 bJustStartedUpdate = false;

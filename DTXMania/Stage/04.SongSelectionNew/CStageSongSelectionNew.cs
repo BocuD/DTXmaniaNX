@@ -440,25 +440,25 @@ public class CStageSongSelectionNew : CStage
             case 0:
                 CDTXMania.Skin.soundBasic.tPlay();
                 string strbsc = CSkin.Path( @"Sounds\Basic.ogg" );
-                if( !File.Exists( strbsc ) )
+                if ( !File.Exists( strbsc ) )
                     CDTXMania.Skin.soundChange.tPlay();
                 break;
             case 1:
                 CDTXMania.Skin.soundAdvanced.tPlay();
                 string stradv = CSkin.Path( @"Sounds\Advanced.ogg" );
-                if( !File.Exists( stradv ) )
+                if ( !File.Exists( stradv ) )
                     CDTXMania.Skin.soundChange.tPlay();
                 break;
             case 2:
                 CDTXMania.Skin.soundExtreme.tPlay();
                 string strext = CSkin.Path( @"Sounds\Extreme.ogg" );
-                if( !File.Exists( strext ) )
+                if ( !File.Exists( strext ) )
                     CDTXMania.Skin.soundChange.tPlay();
                 break;
             case 3:
                 CDTXMania.Skin.soundMaster.tPlay();
                 string strmas = CSkin.Path( @"Sounds\Master.ogg" );
-                if( !File.Exists( strmas ) )
+                if ( !File.Exists( strmas ) )
                     CDTXMania.Skin.soundChange.tPlay();
                 break;
             case 4:

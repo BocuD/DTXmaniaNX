@@ -333,7 +333,7 @@ public class CInputManager : IDisposable // CInput管理
 
 				directInput.Dispose();
 
-				//if( this.timer != null )
+				//if ( this.timer != null )
 				//{
 				//    this.timer.Dispose();
 				//    this.timer = null;

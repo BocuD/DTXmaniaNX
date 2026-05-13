@@ -68,11 +68,11 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
 
                         //base.st状態[i].judge = EJudgement.Perfect;
                         //nNowFrame = 16;
-                        if( st状態[ i ].judge == EJudgement.Perfect )
+                        if ( st状態[ i ].judge == EJudgement.Perfect )
                         {
                             #region[ PERFECT ]
                             #region[ 0～10 ]
-                            if( nNowFrame == 0 )
+                            if ( nNowFrame == 0 )
                             {
                                 st状態[i].fX方向拡大率 = 1.67f;
                                 st状態[i].fY方向拡大率 = 1.67f;
@@ -88,7 +88,7 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                                 st状態[i].fY方向拡大率_棒 = 0f;
                                 st状態[i].fZ軸回転度_棒 = CConversion.DegreeToRadian( -43f );
                             }
-                            else if( nNowFrame == 1 )
+                            else if ( nNowFrame == 1 )
                             {
                                 st状態[i].fX方向拡大率 = 1.33f;
                                 st状態[i].fY方向拡大率 = 1.33f;
@@ -103,7 +103,7 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                                 st状態[i].n相対Y座標_棒 = 6;
                                 st状態[i].fZ軸回転度_棒 = CConversion.DegreeToRadian( -43f );
                             }
-                            else if( nNowFrame == 2 )
+                            else if ( nNowFrame == 2 )
                             {
                                 st状態[i].fX方向拡大率 = 1f;
                                 st状態[i].fY方向拡大率 = 1f;
@@ -124,7 +124,7 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                                 st状態[i].n相対Y座標_棒 = 10;
                                 st状態[i].fZ軸回転度_棒 = CConversion.DegreeToRadian(-14.5f);
                             }
-                            else if( nNowFrame == 3 )
+                            else if ( nNowFrame == 3 )
                             {
                                 st状態[i].fX方向拡大率 = 1f;
                                 st状態[i].fY方向拡大率 = 1f;
@@ -145,7 +145,7 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                                 st状態[i].n相対Y座標_棒 = 10;
                                 st状態[i].fZ軸回転度_棒 = CConversion.DegreeToRadian(15f);
                             }
-                            else if( nNowFrame == 4 )
+                            else if ( nNowFrame == 4 )
                             {
                                 st状態[i].fX方向拡大率 = 1f;
                                 st状態[i].fY方向拡大率 = 1f;
@@ -166,7 +166,7 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                                 st状態[i].n相対Y座標_棒 = 10;
                                 st状態[i].fZ軸回転度_棒 = CConversion.DegreeToRadian(18.5f);
                             }
-                            else if( nNowFrame == 5 )
+                            else if ( nNowFrame == 5 )
                             {
                                 st状態[i].fX方向拡大率 = 1f;
                                 st状態[i].fY方向拡大率 = 1f;
@@ -187,7 +187,7 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                                 st状態[i].n相対Y座標_棒 = 10;
                                 st状態[i].fZ軸回転度_棒 = CConversion.DegreeToRadian(20.5f);
                             }
-                            else if( nNowFrame == 6 )
+                            else if ( nNowFrame == 6 )
                             {
                                 st状態[i].fX方向拡大率 = 1f;
                                 st状態[i].fY方向拡大率 = 1f;
@@ -208,7 +208,7 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                                 st状態[i].n相対Y座標_棒 = 10;
                                 st状態[i].fZ軸回転度_棒 = CConversion.DegreeToRadian(20.5f);
                             }
-                            else if( nNowFrame == 7 )
+                            else if ( nNowFrame == 7 )
                             {
                                 st状態[i].fX方向拡大率 = 1f;
                                 st状態[i].fY方向拡大率 = 1f;
@@ -229,7 +229,7 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                                 st状態[i].n相対Y座標_棒 = 10;
                                 st状態[i].fZ軸回転度_棒 = CConversion.DegreeToRadian(22f);
                             }
-                            else if( nNowFrame == 8 )
+                            else if ( nNowFrame == 8 )
                             {
                                 st状態[i].fX方向拡大率 = 1f;
                                 st状態[i].fY方向拡大率 = 1f;
@@ -250,7 +250,7 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                                 st状態[i].n相対Y座標_棒 = 10;
                                 st状態[i].fZ軸回転度_棒 = CConversion.DegreeToRadian(23.5f);
                             }
-                            else if( nNowFrame == 9 )
+                            else if ( nNowFrame == 9 )
                             {
                                 st状態[i].fX方向拡大率 = 1f;
                                 st状態[i].fY方向拡大率 = 1f;
@@ -271,7 +271,7 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                                 st状態[i].n相対Y座標_棒 = 10;
                                 st状態[i].fZ軸回転度_棒 = CConversion.DegreeToRadian(25.5f);
                             }
-                            else if( nNowFrame == 10 )
+                            else if ( nNowFrame == 10 )
                             {
                                 st状態[i].fX方向拡大率 = 1f;
                                 st状態[i].fY方向拡大率 = 1f;
@@ -296,7 +296,7 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                             }
                             #endregion
                             #region[ 11～18 ]
-                            else if( nNowFrame == 11 )
+                            else if ( nNowFrame == 11 )
                             {
                                 st状態[i].fX方向拡大率 = 1f;
                                 st状態[i].fY方向拡大率 = 1f;
@@ -317,7 +317,7 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                                 st状態[i].n相対Y座標_棒 = 10;
                                 st状態[i].fZ軸回転度_棒 = CConversion.DegreeToRadian(29.5f);
                             }
-                            else if( nNowFrame == 12 )
+                            else if ( nNowFrame == 12 )
                             {
                                 st状態[i].fX方向拡大率 = 1f;
                                 st状態[i].fY方向拡大率 = 1f;
@@ -338,7 +338,7 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                                 st状態[i].n相対Y座標_棒 = 10;
                                 st状態[i].fZ軸回転度_棒 = CConversion.DegreeToRadian(31f);
                             }
-                            else if( nNowFrame == 13 )
+                            else if ( nNowFrame == 13 )
                             {
                                 st状態[i].fX方向拡大率 = 1f;
                                 st状態[i].fY方向拡大率 = 1f;
@@ -359,7 +359,7 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                                 st状態[i].n相対Y座標_棒 = 10;
                                 st状態[i].fZ軸回転度_棒 = CConversion.DegreeToRadian(32.5f);
                             }
-                            else if( nNowFrame == 14 )
+                            else if ( nNowFrame == 14 )
                             {
                                 st状態[i].fX方向拡大率 = 1f;
                                 st状態[i].fY方向拡大率 = 1f;
@@ -380,7 +380,7 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                                 st状態[i].n相対Y座標_棒 = 10;
                                 st状態[i].fZ軸回転度_棒 = CConversion.DegreeToRadian(34f);
                             }
-                            else if( nNowFrame == 15 )
+                            else if ( nNowFrame == 15 )
                             {
                                 st状態[i].fX方向拡大率 = 1f;
                                 st状態[i].fY方向拡大率 = 1f;
@@ -401,7 +401,7 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                                 st状態[i].n相対Y座標_棒 = 10;
                                 st状態[i].fZ軸回転度_棒 = CConversion.DegreeToRadian(36f);
                             }
-                            else if( nNowFrame == 16 )
+                            else if ( nNowFrame == 16 )
                             {
                                 st状態[i].fX方向拡大率 = 1f;
                                 st状態[i].fY方向拡大率 = 1f;
@@ -416,7 +416,7 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                                 st状態[i].n相対Y座標_棒 = 10;
                                 st状態[i].fZ軸回転度_棒 = CConversion.DegreeToRadian(38f);
                             }
-                            else if( nNowFrame == 17 )
+                            else if ( nNowFrame == 17 )
                             {
                                 st状態[i].fX方向拡大率 = 1f;
                                 st状態[i].fY方向拡大率 = 1f;
@@ -431,7 +431,7 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                                 st状態[i].n相対Y座標_棒 = 10;
                                 st状態[i].fZ軸回転度_棒 = CConversion.DegreeToRadian(40.5f);
                             }
-                            else if( nNowFrame == 18 )
+                            else if ( nNowFrame == 18 )
                             {
                                 st状態[i].fX方向拡大率 = 1f;
                                 st状態[i].fY方向拡大率 = 1f;
@@ -448,7 +448,7 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                             }
                             #endregion
                             #region[ 19～23 ]
-                            else if( nNowFrame == 19 )
+                            else if ( nNowFrame == 19 )
                             {
                                 st状態[i].fX方向拡大率 = 1.22f;
                                 st状態[i].fY方向拡大率 = 0.77f;
@@ -463,7 +463,7 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                                 st状態[i].n相対Y座標_棒 = 10;
                                 st状態[i].fZ軸回転度_棒 = CConversion.DegreeToRadian(43f);
                             }
-                            else if( nNowFrame == 20 )
+                            else if ( nNowFrame == 20 )
                             {
                                 st状態[i].fX方向拡大率 = 1.45f;
                                 st状態[i].fY方向拡大率 = 0.64f;
@@ -478,7 +478,7 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                                 st状態[i].n相対Y座標_棒 = 4;
                                 st状態[i].fZ軸回転度_棒 = CConversion.DegreeToRadian(43f);
                             }
-                            else if( nNowFrame == 21 )
+                            else if ( nNowFrame == 21 )
                             {
                                 st状態[i].fX方向拡大率 = 1.70f;
                                 st状態[i].fY方向拡大率 = 0.41f;
@@ -493,7 +493,7 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                                 st状態[i].n相対Y座標_棒 = 2;
                                 st状態[i].fZ軸回転度_棒 = CConversion.DegreeToRadian(43f);
                             }
-                            else if( nNowFrame == 22 )
+                            else if ( nNowFrame == 22 )
                             {
                                 st状態[i].fX方向拡大率 = 1.91f;
                                 st状態[i].fY方向拡大率 = 0.23f;
@@ -508,7 +508,7 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                                 st状態[i].n相対Y座標_棒 = 2;
                                 st状態[i].fZ軸回転度_棒 = CConversion.DegreeToRadian(43f);
                             }
-                            else if( nNowFrame == 23 )
+                            else if ( nNowFrame == 23 )
                             {
                                 st状態[i].fX方向拡大率 = 1.91f;
                                 st状態[i].fY方向拡大率 = 0.23f;
@@ -526,7 +526,7 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                             #endregion
                             #endregion
                         }
-                        else if( st状態[ i ].judge == EJudgement.Great )
+                        else if ( st状態[ i ].judge == EJudgement.Great )
                         {
                             #region[ GREAT ]
                             #region[ 0～10 ]
@@ -898,10 +898,10 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                             #endregion
                             #endregion
                         }
-                        else if( st状態[ i ].judge == EJudgement.Good )
+                        else if ( st状態[ i ].judge == EJudgement.Good )
                         {
                             #region[ GOOD ]
-                            if( nNowFrame == 0 )
+                            if ( nNowFrame == 0 )
                             {
                                 st状態[i].fX方向拡大率 = 0.625f;
                                 st状態[i].fY方向拡大率 = 3.70f;
@@ -909,7 +909,7 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                                 st状態[i].n相対Y座標 = 0;
                                 st状態[i].n透明度 = 0;
                             }
-                            else if( nNowFrame == 1 )
+                            else if ( nNowFrame == 1 )
                             {
                                 st状態[i].fX方向拡大率 = 1.125f;
                                 st状態[i].fY方向拡大率 = 2.00f;
@@ -917,7 +917,7 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                                 st状態[i].n相対Y座標 = 1;
                                 st状態[i].n透明度 = 0;
                             }
-                            else if( nNowFrame == 2 )
+                            else if ( nNowFrame == 2 )
                             {
                                 st状態[i].fX方向拡大率 = 1.375f;
                                 st状態[i].fY方向拡大率 = 0.66f;
@@ -925,7 +925,7 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                                 st状態[i].n相対Y座標 = 1;
                                 st状態[i].n透明度 = 0;
                             }
-                            else if( nNowFrame == 3 )
+                            else if ( nNowFrame == 3 )
                             {
                                 st状態[i].fX方向拡大率 = 1.25f;
                                 st状態[i].fY方向拡大率 = 1f;
@@ -933,7 +933,7 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                                 st状態[i].n相対Y座標 = 1;
                                 st状態[i].n透明度 = 0;
                             }
-                            else if( nNowFrame >= 4 && nNowFrame <= 18 )
+                            else if ( nNowFrame >= 4 && nNowFrame <= 18 )
                             {
                                 st状態[i].fX方向拡大率 = 1f;
                                 st状態[i].fY方向拡大率 = 1f;
@@ -941,7 +941,7 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                                 st状態[i].n相対Y座標 = 1;
                                 st状態[i].n透明度 = 0;
                             }
-                            else if( nNowFrame == 19 )
+                            else if ( nNowFrame == 19 )
                             {
                                 st状態[i].fX方向拡大率 = 1.25f;
                                 st状態[i].fY方向拡大率 = 1f;
@@ -949,7 +949,7 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                                 st状態[i].n相対Y座標 = 1;
                                 st状態[i].n透明度 = 0;
                             }
-                            else if( nNowFrame == 20 )
+                            else if ( nNowFrame == 20 )
                             {
                                 st状態[i].fX方向拡大率 = 1.375f;
                                 st状態[i].fY方向拡大率 = 0.66f;
@@ -957,7 +957,7 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                                 st状態[i].n相対Y座標 = 1;
                                 st状態[i].n透明度 = 0;
                             }
-                            else if( nNowFrame == 21 )
+                            else if ( nNowFrame == 21 )
                             {
                                 st状態[i].fX方向拡大率 = 1.50f;
                                 st状態[i].fY方向拡大率 = 0.50f;
@@ -965,7 +965,7 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                                 st状態[i].n相対Y座標 = 1;
                                 st状態[i].n透明度 = 0;
                             }
-                            else if( nNowFrame == 22 )
+                            else if ( nNowFrame == 22 )
                             {
                                 st状態[i].fX方向拡大率 = 1.91f;
                                 st状態[i].fY方向拡大率 = 0.23f;
@@ -973,7 +973,7 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                                 st状態[i].n相対Y座標 = 1;
                                 st状態[i].n透明度 = 0;
                             }
-                            else if( nNowFrame == 23 )
+                            else if ( nNowFrame == 23 )
                             {
                                 st状態[i].fX方向拡大率 = 1.91f;
                                 st状態[i].fY方向拡大率 = 0.23f;
@@ -983,46 +983,46 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                             }
                             #endregion
                         }
-                        else if( st状態[ i ].judge == EJudgement.Poor || st状態[ i ].judge == EJudgement.Miss )
+                        else if ( st状態[ i ].judge == EJudgement.Poor || st状態[ i ].judge == EJudgement.Miss )
                         {
                             #region[ POOR & MISS ]
-                            if( nNowFrame == 0 )
+                            if ( nNowFrame == 0 )
                             {
                                 st状態[i].n相対X座標 = 0;
                                 st状態[i].n相対Y座標 = -18;
                                 st状態[i].n透明度 = 100;
                             }
-                            else if( nNowFrame == 1 )
+                            else if ( nNowFrame == 1 )
                             {
                                 st状態[i].n相対X座標 = 0;
                                 st状態[i].n相対Y座標 = -12;
                                 st状態[i].n透明度 = 140;
                             }
-                            else if( nNowFrame == 2 )
+                            else if ( nNowFrame == 2 )
                             {
                                 st状態[i].n相対X座標 = 0;
                                 st状態[i].n相対Y座標 = -6;
                                 st状態[i].n透明度 = 190;
                             }
-                            else if( nNowFrame == 3 )
+                            else if ( nNowFrame == 3 )
                             {
                                 st状態[i].n相対X座標 = 0;
                                 st状態[i].n相対Y座標 = 0;
                                 st状態[i].n透明度 = 220;
                             }
-                            else if( nNowFrame == 4 )
+                            else if ( nNowFrame == 4 )
                             {
                                 st状態[i].n相対X座標 = 0;
                                 st状態[i].n相対Y座標 = -4;
                                 st状態[i].n透明度 = 255;
                             }
-                            else if( nNowFrame == 5 )
+                            else if ( nNowFrame == 5 )
                             {
                                 st状態[i].n相対X座標 = 0;
                                 st状態[i].n相対Y座標 = -6;
                                 st状態[i].n透明度 = 255;
                             }
-                            else if( nNowFrame >= 6 && nNowFrame <= 18 )
+                            else if ( nNowFrame >= 6 && nNowFrame <= 18 )
                             {
                                 st状態[i].fX方向拡大率 = 1f;
                                 st状態[i].fY方向拡大率 = 1f;
@@ -1030,7 +1030,7 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                                 st状態[i].n相対Y座標 = 0;
                                 st状態[i].n透明度 = 255;
                             }
-                            else if( nNowFrame == 19 )
+                            else if ( nNowFrame == 19 )
                             {
                                 st状態[i].fX方向拡大率 = 1f;
                                 st状態[i].fY方向拡大率 = 1f;
@@ -1039,7 +1039,7 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                                 st状態[i].n相対Y座標 = 0;
                                 st状態[i].n透明度 = 220;
                             }
-                            else if( nNowFrame == 20 )
+                            else if ( nNowFrame == 20 )
                             {
                                 st状態[i].fX方向拡大率 = 1f;
                                 st状態[i].fY方向拡大率 = 1f;
@@ -1048,7 +1048,7 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                                 st状態[i].n相対Y座標 = 6;
                                 st状態[i].n透明度 = 190;
                             }
-                            else if( nNowFrame == 21 )
+                            else if ( nNowFrame == 21 )
                             {
                                 st状態[i].fX方向拡大率 = 1f;
                                 st状態[i].fY方向拡大率 = 1f;
@@ -1057,7 +1057,7 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                                 st状態[i].n相対Y座標 = 12;
                                 st状態[i].n透明度 = 140;
                             }
-                            else if( nNowFrame == 22 )
+                            else if ( nNowFrame == 22 )
                             {
                                 st状態[i].fX方向拡大率 = 1f;
                                 st状態[i].fY方向拡大率 = 1f;
@@ -1066,7 +1066,7 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                                 st状態[i].n相対Y座標 = 18;
                                 st状態[i].n透明度 = 100;
                             }
-                            else if( nNowFrame == 23 )
+                            else if ( nNowFrame == 23 )
                             {
                                 st状態[i].fX方向拡大率 = 1f;
                                 st状態[i].fY方向拡大率 = 1f;
@@ -1077,10 +1077,10 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                             }
                             #endregion
                         }
-                        else if( st状態[ i ].judge == EJudgement.Auto )
+                        else if ( st状態[ i ].judge == EJudgement.Auto )
                         {
                             #region[ Auto ]
-                            if( nNowFrame == 0 )
+                            if ( nNowFrame == 0 )
                             {
                                 st状態[i].fX方向拡大率 = 0.625f;
                                 st状態[i].fY方向拡大率 = 3.70f;
@@ -1088,7 +1088,7 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                                 st状態[i].n相対Y座標 = 0;
                                 st状態[i].n透明度 = 0;
                             }
-                            else if( nNowFrame == 1 )
+                            else if ( nNowFrame == 1 )
                             {
                                 st状態[i].fX方向拡大率 = 1.125f;
                                 st状態[i].fY方向拡大率 = 2.00f;
@@ -1096,7 +1096,7 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                                 st状態[i].n相対Y座標 = 1;
                                 st状態[i].n透明度 = 0;
                             }
-                            else if( nNowFrame == 2 )
+                            else if ( nNowFrame == 2 )
                             {
                                 st状態[i].fX方向拡大率 = 1.375f;
                                 st状態[i].fY方向拡大率 = 0.66f;
@@ -1104,7 +1104,7 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                                 st状態[i].n相対Y座標 = 1;
                                 st状態[i].n透明度 = 0;
                             }
-                            else if( nNowFrame == 3 )
+                            else if ( nNowFrame == 3 )
                             {
                                 st状態[i].fX方向拡大率 = 1.25f;
                                 st状態[i].fY方向拡大率 = 1f;
@@ -1112,7 +1112,7 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                                 st状態[i].n相対Y座標 = 1;
                                 st状態[i].n透明度 = 0;
                             }
-                            else if( nNowFrame >= 4 && nNowFrame <= 18 )
+                            else if ( nNowFrame >= 4 && nNowFrame <= 18 )
                             {
                                 st状態[i].fX方向拡大率 = 1f;
                                 st状態[i].fY方向拡大率 = 1f;
@@ -1120,7 +1120,7 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                                 st状態[i].n相対Y座標 = 1;
                                 st状態[i].n透明度 = 0;
                             }
-                            else if( nNowFrame == 19 )
+                            else if ( nNowFrame == 19 )
                             {
                                 st状態[i].fX方向拡大率 = 1.25f;
                                 st状態[i].fY方向拡大率 = 1f;
@@ -1128,7 +1128,7 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                                 st状態[i].n相対Y座標 = 1;
                                 st状態[i].n透明度 = 0;
                             }
-                            else if( nNowFrame == 20 )
+                            else if ( nNowFrame == 20 )
                             {
                                 st状態[i].fX方向拡大率 = 1.375f;
                                 st状態[i].fY方向拡大率 = 0.66f;
@@ -1136,7 +1136,7 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                                 st状態[i].n相対Y座標 = 1;
                                 st状態[i].n透明度 = 0;
                             }
-                            else if( nNowFrame == 21 )
+                            else if ( nNowFrame == 21 )
                             {
                                 st状態[i].fX方向拡大率 = 1.50f;
                                 st状態[i].fY方向拡大率 = 0.50f;
@@ -1144,7 +1144,7 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                                 st状態[i].n相対Y座標 = 1;
                                 st状態[i].n透明度 = 0;
                             }
-                            else if( nNowFrame == 22 )
+                            else if ( nNowFrame == 22 )
                             {
                                 st状態[i].fX方向拡大率 = 1.91f;
                                 st状態[i].fY方向拡大率 = 0.23f;
@@ -1152,7 +1152,7 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                                 st状態[i].n相対Y座標 = 1;
                                 st状態[i].n透明度 = 0;
                             }
-                            else if( nNowFrame == 23 )
+                            else if ( nNowFrame == 23 )
                             {
                                 st状態[i].fX方向拡大率 = 1.91f;
                                 st状態[i].fY方向拡大率 = 0.23f;
@@ -1257,7 +1257,7 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                         if (j < 10)
                         {
                             num5 = stLaneSize[j].x;
-                            if( CDTXMania.ConfigIni.JudgementStringPosition.Drums == EType.A )
+                            if ( CDTXMania.ConfigIni.JudgementStringPosition.Drums == EType.A )
                             {
                                 num6 = CDTXMania.ConfigIni.bReverse.Drums ? 348 + -(n文字の縦表示位置[j] * 0x20) : (348 + n文字の縦表示位置[j] * 0x20);
                             }
@@ -1349,7 +1349,7 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                     }
                     #endregion
                     #region[ さいしんばん ]
-                    else if( CDTXMania.ConfigIni.nJudgeAnimeType == 2 )
+                    else if (false)
                     {
                         int num4 = 0;
                         int num5 = 0;
@@ -1357,7 +1357,7 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
                         if (j < 10)
                         {
                             num5 = stLaneSize[j].x;
-                            if( CDTXMania.ConfigIni.JudgementStringPosition.Drums == EType.A )
+                            if ( CDTXMania.ConfigIni.JudgementStringPosition.Drums == EType.A )
                             {
                                 num6 = CDTXMania.ConfigIni.bReverse.Drums ? 348 + -(n文字の縦表示位置[j] * 0x20) : (348 + n文字の縦表示位置[j] * 0x20);
                             }

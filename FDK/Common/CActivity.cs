@@ -34,7 +34,7 @@ public class CActivity
 	public virtual void OnActivate()
 	{
 		// すでに活性化してるなら何もしない。
-		if( bActivated )
+		if ( bActivated )
 			return;
 
 		bActivated = true;		// このフラグは、以下の処理をする前にセットする。

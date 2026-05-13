@@ -22,13 +22,13 @@ internal class CCharacterConsole : CActivity
 
 	public void tPrint( int x, int y, EFontType font, string str英数字文字列 )
 	{
-		if( bActivated && !string.IsNullOrEmpty( str英数字文字列 ) )
+		if ( bActivated && !string.IsNullOrEmpty( str英数字文字列 ) )
 		{
 			int BOL = x;
 			for( int i = 0; i < str英数字文字列.Length; i++ )
 			{
 				char ch = str英数字文字列[ i ];
-				if( ch == '\n' )
+				if ( ch == '\n' )
 				{
 					x = BOL;
 					y += nFontHeight;
@@ -36,13 +36,13 @@ internal class CCharacterConsole : CActivity
 				else
 				{
 					int index = str表記可能文字.IndexOf( ch );
-					if( index < 0 )
+					if ( index < 0 )
 					{
 						x += nFontWidth;
 					}
 					else
 					{
-						if( txフォント8x16[ (int) font / (int) EFontType.WhiteThin ] != null )
+						if ( txフォント8x16[ (int) font / (int) EFontType.WhiteThin ] != null )
 						{
 							txフォント8x16[ (int) font / (int) EFontType.WhiteThin ].tDraw2D(x, y, rc文字の矩形領域[ (int) font % (int) EFontType.WhiteThin, index ] );
 						}
@@ -74,14 +74,14 @@ internal class CCharacterConsole : CActivity
 	}
 	public override void OnDeactivate()
 	{
-		if( rc文字の矩形領域 != null )
+		if ( rc文字の矩形領域 != null )
 			rc文字の矩形領域 = null;
 
 		base.OnDeactivate();
 	}
 	public override void OnManagedCreateResources()
 	{
-		if( bActivated )
+		if ( bActivated )
 		{
 			txフォント8x16[ 0 ] = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\Console font 8x16.png" ) );
 			txフォント8x16[ 1 ] = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\Console font 2 8x16.png" ) );
@@ -90,11 +90,11 @@ internal class CCharacterConsole : CActivity
 	}
 	public override void OnManagedReleaseResources()
 	{
-		if( bActivated )
+		if ( bActivated )
 		{
 			for( int i = 0; i < 2; i++ )
 			{
-				if( txフォント8x16[ i ] != null )
+				if ( txフォント8x16[ i ] != null )
 				{
 					txフォント8x16[ i ].Dispose();
 					txフォント8x16[ i ] = null;

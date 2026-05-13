@@ -17,7 +17,7 @@ internal class CActPerfGuitarChipFire : CActPerfChipFireGB
 
 	public override void Start( int nLane )
 	{
-		if( ( nLane < 0 ) && ( nLane > 9 ) )
+		if ( ( nLane < 0 ) && ( nLane > 9 ) )
 		{
 			throw new IndexOutOfRangeException();
 		}
@@ -25,7 +25,7 @@ internal class CActPerfGuitarChipFire : CActPerfChipFireGB
 		int index = nLane;
 
 		//LEFT時のY座標
-		if( CDTXMania.ConfigIni.bLeft[ (int) e楽器パート ] )
+		if ( CDTXMania.ConfigIni.bLeft[ (int) e楽器パート ] )
 		{
 			index = ( ( index / 5 ) * 5 ) + ( 4 - ( index % 5 ) );
 		}

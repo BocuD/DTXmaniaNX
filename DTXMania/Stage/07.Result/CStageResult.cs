@@ -387,7 +387,7 @@ internal class CStageResult : CStage
 							}
 
 							//Check if Progress record existed or not; if not, update anyway
-							if(CScoreIni.tProgressBarLength(cChartData.SongInformation.progress[instrument]) == 0)
+							if (CScoreIni.tProgressBarLength(cChartData.SongInformation.progress[instrument]) == 0)
 							{
 								cChartData.SongInformation.progress[instrument] = stPerformanceEntry[instrument].strProgress;
 							}
@@ -421,7 +421,7 @@ internal class CStageResult : CStage
 
 		foreach( CChip chip in CDTXMania.DTX.listChip )
 		{
-			if( chip.bIsAutoPlayed )
+			if ( chip.bIsAutoPlayed )
 			{
 				if (chip.nChannelNumber != EChannel.Guitar_Wailing && chip.nChannelNumber != EChannel.Bass_Wailing) // Guitar/Bass Wailing は OK
 				{
@@ -492,8 +492,8 @@ internal class CStageResult : CStage
 			}
 		}
 
-		if( saveCond[(int)inst] )
-			//if(false)
+		if ( saveCond[(int)inst] )
+			//if (false)
 		{
 			using FileStream fs = new(directory + "\\" + filename, FileMode.Create, FileAccess.Write);
 			using BinaryWriter bw = new(fs);
@@ -525,7 +525,7 @@ internal class CStageResult : CStage
 	}
 	public override void OnDeactivate()
 	{
-		if( rResultSound != null )
+		if ( rResultSound != null )
 		{
 			CDTXMania.SoundManager.tDiscard( rResultSound );
 			rResultSound = null;
@@ -535,16 +535,16 @@ internal class CStageResult : CStage
 	}
 	public override void OnManagedCreateResources()
 	{
-		if( bActivated )
+		if ( bActivated )
 		{
 			base.OnManagedCreateResources();
 		}
 	}
 	public override void OnManagedReleaseResources()
 	{
-		if( bActivated )
+		if ( bActivated )
 		{
-			if(ctPlayNewRecord != null)
+			if (ctPlayNewRecord != null)
 			{
 				ctPlayNewRecord = null;
 			}
@@ -565,19 +565,19 @@ internal class CStageResult : CStage
 			    (i != 1 || (CDTXMania.DTX.bHasChips.Guitar && CDTXMania.ConfigIni.bGuitarRevolutionMode)) &&
 			    (i != 2 || (CDTXMania.DTX.bHasChips.Bass && CDTXMania.ConfigIni.bGuitarRevolutionMode)))
 			{ 
-				if(bAuto[i] == false)
+				if (bAuto[i] == false)
 				{
-					if(fPerfectPercentage[i] == 100.0)
+					if (fPerfectPercentage[i] == 100.0)
 					{
 						l_outputSoundEnum = 2; //Excellent
 					}
-					else if(fPoorPercentage[i] == 0.0 && fMissPercentage[i] == 0.0)
+					else if (fPoorPercentage[i] == 0.0 && fMissPercentage[i] == 0.0)
 					{
 						l_outputSoundEnum = 1; //Full Combo
 					}
 				}
 
-				if(bNewRecordSkill[i] == true)
+				if (bNewRecordSkill[i] == true)
 				{
 					l_newRecord = true;
 				}
@@ -585,11 +585,11 @@ internal class CStageResult : CStage
 		}
 
 		//Play the corresponding sound
-		if(l_outputSoundEnum == 1)
+		if (l_outputSoundEnum == 1)
 		{
 			CDTXMania.Skin.soundFullCombo.tPlay();
 		}
-		else if(l_outputSoundEnum == 2)
+		else if (l_outputSoundEnum == 2)
 		{
 			CDTXMania.Skin.soundExcellent.tPlay();
 		}
@@ -599,7 +599,7 @@ internal class CStageResult : CStage
 		}
 
 		//Create the delay timer of 150 x 10 = 1500 ms to play New Record
-		if(l_newRecord)
+		if (l_newRecord)
 		{
 			ctPlayNewRecord = new CCounter(0, 150, 10, CDTXMania.Timer);
 		}
@@ -618,7 +618,7 @@ internal class CStageResult : CStage
 		bAnimationComplete = true;
 
 		//Play new record if available
-		if(ctPlayNewRecord != null && ctPlayNewRecord.bInProgress)
+		if (ctPlayNewRecord != null && ctPlayNewRecord.bInProgress)
 		{
 			ctPlayNewRecord.tUpdate();
 			if (ctPlayNewRecord.bReachedEndValue)
@@ -628,7 +628,7 @@ internal class CStageResult : CStage
 			}
 		}
 		
-		// if( actResultImage.OnUpdateAndDraw() == 0 )
+		// if ( actResultImage.OnUpdateAndDraw() == 0 )
 		// {
 		// 	bAnimationComplete = false;
 		// }
@@ -651,27 +651,27 @@ internal class CStageResult : CStage
 		#endregion
 
 		// キー入力
-		if( CDTXMania.ConfigIni.bドラム打音を発声する && CDTXMania.ConfigIni.bDrumsEnabled )
+		if ( CDTXMania.ConfigIni.bドラム打音を発声する && CDTXMania.ConfigIni.bDrumsEnabled )
 		{
 			for( int i = 0; i < 11; i++ )
 			{
 				List<STInputEvent> events = CDTXMania.Pad.GetEvents( EInstrumentPart.DRUMS, (EPad) i );
-				if( events != null && events.Count > 0 )
+				if ( events != null && events.Count > 0 )
 				{
 					foreach( STInputEvent event2 in events )
 					{
-						if( !event2.b押された )
+						if ( !event2.b押された )
 						{
 							continue;
 						}
 						CChip rChip = rEmptyDrumChip[ i ];
-						if( rChip == null )
+						if ( rChip == null )
 						{
 							switch( (EPad) i )
 							{
 								case EPad.HH:
 									rChip = rEmptyDrumChip[ 7 ];
-									if( rChip == null )
+									if ( rChip == null )
 									{
 										rChip = rEmptyDrumChip[ 9 ];
 									}
@@ -687,7 +687,7 @@ internal class CStageResult : CStage
 
 								case EPad.HHO:
 									rChip = rEmptyDrumChip[ 0 ];
-									if( rChip == null )
+									if ( rChip == null )
 									{
 										rChip = rEmptyDrumChip[ 9 ];
 									}
@@ -699,17 +699,17 @@ internal class CStageResult : CStage
 
 								case EPad.LC:
 									rChip = rEmptyDrumChip[ 0 ];
-									if( rChip == null )
+									if ( rChip == null )
 									{
 										rChip = rEmptyDrumChip[ 7 ];
 									}
 									break;
 							}
 						}
-						if( rChip != null && rChip.nChannelNumber >= EChannel.HiHatClose && rChip.nChannelNumber <= EChannel.LeftPedal )
+						if ( rChip != null && rChip.nChannelNumber >= EChannel.HiHatClose && rChip.nChannelNumber <= EChannel.LeftPedal )
 						{
 							int nLane = nチャンネル0Atoレーン07[ rChip.nChannelNumber - EChannel.HiHatClose ];
-							if( nLane == 1 && ( rChip.nChannelNumber == EChannel.HiHatClose || ( rChip.nChannelNumber == EChannel.HiHatOpen && n最後に再生したHHのチャンネル番号 != EChannel.HiHatOpen ) ) )
+							if ( nLane == 1 && ( rChip.nChannelNumber == EChannel.HiHatClose || ( rChip.nChannelNumber == EChannel.HiHatOpen && n最後に再生したHHのチャンネル番号 != EChannel.HiHatOpen ) ) )
 							{
 								CDTXMania.DTX.tStopPlayingWav( n最後に再生したHHのWAV番号 );
 								n最後に再生したHHのWAV番号 = rChip.nIntegerValue_InternalNumber;

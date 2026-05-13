@@ -181,7 +181,7 @@ public class CSoundDeviceWASAPI : ISoundDevice
 
 		int n周波数 = 48000;   // 仮決め。lデバイス（≠ドライバ）がネイティブに対応している周波数であれば何でもいい？ようだ。BASSWASAPIでデバイスの周波数は変えられる。いずれにしろBASSMXで自動的にリサンプリングされる。
 		// BASS_Initは、WASAPI初期化の直前に行うよう変更。WASAPIのmix周波数を使って初期化することで、余計なリサンプリング処理を省き高速化するため。
-		//if( !Bass.BASS_Init( nデバイス, n周波数, BASSInit.BASS_DEVICE_DEFAULT, IntPtr.Zero ) )
+		//if ( !Bass.BASS_Init( nデバイス, n周波数, BASSInit.BASS_DEVICE_DEFAULT, IntPtr.Zero ) )
 		//	throw new Exception( string.Format( "BASS (WASAPI) の初期化に失敗しました。(BASS_Init)[{0}]", Bass.BASS_ErrorGetCode().ToString() ) );
 
 

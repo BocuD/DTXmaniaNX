@@ -63,7 +63,7 @@ internal class CActPerfDrumsComboDGB : CActPerfCommonCombo
     }
     protected override void tDrawCombo_Drums( int nCombo値, int nジャンプインデックス )
     {
-        if( CDTXMania.ConfigIni.bドラムコンボ文字の表示 )
+        if ( CDTXMania.ConfigIni.bドラムコンボ文字の表示 )
         {
             if (CDTXMania.ConfigIni.bGraph有効.Drums && CDTXMania.ConfigIni.bSmallGraph)
                 base.tDrawCombo_Drums(nCombo値, nジャンプインデックス, 1275, 60);
@@ -74,7 +74,7 @@ internal class CActPerfDrumsComboDGB : CActPerfCommonCombo
         n火薬カウント = (nCombo値 / 100);
 
         //if (nCombo値 % 100 == 0)
-        if(( nCombo値 > (nCombo値 / 100) + 100) && b爆発した[ n火薬カウント ] == false )
+        if (( nCombo値 > (nCombo値 / 100) + 100) && b爆発した[ n火薬カウント ] == false )
         {
             Start( nCombo値 );
         }

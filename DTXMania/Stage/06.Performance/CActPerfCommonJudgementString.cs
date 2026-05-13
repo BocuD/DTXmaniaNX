@@ -107,11 +107,11 @@ internal class CActPerfCommonJudgementString : CActivity
 
 	public virtual void Start( int nLane, EJudgement judge, int lag )
 	{
-		if( ( nLane < 0 ) || ( nLane > 14 ) )
+		if ( ( nLane < 0 ) || ( nLane > 14 ) )
 		{
 			throw new IndexOutOfRangeException( "有効範囲は 0～14 です。" );
 		}
-		if( ( ( nLane >= 10 ) || ( ( (EType) CDTXMania.ConfigIni.JudgementStringPosition.Drums ) != EType.C ) ) && ( ( ( nLane != 13 ) || ( ( (EType) CDTXMania.ConfigIni.JudgementStringPosition.Guitar ) != EType.D ) ) && ( ( nLane != 14 ) || ( ( (EType) CDTXMania.ConfigIni.JudgementStringPosition.Bass ) != EType.D ) ) ) )
+		if ( ( ( nLane >= 10 ) || ( ( (EType) CDTXMania.ConfigIni.JudgementStringPosition.Drums ) != EType.C ) ) && ( ( ( nLane != 13 ) || ( ( (EType) CDTXMania.ConfigIni.JudgementStringPosition.Guitar ) != EType.D ) ) && ( ( nLane != 14 ) || ( ( (EType) CDTXMania.ConfigIni.JudgementStringPosition.Bass ) != EType.D ) ) ) )
 		{
 			if (CDTXMania.ConfigIni.nJudgeAnimeType != 0)
 			{
@@ -157,7 +157,7 @@ internal class CActPerfCommonJudgementString : CActivity
 
 		for ( int i = 0; i < 12; i++ )
 		{
-			if( CDTXMania.ConfigIni.nShowLagTypeColor == 0 )
+			if ( CDTXMania.ConfigIni.nShowLagTypeColor == 0 )
 			{
 				stLag数値[ i      ].rc = new RectangleF( ( i % 4 ) * 15     , ( i / 4 ) * 19     , 15, 19 );	// plus numbers
 				stLag数値[ i + 12 ].rc = new RectangleF( ( i % 4 ) * 15 + 64, ( i / 4 ) * 19 + 64, 15, 19 );	// minus numbers
@@ -180,7 +180,7 @@ internal class CActPerfCommonJudgementString : CActivity
 		for (int i = 0; i < 15; i++)
 		{
 			this.stLaneSize[i] = new STLaneSize();
-			if( CDTXMania.ConfigIni.bDrumsEnabled )
+			if ( CDTXMania.ConfigIni.bDrumsEnabled )
 			{
 				this.stLaneSize[i] = default(STLaneSize);
 				switch ( CDTXMania.ConfigIni.eLaneType.Drums )
@@ -226,7 +226,7 @@ internal class CActPerfCommonJudgementString : CActivity
 	}
 	public override void OnManagedCreateResources()
 	{
-		if( bActivated )
+		if ( bActivated )
 		{
 			if(CDTXMania.ConfigIni.nJudgeAnimeType == 1)
 			{

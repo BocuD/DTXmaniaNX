@@ -190,7 +190,7 @@ public class DensityGraph : UIGroup
 
             if (CDTXMania.ConfigIni.bGuitarEnabled)
             {
-                if(chipsBarHeights.Length == gbChipsBarLine.Length)
+                if (chipsBarHeights.Length == gbChipsBarLine.Length)
                 {
                     for (int i = 0; i < gbChipsBarLine.Length; i++)
                     {
@@ -202,7 +202,7 @@ public class DensityGraph : UIGroup
             }
             else
             {
-                if(chipsBarHeights.Length == drumChipsBarLine.Length)
+                if (chipsBarHeights.Length == drumChipsBarLine.Length)
                 {
                     for (int i = 0; i < drumChipsBarLine.Length; i++)
                     {
@@ -221,7 +221,7 @@ public class DensityGraph : UIGroup
     
     private int[] nCalculateChipsBarPxHeight(int[] arrChipCount, int nMaxBarLength)
     {
-        if(arrChipCount != null)
+        if (arrChipCount != null)
         {
             int[] nChipsBarPxHeight = new int[arrChipCount.Length];
 

@@ -20,7 +20,7 @@ internal abstract class CActPerfChipFireGB : CActivity
 
 	public virtual void Start( int nLane, int n中央X, int n中央Y )
 	{
-		if( ( nLane >= 0 ) || ( nLane <= 5 ) )
+		if ( ( nLane >= 0 ) || ( nLane <= 5 ) )
 		{
 			pt中央位置[ nLane ].X = n中央X;
 			pt中央位置[ nLane ].Y = n中央Y;
@@ -51,30 +51,30 @@ internal abstract class CActPerfChipFireGB : CActivity
 	}
 	public override void OnManagedCreateResources()
 	{
-		if( bActivated )
+		if ( bActivated )
 		{
 			tx火花[ 0 ] = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay chip fire red.png" ) );
-			if( tx火花[ 0 ] != null )
+			if ( tx火花[ 0 ] != null )
 			{
 				tx火花[0].blendMode = BlendMode.Additive;
 			}
 			tx火花[ 1 ] = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay chip fire green.png" ) );
-			if( tx火花[ 1 ] != null )
+			if ( tx火花[ 1 ] != null )
 			{
 				tx火花[1].blendMode = BlendMode.Additive;
 			}
 			tx火花[ 2 ] = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay chip fire blue.png" ) );
-			if( tx火花[ 2 ] != null )
+			if ( tx火花[ 2 ] != null )
 			{
 				tx火花[2].blendMode = BlendMode.Additive;
 			}
 			tx火花[ 3 ] = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay chip fire yellow.png" ) );
-			if( tx火花[ 3 ] != null )
+			if ( tx火花[ 3 ] != null )
 			{
 				tx火花[3].blendMode = BlendMode.Additive;
 			}
 			tx火花[ 4 ] = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay chip fire purple.png" ) );
-			if( tx火花[ 4 ] != null )
+			if ( tx火花[ 4 ] != null )
 			{
 				tx火花[ 4 ].blendMode = BlendMode.Additive;
 			}
@@ -85,19 +85,19 @@ internal abstract class CActPerfChipFireGB : CActivity
 
 	public override int OnUpdateAndDraw()
 	{
-		if( bActivated )
+		if ( bActivated )
 		{
 			for( int i = 0; i < 10; i++ )
 			{
 				ct進行[ i ].tUpdate();
-				if( ct進行[ i ].bReachedEndValue )
+				if ( ct進行[ i ].bReachedEndValue )
 				{
 					ct進行[ i ].tStop();
 				}
 			}
 			for( int j = 0; j < 10; j++ )
 			{
-				if( ( ct進行[ j ].nCurrentElapsedTimeMs != -1 ) && ( tx火花[ j % 5 ] != null ) )
+				if ( ( ct進行[ j ].nCurrentElapsedTimeMs != -1 ) && ( tx火花[ j % 5 ] != null ) )
 				{
 					float scale = (float) ( 3.0 * Math.Cos( ( Math.PI * ( 90.0 - ( 90.0 * ( ( (double) ct進行[ j ].nCurrentValue ) / 56.0 ) ) ) ) / 180.0 ) );
 					int x = pt中央位置[ j ].X - ( (int) ( ( tx火花[ j % 3 ].Width * scale ) / 2f ) );

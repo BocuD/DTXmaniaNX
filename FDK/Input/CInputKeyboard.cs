@@ -334,7 +334,7 @@ public class CInputKeyboard : IInputDevice, IDisposable
 				devKeyboard.Dispose();
 				devKeyboard = null;
 			}
-			//if( this.timer != null )
+			//if ( this.timer != null )
 			//{
 			//    this.timer.Dispose();
 			//    this.timer = null;

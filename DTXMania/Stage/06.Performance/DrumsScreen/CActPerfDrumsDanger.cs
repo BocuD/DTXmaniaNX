@@ -10,7 +10,7 @@ internal class CActPerfDrumsDanger : CActPerfCommonDanger
 {
 	public override void OnManagedCreateResources()
 	{
-		if( bActivated )
+		if ( bActivated )
 		{
 			tx黒 = BaseTexture.LoadFromPath(CSkin.Path( @"Graphics\7_Danger.png" ) );
 			base.OnManagedCreateResources();
@@ -30,9 +30,9 @@ internal class CActPerfDrumsDanger : CActPerfCommonDanger
 	/// <returns></returns>
 	public override int tUpdateAndDraw( bool bIsDangerDrums, bool bIsDangerGuitar, bool bIsDangerBass )
 	{
-		if( bActivated )
+		if ( bActivated )
 		{
-			if( !bIsDangerDrums )
+			if ( !bIsDangerDrums )
 			{
 				bDanger中[(int)EInstrumentPart.DRUMS] = false;
 				return 0;

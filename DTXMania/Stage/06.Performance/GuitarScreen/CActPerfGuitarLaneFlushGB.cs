@@ -28,7 +28,7 @@ internal class CActPerfGuitarLaneFlushGB : CActPerfCommonLaneFlushGB
 
 	public override int OnUpdateAndDraw()
 	{
-		if( bActivated )
+		if ( bActivated )
 		{
 			#region[ レーンの描画 ]
 			//---------------
@@ -52,7 +52,7 @@ internal class CActPerfGuitarLaneFlushGB : CActPerfCommonLaneFlushGB
 
 			for ( int i = 0; i < 10; i++ )
 			{
-				if( !ctUpdate[ i ].bStopped )
+				if ( !ctUpdate[ i ].bStopped )
 				{
 					EInstrumentPart e楽器パート = ( i < 5 ) ? EInstrumentPart.GUITAR : EInstrumentPart.BASS;
 					BaseTexture texture = CDTXMania.ConfigIni.bReverse[ (int) e楽器パート ] ? txFlush[ ( i % 5 ) + 5 ] : txFlush[ i % 5 ];
@@ -62,14 +62,14 @@ internal class CActPerfGuitarLaneFlushGB : CActPerfCommonLaneFlushGB
 					int x2 = ((i < 5) ? 88 : 954);
 					int y = CDTXMania.ConfigIni.bReverse[ (int) e楽器パート ] ? 414 : 100;
 					int y2 = CDTXMania.ConfigIni.bReverse[(int)e楽器パート] ? 414 : 104;
-					if( texture != null && CDTXMania.ConfigIni.bLaneFlush[ (int) e楽器パート ] )
+					if ( texture != null && CDTXMania.ConfigIni.bLaneFlush[ (int) e楽器パート ] )
 					{
 						texture.tDraw2D(x, y, new RectangleF( 37, 0, ( 37 * ( 70 - ctUpdate[ i ].nCurrentValue)) / 70, 256 ) );
-						//if( j == 4 )
+						//if ( j == 4 )
 						//this.txレーンフラッシュ.tDraw2D( CDTXMania.app.Device, x2 + ( ( i < 5 ? i : i - 5 ) * 39 ), y2, new RectangleF( i * 39, 0, 41, 566 ) );
 					}
 					ctUpdate[ i ].tUpdate();
-					if( ctUpdate[ i ].bReachedEndValue )
+					if ( ctUpdate[ i ].bReachedEndValue )
 					{
 						ctUpdate[ i ].tStop();
 					}
@@ -97,23 +97,23 @@ internal class CActPerfGuitarLaneFlushGB : CActPerfCommonLaneFlushGB
 			{
 				txLaneFlush.tDraw2D(( CDTXMania.ConfigIni.bLeft.Guitar ? 86 : 242 ), 104, new RectangleF(156, 0, 41, 566));
 			}
-			if( !ctUpdate[ 5 ].bStopped && CDTXMania.ConfigIni.bLaneFlush.Bass )
+			if ( !ctUpdate[ 5 ].bStopped && CDTXMania.ConfigIni.bLaneFlush.Bass )
 			{
 				txLaneFlush.tDraw2D(( CDTXMania.ConfigIni.bLeft.Bass ? 1112 : 957 ), 104, new RectangleF(0, 0, 41, 566));
 			}
-			if( !ctUpdate[ 6 ].bStopped && CDTXMania.ConfigIni.bLaneFlush.Bass )
+			if ( !ctUpdate[ 6 ].bStopped && CDTXMania.ConfigIni.bLaneFlush.Bass )
 			{
 				txLaneFlush.tDraw2D(( CDTXMania.ConfigIni.bLeft.Bass ? 1073 : 995 ), 104, new RectangleF(39, 0, 41, 566));
 			}
-			if( !ctUpdate[ 7 ].bStopped && CDTXMania.ConfigIni.bLaneFlush.Bass )
+			if ( !ctUpdate[ 7 ].bStopped && CDTXMania.ConfigIni.bLaneFlush.Bass )
 			{
 				txLaneFlush.tDraw2D(1034, 104, new RectangleF(78, 0, 41, 566));
 			}
-			if( !ctUpdate[ 8 ].bStopped && CDTXMania.ConfigIni.bLaneFlush.Bass )
+			if ( !ctUpdate[ 8 ].bStopped && CDTXMania.ConfigIni.bLaneFlush.Bass )
 			{
 				txLaneFlush.tDraw2D(( CDTXMania.ConfigIni.bLeft.Bass ? 995 : 1073 ), 104, new RectangleF(117, 0, 41, 566));
 			}
-			if( !ctUpdate[ 9 ].bStopped && CDTXMania.ConfigIni.bLaneFlush.Bass )
+			if ( !ctUpdate[ 9 ].bStopped && CDTXMania.ConfigIni.bLaneFlush.Bass )
 			{
 				txLaneFlush.tDraw2D(( CDTXMania.ConfigIni.bLeft.Bass ? 957 : 1112 ), 104, new RectangleF(156, 0, 41, 566));
 			}

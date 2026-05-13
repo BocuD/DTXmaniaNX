@@ -31,9 +31,9 @@ internal class CActPerfScrollSpeed : CActivity
 	}
 	public override unsafe int OnUpdateAndDraw()
 	{
-		if( bActivated )
+		if ( bActivated )
 		{
-			if( bJustStartedUpdate )
+			if ( bJustStartedUpdate )
 			{
 				n速度変更制御タイマ.Drums = n速度変更制御タイマ.Guitar = n速度変更制御タイマ.Bass = CSoundManager.rcPerformanceTimer.nシステム時刻;
 				bJustStartedUpdate = false;
@@ -42,27 +42,27 @@ internal class CActPerfScrollSpeed : CActivity
 			for( int i = 0; i < 3; i++ )
 			{
 				double num3 = (double) CDTXMania.ConfigIni.nScrollSpeed[ i ];
-				if( num < n速度変更制御タイマ[ i ] )
+				if ( num < n速度変更制御タイマ[ i ] )
 				{
 					n速度変更制御タイマ[ i ] = num;
 				}
 				while( ( num - n速度変更制御タイマ[ i ] ) >= 2 )
 				{
-					if( db譜面スクロール速度[ i ] < num3 )
+					if ( db譜面スクロール速度[ i ] < num3 )
 					{
 						db現在の譜面スクロール速度[ i ] += 0.012;
 
-						if( db現在の譜面スクロール速度[ i ] > num3 )
+						if ( db現在の譜面スクロール速度[ i ] > num3 )
 						{
 							db現在の譜面スクロール速度[ i ] = num3;
 							db譜面スクロール速度[ i ] = num3;
 						}
 					}
-					else if( db譜面スクロール速度[ i ] > num3 )
+					else if ( db譜面スクロール速度[ i ] > num3 )
 					{
 						db現在の譜面スクロール速度[ i ] -= 0.012;
 
-						if( db現在の譜面スクロール速度[ i ] < num3 )
+						if ( db現在の譜面スクロール速度[ i ] < num3 )
 						{
 							db現在の譜面スクロール速度[ i ] = num3;
 							db譜面スクロール速度[ i ] = num3;

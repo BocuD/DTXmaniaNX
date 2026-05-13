@@ -65,7 +65,7 @@ internal class CStageStartup : CStage
 	}
 	public override void OnManagedCreateResources()
 	{
-		if(bActivated)
+		if (bActivated)
 		{
 			txBackground = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\1_background.jpg"));
 			base.OnManagedCreateResources();
@@ -73,7 +73,7 @@ internal class CStageStartup : CStage
 	}
 	public override void OnManagedReleaseResources()
 	{
-		if(bActivated)
+		if (bActivated)
 		{
 			base.OnManagedReleaseResources();
 		}

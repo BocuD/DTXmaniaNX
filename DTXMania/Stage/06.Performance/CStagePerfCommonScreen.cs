@@ -33,7 +33,7 @@ internal abstract class CStagePerfCommonScreen : CStage
 
             //Shorten details string to avoid hitting max of 128 bytes
             string detailsString = $"{CDTXMania.chosenSong.title}";
-            if(detailsString.Length > 50)
+            if (detailsString.Length > 50)
             {
                 detailsString = detailsString.Substring(0, 50);
             }
@@ -1360,7 +1360,7 @@ internal abstract class CStagePerfCommonScreen : CStage
     }
     protected void tSetStatusPanel()  // tステータスパネルの選択
     {
-        if( CDTXMania.chosenSong != null )
+        if ( CDTXMania.chosenSong != null )
         {
             actStatusPanel.tSetDifficultyLabelFromScript( CDTXMania.chosenSong.difficultyLabel[ CDTXMania.confirmedSongDifficulty ] );
         }
@@ -1529,7 +1529,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                     }
                 }
 
-                if( eJudgeResult == EJudgement.Great || eJudgeResult == EJudgement.Perfect || eJudgeResult == EJudgement.Auto )
+                if ( eJudgeResult == EJudgement.Great || eJudgeResult == EJudgement.Perfect || eJudgeResult == EJudgement.Auto )
                     CDTXMania.stagePerfDrumsScreen.tProcessChipHit_BonusChip( CDTXMania.ConfigIni, CDTXMania.DTX, pChip );
                 break;
 
@@ -1718,7 +1718,7 @@ internal abstract class CStagePerfCommonScreen : CStage
             }
             else
             {
-                if(!bPChipIsAutoPlay && pChip.eInstrumentPart == EInstrumentPart.DRUMS && eJudgeResult != EJudgement.Miss && eJudgeResult != EJudgement.Bad)
+                if (!bPChipIsAutoPlay && pChip.eInstrumentPart == EInstrumentPart.DRUMS && eJudgeResult != EJudgement.Miss && eJudgeResult != EJudgement.Bad)
                 {
                     #region[ドラム]
                     int nCombos = actCombo.nCurrentCombo.Drums;
@@ -1766,7 +1766,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                 }
                 else if (pChip.eInstrumentPart == EInstrumentPart.GUITAR || pChip.eInstrumentPart == EInstrumentPart.BASS)
                 {
-                    if(eJudgeResult != EJudgement.Miss && eJudgeResult != EJudgement.Bad)
+                    if (eJudgeResult != EJudgement.Miss && eJudgeResult != EJudgement.Bad)
                     {
                         #region[ ギター&ベース ]
                         int nCombos = actCombo.nCurrentCombo[(int)pChip.eInstrumentPart];
@@ -2876,17 +2876,17 @@ internal abstract class CStagePerfCommonScreen : CStage
                     pChip.bTargetGhost判定済み = true;
 
                     int ghostLag = 128;
-                    if( 0 <= pChip.n楽器パートでの出現順 && pChip.n楽器パートでの出現順 < CDTXMania.listTargetGhsotLag[instIndex].Count )
+                    if ( 0 <= pChip.n楽器パートでの出現順 && pChip.n楽器パートでの出現順 < CDTXMania.listTargetGhsotLag[instIndex].Count )
                     {
                         ghostLag = CDTXMania.listTargetGhsotLag[instIndex][pChip.n楽器パートでの出現順];
                         // 上位８ビットが１ならコンボが途切れている（ギターBAD空打ちでコンボ数を再現するための措置）
-                        if( ghostLag > 255 )
+                        if ( ghostLag > 255 )
                         {
                             nコンボ数_TargetGhost[instIndex] = 0;
                         }
                         ghostLag = (ghostLag & 255) - 128;
                     }
-                    else if( CDTXMania.ConfigIni.eTargetGhost[instIndex] == ETargetGhostData.PERFECT )
+                    else if ( CDTXMania.ConfigIni.eTargetGhost[instIndex] == ETargetGhostData.PERFECT )
                     {
                         ghostLag = 0;
                     }
@@ -3534,7 +3534,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                     {
                         int l_drumPanelWidth = 0x22f;
                         int l_xOffset = 0;
-                        if(configIni.eNumOfLanes.Drums == EType.B)
+                        if (configIni.eNumOfLanes.Drums == EType.B)
                         {
                             l_drumPanelWidth = 0x207;
                         }
@@ -3685,7 +3685,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                 }
             }
         }
-        else if(pChip.eInstrumentPart == EInstrumentPart.GUITAR || pChip.eInstrumentPart == EInstrumentPart.BASS)
+        else if (pChip.eInstrumentPart == EInstrumentPart.GUITAR || pChip.eInstrumentPart == EInstrumentPart.BASS)
         {
             //bChipHasButtonArray is array of 5, RGBYP
             bool[] bChipHasButtonArray = EnumConverter.GetArrayBoolFromEChannel(pChip.nChannelNumber);
@@ -4179,7 +4179,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                             inst == EInstrumentPart.GUITAR ? 244 : 1115
                         ];
                             
-                        if(inst == EInstrumentPart.GUITAR && CDTXMania.ConfigIni.bLeft.Guitar)
+                        if (inst == EInstrumentPart.GUITAR && CDTXMania.ConfigIni.bLeft.Guitar)
                         {
                             Array.Reverse(nChipXPos);
                         }
@@ -4211,7 +4211,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                         {
                             if (bChipColorFlags[i])
                             {
-                                if(inst == EInstrumentPart.GUITAR || inst == EInstrumentPart.BASS)
+                                if (inst == EInstrumentPart.GUITAR || inst == EInstrumentPart.BASS)
                                 {
                                     int num8 = nChipXPos[i];
                                     RectangleF rect1 = rChipTxRectArray[i];
@@ -4289,7 +4289,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                 bUsePerfectGhost = false;
             }
 
-            if( bUsePerfectGhost )
+            if ( bUsePerfectGhost )
             {
                 // 従来のAUTOを使用する場合
                 autoPlayCondition &= ( pChip.nDistanceFromBar[ instIndex ] < 0 );
@@ -4381,7 +4381,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                 // #35411 modify end
             }
 
-            if( pChip.eInstrumentPart == EInstrumentPart.GUITAR && CDTXMania.ConfigIni.bGraph有効.Guitar )
+            if ( pChip.eInstrumentPart == EInstrumentPart.GUITAR && CDTXMania.ConfigIni.bGraph有効.Guitar )
             {
                 #region[ ギターゴースト ]
                 if (CDTXMania.ConfigIni.eTargetGhost.Guitar != ETargetGhostData.NONE &&
@@ -4401,7 +4401,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                     }
                     else
                     {
-                        if( CDTXMania.ConfigIni.nSkillMode == 0 )
+                        if ( CDTXMania.ConfigIni.nSkillMode == 0 )
                         {
                             val = CScoreIni.tCalculatePlayingSkillOld(
                                 CDTXMania.DTX.nVisibleChipsCount.Guitar,
@@ -4433,7 +4433,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                 }
                 #endregion
             }
-            else if( pChip.eInstrumentPart == EInstrumentPart.BASS && CDTXMania.ConfigIni.bGraph有効.Bass )
+            else if ( pChip.eInstrumentPart == EInstrumentPart.BASS && CDTXMania.ConfigIni.bGraph有効.Bass )
             {
                 #region[ ベースゴースト ]
                 if (CDTXMania.ConfigIni.eTargetGhost.Bass != ETargetGhostData.NONE &&
@@ -4453,7 +4453,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                     }
                     else
                     {
-                        if( CDTXMania.ConfigIni.nSkillMode == 0 )
+                        if ( CDTXMania.ConfigIni.nSkillMode == 0 )
                         {
                             val = CScoreIni.tCalculatePlayingSkillOld(
                                 CDTXMania.DTX.nVisibleChipsCount.Bass,
@@ -5392,11 +5392,11 @@ internal abstract class CStagePerfCommonScreen : CStage
                     }
 
                     //Check Long Note status
-                    if(nロングノートPart[(int)inst] < 5)
+                    if (nロングノートPart[(int)inst] < 5)
                     {
                         int nLongNoteNextPart = nロングノートPart[(int)inst] + 1;
                         int nLongNoteNextPartTime = chipロングノートHit中[(int)inst].nPlaybackTimeMs + (nLongNoteNextPart * nCurrentLongNoteDuration[(int)inst] / 6);
-                        if(CSoundManager.rcPerformanceTimer.nCurrentTime >= nLongNoteNextPartTime)
+                        if (CSoundManager.rcPerformanceTimer.nCurrentTime >= nLongNoteNextPartTime)
                         {
                             //Fire off 100 bonus pt up to 500 pts for holding long notes
                             actScore.Add(inst, bIsAutoPlay, 100);

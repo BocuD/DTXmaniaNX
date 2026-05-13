@@ -11,7 +11,7 @@ public class CTraceLogListener : TraceListener
 
 	public override void Flush()
 	{
-		if( streamWriter != null )
+		if ( streamWriter != null )
 		{
 			try
 			{
@@ -24,7 +24,7 @@ public class CTraceLogListener : TraceListener
 	}
 	public override void TraceEvent( TraceEventCache eventCache, string source, TraceEventType eventType, int id, string message )
 	{
-		if( streamWriter != null )
+		if ( streamWriter != null )
 		{
 			try
 			{
@@ -39,7 +39,7 @@ public class CTraceLogListener : TraceListener
 	}
 	public override void TraceEvent( TraceEventCache eventCache, string source, TraceEventType eventType, int id, string format, params object[] args )
 	{
-		if( streamWriter != null )
+		if ( streamWriter != null )
 		{
 			try
 			{
@@ -54,7 +54,7 @@ public class CTraceLogListener : TraceListener
 	}
 	public override void Write( string message )
 	{
-		if( streamWriter != null )
+		if ( streamWriter != null )
 		{
 			try
 			{
@@ -67,7 +67,7 @@ public class CTraceLogListener : TraceListener
 	}
 	public override void WriteLine( string message )
 	{
-		if( streamWriter != null )
+		if ( streamWriter != null )
 		{
 			try
 			{
@@ -81,7 +81,7 @@ public class CTraceLogListener : TraceListener
 
 	protected override void Dispose( bool disposing )
 	{
-		if( streamWriter != null )
+		if ( streamWriter != null )
 		{
 			try
 			{
@@ -101,7 +101,7 @@ public class CTraceLogListener : TraceListener
 
 	private void tイベント種別を出力する( TraceEventType eventType )
 	{
-		if( streamWriter != null )
+		if ( streamWriter != null )
 		{
 			try
 			{
@@ -135,7 +135,7 @@ public class CTraceLogListener : TraceListener
 	}
 	private void tインデントを出力する()
 	{
-		if( ( streamWriter != null ) && ( IndentLevel > 0 ) )
+		if ( ( streamWriter != null ) && ( IndentLevel > 0 ) )
 		{
 			try
 			{

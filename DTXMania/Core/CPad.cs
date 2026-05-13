@@ -104,7 +104,7 @@ public class CPad
 	}
 	public bool bPressed( EInstrumentPart part, EPad pad )
 	{
-		if( part != EInstrumentPart.UNKNOWN )
+		if ( part != EInstrumentPart.UNKNOWN )
 		{
 			CConfigIni.CKeyAssign.STKEYASSIGN[] stkeyassignArray = rConfigIni.KeyAssign[ (int) part ][ (int) pad ];
 			for( int i = 0; i < stkeyassignArray.Length; i++ )
@@ -112,7 +112,7 @@ public class CPad
 				switch( stkeyassignArray[ i ].InputDevice )
 				{
 					case EInputDevice.Keyboard:
-						if( !rInputManager.Keyboard.bKeyPressed( stkeyassignArray[ i ].Code ) )
+						if ( !rInputManager.Keyboard.bKeyPressed( stkeyassignArray[ i ].Code ) )
 							break;
 
 						stDetectedDevice.Keyboard = true;
@@ -121,7 +121,7 @@ public class CPad
 					case EInputDevice.MIDI入力:
 					{
 						IInputDevice device2 = rInputManager.MidiIn( stkeyassignArray[ i ].ID );
-						if( ( device2 == null ) || !device2.bKeyPressed( stkeyassignArray[ i ].Code ) )
+						if ( ( device2 == null ) || !device2.bKeyPressed( stkeyassignArray[ i ].Code ) )
 							break;
 
 						stDetectedDevice.MIDIIN = true;
@@ -129,18 +129,18 @@ public class CPad
 					}
 					case EInputDevice.Joypad:
 					{
-						if( !rConfigIni.joystickDict.ContainsKey( stkeyassignArray[ i ].ID ) )
+						if ( !rConfigIni.joystickDict.ContainsKey( stkeyassignArray[ i ].ID ) )
 							break;
 
 						IInputDevice device = rInputManager.Joystick( stkeyassignArray[ i ].ID );
-						if( ( device == null ) || !device.bKeyPressed( stkeyassignArray[ i ].Code ) )
+						if ( ( device == null ) || !device.bKeyPressed( stkeyassignArray[ i ].Code ) )
 							break;
 
 						stDetectedDevice.Joypad = true;
 						return true;
 					}
 					case EInputDevice.Mouse:
-						if( !rInputManager.Mouse.bKeyPressed( stkeyassignArray[ i ].Code ) )
+						if ( !rInputManager.Mouse.bKeyPressed( stkeyassignArray[ i ].Code ) )
 							break;
 
 						stDetectedDevice.Mouse = true;
@@ -201,7 +201,7 @@ public class CPad
 	}
 	public bool bPressedDGB( EPad pad )
 	{
-		if( !bPressed( EInstrumentPart.DRUMS, pad ) && !bPressed( EInstrumentPart.GUITAR, pad ) )
+		if ( !bPressed( EInstrumentPart.DRUMS, pad ) && !bPressed( EInstrumentPart.GUITAR, pad ) )
 		{
 			return bPressed( EInstrumentPart.BASS, pad );
 		}
@@ -209,7 +209,7 @@ public class CPad
 	}
 	public bool bPressedGB( EPad pad )
 	{
-		if( !bPressed( EInstrumentPart.GUITAR, pad ) )
+		if ( !bPressed( EInstrumentPart.GUITAR, pad ) )
 		{
 			return bPressed( EInstrumentPart.BASS, pad );
 		}
@@ -217,7 +217,7 @@ public class CPad
 	}
 	public bool bPressing( EInstrumentPart part, EPad pad )
 	{
-		if( part != EInstrumentPart.UNKNOWN )
+		if ( part != EInstrumentPart.UNKNOWN )
 		{
 			CConfigIni.CKeyAssign.STKEYASSIGN[] stkeyassignArray = rConfigIni.KeyAssign[ (int) part ][ (int) pad ];
 			for( int i = 0; i < stkeyassignArray.Length; i++ )
@@ -225,7 +225,7 @@ public class CPad
 				switch( stkeyassignArray[ i ].InputDevice )
 				{
 					case EInputDevice.Keyboard:
-						if( !rInputManager.Keyboard.bKeyPressing( stkeyassignArray[ i ].Code ) )
+						if ( !rInputManager.Keyboard.bKeyPressing( stkeyassignArray[ i ].Code ) )
 						{
 							break;
 						}
@@ -234,12 +234,12 @@ public class CPad
 
 					case EInputDevice.Joypad:
 					{
-						if( !rConfigIni.joystickDict.ContainsKey( stkeyassignArray[ i ].ID ) )
+						if ( !rConfigIni.joystickDict.ContainsKey( stkeyassignArray[ i ].ID ) )
 						{
 							break;
 						}
 						IInputDevice device = rInputManager.Joystick( stkeyassignArray[ i ].ID );
-						if( ( device == null ) || !device.bKeyPressing( stkeyassignArray[ i ].Code ) )
+						if ( ( device == null ) || !device.bKeyPressing( stkeyassignArray[ i ].Code ) )
 						{
 							break;
 						}
@@ -247,7 +247,7 @@ public class CPad
 						return true;
 					}
 					case EInputDevice.Mouse:
-						if( !rInputManager.Mouse.bKeyPressing( stkeyassignArray[ i ].Code ) )
+						if ( !rInputManager.Mouse.bKeyPressing( stkeyassignArray[ i ].Code ) )
 						{
 							break;
 						}
@@ -260,7 +260,7 @@ public class CPad
 	}
 	public bool bPressingGB( EPad pad )
 	{
-		if( !bPressing( EInstrumentPart.GUITAR, pad ) )
+		if ( !bPressing( EInstrumentPart.GUITAR, pad ) )
 		{
 			return bPressing( EInstrumentPart.BASS, pad );
 		}

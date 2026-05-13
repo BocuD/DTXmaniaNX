@@ -578,7 +578,7 @@ public class CChip : IComparable<CChip>, ICloneable
 		nDistanceFromBar.Bass = (int)((nPlaybackTimeMs - nCurrentTime) * ScrollSpeedBass);
 
 		//New: Compute Distance for End of Long Note chip
-		if(bIsLongNote)
+		if (bIsLongNote)
 		{
 			chipロングノート終端.ComputeDistanceFromBar(nCurrentTime, dbPerformanceScrollSpeed);
 		}

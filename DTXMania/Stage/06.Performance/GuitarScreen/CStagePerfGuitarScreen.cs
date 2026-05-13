@@ -73,7 +73,7 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		int nGraphUsePart = CDTXMania.ConfigIni.bGraph有効.Guitar ? 1 : 2;
 		ct登場用 = new CCounter(0, 12, 16, CDTXMania.Timer);
 		dtLastQueueOperation = DateTime.MinValue;
-		if( CDTXMania.bCompactMode )
+		if ( CDTXMania.bCompactMode )
 		{
 			var score = new CChartData();
 			actGraph.dbGraphValue_Goal = score.SongInformation.HighCompletionRate[ nGraphUsePart ];
@@ -97,7 +97,7 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 	}
 	public override void OnManagedCreateResources()
 	{
-		if( bActivated )
+		if ( bActivated )
 		{
 			bサビ区間 = false;
 			//this.tGenerateBackgroundTexture();
@@ -334,7 +334,7 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 	protected override EJudgement tProcessChipHit( long nHitTime, CChip pChip, bool bCorrectLane )
 	{
 		EJudgement eJudgeResult = tProcessChipHit( nHitTime, pChip, EInstrumentPart.GUITAR, bCorrectLane );
-		if(pChip.eInstrumentPart == EInstrumentPart.GUITAR)
+		if (pChip.eInstrumentPart == EInstrumentPart.GUITAR)
 		{
 			if (CDTXMania.ConfigIni.nSkillMode == 0)
 				actGraph.dbグラフ値現在_渡 = CScoreIni.tCalculatePlayingSkillOld(CDTXMania.DTX.nVisibleChipsCount.Guitar, nHitCount_ExclAuto.Guitar.Perfect, nHitCount_ExclAuto.Guitar.Great, nHitCount_ExclAuto.Guitar.Good, nHitCount_ExclAuto.Guitar.Poor, nHitCount_ExclAuto.Guitar.Miss, actCombo.nCurrentCombo.HighestValue.Guitar, EInstrumentPart.GUITAR, bIsAutoPlay);
@@ -363,7 +363,7 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 				actGraph.n現在のAutoを含まない判定数_渡[4] = nHitCount_ExclAuto.Guitar.Miss;
 			}
 		}
-		else if(pChip.eInstrumentPart == EInstrumentPart.BASS)
+		else if (pChip.eInstrumentPart == EInstrumentPart.BASS)
 		{
 			if (CDTXMania.ConfigIni.nSkillMode == 0)
 				actGraph.dbグラフ値現在_渡 = CScoreIni.tCalculatePlayingSkillOld(CDTXMania.DTX.nVisibleChipsCount.Bass, nHitCount_ExclAuto.Bass.Perfect, nHitCount_ExclAuto.Bass.Great, nHitCount_ExclAuto.Bass.Good, nHitCount_ExclAuto.Bass.Poor, nHitCount_ExclAuto.Bass.Miss, actCombo.nCurrentCombo.HighestValue.Bass, EInstrumentPart.BASS, bIsAutoPlay);
@@ -680,10 +680,10 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 					}
 				}
 			}
-			//    if( !pChip.bHit && ( pChip.nDistanceFromBar.Guitar < 0 ) )
+			//    if ( !pChip.bHit && ( pChip.nDistanceFromBar.Guitar < 0 ) )
 			//    {
 			//        pChip.bHit = true;
-			//        if( configIni.bAutoPlay.Guitar )
+			//        if ( configIni.bAutoPlay.Guitar )
 			//        {
 			//            this.actWailingBonus.Start( EInstrumentPart.GUITAR, this.r現在の歓声Chip.Guitar );
 			//        }
@@ -931,7 +931,7 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 			y = CDTXMania.ConfigIni.bReverse.Bass ? ((nJudgeLinePosY.Bass - pChip.nDistanceFromBar.Bass) + 0) : ((nJudgeLinePosY.Bass + pChip.nDistanceFromBar.Bass) + 9);
 			if ( ( dTX.bHasChips.Bass && ( y > 104 ) ) && ( ( y < 670 ) && ( txChip != null ) ) )
 			{
-				if( CDTXMania.ConfigIni.nLaneDisp.Bass == 0 || CDTXMania.ConfigIni.nLaneDisp.Bass == 1 )
+				if ( CDTXMania.ConfigIni.nLaneDisp.Bass == 0 || CDTXMania.ConfigIni.nLaneDisp.Bass == 1 )
 				{
 					//todo: what the fuck is vcScaleRatio
 					//txChip.vcScaleRatio.Y = 1f;

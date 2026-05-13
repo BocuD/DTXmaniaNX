@@ -35,11 +35,11 @@ internal class CActPerfCommonScore : CActivity
 	public void Set( EInstrumentPart part, double nScore )
 	{
 		int nPart = (int) part;
-		if( nCurrentTrueScore[ nPart ] != nScore )
+		if ( nCurrentTrueScore[ nPart ] != nScore )
 		{
 			nCurrentTrueScore[ nPart ] = nScore;
 			nスコアの増分[ nPart ] = (long) ( ( (double) ( nCurrentTrueScore[ nPart ] - n現在表示中のスコア[ nPart ] ) ) / 20.0 );
-			if( nスコアの増分[ nPart ] < 1L )
+			if ( nスコアの増分[ nPart ] < 1L )
 			{
 				nスコアの増分[ nPart ] = 1L;
 			}

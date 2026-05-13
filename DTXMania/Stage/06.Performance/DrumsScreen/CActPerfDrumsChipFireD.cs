@@ -58,7 +58,7 @@ internal class CActPerfDrumsChipFireD : CActivity
 			{
 				for( int j = 0; j < FIRE_MAX; j++ )
 				{
-					if( !st火花[ j ].b使用中 )
+					if ( !st火花[ j ].b使用中 )
 					{
 						st火花[ j ].b使用中 = true;
 						st火花[ j ].nLane = (int) lane;
@@ -112,13 +112,13 @@ internal class CActPerfDrumsChipFireD : CActivity
 						else if (CDTXMania.ConfigIni.eLaneType.Drums == EType.C)
 						{
 							st青い星[j].fX = nレーンの中央X座標C[(int)lane] + 320;
-							if( CDTXMania.ConfigIni.eRDPosition == ERDPosition.RDRC )
+							if ( CDTXMania.ConfigIni.eRDPosition == ERDPosition.RDRC )
 								st青い星[ j ].fX = nレーンの中央X座標C_改[ (int)lane ] + 320;
 						}
 						else if (CDTXMania.ConfigIni.eLaneType.Drums == EType.D)
 						{
 							st青い星[j].fX = nレーンの中央X座標D[(int)lane] + 320;
-							if( CDTXMania.ConfigIni.eRDPosition == ERDPosition.RDRC )
+							if ( CDTXMania.ConfigIni.eRDPosition == ERDPosition.RDRC )
 								st青い星[ j ].fX = nレーンの中央X座標D_改[ (int)lane ] + 320;
 						}
 						st青い星[j].fY = ((((float)iPosY) + 350 + nJudgeLinePosY_delta_Drums + (((float)Math.Sin((double)st青い星[j].f半径)) * st青い星[j].f半径)) - 170f); //Y座標
@@ -216,13 +216,13 @@ internal class CActPerfDrumsChipFireD : CActivity
 			}
 		}
             
-		if( bフィルイン && ( tx青い星 != null ) )
+		if ( bフィルイン && ( tx青い星 != null ) )
 		{
 			for( int i = 0; i < 0x10; i++ )
 			{
 				for( int j = 0; j < STAR_MAX; j++ )
 				{
-					if( !st青い星[ j ].b使用中 )
+					if ( !st青い星[ j ].b使用中 )
 					{
 						st青い星[ j ].b使用中 = true;
 						int n回転初期値 = CDTXMania.Random.Next( 360 );
@@ -270,13 +270,13 @@ internal class CActPerfDrumsChipFireD : CActivity
 				}
 			}
 		}
-		if( b大波 && ( txBigWave != null ) )
+		if ( b大波 && ( txBigWave != null ) )
 		{
 			for( int i = 0; i < 4; i++ )
 			{
 				for( int j = 0; j < BIGWAVE_MAX; j++ )
 				{
-					if( !st大波[ j ].b使用中 )
+					if ( !st大波[ j ].b使用中 )
 					{
 						st大波[ j ].b使用中 = true;
 						st大波[ j ].nLane = (int) lane;
@@ -294,13 +294,13 @@ internal class CActPerfDrumsChipFireD : CActivity
 				}
 			}
 		}
-		if( b細波 && ( txWave2 != null ) )
+		if ( b細波 && ( txWave2 != null ) )
 		{
 			for( int i = 0; i < 1; i++ )
 			{
 				for( int j = 0; j < BIGWAVE_MAX; j++ )
 				{
-					if( !st細波[ j ].b使用中 )
+					if ( !st細波[ j ].b使用中 )
 					{
 						st細波[ j ].b使用中 = true;
 						st細波[ j ].nLane = (int) lane;
@@ -387,7 +387,7 @@ internal class CActPerfDrumsChipFireD : CActivity
 	}
 	public override void OnManagedCreateResources()
 	{
-		if( bActivated )
+		if ( bActivated )
 		{
 			if (CDTXMania.ConfigIni.nExplosionFrames >= 2)
 			{
@@ -403,7 +403,7 @@ internal class CActPerfDrumsChipFireD : CActivity
 				tx火花[0].blendMode = BlendMode.Additive;
 			}
 			tx火花[1] = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums chip fire_HH.png" ) );
-			if( tx火花[1] != null )
+			if ( tx火花[1] != null )
 			{
 				tx火花[1].blendMode = BlendMode.Additive;
 			}
@@ -448,62 +448,62 @@ internal class CActPerfDrumsChipFireD : CActivity
 				tx火花[9].blendMode = BlendMode.Additive;
 			}
 			tx青い星[0] = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums chip star_LC.png" ) );
-			if( tx青い星[0] != null )
+			if ( tx青い星[0] != null )
 			{
 				tx青い星[0].blendMode = BlendMode.Additive;
 			}
 			tx青い星[1] = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums chip star_HH.png" ) );
-			if( tx青い星[1] != null )
+			if ( tx青い星[1] != null )
 			{
 				tx青い星[1].blendMode = BlendMode.Additive;
 			}
 			tx青い星[2] = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums chip star_SD.png" ) );
-			if( tx青い星[2] != null )
+			if ( tx青い星[2] != null )
 			{
 				tx青い星[2].blendMode = BlendMode.Additive;
 			}
 			tx青い星[3] = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums chip star_BD.png" ) );
-			if( tx青い星[3] != null )
+			if ( tx青い星[3] != null )
 			{
 				tx青い星[3].blendMode = BlendMode.Additive;
 			}
 			tx青い星[4] = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums chip star_HT.png" ) );
-			if( tx青い星[4] != null )
+			if ( tx青い星[4] != null )
 			{
 				tx青い星[4].blendMode = BlendMode.Additive;
 			}
 			tx青い星[5] = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums chip star_LT.png" ) );
-			if( tx青い星[5] != null )
+			if ( tx青い星[5] != null )
 			{
 				tx青い星[5].blendMode = BlendMode.Additive;
 			}
 			tx青い星[6] = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums chip star_FT.png" ) );
-			if( tx青い星[6] != null )
+			if ( tx青い星[6] != null )
 			{
 				tx青い星[6].blendMode = BlendMode.Additive;
 			}
 			tx青い星[7] = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums chip star_CY.png" ) );
-			if( tx青い星[7] != null )
+			if ( tx青い星[7] != null )
 			{
 				tx青い星[7].blendMode = BlendMode.Additive;
 			}
 			tx青い星[8] = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums chip star_LP.png" ) );
-			if( tx青い星[8] != null )
+			if ( tx青い星[8] != null )
 			{
 				tx青い星[8].blendMode = BlendMode.Additive;
 			}
 			tx青い星[9] = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums chip star_RD.png" ) );
-			if( tx青い星[9] != null )
+			if ( tx青い星[9] != null )
 			{
 				tx青い星[9].blendMode = BlendMode.Additive;
 			}
 			txBigWave = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums chip wave.png" ) );
-			if( txBigWave != null )
+			if ( txBigWave != null )
 			{
 				txBigWave.blendMode = BlendMode.Additive;
 			}
 			txWave2 = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums chip wave2.png" ) );
-			if( txWave2 != null )
+			if ( txWave2 != null )
 			{
 				txWave2.blendMode = BlendMode.Additive;
 			}
@@ -524,7 +524,7 @@ internal class CActPerfDrumsChipFireD : CActivity
 
 	public override int OnUpdateAndDraw()
 	{
-		if( bActivated )
+		if ( bActivated )
 		{
 			for (int i = 0; i < STAR_MAX; i++)
 			{
@@ -650,10 +650,10 @@ internal class CActPerfDrumsChipFireD : CActivity
                 
 			for( int i = 0; i < FIRE_MAX; i++ )
 			{
-				if( st火花[ i ].b使用中 )
+				if ( st火花[ i ].b使用中 )
 				{
 					st火花[ i ].ct進行.tUpdate();
-					if( st火花[ i ].ct進行.bReachedEndValue )
+					if ( st火花[ i ].ct進行.bReachedEndValue )
 					{
 						st火花[ i ].ct進行.tStop();
 						st火花[ i ].b使用中 = false;
@@ -789,25 +789,25 @@ internal class CActPerfDrumsChipFireD : CActivity
 			}
 			for( int i = 0; i < BIGWAVE_MAX; i++ )
 			{
-				if( st大波[ i ].b使用中 )
+				if ( st大波[ i ].b使用中 )
 				{
 					st大波[ i ].ct進行.tUpdate();
-					if( st大波[ i ].ct進行.bReachedEndValue )
+					if ( st大波[ i ].ct進行.bReachedEndValue )
 					{
 						st大波[ i ].ct進行.tStop();
 						st大波[ i ].b使用中 = false;
 					}
-					if( st大波[ i ].ct進行.nCurrentValue >= 0 )
+					if ( st大波[ i ].ct進行.nCurrentValue >= 0 )
 					{
 						Matrix4x4 matrix3 = Matrix4x4.Identity;
 						float num10 = ( (float) st大波[ i ].ct進行.nCurrentValue ) / 100f;
 						float angle = st大波[ i ].f回転単位 + ( st大波[ i ].f回転方向 * CConversion.DegreeToRadian( (float) ( 60f * num10 ) ) );
 						float num12 = 1f;
-						if( num10 < 0.4f )
+						if ( num10 < 0.4f )
 						{
 							num12 = 2.5f * num10;
 						}
-						else if( num10 < 0.8f )
+						else if ( num10 < 0.8f )
 						{
 							num12 = (float) ( 1.0 + ( 10.1 * ( 1.0 - Math.Cos( ( Math.PI / 2 * ( num10 - 0.4 ) ) * 2.5 ) ) ) );
 						}
@@ -816,7 +816,7 @@ internal class CActPerfDrumsChipFireD : CActivity
 							num12 = 11.1f + ( 12.5f * ( num10 - 0.8f ) );
 						}
 						int num13 = 0xff;
-						if( num10 < 0.75f )
+						if ( num10 < 0.75f )
 						{
 							num13 = 0x37;
 						}
@@ -872,7 +872,7 @@ internal class CActPerfDrumsChipFireD : CActivity
 								matrix3 *= Matrix4x4.CreateTranslation(nレーンの中央X座標D[st大波[i].nLane] + 280 - GameWindowSize.Width / 2f, -(iPosY + nJudgeLinePosY_delta_Drums + 200 - GameWindowSize.Height / 2f), 0f);
 							}
 						}
-						if( txBigWave != null )
+						if ( txBigWave != null )
 						{
 							// txBigWave.nTransparency = num13;
 							Color4 col = Color4.White;
@@ -885,15 +885,15 @@ internal class CActPerfDrumsChipFireD : CActivity
 			}
 			for( int i = 0; i < BIGWAVE_MAX; i++ )
 			{
-				if( st細波[ i ].b使用中 )
+				if ( st細波[ i ].b使用中 )
 				{
 					st細波[ i ].ct進行.tUpdate();
-					if( st細波[ i ].ct進行.bReachedEndValue )
+					if ( st細波[ i ].ct進行.bReachedEndValue )
 					{
 						st細波[ i ].ct進行.tStop();
 						st細波[ i ].b使用中 = false;
 					}
-					if( st細波[ i ].ct進行.nCurrentValue >= 0 )
+					if ( st細波[ i ].ct進行.nCurrentValue >= 0 )
 					{
 						Matrix4x4 matrix4 = Matrix4x4.Identity;
 						float num15 = ( (float) st細波[ i ].ct進行.nCurrentValue ) / 100f;

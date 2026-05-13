@@ -32,14 +32,14 @@ internal class CItemList : CItemBase
 	}
 	public override void tMoveItemValueToNext()
 	{
-		if( ++nCurrentlySelectedIndex >= listItemValues.Count )
+		if ( ++nCurrentlySelectedIndex >= listItemValues.Count )
 		{
 			nCurrentlySelectedIndex = 0;
 		}
 	}
 	public override void tMoveItemValueToPrevious()
 	{
-		if( --nCurrentlySelectedIndex < 0 )
+		if ( --nCurrentlySelectedIndex < 0 )
 		{
 			nCurrentlySelectedIndex = listItemValues.Count - 1;
 		}

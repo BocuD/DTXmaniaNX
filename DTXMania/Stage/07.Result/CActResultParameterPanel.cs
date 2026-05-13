@@ -409,7 +409,7 @@ internal class CActResultParameterPanel : CActivity
     }
     public override void OnDeactivate()
     {
-        if( ct表示用 != null )
+        if ( ct表示用 != null )
         {
             ct表示用 = null;
         }
@@ -541,7 +541,7 @@ internal class CActResultParameterPanel : CActivity
 
                 //this.tDrawStringLarge(58 + this.n本体X[j], 277 + this.n本体Y, string.Format("{0,6:##0.00}", stageResult.stPerformanceEntry[j].dbPerformanceSkill));
                 //Conditional checks for MAX
-                if(txSkillMax != null && stageResult.stPerformanceEntry[j].dbPerformanceSkill >= 100.0)
+                if (txSkillMax != null && stageResult.stPerformanceEntry[j].dbPerformanceSkill >= 100.0)
                 {
                     txSkillMax.tDraw2D(127 + n本体X[j], 277 + n本体Y);
                 }
@@ -549,18 +549,18 @@ internal class CActResultParameterPanel : CActivity
                 {
                     tDrawStringLarge(58 + n本体X[j], 277 + n本体Y,
                         $"{stageResult.stPerformanceEntry[j].dbPerformanceSkill,6:##0.00}");
-                    if(txPercent != null)
+                    if (txPercent != null)
                         txPercent.tDraw2D(217 + n本体X[j], 287 + n本体Y);
                 }
 
                 tDrawStringLarge(88 + n本体X[j], 363 + n本体Y, $"{stageResult.stPerformanceEntry[j].dbGameSkill,6:##0.00}");
                     
-                if(tx難易度パネル != null)
+                if (tx難易度パネル != null)
                     tx難易度パネル.tDraw2D(14 + n本体X[j], 266 + n本体Y, new RectangleF( rectDiffPanelPoint.X, rectDiffPanelPoint.Y, 60, 60));
                 tレベル数字描画((bCLASSIC == true ? 26 : 18) + n本体X[j], 290 + n本体Y, str);
 
                 //Draw Progress Bar Panels first
-                if(txProgressBarPanel != null)
+                if (txProgressBarPanel != null)
                 {
                     txProgressBarPanel.tDraw2D(255 + n本体X[j], 1 + n本体Y);
                 }
@@ -718,15 +718,15 @@ internal class CActResultParameterPanel : CActivity
         {
             for( int i = 0; i < stSmallStringPosition.Length; i++ )
             {
-                if( stSmallStringPosition[ i ].ch == ch )
+                if ( stSmallStringPosition[ i ].ch == ch )
                 {
                     RectangleF rectangle = new( stSmallStringPosition[ i ].pt.X, stSmallStringPosition[ i ].pt.Y, 14, 0x12 );
-                    if( ch == '%' )
+                    if ( ch == '%' )
                     {
                         rectangle.Width -= 2;
                         rectangle.Height -= 2;
                     }
-                    if( txCharacter[ 0 ] != null )
+                    if ( txCharacter[ 0 ] != null )
                     {
                         txCharacter[ 0 ].tDraw2D(x, y, rectangle );
                     }
@@ -746,14 +746,14 @@ internal class CActResultParameterPanel : CActivity
         {
             for( int i = 0; i < stLargeStringPosition.Length; i++ )
             {
-                if( stLargeStringPosition[ i ].ch == ch )
+                if ( stLargeStringPosition[ i ].ch == ch )
                 {
                     RectangleF rectangle = new( stLargeStringPosition[ i ].pt.X, stLargeStringPosition[ i ].pt.Y, 28, 42 );
-                    if( ch == '.' )
+                    if ( ch == '.' )
                     {
                         rectangle.Width -= 18;
                     }
-                    if( txCharacter[ 1 ] != null )
+                    if ( txCharacter[ 1 ] != null )
                     {
                         txCharacter[ 1 ].tDraw2D(x, y, rectangle );
                     }
@@ -914,7 +914,7 @@ internal class CActResultParameterPanel : CActivity
         string strRawScriptFile;
 
         //ファイルの存在チェック
-        if( File.Exists( CSkin.Path( @"Script\difficult.dtxs" ) ) )
+        if ( File.Exists( CSkin.Path( @"Script\difficult.dtxs" ) ) )
         {
             //スクリプトを開く
             StreamReader reader = new StreamReader( CSkin.Path( @"Script\difficult.dtxs" ), Encoding.GetEncoding( "Shift_JIS" ) );
@@ -926,33 +926,33 @@ internal class CActResultParameterPanel : CActivity
 
             for( int i = 0; i < strSingleLine.Length; i++ )
             {
-                if( strSingleLine[ i ].StartsWith( "//" ) )
+                if ( strSingleLine[ i ].StartsWith( "//" ) )
                     continue; //コメント行の場合は無視
 
                 //まずSplit
                 string[] arScriptLine = strSingleLine[ i ].Split( ',' );
 
-                if( ( arScriptLine.Length >= 4 && arScriptLine.Length <= 5 ) == false )
+                if ( ( arScriptLine.Length >= 4 && arScriptLine.Length <= 5 ) == false )
                     continue; //引数が4つか5つじゃなければ無視。
 
-                if( arScriptLine[ 0 ] != "7" )
+                if ( arScriptLine[ 0 ] != "7" )
                     continue; //使用するシーンが違うなら無視。
 
-                if( arScriptLine.Length == 4 )
+                if ( arScriptLine.Length == 4 )
                 {
-                    if( String.Compare( arScriptLine[ 1 ], strラベル名, true ) != 0 )
+                    if ( String.Compare( arScriptLine[ 1 ], strラベル名, true ) != 0 )
                         continue; //ラベル名が違うなら無視。大文字小文字区別しない
                 }
-                else if( arScriptLine.Length == 5 )
+                else if ( arScriptLine.Length == 5 )
                 {
-                    if( arScriptLine[ 4 ] == "1" )
+                    if ( arScriptLine[ 4 ] == "1" )
                     {
-                        if( arScriptLine[ 1 ] != strラベル名 )
+                        if ( arScriptLine[ 1 ] != strラベル名 )
                             continue; //ラベル名が違うなら無視。
                     }
                     else
                     {
-                        if( String.Compare( arScriptLine[ 1 ], strラベル名, true ) != 0 )
+                        if ( String.Compare( arScriptLine[ 1 ], strラベル名, true ) != 0 )
                             continue; //ラベル名が違うなら無視。大文字小文字区別しない
                     }
                 }

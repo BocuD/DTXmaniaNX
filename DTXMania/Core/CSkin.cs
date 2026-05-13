@@ -60,7 +60,7 @@ internal class CSkin : IDisposable
 		{
 			get
 			{
-				if( rSound[ 1 - n次に鳴るサウンド番号 ] == null )
+				if ( rSound[ 1 - n次に鳴るサウンド番号 ] == null )
 					return false;
 
 				return rSound[ 1 - n次に鳴るサウンド番号 ].bIsPlaying;
@@ -71,7 +71,7 @@ internal class CSkin : IDisposable
 			get
 			{
 				CSound sound = rSound[ 1 - n次に鳴るサウンド番号 ];
-				if( sound == null )
+				if ( sound == null )
 					return 0;
 
 				return sound.nPosition;
@@ -79,7 +79,7 @@ internal class CSkin : IDisposable
 			set
 			{
 				CSound sound = rSound[ 1 - n次に鳴るサウンド番号 ];
-				if( sound != null )
+				if ( sound != null )
 					sound.nPosition = value;
 			}
 		}
@@ -88,7 +88,7 @@ internal class CSkin : IDisposable
 			get
 			{
 				CSound sound = rSound[ n次に鳴るサウンド番号 ];
-				if( sound == null )
+				if ( sound == null )
 					return 0;
 
 				return sound.nPosition;
@@ -96,7 +96,7 @@ internal class CSkin : IDisposable
 			set
 			{
 				CSound sound = rSound[ n次に鳴るサウンド番号 ];
-				if( sound != null )
+				if ( sound != null )
 					sound.nPosition = value;
 			}
 		}
@@ -105,7 +105,7 @@ internal class CSkin : IDisposable
 			get
 			{
 				CSound sound = rSound[ 1 - n次に鳴るサウンド番号 ];
-				if( sound == null )
+				if ( sound == null )
 					return 0;
 
 				return sound.nVolume;
@@ -113,7 +113,7 @@ internal class CSkin : IDisposable
 			set
 			{
 				CSound sound = rSound[ 1 - n次に鳴るサウンド番号 ];
-				if( sound != null )
+				if ( sound != null )
 					sound.nVolume = value;
 			}
 		}
@@ -122,7 +122,7 @@ internal class CSkin : IDisposable
 			get
 			{
 				CSound sound = rSound[ n次に鳴るサウンド番号 ];
-				if( sound == null )
+				if ( sound == null )
 				{
 					return 0;
 				}
@@ -131,7 +131,7 @@ internal class CSkin : IDisposable
 			set
 			{
 				CSound sound = rSound[ n次に鳴るサウンド番号 ];
-				if( sound != null )
+				if ( sound != null )
 				{
 					sound.nVolume = value;
 				}
@@ -142,7 +142,7 @@ internal class CSkin : IDisposable
 			get
 			{
 				CSound sound = rSound[ 1 - n次に鳴るサウンド番号 ];
-				if( sound == null )
+				if ( sound == null )
 				{
 					return 0;
 				}
@@ -154,7 +154,7 @@ internal class CSkin : IDisposable
 			get
 			{
 				CSound sound = rSound[ n次に鳴るサウンド番号 ];
-				if( sound == null )
+				if ( sound == null )
 				{
 					return 0;
 				}
@@ -190,10 +190,10 @@ internal class CSkin : IDisposable
 		{
 			bReadNotTried = false;
 			b読み込み成功 = false;
-			if( string.IsNullOrEmpty( strFilename ) )
+			if ( string.IsNullOrEmpty( strFilename ) )
 				throw new InvalidOperationException( "ファイル名が無効です。" );
 
-			if( !File.Exists( Path( strFilename ) ) )
+			if ( !File.Exists( Path( strFilename ) ) )
 			{
 				throw new FileNotFoundException( strFilename );
 			}
@@ -251,15 +251,15 @@ internal class CSkin : IDisposable
 					bReadNotTried = false;
 				}
 			}
-			if( bExclusive )
+			if ( bExclusive )
 			{
-				if( rLastPlayedExclusiveSystemSound != null )
+				if ( rLastPlayedExclusiveSystemSound != null )
 					rLastPlayedExclusiveSystemSound.tStop();
 
 				rLastPlayedExclusiveSystemSound = this;
 			}
 			CSound sound = rSound[ n次に鳴るサウンド番号 ];
-			if( sound != null )
+			if ( sound != null )
 			{
 				sound.nVolume = nVolume;
 				sound.tStartPlaying(bループ);
@@ -268,13 +268,13 @@ internal class CSkin : IDisposable
 		}
 		public void tStop()
 		{
-			if( rSound[ 0 ] != null )
+			if ( rSound[ 0 ] != null )
 				rSound[ 0 ].tStopPlayback();
 
-			if( rSound[ 1 ] != null )
+			if ( rSound[ 1 ] != null )
 				rSound[ 1 ].tStopPlayback();
 
-			if( rLastPlayedExclusiveSystemSound == this )
+			if ( rLastPlayedExclusiveSystemSound == this )
 				rLastPlayedExclusiveSystemSound = null;
 		}
 
@@ -296,11 +296,11 @@ internal class CSkin : IDisposable
 		//-----------------
 		public void Dispose()
 		{
-			if( !bDisposed済み )
+			if ( !bDisposed済み )
 			{
 				for( int i = 0; i < 2; i++ )
 				{
-					if( rSound[ i ] != null )
+					if ( rSound[ i ] != null )
 					{
 						CDTXMania.SoundManager.tDiscard( rSound[ i ] );
 						rSound[ i ] = null;
@@ -894,7 +894,7 @@ internal class CSkin : IDisposable
 
 	public void tReadSkinConfig()
 	{
-		if( File.Exists( Path( @"SkinConfig.ini" ) ) )
+		if ( File.Exists( Path( @"SkinConfig.ini" ) ) )
 		{
 			string str;
 			//this.tClearAllKeyAssignments();
@@ -911,7 +911,7 @@ internal class CSkin : IDisposable
 	/// </summary>
 	public void tSaveSkinConfig()
 	{
-		if( File.Exists( Path( @"SkinConfig.ini" ) ) )
+		if ( File.Exists( Path( @"SkinConfig.ini" ) ) )
 		{
 			StreamWriter sw = new StreamWriter( Path( @"SkinConfig.ini" ), false, Encoding.GetEncoding( "unicode" ) );
 			sw.WriteLine( "; スキンごとでの設定ファイル。現在テスト段階です。" );
@@ -1133,7 +1133,7 @@ internal class CSkin : IDisposable
 	//-----------------
 	public void Dispose()
 	{
-		if( !bDisposed済み )
+		if ( !bDisposed済み )
 		{
 			for( int i = 0; i < nSystemSoundCount; i++ )
 				this[ i ].Dispose();
