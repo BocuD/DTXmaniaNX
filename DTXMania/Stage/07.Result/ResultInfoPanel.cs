@@ -43,6 +43,10 @@ public class ResultInfoPanel : UIGroup
         levelInt.font = "texgyreadventor-regular.otf";
         levelInt.outlineWidth = 0;
         
+        if (DTXLevelDeci.ToString().Length == 1)
+        {
+            DTXLevelDeci *= 10;
+        }
         var levelFractionText = AddChild(new UIText("." + DTXLevelDeci, 50));
         levelFractionText.position = new Vector3(278, 102, 0);
         levelFractionText.anchor = new Vector2(0, 1);
@@ -65,6 +69,11 @@ public class ResultInfoPanel : UIGroup
         rateInt.fontSource = FontSource.System;
         rateInt.font = "texgyreadventor-regular.otf";
         rateInt.outlineWidth = 0;
+        
+        if (rateFraction.ToString().Length == 1)
+        {
+            rateFraction *= 10;
+        }
         
         var rateFractionText = AddChild(new UIText("." + rateFraction + "%", 50));
         rateFractionText.position = new Vector3(278, 176, 0);
