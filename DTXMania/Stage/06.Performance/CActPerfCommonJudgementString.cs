@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System.Diagnostics;
+using System.Drawing;
 using System.Runtime.InteropServices;
 using DTXMania.Core;
 using DTXMania.UI.Drawable;
@@ -234,19 +235,21 @@ internal abstract class CActPerfCommonJudgementString : CActivity
 		int nRectY = CDTXMania.ConfigIni.nJudgeHeight;
 
 		int xc = ( baseX + judgementStatus[ lane ].nRelativeX ) + ( stLaneSize[ lane ].w / 2 );
-		int x = ( xc - ( (int) ( 110f * judgementStatus[ lane ].fXScaleRatio ) ) ) - ( ( nRectX - 225 ) / 2 );
-		int y = ( ( baseY + judgementStatus[ lane ].nRelativeY ) - ( (int) ( ( 140f * judgementStatus[ lane ].fYScaleRatio ) / 2.0 ) ) ) - ( ( nRectY - 135 ) / 2 );
+		float x = xc - ( 110f * judgementStatus[ lane ].fXScaleRatio ) - ( ( nRectX - 225 ) / 2f );
+		float y = baseY + judgementStatus[ lane ].nRelativeY - ( 140f * judgementStatus[ lane ].fYScaleRatio / 2f ) - ( ( nRectY - 135 ) / 2f );
 
 		DrawJudgeFrame( lane, x, y, nRectX, nRectY );
 		DrawLag( lane, xc, y );
 	}
 
-	protected void DrawJudgeFrame( int lane, int x, int y, int nRectX, int nRectY )
+	protected void DrawJudgeFrame( int lane, float x, float y, int nRectX, int nRectY )
 	{
 		if ( CDTXMania.ConfigIni.nJudgeFrames <= 1 )
 		{
 			return;
 		}
+
+		Trace.TraceInformation($"{x}, {y}");
 
 		BaseTexture txJudge = judgementGraphicSheet;
 
@@ -274,7 +277,7 @@ internal abstract class CActPerfCommonJudgementString : CActivity
 		}
 	}
 
-	protected void DrawLag( int lane, int xc, int y )
+	protected void DrawLag( int lane, int xc, float y )
 	{
 		if ( lagDisplayMode != (int) EShowLagType.ON &&
 			!( ( lagDisplayMode == (int) EShowLagType.GREAT_POOR ) && ( judgementStatus[ lane ].judge != EJudgement.Perfect ) ) )
@@ -290,7 +293,7 @@ internal abstract class CActPerfCommonJudgementString : CActivity
 		bool minus = judgementStatus[ lane ].nLag < 0;
 		int offsetX = 0;
 		string strDispLag = judgementStatus[ lane ].nLag.ToString();
-		int x = xc - strDispLag.Length * 15 / 2;
+		float x = xc - strDispLag.Length * 15 / 2f;
 		
 		for ( int i = 0; i < strDispLag.Length; i++ )
 		{
