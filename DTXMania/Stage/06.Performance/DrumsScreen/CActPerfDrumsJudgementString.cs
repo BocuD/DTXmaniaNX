@@ -91,11 +91,6 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
         return true;
     }
 
-    protected override BaseTexture GetJudgeTexture()
-    {
-        return CDTXMania.stagePerfDrumsScreen.tx判定画像anime;
-    }
-
     protected override bool ShouldDrawJudgementString()
     {
         return CDTXMania.ConfigIni.bDisplayJudge.Drums;

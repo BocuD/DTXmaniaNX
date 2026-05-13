@@ -1,5 +1,4 @@
 ﻿using DTXMania.Core;
-using DTXMania.UI.Drawable;
 
 namespace DTXMania;
 
@@ -64,11 +63,6 @@ internal class CActPerfGuitarJudgementString : CActPerfCommonJudgementString
         }
 
         return true;
-    }
-
-    protected override BaseTexture GetJudgeTexture()
-    {
-        return CDTXMania.stagePerfGuitarScreen.tx判定画像anime;
     }
 
     protected override bool ShouldDrawJudgementString()

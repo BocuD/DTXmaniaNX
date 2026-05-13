@@ -144,12 +144,6 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         ctWailingChipPatternAnimation = new CCounter(0, 4, 50, CDTXMania.Timer);
         ePhaseID = EPhase.Common_FadeIn;
 
-        if (tx判定画像anime != null && txBonusEffect != null)
-        {
-            tx判定画像anime.tDraw2D(1280, 720);
-            txBonusEffect.tDraw2D(1280, 720);
-        }
-
         ct登場用.tUpdate();
         
         // display presence now that the initial timer reset has been performed

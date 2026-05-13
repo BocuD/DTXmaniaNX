@@ -8,8 +8,11 @@ namespace DTXMania;
 
 internal abstract class CActPerfCommonJudgementString : CActivity
 {
+
+	private BaseTexture judgementGraphicSheet;
+	
 	// プロパティ
-	protected JudgementStatus[] judgementStatus = new JudgementStatus[ 15 ];
+	protected JudgementStatus[] judgementStatus = new JudgementStatus[15];
 	
 	[StructLayout( LayoutKind.Sequential )]
 	protected struct JudgementStatus
@@ -74,32 +77,32 @@ internal abstract class CActPerfCommonJudgementString : CActivity
 	protected abstract int LaneCount { get; }
 	protected abstract void InitializeLaneSizes();
 	protected abstract bool TryGetLanePosition( int lane, out int x, out int y );
-	protected abstract BaseTexture GetJudgeTexture();
-	// コンストラクタ
 
 	public CActPerfCommonJudgementString()
 	{
-		judgementStringInfoArray = new JudgementStringInfo[ 7 ];
+		judgementStringInfoArray = new JudgementStringInfo[7];
 		RectangleF[] r =
 		[
-			new( 0, 0,    0x80, 0x2a ), // Perfect
-			new( 0, 0x2b, 0x80, 0x2a ), // Great
-			new( 0, 0x56, 0x80, 0x2a ), // Good
-			new( 0, 0,    0x80, 0x2a ), // Poor
-			new( 0, 0x2b, 0x80, 0x2a ), // Miss
-			new( 0, 0x56, 0x80, 0x2a ), // Bad
-			new( 0, 0,    0x80, 0x2a )  // Auto
+			new(0, 0, 0x80, 0x2a), // Perfect
+			new(0, 0x2b, 0x80, 0x2a), // Great
+			new(0, 0x56, 0x80, 0x2a), // Good
+			new(0, 0, 0x80, 0x2a), // Poor
+			new(0, 0x2b, 0x80, 0x2a), // Miss
+			new(0, 0x56, 0x80, 0x2a), // Bad
+			new(0, 0, 0x80, 0x2a) // Auto
 		];
 
-		for ( int i = 0; i < 7; i++ )
+		for (int i = 0; i < 7; i++)
 		{
-			judgementStringInfoArray[ i ] = new JudgementStringInfo();
-			judgementStringInfoArray[ i ].imageNumber = i / 3;
-			judgementStringInfoArray[ i ].rc = r[ i ];
+			judgementStringInfoArray[i] = new JudgementStringInfo();
+			judgementStringInfoArray[i].imageNumber = i / 3;
+			judgementStringInfoArray[i].rc = r[i];
 		}
 
-		lagNumberInfoArray = new LagNumberInfo[ 12 * 2 ]; // #25370 2011.2.1 yyagi
+		lagNumberInfoArray = new LagNumberInfo[12 * 2]; // #25370 2011.2.1 yyagi
 		bActivated = false;
+
+		judgementGraphicSheet = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_judge strings.png"));
 	}
 
 	// メソッド
@@ -231,23 +234,23 @@ internal abstract class CActPerfCommonJudgementString : CActivity
 		int nRectY = CDTXMania.ConfigIni.nJudgeHeight;
 
 		int xc = ( baseX + judgementStatus[ lane ].nRelativeX ) + ( stLaneSize[ lane ].w / 2 );
-		float x = xc - ( 110f * judgementStatus[ lane ].fXScaleRatio ) - ( ( nRectX - 225 ) / 2f );
-		float y = baseY + judgementStatus[ lane ].nRelativeY - ( 140f * judgementStatus[ lane ].fYScaleRatio / 2f ) - ( ( nRectY - 135 ) / 2f );
+		int x = ( xc - ( (int) ( 110f * judgementStatus[ lane ].fXScaleRatio ) ) ) - ( ( nRectX - 225 ) / 2 );
+		int y = ( ( baseY + judgementStatus[ lane ].nRelativeY ) - ( (int) ( ( 140f * judgementStatus[ lane ].fYScaleRatio ) / 2.0 ) ) ) - ( ( nRectY - 135 ) / 2 );
 
 		DrawJudgeFrame( lane, x, y, nRectX, nRectY );
 		DrawLag( lane, xc, y );
 	}
 
-	protected void DrawJudgeFrame( int lane, float x, float y, int nRectX, int nRectY )
+	protected void DrawJudgeFrame( int lane, int x, int y, int nRectX, int nRectY )
 	{
 		if ( CDTXMania.ConfigIni.nJudgeFrames <= 1 )
 		{
 			return;
 		}
 
-		BaseTexture txJudge = GetJudgeTexture();
+		BaseTexture txJudge = judgementGraphicSheet;
 
-		float frameY = judgementStatus[ lane ].nRect * nRectY;
+		int frameY = judgementStatus[ lane ].nRect * nRectY;
 		switch ( judgementStatus[ lane ].judge )
 		{
 			case EJudgement.Perfect:
@@ -271,7 +274,7 @@ internal abstract class CActPerfCommonJudgementString : CActivity
 		}
 	}
 
-	protected void DrawLag( int lane, int xc, float y )
+	protected void DrawLag( int lane, int xc, int y )
 	{
 		if ( lagDisplayMode != (int) EShowLagType.ON &&
 			!( ( lagDisplayMode == (int) EShowLagType.GREAT_POOR ) && ( judgementStatus[ lane ].judge != EJudgement.Perfect ) ) )
@@ -287,7 +290,8 @@ internal abstract class CActPerfCommonJudgementString : CActivity
 		bool minus = judgementStatus[ lane ].nLag < 0;
 		int offsetX = 0;
 		string strDispLag = judgementStatus[ lane ].nLag.ToString();
-		float x = xc - strDispLag.Length * 15 / 2f;
+		int x = xc - strDispLag.Length * 15 / 2;
+		
 		for ( int i = 0; i < strDispLag.Length; i++ )
 		{
 			int p = ( strDispLag[ i ] == '-' ) ? 11 : strDispLag[ i ] - '0';

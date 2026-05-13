@@ -474,8 +474,6 @@ internal abstract class CStagePerfCommonScreen : CStage
 
             txWailingFrame = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay wailing cursor.png" ) );
             txBonusEffect = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\7_Fillin Effect.png" ) );
-            if ( true )
-                tx判定画像anime = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\7_judge strings.png" ) );
         }
     }
 
@@ -824,7 +822,6 @@ internal abstract class CStagePerfCommonScreen : CStage
     protected BaseTexture txChip;  // txチップ
     protected BaseTexture txHitBar;  // txヒットバー
 
-    public BaseTexture tx判定画像anime;     //2013.8.2 kairera0467 アニメーションの場合はあらかじめこっちで読み込む。
     public BaseTexture txBonusEffect;
 
     //fork
