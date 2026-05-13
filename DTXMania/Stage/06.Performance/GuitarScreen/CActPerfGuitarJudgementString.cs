@@ -42,7 +42,7 @@ internal class CActPerfGuitarJudgementString : CActPerfCommonJudgementString
                 return false;
             }
 
-            x = ((CDTXMania.ConfigIni.JudgementStringPosition.Bass == EType.B) ? 770 : 1060) - (stLaneSize[lane].w / 2);
+            x = ((CDTXMania.ConfigIni.JudgementStringPosition.Bass == EType.B) ? 770 : 1060);
             y = CDTXMania.ConfigIni.JudgementStringPosition.Bass == EType.C
                 ? (CDTXMania.ConfigIni.bReverse.Bass ? 650 : 80)
                 : (CDTXMania.ConfigIni.bReverse.Bass ? 450 : 300);
@@ -56,7 +56,7 @@ internal class CActPerfGuitarJudgementString : CActPerfCommonJudgementString
                 return false;
             }
 
-            x = ((CDTXMania.ConfigIni.JudgementStringPosition.Guitar == EType.B) ? 420 : 180) - (stLaneSize[lane].w / 2);
+            x = ((CDTXMania.ConfigIni.JudgementStringPosition.Guitar == EType.B) ? 420 : 180);
             y = CDTXMania.ConfigIni.JudgementStringPosition.Guitar == EType.C
                 ? (CDTXMania.ConfigIni.bReverse.Guitar ? 650 : 80)
                 : (CDTXMania.ConfigIni.bReverse.Guitar ? 450 : 300);

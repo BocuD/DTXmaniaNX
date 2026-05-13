@@ -78,7 +78,7 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
 
     protected override bool TryGetLanePosition(int lane, out int x, out int y)
     {
-        x = stLaneSize[lane].x;
+        x = stLaneSize[lane].x + (stLaneSize[lane].w / 2);
         if (CDTXMania.ConfigIni.JudgementStringPosition.Drums == EType.A)
         {
             y = CDTXMania.ConfigIni.bReverse.Drums ? 348 - (verticalCharacterOffsets[lane] * 0x20) : 348 + verticalCharacterOffsets[lane] * 0x20;

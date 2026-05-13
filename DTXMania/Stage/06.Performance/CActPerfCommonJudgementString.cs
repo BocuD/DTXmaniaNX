@@ -234,7 +234,7 @@ internal abstract class CActPerfCommonJudgementString : CActivity
 		int nRectX = CDTXMania.ConfigIni.nJudgeWidgh;
 		int nRectY = CDTXMania.ConfigIni.nJudgeHeight;
 
-		int xc = ( baseX + judgementStatus[ lane ].nRelativeX ) + ( stLaneSize[ lane ].w / 2 );
+		int xc = baseX + judgementStatus[ lane ].nRelativeX;
 		float x = xc - ( 110f * judgementStatus[ lane ].fXScaleRatio ) - ( ( nRectX - 225 ) / 2f );
 		float y = baseY + judgementStatus[ lane ].nRelativeY - ( 140f * judgementStatus[ lane ].fYScaleRatio / 2f ) - ( ( nRectY - 135 ) / 2f );
 
