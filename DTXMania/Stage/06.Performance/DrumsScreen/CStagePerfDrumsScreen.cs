@@ -535,8 +535,6 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
 
     protected override void tJudgeLineMovingUpandDown()
     {
-        actJudgeString.iP_A = (CDTXMania.ConfigIni.bReverse.Drums ? nJudgeLinePosY.Drums : nJudgeLinePosY.Drums - 189);
-        actJudgeString.iP_B = (CDTXMania.ConfigIni.bReverse.Drums ? nJudgeLinePosY.Drums : nJudgeLinePosY.Drums + 23);
         actChipFireD.iPosY = (CDTXMania.ConfigIni.bReverse.Drums ? nJudgeLinePosY.Drums - 183 : nJudgeLinePosY.Drums - 186);
         CDTXMania.stagePerfDrumsScreen.actPlayInfo.jl = (CDTXMania.ConfigIni.bReverse.Drums ? 0 : nJudgeLineMaxPosY - nJudgeLinePosY.Drums);
     }

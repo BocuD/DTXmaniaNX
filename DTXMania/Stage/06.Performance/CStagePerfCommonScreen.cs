@@ -374,9 +374,6 @@ internal abstract class CStagePerfCommonScreen : CStage
         nShutterInPosY.Bass = CDTXMania.ConfigIni.nShutterInSide.Bass;
         nShutterOutPosY.Bass = CDTXMania.ConfigIni.nShutterOutSide.Bass;
 
-        actJudgeString.iP_A = CDTXMania.ConfigIni.bReverse.Drums ? 159 + 0xbd : 561 - 0xbd;
-        actJudgeString.iP_B = CDTXMania.ConfigIni.bReverse.Drums ? 159 - 0x17 : 561 + 0x17;
-
         nInputAdjustTimeMs.Drums = CDTXMania.ConfigIni.nInputAdjustTimeMs.Drums;		// #23580 2011.1.3 yyagi
         nInputAdjustTimeMs.Guitar = CDTXMania.ConfigIni.nInputAdjustTimeMs.Guitar;		//        2011.1.7 ikanick 修正
         nInputAdjustTimeMs.Bass = CDTXMania.ConfigIni.nInputAdjustTimeMs.Bass;			//
@@ -477,14 +474,8 @@ internal abstract class CStagePerfCommonScreen : CStage
 
             txWailingFrame = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay wailing cursor.png" ) );
             txBonusEffect = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\7_Fillin Effect.png" ) );
-            if( CDTXMania.ConfigIni.nJudgeAnimeType == 1 )
+            if ( true )
                 tx判定画像anime = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\7_judge strings.png" ) );
-            else if( CDTXMania.ConfigIni.nJudgeAnimeType == 2 )
-            {
-                tx判定画像anime = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\7_JudgeStrings_XG.png" ) );
-                tx判定画像anime_2 = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\7_JudgeStrings_XG.png" ) );
-                tx判定画像anime_3 = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\7_JudgeStrings_XG.png" ) );
-            }
         }
     }
 
