@@ -81,11 +81,11 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
         x = stLaneSize[lane].x;
         if (CDTXMania.ConfigIni.JudgementStringPosition.Drums == EType.A)
         {
-            y = CDTXMania.ConfigIni.bReverse.Drums ? 348 - (n文字の縦表示位置[lane] * 0x20) : 348 + n文字の縦表示位置[lane] * 0x20;
+            y = CDTXMania.ConfigIni.bReverse.Drums ? 348 - (verticalCharacterOffsets[lane] * 0x20) : 348 + verticalCharacterOffsets[lane] * 0x20;
         }
         else
         {
-            y = CDTXMania.ConfigIni.bReverse.Drums ? 80 + n文字の縦表示位置[lane] * 0x20 : 583 + n文字の縦表示位置[lane] * 0x20;
+            y = CDTXMania.ConfigIni.bReverse.Drums ? 80 + verticalCharacterOffsets[lane] * 0x20 : 583 + verticalCharacterOffsets[lane] * 0x20;
         }
 
         return true;
@@ -103,7 +103,7 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
 
     #region [ private ]
 
-    private readonly int[] n文字の縦表示位置 = [-1, 1, 1, 2, 0, 0, 1, -1, 2, 1, 2, -1, -1, 0, 0];
+    private readonly int[] verticalCharacterOffsets = [-1, 1, 1, 2, 0, 0, 1, -1, 2, 1, 2, -1, -1, 0, 0];
 
     #endregion
 }

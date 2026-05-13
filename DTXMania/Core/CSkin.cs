@@ -946,9 +946,6 @@ internal class CSkin : IDisposable
 			sw.WriteLine( "Speaker={0}", CDTXMania.ConfigIni.bSpeaker ? 1 : 0 );
 			sw.WriteLine();
 			sw.WriteLine( ";判定画像のアニメーション方式" );
-			sw.WriteLine( ";(0:旧DTXMania方式 1:コマ方式 2:擬似XG方式)" );
-			sw.WriteLine( "JudgeAnimeType={0}", CDTXMania.ConfigIni.nJudgeAnimeType );
-			sw.WriteLine();
 			sw.WriteLine( ";判定画像のコマ数" );
 			sw.WriteLine( "JudgeFrames={0}", CDTXMania.ConfigIni.nJudgeFrames );
 			sw.WriteLine();
@@ -1051,10 +1048,6 @@ internal class CSkin : IDisposable
 						else if (str3.Equals("Speaker"))
 						{
 							CDTXMania.ConfigIni.bSpeaker = CConversion.bONorOFF(str4[0]);
-						}
-						else if (str3.Equals("JudgeAnimeType"))
-						{
-							CDTXMania.ConfigIni.nJudgeAnimeType = CConversion.nGetNumberIfInRange(str4, 0, 2, CDTXMania.ConfigIni.nJudgeAnimeType);
 						}
 						else if (str3.Equals("JudgeFrames"))
 						{

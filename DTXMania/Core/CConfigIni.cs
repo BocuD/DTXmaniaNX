@@ -582,7 +582,6 @@ internal class CConfigIni
 	#endregion
 
 	#region[ 画像関連 ]
-	public int nJudgeAnimeType;
 	public int nJudgeFrames;
 	public int nJudgeInterval;
 	public int nJudgeWidgh;
@@ -1085,7 +1084,6 @@ internal class CConfigIni
 		nNameColor = new int[ 3 ];
 
 		#region[ 画像関連 ]
-		nJudgeAnimeType = 1;
 		nJudgeFrames = 24;
 		nJudgeInterval = 14;
 		nJudgeWidgh = 250;
@@ -1990,9 +1988,6 @@ internal class CConfigIni
 		#endregion
 		#region[ 画像周り ]
 		sw.WriteLine( ";判定画像のアニメーション方式" );
-		sw.WriteLine( ";(0:旧DTXMania方式 1:コマ方式 2:擬似XG方式)");
-		sw.WriteLine( "JudgeAnimeType={0}", nJudgeAnimeType );
-		sw.WriteLine();
 		sw.WriteLine( ";判定画像のコマ数" );
 		sw.WriteLine( "JudgeFrames={0}", nJudgeFrames );
 		sw.WriteLine();
@@ -3252,10 +3247,6 @@ internal class CConfigIni
 									else if (str3.Equals("BassLaneFlush"))
 									{
 										bLaneFlush.Bass = CConversion.bONorOFF(str4[0]);
-									}
-									else if ( str3.Equals( "JudgeAnimeType" ) )
-									{
-										nJudgeAnimeType = CConversion.nGetNumberIfInRange( str4, 0, 2, nJudgeAnimeType );
 									}
 									else if (str3.Equals( "JudgeFrames"))
 									{

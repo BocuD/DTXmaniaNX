@@ -825,8 +825,6 @@ internal abstract class CStagePerfCommonScreen : CStage
     protected BaseTexture txHitBar;  // txヒットバー
 
     public BaseTexture tx判定画像anime;     //2013.8.2 kairera0467 アニメーションの場合はあらかじめこっちで読み込む。
-    public BaseTexture tx判定画像anime_2;   //2014.3.16 kairera0467 棒とかで必要になる。
-    public BaseTexture tx判定画像anime_3;
     public BaseTexture txBonusEffect;
 
     //fork
