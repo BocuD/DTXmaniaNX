@@ -60,7 +60,7 @@ public class ResultRankIcon : UIGroup
 
                     if (bAllAuto)
                     {
-                        txRankIcon = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_rankSS.png"));
+                        txRankIcon = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\Result\Rank\rank_icon_s.png"));
                         txRankBg = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\Result\Rank\rank_bg_ss.png"));
                         isSS = true;
                     }
