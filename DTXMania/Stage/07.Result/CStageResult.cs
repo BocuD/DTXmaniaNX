@@ -49,7 +49,6 @@ internal class CStageResult : CStage
 		bActivated = false;
 		//listChildActivities.Add( actResultImage = new CActResultImage(this) );
 		listChildActivities.Add( actParameterPanel = new CActResultParameterPanel(this) );
-		listChildActivities.Add( actRank = new CActResultRank(this) );
 	}
 
 		
@@ -636,10 +635,6 @@ internal class CStageResult : CStage
 		// {
 		// 	bAnimationComplete = false;
 		// }
-		// if (actRank.OnUpdateAndDraw() == 0)
-		// {
-		// 	bAnimationComplete = false;
-		// }
 		#region [ #24609 2011.3.14 yyagi ランク更新or演奏型スキル更新時、リザルト画像をpngで保存する ]
 		if ( bAnimationComplete && bIsCheckedWhetherResultScreenShouldSaveOrNot == false	// #24609 2011.3.14 yyagi; to save result screen in case BestRank or HiSkill.
 		                        && CDTXMania.ConfigIni.bScoreIniを出力する
@@ -779,10 +774,7 @@ internal class CStageResult : CStage
 	private CCounter ctPlayNewRecord;
 	private EReturnValue eReturnValueWhenFadeOutCompleted;  // eフェードアウト完了時の戻り値
 	private CActResultParameterPanel actParameterPanel;
-	private CActResultRank actRank;
-	//private CActResultImage actResultImage;
 
-	//private CActPerfProgressBar actProgressBar;
 	private bool bAnimationComplete;  // bアニメが完了
 	private bool bIsCheckedWhetherResultScreenShouldSaveOrNot;				// #24509 2011.3.14 yyagi
 	private readonly int[] nチャンネル0Atoレーン07;
