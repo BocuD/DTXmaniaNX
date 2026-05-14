@@ -12,8 +12,6 @@ namespace DTXMania;
 
 internal class CStageResult : CStage
 {
-	// プロパティ
-
 	public STDGBVALUE<bool> bNewRecordSkill;
 	public STDGBVALUE<bool> bNewRecordScore;
 	public STDGBVALUE<bool> bNewRecordRank;
@@ -48,7 +46,6 @@ internal class CStageResult : CStage
 		ePhaseID = EPhase.Common_DefaultState;
 		bActivated = false;
 		//listChildActivities.Add( actResultImage = new CActResultImage(this) );
-		listChildActivities.Add( actParameterPanel = new CActResultParameterPanel(this) );
 	}
 
 		
@@ -189,9 +186,9 @@ internal class CStageResult : CStage
 		else
 		{
 			var guitar1 = ui.AddChild(new UIPlayerNameplate(1, true));
-			guitar1.position = new Vector3(148, 272, 0);
-			var guitar2 = ui.AddChild(new UIPlayerNameplate(2, true));
-			guitar2.position = new Vector3(853, 272, 0);
+			guitar1.position = new Vector3(989, 53, 0);
+			// var guitar2 = ui.AddChild(new UIPlayerNameplate(2, true));
+			// guitar2.position = new Vector3(853, 272, 0);
 		}
 
 		var infoPanel = ui.AddChild(new ResultInfoPanel(CDTXMania.GetCurrentInstrument()));
@@ -631,10 +628,6 @@ internal class CStageResult : CStage
 		// {
 		// 	bAnimationComplete = false;
 		// }
-		// if ( actParameterPanel.OnUpdateAndDraw() == 0 )
-		// {
-		// 	bAnimationComplete = false;
-		// }
 		#region [ #24609 2011.3.14 yyagi ランク更新or演奏型スキル更新時、リザルト画像をpngで保存する ]
 		if ( bAnimationComplete && bIsCheckedWhetherResultScreenShouldSaveOrNot == false	// #24609 2011.3.14 yyagi; to save result screen in case BestRank or HiSkill.
 		                        && CDTXMania.ConfigIni.bScoreIniを出力する
@@ -722,12 +715,12 @@ internal class CStageResult : CStage
 			//actRank.tアニメを完了させる();
 		}
 		#region [ #24609 2011.4.7 yyagi リザルト画面で[F12]を押下すると、リザルト画像をpngで保存する機能は、CDTXManiaに移管。 ]
-//					if ( CDTXMania.InputManager.Keyboard.bKeyPressed( (int) SlimDXKey.F12 ) &&
-//						CDTXMania.ConfigIni.bScoreIniを出力する )
-//					{
-//						CheckAndSaveResultScreen(false);
-//						this.bIsCheckedWhetherResultScreenShouldSaveOrNot = true;
-//					}
+		if ( CDTXMania.InputManager.Keyboard.bKeyPressed( (int) SlimDXKey.F12 ) &&
+			CDTXMania.ConfigIni.bScoreIniを出力する )
+		{
+			CheckAndSaveResultScreen(false);
+			bIsCheckedWhetherResultScreenShouldSaveOrNot = true;
+		}
 		#endregion
 		if ( ePhaseID == EPhase.Common_DefaultState )
 		{
@@ -773,7 +766,6 @@ internal class CStageResult : CStage
 	//New Counter
 	private CCounter ctPlayNewRecord;
 	private EReturnValue eReturnValueWhenFadeOutCompleted;  // eフェードアウト完了時の戻り値
-	private CActResultParameterPanel actParameterPanel;
 
 	private bool bAnimationComplete;  // bアニメが完了
 	private bool bIsCheckedWhetherResultScreenShouldSaveOrNot;				// #24509 2011.3.14 yyagi
@@ -798,7 +790,6 @@ internal class CStageResult : CStage
 	/// <param name="bIsAutoSave">true=自動保存モード, false=手動保存モード</param>
 	private void CheckAndSaveResultScreen(bool bIsAutoSave)
 	{
-		string path = Path.GetDirectoryName( CDTXMania.DTX.strFileNameFullPath );
 		string datetime = DateTime.Now.ToString( "yyyyMMddHHmmss" );
 		if (bIsAutoSave)
 		{
