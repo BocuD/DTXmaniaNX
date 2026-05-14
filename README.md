@@ -35,19 +35,26 @@ Visit [releases](https://github.com/BocuD/DTXmaniaNX/releases) for automated bui
   - Sorting functionality similar to GITADORA, with songs grouped in various categories
   - Group by BOX, Difficulty, Level, Title, Artist, etc
 
-- Song selection UI recreated from scratch
-  - Customizable options for various display parts
-  - Grealy improved smoothness and UX
+- Various stages recreated from scratch
+  - Song selection UI
+    - Customizable options for various display parts
+    - Grealy improved smoothness and UX
+  - Results screen
+    - Added information (Skill is implemented to match the arcade games)
+    - Styling and fonts updated to match recent games
 
 - Improved Guitar navigation
   - P + strum to confirm
   - Y + strum to go back
 
-- Improved settings menu
+- Greatly improved settings menu
   - Most menu options are now sorted into categories (for example, Audio, Video, Gameplay, etc)
   - Added options for drum velocity
   - Removed options that don't affect the current game
   - Improved naming and description for various elements
+
+- Improved WASAPI support
+  - Particularly on some edge cases on Windows 11 where wasapi would not work before
 
 - Extensive Dear ImGui-based tooling
   - Inspector and hierarchy views for new UI framework, performance analysis, song database tests, etc
