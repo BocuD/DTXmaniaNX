@@ -10,30 +10,50 @@ public class UINewVideoRenderer : UIDrawable
 {
     public VideoPlayerController Controller { get; } = new();
 
+    [AddChildMenu("Video/New Video Renderer")]
+    public static UINewVideoRenderer CreateAsync()
+    {
+        return new UINewVideoRenderer();
+    }
+    
     [AddChildMenu("Video/New Video Renderer (Software Decoder)")]
     public static UINewVideoRenderer CreateSoftware()
     {
-        return new UINewVideoRenderer { Controller = { UseAsyncDecoder = false } };
+        return new UINewVideoRenderer { Controller = { UseSoftwareDecoder = true } };
     }
 
-    [AddChildMenu("Video/New Video Renderer (Async Decoder)")]
-    public static UINewVideoRenderer CreateAsync()
+    public UINewVideoRenderer(VideoPlayerController? controller = null)
     {
-        return new UINewVideoRenderer { Controller = { UseAsyncDecoder = true } };
+        if (controller != null)
+        {
+            Controller = controller;
+
+            if (Controller.CurrentFrame.IsValid)
+            {
+                size = new Vector2(Controller.CurrentFrame.Texture.Width, Controller.CurrentFrame.Texture.Height);
+            }
+            else
+            {
+                size = new Vector2(640, 480);
+            }
+        }
+        else
+        {
+            size = new Vector2(640, 480);
+        }
     }
 
-    public UINewVideoRenderer()
+    public bool LoadVideo(string path)
     {
-        // Initial fallback scaling size
-        size = new Vector2(640, 480);
-    }
-
-    public void LoadVideo(string path)
-    {
+        if (!CDTXMania.ConfigIni.bAVIEnabled) return false;
+        
         if (Controller.TryLoadVideo(path) && Controller.CurrentFrame.IsValid)
         {
             size = new Vector2(Controller.CurrentFrame.Texture.Width, Controller.CurrentFrame.Texture.Height);
+            return true;
         }
+
+        return false;
     }
 
     public override void Draw(Matrix4x4 parentMatrix)

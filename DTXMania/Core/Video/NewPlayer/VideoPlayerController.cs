@@ -1,5 +1,4 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Numerics;
 using DTXMania.Core.Video.NewPlayer.Decoders;
 using DTXMania.UI.Drawable;
@@ -38,7 +37,7 @@ public class VideoPlayerController : IDisposable
     
     public bool LoopOnEof { get; set; } = true;
     public string? CurrentSourcePath { get; private set; }
-    public bool UseAsyncDecoder { get; set; } = true;
+    public bool UseSoftwareDecoder { get; set; } = true;
     
     // Core atomic state constraint
     public DisplayedFrame CurrentFrame { get; private set; } = DisplayedFrame.Empty;
@@ -50,7 +49,7 @@ public class VideoPlayerController : IDisposable
 
     public bool TryLoadVideo(string path)
     {
-        VideoDecoder newDecoder = UseAsyncDecoder ? new AsyncVideoDecoder() : new SoftwareVideoDecoder();
+        VideoDecoder newDecoder = UseSoftwareDecoder ? new SoftwareVideoDecoder() : new AsyncVideoDecoder();
         if (!newDecoder.TryOpen(path))
         {
             newDecoder.Dispose();
