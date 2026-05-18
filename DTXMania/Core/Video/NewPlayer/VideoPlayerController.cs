@@ -197,8 +197,11 @@ public class VideoPlayerController : IDisposable
 
         if (ImGui.CollapsingHeader("Video Player Controller", ImGuiTreeNodeFlags.DefaultOpen))
         {
-            ImGui.Text("Decoder: " + decoder.Name);
-            
+            if (decoder != null)
+            {
+                ImGui.Text("Decoder: " + decoder.Name);
+            }
+
             ImGui.Text($"Source path: {CurrentSourcePath ?? "(none)"}");
             if (ImGui.Button("Change video (Browse)..."))
             {
