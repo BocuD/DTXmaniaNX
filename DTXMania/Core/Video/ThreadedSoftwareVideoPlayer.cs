@@ -305,6 +305,23 @@ public unsafe class ThreadedSoftwareVideoPlayer : FFmpegVideoPlayer
                         continue;
                     }
 
+                    framePtsSeconds = ResolveFrameTimestampSeconds();
+
+                    // If we are playing catch-up after a seek, skip sws_scale completely until we reach the target
+                    if (!double.IsNaN(CurrentSeekTargetSeconds))
+                    {
+                        if (framePtsSeconds < CurrentSeekTargetSeconds - 0.001)
+                        {
+                            frameData = [];
+                            reachedEof = false;
+                            return true;
+                        }
+                        else
+                        {
+                            CurrentSeekTargetSeconds = double.NaN;
+                        }
+                    }
+
                     if (ffmpeg.av_frame_make_writable(rgbaFrame) < 0)
                     {
                         frameData = [];

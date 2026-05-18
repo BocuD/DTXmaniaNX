@@ -80,6 +80,8 @@ public abstract unsafe class FFmpegVideoPlayer : IDisposable
     private double queuedFramePtsSeconds = double.NaN;
     private bool isPaused;
 
+    protected double CurrentSeekTargetSeconds { get; set; } = double.NaN;
+
     protected virtual int MaxFramesToDecodePerUpdate => 2;
 
     public virtual string BackendName => GetType().Name;
@@ -208,6 +210,9 @@ public abstract unsafe class FFmpegVideoPlayer : IDisposable
 
         ffmpeg.avcodec_flush_buffers(codecContext);
         
+        // Turn off heavy sws_scale decoding overhead until we reach our target.
+        CurrentSeekTargetSeconds = Math.Max(0, timestamp.TotalSeconds);
+
         // Set the clock to the target time
         playbackTimeOffset = Math.Max(0, timestamp.TotalSeconds);
         playbackClock.Restart();
@@ -266,6 +271,21 @@ public abstract unsafe class FFmpegVideoPlayer : IDisposable
         }
 
         double targetSeconds = targetFrame / fps;
+        
+        // If advancing forward by a very short distance while paused, skip the backward seek loop entirely.
+        if (isPaused)
+        {
+            double currentSeconds = CurrentTime.TotalSeconds;
+            if (targetSeconds > currentSeconds && (targetSeconds - currentSeconds) <= (10.0 / fps))
+            {
+                playbackTimeOffset = targetSeconds;
+                playbackClock.Restart();
+                playbackClock.Stop();
+
+                UpdateTextureForSeek();
+                return true;
+            }
+        }
         
         // Seek will automatically call UpdateTextureForSeek if paused.
         return Seek(TimeSpan.FromSeconds(targetSeconds));
@@ -513,7 +533,7 @@ public abstract unsafe class FFmpegVideoPlayer : IDisposable
 
         // Decode until we reach the current time target, which matters after frame seeks
         // because av_seek_frame typically lands on a preceding keyframe.
-        const int maxSeekDecodeAttempts = 120;
+        const int maxSeekDecodeAttempts = 1000;
         for (int i = 0; i < maxSeekDecodeAttempts; i++)
         {
             if (!TryDecodeAndStageFrame(out double framePtsSeconds, out _))
