@@ -2,11 +2,14 @@
 
 public class AddChildMenuAttribute : Attribute
 {
-    //make adding this attribute to a class constructor count as using it
-    //so the ide doesn't complain about it not being used
-    
+    public string? Path { get; }
+
     public AddChildMenuAttribute()
     {
-        //this is a marker attribute
+    }
+
+    public AddChildMenuAttribute(string path)
+    {
+        Path = path;
     }
 }
