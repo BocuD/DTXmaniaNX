@@ -37,7 +37,7 @@ public class VideoPlayerController : IDisposable
     
     public bool LoopOnEof { get; set; } = true;
     public string? CurrentSourcePath { get; private set; }
-    public bool UseSoftwareDecoder { get; set; } = true;
+    public bool UseSoftwareDecoder { get; set; } = false;
     
     // Core atomic state constraint
     public DisplayedFrame CurrentFrame { get; private set; } = DisplayedFrame.Empty;
@@ -104,9 +104,9 @@ public class VideoPlayerController : IDisposable
                     break; 
                 }
             }
-            else
+            else if (decoder.IsEndOfStream)
             {
-                // Reached end or error
+                // Real end-of-stream confirmed by the decoder.
                 if (LoopOnEof)
                 {
                     ForceSeekAndRender(0);
@@ -115,6 +115,14 @@ public class VideoPlayerController : IDisposable
                 {
                     IsPaused = true;
                 }
+                break;
+            }
+            else
+            {
+                // Async decoder: queue momentarily empty but more frames are coming.
+                // Do nothing this tick and let the current frame linger; the next
+                // Update will pick up the produced frame. The clock keeps running
+                // so playback resumes seamlessly once the worker catches up.
                 break;
             }
         }
@@ -189,9 +197,10 @@ public class VideoPlayerController : IDisposable
 
         if (ImGui.CollapsingHeader("Video Player Controller", ImGuiTreeNodeFlags.DefaultOpen))
         {
-            ImGui.LabelText("Source path: ", CurrentSourcePath ?? "(none)");
-            ImGui.SameLine();
-            if (ImGui.Button("Browse..."))
+            ImGui.Text("Decoder: " + decoder.Name);
+            
+            ImGui.Text($"Source path: {CurrentSourcePath ?? "(none)"}");
+            if (ImGui.Button("Change video (Browse)..."))
             {
                 string path = NFD.OpenDialog("", new Dictionary<string, string> { { "Videos", "mp4,mov,avi,mkv,wmv,flv,webm" } });
                 if (!string.IsNullOrWhiteSpace(path))

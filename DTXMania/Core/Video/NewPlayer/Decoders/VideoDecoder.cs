@@ -8,6 +8,15 @@ public abstract class VideoDecoder : IDisposable
     public abstract long TotalFrames { get; }
     public abstract double FrameRate { get; }
 
+    /// <summary>
+    /// True once the decoder has confirmed end-of-stream and no further frames are pending.
+    /// Implementations must distinguish this from "no frame yet available" so callers can
+    /// tell a transient empty buffer apart from a real EOF.
+    /// </summary>
+    public abstract bool IsEndOfStream { get; }
+
+    public abstract string Name { get; }
+
     public abstract bool TryOpen(string path);
     
     /// <summary>

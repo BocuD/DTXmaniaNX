@@ -19,9 +19,14 @@ public unsafe class SoftwareVideoDecoder : VideoDecoder
 
     private double seekTargetMuteSeconds = double.NaN; // Bypass sws_scale until reached
 
+    private bool endOfStream;
+
     public override int Width => codecContext != null ? codecContext->width : 0;
     public override int Height => codecContext != null ? codecContext->height : 0;
-    
+
+    public override bool IsEndOfStream => endOfStream;
+    public override string Name { get; } = "SoftwareDecoder";
+
     public override double DurationSeconds
     {
         get
@@ -109,6 +114,7 @@ public unsafe class SoftwareVideoDecoder : VideoDecoder
         // Initialize lastDecodedPtsSeconds so it properly starts at 0 without a timeline origin regression
         timelineOriginPtsSeconds = double.NaN;
         lastDecodedPtsSeconds = -1;
+        endOfStream = false;
 
         return true;
     }
@@ -138,6 +144,7 @@ public unsafe class SoftwareVideoDecoder : VideoDecoder
 
         seekTargetMuteSeconds = Math.Max(0, targetSeconds);
         lastDecodedPtsSeconds = -1; // Reset monotonic clamping tracker on seek
+        endOfStream = false;
     }
 
     public override bool TryGetDecodedFrame(out DecodedFrameData data)
@@ -153,6 +160,7 @@ public unsafe class SoftwareVideoDecoder : VideoDecoder
             int readResult = ffmpeg.av_read_frame(formatContext, packet);
             if (readResult < 0) 
             {
+                endOfStream = true;
                 data = default;
                 return false; // EOF or error
             }

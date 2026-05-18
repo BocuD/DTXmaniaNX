@@ -28,9 +28,28 @@ public unsafe class AsyncVideoDecoder : VideoDecoder
     private bool endOfStreamReached;
     private const int MaxBufferedFrames = 2; // Keep queue small for low latency and memory
 
+    // Incremented under decodeSync on every SeekTo. Frames decoded under an older
+    // generation are discarded at enqueue time, eliminating the race where the
+    // worker thread decodes a frame just before a seek and enqueues it just after
+    // the seek cleared the queue.
+    private long seekGeneration;
+
     public override int Width => codecContext != null ? codecContext->width : 0;
     public override int Height => codecContext != null ? codecContext->height : 0;
-    
+
+    public override bool IsEndOfStream
+    {
+        get
+        {
+            lock (queueSync)
+            {
+                return endOfStreamReached && decodedFrames.Count == 0;
+            }
+        }
+    }
+
+    public override string Name { get; } = "Async Decoder";
+
     public override double DurationSeconds
     {
         get
@@ -117,6 +136,7 @@ public unsafe class AsyncVideoDecoder : VideoDecoder
 
         timelineOriginPtsSeconds = double.NaN;
         lastDecodedPtsSeconds = -1;
+        seekGeneration = 0;
         
         // Start background decoding thread
         stopRequested = false;
@@ -147,18 +167,42 @@ public unsafe class AsyncVideoDecoder : VideoDecoder
                 continue;
             }
 
+            // Snapshot the seek generation BEFORE decoding. If SeekTo bumps the
+            // counter while we're decoding, the frame we produce is stale and
+            // must not be enqueued; the seek already cleared the queue and
+            // anything we'd push would be a frame from a pre-seek timeline.
+            long genAtStart;
+            lock (decodeSync)
+            {
+                genAtStart = seekGeneration;
+            }
+
             if (TryDecodeOneFrame(out DecodedFrameData data, out bool reachedEof))
             {
                 lock (queueSync)
                 {
-                    if (!stopRequested) decodedFrames.Enqueue(data);
+                    // Re-check generation under queueSync. We don't need decodeSync here
+                    // because seekGeneration is only written under decodeSync AND the queue
+                    // is cleared under queueSync within that same critical section
+                    // (see SeekTo), so observing the current generation through the
+                    // happens-before edge of acquiring queueSync is safe.
+                    if (!stopRequested && Volatile.Read(ref seekGeneration) == genAtStart)
+                    {
+                        decodedFrames.Enqueue(data);
+                    }
                 }
             }
             else if (reachedEof)
             {
                 lock (queueSync)
                 {
-                    endOfStreamReached = true;
+                    // Only mark EOF if no seek has happened since we started this decode pass.
+                    // Otherwise the EOF is stale (e.g. we hit EOF reading the pre-seek timeline
+                    // because the seek raced in mid-read) and the next decode will recover.
+                    if (Volatile.Read(ref seekGeneration) == genAtStart)
+                    {
+                        endOfStreamReached = true;
+                    }
                 }
                 Thread.Sleep(5);
             }
@@ -271,13 +315,16 @@ public unsafe class AsyncVideoDecoder : VideoDecoder
 
             seekTargetMuteSeconds = Math.Max(0, targetSeconds);
             lastDecodedPtsSeconds = -1; // Reset monotonic clamping tracker on seek
-        }
 
-        // Flush the queue securely
-        lock (queueSync)
-        {
-            decodedFrames.Clear();
-            endOfStreamReached = false;
+            // Bump the generation *and* clear the queue while still holding decodeSync.
+            // This pins both operations into a single critical section so the worker
+            // thread cannot observe a half-applied seek.
+            Volatile.Write(ref seekGeneration, seekGeneration + 1);
+            lock (queueSync)
+            {
+                decodedFrames.Clear();
+                endOfStreamReached = false;
+            }
         }
     }
 
