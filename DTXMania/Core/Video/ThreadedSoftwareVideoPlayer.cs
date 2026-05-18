@@ -138,7 +138,14 @@ public unsafe class ThreadedSoftwareVideoPlayer : FFmpegVideoPlayer
             reachedEndOfStream = endOfStreamReached;
         }
 
-        framePtsSeconds = 0;
+        // If the queue is empty (e.g. immediately after seeking when OnPlaybackReset clears it),
+        // we decode synchronously on the calling thread so we don't return false and fail the seek loop.
+        if (TryDecodeOneFrame(out byte[] syncFrameData, out framePtsSeconds, out reachedEndOfStream))
+        {
+            StageFrame(syncFrameData);
+            return true;
+        }
+
         return false;
     }
 

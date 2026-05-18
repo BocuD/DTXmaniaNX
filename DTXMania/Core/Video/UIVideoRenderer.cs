@@ -2,7 +2,9 @@
 using System.Numerics;
 using DTXMania.Core.Framework;
 using DTXMania.UI.Drawable;
+using DTXMania.UI.Inspector;
 using Hexa.NET.ImGui;
+using NativeFileDialog.Extended;
 
 namespace DTXMania.Core.Video;
 
@@ -10,7 +12,7 @@ public class UIVideoRenderer : UIDrawable
 {
     private FFmpegVideoPlayer player;
     private RectangleF clipRect;
-    private readonly string? sourcePath;
+    private string? sourcePath;
     private readonly IReadOnlyList<FFmpegVideoPlayer.BackendDescriptor> availableBackends;
     private readonly string[] backendNames;
     private Type selectedBackendType;
@@ -19,6 +21,13 @@ public class UIVideoRenderer : UIDrawable
     private bool inspectorSeekInitialized;
     private bool inspectorSeekDragging;
     private BaseTexture lastRenderedTexture = BaseTexture.None;
+
+    [AddChildMenu]
+    public static UIVideoRenderer Create()
+    {
+        SoftwareVideoPlayer player = new();
+        return new UIVideoRenderer(player);
+    }
     
     public UIVideoRenderer(FFmpegVideoPlayer videoPlayer, string? videoSourcePath = null)
     {
@@ -27,9 +36,12 @@ public class UIVideoRenderer : UIDrawable
         availableBackends = FFmpegVideoPlayer.GetAvailableBackends();
         backendNames = availableBackends.Select(b => b.Name).ToArray();
         selectedBackendType = videoPlayer.GetType();
-
-        size = new Vector2(videoPlayer.Width, videoPlayer.Height);
-        clipRect = new RectangleF(0, 0, videoPlayer.Width, videoPlayer.Height);
+        
+        if (videoSourcePath != null)
+        {
+            size = new Vector2(videoPlayer.Width, videoPlayer.Height);
+            clipRect = new RectangleF(0, 0, videoPlayer.Width, videoPlayer.Height);
+        }
     }
     
     public override void Draw(Matrix4x4 parentMatrix)
@@ -42,6 +54,7 @@ public class UIVideoRenderer : UIDrawable
         UpdateLocalTransformMatrix();
         Matrix4x4 combinedMatrix = localTransformMatrix * parentMatrix;
 
+        player.UpdatePlayback();
         BaseTexture tex = player.GetUpdatedTexture();
         lastRenderedTexture = tex;
         if (!tex.IsValid())
@@ -72,10 +85,15 @@ public class UIVideoRenderer : UIDrawable
 
         TimeSpan current = player.CurrentTime;
         TimeSpan duration = player.Duration;
+        long currentFrame = player.GetCurrentFrameNumber();
+        long totalFrames = player.TotalFrameCount;
         ImGui.Text($"Current: {current:mm\\:ss\\.fff}");
         ImGui.Text(duration > TimeSpan.Zero
             ? $"Duration: {duration:mm\\:ss\\.fff}"
             : "Duration: Unknown");
+        ImGui.Text(totalFrames > 0
+            ? $"Frame: {currentFrame + 1} / {totalFrames}"
+            : $"Frame: {currentFrame + 1} / ?");
 
         if (!string.IsNullOrWhiteSpace(sourcePath))
         {
@@ -105,6 +123,38 @@ public class UIVideoRenderer : UIDrawable
                 }
             }
         }
+        
+        ImGui.LabelText("Source path: ", sourcePath ?? "(none)");
+        ImGui.SameLine();
+        if (ImGui.Button("Browse..."))
+        {
+            //open file dialog
+            Dictionary<string, string> filterList = new()
+            {
+                { "Videos", "mp4,mov,avi,mkv,wmv,flv,webm" }
+            };
+
+            string path = NFD.OpenDialog("", filterList);
+            
+            if (!string.IsNullOrWhiteSpace(path) && File.Exists(path))
+            {
+                TimeSpan restoreTimestamp = current;
+                bool loopOnSwitch = player.LoopOnEof;
+                sourcePath = path;
+                if (!SwitchBackend(availableBackends[0], restoreTimestamp, loopOnSwitch, out string error))
+                {
+                    backendSwitchError = error;
+                }
+                else
+                {
+                    backendSwitchError = string.Empty;
+                    current = player.CurrentTime;
+                    duration = player.Duration;
+                    size = new Vector2(player.Width, player.Height);
+                    clipRect = new RectangleF(0, 0, player.Width, player.Height);
+                }
+            }
+        }
 
         if (!string.IsNullOrEmpty(backendSwitchError))
         {
@@ -115,6 +165,37 @@ public class UIVideoRenderer : UIDrawable
         if (ImGui.Checkbox("Loop on EOF", ref loopOnEof))
         {
             player.LoopOnEof = loopOnEof;
+        }
+
+        // Pause toggle button
+        bool isPaused = player.IsPaused;
+        string pauseButtonLabel = isPaused ? "Resume" : "Pause";
+        if (ImGui.Button(pauseButtonLabel))
+        {
+            player.SetPaused(!isPaused);
+        }
+        ImGui.SameLine();
+
+        // Frame advance/retreat buttons (only useful when paused)
+        if (player.IsPaused)
+        {
+            bool previousFramePressed = ImGui.Button("< Frame");
+            if (previousFramePressed)
+            {
+                player.SeekByFrame(Math.Max(0, currentFrame - 1));
+            }
+            ImGui.SameLine();
+            bool nextFramePressed = ImGui.Button("Frame >");
+            if (nextFramePressed)
+            {
+                long nextFrame = currentFrame + 1;
+                if (totalFrames > 0)
+                {
+                    nextFrame = Math.Min(totalFrames - 1, nextFrame);
+                }
+
+                player.SeekByFrame(nextFrame);
+            }
         }
 
         if (!inspectorSeekInitialized)
@@ -138,12 +219,26 @@ public class UIVideoRenderer : UIDrawable
         bool sliderActive = ImGui.IsItemActive();
         if (sliderActive)
         {
-            inspectorSeekDragging = true;
+            if (!inspectorSeekDragging)
+            {
+                inspectorSeekDragging = true;
+                // When starting to drag, seek to the new position and update texture
+                player.Seek(TimeSpan.FromSeconds(inspectorSeekSeconds));
+                player.UpdateTextureForSeek();
+            }
+            else
+            {
+                // While dragging, continuously update the seek position and texture
+                player.Seek(TimeSpan.FromSeconds(inspectorSeekSeconds));
+                player.UpdateTextureForSeek();
+            }
         }
         else if (inspectorSeekDragging)
         {
+            // Released the slider - ensure final position is set
             inspectorSeekDragging = false;
             player.Seek(TimeSpan.FromSeconds(inspectorSeekSeconds));
+            player.UpdateTextureForSeek();
         }
 
         BaseTexture texture = lastRenderedTexture;

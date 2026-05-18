@@ -24,14 +24,61 @@ public abstract unsafe class FFmpegVideoPlayer : IDisposable
     public int Width => codecContext->width;
     public int Height => codecContext->height;
 
+    public long TotalFrameCount
+    {
+        get
+        {
+            if (formatContext == null || videoStreamIndex < 0)
+            {
+                return 0;
+            }
+
+            AVStream* videoStream = formatContext->streams[videoStreamIndex];
+            if (videoStream != null && videoStream->nb_frames > 0)
+            {
+                return videoStream->nb_frames;
+            }
+
+            // Fallback: calculate from duration and frame rate
+            if (videoStream != null && videoStream->duration > 0)
+            {
+                AVRational frameRate = videoStream->avg_frame_rate;
+                if (frameRate.num <= 0 || frameRate.den <= 0)
+                {
+                    frameRate = videoStream->r_frame_rate;
+                }
+
+                if (frameRate.num > 0 && frameRate.den > 0)
+                {
+                    double durationSeconds = videoStream->duration * ffmpeg.av_q2d(videoStream->time_base);
+                    double fps = (double)frameRate.num / frameRate.den;
+                    return (long)(durationSeconds * fps + 0.5);
+                }
+            }
+
+            return 0;
+        }
+    }
+
     // Controls whether playback restarts automatically when EOF is reached.
     public bool LoopOnEof { get; set; } = true;
 
+    /// <summary>
+    /// The single source of truth for playback timing.
+    /// When not paused, this clock advances to drive video playback.
+    /// When paused, the clock is stopped at the current position.
+    /// </summary>
     private readonly Stopwatch playbackClock = new();
-    private bool playbackClockStarted;
-    private double playbackStartSeconds;
+    
+    /// <summary>
+    /// The playback time offset. Combined with playbackClock.Elapsed to get actual playback time.
+    /// When seeking, this is set to the target time and the clock is reset.
+    /// </summary>
+    private double playbackTimeOffset;
+    
     private bool hasQueuedFrame;
     private double queuedFramePtsSeconds = double.NaN;
+    private bool isPaused;
 
     protected virtual int MaxFramesToDecodePerUpdate => 2;
 
@@ -94,7 +141,12 @@ public abstract unsafe class FFmpegVideoPlayer : IDisposable
         return null;
     }
 
-    public virtual TimeSpan CurrentTime => TimeSpan.FromSeconds(playbackStartSeconds + playbackClock.Elapsed.TotalSeconds);
+    public virtual TimeSpan CurrentTime
+    {
+        get => TimeSpan.FromSeconds(playbackTimeOffset + playbackClock.Elapsed.TotalSeconds);
+    }
+
+    public virtual bool IsPaused => isPaused;
 
     public TimeSpan Duration
     {
@@ -155,8 +207,122 @@ public abstract unsafe class FFmpegVideoPlayer : IDisposable
         }
 
         ffmpeg.avcodec_flush_buffers(codecContext);
-        ResetPlaybackState(Math.Max(0, timestamp.TotalSeconds));
+        
+        // Set the clock to the target time
+        playbackTimeOffset = Math.Max(0, timestamp.TotalSeconds);
+        playbackClock.Restart();
+        
+        // If currently paused, keep clock stopped; otherwise start it
+        if (isPaused)
+        {
+            playbackClock.Stop();
+        }
+        
+        // Invalidate queued frame so we'll decode the frame at the new position
+        hasQueuedFrame = false;
+        queuedFramePtsSeconds = double.NaN;
+        OnPlaybackReset();
+        
+        if (isPaused)
+        {
+            UpdateTextureForSeek();
+        }
+
         return true;
+    }
+
+    public virtual void SetPaused(bool paused)
+    {
+        if (isPaused == paused)
+        {
+            return;
+        }
+
+        isPaused = paused;
+        if (paused)
+        {
+            // Pause: stop the clock
+            playbackClock.Stop();
+        }
+        else
+        {
+            // Resume: start the clock from where it was
+            playbackClock.Start();
+        }
+    }
+
+    public virtual bool SeekByFrame(long frameNumber)
+    {
+        if (!TryGetVideoFrameRate(out double fps))
+        {
+            return false;
+        }
+
+        long targetFrame = Math.Max(0, frameNumber);
+        long totalFrames = TotalFrameCount;
+        if (totalFrames > 0)
+        {
+            targetFrame = Math.Min(targetFrame, totalFrames - 1);
+        }
+
+        double targetSeconds = targetFrame / fps;
+        
+        // Seek will automatically call UpdateTextureForSeek if paused.
+        return Seek(TimeSpan.FromSeconds(targetSeconds));
+    }
+
+    public virtual long GetCurrentFrameNumber()
+    {
+        if (formatContext == null || videoStreamIndex < 0)
+        {
+            return 0;
+        }
+
+        if (!TryGetVideoFrameRate(out double fps))
+        {
+            return 0;
+        }
+
+        long frameNumber = (long)Math.Round(CurrentTime.TotalSeconds * fps, MidpointRounding.AwayFromZero);
+        frameNumber = Math.Max(0, frameNumber);
+
+        long totalFrames = TotalFrameCount;
+        if (totalFrames > 0)
+        {
+            frameNumber = Math.Min(frameNumber, totalFrames - 1);
+        }
+
+        return frameNumber;
+    }
+
+    protected bool TryGetVideoFrameRate(out double fps)
+    {
+        fps = 0;
+
+        if (formatContext == null || videoStreamIndex < 0)
+        {
+            return false;
+        }
+
+        AVStream* videoStream = formatContext->streams[videoStreamIndex];
+        if (videoStream == null)
+        {
+            return false;
+        }
+
+        AVRational frameRate = videoStream->avg_frame_rate;
+        if (frameRate.num <= 0 || frameRate.den <= 0)
+        {
+            frameRate = videoStream->r_frame_rate;
+        }
+
+        if (frameRate.num <= 0 || frameRate.den <= 0)
+        {
+            return false;
+        }
+
+        fps = (double)frameRate.num / frameRate.den;
+        return fps > 0;
     }
 
     protected static long TimeSpanToStreamTimestamp(AVStream* videoStream, TimeSpan timestamp)
@@ -250,86 +416,155 @@ public abstract unsafe class FFmpegVideoPlayer : IDisposable
     {
     }
 
-    public virtual BaseTexture GetUpdatedTexture()
+    /// <summary>
+    /// Updates the playback state, including clock management and frame decoding.
+    /// Should be called once per frame/update cycle.
+    /// </summary>
+    public virtual void UpdatePlayback()
     {
-        StartPlaybackClockIfNeeded();
-
         BaseTexture outputTexture = OutputTexture;
         if (!outputTexture.IsValid())
         {
-            return BaseTexture.None;
+            return;
         }
 
-        double playbackTimeSeconds = playbackClock.Elapsed.TotalSeconds;
+        if (!isPaused && !playbackClock.IsRunning)
+        {
+            playbackClock.Start();
+        }
+
+        // Use CurrentTime.TotalSeconds because the elapsed clock is only a delta
+        // from the playbackTimeOffset.
+        double playbackTimeSeconds = CurrentTime.TotalSeconds;
 
         if (hasQueuedFrame)
         {
-            if (playbackTimeSeconds >= queuedFramePtsSeconds)
+            if (!isPaused && playbackTimeSeconds >= queuedFramePtsSeconds)
             {
                 PresentStagedFrame();
                 hasQueuedFrame = false;
                 queuedFramePtsSeconds = double.NaN;
             }
 
-            return outputTexture;
+            return;
         }
 
-        for (int decodedFrames = 0; decodedFrames < MaxFramesToDecodePerUpdate; decodedFrames++)
+        int maxFramesToDecode = MaxFramesToDecodePerUpdate;
+
+        for (int decodedFrames = 0; decodedFrames < maxFramesToDecode; decodedFrames++)
         {
-            bool reachedEndOfStream;
-            if (!TryDecodeAndStageFrame(out double framePtsSeconds, out reachedEndOfStream))
+            if (!TryDecodeAndStageFrame(out double framePtsSeconds, out bool reachedEndOfStream))
             {
                 if (reachedEndOfStream)
                 {
                     HandleEndOfStream();
                 }
-
                 break;
             }
 
-            if (framePtsSeconds <= playbackTimeSeconds)
+            if (isPaused)
             {
-                PresentStagedFrame();
-                continue;
+                // We are paused, looking for the target frame after a seek
+                if (framePtsSeconds >= playbackTimeSeconds - 0.001)
+                {
+                    PresentStagedFrame();
+                    hasQueuedFrame = true;
+                    // Provide a queued PTS in the future exactly at or after so we don't instantly dequeue
+                    queuedFramePtsSeconds = framePtsSeconds; 
+                    break;
+                }
+                // Otherwise silently discard past catch-up frames
             }
+            else
+            {
+                if (framePtsSeconds <= playbackTimeSeconds)
+                {
+                    PresentStagedFrame();
+                }
+                else
+                {
+                    hasQueuedFrame = true;
+                    queuedFramePtsSeconds = framePtsSeconds;
+                    break;
+                }
+            }
+        }
+    }
 
-            hasQueuedFrame = true;
-            queuedFramePtsSeconds = framePtsSeconds;
-            break;
+    /// <summary>
+    /// Forces a single frame update at the current playback position.
+    /// Used for updating the texture after seeking, especially when paused.
+    /// This does not advance the playback clock or affect pause state.
+    /// </summary>
+    public virtual void UpdateTextureForSeek()
+    {
+        BaseTexture outputTexture = OutputTexture;
+        if (!outputTexture.IsValid())
+        {
+            return;
         }
 
-        return outputTexture;
+        // Use the full CurrentTime (offset + elapsed) to ensure frame comparisons work after seeks
+        double playbackTimeSeconds = CurrentTime.TotalSeconds;
+
+        // Clear any queued frame to force a fresh decode
+        hasQueuedFrame = false;
+        queuedFramePtsSeconds = double.NaN;
+
+        // Decode until we reach the current time target, which matters after frame seeks
+        // because av_seek_frame typically lands on a preceding keyframe.
+        const int maxSeekDecodeAttempts = 120;
+        for (int i = 0; i < maxSeekDecodeAttempts; i++)
+        {
+            if (!TryDecodeAndStageFrame(out double framePtsSeconds, out _))
+            {
+                return;
+            }
+
+            if (framePtsSeconds >= playbackTimeSeconds - 0.001)
+            {
+                PresentStagedFrame();
+                hasQueuedFrame = true;
+                queuedFramePtsSeconds = framePtsSeconds;
+                return;
+            }
+        }
+
+        PresentStagedFrame();
+        hasQueuedFrame = true;
+        queuedFramePtsSeconds = playbackTimeSeconds;
+    }
+
+    /// <summary>
+    /// Gets the current texture without updating playback state.
+    /// Call UpdatePlayback() before this to advance frames.
+    /// </summary>
+    public virtual BaseTexture GetUpdatedTexture()
+    {
+        return OutputTexture;
     }
 
     private void HandleEndOfStream()
     {
-        if (!LoopOnEof)
+        if (LoopOnEof)
         {
-            return;
+            Seek(TimeSpan.Zero);
         }
-
-        Seek(TimeSpan.Zero);
+        else
+        {
+            SetPaused(true);
+        }
     }
 
     private void ResetPlaybackState(double startSeconds)
     {
-        playbackStartSeconds = Math.Max(0, startSeconds);
         hasQueuedFrame = false;
         queuedFramePtsSeconds = double.NaN;
-        playbackClock.Reset();
-        playbackClockStarted = false;
+        playbackTimeOffset = Math.Max(0, startSeconds);
+        playbackClock.Restart();
+        isPaused = false;
+        // Clock starts running from the offset position
         OnPlaybackReset();
-    }
-
-    private void StartPlaybackClockIfNeeded()
-    {
-        if (playbackClockStarted)
-        {
-            return;
-        }
-
-        playbackClock.Start();
-        playbackClockStarted = true;
     }
 
     public virtual void Dispose()
@@ -356,7 +591,6 @@ public abstract unsafe class FFmpegVideoPlayer : IDisposable
         }
 
         playbackClock.Stop();
-        playbackClockStarted = false;
         
         GC.SuppressFinalize(this);
     }
