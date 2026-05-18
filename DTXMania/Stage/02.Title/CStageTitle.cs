@@ -7,7 +7,6 @@ using System.Numerics;
 using DTXMania.Core;
 using DTXMania.Core.Framework;
 using DTXMania.Core.Video;
-using DTXMania.Core.Video.NewPlayer;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.DynamicElements;
 

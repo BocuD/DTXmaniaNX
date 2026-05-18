@@ -1,4 +1,4 @@
-﻿namespace DTXMania.Core.Video.NewPlayer.Decoders;
+﻿namespace DTXMania.Core.Video.Decoders;
 
 public abstract class VideoDecoder : IDisposable
 {

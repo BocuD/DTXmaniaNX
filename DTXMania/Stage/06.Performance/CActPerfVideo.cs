@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using DTXMania.Core;
 using DTXMania.Core.Video;
-using DTXMania.Core.Video.NewPlayer;
 using DTXMania.UI.Drawable;
 using FDK;
 

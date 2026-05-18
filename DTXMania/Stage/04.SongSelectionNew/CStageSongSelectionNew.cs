@@ -4,7 +4,6 @@ using System.Numerics;
 using DiscordRPC;
 using DTXMania.Core;
 using DTXMania.Core.Video;
-using DTXMania.Core.Video.NewPlayer;
 using DTXMania.SongDb;
 using DTXMania.SongDb.Sorting;
 using DTXMania.UI;

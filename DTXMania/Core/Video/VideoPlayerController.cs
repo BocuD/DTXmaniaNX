@@ -1,11 +1,11 @@
 ﻿using System.Diagnostics;
 using System.Numerics;
-using DTXMania.Core.Video.NewPlayer.Decoders;
+using DTXMania.Core.Video.Decoders;
 using DTXMania.UI.Drawable;
 using Hexa.NET.ImGui;
 using NativeFileDialog.Extended;
 
-namespace DTXMania.Core.Video.NewPlayer;
+namespace DTXMania.Core.Video;
 
 public class VideoPlayerController : IDisposable
 {

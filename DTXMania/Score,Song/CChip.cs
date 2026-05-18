@@ -555,7 +555,7 @@ public class CChip : IComparable<CChip>, ICloneable
 		{
 			if (rAVI != null && rAVI.fileExists)
 			{
-				nDuration = (int)rAVI.duration.TotalMilliseconds; 
+				nDuration = (int)rAVI.duration * 1000; 
 			}
 		}
 

@@ -1,7 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using FFmpeg.AutoGen.Abstractions;
 
-namespace DTXMania.Core.Video.NewPlayer.Decoders;
+namespace DTXMania.Core.Video.Decoders;
 
 public unsafe class AsyncVideoDecoder : VideoDecoder
 {

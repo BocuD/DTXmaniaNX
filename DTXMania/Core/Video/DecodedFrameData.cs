@@ -1,4 +1,4 @@
-﻿namespace DTXMania.Core.Video.NewPlayer;
+﻿namespace DTXMania.Core.Video;
 
 public readonly struct DecodedFrameData
 {

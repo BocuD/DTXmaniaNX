@@ -4,7 +4,7 @@ using DTXMania.Core.Framework;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.Inspector;
 
-namespace DTXMania.Core.Video.NewPlayer;
+namespace DTXMania.Core.Video;
 
 public class UINewVideoRenderer : UIDrawable
 {
