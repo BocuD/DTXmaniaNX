@@ -248,9 +248,7 @@ internal abstract class CActPerfCommonJudgementString : CActivity
 		{
 			return;
 		}
-
-		Trace.TraceInformation($"{x}, {y}");
-
+		
 		BaseTexture txJudge = judgementGraphicSheet;
 
 		int frameY = judgementStatus[ lane ].nRect * nRectY;
