@@ -11,7 +11,7 @@ internal partial class CActConfigList
         tRecordToConfigIni();
         listItems.Clear();
 
-        CItemToggle iSystemAVI = new("AVI", CDTXMania.ConfigIni.bAVIEnabled,
+        CItemToggle iSystemAVI = new("AVI (ffmpeg)", CDTXMania.ConfigIni.bAVIEnabled,
             "AVIの使用：\n動画(AVI)を再生可能にする場合に\nON にします。AVI の再生には、それ\nなりのマシンパワーが必要とされます。",
             "Turn ON to enable video (AVI) playback.\nThis requires some processing power.");
         iSystemAVI.BindConfig(

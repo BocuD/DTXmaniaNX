@@ -4,6 +4,7 @@ using System.Numerics;
 using DiscordRPC;
 using DTXMania.Core;
 using DTXMania.Core.Video;
+using DTXMania.Core.Video.NewPlayer;
 using DTXMania.SongDb;
 using DTXMania.SongDb.Sorting;
 using DTXMania.UI;
@@ -146,12 +147,13 @@ public class CStageSongSelectionNew : CStage
         bg.name = "Background";
         
         string videoPath = CSkin.Path(@"Graphics\5_background.mp4");
-        FFmpegVideoPlayer videoPlayer = new ThreadedSoftwareVideoPlayer();
-		
-        if (videoPlayer.Open(videoPath))
+
+        UINewVideoRenderer videoPlayer = new();
+        if (videoPlayer.LoadVideo(videoPath))
         {
-            UIVideoRenderer renderer = ui.AddChild(new UIVideoRenderer(videoPlayer, videoPath));
-            renderer.renderOrder = -99;
+            ui.AddChild(videoPlayer);
+            videoPlayer.renderOrder = -100;
+            videoPlayer.name = "BackgroundVideo";
         }
         else
         {

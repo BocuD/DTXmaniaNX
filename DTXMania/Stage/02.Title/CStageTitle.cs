@@ -7,6 +7,7 @@ using System.Numerics;
 using DTXMania.Core;
 using DTXMania.Core.Framework;
 using DTXMania.Core.Video;
+using DTXMania.Core.Video.NewPlayer;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.DynamicElements;
 
@@ -42,13 +43,13 @@ internal class CStageTitle : CStage
 		bg.name = "Background";
 
 		string videoPath = CSkin.Path(@"Graphics\2_background.mp4");
-		FFmpegVideoPlayer videoPlayer = new ThreadedSoftwareVideoPlayer();
-		
-		if (videoPlayer.Open(videoPath))
+
+		UINewVideoRenderer videoPlayer = new();
+		if (videoPlayer.LoadVideo(videoPath))
 		{
-			UIVideoRenderer renderer = ui.AddChild(new UIVideoRenderer(videoPlayer, videoPath));
-			renderer.renderOrder = -100;
-			renderer.name = "VideoPlayer";
+			ui.AddChild(videoPlayer);
+			videoPlayer.renderOrder = -100;
+			videoPlayer.name = "BackgroundVideo";
 		}
 		else
 		{
