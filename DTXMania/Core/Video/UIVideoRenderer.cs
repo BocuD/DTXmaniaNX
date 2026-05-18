@@ -95,6 +95,7 @@ public class UIVideoRenderer : UIDrawable
             ? $"Frame: {currentFrame + 1} / {totalFrames}"
             : $"Frame: {currentFrame + 1} / ?");
 
+
         if (!string.IsNullOrWhiteSpace(sourcePath))
         {
             int backendIndex = FindBackendIndex(selectedBackendType);
@@ -222,15 +223,13 @@ public class UIVideoRenderer : UIDrawable
             if (!inspectorSeekDragging)
             {
                 inspectorSeekDragging = true;
-                // When starting to drag, seek to the new position and update texture
+                // When starting to drag, seek to the new position
                 player.Seek(TimeSpan.FromSeconds(inspectorSeekSeconds));
-                player.UpdateTextureForSeek();
             }
             else
             {
-                // While dragging, continuously update the seek position and texture
+                // While dragging, continuously update the seek position
                 player.Seek(TimeSpan.FromSeconds(inspectorSeekSeconds));
-                player.UpdateTextureForSeek();
             }
         }
         else if (inspectorSeekDragging)
@@ -238,7 +237,6 @@ public class UIVideoRenderer : UIDrawable
             // Released the slider - ensure final position is set
             inspectorSeekDragging = false;
             player.Seek(TimeSpan.FromSeconds(inspectorSeekSeconds));
-            player.UpdateTextureForSeek();
         }
 
         BaseTexture texture = lastRenderedTexture;

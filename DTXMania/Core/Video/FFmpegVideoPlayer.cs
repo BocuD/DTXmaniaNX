@@ -228,10 +228,8 @@ public abstract unsafe class FFmpegVideoPlayer : IDisposable
         queuedFramePtsSeconds = double.NaN;
         OnPlaybackReset();
         
-        if (isPaused)
-        {
-            UpdateTextureForSeek();
-        }
+        // Always synchronously update the texture to visually match the exact seek destination instantly
+        UpdateTextureForSeek();
 
         return true;
     }

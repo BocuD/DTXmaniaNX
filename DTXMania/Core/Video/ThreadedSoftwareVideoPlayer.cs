@@ -138,14 +138,7 @@ public unsafe class ThreadedSoftwareVideoPlayer : FFmpegVideoPlayer
             reachedEndOfStream = endOfStreamReached;
         }
 
-        // If the queue is empty (e.g. immediately after seeking when OnPlaybackReset clears it),
-        // we decode synchronously on the calling thread so we don't return false and fail the seek loop.
-        if (TryDecodeOneFrame(out byte[] syncFrameData, out framePtsSeconds, out reachedEndOfStream))
-        {
-            StageFrame(syncFrameData);
-            return true;
-        }
-
+        framePtsSeconds = 0;
         return false;
     }
 
@@ -168,7 +161,6 @@ public unsafe class ThreadedSoftwareVideoPlayer : FFmpegVideoPlayer
         }
 
         stagedFrameLength = 0;
-        timelineOriginPtsSeconds = double.NaN;
         lastDecodedPtsSeconds = double.NaN;
     }
 
@@ -303,23 +295,6 @@ public unsafe class ThreadedSoftwareVideoPlayer : FFmpegVideoPlayer
                     if (receive != 0)
                     {
                         continue;
-                    }
-
-                    framePtsSeconds = ResolveFrameTimestampSeconds();
-
-                    // If we are playing catch-up after a seek, skip sws_scale completely until we reach the target
-                    if (!double.IsNaN(CurrentSeekTargetSeconds))
-                    {
-                        if (framePtsSeconds < CurrentSeekTargetSeconds - 0.001)
-                        {
-                            frameData = [];
-                            reachedEof = false;
-                            return true;
-                        }
-                        else
-                        {
-                            CurrentSeekTargetSeconds = double.NaN;
-                        }
                     }
 
                     if (ffmpeg.av_frame_make_writable(rgbaFrame) < 0)

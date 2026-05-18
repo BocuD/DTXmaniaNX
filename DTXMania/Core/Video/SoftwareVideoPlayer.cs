@@ -253,7 +253,6 @@ public unsafe class SoftwareVideoPlayer : FFmpegVideoPlayer
     protected override void OnPlaybackReset()
     {
         stagedFrameLength = 0;
-        timelineOriginPtsSeconds = double.NaN;
         lastDecodedPtsSeconds = double.NaN;
     }
 
