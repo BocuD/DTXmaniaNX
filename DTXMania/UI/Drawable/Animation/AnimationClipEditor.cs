@@ -31,8 +31,11 @@ public sealed partial class AnimationClipEditor
 
     // Drag-in-progress state for keyframes. While dragging we mutate kf.time on each frame and
     // call SortKeyframes only on mouse release (sorting mid-drag would re-order under us).
+    // dragStartTime captures the keyframe's time when the drag was armed, so we can revert on
+    // release if the keyframe lands on top of another keyframe at the new position.
     private Keyframe? draggingKeyframe;
     private AnimationTrack? draggingTrack;
+    private float dragStartTime;
 
     // Scrubber drag (when the user is click-dragging in the ruler area).
     private bool draggingScrubber;

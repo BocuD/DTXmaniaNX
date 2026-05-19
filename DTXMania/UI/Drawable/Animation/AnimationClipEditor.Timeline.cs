@@ -1,4 +1,5 @@
 using System.Numerics;
+using System.Reflection;
 using DTXMania.Core.Framework;
 using DTXMania.UI.Drawable;
 using Hexa.NET.ImGui;
@@ -28,17 +29,97 @@ public sealed partial class AnimationClipEditor
             return;
         }
 
-        ImGui.SetNextWindowSize(new Vector2(700, 280), ImGuiCond.FirstUseEver);
+        ImGui.SetNextWindowSize(new Vector2(900, 500), ImGuiCond.FirstUseEver);
         bool windowOpen = timelineWindowOpen;
         if (ImGui.Begin($"Animation Timeline — {selectedClip.name}", ref windowOpen))
         {
             DrawTimelineToolbar(animator);
             ImGui.Separator();
+            DrawAddTrackToolbarRow(root);
+
+            // Reserve room at the bottom for the keyframe/track inspector pane. The body sits
+            // in a scrollable child so very long clips or many tracks don't force the whole
+            // window to scroll.
+            float reserveForInspector = ComputeInspectorPaneHeight();
+            ImGui.BeginChild("timeline_body_scroll", new Vector2(0, -reserveForInspector),
+                ImGuiChildFlags.None,
+                ImGuiWindowFlags.HorizontalScrollbar);
             DrawTimelineBody(animator, root);
-            DrawKeyframeInspector(root);
+            ImGui.EndChild();
+
+            ImGui.Separator();
+            DrawSelectionInspectorPane(root);
         }
         ImGui.End();
         timelineWindowOpen = windowOpen;
+    }
+
+    /// <summary>
+    /// Compact toolbar row between the main toolbar and the scrolling timeline body. Holds the
+    /// "Add Property" button which opens the same recursive property-picker menu the inspector
+    /// used to expose. Placed outside the scroll region so it stays visible.
+    /// </summary>
+    private void DrawAddTrackToolbarRow(UIGroup root)
+    {
+        if (selectedClip == null) return;
+
+        if (ImGui.Button("Add Property"))
+        {
+            ImGui.OpenPopup("addtrackpopup");
+        }
+        if (ImGui.BeginPopup("addtrackpopup"))
+        {
+            DrawAddTrackMenu(selectedClip, root, parentPath: "");
+            ImGui.EndPopup();
+        }
+
+        ImGui.SameLine();
+        ImGui.TextDisabled($"{selectedClip.tracks.Count} track(s)");
+    }
+
+    /// <summary>
+    /// Reserve enough space for whichever inspector pane will render below the body — keyframe
+    /// inspector if a keyframe is selected, otherwise a smaller track inspector if a track is
+    /// selected, otherwise nothing.
+    /// </summary>
+    private float ComputeInspectorPaneHeight()
+    {
+        if (selectedClip == null) return 0f;
+        if (selectedKeyframe != null && selectedTrack != null
+            && selectedTrack.keyframes.Contains(selectedKeyframe))
+        {
+            return 220f;
+        }
+        if (selectedTrack != null) return 80f;
+        return 0f;
+    }
+
+    private void DrawSelectionInspectorPane(UIGroup root)
+    {
+        // Keyframe inspector takes priority — it already includes the track's value editor.
+        if (selectedKeyframe != null && selectedTrack != null
+            && selectedTrack.keyframes.Contains(selectedKeyframe))
+        {
+            DrawKeyframeInspector(root);
+            return;
+        }
+        if (selectedTrack != null)
+        {
+            DrawTrackInspector();
+        }
+    }
+
+    private void DrawTrackInspector()
+    {
+        if (selectedTrack == null) return;
+        ImGui.Text("Track");
+        string path = selectedTrack.path;
+        if (ImGui.InputText("Path", ref path, 256))
+        {
+            selectedTrack.path = path;
+            selectedTrack.Invalidate();
+        }
+        ImGui.TextDisabled($"Keyframes: {selectedTrack.keyframes.Count}");
     }
 
     private void DrawTimelineToolbar(Animator animator)
@@ -174,31 +255,64 @@ public sealed partial class AnimationClipEditor
             drawList.AddRectFilled(rowMin, rowMax, bg);
         }
 
-        // --- Label column buttons (real ImGui widgets) -------------------------------------
-        // For each track, place a "+" button followed by the path label. Clicking "+" inserts
-        // a keyframe at the current scrub time using the live property value.
+        // --- Label column widgets (real ImGui) ----------------------------------------------
+        // For each track row, draw the "+" button followed by a clickable Selectable that
+        // covers the rest of the label column. The Selectable handles track selection on
+        // left-click and exposes a Delete context menu on right-click.
+        // We re-route layout via SetCursorScreenPos because the row positions are computed
+        // from `tracksOrigin`, not the natural ImGui layout cursor.
+        int? trackToDelete = null;
         for (int i = 0; i < selectedClip.tracks.Count; i++)
         {
             AnimationTrack track = selectedClip.tracks[i];
             float rowTop = tracksOrigin.Y + i * trackRowHeight;
 
-            // Vertically center the button within the row by offsetting from rowTop.
+            ImGui.PushID(i);
+
+            // "+" button — add keyframe at scrub time using the property's current value.
             float buttonOffsetY = (trackRowHeight - ImGui.GetFrameHeight()) * 0.5f;
             ImGui.SetCursorScreenPos(new Vector2(tracksOrigin.X + 4, rowTop + buttonOffsetY));
-
-            ImGui.PushID(i);
             if (ImGui.SmallButton("+"))
             {
                 AddKeyframeAtScrub(track, animator, root);
             }
             if (ImGui.IsItemHovered()) ImGui.SetTooltip("Add keyframe at current scrub time using the property's current value");
-            ImGui.PopID();
 
-            // Label text — drawn after the button to sit alongside it.
-            string label = string.IsNullOrEmpty(track.path) ? "(unbound)" : track.path;
+            // Clickable label area — Selectable covers everything from just after the button
+            // to the end of the label column. Click selects the track; right-click opens a
+            // context menu for delete. We don't show Selectable's own highlight because the
+            // row background already tints when selected.
             float labelX = ImGui.GetItemRectMax().X + 6f;
-            drawList.AddText(new Vector2(labelX, rowTop + (trackRowHeight - ImGui.GetTextLineHeight()) * 0.5f),
-                0xFFFFFFFF, label);
+            float labelW = MathF.Max(20f, tracksOrigin.X + labelColumnWidth - labelX);
+            ImGui.SetCursorScreenPos(new Vector2(labelX, rowTop));
+            string label = string.IsNullOrEmpty(track.path) ? "(unbound)" : track.path;
+            if (ImGui.Selectable($"{label}##trackrow", false, ImGuiSelectableFlags.None,
+                                 new Vector2(labelW, trackRowHeight)))
+            {
+                if (selectedTrack != track)
+                {
+                    selectedTrack = track;
+                    selectedKeyframe = null;
+                }
+            }
+            if (ImGui.BeginPopupContextItem("trackrowctx"))
+            {
+                if (ImGui.MenuItem("Delete"))
+                {
+                    trackToDelete = i;
+                }
+                ImGui.EndPopup();
+            }
+
+            ImGui.PopID();
+        }
+
+        // Defer the actual list mutation so we don't disturb the loop's indices.
+        if (trackToDelete != null)
+        {
+            AnimationTrack t = selectedClip.tracks[trackToDelete.Value];
+            selectedClip.tracks.RemoveAt(trackToDelete.Value);
+            if (selectedTrack == t) { selectedTrack = null; selectedKeyframe = null; }
         }
 
         // --- Invisible hit area over content (ruler + track lanes, right of label col) -----
@@ -243,6 +357,35 @@ public sealed partial class AnimationClipEditor
             }
         }
 
+        // First pass: find the nearest keyframe under the hit radius across all tracks. We
+        // compare squared distances so two near-overlapping dots resolve to whichever is
+        // genuinely closest to the cursor rather than whichever happened to be earliest in
+        // the list.
+        float bestDistSq = dotHitRadius * dotHitRadius;
+        for (int i = 0; i < selectedClip.tracks.Count; i++)
+        {
+            if (!contentHovered || hoveredTrackIndex != i) continue;
+            AnimationTrack track = selectedClip.tracks[i];
+            float rowTop = tracksOrigin.Y + i * trackRowHeight;
+            float dotY = rowTop + trackRowHeight * 0.5f;
+
+            foreach (Keyframe kf in track.keyframes)
+            {
+                float x = contentMin.X + kf.time * timelinePixelsPerSecond;
+                float dx = mouse.X - x;
+                float dy = mouse.Y - dotY;
+                float distSq = dx * dx + dy * dy;
+                if (distSq <= bestDistSq)
+                {
+                    bestDistSq = distSq;
+                    hoveredKeyframe = kf;
+                    hoveredKeyframeTrack = track;
+                }
+            }
+        }
+
+        // Second pass: render. We can now correctly highlight whichever keyframe the first
+        // pass picked, even if it appears later in the iteration order.
         for (int i = 0; i < selectedClip.tracks.Count; i++)
         {
             AnimationTrack track = selectedClip.tracks[i];
@@ -252,18 +395,6 @@ public sealed partial class AnimationClipEditor
             foreach (Keyframe kf in track.keyframes)
             {
                 float x = contentMin.X + kf.time * timelinePixelsPerSecond;
-
-                if (contentHovered && hoveredKeyframe == null && hoveredTrackIndex == i)
-                {
-                    float dx = mouse.X - x;
-                    float dy = mouse.Y - dotY;
-                    if (dx * dx + dy * dy <= dotHitRadius * dotHitRadius)
-                    {
-                        hoveredKeyframe = kf;
-                        hoveredKeyframeTrack = track;
-                    }
-                }
-
                 bool isSel = kf == selectedKeyframe;
                 bool isHov = kf == hoveredKeyframe;
                 uint fill = isSel ? 0xFFFFFF00u : (isHov ? 0xFF66DDFFu : 0xFF00CCFFu);
@@ -338,6 +469,33 @@ public sealed partial class AnimationClipEditor
         {
             if (draggingKeyframe != null && draggingTrack != null)
             {
+                // Collision check: if another keyframe on this track shares the new time
+                // (within half a frame, the snap quantum), revert to the start position
+                // rather than silently stacking two keyframes at the same time. Half-frame
+                // tolerance is safe because both times are already frame-snapped — equal
+                // frames produce identical floats and differ-by-one frames are a full frame
+                // apart.
+                float collisionEpsilon = selectedClip is { frameRate: > 0f } c
+                    ? 0.5f / c.frameRate
+                    : 1e-4f;
+
+                bool collision = false;
+                foreach (Keyframe other in draggingTrack.keyframes)
+                {
+                    if (other == draggingKeyframe) continue;
+                    if (MathF.Abs(other.time - draggingKeyframe.time) < collisionEpsilon)
+                    {
+                        collision = true;
+                        break;
+                    }
+                }
+
+                if (collision)
+                {
+                    draggingKeyframe.time = dragStartTime;
+                    ShowStatus("Reverted: another keyframe is at that time");
+                }
+
                 draggingTrack.SortKeyframes();
                 draggingKeyframe = null;
                 draggingTrack = null;
@@ -374,6 +532,7 @@ public sealed partial class AnimationClipEditor
                 {
                     draggingKeyframe = hoveredKeyframe;
                     draggingTrack = hoveredKeyframeTrack;
+                    dragStartTime = hoveredKeyframe.time;
                 }
                 else
                 {
@@ -564,5 +723,154 @@ public sealed partial class AnimationClipEditor
         }
         ImGui.TextDisabled($"(no editor for {type.Name})");
         return false;
+    }
+
+    // =========================================================================================
+    // Add Property menu + helpers — moved from the inspector since track management now lives here.
+    // =========================================================================================
+
+    private void DrawAddTrackMenu(AnimationClip clip, UIDrawable current, string parentPath)
+    {
+        // 1) Children first.
+        bool hasAnyChildren = false;
+        if (current is UIGroup group && group.children.Count > 0)
+        {
+            for (int i = 0; i < group.children.Count; i++)
+            {
+                UIDrawable child = group.children[i];
+                hasAnyChildren = true;
+
+                if (string.IsNullOrEmpty(child.name))
+                {
+                    // Unnamed → not addressable. Show but disable so the user understands
+                    // they need to name it first.
+                    ImGui.BeginDisabled();
+                    ImGui.MenuItem($"(unnamed {child.GetType().Name})");
+                    ImGui.EndDisabled();
+                    continue;
+                }
+
+                string childLabel = $"{child.name} ({child.GetType().Name})";
+                ImGui.PushID(i);
+                if (ImGui.BeginMenu(childLabel))
+                {
+                    string childPath = string.IsNullOrEmpty(parentPath)
+                        ? child.name
+                        : parentPath + "/" + child.name;
+                    DrawAddTrackMenu(clip, child, childPath);
+                    ImGui.EndMenu();
+                }
+                ImGui.PopID();
+            }
+        }
+
+        // 2) Separator between children and own properties (only if both exist).
+        List<PropertyEntry> ownProperties = EnumerateThemableProperties(current.GetType()).ToList();
+        if (hasAnyChildren && ownProperties.Count > 0)
+        {
+            ImGui.Separator();
+        }
+
+        // 3) Own properties.
+        foreach (PropertyEntry entry in ownProperties)
+        {
+            string basePath = string.IsNullOrEmpty(parentPath)
+                ? entry.Name
+                : parentPath + "/" + entry.Name;
+
+            string[] subFields = GetAnimatableSubFields(entry.ValueType);
+            bool wholeAnimatable = Interpolator.IsRegistered(entry.ValueType);
+
+            if (subFields.Length == 0 && wholeAnimatable)
+            {
+                if (ImGui.MenuItem(entry.Name))
+                {
+                    AddTrack(clip, basePath);
+                    ImGui.CloseCurrentPopup();
+                }
+            }
+            else if (subFields.Length > 0)
+            {
+                if (ImGui.BeginMenu(entry.Name))
+                {
+                    if (wholeAnimatable && ImGui.MenuItem($"{entry.Name} (whole)"))
+                    {
+                        AddTrack(clip, basePath);
+                        ImGui.CloseCurrentPopup();
+                    }
+                    foreach (string sub in subFields)
+                    {
+                        if (ImGui.MenuItem(sub))
+                        {
+                            AddTrack(clip, basePath + "." + sub);
+                            ImGui.CloseCurrentPopup();
+                        }
+                    }
+                    ImGui.EndMenu();
+                }
+            }
+            else
+            {
+                // Themable but no known interpolator and no usable sub-fields. Greyed.
+                ImGui.BeginDisabled();
+                ImGui.MenuItem($"{entry.Name} ({entry.ValueType.Name})");
+                ImGui.EndDisabled();
+            }
+        }
+    }
+
+    private void AddTrack(AnimationClip clip, string path)
+    {
+        AnimationTrack track = new() { path = path };
+        clip.tracks.Add(track);
+        selectedTrack = track;
+        selectedKeyframe = null;
+    }
+
+    private readonly struct PropertyEntry
+    {
+        public PropertyEntry(string name, Type valueType) { Name = name; ValueType = valueType; }
+        public string Name { get; }
+        public Type ValueType { get; }
+    }
+
+    private static IEnumerable<PropertyEntry> EnumerateThemableProperties(Type type)
+    {
+        const BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
+
+        // Fields
+        foreach (FieldInfo f in type.GetFields(flags))
+        {
+            if (HasThemable(f))
+                yield return new PropertyEntry(f.Name, f.FieldType);
+        }
+        // Properties (rare in your codebase but harmless to support)
+        foreach (PropertyInfo p in type.GetProperties(flags))
+        {
+            if (p.GetIndexParameters().Length > 0) continue;
+            if (HasThemable(p))
+                yield return new PropertyEntry(p.Name, p.PropertyType);
+        }
+    }
+
+    private static bool HasThemable(MemberInfo m)
+    {
+        foreach (var a in m.GetCustomAttributes(inherit: true))
+            if (a is ThemableAttribute) return true;
+        return false;
+    }
+
+    /// <summary>
+    /// For a property value type, return the names of sub-fields we want to offer as separate
+    /// animation targets. Vectors → X/Y/Z/W, Color4 → Red/Green/Blue/Alpha. Returns an empty
+    /// array for types where the whole value is the only sensible target.
+    /// </summary>
+    private static string[] GetAnimatableSubFields(Type valueType)
+    {
+        if (valueType == typeof(Vector2)) return ["X", "Y"];
+        if (valueType == typeof(Vector3)) return ["X", "Y", "Z"];
+        if (valueType == typeof(Vector4)) return ["X", "Y", "Z", "W"];
+        if (valueType == typeof(Color4)) return ["Red", "Green", "Blue", "Alpha"];
+        return [];
     }
 }
