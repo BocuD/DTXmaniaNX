@@ -1,5 +1,6 @@
 ﻿using System.Numerics;
 using DTXMania.Core;
+using DTXMania.Core.Framework;
 using DTXMania.UI.Animation;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.Inspector;
@@ -11,10 +12,12 @@ public class JudgementString : UIGroup
 {
     private static BaseTexture[] stringTextures;
     private static BaseTexture barTexture;
+    private static BaseTexture autoBarTexture;
 
     private static void CacheTextures()
     {
         barTexture = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\Judge\judge_bar.png"));
+        autoBarTexture = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\Judge\judge_bar_auto.png"));
         stringTextures = new BaseTexture[Enum.GetValues(typeof(EJudgement)).Length];
         
         foreach (EJudgement judgement in Enum.GetValues(typeof(EJudgement)))
@@ -78,15 +81,6 @@ public class JudgementString : UIGroup
         isVisible = false;
     }
 
-    public override void Draw(Matrix4x4 parentMatrix)
-    {
-        baseString.SetTexture(stringTextures[(int)judgement], false, false);
-        highlightString.SetTexture(stringTextures[(int)judgement], false, false);
-        bar.isVisible = judgement is EJudgement.Perfect or EJudgement.Auto;
-        
-        base.Draw(parentMatrix);
-    }
-
     public override void DrawInspector()
     {
         base.DrawInspector();
@@ -103,6 +97,26 @@ public class JudgementString : UIGroup
     {
         isVisible = true;
         judgement = judge;
+
+        switch (judgement)
+        {
+            case EJudgement.Perfect:
+                bar.isVisible = true;
+                bar.SetTexture(barTexture, false, false);
+                break;
+            
+            case EJudgement.Auto:
+                bar.isVisible = true;
+                bar.SetTexture(autoBarTexture, false, false);
+                break;
+            
+            default:
+                bar.isVisible = false;
+                break;
+        }
+        
+        baseString.SetTexture(stringTextures[(int)judgement], false, false);
+        highlightString.SetTexture(stringTextures[(int)judgement], false, false);
         
         //fast forward one frame
         animator.time = 1 / 60.0f;
