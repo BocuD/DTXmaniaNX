@@ -38,7 +38,11 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 	public override void InitializeBaseUI()
 	{
 		base.InitializeBaseUI();
+		
+		var guitarScreen = ui.AddChild(new LegacyDrawable(DrawGuitarScreen));
+		guitarScreen.name = "guitarScreen";
 
+		actJudgeString.InitUI(ui);
 		actStatusPanel.InitUI(ui);
 	}
 
@@ -136,68 +140,6 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 
 		base.OnUpdateAndDraw();
 
-		bool bIsFinishedPlaying = false;
-		bool bIsFinishedFadeout = false;
-		
-		if (CDTXMania.ConfigIni.bSTAGEFAILEDEnabled && !bIsTrainingMode && (ePhaseID == EPhase.Common_DefaultState))
-		{
-			bool bFailedGuitar =
-				actGauge.IsFailed(EInstrumentPart
-					.GUITAR); // #23630 2011.11.12 yyagi: deleted AutoPlay condition: not to be failed at once
-			bool bFailedBass = actGauge.IsFailed(EInstrumentPart.BASS); // #23630
-			bool bFailedNoChips =
-				(!CDTXMania.DTX.bHasChips.Guitar &&
-				 !CDTXMania.DTX.bHasChips.Bass); // #25216 2011.5.21 yyagi add condition
-			if (bFailedGuitar || bFailedBass || bFailedNoChips) // #25216 2011.5.21 yyagi: changed codition: && -> ||
-			{
-				actStageFailed.Start();
-				CDTXMania.DTX.tStopPlayingAllChips();
-				ePhaseID = EPhase.PERFORMANCE_STAGE_FAILED;
-			}
-		}
-
-		tUpdateAndDraw_Background();
-		tUpdateAndDraw_AVI();
-		tUpdateAndDraw_MIDIBGM();
-
-//                if (CDTXMania.ConfigIni.bShowMusicInfo)
-//				    this.t進行描画_パネル文字列();
-
-		tUpdateAndDraw_LaneFlushGB();
-
-		tUpdateAndDraw_DANGER();
-
-		tUpdateAndDraw_WailingBonus();
-		tUpdateAndDraw_ScrollSpeed();
-		tUpdateAndDraw_ChipAnimation();
-		tUpdateAndDraw_BarLines(EInstrumentPart.GUITAR);
-		tDraw_LoopLines();
-		bIsFinishedPlaying = tUpdateAndDraw_Chips(EInstrumentPart.GUITAR);
-		tUpdateAndDraw_RGBButton();
-		tUpdateAndDraw_GuitarBass_JudgementLine();
-		tUpdateAndDraw_JudgementString();
-		actProgressBar.OnUpdateAndDraw();
-		tUpdateAndDraw_Gauge();
-		if (CDTXMania.ConfigIni.nInfoType == 1)
-			tUpdateAndDraw_StatusPanel();
-		if (CDTXMania.ConfigIni.bShowScore)
-			tUpdateAndDraw_Score();
-
-		tUpdateAndDraw_Graph();
-		tUpdateAndDraw_Combo();
-		tUpdateAndDraw_PerformanceInformation();
-		//this.tUpdateAndDraw_WailingFrame();
-
-		tUpdateAndDraw_ChipFireGB();
-		tUpdateAndDraw_GuitarBonus();
-		tUpdateAndDraw_STAGEFAILED();
-		bIsFinishedFadeout = tUpdateAndDraw_FadeIn_Out();
-		if (bIsFinishedPlaying && (ePhaseID == EPhase.Common_DefaultState))
-		{
-			eReturnValueAfterFadeOut = EPerfScreenReturnValue.StageClear;
-			ePhaseID = EPhase.PERFORMANCE_STAGE_CLEAR;
-		}
-
 		if (bIsFinishedFadeout)
 		{
 			if (!CDTXMania.Skin.soundStageClear.b再生中)
@@ -284,6 +226,72 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 			return (int)eReturnValueAfterFadeOut;
 		}
 
+		return 0;
+	}
+
+	private void DrawGuitarScreen()
+	{
+		sw.Start();
+
+		//detect stage failed and switch to it
+		if (CDTXMania.ConfigIni.bSTAGEFAILEDEnabled && !bIsTrainingMode && (ePhaseID == EPhase.Common_DefaultState))
+		{
+			bool bFailedGuitar =
+				actGauge.IsFailed(EInstrumentPart
+					.GUITAR); // #23630 2011.11.12 yyagi: deleted AutoPlay condition: not to be failed at once
+			bool bFailedBass = actGauge.IsFailed(EInstrumentPart.BASS); // #23630
+			bool bFailedNoChips =
+				(!CDTXMania.DTX.bHasChips.Guitar &&
+				 !CDTXMania.DTX.bHasChips.Bass); // #25216 2011.5.21 yyagi add condition
+			if (bFailedGuitar || bFailedBass || bFailedNoChips) // #25216 2011.5.21 yyagi: changed codition: && -> ||
+			{
+				actStageFailed.Start();
+				CDTXMania.DTX.tStopPlayingAllChips();
+				ePhaseID = EPhase.PERFORMANCE_STAGE_FAILED;
+			}
+		}
+
+		tUpdateAndDraw_Background();
+		tUpdateAndDraw_AVI();
+		tUpdateAndDraw_MIDIBGM();
+
+		tUpdateAndDraw_LaneFlushGB();
+
+		tUpdateAndDraw_DANGER();
+
+		tUpdateAndDraw_WailingBonus();
+		tUpdateAndDraw_ScrollSpeed();
+		tUpdateAndDraw_ChipAnimation();
+		tUpdateAndDraw_BarLines(EInstrumentPart.GUITAR);
+		tDraw_LoopLines();
+		bIsFinishedPlaying = tUpdateAndDraw_Chips(EInstrumentPart.GUITAR);
+		tUpdateAndDraw_RGBButton();
+		tUpdateAndDraw_GuitarBass_JudgementLine();
+		tUpdateAndDraw_JudgementString();
+		actProgressBar.OnUpdateAndDraw();
+		tUpdateAndDraw_Gauge();
+		if (CDTXMania.ConfigIni.nInfoType == 1)
+			tUpdateAndDraw_StatusPanel();
+		if (CDTXMania.ConfigIni.bShowScore)
+			tUpdateAndDraw_Score();
+
+		tUpdateAndDraw_Graph();
+		tUpdateAndDraw_Combo();
+		tUpdateAndDraw_PerformanceInformation();
+		//this.tUpdateAndDraw_WailingFrame();
+
+		tUpdateAndDraw_ChipFireGB();
+		tUpdateAndDraw_GuitarBonus();
+		tUpdateAndDraw_STAGEFAILED();
+		
+		//handle end of performance
+		bIsFinishedFadeout = tUpdateAndDraw_FadeIn_Out();
+		if (bIsFinishedPlaying && (ePhaseID == EPhase.Common_DefaultState))
+		{
+			eReturnValueAfterFadeOut = EPerfScreenReturnValue.StageClear;
+			ePhaseID = EPhase.PERFORMANCE_STAGE_CLEAR;
+		}
+		
 		ManageMixerQueue();
 
 		if (LoopEndMs != -1 && CSoundManager.rcPerformanceTimer.nCurrentTime > LoopEndMs)
@@ -308,14 +316,11 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 				nTimingHitCount[inst].nEarly = 0;
 			}
 		}
-
+		
 		// キー入力
 		tHandleKeyInput();
 		sw.Stop();
-
-		return 0;
 	}
-
 
 	// Other
 

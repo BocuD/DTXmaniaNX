@@ -40,9 +40,11 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
     {
         base.InitializeBaseUI();
         
-        actStatusPanel.InitUI(ui);
+        var drumsScreen = ui.AddChild(new LegacyDrawable(DrawDrumsScreen));
+        drumsScreen.name = "drumsScreen";
         
-        ui.AddChild(new LegacyDrawable("", () => tDisplayPresence()));
+        actStatusPanel.InitUI(ui);
+        actJudgeString.InitUI(ui);
     }
 
     // Methods
@@ -152,17 +154,66 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
 
     public override int OnUpdateAndDraw()
     {
-        sw.Start();
+        base.OnUpdateAndDraw();
 
         if (!bActivated) return 0;
+        
+        if (bIsFinishedFadeout)
+        {
+            if (!CDTXMania.Skin.soundStageClear.b再生中 && !CDTXMania.Skin.soundSTAGEFAILED音.b再生中)
+            {
+                Debug.WriteLine("Total OnUpdateAndDraw=" + sw.ElapsedMilliseconds + "ms");
+                nNumberOfMistakes = nHitCount_ExclAuto.Drums.Miss + nHitCount_ExclAuto.Drums.Poor;
+                switch (nNumberOfMistakes)
+                {
+                    case 0:
+                    {
+                        nNumberPerfects = nHitCount_ExclAuto.Drums.Perfect;
+                        if (CDTXMania.ConfigIni.bAllDrumsAreAutoPlay)
+                        {
+                            nNumberPerfects = nHitCount_IncAuto.Drums.Perfect;
+                        }
 
-        base.OnUpdateAndDraw();
+                        //EXC
+                        if (nNumberPerfects == CDTXMania.DTX.nVisibleChipsCount.Drums)
+                        {
+                            bExc = true;
+                            if (CDTXMania.ConfigIni.nSkillMode == 1)
+                                actScore.nCurrentTrueScore.Drums += 30000;
+                            break;
+                        }
+
+                        //FULL COMBO
+                        bFullCom = true;
+                        if (CDTXMania.ConfigIni.nSkillMode == 1)
+                            actScore.nCurrentTrueScore.Drums += 15000;
+                        break;
+                    }
+                }
+
+                return (int)eReturnValueAfterFadeOut;
+            }
+        }
+
+        if (ePhaseID == EPhase.PERFORMANCE_STAGE_RESTART)
+        {
+            Trace.TraceInformation("Restarting");
+            return (int)eReturnValueAfterFadeOut;
+        }
+        
+        return 0;
+    }
+
+    private void DrawDrumsScreen()
+    {
+        sw.Start();
 
         bIsFinishedPlaying = false;
         bIsFinishedFadeout = false;
         bExc = false;
         bFullCom = false;
 
+        //detect stage failed and switch to it
         if ((CDTXMania.ConfigIni.bSTAGEFAILEDEnabled && !bIsTrainingMode && actGauge.IsFailed(EInstrumentPart.DRUMS)) &&
             (ePhaseID == EPhase.Common_DefaultState))
         {
@@ -187,6 +238,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         tUpdateAndDraw_JudgementLine();
         tUpdateAndDraw_DrumPad();
         
+        //handle end of performance
         bIsFinishedFadeout = tUpdateAndDraw_FadeIn_Out();
         if (bIsFinishedPlaying && (ePhaseID == EPhase.Common_DefaultState))
         {
@@ -218,65 +270,6 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         tUpdateAndDraw_ChipFireD();
         tUpdateAndDraw_STAGEFAILED();
         
-        bすべてのチップが判定された = true;
-        if (bIsFinishedFadeout)
-        {
-            if (!CDTXMania.Skin.soundStageClear.b再生中 && !CDTXMania.Skin.soundSTAGEFAILED音.b再生中)
-            {
-                Debug.WriteLine("Total OnUpdateAndDraw=" + sw.ElapsedMilliseconds + "ms");
-                nNumberOfMistakes = nHitCount_ExclAuto.Drums.Miss + nHitCount_ExclAuto.Drums.Poor;
-                switch (nNumberOfMistakes)
-                {
-                    case 0:
-                    {
-                        nNumberPerfects = nHitCount_ExclAuto.Drums.Perfect;
-                        if (CDTXMania.ConfigIni.bAllDrumsAreAutoPlay)
-                        {
-                            nNumberPerfects = nHitCount_IncAuto.Drums.Perfect;
-                        }
-
-                        if (nNumberPerfects == CDTXMania.DTX.nVisibleChipsCount.Drums)
-
-                            #region[ エクセ ]
-
-                        {
-                            bExc = true;
-                            if (CDTXMania.ConfigIni.nSkillMode == 1)
-                                actScore.nCurrentTrueScore.Drums += 30000;
-                            break;
-                        }
-
-                        #endregion
-
-                        else
-
-                            #region[ フルコン ]
-
-                        {
-                            bFullCom = true;
-                            if (CDTXMania.ConfigIni.nSkillMode == 1)
-                                actScore.nCurrentTrueScore.Drums += 15000;
-                            break;
-                        }
-
-                        #endregion
-                    }
-                    default:
-                    {
-                        break;
-                    }
-                }
-
-                return (int)eReturnValueAfterFadeOut;
-            }
-        }
-
-        if (ePhaseID == EPhase.PERFORMANCE_STAGE_RESTART)
-        {
-            Debug.WriteLine("Restarting");
-            return (int)eReturnValueAfterFadeOut;
-        }
-
         // もしサウンドの登録/削除が必要なら、実行する
         if (queueMixerSound.Count > 0)
         {
@@ -323,9 +316,8 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
 
         // キー入力
         tHandleKeyInput();
+        
         sw.Stop();
-
-        return 0;
     }
 
     private void DrawLaneCover()
@@ -421,11 +413,8 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
 
     #region [ private ]
     //-----------------
-    public bool bIsFinishedFadeout;
-    public bool bIsFinishedPlaying;
     public bool bExc;
     public bool bFullCom;
-    public bool bすべてのチップが判定された;
     public int nNumberOfMistakes;
     public int nNumberPerfects;
     private CActPerfDrumsChipFireD actChipFireD;

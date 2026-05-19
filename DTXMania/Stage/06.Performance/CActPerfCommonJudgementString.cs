@@ -1,7 +1,8 @@
-﻿using System.Diagnostics;
-using System.Drawing;
+﻿using System.Drawing;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using DTXMania.Core;
+using DTXMania.Drawable;
 using DTXMania.UI.Drawable;
 using FDK;
 
@@ -9,8 +10,8 @@ namespace DTXMania;
 
 internal abstract class CActPerfCommonJudgementString : CActivity
 {
-
 	private BaseTexture judgementGraphicSheet;
+	private bool renderOld = false;
 	
 	// プロパティ
 	protected JudgementStatus[] judgementStatus = new JudgementStatus[15];
@@ -110,6 +111,8 @@ internal abstract class CActPerfCommonJudgementString : CActivity
 
 	public virtual void Start( int nLane, EJudgement judge, int lag )
 	{
+		judgements[nLane].Play(judge);
+		
 		if ( ( nLane < 0 ) || ( nLane > 14 ) )
 		{
 			throw new IndexOutOfRangeException( "有効範囲は 0～14 です。" );
@@ -238,8 +241,10 @@ internal abstract class CActPerfCommonJudgementString : CActivity
 		float x = xc - ( 110f * judgementStatus[ lane ].fXScaleRatio ) - ( ( nRectX - 225 ) / 2f );
 		float y = baseY + judgementStatus[ lane ].nRelativeY - ( 140f * judgementStatus[ lane ].fYScaleRatio / 2f ) - ( ( nRectY - 135 ) / 2f );
 
-		DrawJudgeFrame( lane, x, y, nRectX, nRectY );
 		DrawLag( lane, xc, y );
+
+		if (!renderOld) return;
+		DrawJudgeFrame( lane, x, y, nRectX, nRectY );
 	}
 
 	protected void DrawJudgeFrame( int lane, float x, float y, int nRectX, int nRectY )
@@ -299,6 +304,34 @@ internal abstract class CActPerfCommonJudgementString : CActivity
 			p += minus ? 0 : 12;
 			txLagNumbers.tDraw2D( x + offsetX, y + 34, lagNumberInfoArray[ p ].rc );
 			offsetX += 15;
+		}
+	}
+
+	private JudgementString[] judgements;
+	
+	public void InitUI(UIGroup ui)
+	{
+		InitializeLaneSizes();
+		
+		var judgement = ui.AddChild(new UIGroup("Judgement"));
+		judgement.renderOrder = 1;
+
+		judgements = new JudgementString[stLaneSize.Length];
+
+		for (int lane = 0; lane < stLaneSize.Length; lane++)
+		{
+			if ( !TryGetLanePosition( lane, out int baseX, out int baseY ) )
+			{
+				continue;
+			}
+			
+			float x = baseX;
+			float y = baseY + 10.0f;
+
+			judgements[lane] = judgement.AddChild(new JudgementString());
+			judgements[lane].dontSerialize = true;
+			//x = laneSize.x + (laneSize.w / 2.0f);
+			judgements[lane].position = new Vector3(x, y, 0);
 		}
 	}
 }

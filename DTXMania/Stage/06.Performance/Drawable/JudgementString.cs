@@ -1,5 +1,6 @@
 ﻿using System.Numerics;
 using DTXMania.Core;
+using DTXMania.UI.Animation;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.Inspector;
 using Hexa.NET.ImGui;
@@ -9,9 +10,11 @@ namespace DTXMania.Drawable;
 public class JudgementString : UIGroup
 {
     private static BaseTexture[] stringTextures;
+    private static BaseTexture barTexture;
 
     private static void CacheTextures()
     {
+        barTexture = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\Judge\judge_bar.png"));
         stringTextures = new BaseTexture[Enum.GetValues(typeof(EJudgement)).Length];
         
         foreach (EJudgement judgement in Enum.GetValues(typeof(EJudgement)))
@@ -35,7 +38,7 @@ public class JudgementString : UIGroup
         }
     }
 
-    private EJudgement previewType = EJudgement.Perfect;
+    private EJudgement judgement = EJudgement.Perfect;
     
     [AddChildMenu]
     public static JudgementString Create()
@@ -45,23 +48,41 @@ public class JudgementString : UIGroup
 
     private UIImage baseString;
     private UIImage highlightString;
+    private UIImage bar;
     
     public JudgementString()
     {
-        if (stringTextures == null) CacheTextures();
+        if (barTexture == null || !barTexture.IsValid()) CacheTextures();
         
         name = $"JudgementString";
         
-        size = new Vector2(stringTextures[0].Width, stringTextures[0].Height);
+        bar = AddChild(new UIImage(barTexture));
+        bar.anchor = new Vector2(0.5f, 0.5f);
+        bar.name = "bar";
+        bar.renderOrder = -1;
         
-        baseString = AddChild(new UIImage(stringTextures[(int)previewType]));
-        highlightString = AddChild(new UIImage(stringTextures[(int)previewType]));
+        baseString = AddChild(new UIImage(stringTextures[(int)judgement]));
+        baseString.name = "judge1";
+        baseString.anchor = new Vector2(0.5f, 0.5f);
+        highlightString = AddChild(new UIImage(stringTextures[(int)judgement]));
+        highlightString.name = "judge2";
+        highlightString.anchor = new Vector2(0.5f, 0.5f);
+
+        animator = new Animator();
+        AnimationClip? loaded = AnimationClipIO.LoadFromFile(CSkin.Path(@"Graphics\Judge\hit.json"));
+        if (loaded != null)
+        {
+            animator.clips.Add(loaded);
+        }
+
+        isVisible = false;
     }
 
     public override void Draw(Matrix4x4 parentMatrix)
     {
-        baseString.SetTexture(stringTextures[(int)previewType], false, false);
-        highlightString.SetTexture(stringTextures[(int)previewType], false, false);
+        baseString.SetTexture(stringTextures[(int)judgement], false, false);
+        highlightString.SetTexture(stringTextures[(int)judgement], false, false);
+        bar.isVisible = judgement is EJudgement.Perfect or EJudgement.Auto;
         
         base.Draw(parentMatrix);
     }
@@ -70,9 +91,21 @@ public class JudgementString : UIGroup
     {
         base.DrawInspector();
 
-        if (ImGui.CollapsingHeader("Judgement String"))
+        if (ImGui.CollapsingHeader("Judgement"))
         {
-            Inspector.Inspect("Preview Type", ref previewType);
+            Inspector.Inspect("Preview Type", ref judgement);
+            
+            if (ImGui.Button("Play")) Play(judgement);
         }
+    }
+
+    public void Play(EJudgement judge)
+    {
+        isVisible = true;
+        judgement = judge;
+        
+        //fast forward one frame
+        animator.time = 1 / 60.0f;
+        animator.Play("hit");
     }
 }

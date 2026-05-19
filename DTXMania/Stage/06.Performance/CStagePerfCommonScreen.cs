@@ -284,6 +284,9 @@ internal abstract class CStagePerfCommonScreen : CStage
 
     private UIText playspeedText;
     
+    public bool bIsFinishedFadeout;
+    public bool bIsFinishedPlaying;
+    
     public override void InitializeBaseUI()
     {
         video.IntegrateUI(ui);
