@@ -213,6 +213,8 @@ public sealed partial class AnimationClipEditor
     private const float DotRadius = 7f;
     private const float DotHitRadius = 10f;
 
+    private const float TimelineEdgePadding = 12f;
+
     /// <summary>
     /// Renders the timeline body as two side-by-side children: a frozen label column on the
     /// left and a scrolling content area on the right. Vertical scroll position is synced
@@ -418,10 +420,17 @@ public sealed partial class AnimationClipEditor
         Vector2 origin = new(MathF.Round(cursor.X), MathF.Round(cursor.Y));
         var drawList = ImGui.GetWindowDrawList();
 
-        // Reserve the full virtual area so both scrollbars can extend properly.
-        ImGui.Dummy(new Vector2(contentWidth, bodyContentHeight));
+        // The reservable width includes padding on both ends so keyframe dots at t=0 and
+        // t=duration don't get clipped by the child's edges.
+        float fullWidth = contentWidth + 2f * TimelineEdgePadding;
+        ImGui.Dummy(new Vector2(fullWidth, bodyContentHeight));
 
         Vector2 contentMin = origin;
+        // The X coordinate at which t=0 should land. Everything that maps a time value to a
+        // pixel — ruler ticks, keyframe dots, playhead — uses this as its anchor. Anything
+        // that spans the full visual width (row tints, ruler background, hit area) uses
+        // contentMin.X / fullWidth instead.
+        float timeOriginX = MathF.Round(origin.X + TimelineEdgePadding);
         float tracksTop = MathF.Round(origin.Y + RulerHeight + 2f);
         Vector2 tracksOrigin = new(origin.X, tracksTop);
 
@@ -431,7 +440,7 @@ public sealed partial class AnimationClipEditor
             AnimationTrack track = selectedClip.tracks[i];
             float rowTop = tracksTop + i * TrackRowHeight;
             Vector2 rowMin = new(tracksOrigin.X, rowTop);
-            Vector2 rowMax = new(rowMin.X + contentWidth, rowTop + TrackRowHeight);
+            Vector2 rowMax = new(rowMin.X + fullWidth, rowTop + TrackRowHeight);
             uint bg = (uint)((i & 1) == 0 ? 0x10FFFFFF : 0x18FFFFFF);
             if (track == selectedTrack) bg = 0x40FFFF00u;
             drawList.AddRectFilled(rowMin, rowMax, bg);
@@ -440,17 +449,17 @@ public sealed partial class AnimationClipEditor
         // --- Invisible hit area covers ruler + track lanes --------------------------------
         ImGui.SetCursorScreenPos(contentMin);
         ImGui.InvisibleButton("timeline_content_hit",
-            new Vector2(contentWidth, RulerHeight + selectedClip.tracks.Count * TrackRowHeight + 2f));
+            new Vector2(fullWidth, RulerHeight + selectedClip.tracks.Count * TrackRowHeight + 2f));
         bool contentHovered = ImGui.IsItemHovered();
         Vector2 mouse = ImGui.GetMousePos();
 
         // --- Ruler ------------------------------------------------------------------------
         Vector2 rulerMin = contentMin;
-        Vector2 rulerMax = new(rulerMin.X + contentWidth, rulerMin.Y + RulerHeight);
+        Vector2 rulerMax = new(rulerMin.X + fullWidth, rulerMin.Y + RulerHeight);
         drawList.AddRectFilled(rulerMin, rulerMax, 0x30FFFFFF);
         for (float t = 0f; t <= duration + 0.0001f; t += 0.25f)
         {
-            float x = rulerMin.X + t * timelinePixelsPerSecond;
+            float x = timeOriginX + t * timelinePixelsPerSecond;
             bool major = MathF.Abs(t - MathF.Round(t)) < 0.001f;
             drawList.AddLine(new Vector2(x, rulerMin.Y), new Vector2(x, rulerMax.Y), major ? 0xFFAAAAAA : 0x60AAAAAA);
             if (major)
@@ -492,7 +501,7 @@ public sealed partial class AnimationClipEditor
 
             foreach (Keyframe kf in track.keyframes)
             {
-                float x = contentMin.X + kf.time * timelinePixelsPerSecond;
+                float x = timeOriginX + kf.time * timelinePixelsPerSecond;
                 float dx = mouse.X - x;
                 float dy = mouse.Y - dotY;
                 float distSq = dx * dx + dy * dy;
@@ -514,7 +523,7 @@ public sealed partial class AnimationClipEditor
 
             foreach (Keyframe kf in track.keyframes)
             {
-                float x = contentMin.X + kf.time * timelinePixelsPerSecond;
+                float x = timeOriginX + kf.time * timelinePixelsPerSecond;
                 bool isSel = kf == selectedKeyframe;
                 bool isHov = kf == hoveredKeyframe;
                 uint fill = isSel ? 0xFFFFFF00u : (isHov ? 0xFF66DDFFu : 0xFF00CCFFu);
@@ -525,7 +534,7 @@ public sealed partial class AnimationClipEditor
 
         // --- Playhead ---------------------------------------------------------------------
         float playheadTime = animator.isPlaying && animator.currentClip == selectedClip ? animator.time : scrubTime;
-        float playheadX = contentMin.X + playheadTime * timelinePixelsPerSecond;
+        float playheadX = timeOriginX + playheadTime * timelinePixelsPerSecond;
         float playheadBottomY = tracksOrigin.Y + selectedClip.tracks.Count * TrackRowHeight;
         drawList.AddLine(new Vector2(playheadX, rulerMin.Y), new Vector2(playheadX, playheadBottomY + 4f), 0xFFFF4444, 2f);
         drawList.AddTriangleFilled(
@@ -537,7 +546,7 @@ public sealed partial class AnimationClipEditor
         // --- Interactions ----------------------------------------------------------------
         HandleTimelineInteractions(
             animator, root, contentHovered, rulerHovered, mouse,
-            tracksOrigin, contentMin, contentWidth, duration,
+            tracksOrigin, timeOriginX, duration,
             hoveredKeyframe, hoveredKeyframeTrack, hoveredTrackIndex);
     }
 
@@ -572,12 +581,14 @@ public sealed partial class AnimationClipEditor
 
     private void HandleTimelineInteractions(
         Animator animator, UIGroup root, bool contentHovered, bool rulerHovered, Vector2 mouse,
-        Vector2 tracksOrigin, Vector2 contentMin, float contentWidth, float duration,
+        Vector2 tracksOrigin, float timeOriginX, float duration,
         Keyframe? hoveredKeyframe, AnimationTrack? hoveredKeyframeTrack, int hoveredTrackIndex)
     {
-        // Convert mouse X to a clamped clip time (in the track area).
+        // Convert mouse X to a clamped clip time. The anchor is timeOriginX (where t=0 sits
+        // visually), not the child's left edge, so clicks inside the left edge padding map
+        // to t=0 rather than to negative times.
         float MouseTime() => Math.Clamp(
-            (mouse.X - contentMin.X) / timelinePixelsPerSecond,
+            (mouse.X - timeOriginX) / timelinePixelsPerSecond,
             0f, duration);
 
         // ---- End drags on mouse release ---------------------------------------------------
