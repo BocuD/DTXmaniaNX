@@ -37,15 +37,12 @@ public sealed partial class AnimationClipEditor
             ImGui.Separator();
             DrawAddTrackToolbarRow(root);
 
-            // Reserve room at the bottom for the keyframe/track inspector pane. The body sits
-            // in a scrollable child so very long clips or many tracks don't force the whole
-            // window to scroll.
+            // Body: a frozen-label-column-plus-scrolling-content split. The label column
+            // child handles the per-track widgets (+ button, label, selection click). The
+            // content child handles the ruler, keyframe dots, and timeline interactions.
+            // Vertical scroll is synced between the two so rows stay aligned.
             float reserveForInspector = ComputeInspectorPaneHeight();
-            ImGui.BeginChild("timeline_body_scroll", new Vector2(0, -reserveForInspector),
-                ImGuiChildFlags.None,
-                ImGuiWindowFlags.HorizontalScrollbar);
-            DrawTimelineBody(animator, root);
-            ImGui.EndChild();
+            DrawTimelineSplitBody(animator, root, reserveForInspector);
 
             ImGui.Separator();
             DrawSelectionInspectorPane(root);
@@ -209,7 +206,19 @@ public sealed partial class AnimationClipEditor
         }
     }
 
-    private void DrawTimelineBody(Animator animator, UIGroup root)
+    // Shared layout constants used by both the label column and the content area.
+    private const float LabelColumnWidth = 200f;
+    private const float TrackRowHeight = 24f;
+    private const float RulerHeight = 28f;
+    private const float DotRadius = 7f;
+    private const float DotHitRadius = 10f;
+
+    /// <summary>
+    /// Renders the timeline body as two side-by-side children: a frozen label column on the
+    /// left and a scrolling content area on the right. Vertical scroll position is synced
+    /// between the two so rows stay aligned; horizontal scroll only affects the content side.
+    /// </summary>
+    private void DrawTimelineSplitBody(Animator animator, UIGroup root, float reserveForInspector)
     {
         if (selectedClip == null) return;
 
@@ -222,72 +231,145 @@ public sealed partial class AnimationClipEditor
             selectedClip.Evaluate(root, scrubTime);
         }
 
-        const float labelColumnWidth = 200f;
-        const float trackRowHeight = 24f;
-        const float dotRadius = 7f;
-        const float dotHitRadius = 10f;
-        const float rulerHeight = 28f;
-
         float duration = MathF.Max(selectedClip.duration, 0.0001f);
-        Vector2 origin = ImGui.GetCursorScreenPos();
+        float contentWidth = duration * timelinePixelsPerSecond;
+        int trackCount = Math.Max(selectedClip.tracks.Count, 1);
+        float bodyContentHeight = RulerHeight + 2f + trackCount * TrackRowHeight + 8f;
+
+        // The body's overall vertical extent: fill remaining vertical space minus what the
+        // selection inspector pane will use below.
+        float availY = -reserveForInspector;
+
+        // --- Labels child (fixed width, scrollY synced) ----------------------------------
+        if (ImGui.BeginChild("timeline_labels", new Vector2(LabelColumnWidth, availY),
+                ImGuiChildFlags.None, ImGuiWindowFlags.NoScrollbar))
+        {
+            SyncChildScroll(ref labelsLastSetScroll);
+            DrawTimelineLabelChild(animator, root, bodyContentHeight);
+        }
+        ImGui.EndChild();
+
+        ImGui.SameLine(0f, 0f);
+
+        // --- Content child (remaining width, both scrollbars) ----------------------------
+        if (ImGui.BeginChild("timeline_content", new Vector2(0f, availY),
+                ImGuiChildFlags.None, ImGuiWindowFlags.HorizontalScrollbar))
+        {
+            SyncChildScroll(ref contentLastSetScroll);
+            DrawTimelineContentChild(animator, root, contentWidth, bodyContentHeight);
+        }
+        ImGui.EndChild();
+    }
+
+    /// <summary>
+    /// Sync helper called inside each child's BeginChild block. Compares the child's current
+    /// scroll to what we last set on it — if they differ, the user wheeled or dragged the
+    /// scrollbar this frame, so adopt that value as authoritative. Then force the synced
+    /// value back onto the child (a no-op if we just adopted) and remember it for next frame.
+    /// </summary>
+    private void SyncChildScroll(ref float lastSetForThisChild)
+    {
+        float current = ImGui.GetScrollY();
+        if (MathF.Abs(current - lastSetForThisChild) > 0.5f)
+        {
+            // User-driven change since the last frame.
+            syncedScrollY = current;
+        }
+        ImGui.SetScrollY(syncedScrollY);
+        lastSetForThisChild = syncedScrollY;
+    }
+
+    /// <summary>
+    /// Renders the label column for each track row: "+" button, clickable label area for
+    /// selection, right-click context menu for delete. Lives inside its own scrolling child.
+    /// </summary>
+    private void DrawTimelineLabelChild(Animator animator, UIGroup root, float bodyContentHeight)
+    {
+        if (selectedClip == null) return;
+
+        // Snap origin to integer pixels — ImGui rasterizes drawlist primitives to nearest pixel
+        // but interactive item bounds are floats, so any fractional Y here causes the hover
+        // tint, the row backgrounds, and the InvisibleButton's hit region to drift relative to
+        // each other by ~1 pixel. Rounding here makes them all agree on the same pixel rows.
+        Vector2 cursor = ImGui.GetCursorScreenPos();
+        Vector2 origin = new(MathF.Round(cursor.X), MathF.Round(cursor.Y));
         var drawList = ImGui.GetWindowDrawList();
 
-        float contentWidth = duration * timelinePixelsPerSecond;
-        float totalWidth = labelColumnWidth + contentWidth + 8f;
-        float totalHeight = rulerHeight + 2f + MathF.Max(selectedClip.tracks.Count, 1) * trackRowHeight + 8f;
+        // Reserve the full virtual height so the child's scrollable area matches the content
+        // side. The label column doesn't paint a ruler, but we still skip the same vertical
+        // gap so labels line up with the first track in the content child.
+        ImGui.Dummy(new Vector2(LabelColumnWidth, bodyContentHeight));
 
-        // Reserve total layout area first so other widgets below the timeline land in the right
-        // place. We'll position ImGui widgets into this region using SetCursorScreenPos and
-        // place an InvisibleButton over the content area for hit-testing.
-        ImGui.Dummy(new Vector2(totalWidth, totalHeight));
+        float tracksTop = MathF.Round(origin.Y + RulerHeight + 2f);
 
-        Vector2 tracksOrigin = new(origin.X, origin.Y + rulerHeight + 2f);
-        Vector2 contentMin = new(origin.X + labelColumnWidth, origin.Y);
-
-        // --- Row backgrounds (drawlist) ----------------------------------------------------
+        // Row backgrounds — alternating stripes plus a selection tint matching the content side.
         for (int i = 0; i < selectedClip.tracks.Count; i++)
         {
             AnimationTrack track = selectedClip.tracks[i];
-            Vector2 rowMin = new(tracksOrigin.X, tracksOrigin.Y + i * trackRowHeight);
-            Vector2 rowMax = new(rowMin.X + labelColumnWidth + contentWidth, rowMin.Y + trackRowHeight);
+            float rowTop = tracksTop + i * TrackRowHeight;
+            Vector2 rowMin = new(origin.X, rowTop);
+            Vector2 rowMax = new(origin.X + LabelColumnWidth, rowTop + TrackRowHeight);
             uint bg = (uint)((i & 1) == 0 ? 0x10FFFFFF : 0x18FFFFFF);
             if (track == selectedTrack) bg = 0x40FFFF00u;
             drawList.AddRectFilled(rowMin, rowMax, bg);
         }
 
-        // --- Label column widgets (real ImGui) ----------------------------------------------
-        // For each track row, draw the "+" button followed by a clickable Selectable that
-        // covers the rest of the label column. The Selectable handles track selection on
-        // left-click and exposes a Delete context menu on right-click.
-        // We re-route layout via SetCursorScreenPos because the row positions are computed
-        // from `tracksOrigin`, not the natural ImGui layout cursor.
+        // Per-row widgets — "+" button + clickable label area, both as InvisibleButtons with
+        // manually-drawn visuals. This avoids SmallButton's CurrentLineTextBaseOffset shift
+        // and Selectable's internal padding, both of which broke alignment with the row tint.
+        const float plusButtonSize = 16f;
+        const float plusPadX = 4f;
         int? trackToDelete = null;
         for (int i = 0; i < selectedClip.tracks.Count; i++)
         {
             AnimationTrack track = selectedClip.tracks[i];
-            float rowTop = tracksOrigin.Y + i * trackRowHeight;
+            float rowTop = tracksTop + i * TrackRowHeight;
 
             ImGui.PushID(i);
 
-            // "+" button — add keyframe at scrub time using the property's current value.
-            float buttonOffsetY = (trackRowHeight - ImGui.GetFrameHeight()) * 0.5f;
-            ImGui.SetCursorScreenPos(new Vector2(tracksOrigin.X + 4, rowTop + buttonOffsetY));
-            if (ImGui.SmallButton("+"))
+            // "+" button — manually rendered so we get pixel-perfect placement and a hit
+            // region that's identical to the visual rect.
+            float plusX = origin.X + plusPadX;
+            float plusY = rowTop + (TrackRowHeight - plusButtonSize) * 0.5f;
+            ImGui.SetCursorScreenPos(new Vector2(plusX, plusY));
+            ImGui.InvisibleButton("plus", new Vector2(plusButtonSize, plusButtonSize));
+            bool plusHovered = ImGui.IsItemHovered();
+            bool plusActive = ImGui.IsItemActive();
+            if (ImGui.IsItemClicked(ImGuiMouseButton.Left))
             {
                 AddKeyframeAtScrub(track, animator, root);
             }
-            if (ImGui.IsItemHovered()) ImGui.SetTooltip("Add keyframe at current scrub time using the property's current value");
+            if (plusHovered) ImGui.SetTooltip("Add keyframe at current scrub time using the property's current value");
 
-            // Clickable label area — Selectable covers everything from just after the button
-            // to the end of the label column. Click selects the track; right-click opens a
-            // context menu for delete. We don't show Selectable's own highlight because the
-            // row background already tints when selected.
-            float labelX = ImGui.GetItemRectMax().X + 6f;
-            float labelW = MathF.Max(20f, tracksOrigin.X + labelColumnWidth - labelX);
+            // Draw the "+" visual: a rounded rect filled in the standard button colors, with a
+            // centered glyph.
+            uint plusFill = plusActive
+                ? ImGui.GetColorU32(ImGuiCol.ButtonActive)
+                : (plusHovered
+                    ? ImGui.GetColorU32(ImGuiCol.ButtonHovered)
+                    : ImGui.GetColorU32(ImGuiCol.Button));
+            Vector2 plusMin = new(plusX, plusY);
+            Vector2 plusMax = new(plusX + plusButtonSize, plusY + plusButtonSize);
+            drawList.AddRectFilled(plusMin, plusMax, plusFill, 3f);
+            Vector2 plusTextSize = ImGui.CalcTextSize("+");
+            drawList.AddText(
+                new Vector2(plusMin.X + (plusButtonSize - plusTextSize.X) * 0.5f,
+                            plusMin.Y + (plusButtonSize - plusTextSize.Y) * 0.5f),
+                ImGui.GetColorU32(ImGuiCol.Text), "+");
+
+            // Clickable label area — InvisibleButton sized exactly to the row, with manual
+            // hover tint and label text via drawlist.
+            float labelX = plusMax.X + 6f;
+            float labelW = MathF.Max(20f, origin.X + LabelColumnWidth - labelX);
             ImGui.SetCursorScreenPos(new Vector2(labelX, rowTop));
-            string label = string.IsNullOrEmpty(track.path) ? "(unbound)" : track.path;
-            if (ImGui.Selectable($"{label}##trackrow", false, ImGuiSelectableFlags.None,
-                                 new Vector2(labelW, trackRowHeight)))
+            ImGui.InvisibleButton("trackrow", new Vector2(labelW, TrackRowHeight));
+            if (ImGui.IsItemHovered())
+            {
+                drawList.AddRectFilled(new Vector2(labelX, rowTop),
+                    new Vector2(labelX + labelW, rowTop + TrackRowHeight),
+                    0x20FFFFFFu);
+            }
+            if (ImGui.IsItemClicked(ImGuiMouseButton.Left))
             {
                 if (selectedTrack != track)
                 {
@@ -295,6 +377,10 @@ public sealed partial class AnimationClipEditor
                     selectedKeyframe = null;
                 }
             }
+            string label = string.IsNullOrEmpty(track.path) ? "(unbound)" : track.path;
+            drawList.AddText(
+                new Vector2(labelX + 2f, MathF.Round(rowTop + (TrackRowHeight - ImGui.GetTextLineHeight()) * 0.5f)),
+                0xFFFFFFFF, label);
             if (ImGui.BeginPopupContextItem("trackrowctx"))
             {
                 if (ImGui.MenuItem("Delete"))
@@ -307,23 +393,60 @@ public sealed partial class AnimationClipEditor
             ImGui.PopID();
         }
 
-        // Defer the actual list mutation so we don't disturb the loop's indices.
-        if (trackToDelete != null)
+        if (trackToDelete is int idx)
         {
-            AnimationTrack t = selectedClip.tracks[trackToDelete.Value];
-            selectedClip.tracks.RemoveAt(trackToDelete.Value);
+            AnimationTrack t = selectedClip.tracks[idx];
+            selectedClip.tracks.RemoveAt(idx);
             if (selectedTrack == t) { selectedTrack = null; selectedKeyframe = null; }
         }
+    }
 
-        // --- Invisible hit area over content (ruler + track lanes, right of label col) -----
+    /// <summary>
+    /// Renders the scrolling content area: ruler, per-track lanes, keyframe dots, playhead,
+    /// plus the InvisibleButton that captures clicks and drags for scrubbing, keyframe
+    /// selection/movement, and click-to-insert.
+    /// </summary>
+    private void DrawTimelineContentChild(Animator animator, UIGroup root, float contentWidth, float bodyContentHeight)
+    {
+        if (selectedClip == null) return;
+
+        float duration = MathF.Max(selectedClip.duration, 0.0001f);
+        // Match the label child's pixel-snapping policy so rows on either side land on the
+        // same scanline. Without this, the row-tint rect, the ruler bottom border, and the
+        // invisible hit-test region can each rasterize to slightly different pixels.
+        Vector2 cursor = ImGui.GetCursorScreenPos();
+        Vector2 origin = new(MathF.Round(cursor.X), MathF.Round(cursor.Y));
+        var drawList = ImGui.GetWindowDrawList();
+
+        // Reserve the full virtual area so both scrollbars can extend properly.
+        ImGui.Dummy(new Vector2(contentWidth, bodyContentHeight));
+
+        Vector2 contentMin = origin;
+        float tracksTop = MathF.Round(origin.Y + RulerHeight + 2f);
+        Vector2 tracksOrigin = new(origin.X, tracksTop);
+
+        // --- Row backgrounds (content side) -----------------------------------------------
+        for (int i = 0; i < selectedClip.tracks.Count; i++)
+        {
+            AnimationTrack track = selectedClip.tracks[i];
+            float rowTop = tracksTop + i * TrackRowHeight;
+            Vector2 rowMin = new(tracksOrigin.X, rowTop);
+            Vector2 rowMax = new(rowMin.X + contentWidth, rowTop + TrackRowHeight);
+            uint bg = (uint)((i & 1) == 0 ? 0x10FFFFFF : 0x18FFFFFF);
+            if (track == selectedTrack) bg = 0x40FFFF00u;
+            drawList.AddRectFilled(rowMin, rowMax, bg);
+        }
+
+        // --- Invisible hit area covers ruler + track lanes --------------------------------
         ImGui.SetCursorScreenPos(contentMin);
-        ImGui.InvisibleButton("timeline_content", new Vector2(contentWidth, rulerHeight + selectedClip.tracks.Count * trackRowHeight + 2f));
+        ImGui.InvisibleButton("timeline_content_hit",
+            new Vector2(contentWidth, RulerHeight + selectedClip.tracks.Count * TrackRowHeight + 2f));
         bool contentHovered = ImGui.IsItemHovered();
         Vector2 mouse = ImGui.GetMousePos();
 
-        // --- Ruler -------------------------------------------------------------------------
+        // --- Ruler ------------------------------------------------------------------------
         Vector2 rulerMin = contentMin;
-        Vector2 rulerMax = new(rulerMin.X + contentWidth, rulerMin.Y + rulerHeight);
+        Vector2 rulerMax = new(rulerMin.X + contentWidth, rulerMin.Y + RulerHeight);
         drawList.AddRectFilled(rulerMin, rulerMax, 0x30FFFFFF);
         for (float t = 0f; t <= duration + 0.0001f; t += 0.25f)
         {
@@ -335,10 +458,9 @@ public sealed partial class AnimationClipEditor
                 drawList.AddText(new Vector2(x + 2, rulerMin.Y + 2), 0xFFCCCCCC, $"{t:0.##}s");
             }
         }
-        // Ruler bottom border so it's visually distinct from the tracks below.
         drawList.AddLine(new Vector2(rulerMin.X, rulerMax.Y), new Vector2(rulerMax.X, rulerMax.Y), 0xFF666666);
 
-        // --- Keyframe dots + hover detection -----------------------------------------------
+        // --- Keyframe dots + hover detection ---------------------------------------------
         Keyframe? hoveredKeyframe = null;
         AnimationTrack? hoveredKeyframeTrack = null;
         int hoveredTrackIndex = -1;
@@ -349,7 +471,7 @@ public sealed partial class AnimationClipEditor
             rulerHovered = mouse.Y >= rulerMin.Y && mouse.Y < rulerMax.Y;
             if (!rulerHovered)
             {
-                int idx = (int)((mouse.Y - tracksOrigin.Y) / trackRowHeight);
+                int idx = (int)((mouse.Y - tracksOrigin.Y) / TrackRowHeight);
                 if (idx >= 0 && idx < selectedClip.tracks.Count)
                 {
                     hoveredTrackIndex = idx;
@@ -359,15 +481,14 @@ public sealed partial class AnimationClipEditor
 
         // First pass: find the nearest keyframe under the hit radius across all tracks. We
         // compare squared distances so two near-overlapping dots resolve to whichever is
-        // genuinely closest to the cursor rather than whichever happened to be earliest in
-        // the list.
-        float bestDistSq = dotHitRadius * dotHitRadius;
+        // genuinely closest to the cursor rather than whichever happened to be earliest.
+        float bestDistSq = DotHitRadius * DotHitRadius;
         for (int i = 0; i < selectedClip.tracks.Count; i++)
         {
             if (!contentHovered || hoveredTrackIndex != i) continue;
             AnimationTrack track = selectedClip.tracks[i];
-            float rowTop = tracksOrigin.Y + i * trackRowHeight;
-            float dotY = rowTop + trackRowHeight * 0.5f;
+            float rowTop = tracksOrigin.Y + i * TrackRowHeight;
+            float dotY = rowTop + TrackRowHeight * 0.5f;
 
             foreach (Keyframe kf in track.keyframes)
             {
@@ -384,13 +505,12 @@ public sealed partial class AnimationClipEditor
             }
         }
 
-        // Second pass: render. We can now correctly highlight whichever keyframe the first
-        // pass picked, even if it appears later in the iteration order.
+        // Second pass: render.
         for (int i = 0; i < selectedClip.tracks.Count; i++)
         {
             AnimationTrack track = selectedClip.tracks[i];
-            float rowTop = tracksOrigin.Y + i * trackRowHeight;
-            float dotY = rowTop + trackRowHeight * 0.5f;
+            float rowTop = tracksOrigin.Y + i * TrackRowHeight;
+            float dotY = rowTop + TrackRowHeight * 0.5f;
 
             foreach (Keyframe kf in track.keyframes)
             {
@@ -398,33 +518,29 @@ public sealed partial class AnimationClipEditor
                 bool isSel = kf == selectedKeyframe;
                 bool isHov = kf == hoveredKeyframe;
                 uint fill = isSel ? 0xFFFFFF00u : (isHov ? 0xFF66DDFFu : 0xFF00CCFFu);
-                drawList.AddCircleFilled(new Vector2(x, dotY), dotRadius, fill);
-                drawList.AddCircle(new Vector2(x, dotY), dotRadius, 0xFF000000, 0, 1.5f);
+                drawList.AddCircleFilled(new Vector2(x, dotY), DotRadius, fill);
+                drawList.AddCircle(new Vector2(x, dotY), DotRadius, 0xFF000000, 0, 1.5f);
             }
         }
 
-        // --- Playhead ----------------------------------------------------------------------
+        // --- Playhead ---------------------------------------------------------------------
         float playheadTime = animator.isPlaying && animator.currentClip == selectedClip ? animator.time : scrubTime;
         float playheadX = contentMin.X + playheadTime * timelinePixelsPerSecond;
-        float playheadBottomY = tracksOrigin.Y + selectedClip.tracks.Count * trackRowHeight;
+        float playheadBottomY = tracksOrigin.Y + selectedClip.tracks.Count * TrackRowHeight;
         drawList.AddLine(new Vector2(playheadX, rulerMin.Y), new Vector2(playheadX, playheadBottomY + 4f), 0xFFFF4444, 2f);
-        // Playhead handle in the ruler so it's clear where to grab to scrub.
         drawList.AddTriangleFilled(
             new Vector2(playheadX - 5f, rulerMin.Y),
             new Vector2(playheadX + 5f, rulerMin.Y),
             new Vector2(playheadX, rulerMin.Y + 8f),
             0xFFFF4444);
 
-        // --- Interactions ------------------------------------------------------------------
+        // --- Interactions ----------------------------------------------------------------
         HandleTimelineInteractions(
             animator, root, contentHovered, rulerHovered, mouse,
             tracksOrigin, contentMin, contentWidth, duration,
             hoveredKeyframe, hoveredKeyframeTrack, hoveredTrackIndex);
-
-        // Restore cursor below the timeline so subsequent widgets (keyframe inspector) flow
-        // normally.
-        ImGui.SetCursorScreenPos(new Vector2(origin.X, origin.Y + totalHeight));
     }
+
 
     private void AddKeyframeAtScrub(AnimationTrack track, Animator animator, UIGroup root)
     {

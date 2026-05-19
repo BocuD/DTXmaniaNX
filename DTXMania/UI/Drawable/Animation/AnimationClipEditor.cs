@@ -40,6 +40,15 @@ public sealed partial class AnimationClipEditor
     // Scrubber drag (when the user is click-dragging in the ruler area).
     private bool draggingScrubber;
 
+    // Scroll position shared between the timeline's label column and content children.
+    // Whichever child the user scrolls on most recently updates `syncedScrollY`; the other
+    // follows. The two `lastSet…` fields let us detect "user scrolled this child" by comparing
+    // the child's current GetScrollY() against what we set it to last frame — if they differ,
+    // the wheel or scrollbar drag was the cause.
+    private float syncedScrollY;
+    private float labelsLastSetScroll;
+    private float contentLastSetScroll;
+
     // File IO state. We remember the last successful save/load path per clip so re-saves
     // can default to that path in the NFD dialog.
     private readonly Dictionary<AnimationClip, string> lastPathByClip = new();
