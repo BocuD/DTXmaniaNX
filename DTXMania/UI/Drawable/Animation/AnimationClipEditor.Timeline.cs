@@ -231,6 +231,15 @@ public sealed partial class AnimationClipEditor
         if (previewEnabled && !animator.isPlaying)
         {
             selectedClip.Evaluate(root, scrubTime);
+
+            if (animator.reference != null)
+            {
+                int currentFrame = (int)MathF.Round(scrubTime * selectedClip.frameRate);
+                if (animator.reference.Controller.CurrentFrame.FrameNumber != currentFrame + animator.referenceStartFrame)
+                {
+                    animator.reference.Controller.SeekToFrame(currentFrame + animator.referenceStartFrame);
+                }
+            }
         }
 
         float duration = MathF.Max(selectedClip.duration, 0.0001f);

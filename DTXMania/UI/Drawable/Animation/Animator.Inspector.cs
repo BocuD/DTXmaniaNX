@@ -1,15 +1,20 @@
 using System.Numerics;
+using DTXMania.Core.Video;
 using DTXMania.UI.Animation.Editor;
 using DTXMania.UI.Drawable;
 using Hexa.NET.ImGui;
+using Newtonsoft.Json;
 
 namespace DTXMania.UI.Animation;
 
 public sealed partial class Animator
 {
     // Lazily-created editor state. JsonIgnore'd so it never touches saved layouts.
-    [Newtonsoft.Json.JsonIgnore] private AnimationClipEditor? editor;
+    [JsonIgnore] private AnimationClipEditor? editor;
 
+    [JsonIgnore] public UINewVideoRenderer? reference;
+    [JsonIgnore] public int referenceStartFrame;
+        
     /// <summary>
     /// Render the animator UI. Inline: playback controls + clip/track editor. Outside: the
     /// floating timeline window if it's been opened (drawn as a top-level ImGui window —
@@ -53,5 +58,42 @@ public sealed partial class Animator
         ImGui.SameLine();
         ImGui.SetNextItemWidth(120f);
         ImGui.SliderFloat("Speed", ref speed, 0f, 4f);
+        
+        ImGui.Separator();
+        ImGui.Text("Reference");
+        
+        if (ImGui.Button("Scan for video renderers")) FindVideoRenderers();
+
+        int index = -1;
+        if (reference != null) index = videoRenderers.IndexOf(reference);
+        if (ImGui.Combo("Video Renderer", ref index, videoRenderers.Select(v => v.name).ToArray(), videoRenderers.Count))
+        {
+            if (index >= 0 && index < videoRenderers.Count)
+            {
+                reference = videoRenderers[index];
+            }
+            else
+            {
+                reference = null;
+            }
+        }
+
+        if (reference != null)
+        {
+            ImGui.InputInt("Start Frame", ref referenceStartFrame);
+            if (ImGui.Button("Set Reference"))
+            {
+                // Set the reference to the current frame of the video renderer, so that users can scrub the video and see the clip update in real time.
+                referenceStartFrame = (int)reference.Controller.CurrentFrame.FrameNumber;
+            }
+        }
+    }
+
+    private List<UINewVideoRenderer> videoRenderers = [];
+
+    private void FindVideoRenderers()
+    {
+        List<KeyValuePair<string, WeakReference<UIDrawable>>> drawables = DrawableTracker.drawables.Where(d => d.Value.TryGetTarget(out UIDrawable? target) && target is UINewVideoRenderer).ToList();
+        videoRenderers = drawables.Select(d => d.Value.TryGetTarget(out UIDrawable? target) ? (UINewVideoRenderer)target : null).Where(v => v != null).ToList()!;
     }
 }
