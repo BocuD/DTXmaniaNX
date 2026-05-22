@@ -134,6 +134,16 @@ public class VideoPlayerController : IDisposable
         ForceSeekAndRender(seconds);
     }
 
+    public void SeekToFrame(long frame)
+    {
+        if (decoder == null) return;
+        if (frame < 0) return;
+        if (CurrentFrame.TotalFrames > 0 && frame >= CurrentFrame.TotalFrames) return;
+
+        double targetSeconds = frame / decoder.FrameRate;
+        ForceSeekAndRender(targetSeconds);
+    }
+
     public void SeekRelativeFrames(long frames)
     {
         if (decoder == null || !CurrentFrame.IsValid) return;
