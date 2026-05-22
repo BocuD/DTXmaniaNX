@@ -92,6 +92,7 @@ internal abstract class CActPerfCommonJudgementString : CActivity
 
 	public virtual void Start( int nLane, EJudgement judge, int lag )
 	{
+		if (nLane > judgements.Length - 1) return;
 		if (judgements[nLane] == null) return;
 		
 		judgements[nLane].Play(judge);
