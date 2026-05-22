@@ -417,8 +417,8 @@ public class CChip : IComparable<CChip>, ICloneable
 	//public bool b空打ちチップである { get; private set; }
 
 	//Long Notes Data members
-	public CChip chipロングノート終端 { get; set; }
-	public bool bIsLongNote => chipロングノート終端 != null;
+	public CChip chipLongNoteEndPosition { get; set; }
+	public bool bIsLongNote => chipLongNoteEndPosition != null;
 	public bool bロングノートHit中 { get; set; }
 
 	//New property for empty chip
@@ -459,7 +459,7 @@ public class CChip : IComparable<CChip>, ICloneable
 			Guitar = 0,
 			Bass = 0,
 		};
-		chipロングノート終端 = null;
+		chipLongNoteEndPosition = null;
 	}
 	public void t初期化()
 	{
@@ -580,7 +580,7 @@ public class CChip : IComparable<CChip>, ICloneable
 		//New: Compute Distance for End of Long Note chip
 		if (bIsLongNote)
 		{
-			chipロングノート終端.ComputeDistanceFromBar(nCurrentTime, dbPerformanceScrollSpeed);
+			chipLongNoteEndPosition.ComputeDistanceFromBar(nCurrentTime, dbPerformanceScrollSpeed);
 		}
 	}
 

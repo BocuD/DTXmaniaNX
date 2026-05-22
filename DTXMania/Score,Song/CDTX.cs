@@ -3870,7 +3870,7 @@ public class CDTX : CActivity
                                     //If candidate start hold survives
                                     if (cCandidateStartHold[(int)eChipPart] != null)
                                     {
-                                        cCandidateStartHold[(int)eChipPart].chipロングノート終端 = chip;
+                                        cCandidateStartHold[(int)eChipPart].chipLongNoteEndPosition = chip;
                                         //Reset
                                         cCandidateStartHold[(int)eChipPart] = null;
                                     }

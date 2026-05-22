@@ -1371,7 +1371,7 @@ internal abstract class CStagePerfCommonScreen : CStage
         {
             pChip.bロングノートHit中 = true;
             chipロングノートHit中[(int)pChip.eInstrumentPart] = pChip;
-            nCurrentLongNoteDuration[(int)pChip.eInstrumentPart] = pChip.chipロングノート終端.nPlaybackTimeMs - pChip.nPlaybackTimeMs;
+            nCurrentLongNoteDuration[(int)pChip.eInstrumentPart] = pChip.chipLongNoteEndPosition.nPlaybackTimeMs - pChip.nPlaybackTimeMs;
             nロングノートPart[(int)pChip.eInstrumentPart] = 0;
         }
 
@@ -2780,7 +2780,7 @@ internal abstract class CStagePerfCommonScreen : CStage
         {
             if (cChip.bIsLongNote)
             {
-                CChip chipロングノート終端 = cChip.chipロングノート終端;
+                CChip chipロングノート終端 = cChip.chipLongNoteEndPosition;
                 if (chipロングノート終端.bHit && chipロングノート終端.nDistanceFromBar.Drums < -200 && chipロングノート終端.nDistanceFromBar.Guitar < -200 && chipロングノート終端.nDistanceFromBar.Bass < -200)
                 {
                     nCurrentTopChip++;
@@ -2822,7 +2822,7 @@ internal abstract class CStagePerfCommonScreen : CStage
 
                 if (dTX.listChip[this.nCurrentTopChip].bIsLongNote)
                 {
-                    CChip chipロングノート終端 = dTX.listChip[this.nCurrentTopChip].chipロングノート終端;
+                    CChip chipロングノート終端 = dTX.listChip[this.nCurrentTopChip].chipLongNoteEndPosition;
                     if (chipロングノート終端.bHit && chipロングノート終端.nDistanceFromBar.Drums < -65)
                     {
                         this.nCurrentTopChip++;
@@ -3295,7 +3295,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                     {                                
                         pChip.bHit = true;
                         EInstrumentPart index = (pChip.nChannelNumber == EChannel.Guitar_LongNote ? EInstrumentPart.GUITAR : EInstrumentPart.BASS);
-                        if (chipロングノートHit中[(int)index] != null && chipロングノートHit中[(int)index].chipロングノート終端 == pChip)
+                        if (chipロングノートHit中[(int)index] != null && chipロングノートHit中[(int)index].chipLongNoteEndPosition == pChip)
                         {                                    
                             chipロングノートHit中[(int)index].bロングノートHit中 = false;
                             chipロングノートHit中[(int)index] = null;
@@ -3475,7 +3475,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                 //					nCurrentTopChip = ++this.nCurrentTopChip;
                 if (dTX.listChip[this.nCurrentTopChip].bIsLongNote)
                 {
-                    CChip chipロングノート終端 = dTX.listChip[this.nCurrentTopChip].chipロングノート終端;
+                    CChip chipロングノート終端 = dTX.listChip[this.nCurrentTopChip].chipLongNoteEndPosition;
                     if (chipロングノート終端.bHit && chipロングノート終端.nDistanceFromBar.Drums < -65)
                     {
                         this.nCurrentTopChip++;
@@ -3603,7 +3603,7 @@ internal abstract class CStagePerfCommonScreen : CStage
 
                 if (dTX.listChip[this.nCurrentTopChip].bIsLongNote)
                 {
-                    CChip chipロングノート終端 = dTX.listChip[this.nCurrentTopChip].chipロングノート終端;
+                    CChip chipロングノート終端 = dTX.listChip[this.nCurrentTopChip].chipLongNoteEndPosition;
                     if (chipロングノート終端.bHit && chipロングノート終端.nDistanceFromBar.Drums < -65)
                     {
                         this.nCurrentTopChip++;
@@ -3784,13 +3784,13 @@ internal abstract class CStagePerfCommonScreen : CStage
             bool bChipHasY = false;
             bool bChipHasP = false;
             bool bChipHasW = false;
-            bool bChipIsO = false;
+            bool bChipIsOpen = false;
             EChannel nChannelNumber = pChip.nChannelNumber;
 
             switch (nChannelNumber)
             {
                 case EChannel.Guitar_Open:
-                    bChipIsO = true;
+                    bChipIsOpen = true;
                     break;
                 case EChannel.Guitar_xxBxx:
                     bChipHasB = true;
@@ -3882,7 +3882,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                             break;
 
                         case EChannel.Bass_Open:
-                            bChipIsO = true;
+                            bChipIsOpen = true;
                             break;
                         case EChannel.Bass_xxBxx:
                             bChipHasB = true;
@@ -4111,15 +4111,15 @@ internal abstract class CStagePerfCommonScreen : CStage
                 int num3 = 0;
                 if (pChip.bIsLongNote)
                 {
-                    if (pChip.chipロングノート終端.nDistanceFromBar[(int)inst] <= 0)
+                    if (pChip.chipLongNoteEndPosition.nDistanceFromBar[(int)inst] <= 0)
                     {
                         return;
                     }
-                    num3 = pChip.chipロングノート終端.nDistanceFromBar[(int)inst] - pChip.nDistanceFromBar[(int)inst];
+                    num3 = pChip.chipLongNoteEndPosition.nDistanceFromBar[(int)inst] - pChip.nDistanceFromBar[(int)inst];
                     if (pChip.bHit && pChip.bロングノートHit中)
                     {
                         y = yBarPos;
-                        num3 = pChip.chipロングノート終端.nDistanceFromBar[(int)inst];
+                        num3 = pChip.chipLongNoteEndPosition.nDistanceFromBar[(int)inst];
                     }
 
                 }
@@ -4128,8 +4128,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                 {
                     if (txChip != null)
                     {
-                        int nアニメカウンタ現在の値 = ctChipPatternAnimation[instIndex].nCurrentValue;
-                        if (bChipIsO)
+                        if (bChipIsOpen)
                         {
                             //todo: what the fuck is vcScaleRatio
                             //txChip.vcScaleRatio.Y = 1f;
@@ -4225,7 +4224,15 @@ internal abstract class CStagePerfCommonScreen : CStage
                                         //txChip.vcScaleRatio.Y = 1f * num3 / rectangle2.Height;
                                         Color4 col = Color4.White;
                                         col.Alpha = 0.5f;
-                                        txChip.tDraw2D(num8, y - (CDTXMania.ConfigIni.bReverse[(int)inst] ? num3 : 0), rectangle2, col);
+                                        
+                                        if (pChip.bHit && !pChip.bロングノートHit中)
+                                        {
+                                            col.Alpha = 0.25f;
+                                        }
+
+                                        Vector2 size = new(rectangle2.Width, num3);
+                                        txChip.tDraw2D(num8, y - (CDTXMania.ConfigIni.bReverse[(int)inst] ? num3 : 0),
+                                            rectangle2, col, size);
                                     }
                                 }
                             }
@@ -4294,7 +4301,7 @@ internal abstract class CStagePerfCommonScreen : CStage
 
                 #region [ Chip Fire effects (auto時用) ]
                 // autoPickでない時の処理は、 tHandleInput_GuitarBass(EInstrumentPart) で行う
-                bool bSuccessOPEN = bChipIsO && ( autoR || !pushingR ) && ( autoG || !pushingG ) && ( autoB || !pushingB ) && ( autoY || !pushingY ) && ( autoP || !pushingP );
+                bool bSuccessOPEN = bChipIsOpen && ( autoR || !pushingR ) && ( autoG || !pushingG ) && ( autoB || !pushingB ) && ( autoY || !pushingY ) && ( autoP || !pushingP );
                 if ( ( bChipHasR && ( autoR || pushingR ) && autoPick ) || bSuccessOPEN && autoPick )
                 {
                     actChipFireGB[(int)inst - 1].Start(0);
@@ -4329,7 +4336,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                     {
                         bMiss = false;
                     }
-                    else if ( ( bChipIsO && ( !pushingR | autoR ) && ( !pushingG | autoG ) && ( !pushingB | autoB ) && ( !pushingY | autoY) && ( !pushingP | autoP) ) )	// OPEN時
+                    else if ( ( bChipIsOpen && ( !pushingR | autoR ) && ( !pushingG | autoG ) && ( !pushingB | autoB ) && ( !pushingY | autoY) && ( !pushingP | autoP) ) )	// OPEN時
                     {
                         bMiss = false;
                     }
@@ -5392,7 +5399,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                         }
                     }
                 }
-                else if (e指定時刻からChipのJUDGEを返す(CSoundManager.rcPerformanceTimer.nCurrentTime, chipロングノートHit中[(int)inst].chipロングノート終端, CDTXMania.ConfigIni.nInputAdjustTimeMs[(int)inst]) >= EJudgement.Miss)
+                else if (e指定時刻からChipのJUDGEを返す(CSoundManager.rcPerformanceTimer.nCurrentTime, chipロングノートHit中[(int)inst].chipLongNoteEndPosition, CDTXMania.ConfigIni.nInputAdjustTimeMs[(int)inst]) >= EJudgement.Miss)
                 {
                     cChip2.bロングノートHit中 = false;
                     chipロングノートHit中[(int)inst] = null;
