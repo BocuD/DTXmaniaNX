@@ -738,7 +738,7 @@ internal abstract class CStagePerfCommonScreen : CStage
     public CActPerfBGA actBGA;
     
     protected CActLVLNFont actLVFont;
-    protected CActPerfChipFireGB actChipFireGB;
+    protected ActPerfNewFire[] actChipFireGB;
     public CActPerfCommonCombo actCombo;
     protected CActPerfCommonDanger actDANGER;
     //protected CActPerfStageClear actStageClear;
@@ -2725,13 +2725,7 @@ internal abstract class CStagePerfCommonScreen : CStage
             }
         }
     }
-
-
-    protected void tUpdateAndDraw_ChipFireGB()
-    {
-        actChipFireGB.OnUpdateAndDraw();
-    }
-
+    
     /*
     protected abstract void t進行描画_パネル文字列();
     protected void t進行描画_パネル文字列()
@@ -4303,23 +4297,23 @@ internal abstract class CStagePerfCommonScreen : CStage
                 bool bSuccessOPEN = bChipIsO && ( autoR || !pushingR ) && ( autoG || !pushingG ) && ( autoB || !pushingB ) && ( autoY || !pushingY ) && ( autoP || !pushingP );
                 if ( ( bChipHasR && ( autoR || pushingR ) && autoPick ) || bSuccessOPEN && autoPick )
                 {
-                    actChipFireGB.Start( 0 + lo );
+                    actChipFireGB[(int)inst - 1].Start(0);
                 }
                 if ( ( bChipHasG && ( autoG || pushingG ) && autoPick ) || bSuccessOPEN && autoPick )
                 {
-                    actChipFireGB.Start( 1 + lo );
+                    actChipFireGB[(int)inst - 1].Start(1);
                 }
                 if ( ( bChipHasB && ( autoB || pushingB ) && autoPick ) || bSuccessOPEN && autoPick )
                 {
-                    actChipFireGB.Start( 2 + lo );
+                    actChipFireGB[(int)inst - 1].Start(2);
                 }
                 if ( ( bChipHasY && ( autoY || pushingY ) && autoPick ) || bSuccessOPEN && autoPick )
                 {
-                    actChipFireGB.Start( 3 + lo );
+                    actChipFireGB[(int)inst - 1].Start(3);
                 }
                 if ( ( bChipHasP && ( autoP || pushingP ) && autoPick ) || bSuccessOPEN && autoPick )
                 {
-                    actChipFireGB.Start( 4 + lo );
+                    actChipFireGB[(int)inst - 1].Start(4);
                 }
                 #endregion
                 #region [ autopick ]
@@ -5361,23 +5355,23 @@ internal abstract class CStagePerfCommonScreen : CStage
                     //
                     if ((bChipColorHasR && (autoR || pushingR != 0)))
                     {
-                        actChipFireGB.Start(R);
+                        actChipFireGB[(int)inst - 1].Start(0);
                     }
                     if ((bChipColorHasG && (autoG || pushingG != 0)))
                     {
-                        actChipFireGB.Start(G);
+                        actChipFireGB[(int)inst - 1].Start(1);
                     }
                     if ((bChipColorHasB && (autoB || pushingB != 0)))
                     {
-                        actChipFireGB.Start(B);
+                        actChipFireGB[(int)inst - 1].Start(2);
                     }
                     if ((bChipColorHasY && (autoY || pushingY != 0)))
                     {
-                        actChipFireGB.Start(Y);
+                        actChipFireGB[(int)inst - 1].Start(3);
                     }
                     if ((bChipColorHasP && (autoP || pushingP != 0)))
                     {
-                        actChipFireGB.Start(P);
+                        actChipFireGB[(int)inst - 1].Start(4);
                     }
 
                     //Check Long Note status
@@ -5451,23 +5445,23 @@ internal abstract class CStagePerfCommonScreen : CStage
                             //Trace.TraceInformation("After successful mask check: ch={0:x2}, Judgement={1}, num17={2:x2}, nKeyPressRGBFlag={3:x2}, nAutoMask={4:x2}", (int)pChip.nChannelNumber, e判定, num17, nKeyPressRGBFlag, nAutoMask);
                             if ((bChipHasButtonArray[0] && (autoR || pushingR != 0)) || bSuccessOPEN)
                             {
-                                actChipFireGB.Start(R);
+                                actChipFireGB[(int)inst - 1].Start(0);
                             }
                             if ((bChipHasButtonArray[1] && (autoG || pushingG != 0)) || bSuccessOPEN)
                             {
-                                actChipFireGB.Start(G);
+                                actChipFireGB[(int)inst - 1].Start(1);
                             }
                             if ((bChipHasButtonArray[2] && (autoB || pushingB != 0)) || bSuccessOPEN)
                             {
-                                actChipFireGB.Start(B);
+                                actChipFireGB[(int)inst - 1].Start(2);
                             }
                             if ((bChipHasButtonArray[3] && (autoY || pushingY != 0)) || bSuccessOPEN)
                             {
-                                actChipFireGB.Start(Y);
+                                actChipFireGB[(int)inst - 1].Start(3);
                             }
                             if ((bChipHasButtonArray[4] && (autoP || pushingP != 0)) || bSuccessOPEN)
                             {
-                                actChipFireGB.Start(P);
+                                actChipFireGB[(int)inst - 1].Start(4);
                             }
                             tProcessChipHit(nTime, pChip);
                             tPlaySound(pChip, CSoundManager.rcPerformanceTimer.nシステム時刻, inst, CDTXMania.ConfigIni.n手動再生音量, CDTXMania.ConfigIni.b演奏音を強調する[indexInst], e判定 == EJudgement.Poor && bCurrInstrumentSpecialist);

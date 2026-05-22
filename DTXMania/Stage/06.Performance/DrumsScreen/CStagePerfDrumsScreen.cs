@@ -9,7 +9,7 @@ namespace DTXMania;
 
 internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
 {
-    // Constructor
+    private bool useNewDrumsFire = true;
 
     public CStagePerfDrumsScreen()
     {
@@ -19,7 +19,14 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         listChildActivities.Add(actPad = new CActPerfDrumsPad());
         listChildActivities.Add(actCombo = new CActPerfDrumsComboDGB());
         listChildActivities.Add(actDANGER = new CActPerfDrumsDanger());
-        listChildActivities.Add(actChipFireD = new CActPerfDrumsChipFireD());
+
+        if (!useNewDrumsFire)
+        {
+            var drumsChipFire = new CActPerfPerfChipFireD();
+            actChipFireD = drumsChipFire;
+            listChildActivities.Add(drumsChipFire);
+        }
+        
         listChildActivities.Add(actGauge = new CActPerfDrumsGauge());
         listChildActivities.Add(actGraph = new CActPerfSkillMeter());
         listChildActivities.Add(actJudgeString = new CActPerfDrumsJudgementString());
@@ -45,6 +52,18 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         
         actStatusPanel.InitUI(ui);
         actJudgeString.InitUI(ui);
+
+        if (useNewDrumsFire)
+        {
+            var drumChipsFire = ui.AddChild(new ActPerfNewFire(0));
+            drumChipsFire.name = "drumChipsFire";
+
+            actChipFireD = drumChipsFire;
+            
+            actChipFireD.iPosY = (CDTXMania.ConfigIni.bReverse.Drums
+                ? nJudgeLinePosY.Drums - 183
+                : nJudgeLinePosY.Drums - 186);
+        }
     }
 
     // Methods
@@ -77,7 +96,13 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         CChartData cChartData = CDTXMania.chosenChartData;
         ct登場用 = new CCounter(0, 12, 16, CDTXMania.Timer);
 
-        actChipFireD.iPosY = (CDTXMania.ConfigIni.bReverse.Drums ? nJudgeLinePosY.Drums - 183 : nJudgeLinePosY.Drums - 186);
+        if (!useNewDrumsFire)
+        {
+            actChipFireD.iPosY = (CDTXMania.ConfigIni.bReverse.Drums
+                ? nJudgeLinePosY.Drums - 183
+                : nJudgeLinePosY.Drums - 186);
+        }
+
         actPlayInfo.jl = (CDTXMania.ConfigIni.bReverse.Drums ? nJudgeLinePosY.Drums - 159 : nJudgeLineMaxPosY - nJudgeLinePosY.Drums);
 
         if ( CDTXMania.bCompactMode )
@@ -417,7 +442,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
     public bool bFullCom;
     public int nNumberOfMistakes;
     public int nNumberPerfects;
-    private CActPerfDrumsChipFireD actChipFireD;
+    private IPerfFire actChipFireD;
     public CActPerfDrumsPad actPad;
     public bool bInFillIn;
     public bool bEndFillIn;

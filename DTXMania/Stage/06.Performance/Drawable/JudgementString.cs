@@ -1,6 +1,5 @@
 ﻿using System.Numerics;
 using DTXMania.Core;
-using DTXMania.Core.Framework;
 using DTXMania.UI.Animation;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.Inspector;
@@ -16,8 +15,8 @@ public class JudgementString : UIGroup
 
     private static void CacheTextures()
     {
-        barTexture = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\Judge\judge_bar.png"));
-        autoBarTexture = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\Judge\judge_bar_auto.png"));
+        barTexture = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\Note\Judge\judge_bar.png"));
+        autoBarTexture = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\Note\Judge\judge_bar_auto.png"));
         stringTextures = new BaseTexture[Enum.GetValues(typeof(EJudgement)).Length];
         
         foreach (EJudgement judgement in Enum.GetValues(typeof(EJudgement)))
@@ -27,13 +26,13 @@ public class JudgementString : UIGroup
             switch (judgement)
             {
                 case EJudgement.Miss:
-                    stringTexture = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\Judge\judge_miss.png"));
+                    stringTexture = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\Note\Judge\judge_miss.png"));
                     break;
                 case EJudgement.Auto:
-                    stringTexture = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\Judge\judge_auto.png"));
+                    stringTexture = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\Note\Judge\judge_auto.png"));
                     break;
                 default:
-                    stringTexture = BaseTexture.LoadFromPath(CSkin.Path($"Graphics\\Judge\\judge_{(int)judgement}.png"));
+                    stringTexture = BaseTexture.LoadFromPath(CSkin.Path($"Graphics\\Note\\Judge\\judge_{(int)judgement}.png"));
                     break;
             }
 
@@ -72,7 +71,7 @@ public class JudgementString : UIGroup
         highlightString.anchor = new Vector2(0.5f, 0.5f);
 
         animator = new Animator();
-        AnimationClip? loaded = AnimationClipIO.LoadFromFile(CSkin.Path(@"Graphics\Judge\hit.json"));
+        AnimationClip? loaded = AnimationClipIO.LoadFromFile(CSkin.Path(@"Graphics\Note\Judge\hit.json"));
         if (loaded != null)
         {
             animator.clips.Add(loaded);

@@ -21,25 +21,6 @@ internal abstract class CActPerfCommonJudgementString : CActivity
 	{
 		public CCounter ctFrameProgress;
 		public EJudgement judge;
-		public float fZRotationDegrees_Bar;
-		public float fXScaleRatio_Bar;
-		public float fYScaleRatio_Bar;
-		public int nRelativeX_Bar;
-		public int nRelativeY_Bar;
-
-		public float fZRotationDegrees;
-		public float fXScaleRatio;
-		public float fYScaleRatio;
-		public int nRelativeX;
-		public int nRelativeY;
-
-		public float fXScaleRatioB;
-		public float fYScaleRatioB;
-		public int nRelativeXB;
-		public int nRelativeYB;
-		public int nOpacityB;
-
-		public int nOpacity;
 		public int nLag; // #25370 2011.2.1 yyagi
 		public int nRect;
 	}
@@ -120,27 +101,7 @@ internal abstract class CActPerfCommonJudgementString : CActivity
 		if ( ( ( nLane >= 10 ) || ( CDTXMania.ConfigIni.JudgementStringPosition.Drums != EType.C ) ) && ( ( ( nLane != 13 ) || ( CDTXMania.ConfigIni.JudgementStringPosition.Guitar != EType.D ) ) && ( ( nLane != 14 ) || ( CDTXMania.ConfigIni.JudgementStringPosition.Bass != EType.D ) ) ) )
 		{
 			judgementStatus[ nLane ].ctFrameProgress = new CCounter( 0, CDTXMania.ConfigIni.nJudgeFrames - 1, CDTXMania.ConfigIni.nJudgeInterval, CDTXMania.Timer );
-
 			judgementStatus[ nLane ].judge = judge;
-			judgementStatus[ nLane ].fXScaleRatio = 1f;
-			judgementStatus[ nLane ].fYScaleRatio = 1f;
-			judgementStatus[ nLane ].fZRotationDegrees = 0f;
-			judgementStatus[ nLane ].nRelativeX = 0;
-			judgementStatus[ nLane ].nRelativeY = 0;
-			judgementStatus[ nLane ].nOpacity = 0xff;
-
-			judgementStatus[ nLane ].fXScaleRatioB = 1f;
-			judgementStatus[ nLane ].fYScaleRatioB = 1f;
-			judgementStatus[ nLane ].nRelativeXB = 0;
-			judgementStatus[ nLane ].nRelativeYB = 0;
-			judgementStatus[ nLane ].nOpacityB = 0xff;
-
-			judgementStatus[ nLane ].fZRotationDegrees_Bar = 0f;
-			judgementStatus[ nLane ].fXScaleRatio_Bar = 0;
-			judgementStatus[ nLane ].fYScaleRatio_Bar = 0;
-			judgementStatus[ nLane ].nRelativeX_Bar = 0;
-			judgementStatus[ nLane ].nRelativeY_Bar = 0;
-
 			judgementStatus[ nLane ].nLag = lag;
 		}
 	}
@@ -232,22 +193,21 @@ internal abstract class CActPerfCommonJudgementString : CActivity
 		return true;
 	}
 
-	protected void DrawJudgementString( int lane, int baseX, int baseY )
+	protected void DrawJudgementString(int lane, int baseX, int baseY)
 	{
 		int nRectX = CDTXMania.ConfigIni.nJudgeWidgh;
 		int nRectY = CDTXMania.ConfigIni.nJudgeHeight;
 
-		int xc = baseX + judgementStatus[ lane ].nRelativeX;
-		float x = xc - ( 110f * judgementStatus[ lane ].fXScaleRatio ) - ( ( nRectX - 225 ) / 2f );
-		float y = baseY + judgementStatus[ lane ].nRelativeY - ( 140f * judgementStatus[ lane ].fYScaleRatio / 2f ) - ( ( nRectY - 135 ) / 2f );
+		float x = baseX - 110f - (nRectX - 225) / 2f;
+		float y = baseY - 140f / 2f - (nRectY - 135) / 2f;
 
-		DrawLag( lane, xc, y );
+		DrawLag(lane, baseX, y);
 
 		if (!renderOld) return;
-		DrawJudgeFrame( lane, x, y, nRectX, nRectY );
+		DrawJudgeFrame(lane, x, y, nRectX, nRectY);
 	}
 
-	protected void DrawJudgeFrame( int lane, float x, float y, int nRectX, int nRectY )
+	protected void DrawJudgeFrame(int lane, float x, float y, int nRectX, int nRectY)
 	{
 		if ( CDTXMania.ConfigIni.nJudgeFrames <= 1 )
 		{

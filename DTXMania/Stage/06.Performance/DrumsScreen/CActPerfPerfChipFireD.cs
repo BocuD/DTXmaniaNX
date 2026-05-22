@@ -8,39 +8,16 @@ using FDK;
 
 namespace DTXMania;
 
-internal class CActPerfDrumsChipFireD : CActivity
+internal class CActPerfPerfChipFireD : CActivity, IPerfFire
 {
 	// コンストラクタ
 
-	public CActPerfDrumsChipFireD()
+	public CActPerfPerfChipFireD()
 	{
 		bActivated = false;
 	}
-		
-		
-	// メソッド
-
-	public void Start( ELane lane )
-	{
-		Start( lane, false, false, false, 0, true );
-	}
-	public void Start( ELane lane, bool bフィルイン )
-	{
-		Start( lane, bフィルイン, false, false, 0, true );
-	}
-	public void Start( ELane lane, bool bフィルイン, bool b大波 )
-	{
-		Start( lane, bフィルイン, b大波, false, 0, true );
-	}
-	public void Start( ELane lane, bool bフィルイン, bool b大波, bool b細波 )
-	{
-		Start( lane, bフィルイン, b大波, b細波, 0, true);
-	}
-	public void Start( ELane lane, bool bフィルイン, bool b大波, bool b細波, int _nJudgeLinePosY_delta_Drums )
-	{
-		Start( lane, bフィルイン, b大波, b細波, 0, true);
-	}
-	public void Start( ELane lane, bool bフィルイン, bool b大波, bool b細波, int _nJudgeLinePosY_delta_Drums, bool b表示 )
+	
+	public void Start( ELane lane, bool bFillIn, bool b大波, bool b細波, int _nJudgeLinePosY_delta_Drums = 0, bool bDisplay = true)
 	{
 		if (( tx火花 != null ) && CDTXMania.ConfigIni.eAttackEffect.Drums != EType.D)
 		{
@@ -73,13 +50,13 @@ internal class CActPerfDrumsChipFireD : CActivity
 						st火花[ j ].f回転単位 = CConversion.DegreeToRadian( (float) ( n回転初期値 + ( i * 90f ) ) );
 						//this.st火花[ j ].f回転方向 = ( i < 4 ) ? 1f : -2f;
 						//this.st火花[ j ].fサイズ = ( i < 4 ) ? 1f : 0.5f;
-						st火花[j].fサイズ = b表示 ? 1f : 0f;
+						st火花[j].fサイズ = bDisplay ? 1f : 0f;
 						break;
 					}
 				}
 			}
 		}
-		if ((tx青い星 != null) && b表示 && (CDTXMania.ConfigIni.eAttackEffect.Drums == EType.A || CDTXMania.ConfigIni.eAttackEffect.Drums == EType.B))
+		if ((tx青い星 != null) && bDisplay && (CDTXMania.ConfigIni.eAttackEffect.Drums == EType.A || CDTXMania.ConfigIni.eAttackEffect.Drums == EType.B))
 		{
 			for (int i = 0; i < 16; i++)
 			{
@@ -134,7 +111,7 @@ internal class CActPerfDrumsChipFireD : CActivity
 			}
 		}
 
-		if (txNotes != null && b表示 && CDTXMania.ConfigIni.eAttackEffect.Drums == EType.A)
+		if (txNotes != null && bDisplay && CDTXMania.ConfigIni.eAttackEffect.Drums == EType.A)
 		{
 			for (int i = 0; i < 1; i++)
 			{
@@ -216,7 +193,7 @@ internal class CActPerfDrumsChipFireD : CActivity
 			}
 		}
             
-		if ( bフィルイン && ( tx青い星 != null ) )
+		if ( bFillIn && ( tx青い星 != null ) )
 		{
 			for( int i = 0; i < 0x10; i++ )
 			{
@@ -965,7 +942,7 @@ internal class CActPerfDrumsChipFireD : CActivity
 		}
 		return 0;
 	}
-		
+	
 
 	// Other
 
@@ -1066,7 +1043,9 @@ internal class CActPerfDrumsChipFireD : CActivity
 	private bool b細波Balance;
 	private bool b大波Balance;
 	private const int FIRE_MAX = 64;
-	public int iPosY;
+	
+	public int iPosY { get; set; }
+	
 	private readonly float[] fY波の最小仰角 = new float[] { -130f, -126f, -120f, -118f, -110f, -108f, -103f, -97f, -85f, -91f, -91f };
 	//   LC      HH     SD     BD     HT     LT    FT     CY    RD    LP   LP
 	private readonly float[] fY波の最大仰角 = new float[] { 70f, 72f, 77f, 84f, 89f, 91f, 99f, 107f, 117f, 112f, 112f };

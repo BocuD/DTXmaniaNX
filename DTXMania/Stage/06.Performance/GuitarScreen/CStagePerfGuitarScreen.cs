@@ -30,7 +30,7 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		listChildActivities.Add( actJudgeString = new CActPerfGuitarJudgementString() );
 		listChildActivities.Add( actGauge = new CActPerfGuitarGauge() );
 		listChildActivities.Add( actCombo = new CActPerfGuitarCombo() );
-		listChildActivities.Add( actChipFireGB = new CActPerfGuitarChipFire() );
+		
 		listChildActivities.Add( actPlayInfo = new CActPerformanceInformation() );
 		listChildActivities.Add( actProgressBar = new CActPerfProgressBar());
 	}
@@ -44,6 +44,13 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 
 		actJudgeString.InitUI(ui);
 		actStatusPanel.InitUI(ui);
+		
+		actChipFireGB = new ActPerfNewFire[2];
+		actChipFireGB[0] = ui.AddChild(new ActPerfNewFire(1));
+		actChipFireGB[0].name = "chipsFireGuitar";
+		
+		actChipFireGB[1] = ui.AddChild(new ActPerfNewFire(2));
+		actChipFireGB[1].name = "chipsFireBass";
 	}
 
 
@@ -280,7 +287,6 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		tUpdateAndDraw_PerformanceInformation();
 		//this.tUpdateAndDraw_WailingFrame();
 
-		tUpdateAndDraw_ChipFireGB();
 		tUpdateAndDraw_GuitarBonus();
 		tUpdateAndDraw_STAGEFAILED();
 		
