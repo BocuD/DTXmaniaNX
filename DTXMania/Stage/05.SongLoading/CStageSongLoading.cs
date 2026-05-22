@@ -423,6 +423,19 @@ internal class CStageSongLoading : CStage
         if (loadingTask.IsCompleted)
         {
             StopLoadingSounds();
+            
+            DateTime timeBeginLoadBMPAVI = DateTime.Now;
+            if (CDTXMania.ConfigIni.bBGAEnabled)
+                CDTXMania.DTX.tLoadBMP_BMPTEX();
+
+            //load BPM and AVI on main thread because :(
+            if (CDTXMania.ConfigIni.bAVIEnabled)
+                CDTXMania.DTX.tLoadAVI();
+            var span = DateTime.Now - timeBeginLoadBMPAVI;
+            Trace.TraceInformation("BMP/AVI読込所要時間({0,4}): {1}",
+                (CDTXMania.DTX.listBMP.Count + CDTXMania.DTX.listBMPTEX.Count + CDTXMania.DTX.listAVI.Count),
+                span.ToString());
+            
             CDTXMania.nStageNumber++;
             return (int)ESongLoadingScreenReturnValue.LoadingComplete;
         }
@@ -693,17 +706,6 @@ internal class CStageSongLoading : CStage
                 span = DateTime.Now - timeBeginLoadWAV;
                 Trace.TraceInformation("WAV/譜面後処理時間({0,4}):  {1}",
                     CDTXMania.DTX.listBMP.Count + CDTXMania.DTX.listBMPTEX.Count + CDTXMania.DTX.listAVI.Count,
-                    span.ToString());
-
-                DateTime timeBeginLoadBMPAVI = DateTime.Now;
-                if (CDTXMania.ConfigIni.bBGAEnabled)
-                    CDTXMania.DTX.tLoadBMP_BMPTEX();
-
-                if (CDTXMania.ConfigIni.bAVIEnabled)
-                    CDTXMania.DTX.tLoadAVI();
-                span = DateTime.Now - timeBeginLoadBMPAVI;
-                Trace.TraceInformation("BMP/AVI読込所要時間({0,4}): {1}",
-                    (CDTXMania.DTX.listBMP.Count + CDTXMania.DTX.listBMPTEX.Count + CDTXMania.DTX.listAVI.Count),
                     span.ToString());
 
                 span = DateTime.Now - timeBeginLoad;
