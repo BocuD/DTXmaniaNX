@@ -424,6 +424,8 @@ internal class CStageSongLoading : CStage
         {
             StopLoadingSounds();
             
+            Trace.TraceInformation("Main load finished, loading BMP / AVI on the main thread now");
+            
             DateTime timeBeginLoadBMPAVI = DateTime.Now;
             if (CDTXMania.ConfigIni.bBGAEnabled)
                 CDTXMania.DTX.tLoadBMP_BMPTEX();
@@ -432,7 +434,7 @@ internal class CStageSongLoading : CStage
             if (CDTXMania.ConfigIni.bAVIEnabled)
                 CDTXMania.DTX.tLoadAVI();
             var span = DateTime.Now - timeBeginLoadBMPAVI;
-            Trace.TraceInformation("BMP/AVI読込所要時間({0,4}): {1}",
+            Trace.TraceInformation("Time to load BMP / AVI ({0,4}): {1}",
                 (CDTXMania.DTX.listBMP.Count + CDTXMania.DTX.listBMPTEX.Count + CDTXMania.DTX.listAVI.Count),
                 span.ToString());
             

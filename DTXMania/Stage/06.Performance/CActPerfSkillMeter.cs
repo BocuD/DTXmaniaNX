@@ -128,8 +128,6 @@ internal class CActPerfSkillMeter : CActivity
 			if ( txグラフ != null )
 			{
 				//背景
-				//todo: vcscaleratio
-				//txグラフ.vcScaleRatio = new Vector3( 1f, 1f, 1f );
 				if (CDTXMania.ConfigIni.bSmallGraph)
 				{
 					txグラフ.tDraw2D(nGraphBG_XPos[nGraphUsePart], nGraphBG_YPos, new RectangleF(448, 2, 111, 584));

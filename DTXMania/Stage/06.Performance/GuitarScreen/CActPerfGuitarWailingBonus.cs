@@ -21,10 +21,7 @@ internal class CActPerfGuitarWailingBonus : CActPerfCommonWailingBonus
 	{
 		bActivated = false;
 	}
-	//public override void Start( EInstrumentPart part )
-	//{
-	//    this.Start( part, null );
-	//}
+	
 	public override void Start( EInstrumentPart part, CChip r歓声Chip )
 	{
 		if ( part != EInstrumentPart.DRUMS )
