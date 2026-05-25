@@ -277,8 +277,7 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		tUpdateAndDraw_JudgementString();
 		actProgressBar.OnUpdateAndDraw();
 		tUpdateAndDraw_Gauge();
-		if (CDTXMania.ConfigIni.nInfoType == 1)
-			tUpdateAndDraw_StatusPanel();
+		tUpdateAndDraw_StatusPanel();
 		if (CDTXMania.ConfigIni.bShowScore)
 			tUpdateAndDraw_Score();
 

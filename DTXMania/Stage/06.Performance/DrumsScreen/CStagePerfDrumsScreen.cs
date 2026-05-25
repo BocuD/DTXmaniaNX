@@ -283,8 +283,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         if (CDTXMania.ConfigIni.bShowScore)
             tUpdateAndDraw_Score();
 
-        if (CDTXMania.ConfigIni.nInfoType == 1)
-            tUpdateAndDraw_StatusPanel();
+        tUpdateAndDraw_StatusPanel();
 
         tUpdateAndDraw_Gauge();
         tUpdateAndDraw_Combo();
