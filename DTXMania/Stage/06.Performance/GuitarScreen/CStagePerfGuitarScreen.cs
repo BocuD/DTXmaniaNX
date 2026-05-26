@@ -856,9 +856,9 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 				const int drawX = 1155;				// 4種全て異なる値
 
 				const int numA = 34;				// 4種全て同じ値
-				int y = CDTXMania.ConfigIni.bReverse.Bass ? ( y_base[ 1 ] - pChip.nDistanceFromBar.Bass ) : ( y_base[ 0 ] + pChip.nDistanceFromBar.Bass );
-				int numB = y - offset;				// 4種全て同じ定義
-				int numC = 0;						// 4種全て同じ初期値
+				float y = CDTXMania.ConfigIni.bReverse.Bass ? ( y_base[ 1 ] - pChip.nDistanceFromBar.Bass ) : ( y_base[ 0 ] + pChip.nDistanceFromBar.Bass );
+				float numB = y - offset;				// 4種全て同じ定義
+				float numC = 0;						// 4種全て同じ初期値
 				const int numD = 709;				// ドラム画面かギター画面かで変わる値
 				if ( ( numB < ( numD + numA ) ) && ( numB > -numA ) )	// 以下のロジックは4種全て同じ
 				{
@@ -917,19 +917,17 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		}
 		if ( ( pChip.bVisible && configIni.bGuitarEnabled ))
 		{
-			int y = CDTXMania.ConfigIni.bReverse.Guitar ? ((nJudgeLinePosY.Guitar - pChip.nDistanceFromBar.Guitar) + 0) : ((nJudgeLinePosY.Guitar + pChip.nDistanceFromBar.Guitar) + 9);
+			float y = CDTXMania.ConfigIni.bReverse.Guitar ? ((nJudgeLinePosY.Guitar - pChip.nDistanceFromBar.Guitar) + 0) : ((nJudgeLinePosY.Guitar + pChip.nDistanceFromBar.Guitar) + 9);
 			if ( ( dTX.bHasChips.Guitar && ( y > 104 ) ) && ( ( y < 670 ) && ( txChip != null ) ) )
 			{
 				if (CDTXMania.ConfigIni.nLaneDisp.Guitar == 0 || CDTXMania.ConfigIni.nLaneDisp.Guitar == 1)
 				{
-					//todo: what the fuck is vcScaleRatio
-					//txChip.vcScaleRatio.Y = 1f;
 					txChip.tDraw2D(88, y, new RectangleF(0, 20, 193, 2));
 				}
 				if ( configIni.bShowPerformanceInformation )
 				{
 					int n小節番号 = n小節番号plus1 - 1;
-					CDTXMania.actDisplayString.tPrint(60, y - 16, CCharacterConsole.EFontType.White, n小節番号.ToString());
+					CDTXMania.actDisplayString.tPrint(60, (int)y - 16, CCharacterConsole.EFontType.White, n小節番号.ToString());
 				}
 			}
 			y = CDTXMania.ConfigIni.bReverse.Bass ? ((nJudgeLinePosY.Bass - pChip.nDistanceFromBar.Bass) + 0) : ((nJudgeLinePosY.Bass + pChip.nDistanceFromBar.Bass) + 9);
@@ -946,7 +944,7 @@ internal class CStagePerfGuitarScreen : CStagePerfCommonScreen
 				if ( configIni.bShowPerformanceInformation )
 				{
 					int n小節番号 = n小節番号plus1 - 1;
-					CDTXMania.actDisplayString.tPrint(930, y - 16, CCharacterConsole.EFontType.White, n小節番号.ToString());
+					CDTXMania.actDisplayString.tPrint(930, (int)y - 16, CCharacterConsole.EFontType.White, n小節番号.ToString());
 				}
 			}
 		}
