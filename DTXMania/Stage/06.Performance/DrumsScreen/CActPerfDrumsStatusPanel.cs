@@ -188,7 +188,7 @@ internal class CActPerfDrumsStatusPanel : CActPerfCommonStatusPanel
             if (txDifficultyBadge != null)
                 txDifficultyBadge.tDraw2D(14 + nBodyX[i], 266 + nBodyY,
                     new RectangleF(rectDiffPanelPoint.X, rectDiffPanelPoint.Y, 60, 60));
-            tDisplayLevelNumber((bCLASSIC == true ? 26 : 18) + nBodyX[i], 290 + nBodyY, str);
+            tDisplayLevelNumber((bCLASSIC ? 26 : 18) + nBodyX[i], 290 + nBodyY, str);
         }
 
         return 0;

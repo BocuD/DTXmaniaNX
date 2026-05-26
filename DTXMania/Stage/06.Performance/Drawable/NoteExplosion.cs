@@ -1,4 +1,5 @@
 ﻿using System.Numerics;
+using System.Windows.Forms;
 using DTXMania.Core;
 using DTXMania.Core.Framework;
 using DTXMania.UI.Animation;
@@ -70,10 +71,24 @@ public class NoteExplosion : UIGroup
             if (ImGui.Button("Play")) Play();
         }
     }
+
+    private CChip? lastChip = null;
     
-    public void Play()
+    public void Play(CChip? chip = null)
     {
         isVisible = true;
+
+        if (chip != null)
+        {
+            if (chip != lastChip)
+            {
+                lastChip = chip;
+            }
+            else
+            {
+                return;
+            }
+        }
         
         //fast forward one frame
         animator.time = 1 / 60.0f;
