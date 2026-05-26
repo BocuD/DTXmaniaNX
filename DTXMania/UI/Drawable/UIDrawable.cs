@@ -19,6 +19,8 @@ public abstract class UIDrawable : IDisposable
     [Themable] public bool isVisible = true;
     public bool dontSerialize = false;
 
+    public Matrix4x4 LocalTransformMatrix => localTransformMatrix;
+
     protected Matrix4x4 localTransformMatrix = Matrix4x4.Identity;
 
     [JsonIgnore]
