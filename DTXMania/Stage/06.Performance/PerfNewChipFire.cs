@@ -193,9 +193,10 @@ public class ActPerfNewFire : UIGroup, IPerfFire
         }
     }
 
-    public void Start(int lane)
+    
+    public void Start(int lane, CChip? chip = null)
     {
-        noteExplosions[lane].Play();
+        noteExplosions[lane].Play(chip);
     }
 
     public void Start(ELane lane, bool bFillIn, bool b大波, bool b細波, int _nJudgeLinePosY_delta_Drums = 0, bool bDisplay = true)
