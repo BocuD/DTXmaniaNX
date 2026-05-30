@@ -87,7 +87,6 @@ public class HoldNote : UIGroup
         staticHoldText.isVisible = !noteHit;
 
         normal.isVisible = isHittingLongNote;
-        //wailing.isVisible = isHittingLongNote;
         holdText.isVisible = isHittingLongNote;
 
         Draw(parentMatrix);
