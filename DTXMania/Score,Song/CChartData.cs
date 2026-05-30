@@ -388,9 +388,7 @@ public class CChartData
         
 		if (!File.Exists(path))
 			return;
-		
-		Trace.TraceInformation("Loading score.ini file: " + path);
-
+        
 		try
 		{
 			CScoreIni ini = new(path);
