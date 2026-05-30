@@ -71,6 +71,8 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
     [DllImport("glfw3", EntryPoint = "glfwGetWin32Window")]
     private static extern IntPtr glfwGetWin32Window(IntPtr window);
 
+    public RuntimeLogListener RuntimeLogListener { get; } = new();
+
     public GlfwOpenGlHost(OpenGlGame game)
     {
         _game = game;
@@ -153,10 +155,11 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
         _windowedX = (int)value.X;
         _windowedY = (int)value.Y;
     }
-
+    
     public void Run()
     {
-        Trace.Listeners.Add(InspectorManager.logWindow);
+        Trace.Listeners.Add(RuntimeLogListener);
+        InspectorManager.logWindow.logSource = RuntimeLogListener;
 
         if (GLFW.Init() == 0)
         {
