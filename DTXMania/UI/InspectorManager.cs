@@ -11,8 +11,8 @@ namespace DTXMania.UI;
 
 public static class InspectorManager
 {
-    public static Inspector.Inspector inspector { get; private set; }
-    public static HierarchyWindow hierarchyWindow { get; private set; }
+    public static Inspector.Inspector inspector { get; } = new();
+    public static HierarchyWindow hierarchyWindow { get; } = new();
     public static TextureInspector textureInspector { get; private set; }
     public static LogWindow logWindow { get; } = new();
 
@@ -27,10 +27,10 @@ public static class InspectorManager
     public static string toRemove = string.Empty;
     public static UIDrawable? toRemoveDrawable => DrawableTracker.GetDrawable(toRemove);
 
-    private class Window(string name, Action draw)
+    private class Window(string name, Action draw, bool defaultShow = false)
     {
         public string name = name;
-        public bool enabled = true;
+        public bool enabled = defaultShow;
         public Action draw = draw;
     }
     
@@ -38,14 +38,12 @@ public static class InspectorManager
     
     static InspectorManager()
     {
-        inspector = new Inspector.Inspector();
-        hierarchyWindow = new HierarchyWindow();
-        
-        windows.Add(new Window("Inspector", () => inspector.Draw()));
-        windows.Add(new Window("Hierarchy", () => hierarchyWindow.Draw()));
-        windows.Add(new Window("Drawable Tracker", () => DrawableTracker.DrawWindow()));
+        windows.Add(new Window("Inspector", () => inspector.Draw(), true));
+        windows.Add(new Window("Hierarchy", () => hierarchyWindow.Draw(), true));
+        windows.Add(new Window("Game Status", () => GameStatus.Draw(), true));
+
         windows.Add(new Window("Textures", () => textureInspector.DrawWindow()));
-        windows.Add(new Window("Game Status", () => GameStatus.Draw()));
+        windows.Add(new Window("Drawable Tracker", () => DrawableTracker.DrawWindow()));
         windows.Add(new Window("Display Controls", () => RendererInfo.Draw()));
     }
 
