@@ -4,7 +4,6 @@ using System.Reflection;
 using System.Runtime;
 using System.Text;
 using System.Windows.Forms;
-using DTXMania.Core.Framework;
 using DTXMania.Core.Video;
 using DTXMania.SongDb;
 using DTXMania.UI;
@@ -41,7 +40,7 @@ internal class CDTXMania
     /// <summary>
     /// The shared Rich Presence integration instance, or <see langword="null"/> if it is disabled.
     /// </summary>
-    public static CDiscordRichPresence DiscordRichPresence { get; private set; }
+    public static CDiscordRichPresence? DiscordRichPresence { get; set; }
 
     //current language
     public static bool isJapanese { get; private set; }

@@ -151,7 +151,22 @@ internal partial class CActConfigList
             "Enable Discord Rich Presence to update your Discord status with current song and playing mode.");
         iDiscordRichPresence.BindConfig(
             () => iDiscordRichPresence.bON = CDTXMania.ConfigIni.bDiscordRichPresenceEnabled,
-            () => CDTXMania.ConfigIni.bDiscordRichPresenceEnabled = iDiscordRichPresence.bON);
+            () =>
+            {
+                bool wasEnabled = CDTXMania.ConfigIni.bDiscordRichPresenceEnabled;
+                CDTXMania.ConfigIni.bDiscordRichPresenceEnabled = iDiscordRichPresence.bON;
+
+                if (!iDiscordRichPresence.bON && wasEnabled)
+                {
+                    CDTXMania.DiscordRichPresence?.Dispose();
+                    CDTXMania.DiscordRichPresence = null;
+                }
+                
+                if (iDiscordRichPresence.bON && !wasEnabled)
+                {
+                    CDTXMania.DiscordRichPresence = new CDiscordRichPresence(CDTXMania.ConfigIni.strDiscordRichPresenceApplicationID);
+                }
+            });
         listItems.Add(iDiscordRichPresence);
         
         CItemBase iSystemGoToKeyAssign = new("System Key Mapping", CItemBase.EPanelType.Folder,
