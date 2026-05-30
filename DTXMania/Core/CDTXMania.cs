@@ -168,6 +168,47 @@ internal class CDTXMania
 
     //how many songs have we played, gets incremented whenever we transition from StageLoading to StagePerformance
     public static int nStageNumber = 0;
+
+    private bool startupFinished = false;
+    private readonly List<(string name, Action initialize)> initializers = [];
+    
+    void RunInitializer((string name, Action initializer) initializer)
+    {
+        try
+        {
+            Trace.TraceInformation($"Initializing {initializer.name}");
+            initializer.initializer();
+        }
+        catch (Exception e)
+        {
+            Trace.TraceError($"Failed to initialize {initializer.name}: {e}\n{e.StackTrace}");
+            MessageBox.Show($"Failed to initialize {initializer.name}: {e}\n{e.StackTrace}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            throw;
+        }
+    }
+
+    private void StartupTick()
+    {
+        //tick through initializers and initialize them one by one
+        if (initializers.Count > 0)
+        {
+            var initializer = initializers.First();
+            initializers.RemoveAt(0);
+            RunInitializer(initializer);
+        }
+        
+        if (initializers.Count == 0)
+        {
+            startupFinished = true;
+
+            Trace.TraceInformation("Finished game initialization");
+            
+            Trace.TraceInformation("----------------------");
+            Trace.TraceInformation("■ Startup");
+        
+            SongDb.StartScan();
+        }
+    }
     
     // Constructor
     public CDTXMania(DTXManiaGL dtxManiaGl)
@@ -175,19 +216,9 @@ internal class CDTXMania
         maniaGl = dtxManiaGl;
         app = this;
 
-        void SafeInitialize(string name, Action action)
+        void AddInitializer(string name, Action action)
         {
-            try
-            {
-                Trace.TraceInformation($"Initializing {name}");
-                action();
-            }
-            catch (Exception e)
-            {
-                Trace.TraceError($"Failed to initialize {name}: {e}");
-                MessageBox.Show($"Failed to initialize {name}: {e}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                throw;
-            }
+            initializers.Add((name, action));
         }
 
         //Update version information
@@ -257,7 +288,7 @@ internal class CDTXMania
                 Environment.Exit(1);
             }
         }
-
+        
         Trace.WriteLine("");
         Trace.WriteLine("DTXMania powered by YAMAHA Silent Session Drums");
         Trace.WriteLine($"Release: {VERSION}");
@@ -281,27 +312,38 @@ internal class CDTXMania
         ConfigIni.SyncGraphicsSettings(maniaGl.host);
         UpdateWindowTitle();
         maniaGl.host.InitializeGraphics();
-
-        SafeInitialize("Skin", () =>
+        
+        AddInitializer("Skin", () =>
         {
             Skin = new CSkin(ConfigIni.strSystemSkinSubfolderFullName, ConfigIni.bUseBoxDefSkin);
             ConfigIni.strSystemSkinSubfolderFullName =
                 Skin.GetCurrentSkinSubfolderFullName(true); // 旧指定のSkinフォルダが消滅していた場合に備える
         });
+        
+        AddInitializer("StageManager", () => StageManager = new StageManager());
+        
+        AddInitializer("LoadingStage", () =>
+        {
+            StageManager.LoadInitialStage();
+        });
 
-        SafeInitialize("FFmpeg", FFmpegCore.Initialize);
+        AddInitializer("FFmpeg", FFmpegCore.Initialize);
 
-        SafeInitialize("Timer", () => { Timer = new CTimer(CTimer.EType.MultiMedia); });
+        AddInitializer("Timer", () =>
+        {
+            Timer = new CTimer(CTimer.EType.MultiMedia); 
+            Random = new Random((int)Timer.nシステム時刻);
+        });
 
-        SafeInitialize("FPS Counter", () => { FPS = new CFPS(); });
+        AddInitializer("FPS Counter", () => { FPS = new CFPS(); });
 
-        SafeInitialize("Character Console", () =>
+        AddInitializer("Character Console", () =>
         {
             actDisplayString = new CCharacterConsole();
             actDisplayString.OnActivate();
         });
 
-        SafeInitialize("Input Manager (DirectInput, MIDI)", () =>
+        AddInitializer("Input Manager (DirectInput, MIDI)", () =>
         {
             InputManager = new CInputManager(maniaGl.host.GetWindowHandle());
             foreach (IInputDevice device in InputManager.listInputDevices)
@@ -331,9 +373,9 @@ internal class CDTXMania
             }
         });
 
-        SafeInitialize("Pad", () => { Pad = new CPad(ConfigIni, InputManager); });
+        AddInitializer("Pad", () => { Pad = new CPad(ConfigIni, InputManager); });
 
-        SafeInitialize("Sound Manager", () =>
+        AddInitializer("Sound Manager", () =>
         {
             ESoundDeviceType soundDeviceType = ConfigIni.nSoundDriverType switch
             {
@@ -360,50 +402,31 @@ internal class CDTXMania
             Trace.TraceInformation($"Bus type of the default sound device = {strDefaultSoundDeviceBusType}");
         });
         
-        Random = new Random((int)Timer.nシステム時刻);
+        AddInitializer("Input", () => Input = new Input());
 
-        #region [ Initialize Stage ]
-
-        StageManager = new StageManager();
-
-        #endregion
-
-        Input = new Input();
-
-        #region [ Discord Rich Presence ]
-
-        if (ConfigIni.bDiscordRichPresenceEnabled && !bCompactMode)
-            DiscordRichPresence = new CDiscordRichPresence(ConfigIni.strDiscordRichPresenceApplicationID);
-
-        #endregion
-        
-        SafeInitialize("SongDb", () =>
+        AddInitializer("DiscordRichPresence", () =>
         {
-            SongDb = new SongDb.SongDb();
+            if (ConfigIni.bDiscordRichPresenceEnabled && !bCompactMode)
+                DiscordRichPresence = new CDiscordRichPresence(ConfigIni.strDiscordRichPresenceApplicationID);
+        });
+       
+        AddInitializer("SongDb", () => SongDb = new SongDb.SongDb());
+        
+        AddInitializer("SongDBStatus", () =>
+        {
+            SongDBStatus songDbStatus = persistentUIGroup.AddChild(new SongDBStatus());
+            songDbStatus.position = new Vector3(0, 720, 0);
+            songDbStatus.anchor = new Vector2(0.0f, 1.0f);
         });
         
-        SongDBStatus songDbStatus = persistentUIGroup.AddChild(new SongDBStatus());
-        songDbStatus.position = new Vector3(0, 720, 0);
-        songDbStatus.anchor = new Vector2(0.0f, 1.0f);
+        AddInitializer("AnimatedTransition", () => gitadoraTransition = persistentUIGroup.AddChild(new GitaDoraTransition()));
         
-        gitadoraTransition = persistentUIGroup.AddChild(new GitaDoraTransition());
-        
-        Trace.TraceInformation("Finished game initialization");
-
-        #region [ Launch First stage ]
-
-        //---------------------
-        Trace.TraceInformation("----------------------");
-        Trace.TraceInformation("■ Startup");
-
-        StageManager.LoadInitialStage();
-        //---------------------
-        
-        SongDb.StartScan();
-
-        #endregion
+        AddInitializer("Load Skin Sounds", () =>
+        {
+            Skin.bgmTitleScreen.tPlay();
+            Skin.ReloadSkin();
+        });
     }
-
 
     // Methods
 
@@ -450,6 +473,18 @@ internal class CDTXMania
 
     public void Draw()
     {
+        persistentUIGroup.scale.X = renderScale;
+        persistentUIGroup.scale.Y = renderScale;
+        
+        if (!startupFinished)
+        {
+            StartupTick();
+            
+            StageManager?.DrawStage();
+            persistentUIGroup.Draw(Matrix4x4.Identity);
+            return;
+        }
+        
         //....????
         if (SoundManager == null)
         {
@@ -493,9 +528,6 @@ internal class CDTXMania
         }
         
         StageManager.DrawStage();
-        
-        persistentUIGroup.scale.X = renderScale;
-        persistentUIGroup.scale.Y = renderScale;
         persistentUIGroup.Draw(Matrix4x4.Identity);
 
         StageManager.HandleStageChanges();

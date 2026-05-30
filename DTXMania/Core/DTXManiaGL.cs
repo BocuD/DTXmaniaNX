@@ -12,6 +12,7 @@ public sealed class DTXManiaGL : OpenGlGame
     public static DTXManiaGL instance;
     private CDTXMania mania;
     private bool clearImGuiFocusOnNextRender = true;
+    private bool isReady = false;
     
     public override void Init()
     {
@@ -39,7 +40,7 @@ public sealed class DTXManiaGL : OpenGlGame
     {
         Gl.Enable(GLEnum.DepthTest);
         Gl.Viewport(0, 0, (uint)Math.Max(width, 1), (uint)Math.Max(height, 1));
-        Gl.ClearColor(0.00f, 0.00f, 0.10f, 1f);
+        Gl.ClearColor(0.00f, 0.00f, 0.00f, 1f);
         Gl.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
         
         CDTXMania.renderScale = windowSize.X / GameWindowSize.Width;
@@ -51,7 +52,7 @@ public sealed class DTXManiaGL : OpenGlGame
             CDTXMania.ConfigIni.nInitialWindowXPosition = (int)windowPosition.X;
             CDTXMania.ConfigIni.nInitialWindowYPosition = (int)windowPosition.Y;
         }
-
+        
         mania.Draw();
 
         if (clearImGuiFocusOnNextRender)

@@ -63,7 +63,7 @@ public class SongDb : IDisposable
 		}
 		catch (Exception ex)
 		{
-			Trace.TraceWarning($"Failed to initialize song cache, continuing without cache: {ex.Message}");
+			Trace.TraceError($"Failed to initialize song cache, continuing without cache: {ex.Message}\n{ex.StackTrace}");
 			songCache = null;
 		}
 	}
@@ -84,8 +84,8 @@ public class SongDb : IDisposable
 		if (maxThreadCount < 2)
 			maxThreadCount = 2;
 		
-		// try
-		// {
+		try
+		{
 			SongNode tempRoot = await RunFullSongScan();
 			
 			tempRoot = await UnpackZipFiles(maxThreadCount, 5, tempRoot);
@@ -138,16 +138,16 @@ public class SongDb : IDisposable
 			lastFinishTime = DateTime.Now;
 			
 			onComplete?.Invoke();
-		// }
-		// catch (Exception ex)
-		// {
-		// 	Trace.TraceError("An error occurred while scanning songs: " + ex.Message);
-		// 	status = SongDbScanStatus.Idle;
-		// }
-		// finally
-		// {
+		}
+		catch (Exception ex)
+		{
+			Trace.TraceError($"An error occurred while scanning songs: {ex.Message}\n{ex.StackTrace}");
 			status = SongDbScanStatus.Idle;
-		// }
+		}
+		finally
+		{
+			status = SongDbScanStatus.Idle;
+		}
 	}
 
 	public static double totalSkill = 0;

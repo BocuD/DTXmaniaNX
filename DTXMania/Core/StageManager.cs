@@ -8,7 +8,6 @@ internal class StageManager
     public CStageStartup stageStartup { get; }
     public CStageTitle stageTitle { get; }
     public CStageConfig stageConfig { get; }
-    //public CStageSongSelection stageSongSelection { get; }
     public CStageSongSelectionNew stageSongSelectionNew { get; }
     public CStageSongLoading stageSongLoading { get; }
     public CStagePerfGuitarScreen stagePerfGuitarScreen { get; }
@@ -25,7 +24,6 @@ internal class StageManager
         stageStartup = new CStageStartup();
         stageTitle = new CStageTitle();
         stageConfig = new CStageConfig();
-        // stageSongSelection = new CStageSongSelection();
         stageSongSelectionNew = new CStageSongSelectionNew();
         stageSongLoading = new CStageSongLoading();
         stagePerfDrumsScreen = new CStagePerfDrumsScreen();
@@ -33,6 +31,11 @@ internal class StageManager
         stageResult = new CStageResult();
         stageChangeSkin = new CStageChangeSkin();
         stageEnd = new CStageEnd();
+    }
+    
+    public void InitializeStages()
+    {
+        throw new NotImplementedException();
     }
     
     public void LoadInitialStage()
