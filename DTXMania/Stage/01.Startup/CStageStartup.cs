@@ -47,9 +47,9 @@ internal class CStageStartup : CStage
 	
 	private void DrawLogArea()
 	{
-		ImGui.SetNextWindowPos(new Vector2(0, 50));
-		var appSize = CDTXMania.app.maniaGl.windowSize;
-		ImGui.SetNextWindowSize(new Vector2(appSize.X, appSize.Y - 100));
+		ImGui.SetNextWindowPos(new Vector2(0, 50 * CDTXMania.renderScale));
+		Vector2 appSize = CDTXMania.app.maniaGl.windowSize;
+		ImGui.SetNextWindowSize(new Vector2(appSize.X, appSize.Y - (100 * CDTXMania.renderScale)));
 		ImGui.Begin("Log Window", 
 			ImGuiWindowFlags.NoDecoration 
 			| ImGuiWindowFlags.NoBackground
@@ -59,7 +59,7 @@ internal class CStageStartup : CStage
 
 		Vector2 available = ImGui.GetContentRegionAvail();
 		ImGui.BeginChild("LogRegion", available, ImGuiWindowFlags.NoScrollbar);
-		ImGui.PushFont(ImFontPtr.Null, 25.0f);
+		ImGui.PushFont(ImFontPtr.Null, 18.0f * CDTXMania.renderScale);
 		
 		bool wasNearBottom = ImGui.GetScrollY() >= ImGui.GetScrollMaxY() - 10f;
 		
