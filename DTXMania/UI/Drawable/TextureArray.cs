@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Drawing;
 using System.Numerics;
+using Hexa.NET.ImGui;
 
 namespace DTXMania.UI.Drawable;
 
@@ -36,5 +37,16 @@ public class TextureArray : UITexture
         UpdateLocalTransformMatrix();
         Matrix4x4 combinedMatrix = localTransformMatrix * parentMatrix;
         target.tDraw2DMatrix(combinedMatrix, size, clipRect, color);
+    }
+
+    public override void DrawInspector()
+    {
+        base.DrawInspector();
+        
+        if (ImGui.CollapsingHeader("TextureArray"))
+        {
+            ImGui.Text($"Texture Index: {textureIndex}");
+            ImGui.SliderInt("Texture Index", ref textureIndex, 0, textures.Length - 1);
+        }
     }
 }
