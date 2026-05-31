@@ -73,10 +73,10 @@ public class UINewVideoRenderer : UIDrawable
             // Dynamically lock proportions if changed 
             if ((int)size.X != frame.Texture.Width || (int)size.Y != frame.Texture.Height)
             {
-                size = new Vector2(frame.Texture.Width, frame.Texture.Height);
+                //size = new Vector2(frame.Texture.Width, frame.Texture.Height);
             }
             
-            RectangleF clipRect = new RectangleF(0, 0, size.X, size.Y);
+            RectangleF clipRect = new(0, 0, frame.Texture.Width, frame.Texture.Height);
             frame.Texture.tDraw2DMatrix(combinedMatrix, size, clipRect, Color4.White);
         }
     }
