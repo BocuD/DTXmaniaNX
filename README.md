@@ -13,23 +13,38 @@ Visit [releases](https://github.com/BocuD/DTXmaniaNX/releases) for automated bui
     - Currently uses OpenGL (instead of DirectX9)
   - Supports translating, rotating, and scaling elements according to a hierarchy
   - Fully serializable and skinnable
-  - Resolution independent
+  - Support for arbitrary resolutions such as 1080p or 2160p (4K)
+    - Currently restricted to 16:9
+    - UI scales gracefully, independent of resolution
   - Font rendering currently handled by Skia
+  - Video decoding and rendering through ffmpeg (supporting practically any format under the sun)
 
 - New theming engine
   - Written on top of new renderer
   - Doesn't affect old UI elements (for now)
-  - Any game element can be skinned or transformed
+  - Most game and menu elements can be skinned or transformed
  
-- Support for arbitrary resolutions such as 1080p or 2160p (4K)
-  - Currently restricted to 16:9
-  - UI scales gracefully, independent of resolution
+- New animation framework
+  - Allows for keyframe based animations, loaded at runtime from json files
+  - Multiple smoothing and interpolation options
+  - Currently used by judgements, some transitions, note explosions, wailing
 
 - Rewritten song database
   - ~4-8x performance speedup
   - Safer handling of files
   - No more reliance on legacy (unsafe) BinaryFormatter
   - Song name transliteration (romanization)
+
+- Improved gameplay features
+  - Improved and more customizable judgement and note explosion effects
+  - Note and gameplay related elements are much easier to skin now with more cleanly separated locations
+
+- Greatly improved guitar support
+  - Greatly overhauled rendering of notes, long notes, and wailing
+  - Long notes and wailing support (customizable) animations
+  - Single player guitar support
+  - Vastly improved guitar chart loading
+    - Loading songs is now multithreaded, resulting in 4-8x performance improvement depending on the hardware
 
 - Greatly improved sorting functionality
   - Sorting functionality similar to GITADORA, with songs grouped in various categories
@@ -63,14 +78,9 @@ Visit [releases](https://github.com/BocuD/DTXmaniaNX/releases) for automated bui
  
 ## Current roadmap (in no particular order)
 
-- Rework guitar gameplay stage
 - Feature parity on song select screen with upstream DTXManiaNX
 - Lane swapping (similar to DTXMania AL)
-- Song database serialization
 - Song favourite filters
-- (fuzzy) song search
-  - Most of the work for this was already done, romanization for japanese is there
-- Play results screen rework
 - Create separate video rendering behaviour option for 4:3 videos to stretch
 - Load random videos from a folder for charts with missing videos
 - P4IO input support (arcade Gitadora hardware)
