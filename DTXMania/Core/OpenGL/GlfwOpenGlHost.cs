@@ -31,6 +31,7 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
 
     private readonly OpenGlGame _game;
     private readonly GameRenderTarget _gameRenderTarget = new();
+    public GameRenderTarget GameRenderTarget => _gameRenderTarget;
     private readonly OpenGlRenderer renderer = new();
     private readonly OpenGlSkiaTextRenderer _skiaTextRenderer = new();
     private readonly OpenGlTextureFactory _textureFactory = new();

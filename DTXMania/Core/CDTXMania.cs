@@ -4,13 +4,12 @@ using System.Reflection;
 using System.Runtime;
 using System.Text;
 using System.Windows.Forms;
-using DTXMania.Core.Video;
+using DTXMania.Core.OpenGL;
 using DTXMania.SongDb;
 using DTXMania.UI;
 using FDK;
 using Hexa.NET.ImGui;
 using ResourceManager = DTXMania.UI.ResourceManager;
-using Vector2 = System.Numerics.Vector2;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.Inspector;
 using DTXMania.UI.Skin;
@@ -151,6 +150,9 @@ internal partial class CDTXMania
     public static string executableDirectory { get; private set; }
     public static string strCompactModeFile { get; private set; }
     public static CTimer Timer { get; private set; }
+    
+    public static GameRenderTarget? GameRenderTarget =>
+        (app?.maniaGl?.host as GlfwOpenGlHost)?.GameRenderTarget;
 
     public bool bApplicationActive => maniaGl.isFocused;
     
