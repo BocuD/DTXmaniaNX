@@ -17,7 +17,11 @@ public static class Interpolator
     {
         Register<float>((a, b, t) => a + (b - a) * t);
         Register<double>((a, b, t) => a + (b - a) * t);
-        Register<int>((a, b, t) => (int)MathF.Round(a + (b - a) * t));
+        // Round half-away-from-zero so we get a uniform staircase
+        // MathF.Round's default is banker's rounding which
+        // alternates 0.5→0 and 1.5→2, producing visibly bunched 2-3-frame clusters even when
+        // the underlying rate is constant.
+        Register<int>((a, b, t) => (int)MathF.Round(a + (b - a) * t, MidpointRounding.AwayFromZero));
         Register<bool>((a, b, t) => t < 1f ? a : b);
         Register<Vector2>(Vector2.Lerp);
         Register<Vector3>(Vector3.Lerp);
