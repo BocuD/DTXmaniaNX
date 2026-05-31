@@ -1055,69 +1055,6 @@ public class CDTX : CActivity
 
                 throw new IndexOutOfRangeException();
             }
-            set
-            {
-                switch (index)
-                {
-                    case 0:
-                        Drums = value;
-                        return;
-
-                    case 1:
-                        Guitar = value;
-                        return;
-
-                    case 2:
-                        Bass = value;
-                        return;
-
-                    case 3:
-                        HHOpen = value;
-                        return;
-
-                    case 4:
-                        LP = value;
-                        return;
-
-                    case 5:
-                        LBD = value;
-                        return;
-
-                    case 6:
-                        FT = value;
-                        return;
-
-                    case 7:
-                        Ride = value;
-                        return;
-
-                    case 8:
-                        LeftCymbal = value;
-                        return;
-
-                    case 9:
-                        OpenGuitar = value;
-                        return;
-
-                    case 10:
-                        OpenBass = value;
-                        return;
-
-                    case 11:
-                        YPGuitar = value;
-                        return;
-
-                    case 12:
-                        YPBass = value;
-                        return;
-
-                    case 13:
-                        AVI = value;
-                        return;
-                }
-
-                throw new IndexOutOfRangeException();
-            }
         }
     }
 
@@ -3308,7 +3245,7 @@ public class CDTX : CActivity
 
         while( ce.Current != '\n' )
         {
-            if( !ce.MoveNext() )
+            if ( !ce.MoveNext() )
                 return false;	// 文字が尽きた
         }
 
@@ -3870,7 +3807,7 @@ public class CDTX : CActivity
                                     //If candidate start hold survives
                                     if (cCandidateStartHold[(int)eChipPart] != null)
                                     {
-                                        cCandidateStartHold[(int)eChipPart].chipロングノート終端 = chip;
+                                        cCandidateStartHold[(int)eChipPart].chipLongNoteEndPosition = chip;
                                         //Reset
                                         cCandidateStartHold[(int)eChipPart] = null;
                                     }
@@ -4776,14 +4713,14 @@ public class CDTX : CActivity
         if (ce.Current != ';') return true;
             
         //If the character string ends at the character after ';', exit
-        if( !ce.MoveNext()) return false;
+        if ( !ce.MoveNext()) return false;
 
         //Treat the characters from the character after ';' to the one before '\n' as the comment string, and copy it to the sb string.
         while( ce.Current != '\n' )
         {
             output.Append( ce.Current );
 
-            if(!ce.MoveNext())
+            if (!ce.MoveNext())
                 return false;
         }
         return true;
@@ -5079,7 +5016,7 @@ public class CDTX : CActivity
                 t入力_パラメータ食い込みチェック("BASEBPM", ref strCommand, ref strParameter);
 
                 double basebpm = 0.0;
-                //if( double.TryParse( str2, out num6 ) && ( num6 > 0.0 ) )
+                //if ( double.TryParse( str2, out num6 ) && ( num6 > 0.0 ) )
                 if (TryParse(strParameter, out basebpm) &&
                     basebpm >
                     0.0) // #23880 2010.12.30 yyagi: alternative TryParse to permit both '.' and ',' for decimal point
@@ -6245,7 +6182,7 @@ public class CDTX : CActivity
         #region [ BPM値を取得する。]
 
         //-----------------
-        //if( !double.TryParse( strパラメータ, out result ) )
+        //if ( !double.TryParse( strパラメータ, out result ) )
         if (!TryParse(strParameter,
                 out dbBPM)) // #23880 2010.12.30 yyagi: alternative TryParse to permit both '.' and ',' for decimal point
             return false;
@@ -7089,7 +7026,7 @@ public class CDTX : CActivity
         {
             // 小節長倍率を取得する。
 
-            //if( !double.TryParse( strパラメータ, out result ) )
+            //if ( !double.TryParse( strパラメータ, out result ) )
             if (!TryParse(strParameter, out double db小節長倍率)) // #23880 2010.12.30 yyagi: alternative TryParse to permit both '.' and ',' for decimal point
             {
                 Trace.TraceError("小節長倍率に不正な値を指定しました。[{0}: {1}行]", strFileNameFullPath, lineNumber);

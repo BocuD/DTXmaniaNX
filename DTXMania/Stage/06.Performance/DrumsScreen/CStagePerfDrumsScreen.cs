@@ -9,7 +9,7 @@ namespace DTXMania;
 
 internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
 {
-    // Constructor
+    private bool useNewDrumsFire = true;
 
     public CStagePerfDrumsScreen()
     {
@@ -19,7 +19,14 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         listChildActivities.Add(actPad = new CActPerfDrumsPad());
         listChildActivities.Add(actCombo = new CActPerfDrumsComboDGB());
         listChildActivities.Add(actDANGER = new CActPerfDrumsDanger());
-        listChildActivities.Add(actChipFireD = new CActPerfDrumsChipFireD());
+
+        if (!useNewDrumsFire)
+        {
+            var drumsChipFire = new CActPerfPerfChipFireD();
+            actChipFireD = drumsChipFire;
+            listChildActivities.Add(drumsChipFire);
+        }
+        
         listChildActivities.Add(actGauge = new CActPerfDrumsGauge());
         listChildActivities.Add(actGraph = new CActPerfSkillMeter());
         listChildActivities.Add(actJudgeString = new CActPerfDrumsJudgementString());
@@ -40,9 +47,23 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
     {
         base.InitializeBaseUI();
         
-        actStatusPanel.InitUI(ui);
+        var drumsScreen = ui.AddChild(new LegacyDrawable(DrawDrumsScreen));
+        drumsScreen.name = "drumsScreen";
         
-        ui.AddChild(new LegacyDrawable("", () => tDisplayPresence()));
+        actStatusPanel.InitUI(ui);
+        actJudgeString.InitUI(ui);
+
+        if (useNewDrumsFire)
+        {
+            var drumChipsFire = ui.AddChild(new ActPerfNewFire(0));
+            drumChipsFire.name = "drumChipsFire";
+
+            actChipFireD = drumChipsFire;
+            
+            actChipFireD.iPosY = (CDTXMania.ConfigIni.bReverse.Drums
+                ? nJudgeLinePosY.Drums - 183
+                : nJudgeLinePosY.Drums - 186);
+        }
     }
 
     // Methods
@@ -57,7 +78,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         for ( int i = 0; i < 12; i++ )
         {
             r空打ちドラムチップ[ i ] = r空うちChip( EInstrumentPart.DRUMS, (EPad) i );
-            if( r空打ちドラムチップ[ i ] == null )
+            if ( r空打ちドラムチップ[ i ] == null )
             {
                 r空打ちドラムチップ[ i ] = r指定時刻に一番近いChip_ヒット未済問わず不可視考慮( CDTXMania.Timer.nCurrentTime, nパッド0Atoチャンネル0A[ i ], nInputAdjustTimeMs.Drums );
             }
@@ -75,10 +96,16 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         CChartData cChartData = CDTXMania.chosenChartData;
         ct登場用 = new CCounter(0, 12, 16, CDTXMania.Timer);
 
-        actChipFireD.iPosY = (CDTXMania.ConfigIni.bReverse.Drums ? nJudgeLinePosY.Drums - 183 : nJudgeLinePosY.Drums - 186);
+        if (!useNewDrumsFire)
+        {
+            actChipFireD.iPosY = (CDTXMania.ConfigIni.bReverse.Drums
+                ? nJudgeLinePosY.Drums - 183
+                : nJudgeLinePosY.Drums - 186);
+        }
+
         actPlayInfo.jl = (CDTXMania.ConfigIni.bReverse.Drums ? nJudgeLinePosY.Drums - 159 : nJudgeLineMaxPosY - nJudgeLinePosY.Drums);
 
-        if( CDTXMania.bCompactMode )
+        if ( CDTXMania.bCompactMode )
         {
             var score = new CChartData();
             actGraph.dbGraphValue_Goal = score.SongInformation.HighCompletionRate[ 0 ];
@@ -103,7 +130,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
     
     public override void OnManagedCreateResources()
     {
-        if( bActivated )
+        if ( bActivated )
         {
             bChorusSection = false;
             bBonus = false;
@@ -115,7 +142,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
             /*
             this.txヒットバーGB = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlayDrums hit-bar guitar.png" ) );
             this.txレーンフレームGB = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlayDrums lane parts guitar.png" ) );
-            if( this.txレーンフレームGB != null )
+            if ( this.txレーンフレームGB != null )
             {
                 this.txレーンフレームGB.nTransparency = 0xff - CDTXMania.ConfigIni.nBackgroundTransparency;
             }
@@ -144,12 +171,6 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         ctWailingChipPatternAnimation = new CCounter(0, 4, 50, CDTXMania.Timer);
         ePhaseID = EPhase.Common_FadeIn;
 
-        if (tx判定画像anime != null && txBonusEffect != null)
-        {
-            tx判定画像anime.tDraw2D(1280, 720);
-            txBonusEffect.tDraw2D(1280, 720);
-        }
-
         ct登場用.tUpdate();
         
         // display presence now that the initial timer reset has been performed
@@ -158,17 +179,66 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
 
     public override int OnUpdateAndDraw()
     {
-        sw.Start();
+        base.OnUpdateAndDraw();
 
         if (!bActivated) return 0;
+        
+        if (bIsFinishedFadeout)
+        {
+            if (!CDTXMania.Skin.soundStageClear.b再生中 && !CDTXMania.Skin.soundSTAGEFAILED音.b再生中)
+            {
+                Debug.WriteLine("Total OnUpdateAndDraw=" + sw.ElapsedMilliseconds + "ms");
+                nNumberOfMistakes = nHitCount_ExclAuto.Drums.Miss + nHitCount_ExclAuto.Drums.Poor;
+                switch (nNumberOfMistakes)
+                {
+                    case 0:
+                    {
+                        nNumberPerfects = nHitCount_ExclAuto.Drums.Perfect;
+                        if (CDTXMania.ConfigIni.bAllDrumsAreAutoPlay)
+                        {
+                            nNumberPerfects = nHitCount_IncAuto.Drums.Perfect;
+                        }
 
-        base.OnUpdateAndDraw();
+                        //EXC
+                        if (nNumberPerfects == CDTXMania.DTX.nVisibleChipsCount.Drums)
+                        {
+                            bExc = true;
+                            if (CDTXMania.ConfigIni.nSkillMode == 1)
+                                actScore.nCurrentTrueScore.Drums += 30000;
+                            break;
+                        }
+
+                        //FULL COMBO
+                        bFullCom = true;
+                        if (CDTXMania.ConfigIni.nSkillMode == 1)
+                            actScore.nCurrentTrueScore.Drums += 15000;
+                        break;
+                    }
+                }
+
+                return (int)eReturnValueAfterFadeOut;
+            }
+        }
+
+        if (ePhaseID == EPhase.PERFORMANCE_STAGE_RESTART)
+        {
+            Trace.TraceInformation("Restarting");
+            return (int)eReturnValueAfterFadeOut;
+        }
+        
+        return 0;
+    }
+
+    private void DrawDrumsScreen()
+    {
+        sw.Start();
 
         bIsFinishedPlaying = false;
         bIsFinishedFadeout = false;
         bExc = false;
         bFullCom = false;
 
+        //detect stage failed and switch to it
         if ((CDTXMania.ConfigIni.bSTAGEFAILEDEnabled && !bIsTrainingMode && actGauge.IsFailed(EInstrumentPart.DRUMS)) &&
             (ePhaseID == EPhase.Common_DefaultState))
         {
@@ -193,6 +263,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         tUpdateAndDraw_JudgementLine();
         tUpdateAndDraw_DrumPad();
         
+        //handle end of performance
         bIsFinishedFadeout = tUpdateAndDraw_FadeIn_Out();
         if (bIsFinishedPlaying && (ePhaseID == EPhase.Common_DefaultState))
         {
@@ -212,8 +283,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         if (CDTXMania.ConfigIni.bShowScore)
             tUpdateAndDraw_Score();
 
-        if (CDTXMania.ConfigIni.nInfoType == 1)
-            tUpdateAndDraw_StatusPanel();
+        tUpdateAndDraw_StatusPanel();
 
         tUpdateAndDraw_Gauge();
         tUpdateAndDraw_Combo();
@@ -224,65 +294,6 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         tUpdateAndDraw_ChipFireD();
         tUpdateAndDraw_STAGEFAILED();
         
-        bすべてのチップが判定された = true;
-        if (bIsFinishedFadeout)
-        {
-            if (!CDTXMania.Skin.soundStageClear.b再生中 && !CDTXMania.Skin.soundSTAGEFAILED音.b再生中)
-            {
-                Debug.WriteLine("Total OnUpdateAndDraw=" + sw.ElapsedMilliseconds + "ms");
-                nNumberOfMistakes = nHitCount_ExclAuto.Drums.Miss + nHitCount_ExclAuto.Drums.Poor;
-                switch (nNumberOfMistakes)
-                {
-                    case 0:
-                    {
-                        nNumberPerfects = nHitCount_ExclAuto.Drums.Perfect;
-                        if (CDTXMania.ConfigIni.bAllDrumsAreAutoPlay)
-                        {
-                            nNumberPerfects = nHitCount_IncAuto.Drums.Perfect;
-                        }
-
-                        if (nNumberPerfects == CDTXMania.DTX.nVisibleChipsCount.Drums)
-
-                            #region[ エクセ ]
-
-                        {
-                            bExc = true;
-                            if (CDTXMania.ConfigIni.nSkillMode == 1)
-                                actScore.nCurrentTrueScore.Drums += 30000;
-                            break;
-                        }
-
-                        #endregion
-
-                        else
-
-                            #region[ フルコン ]
-
-                        {
-                            bFullCom = true;
-                            if (CDTXMania.ConfigIni.nSkillMode == 1)
-                                actScore.nCurrentTrueScore.Drums += 15000;
-                            break;
-                        }
-
-                        #endregion
-                    }
-                    default:
-                    {
-                        break;
-                    }
-                }
-
-                return (int)eReturnValueAfterFadeOut;
-            }
-        }
-
-        if (ePhaseID == EPhase.PERFORMANCE_STAGE_RESTART)
-        {
-            Debug.WriteLine("Restarting");
-            return (int)eReturnValueAfterFadeOut;
-        }
-
         // もしサウンドの登録/削除が必要なら、実行する
         if (queueMixerSound.Count > 0)
         {
@@ -329,9 +340,8 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
 
         // キー入力
         tHandleKeyInput();
+        
         sw.Stop();
-
-        return 0;
     }
 
     private void DrawLaneCover()
@@ -427,14 +437,11 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
 
     #region [ private ]
     //-----------------
-    public bool bIsFinishedFadeout;
-    public bool bIsFinishedPlaying;
     public bool bExc;
     public bool bFullCom;
-    public bool bすべてのチップが判定された;
     public int nNumberOfMistakes;
     public int nNumberPerfects;
-    private CActPerfDrumsChipFireD actChipFireD;
+    private IPerfFire actChipFireD;
     public CActPerfDrumsPad actPad;
     public bool bInFillIn;
     public bool bEndFillIn;
@@ -476,7 +483,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
     //-----------------
     private bool bフィルイン区間の最後のChipである( CChip pChip )
     {
-        if( pChip == null )
+        if ( pChip == null )
         {
             return false;
         }
@@ -484,11 +491,11 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         for (int i = listChip.IndexOf(pChip) + 1; i < listChip.Count; i++)
         {
             pChip = listChip[i];
-            if( ( pChip.nChannelNumber == EChannel.FillIn) && ( pChip.nIntegerValue == 2 ) )
+            if ( ( pChip.nChannelNumber == EChannel.FillIn) && ( pChip.nIntegerValue == 2 ) )
             {
                 return true;
             }
-            if( ( ( pChip.nChannelNumber >= EChannel.HiHatClose) && ( pChip.nChannelNumber <= EChannel.LeftBassDrum) ) && ( ( pChip.nPlaybackPosition - num ) > 0x18 ) )
+            if ( ( ( pChip.nChannelNumber >= EChannel.HiHatClose) && ( pChip.nChannelNumber <= EChannel.LeftBassDrum) ) && ( ( pChip.nPlaybackPosition - num ) > 0x18 ) )
             {
                 return false;
             }
@@ -509,7 +516,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
             actGraph.dbグラフ値現在_渡 = CScoreIni.tCalculatePlayingSkill(CDTXMania.DTX.nVisibleChipsCount.Drums, nHitCount_ExclAuto.Drums.Perfect, nHitCount_ExclAuto.Drums.Great, nHitCount_ExclAuto.Drums.Good, nHitCount_ExclAuto.Drums.Poor, nHitCount_ExclAuto.Drums.Miss, actCombo.nCurrentCombo.HighestValue.Drums, EInstrumentPart.DRUMS, bIsAutoPlay);
         }
         // #35411 2015.09.07 add chnmr0
-        if( CDTXMania.listTargetGhsotLag.Drums != null &&
+        if ( CDTXMania.listTargetGhsotLag.Drums != null &&
             CDTXMania.ConfigIni.eTargetGhost.Drums == ETargetGhostData.ONLINE &&
             CDTXMania.DTX.nVisibleChipsCount.Drums > 0 )
         {
@@ -535,15 +542,13 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
 
     protected override void tJudgeLineMovingUpandDown()
     {
-        actJudgeString.iP_A = (CDTXMania.ConfigIni.bReverse.Drums ? nJudgeLinePosY.Drums : nJudgeLinePosY.Drums - 189);
-        actJudgeString.iP_B = (CDTXMania.ConfigIni.bReverse.Drums ? nJudgeLinePosY.Drums : nJudgeLinePosY.Drums + 23);
         actChipFireD.iPosY = (CDTXMania.ConfigIni.bReverse.Drums ? nJudgeLinePosY.Drums - 183 : nJudgeLinePosY.Drums - 186);
         CDTXMania.stagePerfDrumsScreen.actPlayInfo.jl = (CDTXMania.ConfigIni.bReverse.Drums ? 0 : nJudgeLineMaxPosY - nJudgeLinePosY.Drums);
     }
 
     private bool tProcessDrumHit( long nHitTime, EPad type, CChip pChip, int n強弱度合い0to127)  // tドラムヒット処理
     {
-        if( pChip == null )
+        if ( pChip == null )
         {
             return false;
         }
@@ -561,33 +566,33 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         bool bPChipIsAutoPlay = bIsAutoPlay[ nLane ];
         int nInputAdjustTime = bPChipIsAutoPlay ? 0 : nInputAdjustTimeMs.Drums;
         EJudgement e判定 = e指定時刻からChipのJUDGEを返す( nHitTime, pChip, nInputAdjustTime );
-        if( e判定 == EJudgement.Miss )
+        if ( e判定 == EJudgement.Miss )
         {
             return false;
         }
         tProcessChipHit( nHitTime, pChip );
         actLaneFlushD.Start( (ELane) nLane, ( (float) n強弱度合い0to127 ) / 127f );
         actPad.Hit( nPad );
-        if( ( e判定 != EJudgement.Poor ) && ( e判定 != EJudgement.Miss ) )
+        if ( ( e判定 != EJudgement.Poor ) && ( e判定 != EJudgement.Miss ) )
         {
             bool flag = bInFillIn;
             bool flag2 = bInFillIn && bフィルイン区間の最後のChipである( pChip );
             actChipFireD.Start( (ELane)nLane, flag, flag2, flag2, nJudgeLinePosY_delta.Drums );
             // #31602 2013.6.24 yyagi 判定ラインの表示位置をずらしたら、チップのヒットエフェクトの表示もずらすために、nJudgeLine..を追加
         }
-        if( CDTXMania.ConfigIni.bドラム打音を発声する )
+        if ( CDTXMania.ConfigIni.bドラム打音を発声する )
         {
             CChip rChip = null;
             bool bIsChipsoundPriorToPad = true;
-            if( ( ( type == EPad.HH ) || ( type == EPad.HHO ) ) || ( type == EPad.LC ) )
+            if ( ( ( type == EPad.HH ) || ( type == EPad.HHO ) ) || ( type == EPad.LC ) )
             {
                 bIsChipsoundPriorToPad = CDTXMania.ConfigIni.eHitSoundPriorityHH == EPlaybackPriority.ChipOverPadPriority;
             }
-            else if( ( type == EPad.LT ) || ( type == EPad.FT ) )
+            else if ( ( type == EPad.LT ) || ( type == EPad.FT ) )
             {
                 bIsChipsoundPriorToPad = CDTXMania.ConfigIni.eHitSoundPriorityFT == EPlaybackPriority.ChipOverPadPriority;
             }
-            else if( ( type == EPad.CY ) || ( type == EPad.RD ) )
+            else if ( ( type == EPad.CY ) || ( type == EPad.RD ) )
             {
                 bIsChipsoundPriorToPad = CDTXMania.ConfigIni.eHitSoundPriorityCY == EPlaybackPriority.ChipOverPadPriority;
             }
@@ -596,27 +601,27 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                 bIsChipsoundPriorToPad = CDTXMania.ConfigIni.eHitSoundPriorityLP == EPlaybackPriority.ChipOverPadPriority;
             }
 
-            if( bIsChipsoundPriorToPad )
+            if ( bIsChipsoundPriorToPad )
             {
                 rChip = pChip;
             }
             else
             {
                 EPad hH = type;
-                if( !CDTXMania.DTX.bHasChips.HHOpen && ( type == EPad.HHO ) )
+                if ( !CDTXMania.DTX.bHasChips.HHOpen && ( type == EPad.HHO ) )
                 {
                     hH = EPad.HH;
                 }
-                if( !CDTXMania.DTX.bHasChips.Ride && ( type == EPad.RD ) )
+                if ( !CDTXMania.DTX.bHasChips.Ride && ( type == EPad.RD ) )
                 {
                     hH = EPad.CY;
                 }
-                if( !CDTXMania.DTX.bHasChips.LeftCymbal && ( type == EPad.LC ) )
+                if ( !CDTXMania.DTX.bHasChips.LeftCymbal && ( type == EPad.LC ) )
                 {
                     hH = EPad.HH;
                 }
                 rChip = r指定時刻に一番近いChip_ヒット未済問わず不可視考慮( nHitTime, nパッド0Atoチャンネル0A[ (int) hH ], nInputAdjustTime );
-                if( rChip == null )
+                if ( rChip == null )
                 {
                     rChip = pChip;
                 }
@@ -647,81 +652,10 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
             (int)(CDTXMania.ConfigIni.bReverse.Bass ? ( 400 - txWailingFrame.Height ) : 69)
         );
     }
-
-    /*
-    private void t進行描画_ギターベースフレーム()
-    {
-        if( ( ( CDTXMania.ConfigIni.eDark != EDarkMode.HALF ) && ( CDTXMania.ConfigIni.eDark != EDarkMode.FULL ) ) && CDTXMania.ConfigIni.bGuitarEnabled )
-        {
-            if( CDTXMania.DTX.bチップがある.Guitar )
-            {
-                for( int i = 0; i < 355; i += 0x80 )
-                {
-                    Rectangle rectangle = new Rectangle( 0, 0, 0x6d, 0x80 );
-                    if( ( i + 0x80 ) > 355 )
-                    {
-                        rectangle.Height -= ( i + 0x80 ) - 355;
-                    }
-                    if( this.txレーンフレームGB != null )
-                    {
-                        this.txレーンフレームGB.tDraw2D( CDTXMania.app.Device, 0x1fb, 0x39 + i, rectangle );
-                    }
-                }
-            }
-            if( CDTXMania.DTX.bチップがある.Bass )
-            {
-                for( int j = 0; j < 355; j += 0x80 )
-                {
-                    Rectangle rectangle2 = new Rectangle( 0, 0, 0x6d, 0x80 );
-                    if( ( j + 0x80 ) > 355 )
-                    {
-                        rectangle2.Height -= ( j + 0x80 ) - 355;
-                    }
-                    if( this.txレーンフレームGB != null )
-                    {
-                        this.txレーンフレームGB.tDraw2D( CDTXMania.app.Device, 0x18e, 0x39 + j, rectangle2 );
-                    }
-                }
-            }
-        }
-    }
-    private void t進行描画_ギターベース判定ライン()		// yyagi: ギタレボモードとは座標が違うだけですが、まとめづらかったのでそのまま放置してます。
-    {
-        if ( ( CDTXMania.ConfigIni.eDark != EDarkMode.FULL ) && CDTXMania.ConfigIni.bGuitarEnabled )
-        {
-            if ( CDTXMania.DTX.bチップがある.Guitar )
-            {
-                int y = ( CDTXMania.ConfigIni.bReverse.Guitar ? 374 + nJudgeLinePosY_delta.Guitar : 95 - nJudgeLinePosY_delta.Guitar ) - 3;
-                    // #31602 2013.6.23 yyagi 描画遅延対策として、判定ラインの表示位置をオフセット調整できるようにする
-                if ( this.txヒットバーGB != null )
-                {
-                    for ( int i = 0; i < 3; i++ )
-                    {
-                        this.txヒットバーGB.tDraw2D( CDTXMania.app.Device, 509 + ( 26 * i ), y );
-                        this.txヒットバーGB.tDraw2D( CDTXMania.app.Device, ( 509 + ( 26 * i ) ) + 16, y, new Rectangle( 0, 0, 10, 16 ) );
-                    }
-                }
-            }
-            if ( CDTXMania.DTX.bチップがある.Bass )
-            {
-                int y = ( CDTXMania.ConfigIni.bReverse.Bass ? 374 + nJudgeLinePosY_delta.Bass : 95 - nJudgeLinePosY_delta.Bass ) - 3;
-                // #31602 2013.6.23 yyagi 描画遅延対策として、判定ラインの表示位置をオフセット調整できるようにする
-                if ( this.txヒットバーGB != null )
-                {
-                    for ( int j = 0; j < 3; j++ )
-                    {
-                        this.txヒットバーGB.tDraw2D( CDTXMania.app.Device, 400 + ( 26 * j ), y );
-                        this.txヒットバーGB.tDraw2D( CDTXMania.app.Device, ( 400 + ( 26 * j ) ) + 16, y, new Rectangle( 0, 0, 10, 16 ) );
-                    }
-                }
-            }
-        }
-    }
-     */
-
+    
     private void tUpdateAndDraw_Graph()  // t進行描画_グラフ
     {
-        if( CDTXMania.ConfigIni.bGraph有効.Drums )
+        if ( CDTXMania.ConfigIni.bGraph有効.Drums )
         {
             actGraph.OnUpdateAndDraw();
         }
@@ -1051,13 +985,13 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                         {
                             case EBDGroup.BDとLPで打ち分ける:
                                 #region[ BD & LBD | LP ]
-                                if( e判定BD != EJudgement.Miss && e判定LBD != EJudgement.Miss )
+                                if ( e判定BD != EJudgement.Miss && e判定LBD != EJudgement.Miss )
                                 {
-                                    if( chipBD.nPlaybackPosition < chipLBD.nPlaybackPosition )
+                                    if ( chipBD.nPlaybackPosition < chipLBD.nPlaybackPosition )
                                     {
                                         tProcessDrumHit( nTime, EPad.BD, chipBD, inputEvent.nVelocity );
                                     }
-                                    else if( chipBD.nPlaybackPosition > chipLBD.nPlaybackPosition )
+                                    else if ( chipBD.nPlaybackPosition > chipLBD.nPlaybackPosition )
                                     {
                                         tProcessDrumHit( nTime, EPad.BD, chipLBD, inputEvent.nVelocity );
                                     }
@@ -1068,17 +1002,17 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                                     }
                                     bHitted = true;
                                 }
-                                else if( e判定BD != EJudgement.Miss)
+                                else if ( e判定BD != EJudgement.Miss)
                                 {
                                     tProcessDrumHit( nTime, EPad.BD, chipBD, inputEvent.nVelocity);
                                     bHitted = true;
                                 }
-                                else if( e判定LBD != EJudgement.Miss)
+                                else if ( e判定LBD != EJudgement.Miss)
                                 {
                                     tProcessDrumHit( nTime, EPad.BD, chipLBD, inputEvent.nVelocity);
                                     bHitted = true;
                                 }
-                                if( bHitted )
+                                if ( bHitted )
                                     continue;
                                 else
                                     break;
@@ -2066,13 +2000,13 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                         {
                             case EBDGroup.BDとLPで打ち分ける:
                                 #region[ BD & LBD | LP ]
-                                if( e判定BD != EJudgement.Miss && e判定LBD != EJudgement.Miss )
+                                if ( e判定BD != EJudgement.Miss && e判定LBD != EJudgement.Miss )
                                 {
-                                    if( chipBD.nPlaybackPosition < chipLBD.nPlaybackPosition )
+                                    if ( chipBD.nPlaybackPosition < chipLBD.nPlaybackPosition )
                                     {
                                         tProcessDrumHit( nTime, EPad.LBD, chipBD, inputEvent.nVelocity );
                                     }
-                                    else if( chipBD.nPlaybackPosition > chipLBD.nPlaybackPosition )
+                                    else if ( chipBD.nPlaybackPosition > chipLBD.nPlaybackPosition )
                                     {
                                         tProcessDrumHit( nTime, EPad.LBD, chipLBD, inputEvent.nVelocity );
                                     }
@@ -2083,17 +2017,17 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                                     }
                                     bHitted = true;
                                 }
-                                else if( e判定BD != EJudgement.Miss )
+                                else if ( e判定BD != EJudgement.Miss )
                                 {
                                     tProcessDrumHit( nTime, EPad.LBD, chipBD, inputEvent.nVelocity);
                                     bHitted = true;
                                 }
-                                else if( e判定LBD != EJudgement.Miss )
+                                else if ( e判定LBD != EJudgement.Miss )
                                 {
                                     tProcessDrumHit( nTime, EPad.LBD, chipLBD, inputEvent.nVelocity);
                                     bHitted = true;
                                 }
-                                if( bHitted )
+                                if ( bHitted )
                                     continue;
                                 else
                                     break;
@@ -2519,14 +2453,14 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                                         break;
 
                                     case EBDGroup.BDとLPで打ち分ける:
-                                        if( chipBD != null && chipLBD != null )
+                                        if ( chipBD != null && chipLBD != null )
                                         {
-                                            if( chipBD.nPlaybackTimeMs >= chipLBD.nPlaybackTimeMs )
+                                            if ( chipBD.nPlaybackTimeMs >= chipLBD.nPlaybackTimeMs )
                                                 rChip = chipBD;
-                                            else if( chipBD.nPlaybackTimeMs < chipLBD.nPlaybackTimeMs )
+                                            else if ( chipBD.nPlaybackTimeMs < chipLBD.nPlaybackTimeMs )
                                                 rChip = chipLBD;
                                         }
-                                        else if( chipLBD != null )
+                                        else if ( chipLBD != null )
                                         {
                                             rChip = chipLBD;
                                         }
@@ -2585,7 +2519,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                                         break;
                                     case EBDGroup.BDとLPで打ち分ける:
                                         #region[ BDとLP ]
-                                        if( chipLP != null ){ rChip = chipLP; }
+                                        if ( chipLP != null ){ rChip = chipLP; }
                                         #endregion
                                         break;
                                     case EBDGroup.どっちもBD:
@@ -2637,14 +2571,14 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                                         break;
                                     case EBDGroup.BDとLPで打ち分ける:
                                         #region[ BDとLBD ]
-                                        if( chipBD != null && chipLBD != null )
+                                        if ( chipBD != null && chipLBD != null )
                                         {
-                                            if( chipBD.nPlaybackTimeMs <= chipLBD.nPlaybackTimeMs )
+                                            if ( chipBD.nPlaybackTimeMs <= chipLBD.nPlaybackTimeMs )
                                                 rChip = chipLBD;
-                                            else if( chipBD.nPlaybackTimeMs > chipLBD.nPlaybackTimeMs )
+                                            else if ( chipBD.nPlaybackTimeMs > chipLBD.nPlaybackTimeMs )
                                                 rChip = chipBD;
                                         }
-                                        else if( chipLBD != null )
+                                        else if ( chipLBD != null )
                                         {
                                             rChip = chipLBD;
                                         }
@@ -2854,7 +2788,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                     }
                 }
 
-                int y = configIni.bReverse.Drums ? (nJudgeLinePosY.Drums + pChip.nDistanceFromBar.Drums) : (nJudgeLinePosY.Drums - pChip.nDistanceFromBar.Drums);
+                float y = configIni.bReverse.Drums ? (nJudgeLinePosY.Drums + pChip.nDistanceFromBar.Drums) : (nJudgeLinePosY.Drums - pChip.nDistanceFromBar.Drums);
                 if (txChip != null)
                 {
                     //what the fuck is vcScaleRatio
@@ -3020,17 +2954,17 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
     }
     protected override void tUpdateAndDraw_Chip_Drums( CConfigIni configIni, ref CDTX dTX, ref CChip pChip )
     {
-        if( configIni.bDrumsEnabled )
+        if ( configIni.bDrumsEnabled )
         {
             #region [ Sudden処理 ]
-            if( ( CDTXMania.ConfigIni.nHidSud.Drums == 2 ) || ( CDTXMania.ConfigIni.nHidSud.Drums == 3 ) )
+            if ( ( CDTXMania.ConfigIni.nHidSud.Drums == 2 ) || ( CDTXMania.ConfigIni.nHidSud.Drums == 3 ) )
             {
-                if( pChip.nDistanceFromBar.Drums < 200 )
+                if ( pChip.nDistanceFromBar.Drums < 200 )
                 {
                     pChip.bVisible = true;
                     pChip.nTransparency = 0xff;
                 }
-                else if( pChip.nDistanceFromBar.Drums < 250 )
+                else if ( pChip.nDistanceFromBar.Drums < 250 )
                 {
                     pChip.bVisible = true;
                     pChip.nTransparency = 0xff - ( (int) ( ( ( (double) ( pChip.nDistanceFromBar.Drums - 200 ) ) * 255.0 ) / 50.0 ) );
@@ -3043,13 +2977,13 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
             }
             #endregion
             #region [ Hidden処理 ]
-            if( ( CDTXMania.ConfigIni.nHidSud.Drums == 1 ) || ( CDTXMania.ConfigIni.nHidSud.Drums == 3 ) )
+            if ( ( CDTXMania.ConfigIni.nHidSud.Drums == 1 ) || ( CDTXMania.ConfigIni.nHidSud.Drums == 3 ) )
             {
-                if( pChip.nDistanceFromBar.Drums < 100 )
+                if ( pChip.nDistanceFromBar.Drums < 100 )
                 {
                     pChip.bVisible = false;
                 }
-                else if( pChip.nDistanceFromBar.Drums < 150 )
+                else if ( pChip.nDistanceFromBar.Drums < 150 )
                 {
                     pChip.bVisible = true;
                     pChip.nTransparency = (int) ( ( ( (double) ( pChip.nDistanceFromBar.Drums - 100 ) ) * 255.0 ) / 50.0 );
@@ -3057,80 +2991,80 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
             }
             #endregion
             #region [ ステルス処理 ]
-            if( CDTXMania.ConfigIni.nHidSud.Drums == 4 )
+            if ( CDTXMania.ConfigIni.nHidSud.Drums == 4 )
             {
                 pChip.bVisible = false;
             }
             #endregion
-            if( !pChip.bHit && pChip.bVisible )
+            if ( !pChip.bHit && pChip.bVisible )
             {
                 Color4 col = Color4.White;
-                if( txChip != null )
+                if ( txChip != null )
                 {
                     col.Alpha = pChip.nTransparency / 255.0f;
                     //txChip.nTransparency = pChip.nTransparency;
                 }
                 int x = nチャンネルtoX座標[ pChip.nChannelNumber - EChannel.HiHatClose];
 
-                if( configIni.eLaneType.Drums == EType.A )
+                if ( configIni.eLaneType.Drums == EType.A )
                 {
                     if (configIni.eRDPosition == ERDPosition.RCRD)
                     {
                         x = nチャンネルtoX座標[ pChip.nChannelNumber - EChannel.HiHatClose];
                     }
-                    else if( configIni.eRDPosition == ERDPosition.RDRC )
+                    else if ( configIni.eRDPosition == ERDPosition.RDRC )
                     {
                         x = nチャンネルtoX座標改[ pChip.nChannelNumber - EChannel.HiHatClose];
                     }
                 }
-                else if( configIni.eLaneType.Drums == EType.B )
+                else if ( configIni.eLaneType.Drums == EType.B )
                 {
-                    if( configIni.eRDPosition == ERDPosition.RCRD )
+                    if ( configIni.eRDPosition == ERDPosition.RCRD )
                     {
                         x = nチャンネルtoX座標B[ pChip.nChannelNumber - EChannel.HiHatClose];
                     }
-                    else if( configIni.eRDPosition == ERDPosition.RDRC )
+                    else if ( configIni.eRDPosition == ERDPosition.RDRC )
                     {
                         x = nチャンネルtoX座標B改[ pChip.nChannelNumber - EChannel.HiHatClose];
                     }
                 }
-                else if( configIni.eLaneType.Drums == EType.C )
+                else if ( configIni.eLaneType.Drums == EType.C )
                 {
-                    if( configIni.eRDPosition == ERDPosition.RCRD )
+                    if ( configIni.eRDPosition == ERDPosition.RCRD )
                     {
                         x = nチャンネルtoX座標C[ pChip.nChannelNumber - EChannel.HiHatClose];
                     }
-                    else if( configIni.eRDPosition == ERDPosition.RDRC )
+                    else if ( configIni.eRDPosition == ERDPosition.RDRC )
                     {
                         x = nチャンネルtoX座標C改[ pChip.nChannelNumber - EChannel.HiHatClose];
                     }
                 }
-                else if( configIni.eLaneType.Drums == EType.D )
+                else if ( configIni.eLaneType.Drums == EType.D )
                 {
-                    if( configIni.eRDPosition == ERDPosition.RCRD )
+                    if ( configIni.eRDPosition == ERDPosition.RCRD )
                     {
                         x = nチャンネルtoX座標D[ pChip.nChannelNumber - EChannel.HiHatClose];
                     }
-                    else if( configIni.eRDPosition == ERDPosition.RDRC )
+                    else if ( configIni.eRDPosition == ERDPosition.RDRC )
                     {
                         x = nチャンネルtoX座標D改[ pChip.nChannelNumber - EChannel.HiHatClose];
                     }
                 }
 
-                if( configIni.eRDPosition == ERDPosition.RDRC )
+                if ( configIni.eRDPosition == ERDPosition.RDRC )
                 {
-                    if( configIni.eLaneType.Drums == EType.A )
+                    if ( configIni.eLaneType.Drums == EType.A )
                     {
                         x = nチャンネルtoX座標改[ pChip.nChannelNumber - EChannel.HiHatClose];
                     }
-                    else if( configIni.eLaneType.Drums == EType.B )
+                    else if ( configIni.eLaneType.Drums == EType.B )
                     {
                         x = nチャンネルtoX座標B改[ pChip.nChannelNumber - EChannel.HiHatClose];
                     }
                 }
 
-                int y = configIni.bReverse.Drums ? ( nJudgeLinePosY.Drums + pChip.nDistanceFromBar.Drums ) : ( nJudgeLinePosY.Drums - pChip.nDistanceFromBar.Drums );
-                if( txChip != null )
+                float y = configIni.bReverse.Drums ? ( nJudgeLinePosY.Drums + pChip.nDistanceFromBar.Drums ) : ( nJudgeLinePosY.Drums - pChip.nDistanceFromBar.Drums );
+                if ( txChip != null )
                 {
                     //todo: what the fuck is vcscaleratio
                     //txChip.vcScaleRatio = new Vector3( ( float )pChip.dbChipSizeRatio, ( float )pChip.dbChipSizeRatio, 1f );
@@ -3141,11 +3075,11 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                 {
                     case EChannel.HiHatClose:
                         x = ( x + 0x10 ) - ( ( int )( ( 32.0 * pChip.dbChipSizeRatio ) / 2.0 ) );
-                        if( txChip != null )
+                        if ( txChip != null )
                         {
                             txChip.tDraw2D(x - 5, y - 32, new RectangleF( 60 + 10, 0, 0x2e + 10, 64 ), col);
 
-                            if( pChip.bBonusChip )
+                            if ( pChip.bBonusChip )
                                 txChip.tDraw2D(x - 5, y - 32, new RectangleF( 60 + 10, 64, 0x2e + 10, 64 ), col);
                         }
                         break;
@@ -3156,29 +3090,29 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                         {
                             txChip.tDraw2D(x - 5, y - 32, new RectangleF( 0x6a + 20, 0, 0x36 +10, 64 ), col);
 
-                            if( pChip.bBonusChip )
+                            if ( pChip.bBonusChip )
                                 txChip.tDraw2D(x - 5, y - 32, new RectangleF( 0x6a + 20, 64, 0x36 + 10, 64 ), col);
                         }
                         break;
 
                     case EChannel.BassDrum:
                         x = ( x + 0x16 ) - ( ( int )( ( 44.0 * pChip.dbChipSizeRatio ) / 2.0 ) );
-                        if( txChip != null )
+                        if ( txChip != null )
                         {
                             txChip.tDraw2D(x - 5, y - 32, new RectangleF( 0, 0, 60 + 10, 64 ), col);
 
-                            if( pChip.bBonusChip )
+                            if ( pChip.bBonusChip )
                                 txChip.tDraw2D(x - 5, y - 32, new RectangleF( 0, 64, 60 + 10, 64 ), col);
                         }
                         break;
 
                     case EChannel.HighTom:
                         x = ( x + 0x10 ) - ( ( int )( ( 32.0 * pChip.dbChipSizeRatio ) / 2.0 ) );
-                        if( txChip != null )
+                        if ( txChip != null )
                         {
                             txChip.tDraw2D(x - 5, y - 32, new RectangleF( 160 + 30, 0, 0x2e + 10, 64 ), col);
 
-                            if( pChip.bBonusChip )
+                            if ( pChip.bBonusChip )
                                 txChip.tDraw2D(x - 5, y - 32, new RectangleF( 160 + 30, 64, 0x2e + 10, 64 ), col);
                         }
                         break;
@@ -3189,57 +3123,57 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                         {
                             txChip.tDraw2D(x - 5, y - 32, new RectangleF( 0xce + 40, 0, 0x2e + 10, 64 ), col);
 
-                            if( pChip.bBonusChip )
+                            if ( pChip.bBonusChip )
                                 txChip.tDraw2D(x - 5, y - 32, new RectangleF( 0xce + 40, 64, 0x2e + 10, 64 ), col);
                         }
                         break;
 
                     case EChannel.Cymbal:
                         x = ( x + 19 ) - ( ( int )( ( 38.0 * pChip.dbChipSizeRatio ) / 2.0 ) );
-                        if( txChip != null )
+                        if ( txChip != null )
                         {
                             txChip.tDraw2D(x - 5, y - 32, new RectangleF( 298 + 60, 0, 0x40 + 10, 64 ), col);
 
-                            if( pChip.bBonusChip )
+                            if ( pChip.bBonusChip )
                                 txChip.tDraw2D(x - 5, y - 32, new RectangleF( 298 + 60, 64, 0x40 + 10, 64 ), col);
                         }
                         break;
 
                     case EChannel.FloorTom:
                         x = ( x + 0x10 ) - ( ( int )( ( 32.0 * pChip.dbChipSizeRatio ) / 2.0 ) );
-                        if( txChip != null )
+                        if ( txChip != null )
                         {
                             txChip.tDraw2D(x - 5, y - 32, new RectangleF( 0xfc + 50, 0, 0x2e + 10, 64 ), col);
 
-                            if( pChip.bBonusChip )
+                            if ( pChip.bBonusChip )
                                 txChip.tDraw2D(x - 5, y - 32, new RectangleF( 0xfc + 50, 64, 0x2e + 10, 64 ), col);
                         }
                         break;
 
                     case EChannel.HiHatOpen:
                         x = ( x + 13 ) - ( ( int )( ( 26.0 * pChip.dbChipSizeRatio ) / 2.0 ) );
-                        if( txChip != null )
+                        if ( txChip != null )
                         {
                             switch( configIni.eHHOGraphics.Drums )
                             {
                                 case EType.A:
                                     x = ( x + 14 ) - ( ( int )( ( 26.0 * pChip.dbChipSizeRatio ) / 2.0 ) );
                                     txChip.tDraw2D(x - 5, y - 32, new RectangleF( 0x200 + 100, 0, 0x26 + 10, 64 ), col);
-                                    if( pChip.bBonusChip )
+                                    if ( pChip.bBonusChip )
                                         txChip.tDraw2D(x - 5, y - 32, new RectangleF( 0x200 + 100, 64, 0x26 + 10, 64 ), col);
                                     break;
 
                                 case EType.B:
                                     x = ( x + 14 ) - ( ( int )( ( 26.0 * pChip.dbChipSizeRatio ) / 2.0 ) );
                                     txChip.tDraw2D(x - 5, y - 32, new RectangleF( 0x200 + 100, 0, 0x26 + 10, 64 ), col);
-                                    if( pChip.bBonusChip )
+                                    if ( pChip.bBonusChip )
                                         txChip.tDraw2D(x - 5, y - 32, new RectangleF( 0x200 + 100, 64, 0x26 + 10, 64 ), col);
                                     break;
 
                                 case EType.C:
                                     x = ( x + 13 ) - ( ( int )( ( 32.0 * pChip.dbChipSizeRatio ) / 2.0 ) );
                                     txChip.tDraw2D(x - 5, y - 32, new RectangleF( 60 + 10, 0, 0x2e + 10, 64 ), col);
-                                    if( pChip.bBonusChip )
+                                    if ( pChip.bBonusChip )
                                         txChip.tDraw2D(x - 5, y - 32, new RectangleF( 60 + 100, 64, 0x2e + 10, 64 ), col);
                                     break;
                             }
@@ -3248,11 +3182,11 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
 
                     case EChannel.RideCymbal:
                         x = ( x + 13 ) - ( ( int )( ( 26.0 * pChip.dbChipSizeRatio ) / 2.0 ) );
-                        if( txChip != null )
+                        if ( txChip != null )
                         {
                             txChip.tDraw2D(x - 5, y - 32, new RectangleF( 0x16a + 70, 0, 0x26 + 10, 64 ), col);
 
-                            if( pChip.bBonusChip )
+                            if ( pChip.bBonusChip )
                                 txChip.tDraw2D(x - 5, y - 0x20, new RectangleF( 0x16a + 70, 64, 0x26 + 10, 0x40 ), col);
                         }
                         break;
@@ -3263,7 +3197,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                         {
                             txChip.tDraw2D(x - 5, y - 32, new RectangleF( 448 + 90, 0, 64 + 10, 64 ), col);
 
-                            if( pChip.bBonusChip )
+                            if ( pChip.bBonusChip )
                                 txChip.tDraw2D(x - 5, y - 0x20, new RectangleF( 448 + 90, 64, 64 + 10, 64 ), col);
                         }
                         break;
@@ -3274,31 +3208,31 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                         {
                             txChip.tDraw2D(x - 5, y - 32, new RectangleF( 550 + 110, 0, 0x30 + 10, 64 ), col);
                                 
-                            if( pChip.bBonusChip )
+                            if ( pChip.bBonusChip )
                                 txChip.tDraw2D(x - 5, y - 32, new RectangleF( 550 + 110, 64, 0x30 + 10, 64 ), col);
                         }
                         break;
 
                     case EChannel.LeftBassDrum:
                         x = ( x + 0x13 ) - ( ( int )( ( 38.0 * pChip.dbChipSizeRatio ) / 2.0 ) );
-                        if( txChip != null )
+                        if ( txChip != null )
                         {
-                            if( configIni.eLBDGraphics.Drums == EType.A )
+                            if ( configIni.eLBDGraphics.Drums == EType.A )
                             {
                                 txChip.tDraw2D(x - 5, y - 32, new RectangleF( 550 + 110, 0, 0x30 + 10, 64 ), col);
-                                if( pChip.bBonusChip )
+                                if ( pChip.bBonusChip )
                                     txChip.tDraw2D(x - 5, y - 32, new RectangleF( 550 + 110, 64, 0x30 + 10, 64 ), col);
                             }
-                            else if( configIni.eLBDGraphics.Drums == EType.B )
+                            else if ( configIni.eLBDGraphics.Drums == EType.B )
                             {
                                 txChip.tDraw2D(x - 5, y - 32, new RectangleF( 400 + 80, 0, 0x30 + 10, 64 ), col);
-                                if( pChip.bBonusChip )
+                                if ( pChip.bBonusChip )
                                     txChip.tDraw2D(x - 5, y - 32, new RectangleF( 400 + 80, 64, 0x30 + 10, 64 ), col);
                             }
                         }
                         break;
                 }
-                if( txChip != null )
+                if ( txChip != null )
                 {
                     //todo: what the fuck is vcScaleRatio
                     //txChip.vcScaleRatio = new Vector3( 1f, 1f, 1f );
@@ -3312,7 +3246,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
             bool UsePerfectGhost = true;
             long ghostLag = 0;
 
-            if( CDTXMania.ConfigIni.eAutoGhost.Drums != EAutoGhostData.PERFECT &&
+            if ( CDTXMania.ConfigIni.eAutoGhost.Drums != EAutoGhostData.PERFECT &&
                 CDTXMania.listAutoGhostLag.Drums != null &&
                 0 <= pChip.n楽器パートでの出現順 && pChip.n楽器パートでの出現順 < CDTXMania.listAutoGhostLag.Drums.Count)
 
@@ -3324,7 +3258,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                 autoPlayCondition &= !pChip.bHit && (ghostLag + pChip.nPlaybackTimeMs <= CSoundManager.rcPerformanceTimer.n現在時刻ms);
                 UsePerfectGhost = false;
             }
-            if( UsePerfectGhost )
+            if ( UsePerfectGhost )
             {
                 // 従来の AUTO : バー下で判定
                 autoPlayCondition &= ( pChip.nDistanceFromBar.Drums < 0 );
@@ -3365,7 +3299,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                 }
                 else
                 {
-                    if( CDTXMania.ConfigIni.nSkillMode == 0 )
+                    if ( CDTXMania.ConfigIni.nSkillMode == 0 )
                     {
                         val = CScoreIni.tCalculatePlayingSkillOld(
                             CDTXMania.DTX.nVisibleChipsCount.Drums,
@@ -3397,7 +3331,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
             }
             return;
         }	// end of "if configIni.bDrumsEnabled"
-        if( !pChip.bHit && ( pChip.nDistanceFromBar.Drums < 0 ) )
+        if ( !pChip.bHit && ( pChip.nDistanceFromBar.Drums < 0 ) )
         {
             tPlaySound( pChip, CSoundManager.rcPerformanceTimer.n前回リセットした時のシステム時刻 + pChip.nPlaybackTimeMs, EInstrumentPart.DRUMS, dTX.nモニタを考慮した音量( EInstrumentPart.DRUMS ) );
             pChip.bHit = true;
@@ -3405,82 +3339,8 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
     }
     protected override void tUpdateAndDraw_Chip_GuitarBass(CConfigIni configIni, ref CDTX dTX, ref CChip pChip, EInstrumentPart inst)
     {
-        base.tUpdateAndDraw_Chip_GuitarBass( configIni, ref dTX, ref pChip, inst,
-            95, 374, 57, 412, 509, 400,
-            268, 144, 76, 6,
-            24, 509, 561, 400, 452, 26, 24 );
     }
-
-    /*
-    protected override void tUpdateAndDraw_Chip_Guitar_Wailing( CConfigIni configIni, ref CDTX dTX, ref CChip pChip )
-    {
-        if ( configIni.bGuitarEnabled )
-        {
-            //if ( configIni.bSudden.Guitar )
-            //{
-            //    pChip.bVisible = pChip.nDistanceFromBar.Guitar < 200;
-            //}
-            //if ( configIni.bHidden.Guitar && ( pChip.nDistanceFromBar.Guitar < 100 ) )
-            //{
-            //    pChip.bVisible = false;
-            //}
-
-            // 後日、以下の部分を何とかCStage演奏画面共通.csに移したい。
-            if ( !pChip.bHit && pChip.bVisible )
-            {
-                int[] y_base = { 0x5f, 0x176 };		// 判定バーのY座標: ドラム画面かギター画面かで変わる値
-                int offset = 0x39;					// ドラム画面かギター画面かで変わる値
-
-                const int WailingWidth = 20;		// ウェイリングチップ画像の幅: 4種全て同じ値
-                const int WailingHeight = 50;		// ウェイリングチップ画像の高さ: 4種全て同じ値
-                const int baseTextureOffsetX = 268;	// テクスチャ画像中のウェイリングチップ画像の位置X: ドラム画面かギター画面かで変わる値
-                const int baseTextureOffsetY = 174;	// テクスチャ画像中のウェイリングチップ画像の位置Y: ドラム画面かギター画面かで変わる値
-                const int drawX = 588;				// ウェイリングチップ描画位置X座標: 4種全て異なる値
-
-                const int numA = 25;				// 4種全て同じ値
-                int y = configIni.bReverse.Guitar ? ( y_base[1] - pChip.nDistanceFromBar.Guitar ) : ( y_base[0] + pChip.nDistanceFromBar.Guitar );
-                int numB = y - offset;				// 4種全て同じ定義
-                int numC = 0;						// 4種全て同じ初期値
-                const int numD = 355;				// ドラム画面かギター画面かで変わる値
-                if ( ( numB < ( numD + numA ) ) && ( numB > -numA ) )	// 以下のロジックは4種全て同じ
-                {
-                    int c = this.ctWailingChipPatternAnimation.nCurrentValue;
-                    Rectangle rect = new Rectangle( baseTextureOffsetX + ( c * WailingWidth ), baseTextureOffsetY, WailingWidth, WailingHeight);
-                    if ( numB < numA )
-                    {
-                        rect.Y += numA - numB;
-                        rect.Height -= numA - numB;
-                        numC = numA - numB;
-                    }
-                    if ( numB > ( numD - numA ) )
-                    {
-                        rect.Height -= numB - ( numD - numA );
-                    }
-                    if ( ( rect.Bottom > rect.Top ) && ( this.txチップ != null ) )
-                    {
-                        this.txチップ.tDraw2D( CDTXMania.app.Device, drawX, ( y - numA ) + numC, rect );
-                    }
-                }
-            }
-            //    if ( !pChip.bHit && ( pChip.nDistanceFromBar.Guitar < 0 ) )
-            //    {
-            //        if ( pChip.nDistanceFromBar.Guitar < -234 )	// #25253 2011.5.29 yyagi: Don't set pChip.bHit=true for wailing at once. It need to 1sec-delay (234pix per 1sec).
-            //        {
-            //            pChip.bHit = true;
-            //        }
-            //        if ( configIni.bAutoPlay.Guitar )
-            //        {
-            //            pChip.bHit = true;						// #25253 2011.5.29 yyagi: Set pChip.bHit=true if autoplay.
-            //            this.actWailingBonus.Start( EInstrumentPart.GUITAR, this.r現在の歓声Chip.Guitar );
-            //        }
-            //    }
-            //    return;
-            //}
-            //pChip.bHit = true;
-        }
-        base.tUpdateAndDraw_Chip_Guitar_Wailing( configIni, ref dTX, ref pChip );
-    }
-     */
+    
     protected override void tUpdateAndDraw_Chip_FillIn( CConfigIni configIni, ref CDTX dTX, ref CChip pChip )
     {
         if ( !pChip.bHit && ( pChip.nDistanceFromBar.Drums < 0 ) )
@@ -3577,7 +3437,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         pChip.bHit = true;
 
         //if ((this.actCombo.nCurrentCombo.Drums > 0) && configIni.b歓声を発声する )
-        if( pChip.bBonusChip )
+        if ( pChip.bBonusChip )
         {
             bBonus = true;
             switch( pChip.nChannelNumber )
@@ -3666,91 +3526,18 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                 default:
                     break;
             }
-            if( configIni.DisplayBonusEffects )
+            if ( configIni.DisplayBonusEffects )
             {
-                //actAVI.Start( true );
+                //actAVI.Start(true);
                 CDTXMania.Skin.soundAudience.tPlay();
                 CDTXMania.Skin.soundAudience.n位置_次に鳴るサウンド = 0;
             }
-            if( CDTXMania.ConfigIni.nSkillMode == 1 && ( !CDTXMania.ConfigIni.bAllDrumsAreAutoPlay || CDTXMania.ConfigIni.bAutoAddGage ) )
+            if ( CDTXMania.ConfigIni.nSkillMode == 1 && ( !CDTXMania.ConfigIni.bAllDrumsAreAutoPlay || CDTXMania.ConfigIni.bAutoAddGage ) )
                 actScore.Add( EInstrumentPart.DRUMS, bIsAutoPlay, 500L );
         }
 
 
     }
-
-    /*
-    protected override void t進行描画_チップ_ベース_ウェイリング( CConfigIni configIni, ref CDTX dTX, ref CChip pChip )
-    {
-        if ( configIni.bGuitarEnabled )
-        {
-            //if ( configIni.bSudden.Bass )
-            //{
-            //    pChip.bVisible = pChip.nDistanceFromBar.Bass < 200;
-            //}
-            //if ( configIni.bHidden.Bass && ( pChip.nDistanceFromBar.Bass < 100 ) )
-            //{
-            //    pChip.bVisible = false;
-            //}
-
-            //
-            // 後日、以下の部分を何とかCStage演奏画面共通.csに移したい。
-            //
-            if ( !pChip.bHit && pChip.bVisible )
-            {
-                int[] y_base = { 0x5f, 0x176 };		// 判定バーのY座標: ドラム画面かギター画面かで変わる値
-                int offset = 0x39;					// ドラム画面かギター画面かで変わる値
-
-                const int WailingWidth = 20;		// ウェイリングチップ画像の幅: 4種全て同じ値
-                const int WailingHeight = 50;		// ウェイリングチップ画像の高さ: 4種全て同じ値
-                const int baseTextureOffsetX = 268;	// テクスチャ画像中のウェイリングチップ画像の位置X: ドラム画面かギター画面かで変わる値
-                const int baseTextureOffsetY = 174;	// テクスチャ画像中のウェイリングチップ画像の位置Y: ドラム画面かギター画面かで変わる値
-                const int drawX = 479;				// ウェイリングチップ描画位置X座標: 4種全て異なる値
-
-                const int numA = 25;				// 4種全て同じ値
-                int y = configIni.bReverse.Bass ? ( y_base[ 1 ] - pChip.nDistanceFromBar.Bass ) : ( y_base[ 0 ] + pChip.nDistanceFromBar.Bass );
-                int numB = y - offset;				// 4種全て同じ定義
-                int numC = 0;						// 4種全て同じ初期値
-                const int numD = 355;				// ドラム画面かギター画面かで変わる値
-                if ( ( numB < ( numD + numA ) ) && ( numB > -numA ) )	// 以下のロジックは4種全て同じ
-                {
-                    int c = this.ctWailingChipPatternAnimation.nCurrentValue;
-                    Rectangle rect = new Rectangle( baseTextureOffsetX + ( c * WailingWidth ), baseTextureOffsetY, WailingWidth, WailingHeight );
-                    if ( numB < numA )
-                    {
-                        rect.Y += numA - numB;
-                        rect.Height -= numA - numB;
-                        numC = numA - numB;
-                    }
-                    if ( numB > ( numD - numA ) )
-                    {
-                        rect.Height -= numB - ( numD - numA );
-                    }
-                    if ( ( rect.Bottom > rect.Top ) && ( this.txチップ != null ) )
-                    {
-                        this.txチップ.tDraw2D( CDTXMania.app.Device, drawX, ( y - numA ) + numC, rect );
-                    }
-                }
-            }
-            //    if ( !pChip.bHit && ( pChip.nDistanceFromBar.Bass < 0 ) )
-            //    {
-            //        if ( pChip.nDistanceFromBar.Bass < -234 )	// #25253 2011.5.29 yyagi: Don't set pChip.bHit=true for wailing at once. It need to 1sec-delay (234pix per 1sec).
-            //        {
-            //            pChip.bHit = true;
-            //        }
-            //        if ( configIni.bAutoPlay.Bass )
-            //        {
-            //            this.actWailingBonus.Start( EInstrumentPart.BASS, this.r現在の歓声Chip.Bass );
-            //            pChip.bHit = true;						// #25253 2011.5.29 yyagi: Set pChip.bHit=true if autoplay.
-            //        }
-            //    }
-            //    return;
-            //}
-            //pChip.bHit = true;
-        }
-            base.t進行描画_チップ_ベース_ウェイリング( configIni, ref dTX, ref pChip);
-    }
-     */
 
     protected override void tUpdateAndDraw_Chip_NoSound_Drums(CConfigIni configIni, ref CDTX dTX, ref CChip pChip)  // t進行描画_チップ_空打ち音設定_ドラム
     {
@@ -3790,7 +3577,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         if ( configIni.bShowPerformanceInformation && ( configIni.nLaneDisp.Drums == 0 || configIni.nLaneDisp.Drums == 1 ) )
         {
             int n小節番号 = n小節番号plus1 - 1;
-            CDTXMania.actDisplayString.tPrint( configIni.bGraph有効.Drums && configIni.bSmallGraph ? 828 : 858, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + pChip.nDistanceFromBar.Drums) - 0x11) : ((nJudgeLinePosY.Drums - pChip.nDistanceFromBar.Drums) - 0x11), CCharacterConsole.EFontType.White, n小節番号.ToString());
+            CDTXMania.actDisplayString.tPrint( configIni.bGraph有効.Drums && configIni.bSmallGraph ? 828 : 858, (int) (configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + pChip.nDistanceFromBar.Drums) - 0x11) : ((nJudgeLinePosY.Drums - pChip.nDistanceFromBar.Drums) - 0x11)), CCharacterConsole.EFontType.White, n小節番号.ToString());
         }
         if (((configIni.nLaneDisp.Drums == 0 || configIni.nLaneDisp.Drums == 1) && pChip.bVisible) && (txChip != null))
         {

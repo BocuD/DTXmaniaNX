@@ -73,6 +73,22 @@ public class StatusPane : UIGroup
         base.Draw(parentMatrix);
 
         Matrix4x4 textTranslation = Matrix4x4.CreateTranslation(textOffset) * localTransformMatrix * parentMatrix;
+
+        if (CDTXMania.ConfigIni.bGuitarEnabled && CDTXMania.ConfigIni.bSingleGuitar)
+        {
+            if (CDTXMania.ConfigIni.bIsSwappedGuitarBass)
+            {
+                difficultyFrame.isVisible = instrument == EInstrumentPart.BASS;
+            }
+            else
+            {
+                difficultyFrame.isVisible = instrument == EInstrumentPart.GUITAR;
+            }
+        }
+        else
+        {
+            difficultyFrame.isVisible = true;
+        }
         
         difficultyFrame.position = new Vector3(-7.0f, 5.0f - verticalSpacing * CDTXMania.StageManager.stageSongSelectionNew.GetClosestLevelToTargetForSong(song), 0.0f);
 

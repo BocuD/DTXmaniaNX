@@ -8,7 +8,7 @@ public class CSoundTimer : CTimerBase
 	{
 		get
 		{
-			if( Device.eOutputDevice == ESoundDeviceType.ExclusiveWASAPI || 
+			if ( Device.eOutputDevice == ESoundDeviceType.ExclusiveWASAPI || 
 			    Device.eOutputDevice == ESoundDeviceType.SharedWASAPI ||
 			    Device.eOutputDevice == ESoundDeviceType.ASIO )
 			{
@@ -22,7 +22,7 @@ public class CSoundTimer : CTimerBase
 				return Device.n経過時間ms
 				       + ( Device.tmシステムタイマ.nSystemTimeMs - Device.n経過時間を更新したシステム時刻ms );
 			}
-			else if( Device.eOutputDevice == ESoundDeviceType.DirectSound )
+			else if ( Device.eOutputDevice == ESoundDeviceType.DirectSound )
 			{
 				//return this.Device.n経過時間ms;		// #24820 2013.2.3 yyagi TESTCODE DirectSoundでスクロールが滑らかにならないため、
 				return ct.nSystemTimeMs;				// 仮にCSoundTimerをCTimer相当の動作にしてみた

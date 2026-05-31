@@ -289,7 +289,7 @@ public class CSoundDeviceDirectSound : ISoundDevice
 	protected DirectSound DirectSound = null;
 	protected CSound sd経過時間計測用サウンドバッファ = null;
 	protected Thread th経過時間測定用スレッド = null;
-	//		protected AutoResetEvent autoResetEvent = new AutoResetEvent( false );
+	//		protected AutoResetEvent autoResetEvent = new AutoResetEvent(false);
 	protected const uint n単位繰り上げ間隔sec = 1;  // [秒]
 	protected const uint n単位繰り上げ間隔ms = n単位繰り上げ間隔sec * 1000; // [ミリ秒]
 	protected int nループ回数 = 0;

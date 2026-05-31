@@ -86,16 +86,16 @@ internal class CBoxDef
 		string str = null;
 		while( ( str = reader.ReadLine() ) != null )
 		{
-			if( str.Length != 0 )
+			if ( str.Length != 0 )
 			{
 				try
 				{
 					char[] ignoreCharsWoColon = new char[] { ' ', '\t' };
 
 					str = str.TrimStart( ignoreCharsWoColon );
-					if( ( str[ 0 ] == '#' ) && ( str[ 0 ] != ';' ) )
+					if ( ( str[ 0 ] == '#' ) && ( str[ 0 ] != ';' ) )
 					{
-						if( str.IndexOf( ';' ) != -1 )
+						if ( str.IndexOf( ';' ) != -1 )
 						{
 							str = str.Substring( 0, str.IndexOf( ';' ) );
 						}
@@ -106,27 +106,27 @@ internal class CBoxDef
 						{
 							Title = str.Substring( 6 ).Trim( ignoreChars );
 						}
-						else if( str.StartsWith( "#ARTIST", StringComparison.OrdinalIgnoreCase ) )
+						else if ( str.StartsWith( "#ARTIST", StringComparison.OrdinalIgnoreCase ) )
 						{
 							Artist = str.Substring( 7 ).Trim( ignoreChars );
 						}
-						else if( str.StartsWith( "#COMMENT", StringComparison.OrdinalIgnoreCase ) )
+						else if ( str.StartsWith( "#COMMENT", StringComparison.OrdinalIgnoreCase ) )
 						{
 							Comment = str.Substring( 8 ).Trim( ignoreChars );
 						}
-						else if( str.StartsWith( "#GENRE", StringComparison.OrdinalIgnoreCase ) )
+						else if ( str.StartsWith( "#GENRE", StringComparison.OrdinalIgnoreCase ) )
 						{
 							Genre = str.Substring( 6 ).Trim( ignoreChars );
 						}
-						else if( str.StartsWith( "#PREVIEW", StringComparison.OrdinalIgnoreCase ) )
+						else if ( str.StartsWith( "#PREVIEW", StringComparison.OrdinalIgnoreCase ) )
 						{
 							Presound = str.Substring( 8 ).Trim( ignoreChars );
 						}
-						else if( str.StartsWith( "#PREIMAGE", StringComparison.OrdinalIgnoreCase ) )
+						else if ( str.StartsWith( "#PREIMAGE", StringComparison.OrdinalIgnoreCase ) )
 						{
 							Preimage = str.Substring( 9 ).Trim( ignoreChars );
 						}
-						else if( str.StartsWith( "#PREMOVIE", StringComparison.OrdinalIgnoreCase ) )
+						else if ( str.StartsWith( "#PREMOVIE", StringComparison.OrdinalIgnoreCase ) )
 						{
 							Premovie = str.Substring( 9 ).Trim( ignoreChars );
 						}

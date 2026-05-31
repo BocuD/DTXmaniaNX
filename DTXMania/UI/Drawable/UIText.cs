@@ -25,14 +25,14 @@ public partial class UIText : UITexture
 {
     private const float DefaultFontSize = 32f;
     private bool _dirty = true;
-
+    
     [Themable] public string text = "New UIText";
     [Themable] public FontSource fontSource = FontSource.System;
     [Themable] public string font = UIFonts.FallbackFont;
     [Themable] public string fontFamily = string.Empty;
     [Themable] public float fontSize = DefaultFontSize;
     [Themable] public float outlineWidth = 3f;
-    [Themable] public float texturePadding = 0f;
+    [Themable] public Vector2 texturePadding = Vector2.Zero;
     [Themable] public float lineSpacing = 1f;
     [Themable] public bool antialias = true;
     [Themable] public bool subpixelText = true;
@@ -157,13 +157,13 @@ public partial class UIText : UITexture
         _dirty = true;
     }
 
-    private UiTextRenderRequest CreateRenderRequest()
+    private UiTextParameters CreateRenderRequest()
     {
         //determine renderscale
         float renderSize = fontSize * CDTXMania.renderScale;
         scale = new Vector3(1 / CDTXMania.renderScale);
         
-        return new UiTextRenderRequest
+        return new UiTextParameters
         {
             Name = name,
             Text = text,

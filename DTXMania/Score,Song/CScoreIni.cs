@@ -1240,7 +1240,7 @@ public class CScoreIni
 		}
 
 		//Best Progress record does not exist
-		if(strBestProgress.Length != CActPerfProgressBar.nSectionIntervalCount && 
+		if (strBestProgress.Length != CActPerfProgressBar.nSectionIntervalCount && 
 		   strCurrProgress.Length == CActPerfProgressBar.nSectionIntervalCount)
 		{
 			return true;
@@ -1250,13 +1250,13 @@ public class CScoreIni
 		int nCurrProgressLength = tProgressBarLength(strCurrProgress);
 
 		//If Best record is a clear, progress record is updated only based on skill for now 
-		if(nBestProgressLength == CActPerfProgressBar.nSectionIntervalCount)
+		if (nBestProgressLength == CActPerfProgressBar.nSectionIntervalCount)
 		{
 			return false;
 		}
 
 		//
-		if(nCurrProgressLength >= nBestProgressLength)
+		if (nCurrProgressLength >= nBestProgressLength)
 		{
 			ret = true;
 		}
@@ -1763,7 +1763,7 @@ public class CScoreIni
 	}
 	private static char boolToChar( bool b )
 	{
-		if( !b )
+		if ( !b )
 		{
 			return '0';
 		}

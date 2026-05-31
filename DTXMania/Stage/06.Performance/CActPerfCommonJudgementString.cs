@@ -1,65 +1,48 @@
 ﻿using System.Drawing;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using DTXMania.Core;
+using DTXMania.Drawable;
 using DTXMania.UI.Drawable;
 using FDK;
 
 namespace DTXMania;
 
-internal class CActPerfCommonJudgementString : CActivity
+internal abstract class CActPerfCommonJudgementString : CActivity
 {
+	private BaseTexture judgementGraphicSheet;
+	private bool renderOld = false;
+	
 	// プロパティ
-	public int iP_A;
-	public int iP_B;
-	protected STSTATUS[] st状態 = new STSTATUS[ 15 ];
+	protected JudgementStatus[] judgementStatus = new JudgementStatus[15];
+	
 	[StructLayout( LayoutKind.Sequential )]
-	protected struct STSTATUS
+	protected struct JudgementStatus
 	{
-		public CCounter ct進行;
+		public CCounter ctFrameProgress;
 		public EJudgement judge;
-		public float fZ軸回転度_棒;
-		public float fX方向拡大率_棒;
-		public float fY方向拡大率_棒;
-		public int n相対X座標_棒;
-		public int n相対Y座標_棒;
-
-
-		public float fZ軸回転度;
-		public float fX方向拡大率;
-		public float fY方向拡大率;
-		public int n相対X座標;
-		public int n相対Y座標;
-
-		public float fX方向拡大率B;
-		public float fY方向拡大率B;
-		public int n相対X座標B;
-		public int n相対Y座標B;
-		public int n透明度B;
-
-		public int n透明度;
-		public int nLag;								// #25370 2011.2.1 yyagi
+		public int nLag; // #25370 2011.2.1 yyagi
 		public int nRect;
 	}
 
-	protected readonly ST判定文字列[] st判定文字列;
+	protected readonly JudgementStringInfo[] judgementStringInfoArray;
 	[StructLayout( LayoutKind.Sequential )]
-	protected struct ST判定文字列
+	protected struct JudgementStringInfo
 	{
-		public int n画像番号;
+		public int imageNumber;
 		public RectangleF rc;
 	}
 
-	protected readonly STlag数値[] stLag数値;			// #25370 2011.2.1 yyagi
+	protected readonly LagNumberInfo[] lagNumberInfoArray; // #25370 2011.2.1 yyagi
 	[StructLayout( LayoutKind.Sequential )]
-	protected struct STlag数値
+	protected struct LagNumberInfo
 	{
 		public RectangleF rc;
 	}
 
-	protected BaseTexture[] tx判定文字列 = new BaseTexture[ 3 ];
-	protected BaseTexture txlag数値;		// #25370 2011.2.1 yyagi
+	protected BaseTexture? txLagNumbers; // #25370 2011.2.1 yyagi
 
-	public int nShowLagType							// #25370 2011.6.3 yyagi
+	public int lagDisplayMode // #25370 2011.6.3 yyagi
 	{
 		get;
 		set;
@@ -72,182 +55,247 @@ internal class CActPerfCommonJudgementString : CActivity
 		public int w;
 	}
 
-	protected STLaneSize[] stLaneSize;
-	// コンストラクタ
+	protected STLaneSize[] stLaneSize = [];
+
+	protected abstract int LaneCount { get; }
+	protected abstract void InitializeLaneSizes();
+	protected abstract bool TryGetLanePosition( int lane, out int x, out int y );
 
 	public CActPerfCommonJudgementString()
 	{
-		int iP_A = 390;
-		int iP_B = 0x248;
-		st判定文字列 = new ST判定文字列[ 7 ];
+		judgementStringInfoArray = new JudgementStringInfo[7];
 		RectangleF[] r =
 		[
-			new ( 0, 0,    0x80, 0x2a ),		// Perfect
-			new ( 0, 0x2b, 0x80, 0x2a ),		// Great
-			new ( 0, 0x56, 0x80, 0x2a ),		// Good
-			new ( 0, 0,    0x80, 0x2a ),		// Poor
-			new ( 0, 0x2b, 0x80, 0x2a ),		// Miss
-			new ( 0, 0x56, 0x80, 0x2a ),		// Bad
-			new ( 0, 0,    0x80, 0x2a )		// Auto
+			new(0, 0, 0x80, 0x2a), // Perfect
+			new(0, 0x2b, 0x80, 0x2a), // Great
+			new(0, 0x56, 0x80, 0x2a), // Good
+			new(0, 0, 0x80, 0x2a), // Poor
+			new(0, 0x2b, 0x80, 0x2a), // Miss
+			new(0, 0x56, 0x80, 0x2a), // Bad
+			new(0, 0, 0x80, 0x2a) // Auto
 		];
 
-		for ( int i = 0; i < 7; i++ )
+		for (int i = 0; i < 7; i++)
 		{
-			st判定文字列[ i ] = new ST判定文字列();
-			st判定文字列[ i ].n画像番号 = i / 3;
-			st判定文字列[ i ].rc = r[i];
+			judgementStringInfoArray[i] = new JudgementStringInfo();
+			judgementStringInfoArray[i].imageNumber = i / 3;
+			judgementStringInfoArray[i].rc = r[i];
 		}
 
-		stLag数値 = new STlag数値[ 12 * 2 ];		// #25370 2011.2.1 yyagi
+		lagNumberInfoArray = new LagNumberInfo[12 * 2]; // #25370 2011.2.1 yyagi
 		bActivated = false;
-	}
 
+		judgementGraphicSheet = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_judge strings.png"));
+	}
 
 	// メソッド
 
 	public virtual void Start( int nLane, EJudgement judge, int lag )
 	{
-		if( ( nLane < 0 ) || ( nLane > 14 ) )
+		if (nLane > judgements.Length - 1) return;
+		if (judgements[nLane] == null) return;
+		
+		judgements[nLane].Play(judge);
+		
+		if ( ( nLane < 0 ) || ( nLane > 14 ) )
 		{
 			throw new IndexOutOfRangeException( "有効範囲は 0～14 です。" );
 		}
-		if( ( ( nLane >= 10 ) || ( ( (EType) CDTXMania.ConfigIni.JudgementStringPosition.Drums ) != EType.C ) ) && ( ( ( nLane != 13 ) || ( ( (EType) CDTXMania.ConfigIni.JudgementStringPosition.Guitar ) != EType.D ) ) && ( ( nLane != 14 ) || ( ( (EType) CDTXMania.ConfigIni.JudgementStringPosition.Bass ) != EType.D ) ) ) )
+		if ( ( ( nLane >= 10 ) || ( CDTXMania.ConfigIni.JudgementStringPosition.Drums != EType.C ) ) && ( ( ( nLane != 13 ) || ( CDTXMania.ConfigIni.JudgementStringPosition.Guitar != EType.D ) ) && ( ( nLane != 14 ) || ( CDTXMania.ConfigIni.JudgementStringPosition.Bass != EType.D ) ) ) )
 		{
-			if (CDTXMania.ConfigIni.nJudgeAnimeType != 0)
-			{
-				st状態[nLane].ct進行 = new CCounter(0, CDTXMania.ConfigIni.nJudgeFrames - 1, CDTXMania.ConfigIni.nJudgeInterval, CDTXMania.Timer);
-			}
-			else
-			{
-				st状態[nLane].ct進行 = new CCounter(0, 300, 1, CDTXMania.Timer);
-			}
-			st状態[ nLane ].judge = judge;
-			st状態[ nLane ].fX方向拡大率 = 1f;
-			st状態[ nLane ].fY方向拡大率 = 1f;
-			st状態[ nLane ].fZ軸回転度 = 0f;
-			st状態[ nLane ].n相対X座標 = 0;
-			st状態[ nLane ].n相対Y座標 = 0;
-			st状態[ nLane ].n透明度 = 0xff;
-
-			st状態[ nLane ].fX方向拡大率B = 1f;
-			st状態[ nLane ].fY方向拡大率B = 1f;
-			st状態[ nLane ].n相対X座標B = 0;
-			st状態[ nLane ].n相対Y座標B = 0;
-			st状態[ nLane ].n透明度B = 0xff;
-                
-			st状態[ nLane ].fZ軸回転度_棒 = 0f;
-			st状態[ nLane ].fX方向拡大率_棒 = 0;
-			st状態[ nLane ].fY方向拡大率_棒 = 0;
-			st状態[ nLane ].n相対X座標_棒 = 0;
-			st状態[ nLane ].n相対Y座標_棒 = 0;                
-
-			st状態[ nLane ].nLag = lag;
+			judgementStatus[ nLane ].ctFrameProgress = new CCounter( 0, CDTXMania.ConfigIni.nJudgeFrames - 1, CDTXMania.ConfigIni.nJudgeInterval, CDTXMania.Timer );
+			judgementStatus[ nLane ].judge = judge;
+			judgementStatus[ nLane ].nLag = lag;
 		}
 	}
 
+	public override int OnUpdateAndDraw()
+	{
+		if ( !bActivated || !ShouldDrawJudgementString() )
+		{
+			return 0;
+		}
+
+		for ( int i = 0; i < LaneCount; i++ )
+		{
+			if ( !judgementStatus[ i ].ctFrameProgress.bStopped )
+			{
+				judgementStatus[ i ].ctFrameProgress.tUpdate();
+				if ( judgementStatus[ i ].ctFrameProgress.bReachedEndValue )
+				{
+					judgementStatus[ i ].ctFrameProgress.tStop();
+				}
+				judgementStatus[ i ].nRect = judgementStatus[ i ].ctFrameProgress.nCurrentValue;
+			}
+		}
+
+		for ( int lane = 0; lane < LaneCount; lane++ )
+		{
+			if ( judgementStatus[ lane ].ctFrameProgress.bStopped )
+			{
+				continue;
+			}
+
+			if ( !TryGetLanePosition( lane, out int baseX, out int baseY ) )
+			{
+				continue;
+			}
+
+			DrawJudgementString( lane, baseX, baseY );
+		}
+
+		return 0;
+	}
 
 	// CActivity 実装
 
 	public override void OnActivate()
 	{
-		for( int i = 0; i < 15; i++ )
+		for ( int i = 0; i < 15; i++ )
 		{
-			st状態[ i ].ct進行 = new CCounter();
+			judgementStatus[ i ].ctFrameProgress = new CCounter();
 		}
+
+		InitializeLaneSizes();
 
 		for ( int i = 0; i < 12; i++ )
 		{
-			if( CDTXMania.ConfigIni.nShowLagTypeColor == 0 )
+			if ( CDTXMania.ConfigIni.nShowLagTypeColor == 0 )
 			{
-				stLag数値[ i      ].rc = new RectangleF( ( i % 4 ) * 15     , ( i / 4 ) * 19     , 15, 19 );	// plus numbers
-				stLag数値[ i + 12 ].rc = new RectangleF( ( i % 4 ) * 15 + 64, ( i / 4 ) * 19 + 64, 15, 19 );	// minus numbers
+				lagNumberInfoArray[ i ].rc = new RectangleF( ( i % 4 ) * 15, ( i / 4 ) * 19, 15f, 19f ); // plus numbers
+				lagNumberInfoArray[ i + 12 ].rc = new RectangleF( ( i % 4 ) * 15 + 64, ( i / 4 ) * 19 + 64, 15f, 19f ); // minus numbers
 			}
 			else
 			{
-				stLag数値[ i      ].rc = new RectangleF( ( i % 4 ) * 15 + 64, ( i / 4 ) * 19 + 64, 15, 19 );	// minus numbers
-				stLag数値[ i + 12 ].rc = new RectangleF( ( i % 4 ) * 15     , ( i / 4 ) * 19     , 15, 19 );	// plus numbers
-			}
-		}
-
-		this.stLaneSize = new STLaneSize[15];
-		STLaneSize stレーンサイズ = new STLaneSize();
-		//                                LC          HH          SD            BD          HT           LT           FT            CY          LP             RD
-		int[,] sizeXW = new int[,] { { 290, 80 }, { 367, 46 }, { 470, 54 }, { 582, 60 }, { 528, 46 }, { 645, 46 }, { 694, 46 }, { 748, 64 }, { 419, 46 }, { 815, 80 }, { 815, 80 }, { 815, 80 }, { 815, 80 }, { 815, 80 }, { 815, 80 }, };
-		int[,] sizeXW_B = new int[,] { { 290, 80 }, { 367, 46 }, { 419, 54 }, { 534, 60 }, { 590, 46 }, { 645, 46 }, { 694, 46 }, { 748, 64 }, { 478, 46 }, { 815, 64 }, { 815, 80 }, { 507, 80 }, { 815, 80 }, { 815, 80 }, { 815, 80 }, };
-		int[,] sizeXW_C = new int[,] { { 290, 80 }, { 367, 46 }, { 470, 54 }, { 534, 60 }, { 590, 46 }, { 645, 46 }, { 694, 46 }, { 748, 64 }, { 419, 46 }, { 815, 64 }, { 815, 80 }, { 507, 80 }, { 815, 80 }, { 815, 80 }, { 815, 80 }, };
-		int[,] sizeXW_D = new int[,] { { 290, 80 }, { 367, 46 }, { 419, 54 }, { 582, 60 }, { 476, 46 }, { 645, 46 }, { 694, 46 }, { 748, 64 }, { 528, 46 }, { 815, 64 }, { 815, 80 }, { 507, 80 }, { 815, 80 }, { 815, 80 }, { 815, 80 }, };
-
-		for (int i = 0; i < 15; i++)
-		{
-			this.stLaneSize[i] = new STLaneSize();
-			if( CDTXMania.ConfigIni.bDrumsEnabled )
-			{
-				this.stLaneSize[i] = default(STLaneSize);
-				switch ( CDTXMania.ConfigIni.eLaneType.Drums )
-				{
-					case EType.A:
-						this.stLaneSize[i].x = sizeXW[i, 0];
-						this.stLaneSize[i].w = sizeXW[i, 1];
-						goto IL_19F;
-					case EType.B:
-						this.stLaneSize[i].x = sizeXW_B[i, 0];
-						this.stLaneSize[i].w = sizeXW_B[i, 1];
-						goto IL_19F;
-					case EType.C:
-						this.stLaneSize[i].x = sizeXW_C[i, 0];
-						this.stLaneSize[i].w = sizeXW_C[i, 1];
-						goto IL_19F;
-					case EType.D:
-						this.stLaneSize[i].x = sizeXW_D[i, 0];
-						this.stLaneSize[i].w = sizeXW_D[i, 1];
-						goto IL_19F;
-				}
-				IL_19F:
-				if (i == 7 && CDTXMania.ConfigIni.eRDPosition == ERDPosition.RDRC)
-				{
-					this.stLaneSize[i].x = sizeXW[9, 0] - 24;
-				}
-				if (i == 9 && CDTXMania.ConfigIni.eRDPosition == ERDPosition.RDRC)
-				{
-					this.stLaneSize[i].x = sizeXW[7, 0] - 18;
-				}
+				lagNumberInfoArray[ i ].rc = new RectangleF( ( i % 4 ) * 15 + 64, ( i / 4 ) * 19 + 64, 15f, 19f ); // minus numbers
+				lagNumberInfoArray[ i + 12 ].rc = new RectangleF( ( i % 4 ) * 15, ( i / 4 ) * 19, 15f, 19f ); // plus numbers
 			}
 		}
 		base.OnActivate();
-		nShowLagType = CDTXMania.ConfigIni.nShowLagType;
+		lagDisplayMode = CDTXMania.ConfigIni.nShowLagType;
 	}
 	public override void OnDeactivate()
 	{
-		for( int i = 0; i < 15; i++ )
+		for ( int i = 0; i < 15; i++ )
 		{
-			st状態[ i ].ct進行 = null;
+			judgementStatus[ i ].ctFrameProgress = null!;
 		}
 		base.OnDeactivate();
 	}
 	public override void OnManagedCreateResources()
 	{
-		if( bActivated )
+		if ( bActivated )
 		{
-			if(CDTXMania.ConfigIni.nJudgeAnimeType == 1)
-			{
-				//this.tx判定文字列[0] = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_judge strings.png"));
-				//this.tx判定文字列[1] = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_judge strings.png"));
-				//this.tx判定文字列[2] = CDTXMania.tGenerateTexture(CSkin.Path(@"Graphics\7_judge strings.png"));
-				//2013.8.2 kairera0467 CStage演奏画面共通側で読み込むテスト。
-			}
-			else if( CDTXMania.ConfigIni.nJudgeAnimeType == 2 )
-			{
-                    
-			}
-			else
-			{
-				tx判定文字列[0] = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\ScreenPlay judge strings 1.png"));
-				tx判定文字列[1] = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\ScreenPlay judge strings 2.png"));
-				tx判定文字列[2] = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\ScreenPlay judge strings 3.png"));
-			}
-
-			txlag数値 = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_lag numbers.png"));
+			txLagNumbers = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\7_lag numbers.png" ) );
 			base.OnManagedCreateResources();
 		}
 	}
+
+	protected virtual bool ShouldDrawJudgementString()
+	{
+		return true;
+	}
+
+	protected void DrawJudgementString(int lane, int baseX, int baseY)
+	{
+		int nRectX = CDTXMania.ConfigIni.nJudgeWidgh;
+		int nRectY = CDTXMania.ConfigIni.nJudgeHeight;
+
+		float x = baseX - 110f - (nRectX - 225) / 2f;
+		float y = baseY - 140f / 2f - (nRectY - 135) / 2f;
+
+		DrawLag(lane, baseX, y);
+
+		if (!renderOld) return;
+		DrawJudgeFrame(lane, x, y, nRectX, nRectY);
+	}
+
+	protected void DrawJudgeFrame(int lane, float x, float y, int nRectX, int nRectY)
+	{
+		if ( CDTXMania.ConfigIni.nJudgeFrames <= 1 )
+		{
+			return;
+		}
+		
+		BaseTexture txJudge = judgementGraphicSheet;
+
+		int frameY = judgementStatus[ lane ].nRect * nRectY;
+		switch ( judgementStatus[ lane ].judge )
+		{
+			case EJudgement.Perfect:
+				txJudge.tDraw2D( x, y, new RectangleF( 0, frameY, nRectX, nRectY ) );
+				break;
+			case EJudgement.Great:
+				txJudge.tDraw2D( x, y, new RectangleF( nRectX * 1, frameY, nRectX, nRectY ) );
+				break;
+			case EJudgement.Good:
+				txJudge.tDraw2D( x, y, new RectangleF( nRectX * 2, frameY, nRectX, nRectY ) );
+				break;
+			case EJudgement.Poor:
+				txJudge.tDraw2D( x, y, new RectangleF( nRectX * 3, frameY, nRectX, nRectY ) );
+				break;
+			case EJudgement.Miss:
+				txJudge.tDraw2D( x, y, new RectangleF( nRectX * 4, frameY, nRectX, nRectY ) );
+				break;
+			case EJudgement.Auto:
+				txJudge.tDraw2D( x, y, new RectangleF( nRectX * 5, frameY, nRectX, nRectY ) );
+				break;
+		}
+	}
+
+	protected void DrawLag( int lane, int xc, float y )
+	{
+		if ( lagDisplayMode != (int) EShowLagType.ON &&
+			!( ( lagDisplayMode == (int) EShowLagType.GREAT_POOR ) && ( judgementStatus[ lane ].judge != EJudgement.Perfect ) ) )
+		{
+			return;
+		}
+
+		if ( judgementStatus[ lane ].judge == EJudgement.Auto || txLagNumbers == null )
+		{
+			return;
+		}
+
+		bool minus = judgementStatus[ lane ].nLag < 0;
+		int offsetX = 0;
+		string strDispLag = judgementStatus[ lane ].nLag.ToString();
+		float x = xc - strDispLag.Length * 15 / 2f;
+		
+		for ( int i = 0; i < strDispLag.Length; i++ )
+		{
+			int p = ( strDispLag[ i ] == '-' ) ? 11 : strDispLag[ i ] - '0';
+			p += minus ? 0 : 12;
+			txLagNumbers.tDraw2D( x + offsetX, y + 34, lagNumberInfoArray[ p ].rc );
+			offsetX += 15;
+		}
+	}
+
+	private JudgementString[] judgements;
+	
+	public void InitUI(UIGroup ui)
+	{
+		InitializeLaneSizes();
+		
+		var judgement = ui.AddChild(new UIGroup("Judgement"));
+		judgement.renderOrder = 1;
+
+		judgements = new JudgementString[stLaneSize.Length];
+
+		for (int lane = 0; lane < stLaneSize.Length; lane++)
+		{
+			if ( !TryGetLanePosition( lane, out int baseX, out int baseY ) )
+			{
+				continue;
+			}
+			
+			float x = baseX;
+			float y = baseY + 10.0f;
+
+			judgements[lane] = judgement.AddChild(new JudgementString());
+			judgements[lane].dontSerialize = true;
+			//x = laneSize.x + (laneSize.w / 2.0f);
+			judgements[lane].position = new Vector3(x, y, 0);
+		}
+	}
 }
+

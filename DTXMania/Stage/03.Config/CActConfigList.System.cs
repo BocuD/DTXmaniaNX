@@ -54,11 +54,12 @@ internal partial class CActConfigList
             action = tSetupItemList_Menu
         };
         listItems.Add(iSystemGoToMenu);
-
+        
         CItemBase iSystemReloadDTX = new("Reload Songs", CItemBase.EPanelType.Normal,
-            "曲データの一覧情報を\n"+
-            "取得し直します。",
-            "Clear song list cache and fully reload song data from disk.")
+            "曲データの一覧情報を取得し直します。\n"+
+            "新しい曲を追加したときや、曲データを\n"+
+            "更新したときに使用してください。",
+            "Scan for new songs and update song list.")
         {
             action = () =>
             {
@@ -73,11 +74,29 @@ internal partial class CActConfigList
         };
         listItems.Add(iSystemReloadDTX);
         
-        int nDGmode = CDTXMania.ConfigIni.bDrumsEnabled ? 0 : 1;
+        CItemBase iSystemReloadDTXFull = new("Reload Songs (Full)", CItemBase.EPanelType.Normal,
+            "曲データのキャッシュをクリアして、曲データを完全に再読み込みします。",
+            "Clear song data cache and perform full reload of song data.")
+        {
+            action = () =>
+            {
+                if (CDTXMania.SongDb.status == SongDbScanStatus.Idle)
+                {
+                    CDTXMania.SongDb.ClearCache();
+                    CDTXMania.SongDb.StartScan(() =>
+                    {
+                        CDTXMania.StageManager.stageSongSelectionNew.Reload();
+                    });
+                }
+            }
+        };
+        listItems.Add(iSystemReloadDTXFull);
+        
+        int nDGmode = CDTXMania.ConfigIni.bDrumsEnabled ? 0 : CDTXMania.ConfigIni.bSingleGuitar ? 1 : 2;
         iSystemGRmode = new CItemList("Game Selection", CItemBase.EPanelType.Normal, nDGmode,
-            "使用楽器の選択：\nDrums: ドラムのみ有効にします。\nGuitar: ギター/ベースのみの専用画面を\n用います。",
-            "Instrument selection:\nDrums: Play the drums.\nGuitar: Play guitar.\n",
-            ["Drums", "Guitar"]);
+            "使用楽器の選択：\nDrums: ドラムのみ有効にします。\n1 Player Guitar: ギターのみの専用画面を\n用います。\n2 Player Guitar: ベースとギターを\n同時演奏する専用画面を用います。",
+            "Instrument selection:\nDrums: Play the drums.\n1 Player Guitar: Play guitar.\n2 Player Guitar: Multiplayer guitar.",
+            ["Drums", "1 Player Guitar", "2 Player Guitar"]);
         iSystemGRmode.BindConfig(
             () => iSystemGRmode.nCurrentlySelectedIndex = nDGmode, 
             () => { } );
@@ -150,7 +169,22 @@ internal partial class CActConfigList
             "Enable Discord Rich Presence to update your Discord status with current song and playing mode.");
         iDiscordRichPresence.BindConfig(
             () => iDiscordRichPresence.bON = CDTXMania.ConfigIni.bDiscordRichPresenceEnabled,
-            () => CDTXMania.ConfigIni.bDiscordRichPresenceEnabled = iDiscordRichPresence.bON);
+            () =>
+            {
+                bool wasEnabled = CDTXMania.ConfigIni.bDiscordRichPresenceEnabled;
+                CDTXMania.ConfigIni.bDiscordRichPresenceEnabled = iDiscordRichPresence.bON;
+
+                if (!iDiscordRichPresence.bON && wasEnabled)
+                {
+                    CDTXMania.DiscordRichPresence?.Dispose();
+                    CDTXMania.DiscordRichPresence = null;
+                }
+                
+                if (iDiscordRichPresence.bON && !wasEnabled)
+                {
+                    CDTXMania.DiscordRichPresence = new CDiscordRichPresence(CDTXMania.ConfigIni.strDiscordRichPresenceApplicationID);
+                }
+            });
         listItems.Add(iDiscordRichPresence);
         
         CItemBase iSystemGoToKeyAssign = new("System Key Mapping", CItemBase.EPanelType.Folder,

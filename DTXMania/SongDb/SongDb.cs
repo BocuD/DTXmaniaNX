@@ -14,17 +14,19 @@ public enum SongDbScanStatus
 	Processing
 }
 
-public class SongDb
+public class SongDb : IDisposable
 {
 	//public properties
 	public SongDbScanStatus status { get; private set; } = SongDbScanStatus.Idle;
 	
-	private KawazuConverter jpConverter = new();
+	private SongCacheSqlite songCache;
 
+	public DateTime lastFinishTime;
 	public Dictionary<SongDbScanStatus, TimeSpan> statusDuration { get; private set; } = new()
 	{
 		{ SongDbScanStatus.Idle, TimeSpan.Zero },
 		{ SongDbScanStatus.Scanning, TimeSpan.Zero },
+		{ SongDbScanStatus.Unpacking, TimeSpan.Zero },
 		{ SongDbScanStatus.Processing, TimeSpan.Zero }
 	};
 
@@ -42,10 +44,29 @@ public class SongDb
 	public int processDoneCount { get; private set; } = 0;
 	public int processTotalCount { get; private set; } = 0;
 	
+	// Cache statistics
+	public int cacheHitCount { get; private set; } = 0;
+	public int cacheMissCount { get; private set; } = 0;
+	
 	private int tempCharts = 0;
 	private int tempSongs = 0;
 	private DateTime start;
 	private Task scanTask;
+
+	public SongDb()
+	{
+		try
+		{
+			songCache = new SongCacheSqlite();
+			songCache.Initialize();
+			Trace.TraceInformation("Song database cache initialized");
+		}
+		catch (Exception ex)
+		{
+			Trace.TraceError($"Failed to initialize song cache, continuing without cache: {ex.Message}\n{ex.StackTrace}");
+			songCache = null;
+		}
+	}
 
 	public void StartScan(Action? onComplete = null)
 	{
@@ -67,26 +88,8 @@ public class SongDb
 		{
 			SongNode tempRoot = await RunFullSongScan();
 			
-			int maxLoopCount = 5; //max number of times to loop through unpacking and rescanning
-			while (foundZipFiles.Count > 0 && maxLoopCount-- > 0)
-			{
-				status = SongDbScanStatus.Unpacking;
-				start = DateTime.Now;
-				processTotalCount = foundZipFiles.Count;
-				
-				await Parallel.ForEachAsync(foundZipFiles, new ParallelOptions { MaxDegreeOfParallelism = maxThreadCount },
-					async (info, cancellationToken) => await UnpackZipFile(info));
-				
-				//reset found zip files after unpacking
-				foundZipFiles.Clear();
-				
-				statusDuration[SongDbScanStatus.Unpacking] = DateTime.Now - start;
-				Trace.TraceInformation($"Unpacked {foundZipFiles.Count} zip files in {statusDuration[SongDbScanStatus.Unpacking]} s");
-				
-				Trace.TraceInformation($"Rescanning because ZIP files were unpacked");
-				tempRoot = await RunFullSongScan();
-			}
-			
+			tempRoot = await UnpackZipFiles(maxThreadCount, 5, tempRoot);
+
 			//flatten songs so we can process them all sequentially. Include boxes since we want to generate back boxes.
 			List<SongNode> flattened = await FlattenSongList(tempRoot.childNodes, true);
 			
@@ -114,6 +117,13 @@ public class SongDb
 			Trace.TraceInformation($"Processed {tempSongs} songs and {tempCharts} charts");
 			Trace.TraceInformation($"Processed full song list in {statusDuration[SongDbScanStatus.Processing]} s");
 			
+			// Log cache statistics
+			if (songCache != null)
+			{
+				var cachedCharts = songCache.GetCacheSize();
+				Trace.TraceInformation($"Cache Statistics - Hits: {cacheHitCount}, Misses: {cacheMissCount}, Total Cached Charts: {cachedCharts}");
+			}
+			
 			var tempFlattenedSongList = await FlattenSongList(tempRoot.childNodes);
 			var tempSkillSongs = CalculateSkill(tempFlattenedSongList, out double totalSkill);
 			
@@ -125,12 +135,13 @@ public class SongDb
 			totalCharts = tempCharts;
 
 			hasEverScanned = true;
+			lastFinishTime = DateTime.Now;
 			
 			onComplete?.Invoke();
 		}
 		catch (Exception ex)
 		{
-			Trace.TraceError("An error occurred while scanning songs: " + ex.Message);
+			Trace.TraceError($"An error occurred while scanning songs: {ex.Message}\n{ex.StackTrace}");
 			status = SongDbScanStatus.Idle;
 		}
 		finally
@@ -139,9 +150,22 @@ public class SongDb
 		}
 	}
 
+	public static double totalSkill = 0;
+
+	public void ClearCache()
+	{
+		if (songCache != null)
+		{
+			songCache.ClearAllCache();
+			cacheHitCount = 0;
+			cacheMissCount = 0;
+			Trace.TraceInformation("Song database cache cleared by user request");
+		}
+	}
+
 	public void RecalculateSkill()
 	{
-		skillSongs = CalculateSkill(flattenedSongList, out double totalSkill);
+		skillSongs = CalculateSkill(flattenedSongList, out totalSkill);
 	}
 	
 	private static List<(SongNode node, CChartData chart, double skill, int inst)> CalculateSkill(List<SongNode> songList, out double totalSkill)
@@ -175,7 +199,7 @@ public class SongDb
 		{
 			song.chart.countSkill = true;
 		}
-			
+		
 		TimeSpan duration = DateTime.Now - start;
 		Trace.TraceInformation($"Calculated skill for {tempSkillSongs.Count} songs in {duration.Milliseconds} ms");
 		Trace.TraceInformation($"Total skill points across all ({tempSkillSongs.Count}) skill songs: {totalSkill}");
@@ -341,8 +365,38 @@ public class SongDb
 			}
 		}
 	}
-
+	
 	private readonly List<FileInfo> foundZipFiles = [];
+	
+	private async Task<SongNode> UnpackZipFiles(int maxThreadCount, int maxLoopCount, SongNode tempRoot)
+	{
+		while (foundZipFiles.Count > 0 && maxLoopCount-- > 0)
+		{
+			status = SongDbScanStatus.Unpacking;
+			start = DateTime.Now;
+			processTotalCount = foundZipFiles.Count;
+			
+			Trace.TraceInformation($"Unpacking {foundZipFiles.Count} zip files...");
+				
+			await Parallel.ForEachAsync(foundZipFiles, new ParallelOptions { MaxDegreeOfParallelism = maxThreadCount },
+				async (info, cancellationToken) => await UnpackZipFile(info));
+				
+			//reset found zip files after unpacking
+			foundZipFiles.Clear();
+				
+			statusDuration[SongDbScanStatus.Unpacking] = DateTime.Now - start;
+			Trace.TraceInformation($"Unpacked {foundZipFiles.Count} zip files in {statusDuration[SongDbScanStatus.Unpacking]} s");
+				
+			Trace.TraceInformation($"Rescanning because ZIP files were unpacked");
+			tempRoot = await RunFullSongScan();
+		}
+		
+		//reset count after unzipping
+		processDoneCount = 0;
+		
+		return tempRoot;
+	}
+	
 	private async Task UnpackZipFile(FileInfo fileinfo)
 	{
 		Trace.TraceInformation("Found zip file in song database, unpacking: " + fileinfo.FullName);
@@ -613,9 +667,29 @@ public class SongDb
 
 				CChartData chartData = node.charts[i];
 				string path = chartData.FileInformation.AbsoluteFilePath;
+				string scoreIniPath = path + ".score.ini";
 
 				if (File.Exists(path))
 				{
+					// Try to get from cache first
+					if (songCache != null && songCache.TryGetCachedChart(path, scoreIniPath, out CChartData cachedData))
+					{
+						node.charts[i] = cachedData;
+						
+						if (string.IsNullOrWhiteSpace(node.title))
+						{
+							node.title = cachedData.SongInformation.Title;
+						}
+						
+						node.charts[i].LoadScoreFile();
+
+						cacheHitCount++;
+						processDoneCount++;
+						continue;
+					}
+
+					cacheMissCount++;
+
 					try
 					{
 						processSongDataPath = path;
@@ -633,9 +707,12 @@ public class SongDb
 						if (Utilities.HasJapanese(chartData.SongInformation.Title))
 						{
 							chartData.SongInformation.TitleHasJapanese = true;
-							chartData.SongInformation.TitleKana = await jpConverter.Convert(chartData.SongInformation.Title);
-							chartData.SongInformation.TitleRoman =
-								await jpConverter.Convert(chartData.SongInformation.Title, To.Romaji);
+							
+							// Use cache for Japanese conversions
+							var converted = TextConversionCache.GetOrCacheTextConversion(chartData.SongInformation.Title);
+							
+							chartData.SongInformation.TitleKana = converted.kana;
+							chartData.SongInformation.TitleRoman = converted.romaji;
 						}
 						else
 						{
@@ -646,10 +723,11 @@ public class SongDb
 						if (Utilities.HasJapanese(chartData.SongInformation.ArtistName))
 						{
 							chartData.SongInformation.ArtistNameHasJapanese = true;
-							chartData.SongInformation.ArtistNameKana =
-								await jpConverter.Convert(chartData.SongInformation.ArtistName);
-							chartData.SongInformation.ArtistNameRoman =
-								await jpConverter.Convert(chartData.SongInformation.ArtistName, To.Romaji);
+
+							var converted = TextConversionCache.GetOrCacheTextConversion(chartData.SongInformation.ArtistName);
+							
+							chartData.SongInformation.ArtistNameKana = converted.kana;
+							chartData.SongInformation.ArtistNameRoman = converted.romaji;
 						}
 						else
 						{
@@ -660,10 +738,11 @@ public class SongDb
 						if (Utilities.HasJapanese(chartData.SongInformation.Comment))
 						{
 							chartData.SongInformation.CommentHasJapanese = true;
-							chartData.SongInformation.CommentKana =
-								await jpConverter.Convert(chartData.SongInformation.Comment);
-							chartData.SongInformation.CommentRoman =
-								await jpConverter.Convert(chartData.SongInformation.Comment, To.Romaji);
+							
+							var converted = TextConversionCache.GetOrCacheTextConversion(chartData.SongInformation.Comment);
+							
+							chartData.SongInformation.CommentKana = converted.kana;
+							chartData.SongInformation.CommentRoman = converted.romaji;
 						}
 						else
 						{
@@ -718,7 +797,7 @@ public class SongDb
 							chartData.SongInformation.chipCountByLane[ELane.CY] =
 								cdtx.nVisibleChipsCount.chipCountInLane(ELane.CY);
 						}
-
+						
 						chartData.SongInformation.chipCountByInstrument.Guitar = cdtx.nVisibleChipsCount.Guitar;
 						{
 							chartData.SongInformation.chipCountByLane[ELane.GtR] =
@@ -752,6 +831,12 @@ public class SongDb
 						}
 
 						cdtx.OnDeactivate();
+
+						//save to cache after successful processing
+						if (songCache != null)
+						{
+							songCache.SaveChartData(path, scoreIniPath, chartData);
+						}
 					}
 					catch (Exception exception)
 					{
@@ -759,6 +844,7 @@ public class SongDb
 						Trace.TraceError("" + exception.Message);
 						node.chartCount--;
 						tempCharts--;
+						processDoneCount++;
 						continue;
 					}
 				}
@@ -768,97 +854,15 @@ public class SongDb
 					node.title = node.path;
 				}
 
-				LoadScoreFile(chartData.FileInformation.AbsoluteFilePath + ".score.ini", ref chartData);
+				chartData.LoadScoreFile();
 			}
 		}
 
 		processDoneCount++;
 	}
 
-	private void LoadScoreFile(string path, ref CChartData chartData)
+	public void Dispose()
 	{
-		if (!File.Exists(path))
-			return;
-
-		try
-		{
-			CScoreIni ini = new(path);
-
-			for (int nInstrumentNumber = 0; nInstrumentNumber < 3; nInstrumentNumber++)
-			{
-				int n = (nInstrumentNumber * 2) + 1; // n = 0～5
-
-				#region socre.譜面情報.最大ランク[ n楽器番号 ] = ...
-
-				//-----------------
-				if (ini.stSection[n].bMIDIUsed ||
-				    ini.stSection[n].bKeyboardUsed ||
-				    ini.stSection[n].bJoypadUsed ||
-				    ini.stSection[n].bMouseUsed)
-				{
-					// (A) 全オートじゃないようなので、演奏結果情報を有効としてランクを算出する。
-					if (CDTXMania.ConfigIni.nSkillMode == 0)
-					{
-						chartData.SongInformation.BestRank[nInstrumentNumber] =
-							CScoreIni.tCalculateRankOld(
-								ini.stSection[n].nTotalChipsCount,
-								ini.stSection[n].nPerfectCount,
-								ini.stSection[n].nGreatCount,
-								ini.stSection[n].nGoodCount,
-								ini.stSection[n].nPoorCount,
-								ini.stSection[n].nMissCount
-							);
-					}
-					else if (CDTXMania.ConfigIni.nSkillMode == 1)
-					{
-						chartData.SongInformation.BestRank[nInstrumentNumber] =
-							CScoreIni.tCalculateRank(
-								ini.stSection[n].nTotalChipsCount,
-								ini.stSection[n].nPerfectCount,
-								ini.stSection[n].nGreatCount,
-								ini.stSection[n].nGoodCount,
-								ini.stSection[n].nPoorCount,
-								ini.stSection[n].nMissCount,
-								ini.stSection[n].nMaxCombo
-							);
-					}
-				}
-				else
-				{
-					// (B) 全オートらしいので、ランクは無効とする。
-					chartData.SongInformation.BestRank[nInstrumentNumber] = (int)CScoreIni.ERANK.UNKNOWN;
-				}
-
-				//-----------------
-
-				#endregion
-
-				chartData.SongInformation.HighCompletionRate[nInstrumentNumber] = ini.stSection[n].dbPerformanceSkill;
-				chartData.SongInformation.HighSongSkill[nInstrumentNumber] = ini.stSection[n].dbGameSkill;
-				chartData.SongInformation.FullCombo[nInstrumentNumber] = ini.stSection[n].bIsFullCombo | ini.stSection[nInstrumentNumber * 2].bIsFullCombo;
-				
-				//New for Progress
-				chartData.SongInformation.progress[nInstrumentNumber] = ini.stSection[n].strProgress;
-				if (chartData.SongInformation.progress[nInstrumentNumber] == "")
-				{
-					//TODO: Read from another file if progress string is empty
-					//Set a hard-coded 64 char string for now
-					chartData.SongInformation.progress[nInstrumentNumber] =
-						"0000000000000000000000000000000000000000000000000000000000000000";
-				}
-			}
-
-			chartData.SongInformation.NbPerformances.Drums = ini.stFile.PlayCountDrums;
-			chartData.SongInformation.NbPerformances.Guitar = ini.stFile.PlayCountGuitar;
-			chartData.SongInformation.NbPerformances.Bass = ini.stFile.PlayCountBass;
-			
-			for (int i = 0; i < 5; i++)
-				chartData.SongInformation.PerformanceHistory[i] = ini.stFile.History[i];
-		}
-		catch (Exception e)
-		{
-			Trace.TraceError("Failed to read score.ini file: " + path);
-			Trace.TraceError(e.Message);
-		}
+		songCache?.Dispose();
 	}
 }

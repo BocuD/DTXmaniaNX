@@ -15,7 +15,7 @@ public class CAVI : IDisposable
         public double dbPlaySpeed = 1.0;
 
         public bool fileExists = false;
-        public TimeSpan duration = TimeSpan.Zero;
+        public double duration = 0;
 
         public CAVI(int number, string filename, string comment, double playSpeed)
         {
@@ -61,14 +61,16 @@ public class CAVI : IDisposable
 
             try
             {
-                SoftwareVideoPlayer player = new();
-                if (player.Open(strAVIFileName))
+                //todo: replace this with a simpler call to ffmpegcore (probably) to get video duration instead
+                //what is this even used for anyways??
+                VideoPlayerController controller = new();
+                if (controller.TryLoadVideo(strAVIFileName))
                 {
-                    duration = player.Duration;
+                    duration = controller.CurrentFrame.TotalDurationSeconds;
                     fileExists = true;
                 }
                 
-                player.Dispose();
+                controller.Dispose();
             }
             catch (Exception e)
             {

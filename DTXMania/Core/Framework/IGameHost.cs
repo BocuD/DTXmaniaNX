@@ -14,4 +14,5 @@ public interface IGameHost
     void SetWindowTitle(string newTitle);
     void SetWindowSize(Vector2 value);
     void SetWindowPosition(Vector2 value);
+    public RuntimeLogListener RuntimeLogListener { get; }
 }

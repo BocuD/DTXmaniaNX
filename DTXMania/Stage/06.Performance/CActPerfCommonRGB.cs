@@ -50,7 +50,7 @@ internal class CActPerfCommonRGB : CActivity
 	}
 	public override void OnManagedCreateResources()
 	{
-		if( bActivated )
+		if ( bActivated )
 		{
 			txRGB = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_RGB buttons.png"));
 			txShutter = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_shutter_GB.png"));

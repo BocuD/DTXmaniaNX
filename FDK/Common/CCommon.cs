@@ -8,12 +8,12 @@ public class CCommon
 
 	public static void tDispose<T>( ref T obj )
 	{
-		if( obj == null )
+		if ( obj == null )
 			return;
 
 		var d = obj as IDisposable;
 
-		if( d != null )
+		if ( d != null )
 		{
 			d.Dispose();
 			obj = default( T );
@@ -21,17 +21,17 @@ public class CCommon
 	}
 	public static void tDispose<T>( T obj)  // tDisposeする
 	{
-		if( obj == null )
+		if ( obj == null )
 			return;
 
 		var d = obj as IDisposable;
 
-		if( d != null )
+		if ( d != null )
 			d.Dispose();
 	}
 	public static void tReleaseComObject<T>( ref T obj )
 	{
-		if( obj != null )
+		if ( obj != null )
 		{
 			try
 			{

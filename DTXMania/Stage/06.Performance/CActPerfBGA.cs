@@ -21,7 +21,7 @@ internal class CActPerfBGA : CActivity
 	{
 		for( int i = 0; i < 8; i++ )
 		{
-			if( nチャンネル == nChannel[ i ] )
+			if ( nチャンネル == nChannel[ i ] )
 			{
 				stLayer[ i ].rBMP = bmp;
 				stLayer[ i ].rBMPTEX = bmptex;
@@ -37,7 +37,7 @@ internal class CActPerfBGA : CActivity
 	{
 		for( int i = 0; i < 8; i++ )
 		{
-			if( nチャンネル == nChannel[ i ] )
+			if ( nチャンネル == nChannel[ i ] )
 			{
 				stLayer[ i ].rBMP = bmp;
 				stLayer[ i ].rBMPTEX = bmptex;
@@ -63,35 +63,35 @@ internal class CActPerfBGA : CActivity
 		for( int i = 0; i < CDTXMania.DTX.listChip.Count; i++ )
 		{
 			CChip chip = CDTXMania.DTX.listChip[ i ];
-			if( chip.nPlaybackTimeMs > n移動開始時刻ms )
+			if ( chip.nPlaybackTimeMs > n移動開始時刻ms )
 			{
 				break;
 			}
 			switch( chip.eBGA種別 )
 			{
 				case EBGAType.BMP:
-					if( ( chip.rBMP != null ) && ( chip.rBMP.txImage != null ) )
+					if ( ( chip.rBMP != null ) && ( chip.rBMP.txImage != null ) )
 					{
 						Start( chip.nChannelNumber, chip.rBMP, null, chip.rBMP.nWidth, chip.rBMP.nHeight, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, chip.nPlaybackTimeMs );
 					}
 					break;
 
 				case EBGAType.BMPTEX:
-					if( ( chip.rBMPTEX != null ) && ( chip.rBMPTEX.txImage != null ) )
+					if ( ( chip.rBMPTEX != null ) && ( chip.rBMPTEX.txImage != null ) )
 					{
 						Start( chip.nChannelNumber, null, chip.rBMPTEX, chip.rBMPTEX.txImage.Width, chip.rBMPTEX.txImage.Height, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, chip.nPlaybackTimeMs );
 					}
 					break;
 
 				case EBGAType.BGA:
-					if( chip.rBGA != null )
+					if ( chip.rBGA != null )
 					{
 						Start( chip.nChannelNumber, chip.rBMP, chip.rBMPTEX, chip.rBGA.pt画像側右下座標.X - chip.rBGA.pt画像側左上座標.X, chip.rBGA.pt画像側右下座標.Y - chip.rBGA.pt画像側左上座標.Y, 0, 0, chip.rBGA.pt画像側左上座標.X, chip.rBGA.pt画像側左上座標.Y, 0, 0, chip.rBGA.pt表示座標.X, chip.rBGA.pt表示座標.Y, 0, 0, 0, chip.nPlaybackTimeMs );
 					}
 					break;
 
 				case EBGAType.BGAPAN:
-					if( chip.rBGAPan != null )
+					if ( chip.rBGAPan != null )
 					{
 						Start( chip.nChannelNumber, chip.rBMP, chip.rBMPTEX, chip.rBGAPan.sz開始サイズ.Width, chip.rBGAPan.sz開始サイズ.Height, chip.rBGAPan.sz終了サイズ.Width, chip.rBGAPan.sz終了サイズ.Height, chip.rBGAPan.pt画像側開始位置.X, chip.rBGAPan.pt画像側開始位置.Y, chip.rBGAPan.pt画像側終了位置.X, chip.rBGAPan.pt画像側終了位置.Y, chip.rBGAPan.pt表示側開始位置.X, chip.rBGAPan.pt表示側開始位置.Y, chip.rBGAPan.pt表示側終了位置.X, chip.rBGAPan.pt表示側終了位置.Y, chip.n総移動時間, chip.nPlaybackTimeMs );
 					}
@@ -125,7 +125,7 @@ internal class CActPerfBGA : CActivity
 	}
 	public override void OnManagedCreateResources()
 	{
-		if( bActivated )
+		if ( bActivated )
 		{
 			// txBGAバックパネル = new CTexture(CDTXMania.app.Device, 278, 355, CDTXMania.app.GraphicsDeviceManager.CurrentSettings.BackBufferFormat, Pool.Managed);
 			// using( Surface surface = CDTXMania.app.Device.GetBackBuffer( 0, 0 ) )
@@ -137,10 +137,10 @@ internal class CActPerfBGA : CActivity
 	}
 	public override void OnManagedReleaseResources()
 	{
-		if( bActivated )
+		if ( bActivated )
 		{
 			// CDTXMania.tReleaseTexture( ref txBGAバックパネル );
-			// if( sfBackBuffer != null )
+			// if ( sfBackBuffer != null )
 			// {
 			// 	sfBackBuffer.Dispose();
 			// 	sfBackBuffer = null;
@@ -154,12 +154,12 @@ internal class CActPerfBGA : CActivity
 	}
 	public int tUpdateAndDraw( int x, int y )
 	{
-		if( bActivated )
+		if ( bActivated )
 		{
 			// txBGAバックパネル.tDraw2D(CDTXMania.app.Device, 980, 0);
 			for( int i = 0; i < 8; i++ )
 			{
-				if( ( ( stLayer[ i ].n移動開始時刻ms != -1 ) && ( ( stLayer[ i ].rBMP != null ) || ( stLayer[ i ].rBMPTEX != null ) ) ) && ( ( ( stLayer[ i ].rBMP == null ) || ( stLayer[ i ].rBMP.bUse && ( stLayer[ i ].rBMP.txImage != null ) ) ) && ( ( stLayer[ i ].rBMPTEX == null ) || ( stLayer[ i ].rBMPTEX.bUse && ( stLayer[ i ].rBMPTEX.txImage != null ) ) ) ) )
+				if ( ( ( stLayer[ i ].n移動開始時刻ms != -1 ) && ( ( stLayer[ i ].rBMP != null ) || ( stLayer[ i ].rBMPTEX != null ) ) ) && ( ( ( stLayer[ i ].rBMP == null ) || ( stLayer[ i ].rBMP.bUse && ( stLayer[ i ].rBMP.txImage != null ) ) ) && ( ( stLayer[ i ].rBMPTEX == null ) || ( stLayer[ i ].rBMPTEX.bUse && ( stLayer[ i ].rBMPTEX.txImage != null ) ) ) ) )
 				{
 					Size size = stLayer[ i ].sz開始サイズ;
 					Size size2 = stLayer[ i ].sz終了サイズ;
@@ -169,14 +169,14 @@ internal class CActPerfBGA : CActivity
 					Point point4 = stLayer[ i ].pt表示側終了位置;
 					long num2 = stLayer[ i ].n総移動時間ms;
 					long num3 = stLayer[ i ].n移動開始時刻ms;
-					if( CDTXMania.Timer.nCurrentTime < num3 )
+					if ( CDTXMania.Timer.nCurrentTime < num3 )
 					{
 						num3 = CDTXMania.Timer.nCurrentTime;
 					}
 					Size size3 = new Size( 0x116, 0x163 );
 					Size size4 = new Size( ( stLayer[ i ].rBMP != null ) ? stLayer[ i ].rBMP.nWidth : stLayer[ i ].rBMPTEX.txImage.Width, ( stLayer[ i ].rBMP != null ) ? stLayer[ i ].rBMP.nHeight : stLayer[ i ].rBMPTEX.txImage.Height );
 					int num4 = (int) ( ( CDTXMania.Timer.nCurrentTime - num3 ) * ( ( (double) CDTXMania.ConfigIni.nPlaySpeed ) / 20.0 ) );
-					if( ( num2 != 0 ) && ( num2 < num4 ) )
+					if ( ( num2 != 0 ) && ( num2 < num4 ) )
 					{
 						stLayer[ i ].pt画像側開始位置 = point = point2;
 						stLayer[ i ].pt表示側開始位置 = point3 = point4;
@@ -185,7 +185,7 @@ internal class CActPerfBGA : CActivity
 					}
 					RectangleF rectangle = new();
 					RectangleF rectangle2 = new();
-					if( num2 == 0 )
+					if ( num2 == 0 )
 					{
 						rectangle.X = point.X;
 						rectangle.Y = point.Y;
@@ -209,63 +209,63 @@ internal class CActPerfBGA : CActivity
 						rectangle2.Width = size5.Width;
 						rectangle2.Height = size5.Height;
 					}
-					if( ( ( ( rectangle.Right > 0 ) && ( rectangle.Bottom > 0 ) ) && ( ( rectangle.Left < size4.Width ) && ( rectangle.Top < size4.Height ) ) ) && ( ( ( rectangle2.Right > 0 ) && ( rectangle2.Bottom > 0 ) ) && ( ( rectangle2.Left < size3.Width ) && ( rectangle2.Top < size3.Height ) ) ) )
+					if ( ( ( ( rectangle.Right > 0 ) && ( rectangle.Bottom > 0 ) ) && ( ( rectangle.Left < size4.Width ) && ( rectangle.Top < size4.Height ) ) ) && ( ( ( rectangle2.Right > 0 ) && ( rectangle2.Bottom > 0 ) ) && ( ( rectangle2.Left < size3.Width ) && ( rectangle2.Top < size3.Height ) ) ) )
 					{
-						if( rectangle.X < 0 )
+						if ( rectangle.X < 0 )
 						{
 							rectangle2.Width -= -rectangle.X;
 							rectangle2.X += -rectangle.X;
 							rectangle.Width -= -rectangle.X;
 							rectangle.X = 0;
 						}
-						if( rectangle.Y < 0 )
+						if ( rectangle.Y < 0 )
 						{
 							rectangle2.Height -= -rectangle.Y;
 							rectangle2.Y += -rectangle.Y;
 							rectangle.Height -= -rectangle.Y;
 							rectangle.Y = 0;
 						}
-						if( rectangle.Right > size4.Width )
+						if ( rectangle.Right > size4.Width )
 						{
 							rectangle2.Width -= rectangle.Right - size4.Width;
 							rectangle.Width -= rectangle.Right - size4.Width;
 						}
-						if( rectangle.Bottom > size4.Height )
+						if ( rectangle.Bottom > size4.Height )
 						{
 							rectangle2.Height -= rectangle.Bottom - size4.Height;
 							rectangle.Height -= rectangle.Bottom - size4.Height;
 						}
-						if( rectangle2.X < 0 )
+						if ( rectangle2.X < 0 )
 						{
 							rectangle.Width -= -rectangle2.X;
 							rectangle.X += -rectangle2.X;
 							rectangle2.Width -= rectangle2.X;
 							rectangle2.X = 0;
 						}
-						if( rectangle2.Y < 0 )
+						if ( rectangle2.Y < 0 )
 						{
 							rectangle.Height -= -rectangle2.Y;
 							rectangle.Y += -rectangle2.Y;
 							rectangle2.Height -= -rectangle2.Y;
 							rectangle2.Y = 0;
 						}
-						if( rectangle2.Right > size3.Width )
+						if ( rectangle2.Right > size3.Width )
 						{
 							rectangle.Width -= rectangle2.Right - size3.Width;
 							rectangle2.Width -= rectangle2.Right - size3.Width;
 						}
-						if( rectangle2.Bottom > size3.Height )
+						if ( rectangle2.Bottom > size3.Height )
 						{
 							rectangle.Height -= rectangle2.Bottom - size3.Height;
 							rectangle2.Height -= rectangle2.Bottom - size3.Height;
 						}
-						if( ( ( ( ( rectangle.Left < rectangle.Right ) && ( rectangle.Top < rectangle.Bottom ) ) && ( ( rectangle2.Left < rectangle2.Right ) && ( rectangle2.Top < rectangle2.Bottom ) ) ) && ( ( ( rectangle.Right >= 0 ) && ( rectangle.Bottom >= 0 ) ) && ( ( rectangle.Left <= size4.Width ) && ( rectangle.Top <= size4.Height ) ) ) ) && ( ( ( rectangle2.Right >= 0 ) && ( rectangle2.Bottom >= 0 ) ) && ( ( rectangle2.Left <= size3.Width ) && ( rectangle2.Top <= size3.Height ) ) ) )
+						if ( ( ( ( ( rectangle.Left < rectangle.Right ) && ( rectangle.Top < rectangle.Bottom ) ) && ( ( rectangle2.Left < rectangle2.Right ) && ( rectangle2.Top < rectangle2.Bottom ) ) ) && ( ( ( rectangle.Right >= 0 ) && ( rectangle.Bottom >= 0 ) ) && ( ( rectangle.Left <= size4.Width ) && ( rectangle.Top <= size4.Height ) ) ) ) && ( ( ( rectangle2.Right >= 0 ) && ( rectangle2.Bottom >= 0 ) ) && ( ( rectangle2.Left <= size3.Width ) && ( rectangle2.Top <= size3.Height ) ) ) )
 						{
-							if( ( stLayer[ i ].rBMP != null ) && ( stLayer[ i ].rBMP.txImage != null ) )
+							if ( ( stLayer[ i ].rBMP != null ) && ( stLayer[ i ].rBMP.txImage != null ) )
 							{
 								stLayer[ i ].rBMP.txImage.tDraw2D(x + rectangle2.X, y + rectangle2.Y, rectangle );
 							}
-							else if( ( stLayer[ i ].rBMPTEX != null ) && ( stLayer[ i ].rBMPTEX.txImage != null ) )
+							else if ( ( stLayer[ i ].rBMPTEX != null ) && ( stLayer[ i ].rBMPTEX.txImage != null ) )
 							{
 								stLayer[ i ].rBMPTEX.txImage.tDraw2D(x + rectangle2.X, y + rectangle2.Y, rectangle );
 							}

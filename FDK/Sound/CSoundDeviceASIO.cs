@@ -222,7 +222,7 @@ public class CSoundDeviceASIO : ISoundDevice
 			#region [ debug: channel format ]
 			//BASS_ASIO_CHANNELINFO chinfo = new BASS_ASIO_CHANNELINFO();
 			//int chan = 0;
-			//while ( true )
+			//while (true)
 			//{
 			//    if ( !BassAsio.BASS_ASIO_ChannelGetInfo( false, chan, chinfo ) )
 			//        break;

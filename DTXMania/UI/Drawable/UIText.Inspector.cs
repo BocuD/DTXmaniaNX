@@ -1,4 +1,5 @@
-﻿using DTXMania.Core;
+﻿using System.Numerics;
+using DTXMania.Core;
 using DTXMania.UI.Skin;
 using DTXMania.UI.Text;
 using Hexa.NET.ImGui;
@@ -138,9 +139,9 @@ public partial class UIText
             _dirty = true;
         }
 
-        if (ImGui.InputFloat("Texture Padding", ref texturePadding, 1f, 4f, "%.1f"))
+        if (Inspector.Inspector.Inspect("Texture Padding", ref texturePadding))
         {
-            texturePadding = MathF.Max(texturePadding, 0f);
+            texturePadding = Vector2.Max(texturePadding, new Vector2(0f));
             _dirty = true;
         }
 

@@ -42,13 +42,13 @@ internal class CStageTitle : CStage
 		bg.name = "Background";
 
 		string videoPath = CSkin.Path(@"Graphics\2_background.mp4");
-		FFmpegVideoPlayer videoPlayer = new ThreadedSoftwareVideoPlayer();
-		
-		if (videoPlayer.Open(videoPath))
+
+		UINewVideoRenderer videoPlayer = new();
+		if (videoPlayer.LoadVideo(videoPath))
 		{
-			UIVideoRenderer renderer = ui.AddChild(new UIVideoRenderer(videoPlayer, videoPath));
-			renderer.renderOrder = -100;
-			renderer.name = "VideoPlayer";
+			ui.AddChild(videoPlayer);
+			videoPlayer.renderOrder = -100;
+			videoPlayer.name = "BackgroundVideo";
 		}
 		else
 		{
@@ -103,7 +103,7 @@ internal class CStageTitle : CStage
 	}
 	public override void OnManagedCreateResources()
 	{
-		if( bActivated )
+		if ( bActivated )
 		{
 			txMenu = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\2_menu.png" ) );
 			base.OnManagedCreateResources();
@@ -131,10 +131,10 @@ internal class CStageTitle : CStage
 
 		#region [ カーソル上移動 ]
 		//---------------------
-		if( ct上移動用.bInProgress )
+		if ( ct上移動用.bInProgress )
 		{
 			ct上移動用.tUpdate();
-			if( ct上移動用.bReachedEndValue )
+			if ( ct上移動用.bReachedEndValue )
 			{
 				ct上移動用.tStop();
 			}
@@ -143,10 +143,10 @@ internal class CStageTitle : CStage
 		#endregion
 		#region [ カーソル下移動 ]
 		//---------------------
-		if( ct下移動用.bInProgress )
+		if ( ct下移動用.bInProgress )
 		{
 			ct下移動用.tUpdate();
-			if( ct下移動用.bReachedEndValue )
+			if ( ct下移動用.bReachedEndValue )
 			{
 				ct下移動用.tStop();
 			}
@@ -161,15 +161,15 @@ internal class CStageTitle : CStage
 
 		// キー入力
 
-		if( ePhaseID == EPhase.Common_DefaultState)
+		if ( ePhaseID == EPhase.Common_DefaultState)
 		{
-			if( CDTXMania.InputManager.Keyboard.bKeyPressed( (int) SlimDXKey.Escape ) )
+			if ( CDTXMania.InputManager.Keyboard.bKeyPressed( (int) SlimDXKey.Escape ) )
 				return (int) EReturnResult.EXIT;
 
 			ctキー反復用.Up.tRepeatKey( CDTXMania.InputManager.Keyboard.bKeyPressing( (int)SlimDXKey.UpArrow ), new CCounter.DGキー処理( tMoveCursorUp ) );
 			ctキー反復用.R.tRepeatKey( CDTXMania.Pad.bPressingGB( EPad.HH ), new CCounter.DGキー処理( tMoveCursorUp ) );
 			//Change to HT
-			if( CDTXMania.Pad.bPressed( EInstrumentPart.DRUMS, EPad.HT ) )
+			if ( CDTXMania.Pad.bPressed( EInstrumentPart.DRUMS, EPad.HT ) )
 				tMoveCursorUp();
 
 			ctキー反復用.Down.tRepeatKey( CDTXMania.InputManager.Keyboard.bKeyPressing( (int)SlimDXKey.DownArrow ), new CCounter.DGキー処理( tMoveCursorDown ) );
@@ -188,7 +188,7 @@ internal class CStageTitle : CStage
 				{
 					CDTXMania.Skin.soundDecide.tPlay();
 				}
-				if( nCurrentCursorPosition == (int)EReturnResult.EXIT - 1 )
+				if ( nCurrentCursorPosition == (int)EReturnResult.EXIT - 1 )
 				{
 					return (int)EReturnResult.EXIT;
 				}
@@ -198,15 +198,15 @@ internal class CStageTitle : CStage
 			}
 		}
 		
-		if( txMenu != null )
+		if ( txMenu != null )
 		{
 			int x = MENU_X;
 			int y = MENU_Y + nCurrentCursorPosition * MENU_H;
-			if( ct上移動用.bInProgress )
+			if ( ct上移動用.bInProgress )
 			{
 				y += (int) ( (double)MENU_H / 2 * ( Math.Cos( Math.PI * ( ct上移動用.nCurrentValue / 100.0 ) ) + 1.0 ) );
 			}
-			else if( ct下移動用.bInProgress )
+			else if ( ct下移動用.bInProgress )
 			{
 				y -= (int) ( (double)MENU_H / 2 * ( Math.Cos( Math.PI * ( ct下移動用.nCurrentValue / 100.0 ) ) + 1.0 ) );
 			}
@@ -233,7 +233,7 @@ internal class CStageTitle : CStage
 
 			txMenu.tDraw2DMatrix( mat2, new Vector2(MENU_W, MENU_H), new RectangleF( 0, MENU_H * 4, MENU_W, MENU_H ));
 		}
-		if( txMenu != null )
+		if ( txMenu != null )
 		{
 			Matrix4x4 mat = Matrix4x4.CreateTranslation(MENU_X, MENU_Y, 0) * scaleMatrix;
 			Matrix4x4 mat2 = Matrix4x4.CreateTranslation(MENU_X, MENU_Y + MENU_H, 0) * scaleMatrix;
@@ -353,7 +353,7 @@ internal class CStageTitle : CStage
 			CDTXMania.Skin.soundCursorMovement.tPlay();
 			nCurrentCursorPosition++;
 			ct下移動用.tStart( 0, 100, 1, CDTXMania.Timer );
-			if( ct上移動用.bInProgress )
+			if ( ct上移動用.bInProgress )
 			{
 				ct下移動用.nCurrentValue = 100 - ct上移動用.nCurrentValue;
 				ct上移動用.tStop();
@@ -367,7 +367,7 @@ internal class CStageTitle : CStage
 			CDTXMania.Skin.soundCursorMovement.tPlay();
 			nCurrentCursorPosition--;
 			ct上移動用.tStart( 0, 100, 1, CDTXMania.Timer );
-			if( ct下移動用.bInProgress )
+			if ( ct下移動用.bInProgress )
 			{
 				ct上移動用.nCurrentValue = 100 - ct下移動用.nCurrentValue;
 				ct下移動用.tStop();

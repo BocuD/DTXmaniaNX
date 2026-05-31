@@ -6,8 +6,10 @@ using DTXMania.Core;
 using DTXMania.Core.Video;
 using DTXMania.SongDb;
 using DTXMania.SongDb.Sorting;
+using DTXMania.UI;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.DynamicElements;
+using DTXMania.UI.Text;
 
 namespace DTXMania;
 
@@ -93,6 +95,7 @@ public class CStageSongSelectionNew : CStage
         commentText.position = new Vector3(0, 35, 0);
         commentText.textSource = TextSource.Dynamic;
         commentText.dynamicSource = "SongComment";
+        commentText.name = "CommentText";
         
         songSearchMenu = ui.AddChild(new SongSearchMenu());
         songSearchMenu.renderOrder = 15;
@@ -114,13 +117,24 @@ public class CStageSongSelectionNew : CStage
         dynamicStringSources["SongName"] = new DynamicStringSource(() => selectedChart?.SongInformation.Title ?? "");
         dynamicStringSources["SongArtist"] = new DynamicStringSource(() => selectedChart?.SongInformation.ArtistName ?? "");
         dynamicStringSources["SongGenre"] = new DynamicStringSource(() => selectedChart?.SongInformation.Genre ?? "");
-        dynamicStringSources["SongBPM"] = new DynamicStringSource(() => selectedChart?.SongInformation.Bpm.ToString(CultureInfo.InvariantCulture) ?? "");
+        dynamicStringSources["SongBPM"] = new DynamicStringSource(() => selectedChart?.SongInformation.Bpm.ToString("0.##", CultureInfo.InvariantCulture) ?? "");
         dynamicStringSources["SongDuration"] = new DynamicStringSource(() =>
         {
             int? ms = selectedChart?.SongInformation.DurationMs;
             return ms != null ? TimeSpan.FromMilliseconds(ms.Value).ToString(@"m\:ss") : "";
         });
         dynamicStringSources["SongComment"] = new DynamicStringSource(() => selectedChart?.SongInformation.Comment ?? "");
+        dynamicStringSources["SongSkill"] = new DynamicStringSource(() =>
+        {
+            double? points = selectedNode?.GetTopSkillPoints().skillPoints;
+
+            if (points != null && points > 0)
+            {
+                return points.Value.ToString("0.00");
+            }
+
+            return "";
+        });
     }
 
     public override void InitializeDefaultUI()
@@ -132,12 +146,13 @@ public class CStageSongSelectionNew : CStage
         bg.name = "Background";
         
         string videoPath = CSkin.Path(@"Graphics\5_background.mp4");
-        FFmpegVideoPlayer videoPlayer = new ThreadedSoftwareVideoPlayer();
-		
-        if (videoPlayer.Open(videoPath))
+
+        UINewVideoRenderer videoPlayer = new();
+        if (videoPlayer.LoadVideo(videoPath))
         {
-            UIVideoRenderer renderer = ui.AddChild(new UIVideoRenderer(videoPlayer, videoPath));
-            renderer.renderOrder = -99;
+            ui.AddChild(videoPlayer);
+            videoPlayer.renderOrder = -100;
+            videoPlayer.name = "BackgroundVideo";
         }
         else
         {
@@ -158,7 +173,7 @@ public class CStageSongSelectionNew : CStage
         back2.name = "Back2";
 
         densityGraph1 = ui.AddChild(new DensityGraph((EInstrumentPart)CDTXMania.GetCurrentInstrument()));
-        densityGraph1.position = new Vector3(CDTXMania.GetCurrentInstrument() == 0 ? 212 : 64, 355, 0);
+        densityGraph1.position = new Vector3(CDTXMania.GetCurrentInstrument() == 0 ? 212 : 64, 720, 0);
         densityGraph1.renderOrder = 4;
         densityGraph1.name = "DensityGraph";
         
@@ -166,6 +181,40 @@ public class CStageSongSelectionNew : CStage
         topBar.renderOrder = 12;
         topBar.name = "TopBar";
         topBar.size.X = 1280;
+        
+        var panelSkill = ui.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\SongSelect\panel_skill.png"))));
+        panelSkill.renderOrder = 9;
+        panelSkill.name = "PanelSkill";
+        panelSkill.position = new Vector3(96, 225, 0);
+        
+        var skillText = ui.AddChild(new UIText("", 48));
+        skillText.renderOrder = 11;
+        skillText.textSource = TextSource.Dynamic;
+        skillText.dynamicSource = "SongSkill";
+        skillText.outlineWidth = 0;
+        skillText.style = UiTextStyle.Italic;
+        skillText.fontSource = FontSource.System;
+        skillText.font = "Futura PT Medium.otf";
+        skillText.anchor = new Vector2(1, 1);
+        skillText.position = new Vector3(315, 291, 0);
+        skillText.name = "SkillText";
+        
+        var panelBpm = ui.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\SongSelect\panel_bpm.png"))));
+        panelBpm.renderOrder = 9;
+        panelBpm.name = "PanelBpm";
+        panelBpm.position = new Vector3(96, 300, 0);
+        
+        var bpmText = ui.AddChild(new UIText("", 28));
+        bpmText.renderOrder = 11;
+        bpmText.textSource = TextSource.Dynamic;
+        bpmText.dynamicSource = "SongBPM";
+        bpmText.outlineWidth = 0;
+        bpmText.style = UiTextStyle.Italic;
+        bpmText.fontSource = FontSource.System;
+        bpmText.font = "Futura PT Medium.otf";
+        bpmText.anchor = new Vector2(1, 1);
+        bpmText.position = new Vector3(315, 338, 0);
+        bpmText.name = "BPMText";
     }
 
     public override void FirstUpdate()
@@ -199,8 +248,8 @@ public class CStageSongSelectionNew : CStage
         
         foreach (SongDbSort sorter in sorters)
         {
-            try
-            {
+            // try
+            // {
                 if (!sortCache.TryGetValue(sorter, out SongNode? rootNode) || sorter.requireResort)
                 {
                     DateTime now = DateTime.Now;
@@ -222,11 +271,11 @@ public class CStageSongSelectionNew : CStage
                 container.isVisible = false;
 
                 Trace.TraceInformation($"Containers prepared for {sorter.Name}");
-            }
-            catch (Exception e)
-            {
-                Trace.TraceError($"Failed to prepare container for {sorter.Name}: {e.Message}");
-            }
+            // }
+            // catch (Exception e)
+            // {
+            //     Trace.TraceError($"Failed to prepare container for {sorter.Name}: {e.Message}");
+            // }
         }
         
         //enable the current sort
@@ -346,6 +395,8 @@ public class CStageSongSelectionNew : CStage
         
         actPresound.tSelectionChanged(chart);
         statusPanel.SelectionChanged(node, chart);
+        densityGraph1.SelectionChanged(node, chart);
+        //densityGraph2.SelectionChanged(node, chart);
     }
 
     public int targetDifficultyLevel { get; private set; } = 0;
@@ -374,6 +425,7 @@ public class CStageSongSelectionNew : CStage
 
                 if (chart.SongInformation.chipCountByInstrument[currentInstrument] > 0)
                 {
+                    ChangeSelection(selectedNode, chart);
                     nextAvailableLevel = newLevel;
                     break;
                 }
@@ -389,25 +441,25 @@ public class CStageSongSelectionNew : CStage
             case 0:
                 CDTXMania.Skin.soundBasic.tPlay();
                 string strbsc = CSkin.Path( @"Sounds\Basic.ogg" );
-                if( !File.Exists( strbsc ) )
+                if ( !File.Exists( strbsc ) )
                     CDTXMania.Skin.soundChange.tPlay();
                 break;
             case 1:
                 CDTXMania.Skin.soundAdvanced.tPlay();
                 string stradv = CSkin.Path( @"Sounds\Advanced.ogg" );
-                if( !File.Exists( stradv ) )
+                if ( !File.Exists( stradv ) )
                     CDTXMania.Skin.soundChange.tPlay();
                 break;
             case 2:
                 CDTXMania.Skin.soundExtreme.tPlay();
                 string strext = CSkin.Path( @"Sounds\Extreme.ogg" );
-                if( !File.Exists( strext ) )
+                if ( !File.Exists( strext ) )
                     CDTXMania.Skin.soundChange.tPlay();
                 break;
             case 3:
                 CDTXMania.Skin.soundMaster.tPlay();
                 string strmas = CSkin.Path( @"Sounds\Master.ogg" );
-                if( !File.Exists( strmas ) )
+                if ( !File.Exists( strmas ) )
                     CDTXMania.Skin.soundChange.tPlay();
                 break;
             case 4:
@@ -510,6 +562,9 @@ public class CStageSongSelectionNew : CStage
     public void Reload()
     {
         sortCache.Clear();
+        
+        //song selection stage might not have been loaded yet
+        if (ui == null) return;
         PrepareSelectionContainers();
         ApplySort(currentSort);
     }

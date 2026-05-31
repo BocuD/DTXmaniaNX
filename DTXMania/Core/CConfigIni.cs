@@ -582,7 +582,6 @@ internal class CConfigIni
 	#endregion
 
 	#region[ 画像関連 ]
-	public int nJudgeAnimeType;
 	public int nJudgeFrames;
 	public int nJudgeInterval;
 	public int nJudgeWidgh;
@@ -623,13 +622,13 @@ internal class CConfigIni
 
 	public bool bDrumsEnabled
 	{
-		get => _bDrums有効;
+		get => _bDrumsEnabled;
 		set
 		{
-			_bDrums有効 = value;
-			if( !_bGuitar有効 && !_bDrums有効 )
+			_bDrumsEnabled = value;
+			if ( !_bGuitarEnabled && !_bDrumsEnabled )
 			{
-				_bGuitar有効 = true;
+				_bGuitarEnabled = true;
 			}
 		}
 	}
@@ -639,24 +638,26 @@ internal class CConfigIni
 		switch (inst)
 		{
 			case EInstrumentPart.DRUMS:
-				return _bDrums有効;
+				return _bDrumsEnabled;
 			case EInstrumentPart.GUITAR:
 			case EInstrumentPart.BASS:
-				return _bGuitar有効;
+				return _bGuitarEnabled;
 			default:
 				return false;
 		}
 	}
 
+	public bool bSingleGuitar = true;
+	
 	public bool bGuitarEnabled
 	{
-		get => _bGuitar有効;
+		get => _bGuitarEnabled;
 		set
 		{
-			_bGuitar有効 = value;
-			if( !_bGuitar有効 && !_bDrums有効 )
+			_bGuitarEnabled = value;
+			if ( !_bGuitarEnabled && !_bDrumsEnabled )
 			{
-				_bDrums有効 = true;
+				_bDrumsEnabled = true;
 			}
 		}
 	}
@@ -673,7 +674,7 @@ internal class CConfigIni
 		{
 			for (int i = (int) ELane.LC; i < (int) ELane.LBD; i++)
 			{
-				if( !bAutoPlay[ i ] )
+				if ( !bAutoPlay[ i ] )
 				{
 					return false;
 				}
@@ -738,11 +739,11 @@ internal class CConfigIni
 		get => nBGAlpha;
 		set
 		{
-			if( value < 0 )
+			if ( value < 0 )
 			{
 				nBGAlpha = 0;
 			}
-			else if( value > 0xff )
+			else if ( value > 0xff )
 			{
 				nBGAlpha = 0xff;
 			}
@@ -829,112 +830,6 @@ internal class CConfigIni
 		public int LBD;
 		public int Guitar;
 		public int Bass;
-		public int this[ int index ]
-		{
-			get
-			{
-				switch( index )
-				{
-					case 0:
-						return LC;
-
-					case 1:
-						return HH;
-
-					case 2:
-						return SD;
-
-					case 3:
-						return BD;
-
-					case 4:
-						return HT;
-
-					case 5:
-						return LT;
-
-					case 6:
-						return FT;
-
-					case 7:
-						return CY;
-
-					case 8:
-						return RD;
-
-					case 9:
-						return LP;
-
-					case 10:
-						return LBD;
-
-					case 11:
-						return Guitar;
-
-					case 12:
-						return Bass;
-				}
-				throw new IndexOutOfRangeException();
-			}
-			set
-			{
-				switch( index )
-				{
-					case 0:
-						LC = value;
-						return;
-
-					case 1:
-						HH = value;
-						return;
-
-					case 2:
-						SD = value;
-						return;
-
-					case 3:
-						BD = value;
-						return;
-
-					case 4:
-						HT = value;
-						return;
-
-					case 5:
-						LT = value;
-						return;
-
-					case 6:
-						FT = value;
-						return;
-
-					case 7:
-						CY = value;
-						return;
-
-					case 8:
-						RD = value;
-						return;
-
-					case 9:
-						LP = value;
-						return;
-
-					case 10:
-						LBD = value;
-						return;
-
-					case 11:
-						Guitar = value;
-						return;
-
-					case 12:
-						Bass = value;
-						return;
-				}
-				throw new IndexOutOfRangeException();
-			}
-		}
 	}
 
 	/*
@@ -1026,8 +921,8 @@ internal class CConfigIni
 		nShutterOutSide.Drums = 0;
 		nSleepNMsEveryFrame = -1;			// #xxxxx 2011.11.27 yyagi add
 		n非フォーカス時スリープms = 1;			// #23568 2010.11.04 ikanick add
-		_bGuitar有効 = false;
-		_bDrums有効 = true;
+		_bGuitarEnabled = false;
+		_bDrumsEnabled = true;
 		nBGAlpha = 255;
 		eDamageLevel = EDamageLevel.Normal;
 		bSTAGEFAILEDEnabled = true;
@@ -1085,7 +980,6 @@ internal class CConfigIni
 		nNameColor = new int[ 3 ];
 
 		#region[ 画像関連 ]
-		nJudgeAnimeType = 1;
 		nJudgeFrames = 24;
 		nJudgeInterval = 14;
 		nJudgeWidgh = 250;
@@ -1288,7 +1182,7 @@ internal class CConfigIni
 			{
 				for( int k = 0; k < 0x10; k++ )
 				{
-					if( ( ( KeyAssign[ i ][ j ][ k ].InputDevice == DeviceType ) && ( KeyAssign[ i ][ j ][ k ].ID == nID ) ) && ( KeyAssign[ i ][ j ][ k ].Code == nCode ) )
+					if ( ( ( KeyAssign[ i ][ j ][ k ].InputDevice == DeviceType ) && ( KeyAssign[ i ][ j ][ k ].ID == nID ) ) && ( KeyAssign[ i ][ j ][ k ].Code == nCode ) )
 					{
 						for( int m = k; m < 15; m++ )
 						{
@@ -1517,6 +1411,10 @@ internal class CConfigIni
 		sw.WriteLine( "; ギター/ベース有効(0:OFF,1:ON)" );
 		sw.WriteLine( "; Enable Guitar/Bass or not.(0:OFF,1:ON)" );
 		sw.WriteLine( "Guitar={0}", bGuitarEnabled ? 1 : 0 );
+		sw.WriteLine();
+		sw.WriteLine( "; シングルプレイのギター有効(0:OFF,1:ON)" );
+		sw.WriteLine( "; Enable Singleplayer Guitar or not.(0:OFF,1:ON)" );
+		sw.WriteLine( "SingleGuitar={0}", bSingleGuitar ? 1 : 0 );
 		sw.WriteLine();
 		sw.WriteLine( "; ドラム有効(0:OFF,1:ON)" );
 		sw.WriteLine( "; Enable Drums or not.(0:OFF,1:ON)" );
@@ -1990,9 +1888,6 @@ internal class CConfigIni
 		#endregion
 		#region[ 画像周り ]
 		sw.WriteLine( ";判定画像のアニメーション方式" );
-		sw.WriteLine( ";(0:旧DTXMania方式 1:コマ方式 2:擬似XG方式)");
-		sw.WriteLine( "JudgeAnimeType={0}", nJudgeAnimeType );
-		sw.WriteLine();
 		sw.WriteLine( ";判定画像のコマ数" );
 		sw.WriteLine( "JudgeFrames={0}", nJudgeFrames );
 		sw.WriteLine();
@@ -2314,7 +2209,7 @@ internal class CConfigIni
 	{
 		ConfigIniファイル名 = iniファイル名;
 		bConfigIniExists = File.Exists( ConfigIniファイル名 );
-		if( bConfigIniExists )
+		if ( bConfigIniExists )
 		{
 			string str;
 			StreamReader reader = new StreamReader( ConfigIniファイル名, Encoding.GetEncoding( "Shift_JIS" ) );
@@ -2402,7 +2297,7 @@ internal class CConfigIni
 					else
 					{
 						string[] strArray = str.Split( new char[] { '=' } );
-						if( strArray.Length == 2 )
+						if ( strArray.Length == 2 )
 						{
 							str3 = strArray[ 0 ].Trim();
 							str4 = strArray[ 1 ].Trim();
@@ -2444,11 +2339,11 @@ internal class CConfigIni
 												else
 										//----------------------------------------
 #endif
-									if( str3.Equals( "Version" ) )
+									if ( str3.Equals( "Version" ) )
 									{
 										strDTXManiaのバージョン = str4;
 									}
-									else if( str3.Equals( "DTXPath" ) )
+									else if ( str3.Equals( "DTXPath" ) )
 									{
 										strSongDataSearchPath = str4;
 									}
@@ -2470,39 +2365,39 @@ internal class CConfigIni
 										}
 										strSystemSkinSubfolderFullName = absSkinPath;
 									}
-									else if( str3.Equals( "CardNameDrums" ) )
+									else if ( str3.Equals( "CardNameDrums" ) )
 									{
 										strCardName[0] = str4;
 									}
-									else if( str3.Equals( "CardNameGuitar" ) )
+									else if ( str3.Equals( "CardNameGuitar" ) )
 									{
 										strCardName[1] = str4;
 									}
-									else if( str3.Equals( "CardNameBass" ) )
+									else if ( str3.Equals( "CardNameBass" ) )
 									{
 										strCardName[2] = str4;
 									}
-									else if( str3.Equals( "GroupNameDrums" ) )
+									else if ( str3.Equals( "GroupNameDrums" ) )
 									{
 										strGroupName[0] = str4;
 									}
-									else if( str3.Equals( "GroupNameGuitar" ) )
+									else if ( str3.Equals( "GroupNameGuitar" ) )
 									{
 										strGroupName[1] = str4;
 									}
-									else if( str3.Equals( "GroupNameBass" ) )
+									else if ( str3.Equals( "GroupNameBass" ) )
 									{
 										strGroupName[2] = str4;
 									}
-									else if( str3.Equals( "NameColorDrums" ) )
+									else if ( str3.Equals( "NameColorDrums" ) )
 									{
 										nNameColor[ 0 ] = CConversion.nGetNumberIfInRange(str4, 0, 19, 0);
 									}
-									else if( str3.Equals( "NameColorGuitar" ) )
+									else if ( str3.Equals( "NameColorGuitar" ) )
 									{
 										nNameColor[ 1 ] = CConversion.nGetNumberIfInRange(str4, 0, 19, 0);
 									}
-									else if( str3.Equals( "NameColorBass" ) )
+									else if ( str3.Equals( "NameColorBass" ) )
 									{
 										nNameColor[ 2 ] = CConversion.nGetNumberIfInRange(str4, 0, 19, 0);
 									}
@@ -2629,6 +2524,10 @@ internal class CConfigIni
 									{
 										bGuitarEnabled = CConversion.bONorOFF(str4[0]);
 									}
+									else if (str3.Equals("SingleGuitar"))
+									{
+										bSingleGuitar = CConversion.bONorOFF(str4[0]);
+									}
 									else if (str3.Equals("Drums"))
 									{
 										bDrumsEnabled = CConversion.bONorOFF(str4[0]);
@@ -2745,7 +2644,7 @@ internal class CConfigIni
 									{
 										n表示可能な最小コンボ数.Bass = CConversion.nGetNumberIfInRange(str4, 0, 0x1869f, n表示可能な最小コンボ数.Bass);
 									}
-									else if( str3.Equals( "MusicNameDispDef" ) )
+									else if ( str3.Equals( "MusicNameDispDef" ) )
 									{
 										b曲名表示をdefのものにする = CConversion.bONorOFF(str4[0]);
 									}
@@ -2938,19 +2837,19 @@ internal class CConfigIni
 								//-----------------------------
 								case ESectionType.Log:
 								{
-									if( str3.Equals( "OutputLog" ) )
+									if ( str3.Equals( "OutputLog" ) )
 									{
 										bOutputLogs = CConversion.bONorOFF( str4[ 0 ] );
 									}
-									else if( str3.Equals( "TraceCreatedDisposed" ) )
+									else if ( str3.Equals( "TraceCreatedDisposed" ) )
 									{
 										bLog作成解放ログ出力 = CConversion.bONorOFF( str4[ 0 ] );
 									}
-									else if( str3.Equals( "TraceDTXDetails" ) )
+									else if ( str3.Equals( "TraceDTXDetails" ) )
 									{
 										bLogDTX詳細ログ出力 = CConversion.bONorOFF( str4[ 0 ] );
 									}
-									else if( str3.Equals( "TraceSongSearch" ) )
+									else if ( str3.Equals( "TraceSongSearch" ) )
 									{
 										bLogSongSearch = CConversion.bONorOFF( str4[ 0 ] );
 									}
@@ -2963,15 +2862,15 @@ internal class CConfigIni
 								//-----------------------------
 								case ESectionType.PlayOption:
 								{
-									if( str3.Equals( "DrumGraph" ) )  // #24074 2011.01.23 addikanick
+									if ( str3.Equals( "DrumGraph" ) )  // #24074 2011.01.23 addikanick
 									{
 										bGraph有効.Drums = CConversion.bONorOFF( str4[ 0 ] );
 									}
-									else if( str3.Equals( "GuitarGraph" ) )  // #24074 2011.01.23 addikanick
+									else if ( str3.Equals( "GuitarGraph" ) )  // #24074 2011.01.23 addikanick
 									{
 										bGraph有効.Guitar = CConversion.bONorOFF( str4[ 0 ] );
 									}
-									else if( str3.Equals( "BassGraph" ) )  // #24074 2011.01.23 addikanick
+									else if ( str3.Equals( "BassGraph" ) )  // #24074 2011.01.23 addikanick
 									{
 										bGraph有効.Bass = CConversion.bONorOFF( str4[ 0 ] );
 									}
@@ -2983,31 +2882,31 @@ internal class CConfigIni
 									{
 										bReverse.Drums = CConversion.bONorOFF( str4[ 0 ] );
 									}
-									else if( str3.Equals( "GuitarReverse" ) )
+									else if ( str3.Equals( "GuitarReverse" ) )
 									{
 										bReverse.Guitar = CConversion.bONorOFF( str4[ 0 ] );
 									}
-									else if( str3.Equals( "BassReverse" ) )
+									else if ( str3.Equals( "BassReverse" ) )
 									{
 										bReverse.Bass = CConversion.bONorOFF( str4[ 0 ] );
 									}
-									else if( str3.Equals( "GuitarRandom" ) )
+									else if ( str3.Equals( "GuitarRandom" ) )
 									{
 										eRandom.Guitar = (ERandomMode) CConversion.nGetNumberIfInRange( str4, 0, 4, (int) eRandom.Guitar );
 									}
-									else if( str3.Equals( "BassRandom" ) )
+									else if ( str3.Equals( "BassRandom" ) )
 									{
 										eRandom.Bass = (ERandomMode) CConversion.nGetNumberIfInRange( str4, 0, 4, (int) eRandom.Bass );
 									}
-									else if( str3.Equals( "DrumsTight" ) )
+									else if ( str3.Equals( "DrumsTight" ) )
 									{
 										bTight = CConversion.bONorOFF( str4[ 0 ] );
 									}
-									else if( str3.Equals( "GuitarLight" ) )
+									else if ( str3.Equals( "GuitarLight" ) )
 									{
 										bLight.Guitar = CConversion.bONorOFF( str4[ 0 ] );
 									}
-									else if( str3.Equals( "BassLight" ) )
+									else if ( str3.Equals( "BassLight" ) )
 									{
 										bLight.Bass = CConversion.bONorOFF( str4[ 0 ] );
 									}
@@ -3019,11 +2918,11 @@ internal class CConfigIni
 									{
 										bSpecialist.Bass = CConversion.bONorOFF(str4[0]);
 									}
-									else if( str3.Equals( "GuitarLeft" ) )
+									else if ( str3.Equals( "GuitarLeft" ) )
 									{
 										bLeft.Guitar = CConversion.bONorOFF( str4[ 0 ] );
 									}
-									else if( str3.Equals( "BassLeft" ) )
+									else if ( str3.Equals( "BassLeft" ) )
 									{
 										bLeft.Bass = CConversion.bONorOFF( str4[ 0 ] );
 									}
@@ -3039,31 +2938,31 @@ internal class CConfigIni
 									{
 										nHidSud.Bass = CConversion.nGetNumberIfInRange(str4, 0, 5, nHidSud.Bass);
 									}
-									else if( str3.Equals( "DrumsPosition" ) )
+									else if ( str3.Equals( "DrumsPosition" ) )
 									{
 										JudgementStringPosition.Drums = (EType)CConversion.nGetNumberIfInRange(str4, 0, 2, (int)JudgementStringPosition.Drums);
 									}
-									else if( str3.Equals( "GuitarPosition" ) )
+									else if ( str3.Equals( "GuitarPosition" ) )
 									{
 										JudgementStringPosition.Guitar = (EType)CConversion.nGetNumberIfInRange(str4, 0, 3, (int)JudgementStringPosition.Guitar);
 									}
-									else if( str3.Equals( "BassPosition" ) )
+									else if ( str3.Equals( "BassPosition" ) )
 									{
 										JudgementStringPosition.Bass = (EType)CConversion.nGetNumberIfInRange(str4, 0, 3, (int)JudgementStringPosition.Bass);
 									}
-									else if( str3.Equals( "DrumsScrollSpeed" ) )
+									else if ( str3.Equals( "DrumsScrollSpeed" ) )
 									{
 										nScrollSpeed.Drums = CConversion.nGetNumberIfInRange( str4, 0, 0x7cf, nScrollSpeed.Drums );
 									}
-									else if( str3.Equals( "GuitarScrollSpeed" ) )
+									else if ( str3.Equals( "GuitarScrollSpeed" ) )
 									{
 										nScrollSpeed.Guitar = CConversion.nGetNumberIfInRange( str4, 0, 0x7cf, nScrollSpeed.Guitar );
 									}
-									else if( str3.Equals( "BassScrollSpeed" ) )
+									else if ( str3.Equals( "BassScrollSpeed" ) )
 									{
 										nScrollSpeed.Bass = CConversion.nGetNumberIfInRange( str4, 0, 0x7cf, nScrollSpeed.Bass );
 									}
-									else if( str3.Equals( "PlaySpeed" ) )
+									else if ( str3.Equals( "PlaySpeed" ) )
 									{
 										nPlaySpeed = CConversion.nGetNumberIfInRange( str4, CConstants.PLAYSPEED_MIN, CConstants.PLAYSPEED_MAX, nPlaySpeed );
 									}
@@ -3075,15 +2974,15 @@ internal class CConfigIni
 									{
 										ドラムコンボ文字の表示位置 = (EDrumComboTextDisplayPosition) CConversion.nGetNumberIfInRange( str4, 0, 3, (int) ドラムコンボ文字の表示位置 );
 									}
-									else if( str3.Equals( "Risky" ) )					// #2359 2011.6.23  yyagi
+									else if ( str3.Equals( "Risky" ) )					// #2359 2011.6.23  yyagi
 									{
 										nRisky = CConversion.nGetNumberIfInRange( str4, 0, 10, nRisky );
 									}
-									else if( str3.Equals( "HAZARD" ) )				// #29500 2012.9.11 kairera0467
+									else if ( str3.Equals( "HAZARD" ) )				// #29500 2012.9.11 kairera0467
 									{
 										bHAZARD = CConversion.bONorOFF( str4[ 0 ] );
 									}
-									else if( str3.Equals( "AssignToLBD" ) )
+									else if ( str3.Equals( "AssignToLBD" ) )
 									{
 										bAssignToLBD.Drums = CConversion.bONorOFF( str4[ 0 ] );
 									}
@@ -3221,11 +3120,11 @@ internal class CConfigIni
 									{
 										bDisplayJudge.Drums = CConversion.bONorOFF(str4[0]);
 									}
-									else if( str3.Equals("GuitarDisplayJudge") )
+									else if ( str3.Equals("GuitarDisplayJudge") )
 									{
 										bDisplayJudge.Guitar = CConversion.bONorOFF(str4[0]);
 									}
-									else if( str3.Equals("BassDisplayJudge") )
+									else if ( str3.Equals("BassDisplayJudge") )
 									{
 										bDisplayJudge.Bass = CConversion.bONorOFF(str4[0]);
 									}
@@ -3252,10 +3151,6 @@ internal class CConfigIni
 									else if (str3.Equals("BassLaneFlush"))
 									{
 										bLaneFlush.Bass = CConversion.bONorOFF(str4[0]);
-									}
-									else if( str3.Equals( "JudgeAnimeType" ) )
-									{
-										nJudgeAnimeType = CConversion.nGetNumberIfInRange( str4, 0, 2, nJudgeAnimeType );
 									}
 									else if (str3.Equals( "JudgeFrames"))
 									{
@@ -3359,35 +3254,35 @@ internal class CConfigIni
 								#region [ [AutoPlay] ]
 								//-----------------------------
 								case ESectionType.AutoPlay:
-									if( str3.Equals( "LC" ) )
+									if ( str3.Equals( "LC" ) )
 									{
 										bAutoPlay.LC = CConversion.bONorOFF( str4[ 0 ] );
 									}
-									if( str3.Equals( "HH" ) )
+									if ( str3.Equals( "HH" ) )
 									{
 										bAutoPlay.HH = CConversion.bONorOFF( str4[ 0 ] );
 									}
-									else if( str3.Equals( "SD" ) )
+									else if ( str3.Equals( "SD" ) )
 									{
 										bAutoPlay.SD = CConversion.bONorOFF( str4[ 0 ] );
 									}
-									else if( str3.Equals( "BD" ) )
+									else if ( str3.Equals( "BD" ) )
 									{
 										bAutoPlay.BD = CConversion.bONorOFF( str4[ 0 ] );
 									}
-									else if( str3.Equals( "HT" ) )
+									else if ( str3.Equals( "HT" ) )
 									{
 										bAutoPlay.HT = CConversion.bONorOFF( str4[ 0 ] );
 									}
-									else if( str3.Equals( "LT" ) )
+									else if ( str3.Equals( "LT" ) )
 									{
 										bAutoPlay.LT = CConversion.bONorOFF( str4[ 0 ] );
 									}
-									else if( str3.Equals( "FT" ) )
+									else if ( str3.Equals( "FT" ) )
 									{
 										bAutoPlay.FT = CConversion.bONorOFF( str4[ 0 ] );
 									}
-									else if( str3.Equals( "CY" ) )
+									else if ( str3.Equals( "CY" ) )
 									{
 										bAutoPlay.CY = CConversion.bONorOFF( str4[ 0 ] );
 									}
@@ -3395,7 +3290,7 @@ internal class CConfigIni
 									{
 										bAutoPlay.RD= CConversion.bONorOFF(str4[0]);
 									}
-									else if( str3.Equals( "LP" ) )
+									else if ( str3.Equals( "LP" ) )
 									{
 										bAutoPlay.LP = CConversion.bONorOFF(str4[0]);
 									}
@@ -3403,7 +3298,7 @@ internal class CConfigIni
 									{
 										bAutoPlay.LBD = CConversion.bONorOFF(str4[0]);
 									}
-									//else if( str3.Equals( "Guitar" ) )
+									//else if ( str3.Equals( "Guitar" ) )
 									//{
 									//    this.bAutoPlay.Guitar = CConversion.bONorOFF( str4[ 0 ] );
 									//}
@@ -3529,7 +3424,7 @@ internal class CConfigIni
 								#region [ [GUID] ]
 								//-----------------------------
 								case ESectionType.GUID:
-									if( str3.Equals( "JoystickID" ) )
+									if ( str3.Equals( "JoystickID" ) )
 									{
 										tAcquireJoystickID( str4 );
 									}
@@ -3541,47 +3436,47 @@ internal class CConfigIni
 								//-----------------------------
 								case ESectionType.DrumsKeyAssign:
 								{
-									if( str3.Equals( "HH" ) )
+									if ( str3.Equals( "HH" ) )
 									{
 										tReadAndSetSkey( str4, KeyAssign.Drums.HH );
 									}
-									else if( str3.Equals( "SD" ) )
+									else if ( str3.Equals( "SD" ) )
 									{
 										tReadAndSetSkey( str4, KeyAssign.Drums.SD );
 									}
-									else if( str3.Equals( "BD" ) )
+									else if ( str3.Equals( "BD" ) )
 									{
 										tReadAndSetSkey( str4, KeyAssign.Drums.BD );
 									}
-									else if( str3.Equals( "HT" ) )
+									else if ( str3.Equals( "HT" ) )
 									{
 										tReadAndSetSkey( str4, KeyAssign.Drums.HT );
 									}
-									else if( str3.Equals( "LT" ) )
+									else if ( str3.Equals( "LT" ) )
 									{
 										tReadAndSetSkey( str4, KeyAssign.Drums.LT );
 									}
-									else if( str3.Equals( "FT" ) )
+									else if ( str3.Equals( "FT" ) )
 									{
 										tReadAndSetSkey( str4, KeyAssign.Drums.FT );
 									}
-									else if( str3.Equals( "CY" ) )
+									else if ( str3.Equals( "CY" ) )
 									{
 										tReadAndSetSkey( str4, KeyAssign.Drums.CY );
 									}
-									else if( str3.Equals( "HO" ) )
+									else if ( str3.Equals( "HO" ) )
 									{
 										tReadAndSetSkey( str4, KeyAssign.Drums.HHO );
 									}
-									else if( str3.Equals( "RD" ) )
+									else if ( str3.Equals( "RD" ) )
 									{
 										tReadAndSetSkey( str4, KeyAssign.Drums.RD );
 									}
-									else if( str3.Equals( "LC" ) )
+									else if ( str3.Equals( "LC" ) )
 									{
 										tReadAndSetSkey( str4, KeyAssign.Drums.LC );
 									}
-									else if( str3.Equals( "LP" ) )										// #27029 2012.1.4 from
+									else if ( str3.Equals( "LP" ) )										// #27029 2012.1.4 from
 									{																	//
 										tReadAndSetSkey( str4, KeyAssign.Drums.LP );	//
 									}																	//
@@ -3598,35 +3493,35 @@ internal class CConfigIni
 								//-----------------------------
 								case ESectionType.GuitarKeyAssign:
 								{
-									if( str3.Equals( "R" ) )
+									if ( str3.Equals( "R" ) )
 									{
 										tReadAndSetSkey( str4, KeyAssign.Guitar.R );
 									}
-									else if( str3.Equals( "G" ) )
+									else if ( str3.Equals( "G" ) )
 									{
 										tReadAndSetSkey( str4, KeyAssign.Guitar.G );
 									}
-									else if( str3.Equals( "B" ) )
+									else if ( str3.Equals( "B" ) )
 									{
 										tReadAndSetSkey( str4, KeyAssign.Guitar.B );
 									}
-									else if( str3.Equals( "Y" ) )
+									else if ( str3.Equals( "Y" ) )
 									{
 										tReadAndSetSkey( str4, KeyAssign.Guitar.Y );
 									}
-									else if( str3.Equals( "P" ) )
+									else if ( str3.Equals( "P" ) )
 									{
 										tReadAndSetSkey( str4, KeyAssign.Guitar.P );
 									}
-									else if( str3.Equals( "Pick" ) )
+									else if ( str3.Equals( "Pick" ) )
 									{
 										tReadAndSetSkey( str4, KeyAssign.Guitar.Pick );
 									}
-									else if( str3.Equals( "Wail" ) )
+									else if ( str3.Equals( "Wail" ) )
 									{
 										tReadAndSetSkey( str4, KeyAssign.Guitar.Wail );
 									}
-									else if( str3.Equals( "Decide" ) )
+									else if ( str3.Equals( "Decide" ) )
 									{
 										tReadAndSetSkey( str4, KeyAssign.Guitar.Decide );
 									}
@@ -3642,35 +3537,35 @@ internal class CConfigIni
 								#region [ [BassKeyAssign] ]
 								//-----------------------------
 								case ESectionType.BassKeyAssign:
-									if( str3.Equals( "R" ) )
+									if ( str3.Equals( "R" ) )
 									{
 										tReadAndSetSkey( str4, KeyAssign.Bass.R );
 									}
-									else if( str3.Equals( "G" ) )
+									else if ( str3.Equals( "G" ) )
 									{
 										tReadAndSetSkey( str4, KeyAssign.Bass.G );
 									}
-									else if( str3.Equals( "B" ) )
+									else if ( str3.Equals( "B" ) )
 									{
 										tReadAndSetSkey( str4, KeyAssign.Bass.B );
 									}
-									else if( str3.Equals( "Y" ) )
+									else if ( str3.Equals( "Y" ) )
 									{
 										tReadAndSetSkey( str4, KeyAssign.Bass.Y );
 									}
-									else if( str3.Equals( "P" ) ) 
+									else if ( str3.Equals( "P" ) ) 
 									{
 										tReadAndSetSkey( str4, KeyAssign.Bass.P );
 									}
-									else if( str3.Equals( "Pick" ) )
+									else if ( str3.Equals( "Pick" ) )
 									{
 										tReadAndSetSkey( str4, KeyAssign.Bass.Pick );
 									}
-									else if( str3.Equals( "Wail" ) )
+									else if ( str3.Equals( "Wail" ) )
 									{
 										tReadAndSetSkey( str4, KeyAssign.Bass.Wail );
 									}
-									else if( str3.Equals( "Decide" ) )
+									else if ( str3.Equals( "Decide" ) )
 									{
 										tReadAndSetSkey( str4, KeyAssign.Bass.Decide );
 									}
@@ -3685,7 +3580,7 @@ internal class CConfigIni
 								#region [ [SystemKeyAssign] ]
 								//-----------------------------
 								case ESectionType.SystemKeyAssign:
-									if( str3.Equals( "Capture" ) )
+									if ( str3.Equals( "Capture" ) )
 									{
 										tReadAndSetSkey( str4, KeyAssign.System.Capture );
 									}
@@ -3828,20 +3723,20 @@ internal class CConfigIni
 		Temp,
 	}
 
-	private bool _bDrums有効;
-	private bool _bGuitar有効;
+	private bool _bDrumsEnabled;
+	private bool _bGuitarEnabled;
 	private bool bConfigIniExists;
 	private string ConfigIniファイル名;
 
 	private void tAcquireJoystickID( string strキー記述 )
 	{
 		string[] strArray = strキー記述.Split( new char[] { ',' } );
-		if( strArray.Length >= 2 )
+		if ( strArray.Length >= 2 )
 		{
 			int result = 0;
-			if( ( int.TryParse( strArray[ 0 ], out result ) && ( result >= 0 ) ) && ( result <= 9 ) )
+			if ( ( int.TryParse( strArray[ 0 ], out result ) && ( result >= 0 ) ) && ( result <= 9 ) )
 			{
-				if( joystickDict.ContainsKey( result ) )
+				if ( joystickDict.ContainsKey( result ) )
 				{
 					joystickDict.Remove( result );
 				}
@@ -3869,11 +3764,11 @@ internal class CConfigIni
 		bool flag = true;
 		for( int i = 0; i < 0x10; i++ )
 		{
-			if( assign[ i ].InputDevice == EInputDevice.Unknown )
+			if ( assign[ i ].InputDevice == EInputDevice.Unknown )
 			{
 				continue;
 			}
-			if( !flag )
+			if ( !flag )
 			{
 				sw.Write( ',' );
 			}
@@ -4011,7 +3906,7 @@ Restart=K052
 
 	public void SyncGraphicsSettings(IGameHost host)
 	{
-		Trace.TraceInformation("Applying graphics settings changes...");
+		Trace.TraceInformation("Synchronizing graphics settings...");
 
 		//sync graphics options with game host
 		FullscreenMode targetMode = FullscreenMode.Windowed;

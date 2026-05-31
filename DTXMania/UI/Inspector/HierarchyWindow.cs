@@ -314,68 +314,7 @@ public class HierarchyWindow
         {
             if (ImGui.BeginMenu("Add Child"))
             {
-                //get all executing assemblies
-                var assemblies = AppDomain.CurrentDomain.GetAssemblies()
-                    .Where(a => !a.IsDynamic && !string.IsNullOrWhiteSpace(a.Location))
-                    .ToArray();
-                
-                //get types that inherit from UIDrawable
-                Type[] types = assemblies.SelectMany(x => x.GetTypes())
-                    .Where(t => t.IsSubclassOf(typeof(UIDrawable)) && !t.IsAbstract)
-                    .ToArray();
-                
-                Dictionary<Type, MethodInfo> creators = new();
-                
-                foreach (Type type in types)
-                {
-                    //get static methods with AddChildMenuAttribute
-                    var staticMethods = type.GetMethods(BindingFlags.Public | BindingFlags.Static)
-                        .Where(m => m.GetCustomAttributes(typeof(AddChildMenuAttribute), false).Length != 0)
-                        .ToArray();
-
-                    if (staticMethods.Length > 0)
-                        creators[type] = staticMethods.FirstOrDefault()!;
-                }
-
-                foreach (var creator in creators)
-                {
-                    string typeName = creator.Key.Name;
-                    if (ImGui.Selectable(typeName))
-                    {
-                        //create instance of type using the static method
-                        object? newChild = creator.Value.Invoke(null, null);
-
-                        if (newChild is UIDrawable drawable)
-                        {
-                            group.AddChild(drawable);
-                        }
-                        
-                        //close popup
-                        ImGui.CloseCurrentPopup();
-                    }
-                }
-
-                if (ImGui.Selectable("Load from JSON"))
-                {
-                    string defaultPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-                    string path = NFD.OpenDialog(defaultPath);
-                    
-                    if (!string.IsNullOrEmpty(path))
-                    {
-                        string json = File.ReadAllText(path);
-                        UIGroup? loadedGroup = SkinHierarchySerializer.DeserializeFromJson(json);
-                        if (loadedGroup != null)
-                        {
-                            //add loaded group as child
-                            group.AddChild(loadedGroup);
-                        }
-                        else
-                        {
-                            Trace.TraceError("Failed to load group from JSON");
-                        }
-                    }
-                }
-                    
+                DrawAddChildMenu(group);
                 ImGui.EndMenu();
             }
             
@@ -403,5 +342,164 @@ public class HierarchyWindow
         ImGui.PopStyleColor();
 
         ImGui.EndPopup();
+    }
+
+    private class DrawableCreatorEntry
+    {
+        public string DisplayName = "";       // leaf name shown in the menu
+        public string[] PathSegments = [];    // folder segments, empty = root
+        public MethodInfo Method = null!;
+    }
+
+    private static DrawableCreatorEntry[]? cachedCreators;
+    
+    private static DrawableCreatorEntry[] GetCreators()
+    {
+        if (cachedCreators != null) return cachedCreators;
+
+        var assemblies = AppDomain.CurrentDomain.GetAssemblies()
+            .Where(a => !a.IsDynamic && !string.IsNullOrWhiteSpace(a.Location))
+            .ToArray();
+
+        var types = assemblies.SelectMany(a => a.GetTypes())
+            .Where(t => t.IsSubclassOf(typeof(UIDrawable)) && !t.IsAbstract)
+            .ToArray();
+
+        var list = new List<DrawableCreatorEntry>();
+
+        foreach (Type type in types)
+        {
+            var methods = type.GetMethods(BindingFlags.Public | BindingFlags.Static)
+                .Where(m => m.GetCustomAttributes(typeof(AddChildMenuAttribute), false).Length != 0)
+                .ToArray();
+
+            foreach (MethodInfo method in methods)
+            {
+                var attr = (AddChildMenuAttribute)method.GetCustomAttributes(typeof(AddChildMenuAttribute), false)[0];
+
+                var entry = new DrawableCreatorEntry { Method = method };
+
+                if (string.IsNullOrWhiteSpace(attr.Path))
+                {
+                    //no path: root-level item named after the type (current behaviour)
+                    entry.DisplayName = type.Name;
+                    entry.PathSegments = [];
+                }
+                else
+                {
+                    //path like "Shapes/Rectangle" → folders ["Shapes"], display "Rectangle"
+                    var segments = attr.Path.Split('/', StringSplitOptions.RemoveEmptyEntries
+                                                        | StringSplitOptions.TrimEntries);
+
+                    if (segments.Length == 0)
+                    {
+                        entry.DisplayName = type.Name;
+                        entry.PathSegments = [];
+                    }
+                    else
+                    {
+                        entry.DisplayName = segments[^1];
+                        entry.PathSegments = segments[..^1];
+                    }
+                }
+
+                list.Add(entry);
+            }
+        }
+
+        cachedCreators = list.ToArray();
+        return cachedCreators;
+    }
+
+    private void DrawAddChildMenu(UIGroup group)
+    {
+        var creators = GetCreators();
+
+        //draw recursively. `depth` is how many path segments we've already consumed.
+        DrawAddChildMenuLevel(group, creators, depth: 0, parentPath: []);
+
+        if (ImGui.Selectable("Load from JSON"))
+        {
+            string defaultPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            string path = NFD.OpenDialog(defaultPath);
+
+            if (!string.IsNullOrEmpty(path))
+            {
+                string json = File.ReadAllText(path);
+                UIGroup? loadedGroup = SkinHierarchySerializer.DeserializeFromJson(json);
+                if (loadedGroup != null)
+                {
+                    //add loaded group as child
+                    group.AddChild(loadedGroup);
+                }
+                else
+                {
+                    Trace.TraceError("Failed to load group from JSON");
+                }
+            }
+        }
+    }
+
+    private void DrawAddChildMenuLevel(UIGroup group, DrawableCreatorEntry[] creators, int depth, string[] parentPath)
+    {
+        //leaves at this level: entries whose PathSegments length equals `depth`
+        //folders at this level: entries with more segments; group by the segment at index `depth`
+        var leaves = new List<DrawableCreatorEntry>();
+        var folders = new Dictionary<string, List<DrawableCreatorEntry>>();
+
+        foreach (var entry in creators)
+        {
+            //must be within the same parent path
+            if (entry.PathSegments.Length < depth) continue;
+
+            bool matches = true;
+            for (int i = 0; i < depth; i++)
+            {
+                if (entry.PathSegments[i] != parentPath[i]) { matches = false; break; }
+            }
+            if (!matches) continue;
+
+            if (entry.PathSegments.Length == depth)
+            {
+                leaves.Add(entry);
+            }
+            else
+            {
+                string folderName = entry.PathSegments[depth];
+                if (!folders.TryGetValue(folderName, out var bucket))
+                {
+                    bucket = new List<DrawableCreatorEntry>();
+                    folders[folderName] = bucket;
+                }
+                bucket.Add(entry);
+            }
+        }
+
+        //folders first, then leaves — same convention as Unity
+        foreach (var (folderName, _) in folders)
+        {
+            if (ImGui.BeginMenu(folderName))
+            {
+                var childPath = new string[depth + 1];
+                Array.Copy(parentPath, childPath, depth);
+                childPath[depth] = folderName;
+
+                DrawAddChildMenuLevel(group, creators, depth + 1, childPath);
+                ImGui.EndMenu();
+            }
+        }
+
+        foreach (var entry in leaves)
+        {
+            if (ImGui.Selectable(entry.DisplayName))
+            {
+                object? newChild = entry.Method.Invoke(null, null);
+                if (newChild is UIDrawable drawable)
+                {
+                    group.AddChild(drawable);
+                }
+                ImGui.CloseCurrentPopup();
+            }
+        }
     }
 }

@@ -39,4 +39,4 @@
 //
 // // このアセンブリは「ライブラリ」である（難読化ツールへの指示）。
 // // → デフォルトの true のままだと、アセンブリ public なメンバもすべて難読化されてしまう。
-// [assembly: ObfuscateAssembly( false )]
+// [assembly: ObfuscateAssembly(false)]

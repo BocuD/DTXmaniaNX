@@ -33,14 +33,14 @@ internal class CItemInteger : CItemBase
 	}
 	public override void tMoveItemValueToNext()
 	{
-		if( ++nCurrentValue > nMaximumValue )
+		if ( ++nCurrentValue > nMaximumValue )
 		{
 			nCurrentValue = nMaximumValue;
 		}
 	}
 	public override void tMoveItemValueToPrevious()
 	{
-		if( --nCurrentValue < nMinimumValue )
+		if ( --nCurrentValue < nMinimumValue )
 		{
 			nCurrentValue = nMinimumValue;
 		}

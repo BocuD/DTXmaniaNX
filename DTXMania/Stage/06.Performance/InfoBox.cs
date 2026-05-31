@@ -63,7 +63,7 @@ internal class InfoBox : UIGroup
         artistNameText.outlineColor = Color4.White;
     }
 
-    private string GetStageNumberText()
+    public static string GetStageNumberText()
     {
         if (CDTXMania.nStageNumber == 1)
             return "1st STAGE";

@@ -73,6 +73,8 @@ internal class CActPerfGuitarStatusPanel : CActPerfCommonStatusPanel
     {
         if (bActivated)
         {
+            bool draw = CDTXMania.ConfigIni.nInfoType == 1;
+
             double dbPERFECT率 = 0;
             double dbGREAT率 = 0;
             double dbGOOD率 = 0;
@@ -82,7 +84,9 @@ internal class CActPerfGuitarStatusPanel : CActPerfCommonStatusPanel
 
             for (int i = 1; i < 3; i++)
             {
-                if (nBodyX[i] != 0)
+                playerNameplates[i - 1].isVisible = nBodyX[i] != 0 && draw;
+                
+                if (nBodyX[i] != 0 && draw)
                 {
                     string str = $"{((float)CDTXMania.DTX.LEVEL[i]) / 10.0f +
                                     (CDTXMania.DTX.LEVELDEC[i] != 0 ? CDTXMania.DTX.LEVELDEC[i] / 100.0f : 0):0.00}";

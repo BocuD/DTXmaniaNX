@@ -1,4 +1,6 @@
 ﻿using System.Diagnostics;
+using System.Numerics;
+using DTXMania.Core.Framework;
 using DTXMania.UI.Drawable;
 
 namespace DTXMania.Core;
@@ -8,7 +10,6 @@ internal class StageManager
     public CStageStartup stageStartup { get; }
     public CStageTitle stageTitle { get; }
     public CStageConfig stageConfig { get; }
-    //public CStageSongSelection stageSongSelection { get; }
     public CStageSongSelectionNew stageSongSelectionNew { get; }
     public CStageSongLoading stageSongLoading { get; }
     public CStagePerfGuitarScreen stagePerfGuitarScreen { get; }
@@ -20,12 +21,18 @@ internal class StageManager
     public CStage rCurrentStage;
     public CStage rPreviousStage;
 
+    //fade transition
+    private BaseTexture? _stageSnapshot;
+    private bool _inFadeTransition;
+    private float _fadeAlpha;
+    private long _fadeStartMs;
+    private float FadeDurationMs = 1500f;
+
     public StageManager()
     {
         stageStartup = new CStageStartup();
         stageTitle = new CStageTitle();
         stageConfig = new CStageConfig();
-        // stageSongSelection = new CStageSongSelection();
         stageSongSelectionNew = new CStageSongSelectionNew();
         stageSongLoading = new CStageSongLoading();
         stagePerfDrumsScreen = new CStagePerfDrumsScreen();
@@ -33,6 +40,11 @@ internal class StageManager
         stageResult = new CStageResult();
         stageChangeSkin = new CStageChangeSkin();
         stageEnd = new CStageEnd();
+    }
+    
+    public void InitializeStages()
+    {
+        throw new NotImplementedException();
     }
     
     public void LoadInitialStage()
@@ -46,6 +58,9 @@ internal class StageManager
         if (rCurrentStage == null) return;
 
         int nUpdateAndDrawReturnValue = rCurrentStage.OnUpdateAndDraw();
+
+        //composite our stage snapshot while it fades out
+        DrawFadeOverlay();
 
         //handle stage changes
         switch (rCurrentStage.eStageID)
@@ -158,26 +173,15 @@ internal class StageManager
 
                     if (nUpdateAndDrawReturnValue == (int)ESongLoadingScreenReturnValue.LoadingStopped)
                     {
-                        //DTX.tStopPlayingAllChips();
-                        CDTXMania.DTX.OnDeactivate();
-                        Trace.TraceInformation("曲の読み込みを中止しました。");
-                        CDTXMania.tRunGarbageCollector();
-
-                        GitaDoraTransition.Close(10, () => tChangeStage(stageSongSelectionNew));
                         break;
                     }
 
                     #endregion
 
-
-                    if (!CDTXMania.ConfigIni.bGuitarRevolutionMode)
-                    {
-                        tChangeStage(stagePerfDrumsScreen);
-                    }
-                    else
-                    {
-                        tChangeStage(stagePerfGuitarScreen);
-                    }
+                    var perfStage = CDTXMania.ConfigIni.bGuitarRevolutionMode
+                        ? (CStage)stagePerfGuitarScreen
+                        : stagePerfDrumsScreen;
+                    BeginFadeTransition(perfStage);
                 }
 
                 //-----------------------------
@@ -621,5 +625,69 @@ internal class StageManager
         stageChangeRequested = false;
 
         CDTXMania.tRunGarbageCollector();
+    }
+    
+    //Helpers for fade transition
+    private void BeginFadeTransition(CStage newStage)
+    {
+        var rt = CDTXMania.GameRenderTarget;
+        if (rt != null)
+        {
+            try
+            {
+                byte[] pixels = rt.ReadPixels();
+                _stageSnapshot?.Dispose();
+                _stageSnapshot = BaseTexture.LoadFromMemory(pixels, rt.Width, rt.Height, "LoadingSnapshot");
+            }
+            catch (Exception e)
+            {
+                Trace.TraceWarning($"StageManager: could not capture loading snapshot: {e.Message}");
+                _stageSnapshot = null;
+            }
+        }
+
+        tChangeStage(newStage);
+
+        if (_stageSnapshot != null)
+        {
+            _inFadeTransition = true;
+            _fadeAlpha        = 1.0f;
+            _fadeStartMs      = 0;   // will be latched after perf stage's first frame
+        }
+    }
+    
+    private void DrawFadeOverlay()
+    {
+        if (!_inFadeTransition || _stageSnapshot == null) return;
+
+        // Wait until the performance stage has completed its first frame before
+        // starting the fade, so the activation spike doesn't show through
+        if (rCurrentStage.bJustStartedUpdate)
+        {
+            // _stageSnapshot.tDraw2D(0f, 0f, new RectangleF(0, 0, _stageSnapshot.Width, _stageSnapshot.Height),
+            //     new Color4(1f, 1f, 1f, 1f), new Vector2(1280, 720));
+            _stageSnapshot.tDraw2DMatrix(Matrix4x4.Identity, new Color4(1f, 1f, 1f));
+            return;
+        }
+
+        // Latch the start time on the first frame after the spike
+        if (_fadeStartMs == 0)
+        {
+            _fadeStartMs = CDTXMania.Timer.nCurrentTime;
+        }
+
+        long elapsed = CDTXMania.Timer.nCurrentTime - _fadeStartMs;
+        _fadeAlpha = Math.Clamp(1f - (float)elapsed / FadeDurationMs, 0f, 1f);
+
+        _stageSnapshot.tDraw2DMatrix(Matrix4x4.Identity, new Color4(1f, 1f, 1f, _fadeAlpha));
+        //_stageSnapshot.tDraw2D(0f, 0f, new RectangleF(0, 0, _stageSnapshot.Width, _stageSnapshot.Height), new Color4(1f, 1f, 1f, _fadeAlpha), new Vector2(1280, 720));
+
+        if (_fadeAlpha <= 0f)
+        {
+            _stageSnapshot.Dispose();
+            _stageSnapshot = null;
+            _inFadeTransition = false;
+            _fadeStartMs = 0;
+        }
     }
 }

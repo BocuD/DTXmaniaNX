@@ -4,6 +4,7 @@ using DTXMania.Core;
 using DTXMania.Core.Framework;
 using DTXMania.UI;
 using DTXMania.UI.Drawable;
+using DTXMania.UI.Text;
 using FDK;
 using SlimDXKey = SlimDX.DirectInput.Key;
 
@@ -11,8 +12,6 @@ namespace DTXMania;
 
 internal class CStageResult : CStage
 {
-	// プロパティ
-
 	public STDGBVALUE<bool> bNewRecordSkill;
 	public STDGBVALUE<bool> bNewRecordScore;
 	public STDGBVALUE<bool> bNewRecordRank;
@@ -47,8 +46,6 @@ internal class CStageResult : CStage
 		ePhaseID = EPhase.Common_DefaultState;
 		bActivated = false;
 		//listChildActivities.Add( actResultImage = new CActResultImage(this) );
-		listChildActivities.Add( actParameterPanel = new CActResultParameterPanel(this) );
-		listChildActivities.Add( actRank = new CActResultRank(this) );
 	}
 
 		
@@ -120,6 +117,25 @@ internal class CStageResult : CStage
 		background = ui.AddChild(new UIImage(txBackground));
 		background.renderOrder = -100;
 		background.isVisible = true;
+		background.name = "Background";
+
+		var stageNumber = ui.AddChild(new UIText(InfoBox.GetStageNumberText(), 46));
+		stageNumber.name = "StageNumber";
+		stageNumber.position = new Vector3(640, 50, 0);
+		stageNumber.anchor = new Vector2(0.5f, 0);
+		stageNumber.fontSource = FontSource.System;
+		stageNumber.font = "Futura PT Book.otf";
+		stageNumber.style = UiTextStyle.Bold;
+		stageNumber.outlineWidth = 0;
+
+		var titleArtistBg = ui.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path("Graphics/Result/songname_bg.png"))));
+		titleArtistBg.anchor = new Vector2(0.5f, 0);
+		titleArtistBg.position = new Vector3(640, 529, 0);
+		titleArtistBg.renderOrder = 1;
+		titleArtistBg.name = "TitleArtistBg";
+		
+		var rankIcon = ui.AddChild(new ResultRankIcon(CDTXMania.GetCurrentInstrument()));
+		rankIcon.position = new Vector3(225, 360, 0);
 		
 		string strSongTitle;
 		if (!CDTXMania.bCompactMode && CDTXMania.ConfigIni.b曲名表示をdefのものにする)
@@ -131,12 +147,14 @@ internal class CStageResult : CStage
 		
 		if (!string.IsNullOrWhiteSpace(strSongTitle))
 		{
-			UIText songNameText = ui.AddChild(new UIText(strSongTitle, 30));
+			UIText songNameText = ui.AddChild(new UIText(strSongTitle, 29));
 			songNameText.fillColor = Color4.Black;
 			songNameText.outlineColor = Color4.White;
 			songNameText.name = "SongName";
 			songNameText.font = UIFonts.FallbackFont;
-			songNameText.position = new Vector3(490, 600, 0);
+			songNameText.position = new Vector3(464, 547, 0);
+			songNameText.outlineWidth = 2;
+			songNameText.renderOrder = 2;
 		}
 
 		if (!string.IsNullOrWhiteSpace(strArtistName))
@@ -146,30 +164,38 @@ internal class CStageResult : CStage
 			artistNameText.outlineColor = Color4.White;
 			artistNameText.name = "ArtistName";
 			artistNameText.font = UIFonts.FallbackFont;
-			artistNameText.position = new Vector3(490, 640, 0);
+			artistNameText.position = new Vector3(466, 589, 0);
+			artistNameText.outlineWidth = 2;
+			artistNameText.renderOrder = 2;
 		}
 		
 		string path = CDTXMania.DTX.strFolderName + CDTXMania.DTX.PREIMAGE;
 		var txJacket = BaseTexture.LoadFromPath(!File.Exists(path) ? CSkin.Path(@"Graphics\5_preimage default.png") : path);
 		var jacket = ui.AddChild(new UIImage(txJacket));
-		jacket.size = new Vector2(300, 300);
-		jacket.position = new Vector3(640, 290, 0);
+		jacket.size = new Vector2(380, 380);
+		jacket.position = new Vector3(640, 130, 0);
 		jacket.name = "AlbumArt";
 		jacket.anchor.X = 0.5f;
 
 		//todo: position these
 		if (CDTXMania.GetCurrentInstrument() == 0)
 		{
-			var drums = ui.AddChild(new UIPlayerNameplate(0));
-			drums.position = new Vector3(191, 272, 0);
+			var drums = ui.AddChild(new UIPlayerNameplate(0, true));
+			drums.position = new Vector3(989, 53, 0);
 		}
 		else
 		{
-			var guitar1 = ui.AddChild(new UIPlayerNameplate(1));
-			guitar1.position = new Vector3(148, 272, 0);
-			var guitar2 = ui.AddChild(new UIPlayerNameplate(2));
-			guitar2.position = new Vector3(853, 272, 0);
+			var guitar1 = ui.AddChild(new UIPlayerNameplate(1, true));
+			guitar1.position = new Vector3(989, 53, 0);
+			// var guitar2 = ui.AddChild(new UIPlayerNameplate(2, true));
+			// guitar2.position = new Vector3(853, 272, 0);
 		}
+
+		var infoPanel = ui.AddChild(new ResultInfoPanel(CDTXMania.GetCurrentInstrument()));
+		infoPanel.position = new Vector3(830, 120, 0);
+		
+		var paramPanel = ui.AddChild(new ResultParameterPanel(CDTXMania.GetCurrentInstrument()));
+		paramPanel.position = new Vector3(879, 479, 0);
 	}
 
 	public override void OnActivate()
@@ -357,7 +383,7 @@ internal class CStageResult : CStage
 							}
 
 							//Check if Progress record existed or not; if not, update anyway
-							if(CScoreIni.tProgressBarLength(cChartData.SongInformation.progress[instrument]) == 0)
+							if (CScoreIni.tProgressBarLength(cChartData.SongInformation.progress[instrument]) == 0)
 							{
 								cChartData.SongInformation.progress[instrument] = stPerformanceEntry[instrument].strProgress;
 							}
@@ -391,7 +417,7 @@ internal class CStageResult : CStage
 
 		foreach( CChip chip in CDTXMania.DTX.listChip )
 		{
-			if( chip.bIsAutoPlayed )
+			if ( chip.bIsAutoPlayed )
 			{
 				if (chip.nChannelNumber != EChannel.Guitar_Wailing && chip.nChannelNumber != EChannel.Bass_Wailing) // Guitar/Bass Wailing は OK
 				{
@@ -462,8 +488,8 @@ internal class CStageResult : CStage
 			}
 		}
 
-		if( saveCond[(int)inst] )
-			//if(false)
+		if ( saveCond[(int)inst] )
+			//if (false)
 		{
 			using FileStream fs = new(directory + "\\" + filename, FileMode.Create, FileAccess.Write);
 			using BinaryWriter bw = new(fs);
@@ -495,7 +521,7 @@ internal class CStageResult : CStage
 	}
 	public override void OnDeactivate()
 	{
-		if( rResultSound != null )
+		if ( rResultSound != null )
 		{
 			CDTXMania.SoundManager.tDiscard( rResultSound );
 			rResultSound = null;
@@ -505,16 +531,16 @@ internal class CStageResult : CStage
 	}
 	public override void OnManagedCreateResources()
 	{
-		if( bActivated )
+		if ( bActivated )
 		{
 			base.OnManagedCreateResources();
 		}
 	}
 	public override void OnManagedReleaseResources()
 	{
-		if( bActivated )
+		if ( bActivated )
 		{
-			if(ctPlayNewRecord != null)
+			if (ctPlayNewRecord != null)
 			{
 				ctPlayNewRecord = null;
 			}
@@ -535,19 +561,19 @@ internal class CStageResult : CStage
 			    (i != 1 || (CDTXMania.DTX.bHasChips.Guitar && CDTXMania.ConfigIni.bGuitarRevolutionMode)) &&
 			    (i != 2 || (CDTXMania.DTX.bHasChips.Bass && CDTXMania.ConfigIni.bGuitarRevolutionMode)))
 			{ 
-				if(bAuto[i] == false)
+				if (bAuto[i] == false)
 				{
-					if(fPerfectPercentage[i] == 100.0)
+					if (fPerfectPercentage[i] == 100.0)
 					{
 						l_outputSoundEnum = 2; //Excellent
 					}
-					else if(fPoorPercentage[i] == 0.0 && fMissPercentage[i] == 0.0)
+					else if (fPoorPercentage[i] == 0.0 && fMissPercentage[i] == 0.0)
 					{
 						l_outputSoundEnum = 1; //Full Combo
 					}
 				}
 
-				if(bNewRecordSkill[i] == true)
+				if (bNewRecordSkill[i] == true)
 				{
 					l_newRecord = true;
 				}
@@ -555,11 +581,11 @@ internal class CStageResult : CStage
 		}
 
 		//Play the corresponding sound
-		if(l_outputSoundEnum == 1)
+		if (l_outputSoundEnum == 1)
 		{
 			CDTXMania.Skin.soundFullCombo.tPlay();
 		}
-		else if(l_outputSoundEnum == 2)
+		else if (l_outputSoundEnum == 2)
 		{
 			CDTXMania.Skin.soundExcellent.tPlay();
 		}
@@ -569,11 +595,13 @@ internal class CStageResult : CStage
 		}
 
 		//Create the delay timer of 150 x 10 = 1500 ms to play New Record
-		if(l_newRecord)
+		if (l_newRecord)
 		{
 			ctPlayNewRecord = new CCounter(0, 150, 10, CDTXMania.Timer);
 		}
-						
+		
+		CDTXMania.SongDb.RecalculateSkill();
+		
 		ePhaseID = EPhase.Common_DefaultState;
 	}
 
@@ -586,7 +614,7 @@ internal class CStageResult : CStage
 		bAnimationComplete = true;
 
 		//Play new record if available
-		if(ctPlayNewRecord != null && ctPlayNewRecord.bInProgress)
+		if (ctPlayNewRecord != null && ctPlayNewRecord.bInProgress)
 		{
 			ctPlayNewRecord.tUpdate();
 			if (ctPlayNewRecord.bReachedEndValue)
@@ -596,18 +624,10 @@ internal class CStageResult : CStage
 			}
 		}
 		
-		// if( actResultImage.OnUpdateAndDraw() == 0 )
+		// if ( actResultImage.OnUpdateAndDraw() == 0 )
 		// {
 		// 	bAnimationComplete = false;
 		// }
-		if ( actParameterPanel.OnUpdateAndDraw() == 0 )
-		{
-			bAnimationComplete = false;
-		}
-		if (actRank.OnUpdateAndDraw() == 0)
-		{
-			bAnimationComplete = false;
-		}
 		#region [ #24609 2011.3.14 yyagi ランク更新or演奏型スキル更新時、リザルト画像をpngで保存する ]
 		if ( bAnimationComplete && bIsCheckedWhetherResultScreenShouldSaveOrNot == false	// #24609 2011.3.14 yyagi; to save result screen in case BestRank or HiSkill.
 		                        && CDTXMania.ConfigIni.bScoreIniを出力する
@@ -619,27 +639,27 @@ internal class CStageResult : CStage
 		#endregion
 
 		// キー入力
-		if( CDTXMania.ConfigIni.bドラム打音を発声する && CDTXMania.ConfigIni.bDrumsEnabled )
+		if ( CDTXMania.ConfigIni.bドラム打音を発声する && CDTXMania.ConfigIni.bDrumsEnabled )
 		{
 			for( int i = 0; i < 11; i++ )
 			{
 				List<STInputEvent> events = CDTXMania.Pad.GetEvents( EInstrumentPart.DRUMS, (EPad) i );
-				if( events != null && events.Count > 0 )
+				if ( events != null && events.Count > 0 )
 				{
 					foreach( STInputEvent event2 in events )
 					{
-						if( !event2.b押された )
+						if ( !event2.b押された )
 						{
 							continue;
 						}
 						CChip rChip = rEmptyDrumChip[ i ];
-						if( rChip == null )
+						if ( rChip == null )
 						{
 							switch( (EPad) i )
 							{
 								case EPad.HH:
 									rChip = rEmptyDrumChip[ 7 ];
-									if( rChip == null )
+									if ( rChip == null )
 									{
 										rChip = rEmptyDrumChip[ 9 ];
 									}
@@ -655,7 +675,7 @@ internal class CStageResult : CStage
 
 								case EPad.HHO:
 									rChip = rEmptyDrumChip[ 0 ];
-									if( rChip == null )
+									if ( rChip == null )
 									{
 										rChip = rEmptyDrumChip[ 9 ];
 									}
@@ -667,17 +687,17 @@ internal class CStageResult : CStage
 
 								case EPad.LC:
 									rChip = rEmptyDrumChip[ 0 ];
-									if( rChip == null )
+									if ( rChip == null )
 									{
 										rChip = rEmptyDrumChip[ 7 ];
 									}
 									break;
 							}
 						}
-						if( rChip != null && rChip.nChannelNumber >= EChannel.HiHatClose && rChip.nChannelNumber <= EChannel.LeftPedal )
+						if ( rChip != null && rChip.nChannelNumber >= EChannel.HiHatClose && rChip.nChannelNumber <= EChannel.LeftPedal )
 						{
 							int nLane = nチャンネル0Atoレーン07[ rChip.nChannelNumber - EChannel.HiHatClose ];
-							if( nLane == 1 && ( rChip.nChannelNumber == EChannel.HiHatClose || ( rChip.nChannelNumber == EChannel.HiHatOpen && n最後に再生したHHのチャンネル番号 != EChannel.HiHatOpen ) ) )
+							if ( nLane == 1 && ( rChip.nChannelNumber == EChannel.HiHatClose || ( rChip.nChannelNumber == EChannel.HiHatOpen && n最後に再生したHHのチャンネル番号 != EChannel.HiHatOpen ) ) )
 							{
 								CDTXMania.DTX.tStopPlayingWav( n最後に再生したHHのWAV番号 );
 								n最後に再生したHHのWAV番号 = rChip.nIntegerValue_InternalNumber;
@@ -691,16 +711,16 @@ internal class CStageResult : CStage
 		}
 		if (CDTXMania.Input.ActionDecide())
 		{
-			actParameterPanel.tアニメを完了させる();
-			actRank.tアニメを完了させる();
+			//actParameterPanel.tアニメを完了させる();
+			//actRank.tアニメを完了させる();
 		}
 		#region [ #24609 2011.4.7 yyagi リザルト画面で[F12]を押下すると、リザルト画像をpngで保存する機能は、CDTXManiaに移管。 ]
-//					if ( CDTXMania.InputManager.Keyboard.bKeyPressed( (int) SlimDXKey.F12 ) &&
-//						CDTXMania.ConfigIni.bScoreIniを出力する )
-//					{
-//						CheckAndSaveResultScreen(false);
-//						this.bIsCheckedWhetherResultScreenShouldSaveOrNot = true;
-//					}
+		if ( CDTXMania.InputManager.Keyboard.bKeyPressed( (int) SlimDXKey.F12 ) &&
+			CDTXMania.ConfigIni.bScoreIniを出力する )
+		{
+			CheckAndSaveResultScreen(false);
+			bIsCheckedWhetherResultScreenShouldSaveOrNot = true;
+		}
 		#endregion
 		if ( ePhaseID == EPhase.Common_DefaultState )
 		{
@@ -746,11 +766,7 @@ internal class CStageResult : CStage
 	//New Counter
 	private CCounter ctPlayNewRecord;
 	private EReturnValue eReturnValueWhenFadeOutCompleted;  // eフェードアウト完了時の戻り値
-	private CActResultParameterPanel actParameterPanel;
-	private CActResultRank actRank;
-	//private CActResultImage actResultImage;
 
-	//private CActPerfProgressBar actProgressBar;
 	private bool bAnimationComplete;  // bアニメが完了
 	private bool bIsCheckedWhetherResultScreenShouldSaveOrNot;				// #24509 2011.3.14 yyagi
 	private readonly int[] nチャンネル0Atoレーン07;
@@ -774,7 +790,6 @@ internal class CStageResult : CStage
 	/// <param name="bIsAutoSave">true=自動保存モード, false=手動保存モード</param>
 	private void CheckAndSaveResultScreen(bool bIsAutoSave)
 	{
-		string path = Path.GetDirectoryName( CDTXMania.DTX.strFileNameFullPath );
 		string datetime = DateTime.Now.ToString( "yyyyMMddHHmmss" );
 		if (bIsAutoSave)
 		{

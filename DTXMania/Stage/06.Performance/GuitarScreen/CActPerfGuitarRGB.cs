@@ -17,7 +17,7 @@ internal class CActPerfGuitarRGB : CActPerfCommonRGB
 
     public override int OnUpdateAndDraw()
     {
-        if( bActivated )
+        if ( bActivated )
         {
             if (!CDTXMania.ConfigIni.bGuitarEnabled)
             {
@@ -107,11 +107,11 @@ internal class CActPerfGuitarRGB : CActPerfCommonRGB
                 {
                     int index = CDTXMania.ConfigIni.bLeft.Guitar ? ( 2 - j ) : j;
                     RectangleF rectangle = new RectangleF( index * 24, 0, 0x18, 0x20 );
-                    //if( base.bPressedState[ index ] )
+                    //if ( base.bPressedState[ index ] )
                     {
                         rectangle.Y += 0x20;
                     }
-                    if( base.txRGB != null )
+                    if ( base.txRGB != null )
                     {
                         //base.txRGB.tDraw2D( CDTXMania.app.Device, 0x1f + ( j * 0x24 ), 3, rectangle );
                     }
@@ -154,11 +154,11 @@ internal class CActPerfGuitarRGB : CActPerfCommonRGB
                 {
                     int index = CDTXMania.ConfigIni.bLeft.Guitar ? ( 2 - j ) : j;
                     RectangleF rectangle = new RectangleF( index * 24, 0, 0x18, 0x20 );
-                    //if( base.bPressedState[ index ] )
+                    //if ( base.bPressedState[ index ] )
                     {
                         rectangle.Y += 0x20;
                     }
-                    if( base.txRGB != null )
+                    if ( base.txRGB != null )
                     {
                         //base.txRGB.tDraw2D( CDTXMania.app.Device, 0x1f + ( j * 0x24 ), 3, rectangle );
                     }

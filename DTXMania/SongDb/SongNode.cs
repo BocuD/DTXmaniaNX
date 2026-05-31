@@ -265,7 +265,7 @@ public class SongNode
             
             if (match)
             {
-                SongNode.Clone(node, root);
+                Clone(node, root);
             }
         }
 

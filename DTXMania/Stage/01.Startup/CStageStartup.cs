@@ -1,23 +1,21 @@
-﻿using System.Diagnostics;
+﻿using System.Numerics;
 using DTXMania.Core;
+using DTXMania.Core.Framework;
 using DTXMania.UI.Drawable;
-using DTXMania.UI.DynamicElements;
+using DTXMania.UI.Inspector;
+using Hexa.NET.ImGui;
 
 namespace DTXMania;
 
 internal class CStageStartup : CStage
 {
-	// コンストラクタ
-
+	private RuntimeLogListener? logSource;
+	
 	public CStageStartup()
 	{
 		eStageID = EStage.Startup_1;
 		bActivated = false;
 	}
-
-	public List<string> startupScreenConsole;
-
-	// CStage 実装
 
 	public override void InitializeBaseUI()
 	{
@@ -26,133 +24,80 @@ internal class CStageStartup : CStage
 	
 	public override void InitializeDefaultUI()
 	{
+		var background = ui.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\1_background.jpg"))));
+		background.size = new Vector2(1280, 720);
 		
+		var text = ui.AddChild(new UIText(CDTXMania.VERSION_DISPLAY, 15));
+		text.name = "VersionText";
 	}
-
-	public override void OnActivate()
-	{
-		Trace.TraceInformation( "起動ステージを活性化します。" );
-		Trace.Indent();
-		try
-		{
-			startupScreenConsole = new List<string>();
-			ePhaseID = EPhase.Common_DefaultState;
-			
-			dynamicStringSources["Version"] = new DynamicStringSource(() => CDTXMania.VERSION_DISPLAY);
-
-			base.OnActivate();
-			Trace.TraceInformation( "起動ステージの活性化を完了しました。" );
-		}
-		finally
-		{
-			Trace.Unindent();
-		}
-	}
-	public override void OnDeactivate()
-	{
-		Trace.TraceInformation( "起動ステージを非活性化します。" );
-		Trace.Indent();
-		try
-		{
-			startupScreenConsole = null;
-			base.OnDeactivate();
-			Trace.TraceInformation( "起動ステージの非活性化を完了しました。" );
-		}
-		finally
-		{
-			Trace.Unindent();
-		}
-	}
-	public override void OnManagedCreateResources()
-	{
-		if(bActivated)
-		{
-			txBackground = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\1_background.jpg"));
-			base.OnManagedCreateResources();
-		}
-	}
-	public override void OnManagedReleaseResources()
-	{
-		if(bActivated)
-		{
-			base.OnManagedReleaseResources();
-		}
-	}
-
-	public override void FirstUpdate()
-	{
-		startupScreenConsole.Add("DTXMania powered by YAMAHA Silent Session Drums\n");
-		startupScreenConsole.Add("Release: " + CDTXMania.VERSION + " [" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version + "]");
-
-		ePhaseID = EPhase.起動0_システムサウンドを構築;
-
-		Trace.TraceInformation("0) システムサウンドを構築します。");
-		Trace.Indent();
-
-		try
-		{
-			CDTXMania.Skin.bgmTitleScreen.tPlay();
-                
-			CDTXMania.Skin.ReloadSkin();
-                
-			lock (startupScreenConsole)
-			{
-				startupScreenConsole.Add("Loading system sounds ... OK ");
-			}
-		}
-		finally
-		{
-			Trace.Unindent();
-		}
-	}
-
+	
 	public override int OnUpdateAndDraw()
 	{
-		if (!bActivated) return 0;
-
 		base.OnUpdateAndDraw();
-		
-		txBackground?.tDraw2D(0, 0 );
 
-		#region [ this.str現在進行中 の決定 ]
-		//-----------------
-		switch( ePhaseID )
-		{
-			case EPhase.起動0_システムサウンドを構築:
-				str現在進行中 = "Loading system sounds ... ";
-				break;
-
-			case EPhase.起動7_完了:
-				str現在進行中 = "Setup done.";
-				break;
-		}
-		//-----------------
-		#endregion
-		#region [ this.list進行文字列＋this.現在進行中 の表示 ]
-		//-----------------
-		lock( startupScreenConsole )
-		{
-			int x = 0;
-			int y = 0;
-			foreach( string str in startupScreenConsole )
-			{
-				CDTXMania.actDisplayString.tPrint( x, y, CCharacterConsole.EFontType.AshThin, str );
-				y += 14;
-			}
-			CDTXMania.actDisplayString.tPrint( x, y, CCharacterConsole.EFontType.AshThin, str現在進行中 );
-		}
-		//-----------------
-		#endregion
+		DrawLogArea();
 		
 		return 1;
 	}
 
+	public override void FirstUpdate()
+	{
+		logSource = CDTXMania.app.maniaGl.host.RuntimeLogListener;
+	}
+	
+	private void DrawLogArea()
+	{
+		ImGui.SetNextWindowPos(new Vector2(0, 50 * CDTXMania.renderScale));
+		Vector2 appSize = CDTXMania.app.maniaGl.windowSize;
+		ImGui.SetNextWindowSize(new Vector2(appSize.X, appSize.Y - (100 * CDTXMania.renderScale)));
+		ImGui.Begin("Log Window", 
+			ImGuiWindowFlags.NoDecoration 
+			| ImGuiWindowFlags.NoBackground
+			| ImGuiWindowFlags.NoMove
+			| ImGuiWindowFlags.NoResize
+			| ImGuiWindowFlags.NoScrollbar);
 
-	// Other
+		Vector2 available = ImGui.GetContentRegionAvail();
+		ImGui.BeginChild("LogRegion", available, ImGuiWindowFlags.NoScrollbar);
+		ImGui.PushFont(ImFontPtr.Null, 18.0f * CDTXMania.renderScale);
+		
+		bool wasNearBottom = ImGui.GetScrollY() >= ImGui.GetScrollMaxY() - 10f;
+		
+		if (logSource != null)
+		{
+			lock (logSource.logLock)
+			{
+				int count = logSource.logLines.Count;
+				if (count > 0)
+				{
+					ImGuiListClipper clipper = new();
+					clipper.Begin(count);
 
-	#region [ private ]
-	//-----------------
-	private string str現在進行中 = "";
-	private BaseTexture? txBackground;
-	#endregion
+					while (clipper.Step())
+					{
+						for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++)
+						{
+							RuntimeLogListener.LogLine line = logSource.logLines[i];
+							Vector4 color = LogWindow.GetColorForLevel(line.Level);
+
+							ImGui.PushStyleColor(ImGuiCol.Text, color);
+							ImGui.TextUnformatted(line.Text);
+							ImGui.PopStyleColor();
+						}
+					}
+
+					clipper.End();
+				}
+			}
+		}
+
+		if (wasNearBottom)
+		{
+			ImGui.SetScrollHereY(1.0f);
+		}
+
+		ImGui.PopFont();
+		ImGui.EndChild();
+		ImGui.End();
+	}
 }

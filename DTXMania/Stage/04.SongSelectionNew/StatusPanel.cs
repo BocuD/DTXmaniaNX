@@ -109,7 +109,10 @@ public class StatusPanel : UIGroup
 				// ギターとベースのキーを入れ替え
 				//CDTXMania.ConfigIni.SwapGuitarBassKeyAssign();
 				CDTXMania.ConfigIni.bIsSwappedGuitarBass = !CDTXMania.ConfigIni.bIsSwappedGuitarBass;
+				CDTXMania.StageManager.stageSongSelectionNew.ChangeSelection(CDTXMania.StageManager.stageSongSelectionNew.selectedNode, CDTXMania.StageManager.stageSongSelectionNew.selectedChart);
 				//actSongList.tSwapClearLamps();
+				
+				// (guitar.position.X, bass.position.X) = (bass.position.X, guitar.position.X);
 			}
 		}
 
@@ -129,7 +132,10 @@ public class StatusPanel : UIGroup
 				// ギターとベースのキーを入れ替え
 				//CDTXMania.ConfigIni.SwapGuitarBassKeyAssign();
 				CDTXMania.ConfigIni.bIsSwappedGuitarBass = !CDTXMania.ConfigIni.bIsSwappedGuitarBass;
+				CDTXMania.StageManager.stageSongSelectionNew.ChangeSelection(CDTXMania.StageManager.stageSongSelectionNew.selectedNode, CDTXMania.StageManager.stageSongSelectionNew.selectedChart);
 				//actSongList.tSwapClearLamps();
+				
+				// (guitar.position.X, bass.position.X) = (bass.position.X, guitar.position.X);
 			}
 		}
 

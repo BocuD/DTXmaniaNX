@@ -60,7 +60,7 @@ internal class CActPerfSkillMeter : CActivity
 
 	public override void OnManagedCreateResources()
 	{
-		if( bActivated )
+		if ( bActivated )
 		{
 			txグラフ = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\7_Graph_Main.png" ) );
 			txグラフ_ゲージ = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\7_Graph_Gauge.png" ) );
@@ -71,29 +71,29 @@ internal class CActPerfSkillMeter : CActivity
 
 	public override int OnUpdateAndDraw()
 	{
-		if( bActivated )
+		if ( bActivated )
 		{
-			if( bJustStartedUpdate )
+			if ( bJustStartedUpdate )
 			{
 				//座標などの定義は初回だけにする。
 				//2016.03.29 kairera0467 非セッション譜面で、譜面が無いパートでグラフを有効にしている場合、譜面があるパートに一時的にグラフを切り替える。
 				//                       時間がなくて雑なコードになったため、後日最適化を行う。
-				if( CDTXMania.ConfigIni.bDrumsEnabled )
+				if ( CDTXMania.ConfigIni.bDrumsEnabled )
 				{
 					nGraphUsePart = 0;
 				}
-				else if( CDTXMania.ConfigIni.bGuitarEnabled )
+				else if ( CDTXMania.ConfigIni.bGuitarEnabled )
 				{
 					nGraphUsePart = ( CDTXMania.ConfigIni.bGraph有効.Guitar == true ) ? 1 : 2;
-					if( CDTXMania.DTX.bHasChips.Guitar )
+					if ( CDTXMania.DTX.bHasChips.Guitar )
 					{
 					}
-					else if( !CDTXMania.DTX.bHasChips.Guitar && CDTXMania.ConfigIni.bGraph有効.Guitar )
+					else if ( !CDTXMania.DTX.bHasChips.Guitar && CDTXMania.ConfigIni.bGraph有効.Guitar )
 					{
 						nGraphUsePart = 2;
 					}
 
-					if( !CDTXMania.DTX.bHasChips.Bass && CDTXMania.ConfigIni.bGraph有効.Bass )
+					if ( !CDTXMania.DTX.bHasChips.Bass && CDTXMania.ConfigIni.bGraph有効.Bass )
 					{
 					}
 				}
@@ -109,9 +109,9 @@ internal class CActPerfSkillMeter : CActivity
 					nGraphBG_XPos.Bass = 403;
 				}
 
-				if( CDTXMania.ConfigIni.eTargetGhost[ nGraphUsePart ] != ETargetGhostData.NONE )
+				if ( CDTXMania.ConfigIni.eTargetGhost[ nGraphUsePart ] != ETargetGhostData.NONE )
 				{
-					if( CDTXMania.listTargetGhostScoreData[ nGraphUsePart ] != null )
+					if ( CDTXMania.listTargetGhostScoreData[ nGraphUsePart ] != null )
 					{
 						//this.dbグラフ値目標 = CDTXMania.listTargetGhostScoreData[ this.nGraphUsePart ].dbPerformanceSkill;
 						dbグラフ値目標_表示 = CDTXMania.listTargetGhostScoreData[ nGraphUsePart ].dbPerformanceSkill;
@@ -128,8 +128,6 @@ internal class CActPerfSkillMeter : CActivity
 			if ( txグラフ != null )
 			{
 				//背景
-				//todo: vcscaleratio
-				//txグラフ.vcScaleRatio = new Vector3( 1f, 1f, 1f );
 				if (CDTXMania.ConfigIni.bSmallGraph)
 				{
 					txグラフ.tDraw2D(nGraphBG_XPos[nGraphUsePart], nGraphBG_YPos, new RectangleF(448, 2, 111, 584));
@@ -167,7 +165,7 @@ internal class CActPerfSkillMeter : CActivity
 				int nTargetGaugeRectX = dbグラフ値現在_渡 > dbGraphValue_Goal ? 38 : 74;
 				//txグラフ_ゲージ.nTransparency = 255;
 				txグラフ_ゲージ.tDraw2D(nGraphBG_XPos[ nGraphUsePart ] + 75 + nGraphSizeOffset, nTargetGaugePosY, new RectangleF( nTargetGaugeRectX, 2, 30, nTargetGaugeSize ) );
-				if( txグラフ != null )
+				if ( txグラフ != null )
 				{
 					//ターゲット達成率数値
 
@@ -259,12 +257,12 @@ internal class CActPerfSkillMeter : CActivity
 		{
 			for( int i = 0; i < st比較数字位置.Length; i++ )
 			{
-				if( st比較数字位置[ i ].ch == ch )
+				if ( st比較数字位置[ i ].ch == ch )
 				{
 					int RectX = 8;
-					if( ch == '.' ) RectX = 2;
+					if ( ch == '.' ) RectX = 2;
 					RectangleF rectangle = new( 260 + st比較数字位置[ i ].pt.X, 162, RectX, 10 );
-					if( txグラフ != null )
+					if ( txグラフ != null )
 					{
 						//txグラフ.nTransparency = 255;
 						txグラフ.tDraw2D(x, y, rectangle );
@@ -272,7 +270,7 @@ internal class CActPerfSkillMeter : CActivity
 					break;
 				}
 			}
-			if( ch == '.' ) x += 2;
+			if ( ch == '.' ) x += 2;
 			else x += 7;
 		}
 	}
@@ -282,12 +280,12 @@ internal class CActPerfSkillMeter : CActivity
 		{
 			for( int i = 0; i < st達成率数字位置.Length; i++ )
 			{
-				if( st達成率数字位置[ i ].ch == ch )
+				if ( st達成率数字位置[ i ].ch == ch )
 				{
 					int RectX = 16;
-					if( ch == '.' ) RectX = 8;
+					if ( ch == '.' ) RectX = 8;
 					RectangleF rectangle = new( 260 + st達成率数字位置[ i ].pt.X, 128, RectX, 28 );
-					if( txグラフ != null )
+					if ( txグラフ != null )
 					{
 						//txグラフ.nTransparency = 255;
 						txグラフ.tDraw2D(x, y, rectangle );
@@ -295,7 +293,7 @@ internal class CActPerfSkillMeter : CActivity
 					break;
 				}
 			}
-			if( ch == '.' ) x += 8;
+			if ( ch == '.' ) x += 8;
 			else x += 16;
 		}
 	}

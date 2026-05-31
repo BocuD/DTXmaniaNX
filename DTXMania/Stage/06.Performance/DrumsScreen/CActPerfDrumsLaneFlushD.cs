@@ -141,7 +141,7 @@ internal class CActPerfDrumsLaneFlushD : CActivity
     }
     public override void OnManagedCreateResources()
     {
-        if( bActivated )
+        if ( bActivated )
         {
             if (CDTXMania.ConfigIni.nLaneDisp.Drums == 0 || CDTXMania.ConfigIni.nLaneDisp.Drums == 2)
             {
@@ -162,14 +162,14 @@ internal class CActPerfDrumsLaneFlushD : CActivity
     
     public override int OnUpdateAndDraw()
     {
-        if( bActivated )
+        if ( bActivated )
         {
             for( int i = 0; i < 11; i++ )
             {
-                if( !ct進行[ i ].bStopped )
+                if ( !ct進行[ i ].bStopped )
                 {
                     ct進行[ i ].tUpdate();
-                    if( ct進行[ i ].bReachedEndValue )
+                    if ( ct進行[ i ].bReachedEndValue )
                     {
                         ct進行[ i ].tStop();
                     }
@@ -310,7 +310,7 @@ internal class CActPerfDrumsLaneFlushD : CActivity
                             {
                                 l_drumPanelWidth = 519; // 0x207
                             }
-                            else if(CDTXMania.ConfigIni.eNumOfLanes.Drums == EType.C)
+                            else if (CDTXMania.ConfigIni.eNumOfLanes.Drums == EType.C)
                             {
                                 l_drumPanelWidth = 447;
                                 l_xOffset = 72;

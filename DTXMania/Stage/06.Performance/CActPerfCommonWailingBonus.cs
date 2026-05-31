@@ -13,10 +13,6 @@ internal abstract class CActPerfCommonWailingBonus : CActivity
 		bActivated = false;
 	}
 
-	public void Start( EInstrumentPart part )
-	{
-		Start( part, null );
-	}
 	public abstract void Start( EInstrumentPart part, CChip r歓声Chip );
 
 

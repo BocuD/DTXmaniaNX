@@ -44,7 +44,7 @@ public class UIDFPText : UIDrawable
     {
         BaseTexture texture = isHighlighted ? font.txHighlightCharacterMap : font.txCharacterMap;
             
-        if( texture != null )
+        if ( texture != null )
         {
             UpdateLocalTransformMatrix();
 
@@ -54,7 +54,7 @@ public class UIDFPText : UIDrawable
             {
                 foreach( CActDFPFont.STCharacterMap charcterRect in font.stCharacterRects )
                 {
-                    if( charcterRect.ch == ch )
+                    if ( charcterRect.ch == ch )
                     {
                         var characterOffset = Matrix4x4.CreateTranslation(new Vector3(x, 0, 0));
                         Vector2 sz = new Vector2(charcterRect.rc.Width, charcterRect.rc.Height);

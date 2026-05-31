@@ -83,6 +83,12 @@ public abstract class BaseTexture : IDisposable
         tDraw2DMatrix(transformMatrix * scaleMatrix, new Vector2(clipRect.Width, clipRect.Height), clipRect, color);
     }
     
+    public void tDraw2D(float x, float y, RectangleF clipRect, Color4 color, Vector2 size)
+    {
+        Matrix4x4 transformMatrix = Matrix4x4.CreateTranslation(x, y, 0);
+        tDraw2DMatrix(transformMatrix * scaleMatrix, size, clipRect, color);
+    }
+    
     public void tDraw2DMatrix(Matrix4x4 transformMatrix)
     {
         tDraw2DMatrix(transformMatrix, new Vector2(Width, Height), new RectangleF(0, 0, Width, Height), Color4.White);

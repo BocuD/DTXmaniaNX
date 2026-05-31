@@ -4,14 +4,12 @@ using System.Reflection;
 using System.Runtime;
 using System.Text;
 using System.Windows.Forms;
-using DTXMania.Core.Framework;
-using DTXMania.Core.Video;
+using DTXMania.Core.OpenGL;
 using DTXMania.SongDb;
 using DTXMania.UI;
 using FDK;
 using Hexa.NET.ImGui;
 using ResourceManager = DTXMania.UI.ResourceManager;
-using Vector2 = System.Numerics.Vector2;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.Inspector;
 using DTXMania.UI.Skin;
@@ -19,7 +17,7 @@ using Hexa.NET.GLFW;
 
 namespace DTXMania.Core;
 
-internal class CDTXMania
+internal partial class CDTXMania
 {
     //these get set when initializing the game
     public static string VERSION_DISPLAY; // = "DTX:NX:A:A:2024051900";
@@ -41,7 +39,7 @@ internal class CDTXMania
     /// <summary>
     /// The shared Rich Presence integration instance, or <see langword="null"/> if it is disabled.
     /// </summary>
-    public static CDiscordRichPresence DiscordRichPresence { get; private set; }
+    public static CDiscordRichPresence? DiscordRichPresence { get; set; }
 
     //current language
     public static bool isJapanese { get; private set; }
@@ -152,10 +150,11 @@ internal class CDTXMania
     public static string executableDirectory { get; private set; }
     public static string strCompactModeFile { get; private set; }
     public static CTimer Timer { get; private set; }
+    
+    public static GameRenderTarget? GameRenderTarget =>
+        (app?.maniaGl?.host as GlfwOpenGlHost)?.GameRenderTarget;
 
     public bool bApplicationActive => maniaGl.isFocused;
-
-    private ImGuiContextPtr context;
     
     //fork
     public static STDGBVALUE<List<int>> listAutoGhostLag = new();
@@ -175,21 +174,6 @@ internal class CDTXMania
     {
         maniaGl = dtxManiaGl;
         app = this;
-
-        void SafeInitialize(string name, Action action)
-        {
-            try
-            {
-                Trace.TraceInformation($"Initializing {name}");
-                action();
-            }
-            catch (Exception e)
-            {
-                Trace.TraceError($"Failed to initialize {name}: {e}");
-                MessageBox.Show($"Failed to initialize {name}: {e}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                throw;
-            }
-        }
 
         //Update version information
         Assembly assembly = Assembly.GetExecutingAssembly();
@@ -258,7 +242,7 @@ internal class CDTXMania
                 Environment.Exit(1);
             }
         }
-
+        
         Trace.WriteLine("");
         Trace.WriteLine("DTXMania powered by YAMAHA Silent Session Drums");
         Trace.WriteLine($"Release: {VERSION}");
@@ -277,134 +261,16 @@ internal class CDTXMania
         DTX = null;
 
         Resources = new ResourceManager();
-        SkinManager = new SkinManager();
         
         ConfigIni.SyncGraphicsSettings(maniaGl.host);
         UpdateWindowTitle();
+        
+        Trace.TraceInformation("Initializing graphics backend");
+        Trace.TraceInformation($"Graphics backend: {maniaGl.host.Renderer.name}");
         maniaGl.host.InitializeGraphics();
-
-        SafeInitialize("Skin", () =>
-        {
-            Skin = new CSkin(ConfigIni.strSystemSkinSubfolderFullName, ConfigIni.bUseBoxDefSkin);
-            ConfigIni.strSystemSkinSubfolderFullName =
-                Skin.GetCurrentSkinSubfolderFullName(true); // 旧指定のSkinフォルダが消滅していた場合に備える
-        });
-
-        SafeInitialize("FFmpeg", FFmpegCore.Initialize);
-
-        SafeInitialize("Timer", () => { Timer = new CTimer(CTimer.EType.MultiMedia); });
-
-        SafeInitialize("FPS Counter", () => { FPS = new CFPS(); });
-
-        SafeInitialize("Character Console", () =>
-        {
-            actDisplayString = new CCharacterConsole();
-            actDisplayString.OnActivate();
-        });
-
-        SafeInitialize("Input Manager (DirectInput, MIDI)", () =>
-        {
-            InputManager = new CInputManager(maniaGl.host.GetWindowHandle());
-            foreach (IInputDevice device in InputManager.listInputDevices)
-            {
-                if (device.eInputDeviceType == EInputDeviceType.Joystick &&
-                    !ConfigIni.joystickDict.ContainsValue(device.GUID))
-                {
-                    int key = 0;
-                    while (ConfigIni.joystickDict.ContainsKey(key))
-                    {
-                        key++;
-                    }
-
-                    ConfigIni.joystickDict.Add(key, device.GUID);
-                }
-            }
-
-            foreach (IInputDevice device2 in InputManager.listInputDevices
-                         .Where(x => x.eInputDeviceType == EInputDeviceType.Joystick))
-            {
-                foreach (KeyValuePair<int, string> pair in ConfigIni.joystickDict.Where(pair =>
-                             device2.GUID.Equals(pair.Value)))
-                {
-                    ((CInputJoystick)device2).SetID(pair.Key);
-                    break;
-                }
-            }
-        });
-
-        SafeInitialize("Pad", () => { Pad = new CPad(ConfigIni, InputManager); });
-
-        SafeInitialize("Sound Manager", () =>
-        {
-            ESoundDeviceType soundDeviceType = ConfigIni.nSoundDriverType switch
-            {
-                0 => ESoundDeviceType.DirectSound,
-                1 => ESoundDeviceType.ASIO,
-                2 => ESoundDeviceType.ExclusiveWASAPI,
-                3 => ESoundDeviceType.SharedWASAPI,
-                _ => ESoundDeviceType.Unknown
-            };
-
-            SoundManager = new CSoundManager(maniaGl.host.GetWindowHandle(),
-                soundDeviceType,
-                ConfigIni.nWASAPIBufferSizeMs,
-                ConfigIni.bEventDrivenWASAPI,
-                0,
-                ConfigIni.nASIODevice,
-                ConfigIni.bUseOSTimer
-            );
-            UpdateWindowTitle();
-            CSoundManager.bIsTimeStretch = ConfigIni.bTimeStretch;
-            SoundManager.nMasterVolume = ConfigIni.nMasterVolume;
-
-            string strDefaultSoundDeviceBusType = CSoundManager.strDefaultDeviceBusType;
-            Trace.TraceInformation($"Bus type of the default sound device = {strDefaultSoundDeviceBusType}");
-        });
         
-        Random = new Random((int)Timer.nシステム時刻);
-
-        #region [ Initialize Stage ]
-
-        StageManager = new StageManager();
-
-        #endregion
-
-        Input = new Input();
-
-        #region [ Discord Rich Presence ]
-
-        if (ConfigIni.bDiscordRichPresenceEnabled && !bCompactMode)
-            DiscordRichPresence = new CDiscordRichPresence(ConfigIni.strDiscordRichPresenceApplicationID);
-
-        #endregion
-        
-        SafeInitialize("SongDb", () =>
-        {
-            SongDb = new SongDb.SongDb();
-        });
-        
-        SongDBStatus songDbStatus = persistentUIGroup.AddChild(new SongDBStatus());
-        songDbStatus.position = new Vector3(0, 720, 0);
-        songDbStatus.anchor = new Vector2(0.0f, 1.0f);
-        
-        gitadoraTransition = persistentUIGroup.AddChild(new GitaDoraTransition());
-        
-        Trace.TraceInformation("Finished game initialization");
-
-        #region [ Launch First stage ]
-
-        //---------------------
-        Trace.TraceInformation("----------------------");
-        Trace.TraceInformation("■ Startup");
-
-        StageManager.LoadInitialStage();
-        //---------------------
-        
-        SongDb.StartScan();
-
-        #endregion
+        SetupInitializers();
     }
-
 
     // Methods
 
@@ -451,6 +317,18 @@ internal class CDTXMania
 
     public void Draw()
     {
+        persistentUIGroup.scale.X = renderScale;
+        persistentUIGroup.scale.Y = renderScale;
+        
+        if (!startupFinished)
+        {
+            StartupTick();
+            
+            StageManager?.DrawStage();
+            persistentUIGroup.Draw(Matrix4x4.Identity);
+            return;
+        }
+        
         //....????
         if (SoundManager == null)
         {
@@ -494,9 +372,6 @@ internal class CDTXMania
         }
         
         StageManager.DrawStage();
-        
-        persistentUIGroup.scale.X = renderScale;
-        persistentUIGroup.scale.Y = renderScale;
         persistentUIGroup.Draw(Matrix4x4.Identity);
 
         StageManager.HandleStageChanges();

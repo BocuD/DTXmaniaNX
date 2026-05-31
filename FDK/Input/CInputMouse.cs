@@ -98,7 +98,7 @@ public class CInputMouse : IInputDevice, IDisposable
 				#region [ a.バッファ入力 ]
 				//-----------------------------
 				var bufferedData = devMouse.GetBufferedData();
-				//if( Result.Last.IsSuccess && bufferedData != null )
+				//if ( Result.Last.IsSuccess && bufferedData != null )
 				{
 					foreach (MouseUpdate data in bufferedData)
 					{
@@ -115,7 +115,7 @@ public class CInputMouse : IInputDevice, IDisposable
 
 						for (int k = 0; k < 8; k++)
 						{
-							//if( data.IsPressed( k ) )
+							//if ( data.IsPressed( k ) )
 							if (data.Offset == mouseButton[k] && ((data.Value & 0x80) != 0))
 							{
 								STInputEvent item = new STInputEvent()
@@ -132,7 +132,7 @@ public class CInputMouse : IInputDevice, IDisposable
 								bMousePushDown[k] = true;
 							}
 							else if (data.Offset == mouseButton[k] && bMouseState[k] == true && ((data.Value & 0x80) == 0))
-								//else if( data.IsReleased( k ) )
+								//else if ( data.IsReleased( k ) )
 							{
 								STInputEvent item = new STInputEvent()
 								{
@@ -158,7 +158,7 @@ public class CInputMouse : IInputDevice, IDisposable
 				#region [ b.状態入力 ]
 				//-----------------------------
 				MouseState currentState = devMouse.GetCurrentState();
-				//if( Result.Last.IsSuccess && currentState != null )
+				//if ( Result.Last.IsSuccess && currentState != null )
 				{
 					bool[] buttons = currentState.Buttons;
 
@@ -231,7 +231,7 @@ public class CInputMouse : IInputDevice, IDisposable
 				devMouse.Dispose();
 				devMouse = null;
 			}
-			//if( this.timer != null )
+			//if ( this.timer != null )
 			//{
 			//    this.timer.Dispose();
 			//    this.timer = null;

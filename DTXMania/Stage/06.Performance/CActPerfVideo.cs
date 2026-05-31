@@ -27,8 +27,8 @@ internal class CActPerfVideo : CActivity
         {
             CreateVideoPlayer(avi.strFileName);
 
-            frameWidth = videoPlayer.Width;
-            frameHeight = videoPlayer.Height;
+            frameWidth = controller.CurrentFrame.Texture.Width;
+            frameHeight = controller.CurrentFrame.Texture.Height;
             aspectRatio = (float)frameWidth / (float)frameHeight;
 
             //frame dimensions are known now, so we can lay out the renderers.
@@ -79,9 +79,9 @@ internal class CActPerfVideo : CActivity
         Trace.TraceInformation("CActPerfAVI: Stop()");
         moveStartTimeMs = -1;
 
-        if (videoPlayer != null)
+        if (controller != null)
         {
-            videoPlayer.Seek(TimeSpan.Zero);
+            controller.SeekToSeconds(0);
         }
     }
 
@@ -201,24 +201,28 @@ internal class CActPerfVideo : CActivity
 
     private void CreateVideoPlayer(string videoFileName)
     {
-        videoPlayer = new ThreadedSoftwareVideoPlayer();
-
         string videoPath = GetVideoPath(videoFileName);
-        if (File.Exists(videoPath) && videoPlayer.Open(videoPath))
-        {
-            videoPlayer.LoopOnEof = loop;
+        controller = new();
 
+        if (File.Exists(videoPath) && controller.TryLoadVideo(videoPath))
+        {
+            controller.LoopOnEof = loop;
+            
             //both renderers share the same player
-            windowedRenderer = new UIVideoRenderer(videoPlayer, videoPath);
+            windowedRenderer = new UINewVideoRenderer(controller);
             windowedRenderer.isVisible = false;
             windowedRenderer.renderOrder = 2;
             windowedRenderer.name = "WindowedVideo";
             uiGroup.AddChild(windowedRenderer);
 
-            fullscreenRenderer = new UIVideoRenderer(videoPlayer, videoPath);
+            fullscreenRenderer = new UINewVideoRenderer(controller);
             fullscreenRenderer.isVisible = false;
             fullscreenRenderer.name = "FullscreenVideo";
             uiGroup.AddChild(fullscreenRenderer);
+        }
+        else
+        {
+            controller.Dispose();
         }
     }
 
@@ -253,15 +257,15 @@ internal class CActPerfVideo : CActivity
 
     private void SeekVideo(long timeMs)
     {
-        if (videoPlayer != null)
+        if (controller != null)
         {
-            videoPlayer.Seek(TimeSpan.FromMilliseconds(timeMs));
+            controller.SeekToSeconds(timeMs / 1000.0);
         }
     }
 
     private void UpdateVideoSync()
     {
-        if (videoPlayer == null || (windowedRenderer == null && fullscreenRenderer == null))
+        if (controller == null || (windowedRenderer == null && fullscreenRenderer == null))
             return;
 
         long currentGameTime = CSoundManager.rcPerformanceTimer.nCurrentTime;
@@ -271,27 +275,13 @@ internal class CActPerfVideo : CActivity
             return;
 
         long videoPlayTimeMs = currentGameTime - videoStartTime;
-        TimeSpan currentVideoTime = videoPlayer.CurrentTime;
-        long currentVideoTimeMs = (long)currentVideoTime.TotalMilliseconds;
+        double currentVideoTime = controller.CurrentFrame.TimeSeconds;
+        long currentVideoTimeMs = (long)(currentVideoTime * 1000);
 
         //resync if drift exceeds 100ms.
         if (Math.Abs(videoPlayTimeMs - currentVideoTimeMs) > 100)
         {
-            videoPlayer.Seek(TimeSpan.FromMilliseconds(videoPlayTimeMs));
-        }
-
-        //handle end-of-clip: stop or loop.
-        TimeSpan duration = videoPlayer.Duration;
-        if (duration > TimeSpan.Zero && currentVideoTime >= duration)
-        {
-            if (!isPreviewMovie && !loop)
-            {
-                moveStartTimeMs = -1;
-            }
-            else
-            {
-                videoPlayer.Seek(TimeSpan.Zero);
-            }
+            controller.SeekToSeconds(videoPlayTimeMs / 1000.0);
         }
     }
 
@@ -491,11 +481,14 @@ internal class CActPerfVideo : CActivity
     private UIImage clipPanelImage;
 
     //video renderers (both share the same videoPlayer)
-    private UIVideoRenderer windowedRenderer;
-    private UIVideoRenderer fullscreenRenderer;
+    // private UIVideoRenderer windowedRenderer;
+    // private UIVideoRenderer fullscreenRenderer;
+    
+    private UINewVideoRenderer windowedRenderer;
+    private UINewVideoRenderer fullscreenRenderer;
 
     //video player
-    private FFmpegVideoPlayer videoPlayer;
+    private VideoPlayerController controller;
 
     //textures
     private BaseTexture clipPanelTexture;

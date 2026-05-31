@@ -16,7 +16,6 @@ public class FFmpegCore
             DynamicallyLoadedBindings.ThrowErrorIfFunctionNotFound = true;
             DynamicallyLoadedBindings.Initialize();
             
-            Trace.TraceInformation("Initializing FFmpeg");
             Trace.TraceInformation($"FFmpeg version info: {ffmpeg.av_version_info()}");
             Trace.TraceInformation($"LIBAVFORMAT Version: {ffmpeg.LIBAVFORMAT_VERSION_MAJOR}.{ffmpeg.LIBAVFORMAT_VERSION_MINOR}");
             IsInitialized = true;

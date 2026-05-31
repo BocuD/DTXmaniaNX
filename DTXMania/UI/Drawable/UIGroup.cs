@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Numerics;
+using DTXMania.UI.Animation;
 using DTXMania.UI.Inspector;
 using Hexa.NET.ImGui;
 
@@ -9,6 +10,8 @@ public class UIGroup : UIDrawable
 {
     [Themable] public bool sortByRenderOrder = true;
     public List<UIDrawable> children = [];
+
+    public Animator? animator;
 
     [AddChildMenu]
     public static UIDrawable Create()
@@ -34,6 +37,7 @@ public class UIGroup : UIDrawable
             element.SetParent(this, false);
         }
 
+        animator?.InvalidateBindings();
         return element;
     }
 
@@ -55,6 +59,7 @@ public class UIGroup : UIDrawable
     public void RemoveChild(UIDrawable element)
     {
         children.Remove(element);
+        animator?.InvalidateBindings();
     }
 
     public void ClearChildren()
@@ -73,6 +78,8 @@ public class UIGroup : UIDrawable
         {
             return;
         }
+
+        animator?.TickAuto(this);
 
         UpdateLocalTransformMatrix();
         Matrix4x4 combinedMatrix = localTransformMatrix * parentMatrix;
@@ -151,5 +158,26 @@ public class UIGroup : UIDrawable
     {
         base.DrawInspector();
         ImGui.Checkbox("Sort by Render Order", ref sortByRenderOrder);
+
+        if (ImGui.CollapsingHeader("Animator"))
+        {
+            if (animator == null)
+            {
+                if (ImGui.Button("Add Animator"))
+                {
+                    animator = new Animator();
+                }
+            }
+            else
+            {
+                animator.DrawInspector(this);
+
+                ImGui.Separator();
+                if (ImGui.Button("Remove Animator"))
+                {
+                    animator = null;
+                }
+            }
+        }
     }
 }

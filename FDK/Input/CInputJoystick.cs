@@ -133,7 +133,7 @@ public class CInputJoystick : IInputDevice, IDisposable
 				#region [ a.バッファ入力 ]
 				//-----------------------------
 				var bufferedData = devJoystick.GetBufferedData();
-				//if( Result.Last.IsSuccess && bufferedData != null )
+				//if ( Result.Last.IsSuccess && bufferedData != null )
 				{
 					foreach (JoystickUpdate data in bufferedData)
 					{
@@ -315,7 +315,7 @@ Trace.TraceInformation( "TS={0}: IsPressed={1}, IsReleased={2}", data.TimeStamp,
 				#region [ b.状態入力 ]
 				//-----------------------------
 				JoystickState currentState = devJoystick.GetCurrentState();
-				//if( Result.Last.IsSuccess && currentState != null )
+				//if ( Result.Last.IsSuccess && currentState != null )
 				{
 					#region [ X軸－ ]
 					//-----------------------------
@@ -676,7 +676,7 @@ Trace.TraceInformation( "TS={0}: IsPressed={1}, IsReleased={2}", data.TimeStamp,
 				devJoystick.Dispose();
 				devJoystick = null;
 			}
-			//if( this.timer != null )
+			//if ( this.timer != null )
 			//{
 			//    this.timer.Dispose();
 			//    this.timer = null;

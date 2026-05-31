@@ -14,7 +14,7 @@ public class CActivity
 	/// <para>このフラグは、OnActivate() では行えないタイミングのシビアな初期化を OnUpdateAndDraw() で行うために準備されている。利用は必須ではない。</para>
 	/// <para>OnUpdateAndDraw() 側では、必要な初期化を追えたら false をセットすること。</para>
 	/// </summary>
-	protected bool bJustStartedUpdate = true;
+	public bool bJustStartedUpdate = true;
 
 	
 	// コンストラクタ
@@ -34,7 +34,7 @@ public class CActivity
 	public virtual void OnActivate()
 	{
 		// すでに活性化してるなら何もしない。
-		if( bActivated )
+		if ( bActivated )
 			return;
 
 		bActivated = true;		// このフラグは、以下の処理をする前にセットする。

@@ -58,12 +58,12 @@ internal class CActPerfDrumsScore : CActPerfCommonScore
                     int num4 = int.Parse(str.Substring(i, 1));
                     rectangle = new RectangleF(num4 * 36, 0, 36, 50);
                 }
-                if( txScore != null )
+                if ( txScore != null )
                 {
                     txScore.tDraw2D(n本体X[0] + (i * 34), 28 + n本体Y, rectangle);
                 }
             }
-            if( txScore != null )
+            if ( txScore != null )
             {
                 txScore.tDraw2D(n本体X[0], n本体Y, new RectangleF(0, 50, 86, 28));
             }

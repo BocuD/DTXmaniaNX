@@ -21,23 +21,20 @@ internal class CActPerfGuitarWailingBonus : CActPerfCommonWailingBonus
 	{
 		bActivated = false;
 	}
-	//public override void Start( EInstrumentPart part )
-	//{
-	//    this.Start( part, null );
-	//}
+	
 	public override void Start( EInstrumentPart part, CChip r歓声Chip )
 	{
-		if( part != EInstrumentPart.DRUMS )
+		if ( part != EInstrumentPart.DRUMS )
 		{
 			for( int i = 0; i < 4; i++ )
 			{
-				if( ( ct進行用[ (int) part, i ] == null ) || ct進行用[ (int) part, i ].bStopped )
+				if ( ( ct進行用[ (int) part, i ] == null ) || ct進行用[ (int) part, i ].bStopped )
 				{
 					ct進行用[ (int) part, i ] = new CCounter( 0, 300, 2, CDTXMania.Timer );
 					ctWailing炎[ (int) part, i ] = new CCounter( 0, frames, interval, CDTXMania.Timer );
-					if( CDTXMania.ConfigIni.b歓声を発声する )
+					if ( CDTXMania.ConfigIni.b歓声を発声する )
 					{
-						if( r歓声Chip != null )
+						if ( r歓声Chip != null )
 						{
 							CDTXMania.DTX.tPlayChip( r歓声Chip, CSoundManager.rcPerformanceTimer.nシステム時刻, (int) ELane.BGM, CDTXMania.DTX.nモニタを考慮した音量( EInstrumentPart.UNKNOWN ) );
 							return;
@@ -67,16 +64,16 @@ internal class CActPerfGuitarWailingBonus : CActPerfCommonWailingBonus
 	}
 	public override int OnUpdateAndDraw()
 	{
-		if( bActivated )
+		if ( bActivated )
 		{
 			for( int i = 0; i < 2; i++ )
 			{
 				EInstrumentPart e楽器パート = ( i == 0 ) ? EInstrumentPart.GUITAR : EInstrumentPart.BASS;
 				for( int k = 0; k < 4; k++ )
 				{
-					if( ( ct進行用[ (int) e楽器パート, k ] != null ) && !ct進行用[ (int) e楽器パート, k ].bStopped )
+					if ( ( ct進行用[ (int) e楽器パート, k ] != null ) && !ct進行用[ (int) e楽器パート, k ].bStopped )
 					{
-						if( ct進行用[ (int) e楽器パート, k ].bReachedEndValue )
+						if ( ct進行用[ (int) e楽器パート, k ].bReachedEndValue )
 						{
 							ct進行用[ (int) e楽器パート, k ].tStop();
 						}
@@ -86,9 +83,9 @@ internal class CActPerfGuitarWailingBonus : CActPerfCommonWailingBonus
 						}
 					}
 
-					if( ( ctWailing炎[ (int) e楽器パート, k ] != null ) && ( !ctWailing炎[ (int) e楽器パート, k ].bStopped ) )
+					if ( ( ctWailing炎[ (int) e楽器パート, k ] != null ) && ( !ctWailing炎[ (int) e楽器パート, k ].bStopped ) )
 					{
-						if( ctWailing炎[ (int) e楽器パート, k ].bReachedEndValue )
+						if ( ctWailing炎[ (int) e楽器パート, k ].bReachedEndValue )
 						{
 							ctWailing炎[ (int) e楽器パート, k ].tStop();
 						}
@@ -106,22 +103,22 @@ internal class CActPerfGuitarWailingBonus : CActPerfCommonWailingBonus
 				EInstrumentPart e楽器パート2 = ( j == 0 ) ? EInstrumentPart.GUITAR : EInstrumentPart.BASS;
 				for( int m = 0; m < 4; m++ )
 				{
-					if( ( ct進行用[ (int) e楽器パート2, m ] != null ) && !ct進行用[ (int) e楽器パート2, m ].bStopped )
+					if ( ( ct進行用[ (int) e楽器パート2, m ] != null ) && !ct進行用[ (int) e楽器パート2, m ].bStopped )
 					{
 						//XGではWailingレーンの幅が42px
 						int x = ( ( e楽器パート2 == EInstrumentPart.GUITAR ) ? 160 : 1030 ) + 133;
 						int num6 = 0;
 						int num7 = 0;
 						int num8 = ct進行用[ (int) e楽器パート2, m ].nCurrentValue;
-						if( num8 < 100 )
+						if ( num8 < 100 )
 						{
 							num6 = (int) ( 120.0 + ( 290.0 * Math.Cos( Math.PI / 2 * ( ( (double) num8 ) / 100.0 ) ) ) );
 						}
-						else if( num8 < 150 )
+						else if ( num8 < 150 )
 						{
 							num6 = (int) ( 120.0 + ( ( 150 - num8 ) * Math.Sin( ( Math.PI * ( ( num8 - 100 ) % 25 ) ) / 25.0 ) ) );
 						}
-						else if( num8 < 200 )
+						else if ( num8 < 200 )
 						{
 							num6 = 64;
 						}
@@ -129,43 +126,43 @@ internal class CActPerfGuitarWailingBonus : CActPerfCommonWailingBonus
 						{
 							num6 = (int) ( 64.0 - ( ( (double) ( 290 * ( num8 - 200 ) ) ) / 100.0 ) );
 						}
-						if( CDTXMania.ConfigIni.bReverse[ (int) e楽器パート2 ] )
+						if ( CDTXMania.ConfigIni.bReverse[ (int) e楽器パート2 ] )
 						{
 							num6 = ( 670 - num6 ) - 244;
 						}
 						RectangleF rectangle = new( 0, 0, 26, 122 );
-						if( ( 720 - num6 ) < rectangle.Bottom )
+						if ( ( 720 - num6 ) < rectangle.Bottom )
 						{
 							rectangle.Height = ( 720 - num6 ) - rectangle.Top;
 						}
-						if( num6 < 0 )
+						if ( num6 < 0 )
 						{
 							rectangle.Y = -num6;
 							rectangle.Height -= -num6;
 							num7 = -num6;
 						}
-						if( ( rectangle.Top < rectangle.Bottom ) && ( txWailingBonus != null ) )
+						if ( ( rectangle.Top < rectangle.Bottom ) && ( txWailingBonus != null ) )
 						{
 							txWailingBonus.tDraw2D(x, num6 + num7, rectangle );
 						}
 						num7 = 0;
 						rectangle = new RectangleF( 26, 0, 26, 122 );
-						if( ( 720 - ( num6 + 122 ) ) < rectangle.Bottom )
+						if ( ( 720 - ( num6 + 122 ) ) < rectangle.Bottom )
 						{
 							rectangle.Height = ( 720 - ( num6 + 122 ) ) - rectangle.Top;
 						}
-						if( ( num6 + 0x7a ) < 0 )
+						if ( ( num6 + 0x7a ) < 0 )
 						{
 							rectangle.Y = -( num6 + 122 );
 							rectangle.Height -= rectangle.Y;
 							num7 = -( num6 + 122 );
 						}
-						if( ( rectangle.Top < rectangle.Bottom ) && ( txWailingBonus != null ) && CDTXMania.ConfigIni.nWailingFireFrames == 0 )
+						if ( ( rectangle.Top < rectangle.Bottom ) && ( txWailingBonus != null ) && CDTXMania.ConfigIni.nWailingFireFrames == 0 )
 						{
 							txWailingBonus.tDraw2D(x, ( num6 + num7 ) + 122, rectangle );
 						}
 
-						if( txWailingFlush != null && CDTXMania.ConfigIni.nWailingFireFrames == 0 )
+						if ( txWailingFlush != null && CDTXMania.ConfigIni.nWailingFireFrames == 0 )
 						{
 							Color4 col = Color4.White;
 							int count = ct進行用[ (int)e楽器パート2, m ].nCurrentValue;
@@ -178,16 +175,16 @@ internal class CActPerfGuitarWailingBonus : CActPerfCommonWailingBonus
 						}
 					}
 
-					if( ( ctWailing炎[ (int) e楽器パート2, m ] != null ) && !ctWailing炎[ (int) e楽器パート2, m ].bStopped )
+					if ( ( ctWailing炎[ (int) e楽器パート2, m ] != null ) && !ctWailing炎[ (int) e楽器パート2, m ].bStopped )
 					{
-						if( txWailingFire != null )
+						if ( txWailingFire != null )
 						{
 							RectangleF fireFrame = new( rectW * ctWailing炎[ (int) e楽器パート2, m ].nCurrentValue, 0, rectW, rectH );
-							if( e楽器パート2 == EInstrumentPart.GUITAR )
+							if ( e楽器パート2 == EInstrumentPart.GUITAR )
 							{
 								txWailingFire.tDraw2D(posXGuitar, posY, fireFrame );
 							}
-							if( e楽器パート2 == EInstrumentPart.BASS )
+							if ( e楽器パート2 == EInstrumentPart.BASS )
 							{
 								txWailingFire.tDraw2D(posXBass, posY, fireFrame );
 							}

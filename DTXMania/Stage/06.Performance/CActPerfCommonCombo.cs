@@ -319,7 +319,7 @@ internal class CActPerfCommonCombo : CActivity
 
         for (int i = 0; i < n桁数; i++)
         {
-            if( n桁数 < 4 )
+            if ( n桁数 < 4 )
             {
                 if ((nCurrentCombo.Drums > (nCurrentCombo.Drums / 100 * 100) && (nCurrentCombo.Drums >= 100 ? bn00コンボに到達した[nコンボカウント.Drums].Drums == false : false) && (nジャンプインデックス >= 0 && nジャンプインデックス < 180)))
                 {
@@ -332,7 +332,7 @@ internal class CActPerfCommonCombo : CActivity
                     // txCOMBOドラム.vcScaleRatio = new Vector3(1.0f, 1.0f, 1.0f);
                 }
             }
-            else if( n桁数 >= 4 )
+            else if ( n桁数 >= 4 )
             {
                 if ((nCurrentCombo.Drums > (nCurrentCombo.Drums / 100 * 100) && (nCurrentCombo.Drums >= 100 ? bn00コンボに到達した[nコンボカウント.Drums].Drums == false : false) && (nジャンプインデックス >= 0 && nジャンプインデックス < 180)))
                 {
@@ -355,22 +355,22 @@ internal class CActPerfCommonCombo : CActivity
                 y += nジャンプ差分値[nJump];
             }
 
-            if( n桁数 < 4 )
+            if ( n桁数 < 4 )
             {
-                if( txCOMBOドラム != null )
+                if ( txCOMBOドラム != null )
                 {
                     txCOMBOドラム.tDraw2D(x, y + y動作差分,
                         new RectangleF((n位の数[i] % 5) * nドラムコンボの幅, (n位の数[i] / 5) * nドラムコンボの高さ, nドラムコンボの幅, nドラムコンボの高さ));
                 }
             }
-            else if( n桁数 >= 4 )
+            else if ( n桁数 >= 4 )
             {
                 y = nY上辺位置px + 20;
                 if ((nJump >= 0) && (nJump < 180))
                 {
                     y += nジャンプ差分値[nJump];
                 }
-                if( txCOMBOドラム1000 != null )
+                if ( txCOMBOドラム1000 != null )
                 {
                     txCOMBOドラム1000.tDraw2D(x, y + y動作差分,
                         new RectangleF((n位の数[i] % 5) * 96, (n位の数[i] / 5) * 128, 96, 128));
@@ -425,7 +425,7 @@ internal class CActPerfCommonCombo : CActivity
         //CDTXMania.act文字コンソール.tPrint(1200, 16, CCharacterConsole.Eフォント種別.白, this.ctコンボアニメ.db現在の値.ToString());
         //CDTXMania.act文字コンソール.tPrint(1200, 32, CCharacterConsole.Eフォント種別.白, this.ctコンボアニメ.b進行中.ToString());
         //CDTXMania.act文字コンソール.tPrint(1200, 48, CCharacterConsole.Eフォント種別.白, this.ctコンボアニメ.n終了値.ToString());
-        if( nY1の位座標差分値 > 0 )
+        if ( nY1の位座標差分値 > 0 )
         {
             //this.nY1の位座標差分値 -= ( CDTXMania.ConfigIni.bVerticalSyncWait ? 16 : 4);
             nY1の位座標差分値 = nY1の位座標差分値 - ctAnimation.nCurrentValue;
@@ -527,7 +527,7 @@ internal class CActPerfCommonCombo : CActivity
         //CDTXMania.act文字コンソール.tPrint(1200, 16, CCharacterConsole.Eフォント種別.白, this.ctコンボアニメ.db現在の値.ToString());
         //CDTXMania.act文字コンソール.tPrint(1200, 32, CCharacterConsole.Eフォント種別.白, this.ctコンボアニメ.b進行中.ToString());
         //CDTXMania.act文字コンソール.tPrint(1200, 48, CCharacterConsole.Eフォント種別.白, this.ctコンボアニメ.n終了値.ToString());
-        if( nY1の位座標差分値_2P > 0 )
+        if ( nY1の位座標差分値_2P > 0 )
         {
             //this.nY1の位座標差分値 -= ( CDTXMania.ConfigIni.bVerticalSyncWait ? 16 : 4);
             nY1の位座標差分値_2P = nY1の位座標差分値_2P - ctComboAnimation_2P.nCurrentValue;
@@ -637,7 +637,7 @@ internal class CActPerfCommonCombo : CActivity
         txCOMBOドラム = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums combo.png" ) );
         txCOMBOドラム1000 = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums combo_2.png" ) );
         txComboBom = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\7_Combobomb.png" ) );
-        if( txComboBom != null )
+        if ( txComboBom != null )
             txComboBom.blendMode = BlendMode.Additive;
         
         txCOMBOギター = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayGuitar combo.png" ) );
@@ -781,7 +781,7 @@ internal class CActPerfCommonCombo : CActivity
 
     public void tComboAnime( EInstrumentPart ePart )
     {
-        if( ePart == EInstrumentPart.DRUMS || ePart == EInstrumentPart.GUITAR )
+        if ( ePart == EInstrumentPart.DRUMS || ePart == EInstrumentPart.GUITAR )
         {
             ctAnimation.nCurrentValue = 0;
             nY1の位座標差分値 = 130;

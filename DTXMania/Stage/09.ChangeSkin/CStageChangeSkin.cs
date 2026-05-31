@@ -60,14 +60,14 @@ internal class CStageChangeSkin : CStage
 	}
 	public override void OnManagedCreateResources()
 	{
-		if( bActivated )
+		if ( bActivated )
 		{
 			base.OnManagedCreateResources();
 		}
 	}
 	public override void OnManagedReleaseResources()
 	{
-		if( bActivated )
+		if ( bActivated )
 		{
 			base.OnManagedReleaseResources();
 		}
@@ -84,7 +84,7 @@ internal class CStageChangeSkin : CStage
 	}
 	public void tChangeSkinMain()
 	{
-		Trace.TraceInformation( "スキン変更:" + CDTXMania.Skin.GetCurrentSkinSubfolderFullName( false ) );
+		Trace.TraceInformation( "スキン変更:" + CDTXMania.Skin.GetCurrentSkinSubfolderFullName(false) );
 
 		CDTXMania.actDisplayString.OnDeactivate();
 

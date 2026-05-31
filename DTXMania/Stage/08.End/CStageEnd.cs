@@ -72,7 +72,7 @@ internal class CStageEnd : CStage
 		base.OnUpdateAndDraw();
 		
 		ct時間稼ぎ.tUpdate();
-		if( ct時間稼ぎ.bReachedEndValue && !CDTXMania.Skin.soundGameEnd.b再生中 )
+		if ( ct時間稼ぎ.bReachedEndValue && !CDTXMania.Skin.soundGameEnd.b再生中 )
 		{
 			return 1;
 		}

@@ -51,11 +51,11 @@ internal sealed class OpenGlTexture : BaseTexture
         }
         catch (FileNotFoundException e)
         {
-            Trace.WriteLine($"Texture file not found: {texturePath}");
+            Trace.TraceWarning($"Texture file not found: {texturePath}");
         }
         catch (DirectoryNotFoundException e)
         {
-            Trace.WriteLine($"Texture file not found: {texturePath}");
+            Trace.TraceWarning($"Texture path not found (directory doesn't exist): {texturePath}");
         }
 
         var notFound = CreateSolidColor(renderer, new Color4(1, 0, 1, 1), $"Missing:{Path.GetFileName(texturePath)}");

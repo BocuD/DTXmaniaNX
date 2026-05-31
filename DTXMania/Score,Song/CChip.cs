@@ -12,7 +12,7 @@ public class CChip : IComparable<CChip>, ICloneable
 	internal EBGAType eBGA種別;
 	public EInstrumentPart eInstrumentPart = EInstrumentPart.UNKNOWN;
 	public EChannel nChannelNumber;
-	public STDGBVALUE<int> nDistanceFromBar;
+	public STDGBVALUE<float> nDistanceFromBar;
 	public int nIntegerValue;       // n整数値
 	public int nIntegerValue_InternalNumber; // n整数値_内部番号
 	public int n総移動時間;
@@ -417,9 +417,9 @@ public class CChip : IComparable<CChip>, ICloneable
 	//public bool b空打ちチップである { get; private set; }
 
 	//Long Notes Data members
-	public CChip chipロングノート終端 { get; set; }
-	public bool bIsLongNote => chipロングノート終端 != null;
-	public bool bロングノートHit中 { get; set; }
+	public CChip chipLongNoteEndPosition { get; set; }
+	public bool bIsLongNote => chipLongNoteEndPosition != null;
+	public bool bIsHittingLongNote { get; set; }
 
 	//New property for empty chip
 	public bool bIsEmptyChip
@@ -453,13 +453,13 @@ public class CChip : IComparable<CChip>, ICloneable
 
 	public CChip()
 	{
-		nDistanceFromBar = new STDGBVALUE<int>()
+		nDistanceFromBar = new STDGBVALUE<float>
 		{
 			Drums = 0,
 			Guitar = 0,
 			Bass = 0,
 		};
-		chipロングノート終端 = null;
+		chipLongNoteEndPosition = null;
 	}
 	public void t初期化()
 	{
@@ -555,7 +555,7 @@ public class CChip : IComparable<CChip>, ICloneable
 		{
 			if (rAVI != null && rAVI.fileExists)
 			{
-				nDuration = (int)rAVI.duration.TotalMilliseconds; 
+				nDuration = (int)rAVI.duration * 1000; 
 			}
 		}
 
@@ -573,14 +573,14 @@ public class CChip : IComparable<CChip>, ICloneable
 		double ScrollSpeedGuitar = (dbPerformanceScrollSpeed.Guitar + 1.0) * 0.5 * 0.5 * 37.5 * speed * 1.52f / 60000.0; //todo: verify if this is the correct approach to fix guitar scroll speed
 		double ScrollSpeedBass = (dbPerformanceScrollSpeed.Bass + 1.0) * 0.5 * 0.5 * 37.5 * speed * 1.52f / 60000.0; //todo: verify if this is the correct approach to fix guitar scroll speed
 
-		nDistanceFromBar.Drums = (int)((nPlaybackTimeMs - nCurrentTime) * ScrollSpeedDrums);
-		nDistanceFromBar.Guitar = (int)((nPlaybackTimeMs - nCurrentTime) * ScrollSpeedGuitar);
-		nDistanceFromBar.Bass = (int)((nPlaybackTimeMs - nCurrentTime) * ScrollSpeedBass);
+		nDistanceFromBar.Drums = (float)((nPlaybackTimeMs - nCurrentTime) * ScrollSpeedDrums);
+		nDistanceFromBar.Guitar = (float)((nPlaybackTimeMs - nCurrentTime) * ScrollSpeedGuitar);
+		nDistanceFromBar.Bass = (float)((nPlaybackTimeMs - nCurrentTime) * ScrollSpeedBass);
 
 		//New: Compute Distance for End of Long Note chip
-		if(bIsLongNote)
+		if (bIsLongNote)
 		{
-			chipロングノート終端.ComputeDistanceFromBar(nCurrentTime, dbPerformanceScrollSpeed);
+			chipLongNoteEndPosition.ComputeDistanceFromBar(nCurrentTime, dbPerformanceScrollSpeed);
 		}
 	}
 

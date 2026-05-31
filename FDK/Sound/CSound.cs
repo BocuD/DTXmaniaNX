@@ -594,7 +594,7 @@ public class CSound : IDisposable, ICloneable
 			{
 				float f位置 = 0.0f;
 				if (!Bass.BASS_ChannelGetAttribute(hBassStream, BASSAttribute.BASS_ATTRIB_PAN, ref f位置))
-					//if( BassMix.BASS_Mixer_ChannelGetEnvelopePos( this.hBassStream, BASSMIXEnvelope.BASS_MIXER_ENV_PAN, ref f位置 ) == -1 )
+					//if ( BassMix.BASS_Mixer_ChannelGetEnvelopePos( this.hBassStream, BASSMIXEnvelope.BASS_MIXER_ENV_PAN, ref f位置 ) == -1 )
 					return 0;
 				return (int)(f位置 * 100);
 			}

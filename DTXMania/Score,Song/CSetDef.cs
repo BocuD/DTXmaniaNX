@@ -114,20 +114,20 @@ public class CSetDef
 		string str = null;
 		while( ( str = reader.ReadLine() ) != null )
 		{
-			if( str.Length != 0 )
+			if ( str.Length != 0 )
 			{
 				try
 				{
 					str = str.TrimStart(' ', '\t');
-					if( str.Length > 0 && str[ 0 ] == '#' && str[ 0 ] != ';' )
+					if ( str.Length > 0 && str[ 0 ] == '#' && str[ 0 ] != ';' )
 					{
-						if( str.IndexOf( ';' ) != -1 )
+						if ( str.IndexOf( ';' ) != -1 )
 						{
 							str = str.Substring( 0, str.IndexOf( ';' ) );
 						}
-						if( str.StartsWith( "#TITLE", StringComparison.OrdinalIgnoreCase ) )
+						if ( str.StartsWith( "#TITLE", StringComparison.OrdinalIgnoreCase ) )
 						{
-							if( block.b使用中 )
+							if ( block.b使用中 )
 							{
 								tUseFallbackName( block );
 								tIgnoreMissingFilesWithLabels( block );
@@ -136,56 +136,56 @@ public class CSetDef
 							}
 							block.Title = str.Substring( 6 ).TrimStart(':', ' ', '\t');
 						}
-						else if( str.StartsWith( "#FONTCOLOR", StringComparison.OrdinalIgnoreCase ) )
+						else if ( str.StartsWith( "#FONTCOLOR", StringComparison.OrdinalIgnoreCase ) )
 						{
 							block.FontColor = ColorTranslator.FromHtml( "#" + str.Substring( 10 ).Trim(':', '#', ' ', '\t') );
 						}
-						else if( str.StartsWith( "#L1FILE", StringComparison.OrdinalIgnoreCase ) )
+						else if ( str.StartsWith( "#L1FILE", StringComparison.OrdinalIgnoreCase ) )
 						{
 							block.File[ 0 ] = str.Substring( 7 ).Trim(':', ' ', '\t');
 							block.b使用中 = true;		// #28937 2012.7.7 yyagi; "get" accessor is called for T[] property. So bInUse is not modified to set the property. I need to update it myself.
 						}
-						else if( str.StartsWith( "#L2FILE", StringComparison.OrdinalIgnoreCase ) )
+						else if ( str.StartsWith( "#L2FILE", StringComparison.OrdinalIgnoreCase ) )
 						{
 							block.File[ 1 ] = str.Substring( 7 ).Trim(':', ' ', '\t');
 							block.b使用中 = true;		// #28937 2012.7.7 yyagi; "get" accessor is called for T[] property. So bInUse is not modified to set the property. I need to update it myself.
 						}
-						else if( str.StartsWith( "#L3FILE", StringComparison.OrdinalIgnoreCase ) )
+						else if ( str.StartsWith( "#L3FILE", StringComparison.OrdinalIgnoreCase ) )
 						{
 							block.File[ 2 ] = str.Substring( 7 ).Trim(':', ' ', '\t');
 							block.b使用中 = true;		// #28937 2012.7.7 yyagi; "get" accessor is called for T[] property. So bInUse is not modified to set the property. I need to update it myself.
 						}
-						else if( str.StartsWith( "#L4FILE", StringComparison.OrdinalIgnoreCase ) )
+						else if ( str.StartsWith( "#L4FILE", StringComparison.OrdinalIgnoreCase ) )
 						{
 							block.File[ 3 ] = str.Substring( 7 ).Trim(':', ' ', '\t');
 							block.b使用中 = true;		// #28937 2012.7.7 yyagi; "get" accessor is called for T[] property. So bInUse is not modified to set the property. I need to update it myself.
 						}
-						else if( str.StartsWith( "#L5FILE", StringComparison.OrdinalIgnoreCase ) )
+						else if ( str.StartsWith( "#L5FILE", StringComparison.OrdinalIgnoreCase ) )
 						{
 							block.File[ 4 ] = str.Substring( 7 ).Trim(':', ' ', '\t');
 							block.b使用中 = true;		// #28937 2012.7.7 yyagi; "get" accessor is called for T[] property. So bInUse is not modified to set the property. I need to update it myself.
 						}
-						else if( str.StartsWith( "#L1LABEL", StringComparison.OrdinalIgnoreCase ) )
+						else if ( str.StartsWith( "#L1LABEL", StringComparison.OrdinalIgnoreCase ) )
 						{
 							block.Label[ 0 ] = str.Substring( 8 ).Trim(':', ' ', '\t');
 							block.b使用中 = true;		// #28937 2012.7.7 yyagi; "get" accessor is called for T[] property. So bInUse is not modified to set the property. I need to update it myself.
 						}
-						else if( str.StartsWith( "#L2LABEL", StringComparison.OrdinalIgnoreCase ) )
+						else if ( str.StartsWith( "#L2LABEL", StringComparison.OrdinalIgnoreCase ) )
 						{
 							block.Label[ 1 ] = str.Substring( 8 ).Trim(':', ' ', '\t');
 							block.b使用中 = true;		// #28937 2012.7.7 yyagi; "get" accessor is called for T[] property. So bInUse is not modified to set the property. I need to update it myself.
 						}
-						else if( str.StartsWith( "#L3LABEL", StringComparison.OrdinalIgnoreCase ) )
+						else if ( str.StartsWith( "#L3LABEL", StringComparison.OrdinalIgnoreCase ) )
 						{
 							block.Label[ 2 ] = str.Substring( 8 ).Trim(':', ' ', '\t');
 							block.b使用中 = true;		// #28937 2012.7.7 yyagi; "get" accessor is called for T[] property. So bInUse is not modified to set the property. I need to update it myself.
 						}
-						else if( str.StartsWith( "#L4LABEL", StringComparison.OrdinalIgnoreCase ) )
+						else if ( str.StartsWith( "#L4LABEL", StringComparison.OrdinalIgnoreCase ) )
 						{
 							block.Label[ 3 ] = str.Substring( 8 ).Trim(':', ' ', '\t');
 							block.b使用中 = true;		// #28937 2012.7.7 yyagi; "get" accessor is called for T[] property. So bInUse is not modified to set the property. I need to update it myself.
 						}
-						else if( str.StartsWith( "#L5LABEL", StringComparison.OrdinalIgnoreCase ) )
+						else if ( str.StartsWith( "#L5LABEL", StringComparison.OrdinalIgnoreCase ) )
 						{
 							block.Label[ 4 ] = str.Substring( 8 ).Trim(':', ' ', '\t');
 							block.b使用中 = true;		// #28937 2012.7.7 yyagi; "get" accessor is called for T[] property. So bInUse is not modified to set the property. I need to update it myself.
@@ -200,7 +200,7 @@ public class CSetDef
 			}
 		}
 		reader.Close();
-		if( block.b使用中 )
+		if ( block.b使用中 )
 		{
 			tUseFallbackName( block );
 			tIgnoreMissingFilesWithLabels( block );

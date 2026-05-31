@@ -38,17 +38,27 @@ internal class CActPerfDrumsStatusPanel : CActPerfCommonStatusPanel
             base.OnManagedCreateResources();
         }
     }
+    
+    private UIPlayerNameplate nameplate;
 
     public override void InitUI(UIGroup ui)
     {
         base.InitUI(ui);
         
-        var nameplate = ui.AddChild(new UIPlayerNameplate());
+        nameplate = ui.AddChild(new UIPlayerNameplate());
         nameplate.position = new Vector3(22, 250, 0);
     }
 
     public override int OnUpdateAndDraw()
     {
+        if (CDTXMania.ConfigIni.nInfoType != 1)
+        {
+            nameplate.isVisible = false;
+            return 0;
+        }
+
+        nameplate.isVisible = true;
+        
         if (bActivated)
         {
             double dbPERFECT率 = 0;
@@ -178,7 +188,7 @@ internal class CActPerfDrumsStatusPanel : CActPerfCommonStatusPanel
             if (txDifficultyBadge != null)
                 txDifficultyBadge.tDraw2D(14 + nBodyX[i], 266 + nBodyY,
                     new RectangleF(rectDiffPanelPoint.X, rectDiffPanelPoint.Y, 60, 60));
-            tDisplayLevelNumber((bCLASSIC == true ? 26 : 18) + nBodyX[i], 290 + nBodyY, str);
+            tDisplayLevelNumber((bCLASSIC ? 26 : 18) + nBodyX[i], 290 + nBodyY, str);
         }
 
         return 0;

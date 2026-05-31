@@ -24,7 +24,7 @@ internal class CActPerfCommonLaneFlushGB : CActivity
 
 	public void Start( int nLane )
 	{
-		if( ( nLane < 0 ) || ( nLane > 10 ) )
+		if ( ( nLane < 0 ) || ( nLane > 10 ) )
 		{
 			throw new IndexOutOfRangeException( "有効範囲は 0～10 です。" );
 		}
@@ -52,7 +52,7 @@ internal class CActPerfCommonLaneFlushGB : CActivity
 	}
 	public override void OnManagedCreateResources()
 	{
-		if( bActivated )
+		if ( bActivated )
 		{
 			txFlush[ 0 ] = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay lane flush red.png" ) );
 			txFlush[ 1 ] = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay lane flush green.png" ) );

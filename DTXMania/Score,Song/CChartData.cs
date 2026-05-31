@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Diagnostics;
+using System.Runtime.InteropServices;
 using DTXMania.Core;
 
 namespace DTXMania;
@@ -97,11 +98,11 @@ public class CChartData
         [StructLayout(LayoutKind.Sequential)]
         public struct STHISTORY
         {
-            public string 行1;
-            public string 行2;
-            public string 行3;
-            public string 行4;
-            public string 行5;
+            public string row1;
+            public string row2;
+            public string row3;
+            public string row4;
+            public string row5;
 
             public string this[int index]
             {
@@ -110,19 +111,19 @@ public class CChartData
                     switch (index)
                     {
                         case 0:
-                            return 行1;
+                            return row1;
 
                         case 1:
-                            return 行2;
+                            return row2;
 
                         case 2:
-                            return 行3;
+                            return row3;
 
                         case 3:
-                            return 行4;
+                            return row4;
 
                         case 4:
-                            return 行5;
+                            return row5;
                     }
 
                     throw new IndexOutOfRangeException();
@@ -132,23 +133,23 @@ public class CChartData
                     switch (index)
                     {
                         case 0:
-                            行1 = value;
+                            row1 = value;
                             return;
 
                         case 1:
-                            行2 = value;
+                            row2 = value;
                             return;
 
                         case 2:
-                            行3 = value;
+                            row3 = value;
                             return;
 
                         case 3:
-                            行4 = value;
+                            row4 = value;
                             return;
 
                         case 4:
-                            行5 = value;
+                            row5 = value;
                             return;
                     }
 
@@ -319,11 +320,11 @@ public class CChartData
             NbPerformances = new STDGBVALUE<int>(),
             PerformanceHistory = new STMusicInformation.STHISTORY
             {
-                行1 = "",
-                行2 = "",
-                行3 = "",
-                行4 = "",
-                行5 = ""
+                row1 = "",
+                row2 = "",
+                row3 = "",
+                row4 = "",
+                row5 = ""
             },
             bHiddenLevel = false,
             HighCompletionRate = new STMusicInformation.STSKILL(),
@@ -359,8 +360,19 @@ public class CChartData
         }
     }
 
-    public bool HasChartForCurrentMode()
+    public bool HasChartForCurrentMode(bool strict = false)
     {
+        if (strict)
+        {
+            return CDTXMania.GetCurrentInstrument() switch
+            {
+                0 => SongInformation.bScoreExists.Drums,
+                1 => SongInformation.bScoreExists.Guitar,
+                2 => SongInformation.bScoreExists.Bass,
+                _ => false
+            };
+        }
+        
         bool bChartExistForMode = CDTXMania.ConfigIni.bDrumsEnabled && SongInformation.bScoreExists.Drums;
         if (!bChartExistForMode)
         {
@@ -368,5 +380,94 @@ public class CChartData
                                  (SongInformation.bScoreExists.Guitar || SongInformation.bScoreExists.Bass);
         }
         return bChartExistForMode;
+    }
+
+    public void LoadScoreFile()
+    {
+        string path = FileInformation.AbsoluteFilePath + ".score.ini";
+        
+		if (!File.Exists(path))
+			return;
+        
+		try
+		{
+			CScoreIni ini = new(path);
+
+			for (int nInstrumentNumber = 0; nInstrumentNumber < 3; nInstrumentNumber++)
+			{
+				int n = (nInstrumentNumber * 2) + 1; // n = 0～5
+
+				#region socre.譜面情報.最大ランク[ n楽器番号 ] = ...
+
+				//-----------------
+				if (ini.stSection[n].bMIDIUsed ||
+				    ini.stSection[n].bKeyboardUsed ||
+				    ini.stSection[n].bJoypadUsed ||
+				    ini.stSection[n].bMouseUsed)
+				{
+					// (A) 全オートじゃないようなので、演奏結果情報を有効としてランクを算出する。
+					if (CDTXMania.ConfigIni.nSkillMode == 0)
+					{
+						SongInformation.BestRank[nInstrumentNumber] =
+							CScoreIni.tCalculateRankOld(
+								ini.stSection[n].nTotalChipsCount,
+								ini.stSection[n].nPerfectCount,
+								ini.stSection[n].nGreatCount,
+								ini.stSection[n].nGoodCount,
+								ini.stSection[n].nPoorCount,
+								ini.stSection[n].nMissCount
+							);
+					}
+					else if (CDTXMania.ConfigIni.nSkillMode == 1)
+					{
+						SongInformation.BestRank[nInstrumentNumber] =
+							CScoreIni.tCalculateRank(
+								ini.stSection[n].nTotalChipsCount,
+								ini.stSection[n].nPerfectCount,
+								ini.stSection[n].nGreatCount,
+								ini.stSection[n].nGoodCount,
+								ini.stSection[n].nPoorCount,
+								ini.stSection[n].nMissCount,
+								ini.stSection[n].nMaxCombo
+							);
+					}
+				}
+				else
+				{
+					// (B) 全オートらしいので、ランクは無効とする。
+					SongInformation.BestRank[nInstrumentNumber] = (int)CScoreIni.ERANK.UNKNOWN;
+				}
+
+				//-----------------
+
+				#endregion
+
+				SongInformation.HighCompletionRate[nInstrumentNumber] = ini.stSection[n].dbPerformanceSkill;
+				SongInformation.HighSongSkill[nInstrumentNumber] = ini.stSection[n].dbGameSkill;
+				SongInformation.FullCombo[nInstrumentNumber] = ini.stSection[n].bIsFullCombo | ini.stSection[nInstrumentNumber * 2].bIsFullCombo;
+				
+				//New for Progress
+				SongInformation.progress[nInstrumentNumber] = ini.stSection[n].strProgress;
+				if (SongInformation.progress[nInstrumentNumber] == "")
+				{
+					//TODO: Read from another file if progress string is empty
+					//Set a hard-coded 64 char string for now
+					SongInformation.progress[nInstrumentNumber] =
+						"0000000000000000000000000000000000000000000000000000000000000000";
+				}
+			}
+
+			SongInformation.NbPerformances.Drums = ini.stFile.PlayCountDrums;
+			SongInformation.NbPerformances.Guitar = ini.stFile.PlayCountGuitar;
+			SongInformation.NbPerformances.Bass = ini.stFile.PlayCountBass;
+			
+			for (int i = 0; i < 5; i++)
+				SongInformation.PerformanceHistory[i] = ini.stFile.History[i];
+		}
+		catch (Exception e)
+		{
+			Trace.TraceError("Failed to read score.ini file: " + path);
+			Trace.TraceError(e.Message);
+		}
     }
 }

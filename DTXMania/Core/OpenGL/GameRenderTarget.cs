@@ -175,4 +175,30 @@ internal sealed unsafe class GameRenderTarget : IDisposable
 
         _gl.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
     }
+    
+    public byte[] ReadPixels()
+    {
+        if (_gl == null)
+            throw new InvalidOperationException("Render target has no active GL context.");
+
+        var pixels = new byte[Width * Height * 4];
+        _gl.BindFramebuffer(FramebufferTarget.ReadFramebuffer, _framebuffer);
+        
+        fixed (byte* ptr = pixels)
+            _gl.ReadPixels(0, 0, (uint)Width, (uint)Height,
+                PixelFormat.Rgba, PixelType.UnsignedByte, ptr);
+
+        //flip vertically
+        int stride = Width * 4;
+        var rowBuf = new byte[stride];
+        for (int y = 0; y < Height / 2; y++)
+        {
+            int top = y * stride;
+            int bot = (Height - 1 - y) * stride;
+            Array.Copy(pixels, top, rowBuf, 0, stride);
+            Array.Copy(pixels, bot, pixels, top, stride);
+            Array.Copy(rowBuf, 0, pixels, bot, stride);
+        }
+        return pixels;
+    }
 }
