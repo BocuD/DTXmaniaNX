@@ -56,9 +56,27 @@ internal partial class CActConfigList
         listItems.Add(iSystemGoToMenu);
         
         CItemBase iSystemReloadDTX = new("Reload Songs", CItemBase.EPanelType.Normal,
-            "曲データの一覧情報を\n"+
-            "取得し直します。",
-            "Clear song list cache and fully reload song data from disk.")
+            "曲データの一覧情報を取得し直します。\n"+
+            "新しい曲を追加したときや、曲データを\n"+
+            "更新したときに使用してください。",
+            "Scan for new songs and update song list.")
+        {
+            action = () =>
+            {
+                if (CDTXMania.SongDb.status == SongDbScanStatus.Idle)
+                {
+                    CDTXMania.SongDb.StartScan(() =>
+                    {
+                        CDTXMania.StageManager.stageSongSelectionNew.Reload();
+                    });
+                }
+            }
+        };
+        listItems.Add(iSystemReloadDTX);
+        
+        CItemBase iSystemReloadDTXFull = new("Reload Songs (Full)", CItemBase.EPanelType.Normal,
+            "曲データのキャッシュをクリアして、曲データを完全に再読み込みします。",
+            "Clear song data cache and perform full reload of song data.")
         {
             action = () =>
             {
@@ -72,7 +90,7 @@ internal partial class CActConfigList
                 }
             }
         };
-        listItems.Add(iSystemReloadDTX);
+        listItems.Add(iSystemReloadDTXFull);
         
         int nDGmode = CDTXMania.ConfigIni.bDrumsEnabled ? 0 : 1;
         iSystemGRmode = new CItemList("Game Selection", CItemBase.EPanelType.Normal, nDGmode,
