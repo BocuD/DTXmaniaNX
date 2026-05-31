@@ -226,8 +226,7 @@ internal class CStageSongLoading : CStage
                 }
                 catch
                 {
-                    Trace.TraceError("#SOUND_NOWLOADING に指定されたサウンドファイルの読み込みに失敗しました。({0})",
-                        currentlyLoadingSoundFilePath);
+                    Trace.TraceError("#SOUND_NOWLOADING に指定されたサウンドファイルの読み込みに失敗しました。({0})", currentlyLoadingSoundFilePath);
                 }
             }
 
@@ -312,22 +311,6 @@ internal class CStageSongLoading : CStage
         }
     }
 
-    public override void OnDeactivate()
-    {
-        Trace.TraceInformation("曲読み込みステージを非活性化します。");
-        Trace.Indent();
-        try
-        {
-            RequestCancelLoading();
-            base.OnDeactivate();
-        }
-        finally
-        {
-            Trace.TraceInformation("曲読み込みステージの非活性化を完了しました。");
-            Trace.Unindent();
-        }
-    }
-
     public override void OnManagedCreateResources()
     {
         if (bActivated)
@@ -342,6 +325,8 @@ internal class CStageSongLoading : CStage
 
     public override void FirstUpdate()
     {
+        aborted = false;
+        
         string songPath = !CDTXMania.bCompactMode
             ? CDTXMania.chosenChartData.FileInformation.AbsoluteFilePath
             : CDTXMania.strCompactModeFile;
@@ -389,6 +374,8 @@ internal class CStageSongLoading : CStage
         }
     }
 
+    private bool aborted;
+
     public override int OnUpdateAndDraw()
     {
         if (!bActivated) return 0;
@@ -398,6 +385,7 @@ internal class CStageSongLoading : CStage
         if (tHandleKeyInput())
         {
             RequestCancelLoading();
+            HandleAbortion();
             return (int)ESongLoadingScreenReturnValue.LoadingStopped;
         }
 
@@ -411,19 +399,19 @@ internal class CStageSongLoading : CStage
         if (loadingTask.IsFaulted)
         {
             StopLoadingSounds();
+            HandleAbortion();
             return (int)ESongLoadingScreenReturnValue.LoadingStopped;
         }
 
         if (bCancelRequested)
         {
+            HandleAbortion();
             return (int)ESongLoadingScreenReturnValue.LoadingStopped;
         }
 
 
         if (loadingTask.IsCompleted)
         {
-            StopLoadingSounds();
-            
             Trace.TraceInformation("Main load finished, loading BMP / AVI on the main thread now");
             
             DateTime timeBeginLoadBMPAVI = DateTime.Now;
@@ -443,6 +431,20 @@ internal class CStageSongLoading : CStage
         }
 
         return (int)ESongLoadingScreenReturnValue.Continue;
+    }
+    
+    private void HandleAbortion() 
+    {
+        if (!aborted)
+        {
+            aborted = true;
+
+            CDTXMania.DTX.OnDeactivate();
+            Trace.TraceInformation("曲の読み込みを中止しました。");
+            CDTXMania.tRunGarbageCollector();
+
+            GitaDoraTransition.Close(2, () => CDTXMania.StageManager.tChangeStage(CDTXMania.StageManager.stageSongSelectionNew));
+        }
     }
 
     private void StartLoadingTask()

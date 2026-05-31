@@ -161,12 +161,6 @@ internal class StageManager
 
                     if (nUpdateAndDrawReturnValue == (int)ESongLoadingScreenReturnValue.LoadingStopped)
                     {
-                        //DTX.tStopPlayingAllChips();
-                        CDTXMania.DTX.OnDeactivate();
-                        Trace.TraceInformation("曲の読み込みを中止しました。");
-                        CDTXMania.tRunGarbageCollector();
-
-                        GitaDoraTransition.Close(10, () => tChangeStage(stageSongSelectionNew));
                         break;
                     }
 
