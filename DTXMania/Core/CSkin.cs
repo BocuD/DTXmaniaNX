@@ -12,21 +12,21 @@ public enum ESystemSound
 	BGM起動画面,
 	BGM選曲画面,
 	BGM結果画面,
-	SOUNDステージ失敗音,
-	SOUNDカーソル移動音,
-	SOUNDゲーム開始音,
-	SOUNDゲーム終了音,
-	SOUNDステージクリア音,
+	SOUNDSTAGEFAILED,
+	SOUNDCURSORMOVEMENT,
+	SOUNDGAMESTART,
+	SOUNDGAMEEND,
+	SOUNDSTAGECLEAR,
 	SOUNDタイトル音,
-	SOUNDフルコンボ音,
-	SOUND歓声音,
+	SOUNDFULLCOMBO,
+	SOUNDAUDIENCE,
 	SOUND曲読込開始音,
-	SOUND決定音,
-	SOUND取消音,
-	SOUND変更音,
+	SOUNDDECIDE,
+	SOUNDCANCEL,
+	SOUNDCHANGE,
 	SOUND曲決定,
-	SOUNDエクセレント音,
-	SOUND新記録音,
+	SOUNDEXCELLENT,
+	SOUNDNEWRECORD,
 	SOUNDSELECTMUSIC,
 	SOUNDNOVICE,
 	SOUNDREGULAR,
@@ -361,40 +361,40 @@ internal class CSkin : IDisposable
 		{
 			switch( sound )
 			{
-				case ESystemSound.SOUNDカーソル移動音:
+				case ESystemSound.SOUNDCURSORMOVEMENT:
 					return soundCursorMovement;
 
-				case ESystemSound.SOUND決定音:
+				case ESystemSound.SOUNDDECIDE:
 					return soundDecide;
 
-				case ESystemSound.SOUND変更音:
+				case ESystemSound.SOUNDCHANGE:
 					return soundChange;
 
-				case ESystemSound.SOUND取消音:
+				case ESystemSound.SOUNDCANCEL:
 					return soundCancel;
 
-				case ESystemSound.SOUND歓声音:
+				case ESystemSound.SOUNDAUDIENCE:
 					return soundAudience;
 
-				case ESystemSound.SOUNDステージ失敗音:
+				case ESystemSound.SOUNDSTAGEFAILED:
 					return soundSTAGEFAILED音;
 
-				case ESystemSound.SOUNDゲーム開始音:
+				case ESystemSound.SOUNDGAMESTART:
 					return soundGameStart;
 
-				case ESystemSound.SOUNDゲーム終了音:
+				case ESystemSound.SOUNDGAMEEND:
 					return soundGameEnd;
 
-				case ESystemSound.SOUNDステージクリア音:
+				case ESystemSound.SOUNDSTAGECLEAR:
 					return soundStageClear;
 
-				case ESystemSound.SOUNDフルコンボ音:
+				case ESystemSound.SOUNDFULLCOMBO:
 					return soundFullCombo;
 
-				case ESystemSound.SOUNDエクセレント音:
+				case ESystemSound.SOUNDEXCELLENT:
 					return soundExcellent;
 
-				case ESystemSound.SOUND新記録音:
+				case ESystemSound.SOUNDNEWRECORD:
 					return soundNewRecord;
 
 				case ESystemSound.SOUND曲読込開始音:
