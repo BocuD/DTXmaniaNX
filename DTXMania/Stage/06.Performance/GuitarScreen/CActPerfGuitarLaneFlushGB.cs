@@ -18,11 +18,9 @@ internal class CActPerfGuitarLaneFlushGB : CActPerfCommonLaneFlushGB
 	// CActivity 実装（共通クラスからの差分のみ）
 
 	public override void OnManagedCreateResources()
-	{
-		txLane = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_Paret_Guitar.png"));
-		txLaneDark = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_Paret_Guitar_Dark.png"));
+	{ 
 		txLaneFlush = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_guitar line.png"));
-
+		
 		base.OnManagedCreateResources();
 	}
 
@@ -30,26 +28,6 @@ internal class CActPerfGuitarLaneFlushGB : CActPerfCommonLaneFlushGB
 	{
 		if ( bActivated )
 		{
-			#region[ レーンの描画 ]
-			//---------------
-			//レ－ンのみ先に描画しておく。
-			if (CDTXMania.DTX.bHasChips.Guitar)
-			{
-				if ( CDTXMania.ConfigIni.nLaneDisp.Guitar == 0 || CDTXMania.ConfigIni.nLaneDisp.Guitar == 2 )
-					txLane.tDraw2D(67, 42);
-				else
-					txLaneDark.tDraw2D(67, 42);
-			}
-			if (CDTXMania.DTX.bHasChips.Bass)
-			{
-				if ( CDTXMania.ConfigIni.nLaneDisp.Bass == 0 || CDTXMania.ConfigIni.nLaneDisp.Bass == 2 )
-					txLane.tDraw2D(937, 42);
-				else
-					txLaneDark.tDraw2D(937, 42);
-			}
-			//---------------
-			#endregion
-
 			for ( int i = 0; i < 10; i++ )
 			{
 				if ( !ctUpdate[ i ].bStopped )
@@ -129,8 +107,6 @@ internal class CActPerfGuitarLaneFlushGB : CActPerfCommonLaneFlushGB
 	//-----------------
 	private readonly int[,] nRGBのX座標 = new int[ , ] { { 0, 39, 78, 117, 156, 0, 39, 78, 117, 156 }, { 156, 117, 78, 39, 0, 156, 117, 78, 39, 0 } };
 
-	private BaseTexture txLane;
-	private BaseTexture txLaneDark;
 	private BaseTexture txLaneFlush;
 	//-----------------
 	#endregion

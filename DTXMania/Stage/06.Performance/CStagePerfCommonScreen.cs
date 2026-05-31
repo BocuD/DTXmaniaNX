@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Numerics;
 using DTXMania.Core;
 using DTXMania.Core.Framework;
+using DTXMania.Drawable;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.Text;
 using FDK;
@@ -65,7 +66,9 @@ internal abstract class CStagePerfCommonScreen : CStage
         get;
         protected set;
     }
-
+    
+    protected WailingEffect[] wailingEffect;
+    
     // メソッド
 
     #region [ tStorePerfResults_Drums() ]
@@ -2942,7 +2945,6 @@ internal abstract class CStagePerfCommonScreen : CStage
                         }
                         else if (CDTXMania.ConfigIni.bGuitarEnabled)
                         {
-                            CDTXMania.stagePerfGuitarScreen.UnitTime = ((60.0 / (CDTXMania.stagePerfGuitarScreen.actPlayInfo.dbBPM) / 14.0));
                             CDTXMania.stagePerfGuitarScreen.ctComboTimer = new CCounter(1, 16, (int)((60.0 / (CDTXMania.stagePerfGuitarScreen.actPlayInfo.dbBPM) / 16) * 1000.0), CDTXMania.Timer);
                         }
                     }
@@ -3012,7 +3014,6 @@ internal abstract class CStagePerfCommonScreen : CStage
                             }
                             else if (CDTXMania.ConfigIni.bGuitarEnabled)
                             {
-                                CDTXMania.stagePerfGuitarScreen.UnitTime = ((60.0 / (CDTXMania.stagePerfGuitarScreen.actPlayInfo.dbBPM) / 14.0));
                                 CDTXMania.stagePerfGuitarScreen.ctComboTimer = new CCounter(1, 16, (int)((60.0 / (CDTXMania.stagePerfGuitarScreen.actPlayInfo.dbBPM) / 16) * 1000.0), CDTXMania.Timer);
                             }
                         }
@@ -3888,6 +3889,7 @@ internal abstract class CStagePerfCommonScreen : CStage
     }
     
     protected UIImage background;
+
     protected void tUpdateAndDraw_Background()
     {
         if (background != null)
@@ -4773,6 +4775,10 @@ internal abstract class CStagePerfCommonScreen : CStage
             {
                 chipWailing.bHit = true;
                 actWailingBonus.Start(inst, r現在の歓声Chip[indexInst]);
+                
+                //todo: add new wailing effect here
+                wailingEffect[(int)(inst - 1)].Play();
+                
                 //if ( !bIsAutoPlay[indexInst] )
                 if (!autoW)
                 {

@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Numerics;
 using DTXMania.Core;
+using DTXMania.Drawable;
 using DTXMania.UI.Drawable;
 using FDK;
 
@@ -40,8 +41,35 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 	{
 		base.InitializeBaseUI();
 		
+		var txLane = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_Paret_Guitar.png")); 
+		var txLaneDark = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_Paret_Guitar_Dark.png"));
+		
+		if (CDTXMania.DTX.bHasChips.Guitar)
+		{
+			var guitarLaneTex = ui.AddChild(new UIImage());
+			guitarLaneTex.name = "GuitarLane";
+			guitarLaneTex.position = new Vector3(67, 42, 0);
+
+			if (CDTXMania.ConfigIni.nLaneDisp.Guitar == 0 || CDTXMania.ConfigIni.nLaneDisp.Guitar == 2)
+				guitarLaneTex.SetTexture(txLane);
+			else
+				guitarLaneTex.SetTexture(txLaneDark);
+		}
+		if (CDTXMania.DTX.bHasChips.Bass)
+		{
+			var bassLaneTex = ui.AddChild(new UIImage());
+			bassLaneTex.name = "BassLane";
+			bassLaneTex.position = new Vector3(937, 42, 0);
+	        
+			if (CDTXMania.ConfigIni.nLaneDisp.Bass == 0 || CDTXMania.ConfigIni.nLaneDisp.Bass == 2)
+				bassLaneTex.SetTexture(txLane);
+			else
+				bassLaneTex.SetTexture(txLaneDark);
+		}
+		
 		var guitarScreen = ui.AddChild(new LegacyDrawable(DrawGuitarScreen));
 		guitarScreen.name = "guitarScreen";
+		guitarScreen.renderOrder = 1;
 
 		actJudgeString.InitUI(ui);
 		actStatusPanel.InitUI(ui);
@@ -49,9 +77,11 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		actChipFireGB = new ActPerfNewFire[2];
 		actChipFireGB[0] = ui.AddChild(new ActPerfNewFire(1));
 		actChipFireGB[0].name = "chipsFireGuitar";
+		actChipFireGB[0].renderOrder = 2;
 		
 		actChipFireGB[1] = ui.AddChild(new ActPerfNewFire(2));
 		actChipFireGB[1].name = "chipsFireBass";
+		actChipFireGB[1].renderOrder = 2;
 		
 		//set up hold note rendering
 		float guitarY = CDTXMania.ConfigIni.bReverse[1]
@@ -92,6 +122,13 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 			holdNotes[1, i] = holdParent.AddChild(new HoldNote());
 			holdNotes[1, i].position = new Vector3(bassPositions[i], 0);
 		}
+
+		wailingEffect = new WailingEffect[2];
+		wailingEffect[0] = ui.AddChild(new WailingEffect());
+		wailingEffect[0].position = new Vector3(242, 58, 0);
+		
+		wailingEffect[1] = ui.AddChild(new WailingEffect());
+		wailingEffect[1].position = new Vector3(1111, 58, 0);
 	}
 
 	private HoldNote[,] holdNotes;
@@ -142,12 +179,10 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 	{
 		if ( bActivated )
 		{
-			bサビ区間 = false;
 			//this.tGenerateBackgroundTexture();
 			txChip = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\7_Chips_Guitar.png" ) );
-			txLane = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\7_lanes_Guitar.png") );
 			txHitBar = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\\ScreenPlayDrums hit-bar.png"));
-			//this.txWailingFrame = CDTXMania.tGenerateTexture( CSkin.Path( @"Graphics\ScreenPlay wailing cursor.png" ) );
+			//txWailingFrame = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay wailing cursor.png" ) );
 
 			txNote = new BaseTexture[5];
 			for (int i = 0; i < 5; i++)
@@ -168,10 +203,7 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 	{
 		CSoundManager.rcPerformanceTimer.tReset();
 		CDTXMania.Timer.tReset();
-
-		UnitTime = ((60.0 / (CDTXMania.stagePerfGuitarScreen.actPlayInfo.dbBPM) /
-		             14.0)); //2014.01.14.kairera0467 これも動かしたいのだが____
-
+		
 		ctChipPatternAnimation.Guitar = new CCounter(0, 0x17, 20, CDTXMania.Timer);
 		ctChipPatternAnimation.Bass = new CCounter(0, 0x17, 20, CDTXMania.Timer);
 		ctChipPatternAnimation[0] = null;
@@ -374,10 +406,6 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 	// Other
 
 	#region [ private ]
-	//-----------------
-	private BaseTexture txLane;
-	public bool bサビ区間;
-	public double UnitTime;
 
 	protected override EJudgement tProcessChipHit( long nHitTime, CChip pChip, bool bCorrectLane )
 	{
