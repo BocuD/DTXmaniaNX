@@ -342,6 +342,24 @@ internal class CStageSongLoading : CStage
         Trace.TraceInformation("FILE: {0}", CDTXMania.DTX.strFileNameFullPath);
         Trace.TraceInformation("---------------------------");
 
+        if (CDTXMania.ConfigIni.bGuitarEnabled && CDTXMania.ConfigIni.bSingleGuitar)
+        {
+            if (CDTXMania.ConfigIni.bIsSwappedGuitarBass)
+            {
+                CDTXMania.DTX.bHasChips.Guitar = false;
+                
+                //remove all guitar chips
+                CDTXMania.DTX.listChip.RemoveAll(chip => chip.bGuitar可視チップ_Wailing含む);
+            }
+            else
+            {
+                CDTXMania.DTX.bHasChips.Bass = false;
+                
+                //remove all bass chips
+                CDTXMania.DTX.listChip.RemoveAll(chip => chip.bBass可視チップ_Wailing含む);
+            }
+        }
+        
         StartLoadingTask();
 
         if (sdLoadingSound != null)
@@ -753,10 +771,9 @@ internal class CStageSongLoading : CStage
     
     private void DrawLoadingScreenUI()
     {
-
         int[] iPart = [0, CDTXMania.ConfigIni.bIsSwappedGuitarBass ? 2 : 1, CDTXMania.ConfigIni.bIsSwappedGuitarBass ? 1 : 2];
 
-        int k = 0;
+        int k = 318;
         
         for (int instrument = 0; instrument < 3; instrument++)
         {
@@ -805,6 +822,7 @@ internal class CStageSongLoading : CStage
                             CDTXMania.confirmedSongDifficulty], 191 + k, 102);
         
                     k = 700;
+                    if (CDTXMania.ConfigIni.bSingleGuitar) return;
                 }
             }
         }

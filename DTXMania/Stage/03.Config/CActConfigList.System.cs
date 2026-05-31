@@ -92,11 +92,11 @@ internal partial class CActConfigList
         };
         listItems.Add(iSystemReloadDTXFull);
         
-        int nDGmode = CDTXMania.ConfigIni.bDrumsEnabled ? 0 : 1;
+        int nDGmode = CDTXMania.ConfigIni.bDrumsEnabled ? 0 : CDTXMania.ConfigIni.bSingleGuitar ? 1 : 2;
         iSystemGRmode = new CItemList("Game Selection", CItemBase.EPanelType.Normal, nDGmode,
-            "使用楽器の選択：\nDrums: ドラムのみ有効にします。\nGuitar: ギター/ベースのみの専用画面を\n用います。",
-            "Instrument selection:\nDrums: Play the drums.\nGuitar: Play guitar.\n",
-            ["Drums", "Guitar"]);
+            "使用楽器の選択：\nDrums: ドラムのみ有効にします。\n1 Player Guitar: ギターのみの専用画面を\n用います。\n2 Player Guitar: ベースとギターを\n同時演奏する専用画面を用います。",
+            "Instrument selection:\nDrums: Play the drums.\n1 Player Guitar: Play guitar.\n2 Player Guitar: Multiplayer guitar.",
+            ["Drums", "1 Player Guitar", "2 Player Guitar"]);
         iSystemGRmode.BindConfig(
             () => iSystemGRmode.nCurrentlySelectedIndex = nDGmode, 
             () => { } );

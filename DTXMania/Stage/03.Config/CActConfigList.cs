@@ -760,8 +760,9 @@ internal partial class CActConfigList : CActivity
 
         if (eMenuType == EMenuType.System)
         {
-            CDTXMania.ConfigIni.bGuitarEnabled = (((iSystemGRmode.nCurrentlySelectedIndex + 1) / 2) == 1);
-            CDTXMania.ConfigIni.bDrumsEnabled = (((iSystemGRmode.nCurrentlySelectedIndex + 1) % 2) == 1);
+            CDTXMania.ConfigIni.bDrumsEnabled = iSystemGRmode.nCurrentlySelectedIndex == 0;
+            CDTXMania.ConfigIni.bGuitarEnabled = iSystemGRmode.nCurrentlySelectedIndex > 0;
+            CDTXMania.ConfigIni.bSingleGuitar = iSystemGRmode.nCurrentlySelectedIndex == 1;
         }
 
         if (eMenuType == EMenuType.SystemSkin)

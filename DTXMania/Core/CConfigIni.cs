@@ -622,13 +622,13 @@ internal class CConfigIni
 
 	public bool bDrumsEnabled
 	{
-		get => _bDrums有効;
+		get => _bDrumsEnabled;
 		set
 		{
-			_bDrums有効 = value;
-			if ( !_bGuitar有効 && !_bDrums有効 )
+			_bDrumsEnabled = value;
+			if ( !_bGuitarEnabled && !_bDrumsEnabled )
 			{
-				_bGuitar有効 = true;
+				_bGuitarEnabled = true;
 			}
 		}
 	}
@@ -638,24 +638,26 @@ internal class CConfigIni
 		switch (inst)
 		{
 			case EInstrumentPart.DRUMS:
-				return _bDrums有効;
+				return _bDrumsEnabled;
 			case EInstrumentPart.GUITAR:
 			case EInstrumentPart.BASS:
-				return _bGuitar有効;
+				return _bGuitarEnabled;
 			default:
 				return false;
 		}
 	}
 
+	public bool bSingleGuitar = true;
+	
 	public bool bGuitarEnabled
 	{
-		get => _bGuitar有効;
+		get => _bGuitarEnabled;
 		set
 		{
-			_bGuitar有効 = value;
-			if ( !_bGuitar有効 && !_bDrums有効 )
+			_bGuitarEnabled = value;
+			if ( !_bGuitarEnabled && !_bDrumsEnabled )
 			{
-				_bDrums有効 = true;
+				_bDrumsEnabled = true;
 			}
 		}
 	}
@@ -828,112 +830,6 @@ internal class CConfigIni
 		public int LBD;
 		public int Guitar;
 		public int Bass;
-		public int this[ int index ]
-		{
-			get
-			{
-				switch( index )
-				{
-					case 0:
-						return LC;
-
-					case 1:
-						return HH;
-
-					case 2:
-						return SD;
-
-					case 3:
-						return BD;
-
-					case 4:
-						return HT;
-
-					case 5:
-						return LT;
-
-					case 6:
-						return FT;
-
-					case 7:
-						return CY;
-
-					case 8:
-						return RD;
-
-					case 9:
-						return LP;
-
-					case 10:
-						return LBD;
-
-					case 11:
-						return Guitar;
-
-					case 12:
-						return Bass;
-				}
-				throw new IndexOutOfRangeException();
-			}
-			set
-			{
-				switch( index )
-				{
-					case 0:
-						LC = value;
-						return;
-
-					case 1:
-						HH = value;
-						return;
-
-					case 2:
-						SD = value;
-						return;
-
-					case 3:
-						BD = value;
-						return;
-
-					case 4:
-						HT = value;
-						return;
-
-					case 5:
-						LT = value;
-						return;
-
-					case 6:
-						FT = value;
-						return;
-
-					case 7:
-						CY = value;
-						return;
-
-					case 8:
-						RD = value;
-						return;
-
-					case 9:
-						LP = value;
-						return;
-
-					case 10:
-						LBD = value;
-						return;
-
-					case 11:
-						Guitar = value;
-						return;
-
-					case 12:
-						Bass = value;
-						return;
-				}
-				throw new IndexOutOfRangeException();
-			}
-		}
 	}
 
 	/*
@@ -1025,8 +921,8 @@ internal class CConfigIni
 		nShutterOutSide.Drums = 0;
 		nSleepNMsEveryFrame = -1;			// #xxxxx 2011.11.27 yyagi add
 		n非フォーカス時スリープms = 1;			// #23568 2010.11.04 ikanick add
-		_bGuitar有効 = false;
-		_bDrums有効 = true;
+		_bGuitarEnabled = false;
+		_bDrumsEnabled = true;
 		nBGAlpha = 255;
 		eDamageLevel = EDamageLevel.Normal;
 		bSTAGEFAILEDEnabled = true;
@@ -1515,6 +1411,10 @@ internal class CConfigIni
 		sw.WriteLine( "; ギター/ベース有効(0:OFF,1:ON)" );
 		sw.WriteLine( "; Enable Guitar/Bass or not.(0:OFF,1:ON)" );
 		sw.WriteLine( "Guitar={0}", bGuitarEnabled ? 1 : 0 );
+		sw.WriteLine();
+		sw.WriteLine( "; シングルプレイのギター有効(0:OFF,1:ON)" );
+		sw.WriteLine( "; Enable Singleplayer Guitar or not.(0:OFF,1:ON)" );
+		sw.WriteLine( "SingleGuitar={0}", bSingleGuitar ? 1 : 0 );
 		sw.WriteLine();
 		sw.WriteLine( "; ドラム有効(0:OFF,1:ON)" );
 		sw.WriteLine( "; Enable Drums or not.(0:OFF,1:ON)" );
@@ -2623,6 +2523,10 @@ internal class CConfigIni
 									else if (str3.Equals("Guitar"))
 									{
 										bGuitarEnabled = CConversion.bONorOFF(str4[0]);
+									}
+									else if (str3.Equals("SingleGuitar"))
+									{
+										bSingleGuitar = CConversion.bONorOFF(str4[0]);
 									}
 									else if (str3.Equals("Drums"))
 									{
@@ -3819,8 +3723,8 @@ internal class CConfigIni
 		Temp,
 	}
 
-	private bool _bDrums有効;
-	private bool _bGuitar有効;
+	private bool _bDrumsEnabled;
+	private bool _bGuitarEnabled;
 	private bool bConfigIniExists;
 	private string ConfigIniファイル名;
 
