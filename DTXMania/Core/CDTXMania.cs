@@ -18,7 +18,7 @@ using Hexa.NET.GLFW;
 
 namespace DTXMania.Core;
 
-internal class CDTXMania
+internal partial class CDTXMania
 {
     //these get set when initializing the game
     public static string VERSION_DISPLAY; // = "DTX:NX:A:A:2024051900";
@@ -153,8 +153,6 @@ internal class CDTXMania
     public static CTimer Timer { get; private set; }
 
     public bool bApplicationActive => maniaGl.isFocused;
-
-    private ImGuiContextPtr context;
     
     //fork
     public static STDGBVALUE<List<int>> listAutoGhostLag = new();
@@ -168,58 +166,12 @@ internal class CDTXMania
 
     //how many songs have we played, gets incremented whenever we transition from StageLoading to StagePerformance
     public static int nStageNumber = 0;
-
-    private bool startupFinished = false;
-    private readonly List<(string name, Action initialize)> initializers = [];
-    
-    void RunInitializer((string name, Action initializer) initializer)
-    {
-        try
-        {
-            Trace.TraceInformation($"Initializing {initializer.name}");
-            initializer.initializer();
-        }
-        catch (Exception e)
-        {
-            Trace.TraceError($"Failed to initialize {initializer.name}: {e}\n{e.StackTrace}");
-            MessageBox.Show($"Failed to initialize {initializer.name}: {e}\n{e.StackTrace}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            throw;
-        }
-    }
-
-    private void StartupTick()
-    {
-        //tick through initializers and initialize them one by one
-        if (initializers.Count > 0)
-        {
-            var initializer = initializers.First();
-            initializers.RemoveAt(0);
-            RunInitializer(initializer);
-        }
-        
-        if (initializers.Count == 0)
-        {
-            startupFinished = true;
-
-            Trace.TraceInformation("Finished game initialization");
-            
-            Trace.TraceInformation("----------------------");
-            Trace.TraceInformation("■ Startup");
-        
-            SongDb.StartScan();
-        }
-    }
     
     // Constructor
     public CDTXMania(DTXManiaGL dtxManiaGl)
     {
         maniaGl = dtxManiaGl;
         app = this;
-
-        void AddInitializer(string name, Action action)
-        {
-            initializers.Add((name, action));
-        }
 
         //Update version information
         Assembly assembly = Assembly.GetExecutingAssembly();
@@ -307,125 +259,15 @@ internal class CDTXMania
         DTX = null;
 
         Resources = new ResourceManager();
-        SkinManager = new SkinManager();
         
         ConfigIni.SyncGraphicsSettings(maniaGl.host);
         UpdateWindowTitle();
+        
+        Trace.TraceInformation("Initializing graphics backend");
+        Trace.TraceInformation($"Graphics backend: {maniaGl.host.Renderer.name}");
         maniaGl.host.InitializeGraphics();
         
-        AddInitializer("Skin", () =>
-        {
-            Skin = new CSkin(ConfigIni.strSystemSkinSubfolderFullName, ConfigIni.bUseBoxDefSkin);
-            ConfigIni.strSystemSkinSubfolderFullName =
-                Skin.GetCurrentSkinSubfolderFullName(true); // 旧指定のSkinフォルダが消滅していた場合に備える
-        });
-        
-        AddInitializer("StageManager", () => StageManager = new StageManager());
-        
-        AddInitializer("LoadingStage", () =>
-        {
-            StageManager.LoadInitialStage();
-        });
-
-        AddInitializer("FFmpeg", FFmpegCore.Initialize);
-
-        AddInitializer("Timer", () =>
-        {
-            Timer = new CTimer(CTimer.EType.MultiMedia); 
-            Random = new Random((int)Timer.nシステム時刻);
-        });
-
-        AddInitializer("FPS Counter", () => { FPS = new CFPS(); });
-
-        AddInitializer("Character Console", () =>
-        {
-            actDisplayString = new CCharacterConsole();
-            actDisplayString.OnActivate();
-        });
-
-        AddInitializer("Input Manager (DirectInput, MIDI)", () =>
-        {
-            InputManager = new CInputManager(maniaGl.host.GetWindowHandle());
-            foreach (IInputDevice device in InputManager.listInputDevices)
-            {
-                if (device.eInputDeviceType == EInputDeviceType.Joystick &&
-                    !ConfigIni.joystickDict.ContainsValue(device.GUID))
-                {
-                    int key = 0;
-                    while (ConfigIni.joystickDict.ContainsKey(key))
-                    {
-                        key++;
-                    }
-
-                    ConfigIni.joystickDict.Add(key, device.GUID);
-                }
-            }
-
-            foreach (IInputDevice device2 in InputManager.listInputDevices
-                         .Where(x => x.eInputDeviceType == EInputDeviceType.Joystick))
-            {
-                foreach (KeyValuePair<int, string> pair in ConfigIni.joystickDict.Where(pair =>
-                             device2.GUID.Equals(pair.Value)))
-                {
-                    ((CInputJoystick)device2).SetID(pair.Key);
-                    break;
-                }
-            }
-        });
-
-        AddInitializer("Pad", () => { Pad = new CPad(ConfigIni, InputManager); });
-
-        AddInitializer("Sound Manager", () =>
-        {
-            ESoundDeviceType soundDeviceType = ConfigIni.nSoundDriverType switch
-            {
-                0 => ESoundDeviceType.DirectSound,
-                1 => ESoundDeviceType.ASIO,
-                2 => ESoundDeviceType.ExclusiveWASAPI,
-                3 => ESoundDeviceType.SharedWASAPI,
-                _ => ESoundDeviceType.Unknown
-            };
-
-            SoundManager = new CSoundManager(maniaGl.host.GetWindowHandle(),
-                soundDeviceType,
-                ConfigIni.nWASAPIBufferSizeMs,
-                ConfigIni.bEventDrivenWASAPI,
-                0,
-                ConfigIni.nASIODevice,
-                ConfigIni.bUseOSTimer
-            );
-            UpdateWindowTitle();
-            CSoundManager.bIsTimeStretch = ConfigIni.bTimeStretch;
-            SoundManager.nMasterVolume = ConfigIni.nMasterVolume;
-
-            string strDefaultSoundDeviceBusType = CSoundManager.strDefaultDeviceBusType;
-            Trace.TraceInformation($"Bus type of the default sound device = {strDefaultSoundDeviceBusType}");
-        });
-        
-        AddInitializer("Input", () => Input = new Input());
-
-        AddInitializer("DiscordRichPresence", () =>
-        {
-            if (ConfigIni.bDiscordRichPresenceEnabled && !bCompactMode)
-                DiscordRichPresence = new CDiscordRichPresence(ConfigIni.strDiscordRichPresenceApplicationID);
-        });
-       
-        AddInitializer("SongDb", () => SongDb = new SongDb.SongDb());
-        
-        AddInitializer("SongDBStatus", () =>
-        {
-            SongDBStatus songDbStatus = persistentUIGroup.AddChild(new SongDBStatus());
-            songDbStatus.position = new Vector3(0, 720, 0);
-            songDbStatus.anchor = new Vector2(0.0f, 1.0f);
-        });
-        
-        AddInitializer("AnimatedTransition", () => gitadoraTransition = persistentUIGroup.AddChild(new GitaDoraTransition()));
-        
-        AddInitializer("Load Skin Sounds", () =>
-        {
-            Skin.bgmTitleScreen.tPlay();
-            Skin.ReloadSkin();
-        });
+        SetupInitializers();
     }
 
     // Methods

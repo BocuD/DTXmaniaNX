@@ -4002,7 +4002,7 @@ Restart=K052
 
 	public void SyncGraphicsSettings(IGameHost host)
 	{
-		Trace.TraceInformation("Applying graphics settings changes...");
+		Trace.TraceInformation("Synchronizing graphics settings...");
 
 		//sync graphics options with game host
 		FullscreenMode targetMode = FullscreenMode.Windowed;
