@@ -2,13 +2,9 @@ name: CI Build and Release
 
 on:
   push:
-    branches:
-      - master
-      - main
+    branches: [master, main]
   pull_request:
-    branches:
-      - master
-      - main
+    branches: [master, main]
   workflow_dispatch:
 
 permissions:
@@ -39,6 +35,7 @@ jobs:
         run: dotnet restore DTXMania.sln
 
       # Compile check on every push AND pull request.
+      # On push this same build populates the Runtime folder that gets packaged.
       - name: Build Release
         run: dotnet build DTXMania.sln -c Release --no-restore
 
@@ -55,13 +52,7 @@ jobs:
           $date  = Get-Date -Format "yyyyMMdd"
           $human = Get-Date -Format "yyyy-MM-dd"
 
-          # SemVer-safe, monotonic. The run number (own numeric identifier)
-          # drives ordering; the date is a dot-separated numeric identifier
-          # that only ever acts as a tiebreaker. NOTE the '.' before the date,
-          # not '-': a hyphen would merge it into one lexically-sorted
-          # identifier and break update ordering across digit boundaries.
           $ver = "${{ env.VERSION_BASE }}-beta.${{ github.run_number }}.$date"
-          # Tidier alternative (date lives only in the release name/notes):
           # $ver = "${{ env.VERSION_BASE }}-beta.${{ github.run_number }}"
 
           echo "ver=$ver"     >> $env:GITHUB_OUTPUT
@@ -81,12 +72,6 @@ jobs:
           See commit history for details: ${{ github.event.head_commit.url }}
           "@ | Out-File -FilePath release-notes.md -Encoding utf8
 
-      - name: Publish (self-contained win-x64)
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
-        # IMPORTANT: point this at the PROJECT that produces DTXManiaNX.exe,
-        # not the .sln. dotnet publish targets a project, not a solution.
-        run: dotnet publish PATH/TO/DTXManiaNX.csproj -c Release -r win-x64 --self-contained true -o publish
-
       - name: Package and release with Velopack
         if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
         shell: pwsh
@@ -94,24 +79,21 @@ jobs:
           dotnet tool install -g vpk
 
           # 1. Pull the latest existing release so Velopack can build a delta
-          #    against it. --pre is required: your releases are pre-releases.
           vpk download github `
             --repoUrl https://github.com/${{ github.repository }} `
             --pre `
             --token ${{ secrets.GITHUB_TOKEN }}
 
-          # 2. Pack. -u = packId (MUST stay constant forever), -v = version,
-          #    -p = publish dir, -e = main exe, --releaseNotes = commit link/date.
+          # 2. Pack the runtime folder
           vpk pack `
             -u DTXManiaNX `
             -v ${{ steps.version.outputs.ver }} `
-            -p publish `
+            -p Runtime `
             -e DTXManiaNX.exe `
+            -f net8.0-x64-desktop `
             --releaseNotes release-notes.md
 
-          # 3. Create the GitHub release and upload all Velopack assets.
-          #    --pre marks it pre-release; --targetCommitish ties the tag to
-          #    this exact commit; the notes populate the release body.
+          # 3. Create the GitHub release and upload all Velopack assets
           vpk upload github `
             --repoUrl https://github.com/${{ github.repository }} `
             --publish `
