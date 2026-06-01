@@ -44,20 +44,12 @@ jobs:
         run: dotnet restore DTXMania.sln
 
       # Build the game into Runtime, stamping the full SemVer as InformationalVersion
-      # (what UpdateService reads to compare against releases). Version feeds the
-      # numeric AssemblyVersion/FileVersion.
+      # which UpdateService reads to compare against releases
       - name: Build Release
         run: >
           dotnet build DTXMania.sln -c Release --no-restore
           -p:InformationalVersion=${{ steps.version.outputs.ver }}
           -p:Version=${{ env.VERSION_BASE }}.${{ github.run_number }}
-
-      # Build the updater. Its csproj sends output to Runtime\updater\ on its own,
-      # so there is no -o here. This step is required if DTXMania.Updater is NOT in
-      # DTXMania.sln; it's a harmless rebuild if it already is. Adjust the path if
-      # the project lives somewhere other than DTXMania.Updater\.
-      - name: Build updater
-        run: dotnet build DTXMania.Updater/DTXMania.Updater.csproj -c Release
 
       # ---------------------------------------------------------------
       # Release only on push to main/master. PRs stop after the build.
@@ -108,7 +100,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.version.outputs.ver }}
-          name: DTXManiaNX ${{ steps.version.outputs.ver }} (${{ steps.version.outputs.human }})
+          name: DTXManiaNX ${{ steps.version.outputs.ver }}
           body_path: release-notes.md
           files: ${{ steps.pkg.outputs.zip }}
           prerelease: true
