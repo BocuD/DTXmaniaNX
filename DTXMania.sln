@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FDK", "FDK\FDK.csproj", "{6
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "libbjxa", "Libraries\libbjxa\libbjxa.csproj", "{CD021D00-316B-4455-BB3B-5D86AFE00CFC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DTXMania.Updater", "DTXMania.Updater\DTXMania.Updater.csproj", "{CF9C1D12-3962-4E2A-ACA3-5051568A049A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -55,6 +57,18 @@ Global
 		{CD021D00-316B-4455-BB3B-5D86AFE00CFC}.Release|x64.Build.0 = Release|Any CPU
 		{CD021D00-316B-4455-BB3B-5D86AFE00CFC}.Release|x86.ActiveCfg = Release|Any CPU
 		{CD021D00-316B-4455-BB3B-5D86AFE00CFC}.Release|x86.Build.0 = Release|Any CPU
+		{CF9C1D12-3962-4E2A-ACA3-5051568A049A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CF9C1D12-3962-4E2A-ACA3-5051568A049A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CF9C1D12-3962-4E2A-ACA3-5051568A049A}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{CF9C1D12-3962-4E2A-ACA3-5051568A049A}.Debug|x64.Build.0 = Debug|Any CPU
+		{CF9C1D12-3962-4E2A-ACA3-5051568A049A}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{CF9C1D12-3962-4E2A-ACA3-5051568A049A}.Debug|x86.Build.0 = Debug|Any CPU
+		{CF9C1D12-3962-4E2A-ACA3-5051568A049A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CF9C1D12-3962-4E2A-ACA3-5051568A049A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CF9C1D12-3962-4E2A-ACA3-5051568A049A}.Release|x64.ActiveCfg = Release|Any CPU
+		{CF9C1D12-3962-4E2A-ACA3-5051568A049A}.Release|x64.Build.0 = Release|Any CPU
+		{CF9C1D12-3962-4E2A-ACA3-5051568A049A}.Release|x86.ActiveCfg = Release|Any CPU
+		{CF9C1D12-3962-4E2A-ACA3-5051568A049A}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

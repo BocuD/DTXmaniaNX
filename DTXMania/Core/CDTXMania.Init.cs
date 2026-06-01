@@ -5,6 +5,7 @@ using DTXMania.Core.Video;
 using DTXMania.SongDb;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.Skin;
+using DTXMania.Updating;
 using FDK;
 
 namespace DTXMania.Core;
@@ -184,5 +185,23 @@ internal partial class CDTXMania
             Skin.bgmTitleScreen.tPlay();
             Skin.ReloadSkin();
         });
+        
+        AddInitializer("Update Check", () =>
+        {
+            Task.Run(StartUpdater);
+        });
+    }
+
+    private async Task StartUpdater()
+    {
+        var svc = new UpdateService(new UpdateOptions { Owner = "BocuD", Repo = "DTXManiaNX" });
+        UpdateInfo? update = await svc.CheckAsync();
+        if (update is not null)
+        {
+            Trace.TraceInformation($"Update available: {update.Version} - {update.DownloadUrl}");
+            // var staged = await svc.DownloadAsync(update);   // background; reports progress if you want it
+            // svc.ApplyAndRestart(staged);                    // launches the applier
+            // Environment.Exit(0);                            // let it replace locked files, then it relaunches you
+        }
     }
 }
