@@ -11,13 +11,10 @@ permissions:
   contents: write
 
 env:
-  # Base version. While in beta, releases become <base>-beta.<run>.<date>.
-  # When you ship stable, just use this base on its own.
   VERSION_BASE: "2.0.0"
 
 jobs:
   build-and-release:
-    # Windows packaging (Setup.exe, icon embedding) must run on Windows.
     runs-on: windows-latest
 
     steps:
@@ -31,33 +28,67 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
-      - name: Restore dependencies
-        run: dotnet restore DTXMania.sln
-
-      # Compile check on every push AND pull request.
-      # On push this same build populates the Runtime folder that gets packaged.
-      - name: Build Release
-        run: dotnet build DTXMania.sln -c Release --no-restore
-
-      # ---------------------------------------------------------------
-      # Everything below only runs when publishing a release.
-      # PRs stop at the compile check above.
-      # ---------------------------------------------------------------
-
       - name: Compute version
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
         id: version
         shell: pwsh
         run: |
           $date  = Get-Date -Format "yyyyMMdd"
           $human = Get-Date -Format "yyyy-MM-dd"
-
+          # Full SemVer: run number drives ordering, date is a numeric tiebreaker.
           $ver = "${{ env.VERSION_BASE }}-beta.${{ github.run_number }}.$date"
-          # $ver = "${{ env.VERSION_BASE }}-beta.${{ github.run_number }}"
-
           echo "ver=$ver"     >> $env:GITHUB_OUTPUT
           echo "human=$human" >> $env:GITHUB_OUTPUT
           echo "Computed version: $ver"
+
+      - name: Restore dependencies
+        run: dotnet restore DTXMania.sln
+
+      # Build the game into Runtime, stamping the full SemVer as InformationalVersion
+      # (what UpdateService reads to compare against releases). Version feeds the
+      # numeric AssemblyVersion/FileVersion.
+      - name: Build Release
+        run: >
+          dotnet build DTXMania.sln -c Release --no-restore
+          -p:InformationalVersion=${{ steps.version.outputs.ver }}
+          -p:Version=${{ env.VERSION_BASE }}.${{ github.run_number }}
+
+      # Build the updater. Its csproj sends output to Runtime\updater\ on its own,
+      # so there is no -o here. This step is required if DTXMania.Updater is NOT in
+      # DTXMania.sln; it's a harmless rebuild if it already is. Adjust the path if
+      # the project lives somewhere other than DTXMania.Updater\.
+      - name: Build updater
+        run: dotnet build DTXMania.Updater/DTXMania.Updater.csproj -c Release
+
+      # ---------------------------------------------------------------
+      # Release only on push to main/master. PRs stop after the build.
+      # ---------------------------------------------------------------
+
+      - name: Package release zip (excluding user-owned files)
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
+        id: pkg
+        shell: pwsh
+        run: |
+          $stage = "release-staging"
+          if (Test-Path $stage) { Remove-Item $stage -Recurse -Force }
+          New-Item -ItemType Directory -Path $stage | Out-Null
+
+          # Start from the full Runtime payload (game + Runtime\updater + assets)...
+          Copy-Item -Path "Runtime\*" -Destination $stage -Recurse -Force
+
+          # ...then strip the files/folders the updater must never overwrite, so a
+          # user's own copies survive. These match UpdateOptions.PreservePaths.
+          $excludeFiles = @("Config.ini")
+          $excludeDirs  = @("Logs")
+          foreach ($f in $excludeFiles) {
+            Remove-Item -Path (Join-Path $stage $f) -Force -ErrorAction SilentlyContinue
+          }
+          foreach ($d in $excludeDirs) {
+            Remove-Item -Path (Join-Path $stage $d) -Recurse -Force -ErrorAction SilentlyContinue
+          }
+
+          $zip = "DTXManiaNX-${{ steps.version.outputs.ver }}.zip"
+          Compress-Archive -Path (Join-Path $stage "*") -DestinationPath $zip -Force
+          echo "zip=$zip" >> $env:GITHUB_OUTPUT
 
       - name: Generate release notes
         if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
@@ -72,33 +103,15 @@ jobs:
           See commit history for details: ${{ github.event.head_commit.url }}
           "@ | Out-File -FilePath release-notes.md -Encoding utf8
 
-      - name: Package and release with Velopack
+      - name: Create Release
         if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
-        shell: pwsh
-        run: |
-          dotnet tool install -g vpk
-
-          # 1. Pull the latest existing release so Velopack can build a delta
-          vpk download github `
-            --repoUrl https://github.com/${{ github.repository }} `
-            --pre `
-            --token ${{ secrets.GITHUB_TOKEN }}
-
-          # 2. Pack the runtime folder
-          vpk pack `
-            -u DTXManiaNX `
-            -v ${{ steps.version.outputs.ver }} `
-            -p Runtime `
-            -e DTXManiaNX.exe `
-            -f net8.0-x64-desktop `
-            --releaseNotes release-notes.md
-
-          # 3. Create the GitHub release and upload all Velopack assets
-          vpk upload github `
-            --repoUrl https://github.com/${{ github.repository }} `
-            --publish `
-            --pre `
-            --releaseName "DTXManiaNX ${{ steps.version.outputs.ver }} (${{ steps.version.outputs.human }})" `
-            --tag v${{ steps.version.outputs.ver }} `
-            --targetCommitish ${{ github.sha }} `
-            --token ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.ver }}
+          name: DTXManiaNX ${{ steps.version.outputs.ver }} (${{ steps.version.outputs.human }})
+          body_path: release-notes.md
+          files: ${{ steps.pkg.outputs.zip }}
+          prerelease: true
+          target_commitish: ${{ github.sha }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
