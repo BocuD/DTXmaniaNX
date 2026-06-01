@@ -15,91 +15,108 @@ permissions:
   contents: write
 
 env:
-  VERSION_MAJOR_MINOR_PATCH: "2.0.0"
+  # Base version. While in beta, releases become <base>-beta.<run>.<date>.
+  # When you ship stable, just use this base on its own.
+  VERSION_BASE: "2.0.0"
 
 jobs:
-  build:
+  build-and-release:
+    # Windows packaging (Setup.exe, icon embedding) must run on Windows.
     runs-on: windows-latest
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Setup .NET SDK 8.0
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: '8.0.x'
-        
-    - name: Restore dependencies
-      run: dotnet restore DTXMania.sln
-      
-    - name: Build Release
-      run: dotnet build DTXMania.sln -c Release --no-restore
-      
-    - name: Generate version tag
-      id: version
-      run: |
-        $date = Get-Date -Format "yyyyMMdd"
-        $version = "V${{ env.VERSION_MAJOR_MINOR_PATCH }}-$date-${{ github.run_number }}"
-        echo "tag=$version" >> $env:GITHUB_OUTPUT
-        echo "Generated version: $version"
-      shell: pwsh
-      
-    - name: Prepare release artifacts
-      run: |
-        # Copy the Runtime folder contents directly (no intermediate folder)
-        # Compress directly to the final zip name
-        Compress-Archive -Path Runtime\* -DestinationPath DTXManiaNX-${{ steps.version.outputs.tag }}.zip
-      shell: pwsh
-      
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: DTXManiaNX-${{ steps.version.outputs.tag }}
-        path: DTXManiaNX-${{ steps.version.outputs.tag }}.zip
-        
-  release:
-    needs: build
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Generate version tag
-      id: version
-      run: |
-        date=$(date +%Y%m%d)
-        version="V${{ env.VERSION_MAJOR_MINOR_PATCH }}-$date-${{ github.run_number }}"
-        echo "tag=$version" >> $GITHUB_OUTPUT
-        echo "Generated version: $version"
-        
-    - name: Download artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: DTXManiaNX-${{ steps.version.outputs.tag }}
-        
-    - name: Create Release
-      uses: softprops/action-gh-release@v1
-      with:
-        tag_name: ${{ steps.version.outputs.tag }}
-        name: DTXManiaNX ${{ steps.version.outputs.tag }}
-        body: |
-          ## DTXManiaNX 2.0 Beta Release ${{ steps.version.outputs.tag }}
-          
-          Automated build from commit ${{ github.sha }}
-          
-          ### Installation
-          1. Download and extract the zip file
-          2. Install [.NET 8.0 Runtime](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) if not already installed
-          3. Run DTXManiaNX.exe
-          
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET SDK 8.0
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore DTXMania.sln
+
+      # Compile check on every push AND pull request.
+      - name: Build Release
+        run: dotnet build DTXMania.sln -c Release --no-restore
+
+      # ---------------------------------------------------------------
+      # Everything below only runs when publishing a release.
+      # PRs stop at the compile check above.
+      # ---------------------------------------------------------------
+
+      - name: Compute version
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
+        id: version
+        shell: pwsh
+        run: |
+          $date  = Get-Date -Format "yyyyMMdd"
+          $human = Get-Date -Format "yyyy-MM-dd"
+
+          # SemVer-safe, monotonic. The run number (own numeric identifier)
+          # drives ordering; the date is a dot-separated numeric identifier
+          # that only ever acts as a tiebreaker. NOTE the '.' before the date,
+          # not '-': a hyphen would merge it into one lexically-sorted
+          # identifier and break update ordering across digit boundaries.
+          $ver = "${{ env.VERSION_BASE }}-beta.${{ github.run_number }}.$date"
+          # Tidier alternative (date lives only in the release name/notes):
+          # $ver = "${{ env.VERSION_BASE }}-beta.${{ github.run_number }}"
+
+          echo "ver=$ver"     >> $env:GITHUB_OUTPUT
+          echo "human=$human" >> $env:GITHUB_OUTPUT
+          echo "Computed version: $ver"
+
+      - name: Generate release notes
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
+        shell: pwsh
+        run: |
+          @"
+          ## DTXManiaNX 2.0 Beta Release ${{ steps.version.outputs.ver }}
+
+          Automated build from commit ${{ github.sha }} on ${{ steps.version.outputs.human }}
+
           ### Changes
           See commit history for details: ${{ github.event.head_commit.url }}
-        files: |
-          DTXManiaNX-${{ steps.version.outputs.tag }}.zip
-        draft: false
-        prerelease: true
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          "@ | Out-File -FilePath release-notes.md -Encoding utf8
+
+      - name: Publish (self-contained win-x64)
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
+        # IMPORTANT: point this at the PROJECT that produces DTXManiaNX.exe,
+        # not the .sln. dotnet publish targets a project, not a solution.
+        run: dotnet publish PATH/TO/DTXManiaNX.csproj -c Release -r win-x64 --self-contained true -o publish
+
+      - name: Package and release with Velopack
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
+        shell: pwsh
+        run: |
+          dotnet tool install -g vpk
+
+          # 1. Pull the latest existing release so Velopack can build a delta
+          #    against it. --pre is required: your releases are pre-releases.
+          vpk download github `
+            --repoUrl https://github.com/${{ github.repository }} `
+            --pre `
+            --token ${{ secrets.GITHUB_TOKEN }}
+
+          # 2. Pack. -u = packId (MUST stay constant forever), -v = version,
+          #    -p = publish dir, -e = main exe, --releaseNotes = commit link/date.
+          vpk pack `
+            -u DTXManiaNX `
+            -v ${{ steps.version.outputs.ver }} `
+            -p publish `
+            -e DTXManiaNX.exe `
+            --releaseNotes release-notes.md
+
+          # 3. Create the GitHub release and upload all Velopack assets.
+          #    --pre marks it pre-release; --targetCommitish ties the tag to
+          #    this exact commit; the notes populate the release body.
+          vpk upload github `
+            --repoUrl https://github.com/${{ github.repository }} `
+            --publish `
+            --pre `
+            --releaseName "DTXManiaNX ${{ steps.version.outputs.ver }} (${{ steps.version.outputs.human }})" `
+            --tag v${{ steps.version.outputs.ver }} `
+            --targetCommitish ${{ github.sha }} `
+            --token ${{ secrets.GITHUB_TOKEN }}
