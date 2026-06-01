@@ -4,6 +4,8 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 using DTXMania.Core.OpenGL;
+using Velopack;
+using Velopack.Sources;
 
 namespace DTXMania.Core;
 
@@ -54,6 +56,8 @@ internal class Program
 	[STAThread]
 	private static void Main()
 	{
+		VelopackApp.Build().Run();
+		
 		//prevents two instances from DTXMania from running at the same time
 		concurrencyMutex = new Mutex(false, "DTXManiaMutex");
 
