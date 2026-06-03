@@ -225,7 +225,7 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 
 		if (bIsFinishedFadeout)
 		{
-			if (!CDTXMania.Skin.soundStageClear.b再生中)
+			if (!CDTXMania.Skin.soundStageClear.bIsPlaying)
 			{
 				Debug.WriteLine("Total OnUpdateAndDraw=" + sw.ElapsedMilliseconds + "ms");
 

@@ -56,7 +56,7 @@ internal class CSkin : IDisposable
 		public bool b読み込み成功;
 		public bool bExclusive;
 		public string strFilename = "";
-		public bool b再生中
+		public bool bIsPlaying
 		{
 			get
 			{
