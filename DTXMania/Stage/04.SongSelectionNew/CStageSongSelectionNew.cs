@@ -373,7 +373,7 @@ public class CStageSongSelectionNew : CStage
                 return 0;
 
             case ELoadPhase.ReadyToOpen:
-                GitaDoraTransition.Open(20);
+                GitaDoraTransition.Open(2);
                 loadPhase = ELoadPhase.Complete;
                 return 0;
         }
@@ -546,14 +546,14 @@ public class CStageSongSelectionNew : CStage
         currentSelectionContainer = container;
         currentSelectionContainer.isVisible = true;
         
-        SongNode newSelection = currentSelectionContainer.currentSelection;
+        SongNode? newSelection = currentSelectionContainer.currentSelection;
         int closestLevelToTarget = GetClosestLevelToTargetForSong(currentSelectionContainer.currentSelection);
         CChartData? chart = null;
         
         //check if the closest level is valid
-        chart = closestLevelToTarget > newSelection.charts.Length - 1 
-            ? newSelection.charts.FirstOrDefault()
-            : newSelection.charts[closestLevelToTarget];
+        chart = closestLevelToTarget > newSelection?.charts.Length - 1 
+            ? newSelection?.charts.FirstOrDefault()
+            : newSelection?.charts[closestLevelToTarget];
         
         ChangeSelection(currentSelectionContainer.currentSelection, chart);   
     }

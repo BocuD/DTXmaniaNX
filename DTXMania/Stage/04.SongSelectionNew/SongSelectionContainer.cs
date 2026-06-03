@@ -53,7 +53,7 @@ public class SongSelectionContainer : UIGroup
     private float elementSpacing = 85.0f; //spacing between elements
     private int selectionIndex = 10; //the center element is the 10th element in the array (0-based index)
 
-    public SongNode currentSelection => songSelectionElements[WrapIndex(bufferStartIndex + selectionIndex)].node;
+    public SongNode? currentSelection => songSelectionElements[WrapIndex(bufferStartIndex + selectionIndex)].node;
     
     private bool updateRootRequested;
     private bool requestIsFiltered;
@@ -191,7 +191,7 @@ public class SongSelectionContainer : UIGroup
         currentRoot.CurrentSelection = currentSelection;
         
         int closestLevelToTarget = CDTXMania.StageManager.stageSongSelectionNew.GetClosestLevelToTargetForSong(currentSelection);
-        CDTXMania.StageManager.stageSongSelectionNew.ChangeSelection(currentSelection, currentSelection.charts[closestLevelToTarget]);
+        CDTXMania.StageManager.stageSongSelectionNew.ChangeSelection(currentSelection, currentSelection?.charts[closestLevelToTarget]);
     }
 
     private void UpdateSelectedSongAlbumArt()
