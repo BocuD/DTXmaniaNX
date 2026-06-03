@@ -17,15 +17,6 @@ public class GitaDoraTransition : UIGroup
     public GitaDoraTransition() : base("GITADORA Transition")
     {
         //create a black texture
-        // Bitmap bitmap = new(32, 32);
-        // Graphics graphics = Graphics.FromImage(bitmap);
-        // Color black = Color.FromArgb(255, Color.Black);
-        // graphics.FillRectangle(new SolidBrush(black), new Rectangle(0, 0, bitmap.Width, bitmap.Height));
-        // graphics.Dispose();
-        // CTexture blackTexture = new(CDTXMania.app.Device, bitmap, CDTXMania.TextureFormat, false);
-        // bitmap.Dispose();
-        
-        //create a black texture
         var texture = BaseTexture.CreateSolidColor(new Color4(0, 0, 0, 255));
         
         //create childContainer

@@ -124,6 +124,15 @@ public class SongDb : IDisposable
 				Trace.TraceInformation($"Cache Statistics - Hits: {cacheHitCount}, Misses: {cacheMissCount}, Total Cached Charts: {cachedCharts}");
 			}
 			
+			if (tempRoot.childNodes.Count == 0)
+			{
+				Trace.TraceInformation("No songs found during scan.");
+				var noSongs = new SongNode(tempRoot, SongNode.ENodeType.SONG)
+				{
+					title = "No Songs Found"
+				};
+			}
+			
 			var tempFlattenedSongList = await FlattenSongList(tempRoot.childNodes);
 			var tempSkillSongs = CalculateSkill(tempFlattenedSongList, out double totalSkill);
 			
