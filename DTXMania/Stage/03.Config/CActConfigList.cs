@@ -52,6 +52,13 @@ internal partial class CActConfigList : CActivity
     /// </summary>
     public void tPressEsc()
     {
+        UIImGuiTextInput.CancelActiveInput();
+
+        if (listItems[nCurrentSelection] is CItemTextInput textInput)
+        {
+            textInput.drawableTextInput.DeactivateTextInput(true);
+        }
+
         switch (eMenuType)
         {
             case EMenuType.KeyAssignSystem:

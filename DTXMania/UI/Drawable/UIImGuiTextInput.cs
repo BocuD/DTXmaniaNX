@@ -51,6 +51,15 @@ public class UIImGuiTextInput : UIText
 
     public static bool IsAnyInputActive => _activeInput is { _isActive: true };
 
+    public static void CancelActiveInput()
+    {
+        if (_activeInput != null)
+        {
+            _activeInput.CancelInternal();
+            _activeInput = null;
+        }
+    }
+    
     public void ActivateTextInput(string? initialText = null, Action<string>? onCommit = null, Action? onCancel = null)
     {
         if (_activeInput != null && _activeInput != this)
