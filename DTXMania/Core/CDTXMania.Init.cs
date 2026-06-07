@@ -5,7 +5,7 @@ using DTXMania.Core.Video;
 using DTXMania.SongDb;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.Skin;
-using DTXMania.Updating;
+using DTXMania.Updater;
 using FDK;
 
 namespace DTXMania.Core;
@@ -188,20 +188,39 @@ internal partial class CDTXMania
         
         AddInitializer("Update Check", () =>
         {
-            Task.Run(StartUpdater);
+            Task.Run(RunUpdateService);
         });
     }
 
-    private async Task StartUpdater()
+    public UpdateService updateService { get; private set; }
+    public bool isUpdateReady = false;
+    public string stagedUpdate;
+    private async Task RunUpdateService()
     {
-        var svc = new UpdateService(new UpdateOptions { Owner = "BocuD", Repo = "DTXManiaNX" });
-        UpdateInfo? update = await svc.CheckAsync();
+        updateService = new UpdateService(new UpdateOptions { Owner = "BocuD", Repo = "DTXManiaNX" });
+        UpdateInfo? update = await updateService.CheckAsync();
         if (update is not null)
         {
             Trace.TraceInformation($"Update available: {update.Version} - {update.DownloadUrl}");
-            // var staged = await svc.DownloadAsync(update);   // background; reports progress if you want it
-            // svc.ApplyAndRestart(staged);                    // launches the applier
-            // Environment.Exit(0);                            // let it replace locked files, then it relaunches you
+            
+            UpdateNotification updateNotification = persistentUIGroup.AddChild(new UpdateNotification
+            {
+                position = new Vector3(0, 30, 0),
+                name = "UpdateNotification"
+            });
+            
+            updateNotification.SetText($"Update available: {update.Version} - downloading...");
+            updateNotification.fontSize = 30;
+
+            await Task.Delay(2000);
+
+            stagedUpdate = await updateService.DownloadAsync(update, updateNotification);
+            
+            Trace.TraceInformation($"Update downloaded: {update.Version}");
+            
+            updateNotification.SetText($"Update ready. Exit the game to install");
+
+            isUpdateReady = true;
         }
     }
 }

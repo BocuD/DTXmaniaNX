@@ -1,39 +1,29 @@
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Threading;
 
-// =============================================================================
-// DTXMania update applier (standalone).
+// DTXMania updater
 //
 // Runs from a temporary copy of itself so it can overwrite every file in the
-// install directory - including its own installed copy. It waits for the game to
+// install directory, including the updater itself. It waits for the game to
 // exit, overlays the staged update onto the install folder, then relaunches.
 //
-// Overlay semantics (this is what protects user data):
+// Overlay semantics (to protect user data):
 //   * every file in the staged package is copied over the install folder;
-//   * EXCEPT any path covered by a --preserve entry;
-//   * files already in the install folder that are NOT in the package are left
+//   * does not touch any path covered by a --preserve entry;
+//   * files already in the install folder that are not in the package are left
 //     untouched - they are never deleted. So Config.ini, logs, user themes and
-//     user-added songs all survive.
+//     songs all survive.
 //
 // Args: --staged <dir> --install <dir> --pid <id> --relaunch <exePath>
 //       [--preserve <relPath> ...]
-// =============================================================================
 
 string staged   = GetArg("--staged")   ?? Fail("--staged is required");
 string install  = GetArg("--install")  ?? Fail("--install is required");
 string relaunch = GetArg("--relaunch") ?? Fail("--relaunch is required");
 int    pid      = int.TryParse(GetArg("--pid"), out var parsed) ? parsed : -1;
+
 List<string> preserve = GetArgs("--preserve");
 
-string logPath = Path.Combine(Path.GetTempPath(), "dtxmania-updater.log");
-void Log(string message)
-{
-    try { File.AppendAllText(logPath, $"{DateTime.Now:O}  {message}{Environment.NewLine}"); }
-    catch { /* logging must never throw */ }
-}
+string logPath = Path.Combine(install, "dtxmania-updater.log");
 
 Log($"Updater start. staged='{staged}' install='{install}' pid={pid} preserve=[{string.Join(", ", preserve)}]");
 
@@ -88,6 +78,11 @@ finally
 return;
 
 // ---------- helpers ----------
+void Log(string message)
+{
+    try { File.AppendAllText(logPath, $"{DateTime.Now:O}  {message}{Environment.NewLine}"); }
+    catch { /* logging must never throw */ }
+}
 
 static void WaitForExit(int pid)
 {

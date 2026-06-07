@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 using Octokit;
 using Semver;
 
-namespace DTXMania.Updating;
+namespace DTXMania.Updater;
 
 public sealed class UpdateOptions
 {
@@ -22,16 +22,16 @@ public sealed class UpdateOptions
     //only '*' is a wildcard; matching is case-insensitive.
     public string AssetPattern { get; init; } = "*.zip";
 
-    //paths (relative to the install root) the updater must NEVER overwrite, even
+    //paths (relative to the install root) the updater must never overwrite, even
     //if the package contains them. naming a folder preserves everything beneath it.
     //user files that simply aren't in the package are preserved automatically and
     //don't need listing. must stay in sync with the exclude list in CI packaging.
-    public string[] PreservePaths { get; init; } = { "Config.ini", "Logs" };
+    public string[] PreservePaths { get; init; } = { "Config.ini" };
 
-    //folder (relative to install root) that contains the applier executable.
+    //folder (relative to install root) that contains the applier executable
     public string ApplierDir { get; init; } = "updater";
 
-    //file name (no path) of the main executable to relaunch after updating.
+    //file name (no path) of the main executable to relaunch after updating
     public string MainExe { get; init; } =
         OperatingSystem.IsWindows() ? "DTXManiaNX.exe" : "DTXManiaNX";
 
@@ -82,7 +82,7 @@ public sealed class UpdateService
             .ConfigureAwait(false);
 
         UpdateInfo? best = null;
-        foreach (var rel in releases)
+        foreach (Release? rel in releases)
         {
             if (rel.Draft) continue;
             if (rel.Prerelease && !_opt.IncludePrereleases) continue;
@@ -95,8 +95,8 @@ public sealed class UpdateService
                 best = new UpdateInfo(ver, asset.BrowserDownloadUrl, asset.Name);
         }
 
-        if (best is null || best.Version.ComparePrecedenceTo(CurrentVersion) <= 0)
-            return null; //nothing newer than what we're running
+        // if (best is null || best.Version.ComparePrecedenceTo(CurrentVersion) <= 0)
+        //     return null; //nothing newer than what we're running
 
         return best;
     }
@@ -106,11 +106,18 @@ public sealed class UpdateService
     public async Task<string> DownloadAsync(
         UpdateInfo update, IProgress<double>? progress = null, CancellationToken ct = default)
     {
-        var root = Path.Combine(Path.GetTempPath(), $"{_opt.Repo}-update-{Guid.NewGuid():N}");
+        var root = Path.Combine(Environment.CurrentDirectory, $"{_opt.Repo}-update-{update.Version}");
+
+        if (Directory.Exists(root))
+        {
+            //remove failed update attempt
+            Directory.Delete(root, true);
+        }
+
         Directory.CreateDirectory(root);
         var zipPath = Path.Combine(root, update.AssetName);
 
-        using (var resp = await _http
+        using (HttpResponseMessage resp = await _http
                    .GetAsync(update.DownloadUrl, HttpCompletionOption.ResponseHeadersRead, ct)
                    .ConfigureAwait(false))
         {
@@ -136,30 +143,29 @@ public sealed class UpdateService
         return staged;
     }
 
-    //copies the applier to a temp location (so the installed copy can itself be
+    //copies the updater to a temp location (so the installed copy can itself be
     //replaced by the update), launches it, and returns. The caller MUST exit
     //promptly afterwards so the applier can overwrite locked files and relaunch.
     public void ApplyAndRestart(string stagedDir)
     {
-        var install = AppContext.BaseDirectory
-            .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        var install = AppContext.BaseDirectory.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
         var updaterName = OperatingSystem.IsWindows() ? "updater.exe" : "updater";
 
         var updaterSrc = Path.Combine(install, _opt.ApplierDir);
         if (!Directory.Exists(updaterSrc))
             throw new DirectoryNotFoundException($"Updater folder not found: {updaterSrc}");
 
-        var applierTmp = Path.Combine(Path.GetTempPath(), $"{_opt.Repo}-applier-{Guid.NewGuid():N}");
-        CopyDirectory(updaterSrc, applierTmp);
+        var updaterTmp = Path.Combine(Path.GetTempPath(), $"{_opt.Repo}-updater-{Guid.NewGuid():N}");
+        CopyDirectory(updaterSrc, updaterTmp);
 
-        var applierExe = Path.Combine(applierTmp, updaterName);
-        TrySetExecutable(applierExe);
+        var updaterExe = Path.Combine(updaterTmp, updaterName);
+        TrySetExecutable(updaterExe);
 
         var psi = new ProcessStartInfo
         {
-            FileName = applierExe,
+            FileName = updaterExe,
             UseShellExecute = false,
-            WorkingDirectory = applierTmp,
+            WorkingDirectory = updaterTmp,
         };
         psi.ArgumentList.Add("--staged");   psi.ArgumentList.Add(stagedDir);
         psi.ArgumentList.Add("--install");  psi.ArgumentList.Add(install);
