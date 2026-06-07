@@ -95,8 +95,17 @@ public sealed class UpdateService
                 best = new UpdateInfo(ver, asset.BrowserDownloadUrl, asset.Name);
         }
 
-        // if (best is null || best.Version.ComparePrecedenceTo(CurrentVersion) <= 0)
-        //     return null; //nothing newer than what we're running
+        if (best == null)
+        {
+            Trace.TraceInformation("No updates available");
+            return null;
+        }
+        
+        if (best.Version.ComparePrecedenceTo(CurrentVersion) <= 0)
+        {
+            Trace.TraceInformation("Already up to date. Current: {0}, Latest: {1}", CurrentVersion, best.Version);
+            return null; //nothing newer than what we're running
+        }
 
         return best;
     }
@@ -106,7 +115,7 @@ public sealed class UpdateService
     public async Task<string> DownloadAsync(
         UpdateInfo update, IProgress<double>? progress = null, CancellationToken ct = default)
     {
-        var root = Path.Combine(Environment.CurrentDirectory, $"{_opt.Repo}-update-{update.Version}");
+        var root = Path.Combine(Environment.CurrentDirectory, "Updates", $"{_opt.Repo}-update-{update.Version}");
 
         if (Directory.Exists(root))
         {
