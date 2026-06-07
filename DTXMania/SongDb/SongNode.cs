@@ -224,11 +224,20 @@ public class SongNode
         
         if (Utilities.HasJapanese(searchQuery))
         {
-            KawazuConverter jpConverter = new();
-            string queryKana = jpConverter.Convert(searchQuery).Result;
-            string queryRoman = jpConverter.Convert(searchQuery, To.Romaji).Result;
+            var result = TextConversionCache.GetOrCacheTextConversion(searchQuery);
+            string queryKana = result.kana;
+            string queryRoman = result.romaji;
             
             queries = [searchQuery, searchQuery.Replace(" ", ""), queryKana, queryRoman];
+
+            // //replace hepburn notation (ē) and replace with singular vowel (e)
+            // queryRoman = queryRoman.Replace("ā", "a");
+            // queryRoman = queryRoman.Replace("ī", "i");
+            // queryRoman = queryRoman.Replace("ū", "u");
+            // queryRoman = queryRoman.Replace("ē", "e");
+            // queryRoman = queryRoman.Replace("ō", "o");
+            //
+            // queries = queries.Append(queryRoman).ToArray();
         }
         else
         {
