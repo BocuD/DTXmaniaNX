@@ -3339,6 +3339,14 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
     }
     protected override void tUpdateAndDraw_Chip_GuitarBass(CConfigIni configIni, ref CDTX dTX, ref CChip pChip, EInstrumentPart inst)
     {
+        int instIndex = (int)inst;
+        
+        //auto play guitar and bass chips
+        if ( !pChip.bHit && ( pChip.nDistanceFromBar[ instIndex ] < 0 ) )
+        {
+            pChip.bHit = true;
+            tPlaySound( pChip, CSoundManager.rcPerformanceTimer.n前回リセットした時のシステム時刻 + pChip.nPlaybackTimeMs, inst, dTX.nモニタを考慮した音量( inst ) );
+        }
     }
     
     protected override void tUpdateAndDraw_Chip_FillIn( CConfigIni configIni, ref CDTX dTX, ref CChip pChip )

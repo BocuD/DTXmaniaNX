@@ -488,7 +488,7 @@ internal partial class CStagePerfGuitarScreen
 		}
 	}
 
-	private static void DetermineUsedChips(CChip pChip, out bool bChipHasR, out bool bChipHasG, out bool bChipHasB, out bool bChipHasY,
+	public static void DetermineUsedChips(CChip pChip, out bool bChipHasR, out bool bChipHasG, out bool bChipHasB, out bool bChipHasY,
 		out bool bChipHasP, out bool bChipIsOpen)
 	{
 		bChipHasR = false;
