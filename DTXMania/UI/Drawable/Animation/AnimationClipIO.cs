@@ -20,7 +20,7 @@ public static class AnimationClipIO
     /// Default directory for clip files, relative to the working directory. Used by the
     /// editor UI as the starting directory in file dialogs.
     /// </summary>
-    public static string DefaultDirectory => Path.Combine(Environment.CurrentDirectory, "Animations");
+    public static string DefaultDirectory => Environment.CurrentDirectory;
 
     /// <summary>
     /// Serialize a clip to JSON and write it to <paramref name="path"/>. Returns true on
