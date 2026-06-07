@@ -29,6 +29,9 @@ Visit [releases](https://github.com/BocuD/DTXmaniaNX/releases) for automated bui
   - Multiple smoothing and interpolation options
   - Currently used by judgements, some transitions, note explosions, wailing
 
+- Automatic updates
+  - Builds are automatically done through GitHub Actions, the game will download, unpack, and install updates whenever a new build is available
+
 - Rewritten song database
   - ~4-8x performance speedup
   - Safer handling of files
@@ -79,6 +82,7 @@ Visit [releases](https://github.com/BocuD/DTXmaniaNX/releases) for automated bui
 ## Current roadmap (in no particular order)
 
 - Feature parity on song select screen with upstream DTXManiaNX
+  - Quick settings menu is main blocker
 - Lane swapping (similar to DTXMania AL)
 - Song favourite filters
 - Create separate video rendering behaviour option for 4:3 videos to stretch
@@ -86,7 +90,11 @@ Visit [releases](https://github.com/BocuD/DTXmaniaNX/releases) for automated bui
 - P4IO input support (arcade Gitadora hardware)
 - Configurable slow/fast
 - Configurable positions for judgement
+- Further improve song results screen
 - Separate kick pedal offset (?)
+- Animation based transition handler
+- Improve separation between instruments, allow arbitrary instrument combinations
+  - Currently guitar or bass only mode is implemented in a hacky way by removing extra notes from the chart, preventing bass notes from being played when playing for example guitar only mode. This should be configurable.
 
 ## Building
 
