@@ -62,7 +62,7 @@ public sealed record UpdatePlan(
     IReadOnlyList<DeltaStep> Steps)
 {
     //how many download steps this plan will run: one per delta hop, or a single
-    //full download. always >= 1, so it's safe to show as the "n" in "step x / n".
+    //full download. always >= 1 for valid updates
     public int StepCount => UseDelta ? Steps.Count : 1;
 }
 
@@ -71,6 +71,20 @@ public sealed record UpdatePlan(
 public readonly record struct DownloadProgress(int Step, int StepCount, double StepFraction)
 {
     public double Overall => StepCount <= 0 ? 0 : (Step - 1 + Math.Clamp(StepFraction, 0, 1)) / StepCount;
+}
+
+public enum UpdateCheckStatus
+{
+    UpToDate,        //the check completed and nothing newer is available
+    UpdateAvailable, //a newer release exists; see Plan
+    Failed
+}
+
+public sealed record UpdateCheck(UpdateCheckStatus Status, UpdatePlan? Plan, Exception? Error)
+{
+    public static readonly UpdateCheck UpToDate = new(UpdateCheckStatus.UpToDate, null, null);
+    public static UpdateCheck Available(UpdatePlan plan) => new(UpdateCheckStatus.UpdateAvailable, plan, null);
+    public static UpdateCheck Failed(Exception error) => new(UpdateCheckStatus.Failed, null, error);
 }
 
 public sealed class UpdateService
@@ -113,64 +127,76 @@ public sealed class UpdateService
     private static readonly IComparer<SemVersion> VersionComparer =
         Comparer<SemVersion>.Create((a, b) => a.ComparePrecedenceTo(b));
 
-    //returns a plan to reach the newest release (delta chain or full), or null if up to date
-    public async Task<UpdatePlan?> CheckAsync(CancellationToken ct = default)
+    //checks for updates and reports an outcome
+    public async Task<UpdateCheck> CheckAsync(CancellationToken ct = default)
     {
-        var releases = await _github.Repository.Release
-            .GetAll(_opt.Owner, _opt.Repo)
-            .ConfigureAwait(false);
-
-        //parse releases into version + full asset + (optional) delta asset
-        var parsed = new List<ParsedRelease>();
-        foreach (Release? rel in releases)
+        try
         {
-            if (rel.Draft) continue;
-            if (rel.Prerelease && !_opt.IncludePrereleases) continue;
-            if (!SemVersion.TryParse(rel.TagName, SemVersionStyles.Any, out var ver) || ver is null) continue;
+            var releases = await _github.Repository.Release
+                .GetAll(_opt.Owner, _opt.Repo)
+                .ConfigureAwait(false);
 
-            UpdateInfo? full = null;
-            DeltaStep? delta = null;
-            foreach (var asset in rel.Assets)
+            //parse releases into version + full asset + (optional) delta asset
+            var parsed = new List<ParsedRelease>();
+            foreach (Release? rel in releases)
             {
-                if (TryParseDeltaName(asset.Name, out var from, out var to) && from is not null && to is not null)
-                    delta = new DeltaStep(from, to, asset.BrowserDownloadUrl, asset.Name);
-                else if (GlobMatch(asset.Name, _opt.AssetPattern))
-                    full ??= new UpdateInfo(ver, asset.BrowserDownloadUrl, asset.Name);
+                if (rel.Draft) continue;
+                if (rel.Prerelease && !_opt.IncludePrereleases) continue;
+                if (!SemVersion.TryParse(rel.TagName, SemVersionStyles.Any, out var ver) || ver is null) continue;
+
+                UpdateInfo? full = null;
+                DeltaStep? delta = null;
+                foreach (var asset in rel.Assets)
+                {
+                    if (TryParseDeltaName(asset.Name, out var from, out var to) && from is not null && to is not null)
+                        delta = new DeltaStep(from, to, asset.BrowserDownloadUrl, asset.Name);
+                    else if (GlobMatch(asset.Name, _opt.AssetPattern))
+                        full ??= new UpdateInfo(ver, asset.BrowserDownloadUrl, asset.Name);
+                }
+
+                if (full is not null || delta is not null)
+                    parsed.Add(new ParsedRelease(ver, full, delta));
             }
 
-            if (full is not null || delta is not null)
-                parsed.Add(new ParsedRelease(ver, full, delta));
-        }
+            var withFull = parsed.Where(p => p.Full is not null).OrderBy(p => p.Version, VersionComparer).ToList();
+            if (withFull.Count == 0)
+            {
+                Trace.TraceInformation("Update check: no releases with a downloadable package found");
+                return UpdateCheck.UpToDate;
+            }
 
-        var withFull = parsed.Where(p => p.Full is not null).OrderBy(p => p.Version, VersionComparer).ToList();
-        if (withFull.Count == 0)
+            var latest = withFull[^1];
+            if (VersionComparer.Compare(latest.Version, CurrentVersion) <= 0)
+            {
+                Trace.TraceInformation("Update check: up to date. Current: {0}, Latest: {1}", CurrentVersion, latest.Version);
+                return UpdateCheck.UpToDate;
+            }
+
+            //try to build a contiguous delta chain from CurrentVersion up to latest
+            var ahead = parsed
+                .Where(p => VersionComparer.Compare(p.Version, CurrentVersion) > 0)
+                .OrderBy(p => p.Version, VersionComparer)
+                .ToList();
+
+            var steps = TryBuildDeltaChain(ahead, latest.Version);
+            if (steps is not null)
+            {
+                Trace.TraceInformation("Update check: {0} delta step(s) from {1} to {2}", steps.Count, CurrentVersion, latest.Version);
+                return UpdateCheck.Available(new UpdatePlan(latest.Version, true, latest.Full!, steps));
+            }
+
+            Trace.TraceInformation("Update check: full download to {0}", latest.Version);
+            return UpdateCheck.Available(new UpdatePlan(latest.Version, false, latest.Full!, Array.Empty<DeltaStep>()));
+        }
+        catch (OperationCanceledException) when (ct.IsCancellationRequested)
         {
-            Trace.TraceInformation("No releases with a downloadable package found");
-            return null;
+            throw; //caller cancelled - propagate rather than disguise it as a failure
         }
-
-        var latest = withFull[^1];
-        if (VersionComparer.Compare(latest.Version, CurrentVersion) <= 0)
+        catch (Exception ex)
         {
-            Trace.TraceInformation("Already up to date. Current: {0}, Latest: {1}", CurrentVersion, latest.Version);
-            return null;
+            Trace.TraceWarning("Update check failed: {0}", ex.Message);
+            return UpdateCheck.Failed(ex);
         }
-
-        //try to build a contiguous delta chain from CurrentVersion up to latest
-        var ahead = parsed
-            .Where(p => VersionComparer.Compare(p.Version, CurrentVersion) > 0)
-            .OrderBy(p => p.Version, VersionComparer)
-            .ToList();
-
-        var steps = TryBuildDeltaChain(ahead, latest.Version);
-        if (steps is not null)
-        {
-            Trace.TraceInformation("Updating via {0} delta step(s) from {1} to {2}", steps.Count, CurrentVersion, latest.Version);
-            return new UpdatePlan(latest.Version, true, latest.Full!, steps);
-        }
-
-        Trace.TraceInformation("Updating via full download to {0}", latest.Version);
-        return new UpdatePlan(latest.Version, false, latest.Full!, Array.Empty<DeltaStep>());
     }
 
     //returns an ordered delta chain that reaches target, or null if no usable chain exists
@@ -197,9 +223,9 @@ public sealed class UpdateService
         return VersionComparer.Compare(expected, target) == 0 ? steps : null;
     }
 
-    //downloads the plan and extracts it into a single staged folder, returning that folder.
+    //downloads the plan and extracts it into a single staged folder
     //for a delta plan the steps are merged in order (later steps overwrite earlier ones),
-    //which is equivalent to applying them one after another since nothing is deleted.
+    //which is equivalent to applying them one after another since nothing is deleted
     public async Task<string> DownloadAsync(
         UpdatePlan plan, IProgress<DownloadProgress>? progress = null, CancellationToken ct = default)
     {
@@ -241,8 +267,9 @@ public sealed class UpdateService
     }
 
     //copies the updater to a temp location (so the installed copy can itself be
-    //replaced by the update), launches it, and returns. The caller MUST exit
+    //replaced by the update), launches it, and returns. The caller should exit
     //promptly afterwards so the applier can overwrite locked files and relaunch.
+    //the updater will wait for the caller to exit, but it has a 60 second timeout.
     public void ApplyAndRestart(string stagedDir)
     {
         var install = AppContext.BaseDirectory.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);

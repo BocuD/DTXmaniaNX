@@ -198,42 +198,56 @@ internal partial class CDTXMania
 
     private async Task RunUpdateService()
     {
+        updateService = new UpdateService(new UpdateOptions { Owner = "BocuD", Repo = "DTXManiaNX" });
+
+        UpdateCheck check = await updateService.CheckAsync();
+
+        switch (check.Status)
+        {
+            case UpdateCheckStatus.UpToDate:
+                Trace.TraceInformation("Running the latest version.");
+                return;
+
+            case UpdateCheckStatus.Failed:
+                Trace.TraceWarning("Could not check for updates: " + check.Error?.Message);
+                return;
+
+            case UpdateCheckStatus.UpdateAvailable:
+                break;
+        }
+
+        var plan = check.Plan!;
+        Trace.TraceInformation($"Update available: {plan.TargetVersion} - " +
+            (plan.UseDelta ? $"{plan.StepCount} delta step(s)" : "full download"));
+
+        var updateNotification = persistentUIGroup.AddChild(new UpdateNotification
+        {
+            position = new Vector3(0, 30, 0),
+            name = "UpdateNotification",
+            fontSize = 30,
+        });
+        updateNotification.SetText($"Update available: {plan.TargetVersion} - downloading...");
+
         try
         {
-            updateService = new UpdateService(new UpdateOptions { Owner = "BocuD", Repo = "DTXManiaNX" });
-
-            var plan = await updateService.CheckAsync();
-            if (plan is null) return; // up to date
-
-            Trace.TraceInformation($"Update available: {plan.TargetVersion} - " +
-                                   (plan.UseDelta ? $"{plan.StepCount} delta step(s)" : "full download"));
-
-            var updateNotification = persistentUIGroup.AddChild(new UpdateNotification
-            {
-                position = new Vector3(0, 30, 0),
-                name = "UpdateNotification",
-                fontSize = 30,
-            });
-            updateNotification.SetText($"Update available: {plan.TargetVersion} - downloading...");
-
             try
             {
                 stagedUpdate = await updateService.DownloadAsync(plan, updateNotification);
             }
             catch (InvalidOperationException) when (plan.UseDelta)
             {
-                Trace.TraceWarning("Delta update failed verification; falling back to full download.");
+                Trace.TraceWarning("Delta failed verification; falling back to full download.");
                 var full = plan with { UseDelta = false, Steps = Array.Empty<DeltaStep>() };
                 stagedUpdate = await updateService.DownloadAsync(full, updateNotification);
             }
 
-            Trace.TraceInformation($"Update downloaded: {plan.TargetVersion}");
             updateNotification.SetText("Update ready. Exit the game to install");
             isUpdateReady = true;
         }
         catch (Exception ex)
         {
-            Trace.TraceError("Update failed: " + ex);
+            Trace.TraceError("Update download failed: " + ex);
+            updateNotification.SetText("Update download failed");
         }
     }
 }
