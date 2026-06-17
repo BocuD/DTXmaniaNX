@@ -41,12 +41,11 @@ jobs:
           echo "Computed version: $ver"
 
       - name: Restore dependencies
-        run: dotnet restore DTXMania.sln -r win-x64
+        run: dotnet restore DTXMania.sln
 
       - name: Build Release
         run: >
-          dotnet build DTXMania.sln -c Release --no-restore -r win-x64
-          --self-contained false
+          dotnet build DTXMania.sln -c Release --no-restore
           -p:InformationalVersion=${{ steps.version.outputs.ver }}
           -p:Version=${{ env.VERSION_BASE }}.${{ github.run_number }}
 
