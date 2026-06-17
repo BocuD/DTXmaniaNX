@@ -2,20 +2,23 @@
 
 namespace DTXMania.Updater;
 
-public class UpdateNotification : UIText, IProgress<double>
+public class UpdateNotification : UIText, IProgress<DownloadProgress>
 {
-    //make sure we don't update this more than every second
+    //throttle redraws
     DateTime lastUpdate = DateTime.MinValue;
-    
-    public void Report(double value)
+    int lastStep = -1;
+
+    public void Report(DownloadProgress value)
     {
-        if (lastUpdate.AddSeconds(1) > DateTime.Now)
+        bool stepChanged = value.Step != lastStep;
+        if (!stepChanged && lastUpdate.AddMilliseconds(200) > DateTime.Now)
         {
             return;
         }
-        
+
         lastUpdate = DateTime.Now;
-        
-        SetText($"Downloading update... {value:P0}");
+        lastStep = value.Step;
+
+        SetText($"Downloading update ({value.Step} / {value.StepCount})... {value.StepFraction:P0}");
     }
 }

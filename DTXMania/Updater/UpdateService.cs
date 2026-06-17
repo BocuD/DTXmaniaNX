@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.IO.Compression;
 using System.Reflection;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using Octokit;
 using Semver;
@@ -17,10 +18,17 @@ public sealed class UpdateOptions
 
     //consider releases marked as pre-release
     public bool IncludePrereleases { get; init; } = true;
-    
-    //pattern matched against each release asset's file name to find the zip.
-    //only '*' is a wildcard; matching is case-insensitive.
+
+    //pattern matched against each release asset's file name to find the full zip.
+    //only '*' is a wildcard; matching is case-insensitive. delta assets are
+    //identified separately by their name and are never treated as a full release.
     public string AssetPattern { get; init; } = "*.zip";
+
+    //maximum number of successive delta steps to apply before preferring a single
+    //full download instead. applying a very long chain is slower than one full
+    //download, so beyond this many steps we just fetch the latest full zip.
+    //set to 0 to disable deltas entirely.
+    public int MaxDeltaSteps { get; init; } = 10;
 
     //paths (relative to the install root) the updater must never overwrite, even
     //if the package contains them. naming a folder preserves everything beneath it.
@@ -40,10 +48,37 @@ public sealed class UpdateOptions
     public string? Token { get; init; }
 }
 
+//the target full release for a given check (also the fallback when deltas can't be used)
 public sealed record UpdateInfo(SemVersion Version, string DownloadUrl, string AssetName);
+
+//a single delta hop: applying it upgrades an install from From to To
+public sealed record DeltaStep(SemVersion From, SemVersion To, string DownloadUrl, string AssetName);
+
+//the chosen way to reach the latest version: either a delta chain or one full download
+public sealed record UpdatePlan(
+    SemVersion TargetVersion,
+    bool UseDelta,
+    UpdateInfo FullRelease,
+    IReadOnlyList<DeltaStep> Steps)
+{
+    //how many download steps this plan will run: one per delta hop, or a single
+    //full download. always >= 1, so it's safe to show as the "n" in "step x / n".
+    public int StepCount => UseDelta ? Steps.Count : 1;
+}
+
+//progress for one download step within a plan. Step is 1-based; StepFraction is
+//this step's own 0..1 progress; Overall is completion across the whole plan.
+public readonly record struct DownloadProgress(int Step, int StepCount, double StepFraction)
+{
+    public double Overall => StepCount <= 0 ? 0 : (Step - 1 + Math.Clamp(StepFraction, 0, 1)) / StepCount;
+}
 
 public sealed class UpdateService
 {
+    //manifest file embedded in every delta zip; read for verification then stripped
+    //so it never lands in the install directory.
+    private const string DeltaManifestName = "delta-manifest.json";
+
     private readonly UpdateOptions _opt;
     private readonly IGitHubClient _github;
     private readonly HttpClient _http;
@@ -74,48 +109,101 @@ public sealed class UpdateService
         return SemVersion.TryParse(info, SemVersionStyles.Any, out var v) ? v : new SemVersion(0, 0, 0);
     }
 
-    //returns the newest available update, or null if already up to date
-    public async Task<UpdateInfo?> CheckAsync(CancellationToken ct = default)
+    //precedence comparer (Semver v3 no longer implements IComparable)
+    private static readonly IComparer<SemVersion> VersionComparer =
+        Comparer<SemVersion>.Create((a, b) => a.ComparePrecedenceTo(b));
+
+    //returns a plan to reach the newest release (delta chain or full), or null if up to date
+    public async Task<UpdatePlan?> CheckAsync(CancellationToken ct = default)
     {
         var releases = await _github.Repository.Release
             .GetAll(_opt.Owner, _opt.Repo)
             .ConfigureAwait(false);
 
-        UpdateInfo? best = null;
+        //parse releases into version + full asset + (optional) delta asset
+        var parsed = new List<ParsedRelease>();
         foreach (Release? rel in releases)
         {
             if (rel.Draft) continue;
             if (rel.Prerelease && !_opt.IncludePrereleases) continue;
-            if (!SemVersion.TryParse(rel.TagName, SemVersionStyles.Any, out var ver)) continue;
+            if (!SemVersion.TryParse(rel.TagName, SemVersionStyles.Any, out var ver) || ver is null) continue;
 
-            var asset = rel.Assets.FirstOrDefault(a => GlobMatch(a.Name, _opt.AssetPattern));
-            if (asset is null) continue;
+            UpdateInfo? full = null;
+            DeltaStep? delta = null;
+            foreach (var asset in rel.Assets)
+            {
+                if (TryParseDeltaName(asset.Name, out var from, out var to) && from is not null && to is not null)
+                    delta = new DeltaStep(from, to, asset.BrowserDownloadUrl, asset.Name);
+                else if (GlobMatch(asset.Name, _opt.AssetPattern))
+                    full ??= new UpdateInfo(ver, asset.BrowserDownloadUrl, asset.Name);
+            }
 
-            if (best is null || ver.ComparePrecedenceTo(best.Version) > 0)
-                best = new UpdateInfo(ver, asset.BrowserDownloadUrl, asset.Name);
+            if (full is not null || delta is not null)
+                parsed.Add(new ParsedRelease(ver, full, delta));
         }
 
-        if (best == null)
+        var withFull = parsed.Where(p => p.Full is not null).OrderBy(p => p.Version, VersionComparer).ToList();
+        if (withFull.Count == 0)
         {
-            Trace.TraceInformation("No updates available");
+            Trace.TraceInformation("No releases with a downloadable package found");
             return null;
         }
-        
-        if (best.Version.ComparePrecedenceTo(CurrentVersion) <= 0)
+
+        var latest = withFull[^1];
+        if (VersionComparer.Compare(latest.Version, CurrentVersion) <= 0)
         {
-            Trace.TraceInformation("Already up to date. Current: {0}, Latest: {1}", CurrentVersion, best.Version);
-            return null; //nothing newer than what we're running
+            Trace.TraceInformation("Already up to date. Current: {0}, Latest: {1}", CurrentVersion, latest.Version);
+            return null;
         }
 
-        return best;
+        //try to build a contiguous delta chain from CurrentVersion up to latest
+        var ahead = parsed
+            .Where(p => VersionComparer.Compare(p.Version, CurrentVersion) > 0)
+            .OrderBy(p => p.Version, VersionComparer)
+            .ToList();
+
+        var steps = TryBuildDeltaChain(ahead, latest.Version);
+        if (steps is not null)
+        {
+            Trace.TraceInformation("Updating via {0} delta step(s) from {1} to {2}", steps.Count, CurrentVersion, latest.Version);
+            return new UpdatePlan(latest.Version, true, latest.Full!, steps);
+        }
+
+        Trace.TraceInformation("Updating via full download to {0}", latest.Version);
+        return new UpdatePlan(latest.Version, false, latest.Full!, Array.Empty<DeltaStep>());
     }
 
-    //downloads and extracts the update package to a fresh temporary staging folder,
-    //returning the path to the extracted files.
-    public async Task<string> DownloadAsync(
-        UpdateInfo update, IProgress<double>? progress = null, CancellationToken ct = default)
+    //returns an ordered delta chain that reaches target, or null if no usable chain exists
+    private IReadOnlyList<DeltaStep>? TryBuildDeltaChain(List<ParsedRelease> ahead, SemVersion target)
     {
-        var root = Path.Combine(Environment.CurrentDirectory, "Updates", $"{_opt.Repo}-update-{update.Version}");
+        if (_opt.MaxDeltaSteps <= 0 || ahead.Count == 0 || ahead.Count > _opt.MaxDeltaSteps)
+            return null;
+
+        var steps = new List<DeltaStep>(ahead.Count);
+        var expected = CurrentVersion;
+        foreach (var p in ahead)
+        {
+            //each release must carry a delta that goes from the version we're now at to itself
+            if (p.Delta is null
+                || VersionComparer.Compare(p.Delta.From, expected) != 0
+                || VersionComparer.Compare(p.Delta.To, p.Version) != 0)
+                return null;
+
+            steps.Add(p.Delta);
+            expected = p.Version;
+        }
+
+        //the chain must actually land on the latest version
+        return VersionComparer.Compare(expected, target) == 0 ? steps : null;
+    }
+
+    //downloads the plan and extracts it into a single staged folder, returning that folder.
+    //for a delta plan the steps are merged in order (later steps overwrite earlier ones),
+    //which is equivalent to applying them one after another since nothing is deleted.
+    public async Task<string> DownloadAsync(
+        UpdatePlan plan, IProgress<DownloadProgress>? progress = null, CancellationToken ct = default)
+    {
+        var root = Path.Combine(Environment.CurrentDirectory, "Updates", $"{_opt.Repo}-update-{plan.TargetVersion}");
 
         if (Directory.Exists(root))
         {
@@ -124,31 +212,31 @@ public sealed class UpdateService
         }
 
         Directory.CreateDirectory(root);
-        var zipPath = Path.Combine(root, update.AssetName);
+        var staged = Path.Combine(root, "staged");
+        Directory.CreateDirectory(staged);
 
-        using (HttpResponseMessage resp = await _http
-                   .GetAsync(update.DownloadUrl, HttpCompletionOption.ResponseHeadersRead, ct)
-                   .ConfigureAwait(false))
+        if (!plan.UseDelta)
         {
-            resp.EnsureSuccessStatusCode();
-            var total = resp.Content.Headers.ContentLength ?? -1L;
-
-            await using var src = await resp.Content.ReadAsStreamAsync(ct).ConfigureAwait(false);
-            await using var dst = File.Create(zipPath);
-            var buffer = new byte[81920];
-            long readTotal = 0;
-            int read;
-            while ((read = await src.ReadAsync(buffer, ct).ConfigureAwait(false)) > 0)
-            {
-                await dst.WriteAsync(buffer.AsMemory(0, read), ct).ConfigureAwait(false);
-                readTotal += read;
-                if (total > 0) progress?.Report((double)readTotal / total);
-            }
+            var zipPath = Path.Combine(root, plan.FullRelease.AssetName);
+            var stepProgress = progress is null ? null : new StepProgress(progress, 1, 1);
+            await DownloadZipAsync(plan.FullRelease.DownloadUrl, zipPath, stepProgress, ct).ConfigureAwait(false);
+            ZipFile.ExtractToDirectory(zipPath, staged);
+            File.Delete(zipPath);
+            return staged;
         }
 
-        var staged = Path.Combine(root, "staged");
-        ZipFile.ExtractToDirectory(zipPath, staged);
-        File.Delete(zipPath);
+        for (var i = 0; i < plan.Steps.Count; i++)
+        {
+            var step = plan.Steps[i];
+            IProgress<double>? stepProgress =
+                progress is null ? null : new StepProgress(progress, i + 1, plan.Steps.Count);
+
+            var zipPath = Path.Combine(root, step.AssetName);
+            await DownloadZipAsync(step.DownloadUrl, zipPath, stepProgress, ct).ConfigureAwait(false);
+            MergeDelta(zipPath, staged, step);
+            File.Delete(zipPath);
+        }
+
         return staged;
     }
 
@@ -176,6 +264,7 @@ public sealed class UpdateService
             UseShellExecute = false,
             WorkingDirectory = updaterTmp,
         };
+        psi.ArgumentList.Add("apply");      //selects the applier mode (vs. "delta" at build time)
         psi.ArgumentList.Add("--staged");   psi.ArgumentList.Add(stagedDir);
         psi.ArgumentList.Add("--install");  psi.ArgumentList.Add(install);
         psi.ArgumentList.Add("--pid");      psi.ArgumentList.Add(Environment.ProcessId.ToString());
@@ -190,6 +279,91 @@ public sealed class UpdateService
     }
 
     // ---------- helpers ----------
+
+    //parses a delta asset name of the form <prefix>-delta-<from>-to-<to>.zip.
+    //version strings never contain "-delta-" or "-to-", so the split is unambiguous.
+    private static bool TryParseDeltaName(string name, out SemVersion? from, out SemVersion? to)
+    {
+        from = null;
+        to = null;
+
+        const string marker = "-delta-";
+        var i = name.IndexOf(marker, StringComparison.OrdinalIgnoreCase);
+        if (i < 0) return false;
+
+        var body = name[(i + marker.Length)..];
+        if (body.EndsWith(".zip", StringComparison.OrdinalIgnoreCase)) body = body[..^4];
+
+        var sep = body.IndexOf("-to-", StringComparison.Ordinal);
+        if (sep < 0) return false;
+
+        var fromText = body[..sep];
+        var toText = body[(sep + "-to-".Length)..];
+
+        if (SemVersion.TryParse(fromText, SemVersionStyles.Any, out var f) && f is not null
+            && SemVersion.TryParse(toText, SemVersionStyles.Any, out var t) && t is not null)
+        {
+            from = f;
+            to = t;
+            return true;
+        }
+        return false;
+    }
+
+    private async Task DownloadZipAsync(string url, string destZip, IProgress<double>? progress, CancellationToken ct)
+    {
+        using var resp = await _http
+            .GetAsync(url, HttpCompletionOption.ResponseHeadersRead, ct)
+            .ConfigureAwait(false);
+        resp.EnsureSuccessStatusCode();
+        var total = resp.Content.Headers.ContentLength ?? -1L;
+
+        await using var src = await resp.Content.ReadAsStreamAsync(ct).ConfigureAwait(false);
+        await using var dst = File.Create(destZip);
+        var buffer = new byte[81920];
+        long readTotal = 0;
+        int read;
+        while ((read = await src.ReadAsync(buffer, ct).ConfigureAwait(false)) > 0)
+        {
+            await dst.WriteAsync(buffer.AsMemory(0, read), ct).ConfigureAwait(false);
+            readTotal += read;
+            if (total > 0) progress?.Report((double)readTotal / total);
+        }
+    }
+
+    //verifies a delta's manifest matches the step it's supposed to be, then overlays
+    //its files into the staged folder (the manifest itself is never copied).
+    private static void MergeDelta(string deltaZip, string staged, DeltaStep step)
+    {
+        using var archive = ZipFile.OpenRead(deltaZip);
+
+        var manifestEntry = archive.GetEntry(DeltaManifestName)
+            ?? throw new InvalidOperationException($"Delta '{step.AssetName}' is missing {DeltaManifestName}.");
+
+        using (var ms = manifestEntry.Open())
+        using (var doc = JsonDocument.Parse(ms))
+        {
+            var from = doc.RootElement.GetProperty("from").GetString();
+            var to = doc.RootElement.GetProperty("to").GetString();
+            if (!SemVersion.TryParse(from, SemVersionStyles.Any, out var f) || f is null
+                || !SemVersion.TryParse(to, SemVersionStyles.Any, out var t) || t is null
+                || f.ComparePrecedenceTo(step.From) != 0
+                || t.ComparePrecedenceTo(step.To) != 0)
+                throw new InvalidOperationException(
+                    $"Delta '{step.AssetName}' manifest ({from} -> {to}) does not match its name.");
+        }
+
+        foreach (var entry in archive.Entries)
+        {
+            if (entry.FullName == DeltaManifestName) continue;
+            if (entry.FullName.EndsWith('/') || string.IsNullOrEmpty(entry.Name)) continue; //directory
+
+            var rel = entry.FullName.Replace('/', Path.DirectorySeparatorChar);
+            var dst = Path.Combine(staged, rel);
+            Directory.CreateDirectory(Path.GetDirectoryName(dst)!);
+            entry.ExtractToFile(dst, overwrite: true);
+        }
+    }
 
     private static string SanitizeProduct(string s) => Regex.Replace(s, "[^A-Za-z0-9._-]", "-");
 
@@ -222,5 +396,26 @@ public sealed class UpdateService
                     UnixFileMode.OtherRead | UnixFileMode.OtherExecute);
         }
         catch { /* best effort */ }
+    }
+
+    //a release as parsed for planning: its version, full package (if any), delta (if any)
+    private sealed record ParsedRelease(SemVersion Version, UpdateInfo? Full, DeltaStep? Delta);
+
+    //tags a single download's 0..1 progress with which step it is, so the UI can
+    //show "step x / n" as well as a percentage
+    private sealed class StepProgress : IProgress<double>
+    {
+        private readonly IProgress<DownloadProgress> _inner;
+        private readonly int _step;
+        private readonly int _stepCount;
+
+        public StepProgress(IProgress<DownloadProgress> inner, int step, int stepCount)
+        {
+            _inner = inner;
+            _step = step;
+            _stepCount = stepCount;
+        }
+
+        public void Report(double fraction) => _inner.Report(new DownloadProgress(_step, _stepCount, fraction));
     }
 }

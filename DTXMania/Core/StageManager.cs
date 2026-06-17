@@ -578,9 +578,10 @@ internal class StageManager
 
                     if (CDTXMania.app.isUpdateReady)
                     {
-                        CDTXMania.app.updateService.ApplyAndRestart(CDTXMania.app.stagedUpdate);
+                        try { CDTXMania.app.updateService.ApplyAndRestart(CDTXMania.app.stagedUpdate); }
+                        catch (Exception ex) { Trace.TraceError("Failed to launch updater: " + ex); }
                     }
-
+                    
                     DTXManiaGL.instance.RequestExit();
                 }
 
