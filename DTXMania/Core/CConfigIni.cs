@@ -905,8 +905,8 @@ internal class CConfigIni
 		bFullScreenMode = false;
 		bFullScreenExclusive = true;
 		bVerticalSyncWait = true;
-		nInitialWindowXPosition = 0; // #30675 2013.02.04 ikanick add
-		nInitialWindowYPosition = 0;
+		nInitialWindowXPosition = 50; // #30675 2013.02.04 ikanick add
+		nInitialWindowYPosition = 50;
 		//this.bDirectShowMode = true;
 		nWindowWidth = GameWindowSize.Width;			// #23510 2010.10.31 yyagi add
 		nWindowHeight = GameWindowSize.Height;			// 
