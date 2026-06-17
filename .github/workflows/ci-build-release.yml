@@ -41,13 +41,12 @@ jobs:
           echo "Computed version: $ver"
 
       - name: Restore dependencies
-        run: dotnet restore DTXMania.sln
+        run: dotnet restore DTXMania.sln -r win-x64
 
-      # Build the game into Runtime, stamping the full SemVer as InformationalVersion
-      # which UpdateService reads to compare against releases
       - name: Build Release
         run: >
-          dotnet build DTXMania.sln -c Release --no-restore
+          dotnet build DTXMania.sln -c Release --no-restore -r win-x64
+          --self-contained false
           -p:InformationalVersion=${{ steps.version.outputs.ver }}
           -p:Version=${{ env.VERSION_BASE }}.${{ github.run_number }}
 
