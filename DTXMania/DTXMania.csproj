@@ -13,6 +13,9 @@
         <AssemblyName>DTXManiaNX</AssemblyName>
         <Version>2.0.0</Version>
         <LangVersion>12</LangVersion>
+        <UseCurrentRuntimeIdentifier>true</UseCurrentRuntimeIdentifier>
+        <SelfContained>false</SelfContained>
+        <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -66,8 +69,8 @@
       <PackageReference Include="Semver" Version="3.0.0" />
       <PackageReference Include="Silk.NET.OpenGL" Version="2.23.0" />
       <PackageReference Include="SkiaSharp" Version="3.119.2" />
-      <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="3.119.2" />
       <PackageReference Include="SkiaSharp.NativeAssets.Win32" Version="3.119.2" />
+      <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="3.119.2" Condition="$([MSBuild]::IsOSPlatform('Linux'))" />
       <PackageReference Include="sqlite-net-pcl" Version="1.9.172" />
       <PackageReference Include="StbImageSharp" Version="2.30.15" />
       <PackageReference Include="System.Configuration.ConfigurationManager" Version="6.0.2" />
