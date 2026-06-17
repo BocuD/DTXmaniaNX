@@ -5,7 +5,7 @@ using DTXMania.Core.Video;
 using DTXMania.SongDb;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.Skin;
-using DTXMania.Updating;
+using DTXMania.Updater;
 using FDK;
 
 namespace DTXMania.Core;
@@ -188,20 +188,66 @@ internal partial class CDTXMania
         
         AddInitializer("Update Check", () =>
         {
-            Task.Run(StartUpdater);
+            Task.Run(RunUpdateService);
         });
     }
 
-    private async Task StartUpdater()
+    public UpdateService updateService { get; private set; }
+    public bool isUpdateReady = false;
+    public string stagedUpdate;
+
+    private async Task RunUpdateService()
     {
-        var svc = new UpdateService(new UpdateOptions { Owner = "BocuD", Repo = "DTXManiaNX" });
-        UpdateInfo? update = await svc.CheckAsync();
-        if (update is not null)
+        updateService = new UpdateService(new UpdateOptions { Owner = "BocuD", Repo = "DTXManiaNX" });
+
+        UpdateCheck check = await updateService.CheckAsync();
+
+        switch (check.Status)
         {
-            Trace.TraceInformation($"Update available: {update.Version} - {update.DownloadUrl}");
-            // var staged = await svc.DownloadAsync(update);   // background; reports progress if you want it
-            // svc.ApplyAndRestart(staged);                    // launches the applier
-            // Environment.Exit(0);                            // let it replace locked files, then it relaunches you
+            case UpdateCheckStatus.UpToDate:
+                Trace.TraceInformation("Running the latest version.");
+                return;
+
+            case UpdateCheckStatus.Failed:
+                Trace.TraceWarning("Could not check for updates: " + check.Error?.Message);
+                return;
+
+            case UpdateCheckStatus.UpdateAvailable:
+                break;
+        }
+
+        var plan = check.Plan!;
+        Trace.TraceInformation($"Update available: {plan.TargetVersion} - " +
+            (plan.UseDelta ? $"{plan.StepCount} delta step(s)" : "full download"));
+
+        var updateNotification = persistentUIGroup.AddChild(new UpdateNotification
+        {
+            position = new Vector3(0, 30, 0),
+            name = "UpdateNotification",
+            fontSize = 30,
+        });
+        updateNotification.SetText($"Update available: {plan.TargetVersion} - downloading...");
+
+        try
+        {
+            try
+            {
+                stagedUpdate = await updateService.DownloadAsync(plan, updateNotification);
+            }
+            catch (InvalidOperationException) when (plan.UseDelta)
+            {
+                Trace.TraceWarning("Delta failed verification; falling back to full download.");
+                var full = plan with { UseDelta = false, Steps = Array.Empty<DeltaStep>() };
+                stagedUpdate = await updateService.DownloadAsync(full, updateNotification);
+            }
+
+            updateNotification.SetText("Update ready. Exit the game to install");
+            isUpdateReady = true;
+        }
+        catch (Exception ex)
+        {
+            Trace.TraceError("Update download failed: " + ex);
+            updateNotification.SetText("Update download failed");
         }
     }
 }

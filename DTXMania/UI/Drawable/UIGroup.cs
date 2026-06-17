@@ -10,6 +10,8 @@ public class UIGroup : UIDrawable
 {
     [Themable] public bool sortByRenderOrder = true;
     public List<UIDrawable> children = [];
+    
+    private bool dirty = false;
 
     public Animator? animator;
 
@@ -38,6 +40,9 @@ public class UIGroup : UIDrawable
         }
 
         animator?.InvalidateBindings();
+
+        dirty = true;
+        
         return element;
     }
 
@@ -60,6 +65,8 @@ public class UIGroup : UIDrawable
     {
         children.Remove(element);
         animator?.InvalidateBindings();
+        
+        dirty = true;
     }
 
     public void ClearChildren()
@@ -84,9 +91,10 @@ public class UIGroup : UIDrawable
         UpdateLocalTransformMatrix();
         Matrix4x4 combinedMatrix = localTransformMatrix * parentMatrix;
 
-        if (sortByRenderOrder)
+        if (sortByRenderOrder && dirty)
         {
             children.Sort((a, b) => a.renderOrder.CompareTo(b.renderOrder));
+            dirty = false;
         }
 
         for (int index = 0; index < children.Count; index++)

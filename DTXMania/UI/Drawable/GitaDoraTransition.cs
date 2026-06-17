@@ -127,14 +127,14 @@ public class GitaDoraTransition : UIGroup
         else if (state.animate)
         {
             state.animationProgress += delta * state.animationSpeed * state.animationDirection;
-            if (state.animationProgress > 2.0f && state.animationTarget >= 1.5f)
+            if (state.animationProgress > state.animationTarget && state.animationTarget >= 0)
             {
                 state.animationProgress = state.animationTarget;
                 state.finishOnNextFrame = true;
                 state.closed = false;
             }
 
-            if (state.animationProgress <= -1.0f && state.animationTarget <= -0.5f)
+            if (state.animationProgress <= state.animationTarget && state.animationTarget < 0)
             {
                 state.animationProgress = state.animationTarget;
                 state.finishOnNextFrame = true;
@@ -153,8 +153,8 @@ public class GitaDoraTransition : UIGroup
     public static void Close(int delayFrames = 0, Action? action = null)
     {
         state.animate = true;
-        state.animationProgress = 2.0f;
-        state.animationTarget = -1.0f;
+        state.animationProgress = 1.5f;
+        state.animationTarget = -0.75f;
         state.animationDirection = -1.0f;
         state.onComplete = action;
         state.lastDrawTime = CDTXMania.Timer.nCurrentTime;
@@ -164,8 +164,8 @@ public class GitaDoraTransition : UIGroup
     public static void Open(int delayFrames = 5, Action? action = null)
     {
         state.animate = true;
-        state.animationProgress = -1.0f;
-        state.animationTarget = 2.0f;
+        state.animationProgress = -0.75f;
+        state.animationTarget = 1.5f;
         state.animationDirection = 1.0f;
         state.onComplete = action;
         state.lastDrawTime = CDTXMania.Timer.nCurrentTime;

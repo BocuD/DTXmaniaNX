@@ -575,6 +575,13 @@ internal class StageManager
                 if (nUpdateAndDrawReturnValue != 0)
                 {
                     CDTXMania.app.tTerminate();
+
+                    if (CDTXMania.app.isUpdateReady)
+                    {
+                        try { CDTXMania.app.updateService.ApplyAndRestart(CDTXMania.app.stagedUpdate); }
+                        catch (Exception ex) { Trace.TraceError("Failed to launch updater: " + ex); }
+                    }
+                    
                     DTXManiaGL.instance.RequestExit();
                 }
 

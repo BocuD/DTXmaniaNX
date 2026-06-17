@@ -287,7 +287,7 @@ internal class CStageConfig : CStage
             {
                 GitaDoraTransition.Close(0, async () =>
                 {
-                    await Task.Delay(150);
+                    await Task.Delay(50);
                     GitaDoraTransition.Open();
                 });
                 ePhaseID = EPhase.Common_FadeOut;
@@ -300,7 +300,7 @@ internal class CStageConfig : CStage
                 CDTXMania.Skin.soundDecide.tPlay();
                 GitaDoraTransition.Close(0, async () =>
                 {
-                    await Task.Delay(500);
+                    await Task.Delay(50);
                     GitaDoraTransition.Open();
                 });
                 ePhaseID = EPhase.Common_FadeOut;

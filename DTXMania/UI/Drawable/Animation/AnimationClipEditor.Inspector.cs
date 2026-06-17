@@ -47,12 +47,6 @@ public sealed partial class AnimationClipEditor
                 lastPathByClip.TryGetValue(selectedClip, out string? known);
                 (string defaultDir, string defaultName) = AnimationClipIO.GetSaveDialogDefaults(selectedClip, known);
 
-                // Make sure the default directory exists so NFD has somewhere to open at.
-                if (!Directory.Exists(defaultDir))
-                {
-                    try { Directory.CreateDirectory(defaultDir); } catch { /* ignored — NFD will fall back */ }
-                }
-
                 string chosen = NFD.SaveDialog(defaultDir, defaultName, new Dictionary<string, string> { { "Animation Clip", "json" } });
                 if (!string.IsNullOrEmpty(chosen))
                 {
