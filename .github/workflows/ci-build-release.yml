@@ -2,104 +2,147 @@ name: CI Build and Release
 
 on:
   push:
-    branches:
-      - master
-      - main
+    branches: [master, main]
   pull_request:
-    branches:
-      - master
-      - main
+    branches: [master, main]
   workflow_dispatch:
 
 permissions:
   contents: write
 
 env:
-  VERSION_MAJOR_MINOR_PATCH: "2.0.0"
+  VERSION_BASE: "2.0.0"
 
 jobs:
-  build:
+  build-and-release:
     runs-on: windows-latest
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Setup .NET SDK 8.0
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: '8.0.x'
-        
-    - name: Restore dependencies
-      run: dotnet restore DTXMania.sln
-      
-    - name: Build Release
-      run: dotnet build DTXMania.sln -c Release --no-restore
-      
-    - name: Generate version tag
-      id: version
-      run: |
-        $date = Get-Date -Format "yyyyMMdd"
-        $version = "V${{ env.VERSION_MAJOR_MINOR_PATCH }}-$date-${{ github.run_number }}"
-        echo "tag=$version" >> $env:GITHUB_OUTPUT
-        echo "Generated version: $version"
-      shell: pwsh
-      
-    - name: Prepare release artifacts
-      run: |
-        # Copy the Runtime folder contents directly (no intermediate folder)
-        # Compress directly to the final zip name
-        Compress-Archive -Path Runtime\* -DestinationPath DTXManiaNX-${{ steps.version.outputs.tag }}.zip
-      shell: pwsh
-      
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: DTXManiaNX-${{ steps.version.outputs.tag }}
-        path: DTXManiaNX-${{ steps.version.outputs.tag }}.zip
-        
-  release:
-    needs: build
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Generate version tag
-      id: version
-      run: |
-        date=$(date +%Y%m%d)
-        version="V${{ env.VERSION_MAJOR_MINOR_PATCH }}-$date-${{ github.run_number }}"
-        echo "tag=$version" >> $GITHUB_OUTPUT
-        echo "Generated version: $version"
-        
-    - name: Download artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: DTXManiaNX-${{ steps.version.outputs.tag }}
-        
-    - name: Create Release
-      uses: softprops/action-gh-release@v1
-      with:
-        tag_name: ${{ steps.version.outputs.tag }}
-        name: DTXManiaNX ${{ steps.version.outputs.tag }}
-        body: |
-          ## DTXManiaNX 2.0 Beta Release ${{ steps.version.outputs.tag }}
-          
-          Automated build from commit ${{ github.sha }}
-          
-          ### Installation
-          1. Download and extract the zip file
-          2. Install [.NET 8.0 Runtime](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) if not already installed
-          3. Run DTXManiaNX.exe
-          
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET SDK 8.0
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Compute version
+        id: version
+        shell: pwsh
+        run: |
+          $date  = Get-Date -Format "yyyyMMdd"
+          $human = Get-Date -Format "yyyy-MM-dd"
+          # Full SemVer: run number drives ordering, date is a numeric tiebreaker.
+          $ver = "${{ env.VERSION_BASE }}-beta.${{ github.run_number }}.$date"
+          echo "ver=$ver"     >> $env:GITHUB_OUTPUT
+          echo "human=$human" >> $env:GITHUB_OUTPUT
+          echo "Computed version: $ver"
+
+      - name: Restore dependencies
+        run: dotnet restore DTXMania.sln
+
+      # Build the game into Runtime, stamping the full SemVer as InformationalVersion
+      # which UpdateService reads to compare against releases
+      - name: Build Release
+        run: >
+          dotnet build DTXMania.sln -c Release --no-restore
+          -p:InformationalVersion=${{ steps.version.outputs.ver }}
+          -p:Version=${{ env.VERSION_BASE }}.${{ github.run_number }}
+
+      # ---------------------------------------------------------------
+      # Release only on push to main/master. PRs stop after the build.
+      # ---------------------------------------------------------------
+
+      - name: Package release zip (excluding user-owned files)
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
+        id: pkg
+        shell: pwsh
+        run: |
+          $stage = "release-staging"
+          if (Test-Path $stage) { Remove-Item $stage -Recurse -Force }
+          New-Item -ItemType Directory -Path $stage | Out-Null
+
+          # Start from the full Runtime payload (game + Runtime\updater + assets)...
+          Copy-Item -Path "Runtime\*" -Destination $stage -Recurse -Force
+
+          # ...then strip the files/folders the updater must never overwrite, so a
+          # user's own copies survive. These match UpdateOptions.PreservePaths.
+          $excludeFiles = @("Config.ini")
+          $excludeDirs  = @("Logs")
+          foreach ($f in $excludeFiles) {
+            Remove-Item -Path (Join-Path $stage $f) -Force -ErrorAction SilentlyContinue
+          }
+          foreach ($d in $excludeDirs) {
+            Remove-Item -Path (Join-Path $stage $d) -Recurse -Force -ErrorAction SilentlyContinue
+          }
+
+          $zip = "DTXManiaNX-${{ steps.version.outputs.ver }}.zip"
+          Compress-Archive -Path (Join-Path $stage "*") -DestinationPath $zip -Force
+          echo "zip=$zip" >> $env:GITHUB_OUTPUT
+
+      - name: Generate release notes
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
+        shell: pwsh
+        run: |
+          @"
+          ## DTXManiaNX 2.0 Beta Release ${{ steps.version.outputs.ver }}
+
+          Automated build from commit ${{ github.sha }} on ${{ steps.version.outputs.human }}
+
           ### Changes
           See commit history for details: ${{ github.event.head_commit.url }}
-        files: |
-          DTXManiaNX-${{ steps.version.outputs.tag }}.zip
-        draft: false
-        prerelease: true
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          "@ | Out-File -FilePath release-notes.md -Encoding utf8
+
+      - name: Create Release
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.ver }}
+          name: DTXManiaNX ${{ steps.version.outputs.ver }}
+          body_path: release-notes.md
+          files: ${{ steps.pkg.outputs.zip }}
+          prerelease: true
+          target_commitish: ${{ github.sha }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Build an incremental delta from the previous release and attach it here, so
+      # the updater can chain deltas instead of downloading the full zip. Best-effort:
+      # skips cleanly when there is no prior release.
+      - name: Build and upload delta
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $repo   = "${{ github.repository }}"
+          $ver    = "${{ steps.version.outputs.ver }}"
+          $newTag = "v$ver"
+          $newZip = "${{ steps.pkg.outputs.zip }}"   # already in the workspace from packaging
+
+          # Most recent published release that isn't the one we just created
+          $rels = gh api "repos/$repo/releases?per_page=30" | ConvertFrom-Json
+          $prev = $rels | Where-Object { -not $_.draft -and $_.tag_name -ne $newTag } | Select-Object -First 1
+          if (-not $prev) { Write-Host "No previous release - skipping delta."; exit 0 }
+
+          # Its full package is the .zip that isn't itself a delta
+          $prevZip = $prev.assets |
+            Where-Object { $_.name -like '*.zip' -and $_.name -notlike '*-delta-*' } |
+            Select-Object -First 1 -ExpandProperty name
+          if (-not $prevZip) { Write-Host "Previous release has no full zip - skipping delta."; exit 0 }
+
+          $fromVer = $prev.tag_name -replace '^v', ''
+          New-Item -ItemType Directory -Force -Path prev | Out-Null
+          gh release download $prev.tag_name --pattern $prevZip --dir prev
+
+          # The updater (already built into Runtime\updater) doubles as the delta tool;
+          # the from/to in the asset name let the updater plan a chain without downloading.
+          $delta = "DTXManiaNX-delta-$fromVer-to-$ver.zip"
+          & "Runtime\updater\updater.exe" delta `
+            --old "prev/$prevZip" --new $newZip `
+            --from $fromVer --to $ver --out $delta
+
+          gh release upload $newTag $delta
+          Write-Host "Uploaded $delta to $newTag"
