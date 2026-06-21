@@ -11,23 +11,26 @@ public abstract class SongDbSort
     {
         nodes.Sort((a, b) =>
         {
-            //get the first chart for each song
             CChartData chartDataA = a.charts.FirstOrDefault(x => x != null);
             CChartData chartDataB = b.charts.FirstOrDefault(x => x != null);
 
-            if (chartDataA == null || chartDataB == null)
-            {
-                return 0; // skip if no valid chart
-            }
-            
-            int instrumentA = (int) a.filteredInstrumentPart;
-            int instrumentB = (int) b.filteredInstrumentPart;
+            //push null-chart nodes to a consistent end instead of "equal"
+            if (chartDataA == null && chartDataB == null) return 0;
+            if (chartDataA == null) return 1;
+            if (chartDataB == null) return -1;
 
-            double chartALevel = chartDataA.SongInformation.GetLevel(instrumentA);
-            double chartBLevel = chartDataB.SongInformation.GetLevel(instrumentB);
+            double levelA = chartDataA.SongInformation.GetLevel((int)a.filteredInstrumentPart);
+            double levelB = chartDataB.SongInformation.GetLevel((int)b.filteredInstrumentPart);
 
-            //compare by difficulty number
-            return chartALevel - chartBLevel > 0 ? 1 : chartALevel - chartBLevel < 0 ? -1 : 0;
+            int cmp = levelA.CompareTo(levelB);
+            if (cmp != 0) return cmp;
+
+            //tie-break 1: title
+            cmp = string.Compare(a.title, b.title, StringComparison.OrdinalIgnoreCase);
+            if (cmp != 0) return cmp;
+
+            //tie-break 2: use path so identical titles stay put
+            return string.Compare(a.path, b.path, StringComparison.Ordinal);
         });
     }
     
