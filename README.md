@@ -82,7 +82,7 @@ Visit [releases](https://github.com/BocuD/DTXmaniaNX/releases) for automated bui
 ## Current roadmap (in no particular order)
 
 - Feature parity on song select screen with upstream DTXManiaNX
-  - Quick settings menu is main blocker
+  - Quick settings menu is main missing feature
 - Lane swapping (similar to DTXMania AL)
 - Song favourite filters
 - Create separate video rendering behaviour option for 4:3 videos to stretch
@@ -95,6 +95,7 @@ Visit [releases](https://github.com/BocuD/DTXmaniaNX/releases) for automated bui
 - Animation based transition handler
 - Improve separation between instruments, allow arbitrary instrument combinations
   - Currently guitar or bass only mode is implemented in a hacky way by removing extra notes from the chart, preventing bass notes from being played when playing for example guitar only mode. This should be configurable.
+- Readd screenshot functionality
 
 ## Building
 
