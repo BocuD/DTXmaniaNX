@@ -636,7 +636,6 @@ internal class CStageSongLoading : CStage
                                     CDTXMania.listTargetGhostScoreData[i].nPoorCount++;
                                     break;
                                 case EJudgement.Miss:
-                                case EJudgement.Bad:
                                     CDTXMania.listTargetGhostScoreData[i].nMissCount++;
                                     break;
                             }
@@ -652,7 +651,6 @@ internal class CStageSongLoading : CStage
                                     break;
                                 case EJudgement.Poor:
                                 case EJudgement.Miss:
-                                case EJudgement.Bad:
                                     CDTXMania.listTargetGhostScoreData[i].nMaxCombo = Math.Max(nNowCombo,
                                         CDTXMania.listTargetGhostScoreData[i].nMaxCombo);
                                     nNowCombo = 0;

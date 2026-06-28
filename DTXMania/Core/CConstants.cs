@@ -192,7 +192,6 @@ public enum EJudgement
 	Good	= 2,
 	Poor	= 3,
 	Miss	= 4,
-	Bad		= 5,
 	Auto
 }
 
