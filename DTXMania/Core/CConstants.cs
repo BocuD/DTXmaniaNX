@@ -196,14 +196,6 @@ public enum EJudgement
 	Auto
 }
 
-
-
-internal enum E判定文字表示位置
-{
-	OnTheLane,
-	判定ライン上または横,
-	表示OFF
-}
 internal enum EAVIType
 {
 	Unknown,
