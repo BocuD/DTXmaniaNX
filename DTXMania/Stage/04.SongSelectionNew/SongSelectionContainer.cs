@@ -4,6 +4,7 @@ using System.Numerics;
 using DTXMania.Core;
 using DTXMania.SongDb;
 using DTXMania.UI.Drawable;
+using DTXMania.UI.OpenGL;
 using FDK;
 using Hexa.NET.ImGui;
 using SlimDX.DirectInput;
@@ -86,18 +87,14 @@ public class SongSelectionContainer : UIGroup
 
         bufferStartIndex = 0;
         
-        //clear image cache
-        foreach (KeyValuePair<SongNode, BaseTexture> element in preImageCache)
+        //clear image cache (snapshot the keys: RemoveFromCache mutates the dictionary)
+        foreach (SongNode key in preImageCache.Keys.ToList())
         {
-            RemoveFromCache(element.Key);
+            RemoveFromCache(key);
         }
         
         //assign first node to the first element, then use rNextSong to fill the rest
-        songSelectionElements[selectionIndex].UpdateSongNode(node);
-        if (preLoadImages)
-            songSelectionElements[selectionIndex].UpdateSongThumbnail(CachePreImage(node));
-        else toBeCached.Add(node);
-
+        AssignNode(songSelectionElements[selectionIndex], node);
         songSelectionElements[selectionIndex].position.Y = 0;
         songSelectionElements[selectionIndex].SetHighlighted(true);
 
@@ -106,31 +103,29 @@ public class SongSelectionContainer : UIGroup
         {
             SongNode nextNode = SongNode.rNextSong(songSelectionElements[i - 1].node);
 
-            songSelectionElements[i].UpdateSongNode(nextNode);
-            if (preLoadImages)
-                songSelectionElements[i].UpdateSongThumbnail(CachePreImage(nextNode));
-            else toBeCached.Add(nextNode);
-            
+            AssignNode(songSelectionElements[i], nextNode);
             songSelectionElements[i].position.Y = (i - selectionIndex) * elementSpacing;
             songSelectionElements[i].SetHighlighted(false);
         }
-        
+
         //fill the first elements with previous songs
         for (int i = selectionIndex - 1; i >= 0; i--)
         {
             SongNode prevNode = SongNode.rPreviousSong(songSelectionElements[i + 1].node);
 
-            songSelectionElements[i].UpdateSongNode(prevNode);
-            if (preLoadImages)
-                songSelectionElements[i].UpdateSongThumbnail(CachePreImage(prevNode));
-            else toBeCached.Add(prevNode);
-            
+            AssignNode(songSelectionElements[i], prevNode);
             songSelectionElements[i].position.Y = (i - selectionIndex) * elementSpacing;
             songSelectionElements[i].SetHighlighted(false);
         }
-        
+
+        //kick off async image requests now unless we're warming up (the caller will bulk-load).
+        if (preLoadImages)
+        {
+            UpdateImageCache();
+        }
+
         lastDrawTime = CDTXMania.Timer.nCurrentTime;
-        
+
         //update album art, preview sound, etc
         HandleSelectionChanged();
         
@@ -154,8 +149,7 @@ public class SongSelectionContainer : UIGroup
         bufferStartIndex = 0;
 
         //update selectionIndex element with the requested node
-        songSelectionElements[selectionIndex].UpdateSongNode(node);
-        songSelectionElements[selectionIndex].UpdateSongThumbnail(CachePreImage(node));
+        AssignNode(songSelectionElements[selectionIndex], node);
         songSelectionElements[selectionIndex].position.Y = 0;
         songSelectionElements[selectionIndex].SetHighlighted(true);
 
@@ -163,8 +157,7 @@ public class SongSelectionContainer : UIGroup
         for (int i = selectionIndex + 1; i < songSelectionElements.Length; i++)
         {
             SongNode nextNode = SongNode.rNextSong(songSelectionElements[i - 1].node);
-            songSelectionElements[i].UpdateSongNode(nextNode);
-            songSelectionElements[i].UpdateSongThumbnail(CachePreImage(nextNode));
+            AssignNode(songSelectionElements[i], nextNode);
             songSelectionElements[i].position.Y = (i - selectionIndex) * elementSpacing;
             songSelectionElements[i].SetHighlighted(false);
         }
@@ -173,11 +166,13 @@ public class SongSelectionContainer : UIGroup
         for (int i = selectionIndex - 1; i >= 0; i--)
         {
             SongNode prevNode = SongNode.rPreviousSong(songSelectionElements[i + 1].node);
-            songSelectionElements[i].UpdateSongNode(prevNode);
-            songSelectionElements[i].UpdateSongThumbnail(CachePreImage(prevNode));
+            AssignNode(songSelectionElements[i], prevNode);
             songSelectionElements[i].position.Y = (i - selectionIndex) * elementSpacing;
             songSelectionElements[i].SetHighlighted(false);
         }
+
+        //kick off async image requests for the newly assigned nodes
+        UpdateImageCache();
 
         //update album art, preview sound, etc.
         HandleSelectionChanged();
@@ -388,8 +383,7 @@ public class SongSelectionContainer : UIGroup
         var firstVisibleNode = songSelectionElements[topIndex].node;
         var newNode = SongNode.rPreviousSong(firstVisibleNode);
         
-        overwriteElement.UpdateSongNode(newNode);
-        toBeCached.Add(newNode);
+        AssignNode(overwriteElement, newNode);
 
         //move ring buffer backward
         bufferStartIndex = WrapIndex(bufferStartIndex - 1);
@@ -430,8 +424,7 @@ public class SongSelectionContainer : UIGroup
         var lastVisibleNode = songSelectionElements[bottomIndex].node;
         var newNode = SongNode.rNextSong(lastVisibleNode);
         
-        overwriteElement.UpdateSongNode(newNode);
-        toBeCached.Add(newNode);
+        AssignNode(overwriteElement, newNode);
         
         //update the overwritten slot
         overwriteElement.position.Y = songSelectionElements[bottomIndex].position.Y + elementSpacing;
@@ -514,33 +507,137 @@ public class SongSelectionContainer : UIGroup
 
     #region PreImage cache
 
+    //cap the decoded preimage size: the big album art draws at 300x300 and thumbnails at 65x65,
+    //so 512 preserves quality while bounding per-upload cost and VRAM usage.
+    private const int PreImageMaxDimension = 512;
+
     private readonly List<SongNode> toBeCached = [];
     private readonly Dictionary<SongNode, BaseTexture> preImageCache = new();
-    
+    private readonly HashSet<SongNode> requestedNodes = new(); //nodes with a decode in flight
+    private bool disposed;
+
     public bool isScrolling => MathF.Abs(targetY) > 2.0f;
 
-    private BaseTexture? CachePreImage(SongNode? node)
+    private static string GetPreImagePath(SongNode node)
     {
-        if (node == null) return null;
-        
-        if (!preImageCache.TryGetValue(node, out BaseTexture? preImage))
+        return node.nodeType != SongNode.ENodeType.BACKBOX
+            ? node.GetImagePath()
+            : CSkin.Path(@"Graphics\5_preimage backbox.png");
+    }
+
+    private void AssignThumbnailToElements(SongNode node, BaseTexture tex)
+    {
+        foreach (SongSelectionElement element in songSelectionElements)
         {
-            string imagePath = node.nodeType != SongNode.ENodeType.BACKBOX 
-                ? node.GetImagePath()
-                : CSkin.Path(@"Graphics\5_preimage backbox.png");
-            
-            if (!string.IsNullOrEmpty(imagePath) && File.Exists(imagePath))
+            if (element.node == node)
             {
-                preImage = BaseTexture.LoadFromPath(imagePath);
+                element.UpdateSongThumbnail(tex);
             }
         }
+    }
 
-        if (preImage != null)
+    private bool IsNodeDisplayed(SongNode node)
+    {
+        foreach (SongSelectionElement element in songSelectionElements)
         {
-            preImageCache[node] = preImage;
-            return preImage;
+            if (element.node == node) return true;
         }
-        return null;
+        return false;
+    }
+
+    //assign a node to an element: show the cached image if present (fallback otherwise) so a
+    //recycled element never draws a stale/disposed texture, and queue the image for caching.
+    private void AssignNode(SongSelectionElement element, SongNode? node)
+    {
+        element.UpdateSongNode(node);
+        element.UpdateSongThumbnail(node != null ? preImageCache.GetValueOrDefault(node) : null);
+
+        if (node != null && !preImageCache.ContainsKey(node))
+        {
+            toBeCached.Add(node);
+        }
+    }
+
+    //queue a preimage to be decoded on the background thread and uploaded (throttled) on the main
+    //thread. Elements keep showing the fallback until it arrives.
+    private void RequestPreImage(SongNode? node)
+    {
+        if (node == null) return;
+
+        if (preImageCache.TryGetValue(node, out BaseTexture? cached))
+        {
+            AssignThumbnailToElements(node, cached);
+            return;
+        }
+
+        if (!requestedNodes.Add(node)) return; //already in flight
+
+        string imagePath = GetPreImagePath(node);
+        if (string.IsNullOrEmpty(imagePath) || !File.Exists(imagePath))
+        {
+            requestedNodes.Remove(node);
+            return; //no image; elements keep the fallback
+        }
+
+        AsyncTextureUploader.Instance.RequestImage(imagePath, PreImageMaxDimension,
+            tex => OnPreImageUploaded(node, tex));
+    }
+
+    //runs on the main thread (from the upload pump) once the decode + GPU upload completes.
+    private void OnPreImageUploaded(SongNode node, BaseTexture? tex)
+    {
+        requestedNodes.Remove(node);
+
+        if (tex == null) return; //missing/undecodable; keep fallback
+
+        //drop the result if the container is gone or the node scrolled out of the buffer.
+        if (disposed || (!IsNodeDisplayed(node) && currentSelection != node))
+        {
+            tex.Dispose();
+            return;
+        }
+
+        //guard against a duplicate upload racing in
+        if (preImageCache.TryGetValue(node, out BaseTexture? existing) && existing is { } valid && valid.IsValid())
+        {
+            tex.Dispose();
+            return;
+        }
+
+        preImageCache[node] = tex;
+        AssignThumbnailToElements(node, tex);
+
+        if (currentSelection == node)
+        {
+            UpdateSelectedSongAlbumArt();
+        }
+    }
+
+    //synchronous decode + upload used to warm images up before the screen becomes visible.
+    private void LoadPreImageSync(SongNode? node)
+    {
+        if (node == null) return;
+
+        if (preImageCache.TryGetValue(node, out BaseTexture? cached))
+        {
+            AssignThumbnailToElements(node, cached);
+            return;
+        }
+
+        string imagePath = GetPreImagePath(node);
+        if (string.IsNullOrEmpty(imagePath) || !File.Exists(imagePath)) return;
+
+        DecodedPixels pixels = AsyncTextureUploader.DecodeImage(imagePath, PreImageMaxDimension);
+        if (!pixels.IsValid) return;
+
+        BaseTexture tex = BaseTexture.LoadFromMemory(pixels.Rgba, pixels.Width, pixels.Height, pixels.Name);
+        preImageCache[node] = tex;
+        AssignThumbnailToElements(node, tex);
+
+        if (currentSelection == node)
+        {
+            UpdateSelectedSongAlbumArt();
+        }
     }
 
     private void RemoveFromCache(SongNode node)
@@ -554,34 +651,44 @@ public class SongSelectionContainer : UIGroup
 
     public void UpdateImageCache(bool updateAll = false)
     {
-        int maxIterationCount = updateAll ? songSelectionElements.Length : 1;
-        //cache one image per frame
-        if (toBeCached.Count > 0)
+        if (toBeCached.Count == 0) return;
+
+        if (updateAll)
         {
-            for (int i = 0; i < maxIterationCount && toBeCached.Count > 0; i++)
+            //warmup: load synchronously so images are ready before the transition opens.
+            foreach (SongNode node in toBeCached)
             {
-                SongNode toCache = toBeCached.First();
-                toBeCached.RemoveAt(0);
-
-                BaseTexture? preImage = CachePreImage(toCache);
-
-                foreach (SongSelectionElement element in songSelectionElements)
-                {
-                    if (element.node == toCache)
-                    {
-                        element.UpdateSongThumbnail(preImage);
-                    }
-                }
+                LoadPreImageSync(node);
             }
         }
+        else
+        {
+            //live: hand everything to the background decoder; uploads are throttled by the pump.
+            foreach (SongNode node in toBeCached)
+            {
+                RequestPreImage(node);
+            }
+        }
+
+        toBeCached.Clear();
     }
 
     #endregion
 
     public override void Dispose()
     {
+        //stop applying uploads that complete after we're gone
+        disposed = true;
+
+        foreach (SongNode key in preImageCache.Keys.ToList())
+        {
+            RemoveFromCache(key);
+        }
+        requestedNodes.Clear();
+        toBeCached.Clear();
+
         base.Dispose();
-        
+
         SongSelectionElement.DisposeSongSelectElementAssets();
     }
 
