@@ -50,17 +50,25 @@ internal class InfoBox : UIGroup
         stageText.fillColor = new Color4(0.5f, 0.5f, 0.5f);
         stageText.outlineWidth = 0;
         
-        var songNameText = AddChild(new UIText(songName, 15));
+        var songNameText = AddChild(new HorizontallyScrollingText(songName, 15));
         songNameText.name = "SongTitle";
         songNameText.position = new Vector3(83, 32, 0);
         songNameText.fillColor = Color4.Black;
         songNameText.outlineColor = Color4.White;
+        songNameText.maximumWidth = 210.0f;
+        songNameText.scrollingEnabled = true;
+        songNameText.scrollSpeed = 15.0f;
+        songNameText.pauseDuration = 5.0f;
         
-        var artistNameText = AddChild(new UIText(artistName, 12));
+        var artistNameText = AddChild(new HorizontallyScrollingText(artistName, 12));
         artistNameText.name = "ArtistName";
         artistNameText.position = new Vector3(83, 53, 0);
         artistNameText.fillColor = Color4.Black;
         artistNameText.outlineColor = Color4.White;
+        artistNameText.maximumWidth = 213.0f;
+        artistNameText.scrollingEnabled = true;
+        artistNameText.scrollSpeed = 15.0f;
+        artistNameText.pauseDuration = 5.0f;
     }
 
     public static string GetStageNumberText()

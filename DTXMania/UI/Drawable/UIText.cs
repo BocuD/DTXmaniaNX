@@ -108,9 +108,21 @@ public partial class UIText : UITexture
 
         UpdateLocalTransformMatrix();
         Matrix4x4 combinedMatrix = localTransformMatrix * parentMatrix;
-        texture.tDraw2DMatrix(combinedMatrix, size, new RectangleF(0, 0, texture.Width, texture.Height), Color4.White);
+        texture.tDraw2DMatrix(combinedMatrix, GetTextureDrawSize(), GetTextureSourceRect(), Color4.White);
     }
-    
+
+    /// <summary>
+    /// Source rectangle (in texture pixels) sampled from the rendered text texture. Defaults to the
+    /// whole texture; subclasses can override to draw a sub-region (e.g. a scrolling clip window).
+    /// </summary>
+    protected virtual RectangleF GetTextureSourceRect() => new(0, 0, texture.Width, texture.Height);
+
+    /// <summary>
+    /// Destination size the sampled region is drawn at (before this element's scale). Defaults to
+    /// <see cref="UIDrawable.size"/>; subclasses can override to clamp the drawn width.
+    /// </summary>
+    protected virtual Vector2 GetTextureDrawSize() => size;
+
     private void UpdateDynamicText()
     {
         CDTXMania.StageManager.rCurrentStage.dynamicStringSources.TryGetValue(dynamicSource, out var source);
