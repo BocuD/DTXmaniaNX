@@ -25,7 +25,6 @@ public class CStageSongSelectionNew : CStage
 
     private SongSelectionContainer selectionContainer;
     private DensityGraph densityGraph1;
-    private DensityGraph densityGraph2;
     
     private ELoadPhase loadPhase = ELoadPhase.Initialize;
     
@@ -103,11 +102,9 @@ public class CStageSongSelectionNew : CStage
         songSearchMenu.anchor = new Vector2(0.5f, 0.5f);
         songSearchMenu.position = new Vector3(1280 / 2.0f, 720 / 2.0f, 0);
 
-        var selectionContainerGroup = ui.AddChild(new UIGroup("Selection Containers"));
-        selectionContainerGroup.position = new Vector3(765, 320, 0);
-
         //a single container is re-pointed at the active sort's root (see ApplySort)
-        selectionContainer = selectionContainerGroup.AddChild(new SongSelectionContainer(songDb, bigAlbumArt));
+        selectionContainer = ui.AddChild(new SongSelectionContainer(songDb, bigAlbumArt));
+        selectionContainer.position = new Vector3(765, 320, 0);
         selectionContainer.name = "SongSelect";
         
         dynamicStringSources["SongName"] = new DynamicStringSource(() => selectedChart?.SongInformation.Title ?? "");
@@ -373,7 +370,6 @@ public class CStageSongSelectionNew : CStage
         actPresound.tSelectionChanged(chart);
         statusPanel.SelectionChanged(node, chart);
         densityGraph1.SelectionChanged(node, chart);
-        //densityGraph2.SelectionChanged(node, chart);
     }
 
     public int targetDifficultyLevel { get; private set; } = 0;
@@ -495,7 +491,6 @@ public class CStageSongSelectionNew : CStage
         return closestLevel;
     }
     
-    private bool sortLocked = false;
     private SongDbSort currentSort;
     private Dictionary<SongDbSort, SongNode> sortCache = new();
     private int lastInstrument;

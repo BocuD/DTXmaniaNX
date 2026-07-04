@@ -337,15 +337,6 @@ internal class CActResultParameterPanel : CActivity
         
     }
 
-
-    // メソッド
-
-    public void tアニメを完了させる()
-    {
-        ct表示用.nCurrentValue = ct表示用.nEndValue;
-    }
-
-
     // CActivity 実装
 
     public override void OnActivate()
