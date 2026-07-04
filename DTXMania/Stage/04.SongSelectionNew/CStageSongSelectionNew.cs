@@ -23,7 +23,7 @@ public class CStageSongSelectionNew : CStage
     private SongSearchMenu songSearchMenu;
     private UIText commentText;
 
-    private SongSelectionContainer currentSelectionContainer;
+    private SongSelectionContainer selectionContainer;
     private DensityGraph densityGraph1;
     private DensityGraph densityGraph2;
     
@@ -105,14 +105,10 @@ public class CStageSongSelectionNew : CStage
 
         var selectionContainerGroup = ui.AddChild(new UIGroup("Selection Containers"));
         selectionContainerGroup.position = new Vector3(765, 320, 0);
-        
-        //create songselectioncontainer for each sorter
-        foreach (SongDbSort sorter in sorters)
-        {
-            SongSelectionContainer container = selectionContainerGroup.AddChild(new SongSelectionContainer(songDb, bigAlbumArt));
-            container.name = "SongSelect " + sorter.Name;
-            selectionContainers[sorter] = container;
-        }
+
+        //a single container is re-pointed at the active sort's root (see ApplySort)
+        selectionContainer = selectionContainerGroup.AddChild(new SongSelectionContainer(songDb, bigAlbumArt));
+        selectionContainer.name = "SongSelect";
         
         dynamicStringSources["SongName"] = new DynamicStringSource(() => selectedChart?.SongInformation.Title ?? "");
         dynamicStringSources["SongArtist"] = new DynamicStringSource(() => selectedChart?.SongInformation.ArtistName ?? "");
@@ -230,7 +226,7 @@ public class CStageSongSelectionNew : CStage
     private void PrepareSelectionContainers()
     {
         //backup our current selection
-        SongNode? selectedRootBackup = currentSelectionContainer?.CurrentRoot;
+        SongNode? selectedRootBackup = selectionContainer?.CurrentRoot;
         SongNode? selectedNodeBackup = selectedNode;
         CChartData? selectedChartBackup = selectedChart;
         
@@ -246,39 +242,21 @@ public class CStageSongSelectionNew : CStage
         Trace.TraceInformation("Preparing sort cache...");
         DateTime startTime = DateTime.Now;
         
+        //build (or refresh) the sorted root for every sorter; the single container is pointed at
+        //one of these on demand in ApplySort.
         foreach (SongDbSort sorter in sorters)
         {
-            // try
-            // {
-                if (!sortCache.TryGetValue(sorter, out SongNode? rootNode) || sorter.requireResort)
-                {
-                    DateTime now = DateTime.Now;
-                    rootNode = sorter.Sort(songDb).Result;
-                    TimeSpan sortTime = DateTime.Now - now;
-                    Trace.TraceInformation($"{sorter.Name} finished sorting in {sortTime.TotalMilliseconds} ms");
-                    sortCache[sorter] = rootNode;
-                };
-                
-                if (!selectionContainers.TryGetValue(sorter, out SongSelectionContainer? container))
-                {
-                    container = ui.AddChild(new SongSelectionContainer(songDb, bigAlbumArt));
-                    container.name = "SongSelect " + sorter.Name;
-                    container.position = new Vector3(765, 320, 0);
-                    selectionContainers[sorter] = container;
-                }
-                
-                container.UpdateRoot(rootNode, false);
-                container.isVisible = false;
-
-                Trace.TraceInformation($"Containers prepared for {sorter.Name}");
-            // }
-            // catch (Exception e)
-            // {
-            //     Trace.TraceError($"Failed to prepare container for {sorter.Name}: {e.Message}");
-            // }
+            if (!sortCache.TryGetValue(sorter, out SongNode? rootNode) || sorter.requireResort)
+            {
+                DateTime now = DateTime.Now;
+                rootNode = sorter.Sort(songDb).Result;
+                TimeSpan sortTime = DateTime.Now - now;
+                Trace.TraceInformation($"{sorter.Name} finished sorting in {sortTime.TotalMilliseconds} ms");
+                sortCache[sorter] = rootNode;
+            }
         }
-        
-        //enable the current sort
+
+        //point the container at the current sort
         ApplySort(currentSort);
         
         //try to restore the last selected song if possible
@@ -298,7 +276,7 @@ public class CStageSongSelectionNew : CStage
     private void RestoreSelection(SongNode selectedRootBackup, SongNode selectedNodeBackup, CChartData selectedChartDataBackup)
     {
         //walk down the tree recursively to find the node
-        SongNode currentRoot = currentSelectionContainer.CurrentRoot;
+        SongNode currentRoot = selectionContainer.CurrentRoot;
         SongNode? targetRoot = null;
         SongNode? targetNode = null;
             
@@ -311,8 +289,8 @@ public class CStageSongSelectionNew : CStage
                 targetRoot.parent.CurrentSelection = targetRoot;
             }
             
-            currentSelectionContainer.UpdateRoot(targetRoot);
-            currentSelectionContainer.UpdateSelection(targetNode);
+            selectionContainer.UpdateRoot(targetRoot);
+            selectionContainer.UpdateSelection(targetNode);
         }
         
         void FindRoot(SongNode node)
@@ -361,12 +339,10 @@ public class CStageSongSelectionNew : CStage
             
             case ELoadPhase.CacheThumbnails:
                 DateTime start = DateTime.Now;
-                foreach (var container in selectionContainers.Values)
-                {
-                    //cache thumbnails for this container
-                    container.UpdateImageCache(true);
-                    container.PreRenderText();
-                }
+                //only the active view is warmed synchronously before opening; the other sorts are
+                //prewarmed in the background once we're open (see ReadyToOpen).
+                selectionContainer.UpdateImageCache(true);
+                selectionContainer.PreRenderText();
                 TimeSpan elapsed = DateTime.Now - start;
                 Trace.TraceInformation($"Thumbnail cache updated in {elapsed} s.");
                 loadPhase = ELoadPhase.ReadyToOpen;
@@ -374,6 +350,7 @@ public class CStageSongSelectionNew : CStage
 
             case ELoadPhase.ReadyToOpen:
                 GitaDoraTransition.Open(2);
+                PrewarmOtherSorts();
                 loadPhase = ELoadPhase.Complete;
                 return 0;
         }
@@ -383,7 +360,7 @@ public class CStageSongSelectionNew : CStage
         sortMenuContainer.HandleNavigation();
         statusPanel.HandleNavigation();
         songSearchMenu.HandleNavigation();
-        return currentSelectionContainer.HandleNavigation();
+        return selectionContainer.HandleNavigation();
     }
     
     public SongNode? selectedNode { get; private set; }
@@ -521,41 +498,38 @@ public class CStageSongSelectionNew : CStage
     private bool sortLocked = false;
     private SongDbSort currentSort;
     private Dictionary<SongDbSort, SongNode> sortCache = new();
-    private Dictionary<SongDbSort, SongSelectionContainer> selectionContainers = new();
     private int lastInstrument;
-    public bool isScrolling => currentSelectionContainer.isScrolling;
+    public bool isScrolling => selectionContainer.isScrolling;
 
     public void ApplySort(SongDbSort sorter)
     {
-        //check if we have a container for this sorter
-        if (!selectionContainers.TryGetValue(sorter, out SongSelectionContainer? container))
+        if (!sortCache.TryGetValue(sorter, out SongNode? root))
         {
-            Trace.TraceError("Sort cache does not contain a container for sorter: " + sorter.Name);
+            Trace.TraceError("Sort cache does not contain a root for sorter: " + sorter.Name);
             return;
         }
-        
-        currentSort = sorter;
-        
-        //hide the current selection container
-        if (currentSelectionContainer != null)
-        {
-            currentSelectionContainer.isVisible = false;
-        }
 
-        //set the new container
-        currentSelectionContainer = container;
-        currentSelectionContainer.isVisible = true;
-        
-        SongNode? newSelection = currentSelectionContainer.currentSelection;
-        int closestLevelToTarget = GetClosestLevelToTargetForSong(currentSelectionContainer.currentSelection);
-        CChartData? chart = null;
-        
-        //check if the closest level is valid
-        chart = closestLevelToTarget > newSelection?.charts.Length - 1 
-            ? newSelection?.charts.FirstOrDefault()
-            : newSelection?.charts[closestLevelToTarget];
-        
-        ChangeSelection(currentSelectionContainer.currentSelection, chart);   
+        currentSort = sorter;
+
+        //re-point the single container at the selected sort's root. Each sorted root remembers its
+        //own selection (SongNode.CurrentSelection), so every sort keeps its own scroll position, and
+        //the path-keyed image cache is shared so thumbnails are reused across sorts. UpdateRoot
+        //propagates the selection back to the stage via HandleSelectionChanged -> ChangeSelection.
+        selectionContainer.UpdateRoot(root);
+    }
+
+    //background-prewarm the initial thumbnails of every non-active sort so switching to them shows
+    //images immediately. Fire-and-forget; the async uploader throttles the actual GPU uploads.
+    private void PrewarmOtherSorts()
+    {
+        foreach (SongDbSort sorter in sorters)
+        {
+            if (sorter == currentSort) continue;
+            if (sortCache.TryGetValue(sorter, out SongNode? root))
+            {
+                selectionContainer.PrewarmWindow(root);
+            }
+        }
     }
 
     //reload current view
@@ -565,8 +539,10 @@ public class CStageSongSelectionNew : CStage
         
         //song selection stage might not have been loaded yet
         if (ui == null) return;
+
+        //PrepareSelectionContainers already re-points the container (ApplySort) and restores the
+        //previous selection, so no extra ApplySort is needed here.
         PrepareSelectionContainers();
-        ApplySort(currentSort);
     }
 
     public int UpdateSearch(string searchQuery)
@@ -574,16 +550,16 @@ public class CStageSongSelectionNew : CStage
         if (string.IsNullOrWhiteSpace(searchQuery))
         {
             //if search query is empty, reset to current sort
-            currentSelectionContainer.RequestUpdateRoot(currentSelectionContainer.UnfilteredRoot);
+            selectionContainer.RequestUpdateRoot(selectionContainer.UnfilteredRoot);
             return 0;
         }
         
-        SongNode? searchResult = currentSelectionContainer.UnfilteredRoot.GetSearchResult(searchQuery);
+        SongNode? searchResult = selectionContainer.UnfilteredRoot.GetSearchResult(searchQuery);
         if (searchResult != null)
         {
             if (searchResult.childNodes.Count > 0)
             {
-                currentSelectionContainer.RequestUpdateRoot(searchResult, true);
+                selectionContainer.RequestUpdateRoot(searchResult, true);
             }
             else
             {
