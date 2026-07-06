@@ -134,7 +134,7 @@ public class CStageSongSelectionNew : CStage
     {
         BaseTexture bgTex = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\5_background.jpg"));
         UIImage bg = ui.AddChild(new UIImage(bgTex));
-        bg.renderOrder = -100;
+        bg.renderOrder = -101;
         bg.position = Vector3.Zero;
         bg.name = "Background";
         
