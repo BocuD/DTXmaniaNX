@@ -229,20 +229,23 @@ public class SongNode
             string queryRoman = result.romaji;
             
             queries = [searchQuery, searchQuery.Replace(" ", ""), queryKana, queryRoman];
-
-            // //replace hepburn notation (ē) and replace with singular vowel (e)
-            // queryRoman = queryRoman.Replace("ā", "a");
-            // queryRoman = queryRoman.Replace("ī", "i");
-            // queryRoman = queryRoman.Replace("ū", "u");
-            // queryRoman = queryRoman.Replace("ē", "e");
-            // queryRoman = queryRoman.Replace("ō", "o");
-            //
-            // queries = queries.Append(queryRoman).ToArray();
         }
         else
         {
             queries = [searchQuery, searchQuery.Replace(" ", "")];
         }
+        
+        //replace hepburn notation (ē) and replace with singular vowel (e)
+        string extraQuery = searchQuery.Replace("aa", "a");
+        extraQuery = extraQuery.Replace("ii", "i");
+        extraQuery = extraQuery.Replace("uu", "u");
+        extraQuery = extraQuery.Replace("ee", "e");
+        extraQuery = extraQuery.Replace("ei", "e");
+        extraQuery = extraQuery.Replace("oo", "o");
+        extraQuery = extraQuery.Replace("ou", "o");
+        
+        queries = queries.Append(extraQuery).ToArray();
+        queries = queries.Append(extraQuery.Replace(" ", "")).ToArray();
         
         foreach (SongNode node in childNodes.Where(node => node.nodeType == ENodeType.SONG))
         {
@@ -253,6 +256,13 @@ public class SongNode
 
             void Match(string input)
             {
+                //replace hepburn notation (ē) and replace with singular vowel (e)
+                input = input.Replace("ā", "a");
+                input = input.Replace("ī", "i");
+                input = input.Replace("ū", "u");
+                input = input.Replace("ē", "e");
+                input = input.Replace("ō", "o");
+                
                 if (queries.Any(query => input.Contains(query, StringComparison.InvariantCultureIgnoreCase)))
                 {
                     match = true;
