@@ -207,6 +207,7 @@ internal class CActPerfVideo : CActivity
         if (File.Exists(videoPath) && controller.TryLoadVideo(videoPath))
         {
             controller.LoopOnEof = loop;
+            controller.PlaybackSpeed = CDTXMania.ConfigIni.nPlaySpeed / 20.0f;
             
             //both renderers share the same player
             windowedRenderer = new UINewVideoRenderer(controller);
@@ -268,7 +269,7 @@ internal class CActPerfVideo : CActivity
         if (controller == null || (windowedRenderer == null && fullscreenRenderer == null))
             return;
 
-        long currentGameTime = CSoundManager.rcPerformanceTimer.nCurrentTime;
+        long currentGameTime = (long) (CSoundManager.rcPerformanceTimer.nCurrentTime * (CDTXMania.ConfigIni.nPlaySpeed / 20.0f));
         long videoStartTime = moveStartTimeMs;
 
         if (videoStartTime == -1 || currentGameTime < videoStartTime)
