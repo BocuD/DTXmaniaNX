@@ -47,6 +47,10 @@ internal partial class CActConfigList : CActivity
     public CItemBase ibCurrentSelection => listItems[nCurrentSelection];
     public int nCurrentSelection;
 
+    // set by the config stage when the experimental new ConfigList owns the settings, so this old
+    // list doesn't clobber the config the new one wrote live.
+    public bool suppressConfigWrite;
+
     /// <summary>
     /// ESC押下時の右メニュー描画
     /// </summary>
@@ -165,7 +169,8 @@ internal partial class CActConfigList : CActivity
 
         listItems = [];
         eMenuType = EMenuType.Unknown;
-        
+        suppressConfigWrite = false;
+
         tSetupItemList_Bass(); // #27795 2012.3.11 yyagi; System設定の中でDrumsの設定を参照しているため、
         tSetupItemList_Guitar(); // 活性化の時点でDrumsの設定も入れ込んでおかないと、System設定中に例外発生することがある。
         tSetupItemList_Drums(); // 
@@ -188,7 +193,12 @@ internal partial class CActConfigList : CActivity
         if (!bActivated)
             return;
 
-        tRecordToConfigIni();
+        // when the new ConfigList owns the settings this visit, don't let the old list's stale
+        // items overwrite the config the new list already wrote live.
+        if (!suppressConfigWrite)
+        {
+            tRecordToConfigIni();
+        }
         listItems.Clear();
         ctTriangleArrowAnimation = null;
 

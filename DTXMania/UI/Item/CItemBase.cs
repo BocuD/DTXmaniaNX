@@ -51,6 +51,10 @@ internal class CItemBase
 	//This will allow simplifying the code inside CActConfigList.cs
 	public Action? action;
 
+	//Optional override for the displayed value string (e.g. PlaySpeed showing nCurrentValue/20 as
+	//a decimal). When null, the item's <see cref="GetStringValue"/> is used.
+	public Func<string>? formatValue;
+
 	public void RunAction()
 	{
 		tEnterPressed();

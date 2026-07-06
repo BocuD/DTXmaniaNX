@@ -84,6 +84,12 @@ public partial class UIText : UITexture
         _dirty = true;
     }
 
+    //Forces a re-render on the next Draw (e.g. after changing color/outline/style)
+    public void MarkDirty()
+    {
+        _dirty = true;
+    }
+
     public override void Draw(Matrix4x4 parentMatrix)
     {
         if (!isVisible)
