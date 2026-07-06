@@ -3,6 +3,7 @@ using System.Numerics;
 using DTXMania.Core;
 using DTXMania.Core.Framework;
 using DTXMania.UI;
+using DTXMania.UI.Animation;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.Text;
 using FDK;
@@ -136,6 +137,7 @@ internal class CStageResult : CStage
 		
 		var rankIcon = ui.AddChild(new ResultRankIcon(CDTXMania.GetCurrentInstrument()));
 		rankIcon.position = new Vector3(225, 360, 0);
+		rankIcon.renderOrder = 3;
 		
 		string strSongTitle;
 		if (!CDTXMania.bCompactMode && CDTXMania.ConfigIni.b曲名表示をdefのものにする)
@@ -202,6 +204,15 @@ internal class CStageResult : CStage
 		
 		var paramPanel = ui.AddChild(new ResultParameterPanel(CDTXMania.GetCurrentInstrument()));
 		paramPanel.position = new Vector3(879, 479, 0);
+		
+		ui.animator = new Animator();
+		AnimationClip? loaded = AnimationClipIO.LoadFromFile(CSkin.Path(@"Graphics\Result\open.json"));
+		if (loaded != null)
+		{
+			ui.animator.clips.Add(loaded);
+		}
+		
+		ui.animator.Play("open", false);
 	}
 
 	public override void OnActivate()

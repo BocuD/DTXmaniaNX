@@ -1,0 +1,342 @@
+{
+  "name": "open",
+  "duration": 1.3,
+  "frameRate": 60.0,
+  "loop": false,
+  "tracks": [
+    {
+      "path": "ResultInfo/Level/position",
+      "keyframes": [
+        {
+          "t": 0.0,
+          "v": {
+            "X": 100.0,
+            "Y": 0.0,
+            "Z": 0.0
+          },
+          "ease": 6
+        },
+        {
+          "t": 0.3,
+          "v": {
+            "X": 0.0,
+            "Y": 0.0,
+            "Z": 0.0
+          },
+          "ease": 1
+        }
+      ]
+    },
+    {
+      "path": "ResultInfo/Rate/position",
+      "keyframes": [
+        {
+          "t": 0.10000001,
+          "v": {
+            "X": 100.0,
+            "Y": 0.0,
+            "Z": 0.0
+          },
+          "ease": 6
+        },
+        {
+          "t": 0.40000004,
+          "v": {
+            "X": 0.0,
+            "Y": 0.0,
+            "Z": 0.0
+          },
+          "ease": 1
+        }
+      ]
+    },
+    {
+      "path": "ResultInfo/Skill/position",
+      "keyframes": [
+        {
+          "t": 0.20000002,
+          "v": {
+            "X": 100.0,
+            "Y": 0.0,
+            "Z": 0.0
+          },
+          "ease": 6
+        },
+        {
+          "t": 0.5,
+          "v": {
+            "X": 0.0,
+            "Y": 0.0,
+            "Z": 0.0
+          },
+          "ease": 1
+        }
+      ]
+    },
+    {
+      "path": "ResultParameterPanel/Perfect/position",
+      "keyframes": [
+        {
+          "t": 0.3,
+          "v": {
+            "X": 100.0,
+            "Y": 0.0,
+            "Z": 0.0
+          },
+          "ease": 6
+        },
+        {
+          "t": 0.6,
+          "v": {
+            "X": 0.0,
+            "Y": 0.0,
+            "Z": 0.0
+          },
+          "ease": 1
+        }
+      ]
+    },
+    {
+      "path": "ResultParameterPanel/Great/position",
+      "keyframes": [
+        {
+          "t": 0.35000002,
+          "v": {
+            "X": 100.0,
+            "Y": 0.0,
+            "Z": 0.0
+          },
+          "ease": 6
+        },
+        {
+          "t": 0.65000004,
+          "v": {
+            "X": 0.0,
+            "Y": 0.0,
+            "Z": 0.0
+          },
+          "ease": 1
+        }
+      ]
+    },
+    {
+      "path": "ResultParameterPanel/Good/position",
+      "keyframes": [
+        {
+          "t": 0.40000004,
+          "v": {
+            "X": 100.0,
+            "Y": 0.0,
+            "Z": 0.0
+          },
+          "ease": 6
+        },
+        {
+          "t": 0.70000005,
+          "v": {
+            "X": 0.0,
+            "Y": 0.0,
+            "Z": 0.0
+          },
+          "ease": 1
+        }
+      ]
+    },
+    {
+      "path": "ResultParameterPanel/Ok/position",
+      "keyframes": [
+        {
+          "t": 0.45000002,
+          "v": {
+            "X": 100.0,
+            "Y": 0.0,
+            "Z": 0.0
+          },
+          "ease": 6
+        },
+        {
+          "t": 0.75000006,
+          "v": {
+            "X": 0.0,
+            "Y": 0.0,
+            "Z": 0.0
+          },
+          "ease": 1
+        }
+      ]
+    },
+    {
+      "path": "ResultParameterPanel/Miss/position",
+      "keyframes": [
+        {
+          "t": 0.5,
+          "v": {
+            "X": 100.0,
+            "Y": 0.0,
+            "Z": 0.0
+          },
+          "ease": 6
+        },
+        {
+          "t": 0.8000001,
+          "v": {
+            "X": 0.0,
+            "Y": 0.0,
+            "Z": 0.0
+          },
+          "ease": 1
+        }
+      ]
+    },
+    {
+      "path": "ResultParameterPanel/Max Combo/position",
+      "keyframes": [
+        {
+          "t": 0.55,
+          "v": {
+            "X": 100.0,
+            "Y": 0.0,
+            "Z": 0.0
+          },
+          "ease": 6
+        },
+        {
+          "t": 0.85,
+          "v": {
+            "X": 0.0,
+            "Y": 0.0,
+            "Z": 0.0
+          },
+          "ease": 1
+        }
+      ]
+    },
+    {
+      "path": "ResultParameterPanel/Score/position",
+      "keyframes": [
+        {
+          "t": 0.6,
+          "v": {
+            "X": 100.0,
+            "Y": 0.0,
+            "Z": 0.0
+          },
+          "ease": 6
+        },
+        {
+          "t": 0.90000004,
+          "v": {
+            "X": 0.0,
+            "Y": 0.0,
+            "Z": 0.0
+          },
+          "ease": 1
+        }
+      ]
+    },
+    {
+      "path": "ResultRankIcon/scale",
+      "keyframes": [
+        {
+          "t": 0.0,
+          "v": {
+            "X": 1.5,
+            "Y": 1.5,
+            "Z": 1.0
+          },
+          "ease": 1
+        },
+        {
+          "t": 0.10000001,
+          "v": {
+            "X": 1.0,
+            "Y": 1.0,
+            "Z": 1.0
+          },
+          "ease": 6
+        }
+      ]
+    },
+    {
+      "path": "ResultRankIcon/Icon/isVisible",
+      "keyframes": [
+        {
+          "t": 0.0,
+          "v": false,
+          "ease": 1
+        },
+        {
+          "t": 0.20000002,
+          "v": true,
+          "ease": 1
+        }
+      ]
+    },
+    {
+      "path": "ResultRankIcon/Icon/scale",
+      "keyframes": [
+        {
+          "t": 0.20000002,
+          "v": {
+            "X": 1.5,
+            "Y": 1.5,
+            "Z": 1.0
+          },
+          "ease": 1
+        },
+        {
+          "t": 0.3,
+          "v": {
+            "X": 1.0,
+            "Y": 1.0,
+            "Z": 1.0
+          },
+          "ease": 6
+        }
+      ]
+    },
+    {
+      "path": "ResultRankIcon/Icon2/isVisible",
+      "keyframes": [
+        {
+          "t": 0.0,
+          "v": false,
+          "ease": 1
+        },
+        {
+          "t": 0.3,
+          "v": true,
+          "ease": 1
+        },
+        {
+          "t": 0.40000004,
+          "v": true,
+          "ease": 1
+        }
+      ]
+    },
+    {
+      "path": "ResultRankIcon/Icon2/scale",
+      "keyframes": [
+        {
+          "t": 0.3,
+          "v": {
+            "X": 1.5,
+            "Y": 1.5,
+            "Z": 1.0
+          },
+          "ease": 6
+        },
+        {
+          "t": 0.40000004,
+          "v": {
+            "X": 1.0,
+            "Y": 1.0,
+            "Z": 1.0
+          },
+          "ease": 1
+        }
+      ]
+    }
+  ]
+}

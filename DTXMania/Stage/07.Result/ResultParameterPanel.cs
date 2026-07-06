@@ -30,7 +30,8 @@ public class ResultParameterPanel : UIGroup
     private float yPos;
     public void AddRow(string name, long num1, long num2 = -1)
     {
-        var text = AddChild(new UIText(name));
+        var row = AddChild(new UIGroup(name));
+        var text = row.AddChild(new UIText(name));
         text.name = name + "Label";
         text.outlineWidth = 0;
         text.fontSize = 20;
@@ -40,9 +41,9 @@ public class ResultParameterPanel : UIGroup
         
         if (num2 != -1)
         {
-            AddZeroStyledNumberText(name, new Vector3(107, yPos - 8, 0), num1, 4, "texgyreadventor-regular.otf", 23);
-            AddZeroStyledNumberText(name + "_percentage", new Vector3(187, yPos - 8, 0), num2, 3, "texgyreadventor-regular.otf", 21);
-            var percentSign = AddChild(new UIText("%"));
+            AddZeroStyledNumberText(row, name, new Vector3(107, yPos - 8, 0), num1, 4, "texgyreadventor-regular.otf", 23);
+            AddZeroStyledNumberText(row, name + "_percentage", new Vector3(187, yPos - 8, 0), num2, 3, "texgyreadventor-regular.otf", 21);
+            var percentSign = row.AddChild(new UIText("%"));
             percentSign.fillColor = Color4.White;
             percentSign.outlineWidth = 0;
             percentSign.position = new Vector3(224, yPos, 0);
@@ -53,12 +54,12 @@ public class ResultParameterPanel : UIGroup
         }
         else
         {
-            AddZeroStyledNumberText(name, new Vector3(107, yPos - 8, 0), num1, 7, "texgyreadventor-regular.otf", 23);
+            AddZeroStyledNumberText(row, name, new Vector3(107, yPos - 8, 0), num1, 7, "texgyreadventor-regular.otf", 23);
         }
         yPos += 24.0f;
     }
 
-    public void AddZeroStyledNumberText(string name, Vector3 textPosition, long number, int padding, 
+    public void AddZeroStyledNumberText(UIGroup row, string name, Vector3 textPosition, long number, int padding, 
         string font, int fontSize)
     {
         string num = number.ToString("D" + padding);
@@ -74,7 +75,7 @@ public class ResultParameterPanel : UIGroup
         string paddingString = num.Substring(0, zeroCount);
         string numString = num.Substring(zeroCount);
         
-        var padText = AddChild(new UIText(paddingString));
+        var padText = row.AddChild(new UIText(paddingString));
         padText.name = name + "Pad";
         padText.outlineWidth = 0;
         padText.fontSize = fontSize;
@@ -85,7 +86,7 @@ public class ResultParameterPanel : UIGroup
         padText.fillColor = new Color4(0.31f, 0.31f, 0.31f);
         padText.RenderTexture();
         
-        var numText = AddChild(new UIText(numString));
+        var numText = row.AddChild(new UIText(numString));
         numText.name = name + "Num";
         numText.outlineWidth = 0;
         numText.fontSize = fontSize;
