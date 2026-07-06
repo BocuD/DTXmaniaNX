@@ -21,6 +21,7 @@ public class CStageSongSelectionNew : CStage
     private CActSelectPresound actPresound;
     private StatusPanel statusPanel;
     private SongSearchMenu songSearchMenu;
+    private QuickMenu quickMenu;
     private UIText commentText;
 
     private SongSelectionContainer selectionContainer;
@@ -101,6 +102,12 @@ public class CStageSongSelectionNew : CStage
         songSearchMenu.isVisible = false;
         songSearchMenu.anchor = new Vector2(0.5f, 0.5f);
         songSearchMenu.position = new Vector3(1280 / 2.0f, 720 / 2.0f, 0);
+
+        quickMenu = ui.AddChild(new QuickMenu());
+        quickMenu.renderOrder = 15;
+        quickMenu.isVisible = false;
+        quickMenu.anchor = new Vector2(0.5f, 0.5f);
+        quickMenu.position = new Vector3(1280 / 2.0f, 720 / 2.0f, 0);
 
         //a single container is re-pointed at the active sort's root (see ApplySort)
         selectionContainer = ui.AddChild(new SongSelectionContainer(songDb, bigAlbumArt));
@@ -353,13 +360,31 @@ public class CStageSongSelectionNew : CStage
         }
         
         actPresound.OnUpdateAndDraw();
+
+        bool isSubMenuActive = HandleSubMenus();
+
+        if (isSubMenuActive)
+        {
+            return (int)EReturnValue.Continue;
+        }
         
-        sortMenuContainer.HandleNavigation();
         statusPanel.HandleNavigation();
-        songSearchMenu.HandleNavigation();
+        sortMenuContainer.HandleNavigation();
         return selectionContainer.HandleNavigation();
     }
-    
+
+    private bool HandleSubMenus()
+    {
+        //cache this before running input handlers for submenus,
+        //so enter to close it doesn't get consumed by other menus
+        bool isActive = quickMenu.isVisible || songSearchMenu.isVisible;
+        
+        quickMenu.HandleNavigation();
+        songSearchMenu.HandleNavigation();
+
+        return isActive;
+    }
+
     public SongNode? selectedNode { get; private set; }
     public CChartData? selectedChart { get; private set; }
     public void ChangeSelection(SongNode? node, CChartData? chart)
@@ -381,7 +406,6 @@ public class CStageSongSelectionNew : CStage
         }
         else
         {
-
             var nextAvailableLevel = targetDifficultyLevel;
 
             //find first available new level
