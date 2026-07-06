@@ -121,7 +121,7 @@ internal partial class CActConfigList
         listItems.Add(iGuitarHIDSUD);
             
         //----------DisplayOption----------
-        CItemList iGuitarDark = new("       Dark", CItemBase.EPanelType.Normal, (int)CDTXMania.ConfigIni.eDark,
+        CItemList iGuitarDark = new("       Dark", CItemBase.EPanelType.Normal, (int)CDTXMania.ConfigIni.eDark.Guitar,
             "レーン表示のオプションをまとめて切り替えます。\n" +
             "HALF: レーンが表示されなくなります。\n" +
             "FULL: さらに小節線、拍線、判定ラインも\n" +

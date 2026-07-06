@@ -22,7 +22,33 @@ internal class QuickMenuPage(ConfigList list, EInstrumentPart part, QuickConfigI
         playSpeed.formatValue = () => (playSpeed.nCurrentValue / 20.0).ToString("0.000");
         items.Add(playSpeed);
         
-        AddDisplayBlock(items);
+        CItemList dark = new("Dark", CItemBase.EPanelType.Normal, (int)CDTXMania.ConfigIni.eDark[(int)instrument],
+            "レーン表示オプションをまとめて切り替えます (HALF/FULL)。",
+            "OFF: all shown. HALF: lanes/gauge hidden. FULL: also bar lines and hit bar hidden.",
+            ["OFF", "HALF", "FULL"]);
+        dark.action = () =>
+        {
+            if (dark.nCurrentlySelectedIndex == (int)EDarkMode.FULL)
+            {
+                CDTXMania.ConfigIni.nLaneDisp[(int)instrument] = 3;
+                CDTXMania.ConfigIni.bJudgeLineDisp[(int)instrument] = false;
+                CDTXMania.ConfigIni.bLaneFlush[(int)instrument] = false;
+            }
+            else if (dark.nCurrentlySelectedIndex == (int)EDarkMode.HALF)
+            {
+                CDTXMania.ConfigIni.nLaneDisp[(int)instrument] = 1;
+                CDTXMania.ConfigIni.bJudgeLineDisp[(int)instrument] = true;
+                CDTXMania.ConfigIni.bLaneFlush[(int)instrument] = true;
+            }
+            else
+            {
+                CDTXMania.ConfigIni.nLaneDisp[(int)instrument] = 0;
+                CDTXMania.ConfigIni.bJudgeLineDisp[(int)instrument] = true;
+                CDTXMania.ConfigIni.bLaneFlush[(int)instrument] = true;
+            }
+        };
+
+        items.Add(dark);
 
         var switcherButton = FolderItem($"Instrument: {part}", "", "", switcher);
         items.Add(switcherButton);

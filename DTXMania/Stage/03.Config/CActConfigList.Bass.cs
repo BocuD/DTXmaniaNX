@@ -120,7 +120,7 @@ internal partial class CActConfigList
         listItems.Add(iBassHIDSUD);
 
         //----------DisplayOption----------
-        CItemList iBassDark = new("       Dark", CItemBase.EPanelType.Normal, (int)CDTXMania.ConfigIni.eDark,
+        CItemList iBassDark = new("       Dark", CItemBase.EPanelType.Normal, (int)CDTXMania.ConfigIni.eDark.Bass,
             "レーン表示のオプションをまとめて切り替えます。\n" +
             "HALF: レーンが表示されなくなります。\n" +
             "FULL: さらに小節線、拍線、判定ラインも\n" +

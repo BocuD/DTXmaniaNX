@@ -116,7 +116,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                 Drums.bLeft[i] = CDTXMania.ConfigIni.bLeft[i];
                 Drums.fScrollSpeed[i] = (CDTXMania.ConfigIni.nScrollSpeed[i] + 1) * 0.5f;
             }
-            Drums.eDark = CDTXMania.ConfigIni.eDark;
+            Drums.eDark = CDTXMania.ConfigIni.eDark.Drums;
             Drums.nPlaySpeedNumerator = CDTXMania.ConfigIni.nPlaySpeed;
             Drums.nPlaySpeedDenominator = 20;
             Drums.eHHGroup = CDTXMania.ConfigIni.eHHGroup;
@@ -187,7 +187,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                 Guitar.bLeft[i] = CDTXMania.ConfigIni.bLeft[i];
                 Guitar.fScrollSpeed[i] = (CDTXMania.ConfigIni.nScrollSpeed[i] + 1) * 0.5f;
             }
-            Guitar.eDark = CDTXMania.ConfigIni.eDark;
+            Guitar.eDark = CDTXMania.ConfigIni.eDark.Guitar;
             Guitar.nPlaySpeedNumerator = CDTXMania.ConfigIni.nPlaySpeed;
             Guitar.nPlaySpeedDenominator = 20;
             Guitar.eHHGroup = CDTXMania.ConfigIni.eHHGroup;
@@ -258,7 +258,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                 Bass.bLeft[i] = CDTXMania.ConfigIni.bLeft[i];
                 Bass.fScrollSpeed[i] = (CDTXMania.ConfigIni.nScrollSpeed[i] + 1) * 0.5f;
             }
-            Bass.eDark = CDTXMania.ConfigIni.eDark;
+            Bass.eDark = CDTXMania.ConfigIni.eDark.Bass;
             Bass.nPlaySpeedNumerator = CDTXMania.ConfigIni.nPlaySpeed;
             Bass.nPlaySpeedDenominator = 20;
             Bass.eHHGroup = CDTXMania.ConfigIni.eHHGroup;

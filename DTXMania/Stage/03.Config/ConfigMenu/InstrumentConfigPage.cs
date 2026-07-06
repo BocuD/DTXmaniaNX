@@ -81,7 +81,7 @@ internal abstract class InstrumentConfigPage : ConfigPage
         CItemToggle judgeLineDisp = JudgeLineDispItem();
         CItemToggle laneFlush = LaneFlushItem();
 
-        CItemList dark = new("       Dark", CItemBase.EPanelType.Normal, (int)CDTXMania.ConfigIni.eDark,
+        CItemList dark = new("       Dark", CItemBase.EPanelType.Normal, (int)CDTXMania.ConfigIni.eDark[(int)instrument],
             "レーン表示オプションをまとめて切り替えます (HALF/FULL)。",
             "OFF: all shown. HALF: lanes/gauge hidden. FULL: also bar lines and hit bar hidden.",
             ["OFF", "HALF", "FULL"]);

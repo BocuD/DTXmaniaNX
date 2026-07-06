@@ -167,7 +167,7 @@ internal partial class CActConfigList
         listItems.Add(iDrumsHIDSUD);
 
         //----------DisplayOption----------
-        CItemList iDrumsDark = new("       Dark", CItemBase.EPanelType.Normal, (int)CDTXMania.ConfigIni.eDark,
+        CItemList iDrumsDark = new("       Dark", CItemBase.EPanelType.Normal, (int)CDTXMania.ConfigIni.eDark.Drums,
             "レーン表示のオプションを\n"+
             "まとめて切り替えます。\n" +
             "HALF:レーンが表示されなく\n"+

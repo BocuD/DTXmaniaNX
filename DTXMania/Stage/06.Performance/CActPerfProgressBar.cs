@@ -165,7 +165,7 @@ internal class CActPerfProgressBar : CActivity
 			if ((!bIsCalledFromOutsidePerformance &&
 			     (!CDTXMania.ConfigIni.bInstrumentAvailable(ePart) ||
 			      !CDTXMania.DTX.bHasChips[(int)ePart] ||
-			      (EDarkMode)CDTXMania.ConfigIni.eDark == EDarkMode.FULL)) ||
+			      CDTXMania.ConfigIni.eDark[(int)ePart] == EDarkMode.FULL)) ||
 			    (bIsCalledFromOutsidePerformance && epartプレイ楽器 != ePart && (epartプレイ楽器 != EInstrumentPart.UNKNOWN || ePart != 0)))
 			{
 				continue;
