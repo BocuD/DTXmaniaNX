@@ -26,8 +26,8 @@ public partial class UIText : UITexture
     private const float DefaultFontSize = 32f;
     private bool _dirty = true;
 
-    // Incremented every time a render starts (async or sync). An async result is only applied if
-    // its token still matches, so text that changed again mid-flight discards the stale result.
+    //Incremented every time a render starts (async or sync). An async result is only applied if
+    //its token still matches, so text that changed again mid-flight discards the stale result.
     private int _renderToken;
     
     [Themable] public string text = "New UIText";
@@ -111,16 +111,12 @@ public partial class UIText : UITexture
         texture.tDraw2DMatrix(combinedMatrix, GetTextureDrawSize(), GetTextureSourceRect(), Color4.White);
     }
 
-    /// <summary>
-    /// Source rectangle (in texture pixels) sampled from the rendered text texture. Defaults to the
-    /// whole texture; subclasses can override to draw a sub-region (e.g. a scrolling clip window).
-    /// </summary>
+    //Source rectangle (in texture pixels) sampled from the rendered text texture. Defaults to the
+    //whole texture; subclasses can override to draw a sub-region (e.g. a scrolling clip window).
     protected virtual RectangleF GetTextureSourceRect() => new(0, 0, texture.Width, texture.Height);
 
-    /// <summary>
     /// Destination size the sampled region is drawn at (before this element's scale). Defaults to
     /// <see cref="UIDrawable.size"/>; subclasses can override to clamp the drawn width.
-    /// </summary>
     protected virtual Vector2 GetTextureDrawSize() => size;
 
     private void UpdateDynamicText()
@@ -152,7 +148,7 @@ public partial class UIText : UITexture
 
         _dirty = false;
 
-        // Invalidate any in-flight render and clear immediately when there is nothing to draw.
+        //invalidate any in-flight render and clear immediately when there is nothing to draw.
         int token = ++_renderToken;
 
         if (string.IsNullOrEmpty(text))
@@ -177,7 +173,7 @@ public partial class UIText : UITexture
 
     private void ApplyRenderedText(int token, BaseTexture? renderedTexture)
     {
-        // A newer render (or a synchronous RenderTexture) superseded this one.
+        //A newer render (or a synchronous RenderTexture) superseded this one
         if (token != _renderToken)
         {
             renderedTexture?.Dispose();
@@ -199,7 +195,7 @@ public partial class UIText : UITexture
     /// </summary>
     public void RenderTexture()
     {
-        // Bump the token so any in-flight async render for this element is discarded on arrival.
+        //Bump the token so any in-flight async render for this element is discarded on arrival
         ++_renderToken;
 
         if (texture.IsValid())
