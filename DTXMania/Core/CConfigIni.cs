@@ -20,96 +20,115 @@ internal class CConfigIni
 				get => padHH_R;
 				set => padHH_R = value;
 			}
+
 			public STKEYASSIGN[] R
 			{
 				get => padHH_R;
 				set => padHH_R = value;
 			}
+
 			public STKEYASSIGN[] SD
 			{
 				get => padSD_G;
 				set => padSD_G = value;
 			}
+
 			public STKEYASSIGN[] G
 			{
 				get => padSD_G;
 				set => padSD_G = value;
 			}
+
 			public STKEYASSIGN[] BD
 			{
 				get => padBD_B;
 				set => padBD_B = value;
 			}
+
 			public STKEYASSIGN[] B
 			{
 				get => padBD_B;
 				set => padBD_B = value;
 			}
+
 			public STKEYASSIGN[] HT
 			{
 				get => padHT_Pick;
 				set => padHT_Pick = value;
 			}
+
 			public STKEYASSIGN[] Pick
 			{
 				get => padHT_Pick;
 				set => padHT_Pick = value;
 			}
+
 			public STKEYASSIGN[] LT
 			{
 				get => padLT_Wail;
 				set => padLT_Wail = value;
 			}
+
 			public STKEYASSIGN[] Wail
 			{
 				get => padLT_Wail;
 				set => padLT_Wail = value;
 			}
+
 			public STKEYASSIGN[] FT
 			{
 				get => padFT_Help;
 				set => padFT_Help = value;
 			}
+
 			public STKEYASSIGN[] Help
 			{
 				get => padFT_Help;
 				set => padFT_Help = value;
 			}
+
 			public STKEYASSIGN[] CY
 			{
 				get => padCY_Decide;
 				set => padCY_Decide = value;
 			}
+
 			public STKEYASSIGN[] Decide
 			{
 				get => padCY_Decide;
 				set => padCY_Decide = value;
 			}
+
 			public STKEYASSIGN[] HHO
 			{
 				get => padHHO_Y;
 				set => padHHO_Y = value;
 			}
+
 			public STKEYASSIGN[] Y
 			{
 				get => padHHO_Y;
 				set => padHHO_Y = value;
 			}
+
 			public STKEYASSIGN[] RD
 			{
 				get => padRD;
 				set => padRD = value;
 			}
+
 			public STKEYASSIGN[] P
 			{
 				get => padLC_P;
 				set => padLC_P = value;
 			}
+
 			public STKEYASSIGN[] LC
 			{
 				get => padLC_P;
 				set => padLC_P = value;
 			}
+
 			public STKEYASSIGN[] LP
 			{
 				get => padLP;
@@ -139,87 +158,95 @@ internal class CConfigIni
 				get => padSearch;
 				set => padSearch = value;
 			}
+
 			public STKEYASSIGN[] LoopCreate
 			{
 				get => padLoopCreate;
 				set => padLoopCreate = value;
 			}
+
 			public STKEYASSIGN[] LoopDelete
 			{
 				get => padLoopDelete;
 				set => padLoopDelete = value;
 			}
+
 			public STKEYASSIGN[] SkipForward
 			{
 				get => padSkipForward;
 				set => padSkipForward = value;
 			}
+
 			public STKEYASSIGN[] SkipBackward
 			{
 				get => padSkipBackward;
 				set => padSkipBackward = value;
 			}
+
 			public STKEYASSIGN[] IncreasePlaySpeed
 			{
 				get => padIncreasePlaySpeed;
 				set => padIncreasePlaySpeed = value;
 			}
+
 			public STKEYASSIGN[] DecreasePlaySpeed
 			{
 				get => padDecreasePlaySpeed;
 				set => padDecreasePlaySpeed = value;
 			}
+
 			public STKEYASSIGN[] Restart
 			{
 				get => padRestart;
 				set => padRestart = value;
 			}
-			public STKEYASSIGN[] this[ int index ]
+
+			public STKEYASSIGN[] this[int index]
 			{
 				get
 				{
-					switch ( index )
+					switch (index)
 					{
-						case (int) EKeyConfigPad.HH:
+						case (int)EKeyConfigPad.HH:
 							return padHH_R;
 
-						case (int) EKeyConfigPad.SD:
+						case (int)EKeyConfigPad.SD:
 							return padSD_G;
 
-						case (int) EKeyConfigPad.BD:
+						case (int)EKeyConfigPad.BD:
 							return padBD_B;
 
-						case (int) EKeyConfigPad.HT:
+						case (int)EKeyConfigPad.HT:
 							return padHT_Pick;
 
-						case (int) EKeyConfigPad.LT:
+						case (int)EKeyConfigPad.LT:
 							return padLT_Wail;
 
-						case (int) EKeyConfigPad.FT:
+						case (int)EKeyConfigPad.FT:
 							return padFT_Help;
 
-						case (int) EKeyConfigPad.CY:
+						case (int)EKeyConfigPad.CY:
 							return padCY_Decide;
 
-						case (int) EKeyConfigPad.HHO:
+						case (int)EKeyConfigPad.HHO:
 							return padHHO_Y;
 
-						case (int) EKeyConfigPad.RD:
+						case (int)EKeyConfigPad.RD:
 							return padRD;
 
-						case (int) EKeyConfigPad.LC:
+						case (int)EKeyConfigPad.LC:
 							return padLC_P;
 
-						case (int) EKeyConfigPad.LP:	// #27029 2012.1.4 from
-							return padLP;			//(HPからLPに。)
+						case (int)EKeyConfigPad.LP: // #27029 2012.1.4 from
+							return padLP; //(HPからLPに。)
 
-						case (int) EKeyConfigPad.LBD:
+						case (int)EKeyConfigPad.LBD:
 							return padLBD;
 
-						case (int) EKeyConfigPad.Cancel:
+						case (int)EKeyConfigPad.Cancel:
 							return padCancel;
 
-						case (int) EKeyConfigPad.Capture:
+						case (int)EKeyConfigPad.Capture:
 							return padCapture;
 
 						case (int)EKeyConfigPad.Search:
@@ -246,65 +273,66 @@ internal class CConfigIni
 						case (int)EKeyConfigPad.Restart:
 							return padRestart;
 					}
+
 					throw new IndexOutOfRangeException();
 				}
 				set
 				{
-					switch ( index )
+					switch (index)
 					{
-						case (int) EKeyConfigPad.HH:
+						case (int)EKeyConfigPad.HH:
 							padHH_R = value;
 							return;
 
-						case (int) EKeyConfigPad.SD:
+						case (int)EKeyConfigPad.SD:
 							padSD_G = value;
 							return;
 
-						case (int) EKeyConfigPad.BD:
+						case (int)EKeyConfigPad.BD:
 							padBD_B = value;
 							return;
 
-						case (int) EKeyConfigPad.Pick:
+						case (int)EKeyConfigPad.Pick:
 							padHT_Pick = value;
 							return;
 
-						case (int) EKeyConfigPad.LT:
+						case (int)EKeyConfigPad.LT:
 							padLT_Wail = value;
 							return;
 
-						case (int) EKeyConfigPad.FT:
+						case (int)EKeyConfigPad.FT:
 							padFT_Help = value;
 							return;
 
-						case (int) EKeyConfigPad.CY:
+						case (int)EKeyConfigPad.CY:
 							padCY_Decide = value;
 							return;
 
-						case (int) EKeyConfigPad.HHO:
+						case (int)EKeyConfigPad.HHO:
 							padHHO_Y = value;
 							return;
-                            
-						case (int) EKeyConfigPad.RD:
+
+						case (int)EKeyConfigPad.RD:
 							padRD = value;
 							return;
-                            
-						case (int) EKeyConfigPad.LC:
+
+						case (int)EKeyConfigPad.LC:
 							padLC_P = value;
 							return;
-                            
-						case (int) EKeyConfigPad.LP:
+
+						case (int)EKeyConfigPad.LP:
 							padLP = value;
 							return;
-                            
-						case (int) EKeyConfigPad.LBD:
+
+						case (int)EKeyConfigPad.LBD:
 							padLBD = value;
 							return;
 
-						case (int) EKeyConfigPad.Cancel:
+						case (int)EKeyConfigPad.Cancel:
 							padCancel = value;
 							return;
 
-						case (int) EKeyConfigPad.Capture:
+						case (int)EKeyConfigPad.Capture:
 							padCapture = value;
 							return;
 
@@ -340,11 +368,13 @@ internal class CConfigIni
 							padRestart = value;
 							return;
 					}
+
 					throw new IndexOutOfRangeException();
 				}
 			}
 
 			#region [ private ]
+
 			//-----------------
 			private STKEYASSIGN[] padBD_B;
 			private STKEYASSIGN[] padCY_Decide;
@@ -358,7 +388,7 @@ internal class CConfigIni
 			private STKEYASSIGN[] padSD_G;
 			private STKEYASSIGN[] padLP;
 			private STKEYASSIGN[] padLBD;
-			private STKEYASSIGN[] padCancel; 
+			private STKEYASSIGN[] padCancel;
 			private STKEYASSIGN[] padCapture;
 			private STKEYASSIGN[] padSearch;
 			private STKEYASSIGN[] padLoopCreate;
@@ -367,18 +397,21 @@ internal class CConfigIni
 			private STKEYASSIGN[] padSkipBackward;
 			private STKEYASSIGN[] padIncreasePlaySpeed;
 			private STKEYASSIGN[] padDecreasePlaySpeed;
+
 			private STKEYASSIGN[] padRestart;
 			//-----------------
+
 			#endregion
 		}
 
-		[StructLayout( LayoutKind.Sequential )]
+		[StructLayout(LayoutKind.Sequential)]
 		public struct STKEYASSIGN
 		{
 			public EInputDevice InputDevice;
 			public int ID;
 			public int Code;
-			public STKEYASSIGN( EInputDevice DeviceType, int nID, int nCode )
+
+			public STKEYASSIGN(EInputDevice DeviceType, int nID, int nCode)
 			{
 				InputDevice = DeviceType;
 				ID = nID;
@@ -390,50 +423,54 @@ internal class CConfigIni
 		public CKeyAssignPad Drums = new CKeyAssignPad();
 		public CKeyAssignPad Guitar = new CKeyAssignPad();
 		public CKeyAssignPad System = new CKeyAssignPad();
-		public CKeyAssignPad this[ int index ]
+
+		public CKeyAssignPad this[int index]
 		{
 			get
 			{
-				switch( index )
+				switch (index)
 				{
-					case (int) EKeyConfigPart.DRUMS:
+					case (int)EKeyConfigPart.DRUMS:
 						return Drums;
 
-					case (int) EKeyConfigPart.GUITAR:
+					case (int)EKeyConfigPart.GUITAR:
 						return Guitar;
 
-					case (int) EKeyConfigPart.BASS:
+					case (int)EKeyConfigPart.BASS:
 						return Bass;
 
-					case (int) EKeyConfigPart.SYSTEM:
+					case (int)EKeyConfigPart.SYSTEM:
 						return System;
 				}
+
 				throw new IndexOutOfRangeException();
 			}
 			set
 			{
-				switch( index )
+				switch (index)
 				{
-					case (int) EKeyConfigPart.DRUMS:
+					case (int)EKeyConfigPart.DRUMS:
 						Drums = value;
 						return;
 
-					case (int) EKeyConfigPart.GUITAR:
+					case (int)EKeyConfigPart.GUITAR:
 						Guitar = value;
 						return;
 
-					case (int) EKeyConfigPart.BASS:
+					case (int)EKeyConfigPart.BASS:
 						Bass = value;
 						return;
 
-					case (int) EKeyConfigPart.SYSTEM:
+					case (int)EKeyConfigPart.SYSTEM:
 						System = value;
 						return;
 				}
+
 				throw new IndexOutOfRangeException();
 			}
 		}
 	}
+
 	public enum ESoundDeviceTypeForConfig
 	{
 		ACM = 0,
@@ -445,7 +482,7 @@ internal class CConfigIni
 
 	// プロパティ
 
-#if false		// #23625 2011.1.11 Config.iniからダメージ/回復値の定数変更を行う場合はここを有効にする 087リリースに合わせ機能無効化
+#if false // #23625 2011.1.11 Config.iniからダメージ/回復値の定数変更を行う場合はここを有効にする 087リリースに合わせ機能無効化
 		//----------------------------------------
 		public float[,] fGaugeFactor = new float[5,2];
 		public float[] fDamageLevelFactor = new float[3];
@@ -468,7 +505,7 @@ internal class CConfigIni
 	public bool bSTAGEFAILEDEnabled;
 	public STDGBVALUE<bool> bSudden;
 	public bool bTight;
-	public STDGBVALUE<bool> bGraph有効;     // #24074 2011.01.23 add ikanick
+	public STDGBVALUE<bool> bGraph有効; // #24074 2011.01.23 add ikanick
 	public bool bSmallGraph;
 	public bool bWave再生位置自動調整機能有効;
 	public bool bシンバルフリー;
@@ -483,18 +520,24 @@ internal class CConfigIni
 	public bool b歓声を発声する;
 	public bool bVerticalSyncWait;
 	public bool b選曲リストフォントを斜体にする;
+
 	public bool b選曲リストフォントを太字にする;
+
 	//public bool bDirectShowMode;
 	public bool bFullScreenMode;
 	public bool bFullScreenExclusive;
 	public int nInitialWindowXPosition; // #30675 2013.02.04 ikanick add
 	public int nInitialWindowYPosition;
-	public int nWindowWidth;				// #23510 2010.10.31 yyagi add
-	public int nWindowHeight;				// #23510 2010.10.31 yyagi add
+	public int nWindowWidth; // #23510 2010.10.31 yyagi add
+	public int nWindowHeight; // #23510 2010.10.31 yyagi add
 	public bool DisplayBonusEffects;
 	public bool bHAZARD;
-	public int nSoundDriverType; // #24820 2012.12.23 yyagi 出力サウンドデバイス(0=ACM(にしたいが設計がきつそうならDirectShow), 1=ASIO, 2=WASAPI)
+
+	public int
+		nSoundDriverType; // #24820 2012.12.23 yyagi 出力サウンドデバイス(0=ACM(にしたいが設計がきつそうならDirectShow), 1=ASIO, 2=WASAPI)
+
 	public int nWASAPIBufferSizeMs; // #24820 2013.1.15 yyagi WASAPIのバッファサイズ
+
 	//public int nASIOBufferSizeMs; // #24820 2012.12.28 yyagi ASIOのバッファサイズ
 	public int nASIODevice; // #24820 2013.1.17 yyagi ASIOデバイス
 	public bool bEventDrivenWASAPI;
@@ -515,7 +558,31 @@ internal class CConfigIni
 	public int nSkillMode;
 	public Dictionary<int, string> joystickDict;
 	public ECYGroup eCYGroup;
-	public EDarkMode eDark;
+	public STDGBVALUE<EDarkMode> eDark
+	{
+		get
+		{
+			STDGBVALUE<EDarkMode> ret = new();
+			for (int i = 0; i < 3; i++)
+			{
+				if (CDTXMania.ConfigIni.nLaneDisp[i] == 3
+				    && !CDTXMania.ConfigIni.bJudgeLineDisp[i]
+				    && !CDTXMania.ConfigIni.bLaneFlush[i])
+				{
+					ret[i] = EDarkMode.FULL;
+				}
+				else if (CDTXMania.ConfigIni.nLaneDisp[i] == 1
+				         && CDTXMania.ConfigIni.bJudgeLineDisp[i]
+				         && CDTXMania.ConfigIni.bLaneFlush[i])
+				{
+					ret[i] = EDarkMode.HALF;
+				}
+				else ret[i] = EDarkMode.OFF;
+			}
+			return ret; 
+		}
+	}
+
 	public EFTGroup eFTGroup;
 	public EHHGroup eHHGroup;
 	public EBDGroup eBDGroup;					// #27029 2012.1.4 from add
