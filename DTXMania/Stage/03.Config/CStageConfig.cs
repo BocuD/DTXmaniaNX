@@ -573,7 +573,8 @@ internal class CStageConfig : CStage
         bool showDescription = !bFocusIsOnMenu && newConfigList.IsSettled;
         if (showDescription)
         {
-            descriptionPanel.SetText(newConfigList.CurrentItem?.strDescription ?? "");
+            CItemBase? current = newConfigList.CurrentItem;
+            descriptionPanel.SetText(current?.formatDescription?.Invoke() ?? current?.strDescription ?? "");
         }
         descriptionPanel.isVisible = showDescription;
         newDescriptionBg.isVisible = showDescription;

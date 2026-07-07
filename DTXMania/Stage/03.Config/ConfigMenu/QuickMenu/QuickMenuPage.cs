@@ -11,7 +11,10 @@ internal class QuickMenuPage(ConfigList list, EInstrumentPart part, QuickConfigI
     {
         var items = new List<CItemBase>();
         items.Add(ScrollSpeedItem());
-        
+
+        // auto-play preset cycler (no per-lane toggles in the compact quick menu)
+        items.Add(AutoPlaySelectorItem());
+
         CItemInteger playSpeed = new("PlaySpeed", CConstants.PLAYSPEED_MIN, CConstants.PLAYSPEED_MAX, CDTXMania.ConfigIni.nPlaySpeed,
             "曲の演奏速度を、速くしたり\n遅くしたりすることができます。",
             "Change the song speed.\nFor example, set PlaySpeed = 0.500 for half speed.\nNote: It also changes the song's pitch.");
@@ -70,7 +73,7 @@ internal class QuickMenuPage(ConfigList list, EInstrumentPart part, QuickConfigI
             action = list.Back
         };
         items.Add(closeButton);
-        
+
         return items;
     }
 }

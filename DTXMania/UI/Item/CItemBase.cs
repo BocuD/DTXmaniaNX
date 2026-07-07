@@ -55,6 +55,10 @@ internal class CItemBase
 	//a decimal). When null, the item's <see cref="GetStringValue"/> is used.
 	public Func<string>? formatValue;
 
+	//Optional dynamic description; when set it is preferred over the static <see cref="strDescription"/>
+	//so the panel can preview live state (e.g. the current auto-play lanes).
+	public Func<string>? formatDescription;
+
 	public void RunAction()
 	{
 		tEnterPressed();

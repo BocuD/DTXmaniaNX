@@ -14,18 +14,6 @@ internal sealed class DrumsConfigPage : InstrumentConfigPage
         velocity = new DrumsVelocityConfigPage(list);
     }
     
-    //todo: implement this everywhere
-    public enum DrumsAutoPlayOptions
-    {
-        Off,
-        All,
-        AutoLP,
-        AutoBD,
-        TwoPedalAuto,
-        ThreeAuto,
-        Custom
-    }
-
     public override List<CItemBase> Build()
     {
         List<CItemBase> items = [];
@@ -35,64 +23,33 @@ internal sealed class DrumsConfigPage : InstrumentConfigPage
         items.Add(CreateCardNameInputItem());
         items.Add(CreateGroupNameInputItem());
         
-        // ---- Auto play: the "All" three-state drives every lane toggle (drums-specific) ----
-        CItemThreeState autoPlayAll = new("AutoPlay (All)", CItemThreeState.EState.UNDEFINED,
-            "全パッドの自動演奏のON/OFFをまとめて切り替えます。",
-            "Activate/deactivate Auto for all drum lanes at once.");
-        items.Add(autoPlayAll);
-
-        CItemList autoPlayMode = new("AutoPlay", CItemBase.EPanelType.Normal, 0, "", "", 
-            [
-                "Off",
-                "All",
-                "Left Pedal",
-                "Bass Pedal",
-                "Both Pedals",
-                "3 Auto",
-                "Custom"
-            ]);
-        items.Add(autoPlayMode);
-
-        CItemToggle leftCymbal = Toggle("    LeftCymbal", "左シンバルを自動で演奏します。", "Play Left Cymbal automatically.",
-            () => CDTXMania.ConfigIni.bAutoPlay.LC, v => CDTXMania.ConfigIni.bAutoPlay.LC = v);
-        CItemToggle hiHat = Toggle("    HiHat", "ハイハットを自動で演奏します。", "Play HiHat automatically.",
-            () => CDTXMania.ConfigIni.bAutoPlay.HH, v => CDTXMania.ConfigIni.bAutoPlay.HH = v);
-        CItemToggle leftPedal = Toggle("    LeftPedal", "左ペダルを自動で演奏します。", "Play Left Pedal automatically.",
-            () => CDTXMania.ConfigIni.bAutoPlay.LP, v => CDTXMania.ConfigIni.bAutoPlay.LP = v);
-        CItemToggle leftBassDrum = Toggle("    LBassDrum", "左バスドラムを自動で演奏します。", "Play Left Bass Drum automatically.",
-            () => CDTXMania.ConfigIni.bAutoPlay.LBD, v => CDTXMania.ConfigIni.bAutoPlay.LBD = v);
-        CItemToggle snare = Toggle("    Snare", "スネアを自動で演奏します。", "Play Snare automatically.",
-            () => CDTXMania.ConfigIni.bAutoPlay.SD, v => CDTXMania.ConfigIni.bAutoPlay.SD = v);
-        CItemToggle bass = Toggle("    BassDrum", "バスドラムを自動で演奏します。", "Play Bass Drum automatically.",
-            () => CDTXMania.ConfigIni.bAutoPlay.BD, v => CDTXMania.ConfigIni.bAutoPlay.BD = v);
-        CItemToggle highTom = Toggle("    HighTom", "ハイタムを自動で演奏します。", "Play High Tom automatically.",
-            () => CDTXMania.ConfigIni.bAutoPlay.HT, v => CDTXMania.ConfigIni.bAutoPlay.HT = v);
-        CItemToggle lowTom = Toggle("    LowTom", "ロータムを自動で演奏します。", "Play Low Tom automatically.",
-            () => CDTXMania.ConfigIni.bAutoPlay.LT, v => CDTXMania.ConfigIni.bAutoPlay.LT = v);
-        CItemToggle floorTom = Toggle("    FloorTom", "フロアタムを自動で演奏します。", "Play Floor Tom automatically.",
-            () => CDTXMania.ConfigIni.bAutoPlay.FT, v => CDTXMania.ConfigIni.bAutoPlay.FT = v);
-        CItemToggle cymbal = Toggle("    Cymbal", "右シンバルを自動で演奏します。", "Play Right Cymbal automatically.",
-            () => CDTXMania.ConfigIni.bAutoPlay.CY, v => CDTXMania.ConfigIni.bAutoPlay.CY = v);
-        CItemToggle ride = Toggle("    Ride", "ライドシンバルを自動で演奏します。", "Play Ride Cymbal automatically.",
-            () => CDTXMania.ConfigIni.bAutoPlay.RD, v => CDTXMania.ConfigIni.bAutoPlay.RD = v);
-
-        autoPlayAll.action = () =>
-        {
-            bool on = autoPlayAll.eCurrentState == CItemThreeState.EState.ON;
-            leftCymbal.bON = hiHat.bON = leftPedal.bON = leftBassDrum.bON = snare.bON = bass.bON =
-                highTom.bON = lowTom.bON = floorTom.bON = cymbal.bON = ride.bON = on;
-        };
-        items.Add(leftCymbal);
-        items.Add(hiHat);
-        items.Add(leftPedal);
-        items.Add(leftBassDrum);
-        items.Add(snare);
-        items.Add(bass);
-        items.Add(highTom);
-        items.Add(lowTom);
-        items.Add(floorTom);
-        items.Add(cymbal);
-        items.Add(ride);
+        // ---- Auto play: preset selector (cycles Off / presets / Custom) + per-lane toggles ----
+        List<(ELane, CItemToggle)> autoLanes =
+        [
+            (ELane.LC, Toggle("    LeftCymbal", "左シンバルを自動で演奏します。", "Play Left Cymbal automatically.",
+                () => CDTXMania.ConfigIni.bAutoPlay.LC, v => CDTXMania.ConfigIni.bAutoPlay.LC = v)),
+            (ELane.HH, Toggle("    HiHat", "ハイハットを自動で演奏します。", "Play HiHat automatically.",
+                () => CDTXMania.ConfigIni.bAutoPlay.HH, v => CDTXMania.ConfigIni.bAutoPlay.HH = v)),
+            (ELane.LP, Toggle("    LeftPedal", "左ペダルを自動で演奏します。", "Play Left Pedal automatically.",
+                () => CDTXMania.ConfigIni.bAutoPlay.LP, v => CDTXMania.ConfigIni.bAutoPlay.LP = v)),
+            (ELane.LBD, Toggle("    LBassDrum", "左バスドラムを自動で演奏します。", "Play Left Bass Drum automatically.",
+                () => CDTXMania.ConfigIni.bAutoPlay.LBD, v => CDTXMania.ConfigIni.bAutoPlay.LBD = v)),
+            (ELane.SD, Toggle("    Snare", "スネアを自動で演奏します。", "Play Snare automatically.",
+                () => CDTXMania.ConfigIni.bAutoPlay.SD, v => CDTXMania.ConfigIni.bAutoPlay.SD = v)),
+            (ELane.BD, Toggle("    BassDrum", "バスドラムを自動で演奏します。", "Play Bass Drum automatically.",
+                () => CDTXMania.ConfigIni.bAutoPlay.BD, v => CDTXMania.ConfigIni.bAutoPlay.BD = v)),
+            (ELane.HT, Toggle("    HighTom", "ハイタムを自動で演奏します。", "Play High Tom automatically.",
+                () => CDTXMania.ConfigIni.bAutoPlay.HT, v => CDTXMania.ConfigIni.bAutoPlay.HT = v)),
+            (ELane.LT, Toggle("    LowTom", "ロータムを自動で演奏します。", "Play Low Tom automatically.",
+                () => CDTXMania.ConfigIni.bAutoPlay.LT, v => CDTXMania.ConfigIni.bAutoPlay.LT = v)),
+            (ELane.FT, Toggle("    FloorTom", "フロアタムを自動で演奏します。", "Play Floor Tom automatically.",
+                () => CDTXMania.ConfigIni.bAutoPlay.FT, v => CDTXMania.ConfigIni.bAutoPlay.FT = v)),
+            (ELane.CY, Toggle("    Cymbal", "右シンバルを自動で演奏します。", "Play Right Cymbal automatically.",
+                () => CDTXMania.ConfigIni.bAutoPlay.CY, v => CDTXMania.ConfigIni.bAutoPlay.CY = v)),
+            (ELane.RD, Toggle("    Ride", "ライドシンバルを自動で演奏します。", "Play Ride Cymbal automatically.",
+                () => CDTXMania.ConfigIni.bAutoPlay.RD, v => CDTXMania.ConfigIni.bAutoPlay.RD = v)),
+        ];
+        AddAutoPlayBlock(items, autoLanes);
 
         // ---- Standard / display options (shared) ----
         items.Add(ScrollSpeedItem());

@@ -16,39 +16,25 @@ internal sealed class BassConfigPage(ConfigList list) : InstrumentConfigPage(lis
         items.Add(CreateCardNameInputItem());
         items.Add(CreateGroupNameInputItem());
         
-        // ---- Auto play (bass-specific) ----
-        CItemThreeState autoPlayAll = new("AutoPlay (All)", CItemThreeState.EState.UNDEFINED,
-            "全ネック/ピックの自動演奏の ON/OFF をまとめて切り替えます。",
-            "Toggle Auto for all bass neck/pick at once.");
-        items.Add(autoPlayAll);
-
-        CItemToggle r = Toggle("    R", "Rネックを自動で演奏します。", "Play R neck automatically.",
-            () => CDTXMania.ConfigIni.bAutoPlay.BsR, v => CDTXMania.ConfigIni.bAutoPlay.BsR = v);
-        CItemToggle g = Toggle("    G", "Gネックを自動で演奏します。", "Play G neck automatically.",
-            () => CDTXMania.ConfigIni.bAutoPlay.BsG, v => CDTXMania.ConfigIni.bAutoPlay.BsG = v);
-        CItemToggle b = Toggle("    B", "Bネックを自動で演奏します。", "Play B neck automatically.",
-            () => CDTXMania.ConfigIni.bAutoPlay.BsB, v => CDTXMania.ConfigIni.bAutoPlay.BsB = v);
-        CItemToggle y = Toggle("    Y", "Yネックを自動で演奏します。", "Play Y neck automatically.",
-            () => CDTXMania.ConfigIni.bAutoPlay.BsY, v => CDTXMania.ConfigIni.bAutoPlay.BsY = v);
-        CItemToggle p = Toggle("    P", "Pネックを自動で演奏します。", "Play P neck automatically.",
-            () => CDTXMania.ConfigIni.bAutoPlay.BsP, v => CDTXMania.ConfigIni.bAutoPlay.BsP = v);
-        CItemToggle pick = Toggle("    Pick", "ピックを自動で演奏します。", "Play Pick automatically.",
-            () => CDTXMania.ConfigIni.bAutoPlay.BsPick, v => CDTXMania.ConfigIni.bAutoPlay.BsPick = v);
-        CItemToggle wailing = Toggle("    Wailing", "ウェイリングを自動で演奏します。", "Play wailing automatically.",
-            () => CDTXMania.ConfigIni.bAutoPlay.BsW, v => CDTXMania.ConfigIni.bAutoPlay.BsW = v);
-
-        autoPlayAll.action = () =>
-        {
-            bool on = autoPlayAll.eCurrentState == CItemThreeState.EState.ON;
-            r.bON = g.bON = b.bON = y.bON = p.bON = pick.bON = wailing.bON = on;
-        };
-        items.Add(r);
-        items.Add(g);
-        items.Add(b);
-        items.Add(y);
-        items.Add(p);
-        items.Add(pick);
-        items.Add(wailing);
+        // ---- Auto play: preset selector (cycles Off / presets / Custom) + per-lane toggles ----
+        List<(ELane, CItemToggle)> autoLanes =
+        [
+            (ELane.BsR, Toggle("    R", "Rネックを自動で演奏します。", "Play R neck automatically.",
+                () => CDTXMania.ConfigIni.bAutoPlay.BsR, v => CDTXMania.ConfigIni.bAutoPlay.BsR = v)),
+            (ELane.BsG, Toggle("    G", "Gネックを自動で演奏します。", "Play G neck automatically.",
+                () => CDTXMania.ConfigIni.bAutoPlay.BsG, v => CDTXMania.ConfigIni.bAutoPlay.BsG = v)),
+            (ELane.BsB, Toggle("    B", "Bネックを自動で演奏します。", "Play B neck automatically.",
+                () => CDTXMania.ConfigIni.bAutoPlay.BsB, v => CDTXMania.ConfigIni.bAutoPlay.BsB = v)),
+            (ELane.BsY, Toggle("    Y", "Yネックを自動で演奏します。", "Play Y neck automatically.",
+                () => CDTXMania.ConfigIni.bAutoPlay.BsY, v => CDTXMania.ConfigIni.bAutoPlay.BsY = v)),
+            (ELane.BsP, Toggle("    P", "Pネックを自動で演奏します。", "Play P neck automatically.",
+                () => CDTXMania.ConfigIni.bAutoPlay.BsP, v => CDTXMania.ConfigIni.bAutoPlay.BsP = v)),
+            (ELane.BsPick, Toggle("    Pick", "ピックを自動で演奏します。", "Play Pick automatically.",
+                () => CDTXMania.ConfigIni.bAutoPlay.BsPick, v => CDTXMania.ConfigIni.bAutoPlay.BsPick = v)),
+            (ELane.BsW, Toggle("    Wailing", "ウェイリングを自動で演奏します。", "Play wailing automatically.",
+                () => CDTXMania.ConfigIni.bAutoPlay.BsW, v => CDTXMania.ConfigIni.bAutoPlay.BsW = v)),
+        ];
+        AddAutoPlayBlock(items, autoLanes);
 
         // ---- Standard / display options ----
         items.Add(ScrollSpeedItem());

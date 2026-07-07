@@ -172,4 +172,158 @@ internal abstract class InstrumentConfigPage : ConfigPage
     protected CItemToggle LeftItem() => Toggle("Left",
         "RGBYPの並びが左右反転します（左利きモード）。", "Reverse lane order for lefty.",
         () => CDTXMania.ConfigIni.bLeft[Idx], v => CDTXMania.ConfigIni.bLeft[Idx] = v);
+
+    // ---- auto-play preset selector (shared) ----
+
+    /// <summary>
+    /// Builds the auto-play preset selector for this instrument (Off / presets... / Custom, from
+    /// <see cref="AutoMode.AutoModes"/>). Cycling it applies the chosen preset to <c>bAutoPlay</c>;
+    /// "Custom" applies the separately-stored <c>bAutoPlayCustom</c> so cycling never clears it.
+    ///
+    /// When <paramref name="laneToggles"/> is given (full config) the selector also updates those
+    /// toggle items, and manually toggling any lane flips the selector to "Custom" and saves the
+    /// flags to <c>bAutoPlayCustom</c>. In the quick menu there are no lane toggles, so it just
+    /// applies <c>bAutoPlay</c> directly.
+    /// </summary>
+    protected CItemList AutoPlaySelectorItem(IReadOnlyList<(ELane lane, CItemToggle toggle)>? laneToggles = null)
+    {
+        List<AutoMode> presets = AutoMode.AutoModes[instrument];
+        List<ELane> lanes = presets.First(p => !p.isCustom).state.Keys.ToList();
+        int customIndex = presets.FindIndex(p => p.isCustom);
+
+        // If the current auto-play doesn't match any preset, it's effectively custom: capture it so
+        // the "Custom" option reflects the current state on entry.
+        int initialIndex = MatchingPresetIndex(lanes);
+        if (initialIndex == customIndex)
+        {
+            SaveCustomFromConfig(lanes);
+        }
+
+        CItemList selector = new("AutoPlay", CItemBase.EPanelType.Normal, initialIndex,
+            "オートプレイのプリセットを切り替えます。",
+            "Cycle through the auto-play presets (Off / presets / Custom).",
+            presets.Select(p => p.label).ToArray());
+        // derived from bAutoPlay; only used on an explicit re-read (e.g. config import)
+        selector.BindConfig(() => selector.nCurrentlySelectedIndex = MatchingPresetIndex(lanes));
+        selector.action = () => ApplyAutoPlayPreset(presets[selector.nCurrentlySelectedIndex], lanes, laneToggles);
+        selector.formatDescription = () => AutoPlayDescription(lanes);
+
+        if (laneToggles != null)
+        {
+            foreach ((ELane _, CItemToggle toggle) in laneToggles)
+            {
+                toggle.action = () =>
+                {
+                    // a manual lane edit is a custom set: remember it and mark the selector "Custom"
+                    selector.nCurrentlySelectedIndex = customIndex;
+                    SaveCustomFromItems(laneToggles);
+                };
+            }
+        }
+
+        return selector;
+    }
+
+    /// <summary>
+    /// Adds the auto-play preset selector followed by an "Auto Lanes" folder. The per-lane toggles
+    /// live on that folder's sub-page (rather than inline) so the main page stays compact. Both the
+    /// selector and the folder preview the current auto-play state in their description panel.
+    /// </summary>
+    protected void AddAutoPlayBlock(List<CItemBase> items, IReadOnlyList<(ELane lane, CItemToggle toggle)> laneToggles)
+    {
+        List<ELane> lanes = AutoMode.AutoModes[instrument].First(p => !p.isCustom).state.Keys.ToList();
+
+        items.Add(AutoPlaySelectorItem(laneToggles));
+
+        // per-lane toggles on their own sub-page, opened by the folder below the selector
+        List<CItemBase> lanePage = [BackItem()];
+        foreach ((ELane _, CItemToggle toggle) in laneToggles)
+        {
+            lanePage.Add(toggle);
+        }
+
+        CItemBase folder = new("    Auto Lanes", CItemBase.EPanelType.Folder,
+            "各レーンごとのオートプレイ設定。", "Per-lane auto-play settings.")
+        {
+            action = () => list.OpenFolder(lanePage),
+            formatDescription = () => AutoPlayDescription(lanes)
+        };
+        items.Add(folder);
+    }
+
+    // A live text preview of the auto-play state: the matching preset name + which lanes are on auto.
+    private string AutoPlayDescription(List<ELane> lanes)
+    {
+        string mode = AutoMode.AutoModes[instrument][MatchingPresetIndex(lanes)].label;
+
+        List<string> on = lanes.Where(l => CDTXMania.ConfigIni.bAutoPlay[(int)l]).Select(LaneShortName).ToList();
+        string lanesText = on.Count == 0
+            ? (CDTXMania.isJapanese ? "なし" : "none")
+            : string.Join(" ", on);
+
+        return CDTXMania.isJapanese
+            ? $"オートプレイ: {mode}\nレーン: {lanesText}"
+            : $"Auto: {mode}\nLanes: {lanesText}";
+    }
+
+    // Short lane label for the preview (drops the "Gt"/"Bs" instrument prefix on guitar/bass lanes).
+    private static string LaneShortName(ELane lane)
+    {
+        string name = lane.ToString();
+        return name.StartsWith("Gt") || name.StartsWith("Bs") ? name[2..] : name;
+    }
+
+    // index of the preset matching the current bAutoPlay, or the Custom index if none match
+    private int MatchingPresetIndex(List<ELane> lanes)
+    {
+        List<AutoMode> presets = AutoMode.AutoModes[instrument];
+        for (int i = 0; i < presets.Count; i++)
+        {
+            AutoMode preset = presets[i];
+            if (preset.isCustom) continue;
+
+            if (lanes.All(l => preset.state.TryGetValue(l, out bool v) && CDTXMania.ConfigIni.bAutoPlay[(int)l] == v))
+            {
+                return i;
+            }
+        }
+        return presets.FindIndex(p => p.isCustom);
+    }
+
+    private void ApplyAutoPlayPreset(AutoMode preset, List<ELane> lanes,
+        IReadOnlyList<(ELane lane, CItemToggle toggle)>? laneToggles)
+    {
+        foreach (ELane lane in lanes)
+        {
+            bool value = preset.isCustom
+                ? CDTXMania.ConfigIni.bAutoPlayCustom[(int)lane]
+                : preset.state[lane];
+            CDTXMania.ConfigIni.bAutoPlay[(int)lane] = value;
+        }
+
+        // keep the visible lane toggle items in sync so CommitPage's write-back stays consistent
+        if (laneToggles != null)
+        {
+            foreach ((ELane lane, CItemToggle toggle) in laneToggles)
+            {
+                toggle.bON = CDTXMania.ConfigIni.bAutoPlay[(int)lane];
+            }
+        }
+    }
+
+    private void SaveCustomFromConfig(List<ELane> lanes)
+    {
+        foreach (ELane lane in lanes)
+        {
+            CDTXMania.ConfigIni.bAutoPlayCustom[(int)lane] = CDTXMania.ConfigIni.bAutoPlay[(int)lane];
+        }
+    }
+
+    private static void SaveCustomFromItems(IReadOnlyList<(ELane lane, CItemToggle toggle)> laneToggles)
+    {
+        foreach ((ELane lane, CItemToggle toggle) in laneToggles)
+        {
+            CDTXMania.ConfigIni.bAutoPlayCustom[(int)lane] = toggle.bON;
+        }
+    }
 }

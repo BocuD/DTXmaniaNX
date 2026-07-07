@@ -836,6 +836,12 @@ internal class CConfigIni
 	public STAUTOPLAY bAutoPlay;
 
 	/// <summary>
+	/// The user's saved "Custom" auto-play flags. Kept separate from <see cref="bAutoPlay"/> so that
+	/// cycling through the auto-play presets (which overwrite bAutoPlay) doesn't clobber the custom set.
+	/// </summary>
+	public STAUTOPLAY bAutoPlayCustom;
+
+	/// <summary>
 	/// The <see cref="STHitRanges"/> for all drum chips, except pedals.
 	/// </summary>
 	public STHitRanges stDrumHitRanges;
@@ -1151,6 +1157,8 @@ internal class CConfigIni
 		bAutoPlay.BsP = false;
 		bAutoPlay.BsPick = false;
 		bAutoPlay.BsW = false;
+
+		bAutoPlayCustom = new STAUTOPLAY();
 		#endregion
 
 		#region [ HitRange ]
@@ -2001,43 +2009,8 @@ internal class CConfigIni
 		sw.WriteLine(";-------------------");
 		#endregion
 		#region [ AutoPlay ]
-		sw.WriteLine( "[AutoPlay]" );
-		sw.WriteLine();
-		sw.WriteLine( "; 自動演奏(0:OFF, 1:ON)" );
-		sw.WriteLine();
-		sw.WriteLine( "; Drums" );
-		sw.WriteLine("LC={0}", bAutoPlay.LC ? 1 : 0);
-		sw.WriteLine("HH={0}", bAutoPlay.HH ? 1 : 0);
-		sw.WriteLine("SD={0}", bAutoPlay.SD ? 1 : 0);
-		sw.WriteLine("BD={0}", bAutoPlay.BD ? 1 : 0);
-		sw.WriteLine("HT={0}", bAutoPlay.HT ? 1 : 0);
-		sw.WriteLine("LT={0}", bAutoPlay.LT ? 1 : 0);
-		sw.WriteLine("FT={0}", bAutoPlay.FT ? 1 : 0);
-		sw.WriteLine("CY={0}", bAutoPlay.CY ? 1 : 0);
-		sw.WriteLine("RD={0}", bAutoPlay.RD ? 1 : 0);
-		sw.WriteLine("LP={0}", bAutoPlay.LP ? 1 : 0);
-		sw.WriteLine("LBD={0}", bAutoPlay.LBD ? 1 : 0);
-		sw.WriteLine();
-		sw.WriteLine( "; Guitar" );
-		//sw.WriteLine( "Guitar={0}", this.bAutoPlay.Guitar ? 1 : 0 );
-		sw.WriteLine( "GuitarR={0}", bAutoPlay.GtR ? 1 : 0 );
-		sw.WriteLine( "GuitarG={0}", bAutoPlay.GtG ? 1 : 0 );
-		sw.WriteLine( "GuitarB={0}", bAutoPlay.GtB ? 1 : 0 );
-		sw.WriteLine( "GuitarY={0}", bAutoPlay.GtY ? 1 : 0 );
-		sw.WriteLine( "GuitarP={0}", bAutoPlay.GtP ? 1 : 0 );
-		sw.WriteLine( "GuitarPick={0}", bAutoPlay.GtPick ? 1 : 0 );
-		sw.WriteLine( "GuitarWailing={0}", bAutoPlay.GtW ? 1 : 0 );
-		sw.WriteLine();
-		sw.WriteLine( "; Bass" );
-		// sw.WriteLine( "Bass={0}", this.bAutoPlay.Bass ? 1 : 0 );
-		sw.WriteLine( "BassR={0}", bAutoPlay.BsR ? 1 : 0 );
-		sw.WriteLine( "BassG={0}", bAutoPlay.BsG ? 1 : 0 );
-		sw.WriteLine( "BassB={0}", bAutoPlay.BsB ? 1 : 0 );
-		sw.WriteLine( "BassY={0}", bAutoPlay.BsY ? 1 : 0);
-		sw.WriteLine( "BassP={0}", bAutoPlay.BsP ? 1 : 0);
-		sw.WriteLine( "BassPick={0}", bAutoPlay.BsPick ? 1 : 0 );
-		sw.WriteLine( "BassWailing={0}", bAutoPlay.BsW ? 1 : 0 );
-		sw.WriteLine();
+		WriteAutoPlaySection( sw, "AutoPlay", bAutoPlay );
+		WriteAutoPlaySection( sw, "AutoPlayCustom", bAutoPlayCustom );
 		sw.WriteLine( ";-------------------" );
 		#endregion
 		#region [ HitRange ]
@@ -2325,6 +2298,10 @@ internal class CConfigIni
 						else if ( str2.Equals( "AutoPlay" ) )
 						{
 							unknown = ESectionType.AutoPlay;
+						}
+						else if ( str2.Equals( "AutoPlayCustom" ) )
+						{
+							unknown = ESectionType.AutoPlayCustom;
 						}
 						else if ( str2.Equals( "HitRange" ) )
 						{
@@ -3321,114 +3298,10 @@ internal class CConfigIni
 								#region [ [AutoPlay] ]
 								//-----------------------------
 								case ESectionType.AutoPlay:
-									if ( str3.Equals( "LC" ) )
-									{
-										bAutoPlay.LC = CConversion.bONorOFF( str4[ 0 ] );
-									}
-									if ( str3.Equals( "HH" ) )
-									{
-										bAutoPlay.HH = CConversion.bONorOFF( str4[ 0 ] );
-									}
-									else if ( str3.Equals( "SD" ) )
-									{
-										bAutoPlay.SD = CConversion.bONorOFF( str4[ 0 ] );
-									}
-									else if ( str3.Equals( "BD" ) )
-									{
-										bAutoPlay.BD = CConversion.bONorOFF( str4[ 0 ] );
-									}
-									else if ( str3.Equals( "HT" ) )
-									{
-										bAutoPlay.HT = CConversion.bONorOFF( str4[ 0 ] );
-									}
-									else if ( str3.Equals( "LT" ) )
-									{
-										bAutoPlay.LT = CConversion.bONorOFF( str4[ 0 ] );
-									}
-									else if ( str3.Equals( "FT" ) )
-									{
-										bAutoPlay.FT = CConversion.bONorOFF( str4[ 0 ] );
-									}
-									else if ( str3.Equals( "CY" ) )
-									{
-										bAutoPlay.CY = CConversion.bONorOFF( str4[ 0 ] );
-									}
-									else if (str3.Equals("RD"))
-									{
-										bAutoPlay.RD= CConversion.bONorOFF(str4[0]);
-									}
-									else if ( str3.Equals( "LP" ) )
-									{
-										bAutoPlay.LP = CConversion.bONorOFF(str4[0]);
-									}
-									else if (str3.Equals("LBD"))
-									{
-										bAutoPlay.LBD = CConversion.bONorOFF(str4[0]);
-									}
-									//else if ( str3.Equals( "Guitar" ) )
-									//{
-									//    this.bAutoPlay.Guitar = CConversion.bONorOFF( str4[ 0 ] );
-									//}
-									else if ( str3.Equals( "GuitarR" ) )
-									{
-										bAutoPlay.GtR = CConversion.bONorOFF( str4[ 0 ] );
-									}
-									else if ( str3.Equals( "GuitarG" ) )
-									{
-										bAutoPlay.GtG = CConversion.bONorOFF( str4[ 0 ] );
-									}
-									else if ( str3.Equals( "GuitarB" ) )
-									{
-										bAutoPlay.GtB = CConversion.bONorOFF( str4[ 0 ] );
-									}
-									else if ( str3.Equals( "GuitarY" ) )
-									{
-										bAutoPlay.GtY = CConversion.bONorOFF(str4[0]);
-									}
-									else if ( str3.Equals( "GuitarP" ) )
-									{
-										bAutoPlay.GtP = CConversion.bONorOFF(str4[0]);
-									}
-									else if ( str3.Equals( "GuitarPick" ) )
-									{
-										bAutoPlay.GtPick = CConversion.bONorOFF( str4[ 0 ] );
-									}
-									else if ( str3.Equals( "GuitarWailing" ) )
-									{
-										bAutoPlay.GtW = CConversion.bONorOFF( str4[ 0 ] );
-									}
-									//else if ( str3.Equals( "Bass" ) )
-									//{
-									//    this.bAutoPlay.Bass = CConversion.bONorOFF( str4[ 0 ] );
-									//}
-									else if ( str3.Equals( "BassR" ) )
-									{
-										bAutoPlay.BsR = CConversion.bONorOFF( str4[ 0 ] );
-									}
-									else if ( str3.Equals( "BassG" ) )
-									{
-										bAutoPlay.BsG = CConversion.bONorOFF( str4[ 0 ] );
-									}
-									else if ( str3.Equals( "BassB" ) )
-									{
-										bAutoPlay.BsB = CConversion.bONorOFF( str4[ 0 ] );
-									}
-									else if ( str3.Equals( "BassY" ) )
-									{
-										bAutoPlay.BsY = CConversion.bONorOFF( str4[ 0 ] );
-									}
-									else if ( str3.Equals( "BassP" ) )
-									{
-										bAutoPlay.BsP = CConversion.bONorOFF( str4[ 0 ] );
-									}
-									else if ( str3.Equals( "BassPick" ) )
-									{
-										bAutoPlay.BsPick = CConversion.bONorOFF( str4[ 0 ] );
-									}
-									else if ( str3.Equals( "BassWailing" ) )
-									{
-										bAutoPlay.BsW = CConversion.bONorOFF( str4[ 0 ] );
-									}
+									ParseAutoPlayKey( ref bAutoPlay, str3, str4[ 0 ] );
+									continue;
+								case ESectionType.AutoPlayCustom:
+									ParseAutoPlayKey( ref bAutoPlayCustom, str3, str4[ 0 ] );
 									continue;
 								//-----------------------------
 								#endregion
@@ -3773,6 +3646,80 @@ internal class CConfigIni
 
 	#region [ private ]
 	//-----------------
+
+	// Shared writer/parser for the [AutoPlay] and [AutoPlayCustom] sections (identical keys).
+	private static void WriteAutoPlaySection( StreamWriter sw, string sectionName, in STAUTOPLAY ap )
+	{
+		sw.WriteLine( "[{0}]", sectionName );
+		sw.WriteLine();
+		sw.WriteLine( "; 自動演奏(0:OFF, 1:ON)" );
+		sw.WriteLine();
+		sw.WriteLine( "; Drums" );
+		sw.WriteLine( "LC={0}", ap.LC ? 1 : 0 );
+		sw.WriteLine( "HH={0}", ap.HH ? 1 : 0 );
+		sw.WriteLine( "SD={0}", ap.SD ? 1 : 0 );
+		sw.WriteLine( "BD={0}", ap.BD ? 1 : 0 );
+		sw.WriteLine( "HT={0}", ap.HT ? 1 : 0 );
+		sw.WriteLine( "LT={0}", ap.LT ? 1 : 0 );
+		sw.WriteLine( "FT={0}", ap.FT ? 1 : 0 );
+		sw.WriteLine( "CY={0}", ap.CY ? 1 : 0 );
+		sw.WriteLine( "RD={0}", ap.RD ? 1 : 0 );
+		sw.WriteLine( "LP={0}", ap.LP ? 1 : 0 );
+		sw.WriteLine( "LBD={0}", ap.LBD ? 1 : 0 );
+		sw.WriteLine();
+		sw.WriteLine( "; Guitar" );
+		sw.WriteLine( "GuitarR={0}", ap.GtR ? 1 : 0 );
+		sw.WriteLine( "GuitarG={0}", ap.GtG ? 1 : 0 );
+		sw.WriteLine( "GuitarB={0}", ap.GtB ? 1 : 0 );
+		sw.WriteLine( "GuitarY={0}", ap.GtY ? 1 : 0 );
+		sw.WriteLine( "GuitarP={0}", ap.GtP ? 1 : 0 );
+		sw.WriteLine( "GuitarPick={0}", ap.GtPick ? 1 : 0 );
+		sw.WriteLine( "GuitarWailing={0}", ap.GtW ? 1 : 0 );
+		sw.WriteLine();
+		sw.WriteLine( "; Bass" );
+		sw.WriteLine( "BassR={0}", ap.BsR ? 1 : 0 );
+		sw.WriteLine( "BassG={0}", ap.BsG ? 1 : 0 );
+		sw.WriteLine( "BassB={0}", ap.BsB ? 1 : 0 );
+		sw.WriteLine( "BassY={0}", ap.BsY ? 1 : 0 );
+		sw.WriteLine( "BassP={0}", ap.BsP ? 1 : 0 );
+		sw.WriteLine( "BassPick={0}", ap.BsPick ? 1 : 0 );
+		sw.WriteLine( "BassWailing={0}", ap.BsW ? 1 : 0 );
+		sw.WriteLine();
+	}
+
+	private static void ParseAutoPlayKey( ref STAUTOPLAY ap, string key, char value )
+	{
+		bool on = CConversion.bONorOFF( value );
+		switch ( key )
+		{
+			case "LC": ap.LC = on; break;
+			case "HH": ap.HH = on; break;
+			case "SD": ap.SD = on; break;
+			case "BD": ap.BD = on; break;
+			case "HT": ap.HT = on; break;
+			case "LT": ap.LT = on; break;
+			case "FT": ap.FT = on; break;
+			case "CY": ap.CY = on; break;
+			case "RD": ap.RD = on; break;
+			case "LP": ap.LP = on; break;
+			case "LBD": ap.LBD = on; break;
+			case "GuitarR": ap.GtR = on; break;
+			case "GuitarG": ap.GtG = on; break;
+			case "GuitarB": ap.GtB = on; break;
+			case "GuitarY": ap.GtY = on; break;
+			case "GuitarP": ap.GtP = on; break;
+			case "GuitarPick": ap.GtPick = on; break;
+			case "GuitarWailing": ap.GtW = on; break;
+			case "BassR": ap.BsR = on; break;
+			case "BassG": ap.BsG = on; break;
+			case "BassB": ap.BsB = on; break;
+			case "BassY": ap.BsY = on; break;
+			case "BassP": ap.BsP = on; break;
+			case "BassPick": ap.BsPick = on; break;
+			case "BassWailing": ap.BsW = on; break;
+		}
+	}
+
 	private enum ESectionType
 	{
 		Unknown,
@@ -3780,6 +3727,7 @@ internal class CConfigIni
 		Log,
 		PlayOption,
 		AutoPlay,
+		AutoPlayCustom,
 		HitRange,
 		DiscordRichPresence,
 		GUID,
