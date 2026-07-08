@@ -140,10 +140,18 @@ internal class CStageConfig : CStage
         newDescriptionBg.dontSerialize = true;
 
         configMenu = new ConfigMenu(newConfigList);
-        configMenu.OpenSystem(); // seed a page so the list has content before it's first shown
+        configMenu.OpenSystem(); //seed a page so the list has content before it's first shown
 
-        useNewList = false;
-        usedNewList = false;
+        //key-assign editor overlay: hidden until a pad row opens it; drawn just above the list
+        keyAssignPanel = ui.AddChild(new KeyAssignPanel());
+        keyAssignPanel.position = new Vector3(450, 120, 0);
+        keyAssignPanel.renderOrder = 42;
+        keyAssignPanel.onClose = CloseKeyAssign;
+        keyAssignPanel.isVisible = false;
+        newConfigList.onOpenKeyAssign = OpenKeyAssign;
+
+        useNewList = true;
+        usedNewList = true;
 
         #endregion
     }
@@ -296,8 +304,8 @@ internal class CStageConfig : CStage
         if ((ePhaseID != EPhase.Common_DefaultState) || actKeyAssign.bWaitingForKeyInput)
             return 0;
 
-        // F1 toggles the experimental new config list
-        if (CDTXMania.InputManager.Keyboard.bKeyPressed(SlimDXKey.F1))
+        // F1 toggles the experimental new config list (not while the key-assign editor owns input)
+        if (!keyAssignPanel.IsOpen && CDTXMania.InputManager.Keyboard.bKeyPressed(SlimDXKey.F1))
         {
             SetUseNewList(!useNewList);
         }
@@ -473,6 +481,7 @@ internal class CStageConfig : CStage
     private ConfigList newConfigList;
     private UIImage newDescriptionBg;
     private ConfigMenu configMenu;
+    private KeyAssignPanel keyAssignPanel; // key-assign editor overlay (opened from a pad-list row)
     private bool useNewList;
     private bool usedNewList; // whether the new list was ever shown this visit (gates device apply)
 
@@ -523,6 +532,13 @@ internal class CStageConfig : CStage
     // input handling while the new ConfigList is active (mirrors the old menu/list focus flow)
     private void HandleNewConfigListInput()
     {
+        // the key-assign editor, when open, owns all input until it closes
+        if (keyAssignPanel.IsOpen)
+        {
+            HandleKeyAssignInput();
+            return;
+        }
+
         // cursor + scroll arrows belong to the list; hide them while the left menu has focus
         newConfigList.SetFocused(!bFocusIsOnMenu);
 
@@ -572,12 +588,51 @@ internal class CStageConfig : CStage
         // description + its background only show once a page is focused and fully aligned
         bool showDescription = !bFocusIsOnMenu && newConfigList.IsSettled;
         if (showDescription)
+
+    // Opens the key-assign editor for a pad and hands input over to it (called back from a pad row).
+    private void OpenKeyAssign(EKeyConfigPart part, EKeyConfigPad pad, string padName)
+    {
+        newConfigList.isVisible = false;
+        newConfigList.SetFocused(false);
+        newDescriptionPanel.Update(null, false);
+        keyAssignPanel.Open(part, pad, padName);
+    }
+
+    // Returns from the editor to the pad list it was opened from.
+    private void CloseKeyAssign()
+    {
+        newConfigList.isVisible = true;
+        bFocusIsOnMenu = false; // focus stays on the (pad list) page, not the left menu
+    }
+
+    // Input while the key-assign editor is open. PollCapture runs every frame so it can grab the next
+    // input while waiting; otherwise Up/Down/Decide/Cancel/Delete drive the editor.
+    private void HandleKeyAssignInput()
+    {
+        keyAssignPanel.PollCapture();
+
+        if (keyAssignPanel.IsWaiting)
         {
-            CItemBase? current = newConfigList.CurrentItem;
-            descriptionPanel.SetText(current?.formatDescription?.Invoke() ?? current?.strDescription ?? "");
+            return; // capture owns input (Esc-to-cancel handled inside PollCapture)
         }
-        descriptionPanel.isVisible = showDescription;
-        newDescriptionBg.isVisible = showDescription;
+
+        if (CDTXMania.Input.ActionCancel())
+        {
+            keyAssignPanel.Cancel();
+        }
+        else if (CDTXMania.Input.ActionDecide())
+        {
+            keyAssignPanel.Confirm();
+        }
+        else if (CDTXMania.InputManager.Keyboard.bKeyPressed(SlimDXKey.Delete))
+        {
+            keyAssignPanel.DeleteCurrent();
+        }
+
+        ctKeyRepetition.Up.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(SlimDXKey.UpArrow),
+            () => keyAssignPanel.MoveUp());
+        ctKeyRepetition.Down.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(SlimDXKey.DownArrow),
+            () => keyAssignPanel.MoveDown());
     }
 
     private void tMoveCursorDown()

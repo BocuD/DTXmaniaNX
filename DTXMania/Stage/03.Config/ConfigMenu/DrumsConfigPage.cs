@@ -143,6 +143,10 @@ internal sealed class DrumsConfigPage : InstrumentConfigPage
             "ドラムのヒットベロシティに関する項目を設定します。",
             "Settings for the drums hit velocity.", velocity));
 
+        items.Add(FolderItem("Key Assignment",
+            "ドラムのキー割り当てを設定します。",
+            "Assign keys/pads for the drums.", KeyAssignPage.ForDrums(list)));
+
         return items;
     }
 }

@@ -38,6 +38,9 @@ internal class ConfigList : UIGroup
     //runs when Cancel is pressed at the root page (nothing left to go back to)
     public Action? onExitRoot;
 
+    //runs when a key-assign pad row is confirmed; the host opens the KeyAssignPanel for (part, pad, name)
+    public Action<EKeyConfigPart, EKeyConfigPad, string>? onOpenKeyAssign;
+
     public ConfigList(int slotCount, int selectionIndex) : base("ConfigList")
     {
         this.selectionIndex = selectionIndex;

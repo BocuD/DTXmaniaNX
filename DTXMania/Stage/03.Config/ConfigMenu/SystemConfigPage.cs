@@ -158,7 +158,9 @@ internal sealed class SystemConfigPage : ConfigPage
             });
         items.Add(discord);
 
-        //NOTE: System Key Mapping is intentionally omitted for now
+        items.Add(FolderItem("Key Assignment",
+            "システムキーの割り当てを設定します。",
+            "Assign keys/pads for system actions.", KeyAssignPage.ForSystem(list)));
 
         items.Add(new CItemBase("Import Config", CItemBase.EPanelType.Normal,
             "config.iniファイルから設定を再読み込みする。",
@@ -173,6 +175,24 @@ internal sealed class SystemConfigPage : ConfigPage
         {
             action = ExportConfig
         });
+        
+        CItemList language = EnumChoice("Language", "表示言語を選択します。",
+            "Display language.",
+            () => CDTXMania.ConfigIni.languageMode, v => CDTXMania.ConfigIni.languageMode = v);
+        CConfigIni.LanguageMode[] languageValues = Enum.GetValues<CConfigIni.LanguageMode>();
+        language.action = () =>
+        {
+            // apply the newly-selected language immediately, then rebuild the page so its
+            // descriptions re-render in that language (keeping the cursor on this row)
+            CConfigIni.LanguageMode mode = languageValues[language.nCurrentlySelectedIndex];
+            CDTXMania.ConfigIni.languageMode = mode;
+            CDTXMania.ApplyLanguageMode(mode);
+
+            List<CItemBase> rebuilt = Build();
+            int index = rebuilt.FindIndex(i => i.strItemName == "Language");
+            list.SetItems(rebuilt, index < 0 ? 0 : index);
+        };
+        items.Add(language);
 
         return items;
     }

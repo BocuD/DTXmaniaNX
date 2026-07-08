@@ -62,6 +62,10 @@ internal sealed class BassConfigPage(ConfigList list) : InstrumentConfigPage(lis
         items.Add(GraphItem(EInstrumentPart.GUITAR)); //enabling disables the guitar graph
         items.Add(InputAdjustItem());
 
+        items.Add(FolderItem("Key Assignment",
+            "ベースのキー割り当てを設定します。",
+            "Assign keys/pads for the bass.", KeyAssignPage.ForBass(list)));
+
         return items;
     }
 }
