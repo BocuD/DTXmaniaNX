@@ -1,3 +1,4 @@
+using DTXMania.Core;
 using DTXMania.UI.Config;
 using DTXMania.UI.Item;
 
@@ -70,6 +71,26 @@ internal abstract class ConfigPage
     {
         CItemList item = new(name, CItemBase.EPanelType.Normal, get(), jp, en, values);
         item.BindConfig(() => item.nCurrentlySelectedIndex = get(), () => set(item.nCurrentlySelectedIndex));
+        return item;
+    }
+
+    /// <summary>
+    /// A choice bound directly to an enum field. Options are auto-populated from the enum's members
+    /// (in declaration order), labelled via <see cref="EnumLabelAttribute"/> or the member name
+    /// Handles non-contiguous enum values by mapping value ↔ list index
+    /// </summary>
+    protected static CItemList EnumChoice<TEnum>(string name, string jp, string en, Func<TEnum> get, Action<TEnum> set)
+        where TEnum : struct, Enum
+    {
+        TEnum[] values = Enum.GetValues<TEnum>();
+        string[] labels = Array.ConvertAll(values, v => EnumLabels.Get(v));
+
+        int IndexOfCurrent() => Math.Max(0, Array.IndexOf(values, get()));
+
+        CItemList item = new(name, CItemBase.EPanelType.Normal, IndexOfCurrent(), jp, en, labels);
+        item.BindConfig(
+            () => item.nCurrentlySelectedIndex = IndexOfCurrent(),
+            () => set(values[item.nCurrentlySelectedIndex]));
         return item;
     }
 

@@ -27,6 +27,15 @@ internal partial class CConfigIni
 		public float[] fDamageLevelFactor = new float[3];
 		//----------------------------------------
 #endif
+
+	public enum LanguageMode
+	{
+		[EnumLabel("Auto", "自動")] Auto,
+		[EnumLabel("Japanese", "日本語")] Japanese,
+		[EnumLabel("English", "英語")] English
+	}
+
+	public LanguageMode languageMode;
 	public int nBGAlpha;
 	public int nMovieAlpha;
 	public bool bAVIEnabled;
@@ -514,6 +523,7 @@ internal partial class CConfigIni
 #endif
 		strDTXManiaのバージョン = "Unknown";
 		strSongDataSearchPath = @".\";
+		languageMode = LanguageMode.Auto;
 		bFullScreenMode = false;
 		bFullScreenExclusive = true;
 		bVerticalSyncWait = true;

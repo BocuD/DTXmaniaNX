@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Globalization;
 using System.Numerics;
 using System.Reflection;
 using System.Runtime;
@@ -47,8 +48,17 @@ internal partial class CDTXMania
     public static void SetLanguage(bool jp)
     {
         isJapanese = jp;
+    }
 
-        //todo: implement handling to switch language at runtime
+    public static void ApplyLanguageMode(CConfigIni.LanguageMode mode)
+    {
+        bool jp = mode switch
+        {
+            CConfigIni.LanguageMode.Japanese => true,
+            CConfigIni.LanguageMode.English => false,
+            _ => CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "ja",
+        };
+        SetLanguage(jp);
     }
 
     public static CDTX DTX
@@ -213,6 +223,9 @@ internal partial class CDTXMania
                 //ConfigIni = new CConfigIni();	// 存在してなければ新規生成
             }
         }
+
+        // Apply the configured display language (Auto follows the OS UI culture).
+        ApplyLanguageMode(ConfigIni.languageMode);
 
         // 2012.8.22 Config.iniが無いときに初期値が適用されるよう、この設定行をifブロック外に移動
 

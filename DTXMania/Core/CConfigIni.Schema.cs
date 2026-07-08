@@ -57,6 +57,7 @@ internal partial class CConfigIni
 					@"You can specify many pathes separated with semicolon(;). (e.g. d:\DTXFiles1\;e:\DTXFiles2\)"
 				],
 				Str("DTXPath", c => c.strSongDataSearchPath)),
+			G(["言語設定", "0=自動, 1=日本語, 2=英語", "Language mode", "0=auto, 1=japanese, 2=english"], Enum("Language", 0, 2, c => c.languageMode)),
 			G([
 					"プレイヤーネーム。",
 					"演奏中のネームプレートに表示される名前を設定できます。",
