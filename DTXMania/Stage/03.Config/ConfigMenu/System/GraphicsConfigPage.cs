@@ -48,8 +48,8 @@ internal sealed class GraphicsConfigPage : ConfigPage
         items.Add(bgAlpha);
 
         CItemList movieAlpha = new("LaneAlpha", CItemBase.EPanelType.Normal, CDTXMania.ConfigIni.nMovieAlpha,
-            "レーンの透明度を指定します。\n0% が完全不透明で、\n100% が完全透明となります。",
-            "Degree of transparency for Movie.\n\n0%=No transparency,\n100%=Completely transparent",
+            "演奏レーンの背後に表示される\n動画(BGA)の透明度を指定します。\n0%が完全不透明で、\n100%が完全透明となります。",
+            "Transparency of the movie/BGA shown behind the play lane.\n\n0% = Opaque,\n100% = Fully transparent",
             ["0%", "10%", "20%", "30%", "40%", "50%", "60%", "70%", "80%", "90%", "100%"]);
         movieAlpha.BindConfig(
             () => movieAlpha.nCurrentlySelectedIndex = CDTXMania.ConfigIni.nMovieAlpha,

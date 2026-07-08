@@ -66,8 +66,8 @@ internal sealed class AudioConfigPage : ConfigPage
         items.Add(autoVolume);
 
         CItemInteger bgmAdjust = new("BGM Offset", -99, 99, CDTXMania.ConfigIni.nCommonBGMAdjustMs,
-            "BGMの再生タイミングの微調整を行います。\n-99 ～ 99ms まで指定可能です。\n値を指定してください。\n",
-            "Adjust the BGM play timing.\nYou can set from -99 to 0 ms.\n");
+            "BGMの再生タイミングを微調整します。\n-99 ～ 99ms まで指定可能です。",
+            "Fine-tune the BGM playback timing.\nYou can set from -99 to 99 ms.");
         bgmAdjust.BindConfig(
             () => bgmAdjust.nCurrentValue = CDTXMania.ConfigIni.nCommonBGMAdjustMs,
             () => CDTXMania.ConfigIni.nCommonBGMAdjustMs = bgmAdjust.nCurrentValue);
@@ -82,8 +82,8 @@ internal sealed class AudioConfigPage : ConfigPage
         items.Add(bgmSound);
 
         CItemToggle audienceSound = new("Audience", CDTXMania.ConfigIni.b歓声を発声する,
-            "OFFにすると歓声を再生しません。",
-            "Turn ON if you want to be cheered at the end of fill-in zone or not.");
+            "OFFにすると歓声を再生しません。\n（フィルインゾーン成功時などに再生されます）",
+            "Turn OFF to disable crowd cheering.\n(Played e.g. after successfully clearing a fill-in zone.)");
         audienceSound.BindConfig(
             () => audienceSound.bON = CDTXMania.ConfigIni.b歓声を発声する,
             () => CDTXMania.ConfigIni.b歓声を発声する = audienceSound.bON);

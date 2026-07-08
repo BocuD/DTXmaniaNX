@@ -53,10 +53,14 @@ internal class QuickMenuPage(ConfigList list, EInstrumentPart part, QuickConfigI
 
         items.Add(dark);
 
-        var switcherButton = FolderItem($"Instrument: {part}", "", "", switcher);
+        var switcherButton = FolderItem($"Instrument: {part}",
+            "設定する楽器を切り替えます。",
+            "Switch which instrument these settings apply to.", switcher);
         items.Add(switcherButton);
 
-        var fullConfig = new CItemBase("Open Full Config", CItemBase.EPanelType.Folder, "", "")
+        var fullConfig = new CItemBase("Open Full Config", CItemBase.EPanelType.Folder,
+            "コンフィグ画面を開きます。",
+            "Open the full configuration screen.")
         {
             action = () =>
             {

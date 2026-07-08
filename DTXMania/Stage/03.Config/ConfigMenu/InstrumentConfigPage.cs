@@ -54,7 +54,8 @@ internal abstract class InstrumentConfigPage : ConfigPage
     }
 
     protected CItemList HidSudItem() => Choice("HID-SUD",
-        "チップ表示制御 (Hidden/Sudden/HidSud/Stealth)。", "Chip visibility control.",
+        "チップの見え方を制御します。\nHidden: 手前で消える。\nSudden: 途中から現れる。\nHidSud: 中央付近のみ表示。\nStealth: 常に非表示。",
+        "Chip visibility.\nHidden: chips disappear at mid-screen.\nSudden: chips appear at mid-screen.\nHidSud: visible only around mid-screen.\nStealth: chips never visible.",
         ["OFF", "Hidden", "Sudden", "HidSud", "Stealth"],
         () => CDTXMania.ConfigIni.nHidSud[Idx], v => CDTXMania.ConfigIni.nHidSud[Idx] = v);
 

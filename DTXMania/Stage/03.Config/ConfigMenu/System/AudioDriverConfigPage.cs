@@ -46,8 +46,8 @@ internal sealed class AudioDriverConfigPage : ConfigPage
     private static CItemToggle BuildAdjustWaves()
     {
         CItemToggle item = new("AdjustWaves", CDTXMania.ConfigIni.bWave再生位置自動調整機能有効,
-            "サウンド再生位置自動補正：\nハードウェアやOSに起因する\nサウンドのずれを補正します。\n※DirectSound使用時のみ有効です。",
-            "Automatic wave playing position adjustment feature.\nNote: effective only when DirectSound is used.");
+            "サウンド再生位置自動補正：\nハードウェアやOSに起因する\nサウンドのずれを補正します。\n通常はONを推奨します。\n※DirectSound使用時のみ有効です。",
+            "Automatically corrects sound-playback position drift caused by hardware/OS.\nUsually best left ON.\nNote: effective only when DirectSound is used.");
         item.BindConfig(
             () => item.bON = CDTXMania.ConfigIni.bWave再生位置自動調整機能有効,
             () => CDTXMania.ConfigIni.bWave再生位置自動調整機能有効 = item.bON);
@@ -70,8 +70,8 @@ internal sealed class AudioDriverConfigPage : ConfigPage
     private static CItemInteger BuildWasapiBufferSize()
     {
         CItemInteger item = new("WASAPIBufSize", 0, 99999, CDTXMania.ConfigIni.nWASAPIBufferSizeMs,
-            "WASAPI時のバッファサイズ:\n0～99999msを指定できます。\n0を指定すると、OSがサイズを\n自動設定します。\n",
-            "Sound buffer size for WASAPI, from 0 to 99999ms.\nSet 0 to use default system buffer size.\nNote: Exit CONFIG to make the setting take effect.");
+            "WASAPI時のバッファサイズ:\n0～99999msを指定できます。\n0を指定するとOSが自動設定します。\n値を小さくするほどラグが減少しますが、\n音割れや異常を引き起こす場合があります。",
+            "Sound buffer size for WASAPI, from 0 to 99999ms.\nSet 0 to use the default system buffer size.\nSmaller values reduce lag but may cause audio glitches.\nNote: Exit CONFIG to make the setting take effect.");
         item.BindConfig(
             () => item.nCurrentValue = CDTXMania.ConfigIni.nWASAPIBufferSizeMs,
             () => CDTXMania.ConfigIni.nWASAPIBufferSizeMs = item.nCurrentValue);
@@ -81,7 +81,7 @@ internal sealed class AudioDriverConfigPage : ConfigPage
     private static CItemToggle BuildWasapiEventDriven()
     {
         CItemToggle item = new("WASAPIEventDriven", CDTXMania.ConfigIni.bEventDrivenWASAPI,
-            "WASAPIをEvent Drivenモードで使用します。",
+            "WASAPIをEvent Drivenモードで使用します。\nサウンド出力の遅延を小さくできますが、\nシステム負荷は上昇します。",
             "Use WASAPI Event Driven mode.\nIt reduces sound output lag, but decreases system performance.");
         item.BindConfig(
             () => item.bON = CDTXMania.ConfigIni.bEventDrivenWASAPI,

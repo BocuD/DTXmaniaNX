@@ -15,8 +15,11 @@ public class QuickMenu : UIGroup
     private CCommandHistory commandHistory;
 
     private UIImage blackTexture;
+    private ConfigDescriptionPanel descriptionPanel;
 
     private CCounter openCounter;
+
+    private QuickMenuPage[] instruments;
 
     public QuickMenu() : base("Quick Menu")
     {
@@ -27,7 +30,7 @@ public class QuickMenu : UIGroup
         }
 
         blackTexture = AddChild(new UIImage(BaseTexture.CreateSolidColor(Color4.Black)));
-        blackTexture.size = new Vector2(1280, 720);
+        blackTexture.size = new Vector2(1281, 721);
         blackTexture.anchor = new Vector2(0.5f, 0.5f);
         blackTexture.color = new Color4(0, 0, 0, 0);
         
@@ -37,7 +40,7 @@ public class QuickMenu : UIGroup
         list.onExitRoot = ToggleMenu;
         list.position.Y = -200;
 
-        QuickMenuPage[] instruments = new QuickMenuPage[3];
+        instruments = new QuickMenuPage[3];
         QuickConfigInstrumentSwitcher instrumentSwitcher = new(list, instruments);
         instruments[0] = new QuickMenuPage(list, EInstrumentPart.DRUMS, instrumentSwitcher);
         instruments[1] = new QuickMenuPage(list, EInstrumentPart.GUITAR, instrumentSwitcher);
@@ -45,6 +48,11 @@ public class QuickMenu : UIGroup
         
         list.SetItems(instruments[CDTXMania.GetCurrentInstrument()].Build());
         list.SetFocused(true);
+
+        //help-text panel on the right (position is relative to the centre-anchored menu)
+        descriptionPanel = AddChild(new ConfigDescriptionPanel());
+        descriptionPanel.position = new Vector3(141 - 400, -138, 0);
+        descriptionPanel.renderOrder = 1;
     }
 
     public void HandleNavigation()
@@ -81,6 +89,8 @@ public class QuickMenu : UIGroup
             ctKeyRepetition.Down.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(SlimDX.DirectInput.Key.DownArrow),
                 () => list.MoveDown());
         }
+
+        descriptionPanel.Update(list.CurrentItem, isVisible && !isClosing && list.IsSettled);
     }
 
     private bool isClosing = false;
@@ -95,6 +105,7 @@ public class QuickMenu : UIGroup
             //open
             isVisible = true;
             isClosing = false;
+            list.SetItems(instruments[CDTXMania.GetCurrentInstrument()].Build(), 0);
         }
         else
         {
@@ -111,7 +122,7 @@ public class QuickMenu : UIGroup
         var alpha = openCounter.nCurrentValue / (float)openCounter.nEndValue;
         
         if (isClosing) alpha = 1.0f - alpha;
-        blackTexture.color.Alpha = alpha;
+        blackTexture.color.Alpha = alpha * 0.8f;
 
         if (isClosing && alpha == 0) isVisible = false;
         

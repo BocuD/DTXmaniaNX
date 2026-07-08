@@ -127,8 +127,8 @@ internal sealed class SystemConfigPage : ConfigPage
         items.Add(traceLog);
 
         CItemList chipTiming = new("Chip Timing Mode", CItemBase.EPanelType.Normal, CDTXMania.ConfigIni.nChipPlayTimeComputeMode,
-            "発声時刻の計算方式を選択\nします。\nOriginal: 原発声時刻の計算方式\nAccurate: BPM変更の時刻偏差修正",
-            "Select Chip Timing Mode:\nOriginal: Compatible with other DTXMania players\nAccurate: Fixes time loss issue of BPM/Bar-Length Changes",
+            "発声時刻の計算方式を選択します。\nOriginal: 従来のDTXManiaと互換の計算方式\nAccurate: BPM/小節長変更による時刻のずれを補正\n※BPMや小節長の変更が多い曲以外では違いはほぼありません。",
+            "Select Chip Timing Mode:\nOriginal: Compatible with other DTXMania players\nAccurate: Fixes time loss from BPM/Bar-Length changes\nNote: Only songs with many BPM/Bar-Length changes are noticeably affected.",
             ["Original", "Accurate"]);
         chipTiming.BindConfig(
             () => chipTiming.nCurrentlySelectedIndex = CDTXMania.ConfigIni.nChipPlayTimeComputeMode,

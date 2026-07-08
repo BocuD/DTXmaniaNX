@@ -132,8 +132,8 @@ internal sealed class GameplayConfigPage : ConfigPage
         items.Add(metronome);
 
         CItemToggle saveScore = new("SaveScore", CDTXMania.ConfigIni.bScoreIniを出力する,
-            "演奏記録の保存：\nONで演奏記録を.score.iniに\n保存します。\n",
-            "Turn ON to save high scores/skills.\nTurn OFF in case your song data are on read-only media.");
+            "演奏記録の保存：\nONで演奏記録を.score.iniに保存します。\n読み取り専用メディアの場合はOFFにします。\n※BGM Adjustの値もこのファイルに保存されます。",
+            "Turn ON to save high scores/skills.\nTurn OFF if your song data is on read-only media.\nNote: per-song 'BGM Adjust' values are also stored here, so keep ON to retain them.");
         saveScore.BindConfig(
             () => saveScore.bON = CDTXMania.ConfigIni.bScoreIniを出力する,
             () => CDTXMania.ConfigIni.bScoreIniを出力する = saveScore.bON);

@@ -122,22 +122,19 @@ internal class CStageConfig : CStage
 
         #region [ Experimental new config list (F1 to toggle) ]
 
-        // panels sit at X=420 with the selected row at Y=189 and 67px spacing, matching the old list
         newConfigList = ui.AddChild(new ConfigList(14, 4));
         newConfigList.position = new Vector3(420, 189, 0);
         newConfigList.renderOrder = 41;
-        newConfigList.isVisible = false;
+        newConfigList.isVisible = true;
         newConfigList.dontSerialize = true;
-        // at the root of a page, Cancel returns focus to the left menu
+        
+        //at the root of a page, Cancel returns focus to the left menu
         newConfigList.onExitRoot = () => bFocusIsOnMenu = true;
 
-        // description background (the old CActConfigList drew 4_Description Panel.png here); shown
-        // only when the new list is active and settled
-        newDescriptionBg = ui.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\4_Description Panel.png"))));
-        newDescriptionBg.position = new Vector3(781, 252, 0);
-        newDescriptionBg.renderOrder = 49;
-        newDescriptionBg.isVisible = false;
-        newDescriptionBg.dontSerialize = true;
+        //description panel (background + text) for the new config list
+        newDescriptionPanel = ui.AddChild(new ConfigDescriptionPanel());
+        newDescriptionPanel.position = new Vector3(781, 252, 0);
+        newDescriptionPanel.renderOrder = 49;
 
         configMenu = new ConfigMenu(newConfigList);
         configMenu.OpenSystem(); //seed a page so the list has content before it's first shown
@@ -479,7 +476,7 @@ internal class CStageConfig : CStage
 
     // --- experimental new config list (toggled with F1) ---
     private ConfigList newConfigList;
-    private UIImage newDescriptionBg;
+    private ConfigDescriptionPanel newDescriptionPanel;
     private ConfigMenu configMenu;
     private KeyAssignPanel keyAssignPanel; // key-assign editor overlay (opened from a pad-list row)
     private bool useNewList;
@@ -497,8 +494,11 @@ internal class CStageConfig : CStage
     {
         useNewList = value;
         newConfigList.isVisible = value;
-        if (!value) newDescriptionBg.isVisible = false;
         if (value) usedNewList = true;
+
+        // hand the description panel over to the active backend (avoid both showing at once)
+        if (value) descriptionPanel.isVisible = false; // old backend's text element
+        else newDescriptionPanel.Update(null, false);  // new backend's panel
 
         // the active backend owns config; stop the inactive old list from writing stale values on exit
         actList.suppressConfigWrite = value;
@@ -585,9 +585,10 @@ internal class CStageConfig : CStage
                 () => newConfigList.MoveDown());
         }
 
-        // description + its background only show once a page is focused and fully aligned
-        bool showDescription = !bFocusIsOnMenu && newConfigList.IsSettled;
-        if (showDescription)
+        // the description panel only shows once a page is focused and fully aligned
+        bool showDescription = !bFocusIsOnMenu && newConfigList.IsSettled && !keyAssignPanel.IsOpen;
+        newDescriptionPanel.Update(newConfigList.CurrentItem, showDescription);
+    }
 
     // Opens the key-assign editor for a pad and hands input over to it (called back from a pad row).
     private void OpenKeyAssign(EKeyConfigPart part, EKeyConfigPad pad, string padName)
