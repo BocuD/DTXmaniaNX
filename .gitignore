@@ -215,3 +215,5 @@ Runtime/imgui.ini
 *.db
 *.db-*
 /Runtime/updater
+Runtime/DTXManiaNX.deps.json
+Runtime/DTXManiaNX.exe
