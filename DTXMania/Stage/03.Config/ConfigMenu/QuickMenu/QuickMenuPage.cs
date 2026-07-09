@@ -1,4 +1,5 @@
 ﻿using DTXMania.Core;
+using DTXMania.SongDb;
 using DTXMania.UI.Config;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.Item;
@@ -69,6 +70,22 @@ internal class QuickMenuPage(ConfigList list, EInstrumentPart part, QuickConfigI
             }
         };
         items.Add(fullConfig);
+        
+        items.Add(new CItemBase("Reload Songs", CItemBase.EPanelType.Normal,
+            "曲データの一覧情報を取得し直します。\n新しい曲を追加したときや、曲データを\n更新したときに使用してください。",
+            "Scan for new songs and update song list.")
+        {
+            action = () =>
+            {
+                if (CDTXMania.SongDb.status == SongDbScanStatus.Idle)
+                {
+                    GitaDoraTransition.Close(0, () =>
+                    {
+                        CDTXMania.SongDb.StartScan(() => CDTXMania.StageManager.stageSongSelectionNew.Reload());
+                    });
+                }
+            }
+        });
 
         var closeButton = new CItemBase("Close", CItemBase.EPanelType.Return,
             "メニューを閉じる",
