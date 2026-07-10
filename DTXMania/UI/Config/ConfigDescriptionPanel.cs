@@ -1,5 +1,6 @@
 using System.Numerics;
 using DTXMania.Core;
+using DTXMania.Core.Framework;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.Item;
 
@@ -19,6 +20,8 @@ internal sealed class ConfigDescriptionPanel : UIGroup
 
         text = AddChild(new UIText("", 17));
         text.name = "DescriptionText";
+        text.fillColor = Color4.Black;
+        text.outlineWidth = 0;
         text.renderOrder = 1;
         text.position = new Vector3(19, 18, 0); // text-vs-background offset (matches the old config layout)
     }
