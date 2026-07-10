@@ -48,7 +48,8 @@ internal abstract class ConfigPage
     {
         return new CItemBase(name, CItemBase.EPanelType.Folder, descriptionJp, descriptionEn)
         {
-            action = () => list.OpenFolder(target.Build())
+            action = () => list.OpenFolder(target.Build()),
+            formatValue = () => CDTXMania.isJapanese ? "開く" : "Open Folder"
         };
     }
 

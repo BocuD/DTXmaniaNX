@@ -25,6 +25,7 @@ internal sealed class KeyAssignPage : ConfigPage
             {
                 action = () => list.onOpenKeyAssign?.Invoke(part, pad, label),
                 // live so the description reflects edits made in the panel as soon as we return
+                formatValue = () => CurrentMapping(part, pad, false),
                 formatDescription = () => $"{(CDTXMania.isJapanese ? jp : en)}\n\n{CurrentMapping(part, pad)}"
             });
         }
@@ -33,7 +34,7 @@ internal sealed class KeyAssignPage : ConfigPage
     }
 
     // "Current: Key Z, Key X" for the pad's assigned inputs (or "none").
-    private static string CurrentMapping(EKeyConfigPart part, EKeyConfigPad pad)
+    private static string CurrentMapping(EKeyConfigPart part, EKeyConfigPad pad, bool addLabel = true)
     {
         List<string> labels = CDTXMania.ConfigIni.KeyAssign[(int)part][(int)pad]
             .Where(s => s.InputDevice != EInputDevice.Unknown)
@@ -43,6 +44,8 @@ internal sealed class KeyAssignPage : ConfigPage
         string mapping = labels.Count == 0
             ? (CDTXMania.isJapanese ? "なし" : "none")
             : string.Join(", ", labels);
+
+        if (!addLabel) return mapping;
 
         return CDTXMania.isJapanese ? $"現在: {mapping}" : $"Current: {mapping}";
     }

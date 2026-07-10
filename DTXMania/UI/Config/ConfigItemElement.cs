@@ -83,7 +83,7 @@ internal class ConfigItemElement : UIGroup
         }
         
         //folders / back buttons have no value to show, CItemTextInput will render it on its own
-        bool showValue = item is not CItemTextInput and { ePanelType: CItemBase.EPanelType.Normal };
+        bool showValue = item is not CItemTextInput;
         valueText.isVisible = showValue;
 
         if (showValue)

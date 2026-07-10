@@ -49,13 +49,13 @@ internal static class KeyCodeNames
         switch (a.InputDevice)
         {
             case EInputDevice.Keyboard:
-                return $"Key {KeyboardName(a.Code)}";
+                return $"[Key {KeyboardName(a.Code)}]";
             case EInputDevice.MIDI入力:
-                return $"{DeviceName(EInputDeviceType.MidiIn, a.ID, "MidiIn")} note {a.Code}";
+                return $"[{DeviceName(EInputDeviceType.MidiIn, a.ID, "MidiIn")} note {a.Code}]";
             case EInputDevice.Joypad:
-                return $"{DeviceName(EInputDeviceType.Joystick, a.ID, "Joypad")} {JoypadCode(a.Code)}";
+                return $"[{DeviceName(EInputDeviceType.Joystick, a.ID, "Joypad")} {JoypadCode(a.Code)}]";
             case EInputDevice.Mouse:
-                return $"Mouse Button {a.Code}";
+                return $"[Mouse Button {a.Code}]";
             default:
                 return "";
         }
