@@ -35,7 +35,7 @@ Visit [releases](https://github.com/BocuD/DTXmaniaNX/releases) for automated bui
 - Rewritten song database
   - ~4-8x performance speedup
   - Safer handling of files
-  - No more reliance on legacy (unsafe) BinaryFormatter
+  - No more reliance on legacy (unsafe) BinaryFormatter, using SQLite database for cache
   - Song name transliteration (romanization)
 
 - Improved gameplay features
@@ -68,21 +68,26 @@ Visit [releases](https://github.com/BocuD/DTXmaniaNX/releases) for automated bui
 - Greatly improved settings menu
   - Most menu options are now sorted into categories (for example, Audio, Video, Gameplay, etc)
   - Added options for drum velocity
-  - Removed options that don't affect the current game
+  - New quick settings menu
+  - Removed options that don't affect the current game anymore
   - Improved naming and description for various elements
+  - Layout rendered using new UI
 
 - Improved WASAPI support
-  - Particularly on some edge cases on Windows 11 where wasapi would not work before
+  - Particularly on some edge cases on Windows 11 where wasapi would not work before with some sound devices
 
 - Extensive Dear ImGui-based tooling
   - Inspector and hierarchy views for new UI framework, performance analysis, song database tests, etc
   - Toggle using `ctrl + i`
   - In game log viewer (`ctrl + l`)
  
+- Rewritten config structure
+  - New schema based structure
+  - Properties only need a single reference in most cases (for basic types)
+ 
 ## Current roadmap (in no particular order)
 
 - Feature parity on song select screen with upstream DTXManiaNX
-  - Quick settings menu is main missing feature
 - Lane swapping (similar to DTXMania AL)
 - Song favourite filters
 - Create separate video rendering behaviour option for 4:3 videos to stretch
