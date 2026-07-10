@@ -389,7 +389,7 @@ internal class StageManager
                         }
                         else
                         {
-                            tChangeStage(stageSongSelectionNew);
+                            GitaDoraTransition.Close(0, () => tChangeStage(stageSongSelectionNew));
                         }
 
                         break;

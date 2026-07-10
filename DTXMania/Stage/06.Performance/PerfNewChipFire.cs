@@ -67,7 +67,7 @@ public class ActPerfNewFire : UIGroup, IPerfFire
         {
             ELane colorLane = instrument == 0 ? (ELane)lane : (lane + ELane.GtR);
             laneColors.TryGetValue(colorLane, out Color4 color);
-            noteExplosions[lane] = AddChild(new NoteExplosion(color, hasCircle.Contains(colorLane)));
+            noteExplosions[lane] = AddChild(new NoteExplosion(color));//, hasCircle.Contains(colorLane)));
             noteExplosions[lane].position = new Vector3(stLaneSize[lane].x + (stLaneSize[lane].w / 2.0f), 0, 0);
         }
     }

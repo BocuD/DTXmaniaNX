@@ -8,7 +8,7 @@ public class ResultRankIcon : UIGroup
 {
     public ResultRankIcon(int instrument)
     {
-        name = $"ResultRankIcon {instrument}";
+        name = $"ResultRankIcon";
         anchor = new Vector2(0.5f, 0.5f);
         size = new Vector2(420, 510);
         

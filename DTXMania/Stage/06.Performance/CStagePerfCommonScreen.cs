@@ -116,7 +116,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                 Drums.bLeft[i] = CDTXMania.ConfigIni.bLeft[i];
                 Drums.fScrollSpeed[i] = (CDTXMania.ConfigIni.nScrollSpeed[i] + 1) * 0.5f;
             }
-            Drums.eDark = CDTXMania.ConfigIni.eDark;
+            Drums.eDark = CDTXMania.ConfigIni.eDark.Drums;
             Drums.nPlaySpeedNumerator = CDTXMania.ConfigIni.nPlaySpeed;
             Drums.nPlaySpeedDenominator = 20;
             Drums.eHHGroup = CDTXMania.ConfigIni.eHHGroup;
@@ -187,7 +187,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                 Guitar.bLeft[i] = CDTXMania.ConfigIni.bLeft[i];
                 Guitar.fScrollSpeed[i] = (CDTXMania.ConfigIni.nScrollSpeed[i] + 1) * 0.5f;
             }
-            Guitar.eDark = CDTXMania.ConfigIni.eDark;
+            Guitar.eDark = CDTXMania.ConfigIni.eDark.Guitar;
             Guitar.nPlaySpeedNumerator = CDTXMania.ConfigIni.nPlaySpeed;
             Guitar.nPlaySpeedDenominator = 20;
             Guitar.eHHGroup = CDTXMania.ConfigIni.eHHGroup;
@@ -258,7 +258,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                 Bass.bLeft[i] = CDTXMania.ConfigIni.bLeft[i];
                 Bass.fScrollSpeed[i] = (CDTXMania.ConfigIni.nScrollSpeed[i] + 1) * 0.5f;
             }
-            Bass.eDark = CDTXMania.ConfigIni.eDark;
+            Bass.eDark = CDTXMania.ConfigIni.eDark.Bass;
             Bass.nPlaySpeedNumerator = CDTXMania.ConfigIni.nPlaySpeed;
             Bass.nPlaySpeedDenominator = 20;
             Bass.eHHGroup = CDTXMania.ConfigIni.eHHGroup;
@@ -1461,7 +1461,6 @@ internal abstract class CStagePerfCommonScreen : CStage
                 {
                     #region[ ヒット数の加算 ]
                     case EJudgement.Miss:
-                    case EJudgement.Bad:
                         actCombo.tコンボリセット処理();
                         nHitCount_IncAuto.Drums.Miss++;
                         if (!bPChipIsAutoPlay)
@@ -1534,7 +1533,6 @@ internal abstract class CStagePerfCommonScreen : CStage
                 switch (eJudgeResult)
                 {
                     case EJudgement.Miss:
-                    case EJudgement.Bad:
                         nHitCount_IncAuto[indexInst].Miss++;
                         if (!bPChipIsAutoPlay)
                         {
@@ -1610,7 +1608,7 @@ internal abstract class CStagePerfCommonScreen : CStage
             int nRate = bブーストボーナス ? 2 : 1;
             if (CDTXMania.ConfigIni.bAutoAddGage)
             {
-                if (((pChip.eInstrumentPart == EInstrumentPart.DRUMS)) && (eJudgeResult != EJudgement.Miss) && (eJudgeResult != EJudgement.Bad))
+                if (((pChip.eInstrumentPart == EInstrumentPart.DRUMS)) && (eJudgeResult != EJudgement.Miss))
                 {
                     #region[ドラム]
                     int nCombos = actCombo.nCurrentCombo.Drums;
@@ -1657,7 +1655,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                     actStatusPanel.nCurrentScore += (long)nScoreDelta;
                     #endregion
                 }
-                else if (((pChip.eInstrumentPart == EInstrumentPart.GUITAR) || pChip.eInstrumentPart == EInstrumentPart.BASS) && (eJudgeResult != EJudgement.Miss) && (eJudgeResult != EJudgement.Bad))
+                else if (((pChip.eInstrumentPart == EInstrumentPart.GUITAR) || pChip.eInstrumentPart == EInstrumentPart.BASS) && (eJudgeResult != EJudgement.Miss))
                 {
                     #region[ ギター&ベース ]
                     int nCombos = actCombo.nCurrentCombo[(int)pChip.eInstrumentPart];
@@ -1713,7 +1711,7 @@ internal abstract class CStagePerfCommonScreen : CStage
             }
             else
             {
-                if (!bPChipIsAutoPlay && pChip.eInstrumentPart == EInstrumentPart.DRUMS && eJudgeResult != EJudgement.Miss && eJudgeResult != EJudgement.Bad)
+                if (!bPChipIsAutoPlay && pChip.eInstrumentPart == EInstrumentPart.DRUMS && eJudgeResult != EJudgement.Miss)
                 {
                     #region[ドラム]
                     int nCombos = actCombo.nCurrentCombo.Drums;
@@ -1761,7 +1759,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                 }
                 else if (pChip.eInstrumentPart == EInstrumentPart.GUITAR || pChip.eInstrumentPart == EInstrumentPart.BASS)
                 {
-                    if (eJudgeResult != EJudgement.Miss && eJudgeResult != EJudgement.Bad)
+                    if (eJudgeResult != EJudgement.Miss)
                     {
                         #region[ ギター&ベース ]
                         int nCombos = actCombo.nCurrentCombo[(int)pChip.eInstrumentPart];
@@ -1819,7 +1817,7 @@ internal abstract class CStagePerfCommonScreen : CStage
         {
             if (CDTXMania.ConfigIni.bAutoAddGage)
             {
-                if (((pChip.eInstrumentPart != EInstrumentPart.UNKNOWN)) && (eJudgeResult != EJudgement.Miss) && (eJudgeResult != EJudgement.Bad))
+                if (((pChip.eInstrumentPart != EInstrumentPart.UNKNOWN)) && (eJudgeResult != EJudgement.Miss))
                 {
                     int nCombos = actCombo.nCurrentCombo[(int)pChip.eInstrumentPart];
                     float nScoreDelta = 0;
@@ -1838,7 +1836,7 @@ internal abstract class CStagePerfCommonScreen : CStage
             }
             else
             {
-                if ((!bPChipIsAutoPlay && (pChip.eInstrumentPart != EInstrumentPart.UNKNOWN)) && (eJudgeResult != EJudgement.Miss) && (eJudgeResult != EJudgement.Bad))
+                if ((!bPChipIsAutoPlay && (pChip.eInstrumentPart != EInstrumentPart.UNKNOWN)) && (eJudgeResult != EJudgement.Miss))
                 {
                     int nCombos = actCombo.nCurrentCombo[(int)pChip.eInstrumentPart];
                     float nScoreDelta = 0;
@@ -1884,7 +1882,6 @@ internal abstract class CStagePerfCommonScreen : CStage
         switch (eJudgeResult)
         {
             case EJudgement.Miss:
-            case EJudgement.Bad:
             case EJudgement.Poor:
             case EJudgement.Good:
             case EJudgement.Great:
@@ -1923,12 +1920,12 @@ internal abstract class CStagePerfCommonScreen : CStage
                 return;
 
             case EInstrumentPart.GUITAR:
-                actJudgeString.Start(13, EJudgement.Bad, 999);
+                actJudgeString.Start(13, EJudgement.Miss, 999);
                 actCombo.nCurrentCombo.Guitar = 0;
                 return;
 
             case EInstrumentPart.BASS:
-                actJudgeString.Start(14, EJudgement.Bad, 999);
+                actJudgeString.Start(14, EJudgement.Miss, 999);
                 actCombo.nCurrentCombo.Bass = 0;
                 break;
 

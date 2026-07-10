@@ -3,8 +3,8 @@ using System.Drawing;
 using System.Diagnostics;
 using System.Numerics;
 using DTXMania.Core;
+using DTXMania.UI.Config;
 using DTXMania.UI.Drawable;
-using DTXMania.UI.Item;
 using FDK;
 using SlimDXKey = SlimDX.DirectInput.Key;
 
@@ -12,41 +12,13 @@ namespace DTXMania;
 
 internal class CStageConfig : CStage
 {
-    // プロパティ
-
-    public CActDFPFont actFont { get; private set; }
-
-    // コンストラクタ
-
     public CStageConfig()
     {
-        CActDFPFont font;
         eStageID = EStage.Config_3;
         ePhaseID = EPhase.Common_DefaultState;
-        actFont = font = new CActDFPFont();
-        listChildActivities.Add(font);
-        listChildActivities.Add(actList = new CActConfigList(this, ui));
-        listChildActivities.Add(actKeyAssign = new CActConfigKeyAssign(this));
         bActivated = false;
     }
-
-
-    // メソッド
-
-    public void tNotifyAssignmentComplete()
-    {
-        eItemPanelMode = EItemPanelMode.PadList;
-    }
-    public void tNotifyPadSelection(EKeyConfigPart part, EKeyConfigPad pad)
-    {
-        actKeyAssign.tStart(part, pad, actList.ibCurrentSelection.strItemName);
-        eItemPanelMode = EItemPanelMode.KeyCodeList;
-    }
-    public void tNotifyItemChange()
-    {
-        tDrawSelectedItemDescriptionInDescriptionPanel();
-    }
-        
+    
     // CStage 実装
 
     public override void InitializeBaseUI()
@@ -75,45 +47,40 @@ internal class CStageConfig : CStage
         menuCursor.anchor = new Vector2(0.5f, 0f);
         menuCursor.renderMode = ERenderMode.Sliced;
         menuCursor.sliceRect = new RectangleF(16, 0, 32, 28);
+        
+        configList = ui.AddChild(new ConfigList(14, 4));
+        configList.position = new Vector3(420, 189, 0);
+        configList.renderOrder = 41;
+        configList.isVisible = true;
+        configList.dontSerialize = true;
+        
+        //at the root of a page, Cancel returns focus to the left menu
+        configList.onExitRoot = () => bFocusIsOnMenu = true;
 
-        var family = new FontFamily(CDTXMania.ConfigIni.songListFont);
-        configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(family, 20, "System", () => { actList.tSetupItemList_System(); }));
-        configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(family, 20, "Drums", () => { actList.tSetupItemList_Drums(); }));
-        configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(family, 20, "Guitar P1", () => { actList.tSetupItemList_Guitar(); }));
-        configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(family, 20, "Guitar P2", () => { actList.tSetupItemList_Bass(); }));
-        configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(family, 20, "Exit", () => { actList.tSetupItemList_Exit(); }));
+        //description panel (background + text) for the new config list
+        descriptionPanel = ui.AddChild(new ConfigDescriptionPanel());
+        descriptionPanel.position = new Vector3(781, 252, 0);
+        descriptionPanel.renderOrder = 49;
+
+        configMenu = new ConfigMenu(configList);
+        configMenu.OpenSystem(); //seed a page so the list has content before it's first shown
+
+        //key-assign editor overlay: hidden until a pad row opens it; drawn just above the list
+        keyAssignPanel = ui.AddChild(new KeyAssignPanel());
+        keyAssignPanel.position = new Vector3(450, 120, 0);
+        keyAssignPanel.renderOrder = 42;
+        keyAssignPanel.onClose = CloseKeyAssign;
+        keyAssignPanel.isVisible = false;
+        
+        configList.onOpenKeyAssign = OpenKeyAssign;
+        
+        configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(20, "System", configMenu.OpenSystem));
+        configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(20, "Drums", configMenu.OpenDrums));
+        configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(20, "Guitar P1", configMenu.OpenGuitar));
+        configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(20, "Guitar P2", configMenu.OpenBass));
+        configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(20, "Exit", () => { }));
         configLeftOptionsMenu.UpdateLayout();
         configLeftOptionsMenu.SetSelectedIndex(0);
-
-        var drawList = ui.AddChild(new LegacyDrawable(() =>
-        {
-            switch (eItemPanelMode)
-            {
-                case EItemPanelMode.PadList:
-                    actList.tUpdateAndDraw(!bFocusIsOnMenu);
-                    break;
-
-                case EItemPanelMode.KeyCodeList:
-                    actKeyAssign.OnUpdateAndDraw();
-                    break;
-            }
-        }));
-        drawList.renderOrder = 40;
-        
-        descriptionPanel = ui.AddChild(new UIText("", 17));
-        descriptionPanel.name = "DescriptionPanel";
-        descriptionPanel.position = new Vector3(800, 270, 0);
-        descriptionPanel.renderOrder = 50;
-        descriptionPanel.isVisible = false;
-        
-        if (bFocusIsOnMenu)
-        {
-            tDrawSelectedMenuDescriptionInDescriptionPanel();
-        }
-        else
-        {
-            tDrawSelectedItemDescriptionInDescriptionPanel();
-        }
     }
 
     public override void InitializeDefaultUI()
@@ -148,7 +115,6 @@ internal class CStageConfig : CStage
                 ctKeyRepetition[i] = new CCounter(0, 0, 0, CDTXMania.Timer);
             }
             bFocusIsOnMenu = true;
-            eItemPanelMode = EItemPanelMode.PadList;
             ctDisplayWait = new CCounter( 0, 350, 1, CDTXMania.Timer );
         }
         finally
@@ -165,6 +131,10 @@ internal class CStageConfig : CStage
         try
         {
             CDTXMania.ConfigIni.tWrite(CDTXMania.executableDirectory + "Config.ini");	// CONFIGだけ
+
+            //apply deferred changes made via config list when exiting the stage
+            configMenu.ApplyPendingChanges();
+
             for (int i = 0; i < 4; i++)
             {
                 ctKeyRepetition[i] = null;
@@ -189,7 +159,6 @@ internal class CStageConfig : CStage
 
     private UISelectList configLeftOptionsMenu;
     private UIImage menuCursor;
-    private UIText descriptionPanel;
 
     public override void FirstUpdate()
     {
@@ -213,34 +182,7 @@ internal class CStageConfig : CStage
         //update menu cursor position
         menuCursor.color.Alpha = bFocusIsOnMenu ? 1.0f : 0.5f;
         menuCursor.position.Y = 2 + configLeftOptionsMenu.currentlySelectedIndex * 32;
-
-        #region [ アイテム ]
-
-        //---------------------
         
-
-        //---------------------
-
-        #endregion
-
-        #region [ Description panel ]
-
-        //---------------------
-        if (!bFocusIsOnMenu && actList.nTargetScrollCounter == 0 &&
-            ctDisplayWait.bReachedEndValue)
-        {
-            descriptionPanel.isVisible = true;
-        }
-        else
-        {
-            descriptionPanel.isVisible = false;
-        }
-
-        #endregion
-
-        #region [ Fade in and out ]
-
-        //---------------------
         switch (ePhaseID)
         {
             case EPhase.Common_FadeIn:
@@ -253,123 +195,15 @@ internal class CStageConfig : CStage
                 return 1;
         }
 
-        //---------------------
-
-        #endregion
-
-        // キー入力
-
-        if ((ePhaseID != EPhase.Common_DefaultState) || actKeyAssign.bWaitingForKeyInput)
+        if (ePhaseID != EPhase.Common_DefaultState)
             return 0;
-
-        // 曲データの一覧取得中は、キー入力を無効化する
-        if (CDTXMania.Input.ActionCancel())
-        {
-            CDTXMania.Skin.soundCancel.tPlay();
-            if (!bFocusIsOnMenu)
-            {
-                if (eItemPanelMode == EItemPanelMode.KeyCodeList)
-                {
-                    tNotifyAssignmentComplete();
-                    return 0;
-                }
-
-                if (!actList.bIsSubMenuSelected &&
-                    !actList.bIsFocusingParameter) // #24525 2011.3.15 yyagi, #32059 2013.9.17 yyagi
-                {
-                    bFocusIsOnMenu = true;
-                }
-
-                tDrawSelectedMenuDescriptionInDescriptionPanel();
-                actList.tPressEsc(); // #24525 2011.3.15 yyagi ESC押下時の右メニュー描画用
-            }
-            else
-            {
-                GitaDoraTransition.Close(0, async () =>
-                {
-                    await Task.Delay(50);
-                    GitaDoraTransition.Open();
-                });
-                ePhaseID = EPhase.Common_FadeOut;
-            }
-        }
-        else if (CDTXMania.Input.ActionDecide())
-        {
-            if (configLeftOptionsMenu.currentlySelectedIndex == 4)
-            {
-                CDTXMania.Skin.soundDecide.tPlay();
-                GitaDoraTransition.Close(0, async () =>
-                {
-                    await Task.Delay(50);
-                    GitaDoraTransition.Open();
-                });
-                ePhaseID = EPhase.Common_FadeOut;
-            }
-            else if (bFocusIsOnMenu)
-            {
-                CDTXMania.Skin.soundDecide.tPlay();
-                bFocusIsOnMenu = false;
-                tDrawSelectedItemDescriptionInDescriptionPanel();
-            }
-            else
-            {
-                switch (eItemPanelMode)
-                {
-                    case EItemPanelMode.PadList:
-                        bool bIsKeyAssignSelectedBeforeHitEnter = actList.bIsSubMenuSelected; // #24525 2011.3.15 yyagi
-                        actList.tPressEnter();
-                        if (actList.bCurrentlySelectedItemIsReturnToMenu)
-                        {
-                            tDrawSelectedMenuDescriptionInDescriptionPanel();
-                            if (bIsKeyAssignSelectedBeforeHitEnter == false) // #24525 2011.3.15 yyagi
-                            {
-                                bFocusIsOnMenu = true;
-                            }
-                        }
-
-                        break;
-
-                    case EItemPanelMode.KeyCodeList:
-                        actKeyAssign.tPressEnter();
-                        break;
-                }
-            }
-        }
-
-        ctKeyRepetition.Up.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(SlimDXKey.UpArrow),
-            tMoveCursorUp);
-        ctKeyRepetition.R.tRepeatKey(CDTXMania.Pad.bPressingGB(EPad.HH), tMoveCursorUp);
-        //Change to HT
-        if (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.HT))
-        {
-            tMoveCursorUp();
-        }
-
-        ctKeyRepetition.Down.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(SlimDXKey.DownArrow),
-            tMoveCursorDown);
-        ctKeyRepetition.B.tRepeatKey(CDTXMania.Pad.bPressingGB(EPad.SD), tMoveCursorDown);
-        //Change to LT
-        if (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.LT))
-        {
-            tMoveCursorDown();
-        }
-
+        
+        HandleConfigListInput();
         return 0;
     }
-
-
-    // Other
-
-    #region [ private ]
-    //-----------------
-    private enum EItemPanelMode
-    {
-        PadList,
-        KeyCodeList
-    }
-
+    
     [StructLayout(LayoutKind.Sequential)]
-    private struct STKeyRepetitionCounter
+    public struct STKeyRepetitionCounter
     {
         public CCounter Up;
         public CCounter Down;
@@ -420,113 +254,141 @@ internal class CStageConfig : CStage
         }
     }
 
-    private CActConfigKeyAssign actKeyAssign;
-    private CActConfigList actList;
-    
+    private ConfigList configList;
+    private ConfigDescriptionPanel descriptionPanel;
+    private ConfigMenu configMenu;
+    private KeyAssignPanel keyAssignPanel; //key-assign editor overlay (opened from a pad-list row)
+
+    private const int MenuExitIndex = 4;
+
     private bool bFocusIsOnMenu;
     private STKeyRepetitionCounter ctKeyRepetition;
-    private EItemPanelMode eItemPanelMode;
         
     public CCounter ctDisplayWait;
-        
-    private void tMoveCursorDown()
-    {
-        if (!bFocusIsOnMenu)
-        {
-            switch (eItemPanelMode)
-            {
-                case EItemPanelMode.PadList:
-                    actList.tMoveToPrevious();
-                    return;
 
-                case EItemPanelMode.KeyCodeList:
-                    actKeyAssign.tMoveToNext();
-                    return;
+    private void StartExitConfig()
+    {
+        GitaDoraTransition.Close(0, async () =>
+        {
+            await Task.Delay(50);
+            GitaDoraTransition.Open();
+        });
+        ePhaseID = EPhase.Common_FadeOut;
+    }
+
+    private void MoveMenuSelection(bool next)
+    {
+        CDTXMania.Skin.soundCursorMovement.tPlay();
+        ctDisplayWait.nCurrentValue = 0;
+
+        if (next) configLeftOptionsMenu.SelectNext();
+        else configLeftOptionsMenu.SelectPrevious();
+
+        configLeftOptionsMenu.RunAction(); // loads the newly-selected category into the new list
+    }
+
+    //config list input handling
+    private void HandleConfigListInput()
+    {
+        //key-assign editor, when open, owns all input until it closes
+        if (keyAssignPanel.IsOpen)
+        {
+            HandleKeyAssignInput();
+            return;
+        }
+
+        //cursor + scroll arrows belong to the list; hide them while the left menu has focus
+        configList.SetFocused(!bFocusIsOnMenu);
+
+        if (bFocusIsOnMenu)
+        {
+            if (CDTXMania.Input.ActionCancel())
+            {
+                CDTXMania.Skin.soundCancel.tPlay();
+                StartExitConfig();
             }
+            else if (CDTXMania.Input.ActionDecide())
+            {
+                CDTXMania.Skin.soundDecide.tPlay();
+                if (configLeftOptionsMenu.currentlySelectedIndex == MenuExitIndex)
+                {
+                    StartExitConfig();
+                }
+                else
+                {
+                    bFocusIsOnMenu = false; // drop focus into the list page
+                }
+            }
+
+            ctKeyRepetition.Up.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(SlimDXKey.UpArrow),
+                () => MoveMenuSelection(false));
+            ctKeyRepetition.Down.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(SlimDXKey.DownArrow),
+                () => MoveMenuSelection(true));
         }
         else
         {
-            CDTXMania.Skin.soundCursorMovement.tPlay();
-            ctDisplayWait.nCurrentValue = 0;
-                
-            configLeftOptionsMenu.SelectNext();
-            configLeftOptionsMenu.RunAction();
-                
-            tDrawSelectedMenuDescriptionInDescriptionPanel();
-        }
-    }
-    private void tMoveCursorUp()
-    {
-        if (!bFocusIsOnMenu)
-        {
-            switch (eItemPanelMode)
+            if (CDTXMania.Input.ActionCancel())
             {
-                case EItemPanelMode.PadList:
-                    actList.tMoveToNext();
-                    return;
-
-                case EItemPanelMode.KeyCodeList:
-                    actKeyAssign.tMoveToPrevious();
-                    return;
+                CDTXMania.Skin.soundCancel.tPlay();
+                configList.Cancel(); //pops a folder, or at the root returns focus to the menu
             }
+            else if (CDTXMania.Input.ActionDecide())
+            {
+                configList.Confirm();
+            }
+
+            ctKeyRepetition.Up.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(SlimDXKey.UpArrow),
+                () => configList.MoveUp());
+            ctKeyRepetition.Down.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(SlimDXKey.DownArrow),
+                () => configList.MoveDown());
         }
-        else
-        {
-            CDTXMania.Skin.soundCursorMovement.tPlay();
-            ctDisplayWait.nCurrentValue = 0;
-                
-            configLeftOptionsMenu.SelectPrevious();
-            configLeftOptionsMenu.RunAction();
-                
-            tDrawSelectedMenuDescriptionInDescriptionPanel();
-        }
+
+        //the description panel only shows once a page is focused and fully aligned
+        bool showDescription = !bFocusIsOnMenu && configList.IsSettled && !keyAssignPanel.IsOpen;
+        descriptionPanel.Update(configList.CurrentItem, showDescription);
     }
-    private void tDrawSelectedMenuDescriptionInDescriptionPanel()
+
+    //opens the key-assign editor for a pad and hands input over to it (called back from a pad row)
+    private void OpenKeyAssign(EKeyConfigPart part, EKeyConfigPad pad, string padName)
     {
-        string explanation = "";
-        
-        switch (configLeftOptionsMenu.currentlySelectedIndex)
-        {
-            case 0: //system
-                explanation = CDTXMania.isJapanese 
-                    ? "システムに関係する項目を設定します。" 
-                    : "Settings for an overall systems.";
-                break;
-
-            case 1: //drums
-                explanation = CDTXMania.isJapanese
-                    ? "ドラムの演奏に関する項目を設定します。"
-                    : "Settings to play the drums.";
-                break;
-
-            case 2: //guitar
-                explanation = CDTXMania.isJapanese
-                    ? "ギターの演奏に関する項目を設定します。"
-                    : "Settings to play the guitar.";
-                break;
-
-            case 3: //bass
-                explanation = CDTXMania.isJapanese
-                    ? "ベースの演奏に関する項目を設定します。"
-                    : "Settings to play the bass.";
-                break;
-
-            case 4: //exit
-                explanation = CDTXMania.isJapanese
-                    ? "設定を保存し、コンフィグ画面を終了します。"
-                    : "Save the settings and exit from\nCONFIGURATION menu.";
-                break;
-        }
-        
-        descriptionPanel.SetText(explanation);
+        configList.isVisible = false;
+        configList.SetFocused(false);
+        descriptionPanel.Update(null, false);
+        keyAssignPanel.Open(part, pad, padName);
     }
-    private void tDrawSelectedItemDescriptionInDescriptionPanel()
+
+    //returns from the editor to the pad list it was opened from
+    private void CloseKeyAssign()
     {
-        CItemBase item = actList.ibCurrentSelection;
-        if (item.strDescription is {Length: > 0})
-        {
-            descriptionPanel.SetText(item.strDescription);
-        }
+        configList.isVisible = true;
+        bFocusIsOnMenu = false; //focus stays on the (pad list) page, not the left menu
     }
-    #endregion
+
+    private void HandleKeyAssignInput()
+    {
+        keyAssignPanel.PollCapture();
+
+        if (keyAssignPanel.IsWaiting)
+        {
+            return; //capture owns input (Esc-to-cancel handled inside PollCapture)
+        }
+
+        if (CDTXMania.Input.ActionCancel())
+        {
+            keyAssignPanel.Cancel();
+        }
+        else if (CDTXMania.Input.ActionDecide())
+        {
+            keyAssignPanel.Confirm();
+        }
+        else if (CDTXMania.InputManager.Keyboard.bKeyPressed(SlimDXKey.Delete))
+        {
+            keyAssignPanel.DeleteCurrent();
+        }
+
+        ctKeyRepetition.Up.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(SlimDXKey.UpArrow),
+            () => keyAssignPanel.MoveUp());
+        ctKeyRepetition.Down.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(SlimDXKey.DownArrow),
+            () => keyAssignPanel.MoveDown());
+    }
 }

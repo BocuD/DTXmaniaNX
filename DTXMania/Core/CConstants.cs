@@ -4,27 +4,27 @@ namespace DTXMania.Core;
 
 public enum ECYGroup
 {
-	打ち分ける,
-	共通
+	[EnumLabel("CY-0")] 打ち分ける,
+	[EnumLabel("CY-1")] 共通
 }
 public enum EFTGroup
 {
-	打ち分ける,
-	共通
+	[EnumLabel("FT-0")] 打ち分ける,
+	[EnumLabel("FT-1")] 共通
 }
 public enum EHHGroup
 {
-	全部打ち分ける,
-	ハイハットのみ打ち分ける,
-	左シンバルのみ打ち分ける,
-	全部共通
+	[EnumLabel("HH-0")] 全部打ち分ける,
+	[EnumLabel("HH-1")] ハイハットのみ打ち分ける,
+	[EnumLabel("HH-2")] 左シンバルのみ打ち分ける,
+	[EnumLabel("HH-3")] 全部共通
 }
 public enum EBDGroup		// #27029 2012.1.4 from add
 {
-	打ち分ける,
-	BDとLPで打ち分ける,
-	左右ペダルのみ打ち分ける,
-	どっちもBD
+	[EnumLabel("BD-0")] 打ち分ける,
+	[EnumLabel("BD-1")] BDとLPで打ち分ける,
+	[EnumLabel("BD-2")] 左右ペダルのみ打ち分ける,
+	[EnumLabel("BD-3")] どっちもBD
 }
 public enum EType
 {
@@ -36,8 +36,8 @@ public enum EType
 }
 public enum ERDPosition
 {
-	RDRC,
-	RCRD
+	[EnumLabel("RD RC")] RDRC,
+	[EnumLabel("RC RD")] RCRD
 }
 public enum EDarkMode
 {
@@ -174,8 +174,8 @@ public enum EKeyConfigPart	// : EInstrumentPart
 
 public enum EPlaybackPriority
 {
-	ChipOverPadPriority,
-	PadOverChipPriority
+	[EnumLabel("C>P")] ChipOverPadPriority,
+	[EnumLabel("P>C")] PadOverChipPriority
 }
 internal enum EInputDevice
 {
@@ -192,18 +192,9 @@ public enum EJudgement
 	Good	= 2,
 	Poor	= 3,
 	Miss	= 4,
-	Bad		= 5,
 	Auto
 }
 
-
-
-internal enum E判定文字表示位置
-{
-	OnTheLane,
-	判定ライン上または横,
-	表示OFF
-}
 internal enum EAVIType
 {
 	Unknown,

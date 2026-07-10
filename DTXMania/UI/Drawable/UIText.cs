@@ -25,6 +25,10 @@ public partial class UIText : UITexture
 {
     private const float DefaultFontSize = 32f;
     private bool _dirty = true;
+
+    //Incremented every time a render starts (async or sync). An async result is only applied if
+    //its token still matches, so text that changed again mid-flight discards the stale result.
+    private int _renderToken;
     
     [Themable] public string text = "New UIText";
     [Themable] public FontSource fontSource = FontSource.System;
@@ -80,6 +84,12 @@ public partial class UIText : UITexture
         _dirty = true;
     }
 
+    //Forces a re-render on the next Draw (e.g. after changing color/outline/style)
+    public void MarkDirty()
+    {
+        _dirty = true;
+    }
+
     public override void Draw(Matrix4x4 parentMatrix)
     {
         if (!isVisible)
@@ -94,7 +104,7 @@ public partial class UIText : UITexture
 
         if (_dirty)
         {
-            RenderTexture();
+            RequestRender();
         }
 
         if (!texture.IsValid())
@@ -104,9 +114,17 @@ public partial class UIText : UITexture
 
         UpdateLocalTransformMatrix();
         Matrix4x4 combinedMatrix = localTransformMatrix * parentMatrix;
-        texture.tDraw2DMatrix(combinedMatrix, size, new RectangleF(0, 0, texture.Width, texture.Height), Color4.White);
+        texture.tDraw2DMatrix(combinedMatrix, GetTextureDrawSize(), GetTextureSourceRect(), Color4.White);
     }
-    
+
+    //Source rectangle (in texture pixels) sampled from the rendered text texture. Defaults to the
+    //whole texture; subclasses can override to draw a sub-region (e.g. a scrolling clip window).
+    protected virtual RectangleF GetTextureSourceRect() => new(0, 0, texture.Width, texture.Height);
+
+    /// Destination size the sampled region is drawn at (before this element's scale). Defaults to
+    /// <see cref="UIDrawable.size"/>; subclasses can override to clamp the drawn width.
+    protected virtual Vector2 GetTextureDrawSize() => size;
+
     private void UpdateDynamicText()
     {
         CDTXMania.StageManager.rCurrentStage.dynamicStringSources.TryGetValue(dynamicSource, out var source);
@@ -120,8 +138,72 @@ public partial class UIText : UITexture
         }
     }
 
+    /// <summary>
+    /// Requests an asynchronous re-render. The Skia rasterization runs on a background thread and
+    /// the resulting texture is uploaded + applied on a later frame (see <see cref="AsyncTextureUploader"/>);
+    /// the current texture keeps being drawn until then. This is the normal per-frame path and keeps
+    /// text changes (e.g. scrolling the song list) off the critical path.
+    /// </summary>
+    private void RequestRender()
+    {
+        if (OpenGlRenderer.Instance == null)
+        {
+            _dirty = true;
+            return;
+        }
+
+        _dirty = false;
+
+        //invalidate any in-flight render and clear immediately when there is nothing to draw.
+        int token = ++_renderToken;
+
+        if (string.IsNullOrEmpty(text))
+        {
+            if (texture.IsValid())
+            {
+                texture.Dispose();
+                SetTexture(BaseTexture.None);
+            }
+            return;
+        }
+
+        UiTextParameters request = renderBackend switch
+        {
+            UiTextRenderBackend.Skia when BaseTexture.SkiaTextRenderer != null => CreateRenderRequest(),
+            UiTextRenderBackend.Skia => throw new InvalidOperationException("Skia text renderer is not available."),
+            _ => throw new ArgumentOutOfRangeException()
+        };
+
+        AsyncTextureUploader.Instance.RequestText(request, tex => ApplyRenderedText(token, tex));
+    }
+
+    private void ApplyRenderedText(int token, BaseTexture? renderedTexture)
+    {
+        //A newer render (or a synchronous RenderTexture) superseded this one
+        if (token != _renderToken)
+        {
+            renderedTexture?.Dispose();
+            return;
+        }
+
+        if (texture.IsValid())
+        {
+            texture.Dispose();
+        }
+
+        SetTexture(renderedTexture ?? BaseTexture.None);
+    }
+
+    /// <summary>
+    /// Synchronously rasterizes and uploads the text on the calling (main) thread. Used to warm
+    /// text up before a stage becomes visible (see the song-select load phase). Prefer the async
+    /// path (<see cref="RequestRender"/>) during normal frames.
+    /// </summary>
     public void RenderTexture()
     {
+        //Bump the token so any in-flight async render for this element is discarded on arrival
+        ++_renderToken;
+
         if (texture.IsValid())
         {
             texture.Dispose();

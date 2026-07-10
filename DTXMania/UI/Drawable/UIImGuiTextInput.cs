@@ -320,6 +320,7 @@ public class UIImGuiTextInput : UIText
             _activeInput = null;
         }
 
+        CDTXMania.Skin.soundDecide.tPlay();
         onCommit?.Invoke(text);
     }
 

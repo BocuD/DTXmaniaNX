@@ -1,5 +1,4 @@
 ﻿using System.Numerics;
-using System.Windows.Forms;
 using DTXMania.Core;
 using DTXMania.Core.Framework;
 using DTXMania.UI.Animation;

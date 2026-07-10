@@ -43,9 +43,9 @@ internal class CActOptionPanel : CActivity
                 txOptionPanel.tDraw2D(786, 14, rcHS[(configIni.bHidden.Drums ? 1 : 0) + (configIni.bSudden.Drums ? 2 : 0)]);
                 txOptionPanel.tDraw2D(786, 32, rcHS[(configIni.bHidden.Guitar ? 1 : 0) + (configIni.bSudden.Guitar ? 2 : 0)]);
                 txOptionPanel.tDraw2D(786, 50, rcHS[(configIni.bHidden.Bass ? 1 : 0) + (configIni.bSudden.Bass ? 2 : 0)]);
-                txOptionPanel.tDraw2D(834, 14, rcDark[(int)configIni.eDark]);
-                txOptionPanel.tDraw2D(834, 32, rcDark[(int)configIni.eDark]);
-                txOptionPanel.tDraw2D(834, 50, rcDark[(int)configIni.eDark]);
+                txOptionPanel.tDraw2D(834, 14, rcDark[(int)configIni.eDark.Drums]);
+                txOptionPanel.tDraw2D(834, 32, rcDark[(int)configIni.eDark.Guitar]);
+                txOptionPanel.tDraw2D(834, 50, rcDark[(int)configIni.eDark.Bass]);
                 txOptionPanel.tDraw2D(882, 14, rcReverse[configIni.bReverse.Drums ? 1 : 0]);
                 txOptionPanel.tDraw2D(882, 32, rcReverse[configIni.bReverse.Guitar ? 1 : 0]);
                 txOptionPanel.tDraw2D(882, 50, rcReverse[configIni.bReverse.Bass ? 1 : 0]);

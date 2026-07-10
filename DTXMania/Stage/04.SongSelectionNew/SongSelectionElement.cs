@@ -78,9 +78,7 @@ public class SongSelectionElement : UIGroup
         albumArtImage.renderOrder = 1;
         albumArtImage.name = "albumArt";
         
-        FontFamily family = new(CDTXMania.ConfigIni.songListFont);
-        
-        songTitleText = AddChild(new HorizontallyScrollingText(family, 18));
+        songTitleText = AddChild(new HorizontallyScrollingText("", 18));
         songTitleText.fillColor = Color4.FromColor(Color.Black);
         songTitleText.outlineColor = Color4.FromColor(Color.White);
         songTitleText.position = new Vector3(78, 38, 0);
@@ -90,7 +88,7 @@ public class SongSelectionElement : UIGroup
         songTitleText.maximumWidth = 460.0f;
         songTitleText.isVisible = false;
         
-        songArtistText = AddChild(new HorizontallyScrollingText(family, 12));
+        songArtistText = AddChild(new HorizontallyScrollingText("", 12));
         songArtistText.position = new Vector3(80, 60, 0);
         songArtistText.fillColor = Color4.FromColor(Color.Black);
         songArtistText.outlineColor = Color4.FromColor(Color.White);

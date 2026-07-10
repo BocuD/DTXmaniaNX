@@ -1,34 +1,36 @@
-﻿namespace DTXMania.UI.Drawable;
+namespace DTXMania.UI.Drawable;
 
+/// <summary>
+/// A group of selectable children (e.g. the config left-menu buttons) with a single highlighted
+/// selection that can be moved next/previous and activated.
+/// </summary>
 public class UISelectList : UIGroup
 {
-    public List<IUISelectable> selectableChildren = new List<IUISelectable>();
-    public List<UIDrawable> selectableChildrenDrawables = new List<UIDrawable>();
+    private readonly List<IUISelectable> selectables = [];
 
     public UISelectList(string name) : base(name)
     {
-        
     }
 
-    public int currentlySelectedIndex { get; private set; } = 0;
-        
+    public int currentlySelectedIndex { get; private set; }
+    public int SelectableCount => selectables.Count;
+
     public T AddSelectableChild<T>(T child, int index = -1) where T : UIDrawable, IUISelectable
     {
         if (index >= 0)
         {
             children.Insert(index, child);
-            selectableChildren.Insert(index, child);
-            selectableChildrenDrawables.Insert(index, child);
-            return child;
+            selectables.Insert(index, child);
         }
-            
-        children.Add(child);
-        selectableChildren.Add(child);
-        selectableChildrenDrawables.Add(child);
-            
+        else
+        {
+            children.Add(child);
+            selectables.Add(child);
+        }
+
         return child;
     }
-        
+
     public void RemoveSelectableChild(IUISelectable child)
     {
         if (child is UIDrawable drawable)
@@ -36,57 +38,44 @@ public class UISelectList : UIGroup
             children.Remove(drawable);
         }
 
-        selectableChildren.Remove(child);
+        selectables.Remove(child);
     }
-        
+
     public void SetSelectedIndex(int i)
     {
-        if (i < 0 || i >= selectableChildren.Count)
+        if (i < 0 || i >= selectables.Count)
         {
             return;
         }
-            
-        selectableChildren[currentlySelectedIndex].SetSelected(false);
+
+        selectables[currentlySelectedIndex].SetSelected(false);
         currentlySelectedIndex = i;
-        selectableChildren[currentlySelectedIndex].SetSelected(true);
+        selectables[currentlySelectedIndex].SetSelected(true);
     }
-        
+
     public void SelectNext()
     {
-        selectableChildren[currentlySelectedIndex].SetSelected(false);
-            
-        currentlySelectedIndex++;
-        if (currentlySelectedIndex >= selectableChildren.Count)
-        {
-            currentlySelectedIndex = 0;
-        }
-            
-        selectableChildren[currentlySelectedIndex].SetSelected(true);
+        if (selectables.Count == 0) return;
+        SetSelectedIndex((currentlySelectedIndex + 1) % selectables.Count);
     }
-        
+
     public void SelectPrevious()
     {
-        selectableChildren[currentlySelectedIndex].SetSelected(false);
-            
-        currentlySelectedIndex--;
-        if (currentlySelectedIndex < 0)
-        {
-            currentlySelectedIndex = selectableChildren.Count - 1;
-        }
-            
-        selectableChildren[currentlySelectedIndex].SetSelected(true);
+        if (selectables.Count == 0) return;
+        SetSelectedIndex((currentlySelectedIndex - 1 + selectables.Count) % selectables.Count);
     }
-        
+
     public void RunAction()
     {
-        selectableChildren[currentlySelectedIndex].RunAction();
+        if (selectables.Count == 0) return;
+        selectables[currentlySelectedIndex].RunAction();
     }
-        
+
     public void UpdateLayout(int spacing = 32)
     {
-        for (int i = 0; i < selectableChildren.Count; i++)
+        for (int i = 0; i < selectables.Count; i++)
         {
-            selectableChildrenDrawables[i].position.Y = i * spacing;
+            ((UIDrawable)selectables[i]).position.Y = i * spacing;
         }
     }
 }

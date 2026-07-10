@@ -3,6 +3,7 @@ using System.Numerics;
 using DTXMania.Core;
 using DTXMania.Core.Framework;
 using DTXMania.UI;
+using DTXMania.UI.Animation;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.Text;
 using FDK;
@@ -136,6 +137,7 @@ internal class CStageResult : CStage
 		
 		var rankIcon = ui.AddChild(new ResultRankIcon(CDTXMania.GetCurrentInstrument()));
 		rankIcon.position = new Vector3(225, 360, 0);
+		rankIcon.renderOrder = 3;
 		
 		string strSongTitle;
 		if (!CDTXMania.bCompactMode && CDTXMania.ConfigIni.b曲名表示をdefのものにする)
@@ -147,7 +149,7 @@ internal class CStageResult : CStage
 		
 		if (!string.IsNullOrWhiteSpace(strSongTitle))
 		{
-			UIText songNameText = ui.AddChild(new UIText(strSongTitle, 29));
+			HorizontallyScrollingText songNameText = ui.AddChild(new HorizontallyScrollingText(strSongTitle, 29));
 			songNameText.fillColor = Color4.Black;
 			songNameText.outlineColor = Color4.White;
 			songNameText.name = "SongName";
@@ -155,11 +157,14 @@ internal class CStageResult : CStage
 			songNameText.position = new Vector3(464, 547, 0);
 			songNameText.outlineWidth = 2;
 			songNameText.renderOrder = 2;
+			songNameText.scrollingEnabled = true;
+			songNameText.maximumWidth = 355;
+			songNameText.scrollSpeed = 20.0f;
 		}
 
 		if (!string.IsNullOrWhiteSpace(strArtistName))
 		{
-			UIText artistNameText = ui.AddChild(new UIText(strArtistName, 20));
+			HorizontallyScrollingText artistNameText = ui.AddChild(new HorizontallyScrollingText(strArtistName, 20));
 			artistNameText.fillColor = Color4.Black;
 			artistNameText.outlineColor = Color4.White;
 			artistNameText.name = "ArtistName";
@@ -167,6 +172,9 @@ internal class CStageResult : CStage
 			artistNameText.position = new Vector3(466, 589, 0);
 			artistNameText.outlineWidth = 2;
 			artistNameText.renderOrder = 2;
+			artistNameText.scrollingEnabled = true;
+			artistNameText.maximumWidth = 355;
+			artistNameText.scrollSpeed = 20.0f;
 		}
 		
 		string path = CDTXMania.DTX.strFolderName + CDTXMania.DTX.PREIMAGE;
@@ -196,6 +204,15 @@ internal class CStageResult : CStage
 		
 		var paramPanel = ui.AddChild(new ResultParameterPanel(CDTXMania.GetCurrentInstrument()));
 		paramPanel.position = new Vector3(879, 479, 0);
+		
+		ui.animator = new Animator();
+		AnimationClip? loaded = AnimationClipIO.LoadFromFile(CSkin.Path(@"Graphics\Result\open.json"));
+		if (loaded != null)
+		{
+			ui.animator.clips.Add(loaded);
+		}
+		
+		ui.animator.Play("open", false);
 	}
 
 	public override void OnActivate()

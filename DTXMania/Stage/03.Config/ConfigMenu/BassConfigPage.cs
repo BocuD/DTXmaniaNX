@@ -1,0 +1,75 @@
+using DTXMania.Core;
+using DTXMania.UI.Config;
+using DTXMania.UI.Item;
+
+namespace DTXMania;
+
+//Guitar P2 (bass). Shared (STDGBVALUE-backed) options come from InstrumentConfigPage
+internal sealed class BassConfigPage(ConfigList list) : InstrumentConfigPage(list, EInstrumentPart.BASS)
+{
+    public override List<CItemBase> Build()
+    {
+        List<CItemBase> items = [];
+        
+        items.Add(BackItem());
+
+        items.Add(CreateCardNameInputItem());
+        items.Add(CreateGroupNameInputItem());
+        
+        // ---- Auto play: preset selector (cycles Off / presets / Custom) + per-lane toggles ----
+        List<(ELane, CItemToggle)> autoLanes =
+        [
+            (ELane.BsR, Toggle("    R", "Rネックを自動で演奏します。", "Play R neck automatically.",
+                () => CDTXMania.ConfigIni.bAutoPlay.BsR, v => CDTXMania.ConfigIni.bAutoPlay.BsR = v)),
+            (ELane.BsG, Toggle("    G", "Gネックを自動で演奏します。", "Play G neck automatically.",
+                () => CDTXMania.ConfigIni.bAutoPlay.BsG, v => CDTXMania.ConfigIni.bAutoPlay.BsG = v)),
+            (ELane.BsB, Toggle("    B", "Bネックを自動で演奏します。", "Play B neck automatically.",
+                () => CDTXMania.ConfigIni.bAutoPlay.BsB, v => CDTXMania.ConfigIni.bAutoPlay.BsB = v)),
+            (ELane.BsY, Toggle("    Y", "Yネックを自動で演奏します。", "Play Y neck automatically.",
+                () => CDTXMania.ConfigIni.bAutoPlay.BsY, v => CDTXMania.ConfigIni.bAutoPlay.BsY = v)),
+            (ELane.BsP, Toggle("    P", "Pネックを自動で演奏します。", "Play P neck automatically.",
+                () => CDTXMania.ConfigIni.bAutoPlay.BsP, v => CDTXMania.ConfigIni.bAutoPlay.BsP = v)),
+            (ELane.BsPick, Toggle("    Pick", "ピックを自動で演奏します。", "Play Pick automatically.",
+                () => CDTXMania.ConfigIni.bAutoPlay.BsPick, v => CDTXMania.ConfigIni.bAutoPlay.BsPick = v)),
+            (ELane.BsW, Toggle("    Wailing", "ウェイリングを自動で演奏します。", "Play wailing automatically.",
+                () => CDTXMania.ConfigIni.bAutoPlay.BsW, v => CDTXMania.ConfigIni.bAutoPlay.BsW = v)),
+        ];
+        AddAutoPlayBlock(items, autoLanes);
+
+        // ---- Standard / display options ----
+        items.Add(ScrollSpeedItem());
+        items.Add(HidSudItem());
+        AddDisplayBlock(items);
+
+        items.Add(Choice("AttackEffect", "アタックエフェクトの表示 / 非表示。", "Toggle the attack effect.",
+            ["ON", "OFF"],
+            () => (int)CDTXMania.ConfigIni.eAttackEffect.Bass, v => CDTXMania.ConfigIni.eAttackEffect.Bass = (EType)v));
+        items.Add(ReverseItem("ベースチップが上から下に流れます。", "Chips flow from the top to the bottom."));
+        items.Add(Choice("Position",
+            "判定文字(Perfect / Great …)の表示位置。\n  P-A: レーン上\n  P-B: COMBO の下\n  P-C: 判定ライン上\n  OFF: 表示しない",
+            "Where the judgement mark (Perfect, Great, ...) is shown.\n  P-A: on the lanes\n  P-B: under the COMBO\n  P-C: on the judge line\n  OFF: hidden",
+            ["P-A", "P-B", "P-C", "OFF"],
+            () => (int)CDTXMania.ConfigIni.JudgementStringPosition.Bass, v => CDTXMania.ConfigIni.JudgementStringPosition.Bass = (EType)v));
+        items.Add(Choice("Random",
+            "ベースのチップの並びをランダム化します。\n  Mirror: 左右反転\n  Part: 小節ごとにレーンを入れ替え\n  Super: チップごとに入れ替え(本数は不変)\n  Hyper: 本数も変わる",
+            "Randomize the bass chip lanes.\n  Mirror: flip left/right\n  Part: swap lanes each measure\n  Super: swap per chip (lane count kept)\n  Hyper: swap per chip (lane count changes too)",
+            ["OFF", "Mirror", "Part", "Super", "Hyper"],
+            () => (int)CDTXMania.ConfigIni.eRandom.Bass, v => CDTXMania.ConfigIni.eRandom.Bass = (ERandomMode)v));
+        items.Add(LightItem());
+        items.Add(PerformanceModeItem());
+        items.Add(LeftItem());
+        items.Add(MonitorItem("BassMonitor"));
+        items.Add(MinComboItem("B-MinCombo", 0));
+        items.Add(JudgeLinePosItem());
+        items.Add(ShutterInItem());
+        items.Add(ShutterOutItem());
+        items.Add(GraphItem(EInstrumentPart.GUITAR)); //enabling disables the guitar graph
+        items.Add(InputAdjustItem());
+
+        items.Add(FolderItem("Key Assignment",
+            "ベースのキー割り当てを設定します。",
+            "Assign keys/pads for the bass.", KeyAssignPage.ForBass(list)));
+
+        return items;
+    }
+}

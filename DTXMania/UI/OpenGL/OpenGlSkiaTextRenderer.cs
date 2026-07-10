@@ -3,7 +3,6 @@ using DTXMania.Core.Framework;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.Text;
 using SkiaSharp;
-using StbImageSharp;
 
 namespace DTXMania.UI.OpenGL;
 
@@ -16,12 +15,23 @@ internal sealed class OpenGlSkiaTextRenderer : IUiTextRenderer
             throw new InvalidOperationException("OpenGL UI renderer is not available.");
         }
 
-        if (string.IsNullOrEmpty(request.Text))
+        DecodedPixels pixels = RenderToPixels(request);
+        if (!pixels.IsValid)
         {
             return BaseTexture.None;
         }
 
-        using SKTypeface typeface = ResolveTypeface(request);
+        return OpenGlTexture.CreateFromRgba32(OpenGlRenderer.Instance, pixels.Rgba, pixels.Width, pixels.Height, pixels.Name);
+    }
+
+    public DecodedPixels RenderToPixels(UiTextParameters request)
+    {
+        if (string.IsNullOrEmpty(request.Text))
+        {
+            return default;
+        }
+
+        SKTypeface typeface = ResolveTypeface(request);
         using SKFont font = CreateFont(typeface, request);
 
         string[] lines = NormalizeLines(request.Text);
@@ -73,16 +83,26 @@ internal sealed class OpenGlSkiaTextRenderer : IUiTextRenderer
             }
         }
 
-        using SKImage image = surface.Snapshot();
-        using SKData encoded = image.Encode(SKEncodedImageFormat.Png, 100);
-        if (encoded == null)
+        // Read the rasterized pixels straight out of the surface as straight-alpha (Unpremul)
+        // RGBA. The surface renders premultiplied for correct outline-over-fill blending, so we
+        // convert on read-back. This avoids the previous PNG encode + re-decode round-trip.
+        SKImageInfo readInfo = new(bitmapWidth, bitmapHeight, SKColorType.Rgba8888, SKAlphaType.Unpremul);
+        byte[] rgba = new byte[readInfo.BytesSize];
+        bool read;
+        unsafe
         {
-            throw new InvalidOperationException("Failed to encode Skia text image.");
+            fixed (byte* dst = rgba)
+            {
+                read = surface.ReadPixels(readInfo, (nint)dst, readInfo.RowBytes, 0, 0);
+            }
         }
 
-        byte[] encodedBytes = encoded.ToArray();
-        ImageResult decoded = ImageResult.FromMemory(encodedBytes, ColorComponents.RedGreenBlueAlpha);
-        return OpenGlTexture.CreateFromRgba32(OpenGlRenderer.Instance, decoded.Data, decoded.Width, decoded.Height, $"Text:{request.Name}");
+        if (!read)
+        {
+            throw new InvalidOperationException("Failed to read back Skia text pixels.");
+        }
+
+        return new DecodedPixels(rgba, bitmapWidth, bitmapHeight, $"Text:{request.Name}");
     }
 
     private static string[] NormalizeLines(string value)
@@ -91,7 +111,33 @@ internal sealed class OpenGlSkiaTextRenderer : IUiTextRenderer
         return normalized.Split('\n');
     }
 
+    // Typefaces are immutable and expensive to load (SKTypeface.FromFile hits disk). Cache and
+    // reuse them across renders instead of loading one per call. Never disposed by callers.
+    private static readonly Dictionary<string, SKTypeface> TypefaceCache = new();
+    private static readonly object TypefaceCacheSync = new();
+
     private static SKTypeface ResolveTypeface(UiTextParameters request)
+    {
+        string key = !string.IsNullOrWhiteSpace(request.FontPath)
+            ? "file:" + request.FontPath
+            : !string.IsNullOrWhiteSpace(request.FontFamily)
+                ? "family:" + request.FontFamily
+                : "default";
+
+        lock (TypefaceCacheSync)
+        {
+            if (TypefaceCache.TryGetValue(key, out SKTypeface? cached))
+            {
+                return cached;
+            }
+
+            SKTypeface typeface = LoadTypeface(request) ?? SKTypeface.Default;
+            TypefaceCache[key] = typeface;
+            return typeface;
+        }
+    }
+
+    private static SKTypeface? LoadTypeface(UiTextParameters request)
     {
         if (!string.IsNullOrWhiteSpace(request.FontPath) && File.Exists(request.FontPath))
         {
@@ -104,14 +150,10 @@ internal sealed class OpenGlSkiaTextRenderer : IUiTextRenderer
 
         if (!string.IsNullOrWhiteSpace(request.FontFamily))
         {
-            SKTypeface? typefaceFromFamily = SKTypeface.FromFamilyName(request.FontFamily);
-            if (typefaceFromFamily != null)
-            {
-                return typefaceFromFamily;
-            }
+            return SKTypeface.FromFamilyName(request.FontFamily);
         }
 
-        return SKTypeface.Default;
+        return null;
     }
 
     private static SKFont CreateFont(SKTypeface typeface, UiTextParameters request)

@@ -185,6 +185,7 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
             GLFW.MakeContextCurrent(_window);
         }
 
+        AsyncTextureUploader.Instance.Shutdown();
         ShutdownImGui();
         renderer.Dispose();
         OpenGlRenderer.Instance = null;
