@@ -1,5 +1,4 @@
-﻿using System.Drawing;
-using System.Numerics;
+﻿using System.Numerics;
 using DTXMania.Core.Framework;
 using DTXMania.UI.Text;
 
@@ -12,7 +11,7 @@ public class UIBasicButton : UIGroup, IUISelectable
     private readonly UIText selectedText;
     private readonly Action action;
 
-    public UIBasicButton(FontFamily font, int size, string text, Action action) : base($"UIBasicButton: {text}")
+    public UIBasicButton(int size, string text, Action action) : base($"UIBasicButton: {text}")
     {
         this.action = action;
 
