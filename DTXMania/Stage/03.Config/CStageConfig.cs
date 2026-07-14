@@ -322,8 +322,17 @@ internal class CStageConfig : CStage
 
             ctKeyRepetition.Up.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(SlimDXKey.UpArrow),
                 () => MoveMenuSelection(false));
+            ctKeyRepetition.R.tRepeatKey(CDTXMania.Pad.bPressingGB(EPad.R),
+                () => MoveMenuSelection(false), 400, 25);
+            if (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.HT))
+                MoveMenuSelection(false);
+            
             ctKeyRepetition.Down.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(SlimDXKey.DownArrow),
                 () => MoveMenuSelection(true));
+            ctKeyRepetition.B.tRepeatKey(CDTXMania.Pad.bPressingGB(EPad.G), 
+                () => MoveMenuSelection(true), 400, 25);
+            if (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.LT))
+                MoveMenuSelection(true);
         }
         else
         {
@@ -339,8 +348,17 @@ internal class CStageConfig : CStage
 
             ctKeyRepetition.Up.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(SlimDXKey.UpArrow),
                 () => configList.MoveUp());
+            ctKeyRepetition.R.tRepeatKey(CDTXMania.Pad.bPressingGB(EPad.R),
+                () => configList.MoveUp(), 400, 25);
+            if (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.HT))
+                configList.MoveUp();
+            
             ctKeyRepetition.Down.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(SlimDXKey.DownArrow),
                 () => configList.MoveDown());
+            ctKeyRepetition.B.tRepeatKey(CDTXMania.Pad.bPressingGB(EPad.G), 
+                () => configList.MoveDown(), 400, 25);
+            if (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.LT))
+                configList.MoveDown();
         }
 
         //the description panel only shows once a page is focused and fully aligned
