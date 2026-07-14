@@ -86,8 +86,17 @@ public class QuickMenu : UIGroup
 
             ctKeyRepetition.Up.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(SlimDX.DirectInput.Key.UpArrow),
                 () => list.MoveUp());
+            ctKeyRepetition.R.tRepeatKey(CDTXMania.Pad.bPressingGB(EPad.R),
+                () => list.MoveUp(), 400, 25);
+            if (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.HT))
+                list.MoveUp();
+            
             ctKeyRepetition.Down.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(SlimDX.DirectInput.Key.DownArrow),
                 () => list.MoveDown());
+            ctKeyRepetition.B.tRepeatKey(CDTXMania.Pad.bPressingGB(EPad.G), 
+                () => list.MoveDown(), 400, 25);
+            if (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.LT))
+                list.MoveDown();
         }
 
         descriptionPanel.Update(list.CurrentItem, isVisible && !isClosing && list.IsSettled);
