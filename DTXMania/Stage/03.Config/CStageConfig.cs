@@ -110,10 +110,6 @@ internal class CStageConfig : CStage
         try
         {
             configLeftOptionsMenu?.SetSelectedIndex(0);
-            for (int i = 0; i < 4; i++)
-            {
-                ctKeyRepetition[i] = new CCounter(0, 0, 0, CDTXMania.Timer);
-            }
             bFocusIsOnMenu = true;
             ctDisplayWait = new CCounter( 0, 350, 1, CDTXMania.Timer );
         }
@@ -135,10 +131,6 @@ internal class CStageConfig : CStage
             //apply deferred changes made via config list when exiting the stage
             configMenu.ApplyPendingChanges();
 
-            for (int i = 0; i < 4; i++)
-            {
-                ctKeyRepetition[i] = null;
-            }
             ctDisplayWait = null;
             base.OnDeactivate();
         }
@@ -201,59 +193,6 @@ internal class CStageConfig : CStage
         HandleConfigListInput();
         return 0;
     }
-    
-    [StructLayout(LayoutKind.Sequential)]
-    public struct STKeyRepetitionCounter
-    {
-        public CCounter Up;
-        public CCounter Down;
-        public CCounter R;
-        public CCounter B;
-        public CCounter this[int index]
-        {
-            get
-            {
-                switch (index)
-                {
-                    case 0:
-                        return Up;
-
-                    case 1:
-                        return Down;
-
-                    case 2:
-                        return R;
-
-                    case 3:
-                        return B;
-                }
-                throw new IndexOutOfRangeException();
-            }
-            set
-            {
-                switch (index)
-                {
-                    case 0:
-                        Up = value;
-                        return;
-
-                    case 1:
-                        Down = value;
-                        return;
-
-                    case 2:
-                        R = value;
-                        return;
-
-                    case 3:
-                        B = value;
-                        return;
-                }
-                throw new IndexOutOfRangeException();
-            }
-        }
-    }
-
     private ConfigList configList;
     private ConfigDescriptionPanel descriptionPanel;
     private ConfigMenu configMenu;
@@ -262,7 +201,6 @@ internal class CStageConfig : CStage
     private const int MenuExitIndex = 4;
 
     private bool bFocusIsOnMenu;
-    private STKeyRepetitionCounter ctKeyRepetition;
         
     public CCounter ctDisplayWait;
 
@@ -320,19 +258,7 @@ internal class CStageConfig : CStage
                 }
             }
 
-            ctKeyRepetition.Up.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(SlimDXKey.UpArrow),
-                () => MoveMenuSelection(false));
-            ctKeyRepetition.R.tRepeatKey(CDTXMania.Pad.bPressingGB(EPad.R),
-                () => MoveMenuSelection(false), 400, 25);
-            if (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.HT))
-                MoveMenuSelection(false);
-            
-            ctKeyRepetition.Down.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(SlimDXKey.DownArrow),
-                () => MoveMenuSelection(true));
-            ctKeyRepetition.B.tRepeatKey(CDTXMania.Pad.bPressingGB(EPad.G), 
-                () => MoveMenuSelection(true), 400, 25);
-            if (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.LT))
-                MoveMenuSelection(true);
+            CDTXMania.Input.Navigate(() => MoveMenuSelection(false), () => MoveMenuSelection(true));
         }
         else
         {
@@ -346,19 +272,7 @@ internal class CStageConfig : CStage
                 configList.Confirm();
             }
 
-            ctKeyRepetition.Up.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(SlimDXKey.UpArrow),
-                () => configList.MoveUp());
-            ctKeyRepetition.R.tRepeatKey(CDTXMania.Pad.bPressingGB(EPad.R),
-                () => configList.MoveUp(), 400, 25);
-            if (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.HT))
-                configList.MoveUp();
-            
-            ctKeyRepetition.Down.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(SlimDXKey.DownArrow),
-                () => configList.MoveDown());
-            ctKeyRepetition.B.tRepeatKey(CDTXMania.Pad.bPressingGB(EPad.G), 
-                () => configList.MoveDown(), 400, 25);
-            if (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.LT))
-                configList.MoveDown();
+            CDTXMania.Input.Navigate(configList.MoveUp, configList.MoveDown, configList.MoveUpDrums, configList.MoveDownDrums);
         }
 
         //the description panel only shows once a page is focused and fully aligned
@@ -404,9 +318,6 @@ internal class CStageConfig : CStage
             keyAssignPanel.DeleteCurrent();
         }
 
-        ctKeyRepetition.Up.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(SlimDXKey.UpArrow),
-            () => keyAssignPanel.MoveUp());
-        ctKeyRepetition.Down.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(SlimDXKey.DownArrow),
-            () => keyAssignPanel.MoveDown());
+        CDTXMania.Input.Navigate(keyAssignPanel.MoveUp, keyAssignPanel.MoveDown);
     }
 }

@@ -162,30 +162,29 @@ internal class ConfigList : UIGroup
 
     // Up selects the previous item, down selects the next (the ring rotation happens in Draw when
     // the scroll counter crosses a full row, exactly like the old CActConfigList).
-    public void MoveUp()
+    public void MoveUp() => Move(up: true, invertEdit: false);
+    public void MoveDown() => Move(up: false, invertEdit: false);
+
+    // Drum-pad variants: when editing an integer the drums intentionally reverse the value
+    // direction (HT decreases, LT increases) because pressing right for an increase feels
+    // much more natural
+    public void MoveUpDrums() => Move(up: true, invertEdit: true);
+    public void MoveDownDrums() => Move(up: false, invertEdit: true);
+
+    private void Move(bool up, bool invertEdit)
     {
         if (editing)
         {
-            CurrentItem!.tMoveItemValueToNext(); // up = increase
+            bool increase = up ^ invertEdit;
+            if (increase) CurrentItem!.tMoveItemValueToNext();
+            else CurrentItem!.tMoveItemValueToPrevious();
+
             CommitPage();
             CDTXMania.Skin.soundCursorMovement.tPlay();
             return;
         }
 
-        QueueScroll(-ScrollUnitsPerRow);
-    }
-
-    public void MoveDown()
-    {
-        if (editing)
-        {
-            CurrentItem!.tMoveItemValueToPrevious(); // down = decrease
-            CommitPage();
-            CDTXMania.Skin.soundCursorMovement.tPlay();
-            return;
-        }
-
-        QueueScroll(+ScrollUnitsPerRow);
+        QueueScroll(up ? -ScrollUnitsPerRow : +ScrollUnitsPerRow);
     }
 
     private void QueueScroll(int units)
