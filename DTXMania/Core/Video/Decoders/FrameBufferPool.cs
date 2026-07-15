@@ -7,7 +7,7 @@ internal sealed class FrameBufferPool
     private readonly int maxRetained;
     private int bufferSize = -1;
 
-    public FrameBufferPool(int maxRetained = 6)
+    public FrameBufferPool(int maxRetained = 8)
     {
         this.maxRetained = maxRetained;
     }

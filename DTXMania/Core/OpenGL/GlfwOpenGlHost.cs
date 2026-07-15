@@ -521,8 +521,16 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
             }
 
             _gameRenderTarget.Resize(targetWidth, targetHeight);
+            _gameRenderTarget.RenderToDefaultFramebuffer = !_renderInGameWindow;
             renderer.BeginFrame(targetWidth, targetHeight);
-            _gameRenderTarget.BindForRendering();
+            if (_renderInGameWindow)
+            {
+                _gameRenderTarget.BindForRendering();
+            }
+            else
+            {
+                _gameRenderTarget.BindDefaultFramebuffer(Math.Max(_framebufferWidth, 1), Math.Max(_framebufferHeight, 1));
+            }
 
             FrameProfiler.Begin(FrameSection.Update);
             _game.Update(_deltaTime, _stopwatch.Elapsed.TotalSeconds);
@@ -540,20 +548,20 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
             FrameProfiler.End(FrameSection.Inspector);
 
             FrameProfiler.Begin(FrameSection.Blit);
-            GLFW.MakeContextCurrent(_window);
             if (_renderInGameWindow)
             {
                 _gameRenderTarget.ClearDefaultFramebuffer(0.08f, 0.09f, 0.12f, 1f, Math.Max(_framebufferWidth, 1), Math.Max(_framebufferHeight, 1));
             }
-            else
-            {
-                _gameRenderTarget.BlitToDefaultFramebuffer(Math.Max(_framebufferWidth, 1), Math.Max(_framebufferHeight, 1));
-            }
+            // else: the game was rendered directly to the default framebuffer, so no blit is needed.
             FrameProfiler.End(FrameSection.Blit);
 
             FrameProfiler.Begin(FrameSection.ImGuiRender);
             ImGui.Render();
-            ImGuiImplOpenGL3.RenderDrawData(ImGui.GetDrawData());
+            var imguiDrawData = ImGui.GetDrawData();
+            if (imguiDrawData.TotalVtxCount > 0)
+            {
+                ImGuiImplOpenGL3.RenderDrawData(imguiDrawData);
+            }
             FrameProfiler.End(FrameSection.ImGuiRender);
 
             _gpuFrameTimer.EndFrame();
