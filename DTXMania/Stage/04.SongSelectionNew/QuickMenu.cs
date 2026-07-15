@@ -105,10 +105,11 @@ public class QuickMenu : UIGroup
         }
         else
         {
-            //close
+            //close: persist any changes made in the quick menu (CommitPage already updated the
+            //in-memory ConfigIni; this writes it to disk, like the main config does on exit)
             isClosing = true;
 
-            //commit
+            CDTXMania.ConfigIni.tWrite(CDTXMania.executableDirectory + "Config.ini");
         }
     }
 
