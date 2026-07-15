@@ -180,9 +180,18 @@ public static class EnumConverter
         return new bool[5] { tupleb.R, tupleb.G, tupleb.B, tupleb.Y, tupleb.P };
     }
 
+    private static readonly Dictionary<EChannel, bool[]> _boolArrayFromEChannelCache = new();
+
     public static bool[] GetArrayBoolFromEChannel(EChannel ch)
     {
-        return GetArrayBoolRGBYPFromTupleBool(GetTupleBoolFromEChannel(ch));
+        if (_boolArrayFromEChannelCache.TryGetValue(ch, out bool[]? cached))
+        {
+            return cached;
+        }
+
+        bool[] created = GetArrayBoolRGBYPFromTupleBool(GetTupleBoolFromEChannel(ch));
+        _boolArrayFromEChannelCache[ch] = created;
+        return created;
     }
 
     public static (bool R, bool G, bool B, bool Y, bool P) GetTupleBoolFromEChannel(EChannel ch)
