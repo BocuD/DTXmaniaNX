@@ -28,6 +28,8 @@ public unsafe class AsyncVideoDecoder : VideoDecoder
     private bool endOfStreamReached;
     private const int MaxBufferedFrames = 2; // Keep queue small for low latency and memory
 
+    private readonly FrameBufferPool framePool = new();
+
     // Incremented under decodeSync on every SeekTo. Frames decoded under an older
     // generation are discarded at enqueue time, eliminating the race where the
     // worker thread decodes a frame just before a seek and enqueues it just after
@@ -179,6 +181,7 @@ public unsafe class AsyncVideoDecoder : VideoDecoder
 
             if (TryDecodeOneFrame(out DecodedFrameData data, out bool reachedEof))
             {
+                bool enqueued = false;
                 lock (queueSync)
                 {
                     // Re-check generation under queueSync. We don't need decodeSync here
@@ -189,8 +192,13 @@ public unsafe class AsyncVideoDecoder : VideoDecoder
                     if (!stopRequested && Volatile.Read(ref seekGeneration) == genAtStart)
                     {
                         decodedFrames.Enqueue(data);
+                        enqueued = true;
                     }
                 }
+
+                // Stale frame from a pre-seek timeline (or shutting down): recycle its
+                // buffer rather than letting it become garbage.
+                if (!enqueued) framePool.Return(data.RgbaData);
             }
             else if (reachedEof)
             {
@@ -262,7 +270,7 @@ public unsafe class AsyncVideoDecoder : VideoDecoder
                 ffmpeg.sws_scale(swsContext, frame->data, frame->linesize, 0, codecContext->height, rgbaFrame->data, rgbaFrame->linesize);
 
                 int packedSize = codecContext->width * codecContext->height * 4;
-                byte[] rgbaData = new byte[packedSize];
+                byte[] rgbaData = framePool.Rent(packedSize);
                 
                 int stride = rgbaFrame->linesize[0];
                 int rowBytes = codecContext->width * 4;
@@ -322,7 +330,11 @@ public unsafe class AsyncVideoDecoder : VideoDecoder
             Volatile.Write(ref seekGeneration, seekGeneration + 1);
             lock (queueSync)
             {
-                decodedFrames.Clear();
+                // Recycle the buffers of any queued frames before discarding them.
+                while (decodedFrames.Count > 0)
+                {
+                    framePool.Return(decodedFrames.Dequeue().RgbaData);
+                }
                 endOfStreamReached = false;
             }
         }
@@ -341,6 +353,8 @@ public unsafe class AsyncVideoDecoder : VideoDecoder
         data = default;
         return false;
     }
+
+    public override void ReturnFrameBuffer(byte[] buffer) => framePool.Return(buffer);
 
     public override bool GetNextFrameBlocking(out DecodedFrameData data)
     {

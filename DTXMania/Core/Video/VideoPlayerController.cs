@@ -192,6 +192,8 @@ public class VideoPlayerController : IDisposable
 
         activeTexture.UpdateRgba32(data.RgbaData, decoder.Width, decoder.Height);
 
+        decoder.ReturnFrameBuffer(data.RgbaData);
+
         CurrentFrame = new DisplayedFrame(
             texture: activeTexture,
             timeSeconds: data.TimeSeconds,

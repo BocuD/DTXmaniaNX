@@ -21,6 +21,8 @@ public unsafe class SoftwareVideoDecoder : VideoDecoder
 
     private bool endOfStream;
 
+    private readonly FrameBufferPool framePool = new();
+
     public override int Width => codecContext != null ? codecContext->width : 0;
     public override int Height => codecContext != null ? codecContext->height : 0;
 
@@ -202,7 +204,7 @@ public unsafe class SoftwareVideoDecoder : VideoDecoder
             ffmpeg.sws_scale(swsContext, frame->data, frame->linesize, 0, codecContext->height, rgbaFrame->data, rgbaFrame->linesize);
 
             int packedSize = codecContext->width * codecContext->height * 4;
-            byte[] rgbaData = new byte[packedSize];
+            byte[] rgbaData = framePool.Rent(packedSize);
             
             int stride = rgbaFrame->linesize[0];
             int rowBytes = codecContext->width * 4;
@@ -240,6 +242,8 @@ public unsafe class SoftwareVideoDecoder : VideoDecoder
         data = default;
         return false;
     }
+
+    public override void ReturnFrameBuffer(byte[] buffer) => framePool.Return(buffer);
 
     private double GetCurrentPtsSeconds()
     {

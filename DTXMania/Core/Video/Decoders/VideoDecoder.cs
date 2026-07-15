@@ -34,5 +34,7 @@ public abstract class VideoDecoder : IDisposable
     /// </summary>
     public abstract bool GetNextFrameBlocking(out DecodedFrameData data);
     
+    public virtual void ReturnFrameBuffer(byte[] buffer) { }
+
     public abstract void Dispose();
 }
