@@ -69,6 +69,8 @@ internal class QuickMenuPage(ConfigList list, EInstrumentPart part, QuickConfigI
 
         items.Add(dark);
 
+        items.Add(RandomItem());
+
         // var switcherButton = FolderItem($"Instrument: {part}",
         //     "設定する楽器を切り替えます。",
         //     "Switch which instrument these settings apply to.", switcher);
@@ -97,6 +99,9 @@ internal class QuickMenuPage(ConfigList list, EInstrumentPart part, QuickConfigI
             CDTXMania.ConfigIni.eTargetGhost[(int)instrument] = gtd;
         };
         items.Add(targetGhost);
+        
+        
+        
 
         var fullConfig = new CItemBase("Open Full Config", CItemBase.EPanelType.Folder,
             "コンフィグ画面を開きます。",

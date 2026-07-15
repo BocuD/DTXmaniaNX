@@ -157,16 +157,8 @@ internal sealed class DrumsConfigPage : InstrumentConfigPage
             "Number of lanes.\n10: default.\n9: XG style.\n6: classic style.",
             ["10", "9", "6"],
             () => (int)CDTXMania.ConfigIni.eNumOfLanes.Drums, v => CDTXMania.ConfigIni.eNumOfLanes.Drums = (EType)v));
-        items.Add(Choice("RandomPad",
-            "パッドチップをランダム化します。\nMirror: 左右反転。\nPart: レーン単位で入替。\nSuper: 小節単位で入替。\nHyper: 1拍ごとに入替。\nMaster: 激しく入替。\nAnother: 程よくばらける。",
-            "Randomize pad chips.\nMirror: flip left/right.\nPart: swap by lane.\nSuper: swap per measure.\nHyper: swap per beat.\nMaster: extreme swapping.\nAnother: moderate spread.",
-            ["OFF", "Mirror", "Part", "Super", "Hyper", "Master", "Another"],
-            () => (int)CDTXMania.ConfigIni.eRandom.Drums, v => CDTXMania.ConfigIni.eRandom.Drums = (ERandomMode)v));
-        items.Add(Choice("RandomPedal",
-            "足(ペダル)チップをランダム化します。\nMirror: 左右反転。\nPart: レーン単位で入替。\nSuper: 小節単位で入替。\nHyper: 1拍ごとに入替。\nMaster: 激しく入替。\nAnother: 程よくばらける。",
-            "Randomize pedal chips.\nMirror: flip left/right.\nPart: swap by lane.\nSuper: swap per measure.\nHyper: swap per beat.\nMaster: extreme swapping.\nAnother: moderate spread.",
-            ["OFF", "Mirror", "Part", "Super", "Hyper", "Master", "Another"],
-            () => (int)CDTXMania.ConfigIni.eRandomPedal.Drums, v => CDTXMania.ConfigIni.eRandomPedal.Drums = (ERandomMode)v));
+        items.Add(RandomItem());
+        items.Add(RandomPedalItem());
 
         items.Add(GraphItem()); // drums graph has no mutual exclusion
         items.Add(InputAdjustItem());
