@@ -181,6 +181,9 @@ internal sealed unsafe class GameRenderTarget : IDisposable
         if (_gl == null)
             throw new InvalidOperationException("Render target has no active GL context.");
 
+        //draws still sitting in the sprite batch must land in the framebuffer before we read it
+        UI.OpenGL.OpenGlRenderer.Instance?.Flush();
+
         var pixels = new byte[Width * Height * 4];
         _gl.BindFramebuffer(FramebufferTarget.ReadFramebuffer, _framebuffer);
         

@@ -33,6 +33,7 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
     private readonly GameRenderTarget _gameRenderTarget = new();
     public GameRenderTarget GameRenderTarget => _gameRenderTarget;
     private readonly OpenGlRenderer renderer = new();
+    private readonly GpuFrameTimer _gpuFrameTimer = new();
     private readonly OpenGlSkiaTextRenderer _skiaTextRenderer = new();
     private readonly OpenGlTextureFactory _textureFactory = new();
     private readonly Stopwatch _stopwatch = Stopwatch.StartNew();
@@ -225,6 +226,7 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
         _game.AttachGraphics(_gl);
         _gameRenderTarget.AttachGraphics(_gl);
         renderer.AttachGraphics(_gl);
+        _gpuFrameTimer.AttachGraphics(_gl);
         OpenGlRenderer.Instance = renderer;
         
         BaseTexture.SkiaTextRenderer = _skiaTextRenderer;
@@ -442,6 +444,7 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
         _game.windowSize = new Vector2(_windowWidth, _windowHeight);
         _gameRenderTarget.AttachGraphics(_gl!);
         renderer.AttachGraphics(_gl!);
+        _gpuFrameTimer.AttachGraphics(_gl!);
         GLFW.SetWindowTitle(newWindow, _windowTitle);
         InitializeImGui();
         _clearImGuiFocusOnNextFrame = true;
@@ -470,7 +473,11 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
     {        
         while (GLFW.WindowShouldClose(_window) == 0 && !_game.isExiting)
         {
+            FrameProfiler.NewFrame();
+
+            FrameProfiler.Begin(FrameSection.PollEvents);
             GLFW.PollEvents();
+            FrameProfiler.End(FrameSection.PollEvents);
 
             if (GLFW.WindowShouldClose(_window) != 0)
             {
@@ -481,6 +488,7 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
             GLFW.GetWindowSize(_window, ref _windowWidth, ref _windowHeight);
             UpdateDiagnostics();
 
+            FrameProfiler.Begin(FrameSection.ImGuiNewFrame);
             GLFW.MakeContextCurrent(_window);
             ImGui.SetCurrentContext(_imguiContext);
             ImGuiImplGLFW.SetCurrentContext(_imguiContext);
@@ -488,6 +496,9 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
             ImGuiImplOpenGL3.NewFrame();
             ImGuiImplGLFW.NewFrame();
             ImGui.NewFrame();
+            FrameProfiler.End(FrameSection.ImGuiNewFrame);
+
+            _gpuFrameTimer.BeginFrame();
 
             if (_clearImGuiFocusOnNextFrame)
             {
@@ -512,13 +523,23 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
             _gameRenderTarget.Resize(targetWidth, targetHeight);
             renderer.BeginFrame(targetWidth, targetHeight);
             _gameRenderTarget.BindForRendering();
+
+            FrameProfiler.Begin(FrameSection.Update);
             _game.Update(_deltaTime, _stopwatch.Elapsed.TotalSeconds);
+            FrameProfiler.End(FrameSection.Update);
+
+            FrameProfiler.Begin(FrameSection.GameRender);
             _game.Render(targetWidth, targetHeight, _stopwatch.Elapsed.TotalSeconds);
+            renderer.Flush();
+            FrameProfiler.End(FrameSection.GameRender);
+
             _gameRenderTarget.BindDefaultFramebuffer(Math.Max(_framebufferWidth, 1), Math.Max(_framebufferHeight, 1));
 
+            FrameProfiler.Begin(FrameSection.Inspector);
             InspectorManager.Draw(_renderInGameWindow, _gameRenderTarget.TextureId, new Vector2(_gameRenderTarget.Width, _gameRenderTarget.Height));
-            
-            ImGui.Render();
+            FrameProfiler.End(FrameSection.Inspector);
+
+            FrameProfiler.Begin(FrameSection.Blit);
             GLFW.MakeContextCurrent(_window);
             if (_renderInGameWindow)
             {
@@ -528,8 +549,19 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
             {
                 _gameRenderTarget.BlitToDefaultFramebuffer(Math.Max(_framebufferWidth, 1), Math.Max(_framebufferHeight, 1));
             }
+            FrameProfiler.End(FrameSection.Blit);
+
+            FrameProfiler.Begin(FrameSection.ImGuiRender);
+            ImGui.Render();
             ImGuiImplOpenGL3.RenderDrawData(ImGui.GetDrawData());
+            FrameProfiler.End(FrameSection.ImGuiRender);
+
+            _gpuFrameTimer.EndFrame();
+            FrameProfiler.GpuFrameMs = _gpuFrameTimer.GpuFrameMs;
+
+            FrameProfiler.Begin(FrameSection.SwapBuffers);
             GLFW.SwapBuffers(_window);
+            FrameProfiler.End(FrameSection.SwapBuffers);
 
             if (GLFW.WindowShouldClose(_window) != 0)
             {

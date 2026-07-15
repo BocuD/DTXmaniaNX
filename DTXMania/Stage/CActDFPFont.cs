@@ -488,6 +488,11 @@ public class CActDFPFont : CActivity
 
 	
 		stCharacterRects = st文字領域Array;
+
+		foreach (STCharacterMap characterMap in st文字領域Array)
+		{
+			dicCharacterRects.TryAdd(characterMap.ch, characterMap.rc);
+		}
 	}
 
 
@@ -506,13 +511,9 @@ public class CActDFPFont : CActivity
 		int num = 0;
 		foreach( char ch in str )
 		{
-			foreach( STCharacterMap st文字領域 in stCharacterRects )
+			if ( dicCharacterRects.TryGetValue( ch, out RectangleF rc ) )
 			{
-				if ( st文字領域.ch == ch )
-				{
-					num += (int) ( ( st文字領域.rc.Width - 5 ) * fScale );
-					break;
-				}
+				num += (int) ( ( rc.Width - 5 ) * fScale );
 			}
 		}
 		return num;
@@ -530,24 +531,13 @@ public class CActDFPFont : CActivity
 			Matrix4x4 scale = Matrix4x4.CreateScale(fScale);
 			foreach( char ch in str )
 			{
-				foreach( STCharacterMap st文字領域 in stCharacterRects )
+				if ( dicCharacterRects.TryGetValue( ch, out RectangleF rect ) )
 				{
-					if ( st文字領域.ch == ch )
-					{
-						RectangleF rect = new()
-						{
-							X = st文字領域.rc.X,
-							Y = st文字領域.rc.Y,
-							Width = st文字領域.rc.Width,
-							Height = st文字領域.rc.Height
-						};
-						Vector2 size = new( rect.Width, rect.Height );
-						Matrix4x4 mat = Matrix4x4.CreateTranslation(x, 0, 0);
-						mat = scale * mat;
-						texture.tDraw2DMatrix(mat * matrix, size, rect);
-						x += st文字領域.rc.Width * fScale;
-						break;
-					}
+					Vector2 size = new( rect.Width, rect.Height );
+					Matrix4x4 mat = Matrix4x4.CreateTranslation(x, 0, 0);
+					mat = scale * mat;
+					texture.tDraw2DMatrix(mat * matrix, size, rect);
+					x += rect.Width * fScale;
 				}
 			}
 		}
@@ -596,6 +586,7 @@ public class CActDFPFont : CActivity
 	}
 
 	internal readonly STCharacterMap[] stCharacterRects;
+	private readonly Dictionary<char, RectangleF> dicCharacterRects = new();
 	internal BaseTexture txHighlightCharacterMap;
 	internal BaseTexture txCharacterMap;
 	//-----------------
