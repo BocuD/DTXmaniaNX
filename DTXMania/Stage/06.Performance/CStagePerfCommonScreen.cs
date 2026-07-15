@@ -313,8 +313,18 @@ internal abstract class CStagePerfCommonScreen : CStage
 
     // CStage 実装
 
+    // Remembers the GC latency mode in effect before the song started so it can be restored.
+    private System.Runtime.GCLatencyMode _previousGcLatencyMode;
+
     public override void OnActivate()
     {
+        // Rhythm games are latency-sensitive: ask the runtime to avoid disruptive
+        // blocking gen2 collections while a song is playing. With the video frame
+        // buffers now pooled, allocation pressure is low enough that the GC can
+        // comfortably defer full collections until OnDeactivate.
+        _previousGcLatencyMode = System.Runtime.GCSettings.LatencyMode;
+        System.Runtime.GCSettings.LatencyMode = System.Runtime.GCLatencyMode.SustainedLowLatency;
+
         listChip = CDTXMania.DTX.listChip;
         listWAV = CDTXMania.DTX.listWAV;
 
@@ -450,6 +460,10 @@ internal abstract class CStagePerfCommonScreen : CStage
     }
     public override void OnDeactivate()
     {
+        // Restore the previous GC latency mode so menus and results can reclaim
+        // memory freely again.
+        System.Runtime.GCSettings.LatencyMode = _previousGcLatencyMode;
+
         LLastPlayedHHWAVNumber.Clear();	// #23921 2011.1.4 yyagi
         LLastPlayedHHWAVNumber = null;	//
         for (int i = 0; i < 3; i++)
