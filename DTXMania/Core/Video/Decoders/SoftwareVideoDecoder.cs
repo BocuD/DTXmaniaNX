@@ -1,5 +1,4 @@
-﻿using System.Runtime.InteropServices;
-using FFmpeg.AutoGen.Abstractions;
+﻿using FFmpeg.AutoGen.Abstractions;
 
 namespace DTXMania.Core.Video.Decoders;
 
@@ -8,10 +7,13 @@ public unsafe class SoftwareVideoDecoder : VideoDecoder
     private AVFormatContext* formatContext;
     private AVCodecContext* codecContext;
     private AVFrame* frame;
-    private AVFrame* rgbaFrame;
     private AVPacket* packet;
     private SwsContext* swsContext;
     private int videoStreamIndex = -1;
+
+    // Reusable sws_scale destination descriptors (single packed RGBA plane)
+    private readonly byte*[] dstPlanes = new byte*[4];
+    private readonly int[] dstStrides = new int[4];
 
     private double fallbackFrameDurationSeconds = 1.0 / 30.0;
     private double timelineOriginPtsSeconds = double.NaN;
@@ -21,6 +23,7 @@ public unsafe class SoftwareVideoDecoder : VideoDecoder
 
     private bool endOfStream;
 
+    // Reuses frame pixel buffers instead of allocating one per decoded frame
     private readonly FrameBufferPool framePool = new();
 
     public override int Width => codecContext != null ? codecContext->width : 0;
@@ -93,13 +96,9 @@ public unsafe class SoftwareVideoDecoder : VideoDecoder
         if (ffmpeg.avcodec_open2(codecContext, codec, null) != 0) return false;
 
         frame = ffmpeg.av_frame_alloc();
-        rgbaFrame = ffmpeg.av_frame_alloc();
         packet = ffmpeg.av_packet_alloc();
 
-        rgbaFrame->format = (int)AVPixelFormat.AV_PIX_FMT_RGBA;
-        rgbaFrame->width = codecContext->width;
-        rgbaFrame->height = codecContext->height;
-        ffmpeg.av_frame_get_buffer(rgbaFrame, 0);
+        dstStrides[0] = codecContext->width * 4;
 
         swsContext = ffmpeg.sws_getContext(codecContext->width, codecContext->height, codecContext->pix_fmt,
                                            codecContext->width, codecContext->height, AVPixelFormat.AV_PIX_FMT_RGBA,
@@ -195,32 +194,14 @@ public unsafe class SoftwareVideoDecoder : VideoDecoder
                 }
             }
 
-            if (ffmpeg.av_frame_make_writable(rgbaFrame) < 0)
-            {
-                data = default;
-                return false;
-            }
-
-            ffmpeg.sws_scale(swsContext, frame->data, frame->linesize, 0, codecContext->height, rgbaFrame->data, rgbaFrame->linesize);
-
             int packedSize = codecContext->width * codecContext->height * 4;
             byte[] rgbaData = framePool.Rent(packedSize);
-            
-            int stride = rgbaFrame->linesize[0];
-            int rowBytes = codecContext->width * 4;
-            IntPtr src = (IntPtr)rgbaFrame->data[0];
 
-            if (stride == rowBytes)
+            fixed (byte* dst = rgbaData)
             {
-                Marshal.Copy(src, rgbaData, 0, packedSize);
-            }
-            else
-            {
-                for (int y = 0; y < codecContext->height; y++)
-                {
-                    IntPtr srcRow = src + (y * stride);
-                    Marshal.Copy(srcRow, rgbaData, y * rowBytes, rowBytes);
-                }
+                dstPlanes[0] = dst;
+                ffmpeg.sws_scale(swsContext, frame->data, frame->linesize, 0,
+                                 codecContext->height, dstPlanes, dstStrides);
             }
 
             long frameNum = FrameRate > 0 ? (long)(currentPts * FrameRate + 0.5) : 0;
@@ -283,7 +264,6 @@ public unsafe class SoftwareVideoDecoder : VideoDecoder
     public override void Dispose()
     {
         if (frame != null) { AVFrame* f = frame; ffmpeg.av_frame_free(&f); frame = null; }
-        if (rgbaFrame != null) { AVFrame* rf = rgbaFrame; ffmpeg.av_frame_free(&rf); rgbaFrame = null; }
         if (packet != null) { AVPacket* p = packet; ffmpeg.av_packet_free(&p); packet = null; }
         if (swsContext != null) { ffmpeg.sws_freeContext(swsContext); swsContext = null; }
         if (codecContext != null) { AVCodecContext* cc = codecContext; ffmpeg.avcodec_free_context(&cc); codecContext = null; }

@@ -50,6 +50,17 @@ public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
     private uint _batchTexture;
     private BlendMode _batchBlendMode;
 
+    // PBO ring for stall-free streaming texture uploads (used by video). Uploading a
+    // texture from a client pointer forces the driver to serialize with the GPU (a CPU
+    // stall until the command queue drains). Streaming through an orphaned Pixel Buffer
+    // Object instead turns the upload into a GPU-scheduled async DMA, so the CPU no
+    // longer waits. Falls back to the direct path if PBOs misbehave on the driver.
+    private const int StreamPboCount = 3;
+    private uint[] _streamPbos = Array.Empty<uint>();
+    private int _streamPboIndex;
+    private int _streamPboSize;
+    private bool _streamPboUnavailable;
+
     //events to notify external observers (e.g. an inspector) about texture lifecycle
     internal event Action<uint, int, int>? TextureCreated;
     internal event Action<uint>? TextureDeleted;
@@ -125,6 +136,8 @@ public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
             _gl.DeleteVertexArray(_vao);
             _vao = 0;
         }
+
+        DeleteStreamPbos();
 
         _contextResourcesCreated = false;
     }
@@ -342,6 +355,127 @@ public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
 
         _gl.BindTexture(TextureTarget.Texture2D, 0);
         _boundTexture = 0;
+    }
+    /// <summary>
+    /// Uploads pixels into <paramref name="textureId"/> via an orphaned Pixel Buffer Object so the
+    /// transfer is a GPU-scheduled DMA rather than a synchronous client-pointer copy. This avoids the
+    /// implicit CPU/GPU synchronization that a plain <see cref="UpdateTexture"/> triggers on frames
+    /// where the texture is still referenced by in-flight draw commands. Falls back to the direct path
+    /// if the driver cannot map a PBO.
+    /// </summary>
+    internal void UpdateTextureStreaming(uint textureId, ReadOnlySpan<byte> rgbaPixels, int width, int height)
+    {
+        ValidateTextureSize(width, height);
+
+        int size = width * height * 4;
+        if (rgbaPixels.Length < size)
+        {
+            throw new ArgumentException("RGBA buffer is smaller than width*height*4 bytes.", nameof(rgbaPixels));
+        }
+
+        if (_gl == null)
+        {
+            throw new InvalidOperationException("OpenGL UI renderer has no active GL context.");
+        }
+
+        // Driver already told us PBO streaming doesn't work here: use the direct path.
+        if (_streamPboUnavailable)
+        {
+            UpdateTexture(textureId, rgbaPixels, width, height);
+            return;
+        }
+
+        //pending quads referencing this texture were submitted against its current content;
+        //draw them before overwriting it
+        if (_batchQuadCount > 0 && _batchTexture == textureId)
+        {
+            Flush();
+        }
+
+        try
+        {
+            EnsureStreamPbos(size);
+
+            _streamPboIndex = (_streamPboIndex + 1) % StreamPboCount;
+            uint pbo = _streamPbos[_streamPboIndex];
+
+            _gl.BindBuffer(BufferTargetARB.PixelUnpackBuffer, pbo);
+
+            // InvalidateBuffer orphans the store, so the driver can hand us fresh memory without
+            // waiting for the previous DMA out of this PBO to finish.
+            void* mapped = _gl.MapBufferRange(BufferTargetARB.PixelUnpackBuffer, 0, (nuint)size,
+                MapBufferAccessMask.WriteBit | MapBufferAccessMask.InvalidateBufferBit);
+
+            if (mapped == null)
+            {
+                _gl.BindBuffer(BufferTargetARB.PixelUnpackBuffer, 0);
+                UpdateTexture(textureId, rgbaPixels, width, height);
+                return;
+            }
+
+            rgbaPixels.Slice(0, size).CopyTo(new Span<byte>(mapped, size));
+            _gl.UnmapBuffer(BufferTargetARB.PixelUnpackBuffer);
+
+            _gl.BindTexture(TextureTarget.Texture2D, textureId);
+            _gl.PixelStore(PixelStoreParameter.UnpackAlignment, 1);
+
+            // With a PBO bound, the final arg is a byte OFFSET into that buffer, not a client
+            // pointer — the driver schedules the copy on the GPU timeline and returns immediately.
+            _gl.TexSubImage2D(TextureTarget.Texture2D, 0, 0, 0, (uint)width, (uint)height,
+                PixelFormat.Rgba, PixelType.UnsignedByte, (void*)0);
+
+            _gl.BindTexture(TextureTarget.Texture2D, 0);
+            // Must unbind the PBO, or a later client-pointer upload would be misread as an offset.
+            _gl.BindBuffer(BufferTargetARB.PixelUnpackBuffer, 0);
+            _boundTexture = 0;
+        }
+        catch (Exception e)
+        {
+            System.Diagnostics.Trace.TraceWarning(
+                $"PBO streaming upload failed ({e.Message}); disabling it and falling back to direct upload.");
+            _streamPboUnavailable = true;
+            DeleteStreamPbos();
+            _gl.BindBuffer(BufferTargetARB.PixelUnpackBuffer, 0);
+            UpdateTexture(textureId, rgbaPixels, width, height);
+        }
+    }
+
+    private void EnsureStreamPbos(int size)
+    {
+        if (_streamPbos.Length == StreamPboCount && _streamPboSize == size)
+        {
+            return;
+        }
+
+        DeleteStreamPbos();
+
+        _streamPbos = new uint[StreamPboCount];
+        for (int i = 0; i < StreamPboCount; i++)
+        {
+            uint pbo = _gl!.GenBuffer();
+            _gl.BindBuffer(BufferTargetARB.PixelUnpackBuffer, pbo);
+            _gl.BufferData(BufferTargetARB.PixelUnpackBuffer, (nuint)size, (void*)null, BufferUsageARB.StreamDraw);
+            _streamPbos[i] = pbo;
+        }
+        _gl.BindBuffer(BufferTargetARB.PixelUnpackBuffer, 0);
+
+        _streamPboSize = size;
+        _streamPboIndex = 0;
+    }
+
+    private void DeleteStreamPbos()
+    {
+        if (_gl != null)
+        {
+            foreach (uint pbo in _streamPbos)
+            {
+                if (pbo != 0) _gl.DeleteBuffer(pbo);
+            }
+        }
+
+        _streamPbos = Array.Empty<uint>();
+        _streamPboSize = 0;
+        _streamPboIndex = 0;
     }
     
     private void DrawQuad(uint textureId, float textureWidth, float textureHeight, Matrix4x4 transformMatrix, Vector2 size, RectangleF clipRect, Color4 color, BlendMode blendMode)
