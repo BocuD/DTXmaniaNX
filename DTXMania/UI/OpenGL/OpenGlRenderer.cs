@@ -16,9 +16,12 @@ public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
     private bool _sharedResourcesCreated;
     private bool _contextResourcesCreated;
     private uint _program;
-    private uint _vbo;
     private uint _ebo;
     private uint _vao;
+
+    private const int VboRingCount = 3;
+    private uint[] _vboRing = Array.Empty<uint>();
+    private int _vboRingIndex;
     private int _projectionLocation;
     private Matrix4x4 _projection = Matrix4x4.Identity;
 
@@ -215,10 +218,13 @@ public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
             _ebo = 0;
         }
 
-        if (_vbo != 0)
+        if (_vboRing.Length > 0)
         {
-            _gl.DeleteBuffer(_vbo);
-            _vbo = 0;
+            foreach (uint vbo in _vboRing)
+            {
+                if (vbo != 0) _gl.DeleteBuffer(vbo);
+            }
+            _vboRing = Array.Empty<uint>();
         }
 
         if (_program != 0)
@@ -356,6 +362,7 @@ public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
         _gl.BindTexture(TextureTarget.Texture2D, 0);
         _boundTexture = 0;
     }
+
     /// <summary>
     /// Uploads pixels into <paramref name="textureId"/> via an orphaned Pixel Buffer Object so the
     /// transfer is a GPU-scheduled DMA rather than a synchronous client-pointer copy. This avoids the
@@ -477,7 +484,7 @@ public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
         _streamPboSize = 0;
         _streamPboIndex = 0;
     }
-    
+
     private void DrawQuad(uint textureId, float textureWidth, float textureHeight, Matrix4x4 transformMatrix, Vector2 size, RectangleF clipRect, Color4 color, BlendMode blendMode)
     {
         if (_gl == null || !_sharedResourcesCreated || !_contextResourcesCreated)
@@ -563,11 +570,24 @@ public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
         }
 
         //orphaning BufferData (rather than BufferSubData) so the driver never has to sync with
-        //draws still reading the previous batch's vertices
+        //draws still reading the previous batch's vertices. We also rotate through a small ring
+        //of buffers, so even drivers that don't rename an orphaned buffer well never stall: the
+        //buffer we upload into hasn't been touched by the GPU for VboRingCount draws.
+        _vboRingIndex = (_vboRingIndex + 1) % VboRingCount;
+        uint vbo = _vboRing[_vboRingIndex];
+        _gl.BindBuffer(BufferTargetARB.ArrayBuffer, vbo);
+
         fixed (float* vertexPtr = _batchVertices)
         {
             _gl.BufferData(BufferTargetARB.ArrayBuffer, (nuint)(_batchQuadCount * FloatsPerQuad * sizeof(float)), vertexPtr, BufferUsageARB.DynamicDraw);
         }
+
+        // Re-point the vertex attributes at the ring buffer we just filled (the VAO records which
+        // buffer each attribute reads from). Cheap CPU-only calls; no GPU sync.
+        int stride = FloatsPerVertex * sizeof(float);
+        _gl.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, (uint)stride, (void*)0);
+        _gl.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, (uint)stride, (void*)(3 * sizeof(float)));
+        _gl.VertexAttribPointer(2, 4, VertexAttribPointerType.Float, false, (uint)stride, (void*)(5 * sizeof(float)));
 
         _gl.DrawElements(PrimitiveType.Triangles, (uint)(_batchQuadCount * 6), DrawElementsType.UnsignedShort, null);
         drawCalls++;
@@ -584,7 +604,7 @@ public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
         _gl.Disable(GLEnum.CullFace);
         _gl.UseProgram(_program);
         _gl.BindVertexArray(_vao);
-        _gl.BindBuffer(BufferTargetARB.ArrayBuffer, _vbo);
+        _gl.BindBuffer(BufferTargetARB.ArrayBuffer, _vboRing[0]);
         _gl.ActiveTexture(TextureUnit.Texture0);
 
         Matrix4x4 projection = _projection;
@@ -635,7 +655,11 @@ public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
             """;
 
         _program = CreateProgram(vertexShaderSource, fragmentShaderSource);
-        _vbo = _gl.GenBuffer();
+        _vboRing = new uint[VboRingCount];
+        for (int i = 0; i < VboRingCount; i++)
+        {
+            _vboRing[i] = _gl.GenBuffer();
+        }
         _ebo = _gl.GenBuffer();
         _projectionLocation = _gl.GetUniformLocation(_program, "uProjection");
 
@@ -653,7 +677,7 @@ public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
 
         _vao = _gl.GenVertexArray();
         _gl.BindVertexArray(_vao);
-        _gl.BindBuffer(BufferTargetARB.ArrayBuffer, _vbo);
+        _gl.BindBuffer(BufferTargetARB.ArrayBuffer, _vboRing[0]);
         _gl.BindBuffer(BufferTargetARB.ElementArrayBuffer, _ebo);
 
         //index data never changes (two triangles per quad, repeated for every batch slot) so we
