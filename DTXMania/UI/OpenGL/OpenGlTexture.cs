@@ -117,6 +117,23 @@ internal sealed class OpenGlTexture : BaseTexture
         _renderer.UpdateTexture(_textureId, rgbaPixels, width, height, dstX, dstY);
     }
 
+    public override void UpdateRgba32Streaming(ReadOnlySpan<byte> rgbaPixels, int width, int height)
+    {
+        if (_textureId == 0)
+        {
+            throw new ObjectDisposedException(name, "Cannot update a disposed texture.");
+        }
+
+        int textureWidth = (int)Width;
+        int textureHeight = (int)Height;
+        if (width <= 0 || height <= 0 || width > textureWidth || height > textureHeight)
+        {
+            throw new ArgumentOutOfRangeException(nameof(width), "Update region must stay within the texture bounds.");
+        }
+
+        _renderer.UpdateTextureStreaming(_textureId, rgbaPixels, width, height);
+    }
+
     public override bool IsValid()
     {
         return _textureId != 0;

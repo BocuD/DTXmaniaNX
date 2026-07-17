@@ -150,6 +150,9 @@ public abstract class BaseTexture : IDisposable
     }
     
     public abstract void UpdateRgba32(ReadOnlySpan<byte> rgbaPixels, int width, int height, int dstX = 0, int dstY = 0);
+    public virtual void UpdateRgba32Streaming(ReadOnlySpan<byte> rgbaPixels, int width, int height)
+        => UpdateRgba32(rgbaPixels, width, height);
+
     public abstract void tDraw2DMatrix(Matrix4x4 transformMatrix, Vector2 size, RectangleF clipRect, Color4 color);
     public abstract void tDraw2DMatrixSliced(Matrix4x4 transformMatrix, Vector2 size, RectangleF clipRect, Color4 color, RectangleF sliceRect);
 

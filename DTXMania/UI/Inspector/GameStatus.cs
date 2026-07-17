@@ -1,5 +1,6 @@
 ﻿using System.Numerics;
 using DTXMania.Core;
+using DTXMania.Core.Framework;
 using DTXMania.UI.Skin;
 using Hexa.NET.ImGui;
 
@@ -86,7 +87,9 @@ public class GameStatus
         }
 
         DrawFPSGraph();
-        
+
+        DrawFrameProfiler();
+
         ImGui.End();
         
         if (demoWindowShown)
@@ -139,6 +142,50 @@ public class GameStatus
                 );
             }
         }
+    }
+
+    private static void DrawFrameProfiler()
+    {
+        if (!ImGui.CollapsingHeader("Frame Profiler", ImGuiTreeNodeFlags.DefaultOpen))
+        {
+            return;
+        }
+
+        var renderer = OpenGL.OpenGlRenderer.Instance;
+        if (renderer != null)
+        {
+            ImGui.Text($"Quads last frame: {renderer.lastFrameQuads} in {renderer.lastFrameDrawCalls} GL draw calls");
+        }
+
+        ImGui.Text($"GPU frame time: {FrameProfiler.GpuFrameMs:F2} ms");
+        ImGui.TextDisabled("CPU time per section; GPU back-pressure can surface as stalls inside StageDraw");
+
+        if (!ImGui.BeginTable("##FrameProfiler", 4, ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingStretchProp))
+        {
+            return;
+        }
+
+        ImGui.TableSetupColumn("Section");
+        ImGui.TableSetupColumn("Last (ms)");
+        ImGui.TableSetupColumn("Avg (ms)");
+        ImGui.TableSetupColumn("Max (ms)");
+        ImGui.TableHeadersRow();
+
+        for (int i = 0; i < FrameProfiler.Sections.Length; i++)
+        {
+            FrameSection section = FrameProfiler.Sections[i];
+            ImGui.TableNextRow();
+            ImGui.TableNextColumn();
+            ImGui.Text(FrameProfiler.SectionNames[i]);
+            ImGui.TableNextColumn();
+            ImGui.Text($"{FrameProfiler.GetLastMs(section):F2}");
+            ImGui.TableNextColumn();
+            ImGui.Text($"{FrameProfiler.GetAverageMs(section):F2}");
+            ImGui.TableNextColumn();
+            ImGui.Text($"{FrameProfiler.GetMaxMs(section):F2}");
+        }
+
+        ImGui.EndTable();
     }
 
     private static string newSkinName = "";

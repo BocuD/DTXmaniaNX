@@ -565,22 +565,45 @@ public class CChip : IComparable<CChip>, ICloneable
 
 		
 
-	public void ComputeDistanceFromBar(long nCurrentTime, STDGBVALUE<double> dbPerformanceScrollSpeed) 
+	private static double _cachedScrollSpeedDrums = double.NaN;
+	private static double _cachedScrollSpeedGuitar = double.NaN;
+	private static double _cachedScrollSpeedBass = double.NaN;
+	private static double _cachedMultDrums, _cachedMultGuitar, _cachedMultBass;
+
+	public void ComputeDistanceFromBar(long nCurrentTime, STDGBVALUE<double> dbPerformanceScrollSpeed)
+	{
+		if (dbPerformanceScrollSpeed.Drums != _cachedScrollSpeedDrums
+			|| dbPerformanceScrollSpeed.Guitar != _cachedScrollSpeedGuitar
+			|| dbPerformanceScrollSpeed.Bass != _cachedScrollSpeedBass)
+		{
+			ComputeScrollMultipliers(dbPerformanceScrollSpeed, out _cachedMultDrums, out _cachedMultGuitar, out _cachedMultBass);
+			_cachedScrollSpeedDrums = dbPerformanceScrollSpeed.Drums;
+			_cachedScrollSpeedGuitar = dbPerformanceScrollSpeed.Guitar;
+			_cachedScrollSpeedBass = dbPerformanceScrollSpeed.Bass;
+		}
+
+		ComputeDistanceFromBar(nCurrentTime, _cachedMultDrums, _cachedMultGuitar, _cachedMultBass);
+	}
+
+	public static void ComputeScrollMultipliers(STDGBVALUE<double> dbPerformanceScrollSpeed, out double multDrums, out double multGuitar, out double multBass)
 	{
 		const double speed = 286;   // BPM150の時の1小節の長さ[dot]
 		//XGのHS4.5が1289。思えばBPMじゃなくて拍の長さが関係あるよね。
-		double ScrollSpeedDrums = (dbPerformanceScrollSpeed.Drums + 1.0) * 0.5 * 37.5 * speed / 60000.0;
-		double ScrollSpeedGuitar = (dbPerformanceScrollSpeed.Guitar + 1.0) * 0.5 * 0.5 * 37.5 * speed * 1.52f / 60000.0; //todo: verify if this is the correct approach to fix guitar scroll speed
-		double ScrollSpeedBass = (dbPerformanceScrollSpeed.Bass + 1.0) * 0.5 * 0.5 * 37.5 * speed * 1.52f / 60000.0; //todo: verify if this is the correct approach to fix guitar scroll speed
+		multDrums = (dbPerformanceScrollSpeed.Drums + 1.0) * 0.5 * 37.5 * speed / 60000.0;
+		multGuitar = (dbPerformanceScrollSpeed.Guitar + 1.0) * 0.5 * 0.5 * 37.5 * speed * 1.52f / 60000.0; //todo: verify if this is the correct approach to fix guitar scroll speed
+		multBass = (dbPerformanceScrollSpeed.Bass + 1.0) * 0.5 * 0.5 * 37.5 * speed * 1.52f / 60000.0; //todo: verify if this is the correct approach to fix guitar scroll speed
+	}
 
-		nDistanceFromBar.Drums = (float)((nPlaybackTimeMs - nCurrentTime) * ScrollSpeedDrums);
-		nDistanceFromBar.Guitar = (float)((nPlaybackTimeMs - nCurrentTime) * ScrollSpeedGuitar);
-		nDistanceFromBar.Bass = (float)((nPlaybackTimeMs - nCurrentTime) * ScrollSpeedBass);
+	public void ComputeDistanceFromBar(long nCurrentTime, double multDrums, double multGuitar, double multBass)
+	{
+		nDistanceFromBar.Drums = (float)((nPlaybackTimeMs - nCurrentTime) * multDrums);
+		nDistanceFromBar.Guitar = (float)((nPlaybackTimeMs - nCurrentTime) * multGuitar);
+		nDistanceFromBar.Bass = (float)((nPlaybackTimeMs - nCurrentTime) * multBass);
 
 		//New: Compute Distance for End of Long Note chip
 		if (bIsLongNote)
 		{
-			chipLongNoteEndPosition.ComputeDistanceFromBar(nCurrentTime, dbPerformanceScrollSpeed);
+			chipLongNoteEndPosition.ComputeDistanceFromBar(nCurrentTime, multDrums, multGuitar, multBass);
 		}
 	}
 

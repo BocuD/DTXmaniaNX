@@ -38,6 +38,9 @@ internal class QuickMenuPage(ConfigList list, EInstrumentPart part, QuickConfigI
         playSpeed.formatValue = () => (playSpeed.nCurrentValue / 20.0).ToString("0.000");
         items.Add(playSpeed);
         
+        items.Add(ShutterInItem());
+        items.Add(ShutterOutItem());
+        
         CItemList dark = new("Dark", CItemBase.EPanelType.Normal, (int)CDTXMania.ConfigIni.eDark[(int)instrument],
             "レーン表示オプションをまとめて切り替えます (HALF/FULL)。",
             "OFF: all shown. HALF: lanes/gauge hidden. FULL: also bar lines and hit bar hidden.",
@@ -65,6 +68,8 @@ internal class QuickMenuPage(ConfigList list, EInstrumentPart part, QuickConfigI
         };
 
         items.Add(dark);
+
+        items.Add(RandomItem());
 
         // var switcherButton = FolderItem($"Instrument: {part}",
         //     "設定する楽器を切り替えます。",
@@ -94,6 +99,9 @@ internal class QuickMenuPage(ConfigList list, EInstrumentPart part, QuickConfigI
             CDTXMania.ConfigIni.eTargetGhost[(int)instrument] = gtd;
         };
         items.Add(targetGhost);
+        
+        
+        
 
         var fullConfig = new CItemBase("Open Full Config", CItemBase.EPanelType.Folder,
             "コンフィグ画面を開きます。",

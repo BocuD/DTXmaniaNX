@@ -247,11 +247,11 @@ public class SongNode
         queries = queries.Append(extraQuery).ToArray();
         queries = queries.Append(extraQuery.Replace(" ", "")).ToArray();
         
-        foreach (SongNode node in childNodes.Where(node => node.nodeType == ENodeType.SONG))
+        bool Matches(SongNode node)
         {
             //the actual comparison
             bool match = false;
-            
+
             var metadata = node.charts.FirstOrDefault(x => x != null);
 
             void Match(string input)
@@ -262,31 +262,47 @@ public class SongNode
                 input = input.Replace("ū", "u");
                 input = input.Replace("ē", "e");
                 input = input.Replace("ō", "o");
-                
+
                 if (queries.Any(query => input.Contains(query, StringComparison.InvariantCultureIgnoreCase)))
                 {
                     match = true;
                 }
             }
-            
+
             Match(node.title);
             if (metadata != null)
             {
                 Match(metadata.SongInformation.Title);
                 Match(metadata.SongInformation.TitleRoman);
-                
+
                 Match(metadata.SongInformation.ArtistName);
                 Match(metadata.SongInformation.ArtistNameRoman);
-                
+
                 Match(metadata.SongInformation.Comment);
                 Match(metadata.SongInformation.CommentRoman);
             }
-            
-            if (match)
+
+            return match;
+        }
+
+        void SearchIn(SongNode container)
+        {
+            foreach (SongNode node in container.childNodes)
             {
-                Clone(node, root);
+                switch (node.nodeType)
+                {
+                    case ENodeType.SONG when Matches(node):
+                        Clone(node, root);
+                        break;
+
+                    case ENodeType.BOX:
+                        SearchIn(node);
+                        break;
+                }
             }
         }
+
+        SearchIn(this);
 
         return root;
     }

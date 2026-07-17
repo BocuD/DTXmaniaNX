@@ -52,11 +52,7 @@ internal sealed class GuitarConfigPage(ConfigList list) : InstrumentConfigPage(l
             () => (int)CDTXMania.ConfigIni.JudgementStringPosition.Guitar, v => CDTXMania.ConfigIni.JudgementStringPosition.Guitar = (EType)v));
         items.Add(LightItem());
         items.Add(PerformanceModeItem());
-        items.Add(Choice("Random",
-            "ギターのチップの並びをランダム化します。\n  Mirror: 左右反転\n  Part: 小節ごとにレーンを入れ替え\n  Super: チップごとに入れ替え(本数は不変)\n  Hyper: 本数も変わる",
-            "Randomize the guitar chip lanes.\n  Mirror: flip left/right\n  Part: swap lanes each measure\n  Super: swap per chip (lane count kept)\n  Hyper: swap per chip (lane count changes too)",
-            ["OFF", "Mirror", "Part", "Super", "Hyper"],
-            () => (int)CDTXMania.ConfigIni.eRandom.Guitar, v => CDTXMania.ConfigIni.eRandom.Guitar = (ERandomMode)v));
+        items.Add(RandomItem());
         items.Add(LeftItem());
         items.Add(JudgeLinePosItem());
         items.Add(ShutterInItem());

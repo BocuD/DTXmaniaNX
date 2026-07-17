@@ -62,10 +62,6 @@ internal class CStageTitle : CStage
 		Trace.Indent();
 		try
 		{
-			for( int i = 0; i < 4; i++ )
-			{
-				ctキー反復用[ i ] = new CCounter( 0, 0, 0, CDTXMania.Timer );
-			}
 			ct上移動用 = new CCounter();
 			ct下移動用 = new CCounter();
 			ctCursorFlash = new CCounter();
@@ -86,10 +82,6 @@ internal class CStageTitle : CStage
 		Trace.Indent();
 		try
 		{
-			for( int i = 0; i < 4; i++ )
-			{
-				ctキー反復用[ i ] = null;
-			}
 			ct上移動用 = null;
 			ct下移動用 = null;
 			ctCursorFlash = null;
@@ -166,17 +158,7 @@ internal class CStageTitle : CStage
 			if ( CDTXMania.InputManager.Keyboard.bKeyPressed( (int) SlimDXKey.Escape ) )
 				return (int) EReturnResult.EXIT;
 
-			ctキー反復用.Up.tRepeatKey( CDTXMania.InputManager.Keyboard.bKeyPressing( (int)SlimDXKey.UpArrow ), new CCounter.DGキー処理( tMoveCursorUp ) );
-			ctキー反復用.R.tRepeatKey( CDTXMania.Pad.bPressingGB( EPad.HH ), new CCounter.DGキー処理( tMoveCursorUp ) );
-			//Change to HT
-			if ( CDTXMania.Pad.bPressed( EInstrumentPart.DRUMS, EPad.HT ) )
-				tMoveCursorUp();
-
-			ctキー反復用.Down.tRepeatKey( CDTXMania.InputManager.Keyboard.bKeyPressing( (int)SlimDXKey.DownArrow ), new CCounter.DGキー処理( tMoveCursorDown ) );
-			ctキー反復用.B.tRepeatKey( CDTXMania.Pad.bPressingGB( EPad.SD ), new CCounter.DGキー処理( tMoveCursorDown ) );
-			//Change to LT
-			if ( CDTXMania.Pad.bPressed( EInstrumentPart.DRUMS, EPad.LT ) )
-				tMoveCursorDown();
+			CDTXMania.Input.Navigate( tMoveCursorUp, tMoveCursorDown );
 
 			if (CDTXMania.Input.ActionDecide())
 			{
@@ -282,60 +264,7 @@ internal class CStageTitle : CStage
 
 	#region [ private ]
 	//-----------------
-	[StructLayout( LayoutKind.Sequential )]
-	private struct STキー反復用カウンタ
-	{
-		public CCounter Up;
-		public CCounter Down;
-		public CCounter R;
-		public CCounter B;
-		public CCounter this[ int index ]
-		{
-			get
-			{
-				switch( index )
-				{
-					case 0:
-						return Up;
-
-					case 1:
-						return Down;
-
-					case 2:
-						return R;
-
-					case 3:
-						return B;
-				}
-				throw new IndexOutOfRangeException();
-			}
-			set
-			{
-				switch( index )
-				{
-					case 0:
-						Up = value;
-						return;
-
-					case 1:
-						Down = value;
-						return;
-
-					case 2:
-						R = value;
-						return;
-
-					case 3:
-						B = value;
-						return;
-				}
-				throw new IndexOutOfRangeException();
-			}
-		}
-	}
-
 	private CCounter ctCursorFlash;
-	private STキー反復用カウンタ ctキー反復用;
 	private CCounter ct下移動用;
 	private CCounter ct上移動用;
 	private const int MENU_H = 0x27;

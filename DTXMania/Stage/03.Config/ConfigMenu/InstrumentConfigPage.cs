@@ -174,6 +174,40 @@ internal abstract class InstrumentConfigPage : ConfigPage
         "RGBYPの並びが左右反転します（左利きモード）。", "Reverse lane order for lefty.",
         () => CDTXMania.ConfigIni.bLeft[Idx], v => CDTXMania.ConfigIni.bLeft[Idx] = v);
 
+    // ---- Random (shared) ----
+
+    // Guitar & bass expose five random modes; drums add Master/Another.
+    private static readonly string[] RandomOptions = ["OFF", "Mirror", "Part", "Super", "Hyper"];
+    private static readonly string[] RandomOptionsDrums = ["OFF", "Mirror", "Part", "Super", "Hyper", "Master", "Another"];
+
+    /// <summary>The main random chip-shuffle item for this instrument (named "RandomPad" on drums).</summary>
+    protected CItemList RandomItem()
+    {
+        (string jp, string en) = instrument switch
+        {
+            EInstrumentPart.DRUMS => (
+                "パッドチップをランダム化します。\nMirror: 左右反転。\nPart: レーン単位で入替。\nSuper: 小節単位で入替。\nHyper: 1拍ごとに入替。\nMaster: 激しく入替。\nAnother: 程よくばらける。",
+                "Randomize pad chips.\nMirror: flip left/right.\nPart: swap by lane.\nSuper: swap per measure.\nHyper: swap per beat.\nMaster: extreme swapping.\nAnother: moderate spread."),
+            EInstrumentPart.GUITAR => (
+                "ギターのチップの並びをランダム化します。\n  Mirror: 左右反転\n  Part: 小節ごとにレーンを入れ替え\n  Super: チップごとに入れ替え(本数は不変)\n  Hyper: 本数も変わる",
+                "Randomize the guitar chip lanes.\n  Mirror: flip left/right\n  Part: swap lanes each measure\n  Super: swap per chip (lane count kept)\n  Hyper: swap per chip (lane count changes too)"),
+            _ => (
+                "ベースのチップの並びをランダム化します。\n  Mirror: 左右反転\n  Part: 小節ごとにレーンを入れ替え\n  Super: チップごとに入れ替え(本数は不変)\n  Hyper: 本数も変わる",
+                "Randomize the bass chip lanes.\n  Mirror: flip left/right\n  Part: swap lanes each measure\n  Super: swap per chip (lane count kept)\n  Hyper: swap per chip (lane count changes too)")
+        };
+
+        return Choice(instrument == EInstrumentPart.DRUMS ? "RandomPad" : "Random", jp, en,
+            instrument == EInstrumentPart.DRUMS ? RandomOptionsDrums : RandomOptions,
+            () => (int)CDTXMania.ConfigIni.eRandom[Idx], v => CDTXMania.ConfigIni.eRandom[Idx] = (ERandomMode)v);
+    }
+
+    /// <summary>Drums-only: the separate random mode for the foot/pedal chips.</summary>
+    protected CItemList RandomPedalItem() => Choice("RandomPedal",
+        "足(ペダル)チップをランダム化します。\nMirror: 左右反転。\nPart: レーン単位で入替。\nSuper: 小節単位で入替。\nHyper: 1拍ごとに入替。\nMaster: 激しく入替。\nAnother: 程よくばらける。",
+        "Randomize pedal chips.\nMirror: flip left/right.\nPart: swap by lane.\nSuper: swap per measure.\nHyper: swap per beat.\nMaster: extreme swapping.\nAnother: moderate spread.",
+        RandomOptionsDrums,
+        () => (int)CDTXMania.ConfigIni.eRandomPedal[Idx], v => CDTXMania.ConfigIni.eRandomPedal[Idx] = (ERandomMode)v);
+
     // ---- auto-play preset selector (shared) ----
 
     /// <summary>

@@ -179,21 +179,32 @@ public class VideoPlayerController : IDisposable
         if (IsPaused) clock.Stop();
     }
 
+    private const int TextureRingSize = 3;
+    private readonly BaseTexture[] textureRing = new BaseTexture[TextureRingSize];
+    private int textureRingIndex;
+
     private void ApplyFrameDataAtomic(DecodedFrameData data)
     {
-        BaseTexture activeTexture = CurrentFrame.Texture;
-        
-        // Only alloc if empty / invalid size
-        if (activeTexture == null || !activeTexture.IsValid() || activeTexture.Width != decoder.Width || activeTexture.Height != decoder.Height)
+        textureRingIndex = (textureRingIndex + 1) % TextureRingSize;
+        BaseTexture target = textureRing[textureRingIndex];
+
+        // Allocate (or reallocate on a resolution change) this ring slot as needed.
+        if (target == null || !target.IsValid() || target.Width != decoder.Width || target.Height != decoder.Height)
         {
-            if (activeTexture != null && activeTexture.IsValid()) activeTexture.Dispose();
-            activeTexture = BaseTexture.CreateEmpty(decoder.Width, decoder.Height, "VideoPlayerFrame");
+            if (target != null && target.IsValid()) target.Dispose();
+            target = BaseTexture.CreateEmpty(decoder.Width, decoder.Height, "VideoPlayerFrame");
+            textureRing[textureRingIndex] = target;
         }
 
-        activeTexture.UpdateRgba32(data.RgbaData, decoder.Width, decoder.Height);
+        target.UpdateRgba32Streaming(data.RgbaData, decoder.Width, decoder.Height);
+
+        // The pixels have been copied into the GL texture, so the CPU-side buffer is
+        // free to be reused by the decoder for a future frame. Returning it here is
+        // what keeps steady-state playback allocation-free (no per-frame LOH churn).
+        decoder.ReturnFrameBuffer(data.RgbaData);
 
         CurrentFrame = new DisplayedFrame(
-            texture: activeTexture,
+            texture: target,
             timeSeconds: data.TimeSeconds,
             frameNumber: data.FrameNumber,
             totalFrames: decoder.TotalFrames,
@@ -293,10 +304,14 @@ public class VideoPlayerController : IDisposable
             decoder = null;
         }
 
-        if (CurrentFrame.Texture != null && CurrentFrame.Texture.IsValid())
+        // CurrentFrame.Texture is one of the ring entries, so dispose via the ring to
+        // avoid a double free.
+        for (int i = 0; i < textureRing.Length; i++)
         {
-            CurrentFrame.Texture.Dispose();
+            if (textureRing[i] != null && textureRing[i].IsValid()) textureRing[i].Dispose();
+            textureRing[i] = null;
         }
+        textureRingIndex = 0;
 
         CurrentFrame = DisplayedFrame.Empty;
         clock.Stop();

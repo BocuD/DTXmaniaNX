@@ -65,8 +65,10 @@ internal class CActPerfGuitarStatusPanel : CActPerfCommonStatusPanel
         
         playerNameplates[0] = ui.AddChild(new UIPlayerNameplate(1));
         playerNameplates[0].position = new Vector3(373, 254, 0);
+        playerNameplates[0].renderOrder = 2;
         playerNameplates[1] = ui.AddChild(new UIPlayerNameplate(2));
         playerNameplates[1].position = new Vector3(665, 254, 0);
+        playerNameplates[1].renderOrder = 2;
     }
 
     public override int OnUpdateAndDraw()

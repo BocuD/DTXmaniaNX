@@ -1,5 +1,4 @@
-﻿using System.Runtime.InteropServices;
-using FFmpeg.AutoGen.Abstractions;
+﻿using FFmpeg.AutoGen.Abstractions;
 
 namespace DTXMania.Core.Video.Decoders;
 
@@ -8,10 +7,12 @@ public unsafe class AsyncVideoDecoder : VideoDecoder
     private AVFormatContext* formatContext;
     private AVCodecContext* codecContext;
     private AVFrame* frame;
-    private AVFrame* rgbaFrame;
     private AVPacket* packet;
     private SwsContext* swsContext;
     private int videoStreamIndex = -1;
+
+    private readonly byte*[] dstPlanes = new byte*[4];
+    private readonly int[] dstStrides = new int[4];
 
     private double fallbackFrameDurationSeconds = 1.0 / 30.0;
     private double timelineOriginPtsSeconds = double.NaN;
@@ -26,7 +27,13 @@ public unsafe class AsyncVideoDecoder : VideoDecoder
     private readonly object queueSync = new();
     private readonly Queue<DecodedFrameData> decodedFrames = new();
     private bool endOfStreamReached;
-    private const int MaxBufferedFrames = 2; // Keep queue small for low latency and memory
+    private const int MaxBufferedFrames = 4; // Decode a little ahead so the (lower-priority)
+                                             // worker can fill the queue during the render
+                                             // thread's idle gaps rather than contending with it.
+
+    // Reuses frame pixel buffers instead of allocating one per decoded frame, which
+    // otherwise churns the Large Object Heap and triggers periodic gen2 GC hitches.
+    private readonly FrameBufferPool framePool = new();
 
     // Incremented under decodeSync on every SeekTo. Frames decoded under an older
     // generation are discarded at enqueue time, eliminating the race where the
@@ -114,13 +121,10 @@ public unsafe class AsyncVideoDecoder : VideoDecoder
         if (ffmpeg.avcodec_open2(codecContext, codec, null) != 0) return false;
 
         frame = ffmpeg.av_frame_alloc();
-        rgbaFrame = ffmpeg.av_frame_alloc();
         packet = ffmpeg.av_packet_alloc();
 
-        rgbaFrame->format = (int)AVPixelFormat.AV_PIX_FMT_RGBA;
-        rgbaFrame->width = codecContext->width;
-        rgbaFrame->height = codecContext->height;
-        ffmpeg.av_frame_get_buffer(rgbaFrame, 0);
+        // Destination is a single tightly-packed RGBA plane; stride is fixed for the stream.
+        dstStrides[0] = codecContext->width * 4;
 
         swsContext = ffmpeg.sws_getContext(codecContext->width, codecContext->height, codecContext->pix_fmt,
                                            codecContext->width, codecContext->height, AVPixelFormat.AV_PIX_FMT_RGBA,
@@ -138,13 +142,18 @@ public unsafe class AsyncVideoDecoder : VideoDecoder
         lastDecodedPtsSeconds = -1;
         seekGeneration = 0;
         
-        // Start background decoding thread
+        // Start background decoding thread. Run it below normal priority: on low-core
+        // CPUs (e.g. a dual-core Celeron) the per-frame decode + sws_scale burst can
+        // otherwise steal a core from the render thread at the frame-application cadence,
+        // producing a periodic hitch. Letting the scheduler favour the render thread
+        // keeps playback smooth; the decoder only needs to stay a frame or two ahead.
         stopRequested = false;
         endOfStreamReached = false;
         decoderThread = new Thread(DecoderWorkerLoop)
         {
             Name = "AsyncVideoDecoder.Decode",
-            IsBackground = true
+            IsBackground = true,
+            Priority = ThreadPriority.BelowNormal
         };
         decoderThread.Start();
 
@@ -179,6 +188,7 @@ public unsafe class AsyncVideoDecoder : VideoDecoder
 
             if (TryDecodeOneFrame(out DecodedFrameData data, out bool reachedEof))
             {
+                bool enqueued = false;
                 lock (queueSync)
                 {
                     // Re-check generation under queueSync. We don't need decodeSync here
@@ -189,8 +199,13 @@ public unsafe class AsyncVideoDecoder : VideoDecoder
                     if (!stopRequested && Volatile.Read(ref seekGeneration) == genAtStart)
                     {
                         decodedFrames.Enqueue(data);
+                        enqueued = true;
                     }
                 }
+
+                // Stale frame from a pre-seek timeline (or shutting down): recycle its
+                // buffer rather than letting it become garbage.
+                if (!enqueued) framePool.Return(data.RgbaData);
             }
             else if (reachedEof)
             {
@@ -257,28 +272,16 @@ public unsafe class AsyncVideoDecoder : VideoDecoder
                     }
                 }
 
-                if (ffmpeg.av_frame_make_writable(rgbaFrame) < 0) return false;
-
-                ffmpeg.sws_scale(swsContext, frame->data, frame->linesize, 0, codecContext->height, rgbaFrame->data, rgbaFrame->linesize);
-
                 int packedSize = codecContext->width * codecContext->height * 4;
-                byte[] rgbaData = new byte[packedSize];
-                
-                int stride = rgbaFrame->linesize[0];
-                int rowBytes = codecContext->width * 4;
-                IntPtr src = (IntPtr)rgbaFrame->data[0];
+                byte[] rgbaData = framePool.Rent(packedSize);
 
-                if (stride == rowBytes)
+                // Convert (and, if ever needed, scale) straight into the pooled buffer.
+                // LOH-sized buffers never move, so pinning here is effectively free.
+                fixed (byte* dst = rgbaData)
                 {
-                    Marshal.Copy(src, rgbaData, 0, packedSize);
-                }
-                else
-                {
-                    for (int y = 0; y < codecContext->height; y++)
-                    {
-                        IntPtr srcRow = src + (y * stride);
-                        Marshal.Copy(srcRow, rgbaData, y * rowBytes, rowBytes);
-                    }
+                    dstPlanes[0] = dst;
+                    ffmpeg.sws_scale(swsContext, frame->data, frame->linesize, 0,
+                                     codecContext->height, dstPlanes, dstStrides);
                 }
 
                 long frameNum = FrameRate > 0 ? (long)(currentPts * FrameRate + 0.5) : 0;
@@ -322,7 +325,11 @@ public unsafe class AsyncVideoDecoder : VideoDecoder
             Volatile.Write(ref seekGeneration, seekGeneration + 1);
             lock (queueSync)
             {
-                decodedFrames.Clear();
+                // Recycle the buffers of any queued frames before discarding them.
+                while (decodedFrames.Count > 0)
+                {
+                    framePool.Return(decodedFrames.Dequeue().RgbaData);
+                }
                 endOfStreamReached = false;
             }
         }
@@ -341,6 +348,8 @@ public unsafe class AsyncVideoDecoder : VideoDecoder
         data = default;
         return false;
     }
+
+    public override void ReturnFrameBuffer(byte[] buffer) => framePool.Return(buffer);
 
     public override bool GetNextFrameBlocking(out DecodedFrameData data)
     {
@@ -406,7 +415,6 @@ public unsafe class AsyncVideoDecoder : VideoDecoder
         lock (decodeSync)
         {
             if (frame != null) { AVFrame* f = frame; ffmpeg.av_frame_free(&f); frame = null; }
-            if (rgbaFrame != null) { AVFrame* rf = rgbaFrame; ffmpeg.av_frame_free(&rf); rgbaFrame = null; }
             if (packet != null) { AVPacket* p = packet; ffmpeg.av_packet_free(&p); packet = null; }
             if (swsContext != null) { ffmpeg.sws_freeContext(swsContext); swsContext = null; }
             if (codecContext != null) { AVCodecContext* cc = codecContext; ffmpeg.avcodec_free_context(&cc); codecContext = null; }

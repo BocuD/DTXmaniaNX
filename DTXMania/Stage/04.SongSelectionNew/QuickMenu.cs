@@ -10,8 +10,7 @@ namespace DTXMania;
 public class QuickMenu : UIGroup
 {
     private readonly ConfigList list;
-    
-    private CStageConfig.STKeyRepetitionCounter ctKeyRepetition;
+
     private CCommandHistory commandHistory;
 
     private UIImage blackTexture;
@@ -24,10 +23,6 @@ public class QuickMenu : UIGroup
     public QuickMenu() : base("Quick Menu")
     {
         commandHistory = new CCommandHistory();
-        for (int i = 0; i < 4; i++)
-        {
-            ctKeyRepetition[i] = new CCounter(0, 0, 0, CDTXMania.Timer);
-        }
 
         blackTexture = AddChild(new UIImage(BaseTexture.CreateSolidColor(Color4.Black)));
         blackTexture.size = new Vector2(1281, 721);
@@ -84,19 +79,7 @@ public class QuickMenu : UIGroup
                 list.Confirm();
             }
 
-            ctKeyRepetition.Up.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(SlimDX.DirectInput.Key.UpArrow),
-                () => list.MoveUp());
-            ctKeyRepetition.R.tRepeatKey(CDTXMania.Pad.bPressingGB(EPad.R),
-                () => list.MoveUp(), 400, 25);
-            if (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.HT))
-                list.MoveUp();
-            
-            ctKeyRepetition.Down.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(SlimDX.DirectInput.Key.DownArrow),
-                () => list.MoveDown());
-            ctKeyRepetition.B.tRepeatKey(CDTXMania.Pad.bPressingGB(EPad.G), 
-                () => list.MoveDown(), 400, 25);
-            if (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.LT))
-                list.MoveDown();
+            CDTXMania.Input.Navigate(list.MoveUp, list.MoveDown, list.MoveUpDrums, list.MoveDownDrums);
         }
 
         descriptionPanel.Update(list.CurrentItem, isVisible && !isClosing && list.IsSettled);
@@ -108,7 +91,11 @@ public class QuickMenu : UIGroup
         CDTXMania.Skin.soundChange.tPlay();
 
         openCounter.tStart(0, 100, 1, CDTXMania.Timer);
-        
+
+        //the quick menu overlays the song-select list and shares the navigation counters; clear
+        //them on open/close so a held key can't carry a repeat over between the two.
+        CDTXMania.Input.ResetNavigation();
+
         if (!isVisible)
         {
             //open
@@ -118,10 +105,11 @@ public class QuickMenu : UIGroup
         }
         else
         {
-            //close
+            //close: persist any changes made in the quick menu (CommitPage already updated the
+            //in-memory ConfigIni; this writes it to disk, like the main config does on exit)
             isClosing = true;
 
-            //commit
+            CDTXMania.ConfigIni.tWrite(CDTXMania.executableDirectory + "Config.ini");
         }
     }
 

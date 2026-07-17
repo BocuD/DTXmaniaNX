@@ -292,15 +292,6 @@ public class SongSelectionContainer : UIGroup
         }
     }
     
-    private struct STKeyRepeatCounter()
-    {
-        public CCounter Up = new( 0, 0, 0, CDTXMania.Timer );
-        public CCounter Down = new( 0, 0, 0, CDTXMania.Timer );
-        public CCounter R = new( 0, 0, 0, CDTXMania.Timer );
-        public CCounter B = new( 0, 0, 0, CDTXMania.Timer );
-    }
-    private STKeyRepeatCounter ctKeyRepeat = new();
-    
     public int HandleNavigation()
     {
         void ApplyScrollDelta(float amount)
@@ -318,26 +309,8 @@ public class SongSelectionContainer : UIGroup
             UpdateSelection(randomNode);
             return (int) CStageSongSelectionNew.EReturnValue.Continue;
         }
-        
-        ctKeyRepeat.Up.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(Key.UpArrow),
-            () => ApplyScrollDelta(elementSpacing), 400, 25);
-        ctKeyRepeat.R.tRepeatKey(CDTXMania.Pad.bPressingGB(EPad.R),
-            () => ApplyScrollDelta(elementSpacing), 400, 25);
-        
-        if (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.HT))
-        {
-            ApplyScrollDelta(elementSpacing);
-        }
-        
-        ctKeyRepeat.Down.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(Key.DownArrow), 
-            () => ApplyScrollDelta(-elementSpacing), 400, 25);
-        ctKeyRepeat.B.tRepeatKey(CDTXMania.Pad.bPressingGB(EPad.G), 
-            () => ApplyScrollDelta(-elementSpacing), 400, 25);
-        
-        if (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.LT))
-        {
-            ApplyScrollDelta(-elementSpacing);
-        }
+
+        CDTXMania.Input.Navigate(() => ApplyScrollDelta(elementSpacing), () => ApplyScrollDelta(-elementSpacing));
 
         if (CDTXMania.Input.ActionDecide())
         {

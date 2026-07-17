@@ -50,11 +50,7 @@ internal sealed class BassConfigPage(ConfigList list) : InstrumentConfigPage(lis
             "Where the judgement mark (Perfect, Great, ...) is shown.\n  P-A: on the lanes\n  P-B: under the COMBO\n  P-C: on the judge line\n  OFF: hidden",
             ["P-A", "P-B", "P-C", "OFF"],
             () => (int)CDTXMania.ConfigIni.JudgementStringPosition.Bass, v => CDTXMania.ConfigIni.JudgementStringPosition.Bass = (EType)v));
-        items.Add(Choice("Random",
-            "ベースのチップの並びをランダム化します。\n  Mirror: 左右反転\n  Part: 小節ごとにレーンを入れ替え\n  Super: チップごとに入れ替え(本数は不変)\n  Hyper: 本数も変わる",
-            "Randomize the bass chip lanes.\n  Mirror: flip left/right\n  Part: swap lanes each measure\n  Super: swap per chip (lane count kept)\n  Hyper: swap per chip (lane count changes too)",
-            ["OFF", "Mirror", "Part", "Super", "Hyper"],
-            () => (int)CDTXMania.ConfigIni.eRandom.Bass, v => CDTXMania.ConfigIni.eRandom.Bass = (ERandomMode)v));
+        items.Add(RandomItem());
         items.Add(LightItem());
         items.Add(PerformanceModeItem());
         items.Add(LeftItem());

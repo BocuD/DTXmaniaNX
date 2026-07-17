@@ -14,6 +14,7 @@ internal sealed unsafe class GameRenderTarget : IDisposable
 
     public int Width { get; private set; }
     public int Height { get; private set; }
+    public bool RenderToDefaultFramebuffer { get; set; }
     public ImTextureID? TextureId => _colorTexture == 0 ? null : new ImTextureID((nint)_colorTexture);
 
     public void AttachGraphics(Silk.NET.OpenGL.GL gl)
@@ -181,8 +182,11 @@ internal sealed unsafe class GameRenderTarget : IDisposable
         if (_gl == null)
             throw new InvalidOperationException("Render target has no active GL context.");
 
+        //draws still sitting in the sprite batch must land in the framebuffer before we read it
+        UI.OpenGL.OpenGlRenderer.Instance?.Flush();
+
         var pixels = new byte[Width * Height * 4];
-        _gl.BindFramebuffer(FramebufferTarget.ReadFramebuffer, _framebuffer);
+        _gl.BindFramebuffer(FramebufferTarget.ReadFramebuffer, RenderToDefaultFramebuffer ? 0u : _framebuffer);
         
         fixed (byte* ptr = pixels)
             _gl.ReadPixels(0, 0, (uint)Width, (uint)Height,

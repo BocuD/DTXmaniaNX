@@ -52,7 +52,9 @@ public sealed class DTXManiaGL : OpenGlGame
         
         //upload any images/text decoded on the background thread since last frame, throttled so a
         //burst of newly-loaded textures can never cause a frame-time spike.
+        FrameProfiler.Begin(FrameSection.PumpUploads);
         AsyncTextureUploader.Instance.PumpUploads(AsyncUploadBytesPerFrame);
+        FrameProfiler.End(FrameSection.PumpUploads);
 
         CDTXMania.renderScale = windowSize.X / GameWindowSize.Width;
 

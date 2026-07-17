@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Runtime;
 using System.Text;
 using System.Windows.Forms;
+using DTXMania.Core.Framework;
 using DTXMania.Core.OpenGL;
 using DTXMania.SongDb;
 using DTXMania.UI;
@@ -348,11 +349,14 @@ internal partial class CDTXMania
             return;
         }
 
+        FrameProfiler.Begin(FrameSection.Sound);
         SoundManager.t再生中の処理をする();
+        FrameProfiler.End(FrameSection.Sound);
 
         Timer.tUpdate();
         CSoundManager.rcPerformanceTimer.tUpdate();
-        
+
+        FrameProfiler.Begin(FrameSection.DeviceScan);
         //don't constantly scan unless we lost a midi device
         if (StageManager.rCurrentStage.eStageID == CStage.EStage.Performance_6)
         {
@@ -365,13 +369,16 @@ internal partial class CDTXMania
         {
             InputManager.ScanDevices();
         }
-        
+        FrameProfiler.End(FrameSection.DeviceScan);
+
         bool inspectorCapturingKeyboard = InspectorManager.inspectorEnabled && ImGui.GetIO().WantCaptureKeyboard;
         bool textInputDrawableActive = UIImGuiTextInput.IsAnyInputActive;
         InputManager.Keyboard.preventKeyboardInput = inspectorCapturingKeyboard || textInputDrawableActive || GameStatus.preventGameKeyboardInput;
-        
+
         //poll input
+        FrameProfiler.Begin(FrameSection.InputPolling);
         InputManager.tPolling(bApplicationActive, ConfigIni.bBufferedInput);
+        FrameProfiler.End(FrameSection.InputPolling);
         
         //todo: replace
         FPS.tUpdateCounter();
@@ -384,8 +391,10 @@ internal partial class CDTXMania
             Thread.Sleep(ConfigIni.nSleepNMsEveryFrame); ///?????
         }
         
+        FrameProfiler.Begin(FrameSection.StageDraw);
         StageManager.DrawStage();
         persistentUIGroup.Draw(Matrix4x4.Identity);
+        FrameProfiler.End(FrameSection.StageDraw);
 
         StageManager.HandleStageChanges();
     }
