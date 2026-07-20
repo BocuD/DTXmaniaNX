@@ -35,7 +35,7 @@ internal class ConfigMenu
         guitar = new GuitarConfigPage(list);
         bass = new BassConfigPage(list);
 
-        pages = [system, graphics, skin, audio, gameplay, menu];
+        pages = [system, graphics, skin, audio, gameplay, menu, songDb];
 
         foreach (ConfigPage page in pages)
         {

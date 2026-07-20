@@ -298,6 +298,7 @@ public class SongSelectionElement : UIGroup
 
                 ImGui.Text($"Node Type: {node.nodeType}");
                 ImGui.Text($"Title: {node.title}");
+                ImGui.Text($"Path: {node.path}");
                 
                 if (chart != null)
                 {

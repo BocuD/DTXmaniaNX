@@ -158,9 +158,37 @@ public class SongDb : IDisposable
 					title = "No Songs Found"
 				};
 			}
+
+			void SortBox(SongNode root)
+			{
+				SortList(ref root.childNodes);
+
+				foreach (SongNode node in root.childNodes.Where(node => node.nodeType == SongNode.ENodeType.BOX))
+				{
+					SortBox(node);
+				}
+			}
+
+			void SortList(ref List<SongNode> nodes)
+			{
+				//apply base sort mode to flattened song list
+				nodes = nodes.OrderBy(song =>
+				{
+					return CDTXMania.ConfigIni.baseSortMode switch
+					{
+						CConfigIni.SongSortMode.Title => song.title,
+						CConfigIni.SongSortMode.Path => song.path,
+						_ => song.title
+					};
+				}).ToList();
+			}
+			
+			SortBox(tempRoot);
 			
 			var tempFlattenedSongList = await FlattenSongList(tempRoot.childNodes);
 			var tempSkillSongs = CalculateSkill(tempFlattenedSongList, out double totalSkill);
+			
+			SortList(ref tempFlattenedSongList);
 			
 			songNodeRoot = tempRoot;
 			flattenedSongList = tempFlattenedSongList;
