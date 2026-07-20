@@ -9,9 +9,9 @@ public class Modal : UIGroup
     private const float PanelWidth = 640f;
     private const float ButtonSpacing = 46f;
 
-    private const int TitleFontSize = 40;
-    private const int DescriptionFontSize = 24;
-    private const int OptionFontSize = 30;
+    private const int TitleFontSize = 30;
+    private const int DescriptionFontSize = 22;
+    private const int OptionFontSize = 25;
 
     private readonly UISelectList optionList;
     private readonly bool cancellable;
@@ -20,6 +20,9 @@ public class Modal : UIGroup
     public static bool IsAnyOpen => OpenCount > 0;
 
     private bool counted;
+    
+    //set by ShowAsync; resolves the awaited task with the chosen option index (or -1)
+    private TaskCompletionSource<int>? completionSource;
 
     //close is deferred out of the input/child-draw phase because activating an option disposes this
     //dialog, and we must not dispose children while we're in the middle of drawing/iterating them
@@ -46,13 +49,13 @@ public class Modal : UIGroup
         float centerX = screenWidth / 2f;
 
         //layout fluff
-        const float topPadding = 44f;
+        const float topPadding = 20f;
         const float titleToDescriptionGap = 18f;
-        const float descriptionToOptionsGap = 30f;
-        const float bottomPadding = 36f;
+        const float descriptionToOptionsGap = 20f;
+        const float bottomPadding = 20f;
 
         float optionsBlockHeight = options.Length * ButtonSpacing;
-        float panelHeight = topPadding + TitleFontSize + titleToDescriptionGap + DescriptionFontSize
+        float panelHeight = topPadding + TitleFontSize + titleToDescriptionGap + DescriptionFontSize * 3
                             + descriptionToOptionsGap + optionsBlockHeight + bottomPadding;
         float panelTop = (screenHeight - panelHeight) / 2f;
 
@@ -64,7 +67,7 @@ public class Modal : UIGroup
         backdrop.renderOrder = 0;
 
         //panel
-        UIImage panel = AddChild(new UIImage(BaseTexture.CreateSolidColor(new Color4(0.11f, 0.12f, 0.16f, 0.96f))));
+        UIImage panel = AddChild(new UIImage(BaseTexture.CreateSolidColor(new Color4(0.11f, 0.11f, 0.11f, 0.96f))));
         panel.name = "Panel";
         panel.anchor = new Vector2(0.5f, 0f);
         panel.position = new Vector3(centerX, panelTop, 0f);
@@ -78,6 +81,7 @@ public class Modal : UIGroup
         titleText.anchor = new Vector2(0.5f, 0f);
         titleText.position = new Vector3(centerX, titleY, 0f);
         titleText.renderOrder = 2;
+        titleText.outlineWidth = 0;
         titleText.RenderTexture();
 
         //description
@@ -87,12 +91,15 @@ public class Modal : UIGroup
         descriptionText.anchor = new Vector2(0.5f, 0f);
         descriptionText.position = new Vector3(centerX, descriptionY, 0f);
         descriptionText.renderOrder = 2;
+        descriptionText.outlineWidth = 0;
         descriptionText.RenderTexture();
+
+        panel.size.X = (descriptionText.size.X / CDTXMania.renderScale) + 50f;
 
         //options
         optionList = AddChild(new UISelectList($"{title} options"));
         optionList.renderOrder = 3;
-        optionList.position = new Vector3(centerX, descriptionY + DescriptionFontSize + descriptionToOptionsGap, 0f);
+        optionList.position = new Vector3(centerX, descriptionY + DescriptionFontSize * 3 + descriptionToOptionsGap, 0f);
 
         for (int i = 0; i < options.Length; i++)
         {
@@ -112,6 +119,38 @@ public class Modal : UIGroup
         OpenCount++;
     }
 
+    /// <summary>
+    /// Shows a modal and returns a task that completes with the index of the chosen option, or -1
+    /// if it is cancelled/dismissed. Safe to call from any thread: the dialog (which creates GL
+    /// textures) is built on the main thread via <see cref="CDTXMania.RunOnMainThread"/>, and the
+    /// task's continuation runs on the thread pool, so a background task can simply do:
+    /// <c>int choice = await Modal.ShowAsync(CDTXMania.persistentUIGroup, title, desc, options);</c>
+    /// </summary>
+    public static Task<int> ShowAsync(UIGroup parent, string title, string description, string[] options, bool cancellable = true)
+    {
+        ArgumentNullException.ThrowIfNull(parent);
+        ArgumentNullException.ThrowIfNull(options);
+
+        //RunContinuationsAsynchronously: when the choice is made on the main thread, the awaiting
+        //scan code resumes on the thread pool instead of running inline during the frame's Draw
+        TaskCompletionSource<int> completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        Action[] actions = new Action[options.Length];
+        for (int i = 0; i < options.Length; i++)
+        {
+            int index = i;
+            actions[i] = () => completion.TrySetResult(index);
+        }
+
+        CDTXMania.RunOnMainThread(() =>
+        {
+            Modal modal = new(title, description, options, actions, cancellable) { completionSource = completion };
+            parent.AddChild(modal);
+        });
+
+        return completion.Task;
+    }
+
     public override void Draw(Matrix4x4 parentMatrix)
     {
         if (closeRequested)
@@ -120,7 +159,7 @@ public class Modal : UIGroup
             return;
         }
 
-        HandleInput();
+        HandleNavigation();
 
         if (closeRequested)
         {
@@ -131,19 +170,27 @@ public class Modal : UIGroup
         base.Draw(parentMatrix);
     }
 
-    private void HandleInput()
+    private void HandleNavigation()
     {
-        Input input = CDTXMania.Input;
+        CDTXMania.Input.NavigateRaw(() =>
+        {
+            CDTXMania.Skin.soundCursorMovement.tPlay();
+            optionList.SelectPrevious();
+        }, () =>
+        {
+            CDTXMania.Skin.soundCursorMovement.tPlay();
+            optionList.SelectNext();
+        });
 
-        input.Navigate(() => optionList.SelectPrevious(), () => optionList.SelectNext());
-
-        if (input.ActionDecide())
+        if (CDTXMania.Input.ActionDecide(true))
         {
             //runs the highlighted option's action, which calls RequestClose(...)
+            CDTXMania.Skin.soundDecide.tPlay();
             optionList.RunAction();
         }
-        else if (cancellable && input.ActionCancel())
+        else if (cancellable && CDTXMania.Input.ActionCancel(true))
         {
+            CDTXMania.Skin.soundCancel.tPlay();
             RequestClose(null);
         }
     }
@@ -167,12 +214,13 @@ public class Modal : UIGroup
         Action? action = pendingAction;
         pendingAction = null;
 
-        //remove from the parent and dispose children, then run the option's action
-        //this order means an action that opens another dialog on the same parent works cleanly
         parent?.RemoveChild(this);
-        Dispose();
 
+        // Run the chosen option's action first (for ShowAsync this resolves the task with the
+        // chosen index), then dispose. Dispose resolves the task with -1 as a fallback, which is a
+        // no-op once the action has already resolved it (this is how Cancel produces -1).
         action?.Invoke();
+        Dispose();
     }
 
     public override void Dispose()
@@ -184,6 +232,10 @@ public class Modal : UIGroup
             counted = false;
             OpenCount--;
         }
+
+        // Release any ShowAsync awaiter even if the dialog is torn down without a choice. No-op if
+        // an option's action already set the result.
+        completionSource?.TrySetResult(-1);
 
         base.Dispose();
     }
