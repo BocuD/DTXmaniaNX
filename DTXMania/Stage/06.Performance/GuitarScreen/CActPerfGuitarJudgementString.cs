@@ -67,6 +67,7 @@ internal class CActPerfGuitarJudgementString : CActPerfCommonJudgementString
 
     protected override bool ShouldDrawJudgementString()
     {
-        return CDTXMania.ConfigIni.bDisplayJudge.Guitar || CDTXMania.ConfigIni.bDisplayJudge.Bass;
+        return CDTXMania.ConfigIni.bDisplayJudge.Guitar && CDTXMania.ConfigIni.JudgementStringPosition.Guitar != EType.D 
+               || CDTXMania.ConfigIni.bDisplayJudge.Bass && CDTXMania.ConfigIni.JudgementStringPosition.Bass != EType.D;
     }
 }

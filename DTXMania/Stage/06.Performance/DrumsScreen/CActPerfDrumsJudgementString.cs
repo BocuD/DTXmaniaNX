@@ -84,15 +84,17 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
         }
         else
         {
-            y = CDTXMania.ConfigIni.bReverse.Drums ? 80 + verticalCharacterOffsets[lane] * 0x20 : 583 + verticalCharacterOffsets[lane] * 0x20;
+            y = CDTXMania.ConfigIni.bReverse.Drums
+                ? 80 + verticalCharacterOffsets[lane] * 0x20
+                : 583 + verticalCharacterOffsets[lane] * 0x20;
         }
 
-        return true;
+        return CDTXMania.ConfigIni.JudgementStringPosition.Drums != EType.C;
     }
 
     protected override bool ShouldDrawJudgementString()
     {
-        return CDTXMania.ConfigIni.bDisplayJudge.Drums;
+        return CDTXMania.ConfigIni.bDisplayJudge.Drums && CDTXMania.ConfigIni.JudgementStringPosition.Drums != EType.D;
     }
 
     #region [ private ]
