@@ -20,6 +20,7 @@ public unsafe class SoftwareVideoDecoder : VideoDecoder
     private double lastDecodedPtsSeconds = -1;
 
     private double seekTargetMuteSeconds = double.NaN; // Bypass sws_scale until reached
+    private double catchupTargetSeconds = double.NaN;  // Live drift catch-up hint (see SetCatchupTarget)
 
     private bool endOfStream;
 
@@ -145,7 +146,13 @@ public unsafe class SoftwareVideoDecoder : VideoDecoder
 
         seekTargetMuteSeconds = Math.Max(0, targetSeconds);
         lastDecodedPtsSeconds = -1; // Reset monotonic clamping tracker on seek
+        catchupTargetSeconds = double.NaN; // Stale hint refers to the pre-seek timeline
         endOfStream = false;
+    }
+
+    public override void SetCatchupTarget(double targetSeconds)
+    {
+        catchupTargetSeconds = targetSeconds;
     }
 
     public override bool TryGetDecodedFrame(out DecodedFrameData data)
@@ -156,10 +163,12 @@ public unsafe class SoftwareVideoDecoder : VideoDecoder
             return false;
         }
 
-        while (true)
+        const int maxPacketsPerCall = 24;
+
+        for (int packetsRead = 0; packetsRead < maxPacketsPerCall; packetsRead++)
         {
             int readResult = ffmpeg.av_read_frame(formatContext, packet);
-            if (readResult < 0) 
+            if (readResult < 0)
             {
                 endOfStream = true;
                 data = default;
@@ -194,6 +203,11 @@ public unsafe class SoftwareVideoDecoder : VideoDecoder
                 }
             }
 
+            if (!double.IsNaN(catchupTargetSeconds) && currentPts < catchupTargetSeconds)
+            {
+                continue;
+            }
+
             int packedSize = codecContext->width * codecContext->height * 4;
             byte[] rgbaData = framePool.Rent(packedSize);
 
@@ -208,6 +222,9 @@ public unsafe class SoftwareVideoDecoder : VideoDecoder
             data = new DecodedFrameData(rgbaData, currentPts, frameNum);
             return true;
         }
+
+        data = default;
+        return false;
     }
 
     public override bool GetNextFrameBlocking(out DecodedFrameData data)
@@ -218,8 +235,9 @@ public unsafe class SoftwareVideoDecoder : VideoDecoder
         for (int i = 0; i < maxSeekAttempts; i++)
         {
             if (TryGetDecodedFrame(out data)) return true;
+            if (endOfStream) break;
         }
-        
+
         data = default;
         return false;
     }

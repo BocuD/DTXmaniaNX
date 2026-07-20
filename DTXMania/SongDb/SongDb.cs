@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.IO.Compression;
 using DTXMania.Core;
+using DTXMania.UI.Drawable;
 using Kawazu;
 
 namespace DTXMania.SongDb;
@@ -87,8 +88,33 @@ public class SongDb : IDisposable
 		try
 		{
 			SongNode tempRoot = await RunFullSongScan();
-			
-			tempRoot = await UnpackZipFiles(maxThreadCount, 5, tempRoot);
+
+			if (foundZipFiles.Count > 0)
+			{
+				switch (CDTXMania.ConfigIni.eUnpackSongs)
+				{
+					case CConfigIni.UnpackSongs.Always:
+						tempRoot = await UnpackZipFiles(maxThreadCount, 5, tempRoot);
+						break;
+					
+					case CConfigIni.UnpackSongs.Ask:
+						string title = CDTXMania.isJapanese ? "曲データの解凍" : "Unpack Songs";
+						string description = CDTXMania.isJapanese ? $"演奏データに{foundZipFiles.Count} zip ファイルが見つかりました。\nすべての zip ファイルを解凍しますか？\nこの動作は設定メニューで変更できます。" : $"{foundZipFiles.Count} zip files were found in your song directory.\nDo you want to unpack all zip files?\nYou can change this behavior in the config menu.";
+						string[] options = CDTXMania.isJapanese ? ["はい", "いいえ"] : ["Yes", "No"];
+						
+						int choice = await Modal.ShowAsync(
+							CDTXMania.persistentUIGroup,
+							title,
+							description,
+							options);
+
+						if (choice == 0)
+							tempRoot = await UnpackZipFiles(maxThreadCount, 5, tempRoot);
+						else
+							Trace.TraceInformation("User chose not to unpack zip files.");
+						break;
+				}
+			}
 
 			//flatten songs so we can process them all sequentially. Include boxes since we want to generate back boxes.
 			List<SongNode> flattened = await FlattenSongList(tempRoot.childNodes, true);
@@ -220,6 +246,7 @@ public class SongDb : IDisposable
 		start = DateTime.Now;
 		tempSongs = 0;
 		tempCharts = 0;
+		foundZipFiles.Clear();
 		
 		int maxThreadCount = Environment.ProcessorCount - 2;
 		if (maxThreadCount < 2)
@@ -288,7 +315,6 @@ public class SongDb : IDisposable
 						
 						case ".zip":
 							foundZipFiles.Add(fileinfo);
-							//UnpackZipFile(fileinfo);
 							break;
 
 						case ".mid":
@@ -379,6 +405,8 @@ public class SongDb : IDisposable
 	
 	private async Task<SongNode> UnpackZipFiles(int maxThreadCount, int maxLoopCount, SongNode tempRoot)
 	{
+		processDoneCount = 0;
+		
 		while (foundZipFiles.Count > 0 && maxLoopCount-- > 0)
 		{
 			status = SongDbScanStatus.Unpacking;
@@ -390,15 +418,14 @@ public class SongDb : IDisposable
 			await Parallel.ForEachAsync(foundZipFiles, new ParallelOptions { MaxDegreeOfParallelism = maxThreadCount },
 				async (info, cancellationToken) => await UnpackZipFile(info));
 				
-			//reset found zip files after unpacking
-			foundZipFiles.Clear();
-				
 			statusDuration[SongDbScanStatus.Unpacking] = DateTime.Now - start;
 			Trace.TraceInformation($"Unpacked {foundZipFiles.Count} zip files in {statusDuration[SongDbScanStatus.Unpacking]} s");
 				
 			Trace.TraceInformation($"Rescanning because ZIP files were unpacked");
 			tempRoot = await RunFullSongScan();
 		}
+		
+		Trace.TraceInformation($"Finished unpacking {processDoneCount} zip files");
 		
 		//reset count after unzipping
 		processDoneCount = 0;

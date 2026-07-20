@@ -20,6 +20,8 @@ public unsafe class AsyncVideoDecoder : VideoDecoder
 
     private double seekTargetMuteSeconds = double.NaN;
 
+    private long catchupTargetBits = BitConverter.DoubleToInt64Bits(double.NaN);
+
     // Async / Threading components
     private Thread? decoderThread;
     private volatile bool stopRequested;
@@ -231,11 +233,13 @@ public unsafe class AsyncVideoDecoder : VideoDecoder
 
         if (packet == null) return false;
 
+        const int maxPacketsPerCall = 24;
+
         lock (decodeSync)
         {
             if (formatContext == null || codecContext == null) return false;
 
-            while (true)
+            for (int packetsRead = 0; packetsRead < maxPacketsPerCall; packetsRead++)
             {
                 int readResult = ffmpeg.av_read_frame(formatContext, packet);
                 if (readResult < 0)
@@ -272,6 +276,12 @@ public unsafe class AsyncVideoDecoder : VideoDecoder
                     }
                 }
 
+                double catchupTarget = BitConverter.Int64BitsToDouble(Volatile.Read(ref catchupTargetBits));
+                if (!double.IsNaN(catchupTarget) && currentPts < catchupTarget)
+                {
+                    continue;
+                }
+
                 int packedSize = codecContext->width * codecContext->height * 4;
                 byte[] rgbaData = framePool.Rent(packedSize);
 
@@ -288,7 +298,13 @@ public unsafe class AsyncVideoDecoder : VideoDecoder
                 data = new DecodedFrameData(rgbaData, currentPts, frameNum);
                 return true;
             }
+            return false;
         }
+    }
+
+    public override void SetCatchupTarget(double targetSeconds)
+    {
+        Volatile.Write(ref catchupTargetBits, BitConverter.DoubleToInt64Bits(targetSeconds));
     }
 
     public override void SeekTo(double targetSeconds)
@@ -318,6 +334,8 @@ public unsafe class AsyncVideoDecoder : VideoDecoder
 
             seekTargetMuteSeconds = Math.Max(0, targetSeconds);
             lastDecodedPtsSeconds = -1; // Reset monotonic clamping tracker on seek
+
+            Volatile.Write(ref catchupTargetBits, BitConverter.DoubleToInt64Bits(double.NaN));
 
             // Bump the generation *and* clear the queue while still holding decodeSync.
             // This pins both operations into a single critical section so the worker

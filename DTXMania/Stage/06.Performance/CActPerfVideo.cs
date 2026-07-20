@@ -276,14 +276,8 @@ internal class CActPerfVideo : CActivity
             return;
 
         long videoPlayTimeMs = currentGameTime - videoStartTime;
-        double currentVideoTime = controller.CurrentFrame.TimeSeconds;
-        long currentVideoTimeMs = (long)(currentVideoTime * 1000);
 
-        //resync if drift exceeds 100ms.
-        if (Math.Abs(videoPlayTimeMs - currentVideoTimeMs) > 100)
-        {
-            controller.SeekToSeconds(videoPlayTimeMs / 1000.0);
-        }
+        controller.SyncToSeconds(videoPlayTimeMs / 1000.0);
     }
 
     private void UpdateFillInEffects()

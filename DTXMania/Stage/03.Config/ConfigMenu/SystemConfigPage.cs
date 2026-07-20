@@ -14,15 +14,17 @@ internal sealed class SystemConfigPage : ConfigPage
     private readonly ConfigPage audio;
     private readonly ConfigPage gameplay;
     private readonly ConfigPage menu;
+    private readonly ConfigPage songDb;
 
     public SystemConfigPage(ConfigList list, ConfigPage graphics, ConfigPage skin, ConfigPage audio,
-        ConfigPage gameplay, ConfigPage menu) : base(list)
+        ConfigPage gameplay, ConfigPage menu, SongDbConfigPage songDb) : base(list)
     {
         this.graphics = graphics;
         this.skin = skin;
         this.audio = audio;
         this.gameplay = gameplay;
         this.menu = menu;
+        this.songDb = songDb;
     }
 
     public override List<CItemBase> Build()
@@ -47,6 +49,9 @@ internal sealed class SystemConfigPage : ConfigPage
         items.Add(FolderItem("Menu Options",
             "メニュー設定に関する項目を設定します。",
             "Open the menu settings sub menu.", menu));
+        items.Add(FolderItem("Song Database Options",
+            "曲データベースに関する設定を変更します。",
+            "Open the song database settings sub menu.", songDb));
 
         items.Add(new CItemBase("Reload Songs", CItemBase.EPanelType.Normal,
             "曲データの一覧情報を取得し直します。\n新しい曲を追加したときや、曲データを\n更新したときに使用してください。",
@@ -56,20 +61,6 @@ internal sealed class SystemConfigPage : ConfigPage
             {
                 if (CDTXMania.SongDb.status == SongDbScanStatus.Idle)
                 {
-                    CDTXMania.SongDb.StartScan(() => CDTXMania.StageManager.stageSongSelectionNew.Reload());
-                }
-            }
-        });
-
-        items.Add(new CItemBase("Reload Songs (Full)", CItemBase.EPanelType.Normal,
-            "曲データのキャッシュをクリアして、曲データを完全に再読み込みします。",
-            "Clear song data cache and perform full reload of song data.")
-        {
-            action = () =>
-            {
-                if (CDTXMania.SongDb.status == SongDbScanStatus.Idle)
-                {
-                    CDTXMania.SongDb.ClearCache();
                     CDTXMania.SongDb.StartScan(() => CDTXMania.StageManager.stageSongSelectionNew.Reload());
                 }
             }

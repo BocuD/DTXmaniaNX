@@ -33,7 +33,8 @@ public abstract class VideoDecoder : IDisposable
     /// Synchronously decodes until a frame is produced. Extensively used for seeking.
     /// </summary>
     public abstract bool GetNextFrameBlocking(out DecodedFrameData data);
-    
+    public virtual void SetCatchupTarget(double targetSeconds) { }
+
     public virtual void ReturnFrameBuffer(byte[] buffer) { }
 
     public abstract void Dispose();

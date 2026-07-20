@@ -91,40 +91,90 @@ public class VideoPlayerController : IDisposable
             return; // Our currently displayed frame is already ahead of the current active playback target time, so wait.
         }
 
-        const int maxSyncDecodesPerTick = 2; // Linear decode allowance per tick
-        
-        for (int i = 0; i < maxSyncDecodesPerTick; i++)
-        {
-            if (decoder.TryGetDecodedFrame(out DecodedFrameData data))
-            {
-                ApplyFrameDataAtomic(data);
+        const int maxFramesConsumedPerTick = 8;
 
-                if (data.TimeSeconds >= currentTargetSeconds)
-                {
-                    break; 
-                }
-            }
-            else if (decoder.IsEndOfStream)
+        DecodedFrameData pendingFrame = default;
+        bool hasPendingFrame = false;
+
+        for (int i = 0; i < maxFramesConsumedPerTick; i++)
+        {
+            if (!decoder.TryGetDecodedFrame(out DecodedFrameData data))
             {
-                // Real end-of-stream confirmed by the decoder.
-                if (LoopOnEof)
+                if (!hasPendingFrame && decoder.IsEndOfStream)
                 {
-                    ForceSeekAndRender(0);
+                    // Real end-of-stream confirmed by the decoder.
+                    if (LoopOnEof)
+                    {
+                        ForceSeekAndRender(0);
+                    }
+                    else
+                    {
+                        IsPaused = true;
+                    }
+                    return;
                 }
-                else
-                {
-                    IsPaused = true;
-                }
+
                 break;
             }
-            else
+
+            if (hasPendingFrame)
             {
-                // Async decoder: queue momentarily empty but more frames are coming.
-                // Do nothing this tick and let the current frame linger; the next
-                // Update will pick up the produced frame. The clock keeps running
-                // so playback resumes seamlessly once the worker catches up.
+                decoder.ReturnFrameBuffer(pendingFrame.RgbaData);
+            }
+
+            pendingFrame = data;
+            hasPendingFrame = true;
+
+            if (data.TimeSeconds >= currentTargetSeconds)
+            {
                 break;
             }
+        }
+
+        if (hasPendingFrame)
+        {
+            ApplyFrameDataAtomic(pendingFrame);
+        }
+    }
+
+    private const double CatchupThresholdSeconds = 0.3;
+    private const double HardResyncThresholdSeconds = 4.0;
+    private const double AheadResyncThresholdSeconds = 0.5;
+    private const double SeekCooldownSeconds = 1.0;
+    //Seek slightly past the requested time so that after the worker's catch-up decode finishes,
+    //the produced frame is not already stale again.
+    private const double SeekLeadSeconds = 0.2;
+
+    private readonly Stopwatch seekCooldownClock = Stopwatch.StartNew();
+    private double lastAsyncSeekRealSeconds = double.NegativeInfinity;
+
+    public void SyncToSeconds(double targetSeconds)
+    {
+        if (decoder == null || !CurrentFrame.IsValid) return;
+
+        clockOffsetSeconds = targetSeconds;
+        clock.Restart();
+        if (IsPaused) clock.Stop();
+
+        double drift = targetSeconds - CurrentFrame.TimeSeconds; // > 0: video is behind
+
+        if (drift > HardResyncThresholdSeconds || drift < -AheadResyncThresholdSeconds)
+        {
+            double now = seekCooldownClock.Elapsed.TotalSeconds;
+            if (now - lastAsyncSeekRealSeconds >= SeekCooldownSeconds)
+            {
+                lastAsyncSeekRealSeconds = now;
+                decoder.SeekTo(targetSeconds + SeekLeadSeconds);
+            }
+        }
+
+        if (drift > CatchupThresholdSeconds)
+        {
+            decoder.SetCatchupTarget(targetSeconds - 0.05);
+        }
+        else
+        {
+            decoder.SetCatchupTarget(double.NaN);
         }
     }
 

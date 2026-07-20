@@ -1,12 +1,16 @@
-﻿namespace DTXMania.Core;
+﻿using DTXMania.UI.Drawable;
+
+namespace DTXMania.Core;
 
 using FDK;
 using SlimDXKey = SlimDX.DirectInput.Key;
 
 public class Input
 {
-    public bool ActionDecide()
+    public bool ActionDecide(bool raw = false)
     {
+        if (!raw && Modal.IsAnyOpen) return false;
+
         return CDTXMania.Pad.bPressedDGB(EPad.Decide) ||
                CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.CY) ||
                CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.RD) ||
@@ -15,8 +19,10 @@ public class Input
                CDTXMania.InputManager.Keyboard.bKeyPressed(SlimDXKey.NumberPadEnter);
     }
 
-    public bool ActionCancel()
+    public bool ActionCancel(bool raw = false)
     {
+        if (!raw && Modal.IsAnyOpen) return false;
+        
         return CDTXMania.InputManager.Keyboard.bKeyPressed(SlimDXKey.Escape) ||
                 (CDTXMania.Pad.bPressingGB(EPad.Y) && CDTXMania.Pad.bPressedGB(EPad.Pick)) ||
                 CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.LC) || CDTXMania.Pad.bPressedGB(EPad.Cancel);
@@ -50,6 +56,13 @@ public class Input
     /// reverses the integer-edit direction for drums); otherwise they fall back to the standard actions.
     /// </summary>
     public void Navigate(Action onUp, Action onDown, Action? onDrumsUp = null, Action? onDrumsDown = null)
+    {
+        if (Modal.IsAnyOpen) return;
+        
+        NavigateRaw(onUp, onDown, onDrumsUp, onDrumsDown);
+    }
+
+    public void NavigateRaw(Action onUp, Action onDown, Action? onDrumsUp = null, Action? onDrumsDown = null)
     {
         navUp.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(SlimDXKey.UpArrow),
             () => onUp(), FirstRepeatMs, RepeatIntervalMs);

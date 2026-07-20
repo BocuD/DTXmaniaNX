@@ -165,6 +165,16 @@ internal partial class CConfigIni
 	public STDGBVALUE<int> nScrollSpeed;
 	public string strDTXManiaのバージョン;
 	public string strSongDataSearchPath;
+
+	public enum UnpackSongs
+	{
+		Off,
+		Ask,
+		Always
+	}
+	
+	public UnpackSongs eUnpackSongs;
+	
 	public string songListFont;
 	public string[] strCardName; //2015.12.3 kaiera0467 DrumとGuitarとBassで名前を別々にするため、string[3]に変更。
 	public string[] strGroupName;
@@ -523,6 +533,7 @@ internal partial class CConfigIni
 #endif
 		strDTXManiaのバージョン = "Unknown";
 		strSongDataSearchPath = @".\";
+		eUnpackSongs = UnpackSongs.Ask;
 		languageMode = LanguageMode.Auto;
 		bFullScreenMode = false;
 		bFullScreenExclusive = true;

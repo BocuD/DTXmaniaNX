@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Globalization;
+using System.Collections.Concurrent;
 using System.Numerics;
 using System.Reflection;
 using System.Runtime;
@@ -325,12 +326,40 @@ internal partial class CDTXMania
 
     public static float renderScale = 1.0f;
 
+    private static readonly ConcurrentQueue<Action> mainThreadActions = new();
+
+    //allows running code on the main thread from other threads
+    public static void RunOnMainThread(Action action)
+    {
+        if (action != null)
+        {
+            mainThreadActions.Enqueue(action);
+        }
+    }
+
+    private static void PumpMainThreadActions()
+    {
+        while (mainThreadActions.TryDequeue(out Action? action))
+        {
+            try
+            {
+                action();
+            }
+            catch (Exception e)
+            {
+                Trace.TraceError($"Main-thread action failed: {e}");
+            }
+        }
+    }
+
     public void Update()
     {
     }
 
     public void Draw()
     {
+        PumpMainThreadActions();
+
         persistentUIGroup.scale.X = renderScale;
         persistentUIGroup.scale.Y = renderScale;
         
