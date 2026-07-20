@@ -155,7 +155,7 @@ internal class CStageTitle : CStage
 
 		if ( ePhaseID == EPhase.Common_DefaultState)
 		{
-			if ( CDTXMania.InputManager.Keyboard.bKeyPressed( (int) SlimDXKey.Escape ) )
+			if (CDTXMania.Input.ActionCancel())
 				return (int) EReturnResult.EXIT;
 
 			CDTXMania.Input.Navigate( tMoveCursorUp, tMoveCursorDown );
