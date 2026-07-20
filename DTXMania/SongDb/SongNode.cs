@@ -285,6 +285,8 @@ public class SongNode
             return match;
         }
 
+        //recursively search this folder and every nested box; matching songs are collected into
+        //the flat result root, no matter how deeply they are nested.
         void SearchIn(SongNode container)
         {
             foreach (SongNode node in container.childNodes)

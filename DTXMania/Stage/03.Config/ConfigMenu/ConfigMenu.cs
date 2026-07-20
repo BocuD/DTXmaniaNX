@@ -28,7 +28,8 @@ internal class ConfigMenu
         AudioConfigPage audio = new(list);
         GameplayConfigPage gameplay = new(list);
         MenuConfigPage menu = new(list);
-        system = new SystemConfigPage(list, graphics, skin, audio, gameplay, menu);
+        SongDbConfigPage songDb = new(list);
+        system = new SystemConfigPage(list, graphics, skin, audio, gameplay, menu, songDb);
 
         drums = new DrumsConfigPage(list);
         guitar = new GuitarConfigPage(list);
