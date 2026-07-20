@@ -266,7 +266,7 @@ public class CStageSongSelectionNew : CStage
         //try to restore the last selected song if possible
         if (selectedRootBackup != null && selectedNodeBackup != null && selectedChartBackup != null)
         {
-            RestoreSelection(selectedRootBackup, selectedNodeBackup, selectedChartBackup);
+            RestoreSelection(selectedNodeBackup);
         }
         
         Trace.TraceInformation("Sort cache preparation complete.");
@@ -277,50 +277,56 @@ public class CStageSongSelectionNew : CStage
         loadPhase = ELoadPhase.CacheThumbnails;
     }
 
-    private void RestoreSelection(SongNode selectedRootBackup, SongNode selectedNodeBackup, CChartData selectedChartDataBackup)
+    private void RestoreSelection(SongNode selectedNodeBackup)
     {
-        //walk down the tree recursively to find the node
-        SongNode currentRoot = selectionContainer.CurrentRoot;
-        SongNode? targetRoot = null;
-        SongNode? targetNode = null;
-            
-        FindRoot(currentRoot);
-        
-        if (targetRoot != null && targetNode != null)
+        string? previousBoxTitle = selectedNodeBackup.parent?.title;
+
+        SongNode? fallback = null;
+        SongNode? preferred = null;
+
+        void Find(SongNode container)
         {
-            if (targetRoot.parent != null)
-            {
-                targetRoot.parent.CurrentSelection = targetRoot;
-            }
-            
-            selectionContainer.UpdateRoot(targetRoot);
-            selectionContainer.UpdateSelection(targetNode);
-        }
-        
-        void FindRoot(SongNode node)
-        {
-            foreach (var child in node.childNodes)
+            foreach (SongNode child in container.childNodes)
             {
                 if (child == null) continue;
-                    
-                if (child.path.Equals(selectedNodeBackup.path, StringComparison.InvariantCulture))
-                {
-                    if (node.title.Equals(selectedRootBackup.title, StringComparison.InvariantCulture))
-                    {
-                        targetRoot = node;
-                        targetNode = child;
-                        return;
-                    }
-                }
 
-                if (child.nodeType is SongNode.ENodeType.BOX or SongNode.ENodeType.ROOT)
+                switch (child.nodeType)
                 {
-                    FindRoot(child);
-                }
+                    case SongNode.ENodeType.SONG
+                        when child.path.Equals(selectedNodeBackup.path, StringComparison.InvariantCulture):
+                        fallback ??= child;
+                        if (previousBoxTitle != null &&
+                            container.title.Equals(previousBoxTitle, StringComparison.InvariantCulture))
+                        {
+                            preferred = child;
+                            return;
+                        }
+                        break;
 
-                if (targetRoot != null) return;
+                    case SongNode.ENodeType.BOX or SongNode.ENodeType.ROOT:
+                        Find(child);
+                        if (preferred != null) return;
+                        break;
+                }
             }
         }
+
+        Find(selectionContainer.CurrentRoot);
+
+        SongNode? targetNode = preferred ?? fallback;
+        if (targetNode?.parent == null)
+            return;
+
+        SongNode targetRoot = targetNode.parent;
+
+        //highlight the target's container within each ancestor so backing out lands on the right row
+        for (SongNode node = targetRoot; node.parent != null; node = node.parent)
+        {
+            node.parent.CurrentSelection = node;
+        }
+
+        selectionContainer.UpdateRoot(targetRoot);
+        selectionContainer.UpdateSelection(targetNode);
     }
 
     public override int OnUpdateAndDraw()
