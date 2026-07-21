@@ -41,6 +41,10 @@ internal class ConfigList : UIGroup
     //runs when a key-assign pad row is confirmed; the host opens the KeyAssignPanel for (part, pad, name)
     public Action<EKeyConfigPart, EKeyConfigPad, string>? onOpenKeyAssign;
 
+    public Action<(EKeyConfigPart part, EKeyConfigPad pad, string label)[]>? onOpenInputTest;
+
+    public Action? onOpenMidiTest;
+
     public ConfigList(int slotCount, int selectionIndex) : base("ConfigList")
     {
         this.selectionIndex = selectionIndex;
@@ -141,6 +145,23 @@ internal class ConfigList : UIGroup
     {
         pageStack.Push((currentItems, currentItems.Count == 0 ? 0 : Mod(currentItems.IndexOf(CurrentItem!), currentItems.Count)));
         SetItems(items);
+    }
+
+    public CItemBase? SelectNextNormal()
+    {
+        if (currentItems.Count == 0) return null;
+
+        int start = Mod(currentItems.IndexOf(CurrentItem!), currentItems.Count);
+        for (int step = 1; step <= currentItems.Count; step++)
+        {
+            int idx = Mod(start + step, currentItems.Count);
+            if (currentItems[idx].ePanelType == CItemBase.EPanelType.Normal)
+            {
+                SetItems(currentItems, idx);
+                return currentItems[idx];
+            }
+        }
+        return CurrentItem; // no other Normal item to move to
     }
 
     /// <summary>Returns to the parent page, or invokes <see cref="onExitRoot"/> at the root.</summary>

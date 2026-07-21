@@ -12,7 +12,7 @@ namespace DTXMania.UI.Config;
 /// Editor for a single pad's input bindings, shown as a stage overlay by the config stage. Replaces
 /// the old bitmap-font CActConfigKeyAssign: rows are <see cref="UIText"/>, and the host stage drives
 /// it via <see cref="MoveUp"/>/<see cref="MoveDown"/>/<see cref="Confirm"/>/<see cref="Cancel"/>/
-/// <see cref="DeleteCurrent"/> plus <see cref="PollCapture"/> each frame while waiting for input.
+/// <see cref="DeleteCurrent"/> plus <see cref="PollCapture"/>/<see cref="UpdatePreview"/> each frame.
 ///
 /// Bindings are written straight into <see cref="CConfigIni.KeyAssign"/>; the config stage persists
 /// Config.ini on exit, so nothing extra is needed here.
@@ -22,23 +22,34 @@ internal sealed class KeyAssignPanel : UIGroup
     private const int SlotCount = CConfigIni.CKeyAssign.KeyAssignsPerPad; // 16
     private const int IndexClearAll = SlotCount;      // 16
     private const int IndexReset = SlotCount + 1;     // 17
-    private const int IndexReturn = SlotCount + 2;    // 18
-    private const int RowCount = SlotCount + 3;       // 19
+    private const int IndexNext = SlotCount + 2;      // 18
+    private const int IndexReturn = SlotCount + 3;    // 19
+    private const int RowCount = SlotCount + 4;       // 20
 
     private const float RowSpacing = 24f;
     private const float SlotStartY = 40f;
     private const float FooterGap = 12f;
+    private const float PreviewColumnX = 340f;
+
+    private const int OverwriteConfirmWindowMs = 2000;
 
     private static readonly Color4 NormalColor = Color4.White;
     private static readonly Color4 HighlightColor = new(1f, 0.85f, 0.2f, 1f);
 
     private readonly UIText title;
-    private readonly UIText[] rows = new UIText[RowCount]; // 0..15 slots, then ClearAll / Reset / Return
+    private readonly UIText[] rows = new UIText[RowCount]; // 0..15 slots, then ClearAll / Reset / Next / Return
     private readonly UIText note;
 
     private readonly UIGroup overlay;
     private readonly UIText overlayPrompt;
     private readonly UIText overlayEcho;
+    private readonly UIText overlayStatus; // "already mapped, press again to overwrite" line
+
+    private readonly UIText previewHeader;
+    private readonly UIText[] previewCounters = new UIText[SlotCount];
+    private readonly int[] triggerCounts = new int[SlotCount];
+    private readonly int[] shownCounts = new int[SlotCount];
+    private readonly bool[] shownHeld = new bool[SlotCount];
 
     private EKeyConfigPart part;
     private EKeyConfigPad pad;
@@ -47,8 +58,18 @@ internal sealed class KeyAssignPanel : UIGroup
 
     private int selectedRow;
 
+    private bool pendingOverwrite;
+    private EInputDevice pendingDev;
+    private int pendingId;
+    private int pendingCode;
+    private string pendingLocation = "";
+    private long pendingDeadlineMs;
+
     /// <summary>Invoked when the user leaves the editor (Return / Cancel), to hand focus back to the list.</summary>
     public Action? onClose;
+
+    /// <summary>Invoked by the "Next Item" row to advance to the next pad without backing out to the list.</summary>
+    public Action? onNext;
 
     public bool IsOpen => isVisible;
     public bool IsWaiting { get; private set; }
@@ -71,6 +92,19 @@ internal sealed class KeyAssignPanel : UIGroup
         note.position = new Vector3(20, RowY(IndexReturn) + RowSpacing + FooterGap, 0);
         note.fillColor = new Color4(0.7f, 0.85f, 1f, 1f);
 
+        previewHeader = AddChild(new UIText(CDTXMania.isJapanese ? "入力テスト" : "Input test", 14f));
+        previewHeader.position = new Vector3(PreviewColumnX, SlotStartY - 22, 0);
+        previewHeader.fillColor = new Color4(0.7f, 0.85f, 1f, 1f);
+        previewHeader.isVisible = false;
+
+        for (int i = 0; i < SlotCount; i++)
+        {
+            UIText counter = AddChild(new UIText("", 18f));
+            counter.position = new Vector3(PreviewColumnX, RowY(i), 0);
+            counter.isVisible = false;
+            previewCounters[i] = counter;
+        }
+
         // "press an input" overlay (hidden unless waiting)
         overlay = AddChild(new UIGroup("KeyAssignOverlay"));
         overlay.position = new Vector3(20, 220, 0);
@@ -81,11 +115,14 @@ internal sealed class KeyAssignPanel : UIGroup
         overlayPrompt.fillColor = HighlightColor;
         overlayEcho = overlay.AddChild(new UIText("", 18f));
         overlayEcho.position = new Vector3(0, 32, 0);
+        overlayStatus = overlay.AddChild(new UIText("", 16f));
+        overlayStatus.position = new Vector3(0, 64, 0);
+        overlayStatus.fillColor = HighlightColor;
     }
 
     private static float RowY(int index)
     {
-        // slots are contiguous; the three footer rows sit below a small gap
+        // slots are contiguous; the footer rows sit below a small gap
         float y = SlotStartY + index * RowSpacing;
         if (index >= IndexClearAll)
         {
@@ -106,10 +143,13 @@ internal sealed class KeyAssignPanel : UIGroup
         for (int i = 0; i < SlotCount; i++)
         {
             snapshot[i] = Bindings[i];
+            triggerCounts[i] = 0; // fresh input-test counters for the new pad
         }
 
         IsWaiting = false;
+        pendingOverwrite = false;
         overlay.isVisible = false;
+        overlayStatus.SetText("");
         note.SetText("");
         selectedRow = 0;
         isVisible = true;
@@ -136,7 +176,33 @@ internal sealed class KeyAssignPanel : UIGroup
 
         rows[IndexClearAll].SetText("Clear All");
         rows[IndexReset].SetText("Reset");
+        rows[IndexNext].SetText(CDTXMania.isJapanese ? "次の項目へ >>" : "Next Item >>");
         rows[IndexReturn].SetText("<< Return to List");
+
+        RebuildPreview();
+    }
+
+    private void RebuildPreview()
+    {
+        STKEYASSIGN[] bindings = Bindings;
+        bool any = false;
+
+        for (int i = 0; i < SlotCount; i++)
+        {
+            bool assigned = bindings[i].InputDevice != EInputDevice.Unknown;
+            any |= assigned;
+
+            triggerCounts[i] = 0;
+            shownCounts[i] = 0;
+            shownHeld[i] = false;
+
+            previewCounters[i].isVisible = assigned;
+            previewCounters[i].fillColor = NormalColor;
+            previewCounters[i].SetText(assigned ? "x0" : "");
+            previewCounters[i].MarkDirty();
+        }
+
+        previewHeader.isVisible = any;
     }
 
     #region Input (called by the host stage)
@@ -165,7 +231,9 @@ internal sealed class KeyAssignPanel : UIGroup
         {
             CDTXMania.Skin.soundDecide.tPlay();
             IsWaiting = true;
+            pendingOverwrite = false;
             overlayEcho.SetText("");
+            overlayStatus.SetText("");
             overlay.isVisible = true;
             note.SetText("");
             return;
@@ -191,6 +259,11 @@ internal sealed class KeyAssignPanel : UIGroup
                 }
                 RefreshRows();
                 note.SetText(CDTXMania.isJapanese ? "元に戻しました。" : "Reset to entry state.");
+                break;
+
+            case IndexNext:
+                CDTXMania.Skin.soundDecide.tPlay();
+                onNext?.Invoke();
                 break;
 
             case IndexReturn:
@@ -226,6 +299,8 @@ internal sealed class KeyAssignPanel : UIGroup
     {
         if (!IsWaiting) return;
 
+        long now = CDTXMania.Timer.nCurrentTime;
+
         if (CDTXMania.InputManager.Keyboard.bKeyPressed((int)SlimDXKey.Escape))
         {
             StopWaiting();
@@ -235,33 +310,122 @@ internal sealed class KeyAssignPanel : UIGroup
 
         if (TryCapture(pressing: false, out EInputDevice dev, out int id, out int code))
         {
-            CommitAssignment(dev, id, code);
+            if (IsBoundToCurrentPad(dev, id, code))
+            {
+                pendingOverwrite = false;
+                string label = KeyCodeNames.FormatBinding(new STKEYASSIGN(dev, id, code));
+                overlayStatus.SetText(CDTXMania.isJapanese ? $"割り当て済み: {label}" : $"Already mapped: {label}");
+                return;
+            }
+
+            string? existing = FindExistingBinding(dev, id, code);
+
+            if (existing == null)
+            {
+                CommitAssignment(dev, id, code, null);
+                return;
+            }
+
+            bool sameAsPending = pendingOverwrite && dev == pendingDev && id == pendingId && code == pendingCode;
+            if (sameAsPending && now <= pendingDeadlineMs)
+            {
+                CommitAssignment(dev, id, code, existing);
+                return;
+            }
+
+            pendingOverwrite = true;
+            pendingDev = dev; pendingId = id; pendingCode = code;
+            pendingLocation = existing;
+            pendingDeadlineMs = now + OverwriteConfirmWindowMs;
+            CDTXMania.Skin.soundCursorMovement.tPlay();
+            UpdateOverlayStatus();
             return;
         }
 
-        // live echo of whatever is currently held, before it's committed
+        //no fresh press this frame: let a stale overwrite prompt expire, then echo what's held
+        if (pendingOverwrite && now > pendingDeadlineMs)
+        {
+            pendingOverwrite = false;
+            UpdateOverlayStatus();
+        }
+
         overlayEcho.SetText(TryCapture(pressing: true, out EInputDevice ed, out int eid, out int ecode)
             ? KeyCodeNames.FormatBinding(new STKEYASSIGN(ed, eid, ecode))
             : "...");
     }
 
+    public void UpdatePreview()
+    {
+        if (!isVisible || IsWaiting) return;
+
+        STKEYASSIGN[] bindings = Bindings;
+        for (int i = 0; i < SlotCount; i++)
+        {
+            STKEYASSIGN a = bindings[i];
+            if (a.InputDevice == EInputDevice.Unknown) continue;
+
+            if (KeyAssignProbe.IsBindingPressed(a, pressing: false))
+            {
+                triggerCounts[i]++;
+            }
+
+            bool held = KeyAssignProbe.IsBindingPressed(a, pressing: true);
+
+            if (triggerCounts[i] != shownCounts[i] || held != shownHeld[i])
+            {
+                shownCounts[i] = triggerCounts[i];
+                shownHeld[i] = held;
+                previewCounters[i].SetText($"x{triggerCounts[i]}");
+                previewCounters[i].fillColor = held ? HighlightColor : NormalColor;
+                previewCounters[i].MarkDirty();
+            }
+        }
+    }
+
     #endregion
 
-    private void CommitAssignment(EInputDevice dev, int id, int code)
+    private void UpdateOverlayStatus()
     {
-        string? movedFrom = FindExistingBinding(dev, id, code);
+        if (!pendingOverwrite)
+        {
+            overlayStatus.SetText("");
+            return;
+        }
 
-        // remove this input from every other binding, then set it on the selected slot (old behaviour)
+        string label = KeyCodeNames.FormatBinding(new STKEYASSIGN(pendingDev, pendingId, pendingCode));
+        overlayStatus.SetText(CDTXMania.isJapanese
+            ? $"{label} は {pendingLocation} に割り当て済み。\nもう一度押すと上書きします。"
+            : $"{label} is already mapped to {pendingLocation}.\nPress it again to overwrite.");
+    }
+
+    private void CommitAssignment(EInputDevice dev, int id, int code, string? overwritten)
+    {
+        // remove this input from every other binding, then set it on the selected slot
         CDTXMania.ConfigIni.tDeleteAlreadyAssignedInputs(dev, id, code);
         Bindings[selectedRow] = new STKEYASSIGN(dev, id, code);
 
+        pendingOverwrite = false;
         CDTXMania.Skin.soundDecide.tPlay();
         StopWaiting();
         RefreshRows();
 
-        note.SetText(movedFrom == null
+        note.SetText(overwritten == null
             ? ""
-            : (CDTXMania.isJapanese ? $"{movedFrom} から移動しました。" : $"Moved from {movedFrom}."));
+            : (CDTXMania.isJapanese ? $"{overwritten} から上書きしました。" : $"Overwrote {overwritten}."));
+    }
+
+    // Whether this exact input is already bound to any slot of the pad currently being edited.
+    private bool IsBoundToCurrentPad(EInputDevice dev, int id, int code)
+    {
+        STKEYASSIGN[] bindings = Bindings;
+        for (int s = 0; s < SlotCount; s++)
+        {
+            if (bindings[s].InputDevice == dev && bindings[s].ID == id && bindings[s].Code == code)
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
     // Returns a label for another pad this exact input is already bound to, or null if none.
@@ -288,7 +452,9 @@ internal sealed class KeyAssignPanel : UIGroup
     private void StopWaiting()
     {
         IsWaiting = false;
+        pendingOverwrite = false;
         overlay.isVisible = false;
+        overlayStatus.SetText("");
         // consume the press so it doesn't leak into the next frame's list input
         CDTXMania.InputManager.tPolling(CDTXMania.app.bApplicationActive, false);
     }
@@ -296,6 +462,7 @@ internal sealed class KeyAssignPanel : UIGroup
     private void Close()
     {
         IsWaiting = false;
+        pendingOverwrite = false;
         overlay.isVisible = false;
         isVisible = false;
         onClose?.Invoke();
@@ -309,7 +476,7 @@ internal sealed class KeyAssignPanel : UIGroup
         {
             if (i is (int)SlimDXKey.Escape or (int)SlimDXKey.UpArrow or (int)SlimDXKey.DownArrow
                 or (int)SlimDXKey.LeftArrow or (int)SlimDXKey.RightArrow or (int)SlimDXKey.Delete
-                or (int)SlimDXKey.Return)
+                or (int)SlimDXKey.Backspace or (int)SlimDXKey.Return)
             {
                 continue;
             }

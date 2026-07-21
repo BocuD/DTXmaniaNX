@@ -235,9 +235,9 @@ internal partial class CConfigIni
 				Bool("FillInEffect", c => c.bFillInEnabled)),
 			G("フィルイン達成時の歓声の再生(0:OFF, 1:ON)",
 				Bool("AudienceSound", c => c.b歓声を発声する)),
-			G("曲選択からプレビュー音の再生までのウェイト[ms]",
+			G(["曲選択でプレビュー音が鳴り始めるまでの待ち時間[ms]。", "Delay (ms) before the preview sound starts in song select."],
 				Int("PreviewSoundWait", 0, 0x5f5e0ff, c => c.nSongSelectSoundPreviewWaitTimeMs)),
-			G("曲選択からプレビュー画像表示までのウェイト[ms]",
+			G(["曲選択でプレビュー画像が表示されるまでの待ち時間[ms]。", "Delay (ms) before the preview image shows in song select."],
 				Int("PreviewImageWait", 0, 0x5f5e0ff, c => c.nSongSelectImagePreviewWaitTimeMs)),
 			G("Waveの再生位置自動補正(0:OFF, 1:ON)",
 				Bool("AdjustWaves", c => c.bWave再生位置自動調整機能有効)),
@@ -392,6 +392,16 @@ internal partial class CConfigIni
 				Int("BassScrollSpeed", 0, 0x7cf, c => c.nScrollSpeed.Bass)),
 			G("演奏速度(5～40)(→x5/20～x40/20)",
 				Int("PlaySpeed", CConstants.PLAYSPEED_MIN, CConstants.PLAYSPEED_MAX, c => c.nPlaySpeed)),
+			G([
+					"リザルト画面が表示されるまでの待ち時間[ms]。",
+					"Delay (ms) before the results screen is shown."
+				],
+				Int("ResultDelay", 0, 5000, c => c.nResultDelayMs)),
+			G([
+					"読み込み画面を表示する最小時間[ms]。",
+					"Minimum time (ms) the loading screen is shown."
+				],
+				Int("LoadingMinDuration", 0, 10000, c => c.nLoadingMinMs)),
 			G("Save score when PlaySpeed is not 100% (0:OFF, 1:ON)",
 				Bool("SaveScoreIfModifiedPlaySpeed", c => c.bSaveScoreIfModifiedPlaySpeed)),
 			G("グラフ表示(0:OFF, 1:ON)",

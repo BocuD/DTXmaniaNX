@@ -277,6 +277,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
             {
                 eReturnValueAfterFadeOut = EPerfScreenReturnValue.StageClear;
                 ePhaseID = EPhase.PERFORMANCE_STAGE_CLEAR;
+                tStartResultDelay();
             }
         }
 
