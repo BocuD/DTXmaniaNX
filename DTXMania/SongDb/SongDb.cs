@@ -314,6 +314,12 @@ public class SongDb : IDisposable
 			maxThreadCount = 2;
 
 		DirectoryInfo info = new(searchPath);
+		
+		if (info == null || !info.Exists)
+		{
+			Trace.TraceWarning($"Directory does not exist: {searchPath}");
+			return;
+		}
 
 		//option A: If set.def exists in the folder, create nodes from set.def
 		string path = searchPath + "set.def";
