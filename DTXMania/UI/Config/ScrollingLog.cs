@@ -36,13 +36,11 @@ internal sealed class ScrollingLog : UIGroup
 
     public void Add(string text, Color4 color)
     {
-        if (count == entries.Length)
-        {
-            for (int i = 1; i < count; i++) entries[i - 1] = entries[i];
-            count--;
-        }
+        // newest at the top: shift existing entries down one slot (dropping the oldest if full)
+        count = Math.Min(count + 1, entries.Length);
+        for (int i = count - 1; i > 0; i--) entries[i] = entries[i - 1];
 
-        entries[count++] = (text, color);
+        entries[0] = (text, color);
         Render();
     }
 
