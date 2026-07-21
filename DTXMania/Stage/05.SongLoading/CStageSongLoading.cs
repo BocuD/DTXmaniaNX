@@ -376,6 +376,9 @@ internal class CStageSongLoading : CStage
         CDTXMania.Skin.soundNowLoading.tPlay();
         ePhaseID = EPhase.Common_FadeIn;
 
+        bBmpAviLoaded = false;
+        ctLoadingMinDelay = new CCounter(0, CDTXMania.ConfigIni.nLoadingMinMs, 1, CDTXMania.Timer);
+
         try
         {
             string path = cdtx.strFolderName + cdtx.PREIMAGE;
@@ -430,22 +433,33 @@ internal class CStageSongLoading : CStage
 
         if (loadingTask.IsCompleted)
         {
-            Trace.TraceInformation("Main load finished, loading BMP / AVI on the main thread now");
-            
-            DateTime timeBeginLoadBMPAVI = DateTime.Now;
-            if (CDTXMania.ConfigIni.bBGAEnabled)
-                CDTXMania.DTX.tLoadBMP_BMPTEX();
+            if (!bBmpAviLoaded)
+            {
+                Trace.TraceInformation("Main load finished, loading BMP / AVI on the main thread now");
 
-            //load BPM and AVI on main thread because :(
-            if (CDTXMania.ConfigIni.bAVIEnabled)
-                CDTXMania.DTX.tLoadAVI();
-            var span = DateTime.Now - timeBeginLoadBMPAVI;
-            Trace.TraceInformation("Time to load BMP / AVI ({0,4}): {1}",
-                (CDTXMania.DTX.listBMP.Count + CDTXMania.DTX.listBMPTEX.Count + CDTXMania.DTX.listAVI.Count),
-                span.ToString());
-            
-            CDTXMania.nStageNumber++;
-            return (int)ESongLoadingScreenReturnValue.LoadingComplete;
+                DateTime timeBeginLoadBMPAVI = DateTime.Now;
+                if (CDTXMania.ConfigIni.bBGAEnabled)
+                    CDTXMania.DTX.tLoadBMP_BMPTEX();
+
+                //load BPM and AVI on main thread because :(
+                if (CDTXMania.ConfigIni.bAVIEnabled)
+                    CDTXMania.DTX.tLoadAVI();
+                var span = DateTime.Now - timeBeginLoadBMPAVI;
+                Trace.TraceInformation("Time to load BMP / AVI ({0,4}): {1}",
+                    (CDTXMania.DTX.listBMP.Count + CDTXMania.DTX.listBMPTEX.Count + CDTXMania.DTX.listAVI.Count),
+                    span.ToString());
+
+                bBmpAviLoaded = true;
+            }
+
+            ctLoadingMinDelay?.tUpdate();
+            bool minElapsed = ctLoadingMinDelay == null || ctLoadingMinDelay.bReachedEndValue;
+
+            if (minElapsed)
+            {
+                CDTXMania.nStageNumber++;
+                return (int)ESongLoadingScreenReturnValue.LoadingComplete;
+            }
         }
 
         return (int)ESongLoadingScreenReturnValue.Continue;
@@ -870,6 +884,8 @@ internal class CStageSongLoading : CStage
     private Task? loadingTask;
     private CancellationTokenSource? loadingCancellationTokenSource;
     private bool bCancelRequested;
+    private CCounter? ctLoadingMinDelay; // keeps the loading screen up for at least nLoadingMinMs
+    private bool bBmpAviLoaded;          // guards the one-time main-thread BMP/AVI load
     
     private string strSongTitle;
     private string strArtistName;

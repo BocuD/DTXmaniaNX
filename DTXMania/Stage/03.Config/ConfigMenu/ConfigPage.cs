@@ -68,6 +68,14 @@ internal abstract class ConfigPage
         return item;
     }
 
+    protected static CItemInteger SecondsDelay(string name, int msMin, int msMax, string jp, string en, Func<int> getMs, Action<int> setMs)
+    {
+        CItemInteger item = new(name, msMin / 100, msMax / 100, getMs() / 100, jp, en);
+        item.BindConfig(() => item.nCurrentValue = getMs() / 100, () => setMs(item.nCurrentValue * 100));
+        item.formatValue = () => (item.nCurrentValue / 10.0).ToString("0.0") + "s";
+        return item;
+    }
+
     protected static CItemList Choice(string name, string jp, string en, string[] values, Func<int> get, Action<int> set)
     {
         CItemList item = new(name, CItemBase.EPanelType.Normal, get(), jp, en, values);

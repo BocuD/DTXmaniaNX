@@ -397,6 +397,11 @@ internal partial class CConfigIni
 					"Delay in milliseconds after clearing a song before the result screen appears."
 				],
 				Int("StageClearWait", 0, 5000, c => c.nStageClearWaitMs)),
+			G([
+					"読み込み画面を表示する最小時間[ms]。",
+					"Minimum time (ms) the loading screen is shown."
+				],
+				Int("LoadingMinDuration", 0, 10000, c => c.nLoadingMinMs)),
 			G("Save score when PlaySpeed is not 100% (0:OFF, 1:ON)",
 				Bool("SaveScoreIfModifiedPlaySpeed", c => c.bSaveScoreIfModifiedPlaySpeed)),
 			G("グラフ表示(0:OFF, 1:ON)",

@@ -403,7 +403,8 @@ internal abstract class CStagePerfCommonScreen : CStage
 
         nPolyphonicSounds = CDTXMania.ConfigIni.nPoliphonicSounds;
 
-        CDTXMania.Skin.tRemoveMixerAll();	// 効果音のストリームをミキサーから解除しておく
+        //let the loading sound gracefully fade out
+        CDTXMania.Skin.tRemoveMixerAll(CDTXMania.Skin.soundNowLoading);
 
         //lockmixer = new object();
         queueMixerSound = new Queue<stmixer>(64);
