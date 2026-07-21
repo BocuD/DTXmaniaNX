@@ -643,8 +643,8 @@ internal partial class CConfigIni
 		nPedalLagTime = 0;
 
 		bAutoAddGage = false;
-		nSongSelectSoundPreviewWaitTimeMs = 50;
-		nSongSelectImagePreviewWaitTimeMs = 0;
+		nSongSelectSoundPreviewWaitTimeMs = 200;
+		nSongSelectImagePreviewWaitTimeMs = 200;
 		bWave再生位置自動調整機能有効 = true;
 		bBGM音を発声する = true;
 		bドラム打音を発声する = true;
