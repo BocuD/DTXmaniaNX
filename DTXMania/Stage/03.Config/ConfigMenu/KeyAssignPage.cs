@@ -7,15 +7,34 @@ namespace DTXMania;
 internal sealed class KeyAssignPage : ConfigPage
 {
     private readonly (EKeyConfigPart part, EKeyConfigPad pad, string label)[] pads;
+    private readonly bool includeMidiTest;
 
-    private KeyAssignPage(ConfigList list, (EKeyConfigPart, EKeyConfigPad, string)[] pads) : base(list)
+    private KeyAssignPage(ConfigList list, (EKeyConfigPart, EKeyConfigPad, string)[] pads, bool includeMidiTest = false) : base(list)
     {
         this.pads = pads;
+        this.includeMidiTest = includeMidiTest;
     }
 
     public override List<CItemBase> Build()
     {
         List<CItemBase> items = [BackItem()];
+
+        items.Add(new CItemBase(CDTXMania.isJapanese ? "入力テスト" : "Input Test", CItemBase.EPanelType.Folder,
+            "全チャンネルの入力をまとめてテストします。",
+            "Test the inputs for every channel at once.")
+        {
+            action = () => list.onOpenInputTest?.Invoke(pads)
+        });
+
+        if (includeMidiTest)
+        {
+            items.Add(new CItemBase(CDTXMania.isJapanese ? "MIDI テスト" : "MIDI Test", CItemBase.EPanelType.Folder,
+                "MIDI入力を確認します（割り当て済み/未割り当て）。",
+                "Watch incoming MIDI and see which notes are mapped.")
+            {
+                action = () => list.onOpenMidiTest?.Invoke()
+            });
+        }
 
         foreach ((EKeyConfigPart part, EKeyConfigPad pad, string label) in pads)
         {
@@ -50,7 +69,7 @@ internal sealed class KeyAssignPage : ConfigPage
         return CDTXMania.isJapanese ? $"現在: {mapping}" : $"Current: {mapping}";
     }
     
-    public static KeyAssignPage ForDrums(ConfigList list) => new(list, DrumsPads);
+    public static KeyAssignPage ForDrums(ConfigList list) => new(list, DrumsPads, includeMidiTest: true);
     public static KeyAssignPage ForGuitar(ConfigList list) => new(list, InstrumentPads(EKeyConfigPart.GUITAR));
     public static KeyAssignPage ForBass(ConfigList list) => new(list, InstrumentPads(EKeyConfigPart.BASS));
     public static KeyAssignPage ForSystem(ConfigList list) => new(list, SystemPads);

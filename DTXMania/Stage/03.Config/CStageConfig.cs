@@ -5,6 +5,7 @@ using System.Numerics;
 using DTXMania.Core;
 using DTXMania.UI.Config;
 using DTXMania.UI.Drawable;
+using DTXMania.UI.Item;
 using FDK;
 using SlimDXKey = SlimDX.DirectInput.Key;
 
@@ -70,9 +71,24 @@ internal class CStageConfig : CStage
         keyAssignPanel.position = new Vector3(450, 120, 0);
         keyAssignPanel.renderOrder = 42;
         keyAssignPanel.onClose = CloseKeyAssign;
+        keyAssignPanel.onNext = KeyAssignNext;
         keyAssignPanel.isVisible = false;
-        
+
+        inputTestPanel = ui.AddChild(new InputTestPanel());
+        inputTestPanel.position = new Vector3(450, 120, 0);
+        inputTestPanel.renderOrder = 42;
+        inputTestPanel.onClose = CloseKeyAssign;
+        inputTestPanel.isVisible = false;
+
+        midiTestPanel = ui.AddChild(new MidiTestPanel());
+        midiTestPanel.position = new Vector3(450, 120, 0);
+        midiTestPanel.renderOrder = 42;
+        midiTestPanel.onClose = CloseKeyAssign;
+        midiTestPanel.isVisible = false;
+
         configList.onOpenKeyAssign = OpenKeyAssign;
+        configList.onOpenInputTest = OpenInputTest;
+        configList.onOpenMidiTest = OpenMidiTest;
         
         configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(20, "System", configMenu.OpenSystem));
         configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(20, "Drums", configMenu.OpenDrums));
@@ -197,6 +213,8 @@ internal class CStageConfig : CStage
     private ConfigDescriptionPanel descriptionPanel;
     private ConfigMenu configMenu;
     private KeyAssignPanel keyAssignPanel; //key-assign editor overlay (opened from a pad-list row)
+    private InputTestPanel inputTestPanel;  //all-channel input-test overview (opened from an "Input Test" row)
+    private MidiTestPanel midiTestPanel;    //MIDI diagnostics feed (opened from the drums "MIDI Test" row)
 
     private const int MenuExitIndex = 4;
 
@@ -232,6 +250,19 @@ internal class CStageConfig : CStage
         if (keyAssignPanel.IsOpen)
         {
             HandleKeyAssignInput();
+            return;
+        }
+
+        if (inputTestPanel.IsOpen)
+        {
+            inputTestPanel.UpdatePreview();
+            inputTestPanel.PollClose();
+            return;
+        }
+        if (midiTestPanel.IsOpen)
+        {
+            midiTestPanel.UpdatePreview();
+            midiTestPanel.PollClose();
             return;
         }
 
@@ -275,8 +306,8 @@ internal class CStageConfig : CStage
             CDTXMania.Input.Navigate(configList.MoveUp, configList.MoveDown, configList.MoveUpDrums, configList.MoveDownDrums);
         }
 
-        //the description panel only shows once a page is focused and fully aligned
-        bool showDescription = !bFocusIsOnMenu && configList.IsSettled && !keyAssignPanel.IsOpen;
+        bool showDescription = !bFocusIsOnMenu && configList.IsSettled
+                               && !keyAssignPanel.IsOpen && !inputTestPanel.IsOpen && !midiTestPanel.IsOpen;
         descriptionPanel.Update(configList.CurrentItem, showDescription);
     }
 
@@ -289,16 +320,41 @@ internal class CStageConfig : CStage
         keyAssignPanel.Open(part, pad, padName);
     }
 
-    //returns from the editor to the pad list it was opened from
+    private void OpenInputTest((EKeyConfigPart, EKeyConfigPad, string)[] pads)
+    {
+        configList.isVisible = false;
+        configList.SetFocused(false);
+        descriptionPanel.Update(null, false);
+        inputTestPanel.Open(pads);
+    }
+
+    private void OpenMidiTest()
+    {
+        configList.isVisible = false;
+        configList.SetFocused(false);
+        descriptionPanel.Update(null, false);
+        midiTestPanel.Open();
+    }
+
     private void CloseKeyAssign()
     {
         configList.isVisible = true;
         bFocusIsOnMenu = false; //focus stays on the (pad list) page, not the left menu
     }
 
+    private void KeyAssignNext()
+    {
+        CItemBase? next = configList.SelectNextNormal();
+        if (next is { ePanelType: CItemBase.EPanelType.Normal })
+        {
+            next.RunAction(); // the pad row's action re-opens the panel for that pad
+        }
+    }
+
     private void HandleKeyAssignInput()
     {
         keyAssignPanel.PollCapture();
+        keyAssignPanel.UpdatePreview();
 
         if (keyAssignPanel.IsWaiting)
         {
