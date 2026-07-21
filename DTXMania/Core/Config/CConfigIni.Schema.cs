@@ -392,6 +392,11 @@ internal partial class CConfigIni
 				Int("BassScrollSpeed", 0, 0x7cf, c => c.nScrollSpeed.Bass)),
 			G("演奏速度(5～40)(→x5/20～x40/20)",
 				Int("PlaySpeed", CConstants.PLAYSPEED_MIN, CConstants.PLAYSPEED_MAX, c => c.nPlaySpeed)),
+			G([
+					"曲クリア後、リザルト画面に移行するまでの待ち時間(ms)。",
+					"Delay in milliseconds after clearing a song before the result screen appears."
+				],
+				Int("StageClearWait", 0, 5000, c => c.nStageClearWaitMs)),
 			G("Save score when PlaySpeed is not 100% (0:OFF, 1:ON)",
 				Bool("SaveScoreIfModifiedPlaySpeed", c => c.bSaveScoreIfModifiedPlaySpeed)),
 			G("グラフ表示(0:OFF, 1:ON)",
