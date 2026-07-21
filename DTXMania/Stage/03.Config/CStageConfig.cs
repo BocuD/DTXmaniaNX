@@ -369,7 +369,8 @@ internal class CStageConfig : CStage
         {
             keyAssignPanel.Confirm();
         }
-        else if (CDTXMania.InputManager.Keyboard.bKeyPressed(SlimDXKey.Delete))
+        else if (CDTXMania.InputManager.Keyboard.bKeyPressed(SlimDXKey.Delete)
+                 || CDTXMania.InputManager.Keyboard.bKeyPressed(SlimDXKey.Backspace))
         {
             keyAssignPanel.DeleteCurrent();
         }

@@ -476,7 +476,7 @@ internal sealed class KeyAssignPanel : UIGroup
         {
             if (i is (int)SlimDXKey.Escape or (int)SlimDXKey.UpArrow or (int)SlimDXKey.DownArrow
                 or (int)SlimDXKey.LeftArrow or (int)SlimDXKey.RightArrow or (int)SlimDXKey.Delete
-                or (int)SlimDXKey.Return)
+                or (int)SlimDXKey.Backspace or (int)SlimDXKey.Return)
             {
                 continue;
             }
