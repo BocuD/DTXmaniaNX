@@ -787,11 +787,11 @@ internal class CSkin : IDisposable
 	}
 
 
-	public void tRemoveMixerAll()
+	public void tRemoveMixerAll(CSystemSound? keepPlaying = null)
 	{
 		for (int i = 0; i < nSystemSoundCount; i++)
 		{
-			if (this[i] != null && this[i].b読み込み成功)
+			if (this[i] != null && this[i] != keepPlaying && this[i].b読み込み成功)
 			{
 				this[i].tStop();
 				this[i].tRemoveMixer();
