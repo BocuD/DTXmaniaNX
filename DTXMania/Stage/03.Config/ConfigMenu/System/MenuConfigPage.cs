@@ -40,21 +40,29 @@ internal sealed class MenuConfigPage : ConfigPage
             () => CDTXMania.ConfigIni.bランダムセレクトで子BOXを検索対象とする = randomFromSubBox.bON);
         items.Add(randomFromSubBox);
 
-        CItemInteger previewSoundWait = new("PreSoundWait", 0, 0x2710, CDTXMania.ConfigIni.nSongSelectSoundPreviewWaitTimeMs,
-            "カーソルが合わされてから\nプレビュー音が鳴り始める\nまでの時間を指定します。\n0～10000[ms]が指定可能です。",
-            "Delay time (ms) to start playing preview sound in song selection screen.\nYou can specify from 0ms to 10000ms.");
-        previewSoundWait.BindConfig(
-            () => previewSoundWait.nCurrentValue = CDTXMania.ConfigIni.nSongSelectSoundPreviewWaitTimeMs,
-            () => CDTXMania.ConfigIni.nSongSelectSoundPreviewWaitTimeMs = previewSoundWait.nCurrentValue);
-        items.Add(previewSoundWait);
+        items.Add(SecondsDelay("PreSoundWait", 0, 10000,
+            "カーソルが合わされてから\nプレビュー音が鳴り始めるまでの待ち時間。",
+            "Delay before the preview sound starts in song select.",
+            () => CDTXMania.ConfigIni.nSongSelectSoundPreviewWaitTimeMs,
+            v => CDTXMania.ConfigIni.nSongSelectSoundPreviewWaitTimeMs = v));
 
-        CItemInteger previewImageWait = new("PreImageWait", 0, 0x2710, CDTXMania.ConfigIni.nSongSelectImagePreviewWaitTimeMs,
-            "カーソルが合わされてから\nプレビュー画像が表示\nされるまでの時間を\n指定します。\n0～10000[ms]が指定可能です。",
-            "Delay time (ms) to show preview image in song selection screen.\nYou can specify from 0ms to 10000ms.");
-        previewImageWait.BindConfig(
-            () => previewImageWait.nCurrentValue = CDTXMania.ConfigIni.nSongSelectImagePreviewWaitTimeMs,
-            () => CDTXMania.ConfigIni.nSongSelectImagePreviewWaitTimeMs = previewImageWait.nCurrentValue);
-        items.Add(previewImageWait);
+        items.Add(SecondsDelay("PreImageWait", 0, 10000,
+            "カーソルが合わされてから\nプレビュー画像が表示されるまでの待ち時間。",
+            "Delay before the preview image shows in song select.",
+            () => CDTXMania.ConfigIni.nSongSelectImagePreviewWaitTimeMs,
+            v => CDTXMania.ConfigIni.nSongSelectImagePreviewWaitTimeMs = v));
+
+        items.Add(SecondsDelay("ResultDelay", 0, 5000,
+            "リザルト画面が表示されるまでの待ち時間。",
+            "Delay before the results screen is shown.",
+            () => CDTXMania.ConfigIni.nResultDelayMs,
+            v => CDTXMania.ConfigIni.nResultDelayMs = v));
+
+        items.Add(SecondsDelay("LoadDelay", 0, 10000,
+            "読み込み画面を表示する最小時間。",
+            "Minimum time the loading screen is shown.",
+            () => CDTXMania.ConfigIni.nLoadingMinMs,
+            v => CDTXMania.ConfigIni.nLoadingMinMs = v));
 
         items.Add(BackItem());
         return items;

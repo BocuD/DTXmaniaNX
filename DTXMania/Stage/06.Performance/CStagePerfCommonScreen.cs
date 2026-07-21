@@ -789,7 +789,7 @@ internal abstract class CStagePerfCommonScreen : CStage
     protected STDGBVALUE<CCounter> ctChipPatternAnimation;
     protected abstract void tJudgeLineMovingUpandDown();
     protected EPerfScreenReturnValue eReturnValueAfterFadeOut;
-    protected CCounter ctStageClearDelay;
+    protected CCounter ctResultDelay;
     protected readonly EChannel[,] nBGAスコープチャンネルマップ = new[,] { { EChannel.BGALayer1_Swap, EChannel.BGALayer2_Swap, EChannel.BGALayer3_Swap, EChannel.BGALayer4_Swap, EChannel.BGALayer5_Swap, EChannel.BGALayer6_Swap, EChannel.BGALayer7_Swap, EChannel.BGALayer8_Swap }, { EChannel.BGALayer1, EChannel.BGALayer2, EChannel.BGALayer3, EChannel.BGALayer4, EChannel.BGALayer5, EChannel.BGALayer6, EChannel.BGALayer7, EChannel.BGALayer8 } };
     protected readonly int[] nチャンネル0Atoパッド08 = [1, 2, 3, 4, 5, 7, 6, 1, 8, 0, 9, 9];
     protected readonly int[] nチャンネル0Atoレーン07 = [1, 2, 3, 4, 5, 7, 6, 1, 9, 0, 8, 8];
@@ -3873,16 +3873,16 @@ internal abstract class CStagePerfCommonScreen : CStage
                 break;
 
             case EPhase.PERFORMANCE_STAGE_CLEAR:
-                ctStageClearDelay?.tUpdate();
-                return ctStageClearDelay == null || ctStageClearDelay.bReachedEndValue;
+                ctResultDelay?.tUpdate();
+                return ctResultDelay == null || ctResultDelay.bReachedEndValue;
 
         }
         return false;
     }
 
-    protected void tStartStageClearDelay()
+    protected void tStartResultDelay()
     {
-        ctStageClearDelay = new CCounter(0, CDTXMania.ConfigIni.nStageClearWaitMs, 1, CDTXMania.Timer);
+        ctResultDelay = new CCounter(0, CDTXMania.ConfigIni.nResultDelayMs, 1, CDTXMania.Timer);
     }
     protected void tUpdateAndDraw_LaneFlushD()
     {

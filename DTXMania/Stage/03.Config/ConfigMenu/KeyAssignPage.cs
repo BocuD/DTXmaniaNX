@@ -20,8 +20,8 @@ internal sealed class KeyAssignPage : ConfigPage
         List<CItemBase> items = [BackItem()];
 
         items.Add(new CItemBase(CDTXMania.isJapanese ? "入力テスト" : "Input Test", CItemBase.EPanelType.Folder,
-            "全チャンネルの入力をまとめてテストします。",
-            "Test the inputs for every channel at once.")
+            "現在割り当てられている入力をテストします。",
+            "Test your currently mapped inputs.")
         {
             action = () => list.onOpenInputTest?.Invoke(pads)
         });
@@ -29,8 +29,8 @@ internal sealed class KeyAssignPage : ConfigPage
         if (includeMidiTest)
         {
             items.Add(new CItemBase(CDTXMania.isJapanese ? "MIDI テスト" : "MIDI Test", CItemBase.EPanelType.Folder,
-                "MIDI入力を確認します（割り当て済み/未割り当て）。",
-                "Watch incoming MIDI and see which notes are mapped.")
+                "未割り当てのMIDI入力がないか確認できます。",
+                "Check for any MIDI inputs that aren't mapped.")
             {
                 action = () => list.onOpenMidiTest?.Invoke()
             });

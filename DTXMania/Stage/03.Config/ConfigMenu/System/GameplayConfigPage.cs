@@ -41,15 +41,6 @@ internal sealed class GameplayConfigPage : ConfigPage
         playSpeed.formatValue = () => (playSpeed.nCurrentValue / 20.0).ToString("0.000");
         items.Add(playSpeed);
 
-        CItemInteger clearDelay = new("ClearDelay", 0, 50, CDTXMania.ConfigIni.nStageClearWaitMs / 100,
-            "曲をクリアしてからリザルト画面に\n移行するまでの待ち時間です。\n0.1秒単位で設定できます。",
-            "How long to hold on the cleared chart before\nthe result screen appears.\nAdjustable in 0.1s steps.");
-        clearDelay.BindConfig(
-            () => clearDelay.nCurrentValue = CDTXMania.ConfigIni.nStageClearWaitMs / 100,
-            () => CDTXMania.ConfigIni.nStageClearWaitMs = clearDelay.nCurrentValue * 100);
-        clearDelay.formatValue = () => (clearDelay.nCurrentValue / 10.0).ToString("0.0") + "s";
-        items.Add(clearDelay);
-
         CItemList skillMode = new("SkillMode", CItemBase.EPanelType.Normal, CDTXMania.ConfigIni.nSkillMode,
             "達成率、スコアの計算方法を変更します。\nCLASSIC:V6までのスコア計算とV8までの\nランク計算です。\nXG:XGシリーズの達成率計算とV7以降の\nスコア計算です。",
             "Skill rate and score calculation method\nCLASSIC: Pre-V6 score calculation and pre-V8 rank calculation\nXG: Current score and rank calculation",

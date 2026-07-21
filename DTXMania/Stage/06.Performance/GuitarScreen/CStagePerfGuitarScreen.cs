@@ -371,7 +371,7 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		{
 			eReturnValueAfterFadeOut = EPerfScreenReturnValue.StageClear;
 			ePhaseID = EPhase.PERFORMANCE_STAGE_CLEAR;
-			tStartStageClearDelay();
+			tStartResultDelay();
 		}
 		
 		ManageMixerQueue();

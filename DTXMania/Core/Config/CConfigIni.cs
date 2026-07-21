@@ -387,7 +387,7 @@ internal partial class CConfigIni
 		}
 	}
 	public int nRisky;						// #23559 2011.6.20 yyagi Riskyでの残ミス数。0で閉店
-	public int nStageClearWaitMs;			// How long to hold on a cleared chart before the result screen (ms).
+	public int nResultDelayMs;				// Delay after clearing a song before the result screen is shown (ms).
 	public int nLoadingMinMs;				// Minimum time the song-loading screen stays up, even on a fast load (ms).
 	public bool bIsAllowedDoubleClickFullscreen;	// #26752 2011.11.27 yyagi ダブルクリックしてもフルスクリーンに移行しない
 	public bool bIsSwappedGuitarBass			// #24063 2011.1.16 yyagi ギターとベースの切り替え中か否か
@@ -768,7 +768,7 @@ internal partial class CConfigIni
 
 		bHAZARD = false;
 		nRisky = 0;							// #23539 2011.7.26 yyagi RISKYモード
-		nStageClearWaitMs = 2000;			// original NX pacing (~2s hold before result)
+		nResultDelayMs = 2000;				// original NX pacing (~2s before the result screen)
 		nLoadingMinMs = 1500;				// keep the loading screen up at least this long
 		nShowLagType = (int) EShowLagType.OFF;	// #25370 2011.6.3 yyagi ズレ時間表示
 		nShowLagTypeColor = 0;

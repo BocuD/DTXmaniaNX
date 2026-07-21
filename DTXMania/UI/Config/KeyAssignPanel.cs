@@ -342,7 +342,7 @@ internal sealed class KeyAssignPanel : UIGroup
             return;
         }
 
-        // live echo of whatever is currently held, before it's committed
+        //no fresh press this frame: let a stale overwrite prompt expire, then echo what's held
         if (pendingOverwrite && now > pendingDeadlineMs)
         {
             pendingOverwrite = false;
