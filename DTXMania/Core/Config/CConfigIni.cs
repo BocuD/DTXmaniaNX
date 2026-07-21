@@ -769,7 +769,7 @@ internal partial class CConfigIni
 		bHAZARD = false;
 		nRisky = 0;							// #23539 2011.7.26 yyagi RISKYモード
 		nResultDelayMs = 2000;				// original NX pacing (~2s before the result screen)
-		nLoadingMinMs = 1500;				// keep the loading screen up at least this long
+		nLoadingMinMs = 1000;				// keep the loading screen up at least this long
 		nShowLagType = (int) EShowLagType.OFF;	// #25370 2011.6.3 yyagi ズレ時間表示
 		nShowLagTypeColor = 0;
 		bShowLagHitCount = false;
