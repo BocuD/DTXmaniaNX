@@ -8,17 +8,18 @@ public unsafe class Cmp3ogg : SoundDecoder
 {
 	private int stream_in = -1;
 
-
+	//the BASS "No Sound" device (0) used for decoding is owned by the active sound device
+	//layer, so it is always initialized before we get here; decode streams are
+	//device-independent so this works from any thread
 	public override int Open( string filename )
 	{
-		bool r = Bass.BASS_Init(0, 48000, BASSInit.BASS_DEVICE_DEFAULT, IntPtr.Zero);
-
 		stream_in = Bass.BASS_StreamCreateFile(filename, 0, 0, BASSFlag.BASS_DEFAULT | BASSFlag.BASS_STREAM_DECODE);
-		// BASS_DEFAULT: output 32bit (16bit stereo)
+		//BASS_DEFAULT: output 32bit (16bit stereo)
 		if (stream_in == 0)
 		{
 			BASSError be = Bass.BASS_ErrorGetCode();
-			Trace.TraceInformation("Cmp3ogg: StreamCreateFile error: " + be.ToString());
+			Trace.TraceInformation("Cmp3ogg: StreamCreateFile error: " + be);
+			return -1;  //No valid handle to decode
 		}
 		nTotalPCMSize = Bass.BASS_ChannelGetLength(stream_in);
 
@@ -55,9 +56,15 @@ public unsafe class Cmp3ogg : SoundDecoder
 			{
 				BASSError be = Bass.BASS_ErrorGetCode();
 				Trace.TraceInformation("Cmp3: BASS_ChannelGetData Error: " + be.ToString());
+				return -1;
 			}
-			Array.Copy(data, 0, Dest, p, len);
-			p += len;
+			if (len == 0)
+				break;  //end of stream
+			long copyLen = Math.Min(len, Dest.LongLength - p);
+			if (copyLen <= 0)
+				break;
+			Array.Copy(data, 0, Dest, p, copyLen);
+			p += copyLen;
 		} while (p < nTotalPCMSize);
 		#endregion
 
@@ -69,8 +76,12 @@ public unsafe class Cmp3ogg : SoundDecoder
 
 	public override void Close()
 	{
-		Bass.BASS_StreamFree(stream_in);
-		Bass.BASS_Free();
+		//only free the decode stream, device stays initialized
+		if (stream_in != 0 && stream_in != -1)
+		{
+			Bass.BASS_StreamFree(stream_in);
+			stream_in = -1;
+		}
 	}
 
 	/// <summary>

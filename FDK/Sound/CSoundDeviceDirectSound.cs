@@ -121,6 +121,18 @@ public class CSoundDeviceDirectSound : ISoundDevice
 		BassNet.Registration("dtx2013@gmail.com", "2X9181017152222");
 		#endregion
 
+		#region [ BASS decode device ]
+		//DirectSound plays through SharpDX, but Cmp3ogg decodes mp3/ogg samples via BASS, so
+		//the "No Sound" device (0) is initialized here and released in Dispose();
+		//BASS_ERROR_ALREADY means another device layer already initialized it, which is fine
+		if (!Bass.BASS_Init(0, 48000, BASSInit.BASS_DEVICE_DEFAULT, IntPtr.Zero))
+		{
+			BASSError be = Bass.BASS_ErrorGetCode();
+			if (be != BASSError.BASS_ERROR_ALREADY)
+				Trace.TraceWarning("BASS_Init (decode device) failed: " + be);
+		}
+		#endregion
+
 		#region [ DirectSound デバイスを作成する。]
 		//-----------------
 		DirectSound = new DirectSound();   // 失敗したら例外をそのまま発出。
@@ -273,6 +285,8 @@ public class CSoundDeviceDirectSound : ISoundDevice
 
 			CCommon.tDispose(ref DirectSound);
 			CCommon.tDispose(tmシステムタイマ);
+
+			Bass.BASS_Free();
 		}
 		if (ctimer != null)
 		{
