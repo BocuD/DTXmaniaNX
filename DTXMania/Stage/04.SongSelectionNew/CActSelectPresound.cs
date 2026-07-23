@@ -148,7 +148,6 @@ internal class CActSelectPresound : CActivity
 				sound.tStartPlaying(true);
 				strCurrentlyPlayingAudioPath = strPreviewFilename;
 				tStartFadeOutBgm();
-				Trace.TraceInformation("Created preview sound: ({0})", strPreviewFilename);
 			}
 			catch (Exception e)
 			{
