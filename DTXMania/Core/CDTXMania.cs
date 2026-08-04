@@ -333,7 +333,36 @@ internal partial class CDTXMania
 
     #endregion
 
-    public static float renderScale = 1.0f;
+    /// <summary>
+    /// How many physical pixels one layout pixel is drawn at. Elements that size themselves in pixels read
+    /// this while drawing, so it is the scale of whatever is being drawn right now — the game window, or
+    /// whatever <see cref="PushRenderScale"/> is scoped around.
+    /// </summary>
+    public static float renderScale
+    {
+        get => renderScaleOverride ?? gameRenderScale;
+        set => gameRenderScale = value;
+    }
+
+    private static float gameRenderScale = 1.0f;
+    private static float? renderScaleOverride;
+
+    /// <summary>Draws a subtree at a different scale than the game window, for the length of the returned
+    /// scope. Nests, and cannot outlive the draw it belongs to.</summary>
+    public static RenderScaleScope PushRenderScale(float scale) => new(scale);
+
+    public readonly struct RenderScaleScope : IDisposable
+    {
+        private readonly float? previous;
+
+        internal RenderScaleScope(float scale)
+        {
+            previous = renderScaleOverride;
+            renderScaleOverride = scale;
+        }
+
+        public void Dispose() => renderScaleOverride = previous;
+    }
 
     private static readonly ConcurrentQueue<Action> mainThreadActions = new();
 

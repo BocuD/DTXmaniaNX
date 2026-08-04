@@ -544,7 +544,9 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
             _gameRenderTarget.BindDefaultFramebuffer(Math.Max(_framebufferWidth, 1), Math.Max(_framebufferHeight, 1));
 
             FrameProfiler.Begin(FrameSection.Inspector);
-            InspectorManager.Draw(_renderInGameWindow, _gameRenderTarget.TextureId, new Vector2(_gameRenderTarget.Width, _gameRenderTarget.Height));
+            InspectorManager.Draw(_renderInGameWindow, _gameRenderTarget.TextureId,
+                new Vector2(_gameRenderTarget.Width, _gameRenderTarget.Height),
+                new Vector2(Math.Max(_framebufferWidth, 1), Math.Max(_framebufferHeight, 1)));
             FrameProfiler.End(FrameSection.Inspector);
 
             FrameProfiler.Begin(FrameSection.Blit);

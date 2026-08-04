@@ -23,6 +23,10 @@ public static class InspectorManager
     public static ImDrawListPtr gizmoDrawList;
     public static Rectangle gizmoRect;
 
+    //the state a window that renders into its own target mid-frame has to put back
+    public static Vector2 framebufferSize { get; private set; }
+    public static Vector2 gameRenderSize { get; private set; }
+
     private static Matrix4x4 view = Matrix4x4.Identity;
 
     public static string toRemove = string.Empty;
@@ -50,8 +54,11 @@ public static class InspectorManager
         windows.Add(new Window("Display Controls", () => RendererInfo.Draw()));
     }
 
-    public static void Draw(bool drawGameWindow, ImTextureID? gameTextureId, Vector2 gameTextureSize)
+    public static void Draw(bool drawGameWindow, ImTextureID? gameTextureId, Vector2 gameTextureSize, Vector2 defaultFramebufferSize)
     {
+        framebufferSize = defaultFramebufferSize;
+        gameRenderSize = gameTextureSize;
+
         if (!string.IsNullOrWhiteSpace(toRemove))
         {
             if (Inspector.Inspector.inspectorTarget == toRemove)
@@ -100,31 +107,34 @@ public static class InspectorManager
             selectedDrawable = DrawableTracker.GetDrawable(Inspector.Inspector.inspectorTarget);
         }
 
+        Rectangle gameRect;
+        ImDrawListPtr gameDrawList;
+        Matrix4x4 gameView;
+
         if (drawGameWindow)
         {
-            var windowInfo = GameWindow.Draw(gameTextureId, gameTextureSize);
-            gizmoRect = windowInfo.rect;
-            gizmoDrawList = windowInfo.drawList;
-            view = GameWindow.GetViewMatrix();
+            GameWindow.Draw(gameTextureId, gameTextureSize);
+            gameRect = GameWindow.viewport.rect;
+            gameDrawList = GameWindow.viewport.drawList;
+            gameView = GameWindow.viewport.GetViewMatrix();
         }
         else
         {
             ImGuiViewportPtr mainViewport = ImGui.GetMainViewport();
-            gizmoRect = new Rectangle(
+            gameRect = new Rectangle(
                 (int)mainViewport.Pos.X,
                 (int)mainViewport.Pos.Y,
                 (int)MathF.Max(mainViewport.Size.X, 1f),
                 (int)MathF.Max(mainViewport.Size.Y, 1f));
-            gizmoDrawList = ImGui.GetBackgroundDrawList();
-            view = Matrix4x4.Identity;
+            gameDrawList = ImGui.GetBackgroundDrawList();
+            gameView = Matrix4x4.Identity;
         }
 
         ImGuizmo.SetImGuiContext(ImGui.GetCurrentContext());
         ImGuizmo.BeginFrame();
         ImGuizmo.Enable(true);
         ImGuizmo.SetOrthographic(true);
-        ImGuizmo.SetDrawlist(gizmoDrawList);
-        ImGuizmo.SetRect(gizmoRect.X, gizmoRect.Y, gizmoRect.Width, gizmoRect.Height);
+        SetGizmoTarget(gameRect, gameDrawList, gameView);
 
         if (inspectorEnabled)
         {
@@ -137,6 +147,9 @@ public static class InspectorManager
                     window.draw();
                 }
             }
+
+            //each editor draws the gizmo for a selection inside its own tree, in its own viewport
+            ComponentEditor.DrawAll(selectedDrawable);
         }
 
         if (logWindowEnabled)
@@ -144,7 +157,23 @@ public static class InspectorManager
             logWindow.DrawWindow();
         }
 
-        selectedDrawable?.DrawTransformGizmo();
+        if (ComponentEditor.OwnerOf(selectedDrawable) == null)
+        {
+            SetGizmoTarget(gameRect, gameDrawList, gameView);
+            selectedDrawable?.DrawTransformGizmo();
+        }
+    }
+
+    /// <summary>Points the gizmos at one viewport: where it is on screen, what to draw into, and how it
+    /// maps world positions to that region.</summary>
+    public static void SetGizmoTarget(Rectangle rect, ImDrawListPtr drawList, Matrix4x4 viewMatrix)
+    {
+        gizmoRect = rect;
+        gizmoDrawList = drawList;
+        view = viewMatrix;
+
+        ImGuizmo.SetDrawlist(drawList);
+        ImGuizmo.SetRect(rect.X, rect.Y, rect.Width, rect.Height);
     }
 
     private static void DrawMenuBar()

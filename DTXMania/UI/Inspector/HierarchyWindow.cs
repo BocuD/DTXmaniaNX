@@ -36,6 +36,14 @@ public class HierarchyWindow
             {
                 ImGui.Text("No group selected");
             }
+
+            //an open component editor is a tree of its own, so it gets a root here and everything that
+            //works off the selection keeps working
+            foreach (ComponentEditor editor in ComponentEditor.open)
+            {
+                ImGui.SeparatorText(editor.componentPath);
+                DrawNode(editor.root);
+            }
         }
         finally
         {
@@ -320,6 +328,11 @@ public class HierarchyWindow
 
     private void DrawNodeContextMenu(UIDrawable node)
     {
+        if (node is ComponentInstance { component.Length: > 0 } componentNode && ImGui.Selectable("Edit Component"))
+        {
+            ComponentEditor.Open(componentNode.component, componentNode.GetType());
+        }
+
         //add child menu
         if (node is UIGroup group)
         {

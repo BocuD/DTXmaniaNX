@@ -226,6 +226,12 @@ public class SkinEditorWindow
             string componentName = Path.GetFileNameWithoutExtension(file);
             ImGui.BulletText(componentName);
 
+            ImGui.SameLine(ImGui.GetWindowWidth() - 130);
+            if (ImGui.Button("Edit##component" + componentName))
+            {
+                ComponentEditor.Open($"Components/{Path.GetFileName(file)}");
+            }
+
             ImGui.SameLine(ImGui.GetWindowWidth() - 70);
             if (ImGui.Button("Delete##component" + componentName))
             {

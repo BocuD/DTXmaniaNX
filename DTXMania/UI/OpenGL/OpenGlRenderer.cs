@@ -74,9 +74,16 @@ public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
 
     public readonly record struct TextureInfo(uint Id, int Width, int Height);
 
+    /// <summary>The live context, and a counter bumped every time it is replaced. Anything holding GL
+    /// objects that the host does not know about (an inspector render target) re-attaches when this
+    /// changes, rather than the host having to keep a list of them.</summary>
+    public GL? gl => _gl;
+    public int contextGeneration { get; private set; }
+
     public void AttachGraphics(GL gl)
     {
         _gl = gl;
+        contextGeneration++;
 
         if (!_sharedResourcesCreated)
         {
@@ -91,7 +98,9 @@ public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
         _batchQuadCount = 0;
     }
 
-    public void BeginFrame(int viewportWidth, int viewportHeight)
+    /// <summary>Points the 2D pipeline at a viewport of this size. Separate from <see cref="BeginFrame"/>
+    /// so a render target of a different size can be drawn into mid-frame without disturbing frame state.</summary>
+    public void SetProjection(int viewportWidth, int viewportHeight)
     {
         _projection = Matrix4x4.CreateOrthographicOffCenter(
             0f,
@@ -100,6 +109,14 @@ public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
             0f,
             -1f,
             1f);
+
+        //the projection uniform is only uploaded when the frame state is applied
+        _frameStateSet = false;
+    }
+
+    public void BeginFrame(int viewportWidth, int viewportHeight)
+    {
+        SetProjection(viewportWidth, viewportHeight);
 
         _lastFrameDrawCalls = drawCalls;
         drawCalls = 0;
