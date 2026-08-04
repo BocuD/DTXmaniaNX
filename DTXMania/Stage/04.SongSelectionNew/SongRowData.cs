@@ -15,13 +15,21 @@ namespace DTXMania;
 /// </summary>
 public sealed class SongRowData
 {
+    //the order the SongRow component lists its background arts in
+    private const int Bar = 0;
+    private const int BoxClosed = 1;
+    private const int BoxOpen = 2;
+
     [DataField] public string Title { get; private set; } = string.Empty;
     [DataField] public string Artist { get; private set; } = string.Empty;
     [DataField] public string Skill { get; private set; } = string.Empty;
 
+    //the album art is the one texture that belongs to the song rather than to the skin
     [DataField] public BaseTexture? AlbumArt { get; set; }
-    [DataField] public BaseTexture? Lamp { get; private set; }
-    [DataField] public BaseTexture? Background { get; private set; }
+
+    //which of the SongRow component's arts this row uses; the arts themselves belong to the layout
+    [DataField] public int LampIndex { get; private set; }
+    [DataField] public int BackgroundIndex { get; private set; }
 
     //the bar texture needs a slightly different clip and offset than the two box textures
     [DataField] public double BackgroundClipX { get; private set; }
@@ -32,13 +40,13 @@ public sealed class SongRowData
     [DataField] public bool HasTitle => Title.Length > 0;
     [DataField] public bool HasArtist => Artist.Length > 0;
     [DataField] public bool ShowSkill { get; private set; }
-    [DataField] public bool HasLamp => Lamp != null;
+    [DataField] public bool HasLamp { get; private set; }
 
     public SongNode? Node { get; private set; }
 
     /// <summary>Fills the row from a node. Returns false when the node is unchanged, so the caller can
     /// skip the thumbnail lookup that would otherwise follow.</summary>
-    public bool SetNode(SongNode? node, SongSelectionAssets assets)
+    public bool SetNode(SongNode? node)
     {
         if (ReferenceEquals(Node, node))
         {
@@ -52,7 +60,7 @@ public sealed class SongRowData
             case SongNode.ENodeType.SONG:
                 Title = node.title;
                 Artist = ArtistOf(node);
-                Background = assets.Bar;
+                BackgroundIndex = Bar;
                 //dirty hacks to fix clipping issues with a bad texture (?)
                 BackgroundClipX = 0;
                 BackgroundOffsetX = -40.0;
@@ -61,7 +69,7 @@ public sealed class SongRowData
             case SongNode.ENodeType.BOX:
                 Title = node.title;
                 Artist = BoxSubtitleOf(node);
-                Background = assets.BoxClosed;
+                BackgroundIndex = BoxClosed;
                 BackgroundClipX = 1;
                 BackgroundOffsetX = -39.0;
                 break;
@@ -69,7 +77,7 @@ public sealed class SongRowData
             case SongNode.ENodeType.BACKBOX:
                 Title = "<< BACK";
                 Artist = CDTXMania.isJapanese ? "BOX を出ます。" : "Exit from the BOX.";
-                Background = assets.BoxOpen;
+                BackgroundIndex = BoxOpen;
                 BackgroundClipX = 1;
                 BackgroundOffsetX = -39.0;
                 break;
@@ -77,14 +85,14 @@ public sealed class SongRowData
             default:
                 Title = string.Empty;
                 Artist = string.Empty;
-                Background = assets.Bar;
+                BackgroundIndex = Bar;
                 BackgroundClipX = 0;
                 BackgroundOffsetX = -40.0;
                 break;
         }
 
         UpdateSkill();
-        UpdateLamp(assets);
+        UpdateLamp();
         return true;
     }
 
@@ -110,11 +118,12 @@ public sealed class SongRowData
         SkillBarWidth = 286.0 * (skill.skillPoints / skill.maxSkillPoints);
     }
 
-    private void UpdateLamp(SongSelectionAssets assets)
+    private void UpdateLamp()
     {
-        Lamp = null;
+        HasLamp = Node?.nodeType == SongNode.ENodeType.SONG;
+        LampIndex = 0;
 
-        if (Node?.nodeType != SongNode.ENodeType.SONG)
+        if (!HasLamp)
         {
             return;
         }
@@ -131,7 +140,7 @@ public sealed class SongRowData
             }
         }
 
-        Lamp = assets.Lamps[best];
+        LampIndex = best;
     }
 
     private static string ArtistOf(SongNode song)

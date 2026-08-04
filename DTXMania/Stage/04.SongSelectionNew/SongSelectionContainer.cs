@@ -194,7 +194,7 @@ public class SongSelectionContainer : UIScrollItemsGroup, IUIItemSource
     private void FillRow(int index, SongNode? node)
     {
         SongRowData row = window.At(index);
-        row.SetNode(node, assets);
+        row.SetNode(node);
 
         BaseTexture? cached = null;
         string path = node != null ? GetPreImagePath(node) : string.Empty;
@@ -355,16 +355,21 @@ public class SongSelectionContainer : UIScrollItemsGroup, IUIItemSource
     {
         UIGroup root = new("SongRow");
 
-        UIImage background = root.AddChild(new UIImage
+        TextureArray background = root.AddChild(new TextureArray
         {
             name = "background",
-            imageSource = ImageSource.Dynamic,
-            resource = "Item.Background",
+            resources =
+            {
+                @"Graphics\5_bar.png",
+                @"Graphics\5_box_closed.png",
+                @"Graphics\5_box_open.png"
+            },
             anchor = new Vector2(0.0f, 0.5f),
             position = new Vector3(-40.0f, 42.0f, 0.0f),
-            size = new Vector2(assets.Bar.Width, assets.Bar.Height),
             renderOrder = -1
         });
+
+        background.bindings.Add(new UIBinding("textureIndex", "Item.BackgroundIndex"));
 
         //the box textures need a slightly different clip and offset than the bar
         background.bindings.Add(new UIBinding("clipRect.X", "Item.BackgroundClipX"));
@@ -442,17 +447,27 @@ public class SongSelectionContainer : UIScrollItemsGroup, IUIItemSource
         skill.anchor = new Vector2(0, 0.5f);
         skill.renderOrder = 2;
 
-        root.AddChild(new UIImage
+        root.AddChild(new TextureArray
         {
             name = "lamp",
-            imageSource = ImageSource.Dynamic,
-            resource = "Item.Lamp",
+            resources =
+            {
+                @"Graphics\Lamp\00.png",
+                @"Graphics\Lamp\01.png",
+                @"Graphics\Lamp\02.png",
+                @"Graphics\Lamp\03.png",
+                @"Graphics\Lamp\04.png",
+                @"Graphics\Lamp\05.png"
+            },
             position = new Vector3(-40, 40, 0),
             anchor = new Vector2(0.5f, 0.5f),
-            size = new Vector2(assets.Lamps[0].Width, assets.Lamps[0].Height),
             renderOrder = 1,
             isVisible = false,
-            bindings = { new UIBinding("isVisible", "Item.HasLamp") }
+            bindings =
+            {
+                new UIBinding("textureIndex", "Item.LampIndex"),
+                new UIBinding("isVisible", "Item.HasLamp")
+            }
         });
 
         return root;
