@@ -64,21 +64,8 @@ public class CStageSongSelectionNew : CStage
         
         listChildActivities.Add(actPresound = new CActSelectPresound());
         
-        currentSort = sorters[0];
+        currentSort = SongDbSort.All[0];
     }
-
-    private readonly SongDbSort[] sorters =
-    [
-        new SortDefault(),
-        new SortByBox(),
-        new SortByTitle(),
-        new SortByArtist(),
-        new SortByDifficulty(),
-        new SortByLevel(),
-        new SortByPlayer(),
-        new SortByAllSongs(),
-        new SortBySkill()
-    ];
     
     //the selected song's display values, pushed on change: formatting them per frame would allocate
     private readonly UIDataContext songInfo = new();
@@ -215,6 +202,11 @@ public class CStageSongSelectionNew : CStage
         var statusPanel = ui.AddChild(new StatusPanel());
         statusPanel.renderOrder = 6;
         statusPanel.BuildDefaultPanes();
+
+        var sortMenu = ui.AddChild(new SortMenuContainer());
+        sortMenu.component = "Components/SortMenu.json";
+        sortMenu.position = new Vector3(1281, 35, 0);
+        sortMenu.renderOrder = 8;
     }
 
     public override void OnLayoutReady()
@@ -224,13 +216,10 @@ public class CStageSongSelectionNew : CStage
         previewVideo.renderOrder = -99;
         previewVideo.position = Vector3.Zero;
 
-        sortMenuContainer = ui.AddChild(new SortMenuContainer(songDb, sorters));
-        sortMenuContainer.position = new Vector3(1281, 35, 0);
-        sortMenuContainer.renderOrder = 8;
-        sortMenuContainer.dontSerialize = true;
-
-        //the status panel and selection container are part of the layout, so they may have come from json
+        //the status panel, sort menu and selection container are part of the layout, so they may have
+        //come from json
         statusPanel = ui.GetChild<StatusPanel>("StatusPanel")!;
+        sortMenuContainer = ui.GetChild<SortMenuContainer>("SortMenuContainer")!;
 
         densityGraph1 = ui.AddChild(new DensityGraph((EInstrumentPart)CDTXMania.GetCurrentInstrument()));
         densityGraph1.position = new Vector3(CDTXMania.GetCurrentInstrument() == 0 ? 212 : 64, 720, 0);
@@ -246,6 +235,7 @@ public class CStageSongSelectionNew : CStage
         songSearchMenu.dontSerialize = true;
 
         quickMenu = ui.AddChild(new QuickMenu());
+        quickMenu.component = "Components/QuickMenu.json";
         quickMenu.renderOrder = 15;
         quickMenu.isVisible = false;
         quickMenu.anchor = new Vector2(0.5f, 0.5f);
@@ -270,7 +260,7 @@ public class CStageSongSelectionNew : CStage
     {
         //set initial sort menu container position to be default,
         //or in case of reloading the menu, whatever was last selected
-        sortMenuContainer.SetCurrentSelection(currentSort);
+        sortMenuContainer.ShowSort(currentSort);
         
         //every time we load the stage, containers need to be recreated
         loadPhase = ELoadPhase.Initialize;
@@ -296,7 +286,7 @@ public class CStageSongSelectionNew : CStage
         DateTime startTime = DateTime.Now;
         
         //the container is pointed at one of these on demand in ApplySort
-        foreach (SongDbSort sorter in sorters)
+        foreach (SongDbSort sorter in SongDbSort.All)
         {
             if (!sortCache.TryGetValue(sorter, out SongNode? rootNode) || sorter.requireResort)
             {
@@ -644,7 +634,7 @@ public class CStageSongSelectionNew : CStage
     //so switching sorts shows thumbnails immediately; the uploader throttles the GPU work
     private void PrewarmOtherSorts()
     {
-        foreach (SongDbSort sorter in sorters)
+        foreach (SongDbSort sorter in SongDbSort.All)
         {
             if (sorter == currentSort) continue;
             if (sortCache.TryGetValue(sorter, out SongNode? root))
