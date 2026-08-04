@@ -20,7 +20,6 @@ internal class ConfigList : UIScrollItemsGroup, IUIItemSource
     //where a text input sits within a row, matching where the component draws its value
     private static readonly Vector3 ValueOffset = new(265, 30, 0);
 
-    private readonly ConfigRowAssets assets = new();
     private readonly List<ConfigRowData> rows = [];
     private readonly ConfigItemEditor editor;
 
@@ -123,7 +122,7 @@ internal class ConfigList : UIScrollItemsGroup, IUIItemSource
 
         for (int i = 0; i < items.Count; i++)
         {
-            rows[i].SetItem(items[i], assets);
+            rows[i].SetItem(items[i]);
         }
 
         StopEditing();
@@ -321,13 +320,21 @@ internal class ConfigList : UIScrollItemsGroup, IUIItemSource
     {
         UIGroup root = new("ConfigRow");
 
-        root.AddChild(new UIImage
+        root.AddChild(new TextureArray
         {
             name = "Panel",
-            imageSource = ImageSource.Dynamic,
-            resource = "Item.Panel",
-            size = assets.PanelSize,
-            renderOrder = 0
+            resources =
+            {
+                @"Graphics\4_itembox.png",
+                @"Graphics\4_itembox folder.png",
+                @"Graphics\4_itembox other.png"
+            },
+            renderOrder = 0,
+            bindings =
+            {
+                new UIBinding("textureIndex", "Item.PanelIndex"),
+                new UIBinding("isVisible", "Item.HasPanel")
+            }
         });
 
         UIText name = root.AddChild(new UIText(string.Empty, 16));
@@ -362,10 +369,4 @@ internal class ConfigList : UIScrollItemsGroup, IUIItemSource
     }
 
     #endregion
-
-    public override void Dispose()
-    {
-        base.Dispose();
-        assets.Dispose();
-    }
 }

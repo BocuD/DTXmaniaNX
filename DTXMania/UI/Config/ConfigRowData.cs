@@ -1,8 +1,5 @@
-using DTXMania.Core;
-using DTXMania.UI.Drawable;
 using DTXMania.UI.DynamicElements;
 using DTXMania.UI.Item;
-using System.Numerics;
 
 namespace DTXMania.UI.Config;
 
@@ -16,7 +13,10 @@ internal sealed class ConfigRowData
 
     [DataField] public string Value { get; private set; } = string.Empty;
 
-    [DataField] public BaseTexture? Panel { get; private set; }
+    //which of the ConfigRow component's panel arts this row uses; the arts themselves belong to the layout
+    [DataField] public int PanelIndex { get; private set; }
+
+    [DataField] public bool HasPanel => Item != null;
 
     //the value is drawn in one style or the other, never both, and a text-input row draws neither because
     //it renders its own field
@@ -30,18 +30,26 @@ internal sealed class ConfigRowData
 
     private bool hasValue;
 
-    public void SetItem(CItemBase? item, ConfigRowAssets assets)
+    public void SetItem(CItemBase? item)
     {
         Item = item;
         IsEditing = false;
         Name = item?.strItemName ?? string.Empty;
-        Panel = assets.PanelFor(item);
+        PanelIndex = PanelFor(item);
 
         //a text input renders its own value, so the row leaves that space alone
         hasValue = item != null && item is not CItemTextInput;
 
         RefreshValue();
     }
+
+    //the order the ConfigRow component lists its panel arts in
+    private static int PanelFor(CItemBase? item) => item?.ePanelType switch
+    {
+        CItemBase.EPanelType.Folder => 1,
+        CItemBase.EPanelType.Other or CItemBase.EPanelType.Return => 2,
+        _ => 0
+    };
 
     /// <summary>Re-reads the item's displayed value, which its action may have changed.</summary>
     public void RefreshValue()
@@ -52,28 +60,3 @@ internal sealed class ConfigRowData
     }
 }
 
-/// <summary>The panel art behind a row, which is picked by what kind of row it is.</summary>
-internal sealed class ConfigRowAssets : IDisposable
-{
-    private readonly BaseTexture normal = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\4_itembox.png"));
-    private readonly BaseTexture folder = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\4_itembox folder.png"));
-    private readonly BaseTexture other = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\4_itembox other.png"));
-
-    /// <summary>How big a row's panel is; a dynamic image keeps the size its layout gives it.</summary>
-    public Vector2 PanelSize => new(normal.Width, normal.Height);
-
-    public BaseTexture? PanelFor(CItemBase? item) => item?.ePanelType switch
-    {
-        null => null,
-        CItemBase.EPanelType.Folder => folder,
-        CItemBase.EPanelType.Other or CItemBase.EPanelType.Return => other,
-        _ => normal
-    };
-
-    public void Dispose()
-    {
-        normal.Dispose();
-        folder.Dispose();
-        other.Dispose();
-    }
-}
