@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Numerics;
 using DTXMania.Core;
+using DTXMania.Core.Framework;
 using DTXMania.UI.DynamicElements;
 using DTXMania.UI.Inspector;
 using DTXMania.UI.Skin;
@@ -22,7 +23,9 @@ public enum ImageSource
     //a file the active custom skin owns, copied into its Resources folder
     Resource,
     //a live texture from a data context or the stage's dynamicImageSources
-    Dynamic
+    Dynamic,
+    //no file at all: a rectangle of this element's colour, for a dim behind a menu or a panel
+    Solid
 }
 
 
@@ -69,6 +72,11 @@ public partial class UIImage : UITexture
         {
             _lastFileLoadAttempt = resource;
             LoadResource(updateRects: false);
+        }
+        else if (imageSource == ImageSource.Solid && !texture.IsValid())
+        {
+            //white, so the element's own colour is what shows; the size is the layout's to give
+            SetTexture(BaseTexture.CreateSolidColor(Color4.White), updateRects: true, updateSize: false);
         }
 
         if (!isVisible || !texture.IsValid())
