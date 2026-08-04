@@ -29,6 +29,12 @@ public class UIGroup : UIDrawable
     //against it before falling back to ancestors and the global context. See UIDrawable.DataContexts
     [JsonIgnore] public IUIDataContext? dataContext;
 
+    //what this component's keys resolved to when it was last saved from a running instance. Written on a
+    //component file so it can be edited on its own with values that make sense; nothing at runtime reads it
+    [SkinSerialize]
+    [JsonProperty(ObjectCreationHandling = ObjectCreationHandling.Replace)]
+    public Dictionary<string, string>? sampleContext;
+
     [AddChildMenu]
     public static UIDrawable Create()
     {

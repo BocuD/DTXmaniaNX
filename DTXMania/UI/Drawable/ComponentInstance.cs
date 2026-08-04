@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Numerics;
 using DTXMania.Core;
+using DTXMania.UI.DynamicElements;
 using DTXMania.UI.Skin;
 using Hexa.NET.ImGui;
 
@@ -60,6 +61,11 @@ public abstract class ComponentInstance : UIGroup
         contentLoaded = true;
 
         UIGroup tree = ResolveComponentTree();
+        sampleContext = tree.sampleContext;
+
+        //a component's animation belongs to the component, not to whoever placed an instance of it
+        animator = tree.animator ?? animator;
+
         foreach (UIDrawable child in tree.children.ToArray())
         {
             AddChild(child);
@@ -88,8 +94,12 @@ public abstract class ComponentInstance : UIGroup
         //reparented, so the live instance is untouched
         UIGroup root = new(Path.GetFileNameWithoutExtension(component));
         root.children.AddRange(children);
+        root.sampleContext = CaptureSampleContext();
+        root.animator = animator;
         string json = SkinHierarchySerializer.SerializeToJsonCompact(root);
         root.children.Clear();
+
+        sampleContext = root.sampleContext;
 
         try
         {
@@ -102,6 +112,17 @@ public abstract class ComponentInstance : UIGroup
         {
             Trace.TraceError($"Failed to save component to {fullPath}: {e.Message}");
         }
+    }
+
+    //what this instance's keys resolve to right now, so the component can later be edited on its own with
+    //values that make sense. Keeps the previous sample when nothing resolves, which is the case for an
+    //instance whose data has not arrived yet
+    private Dictionary<string, string>? CaptureSampleContext()
+    {
+        Dictionary<string, string> captured = new();
+        ComponentKeys.Capture(this, captured);
+
+        return captured.Count > 0 ? captured : sampleContext;
     }
 
     /// <summary>Drops this instance's loaded content and the cached json, then reloads from the component
