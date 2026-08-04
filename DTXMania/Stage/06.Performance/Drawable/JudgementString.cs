@@ -54,6 +54,8 @@ public class JudgementString : UIGroup
     
     public JudgementString()
     {
+        //a gameplay element is runtime-only: it never appears in a saved layout
+        dontSerialize = true;
         if (barTexture == null || !barTexture.IsValid()) CacheTextures();
         
         name = $"JudgementString";

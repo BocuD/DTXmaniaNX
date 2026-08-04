@@ -134,11 +134,6 @@ internal class CStageSongSelection : CStage
 				tResetRandomListForNode(null);
 			}
 			
-			dynamicStringSources["SongName"] = new DynamicStringSource(() => actSongList.rSelectedScore.SongInformation.Title ?? "");
-			dynamicStringSources["SongArtist"] = new DynamicStringSource(() => actSongList.rSelectedScore.SongInformation.ArtistName ?? "");
-			dynamicStringSources["SongGenre"] = new DynamicStringSource(() => actSongList.rSelectedScore.SongInformation.Genre ?? "");
-			dynamicStringSources["SongBPM"] = new DynamicStringSource(() => actSongList.rSelectedScore.SongInformation.Bpm.ToString(CultureInfo.InvariantCulture));
-			dynamicStringSources["SongDuration"] = new DynamicStringSource(() => actSongList.rSelectedScore.SongInformation.DurationMs.ToString("mm\\:ss"));
 		}
 		finally
 		{
@@ -187,42 +182,47 @@ internal class CStageSongSelection : CStage
 	private UIImage? songListTopPanel;
 	private UIImage? songListBottomPanel;
 	
-	public override void InitializeBaseUI()
+	public override void RegisterBindings()
+	{
+	}
+
+	//this stage is still entirely immediate-mode drawing wrapped in LegacyDrawables
+	public override void OnLayoutReady()
 	{
 		LegacyDrawable backgroundVideo = ui.AddChild(new LegacyDrawable(() => actBackgroundVideoAVI.tUpdateAndDraw()));
 		backgroundVideo.renderOrder = -99;
 		backgroundVideo.name = "BackgroundVideo";
-		
+
 		LegacyDrawable preImagePanel = ui.AddChild(new LegacyDrawable(() => actPreimagePanel.OnUpdateAndDraw()));
 		preImagePanel.name = "PreImagePanel";
-		
+
 		LegacyDrawable artistComment = ui.AddChild(new LegacyDrawable(() => actArtistComment.OnUpdateAndDraw()));
 		artistComment.name = "ArtistComment";
 
-		UIGroup songList = ui.AddChild(new UIGroup("SongList"));
-		songList.renderOrder = 1;
-
-		LegacyDrawable listView = songList.AddChild(new LegacyDrawable(() => actSongList.OnUpdateAndDraw()));
+		//the list itself draws below the song list panels declared in the layout
+		UIGroup listParent = ui.GetChild<UIGroup>("SongList") ?? ui;
+		LegacyDrawable listView = listParent.AddChild(new LegacyDrawable(() => actSongList.OnUpdateAndDraw()));
 		listView.name = "SongList";
-		
+		listView.renderOrder = -1;
+
 		LegacyDrawable statusPanel = ui.AddChild(new LegacyDrawable(() => actStatusPanel.OnUpdateAndDraw()));
 		statusPanel.name = "StatusPanel";
 		statusPanel.renderOrder = 5;
-		
+
 		LegacyDrawable perfHistoryPanel = ui.AddChild(new LegacyDrawable(() => actPerHistoryPanel.OnUpdateAndDraw()));
 		perfHistoryPanel.name = "PerfHistoryPanel";
 		perfHistoryPanel.renderOrder = 5;
-		
+
 		LegacyDrawable information = ui.AddChild(new LegacyDrawable(() => actInformation.OnUpdateAndDraw()));
 		information.name = "Information";
 		information.renderOrder = 5;
-		
+
 		LegacyDrawable showCurrentPosition = ui.AddChild(new LegacyDrawable(() => actShowCurrentPosition.OnUpdateAndDraw()));
 		showCurrentPosition.name = "ScrollBar";
 		showCurrentPosition.renderOrder = 5;
 	}
-	
-	public override void InitializeDefaultUI()
+
+	public override void BuildDefaultLayout()
 	{
 		UIImage bg = ui.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\5_background.jpg"))));
 		bg.renderOrder = -100;
@@ -245,18 +245,16 @@ internal class CStageSongSelection : CStage
 		bpmLabel.position = new Vector3(32, 258, 0);
 		bpmLabel.name = "BPMLabel";
 
-		UIGroup? songList = ui.GetChild<UIGroup>("SongList");
+		UIGroup songList = ui.AddChild(new UIGroup("SongList"));
+		songList.renderOrder = 1;
 
-		if (songList != null)
-		{
-			songListTopPanel = songList.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\5_header song list.png"))));
-			songListTopPanel.name = "SongListTopPanel";
+		songListTopPanel = songList.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\5_header song list.png"))));
+		songListTopPanel.name = "SongListTopPanel";
 
-			BaseTexture songListBottomPanelTex = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\5_footer song list.png"));
-			songListBottomPanel = songList.AddChild(new UIImage(songListBottomPanelTex));
-			songListBottomPanel.position = new Vector3(0, 720 - songListBottomPanelTex.Height, 0);
-			songListBottomPanel.name = "SongListBottomPanel";
-		}
+		BaseTexture songListBottomPanelTex = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\5_footer song list.png"));
+		songListBottomPanel = songList.AddChild(new UIImage(songListBottomPanelTex));
+		songListBottomPanel.position = new Vector3(0, 720 - songListBottomPanelTex.Height, 0);
+		songListBottomPanel.name = "SongListBottomPanel";
 	}
 	
 	public override void OnManagedCreateResources()
@@ -478,8 +476,8 @@ internal class CStageSongSelection : CStage
 					}
 					#endregion
 					#region [ Up ]
-					ctKeyRepeat.Up.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(SlimDXKey.UpArrow), new CCounter.DGキー処理(tMoveCursorUp));
-					ctKeyRepeat.R.tRepeatKey(CDTXMania.Pad.bPressingGB(EPad.R), new CCounter.DGキー処理(tMoveCursorUp));
+					ctKeyRepeat.Up.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(SlimDXKey.UpArrow), tMoveCursorUp);
+					ctKeyRepeat.R.tRepeatKey(CDTXMania.Pad.bPressingGB(EPad.R), tMoveCursorUp);
 					//SD changed to HT to follow Gitadora style
 					if (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.HT))
 					{
@@ -487,8 +485,8 @@ internal class CStageSongSelection : CStage
 					}
 					#endregion
 					#region [ Down ]
-					ctKeyRepeat.Down.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(SlimDXKey.DownArrow), new CCounter.DGキー処理(tMoveCursorDown));
-					ctKeyRepeat.B.tRepeatKey(CDTXMania.Pad.bPressingGB(EPad.G), new CCounter.DGキー処理(tMoveCursorDown));
+					ctKeyRepeat.Down.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(SlimDXKey.DownArrow), tMoveCursorDown);
+					ctKeyRepeat.B.tRepeatKey(CDTXMania.Pad.bPressingGB(EPad.G), tMoveCursorDown);
 					//FT changed to LT to follow Gitadora style
 					if (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.LT))
 					{

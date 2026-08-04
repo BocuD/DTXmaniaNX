@@ -3,6 +3,19 @@ using Newtonsoft.Json;
 
 namespace DTXMania.UI.Animation;
 
+/// <summary>Where a clip's data comes from, the way <c>ImageSource</c> says it for an image.</summary>
+public enum ClipSource
+{
+    //written into the layout that owns it
+    Embedded,
+
+    //a file in the built-in System folder
+    System,
+
+    //a file in the active skin's Animation folder
+    Skin
+}
+
 /// <summary>
 /// A named collection of tracks with a duration. Serializable to a flat JSON file.
 /// </summary>
@@ -13,6 +26,19 @@ public sealed class AnimationClip
     [JsonProperty("frameRate")] public float frameRate = 60f;
     [JsonProperty("loop")] public bool loop;
     [JsonProperty("tracks")] public List<AnimationTrack> tracks = new();
+
+    /// <summary>
+    /// Where this clip comes from. A layout writes an <see cref="ClipSource.Embedded"/> clip in full and
+    /// any other as a reference, so what a layout says about a clip is what it is.
+    /// </summary>
+    [JsonProperty("clipSource", DefaultValueHandling = DefaultValueHandling.Ignore)]
+    public ClipSource clipSource = ClipSource.Embedded;
+
+    //file this clip lives in, relative to the root its source names
+    [JsonProperty("resource", DefaultValueHandling = DefaultValueHandling.Ignore)]
+    public string resource = string.Empty;
+
+    [JsonIgnore] public bool IsEmbedded => clipSource == ClipSource.Embedded;
 
     public void InvalidateBindings()
     {

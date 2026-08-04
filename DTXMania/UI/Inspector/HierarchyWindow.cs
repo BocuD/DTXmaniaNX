@@ -50,9 +50,11 @@ public class HierarchyWindow
         }
     }
 
-    private void DrawNode(UIDrawable node)
+    private void DrawNode(UIDrawable node, bool inComponent = false)
     {
         UIGroup? group = node as UIGroup;
+
+        bool isComponent = node is ComponentInstance;
 
         ImGuiTreeNodeFlags rootFlags = ImGuiTreeNodeFlags.OpenOnArrow | ImGuiTreeNodeFlags.OpenOnDoubleClick;
 
@@ -66,6 +68,10 @@ public class HierarchyWindow
 
         string id = node.GetHashCode().ToString();
         string name = string.IsNullOrWhiteSpace(node.name) ? node.GetType().Name : node.name;
+        if (node is ComponentInstance componentNode)
+        {
+            name += "   -> " + (string.IsNullOrWhiteSpace(componentNode.component) ? "(code default)" : componentNode.component);
+        }
 
         string contextMenuId = id + "ContextMenu";
 
@@ -86,14 +92,22 @@ public class HierarchyWindow
             ImGui.SetCursorPosY(y);
         }
         
-        if (node.dontSerialize)
+        //component instance (blue) > inside a component, so not part of this layout (dimmed) > dontSerialize (red)
+        bool pushColor = true;
+        Vector4 color;
+        if (isComponent) color = new Vector4(0.45f, 0.7f, 1.0f, 1f);
+        else if (inComponent) color = new Vector4(0.6f, 0.6f, 0.6f, 1f);
+        else if (node.dontSerialize) color = new Vector4(1f, 0f, 0f, 1f);
+        else { pushColor = false; color = default; }
+
+        if (pushColor)
         {
-            ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1, 0, 0, 1));
+            ImGui.PushStyleColor(ImGuiCol.Text, color);
         }
 
         if (ImGui.TreeNodeEx(id, rootFlags, name))
         {
-            if (node.dontSerialize)
+            if (pushColor)
             {
                 ImGui.PopStyleColor();
             }
@@ -152,7 +166,7 @@ public class HierarchyWindow
                     for (int index = 0; index < group.children.Count; index++)
                     {
                         UIDrawable child = group.children[index];
-                        DrawNode(child);
+                        DrawNode(child, isComponent || inComponent);
                     }
                 }
                 else
@@ -179,7 +193,7 @@ public class HierarchyWindow
         }
         else
         {
-            if (node.dontSerialize)
+            if (pushColor)
             {
                 ImGui.PopStyleColor();
             }
@@ -264,13 +278,10 @@ public class HierarchyWindow
     {
         if (ImGui.BeginDragDropSource(ImGuiDragDropFlags.None))
         {
-            Type type = node.GetType();
-
             unsafe
             {
                 ImGui.SetDragDropPayload(nameof(UIDrawable), (void*)IntPtr.Zero, 0);
                 Inspector.dragDropPayload = node.id;
-                Inspector.dragDropType = type;
             }
 
             ImGui.Text(string.IsNullOrWhiteSpace(node.name) ? node.GetType().ToString() : node.name);
@@ -418,6 +429,9 @@ public class HierarchyWindow
         //draw recursively. `depth` is how many path segments we've already consumed.
         DrawAddChildMenuLevel(group, creators, depth: 0, parentPath: []);
 
+        //the active skin's components, which are runtime data rather than reflected creator types
+        DrawAddComponentsMenu(group);
+
         if (ImGui.Selectable("Load from JSON"))
         {
             string defaultPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
@@ -438,6 +452,39 @@ public class HierarchyWindow
                 }
             }
         }
+    }
+
+    private void DrawAddComponentsMenu(UIGroup group)
+    {
+        if (!ImGui.BeginMenu("Components"))
+        {
+            return;
+        }
+
+        if (CDTXMania.SkinManager.currentSkin is { } skin)
+        {
+            foreach (string path in Skin.SkinManager.ComponentPaths(skin))
+            {
+                if (ImGui.Selectable(Path.GetFileNameWithoutExtension(path)))
+                {
+                    group.AddChild(new GenericComponent(path));
+                    ImGui.CloseCurrentPopup();
+                }
+            }
+
+            ImGui.Separator();
+            if (ImGui.Selectable("Blank"))
+            {
+                group.AddChild(new GenericComponent());
+                ImGui.CloseCurrentPopup();
+            }
+        }
+        else
+        {
+            ImGui.TextDisabled("No custom skin active");
+        }
+
+        ImGui.EndMenu();
     }
 
     private void DrawAddChildMenuLevel(UIGroup group, DrawableCreatorEntry[] creators, int depth, string[] parentPath)

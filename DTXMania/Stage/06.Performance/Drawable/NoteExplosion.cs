@@ -18,6 +18,8 @@ public class NoteExplosion : UIGroup
 
     public NoteExplosion(Color4 color, bool hasCircle = true)
     {
+        //a gameplay element is runtime-only: it never appears in a saved layout
+        dontSerialize = true;
         name = $"NoteExplosion";
 
         var explode = new BaseTexture[8];

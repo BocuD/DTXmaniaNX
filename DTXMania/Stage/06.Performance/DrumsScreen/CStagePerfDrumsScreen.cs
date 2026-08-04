@@ -43,9 +43,9 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         listChildActivities.Add(actProgressBar = new CActPerfProgressBar());
     }
 
-    public override void InitializeBaseUI()
+    public override void OnLayoutReady()
     {
-        base.InitializeBaseUI();
+        base.OnLayoutReady();
         
         var drumsScreen = ui.AddChild(new LegacyDrawable(DrawDrumsScreen));
         drumsScreen.name = "drumsScreen";

@@ -1,98 +1,99 @@
-﻿using System.Numerics;
+using System.Numerics;
 using DTXMania.Core;
 using DTXMania.Core.Framework;
 using DTXMania.UI;
 using DTXMania.UI.Drawable;
+using DTXMania.UI.DynamicElements;
 using DTXMania.UI.Text;
 
 namespace DTXMania;
 
-public class ResultParameterPanel : UIGroup
+/// <summary>
+/// The result score/judgement panel: one row per judgement plus the score, all stamped from the shared
+/// ResultRow component, so editing that one component restyles every row.
+/// </summary>
+public class ResultParameterPanel : UIItemsGroup, IUIItemSource
 {
-    public ResultParameterPanel(int instrument)
+    private const float RowSpacing = 24.0f;
+
+    private readonly ResultRowData[] rows;
+
+    public int ItemCount => rows.Length;
+    public object GetItem(int index) => rows[index];
+
+    public ResultParameterPanel(int instrument) : base("ResultParameterPanel")
     {
-        name = "ResultParameterPanel";
-        sortByRenderOrder = false;
         scale.X = 0.96f;
-        
+
         var stageResult = CDTXMania.StageManager.stageResult;
-        var performanceData = stageResult.stPerformanceEntry[instrument];
-        
-        AddRow("Perfect", performanceData.nPerfectCount, (int)Math.Round(stageResult.fPerfectPercentage[instrument]));
-        AddRow("Great", performanceData.nGreatCount, (int)Math.Round(stageResult.fGreatPercentage[instrument]));
-        AddRow("Good", performanceData.nGoodCount, (int)Math.Round(stageResult.fGoodPercentage[instrument]));
-        AddRow("Ok", performanceData.nPoorCount, (int)Math.Round(stageResult.fPoorPercentage[instrument]));
-        AddRow("Miss", performanceData.nMissCount, (int)Math.Round(stageResult.fMissPercentage[instrument]));
-        AddRow("Max Combo", performanceData.nMaxCombo, (int)Math.Round((100.0 * stageResult.stPerformanceEntry[instrument].nMaxCombo / stageResult.stPerformanceEntry[instrument].nTotalChipsCount)));
-        AddRow("Score", performanceData.nScore);
-    }
-    
-    private float yPos;
-    public void AddRow(string name, long num1, long num2 = -1)
-    {
-        var row = AddChild(new UIGroup(name));
-        var text = row.AddChild(new UIText(name));
-        text.name = name + "Label";
-        text.outlineWidth = 0;
-        text.fontSize = 20;
-        text.fontSource = FontSource.System;
-        text.font = "Futura PT Medium.otf";
-        text.position.Y = yPos;
-        
-        if (num2 != -1)
-        {
-            AddZeroStyledNumberText(row, name, new Vector3(107, yPos - 8, 0), num1, 4, "texgyreadventor-regular.otf", 23);
-            AddZeroStyledNumberText(row, name + "_percentage", new Vector3(187, yPos - 8, 0), num2, 3, "texgyreadventor-regular.otf", 21);
-            var percentSign = row.AddChild(new UIText("%"));
-            percentSign.fillColor = Color4.White;
-            percentSign.outlineWidth = 0;
-            percentSign.position = new Vector3(224, yPos, 0);
-            percentSign.font = "texgyreadventor-regular.otf";
-            percentSign.fontSize = 15;
-            percentSign.style = UiTextStyle.Bold;
-            percentSign.anchor = new Vector2(0, 0);
-        }
-        else
-        {
-            AddZeroStyledNumberText(row, name, new Vector3(107, yPos - 8, 0), num1, 7, "texgyreadventor-regular.otf", 23);
-        }
-        yPos += 24.0f;
+        var pd = stageResult.stPerformanceEntry[instrument];
+
+        rows =
+        [
+            Judgement("Perfect", pd.nPerfectCount, stageResult.fPerfectPercentage[instrument]),
+            Judgement("Great", pd.nGreatCount, stageResult.fGreatPercentage[instrument]),
+            Judgement("Good", pd.nGoodCount, stageResult.fGoodPercentage[instrument]),
+            Judgement("Ok", pd.nPoorCount, stageResult.fPoorPercentage[instrument]),
+            Judgement("Miss", pd.nMissCount, stageResult.fMissPercentage[instrument]),
+            Judgement("Max Combo", pd.nMaxCombo, 100.0 * pd.nMaxCombo / pd.nTotalChipsCount),
+            new ResultRowData { Label = "Score", Value = pd.nScore, Padding = 7 }
+        ];
+
+        itemComponent = "Components/ResultRow.json";
+        itemOffset = new Vector3(0, RowSpacing, 0);
+        itemDefault = BuildResultRowDefault;
+
+        SetSource(this);
     }
 
-    public void AddZeroStyledNumberText(UIGroup row, string name, Vector3 textPosition, long number, int padding, 
-        string font, int fontSize)
+    private static ResultRowData Judgement(string label, int count, double percentage) => new()
     {
-        string num = number.ToString("D" + padding);
+        Label = label,
+        Value = count,
+        Padding = 4,
+        Percent = (long)Math.Round(percentage),
+        ShowPercent = true
+    };
 
-        int zeroCount = 0;
-        foreach (char t in num)
-        {
-            if (t == '0') zeroCount++;
-            else break;
-        }
-        if (zeroCount == num.Length) zeroCount = num.Length - 1;
-        
-        string paddingString = num.Substring(0, zeroCount);
-        string numString = num.Substring(zeroCount);
-        
-        var padText = row.AddChild(new UIText(paddingString));
-        padText.name = name + "Pad";
-        padText.outlineWidth = 0;
-        padText.fontSize = fontSize;
-        padText.fontSource = FontSource.System;
-        padText.font = "texgyreadventor-regular.otf";
-        padText.style = UiTextStyle.Bold;
-        padText.position = textPosition;
-        padText.fillColor = new Color4(0.31f, 0.31f, 0.31f);
-        padText.RenderTexture();
-        
-        var numText = row.AddChild(new UIText(numString));
-        numText.name = name + "Num";
-        numText.outlineWidth = 0;
-        numText.fontSize = fontSize;
-        numText.fontSource = FontSource.System;
-        numText.font = font;
-        numText.style = UiTextStyle.Bold;
-        numText.position = new Vector3(textPosition.X + (padText.Texture.Width * (1 / CDTXMania.renderScale)), textPosition.Y, 0);
+    //the code default for one row, seeded into Components/ResultRow.json
+    private static UIGroup BuildResultRowDefault()
+    {
+        UIGroup root = new("ResultRow");
+
+        UIText label = root.AddChild(new UIText("Label"));
+        label.name = "Label";
+        label.bindings.Add(new UIBinding("text", "Item.Label"));
+        label.outlineWidth = 0;
+        label.fontSize = 20;
+        label.fontSource = FontSource.System;
+        label.font = "Futura PT Medium.otf";
+
+        UIPaddedNumber count = root.AddChild(new UIPaddedNumber());
+        count.name = "Count";
+        count.fontSize = 23;
+        count.position = new Vector3(107, -8, 0);
+        count.bindings.Add(new UIBinding("value", "Item.Value"));
+        count.bindings.Add(new UIBinding("padding", "Item.Padding"));
+
+        UIPaddedNumber percent = root.AddChild(new UIPaddedNumber());
+        percent.name = "Percent";
+        percent.padding = 3;
+        percent.fontSize = 21;
+        percent.position = new Vector3(187, -8, 0);
+        percent.bindings.Add(new UIBinding("isVisible", "Item.ShowPercent"));
+        percent.bindings.Add(new UIBinding("value", "Item.Percent"));
+
+        UIText percentSign = root.AddChild(new UIText("%"));
+        percentSign.name = "PercentSign";
+        percentSign.fillColor = Color4.White;
+        percentSign.outlineWidth = 0;
+        percentSign.position = new Vector3(224, 0, 0);
+        percentSign.font = "texgyreadventor-regular.otf";
+        percentSign.fontSize = 15;
+        percentSign.style = UiTextStyle.Bold;
+        percentSign.anchor = new Vector2(0, 0);
+        percentSign.bindings.Add(new UIBinding("isVisible", "Item.ShowPercent"));
+
+        return root;
     }
 }

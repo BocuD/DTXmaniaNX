@@ -41,7 +41,6 @@ public class UIImGuiTextInput : UIText
     public UIImGuiTextInput()
     {
         name = "ImGuiTextInput";
-        textSource = TextSource.String;
         size = new Vector2(320, 30);
         // start with empty text so placeholder is shown by default
         text = string.Empty;

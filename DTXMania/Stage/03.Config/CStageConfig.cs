@@ -3,9 +3,13 @@ using System.Drawing;
 using System.Diagnostics;
 using System.Numerics;
 using DTXMania.Core;
+using DTXMania.Core.Framework;
+using DTXMania.UI;
 using DTXMania.UI.Config;
 using DTXMania.UI.Drawable;
+using DTXMania.UI.DynamicElements;
 using DTXMania.UI.Item;
+using DTXMania.UI.Text;
 using FDK;
 using SlimDXKey = SlimDX.DirectInput.Key;
 
@@ -22,7 +26,12 @@ internal class CStageConfig : CStage
     
     // CStage 実装
 
-    public override void InitializeBaseUI()
+    public override void RegisterBindings()
+    {
+    }
+
+    //the config screen is all bespoke interactive panels, so it is built in code rather than as a layout
+    public override void OnLayoutReady()
     {
         //left menu
         UIGroup leftMenu = ui.AddChild(new UIGroup("Left Options Menu"));
@@ -34,29 +43,32 @@ internal class CStageConfig : CStage
         menuPanel.position = Vector3.Zero;
             
         //menu items
-        configLeftOptionsMenu = leftMenu.AddChild(new UISelectList("Button List"));
-        configLeftOptionsMenu.isVisible = true;
+        configLeftOptionsMenu = leftMenu.AddChild(new UIMenu("Button List"));
         configLeftOptionsMenu.dontSerialize = true;
-        
+        configLeftOptionsMenu.itemOffset = new Vector3(0, 32, 0);
+        configLeftOptionsMenu.itemComponent = "Components/ConfigMenuButton.json";
+        configLeftOptionsMenu.itemDefault = BuildMenuButtonDefault;
+
         //340 - size/2, so this becomes 340-245= 95
-        configLeftOptionsMenu.position = new Vector3(95, 4, 0);
+        configLeftOptionsMenu.position = new Vector3(95, 6, 0);
 
         //todo: render menu cursor correctly to match current version of the game. right now its rendered as a stretched image.
         menuCursor = configLeftOptionsMenu.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\4_menu cursor.png"))));
-        menuCursor.position = new Vector3(-5, 2, 0);
+        menuCursor.position = new Vector3(-5, 0, 0);
         menuCursor.size = new Vector2(170, 28);
         menuCursor.anchor = new Vector2(0.5f, 0f);
         menuCursor.renderMode = ERenderMode.Sliced;
         menuCursor.sliceRect = new RectangleF(16, 0, 32, 28);
-        
+        menuCursor.bindings.Add(new UIBinding("position.Y", "Selection.Y"));
+
         configList = ui.AddChild(new ConfigList(14, 4));
         configList.position = new Vector3(420, 189, 0);
         configList.renderOrder = 41;
         configList.isVisible = true;
         configList.dontSerialize = true;
         
-        //at the root of a page, Cancel returns focus to the left menu
-        configList.onExitRoot = () => bFocusIsOnMenu = true;
+        //at the root of a page, Cancel hands focus back to the left menu
+        configList.onExitRoot = () => UIFocus.Pop(configList);
 
         //description panel (background + text) for the new config list
         descriptionPanel = ui.AddChild(new ConfigDescriptionPanel());
@@ -90,33 +102,100 @@ internal class CStageConfig : CStage
         configList.onOpenInputTest = OpenInputTest;
         configList.onOpenMidiTest = OpenMidiTest;
         
-        configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(20, "System", configMenu.OpenSystem));
-        configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(20, "Drums", configMenu.OpenDrums));
-        configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(20, "Guitar P1", configMenu.OpenGuitar));
-        configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(20, "Guitar P2", configMenu.OpenBass));
-        configLeftOptionsMenu.AddSelectableChild(new UIBasicButton(20, "Exit", () => { }));
-        configLeftOptionsMenu.UpdateLayout();
-        configLeftOptionsMenu.SetSelectedIndex(0);
+        //moving through the categories loads them; choosing one drops focus into its page
+        configLeftOptionsMenu.SetEntries([
+            new UIMenuItem("System", configMenu.OpenSystem),
+            new UIMenuItem("Drums", configMenu.OpenDrums),
+            new UIMenuItem("Guitar P1", configMenu.OpenGuitar),
+            new UIMenuItem("Guitar P2", configMenu.OpenBass),
+            new UIMenuItem("Exit", string.Empty)
+        ]);
+
+        configLeftOptionsMenu.onSelectionChanged = OpenCategory;
+        configLeftOptionsMenu.onDecide = EnterCategory;
+        configLeftOptionsMenu.onCancel = StartExitConfig;
+        focusTarget = configLeftOptionsMenu;
     }
 
-    public override void InitializeDefaultUI()
+    //what one left-menu button looks like: white, or a yellow-to-orange gradient while it is selected
+    private static UIGroup BuildMenuButtonDefault()
     {
-        //create resources for menu elements
-        UIImage bg = ui.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\4_background.png"))));
-        bg.renderOrder = -100;
-        bg.position = Vector3.Zero;
-                
-        UIImage itemBar = ui.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\4_item bar.png"))));
-        itemBar.position = new Vector3(400, 0, 0);
-        itemBar.renderOrder = 20;
-                
-        UIImage headerPanel = ui.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\4_header panel.png"))));
-        headerPanel.position = Vector3.Zero;
-        headerPanel.renderOrder = 52;
-                
-        UIImage footerPanel = ui.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\4_footer panel.png"))));
-        footerPanel.position = new Vector3(0, 720 - footerPanel.Texture.Height, 0);
-        footerPanel.renderOrder = 53;
+        UIGroup root = new("MenuButton");
+
+        UIText label = root.AddChild(new UIText(string.Empty, 20));
+        label.name = "Label";
+        label.anchor = new Vector2(0.5f, 0f);
+        label.position = new Vector3(-5, 0, 0);
+        label.bindings.Add(new UIBinding("text", "Item.Label"));
+        label.bindings.Add(new UIBinding("isVisible", "IsSelected") { invert = true });
+
+        UIText selected = root.AddChild(new UIText(string.Empty, 20));
+        selected.name = "LabelSelected";
+        selected.anchor = new Vector2(0.5f, 0f);
+        selected.position = new Vector3(-5, 0, 0);
+        selected.bindings.Add(new UIBinding("text", "Item.Label"));
+        selected.fillGradientMode = UiTextGradientMode.Vertical;
+        selected.fillGradientTopColor = new Color4(1f, 1f, 0f);
+        selected.fillGradientBottomColor = new Color4(1f, 0.27f, 0f);
+        selected.bindings.Add(new UIBinding("isVisible", "IsSelected"));
+
+        return root;
+    }
+
+    private void OpenCategory(UIMenuItem entry)
+    {
+        ctDisplayWait.nCurrentValue = 0;
+        entry.Run?.Invoke();
+    }
+
+    private void EnterCategory(UIMenuItem entry)
+    {
+        if (configLeftOptionsMenu.SelectedItem == MenuExitIndex)
+        {
+            StartExitConfig();
+            return;
+        }
+
+        UIFocus.Push(configList);
+    }
+
+    public override void BuildDefaultLayout()
+    {
+        ui.AddChild(new UIImage
+        {
+            name = "Background",
+            imageSource = ImageSource.System,
+            resource = @"Graphics\4_background.png",
+            renderOrder = -100
+        });
+
+        ui.AddChild(new UIImage
+        {
+            name = "ItemBar",
+            imageSource = ImageSource.System,
+            resource = @"Graphics\4_item bar.png",
+            position = new Vector3(400, 0, 0),
+            renderOrder = 20
+        });
+
+        ui.AddChild(new UIImage
+        {
+            name = "HeaderPanel",
+            imageSource = ImageSource.System,
+            resource = @"Graphics\4_header panel.png",
+            renderOrder = 52
+        });
+
+        //anchored to its own bottom edge, since the texture's height is not known until it loads
+        ui.AddChild(new UIImage
+        {
+            name = "FooterPanel",
+            imageSource = ImageSource.System,
+            resource = @"Graphics\4_footer panel.png",
+            anchor = new Vector2(0, 1),
+            position = new Vector3(0, 720, 0),
+            renderOrder = 53
+        });
     }
 
     public override void OnActivate()
@@ -125,8 +204,6 @@ internal class CStageConfig : CStage
         Trace.Indent();
         try
         {
-            configLeftOptionsMenu?.SetSelectedIndex(0);
-            bFocusIsOnMenu = true;
             ctDisplayWait = new CCounter( 0, 350, 1, CDTXMania.Timer );
         }
         finally
@@ -135,7 +212,13 @@ internal class CStageConfig : CStage
             Trace.Unindent();
         }
         base.OnActivate();		// 2011.3.14 yyagi: OnActivate()をtryの中から外に移動
+
+        if (configLeftOptionsMenu != null)
+        {
+            configLeftOptionsMenu.SelectedItem = 0;
+        }
     }
+
     public override void OnDeactivate()
     {
         Trace.TraceInformation("コンフィグステージを非活性化します。");
@@ -165,7 +248,7 @@ internal class CStageConfig : CStage
         }
     }
 
-    private UISelectList configLeftOptionsMenu;
+    private UIMenu configLeftOptionsMenu;
     private UIImage menuCursor;
 
     public override void FirstUpdate()
@@ -187,10 +270,9 @@ internal class CStageConfig : CStage
 
         ctDisplayWait.tUpdate();
 
-        //update menu cursor position
-        menuCursor.color.Alpha = bFocusIsOnMenu ? 1.0f : 0.5f;
-        menuCursor.position.Y = 2 + configLeftOptionsMenu.currentlySelectedIndex * 32;
-        
+        //the cursor follows the selection through a binding; only its dimming is about focus
+        menuCursor.color.Alpha = UIFocus.Holds(configLeftOptionsMenu) ? 1.0f : 0.5f;
+
         switch (ePhaseID)
         {
             case EPhase.Common_FadeIn:
@@ -205,8 +287,8 @@ internal class CStageConfig : CStage
 
         if (ePhaseID != EPhase.Common_DefaultState)
             return 0;
-        
-        HandleConfigListInput();
+
+        descriptionPanel.Update(configList.CurrentItem, configList.IsActive && configList.IsSettled);
         return 0;
     }
     private ConfigList configList;
@@ -218,12 +300,13 @@ internal class CStageConfig : CStage
 
     private const int MenuExitIndex = 4;
 
-    private bool bFocusIsOnMenu;
-        
     public CCounter ctDisplayWait;
 
     private void StartExitConfig()
     {
+        //nothing here reads input once the stage starts leaving
+        UIFocus.Pop(configLeftOptionsMenu);
+
         GitaDoraTransition.Close(0, async () =>
         {
             await Task.Delay(50);
@@ -232,90 +315,10 @@ internal class CStageConfig : CStage
         ePhaseID = EPhase.Common_FadeOut;
     }
 
-    private void MoveMenuSelection(bool next)
-    {
-        CDTXMania.Skin.soundCursorMovement.tPlay();
-        ctDisplayWait.nCurrentValue = 0;
-
-        if (next) configLeftOptionsMenu.SelectNext();
-        else configLeftOptionsMenu.SelectPrevious();
-
-        configLeftOptionsMenu.RunAction(); // loads the newly-selected category into the new list
-    }
-
-    //config list input handling
-    private void HandleConfigListInput()
-    {
-        //key-assign editor, when open, owns all input until it closes
-        if (keyAssignPanel.IsOpen)
-        {
-            HandleKeyAssignInput();
-            return;
-        }
-
-        if (inputTestPanel.IsOpen)
-        {
-            inputTestPanel.UpdatePreview();
-            inputTestPanel.PollClose();
-            return;
-        }
-        if (midiTestPanel.IsOpen)
-        {
-            midiTestPanel.UpdatePreview();
-            midiTestPanel.PollClose();
-            return;
-        }
-
-        //cursor + scroll arrows belong to the list; hide them while the left menu has focus
-        configList.SetFocused(!bFocusIsOnMenu);
-
-        if (bFocusIsOnMenu)
-        {
-            if (CDTXMania.Input.ActionCancel())
-            {
-                CDTXMania.Skin.soundCancel.tPlay();
-                StartExitConfig();
-            }
-            else if (CDTXMania.Input.ActionDecide())
-            {
-                CDTXMania.Skin.soundDecide.tPlay();
-                if (configLeftOptionsMenu.currentlySelectedIndex == MenuExitIndex)
-                {
-                    StartExitConfig();
-                }
-                else
-                {
-                    bFocusIsOnMenu = false; // drop focus into the list page
-                }
-            }
-
-            CDTXMania.Input.Navigate(() => MoveMenuSelection(false), () => MoveMenuSelection(true));
-        }
-        else
-        {
-            if (CDTXMania.Input.ActionCancel())
-            {
-                CDTXMania.Skin.soundCancel.tPlay();
-                configList.Cancel(); //pops a folder, or at the root returns focus to the menu
-            }
-            else if (CDTXMania.Input.ActionDecide())
-            {
-                configList.Confirm();
-            }
-
-            CDTXMania.Input.Navigate(configList.MoveUp, configList.MoveDown, configList.MoveUpDrums, configList.MoveDownDrums);
-        }
-
-        bool showDescription = !bFocusIsOnMenu && configList.IsSettled
-                               && !keyAssignPanel.IsOpen && !inputTestPanel.IsOpen && !midiTestPanel.IsOpen;
-        descriptionPanel.Update(configList.CurrentItem, showDescription);
-    }
-
     //opens the key-assign editor for a pad and hands input over to it (called back from a pad row)
     private void OpenKeyAssign(EKeyConfigPart part, EKeyConfigPad pad, string padName)
     {
         configList.isVisible = false;
-        configList.SetFocused(false);
         descriptionPanel.Update(null, false);
         keyAssignPanel.Open(part, pad, padName);
     }
@@ -323,7 +326,6 @@ internal class CStageConfig : CStage
     private void OpenInputTest((EKeyConfigPart, EKeyConfigPad, string)[] pads)
     {
         configList.isVisible = false;
-        configList.SetFocused(false);
         descriptionPanel.Update(null, false);
         inputTestPanel.Open(pads);
     }
@@ -331,15 +333,14 @@ internal class CStageConfig : CStage
     private void OpenMidiTest()
     {
         configList.isVisible = false;
-        configList.SetFocused(false);
         descriptionPanel.Update(null, false);
         midiTestPanel.Open();
     }
 
+    //the panels pop themselves, so the page they were opened from is focused again
     private void CloseKeyAssign()
     {
         configList.isVisible = true;
-        bFocusIsOnMenu = false; //focus stays on the (pad list) page, not the left menu
     }
 
     private void KeyAssignNext()
@@ -351,30 +352,4 @@ internal class CStageConfig : CStage
         }
     }
 
-    private void HandleKeyAssignInput()
-    {
-        keyAssignPanel.PollCapture();
-        keyAssignPanel.UpdatePreview();
-
-        if (keyAssignPanel.IsWaiting)
-        {
-            return; //capture owns input (Esc-to-cancel handled inside PollCapture)
-        }
-
-        if (CDTXMania.Input.ActionCancel())
-        {
-            keyAssignPanel.Cancel();
-        }
-        else if (CDTXMania.Input.ActionDecide())
-        {
-            keyAssignPanel.Confirm();
-        }
-        else if (CDTXMania.InputManager.Keyboard.bKeyPressed(SlimDXKey.Delete)
-                 || CDTXMania.InputManager.Keyboard.bKeyPressed(SlimDXKey.Backspace))
-        {
-            keyAssignPanel.DeleteCurrent();
-        }
-
-        CDTXMania.Input.Navigate(keyAssignPanel.MoveUp, keyAssignPanel.MoveDown);
-    }
 }

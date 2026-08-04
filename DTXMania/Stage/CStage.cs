@@ -1,13 +1,14 @@
 ﻿using System.Numerics;
 using DiscordRPC;
 using DTXMania.Core;
+using DTXMania.UI;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.DynamicElements;
 using FDK;
 
 namespace DTXMania;
 
-public abstract class CStage : CActivity
+public abstract class CStage : CActivity, IUIInputHandler
 {
 	/// <summary>
 	/// The presence used to indicate the user's activity within this stage, or <see langword="null"/> if there is none.
@@ -30,7 +31,8 @@ public abstract class CStage : CActivity
 		Performance_6,
 		Result_7,
 		End_8,
-		ChangeSkin_9						// #28195 2011.5.4 yyagi
+		ChangeSkin_9,						// #28195 2011.5.4 yyagi
+		UITest_10							//dev only json layout test bed
 	}
 		
 	internal EPhase ePhaseID;
@@ -62,28 +64,56 @@ public abstract class CStage : CActivity
 		PERFORMANCE_STAGE_RESTART
 	}
 
-	public Dictionary<string, DynamicStringSource> dynamicStringSources = new();
-	
+	//behaviour a layout can bind to by key. Values come from data contexts instead, so that one element
+	//can be reused with different data; see IUIDataContext
+	public Dictionary<string, Action> dynamicActions = new();
+	public Dictionary<string, Action> drawSources = new();
+
 	public void LoadUI(bool loadSkin = true)
 	{
-		//remove old ui
-		if (ui != null)
-		{
-			ui.Dispose();
-		}
+		//whatever this stage handed its input to is part of the tree about to be replaced
+		UIFocus.PopOverlays(this);
+		focusTarget = null;
+
+		ui?.Dispose();
 
 		ui = new UIGroup(GetType().ToString());
-		InitializeBaseUI();
-		InitializeDefaultUI();
+		RegisterBindings();
 
-		if (loadSkin)
+		//a skin layout defines the serializable UI outright; there is no merge with the code default
+		UIGroup? layout = loadSkin ? CDTXMania.SkinManager.LoadStageLayout(eStageID) : null;
+		if (layout != null)
 		{
-			CDTXMania.SkinManager.ApplySkin(ui, eStageID);
+			foreach (UIDrawable child in layout.children.ToArray())
+			{
+				ui.AddChild(child);
+			}
 		}
+		else
+		{
+			BuildDefaultLayout();
+		}
+
+		OnLayoutReady();
 	}
 
-	public abstract void InitializeBaseUI();
-	public abstract void InitializeDefaultUI();
+	/// <summary>Register the data and behaviour the layout binds to by key. No visuals here.</summary>
+	public abstract void RegisterBindings();
+
+	/// <summary>
+	/// Build the skinnable UI tree in code, using only elements that round-trip through json. This is the
+	/// code "default skin"; a custom skin's layout json replaces it wholesale.
+	/// </summary>
+	public abstract void BuildDefaultLayout();
+
+	/// <summary>
+	/// Runs once the whole tree exists, from json or code. Resolve references to elements by name here,
+	/// and add anything that has no serializable form (marked <c>dontSerialize</c>). Must be idempotent:
+	/// it also runs on a mid-stage rebuild from a skin save/reload.
+	/// </summary>
+	public virtual void OnLayoutReady()
+	{
+	}
 
 	public virtual void FirstUpdate()
 	{
@@ -130,7 +160,58 @@ public abstract class CStage : CActivity
 	public override void OnActivate()
 	{
 		base.OnActivate();
+
+		//one stage reads input at a time, even where the previous one is deliberately left running
+		//underneath this one
+		foreach (IUIInputHandler handler in UIFocus.Stack.ToArray())
+		{
+			if (handler is CStage stage && stage != this)
+			{
+				UIFocus.Remove(stage);
+			}
+		}
+
+		UIFocus.Push(this);
 		tDisplayPresence();
+	}
+
+	public override void OnDeactivate()
+	{
+		UIFocus.Pop(this);
+		base.OnDeactivate();
+	}
+
+	public virtual string FocusName => GetType().Name;
+
+	public NavigationRepeat? Navigation => navigation;
+
+	protected readonly NavigationRepeat navigation = new();
+
+	/// <summary>
+	/// What this stage hands its input to — usually its menu. Set it and there is nothing else to do; a
+	/// stage that reads input itself overrides <see cref="HandleInput"/> instead.
+	/// </summary>
+	protected IUIInputHandler? focusTarget;
+
+	//a stage mid-transition reads nothing, so no stage has to remember to check its own phase
+	void IUIInputHandler.HandleInput()
+	{
+		if (ePhaseID == EPhase.Common_DefaultState)
+		{
+			HandleInput();
+		}
+	}
+
+	/// <summary>
+	/// Reads the frame's input, if this stage still holds focus — an overlay that pushed itself is polled
+	/// instead. Never called mid-transition, so an implementation does not have to check the phase.
+	/// </summary>
+	public virtual void HandleInput()
+	{
+		if (focusTarget != null)
+		{
+			UIFocus.Push(focusTarget);
+		}
 	}
 
 	public UIGroup ui;

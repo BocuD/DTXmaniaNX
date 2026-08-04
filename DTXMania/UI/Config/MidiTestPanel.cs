@@ -8,7 +8,7 @@ using STKEYASSIGN = DTXMania.Core.CConfigIni.CKeyAssign.STKEYASSIGN;
 
 namespace DTXMania.UI.Config;
 
-internal sealed class MidiTestPanel : UIGroup
+internal sealed class MidiTestPanel : UIGroup, IUIInputHandler
 {
     private const int SlotCount = CConfigIni.CKeyAssign.KeyAssignsPerPad;
 
@@ -21,6 +21,15 @@ internal sealed class MidiTestPanel : UIGroup
 
     public Action? onClose;
     public bool IsOpen => isVisible;
+
+    public string FocusName => "MidiTest";
+
+    //a live readout of incoming MIDI, so its refresh belongs with its input
+    public void HandleInput()
+    {
+        UpdatePreview();
+        PollClose();
+    }
 
     public MidiTestPanel() : base("MidiTestPanel")
     {
@@ -44,6 +53,7 @@ internal sealed class MidiTestPanel : UIGroup
             : "Play your MIDI inputs.  green = mapped / red = unmapped.  (Esc to return)");
         log.Clear();
         isVisible = true;
+        UIFocus.Push(this);
     }
 
     public void UpdatePreview()
@@ -104,6 +114,7 @@ internal sealed class MidiTestPanel : UIGroup
     private void Close()
     {
         isVisible = false;
+        UIFocus.Pop(this);
         onClose?.Invoke();
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Drawing;
 using DTXMania.Core;
+using DTXMania.UI.DynamicElements;
 using Kawazu;
 
 namespace DTXMania.SongDb;
@@ -21,9 +22,12 @@ public class SongNode
     
     public EInstrumentPart filteredInstrumentPart = EInstrumentPart.UNKNOWN;
     
-    public string title = string.Empty;
-    public string path = string.Empty;
+    [DataField("Title")] public string title = string.Empty;
+    [DataField("Path")] public string path = string.Empty;
     public Color color = Color.White;
+
+    //the first non-null chart, so a binding can reach chart data without an explicit difficulty index
+    [DataField("Chart")] public CChartData? RepresentativeChart => charts.FirstOrDefault(c => c != null);
 
     public SongNode parent;
     public List<SongNode> childNodes = [];
@@ -126,12 +130,18 @@ public class SongNode
         return clone;
     }
 
-    public string GetImagePath()
+    /// <summary>
+    /// The image to show for this song. Charts of the same song can name different ones, so a caller that
+    /// knows which chart it is showing passes it; the first chart that names one is the song's own.
+    /// </summary>
+    public string GetImagePath(CChartData? preferredChart = null)
     {
-        var chart = charts.FirstOrDefault(x => x != null);
+        var chart = preferredChart != null && !string.IsNullOrWhiteSpace(preferredChart.SongInformation.Preimage)
+            ? preferredChart
+            : charts.FirstOrDefault(x => x != null);
 
         if (chart == null) return "";
-        
+
         string imagePath = "";
         string preImagePath = chart.SongInformation.Preimage;
         if (!string.IsNullOrWhiteSpace(preImagePath))

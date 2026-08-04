@@ -37,9 +37,9 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		listChildActivities.Add( actProgressBar = new CActPerfProgressBar());
 	}
 
-	public override void InitializeBaseUI()
+	public override void OnLayoutReady()
 	{
-		base.InitializeBaseUI();
+		base.OnLayoutReady();
 		
 		var txLane = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_Paret_Guitar.png")); 
 		var txLaneDark = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_Paret_Guitar_Dark.png"));
@@ -48,6 +48,7 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		{
 			var guitarLaneTex = ui.AddChild(new UIImage());
 			guitarLaneTex.name = "GuitarLane";
+			guitarLaneTex.dontSerialize = true;
 			guitarLaneTex.position = new Vector3(67, 42, 0);
 
 			if (CDTXMania.ConfigIni.nLaneDisp.Guitar == 0 || CDTXMania.ConfigIni.nLaneDisp.Guitar == 2)
@@ -59,6 +60,7 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		{
 			var bassLaneTex = ui.AddChild(new UIImage());
 			bassLaneTex.name = "BassLane";
+			bassLaneTex.dontSerialize = true;
 			bassLaneTex.position = new Vector3(937, 42, 0);
 	        
 			if (CDTXMania.ConfigIni.nLaneDisp.Bass == 0 || CDTXMania.ConfigIni.nLaneDisp.Bass == 2)
@@ -112,6 +114,7 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 
 		var holdParent = ui.AddChild(new UIGroup("HoldNotes"));
 		holdParent.renderOrder = 10;
+		holdParent.dontSerialize = true;
 		holdParent.isVisible = false;
 		holdNotes = new HoldNote[2, 5];
 		

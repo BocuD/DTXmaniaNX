@@ -78,6 +78,8 @@ public sealed partial class AnimationClipEditor
                 AnimationClip? loaded = AnimationClipIO.LoadFromFile(chosen);
                 if (loaded != null)
                 {
+                    //a file picked from anywhere on disk has no path a layout could name — it would break
+                    //for anyone else — so it becomes part of the layout, and Move To Skin gives it a home
                     animator.clips.Add(loaded);
                     lastPathByClip[loaded] = chosen;
                     selectedClip = loaded;

@@ -1,5 +1,7 @@
 ﻿using System.Diagnostics;
 using System.IO;
+using DTXMania.Core;
+using DTXMania.UI.Skin;
 using Newtonsoft.Json;
 
 namespace DTXMania.UI.Animation;
@@ -70,6 +72,92 @@ public static class AnimationClipIO
             Trace.TraceError($"AnimationClipIO.LoadFromFile('{path}'): {e.Message}");
             return null;
         }
+    }
+
+    /// <summary>
+    /// Loads a clip from the built-in System folder, e.g. <c>Graphics\Result\open.json</c>, and records
+    /// where it came from so a layout referencing it writes the reference rather than the clip.
+    ///
+    /// For clips that belong to a layout. A gameplay element never appears in one, so it loads its file
+    /// through <see cref="LoadFromFile"/> and owns the clip outright.
+    /// </summary>
+    public static AnimationClip? LoadFromSystem(string systemRelativePath)
+    {
+        AnimationClip? clip = LoadFromFile(SkinManager.SystemPath(systemRelativePath));
+
+        if (clip != null)
+        {
+            clip.clipSource = ClipSource.System;
+            clip.resource = systemRelativePath;
+        }
+
+        return clip;
+    }
+
+    /// <summary>Loads a clip from a skin's own Animation folder.</summary>
+    public static AnimationClip? LoadFromSkin(SkinDescriptor skin, string fileName)
+    {
+        string path = skin.GetResource(ResourceType.Animation, fileName);
+
+        if (string.IsNullOrEmpty(path))
+        {
+            Trace.TraceError($"AnimationClipIO.LoadFromSkin: '{fileName}' is not in skin '{skin.name}'");
+            return null;
+        }
+
+        AnimationClip? clip = LoadFromFile(path);
+
+        if (clip != null)
+        {
+            clip.clipSource = ClipSource.Skin;
+            clip.resource = fileName;
+        }
+
+        return clip;
+    }
+
+    /// <summary>
+    /// The file a clip reference points at, or empty when there is nowhere for it to point — a skin clip
+    /// with no skin active, or one the skin does not have.
+    /// </summary>
+    public static string ResolveResource(AnimationClip clip) => clip.clipSource switch
+    {
+        ClipSource.System => SkinManager.SystemPath(clip.resource),
+        ClipSource.Skin => CDTXMania.SkinManager.currentSkin?.GetResource(ResourceType.Animation, clip.resource) ?? string.Empty,
+        _ => string.Empty
+    };
+
+    /// <summary>
+    /// Copies a clip into the active skin so the skin owns it, and points the clip at that copy. This is
+    /// what a stage save does with the System clips it references: a saved skin carries its own animations
+    /// rather than depending on where it was saved from.
+    /// </summary>
+    public static bool MoveIntoSkin(AnimationClip clip, string fileName)
+    {
+        if (CDTXMania.SkinManager.currentSkin is not { } skin)
+        {
+            return false;
+        }
+
+        clip.clipSource = ClipSource.Skin;
+        clip.resource = fileName;
+
+        return SaveToFile(clip, Path.Combine(skin.basePath,
+            SkinDescriptor.GetResourceFolder(ResourceType.Animation), fileName));
+    }
+
+    /// <summary>Writes a clip back to the file it came from.</summary>
+    public static bool SaveToResource(AnimationClip clip)
+    {
+        string path = ResolveResource(clip);
+
+        if (string.IsNullOrEmpty(path))
+        {
+            Trace.TraceError($"AnimationClipIO.SaveToResource: clip '{clip.name}' has no file to write to");
+            return false;
+        }
+
+        return SaveToFile(clip, path);
     }
 
     /// <summary>

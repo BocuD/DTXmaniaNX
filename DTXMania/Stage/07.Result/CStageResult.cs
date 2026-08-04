@@ -5,6 +5,7 @@ using DTXMania.Core.Framework;
 using DTXMania.UI;
 using DTXMania.UI.Animation;
 using DTXMania.UI.Drawable;
+using DTXMania.UI.DynamicElements;
 using DTXMania.UI.Text;
 using FDK;
 using SlimDXKey = SlimDX.DirectInput.Key;
@@ -13,6 +14,8 @@ namespace DTXMania;
 
 internal class CStageResult : CStage
 {
+	private readonly ResultData resultData = new();
+
 	public STDGBVALUE<bool> bNewRecordSkill;
 	public STDGBVALUE<bool> bNewRecordScore;
 	public STDGBVALUE<bool> bNewRecordRank;
@@ -52,76 +55,18 @@ internal class CStageResult : CStage
 		
 	// CStage 実装
 
-	public override void InitializeBaseUI()
+	public override void RegisterBindings()
 	{
-		
+		var context = new UIDataContext();
+		context.RegisterObject("Result", () => resultData);
+		ui.dataContext = context;
 	}
 
-	public override void InitializeDefaultUI()
+	public override void BuildDefaultLayout()
 	{
-		BaseTexture txBackground = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_background.jpg"));
-
-		switch (nResultRank)
-		{
-			case 0:
-				if (File.Exists(CSkin.Path(@"Graphics\8_background rankSS.png")))
-				{
-					txBackground = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_background rankSS.png"));
-				}
-
-				break;
-			case 1:
-				if (File.Exists(CSkin.Path(@"Graphics\8_background rankS.png")))
-				{
-					txBackground = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_background rankS.png"));
-				}
-
-				break;
-			case 2:
-				if (File.Exists(CSkin.Path(@"Graphics\8_background rankA.png")))
-				{
-					txBackground = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_background rankA.png"));
-				}
-
-				break;
-			case 3:
-				if (File.Exists(CSkin.Path(@"Graphics\8_background rankB.png")))
-				{
-					txBackground = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_background rankB.png"));
-				}
-
-				break;
-			case 4:
-				if (File.Exists(CSkin.Path(@"Graphics\8_background rankC.png")))
-				{
-					txBackground = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_background rankC.png"));
-				}
-
-				break;
-			case 5:
-				if (File.Exists(CSkin.Path(@"Graphics\8_background rankD.png")))
-				{
-					txBackground = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_background rankD.png"));
-				}
-
-				break;
-			case 6:
-			case 99:
-				if (File.Exists(CSkin.Path(@"Graphics\8_background rankE.png")))
-				{
-					txBackground = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_background rankE.png"));
-				}
-
-				break;
-		}
-
-		background = ui.AddChild(new UIImage(txBackground));
-		background.renderOrder = -100;
-		background.isVisible = true;
-		background.name = "Background";
-
-		var stageNumber = ui.AddChild(new UIText(InfoBox.GetStageNumberText(), 46));
+		var stageNumber = ui.AddChild(new UIText("", 46));
 		stageNumber.name = "StageNumber";
+		stageNumber.bindings.Add(new UIBinding("text", "Result.StageNumber"));
 		stageNumber.position = new Vector3(640, 50, 0);
 		stageNumber.anchor = new Vector2(0.5f, 0);
 		stageNumber.fontSource = FontSource.System;
@@ -129,54 +74,59 @@ internal class CStageResult : CStage
 		stageNumber.style = UiTextStyle.Bold;
 		stageNumber.outlineWidth = 0;
 
-		var titleArtistBg = ui.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path("Graphics/Result/songname_bg.png"))));
+		var titleArtistBg = ui.AddChild(new UIImage
+		{
+			imageSource = ImageSource.System,
+			resource = @"Graphics\Result\songname_bg.png"
+		});
 		titleArtistBg.anchor = new Vector2(0.5f, 0);
 		titleArtistBg.position = new Vector3(640, 529, 0);
 		titleArtistBg.renderOrder = 1;
 		titleArtistBg.name = "TitleArtistBg";
+
+		HorizontallyScrollingText songNameText = ui.AddChild(new HorizontallyScrollingText("", 29));
+		songNameText.bindings.Add(new UIBinding("text", "Result.SongTitle"));
+		songNameText.fillColor = Color4.Black;
+		songNameText.outlineColor = Color4.White;
+		songNameText.name = "SongName";
+		songNameText.font = UIFonts.FallbackFont;
+		songNameText.position = new Vector3(464, 547, 0);
+		songNameText.outlineWidth = 2;
+		songNameText.renderOrder = 2;
+		songNameText.scrollingEnabled = true;
+		songNameText.maximumWidth = 355;
+		songNameText.scrollSpeed = 20.0f;
+
+		HorizontallyScrollingText artistNameText = ui.AddChild(new HorizontallyScrollingText("", 20));
+		artistNameText.bindings.Add(new UIBinding("text", "Result.Artist"));
+		artistNameText.fillColor = Color4.Black;
+		artistNameText.outlineColor = Color4.White;
+		artistNameText.name = "ArtistName";
+		artistNameText.font = UIFonts.FallbackFont;
+		artistNameText.position = new Vector3(466, 589, 0);
+		artistNameText.outlineWidth = 2;
+		artistNameText.renderOrder = 2;
+		artistNameText.scrollingEnabled = true;
+		artistNameText.maximumWidth = 355;
+		artistNameText.scrollSpeed = 20.0f;
 		
+	}
+
+	//elements that build runtime textures from the result data (rank icon, jacket, progress bar) can't be
+	//part of the serializable layout, so they are added here and marked dontSerialize. The open animation
+	//is set up here too, once the panels it targets exist
+	public override void OnLayoutReady()
+	{
+		background = ui.AddChild(new UIImage(BaseTexture.LoadFromPath(ResultBackgroundPath())));
+		background.renderOrder = -100;
+		background.name = "Background";
+		background.dontSerialize = true;
+
 		var rankIcon = ui.AddChild(new ResultRankIcon(CDTXMania.GetCurrentInstrument()));
 		rankIcon.position = new Vector3(225, 360, 0);
 		rankIcon.renderOrder = 3;
-		
-		string strSongTitle;
-		if (!CDTXMania.bCompactMode && CDTXMania.ConfigIni.b曲名表示をdefのものにする)
-			strSongTitle = CDTXMania.chosenSong.title;
-		else
-			strSongTitle = CDTXMania.DTX.TITLE;
+		rankIcon.dontSerialize = true;
 
-		string strArtistName = CDTXMania.DTX.ARTIST;
-		
-		if (!string.IsNullOrWhiteSpace(strSongTitle))
-		{
-			HorizontallyScrollingText songNameText = ui.AddChild(new HorizontallyScrollingText(strSongTitle, 29));
-			songNameText.fillColor = Color4.Black;
-			songNameText.outlineColor = Color4.White;
-			songNameText.name = "SongName";
-			songNameText.font = UIFonts.FallbackFont;
-			songNameText.position = new Vector3(464, 547, 0);
-			songNameText.outlineWidth = 2;
-			songNameText.renderOrder = 2;
-			songNameText.scrollingEnabled = true;
-			songNameText.maximumWidth = 355;
-			songNameText.scrollSpeed = 20.0f;
-		}
-
-		if (!string.IsNullOrWhiteSpace(strArtistName))
-		{
-			HorizontallyScrollingText artistNameText = ui.AddChild(new HorizontallyScrollingText(strArtistName, 20));
-			artistNameText.fillColor = Color4.Black;
-			artistNameText.outlineColor = Color4.White;
-			artistNameText.name = "ArtistName";
-			artistNameText.font = UIFonts.FallbackFont;
-			artistNameText.position = new Vector3(466, 589, 0);
-			artistNameText.outlineWidth = 2;
-			artistNameText.renderOrder = 2;
-			artistNameText.scrollingEnabled = true;
-			artistNameText.maximumWidth = 355;
-			artistNameText.scrollSpeed = 20.0f;
-		}
-		
 		string path = CDTXMania.DTX.strFolderName + CDTXMania.DTX.PREIMAGE;
 		var txJacket = BaseTexture.LoadFromPath(!File.Exists(path) ? CSkin.Path(@"Graphics\5_preimage default.png") : path);
 		var jacket = ui.AddChild(new UIImage(txJacket));
@@ -184,35 +134,62 @@ internal class CStageResult : CStage
 		jacket.position = new Vector3(640, 130, 0);
 		jacket.name = "AlbumArt";
 		jacket.anchor.X = 0.5f;
+		jacket.dontSerialize = true;
 
 		//todo: position these
 		if (CDTXMania.GetCurrentInstrument() == 0)
 		{
 			var drums = ui.AddChild(new UIPlayerNameplate(0, true));
 			drums.position = new Vector3(989, 53, 0);
+			drums.dontSerialize = true;
 		}
 		else
 		{
 			var guitar1 = ui.AddChild(new UIPlayerNameplate(1, true));
 			guitar1.position = new Vector3(989, 53, 0);
-			// var guitar2 = ui.AddChild(new UIPlayerNameplate(2, true));
-			// guitar2.position = new Vector3(853, 272, 0);
+			guitar1.dontSerialize = true;
 		}
 
-		var infoPanel = ui.AddChild(new ResultInfoPanel(CDTXMania.GetCurrentInstrument()));
+		var infoPanel = ui.AddChild(new ResultInfoPanel());
 		infoPanel.position = new Vector3(830, 120, 0);
-		
+		infoPanel.dontSerialize = true;
+
 		var paramPanel = ui.AddChild(new ResultParameterPanel(CDTXMania.GetCurrentInstrument()));
 		paramPanel.position = new Vector3(879, 479, 0);
-		
+		paramPanel.dontSerialize = true;
+
+		var progressBar = ui.AddChild(new ResultProgressBar(CDTXMania.GetCurrentInstrument()));
+		progressBar.position = new Vector3(435, 130, 0);
+		progressBar.renderOrder = 4;
+		progressBar.dontSerialize = true;
+
+		//the clip lives in its own file, so a saved layout references it rather than copying it in
 		ui.animator = new Animator();
-		AnimationClip? loaded = AnimationClipIO.LoadFromFile(CSkin.Path(@"Graphics\Result\open.json"));
+		AnimationClip? loaded = AnimationClipIO.LoadFromSystem(@"Graphics\Result\open.json");
 		if (loaded != null)
 		{
 			ui.animator.clips.Add(loaded);
 		}
-		
+
 		ui.animator.Play("open", false);
+	}
+
+	//an optional per-rank background overrides the default one; rank 99 (unknown) shares E's
+	private string ResultBackgroundPath()
+	{
+		string[] rankNames = ["SS", "S", "A", "B", "C", "D", "E"];
+		int rank = nResultRank == 99 ? rankNames.Length - 1 : nResultRank;
+
+		if (rank >= 0 && rank < rankNames.Length)
+		{
+			string rankPath = CSkin.Path($@"Graphics\8_background rank{rankNames[rank]}.png");
+			if (File.Exists(rankPath))
+			{
+				return rankPath;
+			}
+		}
+
+		return CSkin.Path(@"Graphics\8_background.jpg");
 	}
 
 	public override void OnActivate()
@@ -739,14 +716,14 @@ internal class CStageResult : CStage
 			bIsCheckedWhetherResultScreenShouldSaveOrNot = true;
 		}
 		#endregion
-		if ( ePhaseID == EPhase.Common_DefaultState )
+		if ( ePhaseID == EPhase.Common_DefaultState && UIFocus.Holds( this ) )
 		{
 			if ( CDTXMania.InputManager.Keyboard.bKeyPressed( (int)SlimDXKey.Escape ) )
 			{
 				CDTXMania.Skin.soundCancel.tPlay();
 				ePhaseID = EPhase.Common_FadeOut;
 				eReturnValueWhenFadeOutCompleted = EReturnValue.Complete;
-				
+
 				GitaDoraTransition.Close();
 			}
 			if (CDTXMania.Input.ActionDecide() && bAnimationComplete)
@@ -754,7 +731,7 @@ internal class CStageResult : CStage
 				CDTXMania.Skin.soundCancel.tPlay();
 				ePhaseID = EPhase.Common_FadeOut;
 				eReturnValueWhenFadeOutCompleted = EReturnValue.Complete;
-				
+
 				GitaDoraTransition.Close();
 			}
 		}

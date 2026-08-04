@@ -1,8 +1,10 @@
 using System.Diagnostics;
 using System.Numerics;
 using DTXMania.UI.Animation;
+using DTXMania.UI.DynamicElements;
 using DTXMania.UI.Inspector;
 using Hexa.NET.ImGui;
+using Newtonsoft.Json;
 
 namespace DTXMania.UI.Drawable;
 
@@ -10,10 +12,22 @@ public class UIGroup : UIDrawable
 {
     [Themable] public bool sortByRenderOrder = true;
     public List<UIDrawable> children = [];
-    
+
     private bool dirty = false;
 
+    //drawables already reported as failing to draw, so one broken element does not fill the log
+    [JsonIgnore] private static readonly HashSet<string> reportedDrawFailures = [];
+
+    //clips are part of what a skin describes: a cursor that pulses is animation, not code. Replace rather
+    //than populate, so a type that builds an animator in its constructor does not end up with the loaded
+    //clips appended to the ones it made
+    [SkinSerialize]
+    [JsonProperty(ObjectCreationHandling = ObjectCreationHandling.Replace)]
     public Animator? animator;
+
+    //per-instance data source for this subtree, runtime-only; descendants resolve their binding keys
+    //against it before falling back to ancestors and the global context. See UIDrawable.DataContexts
+    [JsonIgnore] public IUIDataContext? dataContext;
 
     [AddChildMenu]
     public static UIDrawable Create()
@@ -53,7 +67,8 @@ public class UIGroup : UIDrawable
 
     public T? GetChild<T>(string name) where T : UIDrawable
     {
-        return (T?)children.FirstOrDefault(x => x.name == name);
+        //names come from json, so a mismatched type is a layout authoring error, not a crash
+        return children.FirstOrDefault(x => x.name == name) as T;
     }
 
     public UIDrawable GetChild(int i)
@@ -86,6 +101,12 @@ public class UIGroup : UIDrawable
             return;
         }
 
+        //bindings first, then the animator, so an animation targeting a bound member wins for this frame
+        for (int index = 0; index < children.Count; index++)
+        {
+            children[index].ApplyBindings();
+        }
+
         animator?.TickAuto(this);
 
         UpdateLocalTransformMatrix();
@@ -111,8 +132,12 @@ public class UIGroup : UIDrawable
             }
             catch (Exception e)
             {
-                string stackTrace = e.StackTrace ?? "No stack trace";
-                Trace.TraceError($"Error drawing {element.name}: {e} Stacktrace: {stackTrace}");
+                //a drawable that throws once throws every frame, so it is reported the first time and
+                //then left alone: the log stays readable and the rest of the tree still draws
+                if (reportedDrawFailures.Add(element.id))
+                {
+                    Trace.TraceError($"Error drawing {element.name}: {e} Stacktrace: {e.StackTrace ?? "No stack trace"}");
+                }
             }
         }
     }

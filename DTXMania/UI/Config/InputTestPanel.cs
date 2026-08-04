@@ -7,7 +7,7 @@ using STKEYASSIGN = DTXMania.Core.CConfigIni.CKeyAssign.STKEYASSIGN;
 
 namespace DTXMania.UI.Config;
 
-internal sealed class InputTestPanel : UIGroup
+internal sealed class InputTestPanel : UIGroup, IUIInputHandler
 {
     private const int MaxChannels = 16;
     private const float RowSpacing = 28f;
@@ -33,6 +33,15 @@ internal sealed class InputTestPanel : UIGroup
 
     public Action? onClose;
     public bool IsOpen => isVisible;
+
+    public string FocusName => "InputTest";
+
+    //the panel is a live readout of what is being pressed, so its refresh belongs with its input
+    public void HandleInput()
+    {
+        UpdatePreview();
+        PollClose();
+    }
 
     public InputTestPanel() : base("InputTestPanel")
     {
@@ -99,6 +108,7 @@ internal sealed class InputTestPanel : UIGroup
 
         log.Clear();
         isVisible = true;
+        UIFocus.Push(this);
     }
 
     public void UpdatePreview()
@@ -149,6 +159,7 @@ internal sealed class InputTestPanel : UIGroup
     private void Close()
     {
         isVisible = false;
+        UIFocus.Pop(this);
         onClose?.Invoke();
     }
 }

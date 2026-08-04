@@ -278,6 +278,7 @@ internal abstract class CActPerfCommonJudgementString : CActivity
 		
 		var judgement = ui.AddChild(new UIGroup("Judgement"));
 		judgement.renderOrder = 1;
+		judgement.dontSerialize = true;
 
 		judgements = new JudgementString[stLaneSize.Length];
 

@@ -1,6 +1,7 @@
 ﻿using System.Numerics;
 using DTXMania.Core;
 using DTXMania.Core.Framework;
+using DTXMania.UI;
 using DTXMania.UI.Config;
 using DTXMania.UI.Drawable;
 using FDK;
@@ -42,7 +43,6 @@ public class QuickMenu : UIGroup
         instruments[2] = new QuickMenuPage(list, EInstrumentPart.BASS, instrumentSwitcher);
         
         list.SetItems(instruments[CDTXMania.GetCurrentInstrument()].Build());
-        list.SetFocused(true);
 
         //help-text panel on the right (position is relative to the centre-anchored menu)
         descriptionPanel = AddChild(new ConfigDescriptionPanel());
@@ -50,36 +50,15 @@ public class QuickMenu : UIGroup
         descriptionPanel.renderOrder = 1;
     }
 
-    public void HandleNavigation()
+    /// <summary>The gesture that opens and closes the menu. Polled by the stage whatever holds focus,
+    /// because it is a pad command rather than navigation — the list itself takes focus once open.</summary>
+    public void PollToggleGesture()
     {
-        if (CheckDoubleInput(EInstrumentPart.DRUMS, EPad.BD, EPadFlag.BD))
+        if (CheckDoubleInput(EInstrumentPart.DRUMS, EPad.BD, EPadFlag.BD)
+            || CheckDoubleInput(EInstrumentPart.GUITAR, EPad.P, EPadFlag.P)
+            || CheckDoubleInput(EInstrumentPart.BASS, EPad.P, EPadFlag.P))
         {
             ToggleMenu();
-        }
-
-        if (CheckDoubleInput(EInstrumentPart.GUITAR, EPad.P, EPadFlag.P))
-        {
-            ToggleMenu();
-        }
-
-        if (CheckDoubleInput(EInstrumentPart.BASS, EPad.P, EPadFlag.P))
-        {
-            ToggleMenu();
-        }
-
-        if (isVisible)
-        {
-            if (CDTXMania.Input.ActionCancel())
-            {
-                CDTXMania.Skin.soundCancel.tPlay();
-                list.Cancel();
-            }
-            else if (CDTXMania.Input.ActionDecide())
-            {
-                list.Confirm();
-            }
-
-            CDTXMania.Input.Navigate(list.MoveUp, list.MoveDown, list.MoveUpDrums, list.MoveDownDrums);
         }
 
         descriptionPanel.Update(list.CurrentItem, isVisible && !isClosing && list.IsSettled);
@@ -92,22 +71,20 @@ public class QuickMenu : UIGroup
 
         openCounter.tStart(0, 100, 1, CDTXMania.Timer);
 
-        //the quick menu overlays the song-select list and shares the navigation counters; clear
-        //them on open/close so a held key can't carry a repeat over between the two.
-        CDTXMania.Input.ResetNavigation();
-
         if (!isVisible)
         {
             //open
             isVisible = true;
             isClosing = false;
             list.SetItems(instruments[CDTXMania.GetCurrentInstrument()].Build(), 0);
+            UIFocus.Push(list);
         }
         else
         {
             //close: persist any changes made in the quick menu (CommitPage already updated the
             //in-memory ConfigIni; this writes it to disk, like the main config does on exit)
             isClosing = true;
+            UIFocus.Pop(list);
 
             CDTXMania.ConfigIni.tWrite(CDTXMania.executableDirectory + "Config.ini");
         }

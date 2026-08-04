@@ -18,33 +18,17 @@ public partial class UIText
             return;
         }
 
-        if (Inspector.Inspector.Inspect("Text Source", ref textSource))
+        //a binding on "text" overwrites whatever is typed here on the next frame, so say so rather than
+        //letting the field look broken
+        string boundTo = TextBindingSource();
+
+        if (boundTo.Length > 0)
+        {
+            ImGui.LabelText("String", $"bound to {boundTo}");
+        }
+        else if (ImGui.InputTextMultiline("String", ref _text, 256))
         {
             _dirty = true;
-        }
-
-        switch (textSource)
-        {
-            case TextSource.String:
-            {
-                if (ImGui.InputTextMultiline("String", ref text, 256))
-                {
-                    _dirty = true;
-                }
-
-                break;
-            }
-            case TextSource.Dynamic:
-            {
-                string[] sources = CDTXMania.StageManager.rCurrentStage.dynamicStringSources.Keys.ToArray();
-                int selectedIndex = Array.IndexOf(sources, dynamicSource);
-                if (ImGui.Combo("Dynamic Source", ref selectedIndex, sources, sources.Length))
-                {
-                    dynamicSource = sources[selectedIndex];
-                    _dirty = true;
-                }
-                break;
-            }
         }
 
         //dropdown for font source

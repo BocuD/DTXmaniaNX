@@ -25,6 +25,8 @@ public class HoldNote : UIGroup
 
     public HoldNote()
     {
+        //a gameplay element is runtime-only: it never appears in a saved layout
+        dontSerialize = true;
         name = "Holdnote";
         
         BaseTexture[] normalTextures = new BaseTexture[5];

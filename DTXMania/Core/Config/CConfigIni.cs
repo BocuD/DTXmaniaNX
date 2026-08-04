@@ -3,6 +3,7 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
 using DTXMania.Core.Framework;
+using DTXMania.UI.DynamicElements;
 
 namespace DTXMania.Core;
 
@@ -72,12 +73,12 @@ internal partial class CConfigIni
 	public bool b選曲リストフォントを太字にする;
 
 	//public bool bDirectShowMode;
-	public bool bFullScreenMode;
+	[DataField("Fullscreen")] public bool bFullScreenMode;
 	public bool bFullScreenExclusive;
 	public int nInitialWindowXPosition; // #30675 2013.02.04 ikanick add
 	public int nInitialWindowYPosition;
-	public int nWindowWidth; // #23510 2010.10.31 yyagi add
-	public int nWindowHeight; // #23510 2010.10.31 yyagi add
+	[DataField("WindowWidth")] public int nWindowWidth; // #23510 2010.10.31 yyagi add
+	[DataField("WindowHeight")] public int nWindowHeight; // #23510 2010.10.31 yyagi add
 	public bool DisplayBonusEffects;
 	public bool bHAZARD;
 
@@ -253,6 +254,7 @@ internal partial class CConfigIni
 
 	public bool bConfigIniがないかDTXManiaのバージョンが異なる => ( !bConfigIniExists || !CDTXMania.VERSION.Equals( strDTXManiaのバージョン ) );
 
+	[DataField("DrumsEnabled")]
 	public bool bDrumsEnabled
 	{
 		get => _bDrumsEnabled;
@@ -280,8 +282,9 @@ internal partial class CConfigIni
 		}
 	}
 
-	public bool bSingleGuitar = true;
-	
+	[DataField("SingleGuitar")] public bool bSingleGuitar = true;
+
+	[DataField("GuitarEnabled")]
 	public bool bGuitarEnabled
 	{
 		get => _bGuitarEnabled;
@@ -294,12 +297,13 @@ internal partial class CConfigIni
 			}
 		}
 	}
+	[DataField("WindowMode")]
 	public bool bWindowMode
 	{
 		get => !bFullScreenMode;
 		set => bFullScreenMode = !value;
 	}
-	public bool bGuitarRevolutionMode => ( !bDrumsEnabled && bGuitarEnabled );
+	[DataField("GuitarRevolutionMode")] public bool bGuitarRevolutionMode => ( !bDrumsEnabled && bGuitarEnabled );
 
 	public bool bAllDrumsAreAutoPlay
 	{
@@ -390,6 +394,7 @@ internal partial class CConfigIni
 	public int nResultDelayMs;				// Delay after clearing a song before the result screen is shown (ms).
 	public int nLoadingMinMs;				// Minimum time the song-loading screen stays up, even on a fast load (ms).
 	public bool bIsAllowedDoubleClickFullscreen;	// #26752 2011.11.27 yyagi ダブルクリックしてもフルスクリーンに移行しない
+	[DataField("SwappedGuitarBass")]
 	public bool bIsSwappedGuitarBass			// #24063 2011.1.16 yyagi ギターとベースの切り替え中か否か
 	{
 		get;

@@ -1,4 +1,5 @@
 using DTXMania.Core;
+using DTXMania.UI.DynamicElements;
 using DTXMania.UI.Skin;
 using Hexa.NET.ImGui;
 using NativeFileDialog.Extended;
@@ -17,10 +18,32 @@ public partial class UIImage
         }
 
         Inspector.Inspector.Inspect("Image Source", ref imageSource);
-        if (imageSource == ImageSource.Resource)
+        switch (imageSource)
         {
-            ImGui.LabelText("Resource", resource);
+            case ImageSource.Resource:
+                ImGui.LabelText("Resource", resource);
+                break;
+
+            case ImageSource.System:
+                //clearing the load attempt lets the lazy reload in Draw pick up the new path
+                if (ImGui.InputText("System Path", ref resource, 512))
+                {
+                    _lastFileLoadAttempt = null;
+                }
+
+                if (ImGui.Button("Reload Image"))
+                {
+                    _lastFileLoadAttempt = null;
+                    LoadResource(updateRects: false);
+                }
+
+                break;
+
+            case ImageSource.Dynamic:
+                Inspector.Inspector.DrawBindingDropdown("Dynamic Source", ref resource, this, DataBindingKind.Texture);
+                break;
         }
+
         Inspector.Inspector.Inspect("Clip Rect", ref clipRect);
         Inspector.Inspector.Inspect("Render Mode", ref renderMode);
         Inspector.Inspector.Inspect("Color", ref color);

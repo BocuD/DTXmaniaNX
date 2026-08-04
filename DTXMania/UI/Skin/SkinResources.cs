@@ -3,7 +3,9 @@
 public enum ResourceType
 {
     Image,
-    Font
+    Font,
+    Video,
+    Animation
 }
 
 public partial class SkinDescriptor
@@ -54,6 +56,12 @@ public partial class SkinDescriptor
                 break;
             case  ResourceType.Font:
                 folder = "Fonts";
+                break;
+            case ResourceType.Video:
+                folder = "Videos";
+                break;
+            case ResourceType.Animation:
+                folder = "Animation";
                 break;
         }
 
