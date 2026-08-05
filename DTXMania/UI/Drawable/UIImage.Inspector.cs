@@ -24,7 +24,7 @@ public partial class UIImage
                 if (Inspector.ResourceBrowser.Draw("Resource", ResourceType.Image, ref resource))
                 {
                     _lastFileLoadAttempt = null;
-                    LoadResource(updateRects: false);
+                    LoadResource(updateRects: true);
                 }
 
                 break;
