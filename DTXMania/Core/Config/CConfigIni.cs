@@ -657,7 +657,7 @@ internal partial class CConfigIni
 		nSongSelectImagePreviewWaitTimeMs = 200;
 		bSongSelectPreviewVideo = true;
 		bShowOtherInstrumentCharts = false;
-		bMergeGuitarBassCharts = false;
+		bMergeGuitarBassCharts = true;
 		bWave再生位置自動調整機能有効 = true;
 		bBGM音を発声する = true;
 		bドラム打音を発声する = true;
