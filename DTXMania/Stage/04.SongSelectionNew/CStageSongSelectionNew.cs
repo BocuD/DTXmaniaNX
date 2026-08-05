@@ -16,7 +16,7 @@ namespace DTXMania;
 public class CStageSongSelectionNew : CStage
 {
     private SongDb.SongDb songDb => CDTXMania.SongDb;
-    private SortMenuContainer sortMenuContainer;
+    private SortMenuContainer? sortMenuContainer;
     private CActSelectPresound actPresound;
     private PreviewVideoBackground previewVideo;
     private StatusPanel statusPanel;
@@ -260,7 +260,7 @@ public class CStageSongSelectionNew : CStage
     {
         //set initial sort menu container position to be default,
         //or in case of reloading the menu, whatever was last selected
-        sortMenuContainer.ShowSort(currentSort);
+        sortMenuContainer?.ShowSort(currentSort);
         
         //every time we load the stage, containers need to be recreated
         loadPhase = ELoadPhase.Initialize;
@@ -419,7 +419,7 @@ public class CStageSongSelectionNew : CStage
         }
 
         //on the arrow keys, so a submenu holding focus takes them with it
-        sortMenuContainer.HandleNavigation();
+        sortMenuContainer?.HandleNavigation();
         pendingResult = selectionContainer.HandleNavigation();
     }
 
