@@ -33,6 +33,14 @@ internal sealed class SongDbConfigPage : ConfigPage
             () => CDTXMania.ConfigIni.eUnpackSongs, e => CDTXMania.ConfigIni.eUnpackSongs = e);
         items.Add(autoExtractSongs);
         
+        CItemToggle otherInstruments = new("Show Other Charts", CDTXMania.ConfigIni.bShowOtherInstrumentCharts,
+            "演奏中の楽器の譜面が無い曲も\n選曲画面に表示します。\nOFF にすると、叩ける曲だけが\n表示されます。",
+            "List songs that have no chart for the instrument you are playing.\nTurn OFF to only see songs you can actually play.");
+        otherInstruments.BindConfig(
+            () => otherInstruments.bON = CDTXMania.ConfigIni.bShowOtherInstrumentCharts,
+            () => CDTXMania.ConfigIni.bShowOtherInstrumentCharts = otherInstruments.bON);
+        items.Add(otherInstruments);
+
         CItemToggle mergeGuitarBass = new("Merge Guitar / Bass", CDTXMania.ConfigIni.bMergeGuitarBassCharts,
             "set.def で「(Guitar)」「(Bass)」に\n分かれている曲を1つにまとめます。\n演奏中の楽器の譜面が使われます。",
             "Show a set.def's separate \"(Guitar)\" and \"(Bass)\" entries as one song.\nThe chart for the instrument you are playing is used.");
