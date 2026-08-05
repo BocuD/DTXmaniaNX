@@ -330,11 +330,11 @@ internal class CStageConfig : CStage
         inputTestPanel.Open(pads);
     }
 
-    private void OpenMidiTest()
+    private void OpenMidiTest((EKeyConfigPart, EKeyConfigPad, string)[] pads)
     {
         configList.isVisible = false;
         descriptionPanel.Update(null, false);
-        midiTestPanel.Open();
+        midiTestPanel.Open(pads);
     }
 
     //the panels pop themselves, so the page they were opened from is focused again

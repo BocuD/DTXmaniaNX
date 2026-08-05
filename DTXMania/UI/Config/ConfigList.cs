@@ -40,7 +40,7 @@ internal class ConfigList : UIScrollItemsGroup, IUIItemSource
 
     public Action<(EKeyConfigPart part, EKeyConfigPad pad, string label)[]>? onOpenInputTest;
 
-    public Action? onOpenMidiTest;
+    public Action<(EKeyConfigPart part, EKeyConfigPad pad, string label)[]>? onOpenMidiTest;
 
     public ConfigList(int slotCount, int selectionIndex) : base("ConfigList")
     {

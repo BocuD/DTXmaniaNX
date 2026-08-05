@@ -19,6 +19,9 @@ internal sealed class MidiTestPanel : UIGroup, IUIInputHandler
     private readonly UIText hint;
     private readonly ScrollingLog log;
 
+    //the pads of the page this was opened from, so a drums test never reports a guitar mapping
+    private (EKeyConfigPart part, EKeyConfigPad pad, string label)[] pads = [];
+
     public Action? onClose;
     public bool IsOpen => isVisible;
 
@@ -45,12 +48,14 @@ internal sealed class MidiTestPanel : UIGroup, IUIInputHandler
         log.position = new Vector3(20, 60, 0);
     }
 
-    public void Open()
+    public void Open((EKeyConfigPart part, EKeyConfigPad pad, string label)[] pads)
     {
+        this.pads = pads;
+
         title.SetText(CDTXMania.isJapanese ? "MIDI テスト" : "MIDI Test");
         hint.SetText(CDTXMania.isJapanese
-            ? "MIDI入力を押してください。緑=割り当て済み / 赤=未割り当て。 Esc で戻ります。"
-            : "Play your MIDI inputs.  green = mapped / red = unmapped.  (Esc to return)");
+            ? "緑=割り当て済み / 赤=未割り当て\nEsc で戻ります。"
+            : "green = mapped / red = unmapped\n(Esc to return)");
         log.Clear();
         isVisible = true;
         UIFocus.Push(this);
@@ -69,7 +74,7 @@ internal sealed class MidiTestPanel : UIGroup, IUIInputHandler
                 if (!device.bKeyPressed(code)) continue;
 
                 string midiLabel = KeyCodeNames.FormatBinding(new STKEYASSIGN(EInputDevice.MIDI入力, device.ID, code));
-                string? mapped = FindMappedPad(device.ID, code);
+                string? mapped = FindMappedPad(pads, device.ID, code);
 
                 if (mapped != null)
                 {
@@ -92,22 +97,23 @@ internal sealed class MidiTestPanel : UIGroup, IUIInputHandler
         }
     }
 
-    private static string? FindMappedPad(int id, int code)
+    //labelled by the page: EKeyConfigPad interleaves drums and guitar pads, so a pad's own name reads
+    //wrong for whichever part is not being tested
+    private static string? FindMappedPad((EKeyConfigPart part, EKeyConfigPad pad, string label)[] pads, int id, int code)
     {
-        for (int p = 0; p <= (int)EKeyConfigPart.SYSTEM; p++)
+        foreach ((EKeyConfigPart part, EKeyConfigPad pad, string label) in pads)
         {
-            for (int b = 0; b < (int)EKeyConfigPad.MAX; b++)
+            STKEYASSIGN[] slots = CDTXMania.ConfigIni.KeyAssign[(int)part][(int)pad];
+
+            for (int s = 0; s < SlotCount; s++)
             {
-                STKEYASSIGN[] slots = CDTXMania.ConfigIni.KeyAssign[p][b];
-                for (int s = 0; s < SlotCount; s++)
+                if (slots[s].InputDevice == EInputDevice.MIDI入力 && slots[s].ID == id && slots[s].Code == code)
                 {
-                    if (slots[s].InputDevice == EInputDevice.MIDI入力 && slots[s].ID == id && slots[s].Code == code)
-                    {
-                        return $"{(EKeyConfigPart)p} / {(EKeyConfigPad)b}";
-                    }
+                    return label;
                 }
             }
         }
+
         return null;
     }
 
