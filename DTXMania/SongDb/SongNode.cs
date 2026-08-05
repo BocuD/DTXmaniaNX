@@ -26,6 +26,10 @@ public class SongNode
     [DataField("Path")] public string path = string.Empty;
     public Color color = Color.White;
 
+    public string listTitle = string.Empty;
+
+    public string ListTitle => listTitle.Length > 0 ? listTitle : title;
+
 
     //the first non-null chart, so a binding can reach chart data without an explicit difficulty index
     [DataField("Chart")] public CChartData? RepresentativeChart => charts.FirstOrDefault(c => c != null);
@@ -105,6 +109,7 @@ public class SongNode
             title = original.title,
             path = original.path,
             color = original.color,
+            listTitle = original.listTitle,
             stDrumHitRanges = original.stDrumHitRanges,
             stDrumPedalHitRanges = original.stDrumPedalHitRanges,
             stGuitarHitRanges = original.stGuitarHitRanges,

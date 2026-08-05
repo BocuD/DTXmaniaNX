@@ -690,7 +690,8 @@ public class SongDb : IDisposable
 
 	private static void MergeInto(SongNode guitar, SongNode bass, string baseTitle)
 	{
-		guitar.title = $"{baseTitle} (Guitar/Bass)";
+		guitar.title = baseTitle;
+		guitar.listTitle = $"{baseTitle} (Guitar/Bass)";
 
 		for (int difficulty = 0; difficulty < guitar.charts.Length; difficulty++)
 		{
@@ -710,9 +711,29 @@ public class SongDb : IDisposable
 				continue;
 			}
 
-			CopyBassData(guitar.charts[difficulty], bassChart);
-			guitar.charts[difficulty].bassChart = bassChart;
+			guitar.charts[difficulty] = BuildProxy(guitar.charts[difficulty], bassChart);
 		}
+	}
+
+	private static CChartData BuildProxy(CChartData guitar, CChartData bass)
+	{
+		CChartData proxy = new()
+		{
+			FileInformation = guitar.FileInformation,
+			ScoreIniInformation = guitar.ScoreIniInformation,
+			SongInformation = guitar.SongInformation,
+			countSkill = guitar.countSkill
+		};
+
+		//the struct copy shares the lane dictionary, so the proxy needs its own before adding bass lanes
+		proxy.SongInformation.chipCountByLane = new Dictionary<ELane, int>(guitar.SongInformation.chipCountByLane);
+		CopyBassData(proxy, bass);
+
+		proxy.instrumentSources = new CChartData[3];
+		proxy.instrumentSources[(int)EInstrumentPart.GUITAR] = guitar;
+		proxy.instrumentSources[(int)EInstrumentPart.BASS] = bass;
+
+		return proxy;
 	}
 
 	//the bass half's own numbers, so one entry can show both instruments without anything reading it

@@ -47,9 +47,12 @@ public class CChartData
 
     [DataField("SongInformation")] public STMusicInformation SongInformation;
 
-    public CChartData? bassChart;
-    public CChartData ForCurrentInstrument()
-        => bassChart != null && CDTXMania.GetCurrentInstrument() == (int)EInstrumentPart.BASS ? bassChart : this;
+    public CChartData[]? instrumentSources;
+
+    /// <summary>The chart to actually load, which for a proxy is this instrument's own.</summary>
+    public CChartData ForInstrument(int instrument) => instrumentSources?[instrument] ?? this;
+
+    public CChartData ForCurrentInstrument() => ForInstrument(CDTXMania.GetCurrentInstrument());
 
     [Serializable]
     [StructLayout(LayoutKind.Sequential)]

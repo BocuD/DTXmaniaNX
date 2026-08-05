@@ -58,7 +58,7 @@ public sealed class SongRowData
         switch (node?.nodeType)
         {
             case SongNode.ENodeType.SONG:
-                Title = node.title;
+                Title = node.ListTitle;
                 Artist = ArtistOf(node);
                 BackgroundIndex = Bar;
                 //dirty hacks to fix clipping issues with a bad texture (?)
@@ -67,7 +67,7 @@ public sealed class SongRowData
                 break;
 
             case SongNode.ENodeType.BOX:
-                Title = node.title;
+                Title = node.ListTitle;
                 Artist = BoxSubtitleOf(node);
                 BackgroundIndex = BoxClosed;
                 BackgroundClipX = 1;
