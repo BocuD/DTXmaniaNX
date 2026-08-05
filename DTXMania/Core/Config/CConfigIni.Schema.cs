@@ -57,6 +57,9 @@ internal partial class CConfigIni
 					@"You can specify many pathes separated with semicolon(;). (e.g. d:\DTXFiles1\;e:\DTXFiles2\)"
 				],
 				Str("DTXPath", c => c.strSongDataSearchPath)),
+			G(["使用するスキンの Skins\\ 以下のフォルダ名。空欄で内蔵スキン。",
+					"Folder name under Skins\\ of the skin to use. Empty for the built-in one."],
+				Str("Skin", c => c.strSkinFolder)),
 			G(["ZIPファイルの展開", "0=展開しない, 1=確認する, 2=常に展開する"], Enum("UnpackSongs", 0, 2, c => c.eUnpackSongs)),
 			G(["言語設定", "0=自動, 1=日本語, 2=英語", "Language mode", "0=auto, 1=japanese, 2=english"], Enum("Language", 0, 2, c => c.languageMode)),
 			G([

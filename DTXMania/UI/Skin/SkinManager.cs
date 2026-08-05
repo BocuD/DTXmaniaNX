@@ -30,6 +30,30 @@ public class SkinManager
     public SkinManager()
     {
         ScanSkinDirectory();
+        RestoreSelectedSkin();
+    }
+
+    public static string FolderNameOf(SkinDescriptor skin) => new DirectoryInfo(skin.basePath).Name;
+
+    private void RestoreSelectedSkin()
+    {
+        string folder = CDTXMania.ConfigIni.strSkinFolder;
+
+        if (string.IsNullOrWhiteSpace(folder))
+        {
+            return;
+        }
+
+        SkinDescriptor? saved = skins.FirstOrDefault(
+            skin => string.Equals(FolderNameOf(skin), folder, StringComparison.OrdinalIgnoreCase));
+
+        if (saved == null)
+        {
+            Trace.TraceWarning($"Skin \"{folder}\" is no longer in {SkinsDirectory}; using the built-in skin.");
+            return;
+        }
+
+        currentSkin = SkinDescriptor.LoadSkin(saved.basePath);
     }
 
     public void ScanSkinDirectory()
@@ -134,6 +158,8 @@ public class SkinManager
     public void ChangeSkin(SkinDescriptor? skin)
     {
         currentSkin = skin == null ? null : SkinDescriptor.LoadSkin(skin.basePath);
+
+        CDTXMania.ConfigIni.strSkinFolder = skin == null ? string.Empty : FolderNameOf(skin);
 
         //so a reload picks up edited component files, and re-seeds deleted ones
         ComponentInstance.ClearCache();
