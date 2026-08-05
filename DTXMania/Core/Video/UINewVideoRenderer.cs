@@ -152,7 +152,7 @@ public class UINewVideoRenderer : UIDrawable
             DTXMania.UI.Inspector.Inspector.Inspect("Video Source", ref videoSource);
 
             bool pathChanged = videoSource == VideoSource.Resource
-                ? DTXMania.UI.Inspector.ResourceBrowser.Draw("Video", ResourceType.Video, ref resource)
+                ? DTXMania.UI.Inspector.ResourceBrowser.Draw("Video Path", ResourceType.Video, ref resource)
                 : ImGui.InputText("Video Path", ref resource, 512);
 
             if (pathChanged)
