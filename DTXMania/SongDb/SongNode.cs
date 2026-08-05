@@ -26,6 +26,7 @@ public class SongNode
     [DataField("Path")] public string path = string.Empty;
     public Color color = Color.White;
 
+
     //the first non-null chart, so a binding can reach chart data without an explicit difficulty index
     [DataField("Chart")] public CChartData? RepresentativeChart => charts.FirstOrDefault(c => c != null);
 
@@ -155,23 +156,29 @@ public class SongNode
         return imagePath;
     }
 
-    public static SongNode? rNextSong(SongNode? song)
+    public bool ShowInSongList()
     {
-        if (song == null) return null;
-        List<SongNode> list = song.parent.childNodes;
+        if (nodeType != ENodeType.SONG || CDTXMania.ConfigIni.bShowOtherInstrumentCharts)
+        {
+            return true;
+        }
 
-        int index = list.IndexOf(song);
+        foreach (CChartData? chart in charts)
+        {
+            if (chart != null && chart.HasChartForCurrentMode())
+            {
+                return true;
+            }
+        }
 
-        if (index < 0)
-            return null;
-
-        if (index == (list.Count - 1))
-            return list[0];
-
-        return list[index + 1];
+        return false;
     }
 
-    public static SongNode? rPreviousSong(SongNode? song)
+    public static SongNode? rNextSong(SongNode? song) => Step(song, 1);
+
+    public static SongNode? rPreviousSong(SongNode? song) => Step(song, -1);
+
+    private static SongNode? Step(SongNode? song, int direction)
     {
         if (song == null) return null;
         List<SongNode> list = song.parent.childNodes;
@@ -181,10 +188,17 @@ public class SongNode
         if (index < 0)
             return null;
 
-        if (index == 0)
-            return list[list.Count - 1];
+        for (int step = 0; step < list.Count; step++)
+        {
+            index = (index + direction + list.Count) % list.Count;
 
-        return list[index - 1];
+            if (list[index].ShowInSongList())
+            {
+                return list[index];
+            }
+        }
+
+        return song;
     }
 
     //loop over all charts on this node. find the one that has the highest skill points (if any)

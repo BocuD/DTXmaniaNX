@@ -160,6 +160,7 @@ internal partial class CConfigIni
 	public int nSongSelectImagePreviewWaitTimeMs;
 
 	public bool bSongSelectPreviewVideo;
+	public bool bMergeGuitarBassCharts;
 	public int n自動再生音量;  // nAutoVolume
 	public int n手動再生音量;  // nChipVolume
 	public int n選曲リストフォントのサイズdot;
@@ -654,6 +655,7 @@ internal partial class CConfigIni
 		nSongSelectSoundPreviewWaitTimeMs = 200;
 		nSongSelectImagePreviewWaitTimeMs = 200;
 		bSongSelectPreviewVideo = true;
+		bMergeGuitarBassCharts = false;
 		bWave再生位置自動調整機能有効 = true;
 		bBGM音を発声する = true;
 		bドラム打音を発声する = true;

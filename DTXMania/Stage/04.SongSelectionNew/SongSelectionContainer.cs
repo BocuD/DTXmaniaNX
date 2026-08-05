@@ -140,6 +140,12 @@ public class SongSelectionContainer : UIScrollItemsGroup, IUIItemSource
     {
         EnsureWindow();
 
+        //the remembered selection can be a song the current instrument has no chart for
+        if (selected != null && !selected.ShowInSongList())
+        {
+            selected = SongNode.rNextSong(selected);
+        }
+
         //the selected row sits at the selection position, and the window starts that far before it
         window.Reset(0);
         ScrollTo(selectionOffset);
@@ -277,8 +283,11 @@ public class SongSelectionContainer : UIScrollItemsGroup, IUIItemSource
     {
         if (CDTXMania.InputManager.Keyboard.bKeyPressed(Key.R))
         {
-            int randomIndex = Random.Shared.Next(0, currentRoot.childNodes.Count);
-            UpdateSelection(currentRoot.childNodes[randomIndex]);
+            List<SongNode> candidates = currentRoot.childNodes.FindAll(node => node.ShowInSongList());
+            if (candidates.Count > 0)
+            {
+                UpdateSelection(candidates[Random.Shared.Next(0, candidates.Count)]);
+            }
             return (int)CStageSongSelectionNew.EReturnValue.Continue;
         }
 

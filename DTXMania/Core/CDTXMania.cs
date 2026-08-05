@@ -584,7 +584,8 @@ internal partial class CDTXMania
     public static void UpdateSelection(SongNode song, CChartData chartData, int difficulty)
     {
         chosenSong = song;
-        chosenChartData = chartData;
+
+        chosenChartData = chartData?.ForCurrentInstrument();
         confirmedSongDifficulty = difficulty;
     }
 

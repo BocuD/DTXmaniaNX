@@ -47,6 +47,9 @@ public class CChartData
 
     [DataField("SongInformation")] public STMusicInformation SongInformation;
 
+    public CChartData ForCurrentInstrument()
+        => bassChart != null && CDTXMania.GetCurrentInstrument() == (int)EInstrumentPart.BASS ? bassChart : this;
+
     [Serializable]
     [StructLayout(LayoutKind.Sequential)]
     public struct STMusicInformation
