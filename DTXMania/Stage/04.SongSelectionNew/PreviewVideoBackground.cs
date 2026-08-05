@@ -223,6 +223,10 @@ public class PreviewVideoBackground : UIGroup
     private string? pendingChartPath;
     private string? loadedChartPath;
 
+    //the last selection, kept so turning the option back on can pick it up without waiting for a scroll
+    private CChartData? lastChart;
+    private bool enabled;
+
     private FadeMode fadeMode = FadeMode.None;
     private CCounter? ctWaitForPlayback;
     private CCounter? ctFade;
@@ -230,6 +234,7 @@ public class PreviewVideoBackground : UIGroup
     public PreviewVideoBackground() : base("PreviewVideoBackground")
     {
         dontSerialize = true;
+        enabled = CDTXMania.ConfigIni.bSongSelectPreviewVideo;
 
         front = new Layer("PreviewA");
         back = new Layer("PreviewB");
@@ -238,6 +243,13 @@ public class PreviewVideoBackground : UIGroup
     //arms the debounce, so the potentially heavy resolve and load only happens once scrolling has settled
     public void SelectionChanged(CChartData? chart)
     {
+        lastChart = chart;
+
+        if (!enabled)
+        {
+            return;
+        }
+
         string? chartPath = chart?.FileInformation.AbsoluteFilePath;
 
         //already showing, and heading toward, this exact chart
@@ -261,6 +273,7 @@ public class PreviewVideoBackground : UIGroup
             return;
         }
 
+        UpdateEnabled();
         UpdateDebounce();
         UpdateFade();
 
@@ -270,6 +283,29 @@ public class PreviewVideoBackground : UIGroup
         //front first, so during a CrossIn the incoming layer draws over the outgoing one
         front.Draw(combined);
         back.Draw(combined);
+    }
+
+    private void UpdateEnabled()
+    {
+        if (enabled == CDTXMania.ConfigIni.bSongSelectPreviewVideo)
+        {
+            return;
+        }
+
+        enabled = !enabled;
+
+        if (enabled)
+        {
+            //nothing is loaded any more, so the current selection resolves from scratch
+            SelectionChanged(lastChart);
+            return;
+        }
+
+        pendingChart = null;
+        pendingChartPath = null;
+        loadedChartPath = null;
+        ctWaitForPlayback = null;
+        FadeOutCurrent();
     }
 
     private void UpdateDebounce()
@@ -319,19 +355,29 @@ public class PreviewVideoBackground : UIGroup
         //nothing to show, or the incoming source failed to load, so fade the current front out
         if (source.Kind == SourceKind.None || !back.Show(source))
         {
-            if (front.Kind == SourceKind.None)
-            {
-                return; //already empty
-            }
-
-            fadeMode = FadeMode.FadeOut;
-            ctFade = new CCounter(0, Math.Max(1, FadeDurationMs), 1, CDTXMania.Timer);
+            FadeOutCurrent();
             return;
         }
 
         //the incoming source is loaded on the back layer, so fade it in over the front
         back.SetAlpha(0f);
         fadeMode = FadeMode.CrossIn;
+        ctFade = new CCounter(0, Math.Max(1, FadeDurationMs), 1, CDTXMania.Timer);
+    }
+
+    private void FadeOutCurrent()
+    {
+        if (fadeMode != FadeMode.None)
+        {
+            FinishFade();
+        }
+
+        if (front.Kind == SourceKind.None)
+        {
+            return; //already empty
+        }
+
+        fadeMode = FadeMode.FadeOut;
         ctFade = new CCounter(0, Math.Max(1, FadeDurationMs), 1, CDTXMania.Timer);
     }
 
