@@ -274,14 +274,6 @@ public class VideoPlayerController : IDisposable
             }
 
             ImGui.Text($"Source path: {CurrentSourcePath ?? "(none)"}");
-            if (ImGui.Button("Change video (Browse)..."))
-            {
-                string path = NFD.OpenDialog("", new Dictionary<string, string> { { "Videos", "mp4,mov,avi,mkv,wmv,flv,webm" } });
-                if (!string.IsNullOrWhiteSpace(path))
-                {
-                    TryLoadVideo(path);
-                }
-            }
 
             if (!string.IsNullOrEmpty(errorMessage))
             {
