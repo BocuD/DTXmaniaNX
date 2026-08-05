@@ -147,15 +147,49 @@ public class UINewVideoRenderer : UIDrawable
     {
         base.DrawInspector();
 
-        DTXMania.UI.Inspector.Inspector.Inspect("Video Source", ref videoSource);
-        if (ImGui.InputText("Video Path", ref resource, 512))
+        if (ImGui.CollapsingHeader("Video"))
         {
-            _lastVideoLoadAttempt = null;
-        }
-        if (ImGui.Button("Reload Video"))
-        {
-            _lastVideoLoadAttempt = null;
-            LoadDeclaredVideo();
+            DTXMania.UI.Inspector.Inspector.Inspect("Video Source", ref videoSource);
+
+            bool pathChanged = videoSource == VideoSource.Resource
+                ? DTXMania.UI.Inspector.ResourceBrowser.Draw("Video", ResourceType.Video, ref resource)
+                : ImGui.InputText("Video Path", ref resource, 512);
+
+            if (pathChanged)
+            {
+                _lastVideoLoadAttempt = null;
+            }
+
+            if (ImGui.Button("Reload Video"))
+            {
+                _lastVideoLoadAttempt = null;
+                LoadDeclaredVideo();
+            }
+
+            ImGui.SameLine();
+            if (ImGui.Button("Load New Video"))
+            {
+                Dictionary<string, string> filters = new()
+                {
+                    { "Videos", "mp4,avi,mkv,webm,mov,wmv,mpg,mpeg,flv,m4v" }
+                };
+
+                DTXMania.UI.Inspector.ResourceImporter.Pick(ResourceType.Video, filters, (value, isSkinResource) =>
+                {
+                    if (isSkinResource)
+                    {
+                        videoSource = VideoSource.Resource;
+                        resource = value;
+                        _lastVideoLoadAttempt = null;
+                        LoadDeclaredVideo();
+                        return;
+                    }
+
+                    //not the skin's, so it plays from where it lies and the layout keeps no reference
+                    _lastVideoLoadAttempt = resource;
+                    LoadVideo(value);
+                });
+            }
         }
 
         // Hand off rendering to the encapsulated Controller securely locked to this drawable instance.

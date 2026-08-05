@@ -21,7 +21,12 @@ public partial class UIImage
         switch (imageSource)
         {
             case ImageSource.Resource:
-                ImGui.LabelText("Resource", resource);
+                if (Inspector.ResourceBrowser.Draw("Resource", ResourceType.Image, ref resource))
+                {
+                    _lastFileLoadAttempt = null;
+                    LoadResource(updateRects: false);
+                }
+
                 break;
 
             case ImageSource.System:
@@ -55,24 +60,19 @@ public partial class UIImage
                 { "Images", "png,jpg,jpeg,bmp,tga,gif" }
             };
 
-            string path = NFD.OpenDialog("", filterList);
-
-            if (!string.IsNullOrWhiteSpace(path) && File.Exists(path))
+            Inspector.ResourceImporter.Pick(ResourceType.Image, filterList, (value, isSkinResource) =>
             {
-                var currentSkin = CDTXMania.SkinManager.currentSkin;
-                    
-                if (currentSkin != null)
+                if (isSkinResource)
                 {
-                    string resourcePath = currentSkin.AddResource(ResourceType.Image, path);
                     imageSource = ImageSource.Resource;
-                    resource = resourcePath;
+                    resource = value;
                     LoadResource(true);
+                    return;
                 }
-                else
-                {
-                    SetTexture(BaseTexture.LoadFromPath(path));
-                }
-            }
+
+                //not the skin's, so it is drawn from where it lies and the layout keeps no reference
+                SetTexture(BaseTexture.LoadFromPath(value));
+            });
         }
 
         if (renderMode == ERenderMode.Sliced)

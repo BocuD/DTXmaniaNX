@@ -150,6 +150,8 @@ public static class InspectorManager
 
             //each editor draws the gizmo for a selection inside its own tree, in its own viewport
             ComponentEditor.DrawAll(selectedDrawable);
+
+            ResourceImporter.DrawPending();
         }
 
         if (logWindowEnabled)
