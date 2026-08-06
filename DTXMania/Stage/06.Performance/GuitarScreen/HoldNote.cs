@@ -65,7 +65,7 @@ public class HoldNote : UIGroup
         AnimationClip? loaded = AnimationClipIO.LoadFromFile(CSkin.Path(@"Graphics\Note\Guitar\hold.json"));
         if (loaded != null)
         {
-            animator.clips.Add(loaded);
+            animator.Add(loaded);
         }
         animator.Play("hold");
     }

@@ -40,7 +40,7 @@ public class WailingEffect : UIGroup
         AnimationClip? loaded = AnimationClipIO.LoadFromFile(CSkin.Path(@"Graphics\Note\Guitar\wailing.json"));
         if (loaded != null)
         {
-            animator.clips.Add(loaded);
+            animator.Add(loaded);
         }
     }
 

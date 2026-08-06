@@ -42,7 +42,7 @@ internal class CStageTitle : CStage
 		//ambient looping background video, part of the layout so its render order is skinnable
 		ui.AddChild(new UINewVideoRenderer
 		{
-			video = SkinResourceRef.System(@"Graphics\2_background.mp4"),
+			video = SkinResource.System(@"Graphics\2_background.mp4"),
 			renderOrder = -100,
 			name = "BackgroundVideo"
 		});
@@ -100,7 +100,7 @@ internal class CStageTitle : CStage
 		flash.tracks.Add(FlashTrack("Flash/color.Alpha", 1.0f, 0.0f));
 
 		cursor.animator = new Animator { autoPlayClip = flash.name };
-		cursor.animator.clips.Add(flash);
+		cursor.animator.Add(flash);
 	}
 
 	//the pulse runs over the first half second of the clip and the rest of it is the gap before the next

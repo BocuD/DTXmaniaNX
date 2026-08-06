@@ -13,7 +13,7 @@ public static class SkinHierarchySerializer
         JsonSerializerSettings settings = new()
         {
             Formatting = Formatting.Indented,
-            Converters = [new UIDrawableConverter(), new AnimationClipConverter()]
+            Converters = [new UIDrawableConverter(), new AnimatorClipConverter()]
         };
 
         try
@@ -34,7 +34,7 @@ public static class SkinHierarchySerializer
         JsonSerializerSettings settings = new()
         {
             Formatting = Formatting.Indented,
-            Converters = [new UIDrawableConverter(compact: true), new AnimationClipConverter()]
+            Converters = [new UIDrawableConverter(compact: true), new AnimatorClipConverter()]
         };
 
         try
@@ -53,7 +53,7 @@ public static class SkinHierarchySerializer
     {
         try
         {
-            UIGroup? loadedGroup = JsonConvert.DeserializeObject<UIGroup>(json, new UIDrawableConverter(), new AnimationClipConverter());
+            UIGroup? loadedGroup = JsonConvert.DeserializeObject<UIGroup>(json, new UIDrawableConverter(), new AnimatorClipConverter());
             if (loadedGroup == null)
             {
                 Trace.TraceError("Deserialization returned null, possibly due to an empty or invalid JSON.");
@@ -79,7 +79,7 @@ public static class SkinHierarchySerializer
     {
         try
         {
-            UIDrawable? loadedDrawable = JsonConvert.DeserializeObject<UIDrawable>(json, new UIDrawableConverter(), new AnimationClipConverter());
+            UIDrawable? loadedDrawable = JsonConvert.DeserializeObject<UIDrawable>(json, new UIDrawableConverter(), new AnimatorClipConverter());
             if (loadedDrawable == null)
             {
                 Trace.TraceError("Deserialization returned null, possibly due to an empty or invalid JSON.");

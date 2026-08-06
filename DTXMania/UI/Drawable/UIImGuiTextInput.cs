@@ -1,4 +1,5 @@
 ﻿using System.Drawing;
+using DTXMania.UI.Skin;
 using System.Numerics;
 using DTXMania.Core;
 using DTXMania.Core.Framework;
@@ -363,7 +364,7 @@ public class UIImGuiTextInput : UIText
         DisposeScaledFont();
 
         // Resolve the font path based on UIText's font settings
-        string fontPath = UIFonts.ResolveFontPath(fontSource, font);
+        string fontPath = UIFonts.ResolveFontPath(font);
         if (string.IsNullOrWhiteSpace(fontPath) || !File.Exists(fontPath))
         {
             return;

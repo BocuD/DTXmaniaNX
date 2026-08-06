@@ -1,3 +1,4 @@
+using DTXMania.UI.Skin;
 using System.Numerics;
 using DTXMania.Core;
 using DTXMania.Core.Framework;
@@ -33,8 +34,7 @@ public class ResultInfoPanel : UIGroup
         text.bindings.Add(new UIBinding("text", source));
         text.position = position;
         text.anchor = anchor;
-        text.fontSource = FontSource.System;
-        text.font = font;
+        text.font = SkinResource.System(font);
         text.outlineWidth = 0;
         return text;
     }

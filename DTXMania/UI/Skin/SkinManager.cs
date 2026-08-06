@@ -115,11 +115,12 @@ public class SkinManager
     {
         if (node is UIGroup group)
         {
-            foreach (AnimationClip clip in group.animator?.clips ?? [])
+            foreach (AnimatorClip entry in group.animator?.clips ?? [])
             {
-                if (clip.clipSource == ClipSource.System)
+                //an embedded clip stays in the layout; only one that points at a built-in file needs copying
+                if (!entry.IsEmbedded && entry.resource.source == ResourceSource.System)
                 {
-                    AnimationClipIO.MoveIntoSkin(clip, Path.Combine(stageId.ToString(), clip.name + ".json"));
+                    AnimationClipIO.MoveIntoSkin(entry, Path.Combine(stageId.ToString(), entry.clip.name + ".json"));
                 }
             }
 

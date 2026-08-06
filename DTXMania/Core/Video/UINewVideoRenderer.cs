@@ -17,7 +17,7 @@ public class UINewVideoRenderer : UIDrawable
     [Themable] public Color4 color = Color4.White;
 
     //with a video set it loads itself; leave it empty and call LoadVideo for a per-song one
-    [Themable] public SkinResourceRef video;
+    [Themable] public SkinResource video;
 
     [JsonIgnore] private string? _lastVideoLoadAttempt;
 
@@ -131,7 +131,7 @@ public class UINewVideoRenderer : UIDrawable
 
         if (ImGui.CollapsingHeader("Video"))
         {
-            DTXMania.UI.Inspector.ResourceRefEditor.Draw("Video", ResourceType.Video, video, chosen =>
+            DTXMania.UI.Inspector.ResourceEditor.Draw("Video", ResourceType.Video, video, chosen =>
             {
                 video = chosen;
                 _lastVideoLoadAttempt = null;

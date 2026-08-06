@@ -1,3 +1,4 @@
+using DTXMania.UI.Skin;
 using System.Numerics;
 using DTXMania.Core;
 using DTXMania.Core.Framework;
@@ -18,8 +19,7 @@ public class UIPaddedNumber : UIGroup
     [Themable] public long value;
     [Themable] public int padding = 4;
 
-    [Themable] public string font = "texgyreadventor-regular.otf";
-    [Themable] public FontSource fontSource = FontSource.System;
+    [Themable] public SkinResource font = SkinResource.System("texgyreadventor-regular.otf");
     [Themable] public int fontSize = 23;
     [Themable] public UiTextStyle style = UiTextStyle.Bold;
     [Themable] public Color4 padColor = new(0.31f, 0.31f, 0.31f);
@@ -52,7 +52,7 @@ public class UIPaddedNumber : UIGroup
         long resolved = value;
 
         //the split, width measure and re-render are wasted work unless something actually changed
-        int styleHash = HashCode.Combine(padding, fontSize, font, fontSource, style, padColor, numColor);
+        int styleHash = HashCode.Combine(padding, fontSize, font.source, font.path, style, padColor, numColor);
         if (!applied || resolved != lastValue || styleHash != lastStyleHash)
         {
             applied = true;
@@ -86,7 +86,6 @@ public class UIPaddedNumber : UIGroup
     private void StylePart(UIText part, string text, Color4 color)
     {
         part.fontSize = fontSize;
-        part.fontSource = fontSource;
         part.font = font;
         part.style = style;
         part.outlineWidth = 0;

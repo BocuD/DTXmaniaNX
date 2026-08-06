@@ -162,8 +162,7 @@ public class CStageSongSelectionNew : CStage
         skillText.bindings.Add(new UIBinding("text", "SongSkill"));
         skillText.outlineWidth = 0;
         skillText.style = UiTextStyle.Italic;
-        skillText.fontSource = FontSource.System;
-        skillText.font = "Futura PT Medium.otf";
+        skillText.font = SkinResource.System("Futura PT Medium.otf");
         skillText.anchor = new Vector2(1, 1);
         skillText.position = new Vector3(315, 291, 0);
         skillText.name = "SkillText";
@@ -173,8 +172,7 @@ public class CStageSongSelectionNew : CStage
         bpmText.bindings.Add(new UIBinding("text", "SongBPM"));
         bpmText.outlineWidth = 0;
         bpmText.style = UiTextStyle.Italic;
-        bpmText.fontSource = FontSource.System;
-        bpmText.font = "Futura PT Medium.otf";
+        bpmText.font = SkinResource.System("Futura PT Medium.otf");
         bpmText.anchor = new Vector2(1, 1);
         bpmText.position = new Vector3(315, 338, 0);
         bpmText.name = "BPMText";
@@ -188,7 +186,7 @@ public class CStageSongSelectionNew : CStage
         //ambient looping background video; the per-song preview movie is PreviewVideoBackground below
         ui.AddChild(new UINewVideoRenderer
         {
-            video = SkinResourceRef.System(@"Graphics\5_background.mp4"),
+            video = SkinResource.System(@"Graphics\5_background.mp4"),
             renderOrder = -100,
             name = "BackgroundVideo"
         });

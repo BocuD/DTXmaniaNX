@@ -1,13 +1,6 @@
-using DTXMania.Core;
 using DTXMania.UI.Skin;
 
 namespace DTXMania.UI;
-
-public enum FontSource
-{
-    System,
-    Resource
-}
 
 public static class UIFonts
 {
@@ -26,19 +19,13 @@ public static class UIFonts
     private static string? _fallbackFontPath;
 
     public static string FallbackFont => DefaultUiFontFileName;
-    
+
     public static string GetSystemFont(string fontName)
     {
-        string[] candidates =
-        [
-            Path.Combine(AppContext.BaseDirectory, "Fonts", fontName),
-            Path.Combine(Directory.GetCurrentDirectory(), "Fonts", fontName),
-            Path.Combine("Fonts", fontName),
-            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "Fonts", fontName)
-        ];
-        
-        foreach (string candidate in candidates)
+        foreach (string folder in SystemFontFolders)
         {
+            string candidate = Path.Combine(folder, fontName);
+
             if (File.Exists(candidate))
             {
                 return candidate;
@@ -48,102 +35,36 @@ public static class UIFonts
         return FallbackFont;
     }
 
-    private static string[]? systemFontCache = null;
-    public static string[] GetAvailableSystemFonts(bool ignoreCache = false)
+    //a font a skin no longer has must still draw something, so an unresolvable reference falls back
+    public static string ResolveFontPath(SkinResource font)
     {
-        if (systemFontCache != null && !ignoreCache)
-        {
-            return systemFontCache;
-        }
+        string path = font.Resolve(ResourceType.Font);
+        return string.IsNullOrWhiteSpace(path) ? FallbackFontPath : path;
+    }
 
-        systemFontCache = [];
-
-        List<string> temp = [];
-        
-        string[] folders =
-        [
-            Path.Combine(AppContext.BaseDirectory, "Fonts"),
-            Path.Combine(Directory.GetCurrentDirectory(), "Fonts"),
-            "Fonts",
-        ];
-        
-        foreach (string folder in folders)
+    //where the browse menu lists system fonts from
+    public static string SystemFontFolder
+    {
+        get
         {
-            //get all ttf and otf files
-            string[] files = Directory.GetFiles(folder);
-            foreach (string file in files)
+            foreach (string folder in SystemFontFolders)
             {
-                if (file.EndsWith(".ttf", StringComparison.OrdinalIgnoreCase) || file.EndsWith(".otf", StringComparison.OrdinalIgnoreCase))
+                if (Directory.Exists(folder))
                 {
-                    //add it if its not already there
-                    string filename = Path.GetFileName(file);
-
-                    if (!temp.Contains(filename))
-                    {
-                        temp.Add(filename);
-                    }
+                    return folder;
                 }
             }
+
+            return "Fonts";
         }
-        
-        systemFontCache = temp.ToArray();
-        return systemFontCache;
     }
-    
-    private static string[]? resourceFontCache = null;
-    public static string[] GetAvailableResourceFonts(bool ignoreCache = false)
-    {
-        if (resourceFontCache != null && !ignoreCache)
-        {
-            return resourceFontCache;
-        }
 
-        resourceFontCache = [];
-
-        List<string> temp = [];
-        
-        if (CDTXMania.SkinManager.currentSkin != null)
-        {
-            string resourceFolder = Path.Combine(CDTXMania.SkinManager.currentSkin.basePath, SkinDescriptor.GetResourceFolder(ResourceType.Font));
-            if (Directory.Exists(resourceFolder))
-            {
-                string[] files = Directory.GetFiles(resourceFolder);
-                foreach (string file in files)
-                {
-                    if (file.EndsWith(".ttf", StringComparison.OrdinalIgnoreCase) || file.EndsWith(".otf", StringComparison.OrdinalIgnoreCase))
-                    {
-                        //add it if its not already there
-                        string filename = Path.GetFileName(file);
-
-                        if (!temp.Contains(filename))
-                        {
-                            temp.Add(filename);
-                        }
-                    }
-                }
-            }
-        }
-        
-        resourceFontCache = temp.ToArray();
-        return resourceFontCache;
-    }
-    
-    public static string ResolveFontPath(FontSource source, string fontName)
-    {
-        switch (source)
-        {
-            case FontSource.Resource:
-                string? resolvedPath = CDTXMania.SkinManager.currentSkin?.GetResource(ResourceType.Font, fontName);
-                if (string.IsNullOrWhiteSpace(resolvedPath))
-                {
-                    return FallbackFontPath;
-                }
-                return resolvedPath;
-                
-            case FontSource.System:
-                return GetSystemFont(fontName);
-        }
-
-        return FallbackFontPath;
-    }
+    //the game's own font folders first, then whatever Windows already has
+    private static string[] SystemFontFolders =>
+    [
+        Path.Combine(AppContext.BaseDirectory, "Fonts"),
+        Path.Combine(Directory.GetCurrentDirectory(), "Fonts"),
+        "Fonts",
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "Fonts")
+    ];
 }

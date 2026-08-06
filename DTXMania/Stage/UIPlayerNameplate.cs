@@ -1,4 +1,5 @@
 ﻿using System.Drawing;
+using DTXMania.UI.Skin;
 using System.Numerics;
 using DTXMania.Core;
 using DTXMania.UI;
@@ -135,12 +136,12 @@ public class UIPlayerNameplate : UIGroup
                 break;
         }
 
-        titleText.font = UIFonts.FallbackFont;
+        titleText.font = SkinResource.System(UIFonts.FallbackFont);
         titleText.fontSize = 12;
         titleText.fillColor = Color.White;
         titleText.SetText(strTitleName);
 
-        playerNameText.font = UIFonts.FallbackFont;
+        playerNameText.font = SkinResource.System(UIFonts.FallbackFont);
         playerNameText.fontSize = 20;
         playerNameText.outlineWidth = 0;
         playerNameText.fillGradientMode = colorIndex > 11

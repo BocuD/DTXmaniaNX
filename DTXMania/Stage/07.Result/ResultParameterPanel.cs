@@ -1,3 +1,4 @@
+using DTXMania.UI.Skin;
 using System.Numerics;
 using DTXMania.Core;
 using DTXMania.Core.Framework;
@@ -65,8 +66,7 @@ public class ResultParameterPanel : UIItemsGroup, IUIItemSource
         label.bindings.Add(new UIBinding("text", "Item.Label"));
         label.outlineWidth = 0;
         label.fontSize = 20;
-        label.fontSource = FontSource.System;
-        label.font = "Futura PT Medium.otf";
+        label.font = SkinResource.System("Futura PT Medium.otf");
 
         UIPaddedNumber count = root.AddChild(new UIPaddedNumber());
         count.name = "Count";
@@ -88,7 +88,7 @@ public class ResultParameterPanel : UIItemsGroup, IUIItemSource
         percentSign.fillColor = Color4.White;
         percentSign.outlineWidth = 0;
         percentSign.position = new Vector3(224, 0, 0);
-        percentSign.font = "texgyreadventor-regular.otf";
+        percentSign.font = SkinResource.System("texgyreadventor-regular.otf");
         percentSign.fontSize = 15;
         percentSign.style = UiTextStyle.Bold;
         percentSign.anchor = new Vector2(0, 0);

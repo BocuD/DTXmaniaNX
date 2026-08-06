@@ -12,20 +12,20 @@ public enum ResourceSource
     Skin
 }
 
-public struct SkinResourceRef
+public struct SkinResource
 {
     [Themable] public ResourceSource source;
 
     //relative to the root the source names, e.g. "Graphics\5_bar.png" or "Sounds/decide.ogg"
     [Themable] public string path;
 
-    public SkinResourceRef(ResourceSource source, string path)
+    public SkinResource(ResourceSource source, string path)
     {
         this.source = source;
         this.path = path;
     }
 
-    public static SkinResourceRef System(string path) => new(ResourceSource.System, path);
+    public static SkinResource System(string path) => new(ResourceSource.System, path);
 
     public bool IsEmpty => string.IsNullOrWhiteSpace(path);
 
@@ -38,7 +38,9 @@ public struct SkinResourceRef
 
         if (source == ResourceSource.System)
         {
-            return SkinManager.SystemPath(path);
+            //fonts are the one thing the built-in skin does not hold: a system font is one of the game's
+            //own Fonts folders or one Windows already has, so it is looked up rather than composed
+            return type == ResourceType.Font ? UIFonts.GetSystemFont(path) : SkinManager.SystemPath(path);
         }
 
         if (CDTXMania.SkinManager.currentSkin is not { } skin)

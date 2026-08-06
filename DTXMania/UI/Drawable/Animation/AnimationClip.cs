@@ -1,20 +1,8 @@
 using DTXMania.UI.Drawable;
+using DTXMania.UI.Skin;
 using Newtonsoft.Json;
 
 namespace DTXMania.UI.Animation;
-
-/// <summary>Where a clip's data comes from, the way <c>ImageSource</c> says it for an image.</summary>
-public enum ClipSource
-{
-    //written into the layout that owns it
-    Embedded,
-
-    //a file in the built-in System folder
-    System,
-
-    //a file in the active skin's Animation folder
-    Skin
-}
 
 /// <summary>
 /// A named collection of tracks with a duration. Serializable to a flat JSON file.
@@ -26,19 +14,6 @@ public sealed class AnimationClip
     [JsonProperty("frameRate")] public float frameRate = 60f;
     [JsonProperty("loop")] public bool loop;
     [JsonProperty("tracks")] public List<AnimationTrack> tracks = new();
-
-    /// <summary>
-    /// Where this clip comes from. A layout writes an <see cref="ClipSource.Embedded"/> clip in full and
-    /// any other as a reference, so what a layout says about a clip is what it is.
-    /// </summary>
-    [JsonProperty("clipSource", DefaultValueHandling = DefaultValueHandling.Ignore)]
-    public ClipSource clipSource = ClipSource.Embedded;
-
-    //file this clip lives in, relative to the root its source names
-    [JsonProperty("resource", DefaultValueHandling = DefaultValueHandling.Ignore)]
-    public string resource = string.Empty;
-
-    [JsonIgnore] public bool IsEmbedded => clipSource == ClipSource.Embedded;
 
     public void InvalidateBindings()
     {
@@ -58,12 +33,36 @@ public sealed class AnimationClip
 }
 
 /// <summary>
+/// One of an animator's clips. The animator, not the clip, records where the clip came from: a clip file
+/// holds nothing but the clip, and whoever points at it is what says where it lives.
+/// </summary>
+public sealed class AnimatorClip
+{
+    //empty for a clip written into the layout, otherwise the file it was loaded from
+    [JsonProperty("resource")] public SkinResource resource;
+
+    [JsonProperty("clip")] public AnimationClip clip = new();
+
+    [JsonIgnore] public bool IsEmbedded => resource.IsEmpty;
+
+    public AnimatorClip()
+    {
+    }
+
+    public AnimatorClip(AnimationClip clip, SkinResource resource = default)
+    {
+        this.clip = clip;
+        this.resource = resource;
+    }
+}
+
+/// <summary>
 /// Lives on a UIGroup and drives one clip at a time. Tick from UIGroup.Draw before children
 /// render so animation writes are visible the same frame.
 /// </summary>
 public sealed partial class Animator
 {
-    [JsonProperty("clips")] public List<AnimationClip> clips = new();
+    [JsonProperty("clips")] public List<AnimatorClip> clips = new();
 
     [JsonProperty("autoPlay", DefaultValueHandling = DefaultValueHandling.Ignore)]
     public string? autoPlayClip;
@@ -76,7 +75,27 @@ public sealed partial class Animator
     [JsonIgnore] private long lastTickTicks;
     [JsonIgnore] private bool tickTimerStarted;
 
-    public AnimationClip? FindClip(string name) => clips.FirstOrDefault(c => c.name == name);
+    public AnimationClip? FindClip(string name) => clips.FirstOrDefault(c => c.clip.name == name)?.clip;
+
+    /// <summary>Adds a clip the layout writes out in full.</summary>
+    public AnimationClip Add(AnimationClip clip)
+    {
+        clips.Add(new AnimatorClip(clip));
+        return clip;
+    }
+
+    /// <summary>Adds the clip in a file, which the layout references rather than copies.</summary>
+    public AnimationClip? AddResource(SkinResource resource)
+    {
+        AnimationClip? clip = AnimationClipIO.Load(resource);
+
+        if (clip != null)
+        {
+            clips.Add(new AnimatorClip(clip, resource));
+        }
+
+        return clip;
+    }
 
     public void Play(string clipName, bool restart = true)
     {
@@ -169,9 +188,9 @@ public sealed partial class Animator
     /// </summary>
     public void InvalidateBindings()
     {
-        foreach (AnimationClip clip in clips)
+        foreach (AnimatorClip entry in clips)
         {
-            clip.InvalidateBindings();
+            entry.clip.InvalidateBindings();
         }
     }
 }

@@ -1,3 +1,4 @@
+using DTXMania.UI.Skin;
 using System.Drawing;
 using System.Numerics;
 using DTXMania.Core;
@@ -46,8 +47,9 @@ public partial class UIText : UITexture
 
     private string _text = "New UIText";
 
-    [Themable] public FontSource fontSource = FontSource.System;
-    [Themable] public string font = UIFonts.FallbackFont;
+    [Themable] public SkinResource font = SkinResource.System(UIFonts.FallbackFont);
+
+    //typeface name to fall back on when the font file cannot be resolved
     [Themable] public string fontFamily = string.Empty;
     [Themable] public float fontSize = DefaultFontSize;
     [Themable] public float outlineWidth = 3f;
@@ -272,7 +274,7 @@ public partial class UIText : UITexture
         {
             Name = name,
             Text = text,
-            FontPath = UIFonts.ResolveFontPath(fontSource, font),
+            FontPath = UIFonts.ResolveFontPath(font),
             FontFamily = fontFamily,
             FontSize = renderSize,
             OutlineWidth = outlineWidth,

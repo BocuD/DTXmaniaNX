@@ -80,7 +80,7 @@ public sealed partial class AnimationClipEditor
                 {
                     //a file picked from anywhere on disk has no path a layout could name — it would break
                     //for anyone else — so it becomes part of the layout, and Move To Skin gives it a home
-                    animator.clips.Add(loaded);
+                    animator.Add(loaded);
                     lastPathByClip[loaded] = chosen;
                     selectedClip = loaded;
                     selectedTrack = null;
@@ -117,7 +117,7 @@ public sealed partial class AnimationClipEditor
         if (ImGui.SmallButton("+##addclip"))
         {
             AnimationClip clip = new() { name = $"Clip {animator.clips.Count + 1}", duration = 1f };
-            animator.clips.Add(clip);
+            animator.Add(clip);
             selectedClip = clip;
             selectedTrack = null;
         }
@@ -130,7 +130,7 @@ public sealed partial class AnimationClipEditor
 
         for (int i = 0; i < animator.clips.Count; i++)
         {
-            AnimationClip clip = animator.clips[i];
+            AnimationClip clip = animator.clips[i].clip;
             ImGui.PushID(i);
             bool isSelected = clip == selectedClip;
             if (ImGui.Selectable($"{clip.name}##sel", isSelected))

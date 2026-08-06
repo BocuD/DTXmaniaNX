@@ -5,27 +5,27 @@ using Hexa.NET.ImGui;
 namespace DTXMania.UI.Inspector;
 
 /// <summary>
-/// Draws a <see cref="SkinResourceRef"/>: which root it is under, its path, a browse menu of what that
+/// Draws a <see cref="SkinResource"/>: which root it is under, its path, a browse menu of what that
 /// root holds, and an import for a file from anywhere else. One call, so every element that references a
 /// file is edited the same way.
 ///
 /// The value is passed by value and written back through <paramref name="apply"/> rather than by ref,
 /// because importing a file is answered a frame or more later — by which time a ref would be long gone.
 /// </summary>
-public static class ResourceRefEditor
+public static class ResourceEditor
 {
-    public static void Draw(string label, ResourceType type, SkinResourceRef value, Action<SkinResourceRef> apply)
+    public static void Draw(string label, ResourceType type, SkinResource value, Action<SkinResource> apply)
     {
         ResourceSource source = value.source;
         if (Inspector.Inspect($"{label} Source", ref source))
         {
-            apply(new SkinResourceRef(source, value.path));
+            apply(new SkinResource(source, value.path));
         }
 
         string path = value.path;
         if (ResourceBrowser.Draw(label, type, RootFor(value.source, type), ref path))
         {
-            apply(new SkinResourceRef(value.source, path));
+            apply(new SkinResource(value.source, path));
         }
 
         ImGui.SameLine();
@@ -37,7 +37,7 @@ public static class ResourceRefEditor
             {
                 if (isSkinResource)
                 {
-                    apply(new SkinResourceRef(ResourceSource.Skin, imported));
+                    apply(new SkinResource(ResourceSource.Skin, imported));
                 }
             });
         }
@@ -53,7 +53,8 @@ public static class ResourceRefEditor
     {
         if (source == ResourceSource.System)
         {
-            return SkinManager.SystemRoot;
+            //system fonts come from the Fonts folders rather than the built-in skin; see SkinResource
+            return type == ResourceType.Font ? UIFonts.SystemFontFolder : SkinManager.SystemRoot;
         }
 
         return CDTXMania.SkinManager.currentSkin is { } skin

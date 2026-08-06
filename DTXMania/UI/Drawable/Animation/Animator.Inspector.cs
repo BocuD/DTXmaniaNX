@@ -3,6 +3,7 @@ using DTXMania.Core;
 using DTXMania.Core.Video;
 using DTXMania.UI.Animation.Editor;
 using DTXMania.UI.Drawable;
+using DTXMania.UI.Skin;
 using Hexa.NET.ImGui;
 using Newtonsoft.Json;
 
@@ -40,34 +41,27 @@ public sealed partial class Animator
     //without one is written into it
     private void DrawClipStorage()
     {
-        foreach (AnimationClip clip in clips)
+        foreach (AnimatorClip entry in clips)
         {
-            ImGui.PushID(clip.name);
+            ImGui.PushID(entry.clip.name);
 
             bool skinLoaded = CDTXMania.SkinManager.currentSkin != null;
 
-            if (clip.IsEmbedded)
-            {
-                ImGui.LabelText(clip.name, "Embedded");
-            }
-            else
-            {
-                ImGui.LabelText(clip.name, $"{clip.clipSource}: {clip.resource}");
-            }
+            ImGui.LabelText(entry.clip.name, entry.IsEmbedded ? "Embedded" : entry.resource.ToString());
 
             //with a skin loaded, saving anything means giving the skin its own copy; without one there is
             //only the System file to write back to
-            bool intoSkin = skinLoaded && clip.clipSource != ClipSource.Skin;
+            bool intoSkin = skinLoaded && entry.resource.source != ResourceSource.Skin;
 
             if (ImGui.Button(intoSkin ? "Copy To Skin" : "Save"))
             {
                 if (intoSkin)
                 {
-                    AnimationClipIO.MoveIntoSkin(clip, StageClipFile(clip));
+                    AnimationClipIO.MoveIntoSkin(entry, StageClipFile(entry.clip));
                 }
                 else
                 {
-                    AnimationClipIO.SaveToResource(clip);
+                    AnimationClipIO.SaveToResource(entry);
                 }
             }
 

@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using DTXMania.UI.Skin;
 using System.Numerics;
 using DTXMania.Core;
 using DTXMania.Core.Framework;
@@ -69,8 +70,7 @@ internal class CStageResult : CStage
 		stageNumber.bindings.Add(new UIBinding("text", "Result.StageNumber"));
 		stageNumber.position = new Vector3(640, 50, 0);
 		stageNumber.anchor = new Vector2(0.5f, 0);
-		stageNumber.fontSource = FontSource.System;
-		stageNumber.font = "Futura PT Book.otf";
+		stageNumber.font = SkinResource.System("Futura PT Book.otf");
 		stageNumber.style = UiTextStyle.Bold;
 		stageNumber.outlineWidth = 0;
 
@@ -89,7 +89,7 @@ internal class CStageResult : CStage
 		songNameText.fillColor = Color4.Black;
 		songNameText.outlineColor = Color4.White;
 		songNameText.name = "SongName";
-		songNameText.font = UIFonts.FallbackFont;
+		songNameText.font = SkinResource.System(UIFonts.FallbackFont);
 		songNameText.position = new Vector3(464, 547, 0);
 		songNameText.outlineWidth = 2;
 		songNameText.renderOrder = 2;
@@ -102,7 +102,7 @@ internal class CStageResult : CStage
 		artistNameText.fillColor = Color4.Black;
 		artistNameText.outlineColor = Color4.White;
 		artistNameText.name = "ArtistName";
-		artistNameText.font = UIFonts.FallbackFont;
+		artistNameText.font = SkinResource.System(UIFonts.FallbackFont);
 		artistNameText.position = new Vector3(466, 589, 0);
 		artistNameText.outlineWidth = 2;
 		artistNameText.renderOrder = 2;
@@ -165,12 +165,7 @@ internal class CStageResult : CStage
 
 		//the clip lives in its own file, so a saved layout references it rather than copying it in
 		ui.animator = new Animator();
-		AnimationClip? loaded = AnimationClipIO.LoadFromSystem(@"Graphics\Result\open.json");
-		if (loaded != null)
-		{
-			ui.animator.clips.Add(loaded);
-		}
-
+		ui.animator.AddResource(SkinResource.System(@"Graphics\Result\open.json"));
 		ui.animator.Play("open", false);
 	}
 

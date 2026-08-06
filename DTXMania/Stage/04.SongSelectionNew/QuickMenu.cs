@@ -133,8 +133,8 @@ public class QuickMenu : ComponentInstance
 
         //where the list ends up is the open clip's last keyframe, so a skin moves the menu by moving that
         root.animator = new Animator();
-        root.animator.clips.Add(Slide(OpenClip, from: -1000.0f, to: -600.0f, fadeTo: 0.8f));
-        root.animator.clips.Add(Slide(CloseClip, from: -600.0f, to: -1000.0f, fadeTo: 0.0f));
+        root.animator.Add(Slide(OpenClip, from: -1000.0f, to: -600.0f, fadeTo: 0.8f));
+        root.animator.Add(Slide(CloseClip, from: -600.0f, to: -1000.0f, fadeTo: 0.0f));
 
         return root;
     }
