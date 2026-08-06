@@ -77,25 +77,35 @@ public abstract class CStage : CActivity, IUIInputHandler
 
 		ui?.Dispose();
 
-		ui = new UIGroup(GetType().ToString());
-		RegisterBindings();
-
 		//a skin layout defines the serializable UI outright; there is no merge with the code default
 		UIGroup? layout = loadSkin ? CDTXMania.SkinManager.LoadStageLayout(eStageID) : null;
-		if (layout != null)
+
+		//a layout rooted in a stage root carries the stage's own settings, so it is adopted whole; one
+		//saved before those existed is only children, which move into a fresh root
+		StageRoot root = layout as StageRoot ?? CreateRoot();
+		root.name = GetType().ToString();
+
+		ui = root;
+		RegisterBindings();
+
+		if (layout == null)
+		{
+			BuildDefaultLayout();
+		}
+		else if (!ReferenceEquals(layout, root))
 		{
 			foreach (UIDrawable child in layout.children.ToArray())
 			{
 				ui.AddChild(child);
 			}
 		}
-		else
-		{
-			BuildDefaultLayout();
-		}
 
 		OnLayoutReady();
+		root.OnStageOpened();
 	}
+
+	/// <summary>The root type this stage uses, for a stage that declares settings of its own.</summary>
+	protected virtual StageRoot CreateRoot() => new();
 
 	/// <summary>Register the data and behaviour the layout binds to by key. No visuals here.</summary>
 	public abstract void RegisterBindings();
