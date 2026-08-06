@@ -9,13 +9,6 @@ using Newtonsoft.Json;
 
 namespace DTXMania.Core.Video;
 
-//mirrors ImageSource: System resolves against <exe>/System, Resource against the skin's Videos folder
-public enum VideoSource
-{
-    System,
-    Resource
-}
-
 public class UINewVideoRenderer : UIDrawable
 {
     public VideoPlayerController Controller { get; } = new();
@@ -23,9 +16,8 @@ public class UINewVideoRenderer : UIDrawable
     //tint and opacity applied to the drawn frame, so callers can fade a video the way they would an image
     [Themable] public Color4 color = Color4.White;
 
-    //with a resource set the video loads itself; leave it empty and call LoadVideo for a per-song one
-    [Themable] public VideoSource videoSource = VideoSource.System;
-    [Themable] public string resource = string.Empty;
+    //with a video set it loads itself; leave it empty and call LoadVideo for a per-song one
+    [Themable] public SkinResourceRef video;
 
     [JsonIgnore] private string? _lastVideoLoadAttempt;
 
@@ -88,34 +80,24 @@ public class UINewVideoRenderer : UIDrawable
 
     private void LoadDeclaredVideo()
     {
-        if (string.IsNullOrWhiteSpace(resource))
+        if (video.IsEmpty)
         {
             return;
         }
 
-        _lastVideoLoadAttempt = resource;
+        _lastVideoLoadAttempt = video.path;
 
-        string? full = ResolveVideoPath();
+        string full = video.Resolve(ResourceType.Video);
         if (!string.IsNullOrWhiteSpace(full))
         {
             LoadVideo(full);
         }
     }
 
-    private string? ResolveVideoPath()
-    {
-        if (videoSource == VideoSource.Resource)
-        {
-            return CDTXMania.SkinManager.currentSkin?.GetResource(ResourceType.Video, resource);
-        }
-
-        return SkinManager.SystemPath(resource);
-    }
-
     public override void Draw(Matrix4x4 parentMatrix)
     {
         //once per distinct resource, so a missing file is not retried every frame
-        if (!string.IsNullOrWhiteSpace(resource) && resource != _lastVideoLoadAttempt)
+        if (!video.IsEmpty && video.path != _lastVideoLoadAttempt)
         {
             LoadDeclaredVideo();
         }
@@ -149,46 +131,17 @@ public class UINewVideoRenderer : UIDrawable
 
         if (ImGui.CollapsingHeader("Video"))
         {
-            DTXMania.UI.Inspector.Inspector.Inspect("Video Source", ref videoSource);
-
-            bool pathChanged = videoSource == VideoSource.Resource
-                ? DTXMania.UI.Inspector.ResourceBrowser.Draw("Video Path", ResourceType.Video, ref resource)
-                : ImGui.InputText("Video Path", ref resource, 512);
-
-            if (pathChanged)
+            DTXMania.UI.Inspector.ResourceRefEditor.Draw("Video", ResourceType.Video, video, chosen =>
             {
+                video = chosen;
                 _lastVideoLoadAttempt = null;
-            }
+                LoadDeclaredVideo();
+            });
 
             if (ImGui.Button("Reload Video"))
             {
                 _lastVideoLoadAttempt = null;
                 LoadDeclaredVideo();
-            }
-
-            ImGui.SameLine();
-            if (ImGui.Button("Load New Video"))
-            {
-                Dictionary<string, string> filters = new()
-                {
-                    { "Videos", "mp4,avi,mkv,webm,mov,wmv,mpg,mpeg,flv,m4v" }
-                };
-
-                DTXMania.UI.Inspector.ResourceImporter.Pick(ResourceType.Video, filters, (value, isSkinResource) =>
-                {
-                    if (isSkinResource)
-                    {
-                        videoSource = VideoSource.Resource;
-                        resource = value;
-                        _lastVideoLoadAttempt = null;
-                        LoadDeclaredVideo();
-                        return;
-                    }
-
-                    //not the skin's, so it plays from where it lies and the layout keeps no reference
-                    _lastVideoLoadAttempt = resource;
-                    LoadVideo(value);
-                });
             }
         }
 

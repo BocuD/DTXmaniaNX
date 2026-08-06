@@ -8,6 +8,7 @@ using DTXMania.SongDb;
 using DTXMania.SongDb.Sorting;
 using DTXMania.UI;
 using DTXMania.UI.Drawable;
+using DTXMania.UI.Skin;
 using DTXMania.UI.DynamicElements;
 using DTXMania.UI.Text;
 
@@ -187,8 +188,7 @@ public class CStageSongSelectionNew : CStage
         //ambient looping background video; the per-song preview movie is PreviewVideoBackground below
         ui.AddChild(new UINewVideoRenderer
         {
-            videoSource = VideoSource.System,
-            resource = @"Graphics\5_background.mp4",
+            video = SkinResourceRef.System(@"Graphics\5_background.mp4"),
             renderOrder = -100,
             name = "BackgroundVideo"
         });

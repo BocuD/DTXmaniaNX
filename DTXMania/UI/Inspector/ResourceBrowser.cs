@@ -9,29 +9,38 @@ public static class ResourceBrowser
     public static bool Draw(string label, ResourceType type, ref string resource)
     {
         SkinDescriptor? skin = CDTXMania.SkinManager.currentSkin;
+
+        string root = skin != null
+            ? Path.Combine(skin.basePath, SkinDescriptor.GetResourceFolder(type))
+            : string.Empty;
+
+        return Draw(label, type, root, ref resource);
+    }
+
+    /// <summary>Browses one root rather than assuming the skin's, so a System reference lists System.</summary>
+    public static bool Draw(string label, ResourceType type, string root, ref string resource)
+    {
         string popupId = $"browse{label}";
 
-        ImGui.BeginDisabled(skin == null);
+        ImGui.BeginDisabled(root.Length == 0);
         if (ImGui.Button($"Browse##{label}"))
         {
             ImGui.OpenPopup(popupId);
         }
         ImGui.EndDisabled();
 
-        if (skin == null && ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+        if (root.Length == 0 && ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
         {
-            ImGui.SetTooltip("Resources belong to a skin, and none is loaded");
+            ImGui.SetTooltip("Skin resources need a skin, and none is loaded");
         }
 
         ImGui.SameLine();
         bool changed = ImGui.InputText(label, ref resource, 512);
 
-        if (skin == null || !ImGui.BeginPopup(popupId))
+        if (root.Length == 0 || !ImGui.BeginPopup(popupId))
         {
             return changed;
         }
-
-        string root = Path.Combine(skin.basePath, SkinDescriptor.GetResourceFolder(type));
 
         if (Directory.Exists(root))
         {
@@ -39,7 +48,7 @@ public static class ResourceBrowser
         }
         else
         {
-            ImGui.TextDisabled("This skin has no resources of this kind yet");
+            ImGui.TextDisabled("Nothing of this kind in that folder yet");
         }
 
         ImGui.EndPopup();

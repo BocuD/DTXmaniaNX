@@ -8,6 +8,7 @@ using DTXMania.Core.Video;
 using DTXMania.UI;
 using DTXMania.UI.Animation;
 using DTXMania.UI.Drawable;
+using DTXMania.UI.Skin;
 using DTXMania.UI.DynamicElements;
 using Newtonsoft.Json.Linq;
 
@@ -41,8 +42,7 @@ internal class CStageTitle : CStage
 		//ambient looping background video, part of the layout so its render order is skinnable
 		ui.AddChild(new UINewVideoRenderer
 		{
-			videoSource = VideoSource.System,
-			resource = @"Graphics\2_background.mp4",
+			video = SkinResourceRef.System(@"Graphics\2_background.mp4"),
 			renderOrder = -100,
 			name = "BackgroundVideo"
 		});
