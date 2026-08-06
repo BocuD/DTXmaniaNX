@@ -72,12 +72,9 @@ public sealed class UIItemSlot : ComponentInstance
         dontSerialize = true;
     }
 
-    private Func<UIGroup>? buildDefault;
-
-    public void Bind(string componentPath, int itemIndex, Func<object?> item, Func<UIGroup>? itemDefault)
+    public void Bind(string componentPath, int itemIndex, Func<object?> item)
     {
         component = componentPath;
-        buildDefault = itemDefault;
 
         data.RegisterObject("Item", item);
         data.SetString("IsSelected", "false");
@@ -110,8 +107,8 @@ public sealed class UIItemSlot : ComponentInstance
         data.SetString("IsSelected", value ? "true" : "false");
     }
 
-    //the list owns the item's code default, since the list is what knows what it is showing
-    protected override UIGroup BuildDefault() => buildDefault?.Invoke() ?? new UIGroup("Item");
+    protected override UIGroup BuildDefault()
+        => (parent as UIItemsGroup)?.itemDefault?.Invoke() ?? new UIGroup("Item");
 }
 
 /// <summary>
@@ -190,7 +187,7 @@ public class UIItemsGroup : UIGroup, IUIInputHandler
     protected int SourceCount => source?.ItemCount ?? itemCount;
 
     /// <summary>Which item the user is on. A scrolling list answers from its scroll position.</summary>
-    public virtual int SelectedItem
+    [JsonIgnore] public virtual int SelectedItem
     {
         get => selectedItem;
         set => selectedItem = SourceCount == 0 ? 0 : Math.Clamp(value, 0, SourceCount - 1);
@@ -328,7 +325,7 @@ public class UIItemsGroup : UIGroup, IUIInputHandler
             slot.name = "Item" + i;
 
             //the provider reads the slot's current index, so recycling never rebuilds the closure
-            slot.Bind(itemComponent, i, () => source?.GetItem(slot.index), itemDefault);
+            slot.Bind(itemComponent, i, () => source?.GetItem(slot.index));
             slots.Add(slot);
         }
 
