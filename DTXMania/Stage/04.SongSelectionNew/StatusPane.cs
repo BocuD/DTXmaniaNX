@@ -1,3 +1,4 @@
+using DTXMania.UI.Skin;
 using System.Numerics;
 using DTXMania.Core;
 using DTXMania.SongDb;
@@ -161,8 +162,8 @@ public class StatusPane : ComponentInstance, IUIItemSource
         root.AddChild(new UIImage
         {
             name = "Background",
-            imageSource = ImageSource.System,
-            resource = @"Graphics\5_difficulty_panel.png",
+            imageSource = ImageSource.File,
+            image = SkinResource.System(@"Graphics\5_difficulty_panel.png"),
             anchor = new Vector2(0.0f, 1.0f),
             renderOrder = 0
         });
@@ -170,8 +171,8 @@ public class StatusPane : ComponentInstance, IUIItemSource
         root.AddChild(new UIImage
         {
             name = "DifficultyFrame",
-            imageSource = ImageSource.System,
-            resource = @"Graphics\5_difficultyframe.png",
+            imageSource = ImageSource.File,
+            image = SkinResource.System(@"Graphics\5_difficultyframe.png"),
             anchor = new Vector2(0.0f, 1.0f),
             position = new Vector3(-7.0f, 5.0f, 0.0f),
             renderOrder = 1
@@ -195,8 +196,8 @@ public class StatusPane : ComponentInstance, IUIItemSource
         root.AddChild(new UIImage
         {
             name = "Skill",
-            imageSource = ImageSource.System,
-            resource = @"Graphics\Rank\skill.png",
+            imageSource = ImageSource.File,
+            image = SkinResource.System(@"Graphics\Rank\skill.png"),
             anchor = new Vector2(0.0f, 1.0f),
             position = new Vector3(14.0f, -49.0f, 0.0f),
             size = new Vector2(27.0f, 27.0f),
@@ -209,7 +210,7 @@ public class StatusPane : ComponentInstance, IUIItemSource
         {
             name = "Rank",
             imageSource = ImageSource.Dynamic,
-            resource = "Item.Rank",
+            dynamicSource = "Item.Rank",
             anchor = new Vector2(0.0f, 1.0f),
             position = new Vector3(60.0f, -49.0f, 0.0f),
             size = new Vector2(27.0f, 27.0f),

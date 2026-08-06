@@ -50,8 +50,8 @@ internal class CStageTitle : CStage
 
 		ui.AddChild(new UIImage
 		{
-			imageSource = ImageSource.System,
-			resource = @"Graphics\2_background.png",
+			imageSource = ImageSource.File,
+			image = SkinResource.System(@"Graphics\2_background.png"),
 			renderOrder = -99,
 			position = Vector3.Zero,
 			name = "Background"
@@ -77,8 +77,8 @@ internal class CStageTitle : CStage
 		cursor.AddChild(new UIImage
 		{
 			name = "Bar",
-			imageSource = ImageSource.System,
-			resource = MenuSheet,
+			imageSource = ImageSource.File,
+			image = SkinResource.System(MenuSheet),
 			size = new Vector2(MENU_W, MENU_H),
 			clipRect = new RectangleF(0, MENU_H * 4, MENU_W, MENU_H)
 		});
@@ -86,8 +86,8 @@ internal class CStageTitle : CStage
 		cursor.AddChild(new UIImage
 		{
 			name = "Flash",
-			imageSource = ImageSource.System,
-			resource = MenuSheet,
+			imageSource = ImageSource.File,
+			image = SkinResource.System(MenuSheet),
 			size = new Vector2(MENU_W, MENU_H),
 			clipRect = new RectangleF(0, MENU_H * 5, MENU_W, MENU_H),
 			anchor = new Vector2(0.5f, 0.5f),
@@ -120,8 +120,8 @@ internal class CStageTitle : CStage
 		UIImage art = root.AddChild(new UIImage
 		{
 			name = "Art",
-			imageSource = ImageSource.System,
-			resource = MenuSheet,
+			imageSource = ImageSource.File,
+			image = SkinResource.System(MenuSheet),
 			size = new Vector2(MENU_W, MENU_H),
 			clipRect = new RectangleF(0, 0, MENU_W, MENU_H)
 		});

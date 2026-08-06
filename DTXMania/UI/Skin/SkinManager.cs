@@ -9,7 +9,7 @@ public class SkinManager
 {
     public static string SkinsDirectory => Path.Combine(CDTXMania.executableDirectory, "Skins");
 
-    //root of the built-in base skin: ImageSource.System and every stage without a custom layout resolve
+    //root of the built-in base skin: ResourceSource.System and every stage without a custom layout resolve
     //here. Hardcoded to <exe>/System so the new skin system doesn't depend on the legacy CSkin paths
     public static string SystemRoot => Path.Combine(CDTXMania.executableDirectory, "System");
 

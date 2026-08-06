@@ -134,8 +134,8 @@ internal class CStageSongLoading : CStage
         ui.AddChild(new UIImage
         {
             name = "Background",
-            imageSource = ImageSource.System,
-            resource = @"Graphics\6_background.jpg",
+            imageSource = ImageSource.File,
+            image = SkinResource.System(@"Graphics\6_background.jpg"),
             renderOrder = -100
         });
         

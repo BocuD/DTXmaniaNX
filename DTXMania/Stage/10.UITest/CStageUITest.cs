@@ -150,8 +150,8 @@ internal sealed class CStageUITest : CStage
 
         UIImage background = root.AddChild(new UIImage());
         background.name = "Background";
-        background.imageSource = ImageSource.System;
-        background.resource = @"Graphics\1_background.jpg";
+        background.imageSource = ImageSource.File;
+        background.image = SkinResource.System(@"Graphics\1_background.jpg");
         background.size = new Vector2(1280, 720);
         background.renderOrder = -100;
 
@@ -176,7 +176,7 @@ internal sealed class CStageUITest : CStage
         UIImage toggle = root.AddChild(new UIImage());
         toggle.name = "ToggleImage";
         toggle.imageSource = ImageSource.Dynamic;
-        toggle.resource = "ToggleImage";
+        toggle.dynamicSource = "ToggleImage";
         toggle.position = new Vector3(960, 520, 0);
         toggle.anchor = new Vector2(0.5f, 0.5f);
         toggle.size = new Vector2(300, 169);

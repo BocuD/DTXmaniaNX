@@ -76,8 +76,8 @@ internal class CStageResult : CStage
 
 		var titleArtistBg = ui.AddChild(new UIImage
 		{
-			imageSource = ImageSource.System,
-			resource = @"Graphics\Result\songname_bg.png"
+			imageSource = ImageSource.File,
+			image = SkinResource.System(@"Graphics\Result\songname_bg.png")
 		});
 		titleArtistBg.anchor = new Vector2(0.5f, 0);
 		titleArtistBg.position = new Vector3(640, 529, 0);

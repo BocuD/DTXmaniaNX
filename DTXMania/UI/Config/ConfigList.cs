@@ -1,3 +1,4 @@
+using DTXMania.UI.Skin;
 using System.Drawing;
 using System.Numerics;
 using DTXMania.Core;
@@ -325,9 +326,9 @@ internal class ConfigList : UIScrollItemsGroup, IUIItemSource
             name = "Panel",
             resources =
             {
-                @"Graphics\4_itembox.png",
-                @"Graphics\4_itembox folder.png",
-                @"Graphics\4_itembox other.png"
+                SkinResource.System(@"Graphics\4_itembox.png"),
+                SkinResource.System(@"Graphics\4_itembox folder.png"),
+                SkinResource.System(@"Graphics\4_itembox other.png")
             },
             renderOrder = 0,
             bindings =

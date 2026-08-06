@@ -14,7 +14,11 @@ namespace DTXMania.UI.Inspector;
 /// </summary>
 public static class ResourceEditor
 {
-    public static void Draw(string label, ResourceType type, SkinResource value, Action<SkinResource> apply)
+    /// <param name="onUseInPlace">What to do with a file the user chose to leave where it is. A layout
+    /// cannot store a reference to one, so this is only worth passing where drawing it now is still useful
+    /// — an image being previewed, say. Left out, choosing "Use In Place" does nothing.</param>
+    public static void Draw(string label, ResourceType type, SkinResource value, Action<SkinResource> apply,
+        Action<string>? onUseInPlace = null)
     {
         ResourceSource source = value.source;
         if (Inspector.Inspect($"{label} Source", ref source))
@@ -38,6 +42,10 @@ public static class ResourceEditor
                 if (isSkinResource)
                 {
                     apply(new SkinResource(ResourceSource.Skin, imported));
+                }
+                else
+                {
+                    onUseInPlace?.Invoke(imported);
                 }
             });
         }

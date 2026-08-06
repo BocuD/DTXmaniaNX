@@ -53,5 +53,17 @@ public struct SkinResource
 
     public bool Exists(ResourceType type) => Resolve(type) is { Length: > 0 } full && File.Exists(full);
 
+    //compared on draw paths to notice a reference changing, so it cannot go through the reflection-based
+    //ValueType.Equals. Also what compact serialization uses to decide a member is untouched
+    public bool Equals(SkinResource other) => source == other.source && path == other.path;
+
+    public override bool Equals(object? obj) => obj is SkinResource other && Equals(other);
+
+    public override int GetHashCode() => HashCode.Combine(source, path);
+
+    public static bool operator ==(SkinResource left, SkinResource right) => left.Equals(right);
+
+    public static bool operator !=(SkinResource left, SkinResource right) => !left.Equals(right);
+
     public override string ToString() => IsEmpty ? "(none)" : $"{source}: {path}";
 }

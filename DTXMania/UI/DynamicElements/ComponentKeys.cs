@@ -18,9 +18,9 @@ public static class ComponentKeys
             }
         }
 
-        if (element is UIImage { imageSource: ImageSource.Dynamic } image && !string.IsNullOrWhiteSpace(image.resource))
+        if (element is UIImage { imageSource: ImageSource.Dynamic } image && !string.IsNullOrWhiteSpace(image.dynamicSource))
         {
-            keys.TryAdd(image.resource, DataBindingKind.Texture);
+            keys.TryAdd(image.dynamicSource, DataBindingKind.Texture);
         }
 
         if (element is UIGroup group)

@@ -117,43 +117,43 @@ public class CStageSongSelectionNew : CStage
     {
         ui.AddChild(new UIImage
         {
-            imageSource = ImageSource.System, resource = @"Graphics\5_background.jpg",
+            imageSource = ImageSource.File, image = SkinResource.System(@"Graphics\5_background.jpg"),
             renderOrder = -101, position = Vector3.Zero, name = "Background"
         });
 
         ui.AddChild(new UIImage
         {
-            imageSource = ImageSource.System, resource = @"Graphics\SongSelect\back1.png",
+            imageSource = ImageSource.File, image = SkinResource.System(@"Graphics\SongSelect\back1.png"),
             renderOrder = 1, position = new Vector3(174, 393, 0), rotation = new Vector3(0, 0, 1.63f), name = "Back1"
         });
 
         ui.AddChild(new UIImage
         {
-            imageSource = ImageSource.System, resource = @"Graphics\SongSelect\back2.png",
+            imageSource = ImageSource.File, image = SkinResource.System(@"Graphics\SongSelect\back2.png"),
             renderOrder = 2, position = new Vector3(126, 336, 0), rotation = new Vector3(0, 0, -0.06f), name = "Back2"
         });
 
         ui.AddChild(new UIImage
         {
-            imageSource = ImageSource.System, resource = @"Graphics\SongSelect\top_bar.png",
+            imageSource = ImageSource.File, image = SkinResource.System(@"Graphics\SongSelect\top_bar.png"),
             renderOrder = 12, name = "TopBar", size = new Vector2(1280, 1) //width stretched, height from texture
         });
 
         ui.AddChild(new UIImage
         {
-            imageSource = ImageSource.System, resource = @"Graphics\SongSelect\panel_skill.png",
+            imageSource = ImageSource.File, image = SkinResource.System(@"Graphics\SongSelect\panel_skill.png"),
             renderOrder = 9, position = new Vector3(96, 225, 0), name = "PanelSkill"
         });
 
         ui.AddChild(new UIImage
         {
-            imageSource = ImageSource.System, resource = @"Graphics\SongSelect\panel_bpm.png",
+            imageSource = ImageSource.File, image = SkinResource.System(@"Graphics\SongSelect\panel_bpm.png"),
             renderOrder = 9, position = new Vector3(96, 300, 0), name = "PanelBpm"
         });
 
         ui.AddChild(new UIImage
         {
-            imageSource = ImageSource.Dynamic, resource = "AlbumArt",
+            imageSource = ImageSource.Dynamic, dynamicSource = "AlbumArt",
             position = new Vector3(320, 35, 0), renderOrder = 10, size = new Vector2(300, 300), name = "AlbumArt"
         });
 

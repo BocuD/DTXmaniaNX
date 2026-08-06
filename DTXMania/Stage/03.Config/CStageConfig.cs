@@ -1,4 +1,5 @@
 ﻿using System.Runtime.InteropServices;
+using DTXMania.UI.Skin;
 using System.Drawing;
 using System.Diagnostics;
 using System.Numerics;
@@ -164,16 +165,16 @@ internal class CStageConfig : CStage
         ui.AddChild(new UIImage
         {
             name = "Background",
-            imageSource = ImageSource.System,
-            resource = @"Graphics\4_background.png",
+            imageSource = ImageSource.File,
+            image = SkinResource.System(@"Graphics\4_background.png"),
             renderOrder = -100
         });
 
         ui.AddChild(new UIImage
         {
             name = "ItemBar",
-            imageSource = ImageSource.System,
-            resource = @"Graphics\4_item bar.png",
+            imageSource = ImageSource.File,
+            image = SkinResource.System(@"Graphics\4_item bar.png"),
             position = new Vector3(400, 0, 0),
             renderOrder = 20
         });
@@ -181,8 +182,8 @@ internal class CStageConfig : CStage
         ui.AddChild(new UIImage
         {
             name = "HeaderPanel",
-            imageSource = ImageSource.System,
-            resource = @"Graphics\4_header panel.png",
+            imageSource = ImageSource.File,
+            image = SkinResource.System(@"Graphics\4_header panel.png"),
             renderOrder = 52
         });
 
@@ -190,8 +191,8 @@ internal class CStageConfig : CStage
         ui.AddChild(new UIImage
         {
             name = "FooterPanel",
-            imageSource = ImageSource.System,
-            resource = @"Graphics\4_footer panel.png",
+            imageSource = ImageSource.File,
+            image = SkinResource.System(@"Graphics\4_footer panel.png"),
             anchor = new Vector2(0, 1),
             position = new Vector3(0, 720, 0),
             renderOrder = 53

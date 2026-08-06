@@ -1,3 +1,4 @@
+using DTXMania.UI.Skin;
 using System.Diagnostics;
 using System.Numerics;
 using DTXMania.Core;
@@ -369,9 +370,9 @@ public class SongSelectionContainer : UIScrollItemsGroup, IUIItemSource
             name = "background",
             resources =
             {
-                @"Graphics\5_bar.png",
-                @"Graphics\5_box_closed.png",
-                @"Graphics\5_box_open.png"
+                SkinResource.System(@"Graphics\5_bar.png"),
+                SkinResource.System(@"Graphics\5_box_closed.png"),
+                SkinResource.System(@"Graphics\5_box_open.png")
             },
             anchor = new Vector2(0.0f, 0.5f),
             position = new Vector3(-40.0f, 42.0f, 0.0f),
@@ -388,7 +389,7 @@ public class SongSelectionContainer : UIScrollItemsGroup, IUIItemSource
         {
             name = "albumArt",
             imageSource = ImageSource.Dynamic,
-            resource = "Item.AlbumArt",
+            dynamicSource = "Item.AlbumArt",
             size = new Vector2(65, 65),
             position = new Vector3(40, 40, 0),
             anchor = new Vector2(0.5f, 0.5f),
@@ -422,8 +423,8 @@ public class SongSelectionContainer : UIScrollItemsGroup, IUIItemSource
         root.AddChild(new UIImage
         {
             name = "skillbar",
-            imageSource = ImageSource.System,
-            resource = @"Graphics\5_skillbar.png",
+            imageSource = ImageSource.File,
+            image = SkinResource.System(@"Graphics\5_skillbar.png"),
             anchor = new Vector2(0.0f, 0.5f),
             position = new Vector3(82.0f, 15.0f, 0.0f),
             renderOrder = 2,
@@ -434,8 +435,8 @@ public class SongSelectionContainer : UIScrollItemsGroup, IUIItemSource
         UIImage skillbarFill = root.AddChild(new UIImage
         {
             name = "skillbarFill",
-            imageSource = ImageSource.System,
-            resource = @"Graphics\5_skillbar_fill.png",
+            imageSource = ImageSource.File,
+            image = SkinResource.System(@"Graphics\5_skillbar_fill.png"),
             anchor = new Vector2(0.0f, 0.5f),
             position = new Vector3(161.0f, 16.0f, 0.0f),
             size = new Vector2(286, 8),
@@ -461,12 +462,12 @@ public class SongSelectionContainer : UIScrollItemsGroup, IUIItemSource
             name = "lamp",
             resources =
             {
-                @"Graphics\Lamp\00.png",
-                @"Graphics\Lamp\01.png",
-                @"Graphics\Lamp\02.png",
-                @"Graphics\Lamp\03.png",
-                @"Graphics\Lamp\04.png",
-                @"Graphics\Lamp\05.png"
+                SkinResource.System(@"Graphics\Lamp\00.png"),
+                SkinResource.System(@"Graphics\Lamp\01.png"),
+                SkinResource.System(@"Graphics\Lamp\02.png"),
+                SkinResource.System(@"Graphics\Lamp\03.png"),
+                SkinResource.System(@"Graphics\Lamp\04.png"),
+                SkinResource.System(@"Graphics\Lamp\05.png")
             },
             position = new Vector3(-40, 40, 0),
             anchor = new Vector2(0.5f, 0.5f),

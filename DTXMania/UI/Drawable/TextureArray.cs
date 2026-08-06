@@ -25,9 +25,9 @@ public class TextureArray : UITexture
 
     public BaseTexture[] textures = [];
 
-    //System-relative paths for a layout that names its frames instead of being handed textures, e.g. the
-    //three panel arts a settings row picks between
-    [Themable] [SkinSerialize] public List<string> resources = [];
+    //the frames a layout names, instead of being handed textures, e.g. the three panel arts a settings
+    //row picks between
+    [Themable] [SkinSerialize] public List<SkinResource> resources = [];
 
     [Themable] public RectangleF clipRect;
 
@@ -94,10 +94,10 @@ public class TextureArray : UITexture
 
         for (int i = 0; i < resources.Count; i++)
         {
-            string fullPath = SkinManager.SystemPath(resources[i]);
-            if (!File.Exists(fullPath))
+            string fullPath = resources[i].Resolve(ResourceType.Image);
+            if (string.IsNullOrWhiteSpace(fullPath) || !File.Exists(fullPath))
             {
-                Trace.TraceError($"TextureArray frame {fullPath} does not exist.");
+                Trace.TraceError($"TextureArray frame {resources[i]} does not exist.");
                 textures[i] = BaseTexture.None;
                 continue;
             }

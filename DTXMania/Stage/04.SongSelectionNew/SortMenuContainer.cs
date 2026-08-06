@@ -1,3 +1,4 @@
+using DTXMania.UI.Skin;
 using System.Numerics;
 using DTXMania.Core;
 using DTXMania.SongDb.Sorting;
@@ -153,8 +154,8 @@ public class SortMenuContainer : ComponentInstance, IUIItemSource
         root.AddChild(new UIImage
         {
             name = "Background",
-            imageSource = ImageSource.System,
-            resource = @"Graphics\5_sortmenu_bg.png",
+            imageSource = ImageSource.File,
+            image = SkinResource.System(@"Graphics\5_sortmenu_bg.png"),
             renderOrder = 0
         });
 
@@ -196,7 +197,7 @@ public class SortMenuContainer : ComponentInstance, IUIItemSource
         //named in sort order, so an entry only carries an index
         foreach (SongDbSort sort in SongDbSort.All)
         {
-            icon.resources.Add($@"Graphics\Sorting\{sort.IconName}.png");
+            icon.resources.Add(SkinResource.System($@"Graphics\Sorting\{sort.IconName}.png"));
         }
 
         root.AddChild(new UIText(string.Empty, 18)
