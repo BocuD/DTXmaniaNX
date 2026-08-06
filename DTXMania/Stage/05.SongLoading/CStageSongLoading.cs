@@ -334,9 +334,9 @@ internal class CStageSongLoading : CStage
         if (sdLoadingSound != null)
         {
             if (CDTXMania.Skin.soundNowLoading.bExclusive &&
-                (CSkin.CSystemSound.rLastPlayedExclusiveSystemSound != null))
+                (CSystemSound.rLastPlayedExclusiveSystemSound != null))
             {
-                CSkin.CSystemSound.rLastPlayedExclusiveSystemSound.tStop();
+                CSystemSound.rLastPlayedExclusiveSystemSound.tStop();
             }
 
             sdLoadingSound.tStartPlaying();

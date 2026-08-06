@@ -215,8 +215,8 @@ internal class CStageTitle : CStage
 	}
 
 	//a skin without a game-start sound falls back to the usual decide sound
-	private static CSkin.CSystemSound? GameStartSound
-		=> CDTXMania.Skin.soundGameStart.b読み込み成功 ? CDTXMania.Skin.soundGameStart : null;
+	private static CSystemSound? GameStartSound
+		=> CDTXMania.Skin.soundGameStart.loadSucceeded ? CDTXMania.Skin.soundGameStart : null;
 
 	private void ChooseEntry(UIMenuItem entry)
 	{

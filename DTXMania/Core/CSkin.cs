@@ -42,285 +42,6 @@ internal class CSkin : IDisposable
 {
 	// クラス
 
-	public class CSystemSound : IDisposable
-	{
-		// static フィールド
-
-		public static CSystemSound rLastPlayedExclusiveSystemSound;
-
-		// フィールド、プロパティ
-
-		public bool bCompact対象;
-		public bool bループ;
-		public bool bReadNotTried;
-		public bool b読み込み成功;
-		public bool bExclusive;
-		public string strFilename = "";
-		public bool bIsPlaying
-		{
-			get
-			{
-				if ( rSound[ 1 - n次に鳴るサウンド番号 ] == null )
-					return false;
-
-				return rSound[ 1 - n次に鳴るサウンド番号 ].bIsPlaying;
-			}
-		}
-		public int n位置_現在のサウンド
-		{
-			get
-			{
-				CSound sound = rSound[ 1 - n次に鳴るサウンド番号 ];
-				if ( sound == null )
-					return 0;
-
-				return sound.nPosition;
-			}
-			set
-			{
-				CSound sound = rSound[ 1 - n次に鳴るサウンド番号 ];
-				if ( sound != null )
-					sound.nPosition = value;
-			}
-		}
-		public int n位置_次に鳴るサウンド
-		{
-			get
-			{
-				CSound sound = rSound[ n次に鳴るサウンド番号 ];
-				if ( sound == null )
-					return 0;
-
-				return sound.nPosition;
-			}
-			set
-			{
-				CSound sound = rSound[ n次に鳴るサウンド番号 ];
-				if ( sound != null )
-					sound.nPosition = value;
-			}
-		}
-		public int nCurrentSoundVolume
-		{
-			get
-			{
-				CSound sound = rSound[ 1 - n次に鳴るサウンド番号 ];
-				if ( sound == null )
-					return 0;
-
-				return sound.nVolume;
-			}
-			set
-			{
-				CSound sound = rSound[ 1 - n次に鳴るサウンド番号 ];
-				if ( sound != null )
-					sound.nVolume = value;
-			}
-		}
-		public int n音量_次に鳴るサウンド
-		{
-			get
-			{
-				CSound sound = rSound[ n次に鳴るサウンド番号 ];
-				if ( sound == null )
-				{
-					return 0;
-				}
-				return sound.nVolume;
-			}
-			set
-			{
-				CSound sound = rSound[ n次に鳴るサウンド番号 ];
-				if ( sound != null )
-				{
-					sound.nVolume = value;
-				}
-			}
-		}
-		public int nLength_CurrentSound
-		{
-			get
-			{
-				CSound sound = rSound[ 1 - n次に鳴るサウンド番号 ];
-				if ( sound == null )
-				{
-					return 0;
-				}
-				return sound.nTotalPlayTimeMs;
-			}
-		}
-		public int nLength_NextSound
-		{
-			get
-			{
-				CSound sound = rSound[ n次に鳴るサウンド番号 ];
-				if ( sound == null )
-				{
-					return 0;
-				}
-				return sound.nTotalPlayTimeMs;
-			}
-		}
-
-
-		/// <summary>
-		/// コンストラクタ
-		/// </summary>
-		/// <param name="strファイル名"></param>
-		/// <param name="bループ"></param>
-		/// <param name="b排他"></param>
-		/// <param name="bCompact対象"></param>
-		public CSystemSound(string strファイル名, bool bループ, bool b排他, bool bCompact対象)
-		{
-			strFilename = strファイル名;
-			this.bループ = bループ;
-			bExclusive = b排他;
-			this.bCompact対象 = bCompact対象;
-			bReadNotTried = true;
-		}
-		public CSystemSound()
-		{
-			bReadNotTried = true;
-		}
-			
-
-		// メソッド
-
-		public void tRead()
-		{
-			bReadNotTried = false;
-			b読み込み成功 = false;
-			if ( string.IsNullOrEmpty( strFilename ) )
-				throw new InvalidOperationException( "ファイル名が無効です。" );
-
-			if ( !File.Exists( Path( strFilename ) ) )
-			{
-				throw new FileNotFoundException( strFilename );
-			}
-////				for( int i = 0; i < 2; i++ )		// #27790 2012.3.10 yyagi 2回読み出しを、1回読みだし＋1回メモリコピーに変更
-////				{
-//                    try
-//                    {
-//                        this.rSound[ 0 ] = CDTXMania.SoundManager.tGenerateSound( CSkin.Path( this.strFilename ) );
-//                    }
-//                    catch
-//                    {
-//                        this.rSound[ 0 ] = null;
-//                        throw;
-//                    }
-//                    if ( this.rSound[ 0 ] == null )	// #28243 2012.5.3 yyagi "this.rSound[ 0 ].bストリーム再生する"時もCloneするようにし、rSound[1]がnullにならないよう修正→rSound[1]の再生正常化
-//                    {
-//                        this.rSound[ 1 ] = null;
-//                    }
-//                    else
-//                    {
-//                        this.rSound[ 1 ] = ( CSound ) this.rSound[ 0 ].Clone();	// #27790 2012.3.10 yyagi add: to accelerate loading chip sounds
-//                        CDTXMania.SoundManager.tサウンドを登録する( this.rSound[ 1 ] );	// #28243 2012.5.3 yyagi add (登録漏れによりストリーム再生処理が発生していなかった)
-//                    }
-
-////				}
-
-			for ( int i = 0; i < 2; i++ )		// 一旦Cloneを止めてASIO対応に専念
-			{
-				try
-				{
-					rSound[ i ] = CDTXMania.SoundManager.tGenerateSound( Path( strFilename ) );
-				}
-				catch
-				{
-					rSound[ i ] = null;
-					throw;
-				}
-			}
-			b読み込み成功 = true;
-		}
-		public void tPlay()
-		{
-			tPlay(100);
-		}
-		public void tPlay( int nVolume )
-		{
-			if ( bReadNotTried )
-			{
-				try
-				{
-					tRead();
-				}
-				catch
-				{
-					bReadNotTried = false;
-				}
-			}
-			if ( bExclusive )
-			{
-				if ( rLastPlayedExclusiveSystemSound != null )
-					rLastPlayedExclusiveSystemSound.tStop();
-
-				rLastPlayedExclusiveSystemSound = this;
-			}
-			CSound sound = rSound[ n次に鳴るサウンド番号 ];
-			if ( sound != null )
-			{
-				sound.nVolume = nVolume;
-				sound.tStartPlaying(bループ);
-			}
-			n次に鳴るサウンド番号 = 1 - n次に鳴るサウンド番号;
-		}
-		public void tStop()
-		{
-			if ( rSound[ 0 ] != null )
-				rSound[ 0 ].tStopPlayback();
-
-			if ( rSound[ 1 ] != null )
-				rSound[ 1 ].tStopPlayback();
-
-			if ( rLastPlayedExclusiveSystemSound == this )
-				rLastPlayedExclusiveSystemSound = null;
-		}
-
-		public void tRemoveMixer()
-		{
-			if ( CDTXMania.SoundManager.GetCurrentSoundDeviceType() != "DirectSound" )
-			{
-				for ( int i = 0; i < 2; i++ )
-				{
-					if ( rSound[ i ] != null )
-					{
-						CDTXMania.SoundManager.RemoveMixer( rSound[ i ] );
-					}
-				}
-			}
-		}
-
-		#region [ IDisposable 実装 ]
-		//-----------------
-		public void Dispose()
-		{
-			if ( !bDisposed済み )
-			{
-				for( int i = 0; i < 2; i++ )
-				{
-					if ( rSound[ i ] != null )
-					{
-						CDTXMania.SoundManager.tDiscard( rSound[ i ] );
-						rSound[ i ] = null;
-					}
-				}
-				b読み込み成功 = false;
-				bDisposed済み = true;
-			}
-		}
-		//-----------------
-		#endregion
-
-		#region [ private ]
-		//-----------------
-		private bool bDisposed済み;
-		private int n次に鳴るサウンド番号;
-		private CSound[] rSound = new CSound[ 2 ];
-		//-----------------
-		#endregion
-	}
 
 	
 	// プロパティ
@@ -571,41 +292,41 @@ internal class CSkin : IDisposable
 
 		for ( int i = 0; i < nSystemSoundCount; i++ )
 		{
-			if ( this[ i ] != null && this[i].b読み込み成功 )
+			if ( this[ i ] != null && this[i].loadSucceeded )
 			{
 				this[ i ].tStop();
 				this[ i ].Dispose();
 			}
 		}
-		soundCursorMovement	= new CSystemSound( @"Sounds\Move.ogg",			false, false, false );
-		soundDecide			= new CSystemSound( @"Sounds\Decide.ogg",			false, false, false );
-		soundChange			= new CSystemSound( @"Sounds\Change.ogg",			false, false, false );
-		soundCancel			= new CSystemSound( @"Sounds\Cancel.ogg",			false, false, true  );
-		soundAudience			= new CSystemSound( @"Sounds\Audience.ogg",		false, false,  true  );
-		soundSTAGEFAILED音		= new CSystemSound( @"Sounds\Stage failed.ogg",	false, true,  true  );
-		soundGameStart		= new CSystemSound( @"Sounds\Game start.ogg",		false, false, false );
-		soundGameEnd		= new CSystemSound( @"Sounds\Game end.ogg",		false, true,  false );
-		soundStageClear	= new CSystemSound( @"Sounds\Stage clear.ogg",		false, true,  false );
-		soundFullCombo		= new CSystemSound( @"Sounds\Full combo.ogg",		false, false, true  );
-		soundNewRecord          = new CSystemSound( @"Sounds\New Record.ogg",      false, false, true  );
-		soundExcellent    = new CSystemSound( @"Sounds\Excellent.ogg",       false, false, true  );
-		soundNowLoading		= new CSystemSound( @"Sounds\Now loading.ogg",		false, true,  true  );
-		soundTitle		= new CSystemSound( @"Sounds\Title.ogg",			false, true,  false );
-		soundDecideSong            = new CSystemSound( @"Sounds\MusicDecide.ogg",     false, false, false );
-		soundNovice            = new CSystemSound( @"Sounds\Novice.ogg",          false, false, false );
-		soundRegular           = new CSystemSound( @"Sounds\Regular.ogg",         false, false, false );
-		soundExpert		    = new CSystemSound( @"Sounds\Expert.ogg",		    false, false, false );
-		soundBasic             = new CSystemSound( @"Sounds\Basic.ogg",           false, false, false );
-		soundAdvanced          = new CSystemSound( @"Sounds\Advanced.ogg",        false, false, false );
-		soundExtreme	        = new CSystemSound( @"Sounds\Extreme.ogg",		    false, false, false );
-		soundMaster		    = new CSystemSound( @"Sounds\Master.ogg",			false, false, false );
-		soundSelectMusic       = new CSystemSound( @"Sounds\SelectMusic.ogg",     false, false, false );
-		bgmTitleScreen			= new CSystemSound( @"Sounds\Setup BGM.ogg",		true,  true,  false );
-		bgmオプション画面		= new CSystemSound( @"Sounds\Option BGM.ogg",		true,  true,  false );
-		bgmコンフィグ画面		= new CSystemSound( @"Sounds\Config BGM.ogg",		true,  true,  false );
-		bgmSongSelectScreen			= new CSystemSound( @"Sounds\Select BGM.ogg",		true,  true,  false );
-		bgmResultScreen            = new CSystemSound( @"Sounds\Result BGM.ogg",      true,  true,  false);
-		soundMetronome     = new CSystemSound(@"Sounds\Metronome.ogg",         false, false, false);
+		soundCursorMovement	= new CSystemSound( @"Sounds\Move.ogg",			false, false);
+		soundDecide			= new CSystemSound( @"Sounds\Decide.ogg",			false, false);
+		soundChange			= new CSystemSound( @"Sounds\Change.ogg",			false, false);
+		soundCancel			= new CSystemSound( @"Sounds\Cancel.ogg",			false, false);
+		soundAudience			= new CSystemSound( @"Sounds\Audience.ogg",		false, false);
+		soundSTAGEFAILED音		= new CSystemSound( @"Sounds\Stage failed.ogg",	false, true);
+		soundGameStart		= new CSystemSound( @"Sounds\Game start.ogg",		false, false);
+		soundGameEnd		= new CSystemSound( @"Sounds\Game end.ogg",		false, true);
+		soundStageClear	= new CSystemSound( @"Sounds\Stage clear.ogg",		false, true);
+		soundFullCombo		= new CSystemSound( @"Sounds\Full combo.ogg",		false, false);
+		soundNewRecord          = new CSystemSound( @"Sounds\New Record.ogg",      false, false);
+		soundExcellent    = new CSystemSound( @"Sounds\Excellent.ogg",       false, false);
+		soundNowLoading		= new CSystemSound( @"Sounds\Now loading.ogg",		false, true);
+		soundTitle		= new CSystemSound( @"Sounds\Title.ogg",			false, true);
+		soundDecideSong            = new CSystemSound( @"Sounds\MusicDecide.ogg",     false, false);
+		soundNovice            = new CSystemSound( @"Sounds\Novice.ogg",          false, false);
+		soundRegular           = new CSystemSound( @"Sounds\Regular.ogg",         false, false);
+		soundExpert		    = new CSystemSound( @"Sounds\Expert.ogg",		    false, false);
+		soundBasic             = new CSystemSound( @"Sounds\Basic.ogg",           false, false);
+		soundAdvanced          = new CSystemSound( @"Sounds\Advanced.ogg",        false, false);
+		soundExtreme	        = new CSystemSound( @"Sounds\Extreme.ogg",		    false, false);
+		soundMaster		    = new CSystemSound( @"Sounds\Master.ogg",			false, false);
+		soundSelectMusic       = new CSystemSound( @"Sounds\SelectMusic.ogg",     false, false);
+		bgmTitleScreen			= new CSystemSound( @"Sounds\Setup BGM.ogg",		true, true);
+		bgmオプション画面		= new CSystemSound( @"Sounds\Option BGM.ogg",		true, true);
+		bgmコンフィグ画面		= new CSystemSound( @"Sounds\Config BGM.ogg",		true, true);
+		bgmSongSelectScreen			= new CSystemSound( @"Sounds\Select BGM.ogg",		true, true);
+		bgmResultScreen            = new CSystemSound( @"Sounds\Result BGM.ogg",      true, true);
+		soundMetronome     = new CSystemSound(@"Sounds\Metronome.ogg",         false, false);
 	}
 
 	public void ReloadSkin()
@@ -616,7 +337,6 @@ internal class CSkin : IDisposable
 			
 			CSystemSound cSystemSound = this[ i ];
 
-			if (CDTXMania.bCompactMode && !cSystemSound.bCompact対象) continue;
 			
 			try
 			{
@@ -791,7 +511,7 @@ internal class CSkin : IDisposable
 	{
 		for (int i = 0; i < nSystemSoundCount; i++)
 		{
-			if (this[i] != null && this[i] != keepPlaying && this[i].b読み込み成功)
+			if (this[i] != null && this[i] != keepPlaying && this[i].loadSucceeded)
 			{
 				this[i].tStop();
 				this[i].tRemoveMixer();

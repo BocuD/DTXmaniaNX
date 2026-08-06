@@ -19,7 +19,7 @@ public sealed class UIMenuItem
     [DataField] public double ClipY { get; init; }
 
     //what choosing this entry sounds like, where the usual decide sound is not what it should sound like
-    internal CSkin.CSystemSound? Sound { get; init; }
+    internal CSystemSound? Sound { get; init; }
 
     public Action? Run { get; }
 

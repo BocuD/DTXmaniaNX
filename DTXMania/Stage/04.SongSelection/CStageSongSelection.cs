@@ -379,7 +379,7 @@ internal class CStageSongSelection : CStage
 		}
 		if( !bBGMPlayed && ( ePhaseID == EPhase.Common_DefaultState ) )
 		{
-			CDTXMania.Skin.bgmSongSelectScreen.n音量_次に鳴るサウンド = 100;
+			CDTXMania.Skin.bgmSongSelectScreen.nextSoundVolume = 100;
 			CDTXMania.Skin.bgmSongSelectScreen.tPlay();
 			bBGMPlayed = true;
 		}
