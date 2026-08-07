@@ -54,10 +54,11 @@ public class StageRoot : UIGroup
 
     public override void Dispose()
     {
-        //only what was loaded, so a root that never opened does not touch the sound device on the way out
+        //only what was loaded, so a root that never opened does not touch the sound device on the way out.
+        //Anything still audible finishes: the stage is leaving, but its exit sound is not
         foreach (SoundReference sound in sounds ?? [])
         {
-            sound.Unload();
+            sound.ReleaseWhenFinished();
         }
 
         sounds = null;
@@ -76,11 +77,33 @@ public class StageRoot : UIGroup
 
         ImGui.InputText("Open Clip", ref openClip, 128);
 
-        foreach (FieldInfo field in SoundFields(GetType()))
+        FieldInfo[] soundFields = SoundFields(GetType()).ToArray();
+
+        if (soundFields.Length == 0)
         {
-            if (field.GetValue(this) is SoundReference sound)
+            return;
+        }
+
+        ImGui.SeparatorText("Sounds");
+
+        foreach (FieldInfo field in soundFields)
+        {
+            if (field.GetValue(this) is not SoundReference sound)
+            {
+                continue;
+            }
+
+            //a tree node rather than a header: these belong to the stage, and a header of their own would
+            //read as another section of the inspector instead of part of this one
+            bool open = ImGui.TreeNode(field.Name);
+
+            ImGui.SameLine();
+            ImGui.TextDisabled(sound.Summary);
+
+            if (open)
             {
                 sound.DrawInspector(field.Name);
+                ImGui.TreePop();
             }
         }
     }

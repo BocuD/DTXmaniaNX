@@ -7,14 +7,6 @@ using Newtonsoft.Json;
 
 namespace DTXMania.UI.Skin;
 
-/// <summary>
-/// A sound a skin names and an element owns. The file is a <see cref="SkinResource"/> like any other; what
-/// this adds is how it is played and the loaded sound itself, which lives no longer than whoever declared
-/// it — a stage root loads its sounds when the stage builds and frees them when it tears down.
-///
-/// Loading is explicit rather than on first play: a sound played during a transition has to already be in
-/// memory, and the first play is exactly when there is no time to read a file.
-/// </summary>
 [SkinSerialize]
 public sealed class SoundReference
 {
@@ -43,10 +35,13 @@ public sealed class SoundReference
     [JsonIgnore] public bool IsLoaded => loaded is { loadSucceeded: true };
 
     /// <summary>Reads the file now, so it is ready before anything asks to play it. Safe to call again;
-    /// the previous copy is freed first.</summary>
+    /// the previous copy is freed first</summary>
     public void Load()
     {
+        //pointing this slot at something else stops what it was playing: only an owner going away lets a
+        //one-shot finish, and the old sound is not what the slot means any more
         Unload();
+        SweepFinished();
 
         if (sound.IsEmpty)
         {
@@ -75,12 +70,16 @@ public sealed class SoundReference
         }
     }
 
-    /// <summary>
-    /// Frees the loaded sound. A one-shot that is still audible is handed over to finish first: the stage
-    /// that owned it is going away, but the sound is often the transition out of it — a game-start jingle
-    /// outlives the title screen by design. A loop is stopped outright, since it would never finish.
-    /// </summary>
+    /// <summary>Stops the loaded sound and frees it.</summary>
     public void Unload()
+    {
+        loaded?.tStop();
+        loaded?.Dispose();
+        loaded = null;
+    }
+
+    //frees the sound, but lets a one-shot that is still audible finish first
+    public void ReleaseWhenFinished()
     {
         SweepFinished();
 
@@ -124,13 +123,18 @@ public sealed class SoundReference
 
     public void RemoveMixer() => loaded?.tRemoveMixer();
 
+    /// <summary>One line of what this sound is, for whoever lists it.</summary>
+    [JsonIgnore] public string Summary => sound.ToString();
+
+    //a missing file is called out by the resource editor itself, so this only says where playback stands
+    [JsonIgnore] private string State => !IsLoaded
+        ? sound.IsEmpty ? "no file" : "not loaded"
+        : IsPlaying ? "playing" : "ready";
+
+    /// <summary>Draws the fields only. The caller owns the heading, so a stage's sounds can be listed
+    /// under one of its own rather than each looking like a section of the inspector.</summary>
     public void DrawInspector(string label)
     {
-        if (!ImGui.CollapsingHeader(label))
-        {
-            return;
-        }
-
         ImGui.PushID(label);
 
         ResourceEditor.Draw("File", ResourceType.Sound, sound, chosen =>
@@ -139,12 +143,19 @@ public sealed class SoundReference
             Load();
         });
 
-        if (ImGui.Checkbox("Loop", ref loop) || ImGui.Checkbox("Exclusive", ref exclusive))
+        //both are handed to the sound when it is created, so a change only takes hold on a reload
+        if (ImGui.Checkbox("Loop", ref loop))
         {
-            //both are given to the sound when it is created, so they only take effect on a reload
             Load();
         }
 
+        ImGui.SameLine();
+        if (ImGui.Checkbox("Exclusive", ref exclusive))
+        {
+            Load();
+        }
+
+        ImGui.BeginDisabled(!IsLoaded);
         if (ImGui.Button("Play"))
         {
             Play();
@@ -156,8 +167,10 @@ public sealed class SoundReference
             Stop();
         }
 
+        ImGui.EndDisabled();
+
         ImGui.SameLine();
-        ImGui.TextDisabled(IsLoaded ? IsPlaying ? "playing" : "loaded" : "not loaded");
+        ImGui.TextDisabled(State);
 
         ImGui.PopID();
     }

@@ -30,7 +30,8 @@ public static class ResourceEditor
             apply(new SkinResource(source, value.path));
         }
 
-        string path = value.path;
+        //a struct that was never assigned has a null path, which is most of them before a file is picked
+        string path = value.path ?? string.Empty;
         if (ResourceBrowser.Draw(label, type, RootFor(value.source, type), ref path))
         {
             apply(new SkinResource(value.source, path));

@@ -20,6 +20,9 @@ public static class ResourceBrowser
     /// <summary>Browses one root rather than assuming the skin's, so a System reference lists System.</summary>
     public static bool Draw(string label, ResourceType type, string root, ref string resource)
     {
+        //a reference that was never given a path holds null, and InputText cannot marshal one
+        resource ??= string.Empty;
+
         string popupId = $"browse{label}";
 
         ImGui.BeginDisabled(root.Length == 0);
@@ -108,6 +111,7 @@ public static class ResourceBrowser
                 or ".mpg" or ".mpeg" or ".flv" or ".m4v",
             ResourceType.Font => extension is ".ttf" or ".otf",
             ResourceType.Animation => extension == ".json",
+            ResourceType.Sound => extension is ".ogg" or ".wav" or ".mp3" or ".flac" or ".xa",
             _ => true
         };
     }
