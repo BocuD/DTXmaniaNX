@@ -196,6 +196,11 @@ public class CSystemSound : IDisposable
             }
         }
 
+        if (rLastPlayedExclusiveSystemSound == this)
+        {
+            rLastPlayedExclusiveSystemSound = null;
+        }
+
         loadSucceeded = false;
         disposed = true;
     }
