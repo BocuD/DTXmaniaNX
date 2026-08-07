@@ -64,6 +64,8 @@ public class CSystemSound : IDisposable
         }
     }
 
+    private string? absolutePath;
+
     public CSystemSound(string fileName, bool loop, bool exclusive)
     {
         strFilename = fileName;
@@ -77,6 +79,12 @@ public class CSystemSound : IDisposable
         bReadNotTried = true;
     }
 
+    /// <summary>A sound whose file has already been located, as the skin system does for a stage's own.</summary>
+    public static CSystemSound FromPath(string path, bool loop, bool exclusive)
+    {
+        return new CSystemSound(Path.GetFileName(path), loop, exclusive) { absolutePath = path };
+    }
+
     public void tRead()
     {
         bReadNotTried = false;
@@ -87,7 +95,7 @@ public class CSystemSound : IDisposable
             throw new InvalidOperationException("A system sound needs a file name.");
         }
 
-        string path = CSkin.Path(strFilename);
+        string path = absolutePath ?? CSkin.Path(strFilename);
 
         if (!File.Exists(path))
         {

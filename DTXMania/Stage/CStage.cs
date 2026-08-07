@@ -80,9 +80,17 @@ public abstract class CStage : CActivity, IUIInputHandler
 		//a skin layout defines the serializable UI outright; there is no merge with the code default
 		UIGroup? layout = loadSkin ? CDTXMania.SkinManager.LoadStageLayout(eStageID) : null;
 
-		//a layout rooted in a stage root carries the stage's own settings, so it is adopted whole; one
-		//saved before those existed is only children, which move into a fresh root
-		StageRoot root = layout as StageRoot ?? CreateRoot();
+		StageRoot root = CreateRoot();
+
+		//a layout saved with this stage's own root type carries the stage's settings, so it is adopted
+		//whole. Anything else — a plain group, or a root from before this stage declared its own type —
+		//contributes only its children, or the stage would lose the sounds and settings that live on it
+		if (layout != null && layout.GetType() == root.GetType())
+		{
+			root.Dispose();
+			root = (StageRoot)layout;
+		}
+
 		root.name = GetType().ToString();
 
 		ui = root;
@@ -99,6 +107,9 @@ public abstract class CStage : CActivity, IUIInputHandler
 				ui.AddChild(child);
 			}
 		}
+
+		//before OnStageOpened, so a stage that plays something as it opens has it in memory by then
+		root.LoadSounds();
 
 		OnLayoutReady();
 		root.OnStageOpened();

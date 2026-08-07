@@ -1,5 +1,6 @@
 using DTXMania.Core;
 using DTXMania.UI.DynamicElements;
+using DTXMania.UI.Skin;
 using FDK;
 
 namespace DTXMania.UI.Drawable;
@@ -19,7 +20,7 @@ public sealed class UIMenuItem
     [DataField] public double ClipY { get; init; }
 
     //what choosing this entry sounds like, where the usual decide sound is not what it should sound like
-    internal CSystemSound? Sound { get; init; }
+    internal SoundReference? Sound { get; init; }
 
     public Action? Run { get; }
 
@@ -95,7 +96,15 @@ public class UIMenu : UIItemsGroup, IUIItemSource
             return;
         }
 
-        (entry.Sound ?? CDTXMania.Skin.soundDecide).tPlay();
+        //an entry with a sound of its own, else the shared decide sound
+        if (entry.Sound is { } sound)
+        {
+            sound.Play();
+        }
+        else
+        {
+            CDTXMania.Skin.soundDecide.tPlay();
+        }
 
         if (onDecide != null)
         {

@@ -3,40 +3,6 @@ using System.Text;
 using FDK;
 
 namespace DTXMania.Core;
-// グローバル定数
-
-public enum ESystemSound
-{
-	BGMオプション画面 = 0,
-	BGMコンフィグ画面,
-	BGM起動画面,
-	BGM選曲画面,
-	BGM結果画面,
-	SOUNDSTAGEFAILED,
-	SOUNDCURSORMOVEMENT,
-	SOUNDGAMESTART,
-	SOUNDGAMEEND,
-	SOUNDSTAGECLEAR,
-	SOUNDタイトル音,
-	SOUNDFULLCOMBO,
-	SOUNDAUDIENCE,
-	SOUND曲読込開始音,
-	SOUNDDECIDE,
-	SOUNDCANCEL,
-	SOUNDCHANGE,
-	SOUND曲決定,
-	SOUNDEXCELLENT,
-	SOUNDNEWRECORD,
-	SOUNDSELECTMUSIC,
-	SOUNDNOVICE,
-	SOUNDREGULAR,
-	SOUNDEXPERT,
-	SOUNDMASTER,
-	SOUNDBASIC,
-	SOUNDADVANCED,
-	SOUNDEXTREME,
-	Count				// システムサウンド総数の計算用
-}
 
 internal class CSkin : IDisposable
 {
@@ -46,130 +12,39 @@ internal class CSkin : IDisposable
 	
 	// プロパティ
 
-	public CSystemSound bgmオプション画面 = null;
 	public CSystemSound bgmコンフィグ画面 = null;
 	public CSystemSound bgmTitleScreen = null;
 	public CSystemSound bgmSongSelectScreen = null;
-	public CSystemSound bgmResultScreen = null;
 	public CSystemSound soundSTAGEFAILED音 = null;
 	public CSystemSound soundCursorMovement = null;
-	public CSystemSound soundGameStart = null;  // soundゲーム開始音
 	public CSystemSound soundGameEnd = null;
 	public CSystemSound soundStageClear = null;
-	public CSystemSound soundTitle = null;  // soundタイトル音
 	public CSystemSound soundFullCombo = null;
 	public CSystemSound soundAudience = null;  // sound歓声音
 	public CSystemSound soundNowLoading = null;
 	public CSystemSound soundDecide = null;  // sound決定音
 	public CSystemSound soundCancel = null;  // sound取消音
 	public CSystemSound soundChange = null;  // sound変更音
-	public CSystemSound soundDecideSong = null;  // sound曲決定
 	public CSystemSound soundExcellent = null;
 	public CSystemSound soundNewRecord = null;  // sound新記録音
-	public CSystemSound soundSelectMusic = null;
-	public CSystemSound soundNovice = null;
-	public CSystemSound soundRegular = null;
-	public CSystemSound soundExpert = null;
 	public CSystemSound soundMaster = null;
 	public CSystemSound soundBasic = null;
 	public CSystemSound soundAdvanced = null;
 	public CSystemSound soundExtreme = null;
 	public CSystemSound soundMetronome = null;
-	public readonly int nSystemSoundCount = (int)ESystemSound.Count;
-	
-	public CSystemSound this[ int index ]
-	{
-		get
-		{
-			switch( index )
-			{
-				case 0:
-					return soundCursorMovement;
-
-				case 1:
-					return soundDecide;
-
-				case 2:
-					return soundChange;
-
-				case 3:
-					return soundCancel;
-
-				case 4:
-					return soundAudience;
-
-				case 5:
-					return soundSTAGEFAILED音;
-
-				case 6:
-					return soundGameStart;
-
-				case 7:
-					return soundGameEnd;
-
-				case 8:
-					return soundFullCombo;
-
-				case 9:
-					return soundExcellent;
-
-				case 10:
-					return soundNewRecord;
-
-				case 11:
-					return soundNowLoading;
-
-				case 12:
-					return soundTitle;
-
-				case 13:
-					return soundDecideSong;
-
-				case 14:
-					return bgmTitleScreen;
-
-				case 15:
-					return bgmオプション画面;
-
-				case 16:
-					return bgmコンフィグ画面;
-
-				case 17:
-					return bgmSongSelectScreen;
-
-				case 18:
-					return bgmResultScreen;
-
-				case 19:
-					return soundStageClear;
-
-				case 20:
-					return soundNovice;
-
-				case 21:
-					return soundRegular;
-
-				case 22:
-					return soundExpert;
-
-				case 23:
-					return soundMaster;
-
-				case 24:
-					return soundSelectMusic;
-                    
-				case 25:
-					return soundBasic;
-
-				case 26:
-					return soundAdvanced;
-
-				case 27:
-					return soundExtreme;
-			}
-			throw new IndexOutOfRangeException();
-		}
-	}
+	//every system sound still living here, for the two things that treat them as a set: freeing
+	//them when the skin changes, and reading them up front. Sounds are moving out to whoever
+	//actually owns them — a stage's to its StageRoot, the shared ones to the skin — so this list
+	//only ever shrinks, and the region goes with its last entry
+	private CSystemSound[] AllSounds =>
+	[
+		bgmコンフィグ画面, bgmTitleScreen, bgmSongSelectScreen,
+		soundCursorMovement, soundDecide, soundCancel, soundChange,
+		soundNowLoading, soundStageClear, soundGameEnd,
+		soundAudience, soundMetronome, soundSTAGEFAILED音,
+		soundFullCombo, soundExcellent, soundNewRecord,
+		soundMaster, soundBasic, soundAdvanced, soundExtreme
+	];
 
 
 	// スキンの切り替えについて___
@@ -290,12 +165,12 @@ internal class CSkin : IDisposable
 				strBoxDefSkinSubfolderFullName
 		);
 
-		for ( int i = 0; i < nSystemSoundCount; i++ )
+		foreach ( CSystemSound sound in AllSounds )
 		{
-			if ( this[ i ] != null && this[i].loadSucceeded )
+			if ( sound is { loadSucceeded: true } )
 			{
-				this[ i ].tStop();
-				this[ i ].Dispose();
+				sound.tStop();
+				sound.Dispose();
 			}
 		}
 		soundCursorMovement	= new CSystemSound( @"Sounds\Move.ogg",			false, false);
@@ -304,40 +179,28 @@ internal class CSkin : IDisposable
 		soundCancel			= new CSystemSound( @"Sounds\Cancel.ogg",			false, false);
 		soundAudience			= new CSystemSound( @"Sounds\Audience.ogg",		false, false);
 		soundSTAGEFAILED音		= new CSystemSound( @"Sounds\Stage failed.ogg",	false, true);
-		soundGameStart		= new CSystemSound( @"Sounds\Game start.ogg",		false, false);
 		soundGameEnd		= new CSystemSound( @"Sounds\Game end.ogg",		false, true);
 		soundStageClear	= new CSystemSound( @"Sounds\Stage clear.ogg",		false, true);
 		soundFullCombo		= new CSystemSound( @"Sounds\Full combo.ogg",		false, false);
 		soundNewRecord          = new CSystemSound( @"Sounds\New Record.ogg",      false, false);
 		soundExcellent    = new CSystemSound( @"Sounds\Excellent.ogg",       false, false);
 		soundNowLoading		= new CSystemSound( @"Sounds\Now loading.ogg",		false, true);
-		soundTitle		= new CSystemSound( @"Sounds\Title.ogg",			false, true);
-		soundDecideSong            = new CSystemSound( @"Sounds\MusicDecide.ogg",     false, false);
-		soundNovice            = new CSystemSound( @"Sounds\Novice.ogg",          false, false);
-		soundRegular           = new CSystemSound( @"Sounds\Regular.ogg",         false, false);
-		soundExpert		    = new CSystemSound( @"Sounds\Expert.ogg",		    false, false);
 		soundBasic             = new CSystemSound( @"Sounds\Basic.ogg",           false, false);
 		soundAdvanced          = new CSystemSound( @"Sounds\Advanced.ogg",        false, false);
 		soundExtreme	        = new CSystemSound( @"Sounds\Extreme.ogg",		    false, false);
 		soundMaster		    = new CSystemSound( @"Sounds\Master.ogg",			false, false);
-		soundSelectMusic       = new CSystemSound( @"Sounds\SelectMusic.ogg",     false, false);
 		bgmTitleScreen			= new CSystemSound( @"Sounds\Setup BGM.ogg",		true, true);
-		bgmオプション画面		= new CSystemSound( @"Sounds\Option BGM.ogg",		true, true);
 		bgmコンフィグ画面		= new CSystemSound( @"Sounds\Config BGM.ogg",		true, true);
 		bgmSongSelectScreen			= new CSystemSound( @"Sounds\Select BGM.ogg",		true, true);
-		bgmResultScreen            = new CSystemSound( @"Sounds\Result BGM.ogg",      true, true);
 		soundMetronome     = new CSystemSound(@"Sounds\Metronome.ogg",         false, false);
 	}
 
 	public void ReloadSkin()
 	{
-		for ( int i = 0; i < nSystemSoundCount; i++ )
+		foreach ( CSystemSound cSystemSound in AllSounds )
 		{
-			if (this[i].bExclusive) continue; // BGM系以外のみ読み込む。(BGM系は必要になったときに読み込む)
-			
-			CSystemSound cSystemSound = this[ i ];
+			if (cSystemSound.bExclusive) continue; // BGM系以外のみ読み込む。(BGM系は必要になったときに読み込む)
 
-			
 			try
 			{
 				cSystemSound.tRead();
@@ -509,12 +372,12 @@ internal class CSkin : IDisposable
 
 	public void tRemoveMixerAll(CSystemSound? keepPlaying = null)
 	{
-		for (int i = 0; i < nSystemSoundCount; i++)
+		foreach (CSystemSound sound in AllSounds)
 		{
-			if (this[i] != null && this[i] != keepPlaying && this[i].loadSucceeded)
+			if (sound != keepPlaying && sound is { loadSucceeded: true })
 			{
-				this[i].tStop();
-				this[i].tRemoveMixer();
+				sound.tStop();
+				sound.tRemoveMixer();
 			}
 		}
 
@@ -756,8 +619,8 @@ internal class CSkin : IDisposable
 	{
 		if ( !bDisposed済み )
 		{
-			for( int i = 0; i < nSystemSoundCount; i++ )
-				this[ i ].Dispose();
+			foreach( CSystemSound sound in AllSounds )
+				sound.Dispose();
 
 			bDisposed済み = true;
 		}

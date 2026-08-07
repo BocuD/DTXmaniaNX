@@ -29,6 +29,11 @@ internal class CStageTitle : CStage
 
 	// CStage 実装
 
+	protected override StageRoot CreateRoot() => new TitleRoot();
+
+	//null only if a skin's layout was saved with a different root type, which LoadUI already refuses
+	private TitleRoot? Root => ui as TitleRoot;
+
 	public override void RegisterBindings()
 	{
 	}
@@ -182,7 +187,7 @@ internal class CStageTitle : CStage
 	}
 	public override void FirstUpdate()
 	{
-		CDTXMania.Skin.soundTitle.tPlay();
+		Root?.bgm.Play();
 		ePhaseID = EPhase.Common_DefaultState;
 		exitRequested = false;
 	}
@@ -215,8 +220,7 @@ internal class CStageTitle : CStage
 	}
 
 	//a skin without a game-start sound falls back to the usual decide sound
-	private static CSystemSound? GameStartSound
-		=> CDTXMania.Skin.soundGameStart.loadSucceeded ? CDTXMania.Skin.soundGameStart : null;
+	private SoundReference? GameStartSound => Root is { gameStart.IsLoaded: true } root ? root.gameStart : null;
 
 	private void ChooseEntry(UIMenuItem entry)
 	{
@@ -230,7 +234,7 @@ internal class CStageTitle : CStage
 		}
 
 		GitaDoraTransition.Close();
-		CDTXMania.Skin.soundTitle.tStop();
+		Root?.bgm.Stop();
 		ePhaseID = EPhase.Common_FadeOut;
 	}
 

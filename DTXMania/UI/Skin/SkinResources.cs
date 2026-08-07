@@ -5,7 +5,8 @@ public enum ResourceType
     Image,
     Font,
     Video,
-    Animation
+    Animation,
+    Sound
 }
 
 public partial class SkinDescriptor
@@ -63,6 +64,9 @@ public partial class SkinDescriptor
                 break;
             case ResourceType.Animation:
                 folder = "Animation";
+                break;
+            case ResourceType.Sound:
+                folder = "Sounds";
                 break;
         }
 
