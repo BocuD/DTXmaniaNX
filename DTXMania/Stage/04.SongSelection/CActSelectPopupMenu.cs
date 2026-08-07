@@ -327,8 +327,8 @@ internal class CActSelectPopupMenu : CActivity
                 }
                 #endregion
                 #region [ キー入力: 前に移動 ]
-                ctキー反復用.Up.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(SlimDXKey.UpArrow), new CCounter.DGキー処理(tMoveToPrevious));
-                ctキー反復用.R.tRepeatKey(CDTXMania.Pad.bPressingGB(EPad.R), new CCounter.DGキー処理(tMoveToPrevious));
+                ctキー反復用.Up.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(SlimDXKey.UpArrow), tMoveToPrevious);
+                ctキー反復用.R.tRepeatKey(CDTXMania.Pad.bPressingGB(EPad.R), tMoveToPrevious);
                 //Change to HT
                 if (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.HT))
                 {
@@ -336,8 +336,8 @@ internal class CActSelectPopupMenu : CActivity
                 }
                 #endregion
                 #region [ キー入力: 次に移動 ]
-                ctキー反復用.Down.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(SlimDXKey.DownArrow), new CCounter.DGキー処理(tMoveToNext));
-                ctキー反復用.B.tRepeatKey(CDTXMania.Pad.bPressingGB(EPad.G), new CCounter.DGキー処理(tMoveToNext));
+                ctキー反復用.Down.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(SlimDXKey.DownArrow), tMoveToNext);
+                ctキー反復用.B.tRepeatKey(CDTXMania.Pad.bPressingGB(EPad.G), tMoveToNext);
                 //Change to LT
                 if (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.LT))
                 {

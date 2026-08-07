@@ -290,25 +290,28 @@ internal abstract class CStagePerfCommonScreen : CStage
     public bool bIsFinishedFadeout;
     public bool bIsFinishedPlaying;
     
-    public override void InitializeBaseUI()
+    public override void RegisterBindings()
+    {
+    }
+
+    public override void BuildDefaultLayout()
+    {
+    }
+
+    //the performance screens are built entirely in code: bespoke chip/lane rendering, not a skinnable layout
+    public override void OnLayoutReady()
     {
         video.IntegrateUI(ui);
 
         ui.AddChild(new InfoBox());
-        
+
         if (CDTXMania.ConfigIni.nShowPlaySpeed == (int)EShowPlaySpeed.ON
             || CDTXMania.ConfigIni.nShowPlaySpeed == (int)EShowPlaySpeed.IF_CHANGED_IN_GAME)
         {
-            //we need to clear this reference because when the stage gets
-            //unloaded the reference doesn't get cleared automatically
+            //the reference isn't cleared automatically when the stage is unloaded
             playspeedText = null;
             tUpdatePlayspeedText();
         }
-    }
-
-    public override void InitializeDefaultUI()
-    {
-        
     }
 
     // CStage 実装
@@ -1373,7 +1376,8 @@ internal abstract class CStagePerfCommonScreen : CStage
     {
         if ( CDTXMania.chosenSong != null )
         {
-            actStatusPanel.tSetDifficultyLabelFromScript( CDTXMania.chosenSong.difficultyLabel[ CDTXMania.confirmedSongDifficulty ] );
+            actStatusPanel.tSetDifficultyLabel(CDTXMania.chosenSong.difficultyLabel[CDTXMania.confirmedSongDifficulty],
+                CDTXMania.confirmedSongDifficulty);
         }
     }
     protected EJudgement tProcessChipHit(long nHitTime, CChip pChip)  // tチップのヒット処理

@@ -21,7 +21,22 @@ public class CSoundManager   // CSound管理
 	{
 		get; set;
 	}
-	public static CSoundTimer rcPerformanceTimer = null;  // rc演奏用タイマ
+	private static readonly CTimer systemTimer = new(CTimer.EType.PerformanceCounter);
+	private static CSoundTimer performanceTimer = null;
+
+	//what input events are stamped with. Swapped rather than left empty: input keeps arriving on its own
+	//device's thread while a sound device is being built or rebuilt
+	public static CTimerBase inputTimer { get; private set; } = systemTimer;
+
+	public static CSoundTimer rcPerformanceTimer  // rc演奏用タイマ
+	{
+		get => performanceTimer;
+		set
+		{
+			performanceTimer = value;
+			inputTimer = value ?? (CTimerBase)systemTimer;
+		}
+	}
 	public static bool bUseOSTimer = false;     // OSのタイマーを使うか、CSoundTimerを使うか。DTXCではfalse, DTXManiaではtrue。
 	// DTXC(DirectSound)でCSoundTimerを使うと、内部で無音のループサウンドを再生するため
 	// サウンドデバイスを占有してしまい、Viewerとして呼び出されるDTXManiaで、ASIOが使えなくなる。
@@ -277,7 +292,7 @@ public class CSoundManager   // CSound管理
 	public static void t終了()
 	{
 		CCommon.tDispose(SoundDevice); SoundDevice = null;
-		CCommon.tDispose(ref rcPerformanceTimer);   // Global.Bass を解放した後に解放すること。（Global.Bass で参照されているため）
+		CCommon.tDispose(rcPerformanceTimer); rcPerformanceTimer = null;   // Global.Bass を解放した後に解放すること。（Global.Bass で参照されているため）
 	}
 	
 	public static void t現在のユーザConfigに従ってサウンドデバイスとすべての既存サウンドを再構築する()
@@ -294,7 +309,7 @@ public class CSoundManager   // CSound管理
 			// サウンドデバイスと演奏タイマを解放する。
 
 			CCommon.tDispose(SoundDevice); SoundDevice = null;
-			CCommon.tDispose(ref rcPerformanceTimer);   // Global.SoundDevice を解放した後に解放すること。（Global.SoundDevice で参照されているため）
+			CCommon.tDispose(rcPerformanceTimer); rcPerformanceTimer = null;   // Global.SoundDevice を解放した後に解放すること。（Global.SoundDevice で参照されているため）
 		}
 		//-----------------
 		#endregion
@@ -1446,6 +1461,9 @@ public class CSound : IDisposable, ICloneable
 	protected SoundBuffer Buffer = null;            // DirectSound 用
 	protected DirectSound DirectSound;
 	protected int hMixer = -1;  // 設計壊してゴメン Mixerに後で登録するときに使う
+
+	public bool bUsesBASS => bIsBASS;
+	public int nMixerHandle => bIsBASS ? hMixer : 0;
 	//-----------------
 	#endregion
 

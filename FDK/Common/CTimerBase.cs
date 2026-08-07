@@ -15,6 +15,9 @@ public abstract class CTimerBase : IDisposable
 	}
 	public abstract void Dispose();
 
+	//an input event carries its own device's timestamp; a timer that keeps a fix on that clock corrects it
+	public virtual long nSystemTimeMsFor(long deviceTimestamp) => nSystemTimeMs;
+
 	#region [ DTXMania用に、語尾にmsのつかない宣言を追加 ]
 	public long nシステム時刻 => nSystemTimeMs;
 

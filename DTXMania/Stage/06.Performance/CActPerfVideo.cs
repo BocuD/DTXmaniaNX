@@ -214,11 +214,13 @@ internal class CActPerfVideo : CActivity
             windowedRenderer.isVisible = false;
             windowedRenderer.renderOrder = 2;
             windowedRenderer.name = "WindowedVideo";
+            windowedRenderer.dontSerialize = true; // imperative (per-song BGA); never part of a saved layout
             uiGroup.AddChild(windowedRenderer);
 
             fullscreenRenderer = new UINewVideoRenderer(controller);
             fullscreenRenderer.isVisible = false;
             fullscreenRenderer.name = "FullscreenVideo";
+            fullscreenRenderer.dontSerialize = true; // imperative (per-song BGA); never part of a saved layout
             uiGroup.AddChild(fullscreenRenderer);
         }
         else

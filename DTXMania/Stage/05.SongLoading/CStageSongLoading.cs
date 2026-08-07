@@ -1,10 +1,12 @@
 ﻿using DiscordRPC;
+using DTXMania.UI.Skin;
 using System.Text;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Drawing;
 using System.Numerics;
 using DTXMania.Core;
+using DTXMania.SongDb;
 using DTXMania.Core.Framework;
 using DTXMania.UI;
 using DTXMania.UI.Drawable;
@@ -108,66 +110,34 @@ internal class CStageSongLoading : CStage
 
         #endregion
 
-        stPanelMap = new STATUSPANEL[12]; // yyagi: 以下、手抜きの初期化でスマン
-        string[] labels =
-        [
-            "DTXMANIA", //0
-            "DEBUT", //1
-            "NOVICE", //2
-            "REGULAR", //3
-            "EXPERT", //4
-            "MASTER", //5
-            "BASIC", //6
-            "ADVANCED", //7
-            "EXTREME", //8
-            "RAW", //9
-            "RWS", //10
-            "REAL" //11
-        ];
-        int[] status = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
-
-        for (int i = 0; i < 12; i++)
-        {
-            stPanelMap[i] = default;
-            stPanelMap[i].status = status[i];
-            stPanelMap[i].label = labels[i];
-        }
     }
 
     // CStage 実装
 
-    private void tDetermineStatusLabelFromLabelName(string strLabelName)
-    {
-        if (string.IsNullOrEmpty(strLabelName))
-        {
-            nIndex = 0;
-        }
-        else
-        {
-            STATUSPANEL[] array = stPanelMap;
-            foreach (STATUSPANEL sTATUSPANEL in array)
-            {
-                if (strLabelName.Equals(sTATUSPANEL.label, StringComparison.CurrentCultureIgnoreCase))
-                {
-                    nIndex = sTATUSPANEL.status;
-                    CDTXMania.nSongDifficulty = sTATUSPANEL.status;
-                    return;
-                }
+    //the name every part of this screen draws the chosen difficulty by; see DifficultyLabel
+    private string difficultyName = DifficultyLabel.Rows[0];
 
-                nIndex++;
-            }
-        }
+    private void SelectDifficulty(string? label, int slot)
+    {
+        difficultyName = DifficultyLabel.Resolve(label, slot);
+        nIndex = Math.Max(0, DifficultyLabel.RowFor(difficultyName));
+        CDTXMania.nSongDifficulty = nIndex;
     }
 
-    public override void InitializeBaseUI()
+    public override void RegisterBindings()
     {
         
     }
     
-    public override void InitializeDefaultUI()
+    public override void BuildDefaultLayout()
     {
-        UIImage bg = ui.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\6_background.jpg"))));
-        bg.renderOrder = -100;
+        ui.AddChild(new UIImage
+        {
+            name = "Background",
+            imageSource = ImageSource.File,
+            image = SkinResource.System(@"Graphics\6_background.jpg"),
+            renderOrder = -100
+        });
         
         if (!string.IsNullOrWhiteSpace(strSongTitle))
         {
@@ -175,7 +145,7 @@ internal class CStageSongLoading : CStage
             songNameText.fillColor = Color4.Black;
             songNameText.outlineColor = Color4.White;
             songNameText.name = "SongName";
-            songNameText.font = UIFonts.FallbackFont;
+            songNameText.font = SkinResource.System(UIFonts.FallbackFont);
             songNameText.position = new Vector3(500, 285, 0);
         }
 
@@ -185,7 +155,7 @@ internal class CStageSongLoading : CStage
             artistNameText.fillColor = Color4.Black;
             artistNameText.outlineColor = Color4.White;
             artistNameText.name = "ArtistName";
-            artistNameText.font = UIFonts.FallbackFont;
+            artistNameText.font = SkinResource.System(UIFonts.FallbackFont);
             artistNameText.position = new Vector3(500, 360, 0);
         }
     }
@@ -292,9 +262,9 @@ internal class CStageSongLoading : CStage
             cdtx.OnDeactivate();
             base.OnActivate();
 
-            tDetermineStatusLabelFromLabelName(
-                CDTXMania.chosenSong.difficultyLabel[
-                    CDTXMania.confirmedSongDifficulty]);
+            SelectDifficulty(
+                CDTXMania.chosenSong.difficultyLabel[CDTXMania.confirmedSongDifficulty],
+                CDTXMania.confirmedSongDifficulty);
             
             //add difficulty panel to ui here
             //todo: this should be moved when chart loading is moved
@@ -365,9 +335,9 @@ internal class CStageSongLoading : CStage
         if (sdLoadingSound != null)
         {
             if (CDTXMania.Skin.soundNowLoading.bExclusive &&
-                (CSkin.CSystemSound.rLastPlayedExclusiveSystemSound != null))
+                (CSystemSound.rLastPlayedExclusiveSystemSound != null))
             {
-                CSkin.CSystemSound.rLastPlayedExclusiveSystemSound.tStop();
+                CSystemSound.rLastPlayedExclusiveSystemSound.tStop();
             }
 
             sdLoadingSound.tStartPlaying();
@@ -829,9 +799,8 @@ internal class CStageSongLoading : CStage
                     }
 
                     //this.txJacket.Dispose();
-                    tDrawDifficultyPanel(
-                        CDTXMania.chosenSong.difficultyLabel[
-                            CDTXMania.confirmedSongDifficulty], 191 + k, 102);
+                    //the sheet has one 50px row per difficulty name, in DifficultyLabel order
+                    txDifficultyPanel?.tDraw2D(191 + k, 102, new RectangleF(0, nIndex * 50, 262, 50));
         
                     k = 700;
                     if (CDTXMania.ConfigIni.bSingleGuitar) return;
@@ -897,15 +866,8 @@ internal class CStageSongLoading : CStage
     private DateTime timeBeginLoadWAV;
     private BaseTexture txLevel;
 
-    [StructLayout(LayoutKind.Sequential)]
-    private struct STATUSPANEL
-    {
-        public string label;
-        public int status;
-    }
-
+    //which row of the difficulty sheet this song's chosen difficulty draws
     private int nIndex;
-    private STATUSPANEL[] stPanelMap;
 
     private STDGBVALUE<List<STGhostLag>> stGhostLag;
 
@@ -1060,66 +1022,6 @@ internal class CStageSongLoading : CStage
         }
     }
 
-    private void tDrawDifficultyPanel(string strLabelName, int nX, int nY)
-    {
-        RectangleF rect = new(0, 0, 262, 50);
-
-        //Check if the script file exists
-        if (File.Exists(CSkin.Path(@"Script\difficult.dtxs")))
-        {
-            //スクリプトを開く
-            StreamReader reader = new(CSkin.Path(@"Script\difficult.dtxs"), Encoding.GetEncoding("Shift_JIS"));
-            string strRawScriptFile = reader.ReadToEnd();
-
-            strRawScriptFile = strRawScriptFile.Replace(Environment.NewLine, "\n");
-            string[] delimiter = ["\n"];
-            string[] strSingleLine = strRawScriptFile.Split(delimiter, StringSplitOptions.RemoveEmptyEntries);
-
-            foreach (string t in strSingleLine)
-            {
-                if (t.StartsWith("//"))
-                    continue; //Ignore comments
-
-                //まずSplit
-                string[] arScriptLine = t.Split(',');
-
-                if ((arScriptLine.Length >= 4 && arScriptLine.Length <= 5) == false)
-                    continue; //引数が4つか5つじゃなければ無視。
-
-                if (arScriptLine[0] != "6")
-                    continue; //使用するシーンが違うなら無視。
-
-                if (arScriptLine.Length == 4)
-                {
-                        if (!string.Equals(arScriptLine[1], strLabelName, StringComparison.OrdinalIgnoreCase))
-                        continue; //ラベル名が違うなら無視。大文字小文字区別しない
-                }
-                else if (arScriptLine.Length == 5)
-                {
-                    if (arScriptLine[4] == "1")
-                    {
-                        if (arScriptLine[1] != strLabelName)
-                            continue; //ラベル名が違うなら無視。
-                    }
-                    else
-                    {
-                        if (!string.Equals(arScriptLine[1], strLabelName, StringComparison.OrdinalIgnoreCase))
-                            continue; //ラベル名が違うなら無視。大文字小文字区別しない
-                    }
-                }
-
-                rect.X = Convert.ToInt32(arScriptLine[2]);
-                rect.Y = Convert.ToInt32(arScriptLine[3]);
-
-                break;
-            }
-        }
-
-        if (txDifficultyPanel != null)
-        {
-            txDifficultyPanel.tDraw2D(nX, nY, rect);
-        }
-    }
 
     #endregion
 }

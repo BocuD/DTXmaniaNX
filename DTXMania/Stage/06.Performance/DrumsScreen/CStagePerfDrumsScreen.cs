@@ -43,9 +43,9 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         listChildActivities.Add(actProgressBar = new CActPerfProgressBar());
     }
 
-    public override void InitializeBaseUI()
+    public override void OnLayoutReady()
     {
-        base.InitializeBaseUI();
+        base.OnLayoutReady();
         
         var drumsScreen = ui.AddChild(new LegacyDrawable(DrawDrumsScreen));
         drumsScreen.name = "drumsScreen";
@@ -3381,7 +3381,6 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                         else
                         {
                             CDTXMania.Skin.soundAudience.tPlay();
-                            CDTXMania.Skin.soundAudience.n位置_次に鳴るサウンド = 0;
                         }
                         //if (CDTXMania.ConfigIni.nSkillMode == 1)
                         //    this.actScore.nCurrentTrueScore.Drums += 500;
@@ -3408,7 +3407,6 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                         else
                         {
                             CDTXMania.Skin.soundAudience.tPlay();
-                            CDTXMania.Skin.soundAudience.n位置_次に鳴るサウンド = 0;
                         }
                     }
                     break;
@@ -3427,7 +3425,6 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                         else
                         {
                             CDTXMania.Skin.soundAudience.tPlay();
-                            CDTXMania.Skin.soundAudience.n位置_次に鳴るサウンド = 0;
                         }
                     }
                     break;
@@ -3539,7 +3536,6 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
             {
                 //actAVI.Start(true);
                 CDTXMania.Skin.soundAudience.tPlay();
-                CDTXMania.Skin.soundAudience.n位置_次に鳴るサウンド = 0;
             }
             if ( CDTXMania.ConfigIni.nSkillMode == 1 && ( !CDTXMania.ConfigIni.bAllDrumsAreAutoPlay || CDTXMania.ConfigIni.bAutoAddGage ) )
                 actScore.Add( EInstrumentPart.DRUMS, bIsAutoPlay, 500L );

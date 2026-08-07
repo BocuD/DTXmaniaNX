@@ -54,6 +54,8 @@ public class JudgementString : UIGroup
     
     public JudgementString()
     {
+        //a gameplay element is runtime-only: it never appears in a saved layout
+        dontSerialize = true;
         if (barTexture == null || !barTexture.IsValid()) CacheTextures();
         
         name = $"JudgementString";
@@ -74,7 +76,7 @@ public class JudgementString : UIGroup
         AnimationClip? loaded = AnimationClipIO.LoadFromFile(CSkin.Path(@"Graphics\Note\Judge\hit.json"));
         if (loaded != null)
         {
-            animator.clips.Add(loaded);
+            animator.Add(loaded);
         }
 
         isVisible = false;

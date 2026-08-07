@@ -286,6 +286,9 @@ public class CSoundDeviceDirectSound : ISoundDevice
 			CCommon.tDispose(ref DirectSound);
 			CCommon.tDispose(tmシステムタイマ);
 
+			//free the BASS "No Sound" device used for decoding; teardown runs on the main
+			//thread after all sounds are released, so no decode is in flight, and this is a
+			//harmless no-op if BASS was never initialized
 			Bass.BASS_Free();
 		}
 		if (ctimer != null)

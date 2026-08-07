@@ -10,14 +10,13 @@ namespace DTXMania.UI.Config;
 
 /// <summary>
 /// Editor for a single pad's input bindings, shown as a stage overlay by the config stage. Replaces
-/// the old bitmap-font CActConfigKeyAssign: rows are <see cref="UIText"/>, and the host stage drives
-/// it via <see cref="MoveUp"/>/<see cref="MoveDown"/>/<see cref="Confirm"/>/<see cref="Cancel"/>/
-/// <see cref="DeleteCurrent"/> plus <see cref="PollCapture"/>/<see cref="UpdatePreview"/> each frame.
+/// the old bitmap-font CActConfigKeyAssign: rows are <see cref="UIText"/>. It takes focus while open, so
+/// nothing underneath reads input, and capture mode simply keeps that focus while swallowing raw keys.
 ///
 /// Bindings are written straight into <see cref="CConfigIni.KeyAssign"/>; the config stage persists
 /// Config.ini on exit, so nothing extra is needed here.
 /// </summary>
-internal sealed class KeyAssignPanel : UIGroup
+internal sealed class KeyAssignPanel : UIGroup, IUIInputHandler
 {
     private const int SlotCount = CConfigIni.CKeyAssign.KeyAssignsPerPad; // 16
     private const int IndexClearAll = SlotCount;      // 16
@@ -74,9 +73,49 @@ internal sealed class KeyAssignPanel : UIGroup
     public bool IsOpen => isVisible;
     public bool IsWaiting { get; private set; }
 
+    public string FocusName => IsWaiting ? "KeyAssign (capturing)" : "KeyAssign";
+
+    public NavigationRepeat? Navigation => navigation;
+
+    private readonly NavigationRepeat navigation = new();
+
+    //cached so polling navigation every frame doesn't convert the method groups to delegates each time
+    private readonly Action moveUp;
+    private readonly Action moveDown;
+
+    public void HandleInput()
+    {
+        PollCapture();
+        UpdatePreview();
+
+        if (IsWaiting)
+        {
+            return; //capture owns input; Esc-to-cancel is handled inside PollCapture
+        }
+
+        if (CDTXMania.Input.ActionCancel())
+        {
+            Cancel();
+        }
+        else if (CDTXMania.Input.ActionDecide())
+        {
+            Confirm();
+        }
+        else if (CDTXMania.InputManager.Keyboard.bKeyPressed(SlimDXKey.Delete)
+                 || CDTXMania.InputManager.Keyboard.bKeyPressed(SlimDXKey.Backspace))
+        {
+            DeleteCurrent();
+        }
+
+        navigation.Poll(moveUp, moveDown);
+    }
+
     public KeyAssignPanel() : base("KeyAssignPanel")
     {
         dontSerialize = true;
+
+        moveUp = MoveUp;
+        moveDown = MoveDown;
 
         title = AddChild(new UIText("", 22f));
         title.position = new Vector3(0, 0, 0);
@@ -153,6 +192,7 @@ internal sealed class KeyAssignPanel : UIGroup
         note.SetText("");
         selectedRow = 0;
         isVisible = true;
+        UIFocus.Push(this);
 
         RefreshRows();
         for (int i = 0; i < RowCount; i++)
@@ -465,6 +505,7 @@ internal sealed class KeyAssignPanel : UIGroup
         pendingOverwrite = false;
         overlay.isVisible = false;
         isVisible = false;
+        UIFocus.Pop(this);
         onClose?.Invoke();
     }
 

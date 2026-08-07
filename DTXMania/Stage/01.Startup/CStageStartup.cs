@@ -1,7 +1,8 @@
-﻿using System.Numerics;
+using System.Numerics;
 using DTXMania.Core;
 using DTXMania.Core.Framework;
 using DTXMania.UI.Drawable;
+using DTXMania.UI.DynamicElements;
 using DTXMania.UI.Inspector;
 using Hexa.NET.ImGui;
 
@@ -17,18 +18,19 @@ internal class CStageStartup : CStage
 		bActivated = false;
 	}
 
-	public override void InitializeBaseUI()
+	public override void RegisterBindings()
 	{
 		
 	}
 	
-	public override void InitializeDefaultUI()
+	public override void BuildDefaultLayout()
 	{
 		var background = ui.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\1_background.jpg"))));
 		background.size = new Vector2(1280, 720);
 		
-		var text = ui.AddChild(new UIText(CDTXMania.VERSION_DISPLAY, 15));
+		var text = ui.AddChild(new UIText("", 15));
 		text.name = "VersionText";
+		text.bindings.Add(new UIBinding("text", "Game.VersionDisplay"));
 	}
 	
 	public override int OnUpdateAndDraw()

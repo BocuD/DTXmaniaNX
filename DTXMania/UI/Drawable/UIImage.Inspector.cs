@@ -1,7 +1,7 @@
-using DTXMania.Core;
+using DTXMania.Core.Framework;
+using DTXMania.UI.DynamicElements;
 using DTXMania.UI.Skin;
 using Hexa.NET.ImGui;
-using NativeFileDialog.Extended;
 
 namespace DTXMania.UI.Drawable;
 
@@ -16,41 +16,34 @@ public partial class UIImage
             return;
         }
 
-        Inspector.Inspector.Inspect("Image Source", ref imageSource);
-        if (imageSource == ImageSource.Resource)
+        //"Content", not "Image Source": this says what the element draws, while the editor below says
+        //where its file is. Two dropdowns both called a source is what made this confusing
+        Inspector.Inspector.Inspect("Content", ref imageSource);
+        switch (imageSource)
         {
-            ImGui.LabelText("Resource", resource);
+            case ImageSource.File:
+                Inspector.ResourceEditor.Draw("File", ResourceType.Image, image, chosen =>
+                {
+                    image = chosen;
+                    _lastFileLoadAttempt = chosen;
+                    LoadResource(updateRects: true);
+                }, inPlace => SetTexture(BaseTexture.LoadFromPath(inPlace)));
+
+                if (ImGui.Button("Reload Image"))
+                {
+                    LoadResource(updateRects: false);
+                }
+
+                break;
+
+            case ImageSource.Dynamic:
+                Inspector.Inspector.DrawBindingDropdown("Dynamic Source", ref dynamicSource, this, DataBindingKind.Texture);
+                break;
         }
+
         Inspector.Inspector.Inspect("Clip Rect", ref clipRect);
         Inspector.Inspector.Inspect("Render Mode", ref renderMode);
         Inspector.Inspector.Inspect("Color", ref color);
-
-        if (ImGui.Button("Load New Texture"))
-        {
-            Dictionary<string, string> filterList = new()
-            {
-                { "Images", "png,jpg,jpeg,bmp,tga,gif" }
-            };
-
-            string path = NFD.OpenDialog("", filterList);
-
-            if (!string.IsNullOrWhiteSpace(path) && File.Exists(path))
-            {
-                var currentSkin = CDTXMania.SkinManager.currentSkin;
-                    
-                if (currentSkin != null)
-                {
-                    string resourcePath = currentSkin.AddResource(ResourceType.Image, path);
-                    imageSource = ImageSource.Resource;
-                    resource = resourcePath;
-                    LoadResource(true);
-                }
-                else
-                {
-                    SetTexture(BaseTexture.LoadFromPath(path));
-                }
-            }
-        }
 
         if (renderMode == ERenderMode.Sliced)
         {

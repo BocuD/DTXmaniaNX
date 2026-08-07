@@ -1,4 +1,5 @@
 using DTXMania.UI.Drawable;
+using DTXMania.UI.Skin;
 using Newtonsoft.Json;
 
 namespace DTXMania.UI.Animation;
@@ -32,12 +33,36 @@ public sealed class AnimationClip
 }
 
 /// <summary>
+/// One of an animator's clips. The animator, not the clip, records where the clip came from: a clip file
+/// holds nothing but the clip, and whoever points at it is what says where it lives.
+/// </summary>
+public sealed class AnimatorClip
+{
+    //empty for a clip written into the layout, otherwise the file it was loaded from
+    [JsonProperty("resource")] public SkinResource resource;
+
+    [JsonProperty("clip")] public AnimationClip clip = new();
+
+    [JsonIgnore] public bool IsEmbedded => resource.IsEmpty;
+
+    public AnimatorClip()
+    {
+    }
+
+    public AnimatorClip(AnimationClip clip, SkinResource resource = default)
+    {
+        this.clip = clip;
+        this.resource = resource;
+    }
+}
+
+/// <summary>
 /// Lives on a UIGroup and drives one clip at a time. Tick from UIGroup.Draw before children
 /// render so animation writes are visible the same frame.
 /// </summary>
 public sealed partial class Animator
 {
-    [JsonProperty("clips")] public List<AnimationClip> clips = new();
+    [JsonProperty("clips")] public List<AnimatorClip> clips = new();
 
     [JsonProperty("autoPlay", DefaultValueHandling = DefaultValueHandling.Ignore)]
     public string? autoPlayClip;
@@ -50,7 +75,27 @@ public sealed partial class Animator
     [JsonIgnore] private long lastTickTicks;
     [JsonIgnore] private bool tickTimerStarted;
 
-    public AnimationClip? FindClip(string name) => clips.FirstOrDefault(c => c.name == name);
+    public AnimationClip? FindClip(string name) => clips.FirstOrDefault(c => c.clip.name == name)?.clip;
+
+    /// <summary>Adds a clip the layout writes out in full.</summary>
+    public AnimationClip Add(AnimationClip clip)
+    {
+        clips.Add(new AnimatorClip(clip));
+        return clip;
+    }
+
+    /// <summary>Adds the clip in a file, which the layout references rather than copies.</summary>
+    public AnimationClip? AddResource(SkinResource resource)
+    {
+        AnimationClip? clip = AnimationClipIO.Load(resource);
+
+        if (clip != null)
+        {
+            clips.Add(new AnimatorClip(clip, resource));
+        }
+
+        return clip;
+    }
 
     public void Play(string clipName, bool restart = true)
     {
@@ -64,6 +109,7 @@ public sealed partial class Animator
             currentClip = clip;
             time = 0f;
             currentClip.InvalidateBindings();
+            tickTimerStarted = false;
         }
         isPlaying = true;
     }
@@ -142,9 +188,9 @@ public sealed partial class Animator
     /// </summary>
     public void InvalidateBindings()
     {
-        foreach (AnimationClip clip in clips)
+        foreach (AnimatorClip entry in clips)
         {
-            clip.InvalidateBindings();
+            entry.clip.InvalidateBindings();
         }
     }
 }

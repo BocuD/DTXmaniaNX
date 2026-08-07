@@ -1,9 +1,7 @@
 ﻿using System.Numerics;
-using DTXMania.Core;
 using DTXMania.UI.Skin;
 using DTXMania.UI.Text;
 using Hexa.NET.ImGui;
-using NativeFileDialog.Extended;
 
 namespace DTXMania.UI.Drawable;
 
@@ -18,109 +16,24 @@ public partial class UIText
             return;
         }
 
-        if (Inspector.Inspector.Inspect("Text Source", ref textSource))
+        //a binding on "text" overwrites whatever is typed here on the next frame, so say so rather than
+        //letting the field look broken
+        string boundTo = TextBindingSource();
+
+        if (boundTo.Length > 0)
+        {
+            ImGui.LabelText("String", $"bound to {boundTo}");
+        }
+        else if (ImGui.InputTextMultiline("String", ref _text, 256))
         {
             _dirty = true;
         }
 
-        switch (textSource)
+        Inspector.ResourceEditor.Draw("Font", ResourceType.Font, font, chosen =>
         {
-            case TextSource.String:
-            {
-                if (ImGui.InputTextMultiline("String", ref text, 256))
-                {
-                    _dirty = true;
-                }
-
-                break;
-            }
-            case TextSource.Dynamic:
-            {
-                string[] sources = CDTXMania.StageManager.rCurrentStage.dynamicStringSources.Keys.ToArray();
-                int selectedIndex = Array.IndexOf(sources, dynamicSource);
-                if (ImGui.Combo("Dynamic Source", ref selectedIndex, sources, sources.Length))
-                {
-                    dynamicSource = sources[selectedIndex];
-                    _dirty = true;
-                }
-                break;
-            }
-        }
-
-        //dropdown for font source
-        Inspector.Inspector.Inspect("Font Location", ref fontSource);
-        switch (fontSource)
-        {
-            case FontSource.Resource:
-            {
-                ImGui.LabelText("Resource", font);
-
-                string[] resourceFonts = UIFonts.GetAvailableResourceFonts();
-                int selectedIndex = Array.IndexOf(resourceFonts, font);
-                if (ImGui.Combo("Resource", ref selectedIndex, resourceFonts, resourceFonts.Length))
-                {
-                    font = resourceFonts[selectedIndex];
-                    _dirty = true;
-                }
-
-                ImGui.SameLine();
-
-                if (ImGui.Button("Refresh List"))
-                {
-                    UIFonts.GetAvailableResourceFonts(true);
-                }
-
-                ImGui.BeginDisabled(CDTXMania.SkinManager.currentSkin == null);
-                if (ImGui.Button("Add new Font Resource"))
-                {
-                    Dictionary<string, string> filterList = new()
-                    {
-                        { "Fonts", "ttf,otf" }
-                    };
-
-                    string path = NFD.OpenDialog("", filterList);
-
-                    if (!string.IsNullOrWhiteSpace(path) && File.Exists(path))
-                    {
-                        var currentSkin = CDTXMania.SkinManager.currentSkin;
-
-                        if (currentSkin != null)
-                        {
-                            string resourcePath = currentSkin.AddResource(ResourceType.Font, path);
-                            font = resourcePath;
-                            _dirty = true;
-                        }
-                    }
-                }
-
-                ImGui.EndDisabled();
-                break;
-            }
-
-            case FontSource.System:
-            {
-                string[] systemFonts = UIFonts.GetAvailableSystemFonts();
-                int selectedIndex = Array.IndexOf(systemFonts, font);
-                if (ImGui.Combo("System Font", ref selectedIndex, systemFonts, systemFonts.Length))
-                {
-                    font = systemFonts[selectedIndex];
-                    _dirty = true;
-                }
-                
-                ImGui.SameLine();
-                
-                if (ImGui.Button("Refresh List"))
-                {
-                    UIFonts.GetAvailableSystemFonts(true);
-                }
-                break;
-            }
-        }
-
-        if (ImGui.InputText("Font Path", ref font, 1024))
-        {
+            font = chosen;
             _dirty = true;
-        }
+        });
 
         if (ImGui.InputText("Fallback Family", ref fontFamily, 256))
         {

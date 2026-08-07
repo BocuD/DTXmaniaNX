@@ -26,6 +26,8 @@ internal partial class CDTXMania
     public static string VERSION_DISPLAY; // = "DTX:NX:A:A:2024051900";
     public static string VERSION; // = "v1.4.2 20240519";
 
+    public static readonly UI.DynamicElements.GameInfo gameInfo = new();
+
     public DTXManiaGL maniaGl;
     
     public static CDTXMania app { get; private set; }
@@ -194,6 +196,13 @@ internal partial class CDTXMania
         VERSION = $"v{assembly.GetName().Version.ToString().Substring(0, 5)} Beta ({buildDate:yyyyMMdd})";
         VERSION_DISPLAY = $"DTX:NX:A:A:{buildDate:yyyyMMdd}00 Beta";
 
+        //global bindings any layout can use: "Game.*" and "Config.*". The providers are read lazily, so
+        //it doesn't matter that ConfigIni isn't loaded yet
+        gameInfo.Version = VERSION;
+        gameInfo.VersionDisplay = VERSION_DISPLAY;
+        UI.DynamicElements.UIDataContext.Global.RegisterObject("Game", () => gameInfo);
+        UI.DynamicElements.UIDataContext.Global.RegisterObject("Config", () => ConfigIni);
+
         #region [ Determine strEXE folder ]
 
         //-----------------
@@ -324,7 +333,36 @@ internal partial class CDTXMania
 
     #endregion
 
-    public static float renderScale = 1.0f;
+    /// <summary>
+    /// How many physical pixels one layout pixel is drawn at. Elements that size themselves in pixels read
+    /// this while drawing, so it is the scale of whatever is being drawn right now — the game window, or
+    /// whatever <see cref="PushRenderScale"/> is scoped around.
+    /// </summary>
+    public static float renderScale
+    {
+        get => renderScaleOverride ?? gameRenderScale;
+        set => gameRenderScale = value;
+    }
+
+    private static float gameRenderScale = 1.0f;
+    private static float? renderScaleOverride;
+
+    /// <summary>Draws a subtree at a different scale than the game window, for the length of the returned
+    /// scope. Nests, and cannot outlive the draw it belongs to.</summary>
+    public static RenderScaleScope PushRenderScale(float scale) => new(scale);
+
+    public readonly struct RenderScaleScope : IDisposable
+    {
+        private readonly float? previous;
+
+        internal RenderScaleScope(float scale)
+        {
+            previous = renderScaleOverride;
+            renderScaleOverride = scale;
+        }
+
+        public void Dispose() => renderScaleOverride = previous;
+    }
 
     private static readonly ConcurrentQueue<Action> mainThreadActions = new();
 
@@ -420,6 +458,9 @@ internal partial class CDTXMania
             Thread.Sleep(ConfigIni.nSleepNMsEveryFrame); ///?????
         }
         
+        //input is read once, here, by whoever holds focus; stages and elements act on it as they draw
+        UIFocus.Dispatch();
+
         FrameProfiler.Begin(FrameSection.StageDraw);
         StageManager.DrawStage();
         persistentUIGroup.Draw(Matrix4x4.Identity);
@@ -543,7 +584,8 @@ internal partial class CDTXMania
     public static void UpdateSelection(SongNode song, CChartData chartData, int difficulty)
     {
         chosenSong = song;
-        chosenChartData = chartData;
+
+        chosenChartData = chartData?.ForCurrentInstrument();
         confirmedSongDifficulty = difficulty;
     }
 

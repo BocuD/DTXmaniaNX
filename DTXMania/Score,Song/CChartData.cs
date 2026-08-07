@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
 using DTXMania.Core;
+using DTXMania.UI.DynamicElements;
 
 namespace DTXMania;
 
@@ -44,15 +45,22 @@ public class CChartData
         }
     }
 
-    public STMusicInformation SongInformation;
+    [DataField("SongInformation")] public STMusicInformation SongInformation;
+
+    public CChartData[]? instrumentSources;
+
+    /// <summary>The chart to actually load, which for a proxy is this instrument's own.</summary>
+    public CChartData ForInstrument(int instrument) => instrumentSources?[instrument] ?? this;
+
+    public CChartData ForCurrentInstrument() => ForInstrument(CDTXMania.GetCurrentInstrument());
 
     [Serializable]
     [StructLayout(LayoutKind.Sequential)]
     public struct STMusicInformation
     {
-        public string Title;
-        public string ArtistName;
-        public string Comment;
+        [DataField("Title")] public string Title;
+        [DataField("ArtistName")] public string ArtistName;
+        [DataField("Comment")] public string Comment;
 
         public bool TitleHasJapanese;
         public bool ArtistNameHasJapanese;
@@ -67,7 +75,7 @@ public class CChartData
         public string CommentKana;
         public string CommentRoman;
         
-        public string Genre;
+        [DataField("Genre")] public string Genre;
         public string Preimage;
         public string Premovie;
         public string Presound;

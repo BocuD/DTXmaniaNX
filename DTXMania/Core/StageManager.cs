@@ -17,6 +17,7 @@ internal class StageManager
     public CStageResult stageResult { get; }
     public CStageChangeSkin stageChangeSkin { get; }
     public CStageEnd stageEnd { get; }
+    public CStageUITest stageUITest { get; } //dev only json layout test bed
     
     public CStage rCurrentStage;
     public CStage rPreviousStage;
@@ -40,6 +41,7 @@ internal class StageManager
         stageResult = new CStageResult();
         stageChangeSkin = new CStageChangeSkin();
         stageEnd = new CStageEnd();
+        stageUITest = new CStageUITest();
     }
     
     public void InitializeStages()
@@ -56,6 +58,22 @@ internal class StageManager
     public void DrawStage()
     {
         if (rCurrentStage == null) return;
+
+        //dev shortcuts: F9 opens the json layout test stage from the title, F10 dumps the current
+        //stage's code-built layout into the active skin
+        if (CDTXMania.InputManager != null)
+        {
+            if (rCurrentStage.eStageID == CStage.EStage.Title_2
+                && CDTXMania.InputManager.Keyboard.bKeyPressed((int)SlimDX.DirectInput.Key.F9))
+            {
+                tChangeStage(stageUITest);
+            }
+
+            if (CDTXMania.InputManager.Keyboard.bKeyPressed((int)SlimDX.DirectInput.Key.F10))
+            {
+                UI.Skin.StageLayoutGenerator.GenerateForCurrentStage();
+            }
+        }
 
         int nUpdateAndDrawReturnValue = rCurrentStage.OnUpdateAndDraw();
 
@@ -102,6 +120,14 @@ internal class StageManager
                 //-----------------------------
 
                 #endregion
+
+                break;
+
+            case CStage.EStage.UITest_10:
+                if (nUpdateAndDrawReturnValue == (int)CStageUITest.EReturnValue.ReturnToTitle)
+                {
+                    tChangeStage(stageTitle);
+                }
 
                 break;
 

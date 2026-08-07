@@ -13,6 +13,7 @@ internal sealed class SongDbConfigPage : ConfigPage
     {
     }
 
+    //set by any option that changes how the song list is built, so leaving the page offers to rebuild it
     private bool isDirty = false;
 
     public override List<CItemBase> Build()
@@ -32,6 +33,24 @@ internal sealed class SongDbConfigPage : ConfigPage
             () => CDTXMania.ConfigIni.eUnpackSongs, e => CDTXMania.ConfigIni.eUnpackSongs = e);
         items.Add(autoExtractSongs);
         
+        CItemToggle otherInstruments = new("Show Other Charts", CDTXMania.ConfigIni.bShowOtherInstrumentCharts,
+            "演奏中の楽器の譜面が無い曲も\n選曲画面に表示します。\nOFF にすると、叩ける曲だけが\n表示されます。",
+            "List songs that have no chart for the instrument you are playing.\nTurn OFF to only see songs you can actually play.");
+        otherInstruments.BindConfig(
+            () => otherInstruments.bON = CDTXMania.ConfigIni.bShowOtherInstrumentCharts,
+            () => CDTXMania.ConfigIni.bShowOtherInstrumentCharts = otherInstruments.bON);
+        items.Add(otherInstruments);
+
+        CItemToggle mergeGuitarBass = new("Merge Guitar / Bass", CDTXMania.ConfigIni.bMergeGuitarBassCharts,
+            "set.def で「(Guitar)」「(Bass)」に\n分かれている曲を1つにまとめます。\n演奏中の楽器の譜面が使われます。",
+            "Show a set.def's separate \"(Guitar)\" and \"(Bass)\" entries as one song.\nThe chart for the instrument you are playing is used.");
+        mergeGuitarBass.BindConfig(
+            () => mergeGuitarBass.bON = CDTXMania.ConfigIni.bMergeGuitarBassCharts,
+            () => CDTXMania.ConfigIni.bMergeGuitarBassCharts = mergeGuitarBass.bON);
+
+        mergeGuitarBass.action = () => isDirty = true;
+        items.Add(mergeGuitarBass);
+
         var songSortMode = EnumChoice("Sort Mode", "曲リストのソート方法", "Sort mode for song list.",
             () => CDTXMania.ConfigIni.baseSortMode, e => CDTXMania.ConfigIni.baseSortMode = e);
         items.Add(songSortMode);
@@ -68,8 +87,8 @@ internal sealed class SongDbConfigPage : ConfigPage
     private async Task AskToReloadSongs()
     {
         string title = CDTXMania.isJapanese ? "曲データの再読み込み" : "Reload Songs";
-        string description = CDTXMania.isJapanese ? "曲データのソート方法を変更しました。\n曲データを再読み込みしますか？" :
-            "You have changed the sort mode for song data.\nDo you want to reload the song data?";
+        string description = CDTXMania.isJapanese ? "変更を反映するには曲リストの再読み込みが必要です。\n今すぐ再読み込みしますか？" :
+            "Your changes need the song list to be rebuilt before they take effect.\nDo you want to reload it now?";
         string[] options = CDTXMania.isJapanese ? ["はい", "いいえ"] : ["Yes", "No"];
 						
         int choice = await Modal.ShowAsync(

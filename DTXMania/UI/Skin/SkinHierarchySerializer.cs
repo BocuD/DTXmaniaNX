@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
+using DTXMania.UI.Animation;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.Drawable.Serialization;
 using Newtonsoft.Json;
@@ -12,7 +13,7 @@ public static class SkinHierarchySerializer
         JsonSerializerSettings settings = new()
         {
             Formatting = Formatting.Indented,
-            Converters = [new UIDrawableConverter()]
+            Converters = [new UIDrawableConverter(), new AnimatorClipConverter()]
         };
 
         try
@@ -27,11 +28,32 @@ public static class SkinHierarchySerializer
         }
     }
 
+    //writes only members that differ from their default, for the declarative layout system
+    public static string SerializeToJsonCompact(UIGroup group)
+    {
+        JsonSerializerSettings settings = new()
+        {
+            Formatting = Formatting.Indented,
+            Converters = [new UIDrawableConverter(compact: true), new AnimatorClipConverter()]
+        };
+
+        try
+        {
+            return JsonConvert.SerializeObject(group, settings);
+        }
+        catch (Exception e)
+        {
+            string stackTrace = e.StackTrace ?? "No stack trace";
+            Trace.TraceError($"Failed to save compact UIGroup: {e} Stacktrace: {stackTrace}");
+            return string.Empty;
+        }
+    }
+
     public static UIGroup? DeserializeFromJson(string json, bool invokeDeserializeCallbacks = true)
     {
         try
         {
-            UIGroup? loadedGroup = JsonConvert.DeserializeObject<UIGroup>(json, new UIDrawableConverter());
+            UIGroup? loadedGroup = JsonConvert.DeserializeObject<UIGroup>(json, new UIDrawableConverter(), new AnimatorClipConverter());
             if (loadedGroup == null)
             {
                 Trace.TraceError("Deserialization returned null, possibly due to an empty or invalid JSON.");
@@ -57,7 +79,7 @@ public static class SkinHierarchySerializer
     {
         try
         {
-            UIDrawable? loadedDrawable = JsonConvert.DeserializeObject<UIDrawable>(json, new UIDrawableConverter());
+            UIDrawable? loadedDrawable = JsonConvert.DeserializeObject<UIDrawable>(json, new UIDrawableConverter(), new AnimatorClipConverter());
             if (loadedDrawable == null)
             {
                 Trace.TraceError("Deserialization returned null, possibly due to an empty or invalid JSON.");

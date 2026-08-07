@@ -10,10 +10,7 @@ public class GameStatus
 {
     private static bool demoWindowShown = false;
     public static bool preventGameKeyboardInput = false;
-   
-    //todo: move this somewhere else, maybe a debug class in the core
-    public static bool logThemeApplyDetails = false;
-    
+
     //fps graph
     private const int BufferSize = 200;
     private static readonly float[] frametimes = new float[BufferSize];
@@ -71,11 +68,6 @@ public class GameStatus
             ImGui.Checkbox("Prevent game keyboard input", ref preventGameKeyboardInput);
             
             ImGui.Checkbox("Prevent stage transitions", ref StageManager.preventStageChanges);
-        }
-
-        if (ImGui.CollapsingHeader("Skin"))
-        {
-            DrawSkinInspector();
         }
 
         if (ImGui.CollapsingHeader("Other"))
@@ -186,103 +178,5 @@ public class GameStatus
         }
 
         ImGui.EndTable();
-    }
-
-    private static string newSkinName = "";
-    private static string newSkinAuthor = "";
-    private static void DrawSkinInspector()
-    {
-        var currentSkin = CDTXMania.SkinManager.currentSkin;
-
-        ImGui.Checkbox("Debug Theme Serializer", ref logThemeApplyDetails);
-
-        string skinName = currentSkin?.name ?? "No skin selected";
-
-        if (ImGui.TreeNode("Currently loaded skin: " + skinName))
-        {
-            if (currentSkin != null)
-            {
-                currentSkin.DrawInspector();
-                
-                if (ImGui.Button("Save Skin Changes"))
-                {
-                    currentSkin.Save();
-                    currentSkin.SaveCurrentStageChanges();
-                    
-                    //run gc
-                    CDTXMania.tRunGarbageCollector();
-                
-                    //load the skin again
-                    CDTXMania.StageManager.rCurrentStage.LoadUI(true);
-                }
-
-                if (ImGui.Button("Unload Skin"))
-                {
-                    CDTXMania.SkinManager.ChangeSkin(null);
-                    
-                    //run gc
-                    CDTXMania.tRunGarbageCollector();
-                }
-
-                if (ImGui.Button("Reset Current Stage"))
-                {
-                    CDTXMania.StageManager.rCurrentStage.LoadUI(false);
-                }
-            }
-            ImGui.TreePop();
-        }
-
-        ImGui.Spacing();
-
-        if (ImGui.TreeNode("Available Skins"))
-        {
-            //display list of skins
-            foreach (SkinDescriptor skin in CDTXMania.SkinManager.skins)
-            {
-                ImGui.Text(skin.name);
-
-                ImGui.SameLine();
-
-                int hash = skin.GetHashCode();
-                if (ImGui.Button("Load##" + hash))
-                {
-                    CDTXMania.SkinManager.ChangeSkin(skin);
-                }
-            }
-            ImGui.TreePop();
-        }
-
-        if (ImGui.Button("Scan skin directory"))
-        {
-            CDTXMania.SkinManager.ScanSkinDirectory();
-        }
-
-        ImGui.SameLine();
-        
-        if (ImGui.Button("Create new skin"))
-        {
-            //create modal
-            ImGui.OpenPopup("Create new skin");
-        }
-            
-        if (ImGui.BeginPopupModal("Create new skin"))
-        {
-            ImGui.Text("Skin Options");
-            ImGui.InputText("Name", ref newSkinName, 100);
-            ImGui.InputText("Author", ref newSkinAuthor, 100);
-            if (ImGui.Button("Create"))
-            {
-                CDTXMania.SkinManager.CreateNewSkin(newSkinName, newSkinAuthor);
-                ImGui.CloseCurrentPopup();
-            }
-            
-            ImGui.SameLine();
-            
-            if (ImGui.Button("Cancel"))
-            {
-                ImGui.CloseCurrentPopup();
-            }
-            ImGui.EndPopup();
-        }
     }
 }

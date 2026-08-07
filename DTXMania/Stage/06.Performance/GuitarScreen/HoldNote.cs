@@ -25,6 +25,8 @@ public class HoldNote : UIGroup
 
     public HoldNote()
     {
+        //a gameplay element is runtime-only: it never appears in a saved layout
+        dontSerialize = true;
         name = "Holdnote";
         
         BaseTexture[] normalTextures = new BaseTexture[5];
@@ -63,7 +65,7 @@ public class HoldNote : UIGroup
         AnimationClip? loaded = AnimationClipIO.LoadFromFile(CSkin.Path(@"Graphics\Note\Guitar\hold.json"));
         if (loaded != null)
         {
-            animator.clips.Add(loaded);
+            animator.Add(loaded);
         }
         animator.Play("hold");
     }

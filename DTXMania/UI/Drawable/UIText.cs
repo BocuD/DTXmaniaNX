@@ -1,18 +1,16 @@
+using DTXMania.UI.Skin;
 using System.Drawing;
 using System.Numerics;
 using DTXMania.Core;
 using DTXMania.Core.Framework;
+using DTXMania.UI.DynamicElements;
 using DTXMania.UI.Inspector;
 using DTXMania.UI.OpenGL;
 using DTXMania.UI.Text;
+using Newtonsoft.Json;
 
 namespace DTXMania.UI.Drawable;
 
-public enum TextSource
-{
-    String,
-    Dynamic
-}
 
 public enum UiTextAlignment
 {
@@ -30,9 +28,28 @@ public partial class UIText : UITexture
     //its token still matches, so text that changed again mid-flight discards the stale result.
     private int _renderToken;
     
-    [Themable] public string text = "New UIText";
-    [Themable] public FontSource fontSource = FontSource.System;
-    [Themable] public string font = UIFonts.FallbackFont;
+    //a property so every writer goes through the same check and only re-rasterizes on a real change
+    [Themable]
+    public string text
+    {
+        get => _text;
+        set
+        {
+            if (_text == value)
+            {
+                return;
+            }
+
+            _text = value;
+            _dirty = true;
+        }
+    }
+
+    private string _text = "New UIText";
+
+    [Themable] public SkinResource font = SkinResource.System(UIFonts.FallbackFont);
+
+    //typeface name to fall back on when the font file cannot be resolved
     [Themable] public string fontFamily = string.Empty;
     [Themable] public float fontSize = DefaultFontSize;
     [Themable] public float outlineWidth = 3f;
@@ -52,9 +69,8 @@ public partial class UIText : UITexture
     [Themable] public Color4 outlineGradientTopColor = new(0f, 0f, 0f, 1f);
     [Themable] public Color4 outlineGradientBottomColor = new(0f, 0f, 0f, 1f);
 
-    [Themable] public TextSource textSource = TextSource.String;
-    [Themable] public string dynamicSource = "Not Set";
-    
+    [JsonIgnore] private string? _unresolvedText;
+
     [AddChildMenu]
     public static UIDrawable Create()
     {
@@ -73,16 +89,7 @@ public partial class UIText : UITexture
         fontSize = size;
     }
 
-    public void SetText(string newText)
-    {
-        if (text == newText)
-        {
-            return;
-        }
-
-        text = newText;
-        _dirty = true;
-    }
+    public void SetText(string newText) => text = newText;
 
     //Forces a re-render on the next Draw (e.g. after changing color/outline/style)
     public void MarkDirty()
@@ -97,10 +104,7 @@ public partial class UIText : UITexture
             return;
         }
         
-        if (textSource == TextSource.Dynamic)
-        {
-            UpdateDynamicText();
-        }
+        ShowUnresolvedBinding();
 
         if (_dirty)
         {
@@ -125,17 +129,38 @@ public partial class UIText : UITexture
     /// <see cref="UIDrawable.size"/>; subclasses can override to clamp the drawn width.
     protected virtual Vector2 GetTextureDrawSize() => size;
 
-    private void UpdateDynamicText()
+    /// <summary>What drives this text, or empty when nothing does.</summary>
+    public string TextBindingSource()
     {
-        CDTXMania.StageManager.rCurrentStage.dynamicStringSources.TryGetValue(dynamicSource, out var source);
-        if (source != null)
+        for (int i = 0; i < bindings.Count; i++)
         {
-            SetText(source.GetString());
+            if (bindings[i].target == nameof(text))
+            {
+                return bindings[i].source;
+            }
         }
-        else
+
+        return string.Empty;
+    }
+
+    //an unresolved binding leaves its target alone, which for text just looks empty; say so instead
+    private void ShowUnresolvedBinding()
+    {
+        for (int i = 0; i < bindings.Count; i++)
         {
-            SetText($"Dynamic source: {dynamicSource} not found");
+            UIBinding binding = bindings[i];
+
+            if (binding.target != nameof(text) || binding.resolved)
+            {
+                continue;
+            }
+
+            //built once per key, since this runs every frame the binding stays broken
+            text = _unresolvedText ??= $"Can't resolve binding: {binding.source}";
+            return;
         }
+
+        _unresolvedText = null;
     }
 
     /// <summary>
@@ -249,7 +274,7 @@ public partial class UIText : UITexture
         {
             Name = name,
             Text = text,
-            FontPath = UIFonts.ResolveFontPath(fontSource, font),
+            FontPath = UIFonts.ResolveFontPath(font),
             FontFamily = fontFamily,
             FontSize = renderSize,
             OutlineWidth = outlineWidth,

@@ -20,12 +20,12 @@ internal class CStageChangeSkin : CStage
 
 	// CStage 実装
 
-	public override void InitializeBaseUI()
+	public override void RegisterBindings()
 	{
 		
 	}
 	
-	public override void InitializeDefaultUI()
+	public override void BuildDefaultLayout()
 	{
 		
 	}

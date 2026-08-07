@@ -3,6 +3,7 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
 using DTXMania.Core.Framework;
+using DTXMania.UI.DynamicElements;
 
 namespace DTXMania.Core;
 
@@ -72,12 +73,12 @@ internal partial class CConfigIni
 	public bool b選曲リストフォントを太字にする;
 
 	//public bool bDirectShowMode;
-	public bool bFullScreenMode;
+	[DataField("Fullscreen")] public bool bFullScreenMode;
 	public bool bFullScreenExclusive;
 	public int nInitialWindowXPosition; // #30675 2013.02.04 ikanick add
 	public int nInitialWindowYPosition;
-	public int nWindowWidth; // #23510 2010.10.31 yyagi add
-	public int nWindowHeight; // #23510 2010.10.31 yyagi add
+	[DataField("WindowWidth")] public int nWindowWidth; // #23510 2010.10.31 yyagi add
+	[DataField("WindowHeight")] public int nWindowHeight; // #23510 2010.10.31 yyagi add
 	public bool DisplayBonusEffects;
 	public bool bHAZARD;
 
@@ -157,6 +158,10 @@ internal partial class CConfigIni
 	public bool bSaveScoreIfModifiedPlaySpeed;
 	public int nSongSelectSoundPreviewWaitTimeMs;
 	public int nSongSelectImagePreviewWaitTimeMs;
+
+	public bool bSongSelectPreviewVideo;
+	public bool bShowOtherInstrumentCharts;
+	public bool bMergeGuitarBassCharts;
 	public int n自動再生音量;  // nAutoVolume
 	public int n手動再生音量;  // nChipVolume
 	public int n選曲リストフォントのサイズdot;
@@ -244,6 +249,7 @@ internal partial class CConfigIni
 	public bool bBufferedInput;
 	public bool bIsEnabledSystemMenu;			// #28200 2012.5.1 yyagi System Menuの使用可否切替
 	public string strSystemSkinSubfolderFullName;	// #28195 2012.5.2 yyagi Skin切替用 System/以下のサブフォルダ名
+	public string strSkinFolder;
 	public bool bUseBoxDefSkin;                     // #28195 2012.5.6 yyagi Skin切替用 box.defによるスキン変更機能を使用するか否か
 	public int nSkipTimeMs;
 
@@ -253,6 +259,7 @@ internal partial class CConfigIni
 
 	public bool bConfigIniがないかDTXManiaのバージョンが異なる => ( !bConfigIniExists || !CDTXMania.VERSION.Equals( strDTXManiaのバージョン ) );
 
+	[DataField("DrumsEnabled")]
 	public bool bDrumsEnabled
 	{
 		get => _bDrumsEnabled;
@@ -280,8 +287,9 @@ internal partial class CConfigIni
 		}
 	}
 
-	public bool bSingleGuitar = true;
-	
+	[DataField("SingleGuitar")] public bool bSingleGuitar = true;
+
+	[DataField("GuitarEnabled")]
 	public bool bGuitarEnabled
 	{
 		get => _bGuitarEnabled;
@@ -294,12 +302,13 @@ internal partial class CConfigIni
 			}
 		}
 	}
+	[DataField("WindowMode")]
 	public bool bWindowMode
 	{
 		get => !bFullScreenMode;
 		set => bFullScreenMode = !value;
 	}
-	public bool bGuitarRevolutionMode => ( !bDrumsEnabled && bGuitarEnabled );
+	[DataField("GuitarRevolutionMode")] public bool bGuitarRevolutionMode => ( !bDrumsEnabled && bGuitarEnabled );
 
 	public bool bAllDrumsAreAutoPlay
 	{
@@ -390,6 +399,7 @@ internal partial class CConfigIni
 	public int nResultDelayMs;				// Delay after clearing a song before the result screen is shown (ms).
 	public int nLoadingMinMs;				// Minimum time the song-loading screen stays up, even on a fast load (ms).
 	public bool bIsAllowedDoubleClickFullscreen;	// #26752 2011.11.27 yyagi ダブルクリックしてもフルスクリーンに移行しない
+	[DataField("SwappedGuitarBass")]
 	public bool bIsSwappedGuitarBass			// #24063 2011.1.16 yyagi ギターとベースの切り替え中か否か
 	{
 		get;
@@ -646,6 +656,9 @@ internal partial class CConfigIni
 		bAutoAddGage = false;
 		nSongSelectSoundPreviewWaitTimeMs = 200;
 		nSongSelectImagePreviewWaitTimeMs = 200;
+		bSongSelectPreviewVideo = true;
+		bShowOtherInstrumentCharts = false;
+		bMergeGuitarBassCharts = true;
 		bWave再生位置自動調整機能有効 = true;
 		bBGM音を発声する = true;
 		bドラム打音を発声する = true;
@@ -798,6 +811,7 @@ internal partial class CConfigIni
 		// #24820 2013.1.17 yyagi 初期値を4に戻した。動的なミキサー制御がうまく動作しているため。
 		bIsEnabledSystemMenu = true;			// #28200 2012.5.1 yyagi System Menuの利用可否切替(使用可)
 		strSystemSkinSubfolderFullName = "";	// #28195 2012.5.2 yyagi 使用中のSkinサブフォルダ名
+		strSkinFolder = "";
 		bUseBoxDefSkin = true;					// #28195 2012.5.6 yyagi box.defによるスキン切替機能を使用するか否か
 		bTight = false;                        // #29500 2012.9.11 kairera0467
 		nSoundDriverType = (int)ESoundDeviceTypeForConfig.ACM; // #24820 2012.12.23 yyagi 初期値はACM

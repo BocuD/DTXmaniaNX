@@ -3,7 +3,10 @@
 public enum ResourceType
 {
     Image,
-    Font
+    Font,
+    Video,
+    Animation,
+    Sound
 }
 
 public partial class SkinDescriptor
@@ -13,12 +16,13 @@ public partial class SkinDescriptor
         //copy the file into the skin directory
         string fileName = Path.GetFileName(path);
         string targetPath = Path.Combine(basePath, GetResourceFolder(type), fileName);
-        
+
+        //already imported. The name is what a layout references either way, so it is what comes back
         if (File.Exists(targetPath))
         {
-            return targetPath;
+            return fileName;
         }
-        
+
         if (!Directory.Exists(Path.GetDirectoryName(targetPath)))
         {
             Directory.CreateDirectory(Path.GetDirectoryName(targetPath)!);
@@ -54,6 +58,15 @@ public partial class SkinDescriptor
                 break;
             case  ResourceType.Font:
                 folder = "Fonts";
+                break;
+            case ResourceType.Video:
+                folder = "Videos";
+                break;
+            case ResourceType.Animation:
+                folder = "Animation";
+                break;
+            case ResourceType.Sound:
+                folder = "Sounds";
                 break;
         }
 

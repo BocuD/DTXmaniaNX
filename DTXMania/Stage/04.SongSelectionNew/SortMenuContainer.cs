@@ -1,206 +1,213 @@
-﻿using System.Diagnostics;
+using DTXMania.UI.Skin;
 using System.Numerics;
 using DTXMania.Core;
 using DTXMania.SongDb.Sorting;
 using DTXMania.UI.Drawable;
-using Hexa.NET.ImGui;
+using DTXMania.UI.DynamicElements;
+using FDK;
 using SlimDX.DirectInput;
 
 namespace DTXMania;
 
-public class SortMenuContainer : UIGroup
+/// <summary>
+/// The carousel of sort modes. A <see cref="UIScrollItemsGroup"/> over one <see cref="SortRowData"/> per
+/// sort: the wrap-around, the easing and the dip towards the selected entry all come from there, so this
+/// only says which sort is showing and reacts when that changes.
+/// </summary>
+public class SortMenuContainer : ComponentInstance, IUIItemSource
 {
-    private UIGroup elementsContainer;
+    private const float EntrySpacing = 90.0f;
 
-    //ring buffer
-    private SortMenuElement[] sortMenuElements;
-    public SortMenuElement currentSelection => sortMenuElements[selectionIndex];
-    
-    private int selectionIndex = 2;
-    
-    public SortMenuContainer(SongDb.SongDb songDb, SongDbSort[] sorters)
+    private readonly SortRowData[] rows = BuildRows();
+
+    private UIScrollItemsGroup? entries;
+    private CSound?[]? sounds;
+
+    //the sort the stage is actually showing, or -1 until it has said. The menu applies whatever scrolls
+    //under the selection, so the first frame must not mistake the starting position for a scroll
+    private int appliedIndex = -1;
+
+    public SortMenuContainer() : base("SortMenuContainer")
     {
-        name = "SortMenuContainer";
-        
         size = new Vector2(662, 92);
         anchor = new Vector2(1.0f, 0.0f);
-        
-        var backgroundImage = AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\5_sortmenu_bg.png"))));
-        
-        sortMenuElements = new SortMenuElement[sorters.Length];
-        
-        elementsContainer = AddChild(new UIGroup("Elements"));
-        elementsContainer.position = new Vector3(0, 40, 0);
-        
-        for (int i = 0; i < sortMenuElements.Length; i++)
+    }
+
+    public int ItemCount => rows.Length;
+    public object GetItem(int index) => rows[Mod(index, rows.Length)];
+
+    protected override void OnContentLoaded()
+    {
+        entries = GetChild<UIScrollItemsGroup>("Entries");
+
+        if (entries != null)
         {
-            sortMenuElements[i] = elementsContainer.AddChild(new SortMenuElement(songDb, sorters[i]));
-            sortMenuElements[i].position = new Vector3(i * elementSpacing, 0, 0);
-            sortMenuElements[i].dontSerialize = true;
+            entries.itemDefault = BuildEntryDefault;
+            entries.SetSource(this);
         }
     }
 
-    private float elementSpacing = 90.0f; //spacing between elements
-    private long lastDrawTime;
-    private float targetX = 0f;
-    
-    //animation
-    private float offsetRange = 90;
-    private float offsetDistance = 18;
-    public override void Draw(Matrix4x4 parentMatrix)
+    /// <summary>Shows a sort without applying it, for restoring what was selected last time.</summary>
+    public void ShowSort(SongDbSort sort)
     {
-        float delta = (CDTXMania.Timer.nCurrentTime - lastDrawTime) / 1000.0f;
-        lastDrawTime = CDTXMania.Timer.nCurrentTime;
+        EnsureContent();
 
-        if (Math.Abs(targetX - elementsContainer.position.X) > 0.01f)
-        {
-            float movementAmount = (targetX - elementsContainer.position.X) * delta * 10.0f;
-            
-            //clamp
-            movementAmount = Math.Clamp(movementAmount, -10.0f, 10.0f);
-            elementsContainer.position.X += movementAmount;
-        }
-        else
-        {
-            elementsContainer.position.X = targetX; //snap to target if close enough
-        }
-        
-        if (elementsContainer.position.X >= elementSpacing / 2)
-        {
-            elementsContainer.position.X -= elementSpacing;
-            targetX -= elementSpacing;
-            MoveLeft();
-        }
-        else if (elementsContainer.position.X <= -elementSpacing / 2)
-        {
-            elementsContainer.position.X += elementSpacing;
-            targetX += elementSpacing;
-            MoveRight();
-        }
-        
-        //animate the selected one slightly downwards
-        foreach (var element in sortMenuElements)
-        {
-            var targetX = elementSpacing * selectionIndex;
-            
-            //same logic as in SongSelectionContainer
-            float distanceTo0 = MathF.Abs(targetX - (element.position.X + elementsContainer.position.X)); //positive only
-            float t = Math.Clamp((distanceTo0 - offsetRange) * -1, 0, offsetRange);
-            //first subtract offsetRange so the range is now -offsetRange - maxDistance.
-            //then invert, so range becomes -maxDistance - offsetRange, then clamp from 0-offsetRange
-            t /= offsetRange; //normalize range
-            
-            //x offset is 30 to the left here
-            element.position.Y = t * offsetDistance;
-        }
-        
-        base.Draw(parentMatrix);
+        appliedIndex = Math.Max(Array.IndexOf(SongDbSort.All, sort), 0);
+        entries?.ScrollTo(appliedIndex);
     }
 
     public void HandleNavigation()
     {
         if (CDTXMania.InputManager.Keyboard.bKeyPressed(Key.LeftArrow)
-            || CDTXMania.Pad.bPressedGB(EPad.Pick) //??
+            || CDTXMania.Pad.bPressedGB(EPad.Pick)
             || CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.SD))
         {
-            targetX += elementSpacing;
+            entries?.ScrollBy(-1);
         }
+
         if (CDTXMania.InputManager.Keyboard.bKeyPressed(Key.RightArrow)
-            || CDTXMania.Pad.bPressedGB(EPad.Pick) //??
+            || CDTXMania.Pad.bPressedGB(EPad.Pick)
             || CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.FT))
         {
-            targetX -= elementSpacing;
+            entries?.ScrollBy(1);
         }
     }
-    
-    private void MoveLeft()
+
+    public override void Draw(Matrix4x4 parentMatrix)
     {
-        CDTXMania.Skin.soundCursorMovement.tPlay();
+        EnsureContent();
 
-        //move the last element to the front
-        var last = sortMenuElements[^1];
-        for (int i = sortMenuElements.Length - 1; i > 0; i--)
+        //the list decides what is selected, so the sort follows it rather than the other way round
+        if (entries != null && Mod(entries.SelectedItem, rows.Length) is var showing && showing != appliedIndex)
         {
-            sortMenuElements[i] = sortMenuElements[i - 1];
-        }
-        sortMenuElements[0] = last;
+            bool scrolled = appliedIndex >= 0;
+            appliedIndex = showing;
 
-        RecalculateElementPositions();
-        sortMenuElements[selectionIndex].PlaySound();
-        CDTXMania.StageManager.stageSongSelectionNew.ApplySort(sortMenuElements[selectionIndex].sorter);
+            if (scrolled)
+            {
+                PlaySound(showing);
+                CDTXMania.StageManager.stageSongSelectionNew.ApplySort(SongDbSort.All[showing]);
+            }
+        }
+
+        base.Draw(parentMatrix);
     }
 
-    private void MoveRight()
+    public override void Dispose()
     {
-        CDTXMania.Skin.soundCursorMovement.tPlay();
+        base.Dispose();
 
-        //move the first element to the end
-        var first = sortMenuElements[0];
-        for (int i = 0; i < sortMenuElements.Length - 1; i++)
+        if (sounds == null)
         {
-            sortMenuElements[i] = sortMenuElements[i + 1];
-        }
-        sortMenuElements[^1] = first;
-        
-        RecalculateElementPositions();
-        sortMenuElements[selectionIndex].PlaySound();
-        CDTXMania.StageManager.stageSongSelectionNew.ApplySort(sortMenuElements[selectionIndex].sorter);
-    }
-
-    public void SetCurrentSelection(SongDbSort newSelection, bool applySort = false, bool playSound = false)
-    {
-        SortMenuElement? element = sortMenuElements.FirstOrDefault(x => x.sorter == newSelection);
-        if (element == null)
-        {
-            Trace.TraceError("Failed to apply selection: sorter not found in array");
             return;
         }
-        
-        int newIndex = Array.IndexOf(sortMenuElements, element);
-        if (newIndex == -1 || newIndex == selectionIndex) return;
 
-        //how many positions we need to rotate the array by
-        int rotateBy = (selectionIndex - newIndex + sortMenuElements.Length) % sortMenuElements.Length;
-
-        //rotate right
-        for (int i = 0; i < rotateBy; i++)
+        foreach (CSound? sound in sounds)
         {
-            var last = sortMenuElements[^1];
-            for (int j = sortMenuElements.Length - 1; j > 0; j--)
+            CDTXMania.SoundManager.tDiscard(sound);
+        }
+
+        sounds = null;
+    }
+
+    //loaded on the first scroll rather than with the menu, so building a default instance for the
+    //serializer to compare against does not touch the disk
+    private void PlaySound(int index)
+    {
+        if (sounds == null)
+        {
+            sounds = new CSound[SongDbSort.All.Length];
+            for (int i = 0; i < sounds.Length; i++)
             {
-                sortMenuElements[j] = sortMenuElements[j - 1];
+                sounds[i] = CDTXMania.SoundManager.tGenerateSound(CSkin.Path($@"Graphics\Sorting\{SongDbSort.All[i].IconName}.wav"));
+
+                if (sounds[i] is { } sound)
+                {
+                    sound.nVolume = 80;
+                }
             }
-
-            sortMenuElements[0] = last;
         }
 
-        RecalculateElementPositions();
-        if (playSound) sortMenuElements[selectionIndex].PlaySound();
-        if (applySort) CDTXMania.StageManager.stageSongSelectionNew.ApplySort(sortMenuElements[selectionIndex].sorter);
+        CDTXMania.Skin.soundCursorMovement.tPlay();
+        sounds[index]?.tStartPlaying(false);
     }
 
-    private void RecalculateElementPositions()
+    private static SortRowData[] BuildRows()
     {
-        for (int i = 0; i < sortMenuElements.Length; i++)
+        SortRowData[] built = new SortRowData[SongDbSort.All.Length];
+
+        for (int i = 0; i < built.Length; i++)
         {
-            sortMenuElements[i].position = new Vector3(i * elementSpacing, 0, 0);
+            built[i] = new SortRowData { Name = SongDbSort.All[i].Name, IconIndex = i };
         }
+
+        return built;
     }
 
-    public override void DrawInspector()
-    {
-        base.DrawInspector();
+    private static int Mod(int value, int length) => length <= 0 ? 0 : (value % length + length) % length;
 
-        if (ImGui.CollapsingHeader("Element Positioning"))
+    //the code default, also the seed for Components/SortMenu.json
+    protected override UIGroup BuildDefault()
+    {
+        UIGroup root = new("SortMenu");
+
+        root.AddChild(new UIImage
         {
-            ImGui.InputFloat("Element Spacing", ref elementSpacing);
-            ImGui.Text("Current Selection Index: " + selectionIndex);
-        }
-        
-        if (ImGui.CollapsingHeader("Animation"))
+            name = "Background",
+            imageSource = ImageSource.File,
+            image = SkinResource.System(@"Graphics\5_sortmenu_bg.png"),
+            renderOrder = 0
+        });
+
+        root.AddChild(new UIScrollItemsGroup("Entries")
         {
-            ImGui.InputFloat("Offset Range", ref offsetRange);
-            ImGui.InputFloat("Offset Distance", ref offsetDistance);
+            itemComponent = "Components/SortItem.json",
+            itemOffset = new Vector3(EntrySpacing, 0.0f, 0.0f),
+            navigationAxis = UINavigationAxis.Horizontal,
+
+            //one slot per sort: nothing is ever recycled, the ring is here for the wrap-around
+            visibleSlots = SongDbSort.All.Length,
+            selectionOffset = 2,
+            position = new Vector3(2 * EntrySpacing, 40.0f, 0.0f),
+            renderOrder = 1,
+
+            //the original feel: eases the whole way with no floor, capped at what the old per-frame
+            //clamp of 10px allowed at 60fps. Speeds are in entries per second, not pixels
+            motion = new UIScrollMotion(rate: 10.0f, maxSpeed: 600.0f / EntrySpacing),
+
+            //the selected entry sits lower than its neighbours
+            curve = new UIItemCurve(UIAxis.Y, distance: 18.0f, range: EntrySpacing)
+        });
+
+        return root;
+    }
+
+    //the code default for one entry, seeded into Components/SortItem.json
+    private static UIGroup BuildEntryDefault()
+    {
+        UIGroup root = new("SortItem");
+
+        TextureArray icon = root.AddChild(new TextureArray
+        {
+            name = "Icon",
+            anchor = new Vector2(0.5f, 0.5f),
+            bindings = { new UIBinding("textureIndex", "Item.IconIndex") }
+        });
+
+        //named in sort order, so an entry only carries an index
+        foreach (SongDbSort sort in SongDbSort.All)
+        {
+            icon.resources.Add(SkinResource.System($@"Graphics\Sorting\{sort.IconName}.png"));
         }
+
+        root.AddChild(new UIText(string.Empty, 18)
+        {
+            name = "Name",
+            anchor = new Vector2(0.5f, 0.5f),
+            isVisible = false,
+            bindings = { new UIBinding("text", "Item.Name") }
+        });
+
+        return root;
     }
 }

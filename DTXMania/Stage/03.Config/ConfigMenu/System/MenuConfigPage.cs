@@ -40,6 +40,14 @@ internal sealed class MenuConfigPage : ConfigPage
             () => CDTXMania.ConfigIni.bランダムセレクトで子BOXを検索対象とする = randomFromSubBox.bON);
         items.Add(randomFromSubBox);
 
+        CItemToggle previewVideo = new("PreviewVideo", CDTXMania.ConfigIni.bSongSelectPreviewVideo,
+            "選曲画面で、選択中の曲の背景を表示します。\nプレビュー動画、背景動画、\n背景画像の順に使用します。",
+            "Show the selected song's own background in song select.\nUses its preview movie, background video\nor background image, whichever it has.");
+        previewVideo.BindConfig(
+            () => previewVideo.bON = CDTXMania.ConfigIni.bSongSelectPreviewVideo,
+            () => CDTXMania.ConfigIni.bSongSelectPreviewVideo = previewVideo.bON);
+        items.Add(previewVideo);
+
         items.Add(SecondsDelay("PreSoundWait", 0, 10000,
             "カーソルが合わされてから\nプレビュー音が鳴り始めるまでの待ち時間。",
             "Delay before the preview sound starts in song select.",

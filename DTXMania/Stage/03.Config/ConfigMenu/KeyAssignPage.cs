@@ -32,7 +32,7 @@ internal sealed class KeyAssignPage : ConfigPage
                 "未割り当てのMIDI入力がないか確認できます。",
                 "Check for any MIDI inputs that aren't mapped.")
             {
-                action = () => list.onOpenMidiTest?.Invoke()
+                action = () => list.onOpenMidiTest?.Invoke(pads)
             });
         }
 
