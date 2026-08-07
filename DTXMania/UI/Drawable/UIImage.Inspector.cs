@@ -16,11 +16,13 @@ public partial class UIImage
             return;
         }
 
-        Inspector.Inspector.Inspect("Image Source", ref imageSource);
+        //"Content", not "Image Source": this says what the element draws, while the editor below says
+        //where its file is. Two dropdowns both called a source is what made this confusing
+        Inspector.Inspector.Inspect("Content", ref imageSource);
         switch (imageSource)
         {
             case ImageSource.File:
-                Inspector.ResourceEditor.Draw("Image", ResourceType.Image, image, chosen =>
+                Inspector.ResourceEditor.Draw("File", ResourceType.Image, image, chosen =>
                 {
                     image = chosen;
                     _lastFileLoadAttempt = chosen;

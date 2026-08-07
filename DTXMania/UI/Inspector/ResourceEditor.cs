@@ -20,8 +20,12 @@ public static class ResourceEditor
     public static void Draw(string label, ResourceType type, SkinResource value, Action<SkinResource> apply,
         Action<string>? onUseInPlace = null)
     {
+        //everything here is named after the label, which an element's own fields may well share — an image
+        //has both a content kind and a file. Scoping the ids keeps those from colliding
+        ImGui.PushID(label);
+
         ResourceSource source = value.source;
-        if (Inspector.Inspect($"{label} Source", ref source))
+        if (Inspector.Inspect($"{label} Location", ref source))
         {
             apply(new SkinResource(source, value.path));
         }
@@ -33,7 +37,7 @@ public static class ResourceEditor
         }
 
         ImGui.SameLine();
-        if (ImGui.Button($"Import##{label}"))
+        if (ImGui.Button("Import"))
         {
             //the import decides the source too: a copy belongs to the skin, and a file left where it is
             //cannot be referenced by a layout at all
@@ -54,6 +58,8 @@ public static class ResourceEditor
         {
             ImGui.TextColored(new System.Numerics.Vector4(1f, 0.6f, 0.4f, 1f), $"{value} does not exist");
         }
+
+        ImGui.PopID();
     }
 
     //where a source's files live, which is what the browse menu lists
@@ -76,6 +82,7 @@ public static class ResourceEditor
         ResourceType.Video => new() { { "Videos", "mp4,avi,mkv,webm,mov,wmv,mpg,mpeg,flv,m4v" } },
         ResourceType.Font => new() { { "Fonts", "ttf,otf" } },
         ResourceType.Animation => new() { { "Animations", "json" } },
+        ResourceType.Sound => new() { { "Sounds", "ogg,wav,mp3,flac,xa" } },
         _ => new Dictionary<string, string>()
     };
 }

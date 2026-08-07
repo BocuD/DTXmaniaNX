@@ -131,7 +131,7 @@ public class UINewVideoRenderer : UIDrawable
 
         if (ImGui.CollapsingHeader("Video"))
         {
-            DTXMania.UI.Inspector.ResourceEditor.Draw("Video", ResourceType.Video, video, chosen =>
+            DTXMania.UI.Inspector.ResourceEditor.Draw("File", ResourceType.Video, video, chosen =>
             {
                 video = chosen;
                 _lastVideoLoadAttempt = null;
