@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Numerics;
 using System.Windows.Forms;
+using DTXMania.Core.Audio;
 using DTXMania.Core.Video;
 using DTXMania.SongDb;
 using DTXMania.UI.Drawable;
@@ -136,26 +137,26 @@ internal partial class CDTXMania
 
         AddInitializer("Sound Manager", () =>
         {
-            ESoundDeviceType soundDeviceType = ConfigIni.nSoundDriverType switch
-            {
-                0 => ESoundDeviceType.DirectSound,
-                1 => ESoundDeviceType.ASIO,
-                2 => ESoundDeviceType.ExclusiveWASAPI,
-                3 => ESoundDeviceType.SharedWASAPI,
-                _ => ESoundDeviceType.Unknown
-            };
+            //the same settings the config page rebuilds from, so the two cannot drift
+            AudioDeviceOptions options = AudioDeviceOptions.FromConfig(ConfigIni);
+            FdkAudioDevice.Request(options);
 
             SoundManager = new CSoundManager(maniaGl.host.GetWindowHandle(),
-                soundDeviceType,
-                ConfigIni.nWASAPIBufferSizeMs,
-                ConfigIni.bEventDrivenWASAPI,
+                FdkAudioDevice.ToFdk(options.Backend),
+                options.BufferSizeMs,
+                options.EventDriven,
                 0,
-                ConfigIni.nASIODevice,
-                ConfigIni.bUseOSTimer
+                FdkAudioDevice.AsioDevice(options),
+                options.UseOsTimer
             );
             UpdateWindowTitle();
             CSoundManager.bIsTimeStretch = ConfigIni.bTimeStretch;
-            SoundManager.nMasterVolume = ConfigIni.nMasterVolume;
+            AudioMixer.Device.MasterVolume = ConfigIni.nMasterVolume;
+
+            foreach (AudioGroup group in Enum.GetValues<AudioGroup>())
+            {
+                AudioMixer.SetGroupVolume(group, ConfigIni.nGroupVolume[(int)group]);
+            }
 
             string strDefaultSoundDeviceBusType = CSoundManager.strDefaultDeviceBusType;
             Trace.TraceInformation($"Bus type of the default sound device = {strDefaultSoundDeviceBusType}");

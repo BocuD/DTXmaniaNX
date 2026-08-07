@@ -205,6 +205,7 @@ public class CSoundDeviceASIO : ISoundDevice
 			//-----------------
 			eOutputDevice = ESoundDeviceType.ASIO;
 			asioInfo = BassAsio.BASS_ASIO_GetInfo();
+			CSoundManager.strActiveOutputDevice = asioInfo.name;
 			n出力チャンネル数 = asioInfo.outputs;
 			db周波数 = BassAsio.BASS_ASIO_GetRate();
 			fmtASIOデバイスフォーマット = BassAsio.BASS_ASIO_ChannelGetFormat(false, 0);
@@ -384,6 +385,11 @@ public class CSoundDeviceASIO : ISoundDevice
 	#endregion
 
 	#region [ tサウンドを作成する() ]
+	//ASIO mixes everything into one stream, so there is no per-group level to set here
+	public void tSetGroupVolume(CSound.EInstType eInstType, int nVolume)
+	{
+	}
+
 	public CSound tサウンドを作成する(string strファイル名, CSound.EInstType eInstType)
 	{
 		var sound = new CSound();

@@ -1,4 +1,5 @@
 using System.Reflection;
+using DTXMania.Core.Audio;
 using DTXMania.UI.Skin;
 using Hexa.NET.ImGui;
 using Newtonsoft.Json;
@@ -17,7 +18,7 @@ public class StageRoot : UIGroup
 
     //most stages have background music and the ones that don't leave it empty, so it lives here rather
     //than being redeclared per stage. A subclass names its file in its constructor
-    public SoundReference bgm = new();
+    public SoundReference bgm = new() { group = AudioGroup.Bgm };
 
     //this root's own SoundReference fields, found once the tree is built. Deserialization replaces the
     //instances the constructor made, so this cannot be collected any earlier

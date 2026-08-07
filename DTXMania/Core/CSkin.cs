@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Text;
+using DTXMania.Core.Audio;
 using FDK;
 
 namespace DTXMania.Core;
@@ -189,9 +190,9 @@ internal class CSkin : IDisposable
 		soundAdvanced          = new CSystemSound( @"Sounds\Advanced.ogg",        false, false);
 		soundExtreme	        = new CSystemSound( @"Sounds\Extreme.ogg",		    false, false);
 		soundMaster		    = new CSystemSound( @"Sounds\Master.ogg",			false, false);
-		bgmTitleScreen			= new CSystemSound( @"Sounds\Setup BGM.ogg",		true, true);
-		bgmコンフィグ画面		= new CSystemSound( @"Sounds\Config BGM.ogg",		true, true);
-		bgmSongSelectScreen			= new CSystemSound( @"Sounds\Select BGM.ogg",		true, true);
+		bgmTitleScreen			= new CSystemSound( @"Sounds\Setup BGM.ogg",		true, true, AudioGroup.Bgm);
+		bgmコンフィグ画面		= new CSystemSound( @"Sounds\Config BGM.ogg",		true, true, AudioGroup.Bgm);
+		bgmSongSelectScreen			= new CSystemSound( @"Sounds\Select BGM.ogg",		true, true, AudioGroup.Bgm);
 		soundMetronome     = new CSystemSound(@"Sounds\Metronome.ogg",         false, false);
 	}
 

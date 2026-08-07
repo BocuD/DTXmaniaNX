@@ -94,6 +94,12 @@ internal partial class CConfigIni
 	public bool bUseOSTimer;
 	public bool bDynamicBassMixerManagement; // #24820
 	public int nMasterVolume;
+
+	/// <summary>Output level of each group, 0-100, indexed by <see cref="Audio.AudioGroup"/>.</summary>
+	public int[] nGroupVolume = [100, 100, 100, 100, 100];
+
+	/// <summary>Output device to play through, by name. Empty follows the system default.</summary>
+	public string strOutputDevice;
 	public int nChipPlayTimeComputeMode; // 2024.2.17 fisyher (0=Original, 1=Accurate)
 
 	public STDGBVALUE<EType> eAttackEffect;
@@ -822,6 +828,8 @@ internal partial class CConfigIni
 		bUseOSTimer = false; ;                 // #33689 2014.6.6 yyagi 初期値はfalse (FDKのタイマー。ＦＲＯＭ氏考案の独自タイマー)
 		bDynamicBassMixerManagement = true;    //
 		nMasterVolume = 100;
+		nGroupVolume = [100, 100, 100, 100, 100];
+		strOutputDevice = "";                  // follow the system default
 		bTimeStretch = false;                  // #23664 2013.2.24 yyagi 初期値はfalse (再生速度変更を、ピッチ変更にて行う)
 		nSkipTimeMs = 5000;
 		nChipPlayTimeComputeMode = 1;			// 2024.2.17 fisyher Set to Accurate by default

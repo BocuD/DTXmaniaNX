@@ -123,6 +123,16 @@ public class CSoundManager   // CSound管理
 	{
 		SoundDelayASIO = value;
 	}
+	/// <summary>
+	/// Output device to build on, by name. Empty means the system default. Read by the device
+	/// constructors, the same way ASIODevice is.
+	/// </summary>
+	public static string strRequestedOutputDevice = "";
+
+	/// <summary>Name of the device in use, which differs from the requested one when that was empty or
+	/// could not be found.</summary>
+	public static string strActiveOutputDevice = "";
+
 	public static int ASIODevice = 0;
 	public int GetASIODevice()
 	{
@@ -348,6 +358,18 @@ public class CSoundManager   // CSound管理
 		SoundDevice.nMasterVolume = _nMasterVolume;                 // サウンドデバイスに対して、マスターボリュームを再設定する
 
 		CSound.tすべてのサウンドを再構築する(SoundDevice);        // すでに生成済みのサウンドがあれば作り直す。
+	}
+
+	/// <summary>
+	/// Output level of one instrument group, 0 to 100. Kept even when the current device cannot apply it,
+	/// since a device built later reads nMixerVolume when it makes its per-group mixers.
+	/// </summary>
+	public int nGetGroupVolume(CSound.EInstType eInstType) => nMixerVolume[(int)eInstType];
+
+	public void tSetGroupVolume(CSound.EInstType eInstType, int nVolume)
+	{
+		nMixerVolume[(int)eInstType] = nVolume;
+		SoundDevice?.tSetGroupVolume(eInstType, nVolume);
 	}
 
 	public CSound tGenerateSound(string filename)  // tサウンドを生成する

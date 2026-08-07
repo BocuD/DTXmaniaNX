@@ -11,6 +11,12 @@ public interface ISoundDevice : IDisposable
 	CTimer tmシステムタイマ { get; }
 	string strDefaultSoundDeviceBusType { get; }
 
+	/// <summary>
+	/// Sets the output level of one instrument group, 0 to 100, on a running device. Only a device that
+	/// mixes each group separately can apply this; the others do nothing and leave it to the caller.
+	/// </summary>
+	void tSetGroupVolume(CSound.EInstType eInstType, int nVolume);
+
 	CSound tサウンドを作成する(string strファイル名, CSound.EInstType einstType);
 	void tサウンドを作成する(string strファイル名, ref CSound sound, CSound.EInstType eInstType);
 	void tサウンドを作成する(byte[] byArrWAVファイルイメージ, ref CSound sound, CSound.EInstType eInstType);

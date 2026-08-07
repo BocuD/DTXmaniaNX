@@ -1,7 +1,7 @@
 using DTXMania.Core;
+using DTXMania.Core.Audio;
 using DTXMania.UI.Config;
 using DTXMania.UI.Item;
-using FDK;
 
 namespace DTXMania;
 
@@ -20,6 +20,8 @@ internal sealed class AudioDriverConfigPage : ConfigPage
     {
         List<CItemBase> items = [];
 
+        items.Add(BuildOutputDevice());
+
         switch (CDTXMania.ConfigIni.nSoundDriverType)
         {
             case 0: // DirectSound
@@ -27,7 +29,6 @@ internal sealed class AudioDriverConfigPage : ConfigPage
                 break;
 
             case 1: // ASIO
-                items.Add(BuildAsioDevice());
                 items.Add(BuildUseOsTimer());
                 break;
 
@@ -43,6 +44,43 @@ internal sealed class AudioDriverConfigPage : ConfigPage
         return items;
     }
 
+    /// <summary>
+    /// Lists what the driver selected in config can play through. That is not necessarily the driver
+    /// running, since a driver change only takes effect on exit.
+    /// </summary>
+    private static CItemList BuildOutputDevice()
+    {
+        AudioBackend backend = AudioDeviceOptions.FromConfig(CDTXMania.ConfigIni).Backend;
+        IReadOnlyList<AudioOutput> outputs = AudioOutputs.For(backend);
+
+        //index 0 is Auto, so a device sits one place further down the list than in outputs
+        List<string> names = ["Auto (system default)"];
+        names.AddRange(outputs.Select(output => output.IsSystemDefault ? $"{output.Name} *" : output.Name));
+
+        int selected = 0;
+        for (int n = 0; n < outputs.Count; n++)
+        {
+            if (outputs[n].Name == CDTXMania.ConfigIni.strOutputDevice)
+            {
+                selected = n + 1;
+                break;
+            }
+        }
+
+        CItemList item = new("Output Device", CItemBase.EPanelType.Normal, selected,
+            "サウンドの出力先デバイスを選択します。\nAutoにすると、Windowsの既定のデバイスに\n追従します（ヘッドホンを抜いたときなど）。\n*印は現在の既定のデバイスです。",
+            "Output device to play through\nAuto follows the Windows default\n* marks the current system default\n\nNote: Exit CONFIG to apply",
+            names.ToArray());
+
+        item.BindConfig(
+            () => { },
+            () => CDTXMania.ConfigIni.strOutputDevice = item.nCurrentlySelectedIndex <= 0
+                ? ""
+                : outputs[item.nCurrentlySelectedIndex - 1].Name);
+
+        return item;
+    }
+
     private static CItemToggle BuildAdjustWaves()
     {
         CItemToggle item = new("AdjustWaves", CDTXMania.ConfigIni.bWave再生位置自動調整機能有効,
@@ -51,19 +89,6 @@ internal sealed class AudioDriverConfigPage : ConfigPage
         item.BindConfig(
             () => item.bON = CDTXMania.ConfigIni.bWave再生位置自動調整機能有効,
             () => CDTXMania.ConfigIni.bWave再生位置自動調整機能有効 = item.bON);
-        return item;
-    }
-
-    private static CItemList BuildAsioDevice()
-    {
-        string[] asioDevices = CEnumerateAllAsioDevices.GetAllASIODevices();
-        CItemList item = new("ASIO device", CItemBase.EPanelType.Normal, CDTXMania.ConfigIni.nASIODevice,
-            "ASIOデバイス:\nASIO使用時の\nサウンドデバイスを選択\nします。\n",
-            "ASIO Sound Device:\nSelect the sound device to use under ASIO mode.\n\nNote: Exit CONFIG to make the setting take effect.",
-            asioDevices);
-        item.BindConfig(
-            () => item.nCurrentlySelectedIndex = CDTXMania.ConfigIni.nASIODevice,
-            () => CDTXMania.ConfigIni.nASIODevice = item.nCurrentlySelectedIndex);
         return item;
     }
 

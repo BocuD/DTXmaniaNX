@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using DTXMania.Core;
+using DTXMania.Core.Audio;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.Inspector;
 using Hexa.NET.ImGui;
@@ -16,17 +17,22 @@ public sealed class SoundReference
 
     //stops whatever exclusive sound was playing before it, so background music replaces rather than layers
     [Themable] public bool exclusive;
+
+    [Themable] public AudioGroup group = AudioGroup.Se;
+
     [JsonIgnore] private CSystemSound? loaded;
 
     public SoundReference()
     {
     }
 
-    public SoundReference(SkinResource sound, bool loop = false, bool exclusive = false)
+    public SoundReference(SkinResource sound, bool loop = false, bool exclusive = false,
+        AudioGroup group = AudioGroup.Se)
     {
         this.sound = sound;
         this.loop = loop;
         this.exclusive = exclusive;
+        this.group = group;
     }
 
     [JsonIgnore] public bool IsPlaying => loaded?.bIsPlaying ?? false;
@@ -55,6 +61,7 @@ public sealed class SoundReference
         }
 
         CSystemSound created = CSystemSound.FromPath(path, loop, exclusive);
+        created.group = group;
 
         try
         {
@@ -122,6 +129,11 @@ public sealed class SoundReference
             Load();
         }
 
+        if (Inspector.Inspector.Inspect("Group", ref group))
+        {
+            Load();
+        }
+
         ImGui.BeginDisabled(!IsLoaded);
         if (ImGui.Button("Play"))
         {
@@ -149,8 +161,9 @@ public sealed class SoundReference
         return obj is SoundReference other
                && sound == other.sound
                && loop == other.loop
-               && exclusive == other.exclusive;
+               && exclusive == other.exclusive
+               && group == other.group;
     }
 
-    public override int GetHashCode() => HashCode.Combine(sound, loop, exclusive);
+    public override int GetHashCode() => HashCode.Combine(sound, loop, exclusive, group);
 }

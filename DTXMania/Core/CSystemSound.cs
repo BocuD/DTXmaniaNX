@@ -1,3 +1,5 @@
+using DTXMania.Core.Audio;
+
 namespace DTXMania.Core;
 
 public class CSystemSound : IDisposable
@@ -8,6 +10,8 @@ public class CSystemSound : IDisposable
     public string strFilename = "";
     public bool loop;
     public bool bExclusive;
+
+    public AudioGroup group = AudioGroup.Se;
 
     //whether loading has not been attempted yet; the first play does it
     public bool bReadNotTried;
@@ -22,24 +26,19 @@ public class CSystemSound : IDisposable
 
     public bool bIsPlaying => AudioMixer.IsPlaying(this);
 
-    /// <summary>The level of the channel that is sounding, so a fade can ride it while it plays.</summary>
+    /// <summary>The level of the channel sounding now, which a fade changes while it plays.</summary>
     public int nCurrentSoundVolume
     {
-        get => AudioMixer.Current(this)?.Volume ?? 0;
-        set
-        {
-            if (AudioMixer.Current(this) is { } sound)
-            {
-                sound.Volume = value;
-            }
-        }
+        get => AudioMixer.CurrentVolume(this);
+        set => AudioMixer.SetCurrentVolume(this, value);
     }
 
-    public CSystemSound(string fileName, bool loop, bool exclusive)
+    public CSystemSound(string fileName, bool loop, bool exclusive, AudioGroup group = AudioGroup.Se)
     {
         strFilename = fileName;
         this.loop = loop;
         bExclusive = exclusive;
+        this.group = group;
         bReadNotTried = true;
     }
 
@@ -47,7 +46,7 @@ public class CSystemSound : IDisposable
     {
     }
 
-    /// <summary>A sound whose file has already been located, as the skin system does for a stage's own.</summary>
+    /// <summary>A sound whose file has already been located, as the skin system does.</summary>
     public static CSystemSound FromPath(string path, bool loop, bool exclusive)
     {
         return new CSystemSound(Path.GetFileName(path), loop, exclusive) { absolutePath = path };

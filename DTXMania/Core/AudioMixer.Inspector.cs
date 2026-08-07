@@ -1,4 +1,5 @@
 using System.Numerics;
+using DTXMania.Core.Audio;
 using Hexa.NET.ImGui;
 
 namespace DTXMania.Core;
@@ -18,17 +19,15 @@ public static partial class AudioMixer
         DrawTotals();
         ImGui.Separator();
 
-        if (ImGui.Button("Stop Everything"))
+        if (ImGui.Button("Stop all playback"))
         {
             foreach (CSystemSound clip in clips.Keys.ToArray())
             {
                 Stop(clip);
             }
         }
-
-        ImGui.SameLine();
-        ImGui.TextDisabled($"channels grow on demand, guard at {RunawayGuard}");
-
+        
+        DrawGroups();
         DrawClips();
 
         ImGui.End();
@@ -45,11 +44,43 @@ public static partial class AudioMixer
             sounding += Sounding(state);
         }
 
-        ImGui.Text($"Clips {clips.Count}     Channels {channels}     Sounding {sounding}");
+        ImGui.Text($"Clips {clips.Count}  Voices {channels} (peak {PeakVoiceCount})  Playing {sounding}");
+
+        //FDK's own counters cover everything this mixer does not own yet — gameplay chips above all — and
+        //do not see sample channels, so the two numbers are separate rather than a total
+        ImGui.TextDisabled($"FDK: {FDK.CSoundManager.nStreams} streams, {FDK.CSoundManager.nMixing} mixed");
+
+        ImGui.TextDisabled($"{Device.TypeName} on " +
+                           $"{(Device.CurrentOutput.Length > 0 ? Device.CurrentOutput : "an unnamed device")}");
 
         ImGui.TextDisabled(CSystemSound.rLastPlayedExclusiveSystemSound is { } exclusive
             ? $"exclusive: {exclusive.strFilename}"
             : "exclusive: none");
+    }
+
+    private static void DrawGroups()
+    {
+        if (!ImGui.CollapsingHeader("Groups"))
+        {
+            return;
+        }
+
+        ImGui.TextDisabled(Device.MixesGroups
+            ? $"{Device.TypeName} mixes each group, so this reaches everything it plays."
+            : $"{Device.TypeName} has no per-group mixing; the level rides each voice this mixer owns.");
+
+        foreach (AudioGroup group in Enum.GetValues<AudioGroup>())
+        {
+            int volume = Device.GetGroupVolume(group);
+
+            if (ImGui.SliderInt(group.ToString(), ref volume, 0, 100))
+            {
+                SetGroupVolume(group, volume);
+            }
+        }
+
+        //these write to the device only, so the config page puts its saved values back on the next visit
+        ImGui.TextDisabled("Not saved — Config > Audio > Mixer Volumes is where these persist.");
     }
 
     private static void DrawClips()
@@ -64,12 +95,13 @@ public static partial class AudioMixer
                                                               | ImGuiTableFlags.SizingStretchProp
                                                               | ImGuiTableFlags.ScrollY;
 
-        if (!ImGui.BeginTable("mixerClips", 5, flags))
+        if (!ImGui.BeginTable("mixerClips", 6, flags))
         {
             return;
         }
 
         ImGui.TableSetupColumn("Clip", ImGuiTableColumnFlags.WidthStretch);
+        ImGui.TableSetupColumn("Group", ImGuiTableColumnFlags.WidthFixed, 60.0f);
         ImGui.TableSetupColumn("Channels", ImGuiTableColumnFlags.WidthFixed, 120.0f);
         ImGui.TableSetupColumn("Plays", ImGuiTableColumnFlags.WidthFixed, 60.0f);
         ImGui.TableSetupColumn("Flags", ImGuiTableColumnFlags.WidthFixed, 110.0f);
@@ -92,6 +124,9 @@ public static partial class AudioMixer
 
         ImGui.TableNextColumn();
         ImGui.Text(clip.strFilename.Length > 0 ? clip.strFilename : "(unnamed)");
+
+        ImGui.TableNextColumn();
+        ImGui.TextDisabled(clip.group.ToString());
 
         //how much of the pool is in use. Full means the next play has to grow it, which is the one moment
         //worth noticing: it is when a decode happens

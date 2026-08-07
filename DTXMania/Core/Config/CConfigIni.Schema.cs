@@ -1,5 +1,6 @@
 #nullable disable
 
+using DTXMania.Core.Audio;
 using FDK;
 
 namespace DTXMania.Core;
@@ -171,6 +172,16 @@ internal partial class CConfigIni
 						c => c.nASIODevice.ToString())
 				],
 				() => CEnumerateAllAsioDevices.GetAllASIODevices().Select((name, i) => $"{i}: {name}")),
+			G([
+					"出力デバイス名。空欄にするとシステムの既定のデバイスに追従します。",
+					"(ヘッドホンを抜いたときなどに自動で切り替わります)",
+					"Output device, by name. Leave empty to follow the system default,",
+					"which switches with it when e.g. headphones are unplugged.",
+					"A name that no longer matches any device falls back to the default."
+				],
+				Custom("OutputDevice",
+					(c, v) => c.strOutputDevice = v.Trim(),
+					c => c.strOutputDevice ?? "")),
 			G(["WASAPI/ASIO時に使用する演奏タイマーの種類", "Playback timer used for WASAPI/ASIO", "(0=FDK Timer, 1=System Timer)"],
 				Bool("SoundTimerType", c => c.bUseOSTimer)),
 			G("WASAPI使用時にEventDrivenモードを使う",
@@ -191,6 +202,15 @@ internal partial class CConfigIni
 				Int("ChipPlayTimeComputeMode", 0, 1, c => c.nChipPlayTimeComputeMode)),
 			G(["全体ボリュームの設定", "(0=無音 ～ 100=最大。WASAPI/ASIO時のみ有効)", "Master volume settings", "(0=Silent - 100=Max)"],
 				Int("MasterVolume", 0, 100, c => c.nMasterVolume)),
+			G([
+					"グループごとのボリューム設定 (0=無音 ～ 100=最大)",
+					"Per-group volume (0=Silent - 100=Max)."
+				],
+				GroupVolume("VolumeBGM", AudioGroup.Bgm),
+				GroupVolume("VolumeSE", AudioGroup.Se),
+				GroupVolume("VolumeDrums", AudioGroup.Drums),
+				GroupVolume("VolumeBass", AudioGroup.Bass),
+				GroupVolume("VolumeGuitar", AudioGroup.Guitar)),
 			G(["ギター/ベース有効(0:OFF,1:ON)", "Enable Guitar/Bass or not.(0:OFF,1:ON)"],
 				Bool("Guitar", c => c.bGuitarEnabled)),
 			G(["シングルプレイのギター有効(0:OFF,1:ON)", "Enable Singleplayer Guitar or not.(0:OFF,1:ON)"],
@@ -668,6 +688,12 @@ internal partial class CConfigIni
 
 	// Fast lookup for reading: section name -> (key -> item).
 	private static readonly Dictionary<string, Dictionary<string, ConfigItem>> SchemaByKey = BuildSchemaLookup();
+
+	//not Int(), because these live in an array and the expression binder only reaches fields
+	private static ConfigItem GroupVolume(string key, AudioGroup group) => Custom(key,
+		(c, v) => c.nGroupVolume[(int)group] =
+			CConversion.nGetNumberIfInRange(v, 0, 100, c.nGroupVolume[(int)group]),
+		c => c.nGroupVolume[(int)group].ToString());
 
 	private static Dictionary<string, Dictionary<string, ConfigItem>> BuildSchemaLookup()
 	{

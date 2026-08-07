@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Runtime;
 using System.Text;
 using System.Windows.Forms;
+using DTXMania.Core.Audio;
 using DTXMania.Core.Framework;
 using DTXMania.Core.OpenGL;
 using DTXMania.SongDb;
@@ -394,6 +395,9 @@ internal partial class CDTXMania
     {
     }
 
+    //held so the per-frame output check does not allocate a delegate
+    private static readonly Func<AudioDeviceOptions> audioSettings = () => AudioDeviceOptions.FromConfig(ConfigIni);
+
     public void Draw()
     {
         PumpMainThreadActions();
@@ -424,8 +428,10 @@ internal partial class CDTXMania
         CSoundManager.rcPerformanceTimer.tUpdate();
 
         FrameProfiler.Begin(FrameSection.DeviceScan);
+        CStage.EStage stage = StageManager.rCurrentStage.eStageID;
+
         //don't constantly scan unless we lost a midi device
-        if (StageManager.rCurrentStage.eStageID == CStage.EStage.Performance_6)
+        if (stage == CStage.EStage.Performance_6)
         {
             if (InputManager.lostMidiDevice)
             {
@@ -435,6 +441,13 @@ internal partial class CDTXMania
         else
         {
             InputManager.ScanDevices();
+        }
+
+        //rebuilding the output reloads every sound and the performance timer, so not during a song. Not
+        //while config is open either: it applies its own device changes on exit
+        if (stage != CStage.EStage.Performance_6 && stage != CStage.EStage.Config_3)
+        {
+            AudioMixer.FollowSystemOutput(audioSettings);
         }
         FrameProfiler.End(FrameSection.DeviceScan);
 

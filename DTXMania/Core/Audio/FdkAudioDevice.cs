@@ -5,28 +5,101 @@ using Un4seen.Bass;
 namespace DTXMania.Core.Audio;
 
 /// <summary>
-/// Thin audio interface implemented on top of existing FDK audio implementation so we keep output during
-/// migration to new audio mixer interface.
+/// <see cref="IAudioDevice"/> on top of FDK, so there is output while the new audio layer is built.
 /// </summary>
 public sealed class FdkAudioDevice : IAudioDevice
 {
     public string TypeName => CDTXMania.SoundManager.GetCurrentSoundDeviceType();
 
-    public IAudioClip Load(string path) => new FdkAudioClip(path);
+    public IAudioClip Load(string path, AudioGroup group) => new FdkAudioClip(path, group);
+
+    public int MasterVolume
+    {
+        get => CDTXMania.SoundManager.nMasterVolume;
+        set => CDTXMania.SoundManager.nMasterVolume = value;
+    }
+
+    public int GetGroupVolume(AudioGroup group) => CDTXMania.SoundManager.nGetGroupVolume(ToFdk(group));
+
+    public void SetGroupVolume(AudioGroup group, int volume)
+        => CDTXMania.SoundManager.tSetGroupVolume(ToFdk(group), volume);
+
+    //only WASAPI has a mixer per instrument group; ASIO has one for everything and DirectSound has none
+    public bool MixesGroups => CSoundManager.SoundDeviceType
+        is ESoundDeviceType.ExclusiveWASAPI or ESoundDeviceType.SharedWASAPI;
+
+    public void Reinitialize(AudioDeviceOptions options)
+    {
+        Request(options);
+
+        //the ASIO buffer stays 0, meaning the device's own setting; only the WASAPI one is configurable
+        CDTXMania.SoundManager.tInitialize(ToFdk(options.Backend),
+            options.BufferSizeMs,
+            options.EventDriven,
+            0,
+            AsioDevice(options),
+            options.UseOsTimer);
+    }
+
+    /// <summary>
+    /// Hands the requested output to FDK, whose device constructors read it. Also needed before the first
+    /// device, which is built by FDK's constructor rather than here.
+    /// </summary>
+    internal static void Request(AudioDeviceOptions options)
+        => CSoundManager.strRequestedOutputDevice = options.OutputDevice;
+
+    /// <summary>
+    /// The ASIO driver index to open. ASIO picks by index, so a name is resolved to one; the stored index
+    /// is the fallback when no name is set or it matches nothing.
+    /// </summary>
+    internal static int AsioDevice(AudioDeviceOptions options)
+        => options.Backend == AudioBackend.Asio && AudioOutputs.AsioDriver(options.OutputDevice) is var n and >= 0
+            ? n
+            : options.AsioDevice;
+
+    public IReadOnlyList<AudioOutput> Outputs
+        => AudioOutputs.For(CurrentBackend);
+
+    public string CurrentOutput => CSoundManager.strActiveOutputDevice;
+
+    private static AudioBackend CurrentBackend => CSoundManager.SoundDeviceType switch
+    {
+        ESoundDeviceType.ASIO => AudioBackend.Asio,
+        ESoundDeviceType.ExclusiveWASAPI => AudioBackend.WasapiExclusive,
+        ESoundDeviceType.SharedWASAPI => AudioBackend.WasapiShared,
+        _ => AudioBackend.DirectSound
+    };
+
+    internal static CSound.EInstType ToFdk(AudioGroup group) => group switch
+    {
+        AudioGroup.Bgm => CSound.EInstType.BGM,
+        AudioGroup.Drums => CSound.EInstType.Drums,
+        AudioGroup.Bass => CSound.EInstType.Bass,
+        AudioGroup.Guitar => CSound.EInstType.Guitar,
+        _ => CSound.EInstType.SE
+    };
+
+    internal static ESoundDeviceType ToFdk(AudioBackend backend) => backend switch
+    {
+        AudioBackend.Asio => ESoundDeviceType.ASIO,
+        AudioBackend.WasapiExclusive => ESoundDeviceType.ExclusiveWASAPI,
+        AudioBackend.WasapiShared => ESoundDeviceType.SharedWASAPI,
+        _ => ESoundDeviceType.DirectSound
+    };
 }
 
 public sealed class FdkAudioClip : IAudioClip
 {
-    //a sample is the whole file decoded in memory, which suits a short effect and not a long BGM — and a
-    //BGM only ever needs one voice anyway, so it never reaches the point of asking for a second
+    //a sample is the whole file decoded in memory, which suits a short effect and not a long BGM. A BGM
+    //only ever needs one voice, so it never asks for a second anyway
     private const long SampleSizeLimit = 4 * 1024 * 1024;
 
     private readonly string path;
+    private readonly CSound.EInstType instrument;
     private readonly List<IAudioVoice> voices = [];
 
     public string VoiceKind { get; private set; } = "stream";
 
-    //the first voice is a CSound, which is also how the mixer this clip feeds is discovered
     private CSound? first;
     private int mixer;
 
@@ -34,22 +107,25 @@ public sealed class FdkAudioClip : IAudioClip
     private int sample;
     private bool sampleTried;
 
-    public FdkAudioClip(string path)
+    public FdkAudioClip(string path, AudioGroup group)
     {
-        this.path = path;
+        instrument = FdkAudioDevice.ToFdk(group);
 
-        if (CreateVoice() == null)
+        //no voice yet; making one here would leave a channel nobody holds. The file is checked, not read
+        if (!File.Exists(path))
         {
             throw new FileNotFoundException(path);
         }
+
+        this.path = path;
     }
 
     public IAudioVoice? CreateVoice()
     {
-        //the first voice comes from FDK, so a clip behaves exactly as it did before whatever happens next
+        //the first voice comes from FDK, and is where the mixer handle for the rest comes from
         if (first == null)
         {
-            CSound sound = CDTXMania.SoundManager.tGenerateSound(path);
+            CSound sound = CDTXMania.SoundManager.tGenerateSound(path, instrument);
             first = sound;
             mixer = sound.nMixerHandle;
 
@@ -66,7 +142,7 @@ public sealed class FdkAudioClip : IAudioClip
             return Track(duplicated, "duplicate");
         }
 
-        return Track(new FdkAudioVoice(CDTXMania.SoundManager.tGenerateSound(path)), "stream");
+        return Track(new FdkAudioVoice(CDTXMania.SoundManager.tGenerateSound(path, instrument)), "stream");
     }
 
     public void Dispose()
@@ -108,8 +184,7 @@ public sealed class FdkAudioClip : IAudioClip
             return null;
         }
 
-        //BASS_SAMPLE_OVER_POS only decides what happens past max, which the mixer's own pool already
-        //prevents; max is high enough that it is the runaway guard that bites first
+        //64 is above the mixer's own runaway guard, so BASS_SAMPLE_OVER_POS never has to decide anything
         sample = Bass.BASS_SampleLoad(path, 0, 0, 64, BASSFlag.BASS_SAMPLE_OVER_POS);
 
         if (sample == 0)

@@ -1,4 +1,5 @@
 using DTXMania.Core;
+using DTXMania.Core.Audio;
 using DTXMania.UI.Config;
 using DTXMania.UI.Item;
 using FDK;
@@ -8,12 +9,15 @@ namespace DTXMania;
 internal sealed class AudioConfigPage : ConfigPage
 {
     private readonly AudioDriverConfigPage driverPage;
+    private readonly MixerVolumeConfigPage volumePage;
 
     // snapshot taken on entry; the device is only rebuilt on exit if one of these changed
     private int soundTypeInitial;
     private int wasapiBufferInitial;
     private int asioDeviceInitial;
+    private string outputDeviceInitial;
     private bool osTimerInitial;
+    private bool eventDrivenInitial;
     private bool opened;
 
     private CItemToggle timeStretch;
@@ -21,6 +25,7 @@ internal sealed class AudioConfigPage : ConfigPage
     public AudioConfigPage(ConfigList list) : base(list)
     {
         driverPage = new AudioDriverConfigPage(list);
+        volumePage = new MixerVolumeConfigPage(list);
     }
 
     public override void CacheInitialState()
@@ -29,6 +34,8 @@ internal sealed class AudioConfigPage : ConfigPage
         wasapiBufferInitial = CDTXMania.ConfigIni.nWASAPIBufferSizeMs;
         asioDeviceInitial = CDTXMania.ConfigIni.nASIODevice;
         osTimerInitial = CDTXMania.ConfigIni.bUseOSTimer;
+        eventDrivenInitial = CDTXMania.ConfigIni.bEventDrivenWASAPI;
+        outputDeviceInitial = CDTXMania.ConfigIni.strOutputDevice;
     }
 
     public override List<CItemBase> Build()
@@ -45,9 +52,13 @@ internal sealed class AudioConfigPage : ConfigPage
             {
                 // master volume applies live while adjusting (matches the original config screen)
                 CDTXMania.ConfigIni.nMasterVolume = masterVolume.nCurrentValue;
-                CDTXMania.SoundManager.nMasterVolume = masterVolume.nCurrentValue;
+                AudioMixer.Device.MasterVolume = masterVolume.nCurrentValue;
             });
         items.Add(masterVolume);
+
+        items.Add(FolderItem("Mixer Volumes",
+            "BGM・効果音・各楽器ごとの音量を設定します。",
+            "Set the volume of BGM, sound effects and each instrument separately.", volumePage));
 
         CItemInteger chipVolume = new("ChipVolume", 0, 100, CDTXMania.ConfigIni.n手動再生音量,
             "打音の音量：\n入力に反応して再生される\nチップの音量を指定します。\n0 ～ 100 % の値が指定可能\nです。\n",
@@ -126,24 +137,12 @@ internal sealed class AudioConfigPage : ConfigPage
         if (soundTypeInitial != CDTXMania.ConfigIni.nSoundDriverType ||
             wasapiBufferInitial != CDTXMania.ConfigIni.nWASAPIBufferSizeMs ||
             asioDeviceInitial != CDTXMania.ConfigIni.nASIODevice ||
-            osTimerInitial != CDTXMania.ConfigIni.bUseOSTimer)
+            osTimerInitial != CDTXMania.ConfigIni.bUseOSTimer ||
+            eventDrivenInitial != CDTXMania.ConfigIni.bEventDrivenWASAPI ||
+            outputDeviceInitial != CDTXMania.ConfigIni.strOutputDevice)
         {
-            ESoundDeviceType soundDeviceType = CDTXMania.ConfigIni.nSoundDriverType switch
-            {
-                0 => ESoundDeviceType.DirectSound,
-                1 => ESoundDeviceType.ASIO,
-                2 => ESoundDeviceType.ExclusiveWASAPI,
-                3 => ESoundDeviceType.SharedWASAPI,
-                _ => ESoundDeviceType.Unknown
-            };
-
-            CDTXMania.SoundManager.tInitialize(soundDeviceType,
-                CDTXMania.ConfigIni.nWASAPIBufferSizeMs,
-                false,
-                0,
-                CDTXMania.ConfigIni.nASIODevice,
-                CDTXMania.ConfigIni.bUseOSTimer);
-
+            //through the mixer, which has to give up its own channels before the rebuild frees them
+            AudioMixer.Reinitialize(AudioDeviceOptions.FromConfig(CDTXMania.ConfigIni));
             CDTXMania.app.UpdateWindowTitle();
         }
 

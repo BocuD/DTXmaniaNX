@@ -135,7 +135,43 @@ public class CSoundDeviceDirectSound : ISoundDevice
 
 		#region [ DirectSound デバイスを作成する。]
 		//-----------------
-		DirectSound = new DirectSound();   // 失敗したら例外をそのまま発出。
+		// An empty name, or one that is not installed, takes the default device.
+		Guid gDriver = Guid.Empty;
+		CSoundManager.strActiveOutputDevice = "";
+		if (!string.IsNullOrEmpty(CSoundManager.strRequestedOutputDevice))
+		{
+			foreach (DeviceInformation di in SharpDX.DirectSound.DirectSound.GetDevices())
+			{
+				if (di.Description == CSoundManager.strRequestedOutputDevice && di.DriverGuid != Guid.Empty)
+				{
+					gDriver = di.DriverGuid;
+					CSoundManager.strActiveOutputDevice = di.Description;
+					break;
+				}
+			}
+
+			if (gDriver == Guid.Empty)
+			{
+				Trace.TraceWarning("Requested output device \"{0}\" was not found; using the default device.",
+					CSoundManager.strRequestedOutputDevice);
+			}
+		}
+
+		if (gDriver == Guid.Empty)
+		{
+			// The primary driver already points at the system default, so report it by name. A caller
+			// watching for the default to change would otherwise see a mismatch on every check.
+			foreach (DeviceInformation di in SharpDX.DirectSound.DirectSound.GetDevices())
+			{
+				if (di.DriverGuid == Guid.Empty)
+				{
+					CSoundManager.strActiveOutputDevice = di.Description;
+					break;
+				}
+			}
+		}
+
+		DirectSound = gDriver == Guid.Empty ? new DirectSound() : new DirectSound(gDriver);   // 失敗したら例外をそのまま発出。
 
 		// デバイスの協調レベルを設定する。
 
@@ -219,6 +255,11 @@ public class CSoundDeviceDirectSound : ISoundDevice
 	#endregion
 
 	#region [ tサウンドを作成する() ]
+	//DirectSound has no mixer; every sound is its own buffer straight to the device
+	public void tSetGroupVolume(CSound.EInstType eInstType, int nVolume)
+	{
+	}
+
 	public CSound tサウンドを作成する(string strファイル名, CSound.EInstType eInstType)
 	{
 		var sound = new CSound();
