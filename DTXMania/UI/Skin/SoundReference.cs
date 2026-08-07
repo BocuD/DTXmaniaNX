@@ -16,7 +16,6 @@ public sealed class SoundReference
 
     //stops whatever exclusive sound was playing before it, so background music replaces rather than layers
     [Themable] public bool exclusive;
-
     [JsonIgnore] private CSystemSound? loaded;
 
     public SoundReference()
@@ -41,7 +40,6 @@ public sealed class SoundReference
         //pointing this slot at something else stops what it was playing: only an owner going away lets a
         //one-shot finish, and the old sound is not what the slot means any more
         Unload();
-        SweepFinished();
 
         if (sound.IsEmpty)
         {
@@ -78,43 +76,12 @@ public sealed class SoundReference
         loaded = null;
     }
 
-    //frees the sound, but lets a one-shot that is still audible finish first
+    //frees the sound, but lets a one-shot that is still audible finish first. The mixer owns the channels,
+    //so letting them run on is its business rather than a list kept here
     public void ReleaseWhenFinished()
     {
-        SweepFinished();
-
-        if (loaded is not { } sound)
-        {
-            return;
-        }
-
+        loaded?.ReleaseWhenFinished();
         loaded = null;
-
-        if (!loop && sound.bIsPlaying)
-        {
-            finishing.Add(sound);
-            return;
-        }
-
-        sound.tStop();
-        sound.Dispose();
-    }
-
-    //handed-over sounds, freed once they fall silent. Nothing pumps this on a timer: it is swept whenever
-    //sounds are loaded or freed, which is every stage change, so the most it ever holds is what was still
-    //playing across the last one
-    private static readonly List<CSystemSound> finishing = [];
-
-    public static void SweepFinished()
-    {
-        for (int i = finishing.Count - 1; i >= 0; i--)
-        {
-            if (!finishing[i].bIsPlaying)
-            {
-                finishing[i].Dispose();
-                finishing.RemoveAt(i);
-            }
-        }
     }
 
     public void Play(int volume = 100) => loaded?.tPlay(volume);

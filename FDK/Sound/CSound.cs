@@ -1461,6 +1461,9 @@ public class CSound : IDisposable, ICloneable
 	protected SoundBuffer Buffer = null;            // DirectSound 用
 	protected DirectSound DirectSound;
 	protected int hMixer = -1;  // 設計壊してゴメン Mixerに後で登録するときに使う
+
+	public bool bUsesBASS => bIsBASS;
+	public int nMixerHandle => bIsBASS ? hMixer : 0;
 	//-----------------
 	#endregion
 

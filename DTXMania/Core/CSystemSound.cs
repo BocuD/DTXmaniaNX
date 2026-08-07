@@ -1,5 +1,3 @@
-using FDK;
-
 namespace DTXMania.Core;
 
 public class CSystemSound : IDisposable
@@ -16,55 +14,26 @@ public class CSystemSound : IDisposable
 
     public bool loadSucceeded;
 
-    private CSound?[] sounds = new CSound?[2];
-    private int nextIndex;
     private bool disposed;
+    private string? absolutePath;
 
-    //the copy that is sounding now is the one that was played last, so it is the other one
-    private CSound? CurrentSound => sounds[1 - nextIndex];
+    /// <summary>The file this clip plays. Empty until it can be resolved.</summary>
+    internal string ResolvedPath => absolutePath ?? (strFilename.Length > 0 ? CSkin.Path(strFilename) : string.Empty);
 
-    public bool bIsPlaying => CurrentSound?.bIsPlaying ?? false;
+    public bool bIsPlaying => AudioMixer.IsPlaying(this);
 
-    //the copy that will sound next, which is what a caller seeks or sets a level on before playing it
-    private CSound? NextSound => sounds[nextIndex];
-
-    public int nextSoundPosition
-    {
-        get => NextSound?.nPosition ?? 0;
-        set
-        {
-            if (NextSound is { } sound)
-            {
-                sound.nPosition = value;
-            }
-        }
-    }
-
-    public int nextSoundVolume
-    {
-        get => NextSound?.nVolume ?? 0;
-        set
-        {
-            if (NextSound is { } sound)
-            {
-                sound.nVolume = value;
-            }
-        }
-    }
-
+    /// <summary>The level of the channel that is sounding, so a fade can ride it while it plays.</summary>
     public int nCurrentSoundVolume
     {
-        get => CurrentSound?.nVolume ?? 0;
+        get => AudioMixer.Current(this)?.Volume ?? 0;
         set
         {
-            if (CurrentSound is { } sound)
+            if (AudioMixer.Current(this) is { } sound)
             {
-                sound.nVolume = value;
+                sound.Volume = value;
             }
         }
     }
-
-    private string? absolutePath;
 
     public CSystemSound(string fileName, bool loop, bool exclusive)
     {
@@ -74,9 +43,8 @@ public class CSystemSound : IDisposable
         bReadNotTried = true;
     }
 
-    public CSystemSound()
+    public CSystemSound() : this(string.Empty, false, false)
     {
-        bReadNotTried = true;
     }
 
     /// <summary>A sound whose file has already been located, as the skin system does for a stage's own.</summary>
@@ -95,32 +63,22 @@ public class CSystemSound : IDisposable
             throw new InvalidOperationException("A system sound needs a file name.");
         }
 
-        string path = absolutePath ?? CSkin.Path(strFilename);
+        string path = ResolvedPath;
 
         if (!File.Exists(path))
         {
             throw new FileNotFoundException(strFilename);
         }
 
-        for (int i = 0; i < sounds.Length; i++)
-        {
-            try
-            {
-                sounds[i] = CDTXMania.SoundManager.tGenerateSound(path);
-            }
-            catch
-            {
-                sounds[i] = null;
-                throw;
-            }
-        }
-
+        //one channel up front, so the first play does not pay to decode it
+        AudioMixer.Preload(this);
         loadSucceeded = true;
     }
 
     public void tPlay() => tPlay(100);
 
-    public void tPlay(int nVolume)
+    /// <param name="pan">Where it sits in the stereo field, -100 left to 100 right.</param>
+    public void tPlay(int nVolume, int pan = 0)
     {
         //loaded on first play rather than up front, and a failure is not retried every time it is played
         if (bReadNotTried)
@@ -141,21 +99,12 @@ public class CSystemSound : IDisposable
             rLastPlayedExclusiveSystemSound = this;
         }
 
-        if (sounds[nextIndex] is { } sound)
-        {
-            sound.nVolume = nVolume;
-            sound.tStartPlaying(loop);
-        }
-
-        nextIndex = 1 - nextIndex;
+        AudioMixer.Play(this, nVolume, pan);
     }
 
     public void tStop()
     {
-        foreach (CSound? sound in sounds)
-        {
-            sound?.tStopPlayback();
-        }
+        AudioMixer.Stop(this);
 
         if (rLastPlayedExclusiveSystemSound == this)
         {
@@ -163,22 +112,10 @@ public class CSystemSound : IDisposable
         }
     }
 
-    public void tRemoveMixer()
-    {
-        //DirectSound has no mixer to remove them from
-        if (CDTXMania.SoundManager.GetCurrentSoundDeviceType() == "DirectSound")
-        {
-            return;
-        }
+    /// <summary>Gives up this clip's channels, letting a one-shot still sounding finish first.</summary>
+    public void ReleaseWhenFinished() => AudioMixer.Release(this);
 
-        foreach (CSound? sound in sounds)
-        {
-            if (sound != null)
-            {
-                CDTXMania.SoundManager.RemoveMixer(sound);
-            }
-        }
-    }
+    public void tRemoveMixer() => AudioMixer.RemoveMixer(this);
 
     public void Dispose()
     {
@@ -187,15 +124,10 @@ public class CSystemSound : IDisposable
             return;
         }
 
-        for (int i = 0; i < sounds.Length; i++)
-        {
-            if (sounds[i] != null)
-            {
-                CDTXMania.SoundManager.tDiscard(sounds[i]);
-                sounds[i] = null;
-            }
-        }
+        AudioMixer.Free(this);
 
+        //tStop clears this, but a sound can be disposed without being stopped, and leaving the static
+        //pointing at a dead clip means the next exclusive play stops something that no longer exists
         if (rLastPlayedExclusiveSystemSound == this)
         {
             rLastPlayedExclusiveSystemSound = null;

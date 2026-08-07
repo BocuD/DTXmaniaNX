@@ -51,6 +51,7 @@ public static class InspectorManager
         windows.Add(new Window("Focus", () => FocusWindow.Draw()));
         windows.Add(new Window("Textures", () => textureInspector.DrawWindow()));
         windows.Add(new Window("Drawable Tracker", () => DrawableTracker.DrawWindow()));
+        windows.Add(new Window("Audio Mixer", () => Core.AudioMixer.DrawWindow()));
         windows.Add(new Window("Display Controls", () => RendererInfo.Draw()));
     }
 
