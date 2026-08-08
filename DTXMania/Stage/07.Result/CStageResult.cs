@@ -510,12 +510,6 @@ internal class CStageResult : CStage
 	}
 	public override void OnDeactivate()
 	{
-		if ( rResultSound != null )
-		{
-			CDTXMania.SoundManager.tDiscard( rResultSound );
-			rResultSound = null;
-		}
-		
 		base.OnDeactivate();
 	}
 	public override void OnManagedCreateResources()
@@ -761,7 +755,6 @@ internal class CStageResult : CStage
 	private readonly int[] nチャンネル0Atoレーン07;
 	private int n最後に再生したHHのWAV番号;
 	private EChannel n最後に再生したHHのチャンネル番号;
-	private CSound rResultSound;
 	private UIImage background;  // tx背景
 	//Copy from CStagePerfCommonScreen
 	public STDGBVALUE<CStagePerfCommonScreen.CLAGTIMINGHITCOUNT> nTimingHitCount;

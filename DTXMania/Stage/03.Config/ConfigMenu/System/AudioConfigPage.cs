@@ -108,6 +108,14 @@ internal sealed class AudioConfigPage : ConfigPage
             () => CDTXMania.ConfigIni.bTimeStretch = timeStretch.bON);
         items.Add(timeStretch);
 
+        CItemToggle speedAffectsChips = new("SpeedOnChips", CDTXMania.ConfigIni.bPlaySpeedAffectsChips,
+            "演奏速度をチップ音にも適用します。\nOFFにすると曲だけが速度に追従し、\nチップ音は録音されたまま鳴ります。",
+            "Apply PlaySpeed to chip sounds as well as the song.\nOFF: only the song follows it, and chips sound as recorded.\nON: chips follow it too, which detunes them unless TimeStretch is on.");
+        speedAffectsChips.BindConfig(
+            () => speedAffectsChips.bON = CDTXMania.ConfigIni.bPlaySpeedAffectsChips,
+            () => CDTXMania.ConfigIni.bPlaySpeedAffectsChips = speedAffectsChips.bON);
+        items.Add(speedAffectsChips);
+
         CItemList audioDriver = new("Audio Driver", CItemBase.EPanelType.Normal, CDTXMania.ConfigIni.nSoundDriverType,
             "サウンド出力方式を選択\nします。\nWASAPIはVista以降、\nASIOは対応機器でのみ使用可能です。\nWASAPIかASIOを使うと、\n遅延を少なくできます。\n",
             "DSound: Direct Sound\nWASAPI: from Windows Vista\nASIO: with ASIO compatible devices only\nUse WASAPI or ASIO to decrease the sound lag.\nNote: Exit CONFIG to make the setting take effect.",

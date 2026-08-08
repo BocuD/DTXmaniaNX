@@ -54,6 +54,9 @@ public interface IAudioClip : IDisposable
 
     /// <summary>How extra voices of this clip are made. Diagnostic, shown in the mixer window.</summary>
     string VoiceKind { get; }
+
+    /// <summary>How long the whole clip is, in ms. 0 if it cannot be told.</summary>
+    long LengthMs { get; }
 }
 
 /// <summary>One playing channel of a clip.</summary>
@@ -67,11 +70,32 @@ public interface IAudioVoice : IDisposable
     /// <summary>-100 hard left, 0 centre, 100 hard right.</summary>
     int Pan { get; set; }
 
+    /// <summary>
+    /// Playback rate, 1.0 being unchanged. With time stretch on this needs a tempo stream, which only a
+    /// stream-backed voice has.
+    /// </summary>
+    double Speed { get; set; }
+
+    /// <summary>Frequency multiplier, 1.0 being unchanged. The wrong-note detune on guitar and bass.</summary>
+    double Pitch { get; set; }
+
+    /// <summary>Moves playback to <paramref name="positionMs"/>. Only meaningful while sounding.</summary>
+    void Seek(long positionMs);
+
     void Play(bool loop);
 
     void Stop();
 
+    /// <summary>Stops without giving up where it was, so <see cref="Resume"/> can pick it up.</summary>
+    void Pause();
+
+    /// <summary>Starts again from <paramref name="positionMs"/>.</summary>
+    void Resume(long positionMs);
+
     /// <summary>Takes this voice out of the output mix without freeing it. The performance stage does
     /// this to sounds that must not carry into a song.</summary>
     void DetachFromMixer();
+
+    /// <summary>Puts it back. A chart attaches a chip shortly before it sounds and detaches it after.</summary>
+    void AttachToMixer();
 }

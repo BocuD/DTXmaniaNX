@@ -100,6 +100,8 @@ public sealed class FdkAudioClip : IAudioClip
 
     public string VoiceKind { get; private set; } = "stream";
 
+    public long LengthMs => first?.nTotalPlayTimeMs ?? 0;
+
     private CSound? first;
     private int mixer;
 
@@ -199,6 +201,15 @@ public sealed class FdkAudioClip : IAudioClip
 
     private bool Qualifies()
     {
+        //time stretch changes speed without changing pitch, which needs the BASS_FX tempo stream CSound
+        //builds per sound. A sample channel has none and can only change frequency, so it is no use to
+        //anything that will be asked for a speed. Only reached for a clip's second voice and later, and
+        //the song BGM never has one, so chips following the speed is the case that matters
+        if (CSoundManager.bIsTimeStretch && CDTXMania.ConfigIni.bPlaySpeedAffectsChips)
+        {
+            return false;
+        }
+
         try
         {
             return new FileInfo(path).Length <= SampleSizeLimit;
@@ -258,9 +269,39 @@ public sealed class FdkAudioVoice : IAudioVoice
         }
     }
 
+    public double Speed
+    {
+        get => sound?.dbPlaySpeed ?? 1.0;
+        set
+        {
+            if (sound is { } current)
+            {
+                current.dbPlaySpeed = value;
+            }
+        }
+    }
+
+    public double Pitch
+    {
+        get => sound?.db周波数倍率 ?? 1.0;
+        set
+        {
+            if (sound is { } current)
+            {
+                current.db周波数倍率 = value;
+            }
+        }
+    }
+
+    public void Seek(long positionMs) => sound?.tChangePlaybackPosition(positionMs);
+
     public void Play(bool loop) => sound?.tStartPlaying(loop);
 
     public void Stop() => sound?.tStopPlayback();
+
+    public void Pause() => sound?.tPausePlayback();
+
+    public void Resume(long positionMs) => sound?.tResumePlayback(positionMs);
 
     public void DetachFromMixer()
     {
@@ -271,6 +312,14 @@ public sealed class FdkAudioVoice : IAudioVoice
         }
 
         CDTXMania.SoundManager.RemoveMixer(current);
+    }
+
+    public void AttachToMixer()
+    {
+        if (sound is { } current && CDTXMania.SoundManager.GetCurrentSoundDeviceType() != "DirectSound")
+        {
+            CDTXMania.SoundManager.AddMixer(current);
+        }
     }
 
     public void Dispose()

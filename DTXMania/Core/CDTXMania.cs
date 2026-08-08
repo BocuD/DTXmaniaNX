@@ -430,6 +430,7 @@ internal partial class CDTXMania
         FrameProfiler.Begin(FrameSection.DeviceScan);
         CStage.EStage stage = StageManager.rCurrentStage.eStageID;
 
+
         //don't constantly scan unless we lost a midi device
         if (stage == CStage.EStage.Performance_6)
         {
@@ -443,11 +444,18 @@ internal partial class CDTXMania
             InputManager.ScanDevices();
         }
 
-        //rebuilding the output reloads every sound and the performance timer, so not during a song. Not
-        //while config is open either: it applies its own device changes on exit
-        if (stage != CStage.EStage.Performance_6 && stage != CStage.EStage.Config_3)
+        if (stage != CStage.EStage.Performance_6)
         {
-            AudioMixer.FollowSystemOutput(audioSettings);
+            //reclaims released clips when nothing is playing to do it. During a song chips play
+            //constantly and sweep as they go, so there is nothing here for it to find anyway
+            AudioMixer.Update();
+
+            //rebuilding the output reloads every sound and the performance timer, so not during a song.
+            //Not while config is open either: it applies its own device changes on exit
+            if (stage != CStage.EStage.Config_3)
+            {
+                AudioMixer.FollowSystemOutput(audioSettings);
+            }
         }
         FrameProfiler.End(FrameSection.DeviceScan);
 

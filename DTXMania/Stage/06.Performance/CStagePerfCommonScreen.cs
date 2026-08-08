@@ -404,13 +404,11 @@ internal abstract class CStagePerfCommonScreen : CStage
         //this.bIsAutoPlay.Bass = CDTXMania.ConfigIni.bAllBassAreAutoPlay;										// #23559 2011.7.28 yyagi
         actGauge.Init(CDTXMania.ConfigIni.nRisky);									// #23559 2011.7.28 yyagi
 
-        nPolyphonicSounds = CDTXMania.ConfigIni.nPoliphonicSounds;
 
         //let the loading sound gracefully fade out
         CDTXMania.Skin.tRemoveMixerAll(CDTXMania.Skin.soundNowLoading);
 
         //lockmixer = new object();
-        queueMixerSound = new Queue<stmixer>(64);
         bIsDirectSound = (CDTXMania.SoundManager.GetCurrentSoundDeviceType() == "DirectSound");
         dbPlaySpeed = CDTXMania.ConfigIni.nPlaySpeed / 20.0;
         bValidScore = true;
@@ -433,13 +431,9 @@ internal abstract class CStagePerfCommonScreen : CStage
                     if (listWAV.ContainsKey(pChip.nIntegerValue_InternalNumber))
                     {
                         CDTX.CWAV wc = listWAV[pChip.nIntegerValue_InternalNumber];
-                        for (int i = 0; i < nPolyphonicSounds; i++)
+                        if (wc.clip != null)
                         {
-                            if (wc.rSound[i] != null)
-                            {
-                                CDTXMania.SoundManager.AddMixer(wc.rSound[i], dbPlaySpeed, pChip.bChipKeepsPlayingAfterPerfEnds);
-                                //AddMixer( wc.rSound[ i ] );		// 最初はqueueを介さず直接ミキサー登録する
-                            }
+                            AudioMixer.AttachToMixer(wc.clip);
                         }
                     }
                 }
@@ -483,8 +477,6 @@ internal abstract class CStagePerfCommonScreen : CStage
         //listWAV.Clear();
         listWAV = null;
         listChip = null;
-        queueMixerSound.Clear();
-        queueMixerSound = null;
         
         base.OnDeactivate();
     }
@@ -740,13 +732,6 @@ internal abstract class CStagePerfCommonScreen : CStage
             }
         }
     }
-    protected struct stmixer
-    {
-        internal bool bIsAdd;
-        internal CSound csound;
-        internal bool b演奏終了後も再生が続くチップである;
-    };
-
     protected enum HitState
     {
         NotHit,
@@ -826,8 +811,6 @@ internal abstract class CStagePerfCommonScreen : CStage
     //		protected int nLastPlayedWAVNumber.GUITAR;
     //		protected int nLastPlayedWAVNumber.BASS;
 
-    protected volatile Queue<stmixer> queueMixerSound; // #24820 2013.1.21 yyagi まずは単純にAdd/Removeを1個のキューでまとめて管理するやり方で設計する
-    protected DateTime dtLastQueueOperation; //
     protected bool bIsDirectSound; //
     protected double dbPlaySpeed;
     protected bool bValidScore;
@@ -860,7 +843,6 @@ internal abstract class CStagePerfCommonScreen : CStage
     protected STDGBVALUE<int> nInputAdjustTimeMs;		// #23580 2011.1.3 yyagi
     public STAUTOPLAY bIsAutoPlay;		// #24239 2011.1.23 yyagi
     //		protected int nRisky_InitialVar, nRiskyTime;		// #23559 2011.7.28 yyagi → CAct演奏ゲージ共通クラスに隠蔽
-    protected int nPolyphonicSounds;
 
     protected List<CChip> listChip;
     protected Dictionary<int, CDTX.CWAV> listWAV;
@@ -895,55 +877,6 @@ internal abstract class CStagePerfCommonScreen : CStage
     //Long Note Accumulated Bonus (For Max score computation only)
     private STDGBVALUE<int> nAccumulatedLongNoteBonusScore;
 
-
-    public void AddMixer(CSound cs, bool _b演奏終了後も再生が続くチップである)
-    {
-        stmixer stm = new()
-        {
-            bIsAdd = true,
-            csound = cs,
-            b演奏終了後も再生が続くチップである = _b演奏終了後も再生が続くチップである
-        };
-        queueMixerSound.Enqueue(stm);
-        //Debug.WriteLine("★Queue: add " + Path.GetFileName(stm.csound.strFilename));
-    }
-    public void RemoveMixer(CSound cs)
-    {
-        stmixer stm = new()
-        {
-            bIsAdd = false,
-            csound = cs,
-            b演奏終了後も再生が続くチップである = false
-        };
-        queueMixerSound.Enqueue(stm);
-        //Debug.WriteLine("★Queue: remove " + Path.GetFileName(stm.csound.strFilename));
-    }
-    public void ManageMixerQueue()
-    {
-        // もしサウンドの登録/削除が必要なら、実行する
-        if (queueMixerSound.Count > 0)
-        {
-            //Debug.WriteLine( "☆queueLength=" + queueMixerSound.Count );
-            DateTime dtnow = DateTime.Now;
-            TimeSpan ts = dtnow - dtLastQueueOperation;
-            if (ts.Milliseconds > 7)
-            {
-                for (int i = 0; i < 2 && queueMixerSound.Count > 0; i++)
-                {
-                    dtLastQueueOperation = dtnow;
-                    stmixer stm = queueMixerSound.Dequeue();
-                    if (stm.bIsAdd)
-                    {
-                        CDTXMania.SoundManager.AddMixer(stm.csound, dbPlaySpeed, stm.b演奏終了後も再生が続くチップである);
-                    }
-                    else
-                    {
-                        CDTXMania.SoundManager.RemoveMixer(stm.csound);
-                    }
-                }
-            }
-        }
-    }
 
     protected EJudgement e指定時刻からChipのJUDGEを返す( long nTime, CChip pChip, int nInputAdjustTime, bool saveLag = true )
     {
@@ -3408,13 +3341,9 @@ internal abstract class CStagePerfCommonScreen : CStage
                         if (listWAV.ContainsKey(pChip.nIntegerValue_InternalNumber)) // 参照が遠いので後日最適化する
                         {
                             CDTX.CWAV wc = listWAV[pChip.nIntegerValue_InternalNumber];
-                            for (int i = 0; i < nPolyphonicSounds; i++)
+                            if (wc.clip != null)
                             {
-                                if (wc.rSound[i] != null)
-                                {
-                                    //CDTXMania.SoundManager.AddMixer( wc.rSound[ i ] );
-                                    AddMixer(wc.rSound[i], pChip.bChipKeepsPlayingAfterPerfEnds);
-                                }
+                                AudioMixer.AttachToMixer(wc.clip);
                             }
                         }
                     }
@@ -3429,13 +3358,9 @@ internal abstract class CStagePerfCommonScreen : CStage
                         if (listWAV.ContainsKey(pChip.nIntegerValue_InternalNumber))	// 参照が遠いので後日最適化する
                         {
                             CDTX.CWAV wc = listWAV[pChip.nIntegerValue_InternalNumber];
-                            for (int i = 0; i < nPolyphonicSounds; i++)
+                            if (wc.clip != null)
                             {
-                                if (wc.rSound[i] != null)
-                                {
-                                    //CDTXMania.SoundManager.RemoveMixer( wc.rSound[ i ] );
-                                    RemoveMixer(wc.rSound[i]);
-                                }
+                                AudioMixer.DetachFromMixer(wc.clip);
                             }
                         }
                     }
@@ -4930,7 +4855,6 @@ internal abstract class CStagePerfCommonScreen : CStage
         }
 
         //Adjust BGM to new position
-        List<CSound> pausedCSound = [];
 
         #region [ BGMやギターなど、演奏開始のタイミングで再生がかかっているサウンドのの途中再生開始 ] // (CDTXのt入力・行解析・チップ配置()で小節番号が+1されているのを削っておくこと)
         for (int i = nCurrentTopChip; i >= 0; i--)
@@ -4949,18 +4873,13 @@ internal abstract class CStagePerfCommonScreen : CStage
                     if ((wc.bIsBGMSound && CDTXMania.ConfigIni.bBGM音を発声する) || (!wc.bIsBGMSound))
                     {
                         CDTXMania.DTX.tチップの再生(pChip, CSoundManager.rcPerformanceTimer.n前回リセットした時のシステム時刻 + pChip.nPlaybackTimeMs, CDTXMania.DTX.nモニタを考慮した音量(EInstrumentPart.UNKNOWN));
-                        #region [ PAUSEする ]
-                        int j = wc.n現在再生中のサウンド番号;
-                        if (wc.rSound[j] != null)
-                        {
-                            // Needed only if the tJumpInSong is called by tChangePlaySpeed
-                            wc.rSound[j].dbPlaySpeed = CDTXMania.ConfigIni.nPlaySpeed / 20.0;
 
-                            wc.rSound[j].tPausePlayback();
-                            wc.rSound[j].tChangePlaybackPosition(nNewPosition - pChip.nPlaybackTimeMs);
-                            pausedCSound.Add(wc.rSound[j]);
+                        //held rather than left running: everything that should already be sounding at the
+                        //new position is set up first, then started together
+                        if (wc.clip != null)
+                        {
+                            AudioMixer.HoldLastAt(wc.clip, nNewPosition - pChip.nPlaybackTimeMs);
                         }
-                        #endregion
                     }
                 }
             }
@@ -4972,11 +4891,7 @@ internal abstract class CStagePerfCommonScreen : CStage
         video.SkipStart((int)nNewPosition);
         #endregion
         #region [ PAUSEしていたサウンドを一斉に再生再開する(ただしタイマを止めているので、ここではまだ再生開始しない) ]
-        foreach (CSound cs in pausedCSound)
-        {
-            cs.tPlaySound();
-        }
-        pausedCSound.Clear();
+        AudioMixer.StartHeld();
         #endregion
 
         bPAUSE = false;

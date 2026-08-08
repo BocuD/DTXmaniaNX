@@ -21,16 +21,41 @@ public class CSystemSound : IDisposable
     private bool disposed;
     private string? absolutePath;
 
+    //made on first use rather than in the constructor: a skin reload disposes these and re-reads them,
+    //and the file the name resolves to is not the same one afterwards
+    private MixerClip? clip;
+
     /// <summary>The file this clip plays. Empty until it can be resolved.</summary>
     internal string ResolvedPath => absolutePath ?? (strFilename.Length > 0 ? CSkin.Path(strFilename) : string.Empty);
 
-    public bool bIsPlaying => AudioMixer.IsPlaying(this);
+    //replaced once the mixer has reclaimed it, rather than reused
+    private MixerClip Clip
+    {
+        get
+        {
+            if (clip is null or { freed: true })
+            {
+                clip = AudioMixer.CreateClip(ResolvedPath, group, loop);
+                AudioMixer.Publish(clip);
+            }
+
+            return clip;
+        }
+    }
+
+    public bool bIsPlaying => clip != null && AudioMixer.IsPlaying(clip);
 
     /// <summary>The level of the channel sounding now, which a fade changes while it plays.</summary>
     public int nCurrentSoundVolume
     {
-        get => AudioMixer.CurrentVolume(this);
-        set => AudioMixer.SetCurrentVolume(this, value);
+        get => clip == null ? 0 : AudioMixer.CurrentVolume(clip);
+        set
+        {
+            if (clip != null)
+            {
+                AudioMixer.SetCurrentVolume(clip, value);
+            }
+        }
     }
 
     public CSystemSound(string fileName, bool loop, bool exclusive, AudioGroup group = AudioGroup.Se)
@@ -57,20 +82,21 @@ public class CSystemSound : IDisposable
         bReadNotTried = false;
         loadSucceeded = false;
 
+        //a skin reload disposes these and reads them again, so reading makes one live a second time
+        disposed = false;
+
         if (string.IsNullOrEmpty(strFilename))
         {
             throw new InvalidOperationException("A system sound needs a file name.");
         }
 
-        string path = ResolvedPath;
-
-        if (!File.Exists(path))
+        if (!File.Exists(ResolvedPath))
         {
             throw new FileNotFoundException(strFilename);
         }
 
         //one channel up front, so the first play does not pay to decode it
-        AudioMixer.Preload(this);
+        AudioMixer.Preload(Clip);
         loadSucceeded = true;
     }
 
@@ -98,12 +124,15 @@ public class CSystemSound : IDisposable
             rLastPlayedExclusiveSystemSound = this;
         }
 
-        AudioMixer.Play(this, nVolume, pan);
+        AudioMixer.Play(Clip, nVolume, pan);
     }
 
     public void tStop()
     {
-        AudioMixer.Stop(this);
+        if (clip != null)
+        {
+            AudioMixer.Stop(clip);
+        }
 
         if (rLastPlayedExclusiveSystemSound == this)
         {
@@ -112,9 +141,22 @@ public class CSystemSound : IDisposable
     }
 
     /// <summary>Gives up this clip's channels, letting a one-shot still sounding finish first.</summary>
-    public void ReleaseWhenFinished() => AudioMixer.Release(this);
+    public void ReleaseWhenFinished()
+    {
+        if (clip != null)
+        {
+            //the handle stays: a sound that is still audible still has to be stoppable
+            AudioMixer.Release(clip);
+        }
+    }
 
-    public void tRemoveMixer() => AudioMixer.RemoveMixer(this);
+    public void tRemoveMixer()
+    {
+        if (clip != null)
+        {
+            AudioMixer.DetachFromMixer(clip);
+        }
+    }
 
     public void Dispose()
     {
@@ -123,7 +165,11 @@ public class CSystemSound : IDisposable
             return;
         }
 
-        AudioMixer.Free(this);
+        if (clip != null)
+        {
+            AudioMixer.Free(clip);
+            clip = null;
+        }
 
         //tStop clears this, but a sound can be disposed without being stopped, and leaving the static
         //pointing at a dead clip means the next exclusive play stops something that no longer exists

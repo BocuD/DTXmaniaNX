@@ -548,7 +548,7 @@ public class CChip : IComparable<CChip>, ICloneable
 			}
 			else
 			{
-				nDuration = (wc.rSound[0] == null) ? 0 : wc.rSound[0].nTotalPlayTimeMs;
+				nDuration = wc.clip == null ? 0 : (int)AudioMixer.LengthMs(wc.clip);
 			}
 		}
 		else if (nChannelNumber == EChannel.Movie || nChannelNumber == EChannel.MovieFull)    // AVI

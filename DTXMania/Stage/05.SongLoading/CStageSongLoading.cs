@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using System.Drawing;
 using System.Numerics;
 using DTXMania.Core;
+using DTXMania.Core.Audio;
 using DTXMania.SongDb;
 using DTXMania.Core.Framework;
 using DTXMania.UI;
@@ -169,11 +170,7 @@ internal class CStageSongLoading : CStage
             strSongTitle = "";
             strArtistName = "";
 
-            if (sdLoadingSound != null)
-            {
-                CDTXMania.SoundManager.tDiscard(sdLoadingSound);
-                sdLoadingSound = null;
-            }
+            StopLoadingSounds();
 
             string strDTXFilePath = (CDTXMania.bCompactMode)
                 ? CDTXMania.strCompactModeFile
@@ -192,7 +189,8 @@ internal class CStageSongLoading : CStage
                 string currentlyLoadingSoundFilePath = cdtx.strFolderName + cdtx.SOUND_NOWLOADING;
                 try
                 {
-                    sdLoadingSound = CDTXMania.SoundManager.tGenerateSound(currentlyLoadingSoundFilePath);
+                    sdLoadingSound = AudioMixer.CreateClip(currentlyLoadingSoundFilePath, AudioGroup.Bgm, false);
+                    AudioMixer.Publish(sdLoadingSound);
                 }
                 catch
                 {
@@ -340,7 +338,7 @@ internal class CStageSongLoading : CStage
                 CSystemSound.rLastPlayedExclusiveSystemSound.tStop();
             }
 
-            sdLoadingSound.tStartPlaying();
+            AudioMixer.Play(sdLoadingSound, 100, 0);
         }
 
         CDTXMania.Skin.soundNowLoading.tPlay();
@@ -405,6 +403,9 @@ internal class CStageSongLoading : CStage
         {
             if (!bBmpAviLoaded)
             {
+                //the loading task kept these to itself; this is where the mixer takes them over
+                CDTXMania.DTX.PublishClips();
+
                 Trace.TraceInformation("Main load finished, loading BMP / AVI on the main thread now");
 
                 DateTime timeBeginLoadBMPAVI = DateTime.Now;
@@ -441,12 +442,37 @@ internal class CStageSongLoading : CStage
         {
             aborted = true;
 
+            //the loading task is reading this chart, and Cancel only asks it to stop. Deactivating before
+            //it has actually stopped pulls listWAV out from under it mid-loop
+            AwaitLoadingStopped();
+
             CDTXMania.DTX.OnDeactivate();
             Trace.TraceInformation("曲の読み込みを中止しました。");
             CDTXMania.tRunGarbageCollector();
 
             GitaDoraTransition.Close(2, () => CDTXMania.StageManager.tChangeStage(CDTXMania.StageManager.stageSongSelectionNew));
         }
+    }
+
+    /// <summary>
+    /// Blocks until the loading task has stopped, so the chart it is reading outlives it. Only reached
+    /// when a load is given up on, and the task checks for cancellation between each WAV, so the wait is
+    /// however long one file takes.
+    /// </summary>
+    private void AwaitLoadingStopped()
+    {
+        loadingCancellationTokenSource?.Cancel();
+
+        try
+        {
+            loadingTask?.Wait();
+        }
+        catch (AggregateException)
+        {
+            //cancelling is how this is meant to end, and a load that failed has already been traced
+        }
+
+        loadingTask = null;
     }
 
     private void StartLoadingTask()
@@ -743,8 +769,7 @@ internal class CStageSongLoading : CStage
     {
         if (sdLoadingSound != null)
         {
-            sdLoadingSound.tStopSound();
-            sdLoadingSound.tRelease();
+            AudioMixer.Free(sdLoadingSound);
             sdLoadingSound = null;
         }
 
@@ -849,7 +874,7 @@ internal class CStageSongLoading : CStage
     
     private readonly STCharacterPosition[] st大文字位置;
     private int nCurrentInst;
-    private CSound? sdLoadingSound;
+    private MixerClip? sdLoadingSound;
     private Task? loadingTask;
     private CancellationTokenSource? loadingCancellationTokenSource;
     private bool bCancelRequested;

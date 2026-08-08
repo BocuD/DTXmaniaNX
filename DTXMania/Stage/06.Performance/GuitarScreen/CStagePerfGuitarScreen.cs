@@ -155,7 +155,6 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 	{
 		int nGraphUsePart = CDTXMania.ConfigIni.bGraph有効.Guitar ? 1 : 2;
 		ct登場用 = new CCounter(0, 12, 16, CDTXMania.Timer);
-		dtLastQueueOperation = DateTime.MinValue;
 		if ( CDTXMania.bCompactMode )
 		{
 			var score = new CChartData();
@@ -377,7 +376,6 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 			tStartResultDelay();
 		}
 		
-		ManageMixerQueue();
 
 		if (LoopEndMs != -1 && CSoundManager.rcPerformanceTimer.nCurrentTime > LoopEndMs)
 		{

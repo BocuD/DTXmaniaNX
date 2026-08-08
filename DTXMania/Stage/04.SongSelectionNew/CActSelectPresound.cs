@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using DTXMania.Core;
+using DTXMania.Core.Audio;
 using FDK;
 
 namespace DTXMania;
@@ -15,8 +16,7 @@ internal class CActSelectPresound : CActivity
 	{
 		if (sound != null)
 		{
-			sound.tStopPlayback();
-			CDTXMania.SoundManager.tDiscard(sound);
+			AudioMixer.Free(sound);
 			sound = null;
 		}
 	}
@@ -25,7 +25,7 @@ internal class CActSelectPresound : CActivity
 	{
 		if (chart != null &&
 		    (!(chart.FileInformation.AbsoluteFolderPath + chart.SongInformation.Presound).Equals(strCurrentlyPlayingAudioPath) ||
-		     sound == null || !sound.bIsPlaying))
+		     sound == null || !AudioMixer.IsPlaying(sound)))
 		{
 			tStopSound();
 			tStartFadeInBgm();
@@ -104,7 +104,7 @@ internal class CActSelectPresound : CActivity
 	private CCounter ctBgmFadeOut;
 	private CCounter ctBgmFadeIn;
 	private CCounter ctWaitForPlayback;
-	private CSound sound;
+	private MixerClip? sound;
 	
 	private string strCurrentlyPlayingAudioPath;
 
@@ -143,9 +143,10 @@ internal class CActSelectPresound : CActivity
 			                            selectedChart.SongInformation.Presound;
 			try
 			{
-				sound = CDTXMania.SoundManager.tGenerateSound(strPreviewFilename);
-				sound.nVolume = 80; // CDTXMania.ConfigIni.n自動再生音量;			// #25217 changed preview volume from AutoVolume
-				sound.tStartPlaying(true);
+				// #25217 the preview plays at a fixed level rather than the auto-play volume
+				sound = AudioMixer.CreateClip(strPreviewFilename, AudioGroup.Bgm, true);
+				AudioMixer.Publish(sound);
+				AudioMixer.Play(sound, 80, 0);
 				strCurrentlyPlayingAudioPath = strPreviewFilename;
 				tStartFadeOutBgm();
 			}
@@ -154,10 +155,9 @@ internal class CActSelectPresound : CActivity
 				Trace.TraceError($"An error occurred while loading preview sound ({strPreviewFilename}): {e}");
 				if (sound != null)
 				{
-					sound.Dispose();
+					AudioMixer.Free(sound);
+					sound = null;
 				}
-
-				sound = null;
 			}
 		}
 	}

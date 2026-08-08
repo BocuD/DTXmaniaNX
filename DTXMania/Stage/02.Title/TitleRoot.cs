@@ -5,7 +5,10 @@ namespace DTXMania;
 
 public sealed class TitleRoot : StageRoot
 {
-    public SoundReference gameStart = new(SkinResource.System(@"Sounds\Game start.ogg"));
+    public SoundReference gameStart = new(SkinResource.System(@"Sounds\Game start.ogg"))
+    {
+        finishAfterStage = true
+    };
 
     public TitleRoot() : base("Title")
     {

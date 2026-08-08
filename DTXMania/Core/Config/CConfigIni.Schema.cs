@@ -327,8 +327,6 @@ internal partial class CConfigIni
 				Enum<EType>("LBDGraphics", 0, 1, c => c.eLBDGraphics.Drums)),
 			G("ライドシンバルレーンの表示位置(0:...RD RC, 1:...RC RD)",
 				Enum<ERDPosition>("RDPosition", 0, 1, c => c.eRDPosition)),
-			G(["レーン毎の最大同時発音数(1～8)", "Number of polyphonic sounds per lane. (1-8)"],
-				Int("PolyphonicSounds", 1, 8, c => c.nPoliphonicSounds)),
 			G(["判定ズレ時間表示(0:OFF, 1:ON, 2=GREAT-POOR)", "Whether displaying the lag times from the just timing or not."],
 				Int("ShowLagTime", 0, 2, c => c.nShowLagType)),
 			G("判定ズレ時間表示の色(0:Slow赤、Fast青, 1:Slow青、Fast赤)",
@@ -349,6 +347,13 @@ internal partial class CConfigIni
 					"(Only available when you're using using WASAPI or ASIO)"
 				],
 				Bool("TimeStretch", c => c.bTimeStretch)),
+			G([
+					"再生速度をチップ音にも適用するか(0:曲のみ, 1:チップ音も)",
+					"Whether the play speed applies to chip sounds as well as the song.",
+					"0: only the song follows it, and a chip sounds as recorded.",
+					"1: chips follow it too, which detunes them unless TimeStretch is on."
+				],
+				Bool("PlaySpeedAffectsChips", c => c.bPlaySpeedAffectsChips)),
 			G([
 					"判定タイミング調整(ドラム, ギター, ベース)(-99～99)[ms]",
 					"Revision value to adjust judgement timing for the drums, guitar and bass."

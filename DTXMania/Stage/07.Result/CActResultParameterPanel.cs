@@ -396,7 +396,6 @@ internal class CActResultParameterPanel : CActivity
         }
         #endregion
 
-        sdDTXで指定されたフルコンボ音 = null;
         base.OnActivate();
     }
     public override void OnDeactivate()
@@ -404,11 +403,6 @@ internal class CActResultParameterPanel : CActivity
         if ( ct表示用 != null )
         {
             ct表示用 = null;
-        }
-        if (sdDTXで指定されたフルコンボ音 != null)
-        {
-            CDTXMania.SoundManager.tDiscard( sdDTXで指定されたフルコンボ音 );
-            sdDTXで指定されたフルコンボ音 = null;
         }
         base.OnDeactivate();
     }
@@ -648,7 +642,6 @@ internal class CActResultParameterPanel : CActivity
     private int n本体Y;
     private STDGBVALUE<int> nスコアX;
     private readonly Point[] ptFullCombo位置;
-    private CSound sdDTXで指定されたフルコンボ音;
     private readonly ST文字位置[] stSmallStringPosition;
     private readonly ST文字位置[] stLargeStringPosition;
     private readonly ST文字位置[] st特大文字位置;

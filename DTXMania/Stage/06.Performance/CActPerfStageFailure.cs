@@ -1,5 +1,6 @@
 ﻿using System.Drawing;
 using DTXMania.Core;
+using DTXMania.Core.Audio;
 using DTXMania.UI.Drawable;
 using FDK;
 
@@ -37,7 +38,7 @@ internal class CActPerfStageFailure : CActivity
         ct進行 = null;
         if (sd効果音 != null)
         {
-            CDTXMania.SoundManager.tDiscard(sd効果音);
+            AudioMixer.Free(sd効果音);
             sd効果音 = null;
         }
         base.OnDeactivate();
@@ -86,11 +87,14 @@ internal class CActPerfStageFailure : CActivity
                     {
                         if (sd効果音 != null)
                         {
-                            CDTXMania.SoundManager.tDiscard(sd効果音);
+                            AudioMixer.Free(sd効果音);
                             sd効果音 = null;
                         }
-                        sd効果音 = CDTXMania.SoundManager.tGenerateSound(CDTXMania.DTX.strFolderName + CDTXMania.DTX.SOUND_STAGEFAILED);
-                        sd効果音.tStartPlaying();
+
+                        sd効果音 = AudioMixer.CreateClip(
+                            CDTXMania.DTX.strFolderName + CDTXMania.DTX.SOUND_STAGEFAILED, AudioGroup.Se, false);
+                        AudioMixer.Publish(sd効果音);
+                        AudioMixer.Play(sd効果音, 100, 0);
                     }
                     catch
                     {
@@ -117,7 +121,7 @@ internal class CActPerfStageFailure : CActivity
     //-----------------
     private bool b効果音再生済み;
     private CCounter ct進行;
-    private CSound sd効果音;
+    private MixerClip? sd効果音;
     private BaseTexture txStageFailed;
     //-----------------
     #endregion

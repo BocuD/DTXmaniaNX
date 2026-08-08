@@ -56,10 +56,17 @@ public class StageRoot : UIGroup
     public override void Dispose()
     {
         //only what was loaded, so a root that never opened does not touch the sound device on the way out.
-        //Anything still audible finishes: the stage is leaving, but its exit sound is not
+        //A stage's sounds go with the stage unless one is marked to finish on its own
         foreach (SoundReference sound in sounds ?? [])
         {
-            sound.ReleaseWhenFinished();
+            if (sound.finishAfterStage)
+            {
+                sound.ReleaseWhenFinished();
+            }
+            else
+            {
+                sound.Unload();
+            }
         }
 
         sounds = null;

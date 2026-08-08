@@ -10,9 +10,7 @@ public readonly record struct AudioOutput(string Name, bool IsSystemDefault);
 
 /// <summary>
 /// What each backend can play through. Answers in names rather than indices, because an index moves when
-/// a device is plugged in.
-///
-/// Safe to call before the device is initialised. Cheap enough for a throttled check, not for every frame.
+/// a device is plugged in. Safe before the device is initialised; too slow for every frame.
 /// </summary>
 public static class AudioOutputs
 {
@@ -55,7 +53,7 @@ public static class AudioOutputs
 
         for (int n = 0; BassWasapi.BASS_WASAPI_GetDeviceInfo(n) is { } info; n++)
         {
-            //disabled means unplugged or switched off; an input is a microphone, not somewhere to play
+            //disabled means unplugged or switched off
             if ((info.flags & BASSWASAPIDeviceInfo.BASS_DEVICE_ENABLED) == 0
                 || (info.flags & BASSWASAPIDeviceInfo.BASS_DEVICE_INPUT) != 0)
             {
@@ -87,7 +85,7 @@ public static class AudioOutputs
 
         foreach (DeviceInformation info in SharpDX.DirectSound.DirectSound.GetDevices())
         {
-            //the primary driver has an empty GUID and points at whatever Windows defaults to
+            //the primary driver has an empty GUID and follows whatever Windows defaults to
             outputs.Add(new AudioOutput(info.Description, info.DriverGuid == Guid.Empty));
         }
 

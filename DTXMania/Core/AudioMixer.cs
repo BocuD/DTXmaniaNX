@@ -4,74 +4,110 @@ using DTXMania.Core.Audio;
 namespace DTXMania.Core;
 
 /// <summary>
-/// Owns every channel the game plays a system sound on.
+/// Owns every channel the game plays a sound on.
 ///
 /// One voice is one channel with one playback position, so playing it again restarts it. Sounding twice
 /// at once needs two of them. A clip gets another voice the first time it needs one and reuses it from
 /// then on, so a pool settles at whatever the game actually asks for and stops growing.
+///
+/// Nothing reached from <see cref="Play"/> allocates; see AUDIO.md §8.3.
 /// </summary>
 public static partial class AudioMixer
 {
-    //a channel and when it last started, which only matters if a clip ever hits the runaway guard
-    private sealed class Voice
-    {
-        public IAudioVoice sound = null!;
-        public long startedAt;
-
-        //the level asked for, before the group level was folded in. The voice only knows the result, so
-        //moving a group slider needs this to recompute what is already sounding
-        public int requested = 100;
-    }
-
-    private sealed class Clip
-    {
-        //the loaded audio every voice of this clip sounds from
-        public IAudioClip? audio;
-
-        public readonly List<Voice> voices = [];
-        public Voice? lastPlayed;
-
-        //freed once it falls silent, rather than cut off; see Release
-        public bool releasing;
-
-        //how often this has sounded, shown in the mixer window
-        public int plays;
-    }
-
     //a clip needing this many at once is retriggering in a loop; reuse a channel rather than keep growing
     private const int RunawayGuard = 64;
-
-    public static IAudioDevice Device { get; set; } = new FdkAudioDevice();
 
     //enumerating outputs costs a round trip to the driver, so the system is only asked this often
     private const int OutputCheckIntervalMs = 1000;
 
-    private static readonly Dictionary<CSystemSound, Clip> clips = new();
+    public static IAudioDevice Device { get; set; } = new FdkAudioDevice();
+
+    private static readonly List<MixerClip> clips = [];
+
+    //so Sweep looks at these rather than scanning every clip; a chart puts hundreds in the list
+    private static readonly List<MixerClip> releasing = [];
+
+    //voices set up but not started, so a song jump can start them together; see HoldLastAt
+    private static readonly List<Voice> held = [];
+
     private static long sequence;
     private static long nextOutputCheck;
     private static bool warnedRunaway;
 
-    /// <summary>Voices held right now. Each one is a channel in the output mix. FDK's own counters do not
-    /// see these.</summary>
-    public static int VoiceCount { get; private set; }
+    //interlocked because a loader preloads on its own thread, and preloading makes a voice
+    private static int voiceCount;
+    private static int peakVoiceCount;
+
+    private static int clipsCreated;
+    private static int clipsFreed;
+
+    /// <summary>Voices held right now. FDK's own counters do not see these.</summary>
+    public static int VoiceCount => Volatile.Read(ref voiceCount);
 
     /// <summary>The most ever held. Still climbing long after startup means something is retriggering
     /// faster than it finishes.</summary>
-    public static int PeakVoiceCount { get; private set; }
+    public static int PeakVoiceCount => Volatile.Read(ref peakVoiceCount);
 
-    /// <summary>Sounds <paramref name="clip"/> on a channel that is free, making one if none is.</summary>
-    public static void Play(CSystemSound clip, int volume, int pan)
+    /// <summary>
+    /// Makes a clip that belongs to the caller. The file is not read until <see cref="Preload"/> or the
+    /// first play, and the mixer does not know about it until <see cref="Publish"/>.
+    ///
+    /// Safe from any thread: an unpublished clip is reachable only by whoever made it.
+    /// </summary>
+    public static MixerClip CreateClip(string path, AudioGroup group, bool loop)
     {
-        //the only pump there is; released clips are reclaimed the next time anything plays
-        Sweep();
+        Interlocked.Increment(ref clipsCreated);
+        return new MixerClip(path, group, loop);
+    }
 
-        Clip state = StateFor(clip);
-        state.releasing = false;
+    /// <summary>
+    /// Clips made but not yet freed, published or not. Every clip owns decoded audio, so this has to come
+    /// back down once a chart is torn down.
+    /// </summary>
+    public static int LiveClips => Volatile.Read(ref clipsCreated) - Volatile.Read(ref clipsFreed);
 
-        if ((FreeVoice(state) ?? Grow(clip, state)) is not { } voice)
+    /// <summary>
+    /// Live clips the mixer cannot see. A loader still building them counts here; anything left once
+    /// loading is done was leaked by whoever made it.
+    /// </summary>
+    public static int UnaccountedClips => LiveClips - clips.Count;
+
+    /// <summary>
+    /// Hands a clip over to the mixer, after which it is swept, rebuilt and shown with the rest.
+    ///
+    /// Game thread only: this is the one place the clip list is added to, which is what makes it safe to
+    /// walk without locking.
+    /// </summary>
+    public static void Publish(MixerClip clip)
+    {
+        if (clip.published || clip.freed)
         {
             return;
         }
+
+        clip.published = true;
+        clips.Add(clip);
+    }
+
+    /// <summary>Sounds <paramref name="clip"/> on a channel that is free, making one if none is.</summary>
+    /// <param name="speed">Playback rate. Only the song BGM passes anything but 1.0.</param>
+    /// <param name="pitch">Frequency multiplier, for the wrong-note detune on guitar and bass.</param>
+    /// <param name="atMs">When this started, on the caller's clock, for drift correction to work from.</param>
+    public static void Play(MixerClip clip, int volume, int pan,
+        double speed = 1.0, double pitch = 1.0, long atMs = 0)
+    {
+        Sweep();
+
+        SetReleasing(clip, false);
+
+        if ((FreeVoice(clip) ?? Grow(clip)) is not { } voice)
+        {
+            return;
+        }
+
+        //rate before level: the speed decides which stream the sound is attached to
+        voice.sound.Speed = speed;
+        voice.sound.Pitch = pitch;
 
         voice.requested = volume;
         voice.sound.Volume = Scaled(clip.group, volume);
@@ -79,19 +115,106 @@ public static partial class AudioMixer
         voice.sound.Play(clip.loop);
 
         voice.startedAt = ++sequence;
-        state.lastPlayed = voice;
-        state.plays++;
+        voice.startedAtMs = atMs;
+        clip.lastPlayed = voice;
+        clip.plays++;
+    }
+
+    /// <summary>
+    /// Seeks everything sounding to where it should be by now: a long chip drifts because the sound
+    /// device and the performance clock are not the same clock.
+    /// </summary>
+    public static void Correct(MixerClip clip, long nowMs)
+    {
+        foreach (Voice voice in clip.voices)
+        {
+            if (voice.sound.IsPlaying && nowMs > voice.startedAtMs)
+            {
+                voice.sound.Seek(nowMs - voice.startedAtMs);
+            }
+        }
+    }
+
+    public static void Pause(MixerClip clip, long nowMs)
+    {
+        foreach (Voice voice in clip.voices)
+        {
+            if (voice.sound.IsPlaying)
+            {
+                voice.sound.Pause();
+                voice.pausedAtMs = nowMs;
+            }
+        }
+    }
+
+    public static void Resume(MixerClip clip, long nowMs)
+    {
+        foreach (Voice voice in clip.voices)
+        {
+            if (voice.pausedAtMs == 0)
+            {
+                continue;
+            }
+
+            voice.sound.Resume(voice.pausedAtMs - voice.startedAtMs);
+
+            //the pause did not happen as far as the chart is concerned, so the start moves with it
+            voice.startedAtMs += nowMs - voice.pausedAtMs;
+            voice.pausedAtMs = 0;
+        }
+    }
+
+    /// <summary>Moves when everything sounding is considered to have started, for a timing adjustment
+    /// made while a song is playing.</summary>
+    public static void ShiftStart(MixerClip clip, long deltaMs)
+    {
+        foreach (Voice voice in clip.voices)
+        {
+            if (voice.sound.IsPlaying)
+            {
+                voice.startedAtMs += deltaMs;
+            }
+        }
+    }
+
+    public static long LengthMs(MixerClip clip) => clip.audio?.LengthMs ?? 0;
+
+    /// <summary>
+    /// Stops the channel that just started and holds it at <paramref name="positionMs"/> until
+    /// <see cref="StartHeld"/>. A song jump sets up every chip that should already be sounding, then
+    /// starts them together so they are in sync.
+    /// </summary>
+    public static void HoldLastAt(MixerClip clip, long positionMs)
+    {
+        if (clip.lastPlayed is not { } voice)
+        {
+            return;
+        }
+
+        voice.sound.Pause();
+        voice.heldPositionMs = positionMs;
+        held.Add(voice);
+    }
+
+    public static void StartHeld()
+    {
+        foreach (Voice voice in held)
+        {
+            voice.sound.Resume(voice.heldPositionMs);
+        }
+
+        held.Clear();
     }
 
     /// <summary>
     /// The level asked for on the channel that sounded most recently, not what the channel ended up at.
     /// A fade reads this back, so it must not see the group level folded in.
     /// </summary>
-    public static int CurrentVolume(CSystemSound clip) => Latest(clip)?.requested ?? 0;
+    public static int CurrentVolume(MixerClip clip) => clip.lastPlayed?.requested ?? 0;
 
-    public static void SetCurrentVolume(CSystemSound clip, int volume)
+    public static void SetCurrentVolume(MixerClip clip, int volume)
     {
-        if (Latest(clip) is not { } voice)
+        if (clip.lastPlayed is not { } voice)
         {
             return;
         }
@@ -100,16 +223,13 @@ public static partial class AudioMixer
         voice.sound.Volume = Scaled(clip.group, volume);
     }
 
-    public static bool IsPlaying(CSystemSound clip) => Latest(clip)?.sound.IsPlaying ?? false;
-
-    private static Voice? Latest(CSystemSound clip)
-        => clips.TryGetValue(clip, out Clip? state) ? state.lastPlayed : null;
+    public static bool IsPlaying(MixerClip clip) => clip.lastPlayed?.sound.IsPlaying ?? false;
 
     public static int GetGroupVolume(AudioGroup group) => Device.GetGroupVolume(group);
 
     /// <summary>
     /// Sets how loud a whole group is, 0 to 100. An output that mixes groups applies it to everything it
-    /// plays. One that does not only covers voices this mixer holds, and those have to be recomputed.
+    /// plays; one that does not only covers voices this mixer holds, so those are recomputed here.
     /// </summary>
     public static void SetGroupVolume(AudioGroup group, int volume)
     {
@@ -120,14 +240,14 @@ public static partial class AudioMixer
             return;
         }
 
-        foreach ((CSystemSound clip, Clip state) in clips)
+        foreach (MixerClip clip in clips)
         {
             if (clip.group != group)
             {
                 continue;
             }
 
-            foreach (Voice voice in state.voices)
+            foreach (Voice voice in clip.voices)
             {
                 voice.sound.Volume = Scaled(group, voice.requested);
             }
@@ -138,16 +258,11 @@ public static partial class AudioMixer
         => Device.MixesGroups ? volume : volume * Device.GetGroupVolume(group) / 100;
 
     /// <summary>Creates a clip's first channel, so the first play does not pay for decoding it.</summary>
-    public static void Preload(CSystemSound clip) => Grow(clip, StateFor(clip));
+    public static void Preload(MixerClip clip) => Grow(clip);
 
-    public static void Stop(CSystemSound clip)
+    public static void Stop(MixerClip clip)
     {
-        if (!clips.TryGetValue(clip, out Clip? state))
-        {
-            return;
-        }
-
-        foreach (Voice voice in state.voices)
+        foreach (Voice voice in clip.voices)
         {
             voice.sound.Stop();
         }
@@ -155,63 +270,89 @@ public static partial class AudioMixer
 
     /// <summary>
     /// Gives up a clip, letting a one-shot that is still audible finish first. For an owner going away,
-    /// not for a sound being replaced. A loop is stopped outright, since it would never finish.
+    /// not a sound being replaced. A loop is stopped outright, since it would never finish.
     /// </summary>
-    public static void Release(CSystemSound clip)
+    public static void Release(MixerClip clip)
     {
-        if (!clips.TryGetValue(clip, out Clip? state))
-        {
-            return;
-        }
-
         if (clip.loop)
         {
             Free(clip);
             return;
         }
 
-        state.releasing = true;
+        SetReleasing(clip, true);
         Sweep();
     }
 
     /// <summary>Stops a clip and frees its channels now.</summary>
-    public static void Free(CSystemSound clip)
+    public static void Free(MixerClip clip)
     {
-        if (!clips.Remove(clip, out Clip? state))
+        //not list membership: a load that is cancelled or fails frees clips that were never published,
+        //and those still own decoded audio
+        if (clip.freed)
         {
             return;
         }
 
-        foreach (Voice voice in state.voices)
+        clip.freed = true;
+        Interlocked.Increment(ref clipsFreed);
+
+        if (clip.published)
         {
-            voice.sound.Stop();
+            clip.published = false;
+            clips.Remove(clip);
         }
 
-        VoiceCount -= state.voices.Count;
+        SetReleasing(clip, false);
 
-        //the clip owns the loaded audio and everything sounding from it
-        state.audio?.Dispose();
+        Unload(clip);
     }
 
     /// <summary>
-    /// Builds a new output, giving up every clip first. Rebuilding tears BASS down underneath them, and a
-    /// freed handle can be reissued to a channel of the new device, so they have to go while their handles
-    /// are still valid. A clip still in use reloads on its next play.
+    /// Builds a new output. Rebuilding tears BASS down underneath the clips and a freed handle can be
+    /// reissued to a new channel, so they are unloaded while their handles are still valid.
     /// </summary>
     public static void Reinitialize(AudioDeviceOptions options)
     {
-        foreach (CSystemSound clip in clips.Keys.ToArray())
+        //unloaded, not freed: a device change is not the owners giving them up
+        foreach (MixerClip clip in clips)
         {
-            Free(clip);
+            Unload(clip);
         }
 
         Device.Reinitialize(options);
     }
 
+    /// <summary>Gives up a clip's channels and its loaded audio, keeping the clip itself. It loads again
+    /// on its next play.</summary>
+    private static void Unload(MixerClip clip)
+    {
+        //a jump that was set up but never started would otherwise leave this holding voices that are
+        //about to be disposed, and StartHeld would resume them
+        for (int i = held.Count - 1; i >= 0; i--)
+        {
+            if (clip.voices.Contains(held[i]))
+            {
+                held.RemoveAt(i);
+            }
+        }
+
+        foreach (Voice voice in clip.voices)
+        {
+            voice.sound.Stop();
+        }
+
+        Interlocked.Add(ref voiceCount, -clip.voices.Count);
+        clip.voices.Clear();
+        clip.lastPlayed = null;
+
+        clip.audio?.Dispose();
+        clip.audio = null;
+    }
+
     /// <summary>
-    /// Rebuilds on the system default when it changes, unless a device is pinned. Cheap to call every
-    /// frame; it only looks at the system on a throttle. The caller decides when this is safe to call at
-    /// all, since it rebuilds the output.
+    /// Rebuilds on the system default when it changes, unless a device is pinned. Only looks at the
+    /// system on a throttle. The caller decides when this is safe to call, since it rebuilds the output.
     /// </summary>
     /// <param name="settings">Only invoked when the throttle lets a check through, so reading config
     /// stays off the per-frame path.</param>
@@ -248,55 +389,77 @@ public static partial class AudioMixer
         Reinitialize(options);
     }
 
-    public static void RemoveMixer(CSystemSound clip)
+    public static void DetachFromMixer(MixerClip clip)
     {
-        if (!clips.TryGetValue(clip, out Clip? state))
-        {
-            return;
-        }
-
-        foreach (Voice voice in state.voices)
+        foreach (Voice voice in clip.voices)
         {
             voice.sound.DetachFromMixer();
         }
     }
 
+    public static void AttachToMixer(MixerClip clip)
+    {
+        foreach (Voice voice in clip.voices)
+        {
+            voice.sound.AttachToMixer();
+        }
+    }
+
+    private static void SetReleasing(MixerClip clip, bool value)
+    {
+        if (clip.releasing == value)
+        {
+            return;
+        }
+
+        clip.releasing = value;
+
+        if (value)
+        {
+            releasing.Add(clip);
+        }
+        else
+        {
+            releasing.Remove(clip);
+        }
+    }
+
+    /// <summary>
+    /// Reclaims released clips that have fallen silent. Called every frame as well as on every play: a
+    /// clip released while nothing is playing would otherwise hold its audio until something did.
+    /// </summary>
+    public static void Update() => Sweep();
+
+    //backwards because Free takes the clip out of this list, which leaves the lower indices alone
     private static void Sweep()
     {
-        //released clips only; anything still owned keeps its channels for the next play
-        List<CSystemSound>? silent = null;
-
-        foreach ((CSystemSound clip, Clip state) in clips)
+        for (int i = releasing.Count - 1; i >= 0; i--)
         {
-            if (!state.releasing || state.voices.Any(voice => voice.sound.IsPlaying))
+            MixerClip clip = releasing[i];
+
+            if (!AnySounding(clip))
             {
-                continue;
+                Free(clip);
             }
-
-            silent ??= [];
-            silent.Add(clip);
-        }
-
-        foreach (CSystemSound clip in silent ?? [])
-        {
-            Free(clip);
         }
     }
 
-    private static Clip StateFor(CSystemSound clip)
+    private static bool AnySounding(MixerClip clip)
     {
-        if (!clips.TryGetValue(clip, out Clip? state))
+        foreach (Voice voice in clip.voices)
         {
-            state = new Clip();
-            clips[clip] = state;
+            if (voice.sound.IsPlaying)
+            {
+                return true;
+            }
         }
 
-        return state;
+        return false;
     }
 
-    private static Voice? FreeVoice(Clip state)
+    private static Voice? FreeVoice(MixerClip clip)
     {
-        foreach (Voice voice in state.voices)
+        foreach (Voice voice in clip.voices)
         {
             if (!voice.sound.IsPlaying)
             {
@@ -307,60 +470,71 @@ public static partial class AudioMixer
         return null;
     }
 
-    private static Voice? Grow(CSystemSound clip, Clip state)
+    private static Voice? Grow(MixerClip clip)
     {
-        if (state.voices.Count >= RunawayGuard)
+        if (clip.voices.Count >= RunawayGuard)
         {
             if (!warnedRunaway)
             {
                 warnedRunaway = true;
-                Trace.TraceWarning($"'{clip.strFilename}' wanted more than {RunawayGuard} channels at once; " +
+                Trace.TraceWarning($"'{clip.name}' wanted more than {RunawayGuard} channels at once; " +
                                    "reusing the one playing longest.");
             }
 
-            return Oldest(state);
+            return Oldest(clip);
         }
 
-        string path = clip.ResolvedPath;
-
-        if (state.audio == null)
+        if (clip.audio == null)
         {
-            if (!File.Exists(path))
+            if (clip.path.Length == 0 || !File.Exists(clip.path))
             {
                 return null;
             }
 
             try
             {
-                state.audio = Device.Load(path, clip.group);
+                clip.audio = Device.Load(clip.path, clip.group);
             }
             catch (Exception e)
             {
-                Trace.TraceError($"Could not load '{path}': {e.Message}");
+                Trace.TraceError($"Could not load '{clip.path}': {e.Message}");
                 return null;
             }
         }
 
-        if (state.audio.CreateVoice() is not { } created)
+        if (clip.audio.CreateVoice() is not { } created)
         {
-            Trace.TraceError($"Could not create a voice for '{path}'.");
+            Trace.TraceError($"Could not create a voice for '{clip.path}'.");
             return null;
         }
 
         Voice voice = new() { sound = created };
+        CountVoiceAdded();
 
-        VoiceCount++;
-        PeakVoiceCount = Math.Max(PeakVoiceCount, VoiceCount);
-
-        state.voices.Add(voice);
+        clip.voices.Add(voice);
         return voice;
     }
 
-    private static Voice? Oldest(Clip state)
+    private static void CountVoiceAdded()
+    {
+        int now = Interlocked.Increment(ref voiceCount);
+
+        //retry while another thread is raising it too
+        int peak;
+        while (now > (peak = Volatile.Read(ref peakVoiceCount)))
+        {
+            if (Interlocked.CompareExchange(ref peakVoiceCount, now, peak) == peak)
+            {
+                break;
+            }
+        }
+    }
+
+    private static Voice? Oldest(MixerClip clip)
     {
         Voice? oldest = null;
 
-        foreach (Voice voice in state.voices)
+        foreach (Voice voice in clip.voices)
         {
             if (oldest == null || voice.startedAt < oldest.startedAt)
             {

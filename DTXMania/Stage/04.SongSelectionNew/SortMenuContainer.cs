@@ -1,3 +1,4 @@
+using Hexa.NET.ImGui;
 using DTXMania.UI.Skin;
 using System.Numerics;
 using DTXMania.Core;
@@ -21,7 +22,9 @@ public class SortMenuContainer : ComponentInstance, IUIItemSource
     private readonly SortRowData[] rows = BuildRows();
 
     private UIScrollItemsGroup? entries;
-    private CSound?[]? sounds;
+
+    //one per sort mode, in the order SongDbSort declares them
+    private SoundReference[]? sounds;
 
     //the sort the stage is actually showing, or -1 until it has said. The menu applies whatever scrolls
     //under the selection, so the first frame must not mistake the starting position for a scroll
@@ -38,6 +41,8 @@ public class SortMenuContainer : ComponentInstance, IUIItemSource
 
     protected override void OnContentLoaded()
     {
+        LoadSounds();
+
         entries = GetChild<UIScrollItemsGroup>("Entries");
 
         if (entries != null)
@@ -102,34 +107,62 @@ public class SortMenuContainer : ComponentInstance, IUIItemSource
             return;
         }
 
-        foreach (CSound? sound in sounds)
+        foreach (SoundReference sound in sounds)
         {
-            CDTXMania.SoundManager.tDiscard(sound);
+            sound.Unload();
         }
 
         sounds = null;
     }
 
-    //loaded on the first scroll rather than with the menu, so building a default instance for the
-    //serializer to compare against does not touch the disk
     private void PlaySound(int index)
     {
-        if (sounds == null)
-        {
-            sounds = new CSound[SongDbSort.All.Length];
-            for (int i = 0; i < sounds.Length; i++)
-            {
-                sounds[i] = CDTXMania.SoundManager.tGenerateSound(CSkin.Path($@"Graphics\Sorting\{SongDbSort.All[i].IconName}.wav"));
+        CDTXMania.Skin.soundCursorMovement.tPlay();
+        sounds?[index].Play(80);
+    }
 
-                if (sounds[i] is { } sound)
-                {
-                    sound.nVolume = 80;
-                }
-            }
+    //only reached for a real instance; the default the serializer compares against never gets here
+    private void LoadSounds()
+    {
+        sounds = new SoundReference[SongDbSort.All.Length];
+
+        for (int i = 0; i < sounds.Length; i++)
+        {
+            sounds[i] = new SoundReference(
+                SkinResource.System($@"Graphics\Sorting\{SongDbSort.All[i].IconName}.wav"));
+            sounds[i].Load();
+        }
+    }
+
+    public override void DrawInspector()
+    {
+        base.DrawInspector();
+
+        if (!ImGui.CollapsingHeader("Sort Sounds"))
+        {
+            return;
         }
 
-        CDTXMania.Skin.soundCursorMovement.tPlay();
-        sounds[index]?.tStartPlaying(false);
+        if (sounds == null)
+        {
+            ImGui.TextDisabled("Loaded with the menu's content.");
+            return;
+        }
+
+        for (int i = 0; i < sounds.Length; i++)
+        {
+            string name = SongDbSort.All[i].IconName;
+            bool open = ImGui.TreeNode(name);
+
+            ImGui.SameLine();
+            ImGui.TextDisabled(sounds[i].Summary);
+
+            if (open)
+            {
+                sounds[i].DrawInspector(name);
+                ImGui.TreePop();
+            }
+        }
     }
 
     private static SortRowData[] BuildRows()

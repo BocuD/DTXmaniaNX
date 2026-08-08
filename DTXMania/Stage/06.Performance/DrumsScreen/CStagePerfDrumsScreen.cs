@@ -125,7 +125,6 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                 }
             }
         }
-        dtLastQueueOperation = DateTime.MinValue;
     }
     
     public override void OnManagedCreateResources()
@@ -295,29 +294,6 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         tUpdateAndDraw_ChipFireD();
         tUpdateAndDraw_STAGEFAILED();
         
-        // もしサウンドの登録/削除が必要なら、実行する
-        if (queueMixerSound.Count > 0)
-        {
-            //Debug.WriteLine( "☆queueLength=" + queueMixerSound.Count );
-            DateTime dtnow = DateTime.Now;
-            TimeSpan ts = dtnow - dtLastQueueOperation;
-            if (ts.Milliseconds > 7)
-            {
-                for (int i = 0; i < 2 && queueMixerSound.Count > 0; i++)
-                {
-                    dtLastQueueOperation = dtnow;
-                    stmixer stm = queueMixerSound.Dequeue();
-                    if (stm.bIsAdd)
-                    {
-                        CDTXMania.SoundManager.AddMixer(stm.csound);
-                    }
-                    else
-                    {
-                        CDTXMania.SoundManager.RemoveMixer(stm.csound);
-                    }
-                }
-            }
-        }
 
         if (LoopEndMs != -1 && CSoundManager.rcPerformanceTimer.nCurrentTime > LoopEndMs)
         {

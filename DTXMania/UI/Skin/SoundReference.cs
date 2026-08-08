@@ -20,6 +20,12 @@ public sealed class SoundReference
 
     [Themable] public AudioGroup group = AudioGroup.Se;
 
+    /// <summary>
+    /// Whether this may finish after the stage that owns it has gone. Off stops it with the stage, which
+    /// is what music wants; on is for a one-shot that carries across a transition.
+    /// </summary>
+    [Themable] public bool finishAfterStage;
+
     [JsonIgnore] private CSystemSound? loaded;
 
     public SoundReference()
@@ -43,8 +49,7 @@ public sealed class SoundReference
     /// the previous copy is freed first</summary>
     public void Load()
     {
-        //pointing this slot at something else stops what it was playing: only an owner going away lets a
-        //one-shot finish, and the old sound is not what the slot means any more
+        //pointing the slot at something else stops what it was playing; only an owner going away defers
         Unload();
 
         if (sound.IsEmpty)
@@ -83,8 +88,7 @@ public sealed class SoundReference
         loaded = null;
     }
 
-    //frees the sound, but lets a one-shot that is still audible finish first. The mixer owns the channels,
-    //so letting them run on is its business rather than a list kept here
+    //lets a one-shot that is still audible finish first; the mixer owns the channels until it does
     public void ReleaseWhenFinished()
     {
         loaded?.ReleaseWhenFinished();
@@ -105,8 +109,7 @@ public sealed class SoundReference
         ? sound.IsEmpty ? "no file" : "not loaded"
         : IsPlaying ? "playing" : "ready";
 
-    /// <summary>Draws the fields only. The caller owns the heading, so a stage's sounds can be listed
-    /// under one of its own rather than each looking like a section of the inspector.</summary>
+    /// <summary>Draws the fields only; the caller owns the heading.</summary>
     public void DrawInspector(string label)
     {
         ImGui.PushID(label);
@@ -128,6 +131,9 @@ public sealed class SoundReference
         {
             Load();
         }
+
+        ImGui.SameLine();
+        ImGui.Checkbox("Finish after stage", ref finishAfterStage);
 
         if (Inspector.Inspector.Inspect("Group", ref group))
         {
@@ -162,8 +168,9 @@ public sealed class SoundReference
                && sound == other.sound
                && loop == other.loop
                && exclusive == other.exclusive
-               && group == other.group;
+               && group == other.group
+               && finishAfterStage == other.finishAfterStage;
     }
 
-    public override int GetHashCode() => HashCode.Combine(sound, loop, exclusive, group);
+    public override int GetHashCode() => HashCode.Combine(sound, loop, exclusive, group, finishAfterStage);
 }

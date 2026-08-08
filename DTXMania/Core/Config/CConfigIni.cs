@@ -251,7 +251,6 @@ internal partial class CConfigIni
 	public int nShowPlaySpeed;
 	public STDGBVALUE<int> nHidSud;
 	public bool bIsAutoResultCapture;			// #25399 2011.6.9 yyagi リザルト画像自動保存機能のON/OFF制御
-	public int nPoliphonicSounds;				// #28228 2012.5.1 yyagi レーン毎の最大同時発音数
 	public bool bBufferedInput;
 	public bool bIsEnabledSystemMenu;			// #28200 2012.5.1 yyagi System Menuの使用可否切替
 	public string strSystemSkinSubfolderFullName;	// #28195 2012.5.2 yyagi Skin切替用 System/以下のサブフォルダ名
@@ -417,6 +416,10 @@ internal partial class CConfigIni
 		set;
 	}
 	public bool bTimeStretch;					// #23664 2013.2.24 yyagi ピッチ変更無しで再生速度を変更するかどうか
+
+	/// <summary>Whether the play speed applies to chip sounds as well as the song. Off means only the
+	/// song follows it and a chip sounds as recorded.</summary>
+	public bool bPlaySpeedAffectsChips;
 	public STAUTOPLAY bAutoPlay;
 
 	/// <summary>
@@ -812,7 +815,6 @@ internal partial class CConfigIni
 		bIsSwappedGuitarBass = false;			// #24063 2011.1.16 yyagi ギターとベースの切り替え
 		bIsAllowedDoubleClickFullscreen = true;	// #26752 2011.11.26 ダブルクリックでのフルスクリーンモード移行を許可
 		eBDGroup = EBDGroup.打ち分ける;		// #27029 2012.1.4 from HHPedalとBassPedalのグルーピング
-		nPoliphonicSounds = 4;                 // #28228 2012.5.1 yyagi レーン毎の最大同時発音数
 		// #24820 2013.1.15 yyagi 初期値を4から2に変更。BASS.net使用時の負荷軽減のため。
 		// #24820 2013.1.17 yyagi 初期値を4に戻した。動的なミキサー制御がうまく動作しているため。
 		bIsEnabledSystemMenu = true;			// #28200 2012.5.1 yyagi System Menuの利用可否切替(使用可)
@@ -831,6 +833,7 @@ internal partial class CConfigIni
 		nGroupVolume = [100, 100, 100, 100, 100];
 		strOutputDevice = "";                  // follow the system default
 		bTimeStretch = false;                  // #23664 2013.2.24 yyagi 初期値はfalse (再生速度変更を、ピッチ変更にて行う)
+		bPlaySpeedAffectsChips = false;        // only the song follows the play speed
 		nSkipTimeMs = 5000;
 		nChipPlayTimeComputeMode = 1;			// 2024.2.17 fisyher Set to Accurate by default
 

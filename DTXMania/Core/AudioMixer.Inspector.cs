@@ -21,16 +21,58 @@ public static partial class AudioMixer
 
         if (ImGui.Button("Stop all playback"))
         {
-            foreach (CSystemSound clip in clips.Keys.ToArray())
+            foreach (MixerClip clip in clips)
             {
                 Stop(clip);
             }
         }
-        
-        DrawGroups();
-        DrawClips();
+
+        foreach (AudioGroup group in Enum.GetValues<AudioGroup>())
+        {
+            DrawGroup(group);
+        }
+
+        ImGui.TextDisabled("Levels are not saved — Config > Audio > Mixer Volumes is where they persist.");
 
         ImGui.End();
+    }
+
+    private static void DrawGroup(AudioGroup group)
+    {
+        int count = 0;
+        int channels = 0;
+        int sounding = 0;
+
+        foreach (MixerClip clip in clips)
+        {
+            if (clip.group != group)
+            {
+                continue;
+            }
+
+            count++;
+            channels += clip.voices.Count;
+            sounding += Sounding(clip);
+        }
+
+        bool open = ImGui.CollapsingHeader($"{group}   {count} clips, {channels} voices, {sounding} playing###{group}");
+
+        int volume = Device.GetGroupVolume(group);
+
+        ImGui.PushID((int)group);
+        ImGui.SetNextItemWidth(200.0f);
+
+        if (ImGui.SliderInt("Level", ref volume, 0, 100))
+        {
+            SetGroupVolume(group, volume);
+        }
+
+        ImGui.PopID();
+
+        if (open)
+        {
+            DrawClips(group, count);
+        }
     }
 
     private static void DrawTotals()
@@ -38,17 +80,27 @@ public static partial class AudioMixer
         int channels = 0;
         int sounding = 0;
 
-        foreach (Clip state in clips.Values)
+        foreach (MixerClip clip in clips)
         {
-            channels += state.voices.Count;
-            sounding += Sounding(state);
+            channels += clip.voices.Count;
+            sounding += Sounding(clip);
         }
 
-        ImGui.Text($"Clips {clips.Count}  Voices {channels} (peak {PeakVoiceCount})  Playing {sounding}");
+        ImGui.Text($"Mixer   clips {clips.Count}   voices {channels} (peak {PeakVoiceCount})   playing {sounding}");
 
-        //FDK's own counters cover everything this mixer does not own yet — gameplay chips above all — and
-        //do not see sample channels, so the two numbers are separate rather than a total
-        ImGui.TextDisabled($"FDK: {FDK.CSoundManager.nStreams} streams, {FDK.CSoundManager.nMixing} mixed");
+        ImGui.Text($"FDK     streams {FDK.CSoundManager.nStreams}   in mix {FDK.CSoundManager.nMixing}");
+
+        ImGui.TextDisabled("In mix counts channels attached to the output, playing or not, and only the "
+                           + "ones FDK made.");
+
+        //normal while a loader still has clips it has not published
+        int unaccounted = UnaccountedClips;
+
+        if (unaccounted != 0)
+        {
+            ImGui.TextColored(Busy, $"Live clips {LiveClips}, {unaccounted} not in this list " +
+                                    "(loading, or leaked)");
+        }
 
         ImGui.TextDisabled($"{Device.TypeName} on " +
                            $"{(Device.CurrentOutput.Length > 0 ? Device.CurrentOutput : "an unnamed device")}");
@@ -58,34 +110,9 @@ public static partial class AudioMixer
             : "exclusive: none");
     }
 
-    private static void DrawGroups()
+    private static void DrawClips(AudioGroup group, int count)
     {
-        if (!ImGui.CollapsingHeader("Groups"))
-        {
-            return;
-        }
-
-        ImGui.TextDisabled(Device.MixesGroups
-            ? $"{Device.TypeName} mixes each group, so this reaches everything it plays."
-            : $"{Device.TypeName} has no per-group mixing; the level rides each voice this mixer owns.");
-
-        foreach (AudioGroup group in Enum.GetValues<AudioGroup>())
-        {
-            int volume = Device.GetGroupVolume(group);
-
-            if (ImGui.SliderInt(group.ToString(), ref volume, 0, 100))
-            {
-                SetGroupVolume(group, volume);
-            }
-        }
-
-        //these write to the device only, so the config page puts its saved values back on the next visit
-        ImGui.TextDisabled("Not saved — Config > Audio > Mixer Volumes is where these persist.");
-    }
-
-    private static void DrawClips()
-    {
-        if (clips.Count == 0)
+        if (count == 0)
         {
             ImGui.TextDisabled("Nothing loaded.");
             return;
@@ -95,13 +122,15 @@ public static partial class AudioMixer
                                                               | ImGuiTableFlags.SizingStretchProp
                                                               | ImGuiTableFlags.ScrollY;
 
-        if (!ImGui.BeginTable("mixerClips", 6, flags))
+        //capped so one group cannot push the others off the window
+        float height = Math.Min(count + 1, 12) * ImGui.GetTextLineHeightWithSpacing();
+
+        if (!ImGui.BeginTable($"mixerClips{group}", 5, flags, new Vector2(0.0f, height)))
         {
             return;
         }
 
         ImGui.TableSetupColumn("Clip", ImGuiTableColumnFlags.WidthStretch);
-        ImGui.TableSetupColumn("Group", ImGuiTableColumnFlags.WidthFixed, 60.0f);
         ImGui.TableSetupColumn("Channels", ImGuiTableColumnFlags.WidthFixed, 120.0f);
         ImGui.TableSetupColumn("Plays", ImGuiTableColumnFlags.WidthFixed, 60.0f);
         ImGui.TableSetupColumn("Flags", ImGuiTableColumnFlags.WidthFixed, 110.0f);
@@ -109,38 +138,37 @@ public static partial class AudioMixer
         ImGui.TableSetupScrollFreeze(0, 1);
         ImGui.TableHeadersRow();
 
-        //by name, so a row stays where it was rather than moving as counts change
-        foreach ((CSystemSound clip, Clip state) in clips.OrderBy(entry => entry.Key.strFilename))
+        //insertion order, so a row stays where it was as counts change
+        foreach (MixerClip clip in clips)
         {
-            DrawClipRow(clip, state);
+            if (clip.group == group)
+            {
+                DrawClipRow(clip);
+            }
         }
 
         ImGui.EndTable();
     }
 
-    private static void DrawClipRow(CSystemSound clip, Clip state)
+    private static void DrawClipRow(MixerClip clip)
     {
         ImGui.TableNextRow();
 
         ImGui.TableNextColumn();
-        ImGui.Text(clip.strFilename.Length > 0 ? clip.strFilename : "(unnamed)");
+        ImGui.Text(clip.name);
 
+        //full means the next play grows the pool, which is when a decode happens
         ImGui.TableNextColumn();
-        ImGui.TextDisabled(clip.group.ToString());
-
-        //how much of the pool is in use. Full means the next play has to grow it, which is the one moment
-        //worth noticing: it is when a decode happens
-        ImGui.TableNextColumn();
-        int sounding = Sounding(state);
-        bool saturated = sounding > 0 && sounding == state.voices.Count;
+        int sounding = Sounding(clip);
+        bool saturated = sounding > 0 && sounding == clip.voices.Count;
 
         if (saturated)
         {
             ImGui.PushStyleColor(ImGuiCol.PlotHistogram, Busy);
         }
 
-        float used = state.voices.Count == 0 ? 0.0f : sounding / (float)state.voices.Count;
-        ImGui.ProgressBar(used, new Vector2(-1.0f, 0.0f), $"{sounding}/{state.voices.Count}");
+        float used = clip.voices.Count == 0 ? 0.0f : sounding / (float)clip.voices.Count;
+        ImGui.ProgressBar(used, new Vector2(-1.0f, 0.0f), $"{sounding}/{clip.voices.Count}");
 
         if (saturated)
         {
@@ -148,20 +176,20 @@ public static partial class AudioMixer
         }
 
         ImGui.TableNextColumn();
-        ImGui.Text(state.plays.ToString());
+        ImGui.Text(clip.plays.ToString());
 
         ImGui.TableNextColumn();
-        ImGui.TextDisabled(Flags(clip, state));
+        ImGui.TextDisabled(Flags(clip));
 
         ImGui.TableNextColumn();
-        ImGui.TextDisabled(state.audio?.VoiceKind ?? "-");
+        ImGui.TextDisabled(clip.audio?.VoiceKind ?? "-");
     }
 
-    private static int Sounding(Clip state)
+    private static int Sounding(MixerClip clip)
     {
         int count = 0;
 
-        foreach (Voice voice in state.voices)
+        foreach (Voice voice in clip.voices)
         {
             if (voice.sound.IsPlaying)
             {
@@ -172,7 +200,7 @@ public static partial class AudioMixer
         return count;
     }
 
-    private static string Flags(CSystemSound clip, Clip state)
+    private static string Flags(MixerClip clip)
     {
         string flags = string.Empty;
 
@@ -181,12 +209,7 @@ public static partial class AudioMixer
             flags += "loop ";
         }
 
-        if (clip.bExclusive)
-        {
-            flags += "excl ";
-        }
-
-        if (state.releasing)
+        if (clip.releasing)
         {
             flags += "ending";
         }
