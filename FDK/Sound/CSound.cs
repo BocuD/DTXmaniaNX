@@ -1227,7 +1227,7 @@ public class CSound : IDisposable, ICloneable
 			bool b = true;
 			try
 			{
-				b = BassMix.BASS_Mixer_ChannelSetPosition(hBassStream, Bass.BASS_ChannelSeconds2Bytes(hBassStream, n位置ms * db周波数倍率 * dbPlaySpeed / 1000.0), BASSMode.BASS_POS_BYTES);
+				b = BassMix.BASS_Mixer_ChannelSetPosition(hBassStream, Bass.BASS_ChannelSeconds2Bytes(hBassStream, n位置ms * db周波数倍率 * dbPlaySpeed / 1000.0), BASSMode.BASS_POS_BYTE);
 			}
 			catch (Exception e)
 			{
@@ -1798,11 +1798,11 @@ public class CSound : IDisposable, ICloneable
 		if (BassMix.BASS_Mixer_ChannelGetMixer(hBassStream) == 0)
 #endif
 		{
-			BASSFlag bf = BASSFlag.BASS_SPEAKER_FRONT | BASSFlag.BASS_MIXER_NORAMPIN | BASSFlag.BASS_MIXER_PAUSE;
+			BASSFlag bf = BASSFlag.BASS_SPEAKER_FRONT | BASSFlag.BASS_MIXER_NORAMPIN | BASSFlag.BASS_MIXER_CHAN_PAUSE;
 			Interlocked.Increment(ref CSoundManager.nMixing);
 
-			// preloadされることを期待して、敢えてflagからはBASS_MIXER_PAUSEを外してAddChannelした上で、すぐにPAUSEする
-			// -> ChannelUpdateでprebufferできることが分かったため、BASS_MIXER_PAUSEを使用することにした
+			// preloadされることを期待して、敢えてflagからはBASS_MIXER_CHAN_PAUSEを外してAddChannelした上で、すぐにPAUSEする
+			// -> ChannelUpdateでprebufferできることが分かったため、BASS_MIXER_CHAN_PAUSEを使用することにした
 
 #if TEST_MultiThreadedMixer
 				bool b1 = BASSThreadedMixerLibraryWrapper.BASS_ThreadedMixer_AddSource( (IntPtr)this.hMixer, this.hBassStream, IntPtr.Zero );
