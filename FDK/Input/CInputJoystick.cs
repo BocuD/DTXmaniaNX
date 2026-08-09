@@ -243,7 +243,7 @@ Trace.TraceInformation( "TS={0}: IsPressed={1}, IsReleased={2}", data.TimeStamp,
 											nKey = 6 + i,
 											b押された = true,
 											b離された = false,
-											nTimeStamp = CSoundManager.inputTimer.nSystemTimeMsFor(data.Timestamp),
+											nTimeStamp = InputClock.Current.nSystemTimeMsFor(data.Timestamp),
 											nVelocity = CInputManager.nDefaultVelocity
 										};
 										listInputEvent.Add(e);
@@ -258,7 +258,7 @@ Trace.TraceInformation( "TS={0}: IsPressed={1}, IsReleased={2}", data.TimeStamp,
 											nKey = 6 + i,
 											b押された = false,
 											b離された = true,
-											nTimeStamp = CSoundManager.inputTimer.nSystemTimeMsFor(data.Timestamp),
+											nTimeStamp = InputClock.Current.nSystemTimeMsFor(data.Timestamp),
 											nVelocity = CInputManager.nDefaultVelocity,
 										};
 										listInputEvent.Add(ev);
@@ -301,7 +301,7 @@ Trace.TraceInformation( "TS={0}: IsPressed={1}, IsReleased={2}", data.TimeStamp,
 								//Debug.WriteLine( "POVS押された" + data.TimeStamp + " " + e.nKey );
 							}
 							//e.nTimeStamp = data.TimeStamp;
-							e.nTimeStamp = CSoundManager.inputTimer.nSystemTimeMsFor(data.Timestamp);
+							e.nTimeStamp = InputClock.Current.nSystemTimeMsFor(data.Timestamp);
 							listInputEvent.Add(e);
 						}
 						#endregion
@@ -327,7 +327,7 @@ Trace.TraceInformation( "TS={0}: IsPressed={1}, IsReleased={2}", data.TimeStamp,
 							{
 								nKey = 0,
 								b押された = true,
-								nTimeStamp = CSoundManager.inputTimer.nSystemTimeMs,
+								nTimeStamp = InputClock.Current.nSystemTimeMs,
 								nVelocity = CInputManager.nDefaultVelocity
 							};
 							listInputEvent.Add(ev);
@@ -344,7 +344,7 @@ Trace.TraceInformation( "TS={0}: IsPressed={1}, IsReleased={2}", data.TimeStamp,
 							{
 								nKey = 0,
 								b押された = false,
-								nTimeStamp = CSoundManager.inputTimer.nSystemTimeMs,
+								nTimeStamp = InputClock.Current.nSystemTimeMs,
 								nVelocity = CInputManager.nDefaultVelocity
 							};
 							listInputEvent.Add(ev);
@@ -365,7 +365,7 @@ Trace.TraceInformation( "TS={0}: IsPressed={1}, IsReleased={2}", data.TimeStamp,
 							{
 								nKey = 1,
 								b押された = true,
-								nTimeStamp = CSoundManager.inputTimer.nSystemTimeMs,
+								nTimeStamp = InputClock.Current.nSystemTimeMs,
 								nVelocity = CInputManager.nDefaultVelocity
 							};
 							listInputEvent.Add(ev);
@@ -382,7 +382,7 @@ Trace.TraceInformation( "TS={0}: IsPressed={1}, IsReleased={2}", data.TimeStamp,
 							{
 								nKey = 1,
 								b押された = false,
-								nTimeStamp = CSoundManager.inputTimer.nSystemTimeMs,
+								nTimeStamp = InputClock.Current.nSystemTimeMs,
 								nVelocity = CInputManager.nDefaultVelocity
 							};
 							listInputEvent.Add(event7);
@@ -403,7 +403,7 @@ Trace.TraceInformation( "TS={0}: IsPressed={1}, IsReleased={2}", data.TimeStamp,
 							{
 								nKey = 2,
 								b押された = true,
-								nTimeStamp = CSoundManager.inputTimer.nSystemTimeMs,
+								nTimeStamp = InputClock.Current.nSystemTimeMs,
 								nVelocity = CInputManager.nDefaultVelocity
 							};
 							listInputEvent.Add(ev);
@@ -420,7 +420,7 @@ Trace.TraceInformation( "TS={0}: IsPressed={1}, IsReleased={2}", data.TimeStamp,
 							{
 								nKey = 2,
 								b押された = false,
-								nTimeStamp = CSoundManager.inputTimer.nSystemTimeMs,
+								nTimeStamp = InputClock.Current.nSystemTimeMs,
 								nVelocity = CInputManager.nDefaultVelocity
 							};
 							listInputEvent.Add(ev);
@@ -441,7 +441,7 @@ Trace.TraceInformation( "TS={0}: IsPressed={1}, IsReleased={2}", data.TimeStamp,
 							{
 								nKey = 3,
 								b押された = true,
-								nTimeStamp = CSoundManager.inputTimer.nSystemTimeMs,
+								nTimeStamp = InputClock.Current.nSystemTimeMs,
 								nVelocity = CInputManager.nDefaultVelocity
 							};
 							listInputEvent.Add(ev);
@@ -458,7 +458,7 @@ Trace.TraceInformation( "TS={0}: IsPressed={1}, IsReleased={2}", data.TimeStamp,
 							{
 								nKey = 3,
 								b押された = false,
-								nTimeStamp = CSoundManager.inputTimer.nSystemTimeMs,
+								nTimeStamp = InputClock.Current.nSystemTimeMs,
 								nVelocity = CInputManager.nDefaultVelocity
 							};
 							listInputEvent.Add(ev);
@@ -479,7 +479,7 @@ Trace.TraceInformation( "TS={0}: IsPressed={1}, IsReleased={2}", data.TimeStamp,
 							{
 								nKey = 4,
 								b押された = true,
-								nTimeStamp = CSoundManager.inputTimer.nSystemTimeMs,
+								nTimeStamp = InputClock.Current.nSystemTimeMs,
 								nVelocity = CInputManager.nDefaultVelocity
 							};
 							listInputEvent.Add(ev);
@@ -496,7 +496,7 @@ Trace.TraceInformation( "TS={0}: IsPressed={1}, IsReleased={2}", data.TimeStamp,
 							{
 								nKey = 4,
 								b押された = false,
-								nTimeStamp = CSoundManager.inputTimer.nSystemTimeMs,
+								nTimeStamp = InputClock.Current.nSystemTimeMs,
 								nVelocity = CInputManager.nDefaultVelocity
 							};
 							listInputEvent.Add(ev);
@@ -517,7 +517,7 @@ Trace.TraceInformation( "TS={0}: IsPressed={1}, IsReleased={2}", data.TimeStamp,
 							{
 								nKey = 5,
 								b押された = true,
-								nTimeStamp = CSoundManager.inputTimer.nSystemTimeMs,
+								nTimeStamp = InputClock.Current.nSystemTimeMs,
 								nVelocity = CInputManager.nDefaultVelocity
 							};
 							listInputEvent.Add(ev);
@@ -534,7 +534,7 @@ Trace.TraceInformation( "TS={0}: IsPressed={1}, IsReleased={2}", data.TimeStamp,
 							{
 								nKey = 5,
 								b押された = false,
-								nTimeStamp = CSoundManager.inputTimer.nSystemTimeMs,
+								nTimeStamp = InputClock.Current.nSystemTimeMs,
 								nVelocity = CInputManager.nDefaultVelocity
 							};
 							listInputEvent.Add(event15);
@@ -557,7 +557,7 @@ Trace.TraceInformation( "TS={0}: IsPressed={1}, IsReleased={2}", data.TimeStamp,
 							{
 								nKey = 6 + j,
 								b押された = true,
-								nTimeStamp = CSoundManager.inputTimer.nSystemTimeMs,
+								nTimeStamp = InputClock.Current.nSystemTimeMs,
 								nVelocity = CInputManager.nDefaultVelocity
 							};
 							listInputEvent.Add(item);
@@ -572,7 +572,7 @@ Trace.TraceInformation( "TS={0}: IsPressed={1}, IsReleased={2}", data.TimeStamp,
 							{
 								nKey = 6 + j,
 								b押された = false,
-								nTimeStamp = CSoundManager.inputTimer.nSystemTimeMs,
+								nTimeStamp = InputClock.Current.nSystemTimeMs,
 								nVelocity = CInputManager.nDefaultVelocity
 							};
 							listInputEvent.Add(item);
@@ -602,7 +602,7 @@ Trace.TraceInformation( "TS={0}: IsPressed={1}, IsReleased={2}", data.TimeStamp,
 									nKey = 6 + 128 + nWay,
 									//Debug.WriteLine( "POVS:" + povs[ 0 ].ToString( CultureInfo.CurrentCulture ) + ", " +stevent.nKey );
 									b押された = true,
-									nTimeStamp = CSoundManager.inputTimer.nSystemTimeMs,
+									nTimeStamp = InputClock.Current.nSystemTimeMs,
 									nVelocity = CInputManager.nDefaultVelocity
 								};
 								listInputEvent.Add(stevent);
@@ -628,7 +628,7 @@ Trace.TraceInformation( "TS={0}: IsPressed={1}, IsReleased={2}", data.TimeStamp,
 								{
 									nKey = nWay,
 									b押された = false,
-									nTimeStamp = CSoundManager.inputTimer.nSystemTimeMs,
+									nTimeStamp = InputClock.Current.nSystemTimeMs,
 									nVelocity = 0
 								};
 								listInputEvent.Add(stevent);
@@ -748,7 +748,7 @@ Trace.TraceInformation( "TS={0}: IsPressed={1}, IsReleased={2}", data.TimeStamp,
 			{
 				nKey = target,
 				b押された = !lastMode,
-				nTimeStamp = CSoundManager.inputTimer.nSystemTimeMsFor(data.Timestamp),
+				nTimeStamp = InputClock.Current.nSystemTimeMsFor(data.Timestamp),
 				nVelocity = (lastMode) ? 0 : CInputManager.nDefaultVelocity
 			};
 			listInputEvent.Add(e);

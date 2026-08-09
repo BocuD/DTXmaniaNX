@@ -123,7 +123,7 @@ public class CInputMouse : IInputDevice, IDisposable
 									nKey = k,
 									b押された = true,
 									b離された = false,
-									nTimeStamp = CSoundManager.inputTimer.nSystemTimeMsFor(data.Timestamp),
+									nTimeStamp = InputClock.Current.nSystemTimeMsFor(data.Timestamp),
 									nVelocity = CInputManager.nDefaultVelocity
 								};
 								listInputEvent.Add(item);
@@ -139,7 +139,7 @@ public class CInputMouse : IInputDevice, IDisposable
 									nKey = k,
 									b押された = false,
 									b離された = true,
-									nTimeStamp = CSoundManager.inputTimer.nSystemTimeMsFor(data.Timestamp),
+									nTimeStamp = InputClock.Current.nSystemTimeMsFor(data.Timestamp),
 									nVelocity = CInputManager.nDefaultVelocity
 								};
 								listInputEvent.Add(item);
@@ -171,7 +171,7 @@ public class CInputMouse : IInputDevice, IDisposable
 								nKey = j,
 								b押された = true,
 								b離された = false,
-								nTimeStamp = CSoundManager.inputTimer.nSystemTimeMs,
+								nTimeStamp = InputClock.Current.nSystemTimeMs,
 								nVelocity = CInputManager.nDefaultVelocity,
 							};
 							listInputEvent.Add(ev);
@@ -186,7 +186,7 @@ public class CInputMouse : IInputDevice, IDisposable
 								nKey = j,
 								b押された = false,
 								b離された = true,
-								nTimeStamp = CSoundManager.inputTimer.nSystemTimeMs,
+								nTimeStamp = InputClock.Current.nSystemTimeMs,
 								nVelocity = CInputManager.nDefaultVelocity,
 							};
 							listInputEvent.Add(ev);

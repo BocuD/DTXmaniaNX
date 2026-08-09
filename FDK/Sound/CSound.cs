@@ -22,30 +22,13 @@ public class CSoundManager   // CSound管理
 		get; set;
 	}
 	private static readonly CTimer systemTimer = new(CTimer.EType.PerformanceCounter);
-	private static CSoundTimer performanceTimer = null;
-
-	//what input events are stamped with. Swapped rather than left empty: input keeps arriving on its own
-	//device's thread while a sound device is being built or rebuilt
-	private static IInputClock deviceInputTimer = systemTimer;
-
-	/// <summary>
-	/// Set by the game so input is stamped on the same clock the audio mixer runs on.
-	/// </summary>
-	public static IInputClock inputTimerOverride;
-
-	public static IInputClock inputTimer => inputTimerOverride ?? deviceInputTimer;
 
 	/// <summary>The plain system clock, for whoever needs a time while no sound device exists.</summary>
 	public static long nSystemClockMs => systemTimer.nSystemTimeMs;
 
 	public static CSoundTimer rcPerformanceTimer  // rc演奏用タイマ
 	{
-		get => performanceTimer;
-		set
-		{
-			performanceTimer = value;
-			deviceInputTimer = value ?? (IInputClock)systemTimer;
-		}
+		get; set;
 	}
 	public static bool bUseOSTimer = false;     // OSのタイマーを使うか、CSoundTimerを使うか。DTXCではfalse, DTXManiaではtrue。
 	// DTXC(DirectSound)でCSoundTimerを使うと、内部で無音のループサウンドを再生するため

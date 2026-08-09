@@ -375,7 +375,7 @@ public class CInputManager : IDisposable // CInput管理
 			return;
 
 		//read before the lock, so the event is stamped when it arrived rather than when it got in
-		long time = CSoundManager.inputTimer.nSystemTimeMs;
+		long time = InputClock.Current.nSystemTimeMs;
 
 		lock (objMidiInMutex)
 		{
