@@ -710,19 +710,6 @@ public class CSoundDeviceWASAPI : ISoundDevice
 	#endregion
 
 	#region [ tサウンドを作成する() ]
-	public void tSetGroupVolume(CSound.EInstType eInstType, int nVolume)
-	{
-		int n = (int)eInstType;
-
-		if (hMixer_Chips == null || n < 0 || n >= hMixer_Chips.Length || hMixer_Chips[n] == 0)
-		{
-			return;
-		}
-
-		//the same attribute the mixer is built with, so setting it live and rebuilding agree
-		Bass.BASS_ChannelSetAttribute(hMixer_Chips[n], BASSAttribute.BASS_ATTRIB_VOL, nVolume / 100.0f);
-	}
-
 	public CSound tサウンドを作成する(string strファイル名, CSound.EInstType eInstType)
 	{
 		var sound = new CSound();

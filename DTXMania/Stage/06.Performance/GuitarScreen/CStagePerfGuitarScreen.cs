@@ -203,7 +203,7 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 
 	public override void FirstUpdate()
 	{
-		CSoundManager.rcPerformanceTimer.tReset();
+		AudioMixer.Timer.tReset();
 		CDTXMania.Timer.tReset();
 		
 		ctChipPatternAnimation.Guitar = new CCounter(0, 0x17, 20, CDTXMania.Timer);
@@ -377,7 +377,7 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		}
 		
 
-		if (LoopEndMs != -1 && CSoundManager.rcPerformanceTimer.nCurrentTime > LoopEndMs)
+		if (LoopEndMs != -1 && AudioMixer.Timer.nCurrentTime > LoopEndMs)
 		{
 			Trace.TraceInformation("Reached end of loop");
 			tJumpInSong(LoopBeginMs == -1 ? 0 : LoopBeginMs);
@@ -575,7 +575,7 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		if (!pChip.bHit && (pChip.nDistanceFromBar.Drums < 0))
 		{
 			//pChip.bHit = true;
-			//this.tPlaySound(pChip, CSoundManager.rcPerformanceTimer.n前回リセットした時のシステム時刻 + pChip.nPlaybackTimeMs, EInstrumentPart.DRUMS, dTX.nモニタを考慮した音量(EInstrumentPart.DRUMS));
+			//this.tPlaySound(pChip, AudioMixer.Timer.nResetAtMs + pChip.nPlaybackTimeMs, EInstrumentPart.DRUMS, dTX.nモニタを考慮した音量(EInstrumentPart.DRUMS));
 		}
 	}
 	protected override void tUpdateAndDraw_Chip_Drums(CConfigIni configIni, ref CDTX dTX, ref CChip pChip)
@@ -584,7 +584,7 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		if ( !pChip.bHit && ( pChip.nDistanceFromBar.Drums < 0 ) )
 		{
 			pChip.bHit = true;
-			tPlaySound(pChip, CSoundManager.rcPerformanceTimer.n前回リセットした時のシステム時刻 + pChip.nPlaybackTimeMs, EInstrumentPart.DRUMS, dTX.nモニタを考慮した音量(EInstrumentPart.DRUMS));
+			tPlaySound(pChip, AudioMixer.Timer.nResetAtMs + pChip.nPlaybackTimeMs, EInstrumentPart.DRUMS, dTX.nモニタを考慮した音量(EInstrumentPart.DRUMS));
 		}
 	}
 	
@@ -751,8 +751,8 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		double ScrollSpeedGuitar = (actScrollSpeed.db現在の譜面スクロール速度.Guitar + 1.0) * 0.5 * 0.5 * 37.5 * speed * 1.52f / 60000.0; //todo: verify if this is the correct approach to fix guitar scroll speed
 		double ScrollSpeedBass = (actScrollSpeed.db現在の譜面スクロール速度.Bass + 1.0) * 0.5 * 0.5 * 37.5 * speed * 1.52f / 60000.0; //todo: verify if this is the correct approach to fix guitar scroll speed
 
-		int nDistanceFromBarGuitar = (int)(((bIsEnd ? LoopEndMs : LoopBeginMs) - CSoundManager.rcPerformanceTimer.nCurrentTime) * ScrollSpeedGuitar);
-		int nDistanceFromBarBass = (int)(((bIsEnd ? LoopEndMs : LoopBeginMs) - CSoundManager.rcPerformanceTimer.nCurrentTime) * ScrollSpeedBass);
+		int nDistanceFromBarGuitar = (int)(((bIsEnd ? LoopEndMs : LoopBeginMs) - AudioMixer.Timer.nCurrentTime) * ScrollSpeedGuitar);
+		int nDistanceFromBarBass = (int)(((bIsEnd ? LoopEndMs : LoopBeginMs) - AudioMixer.Timer.nCurrentTime) * ScrollSpeedBass);
 
 		if (configIni.bGuitarEnabled)
 		{

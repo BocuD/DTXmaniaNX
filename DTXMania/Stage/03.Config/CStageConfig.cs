@@ -231,6 +231,9 @@ internal class CStageConfig : CStage
             //apply deferred changes made via config list when exiting the stage
             configMenu.ApplyPendingChanges();
 
+            //the config BGM is this stage's; it has no business staying resident through a song
+            CDTXMania.Skin.bgmコンフィグ画面.Unload();
+
             ctDisplayWait = null;
             base.OnDeactivate();
         }

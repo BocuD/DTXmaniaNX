@@ -99,8 +99,6 @@ public sealed class SoundReference
 
     public void Stop() => loaded?.tStop();
 
-    public void RemoveMixer() => loaded?.tRemoveMixer();
-
     /// <summary>One line of what this sound is, for whoever lists it.</summary>
     [JsonIgnore] public string Summary => sound.ToString();
 

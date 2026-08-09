@@ -200,7 +200,8 @@ internal class CSkin : IDisposable
 	{
 		foreach ( CSystemSound cSystemSound in AllSounds )
 		{
-			if (cSystemSound.bExclusive) continue; // BGM系以外のみ読み込む。(BGM系は必要になったときに読み込む)
+			// effects are a few MB all told and a late first play is worse; BGM is large and stage-owned
+			if (cSystemSound.group == AudioGroup.Bgm) continue;
 
 			try
 			{

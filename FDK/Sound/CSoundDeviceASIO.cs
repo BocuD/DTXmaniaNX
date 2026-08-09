@@ -385,11 +385,6 @@ public class CSoundDeviceASIO : ISoundDevice
 	#endregion
 
 	#region [ tサウンドを作成する() ]
-	//ASIO mixes everything into one stream, so there is no per-group level to set here
-	public void tSetGroupVolume(CSound.EInstType eInstType, int nVolume)
-	{
-	}
-
 	public CSound tサウンドを作成する(string strファイル名, CSound.EInstType eInstType)
 	{
 		var sound = new CSound();

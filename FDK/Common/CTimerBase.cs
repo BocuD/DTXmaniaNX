@@ -1,106 +1,53 @@
-﻿namespace FDK;
+namespace FDK;
 
 /// <summary>
-/// <para>タイマの抽象クラス。</para>
-/// <para>このクラスを継承し、override したクラスを作成することで、任意のクロックを持つタイマを作成できる。</para>
+/// A stopwatch over the clock a derived timer supplies. <see cref="tUpdate"/> samples that clock; every
+/// read until the next one sees the same time, so a frame gets one consistent answer.
 /// </summary>
 public abstract class CTimerBase : IDisposable
 {
 	public const long nUnused = -1;
 
-	// この２つを override する。
-	public abstract long nSystemTimeMs
-	{
-		get;
-	}
+	public abstract long nSystemTimeMs { get; }
+
 	public abstract void Dispose();
 
-	//an input event carries its own device's timestamp; a timer that keeps a fix on that clock corrects it
-	public virtual long nSystemTimeMsFor(long deviceTimestamp) => nSystemTimeMs;
-
-	#region [ DTXMania用に、語尾にmsのつかない宣言を追加 ]
-	public long nシステム時刻 => nSystemTimeMs;
-
-	public long nCurrentTime  // n現在時刻
+	/// <summary>Time since the last reset, not counting time spent paused.</summary>
+	public long nCurrentTime
 	{
-		get => n現在時刻ms;
-		set => n現在時刻ms = value;
-	}
-	public long n前回リセットした時のシステム時刻 => n前回リセットした時のシステム時刻ms;
-
-	#endregion
-
-	public long n現在時刻ms
-	{
-		get
-		{
-			if (n停止数 > 0)
-				return (n一時停止システム時刻ms - n前回リセットした時のシステム時刻ms);
-
-			return (n更新システム時刻ms - n前回リセットした時のシステム時刻ms);
-		}
-		set
-		{
-			if (n停止数 > 0)
-				n前回リセットした時のシステム時刻ms = n一時停止システム時刻ms - value;
-			else
-				n前回リセットした時のシステム時刻ms = n更新システム時刻ms - value;
-		}
-	}
-	public long nリアルタイム現在時刻ms
-	{
-		get
-		{
-			if (n停止数 > 0)
-				return (n一時停止システム時刻ms - n前回リセットした時のシステム時刻ms);
-
-			return (nSystemTimeMs - n前回リセットした時のシステム時刻ms);
-		}
-	}
-	public long n前回リセットした時のシステム時刻ms
-	{
-		get;
-		protected set;
+		get => nSampledMs - nResetAtMs;
+		set => nResetAtMs = nSampledMs - value;
 	}
 
-	public bool b停止していない => (n停止数 == 0);
+	public long nResetAtMs { get; protected set; }
 
-	public void tReset()  // tリセット
+	public void tUpdate()
 	{
-		tUpdate();
-		n前回リセットした時のシステム時刻ms = n更新システム時刻ms;
-		n一時停止システム時刻ms = n更新システム時刻ms;
-		n停止数 = 0;
-	}
-	public void tPause()  // t一時停止
-	{
-		if (n停止数 == 0)
-			n一時停止システム時刻ms = n更新システム時刻ms;
-
-		n停止数++;
-	}
-	public void tUpdate()  // t更新
-	{
-		n更新システム時刻ms = nSystemTimeMs;
-	}
-	public void tResume()  // t再開
-	{
-		if (n停止数 > 0)
-		{
-			n停止数--;
-			if (n停止数 == 0)
-			{
-				tUpdate();
-				n前回リセットした時のシステム時刻ms += n更新システム時刻ms - n一時停止システム時刻ms;
-			}
-		}
+		if (nPauseDepth == 0)
+			nSampledMs = nSystemTimeMs;
 	}
 
-	#region [ protected ]
-	//-----------------
-	protected long n一時停止システム時刻ms = 0;
-	protected long n更新システム時刻ms = 0;
-	protected int n停止数 = 0;
-	//-----------------
-	#endregion
+	public void tReset()
+	{
+		nSampledMs = nSystemTimeMs;
+		nResetAtMs = nSampledMs;
+		nPauseDepth = 0;
+	}
+
+	/// <summary>Nests: a second pause needs a second resume.</summary>
+	public void tPause() => nPauseDepth++;
+
+	public void tResume()
+	{
+		if (nPauseDepth == 0)
+			return;
+
+		nPauseDepth--;
+
+		if (nPauseDepth == 0)
+			nResetAtMs += nSystemTimeMs - nSampledMs;
+	}
+
+	private long nSampledMs;
+	private int nPauseDepth;
 }

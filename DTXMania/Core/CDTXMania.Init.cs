@@ -92,7 +92,7 @@ internal partial class CDTXMania
         AddInitializer("Timer", () =>
         {
             Timer = new CTimer(CTimer.EType.MultiMedia); 
-            Random = new Random((int)Timer.nシステム時刻);
+            Random = new Random((int)Timer.nSystemTimeMs);
         });
 
         AddInitializer("FPS Counter", () => { FPS = new CFPS(); });
@@ -151,6 +151,9 @@ internal partial class CDTXMania
             );
             UpdateWindowTitle();
             CSoundManager.bIsTimeStretch = ConfigIni.bTimeStretch;
+
+            //input still lives in FDK, so it is pointed at our clock rather than reaching for one itself
+            CSoundManager.inputTimerOverride = AudioMixer.Timer;
             AudioMixer.Device.MasterVolume = ConfigIni.nMasterVolume;
 
             foreach (AudioGroup group in Enum.GetValues<AudioGroup>())

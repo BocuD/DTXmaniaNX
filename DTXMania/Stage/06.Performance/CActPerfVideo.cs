@@ -21,7 +21,7 @@ internal class CActPerfVideo : CActivity
         Trace.TraceInformation("CActPerfAVI: Start(): " + avi.strFileName);
 
         this.avi = avi;
-        this.moveStartTimeMs = (moveStartTimeMs != -1) ? moveStartTimeMs : CSoundManager.rcPerformanceTimer.nCurrentTime;
+        this.moveStartTimeMs = (moveStartTimeMs != -1) ? moveStartTimeMs : AudioMixer.Timer.nCurrentTime;
 
         if (avi != null)
         {
@@ -271,7 +271,7 @@ internal class CActPerfVideo : CActivity
         if (controller == null || (windowedRenderer == null && fullscreenRenderer == null))
             return;
 
-        long currentGameTime = (long) (CSoundManager.rcPerformanceTimer.nCurrentTime * (CDTXMania.ConfigIni.nPlaySpeed / 20.0f));
+        long currentGameTime = (long) (AudioMixer.Timer.nCurrentTime * (CDTXMania.ConfigIni.nPlaySpeed / 20.0f));
         long videoStartTime = moveStartTimeMs;
 
         if (videoStartTime == -1 || currentGameTime < videoStartTime)
@@ -319,7 +319,7 @@ internal class CActPerfVideo : CActivity
         bool shouldShow = CDTXMania.ConfigIni.bAVIEnabled
                           && haveRenderers
                           && moveStartTimeMs != -1
-                          && CSoundManager.rcPerformanceTimer.nCurrentTime >= moveStartTimeMs;
+                          && AudioMixer.Timer.nCurrentTime >= moveStartTimeMs;
 
         if (windowedRenderer != null)
             windowedRenderer.isVisible = shouldShow && isWindowed;

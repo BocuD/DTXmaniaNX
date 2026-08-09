@@ -22,6 +22,9 @@ public static partial class AudioMixer
 
     public static IAudioDevice Device { get; set; } = new FdkAudioDevice();
 
+    /// <summary>The clock gameplay is timed against.</summary>
+    public static readonly PerformanceTimer Timer = new();
+
     private static readonly List<MixerClip> clips = [];
 
     //so Sweep looks at these rather than scanning every clip; a chart puts hundreds in the list
@@ -29,6 +32,9 @@ public static partial class AudioMixer
 
     //voices set up but not started, so a song jump can start them together; see HoldLastAt
     private static readonly List<Voice> held = [];
+
+    //what to restore on the far side of a device rebuild; -1 means loaded but not sounding
+    private static readonly List<(MixerClip clip, int volume, int pan, long positionMs)> resume = [];
 
     private static long sequence;
     private static long nextOutputCheck;
@@ -100,7 +106,7 @@ public static partial class AudioMixer
 
         SetReleasing(clip, false);
 
-        if ((FreeVoice(clip) ?? Grow(clip)) is not { } voice)
+        if ((SoleVoice(clip) ?? FreeVoice(clip) ?? Grow(clip)) is not { } voice)
         {
             return;
         }
@@ -235,11 +241,6 @@ public static partial class AudioMixer
     {
         Device.SetGroupVolume(group, volume);
 
-        if (Device.MixesGroups)
-        {
-            return;
-        }
-
         foreach (MixerClip clip in clips)
         {
             if (clip.group != group)
@@ -254,8 +255,7 @@ public static partial class AudioMixer
         }
     }
 
-    private static int Scaled(AudioGroup group, int volume)
-        => Device.MixesGroups ? volume : volume * Device.GetGroupVolume(group) / 100;
+    private static int Scaled(AudioGroup group, int volume) => volume * Device.GetGroupVolume(group) / 100;
 
     /// <summary>Creates a clip's first channel, so the first play does not pay for decoding it.</summary>
     public static void Preload(MixerClip clip) => Grow(clip);
@@ -314,6 +314,24 @@ public static partial class AudioMixer
     /// </summary>
     public static void Reinitialize(AudioDeviceOptions options)
     {
+        //what was loaded stays loaded, or everything read up front reverts to loading on first play.
+        //Only BGM resumes: an effect cut off mid-flight is over by the time the new device exists
+        resume.Clear();
+
+        foreach (MixerClip clip in clips)
+        {
+            if (clip.audio == null)
+            {
+                continue;
+            }
+
+            Voice? playing = clip.group == AudioGroup.Bgm && clip.lastPlayed is { sound.IsPlaying: true }
+                ? clip.lastPlayed
+                : null;
+
+            resume.Add((clip, playing?.requested ?? 100, playing?.sound.Pan ?? 0, playing?.sound.PositionMs ?? -1));
+        }
+
         //unloaded, not freed: a device change is not the owners giving them up
         foreach (MixerClip clip in clips)
         {
@@ -321,6 +339,22 @@ public static partial class AudioMixer
         }
 
         Device.Reinitialize(options);
+
+        foreach ((MixerClip clip, int volume, int pan, long positionMs) in resume)
+        {
+            if (positionMs < 0)
+            {
+                Preload(clip);
+                continue;
+            }
+
+            Play(clip, volume, pan);
+
+            //back to where it was cut off, so a switch is a gap rather than a restart
+            clip.lastPlayed?.sound.Seek(positionMs);
+        }
+
+        resume.Clear();
     }
 
     /// <summary>Gives up a clip's channels and its loaded audio, keeping the clip itself. It loads again
@@ -456,6 +490,13 @@ public static partial class AudioMixer
 
         return false;
     }
+
+    /// <summary>
+    /// The one channel a clip that must not overlap itself is allowed. Playing music or a loop again
+    /// restarts it rather than layering a second copy.
+    /// </summary>
+    private static Voice? SoleVoice(MixerClip clip)
+        => (clip.loop || clip.group == AudioGroup.Bgm) && clip.voices.Count > 0 ? clip.voices[0] : null;
 
     private static Voice? FreeVoice(MixerClip clip)
     {

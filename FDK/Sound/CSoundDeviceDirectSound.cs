@@ -69,7 +69,7 @@ public class CSoundDeviceDirectSound : ISoundDevice
 				long nRet = ctimer.nSystemTimeMs - n前に経過時間を測定したシステム時刻ms;
 				if (nRet < 0)   // カウンタがループしたときは
 				{
-					nRet = (ctimer.nシステム時刻 - long.MinValue) + (long.MaxValue - n前に経過時間を測定したシステム時刻ms) + 1;
+					nRet = (ctimer.nSystemTimeMs - long.MinValue) + (long.MaxValue - n前に経過時間を測定したシステム時刻ms) + 1;
 				}
 				n前に経過時間を測定したシステム時刻ms = ctimer.nSystemTimeMs;
 
@@ -255,11 +255,6 @@ public class CSoundDeviceDirectSound : ISoundDevice
 	#endregion
 
 	#region [ tサウンドを作成する() ]
-	//DirectSound has no mixer; every sound is its own buffer straight to the device
-	public void tSetGroupVolume(CSound.EInstType eInstType, int nVolume)
-	{
-	}
-
 	public CSound tサウンドを作成する(string strファイル名, CSound.EInstType eInstType)
 	{
 		var sound = new CSound();

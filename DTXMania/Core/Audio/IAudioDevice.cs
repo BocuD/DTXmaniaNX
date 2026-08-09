@@ -21,18 +21,16 @@ public interface IAudioDevice
     void SetGroupVolume(AudioGroup group, int volume);
 
     /// <summary>
-    /// Whether this output applies group volume in its own mixing. When false, the caller has to fold the
-    /// group level into each voice itself.
-    /// </summary>
-    bool MixesGroups { get; }
-
-    /// <summary>
     /// Builds a new output to the given settings. Every clip and voice made before this is dead
     /// afterwards, so use <see cref="AudioMixer.Reinitialize"/>, which gives them up first.
     /// </summary>
     void Reinitialize(AudioDeviceOptions options);
 
-    IReadOnlyList<AudioOutput> Outputs { get; }
+    /// <summary>Elapsed output time, in ms. The clock a chart is played against.</summary>
+    long ElapsedMs { get; }
+
+    /// <summary>An input device timestamp translated onto that clock.</summary>
+    long ElapsedMsFor(long deviceTimestamp);
 
     /// <summary>The output in use, which is not the one asked for if that was empty or missing. Empty
     /// when the backend cannot say.</summary>
@@ -78,6 +76,9 @@ public interface IAudioVoice : IDisposable
 
     /// <summary>Frequency multiplier, 1.0 being unchanged. The wrong-note detune on guitar and bass.</summary>
     double Pitch { get; set; }
+
+    /// <summary>Where playback is, in ms.</summary>
+    long PositionMs { get; }
 
     /// <summary>Moves playback to <paramref name="positionMs"/>. Only meaningful while sounding.</summary>
     void Seek(long positionMs);

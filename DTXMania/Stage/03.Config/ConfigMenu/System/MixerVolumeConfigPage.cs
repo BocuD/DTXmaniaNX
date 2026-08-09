@@ -30,14 +30,9 @@ internal sealed class MixerVolumeConfigPage : ConfigPage
     {
         List<CItemBase> items = [];
 
-        string note = AudioMixer.Device.MixesGroups
-            ? string.Empty
-            : $"\n\nNote: {AudioMixer.Device.TypeName} does not mix groups separately, so this only " +
-              "applies to sounds the game mixes itself.";
-
         foreach ((AudioGroup group, string label, string japanese, string english) in Groups)
         {
-            items.Add(Volume(group, label, japanese, english + note));
+            items.Add(Volume(group, label, japanese, english));
         }
 
         items.Add(BackItem());

@@ -21,8 +21,7 @@ public class CSystemSound : IDisposable
     private bool disposed;
     private string? absolutePath;
 
-    //made on first use rather than in the constructor: a skin reload disposes these and re-reads them,
-    //and the file the name resolves to is not the same one afterwards
+    //made on first use: a skin reload re-reads these, and the name resolves to a different file
     private MixerClip? clip;
 
     /// <summary>The file this clip plays. Empty until it can be resolved.</summary>
@@ -120,7 +119,16 @@ public class CSystemSound : IDisposable
 
         if (bExclusive)
         {
-            rLastPlayedExclusiveSystemSound?.tStop();
+            //a replaced BGM is done with, and it is the large one; effects are small and stay loaded
+            if (rLastPlayedExclusiveSystemSound is { group: AudioGroup.Bgm } outgoing)
+            {
+                outgoing.Unload();
+            }
+            else
+            {
+                rLastPlayedExclusiveSystemSound?.tStop();
+            }
+
             rLastPlayedExclusiveSystemSound = this;
         }
 
@@ -150,6 +158,21 @@ public class CSystemSound : IDisposable
         }
     }
 
+    /// <summary>Stops this and gives its audio back. The next play reads the file again.</summary>
+    public void Unload()
+    {
+        tStop();
+
+        if (clip != null)
+        {
+            AudioMixer.Free(clip);
+            clip = null;
+        }
+
+        bReadNotTried = true;
+        loadSucceeded = false;
+    }
+
     public void tRemoveMixer()
     {
         if (clip != null)
@@ -171,8 +194,7 @@ public class CSystemSound : IDisposable
             clip = null;
         }
 
-        //tStop clears this, but a sound can be disposed without being stopped, and leaving the static
-        //pointing at a dead clip means the next exclusive play stops something that no longer exists
+        //tStop clears this, but a sound can be disposed without being stopped
         if (rLastPlayedExclusiveSystemSound == this)
         {
             rLastPlayedExclusiveSystemSound = null;

@@ -686,7 +686,7 @@ internal class CStageResult : CStage
 								n最後に再生したHHのWAV番号 = rChip.nIntegerValue_InternalNumber;
 								n最後に再生したHHのチャンネル番号 = rChip.nChannelNumber;
 							}
-							CDTXMania.DTX.tPlayChip( rChip, CDTXMania.Timer.nシステム時刻, nLane, CDTXMania.ConfigIni.n手動再生音量, CDTXMania.ConfigIni.b演奏音を強調する.Drums );
+							CDTXMania.DTX.tPlayChip( rChip, CDTXMania.Timer.nSystemTimeMs, nLane, CDTXMania.ConfigIni.n手動再生音量, CDTXMania.ConfigIni.b演奏音を強調する.Drums );
 						}
 					}
 				}

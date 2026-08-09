@@ -134,7 +134,7 @@ public class CInputKeyboard : IInputDevice, IDisposable
 							}
 							//if ( item.nKey == (int) SlimDXKey.Space )
 							//{
-							//    Trace.TraceInformation( "FDK(buffered): SPACE key registered. " + ct.nシステム時刻 );
+							//    Trace.TraceInformation( "FDK(buffered): SPACE key registered. " + ct.nSystemTimeMs );
 							//}
 						}
 						//foreach ( Key key in data.ReleasedKeys )
@@ -192,7 +192,7 @@ public class CInputKeyboard : IInputDevice, IDisposable
 
 							//if ( (int) key == (int) SlimDXKey.Space )
 							//{
-							//    Trace.TraceInformation( "FDK(direct): SPACE key registered. " + ct.nシステム時刻 );
+							//    Trace.TraceInformation( "FDK(direct): SPACE key registered. " + ct.nSystemTimeMs );
 							//}
 						}
 					}

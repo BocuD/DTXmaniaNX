@@ -114,6 +114,10 @@ public sealed class BassSampleVoice : IAudioVoice
         }
     }
 
+    public long PositionMs => channel == 0
+        ? 0
+        : (long)(Bass.BASS_ChannelBytes2Seconds(channel, BassMix.BASS_Mixer_ChannelGetPosition(channel)) * 1000.0);
+
     public void Seek(long positionMs)
     {
         if (channel != 0)

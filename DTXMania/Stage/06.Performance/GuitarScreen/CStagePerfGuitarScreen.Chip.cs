@@ -242,7 +242,7 @@ internal partial class CStagePerfGuitarScreen
 				ghostLag -= (pChip.eInstrumentPart == EInstrumentPart.GUITAR
 					? nInputAdjustTimeMs.Guitar
 					: nInputAdjustTimeMs.Bass);
-				autoPlayCondition &= (pChip.nPlaybackTimeMs + ghostLag <= CSoundManager.rcPerformanceTimer.n現在時刻ms);
+				autoPlayCondition &= (pChip.nPlaybackTimeMs + ghostLag <= AudioMixer.Timer.nCurrentTime);
 				if (resetCombo && autoPlayCondition)
 				{
 					actCombo.nCurrentCombo[(int)pChip.eInstrumentPart] = 0;
@@ -332,7 +332,7 @@ internal partial class CStagePerfGuitarScreen
 						: CDTXMania.ConfigIni.bSpecialist.Bass;
 					pChip.bHit = true;
 					tPlaySound(pChip,
-						CSoundManager.rcPerformanceTimer.n前回リセットした時のシステム時刻 + pChip.nPlaybackTimeMs + ghostLag, inst,
+						AudioMixer.Timer.nResetAtMs + pChip.nPlaybackTimeMs + ghostLag, inst,
 						dTX.nモニタを考慮した音量(inst), false, bMiss && bCurrInstrumentSpecialist);
 					rNextGuitarChip = null;
 					if (!bMiss)
@@ -483,7 +483,7 @@ internal partial class CStagePerfGuitarScreen
 		if (!pChip.bHit && (pChip.nDistanceFromBar[instIndex] < 0)) // Guitar/Bass無効の場合は、自動演奏する
 		{
 			pChip.bHit = true;
-			tPlaySound(pChip, CSoundManager.rcPerformanceTimer.n前回リセットした時のシステム時刻 + pChip.nPlaybackTimeMs, inst,
+			tPlaySound(pChip, AudioMixer.Timer.nResetAtMs + pChip.nPlaybackTimeMs, inst,
 				dTX.nモニタを考慮した音量(inst));
 		}
 	}

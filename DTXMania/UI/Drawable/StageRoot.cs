@@ -38,6 +38,9 @@ public class StageRoot : UIGroup
     {
         sounds = DeclaredSounds();
 
+        //whatever a stage or a skin puts in the bgm slot is background music by definition
+        bgm.group = AudioGroup.Bgm;
+
         foreach (SoundReference sound in sounds)
         {
             sound.Load();

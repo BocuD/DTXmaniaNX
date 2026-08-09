@@ -649,7 +649,7 @@ internal class CActSelectSongList : CActivity
 			for( int i = 0; i < 13; i++ )
 				ct登場アニメ用[ i ] = new CCounter( -i * 10, 100, 3, CDTXMania.Timer );
 
-			nScrollTimer = CSoundManager.rcPerformanceTimer.nCurrentTime;
+			nScrollTimer = AudioMixer.Timer.nCurrentTime;
 			stageSongSelection.tSelectedSongChanged();
 				
 			bJustStartedUpdate = false;

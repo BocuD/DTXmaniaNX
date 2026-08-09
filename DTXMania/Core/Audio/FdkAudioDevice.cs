@@ -19,14 +19,12 @@ public sealed class FdkAudioDevice : IAudioDevice
         set => CDTXMania.SoundManager.nMasterVolume = value;
     }
 
-    public int GetGroupVolume(AudioGroup group) => CDTXMania.SoundManager.nGetGroupVolume(ToFdk(group));
+    //the mixer folds these into each voice, so no output needs per-group mixing
+    private readonly int[] groupVolumes = [100, 100, 100, 100, 100];
 
-    public void SetGroupVolume(AudioGroup group, int volume)
-        => CDTXMania.SoundManager.tSetGroupVolume(ToFdk(group), volume);
+    public int GetGroupVolume(AudioGroup group) => groupVolumes[(int)group];
 
-    //only WASAPI has a mixer per instrument group; ASIO has one for everything and DirectSound has none
-    public bool MixesGroups => CSoundManager.SoundDeviceType
-        is ESoundDeviceType.ExclusiveWASAPI or ESoundDeviceType.SharedWASAPI;
+    public void SetGroupVolume(AudioGroup group, int volume) => groupVolumes[(int)group] = volume;
 
     public void Reinitialize(AudioDeviceOptions options)
     {
@@ -57,10 +55,13 @@ public sealed class FdkAudioDevice : IAudioDevice
             ? n
             : options.AsioDevice;
 
-    public IReadOnlyList<AudioOutput> Outputs
-        => AudioOutputs.For(CurrentBackend);
-
     public string CurrentOutput => CSoundManager.strActiveOutputDevice;
+
+    //the system clock while a device is being rebuilt, since there is no output clock to read
+    public long ElapsedMs => CSoundManager.rcPerformanceTimer?.nSystemTimeMs ?? CSoundManager.nSystemClockMs;
+
+    public long ElapsedMsFor(long deviceTimestamp)
+        => CSoundManager.rcPerformanceTimer?.nSystemTimeMsFor(deviceTimestamp) ?? deviceTimestamp;
 
     private static AudioBackend CurrentBackend => CSoundManager.SoundDeviceType switch
     {
@@ -290,6 +291,20 @@ public sealed class FdkAudioVoice : IAudioVoice
             {
                 current.db周波数倍率 = value;
             }
+        }
+    }
+
+    public long PositionMs
+    {
+        get
+        {
+            if (sound is not { } current)
+            {
+                return 0;
+            }
+
+            current.t再生位置を取得する(out _, out double seconds);
+            return (long)(seconds * 1000.0);
         }
     }
 

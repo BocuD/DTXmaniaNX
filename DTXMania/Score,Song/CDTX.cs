@@ -2720,7 +2720,7 @@ public class CDTX : CActivity
         //a short chip finishes before it can drift audibly
         if (wc.clip != null && AudioMixer.LengthMs(wc.clip) >= 5000)
         {
-            AudioMixer.Correct(wc.clip, CSoundManager.rcPerformanceTimer.nSystemTimeMs);
+            AudioMixer.Correct(wc.clip, AudioMixer.Timer.nSystemTimeMs);
         }
     }
 
@@ -3021,7 +3021,7 @@ public class CDTX : CActivity
 
     public void tPausePlaybackForAllChips()
     {
-        long now = CSoundManager.rcPerformanceTimer.nSystemTimeMs;
+        long now = AudioMixer.Timer.nSystemTimeMs;
 
         foreach (CWAV cwav in listWAV.Values)
         {
@@ -3034,7 +3034,7 @@ public class CDTX : CActivity
 
     public void tResumePlaybackForAllChips()
     {
-        long now = CSoundManager.rcPerformanceTimer.nSystemTimeMs;
+        long now = AudioMixer.Timer.nSystemTimeMs;
 
         foreach (CWAV cwav in listWAV.Values)
         {

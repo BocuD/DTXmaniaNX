@@ -425,7 +425,7 @@ internal partial class CDTXMania
         FrameProfiler.End(FrameSection.Sound);
 
         Timer.tUpdate();
-        CSoundManager.rcPerformanceTimer.tUpdate();
+        AudioMixer.Timer.tUpdate();
 
         FrameProfiler.Begin(FrameSection.DeviceScan);
         CStage.EStage stage = StageManager.rCurrentStage.eStageID;

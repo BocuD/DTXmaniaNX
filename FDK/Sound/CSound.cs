@@ -26,7 +26,17 @@ public class CSoundManager   // CSound管理
 
 	//what input events are stamped with. Swapped rather than left empty: input keeps arriving on its own
 	//device's thread while a sound device is being built or rebuilt
-	public static CTimerBase inputTimer { get; private set; } = systemTimer;
+	private static IInputClock deviceInputTimer = systemTimer;
+
+	/// <summary>
+	/// Set by the game so input is stamped on the same clock the audio mixer runs on.
+	/// </summary>
+	public static IInputClock inputTimerOverride;
+
+	public static IInputClock inputTimer => inputTimerOverride ?? deviceInputTimer;
+
+	/// <summary>The plain system clock, for whoever needs a time while no sound device exists.</summary>
+	public static long nSystemClockMs => systemTimer.nSystemTimeMs;
 
 	public static CSoundTimer rcPerformanceTimer  // rc演奏用タイマ
 	{
@@ -34,7 +44,7 @@ public class CSoundManager   // CSound管理
 		set
 		{
 			performanceTimer = value;
-			inputTimer = value ?? (CTimerBase)systemTimer;
+			deviceInputTimer = value ?? (IInputClock)systemTimer;
 		}
 	}
 	public static bool bUseOSTimer = false;     // OSのタイマーを使うか、CSoundTimerを使うか。DTXCではfalse, DTXManiaではtrue。
@@ -358,18 +368,6 @@ public class CSoundManager   // CSound管理
 		SoundDevice.nMasterVolume = _nMasterVolume;                 // サウンドデバイスに対して、マスターボリュームを再設定する
 
 		CSound.tすべてのサウンドを再構築する(SoundDevice);        // すでに生成済みのサウンドがあれば作り直す。
-	}
-
-	/// <summary>
-	/// Output level of one instrument group, 0 to 100. Kept even when the current device cannot apply it,
-	/// since a device built later reads nMixerVolume when it makes its per-group mixers.
-	/// </summary>
-	public int nGetGroupVolume(CSound.EInstType eInstType) => nMixerVolume[(int)eInstType];
-
-	public void tSetGroupVolume(CSound.EInstType eInstType, int nVolume)
-	{
-		nMixerVolume[(int)eInstType] = nVolume;
-		SoundDevice?.tSetGroupVolume(eInstType, nVolume);
 	}
 
 	public CSound tGenerateSound(string filename)  // tサウンドを生成する

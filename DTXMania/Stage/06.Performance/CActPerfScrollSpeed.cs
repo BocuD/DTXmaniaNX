@@ -35,10 +35,10 @@ internal class CActPerfScrollSpeed : CActivity
 		{
 			if ( bJustStartedUpdate )
 			{
-				n速度変更制御タイマ.Drums = n速度変更制御タイマ.Guitar = n速度変更制御タイマ.Bass = CSoundManager.rcPerformanceTimer.nシステム時刻;
+				n速度変更制御タイマ.Drums = n速度変更制御タイマ.Guitar = n速度変更制御タイマ.Bass = AudioMixer.Timer.nSystemTimeMs;
 				bJustStartedUpdate = false;
 			}
-			long num = CSoundManager.rcPerformanceTimer.nCurrentTime;
+			long num = AudioMixer.Timer.nCurrentTime;
 			for( int i = 0; i < 3; i++ )
 			{
 				double num3 = (double) CDTXMania.ConfigIni.nScrollSpeed[ i ];
