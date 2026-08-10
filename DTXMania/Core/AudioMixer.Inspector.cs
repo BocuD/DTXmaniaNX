@@ -57,7 +57,7 @@ public static partial class AudioMixer
 
         bool open = ImGui.CollapsingHeader($"{group}   {count} clips, {channels} voices, {sounding} playing###{group}");
 
-        int volume = Device.GetGroupVolume(group);
+        int volume = GetGroupVolume(group);
 
         ImGui.PushID((int)group);
         ImGui.SetNextItemWidth(200.0f);
@@ -86,12 +86,13 @@ public static partial class AudioMixer
             sounding += Sounding(clip);
         }
 
+        AudioDeviceStatus audio = Device.Status;
+
         ImGui.Text($"Mixer   clips {clips.Count}   voices {channels} (peak {PeakVoiceCount})   playing {sounding}");
 
-        ImGui.Text($"FDK     streams {FDK.CSoundManager.nStreams}   in mix {FDK.CSoundManager.nMixing}");
+        ImGui.Text($"Output  streams {audio.Streams}   in mix {audio.MixedChannels}");
 
-        ImGui.TextDisabled("In mix counts channels attached to the output, playing or not, and only the "
-                           + "ones FDK made.");
+        ImGui.TextDisabled("In mix counts channels attached to the output, playing or not.");
 
         //normal while a loader still has clips it has not published
         int unaccounted = UnaccountedClips;
@@ -102,12 +103,65 @@ public static partial class AudioMixer
                                     "(loading, or leaked)");
         }
 
-        ImGui.TextDisabled($"{Device.TypeName} on " +
-                           $"{(Device.CurrentOutput.Length > 0 ? Device.CurrentOutput : "an unnamed device")}");
+        ImGui.TextDisabled($"{audio.Backend} on " +
+                           $"{(audio.Output.Length > 0 ? audio.Output : "an unnamed device")}"
+                           + $"{(audio.BufferMs < 0 ? "" : $", {audio.BufferMs}ms buffer")}");
+
+        DrawLatency(audio);
+        DrawDeviceSwap();
 
         ImGui.TextDisabled(CSystemSound.rLastPlayedExclusiveSystemSound is { } exclusive
             ? $"exclusive: {exclusive.strFilename}"
             : "exclusive: none");
+    }
+
+    /// <summary>
+    /// How long a hit takes to be heard, of the parts that can be known. Chart audio does not suffer
+    /// this: chips are scheduled against the output's own clock, so the buffer is already accounted for.
+    /// </summary>
+    private static void DrawLatency(AudioDeviceStatus audio)
+    {
+        //a hit is noticed and played on the frame it arrives, so the frame is part of the wait
+        double frame = CDTXMania.FPS.nCurrentFPS > 0 ? 1000.0 / CDTXMania.FPS.nCurrentFPS : 0.0;
+
+        if (audio.BufferMs < 0)
+        {
+            ImGui.Text($"Hit to sound   frame {frame:0.0}ms + an output that does not report its buffer");
+            return;
+        }
+
+        ImGui.Text($"Hit to sound   ~{frame + audio.BufferMs:0.0}ms before the hardware");
+
+        ImGui.TextDisabled($"frame {frame:0.0}ms + output {audio.BufferMs}ms. Shared modes add the "
+                           + "Windows mixer on top, and the DAC and anything after it cannot be seen "
+                           + "from here.");
+    }
+
+    /// <summary>
+    /// Swaps between FDK's sound device and this layer's own, on the backend config already names. For
+    /// comparing the two by ear; goes when FDK's audio does.
+    /// </summary>
+    private static void DrawDeviceSwap()
+    {
+        //a rebuild frees and reloads every sound the chart is holding, which mid-song is a hang
+        bool duringSong = CDTXMania.StageManager?.rCurrentStage?.eStageID == CStage.EStage.Performance_6;
+        bool fdk = CDTXMania.ConfigIni.bUseFDKAudio;
+
+        ImGui.BeginDisabled(duringSong);
+
+        if (ImGui.Checkbox("Play through FDK's device", ref fdk))
+        {
+            CDTXMania.ConfigIni.bUseFDKAudio = fdk;
+            Reinitialize(AudioDeviceOptions.FromConfig(CDTXMania.ConfigIni));
+            CDTXMania.app.UpdateWindowTitle();
+        }
+
+        ImGui.EndDisabled();
+
+        if (duringSong)
+        {
+            ImGui.TextDisabled("Not during a song: the rebuild would reload every chart sound.");
+        }
     }
 
     private static void DrawClips(AudioGroup group, int count)
@@ -182,7 +236,7 @@ public static partial class AudioMixer
         ImGui.TextDisabled(Flags(clip));
 
         ImGui.TableNextColumn();
-        ImGui.TextDisabled(clip.audio?.VoiceKind ?? "-");
+        ImGui.TextDisabled(VoiceKind(clip));
     }
 
     private static int Sounding(MixerClip clip)

@@ -160,8 +160,6 @@ internal partial class CDTXMania
 
     public static SongDb.SongDb SongDb { get; private set; }
 
-    public static CSoundManager SoundManager { get; private set; }
-
     public static string executableDirectory { get; private set; }
     public static string strCompactModeFile { get; private set; }
     public static CTimer Timer { get; private set; }
@@ -414,16 +412,6 @@ internal partial class CDTXMania
             return;
         }
         
-        //....????
-        if (SoundManager == null)
-        {
-            return;
-        }
-
-        FrameProfiler.Begin(FrameSection.Sound);
-        SoundManager.t再生中の処理をする();
-        FrameProfiler.End(FrameSection.Sound);
-
         Timer.tUpdate();
         AudioMixer.Timer.tUpdate();
 
@@ -444,6 +432,9 @@ internal partial class CDTXMania
             InputManager.ScanDevices();
         }
 
+        FrameProfiler.End(FrameSection.DeviceScan);
+
+        FrameProfiler.Begin(FrameSection.Sound);
         if (stage != CStage.EStage.Performance_6)
         {
             //reclaims released clips when nothing is playing to do it. During a song chips play
@@ -457,7 +448,7 @@ internal partial class CDTXMania
                 AudioMixer.FollowSystemOutput(audioSettings);
             }
         }
-        FrameProfiler.End(FrameSection.DeviceScan);
+        FrameProfiler.End(FrameSection.Sound);
 
         bool inspectorCapturingKeyboard = InspectorManager.inspectorEnabled && ImGui.GetIO().WantCaptureKeyboard;
         bool textInputDrawableActive = UIImGuiTextInput.IsAnyInputActive;
@@ -584,18 +575,10 @@ internal partial class CDTXMania
     
     public void UpdateWindowTitle()
     {
-        if (SoundManager == null)
-        {
-            maniaGl.SetWindowTitle(strWindowTitle);
-            return;
-        }
-        
-        string delay = "";
-        if (SoundManager.GetCurrentSoundDeviceType() != "DirectSound")
-        {
-            delay = "(" + SoundManager.GetSoundDelay() + "ms)";
-        }
-        maniaGl.SetWindowTitle(strWindowTitle + " (" + SoundManager.GetCurrentSoundDeviceType() + delay + ")");
+        AudioDeviceStatus audio = AudioMixer.Device.Status;
+        string delay = audio.BufferMs < 0 ? "" : $"({audio.BufferMs}ms)";
+
+        maniaGl.SetWindowTitle($"{strWindowTitle} ({audio.Backend}{delay})");
     }
     
     public static SongNode chosenSong { get; private set; }
@@ -664,7 +647,7 @@ internal partial class CDTXMania
                 Skin = null;
             }
         });
-        SafeTerminate("SoundManager", () => { SoundManager.Dispose(); });
+        SafeTerminate("AudioMixer", () => { AudioMixer.Shutdown(); });
         SafeTerminate("Pad", () => { Pad = null; });
         SafeTerminate("InputManager", () => { InputManager.Dispose(); });
         SafeTerminate("ActDisplayString", () => { actDisplayString.OnDeactivate(); });

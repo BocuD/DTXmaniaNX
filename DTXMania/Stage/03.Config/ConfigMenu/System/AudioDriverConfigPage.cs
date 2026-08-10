@@ -1,6 +1,7 @@
 using DTXMania.Core;
 using DTXMania.Core.Audio;
 using DTXMania.UI.Config;
+using DTXMania.UI.Drawable;
 using DTXMania.UI.Item;
 
 namespace DTXMania;
@@ -33,9 +34,21 @@ internal sealed class AudioDriverConfigPage : ConfigPage
                 break;
 
             case 2: // ExclusiveWASAPI
+                items.Add(BuildWasapiBufferSize());
+
+                //shared mode does not get one: the buffer comes out the same either way, because the
+                //Windows engine's period decides it and nothing here reaches that
+                items.Add(BuildWasapiEventDriven());
+                items.Add(BuildUseOsTimer());
+                break;
+
             case 3: // SharedWASAPI
                 items.Add(BuildWasapiBufferSize());
-                items.Add(BuildWasapiEventDriven());
+                items.Add(BuildUseOsTimer());
+                break;
+
+            case 4: // BASS
+                items.Add(BuildBassBufferSize());
                 items.Add(BuildUseOsTimer());
                 break;
         }
@@ -103,15 +116,62 @@ internal sealed class AudioDriverConfigPage : ConfigPage
         return item;
     }
 
-    private static CItemToggle BuildWasapiEventDriven()
+    private static CItemInteger BuildBassBufferSize()
+    {
+        CItemInteger item = new("BASSBufSize", 0, 200, CDTXMania.ConfigIni.nWASAPIBufferSizeMs,
+            "BASS出力時のデバイスバッファ:\n0を指定すると10msになります。\nサウンドカードの最小値まで自動的に\n切り上げられます。",
+            "Device buffer for the BASS output, in ms — this is the output latency.\n0 uses 10ms.\nBASS raises it to the sound card's own minimum, so the window may show\nmore than you asked for.\nNote: Exit CONFIG to make the setting take effect.");
+        item.BindConfig(
+            () => item.nCurrentValue = CDTXMania.ConfigIni.nWASAPIBufferSizeMs,
+            () => CDTXMania.ConfigIni.nWASAPIBufferSizeMs = item.nCurrentValue);
+        return item;
+    }
+
+    private CItemToggle BuildWasapiEventDriven()
     {
         CItemToggle item = new("WASAPIEventDriven", CDTXMania.ConfigIni.bEventDrivenWASAPI,
-            "WASAPIをEvent Drivenモードで使用します。\nサウンド出力の遅延を小さくできますが、\nシステム負荷は上昇します。",
-            "Use WASAPI Event Driven mode.\nIt reduces sound output lag, but decreases system performance.");
+            "WASAPIをEvent Drivenモードで使用します。\n出力バッファを大幅に小さくできます。\nOFFにすると遅延が増加します。",
+            "Let the device drive the WASAPI buffer instead of polling it.\nOn exclusive mode this is the difference between a 6ms and a 21ms buffer.\nLeave it ON unless you hear dropouts.");
         item.BindConfig(
             () => item.bON = CDTXMania.ConfigIni.bEventDrivenWASAPI,
-            () => CDTXMania.ConfigIni.bEventDrivenWASAPI = item.bON);
+            () =>
+            {
+                bool wasOn = CDTXMania.ConfigIni.bEventDrivenWASAPI;
+                CDTXMania.ConfigIni.bEventDrivenWASAPI = item.bON;
+
+                if (wasOn && !item.bON)
+                {
+                    _ = ConfirmPolling(item);
+                }
+            });
         return item;
+    }
+
+    /// <summary>
+    /// Polling needs the buffer to be four update periods where the device driving it needs two, so
+    /// turning this off costs about 15ms on exclusive.
+    /// </summary>
+    private async Task ConfirmPolling(CItemToggle item)
+    {
+        string title = CDTXMania.isJapanese ? "遅延が増加します" : "This increases latency";
+
+        string description = CDTXMania.isJapanese
+            ? "Event Drivenを切ると、WASAPI排他モードの出力バッファが\n6msから21ms程度まで大きくなります。\n音切れが発生する場合以外はONのままを推奨します。"
+            : "Turning this off makes the WASAPI exclusive output buffer grow from\nabout 6ms to about 21ms, because a polled buffer has to be four\nupdate periods long.\n\nOnly do this if you are hearing dropouts.";
+
+        string[] options = CDTXMania.isJapanese
+            ? ["ONのままにする", "OFFにする"]
+            : ["Keep it on", "Turn it off"];
+
+        int choice = await Modal.ShowAsync(CDTXMania.persistentUIGroup, title, description, options);
+
+        //anything but a deliberate "turn it off" puts it back, including dismissing the dialog
+        if (choice != 1)
+        {
+            CDTXMania.ConfigIni.bEventDrivenWASAPI = true;
+            item.bON = true;
+            CDTXMania.RunOnMainThread(list.RefreshValues);
+        }
     }
 
     private static CItemToggle BuildUseOsTimer()

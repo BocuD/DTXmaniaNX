@@ -135,34 +135,26 @@ internal partial class CDTXMania
 
         AddInitializer("Pad", () => { Pad = new CPad(ConfigIni, InputManager); });
 
-        AddInitializer("Sound Manager", () =>
+        AddInitializer("Audio Device", () =>
         {
+            AudioDevice.WindowHandle = maniaGl.host.GetWindowHandle();
+
             //the same settings the config page rebuilds from, so the two cannot drift
-            AudioDeviceOptions options = AudioDeviceOptions.FromConfig(ConfigIni);
-            FdkAudioDevice.Request(options);
-
-            SoundManager = new CSoundManager(maniaGl.host.GetWindowHandle(),
-                FdkAudioDevice.ToFdk(options.Backend),
-                options.BufferSizeMs,
-                options.EventDriven,
-                0,
-                FdkAudioDevice.AsioDevice(options),
-                options.UseOsTimer
-            );
-            UpdateWindowTitle();
-            CSoundManager.bIsTimeStretch = ConfigIni.bTimeStretch;
-
-            //input still lives in FDK, so it is pointed at our clock rather than reaching for one itself
-            CSoundManager.inputTimerOverride = AudioMixer.Timer;
-            AudioMixer.Device.MasterVolume = ConfigIni.nMasterVolume;
+            AudioMixer.MasterVolume = ConfigIni.nMasterVolume;
+            AudioMixer.TimeStretch = ConfigIni.bTimeStretch;
+            AudioMixer.Build(AudioDeviceOptions.FromConfig(ConfigIni));
 
             foreach (AudioGroup group in Enum.GetValues<AudioGroup>())
             {
                 AudioMixer.SetGroupVolume(group, ConfigIni.nGroupVolume[(int)group]);
             }
 
-            string strDefaultSoundDeviceBusType = CSoundManager.strDefaultDeviceBusType;
-            Trace.TraceInformation($"Bus type of the default sound device = {strDefaultSoundDeviceBusType}");
+            //so a hit and the sound it triggers are timed against the same clock
+            InputClock.Current = AudioMixer.Timer;
+
+            UpdateWindowTitle();
+            Trace.TraceInformation("Bus type of the default sound device = "
+                                   + AudioMixer.Device.Status.DefaultOutputBusType);
         });
         
         AddInitializer("Input", () => Input = new Input());

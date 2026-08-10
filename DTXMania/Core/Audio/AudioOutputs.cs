@@ -21,6 +21,7 @@ public static class AudioOutputs
             return backend switch
             {
                 AudioBackend.Asio => Asio(),
+                AudioBackend.Bass => BassDevices(),
                 AudioBackend.WasapiExclusive or AudioBackend.WasapiShared => Wasapi(),
                 _ => DirectSound()
             };
@@ -61,6 +62,22 @@ public static class AudioOutputs
             }
 
             outputs.Add(new AudioOutput(info.name, info.IsDefault));
+        }
+
+        return outputs;
+    }
+
+    private static List<AudioOutput> BassDevices()
+    {
+        List<AudioOutput> outputs = [];
+
+        //from 1: device 0 is "no sound", which is what the other backends decode on
+        for (int n = 1; Bass.BASS_GetDeviceInfo(n) is { } info; n++)
+        {
+            if (info.IsEnabled)
+            {
+                outputs.Add(new AudioOutput(info.name, info.IsDefault));
+            }
         }
 
         return outputs;

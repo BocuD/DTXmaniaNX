@@ -186,6 +186,9 @@ internal partial class CConfigIni
 				Bool("SoundTimerType", c => c.bUseOSTimer)),
 			G("WASAPI使用時にEventDrivenモードを使う",
 				Bool("EventDrivenWASAPI", c => c.bEventDrivenWASAPI)),
+			G(["Play through FDK's old sound device instead of the current audio layer.",
+					"Temporary, for comparing the two against each other."],
+				Bool("UseFDKAudio", c => c.bUseFDKAudio)),
 			G([
 					"Enable Embedded Metronome",
 					"Please make sure Metronome.ogg exists in Your current skin sounds folder",

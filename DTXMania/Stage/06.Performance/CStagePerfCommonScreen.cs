@@ -409,7 +409,7 @@ internal abstract class CStagePerfCommonScreen : CStage
         CDTXMania.Skin.tRemoveMixerAll(CDTXMania.Skin.soundNowLoading);
 
         //lockmixer = new object();
-        bIsDirectSound = (CDTXMania.SoundManager.GetCurrentSoundDeviceType() == "DirectSound");
+        bNeedsDriftCorrection = AudioMixer.Device.NeedsDriftCorrection;
         dbPlaySpeed = CDTXMania.ConfigIni.nPlaySpeed / 20.0;
         bValidScore = true;
 
@@ -811,7 +811,7 @@ internal abstract class CStagePerfCommonScreen : CStage
     //		protected int nLastPlayedWAVNumber.GUITAR;
     //		protected int nLastPlayedWAVNumber.BASS;
 
-    protected bool bIsDirectSound; //
+    protected bool bNeedsDriftCorrection;
     protected double dbPlaySpeed;
     protected bool bValidScore;
     protected STDGBVALUE<int> nJudgeLinePosY_delta; // #31602 2013.6.23 yyagi 表示遅延対策として、判定ラインの表示位置をずらす機能を追加する

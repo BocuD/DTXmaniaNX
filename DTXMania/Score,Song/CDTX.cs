@@ -3898,9 +3898,9 @@ public class CDTX : CActivity
     /// </summary>
     public void PlanToAddMixerChannel()
     {
-        if (CDTXMania.SoundManager.GetCurrentSoundDeviceType() == "DirectSound") // DShowでの再生の場合はミキシング負荷が高くないため、
+        //an output that does not mix channels has nothing to attach to, so a chip has no lifetime to plan
+        if (!AudioMixer.Device.MixesChannels)
         {
-            // チップのライフタイム管理を行わない
             return;
         }
 

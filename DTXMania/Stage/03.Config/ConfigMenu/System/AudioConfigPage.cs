@@ -18,9 +18,21 @@ internal sealed class AudioConfigPage : ConfigPage
     private string outputDeviceInitial;
     private bool osTimerInitial;
     private bool eventDrivenInitial;
+    private bool fdkAudioInitial;
     private bool opened;
 
     private CItemToggle timeStretch;
+
+    //held so the legacy toggle can reshape the driver list without the page being reopened
+    private CItemList audioDriver;
+
+    /// <summary>
+    /// The backends the selected audio layer can actually open. FDK has no BASS output and would fall
+    /// through to DirectSound, so it is not offered one.
+    /// </summary>
+    private static string[] Drivers(bool legacy) => legacy
+        ? ["DSound", "ASIO", "WASAPIExclusive", "WASAPIShared"]
+        : ["DSound", "ASIO", "WASAPIExclusive", "WASAPIShared", "BASS"];
 
     public AudioConfigPage(ConfigList list) : base(list)
     {
@@ -35,6 +47,7 @@ internal sealed class AudioConfigPage : ConfigPage
         asioDeviceInitial = CDTXMania.ConfigIni.nASIODevice;
         osTimerInitial = CDTXMania.ConfigIni.bUseOSTimer;
         eventDrivenInitial = CDTXMania.ConfigIni.bEventDrivenWASAPI;
+        fdkAudioInitial = CDTXMania.ConfigIni.bUseFDKAudio;
         outputDeviceInitial = CDTXMania.ConfigIni.strOutputDevice;
     }
 
@@ -52,7 +65,7 @@ internal sealed class AudioConfigPage : ConfigPage
             {
                 // master volume applies live while adjusting (matches the original config screen)
                 CDTXMania.ConfigIni.nMasterVolume = masterVolume.nCurrentValue;
-                AudioMixer.Device.MasterVolume = masterVolume.nCurrentValue;
+                AudioMixer.MasterVolume = masterVolume.nCurrentValue;
             });
         items.Add(masterVolume);
 
@@ -116,14 +129,37 @@ internal sealed class AudioConfigPage : ConfigPage
             () => CDTXMania.ConfigIni.bPlaySpeedAffectsChips = speedAffectsChips.bON);
         items.Add(speedAffectsChips);
 
-        CItemList audioDriver = new("Audio Driver", CItemBase.EPanelType.Normal, CDTXMania.ConfigIni.nSoundDriverType,
+        audioDriver = new CItemList("Audio Driver", CItemBase.EPanelType.Normal, 0,
             "サウンド出力方式を選択\nします。\nWASAPIはVista以降、\nASIOは対応機器でのみ使用可能です。\nWASAPIかASIOを使うと、\n遅延を少なくできます。\n",
-            "DSound: Direct Sound\nWASAPI: from Windows Vista\nASIO: with ASIO compatible devices only\nUse WASAPI or ASIO to decrease the sound lag.\nNote: Exit CONFIG to make the setting take effect.",
-            ["DSound", "ASIO", "WASAPIExclusive", "WASAPIShared"]);
+            "DSound: Direct Sound\nWASAPI: from Windows Vista\nASIO: with ASIO compatible devices only\nBASS: portable fallback, higher latency than WASAPI\nUse WASAPI or ASIO to decrease the sound lag.\nNote: Exit CONFIG to make the setting take effect.",
+            Drivers(CDTXMania.ConfigIni.bUseFDKAudio));
         audioDriver.BindConfig(
-            () => audioDriver.nCurrentlySelectedIndex = CDTXMania.ConfigIni.nSoundDriverType,
-            () => CDTXMania.ConfigIni.nSoundDriverType = audioDriver.nCurrentlySelectedIndex);
+            ShowDrivers,
+            () =>
+            {
+                CDTXMania.ConfigIni.nSoundDriverType = audioDriver.nCurrentlySelectedIndex;
+
+                //WASAPI is only worth its latency event driven: polling needs a buffer four update
+                //periods long where the device driving it needs two
+                if (CDTXMania.ConfigIni.nSoundDriverType is 2 or 3)
+                {
+                    CDTXMania.ConfigIni.bEventDrivenWASAPI = true;
+                }
+            });
+        ShowDrivers();
         items.Add(audioDriver);
+
+        CItemToggle fdkAudio = new("Legacy Audio", CDTXMania.ConfigIni.bUseFDKAudio,
+            "旧FDKサウンドデバイスを使用します。\n新しいオーディオ層に問題がある場合のみ\nONにしてください。近い将来削除されます。",
+            "Play through the old FDK sound device instead of the current audio layer.\nOnly for comparing the two if the new one misbehaves.\nBASS output is unavailable while this is on.\nThis option will be removed in a future release.\nNote: Exit CONFIG to make the setting take effect.");
+        fdkAudio.BindConfig(
+            () => fdkAudio.bON = CDTXMania.ConfigIni.bUseFDKAudio,
+            () =>
+            {
+                CDTXMania.ConfigIni.bUseFDKAudio = fdkAudio.bON;
+                ShowDrivers();
+            });
+        items.Add(fdkAudio);
 
         items.Add(FolderItem("Audio Driver Options",
             "システムのオーディオドライバー設定に関する項目を設定します。",
@@ -131,6 +167,25 @@ internal sealed class AudioConfigPage : ConfigPage
 
         items.Add(BackItem());
         return items;
+    }
+
+    /// <summary>
+    /// Puts the driver list in step with the audio layer, and moves the selection off a driver that
+    /// layer cannot open.
+    /// </summary>
+    private void ShowDrivers()
+    {
+        string[] drivers = Drivers(CDTXMania.ConfigIni.bUseFDKAudio);
+
+        audioDriver.listItemValues.Clear();
+        audioDriver.listItemValues.AddRange(drivers);
+
+        if (CDTXMania.ConfigIni.nSoundDriverType >= drivers.Length)
+        {
+            CDTXMania.ConfigIni.nSoundDriverType = 3;
+        }
+
+        audioDriver.nCurrentlySelectedIndex = Math.Clamp(CDTXMania.ConfigIni.nSoundDriverType, 0, drivers.Length - 1);
     }
 
     /// <summary>
@@ -147,6 +202,7 @@ internal sealed class AudioConfigPage : ConfigPage
             asioDeviceInitial != CDTXMania.ConfigIni.nASIODevice ||
             osTimerInitial != CDTXMania.ConfigIni.bUseOSTimer ||
             eventDrivenInitial != CDTXMania.ConfigIni.bEventDrivenWASAPI ||
+            fdkAudioInitial != CDTXMania.ConfigIni.bUseFDKAudio ||
             outputDeviceInitial != CDTXMania.ConfigIni.strOutputDevice)
         {
             //through the mixer, which has to give up its own channels before the rebuild frees them
@@ -156,7 +212,7 @@ internal sealed class AudioConfigPage : ConfigPage
 
         if (timeStretch != null)
         {
-            CSoundManager.bIsTimeStretch = timeStretch.bON;
+            AudioMixer.TimeStretch = timeStretch.bON;
         }
     }
 }

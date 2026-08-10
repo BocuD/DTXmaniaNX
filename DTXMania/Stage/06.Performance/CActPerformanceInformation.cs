@@ -1,4 +1,5 @@
 ﻿using DTXMania.Core;
+using DTXMania.Core.Audio;
 using FDK;
 
 namespace DTXMania;
@@ -61,13 +62,15 @@ internal class CActPerformanceInformation : CActivity
 			CDTXMania.actDisplayString.tPrint(x, y, CCharacterConsole.EFontType.White, string.Format("Frame:         {0:####0} fps", CDTXMania.FPS.nCurrentFPS));
 			y -= 0x10;
                     
-			if (CDTXMania.ConfigIni.nSoundDriverType != 0)
+			AudioDeviceStatus audio = AudioMixer.Device.Status;
+
+			if (AudioMixer.Device.MixesChannels)
 			{
-				CDTXMania.actDisplayString.tPrint(x, y, CCharacterConsole.EFontType.White, string.Format("Sound CPU : {0:####0.00}%", CDTXMania.SoundManager.GetCPUusage()));
+				CDTXMania.actDisplayString.tPrint(x, y, CCharacterConsole.EFontType.White, string.Format("Sound CPU : {0:####0.00}%", audio.CpuUsage));
 				y -= 0x10;
-				CDTXMania.actDisplayString.tPrint(x, y, CCharacterConsole.EFontType.White, string.Format("Sound Mixing:  {0:####0}", CDTXMania.SoundManager.GetMixingStreams()));
+				CDTXMania.actDisplayString.tPrint(x, y, CCharacterConsole.EFontType.White, string.Format("Sound Mixing:  {0:####0}", audio.MixedChannels));
 				y -= 0x10;
-				CDTXMania.actDisplayString.tPrint(x, y, CCharacterConsole.EFontType.White, string.Format("Sound Streams: {0:####0}", CDTXMania.SoundManager.GetStreams()));
+				CDTXMania.actDisplayString.tPrint(x, y, CCharacterConsole.EFontType.White, string.Format("Sound Streams: {0:####0}", audio.Streams));
 				y -= 0x10;
 			}
 		}

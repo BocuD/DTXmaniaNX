@@ -1,52 +1,48 @@
 namespace DTXMania.Core.Audio;
 
 /// <summary>
-/// An audio output, and where clips come from. Replaces the FDK device layer; see AUDIO.md.
+/// An audio output, and where clips come from. Disposing it kills every clip and voice made from it,
+/// so <see cref="AudioMixer.Reinitialize"/> is what swaps one: it gives them up first.
 /// </summary>
-public interface IAudioDevice
+public interface IAudioDevice : IDisposable
 {
-    /// <summary>Output / backend name, eg "WASAPI" or "DirectSound"</summary>
-    string TypeName { get; }
+    AudioDeviceStatus Status { get; }
 
     /// <summary>Throws if the file cannot be read.</summary>
     IAudioClip Load(string path, AudioGroup group);
 
-    /// <summary>0 to 100.</summary>
+    /// <summary>0 to 100. Applied in the output graph; group levels are folded into each voice by
+    /// <see cref="AudioMixer"/> instead, so no backend has to mix groups.</summary>
     int MasterVolume { get; set; }
 
-    /// <summary>Output level of one group, 0 to 100. Kept even on an output that cannot apply it, so
-    /// switching to one that can does not lose the setting.</summary>
-    int GetGroupVolume(AudioGroup group);
+    /// <summary>Change speed without changing pitch. Costs a tempo stream per sound, which is why it is
+    /// a setting.</summary>
+    bool TimeStretch { get; set; }
 
-    void SetGroupVolume(AudioGroup group, int volume);
+    /// <summary>Whether taking a voice out of the mix buys anything. A chart only schedules attach and
+    /// detach per chip when it does.</summary>
+    bool MixesChannels { get; }
 
-    /// <summary>
-    /// Builds a new output to the given settings. Every clip and voice made before this is dead
-    /// afterwards, so use <see cref="AudioMixer.Reinitialize"/>, which gives them up first.
-    /// </summary>
-    void Reinitialize(AudioDeviceOptions options);
+    /// <summary>Whether a voice's position drifts from <see cref="ElapsedMs"/>, so a long chip has to be
+    /// seeked back onto it.</summary>
+    bool NeedsDriftCorrection { get; }
 
-    /// <summary>Elapsed output time, in ms. The clock a chart is played against.</summary>
+    /// <summary>The clock a chart is played against, in ms.</summary>
     long ElapsedMs { get; }
 
     /// <summary>An input device timestamp translated onto that clock.</summary>
     long ElapsedMsFor(long deviceTimestamp);
-
-    /// <summary>The output in use, which is not the one asked for if that was empty or missing. Empty
-    /// when the backend cannot say.</summary>
-    string CurrentOutput { get; }
 }
 
 /// <summary>
-/// Loaded audio: the file, decoded or streamed, once. Not playable on its own — it is the data a voice
-/// sounds. Disposing it frees the data and everything sounding from it.
+/// A file decoded or streamed once. A voice is what sounds it. Disposing it frees the data and
+/// everything sounding from it.
 /// </summary>
 public interface IAudioClip : IDisposable
 {
     /// <summary>
     /// A channel that sounds independently of every other from this clip, with its own position, volume
-    /// and pan. How cheap this is depends on the backend and is not the caller's concern. Null if a voice
-    /// could not be made.
+    /// and pan. Null if one could not be made.
     /// </summary>
     IAudioVoice? CreateVoice();
 
@@ -77,7 +73,6 @@ public interface IAudioVoice : IDisposable
     /// <summary>Frequency multiplier, 1.0 being unchanged. The wrong-note detune on guitar and bass.</summary>
     double Pitch { get; set; }
 
-    /// <summary>Where playback is, in ms.</summary>
     long PositionMs { get; }
 
     /// <summary>Moves playback to <paramref name="positionMs"/>. Only meaningful while sounding.</summary>

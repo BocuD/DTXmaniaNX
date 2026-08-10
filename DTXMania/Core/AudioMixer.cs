@@ -20,7 +20,13 @@ public static partial class AudioMixer
     //enumerating outputs costs a round trip to the driver, so the system is only asked this often
     private const int OutputCheckIntervalMs = 1000;
 
-    public static IAudioDevice Device { get; set; } = new FdkAudioDevice();
+    public static IAudioDevice Device { get; set; } = new NullAudioDevice();
+
+    //held here rather than on the device: every backend would store them identically, and a rebuild
+    //makes a new device
+    private static readonly int[] groupVolumes = [100, 100, 100, 100, 100];
+    private static int masterVolume = 100;
+    private static bool timeStretch;
 
     /// <summary>The clock gameplay is timed against.</summary>
     public static readonly PerformanceTimer Timer = new();
@@ -185,6 +191,9 @@ public static partial class AudioMixer
 
     public static long LengthMs(MixerClip clip) => clip.audio?.LengthMs ?? 0;
 
+    /// <summary>How this clip makes extra voices. Diagnostic; "-" until it has loaded.</summary>
+    public static string VoiceKind(MixerClip clip) => clip.audio?.VoiceKind ?? "-";
+
     /// <summary>
     /// Stops the channel that just started and holds it at <paramref name="positionMs"/> until
     /// <see cref="StartHeld"/>. A song jump sets up every chip that should already be sounding, then
@@ -231,15 +240,38 @@ public static partial class AudioMixer
 
     public static bool IsPlaying(MixerClip clip) => clip.lastPlayed?.sound.IsPlaying ?? false;
 
-    public static int GetGroupVolume(AudioGroup group) => Device.GetGroupVolume(group);
+    /// <summary>0 to 100.</summary>
+    public static int MasterVolume
+    {
+        get => masterVolume;
+        set
+        {
+            masterVolume = value;
+            Device.MasterVolume = value;
+        }
+    }
+
+    /// <summary>Whether a speed change keeps the original pitch. Decided per sound as it loads, so this
+    /// only reaches what is read after it changes.</summary>
+    public static bool TimeStretch
+    {
+        get => timeStretch;
+        set
+        {
+            timeStretch = value;
+            Device.TimeStretch = value;
+        }
+    }
+
+    public static int GetGroupVolume(AudioGroup group) => groupVolumes[(int)group];
 
     /// <summary>
-    /// Sets how loud a whole group is, 0 to 100. An output that mixes groups applies it to everything it
-    /// plays; one that does not only covers voices this mixer holds, so those are recomputed here.
+    /// Sets how loud a whole group is, 0 to 100. The level is folded into each voice, so everything
+    /// already sounding is recomputed here.
     /// </summary>
     public static void SetGroupVolume(AudioGroup group, int volume)
     {
-        Device.SetGroupVolume(group, volume);
+        groupVolumes[(int)group] = volume;
 
         foreach (MixerClip clip in clips)
         {
@@ -255,7 +287,7 @@ public static partial class AudioMixer
         }
     }
 
-    private static int Scaled(AudioGroup group, int volume) => volume * Device.GetGroupVolume(group) / 100;
+    private static int Scaled(AudioGroup group, int volume) => volume * groupVolumes[(int)group] / 100;
 
     /// <summary>Creates a clip's first channel, so the first play does not pay for decoding it.</summary>
     public static void Preload(MixerClip clip) => Grow(clip);
@@ -309,8 +341,8 @@ public static partial class AudioMixer
     }
 
     /// <summary>
-    /// Builds a new output. Rebuilding tears BASS down underneath the clips and a freed handle can be
-    /// reissued to a new channel, so they are unloaded while their handles are still valid.
+    /// Builds a new output. Rebuilding tears the old one down underneath the clips and a freed handle can
+    /// be reissued to a new channel, so they are unloaded while their handles are still valid.
     /// </summary>
     public static void Reinitialize(AudioDeviceOptions options)
     {
@@ -338,7 +370,7 @@ public static partial class AudioMixer
             Unload(clip);
         }
 
-        Device.Reinitialize(options);
+        Build(options);
 
         foreach ((MixerClip clip, int volume, int pan, long positionMs) in resume)
         {
@@ -355,6 +387,33 @@ public static partial class AudioMixer
         }
 
         resume.Clear();
+    }
+
+    /// <summary>Replaces the output, and tells the new one the levels, which live here rather than on
+    /// the device.</summary>
+    public static void Build(AudioDeviceOptions options)
+    {
+        Device.Dispose();
+
+        //nothing may read a disposed device while the new one is being built, which can take a moment
+        Device = new NullAudioDevice();
+        Device = AudioDevice.Create(options);
+
+        Device.MasterVolume = masterVolume;
+        Device.TimeStretch = timeStretch;
+    }
+
+    /// <summary>Gives up every clip and then the output, since the clips' handles belong to it.</summary>
+    public static void Shutdown()
+    {
+        //backwards because Free takes the clip out of the list
+        for (int i = clips.Count - 1; i >= 0; i--)
+        {
+            Free(clips[i]);
+        }
+
+        Device.Dispose();
+        Device = new NullAudioDevice();
     }
 
     /// <summary>Gives up a clip's channels and its loaded audio, keeping the clip itself. It loads again
@@ -410,15 +469,16 @@ public static partial class AudioMixer
         }
 
         string system = AudioOutputs.SystemDefault(options.Backend);
+        string playing = Device.Status.Output;
 
         //empty means the backend has no default to follow
-        if (system.Length == 0 || system == Device.CurrentOutput)
+        if (system.Length == 0 || system == playing)
         {
             return;
         }
 
-        Trace.TraceInformation($"System output is now '{system}' (playing on " +
-                               $"'{Device.CurrentOutput}'); rebuilding on it.");
+        Trace.TraceInformation($"System output is now '{system}' (playing on '{playing}'); " +
+                               "rebuilding on it.");
 
         Reinitialize(options);
     }

@@ -92,6 +92,9 @@ internal partial class CConfigIni
 	public bool bEventDrivenWASAPI;
 	public bool bMetronome; // 2023.9.22 henryzx
 	public bool bUseOSTimer;
+
+	//temporary, for comparing the two device layers against each other; see AUDIO.md §9
+	public bool bUseFDKAudio;
 	public bool bDynamicBassMixerManagement; // #24820
 	public int nMasterVolume;
 
@@ -826,7 +829,9 @@ internal partial class CConfigIni
 		nWASAPIBufferSizeMs = 0;               // #24820 2013.1.15 yyagi 初期値は0(自動設定)
 		nASIODevice = 0;                       // #24820 2013.1.17 yyagi
 //          this.nASIOBufferSizeMs = 0;                 // #24820 2012.12.25 yyagi 初期値は0(自動設定)
-		bEventDrivenWASAPI = false;
+		//on WASAPI exclusive this is the difference between a 21ms and a 6ms output buffer, because the
+		//buffer has to be four update periods when polling and two when the device drives it
+		bEventDrivenWASAPI = true;
 		bUseOSTimer = false; ;                 // #33689 2014.6.6 yyagi 初期値はfalse (FDKのタイマー。ＦＲＯＭ氏考案の独自タイマー)
 		bDynamicBassMixerManagement = true;    //
 		nMasterVolume = 100;

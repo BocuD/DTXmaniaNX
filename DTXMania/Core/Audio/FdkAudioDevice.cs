@@ -1,37 +1,24 @@
 using System.Diagnostics;
 using FDK;
-using Un4seen.Bass;
 
 namespace DTXMania.Core.Audio;
 
 /// <summary>
-/// <see cref="IAudioDevice"/> on top of FDK, so there is output while the new audio layer is built.
+/// <see cref="IAudioDevice"/> on top of FDK, kept only so the two device layers can be compared against
+/// each other. Selected by <c>UseFDKAudio</c> in the config, and goes when FDK's audio does.
 /// </summary>
 public sealed class FdkAudioDevice : IAudioDevice
 {
-    public string TypeName => CDTXMania.SoundManager.GetCurrentSoundDeviceType();
+    private readonly CSoundManager manager;
 
-    public IAudioClip Load(string path, AudioGroup group) => new FdkAudioClip(path, group);
-
-    public int MasterVolume
+    public FdkAudioDevice(AudioDeviceOptions options)
     {
-        get => CDTXMania.SoundManager.nMasterVolume;
-        set => CDTXMania.SoundManager.nMasterVolume = value;
-    }
-
-    //the mixer folds these into each voice, so no output needs per-group mixing
-    private readonly int[] groupVolumes = [100, 100, 100, 100, 100];
-
-    public int GetGroupVolume(AudioGroup group) => groupVolumes[(int)group];
-
-    public void SetGroupVolume(AudioGroup group, int volume) => groupVolumes[(int)group] = volume;
-
-    public void Reinitialize(AudioDeviceOptions options)
-    {
-        Request(options);
+        //FDK's device constructors read the requested output rather than being handed it
+        CSoundManager.strRequestedOutputDevice = options.OutputDevice;
 
         //the ASIO buffer stays 0, meaning the device's own setting; only the WASAPI one is configurable
-        CDTXMania.SoundManager.tInitialize(ToFdk(options.Backend),
+        manager = new CSoundManager(AudioDevice.WindowHandle,
+            ToFdk(options.Backend),
             options.BufferSizeMs,
             options.EventDriven,
             0,
@@ -39,12 +26,36 @@ public sealed class FdkAudioDevice : IAudioDevice
             options.UseOsTimer);
     }
 
-    /// <summary>
-    /// Hands the requested output to FDK, whose device constructors read it. Also needed before the first
-    /// device, which is built by FDK's constructor rather than here.
-    /// </summary>
-    internal static void Request(AudioDeviceOptions options)
-        => CSoundManager.strRequestedOutputDevice = options.OutputDevice;
+    public AudioDeviceStatus Status => new()
+    {
+        Backend = manager.GetCurrentSoundDeviceType(),
+        Output = CSoundManager.strActiveOutputDevice,
+
+        //DirectSound's figure is the requested delay rather than anything the device reported
+        BufferMs = MixesChannels ? manager.GetSoundDelay() : -1,
+        CpuUsage = manager.GetCPUusage(),
+        Streams = manager.GetStreams(),
+        MixedChannels = manager.GetMixingStreams(),
+        DefaultOutputBusType = CSoundManager.strDefaultDeviceBusType
+    };
+
+    public IAudioClip Load(string path, AudioGroup group) => new FdkAudioClip(this, path, group);
+
+    public int MasterVolume
+    {
+        get => manager.nMasterVolume;
+        set => manager.nMasterVolume = value;
+    }
+
+    public bool TimeStretch
+    {
+        get => CSoundManager.bIsTimeStretch;
+        set => CSoundManager.bIsTimeStretch = value;
+    }
+
+    public bool MixesChannels => CSoundManager.SoundDeviceType != ESoundDeviceType.DirectSound;
+
+    public bool NeedsDriftCorrection => !MixesChannels;
 
     /// <summary>
     /// The ASIO driver index to open. ASIO picks by index, so a name is resolved to one; the stored index
@@ -55,21 +66,22 @@ public sealed class FdkAudioDevice : IAudioDevice
             ? n
             : options.AsioDevice;
 
-    public string CurrentOutput => CSoundManager.strActiveOutputDevice;
-
     //the system clock while a device is being rebuilt, since there is no output clock to read
     public long ElapsedMs => CSoundManager.rcPerformanceTimer?.nSystemTimeMs ?? CSoundManager.nSystemClockMs;
 
     public long ElapsedMsFor(long deviceTimestamp)
         => CSoundManager.rcPerformanceTimer?.nSystemTimeMsFor(deviceTimestamp) ?? deviceTimestamp;
 
-    private static AudioBackend CurrentBackend => CSoundManager.SoundDeviceType switch
-    {
-        ESoundDeviceType.ASIO => AudioBackend.Asio,
-        ESoundDeviceType.ExclusiveWASAPI => AudioBackend.WasapiExclusive,
-        ESoundDeviceType.SharedWASAPI => AudioBackend.WasapiShared,
-        _ => AudioBackend.DirectSound
-    };
+    public void Dispose() => manager.Dispose();
+
+    internal CSound Generate(string path, CSound.EInstType instrument)
+        => manager.tGenerateSound(path, instrument);
+
+    internal void Discard(CSound sound) => manager.tDiscard(sound);
+
+    internal void Attach(CSound sound) => manager.AddMixer(sound);
+
+    internal void Detach(CSound sound) => manager.RemoveMixer(sound);
 
     internal static CSound.EInstType ToFdk(AudioGroup group) => group switch
     {
@@ -91,10 +103,7 @@ public sealed class FdkAudioDevice : IAudioDevice
 
 public sealed class FdkAudioClip : IAudioClip
 {
-    //a sample is the whole file decoded in memory, which suits a short effect and not a long BGM. A BGM
-    //only ever needs one voice, so it never asks for a second anyway
-    private const long SampleSizeLimit = 4 * 1024 * 1024;
-
+    private readonly FdkAudioDevice device;
     private readonly string path;
     private readonly CSound.EInstType instrument;
     private readonly List<IAudioVoice> voices = [];
@@ -104,14 +113,10 @@ public sealed class FdkAudioClip : IAudioClip
     public long LengthMs => first?.nTotalPlayTimeMs ?? 0;
 
     private CSound? first;
-    private int mixer;
 
-    //one decode shared by every voice after the first; 0 until it is needed or if it cannot be had
-    private int sample;
-    private bool sampleTried;
-
-    public FdkAudioClip(string path, AudioGroup group)
+    public FdkAudioClip(FdkAudioDevice device, string path, AudioGroup group)
     {
+        this.device = device;
         instrument = FdkAudioDevice.ToFdk(group);
 
         //no voice yet; making one here would leave a channel nobody holds. The file is checked, not read
@@ -128,16 +133,10 @@ public sealed class FdkAudioClip : IAudioClip
         //the first voice comes from FDK, and is where the mixer handle for the rest comes from
         if (first == null)
         {
-            CSound sound = CDTXMania.SoundManager.tGenerateSound(path, instrument);
+            CSound sound = device.Generate(path, instrument);
             first = sound;
-            mixer = sound.nMixerHandle;
 
-            return Track(new FdkAudioVoice(sound), "stream");
-        }
-
-        if (SampleHandle() is { } handle && BassSampleVoice.Create(handle, mixer) is { } shared)
-        {
-            return Track(shared, "sample");
+            return Track(new FdkAudioVoice(device, sound), "stream");
         }
 
         if (!first.bUsesBASS && Duplicate() is { } duplicated)
@@ -145,7 +144,7 @@ public sealed class FdkAudioClip : IAudioClip
             return Track(duplicated, "duplicate");
         }
 
-        return Track(new FdkAudioVoice(CDTXMania.SoundManager.tGenerateSound(path, instrument)), "stream");
+        return Track(new FdkAudioVoice(device, device.Generate(path, instrument)), "stream");
     }
 
     public void Dispose()
@@ -157,12 +156,6 @@ public sealed class FdkAudioClip : IAudioClip
 
         voices.Clear();
         first = null;
-
-        if (sample != 0)
-        {
-            Bass.BASS_SampleFree(sample);
-            sample = 0;
-        }
     }
 
     private IAudioVoice Track(IAudioVoice voice, string kind)
@@ -172,60 +165,11 @@ public sealed class FdkAudioClip : IAudioClip
         return voice;
     }
 
-    //loaded once, on the first voice that would otherwise cost a decode
-    private int? SampleHandle()
-    {
-        if (sampleTried)
-        {
-            return sample == 0 ? null : sample;
-        }
-
-        sampleTried = true;
-
-        if (first is not { bUsesBASS: true } || mixer == 0 || !Qualifies())
-        {
-            return null;
-        }
-
-        //64 is above the mixer's own runaway guard, so BASS_SAMPLE_OVER_POS never has to decide anything
-        sample = Bass.BASS_SampleLoad(path, 0, 0, 64, BASSFlag.BASS_SAMPLE_OVER_POS);
-
-        if (sample == 0)
-        {
-            Trace.TraceInformation($"'{Path.GetFileName(path)}' will not share a decode " +
-                                   $"({Bass.BASS_ErrorGetCode()}); every voice loads it again.");
-            return null;
-        }
-
-        return sample;
-    }
-
-    private bool Qualifies()
-    {
-        //time stretch changes speed without changing pitch, which needs the BASS_FX tempo stream CSound
-        //builds per sound. A sample channel has none and can only change frequency, so it is no use to
-        //anything that will be asked for a speed. Only reached for a clip's second voice and later, and
-        //the song BGM never has one, so chips following the speed is the case that matters
-        if (CSoundManager.bIsTimeStretch && CDTXMania.ConfigIni.bPlaySpeedAffectsChips)
-        {
-            return false;
-        }
-
-        try
-        {
-            return new FileInfo(path).Length <= SampleSizeLimit;
-        }
-        catch
-        {
-            return false;
-        }
-    }
-
     private IAudioVoice? Duplicate()
     {
         try
         {
-            return first?.Clone() is CSound clone ? new FdkAudioVoice(clone) : null;
+            return first?.Clone() is CSound clone ? new FdkAudioVoice(device, clone) : null;
         }
         catch (Exception e)
         {
@@ -237,10 +181,12 @@ public sealed class FdkAudioClip : IAudioClip
 
 public sealed class FdkAudioVoice : IAudioVoice
 {
+    private readonly FdkAudioDevice device;
     private CSound? sound;
 
-    public FdkAudioVoice(CSound sound)
+    public FdkAudioVoice(FdkAudioDevice device, CSound sound)
     {
+        this.device = device;
         this.sound = sound;
     }
 
@@ -320,20 +266,17 @@ public sealed class FdkAudioVoice : IAudioVoice
 
     public void DetachFromMixer()
     {
-        //DirectSound has no mixer to remove them from
-        if (sound is not { } current || CDTXMania.SoundManager.GetCurrentSoundDeviceType() == "DirectSound")
+        if (sound is { } current && device.MixesChannels)
         {
-            return;
+            device.Detach(current);
         }
-
-        CDTXMania.SoundManager.RemoveMixer(current);
     }
 
     public void AttachToMixer()
     {
-        if (sound is { } current && CDTXMania.SoundManager.GetCurrentSoundDeviceType() != "DirectSound")
+        if (sound is { } current && device.MixesChannels)
         {
-            CDTXMania.SoundManager.AddMixer(current);
+            device.Attach(current);
         }
     }
 
@@ -345,7 +288,7 @@ public sealed class FdkAudioVoice : IAudioVoice
         }
 
         current.tStopPlayback();
-        CDTXMania.SoundManager.tDiscard(current);
+        device.Discard(current);
         sound = null;
     }
 }
