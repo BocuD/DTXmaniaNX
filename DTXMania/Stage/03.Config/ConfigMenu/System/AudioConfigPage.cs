@@ -47,43 +47,14 @@ internal sealed class AudioConfigPage : ConfigPage
         opened = true;
         List<CItemBase> items = [];
 
-        CItemInteger masterVolume = new("MasterVolume", 0, 100, CDTXMania.ConfigIni.nMasterVolume,
-            "マスターボリュームの設定:\n全体の音量を設定します。\n0が無音で、100が最大値です。\n(WASAPI/ASIO時のみ有効です)",
-            "Master Volume:\nYou can set 0 - 100.\n\nNote:\nOnly for WASAPI/ASIO mode.");
-        masterVolume.BindConfig(
-            () => masterVolume.nCurrentValue = CDTXMania.ConfigIni.nMasterVolume,
-            () =>
-            {
-                // master volume applies live while adjusting (matches the original config screen)
-                CDTXMania.ConfigIni.nMasterVolume = masterVolume.nCurrentValue;
-                AudioMixer.MasterVolume = masterVolume.nCurrentValue;
-            });
-        items.Add(masterVolume);
-
         items.Add(FolderItem("Mixer Volumes",
-            "BGM・効果音・各楽器ごとの音量を設定します。",
-            "Set the volume of BGM, sound effects and each instrument separately.", volumePage));
+            "マスター・BGM・効果音・各楽器・チップの音量を設定します。",
+            "Every level: master, BGM, sound effects, each instrument, and chips.", volumePage));
 
         items.Add(FolderItem("Audio Output",
             "サウンドの出力方式とドライバー設定を行います。",
             "Which layer and backend the game plays through, and that backend's own settings.",
             outputPage));
-        
-        CItemInteger chipVolume = new("ChipVolume", 0, 100, CDTXMania.ConfigIni.n手動再生音量,
-            "打音の音量：\n入力に反応して再生される\nチップの音量を指定します。\n0 ～ 100 % の値が指定可能\nです。\n",
-            "Volume for chips you hit.\nYou can specify from 0 to 100%.");
-        chipVolume.BindConfig(
-            () => chipVolume.nCurrentValue = CDTXMania.ConfigIni.n手動再生音量,
-            () => CDTXMania.ConfigIni.n手動再生音量 = chipVolume.nCurrentValue);
-        items.Add(chipVolume);
-
-        CItemInteger autoVolume = new("AutoVolume", 0, 100, CDTXMania.ConfigIni.n自動再生音量,
-            "自動再生音の音量：\n自動的に再生される\nチップの音量を指定します。\n0 ～ 100 % の値が指定可能\nです。\n",
-            "Volume for AUTO chips.\nYou can specify from 0 to 100%.");
-        autoVolume.BindConfig(
-            () => autoVolume.nCurrentValue = CDTXMania.ConfigIni.n自動再生音量,
-            () => CDTXMania.ConfigIni.n自動再生音量 = autoVolume.nCurrentValue);
-        items.Add(autoVolume);
 
         CItemInteger bgmAdjust = new("BGM Offset", -99, 99, CDTXMania.ConfigIni.nCommonBGMAdjustMs,
             "BGMの再生タイミングを微調整します。\n-99 ～ 99ms まで指定可能です。",
