@@ -208,7 +208,7 @@ public class GameStatus
 
             ImGui.SameLine();
             ImGui.TextDisabled(FrameTrace.Frames > 0
-                ? $"{FrameTrace.Frames} frames held{(FrameTrace.Full ? ", buffer full" : "")}"
+                ? $"{FrameTrace.Frames} frames held{(FrameTrace.Full ? ", oldest being overwritten" : "")}"
                 : "not recording");
         }
 

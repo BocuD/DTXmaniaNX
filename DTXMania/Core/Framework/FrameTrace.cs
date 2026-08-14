@@ -5,8 +5,8 @@ namespace DTXMania.Core.Framework;
 
 public static class FrameTrace
 {
-    //about ten minutes at 100fps. Recording stops at the end rather than wrapping, so what is exported
-    //is one contiguous run and not a window whose start moved
+    //a couple of minutes at the rates this runs at. The buffer wraps rather than filling up, because what
+    //is worth catching is rare: play until it happens, then stop, and the frames before it are still here
     private const int Capacity = 60_000;
 
     private static readonly int Sections = FrameProfiler.Sections.Length;
@@ -19,7 +19,10 @@ public static class FrameTrace
     private static readonly long[] allocated = new long[Capacity];
     private static readonly int[] underruns = new int[Capacity];
 
-    private static int count;
+    //where the next frame goes, and how many have ever been written; the two differ once it has wrapped
+    private static int next;
+    private static long written;
+
     private static long previousTimestamp;
     private static long previousAllocated;
     private static int previousGen0;
@@ -29,13 +32,15 @@ public static class FrameTrace
 
     public static bool Recording { get; private set; }
 
-    public static int Frames => count;
+    /// <summary>How many frames are held, which stops climbing once the buffer has wrapped.</summary>
+    public static int Frames => (int)Math.Min(written, Capacity);
 
-    public static bool Full => count >= Capacity;
+    public static bool Full => written >= Capacity;
 
     public static void Start()
     {
-        count = 0;
+        next = 0;
+        written = 0;
         previousTimestamp = 0;
         previousAllocated = GC.GetAllocatedBytesForCurrentThread();
         previousGen0 = GC.CollectionCount(0);
@@ -62,19 +67,15 @@ public static class FrameTrace
             return;
         }
 
-        if (count >= Capacity)
-        {
-            Recording = false;
-            return;
-        }
+        int at = next;
 
-        totalMs[count] = (float)((now - previousTimestamp) * 1000.0
-                                 / System.Diagnostics.Stopwatch.Frequency);
+        totalMs[at] = (float)((now - previousTimestamp) * 1000.0
+                              / System.Diagnostics.Stopwatch.Frequency);
         previousTimestamp = now;
 
         for (int i = 0; i < Sections; i++)
         {
-            sectionMs[count * Sections + i] = FrameProfiler.GetLastMs(FrameProfiler.Sections[i]);
+            sectionMs[at * Sections + i] = FrameProfiler.GetLastMs(FrameProfiler.Sections[i]);
         }
 
         int collected0 = GC.CollectionCount(0);
@@ -83,11 +84,11 @@ public static class FrameTrace
         long allocatedNow = GC.GetAllocatedBytesForCurrentThread();
         int underrunsNow = Audio.AudioUnderruns.Count;
 
-        gen0[count] = collected0 - previousGen0;
-        gen1[count] = collected1 - previousGen1;
-        gen2[count] = collected2 - previousGen2;
-        allocated[count] = allocatedNow - previousAllocated;
-        underruns[count] = underrunsNow - previousUnderruns;
+        gen0[at] = collected0 - previousGen0;
+        gen1[at] = collected1 - previousGen1;
+        gen2[at] = collected2 - previousGen2;
+        allocated[at] = allocatedNow - previousAllocated;
+        underruns[at] = underrunsNow - previousUnderruns;
 
         previousGen0 = collected0;
         previousGen1 = collected1;
@@ -95,7 +96,8 @@ public static class FrameTrace
         previousAllocated = allocatedNow;
         previousUnderruns = underrunsNow;
 
-        count++;
+        next = at + 1 == Capacity ? 0 : at + 1;
+        written++;
     }
 
     /// <summary>Writes what has been recorded next to the executable and answers the path.</summary>
@@ -106,7 +108,12 @@ public static class FrameTrace
         string path = Path.Combine(CDTXMania.executableDirectory,
             $"frametrace-{DateTime.Now:yyyyMMdd-HHmmss}.csv");
 
-        StringBuilder csv = new(count * 96);
+        int held = Frames;
+
+        //oldest first once it has wrapped, so a row number still reads as time going forwards
+        int oldest = written > Capacity ? next : 0;
+
+        StringBuilder csv = new(held * 96);
 
         csv.Append("frame,totalMs,gen0,gen1,gen2,allocatedBytes,underruns");
         for (int i = 0; i < Sections; i++)
@@ -116,19 +123,21 @@ public static class FrameTrace
 
         csv.Append('\n');
 
-        for (int frame = 0; frame < count; frame++)
+        for (int frame = 0; frame < held; frame++)
         {
+            int at = (oldest + frame) % Capacity;
+
             csv.Append(frame).Append(',')
-                .Append(totalMs[frame].ToString("0.###", CultureInfo.InvariantCulture)).Append(',')
-                .Append(gen0[frame]).Append(',')
-                .Append(gen1[frame]).Append(',')
-                .Append(gen2[frame]).Append(',')
-                .Append(allocated[frame]).Append(',')
-                .Append(underruns[frame]);
+                .Append(totalMs[at].ToString("0.###", CultureInfo.InvariantCulture)).Append(',')
+                .Append(gen0[at]).Append(',')
+                .Append(gen1[at]).Append(',')
+                .Append(gen2[at]).Append(',')
+                .Append(allocated[at]).Append(',')
+                .Append(underruns[at]);
 
             for (int i = 0; i < Sections; i++)
             {
-                csv.Append(',').Append(sectionMs[frame * Sections + i]
+                csv.Append(',').Append(sectionMs[at * Sections + i]
                     .ToString("0.###", CultureInfo.InvariantCulture));
             }
 

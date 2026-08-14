@@ -219,3 +219,4 @@ Runtime/DTXManiaNX.deps.json
 Runtime/DTXManiaNX.exe
 /Runtime/LegacySkins
 Tests/*/testresults.txt
+Runtime/frametrace*
