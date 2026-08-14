@@ -29,6 +29,9 @@ public static class FrameProfiler
     public static readonly FrameSection[] Sections = Enum.GetValues<FrameSection>();
     public static readonly string[] SectionNames = Enum.GetNames<FrameSection>();
 
+    //a constant so a trace buffer can be sized at field initialisation, before Sections is assigned
+    public const int SectionCount = (int)FrameSection.SwapBuffers + 1;
+
     private const int HistoryFrames = 120;
 
     /// <summary>
@@ -69,6 +72,12 @@ public static class FrameProfiler
         if (recordedFrames < HistoryFrames)
         {
             recordedFrames++;
+        }
+
+        //after the roll, so the trace reads the frame that has just finished rather than the one before
+        if (FrameTrace.Recording)
+        {
+            FrameTrace.Record();
         }
     }
 

@@ -123,6 +123,11 @@ internal sealed class BassWasapiOutput : IBassOutput
             transferred = 0;
         }
 
+        if (transferred < length)
+        {
+            AudioUnderruns.Report();
+        }
+
         //asked for as late as possible, so it describes the same moment the time is stamped with
         int unplayed = BassWasapi.BASS_WASAPI_GetData(null, (int)BASSData.BASS_DATA_AVAILABLE);
 

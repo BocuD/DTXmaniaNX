@@ -408,6 +408,7 @@ public static partial class AudioMixer
 
         //nothing may read a disposed device while the new one is being built, which can take a moment
         Device = new NullAudioDevice();
+        AudioUnderruns.Reset();
         Device = AudioDevice.Create(options);
 
         if (Device is NullAudioDevice)

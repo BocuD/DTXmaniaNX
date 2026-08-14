@@ -178,5 +178,55 @@ public class GameStatus
         }
 
         ImGui.EndTable();
+
+        DrawFrameTrace();
+    }
+
+    //where the profiler above answers "what is slow now", this answers "what happened during that song"
+    private static string lastTracePath = string.Empty;
+
+    private static void DrawFrameTrace()
+    {
+        ImGui.Separator();
+
+        if (FrameTrace.Recording)
+        {
+            if (ImGui.Button("Stop recording"))
+            {
+                FrameTrace.Stop();
+            }
+
+            ImGui.SameLine();
+            ImGui.TextColored(new Vector4(0.9f, 0.65f, 0.3f, 1.0f), $"recording, {FrameTrace.Frames} frames");
+        }
+        else
+        {
+            if (ImGui.Button("Record frame trace"))
+            {
+                FrameTrace.Start();
+            }
+
+            ImGui.SameLine();
+            ImGui.TextDisabled(FrameTrace.Frames > 0
+                ? $"{FrameTrace.Frames} frames held{(FrameTrace.Full ? ", buffer full" : "")}"
+                : "not recording");
+        }
+
+        ImGui.BeginDisabled(FrameTrace.Frames == 0);
+
+        if (ImGui.Button("Export CSV"))
+        {
+            lastTracePath = FrameTrace.Export();
+        }
+
+        ImGui.EndDisabled();
+
+        if (lastTracePath.Length > 0)
+        {
+            ImGui.TextDisabled(lastTracePath);
+        }
+
+
+        ImGui.TextDisabled($"Audio underruns so far: {DTXMania.Core.Audio.AudioUnderruns.Count}");
     }
 }

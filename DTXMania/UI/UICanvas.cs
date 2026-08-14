@@ -13,6 +13,9 @@ public static class UICanvas
     /// <summary>The middle of the window, which is where the middle of the canvas is placed.</summary>
     public static Vector2 center => windowSize / 2f;
 
+    /// <summary>How many window pixels one canvas pixel is drawn at.</summary>
+    public static float scale => CDTXMania.renderScale;
+
     /// <summary>Top-left of the scaled canvas within the window.</summary>
     public static Vector2 origin => (windowSize - logicalSize * CDTXMania.renderScale) / 2f;
 

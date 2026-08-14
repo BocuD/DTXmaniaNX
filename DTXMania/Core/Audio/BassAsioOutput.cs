@@ -307,6 +307,11 @@ internal sealed class BassAsioOutput : IBassOutput
             transferred = 0;
         }
 
+        if (transferred < length)
+        {
+            AudioUnderruns.Report();
+        }
+
         //the driver's whole path, not just the buffer, or the clock leads what is being heard
         clock.Update(transferredBytes * 1000 / mixerBytesPerSecond - latencyMs);
 
