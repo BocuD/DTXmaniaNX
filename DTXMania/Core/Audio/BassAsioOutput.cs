@@ -225,7 +225,7 @@ internal sealed class BassAsioOutput : IBassOutput
         if (opened)
         {
             //before the clock: the pull callback reads it
-            BassAsio.BASS_ASIO_Free();
+            FreeDriver();
             Bass.BASS_Free();
             opened = false;
         }
@@ -236,11 +236,40 @@ internal sealed class BassAsioOutput : IBassOutput
     private Exception Failed(string call)
     {
         BASSError error = BassAsio.BASS_ASIO_ErrorGetCode();
-        BassAsio.BASS_ASIO_Free();
+        FreeDriver();
         Bass.BASS_Free();
         opened = false;
 
         return new Exception($"BASS (ASIO) initialization failed. ({call})[{error}]");
+    }
+
+    private const int FreeTimeoutMs = 2000;
+
+    private static void FreeDriver()
+    {
+        Thread free = new(() =>
+        {
+            try
+            {
+                BassAsio.BASS_ASIO_Free();
+            }
+            catch (Exception e)
+            {
+                Trace.TraceWarning($"BASS_ASIO_Free threw: {e.Message}");
+            }
+        })
+        {
+            IsBackground = true,
+            Name = "ASIO teardown"
+        };
+
+        free.Start();
+
+        if (!free.Join(FreeTimeoutMs))
+        {
+            Trace.TraceWarning($"BASS_ASIO_Free did not return within {FreeTimeoutMs}ms; "
+                               + "leaving the driver to the process exit.");
+        }
     }
 
     /// <summary>
