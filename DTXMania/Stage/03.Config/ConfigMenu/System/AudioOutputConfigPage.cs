@@ -24,16 +24,16 @@ internal sealed class AudioOutputConfigPage : ConfigPage
     /// <summary>FDK has no BASS output and would fall through to DirectSound, so it is not offered
     /// one.</summary>
     private static string[] Drivers(bool legacy) => legacy
-        ? ["DSound", "ASIO", "WASAPIExclusive", "WASAPIShared"]
-        : ["DSound", "ASIO", "WASAPIExclusive", "WASAPIShared", "BASS"];
+        ? ["DirectSound", "ASIO", "WASAPI Exclusive", "WASAPI Shared"]
+        : ["DirectSound", "ASIO", "WASAPI Exclusive", "WASAPI Shared", "BASS"];
 
     public override List<CItemBase> Build()
     {
         List<CItemBase> items = [];
 
         audioDriver = new CItemList("Audio Driver", CItemBase.EPanelType.Normal, 0,
-            "サウンド出力方式を選択\nします。\nWASAPIはVista以降、\nASIOは対応機器でのみ使用可能です。\nWASAPIかASIOを使うと、\n遅延を少なくできます。\n",
-            "DSound: Direct Sound\nWASAPI: from Windows Vista\nASIO: with ASIO compatible devices only\nBASS: portable fallback, higher latency than WASAPI\nUse WASAPI or ASIO to decrease the sound lag.\nNote: Exit CONFIG to make the setting take effect.",
+            "サウンドデバイスの種類を選択します。\nWASAPIまたはASIOが推奨です。BASSはポータブル用のフォールバックで、WASAPIよりもレイテンシが大きくなります。\n可能であればDirectSoundは避けてください。",
+            "Selected output driver.\nWASAPI or ASIO is recommended. BASS: portable fallback, higher latency than WASAPI\nAvoid DirectSound if possible",
             Drivers(CDTXMania.ConfigIni.bUseFDKAudio));
         audioDriver.BindConfig(
             ShowDrivers,
@@ -52,8 +52,8 @@ internal sealed class AudioOutputConfigPage : ConfigPage
         items.Add(audioDriver);
 
         CItemToggle fdkAudio = new("Legacy Audio", CDTXMania.ConfigIni.bUseFDKAudio,
-            "旧FDKサウンドデバイスを使用します。\n新しいオーディオ層に問題がある場合のみ\nONにしてください。近い将来削除されます。",
-            "Play through the old FDK sound device instead of the current audio layer.\nOnly for comparing the two if the new one misbehaves.\nBASS output is unavailable while this is on.\nThis option will be removed in a future release.\nNote: Exit CONFIG to make the setting take effect.");
+            "旧FDKサウンドデバイスを使用します。\n新しいオーディオ層に問題がある場合のみONにしてください。\n近い将来削除されます。",
+            "Play through the old FDK sound device instead of the current audio layer.\nThis option will be removed in a future release.");
         fdkAudio.BindConfig(
             () => fdkAudio.bON = CDTXMania.ConfigIni.bUseFDKAudio,
             () =>
