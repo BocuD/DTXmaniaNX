@@ -28,7 +28,7 @@ internal sealed class BassWasapiOutput : IBassOutput
         pull = Pull;
     }
 
-    public string Backend => exclusive ? "WASAPI(Exclusive)" : "WASAPI(Shared)";
+    public string Backend => exclusive ? "WASAPI (Exclusive)" : "WASAPI (Shared)";
 
     public string Name { get; private set; } = string.Empty;
 
@@ -310,9 +310,8 @@ internal sealed class BassWasapiOutput : IBassOutput
 
         Bass.BASS_Free();
 
-        //Bluetooth endpoints take no exclusive format at all, so every retry above answers the same way
         string because = exclusive && error == BASSError.BASS_ERROR_FORMAT
-            ? $" \"{device.name}\" accepts no exclusive-mode format, which is usual for Bluetooth outputs."
+            ? $" \"{device.name}\" accepts no exclusive-mode format"
             : string.Empty;
 
         throw new Exception($"BASS ({Backend}) initialization failed."

@@ -627,7 +627,7 @@ internal partial class CDTXMania
                 ? $" {audio.BufferLatencyMs:0.0}ms/{audio.BufferFrames} {audio.FrameUnit}"
                 : $" {audio.BufferLatencyMs:0.0}ms";
 
-        maniaGl.SetWindowTitle($"{strWindowTitle} ({audio.Backend}{buffer})");
+        maniaGl.SetWindowTitle($"{strWindowTitle} {audio.Backend}{buffer}");
     }
     
     public static SongNode chosenSong { get; private set; }
