@@ -55,6 +55,9 @@ public partial class UIText : UITexture
     [Themable] public float outlineWidth = 3f;
     [Themable] public Vector2 texturePadding = Vector2.Zero;
     [Themable] public float lineSpacing = 1f;
+
+    //wraps at the claimed size width; a width still on Auto has nothing to wrap to
+    [Themable] public bool wrap;
     [Themable] public bool antialias = true;
     [Themable] public bool subpixelText = true;
     [Themable] public UiTextStyle style = UiTextStyle.Regular;
@@ -105,6 +108,12 @@ public partial class UIText : UITexture
         }
         
         ShowUnresolvedBinding();
+
+        //a binding or an animation can move the width without going through anything that marks dirty
+        if (WrapWidth() != _renderedWrapWidth)
+        {
+            _dirty = true;
+        }
 
         if (_dirty)
         {
@@ -269,12 +278,16 @@ public partial class UIText : UITexture
     protected override Vector2 ContentSize(BaseTexture t) => new Vector2(t.Width, t.Height) / _textureRenderScale;
 
     private float _textureRenderScale = 1f;
+    private float _renderedWrapWidth;
 
     private static float RenderScale => CDTXMania.renderScale <= 0f ? 1f : CDTXMania.renderScale;
+
+    private float WrapWidth() => wrap && size.xMode == UiSizeMode.Fixed ? size.X : 0f;
 
     private UiTextParameters CreateRenderRequest()
     {
         _textureRenderScale = RenderScale;
+        _renderedWrapWidth = WrapWidth();
         float renderSize = fontSize * _textureRenderScale;
 
         return new UiTextParameters
@@ -287,6 +300,7 @@ public partial class UIText : UITexture
             OutlineWidth = outlineWidth,
             TexturePadding = texturePadding,
             LineSpacing = lineSpacing,
+            MaxWidth = _renderedWrapWidth * _textureRenderScale,
             Antialias = antialias,
             SubpixelText = subpixelText,
             Style = style,
