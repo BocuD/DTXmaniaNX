@@ -27,7 +27,8 @@ public abstract class UITexture : UIDrawable
     //logical pixels than it has of its own
     protected virtual Vector2 ContentSize(BaseTexture t) => new(t.Width, t.Height);
 
-    protected Vector2 MeasuredSize => ContentSize(texture);
+    /// <summary>What the current texture covers, whatever <see cref="UIDrawable.size"/> was claimed as.</summary>
+    public Vector2 MeasuredSize => ContentSize(texture);
 
     public override void Draw(Matrix4x4 parentMatrix)
     {

@@ -54,10 +54,9 @@ internal sealed class OpenGlSkiaTextRenderer : IUiTextRenderer
             maxLineWidth = MathF.Max(maxLineWidth, MeasureLineWidth(font, line));
         }
 
-        //a wrapping text is drawn into the width it was given, so the bitmap is that width outright
-        int bitmapWidth = request.MaxWidth > 0f
-            ? Math.Max((int)MathF.Ceiling(request.MaxWidth), 1)
-            : Math.Max((int)MathF.Ceiling(maxLineWidth + effectivePadding.X * 2f), 1);
+        //wrapping has already held every line to the budget, so the bitmap is the longest of them: a
+        //wrapped text still ends up only as wide as it needed to be
+        int bitmapWidth = Math.Max((int)MathF.Ceiling(maxLineWidth + effectivePadding.X * 2f), 1);
         int bitmapHeight = Math.Max((int)MathF.Ceiling(lines.Length * actualLineHeight + effectivePadding.Y * 2f), 1);
 
         using SKSurface surface = SKSurface.Create(new SKImageInfo(bitmapWidth, bitmapHeight, SKColorType.Rgba8888, SKAlphaType.Premul));

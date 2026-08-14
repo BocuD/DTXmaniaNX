@@ -8,7 +8,10 @@ namespace DTXMania.UI.Drawable;
 
 public class Modal : UIGroup
 {
-    private const float PanelWidth = 640f;
+    //the panel hugs its text, up to a cap; the text wraps at the widest it is allowed to make the panel
+    private const float MaxPanelWidth = 640f;
+    private const float MinPanelWidth = 320f;
+    private const float HorizontalPadding = 50f;
     private const float ButtonSpacing = 46f;
 
     private const int TitleFontSize = 30;
@@ -52,47 +55,47 @@ public class Modal : UIGroup
         const float descriptionToOptionsGap = 20f;
         const float bottomPadding = 20f;
 
-        float optionsBlockHeight = options.Length * ButtonSpacing;
-        float panelHeight = topPadding + TitleFontSize + titleToDescriptionGap + DescriptionFontSize * 3
-                            + descriptionToOptionsGap + optionsBlockHeight + bottomPadding;
-        float panelTop = (screenHeight - panelHeight) / 2f;
-
         UIImage backdrop = AddChild(new UIImage(BaseTexture.CreateSolidColor(new Color4(0f, 0f, 0f, 0.6f))));
         backdrop.name = "Backdrop";
         backdrop.position = new Vector3(0f, 0f, 0f);
         backdrop.size = new Vector2(screenWidth, screenHeight);
         backdrop.renderOrder = 0;
 
+        //both texts are rasterized before anything is placed: the panel is sized to what they measured,
+        //and every position below is taken from the panel. Draw order comes from renderOrder, not from
+        //the order children are added, so measuring first costs nothing.
+        UIText titleText = AddWrappedText(title, TitleFontSize, "Title");
+        UIText descriptionText = AddWrappedText(description, DescriptionFontSize, "Description");
+
+        float contentWidth = MathF.Max(titleText.MeasuredSize.X, descriptionText.MeasuredSize.X);
+        float panelWidth = Math.Clamp(contentWidth + HorizontalPadding, MinPanelWidth, MaxPanelWidth);
+
+        float titleHeight = titleText.MeasuredSize.Y;
+        float descriptionHeight = descriptionText.MeasuredSize.Y;
+        float optionsBlockHeight = options.Length * ButtonSpacing;
+
+        float panelHeight = topPadding + titleHeight + titleToDescriptionGap + descriptionHeight
+                            + descriptionToOptionsGap + optionsBlockHeight + bottomPadding;
+
+        //a dialog taller than the screen grows off the bottom rather than off both ends
+        float panelTop = MathF.Max((screenHeight - panelHeight) / 2f, topPadding);
+
         UIImage panel = AddChild(new UIImage(BaseTexture.CreateSolidColor(new Color4(0.11f, 0.11f, 0.11f, 0.96f))));
         panel.name = "Panel";
         panel.anchor = new Vector2(0.5f, 0f);
         panel.position = new Vector3(centerX, panelTop, 0f);
-        panel.size = new Vector2(PanelWidth, panelHeight);
+        panel.size = new Vector2(panelWidth, panelHeight);
         panel.renderOrder = 1;
 
         float titleY = panelTop + topPadding;
-        UIText titleText = AddChild(new UIText(title, TitleFontSize));
-        titleText.name = "Title";
-        titleText.anchor = new Vector2(0.5f, 0f);
-        titleText.position = new Vector3(centerX, titleY, 0f);
-        titleText.renderOrder = 2;
-        titleText.outlineWidth = 0;
-        titleText.RenderTexture();
+        titleText.position = new Vector3(centerX - titleText.MeasuredSize.X / 2f, titleY, 0f);
 
-        float descriptionY = titleY + TitleFontSize + titleToDescriptionGap;
-        UIText descriptionText = AddChild(new UIText(description, DescriptionFontSize));
-        descriptionText.name = "Description";
-        descriptionText.anchor = new Vector2(0.5f, 0f);
-        descriptionText.position = new Vector3(centerX, descriptionY, 0f);
-        descriptionText.renderOrder = 2;
-        descriptionText.outlineWidth = 0;
-        descriptionText.RenderTexture();
-
-        panel.size.X = descriptionText.size.X + 50f;
+        float descriptionY = titleY + titleHeight + titleToDescriptionGap;
+        descriptionText.position = new Vector3(centerX - descriptionText.MeasuredSize.X / 2f, descriptionY, 0f);
 
         optionList = AddChild(new UIMenu($"{title} options"));
         optionList.renderOrder = 3;
-        optionList.position = new Vector3(centerX, descriptionY + DescriptionFontSize * 3 + descriptionToOptionsGap, 0f);
+        optionList.position = new Vector3(centerX, descriptionY + descriptionHeight + descriptionToOptionsGap, 0f);
         optionList.itemOffset = new Vector3(0f, ButtonSpacing, 0f);
         optionList.itemDefault = BuildOptionDefault;
         optionList.dontSerialize = true;
@@ -114,6 +117,21 @@ public class Modal : UIGroup
         //holding focus is what stops everything under it reading input
         focused = true;
         UIFocus.Push(optionList);
+    }
+
+    //the claimed width is the wrap budget, and the anchor is taken from that rather than from what the
+    //text measured, so the caller centres these by position instead of by anchor
+    private UIText AddWrappedText(string content, int fontSize, string name)
+    {
+        UIText text = AddChild(new UIText(content, fontSize));
+        text.name = name;
+        text.renderOrder = 2;
+        text.outlineWidth = 0;
+        text.alignment = UiTextAlignment.Center;
+        text.wrap = true;
+        text.size.X = MaxPanelWidth - HorizontalPadding;
+        text.RenderTexture();
+        return text;
     }
 
     //one option: white normally, a yellow-to-orange gradient when it is the selected one
