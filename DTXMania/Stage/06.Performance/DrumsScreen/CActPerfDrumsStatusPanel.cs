@@ -1,6 +1,7 @@
 ﻿using System.Drawing;
 using System.Numerics;
 using DTXMania.Core;
+using DTXMania.UI;
 using DTXMania.UI.Drawable;
 
 namespace DTXMania;
@@ -86,10 +87,8 @@ internal class CActPerfDrumsStatusPanel : CActPerfCommonStatusPanel
                 bCLASSIC = true;
             }
 
-            Matrix4x4 scaleMatrix = Matrix4x4.CreateScale(CDTXMania.renderScale);
-
             Matrix4x4 skillPanelMat = Matrix4x4.CreateTranslation(nBodyX[i], nBodyY, 0f);
-            txSkillPanel.tDraw2DMatrix(skillPanelMat * scaleMatrix);
+            txSkillPanel.tDraw2DMatrix(skillPanelMat * UICanvas.toWindow);
 
             tDrawSmallNumber(80 + nBodyX[i], 72 + nBodyY,
                 $"{CDTXMania.stagePerfDrumsScreen.nHitCount_ExclAuto[i].Perfect,4:###0}");

@@ -50,14 +50,7 @@ public abstract class BaseTexture : IDisposable
     }
 
     //stubs for non recreated Device based render code
-    private Matrix4x4 scaleMatrix
-    {
-        get
-        {
-            float scale = CDTXMania.renderScale;
-            return Matrix4x4.CreateScale(scale);
-        }
-    }
+    private Matrix4x4 scaleMatrix => UICanvas.toWindow;
     
     public void tDraw2D(float x, float y)
     {

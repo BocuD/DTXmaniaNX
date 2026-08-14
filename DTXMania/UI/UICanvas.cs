@@ -13,6 +13,13 @@ public static class UICanvas
     /// <summary>The middle of the window, which is where the middle of the canvas is placed.</summary>
     public static Vector2 center => windowSize / 2f;
 
+    /// <summary>Top-left of the scaled canvas within the window.</summary>
+    public static Vector2 origin => (windowSize - logicalSize * CDTXMania.renderScale) / 2f;
+
+    /// <summary>Canvas space to window space, for the legacy draws that do not go through the UI tree.</summary>
+    public static Matrix4x4 toWindow =>
+        Matrix4x4.CreateScale(CDTXMania.renderScale) * Matrix4x4.CreateTranslation(origin.X, origin.Y, 0f);
+
     public static void SetWindowSize(Vector2 pixels)
     {
         windowSize = pixels;
