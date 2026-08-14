@@ -51,10 +51,32 @@ internal sealed class AudioConfigPage : ConfigPage
             "マスター・BGM・効果音・各楽器・チップの音量を設定します。",
             "Every level: master, BGM, sound effects, each instrument, and chips.", volumePage));
 
-        items.Add(FolderItem("Audio Output",
+        var output = FolderItem("Audio Output",
             "サウンドの出力方式とドライバー設定を行います。",
             "Which layer and backend the game plays through, and that backend's own settings.",
-            outputPage));
+            outputPage);
+        output.formatDescription = () =>
+        {
+            string latency = "";
+
+            var audio = AudioMixer.Device.Status;
+            if (audio.BufferMs > 0)
+            {
+                string buffer = audio.BufferFrames > 0
+                    ? $"{audio.BufferFrames} {audio.FrameUnit} ({audio.BufferLatencyMs:0.0}ms)"
+                    : $"{audio.BufferLatencyMs:0.0}ms";
+
+                string wait = AudioMixer.Device.Latency.IsKnown
+                    ? $"{AudioMixer.Device.Latency.Typical:0.0} - {AudioMixer.Device.Latency.Worst:0.0}ms"
+                    : "not reported";
+
+                latency = $"Buffer: {buffer}\nLatency {wait}";
+            }
+
+            return !CDTXMania.isJapanese ? $"Current output device: {AudioMixer.Device.Status.Output}\nCurrent output driver: {AudioMixer.Device.Status.Backend}\nLatency estimates: {latency}"
+                : $"現在の出力デバイス: {AudioMixer.Device.Status.Output}\n現在の出力ドライバー: {AudioMixer.Device.Status.Backend}\nレイテンシー推定値: {latency}";
+        };
+        items.Add(output);
 
         CItemInteger bgmAdjust = new("BGM Offset", -99, 99, CDTXMania.ConfigIni.nCommonBGMAdjustMs,
             "BGMの再生タイミングを微調整します。\n-99 ～ 99ms まで指定可能です。",

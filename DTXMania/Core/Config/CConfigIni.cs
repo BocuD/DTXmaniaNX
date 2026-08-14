@@ -82,8 +82,7 @@ internal partial class CConfigIni
 	public bool DisplayBonusEffects;
 	public bool bHAZARD;
 
-	public int
-		nSoundDriverType; // #24820 2012.12.23 yyagi 出力サウンドデバイス(0=ACM(にしたいが設計がきつそうならDirectShow), 1=ASIO, 2=WASAPI)
+	public int nSoundDriverType; // #24820 2012.12.23 yyagi 出力サウンドデバイス(0=ACM(にしたいが設計がきつそうならDirectShow), 1=ASIO, 2=WASAPI)
 
 	public int nWASAPIBufferSizeMs; // #24820 2013.1.15 yyagi WASAPIのバッファサイズ
 
