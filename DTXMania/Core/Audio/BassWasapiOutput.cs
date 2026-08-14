@@ -34,6 +34,12 @@ internal sealed class BassWasapiOutput : IBassOutput
 
     public long BufferMs { get; private set; }
 
+    public int SampleRate { get; private set; }
+
+    public int BufferFrames { get; private set; }
+
+    public int PeriodFrames { get; private set; }
+
     public float CpuUsage => BassWasapi.BASS_WASAPI_GetCPU();
 
     public long ElapsedMs => clock.ElapsedMs;
@@ -215,30 +221,52 @@ internal sealed class BassWasapiOutput : IBassOutput
             flags |= BASSWASAPIInit.BASS_WASAPI_EVENT;
         }
 
-        //below the device's own period WASAPI fails outright, so that is the floor
-        float period = exclusive ? device.minperiod : device.defperiod;
-        float buffer = options.BufferSizeMs > 0 ? options.BufferSizeMs / 1000.0f : period + 0.001f;
+        //a whole number of milliseconds is rarely a whole number of frames, so asking in ms stops at the
+        //nearest one above the device's floor rather than reaching it
+        flags |= BASSWASAPIInit.BASS_WASAPI_SAMPLES;
 
-        if (buffer < period)
-        {
-            buffer = period + 0.001f;
-        }
+        int rate = device.mixfreq > 0 ? device.mixfreq : 48000;
+
+        //the smallest period the device admits to. Shared mode has a floor of its own that can be higher,
+        //and asking under either one is clamped rather than refused
+        float period = MathF.Round(device.minperiod * rate);
+        float buffer;
 
         if (exclusive)
         {
-            //event driven refills twice per buffer rather than four times
-            float least = period * ((flags & BASSWASAPIInit.BASS_WASAPI_EVENT) != 0 ? 2 : 4);
+            //one period by default, which the driver raises to whatever it will actually take: two
+            //periods event driven, more when polling
+            buffer = options.BufferSizeMs > 0
+                ? MathF.Max(MathF.Round(options.BufferSizeMs * rate / 1000.0f), 1.0f)
+                : period;
+        }
+        else
+        {
+            //a buffer of 0 is what reaches IAudioClient3's shared-mode period; any other value and Windows
+            //uses its own default period instead. The engine settles on about twice the period, so half
+            //the wanted buffer is what lands near it
+            buffer = 0;
 
-            if (buffer < least)
+            float wanted = options.BufferSizeMs > 0
+                ? MathF.Max(MathF.Round(options.BufferSizeMs * rate / 2000.0f), 1.0f)
+                : period;
+
+            //the engine's period stops at its default, so past about twice that the only way up is to ask
+            //for the buffer outright and let Windows run its own period under it
+            if (wanted > MathF.Round(device.defperiod * rate))
             {
-                buffer = least;
+                buffer = MathF.Round(options.BufferSizeMs * rate / 1000.0f);
+                period = MathF.Round(device.defperiod * rate);
+            }
+            else
+            {
+                period = wanted;
             }
         }
 
         Trace.TraceInformation($"Attempting BASS_WASAPI_Init (Device: {device.name}, "
                                + $"Frequency: {device.mixfreq}, Channels: {device.mixchans}, "
-                               + $"Flags: {flags}, Buffer: {buffer * 1000.0f:0.###}ms, "
-                               + $"Period: {period * 1000.0f:0.###}ms, "
+                               + $"Flags: {flags}, Buffer: {buffer:0} frames, Period: {period:0} frames, "
                                + $"device minperiod {device.minperiod * 1000.0f:0.###}ms, "
                                + $"defperiod {device.defperiod * 1000.0f:0.###}ms)");
 
@@ -279,11 +307,13 @@ internal sealed class BassWasapiOutput : IBassOutput
         throw new Exception($"BASS ({Backend}) initialization failed. (BASS_WASAPI_Init)[{error}]");
     }
 
+    /// <summary>Both arguments are in sample frames, which is what the device was asked in.</summary>
     private void Report(float requestedBuffer, float period)
     {
         BASS_WASAPI_INFO info = BassWasapi.BASS_WASAPI_GetInfo();
 
-        int bytesPerSample = info.format switch
+        //buflen is bytes, and a frame is one sample on every channel
+        int bytesPerFrame = info.format switch
         {
             BASSWASAPIFormat.BASS_WASAPI_FORMAT_8BIT => 1,
             BASSWASAPIFormat.BASS_WASAPI_FORMAT_24BIT => 3,
@@ -291,10 +321,21 @@ internal sealed class BassWasapiOutput : IBassOutput
             _ => 2
         } * info.chans;
 
-        BufferMs = (long)(info.buflen * 1000.0f / (bytesPerSample * info.freq));
+        SampleRate = info.freq;
+        BufferFrames = info.buflen / bytesPerFrame;
+        PeriodFrames = (int)period;
+        //rounded rather than truncated, which would understate the wait by up to a millisecond
+        BufferMs = (long)Math.Round(BufferFrames * 1000.0 / info.freq);
+
+        //shared mode is not asked for a buffer at all, so there is no request to report against
+        string asked = requestedBuffer > 0
+            ? $", requested {requestedBuffer:0} frames"
+            : string.Empty;
 
         Trace.TraceInformation($"BASS WASAPI Initialized ({Backend}, {info.freq}Hz, {info.chans}ch, "
-                               + $"Format: {info.format}, Buffer: {info.buflen} bytes [{BufferMs}ms "
-                               + $"(Requested: {requestedBuffer * 1000}ms)], Update Period: {period * 1000}ms)");
+                               + $"Format: {info.format}, Buffer: {info.buflen} bytes = {BufferFrames} frames "
+                               + $"[{BufferMs}ms{asked}], "
+                               + $"Update Period: {PeriodFrames} frames "
+                               + $"[{PeriodFrames * 1000.0f / info.freq:0.###}ms])");
     }
 }

@@ -107,11 +107,19 @@ public sealed class BassAudioDevice : IAudioDevice
         Backend = output.Backend,
         Output = output.Name,
         BufferMs = output.BufferMs,
+        SampleRate = output.SampleRate,
+        BufferFrames = output.BufferFrames,
+        PeriodFrames = output.PeriodFrames,
+        FrameUnit = output.FrameUnit,
         CpuUsage = output.CpuUsage,
         Streams = Streams,
         MixedChannels = MixedChannelCount,
         DefaultOutputBusType = (output as BassWasapiOutput)?.DefaultBusType ?? string.Empty
     };
+
+    /// <summary>The output owns the buffer, and whether it pulls or is pushed decides how the wait works
+    /// out, so it answers this rather than the default deriving it from <see cref="Status"/>.</summary>
+    public AudioLatency Latency => output.Latency;
 
     public IAudioClip Load(string path, AudioGroup group) => new BassAudioClip(this, path);
 

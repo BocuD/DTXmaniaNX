@@ -30,6 +30,14 @@ internal sealed class BassOutput : IBassOutput
 
     public long BufferMs { get; private set; }
 
+    public int SampleRate { get; private set; }
+
+    //BASS states its latency in ms, so this is derived rather than reported
+    public int BufferFrames => (int)(BufferMs * SampleRate / 1000);
+
+    /// <summary>How often BASS tops the device buffer up.</summary>
+    public int PeriodFrames => (int)(UpdatePeriodMs * SampleRate / 1000);
+
     public float CpuUsage => Bass.BASS_GetCPU();
 
     /// <summary>BASS plays the mixer, so the final stage sounds rather than decodes.</summary>
@@ -83,6 +91,7 @@ internal sealed class BassOutput : IBassOutput
         //what BASS says it got, not what was asked for: it clamps the device buffer to the card's own
         //minimum, and this is the figure the rest of the game shows as the output buffer
         BufferMs = info.latency;
+        SampleRate = info.freq > 0 ? info.freq : 48000;
 
         Trace.TraceInformation($"BASS Initialized (Device: \"{Name}\", {info.freq}Hz, {info.speakers} speakers, "
                                + $"Device buffer: {wanted}ms requested, {info.minbuf}ms is this card's "

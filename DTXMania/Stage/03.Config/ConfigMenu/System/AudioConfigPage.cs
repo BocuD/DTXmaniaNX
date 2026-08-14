@@ -15,6 +15,7 @@ internal sealed class AudioConfigPage : ConfigPage
     private int soundTypeInitial;
     private int wasapiBufferInitial;
     private int asioDeviceInitial;
+    private int asioBufferInitial;
     private string outputDeviceInitial;
     private bool osTimerInitial;
     private bool eventDrivenInitial;
@@ -45,6 +46,7 @@ internal sealed class AudioConfigPage : ConfigPage
         soundTypeInitial = CDTXMania.ConfigIni.nSoundDriverType;
         wasapiBufferInitial = CDTXMania.ConfigIni.nWASAPIBufferSizeMs;
         asioDeviceInitial = CDTXMania.ConfigIni.nASIODevice;
+        asioBufferInitial = CDTXMania.ConfigIni.nASIOBufferSizeSamples;
         osTimerInitial = CDTXMania.ConfigIni.bUseOSTimer;
         eventDrivenInitial = CDTXMania.ConfigIni.bEventDrivenWASAPI;
         fdkAudioInitial = CDTXMania.ConfigIni.bUseFDKAudio;
@@ -200,6 +202,7 @@ internal sealed class AudioConfigPage : ConfigPage
         if (soundTypeInitial != CDTXMania.ConfigIni.nSoundDriverType ||
             wasapiBufferInitial != CDTXMania.ConfigIni.nWASAPIBufferSizeMs ||
             asioDeviceInitial != CDTXMania.ConfigIni.nASIODevice ||
+            asioBufferInitial != CDTXMania.ConfigIni.nASIOBufferSizeSamples ||
             osTimerInitial != CDTXMania.ConfigIni.bUseOSTimer ||
             eventDrivenInitial != CDTXMania.ConfigIni.bEventDrivenWASAPI ||
             fdkAudioInitial != CDTXMania.ConfigIni.bUseFDKAudio ||

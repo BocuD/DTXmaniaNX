@@ -19,6 +19,16 @@ internal interface IBassOutput : IDisposable
 
     long BufferMs { get; }
 
+    int SampleRate => 0;
+
+    /// <summary>The buffer in sample frames, for backends configured that way rather than in time.</summary>
+    int BufferFrames => 0;
+
+    int PeriodFrames => 0;
+
+    /// <summary>What the backend's own documentation calls one frame, for display.</summary>
+    string FrameUnit => "frames";
+
     float CpuUsage { get; }
 
     long ElapsedMs { get; }
@@ -28,6 +38,20 @@ internal interface IBassOutput : IDisposable
     /// owns the card and plays the mixer itself, so the final stage has to sound rather than decode.
     /// </summary>
     bool Pulls => true;
+
+    /// <summary>The buffer in milliseconds, from frames where the backend counts that way.</summary>
+    double BufferLatencyMs => BufferFrames > 0 && SampleRate > 0
+        ? BufferFrames * 1000.0 / SampleRate
+        : BufferMs;
+
+    /// <summary>How often the buffer is topped up, in milliseconds. 0 when the output does not say.</summary>
+    double PeriodMs => PeriodFrames > 0 && SampleRate > 0
+        ? PeriodFrames * 1000.0 / SampleRate
+        : 0.0;
+
+    /// <summary>What a sound waits here. An output overrides this only if it is neither pulled nor pushed
+    /// in the ordinary way.</summary>
+    AudioLatency Latency => AudioLatency.FromBuffer(BufferLatencyMs, PeriodMs, Pulls);
 
     /// <summary>Opens the card and answers the format the mixer must match. Throws if it cannot be
     /// opened, so the caller can fall back to another backend.</summary>

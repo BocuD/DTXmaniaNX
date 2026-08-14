@@ -576,9 +576,15 @@ internal partial class CDTXMania
     public void UpdateWindowTitle()
     {
         AudioDeviceStatus audio = AudioMixer.Device.Status;
-        string delay = audio.BufferMs < 0 ? "" : $"({audio.BufferMs}ms)";
 
-        maniaGl.SetWindowTitle($"{strWindowTitle} ({audio.Backend}{delay})");
+        //the exact figure rather than the rounded one, so it agrees with the mixer window
+        string buffer = audio.BufferMs < 0
+            ? ""
+            : audio.BufferFrames > 0
+                ? $" {audio.BufferLatencyMs:0.0}ms/{audio.BufferFrames} {audio.FrameUnit}"
+                : $" {audio.BufferLatencyMs:0.0}ms";
+
+        maniaGl.SetWindowTitle($"{strWindowTitle} ({audio.Backend}{buffer})");
     }
     
     public static SongNode chosenSong { get; private set; }

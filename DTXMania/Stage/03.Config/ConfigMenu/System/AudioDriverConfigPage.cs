@@ -30,14 +30,14 @@ internal sealed class AudioDriverConfigPage : ConfigPage
                 break;
 
             case 1: // ASIO
+                items.Add(BuildAsioBufferSize());
                 items.Add(BuildUseOsTimer());
                 break;
 
             case 2: // ExclusiveWASAPI
                 items.Add(BuildWasapiBufferSize());
 
-                //shared mode does not get one: the buffer comes out the same either way, because the
-                //Windows engine's period decides it and nothing here reaches that
+                //shared mode does not get one: Windows drives its engine either way
                 items.Add(BuildWasapiEventDriven());
                 items.Add(BuildUseOsTimer());
                 break;
@@ -107,12 +107,23 @@ internal sealed class AudioDriverConfigPage : ConfigPage
 
     private static CItemInteger BuildWasapiBufferSize()
     {
-        CItemInteger item = new("WASAPIBufSize", 0, 99999, CDTXMania.ConfigIni.nWASAPIBufferSizeMs,
-            "WASAPI時のバッファサイズ:\n0～99999msを指定できます。\n0を指定するとOSが自動設定します。\n値を小さくするほどラグが減少しますが、\n音割れや異常を引き起こす場合があります。",
-            "Sound buffer size for WASAPI, from 0 to 99999ms.\nSet 0 to use the default system buffer size.\nSmaller values reduce lag but may cause audio glitches.\nNote: Exit CONFIG to make the setting take effect.");
+        CItemInteger item = new("WASAPIBufSize", 0, 500, CDTXMania.ConfigIni.nWASAPIBufferSizeMs,
+            "WASAPI時のバッファサイズ:\n0を指定するとデバイスが扱える最小値に\nなります。音切れが出る場合は増やして\nください。\n実際の値はデバイスの下限まで\n切り上げられます。\nこのバッファがそのまま出力遅延に\nなります。",
+            "Output buffer for WASAPI, in ms. 0 asks for the lowest the device will take.\nIt is rounded to whole sample frames and never goes below the device's own\nfloor, so the window may show more than you asked for.\nThis buffer is the output latency: a hit waits out at most one of it, and\nhalf a fill period less than that on average.\nRaise it if you hear crackling or dropouts.\nNote: Exit CONFIG to make the setting take effect.");
         item.BindConfig(
             () => item.nCurrentValue = CDTXMania.ConfigIni.nWASAPIBufferSizeMs,
             () => CDTXMania.ConfigIni.nWASAPIBufferSizeMs = item.nCurrentValue);
+        return item;
+    }
+
+    private static CItemInteger BuildAsioBufferSize()
+    {
+        CItemInteger item = new("ASIOBufSize", 0, 8192, CDTXMania.ConfigIni.nASIOBufferSizeSamples,
+            "ASIO時のバッファサイズ(単位:サンプル):\n0を指定するとドライバ側の設定値を\n使用します。\n音切れが出る場合は増やしてください。",
+            "ASIO buffer, in samples. 0 uses whatever the driver's own control panel is set to.\nA value the driver will not take is corrected rather than refused, so the\nwindow may show something other than what you asked for.\nRaise it if you hear crackling or dropouts.\nNote: Exit CONFIG to make the setting take effect.");
+        item.BindConfig(
+            () => item.nCurrentValue = CDTXMania.ConfigIni.nASIOBufferSizeSamples,
+            () => CDTXMania.ConfigIni.nASIOBufferSizeSamples = item.nCurrentValue);
         return item;
     }
 
@@ -131,7 +142,7 @@ internal sealed class AudioDriverConfigPage : ConfigPage
     {
         CItemToggle item = new("WASAPIEventDriven", CDTXMania.ConfigIni.bEventDrivenWASAPI,
             "WASAPIをEvent Drivenモードで使用します。\n出力バッファを大幅に小さくできます。\nOFFにすると遅延が増加します。",
-            "Let the device drive the WASAPI buffer instead of polling it.\nOn exclusive mode this is the difference between a 6ms and a 21ms buffer.\nLeave it ON unless you hear dropouts.");
+            "Let the device drive the WASAPI buffer instead of polling it.\nOn exclusive mode a polled buffer is several times the size of a driven one.\nLeave it ON unless you hear dropouts.");
         item.BindConfig(
             () => item.bON = CDTXMania.ConfigIni.bEventDrivenWASAPI,
             () =>
@@ -149,15 +160,15 @@ internal sealed class AudioDriverConfigPage : ConfigPage
 
     /// <summary>
     /// Polling needs the buffer to be four update periods where the device driving it needs two, so
-    /// turning this off costs about 15ms on exclusive.
+    /// turning this off multiplies the exclusive buffer.
     /// </summary>
     private async Task ConfirmPolling(CItemToggle item)
     {
         string title = CDTXMania.isJapanese ? "遅延が増加します" : "This increases latency";
 
         string description = CDTXMania.isJapanese
-            ? "Event Drivenを切ると、WASAPI排他モードの出力バッファが\n6msから21ms程度まで大きくなります。\n音切れが発生する場合以外はONのままを推奨します。"
-            : "Turning this off makes the WASAPI exclusive output buffer grow from\nabout 6ms to about 21ms, because a polled buffer has to be four\nupdate periods long.\n\nOnly do this if you are hearing dropouts.";
+            ? "Event Drivenを切ると、WASAPI排他モードの出力バッファが\n数倍に大きくなります。\n音切れが発生する場合以外はONのままを推奨します。"
+            : "Turning this off makes the WASAPI exclusive output buffer several times\nlarger, because a polled buffer has to be four update periods long where\na driven one is two.\n\nOnly do this if you are hearing dropouts.";
 
         string[] options = CDTXMania.isJapanese
             ? ["ONのままにする", "OFFにする"]

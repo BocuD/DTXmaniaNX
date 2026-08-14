@@ -19,6 +19,7 @@ internal sealed class BassAsioOutput : IBassOutput
     private long mixerBytesPerSecond;
     private long transferredBytes;
     private int outputChannels;
+    private int bufferSamples;
     private double frequency;
     private bool opened;
 
@@ -35,6 +36,15 @@ internal sealed class BassAsioOutput : IBassOutput
     public string Name { get; private set; } = string.Empty;
 
     public long BufferMs { get; private set; }
+
+    public int SampleRate => (int)frequency;
+
+    public int BufferFrames { get; private set; }
+
+    /// <summary>What the driver hands over per callback, which is what its own control panel sets.</summary>
+    public int PeriodFrames { get; private set; }
+
+    public string FrameUnit => "samples";
 
     public float CpuUsage => BassAsio.BASS_ASIO_GetCPU();
 
@@ -56,6 +66,8 @@ internal sealed class BassAsioOutput : IBassOutput
         {
             throw new Exception($"BASS initialization failed. (BASS_Init)[{Bass.BASS_ErrorGetCode()}]");
         }
+
+        bufferSamples = options.AsioBufferSamples;
 
         int driver = AudioOutputs.AsioDriver(options.OutputDevice) is var named and >= 0
             ? named
@@ -79,6 +91,32 @@ internal sealed class BassAsioOutput : IBassOutput
         Name = info.name;
         outputChannels = info.outputs;
         frequency = BassAsio.BASS_ASIO_GetRate();
+
+        //a driver left behind by its hardware still loads and reports channels, but answers 0 here, and
+        //nothing downstream works at 0Hz
+        if (frequency <= 0)
+        {
+            foreach (double rate in (double[])[48000.0, 44100.0])
+            {
+                if (BassAsio.BASS_ASIO_SetRate(rate))
+                {
+                    frequency = rate;
+                    break;
+                }
+            }
+        }
+
+        if (frequency <= 0)
+        {
+            BASSError error = BassAsio.BASS_ASIO_ErrorGetCode();
+            BassAsio.BASS_ASIO_Free();
+            Bass.BASS_Free();
+            opened = false;
+
+            throw new Exception($"BASS (ASIO) initialization failed. \"{info.name}\" reports no sample "
+                                + "rate and would not take one, which usually means the card it belongs "
+                                + $"to is absent. (BASS_ASIO_GetRate)[{error}]");
+        }
 
         BASSASIOFormat deviceFormat = BassAsio.BASS_ASIO_ChannelGetFormat(false, 0);
 
@@ -132,23 +170,55 @@ internal sealed class BassAsioOutput : IBassOutput
 
         mixerBytesPerSecond = (long)info.chans * bytesPerSample * info.freq;
 
-        //out of range is corrected to the driver's own default rather than refused
-        int buffer = (int)(BufferSamples * frequency / 1000.0);
+        //a driver refuses a buffer it cannot take rather than correcting it, so the request is brought
+        //into range first
+        int buffer = BufferFor(BassAsio.BASS_ASIO_GetInfo(), bufferSamples);
 
         if (!BassAsio.BASS_ASIO_Start(buffer))
         {
             throw Failed("BASS_ASIO_Start");
         }
 
-        //only answers once started
-        int latency = BassAsio.BASS_ASIO_GetLatency(false);
-        BufferMs = (long)(latency * 1000.0 / frequency);
+        //only answers once started, and already in samples
+        BufferFrames = BassAsio.BASS_ASIO_GetLatency(false);
+        PeriodFrames = BassAsio.BASS_ASIO_GetInfo() is { } driver ? driver.bufpref : 0;
+        BufferMs = (long)Math.Round(BufferFrames * 1000.0 / frequency);
 
-        Trace.TraceInformation($"ASIO output started: {latency} samples ({BufferMs}ms)");
+        Trace.TraceInformation($"ASIO output started: {BufferFrames} samples ({BufferMs}ms), "
+                               + $"driver buffer {PeriodFrames} samples, {bufferSamples} requested, "
+                               + $"{buffer} used");
     }
 
-    //0 leaves the card on its own setting, and there is no buffer control for ASIO
-    private const int BufferSamples = 0;
+    /// <summary>
+    /// The requested buffer brought onto something the driver will take: inside its range and on its
+    /// granularity. 0 asks for the driver's own setting.
+    /// </summary>
+    private static int BufferFor(BASS_ASIO_INFO? driver, int wanted)
+    {
+        if (wanted <= 0 || driver == null)
+        {
+            return 0;
+        }
+
+        int buffer = Math.Clamp(wanted, driver.bufmin, driver.bufmax);
+
+        //a granularity of -1 means the driver only takes powers of two
+        if (driver.bufgran == -1)
+        {
+            int power = driver.bufmin;
+
+            while (power * 2 <= buffer)
+            {
+                power *= 2;
+            }
+
+            return power;
+        }
+
+        return driver.bufgran > 0
+            ? buffer - (buffer - driver.bufmin) % driver.bufgran
+            : buffer;
+    }
 
     public void Dispose()
     {

@@ -87,7 +87,10 @@ internal partial class CConfigIni
 
 	public int nWASAPIBufferSizeMs; // #24820 2013.1.15 yyagi WASAPIのバッファサイズ
 
-	//public int nASIOBufferSizeMs; // #24820 2012.12.28 yyagi ASIOのバッファサイズ
+	//ASIO is configured in samples rather than milliseconds, which is also what a driver's own control
+	//panel shows, so this is not the WASAPI setting in different units
+	public int nASIOBufferSizeSamples;
+
 	public int nASIODevice; // #24820 2013.1.17 yyagi ASIOデバイス
 	public bool bEventDrivenWASAPI;
 	public bool bMetronome; // 2023.9.22 henryzx
@@ -828,9 +831,9 @@ internal partial class CConfigIni
 		nSoundDriverType = (int)ESoundDeviceTypeForConfig.ACM; // #24820 2012.12.23 yyagi 初期値はACM
 		nWASAPIBufferSizeMs = 0;               // #24820 2013.1.15 yyagi 初期値は0(自動設定)
 		nASIODevice = 0;                       // #24820 2013.1.17 yyagi
-//          this.nASIOBufferSizeMs = 0;                 // #24820 2012.12.25 yyagi 初期値は0(自動設定)
-		//on WASAPI exclusive this is the difference between a 21ms and a 6ms output buffer, because the
-		//buffer has to be four update periods when polling and two when the device drives it
+		//0 leaves the card on whatever its own control panel is set to
+		nASIOBufferSizeSamples = 0;
+		//on WASAPI exclusive a polled buffer has to be four update periods where a driven one is two
 		bEventDrivenWASAPI = true;
 		bUseOSTimer = false; ;                 // #33689 2014.6.6 yyagi 初期値はfalse (FDKのタイマー。ＦＲＯＭ氏考案の独自タイマー)
 		bDynamicBassMixerManagement = true;    //

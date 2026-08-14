@@ -1,12 +1,55 @@
 namespace DTXMania.Core.Audio;
 
 /// <summary>
+/// How long a sound waits between being played and reaching the card, in milliseconds. Both -1 when the
+/// device cannot say.
+/// </summary>
+public readonly record struct AudioLatency(double Typical, double Worst)
+{
+    public static readonly AudioLatency Unknown = new(-1.0, -1.0);
+
+    public bool IsKnown => Worst >= 0.0;
+
+    /// <summary>
+    /// The wait a buffer topped up every <paramref name="periodMs"/> imposes. A pulled output is already
+    /// holding the buffer when a sound arrives, so it waits out only what is queued ahead of it. A pushed
+    /// one waits for the next top-up first, so the period lands on top of the buffer instead of inside
+    /// it. Measured in AUDIO.md §9.11.
+    /// </summary>
+    public static AudioLatency FromBuffer(double bufferMs, double periodMs, bool pulls) => bufferMs < 0.0
+        ? Unknown
+        : pulls
+            ? new AudioLatency(Math.Max(bufferMs - periodMs / 2.0, 0.0), bufferMs)
+            : new AudioLatency(bufferMs + periodMs / 2.0, bufferMs + periodMs);
+}
+
+/// <summary>
 /// An audio output, and where clips come from. Disposing it kills every clip and voice made from it,
 /// so <see cref="AudioMixer.Reinitialize"/> is what swaps one: it gives them up first.
 /// </summary>
 public interface IAudioDevice : IDisposable
 {
     AudioDeviceStatus Status { get; }
+
+    /// <summary>
+    /// What a hit waits before it is heard, of the part this device is responsible for. The DAC and
+    /// anything after it are on top and cannot be known from here.
+    ///
+    /// The default treats <see cref="Status"/> as a pulled buffer, which is what WASAPI and ASIO are. A
+    /// backend shaped differently overrides this; one that cannot say leaves
+    /// <see cref="AudioDeviceStatus.BufferMs"/> negative and gets <see cref="AudioLatency.Unknown"/>.
+    /// </summary>
+    AudioLatency Latency
+    {
+        get
+        {
+            AudioDeviceStatus status = Status;
+
+            return status.BufferMs < 0
+                ? AudioLatency.Unknown
+                : AudioLatency.FromBuffer(status.BufferLatencyMs, status.PeriodMs, true);
+        }
+    }
 
     /// <summary>Throws if the file cannot be read.</summary>
     IAudioClip Load(string path, AudioGroup group);

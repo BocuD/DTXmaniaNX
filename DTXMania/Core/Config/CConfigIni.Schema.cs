@@ -160,6 +160,13 @@ internal partial class CConfigIni
 					"(0=Use system default buffer size, 1-9999=specify the buffer size(ms) by yourself)"
 				],
 				Int("WASAPIBufferSizeMs", 0, 9999, c => c.nWASAPIBufferSizeMs)),
+			G([
+					"ASIO使用時のバッファサイズ(単位:サンプル)",
+					"(0=ドライバの設定値を使用)",
+					"ASIO buffer size, in samples.",
+					"(0=use whatever the driver's own control panel is set to)"
+				],
+				Int("ASIOBufferSizeSamples", 0, 8192, c => c.nASIOBufferSizeSamples)),
 			new([
 					"ASIO使用時のサウンドデバイス",
 					"存在しないデバイスを指定すると、DTXManiaが起動しないことがあります。",

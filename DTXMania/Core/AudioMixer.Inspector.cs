@@ -105,9 +105,11 @@ public static partial class AudioMixer
 
         ImGui.TextDisabled($"{audio.Backend} on " +
                            $"{(audio.Output.Length > 0 ? audio.Output : "an unnamed device")}"
-                           + $"{(audio.BufferMs < 0 ? "" : $", {audio.BufferMs}ms buffer")}");
+                           + $"{(audio.SampleRate > 0 ? $", {audio.SampleRate}Hz" : "")}");
 
-        DrawLatency(audio);
+        DrawBuffer(audio);
+
+        DrawLatency(audio, Device.Latency);
         DrawDeviceSwap();
 
         ImGui.TextDisabled(CSystemSound.rLastPlayedExclusiveSystemSound is { } exclusive
@@ -115,26 +117,45 @@ public static partial class AudioMixer
             : "exclusive: none");
     }
 
+    /// <summary>The buffer and how often it is filled, in milliseconds and in the unit the backend is
+    /// configured in.</summary>
+    private static void DrawBuffer(AudioDeviceStatus audio)
+    {
+        if (audio.BufferMs < 0)
+        {
+            ImGui.TextDisabled("buffer   not reported");
+            return;
+        }
+
+        string buffer = audio.BufferFrames > 0
+            ? $"{audio.BufferLatencyMs:0.0}ms / {audio.BufferFrames} {audio.FrameUnit}"
+            : $"{audio.BufferLatencyMs:0.0}ms";
+
+        ImGui.TextDisabled(audio.PeriodMs > 0.0
+            ? $"buffer   {buffer}   fill {audio.PeriodMs:0.0}ms / {audio.PeriodFrames} {audio.FrameUnit}"
+            : $"buffer   {buffer}");
+    }
+
     /// <summary>
     /// How long a hit takes to be heard, of the parts that can be known. Chart audio does not suffer
     /// this: chips are scheduled against the output's own clock, so the buffer is already accounted for.
     /// </summary>
-    private static void DrawLatency(AudioDeviceStatus audio)
+    private static void DrawLatency(AudioDeviceStatus audio, AudioLatency latency)
     {
         //a hit is noticed and played on the frame it arrives, so the frame is part of the wait
         double frame = CDTXMania.FPS.nCurrentFPS > 0 ? 1000.0 / CDTXMania.FPS.nCurrentFPS : 0.0;
 
-        if (audio.BufferMs < 0)
+        if (!latency.IsKnown)
         {
-            ImGui.Text($"Hit to sound   frame {frame:0.0}ms + an output that does not report its buffer");
+            ImGui.Text($"Hit to sound   frame {frame:0.0}ms, output not reported");
             return;
         }
 
-        ImGui.Text($"Hit to sound   ~{frame + audio.BufferMs:0.0}ms before the hardware");
+        ImGui.Text($"Hit to sound   {frame + latency.Typical:0.0}ms mean, {frame + latency.Worst:0.0}ms max");
 
-        ImGui.TextDisabled($"frame {frame:0.0}ms + output {audio.BufferMs}ms. Shared modes add the "
-                           + "Windows mixer on top, and the DAC and anything after it cannot be seen "
-                           + "from here.");
+        ImGui.TextDisabled(audio.BufferFrames > 0
+            ? $"frame {frame:0.0}ms + output {latency.Worst:0.0}ms / {audio.BufferFrames} {audio.FrameUnit}"
+            : $"frame {frame:0.0}ms + output {latency.Worst:0.0}ms");
     }
 
     /// <summary>

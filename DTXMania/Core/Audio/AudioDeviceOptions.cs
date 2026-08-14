@@ -25,12 +25,16 @@ public sealed record AudioDeviceOptions
 
     /// <summary>
     /// Refill the WASAPI buffer from the device's own event rather than by polling, which lets the buffer
-    /// be two update periods instead of four. Only exclusive mode changes: in shared mode the engine's
-    /// period decides and this reaches nothing.
+    /// be two update periods instead of four. Only exclusive mode changes; Windows drives the shared
+    /// engine either way.
     /// </summary>
     public bool EventDriven { get; init; }
 
     public int AsioDevice { get; init; }
+
+    /// <summary>ASIO's buffer, in sample frames, 0 leaving the driver on its own setting. Separate from
+    /// <see cref="BufferSizeMs"/> because ASIO is configured in samples, not time.</summary>
+    public int AsioBufferSamples { get; init; }
 
     /// <summary>
     /// The output to play through, by name. Empty follows the system default and moves with it. A name
@@ -60,6 +64,7 @@ public sealed record AudioDeviceOptions
         BufferSizeMs = config.nWASAPIBufferSizeMs,
         EventDriven = config.bEventDrivenWASAPI,
         AsioDevice = config.nASIODevice,
+        AsioBufferSamples = config.nASIOBufferSizeSamples,
         UseOsTimer = config.bUseOSTimer,
         UseFdk = config.bUseFDKAudio,
         OutputDevice = config.strOutputDevice ?? string.Empty
