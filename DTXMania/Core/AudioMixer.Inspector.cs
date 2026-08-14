@@ -107,7 +107,7 @@ public static partial class AudioMixer
                            $"{(audio.Output.Length > 0 ? audio.Output : "an unnamed device")}"
                            + $"{(audio.SampleRate > 0 ? $", {audio.SampleRate}Hz" : "")}");
 
-        DrawBuffer(audio);
+        DrawBuffer(audio, Device.Latency);
 
         DrawLatency(audio, Device.Latency);
         DrawDeviceSwap();
@@ -117,9 +117,12 @@ public static partial class AudioMixer
             : "exclusive: none");
     }
 
-    /// <summary>The buffer and how often it is filled, in milliseconds and in the unit the backend is
-    /// configured in.</summary>
-    private static void DrawBuffer(AudioDeviceStatus audio)
+    /// <summary>
+    /// The buffer in the unit its setting is in, and the wait separately. They are the same thing on
+    /// WASAPI, and on a driver whose path reaches past its own buffer the latency is the larger of the
+    /// two. Keeping them apart is what lets the buffer match the driver's own control panel.
+    /// </summary>
+    private static void DrawBuffer(AudioDeviceStatus audio, AudioLatency latency)
     {
         if (audio.BufferMs < 0)
         {
@@ -128,12 +131,20 @@ public static partial class AudioMixer
         }
 
         string buffer = audio.BufferFrames > 0
-            ? $"{audio.BufferLatencyMs:0.0}ms / {audio.BufferFrames} {audio.FrameUnit}"
+            ? $"{audio.BufferFrames} {audio.FrameUnit} ({audio.BufferLatencyMs:0.0}ms)"
             : $"{audio.BufferLatencyMs:0.0}ms";
 
-        ImGui.TextDisabled(audio.PeriodMs > 0.0
-            ? $"buffer   {buffer}   fill {audio.PeriodMs:0.0}ms / {audio.PeriodFrames} {audio.FrameUnit}"
-            : $"buffer   {buffer}");
+        string wait = latency.IsKnown
+            ? $"{latency.Typical:0.0} - {latency.Worst:0.0}ms"
+            : "not reported";
+
+        ImGui.TextDisabled($"buffer   {buffer}   latency {wait}");
+
+        //ASIO hands over one buffer per callback, so saying the fill is the same size says nothing
+        if (audio.PeriodMs > 0.0 && audio.PeriodFrames != audio.BufferFrames)
+        {
+            ImGui.TextDisabled($"fill     {audio.PeriodFrames} {audio.FrameUnit} ({audio.PeriodMs:0.0}ms)");
+        }
     }
 
     /// <summary>
@@ -153,9 +164,7 @@ public static partial class AudioMixer
 
         ImGui.Text($"Hit to sound   {frame + latency.Typical:0.0}ms mean, {frame + latency.Worst:0.0}ms max");
 
-        ImGui.TextDisabled(audio.BufferFrames > 0
-            ? $"frame {frame:0.0}ms + output {latency.Worst:0.0}ms / {audio.BufferFrames} {audio.FrameUnit}"
-            : $"frame {frame:0.0}ms + output {latency.Worst:0.0}ms");
+        ImGui.TextDisabled($"the output above plus a frame at {frame:0.0}ms");
     }
 
     /// <summary>

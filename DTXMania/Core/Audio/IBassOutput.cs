@@ -71,7 +71,10 @@ internal sealed class BassOutputClock : IDisposable
 {
     private CTimer? system = new(CTimer.EType.MultiMedia);
     private long elapsedMs;
-    private long systemMsAtUpdate;
+
+    //negative until the first callback, since the system clock counts from boot and interpolating
+    //against it before there is anything to interpolate from would answer the uptime
+    private long systemMsAtUpdate = -1;
 
     /// <summary>Called from the output's pull callback.</summary>
     public void Update(long elapsed)
@@ -88,7 +91,8 @@ internal sealed class BassOutputClock : IDisposable
             long elapsed = elapsedMs;
             long at = systemMsAtUpdate;
 
-            return elapsed + (SystemMs - at);
+            //nothing has been handed to the card yet, so no time has passed on this clock
+            return at < 0 ? 0 : elapsed + (SystemMs - at);
         }
     }
 

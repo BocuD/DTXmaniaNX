@@ -20,6 +20,8 @@ internal sealed class BassAsioOutput : IBassOutput
     private long transferredBytes;
     private int outputChannels;
     private int bufferSamples;
+    private int latencySamples;
+    private long latencyMs;
     private double frequency;
     private bool opened;
 
@@ -45,6 +47,11 @@ internal sealed class BassAsioOutput : IBassOutput
     public int PeriodFrames { get; private set; }
 
     public string FrameUnit => "samples";
+
+    public AudioLatency Latency => latencySamples > 0 && frequency > 0
+        ? AudioLatency.FromBuffer(latencySamples * 1000.0 / frequency,
+            BufferFrames * 1000.0 / frequency, true)
+        : AudioLatency.Unknown;
 
     public float CpuUsage => BassAsio.BASS_ASIO_GetCPU();
 
@@ -121,8 +128,9 @@ internal sealed class BassAsioOutput : IBassOutput
         BASSASIOFormat deviceFormat = BassAsio.BASS_ASIO_ChannelGetFormat(false, 0);
 
         Trace.TraceInformation($"BASS ASIO Initialized (Device: \"{info.name}\", Outputs: {info.outputs}, "
-                               + $"Rate: {frequency:0.###}Hz, Buffer: {info.bufmin} to {info.bufmax} samples, "
-                               + $"Format: {deviceFormat})");
+                               + $"Inputs: {info.inputs}, Rate: {frequency:0.###}Hz, "
+                               + $"Buffer: {info.bufmin} to {info.bufmax} samples (preferred {info.bufpref}, "
+                               + $"granularity {info.bufgran}), Format: {deviceFormat})");
 
         EnableChannels();
 
@@ -179,14 +187,23 @@ internal sealed class BassAsioOutput : IBassOutput
             throw Failed("BASS_ASIO_Start");
         }
 
-        //only answers once started, and already in samples
-        BufferFrames = BassAsio.BASS_ASIO_GetLatency(false);
-        PeriodFrames = BassAsio.BASS_ASIO_GetInfo() is { } driver ? driver.bufpref : 0;
+        //bufpref lags a request that has just changed it, so a buffer that was asked for is its own answer
+        BufferFrames = buffer > 0
+            ? buffer
+            : BassAsio.BASS_ASIO_GetInfo() is { } driver ? driver.bufpref : 0;
+
+        //ASIO hands over exactly one buffer per callback, so the fill period is the buffer
+        PeriodFrames = BufferFrames;
         BufferMs = (long)Math.Round(BufferFrames * 1000.0 / frequency);
 
-        Trace.TraceInformation($"ASIO output started: {BufferFrames} samples ({BufferMs}ms), "
-                               + $"driver buffer {PeriodFrames} samples, {bufferSamples} requested, "
-                               + $"{buffer} used");
+        //only answers once started, and counts the driver's whole path rather than just the buffer
+        latencySamples = BassAsio.BASS_ASIO_GetLatency(false);
+        latencyMs = (long)Math.Round(latencySamples * 1000.0 / frequency);
+
+        Trace.TraceInformation($"ASIO output started: buffer {BufferFrames} samples ({BufferMs}ms), "
+                               + $"latency {latencySamples} samples "
+                               + $"({latencySamples * 1000.0 / frequency:0.#}ms), "
+                               + $"{bufferSamples} requested, {buffer} used");
     }
 
     /// <summary>
@@ -290,7 +307,8 @@ internal sealed class BassAsioOutput : IBassOutput
             transferred = 0;
         }
 
-        clock.Update(transferredBytes * 1000 / mixerBytesPerSecond - BufferMs);
+        //the driver's whole path, not just the buffer, or the clock leads what is being heard
+        clock.Update(transferredBytes * 1000 / mixerBytesPerSecond - latencyMs);
 
         transferredBytes += transferred;
         return transferred;
