@@ -24,7 +24,18 @@ public static class UICanvas
     {
         windowSize = pixels;
 
-        CDTXMania.renderScale = pixels.Y / GameWindowSize.Height;
+        //calculate aspect ratio
+        float aspectRatio = GameWindowSize.Width / (float)GameWindowSize.Height;
+
+        //if we're narrower than 16:9, scale the width to match
+        if (pixels.X / pixels.Y < aspectRatio)
+        {
+            CDTXMania.renderScale = pixels.X / GameWindowSize.Width;
+        }
+        else
+        {
+            CDTXMania.renderScale = pixels.Y / GameWindowSize.Height;
+        }
     }
 
     /// <summary>Centres <paramref name="root"/>'s canvas in the window at the current scale.</summary>
