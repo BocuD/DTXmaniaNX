@@ -428,7 +428,7 @@ public class UIImGuiTextInput : UIText
             ? new Color4(color.Red, color.Green, color.Blue, color.Alpha * Math.Clamp(placeholderOpacity, 0f, 1f))
             : color;
 
-        texture.tDraw2DMatrix(combinedMatrix, size, new RectangleF(0, 0, texture.Width, texture.Height), drawColor);
+                texture.tDraw2DMatrix(combinedMatrix, MeasuredSize, new RectangleF(0, 0, texture.Width, texture.Height), drawColor);
     }
 }
 

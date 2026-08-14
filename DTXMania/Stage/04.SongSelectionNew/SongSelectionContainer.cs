@@ -405,7 +405,7 @@ public class SongSelectionContainer : UIScrollItemsGroup, IUIItemSource
         title.position = new Vector3(78, 38, 0);
         title.anchor = new Vector2(0, 0.5f);
         title.renderOrder = 1;
-        title.maximumWidth = 460.0f;
+        title.size.X = 460.0f;
         title.bindings.Add(new UIBinding("scrollingEnabled", "IsSelected"));
 
         HorizontallyScrollingText artist = root.AddChild(new HorizontallyScrollingText("", 12));
@@ -417,7 +417,7 @@ public class SongSelectionContainer : UIScrollItemsGroup, IUIItemSource
         artist.position = new Vector3(80, 60, 0);
         artist.anchor = new Vector2(0, 0.5f);
         artist.renderOrder = 1;
-        artist.maximumWidth = 460.0f;
+        artist.size.X = 460.0f;
         artist.bindings.Add(new UIBinding("scrollingEnabled", "IsSelected"));
 
         root.AddChild(new UIImage

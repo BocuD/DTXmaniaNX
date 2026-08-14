@@ -27,7 +27,7 @@ public partial class UIImage
                     image = chosen;
                     _lastFileLoadAttempt = chosen;
                     LoadResource(updateRects: true);
-                }, inPlace => SetTexture(BaseTexture.LoadFromPath(inPlace)));
+                }, inPlace => SetTextureAndFit(BaseTexture.LoadFromPath(inPlace)));
 
                 if (ImGui.Button("Reload Image"))
                 {

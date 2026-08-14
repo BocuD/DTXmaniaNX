@@ -88,7 +88,7 @@ public class Modal : UIGroup
         descriptionText.outlineWidth = 0;
         descriptionText.RenderTexture();
 
-        panel.size.X = (descriptionText.size.X / CDTXMania.renderScale) + 50f;
+        panel.size.X = descriptionText.size.X + 50f;
 
         optionList = AddChild(new UIMenu($"{title} options"));
         optionList.renderOrder = 3;

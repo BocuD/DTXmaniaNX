@@ -13,7 +13,7 @@ public abstract class UIDrawable : IDisposable
     [Themable] public int renderOrder = 0;
     [Themable] public Vector3 position = Vector3.Zero;
     [Themable] public Vector2 anchor = Vector2.Zero;
-    [Themable] public Vector2 size = Vector2.One;
+    [Themable] public UISize size = UISize.Auto(Vector2.One);
     [Themable] public Vector3 scale = Vector3.One;
     [Themable] public Vector3 rotation = Vector3.Zero;
     [Themable] public string name = string.Empty;
@@ -39,6 +39,12 @@ public abstract class UIDrawable : IDisposable
 
     public void UpdateLocalTransformMatrix()
     {
+        //the parent draws first, so its box has settled by the time a child asks for it
+        if (parent != null && size.Inherits)
+        {
+            size.SetInherited(parent.size);
+        }
+
         Vector3 anchorOffset = new(-anchor.X * size.X, -anchor.Y * size.Y, 0f);
         Matrix4x4 translationMatrix = Matrix4x4.CreateTranslation(position);
         Matrix4x4 rotationMatrix = Matrix4x4.CreateFromYawPitchRoll(rotation.Y, rotation.X, rotation.Z);

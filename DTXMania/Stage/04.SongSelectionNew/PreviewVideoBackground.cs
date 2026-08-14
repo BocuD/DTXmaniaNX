@@ -156,7 +156,7 @@ public class PreviewVideoBackground : UIGroup
                 return false;
             }
 
-            image.SetTexture(tex, updateRects: true, updateSize: false);
+            image.SetTextureAndFit(tex);
             image.size = BackgroundSize;
             imageTexture?.Dispose();
             imageTexture = tex;

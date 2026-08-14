@@ -125,9 +125,9 @@ public partial class UIText : UITexture
     //whole texture; subclasses can override to draw a sub-region (e.g. a scrolling clip window).
     protected virtual RectangleF GetTextureSourceRect() => new(0, 0, texture.Width, texture.Height);
 
-    /// Destination size the sampled region is drawn at (before this element's scale). Defaults to
-    /// <see cref="UIDrawable.size"/>; subclasses can override to clamp the drawn width.
-    protected virtual Vector2 GetTextureDrawSize() => size;
+    //Destination size the sampled region is drawn at (before this element's scale). Text draws at the size
+    //it rasterized to; a claimed size is the box it sits in. Subclasses can override to clamp the width.
+    protected virtual Vector2 GetTextureDrawSize() => MeasuredSize;
 
     /// <summary>What drives this text, or empty when nothing does.</summary>
     public string TextBindingSource()
@@ -264,12 +264,19 @@ public partial class UIText : UITexture
         _dirty = true;
     }
 
+    //the scale the texture was rasterized at, not the current one: an async result lands outside the
+    //draw that asked for it, and the component editor draws at its own scale
+    protected override Vector2 ContentSize(BaseTexture t) => new Vector2(t.Width, t.Height) / _textureRenderScale;
+
+    private float _textureRenderScale = 1f;
+
+    private static float RenderScale => CDTXMania.renderScale <= 0f ? 1f : CDTXMania.renderScale;
+
     private UiTextParameters CreateRenderRequest()
     {
-        //determine renderscale
-        float renderSize = fontSize * CDTXMania.renderScale;
-        scale = new Vector3(1 / CDTXMania.renderScale);
-        
+        _textureRenderScale = RenderScale;
+        float renderSize = fontSize * _textureRenderScale;
+
         return new UiTextParameters
         {
             Name = name,

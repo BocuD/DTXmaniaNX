@@ -105,14 +105,7 @@ public class TextureArray : UITexture
             textures[i] = BaseTexture.LoadFromPath(fullPath);
         }
 
-        base.SetTexture(textures[0], updateSize: false);
-
-        //a compact layout leaves size at its default, and a frame set is drawn at its own size unless the
-        //layout says otherwise
-        if (size.X is 0.0f or 1.0f && size.Y is 0.0f or 1.0f)
-        {
-            size = new Vector2(texture.Width, texture.Height);
-        }
+        base.SetTexture(textures[0]);
     }
 
     public override void Dispose()

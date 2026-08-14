@@ -148,6 +148,34 @@ public class Inspector
         return changed;
     }
 
+    public static bool Inspect(string label, ref UISize size)
+    {
+        Vector2 v = size;
+        bool changed = ImGui.InputFloat2(label, ref v);
+
+        //InputFloat2 reports a change for either field, so writing both would claim an untouched axis
+        if (changed)
+        {
+            if (v.X != size.X)
+            {
+                size.X = v.X;
+            }
+
+            if (v.Y != size.Y)
+            {
+                size.Y = v.Y;
+            }
+        }
+
+        ImGui.PushItemWidth(ImGui.CalcItemWidth() * 0.5f - 4f);
+        changed |= Inspect($"##{label}X", ref size.xMode);
+        ImGui.SameLine();
+        changed |= Inspect($"##{label}Y", ref size.yMode);
+        ImGui.PopItemWidth();
+
+        return changed;
+    }
+
     public static bool Inspect(string label, ref Vector3 vector)
     {
         Vector3 v = vector;
