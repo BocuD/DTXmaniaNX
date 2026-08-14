@@ -103,12 +103,12 @@ public class JudgementString : UIGroup
         {
             case EJudgement.Perfect:
                 bar.isVisible = true;
-                bar.SetTexture(barTexture, false, false);
+                bar.SetTexture(barTexture);
                 break;
             
             case EJudgement.Auto:
                 bar.isVisible = true;
-                bar.SetTexture(autoBarTexture, false, false);
+                bar.SetTexture(autoBarTexture);
                 break;
             
             default:
@@ -116,8 +116,8 @@ public class JudgementString : UIGroup
                 break;
         }
         
-        baseString.SetTexture(stringTextures[(int)judgement], false, false);
-        highlightString.SetTexture(stringTextures[(int)judgement], false, false);
+        baseString.SetTexture(stringTextures[(int)judgement]);
+        highlightString.SetTexture(stringTextures[(int)judgement]);
         
         //fast forward one frame
         animator.time = 1 / 60.0f;

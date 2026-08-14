@@ -136,7 +136,7 @@ public class CStageSongSelectionNew : CStage
         ui.AddChild(new UIImage
         {
             imageSource = ImageSource.File, image = SkinResource.System(@"Graphics\SongSelect\top_bar.png"),
-            renderOrder = 12, name = "TopBar", size = new Vector2(1280, 1) //width stretched, height from texture
+            renderOrder = 12, name = "TopBar", size = { X = 1280 } //height stays on the texture
         });
 
         ui.AddChild(new UIImage

@@ -7,15 +7,15 @@ using Hexa.NET.ImGui;
 namespace DTXMania.UI.Drawable;
 
 /// <summary>
-/// A <see cref="UIText"/> that clips itself to <see cref="maximumWidth"/> (logical px). When the
+/// A <see cref="UIText"/> that clips itself to a claimed <see cref="UIDrawable.size"/> width. When the
 /// rendered text is wider than that and <see cref="scrollingEnabled"/> is set, it waits briefly,
 /// scrolls the clip window until the right edge of the text reaches the limit, pauses, resets, and
 /// repeats. Short text draws normally. Everything is driven by the timer sampled in Draw.
+/// Leave the width on Auto and it behaves as a plain UIText.
 /// </summary>
 public class HorizontallyScrollingText : UIText
 {
     public bool scrollingEnabled;
-    public float maximumWidth;
     public float scrollSpeed = 50.0f; //texture-space px per second
 
     public float pauseDuration = 2.0f; //seconds paused before scrolling and again before resetting
@@ -37,6 +37,9 @@ public class HorizontallyScrollingText : UIText
     private float phaseTimer;
     private float scrollOffset;
     private long lastDrawTime;
+
+    //an unclaimed width is the measured text's own, which cannot overflow itself
+    private float maximumWidth => size.xMode == UiSizeMode.Fixed ? size.X : 0f;
 
     //the clip width in texture (render-scale) pixels; comparable to texture.Width.
     private float maximumRenderWidth => maximumWidth * CDTXMania.renderScale;
@@ -126,12 +129,7 @@ public class HorizontallyScrollingText : UIText
 
     protected override Vector2 GetTextureDrawSize()
     {
-        if (!overflowing)
-        {
-            return base.GetTextureDrawSize();
-        }
-
-        return new Vector2(maximumRenderWidth, size.Y);
+        return new Vector2(overflowing ? maximumWidth : MeasuredSize.X, MeasuredSize.Y);
     }
 
     public override void DrawInspector()
@@ -141,9 +139,13 @@ public class HorizontallyScrollingText : UIText
         if (ImGui.CollapsingHeader("Horizontally Scrolling Text"))
         {
             ImGui.Checkbox("Scrolling enabled", ref scrollingEnabled);
-            ImGui.InputFloat("Maximum Width", ref maximumWidth);
             ImGui.InputFloat("Scroll speed", ref scrollSpeed);
             ImGui.InputFloat("Pause duration", ref pauseDuration);
+
+            if (size.xMode != UiSizeMode.Fixed)
+            {
+                ImGui.TextDisabled("Set the size width to something other than Auto to clip and scroll.");
+            }
         }
     }
 }

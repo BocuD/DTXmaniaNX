@@ -16,6 +16,7 @@ public sealed class UiTextParameters
     public float OutlineWidth { get; init; } = 0;
     public Vector2 TexturePadding { get; init; } = Vector2.Zero;
     public float LineSpacing { get; init; } = 1;
+    public float MaxWidth { get; init; }
     public bool Antialias { get; init; } = true;
     public bool SubpixelText { get; init; } = true;
     public UiTextStyle Style { get; init; } = UiTextStyle.Regular;

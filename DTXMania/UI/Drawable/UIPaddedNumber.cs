@@ -80,7 +80,7 @@ public class UIPaddedNumber : UIGroup
         StylePart(numText, s[zeros..], numColor);
 
         padText.RenderTexture();
-        numText.position.X = padText.position.X + padText.Texture.Width * (1f / CDTXMania.renderScale);
+        numText.position.X = padText.position.X + padText.size.X;
     }
 
     private void StylePart(UIText part, string text, Color4 color)

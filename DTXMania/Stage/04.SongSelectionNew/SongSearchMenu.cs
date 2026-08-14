@@ -39,7 +39,7 @@ public class SongSearchMenu : UIGroup, IUIInputHandler
         var bg = AddChild(new UIImage(BaseTexture.CreateSolidColor(Color4.White)));
         bg.name = "Background";
         bg.color = new Color4(0f, 0f, 0f, 0.90f);
-        bg.size = size;
+        bg.size = UISize.Inherited;
         bg.renderOrder = -100;
     }
 

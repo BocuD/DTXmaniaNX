@@ -82,6 +82,12 @@ public class UIGroup : UIDrawable
         return children[i];
     }
 
+    /// <summary>Asks for the children to be sorted again, after something changed a child's renderOrder.</summary>
+    public void InvalidateOrder()
+    {
+        dirty = true;
+    }
+
     public void RemoveChild(UIDrawable element)
     {
         children.Remove(element);
@@ -170,27 +176,6 @@ public class UIGroup : UIDrawable
         }
 
         children.Clear();
-    }
-
-    public int GetChildIndex(UIDrawable node)
-    {
-        return children.IndexOf(node);
-    }
-
-    public void SetChildIndex(UIDrawable node, int index)
-    {
-        if (index < 0 || index >= children.Count)
-        {
-            Trace.TraceError($"Index {index} is out of bounds for children list of size {children.Count}");
-            return;
-        }
-
-        int currentIndex = GetChildIndex(node);
-        if (currentIndex != -1)
-        {
-            children.RemoveAt(currentIndex);
-            children.Insert(index, node);
-        }
     }
 
     public override void DrawInspector()

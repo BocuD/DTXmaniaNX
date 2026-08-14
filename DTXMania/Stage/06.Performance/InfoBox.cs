@@ -55,7 +55,7 @@ internal class InfoBox : UIGroup
         songNameText.position = new Vector3(83, 32, 0);
         songNameText.fillColor = Color4.Black;
         songNameText.outlineColor = Color4.White;
-        songNameText.maximumWidth = 210.0f;
+        songNameText.size.X = 210.0f;
         songNameText.scrollingEnabled = true;
         songNameText.scrollSpeed = 15.0f;
         songNameText.pauseDuration = 5.0f;
@@ -65,7 +65,7 @@ internal class InfoBox : UIGroup
         artistNameText.position = new Vector3(83, 53, 0);
         artistNameText.fillColor = Color4.Black;
         artistNameText.outlineColor = Color4.White;
-        artistNameText.maximumWidth = 213.0f;
+        artistNameText.size.X = 213.0f;
         artistNameText.scrollingEnabled = true;
         artistNameText.scrollSpeed = 15.0f;
         artistNameText.pauseDuration = 5.0f;

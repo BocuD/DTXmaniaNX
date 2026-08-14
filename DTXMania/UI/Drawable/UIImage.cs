@@ -79,8 +79,8 @@ public partial class UIImage : UITexture
         }
         else if (imageSource == ImageSource.Solid && !texture.IsValid())
         {
-            //white, so the element's own colour is what shows; the size is the layout's to give
-            SetTexture(BaseTexture.CreateSolidColor(Color4.White), updateRects: true, updateSize: false);
+            //white, so the element's own colour is what shows
+            SetTexture(BaseTexture.CreateSolidColor(Color4.White));
         }
 
         if (!isVisible || !texture.IsValid())
@@ -100,15 +100,32 @@ public partial class UIImage : UITexture
         texture.tDraw2DMatrix(combinedMatrix, size, clipRect, color);
     }
 
-    public void SetTexture(BaseTexture newTexture, bool updateRects = true, bool updateSize = true)
+    //rects the layout never stated follow the texture; ones it did survive a swap
+    public override void SetTexture(BaseTexture newTexture)
     {
-        base.SetTexture(newTexture, updateSize);
+        base.SetTexture(newTexture);
 
-        if (updateRects && texture.IsValid())
+        if (texture.IsValid() && clipRect.IsEmpty)
         {
             clipRect = new RectangleF(0, 0, texture.Width, texture.Height);
             sliceRect = clipRect;
         }
+    }
+
+    /// <summary>Lets the texture dictate the clip, slice and size outright, unlike <see cref="SetTexture"/>.</summary>
+    public void SetTextureAndFit(BaseTexture newTexture)
+    {
+        base.SetTexture(newTexture);
+
+        if (!texture.IsValid())
+        {
+            return;
+        }
+
+        clipRect = new RectangleF(0, 0, texture.Width, texture.Height);
+        sliceRect = clipRect;
+        size.X = texture.Width;
+        size.Y = texture.Height;
     }
     
     public override void OnDeserialize()
@@ -126,7 +143,7 @@ public partial class UIImage : UITexture
             return;
         }
 
-        base.SetTexture(current, updateSize: false); //keep the size the layout specified
+        base.SetTexture(current);
 
         //dynamic textures vary in size at runtime, so the clip extent tracks the current texture. Its
         //origin is left alone: that is authored, or bound, and must survive a texture swap.
@@ -169,7 +186,7 @@ public partial class UIImage : UITexture
         }
 
         BaseTexture loaded = BaseTexture.LoadFromPath(fullPath);
-        base.SetTexture(loaded, updateSize: false);
+        base.SetTexture(loaded);
 
         if (!loaded.IsValid())
         {
@@ -177,8 +194,7 @@ public partial class UIImage : UITexture
         }
 
         //a compact layout writes none of these, so they follow the texture; anything the layout did state
-        //keeps overriding it. A size axis is "unset" at 0 (SetTexture(None) from the ctor) or 1 (the field
-        //default), which lets an image stretch one axis while the other follows the texture
+        //keeps overriding it
         if (updateRects || clipRect.IsEmpty)
         {
             clipRect = new RectangleF(0, 0, loaded.Width, loaded.Height);
@@ -189,7 +205,11 @@ public partial class UIImage : UITexture
             sliceRect = clipRect;
         }
 
-        if (updateRects || size.X <= 1f) size.X = loaded.Width;
-        if (updateRects || size.Y <= 1f) size.Y = loaded.Height;
+        //picking a file in the inspector re-sizes outright
+        if (updateRects)
+        {
+            size.X = loaded.Width;
+            size.Y = loaded.Height;
+        }
     }
 }

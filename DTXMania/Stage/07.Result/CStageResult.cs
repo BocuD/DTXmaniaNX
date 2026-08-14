@@ -94,7 +94,7 @@ internal class CStageResult : CStage
 		songNameText.outlineWidth = 2;
 		songNameText.renderOrder = 2;
 		songNameText.scrollingEnabled = true;
-		songNameText.maximumWidth = 355;
+		songNameText.size.X = 355;
 		songNameText.scrollSpeed = 20.0f;
 
 		HorizontallyScrollingText artistNameText = ui.AddChild(new HorizontallyScrollingText("", 20));
@@ -107,7 +107,7 @@ internal class CStageResult : CStage
 		artistNameText.outlineWidth = 2;
 		artistNameText.renderOrder = 2;
 		artistNameText.scrollingEnabled = true;
-		artistNameText.maximumWidth = 355;
+		artistNameText.size.X = 355;
 		artistNameText.scrollSpeed = 20.0f;
 		
 	}
