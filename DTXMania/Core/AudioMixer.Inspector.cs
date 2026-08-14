@@ -118,9 +118,8 @@ public static partial class AudioMixer
     }
 
     /// <summary>
-    /// The buffer in the unit its setting is in, and the wait separately. They are the same thing on
-    /// WASAPI, and on a driver whose path reaches past its own buffer the latency is the larger of the
-    /// two. Keeping them apart is what lets the buffer match the driver's own control panel.
+    /// The buffer and the wait separately, since a driver whose path reaches past its own buffer reports
+    /// a larger latency and the buffer still has to match its control panel.
     /// </summary>
     private static void DrawBuffer(AudioDeviceStatus audio, AudioLatency latency)
     {

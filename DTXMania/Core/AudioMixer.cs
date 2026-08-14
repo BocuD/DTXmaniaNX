@@ -52,10 +52,9 @@ public static partial class AudioMixer
 
     private static int failedOutputAttempts;
 
-    /// <summary>True once building has failed enough times that the mixer has stopped trying.</summary>
     public static bool OutputGaveUp => failedOutputAttempts >= MaxOutputAttempts;
 
-    /// <summary>Why the output could not be built, empty while one is running.</summary>
+    /// <summary>Empty while an output is running.</summary>
     public static string OutputError { get; private set; } = string.Empty;
 
     //interlocked because a loader preloads on its own thread, and preloading makes a voice
@@ -413,8 +412,7 @@ public static partial class AudioMixer
 
         if (Device is NullAudioDevice)
         {
-            //a pinned output is never revisited by FollowSystemOutput, so one failure on it is already
-            //as final as three on the system default
+            //a pinned output is never revisited by FollowSystemOutput, so one failure on it is final
             failedOutputAttempts = options.OutputDevice.Length > 0
                 ? MaxOutputAttempts
                 : failedOutputAttempts + 1;
@@ -431,8 +429,7 @@ public static partial class AudioMixer
         Device.TimeStretch = timeStretch;
     }
 
-    /// <summary>Lets the output be tried again after <see cref="OutputGaveUp"/>. The settings changing is
-    /// what earns a fresh set of attempts.</summary>
+    /// <summary>Gives the output a fresh set of attempts after <see cref="OutputGaveUp"/>.</summary>
     public static void RetryOutput()
     {
         failedOutputAttempts = 0;

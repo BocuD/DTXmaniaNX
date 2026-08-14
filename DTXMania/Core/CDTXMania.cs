@@ -577,10 +577,6 @@ internal partial class CDTXMania
     //so the offer comes once per giving up rather than once per frame
     private bool offeredAudioConfig;
 
-    /// <summary>
-    /// Offers the config screen once the mixer has stopped trying to open an output. Config is the only
-    /// place the backend can be changed, and nothing is audible until it is.
-    /// </summary>
     private void OfferAudioConfigOnFailure()
     {
         if (!AudioMixer.OutputGaveUp)

@@ -87,8 +87,6 @@ internal partial class CConfigIni
 
 	public int nWASAPIBufferSizeMs; // #24820 2013.1.15 yyagi WASAPIのバッファサイズ
 
-	//ASIO is configured in samples rather than milliseconds, which is also what a driver's own control
-	//panel shows, so this is not the WASAPI setting in different units
 	public int nASIOBufferSizeSamples;
 
 	public int nASIODevice; // #24820 2013.1.17 yyagi ASIOデバイス

@@ -2,13 +2,12 @@ using DTXMania.Core;
 using DTXMania.Core.Audio;
 using DTXMania.UI.Config;
 using DTXMania.UI.Item;
-using FDK;
 
 namespace DTXMania;
 
 internal sealed class AudioConfigPage : ConfigPage
 {
-    private readonly AudioDriverConfigPage driverPage;
+    private readonly AudioOutputConfigPage outputPage;
     private readonly MixerVolumeConfigPage volumePage;
 
     // snapshot taken on entry; the device is only rebuilt on exit if one of these changed
@@ -24,20 +23,10 @@ internal sealed class AudioConfigPage : ConfigPage
 
     private CItemToggle timeStretch;
 
-    //held so the legacy toggle can reshape the driver list without the page being reopened
-    private CItemList audioDriver;
-
-    /// <summary>
-    /// The backends the selected audio layer can actually open. FDK has no BASS output and would fall
-    /// through to DirectSound, so it is not offered one.
-    /// </summary>
-    private static string[] Drivers(bool legacy) => legacy
-        ? ["DSound", "ASIO", "WASAPIExclusive", "WASAPIShared"]
-        : ["DSound", "ASIO", "WASAPIExclusive", "WASAPIShared", "BASS"];
-
     public AudioConfigPage(ConfigList list) : base(list)
     {
-        driverPage = new AudioDriverConfigPage(list);
+        //a rebuild done from the output page is not one this page has to repeat on the way out
+        outputPage = new AudioOutputConfigPage(list, new AudioDriverConfigPage(list), CacheInitialState);
         volumePage = new MixerVolumeConfigPage(list);
     }
 
@@ -131,69 +120,17 @@ internal sealed class AudioConfigPage : ConfigPage
             () => CDTXMania.ConfigIni.bPlaySpeedAffectsChips = speedAffectsChips.bON);
         items.Add(speedAffectsChips);
 
-        audioDriver = new CItemList("Audio Driver", CItemBase.EPanelType.Normal, 0,
-            "サウンド出力方式を選択\nします。\nWASAPIはVista以降、\nASIOは対応機器でのみ使用可能です。\nWASAPIかASIOを使うと、\n遅延を少なくできます。\n",
-            "DSound: Direct Sound\nWASAPI: from Windows Vista\nASIO: with ASIO compatible devices only\nBASS: portable fallback, higher latency than WASAPI\nUse WASAPI or ASIO to decrease the sound lag.\nNote: Exit CONFIG to make the setting take effect.",
-            Drivers(CDTXMania.ConfigIni.bUseFDKAudio));
-        audioDriver.BindConfig(
-            ShowDrivers,
-            () =>
-            {
-                CDTXMania.ConfigIni.nSoundDriverType = audioDriver.nCurrentlySelectedIndex;
-
-                //WASAPI is only worth its latency event driven: polling needs a buffer four update
-                //periods long where the device driving it needs two
-                if (CDTXMania.ConfigIni.nSoundDriverType is 2 or 3)
-                {
-                    CDTXMania.ConfigIni.bEventDrivenWASAPI = true;
-                }
-            });
-        ShowDrivers();
-        items.Add(audioDriver);
-
-        CItemToggle fdkAudio = new("Legacy Audio", CDTXMania.ConfigIni.bUseFDKAudio,
-            "旧FDKサウンドデバイスを使用します。\n新しいオーディオ層に問題がある場合のみ\nONにしてください。近い将来削除されます。",
-            "Play through the old FDK sound device instead of the current audio layer.\nOnly for comparing the two if the new one misbehaves.\nBASS output is unavailable while this is on.\nThis option will be removed in a future release.\nNote: Exit CONFIG to make the setting take effect.");
-        fdkAudio.BindConfig(
-            () => fdkAudio.bON = CDTXMania.ConfigIni.bUseFDKAudio,
-            () =>
-            {
-                CDTXMania.ConfigIni.bUseFDKAudio = fdkAudio.bON;
-                ShowDrivers();
-            });
-        items.Add(fdkAudio);
-
-        items.Add(FolderItem("Audio Driver Options",
-            "システムのオーディオドライバー設定に関する項目を設定します。",
-            "Open the audio driver settings sub menu.", driverPage));
+        items.Add(FolderItem("Audio Output",
+            "サウンドの出力方式とドライバー設定を行います。",
+            "Which layer and backend the game plays through, and that backend's own settings.",
+            outputPage));
 
         items.Add(BackItem());
         return items;
     }
 
-    /// <summary>
-    /// Puts the driver list in step with the audio layer, and moves the selection off a driver that
-    /// layer cannot open.
-    /// </summary>
-    private void ShowDrivers()
-    {
-        string[] drivers = Drivers(CDTXMania.ConfigIni.bUseFDKAudio);
-
-        audioDriver.listItemValues.Clear();
-        audioDriver.listItemValues.AddRange(drivers);
-
-        if (CDTXMania.ConfigIni.nSoundDriverType >= drivers.Length)
-        {
-            CDTXMania.ConfigIni.nSoundDriverType = 3;
-        }
-
-        audioDriver.nCurrentlySelectedIndex = Math.Clamp(CDTXMania.ConfigIni.nSoundDriverType, 0, drivers.Length - 1);
-    }
-
-    /// <summary>
-    /// Deferred sound-device apply, exactly like CActConfigList.HandleSoundDeviceChanges: only when
-    /// the audio menu was opened and the driver/buffer/device/timer actually changed.
-    /// </summary>
+    /// <summary>Rebuilds only when this menu was opened and something the device is built from
+    /// changed.</summary>
     public override void ApplyPendingChanges()
     {
         if (!opened) return;
