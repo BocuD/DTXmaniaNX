@@ -446,6 +446,7 @@ internal partial class CDTXMania
             if (stage != CStage.EStage.Config_3)
             {
                 AudioMixer.FollowSystemOutput(audioSettings);
+                OfferAudioConfigOnFailure();
             }
         }
         FrameProfiler.End(FrameSection.Sound);
@@ -573,6 +574,52 @@ internal partial class CDTXMania
         return ini;
     }
     
+    //so the offer comes once per giving up rather than once per frame
+    private bool offeredAudioConfig;
+
+    /// <summary>
+    /// Offers the config screen once the mixer has stopped trying to open an output. Config is the only
+    /// place the backend can be changed, and nothing is audible until it is.
+    /// </summary>
+    private void OfferAudioConfigOnFailure()
+    {
+        if (!AudioMixer.OutputGaveUp)
+        {
+            offeredAudioConfig = false;
+            return;
+        }
+
+        if (offeredAudioConfig)
+        {
+            return;
+        }
+
+        offeredAudioConfig = true;
+        _ = OfferAudioConfig();
+    }
+
+    private static async Task OfferAudioConfig()
+    {
+        string title = isJapanese ? "サウンドデバイスを開けません" : "The audio output could not be opened";
+
+        string description = isJapanese
+            ? $"{AudioMixer.OutputError}\n\nCONFIGでサウンドの設定を変更しますか？\n変更しない場合、無音のまま続行します。"
+            : $"{AudioMixer.OutputError}\n\nOpen CONFIG to change the audio settings?\n"
+              + "The game carries on without sound if you do not.";
+
+        string[] options = isJapanese
+            ? ["CONFIGを開く", "無音で続ける"]
+            : ["Open CONFIG", "Carry on silent"];
+
+        //anything but a deliberate yes leaves it alone, including dismissing the dialog
+        if (await Modal.ShowAsync(persistentUIGroup, title, description, options) != 0)
+        {
+            return;
+        }
+
+        RunOnMainThread(() => StageManager.tChangeStage(StageManager.stageConfig));
+    }
+
     public void UpdateWindowTitle()
     {
         AudioDeviceStatus audio = AudioMixer.Device.Status;

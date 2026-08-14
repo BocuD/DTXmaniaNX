@@ -173,6 +173,7 @@ public static partial class AudioMixer
         if (ImGui.Checkbox("Play through FDK's device", ref fdk))
         {
             CDTXMania.ConfigIni.bUseFDKAudio = fdk;
+            RetryOutput();
             Reinitialize(AudioDeviceOptions.FromConfig(CDTXMania.ConfigIni));
             CDTXMania.app.UpdateWindowTitle();
         }

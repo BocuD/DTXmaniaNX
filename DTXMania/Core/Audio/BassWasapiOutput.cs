@@ -235,9 +235,10 @@ internal sealed class BassWasapiOutput : IBassOutput
         if (exclusive)
         {
             //one period by default, which the driver raises to whatever it will actually take: two
-            //periods event driven, more when polling
+            //periods event driven, more when polling. A buffer under one period cannot be satisfied at
+            //all, and a driver is as likely to refuse it as to round it up
             buffer = options.BufferSizeMs > 0
-                ? MathF.Max(MathF.Round(options.BufferSizeMs * rate / 1000.0f), 1.0f)
+                ? MathF.Max(MathF.Round(options.BufferSizeMs * rate / 1000.0f), period)
                 : period;
         }
         else
@@ -280,11 +281,15 @@ internal sealed class BassWasapiOutput : IBassOutput
 
         if (error is BASSError.BASS_ERROR_DRIVER or BASSError.BASS_ERROR_FORMAT)
         {
+            //the device's own format has already been tried, and a stereo card repeats it in the lists
+            //below, so only formats differing from it are worth another call
+            HashSet<(int Frequency, int Channels)> tried = [(device.mixfreq, device.mixchans)];
+
             foreach (int frequency in (int[])[device.mixfreq, 48000, 44100])
             {
                 foreach (int channels in (int[])[device.mixchans, 2])
                 {
-                    if (frequency <= 0 || channels <= 0 || (frequency == device.mixfreq && channels == device.mixchans))
+                    if (frequency <= 0 || channels <= 0 || !tried.Add((frequency, channels)))
                     {
                         continue;
                     }
@@ -304,7 +309,14 @@ internal sealed class BassWasapiOutput : IBassOutput
         }
 
         Bass.BASS_Free();
-        throw new Exception($"BASS ({Backend}) initialization failed. (BASS_WASAPI_Init)[{error}]");
+
+        //Bluetooth endpoints take no exclusive format at all, so every retry above answers the same way
+        string because = exclusive && error == BASSError.BASS_ERROR_FORMAT
+            ? $" \"{device.name}\" accepts no exclusive-mode format, which is usual for Bluetooth outputs."
+            : string.Empty;
+
+        throw new Exception($"BASS ({Backend}) initialization failed."
+                            + $"{because} (BASS_WASAPI_Init)[{error}]");
     }
 
     /// <summary>Both arguments are in sample frames, which is what the device was asked in.</summary>

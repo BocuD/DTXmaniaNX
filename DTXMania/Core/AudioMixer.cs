@@ -46,6 +46,18 @@ public static partial class AudioMixer
     private static long nextOutputCheck;
     private static bool warnedRunaway;
 
+    //a backend that will not open does not start working on its own, and following the system default
+    //would otherwise try it again every second for as long as the game runs
+    private const int MaxOutputAttempts = 3;
+
+    private static int failedOutputAttempts;
+
+    /// <summary>True once building has failed enough times that the mixer has stopped trying.</summary>
+    public static bool OutputGaveUp => failedOutputAttempts >= MaxOutputAttempts;
+
+    /// <summary>Why the output could not be built, empty while one is running.</summary>
+    public static string OutputError { get; private set; } = string.Empty;
+
     //interlocked because a loader preloads on its own thread, and preloading makes a voice
     private static int voiceCount;
     private static int peakVoiceCount;
@@ -399,8 +411,32 @@ public static partial class AudioMixer
         Device = new NullAudioDevice();
         Device = AudioDevice.Create(options);
 
+        if (Device is NullAudioDevice)
+        {
+            //a pinned output is never revisited by FollowSystemOutput, so one failure on it is already
+            //as final as three on the system default
+            failedOutputAttempts = options.OutputDevice.Length > 0
+                ? MaxOutputAttempts
+                : failedOutputAttempts + 1;
+
+            OutputError = AudioDevice.LastError;
+        }
+        else
+        {
+            failedOutputAttempts = 0;
+            OutputError = string.Empty;
+        }
+
         Device.MasterVolume = masterVolume;
         Device.TimeStretch = timeStretch;
+    }
+
+    /// <summary>Lets the output be tried again after <see cref="OutputGaveUp"/>. The settings changing is
+    /// what earns a fresh set of attempts.</summary>
+    public static void RetryOutput()
+    {
+        failedOutputAttempts = 0;
+        OutputError = string.Empty;
     }
 
     /// <summary>Gives up every clip and then the output, since the clips' handles belong to it.</summary>
@@ -460,6 +496,11 @@ public static partial class AudioMixer
         }
 
         nextOutputCheck = now + OutputCheckIntervalMs;
+
+        if (OutputGaveUp)
+        {
+            return;
+        }
 
         AudioDeviceOptions options = settings();
 

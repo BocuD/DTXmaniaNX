@@ -208,6 +208,9 @@ internal sealed class AudioConfigPage : ConfigPage
             fdkAudioInitial != CDTXMania.ConfigIni.bUseFDKAudio ||
             outputDeviceInitial != CDTXMania.ConfigIni.strOutputDevice)
         {
+            //a changed setting is worth trying even if the last one gave up for good
+            AudioMixer.RetryOutput();
+
             //through the mixer, which has to give up its own channels before the rebuild frees them
             AudioMixer.Reinitialize(AudioDeviceOptions.FromConfig(CDTXMania.ConfigIni));
             CDTXMania.app.UpdateWindowTitle();
