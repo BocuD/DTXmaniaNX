@@ -24,15 +24,16 @@ public static class UICanvas
     {
         windowSize = pixels;
 
-        CDTXMania.renderScale = pixels.X / GameWindowSize.Width;
+        CDTXMania.renderScale = pixels.Y / GameWindowSize.Height;
     }
 
     /// <summary>Centres <paramref name="root"/>'s canvas in the window at the current scale.</summary>
     public static void Place(UIGroup root)
     {
+        float scale = CDTXMania.renderScale;
         root.anchor = new Vector2(0.5f, 0.5f);
         root.size = logicalSize;
-        root.scale = new Vector3(CDTXMania.renderScale, CDTXMania.renderScale, 1f);
+        root.scale = new Vector3(scale, scale, 1f);
         root.position = new Vector3(center, 0f);
     }
 }
