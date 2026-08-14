@@ -400,9 +400,9 @@ internal partial class CDTXMania
     {
         PumpMainThreadActions();
 
-        persistentUIGroup.scale.X = renderScale;
-        persistentUIGroup.scale.Y = renderScale;
-        
+        UICanvas.Place(persistentUIGroup);
+
+
         if (!startupFinished)
         {
             StartupTick();

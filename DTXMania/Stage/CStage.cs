@@ -149,9 +149,7 @@ public abstract class CStage : CActivity, IUIInputHandler
 			bJustStartedUpdate = false;
 		}
 		
-		//scale by CDTXMania.renderScale;
-		ui.scale.X = CDTXMania.renderScale;
-		ui.scale.Y = CDTXMania.renderScale;
+		UICanvas.Place(ui);
 		ui.Draw(Matrix4x4.Identity);
 		
 		return base.OnUpdateAndDraw();
