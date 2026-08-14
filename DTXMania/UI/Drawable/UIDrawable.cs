@@ -216,7 +216,10 @@ public abstract class UIDrawable : IDisposable
         ImGui.Text(id);
         ImGui.EndDisabled();
 
-        ImGui.InputInt("Render Order", ref renderOrder);
+        if (ImGui.InputInt("Render Order", ref renderOrder))
+        {
+            parent?.InvalidateOrder();
+        }
         Inspector.Inspector.Inspect("Position", ref position);
         Inspector.Inspector.Inspect("Anchor", ref anchor);
         Inspector.Inspector.Inspect("Size", ref size);
