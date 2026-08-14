@@ -64,6 +64,11 @@ internal sealed class AudioConfigPage : ConfigPage
             "BGM・効果音・各楽器ごとの音量を設定します。",
             "Set the volume of BGM, sound effects and each instrument separately.", volumePage));
 
+        items.Add(FolderItem("Audio Output",
+            "サウンドの出力方式とドライバー設定を行います。",
+            "Which layer and backend the game plays through, and that backend's own settings.",
+            outputPage));
+        
         CItemInteger chipVolume = new("ChipVolume", 0, 100, CDTXMania.ConfigIni.n手動再生音量,
             "打音の音量：\n入力に反応して再生される\nチップの音量を指定します。\n0 ～ 100 % の値が指定可能\nです。\n",
             "Volume for chips you hit.\nYou can specify from 0 to 100%.");
@@ -119,11 +124,6 @@ internal sealed class AudioConfigPage : ConfigPage
             () => speedAffectsChips.bON = CDTXMania.ConfigIni.bPlaySpeedAffectsChips,
             () => CDTXMania.ConfigIni.bPlaySpeedAffectsChips = speedAffectsChips.bON);
         items.Add(speedAffectsChips);
-
-        items.Add(FolderItem("Audio Output",
-            "サウンドの出力方式とドライバー設定を行います。",
-            "Which layer and backend the game plays through, and that backend's own settings.",
-            outputPage));
 
         items.Add(BackItem());
         return items;
