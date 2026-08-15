@@ -73,6 +73,9 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
     [DllImport("glfw3", EntryPoint = "glfwGetWin32Window")]
     private static extern IntPtr glfwGetWin32Window(IntPtr window);
 
+    [DllImport("user32.dll")]
+    private static extern IntPtr GetForegroundWindow();
+
     public RuntimeLogListener RuntimeLogListener { get; } = new();
 
     public GlfwOpenGlHost(OpenGlGame game)
@@ -145,6 +148,33 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
         
         _windowedWidth = (int)value.X;
         _windowedHeight = (int)value.Y;
+    }
+
+    public void FocusWindow()
+    {
+        if (_window.Handle != null)
+        {
+            GLFW.FocusWindow(_window);
+        }
+    }
+
+    public bool IsWindowFocused
+    {
+        get
+        {
+            if (_window.Handle == null)
+            {
+                return false;
+            }
+
+            if (!OperatingSystem.IsWindows())
+            {
+                return GLFW.GetWindowAttrib(_window, GLFW.GLFW_FOCUSED) != 0;
+            }
+
+            IntPtr handle = GetWindowHandle();
+            return handle != IntPtr.Zero && GetForegroundWindow() == handle;
+        }
     }
 
     public void SetWindowPosition(Vector2 value)
@@ -329,7 +359,7 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
             }
         };
         
-        focusCallback = (_, focused) => _game.isFocused = focused != 0;
+        focusCallback = (_, _) => _game.isFocused = IsWindowFocused;
         windowPosCallback = (_, xpos, ypos) => _game.windowPosition = new Vector2(xpos, ypos);
         windowSizeCallback = (_, width, height) => _game.windowSize = new Vector2(width, height);
         
@@ -349,9 +379,8 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
             _game.windowPosition = new Vector2(_windowedX, _windowedY);
         }
 
-        // Focus callbacks may not fire when a window starts already focused.
-        // Seed this state so input polling is enabled immediately on startup/recreate.
-        _game.isFocused = true;
+        //seed the focus state
+        _game.isFocused = IsWindowFocused;
     }
 
     private void InitializeImGui()
@@ -477,6 +506,7 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
 
             FrameProfiler.Begin(FrameSection.PollEvents);
             GLFW.PollEvents();
+            _game.isFocused = IsWindowFocused;
             FrameProfiler.End(FrameSection.PollEvents);
 
             if (GLFW.WindowShouldClose(_window) != 0)
