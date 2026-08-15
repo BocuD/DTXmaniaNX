@@ -20,9 +20,9 @@ internal class CCharacterConsole : CActivity
 
 	// メソッド
 
-	public void tPrint( int x, int y, EFontType font, string str英数字文字列 )
+	public void tPrint( int x, int y, EFontType font, ReadOnlySpan<char> str英数字文字列 )
 	{
-		if ( bActivated && !string.IsNullOrEmpty( str英数字文字列 ) )
+		if ( bActivated && !str英数字文字列.IsEmpty )
 		{
 			int BOL = x;
 			for( int i = 0; i < str英数字文字列.Length; i++ )
