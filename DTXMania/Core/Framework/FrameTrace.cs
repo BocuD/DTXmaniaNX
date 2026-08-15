@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace DTXMania.Core.Framework;
@@ -11,24 +12,52 @@ public static class FrameTrace
 
     private static readonly int Sections = FrameProfiler.Sections.Length;
 
-    private static readonly float[] totalMs = new float[Capacity];
-    private static readonly float[] sectionMs = new float[Capacity * FrameProfiler.SectionCount];
-    private static readonly int[] gen0 = new int[Capacity];
-    private static readonly int[] gen1 = new int[Capacity];
-    private static readonly int[] gen2 = new int[Capacity];
-    private static readonly long[] allocated = new long[Capacity];
-    private static readonly int[] underruns = new int[Capacity];
+    /// <summary>What the whole frame did, beside the per-section detail held separately.</summary>
+    private struct FrameRecord
+    {
+        public float TotalMs;
+        public int Gen0;
+        public int Gen1;
+        public int Gen2;
+        public long Allocated;
+        public int Underruns;
+    }
+
+    //int rather than the profiler's long: plenty per section per frame, and it halves what the buffer
+    //costs at this capacity
+    private readonly record struct SectionSample(float Ms, int Bytes);
+
+    /// <summary>The counters a frame's numbers are differences against.</summary>
+    private struct Counters
+    {
+        public long Timestamp;
+        public long Allocated;
+        public int Gen0;
+        public int Gen1;
+        public int Gen2;
+        public int Underruns;
+    }
+
+    private const int MaxProbes = 24;
+
+    //held only while there is something in them: at this capacity they are tens of megabytes, which is
+    //not worth carrying around for a recording nobody asked for
+    private static FrameRecord[]? frames;
+    private static SectionSample[]? sectionSamples;
+    private static int[]? probeBytes;
+
+    /// <summary>What the buffers cost while they exist, which is nothing until a recording starts.</summary>
+    public static long HeldBytes => frames == null
+        ? 0
+        : (long)Capacity * (Unsafe.SizeOf<FrameRecord>()
+                            + FrameProfiler.SectionCount * Unsafe.SizeOf<SectionSample>()
+                            + MaxProbes * sizeof(int));
 
     //where the next frame goes, and how many have ever been written; the two differ once it has wrapped
     private static int next;
     private static long written;
 
-    private static long previousTimestamp;
-    private static long previousAllocated;
-    private static int previousGen0;
-    private static int previousGen1;
-    private static int previousGen2;
-    private static int previousUnderruns;
+    private static Counters previous;
 
     public static bool Recording { get; private set; }
 
@@ -39,18 +68,41 @@ public static class FrameTrace
 
     public static void Start()
     {
+        //a trace of frames nobody measured would be all zeroes
+        FrameProfiler.Enabled = true;
+
+        frames ??= new FrameRecord[Capacity];
+        sectionSamples ??= new SectionSample[Capacity * FrameProfiler.SectionCount];
+        probeBytes ??= new int[Capacity * MaxProbes];
+
         next = 0;
         written = 0;
-        previousTimestamp = 0;
-        previousAllocated = GC.GetAllocatedBytesForCurrentThread();
-        previousGen0 = GC.CollectionCount(0);
-        previousGen1 = GC.CollectionCount(1);
-        previousGen2 = GC.CollectionCount(2);
-        previousUnderruns = Audio.AudioUnderruns.Count;
+
+        previous = new Counters
+        {
+            Timestamp = 0,
+            Allocated = GC.GetAllocatedBytesForCurrentThread(),
+            Gen0 = GC.CollectionCount(0),
+            Gen1 = GC.CollectionCount(1),
+            Gen2 = GC.CollectionCount(2),
+            Underruns = Audio.AudioUnderruns.Count
+        };
+
         Recording = true;
     }
 
     public static void Stop() => Recording = false;
+
+    /// <summary>Gives the buffers back, losing whatever has not been exported.</summary>
+    public static void Release()
+    {
+        Recording = false;
+        frames = null;
+        sectionSamples = null;
+        probeBytes = null;
+        next = 0;
+        written = 0;
+    }
 
     /// <summary>
     /// Samples the frame <see cref="FrameProfiler.NewFrame"/> has just rolled up. Allocates nothing, so
@@ -58,43 +110,57 @@ public static class FrameTrace
     /// </summary>
     internal static void Record()
     {
+        //Recording is only ever set by Start, which is what makes these
+        if (frames == null || sectionSamples == null || probeBytes == null)
+        {
+            return;
+        }
+
         long now = System.Diagnostics.Stopwatch.GetTimestamp();
 
         //the first call has no previous frame to measure against, and only sets the origin
-        if (previousTimestamp == 0)
+        if (previous.Timestamp == 0)
         {
-            previousTimestamp = now;
+            previous.Timestamp = now;
             return;
         }
 
         int at = next;
 
-        totalMs[at] = (float)((now - previousTimestamp) * 1000.0
-                              / System.Diagnostics.Stopwatch.Frequency);
-        previousTimestamp = now;
-
         for (int i = 0; i < Sections; i++)
         {
-            sectionMs[at * Sections + i] = FrameProfiler.GetLastMs(FrameProfiler.Sections[i]);
+            FrameProfiler.SectionSample sample = FrameProfiler.GetLast(FrameProfiler.Sections[i]);
+            sectionSamples[at * Sections + i] = new SectionSample(sample.Ms, (int)sample.Bytes);
         }
 
-        int collected0 = GC.CollectionCount(0);
-        int collected1 = GC.CollectionCount(1);
-        int collected2 = GC.CollectionCount(2);
-        long allocatedNow = GC.GetAllocatedBytesForCurrentThread();
-        int underrunsNow = Audio.AudioUnderruns.Count;
+        int probes = Math.Min(AllocationProbe.Count, MaxProbes);
+        for (int i = 0; i < probes; i++)
+        {
+            probeBytes[at * MaxProbes + i] = (int)AllocationProbe.BytesLastFrame(i);
+        }
 
-        gen0[at] = collected0 - previousGen0;
-        gen1[at] = collected1 - previousGen1;
-        gen2[at] = collected2 - previousGen2;
-        allocated[at] = allocatedNow - previousAllocated;
-        underruns[at] = underrunsNow - previousUnderruns;
+        Counters counters = new()
+        {
+            Timestamp = now,
+            Allocated = GC.GetAllocatedBytesForCurrentThread(),
+            Gen0 = GC.CollectionCount(0),
+            Gen1 = GC.CollectionCount(1),
+            Gen2 = GC.CollectionCount(2),
+            Underruns = Audio.AudioUnderruns.Count
+        };
 
-        previousGen0 = collected0;
-        previousGen1 = collected1;
-        previousGen2 = collected2;
-        previousAllocated = allocatedNow;
-        previousUnderruns = underrunsNow;
+        frames[at] = new FrameRecord
+        {
+            TotalMs = (float)((now - previous.Timestamp) * 1000.0
+                              / System.Diagnostics.Stopwatch.Frequency),
+            Gen0 = counters.Gen0 - previous.Gen0,
+            Gen1 = counters.Gen1 - previous.Gen1,
+            Gen2 = counters.Gen2 - previous.Gen2,
+            Allocated = counters.Allocated - previous.Allocated,
+            Underruns = counters.Underruns - previous.Underruns
+        };
+
+        previous = counters;
 
         next = at + 1 == Capacity ? 0 : at + 1;
         written++;
@@ -104,6 +170,11 @@ public static class FrameTrace
     public static string Export()
     {
         Recording = false;
+
+        if (frames == null || sectionSamples == null || probeBytes == null)
+        {
+            return string.Empty;
+        }
 
         string path = Path.Combine(CDTXMania.executableDirectory,
             $"frametrace-{DateTime.Now:yyyyMMdd-HHmmss}.csv");
@@ -121,24 +192,47 @@ public static class FrameTrace
             csv.Append(',').Append(FrameProfiler.SectionNames[i]);
         }
 
+        for (int i = 0; i < Sections; i++)
+        {
+            csv.Append(",B_").Append(FrameProfiler.SectionNames[i]);
+        }
+
+        int probes = Math.Min(AllocationProbe.Count, MaxProbes);
+        for (int i = 0; i < probes; i++)
+        {
+            csv.Append(",P_").Append(AllocationProbe.NameOf(i));
+        }
+
         csv.Append('\n');
 
         for (int frame = 0; frame < held; frame++)
         {
             int at = (oldest + frame) % Capacity;
 
+            ref FrameRecord record = ref frames[at];
+
             csv.Append(frame).Append(',')
-                .Append(totalMs[at].ToString("0.###", CultureInfo.InvariantCulture)).Append(',')
-                .Append(gen0[at]).Append(',')
-                .Append(gen1[at]).Append(',')
-                .Append(gen2[at]).Append(',')
-                .Append(allocated[at]).Append(',')
-                .Append(underruns[at]);
+                .Append(record.TotalMs.ToString("0.###", CultureInfo.InvariantCulture)).Append(',')
+                .Append(record.Gen0).Append(',')
+                .Append(record.Gen1).Append(',')
+                .Append(record.Gen2).Append(',')
+                .Append(record.Allocated).Append(',')
+                .Append(record.Underruns);
 
             for (int i = 0; i < Sections; i++)
             {
-                csv.Append(',').Append(sectionMs[at * Sections + i]
+                csv.Append(',').Append(sectionSamples[at * Sections + i].Ms
                     .ToString("0.###", CultureInfo.InvariantCulture));
+            }
+
+            for (int i = 0; i < Sections; i++)
+            {
+                csv.Append(',').Append(sectionSamples[at * Sections + i].Bytes);
+            }
+
+            for (int i = 0; i < probes; i++)
+            {
+                csv.Append(',').Append(probeBytes[at * MaxProbes + i]);
             }
 
             csv.Append('\n');
