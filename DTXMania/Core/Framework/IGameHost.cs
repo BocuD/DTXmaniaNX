@@ -12,6 +12,9 @@ public interface IGameHost
     
     IntPtr GetWindowHandle();
     void SetWindowTitle(string newTitle);
+    void FocusWindow();
+
+    bool IsWindowFocused { get; }
     void SetWindowSize(Vector2 value);
     void SetWindowPosition(Vector2 value);
     public RuntimeLogListener RuntimeLogListener { get; }
