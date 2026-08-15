@@ -20,6 +20,16 @@ public static class InspectorManager
     public static bool inspectorEnabled = false;
     public static bool logWindowEnabled = false;
 
+    public static void ToggleInspector()
+    {
+        inspectorEnabled = !inspectorEnabled;
+
+        if (!inspectorEnabled)
+        {
+            Inspector.Inspector.inspectorTarget = string.Empty;
+        }
+    }
+
     public static ImDrawListPtr gizmoDrawList;
     public static Rectangle gizmoRect;
 
@@ -81,21 +91,6 @@ public static class InspectorManager
             textureInspector = new TextureInspector(OpenGlRenderer.Instance, OpenGlRenderer.Instance.GetTrackedTextures());
         }
         
-        if (ImGui.GetIO().KeyCtrl && ImGui.IsKeyPressed(ImGuiKey.I))
-        {
-            inspectorEnabled = !inspectorEnabled;
-
-            if (!inspectorEnabled)
-            {
-                Inspector.Inspector.inspectorTarget = string.Empty;
-            }
-        }
-        
-        if (ImGui.GetIO().KeyCtrl && ImGui.IsKeyPressed(ImGuiKey.L))
-        {
-            logWindowEnabled = !logWindowEnabled;
-        }
-
         if (inspectorEnabled)
         {
             ImGuiDockNodeFlags flags = ImGuiDockNodeFlags.PassthruCentralNode;
