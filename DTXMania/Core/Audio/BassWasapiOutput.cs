@@ -116,16 +116,13 @@ internal sealed class BassWasapiOutput : IBassOutput
     /// </summary>
     private int Pull(IntPtr buffer, int length, IntPtr user)
     {
+        AudioUnderruns.Observe(BufferMs);
+
         int transferred = Bass.BASS_ChannelGetData(mixer, buffer, length);
 
         if (transferred == -1)
         {
             transferred = 0;
-        }
-
-        if (transferred < length)
-        {
-            AudioUnderruns.Report();
         }
 
         //asked for as late as possible, so it describes the same moment the time is stamped with

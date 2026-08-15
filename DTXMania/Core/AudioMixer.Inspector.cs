@@ -152,8 +152,9 @@ public static partial class AudioMixer
     /// </summary>
     private static void DrawLatency(AudioDeviceStatus audio, AudioLatency latency)
     {
-        //a hit is noticed and played on the frame it arrives, so the frame is part of the wait
-        double frame = CDTXMania.FPS.nCurrentFPS > 0 ? 1000.0 / CDTXMania.FPS.nCurrentFPS : 0.0;
+        //a hit is noticed and played on the frame it arrives, so the frame is part of the wait. The null
+        //check is for shutdown, where the counter is gone before the window stops drawing
+        double frame = CDTXMania.FPS is { nCurrentFPS: > 0 } fps ? 1000.0 / fps.nCurrentFPS : 0.0;
 
         if (!latency.IsKnown)
         {
