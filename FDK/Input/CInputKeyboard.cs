@@ -8,6 +8,12 @@ namespace FDK;
 
 public class CInputKeyboard : IInputDevice, IDisposable
 {
+	private KeyboardState keyboardState = new();
+
+	private const int BufferedEvents = 32;
+
+	private static readonly SharpDXKey[] AllKeys = Enum.GetValues<SharpDXKey>();
+
 	// コンストラクタ
 
 	public CInputKeyboard(IntPtr hWnd, DirectInput directInput)
@@ -19,7 +25,7 @@ public class CInputKeyboard : IInputDevice, IDisposable
 		{
 			devKeyboard = new Keyboard(directInput);
 			devKeyboard.SetCooperativeLevel(hWnd, CooperativeLevel.NoWinKey | CooperativeLevel.Foreground | CooperativeLevel.NonExclusive);
-			devKeyboard.Properties.BufferSize = 32;
+			devKeyboard.Properties.BufferSize = BufferedEvents;
 			Trace.TraceInformation(devKeyboard.Information.ProductName.Trim(new char[] { '\0' }) + " を生成しました。");    // なぜか0x00のゴミが出るので削除
 			strDeviceName = devKeyboard.Information.ProductName.Trim(new char[] { '\0' });
 		}
@@ -85,11 +91,14 @@ public class CInputKeyboard : IInputDevice, IDisposable
 
 		if (isWindowActive && (devKeyboard != null))
 		{
-			devKeyboard.Acquire();
-			devKeyboard.Poll();
+			if (!DirectInputBuffer.Ready(devKeyboard.NativePointer))
+			{
+				listInputEvent.Clear();
+				return;
+			}
 
-			KeyboardState modifierState = devKeyboard.GetCurrentState();
-			bool isAltPressed = modifierState.IsPressed(SharpDXKey.LeftAlt) || modifierState.IsPressed(SharpDXKey.RightAlt);
+			devKeyboard.GetCurrentState(ref keyboardState);
+			bool isAltPressed = keyboardState.IsPressed(SharpDXKey.LeftAlt) || keyboardState.IsPressed(SharpDXKey.RightAlt);
 
 			//this.list入力イベント = new List<STInputEvent>( 32 );
 			listInputEvent.Clear();            // #xxxxx 2012.6.11 yyagi; To optimize, I removed new();
@@ -101,7 +110,6 @@ public class CInputKeyboard : IInputDevice, IDisposable
 				#region [ a.バッファ入力 ]
 				//-----------------------------
 				var bufferedData = devKeyboard.GetBufferedData();
-				//if ( Result.Last.IsSuccess && bufferedData != null )
 				{
 					foreach (KeyboardUpdate data in bufferedData)
 					{
@@ -145,7 +153,7 @@ public class CInputKeyboard : IInputDevice, IDisposable
 								nKey = (int)key,
 								b押された = false,
 								b離された = true,
-								nTimeStamp = InputClock.Current.nSystemTimeMsFor(data.Timestamp),
+								nTimeStamp = InputClock.Current.nSystemTimeMsFor((uint)data.Timestamp),
 								nVelocity = CInputManager.nDefaultVelocity
 							};
 							listInputEvent.Add(item);
@@ -162,11 +170,16 @@ public class CInputKeyboard : IInputDevice, IDisposable
 			{
 				#region [ b.状態入力 ]
 				//-----------------------------
-				KeyboardState currentState = devKeyboard.GetCurrentState();
-				//if ( Result.Last.IsSuccess && currentState != null )
+				//the same read as above rather than a second one, and walked by index: PressedKeys builds
+				//a fresh list every time it is asked
 				{
-					foreach (SharpDXKey dik in currentState.PressedKeys)
+					foreach (SharpDXKey dik in AllKeys)
 					{
+						if (!keyboardState.IsPressed(dik))
+						{
+							continue;
+						}
+
 						// #xxxxx: 2017.5.7: from: DIK (SharpDX.DirectInput.Key) を SlimDX.DirectInput.Key に変換。
 						var key = DeviceConstantConverter.DIKtoKey(dik);
 						if (SlimDXKey.Unknown == key)
@@ -197,14 +210,14 @@ public class CInputKeyboard : IInputDevice, IDisposable
 						}
 					}
 					//foreach ( Key key in currentState.ReleasedKeys )
-					foreach (SharpDXKey dik in currentState.AllKeys)
+					foreach (SharpDXKey dik in AllKeys)
 					{
 						// #xxxxx: 2017.5.7: from: DIK (SharpDX.DirectInput.Key) を SlimDX.DirectInput.Key に変換。
 						var key = DeviceConstantConverter.DIKtoKey(dik);
 						if (SlimDXKey.Unknown == key)
 							continue;   // 未対応キーは無視。
 
-						if (bKeyState[(int)key] == true && !currentState.IsPressed(dik)) // 前回は押されているのに今回は押されていない → 離された
+						if (bKeyState[(int)key] == true && !keyboardState.IsPressed(dik)) // 前回は押されているのに今回は押されていない → 離された
 						{
 							var ev = new STInputEvent()
 							{

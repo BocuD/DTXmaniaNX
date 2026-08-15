@@ -6,6 +6,16 @@ namespace FDK;
 
 public class CInputMouse : IInputDevice, IDisposable
 {
+	//as many entries as the device's own buffer holds, so one read always drains it
+	private const int BufferedEvents = 0x20;
+
+	//hoisted out of the event loop, where a fresh one was built for every button of every event
+	private static readonly MouseOffset[] MouseButtons =
+	[
+		MouseOffset.Buttons0, MouseOffset.Buttons1, MouseOffset.Buttons2, MouseOffset.Buttons3,
+		MouseOffset.Buttons4, MouseOffset.Buttons5, MouseOffset.Buttons6, MouseOffset.Buttons7
+	];
+
 	// 定数
 
 	public const int nマウスの最大ボタン数 = 8;
@@ -22,7 +32,7 @@ public class CInputMouse : IInputDevice, IDisposable
 		{
 			devMouse = new Mouse(directInput);
 			devMouse.SetCooperativeLevel(hWnd, CooperativeLevel.Foreground | CooperativeLevel.NonExclusive);
-			devMouse.Properties.BufferSize = 0x20;
+			devMouse.Properties.BufferSize = BufferedEvents;
 			Trace.TraceInformation(devMouse.Information.ProductName.Trim(new char[] { '\0' }) + " を生成しました。");  // なぜか0x00のゴミが出るので削除
 			strDeviceName = devMouse.Information.ProductName.Trim(new char[] { '\0' });
 		}
@@ -87,8 +97,13 @@ public class CInputMouse : IInputDevice, IDisposable
 
 		if (isWindowActive && (devMouse != null))
 		{
-			devMouse.Acquire();
-			devMouse.Poll();
+			//see CInputKeyboard: not being able to acquire is ordinary, and throwing for it every frame is
+			//what the unfocused game was spending its allocations on
+			if (!DirectInputBuffer.Ready(devMouse.NativePointer))
+			{
+				listInputEvent.Clear();
+				return;
+			}
 
 			// this.list入力イベント = new List<STInputEvent>( 32 );
 			listInputEvent.Clear();            // #xxxxx 2012.6.11 yyagi; To optimize, I removed new();
@@ -98,25 +113,15 @@ public class CInputMouse : IInputDevice, IDisposable
 				#region [ a.バッファ入力 ]
 				//-----------------------------
 				var bufferedData = devMouse.GetBufferedData();
-				//if ( Result.Last.IsSuccess && bufferedData != null )
 				{
 					foreach (MouseUpdate data in bufferedData)
 					{
-						var mouseButton = new[] {
-							MouseOffset.Buttons0,
-							MouseOffset.Buttons1,
-							MouseOffset.Buttons2,
-							MouseOffset.Buttons3,
-							MouseOffset.Buttons4,
-							MouseOffset.Buttons5,
-							MouseOffset.Buttons6,
-							MouseOffset.Buttons7,
-						};
+						var offset = data.Offset;
 
-						for (int k = 0; k < 8; k++)
+						for (int k = 0; k < MouseButtons.Length; k++)
 						{
 							//if ( data.IsPressed( k ) )
-							if (data.Offset == mouseButton[k] && ((data.Value & 0x80) != 0))
+							if (offset == MouseButtons[k] && ((data.Value & 0x80) != 0))
 							{
 								STInputEvent item = new STInputEvent()
 								{
@@ -131,7 +136,7 @@ public class CInputMouse : IInputDevice, IDisposable
 								bMouseState[k] = true;
 								bMousePushDown[k] = true;
 							}
-							else if (data.Offset == mouseButton[k] && bMouseState[k] == true && ((data.Value & 0x80) == 0))
+							else if (offset == MouseButtons[k] && bMouseState[k] == true && ((data.Value & 0x80) == 0))
 								//else if ( data.IsReleased( k ) )
 							{
 								STInputEvent item = new STInputEvent()
