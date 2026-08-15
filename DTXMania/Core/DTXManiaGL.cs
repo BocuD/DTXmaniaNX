@@ -96,6 +96,20 @@ public sealed class DTXManiaGL : OpenGlGame
 
     public override void KeyDown(GlfwKey key, GlfwMod mods)
     {
+        if (mods.HasFlag(GlfwMod.Control))
+        {
+            switch (key)
+            {
+                case GlfwKey.I:
+                    InspectorManager.ToggleInspector();
+                    break;
+
+                case GlfwKey.L:
+                    InspectorManager.logWindowEnabled = !InspectorManager.logWindowEnabled;
+                    break;
+            }
+        }
+
         //check for alt + enter
         if (key == GlfwKey.Enter && mods == GlfwMod.Alt)
         {
