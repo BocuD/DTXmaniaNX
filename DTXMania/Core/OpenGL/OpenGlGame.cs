@@ -52,7 +52,7 @@ public abstract class OpenGlGame : BaseGame, IDisposable
 
     protected abstract void DestroySharedResources();
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         ReleaseContextResources();
 
