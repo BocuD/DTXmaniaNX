@@ -329,7 +329,7 @@ internal sealed class BassWasapiOutput : IBassOutput
         int bytesPerFrame = info.format switch
         {
             BASSWASAPIFormat.BASS_WASAPI_FORMAT_8BIT => 1,
-            BASSWASAPIFormat.BASS_WASAPI_FORMAT_24BIT => 3,
+            BASSWASAPIFormat.BASS_WASAPI_FORMAT_24BIT => 4,
             BASSWASAPIFormat.BASS_WASAPI_FORMAT_32BIT or BASSWASAPIFormat.BASS_WASAPI_FORMAT_FLOAT => 4,
             _ => 2
         } * info.chans;
