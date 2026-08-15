@@ -14,6 +14,13 @@ internal sealed class AudioOutputConfigPage : ConfigPage
     //held so the legacy toggle can reshape the driver list without the page being reopened
     private CItemList audioDriver;
 
+    private CItemList outputDevice;
+    private IReadOnlyList<AudioOutput> outputs = [];
+
+    private AudioBackend? listedBackend;
+
+    private const string AutoDevice = "Auto (system default)";
+
     public AudioOutputConfigPage(ConfigList list, AudioDriverConfigPage driverPage, Action onRebuilt)
         : base(list)
     {
@@ -27,6 +34,8 @@ internal sealed class AudioOutputConfigPage : ConfigPage
         ? ["DirectSound", "ASIO", "WASAPI Exclusive", "WASAPI Shared"]
         : ["DirectSound", "ASIO", "WASAPI Exclusive", "WASAPI Shared", "BASS"];
 
+    protected override void CreateElements() => AddElement(new ConfigAudioPanel());
+
     public override List<CItemBase> Build()
     {
         List<CItemBase> items = [];
@@ -39,6 +48,14 @@ internal sealed class AudioOutputConfigPage : ConfigPage
             ShowDrivers,
             () =>
             {
+                //committing the page writes every row, not just the edited one, so a driver that has not
+                //changed must do nothing: relisting here would reset the device row's selection before
+                //that row has had the chance to write it
+                if (audioDriver.nCurrentlySelectedIndex == CDTXMania.ConfigIni.nSoundDriverType)
+                {
+                    return;
+                }
+
                 CDTXMania.ConfigIni.nSoundDriverType = audioDriver.nCurrentlySelectedIndex;
 
                 //WASAPI is only worth its latency event driven: polling needs a buffer four update
@@ -47,9 +64,13 @@ internal sealed class AudioOutputConfigPage : ConfigPage
                 {
                     CDTXMania.ConfigIni.bEventDrivenWASAPI = true;
                 }
+
+                ShowOutputs();
             });
         ShowDrivers();
         items.Add(audioDriver);
+
+        items.Add(BuildOutputDevice());
 
         CItemToggle fdkAudio = new("Legacy Audio", CDTXMania.ConfigIni.bUseFDKAudio,
             "旧FDKサウンドデバイスを使用します。\n新しいオーディオ層に問題がある場合のみONにしてください。\n近い将来削除されます。",
@@ -58,8 +79,14 @@ internal sealed class AudioOutputConfigPage : ConfigPage
             () => fdkAudio.bON = CDTXMania.ConfigIni.bUseFDKAudio,
             () =>
             {
+                if (fdkAudio.bON == CDTXMania.ConfigIni.bUseFDKAudio)
+                {
+                    return;
+                }
+
                 CDTXMania.ConfigIni.bUseFDKAudio = fdkAudio.bON;
                 ShowDrivers();
+                ShowOutputs();
             });
         items.Add(fdkAudio);
 
@@ -91,6 +118,69 @@ internal sealed class AudioOutputConfigPage : ConfigPage
             },
             formatValue = () => CDTXMania.isJapanese ? "実行" : "Apply now"
         };
+    }
+
+    private CItemBase BuildOutputDevice()
+    {
+        outputDevice = new CItemList("Output Device", CItemBase.EPanelType.Normal, 0,
+            "サウンドの出力先デバイスを選択します。\nAutoにすると、Windowsの既定のデバイスに\n追従します（ヘッドホンを抜いたときなど）。\n*印は現在の既定のデバイスです。",
+            "Output device to play through\nAuto follows the Windows default\n* marks the current system default",
+            [AutoDevice]);
+
+        outputDevice.BindConfig(ShowOutputs, WriteOutputDevice);
+
+        ShowOutputs();
+        return outputDevice;
+    }
+
+    private void WriteOutputDevice()
+    {
+        //index 0 is Auto, so a device sits one place further down the list than in outputs
+        int index = outputDevice.nCurrentlySelectedIndex - 1;
+
+        CDTXMania.ConfigIni.strOutputDevice = index >= 0 && index < outputs.Count
+            ? outputs[index].Name
+            : "";
+    }
+
+    private void ShowOutputs()
+    {
+        AudioBackend backend = AudioDeviceOptions.FromConfig(CDTXMania.ConfigIni).Backend;
+
+        if (backend != listedBackend)
+        {
+            bool relisting = listedBackend.HasValue;
+            listedBackend = backend;
+            outputs = AudioOutputs.For(backend);
+
+            if (relisting && IndexOf(CDTXMania.ConfigIni.strOutputDevice) == 0)
+            {
+                CDTXMania.ConfigIni.strOutputDevice = "";
+            }
+        }
+
+        outputDevice.listItemValues.Clear();
+        outputDevice.listItemValues.Add(AutoDevice);
+
+        foreach (AudioOutput output in outputs)
+        {
+            outputDevice.listItemValues.Add(output.IsSystemDefault ? $"{output.Name} *" : output.Name);
+        }
+
+        outputDevice.nCurrentlySelectedIndex = IndexOf(CDTXMania.ConfigIni.strOutputDevice);
+    }
+
+    private int IndexOf(string name)
+    {
+        for (int n = 0; n < outputs.Count; n++)
+        {
+            if (outputs[n].Name == name)
+            {
+                return n + 1;
+            }
+        }
+
+        return 0;
     }
 
     /// <summary>Moves the selection off a driver the current layer cannot open.</summary>

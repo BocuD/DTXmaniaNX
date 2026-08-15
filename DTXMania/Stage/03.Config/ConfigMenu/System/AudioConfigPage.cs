@@ -42,6 +42,8 @@ internal sealed class AudioConfigPage : ConfigPage
         outputDeviceInitial = CDTXMania.ConfigIni.strOutputDevice;
     }
 
+    protected override void CreateElements() => AddElement(new ConfigAudioPanel());
+
     public override List<CItemBase> Build()
     {
         opened = true;

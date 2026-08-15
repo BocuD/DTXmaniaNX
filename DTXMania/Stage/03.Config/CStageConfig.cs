@@ -76,6 +76,12 @@ internal class CStageConfig : CStage
         descriptionPanel.position = new Vector3(781, 252, 0);
         descriptionPanel.renderOrder = 49;
 
+        //whatever the open page puts beside the list, in screen space and cleared with the page
+        UIGroup pageElements = ui.AddChild(new UIGroup("Page Elements"));
+        pageElements.renderOrder = 49;
+        pageElements.dontSerialize = true;
+        configList.pageElements = pageElements;
+
         configMenu = new ConfigMenu(configList);
         configMenu.OpenSystem(); //seed a page so the list has content before it's first shown
 
@@ -230,6 +236,9 @@ internal class CStageConfig : CStage
 
             //apply deferred changes made via config list when exiting the stage
             configMenu.ApplyPendingChanges();
+
+            //the open page's own elements go with the stage rather than outliving it
+            configList.ClosePage();
 
             //the config BGM is this stage's; it has no business staying resident through a song
             CDTXMania.Skin.bgmコンフィグ画面.Unload();

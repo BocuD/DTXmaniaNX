@@ -29,7 +29,36 @@ internal class ConfigList : UIScrollItemsGroup, IUIItemSource
     private readonly UIImage arrowBottom;
 
     private List<CItemBase> currentItems = [];
-    public readonly Stack<(List<CItemBase> items, int selection)> pageStack = new();
+    public readonly Stack<(List<CItemBase> items, int selection, ConfigPage? page)> pageStack = new();
+
+    /// <summary>The page whose rows are on screen.</summary>
+    public ConfigPage? CurrentPage { get; private set; }
+
+    /// <summary>Where a page's own elements are parented, in screen space rather than beside the rows.</summary>
+    public UIGroup? pageElements;
+
+    /// <summary>Opens a page as the root of the list, dropping whatever folder history there was.</summary>
+    public void OpenRoot(ConfigPage page)
+    {
+        pageStack.Clear();
+        SetPage(page);
+        SetItems(page.Build());
+    }
+
+    public void ClosePage() => SetPage(null);
+
+    //a page owns elements outside the list, so every move between pages goes through here
+    private void SetPage(ConfigPage? page)
+    {
+        if (ReferenceEquals(page, CurrentPage))
+        {
+            return;
+        }
+
+        CurrentPage?.CloseElements();
+        CurrentPage = page;
+        CurrentPage?.OpenElements();
+    }
 
     private bool editing;
 
@@ -133,8 +162,16 @@ internal class ConfigList : UIScrollItemsGroup, IUIItemSource
     /// <summary>Enters a folder: remembers the current page + selection, then shows the new items.</summary>
     public void OpenFolder(List<CItemBase> items)
     {
-        pageStack.Push((currentItems, SelectedIndexOnPage));
+        pageStack.Push((currentItems, SelectedIndexOnPage, CurrentPage));
+        SetPage(null);
         SetItems(items);
+    }
+
+    public void OpenFolder(ConfigPage page)
+    {
+        pageStack.Push((currentItems, SelectedIndexOnPage, CurrentPage));
+        SetPage(page);
+        SetItems(page.Build());
     }
 
     public CItemBase? SelectNextNormal()
@@ -164,7 +201,8 @@ internal class ConfigList : UIScrollItemsGroup, IUIItemSource
             return;
         }
 
-        (List<CItemBase> items, int selection) = pageStack.Pop();
+        (List<CItemBase> items, int selection, ConfigPage? page) = pageStack.Pop();
+        SetPage(page);
         SetItems(items, selection);
     }
 
