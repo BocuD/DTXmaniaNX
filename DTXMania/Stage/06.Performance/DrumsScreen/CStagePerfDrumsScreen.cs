@@ -228,8 +228,24 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         return 0;
     }
 
+    private static readonly int probeLegacyDraw = AllocationProbe.Register("Legacy draw (all)");
+    private static readonly int probeVideo = AllocationProbe.Register("video", 1);
+    private static readonly int probeLanes = AllocationProbe.Register("lanes", 1);
+    private static readonly int probeChips = AllocationProbe.Register("chips", 1);
+    private static readonly int probeScore = AllocationProbe.Register("score", 1);
+    private static readonly int probeStatusPanel = AllocationProbe.Register("status panel", 1);
+    private static readonly int probeGauge = AllocationProbe.Register("gauge", 1);
+    private static readonly int probeCombo = AllocationProbe.Register("combo", 1);
+    private static readonly int probeGraph = AllocationProbe.Register("graph", 1);
+    private static readonly int probeJudgement = AllocationProbe.Register("judgement string", 1);
+    private static readonly int probeOverlay = AllocationProbe.Register("debug overlay", 1);
+    private static readonly int probeEffects = AllocationProbe.Register("chip fire", 1);
+    private static readonly int probeFade = AllocationProbe.Register("fade", 1);
+    private static readonly int probeKeyInput = AllocationProbe.Register("key input", 1);
+
     private void DrawDrumsScreen()
     {
+        AllocationProbe.Begin(probeLegacyDraw);
         sw.Start();
 
         bIsFinishedPlaying = false;
@@ -246,24 +262,38 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
             ePhaseID = EPhase.PERFORMANCE_STAGE_FAILED;
         }
 
+        AllocationProbe.Begin(probeVideo);
         tUpdateAndDraw_MIDIBGM();
         tUpdateAndDraw_AVI();
+        AllocationProbe.End(probeVideo);
+
+        AllocationProbe.Begin(probeLanes);
         tUpdateAndDraw_LaneFlushD();
         tUpdateAndDraw_ScrollSpeed();
+        AllocationProbe.End(probeLanes);
+
+        AllocationProbe.Begin(probeChips);
         tUpdateAndDraw_ChipAnimation();
         tUpdateAndDraw_BarLines(EInstrumentPart.DRUMS);
         tDraw_LoopLines();
         tUpdateAndDraw_Chip_PatternOnly(EInstrumentPart.DRUMS);
         bIsFinishedPlaying = tUpdateAndDraw_Chips(EInstrumentPart.DRUMS);
+        AllocationProbe.End(probeChips);
+
+        AllocationProbe.Begin(probeLanes);
         actProgressBar.OnUpdateAndDraw();
 
         DrawLaneCover();
 
         tUpdateAndDraw_JudgementLine();
         tUpdateAndDraw_DrumPad();
+        AllocationProbe.End(probeLanes);
         
         //handle end of performance
+        AllocationProbe.Begin(probeFade);
         bIsFinishedFadeout = tUpdateAndDraw_FadeIn_Out();
+        AllocationProbe.End(probeFade);
+
         if (bIsFinishedPlaying && (ePhaseID == EPhase.Common_DefaultState))
         {
             if ((actGauge.IsFailed(EInstrumentPart.DRUMS)) && (ePhaseID == EPhase.Common_DefaultState))
@@ -280,20 +310,41 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
             }
         }
 
+        AllocationProbe.Begin(probeScore);
         if (CDTXMania.ConfigIni.bShowScore)
             tUpdateAndDraw_Score();
+        AllocationProbe.End(probeScore);
 
+        AllocationProbe.Begin(probeStatusPanel);
         tUpdateAndDraw_StatusPanel();
+        AllocationProbe.End(probeStatusPanel);
 
+        AllocationProbe.Begin(probeGauge);
         tUpdateAndDraw_Gauge();
+        AllocationProbe.End(probeGauge);
+
+        AllocationProbe.Begin(probeCombo);
         tUpdateAndDraw_Combo();
+        AllocationProbe.End(probeCombo);
+
+        AllocationProbe.Begin(probeGraph);
         tUpdateAndDraw_Graph();
+        AllocationProbe.End(probeGraph);
+
+        AllocationProbe.Begin(probeOverlay);
         tUpdateAndDraw_PerformanceInformation();
+        AllocationProbe.End(probeOverlay);
+
+        AllocationProbe.Begin(probeJudgement);
         tUpdateAndDraw_JudgementString1_ForNormalPosition();
+        AllocationProbe.End(probeJudgement);
+        AllocationProbe.Begin(probeEffects);
         tUpdateAndDraw_JudgementString2_ForPositionOnJudgementLine();
         tUpdateAndDraw_ChipFireD();
         tUpdateAndDraw_STAGEFAILED();
-        
+        AllocationProbe.End(probeEffects);
+
+
 
         if (LoopEndMs != -1 && AudioMixer.Timer.nCurrentTime > LoopEndMs)
         {
@@ -316,9 +367,12 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         }
 
         // キー入力
+        AllocationProbe.Begin(probeKeyInput);
         tHandleKeyInput();
-        
+        AllocationProbe.End(probeKeyInput);
+
         sw.Stop();
+        AllocationProbe.End(probeLegacyDraw);
     }
 
     private void DrawLaneCover()

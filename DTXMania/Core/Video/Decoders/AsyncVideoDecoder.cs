@@ -37,6 +37,8 @@ public unsafe class AsyncVideoDecoder : VideoDecoder
     // otherwise churns the Large Object Heap and triggers periodic gen2 GC hitches.
     private readonly FrameBufferPool framePool = new();
 
+    internal static readonly Framework.OffThreadStats Stats = new("Video decode");
+
     // Incremented under decodeSync on every SeekTo. Frames decoded under an older
     // generation are discarded at enqueue time, eliminating the race where the
     // worker thread decodes a frame just before a seek and enqueues it just after
@@ -188,9 +190,16 @@ public unsafe class AsyncVideoDecoder : VideoDecoder
                 genAtStart = seekGeneration;
             }
 
+            long decodeStarted = System.Diagnostics.Stopwatch.GetTimestamp();
+            long decodeAllocated = GC.GetAllocatedBytesForCurrentThread();
+
             if (TryDecodeOneFrame(out DecodedFrameData data, out bool reachedEof))
             {
+                long decodeTicks = System.Diagnostics.Stopwatch.GetTimestamp() - decodeStarted;
+                long decodeBytes = GC.GetAllocatedBytesForCurrentThread() - decodeAllocated;
+
                 bool enqueued = false;
+                int depth;
                 lock (queueSync)
                 {
                     // Re-check generation under queueSync. We don't need decodeSync here
@@ -203,7 +212,11 @@ public unsafe class AsyncVideoDecoder : VideoDecoder
                         decodedFrames.Enqueue(data);
                         enqueued = true;
                     }
+
+                    depth = decodedFrames.Count;
                 }
+
+                Stats.Record(decodeTicks, decodeBytes, depth);
 
                 // Stale frame from a pre-seek timeline (or shutting down): recycle its
                 // buffer rather than letting it become garbage.

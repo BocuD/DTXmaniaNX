@@ -41,7 +41,7 @@ public sealed class DTXManiaGL : OpenGlGame
     public override void Update(float deltaTime, double totalTime)
     {
         mania.Update();
-        GameStatus.UpdatePerformanceGraph(deltaTime);
+        Profiler.UpdatePerformanceGraph(deltaTime);
     }
 
     public override void Render(int width, int height, double totalTime)

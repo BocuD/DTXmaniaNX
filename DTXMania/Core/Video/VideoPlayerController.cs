@@ -246,7 +246,9 @@ public class VideoPlayerController : IDisposable
             textureRing[textureRingIndex] = target;
         }
 
+        Framework.FrameProfiler.Begin(Framework.FrameSection.VideoUpload);
         target.UpdateRgba32Streaming(data.RgbaData, decoder.Width, decoder.Height);
+        Framework.FrameProfiler.End(Framework.FrameSection.VideoUpload);
 
         // The pixels have been copied into the GL texture, so the CPU-side buffer is
         // free to be reused by the decoder for a future frame. Returning it here is
