@@ -263,7 +263,6 @@ public sealed class ComponentEditor : IDisposable
 
         if (liveInstanceId.Length > 0)
         {
-            ImGui.TextDisabled("Values come from the live instance.");
             return;
         }
 

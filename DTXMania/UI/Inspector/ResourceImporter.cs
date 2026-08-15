@@ -65,8 +65,6 @@ public static class ResourceImporter
         ImGui.TextWrapped($"\"{Path.GetFileName(request.Path)}\" is outside the skin.");
         ImGui.TextWrapped($"Copy it into \"{request.Skin.name}\"?");
         ImGui.Spacing();
-        ImGui.TextDisabled("Used in place, it draws now but the layout cannot store a reference to it.");
-        ImGui.Spacing();
 
         if (ImGui.Button("Copy Into Skin"))
         {

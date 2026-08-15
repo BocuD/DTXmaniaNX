@@ -142,10 +142,6 @@ public class HorizontallyScrollingText : UIText
             ImGui.InputFloat("Scroll speed", ref scrollSpeed);
             ImGui.InputFloat("Pause duration", ref pauseDuration);
 
-            if (size.xMode != UiSizeMode.Fixed)
-            {
-                ImGui.TextDisabled("Set the size width to something other than Auto to clip and scroll.");
-            }
         }
     }
 }

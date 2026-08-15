@@ -69,10 +69,6 @@ public partial class UIText
             _dirty = true;
         }
 
-        if (wrap && size.xMode != UiSizeMode.Fixed)
-        {
-            ImGui.TextDisabled("Set the size width to something other than Auto to wrap at it.");
-        }
 
         bool isBold = style.HasFlag(UiTextStyle.Bold);
         if (ImGui.Checkbox("Bold", ref isBold))

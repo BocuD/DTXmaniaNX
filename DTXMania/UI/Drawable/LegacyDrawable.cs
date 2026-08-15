@@ -31,8 +31,6 @@ public class LegacyDrawable : UIDrawable
         
         if (ImGui.CollapsingHeader("Legacy Drawable"))
         {
-            ImGui.Text("This is a legacy drawable.\nEditing any property other than render order will have no effect.");
-            
             //display info about the method that is called
             ImGui.Text("Draw method: " + drawAction.Method.Name);
         }

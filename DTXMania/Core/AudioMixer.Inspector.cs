@@ -32,8 +32,6 @@ public static partial class AudioMixer
             DrawGroup(group);
         }
 
-        ImGui.TextDisabled("Levels are not saved — Config > Audio > Mixer Volumes is where they persist.");
-
         ImGui.End();
     }
 
@@ -91,8 +89,6 @@ public static partial class AudioMixer
         ImGui.Text($"Mixer   clips {clips.Count}   voices {channels} (peak {PeakVoiceCount})   playing {sounding}");
 
         ImGui.Text($"Output  streams {audio.Streams}   in mix {audio.MixedChannels}");
-
-        ImGui.TextDisabled("In mix counts channels attached to the output, playing or not.");
 
         //normal while a loader still has clips it has not published
         int unaccounted = UnaccountedClips;
@@ -162,9 +158,8 @@ public static partial class AudioMixer
             return;
         }
 
-        ImGui.Text($"Hit to sound   {frame + latency.Typical:0.0}ms mean, {frame + latency.Worst:0.0}ms max");
-
-        ImGui.TextDisabled($"the output above plus a frame at {frame:0.0}ms");
+        ImGui.Text($"Hit to sound   {frame + latency.Typical:0.0}ms mean, {frame + latency.Worst:0.0}ms max"
+                   + $"   (frame {frame:0.0}ms)");
     }
 
     /// <summary>
@@ -191,7 +186,7 @@ public static partial class AudioMixer
 
         if (duringSong)
         {
-            ImGui.TextDisabled("Not during a song: the rebuild would reload every chart sound.");
+            ImGui.TextDisabled("Unavailable during a song");
         }
     }
 
