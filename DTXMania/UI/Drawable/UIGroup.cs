@@ -18,6 +18,11 @@ public class UIGroup : UIDrawable
     //drawables already reported as failing to draw, so one broken element does not fill the log
     [JsonIgnore] private static readonly HashSet<string> reportedDrawFailures = [];
 
+    //an animating property is written every frame for as long as it animates, so a per-write cost here
+    //scales with the frame rate
+    [JsonIgnore] private static readonly int probeAnimators =
+        Core.Framework.AllocationProbe.Register("Animators (whole tree)");
+
     //clips are part of what a skin describes: a cursor that pulses is animation, not code. Replace rather
     //than populate, so a type that builds an animator in its constructor does not end up with the loaded
     //clips appended to the ones it made
@@ -119,7 +124,13 @@ public class UIGroup : UIDrawable
             children[index].ApplyBindings();
         }
 
-        animator?.TickAuto(this);
+        if (animator != null)
+        {
+            //TickAuto does not descend into child groups, so these never nest
+            Core.Framework.AllocationProbe.Begin(probeAnimators);
+            animator.TickAuto(this);
+            Core.Framework.AllocationProbe.End(probeAnimators);
+        }
 
         UpdateLocalTransformMatrix();
         Matrix4x4 combinedMatrix = localTransformMatrix * parentMatrix;
