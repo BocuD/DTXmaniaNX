@@ -145,14 +145,14 @@ internal partial class CConfigIni
 				],
 				IntRound("SleepTimePerFrame", -1, 50, c => c.nSleepNMsEveryFrame)),
 			G([
-					"サウンド出力方式(0=ACM(って今はまだDirectShowですが), 1=ASIO, 2=WASAPI排他, 3=WASAPI共有",
+					"サウンド出力方式(0=ACM(って今はまだDirectShowですが), 1=ASIO, 2=WASAPI排他, 3=WASAPI共有, 4=BASS",
 					"WASAPIはVista以降のOSで使用可能。推奨方式はWASAPI。",
 					"なお、WASAPIが使用不可ならASIOを、ASIOが使用不可ならACMを使用します。",
-					"Sound device type(0=ACM, 1=ASIO, 2=WASAPI Exclusive, 3=WASAPI Shared)",
+					"Sound device type(0=ACM, 1=ASIO, 2=WASAPI Exclusive, 3=WASAPI Shared, 4=BASS)",
 					"WASAPI can use on Vista or later OSs.",
 					"If WASAPI is not available, DTXMania try to use ASIO. If ASIO can't be used, ACM is used."
 				],
-				Int("SoundDeviceType", 0, 3, c => c.nSoundDriverType)),
+				Int("SoundDeviceType", 0, 4, c => c.nSoundDriverType)),
 			G([
 					"WASAPI使用時のサウンドバッファサイズ",
 					"(0=デバイスに設定されている値を使用, 1～9999=バッファサイズ(単位:ms)の手動指定",
