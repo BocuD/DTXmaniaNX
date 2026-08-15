@@ -260,33 +260,10 @@ internal sealed class BassAsioOutput : IBassOutput
         return new Exception($"BASS (ASIO) initialization failed. ({call})[{error}]");
     }
 
-    private const int FreeTimeoutMs = 2000;
-
     private static void FreeDriver()
     {
-        Thread free = new(() =>
-        {
-            try
-            {
-                BassAsio.BASS_ASIO_Free();
-            }
-            catch (Exception e)
-            {
-                Trace.TraceWarning($"BASS_ASIO_Free threw: {e.Message}");
-            }
-        })
-        {
-            IsBackground = true,
-            Name = "ASIO teardown"
-        };
-
-        free.Start();
-
-        if (!free.Join(FreeTimeoutMs))
-        {
-            Trace.TraceWarning($"BASS_ASIO_Free did not return within {FreeTimeoutMs}ms; "
-                               + "leaving the driver to the process exit.");
-        }
+        BassAsio.BASS_ASIO_Stop();
+        BassAsio.BASS_ASIO_Free();
     }
 
     /// <summary>
@@ -300,16 +277,13 @@ internal sealed class BassAsioOutput : IBassOutput
             return 0;
         }
 
+        AudioUnderruns.Observe(latencyMs);
+
         int transferred = Bass.BASS_ChannelGetData(mixer, buffer, length);
 
         if (transferred == -1)
         {
             transferred = 0;
-        }
-
-        if (transferred < length)
-        {
-            AudioUnderruns.Report();
         }
 
         //the driver's whole path, not just the buffer, or the clock leads what is being heard
