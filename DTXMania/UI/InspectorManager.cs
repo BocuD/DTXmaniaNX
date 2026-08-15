@@ -60,6 +60,7 @@ public static class InspectorManager
         windows.Add(new Window("Inspector", () => inspector.Draw(), true));
         windows.Add(new Window("Hierarchy", () => hierarchyWindow.Draw(), true));
         windows.Add(new Window("Game Status", () => GameStatus.Draw(), true));
+        windows.Add(new Window("Profiler", () => Profiler.Draw()));
         windows.Add(new Window("Skin Editor", () => skinEditor.Draw(), true));
 
         windows.Add(new Window("Focus", () => FocusWindow.Draw()));
