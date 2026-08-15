@@ -30,6 +30,9 @@ internal class CStageResult : CStage
 	public STDGBVALUE<int> nRankValue;
 	public int nResultRank;
 	public CChip[] rEmptyDrumChip;
+
+	//refilled per pad rather than allocated per pad
+	private readonly List<STInputEvent> listPadEvents = [];
 	public STDGBVALUE<CScoreIni.CPerformanceEntry> stPerformanceEntry;
 	public bool bIsTrainingMode;
 
@@ -626,8 +629,9 @@ internal class CStageResult : CStage
 		{
 			for( int i = 0; i < 11; i++ )
 			{
-				List<STInputEvent> events = CDTXMania.Pad.GetEvents( EInstrumentPart.DRUMS, (EPad) i );
-				if ( events != null && events.Count > 0 )
+				List<STInputEvent> events = listPadEvents;
+				CDTXMania.Pad.GetEvents( EInstrumentPart.DRUMS, (EPad) i, events );
+				if ( events.Count > 0 )
 				{
 					foreach( STInputEvent event2 in events )
 					{

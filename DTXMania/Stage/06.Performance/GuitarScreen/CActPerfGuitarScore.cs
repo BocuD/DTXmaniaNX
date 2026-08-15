@@ -1,5 +1,4 @@
-﻿using System.Drawing;
-using DTXMania.Core;
+﻿using DTXMania.Core;
 
 namespace DTXMania;
 
@@ -79,29 +78,7 @@ internal class CActPerfGuitarScore : CActPerfCommonScore
             {
                 if ( CDTXMania.DTX.bHasChips[j] && n本体X[j] != 0 )
                 {
-                    string str = string.Format("{0,7:######0}", n現在表示中のスコア[j]);
-                    for (int i = 0; i < 7; i++)
-                    {
-                        RectangleF rectangle;
-                        char ch = str[i];
-                        if (ch.Equals(' '))
-                        {
-                            rectangle = new RectangleF(0, 0, 0, 0);
-                        }
-                        else
-                        {
-                            int num4 = int.Parse(str.Substring(i, 1));
-                            rectangle = new RectangleF(num4 * 36, 0, 36, 50);
-                        }
-                        if (txScore != null)
-                        {
-                            txScore.tDraw2D(n本体X[j] + (i * 34), 28 + n本体Y, rectangle);
-                        }
-                    }
-                    if (txScore != null)
-                    {
-                        txScore.tDraw2D(n本体X[j], n本体Y, new RectangleF(0, 50, 86, 28));
-                    }
+                    tDrawScore(n本体X[j], n本体Y, n現在表示中のスコア[j]);
                 }
             }
         }

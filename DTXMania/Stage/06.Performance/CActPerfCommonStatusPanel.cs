@@ -1,4 +1,4 @@
-﻿using System.Text;
+﻿using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Drawing;
 using DTXMania.Core;
@@ -379,7 +379,50 @@ internal class CActPerfCommonStatusPanel : CActivity
     protected readonly ST文字位置[] stLargeTextRects;
     protected readonly ST文字位置[] stDifficultyNumberRects;
     
-    protected void tDisplayLevelNumber(int x, int y, string str)
+    //none of the number sheets have a space glyph, so a leading space draws nothing while still moving
+    //the cursor along, which is the whole of how these are right-justified
+    private static ReadOnlySpan<char> tJustify(Span<char> destination, int written, int width)
+    {
+        if (written >= width)
+        {
+            return destination[..written];
+        }
+
+        destination[..written].CopyTo(destination[(width - written)..]);
+        destination[..(width - written)].Fill(' ');
+        return destination[..width];
+    }
+
+    //invariant rather than current culture: the sheets carry a '.' and no ',', so a comma-decimal
+    //locale would ask for a glyph that does not exist and drop the separator
+    protected static ReadOnlySpan<char> tFormat(Span<char> destination, int value, int width = 0)
+    {
+        value.TryFormat(destination, out int written, default, CultureInfo.InvariantCulture);
+        return tJustify(destination, written, width);
+    }
+
+    protected static ReadOnlySpan<char> tFormat(Span<char> destination, int value,
+        ReadOnlySpan<char> format, int width = 0)
+    {
+        value.TryFormat(destination, out int written, format, CultureInfo.InvariantCulture);
+        return tJustify(destination, written, width);
+    }
+
+    protected static ReadOnlySpan<char> tFormat(Span<char> destination, double value,
+        ReadOnlySpan<char> format, int width = 0)
+    {
+        value.TryFormat(destination, out int written, format, CultureInfo.InvariantCulture);
+        return tJustify(destination, written, width);
+    }
+
+    protected static ReadOnlySpan<char> tFormatPercent(Span<char> destination, double value)
+    {
+        ReadOnlySpan<char> number = tFormat(destination, value, "##0", 3);
+        destination[number.Length] = '%';
+        return destination[..(number.Length + 1)];
+    }
+
+    protected void tDisplayLevelNumber(int x, int y, ReadOnlySpan<char> str)
     {
         foreach (char ch in str)
         {
@@ -405,7 +448,7 @@ internal class CActPerfCommonStatusPanel : CActivity
     
     protected BaseTexture[] txNumberFontSheet;
     
-    protected void tDrawSmallNumber(int x, int y, string str)
+    protected void tDrawSmallNumber(int x, int y, ReadOnlySpan<char> str)
     {
         foreach (char ch in str)
         {
@@ -425,7 +468,7 @@ internal class CActPerfCommonStatusPanel : CActivity
         }
     }
     
-    protected void tDrawLargeNumber(int x, int y, string str)
+    protected void tDrawLargeNumber(int x, int y, ReadOnlySpan<char> str)
     {
         foreach (char ch in str)
         {
@@ -453,7 +496,7 @@ internal class CActPerfCommonStatusPanel : CActivity
 
     //Note: Lag Text is draw right-justified
     //i.e. x,y is the top right corner of rect
-    protected void tDrawLagCounterText(int x, int y, string str, bool isRed) 
+    protected void tDrawLagCounterText(int x, int y, ReadOnlySpan<char> str, bool isRed)
     {
         ST文字位置Ex[] currTextPosStructArray = isRed ? stLagCountRedText : stLagCountBlueText;
             

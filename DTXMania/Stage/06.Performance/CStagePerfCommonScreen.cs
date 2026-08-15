@@ -744,6 +744,10 @@ internal abstract class CStagePerfCommonScreen : CStage
     public CActPerfBGA actBGA;
     
     protected CActLVLNFont actLVFont;
+
+    //one buffer for every pad read in a frame; the reads are sequential and each is done with before the
+    //next one starts
+    protected readonly List<STInputEvent> listPadEvents = [];
     protected ActPerfNewFire[] actChipFireGB;
     public CActPerfCommonCombo actCombo;
     protected CActPerfCommonDanger actDANGER;
@@ -3869,7 +3873,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                 txHitBar.tDraw2D(295 + l_xOffset, y, new RectangleF(0, 0, l_drumPanelWidth, 6));
             }
             if (CDTXMania.ConfigIni.bShowPerformanceInformation)
-                actLVFont.tDrawString(295, (CDTXMania.ConfigIni.bReverse.Drums ? y - 20 : y + 8), CDTXMania.ConfigIni.nJudgeLine.Drums.ToString());
+                actLVFont.tDrawString(295, (CDTXMania.ConfigIni.bReverse.Drums ? y - 20 : y + 8), CDTXMania.ConfigIni.nJudgeLine.Drums);
         }
     }
 
@@ -4603,8 +4607,9 @@ internal abstract class CStagePerfCommonScreen : CStage
             }
 
             // auto pickだとここから先に行かないので注意
-            List<STInputEvent> events = CDTXMania.Pad.GetEvents(inst, EPad.Pick);
-            if ((events != null) && (events.Count > 0))
+            List<STInputEvent> events = listPadEvents;
+            CDTXMania.Pad.GetEvents(inst, EPad.Pick, events);
+            if (events.Count > 0)
             {
                 foreach (STInputEvent eventPick in events)
                 {
@@ -4697,8 +4702,9 @@ internal abstract class CStagePerfCommonScreen : CStage
                     }
                 }
             }
-            List<STInputEvent> list = CDTXMania.Pad.GetEvents(inst, EPad.Wail);
-            if ((list != null) && (list.Count > 0))
+            List<STInputEvent> list = listPadEvents;
+            CDTXMania.Pad.GetEvents(inst, EPad.Wail, list);
+            if (list.Count > 0)
             {
                 foreach (STInputEvent eventWailed in list)
                 {

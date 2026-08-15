@@ -523,7 +523,7 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 					txHitBar.tDraw2D(80, y, new RectangleF( 0, 0, 252, 6 ) );
 
 				if (CDTXMania.ConfigIni.bShowPerformanceInformation)
-					actLVFont.tDrawString(310, (CDTXMania.ConfigIni.bReverse.Guitar ? y + 8 : y - 20), CDTXMania.ConfigIni.nJudgeLine.Guitar.ToString());
+					actLVFont.tDrawString(310, (CDTXMania.ConfigIni.bReverse.Guitar ? y + 8 : y - 20), CDTXMania.ConfigIni.nJudgeLine.Guitar);
 			}
 			if ( CDTXMania.DTX.bHasChips.Bass )
 			{
@@ -533,7 +533,7 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 					txHitBar.tDraw2D(950, y, new RectangleF(0, 0, 252, 6));
 
 				if (CDTXMania.ConfigIni.bShowPerformanceInformation)
-					actLVFont.tDrawString(1180, (CDTXMania.ConfigIni.bReverse.Bass ? y + 8 : y - 20), CDTXMania.ConfigIni.nJudgeLine.Bass.ToString());
+					actLVFont.tDrawString(1180, (CDTXMania.ConfigIni.bReverse.Bass ? y + 8 : y - 20), CDTXMania.ConfigIni.nJudgeLine.Bass);
 			}
 		}
 	}

@@ -387,25 +387,25 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
             txShutter.tDraw2D(295, (int)(-720 + dbシャッターIN));
 
             if (CDTXMania.ConfigIni.bShowPerformanceInformation)
-                actLVFont.tDrawString(564, (int)dbシャッターIN - 20, CDTXMania.ConfigIni.nShutterOutSide.Drums.ToString());
+                actLVFont.tDrawString(564, (int)dbシャッターIN - 20, CDTXMania.ConfigIni.nShutterOutSide.Drums);
 
             dbシャッターOUT = 720 - (nShutterInPosY.Drums * db倍率);
             txShutter.tDraw2D(295, (int)dbシャッターOUT);
 
             if (CDTXMania.ConfigIni.bShowPerformanceInformation)
-                actLVFont.tDrawString(564, (int)dbシャッターOUT + 2, CDTXMania.ConfigIni.nShutterInSide.Drums.ToString());
+                actLVFont.tDrawString(564, (int)dbシャッターOUT + 2, CDTXMania.ConfigIni.nShutterInSide.Drums);
         }
         else
         {
             txShutter.tDraw2D(295, (int)(-720 + dbシャッターIN));
 
             if (CDTXMania.ConfigIni.bShowPerformanceInformation)
-                actLVFont.tDrawString(564, (int)dbシャッターIN - 20, CDTXMania.ConfigIni.nShutterInSide.Drums.ToString());
+                actLVFont.tDrawString(564, (int)dbシャッターIN - 20, CDTXMania.ConfigIni.nShutterInSide.Drums);
 
             txShutter.tDraw2D(295, (int)dbシャッターOUT);
 
             if (CDTXMania.ConfigIni.bShowPerformanceInformation)
-                actLVFont.tDrawString(564, (int)dbシャッターOUT + 2, CDTXMania.ConfigIni.nShutterOutSide.Drums.ToString());
+                actLVFont.tDrawString(564, (int)dbシャッターOUT + 2, CDTXMania.ConfigIni.nShutterOutSide.Drums);
         }
     }
 
@@ -664,9 +664,10 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
 
         for (int nPad = 0; nPad < (int)EPad.MAX; nPad++)
         {
-            List<STInputEvent> listInputEvent = CDTXMania.Pad.GetEvents(EInstrumentPart.DRUMS, (EPad)nPad);
+            List<STInputEvent> listInputEvent = listPadEvents;
+            CDTXMania.Pad.GetEvents(EInstrumentPart.DRUMS, (EPad)nPad, listInputEvent);
 
-            if ((listInputEvent == null) || (listInputEvent.Count == 0))
+            if (listInputEvent.Count == 0)
                 continue;
 
             tSaveInputMethod(EInstrumentPart.DRUMS);

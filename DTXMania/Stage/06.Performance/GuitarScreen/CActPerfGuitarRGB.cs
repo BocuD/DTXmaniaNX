@@ -134,14 +134,14 @@ internal class CActPerfGuitarRGB : CActPerfCommonRGB
                         txShutter.tDraw2D(80, (int)dbUnderShutter.Guitar);
 
                         if (CDTXMania.ConfigIni.bShowPerformanceInformation)
-                            actLVFont.tDrawString(195, (int)dbUnderShutter.Guitar + 5, nシャッター下.Guitar.ToString());
+                            actLVFont.tDrawString(195, (int)dbUnderShutter.Guitar + 5, nシャッター下.Guitar);
                     }
                     if (nシャッター上.Guitar != 0)
                     {
                         txShutter.tDraw2D(80, (int)dbAboveShutter.Guitar);
 
                         if (CDTXMania.ConfigIni.bShowPerformanceInformation)
-                            actLVFont.tDrawString(195, (int)(dbAboveShutter.Guitar - 25 + txShutter.Height), nシャッター上.Guitar.ToString());
+                            actLVFont.tDrawString(195, (int)(dbAboveShutter.Guitar - 25 + txShutter.Height), nシャッター上.Guitar);
                     }
                 }
             }
@@ -181,14 +181,14 @@ internal class CActPerfGuitarRGB : CActPerfCommonRGB
                         txShutter.tDraw2D(950, (int)dbUnderShutter.Bass);
 
                         if (CDTXMania.ConfigIni.bShowPerformanceInformation)
-                            actLVFont.tDrawString(1065, (int)dbUnderShutter.Bass + 5, nシャッター下.Bass.ToString());
+                            actLVFont.tDrawString(1065, (int)dbUnderShutter.Bass + 5, nシャッター下.Bass);
                     }
                     if (nシャッター上.Bass != 0)
                     {
                         txShutter.tDraw2D(950, (int)dbAboveShutter.Bass);
 
                         if (CDTXMania.ConfigIni.bShowPerformanceInformation)
-                            actLVFont.tDrawString(1065, (int)(dbAboveShutter.Bass - 25 + txShutter.Height), nシャッター上.Bass.ToString());
+                            actLVFont.tDrawString(1065, (int)(dbAboveShutter.Bass - 25 + txShutter.Height), nシャッター上.Bass);
                     }
                 }
             }
