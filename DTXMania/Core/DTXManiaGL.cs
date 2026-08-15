@@ -83,7 +83,13 @@ public sealed class DTXManiaGL : OpenGlGame
 
     protected override void DestroySharedResources()
     {
-        
+
+    }
+
+    public override void Dispose()
+    {
+        CDTXMania.app?.tTerminate();
+        base.Dispose();
     }
 
     public override string name => "DTXManiaNX";
