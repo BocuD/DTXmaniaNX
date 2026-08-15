@@ -25,11 +25,37 @@ public sealed class PropertyAccessor
 
     public bool IsBindable => StringSetter != null || BoolSetter != null || NumberSetter != null;
 
-    private PropertyAccessor(Type valueType, Func<object, object?> getter, Action<object, object?> setter)
+    //kept so a setter for the property's own type can be compiled later, once something knows that type
+    //as a generic argument
+    private readonly Type rootType;
+    private readonly IReadOnlyList<MemberInfo> chain;
+    private Delegate? typedSetter;
+
+    private PropertyAccessor(Type valueType, Func<object, object?> getter, Action<object, object?> setter,
+        Type rootType, IReadOnlyList<MemberInfo> chain)
     {
         ValueType = valueType;
         Getter = getter;
         Setter = setter;
+        this.rootType = rootType;
+        this.chain = chain;
+    }
+
+    /// <summary>
+    /// A setter taking the property's own type, so writing it doesn't box. Null unless
+    /// <typeparamref name="T"/> is exactly <see cref="ValueType"/>. Compiled on first use and kept.
+    /// </summary>
+    public Action<object, T>? GetTypedSetter<T>()
+    {
+        if (typeof(T) != ValueType)
+        {
+            return null;
+        }
+
+        //two threads arriving together compile the same setter and one wins, which costs a compile and
+        //changes nothing
+        typedSetter ??= AccessorCompiler.BuildChainSetter<T>(rootType, chain);
+        return (Action<object, T>)typedSetter;
     }
 
     /// <summary>
@@ -79,7 +105,7 @@ public sealed class PropertyAccessor
         Func<object, object?> getter = AccessorCompiler.BuildChainGetter(rootType, chain);
         Action<object, object?> setter = AccessorCompiler.BuildChainSetter(rootType, chain);
 
-        return new PropertyAccessor(valueType, getter, setter)
+        return new PropertyAccessor(valueType, getter, setter, rootType, chain)
         {
             StringSetter = valueType == typeof(string) ? AccessorCompiler.BuildChainSetter<string>(rootType, chain) : null,
             BoolSetter = valueType == typeof(bool) ? AccessorCompiler.BuildChainSetter<bool>(rootType, chain) : null,

@@ -108,7 +108,6 @@ public sealed partial class Animator
         {
             currentClip = clip;
             time = 0f;
-            currentClip.InvalidateBindings();
             tickTimerStarted = false;
         }
         isPlaying = true;
