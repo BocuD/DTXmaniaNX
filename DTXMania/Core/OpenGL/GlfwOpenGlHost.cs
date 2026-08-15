@@ -488,6 +488,8 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
             GLFW.GetWindowSize(_window, ref _windowWidth, ref _windowHeight);
             UpdateDiagnostics();
 
+            const bool imgui = true;
+
             FrameProfiler.Begin(FrameSection.ImGuiNewFrame);
             GLFW.MakeContextCurrent(_window);
             ImGui.SetCurrentContext(_imguiContext);
@@ -500,7 +502,8 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
 
             _gpuFrameTimer.BeginFrame();
 
-            if (_clearImGuiFocusOnNextFrame)
+            //only inside a frame scope, and there is no focus to clear on a frame ImGui never ran
+            if (_clearImGuiFocusOnNextFrame && imgui)
             {
                 ImGui.SetWindowFocus((string?)null);
                 _clearImGuiFocusOnNextFrame = false;
@@ -544,9 +547,14 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
             _gameRenderTarget.BindDefaultFramebuffer(Math.Max(_framebufferWidth, 1), Math.Max(_framebufferHeight, 1));
 
             FrameProfiler.Begin(FrameSection.Inspector);
-            InspectorManager.Draw(_renderInGameWindow, _gameRenderTarget.TextureId,
-                new Vector2(_gameRenderTarget.Width, _gameRenderTarget.Height),
-                new Vector2(Math.Max(_framebufferWidth, 1), Math.Max(_framebufferHeight, 1)));
+
+            if (imgui)
+            {
+                InspectorManager.Draw(_renderInGameWindow, _gameRenderTarget.TextureId,
+                    new Vector2(_gameRenderTarget.Width, _gameRenderTarget.Height),
+                    new Vector2(Math.Max(_framebufferWidth, 1), Math.Max(_framebufferHeight, 1)));
+            }
+
             FrameProfiler.End(FrameSection.Inspector);
 
             FrameProfiler.Begin(FrameSection.Blit);
@@ -558,12 +566,17 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
             FrameProfiler.End(FrameSection.Blit);
 
             FrameProfiler.Begin(FrameSection.ImGuiRender);
-            ImGui.Render();
-            var imguiDrawData = ImGui.GetDrawData();
-            if (imguiDrawData.TotalVtxCount > 0)
+
+            if (imgui)
             {
-                ImGuiImplOpenGL3.RenderDrawData(imguiDrawData);
+                ImGui.Render();
+                var imguiDrawData = ImGui.GetDrawData();
+                if (imguiDrawData.TotalVtxCount > 0)
+                {
+                    ImGuiImplOpenGL3.RenderDrawData(imguiDrawData);
+                }
             }
+
             FrameProfiler.End(FrameSection.ImGuiRender);
 
             _gpuFrameTimer.EndFrame();

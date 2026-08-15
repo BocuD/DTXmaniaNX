@@ -30,6 +30,10 @@ public static class InspectorManager
         }
     }
 
+    public static bool WantsImGui => inspectorEnabled || logWindowEnabled
+                                     || Drawable.UIImGuiTextInput.IsAnyInputActive
+                                     || Core.CDTXMania.StageManager?.rCurrentStage?.NeedsImGui == true;
+
     public static ImDrawListPtr gizmoDrawList;
     public static Rectangle gizmoRect;
 

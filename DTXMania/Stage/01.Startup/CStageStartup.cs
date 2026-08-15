@@ -42,6 +42,8 @@ internal class CStageStartup : CStage
 		return 1;
 	}
 
+	public override bool NeedsImGui => true;
+
 	public override void FirstUpdate()
 	{
 		logSource = CDTXMania.app.maniaGl.host.RuntimeLogListener;

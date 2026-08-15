@@ -19,6 +19,8 @@ public abstract class CStage : CActivity, IUIInputHandler
 		Details = "Idle",
 	};
 
+	public virtual bool NeedsImGui => false;
+
 	internal EStage eStageID;
 	public enum EStage
 	{
