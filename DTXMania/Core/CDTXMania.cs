@@ -475,8 +475,15 @@ internal partial class CDTXMania
         UIFocus.Dispatch();
 
         FrameProfiler.Begin(FrameSection.StageDraw);
+
+        FrameProfiler.Begin(FrameSection.StageOwnDraw);
         StageManager.DrawStage();
+        FrameProfiler.End(FrameSection.StageOwnDraw);
+
+        FrameProfiler.Begin(FrameSection.PersistentUiDraw);
         persistentUIGroup.Draw(Matrix4x4.Identity);
+        FrameProfiler.End(FrameSection.PersistentUiDraw);
+
         FrameProfiler.End(FrameSection.StageDraw);
 
         StageManager.HandleStageChanges();
