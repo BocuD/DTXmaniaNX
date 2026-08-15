@@ -37,10 +37,10 @@ public class CPad
 
 	// メソッド
 
-	public List<STInputEvent> GetEvents( EInstrumentPart part, EPad pad )
+	public void GetEvents( EInstrumentPart part, EPad pad, List<STInputEvent> list )
 	{
 		CConfigIni.CKeyAssign.STKEYASSIGN[] stkeyassignArray = rConfigIni.KeyAssign[ (int) part ][ (int) pad ];
-		List<STInputEvent> list = [];
+		list.Clear();
 
 		// すべての入力デバイスについて…
 		foreach (IInputDevice device in rInputManager.listInputDevices)
@@ -99,8 +99,6 @@ public class CPad
 				}
 			}
 		}
-
-		return list;
 	}
 	public bool bPressed( EInstrumentPart part, EPad pad )
 	{
