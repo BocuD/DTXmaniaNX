@@ -2,9 +2,9 @@ name: CI Build and Release
 
 on:
   push:
-    branches: [master, main]
-  pull_request:
-    branches: [master, main]
+    branches: [master]
+  # pull_request:
+  #   branches: [master]
   workflow_dispatch:
 
 permissions:
