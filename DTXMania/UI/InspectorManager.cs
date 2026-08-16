@@ -60,11 +60,11 @@ public static class InspectorManager
     
     static InspectorManager()
     {
-        windows.Add(new Window("Inspector", () => inspector.Draw(), true));
-        windows.Add(new Window("Hierarchy", () => hierarchyWindow.Draw(), true));
-        windows.Add(new Window("Game Status", () => GameStatus.Draw(), true));
+        windows.Add(new Window("Inspector", () => inspector.Draw()));
+        windows.Add(new Window("Hierarchy", () => hierarchyWindow.Draw()));
+        windows.Add(new Window("Game Status", () => GameStatus.Draw()));
         windows.Add(new Window("Profiler", () => Profiler.Draw()));
-        windows.Add(new Window("Skin Editor", () => skinEditor.Draw(), true));
+        windows.Add(new Window("Skin Editor", () => skinEditor.Draw()));
 
         windows.Add(new Window("Focus", () => FocusWindow.Draw()));
         windows.Add(new Window("Textures", () => textureInspector.DrawWindow()));
