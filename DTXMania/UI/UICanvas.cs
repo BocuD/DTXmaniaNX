@@ -23,22 +23,15 @@ public static class UICanvas
     public static Matrix4x4 toWindow =>
         Matrix4x4.CreateScale(CDTXMania.renderScale) * Matrix4x4.CreateTranslation(origin.X, origin.Y, 0f);
 
+    /// <summary>The scale the canvas is drawn at to fill an area of this size. Whichever axis runs out
+    /// first decides, so the whole canvas is always visible.</summary>
+    public static float ScaleFor(Vector2 pixels) =>
+        MathF.Min(pixels.X / GameWindowSize.Width, pixels.Y / GameWindowSize.Height);
+
     public static void SetWindowSize(Vector2 pixels)
     {
         windowSize = pixels;
-
-        //calculate aspect ratio
-        float aspectRatio = GameWindowSize.Width / (float)GameWindowSize.Height;
-
-        //if we're narrower than 16:9, scale the width to match
-        if (pixels.X / pixels.Y < aspectRatio)
-        {
-            CDTXMania.renderScale = pixels.X / GameWindowSize.Width;
-        }
-        else
-        {
-            CDTXMania.renderScale = pixels.Y / GameWindowSize.Height;
-        }
+        CDTXMania.renderScale = ScaleFor(pixels);
     }
 
     /// <summary>Centres <paramref name="root"/>'s canvas in the window at the current scale.</summary>

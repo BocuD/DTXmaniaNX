@@ -16,9 +16,12 @@ public static class InspectorManager
     public static SkinEditorWindow skinEditor { get; } = new();
     public static TextureInspector textureInspector { get; private set; }
     public static LogWindow logWindow { get; } = new();
+    public static GameWindow gameWindow { get; } = new();
 
     public static bool inspectorEnabled = false;
     public static bool logWindowEnabled = false;
+
+    public static bool rendersGameToWindow => inspectorEnabled && gameWindow.enabled;
 
     public static void ToggleInspector()
     {
@@ -114,10 +117,10 @@ public static class InspectorManager
 
         if (drawGameWindow)
         {
-            GameWindow.Draw(gameTextureId, gameTextureSize);
-            gameRect = GameWindow.viewport.rect;
-            gameDrawList = GameWindow.viewport.drawList;
-            gameView = GameWindow.viewport.GetViewMatrix();
+            gameWindow.Draw(gameTextureId, gameTextureSize);
+            gameRect = gameWindow.viewport.rect;
+            gameDrawList = gameWindow.viewport.drawList;
+            gameView = gameWindow.viewport.GetViewMatrix();
         }
         else
         {
@@ -186,6 +189,14 @@ public static class InspectorManager
 
         if (ImGui.BeginMenu("Window"))
         {
+            //not one of the windows below: opening it is what makes the game render into a target
+            if (ImGui.MenuItem("Game Window", gameWindow.enabled))
+            {
+                gameWindow.enabled = !gameWindow.enabled;
+            }
+
+            ImGui.Separator();
+
             for (int index = 0; index < windows.Count; index++)
             {
                 Window window = windows[index];

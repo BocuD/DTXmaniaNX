@@ -147,7 +147,7 @@ public sealed class ComponentEditor : IDisposable
         if (!centered && contentMax != contentMin)
         {
             centered = true;
-            viewport.CenterOn(canvasSize, viewport.desiredRenderSize);
+            viewport.CenterOn(viewport.desiredRenderSize);
         }
 
         //the gizmo belongs to whichever viewport rendered the drawable
@@ -195,45 +195,14 @@ public sealed class ComponentEditor : IDisposable
         ImGui.SameLine();
         if (ImGui.Button("Center"))
         {
-            viewport.CenterOn(canvasSize, viewport.desiredRenderSize);
+            viewport.CenterOn(viewport.desiredRenderSize);
         }
 
         ImGui.SameLine();
-        DrawScalePicker();
+        RenderScalePicker.Draw("Scale", ref renderScale);
 
         ImGui.SameLine();
         ImGui.TextDisabled(instance.GetType().Name);
-    }
-
-    //the resolutions the scales correspond to, since that is what a skin is authored against
-    private static readonly (string label, float? scale)[] ScaleOptions =
-    [
-        ("Window", null),
-        ("1x  (1280x720)", 1.0f),
-        ("1.5x  (1920x1080)", 1.5f),
-        ("2x  (2560x1440)", 2.0f),
-        ("3x  (3840x2160)", 3.0f)
-    ];
-
-    private void DrawScalePicker()
-    {
-        ImGui.SetNextItemWidth(150);
-        if (!ImGui.BeginCombo("Scale", ScaleOptions.First(option => option.scale == renderScale).label))
-        {
-            return;
-        }
-
-        foreach ((string label, float? scale) in ScaleOptions)
-        {
-            if (!ImGui.Selectable(label, scale == renderScale) || scale == renderScale)
-            {
-                continue;
-            }
-
-            renderScale = scale;
-        }
-
-        ImGui.EndCombo();
     }
 
     private static void InvalidateText(UIDrawable node)
@@ -361,6 +330,11 @@ public sealed class ComponentEditor : IDisposable
         root.position = new Vector3(canvasOrigin, 0.0f);
 
         float scale = renderScale ?? CDTXMania.renderScale;
+
+        //the canvas grows with the scale it is drawn at, so the view is held in the component's own pixels
+        //and a change of scale leaves it where it was
+        viewport.renderScale = scale;
+
         if (scale != drawnScale)
         {
             //text is rasterized at the scale it was last drawn at, so it has to be asked for again. Also

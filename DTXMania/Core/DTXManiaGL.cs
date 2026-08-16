@@ -1,3 +1,4 @@
+using System.Numerics;
 using DTXMania.Core.Framework;
 using DTXMania.Core.OpenGL;
 using DTXMania.UI;
@@ -57,7 +58,7 @@ public sealed class DTXManiaGL : OpenGlGame
         AsyncTextureUploader.Instance.PumpUploads(AsyncUploadBytesPerFrame);
         FrameProfiler.End(FrameSection.PumpUploads);
 
-        UICanvas.SetWindowSize(windowSize);
+        UICanvas.SetWindowSize(new Vector2(width, height));
 
         if (host.fullscreenMode == FullscreenMode.Windowed)
         {

@@ -45,8 +45,7 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
 
     private bool _vsyncEnabled = true;
     public FullscreenMode fullscreenMode { get; private set; } = FullscreenMode.Windowed;
-    private bool _renderInGameWindow;
-    
+
     private int _windowedX = 80;
     private int _windowedY = 80;
     private int _windowedWidth = 1280;
@@ -87,11 +86,6 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
 
     public bool VsyncEnabled => _vsyncEnabled;
     public FullscreenMode FullscreenMode => fullscreenMode;
-    public bool RenderInGameWindow
-    {
-        get => _renderInGameWindow;
-        set => _renderInGameWindow = value;
-    }
 
     public float Fps => _displayedFps;
     public float FrameTimeMs => _displayedFrameTimeMs;
@@ -539,13 +533,17 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
                 _clearImGuiFocusOnNextFrame = false;
             }
 
+            //read once, because the menu can toggle it later in the same frame and the inspector has to
+            //show what the game actually rendered into
+            bool renderGameToWindow = InspectorManager.rendersGameToWindow;
+
             int targetWidth;
             int targetHeight;
-            if (_renderInGameWindow)
+            if (renderGameToWindow)
             {
-                var desiredRenderSize = GameWindow.DesiredRenderSize;
-                targetWidth = Math.Max((int)desiredRenderSize.X, 1);
-                targetHeight = Math.Max((int)desiredRenderSize.Y, 1);
+                Vector2 renderSize = InspectorManager.gameWindow.renderSize;
+                targetWidth = Math.Clamp((int)renderSize.X, 1, 8192);
+                targetHeight = Math.Clamp((int)renderSize.Y, 1, 8192);
             }
             else
             {
@@ -554,9 +552,9 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
             }
 
             _gameRenderTarget.Resize(targetWidth, targetHeight);
-            _gameRenderTarget.RenderToDefaultFramebuffer = !_renderInGameWindow;
+            _gameRenderTarget.RenderToDefaultFramebuffer = !renderGameToWindow;
             renderer.BeginFrame(targetWidth, targetHeight);
-            if (_renderInGameWindow)
+            if (renderGameToWindow)
             {
                 _gameRenderTarget.BindForRendering();
             }
@@ -580,7 +578,7 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
 
             if (imgui)
             {
-                InspectorManager.Draw(_renderInGameWindow, _gameRenderTarget.TextureId,
+                InspectorManager.Draw(renderGameToWindow, _gameRenderTarget.TextureId,
                     new Vector2(_gameRenderTarget.Width, _gameRenderTarget.Height),
                     new Vector2(Math.Max(_framebufferWidth, 1), Math.Max(_framebufferHeight, 1)));
             }
@@ -588,7 +586,7 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
             FrameProfiler.End(FrameSection.Inspector);
 
             FrameProfiler.Begin(FrameSection.Blit);
-            if (_renderInGameWindow)
+            if (renderGameToWindow)
             {
                 _gameRenderTarget.ClearDefaultFramebuffer(0.08f, 0.09f, 0.12f, 1f, Math.Max(_framebufferWidth, 1), Math.Max(_framebufferHeight, 1));
             }

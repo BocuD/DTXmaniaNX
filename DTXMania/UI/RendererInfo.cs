@@ -20,6 +20,7 @@ internal static class RendererInfo
         ImGui.Text($"Frame time: {host.FrameTimeMs:F2} ms");
         ImGui.Text($"Window: {host.WindowWidth} x {host.WindowHeight}");
         ImGui.Text($"Framebuffer: {host.FramebufferWidth} x {host.FramebufferHeight}");
+        ImGui.Text($"Game render target: {(int)InspectorManager.gameRenderSize.X} x {(int)InspectorManager.gameRenderSize.Y}");
 
         ImGui.Separator();
 
@@ -27,12 +28,6 @@ internal static class RendererInfo
         if (ImGui.Checkbox("VSync", ref vsyncEnabled))
         {
             host.RequestVsync(vsyncEnabled);
-        }
-
-        bool renderInGameWindow = host.RenderInGameWindow;
-        if (ImGui.Checkbox("Render In Game Window", ref renderInGameWindow))
-        {
-            host.RenderInGameWindow = renderInGameWindow;
         }
 
         int fullscreenMode = (int)host.FullscreenMode;
