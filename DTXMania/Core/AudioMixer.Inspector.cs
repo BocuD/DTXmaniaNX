@@ -130,7 +130,7 @@ public static partial class AudioMixer
             : $"{audio.BufferLatencyMs:0.0}ms";
 
         string wait = latency.IsKnown
-            ? $"{latency.Typical:0.0} - {latency.Worst:0.0}ms"
+            ? $"{latency.Ms:0.0}ms"
             : "not reported";
 
         ImGui.TextDisabled($"buffer   {buffer}   latency {wait}");
@@ -158,7 +158,7 @@ public static partial class AudioMixer
             return;
         }
 
-        ImGui.Text($"Hit to sound   {frame + latency.Typical:0.0}ms mean, {frame + latency.Worst:0.0}ms max"
+        ImGui.Text($"Hit to sound   {frame + latency.Ms:0.0}ms"
                    + $"   (frame {frame:0.0}ms)");
     }
 

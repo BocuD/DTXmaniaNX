@@ -52,8 +52,8 @@ public static class Profiler
     {
         ImGui.Begin("Profiler", ImGuiWindowFlags.NoFocusOnAppearing);
 
-        //measuring costs a timestamp per section per frame whether or not anything reads it, so it is off
-        //until asked for and stays on once it is, window open or not
+        //measuring costs a timestamp per section per frame whether or not anything reads it, so it stays
+        //off until asked for
         bool enabled = FrameProfiler.Enabled;
         if (ImGui.Checkbox("Enable profiling", ref enabled))
         {
@@ -301,7 +301,7 @@ public static class Profiler
         ImGui.SameLine();
         ImGui.BeginDisabled(FrameTrace.HeldBytes == 0);
 
-        //the buffer is tens of megabytes and outlives the recording, so there is a way to hand it back
+        //the buffer is tens of megabytes and outlives the recording that filled it
         if (ImGui.Button("Free buffer"))
         {
             FrameTrace.Release();

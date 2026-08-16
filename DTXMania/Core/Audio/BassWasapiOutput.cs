@@ -14,6 +14,8 @@ internal sealed class BassWasapiOutput : IBassOutput
     private readonly bool exclusive;
     private readonly BassOutputClock clock = new();
 
+    private bool eventDriven;
+
     //held as a field or the GC moves the address out from under the unmanaged side
     private readonly WASAPIPROC pull;
 
@@ -39,6 +41,24 @@ internal sealed class BassWasapiOutput : IBassOutput
     public int BufferFrames { get; private set; }
 
     public int PeriodFrames { get; private set; }
+
+    public AudioLatency Latency
+    {
+        get
+        {
+            double buffer = BufferFrames > 0 && SampleRate > 0
+                ? BufferFrames * 1000.0 / SampleRate
+                : BufferMs;
+
+            if (!exclusive || buffer <= 0.0)
+            {
+                return AudioLatency.Unknown;
+            }
+
+            double wait = eventDriven ? buffer * 2.0 : buffer;
+            return new AudioLatency(wait);
+        }
+    }
 
     public float CpuUsage => BassWasapi.BASS_WASAPI_GetCPU();
 
@@ -218,7 +238,9 @@ internal sealed class BassWasapiOutput : IBassOutput
         BASSWASAPIInit flags = BASSWASAPIInit.BASS_WASAPI_AUTOFORMAT
                                | (exclusive ? BASSWASAPIInit.BASS_WASAPI_EXCLUSIVE : BASSWASAPIInit.BASS_WASAPI_SHARED);
 
-        if (COS.bIsWin7OrLater() && options.EventDriven)
+        eventDriven = COS.bIsWin7OrLater() && options.EventDriven;
+
+        if (eventDriven)
         {
             flags |= BASSWASAPIInit.BASS_WASAPI_EVENT;
         }
@@ -320,22 +342,39 @@ internal sealed class BassWasapiOutput : IBassOutput
                             + $"{because} (BASS_WASAPI_Init)[{error}]");
     }
 
-    /// <summary>Both arguments are in sample frames, which is what the device was asked in.</summary>
-    private void Report(float requestedBuffer, float period)
+    /// <summary>Bytes one sample frame takes in <see cref="BASS_WASAPI_INFO.buflen"/>.</summary>
+    //24-bit is ambiguous: WASAPI carries it packed in three bytes or in a 32-bit container, and BASS
+    //documents neither. A buffer is a whole number of frames, so the size that divides buflen is the one
+    //in use
+    private static int BytesPerFrame(BASS_WASAPI_INFO info)
     {
-        BASS_WASAPI_INFO info = BassWasapi.BASS_WASAPI_GetInfo();
+        int channels = Math.Max(info.chans, 1);
 
-        //buflen is bytes, and a frame is one sample on every channel
-        int bytesPerFrame = info.format switch
+        int bytes = info.format switch
         {
             BASSWASAPIFormat.BASS_WASAPI_FORMAT_8BIT => 1,
             BASSWASAPIFormat.BASS_WASAPI_FORMAT_24BIT => 4,
             BASSWASAPIFormat.BASS_WASAPI_FORMAT_32BIT or BASSWASAPIFormat.BASS_WASAPI_FORMAT_FLOAT => 4,
             _ => 2
-        } * info.chans;
+        } * channels;
+
+        //a device that really does pack 24-bit into three bytes divides evenly there and not here
+        if (info.format == BASSWASAPIFormat.BASS_WASAPI_FORMAT_24BIT && info.buflen % bytes != 0)
+        {
+            bytes = 3 * channels;
+        }
+
+        return bytes;
+    }
+
+    /// <summary>Both arguments are in sample frames, which is what the device was asked in.</summary>
+    private void Report(float requestedBuffer, float period)
+    {
+        BASS_WASAPI_INFO info = BassWasapi.BASS_WASAPI_GetInfo();
 
         SampleRate = info.freq;
-        BufferFrames = info.buflen / bytesPerFrame;
+        BufferFrames = info.buflen / BytesPerFrame(info);
+
         PeriodFrames = (int)period;
         //rounded rather than truncated, which would understate the wait by up to a millisecond
         BufferMs = (long)Math.Round(BufferFrames * 1000.0 / info.freq);

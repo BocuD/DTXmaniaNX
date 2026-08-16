@@ -69,7 +69,7 @@ internal sealed class AudioConfigPage : ConfigPage
                     : $"{audio.BufferLatencyMs:0.0}ms";
 
                 string wait = AudioMixer.Device.Latency.IsKnown
-                    ? $"{AudioMixer.Device.Latency.Typical:0.0} - {AudioMixer.Device.Latency.Worst:0.0}ms"
+                    ? $"{AudioMixer.Device.Latency.Ms:0.0}ms"
                     : "not reported";
 
                 latency = $"Buffer: {buffer}\nLatency {wait}";

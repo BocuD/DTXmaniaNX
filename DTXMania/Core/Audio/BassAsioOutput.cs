@@ -48,10 +48,23 @@ internal sealed class BassAsioOutput : IBassOutput
 
     public string FrameUnit => "samples";
 
-    public AudioLatency Latency => latencySamples > 0 && frequency > 0
-        ? AudioLatency.FromBuffer(latencySamples * 1000.0 / frequency,
-            BufferFrames * 1000.0 / frequency, true)
-        : AudioLatency.Unknown;
+    /// <summary>
+    /// The driver's own answer, which covers its whole path rather than just the buffer. The
+    /// <c>asioloop</c> round trip agrees with it to about a millisecond.
+    /// </summary>
+    public AudioLatency Latency
+    {
+        get
+        {
+            if (latencySamples <= 0 || frequency <= 0)
+            {
+                return AudioLatency.Unknown;
+            }
+
+            double wait = latencySamples * 1000.0 / frequency;
+            return new AudioLatency(wait);
+        }
+    }
 
     public float CpuUsage => BassAsio.BASS_ASIO_GetCPU();
 

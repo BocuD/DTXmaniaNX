@@ -1,26 +1,25 @@
 namespace DTXMania.Core.Audio;
 
 /// <summary>
-/// How long a sound waits between being played and reaching the card, in milliseconds. Both -1 when the
-/// device cannot say.
+/// How long a sound waits between being played and reaching the card, in milliseconds. -1 when the device
+/// cannot say.
 /// </summary>
-public readonly record struct AudioLatency(double Typical, double Worst)
+//one figure, not an average and a worst case: a hit measured through a real input lands at the whole
+//figure on every backend that could be measured. See AUDIO.md §9.15
+public readonly record struct AudioLatency(double Ms)
 {
-    public static readonly AudioLatency Unknown = new(-1.0, -1.0);
+    public static readonly AudioLatency Unknown = new(-1.0);
 
-    public bool IsKnown => Worst >= 0.0;
+    public bool IsKnown => Ms >= 0.0;
 
     /// <summary>
     /// The wait a buffer topped up every <paramref name="periodMs"/> imposes. A pulled output is already
-    /// holding the buffer when a sound arrives, so it waits out only what is queued ahead of it. A pushed
-    /// one waits for the next top-up first, so the period lands on top of the buffer instead of inside
-    /// it. Measured in AUDIO.md §9.11.
+    /// holding the buffer when a sound arrives, so it waits out what is queued ahead of it. A pushed one
+    /// waits for the next top-up first, so the period lands on top of the buffer instead of inside it.
     /// </summary>
     public static AudioLatency FromBuffer(double bufferMs, double periodMs, bool pulls) => bufferMs < 0.0
         ? Unknown
-        : pulls
-            ? new AudioLatency(Math.Max(bufferMs - periodMs / 2.0, 0.0), bufferMs)
-            : new AudioLatency(bufferMs + periodMs / 2.0, bufferMs + periodMs);
+        : new AudioLatency(pulls ? bufferMs : bufferMs + periodMs);
 }
 
 /// <summary>

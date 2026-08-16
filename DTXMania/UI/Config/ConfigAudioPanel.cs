@@ -112,7 +112,7 @@ internal sealed class ConfigAudioPanel : UIGroup
 
         lines.Append('\n').Append(japanese ? "レイテンシ " : "Latency ");
         lines.Append(latency.IsKnown
-            ? $"{Ms(latency.Typical)} - {Ms(latency.Worst)}"
+            ? Ms(latency.Ms)
             : japanese ? "不明" : "not reported");
 
         return lines.ToString();

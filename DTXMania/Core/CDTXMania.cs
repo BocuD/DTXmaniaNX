@@ -630,7 +630,7 @@ internal partial class CDTXMania
 
         //the whole wait, not the buffer that is only part of it: a driver whose path reaches past its own
         //buffer reports more, and the buffer size is shown beside it rather than in place of it
-        string wait = latency.IsKnown ? $" {latency.Typical:0.0}-{latency.Worst:0.0}ms" : "";
+        string wait = latency.IsKnown ? $" {latency.Ms:0.0}ms" : "";
 
         string buffer = audio.BufferFrames > 0
             ? $" {audio.BufferFrames} {audio.FrameUnit}"
