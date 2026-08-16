@@ -89,7 +89,7 @@ internal sealed class GraphicsConfigPage : ConfigPage
                 CDTXMania.ConfigIni.SyncGraphicsSettings(CDTXMania.app.maniaGl.host);
 
                 // resolution/renderScale may have changed, so re-render the visible text
-                list.RefreshAllText();
+                list.InvalidateText();
             }
         });
 

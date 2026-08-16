@@ -78,6 +78,7 @@ public sealed class AsyncTextureUploader
                 }
 
                 item = _ready.Dequeue();
+                Stats.SetQueued(_ready.Count);
             }
 
             BaseTexture? tex = null;
@@ -139,10 +140,15 @@ public sealed class AsyncTextureUploader
         }
     }
 
+    internal static readonly Core.Framework.OffThreadStats Stats = new("Texture decode");
+
     private void WorkerLoop()
     {
         foreach (WorkItem item in _work.GetConsumingEnumerable())
         {
+            long started = Stopwatch.GetTimestamp();
+            long allocated = GC.GetAllocatedBytesForCurrentThread();
+
             DecodedPixels pixels;
             try
             {
@@ -154,10 +160,15 @@ public sealed class AsyncTextureUploader
                 pixels = default;
             }
 
+            int depth;
             lock (_readySync)
             {
                 _ready.Enqueue(new ReadyItem(pixels, item.OnUploaded));
+                depth = _ready.Count;
             }
+
+            Stats.Record(Stopwatch.GetTimestamp() - started,
+                GC.GetAllocatedBytesForCurrentThread() - allocated, depth);
         }
     }
 

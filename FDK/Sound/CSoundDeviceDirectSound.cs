@@ -69,7 +69,7 @@ public class CSoundDeviceDirectSound : ISoundDevice
 				long nRet = ctimer.nSystemTimeMs - n前に経過時間を測定したシステム時刻ms;
 				if (nRet < 0)   // カウンタがループしたときは
 				{
-					nRet = (ctimer.nシステム時刻 - long.MinValue) + (long.MaxValue - n前に経過時間を測定したシステム時刻ms) + 1;
+					nRet = (ctimer.nSystemTimeMs - long.MinValue) + (long.MaxValue - n前に経過時間を測定したシステム時刻ms) + 1;
 				}
 				n前に経過時間を測定したシステム時刻ms = ctimer.nSystemTimeMs;
 
@@ -121,9 +121,57 @@ public class CSoundDeviceDirectSound : ISoundDevice
 		BassNet.Registration("dtx2013@gmail.com", "2X9181017152222");
 		#endregion
 
+		#region [ BASS decode device ]
+		//DirectSound plays through SharpDX, but Cmp3ogg decodes mp3/ogg samples via BASS, so
+		//the "No Sound" device (0) is initialized here and released in Dispose();
+		//BASS_ERROR_ALREADY means another device layer already initialized it, which is fine
+		if (!Bass.BASS_Init(0, 48000, BASSInit.BASS_DEVICE_DEFAULT, IntPtr.Zero))
+		{
+			BASSError be = Bass.BASS_ErrorGetCode();
+			if (be != BASSError.BASS_ERROR_ALREADY)
+				Trace.TraceWarning("BASS_Init (decode device) failed: " + be);
+		}
+		#endregion
+
 		#region [ DirectSound デバイスを作成する。]
 		//-----------------
-		DirectSound = new DirectSound();   // 失敗したら例外をそのまま発出。
+		// An empty name, or one that is not installed, takes the default device.
+		Guid gDriver = Guid.Empty;
+		CSoundManager.strActiveOutputDevice = "";
+		if (!string.IsNullOrEmpty(CSoundManager.strRequestedOutputDevice))
+		{
+			foreach (DeviceInformation di in SharpDX.DirectSound.DirectSound.GetDevices())
+			{
+				if (di.Description == CSoundManager.strRequestedOutputDevice && di.DriverGuid != Guid.Empty)
+				{
+					gDriver = di.DriverGuid;
+					CSoundManager.strActiveOutputDevice = di.Description;
+					break;
+				}
+			}
+
+			if (gDriver == Guid.Empty)
+			{
+				Trace.TraceWarning("Requested output device \"{0}\" was not found; using the default device.",
+					CSoundManager.strRequestedOutputDevice);
+			}
+		}
+
+		if (gDriver == Guid.Empty)
+		{
+			// The primary driver already points at the system default, so report it by name. A caller
+			// watching for the default to change would otherwise see a mismatch on every check.
+			foreach (DeviceInformation di in SharpDX.DirectSound.DirectSound.GetDevices())
+			{
+				if (di.DriverGuid == Guid.Empty)
+				{
+					CSoundManager.strActiveOutputDevice = di.Description;
+					break;
+				}
+			}
+		}
+
+		DirectSound = gDriver == Guid.Empty ? new DirectSound() : new DirectSound(gDriver);   // 失敗したら例外をそのまま発出。
 
 		// デバイスの協調レベルを設定する。
 
@@ -273,6 +321,11 @@ public class CSoundDeviceDirectSound : ISoundDevice
 
 			CCommon.tDispose(ref DirectSound);
 			CCommon.tDispose(tmシステムタイマ);
+
+			//free the BASS "No Sound" device used for decoding; teardown runs on the main
+			//thread after all sounds are released, so no decode is in flight, and this is a
+			//harmless no-op if BASS was never initialized
+			Bass.BASS_Free();
 		}
 		if (ctimer != null)
 		{

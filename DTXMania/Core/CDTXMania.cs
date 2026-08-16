@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Runtime;
 using System.Text;
 using System.Windows.Forms;
+using DTXMania.Core.Audio;
 using DTXMania.Core.Framework;
 using DTXMania.Core.OpenGL;
 using DTXMania.SongDb;
@@ -25,6 +26,8 @@ internal partial class CDTXMania
     //these get set when initializing the game
     public static string VERSION_DISPLAY; // = "DTX:NX:A:A:2024051900";
     public static string VERSION; // = "v1.4.2 20240519";
+
+    public static readonly UI.DynamicElements.GameInfo gameInfo = new();
 
     public DTXManiaGL maniaGl;
     
@@ -157,8 +160,6 @@ internal partial class CDTXMania
 
     public static SongDb.SongDb SongDb { get; private set; }
 
-    public static CSoundManager SoundManager { get; private set; }
-
     public static string executableDirectory { get; private set; }
     public static string strCompactModeFile { get; private set; }
     public static CTimer Timer { get; private set; }
@@ -193,6 +194,13 @@ internal partial class CDTXMania
         string appName = "DTXManiaNX";
         VERSION = $"v{assembly.GetName().Version.ToString().Substring(0, 5)} Beta ({buildDate:yyyyMMdd})";
         VERSION_DISPLAY = $"DTX:NX:A:A:{buildDate:yyyyMMdd}00 Beta";
+
+        //global bindings any layout can use: "Game.*" and "Config.*". The providers are read lazily, so
+        //it doesn't matter that ConfigIni isn't loaded yet
+        gameInfo.Version = VERSION;
+        gameInfo.VersionDisplay = VERSION_DISPLAY;
+        UI.DynamicElements.UIDataContext.Global.RegisterObject("Game", () => gameInfo);
+        UI.DynamicElements.UIDataContext.Global.RegisterObject("Config", () => ConfigIni);
 
         #region [ Determine strEXE folder ]
 
@@ -324,7 +332,36 @@ internal partial class CDTXMania
 
     #endregion
 
-    public static float renderScale = 1.0f;
+    /// <summary>
+    /// How many physical pixels one layout pixel is drawn at. Elements that size themselves in pixels read
+    /// this while drawing, so it is the scale of whatever is being drawn right now — the game window, or
+    /// whatever <see cref="PushRenderScale"/> is scoped around.
+    /// </summary>
+    public static float renderScale
+    {
+        get => renderScaleOverride ?? gameRenderScale;
+        set => gameRenderScale = value;
+    }
+
+    private static float gameRenderScale = 1.0f;
+    private static float? renderScaleOverride;
+
+    /// <summary>Draws a subtree at a different scale than the game window, for the length of the returned
+    /// scope. Nests, and cannot outlive the draw it belongs to.</summary>
+    public static RenderScaleScope PushRenderScale(float scale) => new(scale);
+
+    public readonly struct RenderScaleScope : IDisposable
+    {
+        private readonly float? previous;
+
+        internal RenderScaleScope(float scale)
+        {
+            previous = renderScaleOverride;
+            renderScaleOverride = scale;
+        }
+
+        public void Dispose() => renderScaleOverride = previous;
+    }
 
     private static readonly ConcurrentQueue<Action> mainThreadActions = new();
 
@@ -356,13 +393,16 @@ internal partial class CDTXMania
     {
     }
 
+    //held so the per-frame output check does not allocate a delegate
+    private static readonly Func<AudioDeviceOptions> audioSettings = () => AudioDeviceOptions.FromConfig(ConfigIni);
+
     public void Draw()
     {
         PumpMainThreadActions();
 
-        persistentUIGroup.scale.X = renderScale;
-        persistentUIGroup.scale.Y = renderScale;
-        
+        UICanvas.Place(persistentUIGroup);
+
+
         if (!startupFinished)
         {
             StartupTick();
@@ -372,22 +412,15 @@ internal partial class CDTXMania
             return;
         }
         
-        //....????
-        if (SoundManager == null)
-        {
-            return;
-        }
-
-        FrameProfiler.Begin(FrameSection.Sound);
-        SoundManager.t再生中の処理をする();
-        FrameProfiler.End(FrameSection.Sound);
-
         Timer.tUpdate();
-        CSoundManager.rcPerformanceTimer.tUpdate();
+        AudioMixer.Timer.tUpdate();
 
         FrameProfiler.Begin(FrameSection.DeviceScan);
+        CStage.EStage stage = StageManager.rCurrentStage.eStageID;
+
+
         //don't constantly scan unless we lost a midi device
-        if (StageManager.rCurrentStage.eStageID == CStage.EStage.Performance_6)
+        if (stage == CStage.EStage.Performance_6)
         {
             if (InputManager.lostMidiDevice)
             {
@@ -398,7 +431,25 @@ internal partial class CDTXMania
         {
             InputManager.ScanDevices();
         }
+
         FrameProfiler.End(FrameSection.DeviceScan);
+
+        FrameProfiler.Begin(FrameSection.Sound);
+        if (stage != CStage.EStage.Performance_6)
+        {
+            //reclaims released clips when nothing is playing to do it. During a song chips play
+            //constantly and sweep as they go, so there is nothing here for it to find anyway
+            AudioMixer.Update();
+
+            //rebuilding the output reloads every sound and the performance timer, so not during a song.
+            //Not while config is open either: it applies its own device changes on exit
+            if (stage != CStage.EStage.Config_3)
+            {
+                AudioMixer.FollowSystemOutput(audioSettings);
+                OfferAudioConfigOnFailure();
+            }
+        }
+        FrameProfiler.End(FrameSection.Sound);
 
         bool inspectorCapturingKeyboard = InspectorManager.inspectorEnabled && ImGui.GetIO().WantCaptureKeyboard;
         bool textInputDrawableActive = UIImGuiTextInput.IsAnyInputActive;
@@ -420,9 +471,19 @@ internal partial class CDTXMania
             Thread.Sleep(ConfigIni.nSleepNMsEveryFrame); ///?????
         }
         
+        //input is read once, here, by whoever holds focus; stages and elements act on it as they draw
+        UIFocus.Dispatch();
+
         FrameProfiler.Begin(FrameSection.StageDraw);
+
+        FrameProfiler.Begin(FrameSection.StageOwnDraw);
         StageManager.DrawStage();
+        FrameProfiler.End(FrameSection.StageOwnDraw);
+
+        FrameProfiler.Begin(FrameSection.PersistentUiDraw);
         persistentUIGroup.Draw(Matrix4x4.Identity);
+        FrameProfiler.End(FrameSection.PersistentUiDraw);
+
         FrameProfiler.End(FrameSection.StageDraw);
 
         StageManager.HandleStageChanges();
@@ -520,20 +581,64 @@ internal partial class CDTXMania
         return ini;
     }
     
-    public void UpdateWindowTitle()
+    //so the offer comes once per giving up rather than once per frame
+    private bool offeredAudioConfig;
+
+    private void OfferAudioConfigOnFailure()
     {
-        if (SoundManager == null)
+        if (!AudioMixer.OutputGaveUp)
         {
-            maniaGl.SetWindowTitle(strWindowTitle);
+            offeredAudioConfig = false;
             return;
         }
-        
-        string delay = "";
-        if (SoundManager.GetCurrentSoundDeviceType() != "DirectSound")
+
+        if (offeredAudioConfig)
         {
-            delay = "(" + SoundManager.GetSoundDelay() + "ms)";
+            return;
         }
-        maniaGl.SetWindowTitle(strWindowTitle + " (" + SoundManager.GetCurrentSoundDeviceType() + delay + ")");
+
+        offeredAudioConfig = true;
+        _ = OfferAudioConfig();
+    }
+
+    private static async Task OfferAudioConfig()
+    {
+        string title = isJapanese ? "サウンドデバイスを開けません" : "The audio output could not be opened";
+
+        string description = isJapanese
+            ? $"{AudioMixer.OutputError}\n\nCONFIGでサウンドの設定を変更しますか？\n変更しない場合、無音のまま続行します。"
+            : $"{AudioMixer.OutputError}\n\nOpen CONFIG to change the audio settings?\n"
+              + "The game carries on without sound if you do not.";
+
+        string[] options = isJapanese
+            ? ["CONFIGを開く", "無視する"]
+            : ["Open CONFIG", "Ignore"];
+
+        //anything but a deliberate yes leaves it alone, including dismissing the dialog
+        if (await Modal.ShowAsync(persistentUIGroup, title, description, options) != 0)
+        {
+            return;
+        }
+
+        RunOnMainThread(() => StageManager.tChangeStage(StageManager.stageConfig));
+    }
+
+    public void UpdateWindowTitle()
+    {
+        AudioDeviceStatus audio = AudioMixer.Device.Status;
+        AudioLatency latency = AudioMixer.Device.Latency;
+
+        //the whole wait, not the buffer that is only part of it: a driver whose path reaches past its own
+        //buffer reports more, and the buffer size is shown beside it rather than in place of it
+        string wait = latency.IsKnown ? $" {latency.Ms:0.0}ms" : "";
+
+        string buffer = audio.BufferFrames > 0
+            ? $" {audio.BufferFrames} {audio.FrameUnit}"
+            : audio.BufferMs < 0
+                ? ""
+                : $" {audio.BufferLatencyMs:0.0}ms buffer";
+
+        maniaGl.SetWindowTitle($"{strWindowTitle} {audio.Backend}{wait}{buffer}");
     }
     
     public static SongNode chosenSong { get; private set; }
@@ -543,7 +648,8 @@ internal partial class CDTXMania
     public static void UpdateSelection(SongNode song, CChartData chartData, int difficulty)
     {
         chosenSong = song;
-        chosenChartData = chartData;
+
+        chosenChartData = chartData?.ForCurrentInstrument();
         confirmedSongDifficulty = difficulty;
     }
 
@@ -601,7 +707,7 @@ internal partial class CDTXMania
                 Skin = null;
             }
         });
-        SafeTerminate("SoundManager", () => { SoundManager.Dispose(); });
+        SafeTerminate("AudioMixer", () => { AudioMixer.Shutdown(); });
         SafeTerminate("Pad", () => { Pad = null; });
         SafeTerminate("InputManager", () => { InputManager.Dispose(); });
         SafeTerminate("ActDisplayString", () => { actDisplayString.OnDeactivate(); });

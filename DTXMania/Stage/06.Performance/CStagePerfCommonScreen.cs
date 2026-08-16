@@ -49,7 +49,7 @@ internal abstract class CStagePerfCommonScreen : CStage
 
                 // playback speed is automatically applied as chip timings are modified,
                 // but the current time must be accounted for in start/end to display correct timestamps when seeking around
-                Timestamps = Timestamps.FromTimeSpan((nEndTimeMs - CSoundManager.rcPerformanceTimer.nCurrentTime) / 1000.0),
+                Timestamps = Timestamps.FromTimeSpan((nEndTimeMs - AudioMixer.Timer.nCurrentTime) / 1000.0),
             };
         }
     }
@@ -290,25 +290,28 @@ internal abstract class CStagePerfCommonScreen : CStage
     public bool bIsFinishedFadeout;
     public bool bIsFinishedPlaying;
     
-    public override void InitializeBaseUI()
+    public override void RegisterBindings()
+    {
+    }
+
+    public override void BuildDefaultLayout()
+    {
+    }
+
+    //the performance screens are built entirely in code: bespoke chip/lane rendering, not a skinnable layout
+    public override void OnLayoutReady()
     {
         video.IntegrateUI(ui);
 
         ui.AddChild(new InfoBox());
-        
+
         if (CDTXMania.ConfigIni.nShowPlaySpeed == (int)EShowPlaySpeed.ON
             || CDTXMania.ConfigIni.nShowPlaySpeed == (int)EShowPlaySpeed.IF_CHANGED_IN_GAME)
         {
-            //we need to clear this reference because when the stage gets
-            //unloaded the reference doesn't get cleared automatically
+            //the reference isn't cleared automatically when the stage is unloaded
             playspeedText = null;
             tUpdatePlayspeedText();
         }
-    }
-
-    public override void InitializeDefaultUI()
-    {
-        
     }
 
     // CStage 実装
@@ -401,14 +404,12 @@ internal abstract class CStagePerfCommonScreen : CStage
         //this.bIsAutoPlay.Bass = CDTXMania.ConfigIni.bAllBassAreAutoPlay;										// #23559 2011.7.28 yyagi
         actGauge.Init(CDTXMania.ConfigIni.nRisky);									// #23559 2011.7.28 yyagi
 
-        nPolyphonicSounds = CDTXMania.ConfigIni.nPoliphonicSounds;
 
         //let the loading sound gracefully fade out
         CDTXMania.Skin.tRemoveMixerAll(CDTXMania.Skin.soundNowLoading);
 
         //lockmixer = new object();
-        queueMixerSound = new Queue<stmixer>(64);
-        bIsDirectSound = (CDTXMania.SoundManager.GetCurrentSoundDeviceType() == "DirectSound");
+        bNeedsDriftCorrection = AudioMixer.Device.NeedsDriftCorrection;
         dbPlaySpeed = CDTXMania.ConfigIni.nPlaySpeed / 20.0;
         bValidScore = true;
 
@@ -430,13 +431,9 @@ internal abstract class CStagePerfCommonScreen : CStage
                     if (listWAV.ContainsKey(pChip.nIntegerValue_InternalNumber))
                     {
                         CDTX.CWAV wc = listWAV[pChip.nIntegerValue_InternalNumber];
-                        for (int i = 0; i < nPolyphonicSounds; i++)
+                        if (wc.clip != null)
                         {
-                            if (wc.rSound[i] != null)
-                            {
-                                CDTXMania.SoundManager.AddMixer(wc.rSound[i], dbPlaySpeed, pChip.bChipKeepsPlayingAfterPerfEnds);
-                                //AddMixer( wc.rSound[ i ] );		// 最初はqueueを介さず直接ミキサー登録する
-                            }
+                            AudioMixer.AttachToMixer(wc.clip);
                         }
                     }
                 }
@@ -480,8 +477,6 @@ internal abstract class CStagePerfCommonScreen : CStage
         //listWAV.Clear();
         listWAV = null;
         listChip = null;
-        queueMixerSound.Clear();
-        queueMixerSound = null;
         
         base.OnDeactivate();
     }
@@ -737,13 +732,6 @@ internal abstract class CStagePerfCommonScreen : CStage
             }
         }
     }
-    protected struct stmixer
-    {
-        internal bool bIsAdd;
-        internal CSound csound;
-        internal bool b演奏終了後も再生が続くチップである;
-    };
-
     protected enum HitState
     {
         NotHit,
@@ -756,6 +744,10 @@ internal abstract class CStagePerfCommonScreen : CStage
     public CActPerfBGA actBGA;
     
     protected CActLVLNFont actLVFont;
+
+    //one buffer for every pad read in a frame; the reads are sequential and each is done with before the
+    //next one starts
+    protected readonly List<STInputEvent> listPadEvents = [];
     protected ActPerfNewFire[] actChipFireGB;
     public CActPerfCommonCombo actCombo;
     protected CActPerfCommonDanger actDANGER;
@@ -823,9 +815,7 @@ internal abstract class CStagePerfCommonScreen : CStage
     //		protected int nLastPlayedWAVNumber.GUITAR;
     //		protected int nLastPlayedWAVNumber.BASS;
 
-    protected volatile Queue<stmixer> queueMixerSound; // #24820 2013.1.21 yyagi まずは単純にAdd/Removeを1個のキューでまとめて管理するやり方で設計する
-    protected DateTime dtLastQueueOperation; //
-    protected bool bIsDirectSound; //
+    protected bool bNeedsDriftCorrection;
     protected double dbPlaySpeed;
     protected bool bValidScore;
     protected STDGBVALUE<int> nJudgeLinePosY_delta; // #31602 2013.6.23 yyagi 表示遅延対策として、判定ラインの表示位置をずらす機能を追加する
@@ -857,7 +847,6 @@ internal abstract class CStagePerfCommonScreen : CStage
     protected STDGBVALUE<int> nInputAdjustTimeMs;		// #23580 2011.1.3 yyagi
     public STAUTOPLAY bIsAutoPlay;		// #24239 2011.1.23 yyagi
     //		protected int nRisky_InitialVar, nRiskyTime;		// #23559 2011.7.28 yyagi → CAct演奏ゲージ共通クラスに隠蔽
-    protected int nPolyphonicSounds;
 
     protected List<CChip> listChip;
     protected Dictionary<int, CDTX.CWAV> listWAV;
@@ -892,55 +881,6 @@ internal abstract class CStagePerfCommonScreen : CStage
     //Long Note Accumulated Bonus (For Max score computation only)
     private STDGBVALUE<int> nAccumulatedLongNoteBonusScore;
 
-
-    public void AddMixer(CSound cs, bool _b演奏終了後も再生が続くチップである)
-    {
-        stmixer stm = new()
-        {
-            bIsAdd = true,
-            csound = cs,
-            b演奏終了後も再生が続くチップである = _b演奏終了後も再生が続くチップである
-        };
-        queueMixerSound.Enqueue(stm);
-        //Debug.WriteLine("★Queue: add " + Path.GetFileName(stm.csound.strFilename));
-    }
-    public void RemoveMixer(CSound cs)
-    {
-        stmixer stm = new()
-        {
-            bIsAdd = false,
-            csound = cs,
-            b演奏終了後も再生が続くチップである = false
-        };
-        queueMixerSound.Enqueue(stm);
-        //Debug.WriteLine("★Queue: remove " + Path.GetFileName(stm.csound.strFilename));
-    }
-    public void ManageMixerQueue()
-    {
-        // もしサウンドの登録/削除が必要なら、実行する
-        if (queueMixerSound.Count > 0)
-        {
-            //Debug.WriteLine( "☆queueLength=" + queueMixerSound.Count );
-            DateTime dtnow = DateTime.Now;
-            TimeSpan ts = dtnow - dtLastQueueOperation;
-            if (ts.Milliseconds > 7)
-            {
-                for (int i = 0; i < 2 && queueMixerSound.Count > 0; i++)
-                {
-                    dtLastQueueOperation = dtnow;
-                    stmixer stm = queueMixerSound.Dequeue();
-                    if (stm.bIsAdd)
-                    {
-                        CDTXMania.SoundManager.AddMixer(stm.csound, dbPlaySpeed, stm.b演奏終了後も再生が続くチップである);
-                    }
-                    else
-                    {
-                        CDTXMania.SoundManager.RemoveMixer(stm.csound);
-                    }
-                }
-            }
-        }
-    }
 
     protected EJudgement e指定時刻からChipのJUDGEを返す( long nTime, CChip pChip, int nInputAdjustTime, bool saveLag = true )
     {
@@ -1373,7 +1313,8 @@ internal abstract class CStagePerfCommonScreen : CStage
     {
         if ( CDTXMania.chosenSong != null )
         {
-            actStatusPanel.tSetDifficultyLabelFromScript( CDTXMania.chosenSong.difficultyLabel[ CDTXMania.confirmedSongDifficulty ] );
+            actStatusPanel.tSetDifficultyLabel(CDTXMania.chosenSong.difficultyLabel[CDTXMania.confirmedSongDifficulty],
+                CDTXMania.confirmedSongDifficulty);
         }
     }
     protected EJudgement tProcessChipHit(long nHitTime, CChip pChip)  // tチップのヒット処理
@@ -2264,15 +2205,15 @@ internal abstract class CStagePerfCommonScreen : CStage
     protected CChip r次にくるギターChipを更新して返す()
     {
         int nInputAdjustTime = bIsAutoPlay.GtPick ? 0 : nInputAdjustTimeMs.Guitar;
-        //this.rNextGuitarChip = this.r指定時刻に一番近い未ヒットChip(CSoundManager.rcPerformanceTimer.nCurrentTime, (int)EChannel.Guitar_WailingSound, nInputAdjustTime, 500);
-        rNextGuitarChip = r指定時刻に一番近いChip(CSoundManager.rcPerformanceTimer.nCurrentTime, EChannel.Guitar_Open, nInputAdjustTime, 800, b過去優先: true, HitState.NotHit, EInstrumentPart.GUITAR);
+        //this.rNextGuitarChip = this.r指定時刻に一番近い未ヒットChip(AudioMixer.Timer.nCurrentTime, (int)EChannel.Guitar_WailingSound, nInputAdjustTime, 500);
+        rNextGuitarChip = r指定時刻に一番近いChip(AudioMixer.Timer.nCurrentTime, EChannel.Guitar_Open, nInputAdjustTime, 800, b過去優先: true, HitState.NotHit, EInstrumentPart.GUITAR);
         return rNextGuitarChip;
     }
     protected CChip r次にくるベースChipを更新して返す()  // r次にくるベースChipを更新して返す
     {
         int nInputAdjustTime = bIsAutoPlay.BsPick ? 0 : nInputAdjustTimeMs.Bass;//Guitar_xGBYP
-        //this.rNextBassChip = this.r指定時刻に一番近い未ヒットChip(CSoundManager.rcPerformanceTimer.nCurrentTime, (int)EChannel.Guitar_xGBYP, nInputAdjustTime, 500);
-        rNextBassChip = r指定時刻に一番近いChip(CSoundManager.rcPerformanceTimer.nCurrentTime, EChannel.Bass_Open, nInputAdjustTime, 800, b過去優先: true, HitState.NotHit, EInstrumentPart.BASS);
+        //this.rNextBassChip = this.r指定時刻に一番近い未ヒットChip(AudioMixer.Timer.nCurrentTime, (int)EChannel.Guitar_xGBYP, nInputAdjustTime, 500);
+        rNextBassChip = r指定時刻に一番近いChip(AudioMixer.Timer.nCurrentTime, EChannel.Bass_Open, nInputAdjustTime, 800, b過去優先: true, HitState.NotHit, EInstrumentPart.BASS);
         return rNextBassChip;
     }
 
@@ -2319,13 +2260,13 @@ internal abstract class CStagePerfCommonScreen : CStage
             bPAUSE = !bPAUSE;
             if (bPAUSE)
             {
-                CSoundManager.rcPerformanceTimer.tPause();
+                AudioMixer.Timer.tPause();
                 CDTXMania.Timer.tPause();
                 CDTXMania.DTX.tPausePlaybackForAllChips();
             }
             else
             {
-                CSoundManager.rcPerformanceTimer.tResume();
+                AudioMixer.Timer.tResume();
                 CDTXMania.Timer.tResume();
                 CDTXMania.DTX.tResumePlaybackForAllChips();
             }
@@ -2380,7 +2321,7 @@ internal abstract class CStagePerfCommonScreen : CStage
         {
             if (bPAUSE)
             {
-                CSoundManager.rcPerformanceTimer.tResume();
+                AudioMixer.Timer.tResume();
                 CDTXMania.Timer.tResume();
             }
             ePhaseID = EPhase.PERFORMANCE_STAGE_RESTART;
@@ -2389,37 +2330,37 @@ internal abstract class CStagePerfCommonScreen : CStage
         else if (CDTXMania.Pad.bPressed(EKeyConfigPart.SYSTEM, EKeyConfigPad.SkipForward))
         {
             bIsTrainingMode = true;
-            Trace.TraceInformation("SKIP FORWARD CSoundManager.rcPerformanceTimer.nCurrentTime=" + CSoundManager.rcPerformanceTimer.nCurrentTime + ", CDTXMania.Timer.nCurrentTime=" + CDTXMania.Timer.nCurrentTime);
-            tJumpInSong(CSoundManager.rcPerformanceTimer.nCurrentTime + CDTXMania.ConfigIni.nSkipTimeMs);
+            Trace.TraceInformation("SKIP FORWARD AudioMixer.Timer.nCurrentTime=" + AudioMixer.Timer.nCurrentTime + ", CDTXMania.Timer.nCurrentTime=" + CDTXMania.Timer.nCurrentTime);
+            tJumpInSong(AudioMixer.Timer.nCurrentTime + CDTXMania.ConfigIni.nSkipTimeMs);
         }
         else if (CDTXMania.Pad.bPressed(EKeyConfigPart.SYSTEM, EKeyConfigPad.SkipBackward))
         {
             bIsTrainingMode = true;
-            Trace.TraceInformation("SKIP BACKWARD CSoundManager.rcPerformanceTimer.nCurrentTime=" + CSoundManager.rcPerformanceTimer.nCurrentTime + ", CDTXMania.Timer.nCurrentTime=" + CDTXMania.Timer.nCurrentTime);
-            tJumpInSong(Math.Max(0, CSoundManager.rcPerformanceTimer.nCurrentTime - CDTXMania.ConfigIni.nSkipTimeMs));
+            Trace.TraceInformation("SKIP BACKWARD AudioMixer.Timer.nCurrentTime=" + AudioMixer.Timer.nCurrentTime + ", CDTXMania.Timer.nCurrentTime=" + CDTXMania.Timer.nCurrentTime);
+            tJumpInSong(Math.Max(0, AudioMixer.Timer.nCurrentTime - CDTXMania.ConfigIni.nSkipTimeMs));
         }
         else if (CDTXMania.Pad.bPressed(EKeyConfigPart.SYSTEM, EKeyConfigPad.LoopCreate))
         {
             bIsTrainingMode = true;
             if (LoopBeginMs == -1)
             {
-                Trace.TraceInformation("INSERT LOOP BEGIN CSoundManager.rcPerformanceTimer.nCurrentTime=" + CSoundManager.rcPerformanceTimer.nCurrentTime + ", CDTXMania.Timer.nCurrentTime=" + CDTXMania.Timer.nCurrentTime);
-                LoopBeginMs = CSoundManager.rcPerformanceTimer.nCurrentTime;
+                Trace.TraceInformation("INSERT LOOP BEGIN AudioMixer.Timer.nCurrentTime=" + AudioMixer.Timer.nCurrentTime + ", CDTXMania.Timer.nCurrentTime=" + CDTXMania.Timer.nCurrentTime);
+                LoopBeginMs = AudioMixer.Timer.nCurrentTime;
             }
             else
             {
                 if (LoopEndMs == -1)
                 {
-                    if (LoopBeginMs < CSoundManager.rcPerformanceTimer.nCurrentTime)
+                    if (LoopBeginMs < AudioMixer.Timer.nCurrentTime)
                     {
-                        Trace.TraceInformation("INSERT LOOP END CSoundManager.rcPerformanceTimer.nCurrentTime=" + CSoundManager.rcPerformanceTimer.nCurrentTime + ", CDTXMania.Timer.nCurrentTime=" + CDTXMania.Timer.nCurrentTime);
-                        LoopEndMs = CSoundManager.rcPerformanceTimer.nCurrentTime;
+                        Trace.TraceInformation("INSERT LOOP END AudioMixer.Timer.nCurrentTime=" + AudioMixer.Timer.nCurrentTime + ", CDTXMania.Timer.nCurrentTime=" + CDTXMania.Timer.nCurrentTime);
+                        LoopEndMs = AudioMixer.Timer.nCurrentTime;
                     }
                     else
                     {
-                        Trace.TraceInformation("INSERT LOOP BEGIN AND SWAP CSoundManager.rcPerformanceTimer.nCurrentTime=" + CSoundManager.rcPerformanceTimer.nCurrentTime + ", CDTXMania.Timer.nCurrentTime=" + CDTXMania.Timer.nCurrentTime);
+                        Trace.TraceInformation("INSERT LOOP BEGIN AND SWAP AudioMixer.Timer.nCurrentTime=" + AudioMixer.Timer.nCurrentTime + ", CDTXMania.Timer.nCurrentTime=" + CDTXMania.Timer.nCurrentTime);
                         LoopEndMs = LoopBeginMs;
-                        LoopBeginMs = CSoundManager.rcPerformanceTimer.nCurrentTime;
+                        LoopBeginMs = AudioMixer.Timer.nCurrentTime;
                     }
                 }
                 //Else loop already set, do nothing
@@ -2427,7 +2368,7 @@ internal abstract class CStagePerfCommonScreen : CStage
         }
         else if (CDTXMania.Pad.bPressed(EKeyConfigPart.SYSTEM, EKeyConfigPad.LoopDelete))
         {
-            Trace.TraceInformation("REMOVE LOOP CSoundManager.rcPerformanceTimer.nCurrentTime=" + CSoundManager.rcPerformanceTimer.nCurrentTime + ", CDTXMania.Timer.nCurrentTime=" + CDTXMania.Timer.nCurrentTime);
+            Trace.TraceInformation("REMOVE LOOP AudioMixer.Timer.nCurrentTime=" + AudioMixer.Timer.nCurrentTime + ", CDTXMania.Timer.nCurrentTime=" + CDTXMania.Timer.nCurrentTime);
             LoopBeginMs = -1;
             LoopEndMs = -1;
         }
@@ -2825,10 +2766,10 @@ internal abstract class CStagePerfCommonScreen : CStage
         {
             CChip pChip = dTX.listChip[nCurrentTopChip];
             //Debug.WriteLine( "nCurrentTopChip=" + nCurrentTopChip + ", ch=" + pChip.nChannelNumber.ToString("x2") + ", 発音位置=" + pChip.nPlaybackPosition + ", 発声時刻ms=" + pChip.nPlaybackTimeMs );
-            //pChip.nDistanceFromBar.Drums = (int)((pChip.nPlaybackTimeMs - CSoundManager.rcPerformanceTimer.nCurrentTime) * ScrollSpeedDrums);
-            //pChip.nDistanceFromBar.Guitar = (int)((pChip.nPlaybackTimeMs - CSoundManager.rcPerformanceTimer.nCurrentTime) * ScrollSpeedGuitar);
-            //pChip.nDistanceFromBar.Bass = (int)((pChip.nPlaybackTimeMs - CSoundManager.rcPerformanceTimer.nCurrentTime) * ScrollSpeedBass);
-            pChip.ComputeDistanceFromBar(CSoundManager.rcPerformanceTimer.nCurrentTime, actScrollSpeed.db現在の譜面スクロール速度);
+            //pChip.nDistanceFromBar.Drums = (int)((pChip.nPlaybackTimeMs - AudioMixer.Timer.nCurrentTime) * ScrollSpeedDrums);
+            //pChip.nDistanceFromBar.Guitar = (int)((pChip.nPlaybackTimeMs - AudioMixer.Timer.nCurrentTime) * ScrollSpeedGuitar);
+            //pChip.nDistanceFromBar.Bass = (int)((pChip.nPlaybackTimeMs - AudioMixer.Timer.nCurrentTime) * ScrollSpeedBass);
+            pChip.ComputeDistanceFromBar(AudioMixer.Timer.nCurrentTime, actScrollSpeed.db現在の譜面スクロール速度);
             if (Math.Min(Math.Min(pChip.nDistanceFromBar.Drums, pChip.nDistanceFromBar.Guitar), pChip.nDistanceFromBar.Bass) > 600)
             {
                 break;
@@ -2862,9 +2803,9 @@ internal abstract class CStagePerfCommonScreen : CStage
 
             int instIndex = (int) pChip.eInstrumentPart;
             if ( ( ( pChip.eInstrumentPart != EInstrumentPart.UNKNOWN ) && !pChip.bHit ) &&
-                 ( ( pChip.nDistanceFromBar[ instIndex ] < 0 ) && ( e指定時刻からChipのJUDGEを返す( CSoundManager.rcPerformanceTimer.nCurrentTime, pChip, nInputAdjustTime ) == EJudgement.Miss ) ) )
+                 ( ( pChip.nDistanceFromBar[ instIndex ] < 0 ) && ( e指定時刻からChipのJUDGEを返す( AudioMixer.Timer.nCurrentTime, pChip, nInputAdjustTime ) == EJudgement.Miss ) ) )
             {
-                tProcessChipHit( CSoundManager.rcPerformanceTimer.nCurrentTime, pChip );
+                tProcessChipHit( AudioMixer.Timer.nCurrentTime, pChip );
             }
 
             // #35411 chnmr0 add (ターゲットゴースト)
@@ -2939,7 +2880,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                         pChip.bHit = true;
                         if (configIni.bBGM音を発声する)
                         {
-                            dTX.tPlayChip(pChip, CSoundManager.rcPerformanceTimer.n前回リセットした時のシステム時刻 + pChip.nPlaybackTimeMs, (int)ELane.BGM, dTX.nモニタを考慮した音量(EInstrumentPart.UNKNOWN));
+                            dTX.tPlayChip(pChip, AudioMixer.Timer.nResetAtMs + pChip.nPlaybackTimeMs, (int)ELane.BGM, dTX.nモニタを考慮した音量(EInstrumentPart.UNKNOWN));
                         }
                     }
                     break;
@@ -3184,7 +3125,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                         if (configIni.bBGM音を発声する)
                         {   
                             dTX.tStopPlayingWav(nLastPlayedBGMWAVNumber[pChip.nChannelNumber - EChannel.SE01]);
-                            dTX.tPlayChip(pChip, CSoundManager.rcPerformanceTimer.n前回リセットした時のシステム時刻 + pChip.nPlaybackTimeMs, (int)ELane.BGM, dTX.nモニタを考慮した音量(EInstrumentPart.UNKNOWN));
+                            dTX.tPlayChip(pChip, AudioMixer.Timer.nResetAtMs + pChip.nPlaybackTimeMs, (int)ELane.BGM, dTX.nモニタを考慮した音量(EInstrumentPart.UNKNOWN));
                             nLastPlayedBGMWAVNumber[pChip.nChannelNumber - EChannel.SE01] = pChip.nIntegerValue_InternalNumber;
                         }
                     }
@@ -3218,7 +3159,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                         pChip.bHit = true;
                         if (configIni.bBGM音を発声する)
                         {
-                            dTX.tPlayChip(pChip, CSoundManager.rcPerformanceTimer.n前回リセットした時のシステム時刻 + pChip.nPlaybackTimeMs, (int)ELane.BGM, dTX.nモニタを考慮した音量(EInstrumentPart.UNKNOWN));
+                            dTX.tPlayChip(pChip, AudioMixer.Timer.nResetAtMs + pChip.nPlaybackTimeMs, (int)ELane.BGM, dTX.nモニタを考慮した音量(EInstrumentPart.UNKNOWN));
                         }
                     }
                     break;
@@ -3257,7 +3198,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                         //								int[] ch = { 0x11, 0x16, 0x19, 0x1A };
                         //								pChip.nChannelNumber = ch[ pChip.nChannelNumber - 0x84 ]; 
                         //							}
-                        tPlaySound(pChip, CSoundManager.rcPerformanceTimer.n前回リセットした時のシステム時刻 + pChip.nPlaybackTimeMs, pp, dTX.nモニタを考慮した音量(pp));
+                        tPlaySound(pChip, AudioMixer.Timer.nResetAtMs + pChip.nPlaybackTimeMs, pp, dTX.nモニタを考慮した音量(pp));
                     }
                     break;
                 #endregion
@@ -3404,13 +3345,9 @@ internal abstract class CStagePerfCommonScreen : CStage
                         if (listWAV.ContainsKey(pChip.nIntegerValue_InternalNumber)) // 参照が遠いので後日最適化する
                         {
                             CDTX.CWAV wc = listWAV[pChip.nIntegerValue_InternalNumber];
-                            for (int i = 0; i < nPolyphonicSounds; i++)
+                            if (wc.clip != null)
                             {
-                                if (wc.rSound[i] != null)
-                                {
-                                    //CDTXMania.SoundManager.AddMixer( wc.rSound[ i ] );
-                                    AddMixer(wc.rSound[i], pChip.bChipKeepsPlayingAfterPerfEnds);
-                                }
+                                AudioMixer.AttachToMixer(wc.clip);
                             }
                         }
                     }
@@ -3425,13 +3362,9 @@ internal abstract class CStagePerfCommonScreen : CStage
                         if (listWAV.ContainsKey(pChip.nIntegerValue_InternalNumber))	// 参照が遠いので後日最適化する
                         {
                             CDTX.CWAV wc = listWAV[pChip.nIntegerValue_InternalNumber];
-                            for (int i = 0; i < nPolyphonicSounds; i++)
+                            if (wc.clip != null)
                             {
-                                if (wc.rSound[i] != null)
-                                {
-                                    //CDTXMania.SoundManager.RemoveMixer( wc.rSound[ i ] );
-                                    RemoveMixer(wc.rSound[i]);
-                                }
+                                AudioMixer.DetachFromMixer(wc.clip);
                             }
                         }
                     }
@@ -3477,10 +3410,10 @@ internal abstract class CStagePerfCommonScreen : CStage
         {
             CChip pChip = dTX.listChip[nCurrentTopChip];
             //Debug.WriteLine( "nCurrentTopChip=" + nCurrentTopChip + ", ch=" + pChip.nChannelNumber.ToString("x2") + ", 発音位置=" + pChip.nPlaybackPosition + ", 発声時刻ms=" + pChip.nPlaybackTimeMs );
-            //pChip.nDistanceFromBar.Drums = (int)((pChip.nPlaybackTimeMs - CSoundManager.rcPerformanceTimer.nCurrentTime) * ScrollSpeedDrums);
-            //pChip.nDistanceFromBar.Guitar = (int)((pChip.nPlaybackTimeMs - CSoundManager.rcPerformanceTimer.nCurrentTime) * ScrollSpeedGuitar);
-            //pChip.nDistanceFromBar.Bass = (int)((pChip.nPlaybackTimeMs - CSoundManager.rcPerformanceTimer.nCurrentTime) * ScrollSpeedBass);
-            pChip.ComputeDistanceFromBar(CSoundManager.rcPerformanceTimer.nCurrentTime, actScrollSpeed.db現在の譜面スクロール速度);
+            //pChip.nDistanceFromBar.Drums = (int)((pChip.nPlaybackTimeMs - AudioMixer.Timer.nCurrentTime) * ScrollSpeedDrums);
+            //pChip.nDistanceFromBar.Guitar = (int)((pChip.nPlaybackTimeMs - AudioMixer.Timer.nCurrentTime) * ScrollSpeedGuitar);
+            //pChip.nDistanceFromBar.Bass = (int)((pChip.nPlaybackTimeMs - AudioMixer.Timer.nCurrentTime) * ScrollSpeedBass);
+            pChip.ComputeDistanceFromBar(AudioMixer.Timer.nCurrentTime, actScrollSpeed.db現在の譜面スクロール速度);
             if (Math.Min(Math.Min(pChip.nDistanceFromBar.Drums, pChip.nDistanceFromBar.Guitar), pChip.nDistanceFromBar.Bass) > 600)
             {
                 break;
@@ -3596,10 +3529,10 @@ internal abstract class CStagePerfCommonScreen : CStage
         {
             CChip pChip = dTX.listChip[nCurrentTopChip];
             //Debug.WriteLine( "nCurrentTopChip=" + nCurrentTopChip + ", ch=" + pChip.nChannelNumber.ToString("x2") + ", 発音位置=" + pChip.nPlaybackPosition + ", 発声時刻ms=" + pChip.nPlaybackTimeMs );
-            //pChip.nDistanceFromBar.Drums = (int)((pChip.nPlaybackTimeMs - CSoundManager.rcPerformanceTimer.nCurrentTime) * ScrollSpeedDrums);
-            //pChip.nDistanceFromBar.Guitar = (int)((pChip.nPlaybackTimeMs - CSoundManager.rcPerformanceTimer.nCurrentTime) * ScrollSpeedGuitar);
-            //pChip.nDistanceFromBar.Bass = (int)((pChip.nPlaybackTimeMs - CSoundManager.rcPerformanceTimer.nCurrentTime) * ScrollSpeedBass);
-            pChip.ComputeDistanceFromBar(CSoundManager.rcPerformanceTimer.nCurrentTime, actScrollSpeed.db現在の譜面スクロール速度);
+            //pChip.nDistanceFromBar.Drums = (int)((pChip.nPlaybackTimeMs - AudioMixer.Timer.nCurrentTime) * ScrollSpeedDrums);
+            //pChip.nDistanceFromBar.Guitar = (int)((pChip.nPlaybackTimeMs - AudioMixer.Timer.nCurrentTime) * ScrollSpeedGuitar);
+            //pChip.nDistanceFromBar.Bass = (int)((pChip.nPlaybackTimeMs - AudioMixer.Timer.nCurrentTime) * ScrollSpeedBass);
+            pChip.ComputeDistanceFromBar(AudioMixer.Timer.nCurrentTime, actScrollSpeed.db現在の譜面スクロール速度);
             if (Math.Min(Math.Min(pChip.nDistanceFromBar.Drums, pChip.nDistanceFromBar.Guitar), pChip.nDistanceFromBar.Bass) > 600)
             {
                 break;
@@ -3808,7 +3741,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                     //    this.actWailingBonus.Start( inst, this.r現在の歓声Chip[indexInst] );
                     // #23886 2012.5.22 yyagi; To support auto Wailing; Don't do wailing for ALL wailing chips. Do wailing for queued wailing chip.
                     // wailing chips are queued when 1) manually wailing and not missed at that time 2) AutoWailing=ON and not missed at that time
-                    long nTimeStamp_Wailed = pChip.nPlaybackTimeMs + CSoundManager.rcPerformanceTimer.n前回リセットした時のシステム時刻;
+                    long nTimeStamp_Wailed = pChip.nPlaybackTimeMs + AudioMixer.Timer.nResetAtMs;
                     DoWailingFromQueue(inst, nTimeStamp_Wailed, autoW);
                 }
             }
@@ -3940,7 +3873,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                 txHitBar.tDraw2D(295 + l_xOffset, y, new RectangleF(0, 0, l_drumPanelWidth, 6));
             }
             if (CDTXMania.ConfigIni.bShowPerformanceInformation)
-                actLVFont.tDrawString(295, (CDTXMania.ConfigIni.bReverse.Drums ? y - 20 : y + 8), CDTXMania.ConfigIni.nJudgeLine.Drums.ToString());
+                actLVFont.tDrawString(295, (CDTXMania.ConfigIni.bReverse.Drums ? y - 20 : y + 8), CDTXMania.ConfigIni.nJudgeLine.Drums);
         }
     }
 
@@ -4647,7 +4580,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                     {
                         int nLongNoteNextPart = nロングノートPart[(int)inst] + 1;
                         int nLongNoteNextPartTime = chipロングノートHit中[(int)inst].nPlaybackTimeMs + (nLongNoteNextPart * nCurrentLongNoteDuration[(int)inst] / 6);
-                        if (CSoundManager.rcPerformanceTimer.nCurrentTime >= nLongNoteNextPartTime)
+                        if (AudioMixer.Timer.nCurrentTime >= nLongNoteNextPartTime)
                         {
                             //Fire off 100 bonus pt up to 500 pts for holding long notes
                             actScore.Add(inst, bIsAutoPlay, 100);
@@ -4660,7 +4593,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                         }
                     }
                 }
-                else if (e指定時刻からChipのJUDGEを返す(CSoundManager.rcPerformanceTimer.nCurrentTime, chipロングノートHit中[(int)inst].chipLongNoteEndPosition, CDTXMania.ConfigIni.nInputAdjustTimeMs[(int)inst]) >= EJudgement.Miss)
+                else if (e指定時刻からChipのJUDGEを返す(AudioMixer.Timer.nCurrentTime, chipロングノートHit中[(int)inst].chipLongNoteEndPosition, CDTXMania.ConfigIni.nInputAdjustTimeMs[(int)inst]) >= EJudgement.Miss)
                 {
                     cChip2.bIsHittingLongNote = false;
                     chipロングノートHit中[(int)inst] = null;
@@ -4674,8 +4607,9 @@ internal abstract class CStagePerfCommonScreen : CStage
             }
 
             // auto pickだとここから先に行かないので注意
-            List<STInputEvent> events = CDTXMania.Pad.GetEvents(inst, EPad.Pick);
-            if ((events != null) && (events.Count > 0))
+            List<STInputEvent> events = listPadEvents;
+            CDTXMania.Pad.GetEvents(inst, EPad.Pick, events);
+            if (events.Count > 0)
             {
                 foreach (STInputEvent eventPick in events)
                 {
@@ -4685,7 +4619,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                     }
                     tSaveInputMethod(inst);
                     //Trace.TraceInformation("Pick Event: {0} with Timestamp: {1}", eventPick.nKey, eventPick.nTimeStamp);
-                    long nTime = eventPick.nTimeStamp - CSoundManager.rcPerformanceTimer.n前回リセットした時のシステム時刻;
+                    long nTime = eventPick.nTimeStamp - AudioMixer.Timer.nResetAtMs;
                     //int chWailingSound = (inst == EInstrumentPart.GUITAR) ? 0x2F : 0xAF;
                     int chWailingSound = (inst == EInstrumentPart.GUITAR) ? (int)EChannel.Guitar_Wailing : (int)EChannel.Guitar_xGBYP;
 
@@ -4732,7 +4666,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                                 actChipFireGB[(int)inst - 1].Start(4, pChip);
                             }
                             tProcessChipHit(nTime, pChip);
-                            tPlaySound(pChip, CSoundManager.rcPerformanceTimer.nシステム時刻, inst, CDTXMania.ConfigIni.n手動再生音量, CDTXMania.ConfigIni.b演奏音を強調する[indexInst], e判定 == EJudgement.Poor && bCurrInstrumentSpecialist);
+                            tPlaySound(pChip, AudioMixer.Timer.nSystemTimeMs, inst, CDTXMania.ConfigIni.n手動再生音量, CDTXMania.ConfigIni.b演奏音を強調する[indexInst], e判定 == EJudgement.Poor && bCurrInstrumentSpecialist);
 
                             //int chWailingChip = (inst == EInstrumentPart.GUITAR) ? (int)EChannel.Guitar_Wailing : (int)EChannel.Bass_Wailing;                                
                             //CChip item = this.r指定時刻に一番近い未ヒットChip(nTime, chWailingChip, this.nInputAdjustTimeMs[indexInst], 140);
@@ -4760,7 +4694,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                     CChip NoChipPicked = (inst == EInstrumentPart.GUITAR) ? r現在の空うちギターChip : r現在の空うちベースChip;
                     if ((NoChipPicked != null) || ((NoChipPicked = r指定時刻に一番近いChip_ヒット未済問わず不可視考慮(nTime, EChannel.Guitar_Open, nInputAdjustTimeMs[indexInst], inst)) != null))
                     {
-                        tPlaySound(NoChipPicked, CSoundManager.rcPerformanceTimer.nシステム時刻, inst, CDTXMania.ConfigIni.n手動再生音量, CDTXMania.ConfigIni.b演奏音を強調する[indexInst], bCurrInstrumentSpecialist);                   
+                        tPlaySound(NoChipPicked, AudioMixer.Timer.nSystemTimeMs, inst, CDTXMania.ConfigIni.n手動再生音量, CDTXMania.ConfigIni.b演奏音を強調する[indexInst], bCurrInstrumentSpecialist);                   
                     }
                     if (!CDTXMania.ConfigIni.bLight[indexInst])
                     {
@@ -4768,8 +4702,9 @@ internal abstract class CStagePerfCommonScreen : CStage
                     }
                 }
             }
-            List<STInputEvent> list = CDTXMania.Pad.GetEvents(inst, EPad.Wail);
-            if ((list != null) && (list.Count > 0))
+            List<STInputEvent> list = listPadEvents;
+            CDTXMania.Pad.GetEvents(inst, EPad.Wail, list);
+            if (list.Count > 0)
             {
                 foreach (STInputEvent eventWailed in list)
                 {
@@ -4786,7 +4721,7 @@ internal abstract class CStagePerfCommonScreen : CStage
     private void DoWailingFromQueue(EInstrumentPart inst, long nTimeStamp_Wailed, bool autoW)
     {
         int indexInst = (int)inst;
-        long nTimeWailed = nTimeStamp_Wailed - CSoundManager.rcPerformanceTimer.n前回リセットした時のシステム時刻;
+        long nTimeWailed = nTimeStamp_Wailed - AudioMixer.Timer.nResetAtMs;
         CChip chipWailing;
         while ((queWailing[indexInst].Count > 0) && ((chipWailing = queWailing[indexInst].Dequeue()) != null))
         {
@@ -4867,12 +4802,12 @@ internal abstract class CStagePerfCommonScreen : CStage
     protected void tJumpInSong(long newPosition)
     {
         long nNewPosition = Math.Max(0, newPosition);
-        Trace.TraceInformation("JUMP IN SONG currentPosition={0}, newPosition={1}", CSoundManager.rcPerformanceTimer.nCurrentTime, nNewPosition);
+        Trace.TraceInformation("JUMP IN SONG currentPosition={0}, newPosition={1}", AudioMixer.Timer.nCurrentTime, nNewPosition);
 
-        long oldPosition = CSoundManager.rcPerformanceTimer.nCurrentTime;
-        CSoundManager.rcPerformanceTimer.tReset();
-        CSoundManager.rcPerformanceTimer.tPause();
-        CSoundManager.rcPerformanceTimer.nCurrentTime = nNewPosition;
+        long oldPosition = AudioMixer.Timer.nCurrentTime;
+        AudioMixer.Timer.tReset();
+        AudioMixer.Timer.tPause();
+        AudioMixer.Timer.nCurrentTime = nNewPosition;
         CDTXMania.Timer.tReset();
         CDTXMania.Timer.nCurrentTime = nNewPosition;
 
@@ -4926,7 +4861,6 @@ internal abstract class CStagePerfCommonScreen : CStage
         }
 
         //Adjust BGM to new position
-        List<CSound> pausedCSound = [];
 
         #region [ BGMやギターなど、演奏開始のタイミングで再生がかかっているサウンドのの途中再生開始 ] // (CDTXのt入力・行解析・チップ配置()で小節番号が+1されているのを削っておくこと)
         for (int i = nCurrentTopChip; i >= 0; i--)
@@ -4944,19 +4878,14 @@ internal abstract class CStagePerfCommonScreen : CStage
 
                     if ((wc.bIsBGMSound && CDTXMania.ConfigIni.bBGM音を発声する) || (!wc.bIsBGMSound))
                     {
-                        CDTXMania.DTX.tチップの再生(pChip, CSoundManager.rcPerformanceTimer.n前回リセットした時のシステム時刻 + pChip.nPlaybackTimeMs, CDTXMania.DTX.nモニタを考慮した音量(EInstrumentPart.UNKNOWN));
-                        #region [ PAUSEする ]
-                        int j = wc.n現在再生中のサウンド番号;
-                        if (wc.rSound[j] != null)
-                        {
-                            // Needed only if the tJumpInSong is called by tChangePlaySpeed
-                            wc.rSound[j].dbPlaySpeed = CDTXMania.ConfigIni.nPlaySpeed / 20.0;
+                        CDTXMania.DTX.tチップの再生(pChip, AudioMixer.Timer.nResetAtMs + pChip.nPlaybackTimeMs, CDTXMania.DTX.nモニタを考慮した音量(EInstrumentPart.UNKNOWN));
 
-                            wc.rSound[j].tPausePlayback();
-                            wc.rSound[j].tChangePlaybackPosition(nNewPosition - pChip.nPlaybackTimeMs);
-                            pausedCSound.Add(wc.rSound[j]);
+                        //held rather than left running: everything that should already be sounding at the
+                        //new position is set up first, then started together
+                        if (wc.clip != null)
+                        {
+                            AudioMixer.HoldLastAt(wc.clip, nNewPosition - pChip.nPlaybackTimeMs);
                         }
-                        #endregion
                     }
                 }
             }
@@ -4968,15 +4897,11 @@ internal abstract class CStagePerfCommonScreen : CStage
         video.SkipStart((int)nNewPosition);
         #endregion
         #region [ PAUSEしていたサウンドを一斉に再生再開する(ただしタイマを止めているので、ここではまだ再生開始しない) ]
-        foreach (CSound cs in pausedCSound)
-        {
-            cs.tPlaySound();
-        }
-        pausedCSound.Clear();
+        AudioMixer.StartHeld();
         #endregion
 
         bPAUSE = false;
-        CSoundManager.rcPerformanceTimer.tResume();
+        AudioMixer.Timer.tResume();
 
         // re-display presence with new timestamps
         tDisplayPresence();
@@ -5003,9 +4928,9 @@ internal abstract class CStagePerfCommonScreen : CStage
             LoopEndMs = (int)((LoopEndMs * dbOldSpeed) / dbNewSpeed);
         }
 
-        CSoundManager.rcPerformanceTimer.nCurrentTime = (int)((CSoundManager.rcPerformanceTimer.nCurrentTime * dbOldSpeed) / dbNewSpeed);
+        AudioMixer.Timer.nCurrentTime = (int)((AudioMixer.Timer.nCurrentTime * dbOldSpeed) / dbNewSpeed);
 
-        tJumpInSong(CSoundManager.rcPerformanceTimer.nCurrentTime);
+        tJumpInSong(AudioMixer.Timer.nCurrentTime);
 
         // Display new play speed
         if (CDTXMania.ConfigIni.nShowPlaySpeed == (int)EShowPlaySpeed.ON || CDTXMania.ConfigIni.nShowPlaySpeed == (int)EShowPlaySpeed.IF_CHANGED_IN_GAME)

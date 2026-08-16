@@ -2,8 +2,11 @@
 
 namespace FDK;
 
-public class CTimer : CTimerBase
+public class CTimer : CTimerBase, IInputClock
 {
+	//no fix on the input device's clock, so the best answer is now
+	public long nSystemTimeMsFor(long deviceTimestamp) => nSystemTimeMs;
+
 	public enum EType  // E種別
 	{
 		Unknown = -1,
@@ -18,7 +21,7 @@ public class CTimer : CTimerBase
 	}
 
 
-	public override long nSystemTimeMs  // nシステム時刻ms
+	public override long nSystemTimeMs
 	{
 		get
 		{

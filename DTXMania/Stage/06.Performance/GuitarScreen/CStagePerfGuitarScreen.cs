@@ -37,9 +37,9 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		listChildActivities.Add( actProgressBar = new CActPerfProgressBar());
 	}
 
-	public override void InitializeBaseUI()
+	public override void OnLayoutReady()
 	{
-		base.InitializeBaseUI();
+		base.OnLayoutReady();
 		
 		var txLane = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_Paret_Guitar.png")); 
 		var txLaneDark = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_Paret_Guitar_Dark.png"));
@@ -48,6 +48,7 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		{
 			var guitarLaneTex = ui.AddChild(new UIImage());
 			guitarLaneTex.name = "GuitarLane";
+			guitarLaneTex.dontSerialize = true;
 			guitarLaneTex.position = new Vector3(67, 42, 0);
 
 			if (CDTXMania.ConfigIni.nLaneDisp.Guitar == 0 || CDTXMania.ConfigIni.nLaneDisp.Guitar == 2)
@@ -59,6 +60,7 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		{
 			var bassLaneTex = ui.AddChild(new UIImage());
 			bassLaneTex.name = "BassLane";
+			bassLaneTex.dontSerialize = true;
 			bassLaneTex.position = new Vector3(937, 42, 0);
 	        
 			if (CDTXMania.ConfigIni.nLaneDisp.Bass == 0 || CDTXMania.ConfigIni.nLaneDisp.Bass == 2)
@@ -112,6 +114,7 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 
 		var holdParent = ui.AddChild(new UIGroup("HoldNotes"));
 		holdParent.renderOrder = 10;
+		holdParent.dontSerialize = true;
 		holdParent.isVisible = false;
 		holdNotes = new HoldNote[2, 5];
 		
@@ -152,7 +155,6 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 	{
 		int nGraphUsePart = CDTXMania.ConfigIni.bGraph有効.Guitar ? 1 : 2;
 		ct登場用 = new CCounter(0, 12, 16, CDTXMania.Timer);
-		dtLastQueueOperation = DateTime.MinValue;
 		if ( CDTXMania.bCompactMode )
 		{
 			var score = new CChartData();
@@ -201,7 +203,7 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 
 	public override void FirstUpdate()
 	{
-		CSoundManager.rcPerformanceTimer.tReset();
+		AudioMixer.Timer.tReset();
 		CDTXMania.Timer.tReset();
 		
 		ctChipPatternAnimation.Guitar = new CCounter(0, 0x17, 20, CDTXMania.Timer);
@@ -374,9 +376,8 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 			tStartResultDelay();
 		}
 		
-		ManageMixerQueue();
 
-		if (LoopEndMs != -1 && CSoundManager.rcPerformanceTimer.nCurrentTime > LoopEndMs)
+		if (LoopEndMs != -1 && AudioMixer.Timer.nCurrentTime > LoopEndMs)
 		{
 			Trace.TraceInformation("Reached end of loop");
 			tJumpInSong(LoopBeginMs == -1 ? 0 : LoopBeginMs);
@@ -522,7 +523,7 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 					txHitBar.tDraw2D(80, y, new RectangleF( 0, 0, 252, 6 ) );
 
 				if (CDTXMania.ConfigIni.bShowPerformanceInformation)
-					actLVFont.tDrawString(310, (CDTXMania.ConfigIni.bReverse.Guitar ? y + 8 : y - 20), CDTXMania.ConfigIni.nJudgeLine.Guitar.ToString());
+					actLVFont.tDrawString(310, (CDTXMania.ConfigIni.bReverse.Guitar ? y + 8 : y - 20), CDTXMania.ConfigIni.nJudgeLine.Guitar);
 			}
 			if ( CDTXMania.DTX.bHasChips.Bass )
 			{
@@ -532,7 +533,7 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 					txHitBar.tDraw2D(950, y, new RectangleF(0, 0, 252, 6));
 
 				if (CDTXMania.ConfigIni.bShowPerformanceInformation)
-					actLVFont.tDrawString(1180, (CDTXMania.ConfigIni.bReverse.Bass ? y + 8 : y - 20), CDTXMania.ConfigIni.nJudgeLine.Bass.ToString());
+					actLVFont.tDrawString(1180, (CDTXMania.ConfigIni.bReverse.Bass ? y + 8 : y - 20), CDTXMania.ConfigIni.nJudgeLine.Bass);
 			}
 		}
 	}
@@ -574,7 +575,7 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		if (!pChip.bHit && (pChip.nDistanceFromBar.Drums < 0))
 		{
 			//pChip.bHit = true;
-			//this.tPlaySound(pChip, CSoundManager.rcPerformanceTimer.n前回リセットした時のシステム時刻 + pChip.nPlaybackTimeMs, EInstrumentPart.DRUMS, dTX.nモニタを考慮した音量(EInstrumentPart.DRUMS));
+			//this.tPlaySound(pChip, AudioMixer.Timer.nResetAtMs + pChip.nPlaybackTimeMs, EInstrumentPart.DRUMS, dTX.nモニタを考慮した音量(EInstrumentPart.DRUMS));
 		}
 	}
 	protected override void tUpdateAndDraw_Chip_Drums(CConfigIni configIni, ref CDTX dTX, ref CChip pChip)
@@ -583,7 +584,7 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		if ( !pChip.bHit && ( pChip.nDistanceFromBar.Drums < 0 ) )
 		{
 			pChip.bHit = true;
-			tPlaySound(pChip, CSoundManager.rcPerformanceTimer.n前回リセットした時のシステム時刻 + pChip.nPlaybackTimeMs, EInstrumentPart.DRUMS, dTX.nモニタを考慮した音量(EInstrumentPart.DRUMS));
+			tPlaySound(pChip, AudioMixer.Timer.nResetAtMs + pChip.nPlaybackTimeMs, EInstrumentPart.DRUMS, dTX.nモニタを考慮した音量(EInstrumentPart.DRUMS));
 		}
 	}
 	
@@ -703,7 +704,7 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		{
 			pChip.bHit = true;
 			actPlayInfo.n小節番号 = n小節番号plus1 - 1;
-			if ( configIni.bWave再生位置自動調整機能有効 && bIsDirectSound )
+			if ( configIni.bWave再生位置自動調整機能有効 && bNeedsDriftCorrection )
 			{
 				dTX.tAutoCorrectWavPlaybackPosition();
 			}
@@ -750,8 +751,8 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		double ScrollSpeedGuitar = (actScrollSpeed.db現在の譜面スクロール速度.Guitar + 1.0) * 0.5 * 0.5 * 37.5 * speed * 1.52f / 60000.0; //todo: verify if this is the correct approach to fix guitar scroll speed
 		double ScrollSpeedBass = (actScrollSpeed.db現在の譜面スクロール速度.Bass + 1.0) * 0.5 * 0.5 * 37.5 * speed * 1.52f / 60000.0; //todo: verify if this is the correct approach to fix guitar scroll speed
 
-		int nDistanceFromBarGuitar = (int)(((bIsEnd ? LoopEndMs : LoopBeginMs) - CSoundManager.rcPerformanceTimer.nCurrentTime) * ScrollSpeedGuitar);
-		int nDistanceFromBarBass = (int)(((bIsEnd ? LoopEndMs : LoopBeginMs) - CSoundManager.rcPerformanceTimer.nCurrentTime) * ScrollSpeedBass);
+		int nDistanceFromBarGuitar = (int)(((bIsEnd ? LoopEndMs : LoopBeginMs) - AudioMixer.Timer.nCurrentTime) * ScrollSpeedGuitar);
+		int nDistanceFromBarBass = (int)(((bIsEnd ? LoopEndMs : LoopBeginMs) - AudioMixer.Timer.nCurrentTime) * ScrollSpeedBass);
 
 		if (configIni.bGuitarEnabled)
 		{

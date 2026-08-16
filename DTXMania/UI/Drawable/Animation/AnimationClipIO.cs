@@ -1,5 +1,7 @@
 ﻿using System.Diagnostics;
 using System.IO;
+using DTXMania.Core;
+using DTXMania.UI.Skin;
 using Newtonsoft.Json;
 
 namespace DTXMania.UI.Animation;
@@ -70,6 +72,55 @@ public static class AnimationClipIO
             Trace.TraceError($"AnimationClipIO.LoadFromFile('{path}'): {e.Message}");
             return null;
         }
+    }
+
+    /// <summary>
+    /// Loads the clip a reference points at. For clips an animator holds; a gameplay element never
+    /// appears in a layout, so it loads its file through <see cref="LoadFromFile"/> and owns the clip.
+    /// </summary>
+    public static AnimationClip? Load(SkinResource resource)
+    {
+        string path = resource.Resolve(ResourceType.Animation);
+
+        if (string.IsNullOrEmpty(path))
+        {
+            Trace.TraceError($"AnimationClipIO.Load: nowhere to load {resource} from");
+            return null;
+        }
+
+        return LoadFromFile(path);
+    }
+
+    /// <summary>
+    /// Copies a clip into the active skin so the skin owns it, and points the entry at that copy. This is
+    /// what a stage save does with the System clips it references: a saved skin carries its own animations
+    /// rather than depending on where it was saved from.
+    /// </summary>
+    public static bool MoveIntoSkin(AnimatorClip entry, string fileName)
+    {
+        if (CDTXMania.SkinManager.currentSkin is not { } skin)
+        {
+            return false;
+        }
+
+        entry.resource = new SkinResource(ResourceSource.Skin, fileName);
+
+        return SaveToFile(entry.clip, Path.Combine(skin.basePath,
+            SkinDescriptor.GetResourceFolder(ResourceType.Animation), fileName));
+    }
+
+    /// <summary>Writes a clip back to the file it came from.</summary>
+    public static bool SaveToResource(AnimatorClip entry)
+    {
+        string path = entry.resource.Resolve(ResourceType.Animation);
+
+        if (string.IsNullOrEmpty(path))
+        {
+            Trace.TraceError($"AnimationClipIO.SaveToResource: clip '{entry.clip.name}' has no file to write to");
+            return false;
+        }
+
+        return SaveToFile(entry.clip, path);
     }
 
     /// <summary>

@@ -2,7 +2,7 @@
 
 namespace FDK;
 
-public class CSoundTimer : CTimerBase
+public class CSoundTimer : CTimerBase, IInputClock
 {
 	public override long nSystemTimeMs
 	{
@@ -56,9 +56,9 @@ public class CSoundTimer : CTimerBase
 			//Debug.WriteLine( "BaseCounter: " + nDInputTimerCounter + ", " + nSoundTimerCounter );
 		}
 	}
-	public long nサウンドタイマーのシステム時刻msへの変換( long nDInputのタイムスタンプ )
+	public long nSystemTimeMsFor( long deviceTimestamp )
 	{
-		return nDInputのタイムスタンプ - nDInputTimerCounter + nSoundTimerCounter;	// Timer違いによる時差を補正する
+		return deviceTimestamp - nDInputTimerCounter + nSoundTimerCounter;	// Timer違いによる時差を補正する
 	}
 	
 	public override void Dispose()

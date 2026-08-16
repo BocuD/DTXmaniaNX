@@ -6,6 +6,7 @@ namespace DTXMania.SongDb;
 public class TextConversionCache
 {
     private static KawazuConverter jpConverter = new();
+    private static readonly object converterSync = new();
     private static Dictionary<string, (string kana, string romaji)> cache = new();
     
     public static (string kana, string romaji) GetOrCacheTextConversion(string originalText)
@@ -39,7 +40,28 @@ public class TextConversionCache
 
     private static (string kana, string romaji) Convert(string input)
     {
-        return (jpConverter.Convert(input).Result,
-        jpConverter.Convert(input, To.Romaji).Result);
+        lock (converterSync)
+        {
+            return (jpConverter.Convert(input).Result,
+            jpConverter.Convert(input, To.Romaji).Result);
+        }
+    }
+
+    /// <summary>Splits <paramref name="input"/> into morphemes, in order. Empty if it cannot be read.</summary>
+    //slow enough per call that callers memoize. Shares the tagger above rather than loading IpaDic twice.
+    public static List<string> Segment(string input)
+    {
+        try
+        {
+            lock (converterSync)
+            {
+                return jpConverter.GetDivisions(input).Result.Select(division => division.Surface).ToList();
+            }
+        }
+        catch (Exception ex)
+        {
+            Trace.TraceWarning($"Failed to segment Japanese text: {ex.Message}");
+            return [];
+        }
     }
 }

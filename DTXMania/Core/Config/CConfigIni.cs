@@ -3,6 +3,7 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
 using DTXMania.Core.Framework;
+using DTXMania.UI.DynamicElements;
 
 namespace DTXMania.Core;
 
@@ -72,27 +73,36 @@ internal partial class CConfigIni
 	public bool b選曲リストフォントを太字にする;
 
 	//public bool bDirectShowMode;
-	public bool bFullScreenMode;
+	[DataField("Fullscreen")] public bool bFullScreenMode;
 	public bool bFullScreenExclusive;
 	public int nInitialWindowXPosition; // #30675 2013.02.04 ikanick add
 	public int nInitialWindowYPosition;
-	public int nWindowWidth; // #23510 2010.10.31 yyagi add
-	public int nWindowHeight; // #23510 2010.10.31 yyagi add
+	[DataField("WindowWidth")] public int nWindowWidth; // #23510 2010.10.31 yyagi add
+	[DataField("WindowHeight")] public int nWindowHeight; // #23510 2010.10.31 yyagi add
 	public bool DisplayBonusEffects;
 	public bool bHAZARD;
 
-	public int
-		nSoundDriverType; // #24820 2012.12.23 yyagi 出力サウンドデバイス(0=ACM(にしたいが設計がきつそうならDirectShow), 1=ASIO, 2=WASAPI)
+	public int nSoundDriverType; // #24820 2012.12.23 yyagi 出力サウンドデバイス(0=ACM(にしたいが設計がきつそうならDirectShow), 1=ASIO, 2=WASAPI)
 
 	public int nWASAPIBufferSizeMs; // #24820 2013.1.15 yyagi WASAPIのバッファサイズ
 
-	//public int nASIOBufferSizeMs; // #24820 2012.12.28 yyagi ASIOのバッファサイズ
+	public int nASIOBufferSizeSamples;
+
 	public int nASIODevice; // #24820 2013.1.17 yyagi ASIOデバイス
 	public bool bEventDrivenWASAPI;
 	public bool bMetronome; // 2023.9.22 henryzx
 	public bool bUseOSTimer;
+
+	//temporary, for comparing the two device layers against each other; see AUDIO.md §9
+	public bool bUseFDKAudio;
 	public bool bDynamicBassMixerManagement; // #24820
 	public int nMasterVolume;
+
+	/// <summary>Output level of each group, 0-100, indexed by <see cref="Audio.AudioGroup"/>.</summary>
+	public int[] nGroupVolume = [100, 100, 100, 100, 100];
+
+	/// <summary>Output device to play through, by name. Empty follows the system default.</summary>
+	public string strOutputDevice;
 	public int nChipPlayTimeComputeMode; // 2024.2.17 fisyher (0=Original, 1=Accurate)
 
 	public STDGBVALUE<EType> eAttackEffect;
@@ -157,6 +167,10 @@ internal partial class CConfigIni
 	public bool bSaveScoreIfModifiedPlaySpeed;
 	public int nSongSelectSoundPreviewWaitTimeMs;
 	public int nSongSelectImagePreviewWaitTimeMs;
+
+	public bool bSongSelectPreviewVideo;
+	public bool bShowOtherInstrumentCharts;
+	public bool bMergeGuitarBassCharts;
 	public int n自動再生音量;  // nAutoVolume
 	public int n手動再生音量;  // nChipVolume
 	public int n選曲リストフォントのサイズdot;
@@ -240,10 +254,10 @@ internal partial class CConfigIni
 	public int nShowPlaySpeed;
 	public STDGBVALUE<int> nHidSud;
 	public bool bIsAutoResultCapture;			// #25399 2011.6.9 yyagi リザルト画像自動保存機能のON/OFF制御
-	public int nPoliphonicSounds;				// #28228 2012.5.1 yyagi レーン毎の最大同時発音数
 	public bool bBufferedInput;
 	public bool bIsEnabledSystemMenu;			// #28200 2012.5.1 yyagi System Menuの使用可否切替
 	public string strSystemSkinSubfolderFullName;	// #28195 2012.5.2 yyagi Skin切替用 System/以下のサブフォルダ名
+	public string strSkinFolder;
 	public bool bUseBoxDefSkin;                     // #28195 2012.5.6 yyagi Skin切替用 box.defによるスキン変更機能を使用するか否か
 	public int nSkipTimeMs;
 
@@ -253,6 +267,7 @@ internal partial class CConfigIni
 
 	public bool bConfigIniがないかDTXManiaのバージョンが異なる => ( !bConfigIniExists || !CDTXMania.VERSION.Equals( strDTXManiaのバージョン ) );
 
+	[DataField("DrumsEnabled")]
 	public bool bDrumsEnabled
 	{
 		get => _bDrumsEnabled;
@@ -280,8 +295,9 @@ internal partial class CConfigIni
 		}
 	}
 
-	public bool bSingleGuitar = true;
-	
+	[DataField("SingleGuitar")] public bool bSingleGuitar = true;
+
+	[DataField("GuitarEnabled")]
 	public bool bGuitarEnabled
 	{
 		get => _bGuitarEnabled;
@@ -294,12 +310,13 @@ internal partial class CConfigIni
 			}
 		}
 	}
+	[DataField("WindowMode")]
 	public bool bWindowMode
 	{
 		get => !bFullScreenMode;
 		set => bFullScreenMode = !value;
 	}
-	public bool bGuitarRevolutionMode => ( !bDrumsEnabled && bGuitarEnabled );
+	[DataField("GuitarRevolutionMode")] public bool bGuitarRevolutionMode => ( !bDrumsEnabled && bGuitarEnabled );
 
 	public bool bAllDrumsAreAutoPlay
 	{
@@ -390,6 +407,7 @@ internal partial class CConfigIni
 	public int nResultDelayMs;				// Delay after clearing a song before the result screen is shown (ms).
 	public int nLoadingMinMs;				// Minimum time the song-loading screen stays up, even on a fast load (ms).
 	public bool bIsAllowedDoubleClickFullscreen;	// #26752 2011.11.27 yyagi ダブルクリックしてもフルスクリーンに移行しない
+	[DataField("SwappedGuitarBass")]
 	public bool bIsSwappedGuitarBass			// #24063 2011.1.16 yyagi ギターとベースの切り替え中か否か
 	{
 		get;
@@ -401,6 +419,10 @@ internal partial class CConfigIni
 		set;
 	}
 	public bool bTimeStretch;					// #23664 2013.2.24 yyagi ピッチ変更無しで再生速度を変更するかどうか
+
+	/// <summary>Whether the play speed applies to chip sounds as well as the song. Off means only the
+	/// song follows it and a chip sounds as recorded.</summary>
+	public bool bPlaySpeedAffectsChips;
 	public STAUTOPLAY bAutoPlay;
 
 	/// <summary>
@@ -646,6 +668,9 @@ internal partial class CConfigIni
 		bAutoAddGage = false;
 		nSongSelectSoundPreviewWaitTimeMs = 200;
 		nSongSelectImagePreviewWaitTimeMs = 200;
+		bSongSelectPreviewVideo = true;
+		bShowOtherInstrumentCharts = false;
+		bMergeGuitarBassCharts = true;
 		bWave再生位置自動調整機能有効 = true;
 		bBGM音を発声する = true;
 		bドラム打音を発声する = true;
@@ -793,22 +818,28 @@ internal partial class CConfigIni
 		bIsSwappedGuitarBass = false;			// #24063 2011.1.16 yyagi ギターとベースの切り替え
 		bIsAllowedDoubleClickFullscreen = true;	// #26752 2011.11.26 ダブルクリックでのフルスクリーンモード移行を許可
 		eBDGroup = EBDGroup.打ち分ける;		// #27029 2012.1.4 from HHPedalとBassPedalのグルーピング
-		nPoliphonicSounds = 4;                 // #28228 2012.5.1 yyagi レーン毎の最大同時発音数
 		// #24820 2013.1.15 yyagi 初期値を4から2に変更。BASS.net使用時の負荷軽減のため。
 		// #24820 2013.1.17 yyagi 初期値を4に戻した。動的なミキサー制御がうまく動作しているため。
 		bIsEnabledSystemMenu = true;			// #28200 2012.5.1 yyagi System Menuの利用可否切替(使用可)
 		strSystemSkinSubfolderFullName = "";	// #28195 2012.5.2 yyagi 使用中のSkinサブフォルダ名
+		strSkinFolder = "";
 		bUseBoxDefSkin = true;					// #28195 2012.5.6 yyagi box.defによるスキン切替機能を使用するか否か
 		bTight = false;                        // #29500 2012.9.11 kairera0467
 		nSoundDriverType = (int)ESoundDeviceTypeForConfig.ACM; // #24820 2012.12.23 yyagi 初期値はACM
 		nWASAPIBufferSizeMs = 0;               // #24820 2013.1.15 yyagi 初期値は0(自動設定)
 		nASIODevice = 0;                       // #24820 2013.1.17 yyagi
-//          this.nASIOBufferSizeMs = 0;                 // #24820 2012.12.25 yyagi 初期値は0(自動設定)
-		bEventDrivenWASAPI = false;
+		//0 leaves the card on whatever its own control panel is set to
+		nASIOBufferSizeSamples = 0;
+		//on WASAPI exclusive a polled buffer is widened to about four update periods where a driven one
+		//is granted the single period it asks for
+		bEventDrivenWASAPI = true;
 		bUseOSTimer = false; ;                 // #33689 2014.6.6 yyagi 初期値はfalse (FDKのタイマー。ＦＲＯＭ氏考案の独自タイマー)
 		bDynamicBassMixerManagement = true;    //
 		nMasterVolume = 100;
+		nGroupVolume = [100, 100, 100, 100, 100];
+		strOutputDevice = "";                  // follow the system default
 		bTimeStretch = false;                  // #23664 2013.2.24 yyagi 初期値はfalse (再生速度変更を、ピッチ変更にて行う)
+		bPlaySpeedAffectsChips = false;        // only the song follows the play speed
 		nSkipTimeMs = 5000;
 		nChipPlayTimeComputeMode = 1;			// 2024.2.17 fisyher Set to Accurate by default
 

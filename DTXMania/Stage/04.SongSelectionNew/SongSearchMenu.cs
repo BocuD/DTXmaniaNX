@@ -1,12 +1,13 @@
 ﻿using System.Numerics;
 using DTXMania.Core;
 using DTXMania.Core.Framework;
+using DTXMania.UI;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.Inspector;
 
 namespace DTXMania;
 
-public class SongSearchMenu : UIGroup
+public class SongSearchMenu : UIGroup, IUIInputHandler
 {
     private UIImGuiTextInput textInput;
     private UIText statusText;
@@ -38,7 +39,7 @@ public class SongSearchMenu : UIGroup
         var bg = AddChild(new UIImage(BaseTexture.CreateSolidColor(Color4.White)));
         bg.name = "Background";
         bg.color = new Color4(0f, 0f, 0f, 0.90f);
-        bg.size = size;
+        bg.size = UISize.Inherited;
         bg.renderOrder = -100;
     }
 
@@ -48,27 +49,25 @@ public class SongSearchMenu : UIGroup
         return new SongSearchMenu();
     }
 
-    public void HandleNavigation()
+    public string FocusName => "SongSearch";
+
+    //the text field itself takes the keyboard through ImGui; holding focus is what stops the song list
+    //scrolling to whatever is being typed
+    public void HandleInput()
     {
-        if (CDTXMania.Pad.bPressed(EKeyConfigPart.SYSTEM, EKeyConfigPad.Search))
+    }
+
+    /// <summary>The Search key, polled by the stage whatever holds focus, since it is what opens this.</summary>
+    public void PollOpenGesture()
+    {
+        if (!CDTXMania.Pad.bPressed(EKeyConfigPart.SYSTEM, EKeyConfigPad.Search))
         {
-            if (!isVisible)
-            {
-                isVisible = true;
-            }
-            
-            if (isVisible)
-            {
-                textInput.ActivateTextInput(null, OnSearch, OnCancel);
-            }
-            else
-            {
-                if (textInput.IsActive)
-                {
-                    textInput.DeactivateTextInput(true);
-                }
-            }
+            return;
         }
+
+        isVisible = true;
+        UIFocus.Push(this);
+        textInput.ActivateTextInput(null, OnSearch, OnCancel);
     }
 
     private void OnSearch(string searchQuery)
@@ -91,6 +90,7 @@ public class SongSearchMenu : UIGroup
         {
             statusText.SetText($"Found {results} result{(results > 1 ? "s" : "")} for search query '{searchQuery}'");
             isVisible = false;
+            UIFocus.Pop(this);
         }
         else
         {
@@ -104,5 +104,6 @@ public class SongSearchMenu : UIGroup
         isVisible = false;
         statusText.SetText("");
         textInput.DeactivateTextInput(true);
+        UIFocus.Pop(this);
     }
 }

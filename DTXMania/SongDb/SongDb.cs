@@ -183,6 +183,11 @@ public class SongDb : IDisposable
 				}).ToList();
 			}
 			
+			if (CDTXMania.ConfigIni.bMergeGuitarBassCharts)
+			{
+				MergeGuitarBassEntries(tempRoot);
+			}
+
 			SortBox(tempRoot);
 			
 			var tempFlattenedSongList = await FlattenSongList(tempRoot.childNodes);
@@ -314,6 +319,12 @@ public class SongDb : IDisposable
 			maxThreadCount = 2;
 
 		DirectoryInfo info = new(searchPath);
+		
+		if (info == null || !info.Exists)
+		{
+			Trace.TraceWarning($"Directory does not exist: {searchPath}");
+			return;
+		}
 
 		//option A: If set.def exists in the folder, create nodes from set.def
 		string path = searchPath + "set.def";
@@ -637,6 +648,143 @@ public class SongDb : IDisposable
 			Trace.TraceError(ex.Message);
 		}
 	}
+
+	private static void MergeGuitarBassEntries(SongNode container)
+	{
+		foreach (SongNode child in container.childNodes)
+		{
+			if (child.nodeType == SongNode.ENodeType.BOX)
+			{
+				MergeGuitarBassEntries(child);
+			}
+		}
+
+		Dictionary<string, SongNode> guitarEntries = new(StringComparer.CurrentCultureIgnoreCase);
+		List<SongNode> mergedAway = [];
+
+		foreach (SongNode node in container.childNodes)
+		{
+			if (node.nodeType != SongNode.ENodeType.SONG)
+			{
+				continue;
+			}
+
+			(string baseTitle, EInstrumentPart part) = SplitTitle(node.title);
+
+			if (part == EInstrumentPart.GUITAR)
+			{
+				guitarEntries[baseTitle] = node;
+			}
+			else if (part == EInstrumentPart.BASS && guitarEntries.TryGetValue(baseTitle, out SongNode? guitar))
+			{
+				MergeInto(guitar, node, baseTitle);
+				mergedAway.Add(node);
+			}
+		}
+
+		foreach (SongNode node in mergedAway)
+		{
+			container.childNodes.Remove(node);
+		}
+	}
+
+	private static void MergeInto(SongNode guitar, SongNode bass, string baseTitle)
+	{
+		guitar.title = baseTitle;
+		guitar.listTitle = $"{baseTitle} (Guitar/Bass)";
+
+		for (int difficulty = 0; difficulty < guitar.charts.Length; difficulty++)
+		{
+			CChartData? bassChart = bass.charts[difficulty];
+
+			if (bassChart == null)
+			{
+				continue;
+			}
+
+			//a difficulty only the bass half has becomes that half's chart outright
+			if (guitar.charts[difficulty] == null)
+			{
+				guitar.charts[difficulty] = bassChart;
+				guitar.difficultyLabel[difficulty] = bass.difficultyLabel[difficulty];
+				guitar.chartCount++;
+				continue;
+			}
+
+			guitar.charts[difficulty] = BuildProxy(guitar.charts[difficulty], bassChart);
+		}
+	}
+
+	private static CChartData BuildProxy(CChartData guitar, CChartData bass)
+	{
+		CChartData proxy = new()
+		{
+			FileInformation = guitar.FileInformation,
+			ScoreIniInformation = guitar.ScoreIniInformation,
+			SongInformation = guitar.SongInformation,
+			countSkill = guitar.countSkill
+		};
+
+		//the struct copy shares the lane dictionary, so the proxy needs its own before adding bass lanes
+		proxy.SongInformation.chipCountByLane = new Dictionary<ELane, int>(guitar.SongInformation.chipCountByLane);
+		CopyBassData(proxy, bass);
+
+		proxy.instrumentSources = new CChartData[3];
+		proxy.instrumentSources[(int)EInstrumentPart.GUITAR] = guitar;
+		proxy.instrumentSources[(int)EInstrumentPart.BASS] = bass;
+
+		return proxy;
+	}
+
+	//the bass half's own numbers, so one entry can show both instruments without anything reading it
+	//having to know the song was ever split
+	private static void CopyBassData(CChartData target, CChartData source)
+	{
+		const int bass = (int)EInstrumentPart.BASS;
+
+		target.SongInformation.Level.Bass = source.SongInformation.Level.Bass;
+		target.SongInformation.LevelDec.Bass = source.SongInformation.LevelDec.Bass;
+		target.SongInformation.bScoreExists.Bass = source.SongInformation.bScoreExists.Bass;
+		target.SongInformation.chipCountByInstrument.Bass = source.SongInformation.chipCountByInstrument.Bass;
+		target.SongInformation.FullCombo.Bass = source.SongInformation.FullCombo.Bass;
+		target.SongInformation.NbPerformances.Bass = source.SongInformation.NbPerformances.Bass;
+		target.SongInformation.BestRank[bass] = source.SongInformation.BestRank[bass];
+		target.SongInformation.HighCompletionRate[bass] = source.SongInformation.HighCompletionRate[bass];
+		target.SongInformation.HighSongSkill[bass] = source.SongInformation.HighSongSkill[bass];
+
+		//per lane too, not just the totals: the density graph reads the bass lanes individually
+		foreach (ELane lane in BassLanes)
+		{
+			if (source.SongInformation.chipCountByLane.TryGetValue(lane, out int count))
+			{
+				target.SongInformation.chipCountByLane[lane] = count;
+			}
+		}
+	}
+
+	private static readonly ELane[] BassLanes =
+		[ELane.BsR, ELane.BsG, ELane.BsB, ELane.BsY, ELane.BsP, ELane.BsPick, ELane.BsW];
+
+	private static (string baseTitle, EInstrumentPart part) SplitTitle(string title)
+	{
+		string trimmed = title.TrimEnd();
+
+		foreach ((string marker, EInstrumentPart part) in GuitarBassMarkers)
+		{
+			if (trimmed.EndsWith(marker, StringComparison.CurrentCultureIgnoreCase))
+			{
+				return (trimmed[..^marker.Length].TrimEnd(), part);
+			}
+		}
+
+		return (trimmed, EInstrumentPart.UNKNOWN);
+	}
+
+	private static readonly (string marker, EInstrumentPart part)[] GuitarBassMarkers =
+	[
+		("(Guitar)", EInstrumentPart.GUITAR),
+		("(Bass)", EInstrumentPart.BASS)
+	];
 
 	private void AddSongChart(SongNode parent, FileInfo fileinfo)
 	{

@@ -1,31 +1,33 @@
 ﻿using System.Numerics;
 using DTXMania.Core;
 using DTXMania.Core.Framework;
+using DTXMania.UI.DynamicElements;
+using DTXMania.UI.Text;
 
 namespace DTXMania.UI.Drawable;
 
 public class Modal : UIGroup
 {
-    private const float PanelWidth = 640f;
+    //the panel hugs its text, up to a cap; the text wraps at the widest it is allowed to make the panel
+    private const float MaxPanelWidth = 640f;
+    private const float MinPanelWidth = 320f;
+    private const float HorizontalPadding = 50f;
     private const float ButtonSpacing = 46f;
 
     private const int TitleFontSize = 30;
     private const int DescriptionFontSize = 22;
     private const int OptionFontSize = 25;
 
-    private readonly UISelectList optionList;
+    private readonly UIMenu optionList;
     private readonly bool cancellable;
-    
-    public static int OpenCount { get; private set; }
-    public static bool IsAnyOpen => OpenCount > 0;
 
-    private bool counted;
-    
+    //whether this dialog is still on the focus stack, so tearing it down any other way still pops it
+    private bool focused;
+
     //set by ShowAsync; resolves the awaited task with the chosen option index (or -1)
     private TaskCompletionSource<int>? completionSource;
 
-    //close is deferred out of the input/child-draw phase because activating an option disposes this
-    //dialog, and we must not dispose children while we're in the middle of drawing/iterating them
+    //deferred: activating an option disposes this dialog, which must not happen mid-draw
     private bool closeRequested;
     private Action? pendingAction;
 
@@ -48,75 +50,113 @@ public class Modal : UIGroup
         float screenHeight = GameWindowSize.Height;
         float centerX = screenWidth / 2f;
 
-        //layout fluff
         const float topPadding = 20f;
         const float titleToDescriptionGap = 18f;
         const float descriptionToOptionsGap = 20f;
         const float bottomPadding = 20f;
 
-        float optionsBlockHeight = options.Length * ButtonSpacing;
-        float panelHeight = topPadding + TitleFontSize + titleToDescriptionGap + DescriptionFontSize * 3
-                            + descriptionToOptionsGap + optionsBlockHeight + bottomPadding;
-        float panelTop = (screenHeight - panelHeight) / 2f;
-
-        //dimmed full-screen backdrop
         UIImage backdrop = AddChild(new UIImage(BaseTexture.CreateSolidColor(new Color4(0f, 0f, 0f, 0.6f))));
         backdrop.name = "Backdrop";
         backdrop.position = new Vector3(0f, 0f, 0f);
         backdrop.size = new Vector2(screenWidth, screenHeight);
         backdrop.renderOrder = 0;
 
-        //panel
+        //both texts are rasterized before anything is placed: the panel is sized to what they measured,
+        //and every position below is taken from the panel. Draw order comes from renderOrder, not from
+        //the order children are added, so measuring first costs nothing.
+        UIText titleText = AddWrappedText(title, TitleFontSize, "Title");
+        UIText descriptionText = AddWrappedText(description, DescriptionFontSize, "Description");
+
+        float contentWidth = MathF.Max(titleText.MeasuredSize.X, descriptionText.MeasuredSize.X);
+        float panelWidth = Math.Clamp(contentWidth + HorizontalPadding, MinPanelWidth, MaxPanelWidth);
+
+        float titleHeight = titleText.MeasuredSize.Y;
+        float descriptionHeight = descriptionText.MeasuredSize.Y;
+        float optionsBlockHeight = options.Length * ButtonSpacing;
+
+        float panelHeight = topPadding + titleHeight + titleToDescriptionGap + descriptionHeight
+                            + descriptionToOptionsGap + optionsBlockHeight + bottomPadding;
+
+        //a dialog taller than the screen grows off the bottom rather than off both ends
+        float panelTop = MathF.Max((screenHeight - panelHeight) / 2f, topPadding);
+
         UIImage panel = AddChild(new UIImage(BaseTexture.CreateSolidColor(new Color4(0.11f, 0.11f, 0.11f, 0.96f))));
         panel.name = "Panel";
         panel.anchor = new Vector2(0.5f, 0f);
         panel.position = new Vector3(centerX, panelTop, 0f);
-        panel.size = new Vector2(PanelWidth, panelHeight);
+        panel.size = new Vector2(panelWidth, panelHeight);
         panel.renderOrder = 1;
 
-        //title
         float titleY = panelTop + topPadding;
-        UIText titleText = AddChild(new UIText(title, TitleFontSize));
-        titleText.name = "Title";
-        titleText.anchor = new Vector2(0.5f, 0f);
-        titleText.position = new Vector3(centerX, titleY, 0f);
-        titleText.renderOrder = 2;
-        titleText.outlineWidth = 0;
-        titleText.RenderTexture();
+        titleText.position = new Vector3(centerX - titleText.MeasuredSize.X / 2f, titleY, 0f);
 
-        //description
-        float descriptionY = titleY + TitleFontSize + titleToDescriptionGap;
-        UIText descriptionText = AddChild(new UIText(description, DescriptionFontSize));
-        descriptionText.name = "Description";
-        descriptionText.anchor = new Vector2(0.5f, 0f);
-        descriptionText.position = new Vector3(centerX, descriptionY, 0f);
-        descriptionText.renderOrder = 2;
-        descriptionText.outlineWidth = 0;
-        descriptionText.RenderTexture();
+        float descriptionY = titleY + titleHeight + titleToDescriptionGap;
+        descriptionText.position = new Vector3(centerX - descriptionText.MeasuredSize.X / 2f, descriptionY, 0f);
 
-        panel.size.X = (descriptionText.size.X / CDTXMania.renderScale) + 50f;
-
-        //options
-        optionList = AddChild(new UISelectList($"{title} options"));
+        optionList = AddChild(new UIMenu($"{title} options"));
         optionList.renderOrder = 3;
-        optionList.position = new Vector3(centerX, descriptionY + DescriptionFontSize * 3 + descriptionToOptionsGap, 0f);
+        optionList.position = new Vector3(centerX, descriptionY + descriptionHeight + descriptionToOptionsGap, 0f);
+        optionList.itemOffset = new Vector3(0f, ButtonSpacing, 0f);
+        optionList.itemDefault = BuildOptionDefault;
+        optionList.dontSerialize = true;
 
+        if (cancellable)
+        {
+            optionList.onCancel = () => RequestClose(null);
+        }
+
+        UIMenuItem[] entries = new UIMenuItem[options.Length];
         for (int i = 0; i < options.Length; i++)
         {
             Action action = actions[i];
-            optionList.AddSelectableChild(new UIBasicButton(OptionFontSize, options[i], () => RequestClose(action)));
+            entries[i] = new UIMenuItem(options[i], () => RequestClose(action));
         }
 
-        optionList.UpdateLayout((int)ButtonSpacing);
-        if (options.Length > 0)
-        {
-            optionList.SetSelectedIndex(0);
-        }
-        
-        CDTXMania.Input.ResetNavigation();
+        optionList.SetEntries(entries);
 
-        counted = true;
-        OpenCount++;
+        //holding focus is what stops everything under it reading input
+        focused = true;
+        UIFocus.Push(optionList);
+    }
+
+    //the claimed width is the wrap budget, and the anchor is taken from that rather than from what the
+    //text measured, so the caller centres these by position instead of by anchor
+    private UIText AddWrappedText(string content, int fontSize, string name)
+    {
+        UIText text = AddChild(new UIText(content, fontSize));
+        text.name = name;
+        text.renderOrder = 2;
+        text.outlineWidth = 0;
+        text.alignment = UiTextAlignment.Center;
+        text.wrap = true;
+        text.size.X = MaxPanelWidth - HorizontalPadding;
+        text.RenderTexture();
+        return text;
+    }
+
+    //one option: white normally, a yellow-to-orange gradient when it is the selected one
+    private static UIGroup BuildOptionDefault()
+    {
+        UIGroup root = new("Option");
+
+        UIText label = root.AddChild(new UIText(string.Empty, OptionFontSize));
+        label.name = "Label";
+        label.anchor = new Vector2(0.5f, 0f);
+        label.position = new Vector3(-5f, 2f, 0f);
+        label.bindings.Add(new UIBinding("text", "Item.Label"));
+        label.bindings.Add(new UIBinding("isVisible", "IsSelected") { invert = true });
+
+        UIText selected = root.AddChild(new UIText(string.Empty, OptionFontSize));
+        selected.name = "LabelSelected";
+        selected.anchor = new Vector2(0.5f, 0f);
+        selected.position = new Vector3(-5f, 2f, 0f);
+        selected.bindings.Add(new UIBinding("text", "Item.Label"));
+        selected.fillGradientMode = UiTextGradientMode.Vertical;
+        selected.fillGradientTopColor = new Color4(1f, 1f, 0f);
+        selected.fillGradientBottomColor = new Color4(1f, 0.27f, 0f);
+        selected.bindings.Add(new UIBinding("isVisible", "IsSelected"));
+
+        return root;
     }
 
     /// <summary>
@@ -153,14 +193,7 @@ public class Modal : UIGroup
 
     public override void Draw(Matrix4x4 parentMatrix)
     {
-        if (closeRequested)
-        {
-            FinishClose();
-            return;
-        }
-
-        HandleNavigation();
-
+        //deferred to here: an option's action disposes this dialog, which is unsafe mid-draw
         if (closeRequested)
         {
             FinishClose();
@@ -168,31 +201,6 @@ public class Modal : UIGroup
         }
 
         base.Draw(parentMatrix);
-    }
-
-    private void HandleNavigation()
-    {
-        CDTXMania.Input.NavigateRaw(() =>
-        {
-            CDTXMania.Skin.soundCursorMovement.tPlay();
-            optionList.SelectPrevious();
-        }, () =>
-        {
-            CDTXMania.Skin.soundCursorMovement.tPlay();
-            optionList.SelectNext();
-        });
-
-        if (CDTXMania.Input.ActionDecide(true))
-        {
-            //runs the highlighted option's action, which calls RequestClose(...)
-            CDTXMania.Skin.soundDecide.tPlay();
-            optionList.RunAction();
-        }
-        else if (cancellable && CDTXMania.Input.ActionCancel(true))
-        {
-            CDTXMania.Skin.soundCancel.tPlay();
-            RequestClose(null);
-        }
     }
 
     private void RequestClose(Action? action)
@@ -209,7 +217,6 @@ public class Modal : UIGroup
     private void FinishClose()
     {
         isVisible = false;
-        CDTXMania.Input.ResetNavigation();
 
         Action? action = pendingAction;
         pendingAction = null;
@@ -225,12 +232,12 @@ public class Modal : UIGroup
 
     public override void Dispose()
     {
-        //covers both the normal close path (FinishClose disposes) and external
-        //disposal (e.g. the parent group being cleared/torn down) without double-counting
-        if (counted)
+        //covers both the normal close path and being torn down from outside, e.g. the parent group being
+        //cleared: either way focus must go back to whoever had it
+        if (focused)
         {
-            counted = false;
-            OpenCount--;
+            focused = false;
+            UIFocus.Pop(optionList);
         }
 
         // Release any ShowAsync awaiter even if the dialog is torn down without a choice. No-op if

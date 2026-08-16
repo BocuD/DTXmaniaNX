@@ -84,14 +84,20 @@ internal class CActPerfGuitarStatusPanel : CActPerfCommonStatusPanel
             double dbMISS率 = 0;
             double dbMAXCOMBO率 = 0;
 
+            //outside the loop: stackalloc inside one grows the frame on every iteration
+            Span<char> levelText = stackalloc char[16];
+            Span<char> text = stackalloc char[16];
+
             for (int i = 1; i < 3; i++)
             {
                 playerNameplates[i - 1].isVisible = nBodyX[i] != 0 && draw;
-                
+
                 if (nBodyX[i] != 0 && draw)
                 {
-                    string str = $"{((float)CDTXMania.DTX.LEVEL[i]) / 10.0f +
-                                    (CDTXMania.DTX.LEVELDEC[i] != 0 ? CDTXMania.DTX.LEVELDEC[i] / 100.0f : 0):0.00}";
+                    ReadOnlySpan<char> level = tFormat(levelText,
+                        CDTXMania.DTX.LEVEL[i] / 10.0f
+                        + (CDTXMania.DTX.LEVELDEC[i] != 0 ? CDTXMania.DTX.LEVELDEC[i] / 100.0f : 0), "0.00");
+
                     bool bCLASSIC = false;
                     //If Skill Mode is CLASSIC, always display lvl as Classic Style
                     if (CDTXMania.ConfigIni.nSkillMode == 0 || (CDTXMania.ConfigIni.bClassicScoreDisplay &&
@@ -100,24 +106,24 @@ internal class CActPerfGuitarStatusPanel : CActPerfCommonStatusPanel
                                                                     : !CDTXMania.DTX.bHasChips.YPBass) &&
                                                                 (CDTXMania.DTX.bForceXGChart == false)))
                     {
-                        str = $"{CDTXMania.DTX.LEVEL[i]:00}";
+                        level = tFormat(levelText, CDTXMania.DTX.LEVEL[i], "00");
                         bCLASSIC = true;
                     }
 
                     txSkillPanel.tDraw2D(nBodyX[i], nBodyY);
 
                     tDrawSmallNumber(80 + nBodyX[i], 72 + nBodyY,
-                        $"{CDTXMania.stagePerfGuitarScreen.nHitCount_ExclAuto[i].Perfect,4:###0}");
+                        tFormat(text, CDTXMania.stagePerfGuitarScreen.nHitCount_ExclAuto[i].Perfect, 4));
                     tDrawSmallNumber(80 + nBodyX[i], 102 + nBodyY,
-                        $"{CDTXMania.stagePerfGuitarScreen.nHitCount_ExclAuto[i].Great,4:###0}");
+                        tFormat(text, CDTXMania.stagePerfGuitarScreen.nHitCount_ExclAuto[i].Great, 4));
                     tDrawSmallNumber(80 + nBodyX[i], 132 + nBodyY,
-                        $"{CDTXMania.stagePerfGuitarScreen.nHitCount_ExclAuto[i].Good,4:###0}");
+                        tFormat(text, CDTXMania.stagePerfGuitarScreen.nHitCount_ExclAuto[i].Good, 4));
                     tDrawSmallNumber(80 + nBodyX[i], 162 + nBodyY,
-                        $"{CDTXMania.stagePerfGuitarScreen.nHitCount_ExclAuto[i].Poor,4:###0}");
+                        tFormat(text, CDTXMania.stagePerfGuitarScreen.nHitCount_ExclAuto[i].Poor, 4));
                     tDrawSmallNumber(80 + nBodyX[i], 192 + nBodyY,
-                        $"{CDTXMania.stagePerfGuitarScreen.nHitCount_ExclAuto[i].Miss,4:###0}");
+                        tFormat(text, CDTXMania.stagePerfGuitarScreen.nHitCount_ExclAuto[i].Miss, 4));
                     tDrawSmallNumber(80 + nBodyX[i], 222 + nBodyY,
-                        $"{CDTXMania.stagePerfGuitarScreen.actCombo.nCurrentCombo.HighestValue[i],4:###0}");
+                        tFormat(text, CDTXMania.stagePerfGuitarScreen.actCombo.nCurrentCombo.HighestValue[i], 4));
 
                     int n現在のノーツ数 =
                         CDTXMania.stagePerfGuitarScreen.nHitCount_IncAuto[i].Perfect +
@@ -160,12 +166,12 @@ internal class CActPerfGuitarStatusPanel : CActPerfCommonStatusPanel
                     if (double.IsNaN(dbMAXCOMBO率))
                         dbMAXCOMBO率 = 0;
 
-                    tDrawSmallNumber(167 + nBodyX[i], 72 + nBodyY, $"{dbPERFECT率,3:##0}%");
-                    tDrawSmallNumber(167 + nBodyX[i], 102 + nBodyY, $"{dbGREAT率,3:##0}%");
-                    tDrawSmallNumber(167 + nBodyX[i], 132 + nBodyY, $"{dbGOOD率,3:##0}%");
-                    tDrawSmallNumber(167 + nBodyX[i], 162 + nBodyY, $"{dbPOOR率,3:##0}%");
-                    tDrawSmallNumber(167 + nBodyX[i], 192 + nBodyY, $"{dbMISS率,3:##0}%");
-                    tDrawSmallNumber(167 + nBodyX[i], 222 + nBodyY, $"{dbMAXCOMBO率,3:##0}%");
+                    tDrawSmallNumber(167 + nBodyX[i], 72 + nBodyY, tFormatPercent(text, dbPERFECT率));
+                    tDrawSmallNumber(167 + nBodyX[i], 102 + nBodyY, tFormatPercent(text, dbGREAT率));
+                    tDrawSmallNumber(167 + nBodyX[i], 132 + nBodyY, tFormatPercent(text, dbGOOD率));
+                    tDrawSmallNumber(167 + nBodyX[i], 162 + nBodyY, tFormatPercent(text, dbPOOR率));
+                    tDrawSmallNumber(167 + nBodyX[i], 192 + nBodyY, tFormatPercent(text, dbMISS率));
+                    tDrawSmallNumber(167 + nBodyX[i], 222 + nBodyY, tFormatPercent(text, dbMAXCOMBO率));
 
                     //Draw achievement rate
                     if (txSkillMax != null && CDTXMania.stagePerfGuitarScreen.actStatusPanel.db現在の達成率[i] >= 100.0)
@@ -174,8 +180,8 @@ internal class CActPerfGuitarStatusPanel : CActPerfCommonStatusPanel
                     }
                     else
                     {
-                        tDrawLargeNumber(58 + nBodyX[i], 277 + nBodyY,
-                            $"{CDTXMania.stagePerfGuitarScreen.actStatusPanel.db現在の達成率[i],6:##0.00}");
+                        tDrawLargeNumber(58 + nBodyX[i], 277 + nBodyY, tFormat(text,
+                            CDTXMania.stagePerfGuitarScreen.actStatusPanel.db現在の達成率[i], "##0.00", 6));
                         if (txPercent != null)
                             txPercent.tDraw2D(217 + nBodyX[i], 287 + nBodyY);
                     }
@@ -187,33 +193,33 @@ internal class CActPerfGuitarStatusPanel : CActPerfCommonStatusPanel
                         bool bTypeAColor = CDTXMania.ConfigIni.nShowLagTypeColor == 0;
 
                         tDrawLagCounterText(nBodyX[i] + 170, nBodyY + 335,
-                            $"{CDTXMania.stagePerfGuitarScreen.nTimingHitCount[i].nEarly,4:###0}",
+                            tFormat(text, CDTXMania.stagePerfGuitarScreen.nTimingHitCount[i].nEarly, 4),
                             !bTypeAColor);
                         tDrawLagCounterText(nBodyX[i] + 245, nBodyY + 335,
-                            $"{CDTXMania.stagePerfGuitarScreen.nTimingHitCount[i].nLate,4:###0}",
+                            tFormat(text, CDTXMania.stagePerfGuitarScreen.nTimingHitCount[i].nLate, 4),
                             bTypeAColor);
                     }
 
                     //Draw Game skill (Skill points)
                     if (bCLASSIC)
                     {
-                        tDrawLargeNumber(88 + nBodyX[i], 363 + nBodyY,
-                            $"{CDTXMania.stagePerfGuitarScreen.actStatusPanel.db現在の達成率[i] * (CDTXMania.DTX.LEVEL[i]) *
-                               0.0033,6:##0.00}");
+                        tDrawLargeNumber(88 + nBodyX[i], 363 + nBodyY, tFormat(text,
+                            CDTXMania.stagePerfGuitarScreen.actStatusPanel.db現在の達成率[i]
+                            * CDTXMania.DTX.LEVEL[i] * 0.0033, "##0.00", 6));
                     }
                     else
                     {
-                        tDrawLargeNumber(88 + nBodyX[i], 363 + nBodyY,
-                            $"{CScoreIni.tCalculateGameSkillFromPlayingSkill(CDTXMania.DTX.LEVEL[i],
+                        tDrawLargeNumber(88 + nBodyX[i], 363 + nBodyY, tFormat(text,
+                            CScoreIni.tCalculateGameSkillFromPlayingSkill(CDTXMania.DTX.LEVEL[i],
                                 CDTXMania.DTX.LEVELDEC[i],
-                                CDTXMania.stagePerfGuitarScreen.actStatusPanel.db現在の達成率[i]),6:##0.00}");
+                                CDTXMania.stagePerfGuitarScreen.actStatusPanel.db現在の達成率[i]), "##0.00", 6));
                     }
 
 
                     if (txDifficultyBadge != null)
                         txDifficultyBadge.tDraw2D(14 + nBodyX[i], 266 + nBodyY,
                             new RectangleF(rectDiffPanelPoint.X, rectDiffPanelPoint.Y, 60, 60));
-                    tDisplayLevelNumber((bCLASSIC == true ? 26 : 18) + nBodyX[i], 290 + nBodyY, str);
+                    tDisplayLevelNumber((bCLASSIC == true ? 26 : 18) + nBodyX[i], 290 + nBodyY, level);
                 }
             }
         }

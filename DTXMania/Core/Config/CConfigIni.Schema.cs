@@ -1,5 +1,6 @@
 #nullable disable
 
+using DTXMania.Core.Audio;
 using FDK;
 
 namespace DTXMania.Core;
@@ -57,6 +58,9 @@ internal partial class CConfigIni
 					@"You can specify many pathes separated with semicolon(;). (e.g. d:\DTXFiles1\;e:\DTXFiles2\)"
 				],
 				Str("DTXPath", c => c.strSongDataSearchPath)),
+			G(["使用するスキンの Skins\\ 以下のフォルダ名。空欄で内蔵スキン。",
+					"Folder name under Skins\\ of the skin to use. Empty for the built-in one."],
+				Str("Skin", c => c.strSkinFolder)),
 			G(["ZIPファイルの展開", "0=展開しない, 1=確認する, 2=常に展開する"], Enum("UnpackSongs", 0, 2, c => c.eUnpackSongs)),
 			G(["言語設定", "0=自動, 1=日本語, 2=英語", "Language mode", "0=auto, 1=japanese, 2=english"], Enum("Language", 0, 2, c => c.languageMode)),
 			G([
@@ -141,14 +145,14 @@ internal partial class CConfigIni
 				],
 				IntRound("SleepTimePerFrame", -1, 50, c => c.nSleepNMsEveryFrame)),
 			G([
-					"サウンド出力方式(0=ACM(って今はまだDirectShowですが), 1=ASIO, 2=WASAPI排他, 3=WASAPI共有",
+					"サウンド出力方式(0=ACM(って今はまだDirectShowですが), 1=ASIO, 2=WASAPI排他, 3=WASAPI共有, 4=BASS",
 					"WASAPIはVista以降のOSで使用可能。推奨方式はWASAPI。",
 					"なお、WASAPIが使用不可ならASIOを、ASIOが使用不可ならACMを使用します。",
-					"Sound device type(0=ACM, 1=ASIO, 2=WASAPI Exclusive, 3=WASAPI Shared)",
+					"Sound device type(0=ACM, 1=ASIO, 2=WASAPI Exclusive, 3=WASAPI Shared, 4=BASS)",
 					"WASAPI can use on Vista or later OSs.",
 					"If WASAPI is not available, DTXMania try to use ASIO. If ASIO can't be used, ACM is used."
 				],
-				Int("SoundDeviceType", 0, 3, c => c.nSoundDriverType)),
+				Int("SoundDeviceType", 0, 4, c => c.nSoundDriverType)),
 			G([
 					"WASAPI使用時のサウンドバッファサイズ",
 					"(0=デバイスに設定されている値を使用, 1～9999=バッファサイズ(単位:ms)の手動指定",
@@ -156,6 +160,13 @@ internal partial class CConfigIni
 					"(0=Use system default buffer size, 1-9999=specify the buffer size(ms) by yourself)"
 				],
 				Int("WASAPIBufferSizeMs", 0, 9999, c => c.nWASAPIBufferSizeMs)),
+			G([
+					"ASIO使用時のバッファサイズ(単位:サンプル)",
+					"(0=ドライバの設定値を使用)",
+					"ASIO buffer size, in samples.",
+					"(0=use whatever the driver's own control panel is set to)"
+				],
+				Int("ASIOBufferSizeSamples", 0, 8192, c => c.nASIOBufferSizeSamples)),
 			new([
 					"ASIO使用時のサウンドデバイス",
 					"存在しないデバイスを指定すると、DTXManiaが起動しないことがあります。",
@@ -168,10 +179,23 @@ internal partial class CConfigIni
 						c => c.nASIODevice.ToString())
 				],
 				() => CEnumerateAllAsioDevices.GetAllASIODevices().Select((name, i) => $"{i}: {name}")),
+			G([
+					"出力デバイス名。空欄にするとシステムの既定のデバイスに追従します。",
+					"(ヘッドホンを抜いたときなどに自動で切り替わります)",
+					"Output device, by name. Leave empty to follow the system default,",
+					"which switches with it when e.g. headphones are unplugged.",
+					"A name that no longer matches any device falls back to the default."
+				],
+				Custom("OutputDevice",
+					(c, v) => c.strOutputDevice = v.Trim(),
+					c => c.strOutputDevice ?? "")),
 			G(["WASAPI/ASIO時に使用する演奏タイマーの種類", "Playback timer used for WASAPI/ASIO", "(0=FDK Timer, 1=System Timer)"],
 				Bool("SoundTimerType", c => c.bUseOSTimer)),
 			G("WASAPI使用時にEventDrivenモードを使う",
 				Bool("EventDrivenWASAPI", c => c.bEventDrivenWASAPI)),
+			G(["Play through FDK's old sound device instead of the current audio layer.",
+					"Temporary, for comparing the two against each other."],
+				Bool("UseFDKAudio", c => c.bUseFDKAudio)),
 			G([
 					"Enable Embedded Metronome",
 					"Please make sure Metronome.ogg exists in Your current skin sounds folder",
@@ -188,6 +212,15 @@ internal partial class CConfigIni
 				Int("ChipPlayTimeComputeMode", 0, 1, c => c.nChipPlayTimeComputeMode)),
 			G(["全体ボリュームの設定", "(0=無音 ～ 100=最大。WASAPI/ASIO時のみ有効)", "Master volume settings", "(0=Silent - 100=Max)"],
 				Int("MasterVolume", 0, 100, c => c.nMasterVolume)),
+			G([
+					"グループごとのボリューム設定 (0=無音 ～ 100=最大)",
+					"Per-group volume (0=Silent - 100=Max)."
+				],
+				GroupVolume("VolumeBGM", AudioGroup.Bgm),
+				GroupVolume("VolumeSE", AudioGroup.Se),
+				GroupVolume("VolumeDrums", AudioGroup.Drums),
+				GroupVolume("VolumeBass", AudioGroup.Bass),
+				GroupVolume("VolumeGuitar", AudioGroup.Guitar)),
 			G(["ギター/ベース有効(0:OFF,1:ON)", "Enable Guitar/Bass or not.(0:OFF,1:ON)"],
 				Bool("Guitar", c => c.bGuitarEnabled)),
 			G(["シングルプレイのギター有効(0:OFF,1:ON)", "Enable Singleplayer Guitar or not.(0:OFF,1:ON)"],
@@ -239,6 +272,15 @@ internal partial class CConfigIni
 				Int("PreviewSoundWait", 0, 0x5f5e0ff, c => c.nSongSelectSoundPreviewWaitTimeMs)),
 			G(["曲選択でプレビュー画像が表示されるまでの待ち時間[ms]。", "Delay (ms) before the preview image shows in song select."],
 				Int("PreviewImageWait", 0, 0x5f5e0ff, c => c.nSongSelectImagePreviewWaitTimeMs)),
+			G(["選曲画面で選択中の曲の背景（プレビュー動画/背景動画/背景画像）を表示する (0:OFF, 1:ON)",
+					"Show the selected song's own background (preview movie, background video or background image) in song select."],
+				Bool("PreviewVideo", c => c.bSongSelectPreviewVideo)),
+			G(["演奏中の楽器の譜面が無い曲も選曲画面に表示する (0:OFF, 1:ON)",
+					"List songs in song select that have no chart for the instrument being played."],
+				Bool("ShowOtherInstrumentCharts", c => c.bShowOtherInstrumentCharts)),
+			G(["set.def の「(Guitar)」「(Bass)」に分かれた項目を1つにまとめる (0:OFF, 1:ON)",
+					"Show a set.def's separate \"(Guitar)\" and \"(Bass)\" entries as one, picking the chart for the instrument being played."],
+				Bool("MergeGuitarBassCharts", c => c.bMergeGuitarBassCharts)),
 			G("Waveの再生位置自動補正(0:OFF, 1:ON)",
 				Bool("AdjustWaves", c => c.bWave再生位置自動調整機能有効)),
 			G("BGM の再生(0:OFF, 1:ON)",
@@ -295,8 +337,6 @@ internal partial class CConfigIni
 				Enum<EType>("LBDGraphics", 0, 1, c => c.eLBDGraphics.Drums)),
 			G("ライドシンバルレーンの表示位置(0:...RD RC, 1:...RC RD)",
 				Enum<ERDPosition>("RDPosition", 0, 1, c => c.eRDPosition)),
-			G(["レーン毎の最大同時発音数(1～8)", "Number of polyphonic sounds per lane. (1-8)"],
-				Int("PolyphonicSounds", 1, 8, c => c.nPoliphonicSounds)),
 			G(["判定ズレ時間表示(0:OFF, 1:ON, 2=GREAT-POOR)", "Whether displaying the lag times from the just timing or not."],
 				Int("ShowLagTime", 0, 2, c => c.nShowLagType)),
 			G("判定ズレ時間表示の色(0:Slow赤、Fast青, 1:Slow青、Fast赤)",
@@ -317,6 +357,13 @@ internal partial class CConfigIni
 					"(Only available when you're using using WASAPI or ASIO)"
 				],
 				Bool("TimeStretch", c => c.bTimeStretch)),
+			G([
+					"再生速度をチップ音にも適用するか(0:曲のみ, 1:チップ音も)",
+					"Whether the play speed applies to chip sounds as well as the song.",
+					"0: only the song follows it, and a chip sounds as recorded.",
+					"1: chips follow it too, which detunes them unless TimeStretch is on."
+				],
+				Bool("PlaySpeedAffectsChips", c => c.bPlaySpeedAffectsChips)),
 			G([
 					"判定タイミング調整(ドラム, ギター, ベース)(-99～99)[ms]",
 					"Revision value to adjust judgement timing for the drums, guitar and bass."
@@ -656,6 +703,12 @@ internal partial class CConfigIni
 
 	// Fast lookup for reading: section name -> (key -> item).
 	private static readonly Dictionary<string, Dictionary<string, ConfigItem>> SchemaByKey = BuildSchemaLookup();
+
+	//not Int(), because these live in an array and the expression binder only reaches fields
+	private static ConfigItem GroupVolume(string key, AudioGroup group) => Custom(key,
+		(c, v) => c.nGroupVolume[(int)group] =
+			CConversion.nGetNumberIfInRange(v, 0, 100, c.nGroupVolume[(int)group]),
+		c => c.nGroupVolume[(int)group].ToString());
 
 	private static Dictionary<string, Dictionary<string, ConfigItem>> BuildSchemaLookup()
 	{

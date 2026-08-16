@@ -2,8 +2,11 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Numerics;
 using DTXMania.Core;
+using DTXMania.Core.Framework;
+using DTXMania.UI.DynamicElements;
 using DTXMania.UI.Inspector;
 using DTXMania.UI.Skin;
+using Newtonsoft.Json;
 
 namespace DTXMania.UI.Drawable;
 
@@ -13,11 +16,16 @@ public enum ERenderMode
     Sliced
 }
 
+/// <summary>What an image draws. Only <see cref="File"/> is a location, so only it consults
+/// <see cref="UIImage.image"/>; the other two are answered by the element itself.</summary>
 public enum ImageSource
 {
+    //a file, wherever image says it lives
     File,
-    Resource,
-    Dynamic
+    //a live texture from a data context or the stage's dynamicImageSources
+    Dynamic,
+    //no file at all: a rectangle of this element's colour, for a dim behind a menu or a panel
+    Solid
 }
 
 
@@ -27,7 +35,15 @@ public partial class UIImage : UITexture
     [Themable] public RectangleF sliceRect;
     [Themable] public ERenderMode renderMode = ERenderMode.Stretched;
     [Themable] public ImageSource imageSource = ImageSource.File;
-    [Themable] public string resource = string.Empty;
+
+    [Themable] public SkinResource image;
+
+    //the data key a Dynamic image reads its texture from
+    [Themable] public string dynamicSource = string.Empty;
+
+    //code-built images never get OnDeserialize, so Draw loads them lazily; tracking what was attempted
+    //stops a missing file from being retried every frame
+    [JsonIgnore] private SkinResource _lastFileLoadAttempt;
 
     [AddChildMenu]
     public static UIDrawable Create()
@@ -52,6 +68,21 @@ public partial class UIImage : UITexture
 
     public override void Draw(Matrix4x4 parentMatrix)
     {
+        if (imageSource == ImageSource.Dynamic)
+        {
+            UpdateDynamicTexture();
+        }
+        else if (imageSource == ImageSource.File && !texture.IsValid() && image != _lastFileLoadAttempt)
+        {
+            _lastFileLoadAttempt = image;
+            LoadResource(updateRects: false);
+        }
+        else if (imageSource == ImageSource.Solid && !texture.IsValid())
+        {
+            //white, so the element's own colour is what shows
+            SetTexture(BaseTexture.CreateSolidColor(Color4.White));
+        }
+
         if (!isVisible || !texture.IsValid())
         {
             return;
@@ -69,44 +100,116 @@ public partial class UIImage : UITexture
         texture.tDraw2DMatrix(combinedMatrix, size, clipRect, color);
     }
 
-    public void SetTexture(BaseTexture newTexture, bool updateRects = true, bool updateSize = true)
+    //rects the layout never stated follow the texture; ones it did survive a swap
+    public override void SetTexture(BaseTexture newTexture)
     {
-        base.SetTexture(newTexture, updateSize);
+        base.SetTexture(newTexture);
 
-        if (updateRects && texture.IsValid())
+        if (texture.IsValid() && clipRect.IsEmpty)
         {
             clipRect = new RectangleF(0, 0, texture.Width, texture.Height);
             sliceRect = clipRect;
         }
     }
+
+    /// <summary>Lets the texture dictate the clip, slice and size outright, unlike <see cref="SetTexture"/>.</summary>
+    public void SetTextureAndFit(BaseTexture newTexture)
+    {
+        base.SetTexture(newTexture);
+
+        if (!texture.IsValid())
+        {
+            return;
+        }
+
+        clipRect = new RectangleF(0, 0, texture.Width, texture.Height);
+        sliceRect = clipRect;
+        size.X = texture.Width;
+        size.Y = texture.Height;
+    }
     
     public override void OnDeserialize()
     {
         base.OnDeserialize();
-        
+
         LoadResource(false);
     }
-    
+
+    //pulls the current texture from the bound source, swapping only when it changes
+    private void UpdateDynamicTexture()
+    {
+        if (!TryResolveContextTexture(dynamicSource, out BaseTexture current) || ReferenceEquals(current, texture))
+        {
+            return;
+        }
+
+        base.SetTexture(current);
+
+        //dynamic textures vary in size at runtime, so the clip extent tracks the current texture. Its
+        //origin is left alone: that is authored, or bound, and must survive a texture swap.
+        if (current.IsValid())
+        {
+            clipRect = new RectangleF(clipRect.X, clipRect.Y, current.Width, current.Height);
+            sliceRect = clipRect;
+        }
+    }
+
+    //a Dynamic image borrows its texture rather than owning it, so detach before disposing; a File image
+    //loaded it from disk and is disposed normally
+    public override void Dispose()
+    {
+        if (imageSource == ImageSource.Dynamic)
+        {
+            texture = BaseTexture.None;
+        }
+
+        base.Dispose();
+    }
+
+    /// <summary>Loads what <see cref="image"/> points at. <paramref name="updateRects"/> makes the texture
+    /// dictate the clip, slice and size outright, which is what picking a new file in the inspector wants;
+    /// without it they are only filled in where the layout left them unset.</summary>
     public void LoadResource(bool updateRects)
     {
-        if (imageSource == ImageSource.Resource)
+        if (imageSource != ImageSource.File || image.IsEmpty)
         {
-            Trace.TraceInformation("Updating resource for " + id);
-            string? fullPath = CDTXMania.SkinManager.currentSkin?.GetResource(ResourceType.Image, resource);
-            if (string.IsNullOrWhiteSpace(fullPath))
-            {
-                Trace.TraceError($"Resource {resource} not found in current skin.");
-                SetTexture(BaseTexture.None);
-                return;
-            }
-            if (!File.Exists(fullPath))
-            {
-                Trace.TraceError($"Resource file {fullPath} does not exist.");
-                SetTexture(BaseTexture.None);
-                return;
-            }
+            return;
+        }
 
-            SetTexture(BaseTexture.LoadFromPath(fullPath), updateRects);
+        string fullPath = image.Resolve(ResourceType.Image);
+
+        if (string.IsNullOrWhiteSpace(fullPath) || !File.Exists(fullPath))
+        {
+            Trace.TraceError($"Image {image} could not be found.");
+            SetTexture(BaseTexture.None);
+            return;
+        }
+
+        BaseTexture loaded = BaseTexture.LoadFromPath(fullPath);
+        base.SetTexture(loaded);
+
+        if (!loaded.IsValid())
+        {
+            return;
+        }
+
+        //a compact layout writes none of these, so they follow the texture; anything the layout did state
+        //keeps overriding it
+        if (updateRects || clipRect.IsEmpty)
+        {
+            clipRect = new RectangleF(0, 0, loaded.Width, loaded.Height);
+        }
+
+        if (updateRects || sliceRect.IsEmpty)
+        {
+            sliceRect = clipRect;
+        }
+
+        //picking a file in the inspector re-sizes outright
+        if (updateRects)
+        {
+            size.X = loaded.Width;
+            size.Y = loaded.Height;
         }
     }
 }

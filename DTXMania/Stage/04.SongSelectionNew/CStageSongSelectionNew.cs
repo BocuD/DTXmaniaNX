@@ -8,6 +8,7 @@ using DTXMania.SongDb;
 using DTXMania.SongDb.Sorting;
 using DTXMania.UI;
 using DTXMania.UI.Drawable;
+using DTXMania.UI.Skin;
 using DTXMania.UI.DynamicElements;
 using DTXMania.UI.Text;
 
@@ -16,17 +17,22 @@ namespace DTXMania;
 public class CStageSongSelectionNew : CStage
 {
     private SongDb.SongDb songDb => CDTXMania.SongDb;
-    private SortMenuContainer sortMenuContainer;
-    private UIImage bigAlbumArt;
+    private SortMenuContainer? sortMenuContainer;
     private CActSelectPresound actPresound;
+    private PreviewVideoBackground previewVideo;
     private StatusPanel statusPanel;
     private SongSearchMenu songSearchMenu;
     private QuickMenu quickMenu;
-    private UIText commentText;
 
     private SongSelectionContainer selectionContainer;
     private DensityGraph densityGraph1;
-    
+
+    //game rules rather than UI, so a skin cannot move or remove them
+    private readonly CCommandHistory commandHistory = new();
+
+    //what the frame's input decided the stage should do, read back in OnUpdateAndDraw
+    private int pendingResult = (int)EReturnValue.Continue;
+
     private ELoadPhase loadPhase = ELoadPhase.Initialize;
     
     private enum ELoadPhase
@@ -59,169 +65,200 @@ public class CStageSongSelectionNew : CStage
         
         listChildActivities.Add(actPresound = new CActSelectPresound());
         
-        currentSort = sorters[0];
+        currentSort = SongDbSort.All[0];
+    }
+    
+    //the selected song's display values, pushed on change: formatting them per frame would allocate
+    private readonly UIDataContext songInfo = new();
+
+    public override void RegisterBindings()
+    {
+        foreach (string key in SongInfoKeys)
+        {
+            songInfo.DeclareString(key);
+        }
+
+        //also expose the raw selection, so a skin can reach anything these keys don't cover
+        songInfo.RegisterObject("Song", () => selectedNode);
+        songInfo.RegisterObject("Chart", () => selectedChart);
+
+        //pulled rather than pushed: the thumbnail can finish loading after the selection changed
+        songInfo.RegisterTexture("AlbumArt", () => selectionContainer?.CurrentBigAlbumArt);
+
+        ui.dataContext = songInfo;
     }
 
-    private readonly SongDbSort[] sorters =
-    [
-        new SortDefault(),
-        new SortByBox(),
-        new SortByTitle(),
-        new SortByArtist(),
-        new SortByDifficulty(),
-        new SortByLevel(),
-        new SortByPlayer(),
-        new SortByAllSongs(),
-        new SortBySkill()
-    ];
-    
-    public override void InitializeBaseUI()
-    {
-        bigAlbumArt = ui.AddChild(new UIImage());
-        bigAlbumArt.position = new Vector3(320, 35, 0);
-        bigAlbumArt.renderOrder = 10;
-        bigAlbumArt.size = new Vector2(300, 300);
-        bigAlbumArt.name  = "AlbumArt";
-        
-        sortMenuContainer = ui.AddChild(new SortMenuContainer(songDb, sorters));
-        sortMenuContainer.position = new Vector3(1281, 35, 0);
-        sortMenuContainer.renderOrder = 8;
+    private static readonly string[] SongInfoKeys =
+        ["SongName", "SongArtist", "SongGenre", "SongBPM", "SongDuration", "SongComment", "SongSkill"];
 
-        statusPanel = ui.AddChild(new StatusPanel());
-        statusPanel.renderOrder = 6;
-        
-        commentText = ui.AddChild(new UIText("", 18));
+    private void RefreshSongInfo()
+    {
+        CChartData? chart = selectedChart;
+
+        songInfo.SetString("SongName", chart?.SongInformation.Title ?? "");
+        songInfo.SetString("SongArtist", chart?.SongInformation.ArtistName ?? "");
+        songInfo.SetString("SongGenre", chart?.SongInformation.Genre ?? "");
+        songInfo.SetString("SongComment", chart?.SongInformation.Comment ?? "");
+
+        songInfo.SetString("SongBPM", chart != null
+            ? chart.SongInformation.Bpm.ToString("0.##", CultureInfo.InvariantCulture)
+            : "");
+
+        int? durationMs = chart?.SongInformation.DurationMs;
+        songInfo.SetString("SongDuration", durationMs != null
+            ? TimeSpan.FromMilliseconds(durationMs.Value).ToString(@"m\:ss")
+            : "");
+
+        double points = selectedNode?.GetTopSkillPoints().skillPoints ?? 0;
+        songInfo.SetString("SongSkill", points > 0 ? points.ToString("0.00") : "");
+    }
+
+    public override void BuildDefaultLayout()
+    {
+        ui.AddChild(new UIImage
+        {
+            imageSource = ImageSource.File, image = SkinResource.System(@"Graphics\5_background.jpg"),
+            renderOrder = -101, position = Vector3.Zero, name = "Background"
+        });
+
+        ui.AddChild(new UIImage
+        {
+            imageSource = ImageSource.File, image = SkinResource.System(@"Graphics\SongSelect\back1.png"),
+            renderOrder = 1, position = new Vector3(174, 393, 0), rotation = new Vector3(0, 0, 1.63f), name = "Back1"
+        });
+
+        ui.AddChild(new UIImage
+        {
+            imageSource = ImageSource.File, image = SkinResource.System(@"Graphics\SongSelect\back2.png"),
+            renderOrder = 2, position = new Vector3(126, 336, 0), rotation = new Vector3(0, 0, -0.06f), name = "Back2"
+        });
+
+        ui.AddChild(new UIImage
+        {
+            imageSource = ImageSource.File, image = SkinResource.System(@"Graphics\SongSelect\top_bar.png"),
+            renderOrder = 12, name = "TopBar", size = { X = 1280 } //height stays on the texture
+        });
+
+        ui.AddChild(new UIImage
+        {
+            imageSource = ImageSource.File, image = SkinResource.System(@"Graphics\SongSelect\panel_skill.png"),
+            renderOrder = 9, position = new Vector3(96, 225, 0), name = "PanelSkill"
+        });
+
+        ui.AddChild(new UIImage
+        {
+            imageSource = ImageSource.File, image = SkinResource.System(@"Graphics\SongSelect\panel_bpm.png"),
+            renderOrder = 9, position = new Vector3(96, 300, 0), name = "PanelBpm"
+        });
+
+        ui.AddChild(new UIImage
+        {
+            imageSource = ImageSource.Dynamic, dynamicSource = "AlbumArt",
+            position = new Vector3(320, 35, 0), renderOrder = 10, size = new Vector2(300, 300), name = "AlbumArt"
+        });
+
+        var skillText = ui.AddChild(new UIText("", 48));
+        skillText.renderOrder = 11;
+        skillText.bindings.Add(new UIBinding("text", "SongSkill"));
+        skillText.outlineWidth = 0;
+        skillText.style = UiTextStyle.Italic;
+        skillText.font = SkinResource.System("Futura PT Medium.otf");
+        skillText.anchor = new Vector2(1, 1);
+        skillText.position = new Vector3(315, 291, 0);
+        skillText.name = "SkillText";
+
+        var bpmText = ui.AddChild(new UIText("", 28));
+        bpmText.renderOrder = 11;
+        bpmText.bindings.Add(new UIBinding("text", "SongBPM"));
+        bpmText.outlineWidth = 0;
+        bpmText.style = UiTextStyle.Italic;
+        bpmText.font = SkinResource.System("Futura PT Medium.otf");
+        bpmText.anchor = new Vector2(1, 1);
+        bpmText.position = new Vector3(315, 338, 0);
+        bpmText.name = "BPMText";
+
+        var commentText = ui.AddChild(new UIText("", 18));
         commentText.renderOrder = 11;
         commentText.position = new Vector3(0, 35, 0);
-        commentText.textSource = TextSource.Dynamic;
-        commentText.dynamicSource = "SongComment";
+        commentText.bindings.Add(new UIBinding("text", "SongComment"));
         commentText.name = "CommentText";
-        
-        songSearchMenu = ui.AddChild(new SongSearchMenu());
-        songSearchMenu.renderOrder = 15;
-        songSearchMenu.isVisible = false;
-        songSearchMenu.anchor = new Vector2(0.5f, 0.5f);
-        songSearchMenu.position = new Vector3(1280 / 2.0f, 720 / 2.0f, 0);
 
-        quickMenu = ui.AddChild(new QuickMenu());
-        quickMenu.renderOrder = 15;
-        quickMenu.isVisible = false;
-        quickMenu.anchor = new Vector2(0.5f, 0.5f);
-        quickMenu.position = new Vector3(1280 / 2.0f, 720 / 2.0f, 0);
-
-        //a single container is re-pointed at the active sort's root (see ApplySort)
-        selectionContainer = ui.AddChild(new SongSelectionContainer(songDb, bigAlbumArt));
-        selectionContainer.position = new Vector3(765, 320, 0);
-        selectionContainer.name = "SongSelect";
-        
-        dynamicStringSources["SongName"] = new DynamicStringSource(() => selectedChart?.SongInformation.Title ?? "");
-        dynamicStringSources["SongArtist"] = new DynamicStringSource(() => selectedChart?.SongInformation.ArtistName ?? "");
-        dynamicStringSources["SongGenre"] = new DynamicStringSource(() => selectedChart?.SongInformation.Genre ?? "");
-        dynamicStringSources["SongBPM"] = new DynamicStringSource(() => selectedChart?.SongInformation.Bpm.ToString("0.##", CultureInfo.InvariantCulture) ?? "");
-        dynamicStringSources["SongDuration"] = new DynamicStringSource(() =>
+        //ambient looping background video; the per-song preview movie is PreviewVideoBackground below
+        ui.AddChild(new UINewVideoRenderer
         {
-            int? ms = selectedChart?.SongInformation.DurationMs;
-            return ms != null ? TimeSpan.FromMilliseconds(ms.Value).ToString(@"m\:ss") : "";
+            video = SkinResource.System(@"Graphics\5_background.mp4"),
+            renderOrder = -100,
+            name = "BackgroundVideo"
         });
-        dynamicStringSources["SongComment"] = new DynamicStringSource(() => selectedChart?.SongInformation.Comment ?? "");
-        dynamicStringSources["SongSkill"] = new DynamicStringSource(() =>
-        {
-            double? points = selectedNode?.GetTopSkillPoints().skillPoints;
 
-            if (points != null && points > 0)
-            {
-                return points.Value.ToString("0.00");
-            }
+        //the container is serializable (position + which row component it uses) but its rows are runtime
+        var songSelect = ui.AddChild(new SongSelectionContainer());
+        songSelect.position = new Vector3(765, 320, 0);
+        songSelect.name = "SongSelect";
 
-            return "";
-        });
+        //StatusPanel -> 3 pane component instances -> 5 rows each; a skin's json carries the panes instead
+        var statusPanel = ui.AddChild(new StatusPanel());
+        statusPanel.renderOrder = 6;
+        statusPanel.BuildDefaultPanes();
+
+        var sortMenu = ui.AddChild(new SortMenuContainer());
+        sortMenu.component = "Components/SortMenu.json";
+        sortMenu.position = new Vector3(1281, 35, 0);
+        sortMenu.renderOrder = 8;
     }
 
-    public override void InitializeDefaultUI()
+    public override void OnLayoutReady()
     {
-        BaseTexture bgTex = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\5_background.jpg"));
-        UIImage bg = ui.AddChild(new UIImage(bgTex));
-        bg.renderOrder = -101;
-        bg.position = Vector3.Zero;
-        bg.name = "Background";
-        
-        string videoPath = CSkin.Path(@"Graphics\5_background.mp4");
+        //swaps to the selected chart's PREMOVIE as the selection changes, like the preview sound
+        previewVideo = ui.AddChild(new PreviewVideoBackground());
+        previewVideo.renderOrder = -99;
+        previewVideo.position = Vector3.Zero;
 
-        UINewVideoRenderer videoPlayer = new();
-        if (videoPlayer.LoadVideo(videoPath))
-        {
-            ui.AddChild(videoPlayer);
-            videoPlayer.renderOrder = -100;
-            videoPlayer.name = "BackgroundVideo";
-        }
-        else
-        {
-            videoPlayer.Dispose();
-        }
-        
-        //create panel elements
-        var back1 = ui.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\SongSelect\back1.png"))));
-        back1.renderOrder = 1;
-        back1.position = new Vector3(174, 393, 0);
-        back1.rotation = new Vector3(0, 0, 1.63f);
-        back1.name = "Back1";
-        
-        var back2 = ui.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\SongSelect\back2.png"))));
-        back2.renderOrder = 2;
-        back2.position = new Vector3(126, 336, 0);
-        back2.rotation = new Vector3(0, 0, -0.06f);
-        back2.name = "Back2";
+        //the status panel, sort menu and selection container are part of the layout, so they may have
+        //come from json
+        statusPanel = ui.GetChild<StatusPanel>("StatusPanel")!;
+        sortMenuContainer = ui.GetChild<SortMenuContainer>("SortMenuContainer")!;
 
         densityGraph1 = ui.AddChild(new DensityGraph((EInstrumentPart)CDTXMania.GetCurrentInstrument()));
         densityGraph1.position = new Vector3(CDTXMania.GetCurrentInstrument() == 0 ? 212 : 64, 720, 0);
         densityGraph1.renderOrder = 4;
         densityGraph1.name = "DensityGraph";
-        
-        var topBar = ui.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\SongSelect\top_bar.png"))));
-        topBar.renderOrder = 12;
-        topBar.name = "TopBar";
-        topBar.size.X = 1280;
-        
-        var panelSkill = ui.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\SongSelect\panel_skill.png"))));
-        panelSkill.renderOrder = 9;
-        panelSkill.name = "PanelSkill";
-        panelSkill.position = new Vector3(96, 225, 0);
-        
-        var skillText = ui.AddChild(new UIText("", 48));
-        skillText.renderOrder = 11;
-        skillText.textSource = TextSource.Dynamic;
-        skillText.dynamicSource = "SongSkill";
-        skillText.outlineWidth = 0;
-        skillText.style = UiTextStyle.Italic;
-        skillText.fontSource = FontSource.System;
-        skillText.font = "Futura PT Medium.otf";
-        skillText.anchor = new Vector2(1, 1);
-        skillText.position = new Vector3(315, 291, 0);
-        skillText.name = "SkillText";
-        
-        var panelBpm = ui.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\SongSelect\panel_bpm.png"))));
-        panelBpm.renderOrder = 9;
-        panelBpm.name = "PanelBpm";
-        panelBpm.position = new Vector3(96, 300, 0);
-        
-        var bpmText = ui.AddChild(new UIText("", 28));
-        bpmText.renderOrder = 11;
-        bpmText.textSource = TextSource.Dynamic;
-        bpmText.dynamicSource = "SongBPM";
-        bpmText.outlineWidth = 0;
-        bpmText.style = UiTextStyle.Italic;
-        bpmText.fontSource = FontSource.System;
-        bpmText.font = "Futura PT Medium.otf";
-        bpmText.anchor = new Vector2(1, 1);
-        bpmText.position = new Vector3(315, 338, 0);
-        bpmText.name = "BPMText";
+        densityGraph1.dontSerialize = true;
+
+        songSearchMenu = ui.AddChild(new SongSearchMenu());
+        songSearchMenu.renderOrder = 15;
+        songSearchMenu.isVisible = false;
+        songSearchMenu.anchor = new Vector2(0.5f, 0.5f);
+        songSearchMenu.position = new Vector3(1280 / 2.0f, 720 / 2.0f, 0);
+        songSearchMenu.dontSerialize = true;
+
+        quickMenu = ui.AddChild(new QuickMenu());
+        quickMenu.component = "Components/QuickMenu.json";
+        quickMenu.renderOrder = 15;
+        quickMenu.isVisible = false;
+        quickMenu.anchor = new Vector2(0.5f, 0.5f);
+        quickMenu.position = new Vector3(1280 / 2.0f, 720 / 2.0f, 0);
+        quickMenu.dontSerialize = true;
+
+        selectionContainer = ui.GetChild<SongSelectionContainer>("SongSelect");
+
+        //a skin reload recreates the container empty; the first load runs from the loadPhase machine
+        if (selectionContainer != null && sortCache.Count > 0)
+        {
+            SongNode? previousSelection = selectedNode;
+            ApplySort(currentSort);
+            if (previousSelection != null)
+            {
+                RestoreSelection(previousSelection);
+            }
+        }
     }
 
     public override void FirstUpdate()
     {
         //set initial sort menu container position to be default,
         //or in case of reloading the menu, whatever was last selected
-        sortMenuContainer.SetCurrentSelection(currentSort);
+        sortMenuContainer?.ShowSort(currentSort);
         
         //every time we load the stage, containers need to be recreated
         loadPhase = ELoadPhase.Initialize;
@@ -246,9 +283,8 @@ public class CStageSongSelectionNew : CStage
         Trace.TraceInformation("Preparing sort cache...");
         DateTime startTime = DateTime.Now;
         
-        //build (or refresh) the sorted root for every sorter; the single container is pointed at
-        //one of these on demand in ApplySort.
-        foreach (SongDbSort sorter in sorters)
+        //the container is pointed at one of these on demand in ApplySort
+        foreach (SongDbSort sorter in SongDbSort.All)
         {
             if (!sortCache.TryGetValue(sorter, out SongNode? rootNode) || sorter.requireResort)
             {
@@ -366,29 +402,79 @@ public class CStageSongSelectionNew : CStage
         }
         
         actPresound.OnUpdateAndDraw();
+        HandleGestures();
 
-        bool isSubMenuActive = HandleSubMenus();
-
-        if (isSubMenuActive)
-        {
-            return (int)EReturnValue.Continue;
-        }
-        
-        statusPanel.HandleNavigation();
-        sortMenuContainer.HandleNavigation();
-        return selectionContainer.HandleNavigation();
+        int result = pendingResult;
+        pendingResult = (int)EReturnValue.Continue;
+        return result;
     }
 
-    private bool HandleSubMenus()
+    public override void HandleInput()
     {
-        //cache this before running input handlers for submenus,
-        //so enter to close it doesn't get consumed by other menus
-        bool isActive = quickMenu.isVisible || songSearchMenu.isVisible;
-        
-        quickMenu.HandleNavigation();
-        songSearchMenu.HandleNavigation();
+        if (loadPhase != ELoadPhase.Complete)
+        {
+            return;
+        }
 
-        return isActive;
+        //on the arrow keys, so a submenu holding focus takes them with it
+        sortMenuContainer?.HandleNavigation();
+        pendingResult = selectionContainer.HandleNavigation();
+    }
+
+    /// <summary>
+    /// The pad commands that are game rules rather than list navigation: opening the quick menu, the
+    /// search key, changing difficulty and swapping guitar and bass. They are polled whatever holds focus,
+    /// which is why they may only ever be pad commands — a navigation or decide key here would fire
+    /// underneath whatever the player is actually driving.
+    /// </summary>
+    private void HandleGestures()
+    {
+        quickMenu.PollToggleGesture();
+        songSearchMenu.PollOpenGesture();
+
+        PollDifficultyCommand(EInstrumentPart.DRUMS, EPad.HH, EPadFlag.HH);
+        PollDifficultyCommand(EInstrumentPart.DRUMS, EPad.HHO, EPadFlag.HH);
+        PollDifficultyCommand(EInstrumentPart.GUITAR, EPad.B, EPadFlag.B);
+        PollDifficultyCommand(EInstrumentPart.BASS, EPad.B, EPadFlag.B);
+
+        PollSwapCommand(EInstrumentPart.GUITAR);
+        PollSwapCommand(EInstrumentPart.BASS);
+    }
+
+    //two hits on the same pad change difficulty
+    private void PollDifficultyCommand(EInstrumentPart part, EPad pad, EPadFlag flag)
+    {
+        if (!CDTXMania.Pad.bPressed(part, pad))
+        {
+            return;
+        }
+
+        commandHistory.Add(part, flag);
+
+        if (commandHistory.CheckCommand([flag, flag], part))
+        {
+            IncrementDifficultyLevel();
+        }
+    }
+
+    //two Y hits swap which instrument the guitar keys play
+    private void PollSwapCommand(EInstrumentPart part)
+    {
+        if (!CDTXMania.Pad.bPressed(part, EPad.Y))
+        {
+            return;
+        }
+
+        commandHistory.Add(part, EPadFlag.Y);
+
+        if (!commandHistory.CheckCommand([EPadFlag.Y, EPadFlag.Y], part))
+        {
+            return;
+        }
+
+        CDTXMania.Skin.soundChange.tPlay();
+        CDTXMania.ConfigIni.bIsSwappedGuitarBass = !CDTXMania.ConfigIni.bIsSwappedGuitarBass;
+        ChangeSelection(selectedNode, selectedChart);
     }
 
     public SongNode? selectedNode { get; private set; }
@@ -397,8 +483,11 @@ public class CStageSongSelectionNew : CStage
     {
         selectedNode = node;
         selectedChart = chart;
-        
+
+        RefreshSongInfo();
+        selectionContainer.UpdateSelectedSongAlbumArt();
         actPresound.tSelectionChanged(chart);
+        previewVideo?.SelectionChanged(chart);
         statusPanel.SelectionChanged(node, chart);
         densityGraph1.SelectionChanged(node, chart);
     }
@@ -536,18 +625,14 @@ public class CStageSongSelectionNew : CStage
 
         currentSort = sorter;
 
-        //re-point the single container at the selected sort's root. Each sorted root remembers its
-        //own selection (SongNode.CurrentSelection), so every sort keeps its own scroll position, and
-        //the path-keyed image cache is shared so thumbnails are reused across sorts. UpdateRoot
-        //propagates the selection back to the stage via HandleSelectionChanged -> ChangeSelection.
+        //each sorted root remembers its own selection, so every sort keeps its scroll position
         selectionContainer.UpdateRoot(root);
     }
 
-    //background-prewarm the initial thumbnails of every non-active sort so switching to them shows
-    //images immediately. Fire-and-forget; the async uploader throttles the actual GPU uploads.
+    //so switching sorts shows thumbnails immediately; the uploader throttles the GPU work
     private void PrewarmOtherSorts()
     {
-        foreach (SongDbSort sorter in sorters)
+        foreach (SongDbSort sorter in SongDbSort.All)
         {
             if (sorter == currentSort) continue;
             if (sortCache.TryGetValue(sorter, out SongNode? root))

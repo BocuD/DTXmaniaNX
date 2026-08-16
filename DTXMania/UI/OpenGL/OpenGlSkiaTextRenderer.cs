@@ -42,12 +42,20 @@ internal sealed class OpenGlSkiaTextRenderer : IUiTextRenderer
         float actualLineHeight = MathF.Max(baseLineHeight * request.LineSpacing, 1f);
         Vector2 effectivePadding = Vector2.Max(request.TexturePadding + new Vector2(request.OutlineWidth + 2f), new Vector2(2f));
 
+        float wrapBudget = request.MaxWidth - effectivePadding.X * 2f;
+        if (request.MaxWidth > 0f && wrapBudget > 0f)
+        {
+            lines = WrapLines(font, lines, wrapBudget);
+        }
+
         float maxLineWidth = 0f;
         foreach (string line in lines)
         {
             maxLineWidth = MathF.Max(maxLineWidth, MeasureLineWidth(font, line));
         }
 
+        //wrapping has already held every line to the budget, so the bitmap is the longest of them: a
+        //wrapped text still ends up only as wide as it needed to be
         int bitmapWidth = Math.Max((int)MathF.Ceiling(maxLineWidth + effectivePadding.X * 2f), 1);
         int bitmapHeight = Math.Max((int)MathF.Ceiling(lines.Length * actualLineHeight + effectivePadding.Y * 2f), 1);
 
@@ -109,6 +117,18 @@ internal sealed class OpenGlSkiaTextRenderer : IUiTextRenderer
     {
         string normalized = value.Replace("\r\n", "\n");
         return normalized.Split('\n');
+    }
+
+    private static string[] WrapLines(SKFont font, string[] hardLines, float budget)
+    {
+        List<string> wrapped = [];
+
+        foreach (string hardLine in hardLines)
+        {
+            wrapped.AddRange(LineBreaker.Wrap(hardLine, budget, line => MeasureLineWidth(font, line)));
+        }
+
+        return wrapped.ToArray();
     }
 
     // Typefaces are immutable and expensive to load (SKTypeface.FromFile hits disk). Cache and

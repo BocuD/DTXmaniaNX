@@ -1,4 +1,5 @@
 using System.Numerics;
+using DTXMania.UI.DynamicElements;
 using Hexa.NET.ImGui;
 using Hexa.NET.ImGuizmo;
 using Newtonsoft.Json;
@@ -12,11 +13,15 @@ public abstract class UIDrawable : IDisposable
     [Themable] public int renderOrder = 0;
     [Themable] public Vector3 position = Vector3.Zero;
     [Themable] public Vector2 anchor = Vector2.Zero;
-    [Themable] public Vector2 size = Vector2.One;
+    [Themable] public UISize size = UISize.Auto(Vector2.One);
     [Themable] public Vector3 scale = Vector3.One;
     [Themable] public Vector3 rotation = Vector3.Zero;
     [Themable] public string name = string.Empty;
     [Themable] public bool isVisible = true;
+
+    //drives arbitrary [Themable] members from data context keys; see UIBinding
+    [Themable] [SkinSerialize] public List<UIBinding> bindings = [];
+
     public bool dontSerialize = false;
 
     public Matrix4x4 LocalTransformMatrix => localTransformMatrix;
@@ -34,6 +39,12 @@ public abstract class UIDrawable : IDisposable
 
     public void UpdateLocalTransformMatrix()
     {
+        //the parent draws first, so its box has settled by the time a child asks for it
+        if (parent != null && size.Inherits)
+        {
+            size.SetInherited(parent.size);
+        }
+
         Vector3 anchorOffset = new(-anchor.X * size.X, -anchor.Y * size.Y, 0f);
         Matrix4x4 translationMatrix = Matrix4x4.CreateTranslation(position);
         Matrix4x4 rotationMatrix = Matrix4x4.CreateFromYawPitchRoll(rotation.Y, rotation.X, rotation.Z);
@@ -63,6 +74,105 @@ public abstract class UIDrawable : IDisposable
     public virtual void OnDeserialize()
     {
         DrawableTracker.Register(this);
+    }
+
+    //lets a drawable keep transient runtime state out of a saved layout, e.g. a dynamic UIText's text
+    /// <summary>
+    /// Whether a member is worth writing into a layout. A member a binding drives is not: its value is
+    /// whatever the data said last frame, and the binding is the thing that describes it.
+    /// </summary>
+    public virtual bool ShouldSerializeMember(string memberName)
+    {
+        for (int i = 0; i < bindings.Count; i++)
+        {
+            if (bindings[i].target == memberName)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    //the contexts a binding on this element resolves against, nearest first: its own (if it roots one),
+    //then every ancestor's, then the app-wide global context. Nearest context that HAS the key wins.
+    //
+    //the four resolvers below repeat this walk by hand rather than sharing an iterator: they run once per
+    //bound element per frame, and an IEnumerable would allocate a state machine on every one of them.
+    //DataContexts() exists for the inspector, which enumerates once per inspector frame.
+    public IEnumerable<IUIDataContext> DataContexts()
+    {
+        for (UIGroup? group = this as UIGroup ?? parent; group != null; group = group.parent)
+        {
+            if (group.dataContext != null)
+            {
+                yield return group.dataContext;
+            }
+        }
+
+        yield return UIDataContext.Global;
+    }
+
+    public bool TryResolveContextString(string key, out string value)
+    {
+        for (UIGroup? group = this as UIGroup ?? parent; group != null; group = group.parent)
+        {
+            if (group.dataContext != null && group.dataContext.TryGetString(key, out value))
+            {
+                return true;
+            }
+        }
+
+        return UIDataContext.Global.TryGetString(key, out value);
+    }
+
+    public bool TryResolveContextTexture(string key, out BaseTexture texture)
+    {
+        for (UIGroup? group = this as UIGroup ?? parent; group != null; group = group.parent)
+        {
+            if (group.dataContext != null && group.dataContext.TryGetTexture(key, out texture))
+            {
+                return true;
+            }
+        }
+
+        return UIDataContext.Global.TryGetTexture(key, out texture);
+    }
+
+    public bool TryResolveContextBool(string key, out bool value)
+    {
+        for (UIGroup? group = this as UIGroup ?? parent; group != null; group = group.parent)
+        {
+            if (group.dataContext != null && group.dataContext.TryGetBool(key, out value))
+            {
+                return true;
+            }
+        }
+
+        return UIDataContext.Global.TryGetBool(key, out value);
+    }
+
+    public bool TryResolveContextNumber(string key, out double value)
+    {
+        for (UIGroup? group = this as UIGroup ?? parent; group != null; group = group.parent)
+        {
+            if (group.dataContext != null && group.dataContext.TryGetNumber(key, out value))
+            {
+                return true;
+            }
+        }
+
+        return UIDataContext.Global.TryGetNumber(key, out value);
+    }
+
+    //called by the parent group each frame, before its animator ticks, so animation wins on a shared
+    //member. A no-op when nothing is bound, leaving code-set values untouched.
+    public void ApplyBindings()
+    {
+        for (int i = 0; i < bindings.Count; i++)
+        {
+            bindings[i].Apply(this);
+        }
     }
 
     public Matrix4x4 GetFullTransformMatrix()
@@ -106,15 +216,73 @@ public abstract class UIDrawable : IDisposable
         ImGui.Text(id);
         ImGui.EndDisabled();
 
-        ImGui.InputInt("Render Order", ref renderOrder);
+        if (ImGui.InputInt("Render Order", ref renderOrder))
+        {
+            parent?.InvalidateOrder();
+        }
         Inspector.Inspector.Inspect("Position", ref position);
         Inspector.Inspector.Inspect("Anchor", ref anchor);
         Inspector.Inspector.Inspect("Size", ref size);
         Inspector.Inspector.Inspect("Scale", ref scale);
         Inspector.Inspector.Inspect("Rotation", ref rotation);
         ImGui.Checkbox("Is Visible", ref isVisible);
-        ImGui.TextColored(new Vector4(1f, 0.5f, 0f, 1f), "Warning: Enabling 'NonSerialized' will prevent this drawable from being saved in the UI layout.");
+
         ImGui.Checkbox("NonSerialized", ref dontSerialize);
+
+        DrawBindingsSection();
+
+        IUIDataContext? dataContext = DataContexts().FirstOrDefault(c => c != UIDataContext.Global);
+        if (dataContext != null)
+        {
+            ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.4f, 1f, 0.5f, 1f));
+            bool open = ImGui.CollapsingHeader("Data Context");
+            ImGui.PopStyleColor();
+
+            if (open)
+            {
+                Inspector.Inspector.DrawDataContextTree(dataContext);
+            }
+        }
+    }
+
+    private void DrawBindingsSection()
+    {
+        if (!ImGui.CollapsingHeader($"Bindings ({bindings.Count})"))
+        {
+            return;
+        }
+
+        int removeAt = -1;
+        for (int i = 0; i < bindings.Count; i++)
+        {
+            UIBinding binding = bindings[i];
+            ImGui.PushID(i);
+
+            //both ends are picked rather than typed: the target from what this element exposes, the source
+            //from what its data contexts offer
+            Inspector.PathPicker.Draw("Target", ref binding.target, Inspector.PathPicker.TargetsFor(this));
+            Inspector.Inspector.DrawBindingDropdown("Source", ref binding.source, this, binding.KindFor(this));
+
+            ImGui.Checkbox("Invert", ref binding.invert);
+
+            if (ImGui.Button("Remove"))
+            {
+                removeAt = i;
+            }
+
+            ImGui.PopID();
+            ImGui.Separator();
+        }
+
+        if (removeAt >= 0)
+        {
+            bindings.RemoveAt(removeAt);
+        }
+
+        if (ImGui.Button("Add Binding"))
+        {
+            bindings.Add(new UIBinding());
+        }
     }
 
     public void DrawTransformGizmo()

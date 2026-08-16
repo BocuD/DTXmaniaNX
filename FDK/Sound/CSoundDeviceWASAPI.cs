@@ -223,8 +223,18 @@ public class CSoundDeviceWASAPI : ISoundDevice
 		// 更新間隔を最小にするには、BassWasapi.BASS_WASAPI_GetDeviceInfo( ndevNo ).minperiod の値を使えばよい。
 		// これをやらないと、更新間隔ms=6ms となり、バッファサイズを 6ms x 4 = 24msより小さくできない。
 		#region [ Search for WASAPI device matching default sound device ]
+		// A requested device is matched by name, otherwise the system default is. One that is no longer
+		// present falls back to the default rather than failing to start.
+		string strWantedDeviceName = CSoundManager.strRequestedOutputDevice;
+		bool bWantsSpecificDevice = !string.IsNullOrEmpty(strWantedDeviceName);
+		if (!bWantsSpecificDevice)
+		{
+			strWantedDeviceName = strDefaultSoundDeviceName;
+		}
+
 		int nDevNo = -1;
-		Trace.TraceInformation("Searching for WASAPI device matching default sound device: \"{0}\"", strDefaultSoundDeviceName);
+		Trace.TraceInformation("Searching for WASAPI device: \"{0}\" ({1})",
+			strWantedDeviceName, bWantsSpecificDevice ? "explicitly requested" : "system default");
 		BASS_WASAPI_DEVICEINFO deviceInfo = null;
 		for (int n = 0; ; n++)
 		{
@@ -237,12 +247,14 @@ public class CSoundDeviceWASAPI : ISoundDevice
 			if (!isEnabled) continue; // Skip disabled/disconnected devices
 
 			// (Log enabled devices to help debug index mismatches)
-			Trace.TraceInformation("WASAPI Device #{0}: {1} (Input={2}, Default={3})", 
+			Trace.TraceInformation("WASAPI Device #{0}: {1} (Input={2}, Default={3})",
 				n, wasapiDeviceInfo.name, isInput, wasapiDeviceInfo.IsDefault);
 
-			if (wasapiDeviceInfo.name == strDefaultSoundDeviceName && !isInput)
+			if (wasapiDeviceInfo.name == strWantedDeviceName && !isInput)
 			{
-				if (nDevNo == -1 || wasapiDeviceInfo.IsDefault)
+				// Several entries can share a name; when following the default, prefer the one BASS also
+				// flags as default, otherwise take the first match.
+				if (nDevNo == -1 || (!bWantsSpecificDevice && wasapiDeviceInfo.IsDefault))
 				{
 					nDevNo = n;
 					deviceInfo = wasapiDeviceInfo;
@@ -254,6 +266,30 @@ public class CSoundDeviceWASAPI : ISoundDevice
 				}
 			}
 		}
+
+		if (nDevNo == -1 && bWantsSpecificDevice)
+		{
+			Trace.TraceWarning("Requested output device \"{0}\" was not found; falling back to the system default \"{1}\".",
+				strWantedDeviceName, strDefaultSoundDeviceName);
+
+			for (int n = 0; ; n++)
+			{
+				var wasapiDeviceInfo = BassWasapi.BASS_WASAPI_GetDeviceInfo(n);
+				if (wasapiDeviceInfo == null) break;
+
+				if ((wasapiDeviceInfo.flags & BASSWASAPIDeviceInfo.BASS_DEVICE_ENABLED) == 0) continue;
+				if ((wasapiDeviceInfo.flags & BASSWASAPIDeviceInfo.BASS_DEVICE_INPUT) != 0) continue;
+
+				if (wasapiDeviceInfo.name == strDefaultSoundDeviceName
+					&& (nDevNo == -1 || wasapiDeviceInfo.IsDefault))
+				{
+					nDevNo = n;
+					deviceInfo = wasapiDeviceInfo;
+				}
+			}
+		}
+
+		CSoundManager.strActiveOutputDevice = deviceInfo != null ? deviceInfo.name : "";
 		if (nDevNo != -1)
 		{
 			Trace.TraceInformation("Matched WASAPI Device #{0} to default sound device.", nDevNo);
@@ -407,6 +443,10 @@ public class CSoundDeviceWASAPI : ISoundDevice
 
 		if (bSuccess)
 		{
+			// Record what was opened, not what was searched for: the retries above can land elsewhere.
+			var openedDeviceInfo = BassWasapi.BASS_WASAPI_GetDeviceInfo(BassWasapi.BASS_WASAPI_GetDevice());
+			CSoundManager.strActiveOutputDevice = openedDeviceInfo != null ? openedDeviceInfo.name : "";
+
 			if (mode == Eデバイスモード.排他)
 			{
 				#region [ Exclusive Mode Successful ]
@@ -426,7 +466,7 @@ public class CSoundDeviceWASAPI : ISoundDevice
 					case BASSWASAPIFormat.BASS_WASAPI_FORMAT_FLOAT: n1サンプルのバイト数 = 4 * wasapiInfo.chans; break;
 				}
 				int n1秒のバイト数 = n1サンプルのバイト数 * wasapiInfo.freq;
-				n実バッファサイズms = (long)(wasapiInfo.buflen * 1000.0f / n1秒のバイト数);
+				n実バッファサイズms = (long)Math.Round(wasapiInfo.buflen * 1000.0 / n1秒のバイト数);
 				n実出力遅延ms = 0;  // Initial value is zero
 				Trace.TraceInformation("Using Device: #{0} : {1}, flags={2}", nDevNo, deviceInfo.name, deviceInfo.flags);
 				Trace.TraceInformation("BASS WASAPI Initialized (Exclusive Mode, {0}Hz, {1}ch, Format: {2}, Buffer: {3} bytes [{4}ms (Requested: {5}ms)], Update Period: {6}ms)",
@@ -452,7 +492,7 @@ public class CSoundDeviceWASAPI : ISoundDevice
 				var wasapiInfo = BassWasapi.BASS_WASAPI_GetInfo();
 				int n1サンプルのバイト数 = 2 * wasapiInfo.chans; // default;
 				int n1秒のバイト数 = n1サンプルのバイト数 * wasapiInfo.freq;
-				n実バッファサイズms = (long)(wasapiInfo.buflen * 1000.0f / n1秒のバイト数);
+				n実バッファサイズms = (long)Math.Round(wasapiInfo.buflen * 1000.0 / n1秒のバイト数);
 				n実出力遅延ms = 0;  // Initial value is zero
 				var devInfo = BassWasapi.BASS_WASAPI_GetDeviceInfo(BassWasapi.BASS_WASAPI_GetDevice()); // In shared mode, update period is fixed to device's default.
 				Trace.TraceInformation("Using Device: #{0} : {1}, flags={2}", nDevNo, deviceInfo.name, deviceInfo.flags);

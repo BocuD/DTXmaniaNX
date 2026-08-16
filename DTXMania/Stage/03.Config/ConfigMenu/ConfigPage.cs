@@ -1,5 +1,6 @@
 using DTXMania.Core;
 using DTXMania.UI.Config;
+using DTXMania.UI.Drawable;
 using DTXMania.UI.Item;
 
 namespace DTXMania;
@@ -21,6 +22,37 @@ internal abstract class ConfigPage
 
     /// <summary>Builds this page's rows. Called each time the page is (re)opened.</summary>
     public abstract List<CItemBase> Build();
+
+    private readonly List<UIDrawable> elements = [];
+
+    /// <summary>
+    /// Adds anything this page shows beside the list, through <see cref="AddElement"/>. Called when the
+    /// page opens, including on the way back from a folder inside it.
+    /// </summary>
+    protected virtual void CreateElements()
+    {
+    }
+
+    /// <summary>Adds an element that lives as long as the page is open.</summary>
+    protected T AddElement<T>(T element) where T : UIDrawable
+    {
+        elements.Add(element);
+        list.pageElements?.AddChild(element);
+        return element;
+    }
+
+    internal void OpenElements() => CreateElements();
+
+    internal void CloseElements()
+    {
+        foreach (UIDrawable element in elements)
+        {
+            list.pageElements?.RemoveChild(element);
+            element.Dispose();
+        }
+
+        elements.Clear();
+    }
 
     /// <summary>Snapshot any state needed to detect changes on exit. Called once at Config entry.</summary>
     public virtual void CacheInitialState()
@@ -48,7 +80,7 @@ internal abstract class ConfigPage
     {
         return new CItemBase(name, CItemBase.EPanelType.Folder, descriptionJp, descriptionEn)
         {
-            action = () => list.OpenFolder(target.Build()),
+            action = () => list.OpenFolder(target),
             formatValue = () => CDTXMania.isJapanese ? "開く" : "Open Folder"
         };
     }

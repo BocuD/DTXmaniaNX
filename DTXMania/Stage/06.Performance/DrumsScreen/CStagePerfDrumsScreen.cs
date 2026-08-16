@@ -43,9 +43,9 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         listChildActivities.Add(actProgressBar = new CActPerfProgressBar());
     }
 
-    public override void InitializeBaseUI()
+    public override void OnLayoutReady()
     {
-        base.InitializeBaseUI();
+        base.OnLayoutReady();
         
         var drumsScreen = ui.AddChild(new LegacyDrawable(DrawDrumsScreen));
         drumsScreen.name = "drumsScreen";
@@ -125,7 +125,6 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                 }
             }
         }
-        dtLastQueueOperation = DateTime.MinValue;
     }
     
     public override void OnManagedCreateResources()
@@ -154,7 +153,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
 
     public override void FirstUpdate()
     {
-        CSoundManager.rcPerformanceTimer.tReset();
+        AudioMixer.Timer.tReset();
         CDTXMania.Timer.tReset();
         actChipFireD.Start(ELane.HH, false, false, false, 0, false); // #31554 2013.6.12 yyagi
 
@@ -229,8 +228,24 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         return 0;
     }
 
+    private static readonly int probeLegacyDraw = AllocationProbe.Register("Legacy draw (all)");
+    private static readonly int probeVideo = AllocationProbe.Register("video", 1);
+    private static readonly int probeLanes = AllocationProbe.Register("lanes", 1);
+    private static readonly int probeChips = AllocationProbe.Register("chips", 1);
+    private static readonly int probeScore = AllocationProbe.Register("score", 1);
+    private static readonly int probeStatusPanel = AllocationProbe.Register("status panel", 1);
+    private static readonly int probeGauge = AllocationProbe.Register("gauge", 1);
+    private static readonly int probeCombo = AllocationProbe.Register("combo", 1);
+    private static readonly int probeGraph = AllocationProbe.Register("graph", 1);
+    private static readonly int probeJudgement = AllocationProbe.Register("judgement string", 1);
+    private static readonly int probeOverlay = AllocationProbe.Register("debug overlay", 1);
+    private static readonly int probeEffects = AllocationProbe.Register("chip fire", 1);
+    private static readonly int probeFade = AllocationProbe.Register("fade", 1);
+    private static readonly int probeKeyInput = AllocationProbe.Register("key input", 1);
+
     private void DrawDrumsScreen()
     {
+        AllocationProbe.Begin(probeLegacyDraw);
         sw.Start();
 
         bIsFinishedPlaying = false;
@@ -247,24 +262,38 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
             ePhaseID = EPhase.PERFORMANCE_STAGE_FAILED;
         }
 
+        AllocationProbe.Begin(probeVideo);
         tUpdateAndDraw_MIDIBGM();
         tUpdateAndDraw_AVI();
+        AllocationProbe.End(probeVideo);
+
+        AllocationProbe.Begin(probeLanes);
         tUpdateAndDraw_LaneFlushD();
         tUpdateAndDraw_ScrollSpeed();
+        AllocationProbe.End(probeLanes);
+
+        AllocationProbe.Begin(probeChips);
         tUpdateAndDraw_ChipAnimation();
         tUpdateAndDraw_BarLines(EInstrumentPart.DRUMS);
         tDraw_LoopLines();
         tUpdateAndDraw_Chip_PatternOnly(EInstrumentPart.DRUMS);
         bIsFinishedPlaying = tUpdateAndDraw_Chips(EInstrumentPart.DRUMS);
+        AllocationProbe.End(probeChips);
+
+        AllocationProbe.Begin(probeLanes);
         actProgressBar.OnUpdateAndDraw();
 
         DrawLaneCover();
 
         tUpdateAndDraw_JudgementLine();
         tUpdateAndDraw_DrumPad();
+        AllocationProbe.End(probeLanes);
         
         //handle end of performance
+        AllocationProbe.Begin(probeFade);
         bIsFinishedFadeout = tUpdateAndDraw_FadeIn_Out();
+        AllocationProbe.End(probeFade);
+
         if (bIsFinishedPlaying && (ePhaseID == EPhase.Common_DefaultState))
         {
             if ((actGauge.IsFailed(EInstrumentPart.DRUMS)) && (ePhaseID == EPhase.Common_DefaultState))
@@ -281,45 +310,43 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
             }
         }
 
+        AllocationProbe.Begin(probeScore);
         if (CDTXMania.ConfigIni.bShowScore)
             tUpdateAndDraw_Score();
+        AllocationProbe.End(probeScore);
 
+        AllocationProbe.Begin(probeStatusPanel);
         tUpdateAndDraw_StatusPanel();
+        AllocationProbe.End(probeStatusPanel);
 
+        AllocationProbe.Begin(probeGauge);
         tUpdateAndDraw_Gauge();
+        AllocationProbe.End(probeGauge);
+
+        AllocationProbe.Begin(probeCombo);
         tUpdateAndDraw_Combo();
+        AllocationProbe.End(probeCombo);
+
+        AllocationProbe.Begin(probeGraph);
         tUpdateAndDraw_Graph();
+        AllocationProbe.End(probeGraph);
+
+        AllocationProbe.Begin(probeOverlay);
         tUpdateAndDraw_PerformanceInformation();
+        AllocationProbe.End(probeOverlay);
+
+        AllocationProbe.Begin(probeJudgement);
         tUpdateAndDraw_JudgementString1_ForNormalPosition();
+        AllocationProbe.End(probeJudgement);
+        AllocationProbe.Begin(probeEffects);
         tUpdateAndDraw_JudgementString2_ForPositionOnJudgementLine();
         tUpdateAndDraw_ChipFireD();
         tUpdateAndDraw_STAGEFAILED();
-        
-        // もしサウンドの登録/削除が必要なら、実行する
-        if (queueMixerSound.Count > 0)
-        {
-            //Debug.WriteLine( "☆queueLength=" + queueMixerSound.Count );
-            DateTime dtnow = DateTime.Now;
-            TimeSpan ts = dtnow - dtLastQueueOperation;
-            if (ts.Milliseconds > 7)
-            {
-                for (int i = 0; i < 2 && queueMixerSound.Count > 0; i++)
-                {
-                    dtLastQueueOperation = dtnow;
-                    stmixer stm = queueMixerSound.Dequeue();
-                    if (stm.bIsAdd)
-                    {
-                        CDTXMania.SoundManager.AddMixer(stm.csound);
-                    }
-                    else
-                    {
-                        CDTXMania.SoundManager.RemoveMixer(stm.csound);
-                    }
-                }
-            }
-        }
+        AllocationProbe.End(probeEffects);
 
-        if (LoopEndMs != -1 && CSoundManager.rcPerformanceTimer.nCurrentTime > LoopEndMs)
+
+
+        if (LoopEndMs != -1 && AudioMixer.Timer.nCurrentTime > LoopEndMs)
         {
             Trace.TraceInformation("Reached end of loop");
             tJumpInSong(LoopBeginMs == -1 ? 0 : LoopBeginMs);
@@ -340,9 +367,12 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         }
 
         // キー入力
+        AllocationProbe.Begin(probeKeyInput);
         tHandleKeyInput();
-        
+        AllocationProbe.End(probeKeyInput);
+
         sw.Stop();
+        AllocationProbe.End(probeLegacyDraw);
     }
 
     private void DrawLaneCover()
@@ -411,25 +441,25 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
             txShutter.tDraw2D(295, (int)(-720 + dbシャッターIN));
 
             if (CDTXMania.ConfigIni.bShowPerformanceInformation)
-                actLVFont.tDrawString(564, (int)dbシャッターIN - 20, CDTXMania.ConfigIni.nShutterOutSide.Drums.ToString());
+                actLVFont.tDrawString(564, (int)dbシャッターIN - 20, CDTXMania.ConfigIni.nShutterOutSide.Drums);
 
             dbシャッターOUT = 720 - (nShutterInPosY.Drums * db倍率);
             txShutter.tDraw2D(295, (int)dbシャッターOUT);
 
             if (CDTXMania.ConfigIni.bShowPerformanceInformation)
-                actLVFont.tDrawString(564, (int)dbシャッターOUT + 2, CDTXMania.ConfigIni.nShutterInSide.Drums.ToString());
+                actLVFont.tDrawString(564, (int)dbシャッターOUT + 2, CDTXMania.ConfigIni.nShutterInSide.Drums);
         }
         else
         {
             txShutter.tDraw2D(295, (int)(-720 + dbシャッターIN));
 
             if (CDTXMania.ConfigIni.bShowPerformanceInformation)
-                actLVFont.tDrawString(564, (int)dbシャッターIN - 20, CDTXMania.ConfigIni.nShutterInSide.Drums.ToString());
+                actLVFont.tDrawString(564, (int)dbシャッターIN - 20, CDTXMania.ConfigIni.nShutterInSide.Drums);
 
             txShutter.tDraw2D(295, (int)dbシャッターOUT);
 
             if (CDTXMania.ConfigIni.bShowPerformanceInformation)
-                actLVFont.tDrawString(564, (int)dbシャッターOUT + 2, CDTXMania.ConfigIni.nShutterOutSide.Drums.ToString());
+                actLVFont.tDrawString(564, (int)dbシャッターOUT + 2, CDTXMania.ConfigIni.nShutterOutSide.Drums);
         }
     }
 
@@ -627,7 +657,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                     rChip = pChip;
                 }
             }
-            tPlaySound( rChip, CSoundManager.rcPerformanceTimer.nシステム時刻, EInstrumentPart.DRUMS, CDTXMania.ConfigIni.n手動再生音量, CDTXMania.ConfigIni.b演奏音を強調する.Drums );
+            tPlaySound( rChip, AudioMixer.Timer.nSystemTimeMs, EInstrumentPart.DRUMS, CDTXMania.ConfigIni.n手動再生音量, CDTXMania.ConfigIni.b演奏音を強調する.Drums );
         }
         return true;
     }
@@ -688,9 +718,10 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
 
         for (int nPad = 0; nPad < (int)EPad.MAX; nPad++)
         {
-            List<STInputEvent> listInputEvent = CDTXMania.Pad.GetEvents(EInstrumentPart.DRUMS, (EPad)nPad);
+            List<STInputEvent> listInputEvent = listPadEvents;
+            CDTXMania.Pad.GetEvents(EInstrumentPart.DRUMS, (EPad)nPad, listInputEvent);
 
-            if ((listInputEvent == null) || (listInputEvent.Count == 0))
+            if (listInputEvent.Count == 0)
                 continue;
 
             tSaveInputMethod(EInstrumentPart.DRUMS);
@@ -731,7 +762,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                 if (!inputEvent.b押された)
                     continue;
 
-                long nTime = inputEvent.nTimeStamp - CSoundManager.rcPerformanceTimer.n前回リセットした時のシステム時刻;
+                long nTime = inputEvent.nTimeStamp - AudioMixer.Timer.nResetAtMs;
                 int nInputAdjustTime = bIsAutoPlay[nチャンネル0Atoレーン07[nPad]] ? 0 : nInputAdjustTimeMs.Drums;
                 int nPedalLagTime = CDTXMania.ConfigIni.nPedalLagTime;
 
@@ -2224,7 +2255,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                     {
                         #region [ (B1) 空打ち音が譜面で指定されているのでそれを再生する。]
                         //-----------------
-                        tPlaySound(rChip, CSoundManager.rcPerformanceTimer.nシステム時刻, EInstrumentPart.DRUMS, CDTXMania.ConfigIni.n手動再生音量, CDTXMania.ConfigIni.b演奏音を強調する.Drums);
+                        tPlaySound(rChip, AudioMixer.Timer.nSystemTimeMs, EInstrumentPart.DRUMS, CDTXMania.ConfigIni.n手動再生音量, CDTXMania.ConfigIni.b演奏音を強調する.Drums);
                         //-----------------
                         #endregion
                     }
@@ -2631,7 +2662,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                         if (rChip != null)
                         {
                             // 空打ち音が見つかったので再生する。
-                            tPlaySound(rChip, CSoundManager.rcPerformanceTimer.nシステム時刻, EInstrumentPart.DRUMS, CDTXMania.ConfigIni.n手動再生音量, CDTXMania.ConfigIni.b演奏音を強調する.Drums);
+                            tPlaySound(rChip, AudioMixer.Timer.nSystemTimeMs, EInstrumentPart.DRUMS, CDTXMania.ConfigIni.n手動再生音量, CDTXMania.ConfigIni.b演奏音を強調する.Drums);
                         }
                         //-----------------
                         #endregion
@@ -2941,7 +2972,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                 // #31602 2013.6.24 yyagi 判定ラインの表示位置をずらしたら、チップのヒットエフェクトの表示もずらすために、nJudgeLine..を追加
                 this.actChipFireD.Start( (ELane)indexSevenLanes, flag, flag2, flag2, nJudgeLinePosY_delta.Drums );
                 this.actPad.Hit( this.nチャンネル0Atoパッド08[ pChip.nChannelNumber - 0x11 ] );
-                this.tPlaySound( pChip, CSoundManager.rcPerformanceTimer.n前回リセットした時のシステム時刻 + pChip.nPlaybackTimeMs, EInstrumentPart.DRUMS, dTX.nモニタを考慮した音量( EInstrumentPart.DRUMS ) );
+                this.tPlaySound( pChip, AudioMixer.Timer.nResetAtMs + pChip.nPlaybackTimeMs, EInstrumentPart.DRUMS, dTX.nモニタを考慮した音量( EInstrumentPart.DRUMS ) );
                 this.tProcessChipHit( pChip.nPlaybackTimeMs, pChip );
             }
             */
@@ -2949,7 +2980,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         }	// end of "if configIni.bDrumsEnabled"
         if (!pChip.bHit && (pChip.nDistanceFromBar.Drums < 0))
         {
-            //this.tPlaySound(pChip, CSoundManager.rcPerformanceTimer.n前回リセットした時のシステム時刻 + pChip.nPlaybackTimeMs, EInstrumentPart.DRUMS, dTX.nモニタを考慮した音量(EInstrumentPart.DRUMS));
+            //this.tPlaySound(pChip, AudioMixer.Timer.nResetAtMs + pChip.nPlaybackTimeMs, EInstrumentPart.DRUMS, dTX.nモニタを考慮した音量(EInstrumentPart.DRUMS));
             pChip.bHit = true;
         }
     }
@@ -3256,7 +3287,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                 ghostLag = CDTXMania.listAutoGhostLag.Drums[pChip.n楽器パートでの出現順];
                 ghostLag = (ghostLag & 255) - 128;
                 ghostLag -= nInputAdjustTimeMs.Drums;
-                autoPlayCondition &= !pChip.bHit && (ghostLag + pChip.nPlaybackTimeMs <= CSoundManager.rcPerformanceTimer.n現在時刻ms);
+                autoPlayCondition &= !pChip.bHit && (ghostLag + pChip.nPlaybackTimeMs <= AudioMixer.Timer.nCurrentTime);
                 UsePerfectGhost = false;
             }
             if ( UsePerfectGhost )
@@ -3275,7 +3306,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                 // #31602 2013.6.24 yyagi 判定ラインの表示位置をずらしたら、チップのヒットエフェクトの表示もずらすために、nJudgeLine..を追加
                 actChipFireD.Start( (ELane)indexSevenLanes, flag, flag2, flag2, nJudgeLinePosY_delta.Drums );
                 actPad.Hit( nチャンネル0Atoパッド08[ pChip.nChannelNumber - EChannel.HiHatClose] );
-                tPlaySound( pChip, CSoundManager.rcPerformanceTimer.n前回リセットした時のシステム時刻 + pChip.nPlaybackTimeMs + ghostLag, EInstrumentPart.DRUMS, dTX.nモニタを考慮した音量( EInstrumentPart.DRUMS ) );
+                tPlaySound( pChip, AudioMixer.Timer.nResetAtMs + pChip.nPlaybackTimeMs + ghostLag, EInstrumentPart.DRUMS, dTX.nモニタを考慮した音量( EInstrumentPart.DRUMS ) );
                 tProcessChipHit(pChip.nPlaybackTimeMs + ghostLag, pChip);
                 //cInvisibleChip.StartSemiInvisible( EInstrumentPart.DRUMS );
             }
@@ -3334,7 +3365,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         }	// end of "if configIni.bDrumsEnabled"
         if ( !pChip.bHit && ( pChip.nDistanceFromBar.Drums < 0 ) )
         {
-            tPlaySound( pChip, CSoundManager.rcPerformanceTimer.n前回リセットした時のシステム時刻 + pChip.nPlaybackTimeMs, EInstrumentPart.DRUMS, dTX.nモニタを考慮した音量( EInstrumentPart.DRUMS ) );
+            tPlaySound( pChip, AudioMixer.Timer.nResetAtMs + pChip.nPlaybackTimeMs, EInstrumentPart.DRUMS, dTX.nモニタを考慮した音量( EInstrumentPart.DRUMS ) );
             pChip.bHit = true;
         }
     }
@@ -3346,7 +3377,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         if ( !pChip.bHit && ( pChip.nDistanceFromBar[ instIndex ] < 0 ) )
         {
             pChip.bHit = true;
-            tPlaySound( pChip, CSoundManager.rcPerformanceTimer.n前回リセットした時のシステム時刻 + pChip.nPlaybackTimeMs, inst, dTX.nモニタを考慮した音量( inst ) );
+            tPlaySound( pChip, AudioMixer.Timer.nResetAtMs + pChip.nPlaybackTimeMs, inst, dTX.nモニタを考慮した音量( inst ) );
         }
     }
     
@@ -3376,12 +3407,11 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                         video.Start(bInFillIn);
                         if (r現在の歓声Chip.Drums != null)
                         {
-                            dTX.tPlayChip(r現在の歓声Chip.Drums, CSoundManager.rcPerformanceTimer.nシステム時刻, (int)ELane.BGM, dTX.nモニタを考慮した音量(EInstrumentPart.UNKNOWN));
+                            dTX.tPlayChip(r現在の歓声Chip.Drums, AudioMixer.Timer.nSystemTimeMs, (int)ELane.BGM, dTX.nモニタを考慮した音量(EInstrumentPart.UNKNOWN));
                         }
                         else
                         {
                             CDTXMania.Skin.soundAudience.tPlay();
-                            CDTXMania.Skin.soundAudience.n位置_次に鳴るサウンド = 0;
                         }
                         //if (CDTXMania.ConfigIni.nSkillMode == 1)
                         //    this.actScore.nCurrentTrueScore.Drums += 500;
@@ -3403,12 +3433,11 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                         //actAVI.Start(true);
                         if (r現在の歓声Chip.Drums != null)
                         {
-                            dTX.tPlayChip(r現在の歓声Chip.Drums, CSoundManager.rcPerformanceTimer.nシステム時刻, (int)ELane.BGM, dTX.nモニタを考慮した音量(EInstrumentPart.UNKNOWN));
+                            dTX.tPlayChip(r現在の歓声Chip.Drums, AudioMixer.Timer.nSystemTimeMs, (int)ELane.BGM, dTX.nモニタを考慮した音量(EInstrumentPart.UNKNOWN));
                         }
                         else
                         {
                             CDTXMania.Skin.soundAudience.tPlay();
-                            CDTXMania.Skin.soundAudience.n位置_次に鳴るサウンド = 0;
                         }
                     }
                     break;
@@ -3422,12 +3451,11 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                         //actAVI.Start(true);
                         if (r現在の歓声Chip.Drums != null)
                         {
-                            dTX.tPlayChip(r現在の歓声Chip.Drums, CSoundManager.rcPerformanceTimer.nシステム時刻, (int)ELane.BGM, dTX.nモニタを考慮した音量(EInstrumentPart.UNKNOWN));
+                            dTX.tPlayChip(r現在の歓声Chip.Drums, AudioMixer.Timer.nSystemTimeMs, (int)ELane.BGM, dTX.nモニタを考慮した音量(EInstrumentPart.UNKNOWN));
                         }
                         else
                         {
                             CDTXMania.Skin.soundAudience.tPlay();
-                            CDTXMania.Skin.soundAudience.n位置_次に鳴るサウンド = 0;
                         }
                     }
                     break;
@@ -3539,7 +3567,6 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
             {
                 //actAVI.Start(true);
                 CDTXMania.Skin.soundAudience.tPlay();
-                CDTXMania.Skin.soundAudience.n位置_次に鳴るサウンド = 0;
             }
             if ( CDTXMania.ConfigIni.nSkillMode == 1 && ( !CDTXMania.ConfigIni.bAllDrumsAreAutoPlay || CDTXMania.ConfigIni.bAutoAddGage ) )
                 actScore.Add( EInstrumentPart.DRUMS, bIsAutoPlay, 500L );
@@ -3578,7 +3605,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
             }
 
             actPlayInfo.n小節番号 = n小節番号plus1 - 1;
-            if ( configIni.bWave再生位置自動調整機能有効 && bIsDirectSound )
+            if ( configIni.bWave再生位置自動調整機能有効 && bNeedsDriftCorrection )
             {
                 dTX.tAutoCorrectWavPlaybackPosition();
             }
@@ -3628,7 +3655,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         const double speed = 286;	// BPM150の時の1小節の長さ[dot]
         double ScrollSpeedDrums = (actScrollSpeed.db現在の譜面スクロール速度.Drums + 1.0) * 0.5 * 37.5 * speed / 60000.0;
 
-        int nDistanceFromBar = (int)(((bIsEnd ? LoopEndMs : LoopBeginMs) - CSoundManager.rcPerformanceTimer.nCurrentTime) * ScrollSpeedDrums);
+        int nDistanceFromBar = (int)(((bIsEnd ? LoopEndMs : LoopBeginMs) - AudioMixer.Timer.nCurrentTime) * ScrollSpeedDrums);
 
         //Display Loop Begin/Loop End text
         CDTXMania.actDisplayString.tPrint(830, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + nDistanceFromBar) - 0x11) : ((nJudgeLinePosY.Drums - nDistanceFromBar) - 0x11), CCharacterConsole.EFontType.White, (bIsEnd ? "End loop" : "Begin loop"));

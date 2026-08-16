@@ -1,201 +1,256 @@
-﻿using System.Drawing;
+using DTXMania.UI.Skin;
 using System.Numerics;
 using DTXMania.Core;
-using DTXMania.Core.Framework;
 using DTXMania.SongDb;
 using DTXMania.UI.Drawable;
+using DTXMania.UI.DynamicElements;
+using DTXMania.UI.Text;
 
 namespace DTXMania;
 
-public class StatusPane : UIGroup
+/// <summary>
+/// One instrument's difficulty pane: background, difficulty frame and a row per difficulty. The rows are a
+/// <see cref="UIItemsGroup"/> over five <see cref="ChartRowData"/>, so the pane supplies data and the
+/// ChartRow component decides what a row looks like.
+/// </summary>
+public class StatusPane : ComponentInstance, IUIItemSource
 {
-    public StatusPane(EInstrumentPart instrument)
-    {
-        this.instrument = instrument;
-        name = instrument.ToString();
-        
-        UIImage background = AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\5_difficulty_panel.png"))));
-        background.anchor = new Vector2(0.0f, 1.0f);
-        
-        txLevelNumber = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\5_level number.png"));
+    private const float VerticalSpacing = 74.0f;
+    private const int DifficultyCount = 5;
 
-        difficultyFrame = AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\5_difficultyframe.png"))));
-        difficultyFrame.anchor = new Vector2(0.0f, 1.0f);
-        difficultyFrame.position = new Vector3(-7.0f, 5.0f, 0.0f);
-        
-        skillIcon = BaseTexture.LoadFromPath(CSkin.Path($@"Graphics\Rank\skill.png"));
-        rankIcons = new BaseTexture[7];
-        for (int i = 0; i < rankIcons.Length; i++) 
+    //assigned on selection change, never per frame, so the setter can drive a full row rebuild
+    [SkinNonSerialized]
+    public SongNode? song
+    {
+        get => currentSong;
+        set
         {
-            rankIcons[i] = BaseTexture.LoadFromPath(CSkin.Path($@"Graphics\Rank\rank_{i}.png"));
-        }
-        
-        //create image holders for left/right icons
-        rankIconHolders = new UIImage[5];
-        skillIconHolders = new UIImage[5];
-        
-        for (int i = 0; i < 5; i++)
-        {
-            skillIconHolders[i] = AddChild(new UIImage(skillIcon));
-            skillIconHolders[i].anchor = new Vector2(0.0f, 1.0f);
-            skillIconHolders[i].position = new Vector3(14.0f, -49.0f - verticalSpacing * i, 0.0f);
-            skillIconHolders[i].size = new Vector2(27.0f, 27.0f);
-            skillIconHolders[i].name = $"Skill_{i}";
-            skillIconHolders[i].isVisible = false;
-            
-            rankIconHolders[i] = AddChild(new UIImage(rankIcons[0]));
-            rankIconHolders[i].anchor = new Vector2(0.0f, 1.0f);
-            rankIconHolders[i].position = new Vector3(60.0f, -49.0f - verticalSpacing * i, 0.0f);
-            rankIconHolders[i].size = new Vector2(27.0f, 27.0f);
-            rankIconHolders[i].name = $"Rank_{i}";
-            rankIconHolders[i].isVisible = false;
+            currentSong = value;
+            rowsDirty = true;
         }
     }
 
-    private BaseTexture skillIcon;
-    private BaseTexture[] rankIcons;
-    private BaseTexture txLevelNumber;
-    
-    private UIImage difficultyFrame;
-    private UIImage[] skillIconHolders;
-    private UIImage[] rankIconHolders;
-    
-    private EInstrumentPart instrument;
-    
-    private float verticalSpacing = 74;
-    private Vector3 textOffset = new(125, -41, 0);
-    
-    [SkinNonSerialized]
-    public SongNode? song;
+    //serialized so a pane loaded from a skin layout knows which instrument it shows
+    [Themable] public EInstrumentPart instrument;
+
+    private SongNode? currentSong;
+    private bool rowsDirty = true;
+
+    private readonly ChartRowData[] rows = new ChartRowData[DifficultyCount];
+    private BaseTexture[]? rankIcons;
+    private UIImage? difficultyFrame;
+
+    public int ItemCount => DifficultyCount;
+    public object GetItem(int index) => rows[index];
+
+    //loaded lazily so the parameterless deserialization ctor doesn't touch the disk
+    private BaseTexture[] RankIcons
+    {
+        get
+        {
+            if (rankIcons == null)
+            {
+                rankIcons = new BaseTexture[7];
+                for (int i = 0; i < rankIcons.Length; i++)
+                {
+                    rankIcons[i] = BaseTexture.LoadFromPath(CSkin.Path($@"Graphics\Rank\rank_{i}.png"));
+                }
+            }
+
+            return rankIcons;
+        }
+    }
+
+    public StatusPane()
+    {
+        Array.Fill(rows, ChartRowData.Empty);
+    }
+
+    protected override void OnContentLoaded()
+    {
+        difficultyFrame = GetChild<UIImage>("DifficultyFrame");
+
+        if (GetChild<UIItemsGroup>("Rows") is { } rowsGroup)
+        {
+            rowsGroup.itemDefault = BuildChartRowDefault;
+            rowsGroup.SetSource(this);
+        }
+
+        rowsDirty = true;
+    }
 
     public override void Draw(Matrix4x4 parentMatrix)
     {
+        EnsureContent();
+
+        //only on a selection change: resolving a row formats strings
+        if (rowsDirty)
+        {
+            rowsDirty = false;
+            for (int i = 0; i < rows.Length; i++)
+            {
+                rows[i] = ResolveRow(i);
+            }
+        }
+
+        UpdateDifficultyFrame();
+
         base.Draw(parentMatrix);
-
-        Matrix4x4 textTranslation = Matrix4x4.CreateTranslation(textOffset) * localTransformMatrix * parentMatrix;
-
-        if (CDTXMania.ConfigIni.bGuitarEnabled && CDTXMania.ConfigIni.bSingleGuitar)
-        {
-            if (CDTXMania.ConfigIni.bIsSwappedGuitarBass)
-            {
-                difficultyFrame.isVisible = instrument == EInstrumentPart.BASS;
-            }
-            else
-            {
-                difficultyFrame.isVisible = instrument == EInstrumentPart.GUITAR;
-            }
-        }
-        else
-        {
-            difficultyFrame.isVisible = true;
-        }
-        
-        difficultyFrame.position = new Vector3(-7.0f, 5.0f - verticalSpacing * CDTXMania.StageManager.stageSongSelectionNew.GetClosestLevelToTargetForSong(song), 0.0f);
-
-        for (int c = 0; c < 5; c++)
-        {
-            bool hideDifficulty = song != null && (song.filteredInstrumentPart != EInstrumentPart.UNKNOWN &&
-                                  song.filteredInstrumentPart != instrument);
-            if (song == null
-                || song.nodeType != SongNode.ENodeType.SONG
-                || song.charts[c] == null 
-                || song.charts[c].SongInformation.chipCountByInstrument[(int)instrument] == 0
-                || hideDifficulty)
-            {
-                tDrawDifficulty(textTranslation, txLevelNumber, 1.0f, "-.--");
-                rankIconHolders[c].isVisible = false;
-                skillIconHolders[c].isVisible = false;
-            }
-            else
-            {
-                //get difficulty number
-                double dbLevel = song.charts[c].SongInformation.GetLevel((int)instrument);
-                tDrawDifficulty(textTranslation, txLevelNumber, 1.0f, $"{dbLevel:0.00}");
-                
-                int rank = song.charts[c].SongInformation.BestRank[(int)instrument];
-                if (rank != (int)CScoreIni.ERANK.UNKNOWN)
-                {
-                    rankIconHolders[c].SetTexture(rankIcons[rank], false, false);
-                    rankIconHolders[c].isVisible = true;
-
-                    skillIconHolders[c].isVisible = song.charts[c].countSkill;
-                    
-                    //get score as well
-                    double score = song.charts[c].SongInformation.HighCompletionRate[(int)instrument];
-                    
-                    var completionRate = textTranslation * Matrix4x4.CreateTranslation(-102 * CDTXMania.renderScale, 11 * CDTXMania.renderScale, 0);
-                    tDrawDifficulty(completionRate, txLevelNumber, 0.6f, $"{score:0.00}%");
-                }
-                else
-                {
-                    rankIconHolders[c].isVisible = false;
-                    skillIconHolders[c].isVisible = false;
-                }
-            }
-
-            textTranslation *= Matrix4x4.CreateTranslation(0, -verticalSpacing * CDTXMania.renderScale, 0);
-        }
     }
-    
-    private static void tDrawDifficulty(Matrix4x4 textTranslation, BaseTexture txLevelNumber, float scale, string str)
-    {
-        //compensate for actual size of texture
-        float multiplier = txLevelNumber.Height / 28.0f;
 
-        bool foundDecimal = false;
-        
-        Matrix4x4 characterTranslation = Matrix4x4.Identity;
-        for (int index = 0; index < str.Length; index++)
+    private void UpdateDifficultyFrame()
+    {
+        if (difficultyFrame == null)
         {
-            char c = str[index];
-            if (!stDifficultyNumber.TryGetValue(c, out RectangleF rectangle)) continue;
-            
-            if (c == '.') foundDecimal = true;
-
-            float characterScale = scale;
-            if (!foundDecimal) characterScale *= 1.35f;
-            
-            if (txLevelNumber != null)
-            {
-                RectangleF scaledRect = new(
-                    rectangle.X * multiplier,
-                    rectangle.Y * multiplier,
-                    rectangle.Width * multiplier,
-                    rectangle.Height * multiplier
-                );
-
-                //translate matrix by x/y
-                Matrix4x4 matrix = textTranslation * characterTranslation;
-                
-                //calculate if we need to vertically offset upwards to compensate for larger first character
-                if (!foundDecimal)
-                {
-                    float offsetY = (rectangle.Height * characterScale - rectangle.Height * scale);
-                    offsetY *= 111.0f / 128.0f; //character is about 111/128 as tall as the texture height
-                    matrix *= Matrix4x4.CreateTranslation(0, -offsetY * CDTXMania.renderScale, 0);
-                }
-                txLevelNumber.tDraw2DMatrix(matrix, new Vector2(rectangle.Width, rectangle.Height) * characterScale, scaledRect, Color4.White);
-            }
-
-            characterTranslation *= Matrix4x4.CreateTranslation(rectangle.Width * CDTXMania.renderScale * characterScale, 0, 0);
+            return;
         }
+
+        //with a single guitar the frame belongs only to whichever of guitar/bass is being played
+        difficultyFrame.isVisible = !CDTXMania.ConfigIni.bGuitarEnabled
+                                    || !CDTXMania.ConfigIni.bSingleGuitar
+                                    || instrument == (CDTXMania.ConfigIni.bIsSwappedGuitarBass ? EInstrumentPart.BASS : EInstrumentPart.GUITAR);
+
+        int level = CDTXMania.StageManager.stageSongSelectionNew.GetClosestLevelToTargetForSong(currentSong);
+        difficultyFrame.position = new Vector3(-7.0f, 5.0f - VerticalSpacing * level, 0.0f);
     }
-	
-    private static readonly Dictionary<char, RectangleF> stDifficultyNumber = new()
+
+    private ChartRowData ResolveRow(int difficulty)
     {
-        { '0', new RectangleF(0 * 20, 0, 20, 28) },
-        { '1', new RectangleF(1 * 20, 0, 20, 28) },
-        { '2', new RectangleF(2 * 20, 0, 20, 28) },
-        { '3', new RectangleF(3 * 20, 0, 20, 28) },
-        { '4', new RectangleF(4 * 20, 0, 20, 28) },
-        { '5', new RectangleF(5 * 20, 0, 20, 28) },
-        { '6', new RectangleF(6 * 20, 0, 20, 28) },
-        { '7', new RectangleF(7 * 20, 0, 20, 28) },
-        { '8', new RectangleF(8 * 20, 0, 20, 28) },
-        { '9', new RectangleF(9 * 20, 0, 20, 28) },
-        { '.', new RectangleF(10 * 20, 0, 10, 28) },
-        { '-', new RectangleF(11 * 20 - 10, 0, 20, 28) },
-        { '?', new RectangleF(12 * 20 - 10, 0, 20, 28) },
-        { '%', new RectangleF(13 * 20 - 10, 0, 20, 28) }
-    };
+        SongNode? song = currentSong;
+
+        bool filteredToOtherInstrument = song != null && song.filteredInstrumentPart != EInstrumentPart.UNKNOWN &&
+                                         song.filteredInstrumentPart != instrument;
+
+        if (song == null
+            || song.nodeType != SongNode.ENodeType.SONG
+            || song.charts[difficulty] == null
+            || song.charts[difficulty].SongInformation.chipCountByInstrument[(int)instrument] == 0
+            || filteredToOtherInstrument)
+        {
+            return ChartRowData.Empty;
+        }
+
+        CChartData chart = song.charts[difficulty];
+        string level = $"{chart.SongInformation.GetLevel((int)instrument):0.00}";
+
+        string name = song.difficultyLabel[difficulty] ?? string.Empty;
+        bool customName = name.Length > 0 && !name.Equals(DifficultyLabel.Resolve(name, difficulty),
+            StringComparison.CurrentCultureIgnoreCase);
+
+        int rank = chart.SongInformation.BestRank[(int)instrument];
+        if (rank == (int)CScoreIni.ERANK.UNKNOWN)
+        {
+            return new ChartRowData { Level = level, Name = name, HasCustomName = customName };
+        }
+
+        return new ChartRowData
+        {
+            Level = level,
+            Name = name,
+            HasCustomName = customName,
+            Rank = RankIcons[rank],
+            ShowSkill = chart.countSkill,
+            Rate = $"{chart.SongInformation.HighCompletionRate[(int)instrument]:0.00}%"
+        };
+    }
+
+    //the code default, also the seed for Components/StatusPane.json
+    protected override UIGroup BuildDefault()
+    {
+        UIGroup root = new("StatusPane");
+
+        root.AddChild(new UIImage
+        {
+            name = "Background",
+            imageSource = ImageSource.File,
+            image = SkinResource.System(@"Graphics\5_difficulty_panel.png"),
+            anchor = new Vector2(0.0f, 1.0f),
+            renderOrder = 0
+        });
+
+        root.AddChild(new UIImage
+        {
+            name = "DifficultyFrame",
+            imageSource = ImageSource.File,
+            image = SkinResource.System(@"Graphics\5_difficultyframe.png"),
+            anchor = new Vector2(0.0f, 1.0f),
+            position = new Vector3(-7.0f, 5.0f, 0.0f),
+            renderOrder = 1
+        });
+
+        root.AddChild(new UIItemsGroup("Rows")
+        {
+            itemComponent = "Components/ChartRow.json",
+            itemOffset = new Vector3(0.0f, -VerticalSpacing, 0.0f),
+            renderOrder = 2
+        });
+
+        return root;
+    }
+
+    //the code default for one difficulty row, seeded into Components/ChartRow.json
+    private static UIGroup BuildChartRowDefault()
+    {
+        UIGroup root = new("ChartRow");
+
+        root.AddChild(new UIImage
+        {
+            name = "Skill",
+            imageSource = ImageSource.File,
+            image = SkinResource.System(@"Graphics\Rank\skill.png"),
+            anchor = new Vector2(0.0f, 1.0f),
+            position = new Vector3(14.0f, -49.0f, 0.0f),
+            size = new Vector2(27.0f, 27.0f),
+            renderOrder = 2,
+            isVisible = false,
+            bindings = { new UIBinding("isVisible", "Item.ShowSkill") }
+        });
+
+        root.AddChild(new UIImage
+        {
+            name = "Rank",
+            imageSource = ImageSource.Dynamic,
+            dynamicSource = "Item.Rank",
+            anchor = new Vector2(0.0f, 1.0f),
+            position = new Vector3(60.0f, -49.0f, 0.0f),
+            size = new Vector2(27.0f, 27.0f),
+            renderOrder = 2,
+            isVisible = false,
+            bindings = { new UIBinding("isVisible", "Item.HasRank") }
+        });
+
+        root.AddChild(new UINumberText("Item.Level")
+        {
+            name = "Level",
+            position = new Vector3(125.0f, -41.0f, 0.0f),
+            renderOrder = 3
+        });
+
+        root.AddChild(new UINumberText("Item.Rate", 0.6f)
+        {
+            name = "Rate",
+            position = new Vector3(23.0f, -30.0f, 0.0f),
+            renderOrder = 3,
+            isVisible = false,
+            bindings = { new UIBinding("isVisible", "Item.ShowRate") }
+        });
+
+        root.AddChild(new UIText(string.Empty, 15)
+        {
+            name = "Name",
+            position = new Vector3(201.0f, -80.0f, 0.0f),
+            anchor = new Vector2(1.0f, 0.0f),
+            renderOrder = 1,
+            outlineWidth = 0,
+            style = UiTextStyle.Bold,
+            isVisible = false,
+            bindings =
+            {
+                new UIBinding("text", "Item.Name"),
+                new UIBinding("isVisible", "Item.HasCustomName")
+            }
+        });
+
+        return root;
+    }
 }

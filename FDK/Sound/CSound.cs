@@ -21,7 +21,15 @@ public class CSoundManager   // CSound管理
 	{
 		get; set;
 	}
-	public static CSoundTimer rcPerformanceTimer = null;  // rc演奏用タイマ
+	private static readonly CTimer systemTimer = new(CTimer.EType.PerformanceCounter);
+
+	/// <summary>The plain system clock, for whoever needs a time while no sound device exists.</summary>
+	public static long nSystemClockMs => systemTimer.nSystemTimeMs;
+
+	public static CSoundTimer rcPerformanceTimer  // rc演奏用タイマ
+	{
+		get; set;
+	}
 	public static bool bUseOSTimer = false;     // OSのタイマーを使うか、CSoundTimerを使うか。DTXCではfalse, DTXManiaではtrue。
 	// DTXC(DirectSound)でCSoundTimerを使うと、内部で無音のループサウンドを再生するため
 	// サウンドデバイスを占有してしまい、Viewerとして呼び出されるDTXManiaで、ASIOが使えなくなる。
@@ -108,6 +116,16 @@ public class CSoundManager   // CSound管理
 	{
 		SoundDelayASIO = value;
 	}
+	/// <summary>
+	/// Output device to build on, by name. Empty means the system default. Read by the device
+	/// constructors, the same way ASIODevice is.
+	/// </summary>
+	public static string strRequestedOutputDevice = "";
+
+	/// <summary>Name of the device in use, which differs from the requested one when that was empty or
+	/// could not be found.</summary>
+	public static string strActiveOutputDevice = "";
+
 	public static int ASIODevice = 0;
 	public int GetASIODevice()
 	{
@@ -277,7 +295,7 @@ public class CSoundManager   // CSound管理
 	public static void t終了()
 	{
 		CCommon.tDispose(SoundDevice); SoundDevice = null;
-		CCommon.tDispose(ref rcPerformanceTimer);   // Global.Bass を解放した後に解放すること。（Global.Bass で参照されているため）
+		CCommon.tDispose(rcPerformanceTimer); rcPerformanceTimer = null;   // Global.Bass を解放した後に解放すること。（Global.Bass で参照されているため）
 	}
 	
 	public static void t現在のユーザConfigに従ってサウンドデバイスとすべての既存サウンドを再構築する()
@@ -294,7 +312,7 @@ public class CSoundManager   // CSound管理
 			// サウンドデバイスと演奏タイマを解放する。
 
 			CCommon.tDispose(SoundDevice); SoundDevice = null;
-			CCommon.tDispose(ref rcPerformanceTimer);   // Global.SoundDevice を解放した後に解放すること。（Global.SoundDevice で参照されているため）
+			CCommon.tDispose(rcPerformanceTimer); rcPerformanceTimer = null;   // Global.SoundDevice を解放した後に解放すること。（Global.SoundDevice で参照されているため）
 		}
 		//-----------------
 		#endregion
@@ -1192,7 +1210,7 @@ public class CSound : IDisposable, ICloneable
 			bool b = true;
 			try
 			{
-				b = BassMix.BASS_Mixer_ChannelSetPosition(hBassStream, Bass.BASS_ChannelSeconds2Bytes(hBassStream, n位置ms * db周波数倍率 * dbPlaySpeed / 1000.0), BASSMode.BASS_POS_BYTES);
+				b = BassMix.BASS_Mixer_ChannelSetPosition(hBassStream, Bass.BASS_ChannelSeconds2Bytes(hBassStream, n位置ms * db周波数倍率 * dbPlaySpeed / 1000.0), BASSMode.BASS_POS_BYTE);
 			}
 			catch (Exception e)
 			{
@@ -1446,6 +1464,9 @@ public class CSound : IDisposable, ICloneable
 	protected SoundBuffer Buffer = null;            // DirectSound 用
 	protected DirectSound DirectSound;
 	protected int hMixer = -1;  // 設計壊してゴメン Mixerに後で登録するときに使う
+
+	public bool bUsesBASS => bIsBASS;
+	public int nMixerHandle => bIsBASS ? hMixer : 0;
 	//-----------------
 	#endregion
 
@@ -1760,11 +1781,11 @@ public class CSound : IDisposable, ICloneable
 		if (BassMix.BASS_Mixer_ChannelGetMixer(hBassStream) == 0)
 #endif
 		{
-			BASSFlag bf = BASSFlag.BASS_SPEAKER_FRONT | BASSFlag.BASS_MIXER_NORAMPIN | BASSFlag.BASS_MIXER_PAUSE;
+			BASSFlag bf = BASSFlag.BASS_SPEAKER_FRONT | BASSFlag.BASS_MIXER_NORAMPIN | BASSFlag.BASS_MIXER_CHAN_PAUSE;
 			Interlocked.Increment(ref CSoundManager.nMixing);
 
-			// preloadされることを期待して、敢えてflagからはBASS_MIXER_PAUSEを外してAddChannelした上で、すぐにPAUSEする
-			// -> ChannelUpdateでprebufferできることが分かったため、BASS_MIXER_PAUSEを使用することにした
+			// preloadされることを期待して、敢えてflagからはBASS_MIXER_CHAN_PAUSEを外してAddChannelした上で、すぐにPAUSEする
+			// -> ChannelUpdateでprebufferできることが分かったため、BASS_MIXER_CHAN_PAUSEを使用することにした
 
 #if TEST_MultiThreadedMixer
 				bool b1 = BASSThreadedMixerLibraryWrapper.BASS_ThreadedMixer_AddSource( (IntPtr)this.hMixer, this.hBassStream, IntPtr.Zero );

@@ -1,7 +1,7 @@
 using DTXMania.Core;
 using DTXMania.UI.Config;
+using DTXMania.UI.Drawable;
 using DTXMania.UI.Item;
-using FDK;
 
 namespace DTXMania;
 
@@ -16,6 +16,8 @@ internal sealed class AudioDriverConfigPage : ConfigPage
     {
     }
 
+    protected override void CreateElements() => AddElement(new ConfigAudioPanel());
+
     public override List<CItemBase> Build()
     {
         List<CItemBase> items = [];
@@ -24,18 +26,33 @@ internal sealed class AudioDriverConfigPage : ConfigPage
         {
             case 0: // DirectSound
                 items.Add(BuildAdjustWaves());
+
+                //FDK's DirectSound device is the only output that has a clock to choose. The rest count
+                //bytes through their own callback, and this layer's DirectSound never reads the setting
+                if (CDTXMania.ConfigIni.bUseFDKAudio)
+                {
+                    items.Add(BuildUseOsTimer());
+                }
+
                 break;
 
             case 1: // ASIO
-                items.Add(BuildAsioDevice());
-                items.Add(BuildUseOsTimer());
+                items.Add(BuildAsioBufferSize());
                 break;
 
             case 2: // ExclusiveWASAPI
+                items.Add(BuildWasapiBufferSize());
+
+                //shared mode does not get one: Windows drives its engine either way
+                items.Add(BuildWasapiEventDriven());
+                break;
+
             case 3: // SharedWASAPI
                 items.Add(BuildWasapiBufferSize());
-                items.Add(BuildWasapiEventDriven());
-                items.Add(BuildUseOsTimer());
+                break;
+
+            case 4: // BASS
+                items.Add(BuildBassBufferSize());
                 break;
         }
 
@@ -54,46 +71,95 @@ internal sealed class AudioDriverConfigPage : ConfigPage
         return item;
     }
 
-    private static CItemList BuildAsioDevice()
-    {
-        string[] asioDevices = CEnumerateAllAsioDevices.GetAllASIODevices();
-        CItemList item = new("ASIO device", CItemBase.EPanelType.Normal, CDTXMania.ConfigIni.nASIODevice,
-            "ASIOデバイス:\nASIO使用時の\nサウンドデバイスを選択\nします。\n",
-            "ASIO Sound Device:\nSelect the sound device to use under ASIO mode.\n\nNote: Exit CONFIG to make the setting take effect.",
-            asioDevices);
-        item.BindConfig(
-            () => item.nCurrentlySelectedIndex = CDTXMania.ConfigIni.nASIODevice,
-            () => CDTXMania.ConfigIni.nASIODevice = item.nCurrentlySelectedIndex);
-        return item;
-    }
-
     private static CItemInteger BuildWasapiBufferSize()
     {
-        CItemInteger item = new("WASAPIBufSize", 0, 99999, CDTXMania.ConfigIni.nWASAPIBufferSizeMs,
-            "WASAPI時のバッファサイズ:\n0～99999msを指定できます。\n0を指定するとOSが自動設定します。\n値を小さくするほどラグが減少しますが、\n音割れや異常を引き起こす場合があります。",
-            "Sound buffer size for WASAPI, from 0 to 99999ms.\nSet 0 to use the default system buffer size.\nSmaller values reduce lag but may cause audio glitches.\nNote: Exit CONFIG to make the setting take effect.");
+        CItemInteger item = new("WASAPIBufSize", 0, 500, CDTXMania.ConfigIni.nWASAPIBufferSizeMs,
+            "WASAPI時のバッファサイズ:\n0を指定するとデバイスが扱える最小値に\nなります。音切れが出る場合は増やして\nください。\n実際の値はデバイスの下限まで\n切り上げられます。\nこのバッファがそのまま出力遅延に\nなります。",
+            "Output buffer for WASAPI, in ms. 0 asks for the lowest the device will take.\nIt is rounded to whole sample frames and never goes below the device's own\nfloor, so the window may show more than you asked for.\nThis buffer is the output latency: a hit waits out at most one of it, and\nhalf a fill period less than that on average.\nRaise it if you hear crackling or dropouts.\nNote: Exit CONFIG to make the setting take effect.");
         item.BindConfig(
             () => item.nCurrentValue = CDTXMania.ConfigIni.nWASAPIBufferSizeMs,
             () => CDTXMania.ConfigIni.nWASAPIBufferSizeMs = item.nCurrentValue);
         return item;
     }
 
-    private static CItemToggle BuildWasapiEventDriven()
+    private static CItemInteger BuildAsioBufferSize()
     {
-        CItemToggle item = new("WASAPIEventDriven", CDTXMania.ConfigIni.bEventDrivenWASAPI,
-            "WASAPIをEvent Drivenモードで使用します。\nサウンド出力の遅延を小さくできますが、\nシステム負荷は上昇します。",
-            "Use WASAPI Event Driven mode.\nIt reduces sound output lag, but decreases system performance.");
+        CItemInteger item = new("ASIOBufSize", 0, 8192, CDTXMania.ConfigIni.nASIOBufferSizeSamples,
+            "ASIO時のバッファサイズ(単位:サンプル):\n0を指定するとドライバ側の設定値を\n使用します。\n音切れが出る場合は増やしてください。",
+            "ASIO buffer, in samples. 0 uses whatever the driver's own control panel is set to.\nA value the driver will not take is corrected rather than refused, so the\nwindow may show something other than what you asked for.\nRaise it if you hear crackling or dropouts.\nNote: Exit CONFIG to make the setting take effect.");
         item.BindConfig(
-            () => item.bON = CDTXMania.ConfigIni.bEventDrivenWASAPI,
-            () => CDTXMania.ConfigIni.bEventDrivenWASAPI = item.bON);
+            () => item.nCurrentValue = CDTXMania.ConfigIni.nASIOBufferSizeSamples,
+            () => CDTXMania.ConfigIni.nASIOBufferSizeSamples = item.nCurrentValue);
         return item;
     }
 
+    private static CItemInteger BuildBassBufferSize()
+    {
+        CItemInteger item = new("BASSBufSize", 0, 200, CDTXMania.ConfigIni.nWASAPIBufferSizeMs,
+            "BASS出力時のデバイスバッファ:\n0を指定すると10msになります。\nサウンドカードの最小値まで自動的に\n切り上げられます。",
+            "Device buffer for the BASS output, in ms — this is the output latency.\n0 uses 10ms.\nBASS raises it to the sound card's own minimum, so the window may show\nmore than you asked for.\nNote: Exit CONFIG to make the setting take effect.");
+        item.BindConfig(
+            () => item.nCurrentValue = CDTXMania.ConfigIni.nWASAPIBufferSizeMs,
+            () => CDTXMania.ConfigIni.nWASAPIBufferSizeMs = item.nCurrentValue);
+        return item;
+    }
+
+    private CItemToggle BuildWasapiEventDriven()
+    {
+        CItemToggle item = new("WASAPIEventDriven", CDTXMania.ConfigIni.bEventDrivenWASAPI,
+            "WASAPIをEvent Drivenモードで使用します。\n出力バッファを大幅に小さくできます。\nOFFにすると遅延が増加します。",
+            "Let the device drive the WASAPI buffer instead of polling it.\nOn exclusive mode a polled buffer is several times the size of a driven one.\nLeave it ON unless you hear dropouts.");
+        item.BindConfig(
+            () => item.bON = CDTXMania.ConfigIni.bEventDrivenWASAPI,
+            () =>
+            {
+                bool wasOn = CDTXMania.ConfigIni.bEventDrivenWASAPI;
+                CDTXMania.ConfigIni.bEventDrivenWASAPI = item.bON;
+
+                if (wasOn && !item.bON)
+                {
+                    _ = ConfirmPolling(item);
+                }
+            });
+        return item;
+    }
+
+    /// <summary>
+    /// Polling is widened to about four update periods where the device driving it is granted the one
+    /// it asks for, so turning this off multiplies the exclusive buffer.
+    /// </summary>
+    private async Task ConfirmPolling(CItemToggle item)
+    {
+        string title = CDTXMania.isJapanese ? "遅延が増加します" : "This increases latency";
+
+        string description = CDTXMania.isJapanese
+            ? "Event Drivenを切ると、WASAPI排他モードの出力バッファが数倍に大きくなります。音切れが発生する場合以外はONのままを推奨します。"
+            : "Turning this off makes the WASAPI exclusive output buffer several times larger, because a polled buffer is widened to about four update periods where a driven one is granted the single period it asks for.\n\nOnly do this if you are hearing dropouts.";
+
+        string[] options = CDTXMania.isJapanese
+            ? ["ONのままにする", "OFFにする"]
+            : ["Keep it on", "Turn it off"];
+
+        int choice = await Modal.ShowAsync(CDTXMania.persistentUIGroup, title, description, options);
+
+        //anything but a deliberate "turn it off" puts it back, including dismissing the dialog
+        if (choice != 1)
+        {
+            CDTXMania.ConfigIni.bEventDrivenWASAPI = true;
+            item.bON = true;
+            CDTXMania.RunOnMainThread(list.RefreshValues);
+        }
+    }
+
+    /// <summary>
+    /// Off, FDK's DirectSound device times itself from a silent looping buffer it plays, which holds the
+    /// device open. On, it reads the OS clock and leaves the device free. Nothing else consults it.
+    /// </summary>
     private static CItemToggle BuildUseOsTimer()
     {
         CItemToggle item = new("UseOSTimer", CDTXMania.ConfigIni.bUseOSTimer,
-            "OSタイマーを使用するかどうか:\nOS標準タイマーを使うとスクロールが滑らかに\nなりますが、演奏で音ズレが発生することが\nあります。\nこの指定はWASAPI/ASIO使用時のみ有効です。\n",
-            "Use OS Timer or not.\nON = smooth scroll but may cause sound lag; OFF = original timer.\nAvailable only when using WASAPI/ASIO.");
+            "OSタイマーを使用するかどうか:\nOS標準タイマーを使うとスクロールが滑らかに\nなりますが、演奏で音ズレが発生することが\nあります。\nこの指定はFDK(旧)のDirectSound出力でのみ\n有効です。\n",
+            "Use OS Timer or not.\nON = smooth scroll but may cause sound lag; OFF = original timer.\nAffects only the legacy FDK DirectSound output.");
         item.BindConfig(
             () => item.bON = CDTXMania.ConfigIni.bUseOSTimer,
             () => CDTXMania.ConfigIni.bUseOSTimer = item.bON);

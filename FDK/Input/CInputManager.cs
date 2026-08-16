@@ -374,7 +374,8 @@ public class CInputManager : IDisposable // CInput管理
 		if (wMsg != CWin32.MIM_DATA || (p != 0x80 && p != 0x90 && p != 0xB0))
 			return;
 
-		long time = CSoundManager.rcPerformanceTimer.nシステム時刻; // lock前に取得。演奏用タイマと同じタイマを使うことで、BGMと譜面、入力ずれを防ぐ。
+		//read before the lock, so the event is stamped when it arrived rather than when it got in
+		long time = InputClock.Current.nSystemTimeMs;
 
 		lock (objMidiInMutex)
 		{

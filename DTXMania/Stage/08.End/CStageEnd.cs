@@ -19,12 +19,12 @@ internal class CStageEnd : CStage
 
 	// CStage 実装
 
-	public override void InitializeBaseUI()
+	public override void RegisterBindings()
 	{
 		
 	}
 
-	public override void InitializeDefaultUI()
+	public override void BuildDefaultLayout()
 	{
 		ui.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\9_background.jpg"))));
 	}

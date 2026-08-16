@@ -1,4 +1,6 @@
-﻿using DTXMania.Core;
+﻿using System.Globalization;
+using DTXMania.Core;
+using DTXMania.Core.Audio;
 using FDK;
 
 namespace DTXMania;
@@ -41,33 +43,60 @@ internal class CActPerformanceInformation : CActivity
 		base.OnActivate();
 	}
 
+	private void Line(int x, int y, Span<char> text, int written)
+		=> CDTXMania.actDisplayString.tPrint(x, y, CCharacterConsole.EFontType.White, text[..written]);
+
 	public void tUpdateAndDraw( int x, int y)  // t進行描画
 	{
 		if ( bActivated )
 		{
 			y += 0x143;
-			CDTXMania.actDisplayString.tPrint(x, y, CCharacterConsole.EFontType.White, string.Format("BGM/D/G/B Adj: {0:####0}/{1:####0}/{2:####0}/{3:####0} ms", CDTXMania.DTX.nBGMAdjust, CDTXMania.ConfigIni.nInputAdjustTimeMs.Drums, CDTXMania.ConfigIni.nInputAdjustTimeMs.Guitar, CDTXMania.ConfigIni.nInputAdjustTimeMs.Bass));
+
+			//invariant so the decimal separator is always the '.' the console font carries. TryWrite
+			//formats straight into the buffer, so redrawing every line every frame costs nothing
+			CultureInfo culture = CultureInfo.InvariantCulture;
+			Span<char> text = stackalloc char[64];
+
+			text.TryWrite(culture, $"BGM/D/G/B Adj: {CDTXMania.DTX.nBGMAdjust:####0}/{CDTXMania.ConfigIni.nInputAdjustTimeMs.Drums:####0}/{CDTXMania.ConfigIni.nInputAdjustTimeMs.Guitar:####0}/{CDTXMania.ConfigIni.nInputAdjustTimeMs.Bass:####0} ms", out int written);
+			Line(x, y, text, written);
 			y -= 0x10;
-			CDTXMania.actDisplayString.tPrint( x, y, CCharacterConsole.EFontType.White, string.Format( "BGMAdjCommon : {0:####0} ms", CDTXMania.ConfigIni.nCommonBGMAdjustMs ) );
+
+			text.TryWrite(culture, $"BGMAdjCommon : {CDTXMania.ConfigIni.nCommonBGMAdjustMs:####0} ms", out written);
+			Line(x, y, text, written);
 			y -= 0x10;
+
 			int num = (CDTXMania.DTX.listChip.Count > 0) ? CDTXMania.DTX.listChip[CDTXMania.DTX.listChip.Count - 1].nPlaybackTimeMs : 0;
-			string str = "Time: " + ((((double)CDTXMania.Timer.nCurrentTime) / 1000.0)).ToString("####0.000") + " / " + ((((double)num) / 1000.0)).ToString("####0.000");
-			CDTXMania.actDisplayString.tPrint(x, y, CCharacterConsole.EFontType.White, str);
+
+			text.TryWrite(culture, $"Time: {CDTXMania.Timer.nCurrentTime / 1000.0:####0.000} / {num / 1000.0:####0.000}", out written);
+			Line(x, y, text, written);
 			y -= 0x10;
-			CDTXMania.actDisplayString.tPrint(x, y, CCharacterConsole.EFontType.White, string.Format("Part:          {0:####0}", n小節番号));
+
+			text.TryWrite(culture, $"Part:          {n小節番号:####0}", out written);
+			Line(x, y, text, written);
 			y -= 0x10;
-			CDTXMania.actDisplayString.tPrint(x, y, CCharacterConsole.EFontType.White, string.Format("BPM:           {0:####0.00}", dbBPM));
+
+			text.TryWrite(culture, $"BPM:           {dbBPM:####0.00}", out written);
+			Line(x, y, text, written);
 			y -= 0x10;
-			CDTXMania.actDisplayString.tPrint(x, y, CCharacterConsole.EFontType.White, string.Format("Frame:         {0:####0} fps", CDTXMania.FPS.nCurrentFPS));
+
+			text.TryWrite(culture, $"Frame:         {CDTXMania.FPS.nCurrentFPS:####0} fps", out written);
+			Line(x, y, text, written);
 			y -= 0x10;
-                    
-			if (CDTXMania.ConfigIni.nSoundDriverType != 0)
+
+			if (AudioMixer.Device.MixesChannels)
 			{
-				CDTXMania.actDisplayString.tPrint(x, y, CCharacterConsole.EFontType.White, string.Format("Sound CPU : {0:####0.00}%", CDTXMania.SoundManager.GetCPUusage()));
+				AudioDeviceStatus audio = AudioMixer.Device.Status;
+
+				text.TryWrite(culture, $"Sound CPU : {audio.CpuUsage:####0.00}%", out written);
+				Line(x, y, text, written);
 				y -= 0x10;
-				CDTXMania.actDisplayString.tPrint(x, y, CCharacterConsole.EFontType.White, string.Format("Sound Mixing:  {0:####0}", CDTXMania.SoundManager.GetMixingStreams()));
+
+				text.TryWrite(culture, $"Sound Mixing:  {audio.MixedChannels:####0}", out written);
+				Line(x, y, text, written);
 				y -= 0x10;
-				CDTXMania.actDisplayString.tPrint(x, y, CCharacterConsole.EFontType.White, string.Format("Sound Streams: {0:####0}", CDTXMania.SoundManager.GetStreams()));
+
+				text.TryWrite(culture, $"Sound Streams: {audio.Streams:####0}", out written);
+				Line(x, y, text, written);
 				y -= 0x10;
 			}
 		}

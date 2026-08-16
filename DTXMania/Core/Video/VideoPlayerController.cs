@@ -246,7 +246,9 @@ public class VideoPlayerController : IDisposable
             textureRing[textureRingIndex] = target;
         }
 
+        Framework.FrameProfiler.Begin(Framework.FrameSection.VideoUpload);
         target.UpdateRgba32Streaming(data.RgbaData, decoder.Width, decoder.Height);
+        Framework.FrameProfiler.End(Framework.FrameSection.VideoUpload);
 
         // The pixels have been copied into the GL texture, so the CPU-side buffer is
         // free to be reused by the decoder for a future frame. Returning it here is
@@ -274,14 +276,6 @@ public class VideoPlayerController : IDisposable
             }
 
             ImGui.Text($"Source path: {CurrentSourcePath ?? "(none)"}");
-            if (ImGui.Button("Change video (Browse)..."))
-            {
-                string path = NFD.OpenDialog("", new Dictionary<string, string> { { "Videos", "mp4,mov,avi,mkv,wmv,flv,webm" } });
-                if (!string.IsNullOrWhiteSpace(path))
-                {
-                    TryLoadVideo(path);
-                }
-            }
 
             if (!string.IsNullOrEmpty(errorMessage))
             {

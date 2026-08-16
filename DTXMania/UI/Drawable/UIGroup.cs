@@ -1,8 +1,10 @@
 using System.Diagnostics;
 using System.Numerics;
 using DTXMania.UI.Animation;
+using DTXMania.UI.DynamicElements;
 using DTXMania.UI.Inspector;
 using Hexa.NET.ImGui;
+using Newtonsoft.Json;
 
 namespace DTXMania.UI.Drawable;
 
@@ -10,10 +12,33 @@ public class UIGroup : UIDrawable
 {
     [Themable] public bool sortByRenderOrder = true;
     public List<UIDrawable> children = [];
-    
+
     private bool dirty = false;
 
+    //drawables already reported as failing to draw, so one broken element does not fill the log
+    [JsonIgnore] private static readonly HashSet<string> reportedDrawFailures = [];
+
+    //an animating property is written every frame for as long as it animates, so a per-write cost here
+    //scales with the frame rate
+    [JsonIgnore] private static readonly int probeAnimators =
+        Core.Framework.AllocationProbe.Register("Animators (whole tree)");
+
+    //clips are part of what a skin describes: a cursor that pulses is animation, not code. Replace rather
+    //than populate, so a type that builds an animator in its constructor does not end up with the loaded
+    //clips appended to the ones it made
+    [SkinSerialize]
+    [JsonProperty(ObjectCreationHandling = ObjectCreationHandling.Replace)]
     public Animator? animator;
+
+    //per-instance data source for this subtree, runtime-only; descendants resolve their binding keys
+    //against it before falling back to ancestors and the global context. See UIDrawable.DataContexts
+    [JsonIgnore] public IUIDataContext? dataContext;
+
+    //what this component's keys resolved to when it was last saved from a running instance. Written on a
+    //component file so it can be edited on its own with values that make sense; nothing at runtime reads it
+    [SkinSerialize]
+    [JsonProperty(ObjectCreationHandling = ObjectCreationHandling.Replace)]
+    public Dictionary<string, string>? sampleContext;
 
     [AddChildMenu]
     public static UIDrawable Create()
@@ -53,12 +78,19 @@ public class UIGroup : UIDrawable
 
     public T? GetChild<T>(string name) where T : UIDrawable
     {
-        return (T?)children.FirstOrDefault(x => x.name == name);
+        //names come from json, so a mismatched type is a layout authoring error, not a crash
+        return children.FirstOrDefault(x => x.name == name) as T;
     }
 
     public UIDrawable GetChild(int i)
     {
         return children[i];
+    }
+
+    /// <summary>Asks for the children to be sorted again, after something changed a child's renderOrder.</summary>
+    public void InvalidateOrder()
+    {
+        dirty = true;
     }
 
     public void RemoveChild(UIDrawable element)
@@ -86,7 +118,19 @@ public class UIGroup : UIDrawable
             return;
         }
 
-        animator?.TickAuto(this);
+        //bindings first, then the animator, so an animation targeting a bound member wins for this frame
+        for (int index = 0; index < children.Count; index++)
+        {
+            children[index].ApplyBindings();
+        }
+
+        if (animator != null)
+        {
+            //TickAuto does not descend into child groups, so these never nest
+            Core.Framework.AllocationProbe.Begin(probeAnimators);
+            animator.TickAuto(this);
+            Core.Framework.AllocationProbe.End(probeAnimators);
+        }
 
         UpdateLocalTransformMatrix();
         Matrix4x4 combinedMatrix = localTransformMatrix * parentMatrix;
@@ -111,8 +155,12 @@ public class UIGroup : UIDrawable
             }
             catch (Exception e)
             {
-                string stackTrace = e.StackTrace ?? "No stack trace";
-                Trace.TraceError($"Error drawing {element.name}: {e} Stacktrace: {stackTrace}");
+                //a drawable that throws once throws every frame, so it is reported the first time and
+                //then left alone: the log stays readable and the rest of the tree still draws
+                if (reportedDrawFailures.Add(element.id))
+                {
+                    Trace.TraceError($"Error drawing {element.name}: {e} Stacktrace: {e.StackTrace ?? "No stack trace"}");
+                }
             }
         }
     }
@@ -139,27 +187,6 @@ public class UIGroup : UIDrawable
         }
 
         children.Clear();
-    }
-
-    public int GetChildIndex(UIDrawable node)
-    {
-        return children.IndexOf(node);
-    }
-
-    public void SetChildIndex(UIDrawable node, int index)
-    {
-        if (index < 0 || index >= children.Count)
-        {
-            Trace.TraceError($"Index {index} is out of bounds for children list of size {children.Count}");
-            return;
-        }
-
-        int currentIndex = GetChildIndex(node);
-        if (currentIndex != -1)
-        {
-            children.RemoveAt(currentIndex);
-            children.Insert(index, node);
-        }
     }
 
     public override void DrawInspector()

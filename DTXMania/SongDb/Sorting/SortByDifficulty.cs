@@ -7,7 +7,8 @@ public class SortByDifficulty : SongDbSort
     public override string Name => "Difficulty";
     public override string IconName => "difficulty";
 
-    public string[] difficultyLabels = ["BASIC", "ADVANCED", "EXTREME", "MASTER", "DTX"];
+    //the same names the difficulty art is picked by, so a sort view and a loading screen agree
+    public string[] difficultyLabels = DifficultyLabel.SlotNames;
     
     public override async Task<SongNode> Sort(SongDb songDb)
     {

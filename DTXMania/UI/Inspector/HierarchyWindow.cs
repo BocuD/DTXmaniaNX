@@ -36,6 +36,14 @@ public class HierarchyWindow
             {
                 ImGui.Text("No group selected");
             }
+
+            //an open component editor is a tree of its own, so it gets a root here and everything that
+            //works off the selection keeps working
+            foreach (ComponentEditor editor in ComponentEditor.open)
+            {
+                ImGui.SeparatorText(editor.componentPath);
+                DrawNode(editor.root);
+            }
         }
         finally
         {
@@ -50,9 +58,11 @@ public class HierarchyWindow
         }
     }
 
-    private void DrawNode(UIDrawable node)
+    private void DrawNode(UIDrawable node, bool inComponent = false)
     {
         UIGroup? group = node as UIGroup;
+
+        bool isComponent = node is ComponentInstance;
 
         ImGuiTreeNodeFlags rootFlags = ImGuiTreeNodeFlags.OpenOnArrow | ImGuiTreeNodeFlags.OpenOnDoubleClick;
 
@@ -66,161 +76,83 @@ public class HierarchyWindow
 
         string id = node.GetHashCode().ToString();
         string name = string.IsNullOrWhiteSpace(node.name) ? node.GetType().Name : node.name;
+        if (node is ComponentInstance componentNode)
+        {
+            name += "   -> " + (string.IsNullOrWhiteSpace(componentNode.component) ? "(code default)" : componentNode.component);
+        }
 
         string contextMenuId = id + "ContextMenu";
 
-        if (selected && node.parent != null)
+        //component instance (blue) > inside a component, so not part of this layout (dimmed) > dontSerialize (red)
+        bool pushColor = true;
+        Vector4 color;
+        if (isComponent) color = new Vector4(0.45f, 0.7f, 1.0f, 1f);
+        else if (inComponent) color = new Vector4(0.6f, 0.6f, 0.6f, 1f);
+        else if (node.dontSerialize) color = new Vector4(1f, 0f, 0f, 1f);
+        else { pushColor = false; color = default; }
+
+        if (pushColor)
         {
-            ImGui.SetCursorPosX(ImGui.GetWindowWidth() - 80);
-            
-            float y = ImGui.GetCursorPosY();
-            ImGui.SetCursorPosY(y - 20);
-            if (ImGui.Button("Move Up"))
-            {
-                int index = node.parent.GetChildIndex(node);
-                if (index > 0)
-                {
-                    node.parent.SetChildIndex(node, index - 1);
-                }
-            }
-            ImGui.SetCursorPosY(y);
-        }
-        
-        if (node.dontSerialize)
-        {
-            ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1, 0, 0, 1));
+            ImGui.PushStyleColor(ImGuiCol.Text, color);
         }
 
-        if (ImGui.TreeNodeEx(id, rootFlags, name))
+        bool open = ImGui.TreeNodeEx(id, rootFlags, name);
+
+        if (pushColor)
         {
-            if (node.dontSerialize)
-            {
-                ImGui.PopStyleColor();
-            }
-
-            if (ImGui.IsItemHovered())
-            {
-                if (ImGui.IsMouseReleased(ImGuiMouseButton.Left))
-                {
-                    Inspector.inspectorTarget = node.id;
-                }
-
-                if (ImGui.IsMouseReleased(ImGuiMouseButton.Right))
-                {
-                    //open context menu
-                    ImGui.OpenPopup(contextMenuId);
-                }
-            }
-            
-            HandleNodeDragDrop(node);
-            
-            if (ImGui.BeginPopup(contextMenuId))
-            {
-                DrawNodeContextMenu(node);
-            }
-
-            if (selected && node.parent != null)
-            {
-                ImGui.SetCursorPosX(ImGui.GetWindowWidth() - 80);
-                float y = ImGui.GetCursorPosY();
-                ImGui.SetCursorPosY(y - 3);
-                if (ImGui.Button("Move Down"))
-                {
-                    int index = node.parent.GetChildIndex(node);
-                    if (index < node.parent.children.Count - 1)
-                    {
-                        node.parent.SetChildIndex(node, index + 1);
-                    }
-                }
-                ImGui.SetCursorPosY(y);
-            }
-
-            if (group != null)
-            {
-                if (group.children.Count != 0)
-                {
-                    /*
-                    //get last item rect
-                    Vector2 lastItemPos = ImGui.GetItemRectMin();
-                    Vector2 lastItemRect = ImGui.GetItemRectMax();
-                        
-                    //get middle of the item rect
-                    float startY = (lastItemPos.Y + lastItemRect.Y) / 2;
-                    Vector2 content = ImGui.GetContentRegionAvail();
-                    */
-                    
-                    for (int index = 0; index < group.children.Count; index++)
-                    {
-                        UIDrawable child = group.children[index];
-                        DrawNode(child);
-                    }
-                }
-                else
-                {
-                    //no children
-                    var flags = ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.NoTreePushOnOpen;
-                    ImGui.TreeNodeEx(id + "NoChildren", flags, "No children");
-                }
-
-                //we need to remove the drawable from the group, but since this method is called recursively, we need to make sure we're actually at the parent level again
-                if (!string.IsNullOrEmpty(InspectorManager.toRemove))
-                {
-                    var drawable = InspectorManager.toRemoveDrawable;
-                    if (drawable == null) return;
-                    
-                    if (group.children.Contains(drawable))
-                    {
-                        group.RemoveChild(drawable);
-                    }
-                }
-            }
-
-            ImGui.TreePop();
+            ImGui.PopStyleColor();
         }
-        else
+
+        if (ImGui.IsItemHovered())
         {
-            if (node.dontSerialize)
+            if (ImGui.IsMouseReleased(ImGuiMouseButton.Left))
             {
-                ImGui.PopStyleColor();
+                Inspector.inspectorTarget = node.id;
             }
 
-            if (ImGui.IsItemHovered())
+            if (ImGui.IsMouseReleased(ImGuiMouseButton.Right))
             {
-                if (ImGui.IsMouseReleased(ImGuiMouseButton.Left))
-                {
-                    Inspector.inspectorTarget = node.id;
-                }
-
-                if (ImGui.IsMouseReleased(ImGuiMouseButton.Right))
-                {
-                    //open context menu
-                    ImGui.OpenPopup(contextMenuId);
-                }
-            }
-
-            if (selected && node.parent != null)
-            {
-                ImGui.SetCursorPosX(ImGui.GetWindowWidth() - 80);
-                float y = ImGui.GetCursorPosY();
-                ImGui.SetCursorPosY(y - 3);
-                if (ImGui.Button("Move Down"))
-                {
-                    int index = node.parent.GetChildIndex(node);
-                    if (index < node.parent.children.Count - 1)
-                    {
-                        node.parent.SetChildIndex(node, index + 1);
-                    }
-                }
-                ImGui.SetCursorPosY(y);
-            }
-            
-            HandleNodeDragDrop(node);
-            
-            if (ImGui.BeginPopup(contextMenuId))
-            {
-                DrawNodeContextMenu(node);
+                ImGui.OpenPopup(contextMenuId);
             }
         }
+
+        HandleNodeDragDrop(node);
+
+        if (ImGui.BeginPopup(contextMenuId))
+        {
+            DrawNodeContextMenu(node);
+        }
+
+        if (!open)
+        {
+            return;
+        }
+
+        if (group != null)
+        {
+            if (group.children.Count != 0)
+            {
+                for (int index = 0; index < group.children.Count; index++)
+                {
+                    DrawNode(group.children[index], isComponent || inComponent);
+                }
+            }
+            else
+            {
+                ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.NoTreePushOnOpen;
+                ImGui.TreeNodeEx(id + "NoChildren", flags, "No children");
+            }
+
+            //this method is recursive, so the removal has to wait until the walk is back at the parent
+            if (!string.IsNullOrEmpty(InspectorManager.toRemove)
+                && InspectorManager.toRemoveDrawable is { } drawable
+                && group.children.Contains(drawable))
+            {
+                group.RemoveChild(drawable);
+            }
+        }
+
+        ImGui.TreePop();
     }
     
     /*
@@ -264,13 +196,10 @@ public class HierarchyWindow
     {
         if (ImGui.BeginDragDropSource(ImGuiDragDropFlags.None))
         {
-            Type type = node.GetType();
-
             unsafe
             {
                 ImGui.SetDragDropPayload(nameof(UIDrawable), (void*)IntPtr.Zero, 0);
                 Inspector.dragDropPayload = node.id;
-                Inspector.dragDropType = type;
             }
 
             ImGui.Text(string.IsNullOrWhiteSpace(node.name) ? node.GetType().ToString() : node.name);
@@ -309,6 +238,11 @@ public class HierarchyWindow
 
     private void DrawNodeContextMenu(UIDrawable node)
     {
+        if (node is ComponentInstance { component.Length: > 0 } componentNode && ImGui.Selectable("Edit Component"))
+        {
+            ComponentEditor.Open(componentNode.component, componentNode.GetType());
+        }
+
         //add child menu
         if (node is UIGroup group)
         {
@@ -418,6 +352,9 @@ public class HierarchyWindow
         //draw recursively. `depth` is how many path segments we've already consumed.
         DrawAddChildMenuLevel(group, creators, depth: 0, parentPath: []);
 
+        //the active skin's components, which are runtime data rather than reflected creator types
+        DrawAddComponentsMenu(group);
+
         if (ImGui.Selectable("Load from JSON"))
         {
             string defaultPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
@@ -438,6 +375,39 @@ public class HierarchyWindow
                 }
             }
         }
+    }
+
+    private void DrawAddComponentsMenu(UIGroup group)
+    {
+        if (!ImGui.BeginMenu("Components"))
+        {
+            return;
+        }
+
+        if (CDTXMania.SkinManager.currentSkin is { } skin)
+        {
+            foreach (string path in Skin.SkinManager.ComponentPaths(skin))
+            {
+                if (ImGui.Selectable(Path.GetFileNameWithoutExtension(path)))
+                {
+                    group.AddChild(new GenericComponent(path));
+                    ImGui.CloseCurrentPopup();
+                }
+            }
+
+            ImGui.Separator();
+            if (ImGui.Selectable("Blank"))
+            {
+                group.AddChild(new GenericComponent());
+                ImGui.CloseCurrentPopup();
+            }
+        }
+        else
+        {
+            ImGui.TextDisabled("No custom skin active");
+        }
+
+        ImGui.EndMenu();
     }
 
     private void DrawAddChildMenuLevel(UIGroup group, DrawableCreatorEntry[] creators, int depth, string[] parentPath)

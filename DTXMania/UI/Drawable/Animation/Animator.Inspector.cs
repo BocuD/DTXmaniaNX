@@ -1,7 +1,9 @@
 using System.Numerics;
+using DTXMania.Core;
 using DTXMania.Core.Video;
 using DTXMania.UI.Animation.Editor;
 using DTXMania.UI.Drawable;
+using DTXMania.UI.Skin;
 using Hexa.NET.ImGui;
 using Newtonsoft.Json;
 
@@ -24,6 +26,8 @@ public sealed partial class Animator
     {
         DrawPlaybackControls();
         ImGui.Separator();
+        DrawClipStorage();
+        ImGui.Separator();
         editor ??= new AnimationClipEditor();
         editor.DrawInInspector(this, root);
 
@@ -31,6 +35,48 @@ public sealed partial class Animator
         // it here because ImGui.Begin always opens at the top level regardless of where in
         // the frame it's called from.
         editor.DrawTimelineWindow(this, root);
+    }
+
+    //where each clip lives, and how to move it: a clip in a file is referenced by the layout, a clip
+    //without one is written into it
+    private void DrawClipStorage()
+    {
+        foreach (AnimatorClip entry in clips)
+        {
+            ImGui.PushID(entry.clip.name);
+
+            bool skinLoaded = CDTXMania.SkinManager.currentSkin != null;
+
+            ImGui.LabelText(entry.clip.name, entry.IsEmbedded ? "Embedded" : entry.resource.ToString());
+
+            //with a skin loaded, saving anything means giving the skin its own copy; without one there is
+            //only the System file to write back to
+            bool intoSkin = skinLoaded && entry.resource.source != ResourceSource.Skin;
+
+            if (ImGui.Button(intoSkin ? "Copy To Skin" : "Save"))
+            {
+                if (intoSkin)
+                {
+                    AnimationClipIO.MoveIntoSkin(entry, StageClipFile(entry.clip));
+                }
+                else
+                {
+                    AnimationClipIO.SaveToResource(entry);
+                }
+            }
+
+            ImGui.PopID();
+        }
+    }
+
+    //clips are grouped by the stage that owns them, the way layouts are, so two stages can both have an
+    //"open" without one overwriting the other
+    private static string StageClipFile(AnimationClip clip)
+    {
+        string stage = CDTXMania.StageManager.rCurrentStage?.eStageID.ToString() ?? "Common";
+        string name = string.IsNullOrWhiteSpace(clip.name) ? "Untitled" : clip.name;
+
+        return System.IO.Path.Combine(stage, name + ".json");
     }
 
     private void DrawPlaybackControls()

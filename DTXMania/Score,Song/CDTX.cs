@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Globalization;
 using DTXMania.Core;
+using DTXMania.Core.Audio;
 using DTXMania.UI.Drawable;
 using FDK;
 
@@ -276,13 +277,12 @@ public class CDTX : CActivity
         public List<EChannel> listこのWAVを使用するチャンネル番号の集合 = new(16);
         public int nChipSize = 100;
         public int nPosition;
-        public long[] nPauseTime = new long[CDTXMania.ConfigIni.nPoliphonicSounds]; // 4
         public int nVolume = 100;
-        public int n現在再生中のサウンド番号;
-        public long[] nPlayStartTime = new long[CDTXMania.ConfigIni.nPoliphonicSounds]; // 4
         public int n内部番号;
         public int n表記上の番号;
-        public CSound[] rSound = new CSound[CDTXMania.ConfigIni.nPoliphonicSounds]; // 4
+
+        public MixerClip? clip;
+
         public string strコメント文 = "";
         public string strFileName = "";
 
@@ -297,6 +297,50 @@ public class CDTX : CActivity
         public bool bIsDrumsSound = false;
         public bool bIsSESound = false;
         public bool bIsBGMSound = false;
+
+        public AudioGroup group = AudioGroup.Se;
+
+        /// <summary>
+        /// Files this WAV under the instrument of a chip that uses it. First instrument seen wins over
+        /// the Se default; BGM wins over everything.
+        ///
+        /// Goes by the chip.s <see cref="CChip.eInstrumentPart"/>, because channel numbers are not
+        /// grouped: guitar chords run 0x20-0x2F and again 0x93-0x9F, with bass split either side and
+        /// real sound effects in between.
+        /// </summary>
+        public void Classify(CChip chip)
+        {
+            if (chip.nChannelNumber == EChannel.BGM)
+            {
+                group = AudioGroup.Bgm;
+                return;
+            }
+
+            if (group != AudioGroup.Se)
+            {
+                return;
+            }
+
+            group = chip.eInstrumentPart switch
+            {
+                EInstrumentPart.DRUMS => AudioGroup.Drums,
+                EInstrumentPart.GUITAR => AudioGroup.Guitar,
+                EInstrumentPart.BASS => AudioGroup.Bass,
+                _ => HiddenOrNoChip(chip.nChannelNumber)
+            };
+        }
+
+        //instrument channels the parser assigns no part to
+        private static AudioGroup HiddenOrNoChip(EChannel channel) => channel switch
+        {
+            >= EChannel.HiHatClose_Hidden and <= EChannel.LeftBassDrum_Hidden => AudioGroup.Drums,
+            EChannel.Guitar_NoChip => AudioGroup.Guitar,
+            EChannel.Bass_NoChip => AudioGroup.Bass,
+            >= EChannel.HiHatClose_NoChip and <= EChannel.LeftBassDrum_NoChip => AudioGroup.Drums,
+            EChannel.Guitar_Wailing or EChannel.Guitar_WailingSound or EChannel.Guitar_LongNote => AudioGroup.Guitar,
+            EChannel.Bass_Wailing or EChannel.Bass_LongNote => AudioGroup.Bass,
+            _ => AudioGroup.Se
+        };
 
         public override string ToString()
         {
@@ -333,13 +377,12 @@ public class CDTX : CActivity
 
             if (bManagedリソースの解放も行う)
             {
-                for (int i = 0; i < CDTXMania.ConfigIni.nPoliphonicSounds; i++) // 4
+                if (clip != null)
                 {
-                    if (rSound[i] != null)
-                        CDTXMania.SoundManager.tDiscard(rSound[i]);
-                    rSound[i] = null;
+                    AudioMixer.Free(clip);
+                    clip = null;
 
-                    if ((i == 0) && CDTXMania.ConfigIni.bLog作成解放ログ出力)
+                    if (CDTXMania.ConfigIni.bLog作成解放ログ出力)
                         Trace.TraceInformation("サウンドを解放しました。({0})({1})", strコメント文, strFileName);
                 }
             }
@@ -1227,7 +1270,6 @@ public class CDTX : CActivity
         #endregion
 
         nBGMAdjust = 0;
-        nPolyphonicSounds = CDTXMania.ConfigIni.nPoliphonicSounds;
         dbDTXVPlaySpeed = 1.0f;
 #if TEST_NOTEOFFMODE
 			this.bHH演奏で直前のHHを消音する = true;
@@ -2632,44 +2674,38 @@ public class CDTX : CActivity
 
     public void tチップの再生(CChip pChip, long n再生開始システム時刻ms, int nVol, bool bBad = false)
     {
-        if (pChip.nIntegerValue_InternalNumber >= 0)
-        {
-            if (listWAV.TryGetValue(pChip.nIntegerValue_InternalNumber, out CWAV? wc))
-            {
-                int index = wc.n現在再生中のサウンド番号 = (wc.n現在再生中のサウンド番号 + 1) % nPolyphonicSounds;
-                if ((wc.rSound[0] != null) &&
-                    (wc.rSound[0].bストリーム再生する || wc.rSound[index] == null))
-                {
-                    index = wc.n現在再生中のサウンド番号 = 0;
-                }
-
-                CSound sound = wc.rSound[index];
-                if (sound != null)
-                {
-                    if (bBad)
-                    {
-                        sound.db周波数倍率 =
-                            (100 + (((CDTXMania.Random.Next(3) + 1) * 7) * (1 - (CDTXMania.Random.Next(2) * 2)))) /
-                            100f;
-                    }
-                    else
-                    {
-                        sound.db周波数倍率 = 1.0;
-                    }
-
-                    sound.dbPlaySpeed = CDTXMania.ConfigIni.nPlaySpeed / 20.0;
-                    
-                    // 再生速度によって、WASAPI/ASIOで使う使用mixerが決まるため、付随情報の設定(音量/PAN)は、再生速度の設定後に行う
-                    sound.nVolume = (int)(nVol * wc.nVolume / 100.0);
-                    sound.nPosition = wc.nPosition;
-                    sound.tStartPlaying();
-                }
-
-                wc.nPlayStartTime[wc.n現在再生中のサウンド番号] = n再生開始システム時刻ms;
-                tAutoCorrectWavPlaybackPosition(wc);
-            }
-        }
+        tSoundChip(pChip, n再生開始システム時刻ms, nVol, bBad);
     }
+
+    /// <summary>
+    /// The one place a chip makes a sound.
+    /// </summary>
+    private void tSoundChip(CChip pChip, long n再生開始システム時刻ms, int nVol, bool bBad)
+    {
+        if (pChip.nIntegerValue_InternalNumber < 0
+            || !listWAV.TryGetValue(pChip.nIntegerValue_InternalNumber, out CWAV? wc)
+            || wc.clip == null)
+        {
+            return;
+        }
+
+        //a chip is a one-shot triggered at the right time, so speeding it up only detunes it
+        bool follows = wc.group == AudioGroup.Bgm || CDTXMania.ConfigIni.bPlaySpeedAffectsChips;
+        double speed = follows ? CDTXMania.ConfigIni.nPlaySpeed / 20.0 : 1.0;
+
+        AudioMixer.Play(wc.clip,
+            (int)(nVol * wc.nVolume / 100.0),
+            wc.nPosition,
+            speed,
+            bBad ? BadHitPitch() : 1.0,
+            n再生開始システム時刻ms);
+
+        tAutoCorrectWavPlaybackPosition(wc);
+    }
+
+    //the wrong-note detune: up or down by 7, 14 or 21 percent
+    private static double BadHitPitch()
+        => (100 + (CDTXMania.Random.Next(3) + 1) * 7 * (1 - CDTXMania.Random.Next(2) * 2)) / 100.0;
 
     public void tAutoCorrectWavPlaybackPosition() // tWave再生位置自動補正
     {
@@ -2681,168 +2717,50 @@ public class CDTX : CActivity
 
     public void tAutoCorrectWavPlaybackPosition(CWAV wc) // tWave再生位置自動補正
     {
-        if (wc.rSound[0] != null && wc.rSound[0].nTotalPlayTimeMs >= 5000)
+        //a short chip finishes before it can drift audibly
+        if (wc.clip != null && AudioMixer.LengthMs(wc.clip) >= 5000)
         {
-            for (int i = 0; i < nPolyphonicSounds; i++)
-            {
-                if ((wc.rSound[i] != null) && (wc.rSound[i].bIsPlaying))
-                {
-                    long nCurrentTime = CSoundManager.rcPerformanceTimer.nSystemTimeMs;
-                    if (nCurrentTime > wc.nPlayStartTime[i])
-                    {
-                        long nAbsTimeFromStartPlaying = nCurrentTime - wc.nPlayStartTime[i];
-                        //Trace.TraceInformation( "再生位置自動補正: {0}, seek先={1}ms, 全音長={2}ms",
-                        //    Path.GetFileName( wc.rSound[ 0 ].strFilename ),
-                        //    nAbsTimeFromStartPlaying,
-                        //    wc.rSound[ 0 ].nTotalPlayTimeMs
-                        //);
-                        // wc.rSound[ i ].tChangePlaybackPosition( wc.rSound[ i ].t時刻から位置を返す( nAbsTimeFromStartPlaying ) );
-                        wc.rSound[i].tChangePlaybackPosition(nAbsTimeFromStartPlaying); // WASAPI/ASIO用
-                    }
-                }
-            }
+            AudioMixer.Correct(wc.clip, AudioMixer.Timer.nSystemTimeMs);
         }
     }
 
     public void tStopPlayingWav(int nWaveの内部番号)
     {
-        if (!listWAV.TryGetValue(nWaveの内部番号, out CWAV? cwav)) return;
-        
-        for (int i = 0; i < nPolyphonicSounds; i++)
+        if (listWAV.TryGetValue(nWaveの内部番号, out CWAV? cwav) && cwav.clip != null)
         {
-            if (cwav.rSound[i] != null && cwav.rSound[i].bIsPlaying)
+            AudioMixer.Stop(cwav.clip);
+        }
+    }
+
+    /// <summary>
+    /// Hands every loaded chip sound to the mixer. Game thread, once loading has finished:
+    /// <see cref="tLoadWAV"/> leaves each clip private to its CWAV so loading can be spread over threads.
+    /// </summary>
+    public void PublishClips()
+    {
+        foreach (CWAV cwav in listWAV.Values)
+        {
+            if (cwav.clip != null)
             {
-                cwav.rSound[i].tStopPlayback();
+                AudioMixer.Publish(cwav.clip);
             }
         }
     }
 
     public void tLoadWAV(CWAV cwav)
     {
-//			Trace.TraceInformation("WAV files={0}", this.listWAV.Count);
-//			int count = 0;
-//			foreach (CWAV cwav in this.listWAV.Values)
+        string str = string.IsNullOrEmpty(PATH_WAV) ? strFolderName : PATH_WAV;
+        str += PATH + cwav.strFileName;
+
+        //private to this CWAV until PublishClips hands it over, so this is safe on any loader thread
+        cwav.clip = AudioMixer.CreateClip(str, cwav.group, false);
+
+        //one channel up front so the first chip does not pay to decode it
+        AudioMixer.Preload(cwav.clip);
+
+        if (CDTXMania.ConfigIni.bLog作成解放ログ出力)
         {
-//				string strCount = count.ToString() + " / " + this.listWAV.Count.ToString();
-//				Debug.WriteLine(strCount);
-//				CDTXMania.act文字コンソール.tPrint(0, 0, CCharacterConsole.Eフォント種別.白, strCount);
-//				count++;
-
-            string str = string.IsNullOrEmpty(PATH_WAV) ? strFolderName : PATH_WAV;
-            str = str + PATH + cwav.strFileName;
-            _ = (CDTXMania.SoundManager.GetCurrentSoundDeviceType() == "DirectSound");
-            try
-            {
-                //try
-                //{
-                //    cwav.rSound[ 0 ] = CDTXMania.SoundManager.tGenerateSound( str );
-                //    cwav.rSound[ 0 ].nVolume = 100;
-                //    if ( CDTXMania.ConfigIni.bLog作成解放ログ出力 )
-                //    {
-                //        Trace.TraceInformation( "サウンドを作成しました。({3})({0})({1})({2}bytes)", cwav.strコメント文, str, cwav.rSound[ 0 ].nサウンドバッファサイズ, cwav.rSound[ 0 ].bストリーム再生する ? "Stream" : "OnMemory" );
-                //    }
-                //}
-                //catch
-                //{
-                //    cwav.rSound[ 0 ] = null;
-                //    Trace.TraceError( "サウンドの作成に失敗しました。({0})({1})", cwav.strコメント文, str );
-                //}
-                //if ( cwav.rSound[ 0 ] == null )	// #xxxxx 2012.5.3 yyagi rSound[1-3]もClone()するようにし、これらのストリーム再生がおかしくなる問題を修正
-                //{
-                //    for ( int j = 1; j < nPolyphonicSounds; j++ )
-                //    {
-                //        cwav.rSound[ j ] = null;
-                //    }
-                //}
-                //else
-                //{
-                //    for ( int j = 1; j < nPolyphonicSounds; j++ )
-                //    {
-                //        cwav.rSound[ j ] = (CSound) cwav.rSound[ 0 ].Clone();	// #24007 2011.9.5 yyagi add: to accelerate loading chip sounds
-                //        CDTXMania.SoundManager.tサウンドを登録する( cwav.rSound[ j ] );
-                //    }
-                //}
-
-                // まず1つめを登録する
-                try
-                {
-                    cwav.rSound[0] = CDTXMania.SoundManager.tGenerateSound(str);
-                    cwav.rSound[0].nVolume = 100;
-                    if (CDTXMania.ConfigIni.bLog作成解放ログ出力)
-                    {
-                        Trace.TraceInformation("サウンドを作成しました。({3})({0})({1})({2}bytes)", cwav.strコメント文, str,
-                            cwav.rSound[0].nサウンドバッファサイズ, cwav.rSound[0].bストリーム再生する ? "Stream" : "OnMemory");
-                    }
-                }
-                catch (Exception e)
-                {
-                    cwav.rSound[0] = null;
-                    Trace.TraceError("サウンドの作成に失敗しました。({0})({1})", cwav.strコメント文, str);
-                    Trace.TraceError("例外: " + e.Message);
-                }
-
-                #region [ 同時発音数を、チャンネルによって変える ]
-
-                int nPoly = nPolyphonicSounds;
-                if (CDTXMania.SoundManager.GetCurrentSoundDeviceType() !=
-                    "DirectSound") // DShowでの再生の場合はミキシング負荷が高くないため、
-                {
-                    // チップのライフタイム管理を行わない
-                    if (cwav.bIsBassSound) nPoly = (nPolyphonicSounds >= 2) ? 2 : 1;
-                    else if (cwav.bIsGuitarSound) nPoly = (nPolyphonicSounds >= 2) ? 2 : 1;
-                    else if (cwav.bIsSESound) nPoly = 1;
-                    else if (cwav.bIsBGMSound) nPoly = 1;
-                }
-
-                if (cwav.bIsBGMSound) nPoly = 1;
-
-                #endregion
-
-                // 残りはClone等で登録する
-                //if ( bIsDirectSound )	// DShowでの再生の場合はCloneする
-                //{
-                //    for ( int i = 1; i < nPoly; i++ )
-                //    {
-                //        cwav.rSound[ i ] = (CSound) cwav.rSound[ 0 ].Clone();	// #24007 2011.9.5 yyagi add: to accelerate loading chip sounds
-                //        // CDTXMania.SoundManager.tサウンドを登録する( cwav.rSound[ j ] );
-                //    }
-                //    for ( int i = nPoly; i < nPolyphonicSounds; i++ )
-                //    {
-                //        cwav.rSound[ i ] = null;
-                //    }
-                //}
-                //else															// WASAPI/ASIO時は通常通り登録
-                {
-                    for (int i = 1; i < nPoly; i++)
-                    {
-                        try
-                        {
-                            cwav.rSound[i] = CDTXMania.SoundManager.tGenerateSound(str);
-                            cwav.rSound[i].nVolume = 100;
-                            if (CDTXMania.ConfigIni.bLog作成解放ログ出力)
-                            {
-                                Trace.TraceInformation("サウンドを作成しました。({3})({0})({1})({2}bytes)", cwav.strコメント文, str,
-                                    cwav.rSound[0].nサウンドバッファサイズ, cwav.rSound[0].bストリーム再生する ? "Stream" : "OnMemory");
-                            }
-                        }
-                        catch (Exception e)
-                        {
-                            cwav.rSound[i] = null;
-                            Trace.TraceError("サウンドの作成に失敗しました。({0})({1})", cwav.strコメント文, str);
-                            Trace.TraceError("例外: " + e.Message);
-                        }
-                    }
-                }
-            }
-            catch (Exception exception)
-            {
-                Trace.TraceError("サウンドの生成に失敗しました。({0})({1})({2})", exception.Message, cwav.strコメント文, str);
-                for (int j = 0; j < nPolyphonicSounds; j++)
-                {
-                    cwav.rSound[j] = null;
-                }
-                //continue;
-            }
+            Trace.TraceInformation("サウンドを作成しました。({0})({1})", cwav.strコメント文, str);
         }
     }
 
@@ -3055,48 +2973,12 @@ public class CDTX : CActivity
 
     public void tPlayChip(CChip pChip, long n再生開始システム時刻ms, int nLane, int nVol, bool bMIDIMonitor, bool bBad)
     {
-        if (pChip.nIntegerValue_InternalNumber >= 0)
+        if ((nLane < (int)ELane.LC) || ((int)ELane.BGM < nLane))
         {
-            if ((nLane < (int)ELane.LC) || ((int)ELane.BGM < nLane))
-            {
-                throw new ArgumentOutOfRangeException();
-            }
-
-            if (listWAV.ContainsKey(pChip.nIntegerValue_InternalNumber))
-            {
-                CWAV wc = listWAV[pChip.nIntegerValue_InternalNumber];
-                int index = wc.n現在再生中のサウンド番号 = (wc.n現在再生中のサウンド番号 + 1) % nPolyphonicSounds;
-                if ((wc.rSound[0] != null) &&
-                    (wc.rSound[0].bストリーム再生する || wc.rSound[index] == null))
-                {
-                    index = wc.n現在再生中のサウンド番号 = 0;
-                }
-
-                CSound sound = wc.rSound[index];
-                if (sound != null)
-                {
-                    if (bBad)
-                    {
-                        sound.db周波数倍率 =
-                            (100 + (((CDTXMania.Random.Next(3) + 1) * 7) * (1 - (CDTXMania.Random.Next(2) * 2)))) /
-                            100f;
-                    }
-                    else
-                    {
-                        sound.db周波数倍率 = 1.0;
-                    }
-
-                    sound.dbPlaySpeed = CDTXMania.ConfigIni.nPlaySpeed / 20.0;
-                    // 再生速度によって、WASAPI/ASIOで使う使用mixerが決まるため、付随情報の設定(音量/PAN)は、再生速度の設定後に行う
-                    sound.nVolume = (int)(nVol * wc.nVolume / 100.0);
-                    sound.nPosition = wc.nPosition;
-                    sound.tStartPlaying();
-                }
-
-                wc.nPlayStartTime[wc.n現在再生中のサウンド番号] = n再生開始システム時刻ms;
-                tAutoCorrectWavPlaybackPosition(wc);
-            }
+            throw new ArgumentOutOfRangeException();
         }
+
+        tSoundChip(pChip, n再生開始システム時刻ms, nVol, bBad);
     }
 
     public void t各自動再生音チップの再生時刻を変更する(int nBGMAdjustの増減値)
@@ -3130,44 +3012,35 @@ public class CDTX : CActivity
 
         foreach (CWAV cwav in listWAV.Values)
         {
-            for (int j = 0; j < nPolyphonicSounds; j++)
+            if (cwav.clip != null)
             {
-                if ((cwav.rSound[j] != null) && cwav.rSound[j].bIsPlaying)
-                {
-                    cwav.nPlayStartTime[j] += nBGMAdjustの増減値;
-                }
+                AudioMixer.ShiftStart(cwav.clip, nBGMAdjustの増減値);
             }
         }
     }
 
     public void tPausePlaybackForAllChips()
     {
+        long now = AudioMixer.Timer.nSystemTimeMs;
+
         foreach (CWAV cwav in listWAV.Values)
         {
-            for (int i = 0; i < nPolyphonicSounds; i++)
+            if (cwav.clip != null)
             {
-                if ((cwav.rSound[i] != null) && cwav.rSound[i].bIsPlaying)
-                {
-                    cwav.rSound[i].tPausePlayback();
-                    cwav.nPauseTime[i] = CSoundManager.rcPerformanceTimer.nSystemTimeMs;
-                }
+                AudioMixer.Pause(cwav.clip, now);
             }
         }
     }
 
     public void tResumePlaybackForAllChips()
     {
+        long now = AudioMixer.Timer.nSystemTimeMs;
+
         foreach (CWAV cwav in listWAV.Values)
         {
-            for (int i = 0; i < nPolyphonicSounds; i++)
+            if (cwav.clip != null)
             {
-                if ((cwav.rSound[i] != null) && cwav.rSound[i].b一時停止中)
-                {
-                    //long num1 = cwav.nPauseTime[ i ];
-                    //long num2 = cwav.nPlayStartTime[ i ];
-                    cwav.rSound[i].tResumePlayback(cwav.nPauseTime[i] - cwav.nPlayStartTime[i]);
-                    cwav.nPlayStartTime[i] += CSoundManager.rcPerformanceTimer.nSystemTimeMs - cwav.nPauseTime[i];
-                }
+                AudioMixer.Resume(cwav.clip, now);
             }
         }
     }
@@ -3904,6 +3777,8 @@ public class CDTX : CActivity
                 {
                     listWAV[chip.nIntegerValue_InternalNumber].listこのWAVを使用するチャンネル番号の集合.Add(chip.nChannelNumber);
 
+                    listWAV[chip.nIntegerValue_InternalNumber].Classify(chip);
+
                     int c = (int)chip.nChannelNumber >> 4;
                     switch (c)
                     {
@@ -4023,9 +3898,9 @@ public class CDTX : CActivity
     /// </summary>
     public void PlanToAddMixerChannel()
     {
-        if (CDTXMania.SoundManager.GetCurrentSoundDeviceType() == "DirectSound") // DShowでの再生の場合はミキシング負荷が高くないため、
+        //an output that does not mix channels has nothing to attach to, so a chip has no lifetime to plan
+        if (!AudioMixer.Device.MixesChannels)
         {
-            // チップのライフタイム管理を行わない
             return;
         }
 
@@ -4204,15 +4079,7 @@ public class CDTX : CActivity
                 }
                     if (pChip.nChannelNumber == EChannel.BGM) // BGMチップは即ミキサーに追加
                     {
-                        if (listWAV.ContainsKey(pChip.nIntegerValue_InternalNumber))
-                        {
-                            CWAV wc = CDTXMania.DTX.listWAV[pChip.nIntegerValue_InternalNumber];
-                            if (wc.rSound[0] != null)
-                            {
-                                CDTXMania.SoundManager
-                                    .AddMixer(wc.rSound[0]); // BGMは多重再生しない仕様としているので、1個目だけミキサーに登録すればよい
-                            }
-                        }
+                        //the mixer attaches a voice when it makes one, and Preload already did
                     }
 
                     int nAddMixer時刻ms, nAddMixer位置 = 0;
@@ -4240,9 +4107,9 @@ public class CDTX : CActivity
                     if (listWAV.ContainsKey(pChip.nIntegerValue_InternalNumber))
                     {
                         CWAV wc = CDTXMania.DTX.listWAV[pChip.nIntegerValue_InternalNumber];
-                        duration = (wc.rSound[0] == null)
+                        duration = wc.clip == null
                             ? 0
-                            : (int)(wc.rSound[0].nTotalPlayTimeMs /
+                            : (int)(AudioMixer.LengthMs(wc.clip) /
                                     db再生速度); // #23664 durationに再生速度が加味されておらず、低速再生でBGMが途切れる問題を修正 (発声時刻msは、DTX読み込み時に再生速度加味済)
                     }
 
@@ -4665,7 +4532,6 @@ public class CDTX : CActivity
     private int lineNumber;
     private int nCurrentRandomNumber;
 
-    private int nPolyphonicSounds = 4; // #28228 2012.5.1 yyagi
 
     private int n内部番号BPM1to;
     private int n内部番号WAV1to;

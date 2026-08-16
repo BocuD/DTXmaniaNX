@@ -1,6 +1,6 @@
 using System.Collections.Concurrent;
-using System.Linq.Expressions;
 using System.Reflection;
+using DTXMania.UI.DynamicElements;
 
 namespace DTXMania.UI.Animation;
 
@@ -17,11 +17,45 @@ public sealed class PropertyAccessor
     public Func<object, object?> Getter { get; }
     public Action<object, object?> Setter { get; }
 
-    private PropertyAccessor(Type valueType, Func<object, object?> getter, Action<object, object?> setter)
+    //typed setters for the kinds a data binding can supply, so writing one doesn't box. Exactly one is
+    //non-null for a bindable member; all are null for a member no binding can drive (a Vector3, say).
+    public Action<object, string>? StringSetter { get; private init; }
+    public Action<object, bool>? BoolSetter { get; private init; }
+    public Action<object, double>? NumberSetter { get; private init; }
+
+    public bool IsBindable => StringSetter != null || BoolSetter != null || NumberSetter != null;
+
+    //kept so a setter for the property's own type can be compiled later, once something knows that type
+    //as a generic argument
+    private readonly Type rootType;
+    private readonly IReadOnlyList<MemberInfo> chain;
+    private Delegate? typedSetter;
+
+    private PropertyAccessor(Type valueType, Func<object, object?> getter, Action<object, object?> setter,
+        Type rootType, IReadOnlyList<MemberInfo> chain)
     {
         ValueType = valueType;
         Getter = getter;
         Setter = setter;
+        this.rootType = rootType;
+        this.chain = chain;
+    }
+
+    /// <summary>
+    /// A setter taking the property's own type, so writing it doesn't box. Null unless
+    /// <typeparamref name="T"/> is exactly <see cref="ValueType"/>. Compiled on first use and kept.
+    /// </summary>
+    public Action<object, T>? GetTypedSetter<T>()
+    {
+        if (typeof(T) != ValueType)
+        {
+            return null;
+        }
+
+        //two threads arriving together compile the same setter and one wins, which costs a compile and
+        //changes nothing
+        typedSetter ??= AccessorCompiler.BuildChainSetter<T>(rootType, chain);
+        return (Action<object, T>)typedSetter;
     }
 
     /// <summary>
@@ -68,10 +102,15 @@ public sealed class PropertyAccessor
 
         Type valueType = MemberType(leaf);
 
-        Func<object, object?> getter = BuildGetter(rootType, chain);
-        Action<object, object?> setter = BuildSetter(rootType, chain);
+        Func<object, object?> getter = AccessorCompiler.BuildChainGetter(rootType, chain);
+        Action<object, object?> setter = AccessorCompiler.BuildChainSetter(rootType, chain);
 
-        return new PropertyAccessor(valueType, getter, setter);
+        return new PropertyAccessor(valueType, getter, setter, rootType, chain)
+        {
+            StringSetter = valueType == typeof(string) ? AccessorCompiler.BuildChainSetter<string>(rootType, chain) : null,
+            BoolSetter = valueType == typeof(bool) ? AccessorCompiler.BuildChainSetter<bool>(rootType, chain) : null,
+            NumberSetter = DataFieldReflector.IsNumeric(valueType) ? AccessorCompiler.BuildChainSetter<double>(rootType, chain) : null
+        };
     }
 
     private static MemberInfo? ResolveMember(Type type, string name)
@@ -105,67 +144,5 @@ public sealed class PropertyAccessor
             }
         }
         return false;
-    }
-
-    private static Func<object, object?> BuildGetter(Type rootType, List<MemberInfo> chain)
-    {
-        ParameterExpression rootObj = Expression.Parameter(typeof(object), "root");
-        Expression current = Expression.Convert(rootObj, rootType);
-        foreach (MemberInfo member in chain)
-        {
-            current = Expression.MakeMemberAccess(current, member);
-        }
-        Expression boxed = Expression.Convert(current, typeof(object));
-        return Expression.Lambda<Func<object, object?>>(boxed, rootObj).Compile();
-    }
-
-    private static Action<object, object?> BuildSetter(Type rootType, List<MemberInfo> chain)
-    {
-        // For chains like a.b.c = value where intermediates are value types, naive
-        // member-assign would mutate a copy. We have to read each intermediate into a local,
-        // assign through, and write back up the chain.
-        ParameterExpression rootObj = Expression.Parameter(typeof(object), "root");
-        ParameterExpression newValue = Expression.Parameter(typeof(object), "value");
-
-        ParameterExpression rootTyped = Expression.Variable(rootType, "rootTyped");
-        List<ParameterExpression> locals = new() { rootTyped };
-        List<Expression> body = new() { Expression.Assign(rootTyped, Expression.Convert(rootObj, rootType)) };
-
-        // Read intermediates into locals.
-        Expression accessExpr = rootTyped;
-        List<ParameterExpression> intermediates = new();
-        for (int i = 0; i < chain.Count - 1; i++)
-        {
-            MemberInfo m = chain[i];
-            Type t = MemberType(m);
-            ParameterExpression local = Expression.Variable(t, $"v{i}");
-            intermediates.Add(local);
-            locals.Add(local);
-            accessExpr = Expression.MakeMemberAccess(accessExpr, m);
-            body.Add(Expression.Assign(local, accessExpr));
-            accessExpr = local;
-        }
-
-        // Assign the leaf on the deepest local (or directly on rootTyped if chain length == 1).
-        MemberInfo leaf = chain[^1];
-        Expression leafTarget = chain.Count == 1
-            ? Expression.MakeMemberAccess(rootTyped, leaf)
-            : Expression.MakeMemberAccess(intermediates[^1], leaf);
-        Expression valueConverted = Expression.Convert(newValue, MemberType(leaf));
-        body.Add(Expression.Assign(leafTarget, valueConverted));
-
-        // Write the chain back up. For chain length n, write intermediates[i] back into the
-        // appropriate parent (intermediates[i-1] or rootTyped at i==0).
-        for (int i = intermediates.Count - 1; i >= 0; i--)
-        {
-            Expression parent = i == 0 ? (Expression)rootTyped : intermediates[i - 1];
-            Expression parentMember = Expression.MakeMemberAccess(parent, chain[i]);
-            body.Add(Expression.Assign(parentMember, intermediates[i]));
-        }
-
-        // If root is a reference type (UIDrawable always is), we don't need to write back to
-        // the boxed object — the assignments above mutated the same instance.
-        BlockExpression block = Expression.Block(locals, body);
-        return Expression.Lambda<Action<object, object?>>(block, rootObj, newValue).Compile();
     }
 }

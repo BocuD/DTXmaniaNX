@@ -2,6 +2,21 @@
 
 public abstract class SongDbSort
 {
+    /// <summary>Every sort the game offers, in the order the sort menu shows them. One instance each: a
+    /// sorter is a strategy, and the sort cache keys on it.</summary>
+    public static readonly SongDbSort[] All =
+    [
+        new SortDefault(),
+        new SortByBox(),
+        new SortByTitle(),
+        new SortByArtist(),
+        new SortByDifficulty(),
+        new SortByLevel(),
+        new SortByPlayer(),
+        new SortByAllSongs(),
+        new SortBySkill()
+    ];
+
     public abstract string Name { get; }
     public abstract string IconName { get; }
     public abstract Task<SongNode> Sort(SongDb songDb);

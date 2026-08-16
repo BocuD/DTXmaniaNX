@@ -13,6 +13,10 @@ public static class Interpolator
 
     private static readonly ConcurrentDictionary<Type, LerpFn> Registry = new();
 
+    //the same functions unwrapped. A track that knows its value type calls these, so the result of a lerp
+    //never has to be boxed to get back to the caller
+    private static readonly ConcurrentDictionary<Type, Delegate> TypedRegistry = new();
+
     static Interpolator()
     {
         Register<float>((a, b, t) => a + (b - a) * t);
@@ -37,7 +41,11 @@ public static class Interpolator
     public static void Register<T>(Func<T, T, float, T> fn)
     {
         Registry[typeof(T)] = (a, b, t) => fn((T)a, (T)b, t)!;
+        TypedRegistry[typeof(T)] = fn;
     }
+
+    public static Func<T, T, float, T>? TypedLerp<T>()
+        => TypedRegistry.TryGetValue(typeof(T), out Delegate? fn) ? (Func<T, T, float, T>)fn : null;
 
     public static object Lerp(Type type, object a, object b, float t)
     {

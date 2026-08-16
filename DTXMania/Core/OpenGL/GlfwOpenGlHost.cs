@@ -73,6 +73,9 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
     [DllImport("glfw3", EntryPoint = "glfwGetWin32Window")]
     private static extern IntPtr glfwGetWin32Window(IntPtr window);
 
+    [DllImport("user32.dll")]
+    private static extern IntPtr GetForegroundWindow();
+
     public RuntimeLogListener RuntimeLogListener { get; } = new();
 
     public GlfwOpenGlHost(OpenGlGame game)
@@ -145,6 +148,33 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
         
         _windowedWidth = (int)value.X;
         _windowedHeight = (int)value.Y;
+    }
+
+    public void FocusWindow()
+    {
+        if (_window.Handle != null)
+        {
+            GLFW.FocusWindow(_window);
+        }
+    }
+
+    public bool IsWindowFocused
+    {
+        get
+        {
+            if (_window.Handle == null)
+            {
+                return false;
+            }
+
+            if (!OperatingSystem.IsWindows())
+            {
+                return GLFW.GetWindowAttrib(_window, GLFW.GLFW_FOCUSED) != 0;
+            }
+
+            IntPtr handle = GetWindowHandle();
+            return handle != IntPtr.Zero && GetForegroundWindow() == handle;
+        }
     }
 
     public void SetWindowPosition(Vector2 value)
@@ -329,7 +359,7 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
             }
         };
         
-        focusCallback = (_, focused) => _game.isFocused = focused != 0;
+        focusCallback = (_, _) => _game.isFocused = IsWindowFocused;
         windowPosCallback = (_, xpos, ypos) => _game.windowPosition = new Vector2(xpos, ypos);
         windowSizeCallback = (_, width, height) => _game.windowSize = new Vector2(width, height);
         
@@ -349,9 +379,8 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
             _game.windowPosition = new Vector2(_windowedX, _windowedY);
         }
 
-        // Focus callbacks may not fire when a window starts already focused.
-        // Seed this state so input polling is enabled immediately on startup/recreate.
-        _game.isFocused = true;
+        //seed the focus state
+        _game.isFocused = IsWindowFocused;
     }
 
     private void InitializeImGui()
@@ -477,6 +506,7 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
 
             FrameProfiler.Begin(FrameSection.PollEvents);
             GLFW.PollEvents();
+            _game.isFocused = IsWindowFocused;
             FrameProfiler.End(FrameSection.PollEvents);
 
             if (GLFW.WindowShouldClose(_window) != 0)
@@ -487,6 +517,8 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
             GLFW.GetFramebufferSize(_window, ref _framebufferWidth, ref _framebufferHeight);
             GLFW.GetWindowSize(_window, ref _windowWidth, ref _windowHeight);
             UpdateDiagnostics();
+
+            const bool imgui = true;
 
             FrameProfiler.Begin(FrameSection.ImGuiNewFrame);
             GLFW.MakeContextCurrent(_window);
@@ -500,7 +532,8 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
 
             _gpuFrameTimer.BeginFrame();
 
-            if (_clearImGuiFocusOnNextFrame)
+            //only inside a frame scope, and there is no focus to clear on a frame ImGui never ran
+            if (_clearImGuiFocusOnNextFrame && imgui)
             {
                 ImGui.SetWindowFocus((string?)null);
                 _clearImGuiFocusOnNextFrame = false;
@@ -544,7 +577,14 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
             _gameRenderTarget.BindDefaultFramebuffer(Math.Max(_framebufferWidth, 1), Math.Max(_framebufferHeight, 1));
 
             FrameProfiler.Begin(FrameSection.Inspector);
-            InspectorManager.Draw(_renderInGameWindow, _gameRenderTarget.TextureId, new Vector2(_gameRenderTarget.Width, _gameRenderTarget.Height));
+
+            if (imgui)
+            {
+                InspectorManager.Draw(_renderInGameWindow, _gameRenderTarget.TextureId,
+                    new Vector2(_gameRenderTarget.Width, _gameRenderTarget.Height),
+                    new Vector2(Math.Max(_framebufferWidth, 1), Math.Max(_framebufferHeight, 1)));
+            }
+
             FrameProfiler.End(FrameSection.Inspector);
 
             FrameProfiler.Begin(FrameSection.Blit);
@@ -556,12 +596,17 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
             FrameProfiler.End(FrameSection.Blit);
 
             FrameProfiler.Begin(FrameSection.ImGuiRender);
-            ImGui.Render();
-            var imguiDrawData = ImGui.GetDrawData();
-            if (imguiDrawData.TotalVtxCount > 0)
+
+            if (imgui)
             {
-                ImGuiImplOpenGL3.RenderDrawData(imguiDrawData);
+                ImGui.Render();
+                var imguiDrawData = ImGui.GetDrawData();
+                if (imguiDrawData.TotalVtxCount > 0)
+                {
+                    ImGuiImplOpenGL3.RenderDrawData(imguiDrawData);
+                }
             }
+
             FrameProfiler.End(FrameSection.ImGuiRender);
 
             _gpuFrameTimer.EndFrame();

@@ -17,23 +17,18 @@ public abstract class UITexture : UIDrawable
 
     public BaseTexture Texture => texture;
 
-    public void SetTexture(BaseTexture t, bool updateSize = true)
+    public virtual void SetTexture(BaseTexture t)
     {
-        if (t.IsValid())
-        {
-            texture = t;
-
-            if (updateSize)
-            {
-                size = new Vector2(t.Width, t.Height);
-            }
-        }
-        else
-        {
-            texture = BaseTexture.None;
-            size = Vector2.Zero;
-        }
+        texture = t.IsValid() ? t : BaseTexture.None;
+        size.SetContent(ContentSize(texture));
     }
+
+    //virtual because a texture rasterized above the logical resolution, as text is, covers fewer
+    //logical pixels than it has of its own
+    protected virtual Vector2 ContentSize(BaseTexture t) => new(t.Width, t.Height);
+
+    /// <summary>What the current texture covers, whatever <see cref="UIDrawable.size"/> was claimed as.</summary>
+    public Vector2 MeasuredSize => ContentSize(texture);
 
     public override void Draw(Matrix4x4 parentMatrix)
     {

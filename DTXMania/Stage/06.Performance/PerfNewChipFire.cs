@@ -60,6 +60,8 @@ public class ActPerfNewFire : UIGroup, IPerfFire
     
     public ActPerfNewFire(int instrument)
     {
+        //a gameplay element is runtime-only: it never appears in a saved layout
+        dontSerialize = true;
         this.instrument = instrument;
         InitializeLaneSizes();
         

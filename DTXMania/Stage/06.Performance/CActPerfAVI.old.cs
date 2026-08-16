@@ -68,7 +68,7 @@ internal class CActPerfAVI : CActivity
                 this.n表示側終了位置X = n表示側終了位置X;
                 this.n表示側終了位置Y = n表示側終了位置Y;
                 this.n総移動時間ms = n総移動時間ms;
-                this.n移動開始時刻ms = ( n移動開始時刻ms != -1 ) ? n移動開始時刻ms : CSoundManager.rcPerformanceTimer.nCurrentTime;
+                this.n移動開始時刻ms = ( n移動開始時刻ms != -1 ) ? n移動開始時刻ms : AudioMixer.Timer.nCurrentTime;
 
                 if( ( this.rAVI != null ) && ( this.rAVI.avi != null ) )
                 {
@@ -169,7 +169,7 @@ internal class CActPerfAVI : CActivity
                 this.n表示側終了位置X = n表示側終了位置X;
                 this.n表示側終了位置Y = n表示側終了位置Y;
                 this.n総移動時間ms = n総移動時間ms;
-                this.n移動開始時刻ms = ( n移動開始時刻ms != -1 ) ? n移動開始時刻ms : CSoundManager.rcPerformanceTimer.nCurrentTime;
+                this.n移動開始時刻ms = ( n移動開始時刻ms != -1 ) ? n移動開始時刻ms : AudioMixer.Timer.nCurrentTime;
                 n前回表示したフレーム番号 = -1;
                 if( ( this.rAVI != null ) && ( this.rAVI.avi != null ) )
                 {
@@ -445,7 +445,7 @@ internal class CActPerfAVI : CActivity
                 Rectangle rectangle2;
 
                 #region[ frameNoFromTime ]
-                int time = (int)( ( CSoundManager.rcPerformanceTimer.nCurrentTime - n移動開始時刻ms ) * ( ( (double)CDTXMania.ConfigIni.nPlaySpeed ) / 20.0 ) );
+                int time = (int)( ( AudioMixer.Timer.nCurrentTime - n移動開始時刻ms ) * ( ( (double)CDTXMania.ConfigIni.nPlaySpeed ) / 20.0 ) );
                 int frameNoFromTime = 0;
                 if( bUseCAviDS )
                     frameNoFromTime = time;
@@ -469,8 +469,8 @@ internal class CActPerfAVI : CActivity
                     }
                     else 
                     {
-                        n移動開始時刻ms = CSoundManager.rcPerformanceTimer.nCurrentTime;
-                        time = (int)((CSoundManager.rcPerformanceTimer.nCurrentTime - n移動開始時刻ms) * (((double)CDTXMania.ConfigIni.nPlaySpeed) / 20.0));
+                        n移動開始時刻ms = AudioMixer.Timer.nCurrentTime;
+                        time = (int)((AudioMixer.Timer.nCurrentTime - n移動開始時刻ms) * (((double)CDTXMania.ConfigIni.nPlaySpeed) / 20.0));
                         rAVI.avi.Seek(0);
                     }
                         
@@ -490,9 +490,9 @@ internal class CActPerfAVI : CActivity
                 Point point2 = new Point( n画像側終了位置X, n画像側終了位置Y );
                 Point point3 = new Point( n表示側開始位置X, n表示側開始位置Y );
                 Point point4 = new Point( n表示側終了位置X, n表示側終了位置Y );
-                if( CSoundManager.rcPerformanceTimer.nCurrentTime < n移動開始時刻ms )
+                if( AudioMixer.Timer.nCurrentTime < n移動開始時刻ms )
                 {
-                    n移動開始時刻ms = CSoundManager.rcPerformanceTimer.nCurrentTime;
+                    n移動開始時刻ms = AudioMixer.Timer.nCurrentTime;
                 }
                 if( n総移動時間ms == 0 )
                 {

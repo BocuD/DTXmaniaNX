@@ -44,10 +44,10 @@ internal class ConfigMenu
     }
 
     // entry points selected from the left menu (instrument pages are placeholders for now)
-    public void OpenSystem() => list.SetItems(system.Build());
-    public void OpenDrums() => list.SetItems(drums.Build());
-    public void OpenGuitar() => list.SetItems(guitar.Build());
-    public void OpenBass() => list.SetItems(bass.Build());
+    public void OpenSystem() => list.OpenRoot(system);
+    public void OpenDrums() => list.OpenRoot(drums);
+    public void OpenGuitar() => list.OpenRoot(guitar);
+    public void OpenBass() => list.OpenRoot(bass);
 
     /// <summary>Applies all deferred changes (sound device, skin). Call once when leaving Config.</summary>
     public void ApplyPendingChanges()

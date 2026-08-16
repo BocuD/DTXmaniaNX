@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Drawing;
 using DTXMania.Core;
+using DTXMania.UI.DynamicElements;
 using Kawazu;
 
 namespace DTXMania.SongDb;
@@ -21,9 +22,17 @@ public class SongNode
     
     public EInstrumentPart filteredInstrumentPart = EInstrumentPart.UNKNOWN;
     
-    public string title = string.Empty;
-    public string path = string.Empty;
+    [DataField("Title")] public string title = string.Empty;
+    [DataField("Path")] public string path = string.Empty;
     public Color color = Color.White;
+
+    public string listTitle = string.Empty;
+
+    public string ListTitle => listTitle.Length > 0 ? listTitle : title;
+
+
+    //the first non-null chart, so a binding can reach chart data without an explicit difficulty index
+    [DataField("Chart")] public CChartData? RepresentativeChart => charts.FirstOrDefault(c => c != null);
 
     public SongNode parent;
     public List<SongNode> childNodes = [];
@@ -100,6 +109,7 @@ public class SongNode
             title = original.title,
             path = original.path,
             color = original.color,
+            listTitle = original.listTitle,
             stDrumHitRanges = original.stDrumHitRanges,
             stDrumPedalHitRanges = original.stDrumPedalHitRanges,
             stGuitarHitRanges = original.stGuitarHitRanges,
@@ -126,12 +136,18 @@ public class SongNode
         return clone;
     }
 
-    public string GetImagePath()
+    /// <summary>
+    /// The image to show for this song. Charts of the same song can name different ones, so a caller that
+    /// knows which chart it is showing passes it; the first chart that names one is the song's own.
+    /// </summary>
+    public string GetImagePath(CChartData? preferredChart = null)
     {
-        var chart = charts.FirstOrDefault(x => x != null);
+        var chart = preferredChart != null && !string.IsNullOrWhiteSpace(preferredChart.SongInformation.Preimage)
+            ? preferredChart
+            : charts.FirstOrDefault(x => x != null);
 
         if (chart == null) return "";
-        
+
         string imagePath = "";
         string preImagePath = chart.SongInformation.Preimage;
         if (!string.IsNullOrWhiteSpace(preImagePath))
@@ -145,23 +161,29 @@ public class SongNode
         return imagePath;
     }
 
-    public static SongNode? rNextSong(SongNode? song)
+    public bool ShowInSongList()
     {
-        if (song == null) return null;
-        List<SongNode> list = song.parent.childNodes;
+        if (nodeType != ENodeType.SONG || CDTXMania.ConfigIni.bShowOtherInstrumentCharts)
+        {
+            return true;
+        }
 
-        int index = list.IndexOf(song);
+        foreach (CChartData? chart in charts)
+        {
+            if (chart != null && chart.HasChartForCurrentMode())
+            {
+                return true;
+            }
+        }
 
-        if (index < 0)
-            return null;
-
-        if (index == (list.Count - 1))
-            return list[0];
-
-        return list[index + 1];
+        return false;
     }
 
-    public static SongNode? rPreviousSong(SongNode? song)
+    public static SongNode? rNextSong(SongNode? song) => Step(song, 1);
+
+    public static SongNode? rPreviousSong(SongNode? song) => Step(song, -1);
+
+    private static SongNode? Step(SongNode? song, int direction)
     {
         if (song == null) return null;
         List<SongNode> list = song.parent.childNodes;
@@ -171,10 +193,17 @@ public class SongNode
         if (index < 0)
             return null;
 
-        if (index == 0)
-            return list[list.Count - 1];
+        for (int step = 0; step < list.Count; step++)
+        {
+            index = (index + direction + list.Count) % list.Count;
 
-        return list[index - 1];
+            if (list[index].ShowInSongList())
+            {
+                return list[index];
+            }
+        }
+
+        return song;
     }
 
     //loop over all charts on this node. find the one that has the highest skill points (if any)

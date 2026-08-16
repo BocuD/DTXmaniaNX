@@ -54,6 +54,12 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Reference Include="Bass.Net">
+        <HintPath>..\Runtime\dll\Bass.Net.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
+    <ItemGroup>
       <PackageReference Include="Accessibility" Version="4.6.0-preview3-27504-2" />
       <PackageReference Include="DiscordRichPresence" Version="1.0.169" />
       <PackageReference Include="FFmpeg.AutoGen.Bindings.DynamicallyLoaded" Version="7.1.1" />

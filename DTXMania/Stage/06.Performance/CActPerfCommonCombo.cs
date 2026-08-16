@@ -130,6 +130,8 @@ internal class CActPerfCommonCombo : CActivity
         public bool b使用中;
         public CCounter ct進行;
     }
+    private readonly int[] comboDigits = new int[10];
+
     public ST爆発[] st爆発 = new ST爆発[2];
     public bool[] b爆発した = new bool[256];    //たぶん256個あったら十分かな。
     public int n火薬カウント;   //なんとなく火薬(笑)
@@ -236,7 +238,8 @@ internal class CActPerfCommonCombo : CActivity
         //-----------------
         #endregion
 
-        int[] n位の数 = new int[10];	// 表示は10桁もあれば足りるだろう
+        int[] n位の数 = comboDigits;	// 表示は10桁もあれば足りるだろう
+        Array.Clear(n位の数);
 
         #region [ nCombo値を桁数ごとに n位の数[] に格納する。（例：nCombo値=125 のとき n位の数 = { 5,2,1,0,0,0,0,0,0,0 } ） ]
         //-----------------
@@ -400,7 +403,8 @@ internal class CActPerfCommonCombo : CActivity
         //-----------------
         #endregion
 
-        int[] n位の数 = new int[10];	// 表示は10桁もあれば足りるだろう
+        int[] n位の数 = comboDigits;	// 表示は10桁もあれば足りるだろう
+        Array.Clear(n位の数);
 
         #region [ nCombo値を桁数ごとに n位の数[] に格納する。（例：nCombo値=125 のとき n位の数 = { 5,2,1,0,0,0,0,0,0,0 } ） ]
         //-----------------
@@ -502,7 +506,8 @@ internal class CActPerfCommonCombo : CActivity
         //-----------------
         #endregion
 
-        int[] n位の数 = new int[10];	// 表示は10桁もあれば足りるだろう
+        int[] n位の数 = comboDigits;	// 表示は10桁もあれば足りるだろう
+        Array.Clear(n位の数);
 
         #region [ nCombo値を桁数ごとに n位の数[] に格納する。（例：nCombo値=125 のとき n位の数 = { 5,2,1,0,0,0,0,0,0,0 } ） ]
         //-----------------

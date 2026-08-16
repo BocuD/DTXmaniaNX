@@ -73,6 +73,9 @@ internal class CActPerfSkillMeter : CActivity
 	{
 		if ( bActivated )
 		{
+			//shared by every number drawn below, each of which is finished with before the next starts
+			Span<char> text = stackalloc char[ 16 ];
+
 			if ( bJustStartedUpdate )
 			{
 				//座標などの定義は初回だけにする。
@@ -140,11 +143,11 @@ internal class CActPerfSkillMeter : CActivity
 				//自己ベスト数値表示
 				if (CDTXMania.ConfigIni.bSmallGraph)
 				{
-					t達成率文字表示( nGraphBG_XPos[ nGraphUsePart ] - 3, nGraphBG_YPos + 531, string.Format( "{0,6:##0.00}" + "%", dbGraphValue_PersonalBest ) );
+					t達成率文字表示( nGraphBG_XPos[ nGraphUsePart ] - 3, nGraphBG_YPos + 531, PanelNumber.Percent( text, dbGraphValue_PersonalBest, "##0.00", 6 ) );
 				}
 				else
 				{
-					t達成率文字表示(nGraphBG_XPos[nGraphUsePart] + 136, nGraphBG_YPos + 501, string.Format("{0,6:##0.00}" + "%", dbGraphValue_PersonalBest));
+					t達成率文字表示(nGraphBG_XPos[nGraphUsePart] + 136, nGraphBG_YPos + 501, PanelNumber.Percent( text, dbGraphValue_PersonalBest, "##0.00", 6 ));
 				}
 			}
 
@@ -186,8 +189,8 @@ internal class CActPerfSkillMeter : CActivity
 						txグラフ.tDraw2D(nGraphBG_XPos[nGraphUsePart] + 164, nGraphBG_YPos + 357, new RectangleF(260 + 120, 2, 30, 120));
 					}
 				}
-				t比較文字表示( nGraphBG_XPos[ nGraphUsePart ] + 44 + nGraphSizeOffset, nPosY - 10, string.Format( "{0,5:##0.00}", Math.Abs( dbグラフ値現在_渡 ) ) );
-				t比較文字表示( nGraphBG_XPos[ nGraphUsePart ] + 74 + nGraphSizeOffset, nTargetGaugePosY - 10, string.Format( "{0,5:##0.00}", Math.Abs( dbGraphValue_Goal ) ) );
+				t比較文字表示( nGraphBG_XPos[ nGraphUsePart ] + 44 + nGraphSizeOffset, nPosY - 10, PanelNumber.Format( text, Math.Abs( dbグラフ値現在_渡 ), "##0.00", 5 ) );
+				t比較文字表示( nGraphBG_XPos[ nGraphUsePart ] + 74 + nGraphSizeOffset, nTargetGaugePosY - 10, PanelNumber.Format( text, Math.Abs( dbGraphValue_Goal ), "##0.00", 5 ) );
 			}
 
 
@@ -251,7 +254,7 @@ internal class CActPerfSkillMeter : CActivity
 	];
 
 
-	private void t比較文字表示( int x, int y, string str )
+	private void t比較文字表示( int x, int y, ReadOnlySpan<char> str )
 	{
 		foreach( char ch in str )
 		{
@@ -274,7 +277,7 @@ internal class CActPerfSkillMeter : CActivity
 			else x += 7;
 		}
 	}
-	private void t達成率文字表示( int x, int y, string str )
+	private void t達成率文字表示( int x, int y, ReadOnlySpan<char> str )
 	{
 		foreach( char ch in str )
 		{

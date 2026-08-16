@@ -1,4 +1,5 @@
-﻿using DTXMania.Core;
+﻿using System.Drawing;
+using DTXMania.Core;
 using DTXMania.UI.Drawable;
 using FDK;
 
@@ -116,6 +117,33 @@ internal class CActPerfCommonScore : CActivity
 			#endregion
 		}
 		Set( part, Get( part ) + delta * rev );
+	}
+
+
+	protected void tDrawScore( int x, int y, long score )
+	{
+		if ( txScore == null )
+		{
+			return;
+		}
+
+		Span<char> digits = stackalloc char[ 7 ];
+		for ( int i = digits.Length - 1; i >= 0; i-- )
+		{
+			digits[ i ] = score > 0L || i == digits.Length - 1 ? (char) ( '0' + score % 10L ) : ' ';
+			score /= 10L;
+		}
+
+		for ( int i = 0; i < digits.Length; i++ )
+		{
+			RectangleF rectangle = digits[ i ] == ' '
+				? new RectangleF( 0, 0, 0, 0 )
+				: new RectangleF( ( digits[ i ] - '0' ) * 36, 0, 36, 50 );
+
+			txScore.tDraw2D( x + i * 34, 28 + y, rectangle );
+		}
+
+		txScore.tDraw2D( x, y, new RectangleF( 0, 50, 86, 28 ) );
 	}
 
 

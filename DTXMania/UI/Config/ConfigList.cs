@@ -1,39 +1,66 @@
+using DTXMania.UI.Skin;
 using System.Drawing;
 using System.Numerics;
 using DTXMania.Core;
+using DTXMania.Core.Framework;
 using DTXMania.UI.Drawable;
+using DTXMania.UI.DynamicElements;
 using DTXMania.UI.Item;
 
 namespace DTXMania.UI.Config;
 
 /// <summary>
-/// Scrolling settings list built on the same idea as the song-select container: a small
-/// ring of reusable <see cref="ConfigItemElement"/> rows over a finite <see cref="CItemBase"/> list.
-/// Input is driven by the host (MoveUp/MoveDown/Confirm/Cancel) so there is a single input owner.
+/// The settings list: a page of <see cref="CItemBase"/> shown through the same scrolling machinery as the
+/// song list, one <see cref="ConfigRowData"/> per item. What is left here is what is actually about
+/// settings — the page stack, editing a value, and the panels a row can open.
 /// </summary>
-internal class ConfigList : UIGroup
+internal class ConfigList : UIScrollItemsGroup, IUIItemSource
 {
-    private const float ElementSpacing = 67f;
-    private const int ScrollUnitsPerRow = 100;
+    private const float RowSpacing = 67f;
 
-    private readonly ConfigItemElement[] elements;
-    private int selectionIndex = 4;
-    private int bufferStartIndex;
+    //where a text input sits within a row, matching where the component draws its value
+    private static readonly Vector3 ValueOffset = new(265, 30, 0);
 
-    private readonly UIGroup elementsContainer;
+    private readonly List<ConfigRowData> rows = [];
+    private readonly ConfigItemEditor editor;
+
     private readonly UIImage cursor;
     private readonly UIImage arrowTop;
     private readonly UIImage arrowBottom;
 
     private List<CItemBase> currentItems = [];
-    public readonly Stack<(List<CItemBase> items, int selection)> pageStack = new();
+    public readonly Stack<(List<CItemBase> items, int selection, ConfigPage? page)> pageStack = new();
+
+    /// <summary>The page whose rows are on screen.</summary>
+    public ConfigPage? CurrentPage { get; private set; }
+
+    /// <summary>Where a page's own elements are parented, in screen space rather than beside the rows.</summary>
+    public UIGroup? pageElements;
+
+    /// <summary>Opens a page as the root of the list, dropping whatever folder history there was.</summary>
+    public void OpenRoot(ConfigPage page)
+    {
+        pageStack.Clear();
+        SetPage(page);
+        SetItems(page.Build());
+    }
+
+    public void ClosePage() => SetPage(null);
+
+    //a page owns elements outside the list, so every move between pages goes through here
+    private void SetPage(ConfigPage? page)
+    {
+        if (ReferenceEquals(page, CurrentPage))
+        {
+            return;
+        }
+
+        CurrentPage?.CloseElements();
+        CurrentPage = page;
+        CurrentPage?.OpenElements();
+    }
 
     private bool editing;
-
-    //smooth accelerating scroll, ported from the old CActConfigList (units of 100 per row)
-    private int currentScrollCounter;
-    private int targetScrollCounter;
-    private long scrollTimerValue = -1;
 
     //runs when Cancel is pressed at the root page (nothing left to go back to)
     public Action? onExitRoot;
@@ -43,22 +70,28 @@ internal class ConfigList : UIGroup
 
     public Action<(EKeyConfigPart part, EKeyConfigPad pad, string label)[]>? onOpenInputTest;
 
-    public Action? onOpenMidiTest;
+    public Action<(EKeyConfigPart part, EKeyConfigPad pad, string label)[]>? onOpenMidiTest;
 
     public ConfigList(int slotCount, int selectionIndex) : base("ConfigList")
     {
-        this.selectionIndex = selectionIndex;
-        elements = new ConfigItemElement[slotCount];
-        
-        ConfigItemElement.LoadAssets();
         dontSerialize = true;
-        
+        editor = new ConfigItemEditor(this);
+
+        visibleSlots = slotCount;
+        selectionOffset = selectionIndex;
+        itemOffset = new Vector3(0, RowSpacing, 0);
+        itemComponent = "Components/ConfigRow.json";
+        itemDefault = BuildRowDefault;
+
+        //the original settings-list feel: a constant speed that rises with the backlog
+        motion = new UIScrollMotion(rate: 4.0f, minSpeed: 10.0f, maxSpeed: 40.0f);
+
+        SetSource(this);
+
         cursor = AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\4_itembox cursor.png"))));
         cursor.name = "cursor";
         cursor.renderOrder = 1;
-        
         cursor.position = new Vector3(-7, 4, 0);
-        cursor.isVisible = false;
 
         BaseTexture arrowTexture = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\4_Arrow.png"));
 
@@ -68,7 +101,6 @@ internal class ConfigList : UIGroup
         arrowTop.size = new Vector2(40, 40);
         arrowTop.position = new Vector3(-26, -15, 0);
         arrowTop.clipRect = new RectangleF(0, 0, 40, 40);
-        arrowTop.isVisible = false;
 
         arrowBottom = AddChild(new UIImage(arrowTexture));
         arrowBottom.name = "arrowBottom";
@@ -76,46 +108,33 @@ internal class ConfigList : UIGroup
         arrowBottom.size = new Vector2(40, 40);
         arrowBottom.position = new Vector3(-26, 51, 0);
         arrowBottom.clipRect = new RectangleF(0, 40, 40, 40);
-        arrowBottom.isVisible = false;
-
-        elementsContainer = AddChild(new UIGroup("Elements"));
-        elementsContainer.sortByRenderOrder = false;
-        elementsContainer.renderOrder = 0;
-
-        //create child elements
-        for (int i = 0; i < elements.Length; i++)
-        {
-            elements[i] = elementsContainer.AddChild(new ConfigItemElement());
-        }
     }
 
-    public CItemBase? CurrentItem => currentItems.Count == 0 ? null : elements[WrapIndex(bufferStartIndex + selectionIndex)].item;
+    public int ItemCount => Math.Max(1, rows.Count);
 
-    /// <summary>True when the list is fully aligned (not scrolling); used to gate the description panel.</summary>
-    public bool IsSettled => currentScrollCounter == 0 && targetScrollCounter == 0;
+    //a page is cyclic, and the ring counts on unbounded indices, so they wrap onto the page when read
+    public object? GetItem(int index) => rows.Count == 0 ? null : rows[Mod(index, rows.Count)];
 
-    /// <summary>Show the cursor + scroll arrows only when this list (not the left menu) has focus.</summary>
-    public void SetFocused(bool focused)
-    {
-        cursor.isVisible = focused;
-        arrowTop.isVisible = focused;
-        arrowBottom.isVisible = focused;
-    }
+    public CItemBase? CurrentItem => SelectedRow?.Item;
 
-    private ConfigItemElement SelectedElement => elements[WrapIndex(bufferStartIndex + selectionIndex)];
+    /// <summary>True once the selection has stopped changing; used to gate the description panel.</summary>
+    public bool IsSettled => !IsScrolling;
 
-    /// <summary>Forces every row's text to re-render (e.g. after a resolution/renderScale change).</summary>
-    public void RefreshAllText()
-    {
-        foreach (ConfigItemElement element in elements)
-        {
-            element.ForceReRenderText();
-        }
-    }
+    /// <summary>Whether this list is the one being driven, editing a value included.</summary>
+    public bool IsActive => UIFocus.Holds(this) || editing;
 
-    private int WrapIndex(int index) => (index + elements.Length) % elements.Length;
+    private ConfigRowData? SelectedRow => GetItem(SelectedItem) as ConfigRowData;
 
     private static int Mod(int value, int modulus) => ((value % modulus) + modulus) % modulus;
+
+    /// <summary>Re-reads every row's value, which an item's action may have changed.</summary>
+    public void RefreshValues()
+    {
+        foreach (ConfigRowData row in rows)
+        {
+            row.RefreshValue();
+        }
+    }
 
     #region Page navigation
 
@@ -123,44 +142,53 @@ internal class ConfigList : UIGroup
     public void SetItems(List<CItemBase> items, int selection = 0)
     {
         currentItems = items;
-        bufferStartIndex = 0;
-        currentScrollCounter = 0;
-        targetScrollCounter = 0;
-        scrollTimerValue = -1;
-        elementsContainer.position.Y = 0;
-        SetEditing(false);
 
-        int count = items.Count;
-        for (int i = 0; i < elements.Length; i++)
+        while (rows.Count < items.Count)
         {
-            int itemIndex = count > 0 ? Mod(selection + (i - selectionIndex), count) : -1;
-            elements[i].Bind(itemIndex >= 0 ? items[itemIndex] : null);
-            elements[i].position.Y = (i - selectionIndex) * ElementSpacing;
-            elements[i].position.X = 0;
+            rows.Add(new ConfigRowData());
         }
+
+        rows.RemoveRange(items.Count, rows.Count - items.Count);
+
+        for (int i = 0; i < items.Count; i++)
+        {
+            rows[i].SetItem(items[i]);
+        }
+
+        StopEditing();
+        ScrollTo(selection);
     }
 
     /// <summary>Enters a folder: remembers the current page + selection, then shows the new items.</summary>
     public void OpenFolder(List<CItemBase> items)
     {
-        pageStack.Push((currentItems, currentItems.Count == 0 ? 0 : Mod(currentItems.IndexOf(CurrentItem!), currentItems.Count)));
+        pageStack.Push((currentItems, SelectedIndexOnPage, CurrentPage));
+        SetPage(null);
         SetItems(items);
+    }
+
+    public void OpenFolder(ConfigPage page)
+    {
+        pageStack.Push((currentItems, SelectedIndexOnPage, CurrentPage));
+        SetPage(page);
+        SetItems(page.Build());
     }
 
     public CItemBase? SelectNextNormal()
     {
         if (currentItems.Count == 0) return null;
 
-        int start = Mod(currentItems.IndexOf(CurrentItem!), currentItems.Count);
+        int start = SelectedIndexOnPage;
         for (int step = 1; step <= currentItems.Count; step++)
         {
-            int idx = Mod(start + step, currentItems.Count);
-            if (currentItems[idx].ePanelType == CItemBase.EPanelType.Normal)
+            int index = Mod(start + step, currentItems.Count);
+            if (currentItems[index].ePanelType == CItemBase.EPanelType.Normal)
             {
-                SetItems(currentItems, idx);
-                return currentItems[idx];
+                SetItems(currentItems, index);
+                return currentItems[index];
             }
         }
+
         return CurrentItem; // no other Normal item to move to
     }
 
@@ -173,66 +201,26 @@ internal class ConfigList : UIGroup
             return;
         }
 
-        (List<CItemBase> items, int selection) = pageStack.Pop();
+        (List<CItemBase> items, int selection, ConfigPage? page) = pageStack.Pop();
+        SetPage(page);
         SetItems(items, selection);
     }
 
+    private int SelectedIndexOnPage => rows.Count == 0 ? 0 : Mod(SelectedItem, rows.Count);
+
     #endregion
 
-    #region Input (called by the host stage)
+    #region Input
 
-    // Up selects the previous item, down selects the next (the ring rotation happens in Draw when
-    // the scroll counter crosses a full row, exactly like the old CActConfigList).
-    public void MoveUp() => Move(up: true, invertEdit: false);
-    public void MoveDown() => Move(up: false, invertEdit: false);
-
-    // Drum-pad variants: when editing an integer the drums intentionally reverse the value
-    // direction (HT decreases, LT increases) because pressing right for an increase feels
-    // much more natural
-    public void MoveUpDrums() => Move(up: true, invertEdit: true);
-    public void MoveDownDrums() => Move(up: false, invertEdit: true);
-
-    private void Move(bool up, bool invertEdit)
+    protected override void Decide()
     {
-        if (editing)
-        {
-            bool increase = up ^ invertEdit;
-            if (increase) CurrentItem!.tMoveItemValueToNext();
-            else CurrentItem!.tMoveItemValueToPrevious();
-
-            CommitPage();
-            CDTXMania.Skin.soundCursorMovement.tPlay();
-            return;
-        }
-
-        QueueScroll(up ? -ScrollUnitsPerRow : +ScrollUnitsPerRow);
-    }
-
-    private void QueueScroll(int units)
-    {
-        if (currentItems.Count == 0) return;
-
-        targetScrollCounter += units;
-        CDTXMania.Skin.soundCursorMovement.tPlay();
-    }
-
-    public void Confirm()
-    {
-        if (currentItems.Count == 0) return;
+        if (CurrentItem is not { } item) return;
 
         CDTXMania.Skin.soundDecide.tPlay();
 
-        if (editing)
-        {
-            SetEditing(false);
-            return;
-        }
-
-        CItemBase item = CurrentItem!;
-
         if (item.eType == CItemBase.EType.Integer)
         {
-            SetEditing(true);
+            StartEditing();
             return;
         }
 
@@ -244,16 +232,14 @@ internal class ConfigList : UIGroup
         }
     }
 
-    public void Cancel()
+    protected override void Cancel()
     {
-        if (editing)
-        {
-            SetEditing(false);
-            return;
-        }
-
-        Back();
+        CDTXMania.Skin.soundCancel.tPlay();
+        Back(); //pops a folder, or at the root hands focus back to whoever opened this list
     }
+
+    //scrolling by whole rows is what moves the selection here
+    protected override void OnScrolled(int steps) => CDTXMania.Skin.soundCursorMovement.tPlay();
 
     public void CommitPage()
     {
@@ -265,126 +251,161 @@ internal class ConfigList : UIGroup
             item.WriteToConfig();
         }
 
-        foreach (ConfigItemElement element in elements)
-        {
-            element.RefreshValue();
-        }
+        RefreshValues();
+    }
+
+    //editing takes focus: up and down mean something else, and escape must stop editing before going back
+    private void StartEditing()
+    {
+        SetEditing(true);
+        UIFocus.Push(editor);
+    }
+
+    private void StopEditing()
+    {
+        UIFocus.Pop(editor);
+        SetEditing(false);
     }
 
     private void SetEditing(bool value)
     {
         editing = value;
-        SelectedElement.SetEditing(value);
+
+        if (SelectedRow is { } row)
+        {
+            row.IsEditing = value;
+        }
+    }
+
+    private void ChangeValue(bool increase)
+    {
+        if (CurrentItem == null)
+        {
+            return;
+        }
+
+        if (increase)
+        {
+            CurrentItem.tMoveItemValueToNext();
+        }
+        else
+        {
+            CurrentItem.tMoveItemValueToPrevious();
+        }
+
+        CommitPage();
+        CDTXMania.Skin.soundCursorMovement.tPlay();
+    }
+
+    /// <summary>
+    /// Holds input while a row's value is being changed. The drums deliberately run the other way round —
+    /// HT decreases and LT increases — because hitting the right-hand tom to raise a value is what reads
+    /// as natural on a kit.
+    /// </summary>
+    private sealed class ConfigItemEditor(ConfigList list) : IUIInputHandler
+    {
+        private readonly NavigationRepeat navigation = new();
+        private readonly Action increase = () => list.ChangeValue(true);
+        private readonly Action decrease = () => list.ChangeValue(false);
+
+        public string FocusName => $"editing {list.CurrentItem?.strItemName}";
+
+        public NavigationRepeat? Navigation => navigation;
+
+        public void HandleInput()
+        {
+            if (CDTXMania.Input.ActionCancel() || CDTXMania.Input.ActionDecide())
+            {
+                CDTXMania.Skin.soundDecide.tPlay();
+                list.StopEditing();
+                return;
+            }
+
+            navigation.Poll(increase, decrease, decrease, increase);
+        }
     }
 
     #endregion
 
-    #region Scrolling / rendering
+    #region Rendering
 
     public override void Draw(Matrix4x4 parentMatrix)
     {
-        AdvanceScroll();
-
-        // convert the scroll counter to a pixel offset for the whole strip. A positive counter
-        // (scrolling toward the next item) slides the content up.
-        elementsContainer.position.Y = -(currentScrollCounter / (float)ScrollUnitsPerRow) * ElementSpacing;
+        //the cursor and arrows say "this is what you are driving", which is what holding focus means
+        bool active = IsActive;
+        cursor.isVisible = active;
+        arrowTop.isVisible = active;
+        arrowBottom.isVisible = active;
 
         base.Draw(parentMatrix);
+
+        DrawTextInput(parentMatrix);
     }
 
-    // fixed-timestep accelerating scroll, ported verbatim from CActConfigList.tUpdateAndDraw
-    private void AdvanceScroll()
+    //a text input belongs to its item, and only the selected row can be typing in one
+    private void DrawTextInput(Matrix4x4 parentMatrix)
     {
-        long currentTime = CDTXMania.Timer.nCurrentTime;
-        if (scrollTimerValue < 0 || currentTime < scrollTimerValue) scrollTimerValue = currentTime;
-
-        const int interval = 2; // ms
-        while (currentTime - scrollTimerValue >= interval)
+        if (CurrentItem is not CItemTextInput textInput)
         {
-            int distance = Math.Abs(targetScrollCounter - currentScrollCounter);
-            int acceleration = distance <= 100 ? 2 : distance <= 300 ? 3 : distance <= 500 ? 4 : 8;
-
-            if (currentScrollCounter < targetScrollCounter)
-            {
-                currentScrollCounter = Math.Min(currentScrollCounter + acceleration, targetScrollCounter);
-            }
-            else if (currentScrollCounter > targetScrollCounter)
-            {
-                currentScrollCounter = Math.Max(currentScrollCounter - acceleration, targetScrollCounter);
-            }
-
-            if (currentScrollCounter >= ScrollUnitsPerRow)
-            {
-                ScrollToNext();
-                currentScrollCounter -= ScrollUnitsPerRow;
-                targetScrollCounter -= ScrollUnitsPerRow;
-            }
-            else if (currentScrollCounter <= -ScrollUnitsPerRow)
-            {
-                ScrollToPrevious();
-                currentScrollCounter += ScrollUnitsPerRow;
-                targetScrollCounter += ScrollUnitsPerRow;
-            }
-
-            scrollTimerValue += interval;
+            return;
         }
+
+        textInput.drawableTextInput.position = SelectedPosition + ValueOffset;
+        textInput.drawableTextInput.Draw(localTransformMatrix * parentMatrix);
     }
 
-    // recycle the bottom slot to the top and select the previous item
-    private void ScrollToPrevious()
+    //the panel behind a row, its name, and its value in one style or the other
+    private UIGroup BuildRowDefault()
     {
-        if (currentItems.Count == 0) return;
+        UIGroup root = new("ConfigRow");
 
-        bufferStartIndex = WrapIndex(bufferStartIndex - 1);
-
-        ConfigItemElement head = elements[WrapIndex(bufferStartIndex)];
-        CItemBase? below = elements[WrapIndex(bufferStartIndex + 1)].item;
-        head.Bind(PreviousItem(below));
-
-        UpdateSlotPositions();
-    }
-
-    // recycle the top slot to the bottom and select the next item
-    private void ScrollToNext()
-    {
-        if (currentItems.Count == 0) return;
-
-        ConfigItemElement head = elements[WrapIndex(bufferStartIndex)];
-        CItemBase? above = elements[WrapIndex(bufferStartIndex + elements.Length - 1)].item;
-        head.Bind(NextItem(above));
-
-        bufferStartIndex = WrapIndex(bufferStartIndex + 1);
-
-        UpdateSlotPositions();
-    }
-
-    private void UpdateSlotPositions()
-    {
-        for (int i = 0; i < elements.Length; i++)
+        root.AddChild(new TextureArray
         {
-            elements[WrapIndex(bufferStartIndex + i)].position.Y = (i - selectionIndex) * ElementSpacing;
-        }
+            name = "Panel",
+            resources =
+            {
+                SkinResource.System(@"Graphics\4_itembox.png"),
+                SkinResource.System(@"Graphics\4_itembox folder.png"),
+                SkinResource.System(@"Graphics\4_itembox other.png")
+            },
+            renderOrder = 0,
+            bindings =
+            {
+                new UIBinding("textureIndex", "Item.PanelIndex"),
+                new UIBinding("isVisible", "Item.HasPanel")
+            }
+        });
+
+        UIText name = root.AddChild(new UIText(string.Empty, 16));
+        name.name = "Name";
+        name.position = new Vector3(30, 30, 0);
+        name.fillColor = Color4.White;
+        name.outlineWidth = 0;
+        name.renderOrder = 1;
+        name.bindings.Add(new UIBinding("text", "Item.Name"));
+
+        AddValueText(root, "Value", Color4.FromColor(Color.Black), "Item.ShowValue");
+
+        UIText edited = AddValueText(root, "ValueEdited", Color4.White, "Item.ShowEditedValue");
+        edited.outlineColor = Color4.FromColor(Color.OrangeRed);
+        edited.outlineWidth = 4;
+
+        return root;
     }
 
-    private CItemBase? NextItem(CItemBase? item)
+    private static UIText AddValueText(UIGroup root, string name, Color4 fill, string visibleWhen)
     {
-        if (item == null || currentItems.Count == 0) return null;
-        int index = currentItems.IndexOf(item);
-        return currentItems[Mod(index + 1, currentItems.Count)];
-    }
+        UIText value = root.AddChild(new UIText(string.Empty, 16));
+        value.name = name;
+        value.position = ValueOffset;
+        value.fillColor = fill;
+        value.outlineWidth = 0;
+        value.renderOrder = 1;
+        value.bindings.Add(new UIBinding("text", "Item.Value"));
+        value.bindings.Add(new UIBinding("isVisible", visibleWhen));
 
-    private CItemBase? PreviousItem(CItemBase? item)
-    {
-        if (item == null || currentItems.Count == 0) return null;
-        int index = currentItems.IndexOf(item);
-        return currentItems[Mod(index - 1, currentItems.Count)];
+        return value;
     }
 
     #endregion
-
-    public override void Dispose()
-    {
-        base.Dispose();
-        ConfigItemElement.DisposeAssets();
-    }
 }

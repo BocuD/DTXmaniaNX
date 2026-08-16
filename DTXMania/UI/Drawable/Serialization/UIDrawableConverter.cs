@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Collections;
@@ -11,6 +11,19 @@ namespace DTXMania.UI.Drawable.Serialization;
 
 public class UIDrawableConverter : JsonConverter
 {
+    //omits members still holding a freshly-constructed instance's value, so exported layout json only
+    //contains what actually differs from the defaults
+    private readonly bool compact;
+
+    public UIDrawableConverter()
+    {
+    }
+
+    public UIDrawableConverter(bool compact)
+    {
+        this.compact = compact;
+    }
+
     public override bool CanConvert(Type objectType)
     {
         return typeof(UIDrawable).IsAssignableFrom(objectType);
@@ -31,7 +44,8 @@ public class UIDrawableConverter : JsonConverter
 
         if (string.IsNullOrWhiteSpace(id))
         {
-            throw new JsonSerializationException("Drawable id is missing in the JSON.");
+            //hand-authored layouts may omit the id, so synthesise one for the tracker to key on
+            jObject[nameof(UIDrawable.id)] = Guid.NewGuid().ToString();
         }
 
         Type? targetType = Type.GetType(typeName);
@@ -45,6 +59,17 @@ public class UIDrawableConverter : JsonConverter
         // Construct instance first to keep non-themable default values intact.
         object result = CreateDeserializationInstance(targetType);
         serializer.Populate(jObject.CreateReader(), result);
+
+        //children arrive as a plain list and so have no idea who owns them. Drawing passes matrices down
+        //and does not care, but everything that walks up — the gizmos, a binding resolving its context —
+        //stops dead at the first child that was loaded rather than added
+        if (result is UIGroup group)
+        {
+            foreach (UIDrawable child in group.children)
+            {
+                child.SetParent(group, updateGroup: false);
+            }
+        }
 
         return result;
     }
@@ -64,6 +89,7 @@ public class UIDrawableConverter : JsonConverter
         writer.WriteValue(drawable.id);
 
         Type drawableType = drawable.GetType();
+        UIDrawable? defaults = compact ? GetDefaultInstance(drawableType) : null;
         HashSet<string> writtenNames = new(StringComparer.Ordinal)
         {
             "type",
@@ -73,6 +99,16 @@ public class UIDrawableConverter : JsonConverter
 
         foreach (FieldInfo field in drawableType.GetFields(BindingFlags.Instance | BindingFlags.Public))
         {
+            if (writtenNames.Contains(field.Name))
+            {
+                continue; //already written explicitly, e.g. the id field
+            }
+
+            if (!drawable.ShouldSerializeMember(field.Name))
+            {
+                continue;
+            }
+
             if (TryGetFieldSkipReason(field, out string fieldSkipReason))
             {
                 LogSerializationDecision($"[SkinSerialize] Skip write field {drawableType.Name}.{field.Name}: {fieldSkipReason}");
@@ -86,6 +122,11 @@ public class UIDrawableConverter : JsonConverter
                 continue;
             }
 
+            if (defaults != null && ValuesEqual(fieldValue, field.GetValue(defaults)))
+            {
+                continue; //unchanged from the default
+            }
+
             writer.WritePropertyName(field.Name);
             serializer.Serialize(writer, fieldValue);
             writtenNames.Add(field.Name);
@@ -94,6 +135,11 @@ public class UIDrawableConverter : JsonConverter
         foreach (PropertyInfo property in drawableType.GetProperties(BindingFlags.Instance | BindingFlags.Public))
         {
             if (writtenNames.Contains(property.Name))
+            {
+                continue;
+            }
+
+            if (!drawable.ShouldSerializeMember(property.Name))
             {
                 continue;
             }
@@ -121,26 +167,36 @@ public class UIDrawableConverter : JsonConverter
                 continue;
             }
 
+            if (defaults != null && ValuesEqual(propertyValue, TryGetMemberValue(property, defaults)))
+            {
+                continue; //unchanged from the default
+            }
+
             writer.WritePropertyName(property.Name);
             serializer.Serialize(writer, propertyValue);
         }
 
-        if (drawable is UIGroup group)
+        //a component instance's children come from its component file, not the layout
+        if (drawable is UIGroup group && drawable is not ComponentInstance)
         {
-            writer.WritePropertyName(nameof(UIGroup.children));
-            writer.WriteStartArray();
-            foreach (UIDrawable child in group.children)
+            bool hasSerializableChild = group.children.Any(child => !child.dontSerialize);
+            if (!compact || hasSerializableChild)
             {
-                if (child.dontSerialize)
+                writer.WritePropertyName(nameof(UIGroup.children));
+                writer.WriteStartArray();
+                foreach (UIDrawable child in group.children)
                 {
-                    LogSerializationDecision($"[SkinSerialize] Skip write child {child.GetType().Name} '{child.name}': dontSerialize=true");
-                    continue;
+                    if (child.dontSerialize)
+                    {
+                        LogSerializationDecision($"[SkinSerialize] Skip write child {child.GetType().Name} '{child.name}': dontSerialize=true");
+                        continue;
+                    }
+
+                    serializer.Serialize(writer, child);
                 }
 
-                serializer.Serialize(writer, child);
+                writer.WriteEndArray();
             }
-
-            writer.WriteEndArray();
         }
 
         writer.WriteEndObject();
@@ -296,7 +352,7 @@ public class UIDrawableConverter : JsonConverter
 
     private static bool IsSafeSerializableType(Type type)
     {
-        if (IsDrawableReferenceType(type))
+        if (ReferencesDrawables(type))
         {
             return false;
         }
@@ -359,7 +415,7 @@ public class UIDrawableConverter : JsonConverter
                type.GetCustomAttribute<SkinSerializeAttribute>() != null;
     }
 
-    private static bool IsDrawableReferenceType(Type type)
+    private static bool ReferencesDrawables(Type type)
     {
         Type actualType = Nullable.GetUnderlyingType(type) ?? type;
 
@@ -395,7 +451,7 @@ public class UIDrawableConverter : JsonConverter
 
     private static void LogSerializationDecision(string message)
     {
-        if (!GameStatus.logThemeApplyDetails)
+        if (!SkinEditorWindow.logThemeApplyDetails)
         {
             return;
         }
@@ -403,6 +459,59 @@ public class UIDrawableConverter : JsonConverter
         Trace.TraceInformation(message);
     }
 
+
+    //one default-valued instance per drawable type, to compare members against for compact writes
+    private static readonly Dictionary<Type, UIDrawable?> DefaultInstanceCache = new();
+
+    private static UIDrawable? GetDefaultInstance(Type type)
+    {
+        if (DefaultInstanceCache.TryGetValue(type, out UIDrawable? cached))
+        {
+            return cached;
+        }
+
+        UIDrawable? instance = null;
+        try
+        {
+            using IDisposable _ = DrawableTracker.SuppressRegistration();
+            instance = Activator.CreateInstance(type, nonPublic: true) as UIDrawable;
+        }
+        catch
+        {
+            instance = null; //no parameterless ctor, so fall back to writing every member
+        }
+
+        DefaultInstanceCache[type] = instance;
+        return instance;
+    }
+
+    private static object? TryGetMemberValue(PropertyInfo property, object instance)
+    {
+        try
+        {
+            return property.GetValue(instance);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private static bool ValuesEqual(object? a, object? b)
+    {
+        if (a == null)
+        {
+            return b == null;
+        }
+
+        //collections compare by reference, so an untouched list would be written to every element
+        if (a is ICollection collection && collection.Count == 0)
+        {
+            return b is ICollection other && other.Count == 0;
+        }
+
+        return a.Equals(b);
+    }
 
     private static object CreateDeserializationInstance(Type targetType)
     {
@@ -420,6 +529,11 @@ public class UIDrawableConverter : JsonConverter
         {
             // Fallback for drawables without a parameterless constructor.
         }
+
+        //an uninitialized instance has skipped every field initializer, so anything the type expects to
+        //always exist is null and only fails later, somewhere else. Say so here instead
+        Trace.TraceError($"{targetType.Name} has no parameterless constructor, so it deserializes " +
+                         "uninitialized. Add one, or mark the element dontSerialize.");
 
         return RuntimeHelpers.GetUninitializedObject(targetType);
     }

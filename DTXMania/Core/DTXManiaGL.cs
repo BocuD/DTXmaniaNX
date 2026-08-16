@@ -1,5 +1,6 @@
 using DTXMania.Core.Framework;
 using DTXMania.Core.OpenGL;
+using DTXMania.UI;
 using DTXMania.UI.Inspector;
 using DTXMania.UI.OpenGL;
 using Hexa.NET.GLFW;
@@ -40,7 +41,7 @@ public sealed class DTXManiaGL : OpenGlGame
     public override void Update(float deltaTime, double totalTime)
     {
         mania.Update();
-        GameStatus.UpdatePerformanceGraph(deltaTime);
+        Profiler.UpdatePerformanceGraph(deltaTime);
     }
 
     public override void Render(int width, int height, double totalTime)
@@ -56,7 +57,7 @@ public sealed class DTXManiaGL : OpenGlGame
         AsyncTextureUploader.Instance.PumpUploads(AsyncUploadBytesPerFrame);
         FrameProfiler.End(FrameSection.PumpUploads);
 
-        CDTXMania.renderScale = windowSize.X / GameWindowSize.Width;
+        UICanvas.SetWindowSize(windowSize);
 
         if (host.fullscreenMode == FullscreenMode.Windowed)
         {
@@ -82,13 +83,33 @@ public sealed class DTXManiaGL : OpenGlGame
 
     protected override void DestroySharedResources()
     {
-        
+
+    }
+
+    public override void Dispose()
+    {
+        CDTXMania.app?.tTerminate();
+        base.Dispose();
     }
 
     public override string name => "DTXManiaNX";
 
     public override void KeyDown(GlfwKey key, GlfwMod mods)
     {
+        if (mods.HasFlag(GlfwMod.Control))
+        {
+            switch (key)
+            {
+                case GlfwKey.I:
+                    InspectorManager.ToggleInspector();
+                    break;
+
+                case GlfwKey.L:
+                    InspectorManager.logWindowEnabled = !InspectorManager.logWindowEnabled;
+                    break;
+            }
+        }
+
         //check for alt + enter
         if (key == GlfwKey.Enter && mods == GlfwMod.Alt)
         {

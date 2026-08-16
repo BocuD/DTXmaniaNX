@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Globalization;
+using System.Runtime.InteropServices;
 using System.Drawing;
 using DTXMania.Core;
 using DTXMania.UI.Drawable;
@@ -34,27 +35,27 @@ public class CActLVLNFont : CActivity
 
 
 	// メソッド
-	public void tDrawString(int x, int y, string str)
+	public void tDrawString(int x, int y, int value)
+	{
+		Span<char> text = stackalloc char[12];
+		value.TryFormat(text, out int written, default, CultureInfo.InvariantCulture);
+		tDrawString(x, y, text[..written], EFontColor.White, EFontAlign.Right);
+	}
+	public void tDrawString(int x, int y, ReadOnlySpan<char> str)
 	{
 		tDrawString(x, y, str, EFontColor.White, EFontAlign.Right);
 	}
-	public void tDrawString(float x, float y, string str, EFontColor efc, EFontAlign efa)
+	public void tDrawString(float x, float y, ReadOnlySpan<char> str, EFontColor efc, EFontAlign efa)
 	{
-		if (bActivated && !string.IsNullOrEmpty(str))
+		if (bActivated && !str.IsEmpty)
 		{
 			if (tx数値 != null)
 			{
 				bool bRightAlign = (efa == EFontAlign.Right);
 
-				if (bRightAlign)							// 右詰なら文字列反転して右から描画
+				for (int i = 0; i < str.Length; i++)
 				{
-					char[] chars = str.ToCharArray();
-					Array.Reverse(chars);
-					str = new string(chars);
-				}
-
-				foreach (char ch in str)
-				{
+					char ch = str[bRightAlign ? str.Length - 1 - i : i];
 					int p = (ch == '-' ? 11 : ch - '0');
 					ST数字 s = st数字[p, (int)efc];
 					float sw = s.rc.Width;

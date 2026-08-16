@@ -50,14 +50,7 @@ public abstract class BaseTexture : IDisposable
     }
 
     //stubs for non recreated Device based render code
-    private Matrix4x4 scaleMatrix
-    {
-        get
-        {
-            float scale = CDTXMania.renderScale;
-            return Matrix4x4.CreateScale(scale);
-        }
-    }
+    private Matrix4x4 scaleMatrix => UICanvas.toWindow;
     
     public void tDraw2D(float x, float y)
     {
@@ -138,12 +131,11 @@ public abstract class BaseTexture : IDisposable
             Matrix4x4.CreateTranslation(-clipRect.Width / 2f, clipRect.Height / 2f, 0f);
 
         float renderScale = CDTXMania.renderScale <= 0f ? 1f : CDTXMania.renderScale;
-        float renderWidth = GameWindowSize.Width * renderScale;
-        float renderHeight = GameWindowSize.Height * renderScale;
 
+        //legacy world space is centred on the canvas, and the canvas is centred in the window
         Matrix4x4 legacyWorldToScreen =
             Matrix4x4.CreateScale(renderScale, -renderScale, 1f) *
-            Matrix4x4.CreateTranslation(renderWidth / 2f, renderHeight / 2f, 0f);
+            Matrix4x4.CreateTranslation(UICanvas.center.X, UICanvas.center.Y, 0f);
 
         Matrix4x4 convertedMatrix = localToLegacyCentered * transformMatrix * legacyWorldToScreen;
         tDraw2DMatrix(convertedMatrix, new Vector2(clipRect.Width, clipRect.Height), clipRect, color);

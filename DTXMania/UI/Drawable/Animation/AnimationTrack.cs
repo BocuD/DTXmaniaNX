@@ -21,11 +21,13 @@ public sealed class AnimationTrack
     [JsonIgnore] private PropertyAccessor? cachedAccessor;
     [JsonIgnore] private bool bindAttempted;
     [JsonIgnore] private bool keyframesConverted;
+    [JsonIgnore] private AnimationChannel? channel;
 
     public void Invalidate()
     {
         cachedTarget = null;
         cachedAccessor = null;
+        channel = null;
         bindAttempted = false;
         // Keep keyframesConverted as-is — the typed values are still good if the property type
         // hasn't changed. They'll be re-converted on the next Bind() if the new accessor's
@@ -155,15 +157,21 @@ public sealed class AnimationTrack
             ConvertKeyframes(cachedAccessor.ValueType);
         }
 
-        object? value = Sample(time);
-        if (value == null)
-        {
-            return;
-        }
-
         try
         {
-            cachedAccessor.Setter(cachedTarget, value);
+            if (channel != null)
+            {
+                channel.Apply(cachedTarget, keyframes, time);
+                return;
+            }
+
+            //no interpolation is registered for this type, so sampling only ever hands back a value a
+            //keyframe already holds and the object setter costs nothing
+            object? value = Sample(time);
+            if (value != null)
+            {
+                cachedAccessor.Setter(cachedTarget, value);
+            }
         }
         catch (Exception e)
         {
@@ -204,6 +212,7 @@ public sealed class AnimationTrack
 
         cachedTarget = target;
         cachedAccessor = accessor;
+        channel = AnimationChannel.TryCreate(accessor);
         keyframesConverted = false;
     }
 

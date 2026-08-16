@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Numerics;
 using System.Windows.Forms;
+using DTXMania.Core.Audio;
 using DTXMania.Core.Video;
 using DTXMania.SongDb;
 using DTXMania.UI.Drawable;
@@ -91,7 +92,7 @@ internal partial class CDTXMania
         AddInitializer("Timer", () =>
         {
             Timer = new CTimer(CTimer.EType.MultiMedia); 
-            Random = new Random((int)Timer.nシステム時刻);
+            Random = new Random((int)Timer.nSystemTimeMs);
         });
 
         AddInitializer("FPS Counter", () => { FPS = new CFPS(); });
@@ -134,31 +135,26 @@ internal partial class CDTXMania
 
         AddInitializer("Pad", () => { Pad = new CPad(ConfigIni, InputManager); });
 
-        AddInitializer("Sound Manager", () =>
+        AddInitializer("Audio Device", () =>
         {
-            ESoundDeviceType soundDeviceType = ConfigIni.nSoundDriverType switch
+            AudioDevice.WindowHandle = maniaGl.host.GetWindowHandle();
+
+            //the same settings the config page rebuilds from, so the two cannot drift
+            AudioMixer.MasterVolume = ConfigIni.nMasterVolume;
+            AudioMixer.TimeStretch = ConfigIni.bTimeStretch;
+            AudioMixer.Build(AudioDeviceOptions.FromConfig(ConfigIni));
+
+            foreach (AudioGroup group in Enum.GetValues<AudioGroup>())
             {
-                0 => ESoundDeviceType.DirectSound,
-                1 => ESoundDeviceType.ASIO,
-                2 => ESoundDeviceType.ExclusiveWASAPI,
-                3 => ESoundDeviceType.SharedWASAPI,
-                _ => ESoundDeviceType.Unknown
-            };
+                AudioMixer.SetGroupVolume(group, ConfigIni.nGroupVolume[(int)group]);
+            }
 
-            SoundManager = new CSoundManager(maniaGl.host.GetWindowHandle(),
-                soundDeviceType,
-                ConfigIni.nWASAPIBufferSizeMs,
-                ConfigIni.bEventDrivenWASAPI,
-                0,
-                ConfigIni.nASIODevice,
-                ConfigIni.bUseOSTimer
-            );
+            //so a hit and the sound it triggers are timed against the same clock
+            InputClock.Current = AudioMixer.Timer;
+
             UpdateWindowTitle();
-            CSoundManager.bIsTimeStretch = ConfigIni.bTimeStretch;
-            SoundManager.nMasterVolume = ConfigIni.nMasterVolume;
-
-            string strDefaultSoundDeviceBusType = CSoundManager.strDefaultDeviceBusType;
-            Trace.TraceInformation($"Bus type of the default sound device = {strDefaultSoundDeviceBusType}");
+            Trace.TraceInformation("Bus type of the default sound device = "
+                                   + AudioMixer.Device.Status.DefaultOutputBusType);
         });
         
         AddInitializer("Input", () => Input = new Input());

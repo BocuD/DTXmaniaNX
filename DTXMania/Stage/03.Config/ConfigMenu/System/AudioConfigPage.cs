@@ -1,26 +1,33 @@
 using DTXMania.Core;
+using DTXMania.Core.Audio;
 using DTXMania.UI.Config;
 using DTXMania.UI.Item;
-using FDK;
 
 namespace DTXMania;
 
 internal sealed class AudioConfigPage : ConfigPage
 {
-    private readonly AudioDriverConfigPage driverPage;
+    private readonly AudioOutputConfigPage outputPage;
+    private readonly MixerVolumeConfigPage volumePage;
 
     // snapshot taken on entry; the device is only rebuilt on exit if one of these changed
     private int soundTypeInitial;
     private int wasapiBufferInitial;
     private int asioDeviceInitial;
+    private int asioBufferInitial;
+    private string outputDeviceInitial;
     private bool osTimerInitial;
+    private bool eventDrivenInitial;
+    private bool fdkAudioInitial;
     private bool opened;
 
     private CItemToggle timeStretch;
 
     public AudioConfigPage(ConfigList list) : base(list)
     {
-        driverPage = new AudioDriverConfigPage(list);
+        //a rebuild done from the output page is not one this page has to repeat on the way out
+        outputPage = new AudioOutputConfigPage(list, new AudioDriverConfigPage(list), CacheInitialState);
+        volumePage = new MixerVolumeConfigPage(list);
     }
 
     public override void CacheInitialState()
@@ -28,42 +35,50 @@ internal sealed class AudioConfigPage : ConfigPage
         soundTypeInitial = CDTXMania.ConfigIni.nSoundDriverType;
         wasapiBufferInitial = CDTXMania.ConfigIni.nWASAPIBufferSizeMs;
         asioDeviceInitial = CDTXMania.ConfigIni.nASIODevice;
+        asioBufferInitial = CDTXMania.ConfigIni.nASIOBufferSizeSamples;
         osTimerInitial = CDTXMania.ConfigIni.bUseOSTimer;
+        eventDrivenInitial = CDTXMania.ConfigIni.bEventDrivenWASAPI;
+        fdkAudioInitial = CDTXMania.ConfigIni.bUseFDKAudio;
+        outputDeviceInitial = CDTXMania.ConfigIni.strOutputDevice;
     }
+
+    protected override void CreateElements() => AddElement(new ConfigAudioPanel());
 
     public override List<CItemBase> Build()
     {
         opened = true;
         List<CItemBase> items = [];
 
-        CItemInteger masterVolume = new("MasterVolume", 0, 100, CDTXMania.ConfigIni.nMasterVolume,
-            "マスターボリュームの設定:\n全体の音量を設定します。\n0が無音で、100が最大値です。\n(WASAPI/ASIO時のみ有効です)",
-            "Master Volume:\nYou can set 0 - 100.\n\nNote:\nOnly for WASAPI/ASIO mode.");
-        masterVolume.BindConfig(
-            () => masterVolume.nCurrentValue = CDTXMania.ConfigIni.nMasterVolume,
-            () =>
+        items.Add(FolderItem("Mixer Volumes",
+            "マスター・BGM・効果音・各楽器・チップの音量を設定します。",
+            "Every level: master, BGM, sound effects, each instrument, and chips.", volumePage));
+
+        var output = FolderItem("Audio Output",
+            "サウンドの出力方式とドライバー設定を行います。",
+            "Which layer and backend the game plays through, and that backend's own settings.",
+            outputPage);
+        output.formatDescription = () =>
+        {
+            string latency = "";
+
+            var audio = AudioMixer.Device.Status;
+            if (audio.BufferMs > 0)
             {
-                // master volume applies live while adjusting (matches the original config screen)
-                CDTXMania.ConfigIni.nMasterVolume = masterVolume.nCurrentValue;
-                CDTXMania.SoundManager.nMasterVolume = masterVolume.nCurrentValue;
-            });
-        items.Add(masterVolume);
+                string buffer = audio.BufferFrames > 0
+                    ? $"{audio.BufferFrames} {audio.FrameUnit} ({audio.BufferLatencyMs:0.0}ms)"
+                    : $"{audio.BufferLatencyMs:0.0}ms";
 
-        CItemInteger chipVolume = new("ChipVolume", 0, 100, CDTXMania.ConfigIni.n手動再生音量,
-            "打音の音量：\n入力に反応して再生される\nチップの音量を指定します。\n0 ～ 100 % の値が指定可能\nです。\n",
-            "Volume for chips you hit.\nYou can specify from 0 to 100%.");
-        chipVolume.BindConfig(
-            () => chipVolume.nCurrentValue = CDTXMania.ConfigIni.n手動再生音量,
-            () => CDTXMania.ConfigIni.n手動再生音量 = chipVolume.nCurrentValue);
-        items.Add(chipVolume);
+                string wait = AudioMixer.Device.Latency.IsKnown
+                    ? $"{AudioMixer.Device.Latency.Ms:0.0}ms"
+                    : "not reported";
 
-        CItemInteger autoVolume = new("AutoVolume", 0, 100, CDTXMania.ConfigIni.n自動再生音量,
-            "自動再生音の音量：\n自動的に再生される\nチップの音量を指定します。\n0 ～ 100 % の値が指定可能\nです。\n",
-            "Volume for AUTO chips.\nYou can specify from 0 to 100%.");
-        autoVolume.BindConfig(
-            () => autoVolume.nCurrentValue = CDTXMania.ConfigIni.n自動再生音量,
-            () => CDTXMania.ConfigIni.n自動再生音量 = autoVolume.nCurrentValue);
-        items.Add(autoVolume);
+                latency = $"Buffer: {buffer}\nLatency {wait}";
+            }
+
+            return !CDTXMania.isJapanese ? $"Current output device: {AudioMixer.Device.Status.Output}\nCurrent output driver: {AudioMixer.Device.Status.Backend}\nLatency estimates: {latency}"
+                : $"現在の出力デバイス: {AudioMixer.Device.Status.Output}\n現在の出力ドライバー: {AudioMixer.Device.Status.Backend}\nレイテンシー推定値: {latency}";
+        };
+        items.Add(output);
 
         CItemInteger bgmAdjust = new("BGM Offset", -99, 99, CDTXMania.ConfigIni.nCommonBGMAdjustMs,
             "BGMの再生タイミングを微調整します。\n-99 ～ 99ms まで指定可能です。",
@@ -97,27 +112,20 @@ internal sealed class AudioConfigPage : ConfigPage
             () => CDTXMania.ConfigIni.bTimeStretch = timeStretch.bON);
         items.Add(timeStretch);
 
-        CItemList audioDriver = new("Audio Driver", CItemBase.EPanelType.Normal, CDTXMania.ConfigIni.nSoundDriverType,
-            "サウンド出力方式を選択\nします。\nWASAPIはVista以降、\nASIOは対応機器でのみ使用可能です。\nWASAPIかASIOを使うと、\n遅延を少なくできます。\n",
-            "DSound: Direct Sound\nWASAPI: from Windows Vista\nASIO: with ASIO compatible devices only\nUse WASAPI or ASIO to decrease the sound lag.\nNote: Exit CONFIG to make the setting take effect.",
-            ["DSound", "ASIO", "WASAPIExclusive", "WASAPIShared"]);
-        audioDriver.BindConfig(
-            () => audioDriver.nCurrentlySelectedIndex = CDTXMania.ConfigIni.nSoundDriverType,
-            () => CDTXMania.ConfigIni.nSoundDriverType = audioDriver.nCurrentlySelectedIndex);
-        items.Add(audioDriver);
-
-        items.Add(FolderItem("Audio Driver Options",
-            "システムのオーディオドライバー設定に関する項目を設定します。",
-            "Open the audio driver settings sub menu.", driverPage));
+        CItemToggle speedAffectsChips = new("SpeedOnChips", CDTXMania.ConfigIni.bPlaySpeedAffectsChips,
+            "演奏速度をチップ音にも適用します。\nOFFにすると曲だけが速度に追従し、\nチップ音は録音されたまま鳴ります。",
+            "Apply PlaySpeed to chip sounds as well as the song.\nOFF: only the song follows it, and chips sound as recorded.\nON: chips follow it too, which detunes them unless TimeStretch is on.");
+        speedAffectsChips.BindConfig(
+            () => speedAffectsChips.bON = CDTXMania.ConfigIni.bPlaySpeedAffectsChips,
+            () => CDTXMania.ConfigIni.bPlaySpeedAffectsChips = speedAffectsChips.bON);
+        items.Add(speedAffectsChips);
 
         items.Add(BackItem());
         return items;
     }
 
-    /// <summary>
-    /// Deferred sound-device apply, exactly like CActConfigList.HandleSoundDeviceChanges: only when
-    /// the audio menu was opened and the driver/buffer/device/timer actually changed.
-    /// </summary>
+    /// <summary>Rebuilds only when this menu was opened and something the device is built from
+    /// changed.</summary>
     public override void ApplyPendingChanges()
     {
         if (!opened) return;
@@ -126,30 +134,23 @@ internal sealed class AudioConfigPage : ConfigPage
         if (soundTypeInitial != CDTXMania.ConfigIni.nSoundDriverType ||
             wasapiBufferInitial != CDTXMania.ConfigIni.nWASAPIBufferSizeMs ||
             asioDeviceInitial != CDTXMania.ConfigIni.nASIODevice ||
-            osTimerInitial != CDTXMania.ConfigIni.bUseOSTimer)
+            asioBufferInitial != CDTXMania.ConfigIni.nASIOBufferSizeSamples ||
+            osTimerInitial != CDTXMania.ConfigIni.bUseOSTimer ||
+            eventDrivenInitial != CDTXMania.ConfigIni.bEventDrivenWASAPI ||
+            fdkAudioInitial != CDTXMania.ConfigIni.bUseFDKAudio ||
+            outputDeviceInitial != CDTXMania.ConfigIni.strOutputDevice)
         {
-            ESoundDeviceType soundDeviceType = CDTXMania.ConfigIni.nSoundDriverType switch
-            {
-                0 => ESoundDeviceType.DirectSound,
-                1 => ESoundDeviceType.ASIO,
-                2 => ESoundDeviceType.ExclusiveWASAPI,
-                3 => ESoundDeviceType.SharedWASAPI,
-                _ => ESoundDeviceType.Unknown
-            };
+            //a changed setting is worth trying even if the last one gave up for good
+            AudioMixer.RetryOutput();
 
-            CDTXMania.SoundManager.tInitialize(soundDeviceType,
-                CDTXMania.ConfigIni.nWASAPIBufferSizeMs,
-                false,
-                0,
-                CDTXMania.ConfigIni.nASIODevice,
-                CDTXMania.ConfigIni.bUseOSTimer);
-
+            //through the mixer, which has to give up its own channels before the rebuild frees them
+            AudioMixer.Reinitialize(AudioDeviceOptions.FromConfig(CDTXMania.ConfigIni));
             CDTXMania.app.UpdateWindowTitle();
         }
 
         if (timeStretch != null)
         {
-            CSoundManager.bIsTimeStretch = timeStretch.bON;
+            AudioMixer.TimeStretch = timeStretch.bON;
         }
     }
 }

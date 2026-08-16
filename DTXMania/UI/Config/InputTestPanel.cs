@@ -7,7 +7,7 @@ using STKEYASSIGN = DTXMania.Core.CConfigIni.CKeyAssign.STKEYASSIGN;
 
 namespace DTXMania.UI.Config;
 
-internal sealed class InputTestPanel : UIGroup
+internal sealed class InputTestPanel : UIGroup, IUIInputHandler
 {
     private const int MaxChannels = 16;
     private const float RowSpacing = 28f;
@@ -33,6 +33,15 @@ internal sealed class InputTestPanel : UIGroup
 
     public Action? onClose;
     public bool IsOpen => isVisible;
+
+    public string FocusName => "InputTest";
+
+    //the panel is a live readout of what is being pressed, so its refresh belongs with its input
+    public void HandleInput()
+    {
+        UpdatePreview();
+        PollClose();
+    }
 
     public InputTestPanel() : base("InputTestPanel")
     {
@@ -69,8 +78,8 @@ internal sealed class InputTestPanel : UIGroup
     {
         title.SetText(CDTXMania.isJapanese ? "入力テスト（全チャンネル）" : "Input Test — All Channels");
         hint.SetText(CDTXMania.isJapanese
-            ? "各入力を押して確認します。 Esc で戻ります。"
-            : "Press your inputs to test each channel.  (Esc to return)");
+            ? "Esc で戻ります。"
+            : "(Esc to return)");
         logHeader.SetText(CDTXMania.isJapanese ? "最近の入力" : "Recent hits");
 
         int count = Math.Min(pads.Length, MaxChannels);
@@ -99,6 +108,7 @@ internal sealed class InputTestPanel : UIGroup
 
         log.Clear();
         isVisible = true;
+        UIFocus.Push(this);
     }
 
     public void UpdatePreview()
@@ -149,6 +159,7 @@ internal sealed class InputTestPanel : UIGroup
     private void Close()
     {
         isVisible = false;
+        UIFocus.Pop(this);
         onClose?.Invoke();
     }
 }

@@ -54,6 +54,8 @@ public class JudgementString : UIGroup
     
     public JudgementString()
     {
+        //a gameplay element is runtime-only: it never appears in a saved layout
+        dontSerialize = true;
         if (barTexture == null || !barTexture.IsValid()) CacheTextures();
         
         name = $"JudgementString";
@@ -74,7 +76,7 @@ public class JudgementString : UIGroup
         AnimationClip? loaded = AnimationClipIO.LoadFromFile(CSkin.Path(@"Graphics\Note\Judge\hit.json"));
         if (loaded != null)
         {
-            animator.clips.Add(loaded);
+            animator.Add(loaded);
         }
 
         isVisible = false;
@@ -101,12 +103,12 @@ public class JudgementString : UIGroup
         {
             case EJudgement.Perfect:
                 bar.isVisible = true;
-                bar.SetTexture(barTexture, false, false);
+                bar.SetTexture(barTexture);
                 break;
             
             case EJudgement.Auto:
                 bar.isVisible = true;
-                bar.SetTexture(autoBarTexture, false, false);
+                bar.SetTexture(autoBarTexture);
                 break;
             
             default:
@@ -114,8 +116,8 @@ public class JudgementString : UIGroup
                 break;
         }
         
-        baseString.SetTexture(stringTextures[(int)judgement], false, false);
-        highlightString.SetTexture(stringTextures[(int)judgement], false, false);
+        baseString.SetTexture(stringTextures[(int)judgement]);
+        highlightString.SetTexture(stringTextures[(int)judgement]);
         
         //fast forward one frame
         animator.time = 1 / 60.0f;

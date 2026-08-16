@@ -203,7 +203,7 @@ internal class CActPerfProgressBar : CActivity
 			if (!bIsCalledFromOutsidePerformance)
 			{
 				tx縦線.tDraw2D(num + nWidth, num2);
-				int num3 = (int)(((CTimerBase)CDTXMania.Timer).n現在時刻ms / (double)nLastChipTime * nHeightFactor);
+				int num3 = (int)(((CTimerBase)CDTXMania.Timer).nCurrentTime / (double)nLastChipTime * nHeightFactor);
 				if (num3 > nHeight)
 				{
 					num3 = nHeight;
@@ -220,7 +220,7 @@ internal class CActPerfProgressBar : CActivity
 				num2 = p表示位置[(int)ePart].Y + (bIsCalledFromOutsidePerformance ? 20 : 0) + (int)c区間.rectDrawingFrame.Y + pBarPosition[(int)ePart].Y;
 				if (!CDTXMania.ConfigIni.bIsAutoPlay(ePart) || bIsCalledFromOutsidePerformance)
 				{
-					if ((i + 1) * nLastChipTime / nSectionIntervalCount - 1 > ((CTimerBase)CDTXMania.Timer).n現在時刻ms && !bIsCalledFromOutsidePerformance)
+					if ((i + 1) * nLastChipTime / nSectionIntervalCount - 1 > ((CTimerBase)CDTXMania.Timer).nCurrentTime && !bIsCalledFromOutsidePerformance)
 					{
 						tx灰.tDraw2D(num, num2, c区間.rectDrawingFrame);
 					}

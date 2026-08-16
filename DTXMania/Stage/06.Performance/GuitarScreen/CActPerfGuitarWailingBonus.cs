@@ -36,11 +36,11 @@ internal class CActPerfGuitarWailingBonus : CActPerfCommonWailingBonus
 					{
 						if ( r歓声Chip != null )
 						{
-							CDTXMania.DTX.tPlayChip( r歓声Chip, CSoundManager.rcPerformanceTimer.nシステム時刻, (int) ELane.BGM, CDTXMania.DTX.nモニタを考慮した音量( EInstrumentPart.UNKNOWN ) );
+							CDTXMania.DTX.tPlayChip( r歓声Chip, AudioMixer.Timer.nSystemTimeMs, (int) ELane.BGM, CDTXMania.DTX.nモニタを考慮した音量( EInstrumentPart.UNKNOWN ) );
 							return;
 						}
-						CDTXMania.Skin.soundAudience.n位置_次に鳴るサウンド = ( part == EInstrumentPart.GUITAR ) ? -50 : 50;
-						CDTXMania.Skin.soundAudience.tPlay();
+						//guitar cheers from the left, bass from the right
+						CDTXMania.Skin.soundAudience.tPlay( 100, ( part == EInstrumentPart.GUITAR ) ? -50 : 50 );
 					}
 					break;
 				}
