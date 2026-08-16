@@ -466,7 +466,7 @@ public class CSoundDeviceWASAPI : ISoundDevice
 					case BASSWASAPIFormat.BASS_WASAPI_FORMAT_FLOAT: n1サンプルのバイト数 = 4 * wasapiInfo.chans; break;
 				}
 				int n1秒のバイト数 = n1サンプルのバイト数 * wasapiInfo.freq;
-				n実バッファサイズms = (long)(wasapiInfo.buflen * 1000.0f / n1秒のバイト数);
+				n実バッファサイズms = (long)Math.Round(wasapiInfo.buflen * 1000.0 / n1秒のバイト数);
 				n実出力遅延ms = 0;  // Initial value is zero
 				Trace.TraceInformation("Using Device: #{0} : {1}, flags={2}", nDevNo, deviceInfo.name, deviceInfo.flags);
 				Trace.TraceInformation("BASS WASAPI Initialized (Exclusive Mode, {0}Hz, {1}ch, Format: {2}, Buffer: {3} bytes [{4}ms (Requested: {5}ms)], Update Period: {6}ms)",
@@ -492,7 +492,7 @@ public class CSoundDeviceWASAPI : ISoundDevice
 				var wasapiInfo = BassWasapi.BASS_WASAPI_GetInfo();
 				int n1サンプルのバイト数 = 2 * wasapiInfo.chans; // default;
 				int n1秒のバイト数 = n1サンプルのバイト数 * wasapiInfo.freq;
-				n実バッファサイズms = (long)(wasapiInfo.buflen * 1000.0f / n1秒のバイト数);
+				n実バッファサイズms = (long)Math.Round(wasapiInfo.buflen * 1000.0 / n1秒のバイト数);
 				n実出力遅延ms = 0;  // Initial value is zero
 				var devInfo = BassWasapi.BASS_WASAPI_GetDeviceInfo(BassWasapi.BASS_WASAPI_GetDevice()); // In shared mode, update period is fixed to device's default.
 				Trace.TraceInformation("Using Device: #{0} : {1}, flags={2}", nDevNo, deviceInfo.name, deviceInfo.flags);

@@ -18,6 +18,8 @@ public readonly record struct AudioDeviceStatus
 
     public string Mode { get; init; } = string.Empty;
 
+    public bool Legacy { get; init; }
+
     /// <summary>-1 when the backend has no figure to give.</summary>
     public long BufferMs { get; init; } = -1;
 

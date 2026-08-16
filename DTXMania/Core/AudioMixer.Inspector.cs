@@ -99,7 +99,8 @@ public static partial class AudioMixer
                                     "(loading, or leaked)");
         }
 
-        ImGui.TextDisabled($"{audio.Backend}{(audio.Mode.Length > 0 ? $" {audio.Mode}" : "")} on " +
+        ImGui.TextDisabled($"{audio.Backend}{(audio.Legacy ? " (legacy FDK)" : "")}"
+                           + $"{(audio.Mode.Length > 0 ? $" {audio.Mode}" : "")} on " +
                            $"{(audio.Output.Length > 0 ? audio.Output : "an unnamed device")}"
                            + $"{(audio.SampleRate > 0 ? $", {audio.SampleRate}Hz" : "")}");
 

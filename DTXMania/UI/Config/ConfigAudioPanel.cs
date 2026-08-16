@@ -73,6 +73,12 @@ internal sealed class ConfigAudioPanel : UIGroup
         StringBuilder lines = new();
 
         lines.Append(audio.Backend);
+
+        if (audio.Legacy)
+        {
+            lines.Append(japanese ? " (旧)" : " (legacy)");
+        }
+
         if (audio.SampleRate > 0)
         {
             lines.Append("   ").Append(audio.SampleRate.ToString(CultureInfo.InvariantCulture)).Append(" Hz");

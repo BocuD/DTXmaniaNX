@@ -259,9 +259,9 @@ internal sealed class BassWasapiOutput : IBassOutput
 
         if (exclusive)
         {
-            //one period by default, which the driver raises to whatever it will actually take: two
-            //periods event driven, more when polling. A buffer under one period cannot be satisfied at
-            //all, and a driver is as likely to refuse it as to round it up
+            //one period by default. Event driven, that is granted as asked; polling is widened to about
+            //four periods no matter what is requested, which is why it is not the default. A buffer under
+            //one period cannot be satisfied at all, and a driver is as likely to refuse it as round it up
             buffer = options.BufferSizeMs > 0
                 ? MathF.Max(MathF.Round(options.BufferSizeMs * rate / 1000.0f), period)
                 : period;

@@ -30,6 +30,7 @@ public sealed class FdkAudioDevice : IAudioDevice
     {
         Backend = manager.GetCurrentSoundDeviceType(),
         Output = CSoundManager.strActiveOutputDevice,
+        Legacy = true,
 
         //DirectSound's figure is the requested delay rather than anything the device reported
         BufferMs = MixesChannels ? manager.GetSoundDelay() : -1,

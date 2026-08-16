@@ -369,7 +369,7 @@ public class CSoundDeviceASIO : ISoundDevice
 
 		int n遅延sample = BassAsio.BASS_ASIO_GetLatency(false);   // この関数は BASS_ASIO_Start() 後にしか呼び出せない。
 		int n希望遅延sample = (int)(nTargetBufferSizeMs * db周波数 / 1000.0);
-		n実バッファサイズms = n実出力遅延ms = (long)(n遅延sample * 1000.0f / db周波数);
+		n実バッファサイズms = n実出力遅延ms = (long)Math.Round(n遅延sample * 1000.0 / db周波数);
 		Trace.TraceInformation("ASIO デバイス出力開始：バッファ{0}sample(希望{1}) [{2}ms(希望{3}ms)]", n遅延sample, n希望遅延sample, n実出力遅延ms, nTargetBufferSizeMs);
 	}
 
