@@ -830,7 +830,8 @@ internal partial class CConfigIni
 		nASIODevice = 0;                       // #24820 2013.1.17 yyagi
 		//0 leaves the card on whatever its own control panel is set to
 		nASIOBufferSizeSamples = 0;
-		//on WASAPI exclusive a polled buffer has to be four update periods where a driven one is two
+		//on WASAPI exclusive a polled buffer is widened to about four update periods where a driven one
+		//is granted the single period it asks for
 		bEventDrivenWASAPI = true;
 		bUseOSTimer = false; ;                 // #33689 2014.6.6 yyagi 初期値はfalse (FDKのタイマー。ＦＲＯＭ氏考案の独自タイマー)
 		bDynamicBassMixerManagement = true;    //

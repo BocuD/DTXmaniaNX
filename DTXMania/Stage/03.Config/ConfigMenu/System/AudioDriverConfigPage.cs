@@ -26,11 +26,18 @@ internal sealed class AudioDriverConfigPage : ConfigPage
         {
             case 0: // DirectSound
                 items.Add(BuildAdjustWaves());
+
+                //FDK's DirectSound device is the only output that has a clock to choose. The rest count
+                //bytes through their own callback, and this layer's DirectSound never reads the setting
+                if (CDTXMania.ConfigIni.bUseFDKAudio)
+                {
+                    items.Add(BuildUseOsTimer());
+                }
+
                 break;
 
             case 1: // ASIO
                 items.Add(BuildAsioBufferSize());
-                items.Add(BuildUseOsTimer());
                 break;
 
             case 2: // ExclusiveWASAPI
@@ -38,17 +45,14 @@ internal sealed class AudioDriverConfigPage : ConfigPage
 
                 //shared mode does not get one: Windows drives its engine either way
                 items.Add(BuildWasapiEventDriven());
-                items.Add(BuildUseOsTimer());
                 break;
 
             case 3: // SharedWASAPI
                 items.Add(BuildWasapiBufferSize());
-                items.Add(BuildUseOsTimer());
                 break;
 
             case 4: // BASS
                 items.Add(BuildBassBufferSize());
-                items.Add(BuildUseOsTimer());
                 break;
         }
 
@@ -121,16 +125,16 @@ internal sealed class AudioDriverConfigPage : ConfigPage
     }
 
     /// <summary>
-    /// Polling needs the buffer to be four update periods where the device driving it needs two, so
-    /// turning this off multiplies the exclusive buffer.
+    /// Polling is widened to about four update periods where the device driving it is granted the one
+    /// it asks for, so turning this off multiplies the exclusive buffer.
     /// </summary>
     private async Task ConfirmPolling(CItemToggle item)
     {
         string title = CDTXMania.isJapanese ? "遅延が増加します" : "This increases latency";
 
         string description = CDTXMania.isJapanese
-            ? "Event Drivenを切ると、WASAPI排他モードの出力バッファが\n数倍に大きくなります。\n音切れが発生する場合以外はONのままを推奨します。"
-            : "Turning this off makes the WASAPI exclusive output buffer several times\nlarger, because a polled buffer has to be four update periods long where\na driven one is two.\n\nOnly do this if you are hearing dropouts.";
+            ? "Event Drivenを切ると、WASAPI排他モードの出力バッファが数倍に大きくなります。音切れが発生する場合以外はONのままを推奨します。"
+            : "Turning this off makes the WASAPI exclusive output buffer several times larger, because a polled buffer is widened to about four update periods where a driven one is granted the single period it asks for.\n\nOnly do this if you are hearing dropouts.";
 
         string[] options = CDTXMania.isJapanese
             ? ["ONのままにする", "OFFにする"]
@@ -147,11 +151,15 @@ internal sealed class AudioDriverConfigPage : ConfigPage
         }
     }
 
+    /// <summary>
+    /// Off, FDK's DirectSound device times itself from a silent looping buffer it plays, which holds the
+    /// device open. On, it reads the OS clock and leaves the device free. Nothing else consults it.
+    /// </summary>
     private static CItemToggle BuildUseOsTimer()
     {
         CItemToggle item = new("UseOSTimer", CDTXMania.ConfigIni.bUseOSTimer,
-            "OSタイマーを使用するかどうか:\nOS標準タイマーを使うとスクロールが滑らかに\nなりますが、演奏で音ズレが発生することが\nあります。\nこの指定はWASAPI/ASIO使用時のみ有効です。\n",
-            "Use OS Timer or not.\nON = smooth scroll but may cause sound lag; OFF = original timer.\nAvailable only when using WASAPI/ASIO.");
+            "OSタイマーを使用するかどうか:\nOS標準タイマーを使うとスクロールが滑らかに\nなりますが、演奏で音ズレが発生することが\nあります。\nこの指定はFDK(旧)のDirectSound出力でのみ\n有効です。\n",
+            "Use OS Timer or not.\nON = smooth scroll but may cause sound lag; OFF = original timer.\nAffects only the legacy FDK DirectSound output.");
         item.BindConfig(
             () => item.bON = CDTXMania.ConfigIni.bUseOSTimer,
             () => CDTXMania.ConfigIni.bUseOSTimer = item.bON);
