@@ -106,6 +106,7 @@ public sealed class BassAudioDevice : IAudioDevice
     {
         Backend = output.Backend,
         Output = output.Name,
+        Mode = output.Mode,
         BufferMs = output.BufferMs,
         SampleRate = output.SampleRate,
         BufferFrames = output.BufferFrames,

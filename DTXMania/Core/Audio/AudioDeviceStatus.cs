@@ -16,6 +16,8 @@ public readonly record struct AudioDeviceStatus
     /// <summary>Empty when the backend cannot say.</summary>
     public string Output { get; init; } = string.Empty;
 
+    public string Mode { get; init; } = string.Empty;
+
     /// <summary>-1 when the backend has no figure to give.</summary>
     public long BufferMs { get; init; } = -1;
 

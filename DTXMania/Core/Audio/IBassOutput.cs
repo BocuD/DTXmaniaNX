@@ -29,6 +29,8 @@ internal interface IBassOutput : IDisposable
     /// <summary>What the backend's own documentation calls one frame, for display.</summary>
     string FrameUnit => "frames";
 
+    string Mode => string.Empty;
+
     float CpuUsage { get; }
 
     long ElapsedMs { get; }

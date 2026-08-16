@@ -42,6 +42,7 @@ internal sealed class BassWasapiOutput : IBassOutput
 
     public int PeriodFrames { get; private set; }
 
+    public string Mode => eventDriven ? "event driven" : "polled";
     public AudioLatency Latency
     {
         get

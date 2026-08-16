@@ -115,6 +115,11 @@ internal sealed class ConfigAudioPanel : UIGroup
             ? Ms(latency.Ms)
             : japanese ? "不明" : "not reported");
 
+        if (audio.Mode.Length > 0)
+        {
+            lines.Append(", ").Append(audio.Mode);
+        }
+
         return lines.ToString();
     }
 
