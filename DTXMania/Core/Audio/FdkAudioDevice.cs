@@ -10,9 +10,14 @@ namespace DTXMania.Core.Audio;
 public sealed class FdkAudioDevice : IAudioDevice
 {
     private readonly CSoundManager manager;
+    private readonly AudioBackend backend;
+    private readonly bool eventDriven;
 
     public FdkAudioDevice(AudioDeviceOptions options)
     {
+        backend = options.Backend;
+        eventDriven = options.EventDriven;
+
         //FDK's device constructors read the requested output rather than being handed it
         CSoundManager.strRequestedOutputDevice = options.OutputDevice;
 
@@ -31,6 +36,7 @@ public sealed class FdkAudioDevice : IAudioDevice
         Backend = manager.GetCurrentSoundDeviceType(),
         Output = CSoundManager.strActiveOutputDevice,
         Legacy = true,
+        Mode = Wasapi ? eventDriven ? "event driven" : "polled" : string.Empty,
 
         //DirectSound's figure is the requested delay rather than anything the device reported
         BufferMs = MixesChannels ? manager.GetSoundDelay() : -1,
@@ -39,6 +45,33 @@ public sealed class FdkAudioDevice : IAudioDevice
         MixedChannels = manager.GetMixingStreams(),
         DefaultOutputBusType = CSoundManager.strDefaultDeviceBusType
     };
+
+    public AudioLatency Latency
+    {
+        get
+        {
+            //DirectSound's is the delay that was asked for rather than one the device gave back
+            long buffer = MixesChannels ? manager.GetSoundDelay() : -1;
+
+            if (buffer < 0)
+            {
+                return AudioLatency.Unknown;
+            }
+
+            return backend switch
+            {
+                //FDK asks for a buffer of two update periods, and event driven WASAPI holds two of those
+                AudioBackend.WasapiExclusive => new AudioLatency(eventDriven ? buffer * 2.0 : buffer),
+
+                //shared runs its own mixing pass on top, which the buffer says nothing about
+                AudioBackend.WasapiShared => AudioLatency.Unknown,
+
+                _ => new AudioLatency(buffer)
+            };
+        }
+    }
+
+    private bool Wasapi => backend is AudioBackend.WasapiExclusive or AudioBackend.WasapiShared;
 
     public IAudioClip Load(string path, AudioGroup group) => new FdkAudioClip(this, path, group);
 
