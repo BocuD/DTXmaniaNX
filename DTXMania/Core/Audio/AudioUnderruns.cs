@@ -22,6 +22,11 @@ public static class AudioUnderruns
     /// <summary>The longest gap between two callbacks since the device was built.</summary>
     public static double WorstGapMs => Volatile.Read(ref worstGapTicks) * 1000.0 / Stopwatch.Frequency;
 
+    private static long recentGapTicks;
+
+    public static double TakeWorstGapMs()
+        => Interlocked.Exchange(ref recentGapTicks, 0) * 1000.0 / Stopwatch.Frequency;
+
     /// <summary>
     /// Called at the top of an output's callback. <paramref name="bufferMs"/> is how much audio is
     /// queued ahead, so a gap longer than that is the card having run dry before this call landed.
@@ -42,6 +47,11 @@ public static class AudioUnderruns
         if (gap > Volatile.Read(ref worstGapTicks))
         {
             Volatile.Write(ref worstGapTicks, gap);
+        }
+
+        if (gap > Interlocked.Read(ref recentGapTicks))
+        {
+            Interlocked.Exchange(ref recentGapTicks, gap);
         }
 
         if (gap * 1000.0 / Stopwatch.Frequency > bufferMs)

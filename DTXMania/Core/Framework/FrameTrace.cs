@@ -21,6 +21,9 @@ public static class FrameTrace
         public int Gen2;
         public long Allocated;
         public int Underruns;
+
+        //how late the worst audio callback of this frame was, which a count alone does not say
+        public float AudioGapMs;
     }
 
     //int rather than the profiler's long: plenty per section per frame, and it halves what the buffer
@@ -157,7 +160,8 @@ public static class FrameTrace
             Gen1 = counters.Gen1 - previous.Gen1,
             Gen2 = counters.Gen2 - previous.Gen2,
             Allocated = counters.Allocated - previous.Allocated,
-            Underruns = counters.Underruns - previous.Underruns
+            Underruns = counters.Underruns - previous.Underruns,
+            AudioGapMs = (float)Audio.AudioUnderruns.TakeWorstGapMs()
         };
 
         previous = counters;
@@ -186,7 +190,12 @@ public static class FrameTrace
 
         StringBuilder csv = new(held * 96);
 
-        csv.Append("frame,totalMs,gen0,gen1,gen2,allocatedBytes,underruns");
+        //written at export rather than held per frame, since it does not change during a recording
+        Audio.AudioDeviceStatus audio = AudioMixer.Device.Status;
+        string device = $",{audio.Backend},{audio.BufferMs},{audio.BufferFrames},{audio.PeriodFrames}";
+
+        csv.Append("frame,totalMs,gen0,gen1,gen2,allocatedBytes,underruns,audioGapMs")
+            .Append(",backend,audioBufferMs,audioBufferFrames,audioPeriodFrames");
         for (int i = 0; i < Sections; i++)
         {
             csv.Append(',').Append(FrameProfiler.SectionNames[i]);
@@ -217,7 +226,9 @@ public static class FrameTrace
                 .Append(record.Gen1).Append(',')
                 .Append(record.Gen2).Append(',')
                 .Append(record.Allocated).Append(',')
-                .Append(record.Underruns);
+                .Append(record.Underruns).Append(',')
+                .Append(record.AudioGapMs.ToString("0.###", CultureInfo.InvariantCulture))
+                .Append(device);
 
             for (int i = 0; i < Sections; i++)
             {
