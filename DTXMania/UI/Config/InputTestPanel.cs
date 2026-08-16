@@ -78,8 +78,8 @@ internal sealed class InputTestPanel : UIGroup, IUIInputHandler
     {
         title.SetText(CDTXMania.isJapanese ? "入力テスト（全チャンネル）" : "Input Test — All Channels");
         hint.SetText(CDTXMania.isJapanese
-            ? "各入力を押して確認します。 Esc で戻ります。"
-            : "Press your inputs to test each channel.  (Esc to return)");
+            ? "Esc で戻ります。"
+            : "(Esc to return)");
         logHeader.SetText(CDTXMania.isJapanese ? "最近の入力" : "Recent hits");
 
         int count = Math.Min(pads.Length, MaxChannels);
