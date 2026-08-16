@@ -611,8 +611,8 @@ internal partial class CDTXMania
               + "The game carries on without sound if you do not.";
 
         string[] options = isJapanese
-            ? ["CONFIGを開く", "無音で続ける"]
-            : ["Open CONFIG", "Carry on silent"];
+            ? ["CONFIGを開く", "無視する"]
+            : ["Open CONFIG", "Ignore"];
 
         //anything but a deliberate yes leaves it alone, including dismissing the dialog
         if (await Modal.ShowAsync(persistentUIGroup, title, description, options) != 0)
