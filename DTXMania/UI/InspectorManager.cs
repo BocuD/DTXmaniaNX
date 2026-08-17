@@ -23,6 +23,18 @@ public static class InspectorManager
 
     public static bool rendersGameToWindow => inspectorEnabled && gameWindow.enabled;
 
+    /// <summary>Whether the pointer is over the game window, where ImGui is showing the game rather than
+    /// something of its own: a click there belongs to the game.</summary>
+    public static bool PointerIsOverGame => rendersGameToWindow && gameWindow.Contains(PointerInput.windowPosition);
+
+    //where the game's pixels are in the window, both ways round: the pointer comes in through one and the
+    //IME caret goes out through the other
+    public static Vector2 WindowToGame(Vector2 windowPosition)
+        => rendersGameToWindow ? gameWindow.ToRenderTarget(windowPosition) : windowPosition;
+
+    public static Vector2 GameToWindow(Vector2 gamePosition)
+        => rendersGameToWindow ? gameWindow.ToWindow(gamePosition) : gamePosition;
+
     public static void ToggleInspector()
     {
         inspectorEnabled = !inspectorEnabled;
@@ -34,7 +46,6 @@ public static class InspectorManager
     }
 
     public static bool WantsImGui => inspectorEnabled || logWindowEnabled
-                                     || Drawable.UIImGuiTextInput.IsAnyInputActive
                                      || Core.CDTXMania.StageManager?.rCurrentStage?.NeedsImGui == true;
 
     public static ImDrawListPtr gizmoDrawList;

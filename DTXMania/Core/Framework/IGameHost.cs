@@ -17,5 +17,7 @@ public interface IGameHost
     bool IsWindowFocused { get; }
     void SetWindowSize(Vector2 value);
     void SetWindowPosition(Vector2 value);
+    string GetClipboardText();
+    void SetClipboardText(string value);
     public RuntimeLogListener RuntimeLogListener { get; }
 }

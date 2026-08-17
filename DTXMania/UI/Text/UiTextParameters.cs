@@ -4,7 +4,7 @@ using DTXMania.UI.Drawable;
 
 namespace DTXMania.UI.Text;
 
-public sealed class UiTextParameters
+public sealed record UiTextParameters
 {
     public UiTextParameters() { }
 

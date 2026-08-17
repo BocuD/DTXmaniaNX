@@ -171,6 +171,17 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
         }
     }
 
+    public string GetClipboardText()
+        => _window.Handle == null ? string.Empty : GLFW.GetClipboardStringS(_window) ?? string.Empty;
+
+    public void SetClipboardText(string value)
+    {
+        if (_window.Handle != null)
+        {
+            GLFW.SetClipboardString(_window, value);
+        }
+    }
+
     public void SetWindowPosition(Vector2 value)
     {
         if (_window.Handle != null)
@@ -333,6 +344,9 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
     }
     
     private GLFWkeyfun? keyCallback;
+    private GLFWcharfun? charCallback;
+    private GLFWcursorposfun? cursorPosCallback;
+    private GLFWmousebuttonfun? mouseButtonCallback;
     private GLFWwindowfocusfun? focusCallback;
     private GLFWwindowposfun? windowPosCallback;
     private GLFWwindowsizefun? windowSizeCallback;
@@ -347,18 +361,31 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
                     _game.KeyDown((GlfwKey)key, (GlfwMod)mods);
                     break;
 
+                case GLFW.GLFW_REPEAT:
+                    _game.KeyRepeat((GlfwKey)key, (GlfwMod)mods);
+                    break;
+
                 case GLFW.GLFW_RELEASE:
                     _game.KeyUp((GlfwKey)key, (GlfwMod)mods);
                     break;
             }
         };
-        
+
+        charCallback = (_, codepoint) => _game.CharTyped(codepoint);
+
+        cursorPosCallback = (_, x, y) => _game.PointerMoved(new Vector2((float)x, (float)y));
+        mouseButtonCallback = (_, button, action, mods) =>
+            _game.PointerButtonChanged(button, action == GLFW.GLFW_PRESS, (GlfwMod)mods);
+
         focusCallback = (_, _) => _game.isFocused = IsWindowFocused;
         windowPosCallback = (_, xpos, ypos) => _game.windowPosition = new Vector2(xpos, ypos);
         windowSizeCallback = (_, width, height) => _game.windowSize = new Vector2(width, height);
         
         //set key callbacks
         GLFW.SetKeyCallback(window, keyCallback);
+        GLFW.SetCharCallback(window, charCallback);
+        GLFW.SetCursorPosCallback(window, cursorPosCallback);
+        GLFW.SetMouseButtonCallback(window, mouseButtonCallback);
         GLFW.SetWindowFocusCallback(window, focusCallback);
         GLFW.SetWindowPosCallback(window, windowPosCallback);
         GLFW.SetWindowSizeCallback(window, windowSizeCallback);

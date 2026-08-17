@@ -17,6 +17,7 @@ using ResourceManager = DTXMania.UI.ResourceManager;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.Inspector;
 using DTXMania.UI.Skin;
+using DTXMania.UI.Text;
 using Hexa.NET.GLFW;
 
 namespace DTXMania.Core;
@@ -451,9 +452,20 @@ internal partial class CDTXMania
         }
         FrameProfiler.End(FrameSection.Sound);
 
-        bool inspectorCapturingKeyboard = InspectorManager.inspectorEnabled && ImGui.GetIO().WantCaptureKeyboard;
-        bool textInputDrawableActive = UIImGuiTextInput.IsAnyInputActive;
-        InputManager.Keyboard.preventKeyboardInput = inspectorCapturingKeyboard || textInputDrawableActive || GameStatus.preventGameKeyboardInput;
+        bool keyboardTakenByImGui = InspectorManager.inspectorEnabled && ImGui.GetIO().WantCaptureKeyboard;
+        InputManager.Keyboard.preventKeyboardInput = keyboardTakenByImGui || UITextInput.IsAnyActive || GameStatus.preventGameKeyboardInput;
+
+        //a field reads the window's own characters, so it is the one thing that does not stop it
+        if (keyboardTakenByImGui || GameStatus.preventGameKeyboardInput)
+        {
+            TextInput.Clear();
+        }
+
+        //an inspector window under the pointer takes the click, unless it is the one showing the game
+        if (InspectorManager.inspectorEnabled && ImGui.GetIO().WantCaptureMouse && !InspectorManager.PointerIsOverGame)
+        {
+            PointerInput.ClearEdges();
+        }
 
         //poll input
         FrameProfiler.Begin(FrameSection.InputPolling);
@@ -473,6 +485,10 @@ internal partial class CDTXMania
         
         //input is read once, here, by whoever holds focus; stages and elements act on it as they draw
         UIFocus.Dispatch();
+
+        //input nobody was listening for is dropped rather than delivered late
+        TextInput.Clear();
+        PointerInput.ClearEdges();
 
         FrameProfiler.Begin(FrameSection.StageDraw);
 

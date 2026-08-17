@@ -350,6 +350,24 @@ internal class ConfigList : UIScrollItemsGroup, IUIItemSource
             return;
         }
 
+        bool typing = textInput.drawableTextInput.IsActive;
+
+        if (SelectedRow is { } row)
+        {
+            //what the field committed is the row's to show again
+            if (row.IsEditing && !typing)
+            {
+                row.RefreshValue();
+            }
+
+            row.IsEditing = typing;
+        }
+
+        if (!typing)
+        {
+            return;
+        }
+
         textInput.drawableTextInput.position = SelectedPosition + ValueOffset;
         textInput.drawableTextInput.Draw(localTransformMatrix * parentMatrix);
     }

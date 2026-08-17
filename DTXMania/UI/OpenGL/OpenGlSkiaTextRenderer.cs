@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Numerics;
 using DTXMania.Core.Framework;
 using DTXMania.UI.Drawable;
@@ -40,7 +41,7 @@ internal sealed class OpenGlSkiaTextRenderer : IUiTextRenderer
         float descent = metrics.Descent;
         float baseLineHeight = MathF.Max(font.Spacing, ascent + descent);
         float actualLineHeight = MathF.Max(baseLineHeight * request.LineSpacing, 1f);
-        Vector2 effectivePadding = Vector2.Max(request.TexturePadding + new Vector2(request.OutlineWidth + 2f), new Vector2(2f));
+        Vector2 effectivePadding = EffectivePadding(request);
 
         float wrapBudget = request.MaxWidth - effectivePadding.X * 2f;
         if (request.MaxWidth > 0f && wrapBudget > 0f)
@@ -112,6 +113,57 @@ internal sealed class OpenGlSkiaTextRenderer : IUiTextRenderer
 
         return new DecodedPixels(rgba, bitmapWidth, bitmapHeight, $"Text:{request.Name}");
     }
+
+    public float CaretOffset(UiTextParameters request, int characters)
+    {
+        string line = NormalizeLines(request.Text ?? string.Empty)[0];
+        characters = Math.Clamp(characters, 0, line.Length);
+
+        SKTypeface typeface = ResolveTypeface(request);
+        using SKFont font = CreateFont(typeface, request);
+
+        //the bitmap is only as wide as the text, so a single line starts at the padding whatever the
+        //alignment says
+        return EffectivePadding(request).X + MeasureLineWidth(font, line[..characters]);
+    }
+
+    public int CaretIndexAt(UiTextParameters request, float offset)
+    {
+        string line = NormalizeLines(request.Text ?? string.Empty)[0];
+        if (line.Length == 0)
+        {
+            return 0;
+        }
+
+        SKTypeface typeface = ResolveTypeface(request);
+        using SKFont font = CreateFont(typeface, request);
+
+        float left = EffectivePadding(request).X;
+        float before = 0f;
+        int start = 0;
+
+        //measured as prefixes rather than as advances added up, so this and CaretOffset can never
+        //disagree about where a character sits
+        while (start < line.Length)
+        {
+            int next = start + StringInfo.GetNextTextElementLength(line.AsSpan(start));
+            float after = MeasureLineWidth(font, line[..next]);
+
+            //the caret lands on whichever side of the character the offset is nearer
+            if (offset < left + (before + after) * 0.5f)
+            {
+                return start;
+            }
+
+            before = after;
+            start = next;
+        }
+
+        return line.Length;
+    }
+
+    private static Vector2 EffectivePadding(UiTextParameters request)
+        => Vector2.Max(request.TexturePadding + new Vector2(request.OutlineWidth + 2f), new Vector2(2f));
 
     private static string[] NormalizeLines(string value)
     {
