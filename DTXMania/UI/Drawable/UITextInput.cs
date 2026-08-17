@@ -499,7 +499,12 @@ public class UITextInput : UIText, IUIInputHandler
         DrawBlock(combined, CaretLocalX(), caretWidth, fillColor);
     }
 
-    private float CaretLocalX() => Math.Clamp(ToLocal(CaretPixels(buffer.caret)), 0f, FieldWidth());
+    private float CaretLocalX()
+    {
+        float at = ToLocal(CaretPixels(buffer.caret));
+
+        return Overflowing() ? Math.Clamp(at, 0f, size.X) : at;
+    }
 
     //the IME draws its own composition and candidate list, and needs to be told in window pixels where
     //the text it is composing for is
