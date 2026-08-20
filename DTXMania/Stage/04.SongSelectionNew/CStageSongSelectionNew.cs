@@ -477,6 +477,18 @@ public class CStageSongSelectionNew : CStage
         ChangeSelection(selectedNode, selectedChart);
     }
 
+    public bool ConfirmRandomSong()
+    {
+        if (!selectionContainer.ConfirmRandomSong())
+        {
+            return false;
+        }
+
+        //the result a decide on a song produces, so the game goes on to load it by itself
+        pendingResult = (int)EReturnValue.Selected;
+        return true;
+    }
+
     public SongNode? selectedNode { get; private set; }
     public CChartData? selectedChart { get; private set; }
     public void ChangeSelection(SongNode? node, CChartData? chart)

@@ -318,6 +318,20 @@ public class SongSelectionContainer : UIScrollItemsGroup, IUIItemSource
         return (int)CStageSongSelectionNew.EReturnValue.Continue;
     }
 
+    public bool ConfirmRandomSong()
+    {
+        List<SongNode> songs = currentRoot.childNodes
+            .FindAll(node => node.nodeType == SongNode.ENodeType.SONG && node.ShowInSongList());
+
+        if (songs.Count == 0)
+        {
+            return false;
+        }
+
+        UpdateSelection(songs[Random.Shared.Next(songs.Count)]);
+        return ActionDecide();
+    }
+
     private bool ActionDecide()
     {
         if (currentSelection == null)

@@ -486,6 +486,9 @@ internal partial class CDTXMania
         //input is read once, here, by whoever holds focus; stages and elements act on it as they draw
         UIFocus.Dispatch();
 
+        //after the dispatch, so what it asks a stage for is not overwritten by the frame's own input
+        PerformanceRun.Update();
+
         //input nobody was listening for is dropped rather than delivered late
         TextInput.Clear();
         PointerInput.ClearEdges();

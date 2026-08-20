@@ -54,6 +54,8 @@ internal class Program
 	[STAThread]
 	private static void Main()
 	{
+		Framework.PerformanceRun.ReadCommandLine();
+
 		//prevents two instances from DTXMania from running at the same time
 		concurrencyMutex = new Mutex(false, "DTXManiaMutex");
 
