@@ -580,6 +580,7 @@ internal partial class CConfigIni
 		languageMode = LanguageMode.Auto;
 		bFullScreenMode = false;
 		bFullScreenExclusive = true;
+		eHideCursor = HideCursor.Fullscreen;
 		bVerticalSyncWait = true;
 		nInitialWindowXPosition = 50; // #30675 2013.02.04 ikanick add
 		nInitialWindowYPosition = 50;
