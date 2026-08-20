@@ -75,6 +75,18 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
     [DllImport("user32.dll")]
     private static extern IntPtr GetForegroundWindow();
 
+    [DllImport("user32.dll")]
+    private static extern bool SetForegroundWindow(IntPtr window);
+
+    [DllImport("user32.dll")]
+    private static extern uint GetWindowThreadProcessId(IntPtr window, IntPtr processId);
+
+    [DllImport("user32.dll")]
+    private static extern bool AttachThreadInput(uint attachTo, uint attachFrom, bool attach);
+
+    [DllImport("kernel32.dll")]
+    private static extern uint GetCurrentThreadId();
+
     public RuntimeLogListener RuntimeLogListener { get; } = new();
 
     public GlfwOpenGlHost(OpenGlGame game)
@@ -146,9 +158,38 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
 
     public void FocusWindow()
     {
-        if (_window.Handle != null)
+        if (_window.Handle == null)
         {
-            GLFW.FocusWindow(_window);
+            return;
+        }
+
+        GLFW.FocusWindow(_window);
+
+        if (OperatingSystem.IsWindows())
+        {
+            TakeForeground();
+        }
+    }
+
+    private void TakeForeground()
+    {
+        IntPtr window = GetWindowHandle();
+        IntPtr foreground = GetForegroundWindow();
+
+        if (window == IntPtr.Zero || window == foreground)
+        {
+            return;
+        }
+
+        uint foregroundThread = GetWindowThreadProcessId(foreground, IntPtr.Zero);
+        uint thisThread = GetCurrentThreadId();
+        bool shared = foregroundThread != thisThread && AttachThreadInput(thisThread, foregroundThread, true);
+
+        SetForegroundWindow(window);
+
+        if (shared)
+        {
+            AttachThreadInput(thisThread, foregroundThread, false);
         }
     }
 
@@ -322,6 +363,9 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
 
         GLFW.MakeContextCurrent(window);
 
+        //a window is born showing the pointer, whatever the one before it was doing
+        cursorVisible = true;
+
         if (fullscreenMode == FullscreenMode.Windowed)
         {
             GLFW.SetWindowPos(window, _windowedX, _windowedY);
@@ -377,7 +421,14 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
         mouseButtonCallback = (_, button, action, mods) =>
             _game.PointerButtonChanged(button, action == GLFW.GLFW_PRESS, (GlfwMod)mods);
 
-        focusCallback = (_, _) => _game.isFocused = IsWindowFocused;
+        focusCallback = (_, _) =>
+        {
+            _game.isFocused = IsWindowFocused;
+
+            //anything at all may have shown the pointer while another window held the focus, so what it
+            //is doing now is read back rather than assumed
+            cursorVisible = GLFW.GetInputMode(window, GLFW.GLFW_CURSOR) != GLFW.GLFW_CURSOR_HIDDEN;
+        };
         windowPosCallback = (_, xpos, ypos) => _game.windowPosition = new Vector2(xpos, ypos);
         windowSizeCallback = (_, width, height) => _game.windowSize = new Vector2(width, height);
         
