@@ -75,6 +75,16 @@ internal partial class CConfigIni
 	//public bool bDirectShowMode;
 	[DataField("Fullscreen")] public bool bFullScreenMode;
 	public bool bFullScreenExclusive;
+
+	public enum HideCursor
+	{
+		Never,
+		Fullscreen,
+		Always
+	}
+
+	//Always covers a windowed game too, from the moment it is clicked into until it loses focus
+	public HideCursor eHideCursor;
 	public int nInitialWindowXPosition; // #30675 2013.02.04 ikanick add
 	public int nInitialWindowYPosition;
 	[DataField("WindowWidth")] public int nWindowWidth; // #23510 2010.10.31 yyagi add

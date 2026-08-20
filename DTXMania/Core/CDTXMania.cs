@@ -489,6 +489,8 @@ internal partial class CDTXMania
         //after the dispatch, so what it asks a stage for is not overwritten by the frame's own input
         PerformanceRun.Update();
 
+        MouseCursor.Update(maniaGl);
+
         //input nobody was listening for is dropped rather than delivered late
         TextInput.Clear();
         PointerInput.ClearEdges();

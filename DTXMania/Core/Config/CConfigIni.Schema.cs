@@ -109,6 +109,11 @@ internal partial class CConfigIni
 				Bool("FullScreen", c => c.bFullScreenMode)),
 			G("Fullscreen mode uses exclusive mode instead of maximized window. (0:Maximized window, 1:Exclusive)",
 				Bool("FullScreenExclusive", c => c.bFullScreenExclusive)),
+			G([
+					"マウスカーソルを隠すタイミング (0:隠さない, 1:全画面時のみ, 2:常に)",
+					"When to hide the mouse cursor. (0:Never, 1:Fullscreen only, 2:Always)"
+				],
+				Enum("HideCursor", 0, 2, c => c.eHideCursor)),
 			G(["ウインドウモード時の画面幅", "A width size in the window mode."],
 				Custom("WindowWidth",
 					(c, v) => { c.nWindowWidth = CConversion.nGetNumberIfInRange(v, 1, 65535, c.nWindowWidth); if (c.nWindowWidth <= 0) c.nWindowWidth = GameWindowSize.Width; },

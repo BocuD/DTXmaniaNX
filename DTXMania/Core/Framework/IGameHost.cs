@@ -13,6 +13,7 @@ public interface IGameHost
     IntPtr GetWindowHandle();
     void SetWindowTitle(string newTitle);
     void FocusWindow();
+    void SetCursorVisible(bool visible);
 
     bool IsWindowFocused { get; }
     void SetWindowSize(Vector2 value);

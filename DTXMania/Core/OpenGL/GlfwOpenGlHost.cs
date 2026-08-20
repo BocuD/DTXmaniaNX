@@ -44,6 +44,7 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
     private ImGuiContextPtr _imguiContext;
 
     private bool _vsyncEnabled = true;
+    private bool cursorVisible = true;
     public FullscreenMode fullscreenMode { get; private set; } = FullscreenMode.Windowed;
 
     private int _windowedX = 80;
@@ -191,6 +192,29 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
         {
             AttachThreadInput(thisThread, foregroundThread, false);
         }
+    }
+
+    public void SetCursorVisible(bool visible)
+    {
+        if (_window.Handle == null || visible == cursorVisible)
+        {
+            return;
+        }
+
+        cursorVisible = visible;
+        ImGuiIOPtr io = ImGui.GetIO();
+
+        if (visible)
+        {
+            io.ConfigFlags &= ~ImGuiConfigFlags.NoMouseCursorChange;
+        }
+        else
+        {
+            io.ConfigFlags |= ImGuiConfigFlags.NoMouseCursorChange;
+        }
+
+        GLFW.SetInputMode(_window, GLFW.GLFW_CURSOR,
+            visible ? GLFW.GLFW_CURSOR_NORMAL : GLFW.GLFW_CURSOR_HIDDEN);
     }
 
     public bool IsWindowFocused
