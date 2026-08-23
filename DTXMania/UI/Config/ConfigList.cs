@@ -203,7 +203,7 @@ internal class ConfigList : UIScrollItemsGroup, IUIItemSource
 
         (List<CItemBase> items, int selection, ConfigPage? page) = pageStack.Pop();
         SetPage(page);
-        SetItems(items, selection);
+        SetItems(page is { RebuildsOnReturn: true } ? page.Build() : items, selection);
     }
 
     private int SelectedIndexOnPage => rows.Count == 0 ? 0 : Mod(SelectedItem, rows.Count);
