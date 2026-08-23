@@ -6,7 +6,6 @@ using DTXMania.SongDb.Sorting;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.DynamicElements;
 using FDK;
-using SlimDX.DirectInput;
 
 namespace DTXMania;
 
@@ -23,6 +22,12 @@ public class SortMenuContainer : ComponentInstance, IUIItemSource
 
     private UIScrollItemsGroup? entries;
 
+    private readonly NavigationRepeat navigation = NavigationRepeat.Horizontal();
+
+    //cached, so the repeat does not allocate a closure on every polled frame
+    private readonly Action scrollPrevious;
+    private readonly Action scrollNext;
+
     //one per sort mode, in the order SongDbSort declares them
     private SoundReference[]? sounds;
 
@@ -32,6 +37,9 @@ public class SortMenuContainer : ComponentInstance, IUIItemSource
 
     public SortMenuContainer() : base("SortMenuContainer")
     {
+        scrollPrevious = () => entries?.ScrollBy(-1);
+        scrollNext = () => entries?.ScrollBy(1);
+
         size = new Vector2(662, 92);
         anchor = new Vector2(1.0f, 0.0f);
     }
@@ -63,19 +71,7 @@ public class SortMenuContainer : ComponentInstance, IUIItemSource
 
     public void HandleNavigation()
     {
-        if (CDTXMania.InputManager.Keyboard.bKeyPressed(Key.LeftArrow)
-            || CDTXMania.Input.ActionCategoryPrevious()
-            || CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.SD))
-        {
-            entries?.ScrollBy(-1);
-        }
-
-        if (CDTXMania.InputManager.Keyboard.bKeyPressed(Key.RightArrow)
-            || CDTXMania.Input.ActionCategoryNext()
-            || CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.FT))
-        {
-            entries?.ScrollBy(1);
-        }
+        navigation.Poll(scrollPrevious, scrollNext);
     }
 
     public override void Draw(Matrix4x4 parentMatrix)
@@ -206,7 +202,9 @@ public class SortMenuContainer : ComponentInstance, IUIItemSource
 
             //the original feel: eases the whole way with no floor, capped at what the old per-frame
             //clamp of 10px allowed at 60fps. Speeds are in entries per second, not pixels
-            motion = new UIScrollMotion(rate: 10.0f, maxSpeed: 600.0f / EntrySpacing),
+            //queueLimit keeps a held key two entries ahead of what is on screen at most, so letting go
+            //stops it rather than draining a backlog built while the repeat outran the easing
+            motion = new UIScrollMotion(rate: 10.0f, maxSpeed: 600.0f / EntrySpacing, queueLimit: 2.0f),
 
             //the selected entry sits lower than its neighbours
             curve = new UIItemCurve(UIAxis.Y, distance: 18.0f, range: EntrySpacing)

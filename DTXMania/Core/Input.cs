@@ -24,14 +24,13 @@ public class Input
                (CDTXMania.Pad.bPressingGB(EPad.Y) && Strummed()) ||
                CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.LC) || CDTXMania.Pad.bPressedGB(EPad.Cancel);
     }
-    public bool ActionCategoryPrevious() => Strummed(EPad.PickUp);
-    public bool ActionCategoryNext() => Strummed(EPad.PickDown);
+
+    //a strum on guitar or bass, whichever way it was made
     private static bool Strummed() =>
         CDTXMania.Pad.bPressedGB(EPad.Pick) ||
         CDTXMania.Pad.bPressedGB(EPad.PickUp) ||
         CDTXMania.Pad.bPressedGB(EPad.PickDown);
-    private static bool Strummed(EPad direction) =>
-        CDTXMania.Pad.bPressedGB(direction)
-        && !CDTXMania.Pad.bPressingGB(EPad.P)
-        && !CDTXMania.Pad.bPressingGB(EPad.Y);
+
+    public static bool StrumIsNavigation =>
+        !CDTXMania.Pad.bPressingGB(EPad.P) && !CDTXMania.Pad.bPressingGB(EPad.Y);
 }

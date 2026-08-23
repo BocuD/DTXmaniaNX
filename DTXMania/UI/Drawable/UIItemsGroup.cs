@@ -159,7 +159,7 @@ public class UIItemsGroup : UIGroup, IUIInputHandler
     [JsonIgnore] private readonly UISelectionInfo selection = new();
     [JsonIgnore] private long lastSelectionTime;
 
-    [JsonIgnore] private readonly NavigationRepeat navigation = new();
+    [JsonIgnore] private readonly NavigationRepeat navigation = NavigationRepeat.Vertical();
     [JsonIgnore] private readonly Action selectPrevious;
     [JsonIgnore] private readonly Action selectNext;
 

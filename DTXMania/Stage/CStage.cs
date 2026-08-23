@@ -206,7 +206,7 @@ public abstract class CStage : CActivity, IUIInputHandler
 
 	public NavigationRepeat? Navigation => navigation;
 
-	protected readonly NavigationRepeat navigation = new();
+	protected readonly NavigationRepeat navigation = NavigationRepeat.Vertical();
 
 	/// <summary>
 	/// What this stage hands its input to — usually its menu. Set it and there is nothing else to do; a

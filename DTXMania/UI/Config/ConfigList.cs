@@ -304,7 +304,7 @@ internal class ConfigList : UIScrollItemsGroup, IUIItemSource
     /// </summary>
     private sealed class ConfigItemEditor(ConfigList list) : IUIInputHandler
     {
-        private readonly NavigationRepeat navigation = new();
+        private readonly NavigationRepeat navigation = NavigationRepeat.Vertical();
         private readonly Action increase = () => list.ChangeValue(true);
         private readonly Action decrease = () => list.ChangeValue(false);
 
