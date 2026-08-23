@@ -64,14 +64,14 @@ public class SortMenuContainer : ComponentInstance, IUIItemSource
     public void HandleNavigation()
     {
         if (CDTXMania.InputManager.Keyboard.bKeyPressed(Key.LeftArrow)
-            || CDTXMania.Pad.bPressedGB(EPad.Pick)
+            || CDTXMania.Input.ActionCategoryPrevious()
             || CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.SD))
         {
             entries?.ScrollBy(-1);
         }
 
         if (CDTXMania.InputManager.Keyboard.bKeyPressed(Key.RightArrow)
-            || CDTXMania.Pad.bPressedGB(EPad.Pick)
+            || CDTXMania.Input.ActionCategoryNext()
             || CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.FT))
         {
             entries?.ScrollBy(1);

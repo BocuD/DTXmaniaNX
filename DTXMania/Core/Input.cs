@@ -13,7 +13,7 @@ public class Input
         return CDTXMania.Pad.bPressedDGB(EPad.Decide) ||
                CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.CY) ||
                CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.RD) ||
-               (CDTXMania.Pad.bPressingGB(EPad.P) && CDTXMania.Pad.bPressedGB(EPad.Pick)) ||
+               (CDTXMania.Pad.bPressingGB(EPad.P) && Strummed()) ||
                CDTXMania.InputManager.Keyboard.bKeyPressed(SlimDXKey.Return) ||
                CDTXMania.InputManager.Keyboard.bKeyPressed(SlimDXKey.NumberPadEnter);
     }
@@ -21,7 +21,17 @@ public class Input
     public bool ActionCancel()
     {
         return CDTXMania.InputManager.Keyboard.bKeyPressed(SlimDXKey.Escape) ||
-               (CDTXMania.Pad.bPressingGB(EPad.Y) && CDTXMania.Pad.bPressedGB(EPad.Pick)) ||
+               (CDTXMania.Pad.bPressingGB(EPad.Y) && Strummed()) ||
                CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.LC) || CDTXMania.Pad.bPressedGB(EPad.Cancel);
     }
+    public bool ActionCategoryPrevious() => Strummed(EPad.PickUp);
+    public bool ActionCategoryNext() => Strummed(EPad.PickDown);
+    private static bool Strummed() =>
+        CDTXMania.Pad.bPressedGB(EPad.Pick) ||
+        CDTXMania.Pad.bPressedGB(EPad.PickUp) ||
+        CDTXMania.Pad.bPressedGB(EPad.PickDown);
+    private static bool Strummed(EPad direction) =>
+        CDTXMania.Pad.bPressedGB(direction)
+        && !CDTXMania.Pad.bPressingGB(EPad.P)
+        && !CDTXMania.Pad.bPressingGB(EPad.Y);
 }
