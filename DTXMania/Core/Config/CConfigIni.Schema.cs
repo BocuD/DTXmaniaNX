@@ -674,6 +674,8 @@ internal partial class CConfigIni
 				KeyItem("Y", c => c.KeyAssign.Guitar.Y),
 				KeyItem("P", c => c.KeyAssign.Guitar.P),
 				KeyItem("Pick", c => c.KeyAssign.Guitar.Pick),
+				KeyItem("PickUp", c => c.KeyAssign.Guitar.PickUp),
+				KeyItem("PickDown", c => c.KeyAssign.Guitar.PickDown),
 				KeyItem("Wail", c => c.KeyAssign.Guitar.Wail),
 				KeyItem("Decide", c => c.KeyAssign.Guitar.Decide),
 				KeyItem("Cancel", c => c.KeyAssign.Guitar.Cancel))
@@ -686,6 +688,8 @@ internal partial class CConfigIni
 				KeyItem("Y", c => c.KeyAssign.Bass.Y),
 				KeyItem("P", c => c.KeyAssign.Bass.P),
 				KeyItem("Pick", c => c.KeyAssign.Bass.Pick),
+				KeyItem("PickUp", c => c.KeyAssign.Bass.PickUp),
+				KeyItem("PickDown", c => c.KeyAssign.Bass.PickDown),
 				KeyItem("Wail", c => c.KeyAssign.Bass.Wail),
 				KeyItem("Decide", c => c.KeyAssign.Bass.Decide),
 				KeyItem("Cancel", c => c.KeyAssign.Bass.Cancel))
