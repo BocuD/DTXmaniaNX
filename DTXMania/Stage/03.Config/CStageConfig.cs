@@ -354,6 +354,9 @@ internal class CStageConfig : CStage
     private void CloseKeyAssign()
     {
         configList.isVisible = true;
+
+        //a pad row shows the mapping the panel has just been editing
+        configList.RefreshValues();
     }
 
     private void KeyAssignNext()
