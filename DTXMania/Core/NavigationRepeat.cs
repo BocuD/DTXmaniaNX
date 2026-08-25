@@ -44,7 +44,7 @@ public sealed class NavigationRepeat
 
     public static NavigationRepeat Horizontal() =>
         new(SlimDXKey.LeftArrow, SlimDXKey.RightArrow,
-            EPad.PickUp, EPad.PickDown, EPad.SD, EPad.FT);
+            EPad.PickDown, EPad.PickUp, EPad.SD, EPad.FT);
 
     /// <summary>
     /// Runs <paramref name="onPrevious"/>/<paramref name="onNext"/> for the arrow keys and the guitar
@@ -70,7 +70,8 @@ public sealed class NavigationRepeat
 
         //the neck has no double duty, but a strum held under P or Y is on its way to deciding or
         //cancelling and must not scroll the list out from under that
-        bool guitarScrolls = guitarPrevious != EPad.PickUp || Input.StrumIsNavigation;
+        bool strums = guitarPrevious is EPad.PickUp or EPad.PickDown;
+        bool guitarScrolls = !strums || Input.StrumIsNavigation;
 
         guitarRepeatPrevious!.tRepeatKey(guitarScrolls && CDTXMania.Pad.bPressingGB(guitarPrevious),
             onPrevious, FirstRepeatMs, RepeatIntervalMs);

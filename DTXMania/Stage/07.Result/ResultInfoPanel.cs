@@ -105,5 +105,28 @@ public class ResultInfoPanel : UIGroup
             new Vector3(266, 290, 0), new Vector2(0, 1));
         skillFraction.style = UiTextStyle.Italic | UiTextStyle.Bold;
         skillFraction.texturePadding.X = 50;
+
+        CreateSkillBar(skillGroup);
+    }
+
+    private static void CreateSkillBar(UIGroup skillGroup)
+    {
+        var fill = skillGroup.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\5_skillbar_fill.png"))));
+        fill.name = "SkillBarFill";
+        fill.position = new Vector3(93, 319, 0);
+        fill.anchor = new Vector2(0.0f, 0.5f);
+        fill.size = new Vector2(286, 8);
+        fill.renderOrder = 1;
+        fill.isVisible = false;
+        fill.bindings.Add(new UIBinding("isVisible", "Result.ShowSkillBar"));
+        fill.bindings.Add(new UIBinding("size.X", "Result.SkillBarWidth"));
+
+        var frame = skillGroup.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\5_skillbar.png"))));
+        frame.name = "SkillBar";
+        frame.position = new Vector3(14, 318, 0);
+        frame.anchor = new Vector2(0.0f, 0.5f);
+        frame.renderOrder = 2;
+        frame.isVisible = false;
+        frame.bindings.Add(new UIBinding("isVisible", "Result.ShowSkillBar"));
     }
 }
