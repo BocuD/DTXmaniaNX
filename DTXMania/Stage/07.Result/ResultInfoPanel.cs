@@ -113,18 +113,19 @@ public class ResultInfoPanel : UIGroup
     {
         var fill = skillGroup.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\5_skillbar_fill.png"))));
         fill.name = "SkillBarFill";
-        fill.position = new Vector3(93, 319, 0);
+        fill.position = new Vector3(155, 285, 0);
         fill.anchor = new Vector2(0.0f, 0.5f);
-        fill.size = new Vector2(286, 8);
+        fill.size = new Vector2(286, 10);
         fill.renderOrder = 1;
         fill.isVisible = false;
         fill.bindings.Add(new UIBinding("isVisible", "Result.ShowSkillBar"));
         fill.bindings.Add(new UIBinding("size.X", "Result.SkillBarWidth"));
 
-        var frame = skillGroup.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\5_skillbar.png"))));
+        var frame = skillGroup.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\Result\bar.png"))));
         frame.name = "SkillBar";
-        frame.position = new Vector3(14, 318, 0);
+        frame.position = new Vector3(148, 285, 0);
         frame.anchor = new Vector2(0.0f, 0.5f);
+        frame.scale = new Vector3(0.66f, 0.66f, 1.0f);
         frame.renderOrder = 2;
         frame.isVisible = false;
         frame.bindings.Add(new UIBinding("isVisible", "Result.ShowSkillBar"));
