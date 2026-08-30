@@ -65,14 +65,14 @@ public class SkinEditorWindow
             if (ImGui.BeginTabItem("Skins"))
             {
                 DrawAvailableSkinsSection(skinManager, currentSkin);
+                DrawCreateSkinModal(skinManager);
+
                 DrawAdvancedSection();
                 ImGui.EndTabItem();
             }
 
             ImGui.EndTabBar();
         }
-
-        DrawCreateSkinModal(skinManager);
     }
 
     private static void DrawActiveSkinSection(SkinManager skinManager, SkinDescriptor? currentSkin)
