@@ -115,6 +115,12 @@ public partial class UIText : UITexture
             _dirty = true;
         }
 
+        //the texture is rasterized for one canvas scale, so resizing the window needs a new one
+        if (textureRenderScale != RenderScale)
+        {
+            _dirty = true;
+        }
+
         if (_dirty)
         {
             RequestRender();
