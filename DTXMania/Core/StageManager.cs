@@ -619,9 +619,32 @@ internal class StageManager
         }
     }
 
-    public static bool preventStageChanges;
+    public static bool pauseStageChanges;
+
+    /// <summary>Only safe while the skin editor is driving: a change the game needed is lost.</summary>
+    public static bool dropStageChanges;
+
+    /// <summary>
+    /// A change the skin editor is waiting on rather than asking for itself: the loading screen handing over
+    /// to the performance screen.
+    /// </summary>
+    public CStage? handOverTo;
 
     public void tChangeStage(CStage newStage, bool activateNewStage = true, bool deactivateOldStage = true)
+    {
+        if (dropStageChanges && newStage != handOverTo)
+        {
+            return;
+        }
+
+        handOverTo = null;
+        Request(newStage, activateNewStage, deactivateOldStage);
+    }
+
+    /// <summary>Goes through even while <see cref="dropStageChanges"/> is on: the editor's own jumps.</summary>
+    public void ForceChangeStage(CStage newStage) => Request(newStage, true, true);
+
+    private void Request(CStage newStage, bool activateNewStage, bool deactivateOldStage)
     {
         nextStage = newStage;
         this.activateNewStage = activateNewStage;
@@ -633,9 +656,15 @@ internal class StageManager
     private CStage nextStage;
     private bool activateNewStage;
     private bool deactivateOldStage;
+    /// <summary>So lifting a hold does not act on a change that is no longer wanted.</summary>
+    public void CancelPendingStageChange()
+    {
+        stageChangeRequested = false;
+    }
+
     public void HandleStageChanges()
     {
-        if (preventStageChanges) return;
+        if (pauseStageChanges) return;
         if (!stageChangeRequested) return;
         
         if (deactivateOldStage)

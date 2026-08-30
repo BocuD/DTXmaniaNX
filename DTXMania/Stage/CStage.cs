@@ -21,6 +21,8 @@ public abstract class CStage : CActivity, IUIInputHandler
 
 	public virtual bool NeedsImGui => false;
 
+	public static bool previewMode;
+
 	internal EStage eStageID;
 	public enum EStage
 	{
@@ -150,7 +152,7 @@ public abstract class CStage : CActivity, IUIInputHandler
 			FirstUpdate();
 			bJustStartedUpdate = false;
 		}
-		
+
 		UICanvas.Place(ui);
 		ui.Draw(Matrix4x4.Identity);
 		
