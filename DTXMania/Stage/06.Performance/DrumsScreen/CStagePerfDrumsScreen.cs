@@ -178,10 +178,11 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
 
     public override int OnUpdateAndDraw()
     {
+        //base draws the UI, which is gone once deactivated
+        if (!bActivated) return 0;
+
         base.OnUpdateAndDraw();
 
-        if (!bActivated) return 0;
-        
         if (bIsFinishedFadeout)
         {
             if (!CDTXMania.Skin.soundStageClear.bIsPlaying && !CDTXMania.Skin.soundSTAGEFAILED音.bIsPlaying)
@@ -294,7 +295,12 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         bIsFinishedFadeout = tUpdateAndDraw_FadeIn_Out();
         AllocationProbe.End(probeFade);
 
-        if (bIsFinishedPlaying && (ePhaseID == EPhase.Common_DefaultState))
+        //loop instead of going to the result screen
+        if (bIsFinishedPlaying && ePhaseID == EPhase.Common_DefaultState && previewMode)
+        {
+            tRestartForPreview();
+        }
+        else if (bIsFinishedPlaying && (ePhaseID == EPhase.Common_DefaultState))
         {
             if ((actGauge.IsFailed(EInstrumentPart.DRUMS)) && (ePhaseID == EPhase.Common_DefaultState))
             {

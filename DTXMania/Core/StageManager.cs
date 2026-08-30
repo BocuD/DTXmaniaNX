@@ -621,13 +621,10 @@ internal class StageManager
 
     public static bool pauseStageChanges;
 
-    /// <summary>Only safe while the skin editor is driving: a change the game needed is lost.</summary>
+    //dropped changes are gone for good, so only the skin editor should set this
     public static bool dropStageChanges;
 
-    /// <summary>
-    /// A change the skin editor is waiting on rather than asking for itself: the loading screen handing over
-    /// to the performance screen.
-    /// </summary>
+    //lets the loading screen hand over to the performance screen while everything else is held
     public CStage? handOverTo;
 
     public void tChangeStage(CStage newStage, bool activateNewStage = true, bool deactivateOldStage = true)
@@ -641,7 +638,7 @@ internal class StageManager
         Request(newStage, activateNewStage, deactivateOldStage);
     }
 
-    /// <summary>Goes through even while <see cref="dropStageChanges"/> is on: the editor's own jumps.</summary>
+    //ignores dropStageChanges
     public void ForceChangeStage(CStage newStage) => Request(newStage, true, true);
 
     private void Request(CStage newStage, bool activateNewStage, bool deactivateOldStage)
@@ -656,7 +653,7 @@ internal class StageManager
     private CStage nextStage;
     private bool activateNewStage;
     private bool deactivateOldStage;
-    /// <summary>So lifting a hold does not act on a change that is no longer wanted.</summary>
+    //drop a queued change instead of running it later
     public void CancelPendingStageChange()
     {
         stageChangeRequested = false;

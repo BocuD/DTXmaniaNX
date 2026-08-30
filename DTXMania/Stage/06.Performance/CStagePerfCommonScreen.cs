@@ -415,7 +415,8 @@ internal abstract class CStagePerfCommonScreen : CStage
 
         LoopBeginMs = -1;
         LoopEndMs = -1;
-        bIsTrainingMode = false;
+        //do not write a score for a chart played in the editor
+        bIsTrainingMode = previewMode;
         bPAUSE = false;
 
         #region [ Sounds that should be registered in the mixer before starting playing (chip sounds that will be played immediately after the start of the performance) ]
@@ -4799,7 +4800,77 @@ internal abstract class CStagePerfCommonScreen : CStage
 
         tJumpInSong(nStartTime);
     }
-    protected void tJumpInSong(long newPosition)
+    #region [ skin editor transport ]
+
+    //same paths the training keys use
+
+    public long PreviewPositionMs => AudioMixer.Timer.nCurrentTime;
+
+    //a chart has no length of its own, so use the last chip
+    public long PreviewLengthMs => listChip is { Count: > 0 } ? listChip[^1].nPlaybackTimeMs : 0;
+
+    public long PreviewLoopBeginMs => LoopBeginMs;
+    public long PreviewLoopEndMs => LoopEndMs;
+
+    public bool PreviewPaused
+    {
+        get => bPAUSE;
+        set
+        {
+            if (bPAUSE == value)
+            {
+                return;
+            }
+
+            bPAUSE = value;
+
+            if (value)
+            {
+                AudioMixer.Timer.tPause();
+                CDTXMania.Timer.tPause();
+                CDTXMania.DTX.tPausePlaybackForAllChips();
+            }
+            else
+            {
+                AudioMixer.Timer.tResume();
+                CDTXMania.Timer.tResume();
+                CDTXMania.DTX.tResumePlaybackForAllChips();
+            }
+        }
+    }
+
+    public void PreviewSetLoop(long beginMs, long endMs)
+    {
+        LoopBeginMs = Math.Max(0, beginMs);
+        LoopEndMs = Math.Max(LoopBeginMs + 1, endMs);
+    }
+
+    public void PreviewClearLoop()
+    {
+        LoopBeginMs = -1;
+        LoopEndMs = -1;
+    }
+
+    public void PreviewChangeSpeed(int offset) => tChangePlaySpeed(offset);
+
+    #endregion
+
+    //the Restart key restarts via the loading screen, which would rebuild the layout
+    public void tRestartForPreview()
+    {
+        tJumpInSong(0);
+
+        //nobody asked for this restart, so clear the score
+        for (int instrument = 0; instrument < 3; instrument++)
+        {
+            nHitCount_ExclAuto[instrument] = new CHITCOUNTOFRANK();
+            nHitCount_IncAuto[instrument] = new CHITCOUNTOFRANK();
+        }
+
+        actCombo.nCurrentCombo = default;
+    }
+
+    public void tJumpInSong(long newPosition)
     {
         long nNewPosition = Math.Max(0, newPosition);
         Trace.TraceInformation("JUMP IN SONG currentPosition={0}, newPosition={1}", AudioMixer.Timer.nCurrentTime, nNewPosition);

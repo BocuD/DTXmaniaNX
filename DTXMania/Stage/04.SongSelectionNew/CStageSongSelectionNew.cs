@@ -9,6 +9,7 @@ using DTXMania.SongDb.Sorting;
 using DTXMania.UI;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.Skin;
+using DTXMania.UI.Skin.Preview;
 using DTXMania.UI.DynamicElements;
 using DTXMania.UI.Text;
 
@@ -16,7 +17,8 @@ namespace DTXMania;
 
 public class CStageSongSelectionNew : CStage
 {
-    private SongDb.SongDb songDb => CDTXMania.SongDb;
+    //fake songs, so the list can be skinned with none installed
+    private SongDb.SongDb songDb => previewMode ? SkinPreview.SongDb : CDTXMania.SongDb;
     private SortMenuContainer? sortMenuContainer;
     private CActSelectPresound actPresound;
     private PreviewVideoBackground previewVideo;
@@ -271,14 +273,14 @@ public class CStageSongSelectionNew : CStage
         SongNode? selectedNodeBackup = selectedNode;
         CChartData? selectedChartBackup = selectedChart;
         
-        //determine if we need to rebuild sort cache or not
-        if (CDTXMania.GetCurrentInstrument() != lastInstrument)
+        //the editor swaps the whole song list, so check the database too
+        if (CDTXMania.GetCurrentInstrument() != lastInstrument || !ReferenceEquals(songDb, lastSongDb))
         {
-            //force a recreation of sort cache if instrument has changed
             sortCache.Clear();
         }
-        
+
         lastInstrument = CDTXMania.GetCurrentInstrument();
+        lastSongDb = songDb;
         
         Trace.TraceInformation("Preparing sort cache...");
         DateTime startTime = DateTime.Now;
@@ -625,6 +627,7 @@ public class CStageSongSelectionNew : CStage
     private SongDbSort currentSort;
     private Dictionary<SongDbSort, SongNode> sortCache = new();
     private int lastInstrument;
+    private SongDb.SongDb? lastSongDb;
     public bool isScrolling => selectionContainer.isScrolling;
 
     public void ApplySort(SongDbSort sorter)

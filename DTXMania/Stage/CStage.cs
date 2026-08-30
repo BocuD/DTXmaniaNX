@@ -21,6 +21,7 @@ public abstract class CStage : CActivity, IUIInputHandler
 
 	public virtual bool NeedsImGui => false;
 
+	//set by the skin editor. Stages fake any data they are missing and never advance on their own
 	public static bool previewMode;
 
 	internal EStage eStageID;

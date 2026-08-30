@@ -14,6 +14,7 @@ public static class InspectorManager
     public static Inspector.Inspector inspector { get; } = new();
     public static HierarchyWindow hierarchyWindow { get; } = new();
     public static SkinEditorWindow skinEditor { get; } = new();
+    public static SkinPreviewPanel skinPreview { get; } = new();
     public static TextureInspector textureInspector { get; private set; }
     public static LogWindow logWindow { get; } = new();
     public static GameWindow gameWindow { get; } = new();
@@ -82,6 +83,19 @@ public static class InspectorManager
         windows.Add(new Window("Drawable Tracker", () => DrawableTracker.DrawWindow()));
         windows.Add(new Window("Audio Mixer", () => Core.AudioMixer.DrawWindow()));
         windows.Add(new Window("Display Controls", () => RendererInfo.Draw()));
+    }
+
+    //name as shown in the Window menu; unknown names do nothing
+    public static void ShowWindow(string name, bool show = true)
+    {
+        foreach (Window window in windows)
+        {
+            if (window.name == name)
+            {
+                window.enabled = show;
+                return;
+            }
+        }
     }
 
     public static void Draw(bool drawGameWindow, ImTextureID? gameTextureId, Vector2 gameTextureSize, Vector2 defaultFramebufferSize)
