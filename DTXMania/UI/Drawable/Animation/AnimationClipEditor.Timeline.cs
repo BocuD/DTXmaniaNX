@@ -350,7 +350,7 @@ public sealed partial class AnimationClipEditor
             {
                 AddKeyframeAtScrub(track, animator, root);
             }
-            if (plusHovered) ImGui.SetTooltip("Add keyframe at current scrub time using the property's current value");
+            if (plusHovered) ImGui.SetTooltip("Add keyframe at current scrub time");
 
             // Draw the "+" visual: a rounded rect filled in the standard button colors, with a
             // centered glyph.

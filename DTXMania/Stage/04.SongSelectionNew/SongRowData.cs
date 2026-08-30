@@ -115,7 +115,7 @@ public sealed class SongRowData
 
         ShowSkill = true;
         Skill = $"{skill.skillPoints:0.00}";
-        SkillBarWidth = 286.0 * (skill.skillPoints / skill.maxSkillPoints);
+        SkillBarWidth = 203.0 * (skill.skillPoints / skill.maxSkillPoints);
     }
 
     private void UpdateLamp()
