@@ -317,6 +317,12 @@ internal class CStageConfig : CStage
 
     private void StartExitConfig()
     {
+        //the change out of here is dropped in preview, which would leave the stage fading out forever
+        if (previewMode)
+        {
+            return;
+        }
+
         //nothing here reads input once the stage starts leaving
         UIFocus.Pop(configLeftOptionsMenu);
 

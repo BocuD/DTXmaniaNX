@@ -2312,7 +2312,9 @@ internal abstract class CStagePerfCommonScreen : CStage
         {
             ChangeInputAdjustTimeInPlaying(keyboard, +1);
         }
-        else if (!bPAUSE && (ePhaseID == EPhase.Common_DefaultState) && (keyboard.bKeyPressed(SlimDXKey.Escape)))
+        //leaving deactivates this stage before the change runs, and in preview the change is dropped. The
+        //skin editor is how you leave instead
+        else if (!bPAUSE && !previewMode && (ePhaseID == EPhase.Common_DefaultState) && (keyboard.bKeyPressed(SlimDXKey.Escape)))
         {	// escape (exit)
             GitaDoraTransition.Close();
             ePhaseID = EPhase.Common_FadeOut;
@@ -2325,6 +2327,14 @@ internal abstract class CStagePerfCommonScreen : CStage
                 AudioMixer.Timer.tResume();
                 CDTXMania.Timer.tResume();
             }
+
+            //restarting goes out through the loading screen, so in preview seek to the start instead
+            if (previewMode)
+            {
+                tRestartForPreview();
+                return;
+            }
+
             ePhaseID = EPhase.PERFORMANCE_STAGE_RESTART;
             eReturnValueAfterFadeOut = EPerfScreenReturnValue.Restart;
         }

@@ -709,7 +709,9 @@ internal class CStageResult : CStage
 			bIsCheckedWhetherResultScreenShouldSaveOrNot = true;
 		}
 		#endregion
-		if ( ePhaseID == EPhase.Common_DefaultState && UIFocus.Holds( this ) )
+		//leaving deactivates this stage before the change runs, and in preview the change is dropped. The
+		//skin editor is how you leave instead
+		if ( ePhaseID == EPhase.Common_DefaultState && UIFocus.Holds( this ) && !previewMode )
 		{
 			if ( CDTXMania.InputManager.Keyboard.bKeyPressed( (int)SlimDXKey.Escape ) )
 			{

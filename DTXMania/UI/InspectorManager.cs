@@ -46,8 +46,7 @@ public static class InspectorManager
         }
     }
 
-    public static bool WantsImGui => inspectorEnabled || logWindowEnabled
-                                     || Core.CDTXMania.StageManager?.rCurrentStage?.NeedsImGui == true;
+    public static bool WantsImGui => inspectorEnabled || logWindowEnabled;
 
     public static ImDrawListPtr gizmoDrawList;
     public static Rectangle gizmoRect;
