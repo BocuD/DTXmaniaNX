@@ -120,9 +120,13 @@ internal class CStageResult : CStage
 	//is set up here too, once the panels it targets exist
 	public override void OnLayoutReady()
 	{
-		background = ui.AddChild(new UIImage(BaseTexture.LoadFromPath(ResultBackgroundPath())));
-		background.renderOrder = -100;
-		background.name = "Background";
+		UICoverGroup backgroundCover = ui.AddChild(new UICoverGroup("Background"));
+		backgroundCover.renderOrder = -100;
+		backgroundCover.dontSerialize = true;
+
+		background = backgroundCover.AddChild(new UIImage(BaseTexture.LoadFromPath(ResultBackgroundPath())));
+		background.name = "Image";
+		background.size = UISize.Inherited;
 		background.dontSerialize = true;
 
 		var rankIcon = ui.AddChild(new ResultRankIcon(CDTXMania.GetCurrentInstrument()));

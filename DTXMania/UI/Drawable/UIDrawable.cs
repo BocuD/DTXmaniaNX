@@ -49,12 +49,37 @@ public abstract class UIDrawable : IDisposable
         ? new Vector3(parentAnchor.X * parent.size.X, parentAnchor.Y * parent.size.Y, 0f)
         : Vector3.Zero;
 
+    //an inheriting axis is placed by its margins, so position and parentAnchor only reach the others. The
+    //pivot term cancels the one the anchor matrix applies, so the box's start edge lands on the margin
+    private Vector3 LocalTranslation
+    {
+        get
+        {
+            Vector3 translation = position + ParentAnchorOffset;
+
+            if (size.xMode == UiSizeMode.Inherit)
+            {
+                translation.X = size.marginLeft + pivot.X * size.X * scale.X;
+            }
+
+            if (size.yMode == UiSizeMode.Inherit)
+            {
+                translation.Y = size.marginTop + pivot.Y * size.Y * scale.Y;
+            }
+
+            return translation;
+        }
+    }
+
     //the nine corners, edges and centre, in the order the grid draws them
     private static readonly float[] AnchorStops = [0f, 0.5f, 1f];
 
-    private void DrawParentAnchor()
+    private void DrawParentAnchor(bool xDriven, bool yDriven)
     {
-        Inspector.Inspector.Inspect("Parent Anchor", ref parentAnchor);
+        Inspector.Inspector.InspectAxes("Parent Anchor", ref parentAnchor, xDriven, yDriven);
+
+        //a cell sets both axes at once, so the grid is only worth offering while one of them still moves
+        ImGui.BeginDisabled(xDriven && yDriven);
 
         //a grid of the nine places anyone actually wants, for the arbitrary values the field above
         for (int y = 0; y < AnchorStops.Length; y++)
@@ -85,6 +110,8 @@ public abstract class UIDrawable : IDisposable
                 }
             }
         }
+
+        ImGui.EndDisabled();
     }
 
     public void UpdateLocalTransformMatrix()
@@ -96,7 +123,7 @@ public abstract class UIDrawable : IDisposable
         }
 
         Vector3 anchorOffset = new(-pivot.X * size.X, -pivot.Y * size.Y, 0f);
-        Matrix4x4 translationMatrix = Matrix4x4.CreateTranslation(position + ParentAnchorOffset);
+        Matrix4x4 translationMatrix = Matrix4x4.CreateTranslation(LocalTranslation);
         Matrix4x4 rotationMatrix = Matrix4x4.CreateFromYawPitchRoll(rotation.Y, rotation.X, rotation.Z);
         Matrix4x4 scaleMatrix = Matrix4x4.CreateScale(scale);
         Matrix4x4 anchorMatrix = Matrix4x4.CreateTranslation(anchorOffset * scale);
@@ -243,6 +270,43 @@ public abstract class UIDrawable : IDisposable
 
     public virtual void DrawInspector()
     {
+        DrawIdentity();
+
+        if (ImGui.CollapsingHeader("Layout", ImGuiTreeNodeFlags.DefaultOpen))
+        {
+            //an inheriting axis is placed by its margins, so these fields would be lies
+            bool xDriven = size.xMode == UiSizeMode.Inherit;
+            bool yDriven = size.yMode == UiSizeMode.Inherit;
+
+            Inspector.Inspector.Inspect("Size", ref size);
+            Inspector.Inspector.InspectAxes("Position", ref position, xDriven, yDriven);
+            Inspector.Inspector.Inspect("Pivot", ref pivot);
+            DrawParentAnchor(xDriven, yDriven);
+        }
+
+        if (ImGui.CollapsingHeader("Transform", ImGuiTreeNodeFlags.DefaultOpen))
+        {
+            Inspector.Inspector.Inspect("Scale", ref scale);
+            Inspector.Inspector.Inspect("Rotation", ref rotation);
+        }
+
+        if (ImGui.CollapsingHeader("Display", ImGuiTreeNodeFlags.DefaultOpen))
+        {
+            if (ImGui.InputInt("Render Order", ref renderOrder))
+            {
+                parent?.InvalidateOrder();
+            }
+
+            ImGui.Checkbox("Is Visible", ref isVisible);
+            ImGui.Checkbox("NonSerialized", ref dontSerialize);
+        }
+
+        DrawBindingsSection();
+        DrawDataContextSection();
+    }
+
+    private void DrawIdentity()
+    {
         ImGui.Text(string.IsNullOrWhiteSpace(name) ? GetType().Name : name);
         ImGui.SameLine();
         string renameId = GetHashCode() + "Rename";
@@ -261,38 +325,27 @@ public abstract class UIDrawable : IDisposable
 
             ImGui.EndPopup();
         }
-        
+
         ImGui.BeginDisabled(true);
         ImGui.Text(id);
         ImGui.EndDisabled();
+    }
 
-        if (ImGui.InputInt("Render Order", ref renderOrder))
-        {
-            parent?.InvalidateOrder();
-        }
-        Inspector.Inspector.Inspect("Position", ref position);
-        Inspector.Inspector.Inspect("Anchor", ref pivot);
-        DrawParentAnchor();
-        Inspector.Inspector.Inspect("Size", ref size);
-        Inspector.Inspector.Inspect("Scale", ref scale);
-        Inspector.Inspector.Inspect("Rotation", ref rotation);
-        ImGui.Checkbox("Is Visible", ref isVisible);
-
-        ImGui.Checkbox("NonSerialized", ref dontSerialize);
-
-        DrawBindingsSection();
-
+    private void DrawDataContextSection()
+    {
         IUIDataContext? dataContext = DataContexts().FirstOrDefault(c => c != UIDataContext.Global);
-        if (dataContext != null)
+        if (dataContext == null)
         {
-            ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.4f, 1f, 0.5f, 1f));
-            bool open = ImGui.CollapsingHeader("Data Context");
-            ImGui.PopStyleColor();
+            return;
+        }
 
-            if (open)
-            {
-                Inspector.Inspector.DrawDataContextTree(dataContext);
-            }
+        ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.4f, 1f, 0.5f, 1f));
+        bool open = ImGui.CollapsingHeader("Data Context");
+        ImGui.PopStyleColor();
+
+        if (open)
+        {
+            Inspector.Inspector.DrawDataContextTree(dataContext);
         }
     }
 
@@ -352,7 +405,7 @@ public abstract class UIDrawable : IDisposable
         Matrix4x4 localWithoutAnchor =
             Matrix4x4.CreateScale(scale) *
             Matrix4x4.CreateFromYawPitchRoll(rotation.Y, rotation.X, rotation.Z) *
-            Matrix4x4.CreateTranslation(position + ParentAnchorOffset);
+            Matrix4x4.CreateTranslation(LocalTranslation);
 
         Matrix4x4 parentMatrix = parent?.GetFullTransformMatrix() ?? Matrix4x4.Identity;
         Matrix4x4 worldMatrix = localWithoutAnchor * parentMatrix;
@@ -375,8 +428,21 @@ public abstract class UIDrawable : IDisposable
             {
                 scale = newScale;
 
-                //the gizmo works in parent space, which is where the pivot offset already is
-                position = newPosition - ParentAnchorOffset;
+                //the gizmo works in parent space, which is where the pivot offset already is. An
+                //inheriting axis keeps its position, since the margins are what place it
+                Vector3 dragged = newPosition - ParentAnchorOffset;
+
+                if (size.xMode != UiSizeMode.Inherit)
+                {
+                    position.X = dragged.X;
+                }
+
+                if (size.yMode != UiSizeMode.Inherit)
+                {
+                    position.Y = dragged.Y;
+                }
+
+                position.Z = dragged.Z;
                 rotation = QuaternionToEuler(newRotation);
             }
         }

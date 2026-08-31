@@ -73,6 +73,8 @@ public class CStageSongSelectionNew : CStage
     //the selected song's display values, pushed on change: formatting them per frame would allocate
     private readonly UIDataContext songInfo = new();
 
+    protected override StageRoot CreateRoot() => new() { canvasFit = UiCanvasFit.Fill };
+
     public override void RegisterBindings()
     {
         foreach (string key in SongInfoKeys)
@@ -117,10 +119,23 @@ public class CStageSongSelectionNew : CStage
 
     public override void BuildDefaultLayout()
     {
-        ui.AddChild(new UIImage
+        //the video draws over the still, so turning the video off uncovers the still
+        UICoverGroup background = ui.AddChild(new UICoverGroup("Background"));
+        background.renderOrder = -100;
+
+        background.AddChild(new UIImage
         {
             imageSource = ImageSource.File, image = SkinResource.System(@"Graphics\5_background.jpg"),
-            renderOrder = -101, position = Vector3.Zero, name = "Background"
+            renderOrder = 0, name = "Image", size = UISize.Inherited
+        });
+
+        //the per-song preview movie is PreviewVideoBackground, further down
+        background.AddChild(new UINewVideoRenderer
+        {
+            video = SkinResource.System(@"Graphics\5_background.mp4"),
+            renderOrder = 1,
+            name = "Video",
+            size = UISize.Inherited
         });
 
         ui.AddChild(new UIImage
@@ -138,7 +153,8 @@ public class CStageSongSelectionNew : CStage
         ui.AddChild(new UIImage
         {
             imageSource = ImageSource.File, image = SkinResource.System(@"Graphics\SongSelect\top_bar.png"),
-            renderOrder = 12, name = "TopBar", size = { X = 1280 } //height stays on the texture
+            renderOrder = 12, name = "TopBar",
+            size = new UISize { xMode = UiSizeMode.Inherit } //height stays on the texture
         });
 
         ui.AddChild(new UIImage
@@ -185,27 +201,23 @@ public class CStageSongSelectionNew : CStage
         commentText.bindings.Add(new UIBinding("text", "SongComment"));
         commentText.name = "CommentText";
 
-        //ambient looping background video; the per-song preview movie is PreviewVideoBackground below
-        ui.AddChild(new UINewVideoRenderer
-        {
-            video = SkinResource.System(@"Graphics\5_background.mp4"),
-            renderOrder = -100,
-            name = "BackgroundVideo"
-        });
-
         //the container is serializable (position + which row component it uses) but its rows are runtime
         var songSelect = ui.AddChild(new SongSelectionContainer());
-        songSelect.position = new Vector3(765, 320, 0);
+        songSelect.parentAnchor = UICanvas.Right;
+        songSelect.position = UICanvas.FromAnchor(UICanvas.Right, 765, 320);
         songSelect.name = "SongSelect";
 
         //StatusPanel -> 3 pane component instances -> 5 rows each; a skin's json carries the panes instead
         var statusPanel = ui.AddChild(new StatusPanel());
+        statusPanel.parentAnchor = UICanvas.BottomLeft;
+        statusPanel.position = UICanvas.FromAnchor(UICanvas.BottomLeft, 0, 0);
         statusPanel.renderOrder = 6;
         statusPanel.BuildDefaultPanes();
 
         var sortMenu = ui.AddChild(new SortMenuContainer());
         sortMenu.component = "Components/SortMenu.json";
-        sortMenu.position = new Vector3(1281, 35, 0);
+        sortMenu.parentAnchor = UICanvas.TopRight;
+        sortMenu.position = UICanvas.FromAnchor(UICanvas.TopRight, 1281, 35);
         sortMenu.renderOrder = 8;
     }
 
@@ -214,7 +226,6 @@ public class CStageSongSelectionNew : CStage
         //swaps to the selected chart's PREMOVIE as the selection changes, like the preview sound
         previewVideo = ui.AddChild(new PreviewVideoBackground());
         previewVideo.renderOrder = -99;
-        previewVideo.position = Vector3.Zero;
 
         //the status panel, sort menu and selection container are part of the layout, so they may have
         //come from json
@@ -222,7 +233,9 @@ public class CStageSongSelectionNew : CStage
         sortMenuContainer = ui.GetChild<SortMenuContainer>("SortMenuContainer")!;
 
         densityGraph1 = ui.AddChild(new DensityGraph((EInstrumentPart)CDTXMania.GetCurrentInstrument()));
-        densityGraph1.position = new Vector3(CDTXMania.GetCurrentInstrument() == 0 ? 212 : 64, 720, 0);
+        densityGraph1.parentAnchor = UICanvas.BottomLeft;
+        densityGraph1.position =
+            UICanvas.FromAnchor(UICanvas.BottomLeft, CDTXMania.GetCurrentInstrument() == 0 ? 212 : 64, 720);
         densityGraph1.renderOrder = 4;
         densityGraph1.name = "DensityGraph";
         densityGraph1.dontSerialize = true;
@@ -230,16 +243,18 @@ public class CStageSongSelectionNew : CStage
         songSearchMenu = ui.AddChild(new SongSearchMenu());
         songSearchMenu.renderOrder = 15;
         songSearchMenu.isVisible = false;
-        songSearchMenu.pivot = new Vector2(0.5f, 0.5f);
-        songSearchMenu.position = new Vector3(1280 / 2.0f, 720 / 2.0f, 0);
+        songSearchMenu.pivot = UICanvas.Center;
+        songSearchMenu.parentAnchor = UICanvas.Center;
+        songSearchMenu.position = Vector3.Zero;
         songSearchMenu.dontSerialize = true;
 
         quickMenu = ui.AddChild(new QuickMenu());
         quickMenu.component = "Components/QuickMenu.json";
         quickMenu.renderOrder = 15;
         quickMenu.isVisible = false;
-        quickMenu.pivot = new Vector2(0.5f, 0.5f);
-        quickMenu.position = new Vector3(1280 / 2.0f, 720 / 2.0f, 0);
+        quickMenu.pivot = UICanvas.Center;
+        quickMenu.parentAnchor = UICanvas.Center;
+        quickMenu.position = Vector3.Zero;
         quickMenu.dontSerialize = true;
 
         selectionContainer = ui.GetChild<SongSelectionContainer>("SongSelect");

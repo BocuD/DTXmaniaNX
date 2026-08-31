@@ -13,9 +13,9 @@ internal class CStageStartup : CStage
 {
 	private const int LogFontSize = 12;
 	private const float LogLineHeight = 17f;
-	private const float LogBoxHeight = 700f;
+	private const float LogMargin = 40f;
 
-	private static int LogRows => (int)(LogBoxHeight / LogLineHeight);
+	private static int LogRows => (int)((UICanvas.canvasSize.Y - LogMargin * 2f) / LogLineHeight);
 
 	private RuntimeLogListener? logSource;
 
@@ -45,7 +45,7 @@ internal class CStageStartup : CStage
 		background.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\1_background.png")))
 		{
 			name = "Image",
-			size = new Vector2(1280, 720)
+			size = UISize.Inherited
 		});
 
 		UIImage logo = ui.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\logo.png"))));
@@ -61,8 +61,13 @@ internal class CStageStartup : CStage
 
 		//the rows are laid out from the top of this, so moving the log means moving the group
 		UIGroup lines = ui.AddChild(new UIGroup("LogLines"));
-		lines.position = new Vector3(0, 20, 0);
-		lines.size = new Vector2(1240, LogBoxHeight);
+		lines.size = new UISize
+		{
+			xMode = UiSizeMode.Inherit,
+			yMode = UiSizeMode.Inherit,
+			marginTop = LogMargin,
+			marginBottom = LogMargin
+		};
 
 		logRows = new UIText[LogRows];
 		oldestRow = 0;

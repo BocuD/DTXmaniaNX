@@ -123,7 +123,9 @@ internal class CActPerfVideo : CActivity
         if (parentGroup == null)
             return;
 
-        uiGroup = new UIGroup("CActPerfAVI UI");
+        //the cover group below anchors to the middle of this, so it has to be the whole canvas. An
+        //unclaimed box would be 1x1
+        uiGroup = new UIGroup("CActPerfAVI UI") { size = UISize.Inherited };
 
         //load clip panel texture (drums uses skill-meter-aware variants; guitar/bass use the C variant).
         bool isDrums = CDTXMania.GetCurrentInstrument() == 0;
@@ -217,11 +219,16 @@ internal class CActPerfVideo : CActivity
             windowedRenderer.dontSerialize = true; // imperative (per-song BGA); never part of a saved layout
             uiGroup.AddChild(windowedRenderer);
 
+            //CalculateFullscreenPosition places it inside the design box, which the cover group then
+            //scales out to the window
+            UICoverGroup fullscreenCover = new("FullscreenVideo") { dontSerialize = true };
+            uiGroup.AddChild(fullscreenCover);
+
             fullscreenRenderer = new UINewVideoRenderer(controller);
             fullscreenRenderer.isVisible = false;
-            fullscreenRenderer.name = "FullscreenVideo";
+            fullscreenRenderer.name = "Video";
             fullscreenRenderer.dontSerialize = true; // imperative (per-song BGA); never part of a saved layout
-            uiGroup.AddChild(fullscreenRenderer);
+            fullscreenCover.AddChild(fullscreenRenderer);
         }
         else
         {

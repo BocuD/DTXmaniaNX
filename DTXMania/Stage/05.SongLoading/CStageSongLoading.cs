@@ -132,12 +132,14 @@ internal class CStageSongLoading : CStage
     
     public override void BuildDefaultLayout()
     {
-        ui.AddChild(new UIImage
+        UICoverGroup background = ui.AddChild(new UICoverGroup("Background"));
+        background.renderOrder = -100;
+        background.AddChild(new UIImage
         {
-            name = "Background",
+            name = "Image",
             imageSource = ImageSource.File,
             image = SkinResource.System(@"Graphics\6_background.jpg"),
-            renderOrder = -100
+            size = UISize.Inherited
         });
         
         if (!string.IsNullOrWhiteSpace(strSongTitle))

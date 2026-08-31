@@ -33,6 +33,9 @@ public sealed class Viewport
     private int drawListFrame = -1;
     public bool hasDrawList => drawListFrame == ImGui.GetFrameCount();
 
+    //the pan and zoom readout
+    public bool showOverlay = true;
+
     //for content authored around a point rather than filling the target: axes through that point, drawn
     //behind the image so they show through wherever it is transparent
     public bool showOrigin;
@@ -208,7 +211,7 @@ public sealed class Viewport
     private void DrawOverlay(string id)
     {
         float zoomOffset = zoom - 1.0f;
-        if (translation == desiredRenderSize * 0.5f && MathF.Abs(zoomOffset) < 0.0001f)
+        if (!showOverlay || (translation == desiredRenderSize * 0.5f && MathF.Abs(zoomOffset) < 0.0001f))
         {
             return;
         }

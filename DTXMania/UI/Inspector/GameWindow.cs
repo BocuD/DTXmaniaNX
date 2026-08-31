@@ -16,8 +16,11 @@ public sealed class GameWindow
 
     public bool fit = true;
 
+    //the width the target renders at; the height is always the design height
+    public float designWidth = GameWindowSize.Width;
+
     public Vector2 renderSize => renderScale is { } scale
-        ? new Vector2(GameWindowSize.Width, GameWindowSize.Height) * scale
+        ? new Vector2(designWidth, GameWindowSize.Height) * scale
         : viewport.desiredRenderSize;
 
     /// <summary>Maps a position in the window onto the target the game rendered into, which is what the
@@ -51,6 +54,9 @@ public sealed class GameWindow
             viewport.FitTo(gameTextureSize, viewport.desiredRenderSize);
         }
 
+        //fitting keeps the view off its defaults, so the readout would never go away
+        viewport.showOverlay = !fit;
+
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, Vector2.Zero);
         viewport.Draw("GameViewport", gameTextureId, gameTextureSize, ImGui.GetContentRegionAvail());
         ImGui.PopStyleVar();
@@ -66,6 +72,13 @@ public sealed class GameWindow
     private void DrawToolbar(Vector2 gameTextureSize)
     {
         RenderScalePicker.Draw("Scale", ref renderScale);
+
+        ImGui.SameLine();
+
+        //without a scale the target is whatever size the panel is
+        ImGui.BeginDisabled(renderScale == null);
+        AspectRatioPicker.Draw("Aspect", ref designWidth);
+        ImGui.EndDisabled();
 
         ImGui.SameLine();
         ImGui.Checkbox("Fit", ref fit);

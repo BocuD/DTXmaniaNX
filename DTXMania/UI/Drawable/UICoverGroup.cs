@@ -26,6 +26,14 @@ public class UICoverGroup : UIGroup
 
     public override void Draw(Matrix4x4 parentMatrix)
     {
+        PlaceToCover();
+        base.Draw(parentMatrix);
+    }
+
+    /// <summary>Sets the transform that covers the window. A subclass whose own <c>Draw</c> does not reach
+    /// this one has to call it before building its transform.</summary>
+    protected void PlaceToCover()
+    {
         //the axis with further to go decides, so the other overflows
         Vector2 canvas = UICanvas.canvasSize;
         Vector2 design = UICanvas.logicalSize;
@@ -36,7 +44,5 @@ public class UICoverGroup : UIGroup
         parentAnchor = UICanvas.Center;
         position = Vector3.Zero;
         scale = new Vector3(cover, cover, 1f);
-
-        base.Draw(parentMatrix);
     }
 }

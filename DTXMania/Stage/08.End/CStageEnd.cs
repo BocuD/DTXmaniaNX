@@ -26,7 +26,11 @@ internal class CStageEnd : CStage
 
 	public override void BuildDefaultLayout()
 	{
-		ui.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\9_background.jpg"))));
+		UICoverGroup background = ui.AddChild(new UICoverGroup("Background"));
+		background.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\9_background.jpg")))
+		{
+			name = "Image"
+		});
 	}
 	
 	public override void OnActivate()

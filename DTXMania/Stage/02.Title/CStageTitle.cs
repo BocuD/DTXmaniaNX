@@ -49,7 +49,7 @@ internal class CStageTitle : CStage
 		background.AddChild(new UINewVideoRenderer
 		{
 			video = SkinResource.System(@"Graphics\2_background.mp4"),
-			size = new Vector2(1280, 720),
+			size = UISize.Inherited,
 			name = "Video"
 		});
 

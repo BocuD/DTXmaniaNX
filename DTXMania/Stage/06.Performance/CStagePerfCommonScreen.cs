@@ -3951,9 +3951,13 @@ internal abstract class CStagePerfCommonScreen : CStage
         }
 		
         BaseTexture texture = BaseTexture.LoadFromPath(string.IsNullOrEmpty(BgFilename) ? DefaultBgFilename : BgFilename);
-        background = ui.AddChild(new UIImage(texture));
-        background.name = "Static Background";
-        background.renderOrder = -1;
+
+        UICoverGroup backgroundCover = ui.AddChild(new UICoverGroup("Static Background"));
+        backgroundCover.renderOrder = -1;
+
+        background = backgroundCover.AddChild(new UIImage(texture));
+        background.name = "Image";
+        background.size = UISize.Inherited;
         background.isVisible = true;
 
         //todo: maybe reimplement the more complex background texture behaviour

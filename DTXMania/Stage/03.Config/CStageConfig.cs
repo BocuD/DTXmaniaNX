@@ -183,7 +183,7 @@ internal class CStageConfig : CStage
             name = "Image",
             imageSource = ImageSource.File,
             image = SkinResource.System(@"Graphics\4_background.png"),
-            size = new Vector2(1280, 720)
+            size = UISize.Inherited
         });
 
         ui.AddChild(new UIImage
