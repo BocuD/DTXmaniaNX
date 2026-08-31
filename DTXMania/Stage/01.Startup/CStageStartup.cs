@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Numerics;
 using DTXMania.Core;
 using DTXMania.Core.Framework;
+using DTXMania.UI;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.DynamicElements;
 using DTXMania.UI.Inspector;
@@ -30,6 +31,8 @@ internal class CStageStartup : CStage
 		bActivated = false;
 	}
 
+	protected override StageRoot CreateRoot() => new() { canvasFit = UiCanvasFit.Fill };
+
 	public override void RegisterBindings()
 	{
 
@@ -37,8 +40,20 @@ internal class CStageStartup : CStage
 
 	public override void BuildDefaultLayout()
 	{
-		var background = ui.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\1_background.jpg"))));
-		background.size = new Vector2(1280, 720);
+		UICoverGroup background = ui.AddChild(new UICoverGroup("Background"));
+		background.renderOrder = -100;
+		background.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\1_background.png")))
+		{
+			name = "Image",
+			size = new Vector2(1280, 720)
+		});
+
+		UIImage logo = ui.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\logo.png"))));
+		logo.name = "Logo";
+		logo.parentAnchor = new Vector2(1.0f, 1.0f);
+		logo.pivot = new Vector2(1.0f, 1.0f);
+		logo.position = new Vector3(-10, -15, 0);
+		logo.scale = new Vector3(0.18f, 0.18f, 1.0f);
 
 		var text = ui.AddChild(new UIText("", 15));
 		text.name = "VersionText";

@@ -44,26 +44,31 @@ internal class CStageTitle : CStage
 		text.name = "VersionText";
 		text.bindings.Add(new UIBinding("text", "Game.VersionDisplay"));
 
-		//ambient looping background video, part of the layout so its render order is skinnable
-		ui.AddChild(new UINewVideoRenderer
+		UICoverGroup background = ui.AddChild(new UICoverGroup("BackgroundVideo"));
+		background.renderOrder = -100;
+		background.AddChild(new UINewVideoRenderer
 		{
 			video = SkinResource.System(@"Graphics\2_background.mp4"),
-			renderOrder = -100,
-			name = "BackgroundVideo"
+			size = new Vector2(1280, 720),
+			name = "Video"
 		});
 
-
+		//the logo and the menu art are part of this image, so it stays at the design size
 		ui.AddChild(new UIImage
 		{
 			imageSource = ImageSource.File,
 			image = SkinResource.System(@"Graphics\2_background.png"),
 			renderOrder = -99,
-			position = Vector3.Zero,
+			size = new Vector2(1280, 720),
+			parentAnchor = UICanvas.Center,
+			pivot = UICanvas.Center,
 			name = "Background"
 		});
 
+		//placed from the middle of the window, so it stays put at any aspect
 		UIMenu menu = ui.AddChild(new UIMenu("TitleMenu"));
-		menu.position = new Vector3(MENU_X, MENU_Y, 0);
+		menu.parentAnchor = UICanvas.Center;
+		menu.position = UICanvas.FromCenter(MENU_X, MENU_Y);
 		menu.itemOffset = new Vector3(0, MENU_H, 0);
 		menu.itemComponent = @"Components/TitleMenuItem.json";
 		menu.renderOrder = 10;

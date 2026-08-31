@@ -50,6 +50,11 @@ public class Modal : UIGroup
         float screenHeight = GameWindowSize.Height;
         float centerX = screenWidth / 2f;
 
+        //a design sized box centred in the window, so the placements below are in design space
+        size = new Vector2(screenWidth, screenHeight);
+        parentAnchor = UICanvas.Center;
+        pivot = UICanvas.Center;
+
         const float topPadding = 20f;
         const float titleToDescriptionGap = 18f;
         const float descriptionToOptionsGap = 20f;
@@ -57,8 +62,10 @@ public class Modal : UIGroup
 
         UIImage backdrop = AddChild(new UIImage(BaseTexture.CreateSolidColor(new Color4(0f, 0f, 0f, 0.6f))));
         backdrop.name = "Backdrop";
-        backdrop.position = new Vector3(0f, 0f, 0f);
-        backdrop.size = new Vector2(screenWidth, screenHeight);
+        //oversized so the dimming reaches the edges of a window that is not 16:9
+        backdrop.parentAnchor = UICanvas.Center;
+        backdrop.pivot = UICanvas.Center;
+        backdrop.size = new Vector2(4000f, 4000f);
         backdrop.renderOrder = 0;
 
         //both texts are rasterized before anything is placed: the panel is sized to what they measured,
