@@ -29,6 +29,10 @@ public sealed class Viewport
     public Rectangle rect { get; private set; }
     public ImDrawListPtr drawList { get; private set; }
 
+    //ImGui recycles a window's draw list, so the pointer is only good for the frame it was taken on
+    private int drawListFrame = -1;
+    public bool hasDrawList => drawListFrame == ImGui.GetFrameCount();
+
     //for content authored around a point rather than filling the target: axes through that point, drawn
     //behind the image so they show through wherever it is transparent
     public bool showOrigin;
@@ -58,6 +62,7 @@ public sealed class Viewport
 
         ImGui.BeginChild(id, availableSize, ImGuiChildFlags.None, viewportFlags);
         drawList = ImGui.GetWindowDrawList();
+        drawListFrame = ImGui.GetFrameCount();
 
         Vector2 renderOffset = ImGui.GetCursorScreenPos();
         Vector2 size = ImGui.GetContentRegionAvail();

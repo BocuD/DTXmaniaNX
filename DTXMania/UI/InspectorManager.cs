@@ -142,6 +142,10 @@ public static class InspectorManager
         if (drawGameWindow)
         {
             gameWindow.Draw(gameTextureId, gameTextureSize);
+        }
+
+        if (drawGameWindow && gameWindow.viewport.hasDrawList)
+        {
             gameRect = gameWindow.viewport.rect;
             gameDrawList = gameWindow.viewport.drawList;
             gameView = gameWindow.viewport.GetViewMatrix();
