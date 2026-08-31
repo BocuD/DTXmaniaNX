@@ -82,7 +82,7 @@ internal class CBoxDef
 
 	public void t読み込み( string boxdefファイル名 )
 	{
-		StreamReader reader = new StreamReader( boxdefファイル名, Encoding.GetEncoding( "shift-jis" ) );
+		StreamReader reader = ChartTextEncoding.OpenText( boxdefファイル名 );
 		string str = null;
 		while( ( str = reader.ReadLine() ) != null )
 		{
