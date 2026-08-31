@@ -401,7 +401,7 @@ internal partial class CDTXMania
     {
         PumpMainThreadActions();
 
-        UICanvas.Place(persistentUIGroup);
+        UICanvas.Place(persistentUIGroup, UiCanvasFit.Fill);
 
 
         if (!startupFinished)

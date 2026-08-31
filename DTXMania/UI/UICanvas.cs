@@ -4,14 +4,29 @@ using DTXMania.UI.Drawable;
 
 namespace DTXMania.UI;
 
+public enum UiCanvasFit
+{
+    Letterbox,
+    Fill
+}
+
 public static class UICanvas
 {
     public static Vector2 windowSize = new(GameWindowSize.Width, GameWindowSize.Height);
 
     public static Vector2 logicalSize => new(GameWindowSize.Width, GameWindowSize.Height);
 
+    public static Vector2 canvasSize => CDTXMania.renderScale <= 0f
+        ? logicalSize
+        : windowSize / CDTXMania.renderScale;
+
     /// <summary>The middle of the window, which is where the middle of the canvas is placed.</summary>
     public static Vector2 center => windowSize / 2f;
+
+    public static readonly Vector2 Center = new(0.5f, 0.5f);
+
+    public static Vector3 FromCenter(float x, float y)
+        => new(x - logicalSize.X / 2f, y - logicalSize.Y / 2f, 0f);
 
     /// <summary>How many window pixels one canvas pixel is drawn at.</summary>
     public static float scale => CDTXMania.renderScale;
@@ -35,11 +50,13 @@ public static class UICanvas
     }
 
     /// <summary>Centres <paramref name="root"/>'s canvas in the window at the current scale.</summary>
-    public static void Place(UIGroup root)
+    public static void Place(UIGroup root, UiCanvasFit? overrideFit = null)
     {
         float scale = CDTXMania.renderScale;
+        UiCanvasFit fit = overrideFit ?? (root as StageRoot)?.canvasFit ?? UiCanvasFit.Letterbox;
+
         root.pivot = new Vector2(0.5f, 0.5f);
-        root.size = logicalSize;
+        root.size = fit == UiCanvasFit.Fill ? canvasSize : logicalSize;
         root.scale = new Vector3(scale, scale, 1f);
         root.position = new Vector3(center, 0f);
     }
