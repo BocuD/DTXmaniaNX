@@ -57,7 +57,7 @@ internal class CStageConfig : CStage
         menuCursor = configLeftOptionsMenu.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\4_menu cursor.png"))));
         menuCursor.position = new Vector3(-5, 0, 0);
         menuCursor.size = new Vector2(170, 28);
-        menuCursor.anchor = new Vector2(0.5f, 0f);
+        menuCursor.pivot = new Vector2(0.5f, 0f);
         menuCursor.renderMode = ERenderMode.Sliced;
         menuCursor.sliceRect = new RectangleF(16, 0, 32, 28);
         menuCursor.bindings.Add(new UIBinding("position.Y", "Selection.Y"));
@@ -131,14 +131,14 @@ internal class CStageConfig : CStage
 
         UIText label = root.AddChild(new UIText(string.Empty, 20));
         label.name = "Label";
-        label.anchor = new Vector2(0.5f, 0f);
+        label.pivot = new Vector2(0.5f, 0f);
         label.position = new Vector3(-5, 0, 0);
         label.bindings.Add(new UIBinding("text", "Item.Label"));
         label.bindings.Add(new UIBinding("isVisible", "IsSelected") { invert = true });
 
         UIText selected = root.AddChild(new UIText(string.Empty, 20));
         selected.name = "LabelSelected";
-        selected.anchor = new Vector2(0.5f, 0f);
+        selected.pivot = new Vector2(0.5f, 0f);
         selected.position = new Vector3(-5, 0, 0);
         selected.bindings.Add(new UIBinding("text", "Item.Label"));
         selected.fillGradientMode = UiTextGradientMode.Vertical;
@@ -199,7 +199,7 @@ internal class CStageConfig : CStage
             name = "FooterPanel",
             imageSource = ImageSource.File,
             image = SkinResource.System(@"Graphics\4_footer panel.png"),
-            anchor = new Vector2(0, 1),
+            pivot = new Vector2(0, 1),
             position = new Vector3(0, 720, 0),
             renderOrder = 53
         });

@@ -165,7 +165,7 @@ public class CStageSongSelectionNew : CStage
         skillText.outlineWidth = 0;
         skillText.style = UiTextStyle.Italic;
         skillText.font = SkinResource.System("Futura PT Medium.otf");
-        skillText.anchor = new Vector2(1, 1);
+        skillText.pivot = new Vector2(1, 1);
         skillText.position = new Vector3(315, 291, 0);
         skillText.name = "SkillText";
 
@@ -175,7 +175,7 @@ public class CStageSongSelectionNew : CStage
         bpmText.outlineWidth = 0;
         bpmText.style = UiTextStyle.Italic;
         bpmText.font = SkinResource.System("Futura PT Medium.otf");
-        bpmText.anchor = new Vector2(1, 1);
+        bpmText.pivot = new Vector2(1, 1);
         bpmText.position = new Vector3(315, 338, 0);
         bpmText.name = "BPMText";
 
@@ -230,7 +230,7 @@ public class CStageSongSelectionNew : CStage
         songSearchMenu = ui.AddChild(new SongSearchMenu());
         songSearchMenu.renderOrder = 15;
         songSearchMenu.isVisible = false;
-        songSearchMenu.anchor = new Vector2(0.5f, 0.5f);
+        songSearchMenu.pivot = new Vector2(0.5f, 0.5f);
         songSearchMenu.position = new Vector3(1280 / 2.0f, 720 / 2.0f, 0);
         songSearchMenu.dontSerialize = true;
 
@@ -238,7 +238,7 @@ public class CStageSongSelectionNew : CStage
         quickMenu.component = "Components/QuickMenu.json";
         quickMenu.renderOrder = 15;
         quickMenu.isVisible = false;
-        quickMenu.anchor = new Vector2(0.5f, 0.5f);
+        quickMenu.pivot = new Vector2(0.5f, 0.5f);
         quickMenu.position = new Vector3(1280 / 2.0f, 720 / 2.0f, 0);
         quickMenu.dontSerialize = true;
 

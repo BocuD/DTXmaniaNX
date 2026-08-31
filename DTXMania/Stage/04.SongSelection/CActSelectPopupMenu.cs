@@ -213,7 +213,7 @@ internal class CActSelectPopupMenu : CActivity
         {
             ui = CDTXMania.StageManager.stageSongSelection.ui.AddChild(new UIGroup("Popup Menu"));
             ui.position = new Vector3(1280.0f/2.0f, 720.0f/2.0f + 20.0f, 0); 
-            ui.anchor = new Vector2(0.5f, 0.5f);
+            ui.pivot = new Vector2(0.5f, 0.5f);
             ui.renderOrder = 100;
             ui.isVisible = false;
             ui.dontSerialize = true;

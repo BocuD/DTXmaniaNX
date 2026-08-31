@@ -12,7 +12,7 @@ internal class InfoBox : UIGroup
     {
         var background = AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\Performance\info_box.png"))));
         size = new Vector2(304, 84);
-        anchor = new Vector2(1, 0);
+        pivot = new Vector2(1, 0);
         background.name = "Background";
         position = new Vector3(1270, 10, 0);
         name = "InfoBox";

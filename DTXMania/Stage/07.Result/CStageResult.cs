@@ -72,7 +72,7 @@ internal class CStageResult : CStage
 		stageNumber.name = "StageNumber";
 		stageNumber.bindings.Add(new UIBinding("text", "Result.StageNumber"));
 		stageNumber.position = new Vector3(640, 50, 0);
-		stageNumber.anchor = new Vector2(0.5f, 0);
+		stageNumber.pivot = new Vector2(0.5f, 0);
 		stageNumber.font = SkinResource.System("Futura PT Book.otf");
 		stageNumber.style = UiTextStyle.Bold;
 		stageNumber.outlineWidth = 0;
@@ -82,7 +82,7 @@ internal class CStageResult : CStage
 			imageSource = ImageSource.File,
 			image = SkinResource.System(@"Graphics\Result\songname_bg.png")
 		});
-		titleArtistBg.anchor = new Vector2(0.5f, 0);
+		titleArtistBg.pivot = new Vector2(0.5f, 0);
 		titleArtistBg.position = new Vector3(640, 529, 0);
 		titleArtistBg.renderOrder = 1;
 		titleArtistBg.name = "TitleArtistBg";
@@ -136,7 +136,7 @@ internal class CStageResult : CStage
 		jacket.size = new Vector2(380, 380);
 		jacket.position = new Vector3(640, 130, 0);
 		jacket.name = "AlbumArt";
-		jacket.anchor.X = 0.5f;
+		jacket.pivot.X = 0.5f;
 		jacket.dontSerialize = true;
 
 		//todo: position these

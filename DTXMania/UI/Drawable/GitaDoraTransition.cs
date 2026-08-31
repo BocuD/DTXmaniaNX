@@ -23,16 +23,16 @@ public class GitaDoraTransition : UIGroup
         childContainer = AddChild(new UIGroup("covers"));
         childContainer.size = new Vector2(1280, 720);
         childContainer.position = new Vector3(640, 360, 0);
-        childContainer.anchor = new Vector2(0.5f, 0.5f);
+        childContainer.pivot = new Vector2(0.5f, 0.5f);
         
         top = childContainer.AddChild(new UIImage(texture));
         top.size = new Vector2(3000, 1000);
-        top.anchor = new Vector2(0.5f, 1.0f);
+        top.pivot = new Vector2(0.5f, 1.0f);
         top.position = new Vector3(640, 0, 0);
         
         bottom = childContainer.AddChild(new UIImage(texture));
         bottom.size = new Vector2(3000, 1000);
-        bottom.anchor = new Vector2(0.5f, 0.0f);
+        bottom.pivot = new Vector2(0.5f, 0.0f);
         bottom.position = new Vector3(640, 720, 0);
 
         logo = AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path("Graphics/logo_small.png"))));

@@ -95,7 +95,7 @@ internal class CStageTitle : CStage
 			image = SkinResource.System(MenuSheet),
 			size = new Vector2(MENU_W, MENU_H),
 			clipRect = new RectangleF(0, MENU_H * 5, MENU_W, MENU_H),
-			anchor = new Vector2(0.5f, 0.5f),
+			pivot = new Vector2(0.5f, 0.5f),
 			position = new Vector3(MENU_W / 2.0f, MENU_H / 2.0f, 0)
 		});
 

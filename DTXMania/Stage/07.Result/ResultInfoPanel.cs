@@ -27,13 +27,13 @@ public class ResultInfoPanel : UIGroup
     }
 
     private static UIText DynamicNumber(UIGroup parent, string name, string source, int size, string font,
-        Vector3 position, Vector2 anchor)
+        Vector3 position, Vector2 pivot)
     {
         var text = parent.AddChild(new UIText("", size));
         text.name = name;
         text.bindings.Add(new UIBinding("text", source));
         text.position = position;
-        text.anchor = anchor;
+        text.pivot = pivot;
         text.font = SkinResource.System(font);
         text.outlineWidth = 0;
         return text;
@@ -114,7 +114,7 @@ public class ResultInfoPanel : UIGroup
         var fill = skillGroup.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\5_skillbar_fill.png"))));
         fill.name = "SkillBarFill";
         fill.position = new Vector3(155, 285, 0);
-        fill.anchor = new Vector2(0.0f, 0.5f);
+        fill.pivot = new Vector2(0.0f, 0.5f);
         fill.size = new Vector2(286, 10);
         fill.renderOrder = 1;
         fill.isVisible = false;
@@ -124,7 +124,7 @@ public class ResultInfoPanel : UIGroup
         var frame = skillGroup.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\Result\bar.png"))));
         frame.name = "SkillBar";
         frame.position = new Vector3(148, 285, 0);
-        frame.anchor = new Vector2(0.0f, 0.5f);
+        frame.pivot = new Vector2(0.0f, 0.5f);
         frame.scale = new Vector3(0.66f, 0.66f, 1.0f);
         frame.renderOrder = 2;
         frame.isVisible = false;

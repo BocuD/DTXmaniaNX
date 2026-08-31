@@ -41,7 +41,7 @@ public class SortMenuContainer : ComponentInstance, IUIItemSource
         scrollNext = () => entries?.ScrollBy(1);
 
         size = new Vector2(662, 92);
-        anchor = new Vector2(1.0f, 0.0f);
+        pivot = new Vector2(1.0f, 0.0f);
     }
 
     public int ItemCount => rows.Length;
@@ -221,7 +221,7 @@ public class SortMenuContainer : ComponentInstance, IUIItemSource
         TextureArray icon = root.AddChild(new TextureArray
         {
             name = "Icon",
-            anchor = new Vector2(0.5f, 0.5f),
+            pivot = new Vector2(0.5f, 0.5f),
             bindings = { new UIBinding("textureIndex", "Item.IconIndex") }
         });
 
@@ -234,7 +234,7 @@ public class SortMenuContainer : ComponentInstance, IUIItemSource
         root.AddChild(new UIText(string.Empty, 18)
         {
             name = "Name",
-            anchor = new Vector2(0.5f, 0.5f),
+            pivot = new Vector2(0.5f, 0.5f),
             isVisible = false,
             bindings = { new UIBinding("text", "Item.Name") }
         });

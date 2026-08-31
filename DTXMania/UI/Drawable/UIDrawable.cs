@@ -12,7 +12,13 @@ public abstract class UIDrawable : IDisposable
     public string type => GetType().FullName ?? GetType().Name;
     [Themable] public int renderOrder = 0;
     [Themable] public Vector3 position = Vector3.Zero;
-    [Themable] public Vector2 anchor = Vector2.Zero;
+
+    //where in this element's own box its origin sits
+    [Themable] public Vector2 pivot = Vector2.Zero;
+
+    //where in the parent's box position is measured from. 0,0 is the parent's top left, 1,1 its bottom
+    //right, so an element pinned to the right edge stays there when the parent is resized
+    [Themable] public Vector2 parentAnchor = Vector2.Zero;
     [Themable] public UISize size = UISize.Auto(Vector2.One);
     [Themable] public Vector3 scale = Vector3.One;
     [Themable] public Vector3 rotation = Vector3.Zero;
@@ -37,6 +43,50 @@ public abstract class UIDrawable : IDisposable
         DrawableTracker.Register(this);
     }
 
+    //parent space, like position, so it is added to the same translation and this element's own scale
+    //and rotation do not apply to it
+    private Vector3 ParentAnchorOffset => parent != null
+        ? new Vector3(parentAnchor.X * parent.size.X, parentAnchor.Y * parent.size.Y, 0f)
+        : Vector3.Zero;
+
+    //the nine corners, edges and centre, in the order the grid draws them
+    private static readonly float[] AnchorStops = [0f, 0.5f, 1f];
+
+    private void DrawParentAnchor()
+    {
+        Inspector.Inspector.Inspect("Parent Anchor", ref parentAnchor);
+
+        //a grid of the nine places anyone actually wants, for the arbitrary values the field above
+        for (int y = 0; y < AnchorStops.Length; y++)
+        {
+            for (int x = 0; x < AnchorStops.Length; x++)
+            {
+                Vector2 stop = new(AnchorStops[x], AnchorStops[y]);
+                bool active = parentAnchor == stop;
+
+                if (x > 0)
+                {
+                    ImGui.SameLine();
+                }
+
+                if (active)
+                {
+                    ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.16f, 0.5f, 0.22f, 1f));
+                }
+
+                if (ImGui.Button($"##parentAnchor{x}{y}", new Vector2(24, 24)))
+                {
+                    parentAnchor = stop;
+                }
+
+                if (active)
+                {
+                    ImGui.PopStyleColor();
+                }
+            }
+        }
+    }
+
     public void UpdateLocalTransformMatrix()
     {
         //the parent draws first, so its box has settled by the time a child asks for it
@@ -45,8 +95,8 @@ public abstract class UIDrawable : IDisposable
             size.SetInherited(parent.size);
         }
 
-        Vector3 anchorOffset = new(-anchor.X * size.X, -anchor.Y * size.Y, 0f);
-        Matrix4x4 translationMatrix = Matrix4x4.CreateTranslation(position);
+        Vector3 anchorOffset = new(-pivot.X * size.X, -pivot.Y * size.Y, 0f);
+        Matrix4x4 translationMatrix = Matrix4x4.CreateTranslation(position + ParentAnchorOffset);
         Matrix4x4 rotationMatrix = Matrix4x4.CreateFromYawPitchRoll(rotation.Y, rotation.X, rotation.Z);
         Matrix4x4 scaleMatrix = Matrix4x4.CreateScale(scale);
         Matrix4x4 anchorMatrix = Matrix4x4.CreateTranslation(anchorOffset * scale);
@@ -221,7 +271,8 @@ public abstract class UIDrawable : IDisposable
             parent?.InvalidateOrder();
         }
         Inspector.Inspector.Inspect("Position", ref position);
-        Inspector.Inspector.Inspect("Anchor", ref anchor);
+        Inspector.Inspector.Inspect("Anchor", ref pivot);
+        DrawParentAnchor();
         Inspector.Inspector.Inspect("Size", ref size);
         Inspector.Inspector.Inspect("Scale", ref scale);
         Inspector.Inspector.Inspect("Rotation", ref rotation);
@@ -301,7 +352,7 @@ public abstract class UIDrawable : IDisposable
         Matrix4x4 localWithoutAnchor =
             Matrix4x4.CreateScale(scale) *
             Matrix4x4.CreateFromYawPitchRoll(rotation.Y, rotation.X, rotation.Z) *
-            Matrix4x4.CreateTranslation(position);
+            Matrix4x4.CreateTranslation(position + ParentAnchorOffset);
 
         Matrix4x4 parentMatrix = parent?.GetFullTransformMatrix() ?? Matrix4x4.Identity;
         Matrix4x4 worldMatrix = localWithoutAnchor * parentMatrix;
@@ -323,7 +374,9 @@ public abstract class UIDrawable : IDisposable
             if (Matrix4x4.Decompose(localMatrix, out Vector3 newScale, out Quaternion newRotation, out Vector3 newPosition))
             {
                 scale = newScale;
-                position = newPosition;
+
+                //the gizmo works in parent space, which is where the pivot offset already is
+                position = newPosition - ParentAnchorOffset;
                 rotation = QuaternionToEuler(newRotation);
             }
         }
@@ -354,7 +407,7 @@ public abstract class UIDrawable : IDisposable
         Vector3 transformedCenter = Vector3.Transform(center, transform);
         InspectorManager.DrawGizmoPoint(new Vector2(transformedCenter.X, transformedCenter.Y), 15, 0xFFFF0000, 2.5f);
 
-        Vector3 anchorPoint = new(anchor.X * size.X, anchor.Y * size.Y, 0f);
+        Vector3 anchorPoint = new(pivot.X * size.X, pivot.Y * size.Y, 0f);
         Vector3 transformedAnchor = Vector3.Transform(anchorPoint, transform);
         InspectorManager.DrawGizmoPoint(new Vector2(transformedAnchor.X, transformedAnchor.Y), 20, 0xFF0000FF, 2.5f);
     }

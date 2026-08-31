@@ -38,7 +38,7 @@ public static class UICanvas
     public static void Place(UIGroup root)
     {
         float scale = CDTXMania.renderScale;
-        root.anchor = new Vector2(0.5f, 0.5f);
+        root.pivot = new Vector2(0.5f, 0.5f);
         root.size = logicalSize;
         root.scale = new Vector3(scale, scale, 1f);
         root.position = new Vector3(center, 0f);

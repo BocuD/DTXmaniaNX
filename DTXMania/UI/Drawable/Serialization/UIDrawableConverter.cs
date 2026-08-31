@@ -296,8 +296,23 @@ public class UIDrawableConverter : JsonConverter
         }
     }
 
+    //"anchor" was what the pivot used to be called, and nothing claims the name now, so a layout written
+    //before the rename still reads correctly
+    private static void RenameLegacyProperties(JObject jObject)
+    {
+        if (jObject.Property("anchor") is not { } legacy || jObject.Property(nameof(UIDrawable.pivot)) != null)
+        {
+            return;
+        }
+
+        jObject.Add(nameof(UIDrawable.pivot), legacy.Value);
+        legacy.Remove();
+    }
+
     private static void FilterUnsupportedProperties(JObject jObject, Type drawableType)
     {
+        RenameLegacyProperties(jObject);
+
         HashSet<string> allowed = new(StringComparer.Ordinal)
         {
             "type",

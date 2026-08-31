@@ -90,7 +90,7 @@ internal sealed class CStageUITest : CStage
         UIImage cursor = menu.AddChild(new UIImage(BaseTexture.CreateSolidColor(new Color4(1f, 0.85f, 0.2f, 0.3f))));
         cursor.name = "MenuCursor";
         cursor.dontSerialize = true;
-        cursor.anchor = new Vector2(0.5f, 0.5f);
+        cursor.pivot = new Vector2(0.5f, 0.5f);
         cursor.size = new Vector2(440, 44);
         cursor.bindings.Add(new UIBinding("position.Y", "Selection.Y"));
     }
@@ -137,7 +137,7 @@ internal sealed class CStageUITest : CStage
 
         UIText label = root.AddChild(new UIText("", 30f));
         label.name = "Label";
-        label.anchor = new Vector2(0.5f, 0.5f);
+        label.pivot = new Vector2(0.5f, 0.5f);
         label.bindings.Add(new UIBinding("text", "Item.Label"));
 
         return root;
@@ -158,12 +158,12 @@ internal sealed class CStageUITest : CStage
         UIText title = root.AddChild(new UIText("JSON Layout Test", 44f));
         title.name = "Title";
         title.position = new Vector3(640, 120, 0);
-        title.anchor = new Vector2(0.5f, 0.5f);
+        title.pivot = new Vector2(0.5f, 0.5f);
 
         UIText counter = root.AddChild(new UIText("", 30f));
         counter.name = "CounterText";
         counter.position = new Vector3(640, 200, 0);
-        counter.anchor = new Vector2(0.5f, 0.5f);
+        counter.pivot = new Vector2(0.5f, 0.5f);
         counter.bindings.Add(new UIBinding("text", "Counter"));
 
         //the entries themselves are set in code; the layout only decides where the menu sits and how far
@@ -178,7 +178,7 @@ internal sealed class CStageUITest : CStage
         toggle.imageSource = ImageSource.Dynamic;
         toggle.dynamicSource = "ToggleImage";
         toggle.position = new Vector3(960, 520, 0);
-        toggle.anchor = new Vector2(0.5f, 0.5f);
+        toggle.pivot = new Vector2(0.5f, 0.5f);
         toggle.size = new Vector2(300, 169);
 
         return root;
