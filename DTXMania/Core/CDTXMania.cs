@@ -448,6 +448,7 @@ internal partial class CDTXMania
             {
                 AudioMixer.FollowSystemOutput(audioSettings);
                 OfferAudioConfigOnFailure();
+                app.UpdateWindowTitle();
             }
         }
         FrameProfiler.End(FrameSection.Sound);
