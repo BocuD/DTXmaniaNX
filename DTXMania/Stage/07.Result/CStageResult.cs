@@ -53,7 +53,6 @@ internal class CStageResult : CStage
 		eStageID = EStage.Result_7;
 		ePhaseID = EPhase.Common_DefaultState;
 		bActivated = false;
-		//listChildActivities.Add( actResultImage = new CActResultImage(this) );
 	}
 
 		
@@ -630,11 +629,7 @@ internal class CStageResult : CStage
 				ctPlayNewRecord.tStop();
 			}
 		}
-		
-		// if ( actResultImage.OnUpdateAndDraw() == 0 )
-		// {
-		// 	bAnimationComplete = false;
-		// }
+
 		#region [ #24609 2011.3.14 yyagi ランク更新or演奏型スキル更新時、リザルト画像をpngで保存する ]
 		if ( bAnimationComplete && bIsCheckedWhetherResultScreenShouldSaveOrNot == false	// #24609 2011.3.14 yyagi; to save result screen in case BestRank or HiSkill.
 		                        && CDTXMania.ConfigIni.bScoreIniを出力する
@@ -783,8 +778,6 @@ internal class CStageResult : CStage
 	private int n最後に再生したHHのWAV番号;
 	private EChannel n最後に再生したHHのチャンネル番号;
 	private UIImage background;  // tx背景
-	//Copy from CStagePerfCommonScreen
-	public STDGBVALUE<CStagePerfCommonScreen.CLAGTIMINGHITCOUNT> nTimingHitCount;
 
 	//private CDirectShow ds背景動画;
 	private long lDshowPosition;
