@@ -9,6 +9,7 @@ public sealed record PerformanceHistoryRowData
 
     [DataField] public string Date { get; init; } = string.Empty;
 
+    //eg: Cleared, Failed, Cancelled
     [DataField] public string Outcome { get; init; } = string.Empty;
 
     [DataField] public string Instrument { get; init; } = string.Empty;
