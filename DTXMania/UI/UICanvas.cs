@@ -23,10 +23,18 @@ public static class UICanvas
     /// <summary>The middle of the window, which is where the middle of the canvas is placed.</summary>
     public static Vector2 center => windowSize / 2f;
 
-    public static readonly Vector2 Center = new(0.5f, 0.5f);
+    //the nine anchors, laid out the way the inspector's grid draws them
+    public static readonly Vector2 TopLeft = new(0f, 0f);
+    public static readonly Vector2 Top = new(0.5f, 0f);
     public static readonly Vector2 TopRight = new(1f, 0f);
+
+    public static readonly Vector2 Left = new(0f, 0.5f);
+    public static readonly Vector2 Center = new(0.5f, 0.5f);
     public static readonly Vector2 Right = new(1f, 0.5f);
+
     public static readonly Vector2 BottomLeft = new(0f, 1f);
+    public static readonly Vector2 Bottom = new(0.5f, 1f);
+    public static readonly Vector2 BottomRight = new(1f, 1f);
 
     /// <summary>A design space point as an offset from where an anchor puts the origin, so a layout is
     /// still written in the coordinates it was designed in.</summary>

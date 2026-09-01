@@ -26,6 +26,7 @@ public class CStageSongSelectionNew : CStage
     private SongSearchMenu songSearchMenu;
     private QuickMenu quickMenu;
 
+    private PerformanceHistoryPanel? historyPanel;
     private SongSelectionContainer selectionContainer;
     private DensityGraph densityGraph1;
 
@@ -214,6 +215,13 @@ public class CStageSongSelectionNew : CStage
         statusPanel.renderOrder = 6;
         statusPanel.BuildDefaultPanes();
 
+        var history = ui.AddChild(new PerformanceHistoryPanel());
+        history.component = "Components/PerformanceHistoryPanel.json";
+        history.parentAnchor = UICanvas.BottomRight;
+        history.pivot = UICanvas.BottomRight;
+        history.position = new Vector3(-40, -30, 0);
+        history.renderOrder = 7;
+
         var sortMenu = ui.AddChild(new SortMenuContainer());
         sortMenu.component = "Components/SortMenu.json";
         sortMenu.parentAnchor = UICanvas.TopRight;
@@ -231,6 +239,7 @@ public class CStageSongSelectionNew : CStage
         //come from json
         statusPanel = ui.GetChild<StatusPanel>("StatusPanel")!;
         sortMenuContainer = ui.GetChild<SortMenuContainer>("SortMenuContainer")!;
+        historyPanel = ui.GetChild<PerformanceHistoryPanel>("PerformanceHistoryPanel");
 
         densityGraph1 = ui.AddChild(new DensityGraph((EInstrumentPart)CDTXMania.GetCurrentInstrument()));
         densityGraph1.parentAnchor = UICanvas.BottomLeft;
@@ -518,6 +527,7 @@ public class CStageSongSelectionNew : CStage
         actPresound.tSelectionChanged(chart);
         previewVideo?.SelectionChanged(chart);
         statusPanel.SelectionChanged(node, chart);
+        historyPanel?.SelectionChanged(chart);
         densityGraph1.SelectionChanged(node, chart);
     }
 
