@@ -355,7 +355,31 @@ public class SongNode
 
             foreach (CChartData chart in candidate.charts)
             {
-                if (chart?.FileInformation.AbsoluteFilePath.Equals(previousChartPath,
+                if (chart != null && IsChart(chart, previousChartPath))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        //handling for merged guitar/bass
+        static bool IsChart(CChartData chart, string path)
+        {
+            if (chart.FileInformation.AbsoluteFilePath.Equals(path, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            if (chart.instrumentSources == null)
+            {
+                return false;
+            }
+
+            foreach (CChartData source in chart.instrumentSources)
+            {
+                if (source?.FileInformation.AbsoluteFilePath.Equals(path,
                         StringComparison.OrdinalIgnoreCase) == true)
                 {
                     return true;
