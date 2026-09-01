@@ -272,10 +272,11 @@ public class CStageSongSelectionNew : CStage
         if (selectionContainer != null && sortCache.Count > 0)
         {
             SongNode? previousSelection = selectedNode;
+            CChartData? previousChart = selectedChart;
             ApplySort(currentSort);
             if (previousSelection != null)
             {
-                RestoreSelection(previousSelection);
+                RestoreSelection(previousSelection, previousChart);
             }
         }
     }
@@ -328,7 +329,7 @@ public class CStageSongSelectionNew : CStage
         //try to restore the last selected song if possible
         if (selectedRootBackup != null && selectedNodeBackup != null && selectedChartBackup != null)
         {
-            RestoreSelection(selectedNodeBackup);
+            RestoreSelection(selectedNodeBackup, selectedChartBackup);
         }
         
         Trace.TraceInformation("Sort cache preparation complete.");
@@ -339,43 +340,11 @@ public class CStageSongSelectionNew : CStage
         loadPhase = ELoadPhase.CacheThumbnails;
     }
 
-    private void RestoreSelection(SongNode selectedNodeBackup)
+    private void RestoreSelection(SongNode selectedNodeBackup, CChartData? selectedChartBackup = null)
     {
-        string? previousBoxTitle = selectedNodeBackup.parent?.title;
+        SongNode? targetNode = SongNode.FindRestoreTarget(selectionContainer.CurrentRoot,
+            selectedNodeBackup, selectedChartBackup);
 
-        SongNode? fallback = null;
-        SongNode? preferred = null;
-
-        void Find(SongNode container)
-        {
-            foreach (SongNode child in container.childNodes)
-            {
-                if (child == null) continue;
-
-                switch (child.nodeType)
-                {
-                    case SongNode.ENodeType.SONG
-                        when child.path.Equals(selectedNodeBackup.path, StringComparison.InvariantCulture):
-                        fallback ??= child;
-                        if (previousBoxTitle != null &&
-                            container.title.Equals(previousBoxTitle, StringComparison.InvariantCulture))
-                        {
-                            preferred = child;
-                            return;
-                        }
-                        break;
-
-                    case SongNode.ENodeType.BOX or SongNode.ENodeType.ROOT:
-                        Find(child);
-                        if (preferred != null) return;
-                        break;
-                }
-            }
-        }
-
-        Find(selectionContainer.CurrentRoot);
-
-        SongNode? targetNode = preferred ?? fallback;
         if (targetNode?.parent == null)
             return;
 
@@ -614,7 +583,6 @@ public class CStageSongSelectionNew : CStage
         if ((song.nodeType == SongNode.ENodeType.BOX) || (song.nodeType == SongNode.ENodeType.BACKBOX))
             return 0; // BOX と BACKBOX は関係無いよ
 
-
         // 現在のアンカレベルから、難易度上向きに検索開始。
 
         int closestLevel = targetDifficultyLevel;
@@ -626,7 +594,6 @@ public class CStageSongSelectionNew : CStage
 
             closestLevel = (closestLevel + 1) % 5; // 曲がなかったので次の難易度レベルへGo。（5以上になったら0に戻る。）
         }
-
 
         // 見つかった曲がアンカより下のレベルだった場合……
         // アンカから下向きに検索すれば、もっとアンカに近い曲があるんじゃね？
