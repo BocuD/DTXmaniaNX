@@ -118,8 +118,8 @@ internal class CStageResult : CStage
 		fastCount.name = "FastCount";
 		fastCount.bindings.Add(new UIBinding("text", "Result.FastCount"));
 		fastCount.bindings.Add(new UIBinding("isVisible", "Result.ShowLagCounts"));
-		fastCount.position = new Vector3(879, 655, 0);
-		fastCount.fillColor = new Color4(0.0f, 0.39f, 1.0f);
+		fastCount.position = new Vector3(900, 655, 0);
+		fastCount.fillColor = new Color4(0.1f, 0.8f, 1.0f);
 		fastCount.outlineWidth = 0;
 
 		var slowCount = ui.AddChild(new UIText("", 20));
@@ -182,8 +182,9 @@ internal class CStageResult : CStage
 		paramPanel.dontSerialize = true;
 
 		var progressBar = ui.AddChild(new ResultProgressBar(CDTXMania.GetCurrentInstrument()));
-		progressBar.position = new Vector3(435, 130, 0);
+		progressBar.position = new Vector3(1130, 435, 0);
 		progressBar.renderOrder = 4;
+		progressBar.scale = new Vector3(0.55f, 0.55f, 1.0f);
 		progressBar.dontSerialize = true;
 
 		//the clip lives in its own file, so a saved layout references it rather than copying it in
