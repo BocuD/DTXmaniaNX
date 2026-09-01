@@ -41,7 +41,7 @@ public readonly record struct PerformanceHistoryLine
         Rank = (int)CScoreIni.ERANK.UNKNOWN
     };
 
-    public static PerformanceHistoryLine Parse(string? line)
+    public static PerformanceHistoryLine TryRead(string? line)
     {
         if (string.IsNullOrWhiteSpace(line))
         {

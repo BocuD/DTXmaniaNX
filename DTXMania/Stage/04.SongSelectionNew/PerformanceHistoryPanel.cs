@@ -95,7 +95,7 @@ public class PerformanceHistoryPanel : ComponentInstance, IUIItemSource
         }
 
         PerformanceHistoryLine line =
-            PerformanceHistoryLine.Parse(currentChart.SongInformation.PerformanceHistory[index]);
+            PerformanceHistoryLine.TryRead(currentChart.SongInformation.PerformanceHistory[index]);
 
         if (line.Raw.Length == 0)
         {
