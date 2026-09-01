@@ -112,7 +112,24 @@ internal class CStageResult : CStage
 		artistNameText.scrollingEnabled = true;
 		artistNameText.size.X = 355;
 		artistNameText.scrollSpeed = 20.0f;
-		
+
+		//fast/slow hit counts, side by side under the judgement rows; both hide together when the lag
+		//counter is off in config
+		var fastCount = ui.AddChild(new UIText("", 20));
+		fastCount.name = "FastCount";
+		fastCount.bindings.Add(new UIBinding("text", "Result.FastCount"));
+		fastCount.bindings.Add(new UIBinding("isVisible", "Result.ShowLagCounts"));
+		fastCount.position = new Vector3(879, 655, 0);
+		fastCount.fillColor = new Color4(0.0f, 0.39f, 1.0f);
+		fastCount.outlineWidth = 0;
+
+		var slowCount = ui.AddChild(new UIText("", 20));
+		slowCount.name = "SlowCount";
+		slowCount.bindings.Add(new UIBinding("text", "Result.SlowCount"));
+		slowCount.bindings.Add(new UIBinding("isVisible", "Result.ShowLagCounts"));
+		slowCount.position = new Vector3(986, 655, 0);
+		slowCount.fillColor = new Color4(1.0f, 0.2f, 0.2f);
+		slowCount.outlineWidth = 0;
 	}
 
 	//elements that build runtime textures from the result data (rank icon, jacket, progress bar) can't be

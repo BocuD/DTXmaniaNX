@@ -434,15 +434,11 @@ internal class StageManager
                         {
                             stagePerfGuitarScreen.tStorePerfResults(out cPerfEntry_Drums, out cPerfEntry_Guitar,
                                 out cPerfEntry_Bass, out bIsTrainingMode);
-                            //Transfer nTimingHitCount to stageResult
-                            stageResult.nTimingHitCount = stagePerfGuitarScreen.nTimingHitCount;
                         }
                         else
                         {
                             stagePerfDrumsScreen.tStorePerfResults(out cPerfEntry_Drums, out cPerfEntry_Guitar,
                                 out cPerfEntry_Bass, out chipArray, out bIsTrainingMode);
-                            //Transfer nTimingHitCount to stageResult
-                            stageResult.nTimingHitCount = stagePerfDrumsScreen.nTimingHitCount;
                         }
 
                         if (!bIsTrainingMode)

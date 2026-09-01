@@ -52,6 +52,10 @@ public sealed class ResultData
     [DataField] public bool IsFullCombo => !IsExcellent && Entry.bIsFullCombo;
     [DataField] public bool IsClear => !IsExcellent && !Entry.bIsFullCombo;
 
+    [DataField] public bool ShowLagCounts => CDTXMania.ConfigIni.bShowLagHitCount;
+    [DataField] public int FastCount => Entry.nFastCount;
+    [DataField] public int SlowCount => Entry.nSlowCount;
+
     //level is stored as either xx.y (LEVEL<=99 plus LEVELDEC) or xxx (LEVEL>99), split here into a whole
     //part and a 2-digit fraction
     private static (int intPart, int deci) LevelParts()

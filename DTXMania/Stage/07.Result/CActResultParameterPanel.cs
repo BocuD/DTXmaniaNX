@@ -606,9 +606,9 @@ internal class CActResultParameterPanel : CActivity
                     bool bTypeAColor = CDTXMania.ConfigIni.nShowLagTypeColor == 0;
 
                     tDrawLagCounterText(n本体X[j] + 170, n本体Y + 335,
-                        $"{stageResult.nTimingHitCount[j].nEarly,4:###0}", !bTypeAColor);
+                        $"{stageResult.stPerformanceEntry[j].nFastCount,4:###0}", !bTypeAColor);
                     tDrawLagCounterText(n本体X[j] + 245, n本体Y + 335,
-                        $"{stageResult.nTimingHitCount[j].nLate,4:###0}", bTypeAColor);
+                        $"{stageResult.stPerformanceEntry[j].nSlowCount,4:###0}", bTypeAColor);
                 }
             }
         }
