@@ -99,6 +99,8 @@ internal abstract class CStagePerfCommonScreen : CStage
             Drums.nGoodCount_ExclAuto = nHitCount_ExclAuto.Drums.Good;
             Drums.nPoorCount_ExclAuto = nHitCount_ExclAuto.Drums.Poor;
             Drums.nMissCount_ExclAuto = nHitCount_ExclAuto.Drums.Miss;
+            Drums.nFastCount = nTimingHitCount.Drums.nEarly;
+            Drums.nSlowCount = nTimingHitCount.Drums.nLate;
             Drums.nMaxCombo = actCombo.nCurrentCombo.HighestValue.Drums;
             Drums.nTotalChipsCount = CDTXMania.DTX.nVisibleChipsCount.Drums;
             for (int i = 0; i < (int)ELane.MAX; i++)
@@ -170,6 +172,8 @@ internal abstract class CStagePerfCommonScreen : CStage
             Guitar.nGoodCount_ExclAuto = nHitCount_ExclAuto.Guitar.Good;
             Guitar.nPoorCount_ExclAuto = nHitCount_ExclAuto.Guitar.Poor;
             Guitar.nMissCount_ExclAuto = nHitCount_ExclAuto.Guitar.Miss;
+            Guitar.nFastCount = nTimingHitCount.Guitar.nEarly;
+            Guitar.nSlowCount = nTimingHitCount.Guitar.nLate;
             Guitar.nMaxCombo = actCombo.nCurrentCombo.HighestValue.Guitar;
             Guitar.nTotalChipsCount = CDTXMania.DTX.nVisibleChipsCount.Guitar;
             for (int i = 0; i < (int)ELane.MAX; i++)
@@ -241,6 +245,8 @@ internal abstract class CStagePerfCommonScreen : CStage
             Bass.nGoodCount_ExclAuto = nHitCount_ExclAuto.Bass.Good;
             Bass.nPoorCount_ExclAuto = nHitCount_ExclAuto.Bass.Poor;
             Bass.nMissCount_ExclAuto = nHitCount_ExclAuto.Bass.Miss;
+            Bass.nFastCount = nTimingHitCount.Bass.nEarly;
+            Bass.nSlowCount = nTimingHitCount.Bass.nLate;
             Bass.nMaxCombo = actCombo.nCurrentCombo.HighestValue.Bass;
             Bass.nTotalChipsCount = CDTXMania.DTX.nVisibleChipsCount.Bass;
             for (int i = 0; i < (int)ELane.MAX; i++)
