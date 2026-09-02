@@ -10,7 +10,7 @@ namespace DTXMania;
 
 public class PerformanceHistoryPanel : ComponentInstance, IUIItemSource
 {
-    private const float RowSpacing = 20.0f;
+    private const float RowSpacing = 18.0f;
     private const int RowCount = 5;
 
     //the visible part of 5_play history panel.png, which is 458x151 with the rest empty. Anchoring
@@ -149,7 +149,7 @@ public class PerformanceHistoryPanel : ComponentInstance, IUIItemSource
         {
             itemComponent = "Components/PerformanceHistoryRow.json",
             itemOffset = new Vector3(0.0f, RowSpacing, 0.0f),
-            position = new Vector3(14.0f, 30.0f, 0.0f),
+            position = new Vector3(14.0f, 28.0f, 0.0f),
             renderOrder = 1
         });
 
