@@ -104,7 +104,7 @@ public class PerformanceHistoryPanel : ComponentInstance, IUIItemSource
             Raw = line.Raw,
             Date = line.Date,
             Outcome = line.Outcome.ToString(),
-            Instrument = line.Instrument == EInstrumentPart.UNKNOWN
+            Instrument = line.Instrument is EInstrumentPart.UNKNOWN or EInstrumentPart.DRUMS
                 ? string.Empty
                 : line.Instrument.ToString(),
             Skill = Percent(line.Skill),
