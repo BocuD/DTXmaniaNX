@@ -18,7 +18,6 @@ public class PerformanceHistoryPanel : ComponentInstance, IUIItemSource
     private static readonly Vector2 PanelSize = new(345.0f, 130.0f);
 
     private CChartData? currentChart;
-    private bool rowsDirty = true;
 
     private readonly PerformanceHistoryRowData[] rows = new PerformanceHistoryRowData[RowCount];
     private BaseTexture[]? rankIcons;
@@ -51,12 +50,24 @@ public class PerformanceHistoryPanel : ComponentInstance, IUIItemSource
         //on the instance, not on the BuildDefault root: EnsureContent only takes that tree's children
         size = PanelSize;
         Array.Fill(rows, PerformanceHistoryRowData.Empty);
+
+        //nothing to show until a selection says otherwise
+        isVisible = false;
     }
 
     public void SelectionChanged(CChartData? chart)
     {
         currentChart = chart;
-        rowsDirty = true;
+
+        bool any = false;
+        for (int i = 0; i < rows.Length; i++)
+        {
+            rows[i] = ResolveRow(i);
+            any |= rows[i].Raw.Length > 0;
+        }
+
+        //a chart nobody has played has nothing to show, so the panel stays off the screen entirely
+        isVisible = any;
     }
 
     protected override void OnContentLoaded()
@@ -66,25 +77,6 @@ public class PerformanceHistoryPanel : ComponentInstance, IUIItemSource
             rowsGroup.itemDefault = BuildHistoryRowDefault;
             rowsGroup.SetSource(this);
         }
-
-        rowsDirty = true;
-    }
-
-    public override void Draw(Matrix4x4 parentMatrix)
-    {
-        EnsureContent();
-
-        //parsing and formatting five lines is selection-change work
-        if (rowsDirty)
-        {
-            rowsDirty = false;
-            for (int i = 0; i < rows.Length; i++)
-            {
-                rows[i] = ResolveRow(i);
-            }
-        }
-
-        base.Draw(parentMatrix);
     }
 
     private PerformanceHistoryRowData ResolveRow(int index)
