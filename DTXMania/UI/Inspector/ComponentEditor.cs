@@ -52,8 +52,8 @@ public sealed class ComponentEditor : IDisposable
     private bool centered;
     private bool isOpen = true;
 
-    //empty when the dummy context is in use, otherwise the drawable whose context is borrowed
-    private string liveInstanceId = string.Empty;
+    //none when the dummy context is in use, otherwise the drawable whose context is borrowed
+    private DrawableRef liveInstance = DrawableRef.None;
 
     private string? drawError;
 
@@ -64,7 +64,7 @@ public sealed class ComponentEditor : IDisposable
     private ComponentEditor(string componentPath, Type? behaviour)
     {
         this.componentPath = componentPath;
-        borrowed = new BorrowedContext(() => DrawableTracker.GetDrawable(liveInstanceId));
+        borrowed = new BorrowedContext(() => liveInstance.Target);
         instance = CreateInstance(behaviour);
         root.AddChild(instance);
     }
@@ -230,7 +230,7 @@ public sealed class ComponentEditor : IDisposable
 
         DrawContextSourcePicker();
 
-        if (liveInstanceId.Length > 0)
+        if (liveInstance.HasTarget)
         {
             return;
         }
@@ -259,23 +259,23 @@ public sealed class ComponentEditor : IDisposable
 
     private void DrawContextSourcePicker()
     {
-        string current = liveInstanceId.Length == 0 ? "Dummy values" : DescribeLive(DrawableTracker.GetDrawable(liveInstanceId));
+        string current = liveInstance.Target is { } live ? DescribeLive(live) : "Dummy values";
 
         if (!ImGui.BeginCombo("Context", current))
         {
             return;
         }
 
-        if (ImGui.Selectable("Dummy values", liveInstanceId.Length == 0))
+        if (ImGui.Selectable("Dummy values", !liveInstance.HasTarget))
         {
-            liveInstanceId = string.Empty;
+            liveInstance = DrawableRef.None;
         }
 
         foreach (ComponentInstance candidate in LiveInstances(componentPath))
         {
-            if (ImGui.Selectable(DescribeLive(candidate), liveInstanceId == candidate.id))
+            if (ImGui.Selectable(DescribeLive(candidate), liveInstance.Is(candidate)))
             {
-                liveInstanceId = candidate.id;
+                liveInstance = candidate;
             }
         }
 
@@ -423,7 +423,7 @@ public sealed class ComponentEditor : IDisposable
             }
         }
 
-        root.dataContext = liveInstanceId.Length == 0 ? dummy : borrowed;
+        root.dataContext = liveInstance.HasTarget ? borrowed : dummy;
     }
 
     //a number left empty resolves to nothing, which leaves whatever the layout set: a made-up size or

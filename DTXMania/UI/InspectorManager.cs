@@ -42,7 +42,7 @@ public static class InspectorManager
 
         if (!inspectorEnabled)
         {
-            Inspector.Inspector.inspectorTarget = string.Empty;
+            Inspector.Inspector.inspectorTarget = DrawableRef.None;
         }
     }
 
@@ -57,8 +57,7 @@ public static class InspectorManager
 
     private static Matrix4x4 view = Matrix4x4.Identity;
 
-    public static string toRemove = string.Empty;
-    public static UIDrawable? toRemoveDrawable => DrawableTracker.GetDrawable(toRemove);
+    public static DrawableRef toRemove = DrawableRef.None;
 
     private class Window(string name, Action draw, bool defaultShow = false)
     {
@@ -102,21 +101,18 @@ public static class InspectorManager
         framebufferSize = defaultFramebufferSize;
         gameRenderSize = gameTextureSize;
 
-        if (!string.IsNullOrWhiteSpace(toRemove))
+        if (toRemove.Target is { } removing)
         {
-            if (Inspector.Inspector.inspectorTarget == toRemove)
+            if (Inspector.Inspector.inspectorTarget.Is(removing))
             {
-                Inspector.Inspector.inspectorTarget = string.Empty;
+                Inspector.Inspector.inspectorTarget = DrawableRef.None;
             }
 
-            if (toRemoveDrawable?.parent != null)
-            {
-                toRemoveDrawable.parent.RemoveChild(toRemoveDrawable);
-            }
-
-            toRemoveDrawable?.Dispose();
-            toRemove = string.Empty;
+            removing.parent?.RemoveChild(removing);
+            removing.Dispose();
         }
+
+        toRemove = DrawableRef.None;
 
         if (textureInspector == null)
         {
@@ -129,11 +125,7 @@ public static class InspectorManager
             ImGui.DockSpaceOverViewport(ImGui.GetMainViewport(), flags);
         }
 
-        UIDrawable? selectedDrawable = null;
-        if (!string.IsNullOrEmpty(Inspector.Inspector.inspectorTarget))
-        {
-            selectedDrawable = DrawableTracker.GetDrawable(Inspector.Inspector.inspectorTarget);
-        }
+        UIDrawable? selectedDrawable = Inspector.Inspector.inspectorTarget.Target;
 
         Rectangle gameRect;
         ImDrawListPtr gameDrawList;

@@ -1,11 +1,16 @@
-﻿using DTXMania.UI.Drawable;
+﻿using System.Runtime.CompilerServices;
+using DTXMania.UI.Drawable;
 using Hexa.NET.ImGui;
 
 namespace DTXMania.UI;
 
+/// <summary>
+/// Every drawable that has been constructed, weakly. Nothing resolves a drawable through this; it exists
+/// so the Drawables window can list what is still alive.
+/// </summary>
 public class DrawableTracker
 {
-    public static Dictionary<string, WeakReference<UIDrawable>> drawables = new();
+    private static readonly List<WeakReference<UIDrawable>> drawables = [];
     private static int registrationSuppressionDepth;
 
     public static IDisposable SuppressRegistration()
@@ -21,17 +26,30 @@ public class DrawableTracker
             return;
         }
 
-        if (string.IsNullOrWhiteSpace(drawable.id))
-        {
-            throw new InvalidOperationException($"Drawable id is missing for {drawable.GetType().FullName} during registration.");
-        }
-
-        drawables[drawable.id] = new WeakReference<UIDrawable>(drawable);
+        drawables.Add(new WeakReference<UIDrawable>(drawable));
     }
 
     public static void Remove(UIDrawable drawable)
     {
-        drawables.Remove(drawable.id);
+        for (int i = drawables.Count - 1; i >= 0; i--)
+        {
+            if (!drawables[i].TryGetTarget(out UIDrawable? target) || ReferenceEquals(target, drawable))
+            {
+                drawables.RemoveAt(i);
+            }
+        }
+    }
+
+    /// <summary>Every live drawable of the given type.</summary>
+    public static IEnumerable<T> AllOfType<T>() where T : UIDrawable
+    {
+        foreach (WeakReference<UIDrawable> reference in drawables)
+        {
+            if (reference.TryGetTarget(out UIDrawable? target) && target is T match)
+            {
+                yield return match;
+            }
+        }
     }
 
     public static void DrawWindow()
@@ -45,42 +63,32 @@ public class DrawableTracker
                 GC.Collect();
                 GC.WaitForPendingFinalizers();
                 GC.Collect();
+                drawables.RemoveAll(reference => !reference.TryGetTarget(out _));
             }
 
-            ImGui.BeginTable("DrawablesTable", 3);
-            ImGui.TableSetupColumn("ID");
+            ImGui.BeginTable("DrawablesTable", 2);
             ImGui.TableSetupColumn("Type");
             ImGui.TableSetupColumn("Name");
             ImGui.TableHeadersRow();
 
-            foreach (var drawable in drawables)
+            foreach (WeakReference<UIDrawable> reference in drawables)
             {
+                if (!reference.TryGetTarget(out UIDrawable? target))
+                {
+                    continue;
+                }
+
                 ImGui.TableNextRow();
                 ImGui.TableNextColumn();
-                ImGui.Text(drawable.Key);
+                ImGui.Text(target.type);
                 ImGui.TableNextColumn();
-                ImGui.Text(drawable.Value.TryGetTarget(out UIDrawable? target) ? target.type : "null");
-                ImGui.TableNextColumn();
-                ImGui.Text(drawable.Value.TryGetTarget(out UIDrawable? target2)
-                    ? (string.IsNullOrEmpty(target2.name) ? target2.GetType().Name : target2.name)
-                    : "null");
+                ImGui.Text(string.IsNullOrEmpty(target.name) ? target.GetType().Name : target.name);
             }
 
             ImGui.EndTable();
         }
 
         ImGui.End();
-    }
-
-    public static UIDrawable? GetDrawable(string guid)
-    {
-        if (drawables.TryGetValue(guid, out WeakReference<UIDrawable>? weakReference) &&
-            weakReference.TryGetTarget(out UIDrawable? drawable))
-        {
-            return drawable;
-        }
-
-        return null;
     }
 
     private sealed class RegistrationSuppressionScope : IDisposable

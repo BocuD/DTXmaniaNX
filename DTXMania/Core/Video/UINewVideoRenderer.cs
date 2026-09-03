@@ -138,7 +138,7 @@ public class UINewVideoRenderer : UIDrawable
         }
 
         // Hand off rendering to the encapsulated Controller securely locked to this drawable instance.
-        Controller.DrawInspector(id);
+        Controller.DrawInspector(GetHashCode().ToString());
     }
 
     public override void Dispose()

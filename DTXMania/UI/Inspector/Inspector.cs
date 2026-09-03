@@ -11,8 +11,8 @@ namespace DTXMania.UI.Inspector;
 
 public class Inspector
 {
-    internal static string inspectorTarget = string.Empty;
-    internal static string dragDropPayload = string.Empty;
+    internal static DrawableRef inspectorTarget = DrawableRef.None;
+    internal static DrawableRef dragDropPayload = DrawableRef.None;
 
     //a dotted binding key ("Song.Chart.SongInformation.Genre") becomes nested nodes; intermediate
     //segments get collapsible headers, leaves show their live value
@@ -117,17 +117,9 @@ public class Inspector
         {
             ImGui.Begin("Inspector", ImGuiWindowFlags.NoFocusOnAppearing);
 
-            if (!string.IsNullOrEmpty(inspectorTarget))
+            if (inspectorTarget.Target is { } drawable)
             {
-                UIDrawable? drawable = DrawableTracker.GetDrawable(inspectorTarget);
-                if (drawable != null)
-                {
-                    drawable.DrawInspector();
-                }
-                else
-                {
-                    ImGui.Text("Target not found");
-                }
+                drawable.DrawInspector();
             }
             else
             {

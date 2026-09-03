@@ -68,7 +68,7 @@ public class HierarchyWindow
 
         if (group == null) rootFlags |= ImGuiTreeNodeFlags.Leaf;
 
-        bool selected = Inspector.inspectorTarget == node.id;
+        bool selected = Inspector.inspectorTarget.Is(node);
         if (selected)
         {
             rootFlags |= ImGuiTreeNodeFlags.Selected;
@@ -107,7 +107,7 @@ public class HierarchyWindow
         {
             if (ImGui.IsMouseReleased(ImGuiMouseButton.Left))
             {
-                Inspector.inspectorTarget = node.id;
+                Inspector.inspectorTarget = node;
             }
 
             if (ImGui.IsMouseReleased(ImGuiMouseButton.Right))
@@ -144,8 +144,7 @@ public class HierarchyWindow
             }
 
             //this method is recursive, so the removal has to wait until the walk is back at the parent
-            if (!string.IsNullOrEmpty(InspectorManager.toRemove)
-                && InspectorManager.toRemoveDrawable is { } drawable
+            if (InspectorManager.toRemove.Target is { } drawable
                 && group.children.Contains(drawable))
             {
                 group.RemoveChild(drawable);
@@ -199,7 +198,7 @@ public class HierarchyWindow
             unsafe
             {
                 ImGui.SetDragDropPayload(nameof(UIDrawable), (void*)IntPtr.Zero, 0);
-                Inspector.dragDropPayload = node.id;
+                Inspector.dragDropPayload = node;
             }
 
             ImGui.Text(string.IsNullOrWhiteSpace(node.name) ? node.GetType().ToString() : node.name);
@@ -225,10 +224,7 @@ public class HierarchyWindow
             }
             else
             {
-                string droppedId = Inspector.dragDropPayload;
-                var drawable = DrawableTracker.GetDrawable(droppedId);
-                
-                reparentNode = drawable;
+                reparentNode = Inspector.dragDropPayload.Target;
                 reparentGroup = group;
                 
                 ImGui.EndDragDropTarget();
@@ -271,7 +267,7 @@ public class HierarchyWindow
         ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1, 0, 0, 1));
         if (ImGui.Selectable("Delete"))
         {
-            InspectorManager.toRemove = node.id;
+            InspectorManager.toRemove = node;
         }
         ImGui.PopStyleColor();
 

@@ -35,17 +35,10 @@ public class UIDrawableConverter : JsonConverter
 
         // Read the type name from the "type" property
         string? typeName = jObject["type"]?.ToString();
-        string? id = jObject[nameof(UIDrawable.id)]?.ToString();
 
         if (string.IsNullOrEmpty(typeName))
         {
             throw new JsonSerializationException("Type name is missing in the JSON.");
-        }
-
-        if (string.IsNullOrWhiteSpace(id))
-        {
-            //hand-authored layouts may omit the id, so synthesise one for the tracker to key on
-            jObject[nameof(UIDrawable.id)] = Guid.NewGuid().ToString();
         }
 
         Type? targetType = Type.GetType(typeName);
@@ -85,15 +78,12 @@ public class UIDrawableConverter : JsonConverter
         writer.WriteStartObject();
         writer.WritePropertyName("type");
         writer.WriteValue(drawable.type);
-        writer.WritePropertyName(nameof(UIDrawable.id));
-        writer.WriteValue(drawable.id);
 
         Type drawableType = drawable.GetType();
         UIDrawable? defaults = compact ? GetDefaultInstance(drawableType) : null;
         HashSet<string> writtenNames = new(StringComparer.Ordinal)
         {
             "type",
-            nameof(UIDrawable.id),
             nameof(UIGroup.children)
         };
 
@@ -316,7 +306,6 @@ public class UIDrawableConverter : JsonConverter
         HashSet<string> allowed = new(StringComparer.Ordinal)
         {
             "type",
-            nameof(UIDrawable.id),
             nameof(UIGroup.children),
             nameof(UiTextParameters)
         };

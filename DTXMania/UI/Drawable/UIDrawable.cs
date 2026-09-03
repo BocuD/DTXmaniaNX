@@ -8,7 +8,6 @@ namespace DTXMania.UI.Drawable;
 
 public abstract class UIDrawable : IDisposable
 {
-    public string id;
     public string type => GetType().FullName ?? GetType().Name;
     [Themable] public int renderOrder = 0;
     [Themable] public Vector3 position = Vector3.Zero;
@@ -39,7 +38,6 @@ public abstract class UIDrawable : IDisposable
 
     protected UIDrawable()
     {
-        id = Guid.NewGuid().ToString();
         DrawableTracker.Register(this);
     }
 
@@ -326,9 +324,7 @@ public abstract class UIDrawable : IDisposable
             ImGui.EndPopup();
         }
 
-        ImGui.BeginDisabled(true);
-        ImGui.Text(id);
-        ImGui.EndDisabled();
+        ImGui.TextDisabled(GetType().Name);
     }
 
     private void DrawDataContextSection()
