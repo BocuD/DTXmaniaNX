@@ -4739,39 +4739,82 @@ internal abstract class CStagePerfCommonScreen : CStage
         }
     }
 
+    //how long a played marker waits for the wail input	// #24245 2011.1.26 yyagi: 800 -> 1000
+    private const long WailingWindowMs = 1000;
+
     private void DoWailingFromQueue(EInstrumentPart inst, long nTimeStamp_Wailed, bool autoW)
     {
         int indexInst = (int)inst;
         long nTimeWailed = nTimeStamp_Wailed - AudioMixer.Timer.nResetAtMs;
-        CChip chipWailing;
-        while ((queWailing[indexInst].Count > 0) && ((chipWailing = queWailing[indexInst].Dequeue()) != null))
-        {
-            if ((nTimeWailed - chipWailing.nPlaybackTimeMs) <= 1000)		// #24245 2011.1.26 yyagi: 800 -> 1000
-            {
-                chipWailing.bHit = true;
-                actWailingBonus.Start(inst, r現在の歓声Chip[indexInst]);
-                
-                //todo: add new wailing effect here
-                wailingEffect[(int)(inst - 1)].Play();
-                
-                //if ( !bIsAutoPlay[indexInst] )
-                if (!autoW)
-                {
-                    if (CDTXMania.ConfigIni.nSkillMode == 0)
-                    {
-                        int nCombo = (actCombo.nCurrentCombo[indexInst] < 500) ? actCombo.nCurrentCombo[indexInst] : 500;
-                        actScore.Add(inst, bIsAutoPlay, nCombo * 3000L);		// #24245 2011.1.26 yyagi changed DRUMS->BASS, add nCombo conditions
-                    }
-                    else
-                    {
-                        int nAddScore = actCombo.nCurrentCombo[indexInst] > 500 ? 50000 : actCombo.nCurrentCombo[indexInst] * 100;
-                        actScore.Add(inst, bIsAutoPlay, nAddScore);		// #24245 2011.1.26 yyagi changed DRUMS->BASS, add nCombo conditions
+        Queue<CChip> armed = queWailing[indexInst];
 
-                        tBoostBonus();
-                    }
-                }
+        while (armed.Count > 0)
+        {
+            CChip chipWailing = armed.Peek();
+            long since = nTimeWailed - chipWailing.nPlaybackTimeMs;
+
+            //not reached yet, so leave it for the press it belongs to
+            if (since < 0)
+            {
+                return;
+            }
+
+            armed.Dequeue();
+
+            //too old for this press, but the one behind it might not be
+            if (since > WailingWindowMs)
+            {
+                continue;
+            }
+
+            chipWailing.bHit = true;
+            actWailingBonus.Start(inst, SoundForWailing(inst, chipWailing));
+
+            //todo: add new wailing effect here
+            wailingEffect[(int)(inst - 1)].Play();
+
+            //if ( !bIsAutoPlay[indexInst] )
+            if (!autoW)
+            {
+                AddWailingScore(inst, indexInst);
+            }
+
+            //one press wails one marker
+            return;
+        }
+    }
+
+    //the sound is its own chip on the wailing sound channel, matched by the marker's time
+    private CChip SoundForWailing(EInstrumentPart inst, CChip marker)
+    {
+        if (inst == EInstrumentPart.GUITAR)
+        {
+            CChip sound = r指定時刻に一番近いChip(marker.nPlaybackTimeMs, EChannel.Guitar_WailingSound, 0,
+                (int)WailingWindowMs, hs: HitState.DontCare);
+
+            if (sound != null)
+            {
+                return sound;
             }
         }
+
+        //bass has no wailing sound channel, so it falls back to the crowd
+        return r現在の歓声Chip[(int)inst];
+    }
+
+    private void AddWailingScore(EInstrumentPart inst, int indexInst)
+    {
+        if (CDTXMania.ConfigIni.nSkillMode == 0)
+        {
+            int nCombo = (actCombo.nCurrentCombo[indexInst] < 500) ? actCombo.nCurrentCombo[indexInst] : 500;
+            actScore.Add(inst, bIsAutoPlay, nCombo * 3000L);		// #24245 2011.1.26 yyagi changed DRUMS->BASS, add nCombo conditions
+            return;
+        }
+
+        int nAddScore = actCombo.nCurrentCombo[indexInst] > 500 ? 50000 : actCombo.nCurrentCombo[indexInst] * 100;
+        actScore.Add(inst, bIsAutoPlay, nAddScore);		// #24245 2011.1.26 yyagi changed DRUMS->BASS, add nCombo conditions
+
+        tBoostBonus();
     }
 
     private void tBoostBonus()
