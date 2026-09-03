@@ -16,6 +16,8 @@ public class StageRoot : UIGroup
     //a clip in this root's own animator, played once as the stage opens; empty for none
     [Themable] public string openClip = string.Empty;
 
+    [Themable] public UiCanvasFit canvasFit = UiCanvasFit.Letterbox;
+
     //most stages have background music and the ones that don't leave it empty, so it lives here rather
     //than being redeclared per stage. A subclass names its file in its constructor
     public SoundReference bgm = new() { group = AudioGroup.Bgm };
@@ -86,6 +88,7 @@ public class StageRoot : UIGroup
             return;
         }
 
+        Inspector.Inspector.Inspect("Canvas Fit", ref canvasFit);
         ImGui.InputText("Open Clip", ref openClip, 128);
 
         FieldInfo[] soundFields = SoundFields(GetType()).ToArray();

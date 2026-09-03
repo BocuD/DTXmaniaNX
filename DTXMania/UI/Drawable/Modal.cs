@@ -50,6 +50,11 @@ public class Modal : UIGroup
         float screenHeight = GameWindowSize.Height;
         float centerX = screenWidth / 2f;
 
+        //a design sized box centred in the window, so the placements below are in design space
+        size = new Vector2(screenWidth, screenHeight);
+        parentAnchor = UICanvas.Center;
+        pivot = UICanvas.Center;
+
         const float topPadding = 20f;
         const float titleToDescriptionGap = 18f;
         const float descriptionToOptionsGap = 20f;
@@ -57,8 +62,10 @@ public class Modal : UIGroup
 
         UIImage backdrop = AddChild(new UIImage(BaseTexture.CreateSolidColor(new Color4(0f, 0f, 0f, 0.6f))));
         backdrop.name = "Backdrop";
-        backdrop.position = new Vector3(0f, 0f, 0f);
-        backdrop.size = new Vector2(screenWidth, screenHeight);
+        //oversized so the dimming reaches the edges of a window that is not 16:9
+        backdrop.parentAnchor = UICanvas.Center;
+        backdrop.pivot = UICanvas.Center;
+        backdrop.size = new Vector2(4000f, 4000f);
         backdrop.renderOrder = 0;
 
         //both texts are rasterized before anything is placed: the panel is sized to what they measured,
@@ -82,7 +89,7 @@ public class Modal : UIGroup
 
         UIImage panel = AddChild(new UIImage(BaseTexture.CreateSolidColor(new Color4(0.11f, 0.11f, 0.11f, 0.96f))));
         panel.name = "Panel";
-        panel.anchor = new Vector2(0.5f, 0f);
+        panel.pivot = new Vector2(0.5f, 0f);
         panel.position = new Vector3(centerX, panelTop, 0f);
         panel.size = new Vector2(panelWidth, panelHeight);
         panel.renderOrder = 1;
@@ -119,8 +126,8 @@ public class Modal : UIGroup
         UIFocus.Push(optionList);
     }
 
-    //the claimed width is the wrap budget, and the anchor is taken from that rather than from what the
-    //text measured, so the caller centres these by position instead of by anchor
+    //the claimed width is the wrap budget, and the pivot is taken from that rather than from what the
+    //text measured, so the caller centres these by position instead of by pivot
     private UIText AddWrappedText(string content, int fontSize, string name)
     {
         UIText text = AddChild(new UIText(content, fontSize));
@@ -141,14 +148,14 @@ public class Modal : UIGroup
 
         UIText label = root.AddChild(new UIText(string.Empty, OptionFontSize));
         label.name = "Label";
-        label.anchor = new Vector2(0.5f, 0f);
+        label.pivot = new Vector2(0.5f, 0f);
         label.position = new Vector3(-5f, 2f, 0f);
         label.bindings.Add(new UIBinding("text", "Item.Label"));
         label.bindings.Add(new UIBinding("isVisible", "IsSelected") { invert = true });
 
         UIText selected = root.AddChild(new UIText(string.Empty, OptionFontSize));
         selected.name = "LabelSelected";
-        selected.anchor = new Vector2(0.5f, 0f);
+        selected.pivot = new Vector2(0.5f, 0f);
         selected.position = new Vector3(-5f, 2f, 0f);
         selected.bindings.Add(new UIBinding("text", "Item.Label"));
         selected.fillGradientMode = UiTextGradientMode.Vertical;

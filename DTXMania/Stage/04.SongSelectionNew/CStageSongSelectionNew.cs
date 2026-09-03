@@ -9,6 +9,7 @@ using DTXMania.SongDb.Sorting;
 using DTXMania.UI;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.Skin;
+using DTXMania.UI.Skin.Preview;
 using DTXMania.UI.DynamicElements;
 using DTXMania.UI.Text;
 
@@ -16,7 +17,8 @@ namespace DTXMania;
 
 public class CStageSongSelectionNew : CStage
 {
-    private SongDb.SongDb songDb => CDTXMania.SongDb;
+    //fake songs, so the list can be skinned with none installed
+    private SongDb.SongDb songDb => previewMode ? SkinPreview.SongDb : CDTXMania.SongDb;
     private SortMenuContainer? sortMenuContainer;
     private CActSelectPresound actPresound;
     private PreviewVideoBackground previewVideo;
@@ -24,6 +26,7 @@ public class CStageSongSelectionNew : CStage
     private SongSearchMenu songSearchMenu;
     private QuickMenu quickMenu;
 
+    private PerformanceHistoryPanel? historyPanel;
     private SongSelectionContainer selectionContainer;
     private DensityGraph densityGraph1;
 
@@ -71,6 +74,8 @@ public class CStageSongSelectionNew : CStage
     //the selected song's display values, pushed on change: formatting them per frame would allocate
     private readonly UIDataContext songInfo = new();
 
+    protected override StageRoot CreateRoot() => new() { canvasFit = UiCanvasFit.Fill };
+
     public override void RegisterBindings()
     {
         foreach (string key in SongInfoKeys)
@@ -115,10 +120,23 @@ public class CStageSongSelectionNew : CStage
 
     public override void BuildDefaultLayout()
     {
-        ui.AddChild(new UIImage
+        //the video draws over the still, so turning the video off uncovers the still
+        UICoverGroup background = ui.AddChild(new UICoverGroup("Background"));
+        background.renderOrder = -100;
+
+        background.AddChild(new UIImage
         {
             imageSource = ImageSource.File, image = SkinResource.System(@"Graphics\5_background.jpg"),
-            renderOrder = -101, position = Vector3.Zero, name = "Background"
+            renderOrder = 0, name = "Image", size = UISize.Inherited
+        });
+
+        //the per-song preview movie is PreviewVideoBackground, further down
+        background.AddChild(new UINewVideoRenderer
+        {
+            video = SkinResource.System(@"Graphics\5_background.mp4"),
+            renderOrder = 1,
+            name = "Video",
+            size = UISize.Inherited
         });
 
         ui.AddChild(new UIImage
@@ -136,7 +154,8 @@ public class CStageSongSelectionNew : CStage
         ui.AddChild(new UIImage
         {
             imageSource = ImageSource.File, image = SkinResource.System(@"Graphics\SongSelect\top_bar.png"),
-            renderOrder = 12, name = "TopBar", size = { X = 1280 } //height stays on the texture
+            renderOrder = 12, name = "TopBar",
+            size = new UISize { xMode = UiSizeMode.Inherit } //height stays on the texture
         });
 
         ui.AddChild(new UIImage
@@ -163,7 +182,7 @@ public class CStageSongSelectionNew : CStage
         skillText.outlineWidth = 0;
         skillText.style = UiTextStyle.Italic;
         skillText.font = SkinResource.System("Futura PT Medium.otf");
-        skillText.anchor = new Vector2(1, 1);
+        skillText.pivot = new Vector2(1, 1);
         skillText.position = new Vector3(315, 291, 0);
         skillText.name = "SkillText";
 
@@ -173,7 +192,7 @@ public class CStageSongSelectionNew : CStage
         bpmText.outlineWidth = 0;
         bpmText.style = UiTextStyle.Italic;
         bpmText.font = SkinResource.System("Futura PT Medium.otf");
-        bpmText.anchor = new Vector2(1, 1);
+        bpmText.pivot = new Vector2(1, 1);
         bpmText.position = new Vector3(315, 338, 0);
         bpmText.name = "BPMText";
 
@@ -183,27 +202,30 @@ public class CStageSongSelectionNew : CStage
         commentText.bindings.Add(new UIBinding("text", "SongComment"));
         commentText.name = "CommentText";
 
-        //ambient looping background video; the per-song preview movie is PreviewVideoBackground below
-        ui.AddChild(new UINewVideoRenderer
-        {
-            video = SkinResource.System(@"Graphics\5_background.mp4"),
-            renderOrder = -100,
-            name = "BackgroundVideo"
-        });
-
         //the container is serializable (position + which row component it uses) but its rows are runtime
         var songSelect = ui.AddChild(new SongSelectionContainer());
-        songSelect.position = new Vector3(765, 320, 0);
+        songSelect.parentAnchor = UICanvas.Right;
+        songSelect.position = UICanvas.FromAnchor(UICanvas.Right, 765, 320);
         songSelect.name = "SongSelect";
 
         //StatusPanel -> 3 pane component instances -> 5 rows each; a skin's json carries the panes instead
         var statusPanel = ui.AddChild(new StatusPanel());
+        statusPanel.parentAnchor = UICanvas.BottomLeft;
+        statusPanel.position = UICanvas.FromAnchor(UICanvas.BottomLeft, 0, 0);
         statusPanel.renderOrder = 6;
         statusPanel.BuildDefaultPanes();
 
+        var history = ui.AddChild(new PerformanceHistoryPanel());
+        history.component = "Components/PerformanceHistoryPanel.json";
+        history.parentAnchor = UICanvas.BottomRight;
+        history.pivot = UICanvas.BottomRight;
+        history.position = new Vector3(-40, -30, 0);
+        history.renderOrder = 7;
+
         var sortMenu = ui.AddChild(new SortMenuContainer());
         sortMenu.component = "Components/SortMenu.json";
-        sortMenu.position = new Vector3(1281, 35, 0);
+        sortMenu.parentAnchor = UICanvas.TopRight;
+        sortMenu.position = UICanvas.FromAnchor(UICanvas.TopRight, 1281, 35);
         sortMenu.renderOrder = 8;
     }
 
@@ -212,15 +234,17 @@ public class CStageSongSelectionNew : CStage
         //swaps to the selected chart's PREMOVIE as the selection changes, like the preview sound
         previewVideo = ui.AddChild(new PreviewVideoBackground());
         previewVideo.renderOrder = -99;
-        previewVideo.position = Vector3.Zero;
 
         //the status panel, sort menu and selection container are part of the layout, so they may have
         //come from json
         statusPanel = ui.GetChild<StatusPanel>("StatusPanel")!;
         sortMenuContainer = ui.GetChild<SortMenuContainer>("SortMenuContainer")!;
+        historyPanel = ui.GetChild<PerformanceHistoryPanel>("PerformanceHistoryPanel");
 
         densityGraph1 = ui.AddChild(new DensityGraph((EInstrumentPart)CDTXMania.GetCurrentInstrument()));
-        densityGraph1.position = new Vector3(CDTXMania.GetCurrentInstrument() == 0 ? 212 : 64, 720, 0);
+        densityGraph1.parentAnchor = UICanvas.BottomLeft;
+        densityGraph1.position =
+            UICanvas.FromAnchor(UICanvas.BottomLeft, CDTXMania.GetCurrentInstrument() == 0 ? 212 : 64, 720);
         densityGraph1.renderOrder = 4;
         densityGraph1.name = "DensityGraph";
         densityGraph1.dontSerialize = true;
@@ -228,16 +252,18 @@ public class CStageSongSelectionNew : CStage
         songSearchMenu = ui.AddChild(new SongSearchMenu());
         songSearchMenu.renderOrder = 15;
         songSearchMenu.isVisible = false;
-        songSearchMenu.anchor = new Vector2(0.5f, 0.5f);
-        songSearchMenu.position = new Vector3(1280 / 2.0f, 720 / 2.0f, 0);
+        songSearchMenu.pivot = UICanvas.Center;
+        songSearchMenu.parentAnchor = UICanvas.Center;
+        songSearchMenu.position = Vector3.Zero;
         songSearchMenu.dontSerialize = true;
 
         quickMenu = ui.AddChild(new QuickMenu());
         quickMenu.component = "Components/QuickMenu.json";
         quickMenu.renderOrder = 15;
         quickMenu.isVisible = false;
-        quickMenu.anchor = new Vector2(0.5f, 0.5f);
-        quickMenu.position = new Vector3(1280 / 2.0f, 720 / 2.0f, 0);
+        quickMenu.pivot = UICanvas.Center;
+        quickMenu.parentAnchor = UICanvas.Center;
+        quickMenu.position = Vector3.Zero;
         quickMenu.dontSerialize = true;
 
         selectionContainer = ui.GetChild<SongSelectionContainer>("SongSelect");
@@ -246,10 +272,11 @@ public class CStageSongSelectionNew : CStage
         if (selectionContainer != null && sortCache.Count > 0)
         {
             SongNode? previousSelection = selectedNode;
+            CChartData? previousChart = selectedChart;
             ApplySort(currentSort);
             if (previousSelection != null)
             {
-                RestoreSelection(previousSelection);
+                RestoreSelection(previousSelection, previousChart);
             }
         }
     }
@@ -271,14 +298,14 @@ public class CStageSongSelectionNew : CStage
         SongNode? selectedNodeBackup = selectedNode;
         CChartData? selectedChartBackup = selectedChart;
         
-        //determine if we need to rebuild sort cache or not
-        if (CDTXMania.GetCurrentInstrument() != lastInstrument)
+        //the editor swaps the whole song list, so check the database too
+        if (CDTXMania.GetCurrentInstrument() != lastInstrument || !ReferenceEquals(songDb, lastSongDb))
         {
-            //force a recreation of sort cache if instrument has changed
             sortCache.Clear();
         }
-        
+
         lastInstrument = CDTXMania.GetCurrentInstrument();
+        lastSongDb = songDb;
         
         Trace.TraceInformation("Preparing sort cache...");
         DateTime startTime = DateTime.Now;
@@ -302,7 +329,7 @@ public class CStageSongSelectionNew : CStage
         //try to restore the last selected song if possible
         if (selectedRootBackup != null && selectedNodeBackup != null && selectedChartBackup != null)
         {
-            RestoreSelection(selectedNodeBackup);
+            RestoreSelection(selectedNodeBackup, selectedChartBackup);
         }
         
         Trace.TraceInformation("Sort cache preparation complete.");
@@ -313,43 +340,11 @@ public class CStageSongSelectionNew : CStage
         loadPhase = ELoadPhase.CacheThumbnails;
     }
 
-    private void RestoreSelection(SongNode selectedNodeBackup)
+    private void RestoreSelection(SongNode selectedNodeBackup, CChartData? selectedChartBackup = null)
     {
-        string? previousBoxTitle = selectedNodeBackup.parent?.title;
+        SongNode? targetNode = SongNode.FindRestoreTarget(selectionContainer.CurrentRoot,
+            selectedNodeBackup, selectedChartBackup);
 
-        SongNode? fallback = null;
-        SongNode? preferred = null;
-
-        void Find(SongNode container)
-        {
-            foreach (SongNode child in container.childNodes)
-            {
-                if (child == null) continue;
-
-                switch (child.nodeType)
-                {
-                    case SongNode.ENodeType.SONG
-                        when child.path.Equals(selectedNodeBackup.path, StringComparison.InvariantCulture):
-                        fallback ??= child;
-                        if (previousBoxTitle != null &&
-                            container.title.Equals(previousBoxTitle, StringComparison.InvariantCulture))
-                        {
-                            preferred = child;
-                            return;
-                        }
-                        break;
-
-                    case SongNode.ENodeType.BOX or SongNode.ENodeType.ROOT:
-                        Find(child);
-                        if (preferred != null) return;
-                        break;
-                }
-            }
-        }
-
-        Find(selectionContainer.CurrentRoot);
-
-        SongNode? targetNode = preferred ?? fallback;
         if (targetNode?.parent == null)
             return;
 
@@ -477,6 +472,18 @@ public class CStageSongSelectionNew : CStage
         ChangeSelection(selectedNode, selectedChart);
     }
 
+    public bool ConfirmRandomSong()
+    {
+        if (!selectionContainer.ConfirmRandomSong())
+        {
+            return false;
+        }
+
+        //the result a decide on a song produces, so the game goes on to load it by itself
+        pendingResult = (int)EReturnValue.Selected;
+        return true;
+    }
+
     public SongNode? selectedNode { get; private set; }
     public CChartData? selectedChart { get; private set; }
     public void ChangeSelection(SongNode? node, CChartData? chart)
@@ -489,6 +496,7 @@ public class CStageSongSelectionNew : CStage
         actPresound.tSelectionChanged(chart);
         previewVideo?.SelectionChanged(chart);
         statusPanel.SelectionChanged(node, chart);
+        historyPanel?.SelectionChanged(chart);
         densityGraph1.SelectionChanged(node, chart);
     }
 
@@ -575,7 +583,6 @@ public class CStageSongSelectionNew : CStage
         if ((song.nodeType == SongNode.ENodeType.BOX) || (song.nodeType == SongNode.ENodeType.BACKBOX))
             return 0; // BOX と BACKBOX は関係無いよ
 
-
         // 現在のアンカレベルから、難易度上向きに検索開始。
 
         int closestLevel = targetDifficultyLevel;
@@ -587,7 +594,6 @@ public class CStageSongSelectionNew : CStage
 
             closestLevel = (closestLevel + 1) % 5; // 曲がなかったので次の難易度レベルへGo。（5以上になったら0に戻る。）
         }
-
 
         // 見つかった曲がアンカより下のレベルだった場合……
         // アンカから下向きに検索すれば、もっとアンカに近い曲があるんじゃね？
@@ -613,6 +619,7 @@ public class CStageSongSelectionNew : CStage
     private SongDbSort currentSort;
     private Dictionary<SongDbSort, SongNode> sortCache = new();
     private int lastInstrument;
+    private SongDb.SongDb? lastSongDb;
     public bool isScrolling => selectionContainer.isScrolling;
 
     public void ApplySort(SongDbSort sorter)

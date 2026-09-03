@@ -44,9 +44,9 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
     private ImGuiContextPtr _imguiContext;
 
     private bool _vsyncEnabled = true;
+    private bool cursorVisible = true;
     public FullscreenMode fullscreenMode { get; private set; } = FullscreenMode.Windowed;
-    private bool _renderInGameWindow;
-    
+
     private int _windowedX = 80;
     private int _windowedY = 80;
     private int _windowedWidth = 1280;
@@ -76,6 +76,18 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
     [DllImport("user32.dll")]
     private static extern IntPtr GetForegroundWindow();
 
+    [DllImport("user32.dll")]
+    private static extern bool SetForegroundWindow(IntPtr window);
+
+    [DllImport("user32.dll")]
+    private static extern uint GetWindowThreadProcessId(IntPtr window, IntPtr processId);
+
+    [DllImport("user32.dll")]
+    private static extern bool AttachThreadInput(uint attachTo, uint attachFrom, bool attach);
+
+    [DllImport("kernel32.dll")]
+    private static extern uint GetCurrentThreadId();
+
     public RuntimeLogListener RuntimeLogListener { get; } = new();
 
     public GlfwOpenGlHost(OpenGlGame game)
@@ -87,11 +99,6 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
 
     public bool VsyncEnabled => _vsyncEnabled;
     public FullscreenMode FullscreenMode => fullscreenMode;
-    public bool RenderInGameWindow
-    {
-        get => _renderInGameWindow;
-        set => _renderInGameWindow = value;
-    }
 
     public float Fps => _displayedFps;
     public float FrameTimeMs => _displayedFrameTimeMs;
@@ -152,10 +159,62 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
 
     public void FocusWindow()
     {
-        if (_window.Handle != null)
+        if (_window.Handle == null)
         {
-            GLFW.FocusWindow(_window);
+            return;
         }
+
+        GLFW.FocusWindow(_window);
+
+        if (OperatingSystem.IsWindows())
+        {
+            TakeForeground();
+        }
+    }
+
+    private void TakeForeground()
+    {
+        IntPtr window = GetWindowHandle();
+        IntPtr foreground = GetForegroundWindow();
+
+        if (window == IntPtr.Zero || window == foreground)
+        {
+            return;
+        }
+
+        uint foregroundThread = GetWindowThreadProcessId(foreground, IntPtr.Zero);
+        uint thisThread = GetCurrentThreadId();
+        bool shared = foregroundThread != thisThread && AttachThreadInput(thisThread, foregroundThread, true);
+
+        SetForegroundWindow(window);
+
+        if (shared)
+        {
+            AttachThreadInput(thisThread, foregroundThread, false);
+        }
+    }
+
+    public void SetCursorVisible(bool visible)
+    {
+        if (_window.Handle == null || visible == cursorVisible)
+        {
+            return;
+        }
+
+        cursorVisible = visible;
+        ImGuiIOPtr io = ImGui.GetIO();
+
+        if (visible)
+        {
+            io.ConfigFlags &= ~ImGuiConfigFlags.NoMouseCursorChange;
+        }
+        else
+        {
+            io.ConfigFlags |= ImGuiConfigFlags.NoMouseCursorChange;
+        }
+
+        GLFW.SetInputMode(_window, GLFW.GLFW_CURSOR,
+            visible ? GLFW.GLFW_CURSOR_NORMAL : GLFW.GLFW_CURSOR_HIDDEN);
     }
 
     public bool IsWindowFocused
@@ -174,6 +233,17 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
 
             IntPtr handle = GetWindowHandle();
             return handle != IntPtr.Zero && GetForegroundWindow() == handle;
+        }
+    }
+
+    public string GetClipboardText()
+        => _window.Handle == null ? string.Empty : GLFW.GetClipboardStringS(_window) ?? string.Empty;
+
+    public void SetClipboardText(string value)
+    {
+        if (_window.Handle != null)
+        {
+            GLFW.SetClipboardString(_window, value);
         }
     }
 
@@ -317,6 +387,9 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
 
         GLFW.MakeContextCurrent(window);
 
+        //a window is born showing the pointer, whatever the one before it was doing
+        cursorVisible = true;
+
         if (fullscreenMode == FullscreenMode.Windowed)
         {
             GLFW.SetWindowPos(window, _windowedX, _windowedY);
@@ -339,6 +412,9 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
     }
     
     private GLFWkeyfun? keyCallback;
+    private GLFWcharfun? charCallback;
+    private GLFWcursorposfun? cursorPosCallback;
+    private GLFWmousebuttonfun? mouseButtonCallback;
     private GLFWwindowfocusfun? focusCallback;
     private GLFWwindowposfun? windowPosCallback;
     private GLFWwindowsizefun? windowSizeCallback;
@@ -353,18 +429,38 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
                     _game.KeyDown((GlfwKey)key, (GlfwMod)mods);
                     break;
 
+                case GLFW.GLFW_REPEAT:
+                    _game.KeyRepeat((GlfwKey)key, (GlfwMod)mods);
+                    break;
+
                 case GLFW.GLFW_RELEASE:
                     _game.KeyUp((GlfwKey)key, (GlfwMod)mods);
                     break;
             }
         };
-        
-        focusCallback = (_, _) => _game.isFocused = IsWindowFocused;
+
+        charCallback = (_, codepoint) => _game.CharTyped(codepoint);
+
+        cursorPosCallback = (_, x, y) => _game.PointerMoved(new Vector2((float)x, (float)y));
+        mouseButtonCallback = (_, button, action, mods) =>
+            _game.PointerButtonChanged(button, action == GLFW.GLFW_PRESS, (GlfwMod)mods);
+
+        focusCallback = (_, _) =>
+        {
+            _game.isFocused = IsWindowFocused;
+
+            //anything at all may have shown the pointer while another window held the focus, so what it
+            //is doing now is read back rather than assumed
+            cursorVisible = GLFW.GetInputMode(window, GLFW.GLFW_CURSOR) != GLFW.GLFW_CURSOR_HIDDEN;
+        };
         windowPosCallback = (_, xpos, ypos) => _game.windowPosition = new Vector2(xpos, ypos);
         windowSizeCallback = (_, width, height) => _game.windowSize = new Vector2(width, height);
         
         //set key callbacks
         GLFW.SetKeyCallback(window, keyCallback);
+        GLFW.SetCharCallback(window, charCallback);
+        GLFW.SetCursorPosCallback(window, cursorPosCallback);
+        GLFW.SetMouseButtonCallback(window, mouseButtonCallback);
         GLFW.SetWindowFocusCallback(window, focusCallback);
         GLFW.SetWindowPosCallback(window, windowPosCallback);
         GLFW.SetWindowSizeCallback(window, windowSizeCallback);
@@ -539,13 +635,17 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
                 _clearImGuiFocusOnNextFrame = false;
             }
 
+            //read once, because the menu can toggle it later in the same frame and the inspector has to
+            //show what the game actually rendered into
+            bool renderGameToWindow = InspectorManager.rendersGameToWindow;
+
             int targetWidth;
             int targetHeight;
-            if (_renderInGameWindow)
+            if (renderGameToWindow)
             {
-                var desiredRenderSize = GameWindow.DesiredRenderSize;
-                targetWidth = Math.Max((int)desiredRenderSize.X, 1);
-                targetHeight = Math.Max((int)desiredRenderSize.Y, 1);
+                Vector2 renderSize = InspectorManager.gameWindow.renderSize;
+                targetWidth = Math.Clamp((int)renderSize.X, 1, 8192);
+                targetHeight = Math.Clamp((int)renderSize.Y, 1, 8192);
             }
             else
             {
@@ -554,9 +654,9 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
             }
 
             _gameRenderTarget.Resize(targetWidth, targetHeight);
-            _gameRenderTarget.RenderToDefaultFramebuffer = !_renderInGameWindow;
+            _gameRenderTarget.RenderToDefaultFramebuffer = !renderGameToWindow;
             renderer.BeginFrame(targetWidth, targetHeight);
-            if (_renderInGameWindow)
+            if (renderGameToWindow)
             {
                 _gameRenderTarget.BindForRendering();
             }
@@ -580,7 +680,7 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
 
             if (imgui)
             {
-                InspectorManager.Draw(_renderInGameWindow, _gameRenderTarget.TextureId,
+                InspectorManager.Draw(renderGameToWindow, _gameRenderTarget.TextureId,
                     new Vector2(_gameRenderTarget.Width, _gameRenderTarget.Height),
                     new Vector2(Math.Max(_framebufferWidth, 1), Math.Max(_framebufferHeight, 1)));
             }
@@ -588,7 +688,7 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
             FrameProfiler.End(FrameSection.Inspector);
 
             FrameProfiler.Begin(FrameSection.Blit);
-            if (_renderInGameWindow)
+            if (renderGameToWindow)
             {
                 _gameRenderTarget.ClearDefaultFramebuffer(0.08f, 0.09f, 0.12f, 1f, Math.Max(_framebufferWidth, 1), Math.Max(_framebufferHeight, 1));
             }

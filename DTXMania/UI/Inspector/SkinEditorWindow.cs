@@ -38,24 +38,49 @@ public class SkinEditorWindow
         SkinManager skinManager = CDTXMania.SkinManager;
         SkinDescriptor? currentSkin = skinManager.currentSkin;
 
+        //belongs to every tab
         DrawActiveSkinSection(skinManager, currentSkin);
 
-        if (currentSkin != null)
+        if (ImGui.BeginTabBar("SkinEditorTabs"))
         {
-            DrawSkinnedStagesSection(currentSkin);
-            DrawComponentsSection(currentSkin);
+            if (ImGui.BeginTabItem("Stage"))
+            {
+                InspectorManager.skinPreview.DrawContents();
+                ImGui.EndTabItem();
+            }
+
+            if (ImGui.BeginTabItem("Layout"))
+            {
+                DrawCurrentStageSection(skinManager);
+
+                if (currentSkin != null)
+                {
+                    DrawComponentsSection(currentSkin);
+                    DrawSkinnedStagesSection(currentSkin);
+                }
+
+                ImGui.EndTabItem();
+            }
+
+            if (ImGui.BeginTabItem("Skins"))
+            {
+                DrawAvailableSkinsSection(skinManager, currentSkin);
+                DrawCreateSkinModal(skinManager);
+
+                DrawAdvancedSection();
+                ImGui.EndTabItem();
+            }
+
+            ImGui.EndTabBar();
         }
-
-        DrawCurrentStageSection(skinManager);
-        DrawAvailableSkinsSection(skinManager, currentSkin);
-        DrawAdvancedSection();
-
-        DrawCreateSkinModal(skinManager);
     }
 
     private static void DrawActiveSkinSection(SkinManager skinManager, SkinDescriptor? currentSkin)
     {
-        SectionHeader("Active Skin");
+        if (!Section("Active Skin"))
+        {
+            return;
+        }
 
         if (currentSkin != null)
         {
@@ -114,7 +139,10 @@ public class SkinEditorWindow
 
     private static void DrawCurrentStageSection(SkinManager skinManager)
     {
-        SectionHeader("Current Stage");
+        if (!Section("Current Stage"))
+        {
+            return;
+        }
 
         CStage stage = CDTXMania.StageManager.rCurrentStage;
         ImGui.Text($"Stage: {stage.eStageID}");
@@ -148,7 +176,10 @@ public class SkinEditorWindow
 
     private static void DrawSkinnedStagesSection(SkinDescriptor skin)
     {
-        SectionHeader("Skinned Stages");
+        if (!Section("Skinned Stages"))
+        {
+            return;
+        }
 
         static int StageOrder(string file)
             => Enum.TryParse(Path.GetFileNameWithoutExtension(file), out CStage.EStage stage)
@@ -209,7 +240,10 @@ public class SkinEditorWindow
 
     private static void DrawComponentsSection(SkinDescriptor skin)
     {
-        SectionHeader("Components");
+        if (!Section("Components"))
+        {
+            return;
+        }
 
         string folder = skin.componentFolder;
         string[] files = Directory.Exists(folder) ? Directory.GetFiles(folder, "*.json") : [];
@@ -253,7 +287,10 @@ public class SkinEditorWindow
 
     private void DrawAvailableSkinsSection(SkinManager skinManager, SkinDescriptor? currentSkin)
     {
-        SectionHeader("Available Skins");
+        if (!Section("Available Skins"))
+        {
+            return;
+        }
 
         if (ImGui.Button("Create New Skin"))
         {
@@ -350,12 +387,8 @@ public class SkinEditorWindow
         ImGui.EndPopup();
     }
 
-    private static void SectionHeader(string title)
-    {
-        ImGui.Spacing();
-        ImGui.TextDisabled(title.ToUpperInvariant());
-        ImGui.Separator();
-    }
+    internal static bool Section(string title)
+        => ImGui.CollapsingHeader(title, ImGuiTreeNodeFlags.DefaultOpen);
 
     private static void OpenFolder(string path)
     {

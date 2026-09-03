@@ -203,7 +203,7 @@ internal class ConfigList : UIScrollItemsGroup, IUIItemSource
 
         (List<CItemBase> items, int selection, ConfigPage? page) = pageStack.Pop();
         SetPage(page);
-        SetItems(items, selection);
+        SetItems(page is { RebuildsOnReturn: true } ? page.Build() : items, selection);
     }
 
     private int SelectedIndexOnPage => rows.Count == 0 ? 0 : Mod(SelectedItem, rows.Count);
@@ -304,7 +304,7 @@ internal class ConfigList : UIScrollItemsGroup, IUIItemSource
     /// </summary>
     private sealed class ConfigItemEditor(ConfigList list) : IUIInputHandler
     {
-        private readonly NavigationRepeat navigation = new();
+        private readonly NavigationRepeat navigation = NavigationRepeat.Vertical();
         private readonly Action increase = () => list.ChangeValue(true);
         private readonly Action decrease = () => list.ChangeValue(false);
 
@@ -346,6 +346,24 @@ internal class ConfigList : UIScrollItemsGroup, IUIItemSource
     private void DrawTextInput(Matrix4x4 parentMatrix)
     {
         if (CurrentItem is not CItemTextInput textInput)
+        {
+            return;
+        }
+
+        bool typing = textInput.drawableTextInput.IsActive;
+
+        if (SelectedRow is { } row)
+        {
+            //what the field committed is the row's to show again
+            if (row.IsEditing && !typing)
+            {
+                row.RefreshValue();
+            }
+
+            row.IsEditing = typing;
+        }
+
+        if (!typing)
         {
             return;
         }

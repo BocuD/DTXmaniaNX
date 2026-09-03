@@ -14,7 +14,7 @@ public class ResultRankIcon : UIGroup
     public ResultRankIcon(int instrument)
     {
         name = "ResultRankIcon";
-        anchor = new Vector2(0.5f, 0.5f);
+        pivot = new Vector2(0.5f, 0.5f);
         size = new Vector2(420, 510);
 
         bool allAuto = instrument switch
@@ -76,18 +76,18 @@ public class ResultRankIcon : UIGroup
         UIImage bg = AddChild(new UIImage(LoadRankTexture($"rank_bg_{bgName}")));
         bg.name = "Bg";
         bg.renderOrder = -1;
-        bg.anchor = new Vector2(0.5f, 0.5f);
+        bg.pivot = new Vector2(0.5f, 0.5f);
         bg.position = new Vector3(210, 255, 0);
     }
 
-    private void AddBadge(string fileName, string visibleWhen, Vector3 position, Vector2 anchor)
+    private void AddBadge(string fileName, string visibleWhen, Vector3 position, Vector2 pivot)
     {
         UIImage badge = AddChild(new UIImage(LoadRankTexture(fileName)));
         badge.name = "Badge" + fileName;
         badge.renderOrder = 1;
         badge.scale = new Vector3(0.66f, 0.66f, 1.0f);
         badge.position = position;
-        badge.anchor = anchor;
+        badge.pivot = pivot;
         badge.bindings.Add(new UIBinding("isVisible", visibleWhen));
     }
 }

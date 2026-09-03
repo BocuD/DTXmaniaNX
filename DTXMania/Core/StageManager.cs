@@ -434,15 +434,11 @@ internal class StageManager
                         {
                             stagePerfGuitarScreen.tStorePerfResults(out cPerfEntry_Drums, out cPerfEntry_Guitar,
                                 out cPerfEntry_Bass, out bIsTrainingMode);
-                            //Transfer nTimingHitCount to stageResult
-                            stageResult.nTimingHitCount = stagePerfGuitarScreen.nTimingHitCount;
                         }
                         else
                         {
                             stagePerfDrumsScreen.tStorePerfResults(out cPerfEntry_Drums, out cPerfEntry_Guitar,
                                 out cPerfEntry_Bass, out chipArray, out bIsTrainingMode);
-                            //Transfer nTimingHitCount to stageResult
-                            stageResult.nTimingHitCount = stagePerfDrumsScreen.nTimingHitCount;
                         }
 
                         if (!bIsTrainingMode)
@@ -619,9 +615,29 @@ internal class StageManager
         }
     }
 
-    public static bool preventStageChanges;
+    public static bool pauseStageChanges;
+
+    //dropped changes are gone for good, so only the skin editor should set this
+    public static bool dropStageChanges;
+
+    //lets the loading screen hand over to the performance screen while everything else is held
+    public CStage? handOverTo;
 
     public void tChangeStage(CStage newStage, bool activateNewStage = true, bool deactivateOldStage = true)
+    {
+        if (dropStageChanges && newStage != handOverTo)
+        {
+            return;
+        }
+
+        handOverTo = null;
+        Request(newStage, activateNewStage, deactivateOldStage);
+    }
+
+    //ignores dropStageChanges
+    public void ForceChangeStage(CStage newStage) => Request(newStage, true, true);
+
+    private void Request(CStage newStage, bool activateNewStage, bool deactivateOldStage)
     {
         nextStage = newStage;
         this.activateNewStage = activateNewStage;
@@ -633,9 +649,15 @@ internal class StageManager
     private CStage nextStage;
     private bool activateNewStage;
     private bool deactivateOldStage;
+    //drop a queued change instead of running it later
+    public void CancelPendingStageChange()
+    {
+        stageChangeRequested = false;
+    }
+
     public void HandleStageChanges()
     {
-        if (preventStageChanges) return;
+        if (pauseStageChanges) return;
         if (!stageChangeRequested) return;
         
         if (deactivateOldStage)

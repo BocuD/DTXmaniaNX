@@ -91,7 +91,7 @@ public class ResultParameterPanel : UIItemsGroup, IUIItemSource
         percentSign.font = SkinResource.System("texgyreadventor-regular.otf");
         percentSign.fontSize = 15;
         percentSign.style = UiTextStyle.Bold;
-        percentSign.anchor = new Vector2(0, 0);
+        percentSign.pivot = new Vector2(0, 0);
         percentSign.bindings.Add(new UIBinding("isVisible", "Item.ShowPercent"));
 
         return root;

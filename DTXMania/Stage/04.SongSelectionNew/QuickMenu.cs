@@ -127,7 +127,7 @@ public class QuickMenu : ComponentInstance
             imageSource = ImageSource.Solid,
             color = new Color4(0.0f, 0.0f, 0.0f, 0.0f),
             size = new Vector2(1281, 721),
-            anchor = new Vector2(0.5f, 0.5f),
+            pivot = new Vector2(0.5f, 0.5f),
             renderOrder = -1
         });
 

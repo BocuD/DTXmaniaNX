@@ -10,8 +10,11 @@ namespace DTXMania;
 /// </summary>
 public sealed class ResultData
 {
+    private const double SkillBarFullWidth = 286.0;
+
     private static int Instrument => CDTXMania.GetCurrentInstrument();
     private static CScoreIni.CPerformanceEntry Entry => CDTXMania.StageManager.stageResult.stPerformanceEntry[Instrument];
+    private static double MaxSkill => CDTXMania.chosenChartData?.SongInformation.GetMaxSkill(Instrument) ?? 0.0;
 
     [DataField] public string SongTitle
     {
@@ -39,10 +42,19 @@ public sealed class ResultData
     [DataField] public string SkillInt => ((int)Entry.dbGameSkill).ToString();
     [DataField] public string SkillFraction => "." + SkillFractionValue().ToString("N0");
 
+    [DataField] public bool ShowSkillBar => MaxSkill > 0.0;
+
+    [DataField] public double SkillBarWidth =>
+        MaxSkill > 0.0 ? SkillBarFullWidth * (Entry.dbGameSkill / MaxSkill) : 0.0;
+
     //mutually exclusive; drives which result badge is shown
     [DataField] public bool IsExcellent => Entry.nPerfectCount == Entry.nTotalChipsCount;
     [DataField] public bool IsFullCombo => !IsExcellent && Entry.bIsFullCombo;
     [DataField] public bool IsClear => !IsExcellent && !Entry.bIsFullCombo;
+
+    [DataField] public bool ShowLagCounts => CDTXMania.ConfigIni.bShowLagHitCount;
+    [DataField] public int FastCount => Entry.nFastCount;
+    [DataField] public int SlowCount => Entry.nSlowCount;
 
     //level is stored as either xx.y (LEVEL<=99 plus LEVELDEC) or xxx (LEVEL>99), split here into a whole
     //part and a 2-digit fraction

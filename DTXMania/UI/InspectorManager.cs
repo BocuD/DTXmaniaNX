@@ -14,11 +14,27 @@ public static class InspectorManager
     public static Inspector.Inspector inspector { get; } = new();
     public static HierarchyWindow hierarchyWindow { get; } = new();
     public static SkinEditorWindow skinEditor { get; } = new();
+    public static SkinPreviewPanel skinPreview { get; } = new();
     public static TextureInspector textureInspector { get; private set; }
     public static LogWindow logWindow { get; } = new();
+    public static GameWindow gameWindow { get; } = new();
 
     public static bool inspectorEnabled = false;
     public static bool logWindowEnabled = false;
+
+    public static bool rendersGameToWindow => inspectorEnabled && gameWindow.enabled;
+
+    /// <summary>Whether the pointer is over the game window, where ImGui is showing the game rather than
+    /// something of its own: a click there belongs to the game.</summary>
+    public static bool PointerIsOverGame => rendersGameToWindow && gameWindow.Contains(PointerInput.windowPosition);
+
+    //where the game's pixels are in the window, both ways round: the pointer comes in through one and the
+    //IME caret goes out through the other
+    public static Vector2 WindowToGame(Vector2 windowPosition)
+        => rendersGameToWindow ? gameWindow.ToRenderTarget(windowPosition) : windowPosition;
+
+    public static Vector2 GameToWindow(Vector2 gamePosition)
+        => rendersGameToWindow ? gameWindow.ToWindow(gamePosition) : gamePosition;
 
     public static void ToggleInspector()
     {
@@ -26,13 +42,11 @@ public static class InspectorManager
 
         if (!inspectorEnabled)
         {
-            Inspector.Inspector.inspectorTarget = string.Empty;
+            Inspector.Inspector.inspectorTarget = DrawableRef.None;
         }
     }
 
-    public static bool WantsImGui => inspectorEnabled || logWindowEnabled
-                                     || Drawable.UIImGuiTextInput.IsAnyInputActive
-                                     || Core.CDTXMania.StageManager?.rCurrentStage?.NeedsImGui == true;
+    public static bool WantsImGui => inspectorEnabled || logWindowEnabled;
 
     public static ImDrawListPtr gizmoDrawList;
     public static Rectangle gizmoRect;
@@ -43,8 +57,7 @@ public static class InspectorManager
 
     private static Matrix4x4 view = Matrix4x4.Identity;
 
-    public static string toRemove = string.Empty;
-    public static UIDrawable? toRemoveDrawable => DrawableTracker.GetDrawable(toRemove);
+    public static DrawableRef toRemove = DrawableRef.None;
 
     private class Window(string name, Action draw, bool defaultShow = false)
     {
@@ -57,11 +70,11 @@ public static class InspectorManager
     
     static InspectorManager()
     {
-        windows.Add(new Window("Inspector", () => inspector.Draw(), true));
-        windows.Add(new Window("Hierarchy", () => hierarchyWindow.Draw(), true));
-        windows.Add(new Window("Game Status", () => GameStatus.Draw(), true));
+        windows.Add(new Window("Inspector", () => inspector.Draw()));
+        windows.Add(new Window("Hierarchy", () => hierarchyWindow.Draw()));
+        windows.Add(new Window("Game Status", () => GameStatus.Draw()));
         windows.Add(new Window("Profiler", () => Profiler.Draw()));
-        windows.Add(new Window("Skin Editor", () => skinEditor.Draw(), true));
+        windows.Add(new Window("Skin Editor", () => skinEditor.Draw()));
 
         windows.Add(new Window("Focus", () => FocusWindow.Draw()));
         windows.Add(new Window("Textures", () => textureInspector.DrawWindow()));
@@ -70,26 +83,36 @@ public static class InspectorManager
         windows.Add(new Window("Display Controls", () => RendererInfo.Draw()));
     }
 
+    //name as shown in the Window menu; unknown names do nothing
+    public static void ShowWindow(string name, bool show = true)
+    {
+        foreach (Window window in windows)
+        {
+            if (window.name == name)
+            {
+                window.enabled = show;
+                return;
+            }
+        }
+    }
+
     public static void Draw(bool drawGameWindow, ImTextureID? gameTextureId, Vector2 gameTextureSize, Vector2 defaultFramebufferSize)
     {
         framebufferSize = defaultFramebufferSize;
         gameRenderSize = gameTextureSize;
 
-        if (!string.IsNullOrWhiteSpace(toRemove))
+        if (toRemove.Target is { } removing)
         {
-            if (Inspector.Inspector.inspectorTarget == toRemove)
+            if (Inspector.Inspector.inspectorTarget.Is(removing))
             {
-                Inspector.Inspector.inspectorTarget = string.Empty;
+                Inspector.Inspector.inspectorTarget = DrawableRef.None;
             }
 
-            if (toRemoveDrawable?.parent != null)
-            {
-                toRemoveDrawable.parent.RemoveChild(toRemoveDrawable);
-            }
-
-            toRemoveDrawable?.Dispose();
-            toRemove = string.Empty;
+            removing.parent?.RemoveChild(removing);
+            removing.Dispose();
         }
+
+        toRemove = DrawableRef.None;
 
         if (textureInspector == null)
         {
@@ -102,11 +125,7 @@ public static class InspectorManager
             ImGui.DockSpaceOverViewport(ImGui.GetMainViewport(), flags);
         }
 
-        UIDrawable? selectedDrawable = null;
-        if (!string.IsNullOrEmpty(Inspector.Inspector.inspectorTarget))
-        {
-            selectedDrawable = DrawableTracker.GetDrawable(Inspector.Inspector.inspectorTarget);
-        }
+        UIDrawable? selectedDrawable = Inspector.Inspector.inspectorTarget.Target;
 
         Rectangle gameRect;
         ImDrawListPtr gameDrawList;
@@ -114,10 +133,14 @@ public static class InspectorManager
 
         if (drawGameWindow)
         {
-            GameWindow.Draw(gameTextureId, gameTextureSize);
-            gameRect = GameWindow.viewport.rect;
-            gameDrawList = GameWindow.viewport.drawList;
-            gameView = GameWindow.viewport.GetViewMatrix();
+            gameWindow.Draw(gameTextureId, gameTextureSize);
+        }
+
+        if (drawGameWindow && gameWindow.viewport.hasDrawList)
+        {
+            gameRect = gameWindow.viewport.rect;
+            gameDrawList = gameWindow.viewport.drawList;
+            gameView = gameWindow.viewport.GetViewMatrix();
         }
         else
         {
@@ -186,6 +209,14 @@ public static class InspectorManager
 
         if (ImGui.BeginMenu("Window"))
         {
+            //not one of the windows below: opening it is what makes the game render into a target
+            if (ImGui.MenuItem("Game Window", gameWindow.enabled))
+            {
+                gameWindow.enabled = !gameWindow.enabled;
+            }
+
+            ImGui.Separator();
+
             for (int index = 0; index < windows.Count; index++)
             {
                 Window window = windows[index];

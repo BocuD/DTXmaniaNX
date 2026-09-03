@@ -115,6 +115,12 @@ public partial class UIText : UITexture
             _dirty = true;
         }
 
+        //the texture is rasterized for one canvas scale, so resizing the window needs a new one
+        if (textureRenderScale != RenderScale)
+        {
+            _dirty = true;
+        }
+
         if (_dirty)
         {
             RequestRender();
@@ -127,8 +133,12 @@ public partial class UIText : UITexture
 
         UpdateLocalTransformMatrix();
         Matrix4x4 combinedMatrix = localTransformMatrix * parentMatrix;
-        texture.tDraw2DMatrix(combinedMatrix, GetTextureDrawSize(), GetTextureSourceRect(), Color4.White);
+        texture.tDraw2DMatrix(combinedMatrix, GetTextureDrawSize(), GetTextureSourceRect(), TextureDrawColor());
     }
+
+    //the colour is rasterized into the texture, so this multiplies it: a subclass fades text it is
+    //showing on someone else's behalf, such as a placeholder
+    protected virtual Color4 TextureDrawColor() => Color4.White;
 
     //Source rectangle (in texture pixels) sampled from the rendered text texture. Defaults to the
     //whole texture; subclasses can override to draw a sub-region (e.g. a scrolling clip window).
@@ -275,20 +285,22 @@ public partial class UIText : UITexture
 
     //the scale the texture was rasterized at, not the current one: an async result lands outside the
     //draw that asked for it, and the component editor draws at its own scale
-    protected override Vector2 ContentSize(BaseTexture t) => new Vector2(t.Width, t.Height) / _textureRenderScale;
+    protected override Vector2 ContentSize(BaseTexture t) => new Vector2(t.Width, t.Height) / textureRenderScale;
 
-    private float _textureRenderScale = 1f;
+    /// <summary>The scale the current texture was rasterized at, which its pixels have to be measured in.</summary>
+    protected float textureRenderScale { get; private set; } = 1f;
+
     private float _renderedWrapWidth;
 
     private static float RenderScale => CDTXMania.renderScale <= 0f ? 1f : CDTXMania.renderScale;
 
     private float WrapWidth() => wrap && size.xMode == UiSizeMode.Fixed ? size.X : 0f;
 
-    private UiTextParameters CreateRenderRequest()
+    protected UiTextParameters CreateRenderRequest()
     {
-        _textureRenderScale = RenderScale;
+        textureRenderScale = RenderScale;
         _renderedWrapWidth = WrapWidth();
-        float renderSize = fontSize * _textureRenderScale;
+        float renderSize = fontSize * textureRenderScale;
 
         return new UiTextParameters
         {
@@ -300,7 +312,7 @@ public partial class UIText : UITexture
             OutlineWidth = outlineWidth,
             TexturePadding = texturePadding,
             LineSpacing = lineSpacing,
-            MaxWidth = _renderedWrapWidth * _textureRenderScale,
+            MaxWidth = _renderedWrapWidth * textureRenderScale,
             Antialias = antialias,
             SubpixelText = subpixelText,
             Style = style,

@@ -19,7 +19,8 @@ public abstract class CStage : CActivity, IUIInputHandler
 		Details = "Idle",
 	};
 
-	public virtual bool NeedsImGui => false;
+	//set by the skin editor. Stages fake any data they are missing and never advance on their own
+	public static bool previewMode;
 
 	internal EStage eStageID;
 	public enum EStage
@@ -150,7 +151,7 @@ public abstract class CStage : CActivity, IUIInputHandler
 			FirstUpdate();
 			bJustStartedUpdate = false;
 		}
-		
+
 		UICanvas.Place(ui);
 		ui.Draw(Matrix4x4.Identity);
 		
@@ -206,7 +207,7 @@ public abstract class CStage : CActivity, IUIInputHandler
 
 	public NavigationRepeat? Navigation => navigation;
 
-	protected readonly NavigationRepeat navigation = new();
+	protected readonly NavigationRepeat navigation = NavigationRepeat.Vertical();
 
 	/// <summary>
 	/// What this stage hands its input to — usually its menu. Set it and there is nothing else to do; a

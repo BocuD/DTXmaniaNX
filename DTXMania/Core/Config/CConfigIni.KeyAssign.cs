@@ -78,6 +78,8 @@ internal partial class CConfigIni
 			public STKEYASSIGN[] LP { get => this[(int)EKeyConfigPad.LP]; set => this[(int)EKeyConfigPad.LP] = value; }
 			public STKEYASSIGN[] LBD { get => this[(int)EKeyConfigPad.LBD]; set => this[(int)EKeyConfigPad.LBD] = value; }
 			public STKEYASSIGN[] Cancel { get => this[(int)EKeyConfigPad.Cancel]; set => this[(int)EKeyConfigPad.Cancel] = value; }
+			public STKEYASSIGN[] PickUp { get => this[(int)EKeyConfigPad.PickUp]; set => this[(int)EKeyConfigPad.PickUp] = value; }
+			public STKEYASSIGN[] PickDown { get => this[(int)EKeyConfigPad.PickDown]; set => this[(int)EKeyConfigPad.PickDown] = value; }
 			public STKEYASSIGN[] Capture { get => this[(int)EKeyConfigPad.Capture]; set => this[(int)EKeyConfigPad.Capture] = value; }
 			public STKEYASSIGN[] Search { get => this[(int)EKeyConfigPad.Search]; set => this[(int)EKeyConfigPad.Search] = value; }
 			public STKEYASSIGN[] LoopCreate { get => this[(int)EKeyConfigPad.LoopCreate]; set => this[(int)EKeyConfigPad.LoopCreate] = value; }

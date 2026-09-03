@@ -164,7 +164,7 @@ public class StatusPane : ComponentInstance, IUIItemSource
             name = "Background",
             imageSource = ImageSource.File,
             image = SkinResource.System(@"Graphics\5_difficulty_panel.png"),
-            anchor = new Vector2(0.0f, 1.0f),
+            pivot = new Vector2(0.0f, 1.0f),
             renderOrder = 0
         });
 
@@ -173,7 +173,7 @@ public class StatusPane : ComponentInstance, IUIItemSource
             name = "DifficultyFrame",
             imageSource = ImageSource.File,
             image = SkinResource.System(@"Graphics\5_difficultyframe.png"),
-            anchor = new Vector2(0.0f, 1.0f),
+            pivot = new Vector2(0.0f, 1.0f),
             position = new Vector3(-7.0f, 5.0f, 0.0f),
             renderOrder = 1
         });
@@ -198,7 +198,7 @@ public class StatusPane : ComponentInstance, IUIItemSource
             name = "Skill",
             imageSource = ImageSource.File,
             image = SkinResource.System(@"Graphics\Rank\skill.png"),
-            anchor = new Vector2(0.0f, 1.0f),
+            pivot = new Vector2(0.0f, 1.0f),
             position = new Vector3(14.0f, -49.0f, 0.0f),
             size = new Vector2(27.0f, 27.0f),
             renderOrder = 2,
@@ -211,7 +211,7 @@ public class StatusPane : ComponentInstance, IUIItemSource
             name = "Rank",
             imageSource = ImageSource.Dynamic,
             dynamicSource = "Item.Rank",
-            anchor = new Vector2(0.0f, 1.0f),
+            pivot = new Vector2(0.0f, 1.0f),
             position = new Vector3(60.0f, -49.0f, 0.0f),
             size = new Vector2(27.0f, 27.0f),
             renderOrder = 2,
@@ -239,7 +239,7 @@ public class StatusPane : ComponentInstance, IUIItemSource
         {
             name = "Name",
             position = new Vector3(201.0f, -80.0f, 0.0f),
-            anchor = new Vector2(1.0f, 0.0f),
+            pivot = new Vector2(1.0f, 0.0f),
             renderOrder = 1,
             outlineWidth = 0,
             style = UiTextStyle.Bold,

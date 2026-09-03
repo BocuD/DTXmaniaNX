@@ -12,8 +12,15 @@ namespace DTXMania.UI.Inspector;
 /// </summary>
 public sealed class Viewport
 {
-    public float scale { get; private set; } = 1.0f;
+    /// <summary>Screen pixels per canvas pixel.</summary>
+    public float zoom { get; private set; } = 1.0f;
+
+    /// <summary>Where the middle of the target sits on screen, measured from the region's corner.</summary>
     public Vector2 translation { get; private set; }
+
+    /// <summary>Texture pixels per canvas pixel, which is the scale the content was rendered at. Set by
+    /// the owner before fitting or drawing.</summary>
+    public float renderScale = 1.0f;
 
     //the size the content region wants to be rendered at, read by whoever sizes the render target
     public Vector2 desiredRenderSize { get; private set; } = new(1280, 720);
@@ -22,18 +29,34 @@ public sealed class Viewport
     public Rectangle rect { get; private set; }
     public ImDrawListPtr drawList { get; private set; }
 
+    //ImGui recycles a window's draw list, so the pointer is only good for the frame it was taken on
+    private int drawListFrame = -1;
+    public bool hasDrawList => drawListFrame == ImGui.GetFrameCount();
+
+    //the pan and zoom readout
+    public bool showOverlay = true;
+
     //for content authored around a point rather than filling the target: axes through that point, drawn
     //behind the image so they show through wherever it is transparent
     public bool showOrigin;
     public Vector2 origin;
 
+    public bool wasAdjustedByUser { get; private set; }
+
+    private float textureToScreen => zoom / MathF.Max(renderScale, 0.01f);
+
+    private Vector2 textureSize = new(1280, 720);
+
     private Vector2 mouseDragStart;
     private bool isDragging;
+    private bool hasBeenPlaced;
 
     /// <summary>Draws the texture inside a child region of the current window. Call between Begin/End.</summary>
     public unsafe void Draw(string id, ImTextureID? textureId, Vector2 textureSize, Vector2 availableSize)
     {
         availableSize = new Vector2(MathF.Max(availableSize.X, 1f), MathF.Max(availableSize.Y, 1f));
+        wasAdjustedByUser = false;
+        this.textureSize = textureSize;
 
         ImGuiWindowFlags viewportFlags = ImGuiWindowFlags.NoScrollbar |
                                          ImGuiWindowFlags.NoScrollWithMouse |
@@ -42,18 +65,26 @@ public sealed class Viewport
 
         ImGui.BeginChild(id, availableSize, ImGuiChildFlags.None, viewportFlags);
         drawList = ImGui.GetWindowDrawList();
+        drawListFrame = ImGui.GetFrameCount();
 
         Vector2 renderOffset = ImGui.GetCursorScreenPos();
         Vector2 size = ImGui.GetContentRegionAvail();
         desiredRenderSize = new Vector2(MathF.Max(size.X, 1f), MathF.Max(size.Y, 1f));
+
+        //a view nobody has placed yet starts centred, not with the middle of the target in the corner
+        if (!hasBeenPlaced)
+        {
+            hasBeenPlaced = true;
+            CenterOn(desiredRenderSize);
+        }
 
         HandleMouse(renderOffset);
         rect = new Rectangle((int)renderOffset.X, (int)renderOffset.Y, (int)size.X, (int)size.Y);
 
         if (textureId is { } texture)
         {
-            Vector2 topLeft = renderOffset + translation;
-            Vector2 bottomRight = topLeft + textureSize * scale;
+            Vector2 topLeft = renderOffset + translation - textureSize * textureToScreen * 0.5f;
+            Vector2 bottomRight = topLeft + textureSize * textureToScreen;
 
             if (showOrigin)
             {
@@ -73,10 +104,14 @@ public sealed class Viewport
         DrawOverlay(id);
     }
 
+    /// <summary>Maps a position in the render target onto the screen, which is what a gizmo is placed
+    /// with.</summary>
     public Matrix4x4 GetViewMatrix()
     {
-        return Matrix4x4.CreateScale(scale, scale, 1.0f) *
-               Matrix4x4.CreateTranslation(new Vector3(translation, 0));
+        Vector2 targetTopLeft = translation - textureSize * textureToScreen * 0.5f;
+
+        return Matrix4x4.CreateScale(textureToScreen, textureToScreen, 1.0f) *
+               Matrix4x4.CreateTranslation(new Vector3(targetTopLeft, 0));
     }
 
     public Vector2 WorldToScreen(Vector2 worldPos)
@@ -94,16 +129,29 @@ public sealed class Viewport
 
     public void ResetView()
     {
-        translation = Vector2.Zero;
-        scale = 1.0f;
+        CenterOn(desiredRenderSize);
+        wasAdjustedByUser = true;
+    }
+
+    /// <summary>Centres the target in a region, at one screen pixel per canvas pixel.</summary>
+    public void CenterOn(Vector2 regionSize)
+    {
+        zoom = 1.0f;
+        translation = regionSize * 0.5f;
         isDragging = false;
     }
 
-    /// <summary>Centres content of the given size in a region, at 1:1 zoom.</summary>
-    public void CenterOn(Vector2 contentSize, Vector2 regionSize)
+    /// <summary>Zooms a target of the given size to fill a region without cropping, and centres it.</summary>
+    public void FitTo(Vector2 targetSize, Vector2 regionSize)
     {
-        scale = 1.0f;
-        translation = (regionSize - contentSize) * 0.5f;
+        if (targetSize.X < 1f || targetSize.Y < 1f)
+        {
+            return;
+        }
+
+        float fitted = MathF.Min(regionSize.X / targetSize.X, regionSize.Y / targetSize.Y);
+        zoom = Math.Clamp(fitted * renderScale, 0.1f, 10f);
+        translation = regionSize * 0.5f;
         isDragging = false;
     }
 
@@ -115,12 +163,13 @@ public sealed class Viewport
             if (scroll != 0)
             {
                 Vector2 mouseScreenPos = ImGui.GetMousePos() - renderOffset;
-                Vector2 mouseWorldBeforeZoom = (mouseScreenPos - translation) / scale;
+                Vector2 mouseWorldBeforeZoom = (mouseScreenPos - translation) / textureToScreen;
 
-                scale = Math.Clamp(scale * (1 + scroll * 0.1f), 0.1f, 10f);
+                zoom = Math.Clamp(zoom * (1 + scroll * 0.1f), 0.1f, 10f);
 
-                Vector2 mouseWorldAfterZoom = (mouseScreenPos - translation) / scale;
-                translation += (mouseWorldAfterZoom - mouseWorldBeforeZoom) * scale;
+                Vector2 mouseWorldAfterZoom = (mouseScreenPos - translation) / textureToScreen;
+                translation += (mouseWorldAfterZoom - mouseWorldBeforeZoom) * textureToScreen;
+                wasAdjustedByUser = true;
             }
 
             if (ImGui.IsMouseClicked(ImGuiMouseButton.Right))
@@ -138,6 +187,7 @@ public sealed class Viewport
         Vector2 currentMouse = ImGui.GetMousePos() - renderOffset;
         translation += currentMouse - mouseDragStart;
         mouseDragStart = currentMouse;
+        wasAdjustedByUser = true;
 
         if (ImGui.IsMouseReleased(ImGuiMouseButton.Right))
         {
@@ -153,15 +203,15 @@ public sealed class Viewport
         drawList.AddRectFilled(canvasTopLeft, canvasBottomRight, canvasColor);
         drawList.AddRect(canvasTopLeft, canvasBottomRight, axisColor);
 
-        Vector2 point = canvasTopLeft + origin * scale;
+        Vector2 point = canvasTopLeft + origin * textureToScreen;
         drawList.AddLine(new Vector2(rect.X, point.Y), new Vector2(rect.X + rect.Width, point.Y), axisColor);
         drawList.AddLine(new Vector2(point.X, rect.Y), new Vector2(point.X, rect.Y + rect.Height), axisColor);
     }
 
     private void DrawOverlay(string id)
     {
-        float zoomOffset = scale - 1.0f;
-        if (translation == Vector2.Zero && MathF.Abs(zoomOffset) < 0.0001f)
+        float zoomOffset = zoom - 1.0f;
+        if (!showOverlay || (translation == desiredRenderSize * 0.5f && MathF.Abs(zoomOffset) < 0.0001f))
         {
             return;
         }

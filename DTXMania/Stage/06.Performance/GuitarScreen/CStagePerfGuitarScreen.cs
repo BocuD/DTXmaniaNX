@@ -369,7 +369,12 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		
 		//handle end of performance
 		bIsFinishedFadeout = tUpdateAndDraw_FadeIn_Out();
-		if (bIsFinishedPlaying && (ePhaseID == EPhase.Common_DefaultState))
+		//loop instead of going to the result screen
+		if (bIsFinishedPlaying && ePhaseID == EPhase.Common_DefaultState && previewMode)
+		{
+			tRestartForPreview();
+		}
+		else if (bIsFinishedPlaying && (ePhaseID == EPhase.Common_DefaultState))
 		{
 			eReturnValueAfterFadeOut = EPerfScreenReturnValue.StageClear;
 			ePhaseID = EPhase.PERFORMANCE_STAGE_CLEAR;

@@ -52,8 +52,8 @@ public sealed class ComponentEditor : IDisposable
     private bool centered;
     private bool isOpen = true;
 
-    //empty when the dummy context is in use, otherwise the drawable whose context is borrowed
-    private string liveInstanceId = string.Empty;
+    //none when the dummy context is in use, otherwise the drawable whose context is borrowed
+    private DrawableRef liveInstance = DrawableRef.None;
 
     private string? drawError;
 
@@ -64,7 +64,7 @@ public sealed class ComponentEditor : IDisposable
     private ComponentEditor(string componentPath, Type? behaviour)
     {
         this.componentPath = componentPath;
-        borrowed = new BorrowedContext(() => DrawableTracker.GetDrawable(liveInstanceId));
+        borrowed = new BorrowedContext(() => liveInstance.Target);
         instance = CreateInstance(behaviour);
         root.AddChild(instance);
     }
@@ -147,7 +147,7 @@ public sealed class ComponentEditor : IDisposable
         if (!centered && contentMax != contentMin)
         {
             centered = true;
-            viewport.CenterOn(canvasSize, viewport.desiredRenderSize);
+            viewport.CenterOn(viewport.desiredRenderSize);
         }
 
         //the gizmo belongs to whichever viewport rendered the drawable
@@ -195,45 +195,14 @@ public sealed class ComponentEditor : IDisposable
         ImGui.SameLine();
         if (ImGui.Button("Center"))
         {
-            viewport.CenterOn(canvasSize, viewport.desiredRenderSize);
+            viewport.CenterOn(viewport.desiredRenderSize);
         }
 
         ImGui.SameLine();
-        DrawScalePicker();
+        RenderScalePicker.Draw("Scale", ref renderScale);
 
         ImGui.SameLine();
         ImGui.TextDisabled(instance.GetType().Name);
-    }
-
-    //the resolutions the scales correspond to, since that is what a skin is authored against
-    private static readonly (string label, float? scale)[] ScaleOptions =
-    [
-        ("Window", null),
-        ("1x  (1280x720)", 1.0f),
-        ("1.5x  (1920x1080)", 1.5f),
-        ("2x  (2560x1440)", 2.0f),
-        ("3x  (3840x2160)", 3.0f)
-    ];
-
-    private void DrawScalePicker()
-    {
-        ImGui.SetNextItemWidth(150);
-        if (!ImGui.BeginCombo("Scale", ScaleOptions.First(option => option.scale == renderScale).label))
-        {
-            return;
-        }
-
-        foreach ((string label, float? scale) in ScaleOptions)
-        {
-            if (!ImGui.Selectable(label, scale == renderScale) || scale == renderScale)
-            {
-                continue;
-            }
-
-            renderScale = scale;
-        }
-
-        ImGui.EndCombo();
     }
 
     private static void InvalidateText(UIDrawable node)
@@ -261,7 +230,7 @@ public sealed class ComponentEditor : IDisposable
 
         DrawContextSourcePicker();
 
-        if (liveInstanceId.Length > 0)
+        if (liveInstance.HasTarget)
         {
             return;
         }
@@ -290,23 +259,23 @@ public sealed class ComponentEditor : IDisposable
 
     private void DrawContextSourcePicker()
     {
-        string current = liveInstanceId.Length == 0 ? "Dummy values" : DescribeLive(DrawableTracker.GetDrawable(liveInstanceId));
+        string current = liveInstance.Target is { } live ? DescribeLive(live) : "Dummy values";
 
         if (!ImGui.BeginCombo("Context", current))
         {
             return;
         }
 
-        if (ImGui.Selectable("Dummy values", liveInstanceId.Length == 0))
+        if (ImGui.Selectable("Dummy values", !liveInstance.HasTarget))
         {
-            liveInstanceId = string.Empty;
+            liveInstance = DrawableRef.None;
         }
 
         foreach (ComponentInstance candidate in LiveInstances(componentPath))
         {
-            if (ImGui.Selectable(DescribeLive(candidate), liveInstanceId == candidate.id))
+            if (ImGui.Selectable(DescribeLive(candidate), liveInstance.Is(candidate)))
             {
-                liveInstanceId = candidate.id;
+                liveInstance = candidate;
             }
         }
 
@@ -361,6 +330,11 @@ public sealed class ComponentEditor : IDisposable
         root.position = new Vector3(canvasOrigin, 0.0f);
 
         float scale = renderScale ?? CDTXMania.renderScale;
+
+        //the canvas grows with the scale it is drawn at, so the view is held in the component's own pixels
+        //and a change of scale leaves it where it was
+        viewport.renderScale = scale;
+
         if (scale != drawnScale)
         {
             //text is rasterized at the scale it was last drawn at, so it has to be asked for again. Also
@@ -449,7 +423,7 @@ public sealed class ComponentEditor : IDisposable
             }
         }
 
-        root.dataContext = liveInstanceId.Length == 0 ? dummy : borrowed;
+        root.dataContext = liveInstance.HasTarget ? borrowed : dummy;
     }
 
     //a number left empty resolves to nothing, which leaves whatever the layout set: a made-up size or

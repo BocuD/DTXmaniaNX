@@ -11,8 +11,8 @@ namespace DTXMania.UI.Inspector;
 
 public class Inspector
 {
-    internal static string inspectorTarget = string.Empty;
-    internal static string dragDropPayload = string.Empty;
+    internal static DrawableRef inspectorTarget = DrawableRef.None;
+    internal static DrawableRef dragDropPayload = DrawableRef.None;
 
     //a dotted binding key ("Song.Chart.SongInformation.Genre") becomes nested nodes; intermediate
     //segments get collapsible headers, leaves show their live value
@@ -117,17 +117,9 @@ public class Inspector
         {
             ImGui.Begin("Inspector", ImGuiWindowFlags.NoFocusOnAppearing);
 
-            if (!string.IsNullOrEmpty(inspectorTarget))
+            if (inspectorTarget.Target is { } drawable)
             {
-                UIDrawable? drawable = DrawableTracker.GetDrawable(inspectorTarget);
-                if (drawable != null)
-                {
-                    drawable.DrawInspector();
-                }
-                else
-                {
-                    ImGui.Text("Target not found");
-                }
+                drawable.DrawInspector();
             }
             else
             {
@@ -146,6 +138,54 @@ public class Inspector
         bool changed = ImGui.InputFloat2(label, ref v);
         vector = v;
         return changed;
+    }
+
+    /// <summary>One field per axis, so an axis something else drives can be greyed out on its own.</summary>
+    public static bool InspectAxes(string label, ref Vector3 vector, bool xDriven, bool yDriven)
+    {
+        BeginAxes(label, 3);
+        bool changed = Axis(0, ref vector.X, xDriven);
+        changed |= Axis(1, ref vector.Y, yDriven);
+        changed |= Axis(2, ref vector.Z, false);
+        EndAxes(label);
+        return changed;
+    }
+
+    public static bool InspectAxes(string label, ref Vector2 vector, bool xDriven, bool yDriven)
+    {
+        BeginAxes(label, 2);
+        bool changed = Axis(0, ref vector.X, xDriven);
+        changed |= Axis(1, ref vector.Y, yDriven);
+        EndAxes(label);
+        return changed;
+    }
+
+    private static void BeginAxes(string label, int fields)
+    {
+        ImGui.PushID(label);
+        float spacing = ImGui.GetStyle().ItemInnerSpacing.X;
+        ImGui.PushItemWidth((ImGui.CalcItemWidth() - spacing * (fields - 1)) / fields);
+    }
+
+    private static bool Axis(int index, ref float value, bool driven)
+    {
+        if (index > 0)
+        {
+            ImGui.SameLine(0f, ImGui.GetStyle().ItemInnerSpacing.X);
+        }
+
+        ImGui.BeginDisabled(driven);
+        bool changed = ImGui.InputFloat($"##axis{index}", ref value);
+        ImGui.EndDisabled();
+        return changed;
+    }
+
+    private static void EndAxes(string label)
+    {
+        ImGui.PopItemWidth();
+        ImGui.SameLine(0f, ImGui.GetStyle().ItemInnerSpacing.X);
+        ImGui.Text(label);
+        ImGui.PopID();
     }
 
     public static bool Inspect(string label, ref UISize size)
@@ -172,6 +212,31 @@ public class Inspector
         ImGui.SameLine();
         changed |= Inspect($"##{label}Y", ref size.yMode);
         ImGui.PopItemWidth();
+
+        //typing a size claims the axis, which takes its pair away again
+        if (size.xMode == UiSizeMode.Inherit)
+        {
+            Vector2 horizontal = new(size.marginLeft, size.marginRight);
+
+            if (ImGui.InputFloat2($"{label} Margin L/R", ref horizontal))
+            {
+                size.marginLeft = horizontal.X;
+                size.marginRight = horizontal.Y;
+                changed = true;
+            }
+        }
+
+        if (size.yMode == UiSizeMode.Inherit)
+        {
+            Vector2 vertical = new(size.marginTop, size.marginBottom);
+
+            if (ImGui.InputFloat2($"{label} Margin T/B", ref vertical))
+            {
+                size.marginTop = vertical.X;
+                size.marginBottom = vertical.Y;
+                changed = true;
+            }
+        }
 
         return changed;
     }

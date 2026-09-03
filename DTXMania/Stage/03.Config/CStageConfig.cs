@@ -27,6 +27,8 @@ internal class CStageConfig : CStage
     
     // CStage 実装
 
+    protected override StageRoot CreateRoot() => new() { canvasFit = UiCanvasFit.Fill };
+
     public override void RegisterBindings()
     {
     }
@@ -36,7 +38,8 @@ internal class CStageConfig : CStage
     {
         //left menu
         UIGroup leftMenu = ui.AddChild(new UIGroup("Left Options Menu"));
-        leftMenu.position = new Vector3(245, 140, 0);
+        leftMenu.parentAnchor = UICanvas.Center;
+        leftMenu.position = UICanvas.FromCenter(245, 140);
         leftMenu.renderOrder = 30;
         leftMenu.dontSerialize = true;
         
@@ -57,13 +60,14 @@ internal class CStageConfig : CStage
         menuCursor = configLeftOptionsMenu.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\4_menu cursor.png"))));
         menuCursor.position = new Vector3(-5, 0, 0);
         menuCursor.size = new Vector2(170, 28);
-        menuCursor.anchor = new Vector2(0.5f, 0f);
+        menuCursor.pivot = new Vector2(0.5f, 0f);
         menuCursor.renderMode = ERenderMode.Sliced;
         menuCursor.sliceRect = new RectangleF(16, 0, 32, 28);
         menuCursor.bindings.Add(new UIBinding("position.Y", "Selection.Y"));
 
-        configList = ui.AddChild(new ConfigList(14, 4));
-        configList.position = new Vector3(420, 189, 0);
+        configList = ui.AddChild(new ConfigList(25, 11));
+        configList.parentAnchor = UICanvas.Center;
+        configList.position = UICanvas.FromCenter(420, 189);
         configList.renderOrder = 41;
         configList.isVisible = true;
         configList.dontSerialize = true;
@@ -73,7 +77,8 @@ internal class CStageConfig : CStage
 
         //description panel (background + text) for the new config list
         descriptionPanel = ui.AddChild(new ConfigDescriptionPanel());
-        descriptionPanel.position = new Vector3(781, 252, 0);
+        descriptionPanel.parentAnchor = UICanvas.Center;
+        descriptionPanel.position = UICanvas.FromCenter(781, 252);
         descriptionPanel.renderOrder = 49;
 
         //whatever the open page puts beside the list, in screen space and cleared with the page
@@ -87,20 +92,23 @@ internal class CStageConfig : CStage
 
         //key-assign editor overlay: hidden until a pad row opens it; drawn just above the list
         keyAssignPanel = ui.AddChild(new KeyAssignPanel());
-        keyAssignPanel.position = new Vector3(450, 120, 0);
+        keyAssignPanel.parentAnchor = UICanvas.Center;
+        keyAssignPanel.position = UICanvas.FromCenter(450, 120);
         keyAssignPanel.renderOrder = 42;
         keyAssignPanel.onClose = CloseKeyAssign;
         keyAssignPanel.onNext = KeyAssignNext;
         keyAssignPanel.isVisible = false;
 
         inputTestPanel = ui.AddChild(new InputTestPanel());
-        inputTestPanel.position = new Vector3(450, 120, 0);
+        inputTestPanel.parentAnchor = UICanvas.Center;
+        inputTestPanel.position = UICanvas.FromCenter(450, 120);
         inputTestPanel.renderOrder = 42;
         inputTestPanel.onClose = CloseKeyAssign;
         inputTestPanel.isVisible = false;
 
         midiTestPanel = ui.AddChild(new MidiTestPanel());
-        midiTestPanel.position = new Vector3(450, 120, 0);
+        midiTestPanel.parentAnchor = UICanvas.Center;
+        midiTestPanel.position = UICanvas.FromCenter(450, 120);
         midiTestPanel.renderOrder = 42;
         midiTestPanel.onClose = CloseKeyAssign;
         midiTestPanel.isVisible = false;
@@ -131,14 +139,14 @@ internal class CStageConfig : CStage
 
         UIText label = root.AddChild(new UIText(string.Empty, 20));
         label.name = "Label";
-        label.anchor = new Vector2(0.5f, 0f);
+        label.pivot = new Vector2(0.5f, 0f);
         label.position = new Vector3(-5, 0, 0);
         label.bindings.Add(new UIBinding("text", "Item.Label"));
         label.bindings.Add(new UIBinding("isVisible", "IsSelected") { invert = true });
 
         UIText selected = root.AddChild(new UIText(string.Empty, 20));
         selected.name = "LabelSelected";
-        selected.anchor = new Vector2(0.5f, 0f);
+        selected.pivot = new Vector2(0.5f, 0f);
         selected.position = new Vector3(-5, 0, 0);
         selected.bindings.Add(new UIBinding("text", "Item.Label"));
         selected.fillGradientMode = UiTextGradientMode.Vertical;
@@ -168,12 +176,14 @@ internal class CStageConfig : CStage
 
     public override void BuildDefaultLayout()
     {
-        ui.AddChild(new UIImage
+        UICoverGroup background = ui.AddChild(new UICoverGroup("Background"));
+        background.renderOrder = -100;
+        background.AddChild(new UIImage
         {
-            name = "Background",
+            name = "Image",
             imageSource = ImageSource.File,
             image = SkinResource.System(@"Graphics\4_background.png"),
-            renderOrder = -100
+            size = UISize.Inherited
         });
 
         ui.AddChild(new UIImage
@@ -181,7 +191,9 @@ internal class CStageConfig : CStage
             name = "ItemBar",
             imageSource = ImageSource.File,
             image = SkinResource.System(@"Graphics\4_item bar.png"),
-            position = new Vector3(400, 0, 0),
+            parentAnchor = new Vector2(0.5f, 0f),
+            position = UICanvas.FromCenter(400, 0) with { Y = 0 },
+            size = new UISize { yMode = UiSizeMode.Inherit },
             renderOrder = 20
         });
 
@@ -190,6 +202,8 @@ internal class CStageConfig : CStage
             name = "HeaderPanel",
             imageSource = ImageSource.File,
             image = SkinResource.System(@"Graphics\4_header panel.png"),
+            parentAnchor = new Vector2(0.5f, 0f),
+            pivot = new Vector2(0.5f, 0f),
             renderOrder = 52
         });
 
@@ -199,8 +213,8 @@ internal class CStageConfig : CStage
             name = "FooterPanel",
             imageSource = ImageSource.File,
             image = SkinResource.System(@"Graphics\4_footer panel.png"),
-            anchor = new Vector2(0, 1),
-            position = new Vector3(0, 720, 0),
+            parentAnchor = new Vector2(0.5f, 1f),
+            pivot = new Vector2(0.5f, 1f),
             renderOrder = 53
         });
     }
@@ -317,6 +331,12 @@ internal class CStageConfig : CStage
 
     private void StartExitConfig()
     {
+        //the change out of here is dropped in preview, which would leave the stage fading out forever
+        if (previewMode)
+        {
+            return;
+        }
+
         //nothing here reads input once the stage starts leaving
         UIFocus.Pop(configLeftOptionsMenu);
 
@@ -354,6 +374,9 @@ internal class CStageConfig : CStage
     private void CloseKeyAssign()
     {
         configList.isVisible = true;
+
+        //a pad row shows the mapping the panel has just been editing
+        configList.RefreshValues();
     }
 
     private void KeyAssignNext()

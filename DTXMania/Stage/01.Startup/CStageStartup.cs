@@ -1,107 +1,148 @@
+using System.Diagnostics;
 using System.Numerics;
 using DTXMania.Core;
 using DTXMania.Core.Framework;
+using DTXMania.UI;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.DynamicElements;
 using DTXMania.UI.Inspector;
-using Hexa.NET.ImGui;
 
 namespace DTXMania;
 
 internal class CStageStartup : CStage
 {
+	private const int LogFontSize = 12;
+	private const float LogLineHeight = 17f;
+	private const float LogMargin = 40f;
+
+	private static int LogRows => (int)((UICanvas.canvasSize.Y - LogMargin * 2f) / LogLineHeight);
+
 	private RuntimeLogListener? logSource;
-	
+
+	//one element per row, reused. A new line overwrites the oldest row and every row moves up by one,
+	//so only the row that changed is rasterized
+	private UIText[] logRows = [];
+	private int oldestRow;
+	private int linesTaken;
+
 	public CStageStartup()
 	{
 		eStageID = EStage.Startup_1;
 		bActivated = false;
 	}
 
+	protected override StageRoot CreateRoot() => new() { canvasFit = UiCanvasFit.Fill };
+
 	public override void RegisterBindings()
 	{
-		
+
 	}
-	
+
 	public override void BuildDefaultLayout()
 	{
-		var background = ui.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\1_background.jpg"))));
-		background.size = new Vector2(1280, 720);
-		
+		UICoverGroup background = ui.AddChild(new UICoverGroup("Background"));
+		background.renderOrder = -100;
+		background.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\1_background.png")))
+		{
+			name = "Image",
+			size = UISize.Inherited
+		});
+
+		UIImage logo = ui.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\logo.png"))));
+		logo.name = "Logo";
+		logo.parentAnchor = new Vector2(1.0f, 1.0f);
+		logo.pivot = new Vector2(1.0f, 1.0f);
+		logo.position = new Vector3(-10, -15, 0);
+		logo.scale = new Vector3(0.18f, 0.18f, 1.0f);
+
 		var text = ui.AddChild(new UIText("", 15));
 		text.name = "VersionText";
 		text.bindings.Add(new UIBinding("text", "Game.VersionDisplay"));
+
+		//the rows are laid out from the top of this, so moving the log means moving the group
+		UIGroup lines = ui.AddChild(new UIGroup("LogLines"));
+		lines.size = new UISize
+		{
+			xMode = UiSizeMode.Inherit,
+			yMode = UiSizeMode.Inherit,
+			marginTop = LogMargin,
+			marginBottom = LogMargin
+		};
+
+		logRows = new UIText[LogRows];
+		oldestRow = 0;
+		linesTaken = 0;
+
+		for (int row = 0; row < logRows.Length; row++)
+		{
+			UIText line = lines.AddChild(new UIText("", LogFontSize));
+			line.name = $"LogLine{row}";
+			line.position = new Vector3(0, row * LogLineHeight, 0);
+			line.outlineWidth = 0;
+			line.fillColor = Color4.White;
+			logRows[row] = line;
+		}
 	}
-	
+
 	public override int OnUpdateAndDraw()
 	{
+		//before the base call, so a line added this frame is drawn this frame
+		UpdateLog();
+
 		base.OnUpdateAndDraw();
 
-		DrawLogArea();
-		
 		return 1;
 	}
 
-	public override bool NeedsImGui => true;
-
-	public override void FirstUpdate()
+	private void UpdateLog()
 	{
-		logSource = CDTXMania.app.maniaGl.host.RuntimeLogListener;
-	}
-	
-	private void DrawLogArea()
-	{
-		ImGui.SetNextWindowPos(new Vector2(0, 50 * CDTXMania.renderScale));
-		Vector2 appSize = CDTXMania.app.maniaGl.windowSize;
-		ImGui.SetNextWindowSize(new Vector2(appSize.X, appSize.Y - (100 * CDTXMania.renderScale)));
-		ImGui.Begin("Log Window", 
-			ImGuiWindowFlags.NoDecoration 
-			| ImGuiWindowFlags.NoBackground
-			| ImGuiWindowFlags.NoMove
-			| ImGuiWindowFlags.NoResize
-			| ImGuiWindowFlags.NoScrollbar);
+		logSource ??= CDTXMania.app.maniaGl.host.RuntimeLogListener;
 
-		Vector2 available = ImGui.GetContentRegionAvail();
-		ImGui.BeginChild("LogRegion", available, ImGuiWindowFlags.NoScrollbar);
-		ImGui.PushFont(ImFontPtr.Null, 18.0f * CDTXMania.renderScale);
-		
-		bool wasNearBottom = ImGui.GetScrollY() >= ImGui.GetScrollMaxY() - 10f;
-		
-		if (logSource != null)
+		if (logSource == null || logRows.Length == 0)
 		{
-			lock (logSource.logLock)
+			return;
+		}
+
+		bool scrolled = false;
+
+		lock (logSource.logLock)
+		{
+			//everything older than the rows can hold has already scrolled off
+			int first = Math.Max(linesTaken, logSource.logLines.Count - logRows.Length);
+
+			for (int i = first; i < logSource.logLines.Count; i++)
 			{
-				int count = logSource.logLines.Count;
-				if (count > 0)
-				{
-					ImGuiListClipper clipper = new();
-					clipper.Begin(count);
+				RuntimeLogListener.LogLine line = logSource.logLines[i];
+				Vector4 color = LogWindow.GetColorForLevel(line.Level);
 
-					while (clipper.Step())
-					{
-						for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++)
-						{
-							RuntimeLogListener.LogLine line = logSource.logLines[i];
-							Vector4 color = LogWindow.GetColorForLevel(line.Level);
+				UIText row = logRows[oldestRow];
+				row.fillColor = new Color4(color.X, color.Y, color.Z, color.W);
+				row.SetText(line.Text);
 
-							ImGui.PushStyleColor(ImGuiCol.Text, color);
-							ImGui.TextUnformatted(line.Text);
-							ImGui.PopStyleColor();
-						}
-					}
+				//the async render is thrown away whenever the text changes again, and during startup it
+				//changes most frames, so nothing would ever finish
+				row.RenderTexture();
 
-					clipper.End();
-				}
+				oldestRow = (oldestRow + 1) % logRows.Length;
+				scrolled = true;
 			}
+
+			linesTaken = logSource.logLines.Count;
 		}
 
-		if (wasNearBottom)
+		if (scrolled)
 		{
-			ImGui.SetScrollHereY(1.0f);
+			PlaceRows();
 		}
+	}
 
-		ImGui.PopFont();
-		ImGui.EndChild();
-		ImGui.End();
+	//the ring head is the oldest row, so it goes at the top of the group and the rest follow it round
+	private void PlaceRows()
+	{
+		for (int offset = 0; offset < logRows.Length; offset++)
+		{
+			UIText row = logRows[(oldestRow + offset) % logRows.Length];
+			row.position.Y = offset * LogLineHeight;
+		}
 	}
 }

@@ -56,6 +56,15 @@ internal sealed class GraphicsConfigPage : ConfigPage
             () => CDTXMania.ConfigIni.nMovieAlpha = movieAlpha.nCurrentlySelectedIndex);
         items.Add(movieAlpha);
 
+        CItemList hideCursor = new("Hide Cursor", CItemBase.EPanelType.Normal, (int)CDTXMania.ConfigIni.eHideCursor,
+            "マウスカーソルを隠すタイミング (0:隠さない, 1:全画面時のみ, 2:常に)",
+            "When to hide the mouse cursor. (0:Never, 1:Fullscreen only, 2:Always)",
+            ["Never", "Fullscreen", "Always"]);
+        hideCursor.BindConfig(
+            () => hideCursor.nCurrentlySelectedIndex = (int)CDTXMania.ConfigIni.eHideCursor,
+            () => CDTXMania.ConfigIni.eHideCursor = (CConfigIni.HideCursor)hideCursor.nCurrentlySelectedIndex);
+        items.Add(hideCursor);
+
         // Fullscreen / exclusive / vsync are only written when "Apply Changes" runs (they need a
         // coordinated apply), so these bind read-only.
         CItemToggle fullscreen = new("Fullscreen", CDTXMania.ConfigIni.bFullScreenMode,

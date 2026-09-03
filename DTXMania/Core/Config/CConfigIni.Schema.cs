@@ -109,6 +109,11 @@ internal partial class CConfigIni
 				Bool("FullScreen", c => c.bFullScreenMode)),
 			G("Fullscreen mode uses exclusive mode instead of maximized window. (0:Maximized window, 1:Exclusive)",
 				Bool("FullScreenExclusive", c => c.bFullScreenExclusive)),
+			G([
+					"マウスカーソルを隠すタイミング (0:隠さない, 1:全画面時のみ, 2:常に)",
+					"When to hide the mouse cursor. (0:Never, 1:Fullscreen only, 2:Always)"
+				],
+				Enum("HideCursor", 0, 2, c => c.eHideCursor)),
 			G(["ウインドウモード時の画面幅", "A width size in the window mode."],
 				Custom("WindowWidth",
 					(c, v) => { c.nWindowWidth = CConversion.nGetNumberIfInRange(v, 1, 65535, c.nWindowWidth); if (c.nWindowWidth <= 0) c.nWindowWidth = GameWindowSize.Width; },
@@ -669,6 +674,8 @@ internal partial class CConfigIni
 				KeyItem("Y", c => c.KeyAssign.Guitar.Y),
 				KeyItem("P", c => c.KeyAssign.Guitar.P),
 				KeyItem("Pick", c => c.KeyAssign.Guitar.Pick),
+				KeyItem("PickUp", c => c.KeyAssign.Guitar.PickUp),
+				KeyItem("PickDown", c => c.KeyAssign.Guitar.PickDown),
 				KeyItem("Wail", c => c.KeyAssign.Guitar.Wail),
 				KeyItem("Decide", c => c.KeyAssign.Guitar.Decide),
 				KeyItem("Cancel", c => c.KeyAssign.Guitar.Cancel))
@@ -681,6 +688,8 @@ internal partial class CConfigIni
 				KeyItem("Y", c => c.KeyAssign.Bass.Y),
 				KeyItem("P", c => c.KeyAssign.Bass.P),
 				KeyItem("Pick", c => c.KeyAssign.Bass.Pick),
+				KeyItem("PickUp", c => c.KeyAssign.Bass.PickUp),
+				KeyItem("PickDown", c => c.KeyAssign.Bass.PickDown),
 				KeyItem("Wail", c => c.KeyAssign.Bass.Wail),
 				KeyItem("Decide", c => c.KeyAssign.Bass.Decide),
 				KeyItem("Cancel", c => c.KeyAssign.Bass.Cancel))

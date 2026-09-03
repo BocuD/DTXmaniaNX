@@ -20,7 +20,7 @@ public class DensityGraph : UIGroup
         this.inst = inst;
 
         noteCountText = AddChild(new UIText("", 16));
-        noteCountText.anchor = new Vector2(1, 1);
+        noteCountText.pivot = new Vector2(1, 1);
         noteCountText.outlineWidth = 0;
         
         var white = BaseTexture.CreateSolidColor(Color4.White);
@@ -46,7 +46,7 @@ public class DensityGraph : UIGroup
                     Color c = clDrumChipsBarColors[index]; 
                     drumChipsBarLine[index] = AddChild(new UIImage(white));
                     drumChipsBarLine[index].color = c;
-                    drumChipsBarLine[index].anchor = new Vector2(0, 1);
+                    drumChipsBarLine[index].pivot = new Vector2(0, 1);
                     drumChipsBarLine[index].position = new Vector3(36 + index * 12, 284, 0);
                     drumChipsBarLine[index].size = new Vector2(4, 252);
                     drumChipsBarLine[index].renderOrder = 2 + index;
@@ -74,7 +74,7 @@ public class DensityGraph : UIGroup
                     Color c = clGBChipsBarColors[index]; 
                     gbChipsBarLine[index] = AddChild(new UIImage(white));
                     gbChipsBarLine[index].color = c;
-                    gbChipsBarLine[index].anchor = new Vector2(0, 1);
+                    gbChipsBarLine[index].pivot = new Vector2(0, 1);
                     gbChipsBarLine[index].position = new Vector3(34 + index * 12, 284, 0);
                     gbChipsBarLine[index].size = new Vector2(6, 252);
                     gbChipsBarLine[index].renderOrder = 2 + index;
@@ -82,7 +82,7 @@ public class DensityGraph : UIGroup
                 break;
         }
 
-        anchor = new Vector2(0, 1);
+        pivot = new Vector2(0, 1);
     }
     
     private UIImage[] drumChipsBarLine = new UIImage[9];

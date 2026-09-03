@@ -61,16 +61,16 @@ public class JudgementString : UIGroup
         name = $"JudgementString";
         
         bar = AddChild(new UIImage(barTexture));
-        bar.anchor = new Vector2(0.5f, 0.5f);
+        bar.pivot = new Vector2(0.5f, 0.5f);
         bar.name = "bar";
         bar.renderOrder = -1;
         
         baseString = AddChild(new UIImage(stringTextures[(int)judgement]));
         baseString.name = "judge1";
-        baseString.anchor = new Vector2(0.5f, 0.5f);
+        baseString.pivot = new Vector2(0.5f, 0.5f);
         highlightString = AddChild(new UIImage(stringTextures[(int)judgement]));
         highlightString.name = "judge2";
-        highlightString.anchor = new Vector2(0.5f, 0.5f);
+        highlightString.pivot = new Vector2(0.5f, 0.5f);
 
         animator = new Animator();
         AnimationClip? loaded = AnimationClipIO.LoadFromFile(CSkin.Path(@"Graphics\Note\Judge\hit.json"));

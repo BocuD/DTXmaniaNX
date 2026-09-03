@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using DTXMania.UI.Animation;
 using DTXMania.UI.DynamicElements;
 using DTXMania.UI.Inspector;
@@ -16,7 +17,7 @@ public class UIGroup : UIDrawable
     private bool dirty = false;
 
     //drawables already reported as failing to draw, so one broken element does not fill the log
-    [JsonIgnore] private static readonly HashSet<string> reportedDrawFailures = [];
+    [JsonIgnore] private static readonly ConditionalWeakTable<UIDrawable, object> reportedDrawFailures = [];
 
     //an animating property is written every frame for as long as it animates, so a per-write cost here
     //scales with the frame rate
@@ -157,7 +158,7 @@ public class UIGroup : UIDrawable
             {
                 //a drawable that throws once throws every frame, so it is reported the first time and
                 //then left alone: the log stays readable and the rest of the tree still draws
-                if (reportedDrawFailures.Add(element.id))
+                if (reportedDrawFailures.TryAdd(element, null!))
                 {
                     Trace.TraceError($"Error drawing {element.name}: {e} Stacktrace: {e.StackTrace ?? "No stack trace"}");
                 }

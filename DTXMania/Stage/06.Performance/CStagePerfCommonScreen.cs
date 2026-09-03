@@ -99,6 +99,8 @@ internal abstract class CStagePerfCommonScreen : CStage
             Drums.nGoodCount_ExclAuto = nHitCount_ExclAuto.Drums.Good;
             Drums.nPoorCount_ExclAuto = nHitCount_ExclAuto.Drums.Poor;
             Drums.nMissCount_ExclAuto = nHitCount_ExclAuto.Drums.Miss;
+            Drums.nFastCount = nTimingHitCount.Drums.nEarly;
+            Drums.nSlowCount = nTimingHitCount.Drums.nLate;
             Drums.nMaxCombo = actCombo.nCurrentCombo.HighestValue.Drums;
             Drums.nTotalChipsCount = CDTXMania.DTX.nVisibleChipsCount.Drums;
             for (int i = 0; i < (int)ELane.MAX; i++)
@@ -170,6 +172,8 @@ internal abstract class CStagePerfCommonScreen : CStage
             Guitar.nGoodCount_ExclAuto = nHitCount_ExclAuto.Guitar.Good;
             Guitar.nPoorCount_ExclAuto = nHitCount_ExclAuto.Guitar.Poor;
             Guitar.nMissCount_ExclAuto = nHitCount_ExclAuto.Guitar.Miss;
+            Guitar.nFastCount = nTimingHitCount.Guitar.nEarly;
+            Guitar.nSlowCount = nTimingHitCount.Guitar.nLate;
             Guitar.nMaxCombo = actCombo.nCurrentCombo.HighestValue.Guitar;
             Guitar.nTotalChipsCount = CDTXMania.DTX.nVisibleChipsCount.Guitar;
             for (int i = 0; i < (int)ELane.MAX; i++)
@@ -241,6 +245,8 @@ internal abstract class CStagePerfCommonScreen : CStage
             Bass.nGoodCount_ExclAuto = nHitCount_ExclAuto.Bass.Good;
             Bass.nPoorCount_ExclAuto = nHitCount_ExclAuto.Bass.Poor;
             Bass.nMissCount_ExclAuto = nHitCount_ExclAuto.Bass.Miss;
+            Bass.nFastCount = nTimingHitCount.Bass.nEarly;
+            Bass.nSlowCount = nTimingHitCount.Bass.nLate;
             Bass.nMaxCombo = actCombo.nCurrentCombo.HighestValue.Bass;
             Bass.nTotalChipsCount = CDTXMania.DTX.nVisibleChipsCount.Bass;
             for (int i = 0; i < (int)ELane.MAX; i++)
@@ -415,7 +421,8 @@ internal abstract class CStagePerfCommonScreen : CStage
 
         LoopBeginMs = -1;
         LoopEndMs = -1;
-        bIsTrainingMode = false;
+        //do not write a score for a chart played in the editor
+        bIsTrainingMode = previewMode;
         bPAUSE = false;
 
         #region [ Sounds that should be registered in the mixer before starting playing (chip sounds that will be played immediately after the start of the performance) ]
@@ -2311,7 +2318,9 @@ internal abstract class CStagePerfCommonScreen : CStage
         {
             ChangeInputAdjustTimeInPlaying(keyboard, +1);
         }
-        else if (!bPAUSE && (ePhaseID == EPhase.Common_DefaultState) && (keyboard.bKeyPressed(SlimDXKey.Escape)))
+        //leaving deactivates this stage before the change runs, and in preview the change is dropped. The
+        //skin editor is how you leave instead
+        else if (!bPAUSE && !previewMode && (ePhaseID == EPhase.Common_DefaultState) && (keyboard.bKeyPressed(SlimDXKey.Escape)))
         {	// escape (exit)
             GitaDoraTransition.Close();
             ePhaseID = EPhase.Common_FadeOut;
@@ -2324,6 +2333,14 @@ internal abstract class CStagePerfCommonScreen : CStage
                 AudioMixer.Timer.tResume();
                 CDTXMania.Timer.tResume();
             }
+
+            //restarting goes out through the loading screen, so in preview seek to the start instead
+            if (previewMode)
+            {
+                tRestartForPreview();
+                return;
+            }
+
             ePhaseID = EPhase.PERFORMANCE_STAGE_RESTART;
             eReturnValueAfterFadeOut = EPerfScreenReturnValue.Restart;
         }
@@ -3846,9 +3863,11 @@ internal abstract class CStagePerfCommonScreen : CStage
     {
         if (background != null)
         {
-            background.isVisible = true;
+            background.isVisible = ShowStillBackground();
         }
     }
+
+    private bool ShowStillBackground() => !ChartWillPlayVideo() || video.loadFailed;
 
     protected void tUpdateAndDraw_JudgementLine()  // t進行描画_判定ライン
     {
@@ -3901,6 +3920,25 @@ internal abstract class CStagePerfCommonScreen : CStage
         actScrollSpeed.OnUpdateAndDraw();
     }
 
+    //a chip only carries an AVI once the file behind it was found
+    private static bool ChartWillPlayVideo()
+    {
+        if (!CDTXMania.ConfigIni.bAVIEnabled || CDTXMania.DTX?.listChip == null)
+        {
+            return false;
+        }
+
+        foreach (CChip chip in CDTXMania.DTX.listChip)
+        {
+            if (chip.rAVI != null)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     protected void tGenerateBackgroundTexture()
     {
         Rectangle bgrect;
@@ -3939,11 +3977,22 @@ internal abstract class CStagePerfCommonScreen : CStage
             BgFilename = CDTXMania.DTX.strFolderName + BACKGROUND;
         }
 		
+        //a chart can name a background this cannot read, which resolves to the magenta placeholder
         BaseTexture texture = BaseTexture.LoadFromPath(string.IsNullOrEmpty(BgFilename) ? DefaultBgFilename : BgFilename);
-        background = ui.AddChild(new UIImage(texture));
-        background.name = "Static Background";
-        background.renderOrder = -1;
-        background.isVisible = true;
+        if (texture.notFound)
+        {
+            texture.Dispose();
+            texture = BaseTexture.LoadFromPath(DefaultBgFilename);
+        }
+
+        UICoverGroup backgroundCover = ui.AddChild(new UICoverGroup("Static Background"));
+        backgroundCover.renderOrder = -1;
+
+        background = backgroundCover.AddChild(new UIImage(texture));
+        background.name = "Image";
+        background.size = UISize.Inherited;
+
+        background.isVisible = ShowStillBackground();
 
         //todo: maybe reimplement the more complex background texture behaviour
         //tGenerateBackgroundTexture( DefaultBgFilename, bgrect, BgFilename );
@@ -4718,39 +4767,82 @@ internal abstract class CStagePerfCommonScreen : CStage
         }
     }
 
+    //how long a played marker waits for the wail input	// #24245 2011.1.26 yyagi: 800 -> 1000
+    private const long WailingWindowMs = 1000;
+
     private void DoWailingFromQueue(EInstrumentPart inst, long nTimeStamp_Wailed, bool autoW)
     {
         int indexInst = (int)inst;
         long nTimeWailed = nTimeStamp_Wailed - AudioMixer.Timer.nResetAtMs;
-        CChip chipWailing;
-        while ((queWailing[indexInst].Count > 0) && ((chipWailing = queWailing[indexInst].Dequeue()) != null))
-        {
-            if ((nTimeWailed - chipWailing.nPlaybackTimeMs) <= 1000)		// #24245 2011.1.26 yyagi: 800 -> 1000
-            {
-                chipWailing.bHit = true;
-                actWailingBonus.Start(inst, r現在の歓声Chip[indexInst]);
-                
-                //todo: add new wailing effect here
-                wailingEffect[(int)(inst - 1)].Play();
-                
-                //if ( !bIsAutoPlay[indexInst] )
-                if (!autoW)
-                {
-                    if (CDTXMania.ConfigIni.nSkillMode == 0)
-                    {
-                        int nCombo = (actCombo.nCurrentCombo[indexInst] < 500) ? actCombo.nCurrentCombo[indexInst] : 500;
-                        actScore.Add(inst, bIsAutoPlay, nCombo * 3000L);		// #24245 2011.1.26 yyagi changed DRUMS->BASS, add nCombo conditions
-                    }
-                    else
-                    {
-                        int nAddScore = actCombo.nCurrentCombo[indexInst] > 500 ? 50000 : actCombo.nCurrentCombo[indexInst] * 100;
-                        actScore.Add(inst, bIsAutoPlay, nAddScore);		// #24245 2011.1.26 yyagi changed DRUMS->BASS, add nCombo conditions
+        Queue<CChip> armed = queWailing[indexInst];
 
-                        tBoostBonus();
-                    }
-                }
+        while (armed.Count > 0)
+        {
+            CChip chipWailing = armed.Peek();
+            long since = nTimeWailed - chipWailing.nPlaybackTimeMs;
+
+            //not reached yet, so leave it for the press it belongs to
+            if (since < 0)
+            {
+                return;
+            }
+
+            armed.Dequeue();
+
+            //too old for this press, but the one behind it might not be
+            if (since > WailingWindowMs)
+            {
+                continue;
+            }
+
+            chipWailing.bHit = true;
+            actWailingBonus.Start(inst, SoundForWailing(inst, chipWailing));
+
+            //todo: add new wailing effect here
+            wailingEffect[(int)(inst - 1)].Play();
+
+            //if ( !bIsAutoPlay[indexInst] )
+            if (!autoW)
+            {
+                AddWailingScore(inst, indexInst);
+            }
+
+            //one press wails one marker
+            return;
+        }
+    }
+
+    //the sound is its own chip on the wailing sound channel, matched by the marker's time
+    private CChip SoundForWailing(EInstrumentPart inst, CChip marker)
+    {
+        if (inst == EInstrumentPart.GUITAR)
+        {
+            CChip sound = r指定時刻に一番近いChip(marker.nPlaybackTimeMs, EChannel.Guitar_WailingSound, 0,
+                (int)WailingWindowMs, hs: HitState.DontCare);
+
+            if (sound != null)
+            {
+                return sound;
             }
         }
+
+        //bass has no wailing sound channel, so it falls back to the crowd
+        return r現在の歓声Chip[(int)inst];
+    }
+
+    private void AddWailingScore(EInstrumentPart inst, int indexInst)
+    {
+        if (CDTXMania.ConfigIni.nSkillMode == 0)
+        {
+            int nCombo = (actCombo.nCurrentCombo[indexInst] < 500) ? actCombo.nCurrentCombo[indexInst] : 500;
+            actScore.Add(inst, bIsAutoPlay, nCombo * 3000L);		// #24245 2011.1.26 yyagi changed DRUMS->BASS, add nCombo conditions
+            return;
+        }
+
+        int nAddScore = actCombo.nCurrentCombo[indexInst] > 500 ? 50000 : actCombo.nCurrentCombo[indexInst] * 100;
+        actScore.Add(inst, bIsAutoPlay, nAddScore);		// #24245 2011.1.26 yyagi changed DRUMS->BASS, add nCombo conditions
+
+        tBoostBonus();
     }
 
     private void tBoostBonus()
@@ -4799,7 +4891,77 @@ internal abstract class CStagePerfCommonScreen : CStage
 
         tJumpInSong(nStartTime);
     }
-    protected void tJumpInSong(long newPosition)
+    #region [ skin editor transport ]
+
+    //same paths the training keys use
+
+    public long PreviewPositionMs => AudioMixer.Timer.nCurrentTime;
+
+    //a chart has no length of its own, so use the last chip
+    public long PreviewLengthMs => listChip is { Count: > 0 } ? listChip[^1].nPlaybackTimeMs : 0;
+
+    public long PreviewLoopBeginMs => LoopBeginMs;
+    public long PreviewLoopEndMs => LoopEndMs;
+
+    public bool PreviewPaused
+    {
+        get => bPAUSE;
+        set
+        {
+            if (bPAUSE == value)
+            {
+                return;
+            }
+
+            bPAUSE = value;
+
+            if (value)
+            {
+                AudioMixer.Timer.tPause();
+                CDTXMania.Timer.tPause();
+                CDTXMania.DTX.tPausePlaybackForAllChips();
+            }
+            else
+            {
+                AudioMixer.Timer.tResume();
+                CDTXMania.Timer.tResume();
+                CDTXMania.DTX.tResumePlaybackForAllChips();
+            }
+        }
+    }
+
+    public void PreviewSetLoop(long beginMs, long endMs)
+    {
+        LoopBeginMs = Math.Max(0, beginMs);
+        LoopEndMs = Math.Max(LoopBeginMs + 1, endMs);
+    }
+
+    public void PreviewClearLoop()
+    {
+        LoopBeginMs = -1;
+        LoopEndMs = -1;
+    }
+
+    public void PreviewChangeSpeed(int offset) => tChangePlaySpeed(offset);
+
+    #endregion
+
+    //the Restart key restarts via the loading screen, which would rebuild the layout
+    public void tRestartForPreview()
+    {
+        tJumpInSong(0);
+
+        //nobody asked for this restart, so clear the score
+        for (int instrument = 0; instrument < 3; instrument++)
+        {
+            nHitCount_ExclAuto[instrument] = new CHITCOUNTOFRANK();
+            nHitCount_IncAuto[instrument] = new CHITCOUNTOFRANK();
+        }
+
+        actCombo.nCurrentCombo = default;
+    }
+
+    public void tJumpInSong(long newPosition)
     {
         long nNewPosition = Math.Max(0, newPosition);
         Trace.TraceInformation("JUMP IN SONG currentPosition={0}, newPosition={1}", AudioMixer.Timer.nCurrentTime, nNewPosition);
