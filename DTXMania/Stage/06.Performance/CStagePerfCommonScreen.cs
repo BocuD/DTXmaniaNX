@@ -3863,9 +3863,11 @@ internal abstract class CStagePerfCommonScreen : CStage
     {
         if (background != null)
         {
-            background.isVisible = true;
+            background.isVisible = ShowStillBackground();
         }
     }
+
+    private bool ShowStillBackground() => !ChartWillPlayVideo() || video.loadFailed;
 
     protected void tUpdateAndDraw_JudgementLine()  // t進行描画_判定ライン
     {
@@ -3918,6 +3920,25 @@ internal abstract class CStagePerfCommonScreen : CStage
         actScrollSpeed.OnUpdateAndDraw();
     }
 
+    //a chip only carries an AVI once the file behind it was found
+    private static bool ChartWillPlayVideo()
+    {
+        if (!CDTXMania.ConfigIni.bAVIEnabled || CDTXMania.DTX?.listChip == null)
+        {
+            return false;
+        }
+
+        foreach (CChip chip in CDTXMania.DTX.listChip)
+        {
+            if (chip.rAVI != null)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     protected void tGenerateBackgroundTexture()
     {
         Rectangle bgrect;
@@ -3956,7 +3977,13 @@ internal abstract class CStagePerfCommonScreen : CStage
             BgFilename = CDTXMania.DTX.strFolderName + BACKGROUND;
         }
 		
+        //a chart can name a background this cannot read, which resolves to the magenta placeholder
         BaseTexture texture = BaseTexture.LoadFromPath(string.IsNullOrEmpty(BgFilename) ? DefaultBgFilename : BgFilename);
+        if (texture.notFound)
+        {
+            texture.Dispose();
+            texture = BaseTexture.LoadFromPath(DefaultBgFilename);
+        }
 
         UICoverGroup backgroundCover = ui.AddChild(new UICoverGroup("Static Background"));
         backgroundCover.renderOrder = -1;
@@ -3964,7 +3991,8 @@ internal abstract class CStagePerfCommonScreen : CStage
         background = backgroundCover.AddChild(new UIImage(texture));
         background.name = "Image";
         background.size = UISize.Inherited;
-        background.isVisible = true;
+
+        background.isVisible = ShowStillBackground();
 
         //todo: maybe reimplement the more complex background texture behaviour
         //tGenerateBackgroundTexture( DefaultBgFilename, bgrect, BgFilename );

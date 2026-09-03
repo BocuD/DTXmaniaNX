@@ -27,12 +27,16 @@ internal class CActPerfVideo : CActivity
         {
             CreateVideoPlayer(avi.strFileName);
 
-            frameWidth = controller.CurrentFrame.Texture.Width;
-            frameHeight = controller.CurrentFrame.Texture.Height;
-            aspectRatio = (float)frameWidth / (float)frameHeight;
+            DisplayedFrame frame = controller.CurrentFrame;
+            if (frame.IsValid && frame.Texture != null)
+            {
+                frameWidth = frame.Texture.Width;
+                frameHeight = frame.Texture.Height;
+                aspectRatio = (float)frameWidth / frameHeight;
 
-            //frame dimensions are known now, so we can lay out the renderers.
-            ApplyLayout();
+                //frame dimensions are known now, so we can lay out the renderers.
+                ApplyLayout();
+            }
         }
     }
 
@@ -232,6 +236,7 @@ internal class CActPerfVideo : CActivity
         }
         else
         {
+            loadFailed = true;
             controller.Dispose();
         }
     }
@@ -501,6 +506,7 @@ internal class CActPerfVideo : CActivity
     private bool isFullScreen;
     public bool isWindowed;
     private bool isPaused;
+    public bool loadFailed;
     public float aspectRatio;
     private int frameHeight;
     private int frameWidth;
