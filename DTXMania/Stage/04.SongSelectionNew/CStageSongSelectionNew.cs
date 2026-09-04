@@ -237,9 +237,9 @@ public class CStageSongSelectionNew : CStage
 
         //the status panel, sort menu and selection container are part of the layout, so they may have
         //come from json
-        statusPanel = ui.GetChild<StatusPanel>("StatusPanel")!;
-        sortMenuContainer = ui.GetChild<SortMenuContainer>("SortMenuContainer")!;
-        historyPanel = ui.GetChild<PerformanceHistoryPanel>("PerformanceHistoryPanel");
+        statusPanel = ui.FindChild<StatusPanel>()!;
+        sortMenuContainer = ui.FindChild<SortMenuContainer>()!;
+        historyPanel = ui.FindChild<PerformanceHistoryPanel>();
 
         densityGraph1 = ui.AddChild(new DensityGraph((EInstrumentPart)CDTXMania.GetCurrentInstrument()));
         densityGraph1.parentAnchor = UICanvas.BottomLeft;
@@ -266,7 +266,7 @@ public class CStageSongSelectionNew : CStage
         quickMenu.position = Vector3.Zero;
         quickMenu.dontSerialize = true;
 
-        selectionContainer = ui.GetChild<SongSelectionContainer>("SongSelect");
+        selectionContainer = ui.FindChild<SongSelectionContainer>();
 
         //a skin reload recreates the container empty; the first load runs from the loadPhase machine
         if (selectionContainer != null && sortCache.Count > 0)

@@ -83,6 +83,26 @@ public class UIGroup : UIDrawable
         return children.FirstOrDefault(x => x.name == name) as T;
     }
 
+    /// <summary>The first descendant of this type, in draw order. For a behaviour a layout only ever holds
+    /// one of, which is what the type already says.</summary>
+    public T? FindChild<T>() where T : UIDrawable
+    {
+        foreach (UIDrawable child in children)
+        {
+            if (child is T match)
+            {
+                return match;
+            }
+
+            if (child is UIGroup group && group.FindChild<T>() is { } nested)
+            {
+                return nested;
+            }
+        }
+
+        return null;
+    }
+
     public UIDrawable GetChild(int i)
     {
         return children[i];

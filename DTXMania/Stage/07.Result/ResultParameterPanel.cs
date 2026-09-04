@@ -43,8 +43,6 @@ public class ResultParameterPanel : UIItemsGroup, IUIItemSource
         itemComponent = "Components/ResultRow.json";
         itemOffset = new Vector3(0, RowSpacing, 0);
         itemDefault = BuildResultRowDefault;
-
-        SetSource(this);
     }
 
     private static ResultRowData Judgement(string label, int count, double percentage) => new()

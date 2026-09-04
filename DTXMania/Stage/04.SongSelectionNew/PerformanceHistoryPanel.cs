@@ -72,10 +72,9 @@ public class PerformanceHistoryPanel : ComponentInstance, IUIItemSource
 
     protected override void OnContentLoaded()
     {
-        if (GetChild<UIItemsGroup>("Rows") is { } rowsGroup)
+        if (FindChild<UIItemsGroup>() is { } rowsGroup)
         {
             rowsGroup.itemDefault = BuildHistoryRowDefault;
-            rowsGroup.SetSource(this);
         }
     }
 

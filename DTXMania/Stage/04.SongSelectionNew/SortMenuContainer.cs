@@ -51,12 +51,11 @@ public class SortMenuContainer : ComponentInstance, IUIItemSource
     {
         LoadSounds();
 
-        entries = GetChild<UIScrollItemsGroup>("Entries");
+        entries = FindChild<UIScrollItemsGroup>();
 
         if (entries != null)
         {
             entries.itemDefault = BuildEntryDefault;
-            entries.SetSource(this);
         }
     }
 

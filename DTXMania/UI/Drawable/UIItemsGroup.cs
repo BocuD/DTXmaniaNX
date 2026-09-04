@@ -147,6 +147,7 @@ public class UIItemsGroup : UIGroup, IUIInputHandler
     [Themable] public bool wrapSelection = true;
 
     [JsonIgnore] private IUIItemSource? source;
+    [JsonIgnore] private bool searchedForSource;
     [JsonIgnore] private readonly List<UIItemSlot> slots = [];
     [JsonIgnore] private int builtCount = -1;
     [JsonIgnore] private string? builtComponent;
@@ -184,7 +185,33 @@ public class UIItemsGroup : UIGroup, IUIInputHandler
 
     protected IReadOnlyList<UIItemSlot> Slots => slots;
 
-    protected int SourceCount => source?.ItemCount ?? itemCount;
+    protected int SourceCount => Source?.ItemCount ?? itemCount;
+
+    //the owner is the list itself or one of its ancestors, so the list finds it once rather than being
+    //handed it after the tree has loaded
+    private IUIItemSource? Source
+    {
+        get
+        {
+            if (source != null || searchedForSource)
+            {
+                return source;
+            }
+
+            searchedForSource = true;
+
+            for (UIGroup? group = this; group != null; group = group.parent)
+            {
+                if (group is IUIItemSource found)
+                {
+                    source = found;
+                    break;
+                }
+            }
+
+            return source;
+        }
+    }
 
     /// <summary>Which item the user is on. A scrolling list answers from its scroll position.</summary>
     [JsonIgnore] public virtual int SelectedItem
@@ -258,6 +285,7 @@ public class UIItemsGroup : UIGroup, IUIInputHandler
     public void SetSource(IUIItemSource? itemSource)
     {
         source = itemSource;
+        searchedForSource = true;
         EnsureSlots();
     }
 
@@ -325,7 +353,7 @@ public class UIItemsGroup : UIGroup, IUIInputHandler
             slot.name = "Item" + i;
 
             //the provider reads the slot's current index, so recycling never rebuilds the closure
-            slot.Bind(itemComponent, i, () => source?.GetItem(slot.index));
+            slot.Bind(itemComponent, i, () => Source?.GetItem(slot.index));
             slots.Add(slot);
         }
 
@@ -416,7 +444,7 @@ public class UIItemsGroup : UIGroup, IUIInputHandler
         Inspector.Inspector.Inspect("Item Offset", ref itemOffset);
         LayOutSlots();
 
-        ImGui.BeginDisabled(source != null);
+        ImGui.BeginDisabled(Source != null);
         if (ImGui.InputInt("Item Count", ref itemCount))
         {
             itemCount = Math.Max(0, itemCount);
@@ -424,6 +452,6 @@ public class UIItemsGroup : UIGroup, IUIInputHandler
 
         ImGui.EndDisabled();
 
-        ImGui.LabelText("Items", source != null ? $"{SourceCount} (from code)" : SourceCount.ToString());
+        ImGui.LabelText("Items", Source != null ? $"{SourceCount} (from code)" : SourceCount.ToString());
     }
 }

@@ -66,8 +66,6 @@ public class SongSelectionContainer : UIScrollItemsGroup, IUIItemSource
         curve = new UIItemCurve(UIAxis.X, -25.0f, 90.0f);
         itemDefault = BuildSongRowDefault;
 
-        SetSource(this);
-
         scrollToPrevious = () => ScrollBy(-1);
         scrollToNext = () => ScrollBy(1);
     }
