@@ -169,77 +169,6 @@ public abstract class UIDrawable : IDisposable
         return true;
     }
 
-    //the contexts a binding on this element resolves against, nearest first: its own (if it roots one),
-    //then every ancestor's, then the app-wide global context. Nearest context that HAS the key wins.
-    //
-    //the four resolvers below repeat this walk by hand rather than sharing an iterator: they run once per
-    //bound element per frame, and an IEnumerable would allocate a state machine on every one of them.
-    //DataContexts() exists for the inspector, which enumerates once per inspector frame.
-    public IEnumerable<IUIDataContext> DataContexts()
-    {
-        for (UIGroup? group = this as UIGroup ?? parent; group != null; group = group.parent)
-        {
-            if (group.dataContext != null)
-            {
-                yield return group.dataContext;
-            }
-        }
-
-        yield return UIDataContext.Global;
-    }
-
-    public bool TryResolveContextString(string key, out string value)
-    {
-        for (UIGroup? group = this as UIGroup ?? parent; group != null; group = group.parent)
-        {
-            if (group.dataContext != null && group.dataContext.TryGetString(key, out value))
-            {
-                return true;
-            }
-        }
-
-        return UIDataContext.Global.TryGetString(key, out value);
-    }
-
-    public bool TryResolveContextTexture(string key, out BaseTexture texture)
-    {
-        for (UIGroup? group = this as UIGroup ?? parent; group != null; group = group.parent)
-        {
-            if (group.dataContext != null && group.dataContext.TryGetTexture(key, out texture))
-            {
-                return true;
-            }
-        }
-
-        return UIDataContext.Global.TryGetTexture(key, out texture);
-    }
-
-    public bool TryResolveContextBool(string key, out bool value)
-    {
-        for (UIGroup? group = this as UIGroup ?? parent; group != null; group = group.parent)
-        {
-            if (group.dataContext != null && group.dataContext.TryGetBool(key, out value))
-            {
-                return true;
-            }
-        }
-
-        return UIDataContext.Global.TryGetBool(key, out value);
-    }
-
-    public bool TryResolveContextNumber(string key, out double value)
-    {
-        for (UIGroup? group = this as UIGroup ?? parent; group != null; group = group.parent)
-        {
-            if (group.dataContext != null && group.dataContext.TryGetNumber(key, out value))
-            {
-                return true;
-            }
-        }
-
-        return UIDataContext.Global.TryGetNumber(key, out value);
-    }
-
     //called by the parent group each frame, before its animator ticks, so animation wins on a shared
     //member. A no-op when nothing is bound, leaving code-set values untouched.
     public void ApplyBindings()
@@ -329,7 +258,7 @@ public abstract class UIDrawable : IDisposable
 
     private void DrawDataContextSection()
     {
-        IUIDataContext? dataContext = DataContexts().FirstOrDefault(c => c != UIDataContext.Global);
+        IUIDataContext? dataContext = this.DataContexts().FirstOrDefault(c => c != UIDataContext.Global);
         if (dataContext == null)
         {
             return;

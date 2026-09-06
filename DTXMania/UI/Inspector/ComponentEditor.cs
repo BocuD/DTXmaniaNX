@@ -30,13 +30,16 @@ public sealed class ComponentEditor : IDisposable
     private readonly UIGroup instance;
     private readonly GameRenderTarget target = new();
     private readonly Viewport viewport = new();
-    private readonly UIDataContext dummy = new();
     private readonly BorrowedContext borrowed;
+    private readonly LivePreview live;
 
     //what the component reads, recollected from the tree as it is edited; the values are kept separately
     //so an edit survives a key disappearing and coming back
-    private readonly Dictionary<string, DataBindingKind> keys = new();
-    private readonly Dictionary<string, string> values = new();
+    private readonly ComponentPreview preview = new();
+
+    //the context panel sits beside the viewport, so it needs a width of its own
+    private const float ContextPanelWidth = 250.0f;
+    private const float ContextFieldWidth = 110.0f;
 
     private Vector2 canvasSize = new(512, 512);
 
@@ -57,6 +60,11 @@ public sealed class ComponentEditor : IDisposable
     //none when the dummy context is in use, otherwise the drawable whose context is borrowed
     private DrawableRef liveInstance = DrawableRef.None;
 
+    //a borrowed context is real data, so nothing has to stand in for what the tree resolves on its own
+    //both modes go through the same machinery, so a slot resolves per-slot either way: made-up values
+    //from the panel, or the matching slot of the running instance
+    private IUIPreview PreviewValues => liveInstance.HasTarget ? live : preview;
+
     private string? drawError;
 
     private static BaseTexture? placeholderTexture;
@@ -67,6 +75,7 @@ public sealed class ComponentEditor : IDisposable
     {
         this.componentPath = componentPath;
         borrowed = new BorrowedContext(() => liveInstance.Target);
+        live = new LivePreview(borrowed, () => liveInstance.Target as UIGroup);
         instance = CreateInstance(behaviour);
         root.AddChild(instance);
     }
@@ -134,7 +143,6 @@ public sealed class ComponentEditor : IDisposable
         }
 
         DrawToolbar();
-        DrawContextPanel();
 
         if (drawError != null)
         {
@@ -142,6 +150,10 @@ public sealed class ComponentEditor : IDisposable
         }
 
         Render();
+
+        DrawContextPanel();
+        ImGui.SameLine();
+
         viewport.Draw($"ComponentViewport{serial}", target.TextureId, new Vector2(target.Width, target.Height),
             ImGui.GetContentRegionAvail());
 
@@ -168,7 +180,11 @@ public sealed class ComponentEditor : IDisposable
     {
         if (ImGui.Button("Save"))
         {
-            instance.SaveComponent();
+            //the samples written with the component are the values the editor is showing
+            using (UIDataContext.PushPreview(PreviewValues))
+            {
+                instance.SaveComponent();
+            }
         }
 
         ImGui.SameLine();
@@ -225,45 +241,148 @@ public sealed class ComponentEditor : IDisposable
 
     private void DrawContextPanel()
     {
-        if (!ImGui.CollapsingHeader($"Data Context ({keys.Count} keys)", ImGuiTreeNodeFlags.DefaultOpen))
-        {
-            return;
-        }
+        ImGui.BeginChild("Context", new Vector2(ContextPanelWidth, 0), ImGuiChildFlags.Borders,
+            ImGuiWindowFlags.HorizontalScrollbar);
 
         DrawContextSourcePicker();
+        ImGui.Separator();
 
-        if (liveInstance.HasTarget)
+        //the same keys either way, resolved the same way the viewport just resolved them. A borrowed
+        //context is somebody else's data, so its values are shown but not editable
+        using (UIDataContext.PushPreview(PreviewValues))
+        {
+            UIDrawable? readOnly = liveInstance.HasTarget ? instance : null;
+
+            DrawScope(preview.root, "root", readOnly);
+
+            foreach (UIItemsGroup list in preview.listOrder)
+            {
+                DrawList(list, liveInstance.HasTarget);
+            }
+        }
+
+        ImGui.EndChild();
+    }
+
+    //one node per slot, so a list of five shows five sets of values rather than one shared between them
+    private void DrawList(UIItemsGroup list, bool readOnly)
+    {
+        IReadOnlyList<PreviewScope> scopes = preview.ScopesOf(list);
+        if (scopes.Count == 0)
         {
             return;
         }
 
-        foreach ((string key, DataBindingKind kind) in keys)
+        if (!ImGui.TreeNodeEx($"{list.name} [{scopes.Count}]##list{list.name}", ImGuiTreeNodeFlags.DefaultOpen))
         {
-            if (kind == DataBindingKind.Texture)
+            return;
+        }
+
+        for (int i = 0; i < scopes.Count; i++)
+        {
+            if (!ImGui.TreeNodeEx($"{i}##{list.name}{i}", ImGuiTreeNodeFlags.DefaultOpen))
             {
-                ImGui.LabelText(key, "(placeholder texture)");
                 continue;
             }
 
-            string value = values[key];
-            if (ImGui.InputText($"{key} ({kind})", ref value, 256))
+            //a live value is read through the editor's own slot: with the preview pushed, that lands on
+            //the matching slot of the running instance
+            DrawScope(scopes[i], $"{list.name}{i}", readOnly ? LivePreview.SlotAt(list, i) : null);
+            ImGui.TreePop();
+        }
+
+        ImGui.TreePop();
+    }
+
+    //keys are dotted paths, so they nest: "Item.Rank" draws as Rank under Item
+    private static void DrawScope(PreviewScope scope, string id, UIDrawable? source)
+    {
+        ContextTree tree = new();
+        foreach (string key in scope.order)
+        {
+            tree.Insert(key);
+        }
+
+        DrawBranch(tree, scope, id, source);
+    }
+
+    private static void DrawBranch(ContextTree branch, PreviewScope scope, string id, UIDrawable? source)
+    {
+        foreach ((string name, ContextTree child) in branch.children)
+        {
+            if (child.children.Count > 0)
             {
-                values[key] = value;
-                dummy.SetString(key, value);
+                if (ImGui.TreeNodeEx($"{name}##{id}.{name}", ImGuiTreeNodeFlags.DefaultOpen))
+                {
+                    DrawBranch(child, scope, $"{id}.{name}", source);
+                    ImGui.TreePop();
+                }
+
+                continue;
+            }
+
+            DrawValue(name, child.key!, scope, id, source);
+        }
+    }
+
+    //source is the element a live value is read through, or null while the made-up values are being edited
+    private static void DrawValue(string label, string key, PreviewScope scope, string id, UIDrawable? source)
+    {
+        PreviewValue value = scope.values[key];
+        string field = $"{label}##{id}.{key}";
+
+        if (value.kind == DataBindingKind.Texture)
+        {
+            ImGui.LabelText(field, source == null ? "(placeholder)" : "(texture)");
+            return;
+        }
+
+        //a tree node inside BeginDisabled cannot be clicked open, so only the value itself is disabled
+        ImGui.BeginDisabled(source != null);
+        ImGui.SetNextItemWidth(ContextFieldWidth);
+
+        string text = value.text;
+        if (source != null && !source.TryResolveContextString(key, out text))
+        {
+            text = string.Empty;
+        }
+
+        switch (value.kind)
+        {
+            case DataBindingKind.Bool:
+            {
+                bool flag = text is "true" or "True";
+                if (ImGui.Checkbox(field, ref flag) && source == null)
+                {
+                    value.text = flag ? "true" : "false";
+                    scope.Push(key);
+                }
+
+                break;
+            }
+
+            //a number is kept as text: an empty one resolves to nothing, which leaves the layout's own value
+            default:
+            {
+                if (ImGui.InputText(field, ref text, 256) && source == null)
+                {
+                    value.text = text;
+                    scope.Push(key);
+                }
+
+                break;
             }
         }
 
-        // if (keys.Count > 0)
-        // {
-        //     ImGui.TextDisabled("An empty value is left unresolved, so the layout's own value stands.");
-        // }
+        ImGui.EndDisabled();
     }
 
     private void DrawContextSourcePicker()
     {
         string current = liveInstance.Target is { } live ? DescribeLive(live) : "Dummy values";
 
-        if (!ImGui.BeginCombo("Context", current))
+        ImGui.SetNextItemWidth(-1);
+        if (!ImGui.BeginCombo("##Context", current))
         {
             return;
         }
@@ -350,6 +469,7 @@ public sealed class ComponentEditor : IDisposable
             //a stage scales its root by renderScale, and elements that size themselves in pixels read it
             //while drawing, so both have to say the same thing for the whole subtree
             using (CDTXMania.PushRenderScale(scale))
+            using (UIDataContext.PushPreview(PreviewValues))
             {
                 root.scale = new Vector3(scale, scale, 1.0f);
                 root.Draw(Matrix4x4.Identity);
@@ -402,40 +522,85 @@ public sealed class ComponentEditor : IDisposable
     //own values still wins for the keys it owns
     private void UpdateContext()
     {
-        keys.Clear();
-        ComponentKeys.Collect(root, keys);
+        preview.Collect(root);
+        SeedScope(preview.root, null, 0);
 
-        foreach ((string key, DataBindingKind kind) in keys)
+        foreach (UIItemsGroup list in preview.listOrder)
         {
-            if (values.ContainsKey(key))
+            IReadOnlyList<PreviewScope> scopes = preview.ScopesOf(list);
+            for (int i = 0; i < scopes.Count; i++)
+            {
+                SeedScope(scopes[i], list, i);
+            }
+        }
+
+        preview.Apply();
+
+        root.dataContext = liveInstance.HasTarget ? borrowed : null;
+    }
+
+    //a key only just found takes what the component was saved with, or something readable. Slot values fall
+    //back to the unindexed sample, so a component saved before it had a list still seeds every row
+    private void SeedScope(PreviewScope scope, UIItemsGroup? list, int index)
+    {
+        foreach (string key in scope.order)
+        {
+            PreviewValue value = scope.values[key];
+
+            if (value.kind == DataBindingKind.Texture)
+            {
+                scope.context.SetTexture(key, PlaceholderTexture());
+                continue;
+            }
+
+            if (value.seeded)
             {
                 continue;
             }
 
-            //what the component was last saved with beats anything made up here
-            values[key] = instance.sampleContext?.GetValueOrDefault(key) ?? DefaultValue(key, kind);
+            value.seeded = true;
 
-            if (kind == DataBindingKind.Texture)
-            {
-                dummy.SetTexture(key, PlaceholderTexture());
-            }
-            else
-            {
-                dummy.SetString(key, values[key]);
-            }
+            string indexed = list == null ? key : ComponentPreview.SampleKey(list, index, key);
+            value.text = instance.sampleContext?.GetValueOrDefault(indexed)
+                         ?? instance.sampleContext?.GetValueOrDefault(key)
+                         ?? DefaultValue(key, value.kind, list == null ? -1 : index);
         }
-
-        root.dataContext = liveInstance.HasTarget ? borrowed : dummy;
     }
 
     //a number left empty resolves to nothing, which leaves whatever the layout set: a made-up size or
-    //offset would be more confusing than the authored one
-    private static string DefaultValue(string key, DataBindingKind kind) => kind switch
+    //offset would be more confusing than the authored one. A slot's default carries its index, so a list
+    //reads as a list rather than as the same row repeated
+    private static string DefaultValue(string key, DataBindingKind kind, int index) => kind switch
     {
         DataBindingKind.Bool => "true",
         DataBindingKind.Number => string.Empty,
-        _ => key[(key.LastIndexOf('.') + 1)..]
+        _ => index < 0 ? key[(key.LastIndexOf('.') + 1)..] : $"{key[(key.LastIndexOf('.') + 1)..]} {index}"
     };
+
+    //a dotted key splits into the branches the panel nests it under
+    private sealed class ContextTree
+    {
+        public readonly Dictionary<string, ContextTree> children = new();
+        public string? key;
+
+        public void Insert(string fullKey)
+        {
+            ContextTree node = this;
+
+            foreach (string part in fullKey.Split('.'))
+            {
+                if (!node.children.TryGetValue(part, out ContextTree? child))
+                {
+                    child = new ContextTree();
+                    node.children[part] = child;
+                }
+
+                node = child;
+            }
+
+            node.key = fullKey;
+        }
+    }
 
     private UIGroup CreateInstance(Type? behaviour)
     {
