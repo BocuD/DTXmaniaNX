@@ -36,7 +36,7 @@ public class Inspector
             Insert(root, key, isTexture: true);
         }
 
-        RenderContextNode(root, context);
+        RenderContextNode(root, context, string.Empty);
     }
 
     private static void Insert(ContextTreeNode root, string key, bool isTexture)
@@ -57,15 +57,17 @@ public class Inspector
         node.IsTexture = isTexture;
     }
 
-    private static void RenderContextNode(ContextTreeNode node, IUIDataContext context)
+    private static void RenderContextNode(ContextTreeNode node, IUIDataContext context, string path)
     {
         foreach ((string name, ContextTreeNode child) in node.Children)
         {
+            string childPath = $"{path}.{name}";
+
             if (child.Children.Count > 0)
             {
-                if (ImGui.TreeNode(name))
+                if (ImGui.TreeNode($"{name}##{childPath}"))
                 {
-                    RenderContextNode(child, context);
+                    RenderContextNode(child, context, childPath);
                     ImGui.TreePop();
                 }
             }

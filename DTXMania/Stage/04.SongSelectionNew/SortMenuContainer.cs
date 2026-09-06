@@ -144,7 +144,7 @@ public class SortMenuContainer : UIGroup, IUIItemSource
         for (int i = 0; i < sounds.Length; i++)
         {
             string name = SongDbSort.All[i].IconName;
-            bool open = ImGui.TreeNode(name);
+            bool open = ImGui.TreeNode($"{name}##sortsound{i}");
 
             ImGui.SameLine();
             ImGui.TextDisabled(sounds[i].Summary);
