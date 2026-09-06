@@ -85,6 +85,8 @@ internal class ConfigList : UIScrollItemsGroup, IUIItemSource
         //the original settings-list feel: a constant speed that rises with the backlog
         motion = new UIScrollMotion(rate: 4.0f, minSpeed: 10.0f, maxSpeed: 40.0f);
 
+        sortByRenderOrder = true;
+
         cursor = AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\4_itembox cursor.png"))));
         cursor.name = "cursor";
         cursor.renderOrder = 1;
