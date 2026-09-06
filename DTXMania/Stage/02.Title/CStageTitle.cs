@@ -70,7 +70,7 @@ internal class CStageTitle : CStage
 		menu.parentAnchor = UICanvas.Center;
 		menu.position = UICanvas.FromCenter(MENU_X, MENU_Y);
 		menu.itemOffset = new Vector3(0, MENU_H, 0);
-		menu.itemComponent = @"Components/TitleMenuItem.json";
+		menu.itemComponentSource = TitleMenuItem;
 		menu.renderOrder = 10;
 		menu.wrapSelection = false;
 		menu.selectionSpeed = 30.0f;
@@ -123,7 +123,7 @@ internal class CStageTitle : CStage
 	}
 
 	//what one entry looks like: its own row of the menu sheet
-	private static UIGroup BuildEntryDefault()
+	private static UIGroup TitleMenuItem()
 	{
 		UIGroup root = new("TitleMenuItem");
 
@@ -148,8 +148,6 @@ internal class CStageTitle : CStage
 		{
 			return;
 		}
-
-		titleMenu.itemDefault = BuildEntryDefault;
 		titleMenu.onDecide = ChooseEntry;
 		titleMenu.onCancel = () => exitRequested = true;
 		focusTarget = titleMenu;

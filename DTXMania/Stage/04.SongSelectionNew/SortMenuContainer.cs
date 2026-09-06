@@ -14,7 +14,7 @@ namespace DTXMania;
 /// sort: the wrap-around, the easing and the dip towards the selected entry all come from there, so this
 /// only says which sort is showing and reacts when that changes.
 /// </summary>
-public class SortMenuContainer : ComponentInstance, IUIItemSource
+public class SortMenuContainer : UIGroup, IUIItemSource
 {
     private const float EntrySpacing = 90.0f;
 
@@ -37,6 +37,8 @@ public class SortMenuContainer : ComponentInstance, IUIItemSource
 
     public SortMenuContainer() : base("SortMenuContainer")
     {
+        MakeComponent("SortMenuContainer", SortMenuContainerDefault);
+
         scrollPrevious = () => entries?.ScrollBy(-1);
         scrollNext = () => entries?.ScrollBy(1);
 
@@ -52,11 +54,6 @@ public class SortMenuContainer : ComponentInstance, IUIItemSource
         LoadSounds();
 
         entries = FindChild<UIScrollItemsGroup>();
-
-        if (entries != null)
-        {
-            entries.itemDefault = BuildEntryDefault;
-        }
     }
 
     /// <summary>Shows a sort without applying it, for restoring what was selected last time.</summary>
@@ -175,7 +172,7 @@ public class SortMenuContainer : ComponentInstance, IUIItemSource
     private static int Mod(int value, int length) => length <= 0 ? 0 : (value % length + length) % length;
 
     //the code default, also the seed for Components/SortMenu.json
-    protected override UIGroup BuildDefault()
+    private static UIGroup SortMenuContainerDefault()
     {
         UIGroup root = new("SortMenu");
 
@@ -187,9 +184,8 @@ public class SortMenuContainer : ComponentInstance, IUIItemSource
             renderOrder = 0
         });
 
-        root.AddChild(new UIScrollItemsGroup("Entries")
+        root.AddChild(new UIScrollItemsGroup("Entries", SortItem)
         {
-            itemComponent = "Components/SortItem.json",
             itemOffset = new Vector3(EntrySpacing, 0.0f, 0.0f),
             navigationAxis = UINavigationAxis.Horizontal,
 
@@ -213,7 +209,7 @@ public class SortMenuContainer : ComponentInstance, IUIItemSource
     }
 
     //the code default for one entry, seeded into Components/SortItem.json
-    private static UIGroup BuildEntryDefault()
+    private static UIGroup SortItem()
     {
         UIGroup root = new("SortItem");
 

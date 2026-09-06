@@ -50,8 +50,7 @@ internal class CStageConfig : CStage
         configLeftOptionsMenu = leftMenu.AddChild(new UIMenu("Button List"));
         configLeftOptionsMenu.dontSerialize = true;
         configLeftOptionsMenu.itemOffset = new Vector3(0, 32, 0);
-        configLeftOptionsMenu.itemComponent = "Components/ConfigMenuButton.json";
-        configLeftOptionsMenu.itemDefault = BuildMenuButtonDefault;
+        configLeftOptionsMenu.itemComponentSource = ConfigMenuButton;
 
         //340 - size/2, so this becomes 340-245= 95
         configLeftOptionsMenu.position = new Vector3(95, 6, 0);
@@ -133,7 +132,7 @@ internal class CStageConfig : CStage
     }
 
     //what one left-menu button looks like: white, or a yellow-to-orange gradient while it is selected
-    private static UIGroup BuildMenuButtonDefault()
+    private static UIGroup ConfigMenuButton()
     {
         UIGroup root = new("MenuButton");
 

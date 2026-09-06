@@ -8,11 +8,6 @@ using DTXMania.UI.Text;
 
 namespace DTXMania;
 
-/// <summary>
-/// One instrument's difficulty pane: background, difficulty frame and a row per difficulty. The rows are a
-/// <see cref="UIItemsGroup"/> over five <see cref="ChartRowData"/>, so the pane supplies data and the
-/// ChartRow component decides what a row looks like.
-/// </summary>
 /// <summary>Where the pane's difficulty frame sits, for the component to bind to.</summary>
 public sealed class StatusPaneFrame
 {
@@ -20,7 +15,7 @@ public sealed class StatusPaneFrame
     [DataField] public double Y { get; internal set; }
 }
 
-public class StatusPane : ComponentInstance, IUIItemSource
+public class StatusPane : UIGroup, IUIItemSource
 {
     private const float VerticalSpacing = 74.0f;
     private const int DifficultyCount = 5;
@@ -71,8 +66,9 @@ public class StatusPane : ComponentInstance, IUIItemSource
         }
     }
 
-    public StatusPane()
+    public StatusPane() : base("StatusPane")
     {
+        MakeComponent("StatusPane", StatusPaneDefault);
         Array.Fill(rows, ChartRowData.Empty);
 
         paneData.RegisterObject("Frame", () => frame);
@@ -81,11 +77,6 @@ public class StatusPane : ComponentInstance, IUIItemSource
 
     protected override void OnContentLoaded()
     {
-        if (FindChild<UIItemsGroup>() is { } rowsGroup)
-        {
-            rowsGroup.itemDefault = BuildChartRowDefault;
-        }
-
         rowsDirty = true;
     }
 
@@ -160,7 +151,7 @@ public class StatusPane : ComponentInstance, IUIItemSource
     }
 
     //the code default, also the seed for Components/StatusPane.json
-    protected override UIGroup BuildDefault()
+    private static UIGroup StatusPaneDefault()
     {
         UIGroup root = new("StatusPane");
 
@@ -188,9 +179,8 @@ public class StatusPane : ComponentInstance, IUIItemSource
             }
         });
 
-        root.AddChild(new UIItemsGroup("Rows")
+        root.AddChild(new UIItemsGroup("Rows", ChartRow)
         {
-            itemComponent = "Components/ChartRow.json",
             itemOffset = new Vector3(0.0f, -VerticalSpacing, 0.0f),
             renderOrder = 2
         });
@@ -199,7 +189,7 @@ public class StatusPane : ComponentInstance, IUIItemSource
     }
 
     //the code default for one difficulty row, seeded into Components/ChartRow.json
-    private static UIGroup BuildChartRowDefault()
+    private static UIGroup ChartRow()
     {
         UIGroup root = new("ChartRow");
 

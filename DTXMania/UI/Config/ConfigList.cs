@@ -80,8 +80,7 @@ internal class ConfigList : UIScrollItemsGroup, IUIItemSource
         visibleSlots = slotCount;
         selectionOffset = selectionIndex;
         itemOffset = new Vector3(0, RowSpacing, 0);
-        itemComponent = "Components/ConfigRow.json";
-        itemDefault = BuildRowDefault;
+        itemComponentSource = ConfigRow;
 
         //the original settings-list feel: a constant speed that rises with the backlog
         motion = new UIScrollMotion(rate: 4.0f, minSpeed: 10.0f, maxSpeed: 40.0f);
@@ -371,7 +370,7 @@ internal class ConfigList : UIScrollItemsGroup, IUIItemSource
     }
 
     //the panel behind a row, its name, and its value in one style or the other
-    private UIGroup BuildRowDefault()
+    private UIGroup ConfigRow()
     {
         UIGroup root = new("ConfigRow");
 

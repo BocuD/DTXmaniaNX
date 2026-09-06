@@ -7,6 +7,8 @@ using DTXMania.UI.DynamicElements;
 using DTXMania.UI.OpenGL;
 using Hexa.NET.ImGui;
 
+using DTXMania.UI.Skin;
+
 namespace DTXMania.UI.Inspector;
 
 /// <summary>
@@ -25,7 +27,7 @@ public sealed class ComponentEditor : IDisposable
     public string componentPath { get; }
     public UIGroup root { get; } = new("ComponentEditor");
 
-    private readonly ComponentInstance instance;
+    private readonly UIGroup instance;
     private readonly GameRenderTarget target = new();
     private readonly Viewport viewport = new();
     private readonly UIDataContext dummy = new();
@@ -271,7 +273,7 @@ public sealed class ComponentEditor : IDisposable
             liveInstance = DrawableRef.None;
         }
 
-        foreach (ComponentInstance candidate in LiveInstances(componentPath))
+        foreach (UIGroup candidate in LiveInstances(componentPath))
         {
             if (ImGui.Selectable(DescribeLive(candidate), liveInstance.Is(candidate)))
             {
@@ -435,24 +437,24 @@ public sealed class ComponentEditor : IDisposable
         _ => key[(key.LastIndexOf('.') + 1)..]
     };
 
-    private ComponentInstance CreateInstance(Type? behaviour)
+    private UIGroup CreateInstance(Type? behaviour)
     {
-        ComponentInstance created = Instantiate(behaviour);
+        UIGroup created = Instantiate(behaviour);
         created.component = componentPath;
         created.name = Path.GetFileNameWithoutExtension(componentPath);
         return created;
     }
 
-    private static ComponentInstance Instantiate(Type? behaviour)
+    private static UIGroup Instantiate(Type? behaviour)
     {
-        if (behaviour == null || !typeof(ComponentInstance).IsAssignableFrom(behaviour))
+        if (behaviour == null || !typeof(UIGroup).IsAssignableFrom(behaviour))
         {
             return new PreviewComponent();
         }
 
         try
         {
-            return (ComponentInstance)Activator.CreateInstance(behaviour)!;
+            return (UIGroup)Activator.CreateInstance(behaviour)!;
         }
         catch (Exception e)
         {
@@ -461,11 +463,11 @@ public sealed class ComponentEditor : IDisposable
         }
     }
 
-    private static IEnumerable<ComponentInstance> LiveInstances(string componentPath)
+    private static IEnumerable<UIGroup> LiveInstances(string componentPath)
     {
         foreach (UIDrawable root in LiveRoots())
         {
-            foreach (ComponentInstance instance in Descendants(root).OfType<ComponentInstance>())
+            foreach (UIGroup instance in Descendants(root).OfType<UIGroup>())
             {
                 if (instance.component == componentPath)
                 {
@@ -534,7 +536,9 @@ public sealed class ComponentEditor : IDisposable
 }
 
 //a component with no behaviour class of its own: the file is all there is to it
-internal sealed class PreviewComponent : ComponentInstance
+internal sealed class PreviewComponent : UIGroup
 {
-    protected override UIGroup BuildDefault() => new("Component");
+    public PreviewComponent() : base("Component")
+    {
+    }
 }

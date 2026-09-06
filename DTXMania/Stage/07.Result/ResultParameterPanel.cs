@@ -40,9 +40,8 @@ public class ResultParameterPanel : UIItemsGroup, IUIItemSource
             new ResultRowData { Label = "Score", Value = pd.nScore, Padding = 7 }
         ];
 
-        itemComponent = "Components/ResultRow.json";
+        itemComponentSource = ResultRow;
         itemOffset = new Vector3(0, RowSpacing, 0);
-        itemDefault = BuildResultRowDefault;
     }
 
     private static ResultRowData Judgement(string label, int count, double percentage) => new()
@@ -55,7 +54,7 @@ public class ResultParameterPanel : UIItemsGroup, IUIItemSource
     };
 
     //the code default for one row, seeded into Components/ResultRow.json
-    private static UIGroup BuildResultRowDefault()
+    private static UIGroup ResultRow()
     {
         UIGroup root = new("ResultRow");
 

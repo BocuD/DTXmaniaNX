@@ -75,8 +75,6 @@ internal sealed class CStageUITest : CStage
         {
             return;
         }
-
-        menu.itemDefault = BuildMenuItemDefault;
         menu.onCancel = () => returnRequested = true;
         focusTarget = menu;
         menu.SetEntries([
@@ -131,7 +129,7 @@ internal sealed class CStageUITest : CStage
     }
 
     //what one menu entry looks like; everything it shows comes from the entry's own bindings
-    private static UIGroup BuildMenuItemDefault()
+    private static UIGroup UITestMenuItem()
     {
         UIGroup root = new("MenuItem");
 
@@ -171,7 +169,7 @@ internal sealed class CStageUITest : CStage
         UIMenu menu = root.AddChild(new UIMenu("Menu"));
         menu.position = new Vector3(640, 320, 0);
         menu.itemOffset = new Vector3(0, 50, 0);
-        menu.itemComponent = "Components/UITestMenuItem.json";
+        menu.itemComponentSource = UITestMenuItem;
 
         UIImage toggle = root.AddChild(new UIImage());
         toggle.name = "ToggleImage";

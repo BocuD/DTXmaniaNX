@@ -14,7 +14,7 @@ namespace DTXMania;
 /// The settings the player can change without leaving song select. Opening and closing is an animation
 /// clip rather than a counter in here, so where the list sits and how it arrives are both the skin's.
 /// </summary>
-public class QuickMenu : ComponentInstance
+public class QuickMenu : UIGroup
 {
     private const string OpenClip = "open";
     private const string CloseClip = "close";
@@ -31,6 +31,8 @@ public class QuickMenu : ComponentInstance
 
     public QuickMenu() : base("Quick Menu")
     {
+        MakeComponent("QuickMenu", QuickMenuDefault);
+
         list = AddChild(new ConfigList(20, 8));
         list.name = "List";
         list.onExitRoot = ToggleMenu;
@@ -117,7 +119,7 @@ public class QuickMenu : ComponentInstance
     }
 
     //the code default, also the seed for Components/QuickMenu.json
-    protected override UIGroup BuildDefault()
+    private static UIGroup QuickMenuDefault()
     {
         UIGroup root = new("QuickMenu");
 

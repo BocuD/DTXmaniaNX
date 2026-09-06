@@ -62,7 +62,7 @@ public class HierarchyWindow
     {
         UIGroup? group = node as UIGroup;
 
-        bool isComponent = node is ComponentInstance;
+        bool isComponent = group != null && group.IsComponent;
 
         ImGuiTreeNodeFlags rootFlags = ImGuiTreeNodeFlags.OpenOnArrow | ImGuiTreeNodeFlags.OpenOnDoubleClick;
 
@@ -76,9 +76,9 @@ public class HierarchyWindow
 
         string id = node.GetHashCode().ToString();
         string name = string.IsNullOrWhiteSpace(node.name) ? node.GetType().Name : node.name;
-        if (node is ComponentInstance componentNode)
+        if (isComponent)
         {
-            name += "   -> " + (string.IsNullOrWhiteSpace(componentNode.component) ? "(code default)" : componentNode.component);
+            name += "   -> " + (string.IsNullOrWhiteSpace(group!.component) ? "(code default)" : group.component);
         }
 
         string contextMenuId = id + "ContextMenu";
@@ -234,7 +234,7 @@ public class HierarchyWindow
 
     private void DrawNodeContextMenu(UIDrawable node)
     {
-        if (node is ComponentInstance { component.Length: > 0 } componentNode && ImGui.Selectable("Edit Component"))
+        if (node is UIGroup { component.Length: > 0 } componentNode && ImGui.Selectable("Edit Component"))
         {
             ComponentEditor.Open(componentNode.component, componentNode.GetType());
         }
@@ -390,17 +390,13 @@ public class HierarchyWindow
                     ImGui.CloseCurrentPopup();
                 }
             }
-
-            ImGui.Separator();
-            if (ImGui.Selectable("Blank"))
-            {
-                group.AddChild(new GenericComponent());
-                ImGui.CloseCurrentPopup();
-            }
         }
-        else
+
+        ImGui.Separator();
+        if (ImGui.Selectable("Blank"))
         {
-            ImGui.TextDisabled("No custom skin active");
+            group.AddChild(new GenericComponent());
+            ImGui.CloseCurrentPopup();
         }
 
         ImGui.EndMenu();

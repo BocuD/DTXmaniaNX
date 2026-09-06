@@ -279,7 +279,7 @@ public class SkinEditorWindow
                 }
 
                 //rebuild so the deleted file re-seeds from code
-                ComponentInstance.ClearCache();
+                UIGroup.ClearComponentCache();
                 CDTXMania.StageManager.rCurrentStage.LoadUI(true);
             }
         }

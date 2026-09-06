@@ -45,6 +45,10 @@ public class UIScrollItemsGroup : UIItemsGroup
     {
     }
 
+    public UIScrollItemsGroup(string name, Func<UIGroup> itemComponentSource) : base(name, itemComponentSource)
+    {
+    }
+
     /// <summary>The item index currently under the selection position. Setting it scrolls there.</summary>
     public override int SelectedItem
     {

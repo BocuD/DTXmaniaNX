@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Globalization;
 using System.Numerics;
 using DTXMania.Core;
@@ -5,6 +6,8 @@ using DTXMania.UI.DynamicElements;
 using DTXMania.UI.Inspector;
 using Hexa.NET.ImGui;
 using Newtonsoft.Json;
+
+using DTXMania.UI.Skin;
 
 namespace DTXMania.UI.Drawable;
 
@@ -59,7 +62,7 @@ public interface IUIItemSource
 /// One item's copy of the list's component. Its children bind to <c>"Item.*"</c>, so one component
 /// serves every row.
 /// </summary>
-public sealed class UIItemSlot : ComponentInstance
+public sealed class UIItemSlot : UIGroup
 {
     private readonly UIDataContext data = new();
 
@@ -72,9 +75,11 @@ public sealed class UIItemSlot : ComponentInstance
         dontSerialize = true;
     }
 
-    public void Bind(string componentPath, int itemIndex, Func<object?> item)
+    public void Bind(string componentName, string componentPath, Func<UIGroup>? source, int itemIndex,
+        Func<object?> item)
     {
-        component = componentPath;
+        MakeComponent(componentName, componentPath);
+        componentSource = source;
 
         data.RegisterObject("Item", item);
         data.SetString("IsSelected", "false");
@@ -106,9 +111,6 @@ public sealed class UIItemSlot : ComponentInstance
         selected = value;
         data.SetString("IsSelected", value ? "true" : "false");
     }
-
-    protected override UIGroup BuildDefault()
-        => (parent as UIItemsGroup)?.itemDefault?.Invoke() ?? new UIGroup("Item");
 }
 
 /// <summary>
@@ -120,7 +122,7 @@ public sealed class UIItemSlot : ComponentInstance
 /// </summary>
 public class UIItemsGroup : UIGroup, IUIInputHandler
 {
-    //skin-relative path of the component stamped per item, e.g. "Components/ChartRow.json"
+    //skin-relative, eg: Components/ChartRow.json. Empty until a stage is saved into a skin
     [Themable] public string itemComponent = string.Empty;
 
     //the step from one item to the next; a vector so a list can run diagonally
@@ -137,8 +139,8 @@ public class UIItemsGroup : UIGroup, IUIInputHandler
     //used only when no source is attached, i.e. a list placed by hand
     [Themable] public int itemCount;
 
-    //code default for the item component, seeded into the skin the first time it is needed
-    [JsonIgnore] public Func<UIGroup>? itemDefault;
+    //builds one item until a skin has a file of its own
+    [JsonIgnore] public Func<UIGroup>? itemComponentSource;
 
     //where the list starts; a scrolling list takes the selection from its ring instead
     [Themable] public int selectedItem;
@@ -171,6 +173,11 @@ public class UIItemsGroup : UIGroup, IUIInputHandler
     {
     }
 
+    public UIItemsGroup(string name, Func<UIGroup> itemComponentSource) : this(name)
+    {
+        this.itemComponentSource = itemComponentSource;
+    }
+
     public UIItemsGroup(string name) : base(name)
     {
         //slots share a render order, so sorting would shuffle which item draws over which
@@ -182,6 +189,11 @@ public class UIItemsGroup : UIGroup, IUIInputHandler
         selectPrevious = SelectPrevious;
         selectNext = SelectNext;
     }
+
+    //a slot loads nothing until it is a named component, and the list is the only thing that knows a name
+    private string ItemComponentName => itemComponent.Length > 0
+        ? Path.GetFileNameWithoutExtension(itemComponent)
+        : name + "Item";
 
     protected IReadOnlyList<UIItemSlot> Slots => slots;
 
@@ -280,6 +292,43 @@ public class UIItemsGroup : UIGroup, IUIInputHandler
     {
     }
 
+    /// <summary>Gives the skin its own file for the item component and points the list at it.</summary>
+    public void WriteItemComponentIntoSkin(Action<UIDrawable> writeNested)
+    {
+        SkinDescriptor? skin = CDTXMania.SkinManager.currentSkin;
+        if (skin == null || itemComponentSource == null || !string.IsNullOrWhiteSpace(itemComponent))
+        {
+            return;
+        }
+
+        UIGroup built = itemComponentSource();
+        string path = $"Components/{built.name}.json";
+        string fullPath = Path.Combine(skin.basePath, path);
+
+        try
+        {
+            //an item component can hold lists of its own
+            writeNested(built);
+
+            if (!File.Exists(fullPath))
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(fullPath)!);
+                File.WriteAllText(fullPath, SkinHierarchySerializer.SerializeToJsonCompact(built));
+                Trace.TraceInformation($"Wrote item component to {fullPath}.");
+            }
+
+            itemComponent = path;
+        }
+        catch (Exception e)
+        {
+            Trace.TraceError($"Failed to write item component to {fullPath}: {e.Message}");
+        }
+        finally
+        {
+            built.Dispose();
+        }
+    }
+
     /// <summary>Attaches the data behind the list. Safe to call repeatedly; the slots rebuild only when
     /// the item count or the component actually changes.</summary>
     public void SetSource(IUIItemSource? itemSource)
@@ -353,7 +402,8 @@ public class UIItemsGroup : UIGroup, IUIInputHandler
             slot.name = "Item" + i;
 
             //the provider reads the slot's current index, so recycling never rebuilds the closure
-            slot.Bind(itemComponent, i, () => Source?.GetItem(slot.index));
+            slot.Bind(ItemComponentName, itemComponent, itemComponentSource, i,
+                () => Source?.GetItem(slot.index));
             slots.Add(slot);
         }
 

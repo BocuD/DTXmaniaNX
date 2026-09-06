@@ -216,14 +216,12 @@ public class CStageSongSelectionNew : CStage
         statusPanel.BuildDefaultPanes();
 
         var history = ui.AddChild(new PerformanceHistoryPanel());
-        history.component = "Components/PerformanceHistoryPanel.json";
         history.parentAnchor = UICanvas.BottomRight;
         history.pivot = UICanvas.BottomRight;
         history.position = new Vector3(-40, -30, 0);
         history.renderOrder = 7;
 
         var sortMenu = ui.AddChild(new SortMenuContainer());
-        sortMenu.component = "Components/SortMenu.json";
         sortMenu.parentAnchor = UICanvas.TopRight;
         sortMenu.position = UICanvas.FromAnchor(UICanvas.TopRight, 1281, 35);
         sortMenu.renderOrder = 8;
@@ -258,7 +256,6 @@ public class CStageSongSelectionNew : CStage
         songSearchMenu.dontSerialize = true;
 
         quickMenu = ui.AddChild(new QuickMenu());
-        quickMenu.component = "Components/QuickMenu.json";
         quickMenu.renderOrder = 15;
         quickMenu.isVisible = false;
         quickMenu.pivot = UICanvas.Center;

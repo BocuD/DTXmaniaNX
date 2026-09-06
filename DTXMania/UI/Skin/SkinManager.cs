@@ -15,7 +15,7 @@ public class SkinManager
 
     public static string SystemPath(string relativePath) => Path.Combine(SystemRoot, relativePath);
 
-    //skin-relative paths of a skin's components, as authored into ComponentInstance.component
+    //skin-relative paths of a skin's components, as authored into UIGroup.component
     public static string[] ComponentPaths(SkinDescriptor skin)
         => Directory.Exists(skin.componentFolder)
             ? Directory.GetFiles(skin.componentFolder, "*.json")
@@ -99,12 +99,40 @@ public class SkinManager
         if (LayoutPathFor(stageId) is { } path)
         {
             CopySystemClipsIntoSkin(stageId, group);
+            WriteComponentsIntoSkin(group);
             UILayout.Save(path, group);
         }
         else
         {
             Trace.TraceWarning("SaveStageLayout ignored: no custom skin active (System is code-defined).");
         }
+    }
+
+    /// <summary>Writes every component the stage uses into the skin and points the layout at the files.
+    /// This is the only thing that gives a component a path.</summary>
+    private static void WriteComponentsIntoSkin(UIDrawable node)
+    {
+        //an element the layout will not hold has no component to give the skin either
+        if (node is not UIGroup group || node.dontSerialize)
+        {
+            return;
+        }
+
+        //children only exist once the component has loaded, and have to be walked before it is written
+        group.EnsureContent();
+
+        foreach (UIDrawable child in group.children)
+        {
+            WriteComponentsIntoSkin(child);
+        }
+
+        //written on the way back up: a file saved before the lists inside it have paths points nowhere
+        if (node is UIItemsGroup list)
+        {
+            list.WriteItemComponentIntoSkin(WriteComponentsIntoSkin);
+        }
+
+        group.WriteIntoSkin();
     }
 
     /// <summary>
@@ -163,7 +191,7 @@ public class SkinManager
         CDTXMania.ConfigIni.strSkinFolder = skin == null ? string.Empty : FolderNameOf(skin);
 
         //so a reload picks up edited component files, and re-seeds deleted ones
-        ComponentInstance.ClearCache();
+        UIGroup.ClearComponentCache();
 
         CDTXMania.StageManager.rCurrentStage.LoadUI();
     }

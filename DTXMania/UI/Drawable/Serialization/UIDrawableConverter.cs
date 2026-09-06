@@ -166,8 +166,8 @@ public class UIDrawableConverter : JsonConverter
             serializer.Serialize(writer, propertyValue);
         }
 
-        //a component instance's children come from its component file, not the layout
-        if (drawable is UIGroup group && drawable is not ComponentInstance)
+        //a component's children come from its own file, not from whatever placed it
+        if (drawable is UIGroup group && !group.IsComponent)
         {
             bool hasSerializableChild = group.children.Any(child => !child.dontSerialize);
             if (!compact || hasSerializableChild)

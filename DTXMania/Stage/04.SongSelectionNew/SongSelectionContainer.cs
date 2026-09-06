@@ -59,12 +59,11 @@ public class SongSelectionContainer : UIScrollItemsGroup, IUIItemSource
         currentRoot = songDb.songNodeRoot;
         UnfilteredRoot = currentRoot;
 
-        itemComponent = "Components/SongRow.json";
+        itemComponentSource = SongRow;
         itemOffset = new Vector3(0, RowSpacing, 0);
         visibleSlots = DefaultWindowSize;
         selectionOffset = DefaultSelectionRow;
         curve = new UIItemCurve(UIAxis.X, -25.0f, 90.0f);
-        itemDefault = BuildSongRowDefault;
 
         scrollToPrevious = () => ScrollBy(-1);
         scrollToNext = () => ScrollBy(1);
@@ -373,7 +372,7 @@ public class SongSelectionContainer : UIScrollItemsGroup, IUIItemSource
     }
 
     //the code default for one row, seeded into Components/SongRow.json
-    private UIGroup BuildSongRowDefault()
+    private UIGroup SongRow()
     {
         UIGroup root = new("SongRow");
 

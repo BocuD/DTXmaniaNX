@@ -8,7 +8,7 @@ using DTXMania.UI.Text;
 
 namespace DTXMania;
 
-public class PerformanceHistoryPanel : ComponentInstance, IUIItemSource
+public class PerformanceHistoryPanel : UIGroup, IUIItemSource
 {
     private const float RowSpacing = 18.0f;
     private const int RowCount = 5;
@@ -43,11 +43,11 @@ public class PerformanceHistoryPanel : ComponentInstance, IUIItemSource
         }
     }
 
-    public PerformanceHistoryPanel() : base()
+    public PerformanceHistoryPanel() : base("PerformanceHistoryPanel")
     {
-        name = "PerformanceHistoryPanel";
+        MakeComponent("PerformanceHistoryPanel", PerformanceHistoryPanelDefault);
 
-        //on the instance, not on the BuildDefault root: EnsureContent only takes that tree's children
+        //on the instance, not on the default root: EnsureContent only takes that tree's children
         size = PanelSize;
         Array.Fill(rows, PerformanceHistoryRowData.Empty);
 
@@ -68,14 +68,6 @@ public class PerformanceHistoryPanel : ComponentInstance, IUIItemSource
 
         //a chart nobody has played has nothing to show, so the panel stays off the screen entirely
         isVisible = any;
-    }
-
-    protected override void OnContentLoaded()
-    {
-        if (FindChild<UIItemsGroup>() is { } rowsGroup)
-        {
-            rowsGroup.itemDefault = BuildHistoryRowDefault;
-        }
     }
 
     private PerformanceHistoryRowData ResolveRow(int index)
@@ -124,7 +116,7 @@ public class PerformanceHistoryPanel : ComponentInstance, IUIItemSource
     }
 
     //the code default, also the seed for Components/PerformanceHistoryPanel.json
-    protected override UIGroup BuildDefault()
+    private static UIGroup PerformanceHistoryPanelDefault()
     {
         UIGroup root = new("PerformanceHistoryPanel");
 
@@ -136,9 +128,8 @@ public class PerformanceHistoryPanel : ComponentInstance, IUIItemSource
             renderOrder = 0
         });
 
-        root.AddChild(new UIItemsGroup("Rows")
+        root.AddChild(new UIItemsGroup("Rows", PerformanceHistoryRow)
         {
-            itemComponent = "Components/PerformanceHistoryRow.json",
             itemOffset = new Vector3(0.0f, RowSpacing, 0.0f),
             position = new Vector3(14.0f, 28.0f, 0.0f),
             renderOrder = 1
@@ -148,7 +139,7 @@ public class PerformanceHistoryPanel : ComponentInstance, IUIItemSource
     }
 
     //the code default for one attempt, seeded into Components/PerformanceHistoryRow.json
-    private static UIGroup BuildHistoryRowDefault()
+    private static UIGroup PerformanceHistoryRow()
     {
         UIGroup root = new("PerformanceHistoryRow");
 

@@ -104,7 +104,7 @@ public class Modal : UIGroup
         optionList.renderOrder = 3;
         optionList.position = new Vector3(centerX, descriptionY + descriptionHeight + descriptionToOptionsGap, 0f);
         optionList.itemOffset = new Vector3(0f, ButtonSpacing, 0f);
-        optionList.itemDefault = BuildOptionDefault;
+        optionList.itemComponentSource = ModalOption;
         optionList.dontSerialize = true;
 
         if (cancellable)
@@ -142,7 +142,7 @@ public class Modal : UIGroup
     }
 
     //one option: white normally, a yellow-to-orange gradient when it is the selected one
-    private static UIGroup BuildOptionDefault()
+    private static UIGroup ModalOption()
     {
         UIGroup root = new("Option");
 
