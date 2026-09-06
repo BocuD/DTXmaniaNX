@@ -17,32 +17,48 @@ public class ResultParameterPanel : UIItemsGroup, IUIItemSource
 {
     private const float RowSpacing = 24.0f;
 
-    private readonly ResultRowData[] rows;
+    private readonly ResultRowData[] rows = new ResultRowData[7];
+    private bool rowsResolved;
 
     public int ItemCount => rows.Length;
     public object GetItem(int index) => rows[index];
 
-    public ResultParameterPanel(int instrument) : base("ResultParameterPanel")
+    public ResultParameterPanel() : base("ResultParameterPanel")
     {
         scale.X = 0.96f;
-
-        var stageResult = CDTXMania.StageManager.stageResult;
-        var pd = stageResult.stPerformanceEntry[instrument];
-
-        rows =
-        [
-            Judgement("Perfect", pd.nPerfectCount, stageResult.fPerfectPercentage[instrument]),
-            Judgement("Great", pd.nGreatCount, stageResult.fGreatPercentage[instrument]),
-            Judgement("Good", pd.nGoodCount, stageResult.fGoodPercentage[instrument]),
-            Judgement("Ok", pd.nPoorCount, stageResult.fPoorPercentage[instrument]),
-            Judgement("Miss", pd.nMissCount, stageResult.fMissPercentage[instrument]),
-            Judgement("Max Combo", pd.nMaxCombo, 100.0 * pd.nMaxCombo / pd.nTotalChipsCount),
-            new ResultRowData { Label = "Score", Value = pd.nScore, Padding = 7 }
-        ];
+        Array.Fill(rows, Empty);
 
         itemComponentSource = ResultRow;
         itemOffset = new Vector3(0, RowSpacing, 0);
     }
+
+    //read once the stage has its result: the parameterless constructor runs while the layout is loading
+    public override void Draw(Matrix4x4 parentMatrix)
+    {
+        if (!rowsResolved)
+        {
+            rowsResolved = true;
+            ResolveRows(CDTXMania.GetCurrentInstrument());
+        }
+
+        base.Draw(parentMatrix);
+    }
+
+    private void ResolveRows(int instrument)
+    {
+        var stageResult = CDTXMania.StageManager.stageResult;
+        var pd = stageResult.stPerformanceEntry[instrument];
+
+        rows[0] = Judgement("Perfect", pd.nPerfectCount, stageResult.fPerfectPercentage[instrument]);
+        rows[1] = Judgement("Great", pd.nGreatCount, stageResult.fGreatPercentage[instrument]);
+        rows[2] = Judgement("Good", pd.nGoodCount, stageResult.fGoodPercentage[instrument]);
+        rows[3] = Judgement("Ok", pd.nPoorCount, stageResult.fPoorPercentage[instrument]);
+        rows[4] = Judgement("Miss", pd.nMissCount, stageResult.fMissPercentage[instrument]);
+        rows[5] = Judgement("Max Combo", pd.nMaxCombo, 100.0 * pd.nMaxCombo / pd.nTotalChipsCount);
+        rows[6] = new ResultRowData { Label = "Score", Value = pd.nScore, Padding = 7 };
+    }
+
+    private static readonly ResultRowData Empty = new();
 
     private static ResultRowData Judgement(string label, int count, double percentage) => new()
     {

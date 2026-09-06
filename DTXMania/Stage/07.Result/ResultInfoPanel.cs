@@ -1,7 +1,5 @@
 using DTXMania.UI.Skin;
 using System.Numerics;
-using DTXMania.Core;
-using DTXMania.Core.Framework;
 using DTXMania.UI;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.DynamicElements;
@@ -15,15 +13,45 @@ namespace DTXMania;
 /// </summary>
 public class ResultInfoPanel : UIGroup
 {
-    public ResultInfoPanel()
+    public ResultInfoPanel() : base("ResultInfo")
     {
-        name = "ResultInfo";
+        MakeComponent("ResultInfoPanel", ResultInfoPanelDefault);
+    }
 
-        var whiteTex = BaseTexture.CreateSolidColor(Color4.White);
+    //the code default, also the seed for Components/ResultInfoPanel.json
+    private static UIGroup ResultInfoPanelDefault()
+    {
+        UIGroup root = new("ResultInfo");
 
-        CreateLevelGroup(whiteTex);
-        CreateRateGroup(whiteTex);
-        CreateSkillGroup(whiteTex);
+        CreateLevelGroup(root);
+        CreateRateGroup(root);
+        CreateSkillGroup(root);
+
+        return root;
+    }
+
+    private static UIImage Icon(UIGroup parent, string name, string file, Vector3 position)
+    {
+        UIImage icon = parent.AddChild(new UIImage
+        {
+            name = name,
+            imageSource = ImageSource.File,
+            image = SkinResource.System(file),
+            position = position
+        });
+
+        return icon;
+    }
+
+    private static void Divider(UIGroup parent, string name, Vector3 position, float width)
+    {
+        parent.AddChild(new UIImage
+        {
+            name = name,
+            imageSource = ImageSource.Solid,
+            position = position,
+            size = new Vector2(width, 2)
+        });
     }
 
     private static UIText DynamicNumber(UIGroup parent, string name, string source, int size, string font,
@@ -39,18 +67,12 @@ public class ResultInfoPanel : UIGroup
         return text;
     }
 
-    private void CreateLevelGroup(BaseTexture white)
+    private static void CreateLevelGroup(UIGroup root)
     {
-        var levelGroup = AddChild(new UIGroup("Level"));
+        var levelGroup = root.AddChild(new UIGroup("Level"));
 
-        var levelIcon = levelGroup.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\Result\icon_level.png"))));
-        levelIcon.position = new Vector3(64, 21, 0);
-        levelIcon.name = "LevelIcon";
-
-        var levelLine = levelGroup.AddChild(new UIImage(white));
-        levelLine.position = new Vector3(88, 94, 0);
-        levelLine.size = new Vector2(340, 2);
-        levelLine.name = "LevelLine";
+        Icon(levelGroup, "LevelIcon", @"Graphics\Result\icon_level.png", new Vector3(64, 21, 0));
+        Divider(levelGroup, "LevelLine", new Vector3(88, 94, 0), 340);
 
         DynamicNumber(levelGroup, "LevelNum", "Result.LevelInt", 61, "texgyreadventor-regular.otf",
             new Vector3(281, 107, 0), new Vector2(1, 1));
@@ -58,18 +80,12 @@ public class ResultInfoPanel : UIGroup
             new Vector3(278, 102, 0), new Vector2(0, 1));
     }
 
-    private void CreateRateGroup(BaseTexture white)
+    private static void CreateRateGroup(UIGroup root)
     {
-        var rateGroup = AddChild(new UIGroup("Rate"));
+        var rateGroup = root.AddChild(new UIGroup("Rate"));
 
-        var rateIcon = rateGroup.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\Result\icon_rate.png"))));
-        rateIcon.position = new Vector3(32, 77, 0);
-        rateIcon.name = "RateIcon";
-
-        var rateLine = rateGroup.AddChild(new UIImage(white));
-        rateLine.position = new Vector3(60, 168, 0);
-        rateLine.size = new Vector2(344, 2);
-        rateLine.name = "RateLine";
+        Icon(rateGroup, "RateIcon", @"Graphics\Result\icon_rate.png", new Vector3(32, 77, 0));
+        Divider(rateGroup, "RateLine", new Vector3(60, 168, 0), 344);
 
         DynamicNumber(rateGroup, "RateNum", "Result.RateInt", 60, "texgyreadventor-regular.otf",
             new Vector3(281, 180, 0), new Vector2(1, 1));
@@ -77,24 +93,16 @@ public class ResultInfoPanel : UIGroup
             new Vector3(278, 176, 0), new Vector2(0, 1));
     }
 
-    private void CreateSkillGroup(BaseTexture whiteTex)
+    private static void CreateSkillGroup(UIGroup root)
     {
-        var skillGroup = AddChild(new UIGroup("Skill"));
+        var skillGroup = root.AddChild(new UIGroup("Skill"));
 
-        var skillIcon = skillGroup.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\Result\icon_skill.png"))));
-        skillIcon.position = new Vector3(7, 194, 0);
-        skillIcon.scale = new Vector3(0.67f, 0.67f, 1.0f);
-        skillIcon.name = "SkillIcon";
+        Icon(skillGroup, "SkillIcon", @"Graphics\Result\icon_skill.png", new Vector3(7, 194, 0))
+            .scale = new Vector3(0.67f, 0.67f, 1.0f);
+        Icon(skillGroup, "SkillText", @"Graphics\Result\label_skill.png", new Vector3(18, 264, 0))
+            .scale = new Vector3(0.67f, 0.67f, 1.0f);
 
-        var skillText = skillGroup.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\Result\label_skill.png"))));
-        skillText.position = new Vector3(18, 264, 0);
-        skillText.scale = new Vector3(0.67f, 0.67f, 1.0f);
-        skillText.name = "SkillText";
-
-        var skillLine = skillGroup.AddChild(new UIImage(whiteTex));
-        skillLine.position = new Vector3(14, 296, 0);
-        skillLine.size = new Vector2(340, 2);
-        skillLine.name = "SkillLine";
+        Divider(skillGroup, "SkillLine", new Vector3(14, 296, 0), 340);
 
         var skillInt = DynamicNumber(skillGroup, "SkillNum", "Result.SkillInt", 82, "texgyreadventor-italic.otf",
             new Vector3(315, 299, 0), new Vector2(1, 1));
@@ -111,23 +119,34 @@ public class ResultInfoPanel : UIGroup
 
     private static void CreateSkillBar(UIGroup skillGroup)
     {
-        var fill = skillGroup.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\5_skillbar_fill.png"))));
-        fill.name = "SkillBarFill";
-        fill.position = new Vector3(155, 285, 0);
-        fill.pivot = new Vector2(0.0f, 0.5f);
-        fill.size = new Vector2(286, 10);
-        fill.renderOrder = 1;
-        fill.isVisible = false;
-        fill.bindings.Add(new UIBinding("isVisible", "Result.ShowSkillBar"));
-        fill.bindings.Add(new UIBinding("size.X", "Result.SkillBarWidth"));
+        skillGroup.AddChild(new UIImage
+        {
+            name = "SkillBarFill",
+            imageSource = ImageSource.File,
+            image = SkinResource.System(@"Graphics\5_skillbar_fill.png"),
+            position = new Vector3(155, 285, 0),
+            pivot = new Vector2(0.0f, 0.5f),
+            size = new Vector2(286, 10),
+            renderOrder = 1,
+            isVisible = false,
+            bindings =
+            {
+                new UIBinding("isVisible", "Result.ShowSkillBar"),
+                new UIBinding("size.X", "Result.SkillBarWidth")
+            }
+        });
 
-        var frame = skillGroup.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\Result\bar.png"))));
-        frame.name = "SkillBar";
-        frame.position = new Vector3(148, 285, 0);
-        frame.pivot = new Vector2(0.0f, 0.5f);
-        frame.scale = new Vector3(0.66f, 0.66f, 1.0f);
-        frame.renderOrder = 2;
-        frame.isVisible = false;
-        frame.bindings.Add(new UIBinding("isVisible", "Result.ShowSkillBar"));
+        skillGroup.AddChild(new UIImage
+        {
+            name = "SkillBar",
+            imageSource = ImageSource.File,
+            image = SkinResource.System(@"Graphics\Result\bar.png"),
+            position = new Vector3(148, 285, 0),
+            pivot = new Vector2(0.0f, 0.5f),
+            scale = new Vector3(0.66f, 0.66f, 1.0f),
+            renderOrder = 2,
+            isVisible = false,
+            bindings = { new UIBinding("isVisible", "Result.ShowSkillBar") }
+        });
     }
 }

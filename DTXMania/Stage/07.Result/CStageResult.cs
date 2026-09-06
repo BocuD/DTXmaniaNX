@@ -62,11 +62,40 @@ internal class CStageResult : CStage
 	{
 		var context = new UIDataContext();
 		context.RegisterObject("Result", () => resultData);
+		context.RegisterTexture("Result.Background", BackgroundTexture);
+		context.RegisterTexture("Result.Jacket", JacketTexture);
 		ui.dataContext = context;
 	}
 
 	public override void BuildDefaultLayout()
 	{
+		var infoPanel = ui.AddChild(new ResultInfoPanel());
+		infoPanel.position = new Vector3(830, 120, 0);
+
+		var paramPanel = ui.AddChild(new ResultParameterPanel());
+		paramPanel.position = new Vector3(879, 479, 0);
+
+		UICoverGroup backgroundCover = ui.AddChild(new UICoverGroup("Background"));
+		backgroundCover.renderOrder = -100;
+
+		backgroundCover.AddChild(new UIImage
+		{
+			name = "Image",
+			imageSource = ImageSource.Dynamic,
+			dynamicSource = "Result.Background",
+			size = UISize.Inherited
+		});
+
+		ui.AddChild(new UIImage
+		{
+			name = "AlbumArt",
+			imageSource = ImageSource.Dynamic,
+			dynamicSource = "Result.Jacket",
+			size = new Vector2(380, 380),
+			position = new Vector3(640, 130, 0),
+			pivot = new Vector2(0.5f, 0.0f)
+		});
+
 		var stageNumber = ui.AddChild(new UIText("", 46));
 		stageNumber.name = "StageNumber";
 		stageNumber.bindings.Add(new UIBinding("text", "Result.StageNumber"));
@@ -131,33 +160,14 @@ internal class CStageResult : CStage
 		slowCount.outlineWidth = 0;
 	}
 
-	//elements that build runtime textures from the result data (rank icon, jacket, progress bar) can't be
-	//part of the serializable layout, so they are added here and marked dontSerialize. The open animation
-	//is set up here too, once the panels it targets exist
+	//the rank icon, nameplate and progress bar build their children from the result in their constructors,
+	//so a layout cannot hold them. The open animation is set up here, once the panels it targets exist
 	public override void OnLayoutReady()
 	{
-		UICoverGroup backgroundCover = ui.AddChild(new UICoverGroup("Background"));
-		backgroundCover.renderOrder = -100;
-		backgroundCover.dontSerialize = true;
-
-		background = backgroundCover.AddChild(new UIImage(BaseTexture.LoadFromPath(ResultBackgroundPath())));
-		background.name = "Image";
-		background.size = UISize.Inherited;
-		background.dontSerialize = true;
-
 		var rankIcon = ui.AddChild(new ResultRankIcon(CDTXMania.GetCurrentInstrument()));
 		rankIcon.position = new Vector3(225, 360, 0);
 		rankIcon.renderOrder = 3;
 		rankIcon.dontSerialize = true;
-
-		string path = CDTXMania.DTX.strFolderName + CDTXMania.DTX.PREIMAGE;
-		var txJacket = BaseTexture.LoadFromPath(!File.Exists(path) ? CSkin.Path(@"Graphics\5_preimage default.png") : path);
-		var jacket = ui.AddChild(new UIImage(txJacket));
-		jacket.size = new Vector2(380, 380);
-		jacket.position = new Vector3(640, 130, 0);
-		jacket.name = "AlbumArt";
-		jacket.pivot.X = 0.5f;
-		jacket.dontSerialize = true;
 
 		//todo: position these
 		if (CDTXMania.GetCurrentInstrument() == 0)
@@ -173,14 +183,6 @@ internal class CStageResult : CStage
 			guitar1.dontSerialize = true;
 		}
 
-		var infoPanel = ui.AddChild(new ResultInfoPanel());
-		infoPanel.position = new Vector3(830, 120, 0);
-		infoPanel.dontSerialize = true;
-
-		var paramPanel = ui.AddChild(new ResultParameterPanel(CDTXMania.GetCurrentInstrument()));
-		paramPanel.position = new Vector3(879, 479, 0);
-		paramPanel.dontSerialize = true;
-
 		var progressBar = ui.AddChild(new ResultProgressBar(CDTXMania.GetCurrentInstrument()));
 		progressBar.position = new Vector3(1130, 435, 0);
 		progressBar.renderOrder = 4;
@@ -191,6 +193,27 @@ internal class CStageResult : CStage
 		ui.animator = new Animator();
 		ui.animator.AddResource(SkinResource.System(@"Graphics\Result\open.json"));
 		ui.animator.Play("open", false);
+	}
+
+	//a provider is pulled every frame, so each file is resolved once and held until the stage runs again
+	private BaseTexture? backgroundTexture;
+	private BaseTexture? jacketTexture;
+
+	private BaseTexture? BackgroundTexture()
+		=> backgroundTexture ??= BaseTexture.LoadFromPath(ResultBackgroundPath());
+
+	private BaseTexture? JacketTexture()
+	{
+		if (jacketTexture != null)
+		{
+			return jacketTexture;
+		}
+
+		string path = CDTXMania.DTX.strFolderName + CDTXMania.DTX.PREIMAGE;
+		jacketTexture = BaseTexture.LoadFromPath(
+			File.Exists(path) ? path : CSkin.Path(@"Graphics\5_preimage default.png"));
+
+		return jacketTexture;
 	}
 
 	//an optional per-rank background overrides the default one; rank 99 (unknown) shares E's
@@ -220,6 +243,8 @@ internal class CStageResult : CStage
 			#region [ Initialize ]
 			//---------------------
 			eReturnValueWhenFadeOutCompleted = EReturnValue.Continue;
+			backgroundTexture = null;
+			jacketTexture = null;
 			bAnimationComplete = false;
 			bIsCheckedWhetherResultScreenShouldSaveOrNot = false;				// #24609 2011.3.14 yyagi
 			n最後に再生したHHのWAV番号 = -1;
@@ -778,7 +803,6 @@ internal class CStageResult : CStage
 	private readonly int[] nチャンネル0Atoレーン07;
 	private int n最後に再生したHHのWAV番号;
 	private EChannel n最後に再生したHHのチャンネル番号;
-	private UIImage background;  // tx背景
 
 	//private CDirectShow ds背景動画;
 	private long lDshowPosition;
