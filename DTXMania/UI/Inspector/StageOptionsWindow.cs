@@ -7,85 +7,39 @@ using Hexa.NET.ImGui;
 namespace DTXMania.UI.Inspector;
 
 /// <summary>
-/// The skin editor's Stage tab: which stage is on screen, and whatever that stage needs invented for it.
+/// Whatever the stage on screen needs invented for it: the chart it plays, where its playback sits, the
+/// score it shows. A stage with nothing to invent shows nothing.
 /// </summary>
-public class SkinPreviewPanel
+public class StageOptionsWindow
 {
-    internal void DrawContents()
+    public void Draw()
     {
-        if (!SkinPreview.IsActive)
+        try
         {
-            if (ImGui.Button("Enter Preview Mode"))
-            {
-                SkinPreview.Enter();
-            }
+            ImGui.Begin("Stage Options", ImGuiWindowFlags.NoFocusOnAppearing);
 
-            return;
+            ImGui.TextDisabled(CDTXMania.StageManager.rCurrentStage.eStageID.ToString());
+            ImGui.Separator();
+
+            DrawSongSection();
+            DrawTransportSection();
+            DrawResultSection();
+            DrawPreviewSection();
         }
-
-        DrawStageSection();
-        DrawSongSection();
-        DrawTransportSection();
-        DrawResultSection();
+        finally
+        {
+            ImGui.End();
+        }
     }
 
-    #region [ stage ]
+    #region [ preview mode ]
 
-    private int stageIndex;
-
-    //follow the game when it moves itself, but do not overwrite a choice that has not been used yet
-    private CStage.EStage lastSeenStage = CStage.EStage.DoNothing_0;
-
-    private void DrawStageSection()
+    private void DrawPreviewSection()
     {
-        if (!SkinEditorWindow.Section("Stage"))
+        if (!SkinEditorWindow.Section("Preview"))
         {
             return;
         }
-
-        CStage current = CDTXMania.StageManager.rCurrentStage;
-
-        if (current.eStageID != lastSeenStage)
-        {
-            lastSeenStage = current.eStageID;
-
-            int index = Array.IndexOf(SkinPreview.Stages, current.eStageID);
-            if (index >= 0)
-            {
-                stageIndex = index;
-            }
-        }
-
-        string[] names = SkinPreview.Stages.Select(stage => stage.ToString()).ToArray();
-
-        ImGui.SetNextItemWidth(220.0f);
-        ImGui.Combo("##PreviewStage", ref stageIndex, names, names.Length);
-
-        CStage.EStage wanted = SkinPreview.Stages[stageIndex];
-
-        //these stages cannot open without a chart
-        bool needsSong = SkinPreview.RequiresSong(wanted);
-        bool blocked = needsSong && SelectedChart == null;
-
-        ImGui.SameLine();
-        ImGui.BeginDisabled(blocked);
-        if (ImGui.Button("Load Stage"))
-        {
-            SkinPreview.LoadStage(wanted, selectedSong, SelectedChart, difficulty);
-        }
-        ImGui.EndDisabled();
-
-        ImGui.SameLine();
-        ImGui.TextDisabled(blocked ? "pick a song first" : $"showing {current.eStageID}");
-
-        bool hold = SkinPreview.HoldStage;
-        if (ImGui.Checkbox("Hold this stage", ref hold))
-        {
-            SkinPreview.HoldStage = hold;
-        }
-
-        ImGui.SameLine();
-        HelpMarker("Prevent stage transitions (eg, because of timers or keyboard input) by turning this on");
 
         if (ImGui.Button("Regenerate Song List"))
         {
@@ -93,40 +47,23 @@ public class SkinPreviewPanel
         }
 
         ImGui.SameLine();
-        HelpMarker("Generate a random song list");
+        HelpMarker("Builds a new random song list.");
 
-        ImGui.SameLine();
-        if (ImGui.Button("Exit Preview"))
-        {
-            SkinPreview.Exit();
-        }
     }
-
-    private bool WantsSong => SkinPreview.RequiresSong(SkinPreview.Stages[stageIndex]);
 
     #endregion
 
     #region [ song picker ]
 
     private string songFilter = string.Empty;
-    private int difficulty;
-
-    private SongNode? selectedSong;
-
-    //derived, so changing difficulty after picking a song still works
-    private CChartData? SelectedChart => selectedSong == null ? null : ChartFor(selectedSong, difficulty);
 
     //filter on change, not every frame; libraries get big
     private string cachedFilter = "\0";
     private List<SongNode> matches = [];
 
+    //always offered: the song is picked first, and the stages that need one are opened afterwards
     private void DrawSongSection()
     {
-        if (!WantsSong)
-        {
-            return;
-        }
-
         if (!SkinEditorWindow.Section("Song"))
         {
             return;
@@ -140,10 +77,9 @@ public class SkinPreviewPanel
             return;
         }
 
-        ImGui.TextDisabled(selectedSong == null
+        ImGui.TextDisabled(SkinPreview.selectedSong == null
             ? "Select a song"
-            : $"Chart: {selectedSong.title}");
-
+            : $"Chart: {SkinPreview.selectedSong.title}");
         ImGui.SetNextItemWidth(220.0f);
         ImGui.InputTextWithHint("##PreviewSongFilter", "Search songs", ref songFilter, 128);
 
@@ -157,20 +93,26 @@ public class SkinPreviewPanel
                 .ToList();
         }
 
+        int level = SkinPreview.difficulty;
         ImGui.SetNextItemWidth(120.0f);
-        ImGui.SliderInt("Difficulty", ref difficulty, 0, 4);
+        if (ImGui.SliderInt("Difficulty", ref level, 0, 4))
+        {
+            SkinPreview.difficulty = level;
+        }
 
         if (ImGui.BeginListBox("##PreviewSongs", new Vector2(-1.0f, 180.0f)))
         {
             foreach (SongNode node in matches)
             {
-                CChartData? chart = ChartFor(node, difficulty);
+                CChartData? chart = SkinPreview.ChartFor(node, SkinPreview.difficulty);
 
                 ImGui.BeginDisabled(chart == null);
-                if (ImGui.Selectable($"{node.title}##{node.path}", ReferenceEquals(node, selectedSong)))
+                if (ImGui.Selectable($"{node.title}##{node.path}",
+                        ReferenceEquals(node, SkinPreview.selectedSong)))
                 {
-                    selectedSong = node;
+                    SkinPreview.selectedSong = node;
                 }
+
                 ImGui.EndDisabled();
             }
 
@@ -183,10 +125,6 @@ public class SkinPreviewPanel
     }
 
     private const int MaxMatches = 200;
-
-    //falls back to any chart the song does have
-    private static CChartData? ChartFor(SongNode song, int difficulty)
-        => song.charts[difficulty] ?? song.charts.FirstOrDefault(chart => chart != null);
 
     #endregion
 
@@ -327,7 +265,8 @@ public class SkinPreviewPanel
             return;
         }
 
-        if (!SkinEditorWindow.Section("Score"))
+        //not "Score": the section and the score field would share an id, and one of them would stop working
+        if (!SkinEditorWindow.Section("Result"))
         {
             return;
         }
@@ -348,45 +287,41 @@ public class SkinPreviewPanel
 
         ImGui.NewLine();
 
-        //read back live through ResultData, so the numbers move as they are dragged
-        ImGui.DragInt("Total chips", ref entry.nTotalChipsCount, 1.0f, 0, 5000);
-        ImGui.DragInt("Perfect", ref entry.nPerfectCount, 1.0f, 0, 5000);
-        ImGui.DragInt("Great", ref entry.nGreatCount, 1.0f, 0, 5000);
-        ImGui.DragInt("Good", ref entry.nGoodCount, 1.0f, 0, 5000);
-        ImGui.DragInt("Poor", ref entry.nPoorCount, 1.0f, 0, 5000);
-        ImGui.DragInt("Miss", ref entry.nMissCount, 1.0f, 0, 5000);
-        ImGui.DragInt("Max combo", ref entry.nMaxCombo, 1.0f, 0, 5000);
+        int rankBefore = stage.nRankValue[instrument];
+        bool changed = false;
 
-        ImGui.TextDisabled(entry.bIsFullCombo
-            ? "Full combo: max combo matches the judgement total"
-            : "Not a full combo");
+        changed |= ImGui.DragInt("Total chips", ref entry.nTotalChipsCount, 1.0f, 0, 5000);
+        changed |= ImGui.DragInt("Perfect", ref entry.nPerfectCount, 1.0f, 0, 5000);
+        changed |= ImGui.DragInt("Great", ref entry.nGreatCount, 1.0f, 0, 5000);
+        changed |= ImGui.DragInt("Good", ref entry.nGoodCount, 1.0f, 0, 5000);
+        changed |= ImGui.DragInt("Poor", ref entry.nPoorCount, 1.0f, 0, 5000);
+        changed |= ImGui.DragInt("Miss", ref entry.nMissCount, 1.0f, 0, 5000);
+        changed |= ImGui.DragInt("Max combo", ref entry.nMaxCombo, 1.0f, 0, 5000);
 
-        //no double widget, and two decimals is all that shows
-        float skill = (float)entry.dbGameSkill;
-        if (ImGui.DragFloat("Skill", ref skill, 0.05f, 0.0f, 999.0f))
+        if (changed)
         {
-            entry.dbGameSkill = skill;
+            PreviewResult.Recalculate(instrument);
+
+            //rank art is built in OnLayoutReady, so it only rebuilds when the rank itself moves
+            if (stage.nRankValue[instrument] != rankBefore)
+            {
+                stage.LoadUI();
+            }
         }
 
-        float rate = (float)entry.dbPerformanceSkill;
-        if (ImGui.DragFloat("Rate %%", ref rate, 0.1f, 0.0f, 100.0f))
-        {
-            entry.dbPerformanceSkill = rate;
-        }
+        //everything below follows from the counts, the same way it does after a real play
+        ImGui.Spacing();
+        ImGui.LabelText("Rate", $"{entry.dbPerformanceSkill:0.00}%");
+        ImGui.LabelText("Skill", $"{entry.dbGameSkill:0.00}");
+        ImGui.LabelText("Rank", RankNames[Math.Clamp(stage.nRankValue[instrument], 0, RankNames.Length - 1)]);
+        ImGui.LabelText("Full combo", entry.bIsFullCombo ? "yes" : "no");
+
+        ImGui.Spacing();
 
         int score = (int)entry.nScore;
         if (ImGui.DragInt("Score", ref score, 250.0f, 0, 1_000_000))
         {
             entry.nScore = score;
-        }
-
-        //rank art is built in OnLayoutReady, so reload the UI
-        int rank = Math.Clamp(stage.nRankValue[instrument], 0, RankNames.Length - 1);
-        ImGui.SetNextItemWidth(120.0f);
-        if (ImGui.Combo("Rank", ref rank, RankNames, RankNames.Length))
-        {
-            stage.nRankValue[instrument] = rank;
-            stage.LoadUI();
         }
 
         bool newRecord = stage.bNewRecordSkill[instrument];

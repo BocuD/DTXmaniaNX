@@ -80,6 +80,13 @@ internal sealed class PreviewSongDb
         chart.SongInformation.ArtistName = songIndex == 5 ? string.Empty : $"Example Artist {songIndex + 1}";
         chart.SongInformation.Genre = Genres[songIndex % Genres.Length];
         chart.SongInformation.Comment = $"Preview comment for example song {songIndex + 1}.";
+        chart.SongInformation.TitleKana = chart.SongInformation.Title;
+        chart.SongInformation.TitleRoman = chart.SongInformation.Title.ToLowerInvariant();
+        chart.SongInformation.ArtistNameKana = chart.SongInformation.ArtistName;
+        chart.SongInformation.ArtistNameRoman = chart.SongInformation.ArtistName.ToLowerInvariant();
+        chart.SongInformation.CommentKana = chart.SongInformation.Comment;
+        chart.SongInformation.CommentRoman = chart.SongInformation.Comment.ToLowerInvariant();
+
         chart.SongInformation.Bpm = 90.0 + random.Next(0, 130);
         chart.SongInformation.DurationMs = (90 + random.Next(0, 150)) * 1000;
 

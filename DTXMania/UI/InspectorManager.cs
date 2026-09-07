@@ -14,7 +14,7 @@ public static class InspectorManager
     public static Inspector.Inspector inspector { get; } = new();
     public static HierarchyWindow hierarchyWindow { get; } = new();
     public static SkinEditorWindow skinEditor { get; } = new();
-    public static SkinPreviewPanel skinPreview { get; } = new();
+    public static StageOptionsWindow stageOptions { get; } = new();
     public static TextureInspector textureInspector { get; private set; }
     public static LogWindow logWindow { get; } = new();
     public static GameWindow gameWindow { get; } = new();
@@ -75,6 +75,7 @@ public static class InspectorManager
         windows.Add(new Window("Game Status", () => GameStatus.Draw()));
         windows.Add(new Window("Profiler", () => Profiler.Draw()));
         windows.Add(new Window("Skin Editor", () => skinEditor.Draw()));
+        windows.Add(new Window("Stage Options", () => stageOptions.Draw()));
 
         windows.Add(new Window("Focus", () => FocusWindow.Draw()));
         windows.Add(new Window("Textures", () => textureInspector.DrawWindow()));

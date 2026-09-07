@@ -21,17 +21,16 @@ public static class PreviewResult
     private const int TotalChips = 850;
 
     private readonly record struct Score(
-        int Perfect, int Great, int Good, int Poor, int Miss,
-        int MaxCombo, int Rank, double Skill, double Rate, long Points);
+        int Perfect, int Great, int Good, int Poor, int Miss, int MaxCombo, long Points);
 
-    //full combo and excellent are worked out from these. The counts must add up to TotalChips, and
-    //MaxCombo must equal that total to count as a full combo
+    //the counts must add up to TotalChips, and MaxCombo must equal that total to count as a full combo.
+    //Rate, skill and rank are not listed: they follow from the counts, and the game works them out
     private static readonly Dictionary<Preset, Score> Presets = new()
     {
-        [Preset.Excellent] = new(850, 0, 0, 0, 0, MaxCombo: 850, Rank: 0, Skill: 84.32, Rate: 100.0, Points: 1_000_000),
-        [Preset.FullCombo] = new(792, 58, 0, 0, 0, MaxCombo: 850, Rank: 1, Skill: 78.15, Rate: 97.34, Points: 941_200),
-        [Preset.Clear] = new(604, 171, 48, 15, 12, MaxCombo: 318, Rank: 3, Skill: 62.87, Rate: 86.42, Points: 703_450),
-        [Preset.Failed] = new(210, 168, 190, 121, 161, MaxCombo: 47, Rank: 6, Skill: 21.44, Rate: 41.08, Points: 214_900)
+        [Preset.Excellent] = new(850, 0, 0, 0, 0, MaxCombo: 850, Points: 1_000_000),
+        [Preset.FullCombo] = new(792, 58, 0, 0, 0, MaxCombo: 850, Points: 941_200),
+        [Preset.Clear] = new(604, 171, 48, 15, 12, MaxCombo: 318, Points: 703_450),
+        [Preset.Failed] = new(210, 168, 190, 121, 161, MaxCombo: 47, Points: 214_900)
     };
 
     public static void Apply(int instrument, Preset preset)
@@ -51,11 +50,31 @@ public static class PreviewResult
         entry.nMissCount = entry.nMissCount_ExclAuto = score.Miss;
 
         entry.nMaxCombo = score.MaxCombo;
-        entry.dbGameSkill = score.Skill;
-        entry.dbPerformanceSkill = score.Rate;
         entry.nScore = score.Points;
 
-        stage.nRankValue[instrument] = score.Rank;
+        Recalculate(instrument);
+    }
+
+    public static void Recalculate(int instrument)
+    {
+        CStageResult stage = CDTXMania.StageManager.stageResult;
+        CScoreIni.CPerformanceEntry entry = stage.stPerformanceEntry[instrument];
+
+        entry.dbPerformanceSkill = CScoreIni.tCalculatePlayingSkill(
+            entry.nTotalChipsCount, entry.nPerfectCount, entry.nGreatCount, entry.nGoodCount,
+            entry.nPoorCount, entry.nMissCount, entry.nMaxCombo,
+            (EInstrumentPart)instrument, CDTXMania.ConfigIni.bAutoPlay);
+
+        CChartData? chart = CDTXMania.chosenChartData;
+        double level = chart?.SongInformation.GetLevel(instrument) ?? 0.0;
+        int levelDec = chart?.SongInformation.LevelDec[instrument] ?? 0;
+
+        entry.dbGameSkill = CScoreIni.tCalculateGameSkillFromPlayingSkill(
+            level, levelDec, entry.dbPerformanceSkill);
+
+        stage.nRankValue[instrument] = CScoreIni.tCalculateRank(
+            entry.nTotalChipsCount, entry.nPerfectCount, entry.nGreatCount, entry.nGoodCount,
+            entry.nPoorCount, entry.nMissCount, entry.nMaxCombo);
     }
 
     //keeps an existing score, so coming back to the stage shows the same numbers
