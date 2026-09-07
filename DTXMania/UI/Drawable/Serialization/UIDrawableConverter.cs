@@ -50,7 +50,12 @@ public class UIDrawableConverter : JsonConverter
         FilterUnsupportedProperties(jObject, targetType);
 
         // Construct instance first to keep non-themable default values intact.
-        object result = CreateDeserializationInstance(targetType);
+        object? result = CreateDeserializationInstance(targetType);
+        if (result == null)
+        {
+            return null;
+        }
+
         serializer.Populate(jObject.CreateReader(), result);
 
         //children arrive as a plain list and so have no idea who owns them. Drawing passes matrices down
@@ -58,6 +63,9 @@ public class UIDrawableConverter : JsonConverter
         //stops dead at the first child that was loaded rather than added
         if (result is UIGroup group)
         {
+            //a child that could not be constructed came back null, and nothing below wants to meet one
+            group.children.RemoveAll(child => child == null);
+
             foreach (UIDrawable child in group.children)
             {
                 child.SetParent(group, updateGroup: false);
@@ -517,7 +525,9 @@ public class UIDrawableConverter : JsonConverter
         return a.Equals(b);
     }
 
-    private static object CreateDeserializationInstance(Type targetType)
+    //null drops the element: an uninitialized instance skips every field initializer, so anything the
+    //type expects to always exist is null and takes something unrelated down with it later
+    private static object? CreateDeserializationInstance(Type targetType)
     {
         using IDisposable _ = DrawableTracker.SuppressRegistration();
 
@@ -531,14 +541,11 @@ public class UIDrawableConverter : JsonConverter
         }
         catch (MissingMethodException)
         {
-            // Fallback for drawables without a parameterless constructor.
         }
 
-        //an uninitialized instance has skipped every field initializer, so anything the type expects to
-        //always exist is null and only fails later, somewhere else. Say so here instead
-        Trace.TraceError($"{targetType.Name} has no parameterless constructor, so it deserializes " +
-                         "uninitialized. Add one, or mark the element dontSerialize.");
+        Trace.TraceError($"{targetType.Name} has no parameterless constructor, so it cannot be loaded "
+                         + "and was dropped from the layout. Add one, or mark the element dontSerialize.");
 
-        return RuntimeHelpers.GetUninitializedObject(targetType);
+        return null;
     }
 }

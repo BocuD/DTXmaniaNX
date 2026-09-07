@@ -22,10 +22,23 @@ public static class SkinPreview
         set => StageManager.dropStageChanges = value;
     }
 
+    //the chart a stage that needs one is opened with. Held here rather than in a window, so opening such
+    //a stage never depends on which windows are up
+    public static SongNode? selectedSong { get; set; }
+    public static int difficulty { get; set; }
+
+    public static CChartData? SelectedChart => selectedSong == null ? null : ChartFor(selectedSong, difficulty);
+
+    //falls back to any chart the song does have
+    public static CChartData? ChartFor(SongNode song, int level)
+        => song.charts[level] ?? song.charts.FirstOrDefault(chart => chart != null);
+
     public static void RegenerateSongDb()
     {
         songDb = null;
+        selectedSong = null;
     }
+
 
     public static void Enter()
     {
@@ -80,21 +93,23 @@ public static class SkinPreview
         or CStage.EStage.Result_7;
 
     //does nothing if the stage needs a chart and none was passed
-    public static void LoadStage(CStage.EStage stage,
-        SongNode? song = null, CChartData? chart = null, int difficulty = 0)
+    public static void LoadStage(CStage.EStage stage)
     {
-        Enter();
+        //held, or the stage being opened would run its own change in before it could be looked at.
+        //Preview mode is not turned on: that swaps the song library, which is a bigger thing to do
+        //to someone than moving them to a stage
+        HoldStage = true;
         StopPlayback();
 
         if (RequiresSong(stage))
         {
-            //the button is greyed out too, but a missing chart would NRE in OnActivate
-            if (song == null || chart == null)
+            //nothing picked, or a library with nothing in it; the stage would NRE in OnActivate
+            if (selectedSong == null || SelectedChart == null)
             {
                 return;
             }
 
-            CDTXMania.UpdateSelection(song, chart, difficulty);
+            CDTXMania.UpdateSelection(selectedSong, SelectedChart, difficulty);
         }
 
         //the performance screen needs loading to run first
@@ -122,10 +137,15 @@ public static class SkinPreview
         CDTXMania.StageManager.ForceChangeStage(target);
     }
 
-    //jumping out of the performance screen skips the exit that stops the chart
+    //jumping out of the performance screen skips the exit that stops the chart. A chart that was only
+    //ever read for its header has no sounds to stop
     private static void StopPlayback()
     {
-        CDTXMania.DTX?.tStopPlayingAllChips();
+        CDTX? chart = CDTXMania.DTX;
+        if (chart != null && chart.listWAV != null)
+        {
+            chart.tStopPlayingAllChips();
+        }
     }
 
     public static CStage? StageFor(CStage.EStage stage)
