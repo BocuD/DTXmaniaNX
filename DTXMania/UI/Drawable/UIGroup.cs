@@ -373,6 +373,42 @@ public class UIGroup : UIDrawable
         }
     }
 
+    //what a component is, where its children came from, and what editing it would change everywhere else
+    private void DrawComponentInspector()
+    {
+        if (!IsComponent)
+        {
+            return;
+        }
+
+        if (!ImGui.CollapsingHeader("Component", ImGuiTreeNodeFlags.DefaultOpen))
+        {
+            return;
+        }
+
+        ImGui.LabelText("Name", componentName);
+
+        string? path = ComponentPath();
+        bool inSkin = path != null && File.Exists(path);
+        ImGui.LabelText("Source", inSkin ? component : "Default skin");
+
+        ImGui.TextDisabled("Children come from the component, and every placement of it shares them.");
+
+        ImGui.BeginDisabled(!inSkin);
+        if (ImGui.Button("Edit Component"))
+        {
+            Inspector.ComponentEditor.Open(component, GetType());
+        }
+
+        ImGui.SameLine();
+        if (ImGui.Button("Reload Component"))
+        {
+            ReloadComponent();
+        }
+
+        ImGui.EndDisabled();
+    }
+
     public override void OnDeserialize()
     {
         base.OnDeserialize();
@@ -400,6 +436,7 @@ public class UIGroup : UIDrawable
     public override void DrawInspector()
     {
         base.DrawInspector();
+        DrawComponentInspector();
         ImGui.Checkbox("Sort by Render Order", ref sortByRenderOrder);
 
         if (ImGui.CollapsingHeader("Animator"))
