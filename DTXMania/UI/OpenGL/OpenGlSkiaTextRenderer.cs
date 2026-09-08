@@ -163,7 +163,11 @@ internal sealed class OpenGlSkiaTextRenderer : IUiTextRenderer
     }
 
     private static Vector2 EffectivePadding(UiTextParameters request)
-        => Vector2.Max(request.TexturePadding + new Vector2(request.OutlineWidth + 2f), new Vector2(2f));
+    {
+        float guard = 2f * request.RenderScale;
+
+        return Vector2.Max(request.TexturePadding + new Vector2(request.OutlineWidth + guard), new Vector2(guard));
+    }
 
     private static string[] NormalizeLines(string value)
     {

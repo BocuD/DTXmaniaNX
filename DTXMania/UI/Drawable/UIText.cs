@@ -312,6 +312,7 @@ public partial class UIText : UITexture
             OutlineWidth = outlineWidth * textureRenderScale,
             TexturePadding = texturePadding * textureRenderScale,
             LineSpacing = lineSpacing,
+            RenderScale = textureRenderScale,
             MaxWidth = _renderedWrapWidth * textureRenderScale,
             Antialias = antialias,
             SubpixelText = subpixelText,
