@@ -4,6 +4,7 @@ using System.Numerics;
 using DTXMania.Core;
 using DTXMania.UI;
 using DTXMania.UI.Drawable;
+using DTXMania.UI.DynamicElements;
 using DTXMania.UI.Inspector;
 using DTXMania.UI.Text;
 
@@ -17,47 +18,88 @@ public class UIPlayerNameplate : UIGroup
         return new UIPlayerNameplate();
     }
     
-    private UIText playerNameText;
-    private UIText titleText;
+    //serialized so a nameplate loaded from a layout still knows whose it is
+    [Themable] public int instrument;
+    [Themable] public bool displaySkill;
 
-    private int instrument;
+    //found once the component has loaded; the name's colour is not something a binding can carry
+    private UIText? playerNameText;
 
-    public UIPlayerNameplate(int instrument = 0, bool displaySkill = false) : base("Nameplate")
+    private readonly UIDataContext data = new();
+
+    public UIPlayerNameplate() : this(0)
+    {
+    }
+
+    public UIPlayerNameplate(int instrument, bool displaySkill = false) : base("Nameplate")
     {
         this.instrument = instrument;
-        
-        titleText = AddChild(new UIText());
-        titleText.name = "TitleText";
-        titleText.position = new Vector3(11, 10, 0);
+        this.displaySkill = displaySkill;
 
-        playerNameText = AddChild(new UIText());
-        playerNameText.name = "PlayerNameText";
-        playerNameText.position = new Vector3(13, 28, 0);
+        data.RegisterObject("Player", () => new NameplateData(this));
+        dataContext = data;
 
-        if (displaySkill)
-        {
-            var bg = AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path("Graphics/nameplate_bg.png"))));
-            bg.renderOrder = -1;
-            size = bg.size;
+        size = new Vector2(266, 96);
 
-            var skillText = AddChild(new UIText(SongDb.SongDb.totalSkill.ToString("0.00"), 24));
-            skillText.name = "SkillText";
-            skillText.position = new Vector3(159, 53, 0);
-        }
+        MakeComponent("Nameplate", NameplateDefault);
+    }
 
+    protected override void OnContentLoaded()
+    {
+        playerNameText = GetChild<UIText>("PlayerNameText");
         UpdateNameplate();
     }
 
+    //the code default, also the seed for Components/Nameplate.json
+    private static UIGroup NameplateDefault()
+    {
+        UIGroup root = new("Nameplate");
+
+        //only the result screen shows a skill total, so the plate behind it comes and goes with it
+        root.AddChild(new UIImage
+        {
+            name = "Background",
+            imageSource = ImageSource.File,
+            image = SkinResource.System("Graphics/nameplate_bg.png"),
+            renderOrder = -1,
+            bindings = { new UIBinding("isVisible", "Player.ShowSkill") }
+        });
+
+        UIText title = root.AddChild(new UIText());
+        title.name = "TitleText";
+        title.position = new Vector3(11, 10, 0);
+        title.font = SkinResource.System(UIFonts.FallbackFont);
+        title.fontSize = 12;
+        title.fillColor = Color.White;
+        title.bindings.Add(new UIBinding("text", "Player.Title"));
+
+        UIText playerName = root.AddChild(new UIText());
+        playerName.name = "PlayerNameText";
+        playerName.position = new Vector3(13, 28, 0);
+        playerName.font = SkinResource.System(UIFonts.FallbackFont);
+        playerName.fontSize = 20;
+        playerName.outlineWidth = 0;
+        playerName.bindings.Add(new UIBinding("text", "Player.Name"));
+
+        UIText skill = root.AddChild(new UIText("", 24));
+        skill.name = "SkillText";
+        skill.position = new Vector3(159, 53, 0);
+        skill.bindings.Add(new UIBinding("text", "Player.Skill"));
+        skill.bindings.Add(new UIBinding("isVisible", "Player.ShowSkill"));
+
+        return root;
+    }
+
+    /// <summary>Applies the colour the player picked. Bindings carry text, not colours, so this is the one
+    /// part of the plate that is still set by hand.</summary>
     public void UpdateNameplate()
     {
-        int colorIndex = CDTXMania.ConfigIni.nNameColor[instrument];
+        if (playerNameText == null)
+        {
+            return;
+        }
 
-        string strPlayerName = string.IsNullOrEmpty(CDTXMania.ConfigIni.strCardName[instrument])
-            ? "GUEST"
-            : CDTXMania.ConfigIni.strCardName[instrument];
-        string strTitleName = string.IsNullOrEmpty(CDTXMania.ConfigIni.strGroupName[instrument])
-            ? ""
-            : CDTXMania.ConfigIni.strGroupName[instrument];
+        int colorIndex = CDTXMania.ConfigIni.nNameColor[instrument];
 
         Color clNameColor = Color.White;
         Color clNameColorLower = Color.White;
@@ -136,20 +178,11 @@ public class UIPlayerNameplate : UIGroup
                 break;
         }
 
-        titleText.font = SkinResource.System(UIFonts.FallbackFont);
-        titleText.fontSize = 12;
-        titleText.fillColor = Color.White;
-        titleText.SetText(strTitleName);
-
-        playerNameText.font = SkinResource.System(UIFonts.FallbackFont);
-        playerNameText.fontSize = 20;
-        playerNameText.outlineWidth = 0;
         playerNameText.fillGradientMode = colorIndex > 11
             ? UiTextGradientMode.Vertical
             : UiTextGradientMode.None;
         playerNameText.fillGradientTopColor = clNameColor;
         playerNameText.fillGradientBottomColor = clNameColorLower;
         playerNameText.fillColor = clNameColor;
-        playerNameText.SetText(strPlayerName);
     }
 }
