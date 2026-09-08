@@ -22,26 +22,29 @@ public class QuickMenu : UIGroup
     private readonly CCommandHistory commandHistory = new();
     private readonly QuickMenuPage[] instruments = new QuickMenuPage[3];
 
-    //both are built from what the player is playing rather than from the layout, so they are added here
-    //and the clip addresses them by name
-    private readonly ConfigList list;
-    private readonly ConfigDescriptionPanel description;
+    //part of the component, so the clip addresses them by name and a skin can move them
+    private ConfigList? list;
+    private ConfigDescriptionPanel? description;
 
     private bool isClosing;
 
     public QuickMenu() : base("Quick Menu")
     {
         MakeComponent("QuickMenu", QuickMenuDefault);
+    }
 
-        list = AddChild(new ConfigList(20, 8));
-        list.name = "List";
+    //the pages are built around the list, so they wait until there is one
+    protected override void OnContentLoaded()
+    {
+        list = FindChild<ConfigList>();
+        description = FindChild<ConfigDescriptionPanel>();
+
+        if (list == null)
+        {
+            return;
+        }
+
         list.onExitRoot = ToggleMenu;
-
-        //position is relative to the centre-anchored menu
-        description = AddChild(new ConfigDescriptionPanel());
-        description.name = "Description";
-        description.position = new Vector3(141 - 400, -138, 0);
-        description.renderOrder = 1;
 
         QuickConfigInstrumentSwitcher instrumentSwitcher = new(list, instruments);
         instruments[0] = new QuickMenuPage(list, EInstrumentPart.DRUMS, instrumentSwitcher);
@@ -62,12 +65,22 @@ public class QuickMenu : UIGroup
             ToggleMenu();
         }
 
-        description.Update(list.CurrentItem, isVisible && !isClosing && list.IsSettled);
+        if (list != null && description != null)
+        {
+            description.Update(list.CurrentItem, isVisible && !isClosing && list.IsSettled);
+        }
     }
 
     public void ToggleMenu()
     {
         EnsureContent();
+
+        //a layout without a list has no menu to open
+        if (list == null)
+        {
+            return;
+        }
+
         CDTXMania.Skin.soundChange.tPlay();
 
         if (!isVisible)
@@ -122,6 +135,15 @@ public class QuickMenu : UIGroup
     private static UIGroup QuickMenuDefault()
     {
         UIGroup root = new("QuickMenu");
+
+        ConfigList list = root.AddChild(new ConfigList(20, 8));
+        list.name = "List";
+
+        //position is relative to the centre-anchored menu
+        ConfigDescriptionPanel description = root.AddChild(new ConfigDescriptionPanel());
+        description.name = "Description";
+        description.position = new Vector3(141 - 400, -138, 0);
+        description.renderOrder = 1;
 
         root.AddChild(new UIImage
         {

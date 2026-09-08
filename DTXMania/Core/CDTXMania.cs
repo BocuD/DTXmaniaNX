@@ -29,6 +29,7 @@ internal partial class CDTXMania
     public static string VERSION; // = "v1.4.2 20240519";
 
     public static readonly UI.DynamicElements.GameInfo gameInfo = new();
+    public static readonly UI.DynamicElements.PlayingSong playingSong = new();
 
     public DTXManiaGL maniaGl;
     
@@ -201,6 +202,8 @@ internal partial class CDTXMania
         gameInfo.Version = VERSION;
         gameInfo.VersionDisplay = VERSION_DISPLAY;
         UI.DynamicElements.UIDataContext.Global.RegisterObject("Game", () => gameInfo);
+        UI.DynamicElements.UIDataContext.Global.RegisterObject("Song", () => playingSong);
+        UI.DynamicElements.UIDataContext.Global.RegisterTexture("Song.AlbumArt", () => playingSong.AlbumArt);
         UI.DynamicElements.UIDataContext.Global.RegisterObject("Config", () => ConfigIni);
 
         #region [ Determine strEXE folder ]

@@ -31,7 +31,7 @@ public sealed class ResultData
 
     [DataField] public string Artist => CDTXMania.DTX?.ARTIST ?? string.Empty;
 
-    [DataField] public string StageNumber => InfoBox.GetStageNumberText();
+    [DataField] public string StageNumber => CDTXMania.playingSong.StageNumber;
 
     [DataField] public string LevelInt => LevelParts().intPart.ToString();
     [DataField] public string LevelFraction => "." + LevelParts().deci;

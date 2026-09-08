@@ -302,14 +302,14 @@ internal abstract class CStagePerfCommonScreen : CStage
 
     public override void BuildDefaultLayout()
     {
+        InfoBox info = ui.AddChild(new InfoBox());
+        info.position = new Vector3(1270, 10, 0);
     }
 
     //the performance screens are built entirely in code: bespoke chip/lane rendering, not a skinnable layout
     public override void OnLayoutReady()
     {
         video.IntegrateUI(ui);
-
-        ui.AddChild(new InfoBox());
 
         if (CDTXMania.ConfigIni.nShowPlaySpeed == (int)EShowPlaySpeed.ON
             || CDTXMania.ConfigIni.nShowPlaySpeed == (int)EShowPlaySpeed.IF_CHANGED_IN_GAME)

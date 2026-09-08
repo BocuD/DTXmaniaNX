@@ -22,9 +22,9 @@ public class CStageSongSelectionNew : CStage
     private SortMenuContainer? sortMenuContainer;
     private CActSelectPresound actPresound;
     private PreviewVideoBackground previewVideo;
-    private StatusPanel statusPanel;
+    private StatusPanel? statusPanel;
     private SongSearchMenu songSearchMenu;
-    private QuickMenu quickMenu;
+    private QuickMenu? quickMenu;
 
     private PerformanceHistoryPanel? historyPanel;
     private SongSelectionContainer selectionContainer;
@@ -225,6 +225,13 @@ public class CStageSongSelectionNew : CStage
         sortMenu.parentAnchor = UICanvas.TopRight;
         sortMenu.position = UICanvas.FromAnchor(UICanvas.TopRight, 1281, 35);
         sortMenu.renderOrder = 8;
+
+        QuickMenu menu = ui.AddChild(new QuickMenu());
+        menu.renderOrder = 15;
+        menu.isVisible = false;
+        menu.pivot = UICanvas.Center;
+        menu.parentAnchor = UICanvas.Center;
+        menu.position = Vector3.Zero;
     }
 
     public override void OnLayoutReady()
@@ -235,8 +242,8 @@ public class CStageSongSelectionNew : CStage
 
         //the status panel, sort menu and selection container are part of the layout, so they may have
         //come from json
-        statusPanel = ui.FindChild<StatusPanel>()!;
-        sortMenuContainer = ui.FindChild<SortMenuContainer>()!;
+        statusPanel = ui.FindChild<StatusPanel>();
+        sortMenuContainer = ui.FindChild<SortMenuContainer>();
         historyPanel = ui.FindChild<PerformanceHistoryPanel>();
 
         densityGraph1 = ui.AddChild(new DensityGraph((EInstrumentPart)CDTXMania.GetCurrentInstrument()));
@@ -255,13 +262,7 @@ public class CStageSongSelectionNew : CStage
         songSearchMenu.position = Vector3.Zero;
         songSearchMenu.dontSerialize = true;
 
-        quickMenu = ui.AddChild(new QuickMenu());
-        quickMenu.renderOrder = 15;
-        quickMenu.isVisible = false;
-        quickMenu.pivot = UICanvas.Center;
-        quickMenu.parentAnchor = UICanvas.Center;
-        quickMenu.position = Vector3.Zero;
-        quickMenu.dontSerialize = true;
+        quickMenu = ui.FindChild<QuickMenu>();
 
         selectionContainer = ui.FindChild<SongSelectionContainer>();
 
@@ -421,7 +422,7 @@ public class CStageSongSelectionNew : CStage
     /// </summary>
     private void HandleGestures()
     {
-        quickMenu.PollToggleGesture();
+        quickMenu?.PollToggleGesture();
         songSearchMenu.PollOpenGesture();
 
         PollDifficultyCommand(EInstrumentPart.DRUMS, EPad.HH, EPadFlag.HH);
@@ -492,7 +493,7 @@ public class CStageSongSelectionNew : CStage
         selectionContainer.UpdateSelectedSongAlbumArt();
         actPresound.tSelectionChanged(chart);
         previewVideo?.SelectionChanged(chart);
-        statusPanel.SelectionChanged(node, chart);
+        statusPanel?.SelectionChanged(node, chart);
         historyPanel?.SelectionChanged(chart);
         densityGraph1.SelectionChanged(node, chart);
     }
