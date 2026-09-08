@@ -16,23 +16,6 @@ public sealed class ResultData
     private static CScoreIni.CPerformanceEntry Entry => CDTXMania.StageManager.stageResult.stPerformanceEntry[Instrument];
     private static double MaxSkill => CDTXMania.chosenChartData?.SongInformation.GetMaxSkill(Instrument) ?? 0.0;
 
-    [DataField] public string SongTitle
-    {
-        get
-        {
-            if (!CDTXMania.bCompactMode && CDTXMania.ConfigIni.b曲名表示をdefのものにする)
-            {
-                return CDTXMania.chosenSong?.title ?? string.Empty;
-            }
-
-            return CDTXMania.DTX?.TITLE ?? string.Empty;
-        }
-    }
-
-    [DataField] public string Artist => CDTXMania.DTX?.ARTIST ?? string.Empty;
-
-    [DataField] public string StageNumber => CDTXMania.playingSong.StageNumber;
-
     [DataField] public string LevelInt => LevelParts().intPart.ToString();
     [DataField] public string LevelFraction => "." + LevelParts().deci;
 

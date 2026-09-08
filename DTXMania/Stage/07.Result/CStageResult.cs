@@ -63,7 +63,6 @@ internal class CStageResult : CStage
 		var context = new UIDataContext();
 		context.RegisterObject("Result", () => resultData);
 		context.RegisterTexture("Result.Background", BackgroundTexture);
-		context.RegisterTexture("Result.Jacket", JacketTexture);
 		ui.dataContext = context;
 	}
 
@@ -71,6 +70,15 @@ internal class CStageResult : CStage
 	{
 		var infoPanel = ui.AddChild(new ResultInfoPanel());
 		infoPanel.position = new Vector3(830, 120, 0);
+
+		UIPlayerNameplate nameplate = ui.AddChild(new UIPlayerNameplate());
+		nameplate.displaySkill = true;
+		nameplate.position = new Vector3(989, 53, 0);
+
+		var progressBar = ui.AddChild(new ResultProgressBar());
+		progressBar.position = new Vector3(1130, 435, 0);
+		progressBar.renderOrder = 4;
+		progressBar.scale = new Vector3(0.55f, 0.55f, 1.0f);
 
 		var paramPanel = ui.AddChild(new ResultParameterPanel());
 		paramPanel.position = new Vector3(879, 479, 0);
@@ -90,7 +98,7 @@ internal class CStageResult : CStage
 		{
 			name = "AlbumArt",
 			imageSource = ImageSource.Dynamic,
-			dynamicSource = "Result.Jacket",
+			dynamicSource = "Song.AlbumArt",
 			size = new Vector2(380, 380),
 			position = new Vector3(640, 130, 0),
 			pivot = new Vector2(0.5f, 0.0f)
@@ -98,7 +106,7 @@ internal class CStageResult : CStage
 
 		var stageNumber = ui.AddChild(new UIText("", 46));
 		stageNumber.name = "StageNumber";
-		stageNumber.bindings.Add(new UIBinding("text", "Result.StageNumber"));
+		stageNumber.bindings.Add(new UIBinding("text", "Song.StageNumber"));
 		stageNumber.position = new Vector3(640, 50, 0);
 		stageNumber.pivot = new Vector2(0.5f, 0);
 		stageNumber.font = SkinResource.System("Futura PT Book.otf");
@@ -116,7 +124,7 @@ internal class CStageResult : CStage
 		titleArtistBg.name = "TitleArtistBg";
 
 		HorizontallyScrollingText songNameText = ui.AddChild(new HorizontallyScrollingText("", 29));
-		songNameText.bindings.Add(new UIBinding("text", "Result.SongTitle"));
+		songNameText.bindings.Add(new UIBinding("text", "Song.Title"));
 		songNameText.fillColor = Color4.Black;
 		songNameText.outlineColor = Color4.White;
 		songNameText.name = "SongName";
@@ -129,7 +137,7 @@ internal class CStageResult : CStage
 		songNameText.scrollSpeed = 20.0f;
 
 		HorizontallyScrollingText artistNameText = ui.AddChild(new HorizontallyScrollingText("", 20));
-		artistNameText.bindings.Add(new UIBinding("text", "Result.Artist"));
+		artistNameText.bindings.Add(new UIBinding("text", "Song.Artist"));
 		artistNameText.fillColor = Color4.Black;
 		artistNameText.outlineColor = Color4.White;
 		artistNameText.name = "ArtistName";
@@ -160,8 +168,7 @@ internal class CStageResult : CStage
 		slowCount.outlineWidth = 0;
 	}
 
-	//the rank icon, nameplate and progress bar build their children from the result in their constructors,
-	//so a layout cannot hold them. The open animation is set up here, once the panels it targets exist
+	//the rank icon builds its children from the result in its constructor, so a layout cannot hold it
 	public override void OnLayoutReady()
 	{
 		var rankIcon = ui.AddChild(new ResultRankIcon(CDTXMania.GetCurrentInstrument()));
@@ -169,25 +176,12 @@ internal class CStageResult : CStage
 		rankIcon.renderOrder = 3;
 		rankIcon.dontSerialize = true;
 
-		//todo: position these
-		if (CDTXMania.GetCurrentInstrument() == 0)
+		//the plate is placed by the layout; whose it is follows what was just played
+		UIPlayerNameplate? nameplate = ui.FindChild<UIPlayerNameplate>();
+		if (nameplate != null)
 		{
-			var drums = ui.AddChild(new UIPlayerNameplate(0, true));
-			drums.position = new Vector3(989, 53, 0);
-			drums.dontSerialize = true;
+			nameplate.instrument = CDTXMania.GetCurrentInstrument();
 		}
-		else
-		{
-			var guitar1 = ui.AddChild(new UIPlayerNameplate(1, true));
-			guitar1.position = new Vector3(989, 53, 0);
-			guitar1.dontSerialize = true;
-		}
-
-		var progressBar = ui.AddChild(new ResultProgressBar(CDTXMania.GetCurrentInstrument()));
-		progressBar.position = new Vector3(1130, 435, 0);
-		progressBar.renderOrder = 4;
-		progressBar.scale = new Vector3(0.55f, 0.55f, 1.0f);
-		progressBar.dontSerialize = true;
 
 		//the clip lives in its own file, so a saved layout references it rather than copying it in
 		ui.animator = new Animator();
@@ -195,26 +189,11 @@ internal class CStageResult : CStage
 		ui.animator.Play("open", false);
 	}
 
-	//a provider is pulled every frame, so each file is resolved once and held until the stage runs again
+	//a provider is pulled every frame, so the file is resolved once and held until the stage runs again
 	private BaseTexture? backgroundTexture;
-	private BaseTexture? jacketTexture;
 
 	private BaseTexture? BackgroundTexture()
 		=> backgroundTexture ??= BaseTexture.LoadFromPath(ResultBackgroundPath());
-
-	private BaseTexture? JacketTexture()
-	{
-		if (jacketTexture != null)
-		{
-			return jacketTexture;
-		}
-
-		string path = CDTXMania.DTX.strFolderName + CDTXMania.DTX.PREIMAGE;
-		jacketTexture = BaseTexture.LoadFromPath(
-			File.Exists(path) ? path : CSkin.Path(@"Graphics\5_preimage default.png"));
-
-		return jacketTexture;
-	}
 
 	//an optional per-rank background overrides the default one; rank 99 (unknown) shares E's
 	private string ResultBackgroundPath()
@@ -244,7 +223,6 @@ internal class CStageResult : CStage
 			//---------------------
 			eReturnValueWhenFadeOutCompleted = EReturnValue.Continue;
 			backgroundTexture = null;
-			jacketTexture = null;
 			bAnimationComplete = false;
 			bIsCheckedWhetherResultScreenShouldSaveOrNot = false;				// #24609 2011.3.14 yyagi
 			n最後に再生したHHのWAV番号 = -1;
