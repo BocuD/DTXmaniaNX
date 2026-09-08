@@ -28,7 +28,7 @@ public class CStageSongSelectionNew : CStage
 
     private PerformanceHistoryPanel? historyPanel;
     private SongSelectionContainer selectionContainer;
-    private DensityGraph densityGraph1;
+    private DensityGraph? densityGraph1;
 
     //game rules rather than UI, so a skin cannot move or remove them
     private readonly CCommandHistory commandHistory = new();
@@ -226,6 +226,11 @@ public class CStageSongSelectionNew : CStage
         sortMenu.position = UICanvas.FromAnchor(UICanvas.TopRight, 1281, 35);
         sortMenu.renderOrder = 8;
 
+        DensityGraph graph = ui.AddChild(new DensityGraph());
+        graph.parentAnchor = UICanvas.BottomLeft;
+        graph.position = UICanvas.FromAnchor(UICanvas.BottomLeft, 212, 720);
+        graph.renderOrder = 4;
+
         QuickMenu menu = ui.AddChild(new QuickMenu());
         menu.renderOrder = 15;
         menu.isVisible = false;
@@ -246,13 +251,12 @@ public class CStageSongSelectionNew : CStage
         sortMenuContainer = ui.FindChild<SortMenuContainer>();
         historyPanel = ui.FindChild<PerformanceHistoryPanel>();
 
-        densityGraph1 = ui.AddChild(new DensityGraph((EInstrumentPart)CDTXMania.GetCurrentInstrument()));
-        densityGraph1.parentAnchor = UICanvas.BottomLeft;
-        densityGraph1.position =
-            UICanvas.FromAnchor(UICanvas.BottomLeft, CDTXMania.GetCurrentInstrument() == 0 ? 212 : 64, 720);
-        densityGraph1.renderOrder = 4;
-        densityGraph1.name = "DensityGraph";
-        densityGraph1.dontSerialize = true;
+        //the graph is placed by the layout; which lanes it draws follows what is being played
+        densityGraph1 = ui.FindChild<DensityGraph>();
+        if (densityGraph1 != null)
+        {
+            densityGraph1.instrument = (EInstrumentPart)CDTXMania.GetCurrentInstrument();
+        }
 
         songSearchMenu = ui.AddChild(new SongSearchMenu());
         songSearchMenu.renderOrder = 15;
@@ -495,7 +499,7 @@ public class CStageSongSelectionNew : CStage
         previewVideo?.SelectionChanged(chart);
         statusPanel?.SelectionChanged(node, chart);
         historyPanel?.SelectionChanged(chart);
-        densityGraph1.SelectionChanged(node, chart);
+        densityGraph1?.SelectionChanged(node, chart);
     }
 
     public int targetDifficultyLevel { get; private set; } = 0;
