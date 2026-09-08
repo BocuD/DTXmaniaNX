@@ -44,11 +44,6 @@ internal class StageManager
         stageUITest = new CStageUITest();
     }
     
-    public void InitializeStages()
-    {
-        throw new NotImplementedException();
-    }
-    
     public void LoadInitialStage()
     {
         rCurrentStage = CDTXMania.bCompactMode ? stageSongLoading : stageStartup;
