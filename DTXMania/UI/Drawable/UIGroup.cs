@@ -392,12 +392,10 @@ public class UIGroup : UIDrawable
         bool inSkin = path != null && File.Exists(path);
         ImGui.LabelText("Source", inSkin ? component : "Default skin");
 
-        ImGui.TextDisabled("Children come from the component, and every placement of it shares them.");
-
         ImGui.BeginDisabled(!inSkin);
         if (ImGui.Button("Edit Component"))
         {
-            Inspector.ComponentEditor.Open(component, GetType());
+            ComponentEditor.Open(component, GetType());
         }
 
         ImGui.SameLine();
