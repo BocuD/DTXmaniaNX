@@ -66,11 +66,12 @@ public static class PreviewResult
             (EInstrumentPart)instrument, CDTXMania.ConfigIni.bAutoPlay);
 
         CChartData? chart = CDTXMania.chosenChartData;
-        double level = chart?.SongInformation.GetLevel(instrument) ?? 0.0;
-        int levelDec = chart?.SongInformation.LevelDec[instrument] ?? 0;
 
         entry.dbGameSkill = CScoreIni.tCalculateGameSkillFromPlayingSkill(
-            level, levelDec, entry.dbPerformanceSkill);
+            chart?.SongInformation.Level[instrument] ?? 0,
+            chart?.SongInformation.LevelDec[instrument] ?? 0,
+            entry.dbPerformanceSkill,
+            bLivePlay: false);
 
         stage.nRankValue[instrument] = CScoreIni.tCalculateRank(
             entry.nTotalChipsCount, entry.nPerfectCount, entry.nGreatCount, entry.nGoodCount,
