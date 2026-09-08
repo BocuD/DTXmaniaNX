@@ -190,10 +190,29 @@ public class UIItemsGroup : UIGroup, IUIInputHandler
         selectNext = SelectNext;
     }
 
-    //a slot loads nothing until it is a named component, and the list is the only thing that knows a name
-    private string ItemComponentName => itemComponent.Length > 0
-        ? Path.GetFileNameWithoutExtension(itemComponent)
-        : name + "Item";
+    [JsonIgnore] private string? builtItemComponentName;
+
+    public string ItemComponentName
+    {
+        get
+        {
+            if (itemComponent.Length > 0)
+            {
+                return Path.GetFileNameWithoutExtension(itemComponent);
+            }
+
+            if (builtItemComponentName == null)
+            {
+                using IDisposable _ = DrawableTracker.SuppressRegistration();
+                UIGroup? built = itemComponentSource?.Invoke();
+
+                builtItemComponentName = built != null && built.name.Length > 0 ? built.name : name;
+                built?.Dispose();
+            }
+
+            return builtItemComponentName;
+        }
+    }
 
     protected IReadOnlyList<UIItemSlot> Slots => slots;
 
@@ -302,7 +321,7 @@ public class UIItemsGroup : UIGroup, IUIInputHandler
         }
 
         UIGroup built = itemComponentSource();
-        string path = $"Components/{built.name}.json";
+        string path = $"Components/{ItemComponentName}.json";
         string fullPath = Path.Combine(skin.basePath, path);
 
         try
