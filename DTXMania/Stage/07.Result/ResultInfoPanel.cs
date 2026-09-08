@@ -18,7 +18,6 @@ public class ResultInfoPanel : UIGroup
         MakeComponent("ResultInfoPanel", ResultInfoPanelDefault);
     }
 
-    //the code default, also the seed for Components/ResultInfoPanel.json
     private static UIGroup ResultInfoPanelDefault()
     {
         UIGroup root = new("ResultInfo");

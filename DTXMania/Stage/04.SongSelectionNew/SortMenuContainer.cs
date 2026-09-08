@@ -171,7 +171,6 @@ public class SortMenuContainer : UIGroup, IUIItemSource
 
     private static int Mod(int value, int length) => length <= 0 ? 0 : (value % length + length) % length;
 
-    //the code default, also the seed for Components/SortMenu.json
     private static UIGroup SortMenuContainerDefault()
     {
         UIGroup root = new("SortMenu");
@@ -208,7 +207,6 @@ public class SortMenuContainer : UIGroup, IUIItemSource
         return root;
     }
 
-    //the code default for one entry, seeded into Components/SortItem.json
     private static UIGroup SortItem()
     {
         UIGroup root = new("SortItem");

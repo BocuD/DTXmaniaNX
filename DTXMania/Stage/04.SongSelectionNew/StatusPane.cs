@@ -150,7 +150,6 @@ public class StatusPane : UIGroup, IUIItemSource
         };
     }
 
-    //the code default, also the seed for Components/StatusPane.json
     private static UIGroup StatusPaneDefault()
     {
         UIGroup root = new("StatusPane");
@@ -188,7 +187,6 @@ public class StatusPane : UIGroup, IUIItemSource
         return root;
     }
 
-    //the code default for one difficulty row, seeded into Components/ChartRow.json
     private static UIGroup ChartRow()
     {
         UIGroup root = new("ChartRow");

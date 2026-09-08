@@ -17,7 +17,6 @@ internal class InfoBox : UIGroup
         MakeComponent("InfoBox", InfoBoxDefault);
     }
 
-    //the code default, also the seed for Components/InfoBox.json
     private static UIGroup InfoBoxDefault()
     {
         UIGroup root = new("InfoBox");

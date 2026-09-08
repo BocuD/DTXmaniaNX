@@ -104,8 +104,7 @@ internal class ConfigList : UIScrollItemsGroup, IUIItemSource
         arrowBottom = GetChild<UIImage>("ArrowBottom");
     }
 
-    //the code default, also the seed for Components/ConfigListCursor.json. Every settings list shares it,
-    //so the quick menu and the config screen are styled together
+    //every settings list shares this, so the quick menu and the config screen are styled together
     private static UIGroup CursorElement()
     {
         UIGroup root = new("ConfigListCursor");

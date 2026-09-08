@@ -31,7 +31,6 @@ internal sealed class ConfigDescriptionPanel : UIGroup
         text = GetChild<UIText>("DescriptionText");
     }
 
-    //the code default, also the seed for Components/ConfigDescriptionPanel.json
     private static UIGroup DescriptionPanelDefault()
     {
         UIGroup root = new("ConfigDescriptionPanel");

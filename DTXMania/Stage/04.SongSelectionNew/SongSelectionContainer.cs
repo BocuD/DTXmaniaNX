@@ -371,7 +371,6 @@ public class SongSelectionContainer : UIScrollItemsGroup, IUIItemSource
         return false;
     }
 
-    //the code default for one row, seeded into Components/SongRow.json
     private UIGroup SongRow()
     {
         UIGroup root = new("SongRow");

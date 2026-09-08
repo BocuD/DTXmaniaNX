@@ -115,7 +115,6 @@ public class PerformanceHistoryPanel : UIGroup, IUIItemSource
         return string.Join("/", skill.Split('/').Select(part => part.Trim() + "%"));
     }
 
-    //the code default, also the seed for Components/PerformanceHistoryPanel.json
     private static UIGroup PerformanceHistoryPanelDefault()
     {
         UIGroup root = new("PerformanceHistoryPanel");
@@ -138,7 +137,6 @@ public class PerformanceHistoryPanel : UIGroup, IUIItemSource
         return root;
     }
 
-    //the code default for one attempt, seeded into Components/PerformanceHistoryRow.json
     private static UIGroup PerformanceHistoryRow()
     {
         UIGroup root = new("PerformanceHistoryRow");

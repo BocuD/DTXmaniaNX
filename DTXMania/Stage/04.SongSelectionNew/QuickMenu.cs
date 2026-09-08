@@ -131,7 +131,6 @@ public class QuickMenu : UIGroup
         return false;
     }
 
-    //the code default, also the seed for Components/QuickMenu.json
     private static UIGroup QuickMenuDefault()
     {
         UIGroup root = new("QuickMenu");

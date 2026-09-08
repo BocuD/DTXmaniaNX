@@ -69,7 +69,6 @@ public class ResultParameterPanel : UIItemsGroup, IUIItemSource
         ShowPercent = true
     };
 
-    //the code default for one row, seeded into Components/ResultRow.json
     private static UIGroup ResultRow()
     {
         UIGroup root = new("ResultRow");

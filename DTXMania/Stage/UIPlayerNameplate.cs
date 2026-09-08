@@ -50,7 +50,6 @@ public class UIPlayerNameplate : UIGroup
         UpdateNameplate();
     }
 
-    //the code default, also the seed for Components/Nameplate.json
     private static UIGroup NameplateDefault()
     {
         UIGroup root = new("Nameplate");
