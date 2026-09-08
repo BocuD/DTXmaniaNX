@@ -33,52 +33,21 @@ internal class CStageConfig : CStage
     {
     }
 
-    //the config screen is all bespoke interactive panels, so it is built in code rather than as a layout
     public override void OnLayoutReady()
     {
-        //left menu
-        UIGroup leftMenu = ui.AddChild(new UIGroup("Left Options Menu"));
-        leftMenu.parentAnchor = UICanvas.Center;
-        leftMenu.position = UICanvas.FromCenter(245, 140);
-        leftMenu.renderOrder = 30;
-        leftMenu.dontSerialize = true;
-        
-        UIImage menuPanel = leftMenu.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\4_menu panel.png"))));
-        menuPanel.position = Vector3.Zero;
-            
-        //menu items
-        configLeftOptionsMenu = leftMenu.AddChild(new UIMenu("Button List"));
-        configLeftOptionsMenu.dontSerialize = true;
-        configLeftOptionsMenu.itemOffset = new Vector3(0, 32, 0);
-        configLeftOptionsMenu.itemComponentSource = ConfigMenuButton;
+        configLeftOptionsMenu = ui.FindChild<UIMenu>();
+        configList = ui.FindChild<ConfigList>();
+        descriptionPanel = ui.FindChild<ConfigDescriptionPanel>();
+        menuCursor = configLeftOptionsMenu?.GetChild<UIImage>("MenuCursor");
 
-        //340 - size/2, so this becomes 340-245= 95
-        configLeftOptionsMenu.position = new Vector3(95, 6, 0);
+        //a layout is free to leave either of them out, and then there is nothing here to drive
+        if (configList == null || configLeftOptionsMenu == null)
+        {
+            return;
+        }
 
-        //todo: render menu cursor correctly to match current version of the game. right now its rendered as a stretched image.
-        menuCursor = configLeftOptionsMenu.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\4_menu cursor.png"))));
-        menuCursor.position = new Vector3(-5, 0, 0);
-        menuCursor.size = new Vector2(170, 28);
-        menuCursor.pivot = new Vector2(0.5f, 0f);
-        menuCursor.renderMode = ERenderMode.Sliced;
-        menuCursor.sliceRect = new RectangleF(16, 0, 32, 28);
-        menuCursor.bindings.Add(new UIBinding("position.Y", "Selection.Y"));
-
-        configList = ui.AddChild(new ConfigList(25, 11));
-        configList.parentAnchor = UICanvas.Center;
-        configList.position = UICanvas.FromCenter(420, 189);
-        configList.renderOrder = 41;
-        configList.isVisible = true;
-        configList.dontSerialize = true;
-        
         //at the root of a page, Cancel hands focus back to the left menu
         configList.onExitRoot = () => UIFocus.Pop(configList);
-
-        //description panel (background + text) for the new config list
-        descriptionPanel = ui.AddChild(new ConfigDescriptionPanel());
-        descriptionPanel.parentAnchor = UICanvas.Center;
-        descriptionPanel.position = UICanvas.FromCenter(781, 252);
-        descriptionPanel.renderOrder = 49;
 
         //whatever the open page puts beside the list, in screen space and cleared with the page
         UIGroup pageElements = ui.AddChild(new UIGroup("Page Elements"));
@@ -164,6 +133,11 @@ internal class CStageConfig : CStage
 
     private void EnterCategory(UIMenuItem entry)
     {
+        if (configLeftOptionsMenu == null || configList == null)
+        {
+            return;
+        }
+
         if (configLeftOptionsMenu.SelectedItem == MenuExitIndex)
         {
             StartExitConfig();
@@ -216,6 +190,51 @@ internal class CStageConfig : CStage
             pivot = new Vector2(0.5f, 1f),
             renderOrder = 53
         });
+
+        UIGroup leftMenu = ui.AddChild(new UIGroup("Left Options Menu"));
+        leftMenu.parentAnchor = UICanvas.Center;
+        leftMenu.position = UICanvas.FromCenter(245, 140);
+        leftMenu.renderOrder = 30;
+
+        leftMenu.AddChild(new UIImage
+        {
+            name = "MenuPanel",
+            imageSource = ImageSource.File,
+            image = SkinResource.System(@"Graphics\4_menu panel.png"),
+            size = new Vector2(180, 172)
+        });
+
+        UIMenu menu = leftMenu.AddChild(new UIMenu("Button List"));
+        menu.itemOffset = new Vector3(0, 32, 0);
+        menu.itemComponentSource = ConfigMenuButton;
+
+        //340 - size/2, so this becomes 340-245= 95
+        menu.position = new Vector3(95, 6, 0);
+
+        //todo: render menu cursor correctly to match current version of the game. right now its rendered as a stretched image.
+        menu.AddChild(new UIImage
+        {
+            name = "MenuCursor",
+            imageSource = ImageSource.File,
+            image = SkinResource.System(@"Graphics\4_menu cursor.png"),
+            position = new Vector3(-5, 0, 0),
+            size = new Vector2(170, 28),
+            pivot = new Vector2(0.5f, 0f),
+            renderMode = ERenderMode.Sliced,
+            sliceRect = new RectangleF(16, 0, 32, 28),
+            bindings = { new UIBinding("position.Y", "Selection.Y") }
+        });
+
+        ConfigList list = ui.AddChild(new ConfigList(25, 11));
+        list.parentAnchor = UICanvas.Center;
+        list.position = UICanvas.FromCenter(420, 189);
+        list.renderOrder = 41;
+
+        ConfigDescriptionPanel description = ui.AddChild(new ConfigDescriptionPanel());
+        description.parentAnchor = UICanvas.Center;
+        description.position = UICanvas.FromCenter(781, 252);
+        description.renderOrder = 49;
+
     }
 
     public override void OnActivate()
@@ -248,10 +267,10 @@ internal class CStageConfig : CStage
             CDTXMania.ConfigIni.tWrite(CDTXMania.executableDirectory + "Config.ini");	// CONFIGだけ
 
             //apply deferred changes made via config list when exiting the stage
-            configMenu.ApplyPendingChanges();
+            configMenu?.ApplyPendingChanges();
 
             //the open page's own elements go with the stage rather than outliving it
-            configList.ClosePage();
+            configList?.ClosePage();
 
             //the config BGM is this stage's; it has no business staying resident through a song
             CDTXMania.Skin.bgmコンフィグ画面.Unload();
@@ -274,8 +293,8 @@ internal class CStageConfig : CStage
         }
     }
 
-    private UIMenu configLeftOptionsMenu;
-    private UIImage menuCursor;
+    private UIMenu? configLeftOptionsMenu;
+    private UIImage? menuCursor;
 
     public override void FirstUpdate()
     {
@@ -297,7 +316,10 @@ internal class CStageConfig : CStage
         ctDisplayWait.tUpdate();
 
         //the cursor follows the selection through a binding; only its dimming is about focus
-        menuCursor.color.Alpha = UIFocus.Holds(configLeftOptionsMenu) ? 1.0f : 0.5f;
+        if (menuCursor != null && configLeftOptionsMenu != null)
+        {
+            menuCursor.color.Alpha = UIFocus.Holds(configLeftOptionsMenu) ? 1.0f : 0.5f;
+        }
 
         switch (ePhaseID)
         {
@@ -314,12 +336,16 @@ internal class CStageConfig : CStage
         if (ePhaseID != EPhase.Common_DefaultState)
             return 0;
 
-        descriptionPanel.Update(configList.CurrentItem, configList.IsActive && configList.IsSettled);
+        if (configList != null)
+        {
+            descriptionPanel?.Update(configList.CurrentItem, configList.IsActive && configList.IsSettled);
+        }
+
         return 0;
     }
-    private ConfigList configList;
-    private ConfigDescriptionPanel descriptionPanel;
-    private ConfigMenu configMenu;
+    private ConfigList? configList;
+    private ConfigDescriptionPanel? descriptionPanel;
+    private ConfigMenu? configMenu;
     private KeyAssignPanel keyAssignPanel; //key-assign editor overlay (opened from a pad-list row)
     private InputTestPanel inputTestPanel;  //all-channel input-test overview (opened from an "Input Test" row)
     private MidiTestPanel midiTestPanel;    //MIDI diagnostics feed (opened from the drums "MIDI Test" row)
@@ -337,7 +363,10 @@ internal class CStageConfig : CStage
         }
 
         //nothing here reads input once the stage starts leaving
-        UIFocus.Pop(configLeftOptionsMenu);
+        if (configLeftOptionsMenu != null)
+        {
+            UIFocus.Pop(configLeftOptionsMenu);
+        }
 
         GitaDoraTransition.Close(0, async () =>
         {
@@ -350,28 +379,41 @@ internal class CStageConfig : CStage
     //opens the key-assign editor for a pad and hands input over to it (called back from a pad row)
     private void OpenKeyAssign(EKeyConfigPart part, EKeyConfigPad pad, string padName)
     {
-        configList.isVisible = false;
-        descriptionPanel.Update(null, false);
+        HideListForPanel();
         keyAssignPanel.Open(part, pad, padName);
     }
 
     private void OpenInputTest((EKeyConfigPart, EKeyConfigPad, string)[] pads)
     {
-        configList.isVisible = false;
-        descriptionPanel.Update(null, false);
+        HideListForPanel();
         inputTestPanel.Open(pads);
     }
 
     private void OpenMidiTest((EKeyConfigPart, EKeyConfigPad, string)[] pads)
     {
-        configList.isVisible = false;
-        descriptionPanel.Update(null, false);
+        HideListForPanel();
         midiTestPanel.Open(pads);
+    }
+
+    //a panel covers the list, so the list steps aside while one is open
+    private void HideListForPanel()
+    {
+        if (configList != null)
+        {
+            configList.isVisible = false;
+        }
+
+        descriptionPanel?.Update(null, false);
     }
 
     //the panels pop themselves, so the page they were opened from is focused again
     private void CloseKeyAssign()
     {
+        if (configList == null)
+        {
+            return;
+        }
+
         configList.isVisible = true;
 
         //a pad row shows the mapping the panel has just been editing
@@ -380,7 +422,7 @@ internal class CStageConfig : CStage
 
     private void KeyAssignNext()
     {
-        CItemBase? next = configList.SelectNextNormal();
+        CItemBase? next = configList?.SelectNextNormal();
         if (next is { ePanelType: CItemBase.EPanelType.Normal })
         {
             next.RunAction(); // the pad row's action re-opens the panel for that pad
