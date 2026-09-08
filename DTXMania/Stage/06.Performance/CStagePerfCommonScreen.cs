@@ -305,12 +305,17 @@ internal abstract class CStagePerfCommonScreen : CStage
         InfoBox info = ui.AddChild(new InfoBox());
         info.position = new Vector3(1270, 10, 0);
         info.renderOrder = 1;
+
+        StageFailedCover failed = ui.AddChild(new StageFailedCover());
+        failed.renderOrder = 1000;
     }
 
     //the performance screens are built entirely in code: bespoke chip/lane rendering, not a skinnable layout
     public override void OnLayoutReady()
     {
         video.IntegrateUI(ui);
+
+        actStageFailed.cover = ui.FindChild<StageFailedCover>();
 
         if (CDTXMania.ConfigIni.nShowPlaySpeed == (int)EShowPlaySpeed.ON
             || CDTXMania.ConfigIni.nShowPlaySpeed == (int)EShowPlaySpeed.IF_CHANGED_IN_GAME)

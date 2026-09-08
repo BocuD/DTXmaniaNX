@@ -1,5 +1,4 @@
-﻿using System.Drawing;
-using DTXMania.Core;
+﻿using DTXMania.Core;
 using DTXMania.Core.Audio;
 using DTXMania.UI.Drawable;
 using FDK;
@@ -9,6 +8,8 @@ namespace DTXMania;
 internal class CActPerfStageFailure : CActivity
 {
     // コンストラクタ
+
+    public StageFailedCover? cover;
 
     public CActPerfStageFailure()
     {
@@ -21,6 +22,7 @@ internal class CActPerfStageFailure : CActivity
     public void Start()
     {
         ct進行 = new CCounter(0, 0x3e8, 2, CDTXMania.Timer);
+        cover?.Close();
     }
 
 
@@ -31,26 +33,19 @@ internal class CActPerfStageFailure : CActivity
         sd効果音 = null;
         b効果音再生済み = false;
         ct進行 = new CCounter();
+        cover?.Hide();
         base.OnActivate();
     }
     public override void OnDeactivate()
     {
         ct進行 = null;
+        cover?.Hide();
         if (sd効果音 != null)
         {
             AudioMixer.Free(sd効果音);
             sd効果音 = null;
         }
         base.OnDeactivate();
-    }
-
-    public override void OnManagedCreateResources()
-    {
-        if (bActivated)
-        {
-            txStageFailed = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_stage_failed.jpg"));
-            base.OnManagedCreateResources();
-        }
     }
 
     public override int OnUpdateAndDraw()
@@ -64,21 +59,9 @@ internal class CActPerfStageFailure : CActivity
             return 0;
         }
         ct進行.tUpdate();
-        if (ct進行.nCurrentValue < 100)
+
+        if (ct進行.nCurrentValue >= 100)
         {
-            int x = (int)(640.0 * Math.Cos((Math.PI / 2 * ct進行.nCurrentValue) / 100.0));
-            if ((x != 1280) && (txStageFailed != null))
-            {
-                txStageFailed.tDraw2D(0, 0, new RectangleF(x, 0, 640 - x, 720));
-                txStageFailed.tDraw2D(640 + x, 0, new RectangleF(640, 0, 640 - x, 720));
-            }
-        }
-        else
-        {
-            if (txStageFailed != null)
-            {
-                txStageFailed.tDraw2D(0, 0);
-            }
             if (!b効果音再生済み)
             {
                 if (((CDTXMania.DTX.SOUND_STAGEFAILED != null) && (CDTXMania.DTX.SOUND_STAGEFAILED.Length > 0)) && File.Exists(CDTXMania.DTX.strFolderName + CDTXMania.DTX.SOUND_STAGEFAILED))
@@ -122,7 +105,6 @@ internal class CActPerfStageFailure : CActivity
     private bool b効果音再生済み;
     private CCounter ct進行;
     private MixerClip? sd効果音;
-    private BaseTexture txStageFailed;
     //-----------------
     #endregion
 }
