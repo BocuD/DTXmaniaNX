@@ -83,6 +83,7 @@ public class SkinEditorWindow
         }
 
         DrawCreateSkinModal(skinManager);
+        DrawDeleteSkinModal(skinManager);
         DrawRemoveStageModal(skinManager);
 
         ImGui.EndChild();
@@ -292,7 +293,7 @@ public class SkinEditorWindow
 
     //a stage is either this skin's or the built-in one's; nothing here is about where it came from
     private static string StateOf(SkinManager skinManager, CStage.EStage stage)
-        => HasLayout(skinManager, stage) ? "this skin" : "default";
+        => HasLayout(skinManager, stage) ? "skin" : "default";
 
     /// <summary>The chart a stage that plays one is opened with. Changing it loads nothing on its own.
     /// </summary>
@@ -446,7 +447,7 @@ public class SkinEditorWindow
 
         ImGui.TableNextColumn();
         ImGui.AlignTextToFramePadding();
-        ImGui.TextDisabled(inSkin ? "this skin" : "default");
+        ImGui.TextDisabled(inSkin ? "skin" : "default");
 
         ImGui.TableNextColumn();
         ImGui.BeginDisabled(!inSkin);
@@ -522,7 +523,7 @@ public class SkinEditorWindow
 
         CStage stage = CDTXMania.StageManager.rCurrentStage;
 
-        ImGui.Text($"Remove {stage.eStageID} from this skin?");
+        ImGui.Text($"Remove {stage.eStageID} from skin?");
         ImGui.TextDisabled("It goes back to the default skin. Components it uses are kept.");
         ImGui.Spacing();
 
@@ -589,18 +590,99 @@ public class SkinEditorWindow
             return;
         }
 
+        if (!ImGui.BeginTable("skins", 2, ImGuiTableFlags.RowBg))
+        {
+            return;
+        }
+
+        ImGui.TableSetupColumn("skin", ImGuiTableColumnFlags.WidthStretch);
+        ImGui.TableSetupColumn("actions", ImGuiTableColumnFlags.WidthFixed);
+
         foreach (SkinDescriptor skin in skinManager.skins)
         {
+            string folder = SkinManager.FolderNameOf(skin);
+
+            ImGui.TableNextRow();
+            ImGui.TableNextColumn();
+
+            ImGui.AlignTextToFramePadding();
             ImGui.Text(skin.name);
             ImGui.SameLine();
             ImGui.TextDisabled($"by {skin.author}");
 
-            ImGui.SameLine(ImGui.GetWindowWidth() - 70);
-            if (ImGui.Button($"Load##skin{SkinManager.FolderNameOf(skin)}"))
+            ImGui.TableNextColumn();
+            if (ImGui.Button($"Load##skin{folder}"))
             {
                 skinManager.ChangeSkin(skin);
             }
+
+            ImGui.SameLine();
+            ImGui.PushStyleColor(ImGuiCol.Button, Danger);
+            if (ImGui.Button($"Delete##skin{folder}"))
+            {
+                skinToDelete = skin;
+                openPopup = "Delete skin";
+            }
+
+            ImGui.PopStyleColor();
         }
+
+        ImGui.EndTable();
+    }
+
+    //held while the popup is up: the row it was pressed on is gone by the time the answer comes back
+    private SkinDescriptor? skinToDelete;
+
+    private void DrawDeleteSkinModal(SkinManager skinManager)
+    {
+        if (!ImGui.BeginPopupModal("Delete skin", ImGuiWindowFlags.AlwaysAutoResize))
+        {
+            return;
+        }
+
+        if (skinToDelete == null)
+        {
+            ImGui.CloseCurrentPopup();
+            ImGui.EndPopup();
+            return;
+        }
+
+        ImGui.Text($"Delete {skinToDelete.name}?");
+        ImGui.Spacing();
+
+        ImGui.PushStyleColor(ImGuiCol.Button, Danger);
+        if (ImGui.Button("Delete"))
+        {
+            DeleteSkin(skinManager, skinToDelete);
+            skinToDelete = null;
+            ImGui.CloseCurrentPopup();
+        }
+
+        ImGui.PopStyleColor();
+
+        ImGui.SameLine();
+        if (ImGui.Button("Cancel"))
+        {
+            skinToDelete = null;
+            ImGui.CloseCurrentPopup();
+        }
+
+        ImGui.EndPopup();
+    }
+
+    private static void DeleteSkin(SkinManager skinManager, SkinDescriptor skin)
+    {
+        try
+        {
+            Directory.Delete(skin.basePath, recursive: true);
+            Trace.TraceInformation($"Deleted skin {skin.basePath}");
+        }
+        catch (Exception e)
+        {
+            Trace.TraceError($"Failed to delete skin {skin.basePath}: {e.Message}");
+        }
+
+        skinManager.ScanSkinDirectory();
     }
 
     private void DrawCreateSkinModal(SkinManager skinManager)
