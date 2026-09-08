@@ -10,11 +10,12 @@ namespace DTXMania;
 /// </summary>
 public sealed class ResultData
 {
-    private const double SkillBarFullWidth = 286.0;
-
     private static int Instrument => CDTXMania.GetCurrentInstrument();
     private static CScoreIni.CPerformanceEntry Entry => CDTXMania.StageManager.stageResult.stPerformanceEntry[Instrument];
-    private static double MaxSkill => CDTXMania.chosenChartData?.SongInformation.GetMaxSkill(Instrument) ?? 0.0;
+    [DataField] public double Level => LevelParts().intPart + LevelParts().deci / 100.0;
+    [DataField] public double Rate => Entry.dbPerformanceSkill;
+    [DataField] public double Skill => Entry.dbGameSkill;
+    [DataField] public double MaxSkill => CDTXMania.chosenChartData?.SongInformation.GetMaxSkill(Instrument) ?? 0.0;
 
     [DataField] public string LevelInt => LevelParts().intPart.ToString();
     [DataField] public string LevelFraction => "." + LevelParts().deci;
@@ -27,8 +28,7 @@ public sealed class ResultData
 
     [DataField] public bool ShowSkillBar => MaxSkill > 0.0;
 
-    [DataField] public double SkillBarWidth =>
-        MaxSkill > 0.0 ? SkillBarFullWidth * (Entry.dbGameSkill / MaxSkill) : 0.0;
+    [DataField] public double SkillOfMax => MaxSkill > 0.0 ? Entry.dbGameSkill / MaxSkill : 0.0;
 
     //mutually exclusive; drives which result badge is shown
     [DataField] public bool IsExcellent => Entry.nPerfectCount == Entry.nTotalChipsCount;

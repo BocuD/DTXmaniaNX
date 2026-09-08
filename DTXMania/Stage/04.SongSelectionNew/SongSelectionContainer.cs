@@ -449,13 +449,14 @@ public class SongSelectionContainer : UIScrollItemsGroup, IUIItemSource
             image = SkinResource.System(@"Graphics\5_skillbar_fill.png"),
             pivot = new Vector2(0.0f, 0.5f),
             position = new Vector3(161.0f, 16.0f, 0.0f),
+            //286 is the bar at full skill, so the binding below is a plain 0 to 1
             size = new Vector2(286, 8),
             renderOrder = 1,
             isVisible = false,
             bindings = { new UIBinding("isVisible", "Item.ShowSkill") }
         });
 
-        skillbarFill.bindings.Add(new UIBinding("size.X", "Item.SkillBarWidth"));
+        skillbarFill.bindings.Add(new UIBinding("scale.X", "Item.SkillOfMax"));
 
         UIText skill = root.AddChild(new UIText("", 12));
         skill.name = "skilltext";

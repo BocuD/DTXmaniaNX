@@ -125,13 +125,13 @@ public class ResultInfoPanel : UIGroup
             image = SkinResource.System(@"Graphics\5_skillbar_fill.png"),
             position = new Vector3(155, 285, 0),
             pivot = new Vector2(0.0f, 0.5f),
-            size = new Vector2(286, 10),
+            size = new Vector2(203, 10),
             renderOrder = 1,
             isVisible = false,
             bindings =
             {
                 new UIBinding("isVisible", "Result.ShowSkillBar"),
-                new UIBinding("size.X", "Result.SkillBarWidth")
+                new UIBinding("scale.X", "Result.SkillOfMax")
             }
         });
 

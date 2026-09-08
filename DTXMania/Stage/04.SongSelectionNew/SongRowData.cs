@@ -35,7 +35,7 @@ public sealed class SongRowData
     [DataField] public double BackgroundClipX { get; private set; }
     [DataField] public double BackgroundOffsetX { get; private set; } = -40.0;
 
-    [DataField] public double SkillBarWidth { get; private set; }
+    [DataField] public double SkillOfMax { get; private set; }
 
     [DataField] public bool HasTitle => Title.Length > 0;
     [DataField] public bool HasArtist => Artist.Length > 0;
@@ -100,7 +100,7 @@ public sealed class SongRowData
     {
         ShowSkill = false;
         Skill = string.Empty;
-        SkillBarWidth = 0;
+        SkillOfMax = 0;
 
         if (Node?.nodeType != SongNode.ENodeType.SONG)
         {
@@ -115,7 +115,7 @@ public sealed class SongRowData
 
         ShowSkill = true;
         Skill = $"{skill.skillPoints:0.00}";
-        SkillBarWidth = 203.0 * (skill.skillPoints / skill.maxSkillPoints);
+        SkillOfMax = skill.skillPoints / skill.maxSkillPoints;
     }
 
     private void UpdateLamp()
