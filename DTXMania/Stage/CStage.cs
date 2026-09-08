@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System.Diagnostics;
+using System.Numerics;
 using DiscordRPC;
 using DTXMania.Core;
 using DTXMania.UI;
@@ -114,7 +115,18 @@ public abstract class CStage : CActivity, IUIInputHandler
 		//before OnStageOpened, so a stage that plays something as it opens has it in memory by then
 		root.LoadSounds();
 
-		OnLayoutReady();
+		try
+		{
+			OnLayoutReady();
+		}
+		catch (Exception e) when (loadSkin)
+		{
+			Trace.TraceError($"Loading the layout for {eStageID} failed, using the built-in one: {e}");
+
+			LoadUI(false);
+			return;
+		}
+
 		root.OnStageOpened();
 	}
 
