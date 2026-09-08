@@ -4,6 +4,7 @@ using DTXMania.Core;
 using DTXMania.Core.Framework;
 using DTXMania.UI;
 using DTXMania.UI.Drawable;
+using DTXMania.UI.Skin;
 using DTXMania.UI.DynamicElements;
 using DTXMania.UI.Inspector;
 
@@ -11,8 +12,8 @@ namespace DTXMania;
 
 internal class CStageStartup : CStage
 {
-	private const int LogFontSize = 12;
-	private const float LogLineHeight = 17f;
+	private const int LogFontSize = 15;
+	private const float LogLineHeight = 21f;
 	private const float LogMargin = 40f;
 
 	private static int LogRows => (int)((UICanvas.canvasSize.Y - LogMargin * 2f) / LogLineHeight);
@@ -42,18 +43,24 @@ internal class CStageStartup : CStage
 	{
 		UICoverGroup background = ui.AddChild(new UICoverGroup("Background"));
 		background.renderOrder = -100;
-		background.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\1_background.png")))
+		background.AddChild(new UIImage
 		{
 			name = "Image",
+			imageSource = ImageSource.File,
+			image = SkinResource.System(@"Graphics\1_background.png"),
 			size = UISize.Inherited
 		});
 
-		UIImage logo = ui.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\logo.png"))));
-		logo.name = "Logo";
-		logo.parentAnchor = new Vector2(1.0f, 1.0f);
-		logo.pivot = new Vector2(1.0f, 1.0f);
-		logo.position = new Vector3(-10, -15, 0);
-		logo.scale = new Vector3(0.18f, 0.18f, 1.0f);
+		ui.AddChild(new UIImage
+		{
+			name = "Logo",
+			imageSource = ImageSource.File,
+			image = SkinResource.System(@"Graphics\logo.png"),
+			size = new Vector2(300.0f, 153.0f),
+			parentAnchor = UICanvas.BottomRight,
+			pivot = UICanvas.BottomRight,
+			position = new Vector3(-10, -15, 0)
+		});
 
 		var text = ui.AddChild(new UIText("", 15));
 		text.name = "VersionText";
