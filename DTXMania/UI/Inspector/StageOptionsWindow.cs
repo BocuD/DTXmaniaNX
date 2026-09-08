@@ -178,7 +178,7 @@ public class StageOptionsWindow
             if (ImGui.Button(preset.ToString()))
             {
                 PreviewResult.Apply(instrument, preset);
-                stage.LoadUI();
+                stage.ui.FindChild<ResultRankIcon>()?.Refresh();
             }
 
             ImGui.SameLine();
@@ -201,10 +201,9 @@ public class StageOptionsWindow
         {
             PreviewResult.Recalculate(instrument);
 
-            //rank art is built in OnLayoutReady, so it only rebuilds when the rank itself moves
             if (stage.nRankValue[instrument] != rankBefore)
             {
-                stage.LoadUI();
+                stage.ui.FindChild<ResultRankIcon>()?.Refresh();
             }
         }
 

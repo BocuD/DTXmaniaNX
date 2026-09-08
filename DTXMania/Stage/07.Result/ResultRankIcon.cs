@@ -11,12 +11,43 @@ namespace DTXMania;
 /// </summary>
 public class ResultRankIcon : UIGroup
 {
+    private readonly int instrument;
+
+    //the art for the rank itself, which changes when the rank does. The badges below never do
+    private readonly List<UIDrawable> rankArt = [];
+
     public ResultRankIcon(int instrument)
     {
+        this.instrument = instrument;
+
         name = "ResultRankIcon";
         pivot = new Vector2(0.5f, 0.5f);
         size = new Vector2(420, 510);
 
+        BuildRankArt();
+
+        AddBadge("excellent", "Result.IsExcellent", new Vector3(210, 350, 0), new Vector2(0.5f, 0));
+        AddBadge("fullcombo_0", "Result.IsFullCombo", new Vector3(55, 350, 0), Vector2.Zero);
+        AddBadge("fullcombo_1", "Result.IsFullCombo", new Vector3(180, 320, 0), Vector2.Zero);
+        AddBadge("clear_0", "Result.IsClear", new Vector3(210, 364, 0), new Vector2(0.5f, 0));
+        AddBadge("clear_1", "Result.IsClear", new Vector3(210, 420, 0), new Vector2(0.5f, 0));
+    }
+
+    /// <summary>Rebuilds the rank art, for a rank that changed without the stage being reloaded.</summary>
+    public void Refresh()
+    {
+        foreach (UIDrawable art in rankArt)
+        {
+            RemoveChild(art);
+            art.Dispose();
+        }
+
+        rankArt.Clear();
+        BuildRankArt();
+    }
+
+    private void BuildRankArt()
+    {
         bool allAuto = instrument switch
         {
             0 => CDTXMania.ConfigIni.bAllDrumsAreAutoPlay,
@@ -36,17 +67,13 @@ public class ResultRankIcon : UIGroup
             _ => null
         };
 
-        if (rank != null)
+        if (rank == null)
         {
-            AddIcon(rank.Value.icon, rank.Value.isSS);
-            AddBackground(rank.Value.bg);
+            return;
         }
 
-        AddBadge("excellent", "Result.IsExcellent", new Vector3(210, 350, 0), new Vector2(0.5f, 0));
-        AddBadge("fullcombo_0", "Result.IsFullCombo", new Vector3(55, 350, 0), Vector2.Zero);
-        AddBadge("fullcombo_1", "Result.IsFullCombo", new Vector3(180, 320, 0), Vector2.Zero);
-        AddBadge("clear_0", "Result.IsClear", new Vector3(210, 364, 0), new Vector2(0.5f, 0));
-        AddBadge("clear_1", "Result.IsClear", new Vector3(210, 420, 0), new Vector2(0.5f, 0));
+        AddIcon(rank.Value.icon, rank.Value.isSS);
+        AddBackground(rank.Value.bg);
     }
 
     private static BaseTexture LoadRankTexture(string fileName)
@@ -57,6 +84,7 @@ public class ResultRankIcon : UIGroup
         BaseTexture texture = LoadRankTexture($"rank_icon_{iconName}");
 
         UIImage icon = AddChild(new UIImage(texture));
+        rankArt.Add(icon);
         icon.name = "Icon";
         icon.renderOrder = 0;
         icon.position = new Vector3(isSS ? 60 : 132, 150, 0);
@@ -65,6 +93,7 @@ public class ResultRankIcon : UIGroup
         if (isSS)
         {
             UIImage second = AddChild(new UIImage(texture));
+            rankArt.Add(second);
             second.name = "Icon2";
             second.renderOrder = 1;
             second.position = new Vector3(205, 150, 0);

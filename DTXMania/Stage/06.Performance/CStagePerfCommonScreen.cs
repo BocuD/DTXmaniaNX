@@ -304,6 +304,7 @@ internal abstract class CStagePerfCommonScreen : CStage
     {
         InfoBox info = ui.AddChild(new InfoBox());
         info.position = new Vector3(1270, 10, 0);
+        info.renderOrder = 1;
     }
 
     //the performance screens are built entirely in code: bespoke chip/lane rendering, not a skinnable layout
