@@ -764,6 +764,14 @@ public class SkinEditorWindow
 
         ImGui.Checkbox("Log serializer decisions", ref logThemeApplyDetails);
 
+        if (ImGui.Button("Regenerate Song List"))
+        {
+            SkinPreview.RegenerateSongDb();
+        }
+
+        ImGui.SameLine();
+        StageOptionsWindow.HelpMarker("Builds a new stand-in song list.");
+
         ImGui.EndPopup();
     }
 }

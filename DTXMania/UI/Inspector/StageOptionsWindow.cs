@@ -7,8 +7,8 @@ using Hexa.NET.ImGui;
 namespace DTXMania.UI.Inspector;
 
 /// <summary>
-/// Whatever the stage on screen needs invented for it: the chart it plays, where its playback sits, the
-/// score it shows. A stage with nothing to invent shows nothing.
+/// Whatever the stage on screen needs invented for it: where its playback sits, the score it shows. A
+/// stage with nothing to invent shows nothing.
 /// </summary>
 public class StageOptionsWindow
 {
@@ -18,115 +18,14 @@ public class StageOptionsWindow
         {
             ImGui.Begin("Stage Options", ImGuiWindowFlags.NoFocusOnAppearing);
 
-            ImGui.TextDisabled(CDTXMania.StageManager.rCurrentStage.eStageID.ToString());
-            ImGui.Separator();
-
-            DrawSongSection();
             DrawTransportSection();
             DrawResultSection();
-            DrawPreviewSection();
         }
         finally
         {
             ImGui.End();
         }
     }
-
-    #region [ preview mode ]
-
-    private void DrawPreviewSection()
-    {
-        if (!SkinEditorWindow.Section("Preview"))
-        {
-            return;
-        }
-
-        if (ImGui.Button("Regenerate Song List"))
-        {
-            SkinPreview.RegenerateSongDb();
-        }
-
-        ImGui.SameLine();
-        HelpMarker("Builds a new random song list.");
-
-    }
-
-    #endregion
-
-    #region [ song picker ]
-
-    private string songFilter = string.Empty;
-
-    //filter on change, not every frame; libraries get big
-    private string cachedFilter = "\0";
-    private List<SongNode> matches = [];
-
-    //always offered: the song is picked first, and the stages that need one are opened afterwards
-    private void DrawSongSection()
-    {
-        if (!SkinEditorWindow.Section("Song"))
-        {
-            return;
-        }
-
-        SongDb.SongDb library = CDTXMania.SongDb;
-
-        if (library is not { hasEverScanned: true } || library.flattenedSongList.Count == 0)
-        {
-            ImGui.TextWrapped("No songs detected");
-            return;
-        }
-
-        ImGui.TextDisabled(SkinPreview.selectedSong == null
-            ? "Select a song"
-            : $"Chart: {SkinPreview.selectedSong.title}");
-        ImGui.SetNextItemWidth(220.0f);
-        ImGui.InputTextWithHint("##PreviewSongFilter", "Search songs", ref songFilter, 128);
-
-        if (songFilter != cachedFilter)
-        {
-            cachedFilter = songFilter;
-            matches = library.flattenedSongList
-                .Where(node => node.nodeType == SongNode.ENodeType.SONG
-                               && node.title.Contains(songFilter, StringComparison.OrdinalIgnoreCase))
-                .Take(MaxMatches)
-                .ToList();
-        }
-
-        int level = SkinPreview.difficulty;
-        ImGui.SetNextItemWidth(120.0f);
-        if (ImGui.SliderInt("Difficulty", ref level, 0, 4))
-        {
-            SkinPreview.difficulty = level;
-        }
-
-        if (ImGui.BeginListBox("##PreviewSongs", new Vector2(-1.0f, 180.0f)))
-        {
-            foreach (SongNode node in matches)
-            {
-                CChartData? chart = SkinPreview.ChartFor(node, SkinPreview.difficulty);
-
-                ImGui.BeginDisabled(chart == null);
-                if (ImGui.Selectable($"{node.title}##{node.path}",
-                        ReferenceEquals(node, SkinPreview.selectedSong)))
-                {
-                    SkinPreview.selectedSong = node;
-                }
-
-                ImGui.EndDisabled();
-            }
-
-            ImGui.EndListBox();
-        }
-
-        ImGui.TextDisabled(matches.Count >= MaxMatches
-            ? $"First {MaxMatches} matches"
-            : $"{matches.Count} songs");
-    }
-
-    private const int MaxMatches = 200;
-
-    #endregion
 
     #region [ transport ]
 
