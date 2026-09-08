@@ -17,14 +17,14 @@ public sealed class ResultData
     [DataField] public double Skill => Entry.dbGameSkill;
     [DataField] public double MaxSkill => CDTXMania.chosenChartData?.SongInformation.GetMaxSkill(Instrument) ?? 0.0;
 
-    [DataField] public string LevelInt => LevelParts().intPart.ToString();
-    [DataField] public string LevelFraction => "." + LevelParts().deci;
+    [DataField] public string LevelInt => NumberParts.Whole(Level);
+    [DataField] public string LevelFraction => NumberParts.Fraction(Level);
 
-    [DataField] public string RateInt => ((int)Entry.dbPerformanceSkill).ToString();
-    [DataField] public string RateFraction => "." + RateFractionValue() + "%";
+    [DataField] public string RateInt => NumberParts.Whole(Rate);
+    [DataField] public string RateFraction => NumberParts.Fraction(Rate) + "%";
 
-    [DataField] public string SkillInt => ((int)Entry.dbGameSkill).ToString();
-    [DataField] public string SkillFraction => "." + SkillFractionValue().ToString("N0");
+    [DataField] public string SkillInt => NumberParts.Whole(Skill);
+    [DataField] public string SkillFraction => NumberParts.Fraction(Skill);
 
     [DataField] public bool ShowSkillBar => MaxSkill > 0.0;
 
@@ -66,21 +66,4 @@ public sealed class ResultData
         return (intPart, deci);
     }
 
-    private static int RateFractionValue()
-    {
-        double rate = Entry.dbPerformanceSkill;
-        int fraction = (int)((rate - (int)rate) * 100);
-        if (fraction < 10)
-        {
-            fraction *= 10;
-        }
-
-        return fraction;
-    }
-
-    private static int SkillFractionValue()
-    {
-        double skill = Entry.dbGameSkill;
-        return (int)((skill - (int)skill) * 100);
-    }
 }

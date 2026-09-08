@@ -218,6 +218,8 @@ public partial class UIText : UITexture
             _ => throw new ArgumentOutOfRangeException()
         };
 
+        MeasureGlyphInset(request);
+
         AsyncTextureUploader.Instance.RequestText(request, tex => ApplyRenderedText(token, tex));
     }
 
@@ -266,9 +268,12 @@ public partial class UIText : UITexture
             return;
         }
 
+        UiTextParameters request = CreateRenderRequest();
+        MeasureGlyphInset(request);
+
         BaseTexture renderedTexture = renderBackend switch
         {
-            UiTextRenderBackend.Skia when BaseTexture.SkiaTextRenderer != null => BaseTexture.SkiaTextRenderer.Render(CreateRenderRequest()),
+            UiTextRenderBackend.Skia when BaseTexture.SkiaTextRenderer != null => BaseTexture.SkiaTextRenderer.Render(request),
             UiTextRenderBackend.Skia => throw new InvalidOperationException("Skia text renderer is not available."),
             _ => throw new ArgumentOutOfRangeException()
         };
@@ -289,6 +294,15 @@ public partial class UIText : UITexture
 
     /// <summary>The scale the current texture was rasterized at, which its pixels have to be measured in.</summary>
     protected float textureRenderScale { get; private set; } = 1f;
+
+    public float glyphInset { get; private set; }
+
+    private void MeasureGlyphInset(UiTextParameters request)
+    {
+        glyphInset = BaseTexture.SkiaTextRenderer == null
+            ? 0f
+            : BaseTexture.SkiaTextRenderer.CaretOffset(request, 0) / textureRenderScale;
+    }
 
     private float _renderedWrapWidth;
 

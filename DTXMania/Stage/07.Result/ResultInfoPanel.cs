@@ -103,15 +103,20 @@ public class ResultInfoPanel : UIGroup
 
         Divider(skillGroup, "SkillLine", new Vector3(14, 296, 0), 340);
 
-        var skillInt = DynamicNumber(skillGroup, "SkillNum", "Result.SkillInt", 82, "texgyreadventor-italic.otf",
-            new Vector3(315, 299, 0), new Vector2(1, 1));
+        UIPaddedNumber skillInt = skillGroup.AddChild(new UIPaddedNumber("Result.Skill"));
+        skillInt.name = "SkillNum";
+        skillInt.padding = 3;
+        skillInt.position = new Vector3(315, 299, 0);
+        skillInt.pivot = new Vector2(1, 1);
+        skillInt.font = SkinResource.System("texgyreadventor-italic.otf");
+        skillInt.fontSize = 82;
         skillInt.style = UiTextStyle.Italic | UiTextStyle.Bold;
-        skillInt.texturePadding.X = 50;
+        skillInt.texturePadding = new Vector2(24, 0);
 
         var skillFraction = DynamicNumber(skillGroup, "SkillFractionNum", "Result.SkillFraction", 53, "texgyreadventor-italic.otf",
             new Vector3(266, 290, 0), new Vector2(0, 1));
         skillFraction.style = UiTextStyle.Italic | UiTextStyle.Bold;
-        skillFraction.texturePadding.X = 50;
+        skillFraction.texturePadding.X = 24;
 
         CreateSkillBar(skillGroup);
     }
