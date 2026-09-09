@@ -248,7 +248,7 @@ public abstract class CStage : CActivity, IUIInputHandler
 		}
 	}
 
-	public UIGroup ui;
+	public StageRoot ui;
 
 	/// <summary>
 	/// Display the current <see cref="Presence"/> of this stage.

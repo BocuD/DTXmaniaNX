@@ -68,6 +68,10 @@ internal class CStageResult : CStage
 
 	public override void BuildDefaultLayout()
 	{
+		ui.animator = new Animator();
+		ui.animator.AddResource(SkinResource.System(@"Graphics\Result\open.json"));
+		ui.openClip = "open";
+
 		var infoPanel = ui.AddChild(new ResultInfoPanel());
 		infoPanel.position = new Vector3(830, 120, 0);
 
@@ -182,11 +186,6 @@ internal class CStageResult : CStage
 		{
 			nameplate.instrument = CDTXMania.GetCurrentInstrument();
 		}
-
-		//the clip lives in its own file, so a saved layout references it rather than copying it in
-		ui.animator = new Animator();
-		ui.animator.AddResource(SkinResource.System(@"Graphics\Result\open.json"));
-		ui.animator.Play("open", false);
 	}
 
 	//a provider is pulled every frame, so the file is resolved once and held until the stage runs again
