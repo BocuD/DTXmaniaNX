@@ -629,9 +629,8 @@ internal class CActPerfCommonCombo : CActivity
     }
     public override void OnDeactivate()
     {
-        if (status != null)
-            status = null;
-
+        //status stays: it holds counters rather than resources, and a chip landing between here and the
+        //next activation writes its combo through it
         base.OnDeactivate();
     }
     public override void OnManagedCreateResources()

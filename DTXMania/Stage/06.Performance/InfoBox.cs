@@ -1,87 +1,69 @@
-﻿using System.Numerics;
+using System.Numerics;
 using DTXMania.Core;
 using DTXMania.Core.Framework;
 using DTXMania.UI.Drawable;
+using DTXMania.UI.DynamicElements;
+using DTXMania.UI.Skin;
 
 namespace DTXMania;
 
 internal class InfoBox : UIGroup
 {
-    // CActivity 実装
-    public InfoBox()
+    public InfoBox() : base("InfoBox")
     {
-        var background = AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\Performance\info_box.png"))));
         size = new Vector2(304, 84);
-        anchor = new Vector2(1, 0);
-        background.name = "Background";
-        position = new Vector3(1270, 10, 0);
-        name = "InfoBox";
-        
-        string path = CDTXMania.DTX.strFolderName + CDTXMania.DTX.PREIMAGE;
-        BaseTexture txAlbumArt;
-        if (!File.Exists(path))
-        {
-            txAlbumArt = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\5_preimage default.png"));
-        }
-        else
-        {
-            txAlbumArt = BaseTexture.LoadFromPath(path);
-        }
-        
-        var albumArt = AddChild(new UIImage(txAlbumArt));
-        albumArt.size = new Vector2(64, 64);
-        albumArt.position = new Vector3(9, 9, 0);
-        albumArt.name = "AlbumArt";
+        pivot = new Vector2(1, 0);
 
-        string songName = "song name";
-        string artistName = "artist name";
-        
-        if (string.IsNullOrEmpty(CDTXMania.DTX.TITLE) || (!CDTXMania.bCompactMode && CDTXMania.ConfigIni.b曲名表示をdefのものにする))
-            songName = CDTXMania.chosenSong.title;
-        else
-            songName = CDTXMania.DTX.TITLE;
-
-        artistName = CDTXMania.DTX.ARTIST;
-        
-        //add UIText for stage, songname and artist name
-        var stageText = AddChild(new UIText(GetStageNumberText(), 15));
-        stageText.name = "Stage";
-        stageText.position = new Vector3(77, 7, 0);
-        stageText.fillColor = new Color4(0.5f, 0.5f, 0.5f);
-        stageText.outlineWidth = 0;
-        
-        var songNameText = AddChild(new HorizontallyScrollingText(songName, 15));
-        songNameText.name = "SongTitle";
-        songNameText.position = new Vector3(83, 32, 0);
-        songNameText.fillColor = Color4.Black;
-        songNameText.outlineColor = Color4.White;
-        songNameText.size.X = 210.0f;
-        songNameText.scrollingEnabled = true;
-        songNameText.scrollSpeed = 15.0f;
-        songNameText.pauseDuration = 5.0f;
-        
-        var artistNameText = AddChild(new HorizontallyScrollingText(artistName, 12));
-        artistNameText.name = "ArtistName";
-        artistNameText.position = new Vector3(83, 53, 0);
-        artistNameText.fillColor = Color4.Black;
-        artistNameText.outlineColor = Color4.White;
-        artistNameText.size.X = 213.0f;
-        artistNameText.scrollingEnabled = true;
-        artistNameText.scrollSpeed = 15.0f;
-        artistNameText.pauseDuration = 5.0f;
+        MakeComponent("InfoBox", InfoBoxDefault);
     }
 
-    public static string GetStageNumberText()
+    private static UIGroup InfoBoxDefault()
     {
-        if (CDTXMania.nStageNumber == 1)
-            return "1st STAGE";
-        if (CDTXMania.nStageNumber == 2)
-            return "2nd STAGE";
-        if (CDTXMania.nStageNumber == 3)
-            return "3rd STAGE";
-        if (CDTXMania.nStageNumber > 3)
-            return $"{CDTXMania.nStageNumber}th STAGE";
-        return "EXTRA STAGE";
+        UIGroup root = new("InfoBox");
+
+        root.AddChild(new UIImage
+        {
+            name = "Background",
+            imageSource = ImageSource.File,
+            image = SkinResource.System(@"Graphics\Performance\info_box.png")
+        });
+
+        root.AddChild(new UIImage
+        {
+            name = "AlbumArt",
+            imageSource = ImageSource.Dynamic,
+            dynamicSource = "Song.AlbumArt",
+            size = new Vector2(64, 64),
+            position = new Vector3(9, 9, 0)
+        });
+
+        UIText stage = root.AddChild(new UIText("", 15));
+        stage.name = "Stage";
+        stage.position = new Vector3(77, 7, 0);
+        stage.fillColor = new Color4(0.5f, 0.5f, 0.5f);
+        stage.outlineWidth = 0;
+        stage.bindings.Add(new UIBinding("text", "Song.StageNumber"));
+
+        Scrolling(root, "SongTitle", "Song.Title", 15, 210.0f, new Vector3(83, 32, 0));
+        Scrolling(root, "ArtistName", "Song.Artist", 12, 213.0f, new Vector3(83, 53, 0));
+
+        return root;
+    }
+
+    //a title too long for the box travels rather than being cut off
+    private static void Scrolling(UIGroup root, string name, string source, int fontSize, float width,
+        Vector3 position)
+    {
+        HorizontallyScrollingText text = root.AddChild(new HorizontallyScrollingText("", fontSize));
+        text.name = name;
+        text.position = position;
+        text.fillColor = Color4.Black;
+        text.outlineColor = Color4.White;
+        text.size.X = width;
+        text.scrollingEnabled = true;
+        text.scrollSpeed = 15.0f;
+        text.pauseDuration = 5.0f;
+        text.bindings.Add(new UIBinding("text", source));
     }
 
     public override void Draw(Matrix4x4 parentMatrix)

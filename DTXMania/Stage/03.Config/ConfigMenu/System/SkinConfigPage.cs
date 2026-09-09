@@ -2,6 +2,7 @@ using System.Linq;
 using DTXMania.Core;
 using DTXMania.UI.Config;
 using DTXMania.UI.Item;
+using DTXMania.UI.Skin.Preview;
 
 namespace DTXMania;
 
@@ -54,6 +55,14 @@ internal sealed class SkinConfigPage : ConfigPage
                 CSkin.bUseBoxDefSkin = useBoxDefSkin.bON;
             });
         items.Add(useBoxDefSkin);
+
+        //the editor draws over config, so we stay on this stage
+        items.Add(new CItemBase("Open Skin Editor", CItemBase.EPanelType.Normal,
+            "スキンエディタを開きます。",
+            "Open the skin editor.")
+        {
+            action = SkinPreview.Enter
+        });
 
         items.Add(BackItem());
         return items;

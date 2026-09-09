@@ -62,13 +62,13 @@ public class HierarchyWindow
     {
         UIGroup? group = node as UIGroup;
 
-        bool isComponent = node is ComponentInstance;
+        bool isComponent = group != null && group.IsComponent;
 
         ImGuiTreeNodeFlags rootFlags = ImGuiTreeNodeFlags.OpenOnArrow | ImGuiTreeNodeFlags.OpenOnDoubleClick;
 
         if (group == null) rootFlags |= ImGuiTreeNodeFlags.Leaf;
 
-        bool selected = Inspector.inspectorTarget == node.id;
+        bool selected = Inspector.inspectorTarget.Is(node);
         if (selected)
         {
             rootFlags |= ImGuiTreeNodeFlags.Selected;
@@ -76,9 +76,9 @@ public class HierarchyWindow
 
         string id = node.GetHashCode().ToString();
         string name = string.IsNullOrWhiteSpace(node.name) ? node.GetType().Name : node.name;
-        if (node is ComponentInstance componentNode)
+        if (isComponent)
         {
-            name += "   -> " + (string.IsNullOrWhiteSpace(componentNode.component) ? "(code default)" : componentNode.component);
+            name += "   -> " + (string.IsNullOrWhiteSpace(group!.component) ? "(code default)" : group.component);
         }
 
         string contextMenuId = id + "ContextMenu";
@@ -107,7 +107,7 @@ public class HierarchyWindow
         {
             if (ImGui.IsMouseReleased(ImGuiMouseButton.Left))
             {
-                Inspector.inspectorTarget = node.id;
+                Inspector.inspectorTarget = node;
             }
 
             if (ImGui.IsMouseReleased(ImGuiMouseButton.Right))
@@ -144,8 +144,7 @@ public class HierarchyWindow
             }
 
             //this method is recursive, so the removal has to wait until the walk is back at the parent
-            if (!string.IsNullOrEmpty(InspectorManager.toRemove)
-                && InspectorManager.toRemoveDrawable is { } drawable
+            if (InspectorManager.toRemove.Target is { } drawable
                 && group.children.Contains(drawable))
             {
                 group.RemoveChild(drawable);
@@ -199,7 +198,7 @@ public class HierarchyWindow
             unsafe
             {
                 ImGui.SetDragDropPayload(nameof(UIDrawable), (void*)IntPtr.Zero, 0);
-                Inspector.dragDropPayload = node.id;
+                Inspector.dragDropPayload = node;
             }
 
             ImGui.Text(string.IsNullOrWhiteSpace(node.name) ? node.GetType().ToString() : node.name);
@@ -225,10 +224,7 @@ public class HierarchyWindow
             }
             else
             {
-                string droppedId = Inspector.dragDropPayload;
-                var drawable = DrawableTracker.GetDrawable(droppedId);
-                
-                reparentNode = drawable;
+                reparentNode = Inspector.dragDropPayload.Target;
                 reparentGroup = group;
                 
                 ImGui.EndDragDropTarget();
@@ -238,7 +234,7 @@ public class HierarchyWindow
 
     private void DrawNodeContextMenu(UIDrawable node)
     {
-        if (node is ComponentInstance { component.Length: > 0 } componentNode && ImGui.Selectable("Edit Component"))
+        if (node is UIGroup { component.Length: > 0 } componentNode && ImGui.Selectable("Edit Component"))
         {
             ComponentEditor.Open(componentNode.component, componentNode.GetType());
         }
@@ -271,7 +267,7 @@ public class HierarchyWindow
         ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1, 0, 0, 1));
         if (ImGui.Selectable("Delete"))
         {
-            InspectorManager.toRemove = node.id;
+            InspectorManager.toRemove = node;
         }
         ImGui.PopStyleColor();
 
@@ -394,17 +390,13 @@ public class HierarchyWindow
                     ImGui.CloseCurrentPopup();
                 }
             }
-
-            ImGui.Separator();
-            if (ImGui.Selectable("Blank"))
-            {
-                group.AddChild(new GenericComponent());
-                ImGui.CloseCurrentPopup();
-            }
         }
-        else
+
+        ImGui.Separator();
+        if (ImGui.Selectable("Blank"))
         {
-            ImGui.TextDisabled("No custom skin active");
+            group.AddChild(new GenericComponent());
+            ImGui.CloseCurrentPopup();
         }
 
         ImGui.EndMenu();

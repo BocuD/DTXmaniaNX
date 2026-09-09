@@ -24,9 +24,11 @@ internal class ConfigList : UIScrollItemsGroup, IUIItemSource
     private readonly List<ConfigRowData> rows = [];
     private readonly ConfigItemEditor editor;
 
-    private readonly UIImage cursor;
-    private readonly UIImage arrowTop;
-    private readonly UIImage arrowBottom;
+    //found once the component has loaded, rather than built here: a class that adds children of its own
+    //cannot be loaded from a layout without ending up with both sets
+    private UIImage? cursor;
+    private UIImage? arrowTop;
+    private UIImage? arrowBottom;
 
     private List<CItemBase> currentItems = [];
     public readonly Stack<(List<CItemBase> items, int selection, ConfigPage? page)> pageStack = new();
@@ -72,42 +74,74 @@ internal class ConfigList : UIScrollItemsGroup, IUIItemSource
 
     public Action<(EKeyConfigPart part, EKeyConfigPad pad, string label)[]>? onOpenMidiTest;
 
-    public ConfigList(int slotCount, int selectionIndex) : base("ConfigList")
+    public ConfigList() : base("ConfigList")
     {
-        dontSerialize = true;
         editor = new ConfigItemEditor(this);
 
-        visibleSlots = slotCount;
-        selectionOffset = selectionIndex;
         itemOffset = new Vector3(0, RowSpacing, 0);
-        itemComponent = "Components/ConfigRow.json";
-        itemDefault = BuildRowDefault;
+        itemComponentSource = ConfigRow;
 
         //the original settings-list feel: a constant speed that rises with the backlog
         motion = new UIScrollMotion(rate: 4.0f, minSpeed: 10.0f, maxSpeed: 40.0f);
 
-        SetSource(this);
+        //the cursor and arrows load before any slot exists, so insertion order would put them under the
+        //rows. The rows never overlap each other, so ordering them by hand costs nothing here
+        sortByRenderOrder = true;
 
-        cursor = AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\4_itembox cursor.png"))));
-        cursor.name = "cursor";
-        cursor.renderOrder = 1;
-        cursor.position = new Vector3(-7, 4, 0);
+        MakeComponent("ConfigListCursor", CursorElement);
+    }
 
-        BaseTexture arrowTexture = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\4_Arrow.png"));
+    public ConfigList(int slotCount, int selectionIndex) : this()
+    {
+        visibleSlots = slotCount;
+        selectionOffset = selectionIndex;
+    }
 
-        arrowTop = AddChild(new UIImage(arrowTexture));
-        arrowTop.name = "arrowTop";
-        arrowTop.renderOrder = 1;
-        arrowTop.size = new Vector2(40, 40);
-        arrowTop.position = new Vector3(-26, -15, 0);
-        arrowTop.clipRect = new RectangleF(0, 0, 40, 40);
+    protected override void OnContentLoaded()
+    {
+        cursor = GetChild<UIImage>("Cursor");
+        arrowTop = GetChild<UIImage>("ArrowTop");
+        arrowBottom = GetChild<UIImage>("ArrowBottom");
+    }
 
-        arrowBottom = AddChild(new UIImage(arrowTexture));
-        arrowBottom.name = "arrowBottom";
-        arrowBottom.renderOrder = 1;
-        arrowBottom.size = new Vector2(40, 40);
-        arrowBottom.position = new Vector3(-26, 51, 0);
-        arrowBottom.clipRect = new RectangleF(0, 40, 40, 40);
+    //every settings list shares this, so the quick menu and the config screen are styled together
+    private static UIGroup CursorElement()
+    {
+        UIGroup root = new("ConfigListCursor");
+
+        root.AddChild(new UIImage
+        {
+            name = "Cursor",
+            imageSource = ImageSource.File,
+            image = SkinResource.System(@"Graphics\4_itembox cursor.png"),
+            size = new Vector2(444, 67),
+            position = new Vector3(-7, 4, 0),
+            renderOrder = 1
+        });
+
+        root.AddChild(new UIImage
+        {
+            name = "ArrowTop",
+            imageSource = ImageSource.File,
+            image = SkinResource.System(@"Graphics\4_Arrow.png"),
+            size = new Vector2(40, 40),
+            position = new Vector3(-26, -15, 0),
+            clipRect = new RectangleF(0, 0, 40, 40),
+            renderOrder = 1
+        });
+
+        root.AddChild(new UIImage
+        {
+            name = "ArrowBottom",
+            imageSource = ImageSource.File,
+            image = SkinResource.System(@"Graphics\4_Arrow.png"),
+            size = new Vector2(40, 40),
+            position = new Vector3(-26, 51, 0),
+            clipRect = new RectangleF(0, 40, 40, 40),
+            renderOrder = 1
+        });
+
+        return root;
     }
 
     public int ItemCount => Math.Max(1, rows.Count);
@@ -203,7 +237,7 @@ internal class ConfigList : UIScrollItemsGroup, IUIItemSource
 
         (List<CItemBase> items, int selection, ConfigPage? page) = pageStack.Pop();
         SetPage(page);
-        SetItems(items, selection);
+        SetItems(page is { RebuildsOnReturn: true } ? page.Build() : items, selection);
     }
 
     private int SelectedIndexOnPage => rows.Count == 0 ? 0 : Mod(SelectedItem, rows.Count);
@@ -304,7 +338,7 @@ internal class ConfigList : UIScrollItemsGroup, IUIItemSource
     /// </summary>
     private sealed class ConfigItemEditor(ConfigList list) : IUIInputHandler
     {
-        private readonly NavigationRepeat navigation = new();
+        private readonly NavigationRepeat navigation = NavigationRepeat.Vertical();
         private readonly Action increase = () => list.ChangeValue(true);
         private readonly Action decrease = () => list.ChangeValue(false);
 
@@ -333,9 +367,21 @@ internal class ConfigList : UIScrollItemsGroup, IUIItemSource
     {
         //the cursor and arrows say "this is what you are driving", which is what holding focus means
         bool active = IsActive;
-        cursor.isVisible = active;
-        arrowTop.isVisible = active;
-        arrowBottom.isVisible = active;
+
+        if (cursor != null)
+        {
+            cursor.isVisible = active;
+        }
+
+        if (arrowTop != null)
+        {
+            arrowTop.isVisible = active;
+        }
+
+        if (arrowBottom != null)
+        {
+            arrowBottom.isVisible = active;
+        }
 
         base.Draw(parentMatrix);
 
@@ -350,12 +396,30 @@ internal class ConfigList : UIScrollItemsGroup, IUIItemSource
             return;
         }
 
+        bool typing = textInput.drawableTextInput.IsActive;
+
+        if (SelectedRow is { } row)
+        {
+            //what the field committed is the row's to show again
+            if (row.IsEditing && !typing)
+            {
+                row.RefreshValue();
+            }
+
+            row.IsEditing = typing;
+        }
+
+        if (!typing)
+        {
+            return;
+        }
+
         textInput.drawableTextInput.position = SelectedPosition + ValueOffset;
         textInput.drawableTextInput.Draw(localTransformMatrix * parentMatrix);
     }
 
     //the panel behind a row, its name, and its value in one style or the other
-    private UIGroup BuildRowDefault()
+    private UIGroup ConfigRow()
     {
         UIGroup root = new("ConfigRow");
 

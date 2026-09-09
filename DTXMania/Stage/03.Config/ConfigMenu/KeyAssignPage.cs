@@ -98,6 +98,8 @@ internal sealed class KeyAssignPage : ConfigPage
         (part, EKeyConfigPad.Y, "Y"),
         (part, EKeyConfigPad.P, "P"),
         (part, EKeyConfigPad.Pick, "Pick"),
+        (part, EKeyConfigPad.PickUp, "Pick Up"),
+        (part, EKeyConfigPad.PickDown, "Pick Down"),
         (part, EKeyConfigPad.Wail, "Wailing"),
         (part, EKeyConfigPad.Decide, "Decide"),
         (part, EKeyConfigPad.Cancel, "Cancel"),

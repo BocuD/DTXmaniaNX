@@ -8,12 +8,14 @@ using DTXMania.UI.Text;
 
 namespace DTXMania;
 
-/// <summary>
-/// One instrument's difficulty pane: background, difficulty frame and a row per difficulty. The rows are a
-/// <see cref="UIItemsGroup"/> over five <see cref="ChartRowData"/>, so the pane supplies data and the
-/// ChartRow component decides what a row looks like.
-/// </summary>
-public class StatusPane : ComponentInstance, IUIItemSource
+/// <summary>Where the pane's difficulty frame sits, for the component to bind to.</summary>
+public sealed class StatusPaneFrame
+{
+    [DataField] public bool Shown { get; internal set; } = true;
+    [DataField] public double Y { get; internal set; }
+}
+
+public class StatusPane : UIGroup, IUIItemSource
 {
     private const float VerticalSpacing = 74.0f;
     private const int DifficultyCount = 5;
@@ -38,7 +40,10 @@ public class StatusPane : ComponentInstance, IUIItemSource
 
     private readonly ChartRowData[] rows = new ChartRowData[DifficultyCount];
     private BaseTexture[]? rankIcons;
-    private UIImage? difficultyFrame;
+
+    //the frame the pane puts on the difficulty being played, for the component to bind to
+    private readonly UIDataContext paneData = new();
+    private readonly StatusPaneFrame frame = new();
 
     public int ItemCount => DifficultyCount;
     public object GetItem(int index) => rows[index];
@@ -61,21 +66,17 @@ public class StatusPane : ComponentInstance, IUIItemSource
         }
     }
 
-    public StatusPane()
+    public StatusPane() : base("StatusPane")
     {
+        MakeComponent("StatusPane", StatusPaneDefault);
         Array.Fill(rows, ChartRowData.Empty);
+
+        paneData.RegisterObject("Frame", () => frame);
+        dataContext = paneData;
     }
 
     protected override void OnContentLoaded()
     {
-        difficultyFrame = GetChild<UIImage>("DifficultyFrame");
-
-        if (GetChild<UIItemsGroup>("Rows") is { } rowsGroup)
-        {
-            rowsGroup.itemDefault = BuildChartRowDefault;
-            rowsGroup.SetSource(this);
-        }
-
         rowsDirty = true;
     }
 
@@ -100,18 +101,13 @@ public class StatusPane : ComponentInstance, IUIItemSource
 
     private void UpdateDifficultyFrame()
     {
-        if (difficultyFrame == null)
-        {
-            return;
-        }
-
         //with a single guitar the frame belongs only to whichever of guitar/bass is being played
-        difficultyFrame.isVisible = !CDTXMania.ConfigIni.bGuitarEnabled
-                                    || !CDTXMania.ConfigIni.bSingleGuitar
-                                    || instrument == (CDTXMania.ConfigIni.bIsSwappedGuitarBass ? EInstrumentPart.BASS : EInstrumentPart.GUITAR);
+        frame.Shown = !CDTXMania.ConfigIni.bGuitarEnabled
+                      || !CDTXMania.ConfigIni.bSingleGuitar
+                      || instrument == (CDTXMania.ConfigIni.bIsSwappedGuitarBass ? EInstrumentPart.BASS : EInstrumentPart.GUITAR);
 
         int level = CDTXMania.StageManager.stageSongSelectionNew.GetClosestLevelToTargetForSong(currentSong);
-        difficultyFrame.position = new Vector3(-7.0f, 5.0f - VerticalSpacing * level, 0.0f);
+        frame.Y = 5.0f - VerticalSpacing * level;
     }
 
     private ChartRowData ResolveRow(int difficulty)
@@ -154,8 +150,7 @@ public class StatusPane : ComponentInstance, IUIItemSource
         };
     }
 
-    //the code default, also the seed for Components/StatusPane.json
-    protected override UIGroup BuildDefault()
+    private static UIGroup StatusPaneDefault()
     {
         UIGroup root = new("StatusPane");
 
@@ -164,7 +159,7 @@ public class StatusPane : ComponentInstance, IUIItemSource
             name = "Background",
             imageSource = ImageSource.File,
             image = SkinResource.System(@"Graphics\5_difficulty_panel.png"),
-            anchor = new Vector2(0.0f, 1.0f),
+            pivot = new Vector2(0.0f, 1.0f),
             renderOrder = 0
         });
 
@@ -173,14 +168,18 @@ public class StatusPane : ComponentInstance, IUIItemSource
             name = "DifficultyFrame",
             imageSource = ImageSource.File,
             image = SkinResource.System(@"Graphics\5_difficultyframe.png"),
-            anchor = new Vector2(0.0f, 1.0f),
+            pivot = new Vector2(0.0f, 1.0f),
             position = new Vector3(-7.0f, 5.0f, 0.0f),
-            renderOrder = 1
+            renderOrder = 1,
+            bindings =
+            {
+                new UIBinding("position.Y", "Frame.Y"),
+                new UIBinding("isVisible", "Frame.Shown")
+            }
         });
 
-        root.AddChild(new UIItemsGroup("Rows")
+        root.AddChild(new UIItemsGroup("Rows", ChartRow)
         {
-            itemComponent = "Components/ChartRow.json",
             itemOffset = new Vector3(0.0f, -VerticalSpacing, 0.0f),
             renderOrder = 2
         });
@@ -188,8 +187,7 @@ public class StatusPane : ComponentInstance, IUIItemSource
         return root;
     }
 
-    //the code default for one difficulty row, seeded into Components/ChartRow.json
-    private static UIGroup BuildChartRowDefault()
+    private static UIGroup ChartRow()
     {
         UIGroup root = new("ChartRow");
 
@@ -198,7 +196,7 @@ public class StatusPane : ComponentInstance, IUIItemSource
             name = "Skill",
             imageSource = ImageSource.File,
             image = SkinResource.System(@"Graphics\Rank\skill.png"),
-            anchor = new Vector2(0.0f, 1.0f),
+            pivot = new Vector2(0.0f, 1.0f),
             position = new Vector3(14.0f, -49.0f, 0.0f),
             size = new Vector2(27.0f, 27.0f),
             renderOrder = 2,
@@ -211,7 +209,7 @@ public class StatusPane : ComponentInstance, IUIItemSource
             name = "Rank",
             imageSource = ImageSource.Dynamic,
             dynamicSource = "Item.Rank",
-            anchor = new Vector2(0.0f, 1.0f),
+            pivot = new Vector2(0.0f, 1.0f),
             position = new Vector3(60.0f, -49.0f, 0.0f),
             size = new Vector2(27.0f, 27.0f),
             renderOrder = 2,
@@ -239,7 +237,7 @@ public class StatusPane : ComponentInstance, IUIItemSource
         {
             name = "Name",
             position = new Vector3(201.0f, -80.0f, 0.0f),
-            anchor = new Vector2(1.0f, 0.0f),
+            pivot = new Vector2(1.0f, 0.0f),
             renderOrder = 1,
             outlineWidth = 0,
             style = UiTextStyle.Bold,

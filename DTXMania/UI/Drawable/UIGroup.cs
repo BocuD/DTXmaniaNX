@@ -1,5 +1,7 @@
 using System.Diagnostics;
 using System.Numerics;
+using System.Runtime.CompilerServices;
+using DTXMania.Core;
 using DTXMania.UI.Animation;
 using DTXMania.UI.DynamicElements;
 using DTXMania.UI.Inspector;
@@ -16,7 +18,7 @@ public class UIGroup : UIDrawable
     private bool dirty = false;
 
     //drawables already reported as failing to draw, so one broken element does not fill the log
-    [JsonIgnore] private static readonly HashSet<string> reportedDrawFailures = [];
+    [JsonIgnore] private static readonly ConditionalWeakTable<UIDrawable, object> reportedDrawFailures = [];
 
     //an animating property is written every frame for as long as it animates, so a per-write cost here
     //scales with the frame rate
@@ -39,6 +41,51 @@ public class UIGroup : UIDrawable
     [SkinSerialize]
     [JsonProperty(ObjectCreationHandling = ObjectCreationHandling.Replace)]
     public Dictionary<string, string>? sampleContext;
+
+    //skin-relative, eg: Components/ChartRow.json. Empty until a stage is saved into a skin
+    [Themable] public string component = string.Empty;
+
+    //set only where code makes a group a component; one placed by a skin is named by its file instead
+    private string explicitComponentName = string.Empty;
+
+    //a file is written as Components/<name>.json, so the path names the component it came from
+    [JsonIgnore] public string componentName => explicitComponentName.Length > 0
+        ? explicitComponentName
+        : Path.GetFileNameWithoutExtension(component);
+
+    [JsonIgnore] public bool IsComponent => componentName.Length > 0;
+
+    //builds this component until a skin has a file of its own
+    [JsonIgnore] public Func<UIGroup>? componentSource;
+
+    //re-deserializing per instance is how a copy is made: it gives every one a full OnDeserialize pass
+    [JsonIgnore] private static readonly Dictionary<string, string> jsonCache = new();
+
+    [JsonIgnore] private bool contentLoaded;
+
+    public static void ClearComponentCache() => jsonCache.Clear();
+
+    protected void MakeComponent(string name, Func<UIGroup> source)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            throw new ArgumentException("A component needs a name of its own.", nameof(name));
+        }
+
+        explicitComponentName = name;
+        componentSource = source;
+    }
+
+    public void MakeComponent(string name, string componentPath)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            throw new ArgumentException("A component needs a name of its own.", nameof(name));
+        }
+
+        explicitComponentName = name;
+        component = componentPath;
+    }
 
     [AddChildMenu]
     public static UIDrawable Create()
@@ -82,6 +129,26 @@ public class UIGroup : UIDrawable
         return children.FirstOrDefault(x => x.name == name) as T;
     }
 
+    /// <summary>The first descendant of this type, in draw order. For a behaviour a layout only ever holds
+    /// one of, which is what the type already says.</summary>
+    public T? FindChild<T>() where T : UIDrawable
+    {
+        foreach (UIDrawable child in children)
+        {
+            if (child is T match)
+            {
+                return match;
+            }
+
+            if (child is UIGroup group && group.FindChild<T>() is { } nested)
+            {
+                return nested;
+            }
+        }
+
+        return null;
+    }
+
     public UIDrawable GetChild(int i)
     {
         return children[i];
@@ -111,8 +178,149 @@ public class UIGroup : UIDrawable
         children.Clear();
     }
 
+    /// <summary>Loads this component's content as its children, once. Lazy, so a path set by
+    /// deserialization is in place before it runs.</summary>
+    public void EnsureContent()
+    {
+        if (contentLoaded || !IsComponent)
+        {
+            return;
+        }
+
+        contentLoaded = true;
+
+        UIGroup tree = ResolveComponentTree();
+        sampleContext = tree.sampleContext;
+
+        //a component's animation belongs to the component, not to whoever placed an instance of it
+        animator = tree.animator ?? animator;
+
+        foreach (UIDrawable child in tree.children.ToArray())
+        {
+            AddChild(child);
+        }
+
+        OnContentLoaded();
+    }
+
+    protected virtual void OnContentLoaded()
+    {
+    }
+
+    //null when the code default applies: the System skin, or a stage not saved into this one yet
+    public string? ComponentPath()
+    {
+        Skin.SkinDescriptor? skin = CDTXMania.SkinManager.currentSkin;
+        return skin == null || string.IsNullOrWhiteSpace(component)
+            ? null
+            : Path.Combine(skin.basePath, component);
+    }
+
+    private UIGroup ResolveComponentTree()
+    {
+        if (ComponentPath() is not { } fullPath || !File.Exists(fullPath))
+        {
+            return componentSource?.Invoke() ?? new UIGroup(componentName);
+        }
+
+        if (!jsonCache.TryGetValue(fullPath, out string? json))
+        {
+            try
+            {
+                json = File.ReadAllText(fullPath);
+            }
+            catch (Exception e)
+            {
+                Trace.TraceError($"Failed to load component at {fullPath}: {e.Message}");
+                return componentSource?.Invoke() ?? new UIGroup(componentName);
+            }
+
+            jsonCache[fullPath] = json;
+        }
+
+        return Skin.SkinHierarchySerializer.DeserializeFromJson(json)
+               ?? componentSource?.Invoke()
+               ?? new UIGroup(componentName);
+    }
+
+    /// <summary>Gives the skin its own file for this component and points this group at it. Keeps a path
+    /// the skin already set.</summary>
+    public void WriteIntoSkin()
+    {
+        if (!IsComponent || CDTXMania.SkinManager.currentSkin == null)
+        {
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(component))
+        {
+            component = $"Components/{componentName}.json";
+        }
+
+        EnsureContent();
+        SaveComponent();
+    }
+
+    /// <summary>No-op on the System skin, or before the component has a file.</summary>
+    public void SaveComponent()
+    {
+        if (ComponentPath() is not { } fullPath)
+        {
+            Trace.TraceWarning("Save component ignored: System skin or no component set.");
+            return;
+        }
+
+        //wrap the live children in a throwaway root to serialize them; they are referenced, not
+        //reparented, so the live group is untouched
+        UIGroup root = new(componentName);
+        root.children.AddRange(children);
+        root.sampleContext = CaptureSampleContext();
+        root.animator = animator;
+        string json = Skin.SkinHierarchySerializer.SerializeToJsonCompact(root);
+        root.children.Clear();
+
+        sampleContext = root.sampleContext;
+
+        try
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(fullPath)!);
+            File.WriteAllText(fullPath, json);
+            jsonCache[fullPath] = json;
+            Trace.TraceInformation($"Saved component to {fullPath}.");
+        }
+        catch (Exception e)
+        {
+            Trace.TraceError($"Failed to save component to {fullPath}: {e.Message}");
+        }
+    }
+
+    //what the keys resolve to right now, so the component can be edited on its own with sensible values.
+    //Keeps the previous sample when nothing resolves
+    private Dictionary<string, string>? CaptureSampleContext()
+    {
+        Dictionary<string, string> captured = new();
+        DynamicElements.ComponentKeys.Capture(this, captured);
+
+        return captured.Count > 0 ? captured : sampleContext;
+    }
+
+    /// <summary>Picks up external edits to the file, or discards unsaved ones.</summary>
+    public void ReloadComponent()
+    {
+        if (ComponentPath() is { } fullPath)
+        {
+            jsonCache.Remove(fullPath);
+        }
+
+        ClearChildren();
+        contentLoaded = false;
+        EnsureContent();
+    }
+
     public override void Draw(Matrix4x4 parentMatrix)
     {
+        EnsureContent();
+
         if (!isVisible)
         {
             return;
@@ -157,12 +365,46 @@ public class UIGroup : UIDrawable
             {
                 //a drawable that throws once throws every frame, so it is reported the first time and
                 //then left alone: the log stays readable and the rest of the tree still draws
-                if (reportedDrawFailures.Add(element.id))
+                if (reportedDrawFailures.TryAdd(element, null!))
                 {
                     Trace.TraceError($"Error drawing {element.name}: {e} Stacktrace: {e.StackTrace ?? "No stack trace"}");
                 }
             }
         }
+    }
+
+    //what a component is, where its children came from, and what editing it would change everywhere else
+    private void DrawComponentInspector()
+    {
+        if (!IsComponent)
+        {
+            return;
+        }
+
+        if (!ImGui.CollapsingHeader("Component", ImGuiTreeNodeFlags.DefaultOpen))
+        {
+            return;
+        }
+
+        ImGui.LabelText("Name", componentName);
+
+        string? path = ComponentPath();
+        bool inSkin = path != null && File.Exists(path);
+        ImGui.LabelText("Source", inSkin ? component : "Default skin");
+
+        ImGui.BeginDisabled(!inSkin);
+        if (ImGui.Button("Edit Component"))
+        {
+            ComponentEditor.Open(component, GetType());
+        }
+
+        ImGui.SameLine();
+        if (ImGui.Button("Reload Component"))
+        {
+            ReloadComponent();
+        }
+
+        ImGui.EndDisabled();
     }
 
     public override void OnDeserialize()
@@ -192,6 +434,7 @@ public class UIGroup : UIDrawable
     public override void DrawInspector()
     {
         base.DrawInspector();
+        DrawComponentInspector();
         ImGui.Checkbox("Sort by Render Order", ref sortByRenderOrder);
 
         if (ImGui.CollapsingHeader("Animator"))

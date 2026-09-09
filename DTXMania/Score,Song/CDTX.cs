@@ -3094,7 +3094,7 @@ public class CDTX : CActivity
             {
                 this.db再生速度 = dbReplaySpeed;
 
-                StreamReader reader = new(strFileName, Encoding.GetEncoding("shift-jis"));
+                StreamReader reader = ChartTextEncoding.OpenText(strFileName);
                 tRead_FromStream(reader);
                 reader.Close();
                 tProcessChartData(nBgmAdjust);

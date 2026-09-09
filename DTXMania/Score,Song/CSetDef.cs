@@ -109,7 +109,7 @@ public class CSetDef
 
 	public void tReadFromFile( string setdefFileName )
 	{
-		var reader = new StreamReader( setdefFileName, Encoding.GetEncoding( "shift-jis" ) );
+		var reader = ChartTextEncoding.OpenText( setdefFileName );
 		CBlock block = new();
 		string str = null;
 		while( ( str = reader.ReadLine() ) != null )

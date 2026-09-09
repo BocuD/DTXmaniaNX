@@ -76,6 +76,8 @@ public enum EPad			// 演奏用のenum。ここを修正するときは、次に
 	LP      = 10,
 	LBD     = 11,
 	Cancel  = 12,   // fisyher: New Cancel/Go Back Key
+	PickUp	= 13,
+	PickDown = 14,
 	MAX,			// 門番用として定義
 	UNKNOWN = 99
 }
@@ -104,6 +106,8 @@ public enum EKeyConfigPad		// #24609 キーコンフィグで使うenum。captur
 	LP      = EPad.LP,
 	LBD     = EPad.LBD,
 	Cancel  = EPad.Cancel,     // fisyher: New Cancel/Go Back Key
+	PickUp  = EPad.PickUp,
+	PickDown = EPad.PickDown,
 	//Non-Pad System buttons
 	Capture,
 	Search,

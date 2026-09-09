@@ -139,7 +139,6 @@ public sealed partial class Animator
 
     private void FindVideoRenderers()
     {
-        List<KeyValuePair<string, WeakReference<UIDrawable>>> drawables = DrawableTracker.drawables.Where(d => d.Value.TryGetTarget(out UIDrawable? target) && target is UINewVideoRenderer).ToList();
-        videoRenderers = drawables.Select(d => d.Value.TryGetTarget(out UIDrawable? target) ? (UINewVideoRenderer)target : null).Where(v => v != null).ToList()!;
+        videoRenderers = DrawableTracker.AllOfType<UINewVideoRenderer>().ToList();
     }
 }

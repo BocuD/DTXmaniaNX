@@ -1,8 +1,10 @@
+using System.Numerics;
 using DTXMania.Core.Framework;
 using DTXMania.Core.OpenGL;
 using DTXMania.UI;
 using DTXMania.UI.Inspector;
 using DTXMania.UI.OpenGL;
+using DTXMania.UI.Text;
 using Hexa.NET.GLFW;
 using Hexa.NET.ImGui;
 using Silk.NET.OpenGL;
@@ -57,7 +59,7 @@ public sealed class DTXManiaGL : OpenGlGame
         AsyncTextureUploader.Instance.PumpUploads(AsyncUploadBytesPerFrame);
         FrameProfiler.End(FrameSection.PumpUploads);
 
-        UICanvas.SetWindowSize(windowSize);
+        UICanvas.SetWindowSize(new Vector2(width, height));
 
         if (host.fullscreenMode == FullscreenMode.Windowed)
         {
@@ -125,11 +127,32 @@ public sealed class DTXManiaGL : OpenGlGame
         }
         
         mania.KeyPress(key, mods);
+        TextInput.KeyPressed(key, mods);
+    }
+
+    public override void KeyRepeat(GlfwKey key, GlfwMod mods)
+    {
+        TextInput.KeyPressed(key, mods);
+    }
+
+    public override void CharTyped(uint codepoint)
+    {
+        TextInput.Typed(codepoint);
+    }
+
+    public override void PointerMoved(Vector2 windowPosition)
+    {
+        PointerInput.Moved(windowPosition);
+    }
+
+    public override void PointerButtonChanged(int button, bool down, GlfwMod mods)
+    {
+        PointerInput.ButtonChanged(button, down, mods);
     }
 
     public override void KeyUp(GlfwKey key, GlfwMod mods)
     {
-        
+
     }
 
     public override void WindowHandleUpdated(IntPtr newHandle)

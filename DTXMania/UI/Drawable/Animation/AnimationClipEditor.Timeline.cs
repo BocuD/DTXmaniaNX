@@ -350,7 +350,7 @@ public sealed partial class AnimationClipEditor
             {
                 AddKeyframeAtScrub(track, animator, root);
             }
-            if (plusHovered) ImGui.SetTooltip("Add keyframe at current scrub time using the property's current value");
+            if (plusHovered) ImGui.SetTooltip("Add keyframe at current scrub time");
 
             // Draw the "+" visual: a rounded rect filled in the standard button colors, with a
             // centered glyph.
@@ -436,7 +436,7 @@ public sealed partial class AnimationClipEditor
 
         Vector2 contentMin = origin;
         // The X coordinate at which t=0 should land. Everything that maps a time value to a
-        // pixel — ruler ticks, keyframe dots, playhead — uses this as its anchor. Anything
+        // pixel — ruler ticks, keyframe dots, playhead — uses this as its pivot. Anything
         // that spans the full visual width (row tints, ruler background, hit area) uses
         // contentMin.X / fullWidth instead.
         float timeOriginX = MathF.Round(origin.X + TimelineEdgePadding);
@@ -593,7 +593,7 @@ public sealed partial class AnimationClipEditor
         Vector2 tracksOrigin, float timeOriginX, float duration,
         Keyframe? hoveredKeyframe, AnimationTrack? hoveredKeyframeTrack, int hoveredTrackIndex)
     {
-        // Convert mouse X to a clamped clip time. The anchor is timeOriginX (where t=0 sits
+        // Convert mouse X to a clamped clip time. The pivot is timeOriginX (where t=0 sits
         // visually), not the child's left edge, so clicks inside the left edge padding map
         // to t=0 rather than to negative times.
         float MouseTime() => Math.Clamp(

@@ -22,7 +22,7 @@ namespace DTXMania;
 /// the still-visible "front" layer, so the ambient background never shows through mid-load. When the fade
 /// completes the front is hidden and the two swap roles. A selection with no background fades the front out.
 /// </summary>
-public class PreviewVideoBackground : UIGroup
+public class PreviewVideoBackground : UICoverGroup
 {
     //where a full background video starts, to skip intros and initial black frames. Preview movies are
     //short and deliberate, so they play from the very start
@@ -277,6 +277,7 @@ public class PreviewVideoBackground : UIGroup
         UpdateDebounce();
         UpdateFade();
 
+        PlaceToCover();
         UpdateLocalTransformMatrix();
         Matrix4x4 combined = localTransformMatrix * parentMatrix;
 
@@ -487,8 +488,7 @@ public class PreviewVideoBackground : UIGroup
         string[] lines;
         try
         {
-            //chart files are Shift-JIS; the provider is registered at startup in Program.cs
-            lines = File.ReadAllLines(chartFilePath, Encoding.GetEncoding("shift-jis"));
+            lines = ChartTextEncoding.ReadAllLines(chartFilePath);
         }
         catch
         {

@@ -44,28 +44,33 @@ internal class CStageTitle : CStage
 		text.name = "VersionText";
 		text.bindings.Add(new UIBinding("text", "Game.VersionDisplay"));
 
-		//ambient looping background video, part of the layout so its render order is skinnable
-		ui.AddChild(new UINewVideoRenderer
+		UICoverGroup background = ui.AddChild(new UICoverGroup("BackgroundVideo"));
+		background.renderOrder = -100;
+		background.AddChild(new UINewVideoRenderer
 		{
 			video = SkinResource.System(@"Graphics\2_background.mp4"),
-			renderOrder = -100,
-			name = "BackgroundVideo"
+			size = UISize.Inherited,
+			name = "Video"
 		});
 
-
+		//the logo and the menu art are part of this image, so it stays at the design size
 		ui.AddChild(new UIImage
 		{
 			imageSource = ImageSource.File,
 			image = SkinResource.System(@"Graphics\2_background.png"),
 			renderOrder = -99,
-			position = Vector3.Zero,
+			size = new Vector2(1280, 720),
+			parentAnchor = UICanvas.Center,
+			pivot = UICanvas.Center,
 			name = "Background"
 		});
 
+		//placed from the middle of the window, so it stays put at any aspect
 		UIMenu menu = ui.AddChild(new UIMenu("TitleMenu"));
-		menu.position = new Vector3(MENU_X, MENU_Y, 0);
+		menu.parentAnchor = UICanvas.Center;
+		menu.position = UICanvas.FromCenter(MENU_X, MENU_Y);
 		menu.itemOffset = new Vector3(0, MENU_H, 0);
-		menu.itemComponent = @"Components/TitleMenuItem.json";
+		menu.itemComponentSource = TitleMenuItem;
 		menu.renderOrder = 10;
 		menu.wrapSelection = false;
 		menu.selectionSpeed = 30.0f;
@@ -95,7 +100,7 @@ internal class CStageTitle : CStage
 			image = SkinResource.System(MenuSheet),
 			size = new Vector2(MENU_W, MENU_H),
 			clipRect = new RectangleF(0, MENU_H * 5, MENU_W, MENU_H),
-			anchor = new Vector2(0.5f, 0.5f),
+			pivot = new Vector2(0.5f, 0.5f),
 			position = new Vector3(MENU_W / 2.0f, MENU_H / 2.0f, 0)
 		});
 
@@ -118,7 +123,7 @@ internal class CStageTitle : CStage
 	}
 
 	//what one entry looks like: its own row of the menu sheet
-	private static UIGroup BuildEntryDefault()
+	private static UIGroup TitleMenuItem()
 	{
 		UIGroup root = new("TitleMenuItem");
 
@@ -143,8 +148,6 @@ internal class CStageTitle : CStage
 		{
 			return;
 		}
-
-		titleMenu.itemDefault = BuildEntryDefault;
 		titleMenu.onDecide = ChooseEntry;
 		titleMenu.onCancel = () => exitRequested = true;
 		focusTarget = titleMenu;

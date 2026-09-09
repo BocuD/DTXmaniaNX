@@ -7,13 +7,14 @@ internal class CItemTextInput : CItemBase, IDisposable
 {
     public string strCurrentValue = "";
     
-    public UIImGuiTextInput drawableTextInput;
+    public UITextInput drawableTextInput;
 
     public CItemTextInput()
     {
         eType = EType.TextInput;
-        drawableTextInput = new UIImGuiTextInput();
-        drawableTextInput.fillColor = Color4.Black;
+
+        drawableTextInput = new UITextInput();
+        drawableTextInput.fillColor = new Color4(1f, 0.27f, 0f);
         drawableTextInput.outlineWidth = 0;
         drawableTextInput.fontSize = 16;
     }
@@ -33,20 +34,11 @@ internal class CItemTextInput : CItemBase, IDisposable
 
     protected override void tEnterPressed()
     {
-        drawableTextInput.fillColor = new Color4(1, 0.27f, 0);
-        drawableTextInput.ActivateTextInput(strCurrentValue, 
-            (newValue) => 
-            {
-                strCurrentValue = newValue;
-                action?.Invoke();
-                drawableTextInput.fillColor = Color4.Black;
-                drawableTextInput.RenderTexture();
-            },
-            () => {
-                drawableTextInput.fillColor = Color4.Black;
-                drawableTextInput.RenderTexture();
-            });
-        drawableTextInput.RenderTexture();
+        drawableTextInput.ActivateTextInput(strCurrentValue, newValue =>
+        {
+            strCurrentValue = newValue;
+            action?.Invoke();
+        });
     }
 
     public void Dispose()

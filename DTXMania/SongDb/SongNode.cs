@@ -337,4 +337,97 @@ public class SongNode
 
         return root;
     }
+
+    public static SongNode? FindRestoreTarget(SongNode root, SongNode selectedNodeBackup,
+        CChartData? selectedChartBackup)
+    {
+        string? previousBoxTitle = selectedNodeBackup.parent?.title;
+        string? previousChartPath = selectedChartBackup?.FileInformation.AbsoluteFilePath;
+
+        SongNode? exact = null;
+        SongNode? fallback = null;
+        SongNode? preferred = null;
+
+        //use the chart path as identifier instead of just set.def title
+        bool PlayedThis(SongNode candidate)
+        {
+            if (previousChartPath == null) return false;
+
+            foreach (CChartData chart in candidate.charts)
+            {
+                if (chart != null && IsChart(chart, previousChartPath))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        //handling for merged guitar/bass
+        static bool IsChart(CChartData chart, string path)
+        {
+            if (chart.FileInformation.AbsoluteFilePath.Equals(path, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            if (chart.instrumentSources == null)
+            {
+                return false;
+            }
+
+            foreach (CChartData source in chart.instrumentSources)
+            {
+                if (source?.FileInformation.AbsoluteFilePath.Equals(path,
+                        StringComparison.OrdinalIgnoreCase) == true)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        void Find(SongNode container)
+        {
+            foreach (SongNode child in container.childNodes)
+            {
+                if (child == null) continue;
+
+                switch (child.nodeType)
+                {
+                    case ENodeType.SONG:
+                        if (PlayedThis(child))
+                        {
+                            exact = child;
+                            return;
+                        }
+
+                        if (!child.path.Equals(selectedNodeBackup.path, StringComparison.InvariantCulture))
+                        {
+                            break;
+                        }
+
+                        fallback ??= child;
+                        if (previousBoxTitle != null &&
+                            container.title.Equals(previousBoxTitle, StringComparison.InvariantCulture))
+                        {
+                            preferred ??= child;
+                        }
+
+                        break;
+
+                    case ENodeType.BOX or ENodeType.ROOT:
+                        Find(child);
+                        if (exact != null) return;
+                        break;
+                }
+            }
+        }
+
+        Find(root);
+
+        return exact ?? preferred ?? fallback;
+    }
 }

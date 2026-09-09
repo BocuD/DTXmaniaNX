@@ -9,16 +9,16 @@ namespace DTXMania;
 
 public class SongSearchMenu : UIGroup, IUIInputHandler
 {
-    private UIImGuiTextInput textInput;
+    private UITextInput textInput;
     private UIText statusText;
-    
+
     public SongSearchMenu() : base("SongSearchMenu")
     {
         //add child elements
         var header = AddChild(new UIText("Search", 28));
         header.name = "Header";
-        
-        textInput = AddChild(new UIImGuiTextInput());
+
+        textInput = AddChild(new UITextInput());
         textInput.name = "SearchInput";
         textInput.fontSize = 25;
         textInput.position.Y = 30;
@@ -51,8 +51,8 @@ public class SongSearchMenu : UIGroup, IUIInputHandler
 
     public string FocusName => "SongSearch";
 
-    //the text field itself takes the keyboard through ImGui; holding focus is what stops the song list
-    //scrolling to whatever is being typed
+    //the open field is what reads the keyboard, from on top of this; holding focus is what stops the song
+    //list scrolling to whatever is being typed
     public void HandleInput()
     {
     }

@@ -6,7 +6,6 @@ using DTXMania.SongDb.Sorting;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.DynamicElements;
 using FDK;
-using SlimDX.DirectInput;
 
 namespace DTXMania;
 
@@ -15,13 +14,19 @@ namespace DTXMania;
 /// sort: the wrap-around, the easing and the dip towards the selected entry all come from there, so this
 /// only says which sort is showing and reacts when that changes.
 /// </summary>
-public class SortMenuContainer : ComponentInstance, IUIItemSource
+public class SortMenuContainer : UIGroup, IUIItemSource
 {
     private const float EntrySpacing = 90.0f;
 
     private readonly SortRowData[] rows = BuildRows();
 
     private UIScrollItemsGroup? entries;
+
+    private readonly NavigationRepeat navigation = NavigationRepeat.Horizontal();
+
+    //cached, so the repeat does not allocate a closure on every polled frame
+    private readonly Action scrollPrevious;
+    private readonly Action scrollNext;
 
     //one per sort mode, in the order SongDbSort declares them
     private SoundReference[]? sounds;
@@ -32,8 +37,13 @@ public class SortMenuContainer : ComponentInstance, IUIItemSource
 
     public SortMenuContainer() : base("SortMenuContainer")
     {
+        MakeComponent("SortMenuContainer", SortMenuContainerDefault);
+
+        scrollPrevious = () => entries?.ScrollBy(-1);
+        scrollNext = () => entries?.ScrollBy(1);
+
         size = new Vector2(662, 92);
-        anchor = new Vector2(1.0f, 0.0f);
+        pivot = new Vector2(1.0f, 0.0f);
     }
 
     public int ItemCount => rows.Length;
@@ -43,13 +53,7 @@ public class SortMenuContainer : ComponentInstance, IUIItemSource
     {
         LoadSounds();
 
-        entries = GetChild<UIScrollItemsGroup>("Entries");
-
-        if (entries != null)
-        {
-            entries.itemDefault = BuildEntryDefault;
-            entries.SetSource(this);
-        }
+        entries = FindChild<UIScrollItemsGroup>();
     }
 
     /// <summary>Shows a sort without applying it, for restoring what was selected last time.</summary>
@@ -63,19 +67,7 @@ public class SortMenuContainer : ComponentInstance, IUIItemSource
 
     public void HandleNavigation()
     {
-        if (CDTXMania.InputManager.Keyboard.bKeyPressed(Key.LeftArrow)
-            || CDTXMania.Pad.bPressedGB(EPad.Pick)
-            || CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.SD))
-        {
-            entries?.ScrollBy(-1);
-        }
-
-        if (CDTXMania.InputManager.Keyboard.bKeyPressed(Key.RightArrow)
-            || CDTXMania.Pad.bPressedGB(EPad.Pick)
-            || CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.FT))
-        {
-            entries?.ScrollBy(1);
-        }
+        navigation.Poll(scrollPrevious, scrollNext);
     }
 
     public override void Draw(Matrix4x4 parentMatrix)
@@ -152,7 +144,7 @@ public class SortMenuContainer : ComponentInstance, IUIItemSource
         for (int i = 0; i < sounds.Length; i++)
         {
             string name = SongDbSort.All[i].IconName;
-            bool open = ImGui.TreeNode(name);
+            bool open = ImGui.TreeNode($"{name}##sortsound{i}");
 
             ImGui.SameLine();
             ImGui.TextDisabled(sounds[i].Summary);
@@ -179,8 +171,7 @@ public class SortMenuContainer : ComponentInstance, IUIItemSource
 
     private static int Mod(int value, int length) => length <= 0 ? 0 : (value % length + length) % length;
 
-    //the code default, also the seed for Components/SortMenu.json
-    protected override UIGroup BuildDefault()
+    private static UIGroup SortMenuContainerDefault()
     {
         UIGroup root = new("SortMenu");
 
@@ -192,9 +183,8 @@ public class SortMenuContainer : ComponentInstance, IUIItemSource
             renderOrder = 0
         });
 
-        root.AddChild(new UIScrollItemsGroup("Entries")
+        root.AddChild(new UIScrollItemsGroup("Entries", SortItem)
         {
-            itemComponent = "Components/SortItem.json",
             itemOffset = new Vector3(EntrySpacing, 0.0f, 0.0f),
             navigationAxis = UINavigationAxis.Horizontal,
 
@@ -206,7 +196,9 @@ public class SortMenuContainer : ComponentInstance, IUIItemSource
 
             //the original feel: eases the whole way with no floor, capped at what the old per-frame
             //clamp of 10px allowed at 60fps. Speeds are in entries per second, not pixels
-            motion = new UIScrollMotion(rate: 10.0f, maxSpeed: 600.0f / EntrySpacing),
+            //queueLimit keeps a held key two entries ahead of what is on screen at most, so letting go
+            //stops it rather than draining a backlog built while the repeat outran the easing
+            motion = new UIScrollMotion(rate: 10.0f, maxSpeed: 600.0f / EntrySpacing, queueLimit: 2.0f),
 
             //the selected entry sits lower than its neighbours
             curve = new UIItemCurve(UIAxis.Y, distance: 18.0f, range: EntrySpacing)
@@ -215,15 +207,14 @@ public class SortMenuContainer : ComponentInstance, IUIItemSource
         return root;
     }
 
-    //the code default for one entry, seeded into Components/SortItem.json
-    private static UIGroup BuildEntryDefault()
+    private static UIGroup SortItem()
     {
         UIGroup root = new("SortItem");
 
         TextureArray icon = root.AddChild(new TextureArray
         {
             name = "Icon",
-            anchor = new Vector2(0.5f, 0.5f),
+            pivot = new Vector2(0.5f, 0.5f),
             bindings = { new UIBinding("textureIndex", "Item.IconIndex") }
         });
 
@@ -236,7 +227,7 @@ public class SortMenuContainer : ComponentInstance, IUIItemSource
         root.AddChild(new UIText(string.Empty, 18)
         {
             name = "Name",
-            anchor = new Vector2(0.5f, 0.5f),
+            pivot = new Vector2(0.5f, 0.5f),
             isVisible = false,
             bindings = { new UIBinding("text", "Item.Name") }
         });

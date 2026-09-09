@@ -20,6 +20,25 @@ public sealed class UIDataContext : IUIDataContext
     //app-wide context, consulted after every per-element context; register long-lived objects at startup
     public static readonly UIDataContext Global = new();
 
+    public static IUIPreview? preview { get; private set; }
+
+    /// <summary>Resolves every binding against a preview's values first, for the length of the returned
+    /// scope. Null restores real resolution, for a preview showing a live instance.</summary>
+    public static PreviewScope PushPreview(IUIPreview? context) => new(context);
+
+    public readonly struct PreviewScope : IDisposable
+    {
+        private readonly IUIPreview? previous;
+
+        internal PreviewScope(IUIPreview? context)
+        {
+            previous = preview;
+            preview = context;
+        }
+
+        public void Dispose() => preview = previous;
+    }
+
     private readonly Dictionary<string, string> strings = new();
     private readonly Dictionary<string, BaseTexture> textures = new();
     private readonly Dictionary<string, Func<BaseTexture?>> textureProviders = new();

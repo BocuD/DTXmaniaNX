@@ -9,8 +9,11 @@ namespace DTXMania;
 
 internal sealed class SongDbConfigPage : ConfigPage
 {
+    private readonly SongPathsPage songPaths;
+
     public SongDbConfigPage(ConfigList list) : base(list)
     {
+        songPaths = new SongPathsPage(list, () => isDirty = true);
     }
 
     //set by any option that changes how the song list is built, so leaving the page offers to rebuild it
@@ -21,12 +24,10 @@ internal sealed class SongDbConfigPage : ConfigPage
         isDirty = false;
         List<CItemBase> items = [];
 
-        var paths = TextInput("Song Database Paths", CDTXMania.ConfigIni.strSongDataSearchPath, 
-            "演奏データの格納されているフォルダへのパス。\n" +
-            "セミコロン(;)で区切ることにより複数のパスを指定できます。\n例: d:\\DTXFiles1\\;e:\\DTXFiles2\\",
-            "Path for DTX data.\n" +
-            "You can add multiple paths separated with semicolon(;)\nFor example: d:\\DTXFiles1\\;e:\\DTXFiles2\\",
-            () => CDTXMania.ConfigIni.strSongDataSearchPath, s => CDTXMania.ConfigIni.strSongDataSearchPath = s);
+        CItemBase paths = FolderItem("Song Database Paths",
+            "演奏データの格納されているフォルダの一覧です。",
+            "The folders searched for songs.", songPaths);
+        paths.formatValue = () => songPaths.CountLabel;
         items.Add(paths);
         
         var autoExtractSongs = EnumChoice("Auto Extract Songs", "ZIPファイルから楽曲を抽出する", "Whether to extract songs from ZIP files.", 

@@ -42,22 +42,22 @@ public class HoldNote : UIGroup
         
         normal = AddChild(new TextureArray(normalTextures));
         normal.name = "hold_normal";
-        normal.anchor = new Vector2(0.5f, 0.0f);
+        normal.pivot = new Vector2(0.5f, 0.0f);
 
         wailing = AddChild(new TextureArray(wailingTextures));
         wailing.name = "hold_wailing";
-        wailing.anchor = new Vector2(0.5f, 0.0f);
+        wailing.pivot = new Vector2(0.5f, 0.0f);
         wailing.isVisible = false;
         
         holdText = AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\Note\Guitar\hold.png"))));
         holdText.name = "hold_text";
-        holdText.anchor = new Vector2(0.5f, 0.0f);
+        holdText.pivot = new Vector2(0.5f, 0.0f);
         holdText.scale = new Vector3(0.67f, 0.67f, 1.0f);
         holdText.position.Y = -3.0f;
         
         staticHoldText = AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\Note\Guitar\hold.png"))));
         staticHoldText.name = "hold_text_static";
-        staticHoldText.anchor = new Vector2(0.5f, 0.0f);
+        staticHoldText.pivot = new Vector2(0.5f, 0.0f);
         staticHoldText.scale = new Vector3(0.67f, 0.67f, 1.0f);
         staticHoldText.position.Y = -3.0f;
 

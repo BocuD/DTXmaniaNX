@@ -51,7 +51,7 @@ public class SongSelectionContainer : UIScrollItemsGroup, IUIItemSource
     private readonly Action scrollToNext;
 
     //the stage drives this list, since deciding on a song is stage flow
-    private readonly NavigationRepeat listNavigation = new();
+    private readonly NavigationRepeat listNavigation = NavigationRepeat.Vertical(useNeck: true);
 
     public SongSelectionContainer() : base("SongSelectionContainer")
     {
@@ -59,14 +59,11 @@ public class SongSelectionContainer : UIScrollItemsGroup, IUIItemSource
         currentRoot = songDb.songNodeRoot;
         UnfilteredRoot = currentRoot;
 
-        itemComponent = "Components/SongRow.json";
+        itemComponentSource = SongRow;
         itemOffset = new Vector3(0, RowSpacing, 0);
         visibleSlots = DefaultWindowSize;
         selectionOffset = DefaultSelectionRow;
         curve = new UIItemCurve(UIAxis.X, -25.0f, 90.0f);
-        itemDefault = BuildSongRowDefault;
-
-        SetSource(this);
 
         scrollToPrevious = () => ScrollBy(-1);
         scrollToNext = () => ScrollBy(1);
@@ -318,6 +315,20 @@ public class SongSelectionContainer : UIScrollItemsGroup, IUIItemSource
         return (int)CStageSongSelectionNew.EReturnValue.Continue;
     }
 
+    public bool ConfirmRandomSong()
+    {
+        List<SongNode> songs = currentRoot.childNodes
+            .FindAll(node => node.nodeType == SongNode.ENodeType.SONG && node.ShowInSongList());
+
+        if (songs.Count == 0)
+        {
+            return false;
+        }
+
+        UpdateSelection(songs[Random.Shared.Next(songs.Count)]);
+        return ActionDecide();
+    }
+
     private bool ActionDecide()
     {
         if (currentSelection == null)
@@ -360,8 +371,7 @@ public class SongSelectionContainer : UIScrollItemsGroup, IUIItemSource
         return false;
     }
 
-    //the code default for one row, seeded into Components/SongRow.json
-    private UIGroup BuildSongRowDefault()
+    private UIGroup SongRow()
     {
         UIGroup root = new("SongRow");
 
@@ -374,7 +384,7 @@ public class SongSelectionContainer : UIScrollItemsGroup, IUIItemSource
                 SkinResource.System(@"Graphics\5_box_closed.png"),
                 SkinResource.System(@"Graphics\5_box_open.png")
             },
-            anchor = new Vector2(0.0f, 0.5f),
+            pivot = new Vector2(0.0f, 0.5f),
             position = new Vector3(-40.0f, 42.0f, 0.0f),
             renderOrder = -1
         });
@@ -392,7 +402,7 @@ public class SongSelectionContainer : UIScrollItemsGroup, IUIItemSource
             dynamicSource = "Item.AlbumArt",
             size = new Vector2(65, 65),
             position = new Vector3(40, 40, 0),
-            anchor = new Vector2(0.5f, 0.5f),
+            pivot = new Vector2(0.5f, 0.5f),
             renderOrder = 1
         });
 
@@ -403,7 +413,7 @@ public class SongSelectionContainer : UIScrollItemsGroup, IUIItemSource
         title.fillColor = Color4.FromColor(Color.Black);
         title.outlineColor = Color4.FromColor(Color.White);
         title.position = new Vector3(78, 38, 0);
-        title.anchor = new Vector2(0, 0.5f);
+        title.pivot = new Vector2(0, 0.5f);
         title.renderOrder = 1;
         title.size.X = 460.0f;
         title.bindings.Add(new UIBinding("scrollingEnabled", "IsSelected"));
@@ -415,7 +425,7 @@ public class SongSelectionContainer : UIScrollItemsGroup, IUIItemSource
         artist.fillColor = Color4.FromColor(Color.Black);
         artist.outlineColor = Color4.FromColor(Color.White);
         artist.position = new Vector3(80, 60, 0);
-        artist.anchor = new Vector2(0, 0.5f);
+        artist.pivot = new Vector2(0, 0.5f);
         artist.renderOrder = 1;
         artist.size.X = 460.0f;
         artist.bindings.Add(new UIBinding("scrollingEnabled", "IsSelected"));
@@ -425,7 +435,7 @@ public class SongSelectionContainer : UIScrollItemsGroup, IUIItemSource
             name = "skillbar",
             imageSource = ImageSource.File,
             image = SkinResource.System(@"Graphics\5_skillbar.png"),
-            anchor = new Vector2(0.0f, 0.5f),
+            pivot = new Vector2(0.0f, 0.5f),
             position = new Vector3(82.0f, 15.0f, 0.0f),
             renderOrder = 2,
             isVisible = false,
@@ -437,15 +447,16 @@ public class SongSelectionContainer : UIScrollItemsGroup, IUIItemSource
             name = "skillbarFill",
             imageSource = ImageSource.File,
             image = SkinResource.System(@"Graphics\5_skillbar_fill.png"),
-            anchor = new Vector2(0.0f, 0.5f),
+            pivot = new Vector2(0.0f, 0.5f),
             position = new Vector3(161.0f, 16.0f, 0.0f),
+            //286 is the bar at full skill, so the binding below is a plain 0 to 1
             size = new Vector2(286, 8),
             renderOrder = 1,
             isVisible = false,
             bindings = { new UIBinding("isVisible", "Item.ShowSkill") }
         });
 
-        skillbarFill.bindings.Add(new UIBinding("size.X", "Item.SkillBarWidth"));
+        skillbarFill.bindings.Add(new UIBinding("scale.X", "Item.SkillOfMax"));
 
         UIText skill = root.AddChild(new UIText("", 12));
         skill.name = "skilltext";
@@ -454,7 +465,7 @@ public class SongSelectionContainer : UIScrollItemsGroup, IUIItemSource
         skill.position = new Vector3(105.0f, 16.0f, 0.0f);
         skill.fillColor = Color4.FromColor(Color.White);
         skill.style = UiTextStyle.Italic;
-        skill.anchor = new Vector2(0, 0.5f);
+        skill.pivot = new Vector2(0, 0.5f);
         skill.renderOrder = 2;
 
         root.AddChild(new TextureArray
@@ -470,7 +481,7 @@ public class SongSelectionContainer : UIScrollItemsGroup, IUIItemSource
                 SkinResource.System(@"Graphics\Lamp\05.png")
             },
             position = new Vector3(-40, 40, 0),
-            anchor = new Vector2(0.5f, 0.5f),
+            pivot = new Vector2(0.5f, 0.5f),
             renderOrder = 1,
             isVisible = false,
             bindings =

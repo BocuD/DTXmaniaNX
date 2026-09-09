@@ -2,49 +2,109 @@ using System.Numerics;
 using DTXMania.Core;
 using DTXMania.Core.Framework;
 using DTXMania.UI.Drawable;
+using DTXMania.UI.DynamicElements;
+using DTXMania.UI.Skin;
+using Hexa.NET.ImGui;
 
 namespace DTXMania;
 
-/// <summary>
-/// The result-screen progress bars: the panel frame plus the current-play and previous-best bars, generated
-/// from the same progress-string data the performance stage produced. The bar textures are runtime, rebuilt
-/// each time the stage loads.
-/// </summary>
 public class ResultProgressBar : UIGroup
 {
-    public ResultProgressBar(int instrument)
+    [Themable] public int currentBarWidth = 12;
+    [Themable] public int bestBarWidth = 4;
+    [Themable] public int barHeight = 425;
+
+    private readonly UIDataContext data = new();
+
+    private BaseTexture? currentBar;
+    private BaseTexture? bestBar;
+    private bool drawn;
+
+    public ResultProgressBar() : base("ResultProgressBar")
     {
-        name = "ResultProgressBar";
+        data.RegisterTexture("Bars.Current", CurrentBar);
+        data.RegisterTexture("Bars.Best", BestBar);
+        dataContext = data;
 
-        var stageResult = CDTXMania.StageManager.stageResult;
+        MakeComponent("ResultProgressBar", ProgressBarDefault);
+    }
 
-        var panel = AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\8_progress_bar_panel.png"))));
-        panel.name = "Panel";
-        panel.renderOrder = 0;
+    private static UIGroup ProgressBarDefault()
+    {
+        UIGroup root = new("ResultProgressBar");
 
-        //the best-record bar is thin and sits behind the wider current-play bar
-        BaseTexture bestBar = null!;
-        CActPerfProgressBar.txGenerateProgressBarHelper(ref bestBar, stageResult.strBestProgressBarRecord[instrument],
-            4, 425, CActPerfProgressBar.nSectionIntervalCount);
-
-        BaseTexture currentBar = null!;
-        CActPerfProgressBar.txGenerateProgressBarHelper(ref currentBar, stageResult.strCurrProgressBarRecord[instrument],
-            12, 425, CActPerfProgressBar.nSectionIntervalCount);
-
-        if (currentBar != null)
+        root.AddChild(new UIImage
         {
-            var current = AddChild(new UIImage(currentBar));
-            current.name = "CurrentBar";
-            current.position = new Vector3(1, 1, 0);
-            current.renderOrder = 1;
+            name = "Panel",
+            imageSource = ImageSource.File,
+            image = SkinResource.System(@"Graphics\8_progress_bar_panel.png"),
+            renderOrder = 0
+        });
+
+        root.AddChild(new UIImage
+        {
+            name = "CurrentBar",
+            imageSource = ImageSource.Dynamic,
+            dynamicSource = "Bars.Current",
+            position = new Vector3(1, 1, 0),
+            renderOrder = 1
+        });
+
+        root.AddChild(new UIImage
+        {
+            name = "BestBar",
+            imageSource = ImageSource.Dynamic,
+            dynamicSource = "Bars.Best",
+            position = new Vector3(15, 1, 0),
+            renderOrder = 2
+        });
+
+        return root;
+    }
+
+    private BaseTexture? CurrentBar()
+    {
+        EnsureBars();
+        return currentBar;
+    }
+
+    private BaseTexture? BestBar()
+    {
+        EnsureBars();
+        return bestBar;
+    }
+
+    public void Regenerate() => drawn = false;
+
+    //each bar is a surface, so they are drawn once until something asks again
+    private void EnsureBars()
+    {
+        if (drawn)
+        {
+            return;
         }
 
-        if (bestBar != null)
+        drawn = true;
+
+        CStageResult stageResult = CDTXMania.StageManager.stageResult;
+        int instrument = CDTXMania.GetCurrentInstrument();
+
+        CActPerfProgressBar.txGenerateProgressBarHelper(ref bestBar!,
+            stageResult.strBestProgressBarRecord[instrument],
+            bestBarWidth, barHeight, CActPerfProgressBar.nSectionIntervalCount);
+
+        CActPerfProgressBar.txGenerateProgressBarHelper(ref currentBar!,
+            stageResult.strCurrProgressBarRecord[instrument],
+            currentBarWidth, barHeight, CActPerfProgressBar.nSectionIntervalCount);
+    }
+
+    public override void DrawInspector()
+    {
+        base.DrawInspector();
+
+        if (ImGui.Button("Regenerate Bars"))
         {
-            var best = AddChild(new UIImage(bestBar));
-            best.name = "BestBar";
-            best.position = new Vector3(15, 1, 0);
-            best.renderOrder = 2;
+            Regenerate();
         }
     }
 }

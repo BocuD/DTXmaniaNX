@@ -63,7 +63,6 @@ public class UIMenu : UIItemsGroup, IUIItemSource
 
     public UIMenu(string name) : base(name)
     {
-        SetSource(this);
     }
 
     public int ItemCount => entries.Count;
@@ -77,7 +76,7 @@ public class UIMenu : UIItemsGroup, IUIItemSource
         entries.Clear();
         entries.AddRange(items);
 
-        SetSource(this);
+        EnsureSlots();
         SelectedItem = selection;
     }
 

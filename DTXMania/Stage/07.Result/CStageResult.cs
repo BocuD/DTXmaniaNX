@@ -53,7 +53,6 @@ internal class CStageResult : CStage
 		eStageID = EStage.Result_7;
 		ePhaseID = EPhase.Common_DefaultState;
 		bActivated = false;
-		//listChildActivities.Add( actResultImage = new CActResultImage(this) );
 	}
 
 		
@@ -63,16 +62,57 @@ internal class CStageResult : CStage
 	{
 		var context = new UIDataContext();
 		context.RegisterObject("Result", () => resultData);
+		context.RegisterTexture("Result.Background", BackgroundTexture);
 		ui.dataContext = context;
 	}
 
 	public override void BuildDefaultLayout()
 	{
+		ui.animator = new Animator();
+		ui.animator.AddResource(SkinResource.System(@"Graphics\Result\open.json"));
+		ui.openClip = "open";
+
+		var infoPanel = ui.AddChild(new ResultInfoPanel());
+		infoPanel.position = new Vector3(830, 120, 0);
+
+		UIPlayerNameplate nameplate = ui.AddChild(new UIPlayerNameplate());
+		nameplate.displaySkill = true;
+		nameplate.position = new Vector3(989, 53, 0);
+
+		var progressBar = ui.AddChild(new ResultProgressBar());
+		progressBar.position = new Vector3(1130, 435, 0);
+		progressBar.renderOrder = 4;
+		progressBar.scale = new Vector3(0.55f, 0.55f, 1.0f);
+
+		var paramPanel = ui.AddChild(new ResultParameterPanel());
+		paramPanel.position = new Vector3(879, 479, 0);
+
+		UICoverGroup backgroundCover = ui.AddChild(new UICoverGroup("Background"));
+		backgroundCover.renderOrder = -100;
+
+		backgroundCover.AddChild(new UIImage
+		{
+			name = "Image",
+			imageSource = ImageSource.Dynamic,
+			dynamicSource = "Result.Background",
+			size = UISize.Inherited
+		});
+
+		ui.AddChild(new UIImage
+		{
+			name = "AlbumArt",
+			imageSource = ImageSource.Dynamic,
+			dynamicSource = "Song.AlbumArt",
+			size = new Vector2(380, 380),
+			position = new Vector3(640, 130, 0),
+			pivot = new Vector2(0.5f, 0.0f)
+		});
+
 		var stageNumber = ui.AddChild(new UIText("", 46));
 		stageNumber.name = "StageNumber";
-		stageNumber.bindings.Add(new UIBinding("text", "Result.StageNumber"));
+		stageNumber.bindings.Add(new UIBinding("text", "Song.StageNumber"));
 		stageNumber.position = new Vector3(640, 50, 0);
-		stageNumber.anchor = new Vector2(0.5f, 0);
+		stageNumber.pivot = new Vector2(0.5f, 0);
 		stageNumber.font = SkinResource.System("Futura PT Book.otf");
 		stageNumber.style = UiTextStyle.Bold;
 		stageNumber.outlineWidth = 0;
@@ -82,13 +122,13 @@ internal class CStageResult : CStage
 			imageSource = ImageSource.File,
 			image = SkinResource.System(@"Graphics\Result\songname_bg.png")
 		});
-		titleArtistBg.anchor = new Vector2(0.5f, 0);
+		titleArtistBg.pivot = new Vector2(0.5f, 0);
 		titleArtistBg.position = new Vector3(640, 529, 0);
 		titleArtistBg.renderOrder = 1;
 		titleArtistBg.name = "TitleArtistBg";
 
 		HorizontallyScrollingText songNameText = ui.AddChild(new HorizontallyScrollingText("", 29));
-		songNameText.bindings.Add(new UIBinding("text", "Result.SongTitle"));
+		songNameText.bindings.Add(new UIBinding("text", "Song.Title"));
 		songNameText.fillColor = Color4.Black;
 		songNameText.outlineColor = Color4.White;
 		songNameText.name = "SongName";
@@ -101,7 +141,7 @@ internal class CStageResult : CStage
 		songNameText.scrollSpeed = 20.0f;
 
 		HorizontallyScrollingText artistNameText = ui.AddChild(new HorizontallyScrollingText("", 20));
-		artistNameText.bindings.Add(new UIBinding("text", "Result.Artist"));
+		artistNameText.bindings.Add(new UIBinding("text", "Song.Artist"));
 		artistNameText.fillColor = Color4.Black;
 		artistNameText.outlineColor = Color4.White;
 		artistNameText.name = "ArtistName";
@@ -112,65 +152,47 @@ internal class CStageResult : CStage
 		artistNameText.scrollingEnabled = true;
 		artistNameText.size.X = 355;
 		artistNameText.scrollSpeed = 20.0f;
-		
+
+		//fast/slow hit counts, side by side under the judgement rows; both hide together when the lag
+		//counter is off in config
+		var fastCount = ui.AddChild(new UIText("", 20));
+		fastCount.name = "FastCount";
+		fastCount.bindings.Add(new UIBinding("text", "Result.FastCount"));
+		fastCount.bindings.Add(new UIBinding("isVisible", "Result.ShowLagCounts"));
+		fastCount.position = new Vector3(900, 655, 0);
+		fastCount.fillColor = new Color4(0.1f, 0.8f, 1.0f);
+		fastCount.outlineWidth = 0;
+
+		var slowCount = ui.AddChild(new UIText("", 20));
+		slowCount.name = "SlowCount";
+		slowCount.bindings.Add(new UIBinding("text", "Result.SlowCount"));
+		slowCount.bindings.Add(new UIBinding("isVisible", "Result.ShowLagCounts"));
+		slowCount.position = new Vector3(986, 655, 0);
+		slowCount.fillColor = new Color4(1.0f, 0.2f, 0.2f);
+		slowCount.outlineWidth = 0;
 	}
 
-	//elements that build runtime textures from the result data (rank icon, jacket, progress bar) can't be
-	//part of the serializable layout, so they are added here and marked dontSerialize. The open animation
-	//is set up here too, once the panels it targets exist
+	//the rank icon builds its children from the result in its constructor, so a layout cannot hold it
 	public override void OnLayoutReady()
 	{
-		background = ui.AddChild(new UIImage(BaseTexture.LoadFromPath(ResultBackgroundPath())));
-		background.renderOrder = -100;
-		background.name = "Background";
-		background.dontSerialize = true;
-
 		var rankIcon = ui.AddChild(new ResultRankIcon(CDTXMania.GetCurrentInstrument()));
 		rankIcon.position = new Vector3(225, 360, 0);
 		rankIcon.renderOrder = 3;
 		rankIcon.dontSerialize = true;
 
-		string path = CDTXMania.DTX.strFolderName + CDTXMania.DTX.PREIMAGE;
-		var txJacket = BaseTexture.LoadFromPath(!File.Exists(path) ? CSkin.Path(@"Graphics\5_preimage default.png") : path);
-		var jacket = ui.AddChild(new UIImage(txJacket));
-		jacket.size = new Vector2(380, 380);
-		jacket.position = new Vector3(640, 130, 0);
-		jacket.name = "AlbumArt";
-		jacket.anchor.X = 0.5f;
-		jacket.dontSerialize = true;
-
-		//todo: position these
-		if (CDTXMania.GetCurrentInstrument() == 0)
+		//the plate is placed by the layout; whose it is follows what was just played
+		UIPlayerNameplate? nameplate = ui.FindChild<UIPlayerNameplate>();
+		if (nameplate != null)
 		{
-			var drums = ui.AddChild(new UIPlayerNameplate(0, true));
-			drums.position = new Vector3(989, 53, 0);
-			drums.dontSerialize = true;
+			nameplate.instrument = CDTXMania.GetCurrentInstrument();
 		}
-		else
-		{
-			var guitar1 = ui.AddChild(new UIPlayerNameplate(1, true));
-			guitar1.position = new Vector3(989, 53, 0);
-			guitar1.dontSerialize = true;
-		}
-
-		var infoPanel = ui.AddChild(new ResultInfoPanel());
-		infoPanel.position = new Vector3(830, 120, 0);
-		infoPanel.dontSerialize = true;
-
-		var paramPanel = ui.AddChild(new ResultParameterPanel(CDTXMania.GetCurrentInstrument()));
-		paramPanel.position = new Vector3(879, 479, 0);
-		paramPanel.dontSerialize = true;
-
-		var progressBar = ui.AddChild(new ResultProgressBar(CDTXMania.GetCurrentInstrument()));
-		progressBar.position = new Vector3(435, 130, 0);
-		progressBar.renderOrder = 4;
-		progressBar.dontSerialize = true;
-
-		//the clip lives in its own file, so a saved layout references it rather than copying it in
-		ui.animator = new Animator();
-		ui.animator.AddResource(SkinResource.System(@"Graphics\Result\open.json"));
-		ui.animator.Play("open", false);
 	}
+
+	//a provider is pulled every frame, so the file is resolved once and held until the stage runs again
+	private BaseTexture? backgroundTexture;
+
+	private BaseTexture? BackgroundTexture()
+		=> backgroundTexture ??= BaseTexture.LoadFromPath(ResultBackgroundPath());
 
 	//an optional per-rank background overrides the default one; rank 99 (unknown) shares E's
 	private string ResultBackgroundPath()
@@ -199,6 +221,7 @@ internal class CStageResult : CStage
 			#region [ Initialize ]
 			//---------------------
 			eReturnValueWhenFadeOutCompleted = EReturnValue.Continue;
+			backgroundTexture = null;
 			bAnimationComplete = false;
 			bIsCheckedWhetherResultScreenShouldSaveOrNot = false;				// #24609 2011.3.14 yyagi
 			n最後に再生したHHのWAV番号 = -1;
@@ -609,11 +632,7 @@ internal class CStageResult : CStage
 				ctPlayNewRecord.tStop();
 			}
 		}
-		
-		// if ( actResultImage.OnUpdateAndDraw() == 0 )
-		// {
-		// 	bAnimationComplete = false;
-		// }
+
 		#region [ #24609 2011.3.14 yyagi ランク更新or演奏型スキル更新時、リザルト画像をpngで保存する ]
 		if ( bAnimationComplete && bIsCheckedWhetherResultScreenShouldSaveOrNot == false	// #24609 2011.3.14 yyagi; to save result screen in case BestRank or HiSkill.
 		                        && CDTXMania.ConfigIni.bScoreIniを出力する
@@ -709,7 +728,9 @@ internal class CStageResult : CStage
 			bIsCheckedWhetherResultScreenShouldSaveOrNot = true;
 		}
 		#endregion
-		if ( ePhaseID == EPhase.Common_DefaultState && UIFocus.Holds( this ) )
+		//leaving deactivates this stage before the change runs, and in preview the change is dropped. The
+		//skin editor is how you leave instead
+		if ( ePhaseID == EPhase.Common_DefaultState && UIFocus.Holds( this ) && !previewMode )
 		{
 			if ( CDTXMania.InputManager.Keyboard.bKeyPressed( (int)SlimDXKey.Escape ) )
 			{
@@ -759,9 +780,6 @@ internal class CStageResult : CStage
 	private readonly int[] nチャンネル0Atoレーン07;
 	private int n最後に再生したHHのWAV番号;
 	private EChannel n最後に再生したHHのチャンネル番号;
-	private UIImage background;  // tx背景
-	//Copy from CStagePerfCommonScreen
-	public STDGBVALUE<CStagePerfCommonScreen.CLAGTIMINGHITCOUNT> nTimingHitCount;
 
 	//private CDirectShow ds背景動画;
 	private long lDshowPosition;

@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using DTXMania.Core;
 using DTXMania.UI.Drawable;
+using DTXMania.UI.Skin;
 using FDK;
 
 namespace DTXMania;
@@ -26,7 +27,15 @@ internal class CStageEnd : CStage
 
 	public override void BuildDefaultLayout()
 	{
-		ui.AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\9_background.jpg"))));
+		UICoverGroup background = ui.AddChild(new UICoverGroup("Background"));
+		background.renderOrder = -100;
+		background.AddChild(new UIImage
+		{
+			name = "Image",
+			imageSource = ImageSource.File,
+			image = SkinResource.System(@"Graphics\9_background.jpg"),
+			size = UISize.Inherited
+		});
 	}
 	
 	public override void OnActivate()
@@ -72,7 +81,9 @@ internal class CStageEnd : CStage
 		base.OnUpdateAndDraw();
 		
 		ct時間稼ぎ.tUpdate();
-		if ( ct時間稼ぎ.bReachedEndValue && !CDTXMania.Skin.soundGameEnd.bIsPlaying )
+
+		//leaving here closes the game, which is not what someone looking at the layout wants
+		if ( ct時間稼ぎ.bReachedEndValue && !CDTXMania.Skin.soundGameEnd.bIsPlaying && !previewMode )
 		{
 			return 1;
 		}

@@ -30,7 +30,7 @@ public class NoteExplosion : UIGroup
         }
 
         var textureArray = AddChild(new TextureArray(explode));
-        textureArray.anchor = new Vector2(0.5f, 0.5f);
+        textureArray.pivot = new Vector2(0.5f, 0.5f);
         textureArray.color = color;
         textureArray.name = "attack0";
 
@@ -42,13 +42,13 @@ public class NoteExplosion : UIGroup
         }
 
         var textureArray2 = AddChild(new TextureArray(explode2));
-        textureArray2.anchor = new Vector2(0.5f, 0.5f);
+        textureArray2.pivot = new Vector2(0.5f, 0.5f);
         textureArray2.name = "attack1";
 
         var circleTex = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\Note\Explosion\circle01.png"));
         circleTex.blendMode = BlendMode.Additive;
         var circle = AddChild(new UIImage(circleTex));
-        circle.anchor = new Vector2(0.5f, 0.5f);
+        circle.pivot = new Vector2(0.5f, 0.5f);
         circle.color = color;
         circle.name = "circle";
         circle.isVisible = hasCircle;

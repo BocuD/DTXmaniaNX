@@ -11,6 +11,7 @@ using DTXMania.SongDb;
 using DTXMania.Core.Framework;
 using DTXMania.UI;
 using DTXMania.UI.Drawable;
+using DTXMania.UI.DynamicElements;
 using FDK;
 using Point = System.Drawing.Point;
 using SlimDXKey = SlimDX.DirectInput.Key;
@@ -132,33 +133,33 @@ internal class CStageSongLoading : CStage
     
     public override void BuildDefaultLayout()
     {
-        ui.AddChild(new UIImage
+        UICoverGroup background = ui.AddChild(new UICoverGroup("Background"));
+        background.renderOrder = -100;
+        background.AddChild(new UIImage
         {
-            name = "Background",
+            name = "Image",
             imageSource = ImageSource.File,
             image = SkinResource.System(@"Graphics\6_background.jpg"),
-            renderOrder = -100
+            size = UISize.Inherited
         });
         
-        if (!string.IsNullOrWhiteSpace(strSongTitle))
-        {
-            UIText songNameText = ui.AddChild(new UIText(strSongTitle, 40));
-            songNameText.fillColor = Color4.Black;
-            songNameText.outlineColor = Color4.White;
-            songNameText.name = "SongName";
-            songNameText.font = SkinResource.System(UIFonts.FallbackFont);
-            songNameText.position = new Vector3(500, 285, 0);
-        }
+        UIText songNameText = ui.AddChild(new UIText("", 40));
+        songNameText.fillColor = Color4.Black;
+        songNameText.outlineColor = Color4.White;
+        songNameText.name = "SongName";
+        songNameText.font = SkinResource.System(UIFonts.FallbackFont);
+        songNameText.position = new Vector3(500, 285, 0);
+        songNameText.bindings.Add(new UIBinding("text", "Song.Title"));
+        songNameText.bindings.Add(new UIBinding("isVisible", "Song.HasTitle"));
 
-        if (!string.IsNullOrWhiteSpace(strArtistName))
-        {
-            UIText artistNameText = ui.AddChild(new UIText(strArtistName, 30));
-            artistNameText.fillColor = Color4.Black;
-            artistNameText.outlineColor = Color4.White;
-            artistNameText.name = "ArtistName";
-            artistNameText.font = SkinResource.System(UIFonts.FallbackFont);
-            artistNameText.position = new Vector3(500, 360, 0);
-        }
+        UIText artistNameText = ui.AddChild(new UIText("", 30));
+        artistNameText.fillColor = Color4.Black;
+        artistNameText.outlineColor = Color4.White;
+        artistNameText.name = "ArtistName";
+        artistNameText.font = SkinResource.System(UIFonts.FallbackFont);
+        artistNameText.position = new Vector3(500, 360, 0);
+        artistNameText.bindings.Add(new UIBinding("text", "Song.Artist"));
+        artistNameText.bindings.Add(new UIBinding("isVisible", "Song.HasArtist"));
     }
 
     public override void OnActivate()

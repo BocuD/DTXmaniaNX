@@ -22,6 +22,14 @@ public abstract class BaseGame
     public abstract void KeyDown(GlfwKey key, GlfwMod mods);
     public abstract void KeyUp(GlfwKey key, GlfwMod mods);
 
+    public virtual void KeyRepeat(GlfwKey key, GlfwMod mods) {}
+
+    public virtual void CharTyped(uint codepoint) {}
+
+    public virtual void PointerMoved(Vector2 windowPosition) {}
+
+    public virtual void PointerButtonChanged(int button, bool down, GlfwMod mods) {}
+
     public virtual void WindowHandleUpdated(IntPtr newHandle) {}
 
     public void RequestExit()

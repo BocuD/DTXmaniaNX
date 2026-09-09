@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System.Diagnostics;
+using System.Numerics;
 using DiscordRPC;
 using DTXMania.Core;
 using DTXMania.UI;
@@ -19,7 +20,8 @@ public abstract class CStage : CActivity, IUIInputHandler
 		Details = "Idle",
 	};
 
-	public virtual bool NeedsImGui => false;
+	//set by the skin editor. Stages fake any data they are missing and never advance on their own
+	public static bool previewMode;
 
 	internal EStage eStageID;
 	public enum EStage
@@ -113,7 +115,18 @@ public abstract class CStage : CActivity, IUIInputHandler
 		//before OnStageOpened, so a stage that plays something as it opens has it in memory by then
 		root.LoadSounds();
 
-		OnLayoutReady();
+		try
+		{
+			OnLayoutReady();
+		}
+		catch (Exception e) when (loadSkin)
+		{
+			Trace.TraceError($"Loading the layout for {eStageID} failed, using the built-in one: {e}");
+
+			LoadUI(false);
+			return;
+		}
+
 		root.OnStageOpened();
 	}
 
@@ -150,7 +163,7 @@ public abstract class CStage : CActivity, IUIInputHandler
 			FirstUpdate();
 			bJustStartedUpdate = false;
 		}
-		
+
 		UICanvas.Place(ui);
 		ui.Draw(Matrix4x4.Identity);
 		
@@ -206,7 +219,7 @@ public abstract class CStage : CActivity, IUIInputHandler
 
 	public NavigationRepeat? Navigation => navigation;
 
-	protected readonly NavigationRepeat navigation = new();
+	protected readonly NavigationRepeat navigation = NavigationRepeat.Vertical();
 
 	/// <summary>
 	/// What this stage hands its input to — usually its menu. Set it and there is nothing else to do; a
@@ -235,7 +248,7 @@ public abstract class CStage : CActivity, IUIInputHandler
 		}
 	}
 
-	public UIGroup ui;
+	public StageRoot ui;
 
 	/// <summary>
 	/// Display the current <see cref="Presence"/> of this stage.

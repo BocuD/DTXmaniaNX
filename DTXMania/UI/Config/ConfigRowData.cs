@@ -18,17 +18,18 @@ internal sealed class ConfigRowData
 
     [DataField] public bool HasPanel => Item != null;
 
-    //the value is drawn in one style or the other, never both, and a text-input row draws neither because
-    //it renders its own field
+    //the value is drawn in one style or the other, never both. A text-input row shows its value like any
+    //other until it is being typed in, when the field it renders itself takes that space
     [DataField] public bool ShowValue => hasValue && !IsEditing;
 
-    [DataField] public bool ShowEditedValue => hasValue && IsEditing;
+    [DataField] public bool ShowEditedValue => hasValue && IsEditing && !rendersOwnField;
 
     public bool IsEditing { get; set; }
 
     public CItemBase? Item { get; private set; }
 
     private bool hasValue;
+    private bool rendersOwnField;
 
     public void SetItem(CItemBase? item)
     {
@@ -37,8 +38,8 @@ internal sealed class ConfigRowData
         Name = item?.strItemName ?? string.Empty;
         PanelIndex = PanelFor(item);
 
-        //a text input renders its own value, so the row leaves that space alone
-        hasValue = item != null && item is not CItemTextInput;
+        hasValue = item != null;
+        rendersOwnField = item is CItemTextInput;
 
         RefreshValue();
     }

@@ -70,13 +70,13 @@ public partial class SkinDescriptor
         File.WriteAllText(Path.Combine(targetPath, "skin.json"), json);
     }
 
-    //persists inspector edits: writes the current stage's live tree into this skin's layout json
+    //through the manager, so the layout gets the skin's own copy of every clip and component it uses
     public void SaveCurrentStageChanges()
     {
         CStage stage = CDTXMania.StageManager.rCurrentStage;
         if (stage?.ui != null)
         {
-            UILayout.Save(LayoutPath(stage.eStageID), stage.ui);
+            CDTXMania.SkinManager.SaveStageLayout(stage.eStageID, stage.ui);
         }
     }
 }

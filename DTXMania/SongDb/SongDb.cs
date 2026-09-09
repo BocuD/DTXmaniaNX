@@ -54,6 +54,16 @@ public class SongDb : IDisposable
 	private DateTime start;
 	private Task scanTask;
 
+	//no sqlite cache: none of this came from disk
+	internal SongDb(SongNode root, List<SongNode> flattened)
+	{
+		songNodeRoot = root;
+		flattenedSongList = flattened;
+		totalSongs = flattened.Count;
+		hasEverScanned = true;
+		RecalculateSkill();
+	}
+
 	public SongDb()
 	{
 		try

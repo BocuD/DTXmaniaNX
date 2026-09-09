@@ -218,6 +218,9 @@ public class CScoreIni
 		/// </remarks>
 		public STHitRanges stSecondaryHitRanges;
 
+		public int nFastCount;
+		public int nSlowCount;
+
 		public int nGoodCount;
 		public int nGreatCount;
 		public int nMissCount;

@@ -106,14 +106,15 @@ public class UINewVideoRenderer : UIDrawable
         Controller.Update();
 
         DisplayedFrame frame = Controller.CurrentFrame;
-        
-        if (frame.IsValid && frame.Texture != null && frame.Texture.IsValid())
+        BaseTexture? texture = frame.Texture;
+
+        if (frame.IsValid && texture != null && texture.IsValid() && !texture.notFound)
         {
             //a stream can change dimensions mid-playback
-            size.SetContent(new Vector2(frame.Texture.Width, frame.Texture.Height));
+            size.SetContent(new Vector2(texture.Width, texture.Height));
 
-            RectangleF clipRect = new(0, 0, frame.Texture.Width, frame.Texture.Height);
-            frame.Texture.tDraw2DMatrix(combinedMatrix, size, clipRect, color);
+            RectangleF clipRect = new(0, 0, texture.Width, texture.Height);
+            texture.tDraw2DMatrix(combinedMatrix, size, clipRect, color);
         }
     }
 
@@ -138,7 +139,7 @@ public class UINewVideoRenderer : UIDrawable
         }
 
         // Hand off rendering to the encapsulated Controller securely locked to this drawable instance.
-        Controller.DrawInspector(id);
+        Controller.DrawInspector(GetHashCode().ToString());
     }
 
     public override void Dispose()

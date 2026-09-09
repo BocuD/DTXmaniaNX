@@ -97,10 +97,9 @@ public class SortByTitle : SongDbSort
     
     protected virtual char GetSortKey(SongNode song)
     {
-        //get song title
-        CChartData chartData = song.charts.FirstOrDefault(x => x != null);
+        CChartData? chartData = song.charts.FirstOrDefault(x => x != null);
 
-        if (string.IsNullOrWhiteSpace(chartData.SongInformation.TitleRoman))
+        if (chartData == null || string.IsNullOrWhiteSpace(chartData.SongInformation.TitleRoman))
         {
             return '-';
         }

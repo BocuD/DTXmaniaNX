@@ -24,6 +24,13 @@ public struct UISize : IEquatable<UISize>
     public UiSizeMode xMode;
     public UiSizeMode yMode;
 
+    //how far an inheriting edge sits inside the parent's, in parent pixels. A Fixed or Auto axis ignores
+    //its two and is placed by position and parentAnchor as usual
+    public float marginLeft;
+    public float marginRight;
+    public float marginTop;
+    public float marginBottom;
+
     public float X
     {
         get => _x;
@@ -68,12 +75,12 @@ public struct UISize : IEquatable<UISize>
     {
         if (xMode == UiSizeMode.Inherit)
         {
-            _x = parentSize.X;
+            _x = MathF.Max(parentSize.X - marginLeft - marginRight, 0f);
         }
 
         if (yMode == UiSizeMode.Inherit)
         {
-            _y = parentSize.Y;
+            _y = MathF.Max(parentSize.Y - marginTop - marginBottom, 0f);
         }
     }
 
@@ -90,7 +97,11 @@ public struct UISize : IEquatable<UISize>
         }
 
         return (xMode != UiSizeMode.Fixed || _x.Equals(other._x))
-            && (yMode != UiSizeMode.Fixed || _y.Equals(other._y));
+            && (yMode != UiSizeMode.Fixed || _y.Equals(other._y))
+            && (xMode != UiSizeMode.Inherit
+                || (marginLeft.Equals(other.marginLeft) && marginRight.Equals(other.marginRight)))
+            && (yMode != UiSizeMode.Inherit
+                || (marginTop.Equals(other.marginTop) && marginBottom.Equals(other.marginBottom)));
     }
 
     public override bool Equals(object? obj) => obj is UISize other && Equals(other);
@@ -99,7 +110,11 @@ public struct UISize : IEquatable<UISize>
         xMode,
         yMode,
         xMode == UiSizeMode.Fixed ? _x : 0f,
-        yMode == UiSizeMode.Fixed ? _y : 0f);
+        yMode == UiSizeMode.Fixed ? _y : 0f,
+        xMode == UiSizeMode.Inherit ? marginLeft : 0f,
+        xMode == UiSizeMode.Inherit ? marginRight : 0f,
+        yMode == UiSizeMode.Inherit ? marginTop : 0f,
+        yMode == UiSizeMode.Inherit ? marginBottom : 0f);
 
     public override string ToString() => $"{_x} {xMode}, {_y} {yMode}";
 }

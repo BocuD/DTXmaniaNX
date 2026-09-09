@@ -640,7 +640,7 @@ internal class CActSelectQuickConfig : CActSelectPopupMenu
         {
             subMenu = new UIGroup("Quick Options Menu");
             subMenu.renderOrder = 100;
-            subMenu.anchor = new Vector2(0.5f, 0.5f);
+            subMenu.pivot = new Vector2(0.5f, 0.5f);
 
             var popupTex = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\ScreenSelect popup auto settings.png"));
             var popup = new UIImage(popupTex);

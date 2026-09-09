@@ -138,7 +138,7 @@ public partial class UIImage : UITexture
     //pulls the current texture from the bound source, swapping only when it changes
     private void UpdateDynamicTexture()
     {
-        if (!TryResolveContextTexture(dynamicSource, out BaseTexture current) || ReferenceEquals(current, texture))
+        if (!this.TryResolveContextTexture(dynamicSource, out BaseTexture current) || ReferenceEquals(current, texture))
         {
             return;
         }

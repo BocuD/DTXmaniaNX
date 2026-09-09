@@ -3,6 +3,7 @@ using DTXMania.Core;
 using DTXMania.SongDb;
 using DTXMania.UI;
 using DTXMania.UI.Drawable;
+using DTXMania.UI.Skin;
 
 namespace DTXMania;
 
@@ -30,7 +31,6 @@ public class StatusPanel : UIGroup
 		AddChild(new StatusPane
 		{
 			instrument = instrument,
-			component = "Components/StatusPane.json",
 			name = instrument.ToString(),
 			position = position
 		});

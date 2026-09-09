@@ -23,6 +23,8 @@ internal abstract class ConfigPage
     /// <summary>Builds this page's rows. Called each time the page is (re)opened.</summary>
     public abstract List<CItemBase> Build();
 
+    public virtual bool RebuildsOnReturn => false;
+
     private readonly List<UIDrawable> elements = [];
 
     /// <summary>
@@ -81,6 +83,15 @@ internal abstract class ConfigPage
         return new CItemBase(name, CItemBase.EPanelType.Folder, descriptionJp, descriptionEn)
         {
             action = () => list.OpenFolder(target),
+            formatValue = () => CDTXMania.isJapanese ? "開く" : "Open Folder"
+        };
+    }
+
+    protected CItemBase FolderItem(string name, string descriptionJp, string descriptionEn, Func<ConfigPage> target)
+    {
+        return new CItemBase(name, CItemBase.EPanelType.Folder, descriptionJp, descriptionEn)
+        {
+            action = () => list.OpenFolder(target()),
             formatValue = () => CDTXMania.isJapanese ? "開く" : "Open Folder"
         };
     }

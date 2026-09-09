@@ -25,6 +25,10 @@ public class UIPaddedNumber : UIGroup
     [Themable] public Color4 padColor = new(0.31f, 0.31f, 0.31f);
     [Themable] public Color4 numColor = Color4.White;
 
+    [Themable] public Vector2 texturePadding = Vector2.Zero;
+
+    [Themable] public float digitGap;
+
     //code-managed text parts, recreated by the ctor on load and never part of the layout
     [JsonIgnore] private readonly UIText padText;
     [JsonIgnore] private readonly UIText numText;
@@ -52,7 +56,8 @@ public class UIPaddedNumber : UIGroup
         long resolved = value;
 
         //the split, width measure and re-render are wasted work unless something actually changed
-        int styleHash = HashCode.Combine(padding, fontSize, font.source, font.path, style, padColor, numColor);
+        int styleHash = HashCode.Combine(padding, fontSize, font.source, font.path, style, padColor, numColor,
+            HashCode.Combine(texturePadding, digitGap));
         if (!applied || resolved != lastValue || styleHash != lastStyleHash)
         {
             applied = true;
@@ -80,8 +85,18 @@ public class UIPaddedNumber : UIGroup
         StylePart(numText, s[zeros..], numColor);
 
         padText.RenderTexture();
-        numText.position.X = padText.position.X + padText.size.X;
+        numText.RenderTexture();
+
+        numText.position.X = padText.position.X + padText.size.X
+                             - padText.glyphInset - numText.glyphInset + digitGap;
+
+        size = new Vector2(
+            numText.position.X + numText.size.X,
+            MathF.Max(padText.size.Y, numText.size.Y));
     }
+
+    public override bool ShouldSerializeMember(string memberName)
+        => memberName != nameof(size) && base.ShouldSerializeMember(memberName);
 
     private void StylePart(UIText part, string text, Color4 color)
     {
@@ -89,6 +104,7 @@ public class UIPaddedNumber : UIGroup
         part.font = font;
         part.style = style;
         part.outlineWidth = 0;
+        part.texturePadding = texturePadding;
         part.fillColor = color;
         part.SetText(text);
     }

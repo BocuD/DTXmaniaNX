@@ -37,10 +37,22 @@ public class CPad
 
 	// メソッド
 
+	/// </summary>
 	public void GetEvents( EInstrumentPart part, EPad pad, List<STInputEvent> list )
 	{
-		CConfigIni.CKeyAssign.STKEYASSIGN[] stkeyassignArray = rConfigIni.KeyAssign[ (int) part ][ (int) pad ];
 		list.Clear();
+		tAddEvents( part, pad, list );
+
+		if( pad == EPad.Pick && part != EInstrumentPart.DRUMS )
+		{
+			tAddEvents( part, EPad.PickUp, list );
+			tAddEvents( part, EPad.PickDown, list );
+		}
+	}
+
+	private void tAddEvents( EInstrumentPart part, EPad pad, List<STInputEvent> list )
+	{
+		CConfigIni.CKeyAssign.STKEYASSIGN[] stkeyassignArray = rConfigIni.KeyAssign[ (int) part ][ (int) pad ];
 
 		// すべての入力デバイスについて…
 		foreach (IInputDevice device in rInputManager.listInputDevices)

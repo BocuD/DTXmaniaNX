@@ -4,6 +4,8 @@ using DTXMania.Core;
 using DTXMania.Core.Framework;
 using DTXMania.SongDb;
 using DTXMania.UI.Drawable;
+using DTXMania.UI.DynamicElements;
+using DTXMania.UI.Skin;
 using DTXMania.UI.Inspector;
 using Hexa.NET.ImGui;
 
@@ -11,81 +13,124 @@ namespace DTXMania;
 
 public class DensityGraph : UIGroup
 {
-    private EInstrumentPart inst;
+    [Themable] public EInstrumentPart instrument;
 
-    private UIText noteCountText;
-    
+    //where the bars start, how far apart they sit and how big each one is. Drums and guitar draw a
+    //different number of lanes over different art, so each has its own
+    [Themable] public Vector2 drumBarOrigin = new(36, 284);
+    [Themable] public float drumBarSpacing = 12.0f;
+    [Themable] public Vector2 drumBarSize = new(4, 252);
+
+    [Themable] public Vector2 guitarBarOrigin = new(34, 284);
+    [Themable] public float guitarBarSpacing = 12.0f;
+    [Themable] public Vector2 guitarBarSize = new(6, 252);
+
+    [Themable] public float barMaxHeight = 252.0f;
+
+    private readonly UIDataContext data = new();
+    private readonly DensityGraphData values;
+
+    //drawn per selection rather than authored, so they are built here and left out of the layout
+    private UIImage[] drumBars = [];
+    private UIImage[] guitarBars = [];
+
+    private UIText? noteCountText;
+
+    internal int noteCount;
+
+    public DensityGraph() : this(EInstrumentPart.DRUMS)
+    {
+    }
+
     public DensityGraph(EInstrumentPart inst) : base("DensityGraph")
     {
-        this.inst = inst;
+        instrument = inst;
+        pivot = new Vector2(0, 1);
+        size = new Vector2(160, 342);
 
-        noteCountText = AddChild(new UIText("", 16));
-        noteCountText.anchor = new Vector2(1, 1);
-        noteCountText.outlineWidth = 0;
-        
-        var white = BaseTexture.CreateSolidColor(Color4.White);
-        
-        switch (this.inst)
+        values = new DensityGraphData(this);
+        data.RegisterObject("Graph", () => values);
+        dataContext = data;
+
+        MakeComponent("DensityGraph", DensityGraphDefault);
+    }
+
+    protected override void OnContentLoaded()
+    {
+        noteCountText = GetChild<UIText>("NoteCount");
+
+        if (instrument == EInstrumentPart.DRUMS)
         {
-            case EInstrumentPart.DRUMS:
-                noteCountText.position = new Vector3(150, 333, 0);
+            drumBars = BuildBars("DrumBar", clDrumChipsBarColors, drumBarOrigin, drumBarSpacing, drumBarSize);
+        }
+        else
+        {
+            guitarBars = BuildBars("GuitarBar", clGBChipsBarColors, guitarBarOrigin, guitarBarSpacing, guitarBarSize);
+        }
+    }
 
-                var graphPanel = AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\SongSelect\graph_panel_drums.png"))));
-                graphPanel.position = new Vector3(0, 0, 0);
-                graphPanel.renderOrder = -2;
-                graphPanel.name = "GraphPanel";
-                size = graphPanel.size;
-        
-                var graphFg = AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\SongSelect\graph_fg_drums.png"))));
-                graphFg.position = new Vector3(30, 15, 0);
-                graphFg.renderOrder = -1;
-                graphFg.name = "GraphFg";
-                
-                for (int index = 0; index < clDrumChipsBarColors.Length; index++)
-                {
-                    Color c = clDrumChipsBarColors[index]; 
-                    drumChipsBarLine[index] = AddChild(new UIImage(white));
-                    drumChipsBarLine[index].color = c;
-                    drumChipsBarLine[index].anchor = new Vector2(0, 1);
-                    drumChipsBarLine[index].position = new Vector3(36 + index * 12, 284, 0);
-                    drumChipsBarLine[index].size = new Vector2(4, 252);
-                    drumChipsBarLine[index].renderOrder = 2 + index;
-                }
+    private UIImage[] BuildBars(string prefix, Color[] colors, Vector2 origin, float spacing, Vector2 barSize)
+    {
+        UIImage[] bars = new UIImage[colors.Length];
 
-                break;
-            
-            case EInstrumentPart.GUITAR:
-            case EInstrumentPart.BASS:
-                noteCountText.position = new Vector3(102, 333, 0);
-
-                var graphPanelGb = AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\SongSelect\graph_panel_guitarbass.png"))));
-                graphPanelGb.position = new Vector3(0, 0, 0);
-                graphPanelGb.renderOrder = -2;
-                graphPanelGb.name = "GraphPanel";
-                size = graphPanelGb.size;
-        
-                var graphFgGb = AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\SongSelect\graph_fg_guitarbass.png"))));
-                graphFgGb.position = new Vector3(30, 15, 0);
-                graphFgGb.renderOrder = -1;
-                graphFgGb.name = "GraphFg";
-                
-                for (int index = 0; index < clGBChipsBarColors.Length; index++)
-                {
-                    Color c = clGBChipsBarColors[index]; 
-                    gbChipsBarLine[index] = AddChild(new UIImage(white));
-                    gbChipsBarLine[index].color = c;
-                    gbChipsBarLine[index].anchor = new Vector2(0, 1);
-                    gbChipsBarLine[index].position = new Vector3(34 + index * 12, 284, 0);
-                    gbChipsBarLine[index].size = new Vector2(6, 252);
-                    gbChipsBarLine[index].renderOrder = 2 + index;
-                }
-                break;
+        for (int index = 0; index < colors.Length; index++)
+        {
+            bars[index] = AddChild(new UIImage
+            {
+                name = $"{prefix}{index}",
+                imageSource = ImageSource.Solid,
+                color = colors[index],
+                pivot = new Vector2(0, 1),
+                position = new Vector3(origin.X + index * spacing, origin.Y, 0),
+                size = barSize,
+                renderOrder = 2 + index,
+                dontSerialize = true
+            });
         }
 
-        anchor = new Vector2(0, 1);
+        return bars;
     }
-    
-    private UIImage[] drumChipsBarLine = new UIImage[9];
+
+    private static UIGroup DensityGraphDefault()
+    {
+        UIGroup root = new("DensityGraph");
+
+        Panel(root, "PanelDrums", @"Graphics\SongSelect\graph_panel_drums.png", new Vector2(160, 342),
+            Vector3.Zero, -2, "Graph.IsDrums");
+        Panel(root, "PanelGuitarBass", @"Graphics\SongSelect\graph_panel_guitarbass.png", new Vector2(116, 342),
+            Vector3.Zero, -2, "Graph.IsGuitarBass");
+
+        Panel(root, "ForegroundDrums", @"Graphics\SongSelect\graph_fg_drums.png", new Vector2(112, 286),
+            new Vector3(30, 15, 0), -1, "Graph.IsDrums");
+        Panel(root, "ForegroundGuitarBass", @"Graphics\SongSelect\graph_fg_guitarbass.png", new Vector2(74, 286),
+            new Vector3(30, 15, 0), -1, "Graph.IsGuitarBass");
+
+        UIText noteCount = root.AddChild(new UIText("", 16));
+        noteCount.name = "NoteCount";
+        noteCount.pivot = new Vector2(1, 1);
+        noteCount.outlineWidth = 0;
+        noteCount.position = new Vector3(150, 333, 0);
+        noteCount.bindings.Add(new UIBinding("text", "Graph.NoteCount"));
+        noteCount.bindings.Add(new UIBinding("position.X", "Graph.NoteCountX"));
+
+        return root;
+    }
+
+    private static void Panel(UIGroup root, string name, string file, Vector2 size, Vector3 position,
+        int renderOrder, string shownBy)
+    {
+        root.AddChild(new UIImage
+        {
+            name = name,
+            imageSource = ImageSource.File,
+            image = SkinResource.System(file),
+            size = size,
+            position = position,
+            renderOrder = renderOrder,
+            bindings = { new UIBinding("isVisible", shownBy) }
+        });
+    }
+
     [Themable] private Color[] clDrumChipsBarColors =
     [
         Color.Red,
@@ -99,7 +144,6 @@ public class DensityGraph : UIGroup
         Color.RoyalBlue
     ];
     
-    private UIImage[] gbChipsBarLine = new UIImage[6];
     [Themable] private Color[] clGBChipsBarColors =
     [
         Color.Red,
@@ -179,35 +223,34 @@ public class DensityGraph : UIGroup
             }
         }
 
-        //Draw total notes
-        noteCountText.SetText(nPanelNoteCount > 0 ? nPanelNoteCount.ToString() : "");
+        noteCount = nPanelNoteCount;
 
         //Draw Bar Graph for Chips per lane
         if (arrChipsByLane != null)
         {
-            int nBarMaxHeight = 252;
+            int nBarMaxHeight = (int)barMaxHeight;
             int[] chipsBarHeights = nCalculateChipsBarPxHeight(arrChipsByLane, nBarMaxHeight);
 
             if (CDTXMania.ConfigIni.bGuitarEnabled)
             {
-                if (chipsBarHeights.Length == gbChipsBarLine.Length)
+                if (chipsBarHeights.Length == guitarBars.Length)
                 {
-                    for (int i = 0; i < gbChipsBarLine.Length; i++)
+                    for (int i = 0; i < guitarBars.Length; i++)
                     {
-                        gbChipsBarLine[i].size.Y = chipsBarHeights[i];
-                        //this.gbChipsBarLine[i].tDraw2D(CDTXMania.app.Device,
+                        guitarBars[i].size.Y = chipsBarHeights[i];
+                        //this.guitarBars[i].tDraw2D(CDTXMania.app.Device,
                         //    nGraphBaseX + 38 + i * 10, nGraphBaseY + 21 + (nBarMaxHeight - chipsBarHeights[i]), new Rectangle(0, 0, 4, chipsBarHeights[i]));
                     }
                 }                        
             }
             else
             {
-                if (chipsBarHeights.Length == drumChipsBarLine.Length)
+                if (chipsBarHeights.Length == drumBars.Length)
                 {
-                    for (int i = 0; i < drumChipsBarLine.Length; i++)
+                    for (int i = 0; i < drumBars.Length; i++)
                     {
-                        drumChipsBarLine[i].size.Y = chipsBarHeights[i];
-                        //this.drumChipsBarLine[i].tDraw2D(CDTXMania.app.Device,
+                        drumBars[i].size.Y = chipsBarHeights[i];
+                        //this.drumBars[i].tDraw2D(CDTXMania.app.Device,
                         //    nGraphBaseX + 31 + i * 8, nGraphBaseY + 21 + (nBarMaxHeight - chipsBarHeights[i]), new Rectangle(0, 0, 4, chipsBarHeights[i]));
                     }
                 }
@@ -252,16 +295,16 @@ public class DensityGraph : UIGroup
         
         if (ImGui.CollapsingHeader("Density Graph"))
         {
-            ImGui.Text($"Instrument: {inst}");
+            ImGui.Text($"Instrument: {instrument}");
             
             //inspector for colors
-            if (inst == 0)
+            if (instrument == EInstrumentPart.DRUMS)
             {
                 for (int index = 0; index < clDrumChipsBarColors.Length; index++)
                 {
                     if (Inspector.Inspect($"Drum Lane {Array.IndexOf(clDrumChipsBarColors, clDrumChipsBarColors[index])} Color", ref clDrumChipsBarColors[index]))
                     {
-                        drumChipsBarLine[index].color = clDrumChipsBarColors[index];
+                        drumBars[index].color = clDrumChipsBarColors[index];
                     }
                 }
             }
@@ -271,7 +314,7 @@ public class DensityGraph : UIGroup
                 {
                     if (Inspector.Inspect($"Guitar/Bass Lane {Array.IndexOf(clGBChipsBarColors, clGBChipsBarColors[index])} Color", ref clGBChipsBarColors[index]))
                     {
-                        gbChipsBarLine[index].color = clGBChipsBarColors[index];
+                        guitarBars[index].color = clGBChipsBarColors[index];
                     }
                 }
             }

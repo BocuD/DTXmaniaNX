@@ -9,10 +9,9 @@ public class SortByArtist : SortByTitle
 
     protected override char GetSortKey(SongNode song)
     {
-        //get song title
-        CChartData chartData = song.charts.FirstOrDefault(x => x != null);
-        
-        if (string.IsNullOrWhiteSpace(chartData.SongInformation.ArtistNameRoman))
+        CChartData? chartData = song.charts.FirstOrDefault(x => x != null);
+
+        if (chartData == null || string.IsNullOrWhiteSpace(chartData.SongInformation.ArtistNameRoman))
         {
             return '-';
         }

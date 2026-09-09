@@ -24,28 +24,35 @@ internal class CActPerfGuitarWailingBonus : CActPerfCommonWailingBonus
 	
 	public override void Start( EInstrumentPart part, CChip r歓声Chip )
 	{
-		if ( part != EInstrumentPart.DRUMS )
+		if ( part == EInstrumentPart.DRUMS )
 		{
-			for( int i = 0; i < 4; i++ )
+			return;
+		}
+
+		for( int i = 0; i < 4; i++ )
+		{
+			if ( ( ct進行用[ (int) part, i ] == null ) || ct進行用[ (int) part, i ].bStopped )
 			{
-				if ( ( ct進行用[ (int) part, i ] == null ) || ct進行用[ (int) part, i ].bStopped )
-				{
-					ct進行用[ (int) part, i ] = new CCounter( 0, 300, 2, CDTXMania.Timer );
-					ctWailing炎[ (int) part, i ] = new CCounter( 0, frames, interval, CDTXMania.Timer );
-					if ( CDTXMania.ConfigIni.b歓声を発声する )
-					{
-						if ( r歓声Chip != null )
-						{
-							CDTXMania.DTX.tPlayChip( r歓声Chip, AudioMixer.Timer.nSystemTimeMs, (int) ELane.BGM, CDTXMania.DTX.nモニタを考慮した音量( EInstrumentPart.UNKNOWN ) );
-							return;
-						}
-						//guitar cheers from the left, bass from the right
-						CDTXMania.Skin.soundAudience.tPlay( 100, ( part == EInstrumentPart.GUITAR ) ? -50 : 50 );
-					}
-					break;
-				}
+				ct進行用[ (int) part, i ] = new CCounter( 0, 300, 2, CDTXMania.Timer );
+				ctWailing炎[ (int) part, i ] = new CCounter( 0, frames, interval, CDTXMania.Timer );
+				break;
 			}
 		}
+
+		// wails come closer together than the four animation slots, so the sound is not rationed with them
+		if ( !CDTXMania.ConfigIni.b歓声を発声する )
+		{
+			return;
+		}
+
+		if ( r歓声Chip != null )
+		{
+			CDTXMania.DTX.tPlayChip( r歓声Chip, AudioMixer.Timer.nSystemTimeMs, (int) ELane.BGM, CDTXMania.DTX.nモニタを考慮した音量( EInstrumentPart.UNKNOWN ) );
+			return;
+		}
+
+		//guitar cheers from the left, bass from the right
+		CDTXMania.Skin.soundAudience.tPlay( 100, ( part == EInstrumentPart.GUITAR ) ? -50 : 50 );
 	}
 
 

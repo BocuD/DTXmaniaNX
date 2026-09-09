@@ -16,27 +16,31 @@ public class GitaDoraTransition : UIGroup
     
     public GitaDoraTransition() : base("GITADORA Transition")
     {
+        //the logo is anchored to a corner of this group, so the group has to be the window
+        size = UISize.Inherited;
+
         //create a black texture
         var texture = BaseTexture.CreateSolidColor(new Color4(0, 0, 0, 255));
         
-        //create childContainer
+        //the wipe rotates around the middle of the window
         childContainer = AddChild(new UIGroup("covers"));
         childContainer.size = new Vector2(1280, 720);
-        childContainer.position = new Vector3(640, 360, 0);
-        childContainer.anchor = new Vector2(0.5f, 0.5f);
+        childContainer.parentAnchor = UICanvas.Center;
+        childContainer.pivot = new Vector2(0.5f, 0.5f);
         
         top = childContainer.AddChild(new UIImage(texture));
         top.size = new Vector2(3000, 1000);
-        top.anchor = new Vector2(0.5f, 1.0f);
+        top.pivot = new Vector2(0.5f, 1.0f);
         top.position = new Vector3(640, 0, 0);
         
         bottom = childContainer.AddChild(new UIImage(texture));
         bottom.size = new Vector2(3000, 1000);
-        bottom.anchor = new Vector2(0.5f, 0.0f);
+        bottom.pivot = new Vector2(0.5f, 0.0f);
         bottom.position = new Vector3(640, 720, 0);
 
         logo = AddChild(new UIImage(BaseTexture.LoadFromPath(CSkin.Path("Graphics/logo_small.png"))));
-        logo.position = new Vector3(870, 572, 0);
+        logo.parentAnchor = new Vector2(1.0f, 1.0f);
+        logo.position = new Vector3(logoFinalX, logoY, 0);
         logo.size = new Vector2(412, 71);
     }
     
@@ -71,8 +75,10 @@ public class GitaDoraTransition : UIGroup
     private UIGroup childContainer;
     private UIImage logo;
 
-    private const float logoStartX = 635;
-    private const float logoFinalX = 815;
+    //measured back from the bottom right corner the logo anchors to
+    private const float logoStartX = -645;
+    private const float logoFinalX = -465;
+    private const float logoY = -148;
     
     public override void Draw(Matrix4x4 parentMatrix)
     {
@@ -150,28 +156,38 @@ public class GitaDoraTransition : UIGroup
         return toMin + (value - fromMin) * (toMax - toMin) / (fromMax - fromMin);
     }
     
+    private const float Opened = 1.5f;
+    private const float Closed = -0.75f;
+
     public static void Close(int delayFrames = 0, Action? action = null)
+        => Animate(Opened, Closed, delayFrames, action);
+
+    public static void Open(int delayFrames = 5, Action? action = null)
+        => Animate(Closed, Opened, delayFrames, action);
+
+    private static void Animate(float from, float to, int delayFrames, Action? action)
     {
+        //nothing covers the stage the editor is looking at. The callback still runs, at once: the config
+        //stage starts its music there
+        if (CStage.previewMode)
+        {
+            state.animate = false;
+            state.animationProgress = Opened;
+            state.onComplete = null;
+            state.delayFrameCounter = 0;
+            action?.Invoke();
+            return;
+        }
+
         state.animate = true;
-        state.animationProgress = 1.5f;
-        state.animationTarget = -0.75f;
-        state.animationDirection = -1.0f;
+        state.animationProgress = from;
+        state.animationTarget = to;
+        state.animationDirection = MathF.Sign(to - from);
         state.onComplete = action;
         state.lastDrawTime = CDTXMania.Timer.nCurrentTime;
         state.delayFrameCounter = delayFrames;
     }
 
-    public static void Open(int delayFrames = 5, Action? action = null)
-    {
-        state.animate = true;
-        state.animationProgress = -0.75f;
-        state.animationTarget = 1.5f;
-        state.animationDirection = 1.0f;
-        state.onComplete = action;
-        state.lastDrawTime = CDTXMania.Timer.nCurrentTime;
-        state.delayFrameCounter = delayFrames;
-    }
-    
     public override void DrawInspector()
     {
         base.DrawInspector();

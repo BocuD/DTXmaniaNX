@@ -12,37 +12,32 @@ public sealed class ResultData
 {
     private static int Instrument => CDTXMania.GetCurrentInstrument();
     private static CScoreIni.CPerformanceEntry Entry => CDTXMania.StageManager.stageResult.stPerformanceEntry[Instrument];
+    [DataField] public double Level => LevelParts().intPart + LevelParts().deci / 100.0;
+    [DataField] public double Rate => Entry.dbPerformanceSkill;
+    [DataField] public double Skill => Entry.dbGameSkill;
+    [DataField] public double MaxSkill => CDTXMania.chosenChartData?.SongInformation.GetMaxSkill(Instrument) ?? 0.0;
 
-    [DataField] public string SongTitle
-    {
-        get
-        {
-            if (!CDTXMania.bCompactMode && CDTXMania.ConfigIni.b曲名表示をdefのものにする)
-            {
-                return CDTXMania.chosenSong?.title ?? string.Empty;
-            }
+    [DataField] public string LevelInt => NumberParts.Whole(Level);
+    [DataField] public string LevelFraction => NumberParts.Fraction(Level);
 
-            return CDTXMania.DTX?.TITLE ?? string.Empty;
-        }
-    }
+    [DataField] public string RateInt => NumberParts.Whole(Rate);
+    [DataField] public string RateFraction => NumberParts.Fraction(Rate) + "%";
 
-    [DataField] public string Artist => CDTXMania.DTX?.ARTIST ?? string.Empty;
+    [DataField] public string SkillInt => NumberParts.Whole(Skill);
+    [DataField] public string SkillFraction => NumberParts.Fraction(Skill);
 
-    [DataField] public string StageNumber => InfoBox.GetStageNumberText();
+    [DataField] public bool ShowSkillBar => MaxSkill > 0.0;
 
-    [DataField] public string LevelInt => LevelParts().intPart.ToString();
-    [DataField] public string LevelFraction => "." + LevelParts().deci;
-
-    [DataField] public string RateInt => ((int)Entry.dbPerformanceSkill).ToString();
-    [DataField] public string RateFraction => "." + RateFractionValue() + "%";
-
-    [DataField] public string SkillInt => ((int)Entry.dbGameSkill).ToString();
-    [DataField] public string SkillFraction => "." + SkillFractionValue().ToString("N0");
+    [DataField] public double SkillOfMax => MaxSkill > 0.0 ? Entry.dbGameSkill / MaxSkill : 0.0;
 
     //mutually exclusive; drives which result badge is shown
     [DataField] public bool IsExcellent => Entry.nPerfectCount == Entry.nTotalChipsCount;
     [DataField] public bool IsFullCombo => !IsExcellent && Entry.bIsFullCombo;
     [DataField] public bool IsClear => !IsExcellent && !Entry.bIsFullCombo;
+
+    [DataField] public bool ShowLagCounts => CDTXMania.ConfigIni.bShowLagHitCount;
+    [DataField] public int FastCount => Entry.nFastCount;
+    [DataField] public int SlowCount => Entry.nSlowCount;
 
     //level is stored as either xx.y (LEVEL<=99 plus LEVELDEC) or xxx (LEVEL>99), split here into a whole
     //part and a 2-digit fraction
@@ -71,21 +66,4 @@ public sealed class ResultData
         return (intPart, deci);
     }
 
-    private static int RateFractionValue()
-    {
-        double rate = Entry.dbPerformanceSkill;
-        int fraction = (int)((rate - (int)rate) * 100);
-        if (fraction < 10)
-        {
-            fraction *= 10;
-        }
-
-        return fraction;
-    }
-
-    private static int SkillFractionValue()
-    {
-        double skill = Entry.dbGameSkill;
-        return (int)((skill - (int)skill) * 100);
-    }
 }

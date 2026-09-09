@@ -75,6 +75,16 @@ internal partial class CConfigIni
 	//public bool bDirectShowMode;
 	[DataField("Fullscreen")] public bool bFullScreenMode;
 	public bool bFullScreenExclusive;
+
+	public enum HideCursor
+	{
+		Never,
+		Fullscreen,
+		Always
+	}
+
+	//Always covers a windowed game too, from the moment it is clicked into until it loses focus
+	public HideCursor eHideCursor;
 	public int nInitialWindowXPosition; // #30675 2013.02.04 ikanick add
 	public int nInitialWindowYPosition;
 	[DataField("WindowWidth")] public int nWindowWidth; // #23510 2010.10.31 yyagi add
@@ -570,6 +580,7 @@ internal partial class CConfigIni
 		languageMode = LanguageMode.Auto;
 		bFullScreenMode = false;
 		bFullScreenExclusive = true;
+		eHideCursor = HideCursor.Fullscreen;
 		bVerticalSyncWait = true;
 		nInitialWindowXPosition = 50; // #30675 2013.02.04 ikanick add
 		nInitialWindowYPosition = 50;
@@ -1099,6 +1110,8 @@ B=K056
 Y=K057
 P=K058
 Pick=K0115,K046,J06
+PickUp=K074
+PickDown=K038
 Wail=K0116
 Decide=K060
 Cancel=K0115
@@ -1111,6 +1124,8 @@ B=K092
 Y=K093
 P=K094
 Pick=K0103,K0100,J08
+PickUp=K098
+PickDown=K095
 Wail=K089
 Decide=K096
 Cancel=K0103

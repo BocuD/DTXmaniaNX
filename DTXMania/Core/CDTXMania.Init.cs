@@ -170,8 +170,8 @@ internal partial class CDTXMania
         AddInitializer("SongDBStatus", () =>
         {
             SongDBStatus songDbStatus = persistentUIGroup.AddChild(new SongDBStatus());
-            songDbStatus.position = new Vector3(0, 720, 0);
-            songDbStatus.anchor = new Vector2(0.0f, 1.0f);
+            songDbStatus.parentAnchor = new Vector2(0.0f, 1.0f);
+            songDbStatus.pivot = new Vector2(0.0f, 1.0f);
         });
         
         AddInitializer("AnimatedTransition", () => gitadoraTransition = persistentUIGroup.AddChild(new GitaDoraTransition()));

@@ -22,7 +22,7 @@ public class GameStatus
 
             ImGui.Checkbox("Prevent game keyboard input", ref preventGameKeyboardInput);
 
-            ImGui.Checkbox("Prevent stage transitions", ref StageManager.preventStageChanges);
+            ImGui.Checkbox("Pause stage transitions", ref StageManager.pauseStageChanges);
         }
 
         if (ImGui.CollapsingHeader("Other"))

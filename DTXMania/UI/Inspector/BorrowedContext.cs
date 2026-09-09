@@ -7,16 +7,22 @@ namespace DTXMania.UI.Inspector;
 /// Resolves against a live element's context chain, so a component opened on its own can be shown with the
 /// values a real instance of it is seeing. The element is looked up per read: it belongs to a stage that
 /// can be torn down while the editor stays open.
+///
+/// What it reads is the element's own chain, never a preview standing in for it: a preview reads through
+/// here, so consulting one would mean asking it to resolve itself.
 /// </summary>
 public sealed class BorrowedContext(Func<UIDrawable?> element) : IUIDataContext
 {
     public bool TryGetString(string key, out string value)
     {
-        foreach (IUIDataContext context in Contexts())
+        if (element() is { } live)
         {
-            if (context.TryGetString(key, out value))
+            foreach (IUIDataContext context in DataContextChain.Real(live))
             {
-                return true;
+                if (context.TryGetString(key, out value))
+                {
+                    return true;
+                }
             }
         }
 
@@ -26,11 +32,14 @@ public sealed class BorrowedContext(Func<UIDrawable?> element) : IUIDataContext
 
     public bool TryGetTexture(string key, out BaseTexture texture)
     {
-        foreach (IUIDataContext context in Contexts())
+        if (element() is { } live)
         {
-            if (context.TryGetTexture(key, out texture))
+            foreach (IUIDataContext context in DataContextChain.Real(live))
             {
-                return true;
+                if (context.TryGetTexture(key, out texture))
+                {
+                    return true;
+                }
             }
         }
 
@@ -40,11 +49,14 @@ public sealed class BorrowedContext(Func<UIDrawable?> element) : IUIDataContext
 
     public bool TryGetBool(string key, out bool value)
     {
-        foreach (IUIDataContext context in Contexts())
+        if (element() is { } live)
         {
-            if (context.TryGetBool(key, out value))
+            foreach (IUIDataContext context in DataContextChain.Real(live))
             {
-                return true;
+                if (context.TryGetBool(key, out value))
+                {
+                    return true;
+                }
             }
         }
 
@@ -54,11 +66,14 @@ public sealed class BorrowedContext(Func<UIDrawable?> element) : IUIDataContext
 
     public bool TryGetNumber(string key, out double value)
     {
-        foreach (IUIDataContext context in Contexts())
+        if (element() is { } live)
         {
-            if (context.TryGetNumber(key, out value))
+            foreach (IUIDataContext context in DataContextChain.Real(live))
             {
-                return true;
+                if (context.TryGetNumber(key, out value))
+                {
+                    return true;
+                }
             }
         }
 
@@ -67,8 +82,17 @@ public sealed class BorrowedContext(Func<UIDrawable?> element) : IUIDataContext
     }
 
     public IEnumerable<string> AvailableKeys(DataBindingKind kind)
-        => Contexts().SelectMany(context => context.AvailableKeys(kind)).Distinct();
+    {
+        HashSet<string> keys = [];
 
-    private IEnumerable<IUIDataContext> Contexts()
-        => element()?.DataContexts() ?? [];
+        if (element() is { } live)
+        {
+            foreach (IUIDataContext context in DataContextChain.Real(live))
+            {
+                keys.UnionWith(context.AvailableKeys(kind));
+            }
+        }
+
+        return keys;
+    }
 }

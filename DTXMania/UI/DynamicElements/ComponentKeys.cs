@@ -34,25 +34,37 @@ public static class ComponentKeys
 
     /// <summary>
     /// The values those keys currently resolve to, as text. Each key is resolved through the element that
-    /// reads it, since a list's slot supplies keys that its owner cannot see. Textures are left out: there
-    /// is nothing to write down for one.
+    /// reads it, since a list's slot supplies keys that its owner cannot see. A slot's keys are written
+    /// under its list and index, e.g. <c>Rows[2].Item.Level</c>, so rows do not overwrite each other.
+    /// Textures are left out: there is nothing to write down for one.
     /// </summary>
     public static void Capture(UIDrawable element, Dictionary<string, string> values)
+        => Capture(element, values, string.Empty);
+
+    private static void Capture(UIDrawable element, Dictionary<string, string> values, string prefix)
     {
         foreach (UIBinding binding in element.bindings)
         {
             if (!string.IsNullOrEmpty(binding.source) && element.TryResolveContextString(binding.source, out string value))
             {
-                values[binding.source] = value;
+                values[prefix + binding.source] = value;
             }
         }
 
-        if (element is UIGroup group)
+        if (element is not UIGroup group)
         {
-            foreach (UIDrawable child in group.children)
+            return;
+        }
+
+        foreach (UIDrawable child in group.children)
+        {
+            if (child is UIItemSlot slot && group is UIItemsGroup list)
             {
-                Capture(child, values);
+                Capture(slot, values, $"{prefix}{list.name}[{slot.index}].");
+                continue;
             }
+
+            Capture(child, values, prefix);
         }
     }
 }
