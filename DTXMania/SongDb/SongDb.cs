@@ -491,7 +491,7 @@ public class SongDb : IDisposable
 		try
 		{
 			{
-				using ZipArchive zip = new(fileinfo.OpenRead(), ZipArchiveMode.Read);
+				using ZipArchive zip = ZipEntryNames.Open(fileinfo.OpenRead());
 
 				//HashSet<string> rootDirectories = []; //to track unique root directories
 
@@ -499,10 +499,11 @@ public class SongDb : IDisposable
 				{
 					if (string.IsNullOrEmpty(entry.Name)) continue;
 
-					string entryPath = Path.Combine(fileinfo.DirectoryName!, entry.FullName);
-					
+					string name = ZipEntryNames.Decode(entry.FullName);
+					string entryPath = Path.Combine(fileinfo.DirectoryName!, name);
+
 					//skip directories: if directories need to be created for files we will create them below
-					if (entry.FullName.EndsWith(@"\")) continue;
+					if (name.EndsWith(@"\")) continue;
 					
 					//ensure directory exists
 					string directory = Path.GetDirectoryName(entryPath)!;
