@@ -412,6 +412,7 @@ public class SongSelectionContainer : UIScrollItemsGroup, IUIItemSource
         title.bindings.Add(new UIBinding("isVisible", "Item.HasTitle"));
         title.fillColor = Color4.FromColor(Color.Black);
         title.outlineColor = Color4.FromColor(Color.White);
+        title.outlineWidth = 2.0f;
         title.position = new Vector3(78, 38, 0);
         title.pivot = new Vector2(0, 0.5f);
         title.renderOrder = 1;
@@ -424,6 +425,7 @@ public class SongSelectionContainer : UIScrollItemsGroup, IUIItemSource
         artist.bindings.Add(new UIBinding("isVisible", "Item.HasArtist"));
         artist.fillColor = Color4.FromColor(Color.Black);
         artist.outlineColor = Color4.FromColor(Color.White);
+        artist.outlineWidth = 2.0f;
         artist.position = new Vector3(80, 60, 0);
         artist.pivot = new Vector2(0, 0.5f);
         artist.renderOrder = 1;
