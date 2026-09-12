@@ -94,7 +94,7 @@ public class CStageSongSelectionNew : CStage
     }
 
     private static readonly string[] SongInfoKeys =
-        ["SongName", "SongArtist", "SongGenre", "SongBPM", "SongDuration", "SongComment", "SongSkill"];
+        ["SongName", "SongArtist", "SongGenre", "SongBPM", "SongDuration", "SongComment", "SongSkill", "SongCount"];
 
     private void RefreshSongInfo()
     {
@@ -104,6 +104,8 @@ public class CStageSongSelectionNew : CStage
         songInfo.SetString("SongArtist", chart?.SongInformation.ArtistName ?? "");
         songInfo.SetString("SongGenre", chart?.SongInformation.Genre ?? "");
         songInfo.SetString("SongComment", chart?.SongInformation.Comment ?? "");
+        (int position, int total) = selectionContainer.PlaceInList();
+        songInfo.SetString("SongCount", $"{position} / {total}");
 
         songInfo.SetString("SongBPM", chart != null
             ? chart.SongInformation.Bpm.ToString("0.##", CultureInfo.InvariantCulture)
@@ -221,6 +223,16 @@ public class CStageSongSelectionNew : CStage
         history.position = new Vector3(-40, -30, 0);
         history.renderOrder = 7;
 
+        var songCountIndicator = ui.AddChild(new UIText());
+        songCountIndicator.parentAnchor = UICanvas.BottomRight;
+        songCountIndicator.pivot = UICanvas.BottomRight;
+        songCountIndicator.position = new Vector3(-15, -10, 0);
+        songCountIndicator.renderOrder = 7;
+        songCountIndicator.font = SkinResource.System("Futura PT Medium.otf");
+        songCountIndicator.outlineWidth = 0;
+        songCountIndicator.fontSize = 20;
+        songCountIndicator.bindings.Add(new UIBinding("text", "SongCount"));
+        
         var sortMenu = ui.AddChild(new SortMenuContainer());
         sortMenu.parentAnchor = UICanvas.TopRight;
         sortMenu.position = UICanvas.FromAnchor(UICanvas.TopRight, 1281, 35);

@@ -48,6 +48,14 @@ internal sealed class MenuConfigPage : ConfigPage
             () => CDTXMania.ConfigIni.bSongSelectPreviewVideo = previewVideo.bON);
         items.Add(previewVideo);
 
+        CItemToggle strumScroll = new("StrumScroll", CDTXMania.ConfigIni.bStrumScrollsMenus,
+            "メニューの上下移動にピックを使用します。\nOFF にすると R/G ボタンで移動します。\n選曲画面の曲リストは常に R/G です。",
+            "Move up and down through menus with the picks.\nWhen off, the R and G buttons move instead.\nThe song list always uses R and G.");
+        strumScroll.BindConfig(
+            () => strumScroll.bON = CDTXMania.ConfigIni.bStrumScrollsMenus,
+            () => CDTXMania.ConfigIni.bStrumScrollsMenus = strumScroll.bON);
+        items.Add(strumScroll);
+
         items.Add(SecondsDelay("PreSoundWait", 0, 10000,
             "カーソルが合わされてから\nプレビュー音が鳴り始めるまでの待ち時間。",
             "Delay before the preview sound starts in song select.",

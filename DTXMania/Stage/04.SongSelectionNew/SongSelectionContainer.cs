@@ -42,6 +42,9 @@ public class SongSelectionContainer : UIScrollItemsGroup, IUIItemSource
 
     public SongNode UnfilteredRoot;
 
+    private readonly Dictionary<SongNode, int> placeByNode = new();
+    private SongNode? placesBuiltFor;
+
     private bool updateRootRequested;
     private bool requestIsFiltered;
     private SongNode? newSongRoot;
@@ -51,7 +54,8 @@ public class SongSelectionContainer : UIScrollItemsGroup, IUIItemSource
     private readonly Action scrollToNext;
 
     //the stage drives this list, since deciding on a song is stage flow
-    private readonly NavigationRepeat listNavigation = NavigationRepeat.Vertical(useNeck: true);
+    //the sort menu takes the strums, so the list is on the neck whatever the navigation setting says
+    private readonly NavigationRepeat listNavigation = NavigationRepeat.VerticalNeck();
 
     public SongSelectionContainer() : base("SongSelectionContainer")
     {
@@ -86,6 +90,35 @@ public class SongSelectionContainer : UIScrollItemsGroup, IUIItemSource
         }
     }
 
+    public (int Position, int Total) PlaceInList()
+    {
+        if (placesBuiltFor != currentRoot)
+        {
+            BuildPlaces();
+        }
+
+        SongNode? selected = currentSelection;
+
+        return selected != null && placeByNode.TryGetValue(selected, out int place)
+            ? (place, placeByNode.Count)
+            : (0, placeByNode.Count);
+    }
+
+    private void BuildPlaces()
+    {
+        placeByNode.Clear();
+        placesBuiltFor = currentRoot;
+
+        int place = 0;
+        foreach (SongNode node in currentRoot.childNodes)
+        {
+            if (node.ShowInSongList())
+            {
+                placeByNode[node] = ++place;
+            }
+        }
+    }
+
     private void EnsureWindow() => window.Resize(Math.Max(1, visibleSlots), static () => new SongRowData());
 
     public void RequestUpdateRoot(SongNode newRoot, bool isFiltered = false)
@@ -101,6 +134,9 @@ public class SongSelectionContainer : UIScrollItemsGroup, IUIItemSource
         DateTime start = DateTime.Now;
 
         currentRoot = newRoot ?? songDb.songNodeRoot;
+
+        //the same root can come back with different children after a rescan
+        placesBuiltFor = null;
 
         if (!isFiltered)
         {
@@ -412,6 +448,7 @@ public class SongSelectionContainer : UIScrollItemsGroup, IUIItemSource
         title.bindings.Add(new UIBinding("isVisible", "Item.HasTitle"));
         title.fillColor = Color4.FromColor(Color.Black);
         title.outlineColor = Color4.FromColor(Color.White);
+        title.outlineWidth = 2.0f;
         title.position = new Vector3(78, 38, 0);
         title.pivot = new Vector2(0, 0.5f);
         title.renderOrder = 1;
@@ -424,6 +461,7 @@ public class SongSelectionContainer : UIScrollItemsGroup, IUIItemSource
         artist.bindings.Add(new UIBinding("isVisible", "Item.HasArtist"));
         artist.fillColor = Color4.FromColor(Color.Black);
         artist.outlineColor = Color4.FromColor(Color.White);
+        artist.outlineWidth = 2.0f;
         artist.position = new Vector3(80, 60, 0);
         artist.pivot = new Vector2(0, 0.5f);
         artist.renderOrder = 1;

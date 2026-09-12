@@ -111,7 +111,7 @@ public class UIGroup : UIDrawable
             element.SetParent(this, false);
         }
 
-        animator?.InvalidateBindings();
+        InvalidateAnimatorBindings();
 
         dirty = true;
         
@@ -163,7 +163,7 @@ public class UIGroup : UIDrawable
     public void RemoveChild(UIDrawable element)
     {
         children.Remove(element);
-        animator?.InvalidateBindings();
+        InvalidateAnimatorBindings();
         
         dirty = true;
     }
@@ -176,6 +176,15 @@ public class UIGroup : UIDrawable
         }
 
         children.Clear();
+        InvalidateAnimatorBindings();
+    }
+
+    private void InvalidateAnimatorBindings()
+    {
+        for (UIGroup? group = this; group != null; group = group.parent)
+        {
+            group.animator?.InvalidateBindings();
+        }
     }
 
     /// <summary>Loads this component's content as its children, once. Lazy, so a path set by

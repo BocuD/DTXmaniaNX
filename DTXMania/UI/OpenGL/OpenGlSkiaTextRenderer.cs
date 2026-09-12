@@ -32,8 +32,8 @@ internal sealed class OpenGlSkiaTextRenderer : IUiTextRenderer
             return default;
         }
 
-        SKTypeface typeface = ResolveTypeface(request);
-        using SKFont font = CreateFont(typeface, request);
+        using FontSet fonts = CreateFontSet(request);
+        SKFont font = fonts.Primary;
 
         string[] lines = NormalizeLines(request.Text);
         SKFontMetrics metrics = font.Metrics;
@@ -46,13 +46,13 @@ internal sealed class OpenGlSkiaTextRenderer : IUiTextRenderer
         float wrapBudget = request.MaxWidth - effectivePadding.X * 2f;
         if (request.MaxWidth > 0f && wrapBudget > 0f)
         {
-            lines = WrapLines(font, lines, wrapBudget);
+            lines = WrapLines(fonts, lines, wrapBudget);
         }
 
         float maxLineWidth = 0f;
         foreach (string line in lines)
         {
-            maxLineWidth = MathF.Max(maxLineWidth, MeasureLineWidth(font, line));
+            maxLineWidth = MathF.Max(maxLineWidth, fonts.Measure(line));
         }
 
         //wrapping has already held every line to the budget, so the bitmap is the longest of them: a
@@ -75,16 +75,28 @@ internal sealed class OpenGlSkiaTextRenderer : IUiTextRenderer
         for (int i = 0; i < lines.Length; i++)
         {
             string line = lines[i];
-            float lineWidth = MeasureLineWidth(font, line);
+            List<FontSet.Run> runs = fonts.Split(line);
+            float lineWidth = FontSet.Width(runs);
             float drawX = effectivePadding.X + GetAlignedOffset(request.Alignment, bitmapWidth - effectivePadding.X * 2f, lineWidth);
             float drawY = effectivePadding.Y + ascent + i * actualLineHeight;
 
-            if (request.OutlineWidth > 0.01f)
+            void DrawRuns(SKPaint paint)
             {
-                canvas.DrawText(line, drawX, drawY, SKTextAlign.Left, font, strokePaint);
+                float runX = drawX;
+
+                foreach (FontSet.Run run in runs)
+                {
+                    canvas.DrawText(run.Text, runX, drawY, SKTextAlign.Left, run.Font, paint);
+                    runX += run.Font.MeasureText(run.Text);
+                }
             }
 
-            canvas.DrawText(line, drawX, drawY, SKTextAlign.Left, font, fillPaint);
+            if (request.OutlineWidth > 0.01f)
+            {
+                DrawRuns(strokePaint);
+            }
+
+            DrawRuns(fillPaint);
 
             if (request.Style.HasFlag(UiTextStyle.Underline) && lineWidth > 0f)
             {
@@ -119,12 +131,11 @@ internal sealed class OpenGlSkiaTextRenderer : IUiTextRenderer
         string line = NormalizeLines(request.Text ?? string.Empty)[0];
         characters = Math.Clamp(characters, 0, line.Length);
 
-        SKTypeface typeface = ResolveTypeface(request);
-        using SKFont font = CreateFont(typeface, request);
+        using FontSet fonts = CreateFontSet(request);
 
         //the bitmap is only as wide as the text, so a single line starts at the padding whatever the
         //alignment says
-        return EffectivePadding(request).X + MeasureLineWidth(font, line[..characters]);
+        return EffectivePadding(request).X + fonts.Measure(line[..characters]);
     }
 
     public int CaretIndexAt(UiTextParameters request, float offset)
@@ -135,8 +146,7 @@ internal sealed class OpenGlSkiaTextRenderer : IUiTextRenderer
             return 0;
         }
 
-        SKTypeface typeface = ResolveTypeface(request);
-        using SKFont font = CreateFont(typeface, request);
+        using FontSet fonts = CreateFontSet(request);
 
         float left = EffectivePadding(request).X;
         float before = 0f;
@@ -147,7 +157,7 @@ internal sealed class OpenGlSkiaTextRenderer : IUiTextRenderer
         while (start < line.Length)
         {
             int next = start + StringInfo.GetNextTextElementLength(line.AsSpan(start));
-            float after = MeasureLineWidth(font, line[..next]);
+            float after = fonts.Measure(line[..next]);
 
             //the caret lands on whichever side of the character the offset is nearer
             if (offset < left + (before + after) * 0.5f)
@@ -175,13 +185,13 @@ internal sealed class OpenGlSkiaTextRenderer : IUiTextRenderer
         return normalized.Split('\n');
     }
 
-    private static string[] WrapLines(SKFont font, string[] hardLines, float budget)
+    private static string[] WrapLines(FontSet fonts, string[] hardLines, float budget)
     {
         List<string> wrapped = [];
 
         foreach (string hardLine in hardLines)
         {
-            wrapped.AddRange(LineBreaker.Wrap(hardLine, budget, line => MeasureLineWidth(font, line)));
+            wrapped.AddRange(LineBreaker.Wrap(hardLine, budget, fonts.Measure));
         }
 
         return wrapped.ToArray();
@@ -282,10 +292,8 @@ internal sealed class OpenGlSkiaTextRenderer : IUiTextRenderer
         return paint;
     }
 
-    private static float MeasureLineWidth(SKFont font, string line)
-    {
-        return string.IsNullOrEmpty(line) ? 0f : font.MeasureText(line);
-    }
+    private static FontSet CreateFontSet(UiTextParameters request)
+        => new(ResolveTypeface(request), typeface => CreateFont(typeface, request));
 
     private static float GetAlignedOffset(UiTextAlignment alignment, float availableWidth, float lineWidth)
     {
