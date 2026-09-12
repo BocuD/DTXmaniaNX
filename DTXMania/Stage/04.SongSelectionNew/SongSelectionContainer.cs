@@ -42,6 +42,9 @@ public class SongSelectionContainer : UIScrollItemsGroup, IUIItemSource
 
     public SongNode UnfilteredRoot;
 
+    private readonly Dictionary<SongNode, int> placeByNode = new();
+    private SongNode? placesBuiltFor;
+
     private bool updateRootRequested;
     private bool requestIsFiltered;
     private SongNode? newSongRoot;
@@ -87,6 +90,35 @@ public class SongSelectionContainer : UIScrollItemsGroup, IUIItemSource
         }
     }
 
+    public (int Position, int Total) PlaceInList()
+    {
+        if (placesBuiltFor != currentRoot)
+        {
+            BuildPlaces();
+        }
+
+        SongNode? selected = currentSelection;
+
+        return selected != null && placeByNode.TryGetValue(selected, out int place)
+            ? (place, placeByNode.Count)
+            : (0, placeByNode.Count);
+    }
+
+    private void BuildPlaces()
+    {
+        placeByNode.Clear();
+        placesBuiltFor = currentRoot;
+
+        int place = 0;
+        foreach (SongNode node in currentRoot.childNodes)
+        {
+            if (node.ShowInSongList())
+            {
+                placeByNode[node] = ++place;
+            }
+        }
+    }
+
     private void EnsureWindow() => window.Resize(Math.Max(1, visibleSlots), static () => new SongRowData());
 
     public void RequestUpdateRoot(SongNode newRoot, bool isFiltered = false)
@@ -102,6 +134,9 @@ public class SongSelectionContainer : UIScrollItemsGroup, IUIItemSource
         DateTime start = DateTime.Now;
 
         currentRoot = newRoot ?? songDb.songNodeRoot;
+
+        //the same root can come back with different children after a rescan
+        placesBuiltFor = null;
 
         if (!isFiltered)
         {
