@@ -51,7 +51,8 @@ public class SongSelectionContainer : UIScrollItemsGroup, IUIItemSource
     private readonly Action scrollToNext;
 
     //the stage drives this list, since deciding on a song is stage flow
-    private readonly NavigationRepeat listNavigation = NavigationRepeat.Vertical(useNeck: true);
+    //the sort menu takes the strums, so the list is on the neck whatever the navigation setting says
+    private readonly NavigationRepeat listNavigation = NavigationRepeat.VerticalNeck();
 
     public SongSelectionContainer() : base("SongSelectionContainer")
     {

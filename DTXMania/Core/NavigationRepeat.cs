@@ -20,6 +20,8 @@ public sealed class NavigationRepeat
     private readonly EPad drumPrevious;
     private readonly EPad drumNext;
 
+    private readonly (EPad Previous, EPad Next)? neck;
+
     //built on the first poll, since a consumer can be constructed before CDTXMania.Timer exists
     private CCounter? keyRepeatPrevious;
     private CCounter? keyRepeatNext;
@@ -27,7 +29,8 @@ public sealed class NavigationRepeat
     private CCounter? guitarRepeatNext;
 
     private NavigationRepeat(SlimDXKey keyPrevious, SlimDXKey keyNext,
-        EPad guitarPrevious, EPad guitarNext, EPad drumPrevious, EPad drumNext)
+        EPad guitarPrevious, EPad guitarNext, EPad drumPrevious, EPad drumNext,
+        (EPad Previous, EPad Next)? neck = null)
     {
         this.keyPrevious = keyPrevious;
         this.keyNext = keyNext;
@@ -35,12 +38,15 @@ public sealed class NavigationRepeat
         this.guitarNext = guitarNext;
         this.drumPrevious = drumPrevious;
         this.drumNext = drumNext;
+        this.neck = neck;
     }
 
-    public static NavigationRepeat Vertical(bool useNeck = false) =>
+    public static NavigationRepeat Vertical() =>
         new(SlimDXKey.UpArrow, SlimDXKey.DownArrow,
-            useNeck ? EPad.R : EPad.PickUp, useNeck ? EPad.G : EPad.PickDown,
-            EPad.HT, EPad.LT);
+            EPad.PickUp, EPad.PickDown, EPad.HT, EPad.LT, neck: (EPad.R, EPad.G));
+
+    public static NavigationRepeat VerticalNeck() =>
+        new(SlimDXKey.UpArrow, SlimDXKey.DownArrow, EPad.R, EPad.G, EPad.HT, EPad.LT);
 
     public static NavigationRepeat Horizontal() =>
         new(SlimDXKey.LeftArrow, SlimDXKey.RightArrow,
@@ -67,6 +73,10 @@ public sealed class NavigationRepeat
             onPrevious, FirstRepeatMs, RepeatIntervalMs);
         keyRepeatNext!.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(keyNext),
             onNext, FirstRepeatMs, RepeatIntervalMs);
+
+        (EPad guitarPrevious, EPad guitarNext) = neck is { } pads && !CDTXMania.ConfigIni.bStrumScrollsMenus
+            ? pads
+            : (this.guitarPrevious, this.guitarNext);
 
         //the neck has no double duty, but a strum held under P or Y is on its way to deciding or
         //cancelling and must not scroll the list out from under that
