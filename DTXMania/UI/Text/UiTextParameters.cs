@@ -14,6 +14,7 @@ public sealed record UiTextParameters
     public string FontFamily { get; init; } = string.Empty;
     public float FontSize { get; init; } = 12;
     public float OutlineWidth { get; init; } = 0;
+    public float OutlineSoftness { get; init; } = 0;
     public Vector2 TexturePadding { get; init; } = Vector2.Zero;
     public float LineSpacing { get; init; } = 1;
     public float RenderScale { get; init; } = 1;

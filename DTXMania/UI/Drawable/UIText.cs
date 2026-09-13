@@ -53,6 +53,7 @@ public partial class UIText : UITexture
     [Themable] public string fontFamily = string.Empty;
     [Themable] public float fontSize = DefaultFontSize;
     [Themable] public float outlineWidth = 3f;
+    [Themable] public float outlineSoftness = 0f;
     [Themable] public Vector2 texturePadding = Vector2.Zero;
     [Themable] public float lineSpacing = 1f;
 
@@ -324,6 +325,7 @@ public partial class UIText : UITexture
             FontFamily = fontFamily,
             FontSize = renderSize,
             OutlineWidth = outlineWidth * textureRenderScale,
+            OutlineSoftness = outlineSoftness * textureRenderScale,
             TexturePadding = texturePadding * textureRenderScale,
             LineSpacing = lineSpacing,
             RenderScale = textureRenderScale,

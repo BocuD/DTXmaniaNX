@@ -175,8 +175,9 @@ internal sealed class OpenGlSkiaTextRenderer : IUiTextRenderer
     private static Vector2 EffectivePadding(UiTextParameters request)
     {
         float guard = 2f * request.RenderScale;
+        float outline = request.OutlineWidth + request.OutlineSoftness;
 
-        return Vector2.Max(request.TexturePadding + new Vector2(request.OutlineWidth + guard), new Vector2(guard));
+        return Vector2.Max(request.TexturePadding + new Vector2(outline + guard), new Vector2(guard));
     }
 
     private static string[] NormalizeLines(string value)
@@ -282,6 +283,11 @@ internal sealed class OpenGlSkiaTextRenderer : IUiTextRenderer
             StrokeJoin = SKStrokeJoin.Round,
             StrokeWidth = MathF.Max(request.OutlineWidth * 2f, 0.01f)
         };
+
+        if (request.OutlineSoftness > 0.01f)
+        {
+            paint.MaskFilter = SKMaskFilter.CreateBlur(SKBlurStyle.Normal, request.OutlineSoftness / 3f);
+        }
 
         paint.Shader = CreateGradientShader(
             request.OutlineGradientMode,

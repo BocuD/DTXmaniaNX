@@ -52,6 +52,12 @@ public partial class UIText
             _dirty = true;
         }
 
+        if (ImGui.InputFloat("Outline Softness", ref outlineSoftness, 0.5f, 2f, "%.1f"))
+        {
+            outlineSoftness = MathF.Max(outlineSoftness, 0f);
+            _dirty = true;
+        }
+
         if (Inspector.Inspector.Inspect("Texture Padding", ref texturePadding))
         {
             texturePadding = Vector2.Max(texturePadding, new Vector2(0f));
