@@ -232,6 +232,7 @@ public class CStageSongSelectionNew : CStage
         songCountIndicator.outlineWidth = 0;
         songCountIndicator.fontSize = 20;
         songCountIndicator.bindings.Add(new UIBinding("text", "SongCount"));
+        songCountIndicator.name = "SongCountIndicator";
         
         var sortMenu = ui.AddChild(new SortMenuContainer());
         sortMenu.parentAnchor = UICanvas.TopRight;
