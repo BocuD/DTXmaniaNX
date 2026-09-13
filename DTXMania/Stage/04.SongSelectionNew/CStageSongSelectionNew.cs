@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Numerics;
 using DiscordRPC;
 using DTXMania.Core;
+using DTXMania.Core.Framework;
 using DTXMania.Core.Video;
 using DTXMania.SongDb;
 using DTXMania.SongDb.Sorting;
@@ -177,6 +178,36 @@ public class CStageSongSelectionNew : CStage
             imageSource = ImageSource.Dynamic, dynamicSource = "AlbumArt",
             position = new Vector3(320, 35, 0), renderOrder = 10, size = new Vector2(300, 300), name = "AlbumArt"
         });
+        
+        var songlengthGroup = ui.AddChild(new UIGroup("SongLength"));
+        songlengthGroup.renderOrder = 11;
+        songlengthGroup.position = new Vector3(100, 187, 0);
+        songlengthGroup.size = new Vector2(220, 30);
+        songlengthGroup.AddChild(new UIImage
+        {
+            imageSource = ImageSource.File, image = SkinResource.System(@"Graphics\SongSelect\panel_base.png"), 
+            name = "PanelLength", scale = new Vector3(0.545f, 0.545f, 0)
+        });
+        var labelText = songlengthGroup.AddChild(new UIText("LENGTH", 18));
+        labelText.renderOrder = 1;
+        labelText.pivot = new Vector2(0, 1);
+        labelText.parentAnchor = new Vector2(0, 1);
+        labelText.position = new Vector3(-2, 8, 0);
+        labelText.name = "LabelText";
+        labelText.outlineWidth = 0.7f;
+        labelText.outlineSoftness = 3.0f;
+        labelText.outlineColor = new Color4(0, 0.96f, 0.06f);
+        labelText.font = SkinResource.System("Brandon Grotesque Black.ttf");
+        var lengthText = songlengthGroup.AddChild(new UIText("", 28));
+        lengthText.renderOrder = 1;
+        lengthText.bindings.Add(new UIBinding("text", "SongDuration"));
+        lengthText.parentAnchor = new Vector2(1, 0.5f);
+        lengthText.outlineWidth = 0;
+        lengthText.style = UiTextStyle.Italic;
+        lengthText.font = SkinResource.System("Futura PT Medium.otf");
+        lengthText.pivot = new Vector2(1, 0.5f);
+        lengthText.name = "LengthText";
+        lengthText.position = new Vector3(-3, 0, 0);
 
         var skillText = ui.AddChild(new UIText("", 48));
         skillText.renderOrder = 11;
