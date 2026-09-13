@@ -69,49 +69,6 @@ public abstract class UIDrawable : IDisposable
         }
     }
 
-    //the nine corners, edges and centre, in the order the grid draws them
-    private static readonly float[] AnchorStops = [0f, 0.5f, 1f];
-
-    private void DrawParentAnchor(bool xDriven, bool yDriven)
-    {
-        Inspector.Inspector.InspectAxes("Parent Anchor", ref parentAnchor, xDriven, yDriven);
-
-        //a cell sets both axes at once, so the grid is only worth offering while one of them still moves
-        ImGui.BeginDisabled(xDriven && yDriven);
-
-        //a grid of the nine places anyone actually wants, for the arbitrary values the field above
-        for (int y = 0; y < AnchorStops.Length; y++)
-        {
-            for (int x = 0; x < AnchorStops.Length; x++)
-            {
-                Vector2 stop = new(AnchorStops[x], AnchorStops[y]);
-                bool active = parentAnchor == stop;
-
-                if (x > 0)
-                {
-                    ImGui.SameLine();
-                }
-
-                if (active)
-                {
-                    ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.16f, 0.5f, 0.22f, 1f));
-                }
-
-                if (ImGui.Button($"##parentAnchor{x}{y}", new Vector2(24, 24)))
-                {
-                    parentAnchor = stop;
-                }
-
-                if (active)
-                {
-                    ImGui.PopStyleColor();
-                }
-            }
-        }
-
-        ImGui.EndDisabled();
-    }
-
     public void UpdateLocalTransformMatrix()
     {
         //the parent draws first, so its box has settled by the time a child asks for it
@@ -207,8 +164,8 @@ public abstract class UIDrawable : IDisposable
 
             Inspector.Inspector.Inspect("Size", ref size);
             Inspector.Inspector.InspectAxes("Position", ref position, xDriven, yDriven);
-            Inspector.Inspector.Inspect("Pivot", ref pivot);
-            DrawParentAnchor(xDriven, yDriven);
+            Inspector.Inspector.AnchorField("Pivot", ref pivot, false, false);
+            Inspector.Inspector.AnchorField("Parent Anchor", ref parentAnchor, xDriven, yDriven);
         }
 
         if (ImGui.CollapsingHeader("Transform", ImGuiTreeNodeFlags.DefaultOpen))

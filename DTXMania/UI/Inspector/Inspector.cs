@@ -162,11 +162,111 @@ public class Inspector
         return changed;
     }
 
-    private static void BeginAxes(string label, int fields)
+    private static readonly float[] AnchorStops = [0.0f, 0.5f, 1.0f];
+
+    /// <summary>Axis fields with a button on the left that picks one of the nine stops.</summary>
+    public static bool AnchorField(string label, ref Vector2 value, bool xDriven, bool yDriven)
+    {
+        ImGui.PushID(label);
+
+        float button = ImGui.GetFrameHeight();
+
+        ImGui.BeginDisabled(xDriven && yDriven);
+
+        if (AnchorButton(value, button))
+        {
+            ImGui.OpenPopup("stops");
+        }
+
+        ImGui.EndDisabled();
+
+        bool changed = AnchorStopsPopup(ref value);
+        ImGui.SameLine(0.0f, ImGui.GetStyle().ItemInnerSpacing.X);
+
+        BeginAxes(label, 2, button + ImGui.GetStyle().ItemInnerSpacing.X);
+        changed |= Axis(0, ref value.X, xDriven);
+        changed |= Axis(1, ref value.Y, yDriven);
+        EndAxes(label);
+
+        ImGui.PopID();
+
+        return changed;
+    }
+
+    private static bool AnchorButton(Vector2 value, float size)
+    {
+        Vector2 origin = ImGui.GetCursorScreenPos();
+        bool pressed = ImGui.Button("##stops", new Vector2(size, size));
+
+        ImDrawListPtr draw = ImGui.GetWindowDrawList();
+        float step = size / 4.0f;
+        float dot = MathF.Max(1.5f, size / 12.0f);
+
+        for (int y = 0; y < AnchorStops.Length; y++)
+        {
+            for (int x = 0; x < AnchorStops.Length; x++)
+            {
+                Vector2 centre = origin + new Vector2(step * (x + 1), step * (y + 1));
+                bool active = value == new Vector2(AnchorStops[x], AnchorStops[y]);
+
+                draw.AddRectFilled(centre - new Vector2(dot), centre + new Vector2(dot),
+                    ImGui.GetColorU32(active ? ImGuiCol.CheckMark : ImGuiCol.TextDisabled));
+            }
+        }
+
+        return pressed;
+    }
+
+    private static bool AnchorStopsPopup(ref Vector2 value)
+    {
+        if (!ImGui.BeginPopup("stops"))
+        {
+            return false;
+        }
+
+        bool changed = false;
+
+        for (int y = 0; y < AnchorStops.Length; y++)
+        {
+            for (int x = 0; x < AnchorStops.Length; x++)
+            {
+                Vector2 stop = new(AnchorStops[x], AnchorStops[y]);
+                bool active = value == stop;
+
+                if (x > 0)
+                {
+                    ImGui.SameLine();
+                }
+
+                if (active)
+                {
+                    ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.16f, 0.5f, 0.22f, 1.0f));
+                }
+
+                if (ImGui.Button($"##stop{x}{y}", new Vector2(24, 24)))
+                {
+                    value = stop;
+                    changed = true;
+                    ImGui.CloseCurrentPopup();
+                }
+
+                if (active)
+                {
+                    ImGui.PopStyleColor();
+                }
+            }
+        }
+
+        ImGui.EndPopup();
+
+        return changed;
+    }
+
+    private static void BeginAxes(string label, int fields, float usedWidth = 0.0f)
     {
         ImGui.PushID(label);
         float spacing = ImGui.GetStyle().ItemInnerSpacing.X;
-        ImGui.PushItemWidth((ImGui.CalcItemWidth() - spacing * (fields - 1)) / fields);
+        ImGui.PushItemWidth((ImGui.CalcItemWidth() - usedWidth - spacing * (fields - 1)) / fields);
     }
 
     private static bool Axis(int index, ref float value, bool driven)
