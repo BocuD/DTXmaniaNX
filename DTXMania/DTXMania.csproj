@@ -55,7 +55,7 @@
 
     <ItemGroup>
       <Reference Include="Bass.Net">
-        <HintPath>..\Runtime\dll\Bass.Net.dll</HintPath>
+        <HintPath>..\Runtime\lib\bass\Bass.Net.dll</HintPath>
       </Reference>
     </ItemGroup>
 
