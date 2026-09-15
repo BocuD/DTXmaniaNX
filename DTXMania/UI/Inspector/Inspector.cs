@@ -351,6 +351,19 @@ public class Inspector
         return changed;
     }
 
+    //shown in degrees, stored in radians
+    public static bool InspectAngles(string label, ref Vector3 radians)
+    {
+        Vector3 degrees = radians * (180.0f / MathF.PI);
+        if (!ImGui.InputFloat3(label, ref degrees))
+        {
+            return false;
+        }
+
+        radians = degrees * (MathF.PI / 180.0f);
+        return true;
+    }
+
     public static bool Inspect(string label, ref RectangleF vector)
     {
         Vector4 v = new(vector.X, vector.Y, vector.Width, vector.Height);

@@ -171,7 +171,7 @@ public abstract class UIDrawable : IDisposable
         if (ImGui.CollapsingHeader("Transform", ImGuiTreeNodeFlags.DefaultOpen))
         {
             Inspector.Inspector.Inspect("Scale", ref scale);
-            Inspector.Inspector.Inspect("Rotation", ref rotation);
+            Inspector.Inspector.InspectAngles("Rotation", ref rotation);
         }
 
         if (ImGui.CollapsingHeader("Display", ImGuiTreeNodeFlags.DefaultOpen))
