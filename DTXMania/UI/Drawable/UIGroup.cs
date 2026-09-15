@@ -13,6 +13,12 @@ namespace DTXMania.UI.Drawable;
 public class UIGroup : UIDrawable
 {
     [Themable] public bool sortByRenderOrder = true;
+
+    //camera distance in this group's pixels; children at +Z shrink towards the vanishing point. 0 is flat
+    [Themable] public float perspective;
+
+    //in this group's own coordinates
+    [Themable] public Vector2 vanishingPoint;
     public List<UIDrawable> children = [];
 
     private bool dirty = false;
@@ -350,7 +356,9 @@ public class UIGroup : UIDrawable
         }
 
         UpdateLocalTransformMatrix();
-        Matrix4x4 combinedMatrix = localTransformMatrix * parentMatrix;
+        Matrix4x4 combinedMatrix = perspective > 0.0f
+            ? PerspectiveMatrix() * localTransformMatrix * parentMatrix
+            : localTransformMatrix * parentMatrix;
 
         if (sortByRenderOrder && dirty)
         {
@@ -440,11 +448,31 @@ public class UIGroup : UIDrawable
         children.Clear();
     }
 
+    //depth goes into w for the divide and is flattened, so nothing in front of or behind the canvas is clipped
+    private Matrix4x4 PerspectiveMatrix()
+    {
+        Matrix4x4 project = Matrix4x4.Identity;
+        project.M33 = 0.0f;
+        project.M34 = 1.0f / perspective;
+
+        Vector3 centre = new(vanishingPoint, 0.0f);
+        return Matrix4x4.CreateTranslation(-centre) * project * Matrix4x4.CreateTranslation(centre);
+    }
+
     public override void DrawInspector()
     {
         base.DrawInspector();
         DrawComponentInspector();
         ImGui.Checkbox("Sort by Render Order", ref sortByRenderOrder);
+
+        if (ImGui.InputFloat("Perspective", ref perspective, 10.0f, 100.0f, "%.0f"))
+        {
+            perspective = MathF.Max(perspective, 0.0f);
+        }
+
+        ImGui.BeginDisabled(perspective <= 0.0f);
+        Inspector.Inspector.Inspect("Vanishing Point", ref vanishingPoint);
+        ImGui.EndDisabled();
 
         if (ImGui.CollapsingHeader("Animator"))
         {
