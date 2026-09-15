@@ -193,7 +193,12 @@ public class SortMenuContainer : UIGroup, IUIItemSource
             motion = new UIScrollMotion(rate: 10.0f, maxSpeed: 600.0f / EntrySpacing, queueLimit: 2.0f),
 
             //the selected entry sits lower than its neighbours
-            curve = new UIItemCurve(UIAxis.Y, distance: 18.0f, range: EntrySpacing)
+            itemLayout = new UIItemLayout
+            {
+                enabled = true,
+                selectedPosition = new Vector3(0.0f, 18.0f, 0.0f),
+                next = new UIItemPath { start = new Vector3(EntrySpacing, 0.0f, 0.0f), spacing = EntrySpacing }
+            }
         });
 
         return root;

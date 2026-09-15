@@ -12,7 +12,7 @@ namespace DTXMania.UI.Drawable;
 /// than the item count. <see cref="UIScrollRing"/> owns the wrap-around arithmetic.
 ///
 /// The selected item sits at the group's origin, so a skin positions the list by where its selection
-/// should be. Slots are laid out around that, displaced by <see cref="curve"/>.
+/// should be. Slots are laid out around that, along itemOffset or by <see cref="itemLayout"/>.
 /// </summary>
 public class UIScrollItemsGroup : UIItemsGroup
 {
@@ -28,8 +28,8 @@ public class UIScrollItemsGroup : UIItemsGroup
     //flips which way that input moves the list
     [Themable] public bool invertNavigation;
 
-    //displaces items by their distance from the selection; see UIItemCurve
-    [Themable] [SkinSerialize] public UIItemCurve curve = new();
+    //when enabled, places the slots; itemOffset still sets how far one item of distance is
+    [Themable] [SkinSerialize] public UIItemLayout itemLayout = new();
 
     [JsonIgnore] private UIScrollRing? ring;
 
@@ -109,7 +109,7 @@ public class UIScrollItemsGroup : UIItemsGroup
         base.Draw(parentMatrix);
     }
 
-    //the selection sits at the group's origin, so slots run outwards from there and the curve measures
+    //the selection sits at the group's origin, so slots run outwards from there and the layout measures
     //distance from that same point
     protected override void LayOutSlots()
     {
@@ -125,14 +125,31 @@ public class UIScrollItemsGroup : UIItemsGroup
         for (int position = 0; position < Slots.Count; position++)
         {
             Vector3 slotPosition = itemOffset * (position - selectionOffset) + scrolled;
+            UIItemSlot slot = Slots[ring.SlotAt(position)];
 
-            if (curve.IsActive)
+            if (itemLayout.enabled)
             {
-                //how far down the list this item sits, which for a diagonal list is its projection
-                slotPosition += curve.Evaluate(Vector3.Dot(slotPosition, direction));
+                float distance = Vector3.Dot(slotPosition, direction) / ItemDistance;
+                itemLayout.Apply(slot, distance, direction);
+
+                //the item nearest the selection draws last, so a list folding into depth overlaps the right way
+                SetSlotOrder(slot, -(int)MathF.Round(MathF.Abs(distance) * 100.0f));
+                continue;
             }
 
-            Slots[ring.SlotAt(position)].position = slotPosition;
+            slot.position = slotPosition;
+            slot.rotation = Vector3.Zero;
+            slot.scale = Vector3.One;
+            SetSlotOrder(slot, 0);
+        }
+    }
+
+    private void SetSlotOrder(UIItemSlot slot, int order)
+    {
+        if (slot.renderOrder != order)
+        {
+            slot.renderOrder = order;
+            InvalidateOrder();
         }
     }
 
@@ -190,21 +207,7 @@ public class UIScrollItemsGroup : UIItemsGroup
             ? "no ring"
             : $"{ring.Offset:0.##} / {ring.Target:0.##}   (spacing {ring.Spacing:0.##}, settled {ring.IsSettled})");
 
-        ImGui.SeparatorText("Curve");
-        Inspector.Inspector.Inspect("Axis", ref curve.axis);
-        Inspector.Inspector.Inspect("Shape", ref curve.shape);
-        ImGui.InputFloat("Distance", ref curve.distance);
-        ImGui.InputFloat("Range", ref curve.range);
-        ImGui.InputFloat("Focus", ref curve.focus);
-
-        //what the selected item and its neighbours actually get, to see where the peak really lands
-        if (ring != null)
-        {
-            float spacing = SpacingAlongAxis;
-            ImGui.LabelText("Curve at prev / sel / next",
-                $"{curve.EvaluateAmount(-spacing + ring.Offset):0.#} / " +
-                $"{curve.EvaluateAmount(ring.Offset):0.#} / " +
-                $"{curve.EvaluateAmount(spacing + ring.Offset):0.#}");
-        }
+        ImGui.SeparatorText("Item Layout");
+        itemLayout.DrawInspector();
     }
 }

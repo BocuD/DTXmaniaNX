@@ -59,7 +59,13 @@ public class SongSelectionContainer : UIScrollItemsGroup, IUIItemSource
         itemOffset = new Vector3(0, RowSpacing, 0);
         visibleSlots = DefaultWindowSize;
         selectionOffset = DefaultSelectionRow;
-        curve = new UIItemCurve(UIAxis.X, -25.0f, 90.0f);
+
+        itemLayout = new UIItemLayout
+        {
+            enabled = true,
+            selectedPosition = new Vector3(-25.0f, 0.0f, 0.0f),
+            next = new UIItemPath { start = itemOffset, spacing = RowSpacing }
+        };
     }
 
     public int ItemCount => Math.Max(1, visibleSlots);

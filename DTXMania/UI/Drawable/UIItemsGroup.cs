@@ -131,7 +131,7 @@ public class UIItemsGroup : UIGroup, IUIInputHandler
     /// <summary>How far apart items sit, measured along the list's own direction.</summary>
     public float ItemDistance => Math.Max(itemOffset.Length(), 0.001f);
 
-    /// <summary>Unit vector along the list, which scrolling and the curve both measure against.</summary>
+    /// <summary>Unit vector along the list, which scrolling and the item layout both measure against.</summary>
     public Vector3 ItemDirection => itemOffset.LengthSquared() > 0.000001f
         ? Vector3.Normalize(itemOffset)
         : Vector3.UnitY;
