@@ -241,6 +241,9 @@ public class CStageSongSelectionNew : CStage
         songSelect.position = UICanvas.FromAnchor(UICanvas.Right, 765, 320);
         songSelect.name = "SongSelect";
 
+        //sorting has the strums
+        songSelect.guitarNavigation = UIGuitarNavigation.Neck;
+
         //StatusPanel -> 3 pane component instances -> 5 rows each; a skin's json carries the panes instead
         var statusPanel = ui.AddChild(new StatusPanel());
         statusPanel.parentAnchor = UICanvas.BottomLeft;

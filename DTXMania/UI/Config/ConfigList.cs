@@ -338,7 +338,7 @@ internal class ConfigList : UIScrollItemsGroup, IUIItemSource
     /// </summary>
     private sealed class ConfigItemEditor(ConfigList list) : IUIInputHandler
     {
-        private readonly NavigationRepeat navigation = NavigationRepeat.Vertical();
+        private readonly NavigationRepeat navigation = new();
         private readonly Action increase = () => list.ChangeValue(true);
         private readonly Action decrease = () => list.ChangeValue(false);
 
@@ -355,7 +355,8 @@ internal class ConfigList : UIScrollItemsGroup, IUIItemSource
                 return;
             }
 
-            navigation.Poll(increase, decrease, decrease, increase);
+            navigation.Poll(UINavigationAxis.Vertical, UIGuitarNavigation.Default,
+                increase, decrease, decrease, increase);
         }
     }
 

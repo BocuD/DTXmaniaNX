@@ -25,10 +25,6 @@ public class UIScrollItemsGroup : UIItemsGroup
     //how the list travels towards where it has been asked to go; see UIScrollMotion
     [Themable] [SkinSerialize] public UIScrollMotion motion = new();
 
-    //which input direction drives this list. Separate from itemOffset on purpose: a list can be laid out
-    //diagonally, or run bottom-to-top, and still be navigated with the obvious keys
-    [Themable] public UINavigationAxis navigationAxis = UINavigationAxis.Vertical;
-
     //flips which way that input moves the list
     [Themable] public bool invertNavigation;
 
@@ -78,10 +74,6 @@ public class UIScrollItemsGroup : UIItemsGroup
 
         EnsureRing().Queue(-items * SpacingAlongAxis, motion);
     }
-
-    /// <summary>Whether this list responds to the given input direction, so an owner can wire only the
-    /// keys the list actually uses.</summary>
-    public bool RespondsTo(UINavigationAxis axis) => navigationAxis == axis;
 
     /// <summary>Puts <paramref name="itemIndex"/> under the selection position immediately.</summary>
     public void ScrollTo(int itemIndex)
@@ -187,7 +179,6 @@ public class UIScrollItemsGroup : UIItemsGroup
         }
 
         ImGui.InputInt("Selection Offset", ref selectionOffset);
-        Inspector.Inspector.Inspect("Navigation Axis", ref navigationAxis);
         ImGui.Checkbox("Invert Navigation", ref invertNavigation);
 
         ImGui.SeparatorText("Motion");

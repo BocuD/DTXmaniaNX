@@ -16,6 +16,13 @@ public enum UINavigationAxis
     Horizontal
 }
 
+public enum UIGuitarNavigation
+{
+    Default,
+    Neck,
+    Strum
+}
+
 public static class UIAxisExtensions
 {
     public static Vector3 Unit(this UIAxis axis) => axis switch

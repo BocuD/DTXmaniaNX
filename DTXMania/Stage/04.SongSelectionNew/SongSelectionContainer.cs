@@ -49,14 +49,6 @@ public class SongSelectionContainer : UIScrollItemsGroup, IUIItemSource
     private bool requestIsFiltered;
     private SongNode? newSongRoot;
 
-    //cached so polling navigation every frame doesn't allocate a closure per frame
-    private readonly Action scrollToPrevious;
-    private readonly Action scrollToNext;
-
-    //the stage drives this list, since deciding on a song is stage flow
-    //the sort menu takes the strums, so the list is on the neck whatever the navigation setting says
-    private readonly NavigationRepeat listNavigation = NavigationRepeat.VerticalNeck();
-
     public SongSelectionContainer() : base("SongSelectionContainer")
     {
         songDb = CDTXMania.SongDb;
@@ -68,9 +60,6 @@ public class SongSelectionContainer : UIScrollItemsGroup, IUIItemSource
         visibleSlots = DefaultWindowSize;
         selectionOffset = DefaultSelectionRow;
         curve = new UIItemCurve(UIAxis.X, -25.0f, 90.0f);
-
-        scrollToPrevious = () => ScrollBy(-1);
-        scrollToNext = () => ScrollBy(1);
     }
 
     public int ItemCount => Math.Max(1, visibleSlots);
@@ -313,6 +302,7 @@ public class SongSelectionContainer : UIScrollItemsGroup, IUIItemSource
         base.Draw(parentMatrix);
     }
 
+    //the stage drives this list, since deciding on a song is stage flow
     public int HandleNavigation()
     {
         if (CDTXMania.InputManager.Keyboard.bKeyPressed(Key.R))
@@ -325,11 +315,7 @@ public class SongSelectionContainer : UIScrollItemsGroup, IUIItemSource
             return (int)CStageSongSelectionNew.EReturnValue.Continue;
         }
 
-        //only the vertical keys exist for now, so a list configured for horizontal input simply has none
-        if (RespondsTo(UINavigationAxis.Vertical))
-        {
-            listNavigation.Poll(scrollToPrevious, scrollToNext);
-        }
+        PollNavigation();
 
         if (CDTXMania.Input.ActionDecide() && ActionDecide())
         {

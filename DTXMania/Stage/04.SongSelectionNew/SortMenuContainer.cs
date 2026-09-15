@@ -22,12 +22,6 @@ public class SortMenuContainer : UIGroup, IUIItemSource
 
     private UIScrollItemsGroup? entries;
 
-    private readonly NavigationRepeat navigation = NavigationRepeat.Horizontal();
-
-    //cached, so the repeat does not allocate a closure on every polled frame
-    private readonly Action scrollPrevious;
-    private readonly Action scrollNext;
-
     //one per sort mode, in the order SongDbSort declares them
     private SoundReference[]? sounds;
 
@@ -38,9 +32,6 @@ public class SortMenuContainer : UIGroup, IUIItemSource
     public SortMenuContainer() : base("SortMenuContainer")
     {
         MakeComponent("SortMenuContainer", SortMenuContainerDefault);
-
-        scrollPrevious = () => entries?.ScrollBy(-1);
-        scrollNext = () => entries?.ScrollBy(1);
 
         size = new Vector2(662, 92);
         pivot = new Vector2(1.0f, 0.0f);
@@ -67,7 +58,7 @@ public class SortMenuContainer : UIGroup, IUIItemSource
 
     public void HandleNavigation()
     {
-        navigation.Poll(scrollPrevious, scrollNext);
+        entries?.PollNavigation();
     }
 
     public override void Draw(Matrix4x4 parentMatrix)
@@ -187,6 +178,7 @@ public class SortMenuContainer : UIGroup, IUIItemSource
         {
             itemOffset = new Vector3(EntrySpacing, 0.0f, 0.0f),
             navigationAxis = UINavigationAxis.Horizontal,
+            guitarNavigation = UIGuitarNavigation.Strum,
 
             //one slot per sort: nothing is ever recycled, the ring is here for the wrap-around
             visibleSlots = SongDbSort.All.Length,

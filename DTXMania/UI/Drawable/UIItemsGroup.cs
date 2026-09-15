@@ -162,7 +162,11 @@ public class UIItemsGroup : UIGroup, IUIInputHandler
     [JsonIgnore] private readonly UISelectionInfo selection = new();
     [JsonIgnore] private long lastSelectionTime;
 
-    [JsonIgnore] private readonly NavigationRepeat navigation = NavigationRepeat.Vertical();
+    [Themable] public UINavigationAxis navigationAxis = UINavigationAxis.Vertical;
+
+    [Themable] public UIGuitarNavigation guitarNavigation = UIGuitarNavigation.Default;
+
+    [JsonIgnore] private readonly NavigationRepeat navigation = new();
     [JsonIgnore] private readonly Action selectPrevious;
     [JsonIgnore] private readonly Action selectNext;
 
@@ -288,9 +292,11 @@ public class UIItemsGroup : UIGroup, IUIInputHandler
 
     public NavigationRepeat? Navigation => navigation;
 
+    public void PollNavigation() => navigation.Poll(navigationAxis, guitarNavigation, selectPrevious, selectNext);
+
     public virtual void HandleInput()
     {
-        navigation.Poll(selectPrevious, selectNext);
+        PollNavigation();
 
         if (CDTXMania.Input.ActionDecide())
         {
@@ -512,6 +518,9 @@ public class UIItemsGroup : UIGroup, IUIInputHandler
 
         Inspector.Inspector.Inspect("Item Offset", ref itemOffset);
         LayOutSlots();
+
+        Inspector.Inspector.Inspect("Navigation Axis", ref navigationAxis);
+        Inspector.Inspector.Inspect("Guitar Navigation", ref guitarNavigation);
 
         ImGui.BeginDisabled(Source != null);
         if (ImGui.InputInt("Item Count", ref itemCount))
