@@ -46,7 +46,8 @@ public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
     //when the batch breaks (texture/blend change, capacity, texture update/delete, readback,
     //or the explicit end-of-render Flush).
     private const int MaxBatchQuads = 2048;
-    private const int FloatsPerVertex = 9; //pos(3) + uv(2) + color(4)
+    //w carries the perspective divide, so a quad in a group with perspective keeps its texture straight
+    private const int FloatsPerVertex = 10; //pos(4) + uv(2) + color(4)
     private const int FloatsPerQuad = FloatsPerVertex * 4;
     private readonly float[] _batchVertices = new float[MaxBatchQuads * FloatsPerQuad];
     private int _batchQuadCount;
@@ -549,12 +550,13 @@ public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
         buffer[offset] = position.X;
         buffer[offset + 1] = position.Y;
         buffer[offset + 2] = position.Z;
-        buffer[offset + 3] = u;
-        buffer[offset + 4] = texV;
-        buffer[offset + 5] = color.X;
-        buffer[offset + 6] = color.Y;
-        buffer[offset + 7] = color.Z;
-        buffer[offset + 8] = color.W;
+        buffer[offset + 3] = position.W;
+        buffer[offset + 4] = u;
+        buffer[offset + 5] = texV;
+        buffer[offset + 6] = color.X;
+        buffer[offset + 7] = color.Y;
+        buffer[offset + 8] = color.Z;
+        buffer[offset + 9] = color.W;
     }
 
     /// <summary>
@@ -602,9 +604,9 @@ public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
         // Re-point the vertex attributes at the ring buffer we just filled (the VAO records which
         // buffer each attribute reads from). Cheap CPU-only calls; no GPU sync.
         int stride = FloatsPerVertex * sizeof(float);
-        _gl.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, (uint)stride, (void*)0);
-        _gl.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, (uint)stride, (void*)(3 * sizeof(float)));
-        _gl.VertexAttribPointer(2, 4, VertexAttribPointerType.Float, false, (uint)stride, (void*)(5 * sizeof(float)));
+        _gl.VertexAttribPointer(0, 4, VertexAttribPointerType.Float, false, (uint)stride, (void*)0);
+        _gl.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, (uint)stride, (void*)(4 * sizeof(float)));
+        _gl.VertexAttribPointer(2, 4, VertexAttribPointerType.Float, false, (uint)stride, (void*)(6 * sizeof(float)));
 
         _gl.DrawElements(PrimitiveType.Triangles, (uint)(_batchQuadCount * 6), DrawElementsType.UnsignedShort, null);
         drawCalls++;
@@ -639,7 +641,7 @@ public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
 
         const string vertexShaderSource = """
             #version 330 core
-            layout (location = 0) in vec3 aPosition;
+            layout (location = 0) in vec4 aPosition;
             layout (location = 1) in vec2 aTexCoord;
             layout (location = 2) in vec4 aColor;
 
@@ -652,7 +654,7 @@ public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
             {
                 vTexCoord = aTexCoord;
                 vColor = aColor;
-                gl_Position = uProjection * vec4(aPosition, 1.0);
+                gl_Position = uProjection * aPosition;
             }
             """;
 
@@ -717,11 +719,11 @@ public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
             _gl.BufferData(BufferTargetARB.ElementArrayBuffer, (nuint)(indices.Length * sizeof(ushort)), indexPtr, BufferUsageARB.StaticDraw);
         }
 
-        _gl.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, FloatsPerVertex * sizeof(float), (void*)0);
+        _gl.VertexAttribPointer(0, 4, VertexAttribPointerType.Float, false, FloatsPerVertex * sizeof(float), (void*)0);
         _gl.EnableVertexAttribArray(0);
-        _gl.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, FloatsPerVertex * sizeof(float), (void*)(3 * sizeof(float)));
+        _gl.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, FloatsPerVertex * sizeof(float), (void*)(4 * sizeof(float)));
         _gl.EnableVertexAttribArray(1);
-        _gl.VertexAttribPointer(2, 4, VertexAttribPointerType.Float, false, FloatsPerVertex * sizeof(float), (void*)(5 * sizeof(float)));
+        _gl.VertexAttribPointer(2, 4, VertexAttribPointerType.Float, false, FloatsPerVertex * sizeof(float), (void*)(6 * sizeof(float)));
         _gl.EnableVertexAttribArray(2);
         _gl.BindVertexArray(0);
     }
