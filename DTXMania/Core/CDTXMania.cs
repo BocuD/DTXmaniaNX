@@ -5,7 +5,6 @@ using System.Numerics;
 using System.Reflection;
 using System.Runtime;
 using System.Text;
-using System.Windows.Forms;
 using DTXMania.Core.Audio;
 using DTXMania.Core.Framework;
 using DTXMania.Core.OpenGL;
@@ -211,10 +210,9 @@ internal partial class CDTXMania
         //-----------------
         // BEGIN #23629 2010.11.13 from: デバッグ時は Application.ExecutablePath が ($SolutionDir)/bin/x86/Debug/ などになり System/ の読み込みに失敗するので、カレントディレクトリを採用する。（プロジェクトのプロパティ→デバッグ→作業ディレクトリが有効になる）
 #if DEBUG
-        executableDirectory = Environment.CurrentDirectory + @"\";
+        executableDirectory = Environment.CurrentDirectory + Path.DirectorySeparatorChar;
 #else
-        executableDirectory =
-            Path.GetDirectoryName(Application.ExecutablePath) + @"\";	// #23629 2010.11.9 yyagi: set correct pathname where DTXManiaGR.exe is.
+        executableDirectory = AppContext.BaseDirectory;
 #endif
         // END #23629 2010.11.13 from
         //-----------------
@@ -265,7 +263,7 @@ internal partial class CDTXMania
                     "DTXManiaLog.txtへの書き込みができませんでした。書き込みできるようにしてから、再度起動してください。",
                     "Failed to write DTXManiaLog.txt. Please set it writable and try again."
                 };
-                MessageBox.Show(mes_writeErr[c], "DTXMania boot error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                NativeMessageBox.Show("DTXMania boot error", mes_writeErr[c]);
                 Environment.Exit(1);
             }
         }

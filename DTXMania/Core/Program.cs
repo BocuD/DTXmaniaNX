@@ -1,9 +1,10 @@
 ﻿using System.Diagnostics;
 using System.Globalization;
-using System.Runtime.InteropServices;
 using System.Text;
-using System.Windows.Forms;
+using DTXMania.Core.Audio;
 using DTXMania.Core.OpenGL;
+using DTXMania.Core.Video;
+using NativeFileDialog.Extended;
 
 namespace DTXMania.Core;
 
@@ -11,45 +12,6 @@ internal class Program
 {
 	//-----------------------------
 	private static Mutex concurrencyMutex;
-	private static bool missingDll = false;
-
-	private static void tCheckIfDllExists(string strDllPath, string strDllNotFoundErrorJp, string strDllNotFoundErrorEn,
-		bool bLoadDllCheck = false)
-	{
-		string errorString = CDTXMania.isJapanese ? strDllNotFoundErrorJp : strDllNotFoundErrorEn;
-		if (bLoadDllCheck)
-		{
-			IntPtr hModule = LoadLibrary(strDllPath); // 実際にLoadDll()してチェックする
-			// if (hModule == IntPtr.Zero)
-			{
-				MessageBox.Show(errorString, "DTXMania runtime error", MessageBoxButtons.OK, MessageBoxIcon.Hand);
-				missingDll = true;
-			}
-
-			FreeLibrary(hModule);
-		}
-		else
-		{
-			// 単純にファイルの存在有無をチェックするだけ (プロジェクトで「参照」していたり、アンマネージドなDLLが暗黙リンクされるものはこちら)
-			string path = Path.Combine(Directory.GetCurrentDirectory(), strDllPath);
-			if (!File.Exists(path))
-			{
-				MessageBox.Show(errorString, "DTXMania runtime error", MessageBoxButtons.OK, MessageBoxIcon.Hand);
-				missingDll = true;
-			}
-		}
-	}
-
-	#region [DllImport]
-	[DllImport( "kernel32", CharSet = CharSet.Unicode, SetLastError = true )]
-	internal static extern void FreeLibrary( IntPtr hModule );
-
-	[DllImport( "kernel32", CharSet = CharSet.Unicode, SetLastError = true )]
-	internal static extern IntPtr LoadLibrary( string lpFileName );
-
-	[DllImport("kernel32", CharSet = CharSet.Unicode, SetLastError = true)]
-	internal static extern bool SetDllDirectory(string lpPathName);
-	#endregion
 
 	[STAThread]
 	private static void Main()
@@ -64,16 +26,12 @@ internal class Program
 		if (!concurrencyMutex.WaitOne(0, false))
 		{
 			//display message that another instance is already running, and ask the user if they want to terminate it to start a new one
-			var result = MessageBox.Show(
+			bool startNew = NativeMessageBox.Ask("DTXMania",
 				CDTXMania.isJapanese
 					? "DTXMania は既に起動しています。\n新しく起動しますか？"
-					: "DTXMania is already running.\nDo you want to start a new instance?",
-				"DTXMania",
-				MessageBoxButtons.YesNo,
-				MessageBoxIcon.Question
-			);
+					: "DTXMania is already running.\nDo you want to start a new instance?");
 
-			if (result == DialogResult.Yes)
+			if (startNew)
 			{
 				//terminate all other instances
 				Process currentProcess = Process.GetCurrentProcess();
@@ -92,57 +50,27 @@ internal class Program
 			}
 		}
 
-		string newLine = Environment.NewLine;
-
 		Trace.WriteLine("Current Directory: " + Environment.CurrentDirectory);
-		Trace.WriteLine("EXEのあるフォルダ: " + Path.GetDirectoryName(Application.ExecutablePath));
+		Trace.WriteLine("Executable directory: " + AppContext.BaseDirectory);
 
-		tCheckIfDllExists("dll\\FDK.dll",
-			"FDK.dll またはその依存するdllが存在しません。" + newLine + "DTXManiaをダウンロードしなおしてください。",
-			"FDK.dll, or its depended DLL, is not found." + newLine + "Please download DTXMania again.");
+		string[] missingLibraries = BassRuntime.LibraryFiles.Concat(FFmpegCore.LibraryFiles)
+			.Where(file => !File.Exists(file))
+			.Select(file => Path.GetRelativePath(AppContext.BaseDirectory, file))
+			.ToArray();
 
-		tCheckIfDllExists("dll\\bass.dll",
-			"bass.dll が存在しません。" + newLine + "DTXManiaをダウンロードしなおしてください。",
-			"baas.dll is not found." + newLine + "Please download DTXMania again.");
-
-		tCheckIfDllExists("dll\\Bass.Net.dll",
-			"Bass.Net.dll が存在しません。" + newLine + "DTXManiaをダウンロードしなおしてください。",
-			"Bass.Net.dll is not found." + newLine + "Please download DTXMania again.");
-
-		tCheckIfDllExists("dll\\bassmix.dll",
-			"bassmix.dll を読み込めません。bassmix.dll か bass.dll が存在しません。" + newLine + "DTXManiaをダウンロードしなおしてください。",
-			"bassmix.dll is not loaded. bassmix.dll or bass.dll must not exist." + newLine +
-			"Please download DTXMania again.");
-
-		tCheckIfDllExists("dll\\bassasio.dll",
-			"bassasio.dll を読み込めません。bassasio.dll か bass.dll が存在しません。" + newLine + "DTXManiaをダウンロードしなおしてください。",
-			"bassasio.dll is not loaded. bassasio.dll or bass.dll must not exist." + newLine +
-			"Please download DTXMania again.");
-
-		tCheckIfDllExists("dll\\basswasapi.dll",
-			"basswasapi.dll を読み込めません。basswasapi.dll か bass.dll が存在しません。" + newLine +
-			"DTXManiaをダウンロードしなおしてください。",
-			"basswasapi.dll is not loaded. basswasapi.dll or bass.dll must not exist." + newLine +
-			"Please download DTXMania again.");
-
-		tCheckIfDllExists("dll\\bass_fx.dll",
-			"bass_fx.dll を読み込めません。bass_fx.dll か bass.dll が存在しません。" + newLine + "DTXManiaをダウンロードしなおしてください。",
-			"bass_fx.dll is not loaded. bass_fx.dll or bass.dll must not exist." + newLine +
-			"Please download DTXMania again.");
-
-		if (missingDll)
+		if (missingLibraries.Length > 0)
 		{
-			//show messagebox and ask if the user still wants to continue
-			var result = MessageBox.Show(
-				CDTXMania.isJapanese
-					? "必要なDLLが見つかりませんでした。\nDTXManiaを起動しますか？"
-					: "Some required DLLs are missing.\nDo you want to start DTXMania?",
-				"DTXMania",
-				MessageBoxButtons.YesNo,
-				MessageBoxIcon.Question
-			);
+			string list = string.Join(Environment.NewLine, missingLibraries);
+			Trace.TraceError("Missing libraries:" + Environment.NewLine + list);
 
-			if (result != DialogResult.Yes)
+			//show messagebox and ask if the user still wants to continue
+			bool start = NativeMessageBox.Ask("DTXMania runtime error",
+				CDTXMania.isJapanese
+					? $"必要なライブラリが見つかりませんでした。DTXManiaをダウンロードしなおしてください。\n\n{list}\n\nDTXManiaを起動しますか？"
+					: $"Some required libraries are missing. Please download DTXMania again.\n\n{list}\n\nDo you want to start DTXMania?",
+				MessageBoxIcon.Error);
+
+			if (!start)
 			{
 				return;
 			}
@@ -153,17 +81,10 @@ internal class Program
 			Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
 		}
 
-		string path = Path.GetDirectoryName(Application.ExecutablePath);
-		/* For future 64bit migration
-		SetDllDirectory(null);
-		if (Environment.Is64BitProcess)
-		{
-			SetDllDirectory(Path.Combine(path, @"dll\x64"));
-		}
-		else */
-		{
-			SetDllDirectory(Path.Combine(path, @"dll"));
-		}
+		BassRuntime.ResolveLibraries();
+
+		//NuGet's nfd is arm64 only on macOS
+		NativeLibraries.ResolveFrom(typeof(NFD).Assembly, "nfd");
 
 		//set up support for shift-jis
 		Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
@@ -190,7 +111,7 @@ internal class Program
 			Trace.Write( e.ToString() );
 			Trace.WriteLine( "" );
 			Trace.WriteLine( "エラーだゴメン！（涙" );
-			MessageBox.Show( e.ToString(), "DTXMania Error", MessageBoxButtons.OK, MessageBoxIcon.Error );	// #23670 2011.2.28 yyagi to show error dialog
+			NativeMessageBox.Show("DTXMania Error", e.ToString());	// #23670 2011.2.28 yyagi to show error dialog
 		}
 #endif
 		// END #24606 2011.03.08 from

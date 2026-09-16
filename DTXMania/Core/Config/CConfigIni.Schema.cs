@@ -124,11 +124,11 @@ internal partial class CConfigIni
 					c => c.nWindowHeight.ToString())),
 			G(["ウィンドウモード時の位置X", "X position in the window mode."],
 				Custom("WindowX",
-					(c, v) => c.nInitialWindowXPosition = CConversion.nGetNumberIfInRange(v, 0, System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width - 1, c.nInitialWindowXPosition),
+					(c, v) => c.nInitialWindowXPosition = CConversion.nGetNumberIfInRange(v, 0, 65535, c.nInitialWindowXPosition),
 					c => c.nInitialWindowXPosition.ToString())),
 			G(["ウィンドウモード時の位置Y", "Y position in the window mode."],
 				Custom("WindowY",
-					(c, v) => c.nInitialWindowYPosition = CConversion.nGetNumberIfInRange(v, 0, System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height - 1, c.nInitialWindowYPosition),
+					(c, v) => c.nInitialWindowYPosition = CConversion.nGetNumberIfInRange(v, 0, 65535, c.nInitialWindowYPosition),
 					c => c.nInitialWindowYPosition.ToString())),
 			G([
 					"ウインドウをダブルクリックした時にフルスクリーンに移行するか(0:移行しない,1:移行する)",

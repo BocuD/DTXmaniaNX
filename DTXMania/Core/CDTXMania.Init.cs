@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using System.Numerics;
-using System.Windows.Forms;
 using DTXMania.Core.Audio;
 using DTXMania.Core.Video;
 using DTXMania.SongDb;
@@ -31,7 +30,7 @@ internal partial class CDTXMania
         catch (Exception e)
         {
             Trace.TraceError($"Failed to initialize {initializer.name}: {e}\n{e.StackTrace}");
-            MessageBox.Show($"Failed to initialize {initializer.name}: {e}\n{e.StackTrace}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            NativeMessageBox.Show("Error", $"Failed to initialize {initializer.name}: {e}\n{e.StackTrace}");
             throw;
         }
     }
