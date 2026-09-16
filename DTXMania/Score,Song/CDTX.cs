@@ -3066,7 +3066,7 @@ public class CDTX : CActivity
 
         strFileNameFullPath = Path.GetFullPath(strFileName);
         this.strFileName = Path.GetFileName(strFileNameFullPath);
-        strFolderName = Path.GetDirectoryName(strFileNameFullPath) + @"\";
+        strFolderName = Path.GetDirectoryName(strFileNameFullPath) + Path.DirectorySeparatorChar;
         string ext = Path.GetExtension(this.strFileName).ToLower();
         if (!string.IsNullOrEmpty(ext))
         {
@@ -4650,6 +4650,16 @@ public class CDTX : CActivity
 
     bool lastLineWasChipLocation = false;
 
+    //text commands like #TITLE keep their '\'
+    private static readonly string[] filePathCommandPrefixes =
+    [
+        "PATH", "STAGEFILE", "PREVIEW", "PREIMAGE", "PREMOVIE", "BACKGROUND", "WALL", "SOUND_", "MIDIFILE",
+        "WAV", "BMP", "AVI", "VIDEO", "RESULTIMAGE", "RESULTMOVIE", "RESULTSOUND"
+    ];
+
+    private static bool IsFilePathCommand(string command) =>
+        filePathCommandPrefixes.Any(prefix => command.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
+
     private static readonly Dictionary<string, Action<CDTX, string>> commandHandlers = new(StringComparer.OrdinalIgnoreCase)
     {
         { "PATH_WAV", (dtx, param) => dtx.PATH_WAV = param },
@@ -4813,6 +4823,11 @@ public class CDTX : CActivity
         #endregion
         else if (!bstackIFからENDIFをスキップする.Peek()) // IF～ENDIF をスキップするなら以下はすべて無視。
         {
+            if (IsFilePathCommand(strCommand))
+            {
+                strParameter = DataPath.Normalize(strParameter);
+            }
+
             if (commandHandlers.TryGetValue(strCommand, out Action<CDTX, string>? handler))
             {
                 handler(this, strParameter);

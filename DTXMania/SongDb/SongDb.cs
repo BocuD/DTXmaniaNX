@@ -321,8 +321,9 @@ public class SongDb : IDisposable
 
 	private async Task ScanDirectoryAsyncRecursive(string searchPath, SongNode parent)
 	{
-		if (!searchPath.EndsWith(@"\"))
-			searchPath += @"\";
+		searchPath = DataPath.Normalize(searchPath);
+		if (!searchPath.EndsWith(Path.DirectorySeparatorChar))
+			searchPath += Path.DirectorySeparatorChar;
 		
 		int maxThreadCount = Environment.ProcessorCount - 2;
 		if (maxThreadCount < 2)
@@ -397,7 +398,7 @@ public class SongDb : IDisposable
 					SongNode node = new(parent, SongNode.ENodeType.BOX)
 					{
 						title = infoDir.Name.Substring(9),
-						path = infoDir.FullName + @"\",
+						path = infoDir.FullName + Path.DirectorySeparatorChar,
 						skinPath = parent.skinPath,
 						charts =
 						[
@@ -405,7 +406,7 @@ public class SongDb : IDisposable
 							{
 								FileInformation = new CChartData.STFileInformation
 								{
-									AbsoluteFolderPath = infoDir.FullName + @"\"
+									AbsoluteFolderPath = infoDir.FullName + Path.DirectorySeparatorChar
 								},
 								SongInformation = new CChartData.STMusicInformation
 								{
@@ -417,14 +418,14 @@ public class SongDb : IDisposable
 					};
 
 					TryLoadBoxDef(node, infoDir);
-					await ScanDirectoryAsyncRecursive(infoDir.FullName + @"\", node);
+					await ScanDirectoryAsyncRecursive(infoDir.FullName + Path.DirectorySeparatorChar, node);
 				}
 				//if the folder contains a box.def file, handle it differently
-				else if (File.Exists(infoDir.FullName + @"\box.def"))
+				else if (File.Exists(Path.Combine(infoDir.FullName, "box.def")))
 				{
 					SongNode node = new(parent, SongNode.ENodeType.BOX)
 					{
-						path = infoDir.FullName + @"\",
+						path = infoDir.FullName + Path.DirectorySeparatorChar,
 						chartCount = 1,
 						charts =
 						[
@@ -432,14 +433,14 @@ public class SongDb : IDisposable
 						]
 					};
 
-					node.charts[0].FileInformation.AbsoluteFolderPath = infoDir.FullName + @"\";
+					node.charts[0].FileInformation.AbsoluteFolderPath = infoDir.FullName + Path.DirectorySeparatorChar;
 
 					TryLoadBoxDef(node, infoDir);
-					await ScanDirectoryAsyncRecursive(infoDir.FullName + @"\", node);
+					await ScanDirectoryAsyncRecursive(infoDir.FullName + Path.DirectorySeparatorChar, node);
 				}
 				else //folder should not be treated as a box of any kind, just recursively scan its contents
 				{
-					await ScanDirectoryAsyncRecursive(infoDir.FullName + @"\", parent);
+					await ScanDirectoryAsyncRecursive(infoDir.FullName + Path.DirectorySeparatorChar, parent);
 				}
 			}
 			catch (Exception ex)
@@ -499,11 +500,11 @@ public class SongDb : IDisposable
 				{
 					if (string.IsNullOrEmpty(entry.Name)) continue;
 
-					string name = ZipEntryNames.Decode(entry.FullName);
+					string name = DataPath.Normalize(ZipEntryNames.Decode(entry.FullName));
 					string entryPath = Path.Combine(fileinfo.DirectoryName!, name);
 
 					//skip directories: if directories need to be created for files we will create them below
-					if (name.EndsWith(@"\")) continue;
+					if (name.EndsWith(Path.DirectorySeparatorChar)) continue;
 					
 					//ensure directory exists
 					string directory = Path.GetDirectoryName(entryPath)!;
@@ -531,7 +532,7 @@ public class SongDb : IDisposable
 
 	private void TryLoadBoxDef(SongNode node, DirectoryInfo infoDir)
 	{
-		string boxDefPath = infoDir.FullName + @"\box.def";
+		string boxDefPath = Path.Combine(infoDir.FullName, "box.def");
 		if (File.Exists(boxDefPath))
 		{
 			CBoxDef boxdef = new(boxDefPath);
@@ -610,7 +611,7 @@ public class SongDb : IDisposable
 				SongNode song = new(parent, SongNode.ENodeType.SONG)
 				{
 					title = block.Title,
-					path = baseFolder + @"\",
+					path = baseFolder + Path.DirectorySeparatorChar,
 					color = block.FontColor
 				};
 
@@ -618,14 +619,14 @@ public class SongDb : IDisposable
 				{
 					if (string.IsNullOrEmpty(block.File[j])) continue;
 					
-					string chartPath = baseFolder + block.File[j];
+					string chartPath = baseFolder + DataPath.Normalize(block.File[j]);
 					if (!File.Exists(chartPath)) continue;
 						
 					song.difficultyLabel[j] = block.Label[j];
 							
 					song.charts[j] = new CChartData();
 					song.charts[j].FileInformation.AbsoluteFilePath = chartPath;
-					song.charts[j].FileInformation.AbsoluteFolderPath = Path.GetFullPath(Path.GetDirectoryName(chartPath)!) + @"\";
+					song.charts[j].FileInformation.AbsoluteFolderPath = Path.GetFullPath(Path.GetDirectoryName(chartPath)!) + Path.DirectorySeparatorChar;
 							
 					FileInfo info = new(chartPath);
 					song.charts[j].FileInformation.FileSize = info.Length;
@@ -802,7 +803,7 @@ public class SongDb : IDisposable
 		SongNode songNode = new(parent, SongNode.ENodeType.SONG)
 		{
 			chartCount = 1,
-			path = fileinfo.FullName + @"\",
+			path = fileinfo.FullName + Path.DirectorySeparatorChar,
 			charts =
 			{
 				[0] = new CChartData
@@ -810,7 +811,7 @@ public class SongDb : IDisposable
 					FileInformation = new CChartData.STFileInformation
 					{
 						AbsoluteFilePath = fileinfo.FullName,
-						AbsoluteFolderPath = Path.GetFullPath(Path.GetDirectoryName(fileinfo.FullName)!) + @"\",
+						AbsoluteFolderPath = Path.GetFullPath(Path.GetDirectoryName(fileinfo.FullName)!) + Path.DirectorySeparatorChar,
 						FileSize = fileinfo.Length,
 						LastModified = fileinfo.LastWriteTime
 					}

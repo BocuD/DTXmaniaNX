@@ -13,7 +13,7 @@ public class SkinManager
     //here. Hardcoded to <exe>/System so the new skin system doesn't depend on the legacy CSkin paths
     public static string SystemRoot => Path.Combine(CDTXMania.executableDirectory, "System");
 
-    public static string SystemPath(string relativePath) => Path.Combine(SystemRoot, relativePath);
+    public static string SystemPath(string relativePath) => Path.Combine(SystemRoot, DataPath.Normalize(relativePath));
 
     //skin-relative paths of a skin's components, as authored into UIGroup.component
     public static string[] ComponentPaths(SkinDescriptor skin)
