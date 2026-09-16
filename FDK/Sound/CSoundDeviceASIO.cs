@@ -13,6 +13,12 @@ public static class CEnumerateAllAsioDevices
 {
 	public static string[] GetAllASIODevices()
 	{
+		//used while reading and writing Config.ini, so it must not throw
+		if (!OperatingSystem.IsWindows())
+		{
+			return ["None"];
+		}
+
 		//Debug.WriteLine( "BassAsio.BASS_ASIO_GetDeviceInfos():" );
 		BASS_ASIO_DEVICEINFO[] bassAsioDevInfo = BassAsio.BASS_ASIO_GetDeviceInfos();
 
