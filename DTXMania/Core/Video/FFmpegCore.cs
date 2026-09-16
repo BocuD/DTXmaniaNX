@@ -33,7 +33,17 @@ public class FFmpegCore
 
     private static string FileName(string name, int version)
     {
+        if (OperatingSystem.IsWindows())
+        {
             return $"{name}-{version}.dll";
+        }
+
+        if (OperatingSystem.IsMacOS()) 
+        {
+            return $"lib{name}.{version}.dylib";
+        }
+
+        return  $"lib{name}.so.{version}";
     }
 
     //take in error code, call ffmpeg.av_strerror to get the error message
