@@ -98,7 +98,7 @@ public class SkinManager
     {
         if (LayoutPathFor(stageId) is { } path)
         {
-            CopySystemClipsIntoSkin(stageId, group);
+            SaveClipsIntoSkin(stageId, group);
             WriteComponentsIntoSkin(group);
             UILayout.Save(path, group);
         }
@@ -136,25 +136,35 @@ public class SkinManager
     }
 
     /// <summary>
-    /// Gives the skin its own copy of every built-in clip the stage uses, so the saved layout references
-    /// files the skin owns rather than depending on what the System folder happens to hold.
+    /// Writes out every clip the stage uses, so a saved layout carries the animations it plays rather than
+    /// depending on what the System folder happens to hold.
     /// </summary>
-    private static void CopySystemClipsIntoSkin(CStage.EStage stageId, UIDrawable node)
+    private static void SaveClipsIntoSkin(CStage.EStage stageId, UIDrawable node)
     {
         if (node is UIGroup group)
         {
             foreach (AnimatorClip entry in group.animator?.clips ?? [])
             {
-                //an embedded clip stays in the layout; only one that points at a built-in file needs copying
-                if (!entry.IsEmbedded && entry.resource.source == ResourceSource.System)
+                //an embedded clip goes into the layout itself. One that still points at a built-in file gets
+                //a copy of its own here; one the skin already owns is written back to
+                if (entry.IsEmbedded)
+                {
+                    continue;
+                }
+
+                if (entry.resource.source == ResourceSource.System)
                 {
                     AnimationClipIO.MoveIntoSkin(entry, Path.Combine(stageId.ToString(), entry.clip.name + ".json"));
+                }
+                else
+                {
+                    AnimationClipIO.SaveToResource(entry);
                 }
             }
 
             foreach (UIDrawable child in group.children)
             {
-                CopySystemClipsIntoSkin(stageId, child);
+                SaveClipsIntoSkin(stageId, child);
             }
         }
     }

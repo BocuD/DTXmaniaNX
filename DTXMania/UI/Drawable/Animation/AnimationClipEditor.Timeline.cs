@@ -914,45 +914,76 @@ public sealed partial class AnimationClipEditor
                 ? entry.Name
                 : parentPath + "/" + entry.Name;
 
-            string[] subFields = GetAnimatableSubFields(entry.ValueType);
-            bool wholeAnimatable = Interpolator.IsRegistered(entry.ValueType);
+            DrawPropertyEntry(clip, entry, basePath, depth: 1);
+        }
+    }
 
-            if (subFields.Length == 0 && wholeAnimatable)
+    //how far a path may reach into nested members, eg itemLayout.next.spacing
+    private const int MaxMemberDepth = 3;
+
+    private void DrawPropertyEntry(AnimationClip clip, PropertyEntry entry, string path, int depth)
+    {
+        string[] subFields = GetAnimatableSubFields(entry.ValueType);
+        bool wholeAnimatable = Interpolator.IsRegistered(entry.ValueType);
+
+        if (subFields.Length == 0 && wholeAnimatable)
+        {
+            if (ImGui.MenuItem(entry.Name))
             {
-                if (ImGui.MenuItem(entry.Name))
+                AddTrack(clip, path);
+                ImGui.CloseCurrentPopup();
+            }
+
+            return;
+        }
+
+        if (subFields.Length > 0)
+        {
+            if (ImGui.BeginMenu(entry.Name))
+            {
+                if (wholeAnimatable && ImGui.MenuItem($"{entry.Name} (whole)"))
                 {
-                    AddTrack(clip, basePath);
+                    AddTrack(clip, path);
                     ImGui.CloseCurrentPopup();
                 }
-            }
-            else if (subFields.Length > 0)
-            {
-                if (ImGui.BeginMenu(entry.Name))
+
+                foreach (string sub in subFields)
                 {
-                    if (wholeAnimatable && ImGui.MenuItem($"{entry.Name} (whole)"))
+                    if (ImGui.MenuItem(sub))
                     {
-                        AddTrack(clip, basePath);
+                        AddTrack(clip, path + "." + sub);
                         ImGui.CloseCurrentPopup();
                     }
-                    foreach (string sub in subFields)
-                    {
-                        if (ImGui.MenuItem(sub))
-                        {
-                            AddTrack(clip, basePath + "." + sub);
-                            ImGui.CloseCurrentPopup();
-                        }
-                    }
-                    ImGui.EndMenu();
                 }
+
+                ImGui.EndMenu();
             }
-            else
-            {
-                // Themable but no known interpolator and no usable sub-fields. Greyed.
-                ImGui.BeginDisabled();
-                ImGui.MenuItem($"{entry.Name} ({entry.ValueType.Name})");
-                ImGui.EndDisabled();
-            }
+
+            return;
         }
+
+        List<PropertyEntry> members = depth < MaxMemberDepth
+            ? EnumerateThemableProperties(entry.ValueType).ToList()
+            : [];
+
+        if (members.Count > 0)
+        {
+            if (ImGui.BeginMenu(entry.Name))
+            {
+                foreach (PropertyEntry member in members)
+                {
+                    DrawPropertyEntry(clip, member, path + "." + member.Name, depth + 1);
+                }
+
+                ImGui.EndMenu();
+            }
+
+            return;
+        }
+
+        ImGui.BeginDisabled();
+        ImGui.MenuItem($"{entry.Name} ({entry.ValueType.Name})");
+        ImGui.EndDisabled();
     }
 
     private void AddTrack(AnimationClip clip, string path)
