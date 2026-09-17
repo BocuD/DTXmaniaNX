@@ -184,4 +184,60 @@ internal static class NativeMessageBox
         private static IntPtr NSString(string value) =>
             Send(objc_getClass("NSString"), sel_registerName("stringWithUTF8String:"), value);
     }
+
+    private static class Linux
+    {
+        public static bool TryShow(string title, string message, MessageBoxIcon icon, bool yesNo, out bool result)
+        {
+            string zenityType = yesNo ? "--question" : icon switch
+            {
+                MessageBoxIcon.Error => "--error",
+                MessageBoxIcon.Warning => "--warning",
+                _ => "--info"
+            };
+
+            if (TryRun("zenity", [zenityType, "--no-markup", "--title", title, "--text", message], out int exitCode))
+            {
+                result = exitCode == 0;
+                return true;
+            }
+
+            string kdialogType = yesNo ? "--yesno" : icon switch
+            {
+                MessageBoxIcon.Error => "--error",
+                MessageBoxIcon.Warning => "--sorry",
+                _ => "--msgbox"
+            };
+
+            if (TryRun("kdialog", ["--title", title, kdialogType, message], out exitCode))
+            {
+                result = exitCode == 0;
+                return true;
+            }
+
+            result = false;
+            return false;
+        }
+
+        private static bool TryRun(string program, string[] arguments, out int exitCode)
+        {
+            exitCode = -1;
+
+            ProcessStartInfo startInfo = new(program) { UseShellExecute = false };
+            foreach (string argument in arguments)
+            {
+                startInfo.ArgumentList.Add(argument);
+            }
+
+                using Process? process = Process.Start(startInfo);
+                if (process == null)
+                {
+                    return false;
+                }
+
+                process.WaitForExit();
+                exitCode = process.ExitCode;
+                return true;
+        }
+    }
 }
