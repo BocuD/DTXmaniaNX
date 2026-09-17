@@ -16,9 +16,7 @@ internal sealed class AudioConfigPage : ConfigPage
     private int asioDeviceInitial;
     private int asioBufferInitial;
     private string outputDeviceInitial;
-    private bool osTimerInitial;
     private bool eventDrivenInitial;
-    private bool fdkAudioInitial;
     private bool opened;
 
     private CItemToggle timeStretch;
@@ -36,9 +34,7 @@ internal sealed class AudioConfigPage : ConfigPage
         wasapiBufferInitial = CDTXMania.ConfigIni.nWASAPIBufferSizeMs;
         asioDeviceInitial = CDTXMania.ConfigIni.nASIODevice;
         asioBufferInitial = CDTXMania.ConfigIni.nASIOBufferSizeSamples;
-        osTimerInitial = CDTXMania.ConfigIni.bUseOSTimer;
         eventDrivenInitial = CDTXMania.ConfigIni.bEventDrivenWASAPI;
-        fdkAudioInitial = CDTXMania.ConfigIni.bUseFDKAudio;
         outputDeviceInitial = CDTXMania.ConfigIni.strOutputDevice;
     }
 
@@ -55,7 +51,7 @@ internal sealed class AudioConfigPage : ConfigPage
 
         var output = FolderItem("Audio Output",
             "サウンドの出力方式とドライバー設定を行います。",
-            "Which layer and backend the game plays through, and that backend's own settings.",
+            "Audio backend selection and settings.",
             outputPage);
         output.formatDescription = () =>
         {
@@ -135,9 +131,7 @@ internal sealed class AudioConfigPage : ConfigPage
             wasapiBufferInitial != CDTXMania.ConfigIni.nWASAPIBufferSizeMs ||
             asioDeviceInitial != CDTXMania.ConfigIni.nASIODevice ||
             asioBufferInitial != CDTXMania.ConfigIni.nASIOBufferSizeSamples ||
-            osTimerInitial != CDTXMania.ConfigIni.bUseOSTimer ||
             eventDrivenInitial != CDTXMania.ConfigIni.bEventDrivenWASAPI ||
-            fdkAudioInitial != CDTXMania.ConfigIni.bUseFDKAudio ||
             outputDeviceInitial != CDTXMania.ConfigIni.strOutputDevice)
         {
             //a changed setting is worth trying even if the last one gave up for good

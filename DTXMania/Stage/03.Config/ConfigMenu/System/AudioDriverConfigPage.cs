@@ -1,4 +1,5 @@
 using DTXMania.Core;
+using DTXMania.Core.Audio;
 using DTXMania.UI.Config;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.Item;
@@ -22,36 +23,28 @@ internal sealed class AudioDriverConfigPage : ConfigPage
     {
         List<CItemBase> items = [];
 
-        switch (CDTXMania.ConfigIni.nSoundDriverType)
+        switch (AudioDeviceOptions.FromConfig(CDTXMania.ConfigIni).Backend)
         {
-            case 0: // DirectSound
+            case AudioBackend.DirectSound:
                 items.Add(BuildAdjustWaves());
-
-                //FDK's DirectSound device is the only output that has a clock to choose. The rest count
-                //bytes through their own callback, and this layer's DirectSound never reads the setting
-                if (CDTXMania.ConfigIni.bUseFDKAudio)
-                {
-                    items.Add(BuildUseOsTimer());
-                }
-
                 break;
 
-            case 1: // ASIO
+            case AudioBackend.Asio:
                 items.Add(BuildAsioBufferSize());
                 break;
 
-            case 2: // ExclusiveWASAPI
+            case AudioBackend.WasapiExclusive:
                 items.Add(BuildWasapiBufferSize());
 
                 //shared mode does not get one: Windows drives its engine either way
                 items.Add(BuildWasapiEventDriven());
                 break;
 
-            case 3: // SharedWASAPI
+            case AudioBackend.WasapiShared:
                 items.Add(BuildWasapiBufferSize());
                 break;
 
-            case 4: // BASS
+            case AudioBackend.Bass:
                 items.Add(BuildBassBufferSize());
                 break;
         }
@@ -149,20 +142,5 @@ internal sealed class AudioDriverConfigPage : ConfigPage
             item.bON = true;
             CDTXMania.RunOnMainThread(list.RefreshValues);
         }
-    }
-
-    /// <summary>
-    /// Off, FDK's DirectSound device times itself from a silent looping buffer it plays, which holds the
-    /// device open. On, it reads the OS clock and leaves the device free. Nothing else consults it.
-    /// </summary>
-    private static CItemToggle BuildUseOsTimer()
-    {
-        CItemToggle item = new("UseOSTimer", CDTXMania.ConfigIni.bUseOSTimer,
-            "OSタイマーを使用するかどうか:\nOS標準タイマーを使うとスクロールが滑らかに\nなりますが、演奏で音ズレが発生することが\nあります。\nこの指定はFDK(旧)のDirectSound出力でのみ\n有効です。\n",
-            "Use OS Timer or not.\nON = smooth scroll but may cause sound lag; OFF = original timer.\nAffects only the legacy FDK DirectSound output.");
-        item.BindConfig(
-            () => item.bON = CDTXMania.ConfigIni.bUseOSTimer,
-            () => CDTXMania.ConfigIni.bUseOSTimer = item.bON);
-        return item;
     }
 }
