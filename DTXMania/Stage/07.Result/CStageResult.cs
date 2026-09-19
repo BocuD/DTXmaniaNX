@@ -506,7 +506,7 @@ internal class CStageResult : CStage
 		if ( saveCond[(int)inst] )
 			//if (false)
 		{
-			using FileStream fs = new(directory + "\\" + filename, FileMode.Create, FileAccess.Write);
+			using FileStream fs = new(directory + Path.DirectorySeparatorChar + filename, FileMode.Create, FileAccess.Write);
 			using BinaryWriter bw = new(fs);
 			
 			bw.Write(cnt);

@@ -305,6 +305,8 @@ internal class CSkin : IDisposable
 
 	public static string Path( string strファイルの相対パス )
 	{
+		strファイルの相対パス = DataPath.Normalize(strファイルの相対パス);
+
 		if (string.IsNullOrEmpty(strBoxDefSkinSubfolderFullName) || !bUseBoxDefSkin )
 		{
 			return System.IO.Path.Combine( strSystemSkinSubfolderFullName, strファイルの相対パス );

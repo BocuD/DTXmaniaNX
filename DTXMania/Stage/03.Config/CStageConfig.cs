@@ -264,7 +264,19 @@ internal class CStageConfig : CStage
         Trace.Indent();
         try
         {
-            CDTXMania.ConfigIni.tWrite(CDTXMania.executableDirectory + "Config.ini");	// CONFIGだけ
+            //a failed save must not skip base.OnDeactivate()
+            try
+            {
+                CDTXMania.ConfigIni.tWrite(CDTXMania.executableDirectory + "Config.ini");
+            }
+            catch (UnauthorizedAccessException e)
+            {
+                Trace.TraceError(e.Message + " Check that Config.ini is not read-only and does not need administrator rights to write.");
+            }
+            catch (Exception e)
+            {
+                Trace.TraceError("Failed to write Config.ini: " + e);
+            }
 
             //apply deferred changes made via config list when exiting the stage
             configMenu?.ApplyPendingChanges();
@@ -277,10 +289,6 @@ internal class CStageConfig : CStage
 
             ctDisplayWait = null;
             base.OnDeactivate();
-        }
-        catch (UnauthorizedAccessException e)
-        {
-            Trace.TraceError(e.Message + "ファイルが読み取り専用になっていないか、管理者権限がないと書き込めなくなっていないか等を確認して下さい");
         }
         catch (Exception e)
         {

@@ -2230,7 +2230,7 @@ internal abstract class CStagePerfCommonScreen : CStage
         return rNextBassChip;
     }
 
-    private void ChangeInputAdjustTimeInPlaying(CInputKeyboard keyboard, int plusminus)		// #23580 2011.1.16 yyagi UI for InputAdjustTime in playing screen.
+    private void ChangeInputAdjustTimeInPlaying(IInputKeyboard keyboard, int plusminus)		// #23580 2011.1.16 yyagi UI for InputAdjustTime in playing screen.
     {
         int part, offset = plusminus;
         if (keyboard.bKeyPressing(SlimDXKey.LeftShift) || keyboard.bKeyPressing(SlimDXKey.RightShift))	// Guitar InputAdjustTime
@@ -2267,7 +2267,7 @@ internal abstract class CStagePerfCommonScreen : CStage
     protected abstract void ScrollSpeedDown();
     protected void tHandleKeyInput()
     {
-        CInputKeyboard keyboard = CDTXMania.InputManager.Keyboard;
+        IInputKeyboard keyboard = CDTXMania.InputManager.Keyboard;
         if (CDTXMania.Pad.bPressed(EInstrumentPart.BASS, EPad.Help))
         {	// shift+f1 (pause)
             bPAUSE = !bPAUSE;

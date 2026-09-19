@@ -11,15 +11,6 @@ internal partial class CConfigIni
 {
 	// Class
 
-	public enum ESoundDeviceTypeForConfig
-	{
-		ACM = 0,
-		ASIO,
-		WASAPI,
-		WASAPI_Share,
-		Unknown = 99
-	}
-
 	// プロパティ
 
 #if false // #23625 2011.1.11 Config.iniからダメージ/回復値の定数変更を行う場合はここを有効にする 087リリースに合わせ機能無効化
@@ -92,7 +83,8 @@ internal partial class CConfigIni
 	public bool DisplayBonusEffects;
 	public bool bHAZARD;
 
-	public int nSoundDriverType; // #24820 2012.12.23 yyagi 出力サウンドデバイス(0=ACM(にしたいが設計がきつそうならDirectShow), 1=ASIO, 2=WASAPI)
+	//an Audio.AudioBackend value
+	public int nSoundDriverType;
 
 	public int nWASAPIBufferSizeMs; // #24820 2013.1.15 yyagi WASAPIのバッファサイズ
 
@@ -101,10 +93,6 @@ internal partial class CConfigIni
 	public int nASIODevice; // #24820 2013.1.17 yyagi ASIOデバイス
 	public bool bEventDrivenWASAPI;
 	public bool bMetronome; // 2023.9.22 henryzx
-	public bool bUseOSTimer;
-
-	//temporary, for comparing the two device layers against each other; see AUDIO.md §9
-	public bool bUseFDKAudio;
 	public bool bDynamicBassMixerManagement; // #24820
 	public int nMasterVolume;
 
@@ -838,7 +826,7 @@ internal partial class CConfigIni
 		strSkinFolder = "";
 		bUseBoxDefSkin = true;					// #28195 2012.5.6 yyagi box.defによるスキン切替機能を使用するか否か
 		bTight = false;                        // #29500 2012.9.11 kairera0467
-		nSoundDriverType = (int)ESoundDeviceTypeForConfig.ACM; // #24820 2012.12.23 yyagi 初期値はACM
+		nSoundDriverType = (int)Audio.AudioBackends.Fallback;
 		nWASAPIBufferSizeMs = 0;               // #24820 2013.1.15 yyagi 初期値は0(自動設定)
 		nASIODevice = 0;                       // #24820 2013.1.17 yyagi
 		//0 leaves the card on whatever its own control panel is set to
@@ -846,7 +834,6 @@ internal partial class CConfigIni
 		//on WASAPI exclusive a polled buffer is widened to about four update periods where a driven one
 		//is granted the single period it asks for
 		bEventDrivenWASAPI = true;
-		bUseOSTimer = false; ;                 // #33689 2014.6.6 yyagi 初期値はfalse (FDKのタイマー。ＦＲＯＭ氏考案の独自タイマー)
 		bDynamicBassMixerManagement = true;    //
 		nMasterVolume = 100;
 		nGroupVolume = [100, 100, 100, 100, 100];

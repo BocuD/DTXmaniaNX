@@ -396,7 +396,7 @@ Source: "Runtime\DTXCreator.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "Runtime\DTXCreator.exe.config"; DestDir: "{app}"; Flags: ignoreversion
 Source: "Runtime\Manual.chm"; DestDir: "{app}"; Flags: ignoreversion
 Source: "Runtime\readme_jp.txt"; DestDir: "{app}"; Flags: ignoreversion
-Source: "Runtime\dll\*"; DestDir: "{app}\dll"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "Runtime\lib\*"; DestDir: "{app}\lib"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "Runtime\System\Graphics\*"; DestDir: "{app}\System\Graphics"; Flags: ignoreversion recursesubdirs createallsubdirs uninsneveruninstall
 Source: "Runtime\System\Sounds\*"; DestDir: "{app}\System\Sounds"; Flags: ignoreversion recursesubdirs createallsubdirs uninsneveruninstall
 Source: "Runtime\ja-JP\*"; DestDir: "{app}\ja-JP"; Flags: ignoreversion recursesubdirs createallsubdirs

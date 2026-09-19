@@ -11,7 +11,6 @@ internal sealed class AudioOutputConfigPage : ConfigPage
     private readonly AudioDriverConfigPage driverPage;
     private readonly Action onRebuilt;
 
-    //held so the legacy toggle can reshape the driver list without the page being reopened
     private CItemList audioDriver;
 
     private CItemList outputDevice;
@@ -28,11 +27,14 @@ internal sealed class AudioOutputConfigPage : ConfigPage
         this.onRebuilt = onRebuilt;
     }
 
-    /// <summary>FDK has no BASS output and would fall through to DirectSound, so it is not offered
-    /// one.</summary>
-    private static string[] Drivers(bool legacy) => legacy
-        ? ["DirectSound", "ASIO", "WASAPI Exclusive", "WASAPI Shared"]
-        : ["DirectSound", "ASIO", "WASAPI Exclusive", "WASAPI Shared", "BASS"];
+    private static string Label(AudioBackend backend) => backend switch
+    {
+        AudioBackend.DirectSound => "DirectSound",
+        AudioBackend.Asio => "ASIO",
+        AudioBackend.WasapiExclusive => "WASAPI Exclusive",
+        AudioBackend.WasapiShared => "WASAPI Shared",
+        _ => "BASS"
+    };
 
     protected override void CreateElements() => AddElement(new ConfigAudioPanel());
 
@@ -43,52 +45,36 @@ internal sealed class AudioOutputConfigPage : ConfigPage
         audioDriver = new CItemList("Audio Driver", CItemBase.EPanelType.Normal, 0,
             "サウンドデバイスの種類を選択します。\nWASAPIまたはASIOが推奨です。BASSはポータブル用のフォールバックで、WASAPIよりもレイテンシが大きくなります。\n可能であればDirectSoundは避けてください。",
             "Selected output driver.\nWASAPI or ASIO is recommended. BASS: portable fallback, higher latency than WASAPI\nAvoid DirectSound if possible",
-            Drivers(CDTXMania.ConfigIni.bUseFDKAudio));
+            AudioBackends.Supported.Select(Label).ToArray());
         audioDriver.BindConfig(
-            ShowDrivers,
+            ShowDriver,
             () =>
             {
+                AudioBackend selected = AudioBackends.Supported[audioDriver.nCurrentlySelectedIndex];
+
                 //committing the page writes every row, not just the edited one, so a driver that has not
                 //changed must do nothing: relisting here would reset the device row's selection before
                 //that row has had the chance to write it
-                if (audioDriver.nCurrentlySelectedIndex == CDTXMania.ConfigIni.nSoundDriverType)
+                if ((int)selected == CDTXMania.ConfigIni.nSoundDriverType)
                 {
                     return;
                 }
 
-                CDTXMania.ConfigIni.nSoundDriverType = audioDriver.nCurrentlySelectedIndex;
+                CDTXMania.ConfigIni.nSoundDriverType = (int)selected;
 
                 //WASAPI is only worth its latency event driven: polling needs a buffer four update
                 //periods long where the device driving it needs two
-                if (CDTXMania.ConfigIni.nSoundDriverType is 2 or 3)
+                if (selected is AudioBackend.WasapiExclusive or AudioBackend.WasapiShared)
                 {
                     CDTXMania.ConfigIni.bEventDrivenWASAPI = true;
                 }
 
                 ShowOutputs();
             });
-        ShowDrivers();
+        ShowDriver();
         items.Add(audioDriver);
 
         items.Add(BuildOutputDevice());
-
-        CItemToggle fdkAudio = new("Legacy Audio", CDTXMania.ConfigIni.bUseFDKAudio,
-            "旧FDKサウンドデバイスを使用します。\n新しいオーディオ層に問題がある場合のみONにしてください。\n近い将来削除されます。",
-            "Play through the old FDK sound device instead of the current audio layer.\nThis option will be removed in a future release.");
-        fdkAudio.BindConfig(
-            () => fdkAudio.bON = CDTXMania.ConfigIni.bUseFDKAudio,
-            () =>
-            {
-                if (fdkAudio.bON == CDTXMania.ConfigIni.bUseFDKAudio)
-                {
-                    return;
-                }
-
-                CDTXMania.ConfigIni.bUseFDKAudio = fdkAudio.bON;
-                ShowDrivers();
-                ShowOutputs();
-            });
-        items.Add(fdkAudio);
 
         items.Add(FolderItem("Audio Driver Options",
             "選択中のドライバー固有の設定を行います。",
@@ -183,19 +169,11 @@ internal sealed class AudioOutputConfigPage : ConfigPage
         return 0;
     }
 
-    /// <summary>Moves the selection off a driver the current layer cannot open.</summary>
-    private void ShowDrivers()
+    /// <summary>Moves the selection off a driver the platform cannot open.</summary>
+    private void ShowDriver()
     {
-        string[] drivers = Drivers(CDTXMania.ConfigIni.bUseFDKAudio);
-
-        audioDriver.listItemValues.Clear();
-        audioDriver.listItemValues.AddRange(drivers);
-
-        if (CDTXMania.ConfigIni.nSoundDriverType >= drivers.Length)
-        {
-            CDTXMania.ConfigIni.nSoundDriverType = 3;
-        }
-
-        audioDriver.nCurrentlySelectedIndex = Math.Clamp(CDTXMania.ConfigIni.nSoundDriverType, 0, drivers.Length - 1);
+        AudioBackend current = AudioDeviceOptions.FromConfig(CDTXMania.ConfigIni).Backend;
+        CDTXMania.ConfigIni.nSoundDriverType = (int)current;
+        audioDriver.nCurrentlySelectedIndex = Array.IndexOf(AudioBackends.Supported, current);
     }
 }

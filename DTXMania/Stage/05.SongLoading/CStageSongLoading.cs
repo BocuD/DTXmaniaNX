@@ -227,7 +227,7 @@ internal class CStageSongLoading : CStage
                 {
                     string[] prefix = ["perfect", "lastplay", "hiskill", "hiscore", "online"];
                     int indPrefix = (int)CDTXMania.ConfigIni.eAutoGhost[instIndex];
-                    string filename = cdtx.strFolderName + "\\" + cdtx.strFileName + "." + prefix[indPrefix] + "." +
+                    string filename = cdtx.strFolderName + Path.DirectorySeparatorChar + cdtx.strFileName + "." + prefix[indPrefix] + "." +
                                       inst[instIndex] + ".ghost";
                     if (File.Exists(filename))
                     {
@@ -241,7 +241,7 @@ internal class CStageSongLoading : CStage
                 {
                     string[] prefix = ["none", "perfect", "lastplay", "hiskill", "hiscore", "online"];
                     int indPrefix = (int)CDTXMania.ConfigIni.eTargetGhost[instIndex];
-                    string filename = cdtx.strFolderName + "\\" + cdtx.strFileName + "." + prefix[indPrefix] + "." +
+                    string filename = cdtx.strFolderName + Path.DirectorySeparatorChar + cdtx.strFileName + "." + prefix[indPrefix] + "." +
                                       inst[instIndex] + ".ghost";
                     if (File.Exists(filename))
                     {
@@ -522,7 +522,7 @@ internal class CStageSongLoading : CStage
                     {
                         string[] prefix = ["perfect", "lastplay", "hiskill", "hiscore", "online"];
                         int indPrefix = (int)CDTXMania.ConfigIni.eAutoGhost[instIndex];
-                        string filename = CDTXMania.DTX.strFolderName + "\\" + CDTXMania.DTX.strFileName + "." + prefix[indPrefix] + "." +
+                        string filename = CDTXMania.DTX.strFolderName + Path.DirectorySeparatorChar + CDTXMania.DTX.strFileName + "." + prefix[indPrefix] + "." +
                                           ghostInst[instIndex] + ".ghost";
                         if (File.Exists(filename))
                         {
@@ -536,7 +536,7 @@ internal class CStageSongLoading : CStage
                     {
                         string[] prefix = ["none", "perfect", "lastplay", "hiskill", "hiscore", "online"];
                         int indPrefix = (int)CDTXMania.ConfigIni.eTargetGhost[instIndex];
-                        string filename = CDTXMania.DTX.strFolderName + "\\" + CDTXMania.DTX.strFileName + "." + prefix[indPrefix] + "." +
+                        string filename = CDTXMania.DTX.strFolderName + Path.DirectorySeparatorChar + CDTXMania.DTX.strFileName + "." + prefix[indPrefix] + "." +
                                           ghostInst[instIndex] + ".ghost";
                         if (File.Exists(filename))
                         {
@@ -607,7 +607,7 @@ internal class CStageSongLoading : CStage
                     //2016.06.18 kairera0467 「.ghost.score」ファイルが無かった場合ghostファイルから逆算を行う形に変更。
                     string[] prefix = ["none", "perfect", "lastplay", "hiskill", "hiscore", "online"];
                     int indPrefix = (int)CDTXMania.ConfigIni.eTargetGhost[i];
-                    string filename = $"{CDTXMania.DTX.strFolderName}\\{CDTXMania.DTX.strFileName}.{prefix[indPrefix]}.{reverseInst[i]}.ghost";
+                    string filename = $"{CDTXMania.DTX.strFolderName}{Path.DirectorySeparatorChar}{CDTXMania.DTX.strFileName}.{prefix[indPrefix]}.{reverseInst[i]}.ghost";
 
                     if (stGhostLag[i] == null || File.Exists(filename + ".score"))
                         continue;
@@ -841,7 +841,7 @@ internal class CStageSongLoading : CStage
     /// <returns></returns>
     private bool tHandleKeyInput()
     {
-        CInputKeyboard keyboard = CDTXMania.InputManager.Keyboard;
+        IInputKeyboard keyboard = CDTXMania.InputManager.Keyboard;
         if (keyboard.bKeyPressed(SlimDXKey.Escape)) // escape (exit)
         {
             if (CDTXMania.ConfigIni.bGuitarRevolutionMode)

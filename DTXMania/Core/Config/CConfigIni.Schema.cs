@@ -124,11 +124,11 @@ internal partial class CConfigIni
 					c => c.nWindowHeight.ToString())),
 			G(["ウィンドウモード時の位置X", "X position in the window mode."],
 				Custom("WindowX",
-					(c, v) => c.nInitialWindowXPosition = CConversion.nGetNumberIfInRange(v, 0, System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width - 1, c.nInitialWindowXPosition),
+					(c, v) => c.nInitialWindowXPosition = CConversion.nGetNumberIfInRange(v, 0, 65535, c.nInitialWindowXPosition),
 					c => c.nInitialWindowXPosition.ToString())),
 			G(["ウィンドウモード時の位置Y", "Y position in the window mode."],
 				Custom("WindowY",
-					(c, v) => c.nInitialWindowYPosition = CConversion.nGetNumberIfInRange(v, 0, System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height - 1, c.nInitialWindowYPosition),
+					(c, v) => c.nInitialWindowYPosition = CConversion.nGetNumberIfInRange(v, 0, 65535, c.nInitialWindowYPosition),
 					c => c.nInitialWindowYPosition.ToString())),
 			G([
 					"ウインドウをダブルクリックした時にフルスクリーンに移行するか(0:移行しない,1:移行する)",
@@ -150,12 +150,12 @@ internal partial class CConfigIni
 				],
 				IntRound("SleepTimePerFrame", -1, 50, c => c.nSleepNMsEveryFrame)),
 			G([
-					"サウンド出力方式(0=ACM(って今はまだDirectShowですが), 1=ASIO, 2=WASAPI排他, 3=WASAPI共有, 4=BASS",
-					"WASAPIはVista以降のOSで使用可能。推奨方式はWASAPI。",
-					"なお、WASAPIが使用不可ならASIOを、ASIOが使用不可ならACMを使用します。",
-					"Sound device type(0=ACM, 1=ASIO, 2=WASAPI Exclusive, 3=WASAPI Shared, 4=BASS)",
-					"WASAPI can use on Vista or later OSs.",
-					"If WASAPI is not available, DTXMania try to use ASIO. If ASIO can't be used, ACM is used."
+					"サウンド出力方式(0=DirectSound, 1=ASIO, 2=WASAPI排他, 3=WASAPI共有, 4=BASS)",
+					"macOSとLinuxではBASSのみ使用可能です。",
+					"使用できない方式はWindowsではWASAPI共有、それ以外ではBASSになります。",
+					"Sound device type(0=DirectSound, 1=ASIO, 2=WASAPI Exclusive, 3=WASAPI Shared, 4=BASS)",
+					"Only BASS is available on macOS and Linux.",
+					"A type the platform cannot use falls back to WASAPI Shared on Windows, BASS elsewhere."
 				],
 				Int("SoundDeviceType", 0, 4, c => c.nSoundDriverType)),
 			G([
@@ -180,10 +180,10 @@ internal partial class CConfigIni
 				],
 				[
 					Custom("ASIODevice",
-						(c, v) => c.nASIODevice = CConversion.nGetNumberIfInRange(v, 0, CEnumerateAllAsioDevices.GetAllASIODevices().Length - 1, c.nASIODevice),
+						(c, v) => c.nASIODevice = CConversion.nGetNumberIfInRange(v, 0, AsioDriverNames().Length - 1, c.nASIODevice),
 						c => c.nASIODevice.ToString())
 				],
-				() => CEnumerateAllAsioDevices.GetAllASIODevices().Select((name, i) => $"{i}: {name}")),
+				() => AsioDriverNames().Select((name, i) => $"{i}: {name}")),
 			G([
 					"出力デバイス名。空欄にするとシステムの既定のデバイスに追従します。",
 					"(ヘッドホンを抜いたときなどに自動で切り替わります)",
@@ -194,13 +194,8 @@ internal partial class CConfigIni
 				Custom("OutputDevice",
 					(c, v) => c.strOutputDevice = v.Trim(),
 					c => c.strOutputDevice ?? "")),
-			G(["WASAPI/ASIO時に使用する演奏タイマーの種類", "Playback timer used for WASAPI/ASIO", "(0=FDK Timer, 1=System Timer)"],
-				Bool("SoundTimerType", c => c.bUseOSTimer)),
 			G("WASAPI使用時にEventDrivenモードを使う",
 				Bool("EventDrivenWASAPI", c => c.bEventDrivenWASAPI)),
-			G(["Play through FDK's old sound device instead of the current audio layer.",
-					"Temporary, for comparing the two against each other."],
-				Bool("UseFDKAudio", c => c.bUseFDKAudio)),
 			G([
 					"Enable Embedded Metronome",
 					"Please make sure Metronome.ogg exists in Your current skin sounds folder",
@@ -721,6 +716,9 @@ internal partial class CConfigIni
 		(c, v) => c.nGroupVolume[(int)group] =
 			CConversion.nGetNumberIfInRange(v, 0, 100, c.nGroupVolume[(int)group]),
 		c => c.nGroupVolume[(int)group].ToString());
+
+	private static string[] AsioDriverNames() =>
+		AudioOutputs.For(AudioBackend.Asio).Select(output => output.Name).ToArray();
 
 	private static Dictionary<string, Dictionary<string, ConfigItem>> BuildSchemaLookup()
 	{
