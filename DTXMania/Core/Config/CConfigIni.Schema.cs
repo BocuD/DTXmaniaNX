@@ -62,6 +62,9 @@ internal partial class CConfigIni
 					"Folder name under Skins\\ of the skin to use. Empty for the built-in one."],
 				Str("Skin", c => c.strSkinFolder)),
 			G(["ZIPファイルの展開", "0=展開しない, 1=確認する, 2=常に展開する"], Enum("UnpackSongs", 0, 2, c => c.eUnpackSongs)),
+			G(["曲リストの並び順 (0=曲名, 1=フォルダのパス)",
+					"How the song list is sorted. (0=title, 1=folder path)"],
+				Enum("SortMode", 0, 1, c => c.baseSortMode)),
 			G(["言語設定", "0=自動, 1=日本語, 2=英語", "Language mode", "0=auto, 1=japanese, 2=english"], Enum("Language", 0, 2, c => c.languageMode)),
 			G([
 					"プレイヤーネーム。",
