@@ -240,6 +240,14 @@ public static class InspectorManager
         gizmoDrawList.AddCircle(new Vector2(transformed.X, transformed.Y), radius, color, 12, thickness);
     }
 
+    public static void DrawGizmoText(Vector2 point, string text, uint color, float offsetY)
+    {
+        Vector2 transformed = Vector2.Transform(point, view) + new Vector2(gizmoRect.X, gizmoRect.Y);
+        Vector2 extent = ImGui.CalcTextSize(text);
+
+        gizmoDrawList.AddText(transformed + new Vector2(-extent.X / 2.0f, offsetY), color, text);
+    }
+
     public static void DrawGizmoLine(Vector2 start, Vector2 end, uint color)
     {
         Vector2 startTransformed = Vector2.Transform(start, view);
