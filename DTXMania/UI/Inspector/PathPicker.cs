@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Numerics;
 using System.Reflection;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.DynamicElements;
@@ -21,18 +22,30 @@ public static class PathPicker
         public string? path;
     }
 
-    /// <summary>Draws the picker and the raw field beneath it. Returns true when the value changed.</summary>
+    /// <summary>Returns true when the value changed. A label starting with <c>##</c> is hidden, and the
+    /// picker then fills the width it is given.</summary>
     public static bool Draw(string label, ref string value, IEnumerable<string> paths)
     {
         bool changed = false;
+        string caption = label.StartsWith("##", StringComparison.Ordinal) ? string.Empty : label;
 
-        if (ImGui.Button($"{(string.IsNullOrEmpty(value) ? "(none)" : value)}##{label}"))
+        if (ImGui.Button($"{(string.IsNullOrEmpty(value) ? "(none)" : value)}##{label}",
+                new Vector2(caption.Length > 0 ? 0.0f : -1.0f, 0.0f)))
         {
             ImGui.OpenPopup($"pick{label}");
         }
 
-        ImGui.SameLine();
-        ImGui.Text(label);
+        //a long path is cut off by the space the button has
+        if (!string.IsNullOrEmpty(value) && ImGui.IsItemHovered())
+        {
+            ImGui.SetTooltip(value);
+        }
+
+        if (caption.Length > 0)
+        {
+            ImGui.SameLine();
+            ImGui.Text(caption);
+        }
 
         if (ImGui.BeginPopup($"pick{label}"))
         {
@@ -49,13 +62,15 @@ public static class PathPicker
                 changed = true;
             }
 
-            ImGui.EndPopup();
-        }
+            ImGui.Separator();
 
-        //still typeable: an indexed or ":format" key has no entry of its own to pick
-        if (ImGui.InputText($"{label} (key)", ref value, 256))
-        {
-            changed = true;
+            ImGui.SetNextItemWidth(260.0f);
+            if (ImGui.InputText("Key", ref value, 256))
+            {
+                changed = true;
+            }
+
+            ImGui.EndPopup();
         }
 
         return changed;

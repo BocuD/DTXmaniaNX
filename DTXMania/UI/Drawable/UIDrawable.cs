@@ -233,31 +233,65 @@ public abstract class UIDrawable : IDisposable
 
     private void DrawBindingsSection()
     {
-        if (!ImGui.CollapsingHeader($"Bindings ({bindings.Count})"))
+        if (!ImGui.CollapsingHeader($"Bindings ({bindings.Count})###bindings"))
         {
             return;
         }
 
         int removeAt = -1;
-        for (int i = 0; i < bindings.Count; i++)
+
+        if (bindings.Count > 0 && ImGui.BeginTable("bindings", 4,
+                ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingStretchSame))
         {
-            UIBinding binding = bindings[i];
-            ImGui.PushID(i);
+            float square = ImGui.GetFrameHeight();
+            ImGui.TableSetupColumn("Target", ImGuiTableColumnFlags.WidthStretch);
+            ImGui.TableSetupColumn("Source", ImGuiTableColumnFlags.WidthStretch);
+            ImGui.TableSetupColumn("Invert", ImGuiTableColumnFlags.WidthFixed, ImGui.CalcTextSize("Invert").X);
+            ImGui.TableSetupColumn("##remove", ImGuiTableColumnFlags.WidthFixed, square);
+            ImGui.TableHeadersRow();
 
-            //both ends are picked rather than typed: the target from what this element exposes, the source
-            //from what its data contexts offer
-            Inspector.PathPicker.Draw("Target", ref binding.target, Inspector.PathPicker.TargetsFor(this));
-            Inspector.Inspector.DrawBindingDropdown("Source", ref binding.source, this, binding.KindFor(this));
-
-            ImGui.Checkbox("Invert", ref binding.invert);
-
-            if (ImGui.Button("Remove"))
+            for (int i = 0; i < bindings.Count; i++)
             {
-                removeAt = i;
+                UIBinding binding = bindings[i];
+                DataBindingKind kind = binding.KindFor(this);
+                ImGui.PushID(i);
+                ImGui.TableNextRow();
+
+                ImGui.TableSetColumnIndex(0);
+                Inspector.PathPicker.Draw("##target", ref binding.target, Inspector.PathPicker.TargetsFor(this));
+
+                ImGui.TableSetColumnIndex(1);
+
+                bool missing = !binding.resolved && binding.source.Length > 0;
+                if (missing)
+                {
+                    ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1.0f, 0.45f, 0.4f, 1.0f));
+                }
+
+                Inspector.Inspector.DrawBindingDropdown("##source", ref binding.source, this, kind);
+
+                if (missing)
+                {
+                    ImGui.PopStyleColor();
+                }
+
+                ImGui.TableSetColumnIndex(2);
+
+                if (kind == DataBindingKind.Bool)
+                {
+                    ImGui.Checkbox("##invert", ref binding.invert);
+                }
+
+                ImGui.TableSetColumnIndex(3);
+                if (ImGui.Button("x", new Vector2(square, square)))
+                {
+                    removeAt = i;
+                }
+
+                ImGui.PopID();
             }
 
-            ImGui.PopID();
-            ImGui.Separator();
+            ImGui.EndTable();
         }
 
         if (removeAt >= 0)
