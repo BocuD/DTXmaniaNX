@@ -40,6 +40,7 @@ public sealed class UIDataContext : IUIDataContext
     }
 
     private readonly Dictionary<string, string> strings = new();
+    private readonly Dictionary<string, DataBindingKind> stringKinds = new();
     private readonly Dictionary<string, BaseTexture> textures = new();
     private readonly Dictionary<string, Func<BaseTexture?>> textureProviders = new();
 
@@ -54,6 +55,12 @@ public sealed class UIDataContext : IUIDataContext
     public void DeclareTexture(string key) => textures.TryAdd(key, BaseTexture.None);
 
     public void SetString(string key, string value) => strings[key] = value;
+
+    public void SetString(string key, string value, DataBindingKind kind)
+    {
+        strings[key] = value;
+        stringKinds[key] = kind;
+    }
     public void SetTexture(string key, BaseTexture value) => textures[key] = value;
 
     //a texture whose current value is fetched on each read, for art that arrives after the fact
@@ -163,14 +170,18 @@ public sealed class UIDataContext : IUIDataContext
 
     public IEnumerable<string> AvailableKeys(DataBindingKind kind)
     {
-        if (kind == DataBindingKind.String)
+        if (kind != DataBindingKind.Texture)
         {
             foreach (string key in strings.Keys)
             {
-                yield return key;
+                if (kind == (stringKinds.TryGetValue(key, out DataBindingKind pushed) ? pushed : DataBindingKind.String))
+                {
+                    yield return key;
+                }
             }
         }
-        else if (kind == DataBindingKind.Texture)
+
+        if (kind == DataBindingKind.Texture)
         {
             foreach (string key in textures.Keys)
             {

@@ -40,7 +40,7 @@ public sealed class PreviewScope
     {
         if (values.TryGetValue(key, out PreviewValue? value))
         {
-            context.SetString(key, value.text);
+            context.SetString(key, value.text, value.kind);
         }
     }
 
