@@ -19,6 +19,7 @@ public abstract class UIDrawable : IDisposable
     //right, so an element pinned to the right edge stays there when the parent is resized
     [Themable] public Vector2 parentAnchor = Vector2.Zero;
     [Themable] public UISize size = UISize.Auto(Vector2.One);
+    public virtual Vector2 MeasuredSize => size;
     [Themable] public Vector3 scale = Vector3.One;
     [Themable] public Vector3 rotation = Vector3.Zero;
     [Themable] public string name = string.Empty;
@@ -71,7 +72,8 @@ public abstract class UIDrawable : IDisposable
 
     public void UpdateLocalTransformMatrix()
     {
-        //the parent draws first, so its box has settled by the time a child asks for it
+        size.SetContent(MeasuredSize);
+
         if (parent != null && size.Inherits)
         {
             size.SetInherited(parent.size);
@@ -387,12 +389,31 @@ public abstract class UIDrawable : IDisposable
 
         Vector3 center = (quadTopLeft + quadTopRight + quadBottomLeft + quadBottomRight) / 4f;
         Vector3 transformedCenter = Vector3.Transform(center, transform);
-        InspectorManager.DrawGizmoPoint(new Vector2(transformedCenter.X, transformedCenter.Y), 15, 0xFFFF0000, 2.5f);
+        InspectorManager.DrawGizmoPoint(new Vector2(transformedCenter.X, transformedCenter.Y), 15, CentreColour, 2.5f);
 
-        Vector3 anchorPoint = new(pivot.X * size.X, pivot.Y * size.Y, 0f);
-        Vector3 transformedAnchor = Vector3.Transform(anchorPoint, transform);
-        InspectorManager.DrawGizmoPoint(new Vector2(transformedAnchor.X, transformedAnchor.Y), 20, 0xFF0000FF, 2.5f);
+        Vector3 pivotPoint = new(pivot.X * size.X, pivot.Y * size.Y, 0f);
+        Vector3 transformedPivot = Vector3.Transform(pivotPoint, transform);
+        Vector2 pivotScreen = new(transformedPivot.X, transformedPivot.Y);
+        InspectorManager.DrawGizmoPoint(pivotScreen, PivotRadius, PivotColour, 2.5f);
+        InspectorManager.DrawGizmoText(pivotScreen, "Pivot", PivotColour, PivotRadius + 2.0f);
+
+        if (parent == null)
+        {
+            return;
+        }
+
+        Vector3 anchorPoint = new(parentAnchor.X * parent.size.X, parentAnchor.Y * parent.size.Y, 0f);
+        Vector3 transformedAnchor = Vector3.Transform(anchorPoint, parent.GetFullTransformMatrix());
+        Vector2 anchorScreen = new(transformedAnchor.X, transformedAnchor.Y);
+        InspectorManager.DrawGizmoPoint(anchorScreen, AnchorRadius, AnchorColour, 2.5f);
+        InspectorManager.DrawGizmoText(anchorScreen, "Parent Anchor", AnchorColour, -AnchorRadius - ImGui.GetTextLineHeight() - 2.0f);
     }
+
+    private const uint CentreColour = 0xFFBBBBBB;
+    private const uint PivotColour = 0xFF44FF44;
+    private const uint AnchorColour = 0xFFFF7744;
+    private const float PivotRadius = 18.0f;
+    private const float AnchorRadius = 26.0f;
 
     private static Vector3 QuaternionToEuler(Quaternion quaternion)
     {

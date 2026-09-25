@@ -459,10 +459,13 @@ public class UIGroup : UIDrawable
         return Matrix4x4.CreateTranslation(-centre) * project * Matrix4x4.CreateTranslation(centre);
     }
 
-    public override void DrawInspector()
+    private void DrawGroupSection()
     {
-        base.DrawInspector();
-        DrawComponentInspector();
+        if (!ImGui.CollapsingHeader("Group"))
+        {
+            return;
+        }
+
         ImGui.Checkbox("Sort by Render Order", ref sortByRenderOrder);
 
         if (ImGui.InputFloat("Perspective", ref perspective, 10.0f, 100.0f, "%.0f"))
@@ -473,6 +476,13 @@ public class UIGroup : UIDrawable
         ImGui.BeginDisabled(perspective <= 0.0f);
         Inspector.Inspector.Inspect("Vanishing Point", ref vanishingPoint);
         ImGui.EndDisabled();
+    }
+
+    public override void DrawInspector()
+    {
+        base.DrawInspector();
+        DrawGroupSection();
+        DrawComponentInspector();
 
         if (ImGui.CollapsingHeader("Animator"))
         {
