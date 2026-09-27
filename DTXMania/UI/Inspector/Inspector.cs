@@ -113,6 +113,25 @@ public class Inspector
         return PathPicker.Draw(label, ref value, options);
     }
 
+    /// <summary>The rename field, for wherever an element can be renamed from. Call it every frame at a
+    /// fixed place; <see cref="ImGui.OpenPopup(string)"/> with the same id is what shows it.</summary>
+    public static void DrawRenamePopup(string id, UIDrawable node)
+    {
+        if (!ImGui.BeginPopup(id))
+        {
+            return;
+        }
+
+        ImGui.InputText("Name", ref node.name, 256);
+
+        if (ImGui.Button("OK"))
+        {
+            ImGui.CloseCurrentPopup();
+        }
+
+        ImGui.EndPopup();
+    }
+
     public void Draw()
     {
         try

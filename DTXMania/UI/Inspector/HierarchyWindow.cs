@@ -15,6 +15,11 @@ public class HierarchyWindow
 
     private UIDrawable? reparentNode;
     private UIGroup? reparentGroup;
+    private UIDrawable? duplicateNode;
+
+    private const string RenameId = "HierarchyRename";
+    private UIDrawable? renameNode;
+    private bool renameOpening;
     
     public void Draw()
     {
@@ -44,6 +49,8 @@ public class HierarchyWindow
                 ImGui.SeparatorText(editor.componentPath);
                 DrawNode(editor.root);
             }
+
+            DrawRename();
         }
         finally
         {
@@ -56,6 +63,71 @@ public class HierarchyWindow
             reparentNode = null;
             reparentGroup = null;
         }
+
+        if (duplicateNode != null)
+        {
+            Duplicate(duplicateNode);
+            duplicateNode = null;
+        }
+    }
+
+    private void DrawRename()
+    {
+        if (renameNode is not { } node)
+        {
+            return;
+        }
+
+        if (renameOpening)
+        {
+            ImGui.OpenPopup(RenameId);
+            renameOpening = false;
+        }
+
+        Inspector.DrawRenamePopup(RenameId, node);
+
+        if (!ImGui.IsPopupOpen(RenameId))
+        {
+            renameNode = null;
+        }
+    }
+
+    private static void Duplicate(UIDrawable node)
+    {
+        if (node.parent is not { } parent)
+        {
+            return;
+        }
+
+        UIGroup wrapper = new("Copy");
+        wrapper.children.Add(node);
+        string json = SkinHierarchySerializer.SerializeToJsonCompact(wrapper);
+        wrapper.children.Clear();
+
+        if (SkinHierarchySerializer.DeserializeFromJson(json)?.children.FirstOrDefault() is not { } copy)
+        {
+            Trace.TraceError($"Could not duplicate {node.name}.");
+            return;
+        }
+
+        copy.name = UniqueName(parent, node.name);
+        parent.AddChild(copy);
+        parent.children.Remove(copy);
+        parent.children.Insert(parent.children.IndexOf(node) + 1, copy);
+
+        Inspector.inspectorTarget = copy;
+    }
+
+    private static string UniqueName(UIGroup parent, string name)
+    {
+        string candidate = $"{name} Copy";
+
+        for (int suffix = 2; parent.children.Any(c => c.name == candidate); suffix++)
+        {
+            candidate = $"{name} Copy {suffix}";
+        }
+
+        return candidate;
     }
 
     private void DrawNode(UIDrawable node, bool inComponent = false)
@@ -95,6 +167,18 @@ public class HierarchyWindow
         {
             ImGui.PushStyleColor(ImGuiCol.Text, color);
         }
+
+        ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(2.0f, 0.0f));
+        ImGui.PushID(id);
+        bool visible = node.isVisible;
+        if (ImGui.Checkbox("##visible", ref visible))
+        {
+            node.isVisible = visible;
+        }
+
+        ImGui.PopID();
+        ImGui.PopStyleVar();
+        ImGui.SameLine();
 
         bool open = ImGui.TreeNodeEx(id, rootFlags, name);
 
@@ -263,6 +347,17 @@ public class HierarchyWindow
             }
         }
             
+        if (ImGui.Selectable("Rename"))
+        {
+            renameNode = node;
+            renameOpening = true;
+        }
+
+        if (node.parent != null && ImGui.Selectable("Duplicate"))
+        {
+            duplicateNode = node;
+        }
+
         //delete
         ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1, 0, 0, 1));
         if (ImGui.Selectable("Delete"))
