@@ -82,7 +82,7 @@ public sealed class UIItemSlot : UIGroup
         componentSource = source;
 
         data.RegisterObject("Item", item);
-        data.SetString("IsSelected", "false");
+        data.SetString("IsSelected", "false", DataBindingKind.Bool);
         dataContext = data;
 
         SetItemIndex(itemIndex);
@@ -97,7 +97,7 @@ public sealed class UIItemSlot : UIGroup
         }
 
         index = itemIndex;
-        data.SetString("Index", itemIndex.ToString());
+        data.SetString("Index", itemIndex.ToString(), DataBindingKind.Number);
     }
 
     /// <summary>Marks this slot as the selected one, which its component reads as <c>"IsSelected"</c>.</summary>
@@ -109,7 +109,7 @@ public sealed class UIItemSlot : UIGroup
         }
 
         selected = value;
-        data.SetString("IsSelected", value ? "true" : "false");
+        data.SetString("IsSelected", value ? "true" : "false", DataBindingKind.Bool);
     }
 }
 

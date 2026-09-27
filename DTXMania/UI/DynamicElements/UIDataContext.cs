@@ -174,7 +174,12 @@ public sealed class UIDataContext : IUIDataContext
         {
             foreach (string key in strings.Keys)
             {
-                if (kind == (stringKinds.TryGetValue(key, out DataBindingKind pushed) ? pushed : DataBindingKind.String))
+                DataBindingKind pushed = stringKinds.TryGetValue(key, out DataBindingKind declared)
+                    ? declared
+                    : DataBindingKind.String;
+
+                //a bool or a number reads as text too; a plain string is not offered the other way round
+                if (kind == pushed || (kind == DataBindingKind.String && pushed != DataBindingKind.String))
                 {
                     yield return key;
                 }
