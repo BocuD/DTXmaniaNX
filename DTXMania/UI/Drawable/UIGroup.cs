@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using DTXMania.Core;
+using DTXMania.Core.Framework;
 using DTXMania.UI.Animation;
 using DTXMania.UI.DynamicElements;
 using DTXMania.UI.Inspector;
@@ -93,7 +94,7 @@ public class UIGroup : UIDrawable
         component = componentPath;
     }
 
-    [AddChildMenu]
+    [AddChildMenu("Group/Group")]
     public static UIDrawable Create()
     {
         return new UIGroup("New UIGroup");

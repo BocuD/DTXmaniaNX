@@ -43,8 +43,8 @@ public class SongSearchMenu : UIGroup, IUIInputHandler
         bg.renderOrder = -100;
     }
 
-    [AddChildMenu]
-    public SongSearchMenu Create()
+    [AddChildMenu("Game/Song Select/Search Menu")]
+    public new static SongSearchMenu Create()
     {
         return new SongSearchMenu();
     }

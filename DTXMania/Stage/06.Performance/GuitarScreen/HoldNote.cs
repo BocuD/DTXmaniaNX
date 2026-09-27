@@ -9,8 +9,8 @@ namespace DTXMania;
 
 public class HoldNote : UIGroup
 {
-    [AddChildMenu]
-    public static HoldNote Create()
+    [AddChildMenu("Game/Performance/Hold Note")]
+    public new static HoldNote Create()
     {
         return new HoldNote();
     }

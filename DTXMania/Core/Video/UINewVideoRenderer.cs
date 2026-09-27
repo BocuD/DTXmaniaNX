@@ -21,13 +21,13 @@ public class UINewVideoRenderer : UIDrawable
 
     [JsonIgnore] private string? _lastVideoLoadAttempt;
 
-    [AddChildMenu("Video/New Video Renderer")]
+    [AddChildMenu("Video/Video Player")]
     public static UINewVideoRenderer CreateAsync()
     {
         return new UINewVideoRenderer();
     }
     
-    [AddChildMenu("Video/New Video Renderer (Software Decoder)")]
+    [AddChildMenu("Video/Video Player (Software)")]
     public static UINewVideoRenderer CreateSoftware()
     {
         return new UINewVideoRenderer { Controller = { UseSoftwareDecoder = true } };
