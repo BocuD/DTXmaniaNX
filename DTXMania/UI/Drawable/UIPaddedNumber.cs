@@ -49,7 +49,7 @@ public class UIPaddedNumber : UIGroup
     }
 
     [AddChildMenu("Padded Number")]
-    public static UIDrawable Create() => new UIPaddedNumber();
+    public new static UIDrawable Create() => new UIPaddedNumber();
 
     public override void Draw(Matrix4x4 parentMatrix)
     {

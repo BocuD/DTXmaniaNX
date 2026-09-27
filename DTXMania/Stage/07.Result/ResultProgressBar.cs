@@ -5,11 +5,15 @@ using DTXMania.UI.Drawable;
 using DTXMania.UI.DynamicElements;
 using DTXMania.UI.Skin;
 using Hexa.NET.ImGui;
+using DTXMania.UI.Inspector;
 
 namespace DTXMania;
 
 public class ResultProgressBar : UIGroup
 {
+
+    [AddChildMenu("Game/Result/Progress Bar")]
+    public new static UIDrawable Create() => new ResultProgressBar();
     [Themable] public int currentBarWidth = 12;
     [Themable] public int bestBarWidth = 4;
     [Themable] public int barHeight = 425;

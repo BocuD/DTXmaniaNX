@@ -10,6 +10,7 @@ using DTXMania.UI.OpenGL;
 using DTXMania.UI.Text;
 using SlimDX.DirectInput;
 using Color = System.Drawing.Color;
+using DTXMania.UI.Inspector;
 
 namespace DTXMania;
 
@@ -23,6 +24,9 @@ namespace DTXMania;
 /// </summary>
 public class SongSelectionContainer : UIScrollItemsGroup, IUIItemSource
 {
+
+    [AddChildMenu("Game/Song Select/Song List")]
+    public new static UIDrawable Create() => new SongSelectionContainer();
     private const float RowSpacing = 85.0f;
     private const int DefaultWindowSize = 20;
     private const int DefaultSelectionRow = 10;

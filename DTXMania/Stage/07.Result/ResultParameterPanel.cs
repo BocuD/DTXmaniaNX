@@ -6,6 +6,7 @@ using DTXMania.UI;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.DynamicElements;
 using DTXMania.UI.Text;
+using DTXMania.UI.Inspector;
 
 namespace DTXMania;
 
@@ -15,6 +16,9 @@ namespace DTXMania;
 /// </summary>
 public class ResultParameterPanel : UIItemsGroup, IUIItemSource
 {
+
+    [AddChildMenu("Game/Result/Parameter Panel")]
+    public new static UIDrawable Create() => new ResultParameterPanel();
     private const float RowSpacing = 24.0f;
 
     private readonly ResultRowData[] rows = new ResultRowData[7];

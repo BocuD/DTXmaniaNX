@@ -16,6 +16,9 @@ namespace DTXMania.UI.Drawable;
 /// </summary>
 public class UIScrollItemsGroup : UIItemsGroup
 {
+
+    [AddChildMenu("Group/Scroll Items Group")]
+    public new static UIDrawable Create() => new UIScrollItemsGroup();
     //how many copies exist; enough to cover the visible window plus overscan at each end
     [Themable] public int visibleSlots = 8;
 

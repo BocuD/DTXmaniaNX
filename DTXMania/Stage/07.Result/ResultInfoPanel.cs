@@ -4,6 +4,7 @@ using DTXMania.UI;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.DynamicElements;
 using DTXMania.UI.Text;
+using DTXMania.UI.Inspector;
 
 namespace DTXMania;
 
@@ -13,6 +14,9 @@ namespace DTXMania;
 /// </summary>
 public class ResultInfoPanel : UIGroup
 {
+
+    [AddChildMenu("Game/Result/Info Panel")]
+    public new static UIDrawable Create() => new ResultInfoPanel();
     public ResultInfoPanel() : base("ResultInfo")
     {
         MakeComponent("ResultInfoPanel", ResultInfoPanelDefault);

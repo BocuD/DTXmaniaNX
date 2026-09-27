@@ -6,6 +6,7 @@ using DTXMania.Core.Framework;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.DynamicElements;
 using DTXMania.UI.Item;
+using DTXMania.UI.Inspector;
 
 namespace DTXMania.UI.Config;
 
@@ -16,6 +17,9 @@ namespace DTXMania.UI.Config;
 /// </summary>
 internal class ConfigList : UIScrollItemsGroup, IUIItemSource
 {
+
+    [AddChildMenu("Game/Config/Config List")]
+    public new static UIDrawable Create() => new ConfigList();
     private const float RowSpacing = 67f;
 
     //where a text input sits within a row, matching where the component draws its value

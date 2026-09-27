@@ -13,6 +13,9 @@ namespace DTXMania;
 
 public class DensityGraph : UIGroup
 {
+
+    [AddChildMenu("Game/Song Select/Density Graph")]
+    public new static UIDrawable Create() => new DensityGraph();
     [Themable] public EInstrumentPart instrument;
 
     //where the bars start, how far apart they sit and how big each one is. Drums and guitar draw a

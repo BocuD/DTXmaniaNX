@@ -20,7 +20,7 @@ public class HorizontallyScrollingText : UIText
     [Themable] public float pauseDuration = 2.0f; //seconds paused before scrolling and again before resetting
 
     [AddChildMenu("Text/Scrolling Text")]
-    public static HorizontallyScrollingText Create()
+    public new static HorizontallyScrollingText Create()
     {
         return new();
     }

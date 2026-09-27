@@ -6,6 +6,7 @@ using DTXMania.SongDb.Sorting;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.DynamicElements;
 using FDK;
+using DTXMania.UI.Inspector;
 
 namespace DTXMania;
 
@@ -16,6 +17,9 @@ namespace DTXMania;
 /// </summary>
 public class SortMenuContainer : UIGroup, IUIItemSource
 {
+
+    [AddChildMenu("Game/Song Select/Sort Menu")]
+    public new static UIDrawable Create() => new SortMenuContainer();
     private const float EntrySpacing = 90.0f;
 
     private readonly SortRowData[] rows = BuildRows();
