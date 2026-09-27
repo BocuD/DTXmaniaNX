@@ -68,7 +68,7 @@ public class SongSelectionContainer : UIScrollItemsGroup, IUIItemSource
         {
             enabled = true,
             selectedPosition = new Vector3(-25.0f, 0.0f, 0.0f),
-            next = new UIItemPath { start = itemOffset, spacing = RowSpacing }
+            next = new UIItemPath { position = itemOffset, positionStep = itemOffset }
         };
     }
 

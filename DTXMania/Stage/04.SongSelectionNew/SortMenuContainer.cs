@@ -201,7 +201,7 @@ public class SortMenuContainer : UIGroup, IUIItemSource
             {
                 enabled = true,
                 selectedPosition = new Vector3(0.0f, 18.0f, 0.0f),
-                next = new UIItemPath { start = new Vector3(EntrySpacing, 0.0f, 0.0f), spacing = EntrySpacing }
+                next = new UIItemPath { position = new Vector3(EntrySpacing, 0.0f, 0.0f), positionStep = new Vector3(EntrySpacing, 0.0f, 0.0f) }
             }
         });
 

@@ -201,8 +201,11 @@ public class UIScrollItemsGroup : UIItemsGroup
         ImGui.InputInt("Selection Offset", ref selectionOffset);
         ImGui.Checkbox("Invert Navigation", ref invertNavigation);
 
-        ImGui.SeparatorText("Motion");
-        motion.DrawInspector();
+        if (Inspector.Inspector.BeginSection("Motion"))
+        {
+            motion.DrawInspector();
+            Inspector.Inspector.EndSection();
+        }
 
         //live scroll state, so a list that looks misplaced can be read rather than guessed at
         ImGui.LabelText("Selected Item", SelectedItem.ToString());
@@ -210,7 +213,10 @@ public class UIScrollItemsGroup : UIItemsGroup
             ? "no ring"
             : $"{ring.Offset:0.##} / {ring.Target:0.##}   (spacing {ring.Spacing:0.##}, settled {ring.IsSettled})");
 
-        ImGui.SeparatorText("Item Layout");
-        itemLayout.DrawInspector();
+        if (Inspector.Inspector.BeginSection("Item Layout"))
+        {
+            itemLayout.DrawInspector();
+            Inspector.Inspector.EndSection();
+        }
     }
 }
