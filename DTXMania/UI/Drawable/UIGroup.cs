@@ -409,6 +409,17 @@ public class UIGroup : UIDrawable
         bool inSkin = path != null && File.Exists(path);
         ImGui.LabelText("Source", inSkin ? component : "Default skin");
 
+        //enabled without a file, since saving is what creates one
+        ImGui.BeginDisabled(CDTXMania.SkinManager.currentSkin == null);
+        if (ImGui.Button("Save Component"))
+        {
+            WriteIntoSkin();
+            ReloadOtherInstances();
+        }
+
+        ImGui.EndDisabled();
+        ImGui.SameLine();
+
         ImGui.BeginDisabled(!inSkin);
         if (ImGui.Button("Edit Component"))
         {
@@ -422,6 +433,43 @@ public class UIGroup : UIDrawable
         }
 
         ImGui.EndDisabled();
+    }
+
+    //each placement holds the copy it loaded
+    private void ReloadOtherInstances()
+    {
+        if (ComponentPath() is not { } path)
+        {
+            return;
+        }
+
+        UIDrawable top = this;
+        while (top.parent != null)
+        {
+            top = top.parent;
+        }
+
+        ReloadInstancesOf(top, path);
+    }
+
+    private void ReloadInstancesOf(UIDrawable node, string path)
+    {
+        if (node is not UIGroup group)
+        {
+            return;
+        }
+
+        if (group != this && group.IsComponent && group.ComponentPath() == path)
+        {
+            group.ReloadComponent();
+            return;
+        }
+
+        //a reload replaces the children, so the walk goes over a copy of them
+        foreach (UIDrawable child in group.children.ToArray())
+        {
+            ReloadInstancesOf(child, path);
+        }
     }
 
     public override void OnDeserialize()
