@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Numerics;
 using System.Reflection;
+using System.Text;
 using DTXMania.Core;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.Skin;
@@ -406,8 +407,7 @@ public class HierarchyWindow
 
                 if (string.IsNullOrWhiteSpace(attr.Path))
                 {
-                    //no path: root-level item named after the type (current behaviour)
-                    entry.DisplayName = type.Name;
+                    entry.DisplayName = ReadableName(type.Name);
                     entry.PathSegments = [];
                 }
                 else
@@ -418,7 +418,7 @@ public class HierarchyWindow
 
                     if (segments.Length == 0)
                     {
-                        entry.DisplayName = type.Name;
+                        entry.DisplayName = ReadableName(type.Name);
                         entry.PathSegments = [];
                     }
                     else
@@ -432,19 +432,47 @@ public class HierarchyWindow
             }
         }
 
+        //sorted once here, so every level of the menu comes out alphabetical without sorting per frame
+        list.Sort((first, second) => string.Compare(MenuPath(first), MenuPath(second), StringComparison.OrdinalIgnoreCase));
+
         cachedCreators = list.ToArray();
         return cachedCreators;
     }
 
+    private static string MenuPath(DrawableCreatorEntry entry)
+        => entry.PathSegments.Length == 0 ? entry.DisplayName : $"{string.Join('/', entry.PathSegments)}/{entry.DisplayName}";
+
+    private static string ReadableName(string typeName)
+    {
+        ReadOnlySpan<char> name = typeName.AsSpan();
+        if (name.StartsWith("UI") && name.Length > 2 && char.IsUpper(name[2]))
+        {
+            name = name[2..];
+        }
+
+        StringBuilder readable = new(name.Length + 4);
+        for (int index = 0; index < name.Length; index++)
+        {
+            if (index > 0 && char.IsUpper(name[index]) && !char.IsUpper(name[index - 1]))
+            {
+                readable.Append(' ');
+            }
+
+            readable.Append(name[index]);
+        }
+
+        return readable.ToString();
+    }
+
     private void DrawAddChildMenu(UIGroup group)
     {
-        var creators = GetCreators();
-
-        //draw recursively. `depth` is how many path segments we've already consumed.
-        DrawAddChildMenuLevel(group, creators, depth: 0, parentPath: []);
-
         //the active skin's components, which are runtime data rather than reflected creator types
         DrawAddComponentsMenu(group);
+
+        //depth is how many path segments of the menu have been consumed
+        DrawAddChildMenuLevel(group, GetCreators(), depth: 0, parentPath: []);
+
+        ImGui.Separator();
 
         if (ImGui.Selectable("Load from JSON"))
         {
@@ -502,7 +530,7 @@ public class HierarchyWindow
         //leaves at this level: entries whose PathSegments length equals `depth`
         //folders at this level: entries with more segments; group by the segment at index `depth`
         var leaves = new List<DrawableCreatorEntry>();
-        var folders = new Dictionary<string, List<DrawableCreatorEntry>>();
+        var folders = new List<string>();
 
         foreach (var entry in creators)
         {
@@ -523,17 +551,15 @@ public class HierarchyWindow
             else
             {
                 string folderName = entry.PathSegments[depth];
-                if (!folders.TryGetValue(folderName, out var bucket))
+                if (!folders.Contains(folderName))
                 {
-                    bucket = new List<DrawableCreatorEntry>();
-                    folders[folderName] = bucket;
+                    folders.Add(folderName);
                 }
-                bucket.Add(entry);
             }
         }
 
         //folders first, then leaves — same convention as Unity
-        foreach (var (folderName, _) in folders)
+        foreach (string folderName in folders)
         {
             if (ImGui.BeginMenu(folderName))
             {
