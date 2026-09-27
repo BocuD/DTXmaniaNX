@@ -170,7 +170,7 @@ public class UIItemsGroup : UIGroup, IUIInputHandler
     [JsonIgnore] private readonly Action selectPrevious;
     [JsonIgnore] private readonly Action selectNext;
 
-    [AddChildMenu("Items Group")]
+    [AddChildMenu("Group/Items Group")]
     public static new UIDrawable Create() => new UIItemsGroup();
 
     public UIItemsGroup() : this("Items")

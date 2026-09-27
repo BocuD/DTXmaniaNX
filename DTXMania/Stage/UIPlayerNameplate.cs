@@ -12,7 +12,7 @@ namespace DTXMania;
 
 public class UIPlayerNameplate : UIGroup
 {
-    [AddChildMenu]
+    [AddChildMenu("Game/Player Nameplate")]
     public new static UIPlayerNameplate Create()
     {
         return new UIPlayerNameplate();

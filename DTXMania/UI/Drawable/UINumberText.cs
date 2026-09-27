@@ -29,7 +29,7 @@ public class UINumberText : UIDrawable
     [JsonIgnore] private BaseTexture atlasTexture = BaseTexture.None;
     [JsonIgnore] private string? _lastAtlasLoaded;
 
-    [AddChildMenu("Text/Number Text")]
+    [AddChildMenu("Number Text")]
     public static UIDrawable Create() => new UINumberText();
 
     public UINumberText()

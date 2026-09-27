@@ -65,7 +65,7 @@ public class UITextInput : UIText, IUIInputHandler
     private string? renderedPlaceholder;
     private float renderedPlaceholderScale;
 
-    [AddChildMenu]
+    [AddChildMenu("Text/Text Input")]
     public new static UIDrawable Create()
     {
         return new UITextInput();

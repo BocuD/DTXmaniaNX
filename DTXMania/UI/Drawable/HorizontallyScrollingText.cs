@@ -19,7 +19,7 @@ public class HorizontallyScrollingText : UIText
     [Themable] public float scrollSpeed = 50.0f; //texture-space px per second
     [Themable] public float pauseDuration = 2.0f; //seconds paused before scrolling and again before resetting
 
-    [AddChildMenu]
+    [AddChildMenu("Text/Scrolling Text")]
     public static HorizontallyScrollingText Create()
     {
         return new();

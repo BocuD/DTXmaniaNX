@@ -75,7 +75,7 @@ public partial class UIText : UITexture
 
     [JsonIgnore] private string? _unresolvedText;
 
-    [AddChildMenu]
+    [AddChildMenu("Text/Text")]
     public static UIDrawable Create()
     {
         return new UIText();
