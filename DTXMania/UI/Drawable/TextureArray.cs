@@ -76,7 +76,7 @@ public class TextureArray : UITexture
 
         UpdateLocalTransformMatrix();
         Matrix4x4 combinedMatrix = localTransformMatrix * parentMatrix;
-        target.tDraw2DMatrix(combinedMatrix, size, ClipFor(target), color);
+        target.tDraw2DMatrix(combinedMatrix, size, ClipFor(target), UITint.Current * color);
     }
 
     //frames can differ in size, so an unset extent follows whichever one is on screen; only what the

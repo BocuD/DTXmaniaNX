@@ -109,7 +109,7 @@ public class UINumberText : UIDrawable
                 matrix *= Matrix4x4.CreateTranslation(0, -offsetY * CDTXMania.renderScale, 0);
             }
 
-            atlasTexture.tDraw2DMatrix(matrix, new Vector2(rectangle.Width, rectangle.Height) * characterScale, scaledRect, color);
+            atlasTexture.tDraw2DMatrix(matrix, new Vector2(rectangle.Width, rectangle.Height) * characterScale, scaledRect, UITint.Current * color);
 
             characterTranslation *= Matrix4x4.CreateTranslation(rectangle.Width * CDTXMania.renderScale * characterScale, 0, 0);
         }

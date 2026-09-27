@@ -93,11 +93,11 @@ public partial class UIImage : UITexture
 
         if (renderMode == ERenderMode.Sliced)
         {
-            texture.tDraw2DMatrixSliced(combinedMatrix, size, clipRect, color, sliceRect);
+            texture.tDraw2DMatrixSliced(combinedMatrix, size, clipRect, UITint.Current * color, sliceRect);
             return;
         }
 
-        texture.tDraw2DMatrix(combinedMatrix, size, clipRect, color);
+        texture.tDraw2DMatrix(combinedMatrix, size, clipRect, UITint.Current * color);
     }
 
     //rects the layout never stated follow the texture; ones it did survive a swap

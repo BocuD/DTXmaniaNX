@@ -114,7 +114,7 @@ public class UINewVideoRenderer : UIDrawable
             size.SetContent(new Vector2(texture.Width, texture.Height));
 
             RectangleF clipRect = new(0, 0, texture.Width, texture.Height);
-            texture.tDraw2DMatrix(combinedMatrix, size, clipRect, color);
+            texture.tDraw2DMatrix(combinedMatrix, size, clipRect, UITint.Current * color);
         }
     }
 

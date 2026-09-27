@@ -134,7 +134,7 @@ public partial class UIText : UITexture
 
         UpdateLocalTransformMatrix();
         Matrix4x4 combinedMatrix = localTransformMatrix * parentMatrix;
-        texture.tDraw2DMatrix(combinedMatrix, GetTextureDrawSize(), GetTextureSourceRect(), TextureDrawColor());
+        texture.tDraw2DMatrix(combinedMatrix, GetTextureDrawSize(), GetTextureSourceRect(), UITint.Current * TextureDrawColor());
     }
 
     //the colour is rasterized into the texture, so this multiplies it: a subclass fades text it is

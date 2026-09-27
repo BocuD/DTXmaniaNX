@@ -39,7 +39,7 @@ public abstract class UITexture : UIDrawable
 
         UpdateLocalTransformMatrix();
         Matrix4x4 combinedMatrix = localTransformMatrix * parentMatrix;
-        texture.tDraw2DMatrix(combinedMatrix, size, new RectangleF(0, 0, texture.Width, texture.Height), color);
+        texture.tDraw2DMatrix(combinedMatrix, size, new RectangleF(0, 0, texture.Width, texture.Height), UITint.Current * color);
     }
 
     public override void Dispose()

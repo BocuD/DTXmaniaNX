@@ -201,16 +201,7 @@ public abstract class UIDrawable : IDisposable
             ImGui.OpenPopup(renameId);
         }
 
-        if (ImGui.BeginPopup(renameId))
-        {
-            ImGui.InputText("Name", ref name, 256);
-            if (ImGui.Button("OK"))
-            {
-                ImGui.CloseCurrentPopup();
-            }
-
-            ImGui.EndPopup();
-        }
+        Inspector.Inspector.DrawRenamePopup(renameId, this);
 
         ImGui.TextDisabled(GetType().Name);
     }

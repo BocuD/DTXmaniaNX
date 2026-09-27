@@ -522,7 +522,7 @@ public class UITextInput : UIText, IUIInputHandler
         block ??= BaseTexture.CreateSolidColor(Color4.White);
 
         Matrix4x4 placed = Matrix4x4.CreateTranslation(x, 0f, 0f) * combined;
-        block.tDraw2DMatrix(placed, new Vector2(width, LineHeight()), new RectangleF(0, 0, block.Width, block.Height), blockColor);
+        block.tDraw2DMatrix(placed, new Vector2(width, LineHeight()), new RectangleF(0, 0, block.Width, block.Height), UITint.Current * blockColor);
     }
 
     private void DrawPlaceholder(Matrix4x4 combined)
@@ -544,7 +544,7 @@ public class UITextInput : UIText, IUIInputHandler
         Color4 faded = new(color.Red, color.Green, color.Blue, color.Alpha * Math.Clamp(placeholderOpacity, 0f, 1f));
 
         placeholderTexture.tDraw2DMatrix(combined, drawSize,
-            new RectangleF(0, 0, placeholderTexture.Width, placeholderTexture.Height), faded);
+            new RectangleF(0, 0, placeholderTexture.Width, placeholderTexture.Height), UITint.Current * faded);
     }
 
     public override void DrawInspector()

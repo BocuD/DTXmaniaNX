@@ -15,6 +15,9 @@ public class UIGroup : UIDrawable
 {
     [Themable] public bool sortByRenderOrder = true;
 
+    //multiplied into everything drawn inside the group
+    [Themable] public Color4 tint = Color4.White;
+
     //camera distance in this group's pixels; children at +Z shrink towards the vanishing point. 0 is flat
     [Themable] public float perspective;
 
@@ -367,6 +370,8 @@ public class UIGroup : UIDrawable
             dirty = false;
         }
 
+        using UITint.Scope tinted = UITint.Push(tint);
+
         for (int index = 0; index < children.Count; index++)
         {
             UIDrawable element = children[index];
@@ -516,6 +521,7 @@ public class UIGroup : UIDrawable
         }
 
         ImGui.Checkbox("Sort by Render Order", ref sortByRenderOrder);
+        Inspector.Inspector.Inspect("Tint", ref tint);
 
         if (ImGui.InputFloat("Perspective", ref perspective, 10.0f, 100.0f, "%.0f"))
         {
