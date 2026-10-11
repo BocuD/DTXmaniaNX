@@ -113,6 +113,11 @@ public class Inspector
         return PathPicker.Draw(label, ref value, options);
     }
 
+    public static bool BeginSection(string label)
+        => ImGui.TreeNodeEx(label, ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.SpanAvailWidth);
+
+    public static void EndSection() => ImGui.TreePop();
+
     /// <summary>The rename field, for wherever an element can be renamed from. Call it every frame at a
     /// fixed place; <see cref="ImGui.OpenPopup(string)"/> with the same id is what shows it.</summary>
     public static void DrawRenamePopup(string id, UIDrawable node)
