@@ -918,7 +918,7 @@ public sealed partial class AnimationClipEditor
         }
     }
 
-    //how far a path may reach into nested members, eg itemLayout.next.spacing
+    //how far a path may reach into nested members, eg itemLayout.next.positionStep
     private const int MaxMemberDepth = 3;
 
     private void DrawPropertyEntry(AnimationClip clip, PropertyEntry entry, string path, int depth)
