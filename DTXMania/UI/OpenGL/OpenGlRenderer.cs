@@ -578,7 +578,9 @@ public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
 
         if (_activeBlendMode != _batchBlendMode)
         {
-            _gl.BlendFunc(GLEnum.SrcAlpha, _batchBlendMode == BlendMode.Additive ? GLEnum.One : GLEnum.OneMinusSrcAlpha);
+            _gl.BlendFuncSeparate(
+                GLEnum.SrcAlpha, _batchBlendMode == BlendMode.Additive ? GLEnum.One : GLEnum.OneMinusSrcAlpha,
+                GLEnum.One, GLEnum.OneMinusSrcAlpha);
             _activeBlendMode = _batchBlendMode;
         }
 
