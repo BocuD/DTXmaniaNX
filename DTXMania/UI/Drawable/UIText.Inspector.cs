@@ -70,6 +70,22 @@ public partial class UIText
             _dirty = true;
         }
 
+        if (ImGui.InputFloat("Letter Spacing", ref letterSpacing, 0.5f, 2f, "%.1f"))
+        {
+            _dirty = true;
+        }
+
+        if (ImGui.InputFloat("Weight", ref weight, 0.05f, 0.25f, "%.2f"))
+        {
+            _dirty = true;
+        }
+
+        if (ImGui.InputFloat("Horizontal Scale", ref horizontalScale, 0.01f, 0.1f, "%.3f"))
+        {
+            horizontalScale = MathF.Max(horizontalScale, 0.1f);
+            _dirty = true;
+        }
+
         if (ImGui.Checkbox("Wrap", ref wrap))
         {
             _dirty = true;
