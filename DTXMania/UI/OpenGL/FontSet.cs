@@ -44,7 +44,6 @@ internal sealed class FontSet : IDisposable
     {
         foreach (Run run in runs)
         {
-            width += run.Font.MeasureText(run.Text);
             if (LetterSpacing == 0.0f)
             {
                 draw?.Invoke(run.Text, run.Font, x);
@@ -62,7 +61,7 @@ internal sealed class FontSet : IDisposable
             }
         }
 
-        return width;
+        return x;
     }
 
     public List<Run> Split(string line)
