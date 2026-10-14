@@ -17,6 +17,9 @@ public sealed record UiTextParameters
     public float OutlineSoftness { get; init; } = 0;
     public Vector2 TexturePadding { get; init; } = Vector2.Zero;
     public float LineSpacing { get; init; } = 1;
+    public float LetterSpacing { get; init; }
+    public float Weight { get; init; }
+    public float HorizontalScale { get; init; } = 1;
     public float RenderScale { get; init; } = 1;
     public float MaxWidth { get; init; }
     public bool Antialias { get; init; } = true;
