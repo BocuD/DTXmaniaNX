@@ -366,7 +366,7 @@ public class UIGroup : UIDrawable
 
         if (sortByRenderOrder && dirty)
         {
-            children.Sort((a, b) => a.renderOrder.CompareTo(b.renderOrder));
+            SortChildrenByRenderOrder();
             dirty = false;
         }
 
@@ -476,6 +476,15 @@ public class UIGroup : UIDrawable
         {
             ReloadInstancesOf(child, path);
         }
+    }
+
+    public void SortChildrenByRenderOrder()
+    {
+        //OrderBy is stable, List.Sort is not
+        //the allocation here is fine because this only runs when children actually change
+        UIDrawable[] sorted = children.OrderBy(child => child.renderOrder).ToArray();
+        children.Clear();
+        children.AddRange(sorted);
     }
 
     public override void OnDeserialize()
