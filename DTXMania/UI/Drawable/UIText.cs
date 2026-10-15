@@ -140,6 +140,14 @@ public partial class UIText : UITexture
 
         UpdateLocalTransformMatrix();
         Matrix4x4 combinedMatrix = localTransformMatrix * parentMatrix;
+
+        if (combinedMatrix is { M12: 0, M21: 0, M14: 0, M24: 0 } &&
+            combinedMatrix.M11 == textureRenderScale && combinedMatrix.M22 == textureRenderScale)
+        {
+            combinedMatrix.M41 = MathF.Round(combinedMatrix.M41);
+            combinedMatrix.M42 = MathF.Round(combinedMatrix.M42);
+        }
+
         texture.tDraw2DMatrix(combinedMatrix, GetTextureDrawSize(), GetTextureSourceRect(), UITint.Current * TextureDrawColor());
     }
 
