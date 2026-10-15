@@ -16,9 +16,6 @@ public class PerformanceGauge : UIGroup
 
     [Themable] public EInstrumentPart instrument;
 
-    [Themable] public bool moveWhenReversed;
-    [Themable] public Vector3 reversedPosition;
-
     private readonly PerformanceStats stats = new();
     private readonly UIDataContext data = new();
 
@@ -35,35 +32,14 @@ public class PerformanceGauge : UIGroup
         dataContext = data;
 
         size = instrument == EInstrumentPart.DRUMS ? new Vector2(543, 47) : new Vector2(290, 68);
-        UseDefaultFor(instrument);
+        MakeComponent(ComponentName(instrument), () => GaugeDefault(instrument));
     }
 
     public override void OnDeserialize()
     {
         base.OnDeserialize();
         stats.Instrument = (int)instrument;
-        UseDefaultFor(instrument);
-    }
-
-    private void UseDefaultFor(EInstrumentPart part)
-    {
-        switch (part)
-        {
-            case EInstrumentPart.GUITAR:
-                MakeComponent("GuitarGauge", () => GaugeDefault("GuitarGauge", @"Graphics\7_Gauge_Guitar.png",
-                    new Vector2(290, 68), new Vector3(6, 31, 0), new Vector2(242, 30), new Vector3(254, 30, 0)));
-                break;
-
-            case EInstrumentPart.BASS:
-                MakeComponent("BassGauge", () => GaugeDefault("BassGauge", @"Graphics\7_Gauge_Bass.png",
-                    new Vector2(290, 68), new Vector3(42, 31, 0), new Vector2(242, 30), new Vector3(4, 30, 0)));
-                break;
-
-            default:
-                MakeComponent("DrumsGauge", () => GaugeDefault("DrumsGauge", @"Graphics\7_Gauge.png",
-                    new Vector2(543, 47), new Vector3(20, 9, 0), new Vector2(480, 31), new Vector3(506, 8, 0)));
-                break;
-        }
+        MakeComponent(ComponentName(instrument), () => GaugeDefault(instrument));
     }
 
     public override void Draw(Matrix4x4 parentMatrix)
@@ -73,11 +49,6 @@ public class PerformanceGauge : UIGroup
         if (!stats.ShowsGauge)
         {
             return;
-        }
-
-        if (moveWhenReversed && stats.IsReversed)
-        {
-            parentMatrix = Matrix4x4.CreateTranslation(reversedPosition - position) * parentMatrix;
         }
 
         base.Draw(parentMatrix);
@@ -90,28 +61,45 @@ public class PerformanceGauge : UIGroup
         if (ImGui.CollapsingHeader("Gauge"))
         {
             Inspector.Inspect("Instrument", ref instrument);
-            ImGui.Checkbox("Move When Reversed", ref moveWhenReversed);
-
-            ImGui.BeginDisabled(!moveWhenReversed);
-            Inspector.Inspect("Reversed Position", ref reversedPosition);
-            ImGui.EndDisabled();
         }
     }
 
-    private static UIGroup GaugeDefault(string name, string frame, Vector2 frameSize, Vector3 barPosition,
-        Vector2 barSize, Vector3 speedPosition)
+    private static string ComponentName(EInstrumentPart part) => part switch
     {
-        UIGroup root = new(name);
-        RectangleF barRect = new(0, 0, barSize.X, barSize.Y);
+        EInstrumentPart.GUITAR => "GuitarGauge",
+        EInstrumentPart.BASS => "BassGauge",
+        _ => "DrumsGauge"
+    };
 
-        root.AddChild(Frame("FrameBack", frame, frameSize, 0, 0));
+    private static UIGroup GaugeDefault(EInstrumentPart part)
+    {
+        (string frame, Vector2 frameSize, Vector3 bar, Vector2 barSize, Vector3 speed) = part switch
+        {
+            EInstrumentPart.GUITAR => (@"Graphics\7_Gauge_Guitar.png", new Vector2(290, 68), new Vector3(6, 31, 0),
+                new Vector2(242, 30), new Vector3(254, 30, 0)),
+            EInstrumentPart.BASS => (@"Graphics\7_Gauge_Bass.png", new Vector2(290, 68), new Vector3(42, 31, 0),
+                new Vector2(242, 30), new Vector3(4, 30, 0)),
+            _ => (@"Graphics\7_Gauge.png", new Vector2(543, 47), new Vector3(20, 9, 0),
+                new Vector2(480, 31), new Vector3(506, 8, 0))
+        };
+
+        UIGroup root = new(ComponentName(part));
+
+        root.AddChild(new UIImage
+        {
+            name = "FrameBack",
+            imageSource = ImageSource.File,
+            image = SkinResource.System(frame),
+            size = frameSize,
+            clipRect = new RectangleF(0, 0, frameSize.X, frameSize.Y)
+        });
 
         root.AddChild(new UIImage
         {
             name = "ScrollSpeed",
             imageSource = ImageSource.File,
             image = SkinResource.System(@"Graphics\7_Panel_icons.jpg"),
-            position = speedPosition,
+            position = speed,
             size = new Vector2(32, 32),
             clipRect = new RectangleF(0, 0, 42, 48),
             renderOrder = 1,
@@ -123,9 +111,9 @@ public class PerformanceGauge : UIGroup
             name = "Bar",
             imageSource = ImageSource.File,
             image = SkinResource.System(@"Graphics\7_gauge_bar.png"),
-            position = barPosition,
+            position = bar,
             size = barSize,
-            clipRect = barRect,
+            clipRect = new RectangleF(0, 0, barSize.X, barSize.Y),
             renderOrder = 2,
             bindings =
             {
@@ -139,25 +127,23 @@ public class PerformanceGauge : UIGroup
             name = "FullBar",
             imageSource = ImageSource.File,
             image = SkinResource.System(@"Graphics\7_gauge_bar.jpg"),
-            position = barPosition,
+            position = bar,
             size = barSize,
-            clipRect = barRect,
+            clipRect = new RectangleF(0, 0, barSize.X, barSize.Y),
             renderOrder = 2,
             bindings = { new UIBinding("isVisible", "Stats.IsGaugeFull") }
         });
 
-        root.AddChild(Frame("FrameFront", frame, frameSize, frameSize.Y, 3));
+        root.AddChild(new UIImage
+        {
+            name = "FrameFront",
+            imageSource = ImageSource.File,
+            image = SkinResource.System(frame),
+            size = frameSize,
+            clipRect = new RectangleF(0, frameSize.Y, frameSize.X, frameSize.Y),
+            renderOrder = 3
+        });
 
         return root;
     }
-
-    private static UIImage Frame(string name, string frame, Vector2 frameSize, float top, int renderOrder) => new()
-    {
-        name = name,
-        imageSource = ImageSource.File,
-        image = SkinResource.System(frame),
-        size = frameSize,
-        clipRect = new RectangleF(0, top, frameSize.X, frameSize.Y),
-        renderOrder = renderOrder
-    };
 }

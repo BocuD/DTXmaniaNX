@@ -308,19 +308,15 @@ internal abstract class CStagePerfCommonScreen : CStage
 
         StageFailedCover failed = ui.AddChild(new StageFailedCover());
         failed.renderOrder = 1000;
-        PerformanceGauge drumsGauge = Gauge(EInstrumentPart.DRUMS, "DrumsGauge", new Vector3(294, 626, 0));
-        drumsGauge.moveWhenReversed = true;
-        drumsGauge.reversedPosition = new Vector3(294, 28, 0);
 
-        //drums and guitar share this layout; each panel and gauge hides unless its instrument is played.
         //renderOrder 2 is above both legacy screens
         StatusPanel(EInstrumentPart.DRUMS, "DrumsStatus", new Vector3(22, 250, 0));
         StatusPanel(EInstrumentPart.GUITAR, "GuitarStatus", new Vector3(373, 254, 0));
         StatusPanel(EInstrumentPart.BASS, "BassStatus", new Vector3(665, 254, 0));
 
+        Gauge(EInstrumentPart.DRUMS, "DrumsGauge", new Vector3(294, 626, 0));
         Gauge(EInstrumentPart.GUITAR, "GuitarGauge", new Vector3(80, 0, 0));
         Gauge(EInstrumentPart.BASS, "BassGauge", new Vector3(950, 0, 0));
-        PerformanceGauge Gauge(EInstrumentPart instrument, string name, Vector3 position)
 
         void StatusPanel(EInstrumentPart instrument, string name, Vector3 position)
         {
@@ -330,12 +326,12 @@ internal abstract class CStagePerfCommonScreen : CStage
             panel.renderOrder = 2;
         }
 
+        void Gauge(EInstrumentPart instrument, string name, Vector3 position)
         {
             PerformanceGauge gauge = ui.AddChild(new PerformanceGauge(instrument));
             gauge.name = name;
             gauge.position = position;
             gauge.renderOrder = 2;
-            return gauge;
         }
     }
 
@@ -345,6 +341,11 @@ internal abstract class CStagePerfCommonScreen : CStage
         video.IntegrateUI(ui);
 
         actStageFailed.cover = ui.FindChild<StageFailedCover>();
+
+        if (CDTXMania.ConfigIni.bReverse.Drums && ui.GetChild<PerformanceGauge>("DrumsGauge") is { } drumsGauge)
+        {
+            drumsGauge.position.Y = 28;
+        }
 
         if (CDTXMania.ConfigIni.nShowPlaySpeed == (int)EShowPlaySpeed.ON
             || CDTXMania.ConfigIni.nShowPlaySpeed == (int)EShowPlaySpeed.IF_CHANGED_IN_GAME)
