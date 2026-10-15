@@ -312,9 +312,24 @@ internal abstract class CStagePerfCommonScreen : CStage
         drumsGauge.moveWhenReversed = true;
         drumsGauge.reversedPosition = new Vector3(294, 28, 0);
 
+        //drums and guitar share this layout; each panel and gauge hides unless its instrument is played.
+        //renderOrder 2 is above both legacy screens
+        StatusPanel(EInstrumentPart.DRUMS, "DrumsStatus", new Vector3(22, 250, 0));
+        StatusPanel(EInstrumentPart.GUITAR, "GuitarStatus", new Vector3(373, 254, 0));
+        StatusPanel(EInstrumentPart.BASS, "BassStatus", new Vector3(665, 254, 0));
+
         Gauge(EInstrumentPart.GUITAR, "GuitarGauge", new Vector3(80, 0, 0));
         Gauge(EInstrumentPart.BASS, "BassGauge", new Vector3(950, 0, 0));
         PerformanceGauge Gauge(EInstrumentPart instrument, string name, Vector3 position)
+
+        void StatusPanel(EInstrumentPart instrument, string name, Vector3 position)
+        {
+            PerformanceStatusPanel panel = ui.AddChild(new PerformanceStatusPanel(instrument));
+            panel.name = name;
+            panel.position = position;
+            panel.renderOrder = 2;
+        }
+
         {
             PerformanceGauge gauge = ui.AddChild(new PerformanceGauge(instrument));
             gauge.name = name;
@@ -385,6 +400,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                 nヒット数_TargetGhost[ k ] = new CHITCOUNTOFRANK(); // #35411 2015.08.21 chnmr0 add
 
                 nTimingHitCount[k] = new CLAGTIMINGHITCOUNT();
+                dbAchievementRate[k] = 0;
             }
             queWailing[k] = new Queue<CChip>();
             r現在の歓声Chip[k] = null;
@@ -406,7 +422,6 @@ internal abstract class CStagePerfCommonScreen : CStage
         }
         bAUTOでないチップが１つでもバーを通過した = false;
         //base.OnActivate();
-        tSetStatusPanel();
         //this.tパネル文字列の設定();
         nJudgeLinePosY.Drums = (CDTXMania.ConfigIni.bReverse.Drums ? 159 + CDTXMania.ConfigIni.nJudgeLine.Drums : 561 - CDTXMania.ConfigIni.nJudgeLine.Drums);
         nJudgeLinePosY.Guitar = (CDTXMania.ConfigIni.bReverse.Guitar ? 611 - CDTXMania.ConfigIni.nJudgeLine.Guitar : 154 + CDTXMania.ConfigIni.nJudgeLine.Guitar);
@@ -479,7 +494,6 @@ internal abstract class CStagePerfCommonScreen : CStage
         sw = new Stopwatch();
         sw2 = new Stopwatch();
         base.OnActivate();
-        //this.tSetStatusPanel();
         //			this.gclatencymode = GCSettings.LatencyMode;
         //          GCSettings.LatencyMode = GCLatencyMode.Batch; // 演奏画面中はGCを抑止する
     }
@@ -778,7 +792,6 @@ internal abstract class CStagePerfCommonScreen : CStage
     protected ActPerfNewFire[] actChipFireGB;
     public CActPerfCommonCombo actCombo;
     protected CActPerfCommonDanger actDANGER;
-    //protected CActPerfStageClear actStageClear;
     public CActPerfCommonGauge actGauge;
     public CActPerfDrumsFillingEffect actFillin;
     protected CActPerfCommonJudgementString actJudgeString;
@@ -789,7 +802,6 @@ internal abstract class CStagePerfCommonScreen : CStage
     public CActPerfCommonRGB actRGB;
     public CActPerfCommonScore actScore;
     protected CActPerfStageFailure actStageFailed;
-    public CActPerfCommonStatusPanel actStatusPanel;
     protected CActPerfCommonWailingBonus actWailingBonus;
     public CActPerfScrollSpeed actScrollSpeed;
     protected CActPerfSkillMeter actGraph;
@@ -823,7 +835,7 @@ internal abstract class CStagePerfCommonScreen : CStage
     public STDGBVALUE<int> nJudgeLinePosY;//(CDTXMania.ConfigIni.bReverse.Drums ? 159 : 561);
     public STDGBVALUE<int> nShutterInPosY;
     public STDGBVALUE<int> nShutterOutPosY;
-    public long n現在のスコア = 0;
+    public STDGBVALUE<double> dbAchievementRate;
     public STDGBVALUE<CHITCOUNTOFRANK> nHitCount_ExclAuto;
     public STDGBVALUE<CHITCOUNTOFRANK> nHitCount_IncAuto;
     //
@@ -896,6 +908,12 @@ internal abstract class CStagePerfCommonScreen : CStage
             if (actGraph != null)
             {
                 actGraph.bIsTrainingMode = value;
+            }
+
+            //training has no achievement rate
+            if (value)
+            {
+                dbAchievementRate = default;
             }
         }
     }
@@ -1336,14 +1354,6 @@ internal abstract class CStagePerfCommonScreen : CStage
             }
         }
     }
-    protected void tSetStatusPanel()  // tステータスパネルの選択
-    {
-        if ( CDTXMania.chosenSong != null )
-        {
-            actStatusPanel.tSetDifficultyLabel(CDTXMania.chosenSong.difficultyLabel[CDTXMania.confirmedSongDifficulty],
-                CDTXMania.confirmedSongDifficulty);
-        }
-    }
     protected EJudgement tProcessChipHit(long nHitTime, CChip pChip)  // tチップのヒット処理
     {
         return tProcessChipHit(nHitTime, pChip, true);
@@ -1636,7 +1646,6 @@ internal abstract class CStagePerfCommonScreen : CStage
                     }
 
                     actScore.Add(pChip.eInstrumentPart, bIsAutoPlay, (long)nScoreDelta);
-                    actStatusPanel.nCurrentScore += (long)nScoreDelta;
                     #endregion
                 }
                 else if (((pChip.eInstrumentPart == EInstrumentPart.GUITAR) || pChip.eInstrumentPart == EInstrumentPart.BASS) && (eJudgeResult != EJudgement.Miss))
@@ -1685,7 +1694,6 @@ internal abstract class CStagePerfCommonScreen : CStage
                     }
 
                     actScore.Add(pChip.eInstrumentPart, bIsAutoPlay, (long)nScoreDelta);
-                    //this.actStatusPanel.nCurrentScore += (long)nScoreDelta;
                     #endregion
                 }
                 else
@@ -1738,7 +1746,6 @@ internal abstract class CStagePerfCommonScreen : CStage
                     }
 
                     actScore.Add(pChip.eInstrumentPart, bIsAutoPlay, (long)nScoreDelta);
-                    actStatusPanel.nCurrentScore += (long)nScoreDelta;
                     #endregion
                 }
                 else if (pChip.eInstrumentPart == EInstrumentPart.GUITAR || pChip.eInstrumentPart == EInstrumentPart.BASS)
@@ -1790,7 +1797,6 @@ internal abstract class CStagePerfCommonScreen : CStage
                         }
 
                         actScore.Add(pChip.eInstrumentPart, bIsAutoPlay, (long)nScoreDelta);
-                        //this.actStatusPanel.nCurrentScore += (long)nScoreDelta;
                         #endregion
                     }
                 }
@@ -1815,7 +1821,6 @@ internal abstract class CStagePerfCommonScreen : CStage
                         nScoreDelta = nComboScoreDelta[(int)eJudgeResult] * 500L;
                     }
                     actScore.Add(pChip.eInstrumentPart, bIsAutoPlay, (long)nScoreDelta);
-                    actStatusPanel.nCurrentScore += (long)nScoreDelta;
                 }
             }
             else
@@ -1834,7 +1839,6 @@ internal abstract class CStagePerfCommonScreen : CStage
                         nScoreDelta = nComboScoreDelta[(int)eJudgeResult] * 500L;
                     }
                     actScore.Add(pChip.eInstrumentPart, bIsAutoPlay, (long)nScoreDelta);
-                    actStatusPanel.nCurrentScore += (long)nScoreDelta;
                 }
             }
         }
@@ -2745,10 +2749,6 @@ internal abstract class CStagePerfCommonScreen : CStage
     protected void tUpdateAndDraw_Score()
     {
         actScore.OnUpdateAndDraw();
-    }
-    protected void tUpdateAndDraw_StatusPanel()
-    {
-        actStatusPanel.OnUpdateAndDraw();
     }
     protected bool tUpdateAndDraw_Chips(EInstrumentPart ePlayMode)
     {

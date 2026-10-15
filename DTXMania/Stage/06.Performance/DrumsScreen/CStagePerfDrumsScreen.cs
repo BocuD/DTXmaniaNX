@@ -32,7 +32,6 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         listChildActivities.Add(actJudgeString = new CActPerfDrumsJudgementString());
         listChildActivities.Add(actLaneFlushD = new CActPerfDrumsLaneFlushD());
         listChildActivities.Add(actScore = new CActPerfDrumsScore());
-        listChildActivities.Add(actStatusPanel = new CActPerfDrumsStatusPanel());
         listChildActivities.Add(actScrollSpeed = new CActPerfScrollSpeed());
         listChildActivities.Add(video = new CActPerfVideo());
         listChildActivities.Add(actBGA = new CActPerfBGA());
@@ -50,7 +49,6 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         var drumsScreen = ui.AddChild(new LegacyDrawable(DrawDrumsScreen));
         drumsScreen.name = "drumsScreen";
         
-        actStatusPanel.InitUI(ui);
         actJudgeString.InitUI(ui);
 
         if (useNewDrumsFire)
@@ -234,7 +232,6 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
     private static readonly int probeLanes = AllocationProbe.Register("lanes", 1);
     private static readonly int probeChips = AllocationProbe.Register("chips", 1);
     private static readonly int probeScore = AllocationProbe.Register("score", 1);
-    private static readonly int probeStatusPanel = AllocationProbe.Register("status panel", 1);
     private static readonly int probeCombo = AllocationProbe.Register("combo", 1);
     private static readonly int probeGraph = AllocationProbe.Register("graph", 1);
     private static readonly int probeJudgement = AllocationProbe.Register("judgement string", 1);
@@ -319,10 +316,6 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         if (CDTXMania.ConfigIni.bShowScore)
             tUpdateAndDraw_Score();
         AllocationProbe.End(probeScore);
-
-        AllocationProbe.Begin(probeStatusPanel);
-        tUpdateAndDraw_StatusPanel();
-        AllocationProbe.End(probeStatusPanel);
 
         AllocationProbe.Begin(probeCombo);
         tUpdateAndDraw_Combo();
@@ -559,7 +552,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                   actCombo.nCurrentCombo.HighestValue.Drums * 3 ) / ( 20.0 * CDTXMania.DTX.nVisibleChipsCount.Drums );
         }
 
-        actStatusPanel.db現在の達成率.Drums = actGraph.dbグラフ値現在_渡;
+        dbAchievementRate.Drums = bIsTrainingMode ? 0 : actGraph.dbグラフ値現在_渡;
         return eJudgeResult;
     }
 

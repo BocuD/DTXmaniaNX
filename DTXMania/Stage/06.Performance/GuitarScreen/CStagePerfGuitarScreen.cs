@@ -24,7 +24,6 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		listChildActivities.Add( actGraph = new CActPerfSkillMeter() );
 		listChildActivities.Add(actGuitarBonus = new CActPerfGuitarBonus());
 		listChildActivities.Add( actScrollSpeed = new CActPerfScrollSpeed() );
-		listChildActivities.Add( actStatusPanel = new CActPerfGuitarStatusPanel() );
 		listChildActivities.Add( actWailingBonus = new CActPerfGuitarWailingBonus() );
 		listChildActivities.Add( actScore = new CActPerfGuitarScore() );
 		listChildActivities.Add( actRGB = new CActPerfGuitarRGB() );
@@ -74,7 +73,6 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		guitarScreen.renderOrder = 1;
 
 		actJudgeString.InitUI(ui);
-		actStatusPanel.InitUI(ui);
 		
 		actChipFireGB = new ActPerfNewFire[2];
 		actChipFireGB[0] = ui.AddChild(new ActPerfNewFire(1));
@@ -354,7 +352,6 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		tUpdateAndDraw_GuitarBass_JudgementLine();
 		tUpdateAndDraw_JudgementString();
 		actProgressBar.OnUpdateAndDraw();
-		tUpdateAndDraw_StatusPanel();
 		if (CDTXMania.ConfigIni.bShowScore)
 			tUpdateAndDraw_Score();
 
@@ -422,7 +419,7 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 				actGraph.dbグラフ値現在_渡 = CScoreIni.tCalculatePlayingSkillOld(CDTXMania.DTX.nVisibleChipsCount.Guitar, nHitCount_ExclAuto.Guitar.Perfect, nHitCount_ExclAuto.Guitar.Great, nHitCount_ExclAuto.Guitar.Good, nHitCount_ExclAuto.Guitar.Poor, nHitCount_ExclAuto.Guitar.Miss, actCombo.nCurrentCombo.HighestValue.Guitar, EInstrumentPart.GUITAR, bIsAutoPlay);
 			else
 				actGraph.dbグラフ値現在_渡 = CScoreIni.tCalculatePlayingSkill(CDTXMania.DTX.nVisibleChipsCount.Guitar, nHitCount_ExclAuto.Guitar.Perfect, nHitCount_ExclAuto.Guitar.Great, nHitCount_ExclAuto.Guitar.Good, nHitCount_ExclAuto.Guitar.Poor, nHitCount_ExclAuto.Guitar.Miss, actCombo.nCurrentCombo.HighestValue.Guitar, EInstrumentPart.GUITAR, bIsAutoPlay);
-			actStatusPanel.db現在の達成率.Guitar = actGraph.dbグラフ値現在_渡;
+			dbAchievementRate.Guitar = bIsTrainingMode ? 0 : actGraph.dbグラフ値現在_渡;
 
 			if (CDTXMania.ConfigIni.bGraph有効.Guitar)
 			{
@@ -451,7 +448,7 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 				actGraph.dbグラフ値現在_渡 = CScoreIni.tCalculatePlayingSkillOld(CDTXMania.DTX.nVisibleChipsCount.Bass, nHitCount_ExclAuto.Bass.Perfect, nHitCount_ExclAuto.Bass.Great, nHitCount_ExclAuto.Bass.Good, nHitCount_ExclAuto.Bass.Poor, nHitCount_ExclAuto.Bass.Miss, actCombo.nCurrentCombo.HighestValue.Bass, EInstrumentPart.BASS, bIsAutoPlay);
 			else
 				actGraph.dbグラフ値現在_渡 = CScoreIni.tCalculatePlayingSkill(CDTXMania.DTX.nVisibleChipsCount.Bass, nHitCount_ExclAuto.Bass.Perfect, nHitCount_ExclAuto.Bass.Great, nHitCount_ExclAuto.Bass.Good, nHitCount_ExclAuto.Bass.Poor, nHitCount_ExclAuto.Bass.Miss, actCombo.nCurrentCombo.HighestValue.Bass, EInstrumentPart.BASS, bIsAutoPlay);
-			actStatusPanel.db現在の達成率.Bass = actGraph.dbグラフ値現在_渡;
+			dbAchievementRate.Bass = bIsTrainingMode ? 0 : actGraph.dbグラフ値現在_渡;
 
 			if (CDTXMania.ConfigIni.bGraph有効.Bass)
 			{
