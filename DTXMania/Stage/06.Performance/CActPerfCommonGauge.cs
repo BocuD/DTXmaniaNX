@@ -1,36 +1,16 @@
 ﻿using DTXMania.Core;
-using DTXMania.UI.Drawable;
 using FDK;
 
 namespace DTXMania;
 
 /// <summary>
-/// CActPerfDrumsGauge と CAct演奏Gutiarゲージ のbaseクラス。ダメージ計算やDanger/Failed判断もこのクラスで行う。
+/// Life gauge state, drawn by <see cref="PerformanceGauge"/>.
 /// </summary>
 internal class CActPerfCommonGauge : CActivity
 {
-	// プロパティ
-	public CActLVLNFont actLVLNFont { get; protected set; }
-
-	// コンストラクタ
 	public CActPerfCommonGauge()
 	{
-		//actLVLNFont = new CActLVLNFont(); // OnActivate()に移動
-		//actLVLNFont.OnActivate();
-	}
-	// CActivity 実装
-	public override void OnActivate()
-	{
-		actLVLNFont = new CActLVLNFont();
-		actLVLNFont.OnActivate();
-		base.OnActivate();
-	}
-
-	public override void OnDeactivate()
-	{
-		actLVLNFont.OnDeactivate();
-		actLVLNFont = null;
-		base.OnDeactivate();
+		bActivated = false;
 	}
 		
 		
@@ -285,13 +265,4 @@ internal class CActPerfCommonGauge : CActivity
 	#endregion
 
 	public STDGBVALUE<double> db現在のゲージ値;
-	protected STDGBVALUE<int> n本体X;
-	protected CCounter ct本体移動;
-	protected CCounter ct本体振動;
-	//protected CTexture txマスクF;
-	//protected CTexture txマスクD;
-	protected BaseTexture txゲージ;
-	protected BaseTexture txフルゲージ;
-	protected STDGBVALUE<BaseTexture> txフレーム;
-	protected BaseTexture txハイスピ;
 }

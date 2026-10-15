@@ -27,7 +27,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
             listChildActivities.Add(drumsChipFire);
         }
         
-        listChildActivities.Add(actGauge = new CActPerfDrumsGauge());
+        listChildActivities.Add(actGauge = new CActPerfCommonGauge());
         listChildActivities.Add(actGraph = new CActPerfSkillMeter());
         listChildActivities.Add(actJudgeString = new CActPerfDrumsJudgementString());
         listChildActivities.Add(actLaneFlushD = new CActPerfDrumsLaneFlushD());
@@ -235,7 +235,6 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
     private static readonly int probeChips = AllocationProbe.Register("chips", 1);
     private static readonly int probeScore = AllocationProbe.Register("score", 1);
     private static readonly int probeStatusPanel = AllocationProbe.Register("status panel", 1);
-    private static readonly int probeGauge = AllocationProbe.Register("gauge", 1);
     private static readonly int probeCombo = AllocationProbe.Register("combo", 1);
     private static readonly int probeGraph = AllocationProbe.Register("graph", 1);
     private static readonly int probeJudgement = AllocationProbe.Register("judgement string", 1);
@@ -324,10 +323,6 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         AllocationProbe.Begin(probeStatusPanel);
         tUpdateAndDraw_StatusPanel();
         AllocationProbe.End(probeStatusPanel);
-
-        AllocationProbe.Begin(probeGauge);
-        tUpdateAndDraw_Gauge();
-        AllocationProbe.End(probeGauge);
 
         AllocationProbe.Begin(probeCombo);
         tUpdateAndDraw_Combo();

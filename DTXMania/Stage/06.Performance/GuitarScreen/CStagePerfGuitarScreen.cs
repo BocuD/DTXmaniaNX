@@ -30,7 +30,7 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		listChildActivities.Add( actRGB = new CActPerfGuitarRGB() );
 		listChildActivities.Add( actLaneFlushGB = new CActPerfGuitarLaneFlushGB() );
 		listChildActivities.Add( actJudgeString = new CActPerfGuitarJudgementString() );
-		listChildActivities.Add( actGauge = new CActPerfGuitarGauge() );
+		listChildActivities.Add( actGauge = new CActPerfCommonGauge() );
 		listChildActivities.Add( actCombo = new CActPerfGuitarCombo() );
 		
 		listChildActivities.Add( actPlayInfo = new CActPerformanceInformation() );
@@ -354,7 +354,6 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		tUpdateAndDraw_GuitarBass_JudgementLine();
 		tUpdateAndDraw_JudgementString();
 		actProgressBar.OnUpdateAndDraw();
-		tUpdateAndDraw_Gauge();
 		tUpdateAndDraw_StatusPanel();
 		if (CDTXMania.ConfigIni.bShowScore)
 			tUpdateAndDraw_Score();

@@ -308,6 +308,20 @@ internal abstract class CStagePerfCommonScreen : CStage
 
         StageFailedCover failed = ui.AddChild(new StageFailedCover());
         failed.renderOrder = 1000;
+        PerformanceGauge drumsGauge = Gauge(EInstrumentPart.DRUMS, "DrumsGauge", new Vector3(294, 626, 0));
+        drumsGauge.moveWhenReversed = true;
+        drumsGauge.reversedPosition = new Vector3(294, 28, 0);
+
+        Gauge(EInstrumentPart.GUITAR, "GuitarGauge", new Vector3(80, 0, 0));
+        Gauge(EInstrumentPart.BASS, "BassGauge", new Vector3(950, 0, 0));
+        PerformanceGauge Gauge(EInstrumentPart instrument, string name, Vector3 position)
+        {
+            PerformanceGauge gauge = ui.AddChild(new PerformanceGauge(instrument));
+            gauge.name = name;
+            gauge.position = position;
+            gauge.renderOrder = 2;
+            return gauge;
+        }
     }
 
     //the performance screens are built entirely in code: bespoke chip/lane rendering, not a skinnable layout
@@ -2724,10 +2738,6 @@ internal abstract class CStagePerfCommonScreen : CStage
     }
      */
 
-    protected void tUpdateAndDraw_Gauge()
-    {
-        actGauge.OnUpdateAndDraw();
-    }
     protected void tUpdateAndDraw_Combo()
     {
         actCombo.OnUpdateAndDraw();
