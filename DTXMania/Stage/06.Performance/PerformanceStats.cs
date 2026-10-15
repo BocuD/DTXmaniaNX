@@ -1,0 +1,199 @@
+using System.Globalization;
+using DTXMania.Core;
+using DTXMania.SongDb;
+using DTXMania.UI.DynamicElements;
+
+namespace DTXMania;
+
+public sealed class PerformanceStats
+{
+    [DataField] public int Instrument { get; set; }
+
+    //null outside a performance screen, eg in the editor
+    private static CStagePerfCommonScreen? Stage => CDTXMania.StageManager?.rCurrentStage as CStagePerfCommonScreen;
+
+    private CStagePerfCommonScreen.CHITCOUNTOFRANK? Hits => Stage?.nHitCount_ExclAuto[Instrument];
+
+    [DataField] public int Perfect => Hits?.Perfect ?? 0;
+    [DataField] public int Great => Hits?.Great ?? 0;
+    [DataField] public int Good => Hits?.Good ?? 0;
+    [DataField] public int Poor => Hits?.Poor ?? 0;
+    [DataField] public int Miss => Hits?.Miss ?? 0;
+    [DataField] public int MaxCombo => Stage?.actCombo.nCurrentCombo.HighestValue[Instrument] ?? 0;
+
+    [DataField] public int PerfectPercent => Percent(Perfect);
+    [DataField] public int GreatPercent => Percent(Great);
+    [DataField] public int GoodPercent => Percent(Good);
+    [DataField] public int PoorPercent => Percent(Poor);
+    [DataField] public int MissPercent => Percent(Miss);
+    [DataField] public int MaxComboPercent => Percent(MaxCombo);
+
+    [DataField] public double Rate => Stage?.dbAchievementRate[Instrument] ?? 0.0;
+    [DataField] public bool IsMaxRate => Rate >= 100.0;
+    [DataField] public long RateWhole => (long)Math.Truncate(Rate);
+    [DataField] public long RateHundredths => Hundredths(Rate);
+
+    [DataField] public double Skill => IsClassic
+        ? Rate * (Level * 0.0033)
+        : CScoreIni.tCalculateGameSkillFromPlayingSkill(Level, LevelDec, Rate);
+
+    [DataField] public long SkillWhole => (long)Math.Truncate(Skill);
+    [DataField] public long SkillHundredths => Hundredths(Skill);
+
+    //6.50, or 65 for a classic chart
+    [DataField] public string LevelText
+    {
+        get
+        {
+            RefreshSongValues();
+            return levelText;
+        }
+    }
+
+    [DataField] public bool IsClassicLevel => IsClassic;
+    [DataField] public long LevelWhole => IsClassic ? Level : Level / 10;
+    [DataField] public long LevelHundredths => Level % 10 * 10 + LevelDec;
+
+    //row in the difficulty sheet, 60px per badge
+    [DataField] public float DifficultyBadgeY
+    {
+        get
+        {
+            RefreshSongValues();
+            return difficultyBadgeY;
+        }
+    }
+
+    [DataField] public bool ShowLagCounts => CDTXMania.ConfigIni.bShowLagHitCount;
+
+    [DataField] public bool LagColorsSwapped => CDTXMania.ConfigIni.nShowLagTypeColor != 0;
+
+    [DataField] public int Early => Stage?.nTimingHitCount[Instrument].nEarly ?? 0;
+    [DataField] public int Late => Stage?.nTimingHitCount[Instrument].nLate ?? 0;
+
+    //0 to 1, clamped
+    [DataField] public double Gauge => Math.Max(0.0, Stage?.actGauge.db現在のゲージ値[Instrument] ?? 0.0);
+    [DataField] public bool IsGaugeFull => (Stage?.actGauge.db現在のゲージ値[Instrument] ?? 0.0) >= 1.0;
+    [DataField] public bool IsDanger => Stage?.actGauge.IsDanger((EInstrumentPart)Instrument) ?? false;
+
+    //row in the scroll speed sheet, 48px per speed
+    [DataField] public float ScrollSpeedIconY => Math.Min(CDTXMania.ConfigIni.nScrollSpeed[Instrument], 20) * 48.0f;
+
+    public bool ShowsPanel => CDTXMania.ConfigIni.nInfoType == 1 && IsPlayed && !HiddenBesideTheOther;
+
+    public bool ShowsGauge => IsPlayed && Instrument switch
+    {
+        1 => CDTXMania.DTX?.bHasChips.Guitar ?? false,
+        2 => CDTXMania.DTX?.bHasChips.Bass ?? false,
+        _ => true
+    };
+
+    private bool IsPlayed => Instrument == 0 ? Stage is CStagePerfDrumsScreen : Stage is CStagePerfGuitarScreen;
+
+    //cached per song
+    private object? songValuesFor;
+    private int songValuesInstrument = -1;
+    private string levelText = string.Empty;
+    private float difficultyBadgeY;
+
+    private int Level => CDTXMania.DTX?.LEVEL[Instrument] ?? 0;
+    private int LevelDec => CDTXMania.DTX?.LEVELDEC[Instrument] ?? 0;
+
+    //classic skill mode, or a classic score display for a chart that has none of the XG parts
+    private bool IsClassic
+    {
+        get
+        {
+            CConfigIni config = CDTXMania.ConfigIni;
+            if (config.nSkillMode == 0)
+            {
+                return true;
+            }
+
+            var chart = CDTXMania.DTX;
+            if (chart == null) return false;
+            
+            if (!config.bClassicScoreDisplay || CDTXMania.DTX.bForceXGChart)
+            {
+                return false;
+            }
+            
+            return Instrument switch
+            {
+                1 => !chart.bHasChips.YPGuitar,
+                2 => !chart.bHasChips.YPBass,
+                _ => !chart.bHasChips.LeftCymbal && !chart.bHasChips.LP && !chart.bHasChips.LBD &&
+                     !chart.bHasChips.FT && !chart.bHasChips.Ride
+            };
+        }
+    }
+
+    private void RefreshSongValues()
+    {
+        if (ReferenceEquals(songValuesFor, CDTXMania.DTX) && songValuesInstrument == Instrument)
+        {
+            return;
+        }
+
+        songValuesFor = CDTXMania.DTX;
+        songValuesInstrument = Instrument;
+
+        levelText = IsClassic
+            ? Level.ToString("00", CultureInfo.InvariantCulture)
+            : (Level / 10.0f + LevelDec / 100.0f).ToString("0.00", CultureInfo.InvariantCulture);
+
+        int slot = CDTXMania.confirmedSongDifficulty;
+        string? label = CDTXMania.chosenSong?.difficultyLabel[slot];
+        difficultyBadgeY = Math.Max(0, DifficultyLabel.RowFor(DifficultyLabel.Resolve(label, slot))) * 60.0f;
+    }
+
+    //hidden for an instrument without chips, or, with the graph on, for the one on autoplay beside a played one
+    private bool HiddenBesideTheOther
+    {
+        get
+        {
+            if (Instrument == 0 || CDTXMania.DTX is not { } chart)
+            {
+                return false;
+            }
+
+            CConfigIni config = CDTXMania.ConfigIni;
+            bool isGuitar = Instrument == 1;
+
+            if (!chart.bHasChips.Bass)
+            {
+                return !isGuitar;
+            }
+
+            if (!chart.bHasChips.Guitar)
+            {
+                return isGuitar;
+            }
+
+            if (!config.bGraph有効.Guitar && !config.bGraph有効.Bass)
+            {
+                return false;
+            }
+
+            return isGuitar
+                ? config.bAllGuitarsAreAutoPlay && !config.bAllBassAreAutoPlay
+                : !config.bAllGuitarsAreAutoPlay && config.bAllBassAreAutoPlay;
+        }
+    }
+
+    //against every note judged so far, autoplay included
+    private int Percent(int count)
+    {
+        if (Stage is not { } stage || stage.bIsTrainingMode)
+        {
+            return 0;
+        }
+
+        CStagePerfCommonScreen.CHITCOUNTOFRANK all = stage.nHitCount_IncAuto[Instrument];
+        int judged = all.Perfect + all.Great + all.Good + all.Poor + all.Miss;
+
+        return judged == 0 ? 0 : (int)Math.Round(100.0 * count / judged);
+    }
+
+    private static long Hundredths(double value) => (long)((value - Math.Truncate(value)) * 100.0 + 1e-6);
+}
