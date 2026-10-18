@@ -40,48 +40,24 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 	{
 		base.OnLayoutReady();
 		
-		var txLane = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_Paret_Guitar.png")); 
-		var txLaneDark = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_Paret_Guitar_Dark.png"));
-		
-		if (CDTXMania.DTX.bHasChips.Guitar)
-		{
-			var guitarLaneTex = ui.AddChild(new UIImage());
-			guitarLaneTex.name = "GuitarLane";
-			guitarLaneTex.dontSerialize = true;
-			guitarLaneTex.position = new Vector3(67, 42, 0);
+		LegacyDrawable lanes = ui.AddChild(new LegacyDrawable(DrawGuitarLanes));
+		lanes.name = "guitarLanes";
+		lanes.renderOrder = LegacyLanesLayer;
 
-			if (CDTXMania.ConfigIni.nLaneDisp.Guitar == 0 || CDTXMania.ConfigIni.nLaneDisp.Guitar == 2)
-				guitarLaneTex.SetTexture(txLane);
-			else
-				guitarLaneTex.SetTexture(txLaneDark);
-		}
-		if (CDTXMania.DTX.bHasChips.Bass)
-		{
-			var bassLaneTex = ui.AddChild(new UIImage());
-			bassLaneTex.name = "BassLane";
-			bassLaneTex.dontSerialize = true;
-			bassLaneTex.position = new Vector3(937, 42, 0);
-	        
-			if (CDTXMania.ConfigIni.nLaneDisp.Bass == 0 || CDTXMania.ConfigIni.nLaneDisp.Bass == 2)
-				bassLaneTex.SetTexture(txLane);
-			else
-				bassLaneTex.SetTexture(txLaneDark);
-		}
-		
-		var guitarScreen = ui.AddChild(new LegacyDrawable(DrawGuitarScreen));
-		guitarScreen.name = "guitarScreen";
-		guitarScreen.renderOrder = 1;
+		LegacyDrawable overlay = ui.AddChild(new LegacyDrawable(DrawGuitarOverlay));
+		overlay.name = "guitarOverlay";
+		overlay.renderOrder = LegacyOverlayLayer;
 
 		actJudgeString.InitUI(ui);
 		
 		actChipFireGB = new ActPerfNewFire[2];
 		actChipFireGB[0] = ui.AddChild(new ActPerfNewFire(1));
 		actChipFireGB[0].name = "chipsFireGuitar";
-		actChipFireGB[0].renderOrder = 2;
+		actChipFireGB[0].renderOrder = EffectsLayer;
 		
 		actChipFireGB[1] = ui.AddChild(new ActPerfNewFire(2));
 		actChipFireGB[1].name = "chipsFireBass";
-		actChipFireGB[1].renderOrder = 2;
+		actChipFireGB[1].renderOrder = EffectsLayer;
 		
 		//set up hold note rendering
 		float guitarY = CDTXMania.ConfigIni.bReverse[1]
@@ -126,9 +102,11 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 
 		wailingEffect = new WailingEffect[2];
 		wailingEffect[0] = ui.AddChild(new WailingEffect());
+		wailingEffect[0].renderOrder = LaneArtLayer;
 		wailingEffect[0].position = new Vector3(242, 58, 0);
 		
 		wailingEffect[1] = ui.AddChild(new WailingEffect());
+		wailingEffect[1].renderOrder = LaneArtLayer;
 		wailingEffect[1].position = new Vector3(1111, 58, 0);
 	}
 
@@ -181,7 +159,6 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		{
 			//this.tGenerateBackgroundTexture();
 			txChip = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\7_Chips_Guitar.png" ) );
-			txHitBar = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\\ScreenPlayDrums hit-bar.png"));
 			//txWailingFrame = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay wailing cursor.png" ) );
 
 			txNote = new BaseTexture[5];
@@ -312,7 +289,7 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		return 0;
 	}
 
-	private void DrawGuitarScreen()
+	private void DrawGuitarLanes()
 	{
 		sw.Start();
 
@@ -349,7 +326,15 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		tDraw_LoopLines();
 		bIsFinishedPlaying = tUpdateAndDraw_Chips(EInstrumentPart.GUITAR);
 		tUpdateAndDraw_RGBButton();
-		tUpdateAndDraw_GuitarBass_JudgementLine();
+
+		sw.Stop();
+	}
+
+	//drawn over the judge lines and shutters
+	private void DrawGuitarOverlay()
+	{
+		sw.Start();
+
 		tUpdateAndDraw_JudgementString();
 		actProgressBar.OnUpdateAndDraw();
 		if (CDTXMania.ConfigIni.bShowScore)
@@ -511,32 +496,6 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 			CDTXMania.ConfigIni.bReverse.Guitar ? 340 : 130,
 			CDTXMania.ConfigIni.bReverse.Bass ?   340 : 130
 		);
-	}
-	private void tUpdateAndDraw_GuitarBass_JudgementLine()  // t進行描画_ギターベース判定ライン	yyagi: ドラム画面とは座標が違うだけですが、まとめづらかったのでそのまま放置してます。
-	{
-		if ( CDTXMania.ConfigIni.bGuitarEnabled )
-		{
-			if ( CDTXMania.DTX.bHasChips.Guitar )
-			{
-				int y = CDTXMania.ConfigIni.bReverse.Guitar ? nJudgeLinePosY.Guitar : nJudgeLinePosY.Guitar - 1;
-
-				if ( txHitBar != null && CDTXMania.ConfigIni.bJudgeLineDisp.Guitar )
-					txHitBar.tDraw2D(80, y, new RectangleF( 0, 0, 252, 6 ) );
-
-				if (CDTXMania.ConfigIni.bShowPerformanceInformation)
-					actLVFont.tDrawString(310, (CDTXMania.ConfigIni.bReverse.Guitar ? y + 8 : y - 20), CDTXMania.ConfigIni.nJudgeLine.Guitar);
-			}
-			if ( CDTXMania.DTX.bHasChips.Bass )
-			{
-				int y = CDTXMania.ConfigIni.bReverse.Bass ? nJudgeLinePosY.Bass : nJudgeLinePosY.Bass - 1;
-
-				if ( txHitBar != null && CDTXMania.ConfigIni.bJudgeLineDisp.Bass )
-					txHitBar.tDraw2D(950, y, new RectangleF(0, 0, 252, 6));
-
-				if (CDTXMania.ConfigIni.bShowPerformanceInformation)
-					actLVFont.tDrawString(1180, (CDTXMania.ConfigIni.bReverse.Bass ? y + 8 : y - 20), CDTXMania.ConfigIni.nJudgeLine.Bass);
-			}
-		}
 	}
 
 	/*

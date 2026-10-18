@@ -14,18 +14,12 @@ internal class CActPerfCommonRGB : CActivity
 	public bool[] bPressedState = new bool[ 10 ];
 	protected STDGBVALUE<int> nシャッター上;
 	protected STDGBVALUE<int> nシャッター下;
-	protected STDGBVALUE<double> dbAboveShutter;
-	protected STDGBVALUE<double> dbUnderShutter;
-	protected double db倍率 = 6.14;
 	protected BaseTexture txRGB;
-	protected BaseTexture txShutter;
-	protected CActLVLNFont actLVFont;
 
 	// コンストラクタ
 
 	public CActPerfCommonRGB()
 	{
-		listChildActivities.Add(actLVFont = new CActLVLNFont());
 		bActivated = false;
 	}
 		
@@ -53,7 +47,6 @@ internal class CActPerfCommonRGB : CActivity
 		if ( bActivated )
 		{
 			txRGB = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_RGB buttons.png"));
-			txShutter = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_shutter_GB.png"));
 			base.OnManagedCreateResources();
 		}
 	}

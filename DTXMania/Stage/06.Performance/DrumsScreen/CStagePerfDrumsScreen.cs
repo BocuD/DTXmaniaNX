@@ -38,7 +38,6 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         listChildActivities.Add(actStageFailed = new CActPerfStageFailure());
         listChildActivities.Add(actPlayInfo = new CActPerformanceInformation());
         listChildActivities.Add(actFillin = new CActPerfDrumsFillingEffect());
-        listChildActivities.Add(actLVFont = new CActLVLNFont());
         listChildActivities.Add(actProgressBar = new CActPerfProgressBar());
     }
 
@@ -46,15 +45,19 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
     {
         base.OnLayoutReady();
         
-        var drumsScreen = ui.AddChild(new LegacyDrawable(DrawDrumsScreen));
-        drumsScreen.name = "drumsScreen";
-        
-        actJudgeString.InitUI(ui);
+        LegacyDrawable lanes = ui.AddChild(new LegacyDrawable(DrawDrumsLanes));
+        lanes.name = "drumsLanes";
+        lanes.renderOrder = LegacyLanesLayer;
+
+        LegacyDrawable overlay = ui.AddChild(new LegacyDrawable(DrawDrumsOverlay));
+        overlay.name = "drumsOverlay";
+        overlay.renderOrder = LegacyOverlayLayer;
 
         if (useNewDrumsFire)
         {
             var drumChipsFire = ui.AddChild(new ActPerfNewFire(0));
             drumChipsFire.name = "drumChipsFire";
+            drumChipsFire.renderOrder = EffectsLayer;
 
             actChipFireD = drumChipsFire;
             
@@ -62,6 +65,8 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                 ? nJudgeLinePosY.Drums - 183
                 : nJudgeLinePosY.Drums - 186);
         }
+
+        actJudgeString.InitUI(ui);
     }
 
     // Methods
@@ -132,8 +137,6 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
             bChorusSection = false;
             bBonus = false;
             txChip = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_chips_drums.png"));
-            txHitBar = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlayDrums hit-bar.png" ) );
-            txShutter = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\7_shutter.png" ) );
             txLaneCover = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_lanes_Cover_cls.png"));
 
             /*
@@ -240,7 +243,7 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
     private static readonly int probeFade = AllocationProbe.Register("fade", 1);
     private static readonly int probeKeyInput = AllocationProbe.Register("key input", 1);
 
-    private void DrawDrumsScreen()
+    private void DrawDrumsLanes()
     {
         AllocationProbe.Begin(probeLegacyDraw);
         sw.Start();
@@ -281,8 +284,19 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
         actProgressBar.OnUpdateAndDraw();
 
         DrawLaneCover();
+        AllocationProbe.End(probeLanes);
 
-        tUpdateAndDraw_JudgementLine();
+        sw.Stop();
+        AllocationProbe.End(probeLegacyDraw);
+    }
+
+    //drawn over the judge lines and shutters
+    private void DrawDrumsOverlay()
+    {
+        AllocationProbe.Begin(probeLegacyDraw);
+        sw.Start();
+
+        AllocationProbe.Begin(probeLanes);
         tUpdateAndDraw_DrumPad();
         AllocationProbe.End(probeLanes);
         
@@ -424,37 +438,6 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
                 }
             }
         }
-
-        double db倍率 = 7.2;
-        double dbシャッターIN = (nShutterInPosY.Drums * db倍率);
-        double dbシャッターOUT = 720 - (nShutterOutPosY.Drums * db倍率);
-
-        if (CDTXMania.ConfigIni.bReverse.Drums)
-        {
-            dbシャッターIN = (nShutterOutPosY.Drums * db倍率);
-            txShutter.tDraw2D(295, (int)(-720 + dbシャッターIN));
-
-            if (CDTXMania.ConfigIni.bShowPerformanceInformation)
-                actLVFont.tDrawString(564, (int)dbシャッターIN - 20, CDTXMania.ConfigIni.nShutterOutSide.Drums);
-
-            dbシャッターOUT = 720 - (nShutterInPosY.Drums * db倍率);
-            txShutter.tDraw2D(295, (int)dbシャッターOUT);
-
-            if (CDTXMania.ConfigIni.bShowPerformanceInformation)
-                actLVFont.tDrawString(564, (int)dbシャッターOUT + 2, CDTXMania.ConfigIni.nShutterInSide.Drums);
-        }
-        else
-        {
-            txShutter.tDraw2D(295, (int)(-720 + dbシャッターIN));
-
-            if (CDTXMania.ConfigIni.bShowPerformanceInformation)
-                actLVFont.tDrawString(564, (int)dbシャッターIN - 20, CDTXMania.ConfigIni.nShutterInSide.Drums);
-
-            txShutter.tDraw2D(295, (int)dbシャッターOUT);
-
-            if (CDTXMania.ConfigIni.bShowPerformanceInformation)
-                actLVFont.tDrawString(564, (int)dbシャッターOUT + 2, CDTXMania.ConfigIni.nShutterOutSide.Drums);
-        }
     }
 
 
@@ -503,7 +486,6 @@ internal class CStagePerfDrumsScreen : CStagePerfCommonScreen
     public double UnitTime;
 //		private CTexture txヒットバーGB;
 //		private CTexture txレーンフレームGB;
-    public BaseTexture txShutter;
     private BaseTexture txLaneCover;
     //-----------------
     private bool bフィルイン区間の最後のChipである( CChip pChip )

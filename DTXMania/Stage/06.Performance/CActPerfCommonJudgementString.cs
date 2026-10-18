@@ -277,7 +277,7 @@ internal abstract class CActPerfCommonJudgementString : CActivity
 		InitializeLaneSizes();
 		
 		var judgement = ui.AddChild(new UIGroup("Judgement"));
-		judgement.renderOrder = 1;
+		judgement.renderOrder = CStagePerfCommonScreen.EffectsLayer;
 		judgement.dontSerialize = true;
 
 		judgements = new JudgementString[stLaneSize.Length];

@@ -5,73 +5,31 @@ using DTXMania.UI.Drawable;
 using DTXMania.UI.DynamicElements;
 using DTXMania.UI.Inspector;
 using DTXMania.UI.Skin;
-using Hexa.NET.ImGui;
 
 namespace DTXMania;
 
-public class PerformanceGauge : UIGroup
+public class PerformanceGauge : PerformanceElement
 {
     [AddChildMenu("Game/Performance/Gauge")]
     public new static UIDrawable Create() => new PerformanceGauge();
-
-    [Themable] public EInstrumentPart instrument;
-
-    private readonly PerformanceStats stats = new();
-    private readonly UIDataContext data = new();
 
     public PerformanceGauge() : this(EInstrumentPart.DRUMS)
     {
     }
 
-    public PerformanceGauge(EInstrumentPart instrument) : base("Gauge")
+    public PerformanceGauge(EInstrumentPart instrument) : base("Gauge", instrument)
     {
-        this.instrument = instrument;
-        stats.Instrument = (int)instrument;
-
-        data.RegisterObject("Stats", () => stats);
-        dataContext = data;
-
         size = instrument == EInstrumentPart.DRUMS ? new Vector2(543, 47) : new Vector2(290, 68);
-        MakeComponent(ComponentName(instrument), () => GaugeDefault(instrument));
     }
 
-    public override void OnDeserialize()
-    {
-        base.OnDeserialize();
-        stats.Instrument = (int)instrument;
-        MakeComponent(ComponentName(instrument), () => GaugeDefault(instrument));
-    }
-
-    public override void Draw(Matrix4x4 parentMatrix)
-    {
-        stats.Instrument = (int)instrument;
-
-        if (!stats.ShowsGauge)
-        {
-            return;
-        }
-
-        base.Draw(parentMatrix);
-    }
-
-    public override void DrawInspector()
-    {
-        base.DrawInspector();
-
-        if (ImGui.CollapsingHeader("Gauge"))
-        {
-            Inspector.Inspect("Instrument", ref instrument);
-        }
-    }
-
-    private static string ComponentName(EInstrumentPart part) => part switch
+    protected override string ComponentName(EInstrumentPart part) => part switch
     {
         EInstrumentPart.GUITAR => "GuitarGauge",
         EInstrumentPart.BASS => "BassGauge",
         _ => "DrumsGauge"
     };
 
-    private static UIGroup GaugeDefault(EInstrumentPart part)
+    protected override UIGroup BuildDefault(EInstrumentPart part)
     {
         (string frame, Vector2 frameSize, Vector3 bar, Vector2 barSize, Vector3 speed) = part switch
         {

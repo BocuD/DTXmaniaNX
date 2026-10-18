@@ -58,7 +58,6 @@ internal abstract class CStagePerfCommonScreen : CStage
 
     public CStagePerfCommonScreen()
     {
-        listChildActivities.Add(actLVFont = new CActLVLNFont());
     }
 
     public bool bAUTOでないチップが１つでもバーを通過した
@@ -300,38 +299,59 @@ internal abstract class CStagePerfCommonScreen : CStage
     {
     }
 
+    internal const int LaneArtLayer = 1;
+    internal const int LegacyLanesLayer = 2;
+    internal const int LaneOverlayLayer = 3;
+    internal const int LegacyOverlayLayer = 4;
+    internal const int EffectsLayer = 5;
+    internal const int PanelLayer = 6;
+
     public override void BuildDefaultLayout()
     {
         InfoBox info = ui.AddChild(new InfoBox());
         info.position = new Vector3(1270, 10, 0);
-        info.renderOrder = 1;
+        info.renderOrder = LaneArtLayer;
 
         StageFailedCover failed = ui.AddChild(new StageFailedCover());
         failed.renderOrder = 1000;
 
-        //renderOrder 2 is above both legacy screens
-        StatusPanel(EInstrumentPart.DRUMS, "DrumsStatus", new Vector3(22, 250, 0));
-        StatusPanel(EInstrumentPart.GUITAR, "GuitarStatus", new Vector3(373, 254, 0));
-        StatusPanel(EInstrumentPart.BASS, "BassStatus", new Vector3(665, 254, 0));
+        Add(new PerformanceLane(EInstrumentPart.GUITAR), "GuitarLane", 67, 42, LaneArtLayer);
+        Add(new PerformanceLane(EInstrumentPart.BASS), "BassLane", 937, 42, LaneArtLayer);
 
-        Gauge(EInstrumentPart.DRUMS, "DrumsGauge", new Vector3(294, 626, 0));
-        Gauge(EInstrumentPart.GUITAR, "GuitarGauge", new Vector3(80, 0, 0));
-        Gauge(EInstrumentPart.BASS, "BassGauge", new Vector3(950, 0, 0));
+        Add(new PerformanceShutters(EInstrumentPart.DRUMS), "DrumsShutters", 295, 0, LaneOverlayLayer);
+        Add(new PerformanceShutters(EInstrumentPart.GUITAR), "GuitarShutters", 80, 0, LaneOverlayLayer);
+        Add(new PerformanceShutters(EInstrumentPart.BASS), "BassShutters", 950, 0, LaneOverlayLayer);
 
-        void StatusPanel(EInstrumentPart instrument, string name, Vector3 position)
+        Add(new PerformanceJudgeLine(EInstrumentPart.DRUMS), "DrumsJudgeLine", 295, 0, LaneOverlayLayer);
+        Add(new PerformanceJudgeLine(EInstrumentPart.GUITAR), "GuitarJudgeLine", 80, 0, LaneOverlayLayer);
+        Add(new PerformanceJudgeLine(EInstrumentPart.BASS), "BassJudgeLine", 950, 0, LaneOverlayLayer);
+
+        UIGroup perspective = ui.AddChild(new UIGroup("Perspective"));
+        perspective.size = new Vector2(1280, 720);
+        perspective.parentAnchor = new Vector2(0.5f, 0.5f);
+        perspective.pivot = new Vector2(0.5f, 0.5f);
+        perspective.perspective = 1410;
+        perspective.vanishingPoint = new Vector2(640, 360);
+        perspective.renderOrder = PanelLayer;
+
+        PerformanceStatusPanel drumsStatus = perspective.AddChild(new PerformanceStatusPanel(EInstrumentPart.DRUMS));
+        drumsStatus.name = "DrumsStatus";
+        drumsStatus.position = new Vector3(86, 186, -39);
+        drumsStatus.rotation = new Vector3(0, -61f * MathF.PI / 180, 0);
+
+        Add(new PerformanceStatusPanel(EInstrumentPart.GUITAR), "GuitarStatus", 373, 254, PanelLayer);
+        Add(new PerformanceStatusPanel(EInstrumentPart.BASS), "BassStatus", 665, 254, PanelLayer);
+
+        Add(new PerformanceGauge(EInstrumentPart.DRUMS), "DrumsGauge", 294, 626, PanelLayer);
+        Add(new PerformanceGauge(EInstrumentPart.GUITAR), "GuitarGauge", 80, 0, PanelLayer);
+        Add(new PerformanceGauge(EInstrumentPart.BASS), "BassGauge", 950, 0, PanelLayer);
+
+        void Add(PerformanceElement element, string name, float x, float y, int renderOrder)
         {
-            PerformanceStatusPanel panel = ui.AddChild(new PerformanceStatusPanel(instrument));
-            panel.name = name;
-            panel.position = position;
-            panel.renderOrder = 2;
-        }
-
-        void Gauge(EInstrumentPart instrument, string name, Vector3 position)
-        {
-            PerformanceGauge gauge = ui.AddChild(new PerformanceGauge(instrument));
-            gauge.name = name;
-            gauge.position = position;
-            gauge.renderOrder = 2;
+            ui.AddChild(element);
+            element.name = name;
+            element.position = new Vector3(x, y, 0);
+            element.renderOrder = renderOrder;
         }
     }
 
@@ -785,7 +805,6 @@ internal abstract class CStagePerfCommonScreen : CStage
     public CActPerfVideo video;
     public CActPerfBGA actBGA;
     
-    protected CActLVLNFont actLVFont;
 
     //one buffer for every pad read in a frame; the reads are sequential and each is done with before the
     //next one starts
@@ -872,7 +891,6 @@ internal abstract class CStagePerfCommonScreen : CStage
     protected CChip rNextBassChip;
     protected BaseTexture txWailingFrame;
     protected BaseTexture txChip;  // txチップ
-    protected BaseTexture txHitBar;  // txヒットバー
 
     protected BaseTexture[] txNote = [];
     protected BaseTexture[] txHoldNoteBg = [];
@@ -3886,33 +3904,6 @@ internal abstract class CStagePerfCommonScreen : CStage
 
     private bool ShowStillBackground() => !ChartWillPlayVideo() || video.loadFailed;
 
-    protected void tUpdateAndDraw_JudgementLine()  // t進行描画_判定ライン
-    {
-        if (CDTXMania.ConfigIni.bDrumsEnabled)
-        {
-            int y = CDTXMania.ConfigIni.bReverse.Drums ? nJudgeLinePosY.Drums - nJudgeLinePosY_delta.Drums : nJudgeLinePosY.Drums + nJudgeLinePosY_delta.Drums;
-            if (CDTXMania.ConfigIni.bJudgeLineDisp.Drums)
-            {
-                // #31602 2013.6.23 yyagi 描画遅延対策として、判定ラインの表示位置をオフセット調整できるようにする
-                // Check for numofLanes config to decide on the length to draw
-                int l_drumPanelWidth = 0x22f;
-                int l_xOffset = 0;
-                if (CDTXMania.ConfigIni.eNumOfLanes.Drums == EType.B)
-                {
-                    l_drumPanelWidth = 0x207;
-                }
-                else if (CDTXMania.ConfigIni.eNumOfLanes.Drums == EType.C)
-                {
-                    l_drumPanelWidth = 447;
-                    l_xOffset = 72;
-                }
-                txHitBar.tDraw2D(295 + l_xOffset, y, new RectangleF(0, 0, l_drumPanelWidth, 6));
-            }
-            if (CDTXMania.ConfigIni.bShowPerformanceInformation)
-                actLVFont.tDrawString(295, (CDTXMania.ConfigIni.bReverse.Drums ? y - 20 : y + 8), CDTXMania.ConfigIni.nJudgeLine.Drums);
-        }
-    }
-
     protected void tUpdateAndDraw_JudgementString()  // t進行描画_判定文字列
     {
         actJudgeString.OnUpdateAndDraw();
@@ -5126,6 +5117,7 @@ internal abstract class CStagePerfCommonScreen : CStage
         if (playspeedText == null)
         {
             playspeedText = ui.AddChild(new UIText("playspeed", 18));
+            playspeedText.dontSerialize = true;
             playspeedText.fillColor = Color4.White;
             playspeedText.outlineGradientTopColor = Color4.Black;
             playspeedText.outlineGradientBottomColor = Color.Red;
