@@ -274,6 +274,11 @@ public class UIGroup : UIDrawable
         if (string.IsNullOrWhiteSpace(component))
         {
             component = $"Components/{componentName}.json";
+
+            if (ComponentPath() is { } existing && File.Exists(existing))
+            {
+                return;
+            }
         }
 
         EnsureContent();
