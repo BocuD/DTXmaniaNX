@@ -309,7 +309,7 @@ internal abstract class CStagePerfCommonScreen : CStage
     public override void BuildDefaultLayout()
     {
         InfoBox info = ui.AddChild(new InfoBox());
-        info.position = new Vector3(1270, 10, 0);
+        info.position = new Vector3(1277, 3, 0);
         info.renderOrder = LaneArtLayer;
 
         StageFailedCover failed = ui.AddChild(new StageFailedCover());
