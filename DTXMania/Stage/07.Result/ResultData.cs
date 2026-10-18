@@ -35,7 +35,6 @@ public sealed class ResultData
     [DataField] public bool IsFullCombo => !IsExcellent && Entry.bIsFullCombo;
     [DataField] public bool IsClear => !IsExcellent && !Entry.bIsFullCombo;
 
-    [DataField] public bool ShowLagCounts => CDTXMania.ConfigIni.bShowLagHitCount;
     [DataField] public int FastCount => Entry.nFastCount;
     [DataField] public int SlowCount => Entry.nSlowCount;
 

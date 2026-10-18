@@ -55,7 +55,7 @@ internal partial class CConfigIni
 	public bool bランダムセレクトで子BOXを検索対象とする;
 	public bool bOutputLogs;
 	public STDGBVALUE<bool> b演奏音を強調する;
-	public bool bShowPerformanceInformation;
+	[DataField("ShowPerformanceInformation")] public bool bShowPerformanceInformation;
 	public bool bAutoAddGage; //2012.9.18
 	public bool b歓声を発声する;
 	public bool bVerticalSyncWait;
@@ -249,7 +249,8 @@ internal partial class CConfigIni
 	public STDGBVALUE<int> nJudgeLinePosOffset; // #31602 2013.6.23 yyagi 判定ライン表示位置のオフセット
 	public int nShowLagType;					// #25370 2011.6.5 yyagi ズレ時間表示機能
 	public int nShowLagTypeColor;
-	public bool bShowLagHitCount;				// fisyher New Config to enable hit count display or not
+	[DataField("LagColorsSwapped")] public bool bLagColorsSwapped => nShowLagTypeColor != 0;
+	[DataField("ShowLagHitCount")] public bool bShowLagHitCount;				// fisyher New Config to enable hit count display or not
 	public int nShowPlaySpeed;
 	public STDGBVALUE<int> nHidSud;
 	public bool bIsAutoResultCapture;			// #25399 2011.6.9 yyagi リザルト画像自動保存機能のON/OFF制御

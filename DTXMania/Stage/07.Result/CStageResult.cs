@@ -158,7 +158,7 @@ internal class CStageResult : CStage
 		var fastCount = ui.AddChild(new UIText("", 20));
 		fastCount.name = "FastCount";
 		fastCount.bindings.Add(new UIBinding("text", "Result.FastCount"));
-		fastCount.bindings.Add(new UIBinding("isVisible", "Result.ShowLagCounts"));
+		fastCount.bindings.Add(new UIBinding("isVisible", "Config.ShowLagHitCount"));
 		fastCount.position = new Vector3(900, 655, 0);
 		fastCount.fillColor = new Color4(0.1f, 0.8f, 1.0f);
 		fastCount.outlineWidth = 0;
@@ -166,7 +166,7 @@ internal class CStageResult : CStage
 		var slowCount = ui.AddChild(new UIText("", 20));
 		slowCount.name = "SlowCount";
 		slowCount.bindings.Add(new UIBinding("text", "Result.SlowCount"));
-		slowCount.bindings.Add(new UIBinding("isVisible", "Result.ShowLagCounts"));
+		slowCount.bindings.Add(new UIBinding("isVisible", "Config.ShowLagHitCount"));
 		slowCount.position = new Vector3(986, 655, 0);
 		slowCount.fillColor = new Color4(1.0f, 0.2f, 0.2f);
 		slowCount.outlineWidth = 0;
