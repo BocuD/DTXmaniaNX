@@ -9,6 +9,8 @@ public sealed class PerformanceStats
 {
     [DataField] public int Instrument { get; set; }
 
+    [DataField] public string InstrumentName => Instrument switch { 0 => "DRUM", 1 => "GUITAR", _ => "BASS" };
+
     //null outside a performance screen, eg in the editor
     private static CStagePerfCommonScreen? Stage => CDTXMania.StageManager?.rCurrentStage as CStagePerfCommonScreen;
 
@@ -50,10 +52,6 @@ public sealed class PerformanceStats
         }
     }
 
-    [DataField] public bool IsClassicLevel => IsClassic;
-    [DataField] public long LevelWhole => IsClassic ? Level : Level / 10;
-    [DataField] public long LevelHundredths => Level % 10 * 10 + LevelDec;
-
     //row in the difficulty sheet, 60px per badge
     [DataField] public float DifficultyBadgeY
     {
@@ -63,10 +61,6 @@ public sealed class PerformanceStats
             return difficultyBadgeY;
         }
     }
-
-    [DataField] public bool ShowLagCounts => CDTXMania.ConfigIni.bShowLagHitCount;
-
-    [DataField] public bool LagColorsSwapped => CDTXMania.ConfigIni.nShowLagTypeColor != 0;
 
     [DataField] public int Early => Stage?.nTimingHitCount[Instrument].nEarly ?? 0;
     [DataField] public int Late => Stage?.nTimingHitCount[Instrument].nLate ?? 0;
@@ -79,9 +73,54 @@ public sealed class PerformanceStats
     //row in the scroll speed sheet, 48px per speed
     [DataField] public float ScrollSpeedIconY => Math.Min(CDTXMania.ConfigIni.nScrollSpeed[Instrument], 20) * 48.0f;
 
+    [DataField] public bool IsLaneDark => CDTXMania.ConfigIni.nLaneDisp[Instrument] is not (0 or 2);
+
+    [DataField] public bool ShowsJudgeLine => CDTXMania.ConfigIni.bJudgeLineDisp[Instrument];
+    [DataField] public int JudgeLine => CDTXMania.ConfigIni.nJudgeLine[Instrument];
+
+    [DataField] public float JudgeLineY
+    {
+        get
+        {
+            int y = Stage?.nJudgeLinePosY[Instrument] ?? 0;
+
+            if (Instrument != 0)
+            {
+                return IsReversed ? y : y - 1;
+            }
+
+            int offset = CDTXMania.ConfigIni.nJudgeLinePosOffset.Drums;
+            return IsReversed ? y - offset : y + offset;
+        }
+    }
+
+    //drums label the line from below and guitar and bass from above, until reversed
+    [DataField] public float JudgeLineNumberY => JudgeLineY + ((Instrument == 0) != IsReversed ? 8 : -20);
+
+    //the drums line spans only the lanes in use
+    [DataField] public float JudgeLineX => Instrument == 0 && CDTXMania.ConfigIni.eNumOfLanes.Drums == EType.C ? 72 : 0;
+
+    [DataField] public float JudgeLineWidth => Instrument != 0 ? 252 : CDTXMania.ConfigIni.eNumOfLanes.Drums switch
+    {
+        EType.B => 519,
+        EType.C => 447,
+        _ => 559
+    };
+
+    [DataField] public int TopShutter => IsReversed ? CDTXMania.ConfigIni.nShutterOutSide[Instrument] : CDTXMania.ConfigIni.nShutterInSide[Instrument];
+    [DataField] public int BottomShutter => IsReversed ? CDTXMania.ConfigIni.nShutterInSide[Instrument] : CDTXMania.ConfigIni.nShutterOutSide[Instrument];
+
+    [DataField] public bool ShowsTopShutter => TopShutter != 0;
+    [DataField] public bool ShowsBottomShutter => BottomShutter != 0;
+
+    [DataField] public float TopShutterEdge => MathF.Ceiling(Instrument == 0 ? TopShutter * 7.2f : 108 + TopShutter * 6.14f);
+    [DataField] public float BottomShutterEdge => MathF.Floor(Instrument == 0 ? 720 - BottomShutter * 7.2f : 670 - BottomShutter * 6.14f);
+
+    private bool IsReversed => CDTXMania.ConfigIni.bReverse[Instrument];
+
     public bool ShowsPanel => CDTXMania.ConfigIni.nInfoType == 1 && IsPlayed && !HiddenBesideTheOther;
 
-    public bool ShowsGauge => IsPlayed && Instrument switch
+    public bool HasLane => IsPlayed && Instrument switch
     {
         1 => CDTXMania.DTX?.bHasChips.Guitar ?? false,
         2 => CDTXMania.DTX?.bHasChips.Bass ?? false,
