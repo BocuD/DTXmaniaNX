@@ -35,6 +35,11 @@ public sealed class UIBinding
     [JsonIgnore] private PropertyAccessor? accessor;
     [JsonIgnore] private string? resolvedTarget;
 
+    [JsonIgnore] private bool hasNumber;
+    [JsonIgnore] private string? numberSource;
+    [JsonIgnore] private double lastNumber;
+    [JsonIgnore] private string lastText = string.Empty;
+
     public UIBinding()
     {
     }
@@ -66,11 +71,26 @@ public sealed class UIBinding
 
         if (accessor.StringSetter != null)
         {
-            resolved = element.TryResolveContextString(source, out string text);
+            if (element.TryResolveContextNumber(source, out double number))
+            {
+                if (!hasNumber || number != lastNumber || numberSource != source)
+                {
+                    hasNumber = element.TryResolveContextString(source, out lastText);
+                    lastNumber = number;
+                    numberSource = source;
+                }
+
+                resolved = hasNumber;
+            }
+            else
+            {
+                hasNumber = false;
+                resolved = element.TryResolveContextString(source, out lastText);
+            }
 
             if (resolved)
             {
-                accessor.StringSetter(element, text);
+                accessor.StringSetter(element, lastText);
             }
         }
         else if (accessor.BoolSetter != null)
