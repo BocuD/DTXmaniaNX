@@ -80,9 +80,11 @@ public class UIPlayerNameplate : UIGroup
         playerName.outlineWidth = 0;
         playerName.bindings.Add(new UIBinding("text", "Player.Name"));
 
-        UIText skill = root.AddChild(new UIText("", 24));
+        UIText skill = root.AddChild(new UIText("", 26));
         skill.name = "SkillText";
-        skill.position = new Vector3(159, 53, 0);
+        skill.position = new Vector3(235, 53, 0);
+        skill.pivot = new Vector2(1, 0);
+        skill.outlineWidth = 0;
         skill.bindings.Add(new UIBinding("text", "Player.Skill"));
         skill.bindings.Add(new UIBinding("isVisible", "Player.ShowSkill"));
 
