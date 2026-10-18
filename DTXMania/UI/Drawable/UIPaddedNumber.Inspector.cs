@@ -61,5 +61,12 @@ public partial class UIPaddedNumber
 
         Inspector.Inspector.Inspect("Number Color", ref numColor);
         Inspector.Inspector.Inspect("Padding Color", ref padColor);
+
+        if (ImGui.InputFloat("Outline Width", ref outlineWidth, 0.5f, 2f, "%.1f"))
+        {
+            outlineWidth = MathF.Max(outlineWidth, 0f);
+        }
+
+        Inspector.Inspector.Inspect("Outline Color", ref outlineColor);
     }
 }

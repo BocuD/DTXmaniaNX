@@ -31,6 +31,8 @@ public partial class UIPaddedNumber : UIGroup
     [Themable] public float letterSpacing;
     [Themable] public float weight;
     [Themable] public float horizontalScale = 1f;
+    [Themable] public float outlineWidth;
+    [Themable] public Color4 outlineColor = new(0, 0, 0, 1);
 
     //code-managed text parts, recreated by the ctor on load and never part of the layout
     [JsonIgnore] private readonly UIText padText;
@@ -60,7 +62,7 @@ public partial class UIPaddedNumber : UIGroup
 
         //the split, width measure and re-render are wasted work unless something actually changed
         int styleHash = HashCode.Combine(padding, fontSize, font.source, font.path, style, padColor, numColor,
-            HashCode.Combine(texturePadding, digitGap, letterSpacing, weight, horizontalScale));
+            HashCode.Combine(texturePadding, digitGap, letterSpacing, weight, horizontalScale, outlineWidth, outlineColor));
         if (!applied || resolved != lastValue || styleHash != lastStyleHash)
         {
             applied = true;
@@ -105,7 +107,8 @@ public partial class UIPaddedNumber : UIGroup
         part.fontSize = fontSize;
         part.font = font;
         part.style = style;
-        part.outlineWidth = 0;
+        part.outlineWidth = outlineWidth;
+        part.outlineColor = outlineColor;
         part.texturePadding = texturePadding;
         part.letterSpacing = letterSpacing;
         part.weight = weight;
