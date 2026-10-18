@@ -336,9 +336,14 @@ internal abstract class CStagePerfCommonScreen : CStage
 
         PerformanceStatusPanel drumsStatus = perspective.AddChild(new PerformanceStatusPanel(EInstrumentPart.DRUMS));
         drumsStatus.name = "DrumsStatus";
-        drumsStatus.position = new Vector3(86, 186, -39);
-        drumsStatus.rotation = new Vector3(0, -61f * MathF.PI / 180, 0);
+        
+        //3d version
+        //drumsStatus.position = new Vector3(86, 186, -39);
+        //drumsStatus.rotation = new Vector3(0, -61f * MathF.PI / 180, 0);
 
+        //2d version
+        drumsStatus.position = new Vector3(14, 237, 0);
+        
         Add(new PerformanceStatusPanel(EInstrumentPart.GUITAR), "GuitarStatus", 373, 254, PanelLayer);
         Add(new PerformanceStatusPanel(EInstrumentPart.BASS), "BassStatus", 665, 254, PanelLayer);
 
