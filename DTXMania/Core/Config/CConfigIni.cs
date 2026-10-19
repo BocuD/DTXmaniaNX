@@ -63,7 +63,6 @@ internal partial class CConfigIni
 
 	public bool b選曲リストフォントを太字にする;
 
-	//public bool bDirectShowMode;
 	[DataField("Fullscreen")] public bool bFullScreenMode;
 	public bool bFullScreenExclusive;
 
@@ -574,7 +573,6 @@ internal partial class CConfigIni
 		bVerticalSyncWait = true;
 		nInitialWindowXPosition = 50; // #30675 2013.02.04 ikanick add
 		nInitialWindowYPosition = 50;
-		//this.bDirectShowMode = true;
 		nWindowWidth = GameWindowSize.Width;			// #23510 2010.10.31 yyagi add
 		nWindowHeight = GameWindowSize.Height;			// 
 		nMovieMode = 1;

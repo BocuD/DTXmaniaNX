@@ -5,8 +5,11 @@ using System.Diagnostics;
 using System.Numerics;
 using DTXMania.Core;
 using DTXMania.Core.Framework;
+using DTXMania.Core.Video;
 using DTXMania.Drawable;
 using DTXMania.UI.Drawable;
+using DTXMania.UI.DynamicElements;
+using DTXMania.UI.Skin;
 using DTXMania.UI.Text;
 using FDK;
 using Color = System.Drawing.Color;
@@ -297,6 +300,10 @@ internal abstract class CStagePerfCommonScreen : CStage
     
     public override void RegisterBindings()
     {
+        UIDataContext context = new();
+        context.RegisterObject("Video", () => video);
+        context.RegisterTexture("Video.Frame", () => video.Player.CurrentFrame.IsValid ? video.Player.CurrentFrame.Texture : null);
+        ui.dataContext = context;
     }
 
     internal const int LaneArtLayer = 1;
@@ -314,6 +321,29 @@ internal abstract class CStagePerfCommonScreen : CStage
 
         StageFailedCover failed = ui.AddChild(new StageFailedCover());
         failed.renderOrder = 1000;
+
+        UIGroup videos = ui.AddChild(new UIGroup("Video"));
+        videos.size = new Vector2(1280, 720);
+        videos.bindings.Add(new UIBinding("isVisible", "Video.IsPlaying"));
+
+        UIGroup fullscreen = Shown(videos, "Fullscreen", "Video.ShowsFullscreen");
+        LinkedVideo(fullscreen, "Wide", 0, 0, new Vector2(1280, 720)).bindings.Add(new UIBinding("isVisible", "Video.IsWide"));
+
+        UIGroup classic = Shown(fullscreen, "Classic", "Video.IsWide", invert: true);
+        LinkedVideo(Shown(classic, "Drums", "Game.IsDrums"), "Video", 882, 0).scale = new Vector3(1.42f, 1.42f, 1);
+        LinkedVideo(Shown(classic, "Guitar", "Game.IsDrums", invert: true), "Video", 640, 0).pivot = new Vector2(0.5f, 0);
+
+        UIGroup windowed = Shown(videos, "Windowed", "Video.ShowsWindowed");
+
+        UIGroup drumsWindow = Shown(windowed, "Drums", "Game.IsDrums");
+        drumsWindow.position = new Vector3(854, 142, 0);
+        drumsWindow.AddChild(new UIImage { name = "Panel", imageSource = ImageSource.File, image = SkinResource.System(@"Graphics\7_ClipPanel.png") });
+        LinkedVideo(drumsWindow, "Video", 5, 30, new Vector2(416, 234));
+
+        UIGroup guitarWindow = Shown(windowed, "Guitar", "Game.IsDrums", invert: true);
+        guitarWindow.position = new Vector3(380, 50, 0);
+        guitarWindow.AddChild(new UIImage { name = "Panel", imageSource = ImageSource.File, image = SkinResource.System(@"Graphics\7_ClipPanelC.png") });
+        LinkedVideo(guitarWindow, "Video", 30, 5, new Vector2(460, 258));
 
         Add(new PerformanceLane(EInstrumentPart.GUITAR), "GuitarLane", 67, 42, LaneArtLayer);
         Add(new PerformanceLane(EInstrumentPart.BASS), "BassLane", 937, 42, LaneArtLayer);
@@ -351,6 +381,27 @@ internal abstract class CStagePerfCommonScreen : CStage
         Add(new PerformanceGauge(EInstrumentPart.GUITAR), "GuitarGauge", 80, 0, PanelLayer);
         Add(new PerformanceGauge(EInstrumentPart.BASS), "BassGauge", 950, 0, PanelLayer);
 
+        static UINewVideoRenderer LinkedVideo(UIGroup parent, string name, float x, float y, Vector2? box = null)
+        {
+            UINewVideoRenderer video = parent.AddChild(UINewVideoRenderer.CreateLinked());
+            video.name = name;
+            video.position = new Vector3(x, y, 0);
+
+            if (box is { } size)
+            {
+                video.size = size;
+            }
+
+            return video;
+        }
+
+        static UIGroup Shown(UIGroup parent, string name, string source, bool invert = false)
+        {
+            UIGroup group = parent.AddChild(new UIGroup(name));
+            group.bindings.Add(new UIBinding("isVisible", source) { invert = invert });
+            return group;
+        }
+
         void Add(PerformanceElement element, string name, float x, float y, int renderOrder)
         {
             ui.AddChild(element);
@@ -363,8 +414,6 @@ internal abstract class CStagePerfCommonScreen : CStage
     //the performance screens are built entirely in code: bespoke chip/lane rendering, not a skinnable layout
     public override void OnLayoutReady()
     {
-        video.IntegrateUI(ui);
-
         actStageFailed.cover = ui.FindChild<StageFailedCover>();
 
         if (CDTXMania.ConfigIni.bReverse.Drums && ui.GetChild<PerformanceGauge>("DrumsGauge") is { } drumsGauge)
@@ -2643,13 +2692,7 @@ internal abstract class CStagePerfCommonScreen : CStage
 
         if (keyboard.bKeyPressed(SlimDXKey.F5))
         {
-            CConfigIni configIni = CDTXMania.ConfigIni;
-            configIni.nMovieMode++;
-            if (CDTXMania.ConfigIni.nMovieMode >= 4)
-            {
-                CDTXMania.ConfigIni.nMovieMode = 0;
-            }
-            video.MovieMode();
+            video.CycleMovieMode();
         }
         if (keyboard.bKeyPressed(SlimDXKey.F6))
         {
@@ -3153,7 +3196,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                                     if (pChip.rAVI != null)
                                     {
                                         //actAVI.bLoop = false;
-                                        video.Start(pChip.nChannelNumber, pChip.rAVI, 278, 355, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, pChip.nPlaybackTimeMs);
+                                        video.Start(pChip.rAVI, pChip.nPlaybackTimeMs);
                                     }                                        
                                     break;
 
@@ -3161,7 +3204,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                                     if (pChip.rAVIPan != null)
                                     {
                                         //actAVI.bLoop = false;
-                                        video.Start(pChip.nChannelNumber, pChip.rAVI, pChip.rAVIPan.sz開始サイズ.Width, pChip.rAVIPan.sz開始サイズ.Height, pChip.rAVIPan.sz終了サイズ.Width, pChip.rAVIPan.sz終了サイズ.Height, pChip.rAVIPan.pt動画側開始位置.X, pChip.rAVIPan.pt動画側開始位置.Y, pChip.rAVIPan.pt動画側終了位置.X, pChip.rAVIPan.pt動画側終了位置.Y, pChip.rAVIPan.pt表示側開始位置.X, pChip.rAVIPan.pt表示側開始位置.Y, pChip.rAVIPan.pt表示側終了位置.X, pChip.rAVIPan.pt表示側終了位置.Y, pChip.n総移動時間, pChip.nPlaybackTimeMs);
+                                        video.Start(pChip.rAVI, pChip.nPlaybackTimeMs);
                                     }                                        
                                     break;
                             }
