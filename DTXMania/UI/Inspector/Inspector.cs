@@ -88,16 +88,19 @@ public class Inspector
     /// filtered to <paramref name="kind"/>, plus an editable field for concrete indices
     /// (<c>Info.BestRank[0]</c>), <c>:format</c> suffixes, or hand-typed keys. "(none)" clears the binding.
     /// </summary>
-    public static bool DrawBindingDropdown(string label, ref string value, UIDrawable element, DataBindingKind kind)
+    public static bool DrawBindingDropdown(string label, ref string value, UIDrawable element, params DataBindingKind[] kinds)
     {
         List<string> options = ["(none)"];
         HashSet<string> seen = new();
 
         foreach (IUIDataContext context in element.DataContexts())
         {
-            foreach (string key in context.AvailableKeys(kind))
+            foreach (DataBindingKind kind in kinds)
             {
-                if (seen.Add(key)) options.Add(key);
+                foreach (string key in context.AvailableKeys(kind))
+                {
+                    if (seen.Add(key)) options.Add(key);
+                }
             }
         }
 

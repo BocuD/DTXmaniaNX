@@ -26,6 +26,16 @@ public sealed class UIBinding
     //opposite of one that already exists
     public bool invert;
 
+    public BindingCondition condition = BindingCondition.None;
+    public double value;
+    public double whenTrue = 1;
+    public double whenFalse;
+
+    public bool ShouldSerializecondition() => condition != BindingCondition.None;
+    public bool ShouldSerializevalue() => condition is not (BindingCondition.None or BindingCondition.IsTrue or BindingCondition.IsFalse);
+    public bool ShouldSerializewhenTrue() => condition != BindingCondition.None;
+    public bool ShouldSerializewhenFalse() => condition != BindingCondition.None;
+
     /// <summary>
     /// Whether the last apply found a value. A binding that resolves nothing leaves its target untouched,
     /// so this is the only way to tell a key that is missing from one that happens to match.
@@ -66,6 +76,31 @@ public sealed class UIBinding
 
         if (accessor == null)
         {
+            return;
+        }
+
+        if (condition != BindingCondition.None)
+        {
+            resolved = TryTest(element, out bool result);
+
+            if (!resolved)
+            {
+                return;
+            }
+
+            if (accessor.BoolSetter != null)
+            {
+                accessor.BoolSetter(element, result);
+            }
+            else if (accessor.NumberSetter != null)
+            {
+                accessor.NumberSetter(element, result ? whenTrue : whenFalse);
+            }
+            else
+            {
+                accessor.StringSetter?.Invoke(element, result ? "true" : "false");
+            }
+
             return;
         }
 
@@ -123,4 +158,57 @@ public sealed class UIBinding
 
         return DataBindingKind.String;
     }
+
+    public DataBindingKind SourceKindFor(UIDrawable element)
+    {
+        foreach (IUIDataContext context in element.DataContexts())
+        {
+            if (context.AvailableKeys(DataBindingKind.Bool).Contains(source)) return DataBindingKind.Bool;
+            if (context.AvailableKeys(DataBindingKind.Number).Contains(source)) return DataBindingKind.Number;
+        }
+
+        return condition switch
+        {
+            BindingCondition.None => KindFor(element),
+            BindingCondition.IsTrue or BindingCondition.IsFalse => DataBindingKind.Bool,
+            _ => DataBindingKind.Number
+        };
+    }
+
+    private bool TryTest(UIDrawable element, out bool result)
+    {
+        if (condition is BindingCondition.IsTrue or BindingCondition.IsFalse)
+        {
+            bool found = element.TryResolveContextBool(source, out bool flag);
+            result = (flag == (condition == BindingCondition.IsTrue)) ^ invert;
+            return found;
+        }
+
+        bool resolvedNumber = element.TryResolveContextNumber(source, out double number);
+
+        result = condition switch
+        {
+            BindingCondition.Equal => number == value,
+            BindingCondition.NotEqual => number != value,
+            BindingCondition.Greater => number > value,
+            BindingCondition.GreaterOrEqual => number >= value,
+            BindingCondition.Less => number < value,
+            _ => number <= value
+        } ^ invert;
+
+        return resolvedNumber;
+    }
+}
+
+public enum BindingCondition
+{
+    None,
+    Equal,
+    NotEqual,
+    Greater,
+    GreaterOrEqual,
+    Less,
+    LessOrEqual,
+    IsTrue,
+    IsFalse
 }

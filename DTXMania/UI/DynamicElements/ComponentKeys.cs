@@ -14,7 +14,7 @@ public static class ComponentKeys
         {
             if (!string.IsNullOrEmpty(binding.source))
             {
-                keys.TryAdd(binding.source, binding.KindFor(element));
+                keys.TryAdd(binding.source, binding.SourceKindFor(element));
             }
         }
 

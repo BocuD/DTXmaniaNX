@@ -239,7 +239,7 @@ public abstract class UIDrawable : IDisposable
             float square = ImGui.GetFrameHeight();
             ImGui.TableSetupColumn("Target", ImGuiTableColumnFlags.WidthStretch);
             ImGui.TableSetupColumn("Source", ImGuiTableColumnFlags.WidthStretch);
-            ImGui.TableSetupColumn("Invert", ImGuiTableColumnFlags.WidthFixed, ImGui.CalcTextSize("Invert").X);
+            ImGui.TableSetupColumn("Rule", ImGuiTableColumnFlags.WidthStretch);
             ImGui.TableSetupColumn("##remove", ImGuiTableColumnFlags.WidthFixed, square);
             ImGui.TableHeadersRow();
 
@@ -261,7 +261,14 @@ public abstract class UIDrawable : IDisposable
                     ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1.0f, 0.45f, 0.4f, 1.0f));
                 }
 
-                Inspector.Inspector.DrawBindingDropdown("##source", ref binding.source, this, kind);
+                if (kind == DataBindingKind.String)
+                {
+                    Inspector.Inspector.DrawBindingDropdown("##source", ref binding.source, this, kind);
+                }
+                else
+                {
+                    Inspector.Inspector.DrawBindingDropdown("##source", ref binding.source, this, DataBindingKind.Bool, DataBindingKind.Number);
+                }
 
                 if (missing)
                 {
@@ -269,11 +276,7 @@ public abstract class UIDrawable : IDisposable
                 }
 
                 ImGui.TableSetColumnIndex(2);
-
-                if (kind == DataBindingKind.Bool)
-                {
-                    ImGui.Checkbox("##invert", ref binding.invert);
-                }
+                DrawBindingRule(binding, kind, binding.SourceKindFor(this));
 
                 ImGui.TableSetColumnIndex(3);
                 if (ImGui.Button("x", new Vector2(square, square)))
@@ -295,6 +298,109 @@ public abstract class UIDrawable : IDisposable
         if (ImGui.Button("Add Binding"))
         {
             bindings.Add(new UIBinding());
+        }
+    }
+
+    private static readonly string[] BoolRules = ["Is True", "Is False"];
+    private static readonly string[] NumberRules = ["Value", "==", "!=", ">", ">=", "<", "<="];
+
+    //what to do with the source: a bool is tested, a number is used as it is or compared. A number target
+    //driven by a test picks between two values, on a line of its own
+    private static void MakeTestExplicit(UIBinding binding)
+    {
+        if (binding.condition == BindingCondition.None)
+        {
+            binding.condition = binding.invert ? BindingCondition.IsFalse : BindingCondition.IsTrue;
+            binding.invert = false;
+        }
+    }
+
+    private static void DrawBindingRule(UIBinding binding, DataBindingKind target, DataBindingKind source)
+    {
+        if (target == DataBindingKind.String && binding.condition == BindingCondition.None)
+        {
+            return;
+        }
+
+        if (source == DataBindingKind.Bool)
+        {
+            bool isFalse = binding.condition == BindingCondition.IsFalse
+                           || (binding.condition == BindingCondition.None && binding.invert);
+
+            ImGui.SetNextItemWidth(-1);
+            if (ImGui.BeginCombo("##rule", BoolRules[isFalse ? 1 : 0]))
+            {
+                for (int r = 0; r < BoolRules.Length; r++)
+                {
+                    if (ImGui.Selectable(BoolRules[r], r == (isFalse ? 1 : 0)))
+                    {
+                        binding.condition = r == 0 ? BindingCondition.IsTrue : BindingCondition.IsFalse;
+                        binding.invert = false;
+                    }
+                }
+
+                ImGui.EndCombo();
+            }
+        }
+        else
+        {
+            //Value, then the comparisons in BindingCondition's order
+            int current = binding.condition is >= BindingCondition.Equal and <= BindingCondition.LessOrEqual
+                ? (int)binding.condition
+                : 0;
+
+            bool compares = current != 0;
+            ImGui.SetNextItemWidth(compares ? ImGui.CalcTextSize("Value").X + ImGui.GetFrameHeight() * 1.5f : -1);
+
+            if (ImGui.BeginCombo("##rule", NumberRules[current]))
+            {
+                for (int r = 0; r < NumberRules.Length; r++)
+                {
+                    if (ImGui.Selectable(NumberRules[r], r == current))
+                    {
+                        binding.condition = (BindingCondition)r;
+                        binding.invert = false;
+                    }
+                }
+
+                ImGui.EndCombo();
+            }
+
+            if (compares)
+            {
+                ImGui.SameLine();
+                ImGui.SetNextItemWidth(-1);
+                float value = (float)binding.value;
+                if (ImGui.InputFloat("##value", ref value))
+                {
+                    binding.value = value;
+                }
+            }
+        }
+
+        if (target != DataBindingKind.Number || (binding.condition == BindingCondition.None && source != DataBindingKind.Bool))
+        {
+            return;
+        }
+
+        float half = (ImGui.GetContentRegionAvail().X - ImGui.GetStyle().ItemSpacing.X) / 2;
+        float labelRoom = ImGui.CalcTextSize("False").X + ImGui.GetStyle().ItemInnerSpacing.X;
+
+        ImGui.SetNextItemWidth(half - labelRoom);
+        float whenTrue = (float)binding.whenTrue;
+        if (ImGui.InputFloat("True##whenTrue", ref whenTrue))
+        {
+            binding.whenTrue = whenTrue;
+            MakeTestExplicit(binding);
+        }
+
+        ImGui.SameLine();
+        ImGui.SetNextItemWidth(half - labelRoom);
+        float whenFalse = (float)binding.whenFalse;
+        if (ImGui.InputFloat("False##whenFalse", ref whenFalse))
+        {
+            binding.whenFalse = whenFalse;
+            MakeTestExplicit(binding);
         }
     }
 

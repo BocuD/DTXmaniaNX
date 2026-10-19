@@ -126,7 +126,7 @@ public sealed class ComponentPreview : IUIPreview
         {
             if (!string.IsNullOrEmpty(binding.source))
             {
-                scope.Declare(binding.source, binding.KindFor(element));
+                scope.Declare(binding.source, binding.SourceKindFor(element));
             }
         }
 
