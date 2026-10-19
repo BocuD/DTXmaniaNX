@@ -23,7 +23,6 @@ public class CChip : IComparable<CChip>, ICloneable
 	public int nLag;                // 2011.2.1 yyagi
 	public int nCurrentComboForGhost; // 2015.9.29 chnmr0 fork
 	internal CAVI rAVI;
-	//internal CDTX.CDirectShow rDShow;
 	internal CDTX.CAVIPAN rAVIPan;
 	internal CDTX.CBGA rBGA;
 	internal CDTX.CBGAPAN rBGAPan;

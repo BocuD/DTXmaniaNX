@@ -781,7 +781,6 @@ internal class CStageResult : CStage
 	private int n最後に再生したHHのWAV番号;
 	private EChannel n最後に再生したHHのチャンネル番号;
 
-	//private CDirectShow ds背景動画;
 	private long lDshowPosition;
 	private long lStopPosition;
 
