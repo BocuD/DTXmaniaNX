@@ -381,9 +381,9 @@ internal abstract class CStagePerfCommonScreen : CStage
         Add(new PerformanceGauge(EInstrumentPart.GUITAR), "GuitarGauge", 80, 0, PanelLayer);
         Add(new PerformanceGauge(EInstrumentPart.BASS), "BassGauge", 950, 0, PanelLayer);
 
-        static UINewVideoRenderer LinkedVideo(UIGroup parent, string name, float x, float y, Vector2? box = null)
+        static UIImage LinkedVideo(UIGroup parent, string name, float x, float y, Vector2? box = null)
         {
-            UINewVideoRenderer video = parent.AddChild(UINewVideoRenderer.CreateLinked());
+            UIImage video = parent.AddChild(UINewVideoRenderer.CreateLinked());
             video.name = name;
             video.position = new Vector3(x, y, 0);
 
