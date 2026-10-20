@@ -37,7 +37,7 @@ public class PerformanceShutters : PerformanceElement
 
         UIGroup top = root.AddChild(new UIGroup("Top"));
         top.bindings.Add(new UIBinding("position.Y", "Stats.TopShutterEdge"));
-        top.bindings.Add(new UIBinding("isVisible", "Stats.ShowsTopShutter"));
+        top.bindings.Add(new UIBinding("isVisible", "Stats.TopShutter") { condition = BindingCondition.NotEqual });
         top.AddChild(new UIImage
         {
             name = "Shutter",
@@ -49,7 +49,7 @@ public class PerformanceShutters : PerformanceElement
 
         UIGroup bottom = root.AddChild(new UIGroup("Bottom"));
         bottom.bindings.Add(new UIBinding("position.Y", "Stats.BottomShutterEdge"));
-        bottom.bindings.Add(new UIBinding("isVisible", "Stats.ShowsBottomShutter"));
+        bottom.bindings.Add(new UIBinding("isVisible", "Stats.BottomShutter") { condition = BindingCondition.NotEqual });
         bottom.AddChild(new UIImage
         {
             name = "Shutter",

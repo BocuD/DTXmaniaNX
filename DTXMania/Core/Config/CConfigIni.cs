@@ -40,12 +40,12 @@ internal partial class CConfigIni
 	public bool bLogDTX詳細ログ出力;
 	public bool bLogSongSearch;
 	public bool bLog作成解放ログ出力;
-	public STDGBVALUE<bool> bReverse;
+	[DataField("Reverse")] public STDGBVALUE<bool> bReverse;
 	public bool bScoreIniを出力する;
 	public bool bSTAGEFAILEDEnabled;
 	public STDGBVALUE<bool> bSudden;
 	public bool bTight;
-	public STDGBVALUE<bool> bGraph有効; // #24074 2011.01.23 add ikanick
+	[DataField("Graph")] public STDGBVALUE<bool> bGraph有効; // #24074 2011.01.23 add ikanick
 	public bool bSmallGraph;
 	public bool bWave再生位置自動調整機能有効;
 	public bool bシンバルフリー;
@@ -201,7 +201,8 @@ internal partial class CConfigIni
 	public EDrumComboTextDisplayPosition ドラムコンボ文字の表示位置;
 	public bool bドラムコンボ文字の表示;
 	public STDGBVALUE<EType> JudgementStringPosition;  // 判定文字表示位置
-	public int nMovieMode;
+	//0 off, 1 fullscreen, 2 windowed, 3 both
+	[DataField("MovieMode")] public int nMovieMode;
 	public STDGBVALUE<int> nJudgeLine;
 	public STDGBVALUE<int> nShutterInSide;
 	public STDGBVALUE<int> nShutterOutSide;

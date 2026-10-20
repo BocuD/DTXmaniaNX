@@ -326,24 +326,32 @@ internal abstract class CStagePerfCommonScreen : CStage
         videos.size = new Vector2(1280, 720);
         videos.bindings.Add(new UIBinding("isVisible", "Video.IsPlaying"));
 
-        UIGroup fullscreen = Shown(videos, "Fullscreen", "Video.ShowsFullscreen");
+        //MovieMode: 0 off, 1 fullscreen, 2 windowed, 3 both
+        UIGroup fullscreen = videos.AddChild(new UIGroup("Fullscreen"));
+        fullscreen.bindings.Add(new UIBinding("isVisible", "Config.MovieMode")
+        {
+            condition = BindingCondition.Equal, value = 1, match = BindingMatch.Any,
+            clauses = [new BindingClause { source = "Config.MovieMode", condition = BindingCondition.Equal, value = 3 }]
+        });
         LinkedVideo(fullscreen, "Wide", 0, 0, new Vector2(1280, 720)).bindings.Add(new UIBinding("isVisible", "Video.IsWide"));
 
         UIGroup classic = Shown(fullscreen, "Classic", "Video.IsWide", invert: true);
         LinkedVideo(Shown(classic, "Drums", "Game.IsDrums"), "Video", 882, 0).scale = new Vector3(1.42f, 1.42f, 1);
         LinkedVideo(Shown(classic, "Guitar", "Game.IsDrums", invert: true), "Video", 640, 0).pivot = new Vector2(0.5f, 0);
 
-        UIGroup windowed = Shown(videos, "Windowed", "Video.ShowsWindowed");
+        UIGroup windowed = videos.AddChild(new UIGroup("Windowed"));
+        windowed.bindings.Add(new UIBinding("isVisible", "Config.MovieMode") { condition = BindingCondition.GreaterOrEqual, value = 2 });
 
-        UIGroup drumsWindow = Shown(windowed, "Drums", "Game.IsDrums");
-        drumsWindow.position = new Vector3(854, 142, 0);
-        drumsWindow.AddChild(new UIImage { name = "Panel", imageSource = ImageSource.File, image = SkinResource.System(@"Graphics\7_ClipPanel.png") });
-        LinkedVideo(drumsWindow, "Video", 5, 30, new Vector2(416, 234));
+        UIGroup drums = Shown(windowed, "Drums", "Game.IsDrums");
+        Window(drums, "Beside Lanes", 854, 142, "7_ClipPanel.png", 5, 30, new Vector2(416, 234))
+            .bindings.Add(new UIBinding("isVisible", "Config.Graph.Drums") { invert = true });
+        Window(drums, "Below Graph", 2, 402, "7_ClipPanelB.png", 5, 20, new Vector2(260, 270))
+            .bindings.Add(new UIBinding("isVisible", "Config.Graph.Drums"));
 
-        UIGroup guitarWindow = Shown(windowed, "Guitar", "Game.IsDrums", invert: true);
-        guitarWindow.position = new Vector3(380, 50, 0);
-        guitarWindow.AddChild(new UIImage { name = "Panel", imageSource = ImageSource.File, image = SkinResource.System(@"Graphics\7_ClipPanelC.png") });
-        LinkedVideo(guitarWindow, "Video", 30, 5, new Vector2(460, 258));
+        UIGroup guitar = Shown(windowed, "Guitar", "Game.IsDrums", invert: true);
+        UIGroup intoBassSlot = GraphShift(guitar, "Into Bass Graph", "Bass", 267);
+        UIGroup intoGuitarSlot = GraphShift(intoBassSlot, "Into Guitar Graph", "Guitar", -267);
+        Window(intoGuitarSlot, "Window", 380, 50, "7_ClipPanelC.png", 30, 5, new Vector2(460, 258));
 
         Add(new PerformanceLane(EInstrumentPart.GUITAR), "GuitarLane", 67, 42, LaneArtLayer);
         Add(new PerformanceLane(EInstrumentPart.BASS), "BassLane", 937, 42, LaneArtLayer);
@@ -377,7 +385,11 @@ internal abstract class CStagePerfCommonScreen : CStage
         Add(new PerformanceStatusPanel(EInstrumentPart.GUITAR), "GuitarStatus", 373, 254, PanelLayer);
         Add(new PerformanceStatusPanel(EInstrumentPart.BASS), "BassStatus", 665, 254, PanelLayer);
 
-        Add(new PerformanceGauge(EInstrumentPart.DRUMS), "DrumsGauge", 294, 626, PanelLayer);
+        PerformanceElement drumsGauge = Add(new PerformanceGauge(EInstrumentPart.DRUMS), "DrumsGauge", 294, 626, PanelLayer);
+        drumsGauge.bindings.Add(new UIBinding("position.Y", "Config.Reverse.Drums")
+        {
+            condition = BindingCondition.IsTrue, whenTrue = 28, whenFalse = 626
+        });
         Add(new PerformanceGauge(EInstrumentPart.GUITAR), "GuitarGauge", 80, 0, PanelLayer);
         Add(new PerformanceGauge(EInstrumentPart.BASS), "BassGauge", 950, 0, PanelLayer);
 
@@ -395,6 +407,26 @@ internal abstract class CStagePerfCommonScreen : CStage
             return video;
         }
 
+        static UIGroup Window(UIGroup parent, string name, float x, float y, string panel, float videoX, float videoY, Vector2 box)
+        {
+            UIGroup window = parent.AddChild(new UIGroup(name));
+            window.position = new Vector3(x, y, 0);
+            window.AddChild(new UIImage { name = "Panel", imageSource = ImageSource.File, image = SkinResource.System($@"Graphics\{panel}") });
+            LinkedVideo(window, "Video", videoX, videoY, box);
+            return window;
+        }
+
+        static UIGroup GraphShift(UIGroup parent, string name, string part, float x)
+        {
+            UIGroup group = parent.AddChild(new UIGroup(name));
+            group.bindings.Add(new UIBinding("position.X", $"Config.Graph.{part}")
+            {
+                condition = BindingCondition.IsTrue, whenTrue = x, whenFalse = 0,
+                clauses = [new BindingClause { source = $"Game.HasChips.{part}", condition = BindingCondition.IsFalse }]
+            });
+            return group;
+        }
+
         static UIGroup Shown(UIGroup parent, string name, string source, bool invert = false)
         {
             UIGroup group = parent.AddChild(new UIGroup(name));
@@ -402,12 +434,13 @@ internal abstract class CStagePerfCommonScreen : CStage
             return group;
         }
 
-        void Add(PerformanceElement element, string name, float x, float y, int renderOrder)
+        PerformanceElement Add(PerformanceElement element, string name, float x, float y, int renderOrder)
         {
             ui.AddChild(element);
             element.name = name;
             element.position = new Vector3(x, y, 0);
             element.renderOrder = renderOrder;
+            return element;
         }
     }
 
@@ -415,11 +448,6 @@ internal abstract class CStagePerfCommonScreen : CStage
     public override void OnLayoutReady()
     {
         actStageFailed.cover = ui.FindChild<StageFailedCover>();
-
-        if (CDTXMania.ConfigIni.bReverse.Drums && ui.GetChild<PerformanceGauge>("DrumsGauge") is { } drumsGauge)
-        {
-            drumsGauge.position.Y = 28;
-        }
 
         if (CDTXMania.ConfigIni.nShowPlaySpeed == (int)EShowPlaySpeed.ON
             || CDTXMania.ConfigIni.nShowPlaySpeed == (int)EShowPlaySpeed.IF_CHANGED_IN_GAME)

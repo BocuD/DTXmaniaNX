@@ -31,7 +31,6 @@ public sealed class PerformanceStats
     [DataField] public int MaxComboPercent => Percent(MaxCombo);
 
     [DataField] public double Rate => Stage?.dbAchievementRate[Instrument] ?? 0.0;
-    [DataField] public bool IsMaxRate => Rate >= 100.0;
     [DataField] public long RateWhole => (long)Math.Truncate(Rate);
     [DataField] public long RateHundredths => Hundredths(Rate);
 
@@ -67,7 +66,6 @@ public sealed class PerformanceStats
 
     //0 to 1, clamped
     [DataField] public double Gauge => Math.Max(0.0, Stage?.actGauge.db現在のゲージ値[Instrument] ?? 0.0);
-    [DataField] public bool IsGaugeFull => (Stage?.actGauge.db現在のゲージ値[Instrument] ?? 0.0) >= 1.0;
     [DataField] public bool IsDanger => Stage?.actGauge.IsDanger((EInstrumentPart)Instrument) ?? false;
 
     //row in the scroll speed sheet, 48px per speed
@@ -109,9 +107,6 @@ public sealed class PerformanceStats
 
     [DataField] public int TopShutter => IsReversed ? CDTXMania.ConfigIni.nShutterOutSide[Instrument] : CDTXMania.ConfigIni.nShutterInSide[Instrument];
     [DataField] public int BottomShutter => IsReversed ? CDTXMania.ConfigIni.nShutterInSide[Instrument] : CDTXMania.ConfigIni.nShutterOutSide[Instrument];
-
-    [DataField] public bool ShowsTopShutter => TopShutter != 0;
-    [DataField] public bool ShowsBottomShutter => BottomShutter != 0;
 
     [DataField] public float TopShutterEdge => MathF.Ceiling(Instrument == 0 ? TopShutter * 7.2f : 108 + TopShutter * 6.14f);
     [DataField] public float BottomShutterEdge => MathF.Floor(Instrument == 0 ? 720 - BottomShutter * 7.2f : 670 - BottomShutter * 6.14f);

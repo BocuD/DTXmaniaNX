@@ -26,8 +26,6 @@ public sealed class ResultData
     [DataField] public string SkillInt => NumberParts.Whole(Skill);
     [DataField] public string SkillFraction => NumberParts.Fraction(Skill);
 
-    [DataField] public bool ShowSkillBar => MaxSkill > 0.0;
-
     [DataField] public double SkillOfMax => MaxSkill > 0.0 ? Entry.dbGameSkill / MaxSkill : 0.0;
 
     //mutually exclusive; drives which result badge is shown

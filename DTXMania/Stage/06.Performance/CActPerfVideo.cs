@@ -17,10 +17,6 @@ internal class CActPerfVideo : CActivity
     [DataField] public bool IsPlaying => Player.IsPlaying;
     [DataField] public bool IsWide => Player.IsWide;
 
-    [DataField] public bool ShowsFullscreen => CDTXMania.ConfigIni.nMovieMode is 1 or 3;
-    [DataField] public bool ShowsWindowed => CDTXMania.ConfigIni.nMovieMode is 2 or 3;
-
-    //off, fullscreen, windowed, both
     public void CycleMovieMode() => CDTXMania.ConfigIni.nMovieMode = (CDTXMania.ConfigIni.nMovieMode + 1) % 4;
 
     //chart time the current video started at (or -1)

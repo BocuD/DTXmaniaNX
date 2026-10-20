@@ -86,14 +86,15 @@ public class PerformanceStatusPanel : PerformanceElement
 
         root.AddChild(Image("RateLabel", @"Graphics\Result\icon_rate_en.png", 91, 270)).scale = new Vector3(0.52f, 0.52f, 1);
 
-        UIGroup rate = Group(root, "Rate", 0, 0, "Stats.IsMaxRate", invert: true);
+        UIGroup rate = Group(root, "Rate", 0, 0);
+        rate.bindings.Add(new UIBinding("isVisible", "Stats.Rate") { condition = BindingCondition.Less, value = 100 });
         Number(rate, "Whole", "Stats.RateWhole", Rate, 2, 166, 291, Dim);
         Text(rate, "Point", ".", RateDecimals, 163, 301);
         Number(rate, "Hundredths", "Stats.RateHundredths", RateDecimals, 2, 218, 301, Color4.White);
         Text(rate, "PercentSign", "%", RatePercent, 220, 315);
 
         UIImage rateMax = root.AddChild(Image("RateMax", @"Graphics\7_skill max.png", 127, 310));
-        rateMax.bindings.Add(new UIBinding("isVisible", "Stats.IsMaxRate"));
+        rateMax.bindings.Add(new UIBinding("isVisible", "Stats.Rate") { condition = BindingCondition.GreaterOrEqual, value = 100 });
 
         root.AddChild(Image("SkillIcon", @"Graphics\Result\icon_skill.png", 16, 376)).scale = new Vector3(0.37f, 0.37f, 1);
         root.AddChild(Image("SkillLabel", @"Graphics\Result\label_skill_en.png", 16, 415)).scale = new Vector3(0.38f, 0.38f, 1);

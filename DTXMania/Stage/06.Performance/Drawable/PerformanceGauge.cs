@@ -76,7 +76,7 @@ public class PerformanceGauge : PerformanceElement
             bindings =
             {
                 new UIBinding("scale.X", "Stats.Gauge"),
-                new UIBinding("isVisible", "Stats.IsGaugeFull") { invert = true }
+                new UIBinding("isVisible", "Stats.Gauge") { condition = BindingCondition.Less, value = 1 }
             }
         });
 
@@ -89,7 +89,7 @@ public class PerformanceGauge : PerformanceElement
             size = barSize,
             clipRect = new RectangleF(0, 0, barSize.X, barSize.Y),
             renderOrder = 2,
-            bindings = { new UIBinding("isVisible", "Stats.IsGaugeFull") }
+            bindings = { new UIBinding("isVisible", "Stats.Gauge") { condition = BindingCondition.GreaterOrEqual, value = 1 } }
         });
 
         root.AddChild(new UIImage

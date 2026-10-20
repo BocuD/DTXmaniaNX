@@ -143,7 +143,7 @@ public class ResultInfoPanel : UIGroup
             isVisible = false,
             bindings =
             {
-                new UIBinding("isVisible", "Result.ShowSkillBar"),
+                new UIBinding("isVisible", "Result.MaxSkill") { condition = BindingCondition.Greater },
                 new UIBinding("scale.X", "Result.SkillOfMax")
             }
         });
@@ -158,7 +158,7 @@ public class ResultInfoPanel : UIGroup
             scale = new Vector3(0.66f, 0.66f, 1.0f),
             renderOrder = 2,
             isVisible = false,
-            bindings = { new UIBinding("isVisible", "Result.ShowSkillBar") }
+            bindings = { new UIBinding("isVisible", "Result.MaxSkill") { condition = BindingCondition.Greater } }
         });
     }
 }
