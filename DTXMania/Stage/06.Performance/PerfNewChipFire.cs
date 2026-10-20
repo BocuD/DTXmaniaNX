@@ -227,10 +227,5 @@ public class ActPerfNewFire : UIGroup, IPerfFire
         base.Draw(parentMatrix);
     }
 
-    public int OnUpdateAndDraw()
-    {
-        return 0;
-    }
-
     public int iPosY { get; set; }
 }
