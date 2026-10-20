@@ -43,7 +43,6 @@ internal class CActPerfGuitarBonus : CActivity
         {
             if (bJustStartedUpdate)
             {
-                //base.n進行用タイマ = CDTXMania.Timer.nCurrentTime;                    
                 bJustStartedUpdate = false;
             }
 

@@ -26,7 +26,6 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		listChildActivities.Add( actScrollSpeed = new CActPerfScrollSpeed() );
 		listChildActivities.Add( actWailingBonus = new CActPerfGuitarWailingBonus() );
 		listChildActivities.Add( actScore = new CActPerfGuitarScore() );
-		listChildActivities.Add( actRGB = new CActPerfGuitarRGB() );
 		listChildActivities.Add( actLaneFlushGB = new CActPerfGuitarLaneFlushGB() );
 		listChildActivities.Add( actJudgeString = new CActPerfGuitarJudgementString() );
 		listChildActivities.Add( actGauge = new CActPerfCommonGauge() );
@@ -157,9 +156,7 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 	{
 		if ( bActivated )
 		{
-			//this.tGenerateBackgroundTexture();
 			txChip = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\7_Chips_Guitar.png" ) );
-			//txWailingFrame = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\ScreenPlay wailing cursor.png" ) );
 
 			txNote = new BaseTexture[5];
 			for (int i = 0; i < 5; i++)
@@ -313,7 +310,6 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 
 		tUpdateAndDraw_Background();
 		tUpdateAndDraw_AVI();
-		tUpdateAndDraw_MIDIBGM();
 
 		tUpdateAndDraw_LaneFlushGB();
 
@@ -325,7 +321,6 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		tUpdateAndDraw_BarLines(EInstrumentPart.GUITAR);
 		tDraw_LoopLines();
 		bIsFinishedPlaying = tUpdateAndDraw_Chips(EInstrumentPart.GUITAR);
-		tUpdateAndDraw_RGBButton();
 
 		sw.Stop();
 	}
@@ -343,7 +338,6 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		tUpdateAndDraw_Graph();
 		tUpdateAndDraw_Combo();
 		tUpdateAndDraw_PerformanceInformation();
-		//this.tUpdateAndDraw_WailingFrame();
 
 		tUpdateAndDraw_GuitarBonus();
 		tUpdateAndDraw_STAGEFAILED();
@@ -468,19 +462,8 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		tチップのヒット処理_BadならびにTight時のMiss( part, nLane, EInstrumentPart.GUITAR );
 	}
 
-	/*
-	protected override void tUpdateAndDraw_AVI()
-	{
-		base.tUpdateAndDraw_AVI( 0, 0 );
-	}
-	protected override void t進行描画_BGA()
-	{
-		base.t進行描画_BGA( 500, 50 );
-	}
-	 */
 	protected override void tUpdateAndDraw_DANGER()			// #23631 2011.4.19 yyagi
 	{
-		//this.actDANGER.tUpdateAndDraw( false, this.actGauge.db現在のゲージ値.Guitar < 0.3, this.actGauge.db現在のゲージ値.Bass < 0.3 );
 		actDANGER.tUpdateAndDraw( false, actGauge.IsDanger(EInstrumentPart.GUITAR), actGauge.IsDanger(EInstrumentPart.BASS) );
 	}
 	private void tUpdateAndDraw_Graph()  // t進行描画_グラフ
@@ -498,12 +481,6 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		);
 	}
 
-	/*
-	protected override void t進行描画_パネル文字列()
-	{
-		base.t進行描画_パネル文字列( 0xb5, 430 );
-	}
-	 */
 
 	protected override void tUpdateAndDraw_PerformanceInformation()
 	{
@@ -531,16 +508,9 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 	
 	protected override void tUpdateAndDraw_Chip_PatternOnly_Drums(CConfigIni configIni, ref CDTX dTX, ref CChip pChip)
 	{
-		// int indexSevenLanes = this.nチャンネル0Atoレーン07[ pChip.nChannelNumber - 0x11 ];
-		if (!pChip.bHit && (pChip.nDistanceFromBar.Drums < 0))
-		{
-			//pChip.bHit = true;
-			//this.tPlaySound(pChip, AudioMixer.Timer.nResetAtMs + pChip.nPlaybackTimeMs, EInstrumentPart.DRUMS, dTX.nモニタを考慮した音量(EInstrumentPart.DRUMS));
-		}
 	}
 	protected override void tUpdateAndDraw_Chip_Drums(CConfigIni configIni, ref CDTX dTX, ref CChip pChip)
 	{
-		// int indexSevenLanes = this.nチャンネル0Atoレーン07[ pChip.nChannelNumber - 0x11 ];
 		if ( !pChip.bHit && ( pChip.nDistanceFromBar.Drums < 0 ) )
 		{
 			pChip.bHit = true;
@@ -594,13 +564,6 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 	protected override void tUpdateAndDraw_Chip_FillIn( CConfigIni configIni, ref CDTX dTX, ref CChip pChip )
 	{
 		if ( !pChip.bHit && ( pChip.nDistanceFromBar.Drums < 0 ) )
-		{
-			pChip.bHit = true;
-		}
-	}
-	protected override void tUpdateAndDraw_Chip_Bonus(CConfigIni configIni, ref CDTX dTX, ref CChip pChip)
-	{
-		if (!pChip.bHit && (pChip.nDistanceFromBar.Drums < 0))
 		{
 			pChip.bHit = true;
 		}
@@ -689,8 +652,6 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 			{
 				if ( CDTXMania.ConfigIni.nLaneDisp.Bass == 0 || CDTXMania.ConfigIni.nLaneDisp.Bass == 1 )
 				{
-					//todo: what the fuck is vcScaleRatio
-					//txChip.vcScaleRatio.Y = 1f;
 					txChip.tDraw2D(959, y, new RectangleF(0, 20, 193, 2));
 				}
 					    
@@ -724,8 +685,6 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 
 				if (CDTXMania.ConfigIni.nLaneDisp.Guitar == 0 || CDTXMania.ConfigIni.nLaneDisp.Guitar == 1)
 				{
-					//todo: what the fuck is vcScaleRatio
-					//txChip.vcScaleRatio.Y = 1.0f;
 					txChip.tDraw2D(88, y - 1, new RectangleF(0, 20, 193, 2));
 					txChip.tDraw2D(88, y + 1, new RectangleF(0, 20, 193, 2));
 				}
@@ -738,8 +697,6 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 
 				if (CDTXMania.ConfigIni.nLaneDisp.Bass == 0 || CDTXMania.ConfigIni.nLaneDisp.Bass == 1)
 				{
-					//todo: what the fuck is vcScaleRatio
-					//txChip.vcScaleRatio.Y = 1.0f;
 					txChip.tDraw2D(959, y - 1, new RectangleF(0, 20, 193, 2));
 					txChip.tDraw2D(959, y + 1, new RectangleF(0, 20, 193, 2));
 				}

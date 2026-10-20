@@ -65,12 +65,6 @@ internal class CActPerfDrumsDanger : CActPerfCommonDanger
 	// Other
 
 	#region [ private ]
-	//-----------------
-	//private bool bDanger中;
-	//private CCounter ct移動用;
-	//private CCounter ct透明度用;
-//		private const int n右位置 = 0x12a;
-//		private const int n左位置 = 0x26;
 	private readonly Rectangle[] rc領域 = new Rectangle[] { new Rectangle( 0, 0, 0x20, 0x40 ), new Rectangle( 0x20, 0, 0x20, 0x40 ) };
 	private BaseTexture tx黒;
 	//-----------------

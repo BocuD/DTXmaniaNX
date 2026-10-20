@@ -20,8 +20,6 @@ internal abstract class CActPerfCommonDanger : CActivity
 		{
 			bDanger中[i] = false;
 		}
-//			this.ct移動用 = new CCounter();
-//			this.ct透明度用 = new CCounter();
 		ct移動用 = null;
 		ct透明度用 = null;
 
@@ -42,8 +40,6 @@ internal abstract class CActPerfCommonDanger : CActivity
 	/// <param name="bIsDangerBass">BassがDangerならtrue</param>
 	/// <returns></returns>
 	public abstract int tUpdateAndDraw( bool bIsDangerDrums, bool bIsDamgerGuitar, bool bIsDangerBass );  // t進行描画
-
-
 
 	// Other
 

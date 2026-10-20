@@ -181,12 +181,8 @@ internal class CActPerfDrumsLaneFlushD : CActivity
                 int numOfLanesflagIndex = (int)CDTXMania.ConfigIni.eNumOfLanes.Drums;
 
                 int x2 = (CDTXMania.stagePerfDrumsScreen.actPad.st基本位置[index].x + 32);
-                int x3 = (CDTXMania.stagePerfDrumsScreen.actPad.st基本位置[index].x + (CDTXMania.ConfigIni.bReverse.Drums ? 32 : 32));
-                int xHH = (CDTXMania.stagePerfDrumsScreen.actPad.st基本位置[index].x + 32);
-                int xLC = (CDTXMania.stagePerfDrumsScreen.actPad.st基本位置[index].x + (CDTXMania.ConfigIni.bReverse.Drums ? 32 : 32));
                 int xCY = (CDTXMania.stagePerfDrumsScreen.actPad.st基本位置[index].x + (CDTXMania.ConfigIni.bReverse.Drums ? 79 : 79));
                 int nAlpha = 255 - ((int)(((float)(CDTXMania.ConfigIni.nMovieAlpha * 255)) / 10f));
-                //if (CDTXMania.ConfigIni.eDark == EDarkMode.OFF) //2013.02.17 kairera0467 ダークOFF以外でも透明度を有効にした。
                 //26072020: Check flag before drawing
                 if (nDrawFlags[numOfLanesflagIndex, index] == 1 && txLine != null)
                 {
@@ -249,15 +245,6 @@ internal class CActPerfDrumsLaneFlushD : CActivity
                         if (index == 6) //FT
                         {
                             txLine.tDraw2D(691, 0, new RectangleF(396, 0, 54, 720), color);
-                            //if (CDTXMania.ConfigIni.eRDPosition == ERDPosition.RCRD)
-                            {
-                                //this.txLine.tDraw2D(CDTXMania.app.Device, 742, 0, new  SharpDX.RectangleF(447, 0, 5, 720));
-                            }
-                            //else
-                            {
-                                //this.txLine.tDraw2D(CDTXMania.app.Device, 742, 0, new  SharpDX.RectangleF(447, 0, 4, 720));
-                            }
-
                         }
 
                         if (index == 7) //CY
@@ -291,7 +278,6 @@ internal class CActPerfDrumsLaneFlushD : CActivity
                             else if (CDTXMania.ConfigIni.eLaneType.Drums == EType.B)
                             {
                                 txLine.tDraw2D(x2 + 45, 0, new RectangleF(121, 0, 51, 720), color);
-                                //this.txLine.tDraw2D(CDTXMania.app.Device, 524, 0, new  SharpDX.RectangleF(278, 0, 6, 720));
                             }
                             else if (CDTXMania.ConfigIni.eLaneType.Drums == EType.D)
                             {
@@ -450,7 +436,6 @@ internal class CActPerfDrumsLaneFlushD : CActivity
     //26072020: New array Fisyher
     private readonly int[,] nDrawFlags = new int[3, 10] { { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, { 1, 1, 1, 1, 1, 1, 1, 1, 0, 1 }, { 0, 1, 1, 1, 1, 1, 1, 1, 0, 1 } };
     private BaseTexture[] txFlush = new BaseTexture[ 22 ];
-    private BaseTexture txLC;
     private BaseTexture txLine;
     //-----------------
     #endregion

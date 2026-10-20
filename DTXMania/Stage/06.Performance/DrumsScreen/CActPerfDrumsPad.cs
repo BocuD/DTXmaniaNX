@@ -153,7 +153,6 @@ internal class CActPerfDrumsPad : CActivity
     {
         if (bActivated)
         {
-            int num1 = CDTXMania.stagePerfDrumsScreen.ctBPMBar.nCurrentValue;
 
 
             if (bJustStartedUpdate)
@@ -280,14 +279,7 @@ internal class CActPerfDrumsPad : CActivity
                 {
                     #region[レーン切り替え]                    
                     int x = st基本位置[index].x;
-                    int x2 = (st基本位置[index].x + (CDTXMania.ConfigIni.bReverse.Drums ? -10 : 32)) + stパッド状態[index].nX座標オフセットdot;
-                    int x3 = (st基本位置[index].x + (CDTXMania.ConfigIni.bReverse.Drums ? -10 : 79)) - stパッド状態[index].nX座標オフセットdotFLIP;
                     int y = (st基本位置[index].y + (CDTXMania.ConfigIni.bReverse.Drums ? 60 : 560)) + stパッド状態[index].nY座標オフセットdot2;
-                    int y2 = (st基本位置[index].y + (CDTXMania.ConfigIni.bReverse.Drums ? 0 : 482)) + stパッド状態[index].nY座標オフセットdot;
-                    int yh = (st基本位置[index].y + (CDTXMania.ConfigIni.bReverse.Drums ? 0 : 495)) + stパッド状態[index].nY座標オフセットdot;
-                    int yb = (st基本位置[index].y + (CDTXMania.ConfigIni.bReverse.Drums ? 0 : 570)) - stパッド状態[index].nY座標オフセットdot;
-                    int yl = (st基本位置[index].y + (CDTXMania.ConfigIni.bReverse.Drums ? 0 : 486)) + stパッド状態[index].nY座標オフセットdot;
-                    int yf = (st基本位置[index].y + (CDTXMania.ConfigIni.bReverse.Drums ? 0 : 470)) + stパッド状態[index].nY座標オフセットdot;
 
                     if ((index == 2) && ((CDTXMania.ConfigIni.eLaneType.Drums == EType.B) || CDTXMania.ConfigIni.eLaneType.Drums == EType.D))
                     {
@@ -338,31 +330,12 @@ internal class CActPerfDrumsPad : CActivity
                     {
                         txPad.tDraw2D(x, y, st基本位置[index].rc);
 
-                        //if (CDTXMania.ConfigIni.eNumOfLanes.Drums == EType.B && index == 8)
-                        //{
-                        //    // Do not draw RD if numOfLanes is 9
-                        //}
-                        //else
-                        //{
-
-                        //}
-
                     }
                     if (txPadFlush != null)
                     {
-                        //txPadFlush.nTransparency = (stパッド状態[index].n明るさ * 50) + 0;
                         Color4 color = Color4.White;
                         color.Alpha = ((stパッド状態[index].n明るさ * 50) + 0 / 255.0f);
                         txPadFlush.tDraw2D(x, y, st基本位置[index].rc, color);
-
-                        //if (CDTXMania.ConfigIni.eNumOfLanes.Drums == EType.B && index == 8)
-                        //{
-                        //    // Do not draw RD if numOfLanes is 9
-                        //}
-                        //else
-                        //{
-
-                        //}
 
                     }
 
@@ -376,7 +349,6 @@ internal class CActPerfDrumsPad : CActivity
                 //アニメーションは仮のもの。後から強化する予定。
                 if (stボーナス[i].b使用中)
                 {
-                    int numf = stボーナス[i].ct進行.nCurrentValue;
                     stボーナス[i].ct進行.tUpdate();
                     if (stボーナス[i].ct進行.bReachedEndValue)
                     {
@@ -386,11 +358,6 @@ internal class CActPerfDrumsPad : CActivity
                     if (txBonus != null && CDTXMania.ConfigIni.bShowScore)
                     {
                         txBonus.tDraw2D(160, 80);
-                        //if (this.stボーナス[i].ctUpdate.nCurrentValue >= 765)
-                        //{
-                        //    int n = this.stボーナス[i].ctUpdate.nCurrentValue - 765;
-                        //    this.txボーナス文字.nTransparency = 255 - n;
-                        //}
                     }
                 }
             }

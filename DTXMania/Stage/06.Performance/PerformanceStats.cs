@@ -72,6 +72,7 @@ public sealed class PerformanceStats
     [DataField] public float ScrollSpeedIconY => Math.Min(CDTXMania.ConfigIni.nScrollSpeed[Instrument], 20) * 48.0f;
 
     [DataField] public bool IsLaneDark => CDTXMania.ConfigIni.nLaneDisp[Instrument] is not (0 or 2);
+    [DataField] public bool IsLeft => CDTXMania.ConfigIni.bLeft[Instrument];
 
     [DataField] public bool ShowsJudgeLine => CDTXMania.ConfigIni.bJudgeLineDisp[Instrument];
     [DataField] public int JudgeLine => CDTXMania.ConfigIni.nJudgeLine[Instrument];

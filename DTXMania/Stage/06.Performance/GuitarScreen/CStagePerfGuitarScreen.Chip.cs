@@ -65,11 +65,6 @@ internal partial class CStagePerfGuitarScreen
 				pChip.bVisible = false;
 			}
 
-			if (txChip != null)
-			{
-				//txChip.nTransparency = pChip.nTransparency;
-			}
-
 			#endregion
 
 			#endregion
@@ -212,19 +207,11 @@ internal partial class CStagePerfGuitarScreen
 
 			#endregion
 
-			//if ( ( configIni.bAutoPlay.Guitar && !pChip.bHit ) && ( pChip.nDistanceFromBar.Guitar < 0 ) )
-			//if ( ( !pChip.bHit ) && ( pChip.nDistanceFromBar[ instIndex ] < 0 ) )
 
 			// #35411 2015.08.20 chnmr0 modified
 			// 従来のAUTO処理に加えてプレーヤーゴーストの再生機能を追加
-			bool autoPlayCondition = (!pChip.bHit) && (pChip.nDistanceFromBar[instIndex] < 0);
-			if (autoPlayCondition)
-			{
-				//cInvisibleChip.StartSemiInvisible( inst );
-			}
-
 			bool autoPick = (inst == EInstrumentPart.GUITAR) ? bIsAutoPlay.GtPick : bIsAutoPlay.BsPick;
-			autoPlayCondition = !pChip.bHit && autoPick;
+			bool autoPlayCondition = !pChip.bHit && autoPick;
 			long ghostLag = 0;
 			bool bUsePerfectGhost = true;
 
@@ -259,7 +246,6 @@ internal partial class CStagePerfGuitarScreen
 
 			if (autoPlayCondition)
 			{
-				int lo = (inst == EInstrumentPart.GUITAR) ? 0 : 5; // lane offset
 				bool autoR = (inst == EInstrumentPart.GUITAR) ? bIsAutoPlay.GtR : bIsAutoPlay.BsR;
 				bool autoG = (inst == EInstrumentPart.GUITAR) ? bIsAutoPlay.GtG : bIsAutoPlay.BsG;
 				bool autoB = (inst == EInstrumentPart.GUITAR) ? bIsAutoPlay.GtB : bIsAutoPlay.BsB;
@@ -345,8 +331,6 @@ internal partial class CStagePerfGuitarScreen
 						tProcessChipHit(pChip.nPlaybackTimeMs + ghostLag, pChip, false);
 					}
 
-					//int chWailingChip = ( inst == EInstrumentPart.GUITAR ) ? (int)EChannel.Guitar_Wailing : (int)EChannel.Bass_Wailing;
-					//CChip item = this.r指定時刻に一番近い未ヒットChip( pChip.nPlaybackTimeMs + ghostLag, chWailingChip, this.nInputAdjustTimeMs[ instIndex ], 140 );
 
 					//New method for Guitar and Bass
 					EChannel search = ((inst == EInstrumentPart.GUITAR)

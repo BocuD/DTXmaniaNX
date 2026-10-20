@@ -294,7 +294,6 @@ internal abstract class CActPerfCommonJudgementString : CActivity
 
 			judgements[lane] = judgement.AddChild(new JudgementString());
 			judgements[lane].dontSerialize = true;
-			//x = laneSize.x + (laneSize.w / 2.0f);
 			judgements[lane].position = new Vector3(x, y, 0);
 		}
 	}

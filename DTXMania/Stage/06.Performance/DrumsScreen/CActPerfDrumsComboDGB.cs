@@ -73,7 +73,6 @@ internal class CActPerfDrumsComboDGB : CActPerfCommonCombo
 
         n火薬カウント = (nCombo値 / 100);
 
-        //if (nCombo値 % 100 == 0)
         if (( nCombo値 > (nCombo値 / 100) + 100) && b爆発した[ n火薬カウント ] == false )
         {
             Start( nCombo値 );
@@ -99,8 +98,7 @@ internal class CActPerfDrumsComboDGB : CActPerfCommonCombo
                     if ( txComboBom != null && CDTXMania.ConfigIni.bドラムコンボ文字の表示 != false )
                     {
                         txComboBom.tDraw2D(x, y, new RectangleF(0, (340 * num1), 360, 340));
-                        //todo: vcscaleratio
-                        //txComboBom.vcScaleRatio = new SharpDX.Vector3(1.5f, 1.5f, 1f);
+                        //todo: draw at 1.5x scale
                     }
                 }
             }

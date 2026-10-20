@@ -35,16 +35,11 @@ internal class CActPerfGuitarLaneFlushGB : CActPerfCommonLaneFlushGB
 					EInstrumentPart e楽器パート = ( i < 5 ) ? EInstrumentPart.GUITAR : EInstrumentPart.BASS;
 					BaseTexture texture = CDTXMania.ConfigIni.bReverse[ (int) e楽器パート ] ? txFlush[ ( i % 5 ) + 5 ] : txFlush[ i % 5 ];
 					int num2 = CDTXMania.ConfigIni.bLeft[ (int) e楽器パート ] ? 1 : 0;
-					//int x = ( ( ( i < 5 ) ? 88 : 480 ) + this.nRGBのX座標[ num2, i ] ) + ( ( 37 * base.ctUpdate[ i ].nCurrentValue ) / 100 );
 					int x = (((i < 5) ? 88 : 958) + nRGBのX座標[num2, i] + ( ( 19 * ctUpdate[ i ].nCurrentValue ) / 70 ));
-					int x2 = ((i < 5) ? 88 : 954);
 					int y = CDTXMania.ConfigIni.bReverse[ (int) e楽器パート ] ? 414 : 100;
-					int y2 = CDTXMania.ConfigIni.bReverse[(int)e楽器パート] ? 414 : 104;
 					if ( texture != null && CDTXMania.ConfigIni.bLaneFlush[ (int) e楽器パート ] )
 					{
 						texture.tDraw2D(x, y, new RectangleF( 37, 0, ( 37 * ( 70 - ctUpdate[ i ].nCurrentValue)) / 70, 256 ) );
-						//if ( j == 4 )
-						//this.txレーンフラッシュ.tDraw2D( CDTXMania.app.Device, x2 + ( ( i < 5 ? i : i - 5 ) * 39 ), y2, new RectangleF( i * 39, 0, 41, 566 ) );
 					}
 					ctUpdate[ i ].tUpdate();
 					if ( ctUpdate[ i ].bReachedEndValue )
