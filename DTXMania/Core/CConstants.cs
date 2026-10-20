@@ -1,4 +1,5 @@
 ﻿using System.Runtime.InteropServices;
+using DTXMania.UI.DynamicElements;
 
 namespace DTXMania.Core;
 
@@ -328,9 +329,9 @@ public enum ETargetGhostData
 [StructLayout( LayoutKind.Sequential )]
 public struct STDGBVALUE<T>			// indexはE楽器パートと一致させること
 {
-	public T Drums;
-	public T Guitar;
-	public T Bass;
+	[DataField] public T Drums;
+	[DataField] public T Guitar;
+	[DataField] public T Bass;
 	public T Unknown;
 	public T this[ int index ]
 	{

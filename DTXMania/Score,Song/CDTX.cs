@@ -7,6 +7,7 @@ using System.Globalization;
 using DTXMania.Core;
 using DTXMania.Core.Audio;
 using DTXMania.UI.Drawable;
+using DTXMania.UI.DynamicElements;
 using FDK;
 
 namespace DTXMania;
@@ -1030,9 +1031,9 @@ public class CDTX : CActivity
 
     public struct STHASCHIPS
     {
-        public bool Drums;
-        public bool Guitar;
-        public bool Bass;
+        [DataField] public bool Drums;
+        [DataField] public bool Guitar;
+        [DataField] public bool Bass;
 
         public bool HHOpen;
         public bool LP;
