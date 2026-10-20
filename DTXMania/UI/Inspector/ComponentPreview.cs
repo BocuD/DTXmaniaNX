@@ -128,6 +128,14 @@ public sealed class ComponentPreview : IUIPreview
             {
                 scope.Declare(binding.source, binding.SourceKindFor(element));
             }
+
+            foreach (BindingClause clause in binding.clauses ?? [])
+            {
+                if (!string.IsNullOrEmpty(clause.source))
+                {
+                    scope.Declare(clause.source, clause.SourceKindFor(element));
+                }
+            }
         }
 
         if (element is UIImage { imageSource: ImageSource.Dynamic } image

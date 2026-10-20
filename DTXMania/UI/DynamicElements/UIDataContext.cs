@@ -168,6 +168,28 @@ public sealed class UIDataContext : IUIDataContext
         return false;
     }
 
+    public Type? KeyType(string key)
+    {
+        foreach ((string name, Type type) in objectTypes)
+        {
+            if (key.Length <= name.Length || !key.StartsWith(name, StringComparison.Ordinal) || key[name.Length] != '.')
+            {
+                continue;
+            }
+
+            string path = key[(name.Length + 1)..];
+            foreach (DataFieldPath field in DataFieldReflector.EnumeratePaths(type))
+            {
+                if (field.Path == path)
+                {
+                    return Nullable.GetUnderlyingType(field.ValueType) ?? field.ValueType;
+                }
+            }
+        }
+
+        return null;
+    }
+
     public IEnumerable<string> AvailableKeys(DataBindingKind kind)
     {
         if (kind != DataBindingKind.Texture)
@@ -225,16 +247,11 @@ public sealed class UIDataContext : IUIDataContext
             return [DataBindingKind.Bool, DataBindingKind.String];
         }
 
-        if (IsNumeric(actual))
+        if (DataFieldReflector.ReadsAsNumber(actual))
         {
             return [DataBindingKind.Number, DataBindingKind.String];
         }
 
         return [DataBindingKind.String];
     }
-
-    private static bool IsNumeric(Type type) =>
-        type == typeof(byte) || type == typeof(sbyte) || type == typeof(short) || type == typeof(ushort) ||
-        type == typeof(int) || type == typeof(uint) || type == typeof(long) || type == typeof(ulong) ||
-        type == typeof(float) || type == typeof(double) || type == typeof(decimal);
 }

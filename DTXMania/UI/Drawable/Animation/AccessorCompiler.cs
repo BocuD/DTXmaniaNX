@@ -55,6 +55,10 @@ public static class AccessorCompiler
 
     //walks a member chain from rootType, e.g. position.X
     public static Func<object, object?> BuildChainGetter(Type rootType, IReadOnlyList<MemberInfo> chain)
+        => BuildChainGetter<object?>(rootType, chain);
+
+    //returns TValue without boxing, also when the chain goes through a struct
+    public static Func<object, TValue> BuildChainGetter<TValue>(Type rootType, IReadOnlyList<MemberInfo> chain)
     {
         ParameterExpression rootObj = Expression.Parameter(typeof(object), "root");
         Expression current = Expression.Convert(rootObj, rootType);
@@ -63,8 +67,8 @@ public static class AccessorCompiler
             current = Expression.MakeMemberAccess(current, member);
         }
 
-        Expression boxed = Expression.Convert(current, typeof(object));
-        return Expression.Lambda<Func<object, object?>>(boxed, rootObj).Compile();
+        Expression converted = current.Type == typeof(TValue) ? current : Expression.Convert(current, typeof(TValue));
+        return Expression.Lambda<Func<object, TValue>>(converted, rootObj).Compile();
     }
 
     public static Action<object, object?> BuildChainSetter(Type rootType, IReadOnlyList<MemberInfo> chain)

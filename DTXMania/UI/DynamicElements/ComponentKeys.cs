@@ -16,6 +16,14 @@ public static class ComponentKeys
             {
                 keys.TryAdd(binding.source, binding.SourceKindFor(element));
             }
+
+            foreach (BindingClause clause in binding.clauses ?? [])
+            {
+                if (!string.IsNullOrEmpty(clause.source))
+                {
+                    keys.TryAdd(clause.source, clause.SourceKindFor(element));
+                }
+            }
         }
 
         if (element is UIImage { imageSource: ImageSource.Dynamic } image && !string.IsNullOrWhiteSpace(image.dynamicSource))
@@ -48,6 +56,14 @@ public static class ComponentKeys
             if (!string.IsNullOrEmpty(binding.source) && element.TryResolveContextString(binding.source, out string value))
             {
                 values[prefix + binding.source] = value;
+            }
+
+            foreach (BindingClause clause in binding.clauses ?? [])
+            {
+                if (!string.IsNullOrEmpty(clause.source) && element.TryResolveContextString(clause.source, out string clauseValue))
+                {
+                    values[prefix + clause.source] = clauseValue;
+                }
             }
         }
 
