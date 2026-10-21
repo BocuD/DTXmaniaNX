@@ -46,7 +46,13 @@ internal class StageManager
     
     public void LoadInitialStage()
     {
-        rCurrentStage = CDTXMania.bCompactMode ? stageSongLoading : stageStartup;
+        if (CDTXMania.bCompactMode)
+        {
+            CDTXMania.SelectCompactModeChart();
+        }
+
+        //startup moves on to song loading itself in compact mode
+        rCurrentStage = stageStartup;
         rCurrentStage.OnActivate();
     }
 

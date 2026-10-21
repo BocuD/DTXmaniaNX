@@ -163,6 +163,31 @@ internal partial class CDTXMania
 
     public static string executableDirectory { get; private set; }
     public static string strCompactModeFile { get; private set; }
+
+    //a chart path as the first argument plays only that chart, then exits
+    public static void ReadCommandLine()
+    {
+        string[] args = Environment.GetCommandLineArgs();
+        if (args.Length > 1 && !args[1].StartsWith('-') && File.Exists(args[1]))
+        {
+            bCompactMode = true;
+            strCompactModeFile = Path.GetFullPath(args[1]);
+        }
+    }
+
+    //stands in for what song select would have picked
+    public static void SelectCompactModeChart()
+    {
+        CChartData chart = new();
+        chart.FileInformation.AbsoluteFilePath = strCompactModeFile;
+        chart.FileInformation.AbsoluteFolderPath = Path.GetDirectoryName(strCompactModeFile) + Path.DirectorySeparatorChar;
+
+        SongNode song = new(null, SongNode.ENodeType.SONG) { title = Path.GetFileNameWithoutExtension(strCompactModeFile) };
+        song.charts[0] = chart;
+        song.chartCount = 1;
+
+        UpdateSelection(song, chart, 0);
+    }
     public static CTimer Timer { get; private set; }
     
     public static GameRenderTarget? GameRenderTarget =>
