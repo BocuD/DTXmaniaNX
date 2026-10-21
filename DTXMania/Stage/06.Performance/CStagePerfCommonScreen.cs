@@ -2948,17 +2948,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                     if (!pChip.bHit && (pChip.nDistanceFromBar.Drums < 0))
                     {
                         pChip.bHit = true;
-                        actPlayInfo.dbBPM = (pChip.nIntegerValue * (configIni.nPlaySpeed / 20.0)) + dTX.BASEBPM;
-
-                        if (CDTXMania.ConfigIni.bDrumsEnabled)
-                        {
-                            CDTXMania.stagePerfDrumsScreen.UnitTime = ((60.0 / (CDTXMania.stagePerfDrumsScreen.actPlayInfo.dbBPM) / 14.0));
-                            CDTXMania.stagePerfDrumsScreen.ctComboTimer = new CCounter(1, 16, (int)((60.0 / (CDTXMania.stagePerfDrumsScreen.actPlayInfo.dbBPM) / 16) * 1000.0), CDTXMania.Timer);
-                        }
-                        else if (CDTXMania.ConfigIni.bGuitarEnabled)
-                        {
-                            CDTXMania.stagePerfGuitarScreen.ctComboTimer = new CCounter(1, 16, (int)((60.0 / (CDTXMania.stagePerfGuitarScreen.actPlayInfo.dbBPM) / 16) * 1000.0), CDTXMania.Timer);
-                        }
+                        ChangeBPM(pChip.nIntegerValue);
                     }
                     break;
                 #endregion
@@ -3017,17 +3007,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                         pChip.bHit = true;
                         if (dTX.listBPM.ContainsKey(pChip.nIntegerValue_InternalNumber))
                         {
-                            actPlayInfo.dbBPM = (dTX.listBPM[pChip.nIntegerValue_InternalNumber].dbBPM値 * (configIni.nPlaySpeed / 20.0)) + dTX.BASEBPM;
-
-                            if (CDTXMania.ConfigIni.bDrumsEnabled)
-                            {
-                                CDTXMania.stagePerfDrumsScreen.UnitTime = ((60.0 / (CDTXMania.stagePerfDrumsScreen.actPlayInfo.dbBPM) / 14.0));
-                                CDTXMania.stagePerfDrumsScreen.ctComboTimer = new CCounter(1, 16, (int)((60.0 / (CDTXMania.stagePerfDrumsScreen.actPlayInfo.dbBPM) / 16) * 1000.0), CDTXMania.Timer);
-                            }
-                            else if (CDTXMania.ConfigIni.bGuitarEnabled)
-                            {
-                                CDTXMania.stagePerfGuitarScreen.ctComboTimer = new CCounter(1, 16, (int)((60.0 / (CDTXMania.stagePerfGuitarScreen.actPlayInfo.dbBPM) / 16) * 1000.0), CDTXMania.Timer);
-                            }
+                            ChangeBPM(dTX.listBPM[pChip.nIntegerValue_InternalNumber].dbBPM値);
                         }
                     }
                     break;
@@ -3579,6 +3559,63 @@ internal abstract class CStagePerfCommonScreen : CStage
         }
     }
 
+    //the combo timers tick 16 times a beat
+    private void ChangeBPM(double chartBPM)
+    {
+        actPlayInfo.dbBPM = (chartBPM * (CDTXMania.ConfigIni.nPlaySpeed / 20.0)) + CDTXMania.DTX.BASEBPM;
+
+        if (CDTXMania.ConfigIni.bDrumsEnabled)
+        {
+            CDTXMania.stagePerfDrumsScreen.UnitTime = ((60.0 / (CDTXMania.stagePerfDrumsScreen.actPlayInfo.dbBPM) / 14.0));
+            CDTXMania.stagePerfDrumsScreen.ctComboTimer = new CCounter(1, 16, (int)((60.0 / (CDTXMania.stagePerfDrumsScreen.actPlayInfo.dbBPM) / 16) * 1000.0), CDTXMania.Timer);
+        }
+        else if (CDTXMania.ConfigIni.bGuitarEnabled)
+        {
+            CDTXMania.stagePerfGuitarScreen.ctComboTimer = new CCounter(1, 16, (int)((60.0 / (CDTXMania.stagePerfGuitarScreen.actPlayInfo.dbBPM) / 16) * 1000.0), CDTXMania.Timer);
+        }
+    }
+
+    //mode: 1 hidden, 2 sudden, 3 both, 4 stealth. Both fades are 50 units long
+    protected static void ApplyHiddenSudden(CChip pChip, float distance, int mode, int suddenFrom, int hiddenFrom, double fadeDivisor)
+    {
+        if (mode is 2 or 3)
+        {
+            if (distance < suddenFrom)
+            {
+                pChip.bVisible = true;
+                pChip.nTransparency = 0xff;
+            }
+            else if (distance < suddenFrom + 50)
+            {
+                pChip.bVisible = true;
+                pChip.nTransparency = 0xff - (int)((distance - suddenFrom) * 255.0 / fadeDivisor);
+            }
+            else
+            {
+                pChip.bVisible = false;
+                pChip.nTransparency = 0;
+            }
+        }
+
+        if (mode is 1 or 3)
+        {
+            if (distance < hiddenFrom)
+            {
+                pChip.bVisible = false;
+            }
+            else if (distance < hiddenFrom + 50)
+            {
+                pChip.bVisible = true;
+                pChip.nTransparency = (int)((distance - hiddenFrom) * 255.0 / fadeDivisor);
+            }
+        }
+
+        if (mode == 4)
+        {
+            pChip.bVisible = false;
+        }
+    }
+
     //distances are worked out by UpdateChips earlier in the frame
     private static bool IsBeyondDrawRange(CChip pChip) =>
         Math.Min(Math.Min(pChip.nDistanceFromBar.Drums, pChip.nDistanceFromBar.Guitar), pChip.nDistanceFromBar.Bass) > 600;
@@ -3635,45 +3672,23 @@ internal abstract class CStagePerfCommonScreen : CStage
         }
         else if (pChip.eInstrumentPart == EInstrumentPart.GUITAR || pChip.eInstrumentPart == EInstrumentPart.BASS)
         {
-            //bChipHasButtonArray is array of 5, RGBYP
-            bool[] bChipHasButtonArray = EnumConverter.GetArrayBoolFromEChannel(pChip.nChannelNumber);
-            bool bGtBsW = pChip.bChipIsWailingNote;
-            bool bGtBsO = pChip.bChipIsOpenNote;
+            //lanes run R G B Y P Pick W, with bass seven lanes after guitar
+            int firstLane = pChip.eInstrumentPart == EInstrumentPart.GUITAR ? (int)ELane.GtR : (int)ELane.BsR;
+            bool[] buttons = EnumConverter.GetArrayBoolFromEChannel(pChip.nChannelNumber);
+            bool allButtonsAuto = true;
 
-            if (pChip.eInstrumentPart == EInstrumentPart.GUITAR)
+            bPChipIsAutoPlay = bIsAutoPlay[firstLane + 5];
+            for (int i = 0; i < 5; i++)
             {
-                bPChipIsAutoPlay = true;
-                if (!bIsAutoPlay[(int)ELane.GtPick]) bPChipIsAutoPlay = false;
-                else
+                if (!bIsAutoPlay[firstLane + i])
                 {
-                    if (bChipHasButtonArray[0] && !bIsAutoPlay[(int)ELane.GtR]) bPChipIsAutoPlay = false;
-                    else if (bChipHasButtonArray[1] && !bIsAutoPlay[(int)ELane.GtG]) bPChipIsAutoPlay = false;
-                    else if (bChipHasButtonArray[2] && !bIsAutoPlay[(int)ELane.GtB]) bPChipIsAutoPlay = false;
-                    else if (bChipHasButtonArray[3] && !bIsAutoPlay[(int)ELane.GtY]) bPChipIsAutoPlay = false;
-                    else if (bChipHasButtonArray[4] && !bIsAutoPlay[(int)ELane.GtP]) bPChipIsAutoPlay = false;
-                    else if (bGtBsW && !bIsAutoPlay[(int)ELane.GtW]) bPChipIsAutoPlay = false;
-                    else if (bGtBsO &&
-                             (!bIsAutoPlay[(int)ELane.GtR] || !bIsAutoPlay[(int)ELane.GtG] || !bIsAutoPlay[(int)ELane.GtB] || !bIsAutoPlay[(int)ELane.GtY] || !bIsAutoPlay[(int)ELane.GtP]))
-                        bPChipIsAutoPlay = false;
+                    allButtonsAuto = false;
+                    if (buttons[i]) bPChipIsAutoPlay = false;
                 }
             }
-            else if (pChip.eInstrumentPart == EInstrumentPart.BASS)
-            {
-                bPChipIsAutoPlay = true;
-                if (!bIsAutoPlay[(int)ELane.BsPick]) bPChipIsAutoPlay = false;
-                else
-                {
-                    if (bChipHasButtonArray[0] && !bIsAutoPlay[(int)ELane.BsR]) bPChipIsAutoPlay = false;
-                    else if (bChipHasButtonArray[1] && !bIsAutoPlay[(int)ELane.BsG]) bPChipIsAutoPlay = false;
-                    else if (bChipHasButtonArray[2] && !bIsAutoPlay[(int)ELane.BsB]) bPChipIsAutoPlay = false;                       
-                    else if (bChipHasButtonArray[3] && !bIsAutoPlay[(int)ELane.BsY]) bPChipIsAutoPlay = false;
-                    else if (bChipHasButtonArray[4] && !bIsAutoPlay[(int)ELane.BsP]) bPChipIsAutoPlay = false;
-                    else if (bGtBsW && !bIsAutoPlay[(int)ELane.BsW]) bPChipIsAutoPlay = false;
-                    else if (bGtBsO &&
-                             (!bIsAutoPlay[(int)ELane.BsR] || !bIsAutoPlay[(int)ELane.BsG] || !bIsAutoPlay[(int)ELane.BsB] || !bIsAutoPlay[(int)ELane.BsY] || !bIsAutoPlay[(int)ELane.BsP]))
-                        bPChipIsAutoPlay = false;
-                }
-            }
+
+            if (pChip.bChipIsWailingNote && !bIsAutoPlay[firstLane + 6]) bPChipIsAutoPlay = false;
+            if (pChip.bChipIsOpenNote && !allButtonsAuto) bPChipIsAutoPlay = false;
         }
              
         return bPChipIsAutoPlay;
@@ -3689,48 +3704,7 @@ internal abstract class CStagePerfCommonScreen : CStage
         int indexInst = (int)inst;
         if (configIni.bGuitarEnabled)
         {
-            #region [ Hidden/Sudden処理 ]
-            #region [ Sudden処理 ]
-            if ((CDTXMania.ConfigIni.nHidSud[indexInst] == 2) || (CDTXMania.ConfigIni.nHidSud[indexInst] == 3))
-            {
-                if (pChip.nDistanceFromBar[indexInst] < 250)
-                {
-                    pChip.bVisible = true;
-                    pChip.nTransparency = 0xff;
-                }
-                else if (pChip.nDistanceFromBar[indexInst] < 300)
-                {
-                    pChip.bVisible = true;
-                    pChip.nTransparency = 0xff - ((int)(((pChip.nDistanceFromBar[indexInst] - 250) * 255.0) / 75.0));
-                }
-                else
-                {
-                    pChip.bVisible = false;
-                    pChip.nTransparency = 0;
-                }
-            }
-            #endregion
-            #region [ Hidden処理 ]
-            if ((CDTXMania.ConfigIni.nHidSud[indexInst] == 1) || (CDTXMania.ConfigIni.nHidSud[indexInst] == 3))
-            {
-                if (pChip.nDistanceFromBar[indexInst] < 150)
-                {
-                    pChip.bVisible = false;
-                }
-                else if (pChip.nDistanceFromBar[indexInst] < 200)
-                {
-                    pChip.bVisible = true;
-                    pChip.nTransparency = (int)(((pChip.nDistanceFromBar[indexInst] - 150) * 255.0) / 75.0);
-                }
-            }
-            #endregion
-            #region [ ステルス処理 ]
-            if (CDTXMania.ConfigIni.nHidSud[indexInst] == 4)
-            {
-                pChip.bVisible = false;
-            }
-            #endregion
-            #endregion
+            ApplyHiddenSudden(pChip, pChip.nDistanceFromBar[indexInst], CDTXMania.ConfigIni.nHidSud[indexInst], 250, 150, 75.0);
             //
             // ここにチップ更新処理が入る(overrideで入れる)。といっても座標とチップサイズが違うだけで処理はまるまる同じ。
             //

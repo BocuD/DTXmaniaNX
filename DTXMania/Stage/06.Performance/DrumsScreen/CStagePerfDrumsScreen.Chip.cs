@@ -13,46 +13,7 @@ internal partial class CStagePerfDrumsScreen
     {
         if (configIni.bDrumsEnabled)
         {
-            #region [ Sudden処理 ]
-            if ((CDTXMania.ConfigIni.nHidSud.Drums == 2) || (CDTXMania.ConfigIni.nHidSud.Drums == 3))
-            {
-                if (pChip.nDistanceFromBar.Drums < 200)
-                {
-                    pChip.bVisible = true;
-                    pChip.nTransparency = 0xff;
-                }
-                else if (pChip.nDistanceFromBar.Drums < 250)
-                {
-                    pChip.bVisible = true;
-                    pChip.nTransparency = 0xff - ((int)((((double)(pChip.nDistanceFromBar.Drums - 200)) * 255.0) / 50.0));
-                }
-                else
-                {
-                    pChip.bVisible = false;
-                    pChip.nTransparency = 0;
-                }
-            }
-            #endregion
-            #region [ Hidden処理 ]
-            if ((CDTXMania.ConfigIni.nHidSud.Drums == 1) || (CDTXMania.ConfigIni.nHidSud.Drums == 3))
-            {
-                if (pChip.nDistanceFromBar.Drums < 100)
-                {
-                    pChip.bVisible = false;
-                }
-                else if (pChip.nDistanceFromBar.Drums < 150)
-                {
-                    pChip.bVisible = true;
-                    pChip.nTransparency = (int)((((double)(pChip.nDistanceFromBar.Drums - 100)) * 255.0) / 50.0);
-                }
-            }
-            #endregion
-            #region [ ステルス処理 ]
-            if (CDTXMania.ConfigIni.nHidSud.Drums == 4)
-            {
-                pChip.bVisible = false;
-            }
-            #endregion
+            ApplyHiddenSudden(pChip, pChip.nDistanceFromBar.Drums, CDTXMania.ConfigIni.nHidSud.Drums, 200, 100, 50.0);
 
             return;
         }	// end of "if configIni.bDrumsEnabled"
@@ -76,64 +37,7 @@ internal partial class CStagePerfDrumsScreen
             {
                 col.Alpha = pChip.nTransparency / 255.0f;
             }
-            int x = nチャンネルtoX座標[pChip.nChannelNumber - EChannel.HiHatClose];
-
-            if (configIni.eLaneType.Drums == EType.A)
-            {
-                if (configIni.eRDPosition == ERDPosition.RCRD)
-                {
-                    x = nチャンネルtoX座標[pChip.nChannelNumber - EChannel.HiHatClose];
-                }
-                else if (configIni.eRDPosition == ERDPosition.RDRC)
-                {
-                    x = nチャンネルtoX座標改[pChip.nChannelNumber - EChannel.HiHatClose];
-                }
-            }
-            else if (configIni.eLaneType.Drums == EType.B)
-            {
-                if (configIni.eRDPosition == ERDPosition.RCRD)
-                {
-                    x = nチャンネルtoX座標B[pChip.nChannelNumber - EChannel.HiHatClose];
-                }
-                else if (configIni.eRDPosition == ERDPosition.RDRC)
-                {
-                    x = nチャンネルtoX座標B改[pChip.nChannelNumber - EChannel.HiHatClose];
-                }
-            }
-            else if (configIni.eLaneType.Drums == EType.C)
-            {
-                if (configIni.eRDPosition == ERDPosition.RCRD)
-                {
-                    x = nチャンネルtoX座標C[pChip.nChannelNumber - EChannel.HiHatClose];
-                }
-                else if (configIni.eRDPosition == ERDPosition.RDRC)
-                {
-                    x = nチャンネルtoX座標C改[pChip.nChannelNumber - EChannel.HiHatClose];
-                }
-            }
-            else if (configIni.eLaneType.Drums == EType.D)
-            {
-                if (configIni.eRDPosition == ERDPosition.RCRD)
-                {
-                    x = nチャンネルtoX座標D[pChip.nChannelNumber - EChannel.HiHatClose];
-                }
-                else if (configIni.eRDPosition == ERDPosition.RDRC)
-                {
-                    x = nチャンネルtoX座標D改[pChip.nChannelNumber - EChannel.HiHatClose];
-                }
-            }
-
-            if (configIni.eRDPosition == ERDPosition.RDRC)
-            {
-                if (configIni.eLaneType.Drums == EType.A)
-                {
-                    x = nチャンネルtoX座標改[pChip.nChannelNumber - EChannel.HiHatClose];
-                }
-                else if (configIni.eLaneType.Drums == EType.B)
-                {
-                    x = nチャンネルtoX座標B改[pChip.nChannelNumber - EChannel.HiHatClose];
-                }
-            }
+            int x = ChipX(pChip.nChannelNumber);
 
             float y = configIni.bReverse.Drums ? (nJudgeLinePosY.Drums + pChip.nDistanceFromBar.Drums) : (nJudgeLinePosY.Drums - pChip.nDistanceFromBar.Drums);
             int num9 = ctChipPatternAnimation.Drums.nCurrentValue;
@@ -262,46 +166,7 @@ internal partial class CStagePerfDrumsScreen
     {
         if ( configIni.bDrumsEnabled )
         {
-            #region [ Sudden処理 ]
-            if ( ( CDTXMania.ConfigIni.nHidSud.Drums == 2 ) || ( CDTXMania.ConfigIni.nHidSud.Drums == 3 ) )
-            {
-                if ( pChip.nDistanceFromBar.Drums < 200 )
-                {
-                    pChip.bVisible = true;
-                    pChip.nTransparency = 0xff;
-                }
-                else if ( pChip.nDistanceFromBar.Drums < 250 )
-                {
-                    pChip.bVisible = true;
-                    pChip.nTransparency = 0xff - ( (int) ( ( ( (double) ( pChip.nDistanceFromBar.Drums - 200 ) ) * 255.0 ) / 50.0 ) );
-                }
-                else
-                {
-                    pChip.bVisible = false;
-                    pChip.nTransparency = 0;
-                }
-            }
-            #endregion
-            #region [ Hidden処理 ]
-            if ( ( CDTXMania.ConfigIni.nHidSud.Drums == 1 ) || ( CDTXMania.ConfigIni.nHidSud.Drums == 3 ) )
-            {
-                if ( pChip.nDistanceFromBar.Drums < 100 )
-                {
-                    pChip.bVisible = false;
-                }
-                else if ( pChip.nDistanceFromBar.Drums < 150 )
-                {
-                    pChip.bVisible = true;
-                    pChip.nTransparency = (int) ( ( ( (double) ( pChip.nDistanceFromBar.Drums - 100 ) ) * 255.0 ) / 50.0 );
-                }
-            }
-            #endregion
-            #region [ ステルス処理 ]
-            if ( CDTXMania.ConfigIni.nHidSud.Drums == 4 )
-            {
-                pChip.bVisible = false;
-            }
-            #endregion
+            ApplyHiddenSudden(pChip, pChip.nDistanceFromBar.Drums, CDTXMania.ConfigIni.nHidSud.Drums, 200, 100, 50.0);
 
             int indexSevenLanes = nチャンネル0Atoレーン07[ pChip.nChannelNumber - EChannel.HiHatClose];
             // #35411 chnmr0 modified
@@ -413,64 +278,7 @@ internal partial class CStagePerfDrumsScreen
             {
                 col.Alpha = pChip.nTransparency / 255.0f;
             }
-            int x = nチャンネルtoX座標[ pChip.nChannelNumber - EChannel.HiHatClose];
-
-            if ( configIni.eLaneType.Drums == EType.A )
-            {
-                if (configIni.eRDPosition == ERDPosition.RCRD)
-                {
-                    x = nチャンネルtoX座標[ pChip.nChannelNumber - EChannel.HiHatClose];
-                }
-                else if ( configIni.eRDPosition == ERDPosition.RDRC )
-                {
-                    x = nチャンネルtoX座標改[ pChip.nChannelNumber - EChannel.HiHatClose];
-                }
-            }
-            else if ( configIni.eLaneType.Drums == EType.B )
-            {
-                if ( configIni.eRDPosition == ERDPosition.RCRD )
-                {
-                    x = nチャンネルtoX座標B[ pChip.nChannelNumber - EChannel.HiHatClose];
-                }
-                else if ( configIni.eRDPosition == ERDPosition.RDRC )
-                {
-                    x = nチャンネルtoX座標B改[ pChip.nChannelNumber - EChannel.HiHatClose];
-                }
-            }
-            else if ( configIni.eLaneType.Drums == EType.C )
-            {
-                if ( configIni.eRDPosition == ERDPosition.RCRD )
-                {
-                    x = nチャンネルtoX座標C[ pChip.nChannelNumber - EChannel.HiHatClose];
-                }
-                else if ( configIni.eRDPosition == ERDPosition.RDRC )
-                {
-                    x = nチャンネルtoX座標C改[ pChip.nChannelNumber - EChannel.HiHatClose];
-                }
-            }
-            else if ( configIni.eLaneType.Drums == EType.D )
-            {
-                if ( configIni.eRDPosition == ERDPosition.RCRD )
-                {
-                    x = nチャンネルtoX座標D[ pChip.nChannelNumber - EChannel.HiHatClose];
-                }
-                else if ( configIni.eRDPosition == ERDPosition.RDRC )
-                {
-                    x = nチャンネルtoX座標D改[ pChip.nChannelNumber - EChannel.HiHatClose];
-                }
-            }
-
-            if ( configIni.eRDPosition == ERDPosition.RDRC )
-            {
-                if ( configIni.eLaneType.Drums == EType.A )
-                {
-                    x = nチャンネルtoX座標改[ pChip.nChannelNumber - EChannel.HiHatClose];
-                }
-                else if ( configIni.eLaneType.Drums == EType.B )
-                {
-                    x = nチャンネルtoX座標B改[ pChip.nChannelNumber - EChannel.HiHatClose];
-                }
-            }
+            int x = ChipX(pChip.nChannelNumber);
 
             float y = configIni.bReverse.Drums ? ( nJudgeLinePosY.Drums + pChip.nDistanceFromBar.Drums ) : ( nJudgeLinePosY.Drums - pChip.nDistanceFromBar.Drums );
             //todo: scale the chip by pChip.dbChipSizeRatio

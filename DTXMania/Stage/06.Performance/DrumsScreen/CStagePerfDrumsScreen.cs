@@ -436,6 +436,22 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
     private int[] nチャンネルtoX座標C改 = new int[] { 370, 470, 533, 596, 644, 786, 694, 373, 746, 298, 419, 419 };
     private int[] nチャンネルtoX座標D改 = new int[] { 370, 419, 582, 476, 645, 786, 694, 373, 746, 298, 527, 527 };
 
+    //the 改 tables are for RD RC
+    private int ChipX(EChannel channel)
+    {
+        bool rdrc = CDTXMania.ConfigIni.eRDPosition == ERDPosition.RDRC;
+        int[] table = CDTXMania.ConfigIni.eLaneType.Drums switch
+        {
+            EType.A => rdrc ? nチャンネルtoX座標改 : nチャンネルtoX座標,
+            EType.B => rdrc ? nチャンネルtoX座標B改 : nチャンネルtoX座標B,
+            EType.C => rdrc ? nチャンネルtoX座標C改 : nチャンネルtoX座標C,
+            EType.D => rdrc ? nチャンネルtoX座標D改 : nチャンネルtoX座標D,
+            _ => nチャンネルtoX座標
+        };
+
+        return table[channel - EChannel.HiHatClose];
+    }
+
     private int[] nボーナスチャンネルtoX座標 = new int[] { 0, 298, 370, 419, 470, 527, 582, 645, 694, 748, 815, 0 };
     private int[] nボーナスチャンネルtoX座標B = new int[] { 0, 298, 370, 476, 419, 596, 533, 645, 694, 748, 815, 476 };
     private int[] nボーナスチャンネルtoX座標C = new int[] { 0, 298, 370, 419, 470, 596, 533, 645, 694, 748, 815, 419 };

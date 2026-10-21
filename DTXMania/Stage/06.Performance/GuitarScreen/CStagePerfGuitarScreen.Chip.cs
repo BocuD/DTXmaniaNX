@@ -16,58 +16,7 @@ internal partial class CStagePerfGuitarScreen
 		int instIndex = (int)inst;
 		if (configIni.bGuitarEnabled)
 		{
-			#region [ Hidden/Sudden処理 ]
-
-			#region [ Sudden処理 ]
-
-			if ((CDTXMania.ConfigIni.nHidSud[instIndex] == 2) || (CDTXMania.ConfigIni.nHidSud[instIndex] == 3))
-			{
-				if (pChip.nDistanceFromBar[instIndex] < 250)
-				{
-					pChip.bVisible = true;
-					pChip.nTransparency = 0xff;
-				}
-				else if (pChip.nDistanceFromBar[instIndex] < 300)
-				{
-					pChip.bVisible = true;
-					pChip.nTransparency = 0xff - ((int)(((pChip.nDistanceFromBar[instIndex] - 250) * 255.0) / 75.0));
-				}
-				else
-				{
-					pChip.bVisible = false;
-					pChip.nTransparency = 0;
-				}
-			}
-
-			#endregion
-
-			#region [ Hidden処理 ]
-
-			if ((CDTXMania.ConfigIni.nHidSud[instIndex] == 1) || (CDTXMania.ConfigIni.nHidSud[instIndex] == 3))
-			{
-				if (pChip.nDistanceFromBar[instIndex] < 150)
-				{
-					pChip.bVisible = false;
-				}
-				else if (pChip.nDistanceFromBar[instIndex] < 200)
-				{
-					pChip.bVisible = true;
-					pChip.nTransparency = (int)(((pChip.nDistanceFromBar[instIndex] - 150) * 255.0) / 75.0);
-				}
-			}
-
-			#endregion
-
-			#region [ ステルス処理 ]
-
-			if (CDTXMania.ConfigIni.nHidSud[instIndex] == 4)
-			{
-				pChip.bVisible = false;
-			}
-
-			#endregion
-
-			#endregion
+			ApplyHiddenSudden(pChip, pChip.nDistanceFromBar[instIndex], CDTXMania.ConfigIni.nHidSud[instIndex], 250, 150, 75.0);
 
 			DetermineUsedChips(pChip, 
 				out bool bChipHasR, 
