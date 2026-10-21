@@ -37,13 +37,20 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
     {
         base.OnLayoutReady();
         
-        LegacyDrawable lanes = ui.AddChild(new LegacyDrawable(DrawDrumsLanes));
-        lanes.name = "drumsLanes";
-        lanes.renderOrder = LegacyLanesLayer;
+        AddLegacyPart("VideoFillIn", LegacyLanesLayer, DrawVideoFillIn);
+        AddLegacyPart("LaneFlush", LegacyLanesLayer, () => Probed(probeLanes, tUpdateAndDraw_LaneFlushD));
+        AddLegacyPart("Chips", LegacyLanesLayer, () => Probed(probeChips, () => DrawChips(EInstrumentPart.DRUMS)));
+        AddLegacyPart("ProgressBar", LegacyLanesLayer, () => Probed(probeLanes, () => actProgressBar.OnUpdateAndDraw()));
+        AddLegacyPart("LaneCover", LegacyLanesLayer, () => Probed(probeLanes, DrawLaneCover));
 
-        LegacyDrawable overlay = ui.AddChild(new LegacyDrawable(DrawDrumsOverlay));
-        overlay.name = "drumsOverlay";
-        overlay.renderOrder = LegacyOverlayLayer;
+        //drawn over the judge lines and shutters
+        AddLegacyPart("Pad", LegacyOverlayLayer, () => Probed(probeLanes, tUpdateAndDraw_DrumPad));
+        AddLegacyPart("Fade", LegacyOverlayLayer, () => Probed(probeFade, () => bIsFinishedFadeout = tUpdateAndDraw_FadeIn_Out()));
+        AddLegacyPart("Score", LegacyOverlayLayer, () => Probed(probeScore, DrawScore));
+        AddLegacyPart("Combo", LegacyOverlayLayer, () => Probed(probeCombo, tUpdateAndDraw_Combo));
+        AddLegacyPart("Graph", LegacyOverlayLayer, () => Probed(probeGraph, tUpdateAndDraw_Graph));
+        AddLegacyPart("PerformanceInformation", LegacyOverlayLayer, () => Probed(probeOverlay, tUpdateAndDraw_PerformanceInformation));
+        AddLegacyPart("JudgementStrings", LegacyOverlayLayer, () => Probed(probeJudgement, DrawJudgementStrings));
 
         UIDrawable chipFire = ui.AddChild<UIDrawable>(useNewDrumsFire ? new ActPerfNewFire(0) : new ClassicDrumsChipFire());
         chipFire.name = "drumChipsFire";
@@ -158,7 +165,6 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
         {
             if (!CDTXMania.Skin.soundStageClear.bIsPlaying && !CDTXMania.Skin.soundSTAGEFAILED音.bIsPlaying)
             {
-                Debug.WriteLine("Total OnUpdateAndDraw=" + sw.ElapsedMilliseconds + "ms");
                 nNumberOfMistakes = nHitCount_ExclAuto.Drums.Miss + nHitCount_ExclAuto.Drums.Poor;
                 switch (nNumberOfMistakes)
                 {
@@ -200,22 +206,37 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
         return 0;
     }
 
-    private static readonly int probeLegacyDraw = AllocationProbe.Register("Legacy draw (all)");
-    private static readonly int probeVideo = AllocationProbe.Register("video", 1);
-    private static readonly int probeLanes = AllocationProbe.Register("lanes", 1);
-    private static readonly int probeChips = AllocationProbe.Register("chips", 1);
-    private static readonly int probeScore = AllocationProbe.Register("score", 1);
-    private static readonly int probeCombo = AllocationProbe.Register("combo", 1);
-    private static readonly int probeGraph = AllocationProbe.Register("graph", 1);
-    private static readonly int probeJudgement = AllocationProbe.Register("judgement string", 1);
-    private static readonly int probeOverlay = AllocationProbe.Register("debug overlay", 1);
-    private static readonly int probeEffects = AllocationProbe.Register("chip fire", 1);
-    private static readonly int probeFade = AllocationProbe.Register("fade", 1);
-    private static readonly int probeKeyInput = AllocationProbe.Register("key input", 1);
+    private static readonly int probeVideo = AllocationProbe.Register("video");
+    private static readonly int probeLanes = AllocationProbe.Register("lanes");
+    private static readonly int probeChips = AllocationProbe.Register("chips");
+    private static readonly int probeScore = AllocationProbe.Register("score");
+    private static readonly int probeCombo = AllocationProbe.Register("combo");
+    private static readonly int probeGraph = AllocationProbe.Register("graph");
+    private static readonly int probeJudgement = AllocationProbe.Register("judgement string");
+    private static readonly int probeOverlay = AllocationProbe.Register("debug overlay");
+    private static readonly int probeFade = AllocationProbe.Register("fade");
+    private static readonly int probeKeyInput = AllocationProbe.Register("key input");
+
+    private static void Probed(int probe, Action draw)
+    {
+        AllocationProbe.Begin(probe);
+        draw();
+        AllocationProbe.End(probe);
+    }
+
+    private void DrawJudgementStrings()
+    {
+        tUpdateAndDraw_JudgementString1_ForNormalPosition();
+        tUpdateAndDraw_JudgementString2_ForPositionOnJudgementLine();
+    }
 
     public override void OnUpdate()
     {
         if (!bActivated) return;
+
+        bIsFinishedFadeout = false;
+        bExc = false;
+        bFullCom = false;
 
         if (CDTXMania.ConfigIni.bSTAGEFAILEDEnabled && !bIsTrainingMode && actGauge.IsFailed(EInstrumentPart.DRUMS)
             && ePhaseID == EPhase.Common_DefaultState)
@@ -228,6 +249,9 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
         AllocationProbe.Begin(probeVideo);
         UpdateVideo();
         AllocationProbe.End(probeVideo);
+
+        UpdateScrollSpeed();
+        UpdateChipAnimation();
 
         AllocationProbe.Begin(probeChips);
         bIsFinishedPlaying = UpdateChips(EInstrumentPart.DRUMS);
@@ -278,81 +302,6 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
         AllocationProbe.Begin(probeKeyInput);
         tHandleKeyInput();
         AllocationProbe.End(probeKeyInput);
-    }
-
-    private void DrawDrumsLanes()
-    {
-        AllocationProbe.Begin(probeLegacyDraw);
-        sw.Start();
-
-        bIsFinishedFadeout = false;
-        bExc = false;
-        bFullCom = false;
-
-        DrawVideoFillIn();
-
-        AllocationProbe.Begin(probeLanes);
-        tUpdateAndDraw_LaneFlushD();
-        tUpdateAndDraw_ScrollSpeed();
-        AllocationProbe.End(probeLanes);
-
-        AllocationProbe.Begin(probeChips);
-        tUpdateAndDraw_ChipAnimation();
-        DrawChips(EInstrumentPart.DRUMS);
-        AllocationProbe.End(probeChips);
-
-        AllocationProbe.Begin(probeLanes);
-        actProgressBar.OnUpdateAndDraw();
-
-        DrawLaneCover();
-        AllocationProbe.End(probeLanes);
-
-        sw.Stop();
-        AllocationProbe.End(probeLegacyDraw);
-    }
-
-    //drawn over the judge lines and shutters
-    private void DrawDrumsOverlay()
-    {
-        AllocationProbe.Begin(probeLegacyDraw);
-        sw.Start();
-
-        AllocationProbe.Begin(probeLanes);
-        tUpdateAndDraw_DrumPad();
-        AllocationProbe.End(probeLanes);
-        
-        //handle end of performance
-        AllocationProbe.Begin(probeFade);
-        bIsFinishedFadeout = tUpdateAndDraw_FadeIn_Out();
-        AllocationProbe.End(probeFade);
-
-
-        AllocationProbe.Begin(probeScore);
-        if (CDTXMania.ConfigIni.bShowScore)
-            tUpdateAndDraw_Score();
-        AllocationProbe.End(probeScore);
-
-        AllocationProbe.Begin(probeCombo);
-        tUpdateAndDraw_Combo();
-        AllocationProbe.End(probeCombo);
-
-        AllocationProbe.Begin(probeGraph);
-        tUpdateAndDraw_Graph();
-        AllocationProbe.End(probeGraph);
-
-        AllocationProbe.Begin(probeOverlay);
-        tUpdateAndDraw_PerformanceInformation();
-        AllocationProbe.End(probeOverlay);
-
-        AllocationProbe.Begin(probeJudgement);
-        tUpdateAndDraw_JudgementString1_ForNormalPosition();
-        AllocationProbe.End(probeJudgement);
-        AllocationProbe.Begin(probeEffects);
-        tUpdateAndDraw_JudgementString2_ForPositionOnJudgementLine();
-        AllocationProbe.End(probeEffects);
-
-        sw.Stop();
-        AllocationProbe.End(probeLegacyDraw);
     }
 
     private void DrawLaneCover()

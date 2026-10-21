@@ -39,13 +39,21 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 	{
 		base.OnLayoutReady();
 		
-		LegacyDrawable lanes = ui.AddChild(new LegacyDrawable(DrawGuitarLanes));
-		lanes.name = "guitarLanes";
-		lanes.renderOrder = LegacyLanesLayer;
+		AddLegacyPart("VideoFillIn", LegacyLanesLayer, DrawVideoFillIn);
+		AddLegacyPart("LaneFlush", LegacyLanesLayer, tUpdateAndDraw_LaneFlushGB);
+		AddLegacyPart("Danger", LegacyLanesLayer, tUpdateAndDraw_DANGER);
+		AddLegacyPart("WailingBonus", LegacyLanesLayer, tUpdateAndDraw_WailingBonus);
+		AddLegacyPart("Chips", LegacyLanesLayer, () => DrawChips(EInstrumentPart.GUITAR));
 
-		LegacyDrawable overlay = ui.AddChild(new LegacyDrawable(DrawGuitarOverlay));
-		overlay.name = "guitarOverlay";
-		overlay.renderOrder = LegacyOverlayLayer;
+		//drawn over the judge lines and shutters
+		AddLegacyPart("JudgementStrings", LegacyOverlayLayer, tUpdateAndDraw_JudgementString);
+		AddLegacyPart("ProgressBar", LegacyOverlayLayer, () => actProgressBar.OnUpdateAndDraw());
+		AddLegacyPart("Score", LegacyOverlayLayer, DrawScore);
+		AddLegacyPart("Graph", LegacyOverlayLayer, tUpdateAndDraw_Graph);
+		AddLegacyPart("Combo", LegacyOverlayLayer, tUpdateAndDraw_Combo);
+		AddLegacyPart("PerformanceInformation", LegacyOverlayLayer, tUpdateAndDraw_PerformanceInformation);
+		AddLegacyPart("GuitarBonus", LegacyOverlayLayer, tUpdateAndDraw_GuitarBonus);
+		AddLegacyPart("Fade", LegacyOverlayLayer, () => bIsFinishedFadeout = tUpdateAndDraw_FadeIn_Out());
 
 		actJudgeString.InitUI(ui);
 		
@@ -201,7 +209,6 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		{
 			if (!CDTXMania.Skin.soundStageClear.bIsPlaying)
 			{
-				Debug.WriteLine("Total OnUpdateAndDraw=" + sw.ElapsedMilliseconds + "ms");
 
 				//Update Guitar score like in PerfDrumsScreen
 				int nNumberOfMistakes = nHitCount_ExclAuto.Guitar.Miss + nHitCount_ExclAuto.Guitar.Poor;
@@ -300,7 +307,10 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 			ePhaseID = EPhase.PERFORMANCE_STAGE_FAILED;
 		}
 
+		UpdateBackground();
 		UpdateVideo();
+		UpdateScrollSpeed();
+		UpdateChipAnimation();
 		bIsFinishedPlaying = UpdateChips(EInstrumentPart.GUITAR);
 		UpdateStageFailed();
 
@@ -339,47 +349,6 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		}
 
 		tHandleKeyInput();
-	}
-
-	private void DrawGuitarLanes()
-	{
-		sw.Start();
-
-		tUpdateAndDraw_Background();
-		DrawVideoFillIn();
-
-		tUpdateAndDraw_LaneFlushGB();
-
-		tUpdateAndDraw_DANGER();
-
-		tUpdateAndDraw_WailingBonus();
-		tUpdateAndDraw_ScrollSpeed();
-		tUpdateAndDraw_ChipAnimation();
-		DrawChips(EInstrumentPart.GUITAR);
-
-		sw.Stop();
-	}
-
-	//drawn over the judge lines and shutters
-	private void DrawGuitarOverlay()
-	{
-		sw.Start();
-
-		tUpdateAndDraw_JudgementString();
-		actProgressBar.OnUpdateAndDraw();
-		if (CDTXMania.ConfigIni.bShowScore)
-			tUpdateAndDraw_Score();
-
-		tUpdateAndDraw_Graph();
-		tUpdateAndDraw_Combo();
-		tUpdateAndDraw_PerformanceInformation();
-
-		tUpdateAndDraw_GuitarBonus();
-		
-		//handle end of performance
-		bIsFinishedFadeout = tUpdateAndDraw_FadeIn_Out();
-
-		sw.Stop();
 	}
 
 	// Other

@@ -975,7 +975,8 @@ internal abstract class CStagePerfCommonScreen : CStage
     protected List<CChip> listChip;
     protected Dictionary<int, CDTX.CWAV> listWAV;
 
-    protected Stopwatch sw;		// 2011.6.13 最適化検討用のストップウォッチ
+    //key repeat for moving the judge line: a 100ms delay, then a step every 10ms
+    protected Stopwatch sw;
     protected Stopwatch sw2;
 
     protected long LoopBeginMs;
@@ -3747,7 +3748,7 @@ internal abstract class CStagePerfCommonScreen : CStage
     protected virtual void DrawChip_Guitar_Wailing(CConfigIni configIni, ref CDTX dTX, ref CChip pChip) { }
     protected virtual void DrawChip_Bass_Wailing(CConfigIni configIni, ref CDTX dTX, ref CChip pChip) { }
     protected virtual void DrawChip_BarLine(CConfigIni configIni, ref CDTX dTX, ref CChip pChip) { }
-    protected void tUpdateAndDraw_ChipAnimation()
+    protected void UpdateChipAnimation()
     {
         for (int i = 0; i < 3; i++)			// 0=drums, 1=guitar, 2=bass
         {
@@ -3822,7 +3823,7 @@ internal abstract class CStagePerfCommonScreen : CStage
     
     protected UIImage background;
 
-    protected void tUpdateAndDraw_Background()
+    protected void UpdateBackground()
     {
         if (background != null)
         {
@@ -3851,7 +3852,21 @@ internal abstract class CStagePerfCommonScreen : CStage
         }
     }
 
-    protected void tUpdateAndDraw_ScrollSpeed()
+    protected void DrawScore()
+    {
+        if (CDTXMania.ConfigIni.bShowScore)
+        {
+            tUpdateAndDraw_Score();
+        }
+    }
+
+    protected void AddLegacyPart(string name, int layer, Action draw)
+    {
+        LegacyDrawable part = ui.AddChild(new LegacyDrawable(name, draw));
+        part.renderOrder = layer;
+    }
+
+    protected void UpdateScrollSpeed()
     {
         actScrollSpeed.OnUpdateAndDraw();
     }
