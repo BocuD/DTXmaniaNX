@@ -391,29 +391,24 @@ internal partial class CDTXMania
         }
     }
 
-    public void Update()
-    {
-    }
-
     //held so the per-frame output check does not allocate a delegate
     private static readonly Func<AudioDeviceOptions> audioSettings = () => AudioDeviceOptions.FromConfig(ConfigIni);
 
-    public void Draw()
+    //the frame that finishes startup still draws as a startup frame
+    private bool startupFrame = true;
+
+    public void Update()
     {
         PumpMainThreadActions();
 
-        UICanvas.Place(persistentUIGroup, UiCanvasFit.Fill);
-
-
-        if (!startupFinished)
+        startupFrame = !startupFinished;
+        if (startupFrame)
         {
             StartupTick();
-            
-            StageManager?.DrawStage();
-            persistentUIGroup.Draw(Matrix4x4.Identity);
+            StageManager?.UpdateStage();
             return;
         }
-        
+
         Timer.tUpdate();
         AudioMixer.Timer.tUpdate();
 
@@ -485,7 +480,7 @@ internal partial class CDTXMania
             Thread.Sleep(ConfigIni.nSleepNMsEveryFrame); ///?????
         }
         
-        //input is read once, here, by whoever holds focus; stages and elements act on it as they draw
+        //input is read once, here, by whoever holds focus
         UIFocus.Dispatch();
 
         //after the dispatch, so what it asks a stage for is not overwritten by the frame's own input
@@ -496,6 +491,22 @@ internal partial class CDTXMania
         //input nobody was listening for is dropped rather than delivered late
         TextInput.Clear();
         PointerInput.ClearEdges();
+
+        FrameProfiler.Begin(FrameSection.StageUpdate);
+        StageManager.UpdateStage();
+        FrameProfiler.End(FrameSection.StageUpdate);
+    }
+
+    public void Draw()
+    {
+        UICanvas.Place(persistentUIGroup, UiCanvasFit.Fill);
+
+        if (startupFrame)
+        {
+            StageManager?.DrawStage();
+            persistentUIGroup.Draw(Matrix4x4.Identity);
+            return;
+        }
 
         FrameProfiler.Begin(FrameSection.StageDraw);
 

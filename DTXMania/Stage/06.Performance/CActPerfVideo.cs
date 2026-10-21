@@ -87,10 +87,10 @@ internal class CActPerfVideo : CActivity
         base.OnDeactivate();
     }
 
-    public int tUpdateAndDraw(int x, int y)
+    public void Update()
     {
         if (!bActivated)
-            return 0;
+            return;
 
         long now = AudioMixer.Timer.nCurrentTime;
         Player.IsPlaying = !loadFailed && startTimeMs != -1 && now >= startTimeMs && Player.CurrentFrame.IsValid;
@@ -101,14 +101,11 @@ internal class CActPerfVideo : CActivity
             Player.SyncToSeconds((chartTime - startTimeMs) / 1000.0);
             Player.Update();
         }
-
-        DrawFillIn();
-        return 0;
     }
 
-    private void DrawFillIn()
+    public void DrawFillIn()
     {
-        if (!CDTXMania.ConfigIni.DisplayBonusEffects || CDTXMania.GetCurrentInstrument() != 0)
+        if (!bActivated || !CDTXMania.ConfigIni.DisplayBonusEffects || CDTXMania.GetCurrentInstrument() != 0)
             return;
 
         for (int i = 0; i < fillInCounters.Length; i++)

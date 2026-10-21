@@ -153,9 +153,25 @@ public abstract class CStage : CActivity, IUIInputHandler
 
 	public virtual void FirstUpdate()
 	{
-		
+
 	}
-	
+
+	//every frame before drawing, whether or not anything is drawn
+	public void Update()
+	{
+		if (bJustStartedUpdate)
+		{
+			FirstUpdate();
+			bJustStartedUpdate = false;
+		}
+
+		OnUpdate();
+	}
+
+	public virtual void OnUpdate()
+	{
+	}
+
 	public override int OnUpdateAndDraw()
 	{
 		if (bJustStartedUpdate)

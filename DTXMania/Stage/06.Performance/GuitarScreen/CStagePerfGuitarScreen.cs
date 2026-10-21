@@ -286,30 +286,54 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		return 0;
 	}
 
+	public override void OnUpdate()
+	{
+		if (!bActivated) return;
+
+		//either part failing fails the stage, as does a chart with nothing to play
+		if (CDTXMania.ConfigIni.bSTAGEFAILEDEnabled && !bIsTrainingMode && ePhaseID == EPhase.Common_DefaultState
+		    && (actGauge.IsFailed(EInstrumentPart.GUITAR) || actGauge.IsFailed(EInstrumentPart.BASS)
+		        || (!CDTXMania.DTX.bHasChips.Guitar && !CDTXMania.DTX.bHasChips.Bass)))
+		{
+			actStageFailed.Start();
+			CDTXMania.DTX.tStopPlayingAllChips();
+			ePhaseID = EPhase.PERFORMANCE_STAGE_FAILED;
+		}
+
+		UpdateVideo();
+		UpdateStageFailed();
+
+		if (LoopEndMs != -1 && AudioMixer.Timer.nCurrentTime > LoopEndMs)
+		{
+			Trace.TraceInformation("Reached end of loop");
+			tJumpInSong(LoopBeginMs == -1 ? 0 : LoopBeginMs);
+
+			//Reset hit counts and scores, so that the displayed score reflects the looped part only
+			for (int inst = 1; inst < 3; ++inst)
+			{
+				nHitCount_ExclAuto[inst].Perfect = 0;
+				nHitCount_ExclAuto[inst].Great = 0;
+				nHitCount_ExclAuto[inst].Good = 0;
+				nHitCount_ExclAuto[inst].Poor = 0;
+				nHitCount_ExclAuto[inst].Miss = 0;
+				actCombo.nCurrentCombo[inst] = 0;
+				actCombo.nCurrentCombo.HighestValue[inst] = 0;
+				actScore.nCurrentTrueScore[inst] = 0;
+
+				nTimingHitCount[inst].nLate = 0;
+				nTimingHitCount[inst].nEarly = 0;
+			}
+		}
+
+		tHandleKeyInput();
+	}
+
 	private void DrawGuitarLanes()
 	{
 		sw.Start();
 
-		//detect stage failed and switch to it
-		if (CDTXMania.ConfigIni.bSTAGEFAILEDEnabled && !bIsTrainingMode && (ePhaseID == EPhase.Common_DefaultState))
-		{
-			bool bFailedGuitar =
-				actGauge.IsFailed(EInstrumentPart
-					.GUITAR); // #23630 2011.11.12 yyagi: deleted AutoPlay condition: not to be failed at once
-			bool bFailedBass = actGauge.IsFailed(EInstrumentPart.BASS); // #23630
-			bool bFailedNoChips =
-				(!CDTXMania.DTX.bHasChips.Guitar &&
-				 !CDTXMania.DTX.bHasChips.Bass); // #25216 2011.5.21 yyagi add condition
-			if (bFailedGuitar || bFailedBass || bFailedNoChips) // #25216 2011.5.21 yyagi: changed codition: && -> ||
-			{
-				actStageFailed.Start();
-				CDTXMania.DTX.tStopPlayingAllChips();
-				ePhaseID = EPhase.PERFORMANCE_STAGE_FAILED;
-			}
-		}
-
 		tUpdateAndDraw_Background();
-		tUpdateAndDraw_AVI();
+		DrawVideoFillIn();
 
 		tUpdateAndDraw_LaneFlushGB();
 
@@ -340,7 +364,6 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		tUpdateAndDraw_PerformanceInformation();
 
 		tUpdateAndDraw_GuitarBonus();
-		tUpdateAndDraw_STAGEFAILED();
 		
 		//handle end of performance
 		bIsFinishedFadeout = tUpdateAndDraw_FadeIn_Out();
@@ -355,33 +378,7 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 			ePhaseID = EPhase.PERFORMANCE_STAGE_CLEAR;
 			tStartResultDelay();
 		}
-		
 
-		if (LoopEndMs != -1 && AudioMixer.Timer.nCurrentTime > LoopEndMs)
-		{
-			Trace.TraceInformation("Reached end of loop");
-			tJumpInSong(LoopBeginMs == -1 ? 0 : LoopBeginMs);
-
-			//Reset hit counts and scores, so that the displayed score reflects the looped part only
-			for (int inst = 1; inst < 3; ++inst)
-			{
-				nHitCount_ExclAuto[inst].Perfect = 0;
-				nHitCount_ExclAuto[inst].Great = 0;
-				nHitCount_ExclAuto[inst].Good = 0;
-				nHitCount_ExclAuto[inst].Poor = 0;
-				nHitCount_ExclAuto[inst].Miss = 0;
-				actCombo.nCurrentCombo[inst] = 0;
-				actCombo.nCurrentCombo.HighestValue[inst] = 0;
-				actScore.nCurrentTrueScore[inst] = 0;
-
-				//
-				nTimingHitCount[inst].nLate = 0;
-				nTimingHitCount[inst].nEarly = 0;
-			}
-		}
-		
-		// キー入力
-		tHandleKeyInput();
 		sw.Stop();
 	}
 

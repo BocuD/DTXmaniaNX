@@ -2682,15 +2682,26 @@ internal abstract class CStagePerfCommonScreen : CStage
         }
     }
 
-    protected void tUpdateAndDraw_AVI()
+    private bool ShowsVideo => ePhaseID is not (EPhase.PERFORMANCE_STAGE_FAILED or EPhase.PERFORMANCE_STAGE_FAILED_FADEOUT)
+                               && !CDTXMania.ConfigIni.bストイックモード;
+
+    protected void UpdateVideo()
     {
-        if (((ePhaseID != EPhase.PERFORMANCE_STAGE_FAILED) && (ePhaseID != EPhase.PERFORMANCE_STAGE_FAILED_FADEOUT)) && (!CDTXMania.ConfigIni.bストイックモード))
+        if (ShowsVideo)
         {
-            video.tUpdateAndDraw(0, 0);
+            video.Update();
+        }
+    }
+
+    protected void DrawVideoFillIn()
+    {
+        if (ShowsVideo)
+        {
+            video.DrawFillIn();
         }
     }
     protected abstract void tUpdateAndDraw_DANGER();
-    protected void tUpdateAndDraw_STAGEFAILED()
+    protected void UpdateStageFailed()
     {
         if (((ePhaseID == EPhase.PERFORMANCE_STAGE_FAILED) || (ePhaseID == EPhase.PERFORMANCE_STAGE_FAILED_FADEOUT)) && ((actStageFailed.OnUpdateAndDraw() != 0) && (ePhaseID != EPhase.PERFORMANCE_STAGE_FAILED_FADEOUT)))
         {

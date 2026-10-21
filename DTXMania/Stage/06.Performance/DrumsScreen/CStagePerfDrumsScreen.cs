@@ -213,6 +213,48 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
     private static readonly int probeFade = AllocationProbe.Register("fade", 1);
     private static readonly int probeKeyInput = AllocationProbe.Register("key input", 1);
 
+    public override void OnUpdate()
+    {
+        if (!bActivated) return;
+
+        if (CDTXMania.ConfigIni.bSTAGEFAILEDEnabled && !bIsTrainingMode && actGauge.IsFailed(EInstrumentPart.DRUMS)
+            && ePhaseID == EPhase.Common_DefaultState)
+        {
+            actStageFailed.Start();
+            CDTXMania.DTX.tStopPlayingAllChips();
+            ePhaseID = EPhase.PERFORMANCE_STAGE_FAILED;
+        }
+
+        AllocationProbe.Begin(probeVideo);
+        UpdateVideo();
+        AllocationProbe.End(probeVideo);
+
+        UpdateStageFailed();
+
+        if (LoopEndMs != -1 && AudioMixer.Timer.nCurrentTime > LoopEndMs)
+        {
+            Trace.TraceInformation("Reached end of loop");
+            tJumpInSong(LoopBeginMs == -1 ? 0 : LoopBeginMs);
+
+            //Reset hit counts and scores, so that the displayed score reflects the looped part only
+            nHitCount_ExclAuto.Drums.Perfect = 0;
+            nHitCount_ExclAuto.Drums.Great = 0;
+            nHitCount_ExclAuto.Drums.Good = 0;
+            nHitCount_ExclAuto.Drums.Poor = 0;
+            nHitCount_ExclAuto.Drums.Miss = 0;
+            actCombo.nCurrentCombo.Drums = 0;
+            actCombo.nCurrentCombo.HighestValue.Drums = 0;
+            actScore.nCurrentTrueScore.Drums = 0;
+
+            nTimingHitCount.Drums.nLate = 0;
+            nTimingHitCount.Drums.nEarly = 0;
+        }
+
+        AllocationProbe.Begin(probeKeyInput);
+        tHandleKeyInput();
+        AllocationProbe.End(probeKeyInput);
+    }
+
     private void DrawDrumsLanes()
     {
         AllocationProbe.Begin(probeLegacyDraw);
@@ -223,18 +265,7 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
         bExc = false;
         bFullCom = false;
 
-        //detect stage failed and switch to it
-        if ((CDTXMania.ConfigIni.bSTAGEFAILEDEnabled && !bIsTrainingMode && actGauge.IsFailed(EInstrumentPart.DRUMS)) &&
-            (ePhaseID == EPhase.Common_DefaultState))
-        {
-            actStageFailed.Start();
-            CDTXMania.DTX.tStopPlayingAllChips();
-            ePhaseID = EPhase.PERFORMANCE_STAGE_FAILED;
-        }
-
-        AllocationProbe.Begin(probeVideo);
-        tUpdateAndDraw_AVI();
-        AllocationProbe.End(probeVideo);
+        DrawVideoFillIn();
 
         AllocationProbe.Begin(probeLanes);
         tUpdateAndDraw_LaneFlushD();
@@ -317,33 +348,7 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
         AllocationProbe.End(probeJudgement);
         AllocationProbe.Begin(probeEffects);
         tUpdateAndDraw_JudgementString2_ForPositionOnJudgementLine();
-        tUpdateAndDraw_STAGEFAILED();
         AllocationProbe.End(probeEffects);
-
-        if (LoopEndMs != -1 && AudioMixer.Timer.nCurrentTime > LoopEndMs)
-        {
-            Trace.TraceInformation("Reached end of loop");
-            tJumpInSong(LoopBeginMs == -1 ? 0 : LoopBeginMs);
-
-            //Reset hit counts and scores, so that the displayed score reflects the looped part only
-            nHitCount_ExclAuto.Drums.Perfect = 0;
-            nHitCount_ExclAuto.Drums.Great = 0;
-            nHitCount_ExclAuto.Drums.Good = 0;
-            nHitCount_ExclAuto.Drums.Poor = 0;
-            nHitCount_ExclAuto.Drums.Miss = 0;
-            actCombo.nCurrentCombo.Drums = 0;
-            actCombo.nCurrentCombo.HighestValue.Drums = 0;
-            actScore.nCurrentTrueScore.Drums = 0;
-
-            //
-            nTimingHitCount.Drums.nLate = 0;
-            nTimingHitCount.Drums.nEarly = 0;
-        }
-
-        // キー入力
-        AllocationProbe.Begin(probeKeyInput);
-        tHandleKeyInput();
-        AllocationProbe.End(probeKeyInput);
 
         sw.Stop();
         AllocationProbe.End(probeLegacyDraw);

@@ -50,7 +50,7 @@ internal class StageManager
         rCurrentStage.OnActivate();
     }
 
-    public void DrawStage()
+    public void UpdateStage()
     {
         if (rCurrentStage == null) return;
 
@@ -69,6 +69,13 @@ internal class StageManager
                 UI.Skin.StageLayoutGenerator.GenerateForCurrentStage();
             }
         }
+
+        rCurrentStage.Update();
+    }
+
+    public void DrawStage()
+    {
+        if (rCurrentStage == null) return;
 
         int nUpdateAndDrawReturnValue = rCurrentStage.OnUpdateAndDraw();
 
