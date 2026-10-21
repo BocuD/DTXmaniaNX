@@ -37,7 +37,7 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
     {
         base.OnLayoutReady();
         
-        AddLegacyPart("VideoFillIn", LegacyLanesLayer, DrawVideoFillIn);
+        AddLegacyPart("FillInEffect", LegacyLanesLayer, DrawFillInEffect);
         AddLegacyPart("LaneFlush", LegacyLanesLayer, () => Probed(probeLanes, tUpdateAndDraw_LaneFlushD));
         AddLegacyPart("Chips", LegacyLanesLayer, () => Probed(probeChips, () => DrawChips(EInstrumentPart.DRUMS)));
         AddLegacyPart("ProgressBar", LegacyLanesLayer, () => Probed(probeLanes, () => actProgressBar.OnUpdateAndDraw()));

@@ -2694,11 +2694,11 @@ internal abstract class CStagePerfCommonScreen : CStage
         }
     }
 
-    protected void DrawVideoFillIn()
+    protected void DrawFillInEffect()
     {
         if (ShowsVideo)
         {
-            video.DrawFillIn();
+            video.DrawFillInEffect();
         }
     }
     protected abstract void tUpdateAndDraw_DANGER();

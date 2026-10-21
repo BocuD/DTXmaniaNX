@@ -66,7 +66,7 @@ internal class CActPerfVideo : CActivity
         Player.SeekToSeconds(0);
     }
 
-    public void StartFillIn()
+    public void StartFillInEffect()
     {
         fillInCounters[0] = new CCounter(0, 30, 30, CDTXMania.Timer);
         fillInCounters[1] = null;
@@ -103,7 +103,7 @@ internal class CActPerfVideo : CActivity
         }
     }
 
-    public void DrawFillIn()
+    public void DrawFillInEffect()
     {
         if (!bActivated || !CDTXMania.ConfigIni.DisplayBonusEffects || CDTXMania.GetCurrentInstrument() != 0)
             return;

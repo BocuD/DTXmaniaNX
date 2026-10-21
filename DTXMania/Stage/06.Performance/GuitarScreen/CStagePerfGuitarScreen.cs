@@ -39,7 +39,6 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 	{
 		base.OnLayoutReady();
 		
-		AddLegacyPart("VideoFillIn", LegacyLanesLayer, DrawVideoFillIn);
 		AddLegacyPart("LaneFlush", LegacyLanesLayer, tUpdateAndDraw_LaneFlushGB);
 		AddLegacyPart("Danger", LegacyLanesLayer, tUpdateAndDraw_DANGER);
 		AddLegacyPart("WailingBonus", LegacyLanesLayer, tUpdateAndDraw_WailingBonus);
