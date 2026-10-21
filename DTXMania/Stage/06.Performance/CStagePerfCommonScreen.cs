@@ -295,7 +295,6 @@ internal abstract class CStagePerfCommonScreen : CStage
 
     private UIText playspeedText;
     
-    public bool bIsFinishedFadeout;
     public bool bIsFinishedPlaying;
     
     public override void RegisterBindings()
@@ -306,6 +305,13 @@ internal abstract class CStagePerfCommonScreen : CStage
         ui.dataContext = context;
     }
 
+    protected const string PlayfieldGroup = "Playfield";
+    protected const string HudGroup = "HUD";
+    protected const string OverlaysGroup = "Overlays";
+
+    //a skin layout without the group gets the part at the root
+    protected UIGroup LayoutGroup(string name) => ui.GetChild<UIGroup>(name) ?? ui;
+
     internal const int LaneArtLayer = 1;
     internal const int LegacyLanesLayer = 2;
     internal const int LaneOverlayLayer = 3;
@@ -315,13 +321,6 @@ internal abstract class CStagePerfCommonScreen : CStage
 
     public override void BuildDefaultLayout()
     {
-        InfoBox info = ui.AddChild(new InfoBox());
-        info.position = new Vector3(1277, 3, 0);
-        info.renderOrder = LaneArtLayer;
-
-        StageFailedCover failed = ui.AddChild(new StageFailedCover());
-        failed.renderOrder = 1000;
-
         UIGroup videos = ui.AddChild(new UIGroup("Video"));
         videos.size = new Vector2(1280, 720);
         videos.bindings.Add(new UIBinding("isVisible", "Video.IsPlaying"));
@@ -353,21 +352,29 @@ internal abstract class CStagePerfCommonScreen : CStage
         UIGroup intoGuitarSlot = GraphShift(intoBassSlot, "Into Guitar Graph", "Guitar", -267);
         Window(intoGuitarSlot, "Window", 380, 50, "7_ClipPanelC.png", 30, 5, new Vector2(460, 258));
 
-        Add(new PerformanceLane(EInstrumentPart.GUITAR), "GuitarLane", 67, 42, LaneArtLayer);
-        Add(new PerformanceLane(EInstrumentPart.BASS), "BassLane", 937, 42, LaneArtLayer);
+        UIGroup playfield = Group(PlayfieldGroup, 1);
+        UIGroup hud = Group(HudGroup, 2);
+        UIGroup overlays = Group(OverlaysGroup, 3);
 
-        Add(new PerformanceLaneCaps(EInstrumentPart.GUITAR), "GuitarLaneCaps", 67, 42, LaneOverlayLayer);
-        Add(new PerformanceLaneCaps(EInstrumentPart.BASS), "BassLaneCaps", 937, 42, LaneOverlayLayer);
+        Add(playfield, new PerformanceLane(EInstrumentPart.GUITAR), "GuitarLane", 67, 42, LaneArtLayer);
+        Add(playfield, new PerformanceLane(EInstrumentPart.BASS), "BassLane", 937, 42, LaneArtLayer);
 
-        Add(new PerformanceShutters(EInstrumentPart.DRUMS), "DrumsShutters", 295, 0, LaneOverlayLayer);
-        Add(new PerformanceShutters(EInstrumentPart.GUITAR), "GuitarShutters", 80, 0, LaneOverlayLayer);
-        Add(new PerformanceShutters(EInstrumentPart.BASS), "BassShutters", 950, 0, LaneOverlayLayer);
+        Add(playfield, new PerformanceLaneCaps(EInstrumentPart.GUITAR), "GuitarLaneCaps", 67, 42, LaneOverlayLayer);
+        Add(playfield, new PerformanceLaneCaps(EInstrumentPart.BASS), "BassLaneCaps", 937, 42, LaneOverlayLayer);
 
-        Add(new PerformanceJudgeLine(EInstrumentPart.DRUMS), "DrumsJudgeLine", 295, 0, LaneOverlayLayer);
-        Add(new PerformanceJudgeLine(EInstrumentPart.GUITAR), "GuitarJudgeLine", 80, 0, LaneOverlayLayer);
-        Add(new PerformanceJudgeLine(EInstrumentPart.BASS), "BassJudgeLine", 950, 0, LaneOverlayLayer);
+        Add(playfield, new PerformanceShutters(EInstrumentPart.DRUMS), "DrumsShutters", 295, 0, LaneOverlayLayer);
+        Add(playfield, new PerformanceShutters(EInstrumentPart.GUITAR), "GuitarShutters", 80, 0, LaneOverlayLayer);
+        Add(playfield, new PerformanceShutters(EInstrumentPart.BASS), "BassShutters", 950, 0, LaneOverlayLayer);
 
-        UIGroup perspective = ui.AddChild(new UIGroup("Perspective"));
+        Add(playfield, new PerformanceJudgeLine(EInstrumentPart.DRUMS), "DrumsJudgeLine", 295, 0, LaneOverlayLayer);
+        Add(playfield, new PerformanceJudgeLine(EInstrumentPart.GUITAR), "GuitarJudgeLine", 80, 0, LaneOverlayLayer);
+        Add(playfield, new PerformanceJudgeLine(EInstrumentPart.BASS), "BassJudgeLine", 950, 0, LaneOverlayLayer);
+
+        InfoBox info = hud.AddChild(new InfoBox());
+        info.position = new Vector3(1277, 3, 0);
+        info.renderOrder = LaneArtLayer;
+
+        UIGroup perspective = hud.AddChild(new UIGroup("Perspective"));
         perspective.size = new Vector2(1280, 720);
         perspective.parentAnchor = new Vector2(0.5f, 0.5f);
         perspective.pivot = new Vector2(0.5f, 0.5f);
@@ -385,16 +392,19 @@ internal abstract class CStagePerfCommonScreen : CStage
         //2d version
         drumsStatus.position = new Vector3(14, 237, 0);
         
-        Add(new PerformanceStatusPanel(EInstrumentPart.GUITAR), "GuitarStatus", 373, 254, PanelLayer);
-        Add(new PerformanceStatusPanel(EInstrumentPart.BASS), "BassStatus", 665, 254, PanelLayer);
+        Add(hud, new PerformanceStatusPanel(EInstrumentPart.GUITAR), "GuitarStatus", 373, 254, PanelLayer);
+        Add(hud, new PerformanceStatusPanel(EInstrumentPart.BASS), "BassStatus", 665, 254, PanelLayer);
 
-        PerformanceElement drumsGauge = Add(new PerformanceGauge(EInstrumentPart.DRUMS), "DrumsGauge", 294, 626, PanelLayer);
+        PerformanceElement drumsGauge = Add(hud, new PerformanceGauge(EInstrumentPart.DRUMS), "DrumsGauge", 294, 626, PanelLayer);
         drumsGauge.bindings.Add(new UIBinding("position.Y", "Config.Reverse.Drums")
         {
             condition = BindingCondition.IsTrue, whenTrue = 28, whenFalse = 626
         });
-        Add(new PerformanceGauge(EInstrumentPart.GUITAR), "GuitarGauge", 80, 0, PanelLayer);
-        Add(new PerformanceGauge(EInstrumentPart.BASS), "BassGauge", 950, 0, PanelLayer);
+        Add(hud, new PerformanceGauge(EInstrumentPart.GUITAR), "GuitarGauge", 80, 0, PanelLayer);
+        Add(hud, new PerformanceGauge(EInstrumentPart.BASS), "BassGauge", 950, 0, PanelLayer);
+
+        StageFailedCover failed = overlays.AddChild(new StageFailedCover());
+        failed.renderOrder = 1000;
 
         static UIImage LinkedVideo(UIGroup parent, string name, float x, float y, Vector2? box = null)
         {
@@ -437,9 +447,17 @@ internal abstract class CStagePerfCommonScreen : CStage
             return group;
         }
 
-        PerformanceElement Add(PerformanceElement element, string name, float x, float y, int renderOrder)
+        UIGroup Group(string name, int renderOrder)
         {
-            ui.AddChild(element);
+            UIGroup group = ui.AddChild(new UIGroup(name));
+            group.size = new Vector2(1280, 720);
+            group.renderOrder = renderOrder;
+            return group;
+        }
+
+        static PerformanceElement Add(UIGroup parent, PerformanceElement element, string name, float x, float y, int renderOrder)
+        {
+            parent.AddChild(element);
             element.name = name;
             element.position = new Vector3(x, y, 0);
             element.renderOrder = renderOrder;
@@ -478,7 +496,7 @@ internal abstract class CStagePerfCommonScreen : CStage
         listChip = CDTXMania.DTX.listChip;
         listWAV = CDTXMania.DTX.listWAV;
 
-        eReturnValueAfterFadeOut = EPerfScreenReturnValue.Continue;
+        eReturnValue = EPerfScreenReturnValue.Continue;
         nCurrentTopChip = (listChip.Count > 0) ? 0 : -1;
         LLastPlayedHHWAVNumber = new List<int>(16);
         nLastPlayedHHChannelNumber = 0;
@@ -907,7 +925,7 @@ internal abstract class CStagePerfCommonScreen : CStage
 
     protected STDGBVALUE<CCounter> ctChipPatternAnimation;
     protected abstract void tJudgeLineMovingUpandDown();
-    protected EPerfScreenReturnValue eReturnValueAfterFadeOut;
+    protected EPerfScreenReturnValue eReturnValue;
     protected CCounter ctResultDelay;
     protected readonly EChannel[,] nBGAスコープチャンネルマップ = new[,] { { EChannel.BGALayer1_Swap, EChannel.BGALayer2_Swap, EChannel.BGALayer3_Swap, EChannel.BGALayer4_Swap, EChannel.BGALayer5_Swap, EChannel.BGALayer6_Swap, EChannel.BGALayer7_Swap, EChannel.BGALayer8_Swap }, { EChannel.BGALayer1, EChannel.BGALayer2, EChannel.BGALayer3, EChannel.BGALayer4, EChannel.BGALayer5, EChannel.BGALayer6, EChannel.BGALayer7, EChannel.BGALayer8 } };
     protected readonly int[] nチャンネル0Atoパッド08 = [1, 2, 3, 4, 5, 7, 6, 1, 8, 0, 9, 9];
@@ -2333,7 +2351,7 @@ internal abstract class CStagePerfCommonScreen : CStage
             }
         }
 
-        if (((ePhaseID == EPhase.PERFORMANCE_STAGE_FAILED)) || (ePhaseID == EPhase.PERFORMANCE_STAGE_FAILED_FADEOUT)) return;
+        if (((ePhaseID == EPhase.PERFORMANCE_STAGE_FAILED)) || (ePhaseID == EPhase.PERFORMANCE_STAGE_FAILED_END)) return;
         
         if (!bPAUSE)
         {
@@ -2378,7 +2396,7 @@ internal abstract class CStagePerfCommonScreen : CStage
         {	// escape (exit)
             GitaDoraTransition.Close();
             ePhaseID = EPhase.Common_FadeOut;
-            eReturnValueAfterFadeOut = EPerfScreenReturnValue.Interruption;
+            eReturnValue = EPerfScreenReturnValue.Interruption;
         }
         else if (CDTXMania.Pad.bPressed(EKeyConfigPart.SYSTEM, EKeyConfigPad.Restart))
         {
@@ -2396,7 +2414,7 @@ internal abstract class CStagePerfCommonScreen : CStage
             }
 
             ePhaseID = EPhase.PERFORMANCE_STAGE_RESTART;
-            eReturnValueAfterFadeOut = EPerfScreenReturnValue.Restart;
+            eReturnValue = EPerfScreenReturnValue.Restart;
         }
         else if (CDTXMania.Pad.bPressed(EKeyConfigPart.SYSTEM, EKeyConfigPad.SkipForward))
         {
@@ -2682,7 +2700,7 @@ internal abstract class CStagePerfCommonScreen : CStage
         }
     }
 
-    private bool ShowsVideo => ePhaseID is not (EPhase.PERFORMANCE_STAGE_FAILED or EPhase.PERFORMANCE_STAGE_FAILED_FADEOUT)
+    private bool ShowsVideo => ePhaseID is not (EPhase.PERFORMANCE_STAGE_FAILED or EPhase.PERFORMANCE_STAGE_FAILED_END)
                                && !CDTXMania.ConfigIni.bストイックモード;
 
     protected void UpdateVideo()
@@ -2700,19 +2718,18 @@ internal abstract class CStagePerfCommonScreen : CStage
             video.DrawFillInEffect();
         }
     }
-    protected abstract void tUpdateAndDraw_DANGER();
     protected void UpdateStageFailed()
     {
-        if (((ePhaseID == EPhase.PERFORMANCE_STAGE_FAILED) || (ePhaseID == EPhase.PERFORMANCE_STAGE_FAILED_FADEOUT)) && ((actStageFailed.OnUpdateAndDraw() != 0) && (ePhaseID != EPhase.PERFORMANCE_STAGE_FAILED_FADEOUT)))
+        if (((ePhaseID == EPhase.PERFORMANCE_STAGE_FAILED) || (ePhaseID == EPhase.PERFORMANCE_STAGE_FAILED_END)) && ((actStageFailed.OnUpdateAndDraw() != 0) && (ePhaseID != EPhase.PERFORMANCE_STAGE_FAILED_END)))
         {
-            eReturnValueAfterFadeOut = EPerfScreenReturnValue.StageFailure;
-            ePhaseID = EPhase.PERFORMANCE_STAGE_FAILED_FADEOUT;
+            eReturnValue = EPerfScreenReturnValue.StageFailure;
+            ePhaseID = EPhase.PERFORMANCE_STAGE_FAILED_END;
             CDTXMania.DTX.tStopPlayingAllChips();
         }
     }
     protected void tUpdateAndDraw_WailingBonus()
     {
-        if ((ePhaseID != EPhase.PERFORMANCE_STAGE_FAILED) && (ePhaseID != EPhase.PERFORMANCE_STAGE_FAILED_FADEOUT))
+        if ((ePhaseID != EPhase.PERFORMANCE_STAGE_FAILED) && (ePhaseID != EPhase.PERFORMANCE_STAGE_FAILED_END))
         {
             actWailingBonus.OnUpdateAndDraw();
         }
@@ -2720,7 +2737,7 @@ internal abstract class CStagePerfCommonScreen : CStage
 
     protected void tUpdateAndDraw_GuitarBonus()
     {
-        if ((ePhaseID != EPhase.PERFORMANCE_STAGE_FAILED) && (ePhaseID != EPhase.PERFORMANCE_STAGE_FAILED_FADEOUT))
+        if ((ePhaseID != EPhase.PERFORMANCE_STAGE_FAILED) && (ePhaseID != EPhase.PERFORMANCE_STAGE_FAILED_END))
         {
             actGuitarBonus.OnUpdateAndDraw();
         }
@@ -2752,7 +2769,7 @@ internal abstract class CStagePerfCommonScreen : CStage
     }
     protected bool UpdateChips(EInstrumentPart ePlayMode)
     {
-        if ((ePhaseID == EPhase.PERFORMANCE_STAGE_FAILED) || (ePhaseID == EPhase.PERFORMANCE_STAGE_FAILED_FADEOUT))
+        if ((ePhaseID == EPhase.PERFORMANCE_STAGE_FAILED) || (ePhaseID == EPhase.PERFORMANCE_STAGE_FAILED_END))
         {
             return true;
         }
@@ -3398,7 +3415,7 @@ internal abstract class CStagePerfCommonScreen : CStage
     }
     protected void DrawChips(EInstrumentPart ePlayMode)
     {
-        bool drawsChips = ePhaseID is not (EPhase.PERFORMANCE_STAGE_FAILED or EPhase.PERFORMANCE_STAGE_FAILED_FADEOUT)
+        bool drawsChips = ePhaseID is not (EPhase.PERFORMANCE_STAGE_FAILED or EPhase.PERFORMANCE_STAGE_FAILED_END)
                           && nCurrentTopChip != -1 && nCurrentTopChip < listChip.Count;
 
         CDTX dTX = CDTXMania.DTX;
@@ -3769,28 +3786,19 @@ internal abstract class CStagePerfCommonScreen : CStage
             ct登場用.tUpdate();
     }
 
-    protected bool tUpdateAndDraw_FadeIn_Out()
+    protected bool CanLeave => ePhaseID switch
     {
-        switch (ePhaseID)
+        EPhase.Common_FadeOut or EPhase.PERFORMANCE_STAGE_FAILED_END => !GitaDoraTransition.isAnimating,
+        EPhase.PERFORMANCE_STAGE_CLEAR => ctResultDelay.bReachedEndValue,
+        _ => false
+    };
+
+    protected void UpdateResultDelay()
+    {
+        if (ePhaseID == EPhase.PERFORMANCE_STAGE_CLEAR)
         {
-            case EPhase.Common_FadeIn:
-                ePhaseID = EPhase.Common_DefaultState;
-                break;
-
-            case EPhase.Common_FadeOut:
-            case EPhase.PERFORMANCE_STAGE_FAILED_FADEOUT:
-                if (!GitaDoraTransition.isAnimating)
-                {
-                    return true;
-                }
-                break;
-
-            case EPhase.PERFORMANCE_STAGE_CLEAR:
-                ctResultDelay?.tUpdate();
-                return ctResultDelay == null || ctResultDelay.bReachedEndValue;
-
+            ctResultDelay.tUpdate();
         }
-        return false;
     }
 
     protected void tStartResultDelay()
@@ -3799,7 +3807,7 @@ internal abstract class CStagePerfCommonScreen : CStage
     }
     protected void tUpdateAndDraw_LaneFlushD()
     {
-        if ((ePhaseID != EPhase.PERFORMANCE_STAGE_FAILED) && (ePhaseID != EPhase.PERFORMANCE_STAGE_FAILED_FADEOUT))
+        if ((ePhaseID != EPhase.PERFORMANCE_STAGE_FAILED) && (ePhaseID != EPhase.PERFORMANCE_STAGE_FAILED_END))
         {
             actLaneFlushD.OnUpdateAndDraw();
         }
@@ -3859,9 +3867,9 @@ internal abstract class CStagePerfCommonScreen : CStage
         }
     }
 
-    protected void AddLegacyPart(string name, int layer, Action draw)
+    protected void AddLegacyPart(string group, string name, int layer, Action draw)
     {
-        LegacyDrawable part = ui.AddChild(new LegacyDrawable(name, draw));
+        LegacyDrawable part = LayoutGroup(group).AddChild(new LegacyDrawable(name, draw));
         part.renderOrder = layer;
     }
 
@@ -4922,7 +4930,7 @@ internal abstract class CStagePerfCommonScreen : CStage
     {
         if (playspeedText == null)
         {
-            playspeedText = ui.AddChild(new UIText("playspeed", 18));
+            playspeedText = LayoutGroup(HudGroup).AddChild(new UIText("playspeed", 18));
             playspeedText.dontSerialize = true;
             playspeedText.fillColor = Color4.White;
             playspeedText.outlineGradientTopColor = Color4.Black;
@@ -4954,7 +4962,7 @@ internal abstract class CStagePerfCommonScreen : CStage
     public void t再読込()
     {
         CDTXMania.DTX.tStopPlayingAllChips();
-        eReturnValueAfterFadeOut = EPerfScreenReturnValue.Restart;
+        eReturnValue = EPerfScreenReturnValue.Restart;
         ePhaseID = EPhase.PERFORMANCE_STAGE_RESTART;
         bPAUSE = false;
 

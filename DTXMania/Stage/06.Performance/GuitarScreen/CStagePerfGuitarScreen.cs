@@ -38,29 +38,27 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 	{
 		base.OnLayoutReady();
 		
-		AddLegacyPart("LaneFlush", LegacyLanesLayer, tUpdateAndDraw_LaneFlushGB);
-		AddLegacyPart("Danger", LegacyLanesLayer, tUpdateAndDraw_DANGER);
-		AddLegacyPart("WailingBonus", LegacyLanesLayer, tUpdateAndDraw_WailingBonus);
-		AddLegacyPart("Chips", LegacyLanesLayer, () => DrawChips(EInstrumentPart.GUITAR));
+		AddLegacyPart(PlayfieldGroup, "LaneFlush", LegacyLanesLayer, tUpdateAndDraw_LaneFlushGB);
+		AddLegacyPart(PlayfieldGroup, "WailingBonus", LegacyLanesLayer, tUpdateAndDraw_WailingBonus);
+		AddLegacyPart(PlayfieldGroup, "Chips", LegacyLanesLayer, () => DrawChips(EInstrumentPart.GUITAR));
 
 		//drawn over the judge lines and shutters
-		AddLegacyPart("JudgementStrings", LegacyOverlayLayer, tUpdateAndDraw_JudgementString);
-		AddLegacyPart("ProgressBar", LegacyOverlayLayer, () => actProgressBar.OnUpdateAndDraw());
-		AddLegacyPart("Score", LegacyOverlayLayer, DrawScore);
-		AddLegacyPart("Graph", LegacyOverlayLayer, tUpdateAndDraw_Graph);
-		AddLegacyPart("Combo", LegacyOverlayLayer, tUpdateAndDraw_Combo);
-		AddLegacyPart("PerformanceInformation", LegacyOverlayLayer, tUpdateAndDraw_PerformanceInformation);
-		AddLegacyPart("GuitarBonus", LegacyOverlayLayer, tUpdateAndDraw_GuitarBonus);
-		AddLegacyPart("Fade", LegacyOverlayLayer, () => bIsFinishedFadeout = tUpdateAndDraw_FadeIn_Out());
+		AddLegacyPart(PlayfieldGroup, "JudgementStrings", LegacyOverlayLayer, tUpdateAndDraw_JudgementString);
+		AddLegacyPart(PlayfieldGroup, "ProgressBar", LegacyOverlayLayer, () => actProgressBar.OnUpdateAndDraw());
+		AddLegacyPart(HudGroup, "Score", LegacyOverlayLayer, DrawScore);
+		AddLegacyPart(HudGroup, "Graph", LegacyOverlayLayer, tUpdateAndDraw_Graph);
+		AddLegacyPart(HudGroup, "Combo", LegacyOverlayLayer, tUpdateAndDraw_Combo);
+		AddLegacyPart(HudGroup, "PerformanceInformation", LegacyOverlayLayer, tUpdateAndDraw_PerformanceInformation);
+		AddLegacyPart(PlayfieldGroup, "GuitarBonus", LegacyOverlayLayer, tUpdateAndDraw_GuitarBonus);
 
-		actJudgeString.InitUI(ui);
+		actJudgeString.InitUI(LayoutGroup(PlayfieldGroup));
 		
 		actChipFireGB = new ActPerfNewFire[2];
-		actChipFireGB[0] = ui.AddChild(new ActPerfNewFire(1));
+		actChipFireGB[0] = LayoutGroup(PlayfieldGroup).AddChild(new ActPerfNewFire(1));
 		actChipFireGB[0].name = "chipsFireGuitar";
 		actChipFireGB[0].renderOrder = EffectsLayer;
 		
-		actChipFireGB[1] = ui.AddChild(new ActPerfNewFire(2));
+		actChipFireGB[1] = LayoutGroup(PlayfieldGroup).AddChild(new ActPerfNewFire(2));
 		actChipFireGB[1].name = "chipsFireBass";
 		actChipFireGB[1].renderOrder = EffectsLayer;
 		
@@ -91,7 +89,7 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 			new(1134, bassY)
 		];
 
-		var holdParent = ui.AddChild(new UIGroup("HoldNotes"));
+		var holdParent = LayoutGroup(PlayfieldGroup).AddChild(new UIGroup("HoldNotes"));
 		holdParent.renderOrder = 10;
 		holdParent.dontSerialize = true;
 		holdParent.isVisible = false;
@@ -106,11 +104,11 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		}
 
 		wailingEffect = new WailingEffect[2];
-		wailingEffect[0] = ui.AddChild(new WailingEffect());
+		wailingEffect[0] = LayoutGroup(PlayfieldGroup).AddChild(new WailingEffect());
 		wailingEffect[0].renderOrder = LaneArtLayer;
 		wailingEffect[0].position = new Vector3(242, 58, 0);
 		
-		wailingEffect[1] = ui.AddChild(new WailingEffect());
+		wailingEffect[1] = LayoutGroup(PlayfieldGroup).AddChild(new WailingEffect());
 		wailingEffect[1].renderOrder = LaneArtLayer;
 		wailingEffect[1].position = new Vector3(1111, 58, 0);
 	}
@@ -191,7 +189,7 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 			(int)((60.0 / (CDTXMania.stagePerfGuitarScreen.actPlayInfo.dbBPM) / 16.0 * 1000.0)), CDTXMania.Timer);
 		ctWailingChipPatternAnimation = new CCounter(0, 4, 50, CDTXMania.Timer);
 
-		ePhaseID = EPhase.Common_FadeIn;
+		ePhaseID = EPhase.Common_DefaultState;
 		
 		// display presence now that the initial timer reset has been performed
 		tDisplayPresence();
@@ -203,7 +201,7 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 
 		base.OnUpdateAndDraw();
 
-		if (bIsFinishedFadeout)
+		if (CanLeave)
 		{
 			if (!CDTXMania.Skin.soundStageClear.bIsPlaying)
 			{
@@ -278,14 +276,14 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 					}
 				}
 
-				return (int)eReturnValueAfterFadeOut;
+				return (int)eReturnValue;
 			}
 		}
 
 		if (ePhaseID == EPhase.PERFORMANCE_STAGE_RESTART)
 		{
 			Debug.WriteLine("Restarting");
-			return (int)eReturnValueAfterFadeOut;
+			return (int)eReturnValue;
 		}
 
 		return 0;
@@ -319,10 +317,12 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		}
 		else if (bIsFinishedPlaying && (ePhaseID == EPhase.Common_DefaultState))
 		{
-			eReturnValueAfterFadeOut = EPerfScreenReturnValue.StageClear;
+			eReturnValue = EPerfScreenReturnValue.StageClear;
 			ePhaseID = EPhase.PERFORMANCE_STAGE_CLEAR;
 			tStartResultDelay();
 		}
+
+		UpdateResultDelay();
 
 		if (LoopEndMs != -1 && AudioMixer.Timer.nCurrentTime > LoopEndMs)
 		{

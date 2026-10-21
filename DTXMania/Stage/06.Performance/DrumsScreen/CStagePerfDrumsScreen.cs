@@ -36,29 +36,28 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
     {
         base.OnLayoutReady();
         
-        AddLegacyPart("FillInEffect", LegacyLanesLayer, DrawFillInEffect);
-        AddLegacyPart("LaneFlush", LegacyLanesLayer, () => Probed(probeLanes, tUpdateAndDraw_LaneFlushD));
-        AddLegacyPart("Chips", LegacyLanesLayer, () => Probed(probeChips, () => DrawChips(EInstrumentPart.DRUMS)));
-        AddLegacyPart("ProgressBar", LegacyLanesLayer, () => Probed(probeLanes, () => actProgressBar.OnUpdateAndDraw()));
-        AddLegacyPart("LaneCover", LegacyLanesLayer, () => Probed(probeLanes, DrawLaneCover));
+        AddLegacyPart(PlayfieldGroup, "FillInEffect", LegacyLanesLayer, DrawFillInEffect);
+        AddLegacyPart(PlayfieldGroup, "LaneFlush", LegacyLanesLayer, () => Probed(probeLanes, tUpdateAndDraw_LaneFlushD));
+        AddLegacyPart(PlayfieldGroup, "Chips", LegacyLanesLayer, () => Probed(probeChips, () => DrawChips(EInstrumentPart.DRUMS)));
+        AddLegacyPart(PlayfieldGroup, "ProgressBar", LegacyLanesLayer, () => Probed(probeLanes, () => actProgressBar.OnUpdateAndDraw()));
+        AddLegacyPart(PlayfieldGroup, "LaneCover", LegacyLanesLayer, () => Probed(probeLanes, DrawLaneCover));
 
         //drawn over the judge lines and shutters
-        AddLegacyPart("Pad", LegacyOverlayLayer, () => Probed(probeLanes, tUpdateAndDraw_DrumPad));
-        AddLegacyPart("Fade", LegacyOverlayLayer, () => Probed(probeFade, () => bIsFinishedFadeout = tUpdateAndDraw_FadeIn_Out()));
-        AddLegacyPart("Score", LegacyOverlayLayer, () => Probed(probeScore, DrawScore));
-        AddLegacyPart("Combo", LegacyOverlayLayer, () => Probed(probeCombo, tUpdateAndDraw_Combo));
-        AddLegacyPart("Graph", LegacyOverlayLayer, () => Probed(probeGraph, tUpdateAndDraw_Graph));
-        AddLegacyPart("PerformanceInformation", LegacyOverlayLayer, () => Probed(probeOverlay, tUpdateAndDraw_PerformanceInformation));
-        AddLegacyPart("JudgementStrings", LegacyOverlayLayer, () => Probed(probeJudgement, DrawJudgementStrings));
+        AddLegacyPart(PlayfieldGroup, "Pad", LegacyOverlayLayer, () => Probed(probeLanes, tUpdateAndDraw_DrumPad));
+        AddLegacyPart(HudGroup, "Score", LegacyOverlayLayer, () => Probed(probeScore, DrawScore));
+        AddLegacyPart(HudGroup, "Combo", LegacyOverlayLayer, () => Probed(probeCombo, tUpdateAndDraw_Combo));
+        AddLegacyPart(HudGroup, "Graph", LegacyOverlayLayer, () => Probed(probeGraph, tUpdateAndDraw_Graph));
+        AddLegacyPart(HudGroup, "PerformanceInformation", LegacyOverlayLayer, () => Probed(probeOverlay, tUpdateAndDraw_PerformanceInformation));
+        AddLegacyPart(PlayfieldGroup, "JudgementStrings", LegacyOverlayLayer, () => Probed(probeJudgement, DrawJudgementStrings));
 
-        UIDrawable chipFire = ui.AddChild<UIDrawable>(useNewDrumsFire ? new ActPerfNewFire(0) : new ClassicDrumsChipFire());
+        UIDrawable chipFire = LayoutGroup(PlayfieldGroup).AddChild<UIDrawable>(useNewDrumsFire ? new ActPerfNewFire(0) : new ClassicDrumsChipFire());
         chipFire.name = "drumChipsFire";
         chipFire.renderOrder = EffectsLayer;
 
         actChipFireD = (IPerfFire)chipFire;
         actChipFireD.iPosY = CDTXMania.ConfigIni.bReverse.Drums ? nJudgeLinePosY.Drums - 183 : nJudgeLinePosY.Drums - 186;
 
-        actJudgeString.InitUI(ui);
+        actJudgeString.InitUI(LayoutGroup(PlayfieldGroup));
     }
 
     // Methods
@@ -145,7 +144,7 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
         ctChipPatternAnimation.Guitar = new CCounter(0, 0x17, 20, CDTXMania.Timer);
         ctChipPatternAnimation.Bass = new CCounter(0, 0x17, 20, CDTXMania.Timer);
         ctWailingChipPatternAnimation = new CCounter(0, 4, 50, CDTXMania.Timer);
-        ePhaseID = EPhase.Common_FadeIn;
+        ePhaseID = EPhase.Common_DefaultState;
 
         ct登場用.tUpdate();
         
@@ -160,7 +159,7 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
 
         base.OnUpdateAndDraw();
 
-        if (bIsFinishedFadeout)
+        if (CanLeave)
         {
             if (!CDTXMania.Skin.soundStageClear.bIsPlaying && !CDTXMania.Skin.soundSTAGEFAILED音.bIsPlaying)
             {
@@ -192,14 +191,14 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
                     }
                 }
 
-                return (int)eReturnValueAfterFadeOut;
+                return (int)eReturnValue;
             }
         }
 
         if (ePhaseID == EPhase.PERFORMANCE_STAGE_RESTART)
         {
             Trace.TraceInformation("Restarting");
-            return (int)eReturnValueAfterFadeOut;
+            return (int)eReturnValue;
         }
         
         return 0;
@@ -213,7 +212,6 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
     private static readonly int probeGraph = AllocationProbe.Register("graph");
     private static readonly int probeJudgement = AllocationProbe.Register("judgement string");
     private static readonly int probeOverlay = AllocationProbe.Register("debug overlay");
-    private static readonly int probeFade = AllocationProbe.Register("fade");
     private static readonly int probeKeyInput = AllocationProbe.Register("key input");
 
     private static void Probed(int probe, Action draw)
@@ -233,7 +231,6 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
     {
         if (!bActivated) return;
 
-        bIsFinishedFadeout = false;
         bExc = false;
         bFullCom = false;
 
@@ -271,11 +268,13 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
             }
             else
             {
-                eReturnValueAfterFadeOut = EPerfScreenReturnValue.StageClear;
+                eReturnValue = EPerfScreenReturnValue.StageClear;
                 ePhaseID = EPhase.PERFORMANCE_STAGE_CLEAR;
                 tStartResultDelay();
             }
         }
+
+        UpdateResultDelay();
 
         UpdateStageFailed();
 
