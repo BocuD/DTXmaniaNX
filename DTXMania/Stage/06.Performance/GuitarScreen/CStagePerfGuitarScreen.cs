@@ -18,7 +18,6 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		ePhaseID = EPhase.Common_DefaultState;
 		bActivated = false;
 		listChildActivities.Add( actStageFailed = new CActPerfStageFailure() );
-		listChildActivities.Add( actDANGER = new CActPerfGuitarDanger() );
 		listChildActivities.Add( video = new CActPerfVideo() );
 		listChildActivities.Add( actBGA = new CActPerfBGA() );
 		listChildActivities.Add( actGraph = new CActPerfSkillMeter() );
@@ -427,10 +426,6 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		tチップのヒット処理_BadならびにTight時のMiss( part, nLane, EInstrumentPart.GUITAR );
 	}
 
-	protected override void tUpdateAndDraw_DANGER()			// #23631 2011.4.19 yyagi
-	{
-		actDANGER.tUpdateAndDraw( false, actGauge.IsDanger(EInstrumentPart.GUITAR), actGauge.IsDanger(EInstrumentPart.BASS) );
-	}
 	private void tUpdateAndDraw_Graph()  // t進行描画_グラフ
 	{
 		if ( !CDTXMania.ConfigIni.bストイックモード && ( CDTXMania.ConfigIni.bGraph有効.Guitar || CDTXMania.ConfigIni.bGraph有効.Bass ) )

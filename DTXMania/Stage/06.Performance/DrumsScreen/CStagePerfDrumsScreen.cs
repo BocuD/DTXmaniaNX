@@ -18,7 +18,6 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
         bActivated = false;
         listChildActivities.Add(actPad = new CActPerfDrumsPad());
         listChildActivities.Add(actCombo = new CActPerfDrumsComboDGB());
-        listChildActivities.Add(actDANGER = new CActPerfDrumsDanger());
 
         listChildActivities.Add(actGauge = new CActPerfCommonGauge());
         listChildActivities.Add(actGraph = new CActPerfSkillMeter());
@@ -469,11 +468,6 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
         CDTXMania.ConfigIni.nScrollSpeed.Drums = Math.Max( CDTXMania.ConfigIni.nScrollSpeed.Drums - 1, 0 );
     }
     
-    protected override void tUpdateAndDraw_DANGER()
-    {
-        actDANGER.tUpdateAndDraw( actGauge.IsDanger(EInstrumentPart.DRUMS), false, false );
-    }
-
     protected override void tUpdateAndDraw_WailingFrame()
     {
         base.tUpdateAndDraw_WailingFrame( 587, 478,

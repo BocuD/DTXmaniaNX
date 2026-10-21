@@ -883,7 +883,6 @@ internal abstract class CStagePerfCommonScreen : CStage
     protected readonly List<STInputEvent> listPadEvents = [];
     protected ActPerfNewFire[] actChipFireGB;
     public CActPerfCommonCombo actCombo;
-    protected CActPerfCommonDanger actDANGER;
     public CActPerfCommonGauge actGauge;
     protected CActPerfCommonJudgementString actJudgeString;
     protected CActPerfDrumsLaneFlushD actLaneFlushD;
