@@ -301,7 +301,20 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		}
 
 		UpdateVideo();
+		bIsFinishedPlaying = UpdateChips(EInstrumentPart.GUITAR);
 		UpdateStageFailed();
+
+		//loop instead of going to the result screen
+		if (bIsFinishedPlaying && ePhaseID == EPhase.Common_DefaultState && previewMode)
+		{
+			tRestartForPreview();
+		}
+		else if (bIsFinishedPlaying && (ePhaseID == EPhase.Common_DefaultState))
+		{
+			eReturnValueAfterFadeOut = EPerfScreenReturnValue.StageClear;
+			ePhaseID = EPhase.PERFORMANCE_STAGE_CLEAR;
+			tStartResultDelay();
+		}
 
 		if (LoopEndMs != -1 && AudioMixer.Timer.nCurrentTime > LoopEndMs)
 		{
@@ -342,9 +355,7 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		tUpdateAndDraw_WailingBonus();
 		tUpdateAndDraw_ScrollSpeed();
 		tUpdateAndDraw_ChipAnimation();
-		tUpdateAndDraw_BarLines(EInstrumentPart.GUITAR);
-		tDraw_LoopLines();
-		bIsFinishedPlaying = tUpdateAndDraw_Chips(EInstrumentPart.GUITAR);
+		DrawChips(EInstrumentPart.GUITAR);
 
 		sw.Stop();
 	}
@@ -367,17 +378,6 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		
 		//handle end of performance
 		bIsFinishedFadeout = tUpdateAndDraw_FadeIn_Out();
-		//loop instead of going to the result screen
-		if (bIsFinishedPlaying && ePhaseID == EPhase.Common_DefaultState && previewMode)
-		{
-			tRestartForPreview();
-		}
-		else if (bIsFinishedPlaying && (ePhaseID == EPhase.Common_DefaultState))
-		{
-			eReturnValueAfterFadeOut = EPerfScreenReturnValue.StageClear;
-			ePhaseID = EPhase.PERFORMANCE_STAGE_CLEAR;
-			tStartResultDelay();
-		}
 
 		sw.Stop();
 	}
@@ -503,10 +503,10 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		// ギタレボモードでは何もしない
 	}
 	
-	protected override void tUpdateAndDraw_Chip_PatternOnly_Drums(CConfigIni configIni, ref CDTX dTX, ref CChip pChip)
+	protected override void UpdateChip_PatternOnly_Drums(CConfigIni configIni, ref CDTX dTX, ref CChip pChip)
 	{
 	}
-	protected override void tUpdateAndDraw_Chip_Drums(CConfigIni configIni, ref CDTX dTX, ref CChip pChip)
+	protected override void UpdateChip_Drums(CConfigIni configIni, ref CDTX dTX, ref CChip pChip)
 	{
 		if ( !pChip.bHit && ( pChip.nDistanceFromBar.Drums < 0 ) )
 		{
@@ -515,7 +515,7 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		}
 	}
 	
-	protected override void tUpdateAndDraw_Chip_Guitar_Wailing( CConfigIni configIni, ref CDTX dTX, ref CChip pChip )
+	protected override void DrawChip_Guitar_Wailing( CConfigIni configIni, ref CDTX dTX, ref CChip pChip )
 	{
 		if ( configIni.bGuitarEnabled )
 		{
@@ -556,9 +556,8 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 				}
 			}
 		}
-		base.tUpdateAndDraw_Chip_Guitar_Wailing( configIni, ref dTX, ref pChip );
 	}
-	protected override void tUpdateAndDraw_Chip_FillIn( CConfigIni configIni, ref CDTX dTX, ref CChip pChip )
+	protected override void UpdateChip_FillIn( CConfigIni configIni, ref CDTX dTX, ref CChip pChip )
 	{
 		if ( !pChip.bHit && ( pChip.nDistanceFromBar.Drums < 0 ) )
 		{
@@ -566,7 +565,7 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		}
 	}
 
-	protected override void tUpdateAndDraw_Chip_Bass_Wailing( CConfigIni configIni, ref CDTX dTX, ref CChip pChip )
+	protected override void DrawChip_Bass_Wailing( CConfigIni configIni, ref CDTX dTX, ref CChip pChip )
 	{
 		if ( configIni.bGuitarEnabled )
 		{
@@ -607,17 +606,16 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 				}
 			}
 			
-			base.tUpdateAndDraw_Chip_Bass_Wailing( configIni, ref dTX, ref pChip );
 		}
 	}
-	protected override void tUpdateAndDraw_Chip_NoSound_Drums( CConfigIni configIni, ref CDTX dTX, ref CChip pChip )
+	protected override void UpdateChip_NoSound_Drums( CConfigIni configIni, ref CDTX dTX, ref CChip pChip )
 	{
 		if ( !pChip.bHit && ( pChip.nDistanceFromBar.Drums < 0 ) )
 		{
 			pChip.bHit = true;
 		}
 	}
-	protected override void tUpdateAndDraw_Chip_BarLine( CConfigIni configIni, ref CDTX dTX, ref CChip pChip )
+	protected override void UpdateChip_BarLine( CConfigIni configIni, ref CDTX dTX, ref CChip pChip )
 	{
 		int n小節番号plus1 = pChip.nPlaybackPosition / 0x180;
 		if ( !pChip.bHit && ( pChip.nDistanceFromBar.Drums < 0 ) )
@@ -629,6 +627,11 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 				dTX.tAutoCorrectWavPlaybackPosition();
 			}
 		}
+	}
+
+	protected override void DrawChip_BarLine( CConfigIni configIni, ref CDTX dTX, ref CChip pChip )
+	{
+		int n小節番号plus1 = pChip.nPlaybackPosition / 0x180;
 		if ( ( pChip.bVisible && configIni.bGuitarEnabled ))
 		{
 			float y = CDTXMania.ConfigIni.bReverse.Guitar ? ((nJudgeLinePosY.Guitar - pChip.nDistanceFromBar.Guitar) + 0) : ((nJudgeLinePosY.Guitar + pChip.nDistanceFromBar.Guitar) + 9);

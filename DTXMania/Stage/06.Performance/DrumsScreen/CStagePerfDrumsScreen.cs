@@ -229,6 +229,31 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
         UpdateVideo();
         AllocationProbe.End(probeVideo);
 
+        AllocationProbe.Begin(probeChips);
+        bIsFinishedPlaying = UpdateChips(EInstrumentPart.DRUMS);
+        AllocationProbe.End(probeChips);
+
+        //loop instead of going to the result screen
+        if (bIsFinishedPlaying && ePhaseID == EPhase.Common_DefaultState && previewMode)
+        {
+            tRestartForPreview();
+        }
+        else if (bIsFinishedPlaying && (ePhaseID == EPhase.Common_DefaultState))
+        {
+            if ((actGauge.IsFailed(EInstrumentPart.DRUMS)) && (ePhaseID == EPhase.Common_DefaultState))
+            {
+                actStageFailed.Start();
+                CDTXMania.DTX.tStopPlayingAllChips();
+                ePhaseID = EPhase.PERFORMANCE_STAGE_FAILED;
+            }
+            else
+            {
+                eReturnValueAfterFadeOut = EPerfScreenReturnValue.StageClear;
+                ePhaseID = EPhase.PERFORMANCE_STAGE_CLEAR;
+                tStartResultDelay();
+            }
+        }
+
         UpdateStageFailed();
 
         if (LoopEndMs != -1 && AudioMixer.Timer.nCurrentTime > LoopEndMs)
@@ -260,7 +285,6 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
         AllocationProbe.Begin(probeLegacyDraw);
         sw.Start();
 
-        bIsFinishedPlaying = false;
         bIsFinishedFadeout = false;
         bExc = false;
         bFullCom = false;
@@ -274,10 +298,7 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
 
         AllocationProbe.Begin(probeChips);
         tUpdateAndDraw_ChipAnimation();
-        tUpdateAndDraw_BarLines(EInstrumentPart.DRUMS);
-        tDraw_LoopLines();
-        tUpdateAndDraw_Chip_PatternOnly(EInstrumentPart.DRUMS);
-        bIsFinishedPlaying = tUpdateAndDraw_Chips(EInstrumentPart.DRUMS);
+        DrawChips(EInstrumentPart.DRUMS);
         AllocationProbe.End(probeChips);
 
         AllocationProbe.Begin(probeLanes);
@@ -305,26 +326,6 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
         bIsFinishedFadeout = tUpdateAndDraw_FadeIn_Out();
         AllocationProbe.End(probeFade);
 
-        //loop instead of going to the result screen
-        if (bIsFinishedPlaying && ePhaseID == EPhase.Common_DefaultState && previewMode)
-        {
-            tRestartForPreview();
-        }
-        else if (bIsFinishedPlaying && (ePhaseID == EPhase.Common_DefaultState))
-        {
-            if ((actGauge.IsFailed(EInstrumentPart.DRUMS)) && (ePhaseID == EPhase.Common_DefaultState))
-            {
-                actStageFailed.Start();
-                CDTXMania.DTX.tStopPlayingAllChips();
-                ePhaseID = EPhase.PERFORMANCE_STAGE_FAILED;
-            }
-            else
-            {
-                eReturnValueAfterFadeOut = EPerfScreenReturnValue.StageClear;
-                ePhaseID = EPhase.PERFORMANCE_STAGE_CLEAR;
-                tStartResultDelay();
-            }
-        }
 
         AllocationProbe.Begin(probeScore);
         if (CDTXMania.ConfigIni.bShowScore)
@@ -535,7 +536,7 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
         base.tUpdateAndDraw_PerformanceInformation( 1000, 257 );
     }
 
-    protected override void tUpdateAndDraw_Chip_BarLine( CConfigIni configIni, ref CDTX dTX, ref CChip pChip )
+    protected override void UpdateChip_BarLine( CConfigIni configIni, ref CDTX dTX, ref CChip pChip )
     {
         int n小節番号plus1 = pChip.nPlaybackPosition / 384;
         if ( !pChip.bHit && ( pChip.nDistanceFromBar.Drums < 0 ) )
@@ -553,6 +554,11 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
                 dTX.tAutoCorrectWavPlaybackPosition();
             }
         }
+    }
+
+    protected override void DrawChip_BarLine( CConfigIni configIni, ref CDTX dTX, ref CChip pChip )
+    {
+        int n小節番号plus1 = pChip.nPlaybackPosition / 384;
         if ( configIni.bShowPerformanceInformation && ( configIni.nLaneDisp.Drums == 0 || configIni.nLaneDisp.Drums == 1 ) )
         {
             int n小節番号 = n小節番号plus1 - 1;

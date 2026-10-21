@@ -9,7 +9,7 @@ namespace DTXMania;
 
 internal partial class CStagePerfDrumsScreen
 {
-    protected override void tUpdateAndDraw_Chip_PatternOnly_Drums(CConfigIni configIni, ref CDTX dTX, ref CChip pChip)  // t進行描画_チップ_模様のみ_ドラムス
+    protected override void UpdateChip_PatternOnly_Drums(CConfigIni configIni, ref CDTX dTX, ref CChip pChip)  // t進行描画_チップ_模様のみ_ドラムス
     {
         if (configIni.bDrumsEnabled)
         {
@@ -53,194 +53,6 @@ internal partial class CStagePerfDrumsScreen
                 pChip.bVisible = false;
             }
             #endregion
-            if (!pChip.bHit && pChip.bVisible)
-            {
-                Color4 col = Color4.White;
-                if (txChip != null)
-                {
-                    col.Alpha = pChip.nTransparency / 255.0f;
-                }
-                int x = nチャンネルtoX座標[pChip.nChannelNumber - EChannel.HiHatClose];
-
-                if (configIni.eLaneType.Drums == EType.A)
-                {
-                    if (configIni.eRDPosition == ERDPosition.RCRD)
-                    {
-                        x = nチャンネルtoX座標[pChip.nChannelNumber - EChannel.HiHatClose];
-                    }
-                    else if (configIni.eRDPosition == ERDPosition.RDRC)
-                    {
-                        x = nチャンネルtoX座標改[pChip.nChannelNumber - EChannel.HiHatClose];
-                    }
-                }
-                else if (configIni.eLaneType.Drums == EType.B)
-                {
-                    if (configIni.eRDPosition == ERDPosition.RCRD)
-                    {
-                        x = nチャンネルtoX座標B[pChip.nChannelNumber - EChannel.HiHatClose];
-                    }
-                    else if (configIni.eRDPosition == ERDPosition.RDRC)
-                    {
-                        x = nチャンネルtoX座標B改[pChip.nChannelNumber - EChannel.HiHatClose];
-                    }
-                }
-                else if (configIni.eLaneType.Drums == EType.C)
-                {
-                    if (configIni.eRDPosition == ERDPosition.RCRD)
-                    {
-                        x = nチャンネルtoX座標C[pChip.nChannelNumber - EChannel.HiHatClose];
-                    }
-                    else if (configIni.eRDPosition == ERDPosition.RDRC)
-                    {
-                        x = nチャンネルtoX座標C改[pChip.nChannelNumber - EChannel.HiHatClose];
-                    }
-                }
-                else if (configIni.eLaneType.Drums == EType.D)
-                {
-                    if (configIni.eRDPosition == ERDPosition.RCRD)
-                    {
-                        x = nチャンネルtoX座標D[pChip.nChannelNumber - EChannel.HiHatClose];
-                    }
-                    else if (configIni.eRDPosition == ERDPosition.RDRC)
-                    {
-                        x = nチャンネルtoX座標D改[pChip.nChannelNumber - EChannel.HiHatClose];
-                    }
-                }
-
-                if (configIni.eRDPosition == ERDPosition.RDRC)
-                {
-                    if (configIni.eLaneType.Drums == EType.A)
-                    {
-                        x = nチャンネルtoX座標改[pChip.nChannelNumber - EChannel.HiHatClose];
-                    }
-                    else if (configIni.eLaneType.Drums == EType.B)
-                    {
-                        x = nチャンネルtoX座標B改[pChip.nChannelNumber - EChannel.HiHatClose];
-                    }
-                }
-
-                float y = configIni.bReverse.Drums ? (nJudgeLinePosY.Drums + pChip.nDistanceFromBar.Drums) : (nJudgeLinePosY.Drums - pChip.nDistanceFromBar.Drums);
-                int num9 = ctChipPatternAnimation.Drums.nCurrentValue;
-
-                switch (pChip.nChannelNumber)
-                {
-                    case EChannel.HiHatClose:
-                        x = (x + 0x10) - ((int)((32.0 * pChip.dbChipSizeRatio) / 2.0));
-                        if (txChip != null)
-                        {
-                            txChip.tDraw2D(x - 5, y - 0x20, new RectangleF(60 + 10, 128 + (num9 * 64), 0x2e + 10, 64), col);
-                        }
-                        break;
-
-                    case EChannel.Snare:
-                        x = (x + 0x10) - ((int)((32.0 * pChip.dbChipSizeRatio) / 2.0));
-                        if (txChip != null)
-                        {
-                            txChip.tDraw2D(x - 5, y - 32, new RectangleF(0x6a + 20, 128 + (num9 * 64), 0x36 + 10, 64), col);
-                        }
-                        break;
-
-                    case EChannel.BassDrum:
-                        x = (x + 0x16) - ((int)((44.0 * pChip.dbChipSizeRatio) / 2.0));
-                        if (txChip != null)
-                        {
-                            txChip.tDraw2D(x - 5, y - 0x20, new RectangleF(0, 128 + (num9 * 0x40), 60 + 10, 0x40), col);
-                        }
-                        break;
-
-                    case EChannel.HighTom:
-                        x = (x + 0x10) - ((int)((32.0 * pChip.dbChipSizeRatio) / 2.0));
-                        if (txChip != null)
-                        {
-                            txChip.tDraw2D(x - 5, y - 32, new RectangleF(160 + 30, 128 + (num9 * 0x40), 0x2e + 10, 64), col);
-                        }
-                        break;
-
-                    case EChannel.LowTom:
-                        x = (x + 0x10) - ((int)((32.0 * pChip.dbChipSizeRatio) / 2.0));
-                        if (txChip != null)
-                        {
-                            txChip.tDraw2D(x - 5, y - 32, new RectangleF(0xce + 40, 128 + (num9 * 0x40), 0x2e + 10, 64), col);
-                        }
-                        break;
-
-                    case EChannel.Cymbal:
-                        x = (x + 19) - ((int)((38.0 * pChip.dbChipSizeRatio) / 2.0));
-                        if (txChip != null)
-                        {
-                            txChip.tDraw2D(x - 5, y - 0x20, new RectangleF(298 + 60, 128 + (num9 * 64), 64 + 10, 64), col);
-                        }
-                        break;
-
-                    case EChannel.FloorTom:
-                        x = (x + 0x10) - ((int)((32.0 * pChip.dbChipSizeRatio) / 2.0));
-                        if (txChip != null)
-                        {
-                            txChip.tDraw2D(x - 5, y - 0x20, new RectangleF(0xfc + 50, 128 + (num9 * 64), 0x2e + 10, 0x40), col);
-                        }
-                        break;
-
-                    case EChannel.HiHatOpen:
-                        x = (x + 13) - ((int)((26.0 * pChip.dbChipSizeRatio) / 2.0));
-                        if (txChip != null)
-                        {
-                            switch (configIni.eHHOGraphics.Drums)
-                            {
-                                case EType.A:
-                                    x = (x + 14) - ((int)((26.0 * pChip.dbChipSizeRatio) / 2.0));
-                                    txChip.tDraw2D(x - 5, y - 0x20, new RectangleF(0x200 + 100, 128 + (num9 * 64), 0x26 + 10, 64), col);
-                                    break;
-
-
-                                case EType.C:
-                                    x = (x + 13) - ((int)((32.0 * pChip.dbChipSizeRatio) / 2.0));
-                                    txChip.tDraw2D(x - 5, y - 0x20, new RectangleF(60 + 10, 128 + (num9 * 64), 0x2e + 10, 64), col);
-                                    break;
-                            }
-                        }
-                        break;
-
-                    case EChannel.RideCymbal:
-                        x = (x + 13) - ((int)((26.0 * pChip.dbChipSizeRatio) / 2.0));
-                        if (txChip != null)
-                        {
-                            txChip.tDraw2D(x - 5, y - 0x20, new RectangleF(0x16a + 70, 128 + (num9 * 64), 0x26 + 10, 0x40), col);
-                        }
-                        break;
-
-                    case EChannel.LeftCymbal:
-                        x = (x + 0x13) - ((int)((38.0 * pChip.dbChipSizeRatio) / 2.0));
-                        if (txChip != null)
-                        {
-                            txChip.tDraw2D(x - 5, y - 0x20, new RectangleF(448 + 90, 128 + (num9 * 64), 64 + 10, 64), col);
-                        }
-                        break;
-
-                    case EChannel.LeftPedal:
-                        x = (x + 0x13) - ((int)((38.0 * pChip.dbChipSizeRatio) / 2.0));
-                        if (txChip != null)
-                        {
-                            txChip.tDraw2D(x - 5, y - 0x20, new RectangleF(550 + 110, 128 + (num9 * 64), 0x30 + 10, 64), col);
-                        }
-                        break;
-
-                    case EChannel.LeftBassDrum:
-                        x = (x + 0x13) - ((int)((38.0 * pChip.dbChipSizeRatio) / 2.0));
-                        if (txChip != null)
-                        {
-
-                            if (configIni.eLBDGraphics.Drums == EType.A)
-                            {
-                                txChip.tDraw2D(x - 5, y - 0x20, new RectangleF(550 + 110, 128 + (num9 * 64), 0x30, 0x40), col);
-                            }
-                            else if (configIni.eLBDGraphics.Drums == EType.B)
-                            {
-                                txChip.tDraw2D(x - 5, y - 0x20, new RectangleF(400 + 80, 128 + (num9 * 64), 0x30 + 10, 0x40), col);
-                            }
-                        }
-                        break;
-                }
-            }
 
             return;
         }	// end of "if configIni.bDrumsEnabled"
@@ -249,7 +61,204 @@ internal partial class CStagePerfDrumsScreen
             pChip.bHit = true;
         }
     }
-    protected override void tUpdateAndDraw_Chip_Drums( CConfigIni configIni, ref CDTX dTX, ref CChip pChip )
+
+    protected override void DrawChip_PatternOnly_Drums(CConfigIni configIni, ref CDTX dTX, ref CChip pChip)
+    {
+        if (!configIni.bDrumsEnabled)
+        {
+            return;
+        }
+
+        if (!pChip.bHit && pChip.bVisible)
+        {
+            Color4 col = Color4.White;
+            if (txChip != null)
+            {
+                col.Alpha = pChip.nTransparency / 255.0f;
+            }
+            int x = nチャンネルtoX座標[pChip.nChannelNumber - EChannel.HiHatClose];
+
+            if (configIni.eLaneType.Drums == EType.A)
+            {
+                if (configIni.eRDPosition == ERDPosition.RCRD)
+                {
+                    x = nチャンネルtoX座標[pChip.nChannelNumber - EChannel.HiHatClose];
+                }
+                else if (configIni.eRDPosition == ERDPosition.RDRC)
+                {
+                    x = nチャンネルtoX座標改[pChip.nChannelNumber - EChannel.HiHatClose];
+                }
+            }
+            else if (configIni.eLaneType.Drums == EType.B)
+            {
+                if (configIni.eRDPosition == ERDPosition.RCRD)
+                {
+                    x = nチャンネルtoX座標B[pChip.nChannelNumber - EChannel.HiHatClose];
+                }
+                else if (configIni.eRDPosition == ERDPosition.RDRC)
+                {
+                    x = nチャンネルtoX座標B改[pChip.nChannelNumber - EChannel.HiHatClose];
+                }
+            }
+            else if (configIni.eLaneType.Drums == EType.C)
+            {
+                if (configIni.eRDPosition == ERDPosition.RCRD)
+                {
+                    x = nチャンネルtoX座標C[pChip.nChannelNumber - EChannel.HiHatClose];
+                }
+                else if (configIni.eRDPosition == ERDPosition.RDRC)
+                {
+                    x = nチャンネルtoX座標C改[pChip.nChannelNumber - EChannel.HiHatClose];
+                }
+            }
+            else if (configIni.eLaneType.Drums == EType.D)
+            {
+                if (configIni.eRDPosition == ERDPosition.RCRD)
+                {
+                    x = nチャンネルtoX座標D[pChip.nChannelNumber - EChannel.HiHatClose];
+                }
+                else if (configIni.eRDPosition == ERDPosition.RDRC)
+                {
+                    x = nチャンネルtoX座標D改[pChip.nChannelNumber - EChannel.HiHatClose];
+                }
+            }
+
+            if (configIni.eRDPosition == ERDPosition.RDRC)
+            {
+                if (configIni.eLaneType.Drums == EType.A)
+                {
+                    x = nチャンネルtoX座標改[pChip.nChannelNumber - EChannel.HiHatClose];
+                }
+                else if (configIni.eLaneType.Drums == EType.B)
+                {
+                    x = nチャンネルtoX座標B改[pChip.nChannelNumber - EChannel.HiHatClose];
+                }
+            }
+
+            float y = configIni.bReverse.Drums ? (nJudgeLinePosY.Drums + pChip.nDistanceFromBar.Drums) : (nJudgeLinePosY.Drums - pChip.nDistanceFromBar.Drums);
+            int num9 = ctChipPatternAnimation.Drums.nCurrentValue;
+
+            switch (pChip.nChannelNumber)
+            {
+                case EChannel.HiHatClose:
+                    x = (x + 0x10) - ((int)((32.0 * pChip.dbChipSizeRatio) / 2.0));
+                    if (txChip != null)
+                    {
+                        txChip.tDraw2D(x - 5, y - 0x20, new RectangleF(60 + 10, 128 + (num9 * 64), 0x2e + 10, 64), col);
+                    }
+                    break;
+
+                case EChannel.Snare:
+                    x = (x + 0x10) - ((int)((32.0 * pChip.dbChipSizeRatio) / 2.0));
+                    if (txChip != null)
+                    {
+                        txChip.tDraw2D(x - 5, y - 32, new RectangleF(0x6a + 20, 128 + (num9 * 64), 0x36 + 10, 64), col);
+                    }
+                    break;
+
+                case EChannel.BassDrum:
+                    x = (x + 0x16) - ((int)((44.0 * pChip.dbChipSizeRatio) / 2.0));
+                    if (txChip != null)
+                    {
+                        txChip.tDraw2D(x - 5, y - 0x20, new RectangleF(0, 128 + (num9 * 0x40), 60 + 10, 0x40), col);
+                    }
+                    break;
+
+                case EChannel.HighTom:
+                    x = (x + 0x10) - ((int)((32.0 * pChip.dbChipSizeRatio) / 2.0));
+                    if (txChip != null)
+                    {
+                        txChip.tDraw2D(x - 5, y - 32, new RectangleF(160 + 30, 128 + (num9 * 0x40), 0x2e + 10, 64), col);
+                    }
+                    break;
+
+                case EChannel.LowTom:
+                    x = (x + 0x10) - ((int)((32.0 * pChip.dbChipSizeRatio) / 2.0));
+                    if (txChip != null)
+                    {
+                        txChip.tDraw2D(x - 5, y - 32, new RectangleF(0xce + 40, 128 + (num9 * 0x40), 0x2e + 10, 64), col);
+                    }
+                    break;
+
+                case EChannel.Cymbal:
+                    x = (x + 19) - ((int)((38.0 * pChip.dbChipSizeRatio) / 2.0));
+                    if (txChip != null)
+                    {
+                        txChip.tDraw2D(x - 5, y - 0x20, new RectangleF(298 + 60, 128 + (num9 * 64), 64 + 10, 64), col);
+                    }
+                    break;
+
+                case EChannel.FloorTom:
+                    x = (x + 0x10) - ((int)((32.0 * pChip.dbChipSizeRatio) / 2.0));
+                    if (txChip != null)
+                    {
+                        txChip.tDraw2D(x - 5, y - 0x20, new RectangleF(0xfc + 50, 128 + (num9 * 64), 0x2e + 10, 0x40), col);
+                    }
+                    break;
+
+                case EChannel.HiHatOpen:
+                    x = (x + 13) - ((int)((26.0 * pChip.dbChipSizeRatio) / 2.0));
+                    if (txChip != null)
+                    {
+                        switch (configIni.eHHOGraphics.Drums)
+                        {
+                            case EType.A:
+                                x = (x + 14) - ((int)((26.0 * pChip.dbChipSizeRatio) / 2.0));
+                                txChip.tDraw2D(x - 5, y - 0x20, new RectangleF(0x200 + 100, 128 + (num9 * 64), 0x26 + 10, 64), col);
+                                break;
+
+
+                            case EType.C:
+                                x = (x + 13) - ((int)((32.0 * pChip.dbChipSizeRatio) / 2.0));
+                                txChip.tDraw2D(x - 5, y - 0x20, new RectangleF(60 + 10, 128 + (num9 * 64), 0x2e + 10, 64), col);
+                                break;
+                        }
+                    }
+                    break;
+
+                case EChannel.RideCymbal:
+                    x = (x + 13) - ((int)((26.0 * pChip.dbChipSizeRatio) / 2.0));
+                    if (txChip != null)
+                    {
+                        txChip.tDraw2D(x - 5, y - 0x20, new RectangleF(0x16a + 70, 128 + (num9 * 64), 0x26 + 10, 0x40), col);
+                    }
+                    break;
+
+                case EChannel.LeftCymbal:
+                    x = (x + 0x13) - ((int)((38.0 * pChip.dbChipSizeRatio) / 2.0));
+                    if (txChip != null)
+                    {
+                        txChip.tDraw2D(x - 5, y - 0x20, new RectangleF(448 + 90, 128 + (num9 * 64), 64 + 10, 64), col);
+                    }
+                    break;
+
+                case EChannel.LeftPedal:
+                    x = (x + 0x13) - ((int)((38.0 * pChip.dbChipSizeRatio) / 2.0));
+                    if (txChip != null)
+                    {
+                        txChip.tDraw2D(x - 5, y - 0x20, new RectangleF(550 + 110, 128 + (num9 * 64), 0x30 + 10, 64), col);
+                    }
+                    break;
+
+                case EChannel.LeftBassDrum:
+                    x = (x + 0x13) - ((int)((38.0 * pChip.dbChipSizeRatio) / 2.0));
+                    if (txChip != null)
+                    {
+
+                        if (configIni.eLBDGraphics.Drums == EType.A)
+                        {
+                            txChip.tDraw2D(x - 5, y - 0x20, new RectangleF(550 + 110, 128 + (num9 * 64), 0x30, 0x40), col);
+                        }
+                        else if (configIni.eLBDGraphics.Drums == EType.B)
+                        {
+                            txChip.tDraw2D(x - 5, y - 0x20, new RectangleF(400 + 80, 128 + (num9 * 64), 0x30 + 10, 0x40), col);
+                        }
+                    }
+                    break;
+            }
+        }
+    }
+    protected override void UpdateChip_Drums( CConfigIni configIni, ref CDTX dTX, ref CChip pChip )
     {
         if ( configIni.bDrumsEnabled )
         {
@@ -293,238 +302,6 @@ internal partial class CStagePerfDrumsScreen
                 pChip.bVisible = false;
             }
             #endregion
-            if ( !pChip.bHit && pChip.bVisible )
-            {
-                Color4 col = Color4.White;
-                if ( txChip != null )
-                {
-                    col.Alpha = pChip.nTransparency / 255.0f;
-                }
-                int x = nチャンネルtoX座標[ pChip.nChannelNumber - EChannel.HiHatClose];
-
-                if ( configIni.eLaneType.Drums == EType.A )
-                {
-                    if (configIni.eRDPosition == ERDPosition.RCRD)
-                    {
-                        x = nチャンネルtoX座標[ pChip.nChannelNumber - EChannel.HiHatClose];
-                    }
-                    else if ( configIni.eRDPosition == ERDPosition.RDRC )
-                    {
-                        x = nチャンネルtoX座標改[ pChip.nChannelNumber - EChannel.HiHatClose];
-                    }
-                }
-                else if ( configIni.eLaneType.Drums == EType.B )
-                {
-                    if ( configIni.eRDPosition == ERDPosition.RCRD )
-                    {
-                        x = nチャンネルtoX座標B[ pChip.nChannelNumber - EChannel.HiHatClose];
-                    }
-                    else if ( configIni.eRDPosition == ERDPosition.RDRC )
-                    {
-                        x = nチャンネルtoX座標B改[ pChip.nChannelNumber - EChannel.HiHatClose];
-                    }
-                }
-                else if ( configIni.eLaneType.Drums == EType.C )
-                {
-                    if ( configIni.eRDPosition == ERDPosition.RCRD )
-                    {
-                        x = nチャンネルtoX座標C[ pChip.nChannelNumber - EChannel.HiHatClose];
-                    }
-                    else if ( configIni.eRDPosition == ERDPosition.RDRC )
-                    {
-                        x = nチャンネルtoX座標C改[ pChip.nChannelNumber - EChannel.HiHatClose];
-                    }
-                }
-                else if ( configIni.eLaneType.Drums == EType.D )
-                {
-                    if ( configIni.eRDPosition == ERDPosition.RCRD )
-                    {
-                        x = nチャンネルtoX座標D[ pChip.nChannelNumber - EChannel.HiHatClose];
-                    }
-                    else if ( configIni.eRDPosition == ERDPosition.RDRC )
-                    {
-                        x = nチャンネルtoX座標D改[ pChip.nChannelNumber - EChannel.HiHatClose];
-                    }
-                }
-
-                if ( configIni.eRDPosition == ERDPosition.RDRC )
-                {
-                    if ( configIni.eLaneType.Drums == EType.A )
-                    {
-                        x = nチャンネルtoX座標改[ pChip.nChannelNumber - EChannel.HiHatClose];
-                    }
-                    else if ( configIni.eLaneType.Drums == EType.B )
-                    {
-                        x = nチャンネルtoX座標B改[ pChip.nChannelNumber - EChannel.HiHatClose];
-                    }
-                }
-
-                float y = configIni.bReverse.Drums ? ( nJudgeLinePosY.Drums + pChip.nDistanceFromBar.Drums ) : ( nJudgeLinePosY.Drums - pChip.nDistanceFromBar.Drums );
-                //todo: scale the chip by pChip.dbChipSizeRatio
-                int num9 = ctChipPatternAnimation.Drums.nCurrentValue;
-
-                switch( pChip.nChannelNumber )
-                {
-                    case EChannel.HiHatClose:
-                        x = ( x + 0x10 ) - ( ( int )( ( 32.0 * pChip.dbChipSizeRatio ) / 2.0 ) );
-                        if ( txChip != null )
-                        {
-                            txChip.tDraw2D(x - 5, y - 32, new RectangleF( 60 + 10, 0, 0x2e + 10, 64 ), col);
-
-                            if ( pChip.bBonusChip )
-                                txChip.tDraw2D(x - 5, y - 32, new RectangleF( 60 + 10, 64, 0x2e + 10, 64 ), col);
-                        }
-                        break;
-
-                    case EChannel.Snare:
-                        x = ( x + 0x10 ) - ( ( int )( ( 32.0 * pChip.dbChipSizeRatio ) / 2.0 ) );
-                        if (txChip != null)
-                        {
-                            txChip.tDraw2D(x - 5, y - 32, new RectangleF( 0x6a + 20, 0, 0x36 +10, 64 ), col);
-
-                            if ( pChip.bBonusChip )
-                                txChip.tDraw2D(x - 5, y - 32, new RectangleF( 0x6a + 20, 64, 0x36 + 10, 64 ), col);
-                        }
-                        break;
-
-                    case EChannel.BassDrum:
-                        x = ( x + 0x16 ) - ( ( int )( ( 44.0 * pChip.dbChipSizeRatio ) / 2.0 ) );
-                        if ( txChip != null )
-                        {
-                            txChip.tDraw2D(x - 5, y - 32, new RectangleF( 0, 0, 60 + 10, 64 ), col);
-
-                            if ( pChip.bBonusChip )
-                                txChip.tDraw2D(x - 5, y - 32, new RectangleF( 0, 64, 60 + 10, 64 ), col);
-                        }
-                        break;
-
-                    case EChannel.HighTom:
-                        x = ( x + 0x10 ) - ( ( int )( ( 32.0 * pChip.dbChipSizeRatio ) / 2.0 ) );
-                        if ( txChip != null )
-                        {
-                            txChip.tDraw2D(x - 5, y - 32, new RectangleF( 160 + 30, 0, 0x2e + 10, 64 ), col);
-
-                            if ( pChip.bBonusChip )
-                                txChip.tDraw2D(x - 5, y - 32, new RectangleF( 160 + 30, 64, 0x2e + 10, 64 ), col);
-                        }
-                        break;
-
-                    case EChannel.LowTom:
-                        x = ( x + 0x10 ) - ( ( int )( ( 32.0 * pChip.dbChipSizeRatio ) / 2.0 ) );
-                        if (txChip != null)
-                        {
-                            txChip.tDraw2D(x - 5, y - 32, new RectangleF( 0xce + 40, 0, 0x2e + 10, 64 ), col);
-
-                            if ( pChip.bBonusChip )
-                                txChip.tDraw2D(x - 5, y - 32, new RectangleF( 0xce + 40, 64, 0x2e + 10, 64 ), col);
-                        }
-                        break;
-
-                    case EChannel.Cymbal:
-                        x = ( x + 19 ) - ( ( int )( ( 38.0 * pChip.dbChipSizeRatio ) / 2.0 ) );
-                        if ( txChip != null )
-                        {
-                            txChip.tDraw2D(x - 5, y - 32, new RectangleF( 298 + 60, 0, 0x40 + 10, 64 ), col);
-
-                            if ( pChip.bBonusChip )
-                                txChip.tDraw2D(x - 5, y - 32, new RectangleF( 298 + 60, 64, 0x40 + 10, 64 ), col);
-                        }
-                        break;
-
-                    case EChannel.FloorTom:
-                        x = ( x + 0x10 ) - ( ( int )( ( 32.0 * pChip.dbChipSizeRatio ) / 2.0 ) );
-                        if ( txChip != null )
-                        {
-                            txChip.tDraw2D(x - 5, y - 32, new RectangleF( 0xfc + 50, 0, 0x2e + 10, 64 ), col);
-
-                            if ( pChip.bBonusChip )
-                                txChip.tDraw2D(x - 5, y - 32, new RectangleF( 0xfc + 50, 64, 0x2e + 10, 64 ), col);
-                        }
-                        break;
-
-                    case EChannel.HiHatOpen:
-                        x = ( x + 13 ) - ( ( int )( ( 26.0 * pChip.dbChipSizeRatio ) / 2.0 ) );
-                        if ( txChip != null )
-                        {
-                            switch( configIni.eHHOGraphics.Drums )
-                            {
-                                case EType.A:
-                                    x = ( x + 14 ) - ( ( int )( ( 26.0 * pChip.dbChipSizeRatio ) / 2.0 ) );
-                                    txChip.tDraw2D(x - 5, y - 32, new RectangleF( 0x200 + 100, 0, 0x26 + 10, 64 ), col);
-                                    if ( pChip.bBonusChip )
-                                        txChip.tDraw2D(x - 5, y - 32, new RectangleF( 0x200 + 100, 64, 0x26 + 10, 64 ), col);
-                                    break;
-
-                                case EType.B:
-                                    x = ( x + 14 ) - ( ( int )( ( 26.0 * pChip.dbChipSizeRatio ) / 2.0 ) );
-                                    txChip.tDraw2D(x - 5, y - 32, new RectangleF( 0x200 + 100, 0, 0x26 + 10, 64 ), col);
-                                    if ( pChip.bBonusChip )
-                                        txChip.tDraw2D(x - 5, y - 32, new RectangleF( 0x200 + 100, 64, 0x26 + 10, 64 ), col);
-                                    break;
-
-                                case EType.C:
-                                    x = ( x + 13 ) - ( ( int )( ( 32.0 * pChip.dbChipSizeRatio ) / 2.0 ) );
-                                    txChip.tDraw2D(x - 5, y - 32, new RectangleF( 60 + 10, 0, 0x2e + 10, 64 ), col);
-                                    if ( pChip.bBonusChip )
-                                        txChip.tDraw2D(x - 5, y - 32, new RectangleF( 60 + 100, 64, 0x2e + 10, 64 ), col);
-                                    break;
-                            }
-                        }
-                        break;
-
-                    case EChannel.RideCymbal:
-                        x = ( x + 13 ) - ( ( int )( ( 26.0 * pChip.dbChipSizeRatio ) / 2.0 ) );
-                        if ( txChip != null )
-                        {
-                            txChip.tDraw2D(x - 5, y - 32, new RectangleF( 0x16a + 70, 0, 0x26 + 10, 64 ), col);
-
-                            if ( pChip.bBonusChip )
-                                txChip.tDraw2D(x - 5, y - 0x20, new RectangleF( 0x16a + 70, 64, 0x26 + 10, 0x40 ), col);
-                        }
-                        break;
-
-                    case EChannel.LeftCymbal:
-                        x = ( x + 0x13 ) - ( ( int )( ( 38.0 * pChip.dbChipSizeRatio ) / 2.0 ) );
-                        if (txChip != null)
-                        {
-                            txChip.tDraw2D(x - 5, y - 32, new RectangleF( 448 + 90, 0, 64 + 10, 64 ), col);
-
-                            if ( pChip.bBonusChip )
-                                txChip.tDraw2D(x - 5, y - 0x20, new RectangleF( 448 + 90, 64, 64 + 10, 64 ), col);
-                        }
-                        break;
-
-                    case EChannel.LeftPedal:
-                        x = ( x + 0x13 ) - ( ( int )( ( 38.0 * pChip.dbChipSizeRatio ) / 2.0 ) );
-                        if (txChip != null)
-                        {
-                            txChip.tDraw2D(x - 5, y - 32, new RectangleF( 550 + 110, 0, 0x30 + 10, 64 ), col);
-                                
-                            if ( pChip.bBonusChip )
-                                txChip.tDraw2D(x - 5, y - 32, new RectangleF( 550 + 110, 64, 0x30 + 10, 64 ), col);
-                        }
-                        break;
-
-                    case EChannel.LeftBassDrum:
-                        x = ( x + 0x13 ) - ( ( int )( ( 38.0 * pChip.dbChipSizeRatio ) / 2.0 ) );
-                        if ( txChip != null )
-                        {
-                            if ( configIni.eLBDGraphics.Drums == EType.A )
-                            {
-                                txChip.tDraw2D(x - 5, y - 32, new RectangleF( 550 + 110, 0, 0x30 + 10, 64 ), col);
-                                if ( pChip.bBonusChip )
-                                    txChip.tDraw2D(x - 5, y - 32, new RectangleF( 550 + 110, 64, 0x30 + 10, 64 ), col);
-                            }
-                            else if ( configIni.eLBDGraphics.Drums == EType.B )
-                            {
-                                txChip.tDraw2D(x - 5, y - 32, new RectangleF( 400 + 80, 0, 0x30 + 10, 64 ), col);
-                                if ( pChip.bBonusChip )
-                                    txChip.tDraw2D(x - 5, y - 32, new RectangleF( 400 + 80, 64, 0x30 + 10, 64 ), col);
-                            }
-                        }
-                        break;
-                }
-            }
 
             int indexSevenLanes = nチャンネル0Atoレーン07[ pChip.nChannelNumber - EChannel.HiHatClose];
             // #35411 chnmr0 modified
@@ -621,7 +398,248 @@ internal partial class CStagePerfDrumsScreen
             pChip.bHit = true;
         }
     }
-    protected override void tUpdateAndDraw_Chip_GuitarBass(CConfigIni configIni, ref CDTX dTX, ref CChip pChip, EInstrumentPart inst)
+
+    protected override void DrawChip_Drums( CConfigIni configIni, ref CDTX dTX, ref CChip pChip )
+    {
+        if (!configIni.bDrumsEnabled)
+        {
+            return;
+        }
+
+        if ( !pChip.bHit && pChip.bVisible )
+        {
+            Color4 col = Color4.White;
+            if ( txChip != null )
+            {
+                col.Alpha = pChip.nTransparency / 255.0f;
+            }
+            int x = nチャンネルtoX座標[ pChip.nChannelNumber - EChannel.HiHatClose];
+
+            if ( configIni.eLaneType.Drums == EType.A )
+            {
+                if (configIni.eRDPosition == ERDPosition.RCRD)
+                {
+                    x = nチャンネルtoX座標[ pChip.nChannelNumber - EChannel.HiHatClose];
+                }
+                else if ( configIni.eRDPosition == ERDPosition.RDRC )
+                {
+                    x = nチャンネルtoX座標改[ pChip.nChannelNumber - EChannel.HiHatClose];
+                }
+            }
+            else if ( configIni.eLaneType.Drums == EType.B )
+            {
+                if ( configIni.eRDPosition == ERDPosition.RCRD )
+                {
+                    x = nチャンネルtoX座標B[ pChip.nChannelNumber - EChannel.HiHatClose];
+                }
+                else if ( configIni.eRDPosition == ERDPosition.RDRC )
+                {
+                    x = nチャンネルtoX座標B改[ pChip.nChannelNumber - EChannel.HiHatClose];
+                }
+            }
+            else if ( configIni.eLaneType.Drums == EType.C )
+            {
+                if ( configIni.eRDPosition == ERDPosition.RCRD )
+                {
+                    x = nチャンネルtoX座標C[ pChip.nChannelNumber - EChannel.HiHatClose];
+                }
+                else if ( configIni.eRDPosition == ERDPosition.RDRC )
+                {
+                    x = nチャンネルtoX座標C改[ pChip.nChannelNumber - EChannel.HiHatClose];
+                }
+            }
+            else if ( configIni.eLaneType.Drums == EType.D )
+            {
+                if ( configIni.eRDPosition == ERDPosition.RCRD )
+                {
+                    x = nチャンネルtoX座標D[ pChip.nChannelNumber - EChannel.HiHatClose];
+                }
+                else if ( configIni.eRDPosition == ERDPosition.RDRC )
+                {
+                    x = nチャンネルtoX座標D改[ pChip.nChannelNumber - EChannel.HiHatClose];
+                }
+            }
+
+            if ( configIni.eRDPosition == ERDPosition.RDRC )
+            {
+                if ( configIni.eLaneType.Drums == EType.A )
+                {
+                    x = nチャンネルtoX座標改[ pChip.nChannelNumber - EChannel.HiHatClose];
+                }
+                else if ( configIni.eLaneType.Drums == EType.B )
+                {
+                    x = nチャンネルtoX座標B改[ pChip.nChannelNumber - EChannel.HiHatClose];
+                }
+            }
+
+            float y = configIni.bReverse.Drums ? ( nJudgeLinePosY.Drums + pChip.nDistanceFromBar.Drums ) : ( nJudgeLinePosY.Drums - pChip.nDistanceFromBar.Drums );
+            //todo: scale the chip by pChip.dbChipSizeRatio
+            int num9 = ctChipPatternAnimation.Drums.nCurrentValue;
+
+            switch( pChip.nChannelNumber )
+            {
+                case EChannel.HiHatClose:
+                    x = ( x + 0x10 ) - ( ( int )( ( 32.0 * pChip.dbChipSizeRatio ) / 2.0 ) );
+                    if ( txChip != null )
+                    {
+                        txChip.tDraw2D(x - 5, y - 32, new RectangleF( 60 + 10, 0, 0x2e + 10, 64 ), col);
+
+                        if ( pChip.bBonusChip )
+                            txChip.tDraw2D(x - 5, y - 32, new RectangleF( 60 + 10, 64, 0x2e + 10, 64 ), col);
+                    }
+                    break;
+
+                case EChannel.Snare:
+                    x = ( x + 0x10 ) - ( ( int )( ( 32.0 * pChip.dbChipSizeRatio ) / 2.0 ) );
+                    if (txChip != null)
+                    {
+                        txChip.tDraw2D(x - 5, y - 32, new RectangleF( 0x6a + 20, 0, 0x36 +10, 64 ), col);
+
+                        if ( pChip.bBonusChip )
+                            txChip.tDraw2D(x - 5, y - 32, new RectangleF( 0x6a + 20, 64, 0x36 + 10, 64 ), col);
+                    }
+                    break;
+
+                case EChannel.BassDrum:
+                    x = ( x + 0x16 ) - ( ( int )( ( 44.0 * pChip.dbChipSizeRatio ) / 2.0 ) );
+                    if ( txChip != null )
+                    {
+                        txChip.tDraw2D(x - 5, y - 32, new RectangleF( 0, 0, 60 + 10, 64 ), col);
+
+                        if ( pChip.bBonusChip )
+                            txChip.tDraw2D(x - 5, y - 32, new RectangleF( 0, 64, 60 + 10, 64 ), col);
+                    }
+                    break;
+
+                case EChannel.HighTom:
+                    x = ( x + 0x10 ) - ( ( int )( ( 32.0 * pChip.dbChipSizeRatio ) / 2.0 ) );
+                    if ( txChip != null )
+                    {
+                        txChip.tDraw2D(x - 5, y - 32, new RectangleF( 160 + 30, 0, 0x2e + 10, 64 ), col);
+
+                        if ( pChip.bBonusChip )
+                            txChip.tDraw2D(x - 5, y - 32, new RectangleF( 160 + 30, 64, 0x2e + 10, 64 ), col);
+                    }
+                    break;
+
+                case EChannel.LowTom:
+                    x = ( x + 0x10 ) - ( ( int )( ( 32.0 * pChip.dbChipSizeRatio ) / 2.0 ) );
+                    if (txChip != null)
+                    {
+                        txChip.tDraw2D(x - 5, y - 32, new RectangleF( 0xce + 40, 0, 0x2e + 10, 64 ), col);
+
+                        if ( pChip.bBonusChip )
+                            txChip.tDraw2D(x - 5, y - 32, new RectangleF( 0xce + 40, 64, 0x2e + 10, 64 ), col);
+                    }
+                    break;
+
+                case EChannel.Cymbal:
+                    x = ( x + 19 ) - ( ( int )( ( 38.0 * pChip.dbChipSizeRatio ) / 2.0 ) );
+                    if ( txChip != null )
+                    {
+                        txChip.tDraw2D(x - 5, y - 32, new RectangleF( 298 + 60, 0, 0x40 + 10, 64 ), col);
+
+                        if ( pChip.bBonusChip )
+                            txChip.tDraw2D(x - 5, y - 32, new RectangleF( 298 + 60, 64, 0x40 + 10, 64 ), col);
+                    }
+                    break;
+
+                case EChannel.FloorTom:
+                    x = ( x + 0x10 ) - ( ( int )( ( 32.0 * pChip.dbChipSizeRatio ) / 2.0 ) );
+                    if ( txChip != null )
+                    {
+                        txChip.tDraw2D(x - 5, y - 32, new RectangleF( 0xfc + 50, 0, 0x2e + 10, 64 ), col);
+
+                        if ( pChip.bBonusChip )
+                            txChip.tDraw2D(x - 5, y - 32, new RectangleF( 0xfc + 50, 64, 0x2e + 10, 64 ), col);
+                    }
+                    break;
+
+                case EChannel.HiHatOpen:
+                    x = ( x + 13 ) - ( ( int )( ( 26.0 * pChip.dbChipSizeRatio ) / 2.0 ) );
+                    if ( txChip != null )
+                    {
+                        switch( configIni.eHHOGraphics.Drums )
+                        {
+                            case EType.A:
+                                x = ( x + 14 ) - ( ( int )( ( 26.0 * pChip.dbChipSizeRatio ) / 2.0 ) );
+                                txChip.tDraw2D(x - 5, y - 32, new RectangleF( 0x200 + 100, 0, 0x26 + 10, 64 ), col);
+                                if ( pChip.bBonusChip )
+                                    txChip.tDraw2D(x - 5, y - 32, new RectangleF( 0x200 + 100, 64, 0x26 + 10, 64 ), col);
+                                break;
+
+                            case EType.B:
+                                x = ( x + 14 ) - ( ( int )( ( 26.0 * pChip.dbChipSizeRatio ) / 2.0 ) );
+                                txChip.tDraw2D(x - 5, y - 32, new RectangleF( 0x200 + 100, 0, 0x26 + 10, 64 ), col);
+                                if ( pChip.bBonusChip )
+                                    txChip.tDraw2D(x - 5, y - 32, new RectangleF( 0x200 + 100, 64, 0x26 + 10, 64 ), col);
+                                break;
+
+                            case EType.C:
+                                x = ( x + 13 ) - ( ( int )( ( 32.0 * pChip.dbChipSizeRatio ) / 2.0 ) );
+                                txChip.tDraw2D(x - 5, y - 32, new RectangleF( 60 + 10, 0, 0x2e + 10, 64 ), col);
+                                if ( pChip.bBonusChip )
+                                    txChip.tDraw2D(x - 5, y - 32, new RectangleF( 60 + 100, 64, 0x2e + 10, 64 ), col);
+                                break;
+                        }
+                    }
+                    break;
+
+                case EChannel.RideCymbal:
+                    x = ( x + 13 ) - ( ( int )( ( 26.0 * pChip.dbChipSizeRatio ) / 2.0 ) );
+                    if ( txChip != null )
+                    {
+                        txChip.tDraw2D(x - 5, y - 32, new RectangleF( 0x16a + 70, 0, 0x26 + 10, 64 ), col);
+
+                        if ( pChip.bBonusChip )
+                            txChip.tDraw2D(x - 5, y - 0x20, new RectangleF( 0x16a + 70, 64, 0x26 + 10, 0x40 ), col);
+                    }
+                    break;
+
+                case EChannel.LeftCymbal:
+                    x = ( x + 0x13 ) - ( ( int )( ( 38.0 * pChip.dbChipSizeRatio ) / 2.0 ) );
+                    if (txChip != null)
+                    {
+                        txChip.tDraw2D(x - 5, y - 32, new RectangleF( 448 + 90, 0, 64 + 10, 64 ), col);
+
+                        if ( pChip.bBonusChip )
+                            txChip.tDraw2D(x - 5, y - 0x20, new RectangleF( 448 + 90, 64, 64 + 10, 64 ), col);
+                    }
+                    break;
+
+                case EChannel.LeftPedal:
+                    x = ( x + 0x13 ) - ( ( int )( ( 38.0 * pChip.dbChipSizeRatio ) / 2.0 ) );
+                    if (txChip != null)
+                    {
+                        txChip.tDraw2D(x - 5, y - 32, new RectangleF( 550 + 110, 0, 0x30 + 10, 64 ), col);
+                            
+                        if ( pChip.bBonusChip )
+                            txChip.tDraw2D(x - 5, y - 32, new RectangleF( 550 + 110, 64, 0x30 + 10, 64 ), col);
+                    }
+                    break;
+
+                case EChannel.LeftBassDrum:
+                    x = ( x + 0x13 ) - ( ( int )( ( 38.0 * pChip.dbChipSizeRatio ) / 2.0 ) );
+                    if ( txChip != null )
+                    {
+                        if ( configIni.eLBDGraphics.Drums == EType.A )
+                        {
+                            txChip.tDraw2D(x - 5, y - 32, new RectangleF( 550 + 110, 0, 0x30 + 10, 64 ), col);
+                            if ( pChip.bBonusChip )
+                                txChip.tDraw2D(x - 5, y - 32, new RectangleF( 550 + 110, 64, 0x30 + 10, 64 ), col);
+                        }
+                        else if ( configIni.eLBDGraphics.Drums == EType.B )
+                        {
+                            txChip.tDraw2D(x - 5, y - 32, new RectangleF( 400 + 80, 0, 0x30 + 10, 64 ), col);
+                            if ( pChip.bBonusChip )
+                                txChip.tDraw2D(x - 5, y - 32, new RectangleF( 400 + 80, 64, 0x30 + 10, 64 ), col);
+                        }
+                    }
+                    break;
+            }
+        }
+    }
+    protected override void UpdateChip_GuitarBass(CConfigIni configIni, ref CDTX dTX, ref CChip pChip, EInstrumentPart inst)
     {
         int instIndex = (int)inst;
         
@@ -633,7 +651,7 @@ internal partial class CStagePerfDrumsScreen
         }
     }
     
-    protected override void tUpdateAndDraw_Chip_FillIn( CConfigIni configIni, ref CDTX dTX, ref CChip pChip )
+    protected override void UpdateChip_FillIn( CConfigIni configIni, ref CDTX dTX, ref CChip pChip )
     {
         if ( !pChip.bHit && ( pChip.nDistanceFromBar.Drums < 0 ) )
         {
@@ -777,7 +795,7 @@ internal partial class CStagePerfDrumsScreen
 
     }
 
-    protected override void tUpdateAndDraw_Chip_NoSound_Drums(CConfigIni configIni, ref CDTX dTX, ref CChip pChip)  // t進行描画_チップ_空打ち音設定_ドラム
+    protected override void UpdateChip_NoSound_Drums(CConfigIni configIni, ref CDTX dTX, ref CChip pChip)  // t進行描画_チップ_空打ち音設定_ドラム
     {
         if (!pChip.bHit && (pChip.nDistanceFromBar.Drums < 0))
         {

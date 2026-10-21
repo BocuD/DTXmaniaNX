@@ -8,7 +8,7 @@ namespace DTXMania;
 
 internal partial class CStagePerfGuitarScreen
 {
-	protected override void tUpdateAndDraw_Chip_GuitarBass(CConfigIni configIni, ref CDTX dTX, ref CChip pChip,
+	protected override void UpdateChip_GuitarBass(CConfigIni configIni, ref CDTX dTX, ref CChip pChip,
 		EInstrumentPart inst)
 	{
 		int barYNormal = nJudgeLinePosY[(int)inst] + 10;
@@ -77,135 +77,11 @@ internal partial class CStagePerfGuitarScreen
 				out bool bChipHasP, 
 				out bool bChipIsOpen);
 
-			#region [ chip描画 ]
-
-			if ((!pChip.bHit || pChip.bIsLongNote) && pChip.bVisible)
+			//a long note whose end has passed is finished
+			if (pChip.bIsLongNote && pChip.bVisible && pChip.chipLongNoteEndPosition.nDistanceFromBar[(int)inst] <= 0)
 			{
-				float yBarPos = configIni.bReverse[instIndex] ? barYReverse : barYNormal;
-				float y = configIni.bReverse[instIndex]
-					? (barYReverse - pChip.nDistanceFromBar[instIndex])
-					: (barYNormal + pChip.nDistanceFromBar[instIndex]);
-
-				//
-				float noteLength = 0;
-				if (pChip.bIsLongNote)
-				{
-					if (pChip.chipLongNoteEndPosition.nDistanceFromBar[(int)inst] <= 0)
-					{
-						return;
-					}
-
-					noteLength = (float) (pChip.chipLongNoteEndPosition.nDistanceFromBar[(int)inst] -
-					       pChip.nDistanceFromBar[(int)inst]);
-					
-					if (pChip.bHit && pChip.bIsHittingLongNote)
-					{
-						y = yBarPos - 5; //-5 because otherwise it doesn't align or some shit
-						noteLength = (float) (pChip.chipLongNoteEndPosition.nDistanceFromBar[(int)inst] + 5f); //add 5 to compensate
-					}
-				}
-
-				if (txChip != null)
-				{
-					if (bChipIsOpen)
-					{
-						int xo = (inst == EInstrumentPart.GUITAR) ? 88 : 959;
-						Color4 col = Color4.White;
-						col.Alpha = pChip.nTransparency / 255.0f;
-						txChip.tDraw2D(xo, y - 2, new RectangleF(0, 10, 196, 10), col);
-					}
-
-					//Refactored code for drawing
-					int[] nChipXPos =
-					[
-						inst == EInstrumentPart.GUITAR ? 88 : 959,
-						inst == EInstrumentPart.GUITAR ? 127 : 998,
-						inst == EInstrumentPart.GUITAR ? 166 : 1036,
-						inst == EInstrumentPart.GUITAR ? 205 : 1076,
-						inst == EInstrumentPart.GUITAR ? 244 : 1115
-					];
-
-					if (inst == EInstrumentPart.GUITAR && CDTXMania.ConfigIni.bLeft.Guitar)
-					{
-						Array.Reverse(nChipXPos);
-					}
-
-					if (inst == EInstrumentPart.BASS && CDTXMania.ConfigIni.bLeft.Bass)
-					{
-						Array.Reverse(nChipXPos);
-					}
-
-					RectangleF[] rChipTxRectArray =
-					[
-						new(0, 0, 38, 10),
-						new(38, 0, 38, 10),
-						new(76, 0, 38, 10),
-						new(114, 0, 38, 10),
-						new(152, 0, 38, 10)
-					];
-
-					bool[] bChipColorFlags =
-					[
-						bChipHasR,
-						bChipHasG,
-						bChipHasB,
-						bChipHasY,
-						bChipHasP
-					];
-
-					for (int i = 0; i < bChipColorFlags.Length; i++)
-					{
-						if (bChipColorFlags[i])
-						{
-							if (inst == EInstrumentPart.GUITAR || inst == EInstrumentPart.BASS)
-							{
-								int num8 = nChipXPos[i];
-								RectangleF rect1 = rChipTxRectArray[i];
-
-								if (!pChip.bHit)
-								{
-									Color4 color = Color4.White;
-									color.Alpha = pChip.nTransparency / 255.0f;
-
-									//normal chip draw i think (?)
-									////yeeeep
-									/// 
-									//txChip.tDraw2D(num8, y - 10 / 2, rect1, color);
-									txNote[i].tDraw2D(num8, y - 10 / 2.0f, color);
-								}
-
-								if (pChip.bIsLongNote)
-								{
-									RectangleF rectangle2 = rect1;
-									rectangle2.Y += 3;
-									rectangle2.Height = 5;
-									Color4 col = Color4.White;
-									col.Alpha = 0.5f;
-
-									if (pChip.bHit && !pChip.bIsHittingLongNote)
-									{
-										col.Alpha = 0.25f;
-									}
-									
-									txHoldNoteBg[i].tDraw2D(num8,
-										y - (CDTXMania.ConfigIni.bReverse[(int)inst] ? noteLength : 0),
-										new RectangleF(0, 0, 36, 8), col,
-										new Vector2(36, noteLength));
-									
-									HoldNote holdNote = holdNotes[(int)inst - 1, i];
-									
-									holdNote.clipHeight = noteLength;
-									holdNote.position.Y = y - (CDTXMania.ConfigIni.bReverse[(int)inst] ? noteLength : 0.0f);
-									
-									holdNote.Draw(ui.LocalTransformMatrix, pChip.bHit, pChip.bIsHittingLongNote);
-								}
-							}
-						}
-					}
-				}
+				return;
 			}
-
-			#endregion
 
 
 			// #35411 2015.08.20 chnmr0 modified
@@ -469,6 +345,145 @@ internal partial class CStagePerfGuitarScreen
 			pChip.bHit = true;
 			tPlaySound(pChip, AudioMixer.Timer.nResetAtMs + pChip.nPlaybackTimeMs, inst,
 				dTX.nモニタを考慮した音量(inst));
+		}
+	}
+
+	protected override void DrawChip_GuitarBass(CConfigIni configIni, ref CDTX dTX, ref CChip pChip, EInstrumentPart inst)
+	{
+		if (!configIni.bGuitarEnabled)
+		{
+			return;
+		}
+
+		int barYNormal = nJudgeLinePosY[(int)inst] + 10;
+		int barYReverse = nJudgeLinePosY[(int)inst] + 1;
+		int instIndex = (int)inst;
+		DetermineUsedChips(pChip, out bool bChipHasR, out bool bChipHasG, out bool bChipHasB, out bool bChipHasY, out bool bChipHasP, out bool bChipIsOpen);
+
+		if ((!pChip.bHit || pChip.bIsLongNote) && pChip.bVisible)
+		{
+			float yBarPos = configIni.bReverse[instIndex] ? barYReverse : barYNormal;
+			float y = configIni.bReverse[instIndex]
+				? (barYReverse - pChip.nDistanceFromBar[instIndex])
+				: (barYNormal + pChip.nDistanceFromBar[instIndex]);
+
+			//
+			float noteLength = 0;
+			if (pChip.bIsLongNote)
+			{
+				if (pChip.chipLongNoteEndPosition.nDistanceFromBar[(int)inst] <= 0)
+				{
+					return;
+				}
+
+				noteLength = (float) (pChip.chipLongNoteEndPosition.nDistanceFromBar[(int)inst] -
+				       pChip.nDistanceFromBar[(int)inst]);
+				
+				if (pChip.bHit && pChip.bIsHittingLongNote)
+				{
+					y = yBarPos - 5; //-5 because otherwise it doesn't align or some shit
+					noteLength = (float) (pChip.chipLongNoteEndPosition.nDistanceFromBar[(int)inst] + 5f); //add 5 to compensate
+				}
+			}
+
+			if (txChip != null)
+			{
+				if (bChipIsOpen)
+				{
+					int xo = (inst == EInstrumentPart.GUITAR) ? 88 : 959;
+					Color4 col = Color4.White;
+					col.Alpha = pChip.nTransparency / 255.0f;
+					txChip.tDraw2D(xo, y - 2, new RectangleF(0, 10, 196, 10), col);
+				}
+
+				//Refactored code for drawing
+				int[] nChipXPos =
+				[
+					inst == EInstrumentPart.GUITAR ? 88 : 959,
+					inst == EInstrumentPart.GUITAR ? 127 : 998,
+					inst == EInstrumentPart.GUITAR ? 166 : 1036,
+					inst == EInstrumentPart.GUITAR ? 205 : 1076,
+					inst == EInstrumentPart.GUITAR ? 244 : 1115
+				];
+
+				if (inst == EInstrumentPart.GUITAR && CDTXMania.ConfigIni.bLeft.Guitar)
+				{
+					Array.Reverse(nChipXPos);
+				}
+
+				if (inst == EInstrumentPart.BASS && CDTXMania.ConfigIni.bLeft.Bass)
+				{
+					Array.Reverse(nChipXPos);
+				}
+
+				RectangleF[] rChipTxRectArray =
+				[
+					new(0, 0, 38, 10),
+					new(38, 0, 38, 10),
+					new(76, 0, 38, 10),
+					new(114, 0, 38, 10),
+					new(152, 0, 38, 10)
+				];
+
+				bool[] bChipColorFlags =
+				[
+					bChipHasR,
+					bChipHasG,
+					bChipHasB,
+					bChipHasY,
+					bChipHasP
+				];
+
+				for (int i = 0; i < bChipColorFlags.Length; i++)
+				{
+					if (bChipColorFlags[i])
+					{
+						if (inst == EInstrumentPart.GUITAR || inst == EInstrumentPart.BASS)
+						{
+							int num8 = nChipXPos[i];
+							RectangleF rect1 = rChipTxRectArray[i];
+
+							if (!pChip.bHit)
+							{
+								Color4 color = Color4.White;
+								color.Alpha = pChip.nTransparency / 255.0f;
+
+								//normal chip draw i think (?)
+								////yeeeep
+								/// 
+								//txChip.tDraw2D(num8, y - 10 / 2, rect1, color);
+								txNote[i].tDraw2D(num8, y - 10 / 2.0f, color);
+							}
+
+							if (pChip.bIsLongNote)
+							{
+								RectangleF rectangle2 = rect1;
+								rectangle2.Y += 3;
+								rectangle2.Height = 5;
+								Color4 col = Color4.White;
+								col.Alpha = 0.5f;
+
+								if (pChip.bHit && !pChip.bIsHittingLongNote)
+								{
+									col.Alpha = 0.25f;
+								}
+								
+								txHoldNoteBg[i].tDraw2D(num8,
+									y - (CDTXMania.ConfigIni.bReverse[(int)inst] ? noteLength : 0),
+									new RectangleF(0, 0, 36, 8), col,
+									new Vector2(36, noteLength));
+								
+								HoldNote holdNote = holdNotes[(int)inst - 1, i];
+								
+								holdNote.clipHeight = noteLength;
+								holdNote.position.Y = y - (CDTXMania.ConfigIni.bReverse[(int)inst] ? noteLength : 0.0f);
+								
+								holdNote.Draw(ui.LocalTransformMatrix, pChip.bHit, pChip.bIsHittingLongNote);
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 
