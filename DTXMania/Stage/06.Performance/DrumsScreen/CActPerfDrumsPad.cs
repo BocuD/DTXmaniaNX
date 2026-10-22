@@ -1,5 +1,4 @@
 ﻿using System.Drawing;
-using System.Runtime.InteropServices;
 using DTXMania.Core;
 using DTXMania.Core.Framework;
 using DTXMania.UI.Drawable;
@@ -9,458 +8,187 @@ namespace DTXMania;
 
 internal class CActPerfDrumsPad : CActivity
 {
-    // コンストラクタ
+    //pads are indexed LC HH SD BD HT LT FT CY RD LP
+    private const int PadCount = 10;
+    //with RD RC the ride pad reaches under the cymbal pad, so CY draws last
+    private static readonly int[] DrawOrder = [0, 1, 2, 3, 4, 5, 6, 8, 9, 7];
+    //per NumOfLanes
+    private static readonly bool[][] Shown =
+    [
+        [true, true, true, true, true, true, true, true, true, true],
+        [true, true, true, true, true, true, true, true, false, true],
+        [false, true, true, true, true, true, false, true, false, false]
+    ];
+    private static readonly ELane[] Lanes =
+        [ELane.LC, ELane.HH, ELane.SD, ELane.BD, ELane.HT, ELane.LT, ELane.FT, ELane.CY, ELane.RD, ELane.LP];
+    //how far left of its lane's centre each 96px cell of 7_pads.png starts. Cymbal art hangs off to the right
+    private static readonly float[] CellOffset = [67.5f, 57f, 51f, 45f, 40f, 46f, 45f, 45f, 43f, 47f];
+    private static readonly PointF[] SourceOrigin =
+    [
+        new(0, 0), new(96, 0), new(0, 96), new(0, 192), new(96, 96),
+        new(192, 96), new(288, 96), new(192, 0), new(288, 0), new(96, 192)
+    ];
+
+    //what a pad's colours are multiplied by at full brightness. Above 1 is drawn a second time, additively
+    private static readonly Color4[] LitColour =
+    [
+        new(1.16f, 0.74f, 0.99f), new(0.5f, 0.85f, 1.16f), new(1.16f, 1.06f, 0.52f), new(0.89f, 0.63f, 1.16f),
+        new(0.53f, 0.96f, 0.61f), new(1.16f, 0.8f, 0.76f), new(1.16f, 0.92f, 0.54f), new(0.5f, 0.85f, 1.16f),
+        new(0.5f, 0.85f, 1.16f), new(1.16f, 0.77f, 0.99f)
+    ];
+
+    private struct PadState
+    {
+        public int brightness;
+        public int bounce;
+        public int bounceSpeed;
+    }
+
+    private readonly PadState[] pads = new PadState[PadCount];
+    private long brightnessTimer;
+    private long bounceTimer;
+    private CCounter? bonusTimer;
+    private BaseTexture? txPad;
+    private BaseTexture? txBonus;
 
     public CActPerfDrumsPad()
     {
-        ST基本位置[] st基本位置Array = new ST基本位置[10];
-
-        //LC
-        ST基本位置 st基本位置 = new()
-        {
-            x = 263,
-            y = 10,
-            rc = new RectangleF(0, 0, 0x60, 0x60)
-        };
-        st基本位置Array[0] = st基本位置;
-
-        //HH
-        ST基本位置 st基本位置2 = new()
-        {
-            x = 336,
-            y = 10,
-            rc = new RectangleF(0x60, 0, 0x60, 0x60)
-        };
-        st基本位置Array[1] = st基本位置2;
-
-        //SD
-        ST基本位置 st基本位置3 = new()
-        {
-            x = 446,
-            y = 10,
-            rc = new RectangleF(0, 0x60, 0x60, 0x60)
-        };
-        st基本位置Array[2] = st基本位置3;
-
-        //BD
-        ST基本位置 st基本位置4 = new()
-        {
-            x = 565,
-            y = 10,
-            rc = new RectangleF(0, 0xc0, 0x60, 0x60)
-        };
-        st基本位置Array[3] = st基本位置4;
-
-        //HT
-        ST基本位置 st基本位置5 = new()
-        {
-            x = 510,
-            y = 10,
-            rc = new RectangleF(0x60, 0x60, 0x60, 0x60)
-        };
-        st基本位置Array[4] = st基本位置5;
-
-        //LT
-        ST基本位置 st基本位置6 = new()
-        {
-            x = 622,
-            y = 10,
-            rc = new RectangleF(0xc0, 0x60, 0x60, 0x60)
-        };
-        st基本位置Array[5] = st基本位置6;
-
-        //FT
-        ST基本位置 st基本位置7 = new()
-        {
-            x = 672,
-            y = 10,
-            rc = new RectangleF(288, 0x60, 0x60, 0x60)
-        };
-        st基本位置Array[6] = st基本位置7;
-
-        //CY
-        ST基本位置 st基本位置8 = new()
-        {
-            x = 0x2df,
-            y = 10,
-            rc = new RectangleF(0xc0, 0, 0x60, 0x60)
-        };
-        st基本位置Array[7] = st基本位置8;
-
-        //RD
-        ST基本位置 st基本位置9 = new()
-        {
-            x = 0x317,
-            y = 10,
-            rc = new RectangleF(288, 0, 0x60, 0x60)
-        };
-        st基本位置Array[8] = st基本位置9;
-
-        //LP
-        ST基本位置 st基本位置10 = new()
-        {
-            x = 0x18c,
-            y = 10,
-            rc = new RectangleF(0x60, 0xc0, 0x60, 0x60)
-        };
-        st基本位置Array[9] = st基本位置10;
-
-        this.st基本位置 = st基本位置Array;
         bActivated = false;
     }
 
-
-    // メソッド
-
-    public void Hit(int nLane)
+    public void Hit(int pad)
     {
-        stパッド状態[nLane].n明るさ = 6;
-        stパッド状態[nLane].nY座標加速度dot = 2;
-        stパッド状態[nLane].nY座標加速度dot2 = 2;
+        pads[pad].brightness = 6;
+        pads[pad].bounceSpeed = 2;
     }
 
-    // CActivity 実装
+    public void ShowBonus()
+    {
+        bonusTimer = new CCounter(0, 1020, 1, CDTXMania.Timer);
+    }
 
     public override void OnActivate()
     {
-        nフラッシュ制御タイマ = -1L;
-        nY座標制御タイマ = -1L;
-        for (int i = 0; i < 10; i++)
-        {
-            STパッド状態 stパッド状態2 = new();
-            STパッド状態 stパッド状態 = stパッド状態2;
-            stパッド状態.nY座標オフセットdot = 0;
-            stパッド状態.nY座標加速度dot = 0;
-            stパッド状態.nY座標オフセットdot2 = 0;
-            stパッド状態.nY座標加速度dot2 = 0;
-            stパッド状態.n明るさ = 0;
-            this.stパッド状態[i] = stパッド状態;
-        }
+        Array.Clear(pads);
+        bonusTimer = null;
         base.OnActivate();
     }
+
     public override void OnManagedCreateResources()
     {
-        if (bActivated)
+        if (!bActivated)
         {
-            txPad = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_pads.png"));
-            txPadFlush = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\ScreenPlayDrums pads flush.png"));
-            txBonus = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_Bonus.png"));
-            base.OnManagedCreateResources();
+            return;
         }
+
+        txPad = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_pads.png"));
+        txBonus = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_Bonus.png"));
+        base.OnManagedCreateResources();
     }
 
     public override int OnUpdateAndDraw()
     {
-        if (bActivated)
+        if (!bActivated)
         {
-
-
-            if (bJustStartedUpdate)
-            {
-                nフラッシュ制御タイマ = CDTXMania.Timer.nCurrentTime;
-                nY座標制御タイマ = CDTXMania.Timer.nCurrentTime;
-                bJustStartedUpdate = false;
-            }
-            long num = CDTXMania.Timer.nCurrentTime;
-            if (num < nフラッシュ制御タイマ)
-            {
-                nフラッシュ制御タイマ = num;
-            }
-            while ((num - nフラッシュ制御タイマ) >= 18L)
-            {
-                for (int j = 0; j < 10; j++)
-                {
-                    if (stパッド状態[j].n明るさ > 0)
-                    {
-                        stパッド状態[j].n明るさ--;
-                    }
-                }
-                nフラッシュ制御タイマ += 18L;
-            }
-            long num3 = CDTXMania.Timer.nCurrentTime;
-            if (num3 < nY座標制御タイマ)
-            {
-                nY座標制御タイマ = num3;
-            }
-            if (num3 < nY座標制御タイマ2)
-            {
-                nY座標制御タイマ2 = num3;
-            }
-            while ((num3 - nY座標制御タイマ) >= 5L)
-            {
-                for (int k = 0; k < 10; k++)
-                {
-                    stパッド状態[k].nY座標オフセットdot += stパッド状態[k].nY座標加速度dot;
-                    if (stパッド状態[k].nY座標オフセットdot > 15)
-                    {
-                        stパッド状態[k].nY座標オフセットdot = 15;
-                        stパッド状態[k].nY座標加速度dot = -1;
-                    }
-                    else if (stパッド状態[k].nY座標オフセットdot < 0)
-                    {
-                        stパッド状態[k].nY座標オフセットdot = 0;
-                        stパッド状態[k].nY座標加速度dot = 0;
-                    }
-
-                    stパッド状態[k].nX座標オフセットdot += stパッド状態[k].nY座標加速度dot;
-                    if (stパッド状態[k].nX座標オフセットdot > 6)
-                    {
-                        stパッド状態[k].nX座標オフセットdot = 6;
-                        stパッド状態[k].nX座標加速度dot = -2;
-                    }
-                    else if (stパッド状態[k].nX座標オフセットdot < 0)
-                    {
-                        stパッド状態[k].nX座標オフセットdot = 0;
-                        stパッド状態[k].nX座標加速度dot = 0;
-                    }
-
-                    stパッド状態[k].nX座標オフセットdotFLIP += stパッド状態[k].nY座標加速度dot;
-                    if (stパッド状態[k].nX座標オフセットdotFLIP > 6)
-                    {
-                        stパッド状態[k].nX座標オフセットdotFLIP = 6;
-                        stパッド状態[k].nX座標加速度dot = -2;
-                    }
-                    else if (stパッド状態[k].nX座標オフセットdotFLIP < 0)
-                    {
-                        stパッド状態[k].nX座標オフセットdotFLIP = 0;
-                        stパッド状態[k].nX座標加速度dot = 0;
-                    }
-
-                    stパッド状態[k].nX座標オフセットdot2 += stパッド状態[k].nY座標加速度dot;
-                    if (stパッド状態[k].nX座標オフセットdot2 > 3)
-                    {
-                        stパッド状態[k].nX座標オフセットdot2 = 3;
-                        stパッド状態[k].nX座標加速度dot = -1;
-                    }
-                    else if (stパッド状態[k].nX座標オフセットdot2 < 0)
-                    {
-                        stパッド状態[k].nX座標オフセットdot2 = 0;
-                        stパッド状態[k].nX座標加速度dot = 0;
-                    }
-
-                    stパッド状態[k].nX座標オフセットdot2FLIP += stパッド状態[k].nY座標加速度dot;
-                    if (stパッド状態[k].nX座標オフセットdot2FLIP > 3)
-                    {
-                        stパッド状態[k].nX座標オフセットdot2FLIP = 3;
-                        stパッド状態[k].nX座標加速度dot = -1;
-                    }
-                    else if (stパッド状態[k].nX座標オフセットdot2FLIP < 0)
-                    {
-                        stパッド状態[k].nX座標オフセットdot2FLIP = 0;
-                        stパッド状態[k].nX座標加速度dot = 0;
-                    }
-                }
-                nY座標制御タイマ += 6L;
-            }
-            while ((num3 - nY座標制御タイマ2) >= 6L)
-            {
-                for (int k = 0; k < 10; k++)
-                {
-                    stパッド状態[k].nY座標オフセットdot2 += stパッド状態[k].nY座標加速度dot2;
-                    if (stパッド状態[k].nY座標オフセットdot2 > 11)
-                    {
-                        stパッド状態[k].nY座標オフセットdot2 = 11;
-                        stパッド状態[k].nY座標加速度dot2 = -1;
-                    }
-                    else if (stパッド状態[k].nY座標オフセットdot2 < 0)
-                    {
-                        stパッド状態[k].nY座標オフセットdot2 = 0;
-                        stパッド状態[k].nY座標加速度dot2 = 0;
-                    }
-                }
-                nY座標制御タイマ2 += 8L;
-            }
-            for (int i = 0; i < 10; i++)
-            {
-                int index = n描画順[i];
-                int numOfLanesflagIndex = (int)CDTXMania.ConfigIni.eNumOfLanes.Drums;
-                //26072020: Check DrawFlags array before even compute positions for drawing
-                if (nDrawFlags[numOfLanesflagIndex, index] == 1)
-                {
-                    #region[レーン切り替え]                    
-                    int x = st基本位置[index].x;
-                    int y = (st基本位置[index].y + (CDTXMania.ConfigIni.bReverse.Drums ? 60 : 560)) + stパッド状態[index].nY座標オフセットdot2;
-
-                    if ((index == 2) && ((CDTXMania.ConfigIni.eLaneType.Drums == EType.B) || CDTXMania.ConfigIni.eLaneType.Drums == EType.D))
-                    {
-                        x = st基本位置[9].x - 4;
-                    }
-                    if (index == 3)
-                    {
-                        if ((CDTXMania.ConfigIni.eLaneType.Drums == EType.B) || (CDTXMania.ConfigIni.eLaneType.Drums == EType.C))
-                        {
-                            x = st基本位置[4].x + 7;
-                        }
-                    }
-                    if (index == 4)
-                    {
-                        if ((CDTXMania.ConfigIni.eLaneType.Drums == EType.B) || (CDTXMania.ConfigIni.eLaneType.Drums == EType.C))
-                        {
-                            x = st基本位置[3].x + 15;
-                        }
-                        else if (CDTXMania.ConfigIni.eLaneType.Drums == EType.D)
-                        {
-                            x = st基本位置[3].x - 108;
-                        }
-                    }
-                    if (index == 9)
-                    {
-                        if (CDTXMania.ConfigIni.eLaneType.Drums == EType.B)
-                        {
-                            x = st基本位置[2].x + 10;
-                        }
-                        else if (CDTXMania.ConfigIni.eLaneType.Drums == EType.D)
-                        {
-                            x = st基本位置[2].x + 50;
-                        }
-                    }
-                    if ((index == 5) && (CDTXMania.ConfigIni.eLaneType.Drums == EType.B))
-                    {
-                        x = st基本位置[5].x + 2;
-                    }
-                    if ((index == 8) && (CDTXMania.ConfigIni.eRDPosition == ERDPosition.RDRC))
-                    {
-                        x = st基本位置[7].x - 15;
-                    }
-                    if ((index == 7) && (CDTXMania.ConfigIni.eRDPosition == ERDPosition.RDRC))
-                    {
-                        x = st基本位置[8].x - 15;
-                    }
-                    if (txPad != null)
-                    {
-                        txPad.tDraw2D(x, y, st基本位置[index].rc);
-
-                    }
-                    if (txPadFlush != null)
-                    {
-                        Color4 color = Color4.White;
-                        color.Alpha = ((stパッド状態[index].n明るさ * 50) + 0 / 255.0f);
-                        txPadFlush.tDraw2D(x, y, st基本位置[index].rc, color);
-
-                    }
-
-                    #endregion
-                }
-
-            }
-            #region[ ボーナス表示 ]
-            for (int i = 0; i < 4; i++)
-            {
-                //アニメーションは仮のもの。後から強化する予定。
-                if (stボーナス[i].b使用中)
-                {
-                    stボーナス[i].ct進行.tUpdate();
-                    if (stボーナス[i].ct進行.bReachedEndValue)
-                    {
-                        stボーナス[i].ct進行.tStop();
-                        stボーナス[i].b使用中 = false;
-                    }
-                    if (txBonus != null && CDTXMania.ConfigIni.bShowScore)
-                    {
-                        txBonus.tDraw2D(160, 80);
-                    }
-                }
-            }
-            #endregion
+            return 0;
         }
+
+        Animate();
+
+        bool[] shown = Shown[(int)CDTXMania.ConfigIni.eNumOfLanes.Drums];
+        int baseY = 10 + (CDTXMania.ConfigIni.bReverse.Drums ? 60 : 560);
+        foreach (int pad in DrawOrder)
+        {
+            if (!shown[pad])
+            {
+                continue;
+            }
+
+            int x = PadX(pad);
+            int y = baseY + pads[pad].bounce;
+            RectangleF source = new(SourceOrigin[pad], new SizeF(96, 96));
+
+            if (txPad != null)
+            {
+                DrawPad(txPad, pad, x, y, source);
+            }
+        }
+
+        if (bonusTimer != null)
+        {
+            bonusTimer.tUpdate();
+            if (txBonus != null && CDTXMania.ConfigIni.bShowScore)
+            {
+                txBonus.tDraw2D(160, 80);
+            }
+            if (bonusTimer.bReachedEndValue)
+            {
+                bonusTimer = null;
+            }
+        }
+
         return 0;
     }
 
-    public void Start(int nLane, bool bボーナス)
+    private void DrawPad(BaseTexture texture, int pad, int x, int y, RectangleF source)
     {
-        for (int j = 0; j < 3; j++)
+        float lit = Math.Min(pads[pad].brightness * 50 / 255f, 1f);
+        if (lit <= 0)
         {
-            if (stボーナス[j].b使用中)
+            texture.tDraw2D(x, y, source);
+            return;
+        }
+
+        Color4 full = LitColour[pad];
+        float r = 1 + (full.Red - 1) * lit;
+        float g = 1 + (full.Green - 1) * lit;
+        float b = 1 + (full.Blue - 1) * lit;
+        texture.tDraw2D(x, y, source, new Color4(Math.Min(r, 1), Math.Min(g, 1), Math.Min(b, 1)));
+
+        texture.blendMode = BlendMode.Additive;
+        texture.tDraw2D(x, y, source, new Color4(Math.Max(r - 1, 0), Math.Max(g - 1, 0), Math.Max(b - 1, 0)));
+        texture.blendMode = BlendMode.Alpha;
+    }
+
+    private void Animate()
+    {
+        long now = CDTXMania.Timer.nCurrentTime;
+        if (bJustStartedUpdate)
+        {
+            brightnessTimer = now;
+            bounceTimer = now;
+            bJustStartedUpdate = false;
+        }
+        brightnessTimer = Math.Min(brightnessTimer, now);
+        bounceTimer = Math.Min(bounceTimer, now);
+
+        for (; now - brightnessTimer >= 18; brightnessTimer += 18)
+        {
+            for (int i = 0; i < PadCount; i++)
             {
-                stボーナス[j].ct進行.tStop();
-                stボーナス[j].b使用中 = false;
+                pads[i].brightness = Math.Max(pads[i].brightness - 1, 0);
             }
         }
-        for (int i = 0; i < 3; i++)
+
+        for (; now - bounceTimer >= 6; bounceTimer += 8)
         {
-            for (int j = 0; j < 3; j++)
+            for (int i = 0; i < PadCount; i++)
             {
-                if (!stボーナス[j].b使用中)
+                ref PadState pad = ref pads[i];
+                pad.bounce += pad.bounceSpeed;
+                if (pad.bounce > 11)
                 {
-                    stボーナス[j].b使用中 = true;
-                    stボーナス[j].ct進行 = new CCounter(0, 1020, 1, CDTXMania.Timer);
-                    break;
+                    pad.bounce = 11;
+                    pad.bounceSpeed = -1;
+                }
+                else if (pad.bounce < 0)
+                {
+                    pad.bounce = 0;
+                    pad.bounceSpeed = 0;
                 }
             }
         }
     }
 
-    public void Start(int nLane, bool bボーナス, EChannel n代入番号)
-    {
-        for (int j = 0; j < 4; j++)
-        {
-            if (stボーナス[j].b使用中)
-            {
-                stボーナス[j].ct進行.tStop();
-                stボーナス[j].b使用中 = false;
-            }
-        }
-        for (int i = 0; i < 1; i++)
-        {
-            for (int j = 0; j < 4; j++)
-            {
-                if (!stボーナス[j].b使用中)
-                {
-                    stボーナス[j].b使用中 = true;
-                    stボーナス[j].ct進行 = new CCounter(0, 1020, 1, CDTXMania.Timer);
-                }
-
-            }
-        }
-    }
-
-
-    // Other
-
-    #region [ private ]
-    //-----------------
-    [StructLayout(LayoutKind.Sequential)]
-    public struct STパッド状態
-    {
-        public int n明るさ;
-        public int nY座標オフセットdot;
-        public int nY座標オフセットdot2;
-        public int nX座標オフセットdot;
-        public int nX座標オフセットdotFLIP;
-        public int nX座標オフセットdot2;
-        public int nX座標オフセットdot2FLIP;
-        public int nY座標加速度dot;
-        public int nY座標加速度dot2;
-        public int nX座標加速度dot;
-    }
-    [StructLayout(LayoutKind.Sequential)]
-    public struct ST基本位置
-    {
-        public int x;
-        public int y;
-        public RectangleF rc;
-    }
-    [StructLayout(LayoutKind.Sequential)]
-    public struct STボーナス
-    {
-        public bool b使用中;
-        public CCounter ct進行;
-        public int x;
-    }
-    private long nY座標制御タイマ;
-    private long nY座標制御タイマ2;
-    private long nフラッシュ制御タイマ;
-    private readonly int[] n描画順 = new int[] { 9, 3, 2, 6, 5, 4, 8, 7, 1, 0 };
-    // LP BD SD FT HT LT RD CY HH LC
-    //26072020: New array Fisyher
-    private readonly int[,] nDrawFlags = new int[3, 10] { { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, { 1, 1, 1, 1, 1, 1, 1, 1, 0, 1 }, { 0, 1, 1, 1, 1, 1, 0, 1, 0, 0 } };
-    public STパッド状態[] stパッド状態 = new STパッド状態[ 0x13 ];
-    public readonly ST基本位置[] st基本位置;
-    private BaseTexture txPad;
-    private BaseTexture txPadFlush;
-    private BaseTexture txBonus;
-    public bool[] bボーナス文字 = new bool[10];
-    public STボーナス[] stボーナス = new STボーナス[4];
-    //-----------------
-    #endregion
+    private static int PadX(int pad) => (int)(DrumLanes.Centre(Lanes[pad]) - CellOffset[pad]);
 }

@@ -80,14 +80,6 @@ public class ClassicDrumsChipFire : UIDrawable, IPerfFire
     private static readonly int[] noteLeft = [448 + 90, 60 + 10, 106 + 20, 0, 160 + 30, 206 + 40, 252 + 50, 298 + 60, 550 + 110, 362 + 70, 400 + 80];
     private static readonly int[] noteWidth = [64, 46, 54, 60, 46, 46, 46, 60, 48, 48, 48];
 
-    //lane centres per lane type, then for RD RC
-    private static readonly int[][][] laneX =
-    [
-        [[7, 71, 176, 293, 230, 349, 398, 464, 124, 514, 124], [7, 71, 176, 293, 230, 349, 398, 498, 124, 448, 124]],
-        [[7, 71, 124, 240, 297, 349, 398, 464, 180, 514, 180], [7, 71, 124, 240, 297, 349, 398, 500, 180, 448, 180]],
-        [[7, 71, 176, 242, 297, 349, 398, 464, 124, 508, 124], [7, 71, 176, 242, 297, 349, 398, 500, 124, 448, 124]],
-        [[7, 71, 124, 294, 182, 349, 398, 464, 230, 514, 230], [7, 71, 124, 294, 182, 349, 398, 500, 230, 448, 230]]
-    ];
 
     private static readonly string[] textureLanes = ["LC", "HH", "SD", "BD", "HT", "LT", "FT", "CY", "LP", "RD"];
 
@@ -131,18 +123,8 @@ public class ClassicDrumsChipFire : UIDrawable, IPerfFire
         return texture;
     }
 
-    private static float LaneX(int lane)
-    {
-        int type = CDTXMania.ConfigIni.eLaneType.Drums switch
-        {
-            EType.B => 1,
-            EType.C => 2,
-            EType.D => 3,
-            _ => 0
-        };
-
-        return laneX[type][CDTXMania.ConfigIni.eRDPosition == ERDPosition.RDRC ? 1 : 0][lane];
-    }
+    //the fire art is drawn 320px right of this
+    private static float LaneX(int lane) => DrumLanes.Centre((ELane)lane) - 320;
 
     public void Start(ELane lane, bool fillIn, bool bigWaves, bool smallWaves, int judgeLineOffset = 0, bool display = true)
     {

@@ -374,44 +374,6 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
         EPad.LT, EPad.CY, EPad.FT, EPad.HHO,
         EPad.RD, EPad.UNKNOWN, EPad.UNKNOWN, EPad.LC
     };
-    private int[] nチャンネルtoX座標 = new int[] { 370, 470, 582, 527, 645, 748, 694, 373, 815, 298, 419, 419 };
-    private int[] nチャンネルtoX座標B = new int[] { 370, 419, 533, 596, 645, 748, 694, 373, 815, 298, 476, 476 };
-    private int[] nチャンネルtoX座標C = new int[] { 370, 470, 533, 596, 645, 748, 694, 373, 815, 298, 419, 419 };
-    private int[] nチャンネルtoX座標D = new int[] { 370, 419, 582, 476, 645, 748, 694, 373, 815, 298, 525, 525 };
-    private int[] nチャンネルtoX座標改 = new int[] { 370, 470, 582, 527, 645, 786, 694, 373, 746, 298, 419, 419 };
-    private int[] nチャンネルtoX座標B改 = new int[] { 370, 419, 533, 596, 645, 786, 694, 373, 746, 298, 476, 476 };
-    private int[] nチャンネルtoX座標C改 = new int[] { 370, 470, 533, 596, 644, 786, 694, 373, 746, 298, 419, 419 };
-    private int[] nチャンネルtoX座標D改 = new int[] { 370, 419, 582, 476, 645, 786, 694, 373, 746, 298, 527, 527 };
-
-    //the 改 tables are for RD RC
-    private int ChipX(EChannel channel)
-    {
-        bool rdrc = CDTXMania.ConfigIni.eRDPosition == ERDPosition.RDRC;
-        int[] table = CDTXMania.ConfigIni.eLaneType.Drums switch
-        {
-            EType.A => rdrc ? nチャンネルtoX座標改 : nチャンネルtoX座標,
-            EType.B => rdrc ? nチャンネルtoX座標B改 : nチャンネルtoX座標B,
-            EType.C => rdrc ? nチャンネルtoX座標C改 : nチャンネルtoX座標C,
-            EType.D => rdrc ? nチャンネルtoX座標D改 : nチャンネルtoX座標D,
-            _ => nチャンネルtoX座標
-        };
-
-        return table[channel - EChannel.HiHatClose];
-    }
-
-    private int[] nボーナスチャンネルtoX座標 = new int[] { 0, 298, 370, 419, 470, 527, 582, 645, 694, 748, 815, 0 };
-    private int[] nボーナスチャンネルtoX座標B = new int[] { 0, 298, 370, 476, 419, 596, 533, 645, 694, 748, 815, 476 };
-    private int[] nボーナスチャンネルtoX座標C = new int[] { 0, 298, 370, 419, 470, 596, 533, 645, 694, 748, 815, 419 };
-    private int[] nボーナスチャンネルtoX座標D = new int[] { 0, 298, 370, 527, 420, 477, 582, 645, 694, 748, 815, 527 };
-    private int[] nボーナスチャンネルtoX座標改 = new int[] { 0, 298, 370, 419, 470, 527, 582, 645, 694, 786, 748, 419 };
-    private int[] nボーナスチャンネルtoX座標B改 = new int[] { 0, 298, 370, 476, 419, 596, 533, 645, 694, 786, 748, 476 };
-    private int[] nボーナスチャンネルtoX座標C改 = new int[] { 0, 298, 370, 419, 470, 596, 533, 645, 694, 786, 748, 419 };
-    private int[] nボーナスチャンネルtoX座標D改 = new int[] { 0, 298, 370, 527, 420, 477, 582, 645, 694, 786, 748, 527 };
-    //HH SD BD HT LT CY FT HHO RD LC LP LBD
-    //レーンタイプB
-    //LC 298  HH 371 HHO 374  SD 420  LP 477  BD 534  HT 597 LT 646  FT 695  CY 749  RD 815
-    //レーンタイプC
-
     public double UnitTime;
     private BaseTexture txLaneCover;
     //-----------------
