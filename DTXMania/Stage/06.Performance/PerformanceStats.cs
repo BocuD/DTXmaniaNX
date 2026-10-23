@@ -14,7 +14,7 @@ public sealed class PerformanceStats
     //null outside a performance screen, eg in the editor
     private static CStagePerfCommonScreen? Stage => CDTXMania.StageManager?.rCurrentStage as CStagePerfCommonScreen;
 
-    private CStagePerfCommonScreen.CHITCOUNTOFRANK? Hits => Stage?.nHitCount_ExclAuto[Instrument];
+    private HitCounts? Hits => Stage?.session.HitCountExclAuto[Instrument];
 
     [DataField] public int Perfect => Hits?.Perfect ?? 0;
     [DataField] public int Great => Hits?.Great ?? 0;
@@ -30,7 +30,7 @@ public sealed class PerformanceStats
     [DataField] public int MissPercent => Percent(Miss);
     [DataField] public int MaxComboPercent => Percent(MaxCombo);
 
-    [DataField] public double Rate => Stage?.dbAchievementRate[Instrument] ?? 0.0;
+    [DataField] public double Rate => Stage?.session.AchievementRate[Instrument] ?? 0.0;
     [DataField] public long RateWhole => (long)Math.Truncate(Rate);
     [DataField] public long RateHundredths => Hundredths(Rate);
 
@@ -61,8 +61,8 @@ public sealed class PerformanceStats
         }
     }
 
-    [DataField] public int Early => Stage?.nTimingHitCount[Instrument].nEarly ?? 0;
-    [DataField] public int Late => Stage?.nTimingHitCount[Instrument].nLate ?? 0;
+    [DataField] public int Early => Stage?.session.TimingHitCount[Instrument].Early ?? 0;
+    [DataField] public int Late => Stage?.session.TimingHitCount[Instrument].Late ?? 0;
 
     //0 to 1, clamped
     [DataField] public double Gauge => Math.Max(0.0, Stage?.actGauge.db現在のゲージ値[Instrument] ?? 0.0);
@@ -224,7 +224,7 @@ public sealed class PerformanceStats
             return 0;
         }
 
-        CStagePerfCommonScreen.CHITCOUNTOFRANK all = stage.nHitCount_IncAuto[Instrument];
+        HitCounts all = stage.session.HitCountIncAuto[Instrument];
         int judged = all.Perfect + all.Great + all.Good + all.Poor + all.Miss;
 
         return judged == 0 ? 0 : (int)Math.Round(100.0 * count / judged);

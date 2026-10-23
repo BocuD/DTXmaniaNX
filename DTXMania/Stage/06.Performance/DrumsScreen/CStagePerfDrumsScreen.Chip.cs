@@ -87,9 +87,9 @@ internal partial class CStagePerfDrumsScreen
                     {
                         // Online Stats の計算式
                         val = 100 *
-                            (nヒット数_TargetGhost.Drums.Perfect * 17 +
-                             nヒット数_TargetGhost.Drums.Great * 7 +
-                             n最大コンボ数_TargetGhost.Drums * 3) / (20.0 * CDTXMania.DTX.nVisibleChipsCount.Drums);
+                            (session.GhostHitCount.Drums.Perfect * 17 +
+                             session.GhostHitCount.Drums.Great * 7 +
+                             session.GhostMaxCombo.Drums * 3) / (20.0 * CDTXMania.DTX.nVisibleChipsCount.Drums);
                     }
                 }
                 else
@@ -98,24 +98,24 @@ internal partial class CStagePerfDrumsScreen
                     {
                         val = CScoreIni.tCalculatePlayingSkillOld(
                             CDTXMania.DTX.nVisibleChipsCount.Drums,
-                            nヒット数_TargetGhost.Drums.Perfect,
-                            nヒット数_TargetGhost.Drums.Great,
-                            nヒット数_TargetGhost.Drums.Good,
-                            nヒット数_TargetGhost.Drums.Poor,
-                            nヒット数_TargetGhost.Drums.Miss,
-                            n最大コンボ数_TargetGhost.Drums,
+                            session.GhostHitCount.Drums.Perfect,
+                            session.GhostHitCount.Drums.Great,
+                            session.GhostHitCount.Drums.Good,
+                            session.GhostHitCount.Drums.Poor,
+                            session.GhostHitCount.Drums.Miss,
+                            session.GhostMaxCombo.Drums,
                             EInstrumentPart.DRUMS, new STAUTOPLAY());
                     }
                     else
                     {
                         val = CScoreIni.tCalculatePlayingSkill(
                             CDTXMania.DTX.nVisibleChipsCount.Drums,
-                            nヒット数_TargetGhost.Drums.Perfect,
-                            nヒット数_TargetGhost.Drums.Great,
-                            nヒット数_TargetGhost.Drums.Good,
-                            nヒット数_TargetGhost.Drums.Poor,
-                            nヒット数_TargetGhost.Drums.Miss,
-                            n最大コンボ数_TargetGhost.Drums,
+                            session.GhostHitCount.Drums.Perfect,
+                            session.GhostHitCount.Drums.Great,
+                            session.GhostHitCount.Drums.Good,
+                            session.GhostHitCount.Drums.Poor,
+                            session.GhostHitCount.Drums.Miss,
+                            session.GhostMaxCombo.Drums,
                             EInstrumentPart.DRUMS, new STAUTOPLAY());
                     }
 

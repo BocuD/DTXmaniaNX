@@ -83,26 +83,26 @@ internal abstract class CStagePerfCommonScreen : CStage
             Drums.nScore = (long)actScore.Get(EInstrumentPart.DRUMS);
             if (CDTXMania.ConfigIni.nSkillMode == 0)
             {
-                Drums.dbGameSkill = CScoreIni.tCalculateGameSkillOld(CDTXMania.DTX.LEVEL.Drums, CDTXMania.DTX.LEVELDEC.Drums, CDTXMania.DTX.nVisibleChipsCount.Drums, nHitCount_ExclAuto.Drums.Perfect, nHitCount_ExclAuto.Drums.Great, actCombo.nCurrentCombo.HighestValue.Drums, EInstrumentPart.DRUMS, bIsAutoPlay);
-                Drums.dbPerformanceSkill = CScoreIni.tCalculatePlayingSkillOld(CDTXMania.DTX.nVisibleChipsCount.Drums, nHitCount_ExclAuto.Drums.Perfect, nHitCount_ExclAuto.Drums.Great, nHitCount_ExclAuto.Drums.Good, nHitCount_ExclAuto.Drums.Poor, nHitCount_ExclAuto.Drums.Miss, actCombo.nCurrentCombo.HighestValue.Drums, EInstrumentPart.DRUMS, bIsAutoPlay);
+                Drums.dbGameSkill = CScoreIni.tCalculateGameSkillOld(CDTXMania.DTX.LEVEL.Drums, CDTXMania.DTX.LEVELDEC.Drums, CDTXMania.DTX.nVisibleChipsCount.Drums, session.HitCountExclAuto.Drums.Perfect, session.HitCountExclAuto.Drums.Great, actCombo.nCurrentCombo.HighestValue.Drums, EInstrumentPart.DRUMS, bIsAutoPlay);
+                Drums.dbPerformanceSkill = CScoreIni.tCalculatePlayingSkillOld(CDTXMania.DTX.nVisibleChipsCount.Drums, session.HitCountExclAuto.Drums.Perfect, session.HitCountExclAuto.Drums.Great, session.HitCountExclAuto.Drums.Good, session.HitCountExclAuto.Drums.Poor, session.HitCountExclAuto.Drums.Miss, actCombo.nCurrentCombo.HighestValue.Drums, EInstrumentPart.DRUMS, bIsAutoPlay);
             }
             else if (CDTXMania.ConfigIni.nSkillMode == 1)
             {
-                Drums.dbPerformanceSkill = CScoreIni.tCalculatePlayingSkill(CDTXMania.DTX.nVisibleChipsCount.Drums, nHitCount_ExclAuto.Drums.Perfect, nHitCount_ExclAuto.Drums.Great, nHitCount_ExclAuto.Drums.Good, nHitCount_ExclAuto.Drums.Poor, nHitCount_ExclAuto.Drums.Miss, actCombo.nCurrentCombo.HighestValue.Drums, EInstrumentPart.DRUMS, bIsAutoPlay);
+                Drums.dbPerformanceSkill = CScoreIni.tCalculatePlayingSkill(CDTXMania.DTX.nVisibleChipsCount.Drums, session.HitCountExclAuto.Drums.Perfect, session.HitCountExclAuto.Drums.Great, session.HitCountExclAuto.Drums.Good, session.HitCountExclAuto.Drums.Poor, session.HitCountExclAuto.Drums.Miss, actCombo.nCurrentCombo.HighestValue.Drums, EInstrumentPart.DRUMS, bIsAutoPlay);
                 Drums.dbGameSkill = CScoreIni.tCalculateGameSkillFromPlayingSkill(CDTXMania.DTX.LEVEL.Drums, CDTXMania.DTX.LEVELDEC.Drums, Drums.dbPerformanceSkill);
             }
-            Drums.nPerfectCount = CDTXMania.ConfigIni.bAllDrumsAreAutoPlay ? nHitCount_IncAuto.Drums.Perfect : nHitCount_ExclAuto.Drums.Perfect;
-            Drums.nGreatCount = CDTXMania.ConfigIni.bAllDrumsAreAutoPlay ? nHitCount_IncAuto.Drums.Great : nHitCount_ExclAuto.Drums.Great;
-            Drums.nGoodCount = CDTXMania.ConfigIni.bAllDrumsAreAutoPlay ? nHitCount_IncAuto.Drums.Good : nHitCount_ExclAuto.Drums.Good;
-            Drums.nPoorCount = CDTXMania.ConfigIni.bAllDrumsAreAutoPlay ? nHitCount_IncAuto.Drums.Poor : nHitCount_ExclAuto.Drums.Poor;
-            Drums.nMissCount = CDTXMania.ConfigIni.bAllDrumsAreAutoPlay ? nHitCount_IncAuto.Drums.Miss : nHitCount_ExclAuto.Drums.Miss;
-            Drums.nPerfectCount_ExclAuto = nHitCount_ExclAuto.Drums.Perfect;
-            Drums.nGreatCount_ExclAuto = nHitCount_ExclAuto.Drums.Great;
-            Drums.nGoodCount_ExclAuto = nHitCount_ExclAuto.Drums.Good;
-            Drums.nPoorCount_ExclAuto = nHitCount_ExclAuto.Drums.Poor;
-            Drums.nMissCount_ExclAuto = nHitCount_ExclAuto.Drums.Miss;
-            Drums.nFastCount = nTimingHitCount.Drums.nEarly;
-            Drums.nSlowCount = nTimingHitCount.Drums.nLate;
+            Drums.nPerfectCount = CDTXMania.ConfigIni.bAllDrumsAreAutoPlay ? session.HitCountIncAuto.Drums.Perfect : session.HitCountExclAuto.Drums.Perfect;
+            Drums.nGreatCount = CDTXMania.ConfigIni.bAllDrumsAreAutoPlay ? session.HitCountIncAuto.Drums.Great : session.HitCountExclAuto.Drums.Great;
+            Drums.nGoodCount = CDTXMania.ConfigIni.bAllDrumsAreAutoPlay ? session.HitCountIncAuto.Drums.Good : session.HitCountExclAuto.Drums.Good;
+            Drums.nPoorCount = CDTXMania.ConfigIni.bAllDrumsAreAutoPlay ? session.HitCountIncAuto.Drums.Poor : session.HitCountExclAuto.Drums.Poor;
+            Drums.nMissCount = CDTXMania.ConfigIni.bAllDrumsAreAutoPlay ? session.HitCountIncAuto.Drums.Miss : session.HitCountExclAuto.Drums.Miss;
+            Drums.nPerfectCount_ExclAuto = session.HitCountExclAuto.Drums.Perfect;
+            Drums.nGreatCount_ExclAuto = session.HitCountExclAuto.Drums.Great;
+            Drums.nGoodCount_ExclAuto = session.HitCountExclAuto.Drums.Good;
+            Drums.nPoorCount_ExclAuto = session.HitCountExclAuto.Drums.Poor;
+            Drums.nMissCount_ExclAuto = session.HitCountExclAuto.Drums.Miss;
+            Drums.nFastCount = session.TimingHitCount.Drums.Early;
+            Drums.nSlowCount = session.TimingHitCount.Drums.Late;
             Drums.nMaxCombo = actCombo.nCurrentCombo.HighestValue.Drums;
             Drums.nTotalChipsCount = CDTXMania.DTX.nVisibleChipsCount.Drums;
             for (int i = 0; i < (int)ELane.MAX; i++)
@@ -156,26 +156,26 @@ internal abstract class CStagePerfCommonScreen : CStage
             Guitar.nScore = (long)actScore.Get(EInstrumentPart.GUITAR);
             if (CDTXMania.ConfigIni.nSkillMode == 0)
             {
-                Guitar.dbGameSkill = CScoreIni.tCalculateGameSkillOld(CDTXMania.DTX.LEVEL.Guitar, CDTXMania.DTX.LEVELDEC.Guitar, CDTXMania.DTX.nVisibleChipsCount.Guitar, nHitCount_ExclAuto.Guitar.Perfect, nHitCount_ExclAuto.Guitar.Great, actCombo.nCurrentCombo.HighestValue.Guitar, EInstrumentPart.GUITAR, bIsAutoPlay);
-                Guitar.dbPerformanceSkill = CScoreIni.tCalculatePlayingSkillOld(CDTXMania.DTX.nVisibleChipsCount.Guitar, nHitCount_ExclAuto.Guitar.Perfect, nHitCount_ExclAuto.Guitar.Great, nHitCount_ExclAuto.Guitar.Good, nHitCount_ExclAuto.Guitar.Poor, nHitCount_ExclAuto.Guitar.Miss, actCombo.nCurrentCombo.HighestValue.Guitar, EInstrumentPart.GUITAR, bIsAutoPlay);
+                Guitar.dbGameSkill = CScoreIni.tCalculateGameSkillOld(CDTXMania.DTX.LEVEL.Guitar, CDTXMania.DTX.LEVELDEC.Guitar, CDTXMania.DTX.nVisibleChipsCount.Guitar, session.HitCountExclAuto.Guitar.Perfect, session.HitCountExclAuto.Guitar.Great, actCombo.nCurrentCombo.HighestValue.Guitar, EInstrumentPart.GUITAR, bIsAutoPlay);
+                Guitar.dbPerformanceSkill = CScoreIni.tCalculatePlayingSkillOld(CDTXMania.DTX.nVisibleChipsCount.Guitar, session.HitCountExclAuto.Guitar.Perfect, session.HitCountExclAuto.Guitar.Great, session.HitCountExclAuto.Guitar.Good, session.HitCountExclAuto.Guitar.Poor, session.HitCountExclAuto.Guitar.Miss, actCombo.nCurrentCombo.HighestValue.Guitar, EInstrumentPart.GUITAR, bIsAutoPlay);
             }
             else if (CDTXMania.ConfigIni.nSkillMode == 1)
             {
-                Guitar.dbPerformanceSkill = CScoreIni.tCalculatePlayingSkill(CDTXMania.DTX.nVisibleChipsCount.Guitar, nHitCount_ExclAuto.Guitar.Perfect, nHitCount_ExclAuto.Guitar.Great, nHitCount_ExclAuto.Guitar.Good, nHitCount_ExclAuto.Guitar.Poor, nHitCount_ExclAuto.Guitar.Miss, actCombo.nCurrentCombo.HighestValue.Guitar, EInstrumentPart.GUITAR, bIsAutoPlay);
+                Guitar.dbPerformanceSkill = CScoreIni.tCalculatePlayingSkill(CDTXMania.DTX.nVisibleChipsCount.Guitar, session.HitCountExclAuto.Guitar.Perfect, session.HitCountExclAuto.Guitar.Great, session.HitCountExclAuto.Guitar.Good, session.HitCountExclAuto.Guitar.Poor, session.HitCountExclAuto.Guitar.Miss, actCombo.nCurrentCombo.HighestValue.Guitar, EInstrumentPart.GUITAR, bIsAutoPlay);
                 Guitar.dbGameSkill = CScoreIni.tCalculateGameSkillFromPlayingSkill(CDTXMania.DTX.LEVEL.Guitar, CDTXMania.DTX.LEVELDEC.Guitar, Guitar.dbPerformanceSkill);
             }
-            Guitar.nPerfectCount = CDTXMania.ConfigIni.bAllGuitarsAreAutoPlay ? nHitCount_IncAuto.Guitar.Perfect : nHitCount_ExclAuto.Guitar.Perfect;
-            Guitar.nGreatCount = CDTXMania.ConfigIni.bAllGuitarsAreAutoPlay ? nHitCount_IncAuto.Guitar.Great : nHitCount_ExclAuto.Guitar.Great;
-            Guitar.nGoodCount = CDTXMania.ConfigIni.bAllGuitarsAreAutoPlay ? nHitCount_IncAuto.Guitar.Good : nHitCount_ExclAuto.Guitar.Good;
-            Guitar.nPoorCount = CDTXMania.ConfigIni.bAllGuitarsAreAutoPlay ? nHitCount_IncAuto.Guitar.Poor : nHitCount_ExclAuto.Guitar.Poor;
-            Guitar.nMissCount = CDTXMania.ConfigIni.bAllGuitarsAreAutoPlay ? nHitCount_IncAuto.Guitar.Miss : nHitCount_ExclAuto.Guitar.Miss;
-            Guitar.nPerfectCount_ExclAuto = nHitCount_ExclAuto.Guitar.Perfect;
-            Guitar.nGreatCount_ExclAuto = nHitCount_ExclAuto.Guitar.Great;
-            Guitar.nGoodCount_ExclAuto = nHitCount_ExclAuto.Guitar.Good;
-            Guitar.nPoorCount_ExclAuto = nHitCount_ExclAuto.Guitar.Poor;
-            Guitar.nMissCount_ExclAuto = nHitCount_ExclAuto.Guitar.Miss;
-            Guitar.nFastCount = nTimingHitCount.Guitar.nEarly;
-            Guitar.nSlowCount = nTimingHitCount.Guitar.nLate;
+            Guitar.nPerfectCount = CDTXMania.ConfigIni.bAllGuitarsAreAutoPlay ? session.HitCountIncAuto.Guitar.Perfect : session.HitCountExclAuto.Guitar.Perfect;
+            Guitar.nGreatCount = CDTXMania.ConfigIni.bAllGuitarsAreAutoPlay ? session.HitCountIncAuto.Guitar.Great : session.HitCountExclAuto.Guitar.Great;
+            Guitar.nGoodCount = CDTXMania.ConfigIni.bAllGuitarsAreAutoPlay ? session.HitCountIncAuto.Guitar.Good : session.HitCountExclAuto.Guitar.Good;
+            Guitar.nPoorCount = CDTXMania.ConfigIni.bAllGuitarsAreAutoPlay ? session.HitCountIncAuto.Guitar.Poor : session.HitCountExclAuto.Guitar.Poor;
+            Guitar.nMissCount = CDTXMania.ConfigIni.bAllGuitarsAreAutoPlay ? session.HitCountIncAuto.Guitar.Miss : session.HitCountExclAuto.Guitar.Miss;
+            Guitar.nPerfectCount_ExclAuto = session.HitCountExclAuto.Guitar.Perfect;
+            Guitar.nGreatCount_ExclAuto = session.HitCountExclAuto.Guitar.Great;
+            Guitar.nGoodCount_ExclAuto = session.HitCountExclAuto.Guitar.Good;
+            Guitar.nPoorCount_ExclAuto = session.HitCountExclAuto.Guitar.Poor;
+            Guitar.nMissCount_ExclAuto = session.HitCountExclAuto.Guitar.Miss;
+            Guitar.nFastCount = session.TimingHitCount.Guitar.Early;
+            Guitar.nSlowCount = session.TimingHitCount.Guitar.Late;
             Guitar.nMaxCombo = actCombo.nCurrentCombo.HighestValue.Guitar;
             Guitar.nTotalChipsCount = CDTXMania.DTX.nVisibleChipsCount.Guitar;
             for (int i = 0; i < (int)ELane.MAX; i++)
@@ -229,26 +229,26 @@ internal abstract class CStagePerfCommonScreen : CStage
             Bass.nScore = (long)actScore.Get(EInstrumentPart.BASS);
             if (CDTXMania.ConfigIni.nSkillMode == 0)
             {
-                Bass.dbGameSkill = CScoreIni.tCalculateGameSkillOld(CDTXMania.DTX.LEVEL.Bass, CDTXMania.DTX.LEVELDEC.Bass, CDTXMania.DTX.nVisibleChipsCount.Bass, nHitCount_ExclAuto.Bass.Perfect, nHitCount_ExclAuto.Bass.Great, actCombo.nCurrentCombo.HighestValue.Bass, EInstrumentPart.BASS, bIsAutoPlay);
-                Bass.dbPerformanceSkill = CScoreIni.tCalculatePlayingSkillOld(CDTXMania.DTX.nVisibleChipsCount.Bass, nHitCount_ExclAuto.Bass.Perfect, nHitCount_ExclAuto.Bass.Great, nHitCount_ExclAuto.Bass.Good, nHitCount_ExclAuto.Bass.Poor, nHitCount_ExclAuto.Bass.Miss, actCombo.nCurrentCombo.HighestValue.Bass, EInstrumentPart.BASS, bIsAutoPlay);
+                Bass.dbGameSkill = CScoreIni.tCalculateGameSkillOld(CDTXMania.DTX.LEVEL.Bass, CDTXMania.DTX.LEVELDEC.Bass, CDTXMania.DTX.nVisibleChipsCount.Bass, session.HitCountExclAuto.Bass.Perfect, session.HitCountExclAuto.Bass.Great, actCombo.nCurrentCombo.HighestValue.Bass, EInstrumentPart.BASS, bIsAutoPlay);
+                Bass.dbPerformanceSkill = CScoreIni.tCalculatePlayingSkillOld(CDTXMania.DTX.nVisibleChipsCount.Bass, session.HitCountExclAuto.Bass.Perfect, session.HitCountExclAuto.Bass.Great, session.HitCountExclAuto.Bass.Good, session.HitCountExclAuto.Bass.Poor, session.HitCountExclAuto.Bass.Miss, actCombo.nCurrentCombo.HighestValue.Bass, EInstrumentPart.BASS, bIsAutoPlay);
             }
             else if (CDTXMania.ConfigIni.nSkillMode == 1)
             {
-                Bass.dbPerformanceSkill = CScoreIni.tCalculatePlayingSkill(CDTXMania.DTX.nVisibleChipsCount.Bass, nHitCount_ExclAuto.Bass.Perfect, nHitCount_ExclAuto.Bass.Great, nHitCount_ExclAuto.Bass.Good, nHitCount_ExclAuto.Bass.Poor, nHitCount_ExclAuto.Bass.Miss, actCombo.nCurrentCombo.HighestValue.Bass, EInstrumentPart.BASS, bIsAutoPlay);
+                Bass.dbPerformanceSkill = CScoreIni.tCalculatePlayingSkill(CDTXMania.DTX.nVisibleChipsCount.Bass, session.HitCountExclAuto.Bass.Perfect, session.HitCountExclAuto.Bass.Great, session.HitCountExclAuto.Bass.Good, session.HitCountExclAuto.Bass.Poor, session.HitCountExclAuto.Bass.Miss, actCombo.nCurrentCombo.HighestValue.Bass, EInstrumentPart.BASS, bIsAutoPlay);
                 Bass.dbGameSkill = CScoreIni.tCalculateGameSkillFromPlayingSkill(CDTXMania.DTX.LEVEL.Bass, CDTXMania.DTX.LEVELDEC.Bass, Bass.dbPerformanceSkill);
             }
-            Bass.nPerfectCount = CDTXMania.ConfigIni.bAllBassAreAutoPlay ? nHitCount_IncAuto.Bass.Perfect : nHitCount_ExclAuto.Bass.Perfect;
-            Bass.nGreatCount = CDTXMania.ConfigIni.bAllBassAreAutoPlay ? nHitCount_IncAuto.Bass.Great : nHitCount_ExclAuto.Bass.Great;
-            Bass.nGoodCount = CDTXMania.ConfigIni.bAllBassAreAutoPlay ? nHitCount_IncAuto.Bass.Good : nHitCount_ExclAuto.Bass.Good;
-            Bass.nPoorCount = CDTXMania.ConfigIni.bAllBassAreAutoPlay ? nHitCount_IncAuto.Bass.Poor : nHitCount_ExclAuto.Bass.Poor;
-            Bass.nMissCount = CDTXMania.ConfigIni.bAllBassAreAutoPlay ? nHitCount_IncAuto.Bass.Miss : nHitCount_ExclAuto.Bass.Miss;
-            Bass.nPerfectCount_ExclAuto = nHitCount_ExclAuto.Bass.Perfect;
-            Bass.nGreatCount_ExclAuto = nHitCount_ExclAuto.Bass.Great;
-            Bass.nGoodCount_ExclAuto = nHitCount_ExclAuto.Bass.Good;
-            Bass.nPoorCount_ExclAuto = nHitCount_ExclAuto.Bass.Poor;
-            Bass.nMissCount_ExclAuto = nHitCount_ExclAuto.Bass.Miss;
-            Bass.nFastCount = nTimingHitCount.Bass.nEarly;
-            Bass.nSlowCount = nTimingHitCount.Bass.nLate;
+            Bass.nPerfectCount = CDTXMania.ConfigIni.bAllBassAreAutoPlay ? session.HitCountIncAuto.Bass.Perfect : session.HitCountExclAuto.Bass.Perfect;
+            Bass.nGreatCount = CDTXMania.ConfigIni.bAllBassAreAutoPlay ? session.HitCountIncAuto.Bass.Great : session.HitCountExclAuto.Bass.Great;
+            Bass.nGoodCount = CDTXMania.ConfigIni.bAllBassAreAutoPlay ? session.HitCountIncAuto.Bass.Good : session.HitCountExclAuto.Bass.Good;
+            Bass.nPoorCount = CDTXMania.ConfigIni.bAllBassAreAutoPlay ? session.HitCountIncAuto.Bass.Poor : session.HitCountExclAuto.Bass.Poor;
+            Bass.nMissCount = CDTXMania.ConfigIni.bAllBassAreAutoPlay ? session.HitCountIncAuto.Bass.Miss : session.HitCountExclAuto.Bass.Miss;
+            Bass.nPerfectCount_ExclAuto = session.HitCountExclAuto.Bass.Perfect;
+            Bass.nGreatCount_ExclAuto = session.HitCountExclAuto.Bass.Great;
+            Bass.nGoodCount_ExclAuto = session.HitCountExclAuto.Bass.Good;
+            Bass.nPoorCount_ExclAuto = session.HitCountExclAuto.Bass.Poor;
+            Bass.nMissCount_ExclAuto = session.HitCountExclAuto.Bass.Miss;
+            Bass.nFastCount = session.TimingHitCount.Bass.Early;
+            Bass.nSlowCount = session.TimingHitCount.Bass.Late;
             Bass.nMaxCombo = actCombo.nCurrentCombo.HighestValue.Bass;
             Bass.nTotalChipsCount = CDTXMania.DTX.nVisibleChipsCount.Bass;
             for (int i = 0; i < (int)ELane.MAX; i++)
@@ -514,25 +514,15 @@ internal abstract class CStagePerfCommonScreen : CStage
         }
         r現在の空うちギターChip = null;
         r現在の空うちベースChip = null;
-        n最大コンボ数_TargetGhost = new STDGBVALUE<int>(); // #35411 2015.08.21 chnmr0 add
+        session.Reset();
         for (int k = 0; k < 3; k++)
         {
-            {
-                nHitCount_ExclAuto[ k ] = new CHITCOUNTOFRANK();
-                nHitCount_IncAuto[ k ] = new CHITCOUNTOFRANK();
-                nヒット数_TargetGhost[ k ] = new CHITCOUNTOFRANK(); // #35411 2015.08.21 chnmr0 add
-
-                nTimingHitCount[k] = new CLAGTIMINGHITCOUNT();
-                dbAchievementRate[k] = 0;
-            }
             queWailing[k] = new Queue<CChip>();
             r現在の歓声Chip[k] = null;
             //
             chipロングノートHit中[k] = null;
             nCurrentLongNoteDuration[k] = 0;
             nロングノートPart[k] = 0;
-            //
-            nAccumulatedLongNoteBonusScore[k] = 0;
         }
         for (int i = 0; i < 3; i++)
         {
@@ -651,114 +641,6 @@ internal abstract class CStagePerfCommonScreen : CStage
 
     #region [ protected ]
     //-----------------
-    public class CHITCOUNTOFRANK
-    {
-        // Fields
-        public int Good;
-        public int Great;
-        public int Miss;
-        public int Perfect;
-        public int Poor;
-
-        // Properties
-        public int this[int index]
-        {
-            get
-            {
-                switch (index)
-                {
-                    case 0:
-                        return Perfect;
-
-                    case 1:
-                        return Great;
-
-                    case 2:
-                        return Good;
-
-                    case 3:
-                        return Poor;
-
-                    case 4:
-                        return Miss;
-                }
-                throw new IndexOutOfRangeException();
-            }
-            set
-            {
-                switch (index)
-                {
-                    case 0:
-                        Perfect = value;
-                        return;
-
-                    case 1:
-                        Great = value;
-                        return;
-
-                    case 2:
-                        Good = value;
-                        return;
-
-                    case 3:
-                        Poor = value;
-                        return;
-
-                    case 4:
-                        Miss = value;
-                        return;
-                }
-                throw new IndexOutOfRangeException();
-            }
-        }
-    }
-
-    public class CLAGTIMINGHITCOUNT 
-    {
-        public enum ETiming
-        {
-            Late,                
-            Early,                
-            Unknown
-        }
-
-        // Fields
-        public int nLate;
-        public int nEarly;
-
-        // Properties
-        public int this[ETiming index]
-        {
-            get
-            {
-                switch (index)
-                {
-                    case ETiming.Late:
-                        return nLate;
-
-                    case ETiming.Early:
-                        return nEarly;
-                }
-                throw new IndexOutOfRangeException();
-            }
-            set
-            {
-                switch (index)
-                {
-                    case ETiming.Late:
-                        nLate = value;
-                        return;
-
-                    case ETiming.Early:
-                        nEarly = value;
-                        return;
-                }
-                throw new IndexOutOfRangeException();
-            }
-        }
-
-    }
-
     static CStagePerfCommonScreen()
     {
         nJudgeLineMinPosY = 461;//(CDTXMania.ConfigIni.bReverse.Drums ? 259 : 461);
@@ -941,11 +823,7 @@ internal abstract class CStagePerfCommonScreen : CStage
     public STDGBVALUE<int> nJudgeLinePosY;//(CDTXMania.ConfigIni.bReverse.Drums ? 159 : 561);
     public STDGBVALUE<int> nShutterInPosY;
     public STDGBVALUE<int> nShutterOutPosY;
-    public STDGBVALUE<double> dbAchievementRate;
-    public STDGBVALUE<CHITCOUNTOFRANK> nHitCount_ExclAuto;
-    public STDGBVALUE<CHITCOUNTOFRANK> nHitCount_IncAuto;
-    //
-    public STDGBVALUE<CLAGTIMINGHITCOUNT> nTimingHitCount;
+    public readonly PerformanceSession session = new();
 
     protected int nCurrentTopChip = -1;
     protected int[] nLastPlayedBGMWAVNumber = new int[50];
@@ -981,9 +859,6 @@ internal abstract class CStagePerfCommonScreen : CStage
     public BaseTexture txBonusEffect;
 
     //fork
-    protected STDGBVALUE<CHITCOUNTOFRANK> nヒット数_TargetGhost; // #35411 2015.08.21 chnmr0 add
-    protected STDGBVALUE<int> nコンボ数_TargetGhost;
-    public STDGBVALUE<int> n最大コンボ数_TargetGhost;
 
     protected STDGBVALUE<int> nInputAdjustTimeMs;		// #23580 2011.1.3 yyagi
     public STAUTOPLAY bIsAutoPlay;		// #24239 2011.1.23 yyagi
@@ -1015,7 +890,7 @@ internal abstract class CStagePerfCommonScreen : CStage
             //training has no achievement rate
             if (value)
             {
-                dbAchievementRate = default;
+                session.AchievementRate = default;
             }
         }
     }
@@ -1025,8 +900,6 @@ internal abstract class CStagePerfCommonScreen : CStage
     private STDGBVALUE<int> nロングノートPart; //0 to 5, default 0
     private STDGBVALUE<int> nCurrentLongNoteDuration; //in ms
 
-    //Long Note Accumulated Bonus (For Max score computation only)
-    private STDGBVALUE<int> nAccumulatedLongNoteBonusScore;
 
 
     protected EJudgement e指定時刻からChipのJUDGEを返す( long nTime, CChip pChip, int nInputAdjustTime, bool saveLag = true )
@@ -1551,42 +1424,42 @@ internal abstract class CStagePerfCommonScreen : CStage
                     #region[ ヒット数の加算 ]
                     case EJudgement.Miss:
                         actCombo.tコンボリセット処理();
-                        nHitCount_IncAuto.Drums.Miss++;
+                        session.HitCountIncAuto.Drums.Miss++;
                         if (!bPChipIsAutoPlay)
                         {
-                            nHitCount_ExclAuto.Drums.Miss++;
+                            session.HitCountExclAuto.Drums.Miss++;
                             actPlayInfo.nMISS数++;
                         }
                         break;
                     case EJudgement.Poor:
-                        nHitCount_IncAuto.Drums.Poor++;
+                        session.HitCountIncAuto.Drums.Poor++;
                         if (!bPChipIsAutoPlay)
                         {
-                            nHitCount_ExclAuto.Drums.Poor++;
+                            session.HitCountExclAuto.Drums.Poor++;
                             actPlayInfo.nPOOR数++;
                         }
                         break;
                     case EJudgement.Good:
-                        nHitCount_IncAuto.Drums.Good++;
+                        session.HitCountIncAuto.Drums.Good++;
                         if (!bPChipIsAutoPlay)
                         {
-                            nHitCount_ExclAuto.Drums.Good++;
+                            session.HitCountExclAuto.Drums.Good++;
                             actPlayInfo.nGOOD数++;
                         }
                         break;
                     case EJudgement.Great:
-                        nHitCount_IncAuto.Drums.Great++;
+                        session.HitCountIncAuto.Drums.Great++;
                         if (!bPChipIsAutoPlay)
                         {
-                            nHitCount_ExclAuto.Drums.Great++;
+                            session.HitCountExclAuto.Drums.Great++;
                             actPlayInfo.nGREAT数++;
                         }
                         break;
                     case EJudgement.Perfect:
-                        nHitCount_IncAuto.Drums.Perfect++;
+                        session.HitCountIncAuto.Drums.Perfect++;
                         if (!bPChipIsAutoPlay)
                         {
-                            nHitCount_ExclAuto.Drums.Perfect++;
+                            session.HitCountExclAuto.Drums.Perfect++;
                             actPlayInfo.nPERFECT数++;
                         }
                         break;
@@ -1622,10 +1495,10 @@ internal abstract class CStagePerfCommonScreen : CStage
                 switch (eJudgeResult)
                 {
                     case EJudgement.Miss:
-                        nHitCount_IncAuto[indexInst].Miss++;
+                        session.HitCountIncAuto[indexInst].Miss++;
                         if (!bPChipIsAutoPlay)
                         {
-                            nHitCount_ExclAuto[indexInst].Miss++;
+                            session.HitCountExclAuto[indexInst].Miss++;
                         }
                         if (eJudgeResult == EJudgement.Miss)
                         {
@@ -1637,10 +1510,10 @@ internal abstract class CStagePerfCommonScreen : CStage
                         break;
                     default:	// #24068 2011.1.10 ikanick changed
                         // #24167 2011.1.16 yyagi changed
-                        nHitCount_IncAuto[indexInst][(int)eJudgeResult]++;
+                        session.HitCountIncAuto[indexInst][(int)eJudgeResult]++;
                         if (!bPChipIsAutoPlay)
                         {
-                            nHitCount_ExclAuto[indexInst][(int)eJudgeResult]++;
+                            session.HitCountExclAuto[indexInst][(int)eJudgeResult]++;
                         }
                         break;
                 }
@@ -1709,8 +1582,8 @@ internal abstract class CStagePerfCommonScreen : CStage
         float score = judgement switch
         {
             EJudgement.Perfect when combo < maxCombo => perfect,
-            EJudgement.Perfect when nHitCount_IncAuto[index].Perfect >= maxCombo
-                => 1000000.0f - (float)actScore.nCurrentTrueScore[index] + nAccumulatedLongNoteBonusScore[index],
+            EJudgement.Perfect when session.HitCountIncAuto[index].Perfect >= maxCombo
+                => 1000000.0f - (float)actScore.nCurrentTrueScore[index] + session.LongNoteBonusScore[index],
             EJudgement.Great => perfect * 0.5f,
             EJudgement.Good => perfect * 0.2f,
             _ => 0f
@@ -1720,7 +1593,7 @@ internal abstract class CStagePerfCommonScreen : CStage
         {
             score *= combo;
         }
-        else if (combo != maxCombo && nHitCount_ExclAuto[index].Perfect != maxCombo)
+        else if (combo != maxCombo && session.HitCountExclAuto[index].Perfect != maxCombo)
         {
             score *= 50.0f;
         }
@@ -1771,11 +1644,11 @@ internal abstract class CStagePerfCommonScreen : CStage
             case EJudgement.Perfect:
                 if (pChip.nLag > 0)
                 {
-                    nTimingHitCount[(int)pChip.eInstrumentPart].nLate++;
+                    session.TimingHitCount[(int)pChip.eInstrumentPart].Late++;
                 }
                 else
                 {
-                    nTimingHitCount[(int)pChip.eInstrumentPart].nEarly++;
+                    session.TimingHitCount[(int)pChip.eInstrumentPart].Early++;
                 }
                 break;
         }
@@ -2733,7 +2606,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                         // 上位８ビットが１ならコンボが途切れている（ギターBAD空打ちでコンボ数を再現するための措置）
                         if ( ghostLag > 255 )
                         {
-                            nコンボ数_TargetGhost[instIndex] = 0;
+                            session.GhostCombo[instIndex] = 0;
                         }
                         ghostLag = (ghostLag & 255) - 128;
                     }
@@ -2745,16 +2618,16 @@ internal abstract class CStagePerfCommonScreen : CStage
                     if ( ghostLag <= 127 )
                     {
                         EJudgement eJudge = e指定時刻からChipのJUDGEを返す(pChip.nPlaybackTimeMs + ghostLag, pChip, 0, false);
-                        nヒット数_TargetGhost[instIndex][(int)eJudge]++;
+                        session.GhostHitCount[instIndex][(int)eJudge]++;
                         if (eJudge == EJudgement.Miss || eJudge == EJudgement.Poor)
                         {
-                            n最大コンボ数_TargetGhost[instIndex] = Math.Max(n最大コンボ数_TargetGhost[instIndex], nコンボ数_TargetGhost[instIndex]);
-                            nコンボ数_TargetGhost[instIndex] = 0;
+                            session.GhostMaxCombo[instIndex] = Math.Max(session.GhostMaxCombo[instIndex], session.GhostCombo[instIndex]);
+                            session.GhostCombo[instIndex] = 0;
                         }
                         else
                         {
-                            n最大コンボ数_TargetGhost[instIndex] = Math.Max(n最大コンボ数_TargetGhost[instIndex], nコンボ数_TargetGhost[instIndex]);
-                            nコンボ数_TargetGhost[instIndex]++;
+                            session.GhostMaxCombo[instIndex] = Math.Max(session.GhostMaxCombo[instIndex], session.GhostCombo[instIndex]);
+                            session.GhostCombo[instIndex]++;
                         }
                     }
                 }
@@ -4303,7 +4176,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                             //Fire off 100 bonus pt up to 500 pts for holding long notes
                             actScore.Add(inst, bIsAutoPlay, 100);
                             //Also accumulate Bonus score to eventually correct Max score computation
-                            nAccumulatedLongNoteBonusScore[(int)inst] += 100;
+                            session.LongNoteBonusScore[(int)inst] += 100;
                             //Set off Bonus Score animation
                             actGuitarBonus.startBonus(inst);
                             //Increment part number
@@ -4607,11 +4480,7 @@ internal abstract class CStagePerfCommonScreen : CStage
         tJumpInSong(0);
 
         //nobody asked for this restart, so clear the score
-        for (int instrument = 0; instrument < 3; instrument++)
-        {
-            nHitCount_ExclAuto[instrument] = new CHITCOUNTOFRANK();
-            nHitCount_IncAuto[instrument] = new CHITCOUNTOFRANK();
-        }
+        session.Reset();
 
         actCombo.nCurrentCombo = default;
     }
@@ -4637,7 +4506,7 @@ internal abstract class CStagePerfCommonScreen : CStage
         nCurrentLongNoteDuration = default;
 
         //Reset Accumulated Score
-        nAccumulatedLongNoteBonusScore = default;
+        session.LongNoteBonusScore = default;
 
         // Loop to set new nCurrentTopChip
         // Also, if we are going backward, we need to unhit some chips, and reset TopChip
@@ -4819,7 +4688,7 @@ internal abstract class CStagePerfCommonScreen : CStage
         nロングノートPart = default;
         nCurrentLongNoteDuration = default;
         //
-        nAccumulatedLongNoteBonusScore = default;
+        session.LongNoteBonusScore = default;
         // 自分自身のOn活性化()相当の処理もすべき。
     }
 }

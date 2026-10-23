@@ -189,9 +189,9 @@ internal partial class CStagePerfGuitarScreen
 						{
 							// Online Stats の計算式
 							val = 100 *
-								(nヒット数_TargetGhost.Guitar.Perfect * 17 +
-								 nヒット数_TargetGhost.Guitar.Great * 7 +
-								 n最大コンボ数_TargetGhost.Guitar * 3) / (20.0 * CDTXMania.DTX.nVisibleChipsCount.Guitar);
+								(session.GhostHitCount.Guitar.Perfect * 17 +
+								 session.GhostHitCount.Guitar.Great * 7 +
+								 session.GhostMaxCombo.Guitar * 3) / (20.0 * CDTXMania.DTX.nVisibleChipsCount.Guitar);
 						}
 					}
 					else
@@ -200,24 +200,24 @@ internal partial class CStagePerfGuitarScreen
 						{
 							val = CScoreIni.tCalculatePlayingSkillOld(
 								CDTXMania.DTX.nVisibleChipsCount.Guitar,
-								nヒット数_TargetGhost.Guitar.Perfect,
-								nヒット数_TargetGhost.Guitar.Great,
-								nヒット数_TargetGhost.Guitar.Good,
-								nヒット数_TargetGhost.Guitar.Poor,
-								nヒット数_TargetGhost.Guitar.Miss,
-								n最大コンボ数_TargetGhost.Guitar,
+								session.GhostHitCount.Guitar.Perfect,
+								session.GhostHitCount.Guitar.Great,
+								session.GhostHitCount.Guitar.Good,
+								session.GhostHitCount.Guitar.Poor,
+								session.GhostHitCount.Guitar.Miss,
+								session.GhostMaxCombo.Guitar,
 								EInstrumentPart.GUITAR, new STAUTOPLAY());
 						}
 						else
 						{
 							val = CScoreIni.tCalculatePlayingSkill(
 								CDTXMania.DTX.nVisibleChipsCount.Guitar,
-								nヒット数_TargetGhost.Guitar.Perfect,
-								nヒット数_TargetGhost.Guitar.Great,
-								nヒット数_TargetGhost.Guitar.Good,
-								nヒット数_TargetGhost.Guitar.Poor,
-								nヒット数_TargetGhost.Guitar.Miss,
-								n最大コンボ数_TargetGhost.Guitar,
+								session.GhostHitCount.Guitar.Perfect,
+								session.GhostHitCount.Guitar.Great,
+								session.GhostHitCount.Guitar.Good,
+								session.GhostHitCount.Guitar.Poor,
+								session.GhostHitCount.Guitar.Miss,
+								session.GhostMaxCombo.Guitar,
 								EInstrumentPart.GUITAR, new STAUTOPLAY());
 						}
 
@@ -244,9 +244,9 @@ internal partial class CStagePerfGuitarScreen
 						{
 							// Online Stats の計算式
 							val = 100 *
-								(nヒット数_TargetGhost.Bass.Perfect * 17 +
-								 nヒット数_TargetGhost.Bass.Great * 7 +
-								 n最大コンボ数_TargetGhost.Bass * 3) / (20.0 * CDTXMania.DTX.nVisibleChipsCount.Bass);
+								(session.GhostHitCount.Bass.Perfect * 17 +
+								 session.GhostHitCount.Bass.Great * 7 +
+								 session.GhostMaxCombo.Bass * 3) / (20.0 * CDTXMania.DTX.nVisibleChipsCount.Bass);
 						}
 					}
 					else
@@ -255,24 +255,24 @@ internal partial class CStagePerfGuitarScreen
 						{
 							val = CScoreIni.tCalculatePlayingSkillOld(
 								CDTXMania.DTX.nVisibleChipsCount.Bass,
-								nヒット数_TargetGhost.Bass.Perfect,
-								nヒット数_TargetGhost.Bass.Great,
-								nヒット数_TargetGhost.Bass.Good,
-								nヒット数_TargetGhost.Bass.Poor,
-								nヒット数_TargetGhost.Bass.Miss,
-								n最大コンボ数_TargetGhost.Bass,
+								session.GhostHitCount.Bass.Perfect,
+								session.GhostHitCount.Bass.Great,
+								session.GhostHitCount.Bass.Good,
+								session.GhostHitCount.Bass.Poor,
+								session.GhostHitCount.Bass.Miss,
+								session.GhostMaxCombo.Bass,
 								EInstrumentPart.BASS, new STAUTOPLAY());
 						}
 						else
 						{
 							val = CScoreIni.tCalculatePlayingSkill(
 								CDTXMania.DTX.nVisibleChipsCount.Bass,
-								nヒット数_TargetGhost.Bass.Perfect,
-								nヒット数_TargetGhost.Bass.Great,
-								nヒット数_TargetGhost.Bass.Good,
-								nヒット数_TargetGhost.Bass.Poor,
-								nヒット数_TargetGhost.Bass.Miss,
-								n最大コンボ数_TargetGhost.Bass,
+								session.GhostHitCount.Bass.Perfect,
+								session.GhostHitCount.Bass.Great,
+								session.GhostHitCount.Bass.Good,
+								session.GhostHitCount.Bass.Poor,
+								session.GhostHitCount.Bass.Miss,
+								session.GhostMaxCombo.Bass,
 								EInstrumentPart.BASS, new STAUTOPLAY());
 						}
 
