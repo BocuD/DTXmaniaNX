@@ -499,10 +499,6 @@ internal abstract class CStagePerfCommonScreen : CStage
         {
             nLastPlayedBGMWAVNumber[i] = -1;
         }
-        for (int j = 0; j < 12; j++)
-        {
-            r現在の空うちドラムChip[j] = null;
-        }
         for (int k = 0; k < 3; k++)
         {
             r現在の歓声Chip[k] = null;
@@ -536,7 +532,7 @@ internal abstract class CStagePerfCommonScreen : CStage
         {
             data.Reset(bIsAutoPlay, CDTXMania.ConfigIni.nRisky);
         }
-        drums = IsPlayed(EInstrumentPart.DRUMS) ? new DrumsPerformance(DrumsData, bIsAutoPlay) : null;
+        drums = IsPlayed(EInstrumentPart.DRUMS) ? new DrumsPerformance(DrumsData, timeline, bIsAutoPlay) : null;
         guitars[0] = IsPlayed(EInstrumentPart.GUITAR) ? new GuitarPerformance(EInstrument.Guitar1, EChartPart.Guitar, GuitarData, timeline, bIsAutoPlay) : null;
         guitars[1] = IsPlayed(EInstrumentPart.BASS) ? new GuitarPerformance(EInstrument.Guitar2, EChartPart.Bass, BassData, timeline, bIsAutoPlay) : null;
 
@@ -631,123 +627,6 @@ internal abstract class CStagePerfCommonScreen : CStage
         nShutterMaxPosY = 100;
     }
 
-    [StructLayout(LayoutKind.Sequential)]
-    protected struct STKARAUCHI
-    {
-        public CChip HH;
-        public CChip SD;
-        public CChip BD;
-        public CChip HT;
-        public CChip LT;
-        public CChip FT;
-        public CChip CY;
-        public CChip HHO;
-        public CChip RD;
-        public CChip LC;
-        public CChip LP;
-        public CChip LBD;
-        public CChip this[int index]
-        {
-            get
-            {
-                switch (index)
-                {
-                    case 0:
-                        return HH;
-
-                    case 1:
-                        return SD;
-
-                    case 2:
-                        return BD;
-
-                    case 3:
-                        return HT;
-
-                    case 4:
-                        return LT;
-
-                    case 5:
-                        return FT;
-
-                    case 6:
-                        return CY;
-
-                    case 7:
-                        return HHO;
-
-                    case 8:
-                        return RD;
-
-                    case 9:
-                        return LC;
-
-                    case 10:
-                        return LP;
-
-                    case 11:
-                        return LBD;
-
-                }
-                throw new IndexOutOfRangeException();
-            }
-            set
-            {
-                switch (index)
-                {
-                    case 0:
-                        HH = value;
-                        return;
-
-                    case 1:
-                        SD = value;
-                        return;
-
-                    case 2:
-                        BD = value;
-                        return;
-
-                    case 3:
-                        HT = value;
-                        return;
-
-                    case 4:
-                        LT = value;
-                        return;
-
-                    case 5:
-                        FT = value;
-                        return;
-
-                    case 6:
-                        CY = value;
-                        return;
-
-                    case 7:
-                        HHO = value;
-                        return;
-
-                    case 8:
-                        RD = value;
-                        return;
-
-                    case 9:
-                        LC = value;
-                        return;
-
-                    case 10:
-                        LP = value;
-                        return;
-
-                    case 11:
-                        LBD = value;
-                        return;
-
-                }
-                throw new IndexOutOfRangeException();
-            }
-        }
-    }
     //todo: reintroduce background video and art
     public CActPerfVideo video;
     public CActPerfBGA actBGA;
@@ -784,13 +663,6 @@ internal abstract class CStagePerfCommonScreen : CStage
     protected EPerfScreenReturnValue eReturnValue;
     protected CCounter ctResultDelay;
     protected readonly EChannel[,] nBGAスコープチャンネルマップ = new[,] { { EChannel.BGALayer1_Swap, EChannel.BGALayer2_Swap, EChannel.BGALayer3_Swap, EChannel.BGALayer4_Swap, EChannel.BGALayer5_Swap, EChannel.BGALayer6_Swap, EChannel.BGALayer7_Swap, EChannel.BGALayer8_Swap }, { EChannel.BGALayer1, EChannel.BGALayer2, EChannel.BGALayer3, EChannel.BGALayer4, EChannel.BGALayer5, EChannel.BGALayer6, EChannel.BGALayer7, EChannel.BGALayer8 } };
-    protected readonly int[] nチャンネル0Atoパッド08 = [1, 2, 3, 4, 5, 7, 6, 1, 8, 0, 9, 9];
-    protected readonly int[] nチャンネル0Atoレーン07 = [1, 2, 3, 4, 5, 7, 6, 1, 9, 0, 8, 8];
-    //                         RD LC  LP  RD
-    protected readonly EChannel[] nパッド0Atoチャンネル0A = [EChannel.HiHatClose, EChannel.Snare, EChannel.BassDrum, EChannel.HighTom, EChannel.LowTom, EChannel.FloorTom, EChannel.Cymbal, EChannel.HiHatOpen, EChannel.RideCymbal, EChannel.LeftCymbal, EChannel.LeftPedal, EChannel.LeftBassDrum];
-    protected readonly int[] nパッド0Atoパッド08 = [1, 2, 3, 4, 5, 6, 7, 1, 8, 0, 9, 9];// パッド画像のヒット処理用
-    //   HH SD BD HT LT FT CY HHO RD LC LP LBD
-    protected readonly int[] nパッド0Atoレーン07 = [1, 2, 3, 4, 5, 6, 7, 1, 9, 0, 8, 8];
 
     public STDGBVALUE<int> nJudgeLinePosY;//(CDTXMania.ConfigIni.bReverse.Drums ? 159 : 561);
     public STDGBVALUE<int> nShutterInPosY;
@@ -828,7 +700,6 @@ internal abstract class CStagePerfCommonScreen : CStage
     protected STDGBVALUE<int> nJudgeLinePosY_delta; // #31602 2013.6.23 yyagi 表示遅延対策として、判定ラインの表示位置をずらす機能を追加する
 
     protected STDGBVALUE<CChip> r現在の歓声Chip;
-    protected STKARAUCHI r現在の空うちドラムChip;
     protected BaseTexture txWailingFrame;
     protected BaseTexture txChip;  // txチップ
 
@@ -897,152 +768,6 @@ internal abstract class CStagePerfCommonScreen : CStage
         return ChipJudge.GetJudgementForLag(pChip, lag);
     }
 
-    protected CChip r空うちChip(EInstrumentPart part, EPad pad)
-    {
-        switch (part)
-        {
-            case EInstrumentPart.DRUMS:
-                switch (pad)
-                {
-                    case EPad.HH:
-                        if (r現在の空うちドラムChip.HH != null)
-                        {
-                            return r現在の空うちドラムChip.HH;
-                        }
-                        if (CDTXMania.ConfigIni.eHHGroup != EHHGroup.ハイハットのみ打ち分ける)
-                        {
-                            if (CDTXMania.ConfigIni.eHHGroup == EHHGroup.左シンバルのみ打ち分ける)
-                            {
-                                return r現在の空うちドラムChip.HHO;
-                            }
-                            if (r現在の空うちドラムChip.HHO != null)
-                            {
-                                return r現在の空うちドラムChip.HHO;
-                            }
-                        }
-                        return r現在の空うちドラムChip.LC;
-
-                    case EPad.SD:
-                        return r現在の空うちドラムChip.SD;
-
-                    case EPad.BD:
-                        return r現在の空うちドラムChip.BD;
-
-                    case EPad.HT:
-                        return r現在の空うちドラムChip.HT;
-
-                    case EPad.LT:
-                        if (r現在の空うちドラムChip.LT != null)
-                        {
-                            return r現在の空うちドラムChip.LT;
-                        }
-                        if (CDTXMania.ConfigIni.eFTGroup == EFTGroup.共通)
-                        {
-                            return r現在の空うちドラムChip.FT;
-                        }
-                        return null;
-
-                    case EPad.FT:
-                        if (r現在の空うちドラムChip.FT != null)
-                        {
-                            return r現在の空うちドラムChip.FT;
-                        }
-                        if (CDTXMania.ConfigIni.eFTGroup == EFTGroup.共通)
-                        {
-                            return r現在の空うちドラムChip.LT;
-                        }
-                        return null;
-
-                    case EPad.CY:
-                        if (r現在の空うちドラムChip.CY != null)
-                        {
-                            return r現在の空うちドラムChip.CY;
-                        }
-                        if (CDTXMania.ConfigIni.eCYGroup == ECYGroup.共通)
-                        {
-                            return r現在の空うちドラムChip.RD;
-                        }
-                        return null;
-
-                    case EPad.HHO:
-                        if (r現在の空うちドラムChip.HHO != null)
-                        {
-                            return r現在の空うちドラムChip.HHO;
-                        }
-                        if (CDTXMania.ConfigIni.eHHGroup != EHHGroup.ハイハットのみ打ち分ける)
-                        {
-                            if (CDTXMania.ConfigIni.eHHGroup == EHHGroup.左シンバルのみ打ち分ける)
-                            {
-                                return r現在の空うちドラムChip.HH;
-                            }
-                            if (r現在の空うちドラムChip.HH != null)
-                            {
-                                return r現在の空うちドラムChip.HH;
-                            }
-                        }
-                        return r現在の空うちドラムChip.LC;
-
-                    case EPad.RD:
-                        if (r現在の空うちドラムChip.RD != null)
-                        {
-                            return r現在の空うちドラムChip.RD;
-                        }
-                        if (CDTXMania.ConfigIni.eCYGroup == ECYGroup.共通)
-                        {
-                            return r現在の空うちドラムChip.CY;
-                        }
-                        return null;
-
-                    case EPad.LC:
-                        if (r現在の空うちドラムChip.LC != null)
-                        {
-                            return r現在の空うちドラムChip.LC;
-                        }
-                        if ((CDTXMania.ConfigIni.eHHGroup != EHHGroup.ハイハットのみ打ち分ける) && (CDTXMania.ConfigIni.eHHGroup != EHHGroup.全部共通))
-                        {
-                            return null;
-                        }
-                        if (r現在の空うちドラムChip.HH != null)
-                        {
-                            return r現在の空うちドラムChip.HH;
-                        }
-                        return r現在の空うちドラムChip.HHO;
-
-                    case EPad.LP:
-                        if (r現在の空うちドラムChip.LP != null)
-                        {
-                            return r現在の空うちドラムChip.LP;
-                        }
-                        if (CDTXMania.ConfigIni.eBDGroup != EBDGroup.左右ペダルのみ打ち分ける)
-                        {
-                            if (r現在の空うちドラムChip.LBD != null)
-                            {
-                                return r現在の空うちドラムChip.LBD;
-                            }
-                        }
-                        return r現在の空うちドラムChip.LP;
-
-                    case EPad.LBD:
-                        if (r現在の空うちドラムChip.LBD != null)
-                        {
-                            return r現在の空うちドラムChip.LBD;
-                        }
-                        if (CDTXMania.ConfigIni.eBDGroup != EBDGroup.左右ペダルのみ打ち分ける)
-                        {
-                            if (r現在の空うちドラムChip.LP != null)
-                            {
-                                return r現在の空うちドラムChip.LP;
-                            }
-                        }
-                        return r現在の空うちドラムChip.LBD;
-
-
-                }
-                break;
-
-        }
-        return null;
-    }
     protected void tPlaySound(CChip rChip, long n再生開始システム時刻ms, EInstrumentPart part)
     {
         tPlaySound(rChip, n再生開始システム時刻ms, part, CDTXMania.ConfigIni.n手動再生音量, false, false);
@@ -1096,7 +821,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                         return;
                     }
 
-                    int nLane = nチャンネル0Atoレーン07[(int)index];
+                    int nLane = DrumsPerformance.ChannelLanes[(int)index];
                     if (((((nLane == 1) && (index == 0)) && ((nLastPlayedHHChannelNumber != EChannel.HiHatOpen) && (nLastPlayedHHChannelNumber != EChannel.HiHatOpen_Hidden))) || ((((nLane == 8)) && ((index == EChannel.BMS_reserved_0A) && (nLastPlayedHHChannelNumber != EChannel.HiHatOpen))) && (nLastPlayedHHChannelNumber != EChannel.HiHatOpen_Hidden))) && CDTXMania.ConfigIni.bMutingLP)
                     {
                         for (int i = 0; i < LLastPlayedHHWAVNumber.Count; i++)
@@ -1148,16 +873,6 @@ internal abstract class CStagePerfCommonScreen : CStage
             }
         }
     }
-    protected void tチップのヒット処理_BadならびにTight時のMiss(int nLane)
-    {
-        DrumsData.Damage(EJudgement.Miss);
-        if ((nLane >= 0) && (nLane <= 10))
-        {
-            actJudgeString.Start(nLane, bIsAutoPlay[nLane] ? EJudgement.Auto : EJudgement.Miss, 999);
-        }
-        DrumsData.BreakCombo();
-    }
-
     private void ChangeInputAdjustTimeInPlaying(IInputKeyboard keyboard, int plusminus)		// #23580 2011.1.16 yyagi UI for InputAdjustTime in playing screen.
     {
         int part, offset = plusminus;
@@ -2730,8 +2445,14 @@ internal abstract class CStagePerfCommonScreen : CStage
         //todo: maybe reimplement the more complex background texture behaviour
     }
 
-    protected virtual void tHandleInput_GuitarBass(EInstrumentPart inst)
+    protected void tHandleInput_GuitarBass(EInstrumentPart inst)
     {
+        GuitarPerformance? guitar = GuitarFor(inst);
+        if (guitar == null)
+        {
+            return;
+        }
+
         int indexInst = (int)inst;
         #region [ スクロール速度変更 ]
         if (CDTXMania.Pad.bPressing(inst, EPad.Decide) && CDTXMania.Pad.bPressed(inst, EPad.B))
@@ -2744,8 +2465,7 @@ internal abstract class CStagePerfCommonScreen : CStage
         }
         #endregion
 
-        GuitarPerformance? guitar = GuitarFor(inst);
-        if (!CDTXMania.ConfigIni.bGuitarEnabled || !CDTXMania.DTX.bHasChips[indexInst] || guitar == null)
+        if (!CDTXMania.ConfigIni.bGuitarEnabled || !CDTXMania.DTX.bHasChips[indexInst])
         {
             return;
         }

@@ -70,7 +70,7 @@ internal partial class CStagePerfDrumsScreen
             return;
         }
 
-        ELane lane = (ELane)nチャンネル0Atoレーン07[chip.nChannelNumber - EChannel.HiHatClose];
+        ELane lane = (ELane)DrumsPerformance.LaneOf(chip);
         int x = (int)(DrumLanes.Centre(lane) - art.SourceWidth / 2f);
         float distance = chip.nDistanceFromBar.Drums;
         float y = (CDTXMania.ConfigIni.bReverse.Drums ? nJudgeLinePosY.Drums + distance : nJudgeLinePosY.Drums - distance) - 32;
@@ -165,20 +165,7 @@ internal partial class CStagePerfDrumsScreen
         
     protected override void UpdateChip_NoSound_Drums(CConfigIni configIni, ref CDTX dTX, ref CChip pChip)  // t進行描画_チップ_空打ち音設定_ドラム
     {
-        if (!pChip.bHit && (pChip.nDistanceFromBar.Drums < 0))
-        {
-            try
-            {
-                pChip.bHit = true;
-                r現在の空うちドラムChip[(int)eChannelToPad[(int)pChip.nChannelNumber - (int)EChannel.HiHatClose_NoChip]] = pChip;
-                pChip.nChannelNumber = ((pChip.nChannelNumber < EChannel.LeftCymbal_NoChip) || (pChip.nChannelNumber > EChannel.LeftBassDrum_NoChip)) ? ((pChip.nChannelNumber - 0xb1) + 0x11) : ((pChip.nChannelNumber - 0xb3) + 0x11);
-            }
-            catch
-            {
-                return;
-            }
-        }
-
+        drums!.UpdateEmptyHitChip(pChip);
     }
 
     private bool bフィルイン区間の最後のChipである( CChip pChip )

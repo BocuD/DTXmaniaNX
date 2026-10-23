@@ -70,10 +70,10 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
         r空打ちドラムチップ = new CChip[ 12 ];
         for ( int i = 0; i < 12; i++ )
         {
-            r空打ちドラムチップ[ i ] = r空うちChip( EInstrumentPart.DRUMS, (EPad) i );
+            r空打ちドラムチップ[ i ] = drums!.FindEmptyHitSound( (EPad) i );
             if ( r空打ちドラムチップ[ i ] == null )
             {
-                r空打ちドラムチップ[ i ] = timeline.NearestDrum(CDTXMania.Timer.nCurrentTime + nInputAdjustTimeMs.Drums, nパッド0Atoチャンネル0A[i], HitState.DontCare);
+                r空打ちドラムチップ[ i ] = timeline.NearestDrum(CDTXMania.Timer.nCurrentTime + nInputAdjustTimeMs.Drums, DrumsPerformance.PadChannels[i], HitState.DontCare);
             }
         }
         bIsTrainingMode = this.bIsTrainingMode;
@@ -355,12 +355,6 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
     public bool bInFillIn;
     public bool bEndFillIn;
     public bool bChorusSection;
-    private readonly EPad[] eChannelToPad = new EPad[12]
-    {
-        EPad.HH, EPad.SD, EPad.BD, EPad.HT,
-        EPad.LT, EPad.CY, EPad.FT, EPad.HHO,
-        EPad.RD, EPad.UNKNOWN, EPad.UNKNOWN, EPad.LC
-    };
     public double UnitTime;
     private BaseTexture txLaneCover;
     //-----------------
@@ -380,14 +374,33 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
     {
         foreach (DrumsEvent e in drums!.Events)
         {
-            int lane = DrumsPerformance.LaneOf(e.Chip);
             switch (e.Kind)
             {
                 case EDrumsEvent.AutoNote:
-                    actLaneFlushD.Start((ELane)lane, CInputManager.nDefaultVelocity / 127f);
-                    StartChipFire(lane, e.Chip);
-                    actPad.Hit(DrumsPerformance.PadOf(e.Chip));
+                    actLaneFlushD.Start((ELane)e.Lane, e.Velocity);
+                    StartChipFire(e.Lane, e.Chip);
+                    actPad.Hit(e.Pad);
                     tPlaySound(e.Chip, AudioMixer.Timer.nResetAtMs + e.Time, EInstrumentPart.DRUMS, CDTXMania.DTX.nモニタを考慮した音量(EInstrumentPart.DRUMS));
+                    break;
+
+                case EDrumsEvent.Hit:
+                    actLaneFlushD.Start((ELane)e.Lane, e.Velocity);
+                    actPad.Hit(e.Pad);
+                    if (e.Fire)
+                    {
+                        StartChipFire(e.Lane, e.Chip);
+                    }
+                    PlayHitSound(e.Sound);
+                    break;
+
+                case EDrumsEvent.EmptyHit:
+                    actLaneFlushD.Start((ELane)e.Lane, e.Velocity);
+                    actPad.Hit(e.Pad);
+                    PlayHitSound(e.Sound);
+                    if (e.Miss)
+                    {
+                        actJudgeString.Start(e.Lane, e.Auto ? EJudgement.Auto : EJudgement.Miss, 999);
+                    }
                     break;
 
                 case EDrumsEvent.Bonus:
@@ -399,7 +412,7 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
                     break;
 
                 case EDrumsEvent.Judged:
-                    actJudgeString.Start(lane, e.Auto ? EJudgement.Auto : e.Judgement, e.Chip.nLag);
+                    actJudgeString.Start(e.Lane, e.Auto ? EJudgement.Auto : e.Judgement, e.Chip.nLag);
                     bool hit = e.Judgement is EJudgement.Perfect or EJudgement.Great or EJudgement.Good;
                     if (!e.Auto && hit)
                     {
@@ -426,11 +439,22 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
         actChipFireD.Start((ELane)lane, bInFillIn, lastInFillIn, lastInFillIn, nJudgeLinePosY_delta.Drums);
     }
 
-    private EJudgement ApplyDrumsHit(long time, CChip chip)
+    private void PlayHitSound(CChip? sound)
     {
-        EJudgement judgement = drums!.ApplyHit(chip, time, true);
+        if (sound != null)
+        {
+            tPlaySound(sound, AudioMixer.Timer.nSystemTimeMs, EInstrumentPart.DRUMS, CDTXMania.ConfigIni.n手動再生音量, CDTXMania.ConfigIni.b演奏音を強調する.Drums);
+        }
+    }
+
+    protected override void tHandleInput_Drums()
+    {
+        drums!.UpdateInput();
+        if (drums.HadInput)
+        {
+            tSaveInputMethod(EInstrumentPart.DRUMS);
+        }
         ApplyDrumsEvents();
-        return judgement;
     }
 
     protected override void tJudgeLineMovingUpandDown()
@@ -448,10 +472,6 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
         CDTXMania.ConfigIni.nScrollSpeed.Drums = Math.Max( CDTXMania.ConfigIni.nScrollSpeed.Drums - 1, 0 );
     }
 
-    protected override void tHandleInput_GuitarBass(EInstrumentPart inst)
-    {
-    }
-    
     protected override void tUpdateAndDraw_WailingFrame()
     {
         base.tUpdateAndDraw_WailingFrame( 587, 478,
