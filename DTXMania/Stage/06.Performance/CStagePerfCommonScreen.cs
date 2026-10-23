@@ -505,8 +505,6 @@ internal abstract class CStagePerfCommonScreen : CStage
         {
             nLastPlayedBGMWAVNumber[i] = -1;
         }
-        rNextGuitarChip = null;
-        rNextBassChip = null;
         for (int j = 0; j < 12; j++)
         {
             r現在の空うちドラムChip[j] = null;
@@ -515,7 +513,6 @@ internal abstract class CStagePerfCommonScreen : CStage
         r現在の空うちベースChip = null;
         for (int k = 0; k < 3; k++)
         {
-            queWailing[k] = new Queue<CChip>();
             r現在の歓声Chip[k] = null;
             //
             chipロングノートHit中[k] = null;
@@ -528,8 +525,6 @@ internal abstract class CStagePerfCommonScreen : CStage
             bJoypadUsed[i] = false;
             bMIDIUsed[i] = false;
             bMouseUsed[i] = false;
-            ctTimer[i] = null;//new CCounter(0, 3000, 1, CDTXMania.Timer);
-            ctTimer[i] = new CCounter(0, 3000, 1, CDTXMania.Timer);
         }
         bAUTOでないチップが１つでもバーを通過した = false;
         nJudgeLinePosY.Drums = (CDTXMania.ConfigIni.bReverse.Drums ? 159 + CDTXMania.ConfigIni.nJudgeLine.Drums : 561 - CDTXMania.ConfigIni.nJudgeLine.Drums);
@@ -554,6 +549,8 @@ internal abstract class CStagePerfCommonScreen : CStage
         {
             data.Reset(bIsAutoPlay, CDTXMania.ConfigIni.nRisky);
         }
+        guitars[0] = IsPlayed(EInstrumentPart.GUITAR) ? new GuitarPerformance(EInstrument.Guitar1, EChartPart.Guitar, GuitarData, timeline, bIsAutoPlay) : null;
+        guitars[1] = IsPlayed(EInstrumentPart.BASS) ? new GuitarPerformance(EInstrument.Guitar2, EChartPart.Bass, BassData, timeline, bIsAutoPlay) : null;
 
 
         //let the loading sound gracefully fade out
@@ -597,7 +594,6 @@ internal abstract class CStagePerfCommonScreen : CStage
         {
             CDTXMania.DTX.SwapGuitarBassInfos();
         }
-        bブーストボーナス = false;
         sw = new Stopwatch();
         sw2 = new Stopwatch();
         base.OnActivate();
@@ -610,11 +606,7 @@ internal abstract class CStagePerfCommonScreen : CStage
 
         LLastPlayedHHWAVNumber.Clear();	// #23921 2011.1.4 yyagi
         LLastPlayedHHWAVNumber = null;	//
-        for (int i = 0; i < 3; i++)
-        {
-            queWailing[i].Clear();
-            queWailing[i] = null;
-        }
+        Array.Clear(guitars);
         ctWailingChipPatternAnimation = null;
         ctBPMBar = null;
         ctChipPatternAnimation.Drums = null;
@@ -819,6 +811,13 @@ internal abstract class CStagePerfCommonScreen : CStage
         [new(EInstrumentPart.DRUMS), new(EInstrumentPart.GUITAR), new(EInstrumentPart.BASS)];
 
     public PerformanceData DataFor(EInstrumentPart part) => partData[(int)part];
+
+    //by EInstrument - 1, null when not playing
+    protected readonly GuitarPerformance?[] guitars = new GuitarPerformance?[2];
+
+    //for now Guitar1 always plays the guitar chart and Guitar2 the bass chart
+    protected GuitarPerformance? GuitarFor(EInstrumentPart part) =>
+        part == EInstrumentPart.GUITAR ? guitars[0] : part == EInstrumentPart.BASS ? guitars[1] : null;
     protected PerformanceData DrumsData => partData[(int)EInstrumentPart.DRUMS];
     protected PerformanceData GuitarData => partData[(int)EInstrumentPart.GUITAR];
     protected PerformanceData BassData => partData[(int)EInstrumentPart.BASS];
@@ -837,16 +836,10 @@ internal abstract class CStagePerfCommonScreen : CStage
     protected bool bValidScore;
     protected STDGBVALUE<int> nJudgeLinePosY_delta; // #31602 2013.6.23 yyagi 表示遅延対策として、判定ラインの表示位置をずらす機能を追加する
 
-    private CCounter[] ctTimer = new CCounter[3];
-    public bool bブーストボーナス;
-
-    protected STDGBVALUE<Queue<CChip>> queWailing;
     protected STDGBVALUE<CChip> r現在の歓声Chip;
     protected CChip r現在の空うちギターChip;
     protected STKARAUCHI r現在の空うちドラムChip;
     protected CChip r現在の空うちベースChip;
-    protected CChip rNextGuitarChip;
-    protected CChip rNextBassChip;
     protected BaseTexture txWailingFrame;
     protected BaseTexture txChip;  // txチップ
 
@@ -1350,21 +1343,6 @@ internal abstract class CStagePerfCommonScreen : CStage
             default:
                 break;
         }
-        for (int i = 0; i < 3; i++)
-        {
-            if (ctTimer[i] != null)
-            {
-                if (!ctTimer[i].bStopped)
-                {
-                    if (ctTimer[i].bReachedEndValue)
-                    {
-                        bブーストボーナス = false;
-                        ctTimer[i].tStop();
-
-                    }
-                }
-            }
-        }
         //guitar and bass score auto chips in skill mode 1 even without AutoAddGage
         bool scoresAuto = CDTXMania.ConfigIni.bAutoAddGage
                           || (CDTXMania.ConfigIni.nSkillMode == 1 && pChip.eInstrumentPart != EInstrumentPart.DRUMS);
@@ -1484,31 +1462,6 @@ internal abstract class CStagePerfCommonScreen : CStage
             default:
                 return;
         }
-    }
-
-    protected CChip r次に来る指定楽器Chipを更新して返す(EInstrumentPart inst)
-    {
-        switch ((int)inst)
-        {
-            case (int)EInstrumentPart.GUITAR:
-                return r次にくるギターChipを更新して返す();
-            case (int)EInstrumentPart.BASS:
-                return r次にくるベースChipを更新して返す();
-            default:
-                return null;
-        }
-    }
-    protected CChip r次にくるギターChipを更新して返す()
-    {
-        int nInputAdjustTime = bIsAutoPlay.GtPick ? 0 : nInputAdjustTimeMs.Guitar;
-        rNextGuitarChip = timeline.NearestNote(AudioMixer.Timer.nCurrentTime + nInputAdjustTime, EInstrumentPart.GUITAR, 800, HitState.NotHit, preferPast: true);
-        return rNextGuitarChip;
-    }
-    protected CChip r次にくるベースChipを更新して返す()  // r次にくるベースChipを更新して返す
-    {
-        int nInputAdjustTime = bIsAutoPlay.BsPick ? 0 : nInputAdjustTimeMs.Bass;
-        rNextBassChip = timeline.NearestNote(AudioMixer.Timer.nCurrentTime + nInputAdjustTime, EInstrumentPart.BASS, 800, HitState.NotHit, preferPast: true);
-        return rNextBassChip;
     }
 
     private void ChangeInputAdjustTimeInPlaying(IInputKeyboard keyboard, int plusminus)		// #23580 2011.1.16 yyagi UI for InputAdjustTime in playing screen.
@@ -2276,7 +2229,6 @@ internal abstract class CStagePerfCommonScreen : CStage
                     if (!pChip.bHit && (pChip.nDistanceFromBar.Guitar < 0))
                     {
                         pChip.bHit = true;
-                        r現在の歓声Chip.Guitar = pChip;
                     }
                     break;
                 #endregion
@@ -2906,7 +2858,8 @@ internal abstract class CStagePerfCommonScreen : CStage
     
     protected virtual void UpdateChip_GuitarBass_Wailing(CConfigIni configIni, ref CDTX dTX, ref CChip pChip, EInstrumentPart inst)
     {
-        if (!IsPlayed(inst))
+        GuitarPerformance? guitar = GuitarFor(inst);
+        if (guitar == null)
         {
             pChip.bHit = true;
             return;
@@ -2914,24 +2867,8 @@ internal abstract class CStagePerfCommonScreen : CStage
 
         int indexInst = (int)inst;
         ApplyHiddenSudden(pChip, pChip.nDistanceFromBar[indexInst], CDTXMania.ConfigIni.nHidSud[indexInst], 250, 150, 75.0);
-        //
-        // ここにチップ更新処理が入る(overrideで入れる)。といっても座標とチップサイズが違うだけで処理はまるまる同じ。
-        //
-        if (!pChip.bHit && (pChip.nDistanceFromBar[indexInst] < 0))
-        {
-            if (pChip.nDistanceFromBar[indexInst] < -234)	// #25253 2011.5.29 yyagi: Don't set pChip.bHit=true for wailing at once. It need to 1sec-delay (234pix per 1sec). 
-            {
-                pChip.bHit = true;
-            }
-            bool autoW = (inst == EInstrumentPart.GUITAR) ? configIni.bAutoPlay.GtW : configIni.bAutoPlay.BsW;
-            if (autoW)
-            {
-                // #23886 2012.5.22 yyagi; To support auto Wailing; Don't do wailing for ALL wailing chips. Do wailing for queued wailing chip.
-                // wailing chips are queued when 1) manually wailing and not missed at that time 2) AutoWailing=ON and not missed at that time
-                long nTimeStamp_Wailed = pChip.nPlaybackTimeMs + AudioMixer.Timer.nResetAtMs;
-                DoWailingFromQueue(inst, nTimeStamp_Wailed, autoW);
-            }
-        }
+        guitar.UpdateWailingMarker(pChip);
+        ApplyGuitarEvents(guitar);
     }
     protected virtual void UpdateChip_Guitar_Wailing(CConfigIni configIni, ref CDTX dTX, ref CChip pChip)
     {
@@ -3189,7 +3126,7 @@ internal abstract class CStagePerfCommonScreen : CStage
         int nAutoP = (autoP) ? 32 : 0;
         int nAutoMask = nAutoW | nAutoR | nAutoG | nAutoB | nAutoY | nAutoP;
 
-        CChip chip = ((chipロングノートHit中[(int)inst] == null) ? r次に来る指定楽器Chipを更新して返す(inst) : chipロングノートHit中[(int)inst]);
+        CChip chip = ((chipロングノートHit中[(int)inst] == null) ? GuitarFor(inst)?.NextNote() : chipロングノートHit中[(int)inst]);
         int nChipColorFlag = 0;
         bool bChipColorHasR = false;
         bool bChipColorHasG = false;
@@ -3735,13 +3672,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                             tProcessChipHit(nTime, pChip);
                             tPlaySound(pChip, AudioMixer.Timer.nSystemTimeMs, inst, CDTXMania.ConfigIni.n手動再生音量, CDTXMania.ConfigIni.b演奏音を強調する[indexInst], e判定 == EJudgement.Poor && bCurrInstrumentSpecialist);
 
-                            EChannel search = ((inst == EInstrumentPart.GUITAR) ? EChannel.Guitar_Wailing : EChannel.Bass_Wailing);
-                            CChip item = timeline.Nearest(nTime + nInputAdjustTimeMs[indexInst], search, 140, HitState.NotHit);
-
-                            if (item != null)
-                            {
-                                queWailing[indexInst].Enqueue(item);
-                            }
+                            GuitarFor(inst)?.ArmWailing(nTime + nInputAdjustTimeMs[indexInst]);
                             continue;
                         }
                         else
@@ -3772,115 +3703,48 @@ internal abstract class CStagePerfCommonScreen : CStage
                     {
                         continue;
                     }
-                    DoWailingFromQueue(inst, eventWailed.nTimeStamp, autoW);
+                    GuitarPerformance? guitar = GuitarFor(inst);
+                    if (guitar != null)
+                    {
+                        guitar.Wail(eventWailed.nTimeStamp - AudioMixer.Timer.nResetAtMs);
+                        ApplyGuitarEvents(guitar);
+                    }
                 }
             }
         }
     }
 
-    //how long a played marker waits for the wail input	// #24245 2011.1.26 yyagi: 800 -> 1000
-    private const long WailingWindowMs = 1000;
-
-    private void DoWailingFromQueue(EInstrumentPart inst, long nTimeStamp_Wailed, bool autoW)
+    protected void ApplyGuitarEvents(GuitarPerformance guitar)
     {
-        int indexInst = (int)inst;
-        long nTimeWailed = nTimeStamp_Wailed - AudioMixer.Timer.nResetAtMs;
-        Queue<CChip> armed = queWailing[indexInst];
-
-        while (armed.Count > 0)
+        EInstrumentPart side = guitar.Side;
+        int player = (int)guitar.Player - 1;
+        foreach (GuitarEvent e in guitar.Events)
         {
-            CChip chipWailing = armed.Peek();
-            long since = nTimeWailed - chipWailing.nPlaybackTimeMs;
-
-            //not reached yet, so leave it for the press it belongs to
-            if (since < 0)
+            if (e.Kind == EGuitarEvent.Wail)
             {
-                return;
-            }
-
-            armed.Dequeue();
-
-            //too old for this press, but the one behind it might not be
-            if (since > WailingWindowMs)
-            {
+                actWailingBonus.Start(side, e.Chip);
+                wailingEffect[player].Play();
                 continue;
             }
 
-            chipWailing.bHit = true;
-            actWailingBonus.Start(inst, SoundForWailing(inst, chipWailing));
-
-            //todo: add new wailing effect here
-            wailingEffect[(int)(inst - 1)].Play();
-
-            if (!autoW)
+            for (int lane = 0; lane < 5; lane++)
             {
-                AddWailingScore(inst, indexInst);
-            }
-
-            //one press wails one marker
-            return;
-        }
-    }
-
-    //the sound is its own chip on the wailing sound channel, matched by the marker's time
-    private CChip SoundForWailing(EInstrumentPart inst, CChip marker)
-    {
-        if (inst == EInstrumentPart.GUITAR)
-        {
-            CChip sound = timeline.Nearest(marker.nPlaybackTimeMs, EChannel.Guitar_WailingSound, (int)WailingWindowMs, HitState.DontCare);
-
-            if (sound != null)
-            {
-                return sound;
-            }
-        }
-
-        //bass has no wailing sound channel, so it falls back to the crowd
-        return r現在の歓声Chip[(int)inst];
-    }
-
-    private void AddWailingScore(EInstrumentPart inst, int indexInst)
-    {
-        if (CDTXMania.ConfigIni.nSkillMode == 0)
-        {
-            int nCombo = (partData[indexInst].Combo < 500) ? partData[indexInst].Combo : 500;
-            DataFor(inst).AddScore(nCombo * 3000L);		// #24245 2011.1.26 yyagi changed DRUMS->BASS, add nCombo conditions
-            return;
-        }
-
-        int nAddScore = partData[indexInst].Combo > 500 ? 50000 : partData[indexInst].Combo * 100;
-        DataFor(inst).AddScore(nAddScore);		// #24245 2011.1.26 yyagi changed DRUMS->BASS, add nCombo conditions
-
-        tBoostBonus();
-    }
-
-    private void tBoostBonus()
-    {
-
-        for (int i = 0; i < 1; i++)
-        {
-
-            if (ctTimer[i].bInProgress)
-            {
-                ctTimer[i].tStop();
-            }
-
-        }
-
-        for (int i = 0; i < 1; i++)
-        {
-            if (!ctTimer[i].bInProgress)
-            {
-                bブーストボーナス = true;
-                ctTimer[i].tUpdate();
-                if (ctTimer[i].bReachedEndValue)
+                if ((e.FireLanes & (1 << lane)) != 0)
                 {
-                    ctTimer[i].tStop();
-                    bブーストボーナス = false;
+                    actChipFireGB[player].Start(lane, e.Chip);
                 }
             }
 
+            tPlaySound(e.Chip, AudioMixer.Timer.nResetAtMs + e.Time, side, CDTXMania.DTX.nモニタを考慮した音量(side), false,
+                e.Miss && CDTXMania.ConfigIni.bSpecialist[(int)side]);
+            if (e.Miss)
+            {
+                //a hit processed without a judgement does not set the lag itself
+                e.Chip.nLag = 0;
+            }
+            tProcessChipHit(e.Time, e.Chip, !e.Miss);
         }
+        guitar.Events.Clear();
     }
 
     #endregion

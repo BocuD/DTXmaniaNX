@@ -168,6 +168,21 @@ public enum EInstrumentPart		// ここを修正するときは、セットで次
 	//SYSTEM  = 3,
 	UNKNOWN	= 99
 }
+
+public enum EInstrument
+{
+	Drums,
+	Guitar1,
+	Guitar2
+}
+
+public enum EChartPart
+{
+	Drums,
+	Guitar,
+	Bass
+}
+
 public enum EKeyConfigPart	// : EInstrumentPart
 {
 	DRUMS	= EInstrumentPart.DRUMS,
