@@ -117,7 +117,6 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
         if ( bActivated )
         {
             bChorusSection = false;
-            bBonus = false;
             txChip = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_chips_drums.png"));
             txLaneCover = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_lanes_Cover_cls.png"));
 
@@ -356,7 +355,6 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
     public bool bInFillIn;
     public bool bEndFillIn;
     public bool bChorusSection;
-    public bool bBonus;
     private readonly EPad[] eChannelToPad = new EPad[12]
     {
         EPad.HH, EPad.SD, EPad.BD, EPad.HT,
@@ -366,34 +364,74 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
     public double UnitTime;
     private BaseTexture txLaneCover;
     //-----------------
-    protected override EJudgement tProcessChipHit( long nHitTime, CChip pChip, bool bCorrectLane )
+    protected override void UpdateGraph(EInstrumentPart part)
     {
-        EJudgement eJudgeResult = tProcessChipHitCore( nHitTime, pChip, bCorrectLane );
-        // #24074 2011.01.23 add ikanick
-        if (CDTXMania.ConfigIni.nSkillMode == 0)
+        actGraph.dbグラフ値現在_渡 = DrumsData.CalculateSkill();
+        int chips = DrumsData.ChartChips;
+        if (CDTXMania.listTargetGhsotLag.Drums != null && CDTXMania.ConfigIni.eTargetGhost.Drums == ETargetGhostData.ONLINE && chips > 0)
         {
-            actGraph.dbグラフ値現在_渡 = CScoreIni.tCalculatePlayingSkillOld(CDTXMania.DTX.nVisibleChipsCount.Drums, DrumsData.HitCountExclAuto.Perfect, DrumsData.HitCountExclAuto.Great, DrumsData.HitCountExclAuto.Good, DrumsData.HitCountExclAuto.Poor, DrumsData.HitCountExclAuto.Miss, DrumsData.MaxCombo, EInstrumentPart.DRUMS, bIsAutoPlay);
-        }
-        else if (CDTXMania.ConfigIni.nSkillMode == 1)
-        {
-            actGraph.dbグラフ値現在_渡 = CScoreIni.tCalculatePlayingSkill(CDTXMania.DTX.nVisibleChipsCount.Drums, DrumsData.HitCountExclAuto.Perfect, DrumsData.HitCountExclAuto.Great, DrumsData.HitCountExclAuto.Good, DrumsData.HitCountExclAuto.Poor, DrumsData.HitCountExclAuto.Miss, DrumsData.MaxCombo, EInstrumentPart.DRUMS, bIsAutoPlay);
-        }
-        // #35411 2015.09.07 add chnmr0
-        if ( CDTXMania.listTargetGhsotLag.Drums != null &&
-            CDTXMania.ConfigIni.eTargetGhost.Drums == ETargetGhostData.ONLINE &&
-            CDTXMania.DTX.nVisibleChipsCount.Drums > 0 )
-        {
-            // Online Stats の計算式
-            actGraph.dbグラフ値現在_渡 = 100 *
-                ( DrumsData.HitCountExclAuto.Perfect * 17 +
-                  DrumsData.HitCountExclAuto.Great * 7 +
-                  DrumsData.MaxCombo * 3 ) / ( 20.0 * CDTXMania.DTX.nVisibleChipsCount.Drums );
+            actGraph.dbグラフ値現在_渡 = 100 * (DrumsData.HitCountExclAuto.Perfect * 17 + DrumsData.HitCountExclAuto.Great * 7 + DrumsData.MaxCombo * 3) / (20.0 * chips);
         }
 
         DrumsData.SetAchievementRate(bIsTrainingMode ? 0 : actGraph.dbグラフ値現在_渡);
-        return eJudgeResult;
     }
 
+    private void ApplyDrumsEvents()
+    {
+        foreach (DrumsEvent e in drums!.Events)
+        {
+            int lane = DrumsPerformance.LaneOf(e.Chip);
+            switch (e.Kind)
+            {
+                case EDrumsEvent.AutoNote:
+                    actLaneFlushD.Start((ELane)lane, CInputManager.nDefaultVelocity / 127f);
+                    StartChipFire(lane, e.Chip);
+                    actPad.Hit(DrumsPerformance.PadOf(e.Chip));
+                    tPlaySound(e.Chip, AudioMixer.Timer.nResetAtMs + e.Time, EInstrumentPart.DRUMS, CDTXMania.DTX.nモニタを考慮した音量(EInstrumentPart.DRUMS));
+                    break;
+
+                case EDrumsEvent.Bonus:
+                    actPad.ShowBonus();
+                    if (CDTXMania.ConfigIni.DisplayBonusEffects)
+                    {
+                        CDTXMania.Skin.soundAudience.tPlay();
+                    }
+                    break;
+
+                case EDrumsEvent.Judged:
+                    actJudgeString.Start(lane, e.Auto ? EJudgement.Auto : e.Judgement, e.Chip.nLag);
+                    bool hit = e.Judgement is EJudgement.Perfect or EJudgement.Great or EJudgement.Good;
+                    if (!e.Auto && hit)
+                    {
+                        actProgressBar.Hit(EInstrumentPart.DRUMS, e.Chip.nPlaybackTimeMs, e.Judgement);
+                    }
+                    if (e.Judgement == EJudgement.Miss)
+                    {
+                        actCombo.tコンボリセット処理();
+                    }
+                    if (e.CountsCombo && hit)
+                    {
+                        actCombo.tComboAnime(EInstrumentPart.DRUMS);
+                    }
+                    UpdateGraph(EInstrumentPart.DRUMS);
+                    break;
+            }
+        }
+        drums.Events.Clear();
+    }
+
+    private void StartChipFire(int lane, CChip chip)
+    {
+        bool lastInFillIn = bInFillIn && bフィルイン区間の最後のChipである(chip);
+        actChipFireD.Start((ELane)lane, bInFillIn, lastInFillIn, lastInFillIn, nJudgeLinePosY_delta.Drums);
+    }
+
+    private EJudgement ApplyDrumsHit(long time, CChip chip)
+    {
+        EJudgement judgement = drums!.ApplyHit(chip, time, true);
+        ApplyDrumsEvents();
+        return judgement;
+    }
 
     protected override void tJudgeLineMovingUpandDown()
     {

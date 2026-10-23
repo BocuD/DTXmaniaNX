@@ -166,6 +166,47 @@ public class PerformanceData
         achievementRate = rate;
     }
 
+    //sets the chip's lag; the combo is kept for recording a ghost
+    public EJudgement JudgeChip(long time, CChip? chip, int inputAdjustMs)
+    {
+        if (chip == null)
+        {
+            return EJudgement.Miss;
+        }
+
+        chip.nLag = (int)(time + inputAdjustMs - chip.nPlaybackTimeMs);
+        if (chip.eInstrumentPart != EInstrumentPart.UNKNOWN)
+        {
+            chip.nCurrentComboForGhost = combo;
+        }
+        return ChipJudge.GetJudgementForLag(chip, chip.nLag);
+    }
+
+    public bool HasTargetGhost => CDTXMania.ConfigIni.eTargetGhost[(int)Part] != ETargetGhostData.NONE && CDTXMania.listTargetGhsotLag[(int)Part] != null;
+
+    public double CalculateTargetGhostGoal()
+    {
+        int chips = ChartChips;
+        HitCounts ghost = ghostHitCount;
+        double goal;
+        if (CDTXMania.ConfigIni.eTargetGhost[(int)Part] == ETargetGhostData.ONLINE)
+        {
+            goal = chips > 0 ? 100 * (ghost.Perfect * 17 + ghost.Great * 7 + ghostMaxCombo * 3) / (20.0 * chips) : 0;
+        }
+        else if (CDTXMania.ConfigIni.nSkillMode == 0)
+        {
+            goal = CScoreIni.tCalculatePlayingSkillOld(chips, ghost.Perfect, ghost.Great, ghost.Good, ghost.Poor, ghost.Miss,
+                ghostMaxCombo, Part, new STAUTOPLAY());
+        }
+        else
+        {
+            goal = CScoreIni.tCalculatePlayingSkill(chips, ghost.Perfect, ghost.Great, ghost.Good, ghost.Poor, ghost.Miss,
+                ghostMaxCombo, Part, new STAUTOPLAY());
+        }
+
+        return Math.Clamp(goal, 0, 100);
+    }
+
     public void ApplyJudgement(EJudgement judgement, bool auto, int lag, bool countsCombo)
     {
         if (CDTXMania.ConfigIni.bAutoAddGage || !auto)

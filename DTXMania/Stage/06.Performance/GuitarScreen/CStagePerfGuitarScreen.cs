@@ -342,11 +342,6 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 
 	#region [ private ]
 
-	protected override EJudgement tProcessChipHit( long nHitTime, CChip pChip, bool bCorrectLane )
-	{
-		return tProcessChipHitCore( nHitTime, pChip, bCorrectLane );
-	}
-
 	protected override void UpdateGraph(EInstrumentPart part)
 	{
 		PerformanceData data = DataFor(part);

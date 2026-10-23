@@ -18,9 +18,9 @@ internal partial class CStagePerfGuitarScreen
 		guitar.UpdateNote(pChip);
 		ApplyGuitarEvents(guitar);
 
-		if (CDTXMania.ConfigIni.bGraph有効[instIndex] && guitar.HasTargetGhost)
+		if (CDTXMania.ConfigIni.bGraph有効[instIndex] && guitar.Data.HasTargetGhost)
 		{
-			actGraph.dbGraphValue_Goal = guitar.CalculateTargetGhostGoal();
+			actGraph.dbGraphValue_Goal = guitar.Data.CalculateTargetGhostGoal();
 		}
 	}
 

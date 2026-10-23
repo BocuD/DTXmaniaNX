@@ -1977,7 +1977,7 @@ internal partial class CStagePerfDrumsScreen
         {
             return false;
         }
-        tProcessChipHit( nHitTime, pChip );
+        ApplyDrumsHit( nHitTime, pChip );
         actLaneFlushD.Start( (ELane) nLane, ( (float) n強弱度合い0to127 ) / 127f );
         actPad.Hit( nPad );
         if ( ( e判定 != EJudgement.Poor ) && ( e判定 != EJudgement.Miss ) )

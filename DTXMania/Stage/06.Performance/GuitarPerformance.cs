@@ -97,21 +97,6 @@ internal class GuitarPerformance
     private int GetPressedLanes() => ToLaneMask(CDTXMania.Pad.bPressing(Side, EPad.R), CDTXMania.Pad.bPressing(Side, EPad.G),
         CDTXMania.Pad.bPressing(Side, EPad.B), CDTXMania.Pad.bPressing(Side, EPad.Y), CDTXMania.Pad.bPressing(Side, EPad.P));
 
-    private EJudgement JudgeChip(long time, CChip? chip, int inputAdjustMs)
-    {
-        if (chip == null)
-        {
-            return EJudgement.Miss;
-        }
-
-        chip.nLag = (int)(time + inputAdjustMs - chip.nPlaybackTimeMs);
-        if (chip.eInstrumentPart != EInstrumentPart.UNKNOWN)
-        {
-            chip.nCurrentComboForGhost = Data.Combo;
-        }
-        return ChipJudge.GetJudgementForLag(chip, chip.nLag);
-    }
-
     private bool IsAuto(CChip chip) =>
         autoPick && (GetLanes(chip) & ~autoLanes) == 0 && (!chip.bChipIsWailingNote || autoWail) && (!chip.bChipIsOpenNote || autoLanes == AllLanes);
 
@@ -127,7 +112,7 @@ internal class GuitarPerformance
 
         bool auto = IsAuto(chip);
         chip.bIsAutoPlayed = auto;
-        EJudgement judgement = correctLane ? JudgeChip(time, chip, auto ? 0 : InputAdjustMs) : EJudgement.Miss;
+        EJudgement judgement = correctLane ? Data.JudgeChip(time, chip, auto ? 0 : InputAdjustMs) : EJudgement.Miss;
         Data.ApplyJudgement(judgement, auto, chip.nLag, countsCombo: true);
         if (judgement == EJudgement.Miss)
         {
@@ -141,7 +126,7 @@ internal class GuitarPerformance
     public void UpdateNote(CChip chip)
     {
         long now = AudioMixer.Timer.nCurrentTime;
-        if (!chip.bHit && chip.nDistanceFromBar[(int)Side] < 0 && JudgeChip(now, chip, IsAuto(chip) ? 0 : InputAdjustMs) == EJudgement.Miss)
+        if (!chip.bHit && chip.nDistanceFromBar[(int)Side] < 0 && Data.JudgeChip(now, chip, IsAuto(chip) ? 0 : InputAdjustMs) == EJudgement.Miss)
         {
             ApplyHit(chip, now, true);
         }
@@ -241,7 +226,7 @@ internal class GuitarPerformance
     {
         int poorRangeMs = Chart == EChartPart.Guitar ? CDTXMania.stGuitarHitRanges.nPoorSizeMs : CDTXMania.stBassHitRanges.nPoorSizeMs;
         CChip? note = timeline.NearestNote(time + InputAdjustMs, Part, poorRangeMs, HitState.NotHit, preferPast: true);
-        EJudgement judgement = JudgeChip(time, note, InputAdjustMs);
+        EJudgement judgement = Data.JudgeChip(time, note, InputAdjustMs);
         bool specialist = CDTXMania.ConfigIni.bSpecialist[(int)Side];
         bool light = CDTXMania.ConfigIni.bLight[(int)Side];
 
@@ -304,7 +289,7 @@ internal class GuitarPerformance
         CChip note = HeldNote!;
         if ((noteLanes & ~autoLanes) != (pressed & ~autoLanes))
         {
-            if (JudgeChip(AudioMixer.Timer.nCurrentTime, note.chipLongNoteEndPosition, InputAdjustMs) >= EJudgement.Miss)
+            if (Data.JudgeChip(AudioMixer.Timer.nCurrentTime, note.chipLongNoteEndPosition, InputAdjustMs) >= EJudgement.Miss)
             {
                 EndHold();
                 Events.Add(new GuitarEvent { Kind = EGuitarEvent.HoldRelease });
@@ -407,30 +392,5 @@ internal class GuitarPerformance
         }
 
         Data.AddScore(Data.Combo > 500 ? 50000 : Data.Combo * 100);
-    }
-
-    public bool HasTargetGhost => CDTXMania.ConfigIni.eTargetGhost[(int)Part] != ETargetGhostData.NONE && CDTXMania.listTargetGhsotLag[(int)Part] != null;
-
-    public double CalculateTargetGhostGoal()
-    {
-        int notes = Data.ChartChips;
-        HitCounts ghost = Data.GhostHitCount;
-        double goal;
-        if (CDTXMania.ConfigIni.eTargetGhost[(int)Part] == ETargetGhostData.ONLINE)
-        {
-            goal = notes > 0 ? 100 * (ghost.Perfect * 17 + ghost.Great * 7 + Data.GhostMaxCombo * 3) / (20.0 * notes) : 0;
-        }
-        else if (CDTXMania.ConfigIni.nSkillMode == 0)
-        {
-            goal = CScoreIni.tCalculatePlayingSkillOld(notes, ghost.Perfect, ghost.Great, ghost.Good, ghost.Poor, ghost.Miss,
-                Data.GhostMaxCombo, Part, new STAUTOPLAY());
-        }
-        else
-        {
-            goal = CScoreIni.tCalculatePlayingSkill(notes, ghost.Perfect, ghost.Great, ghost.Good, ghost.Poor, ghost.Miss,
-                Data.GhostMaxCombo, Part, new STAUTOPLAY());
-        }
-
-        return Math.Clamp(goal, 0, 100);
     }
 }

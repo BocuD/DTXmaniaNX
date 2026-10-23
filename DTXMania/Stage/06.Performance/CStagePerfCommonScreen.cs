@@ -536,6 +536,7 @@ internal abstract class CStagePerfCommonScreen : CStage
         {
             data.Reset(bIsAutoPlay, CDTXMania.ConfigIni.nRisky);
         }
+        drums = IsPlayed(EInstrumentPart.DRUMS) ? new DrumsPerformance(DrumsData, bIsAutoPlay) : null;
         guitars[0] = IsPlayed(EInstrumentPart.GUITAR) ? new GuitarPerformance(EInstrument.Guitar1, EChartPart.Guitar, GuitarData, timeline, bIsAutoPlay) : null;
         guitars[1] = IsPlayed(EInstrumentPart.BASS) ? new GuitarPerformance(EInstrument.Guitar2, EChartPart.Bass, BassData, timeline, bIsAutoPlay) : null;
 
@@ -593,6 +594,7 @@ internal abstract class CStagePerfCommonScreen : CStage
 
         LLastPlayedHHWAVNumber.Clear();	// #23921 2011.1.4 yyagi
         LLastPlayedHHWAVNumber = null;	//
+        drums = null;
         Array.Clear(guitars);
         ctWailingChipPatternAnimation = null;
         ctBPMBar = null;
@@ -803,6 +805,8 @@ internal abstract class CStagePerfCommonScreen : CStage
     protected readonly GuitarPerformance?[] guitars = new GuitarPerformance?[2];
 
     //for now Guitar1 always plays the guitar chart and Guitar2 the bass chart
+    protected DrumsPerformance? drums;
+
     protected GuitarPerformance? GuitarFor(EInstrumentPart part) =>
         part == EInstrumentPart.GUITAR ? guitars[0] : part == EInstrumentPart.BASS ? guitars[1] : null;
     protected PerformanceData DrumsData => partData[(int)EInstrumentPart.DRUMS];
@@ -1144,55 +1148,6 @@ internal abstract class CStagePerfCommonScreen : CStage
             }
         }
     }
-    protected EJudgement tProcessChipHit(long nHitTime, CChip pChip)  // tチップのヒット処理
-    {
-        return tProcessChipHit(nHitTime, pChip, true);
-    }
-    protected abstract EJudgement tProcessChipHit(long nHitTime, CChip pChip, bool bCorrectLane);  // tチップのヒット処理
-    protected EJudgement tProcessChipHitCore(long nHitTime, CChip pChip, bool bCorrectLane)
-    {
-        pChip.bHit = true;
-        bool bPChipIsAutoPlay = bCheckAutoPlay(pChip);
-        pChip.bIsAutoPlayed = bPChipIsAutoPlay;			// 2011.6.10 yyagi
-        EJudgement eJudgeResult = EJudgement.Auto;
-        if (pChip.eInstrumentPart == EInstrumentPart.DRUMS || pChip.nChannelNumber == EChannel.BonusEffect)
-        {
-            int nInputAdjustTime = bPChipIsAutoPlay ? 0 : nInputAdjustTimeMs.Drums;
-            eJudgeResult = bCorrectLane ? e指定時刻からChipのJUDGEを返す(nHitTime, pChip, nInputAdjustTime) : EJudgement.Miss;
-        }
-        if (pChip.eInstrumentPart != EInstrumentPart.DRUMS)
-        {
-            return eJudgeResult;
-        }
-
-        actJudgeString.Start(nチャンネル0Atoレーン07[pChip.nChannelNumber - EChannel.HiHatClose], bPChipIsAutoPlay ? EJudgement.Auto : eJudgeResult, pChip.nLag);
-
-        //before ApplyJudgement, so the last perfect's top-up to 1,000,000 includes the bonus score
-        if (eJudgeResult is EJudgement.Great or EJudgement.Perfect or EJudgement.Auto)
-        {
-            CDTXMania.stagePerfDrumsScreen.tProcessChipHit_BonusChip(CDTXMania.ConfigIni, CDTXMania.DTX, pChip);
-        }
-
-        bool countsCombo = CDTXMania.ConfigIni.bAllDrumsAreAutoPlay || !bPChipIsAutoPlay;
-        DrumsData.ApplyJudgement(eJudgeResult, bPChipIsAutoPlay, pChip.nLag, countsCombo);
-
-        bool hit = eJudgeResult is EJudgement.Perfect or EJudgement.Great or EJudgement.Good;
-        if (!bPChipIsAutoPlay && hit)
-        {
-            actProgressBar.Hit(EInstrumentPart.DRUMS, pChip.nPlaybackTimeMs, eJudgeResult);
-        }
-        if (eJudgeResult == EJudgement.Miss)
-        {
-            actCombo.tコンボリセット処理();
-        }
-        if (countsCombo && hit)
-        {
-            actCombo.tComboAnime(EInstrumentPart.DRUMS);
-        }
-
-        return eJudgeResult;
-    }
-
     protected void tチップのヒット処理_BadならびにTight時のMiss(int nLane)
     {
         DrumsData.Damage(EJudgement.Miss);
@@ -1762,16 +1717,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                     break;
             }
 
-            bool bPChipIsAutoPlay = bCheckAutoPlay(pChip);
-
-            int nInputAdjustTime = (bPChipIsAutoPlay || (pChip.eInstrumentPart == EInstrumentPart.UNKNOWN)) ? 0 : nInputAdjustTimeMs[(int)pChip.eInstrumentPart];
-
             int instIndex = (int) pChip.eInstrumentPart;
-            if ( ( ( pChip.eInstrumentPart == EInstrumentPart.DRUMS ) && !pChip.bHit ) &&
-                 ( ( pChip.nDistanceFromBar[ instIndex ] < 0 ) && ( e指定時刻からChipのJUDGEを返す( AudioMixer.Timer.nCurrentTime, pChip, nInputAdjustTime ) == EJudgement.Miss ) ) )
-            {
-                tProcessChipHit( AudioMixer.Timer.nCurrentTime, pChip );
-            }
 
             // #35411 chnmr0 add (ターゲットゴースト)
             if ( CDTXMania.ConfigIni.eTargetGhost[instIndex] != ETargetGhostData.NONE &&
@@ -2546,26 +2492,6 @@ internal abstract class CStagePerfCommonScreen : CStage
             }
         }
         return false;
-    }
-
-    public bool bCheckAutoPlay(CChip pChip)
-    {
-        bool bPChipIsAutoPlay = false;
-                                    
-        if (pChip.eInstrumentPart == EInstrumentPart.DRUMS)
-        {
-            bPChipIsAutoPlay = true;
-            int offsetIndex = pChip.nChannelNumber - EChannel.HiHatClose;
-            if (offsetIndex >= 0 && offsetIndex < nチャンネル0Atoレーン07.Length)
-            {
-                if (!bIsAutoPlay[nチャンネル0Atoレーン07[offsetIndex]])
-                {
-                    bPChipIsAutoPlay = false;
-                }
-            }
-        }
-             
-        return bPChipIsAutoPlay;
     }
 
 
