@@ -17,7 +17,7 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
         ePhaseID = EPhase.Common_DefaultState;
         bActivated = false;
         listChildActivities.Add(actPad = new CActPerfDrumsPad());
-        listChildActivities.Add(actCombo = new CActPerfDrumsComboDGB());
+        listChildActivities.Add(actCombo = new CActPerfDrumsComboDGB(session));
 
         listChildActivities.Add(actGauge = new CActPerfCommonGauge());
         listChildActivities.Add(actGraph = new CActPerfSkillMeter());
@@ -289,8 +289,8 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
             session.HitCountExclAuto.Drums.Good = 0;
             session.HitCountExclAuto.Drums.Poor = 0;
             session.HitCountExclAuto.Drums.Miss = 0;
-            actCombo.nCurrentCombo.Drums = 0;
-            actCombo.nCurrentCombo.HighestValue.Drums = 0;
+            session.Combo.Drums = 0;
+            session.MaxCombo.Drums = 0;
             actScore.nCurrentTrueScore.Drums = 0;
 
             session.TimingHitCount.Drums.Late = 0;
@@ -383,11 +383,11 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
         // #24074 2011.01.23 add ikanick
         if (CDTXMania.ConfigIni.nSkillMode == 0)
         {
-            actGraph.dbグラフ値現在_渡 = CScoreIni.tCalculatePlayingSkillOld(CDTXMania.DTX.nVisibleChipsCount.Drums, session.HitCountExclAuto.Drums.Perfect, session.HitCountExclAuto.Drums.Great, session.HitCountExclAuto.Drums.Good, session.HitCountExclAuto.Drums.Poor, session.HitCountExclAuto.Drums.Miss, actCombo.nCurrentCombo.HighestValue.Drums, EInstrumentPart.DRUMS, bIsAutoPlay);
+            actGraph.dbグラフ値現在_渡 = CScoreIni.tCalculatePlayingSkillOld(CDTXMania.DTX.nVisibleChipsCount.Drums, session.HitCountExclAuto.Drums.Perfect, session.HitCountExclAuto.Drums.Great, session.HitCountExclAuto.Drums.Good, session.HitCountExclAuto.Drums.Poor, session.HitCountExclAuto.Drums.Miss, session.MaxCombo.Drums, EInstrumentPart.DRUMS, bIsAutoPlay);
         }
         else if (CDTXMania.ConfigIni.nSkillMode == 1)
         {
-            actGraph.dbグラフ値現在_渡 = CScoreIni.tCalculatePlayingSkill(CDTXMania.DTX.nVisibleChipsCount.Drums, session.HitCountExclAuto.Drums.Perfect, session.HitCountExclAuto.Drums.Great, session.HitCountExclAuto.Drums.Good, session.HitCountExclAuto.Drums.Poor, session.HitCountExclAuto.Drums.Miss, actCombo.nCurrentCombo.HighestValue.Drums, EInstrumentPart.DRUMS, bIsAutoPlay);
+            actGraph.dbグラフ値現在_渡 = CScoreIni.tCalculatePlayingSkill(CDTXMania.DTX.nVisibleChipsCount.Drums, session.HitCountExclAuto.Drums.Perfect, session.HitCountExclAuto.Drums.Great, session.HitCountExclAuto.Drums.Good, session.HitCountExclAuto.Drums.Poor, session.HitCountExclAuto.Drums.Miss, session.MaxCombo.Drums, EInstrumentPart.DRUMS, bIsAutoPlay);
         }
         // #35411 2015.09.07 add chnmr0
         if ( CDTXMania.listTargetGhsotLag.Drums != null &&
@@ -398,7 +398,7 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
             actGraph.dbグラフ値現在_渡 = 100 *
                 ( session.HitCountExclAuto.Drums.Perfect * 17 +
                   session.HitCountExclAuto.Drums.Great * 7 +
-                  actCombo.nCurrentCombo.HighestValue.Drums * 3 ) / ( 20.0 * CDTXMania.DTX.nVisibleChipsCount.Drums );
+                  session.MaxCombo.Drums * 3 ) / ( 20.0 * CDTXMania.DTX.nVisibleChipsCount.Drums );
         }
 
         session.AchievementRate.Drums = bIsTrainingMode ? 0 : actGraph.dbグラフ値現在_渡;

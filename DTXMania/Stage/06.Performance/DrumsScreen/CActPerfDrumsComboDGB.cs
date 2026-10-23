@@ -6,6 +6,10 @@ namespace DTXMania;
 
 internal class CActPerfDrumsComboDGB : CActPerfCommonCombo
 {
+    public CActPerfDrumsComboDGB(PerformanceSession session) : base(session)
+    {
+    }
+
     // CActPerfCommonCombo 実装
     public override void OnActivate()
     {

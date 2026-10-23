@@ -215,7 +215,7 @@ internal partial class CStagePerfDrumsScreen
                     {
                         bInFillIn = false;
                     }
-                    if (((actCombo.nCurrentCombo.Drums > 0) || configIni.bAllDrumsAreAutoPlay) && configIni.b歓声を発声する)
+                    if (((session.Combo.Drums > 0) || configIni.bAllDrumsAreAutoPlay) && configIni.b歓声を発声する)
                     {
                         video.StartFillInEffect();
                         if (r現在の歓声Chip.Drums != null)
@@ -239,7 +239,7 @@ internal partial class CStagePerfDrumsScreen
                     {
                         bChorusSection = true;
                     }
-                    if (((actCombo.nCurrentCombo.Drums > 0) || configIni.bAllDrumsAreAutoPlay) && configIni.b歓声を発声する && configIni.DisplayBonusEffects)
+                    if (((session.Combo.Drums > 0) || configIni.bAllDrumsAreAutoPlay) && configIni.b歓声を発声する && configIni.DisplayBonusEffects)
                     {
                         if (r現在の歓声Chip.Drums != null)
                         {
@@ -256,7 +256,7 @@ internal partial class CStagePerfDrumsScreen
                     {
                         bChorusSection = false;
                     }
-                    if (((actCombo.nCurrentCombo.Drums > 0) || configIni.bAllDrumsAreAutoPlay) && configIni.b歓声を発声する && configIni.DisplayBonusEffects)
+                    if (((session.Combo.Drums > 0) || configIni.bAllDrumsAreAutoPlay) && configIni.b歓声を発声する && configIni.DisplayBonusEffects)
                     {
                         if (r現在の歓声Chip.Drums != null)
                         {

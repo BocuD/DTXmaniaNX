@@ -83,12 +83,12 @@ internal abstract class CStagePerfCommonScreen : CStage
             Drums.nScore = (long)actScore.Get(EInstrumentPart.DRUMS);
             if (CDTXMania.ConfigIni.nSkillMode == 0)
             {
-                Drums.dbGameSkill = CScoreIni.tCalculateGameSkillOld(CDTXMania.DTX.LEVEL.Drums, CDTXMania.DTX.LEVELDEC.Drums, CDTXMania.DTX.nVisibleChipsCount.Drums, session.HitCountExclAuto.Drums.Perfect, session.HitCountExclAuto.Drums.Great, actCombo.nCurrentCombo.HighestValue.Drums, EInstrumentPart.DRUMS, bIsAutoPlay);
-                Drums.dbPerformanceSkill = CScoreIni.tCalculatePlayingSkillOld(CDTXMania.DTX.nVisibleChipsCount.Drums, session.HitCountExclAuto.Drums.Perfect, session.HitCountExclAuto.Drums.Great, session.HitCountExclAuto.Drums.Good, session.HitCountExclAuto.Drums.Poor, session.HitCountExclAuto.Drums.Miss, actCombo.nCurrentCombo.HighestValue.Drums, EInstrumentPart.DRUMS, bIsAutoPlay);
+                Drums.dbGameSkill = CScoreIni.tCalculateGameSkillOld(CDTXMania.DTX.LEVEL.Drums, CDTXMania.DTX.LEVELDEC.Drums, CDTXMania.DTX.nVisibleChipsCount.Drums, session.HitCountExclAuto.Drums.Perfect, session.HitCountExclAuto.Drums.Great, session.MaxCombo.Drums, EInstrumentPart.DRUMS, bIsAutoPlay);
+                Drums.dbPerformanceSkill = CScoreIni.tCalculatePlayingSkillOld(CDTXMania.DTX.nVisibleChipsCount.Drums, session.HitCountExclAuto.Drums.Perfect, session.HitCountExclAuto.Drums.Great, session.HitCountExclAuto.Drums.Good, session.HitCountExclAuto.Drums.Poor, session.HitCountExclAuto.Drums.Miss, session.MaxCombo.Drums, EInstrumentPart.DRUMS, bIsAutoPlay);
             }
             else if (CDTXMania.ConfigIni.nSkillMode == 1)
             {
-                Drums.dbPerformanceSkill = CScoreIni.tCalculatePlayingSkill(CDTXMania.DTX.nVisibleChipsCount.Drums, session.HitCountExclAuto.Drums.Perfect, session.HitCountExclAuto.Drums.Great, session.HitCountExclAuto.Drums.Good, session.HitCountExclAuto.Drums.Poor, session.HitCountExclAuto.Drums.Miss, actCombo.nCurrentCombo.HighestValue.Drums, EInstrumentPart.DRUMS, bIsAutoPlay);
+                Drums.dbPerformanceSkill = CScoreIni.tCalculatePlayingSkill(CDTXMania.DTX.nVisibleChipsCount.Drums, session.HitCountExclAuto.Drums.Perfect, session.HitCountExclAuto.Drums.Great, session.HitCountExclAuto.Drums.Good, session.HitCountExclAuto.Drums.Poor, session.HitCountExclAuto.Drums.Miss, session.MaxCombo.Drums, EInstrumentPart.DRUMS, bIsAutoPlay);
                 Drums.dbGameSkill = CScoreIni.tCalculateGameSkillFromPlayingSkill(CDTXMania.DTX.LEVEL.Drums, CDTXMania.DTX.LEVELDEC.Drums, Drums.dbPerformanceSkill);
             }
             Drums.nPerfectCount = CDTXMania.ConfigIni.bAllDrumsAreAutoPlay ? session.HitCountIncAuto.Drums.Perfect : session.HitCountExclAuto.Drums.Perfect;
@@ -103,7 +103,7 @@ internal abstract class CStagePerfCommonScreen : CStage
             Drums.nMissCount_ExclAuto = session.HitCountExclAuto.Drums.Miss;
             Drums.nFastCount = session.TimingHitCount.Drums.Early;
             Drums.nSlowCount = session.TimingHitCount.Drums.Late;
-            Drums.nMaxCombo = actCombo.nCurrentCombo.HighestValue.Drums;
+            Drums.nMaxCombo = session.MaxCombo.Drums;
             Drums.nTotalChipsCount = CDTXMania.DTX.nVisibleChipsCount.Drums;
             for (int i = 0; i < (int)ELane.MAX; i++)
             {
@@ -156,12 +156,12 @@ internal abstract class CStagePerfCommonScreen : CStage
             Guitar.nScore = (long)actScore.Get(EInstrumentPart.GUITAR);
             if (CDTXMania.ConfigIni.nSkillMode == 0)
             {
-                Guitar.dbGameSkill = CScoreIni.tCalculateGameSkillOld(CDTXMania.DTX.LEVEL.Guitar, CDTXMania.DTX.LEVELDEC.Guitar, CDTXMania.DTX.nVisibleChipsCount.Guitar, session.HitCountExclAuto.Guitar.Perfect, session.HitCountExclAuto.Guitar.Great, actCombo.nCurrentCombo.HighestValue.Guitar, EInstrumentPart.GUITAR, bIsAutoPlay);
-                Guitar.dbPerformanceSkill = CScoreIni.tCalculatePlayingSkillOld(CDTXMania.DTX.nVisibleChipsCount.Guitar, session.HitCountExclAuto.Guitar.Perfect, session.HitCountExclAuto.Guitar.Great, session.HitCountExclAuto.Guitar.Good, session.HitCountExclAuto.Guitar.Poor, session.HitCountExclAuto.Guitar.Miss, actCombo.nCurrentCombo.HighestValue.Guitar, EInstrumentPart.GUITAR, bIsAutoPlay);
+                Guitar.dbGameSkill = CScoreIni.tCalculateGameSkillOld(CDTXMania.DTX.LEVEL.Guitar, CDTXMania.DTX.LEVELDEC.Guitar, CDTXMania.DTX.nVisibleChipsCount.Guitar, session.HitCountExclAuto.Guitar.Perfect, session.HitCountExclAuto.Guitar.Great, session.MaxCombo.Guitar, EInstrumentPart.GUITAR, bIsAutoPlay);
+                Guitar.dbPerformanceSkill = CScoreIni.tCalculatePlayingSkillOld(CDTXMania.DTX.nVisibleChipsCount.Guitar, session.HitCountExclAuto.Guitar.Perfect, session.HitCountExclAuto.Guitar.Great, session.HitCountExclAuto.Guitar.Good, session.HitCountExclAuto.Guitar.Poor, session.HitCountExclAuto.Guitar.Miss, session.MaxCombo.Guitar, EInstrumentPart.GUITAR, bIsAutoPlay);
             }
             else if (CDTXMania.ConfigIni.nSkillMode == 1)
             {
-                Guitar.dbPerformanceSkill = CScoreIni.tCalculatePlayingSkill(CDTXMania.DTX.nVisibleChipsCount.Guitar, session.HitCountExclAuto.Guitar.Perfect, session.HitCountExclAuto.Guitar.Great, session.HitCountExclAuto.Guitar.Good, session.HitCountExclAuto.Guitar.Poor, session.HitCountExclAuto.Guitar.Miss, actCombo.nCurrentCombo.HighestValue.Guitar, EInstrumentPart.GUITAR, bIsAutoPlay);
+                Guitar.dbPerformanceSkill = CScoreIni.tCalculatePlayingSkill(CDTXMania.DTX.nVisibleChipsCount.Guitar, session.HitCountExclAuto.Guitar.Perfect, session.HitCountExclAuto.Guitar.Great, session.HitCountExclAuto.Guitar.Good, session.HitCountExclAuto.Guitar.Poor, session.HitCountExclAuto.Guitar.Miss, session.MaxCombo.Guitar, EInstrumentPart.GUITAR, bIsAutoPlay);
                 Guitar.dbGameSkill = CScoreIni.tCalculateGameSkillFromPlayingSkill(CDTXMania.DTX.LEVEL.Guitar, CDTXMania.DTX.LEVELDEC.Guitar, Guitar.dbPerformanceSkill);
             }
             Guitar.nPerfectCount = CDTXMania.ConfigIni.bAllGuitarsAreAutoPlay ? session.HitCountIncAuto.Guitar.Perfect : session.HitCountExclAuto.Guitar.Perfect;
@@ -176,7 +176,7 @@ internal abstract class CStagePerfCommonScreen : CStage
             Guitar.nMissCount_ExclAuto = session.HitCountExclAuto.Guitar.Miss;
             Guitar.nFastCount = session.TimingHitCount.Guitar.Early;
             Guitar.nSlowCount = session.TimingHitCount.Guitar.Late;
-            Guitar.nMaxCombo = actCombo.nCurrentCombo.HighestValue.Guitar;
+            Guitar.nMaxCombo = session.MaxCombo.Guitar;
             Guitar.nTotalChipsCount = CDTXMania.DTX.nVisibleChipsCount.Guitar;
             for (int i = 0; i < (int)ELane.MAX; i++)
             {
@@ -229,12 +229,12 @@ internal abstract class CStagePerfCommonScreen : CStage
             Bass.nScore = (long)actScore.Get(EInstrumentPart.BASS);
             if (CDTXMania.ConfigIni.nSkillMode == 0)
             {
-                Bass.dbGameSkill = CScoreIni.tCalculateGameSkillOld(CDTXMania.DTX.LEVEL.Bass, CDTXMania.DTX.LEVELDEC.Bass, CDTXMania.DTX.nVisibleChipsCount.Bass, session.HitCountExclAuto.Bass.Perfect, session.HitCountExclAuto.Bass.Great, actCombo.nCurrentCombo.HighestValue.Bass, EInstrumentPart.BASS, bIsAutoPlay);
-                Bass.dbPerformanceSkill = CScoreIni.tCalculatePlayingSkillOld(CDTXMania.DTX.nVisibleChipsCount.Bass, session.HitCountExclAuto.Bass.Perfect, session.HitCountExclAuto.Bass.Great, session.HitCountExclAuto.Bass.Good, session.HitCountExclAuto.Bass.Poor, session.HitCountExclAuto.Bass.Miss, actCombo.nCurrentCombo.HighestValue.Bass, EInstrumentPart.BASS, bIsAutoPlay);
+                Bass.dbGameSkill = CScoreIni.tCalculateGameSkillOld(CDTXMania.DTX.LEVEL.Bass, CDTXMania.DTX.LEVELDEC.Bass, CDTXMania.DTX.nVisibleChipsCount.Bass, session.HitCountExclAuto.Bass.Perfect, session.HitCountExclAuto.Bass.Great, session.MaxCombo.Bass, EInstrumentPart.BASS, bIsAutoPlay);
+                Bass.dbPerformanceSkill = CScoreIni.tCalculatePlayingSkillOld(CDTXMania.DTX.nVisibleChipsCount.Bass, session.HitCountExclAuto.Bass.Perfect, session.HitCountExclAuto.Bass.Great, session.HitCountExclAuto.Bass.Good, session.HitCountExclAuto.Bass.Poor, session.HitCountExclAuto.Bass.Miss, session.MaxCombo.Bass, EInstrumentPart.BASS, bIsAutoPlay);
             }
             else if (CDTXMania.ConfigIni.nSkillMode == 1)
             {
-                Bass.dbPerformanceSkill = CScoreIni.tCalculatePlayingSkill(CDTXMania.DTX.nVisibleChipsCount.Bass, session.HitCountExclAuto.Bass.Perfect, session.HitCountExclAuto.Bass.Great, session.HitCountExclAuto.Bass.Good, session.HitCountExclAuto.Bass.Poor, session.HitCountExclAuto.Bass.Miss, actCombo.nCurrentCombo.HighestValue.Bass, EInstrumentPart.BASS, bIsAutoPlay);
+                Bass.dbPerformanceSkill = CScoreIni.tCalculatePlayingSkill(CDTXMania.DTX.nVisibleChipsCount.Bass, session.HitCountExclAuto.Bass.Perfect, session.HitCountExclAuto.Bass.Great, session.HitCountExclAuto.Bass.Good, session.HitCountExclAuto.Bass.Poor, session.HitCountExclAuto.Bass.Miss, session.MaxCombo.Bass, EInstrumentPart.BASS, bIsAutoPlay);
                 Bass.dbGameSkill = CScoreIni.tCalculateGameSkillFromPlayingSkill(CDTXMania.DTX.LEVEL.Bass, CDTXMania.DTX.LEVELDEC.Bass, Bass.dbPerformanceSkill);
             }
             Bass.nPerfectCount = CDTXMania.ConfigIni.bAllBassAreAutoPlay ? session.HitCountIncAuto.Bass.Perfect : session.HitCountExclAuto.Bass.Perfect;
@@ -249,7 +249,7 @@ internal abstract class CStagePerfCommonScreen : CStage
             Bass.nMissCount_ExclAuto = session.HitCountExclAuto.Bass.Miss;
             Bass.nFastCount = session.TimingHitCount.Bass.Early;
             Bass.nSlowCount = session.TimingHitCount.Bass.Late;
-            Bass.nMaxCombo = actCombo.nCurrentCombo.HighestValue.Bass;
+            Bass.nMaxCombo = session.MaxCombo.Bass;
             Bass.nTotalChipsCount = CDTXMania.DTX.nVisibleChipsCount.Bass;
             for (int i = 0; i < (int)ELane.MAX; i++)
             {
@@ -914,7 +914,7 @@ internal abstract class CStagePerfCommonScreen : CStage
             pChip.nLag = lag;       // #23580 2011.1.3 yyagi: add "nInputAdjustTime" to add input timing adjust feature
             if (pChip.eInstrumentPart != EInstrumentPart.UNKNOWN)
             {
-                pChip.nCurrentComboForGhost = actCombo.nCurrentCombo[(int)pChip.eInstrumentPart];
+                pChip.nCurrentComboForGhost = session.Combo[(int)pChip.eInstrumentPart];
             }
         }
         // #35411 modify end
@@ -1475,12 +1475,13 @@ internal abstract class CStagePerfCommonScreen : CStage
                         case EJudgement.Perfect:
                         case EJudgement.Great:
                         case EJudgement.Good:
-                            actCombo.nCurrentCombo.Drums++;
+                            session.Combo.Drums++;
+                            session.MaxCombo.Drums = Math.Max(session.MaxCombo.Drums, session.Combo.Drums);
                             actCombo.tComboAnime(EInstrumentPart.DRUMS);
                             break;
 
                         default:
-                            actCombo.nCurrentCombo.Drums = 0;
+                            session.Combo.Drums = 0;
                             break;
                     }
                 }
@@ -1522,11 +1523,12 @@ internal abstract class CStagePerfCommonScreen : CStage
                     case EJudgement.Perfect:
                     case EJudgement.Great:
                     case EJudgement.Good:
-                        actCombo.nCurrentCombo[indexInst]++;
+                        session.Combo[indexInst]++;
+                        session.MaxCombo[indexInst] = Math.Max(session.MaxCombo[indexInst], session.Combo[indexInst]);
                         break;
 
                     default:
-                        actCombo.nCurrentCombo[indexInst] = 0;
+                        session.Combo[indexInst] = 0;
                         break;
                 }
                 break;
@@ -1567,7 +1569,7 @@ internal abstract class CStagePerfCommonScreen : CStage
     private long SkillModeScore(EInstrumentPart part, EJudgement judgement)
     {
         int index = (int)part;
-        int combo = actCombo.nCurrentCombo[index];
+        int combo = session.Combo[index];
         float maxCombo = part switch
         {
             EInstrumentPart.DRUMS => CDTXMania.DTX.nVisibleChipsCount.Drums,
@@ -1606,7 +1608,7 @@ internal abstract class CStagePerfCommonScreen : CStage
 
     private long ClassicScore(EInstrumentPart part, EJudgement judgement)
     {
-        int combo = actCombo.nCurrentCombo[(int)part];
+        int combo = session.Combo[(int)part];
         if (combo <= 500 || judgement == EJudgement.Good)
         {
             return ClassicScorePerCombo[(int)judgement] * combo;
@@ -1671,17 +1673,17 @@ internal abstract class CStagePerfCommonScreen : CStage
                 {
                     actJudgeString.Start(nLane, bIsAutoPlay[nLane] ? EJudgement.Auto : EJudgement.Miss, 999);
                 }
-                actCombo.nCurrentCombo.Drums = 0;
+                session.Combo.Drums = 0;
                 return;
 
             case EInstrumentPart.GUITAR:
                 actJudgeString.Start(13, EJudgement.Miss, 999);
-                actCombo.nCurrentCombo.Guitar = 0;
+                session.Combo.Guitar = 0;
                 return;
 
             case EInstrumentPart.BASS:
                 actJudgeString.Start(14, EJudgement.Miss, 999);
-                actCombo.nCurrentCombo.Bass = 0;
+                session.Combo.Bass = 0;
                 break;
 
             default:
@@ -4362,12 +4364,12 @@ internal abstract class CStagePerfCommonScreen : CStage
     {
         if (CDTXMania.ConfigIni.nSkillMode == 0)
         {
-            int nCombo = (actCombo.nCurrentCombo[indexInst] < 500) ? actCombo.nCurrentCombo[indexInst] : 500;
+            int nCombo = (session.Combo[indexInst] < 500) ? session.Combo[indexInst] : 500;
             actScore.Add(inst, bIsAutoPlay, nCombo * 3000L);		// #24245 2011.1.26 yyagi changed DRUMS->BASS, add nCombo conditions
             return;
         }
 
-        int nAddScore = actCombo.nCurrentCombo[indexInst] > 500 ? 50000 : actCombo.nCurrentCombo[indexInst] * 100;
+        int nAddScore = session.Combo[indexInst] > 500 ? 50000 : session.Combo[indexInst] * 100;
         actScore.Add(inst, bIsAutoPlay, nAddScore);		// #24245 2011.1.26 yyagi changed DRUMS->BASS, add nCombo conditions
 
         tBoostBonus();
@@ -4481,8 +4483,6 @@ internal abstract class CStagePerfCommonScreen : CStage
 
         //nobody asked for this restart, so clear the score
         session.Reset();
-
-        actCombo.nCurrentCombo = default;
     }
 
     public void tJumpInSong(long newPosition)

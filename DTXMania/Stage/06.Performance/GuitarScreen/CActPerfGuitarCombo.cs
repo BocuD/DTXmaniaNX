@@ -2,6 +2,10 @@
 
 internal class CActPerfGuitarCombo : CActPerfCommonCombo
 {
+    public CActPerfGuitarCombo(PerformanceSession session) : base(session)
+    {
+    }
+
 	// CActPerfCommonCombo 実装
 
 	protected override void tDrawCombo_Guitar( int nCombo値, int nジャンプインデックス )

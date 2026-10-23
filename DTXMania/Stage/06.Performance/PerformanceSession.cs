@@ -9,6 +9,8 @@ public class PerformanceSession
     public STDGBVALUE<HitCounts> HitCountIncAuto;
     public STDGBVALUE<TimingCounts> TimingHitCount;
     public STDGBVALUE<double> AchievementRate;
+    public STDGBVALUE<int> Combo;
+    public STDGBVALUE<int> MaxCombo;
 
     //from holding long notes, and allowed on top of the 1,000,000 maximum
     public STDGBVALUE<int> LongNoteBonusScore;
@@ -34,6 +36,8 @@ public class PerformanceSession
         }
 
         AchievementRate = default;
+        Combo = default;
+        MaxCombo = default;
         LongNoteBonusScore = default;
         GhostCombo = default;
         GhostMaxCombo = default;

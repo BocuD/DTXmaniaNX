@@ -21,7 +21,7 @@ public sealed class PerformanceStats
     [DataField] public int Good => Hits?.Good ?? 0;
     [DataField] public int Poor => Hits?.Poor ?? 0;
     [DataField] public int Miss => Hits?.Miss ?? 0;
-    [DataField] public int MaxCombo => Stage?.actCombo.nCurrentCombo.HighestValue[Instrument] ?? 0;
+    [DataField] public int MaxCombo => Stage?.session.MaxCombo[Instrument] ?? 0;
 
     [DataField] public int PerfectPercent => Percent(Perfect);
     [DataField] public int GreatPercent => Percent(Great);
