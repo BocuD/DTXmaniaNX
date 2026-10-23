@@ -287,9 +287,9 @@ internal partial class CStagePerfDrumsScreen
             return false;
         }
         int num = pChip.nPlaybackPosition;
-        for (int i = listChip.IndexOf(pChip) + 1; i < listChip.Count; i++)
+        for (int i = timeline.Chips.IndexOf(pChip) + 1; i < timeline.Chips.Count; i++)
         {
-            pChip = listChip[i];
+            pChip = timeline.Chips[i];
             if ( ( pChip.nChannelNumber == EChannel.FillIn) && ( pChip.nIntegerValue == 2 ) )
             {
                 return true;

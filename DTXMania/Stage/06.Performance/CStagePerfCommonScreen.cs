@@ -493,11 +493,10 @@ internal abstract class CStagePerfCommonScreen : CStage
         _previousGcLatencyMode = System.Runtime.GCSettings.LatencyMode;
         System.Runtime.GCSettings.LatencyMode = System.Runtime.GCLatencyMode.SustainedLowLatency;
 
-        listChip = CDTXMania.DTX.listChip;
+        timeline.Load(CDTXMania.DTX.listChip);
         listWAV = CDTXMania.DTX.listWAV;
 
         eReturnValue = EPerfScreenReturnValue.Continue;
-        nCurrentTopChip = (listChip.Count > 0) ? 0 : -1;
         LLastPlayedHHWAVNumber = new List<int>(16);
         nLastPlayedHHChannelNumber = 0;
         nLastPlayedWAVNumber.Guitar = -1;
@@ -571,7 +570,7 @@ internal abstract class CStagePerfCommonScreen : CStage
         bPAUSE = false;
 
         #region [ Sounds that should be registered in the mixer before starting playing (chip sounds that will be played immediately after the start of the performance) ]
-        foreach (CChip pChip in listChip)
+        foreach (CChip pChip in timeline.Chips)
         {
             if (pChip.nPlaybackTimeMs <= 0)
             {
@@ -622,7 +621,7 @@ internal abstract class CStagePerfCommonScreen : CStage
         ctChipPatternAnimation.Guitar = null;
         ctChipPatternAnimation.Bass = null;
         listWAV = null;
-        listChip = null;
+        timeline.Load(null);
         
         base.OnDeactivate();
     }
@@ -768,13 +767,6 @@ internal abstract class CStagePerfCommonScreen : CStage
             }
         }
     }
-    protected enum HitState
-    {
-        NotHit,
-        Hit,
-        DontCare
-    }
-
     //todo: reintroduce background video and art
     public CActPerfVideo video;
     public CActPerfBGA actBGA;
@@ -814,7 +806,7 @@ internal abstract class CStagePerfCommonScreen : CStage
     protected readonly int[] nチャンネル0Atoパッド08 = [1, 2, 3, 4, 5, 7, 6, 1, 8, 0, 9, 9];
     protected readonly int[] nチャンネル0Atoレーン07 = [1, 2, 3, 4, 5, 7, 6, 1, 9, 0, 8, 8];
     //                         RD LC  LP  RD
-    protected readonly int[] nパッド0Atoチャンネル0A = [0x11, 0x12, 0x13, 0x14, 0x15, 0x17, 0x16, 0x18, 0x19, 0x1a, 0x1b, 0x1c];
+    protected readonly EChannel[] nパッド0Atoチャンネル0A = [EChannel.HiHatClose, EChannel.Snare, EChannel.BassDrum, EChannel.HighTom, EChannel.LowTom, EChannel.FloorTom, EChannel.Cymbal, EChannel.HiHatOpen, EChannel.RideCymbal, EChannel.LeftCymbal, EChannel.LeftPedal, EChannel.LeftBassDrum];
     protected readonly int[] nパッド0Atoパッド08 = [1, 2, 3, 4, 5, 6, 7, 1, 8, 0, 9, 9];// パッド画像のヒット処理用
     //   HH SD BD HT LT FT CY HHO RD LC LP LBD
     protected readonly int[] nパッド0Atoレーン07 = [1, 2, 3, 4, 5, 6, 7, 1, 9, 0, 8, 8];
@@ -831,7 +823,6 @@ internal abstract class CStagePerfCommonScreen : CStage
     protected PerformanceData GuitarData => partData[(int)EInstrumentPart.GUITAR];
     protected PerformanceData BassData => partData[(int)EInstrumentPart.BASS];
 
-    protected int nCurrentTopChip = -1;
     protected int[] nLastPlayedBGMWAVNumber = new int[50];
     protected static int nJudgeLineMaxPosY;
     protected static int nJudgeLineMinPosY;
@@ -870,7 +861,7 @@ internal abstract class CStagePerfCommonScreen : CStage
     public STAUTOPLAY bIsAutoPlay;		// #24239 2011.1.23 yyagi
     //		protected int nRisky_InitialVar, nRiskyTime;		// #23559 2011.7.28 yyagi → CAct演奏ゲージ共通クラスに隠蔽
 
-    protected List<CChip> listChip;
+    protected readonly ChipTimeline timeline = new();
     protected Dictionary<int, CDTX.CWAV> listWAV;
 
     //key repeat for moving the judge line: a 100ms delay, then a step every 10ms
@@ -1115,119 +1106,6 @@ internal abstract class CStagePerfCommonScreen : CStage
         }
         return null;
     }
-    protected CChip r指定時刻に一番近いChip_ヒット未済問わず不可視考慮(long nTime, int int_nChannel, int nInputAdjustTime)
-    {
-        EChannel nChannel = (EChannel)int_nChannel;
-        sw2.Start();
-        nTime += nInputAdjustTime;						// #24239 2011.1.23 yyagi InputAdjust
-
-        int nIndex_InitialPositionSearchingToPast;
-        if (nCurrentTopChip == -1)				// 演奏データとして1個もチップがない場合は
-        {
-            sw2.Stop();
-            return null;
-        }
-        int count = listChip.Count;
-        int nIndex_NearestChip_Future = nIndex_InitialPositionSearchingToPast = nCurrentTopChip;
-        if (nCurrentTopChip >= count)			// その時点で演奏すべきチップが既に全部無くなっていたら
-        {
-            nIndex_NearestChip_Future = nIndex_InitialPositionSearchingToPast = count - 1;
-        }
-        for (; nIndex_NearestChip_Future < count; nIndex_NearestChip_Future++)
-        {
-            CChip chip = CDTXMania.DTX.listChip[nIndex_NearestChip_Future];
-            if (((EChannel.HiHatClose <= nChannel) && (nChannel <= EChannel.LeftBassDrum)))
-            {
-                if ((chip.nChannelNumber == nChannel) || (chip.nChannelNumber == ((int)nChannel + EChannel.Guitar_Open)))
-                {
-                    if (chip.nPlaybackTimeMs > nTime)
-                    {
-                        break;
-                    }
-                    nIndex_InitialPositionSearchingToPast = nIndex_NearestChip_Future;
-                }
-                continue;	// ほんの僅かながら高速化
-            }
-            else if ((nChannel == EChannel.Guitar_WailingSound && chip.eInstrumentPart == EInstrumentPart.GUITAR) || (((EChannel.Guitar_Open <= nChannel && nChannel <= EChannel.Guitar_Wailing) || (EChannel.Guitar_xxxYx <= nChannel && nChannel <= EChannel.Guitar_RxxxP) || (EChannel.Guitar_RxBxP <= nChannel && nChannel <= EChannel.Guitar_xGBYP) || (EChannel.Guitar_RxxYP <= nChannel && nChannel <= EChannel.Guitar_RGBYP)) && chip.nChannelNumber == nChannel))
-            {
-                if (chip.nPlaybackTimeMs > nTime)
-                {
-                    break;
-                }
-                nIndex_InitialPositionSearchingToPast = nIndex_NearestChip_Future;
-            }
-            else if ((nChannel == EChannel.BonusEffect) && (chip.eInstrumentPart == EInstrumentPart.BASS) || (((EChannel.Bass_Open <= nChannel && nChannel <= EChannel.Bass_Wailing) || (EChannel.Bass_xxxYx <= nChannel && nChannel <= EChannel.Bass_xxBYx) || (EChannel.Bass_xGxYx <= nChannel && nChannel <= EChannel.Bass_xxBxP) || (EChannel.Bass_xGxxP <= nChannel && nChannel <= EChannel.Bass_RGBxP) || (EChannel.Bass_xxxYP <= nChannel && nChannel <= EChannel.Bass_RGBYP)) && chip.nChannelNumber == nChannel))
-            {
-                if (chip.nPlaybackTimeMs > nTime)
-                {
-                    break;
-                }
-                nIndex_InitialPositionSearchingToPast = nIndex_NearestChip_Future;
-            }
-        }
-        int nIndex_NearestChip_Past = nIndex_InitialPositionSearchingToPast;
-        for (; nIndex_NearestChip_Past >= 0; nIndex_NearestChip_Past--)
-        {
-            CChip chip = listChip[nIndex_NearestChip_Past];
-            if ((EChannel.HiHatClose <= nChannel) && (nChannel <= EChannel.LeftBassDrum))
-            {
-                if ((chip.nChannelNumber == nChannel) || (chip.nChannelNumber == ((int)nChannel + EChannel.Guitar_Open)))
-                {
-                    break;
-                }
-            }
-            else if ((nChannel == EChannel.Guitar_WailingSound && chip.eInstrumentPart == EInstrumentPart.GUITAR) || (((EChannel.Guitar_Open <= nChannel && nChannel <= EChannel.Guitar_Wailing) || (EChannel.Guitar_xxxYx <= nChannel && nChannel <= EChannel.Guitar_RxxxP) || (EChannel.Guitar_RxBxP <= nChannel && nChannel <= EChannel.Guitar_xGBYP) || (EChannel.Guitar_RxxYP <= nChannel && nChannel <= EChannel.Guitar_RGBYP)) && chip.nChannelNumber == nChannel))
-            {
-                if ((EChannel.Guitar_Open <= chip.nChannelNumber && chip.nChannelNumber <= EChannel.Guitar_Wailing) || (((EChannel.Guitar_Open <= nChannel && nChannel <= EChannel.Guitar_Wailing) || (EChannel.Guitar_xxxYx <= nChannel && nChannel <= EChannel.Guitar_RxxxP) || (EChannel.Guitar_RxBxP <= nChannel && nChannel <= EChannel.Guitar_xGBYP) || (EChannel.Guitar_RxxYP <= nChannel && nChannel <= EChannel.Guitar_RGBYP)) && chip.nChannelNumber == nChannel))
-                {
-                    break;
-                }
-            }
-            else if (((nChannel == EChannel.Guitar_xGBYP && chip.eInstrumentPart == EInstrumentPart.BASS) || (((EChannel.Bass_Open <= nChannel && nChannel <= EChannel.Bass_Wailing) || (EChannel.Bass_xxxYx <= nChannel && nChannel <= EChannel.Bass_xxBYx) || (EChannel.Bass_xGxYx <= nChannel && nChannel <= EChannel.Bass_xxBxP) || (EChannel.Bass_xGxxP <= nChannel && nChannel <= EChannel.Bass_RGBxP) || (EChannel.Bass_xxxYP <= nChannel && nChannel <= EChannel.Bass_RGBYP)) && chip.nChannelNumber == nChannel)))
-            {
-                if ((EChannel.Bass_Open <= nChannel && nChannel <= EChannel.Bass_Wailing) || (((EChannel.Bass_xxxYx <= nChannel && nChannel <= EChannel.Bass_xxBYx) || (EChannel.Bass_xGxYx <= nChannel && nChannel <= EChannel.Bass_xxBxP) || (EChannel.Bass_xGxxP <= nChannel && nChannel <= EChannel.Bass_RGBxP) || (EChannel.Bass_xxxYP <= nChannel && nChannel <= EChannel.Bass_RGBYP)) && chip.nChannelNumber == nChannel))
-                {
-                    break;
-                }
-            }
-        }
-
-        if (nIndex_NearestChip_Future >= count)
-        {
-            if (nIndex_NearestChip_Past < 0)	// 検索対象が過去未来どちらにも見つからなかった場合
-            {
-                return null;
-            }
-            else 								// 検索対象が未来方向には見つからなかった(しかし過去方向には見つかった)場合
-            {
-                sw2.Stop();
-                return listChip[nIndex_NearestChip_Past];
-            }
-        }
-        else if (nIndex_NearestChip_Past < 0)	// 検索対象が過去方向には見つからなかった(しかし未来方向には見つかった)場合
-        {
-            sw2.Stop();
-            return listChip[nIndex_NearestChip_Future];
-        }
-        // 検索対象が過去未来の双方に見つかったなら、より近い方を採用する
-        CChip nearestChip_Future = listChip[nIndex_NearestChip_Future];
-        CChip nearestChip_Past = listChip[nIndex_NearestChip_Past];
-        int nDiffTime_Future = Math.Abs((int)(nTime - nearestChip_Future.nPlaybackTimeMs));
-        int nDiffTime_Past = Math.Abs((int)(nTime - nearestChip_Past.nPlaybackTimeMs));
-        if (nDiffTime_Future >= nDiffTime_Past)
-        {
-            sw2.Stop();
-            return nearestChip_Past;
-        }
-        sw2.Stop();
-        return nearestChip_Future;
-    }
-
-    //NOTE: Implementation is from AL, which is completely different from its overloaded sibling method
-    protected CChip r指定時刻に一番近いChip_ヒット未済問わず不可視考慮(long nTime, EChannel eChannel, int nInputAdjustTime, EInstrumentPart inst = EInstrumentPart.UNKNOWN) {
-        return r指定時刻に一番近いChip(nTime, eChannel, nInputAdjustTime, 0, b過去優先: false, HitState.DontCare, inst);
-    }
-
     protected void tPlaySound(CChip rChip, long n再生開始システム時刻ms, EInstrumentPart part)
     {
         tPlaySound(rChip, n再生開始システム時刻ms, part, CDTXMania.ConfigIni.n手動再生音量, false, false);
@@ -1608,294 +1486,6 @@ internal abstract class CStagePerfCommonScreen : CStage
         }
     }
 
-    //From AL
-    protected CChip r指定時刻に一番近いChip(long nTime, EChannel search, int nInputAdjustTime, int n検索範囲時間ms = 0, bool b過去優先 = true, HitState hs = HitState.NotHit, EInstrumentPart inst = EInstrumentPart.UNKNOWN)
-    {
-        CChip cChip = null;
-        nTime += nInputAdjustTime;
-        if (nCurrentTopChip >= 0 && nCurrentTopChip <= listChip.Count)
-        {
-            int num = -1;
-            int num2 = -1;
-            int num3 = listChip.Count - 1;
-            for (int i = nCurrentTopChip; i < listChip.Count; i++)
-            {
-                CChip chip2 = listChip[i];
-                if (Future(chip2) && OutOfRange(chip2))
-                {
-                    break;
-                }
-                if (Found(chip2, Future))
-                {
-                    num = i;
-                    num3 = i;
-                    break;
-                }
-            }
-            for (int num4 = num3; num4 >= 0; num4--)
-            {
-                CChip chip3 = listChip[num4];
-                if (Past(chip3) && OutOfRange(chip3))
-                {
-                    break;
-                }
-                if (Found(chip3, Past))
-                {
-                    num2 = num4;
-                    break;
-                }
-            }
-            if (num >= 0 || num2 >= 0)
-            {
-                if (num2 >= 0)
-                {
-                    cChip = listChip[num2];
-                }
-                else if (num >= 0)
-                {
-                    cChip = listChip[num];
-                }
-            }
-            if (!b過去優先 && num >= 0 && num2 >= 0)
-            {
-                long num5 = Math.Abs(nTime - listChip[num].nPlaybackTimeMs);
-                long num6 = Math.Abs(nTime - listChip[num2].nPlaybackTimeMs);
-                cChip = ((num5 >= num6) ? listChip[num2] : listChip[num]);
-            }
-            if (cChip != null && OutOfRange(cChip))
-            {
-                cChip = null;
-            }
-        }
-        return cChip;
-        bool Found(CChip chip, Func<CChip, bool> futureOrPast)
-        {
-            if (futureOrPast(chip) && ((hs == HitState.NotHit && !chip.bHit) || (hs == HitState.Hit && chip.bHit) || hs == HitState.DontCare) && !chip.bIsEmptyChip)
-            {
-                if (((search != chip.nChannelNumber && search + 32 != chip.nChannelNumber) || !chip.bDrums可視チップ) && (search != chip.nChannelNumber || !chip.bGuitar可視チップ_Wailing含む) && (search != chip.nChannelNumber || !chip.bBass可視チップ_Wailing含む) && (inst != EInstrumentPart.GUITAR || !chip.bGuitar可視チップ))
-                {
-                    if (inst == EInstrumentPart.BASS)
-                    {
-                        return chip.bBass可視チップ;
-                    }
-                    return false;
-                }
-                return true;
-            }
-            return false;
-        }
-        bool Future(CChip chip)
-        {
-            return chip.nPlaybackTimeMs > nTime;
-        }
-        bool OutOfRange(CChip chip)
-        {
-            if (n検索範囲時間ms > 0)
-            {
-                return Math.Abs(nTime - chip.nPlaybackTimeMs) > n検索範囲時間ms;
-            }
-            return false;
-        }
-        bool Past(CChip chip)
-        {
-            return chip.nPlaybackTimeMs <= nTime;
-        }
-    }
-
-    protected CChip r指定時刻に一番近い未ヒットChip(long nTime, int nChannelFlag, int nInputAdjustTime, bool enableTrace = false)
-    {
-        return r指定時刻に一番近い未ヒットChip(nTime, nChannelFlag, nInputAdjustTime, 0, enableTrace);
-    }
-               
-    //This method occassionally returns non-hittable chip! for Guitar and Bass
-    protected CChip r指定時刻に一番近い未ヒットChip(long nTime, int int_nChannel, int nInputAdjustTime, int n検索範囲時間ms, bool enableTrace = false)
-    {
-        if (enableTrace) 
-        {
-            Trace.TraceInformation("r指定時刻に一番近い未ヒットChip arg: int_nChannel={0:x2}", int_nChannel);
-        }
-
-        EChannel nChannel = (EChannel)int_nChannel;
-        sw2.Start();
-        nTime += nInputAdjustTime;
-
-        int nIndex_InitialPositionSearchingToPast;
-        int nTimeDiff;
-        if (nCurrentTopChip == -1)			// 演奏データとして1個もチップがない場合は
-        {
-            sw2.Stop();
-            return null;
-        }
-        int count = listChip.Count;
-        int nIndex_NearestChip_Future = nIndex_InitialPositionSearchingToPast = nCurrentTopChip;
-        if (nCurrentTopChip >= count)		// その時点で演奏すべきチップが既に全部無くなっていたら
-        {
-            nIndex_NearestChip_Future = nIndex_InitialPositionSearchingToPast = count - 1;
-        }
-        for (; nIndex_NearestChip_Future < count; nIndex_NearestChip_Future++)
-        {
-            CChip chip = listChip[nIndex_NearestChip_Future];
-            if (!chip.bHit)
-            {
-                if ((EChannel.HiHatClose <= nChannel) && (nChannel <= EChannel.LeftBassDrum))
-                {
-                    if ((chip.nChannelNumber == nChannel) || (chip.nChannelNumber == ((int)nChannel + EChannel.Guitar_Open)))
-                    {
-                        if (chip.nPlaybackTimeMs > nTime)
-                        {
-                            break;
-                        }
-                        nIndex_InitialPositionSearchingToPast = nIndex_NearestChip_Future;
-                    }
-                    continue;
-                }
-                else if ((nChannel == EChannel.Guitar_WailingSound && chip.eInstrumentPart == EInstrumentPart.GUITAR) || 
-                         (((EChannel.Guitar_Open <= nChannel && nChannel <= EChannel.Guitar_Wailing) || (EChannel.Guitar_xxxYx <= nChannel && nChannel <= EChannel.Guitar_RxxxP) || (EChannel.Guitar_RxBxP <= nChannel && nChannel <= EChannel.Guitar_xGBYP) || (EChannel.Guitar_RxxYP <= nChannel && nChannel <= EChannel.Guitar_RGBYP)) && chip.nChannelNumber == nChannel))
-                {
-                    if (chip.nPlaybackTimeMs > nTime)
-                    {
-                        break;
-                    }
-                    nIndex_InitialPositionSearchingToPast = nIndex_NearestChip_Future;
-                }
-                else if ((nChannel == EChannel.Guitar_xGBYP && chip.eInstrumentPart == EInstrumentPart.BASS) || (((nChannel >= EChannel.Bass_Open && nChannel <= EChannel.Bass_Wailing) || (EChannel.Bass_xxxYx == nChannel) || (nChannel == EChannel.Bass_xxBYx) || (nChannel >= EChannel.Bass_xGxYx && nChannel <= EChannel.Bass_xxBxP) || (nChannel >= EChannel.Bass_xGxxP && nChannel <= EChannel.Bass_RGBxP) || (nChannel >= EChannel.Bass_xxxYP && nChannel <= EChannel.Bass_RGBYP)) && chip.nChannelNumber == nChannel))
-                {
-                    EChannel currChipChannel = chip.nChannelNumber;
-                    if ((currChipChannel >= EChannel.Bass_Open && currChipChannel <= EChannel.Bass_Wailing) || (EChannel.Bass_xxxYx == currChipChannel) || (currChipChannel == EChannel.Bass_xxBYx) || (currChipChannel >= EChannel.Bass_xGxYx && currChipChannel <= EChannel.Bass_xxBxP) || (currChipChannel >= EChannel.Bass_xGxxP && currChipChannel <= EChannel.Bass_RGBxP) || (currChipChannel >= EChannel.Bass_xxxYP && currChipChannel <= EChannel.Bass_RGBYP)) {
-                        if (enableTrace)
-                        {
-                            Trace.TraceInformation("r指定時刻に一番近い未ヒットChip 1st condition met: chip_channel={0:x2}, nIndexPast={1}, nIndexNearestChipFuture={2}", (int)chip.nChannelNumber, nIndex_InitialPositionSearchingToPast, nIndex_NearestChip_Future);
-                        }
-
-                        if (chip.nPlaybackTimeMs > nTime)
-                        {
-                            break;
-                        }
-                        nIndex_InitialPositionSearchingToPast = nIndex_NearestChip_Future;
-                    }
-                }
-            }
-        }
-        int nIndex_NearestChip_Past = nIndex_InitialPositionSearchingToPast;
-        for (; nIndex_NearestChip_Past >= 0; nIndex_NearestChip_Past--)
-        {
-            CChip chip = listChip[nIndex_NearestChip_Past];
-            if ((!chip.bHit) &&
-                (
-                    ((nChannel >= EChannel.HiHatClose) && (nChannel <= EChannel.LeftBassDrum) &&
-                     ((chip.nChannelNumber == nChannel) || (chip.nChannelNumber == ((int)nChannel + EChannel.Guitar_Open)))
-                    )
-                    ||
-                    (
-                        ((nChannel == EChannel.Guitar_WailingSound) && (chip.eInstrumentPart == EInstrumentPart.GUITAR)) ||
-                        (((nChannel >= EChannel.Guitar_Open) && (nChannel <= EChannel.Guitar_Wailing)) ||
-                         (EChannel.Guitar_xxxYx <= nChannel && nChannel <= EChannel.Guitar_RxxxP) ||
-                         (EChannel.Guitar_RxBxP <= nChannel && nChannel <= EChannel.Guitar_xGBYP) ||
-                         (EChannel.Guitar_RxxYP <= nChannel && nChannel <= EChannel.Guitar_RGBYP)
-                         && (chip.nChannelNumber == nChannel))
-                    )
-                    ||
-                    (
-                        ((nChannel == EChannel.Guitar_xGBYP) && (chip.eInstrumentPart == EInstrumentPart.BASS)) ||
-                        (((nChannel >= EChannel.Bass_Open) && (nChannel <= EChannel.Bass_Wailing)) ||
-                         (EChannel.Bass_xxxYx <= nChannel && nChannel <= EChannel.Bass_xxBYx) ||
-                         (EChannel.Bass_xGxYx <= nChannel && nChannel <= EChannel.Bass_xxBxP) ||
-                         (EChannel.Bass_xGxxP <= nChannel && nChannel <= EChannel.Bass_RGBxP) ||
-                         (EChannel.Bass_xxxYP <= nChannel && nChannel <= EChannel.Bass_RGBYP)
-                         && (chip.nChannelNumber == nChannel))
-                    )
-                )
-               )
-            {
-                if (chip.eInstrumentPart == EInstrumentPart.BASS)
-                {
-                    EChannel currChipChannel = chip.nChannelNumber;
-                        
-
-                    if (((currChipChannel >= EChannel.Bass_Open) && (currChipChannel <= EChannel.Bass_Wailing)) ||
-                        (EChannel.Bass_xxxYx <= currChipChannel && currChipChannel <= EChannel.Bass_xxBYx) ||
-                        (EChannel.Bass_xGxYx <= currChipChannel && currChipChannel <= EChannel.Bass_xxBxP) ||
-                        (EChannel.Bass_xGxxP <= currChipChannel && currChipChannel <= EChannel.Bass_RGBxP) ||
-                        (EChannel.Bass_xxxYP <= currChipChannel && currChipChannel <= EChannel.Bass_RGBYP)) 
-                    {
-                        if (enableTrace)
-                        {
-                            Trace.TraceInformation("r指定時刻に一番近い未ヒットChip 2nd condition met: chip_channel={0:x2}", (int)chip.nChannelNumber);
-                        }
-                        break;                        
-                    }
-
-                }
-                else 
-                {
-                    break;
-                }
-                    
-            }
-        }
-        if ((nIndex_NearestChip_Future >= count) && (nIndex_NearestChip_Past < 0))	// 検索対象が過去未来どちらにも見つからなかった場合
-        {
-            sw2.Stop();
-            return null;
-        }
-        CChip nearestChip;	// = null;	// 以下のifブロックのいずれかで必ずnearestChipには非nullが代入されるので、null初期化を削除
-        if (nIndex_NearestChip_Future >= count)											// 検索対象が未来方向には見つからなかった(しかし過去方向には見つかった)場合
-        {
-            if (enableTrace)
-            {
-                Trace.TraceInformation("r指定時刻に一番近い未ヒットChip Nearest Chip Assign 1: nIndex_NearestChip_Past={0}", nIndex_NearestChip_Past);
-            }
-            nearestChip = listChip[nIndex_NearestChip_Past];
-        }
-        else if (nIndex_NearestChip_Past < 0)												// 検索対象が過去方向には見つからなかった(しかし未来方向には見つかった)場合
-        {
-            if (enableTrace)
-            {
-                Trace.TraceInformation("r指定時刻に一番近い未ヒットChip Nearest Chip Assign 2: nIndex_NearestChip_Future={0}", nIndex_NearestChip_Future);
-            }
-            nearestChip = listChip[nIndex_NearestChip_Future];
-        }
-        else
-        {
-            int nTimeDiff_Future = Math.Abs((int)(nTime - listChip[nIndex_NearestChip_Future].nPlaybackTimeMs));
-            int nTimeDiff_Past = Math.Abs((int)(nTime - listChip[nIndex_NearestChip_Past].nPlaybackTimeMs));
-            if (nTimeDiff_Future < nTimeDiff_Past)
-            {
-                if (enableTrace)
-                {
-                    Trace.TraceInformation("r指定時刻に一番近い未ヒットChip Nearest Chip Assign 3: nIndex_NearestChip_Future={0}", nIndex_NearestChip_Future);
-                }
-                nearestChip = listChip[nIndex_NearestChip_Future];
-            }
-            else
-            {
-                if (enableTrace)
-                {
-                    Trace.TraceInformation("r指定時刻に一番近い未ヒットChip Nearest Chip Assign 4: nIndex_NearestChip_Past={0}", nIndex_NearestChip_Past);
-                }
-                nearestChip = listChip[nIndex_NearestChip_Past];
-            }
-        }
-        nTimeDiff = Math.Abs((int)(nTime - nearestChip.nPlaybackTimeMs));
-        if ((n検索範囲時間ms > 0) && (nTimeDiff > n検索範囲時間ms))					// チップは見つかったが、検索範囲時間外だった場合
-        {
-            sw2.Stop();
-            return null;
-        }
-        sw2.Stop();
-
-        if (enableTrace)                
-        {
-            if (!nearestChip.bChannelWithVisibleChip && nearestChip.nChannelNumber != EChannel.Guitar_Wailing && nearestChip.nChannelNumber != EChannel.Bass_Wailing)
-            {
-                Trace.TraceWarning("Nearest chip is not a visible chip!!! ch={0:x2}", (int)nearestChip.nChannelNumber);
-                Trace.TraceWarning("r指定時刻に一番近い未ヒットChip arguments: nTime (adjusted):{0}, int_nChannel:{1:x2}, nInputAdjustTime:{2}, n検索範囲時間ms:{3}", nTime, int_nChannel, nInputAdjustTime, n検索範囲時間ms);
-            }
-        }
-
-        return nearestChip;
-    }
-
     protected CChip r次に来る指定楽器Chipを更新して返す(EInstrumentPart inst)
     {
         switch ((int)inst)
@@ -1911,13 +1501,13 @@ internal abstract class CStagePerfCommonScreen : CStage
     protected CChip r次にくるギターChipを更新して返す()
     {
         int nInputAdjustTime = bIsAutoPlay.GtPick ? 0 : nInputAdjustTimeMs.Guitar;
-        rNextGuitarChip = r指定時刻に一番近いChip(AudioMixer.Timer.nCurrentTime, EChannel.Guitar_Open, nInputAdjustTime, 800, b過去優先: true, HitState.NotHit, EInstrumentPart.GUITAR);
+        rNextGuitarChip = timeline.NearestNote(AudioMixer.Timer.nCurrentTime + nInputAdjustTime, EInstrumentPart.GUITAR, 800, HitState.NotHit, preferPast: true);
         return rNextGuitarChip;
     }
     protected CChip r次にくるベースChipを更新して返す()  // r次にくるベースChipを更新して返す
     {
-        int nInputAdjustTime = bIsAutoPlay.BsPick ? 0 : nInputAdjustTimeMs.Bass;//Guitar_xGBYP
-        rNextBassChip = r指定時刻に一番近いChip(AudioMixer.Timer.nCurrentTime, EChannel.Bass_Open, nInputAdjustTime, 800, b過去優先: true, HitState.NotHit, EInstrumentPart.BASS);
+        int nInputAdjustTime = bIsAutoPlay.BsPick ? 0 : nInputAdjustTimeMs.Bass;
+        rNextBassChip = timeline.NearestNote(AudioMixer.Timer.nCurrentTime + nInputAdjustTime, EInstrumentPart.BASS, 800, HitState.NotHit, preferPast: true);
         return rNextBassChip;
     }
 
@@ -2419,65 +2009,24 @@ internal abstract class CStagePerfCommonScreen : CStage
         {
             return true;
         }
-        if ((this.nCurrentTopChip == -1) || (this.nCurrentTopChip >= listChip.Count))
+        if ((timeline.TopChip == -1) || (timeline.TopChip >= timeline.Chips.Count))
         {
             return true;
         }
 
-        //Update currentTopChip index when current top chip has moved past bar
-        //Updates nCurrentTopChip for Long Notes
-        #region [Update nCurrentTopChip for Long Notes]
-        CChip cChip = CDTXMania.DTX.listChip[this.nCurrentTopChip];
-        if (cChip.bHit && cChip.nDistanceFromBar.Drums < -200 && cChip.nDistanceFromBar.Guitar < -200 && cChip.nDistanceFromBar.Bass < -200)
-        {
-            if (cChip.bIsLongNote)
-            {
-                CChip chipロングノート終端 = cChip.chipLongNoteEndPosition;
-                if (chipロングノート終端.bHit && chipロングノート終端.nDistanceFromBar.Drums < -200 && chipロングノート終端.nDistanceFromBar.Guitar < -200 && chipロングノート終端.nDistanceFromBar.Bass < -200)
-                {
-                    nCurrentTopChip++;
-                }
-            }
-            else
-            {
-                nCurrentTopChip++;
-            }
-        }
-        #endregion
-
-        // BPM150の時の1小節の長さ[dot]
-        //XGのHS4.5が1289。思えばBPMじゃなくて拍の長さが関係あるよね。
-
-
         CDTX dTX = CDTXMania.DTX;
         CConfigIni configIni = CDTXMania.ConfigIni;
-        for (int nCurrentTopChip = this.nCurrentTopChip; nCurrentTopChip < dTX.listChip.Count; nCurrentTopChip++)
+        for (int chipIndex = timeline.TopChip; chipIndex < dTX.listChip.Count; chipIndex++)
         {
-            CChip pChip = dTX.listChip[nCurrentTopChip];
+            CChip pChip = dTX.listChip[chipIndex];
             pChip.ComputeDistanceFromBar(AudioMixer.Timer.nCurrentTime, actScrollSpeed.db現在の譜面スクロール速度);
             if (Math.Min(Math.Min(pChip.nDistanceFromBar.Drums, pChip.nDistanceFromBar.Guitar), pChip.nDistanceFromBar.Bass) > 600)
             {
                 break;
             }
-            // #28026 2012.4.5 yyagi; 信心ワールドエンドの曲終了後リザルトになかなか行かない問題の修正
-            if ((dTX.listChip[this.nCurrentTopChip].nDistanceFromBar.Drums < -65) && dTX.listChip[this.nCurrentTopChip].bHit)
+            if (chipIndex == timeline.TopChip && timeline.TryAdvance())
             {
-
-                if (dTX.listChip[this.nCurrentTopChip].bIsLongNote)
-                {
-                    CChip chipロングノート終端 = dTX.listChip[this.nCurrentTopChip].chipLongNoteEndPosition;
-                    if (chipロングノート終端.bHit && chipロングノート終端.nDistanceFromBar.Drums < -65)
-                    {
-                        this.nCurrentTopChip++;
-                        continue;
-                    }
-                }
-                else
-                {
-                    ++this.nCurrentTopChip;
-                    continue;
-                }
-                    
+                continue;
             }
 
             if (pChip.eInstrumentPart != EInstrumentPart.UNKNOWN && !IsPlayed(pChip.eInstrumentPart))
@@ -3055,14 +2604,14 @@ internal abstract class CStagePerfCommonScreen : CStage
     protected void DrawChips(EInstrumentPart ePlayMode)
     {
         bool drawsChips = ePhaseID is not (EPhase.PERFORMANCE_STAGE_FAILED or EPhase.PERFORMANCE_STAGE_FAILED_END)
-                          && nCurrentTopChip != -1 && nCurrentTopChip < listChip.Count;
+                          && timeline.TopChip != -1 && timeline.TopChip < timeline.Chips.Count;
 
         CDTX dTX = CDTXMania.DTX;
         CConfigIni configIni = CDTXMania.ConfigIni;
 
         if (drawsChips)
         {
-            for (int i = nCurrentTopChip; i < dTX.listChip.Count; i++)
+            for (int i = timeline.TopChip; i < dTX.listChip.Count; i++)
             {
                 CChip pChip = dTX.listChip[i];
                 if (IsBeyondDrawRange(pChip)) break;
@@ -3087,7 +2636,7 @@ internal abstract class CStagePerfCommonScreen : CStage
 
         if (ePlayMode == EInstrumentPart.DRUMS)
         {
-            for (int i = nCurrentTopChip; i < dTX.listChip.Count; i++)
+            for (int i = timeline.TopChip; i < dTX.listChip.Count; i++)
             {
                 CChip pChip = dTX.listChip[i];
                 if (IsBeyondDrawRange(pChip)) break;
@@ -3112,7 +2661,7 @@ internal abstract class CStagePerfCommonScreen : CStage
             }
         }
 
-        for (int i = nCurrentTopChip; i < dTX.listChip.Count; i++)
+        for (int i = timeline.TopChip; i < dTX.listChip.Count; i++)
         {
             CChip pChip = dTX.listChip[i];
             if (IsBeyondDrawRange(pChip)) break;
@@ -4147,12 +3696,8 @@ internal abstract class CStagePerfCommonScreen : CStage
                     tSaveInputMethod(inst);
                     long nTime = eventPick.nTimeStamp - AudioMixer.Timer.nResetAtMs;
 
-
-                    //Test new method to find next hittable chip
-                    //CChip pChip = this.r指定時刻に一番近い未ヒットChip(nTime, chWailingSound, this.nInputAdjustTimeMs[indexInst], true);	// EInstrumentPart.GUITARなチップ全てにヒットする
-                    EChannel eChannelFromInstAndArrayBool = EnumConverter.GetEChannelFromInstAndArrayBool(inst, buttonPressArray);
                     int nCurrPoorRangeMs = (inst == EInstrumentPart.GUITAR) ? CDTXMania.stGuitarHitRanges.nPoorSizeMs : CDTXMania.stBassHitRanges.nPoorSizeMs;
-                    CChip pChip = r指定時刻に一番近いChip(nTime, eChannelFromInstAndArrayBool, nInputAdjustTimeMs[indexInst], nCurrPoorRangeMs, b過去優先: true, HitState.NotHit, inst);
+                    CChip pChip = timeline.NearestNote(nTime + nInputAdjustTimeMs[indexInst], inst, nCurrPoorRangeMs, HitState.NotHit, preferPast: true);
 
                     EJudgement e判定 = e指定時刻からChipのJUDGEを返す(nTime, pChip, nInputAdjustTimeMs[indexInst]);
                     if (pChip != null)
@@ -4190,9 +3735,8 @@ internal abstract class CStagePerfCommonScreen : CStage
                             tProcessChipHit(nTime, pChip);
                             tPlaySound(pChip, AudioMixer.Timer.nSystemTimeMs, inst, CDTXMania.ConfigIni.n手動再生音量, CDTXMania.ConfigIni.b演奏音を強調する[indexInst], e判定 == EJudgement.Poor && bCurrInstrumentSpecialist);
 
-                            //New Method
                             EChannel search = ((inst == EInstrumentPart.GUITAR) ? EChannel.Guitar_Wailing : EChannel.Bass_Wailing);
-                            CChip item = r指定時刻に一番近いChip(nTime, search, nInputAdjustTimeMs[indexInst], 140);
+                            CChip item = timeline.Nearest(nTime + nInputAdjustTimeMs[indexInst], search, 140, HitState.NotHit);
 
                             if (item != null)
                             {
@@ -4208,7 +3752,7 @@ internal abstract class CStagePerfCommonScreen : CStage
 
                     // 以下、間違いレーンでのピック時
                     CChip NoChipPicked = (inst == EInstrumentPart.GUITAR) ? r現在の空うちギターChip : r現在の空うちベースChip;
-                    if ((NoChipPicked != null) || ((NoChipPicked = r指定時刻に一番近いChip_ヒット未済問わず不可視考慮(nTime, EChannel.Guitar_Open, nInputAdjustTimeMs[indexInst], inst)) != null))
+                    if ((NoChipPicked != null) || ((NoChipPicked = timeline.NearestNote(nTime + nInputAdjustTimeMs[indexInst], inst, 0, HitState.DontCare, preferPast: false)) != null))
                     {
                         tPlaySound(NoChipPicked, AudioMixer.Timer.nSystemTimeMs, inst, CDTXMania.ConfigIni.n手動再生音量, CDTXMania.ConfigIni.b演奏音を強調する[indexInst], bCurrInstrumentSpecialist);                   
                     }
@@ -4283,8 +3827,7 @@ internal abstract class CStagePerfCommonScreen : CStage
     {
         if (inst == EInstrumentPart.GUITAR)
         {
-            CChip sound = r指定時刻に一番近いChip(marker.nPlaybackTimeMs, EChannel.Guitar_WailingSound, 0,
-                (int)WailingWindowMs, hs: HitState.DontCare);
+            CChip sound = timeline.Nearest(marker.nPlaybackTimeMs, EChannel.Guitar_WailingSound, (int)WailingWindowMs, HitState.DontCare);
 
             if (sound != null)
             {
@@ -4364,7 +3907,7 @@ internal abstract class CStagePerfCommonScreen : CStage
     public long PreviewPositionMs => AudioMixer.Timer.nCurrentTime;
 
     //a chart has no length of its own, so use the last chip
-    public long PreviewLengthMs => listChip is { Count: > 0 } ? listChip[^1].nPlaybackTimeMs : 0;
+    public long PreviewLengthMs => timeline.Chips is { Count: > 0 } ? timeline.Chips[^1].nPlaybackTimeMs : 0;
 
     public long PreviewLoopBeginMs => LoopBeginMs;
     public long PreviewLoopEndMs => LoopEndMs;
@@ -4429,7 +3972,6 @@ internal abstract class CStagePerfCommonScreen : CStage
         long nNewPosition = Math.Max(0, newPosition);
         Trace.TraceInformation("JUMP IN SONG currentPosition={0}, newPosition={1}", AudioMixer.Timer.nCurrentTime, nNewPosition);
 
-        long oldPosition = AudioMixer.Timer.nCurrentTime;
         AudioMixer.Timer.tReset();
         AudioMixer.Timer.tPause();
         AudioMixer.Timer.nCurrentTime = nNewPosition;
@@ -4450,48 +3992,12 @@ internal abstract class CStagePerfCommonScreen : CStage
             data.ResetLongNoteBonus();
         }
 
-        // Loop to set new nCurrentTopChip
-        // Also, if we are going backward, we need to unhit some chips, and reset TopChip
-        nCurrentTopChip = 0;
-        bool bIsTopChipSet = false;
-        for (int nCurrentChip = 0; nCurrentChip < CDTXMania.DTX.listChip.Count; nCurrentChip++)
-        {
-            CChip pChip = CDTXMania.DTX.listChip[nCurrentChip];
-
-            if (bIsTopChipSet && pChip.nPlaybackTimeMs > oldPosition)
-            {
-                break;
-            }
-
-            if (pChip.nPlaybackTimeMs >= nNewPosition)
-            {
-                if (!bIsTopChipSet)
-                {
-                    nCurrentTopChip = nCurrentChip;
-                    bIsTopChipSet = true;
-                    if (nNewPosition > oldPosition)
-                    {
-                        break;
-                    }
-                }
-                // Unhit the chip so it displays again (and is hittable again)
-                if (pChip.bHit)
-                {
-                    pChip.bHit = false;
-                }
-
-                //NEW: Reset Long Note too
-                if (pChip.bIsHittingLongNote)
-                {
-                    pChip.bIsHittingLongNote = false;
-                }
-            }
-        }
+        timeline.Seek(nNewPosition);
 
         //Adjust BGM to new position
 
         #region [ BGMやギターなど、演奏開始のタイミングで再生がかかっているサウンドのの途中再生開始 ] // (CDTXのt入力・行解析・チップ配置()で小節番号が+1されているのを削っておくこと)
-        for (int i = nCurrentTopChip; i >= 0; i--)
+        for (int i = timeline.TopChip; i >= 0; i--)
         {
             CChip pChip = CDTXMania.DTX.listChip[i];
             int nDuration = pChip.GetDuration();
@@ -4624,7 +4130,7 @@ internal abstract class CStagePerfCommonScreen : CStage
         actBGA.Stop();
         CDTXMania.Timer.tPause();       // 再生時刻カウンタ停止
 
-        nCurrentTopChip = CDTXMania.DTX.listChip.Count - 1;   // 終端にシーク
+        timeline.SeekToEnd();
         //Reset Hold note cache
         chipロングノートHit中 = default;
         nロングノートPart = default;

@@ -155,12 +155,10 @@ internal partial class CStagePerfGuitarScreen
 				}
 
 
-				//New method for Guitar and Bass
 				EChannel search = ((inst == EInstrumentPart.GUITAR)
 					? EChannel.Guitar_Wailing
 					: EChannel.Bass_Wailing);
-				CChip item = r指定時刻に一番近いChip(pChip.nPlaybackTimeMs + ghostLag, search, nInputAdjustTimeMs[instIndex],
-					140);
+				CChip item = timeline.Nearest(pChip.nPlaybackTimeMs + ghostLag + nInputAdjustTimeMs[instIndex], search, 140, HitState.NotHit);
 
 				if (item != null && !bMiss)
 				{

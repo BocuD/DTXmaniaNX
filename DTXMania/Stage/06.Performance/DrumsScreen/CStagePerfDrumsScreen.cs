@@ -73,7 +73,7 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
             r空打ちドラムチップ[ i ] = r空うちChip( EInstrumentPart.DRUMS, (EPad) i );
             if ( r空打ちドラムチップ[ i ] == null )
             {
-                r空打ちドラムチップ[ i ] = r指定時刻に一番近いChip_ヒット未済問わず不可視考慮( CDTXMania.Timer.nCurrentTime, nパッド0Atoチャンネル0A[ i ], nInputAdjustTimeMs.Drums );
+                r空打ちドラムチップ[ i ] = timeline.NearestDrum(CDTXMania.Timer.nCurrentTime + nInputAdjustTimeMs.Drums, nパッド0Atoチャンネル0A[i], HitState.DontCare);
             }
         }
         bIsTrainingMode = this.bIsTrainingMode;

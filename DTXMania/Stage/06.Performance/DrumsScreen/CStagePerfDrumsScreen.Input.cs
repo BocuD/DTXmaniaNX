@@ -75,9 +75,9 @@ internal partial class CStagePerfDrumsScreen
                         if (inputEvent.nVelocity <= CDTXMania.ConfigIni.nVelocityMin.HH)
                             continue;	// 電子ドラムによる意図的なクロストークを無効にする
 
-                        CChip chipHC = r指定時刻に一番近い未ヒットChip(nTime, 0x11, nInputAdjustTime);	// HiHat Close
-                        CChip chipHO = r指定時刻に一番近い未ヒットChip(nTime, 0x18, nInputAdjustTime);	// HiHat Open
-                        CChip chipLC = r指定時刻に一番近い未ヒットChip(nTime, 0x1a, nInputAdjustTime);	// LC
+                        CChip chipHC = timeline.NearestDrum(nTime + nInputAdjustTime, EChannel.HiHatClose, HitState.NotHit);
+                        CChip chipHO = timeline.NearestDrum(nTime + nInputAdjustTime, EChannel.HiHatOpen, HitState.NotHit);
+                        CChip chipLC = timeline.NearestDrum(nTime + nInputAdjustTime, EChannel.LeftCymbal, HitState.NotHit);
                         EJudgement e判定HC = (chipHC != null) ? e指定時刻からChipのJUDGEを返す(nTime, chipHC, nInputAdjustTime) : EJudgement.Miss;
                         EJudgement e判定HO = (chipHO != null) ? e指定時刻からChipのJUDGEを返す(nTime, chipHO, nInputAdjustTime) : EJudgement.Miss;
                         EJudgement e判定LC = (chipLC != null) ? e指定時刻からChipのJUDGEを返す(nTime, chipLC, nInputAdjustTime) : EJudgement.Miss;
@@ -290,7 +290,7 @@ internal partial class CStagePerfDrumsScreen
                         //-----------------------------
                         if (inputEvent.nVelocity <= CDTXMania.ConfigIni.nVelocityMin.SD)	// #23857 2010.12.12 yyagi: to support VelocityMin
                             continue;	// 電子ドラムによる意図的なクロストークを無効にする
-                        if (!tProcessDrumHit(nTime, EPad.SD, r指定時刻に一番近い未ヒットChip(nTime, 0x12, nInputAdjustTime), inputEvent.nVelocity))
+                        if (!tProcessDrumHit(nTime, EPad.SD, timeline.NearestDrum(nTime + nInputAdjustTime, EChannel.Snare, HitState.NotHit), inputEvent.nVelocity))
                             break;
                         continue;
                     //-----------------------------
@@ -303,9 +303,9 @@ internal partial class CStagePerfDrumsScreen
                         if (inputEvent.nVelocity <= CDTXMania.ConfigIni.nVelocityMin.BD)	// #23857 2010.12.12 yyagi: to support VelocityMin
                             continue;	// 電子ドラムによる意図的なクロストークを無効にする
 
-                        CChip chipBD  = r指定時刻に一番近い未ヒットChip(nTime, 0x13, nInputAdjustTime + nPedalLagTime);	// BD
-                        CChip chipLP  = r指定時刻に一番近い未ヒットChip(nTime, 0x1b, nInputAdjustTime + nPedalLagTime);	// LP
-                        CChip chipLBD = r指定時刻に一番近い未ヒットChip(nTime, 0x1c, nInputAdjustTime + nPedalLagTime);	// LBD
+                        CChip chipBD  = timeline.NearestDrum(nTime + nInputAdjustTime + nPedalLagTime, EChannel.BassDrum, HitState.NotHit);
+                        CChip chipLP  = timeline.NearestDrum(nTime + nInputAdjustTime + nPedalLagTime, EChannel.LeftPedal, HitState.NotHit);
+                        CChip chipLBD = timeline.NearestDrum(nTime + nInputAdjustTime + nPedalLagTime, EChannel.LeftBassDrum, HitState.NotHit);
                         EJudgement e判定BD  = (chipBD  != null) ? e指定時刻からChipのJUDGEを返す(nTime, chipBD, nInputAdjustTime + nPedalLagTime) : EJudgement.Miss;
                         EJudgement e判定LP  = (chipLP  != null) ? e指定時刻からChipのJUDGEを返す(nTime, chipLP, nInputAdjustTime + nPedalLagTime) : EJudgement.Miss;
                         EJudgement e判定LBD = (chipLBD != null) ? e指定時刻からChipのJUDGEを返す(nTime, chipLBD, nInputAdjustTime + nPedalLagTime) : EJudgement.Miss;
@@ -498,7 +498,7 @@ internal partial class CStagePerfDrumsScreen
                         //-----------------------------
                         if (inputEvent.nVelocity <= CDTXMania.ConfigIni.nVelocityMin.HT)	// #23857 2010.12.12 yyagi: to support VelocityMin
                             continue;	// 電子ドラムによる意図的なクロストークを無効にする
-                        if (tProcessDrumHit(nTime, EPad.HT, r指定時刻に一番近い未ヒットChip(nTime, 20, nInputAdjustTime), inputEvent.nVelocity))
+                        if (tProcessDrumHit(nTime, EPad.HT, timeline.NearestDrum(nTime + nInputAdjustTime, EChannel.HighTom, HitState.NotHit), inputEvent.nVelocity))
                             continue;
                         break;
                     //-----------------------------
@@ -510,8 +510,8 @@ internal partial class CStagePerfDrumsScreen
                     {
                         if (inputEvent.nVelocity <= CDTXMania.ConfigIni.nVelocityMin.LT)	// #23857 2010.12.12 yyagi: to support VelocityMin
                             continue;	// 電子ドラムによる意図的なクロストークを無効にする
-                        CChip chipLT = r指定時刻に一番近い未ヒットChip(nTime, 0x15, nInputAdjustTime);	// LT
-                        CChip chipFT = r指定時刻に一番近い未ヒットChip(nTime, 0x17, nInputAdjustTime);	// FT
+                        CChip chipLT = timeline.NearestDrum(nTime + nInputAdjustTime, EChannel.LowTom, HitState.NotHit);
+                        CChip chipFT = timeline.NearestDrum(nTime + nInputAdjustTime, EChannel.FloorTom, HitState.NotHit);
                         EJudgement e判定LT = (chipLT != null) ? e指定時刻からChipのJUDGEを返す(nTime, chipLT, nInputAdjustTime) : EJudgement.Miss;
                         EJudgement e判定FT = (chipFT != null) ? e指定時刻からChipのJUDGEを返す(nTime, chipFT, nInputAdjustTime) : EJudgement.Miss;
                         switch (eFTGroup)
@@ -575,8 +575,8 @@ internal partial class CStagePerfDrumsScreen
                     {
                         if (inputEvent.nVelocity <= CDTXMania.ConfigIni.nVelocityMin.FT)	// #23857 2010.12.12 yyagi: to support VelocityMin
                             continue;	// 電子ドラムによる意図的なクロストークを無効にする
-                        CChip chipLT = r指定時刻に一番近い未ヒットChip(nTime, 0x15, nInputAdjustTime);	// LT
-                        CChip chipFT = r指定時刻に一番近い未ヒットChip(nTime, 0x17, nInputAdjustTime);	// FT
+                        CChip chipLT = timeline.NearestDrum(nTime + nInputAdjustTime, EChannel.LowTom, HitState.NotHit);
+                        CChip chipFT = timeline.NearestDrum(nTime + nInputAdjustTime, EChannel.FloorTom, HitState.NotHit);
                         EJudgement e判定LT = (chipLT != null) ? e指定時刻からChipのJUDGEを返す(nTime, chipLT, nInputAdjustTime) : EJudgement.Miss;
                         EJudgement e判定FT = (chipFT != null) ? e指定時刻からChipのJUDGEを返す(nTime, chipFT, nInputAdjustTime) : EJudgement.Miss;
                         switch (eFTGroup)
@@ -640,9 +640,9 @@ internal partial class CStagePerfDrumsScreen
                     {
                         if (inputEvent.nVelocity <= CDTXMania.ConfigIni.nVelocityMin.CY)	// #23857 2010.12.12 yyagi: to support VelocityMin
                             continue;	// 電子ドラムによる意図的なクロストークを無効にする
-                        CChip chipCY = r指定時刻に一番近い未ヒットChip(nTime, 0x16, nInputAdjustTime);	// CY
-                        CChip chipRD = r指定時刻に一番近い未ヒットChip(nTime, 0x19, nInputAdjustTime);	// RD
-                        CChip chipLC = CDTXMania.ConfigIni.bシンバルフリー ? r指定時刻に一番近い未ヒットChip(nTime, 0x1a, nInputAdjustTime) : null;
+                        CChip chipCY = timeline.NearestDrum(nTime + nInputAdjustTime, EChannel.Cymbal, HitState.NotHit);
+                        CChip chipRD = timeline.NearestDrum(nTime + nInputAdjustTime, EChannel.RideCymbal, HitState.NotHit);
+                        CChip chipLC = CDTXMania.ConfigIni.bシンバルフリー ? timeline.NearestDrum(nTime + nInputAdjustTime, EChannel.LeftCymbal, HitState.NotHit) : null;
                         EJudgement e判定CY = (chipCY != null) ? e指定時刻からChipのJUDGEを返す(nTime, chipCY, nInputAdjustTime) : EJudgement.Miss;
                         EJudgement e判定RD = (chipRD != null) ? e指定時刻からChipのJUDGEを返す(nTime, chipRD, nInputAdjustTime) : EJudgement.Miss;
                         EJudgement e判定LC = (chipLC != null) ? e指定時刻からChipのJUDGEを返す(nTime, chipLC, nInputAdjustTime) : EJudgement.Miss;
@@ -732,9 +732,9 @@ internal partial class CStagePerfDrumsScreen
                         if (inputEvent.nVelocity <= CDTXMania.ConfigIni.nVelocityMin.HH)
                             continue;	// 電子ドラムによる意図的なクロストークを無効にする
 
-                        CChip chipHC = r指定時刻に一番近い未ヒットChip(nTime, 0x11, nInputAdjustTime);	// HC
-                        CChip chipHO = r指定時刻に一番近い未ヒットChip(nTime, 0x18, nInputAdjustTime);	// HO
-                        CChip chipLC = r指定時刻に一番近い未ヒットChip(nTime, 0x1a, nInputAdjustTime);	// LC
+                        CChip chipHC = timeline.NearestDrum(nTime + nInputAdjustTime, EChannel.HiHatClose, HitState.NotHit);
+                        CChip chipHO = timeline.NearestDrum(nTime + nInputAdjustTime, EChannel.HiHatOpen, HitState.NotHit);
+                        CChip chipLC = timeline.NearestDrum(nTime + nInputAdjustTime, EChannel.LeftCymbal, HitState.NotHit);
                         EJudgement e判定HC = (chipHC != null) ? e指定時刻からChipのJUDGEを返す(nTime, chipHC, nInputAdjustTime) : EJudgement.Miss;
                         EJudgement e判定HO = (chipHO != null) ? e指定時刻からChipのJUDGEを返す(nTime, chipHO, nInputAdjustTime) : EJudgement.Miss;
                         EJudgement e判定LC = (chipLC != null) ? e指定時刻からChipのJUDGEを返す(nTime, chipLC, nInputAdjustTime) : EJudgement.Miss;
@@ -932,9 +932,9 @@ internal partial class CStagePerfDrumsScreen
                     {
                         if (inputEvent.nVelocity <= CDTXMania.ConfigIni.nVelocityMin.RD)	// #23857 2010.12.12 yyagi: to support VelocityMin
                             continue;	// 電子ドラムによる意図的なクロストークを無効にする
-                        CChip chipCY = r指定時刻に一番近い未ヒットChip(nTime, 0x16, nInputAdjustTime);	// CY
-                        CChip chipRD = r指定時刻に一番近い未ヒットChip(nTime, 0x19, nInputAdjustTime);	// RD
-                        CChip chipLC = CDTXMania.ConfigIni.bシンバルフリー ? r指定時刻に一番近い未ヒットChip(nTime, 0x1a, nInputAdjustTime) : null;
+                        CChip chipCY = timeline.NearestDrum(nTime + nInputAdjustTime, EChannel.Cymbal, HitState.NotHit);
+                        CChip chipRD = timeline.NearestDrum(nTime + nInputAdjustTime, EChannel.RideCymbal, HitState.NotHit);
+                        CChip chipLC = CDTXMania.ConfigIni.bシンバルフリー ? timeline.NearestDrum(nTime + nInputAdjustTime, EChannel.LeftCymbal, HitState.NotHit) : null;
                         EJudgement e判定CY = (chipCY != null) ? e指定時刻からChipのJUDGEを返す(nTime, chipCY, nInputAdjustTime) : EJudgement.Miss;
                         EJudgement e判定RD = (chipRD != null) ? e指定時刻からChipのJUDGEを返す(nTime, chipRD, nInputAdjustTime) : EJudgement.Miss;
                         EJudgement e判定LC = (chipLC != null) ? e指定時刻からChipのJUDGEを返す(nTime, chipLC, nInputAdjustTime) : EJudgement.Miss;
@@ -992,11 +992,11 @@ internal partial class CStagePerfDrumsScreen
                     {
                         if (inputEvent.nVelocity <= CDTXMania.ConfigIni.nVelocityMin.LC)	// #23857 2010.12.12 yyagi: to support VelocityMin
                             continue;	// 電子ドラムによる意図的なクロストークを無効にする
-                        CChip chipHC = r指定時刻に一番近い未ヒットChip(nTime, 0x11, nInputAdjustTime);	// HC
-                        CChip chipHO = r指定時刻に一番近い未ヒットChip(nTime, 0x18, nInputAdjustTime);	// HO
-                        CChip chipLC = r指定時刻に一番近い未ヒットChip(nTime, 0x1a, nInputAdjustTime);	// LC
-                        CChip chipCY = CDTXMania.ConfigIni.bシンバルフリー ? r指定時刻に一番近い未ヒットChip(nTime, 0x16, nInputAdjustTime) : null;
-                        CChip chipRD = CDTXMania.ConfigIni.bシンバルフリー ? r指定時刻に一番近い未ヒットChip(nTime, 0x19, nInputAdjustTime) : null;
+                        CChip chipHC = timeline.NearestDrum(nTime + nInputAdjustTime, EChannel.HiHatClose, HitState.NotHit);
+                        CChip chipHO = timeline.NearestDrum(nTime + nInputAdjustTime, EChannel.HiHatOpen, HitState.NotHit);
+                        CChip chipLC = timeline.NearestDrum(nTime + nInputAdjustTime, EChannel.LeftCymbal, HitState.NotHit);
+                        CChip chipCY = CDTXMania.ConfigIni.bシンバルフリー ? timeline.NearestDrum(nTime + nInputAdjustTime, EChannel.Cymbal, HitState.NotHit) : null;
+                        CChip chipRD = CDTXMania.ConfigIni.bシンバルフリー ? timeline.NearestDrum(nTime + nInputAdjustTime, EChannel.RideCymbal, HitState.NotHit) : null;
                         EJudgement e判定HC = (chipHC != null) ? e指定時刻からChipのJUDGEを返す(nTime, chipHC, nInputAdjustTime) : EJudgement.Miss;
                         EJudgement e判定HO = (chipHO != null) ? e指定時刻からChipのJUDGEを返す(nTime, chipHO, nInputAdjustTime) : EJudgement.Miss;
                         EJudgement e判定LC = (chipLC != null) ? e指定時刻からChipのJUDGEを返す(nTime, chipLC, nInputAdjustTime) : EJudgement.Miss;
@@ -1083,9 +1083,9 @@ internal partial class CStagePerfDrumsScreen
                     {
                         if (inputEvent.nVelocity <= CDTXMania.ConfigIni.nVelocityMin.LP)
                             continue;
-                        CChip chipBD  = r指定時刻に一番近い未ヒットChip(nTime, 0x13, nInputAdjustTime + nPedalLagTime);	// BD
-                        CChip chipLP  = r指定時刻に一番近い未ヒットChip(nTime, 0x1b, nInputAdjustTime + nPedalLagTime);	// LP
-                        CChip chipLBD = r指定時刻に一番近い未ヒットChip(nTime, 0x1c, nInputAdjustTime + nPedalLagTime);	// LBD
+                        CChip chipBD  = timeline.NearestDrum(nTime + nInputAdjustTime + nPedalLagTime, EChannel.BassDrum, HitState.NotHit);
+                        CChip chipLP  = timeline.NearestDrum(nTime + nInputAdjustTime + nPedalLagTime, EChannel.LeftPedal, HitState.NotHit);
+                        CChip chipLBD = timeline.NearestDrum(nTime + nInputAdjustTime + nPedalLagTime, EChannel.LeftBassDrum, HitState.NotHit);
                         EJudgement e判定BD  = (chipBD  != null) ? e指定時刻からChipのJUDGEを返す(nTime, chipBD,  nInputAdjustTime + nPedalLagTime) : EJudgement.Miss;
                         EJudgement e判定LP  = (chipLP  != null) ? e指定時刻からChipのJUDGEを返す(nTime, chipLP,  nInputAdjustTime + nPedalLagTime) : EJudgement.Miss;
                         EJudgement e判定LBD = (chipLBD != null) ? e指定時刻からChipのJUDGEを返す(nTime, chipLBD, nInputAdjustTime + nPedalLagTime) : EJudgement.Miss;
@@ -1272,9 +1272,9 @@ internal partial class CStagePerfDrumsScreen
                     {
                         if (inputEvent.nVelocity <= CDTXMania.ConfigIni.nVelocityMin.LBD)
                             continue;
-                        CChip chipBD  = r指定時刻に一番近い未ヒットChip(nTime, 0x13, nInputAdjustTime + nPedalLagTime);	// BD
-                        CChip chipLP  = r指定時刻に一番近い未ヒットChip(nTime, 0x1b, nInputAdjustTime + nPedalLagTime);	// LP
-                        CChip chipLBD = r指定時刻に一番近い未ヒットChip(nTime, 0x1c, nInputAdjustTime + nPedalLagTime);	// LBD
+                        CChip chipBD  = timeline.NearestDrum(nTime + nInputAdjustTime + nPedalLagTime, EChannel.BassDrum, HitState.NotHit);
+                        CChip chipLP  = timeline.NearestDrum(nTime + nInputAdjustTime + nPedalLagTime, EChannel.LeftPedal, HitState.NotHit);
+                        CChip chipLBD = timeline.NearestDrum(nTime + nInputAdjustTime + nPedalLagTime, EChannel.LeftBassDrum, HitState.NotHit);
                         EJudgement e判定BD  = (chipBD  != null) ? e指定時刻からChipのJUDGEを返す(nTime, chipBD,  nInputAdjustTime + nPedalLagTime) : EJudgement.Miss;
                         EJudgement e判定LP  = (chipLP  != null) ? e指定時刻からChipのJUDGEを返す(nTime, chipLP,  nInputAdjustTime + nPedalLagTime) : EJudgement.Miss;
                         EJudgement e判定LBD = (chipLBD != null) ? e指定時刻からChipのJUDGEを返す(nTime, chipLBD, nInputAdjustTime + nPedalLagTime) : EJudgement.Miss;
@@ -1519,9 +1519,9 @@ internal partial class CStagePerfDrumsScreen
                                 #region [ *** ]
                                 //-----------------------------
                             {
-                                CChip chipHC = r指定時刻に一番近いChip_ヒット未済問わず不可視考慮(nTime, nパッド0Atoチャンネル0A[0], nInputAdjustTime);
-                                CChip chipHO = r指定時刻に一番近いChip_ヒット未済問わず不可視考慮(nTime, nパッド0Atoチャンネル0A[7], nInputAdjustTime);
-                                CChip chipLC = r指定時刻に一番近いChip_ヒット未済問わず不可視考慮(nTime, nパッド0Atoチャンネル0A[9], nInputAdjustTime);
+                                CChip chipHC = timeline.NearestDrum(nTime + nInputAdjustTime, EChannel.HiHatClose, HitState.DontCare);
+                                CChip chipHO = timeline.NearestDrum(nTime + nInputAdjustTime, EChannel.HiHatOpen, HitState.DontCare);
+                                CChip chipLC = timeline.NearestDrum(nTime + nInputAdjustTime, EChannel.LeftCymbal, HitState.DontCare);
                                 switch (CDTXMania.ConfigIni.eHHGroup)
                                 {
                                     case EHHGroup.ハイハットのみ打ち分ける:
@@ -1568,8 +1568,8 @@ internal partial class CStagePerfDrumsScreen
                                 #region [ *** ]
                                 //-----------------------------
                             {
-                                CChip chipLT = r指定時刻に一番近いChip_ヒット未済問わず不可視考慮(nTime, nパッド0Atoチャンネル0A[4], nInputAdjustTime);
-                                CChip chipFT = r指定時刻に一番近いChip_ヒット未済問わず不可視考慮(nTime, nパッド0Atoチャンネル0A[5], nInputAdjustTime);
+                                CChip chipLT = timeline.NearestDrum(nTime + nInputAdjustTime, EChannel.LowTom, HitState.DontCare);
+                                CChip chipFT = timeline.NearestDrum(nTime + nInputAdjustTime, EChannel.FloorTom, HitState.DontCare);
                                 if (CDTXMania.ConfigIni.eFTGroup != EFTGroup.打ち分ける)
                                     rChip = (chipLT != null) ? chipLT : chipFT;
                                 else
@@ -1583,8 +1583,8 @@ internal partial class CStagePerfDrumsScreen
                                 #region [ *** ]
                                 //-----------------------------
                             {
-                                CChip chipLT = r指定時刻に一番近いChip_ヒット未済問わず不可視考慮(nTime, nパッド0Atoチャンネル0A[4], nInputAdjustTime);
-                                CChip chipFT = r指定時刻に一番近いChip_ヒット未済問わず不可視考慮(nTime, nパッド0Atoチャンネル0A[5], nInputAdjustTime);
+                                CChip chipLT = timeline.NearestDrum(nTime + nInputAdjustTime, EChannel.LowTom, HitState.DontCare);
+                                CChip chipFT = timeline.NearestDrum(nTime + nInputAdjustTime, EChannel.FloorTom, HitState.DontCare);
                                 if (CDTXMania.ConfigIni.eFTGroup != EFTGroup.打ち分ける)
                                     rChip = (chipFT != null) ? chipFT : chipLT;
                                 else
@@ -1599,8 +1599,8 @@ internal partial class CStagePerfDrumsScreen
                                 //-----------------------------
                             {
 
-                                CChip chipCY = r指定時刻に一番近いChip_ヒット未済問わず不可視考慮(nTime, nパッド0Atoチャンネル0A[6], nInputAdjustTime);
-                                CChip chipRD = r指定時刻に一番近いChip_ヒット未済問わず不可視考慮(nTime, nパッド0Atoチャンネル0A[8], nInputAdjustTime);
+                                CChip chipCY = timeline.NearestDrum(nTime + nInputAdjustTime, EChannel.Cymbal, HitState.DontCare);
+                                CChip chipRD = timeline.NearestDrum(nTime + nInputAdjustTime, EChannel.RideCymbal, HitState.DontCare);
                                 if (CDTXMania.ConfigIni.eCYGroup != ECYGroup.打ち分ける)
                                     rChip = (chipCY != null) ? chipCY : chipRD;
                                 else
@@ -1614,9 +1614,9 @@ internal partial class CStagePerfDrumsScreen
                                 #region [ *** ]
                                 //-----------------------------
                             {
-                                CChip chipHC = r指定時刻に一番近いChip_ヒット未済問わず不可視考慮(nTime, nパッド0Atoチャンネル0A[0], nInputAdjustTime);
-                                CChip chipHO = r指定時刻に一番近いChip_ヒット未済問わず不可視考慮(nTime, nパッド0Atoチャンネル0A[7], nInputAdjustTime);
-                                CChip chipLC = r指定時刻に一番近いChip_ヒット未済問わず不可視考慮(nTime, nパッド0Atoチャンネル0A[9], nInputAdjustTime);
+                                CChip chipHC = timeline.NearestDrum(nTime + nInputAdjustTime, EChannel.HiHatClose, HitState.DontCare);
+                                CChip chipHO = timeline.NearestDrum(nTime + nInputAdjustTime, EChannel.HiHatOpen, HitState.DontCare);
+                                CChip chipLC = timeline.NearestDrum(nTime + nInputAdjustTime, EChannel.LeftCymbal, HitState.DontCare);
                                 switch (CDTXMania.ConfigIni.eHHGroup)
                                 {
                                     case EHHGroup.全部打ち分ける:
@@ -1663,8 +1663,8 @@ internal partial class CStagePerfDrumsScreen
                                 #region [ *** ]
                                 //-----------------------------
                             {
-                                CChip chipCY = r指定時刻に一番近いChip_ヒット未済問わず不可視考慮(nTime, nパッド0Atoチャンネル0A[6], nInputAdjustTime);
-                                CChip chipRD = r指定時刻に一番近いChip_ヒット未済問わず不可視考慮(nTime, nパッド0Atoチャンネル0A[8], nInputAdjustTime);
+                                CChip chipCY = timeline.NearestDrum(nTime + nInputAdjustTime, EChannel.Cymbal, HitState.DontCare);
+                                CChip chipRD = timeline.NearestDrum(nTime + nInputAdjustTime, EChannel.RideCymbal, HitState.DontCare);
                                 if (CDTXMania.ConfigIni.eCYGroup != ECYGroup.打ち分ける)
                                     rChip = (chipRD != null) ? chipRD : chipCY;
                                 else
@@ -1678,9 +1678,9 @@ internal partial class CStagePerfDrumsScreen
                                 #region [ *** ]
                                 //-----------------------------
                             {
-                                CChip chipHC = r指定時刻に一番近いChip_ヒット未済問わず不可視考慮(nTime, nパッド0Atoチャンネル0A[0], nInputAdjustTime);
-                                CChip chipHO = r指定時刻に一番近いChip_ヒット未済問わず不可視考慮(nTime, nパッド0Atoチャンネル0A[7], nInputAdjustTime);
-                                CChip chipLC = r指定時刻に一番近いChip_ヒット未済問わず不可視考慮(nTime, nパッド0Atoチャンネル0A[9], nInputAdjustTime);
+                                CChip chipHC = timeline.NearestDrum(nTime + nInputAdjustTime, EChannel.HiHatClose, HitState.DontCare);
+                                CChip chipHO = timeline.NearestDrum(nTime + nInputAdjustTime, EChannel.HiHatOpen, HitState.DontCare);
+                                CChip chipLC = timeline.NearestDrum(nTime + nInputAdjustTime, EChannel.LeftCymbal, HitState.DontCare);
                                 switch (CDTXMania.ConfigIni.eHHGroup)
                                 {
                                     case EHHGroup.全部打ち分ける:
@@ -1721,9 +1721,9 @@ internal partial class CStagePerfDrumsScreen
                                 #region [ *** ]
                                 //-----------------------------
                             {
-                                CChip chipBD = r指定時刻に一番近いChip_ヒット未済問わず不可視考慮(nTime, nパッド0Atoチャンネル0A[2], nInputAdjustTime + nPedalLagTime);
-                                CChip chipLP = r指定時刻に一番近いChip_ヒット未済問わず不可視考慮(nTime, nパッド0Atoチャンネル0A[10], nInputAdjustTime + nPedalLagTime);
-                                CChip chipLBD = r指定時刻に一番近いChip_ヒット未済問わず不可視考慮(nTime, nパッド0Atoチャンネル0A[11], nInputAdjustTime + nPedalLagTime);
+                                CChip chipBD = timeline.NearestDrum(nTime + nInputAdjustTime + nPedalLagTime, EChannel.BassDrum, HitState.DontCare);
+                                CChip chipLP = timeline.NearestDrum(nTime + nInputAdjustTime + nPedalLagTime, EChannel.LeftPedal, HitState.DontCare);
+                                CChip chipLBD = timeline.NearestDrum(nTime + nInputAdjustTime + nPedalLagTime, EChannel.LeftBassDrum, HitState.DontCare);
                                 switch (CDTXMania.ConfigIni.eBDGroup)
                                 {
                                     case EBDGroup.打ち分ける:
@@ -1786,9 +1786,9 @@ internal partial class CStagePerfDrumsScreen
                                 #region [ *** ]
                                 //-----------------------------
                             {
-                                CChip chipBD = r指定時刻に一番近いChip_ヒット未済問わず不可視考慮(nTime, nパッド0Atoチャンネル0A[2], nInputAdjustTime + nPedalLagTime );
-                                CChip chipLP = r指定時刻に一番近いChip_ヒット未済問わず不可視考慮(nTime, nパッド0Atoチャンネル0A[10], nInputAdjustTime + nPedalLagTime );
-                                CChip chipLBD = r指定時刻に一番近いChip_ヒット未済問わず不可視考慮(nTime, nパッド0Atoチャンネル0A[11], nInputAdjustTime + nPedalLagTime );
+                                CChip chipBD = timeline.NearestDrum(nTime + nInputAdjustTime + nPedalLagTime, EChannel.BassDrum, HitState.DontCare);
+                                CChip chipLP = timeline.NearestDrum(nTime + nInputAdjustTime + nPedalLagTime, EChannel.LeftPedal, HitState.DontCare);
+                                CChip chipLBD = timeline.NearestDrum(nTime + nInputAdjustTime + nPedalLagTime, EChannel.LeftBassDrum, HitState.DontCare);
                                 switch (CDTXMania.ConfigIni.eBDGroup)
                                 {
                                     case EBDGroup.打ち分ける:
@@ -1838,9 +1838,9 @@ internal partial class CStagePerfDrumsScreen
                             case EPad.LBD:
                                 #region [ *** ]
                             {
-                                CChip chipBD = r指定時刻に一番近いChip_ヒット未済問わず不可視考慮(nTime, nパッド0Atoチャンネル0A[2], nInputAdjustTime + nPedalLagTime);
-                                CChip chipLP = r指定時刻に一番近いChip_ヒット未済問わず不可視考慮(nTime, nパッド0Atoチャンネル0A[10], nInputAdjustTime + nPedalLagTime);
-                                CChip chipLBD = r指定時刻に一番近いChip_ヒット未済問わず不可視考慮(nTime, nパッド0Atoチャンネル0A[11], nInputAdjustTime + nPedalLagTime);
+                                CChip chipBD = timeline.NearestDrum(nTime + nInputAdjustTime + nPedalLagTime, EChannel.BassDrum, HitState.DontCare);
+                                CChip chipLP = timeline.NearestDrum(nTime + nInputAdjustTime + nPedalLagTime, EChannel.LeftPedal, HitState.DontCare);
+                                CChip chipLBD = timeline.NearestDrum(nTime + nInputAdjustTime + nPedalLagTime, EChannel.LeftBassDrum, HitState.DontCare);
                                 switch (CDTXMania.ConfigIni.eBDGroup)
                                 {
                                     case EBDGroup.打ち分ける:
@@ -1902,7 +1902,7 @@ internal partial class CStagePerfDrumsScreen
                             default:
                                 #region [ *** ]
                                 //-----------------------------
-                                rChip = r指定時刻に一番近いChip_ヒット未済問わず不可視考慮(nTime, nパッド0Atoチャンネル0A[nPad], nInputAdjustTime);
+                                rChip = timeline.NearestDrum(nTime + nInputAdjustTime, nパッド0Atoチャンネル0A[nPad], HitState.DontCare);
                                 //-----------------------------
                                 #endregion
                                 break;
@@ -2027,7 +2027,7 @@ internal partial class CStagePerfDrumsScreen
                 {
                     hH = EPad.HH;
                 }
-                rChip = r指定時刻に一番近いChip_ヒット未済問わず不可視考慮( nHitTime, nパッド0Atoチャンネル0A[ (int) hH ], nInputAdjustTime );
+                rChip = timeline.NearestDrum(nHitTime + nInputAdjustTime, nパッド0Atoチャンネル0A[(int) hH], HitState.DontCare);
                 if ( rChip == null )
                 {
                     rChip = pChip;
