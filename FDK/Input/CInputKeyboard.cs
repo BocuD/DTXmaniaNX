@@ -132,7 +132,7 @@ public class CInputKeyboard : IInputKeyboard, IDisposable
 									nKey = (int)key,
 									b押された = true,
 									b離された = false,
-									nTimeStamp = InputClock.Current.nSystemTimeMsFor(data.Timestamp),
+									nTimeStamp = InputClock.Current.nSystemTimeMsFor((uint)data.Timestamp),
 									nVelocity = CInputManager.nDefaultVelocity
 								};
 								listInputEvent.Add(item);
