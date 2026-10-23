@@ -46,11 +46,17 @@ internal class StageManager
     
     public void LoadInitialStage()
     {
-        rCurrentStage = CDTXMania.bCompactMode ? stageSongLoading : stageStartup;
+        if (CDTXMania.bCompactMode)
+        {
+            CDTXMania.SelectCompactModeChart();
+        }
+
+        //startup moves on to song loading itself in compact mode
+        rCurrentStage = stageStartup;
         rCurrentStage.OnActivate();
     }
 
-    public void DrawStage()
+    public void UpdateStage()
     {
         if (rCurrentStage == null) return;
 
@@ -69,6 +75,13 @@ internal class StageManager
                 UI.Skin.StageLayoutGenerator.GenerateForCurrentStage();
             }
         }
+
+        rCurrentStage.Update();
+    }
+
+    public void DrawStage()
+    {
+        if (rCurrentStage == null) return;
 
         int nUpdateAndDrawReturnValue = rCurrentStage.OnUpdateAndDraw();
 

@@ -45,7 +45,7 @@ internal class CActPerfProgressBar : CActivity
 					listProgressSection[(int)ePart].Add(new CProgressSection());
 				}
 
-				if (!bIsCalledFromOutsidePerformance && CDTXMania.ConfigIni.bInstrumentAvailable(ePart) && CDTXMania.DTX.bHasChips[(int)ePart])
+				if (!bIsCalledFromOutsidePerformance && CStagePerfCommonScreen.IsPlayed(ePart) && CDTXMania.DTX.bHasChips[(int)ePart])
 				{
 					int x = pBarPosition[(int)ePart].X;
 					p表示位置[(int)ePart] = new Point(x, 0);
@@ -163,7 +163,7 @@ internal class CActPerfProgressBar : CActivity
 		for (EInstrumentPart ePart = EInstrumentPart.DRUMS; ePart <= EInstrumentPart.BASS; ePart++)
 		{
 			if ((!bIsCalledFromOutsidePerformance &&
-			     (!CDTXMania.ConfigIni.bInstrumentAvailable(ePart) ||
+			     (!CStagePerfCommonScreen.IsPlayed(ePart) ||
 			      !CDTXMania.DTX.bHasChips[(int)ePart] ||
 			      CDTXMania.ConfigIni.eDark[(int)ePart] == EDarkMode.FULL)) ||
 			    (bIsCalledFromOutsidePerformance && epartプレイ楽器 != ePart && (epartプレイ楽器 != EInstrumentPart.UNKNOWN || ePart != 0)))

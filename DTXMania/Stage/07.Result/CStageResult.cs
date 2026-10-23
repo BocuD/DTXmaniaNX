@@ -158,7 +158,7 @@ internal class CStageResult : CStage
 		var fastCount = ui.AddChild(new UIText("", 20));
 		fastCount.name = "FastCount";
 		fastCount.bindings.Add(new UIBinding("text", "Result.FastCount"));
-		fastCount.bindings.Add(new UIBinding("isVisible", "Result.ShowLagCounts"));
+		fastCount.bindings.Add(new UIBinding("isVisible", "Config.ShowLagHitCount"));
 		fastCount.position = new Vector3(900, 655, 0);
 		fastCount.fillColor = new Color4(0.1f, 0.8f, 1.0f);
 		fastCount.outlineWidth = 0;
@@ -166,7 +166,7 @@ internal class CStageResult : CStage
 		var slowCount = ui.AddChild(new UIText("", 20));
 		slowCount.name = "SlowCount";
 		slowCount.bindings.Add(new UIBinding("text", "Result.SlowCount"));
-		slowCount.bindings.Add(new UIBinding("isVisible", "Result.ShowLagCounts"));
+		slowCount.bindings.Add(new UIBinding("isVisible", "Config.ShowLagHitCount"));
 		slowCount.position = new Vector3(986, 655, 0);
 		slowCount.fillColor = new Color4(1.0f, 0.2f, 0.2f);
 		slowCount.outlineWidth = 0;
@@ -506,7 +506,7 @@ internal class CStageResult : CStage
 		if ( saveCond[(int)inst] )
 			//if (false)
 		{
-			using FileStream fs = new(directory + "\\" + filename, FileMode.Create, FileAccess.Write);
+			using FileStream fs = new(directory + Path.DirectorySeparatorChar + filename, FileMode.Create, FileAccess.Write);
 			using BinaryWriter bw = new(fs);
 			
 			bw.Write(cnt);
@@ -609,7 +609,7 @@ internal class CStageResult : CStage
 			ctPlayNewRecord = new CCounter(0, 150, 10, CDTXMania.Timer);
 		}
 		
-		CDTXMania.SongDb.RecalculateSkill();
+		CDTXMania.SongDb?.RecalculateSkill();
 		
 		ePhaseID = EPhase.Common_DefaultState;
 	}
@@ -781,7 +781,6 @@ internal class CStageResult : CStage
 	private int n最後に再生したHHのWAV番号;
 	private EChannel n最後に再生したHHのチャンネル番号;
 
-	//private CDirectShow ds背景動画;
 	private long lDshowPosition;
 	private long lStopPosition;
 

@@ -251,7 +251,7 @@ internal abstract class CActPerfCommonJudgementString : CActivity
 			return;
 		}
 
-		if ( judgementStatus[ lane ].judge == EJudgement.Auto || txLagNumbers == null )
+		if ( judgementStatus[ lane ].judge is EJudgement.Auto or EJudgement.Miss || txLagNumbers == null )
 		{
 			return;
 		}
@@ -277,7 +277,7 @@ internal abstract class CActPerfCommonJudgementString : CActivity
 		InitializeLaneSizes();
 		
 		var judgement = ui.AddChild(new UIGroup("Judgement"));
-		judgement.renderOrder = 1;
+		judgement.renderOrder = CStagePerfCommonScreen.EffectsLayer;
 		judgement.dontSerialize = true;
 
 		judgements = new JudgementString[stLaneSize.Length];
@@ -294,7 +294,6 @@ internal abstract class CActPerfCommonJudgementString : CActivity
 
 			judgements[lane] = judgement.AddChild(new JudgementString());
 			judgements[lane].dontSerialize = true;
-			//x = laneSize.x + (laneSize.w / 2.0f);
 			judgements[lane].position = new Vector3(x, y, 0);
 		}
 	}

@@ -7,6 +7,7 @@ using DTXMania.UI.Config;
 using DTXMania.UI.Drawable;
 using FDK;
 using Newtonsoft.Json.Linq;
+using DTXMania.UI.Inspector;
 
 namespace DTXMania;
 
@@ -16,6 +17,9 @@ namespace DTXMania;
 /// </summary>
 public class QuickMenu : UIGroup
 {
+
+    [AddChildMenu("Game/Song Select/Quick Menu")]
+    public new static UIDrawable Create() => new QuickMenu();
     private const string OpenClip = "open";
     private const string CloseClip = "close";
 

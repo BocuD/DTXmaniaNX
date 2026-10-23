@@ -12,11 +12,6 @@ internal class CActPerformanceInformation : CActivity
 	public double dbBPM;
 	public int jl;
 	public int n小節番号;
-	public int nPERFECT数;
-	public int nGREAT数;
-	public int nGOOD数;
-	public int nPOOR数;
-	public int nMISS数;
 
 
 	// コンストラクタ
@@ -35,11 +30,6 @@ internal class CActPerformanceInformation : CActivity
 		n小節番号 = 0;
 		dbBPM = CDTXMania.DTX.BASEBPM + CDTXMania.DTX.BPM;
 
-		nPERFECT数 = 0;
-		nGREAT数 = 0;
-		nGOOD数 = 0;
-		nPOOR数 = 0;
-		nMISS数 = 0;
 		base.OnActivate();
 	}
 

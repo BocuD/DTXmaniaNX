@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using DTXMania.Core;
+using DTXMania.Core.Framework;
 using DTXMania.UI.Animation;
 using DTXMania.UI.DynamicElements;
 using DTXMania.UI.Inspector;
@@ -13,6 +14,15 @@ namespace DTXMania.UI.Drawable;
 public class UIGroup : UIDrawable
 {
     [Themable] public bool sortByRenderOrder = true;
+
+    //multiplied into everything drawn inside the group
+    [Themable] public Color4 tint = Color4.White;
+
+    //camera distance in this group's pixels; children at +Z shrink towards the vanishing point. 0 is flat
+    [Themable] public float perspective;
+
+    //in this group's own coordinates
+    [Themable] public Vector2 vanishingPoint;
     public List<UIDrawable> children = [];
 
     private bool dirty = false;
@@ -87,7 +97,7 @@ public class UIGroup : UIDrawable
         component = componentPath;
     }
 
-    [AddChildMenu]
+    [AddChildMenu("Group/Group")]
     public static UIDrawable Create()
     {
         return new UIGroup("New UIGroup");
@@ -264,6 +274,11 @@ public class UIGroup : UIDrawable
         if (string.IsNullOrWhiteSpace(component))
         {
             component = $"Components/{componentName}.json";
+
+            if (ComponentPath() is { } existing && File.Exists(existing))
+            {
+                return;
+            }
         }
 
         EnsureContent();
@@ -350,13 +365,17 @@ public class UIGroup : UIDrawable
         }
 
         UpdateLocalTransformMatrix();
-        Matrix4x4 combinedMatrix = localTransformMatrix * parentMatrix;
+        Matrix4x4 combinedMatrix = perspective > 0.0f
+            ? PerspectiveMatrix() * localTransformMatrix * parentMatrix
+            : localTransformMatrix * parentMatrix;
 
         if (sortByRenderOrder && dirty)
         {
-            children.Sort((a, b) => a.renderOrder.CompareTo(b.renderOrder));
+            SortChildrenByRenderOrder();
             dirty = false;
         }
+
+        using UITint.Scope tinted = UITint.Push(tint);
 
         for (int index = 0; index < children.Count; index++)
         {
@@ -401,6 +420,17 @@ public class UIGroup : UIDrawable
         bool inSkin = path != null && File.Exists(path);
         ImGui.LabelText("Source", inSkin ? component : "Default skin");
 
+        //enabled without a file, since saving is what creates one
+        ImGui.BeginDisabled(CDTXMania.SkinManager.currentSkin == null);
+        if (ImGui.Button("Save Component"))
+        {
+            WriteIntoSkin();
+            ReloadOtherInstances();
+        }
+
+        ImGui.EndDisabled();
+        ImGui.SameLine();
+
         ImGui.BeginDisabled(!inSkin);
         if (ImGui.Button("Edit Component"))
         {
@@ -414,6 +444,52 @@ public class UIGroup : UIDrawable
         }
 
         ImGui.EndDisabled();
+    }
+
+    //each placement holds the copy it loaded
+    private void ReloadOtherInstances()
+    {
+        if (ComponentPath() is not { } path)
+        {
+            return;
+        }
+
+        UIDrawable top = this;
+        while (top.parent != null)
+        {
+            top = top.parent;
+        }
+
+        ReloadInstancesOf(top, path);
+    }
+
+    private void ReloadInstancesOf(UIDrawable node, string path)
+    {
+        if (node is not UIGroup group)
+        {
+            return;
+        }
+
+        if (group != this && group.IsComponent && group.ComponentPath() == path)
+        {
+            group.ReloadComponent();
+            return;
+        }
+
+        //a reload replaces the children, so the walk goes over a copy of them
+        foreach (UIDrawable child in group.children.ToArray())
+        {
+            ReloadInstancesOf(child, path);
+        }
+    }
+
+    public void SortChildrenByRenderOrder()
+    {
+        //OrderBy is stable, List.Sort is not
+        //the allocation here is fine because this only runs when children actually change
+        UIDrawable[] sorted = children.OrderBy(child => child.renderOrder).ToArray();
+        children.Clear();
+        children.AddRange(sorted);
     }
 
     public override void OnDeserialize()
@@ -440,11 +516,42 @@ public class UIGroup : UIDrawable
         children.Clear();
     }
 
+    //depth goes into w for the divide and is flattened, so nothing in front of or behind the canvas is clipped
+    private Matrix4x4 PerspectiveMatrix()
+    {
+        Matrix4x4 project = Matrix4x4.Identity;
+        project.M33 = 0.0f;
+        project.M34 = 1.0f / perspective;
+
+        Vector3 centre = new(vanishingPoint, 0.0f);
+        return Matrix4x4.CreateTranslation(-centre) * project * Matrix4x4.CreateTranslation(centre);
+    }
+
+    private void DrawGroupSection()
+    {
+        if (!ImGui.CollapsingHeader("Group"))
+        {
+            return;
+        }
+
+        ImGui.Checkbox("Sort by Render Order", ref sortByRenderOrder);
+        Inspector.Inspector.Inspect("Tint", ref tint);
+
+        if (ImGui.InputFloat("Perspective", ref perspective, 10.0f, 100.0f, "%.0f"))
+        {
+            perspective = MathF.Max(perspective, 0.0f);
+        }
+
+        ImGui.BeginDisabled(perspective <= 0.0f);
+        Inspector.Inspector.Inspect("Vanishing Point", ref vanishingPoint);
+        ImGui.EndDisabled();
+    }
+
     public override void DrawInspector()
     {
         base.DrawInspector();
+        DrawGroupSection();
         DrawComponentInspector();
-        ImGui.Checkbox("Sort by Render Order", ref sortByRenderOrder);
 
         if (ImGui.CollapsingHeader("Animator"))
         {

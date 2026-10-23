@@ -136,45 +136,6 @@ public static class EnumConverter
         }
     };
 
-    public static EChannel GetEChannelFromInstAndArrayBool(EInstrumentPart inst, bool[] b)
-    {
-        if (inst != EInstrumentPart.GUITAR && inst != EInstrumentPart.BASS)
-        {
-            throw new NotImplementedException();
-        }
-        if (b.Length != 5)
-        {
-            throw new NotImplementedException();
-        }
-        return GetEChannelFromInstAndTupleBool(inst, GetTupleBoolRGBYPFromArrayBool(b));
-    }
-
-    public static EChannel GetEChannelFromInstAndTupleBool(EInstrumentPart inst, (bool, bool, bool, bool, bool) btuple)
-    {
-        if (inst != EInstrumentPart.GUITAR && inst != EInstrumentPart.BASS)
-        {
-            throw new NotImplementedException();
-        }
-        if (dicBoolTupleAsEChannels.TryGetValue(btuple, out var value))
-        {
-            if (inst != EInstrumentPart.GUITAR)
-            {
-                return value.Item2;
-            }
-            return value.Item1;
-        }
-        throw new NotImplementedException();
-    }
-
-    public static (bool R, bool G, bool B, bool Y, bool P) GetTupleBoolRGBYPFromArrayBool(bool[] b)
-    {
-        if (b.Length != 5)
-        {
-            throw new NotImplementedException();
-        }
-        return (b[0], b[1], b[2], b[3], b[4]);
-    }
-
     public static bool[] GetArrayBoolRGBYPFromTupleBool((bool R, bool G, bool B, bool Y, bool P) tupleb)
     {
         return new bool[5] { tupleb.R, tupleb.G, tupleb.B, tupleb.Y, tupleb.P };

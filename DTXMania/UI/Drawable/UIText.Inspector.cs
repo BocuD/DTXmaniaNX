@@ -52,6 +52,12 @@ public partial class UIText
             _dirty = true;
         }
 
+        if (ImGui.InputFloat("Outline Softness", ref outlineSoftness, 0.5f, 2f, "%.1f"))
+        {
+            outlineSoftness = MathF.Max(outlineSoftness, 0f);
+            _dirty = true;
+        }
+
         if (Inspector.Inspector.Inspect("Texture Padding", ref texturePadding))
         {
             texturePadding = Vector2.Max(texturePadding, new Vector2(0f));
@@ -61,6 +67,22 @@ public partial class UIText
         if (ImGui.InputFloat("Line Spacing", ref lineSpacing, 0.05f, 0.25f, "%.2f"))
         {
             lineSpacing = MathF.Max(lineSpacing, 0.25f);
+            _dirty = true;
+        }
+
+        if (ImGui.InputFloat("Letter Spacing", ref letterSpacing, 0.5f, 2f, "%.1f"))
+        {
+            _dirty = true;
+        }
+
+        if (ImGui.InputFloat("Weight", ref weight, 0.05f, 0.25f, "%.2f"))
+        {
+            _dirty = true;
+        }
+
+        if (ImGui.InputFloat("Horizontal Scale", ref horizontalScale, 0.01f, 0.1f, "%.3f"))
+        {
+            horizontalScale = MathF.Max(horizontalScale, 0.1f);
             _dirty = true;
         }
 

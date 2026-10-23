@@ -4,6 +4,7 @@ using DTXMania.UI;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.DynamicElements;
 using DTXMania.UI.Text;
+using DTXMania.UI.Inspector;
 
 namespace DTXMania;
 
@@ -13,6 +14,9 @@ namespace DTXMania;
 /// </summary>
 public class ResultInfoPanel : UIGroup
 {
+
+    [AddChildMenu("Game/Result/Info Panel")]
+    public new static UIDrawable Create() => new ResultInfoPanel();
     public ResultInfoPanel() : base("ResultInfo")
     {
         MakeComponent("ResultInfoPanel", ResultInfoPanelDefault);
@@ -74,9 +78,11 @@ public class ResultInfoPanel : UIGroup
         Divider(levelGroup, "LevelLine", new Vector3(88, 94, 0), 340);
 
         DynamicNumber(levelGroup, "LevelNum", "Result.LevelInt", 61, "texgyreadventor-regular.otf",
-            new Vector3(281, 107, 0), new Vector2(1, 1));
+            new Vector3(281, 107, 0), new Vector2(1, 1))
+            .weight = -0.27f;
         DynamicNumber(levelGroup, "LevelFraction", "Result.LevelFraction", 50, "texgyreadventor-regular.otf",
-            new Vector3(278, 102, 0), new Vector2(0, 1));
+            new Vector3(278, 102, 0), new Vector2(0, 1))
+            .weight = -0.22f;
     }
 
     private static void CreateRateGroup(UIGroup root)
@@ -87,9 +93,11 @@ public class ResultInfoPanel : UIGroup
         Divider(rateGroup, "RateLine", new Vector3(60, 168, 0), 344);
 
         DynamicNumber(rateGroup, "RateNum", "Result.RateInt", 60, "texgyreadventor-regular.otf",
-            new Vector3(281, 180, 0), new Vector2(1, 1));
+            new Vector3(281, 180, 0), new Vector2(1, 1))
+            .weight = -0.27f;
         DynamicNumber(rateGroup, "RateFraction", "Result.RateFraction", 50, "texgyreadventor-regular.otf",
-            new Vector3(278, 176, 0), new Vector2(0, 1));
+            new Vector3(278, 176, 0), new Vector2(0, 1))
+            .weight = -0.22f;
     }
 
     private static void CreateSkillGroup(UIGroup root)
@@ -106,7 +114,7 @@ public class ResultInfoPanel : UIGroup
         UIPaddedNumber skillInt = skillGroup.AddChild(new UIPaddedNumber("Result.Skill"));
         skillInt.name = "SkillNum";
         skillInt.padding = 3;
-        skillInt.position = new Vector3(315, 299, 0);
+        skillInt.position = new Vector3(288.4f, 299, 0);
         skillInt.pivot = new Vector2(1, 1);
         skillInt.font = SkinResource.System("texgyreadventor-italic.otf");
         skillInt.fontSize = 82;
@@ -135,7 +143,7 @@ public class ResultInfoPanel : UIGroup
             isVisible = false,
             bindings =
             {
-                new UIBinding("isVisible", "Result.ShowSkillBar"),
+                new UIBinding("isVisible", "Result.MaxSkill") { condition = BindingCondition.Greater },
                 new UIBinding("scale.X", "Result.SkillOfMax")
             }
         });
@@ -150,7 +158,7 @@ public class ResultInfoPanel : UIGroup
             scale = new Vector3(0.66f, 0.66f, 1.0f),
             renderOrder = 2,
             isVisible = false,
-            bindings = { new UIBinding("isVisible", "Result.ShowSkillBar") }
+            bindings = { new UIBinding("isVisible", "Result.MaxSkill") { condition = BindingCondition.Greater } }
         });
     }
 }

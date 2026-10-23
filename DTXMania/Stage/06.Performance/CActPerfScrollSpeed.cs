@@ -68,7 +68,6 @@ internal class CActPerfScrollSpeed : CActivity
 							db譜面スクロール速度[ i ] = num3;
 						}
 					}
-					//this.db現在の譜面スクロール速度[ i ] = this.db譜面スクロール速度[ i ];
 					n速度変更制御タイマ[ i ] += 2;
 				}
 			}

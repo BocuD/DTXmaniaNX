@@ -6,6 +6,7 @@ using DTXMania.SongDb.Sorting;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.DynamicElements;
 using FDK;
+using DTXMania.UI.Inspector;
 
 namespace DTXMania;
 
@@ -16,17 +17,14 @@ namespace DTXMania;
 /// </summary>
 public class SortMenuContainer : UIGroup, IUIItemSource
 {
+
+    [AddChildMenu("Game/Song Select/Sort Menu")]
+    public new static UIDrawable Create() => new SortMenuContainer();
     private const float EntrySpacing = 90.0f;
 
     private readonly SortRowData[] rows = BuildRows();
 
     private UIScrollItemsGroup? entries;
-
-    private readonly NavigationRepeat navigation = NavigationRepeat.Horizontal();
-
-    //cached, so the repeat does not allocate a closure on every polled frame
-    private readonly Action scrollPrevious;
-    private readonly Action scrollNext;
 
     //one per sort mode, in the order SongDbSort declares them
     private SoundReference[]? sounds;
@@ -38,9 +36,6 @@ public class SortMenuContainer : UIGroup, IUIItemSource
     public SortMenuContainer() : base("SortMenuContainer")
     {
         MakeComponent("SortMenuContainer", SortMenuContainerDefault);
-
-        scrollPrevious = () => entries?.ScrollBy(-1);
-        scrollNext = () => entries?.ScrollBy(1);
 
         size = new Vector2(662, 92);
         pivot = new Vector2(1.0f, 0.0f);
@@ -67,7 +62,7 @@ public class SortMenuContainer : UIGroup, IUIItemSource
 
     public void HandleNavigation()
     {
-        navigation.Poll(scrollPrevious, scrollNext);
+        entries?.PollNavigation();
     }
 
     public override void Draw(Matrix4x4 parentMatrix)
@@ -187,6 +182,7 @@ public class SortMenuContainer : UIGroup, IUIItemSource
         {
             itemOffset = new Vector3(EntrySpacing, 0.0f, 0.0f),
             navigationAxis = UINavigationAxis.Horizontal,
+            guitarNavigation = UIGuitarNavigation.Strum,
 
             //one slot per sort: nothing is ever recycled, the ring is here for the wrap-around
             visibleSlots = SongDbSort.All.Length,
@@ -201,7 +197,12 @@ public class SortMenuContainer : UIGroup, IUIItemSource
             motion = new UIScrollMotion(rate: 10.0f, maxSpeed: 600.0f / EntrySpacing, queueLimit: 2.0f),
 
             //the selected entry sits lower than its neighbours
-            curve = new UIItemCurve(UIAxis.Y, distance: 18.0f, range: EntrySpacing)
+            itemLayout = new UIItemLayout
+            {
+                enabled = true,
+                selectedPosition = new Vector3(0.0f, 18.0f, 0.0f),
+                next = new UIItemPath { position = new Vector3(EntrySpacing, 0.0f, 0.0f), positionStep = new Vector3(EntrySpacing, 0.0f, 0.0f) }
+            }
         });
 
         return root;

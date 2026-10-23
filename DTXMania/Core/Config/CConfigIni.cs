@@ -11,15 +11,6 @@ internal partial class CConfigIni
 {
 	// Class
 
-	public enum ESoundDeviceTypeForConfig
-	{
-		ACM = 0,
-		ASIO,
-		WASAPI,
-		WASAPI_Share,
-		Unknown = 99
-	}
-
 	// プロパティ
 
 #if false // #23625 2011.1.11 Config.iniからダメージ/回復値の定数変更を行う場合はここを有効にする 087リリースに合わせ機能無効化
@@ -49,12 +40,12 @@ internal partial class CConfigIni
 	public bool bLogDTX詳細ログ出力;
 	public bool bLogSongSearch;
 	public bool bLog作成解放ログ出力;
-	public STDGBVALUE<bool> bReverse;
+	[DataField("Reverse")] public STDGBVALUE<bool> bReverse;
 	public bool bScoreIniを出力する;
 	public bool bSTAGEFAILEDEnabled;
 	public STDGBVALUE<bool> bSudden;
 	public bool bTight;
-	public STDGBVALUE<bool> bGraph有効; // #24074 2011.01.23 add ikanick
+	[DataField("Graph")] public STDGBVALUE<bool> bGraph有効; // #24074 2011.01.23 add ikanick
 	public bool bSmallGraph;
 	public bool bWave再生位置自動調整機能有効;
 	public bool bシンバルフリー;
@@ -64,7 +55,7 @@ internal partial class CConfigIni
 	public bool bランダムセレクトで子BOXを検索対象とする;
 	public bool bOutputLogs;
 	public STDGBVALUE<bool> b演奏音を強調する;
-	public bool bShowPerformanceInformation;
+	[DataField("ShowPerformanceInformation")] public bool bShowPerformanceInformation;
 	public bool bAutoAddGage; //2012.9.18
 	public bool b歓声を発声する;
 	public bool bVerticalSyncWait;
@@ -72,7 +63,6 @@ internal partial class CConfigIni
 
 	public bool b選曲リストフォントを太字にする;
 
-	//public bool bDirectShowMode;
 	[DataField("Fullscreen")] public bool bFullScreenMode;
 	public bool bFullScreenExclusive;
 
@@ -92,7 +82,8 @@ internal partial class CConfigIni
 	public bool DisplayBonusEffects;
 	public bool bHAZARD;
 
-	public int nSoundDriverType; // #24820 2012.12.23 yyagi 出力サウンドデバイス(0=ACM(にしたいが設計がきつそうならDirectShow), 1=ASIO, 2=WASAPI)
+	//an Audio.AudioBackend value
+	public int nSoundDriverType;
 
 	public int nWASAPIBufferSizeMs; // #24820 2013.1.15 yyagi WASAPIのバッファサイズ
 
@@ -101,10 +92,6 @@ internal partial class CConfigIni
 	public int nASIODevice; // #24820 2013.1.17 yyagi ASIOデバイス
 	public bool bEventDrivenWASAPI;
 	public bool bMetronome; // 2023.9.22 henryzx
-	public bool bUseOSTimer;
-
-	//temporary, for comparing the two device layers against each other; see AUDIO.md §9
-	public bool bUseFDKAudio;
 	public bool bDynamicBassMixerManagement; // #24820
 	public int nMasterVolume;
 
@@ -214,7 +201,8 @@ internal partial class CConfigIni
 	public EDrumComboTextDisplayPosition ドラムコンボ文字の表示位置;
 	public bool bドラムコンボ文字の表示;
 	public STDGBVALUE<EType> JudgementStringPosition;  // 判定文字表示位置
-	public int nMovieMode;
+	//0 off, 1 fullscreen, 2 windowed, 3 both
+	[DataField("MovieMode")] public int nMovieMode;
 	public STDGBVALUE<int> nJudgeLine;
 	public STDGBVALUE<int> nShutterInSide;
 	public STDGBVALUE<int> nShutterOutSide;
@@ -261,7 +249,8 @@ internal partial class CConfigIni
 	public STDGBVALUE<int> nJudgeLinePosOffset; // #31602 2013.6.23 yyagi 判定ライン表示位置のオフセット
 	public int nShowLagType;					// #25370 2011.6.5 yyagi ズレ時間表示機能
 	public int nShowLagTypeColor;
-	public bool bShowLagHitCount;				// fisyher New Config to enable hit count display or not
+	[DataField("LagColorsSwapped")] public bool bLagColorsSwapped => nShowLagTypeColor != 0;
+	[DataField("ShowLagHitCount")] public bool bShowLagHitCount;				// fisyher New Config to enable hit count display or not
 	public int nShowPlaySpeed;
 	public STDGBVALUE<int> nHidSud;
 	public bool bIsAutoResultCapture;			// #25399 2011.6.9 yyagi リザルト画像自動保存機能のON/OFF制御
@@ -585,7 +574,6 @@ internal partial class CConfigIni
 		bVerticalSyncWait = true;
 		nInitialWindowXPosition = 50; // #30675 2013.02.04 ikanick add
 		nInitialWindowYPosition = 50;
-		//this.bDirectShowMode = true;
 		nWindowWidth = GameWindowSize.Width;			// #23510 2010.10.31 yyagi add
 		nWindowHeight = GameWindowSize.Height;			// 
 		nMovieMode = 1;
@@ -838,7 +826,7 @@ internal partial class CConfigIni
 		strSkinFolder = "";
 		bUseBoxDefSkin = true;					// #28195 2012.5.6 yyagi box.defによるスキン切替機能を使用するか否か
 		bTight = false;                        // #29500 2012.9.11 kairera0467
-		nSoundDriverType = (int)ESoundDeviceTypeForConfig.ACM; // #24820 2012.12.23 yyagi 初期値はACM
+		nSoundDriverType = (int)Audio.AudioBackends.Fallback;
 		nWASAPIBufferSizeMs = 0;               // #24820 2013.1.15 yyagi 初期値は0(自動設定)
 		nASIODevice = 0;                       // #24820 2013.1.17 yyagi
 		//0 leaves the card on whatever its own control panel is set to
@@ -846,7 +834,6 @@ internal partial class CConfigIni
 		//on WASAPI exclusive a polled buffer is widened to about four update periods where a driven one
 		//is granted the single period it asks for
 		bEventDrivenWASAPI = true;
-		bUseOSTimer = false; ;                 // #33689 2014.6.6 yyagi 初期値はfalse (FDKのタイマー。ＦＲＯＭ氏考案の独自タイマー)
 		bDynamicBassMixerManagement = true;    //
 		nMasterVolume = 100;
 		nGroupVolume = [100, 100, 100, 100, 100];

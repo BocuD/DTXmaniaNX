@@ -19,19 +19,6 @@ internal static class PanelNumber
         return destination[..width];
     }
 
-    public static ReadOnlySpan<char> Format(Span<char> destination, int value, int width = 0)
-    {
-        value.TryFormat(destination, out int written, default, CultureInfo.InvariantCulture);
-        return Justify(destination, written, width);
-    }
-
-    public static ReadOnlySpan<char> Format(Span<char> destination, int value,
-        ReadOnlySpan<char> format, int width = 0)
-    {
-        value.TryFormat(destination, out int written, format, CultureInfo.InvariantCulture);
-        return Justify(destination, written, width);
-    }
-
     public static ReadOnlySpan<char> Format(Span<char> destination, double value,
         ReadOnlySpan<char> format, int width = 0)
     {

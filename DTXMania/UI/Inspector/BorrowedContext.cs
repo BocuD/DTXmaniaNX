@@ -81,6 +81,22 @@ public sealed class BorrowedContext(Func<UIDrawable?> element) : IUIDataContext
         return false;
     }
 
+    public Type? KeyType(string key)
+    {
+        if (element() is { } live)
+        {
+            foreach (IUIDataContext context in DataContextChain.Real(live))
+            {
+                if (context.KeyType(key) is { } type)
+                {
+                    return type;
+                }
+            }
+        }
+
+        return null;
+    }
+
     public IEnumerable<string> AvailableKeys(DataBindingKind kind)
     {
         HashSet<string> keys = [];

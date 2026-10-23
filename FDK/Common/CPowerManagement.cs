@@ -10,6 +10,9 @@ public static class CPowerManagement
 	/// </summary>
 	public static void tDisableMonitorSuspend()
 	{
+		if (!OperatingSystem.IsWindows())
+			return;
+
 		CWin32.SetThreadExecutionState( CWin32.ExecutionState.SystemRequired | CWin32.ExecutionState.DisplayRequired );
 	}
 
@@ -18,6 +21,9 @@ public static class CPowerManagement
 	/// </summary>
 	public static void tEnableMonitorSuspend()
 	{
+		if (!OperatingSystem.IsWindows())
+			return;
+
 		CWin32.SetThreadExecutionState( CWin32.ExecutionState.Continuous );		// スリープ抑止状態を解除
 	}
 }

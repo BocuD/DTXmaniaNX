@@ -1,4 +1,5 @@
 ﻿using System.Runtime.InteropServices;
+using DTXMania.UI.DynamicElements;
 
 namespace DTXMania.Core;
 
@@ -167,6 +168,21 @@ public enum EInstrumentPart		// ここを修正するときは、セットで次
 	//SYSTEM  = 3,
 	UNKNOWN	= 99
 }
+
+public enum EInstrument
+{
+	Drums,
+	Guitar1,
+	Guitar2
+}
+
+public enum EChartPart
+{
+	Drums,
+	Guitar,
+	Bass
+}
+
 public enum EKeyConfigPart	// : EInstrumentPart
 {
 	DRUMS	= EInstrumentPart.DRUMS,
@@ -328,9 +344,9 @@ public enum ETargetGhostData
 [StructLayout( LayoutKind.Sequential )]
 public struct STDGBVALUE<T>			// indexはE楽器パートと一致させること
 {
-	public T Drums;
-	public T Guitar;
-	public T Bass;
+	[DataField] public T Drums;
+	[DataField] public T Guitar;
+	[DataField] public T Bass;
 	public T Unknown;
 	public T this[ int index ]
 	{

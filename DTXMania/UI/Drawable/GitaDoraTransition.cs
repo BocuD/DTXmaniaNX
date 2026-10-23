@@ -8,7 +8,7 @@ namespace DTXMania.UI.Drawable;
 
 public class GitaDoraTransition : UIGroup
 {
-    [AddChildMenu]
+    [AddChildMenu("Game/GitaDora Transition")]
     public new static GitaDoraTransition Create()
     {
         return new GitaDoraTransition();

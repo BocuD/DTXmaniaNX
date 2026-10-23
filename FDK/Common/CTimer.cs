@@ -42,7 +42,7 @@ public class CTimer : CTimerBase, IInputClock
 					return (long)timeGetTime();
 
 				case EType.GetTickCount:
-					return (long)Environment.TickCount;
+					return Environment.TickCount64;
 			}
 			return 0;
 		}
@@ -112,6 +112,9 @@ public class CTimer : CTimerBase, IInputClock
 	}
 	protected bool b確認と設定_MultiMedia()
 	{
+		if (!OperatingSystem.IsWindows())
+			return false;
+
 		timeCaps = new TimeCaps();
 		if ((timeGetDevCaps(out timeCaps, (uint)Marshal.SizeOf(typeof(TimeCaps))) == 0) && (timeCaps.wPeriodMin < 10))
 		{
@@ -123,6 +126,9 @@ public class CTimer : CTimerBase, IInputClock
 	}
 	protected bool b確認と設定_PerformanceCounter()
 	{
+		if (!OperatingSystem.IsWindows())
+			return false;
+
 		if (QueryPerformanceFrequency(ref n現在の周波数) != 0)
 		{
 			eタイマ種別 = EType.PerformanceCounter;

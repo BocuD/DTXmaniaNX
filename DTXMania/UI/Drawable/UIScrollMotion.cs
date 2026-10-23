@@ -8,7 +8,7 @@ namespace DTXMania.UI.Drawable;
 /// (speed proportional to the distance left), the settings list runs at a constant speed and lands, and
 /// speeds up while a held key builds a backlog.
 ///
-/// Kept separate from the list so the feel is data, the way <see cref="UIItemCurve"/> is for shape: every
+/// Kept separate from the list so the feel is data, the way <see cref="UIItemLayout"/> is for shape: every
 /// parameter is <c>[Themable]</c>, it serializes into the layout, and it can be reasoned about on its own.
 /// Everything here is measured in items per second, so a list keeps its feel whatever its spacing is.
 /// </summary>

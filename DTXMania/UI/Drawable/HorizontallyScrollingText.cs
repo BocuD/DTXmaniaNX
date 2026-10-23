@@ -15,13 +15,12 @@ namespace DTXMania.UI.Drawable;
 /// </summary>
 public class HorizontallyScrollingText : UIText
 {
-    public bool scrollingEnabled;
-    public float scrollSpeed = 50.0f; //texture-space px per second
+    [Themable] public bool scrollingEnabled;
+    [Themable] public float scrollSpeed = 50.0f; //texture-space px per second
+    [Themable] public float pauseDuration = 2.0f; //seconds paused before scrolling and again before resetting
 
-    public float pauseDuration = 2.0f; //seconds paused before scrolling and again before resetting
-
-    [AddChildMenu]
-    public static HorizontallyScrollingText Create()
+    [AddChildMenu("Text/Scrolling Text")]
+    public new static HorizontallyScrollingText Create()
     {
         return new();
     }

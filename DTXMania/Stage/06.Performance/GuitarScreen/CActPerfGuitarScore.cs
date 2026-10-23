@@ -6,7 +6,7 @@ internal class CActPerfGuitarScore : CActPerfCommonScore
 {
     // コンストラクタ
 
-    public CActPerfGuitarScore()
+    public CActPerfGuitarScore(PerformanceData[] parts) : base(parts)
     {
         bActivated = false;
     }
@@ -53,7 +53,8 @@ internal class CActPerfGuitarScore : CActPerfCommonScore
             }
             if (CDTXMania.stagePerfGuitarScreen.bIsTrainingMode)
             {
-                n現在表示中のスコア[0] = 0;
+                n現在表示中のスコア[1] = 0;
+                n現在表示中のスコア[2] = 0;
             }
             else
             {
@@ -66,10 +67,7 @@ internal class CActPerfGuitarScore : CActPerfCommonScore
                 {
                     for (int j = 1; j < 3; j++)
                     {
-                        n現在表示中のスコア[j] += nスコアの増分[j];
-
-                        if (n現在表示中のスコア[j] > (long)nCurrentTrueScore[j])
-                            n現在表示中のスコア[j] = (long)nCurrentTrueScore[j];
+                        RollStep(j);
                     }
                     n進行用タイマ += 10;
                 }
