@@ -14,19 +14,13 @@ internal partial class CStagePerfGuitarScreen
 		int instIndex = (int)inst;
 		ApplyHiddenSudden(pChip, pChip.nDistanceFromBar[instIndex], CDTXMania.ConfigIni.nHidSud[instIndex], 250, 150, 75.0);
 
-		//a long note whose end has passed is finished
-		if (pChip.bIsLongNote && pChip.bVisible && pChip.chipLongNoteEndPosition.nDistanceFromBar[instIndex] <= 0)
-		{
-			return;
-		}
-
 		GuitarPerformance guitar = GuitarFor(inst)!;
 		guitar.UpdateNote(pChip);
 		ApplyGuitarEvents(guitar);
 
 		if (CDTXMania.ConfigIni.bGraph有効[instIndex] && guitar.HasTargetGhost)
 		{
-			actGraph.dbGraphValue_Goal = guitar.TargetGhostGoal();
+			actGraph.dbGraphValue_Goal = guitar.CalculateTargetGhostGoal();
 		}
 	}
 

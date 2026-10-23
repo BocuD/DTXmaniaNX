@@ -55,6 +55,13 @@ public class PerformanceData
     public HitCounts GhostHitCount => ghostHitCount;
     public int GhostMaxCombo => ghostMaxCombo;
 
+    public int ChartChips => Part switch
+    {
+        EInstrumentPart.DRUMS => CDTXMania.DTX.nVisibleChipsCount.Drums,
+        EInstrumentPart.GUITAR => CDTXMania.DTX.nVisibleChipsCount.Guitar,
+        _ => CDTXMania.DTX.nVisibleChipsCount.Bass
+    };
+
     public PerformanceData(EInstrumentPart part)
     {
         Part = part;
@@ -157,6 +164,90 @@ public class PerformanceData
     public void SetAchievementRate(double rate)
     {
         achievementRate = rate;
+    }
+
+    public void ApplyJudgement(EJudgement judgement, bool auto, int lag, bool countsCombo)
+    {
+        if (CDTXMania.ConfigIni.bAutoAddGage || !auto)
+        {
+            Damage(judgement);
+        }
+        if (!auto)
+        {
+            CountTiming(lag > 0);
+        }
+        CountJudgement(judgement, auto);
+
+        if (countsCombo)
+        {
+            if (judgement is EJudgement.Perfect or EJudgement.Great or EJudgement.Good)
+            {
+                AddCombo();
+            }
+            else
+            {
+                BreakCombo();
+            }
+        }
+
+        //guitar and bass score auto chips in skill mode 1 even without AutoAddGage
+        bool scoresAuto = CDTXMania.ConfigIni.bAutoAddGage || (CDTXMania.ConfigIni.nSkillMode == 1 && Part != EInstrumentPart.DRUMS);
+        if (judgement != EJudgement.Miss && (scoresAuto || !auto))
+        {
+            AddScore(CDTXMania.ConfigIni.nSkillMode == 1 ? SkillModeScore(judgement) : ClassicScore(judgement));
+        }
+    }
+
+    //a full perfect play adds up to 1,000,000. The combo multiplier ramps up to 50, and the last chip tops the score up
+    private long SkillModeScore(EJudgement judgement)
+    {
+        float maxChips = ChartChips;
+
+        //drum bonus chips score 500 each, out of the same 1,000,000
+        float bonusChips = Part == EInstrumentPart.DRUMS ? 500.0f * CDTXMania.DTX.nボーナスチップ数 : 0f;
+        float perfect = (1000000.0f - bonusChips) / (1275.0f + 50.0f * (maxChips - 50.0f));
+
+        float delta = judgement switch
+        {
+            EJudgement.Perfect when combo < maxChips => perfect,
+            EJudgement.Perfect when hitCountIncAuto.Perfect >= maxChips => 1000000.0f - (float)score + longNoteBonusScore,
+            EJudgement.Great => perfect * 0.5f,
+            EJudgement.Good => perfect * 0.2f,
+            _ => 0f
+        };
+
+        if (combo < 50)
+        {
+            delta *= combo;
+        }
+        else if (combo != maxChips && hitCountExclAuto.Perfect != maxChips)
+        {
+            delta *= 50.0f;
+        }
+
+        return (long)delta;
+    }
+
+    //perfect, great, good, poor
+    private static readonly long[] ClassicScorePerCombo = [350L, 200L, 50L, 0L];
+
+    private long ClassicScore(EJudgement judgement)
+    {
+        if (combo <= 500 || judgement == EJudgement.Good)
+        {
+            return ClassicScorePerCombo[(int)judgement] * combo;
+        }
+
+        return judgement == EJudgement.Perfect ? ClassicScorePerCombo[(int)judgement] * 500L : 0L;
+    }
+
+    public double CalculateSkill()
+    {
+        int chips = ChartChips;
+        HitCounts hits = hitCountExclAuto;
+        return CDTXMania.ConfigIni.nSkillMode == 0
+            ? CScoreIni.tCalculatePlayingSkillOld(chips, hits.Perfect, hits.Great, hits.Good, hits.Poor, hits.Miss, maxCombo, Part, autoPlay)
+            : CScoreIni.tCalculatePlayingSkill(chips, hits.Perfect, hits.Great, hits.Good, hits.Poor, hits.Miss, maxCombo, Part, autoPlay);
     }
 
     //the max is taken before the combo moves, so it trails the ghost's combo by one hit

@@ -63,12 +63,6 @@ internal abstract class CStagePerfCommonScreen : CStage
     {
     }
 
-    public bool bAUTOでないチップが１つでもバーを通過した
-    {
-        get;
-        protected set;
-    }
-    
     protected WailingEffect[] wailingEffect;
     
     // メソッド
@@ -520,7 +514,6 @@ internal abstract class CStagePerfCommonScreen : CStage
             bMIDIUsed[i] = false;
             bMouseUsed[i] = false;
         }
-        bAUTOでないチップが１つでもバーを通過した = false;
         nJudgeLinePosY.Drums = (CDTXMania.ConfigIni.bReverse.Drums ? 159 + CDTXMania.ConfigIni.nJudgeLine.Drums : 561 - CDTXMania.ConfigIni.nJudgeLine.Drums);
         nJudgeLinePosY.Guitar = (CDTXMania.ConfigIni.bReverse.Guitar ? 611 - CDTXMania.ConfigIni.nJudgeLine.Guitar : 154 + CDTXMania.ConfigIni.nJudgeLine.Guitar);
         nJudgeLinePosY.Bass = (CDTXMania.ConfigIni.bReverse.Bass ? 611 - CDTXMania.ConfigIni.nJudgeLine.Bass : 154 + CDTXMania.ConfigIni.nJudgeLine.Bass);
@@ -888,52 +881,16 @@ internal abstract class CStagePerfCommonScreen : CStage
         if (pChip == null)
             return EJudgement.Miss;
 
-        // #35411 2015.08.22 chnmr0 modified add check save lag flag for ghost
         int lag = (int)(nTime + nInputAdjustTime - pChip.nPlaybackTimeMs);
         if (saveLag)
         {
-            pChip.nLag = lag;       // #23580 2011.1.3 yyagi: add "nInputAdjustTime" to add input timing adjust feature
+            pChip.nLag = lag;
             if (pChip.eInstrumentPart != EInstrumentPart.UNKNOWN)
             {
                 pChip.nCurrentComboForGhost = partData[(int)pChip.eInstrumentPart].Combo;
             }
         }
-        // #35411 modify end
-
-        // chips for all instrument parts are passed here, so processing cannot be delegated to subclasses
-        // note that unknown part chips can also be passed, such as measure and quarter lines
-        // in these cases it expects to receive default hit ranges
-        int nDeltaTimeMs = Math.Abs(lag);
-        switch (pChip.eInstrumentPart)
-        {
-            // drum chips
-            case EInstrumentPart.DRUMS:
-                switch (pChip.nChannelNumber)
-                {
-                    // drum pedal chips
-                    case EChannel.BassDrum: //kick
-                    case EChannel.LeftPedal: //left pedal
-                    case EChannel.LeftBassDrum: //left bass drum
-                        return CDTXMania.stDrumPedalHitRanges.tGetJudgement(nDeltaTimeMs);
-
-                    // all other drum chips
-                    default:
-                        return CDTXMania.stDrumHitRanges.tGetJudgement(nDeltaTimeMs);
-                }
-
-            // guitar chips
-            case EInstrumentPart.GUITAR:
-                return CDTXMania.stGuitarHitRanges.tGetJudgement(nDeltaTimeMs);
-
-            // bass chips
-            case EInstrumentPart.BASS:
-                return CDTXMania.stBassHitRanges.tGetJudgement(nDeltaTimeMs);
-
-            // all other chips (measure lines, quarter lines, etc.)
-            case EInstrumentPart.UNKNOWN:
-            default:
-                return STHitRanges.tCreateDefaultDTXHitRanges().tGetJudgement(nDeltaTimeMs);
-        }
+        return ChipJudge.GetJudgementForLag(pChip, lag);
     }
 
     protected CChip r空うちChip(EInstrumentPart part, EPad pad)
@@ -1195,252 +1152,55 @@ internal abstract class CStagePerfCommonScreen : CStage
     protected EJudgement tProcessChipHitCore(long nHitTime, CChip pChip, bool bCorrectLane)
     {
         pChip.bHit = true;
-        //Start of Long Note
-        if (pChip.bIsLongNote)
-        {
-            pChip.bIsHittingLongNote = true;
-            GuitarFor(pChip.eInstrumentPart)?.StartHold(pChip);
-        }
-
-        if (pChip.eInstrumentPart == EInstrumentPart.UNKNOWN)
-        {
-            bAUTOでないチップが１つでもバーを通過した = true;
-        }
         bool bPChipIsAutoPlay = bCheckAutoPlay(pChip);
         pChip.bIsAutoPlayed = bPChipIsAutoPlay;			// 2011.6.10 yyagi
         EJudgement eJudgeResult = EJudgement.Auto;
-        switch (pChip.eInstrumentPart)
+        if (pChip.eInstrumentPart == EInstrumentPart.DRUMS || pChip.nChannelNumber == EChannel.BonusEffect)
         {
-            case EInstrumentPart.DRUMS:
-            {
-                int nInputAdjustTime = bPChipIsAutoPlay ? 0 : nInputAdjustTimeMs.Drums;
-                eJudgeResult = (bCorrectLane) ? e指定時刻からChipのJUDGEを返す(nHitTime, pChip, nInputAdjustTime) : EJudgement.Miss;
-                actJudgeString.Start(nチャンネル0Atoレーン07[pChip.nChannelNumber - EChannel.HiHatClose], bPChipIsAutoPlay ? EJudgement.Auto : eJudgeResult, pChip.nLag);
-            }
-                break;
-
-            case EInstrumentPart.GUITAR:
-            {
-                int nInputAdjustTime = bPChipIsAutoPlay ? 0 : nInputAdjustTimeMs.Guitar;
-                eJudgeResult = (bCorrectLane) ? e指定時刻からChipのJUDGEを返す(nHitTime, pChip, nInputAdjustTime) : EJudgement.Miss;
-                actJudgeString.Start(13, bPChipIsAutoPlay ? EJudgement.Auto : eJudgeResult, pChip.nLag);
-                break;
-            }
-
-            case EInstrumentPart.BASS:
-            {
-                int nInputAdjustTime = bPChipIsAutoPlay ? 0 : nInputAdjustTimeMs.Bass;
-                eJudgeResult = (bCorrectLane) ? e指定時刻からChipのJUDGEを返す(nHitTime, pChip, nInputAdjustTime) : EJudgement.Miss;
-                actJudgeString.Start(14, bPChipIsAutoPlay ? EJudgement.Auto : eJudgeResult, pChip.nLag);
-            }
-                break;
-
-            case EInstrumentPart.UNKNOWN:
-            {
-                if (pChip.nChannelNumber == EChannel.BonusEffect)
-                {
-                    int nInputAdjustTime = bPChipIsAutoPlay ? 0 : nInputAdjustTimeMs.Drums;
-                    eJudgeResult = (bCorrectLane) ? e指定時刻からChipのJUDGEを返す(nHitTime, pChip, nInputAdjustTime) : EJudgement.Miss;
-                }
-            }
-                break;
+            int nInputAdjustTime = bPChipIsAutoPlay ? 0 : nInputAdjustTimeMs.Drums;
+            eJudgeResult = bCorrectLane ? e指定時刻からChipのJUDGEを返す(nHitTime, pChip, nInputAdjustTime) : EJudgement.Miss;
+        }
+        if (pChip.eInstrumentPart != EInstrumentPart.DRUMS)
+        {
+            return eJudgeResult;
         }
 
-        if (pChip.eInstrumentPart != EInstrumentPart.UNKNOWN && (CDTXMania.ConfigIni.bAutoAddGage || !bPChipIsAutoPlay))
+        actJudgeString.Start(nチャンネル0Atoレーン07[pChip.nChannelNumber - EChannel.HiHatClose], bPChipIsAutoPlay ? EJudgement.Auto : eJudgeResult, pChip.nLag);
+
+        //before ApplyJudgement, so the last perfect's top-up to 1,000,000 includes the bonus score
+        if (eJudgeResult is EJudgement.Great or EJudgement.Perfect or EJudgement.Auto)
         {
-            DataFor(pChip.eInstrumentPart).Damage(eJudgeResult);
+            CDTXMania.stagePerfDrumsScreen.tProcessChipHit_BonusChip(CDTXMania.ConfigIni, CDTXMania.DTX, pChip);
         }
 
-        //Update progressBar
-        if (!bPChipIsAutoPlay && (eJudgeResult == EJudgement.Perfect || eJudgeResult == EJudgement.Great || eJudgeResult == EJudgement.Good))
+        bool countsCombo = CDTXMania.ConfigIni.bAllDrumsAreAutoPlay || !bPChipIsAutoPlay;
+        DrumsData.ApplyJudgement(eJudgeResult, bPChipIsAutoPlay, pChip.nLag, countsCombo);
+
+        bool hit = eJudgeResult is EJudgement.Perfect or EJudgement.Great or EJudgement.Good;
+        if (!bPChipIsAutoPlay && hit)
         {
-            actProgressBar.Hit(pChip.eInstrumentPart, pChip.nPlaybackTimeMs, eJudgeResult);
+            actProgressBar.Hit(EInstrumentPart.DRUMS, pChip.nPlaybackTimeMs, eJudgeResult);
         }
-
-        //Update Lag Timing Counter data
-        if (!bPChipIsAutoPlay)
+        if (eJudgeResult == EJudgement.Miss)
         {
-            tUpdateLagTimingCounter(pChip, eJudgeResult);
+            actCombo.tコンボリセット処理();
         }
-
-        switch (pChip.eInstrumentPart)
+        if (countsCombo && hit)
         {
-            case EInstrumentPart.DRUMS:
-                if (eJudgeResult != EJudgement.Auto)
-                {
-                    DrumsData.CountJudgement(eJudgeResult, bPChipIsAutoPlay);
-                }
-                if (eJudgeResult == EJudgement.Miss)
-                {
-                    actCombo.tコンボリセット処理();
-                }
-
-                if (CDTXMania.ConfigIni.bAllDrumsAreAutoPlay || !bPChipIsAutoPlay)
-                {
-                    switch (eJudgeResult)
-                    {
-                        case EJudgement.Perfect:
-                        case EJudgement.Great:
-                        case EJudgement.Good:
-                            DrumsData.AddCombo();
-                            actCombo.tComboAnime(EInstrumentPart.DRUMS);
-                            break;
-
-                        default:
-                            DrumsData.BreakCombo();
-                            break;
-                    }
-                }
-
-                if ( eJudgeResult == EJudgement.Great || eJudgeResult == EJudgement.Perfect || eJudgeResult == EJudgement.Auto )
-                    CDTXMania.stagePerfDrumsScreen.tProcessChipHit_BonusChip( CDTXMania.ConfigIni, CDTXMania.DTX, pChip );
-                break;
-
-            case EInstrumentPart.GUITAR:
-            case EInstrumentPart.BASS:
-                int indexInst = (int)pChip.eInstrumentPart;
-                DataFor(pChip.eInstrumentPart).CountJudgement(eJudgeResult, bPChipIsAutoPlay);
-                if (eJudgeResult == EJudgement.Miss)
-                {
-                    pChip.bIsHittingLongNote = false;
-                    GuitarFor(pChip.eInstrumentPart)?.EndHold();
-                }
-                switch (eJudgeResult)
-                {
-                    case EJudgement.Perfect:
-                    case EJudgement.Great:
-                    case EJudgement.Good:
-                        DataFor(pChip.eInstrumentPart).AddCombo();
-                        break;
-
-                    default:
-                        DataFor(pChip.eInstrumentPart).BreakCombo();
-                        break;
-                }
-                break;
-
-            default:
-                break;
-        }
-        //guitar and bass score auto chips in skill mode 1 even without AutoAddGage
-        bool scoresAuto = CDTXMania.ConfigIni.bAutoAddGage
-                          || (CDTXMania.ConfigIni.nSkillMode == 1 && pChip.eInstrumentPart != EInstrumentPart.DRUMS);
-        if (pChip.eInstrumentPart != EInstrumentPart.UNKNOWN && eJudgeResult != EJudgement.Miss && (scoresAuto || !bPChipIsAutoPlay))
-        {
-            long score = CDTXMania.ConfigIni.nSkillMode == 1
-                ? SkillModeScore(pChip.eInstrumentPart, eJudgeResult)
-                : ClassicScore(pChip.eInstrumentPart, eJudgeResult);
-            DataFor(pChip.eInstrumentPart).AddScore(score);
+            actCombo.tComboAnime(EInstrumentPart.DRUMS);
         }
 
         return eJudgeResult;
     }
 
-    //a full perfect play adds up to 1,000,000. The combo multiplier ramps up to 50, and the last chip tops the score up
-    private long SkillModeScore(EInstrumentPart part, EJudgement judgement)
+    protected void tチップのヒット処理_BadならびにTight時のMiss(int nLane)
     {
-        int index = (int)part;
-        int combo = partData[index].Combo;
-        float maxCombo = part switch
+        DrumsData.Damage(EJudgement.Miss);
+        if ((nLane >= 0) && (nLane <= 10))
         {
-            EInstrumentPart.DRUMS => CDTXMania.DTX.nVisibleChipsCount.Drums,
-            EInstrumentPart.GUITAR => CDTXMania.DTX.nVisibleChipsCount.Guitar,
-            _ => CDTXMania.DTX.nVisibleChipsCount.Bass
-        };
-
-        //drum bonus chips score 500 each, outside the 1,000,000
-        float bonusChips = part == EInstrumentPart.DRUMS ? 500.0f * CDTXMania.DTX.nボーナスチップ数 : 0f;
-        float perfect = (1000000.0f - bonusChips) / (1275.0f + 50.0f * (maxCombo - 50.0f));
-
-        float score = judgement switch
-        {
-            EJudgement.Perfect when combo < maxCombo => perfect,
-            EJudgement.Perfect when partData[index].HitCountIncAuto.Perfect >= maxCombo
-                => 1000000.0f - (float)partData[index].Score + partData[index].LongNoteBonusScore,
-            EJudgement.Great => perfect * 0.5f,
-            EJudgement.Good => perfect * 0.2f,
-            _ => 0f
-        };
-
-        if (combo < 50)
-        {
-            score *= combo;
+            actJudgeString.Start(nLane, bIsAutoPlay[nLane] ? EJudgement.Auto : EJudgement.Miss, 999);
         }
-        else if (combo != maxCombo && partData[index].HitCountExclAuto.Perfect != maxCombo)
-        {
-            score *= 50.0f;
-        }
-
-        return (long)score;
-    }
-
-    //perfect, great, good, poor
-    private static readonly long[] ClassicScorePerCombo = [350L, 200L, 50L, 0L];
-
-    private long ClassicScore(EInstrumentPart part, EJudgement judgement)
-    {
-        int combo = partData[(int)part].Combo;
-        if (combo <= 500 || judgement == EJudgement.Good)
-        {
-            return ClassicScorePerCombo[(int)judgement] * combo;
-        }
-
-        return judgement == EJudgement.Perfect ? ClassicScorePerCombo[(int)judgement] * 500L : 0L;
-    }
-
-    private void tUpdateLagTimingCounter(CChip pChip, EJudgement eJudgeResult)
-    {
-        if (pChip.eInstrumentPart == EInstrumentPart.UNKNOWN)
-        {
-            return;
-        }
-
-        switch (eJudgeResult)
-        {
-            case EJudgement.Miss:
-            case EJudgement.Poor:
-            case EJudgement.Good:
-            case EJudgement.Great:
-            case EJudgement.Perfect:
-                if (pChip.nLag > 0)
-                {
-                    DataFor(pChip.eInstrumentPart).CountTiming(true);
-                }
-                else
-                {
-                    DataFor(pChip.eInstrumentPart).CountTiming(false);
-                }
-                break;
-        }
-    }
-        
-    protected void tチップのヒット処理_BadならびにTight時のMiss(EInstrumentPart part, int nLane = 0)
-    {
-        bAUTOでないチップが１つでもバーを通過した = true;
-        DataFor(part).Damage(EJudgement.Miss);
-        switch (part)
-        {
-            case EInstrumentPart.DRUMS:
-                if ((nLane >= 0) && (nLane <= 10))
-                {
-                    actJudgeString.Start(nLane, bIsAutoPlay[nLane] ? EJudgement.Auto : EJudgement.Miss, 999);
-                }
-                DrumsData.BreakCombo();
-                return;
-
-            case EInstrumentPart.GUITAR:
-                actJudgeString.Start(13, EJudgement.Miss, 999);
-                GuitarData.BreakCombo();
-                return;
-
-            case EInstrumentPart.BASS:
-                actJudgeString.Start(14, EJudgement.Miss, 999);
-                BassData.BreakCombo();
-                break;
-
-            default:
-                return;
-        }
+        DrumsData.BreakCombo();
     }
 
     private void ChangeInputAdjustTimeInPlaying(IInputKeyboard keyboard, int plusminus)		// #23580 2011.1.16 yyagi UI for InputAdjustTime in playing screen.
@@ -2007,7 +1767,7 @@ internal abstract class CStagePerfCommonScreen : CStage
             int nInputAdjustTime = (bPChipIsAutoPlay || (pChip.eInstrumentPart == EInstrumentPart.UNKNOWN)) ? 0 : nInputAdjustTimeMs[(int)pChip.eInstrumentPart];
 
             int instIndex = (int) pChip.eInstrumentPart;
-            if ( ( ( pChip.eInstrumentPart != EInstrumentPart.UNKNOWN ) && !pChip.bHit ) &&
+            if ( ( ( pChip.eInstrumentPart == EInstrumentPart.DRUMS ) && !pChip.bHit ) &&
                  ( ( pChip.nDistanceFromBar[ instIndex ] < 0 ) && ( e指定時刻からChipのJUDGEを返す( AudioMixer.Timer.nCurrentTime, pChip, nInputAdjustTime ) == EJudgement.Miss ) ) )
             {
                 tProcessChipHit( AudioMixer.Timer.nCurrentTime, pChip );
@@ -2804,26 +2564,6 @@ internal abstract class CStagePerfCommonScreen : CStage
                 }
             }
         }
-        else if (pChip.eInstrumentPart == EInstrumentPart.GUITAR || pChip.eInstrumentPart == EInstrumentPart.BASS)
-        {
-            //lanes run R G B Y P Pick W, with bass seven lanes after guitar
-            int firstLane = pChip.eInstrumentPart == EInstrumentPart.GUITAR ? (int)ELane.GtR : (int)ELane.BsR;
-            bool[] buttons = EnumConverter.GetArrayBoolFromEChannel(pChip.nChannelNumber);
-            bool allButtonsAuto = true;
-
-            bPChipIsAutoPlay = bIsAutoPlay[firstLane + 5];
-            for (int i = 0; i < 5; i++)
-            {
-                if (!bIsAutoPlay[firstLane + i])
-                {
-                    allButtonsAuto = false;
-                    if (buttons[i]) bPChipIsAutoPlay = false;
-                }
-            }
-
-            if (pChip.bChipIsWailingNote && !bIsAutoPlay[firstLane + 6]) bPChipIsAutoPlay = false;
-            if (pChip.bChipIsOpenNote && !allButtonsAuto) bPChipIsAutoPlay = false;
-        }
              
         return bPChipIsAutoPlay;
     }
@@ -3108,6 +2848,8 @@ internal abstract class CStagePerfCommonScreen : CStage
         }
     }
 
+    protected virtual void UpdateGraph(EInstrumentPart part) { }
+
     protected void ApplyGuitarEvents(GuitarPerformance guitar)
     {
         EInstrumentPart side = guitar.Side;
@@ -3126,16 +2868,9 @@ internal abstract class CStagePerfCommonScreen : CStage
             {
                 case EGuitarEvent.AutoNote:
                     tPlaySound(e.Chip, AudioMixer.Timer.nResetAtMs + e.Time, side, CDTXMania.DTX.nモニタを考慮した音量(side), false, e.ShiftPitch);
-                    if (e.Miss)
-                    {
-                        //a hit processed without a judgement does not set the lag itself
-                        e.Chip.nLag = 0;
-                    }
-                    tProcessChipHit(e.Time, e.Chip, !e.Miss);
                     break;
 
                 case EGuitarEvent.PickedNote:
-                    tProcessChipHit(e.Time, e.Chip);
                     tPlaySound(e.Chip, AudioMixer.Timer.nSystemTimeMs, side, CDTXMania.ConfigIni.n手動再生音量, CDTXMania.ConfigIni.b演奏音を強調する[(int)side], e.ShiftPitch);
                     break;
 
@@ -3146,8 +2881,17 @@ internal abstract class CStagePerfCommonScreen : CStage
                     }
                     if (e.Miss)
                     {
-                        tチップのヒット処理_BadならびにTight時のMiss(side);
+                        actJudgeString.Start(guitar.Chart == EChartPart.Guitar ? 13 : 14, EJudgement.Miss, 999);
                     }
+                    break;
+
+                case EGuitarEvent.Judged:
+                    actJudgeString.Start(e.Chip.eInstrumentPart == EInstrumentPart.GUITAR ? 13 : 14, e.Auto ? EJudgement.Auto : e.Judgement, e.Chip.nLag);
+                    if (!e.Auto && e.Judgement is EJudgement.Perfect or EJudgement.Great or EJudgement.Good)
+                    {
+                        actProgressBar.Hit(e.Chip.eInstrumentPart, e.Chip.nPlaybackTimeMs, e.Judgement);
+                    }
+                    UpdateGraph(e.Chip.eInstrumentPart);
                     break;
 
                 case EGuitarEvent.HoldBonus:

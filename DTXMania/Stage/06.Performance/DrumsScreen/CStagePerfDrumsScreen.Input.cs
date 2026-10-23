@@ -1919,7 +1919,7 @@ internal partial class CStagePerfDrumsScreen
 
                 // BAD or TIGHT 時の処理。
                 if (CDTXMania.ConfigIni.bTight)
-                    tチップのヒット処理_BadならびにTight時のMiss(EInstrumentPart.DRUMS, nパッド0Atoレーン07[nPad]);
+                    tチップのヒット処理_BadならびにTight時のMiss(nパッド0Atoレーン07[nPad]);
                 //-----------------------------
                 #endregion
             }

@@ -344,66 +344,31 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 
 	protected override EJudgement tProcessChipHit( long nHitTime, CChip pChip, bool bCorrectLane )
 	{
-		EJudgement eJudgeResult = tProcessChipHitCore( nHitTime, pChip, bCorrectLane );
-		if (pChip.eInstrumentPart == EInstrumentPart.GUITAR)
+		return tProcessChipHitCore( nHitTime, pChip, bCorrectLane );
+	}
+
+	protected override void UpdateGraph(EInstrumentPart part)
+	{
+		PerformanceData data = DataFor(part);
+		int index = (int)part;
+		actGraph.dbグラフ値現在_渡 = data.CalculateSkill();
+		data.SetAchievementRate(bIsTrainingMode ? 0 : actGraph.dbグラフ値現在_渡);
+
+		if (!CDTXMania.ConfigIni.bGraph有効[index])
 		{
-			if (CDTXMania.ConfigIni.nSkillMode == 0)
-				actGraph.dbグラフ値現在_渡 = CScoreIni.tCalculatePlayingSkillOld(CDTXMania.DTX.nVisibleChipsCount.Guitar, GuitarData.HitCountExclAuto.Perfect, GuitarData.HitCountExclAuto.Great, GuitarData.HitCountExclAuto.Good, GuitarData.HitCountExclAuto.Poor, GuitarData.HitCountExclAuto.Miss, GuitarData.MaxCombo, EInstrumentPart.GUITAR, bIsAutoPlay);
-			else
-				actGraph.dbグラフ値現在_渡 = CScoreIni.tCalculatePlayingSkill(CDTXMania.DTX.nVisibleChipsCount.Guitar, GuitarData.HitCountExclAuto.Perfect, GuitarData.HitCountExclAuto.Great, GuitarData.HitCountExclAuto.Good, GuitarData.HitCountExclAuto.Poor, GuitarData.HitCountExclAuto.Miss, GuitarData.MaxCombo, EInstrumentPart.GUITAR, bIsAutoPlay);
-			GuitarData.SetAchievementRate(bIsTrainingMode ? 0 : actGraph.dbグラフ値現在_渡);
-
-			if (CDTXMania.ConfigIni.bGraph有効.Guitar)
-			{
-
-				if (CDTXMania.listTargetGhsotLag.Guitar != null &&
-				    CDTXMania.ConfigIni.eTargetGhost.Guitar == ETargetGhostData.ONLINE &&
-				    CDTXMania.DTX.nVisibleChipsCount.Guitar > 0)
-				{
-
-					actGraph.dbグラフ値現在_渡 = 100 *
-						(GuitarData.HitCountExclAuto.Perfect * 17 +
-						 GuitarData.HitCountExclAuto.Great * 7 +
-						 GuitarData.MaxCombo * 3) / (20.0 * CDTXMania.DTX.nVisibleChipsCount.Guitar);
-				}
-
-				actGraph.n現在のAutoを含まない判定数_渡[0] = GuitarData.HitCountExclAuto.Perfect;
-				actGraph.n現在のAutoを含まない判定数_渡[1] = GuitarData.HitCountExclAuto.Great;
-				actGraph.n現在のAutoを含まない判定数_渡[2] = GuitarData.HitCountExclAuto.Good;
-				actGraph.n現在のAutoを含まない判定数_渡[3] = GuitarData.HitCountExclAuto.Poor;
-				actGraph.n現在のAutoを含まない判定数_渡[4] = GuitarData.HitCountExclAuto.Miss;
-			}
+			return;
 		}
-		else if (pChip.eInstrumentPart == EInstrumentPart.BASS)
+
+		int chips = data.ChartChips;
+		if (CDTXMania.listTargetGhsotLag[index] != null && CDTXMania.ConfigIni.eTargetGhost[index] == ETargetGhostData.ONLINE && chips > 0)
 		{
-			if (CDTXMania.ConfigIni.nSkillMode == 0)
-				actGraph.dbグラフ値現在_渡 = CScoreIni.tCalculatePlayingSkillOld(CDTXMania.DTX.nVisibleChipsCount.Bass, BassData.HitCountExclAuto.Perfect, BassData.HitCountExclAuto.Great, BassData.HitCountExclAuto.Good, BassData.HitCountExclAuto.Poor, BassData.HitCountExclAuto.Miss, BassData.MaxCombo, EInstrumentPart.BASS, bIsAutoPlay);
-			else
-				actGraph.dbグラフ値現在_渡 = CScoreIni.tCalculatePlayingSkill(CDTXMania.DTX.nVisibleChipsCount.Bass, BassData.HitCountExclAuto.Perfect, BassData.HitCountExclAuto.Great, BassData.HitCountExclAuto.Good, BassData.HitCountExclAuto.Poor, BassData.HitCountExclAuto.Miss, BassData.MaxCombo, EInstrumentPart.BASS, bIsAutoPlay);
-			BassData.SetAchievementRate(bIsTrainingMode ? 0 : actGraph.dbグラフ値現在_渡);
-
-			if (CDTXMania.ConfigIni.bGraph有効.Bass)
-			{
-
-				if (CDTXMania.listTargetGhsotLag.Bass != null &&
-				    CDTXMania.ConfigIni.eTargetGhost.Bass == ETargetGhostData.ONLINE &&
-				    CDTXMania.DTX.nVisibleChipsCount.Bass > 0)
-				{
-
-					actGraph.dbグラフ値現在_渡 = 100 *
-						(BassData.HitCountExclAuto.Perfect * 17 +
-						 BassData.HitCountExclAuto.Great * 7 +
-						 BassData.MaxCombo * 3) / (20.0 * CDTXMania.DTX.nVisibleChipsCount.Bass);
-				}
-
-				actGraph.n現在のAutoを含まない判定数_渡[0] = BassData.HitCountExclAuto.Perfect;
-				actGraph.n現在のAutoを含まない判定数_渡[1] = BassData.HitCountExclAuto.Great;
-				actGraph.n現在のAutoを含まない判定数_渡[2] = BassData.HitCountExclAuto.Good;
-				actGraph.n現在のAutoを含まない判定数_渡[3] = BassData.HitCountExclAuto.Poor;
-				actGraph.n現在のAutoを含まない判定数_渡[4] = BassData.HitCountExclAuto.Miss;
-			}
+			actGraph.dbグラフ値現在_渡 = 100 * (data.HitCountExclAuto.Perfect * 17 + data.HitCountExclAuto.Great * 7 + data.MaxCombo * 3) / (20.0 * chips);
 		}
-		return eJudgeResult;
+
+		for (int i = 0; i < 5; i++)
+		{
+			actGraph.n現在のAutoを含まない判定数_渡[i] = data.HitCountExclAuto[i];
+		}
 	}
 
 

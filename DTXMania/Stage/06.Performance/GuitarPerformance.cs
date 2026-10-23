@@ -11,6 +11,7 @@ internal enum EGuitarEvent
     HoldFire,
     HoldBonus,
     HoldRelease,
+    Judged,
     Wail
 }
 
@@ -25,6 +26,10 @@ internal struct GuitarEvent
     public bool Miss;
 
     public bool ShiftPitch;
+
+    public EJudgement Judgement;
+
+    public bool Auto;
 
     //bit per lane, R G B Y P from bit 0
     public int FireLanes;
@@ -70,7 +75,7 @@ internal class GuitarPerformance
         bool guitarSide = player == EInstrument.Guitar1;
         autoPick = guitarSide ? auto.GtPick : auto.BsPick;
         autoWail = guitarSide ? auto.GtW : auto.BsW;
-        autoLanes = Lanes(guitarSide ? auto.GtR : auto.BsR, guitarSide ? auto.GtG : auto.BsG, guitarSide ? auto.GtB : auto.BsB,
+        autoLanes = ToLaneMask(guitarSide ? auto.GtR : auto.BsR, guitarSide ? auto.GtG : auto.BsG, guitarSide ? auto.GtB : auto.BsB,
             guitarSide ? auto.GtY : auto.BsY, guitarSide ? auto.GtP : auto.BsP);
     }
 
@@ -81,42 +86,71 @@ internal class GuitarPerformance
 
     private int InputAdjustMs => CDTXMania.ConfigIni.nInputAdjustTimeMs[(int)Side];
 
-    private static int Lanes(bool r, bool g, bool b, bool y, bool p) => (r ? 1 : 0) | (g ? 2 : 0) | (b ? 4 : 0) | (y ? 8 : 0) | (p ? 16 : 0);
+    private static int ToLaneMask(bool r, bool g, bool b, bool y, bool p) => (r ? 1 : 0) | (g ? 2 : 0) | (b ? 4 : 0) | (y ? 8 : 0) | (p ? 16 : 0);
 
-    private static int LanesOf(CChip chip)
+    private static int GetLanes(CChip chip)
     {
         bool[] lanes = EnumConverter.GetArrayBoolFromEChannel(chip.nChannelNumber);
-        return Lanes(lanes[0], lanes[1], lanes[2], lanes[3], lanes[4]);
+        return ToLaneMask(lanes[0], lanes[1], lanes[2], lanes[3], lanes[4]);
     }
 
-    private int PressedLanes() => Lanes(CDTXMania.Pad.bPressing(Side, EPad.R), CDTXMania.Pad.bPressing(Side, EPad.G),
+    private int GetPressedLanes() => ToLaneMask(CDTXMania.Pad.bPressing(Side, EPad.R), CDTXMania.Pad.bPressing(Side, EPad.G),
         CDTXMania.Pad.bPressing(Side, EPad.B), CDTXMania.Pad.bPressing(Side, EPad.Y), CDTXMania.Pad.bPressing(Side, EPad.P));
 
-    private EJudgement Judge(long time, CChip? chip)
+    private EJudgement JudgeChip(long time, CChip? chip, int inputAdjustMs)
     {
         if (chip == null)
         {
             return EJudgement.Miss;
         }
 
-        int lag = (int)(time + InputAdjustMs - chip.nPlaybackTimeMs);
-        chip.nLag = lag;
+        chip.nLag = (int)(time + inputAdjustMs - chip.nPlaybackTimeMs);
         if (chip.eInstrumentPart != EInstrumentPart.UNKNOWN)
         {
             chip.nCurrentComboForGhost = Data.Combo;
         }
+        return ChipJudge.GetJudgementForLag(chip, chip.nLag);
+    }
 
-        STHitRanges ranges = chip.eInstrumentPart switch
+    private bool IsAuto(CChip chip) =>
+        autoPick && (GetLanes(chip) & ~autoLanes) == 0 && (!chip.bChipIsWailingNote || autoWail) && (!chip.bChipIsOpenNote || autoLanes == AllLanes);
+
+    //correctLane false is a miss without judging the timing
+    private void ApplyHit(CChip chip, long time, bool correctLane)
+    {
+        chip.bHit = true;
+        if (chip.bIsLongNote)
         {
-            EInstrumentPart.GUITAR => CDTXMania.stGuitarHitRanges,
-            EInstrumentPart.BASS => CDTXMania.stBassHitRanges,
-            _ => STHitRanges.tCreateDefaultDTXHitRanges()
-        };
-        return ranges.tGetJudgement(Math.Abs(lag));
+            chip.bIsHittingLongNote = true;
+            StartHold(chip);
+        }
+
+        bool auto = IsAuto(chip);
+        chip.bIsAutoPlayed = auto;
+        EJudgement judgement = correctLane ? JudgeChip(time, chip, auto ? 0 : InputAdjustMs) : EJudgement.Miss;
+        Data.ApplyJudgement(judgement, auto, chip.nLag, countsCombo: true);
+        if (judgement == EJudgement.Miss)
+        {
+            chip.bIsHittingLongNote = false;
+            EndHold();
+        }
+
+        Events.Add(new GuitarEvent { Kind = EGuitarEvent.Judged, Chip = chip, Judgement = judgement, Auto = auto });
     }
 
     public void UpdateNote(CChip chip)
     {
+        long now = AudioMixer.Timer.nCurrentTime;
+        if (!chip.bHit && chip.nDistanceFromBar[(int)Side] < 0 && JudgeChip(now, chip, IsAuto(chip) ? 0 : InputAdjustMs) == EJudgement.Miss)
+        {
+            ApplyHit(chip, now, true);
+        }
+
+        if (chip.bIsLongNote && chip.bVisible && chip.chipLongNoteEndPosition.nDistanceFromBar[(int)Side] <= 0)
+        {
+            return;
+        }
+
         if (chip.bHit || !autoPick)
         {
             return;
@@ -130,7 +164,7 @@ internal class GuitarPerformance
             //low byte is the lag + 128, anything above it breaks the combo
             int recorded = ghost[chip.n楽器パートでの出現順];
             ghostLag = (recorded & 255) - 128 - InputAdjustMs;
-            if (chip.nPlaybackTimeMs + ghostLag > AudioMixer.Timer.nCurrentTime)
+            if (chip.nPlaybackTimeMs + ghostLag > now)
             {
                 return;
             }
@@ -144,8 +178,8 @@ internal class GuitarPerformance
             return;
         }
 
-        int chipLanes = LanesOf(chip);
-        int pressed = PressedLanes();
+        int chipLanes = GetLanes(chip);
+        int pressed = GetPressedLanes();
         bool openPlayed = chip.bChipIsOpenNote && (pressed & ~autoLanes) == 0;
         bool miss = chipLanes != autoLanes && ((chipLanes ^ pressed) & ~autoLanes) != 0 && !openPlayed;
 
@@ -156,10 +190,15 @@ internal class GuitarPerformance
             Kind = EGuitarEvent.AutoNote,
             Chip = chip,
             Time = time,
-            Miss = miss,
             ShiftPitch = miss && CDTXMania.ConfigIni.bSpecialist[(int)Side],
             FireLanes = openPlayed ? AllLanes : chipLanes & (autoLanes | pressed)
         });
+
+        if (miss)
+        {
+            chip.nLag = 0;
+        }
+        ApplyHit(chip, time, !miss);
 
         if (!miss)
         {
@@ -169,9 +208,9 @@ internal class GuitarPerformance
 
     public void UpdateInput()
     {
-        int pressed = PressedLanes();
-        CChip? shown = HeldNote ?? NextNote();
-        int shownLanes = shown != null ? LanesOf(shown) : 0;
+        int pressed = GetPressedLanes();
+        CChip? shown = HeldNote ?? FindNextNote();
+        int shownLanes = shown != null ? GetLanes(shown) : 0;
         LitLanes = pressed | (shownLanes & autoLanes);
 
         if (HeldNote != null)
@@ -202,16 +241,16 @@ internal class GuitarPerformance
     {
         int poorRangeMs = Chart == EChartPart.Guitar ? CDTXMania.stGuitarHitRanges.nPoorSizeMs : CDTXMania.stBassHitRanges.nPoorSizeMs;
         CChip? note = timeline.NearestNote(time + InputAdjustMs, Part, poorRangeMs, HitState.NotHit, preferPast: true);
-        EJudgement judgement = Judge(time, note);
+        EJudgement judgement = JudgeChip(time, note, InputAdjustMs);
         bool specialist = CDTXMania.ConfigIni.bSpecialist[(int)Side];
+        bool light = CDTXMania.ConfigIni.bLight[(int)Side];
 
         if (note != null && judgement != EJudgement.Miss)
         {
-            int noteLanes = LanesOf(note);
+            int noteLanes = GetLanes(note);
             if ((noteLanes & ~autoLanes) == (pressed & ~autoLanes))
             {
                 bool openPlayed = note.bChipIsOpenNote && (pressed & ~autoLanes) == 0;
-                note.bHit = true;
                 Events.Add(new GuitarEvent
                 {
                     Kind = EGuitarEvent.PickedNote,
@@ -220,6 +259,7 @@ internal class GuitarPerformance
                     ShiftPitch = judgement == EJudgement.Poor && specialist,
                     FireLanes = openPlayed ? AllLanes : noteLanes & (autoLanes | pressed)
                 });
+                ApplyHit(note, time, true);
                 ArmWailing(time + InputAdjustMs);
                 return;
             }
@@ -229,12 +269,18 @@ internal class GuitarPerformance
         {
             Kind = EGuitarEvent.EmptyPick,
             Chip = EmptyPickSound ?? timeline.NearestNote(time + InputAdjustMs, Part, 0, HitState.DontCare, preferPast: false),
-            Miss = !CDTXMania.ConfigIni.bLight[(int)Side],
+            Miss = !light,
             ShiftPitch = specialist
         });
+
+        if (!light)
+        {
+            Data.Damage(EJudgement.Miss);
+            Data.BreakCombo();
+        }
     }
 
-    public void StartHold(CChip note)
+    private void StartHold(CChip note)
     {
         HeldNote = note;
         holdDurationMs = note.chipLongNoteEndPosition.nPlaybackTimeMs - note.nPlaybackTimeMs;
@@ -258,7 +304,7 @@ internal class GuitarPerformance
         CChip note = HeldNote!;
         if ((noteLanes & ~autoLanes) != (pressed & ~autoLanes))
         {
-            if (Judge(AudioMixer.Timer.nCurrentTime, note.chipLongNoteEndPosition) >= EJudgement.Miss)
+            if (JudgeChip(AudioMixer.Timer.nCurrentTime, note.chipLongNoteEndPosition, InputAdjustMs) >= EJudgement.Miss)
             {
                 EndHold();
                 Events.Add(new GuitarEvent { Kind = EGuitarEvent.HoldRelease });
@@ -333,7 +379,7 @@ internal class GuitarPerformance
             }
 
             marker.bHit = true;
-            Events.Add(new GuitarEvent { Kind = EGuitarEvent.Wail, Chip = SoundForWailing(marker) });
+            Events.Add(new GuitarEvent { Kind = EGuitarEvent.Wail, Chip = FindWailingSound(marker) });
             if (!autoWail)
             {
                 AddWailingScore();
@@ -343,13 +389,13 @@ internal class GuitarPerformance
         }
     }
 
-    private CChip? NextNote()
+    private CChip? FindNextNote()
     {
         int adjust = autoPick ? 0 : InputAdjustMs;
         return timeline.NearestNote(AudioMixer.Timer.nCurrentTime + adjust, Part, 800, HitState.NotHit, preferPast: true);
     }
 
-    private CChip? SoundForWailing(CChip marker) =>
+    private CChip? FindWailingSound(CChip marker) =>
         Chart == EChartPart.Guitar ? timeline.Nearest(marker.nPlaybackTimeMs, EChannel.Guitar_WailingSound, 0, HitState.DontCare) : null;
 
     private void AddWailingScore()
@@ -365,9 +411,9 @@ internal class GuitarPerformance
 
     public bool HasTargetGhost => CDTXMania.ConfigIni.eTargetGhost[(int)Part] != ETargetGhostData.NONE && CDTXMania.listTargetGhsotLag[(int)Part] != null;
 
-    public double TargetGhostGoal()
+    public double CalculateTargetGhostGoal()
     {
-        int notes = CDTXMania.DTX.nVisibleChipsCount[(int)Part];
+        int notes = Data.ChartChips;
         HitCounts ghost = Data.GhostHitCount;
         double goal;
         if (CDTXMania.ConfigIni.eTargetGhost[(int)Part] == ETargetGhostData.ONLINE)
