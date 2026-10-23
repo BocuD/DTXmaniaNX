@@ -609,7 +609,7 @@ internal class CStageResult : CStage
 			ctPlayNewRecord = new CCounter(0, 150, 10, CDTXMania.Timer);
 		}
 		
-		CDTXMania.SongDb.RecalculateSkill();
+		CDTXMania.SongDb?.RecalculateSkill();
 		
 		ePhaseID = EPhase.Common_DefaultState;
 	}

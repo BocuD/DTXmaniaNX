@@ -159,7 +159,8 @@ internal partial class CDTXMania
 
     public static ResourceManager Resources { get; private set; }
 
-    public static SongDb.SongDb SongDb { get; private set; }
+    //null in compact mode
+    public static SongDb.SongDb? SongDb { get; private set; }
 
     public static string executableDirectory { get; private set; }
     public static string strCompactModeFile { get; private set; }

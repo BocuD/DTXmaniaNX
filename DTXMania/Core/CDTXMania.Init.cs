@@ -54,7 +54,10 @@ internal partial class CDTXMania
             Trace.TraceInformation("----------------------");
             Trace.TraceInformation("■ Startup");
         
-            SongDb.StartScan();
+            if (!bCompactMode)
+            {
+                SongDb.StartScan();
+            }
         }
     }
 
@@ -164,14 +167,17 @@ internal partial class CDTXMania
                 DiscordRichPresence = new CDiscordRichPresence(ConfigIni.strDiscordRichPresenceApplicationID);
         });
        
-        AddInitializer("SongDb", () => SongDb = new SongDb.SongDb());
-        
-        AddInitializer("SongDBStatus", () =>
+        if (!bCompactMode)
         {
-            SongDBStatus songDbStatus = persistentUIGroup.AddChild(new SongDBStatus());
-            songDbStatus.parentAnchor = new Vector2(0.0f, 1.0f);
-            songDbStatus.pivot = new Vector2(0.0f, 1.0f);
-        });
+            AddInitializer("SongDb", () => SongDb = new SongDb.SongDb());
+
+            AddInitializer("SongDBStatus", () =>
+            {
+                SongDBStatus songDbStatus = persistentUIGroup.AddChild(new SongDBStatus());
+                songDbStatus.parentAnchor = new Vector2(0.0f, 1.0f);
+                songDbStatus.pivot = new Vector2(0.0f, 1.0f);
+            });
+        }
         
         AddInitializer("AnimatedTransition", () => gitadoraTransition = persistentUIGroup.AddChild(new GitaDoraTransition()));
         
