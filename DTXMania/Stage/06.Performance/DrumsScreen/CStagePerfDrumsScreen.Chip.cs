@@ -11,16 +11,7 @@ internal partial class CStagePerfDrumsScreen
 {
     protected override void UpdateChip_PatternOnly_Drums(CConfigIni configIni, ref CDTX dTX, ref CChip pChip)  // t進行描画_チップ_模様のみ_ドラムス
     {
-        if (configIni.bDrumsEnabled)
-        {
-            ApplyHiddenSudden(pChip, pChip.nDistanceFromBar.Drums, CDTXMania.ConfigIni.nHidSud.Drums, 200, 100, 50.0);
-
-            return;
-        }	// end of "if configIni.bDrumsEnabled"
-        if (!pChip.bHit && (pChip.nDistanceFromBar.Drums < 0))
-        {
-            pChip.bHit = true;
-        }
+        ApplyHiddenSudden(pChip, pChip.nDistanceFromBar.Drums, CDTXMania.ConfigIni.nHidSud.Drums, 200, 100, 50.0);
     }
 
     protected override void DrawChip_PatternOnly_Drums(CConfigIni configIni, ref CDTX dTX, ref CChip pChip)
@@ -33,103 +24,94 @@ internal partial class CStagePerfDrumsScreen
 
     protected override void UpdateChip_Drums( CConfigIni configIni, ref CDTX dTX, ref CChip pChip )
     {
-        if ( configIni.bDrumsEnabled )
+        ApplyHiddenSudden(pChip, pChip.nDistanceFromBar.Drums, CDTXMania.ConfigIni.nHidSud.Drums, 200, 100, 50.0);
+
+        int indexSevenLanes = nチャンネル0Atoレーン07[ pChip.nChannelNumber - EChannel.HiHatClose];
+        // #35411 chnmr0 modified
+        bool autoPlayCondition = ( configIni.bAutoPlay[ indexSevenLanes ] && !pChip.bHit );
+        bool UsePerfectGhost = true;
+        long ghostLag = 0;
+
+        if ( CDTXMania.ConfigIni.eAutoGhost.Drums != EAutoGhostData.PERFECT &&
+            CDTXMania.listAutoGhostLag.Drums != null &&
+            0 <= pChip.n楽器パートでの出現順 && pChip.n楽器パートでの出現順 < CDTXMania.listAutoGhostLag.Drums.Count)
+
         {
-            ApplyHiddenSudden(pChip, pChip.nDistanceFromBar.Drums, CDTXMania.ConfigIni.nHidSud.Drums, 200, 100, 50.0);
+            // ゴーストデータが有効 : ラグに合わせて判定
+            ghostLag = CDTXMania.listAutoGhostLag.Drums[pChip.n楽器パートでの出現順];
+            ghostLag = (ghostLag & 255) - 128;
+            ghostLag -= nInputAdjustTimeMs.Drums;
+            autoPlayCondition &= !pChip.bHit && (ghostLag + pChip.nPlaybackTimeMs <= AudioMixer.Timer.nCurrentTime);
+            UsePerfectGhost = false;
+        }
+        if ( UsePerfectGhost )
+        {
+            // 従来の AUTO : バー下で判定
+            autoPlayCondition &= ( pChip.nDistanceFromBar.Drums < 0 );
+        }
 
-            int indexSevenLanes = nチャンネル0Atoレーン07[ pChip.nChannelNumber - EChannel.HiHatClose];
-            // #35411 chnmr0 modified
-            bool autoPlayCondition = ( configIni.bAutoPlay[ indexSevenLanes ] && !pChip.bHit );
-            bool UsePerfectGhost = true;
-            long ghostLag = 0;
-
-            if ( CDTXMania.ConfigIni.eAutoGhost.Drums != EAutoGhostData.PERFECT &&
-                CDTXMania.listAutoGhostLag.Drums != null &&
-                0 <= pChip.n楽器パートでの出現順 && pChip.n楽器パートでの出現順 < CDTXMania.listAutoGhostLag.Drums.Count)
-
+        if ( autoPlayCondition )
+        {
+            pChip.bHit = true;
+            actLaneFlushD.Start( (ELane) indexSevenLanes, ( (float) CInputManager.nDefaultVelocity ) / 127f );
+            bool flag = bInFillIn;
+            bool flag2 = bInFillIn && bフィルイン区間の最後のChipである( pChip );
+            // #31602 2013.6.24 yyagi 判定ラインの表示位置をずらしたら、チップのヒットエフェクトの表示もずらすために、nJudgeLine..を追加
+            actChipFireD.Start( (ELane)indexSevenLanes, flag, flag2, flag2, nJudgeLinePosY_delta.Drums );
+            actPad.Hit( nチャンネル0Atoパッド08[ pChip.nChannelNumber - EChannel.HiHatClose] );
+            tPlaySound( pChip, AudioMixer.Timer.nResetAtMs + pChip.nPlaybackTimeMs + ghostLag, EInstrumentPart.DRUMS, dTX.nモニタを考慮した音量( EInstrumentPart.DRUMS ) );
+            tProcessChipHit(pChip.nPlaybackTimeMs + ghostLag, pChip);
+        }
+        // #35411 modify end
+            
+        // #35411 2015.08.21 chnmr0 add
+        // 目標値グラフにゴーストの達成率を渡す
+        if (CDTXMania.ConfigIni.eTargetGhost.Drums != ETargetGhostData.NONE &&
+            CDTXMania.listTargetGhsotLag.Drums != null)
+        {
+            double val = 0;
+            if (CDTXMania.ConfigIni.eTargetGhost.Drums == ETargetGhostData.ONLINE)
             {
-                // ゴーストデータが有効 : ラグに合わせて判定
-                ghostLag = CDTXMania.listAutoGhostLag.Drums[pChip.n楽器パートでの出現順];
-                ghostLag = (ghostLag & 255) - 128;
-                ghostLag -= nInputAdjustTimeMs.Drums;
-                autoPlayCondition &= !pChip.bHit && (ghostLag + pChip.nPlaybackTimeMs <= AudioMixer.Timer.nCurrentTime);
-                UsePerfectGhost = false;
-            }
-            if ( UsePerfectGhost )
-            {
-                // 従来の AUTO : バー下で判定
-                autoPlayCondition &= ( pChip.nDistanceFromBar.Drums < 0 );
-            }
-
-            if ( autoPlayCondition )
-            {
-                pChip.bHit = true;
-                actLaneFlushD.Start( (ELane) indexSevenLanes, ( (float) CInputManager.nDefaultVelocity ) / 127f );
-                bool flag = bInFillIn;
-                bool flag2 = bInFillIn && bフィルイン区間の最後のChipである( pChip );
-                // #31602 2013.6.24 yyagi 判定ラインの表示位置をずらしたら、チップのヒットエフェクトの表示もずらすために、nJudgeLine..を追加
-                actChipFireD.Start( (ELane)indexSevenLanes, flag, flag2, flag2, nJudgeLinePosY_delta.Drums );
-                actPad.Hit( nチャンネル0Atoパッド08[ pChip.nChannelNumber - EChannel.HiHatClose] );
-                tPlaySound( pChip, AudioMixer.Timer.nResetAtMs + pChip.nPlaybackTimeMs + ghostLag, EInstrumentPart.DRUMS, dTX.nモニタを考慮した音量( EInstrumentPart.DRUMS ) );
-                tProcessChipHit(pChip.nPlaybackTimeMs + ghostLag, pChip);
-            }
-            // #35411 modify end
-                
-            // #35411 2015.08.21 chnmr0 add
-            // 目標値グラフにゴーストの達成率を渡す
-            if (CDTXMania.ConfigIni.eTargetGhost.Drums != ETargetGhostData.NONE &&
-                CDTXMania.listTargetGhsotLag.Drums != null)
-            {
-                double val = 0;
-                if (CDTXMania.ConfigIni.eTargetGhost.Drums == ETargetGhostData.ONLINE)
+                if (CDTXMania.DTX.nVisibleChipsCount.Drums > 0)
                 {
-                    if (CDTXMania.DTX.nVisibleChipsCount.Drums > 0)
-                    {
-                        // Online Stats の計算式
-                        val = 100 *
-                            (DrumsData.GhostHitCount.Perfect * 17 +
-                             DrumsData.GhostHitCount.Great * 7 +
-                             DrumsData.GhostMaxCombo * 3) / (20.0 * CDTXMania.DTX.nVisibleChipsCount.Drums);
-                    }
+                    // Online Stats の計算式
+                    val = 100 *
+                        (DrumsData.GhostHitCount.Perfect * 17 +
+                         DrumsData.GhostHitCount.Great * 7 +
+                         DrumsData.GhostMaxCombo * 3) / (20.0 * CDTXMania.DTX.nVisibleChipsCount.Drums);
+                }
+            }
+            else
+            {
+                if ( CDTXMania.ConfigIni.nSkillMode == 0 )
+                {
+                    val = CScoreIni.tCalculatePlayingSkillOld(
+                        CDTXMania.DTX.nVisibleChipsCount.Drums,
+                        DrumsData.GhostHitCount.Perfect,
+                        DrumsData.GhostHitCount.Great,
+                        DrumsData.GhostHitCount.Good,
+                        DrumsData.GhostHitCount.Poor,
+                        DrumsData.GhostHitCount.Miss,
+                        DrumsData.GhostMaxCombo,
+                        EInstrumentPart.DRUMS, new STAUTOPLAY());
                 }
                 else
                 {
-                    if ( CDTXMania.ConfigIni.nSkillMode == 0 )
-                    {
-                        val = CScoreIni.tCalculatePlayingSkillOld(
-                            CDTXMania.DTX.nVisibleChipsCount.Drums,
-                            DrumsData.GhostHitCount.Perfect,
-                            DrumsData.GhostHitCount.Great,
-                            DrumsData.GhostHitCount.Good,
-                            DrumsData.GhostHitCount.Poor,
-                            DrumsData.GhostHitCount.Miss,
-                            DrumsData.GhostMaxCombo,
-                            EInstrumentPart.DRUMS, new STAUTOPLAY());
-                    }
-                    else
-                    {
-                        val = CScoreIni.tCalculatePlayingSkill(
-                            CDTXMania.DTX.nVisibleChipsCount.Drums,
-                            DrumsData.GhostHitCount.Perfect,
-                            DrumsData.GhostHitCount.Great,
-                            DrumsData.GhostHitCount.Good,
-                            DrumsData.GhostHitCount.Poor,
-                            DrumsData.GhostHitCount.Miss,
-                            DrumsData.GhostMaxCombo,
-                            EInstrumentPart.DRUMS, new STAUTOPLAY());
-                    }
-
+                    val = CScoreIni.tCalculatePlayingSkill(
+                        CDTXMania.DTX.nVisibleChipsCount.Drums,
+                        DrumsData.GhostHitCount.Perfect,
+                        DrumsData.GhostHitCount.Great,
+                        DrumsData.GhostHitCount.Good,
+                        DrumsData.GhostHitCount.Poor,
+                        DrumsData.GhostHitCount.Miss,
+                        DrumsData.GhostMaxCombo,
+                        EInstrumentPart.DRUMS, new STAUTOPLAY());
                 }
-                if (val < 0) val = 0;
-                if (val > 100) val = 100;
-                actGraph.dbGraphValue_Goal = val;
+
             }
-            return;
-        }	// end of "if configIni.bDrumsEnabled"
-        if ( !pChip.bHit && ( pChip.nDistanceFromBar.Drums < 0 ) )
-        {
-            tPlaySound( pChip, AudioMixer.Timer.nResetAtMs + pChip.nPlaybackTimeMs, EInstrumentPart.DRUMS, dTX.nモニタを考慮した音量( EInstrumentPart.DRUMS ) );
-            pChip.bHit = true;
+            if (val < 0) val = 0;
+            if (val > 100) val = 100;
+            actGraph.dbGraphValue_Goal = val;
         }
     }
 
@@ -182,18 +164,6 @@ internal partial class CStagePerfDrumsScreen
         }
     }
 
-    protected override void UpdateChip_GuitarBass(CConfigIni configIni, ref CDTX dTX, ref CChip pChip, EInstrumentPart inst)
-    {
-        int instIndex = (int)inst;
-        
-        //auto play guitar and bass chips
-        if ( !pChip.bHit && ( pChip.nDistanceFromBar[ instIndex ] < 0 ) )
-        {
-            pChip.bHit = true;
-            tPlaySound( pChip, AudioMixer.Timer.nResetAtMs + pChip.nPlaybackTimeMs, inst, dTX.nモニタを考慮した音量( inst ) );
-        }
-    }
-    
     protected override void UpdateChip_FillIn( CConfigIni configIni, ref CDTX dTX, ref CChip pChip )
     {
         if ( !pChip.bHit && ( pChip.nDistanceFromBar.Drums < 0 ) )

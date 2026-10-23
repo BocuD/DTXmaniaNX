@@ -249,7 +249,7 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
         UpdateChipAnimation();
 
         AllocationProbe.Begin(probeChips);
-        bIsFinishedPlaying = UpdateChips(EInstrumentPart.DRUMS);
+        bIsFinishedPlaying = UpdateChips();
         AllocationProbe.End(probeChips);
 
         //loop instead of going to the result screen

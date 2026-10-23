@@ -306,7 +306,7 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		UpdateVideo();
 		UpdateScrollSpeed();
 		UpdateChipAnimation();
-		bIsFinishedPlaying = UpdateChips(EInstrumentPart.GUITAR);
+		bIsFinishedPlaying = UpdateChips();
 		UpdateStageFailed();
 
 		//loop instead of going to the result screen
@@ -447,18 +447,6 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		// ギタレボモードでは何もしない
 	}
 	
-	protected override void UpdateChip_PatternOnly_Drums(CConfigIni configIni, ref CDTX dTX, ref CChip pChip)
-	{
-	}
-	protected override void UpdateChip_Drums(CConfigIni configIni, ref CDTX dTX, ref CChip pChip)
-	{
-		if ( !pChip.bHit && ( pChip.nDistanceFromBar.Drums < 0 ) )
-		{
-			pChip.bHit = true;
-			tPlaySound(pChip, AudioMixer.Timer.nResetAtMs + pChip.nPlaybackTimeMs, EInstrumentPart.DRUMS, dTX.nモニタを考慮した音量(EInstrumentPart.DRUMS));
-		}
-	}
-	
 	protected override void DrawChip_Guitar_Wailing( CConfigIni configIni, ref CDTX dTX, ref CChip pChip )
 	{
 		if ( configIni.bGuitarEnabled )
@@ -550,13 +538,6 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 				}
 			}
 			
-		}
-	}
-	protected override void UpdateChip_NoSound_Drums( CConfigIni configIni, ref CDTX dTX, ref CChip pChip )
-	{
-		if ( !pChip.bHit && ( pChip.nDistanceFromBar.Drums < 0 ) )
-		{
-			pChip.bHit = true;
 		}
 	}
 	protected override void UpdateChip_BarLine( CConfigIni configIni, ref CDTX dTX, ref CChip pChip )

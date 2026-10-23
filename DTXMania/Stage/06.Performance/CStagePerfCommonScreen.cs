@@ -2392,7 +2392,28 @@ internal abstract class CStagePerfCommonScreen : CStage
     {
         actScore.OnUpdateAndDraw();
     }
-    protected bool UpdateChips(EInstrumentPart ePlayMode)
+    public static bool IsPlayed(EInstrumentPart part)
+    {
+        bool guitarScreen = CDTXMania.ConfigIni.bGuitarRevolutionMode;
+        return part switch
+        {
+            EInstrumentPart.DRUMS => !guitarScreen,
+            EInstrumentPart.GUITAR => guitarScreen,
+            EInstrumentPart.BASS => guitarScreen && !CDTXMania.ConfigIni.bSingleGuitar,
+            _ => false
+        };
+    }
+
+    private void UpdateBackgroundChip(CDTX dTX, CChip pChip, EInstrumentPart part)
+    {
+        if (!pChip.bHit && pChip.nDistanceFromBar[(int)part] < 0)
+        {
+            pChip.bHit = true;
+            tPlaySound(pChip, AudioMixer.Timer.nResetAtMs + pChip.nPlaybackTimeMs, part, dTX.nモニタを考慮した音量(part));
+        }
+    }
+
+    protected bool UpdateChips()
     {
         if ((ePhaseID == EPhase.PERFORMANCE_STAGE_FAILED) || (ePhaseID == EPhase.PERFORMANCE_STAGE_FAILED_END))
         {
@@ -2459,6 +2480,12 @@ internal abstract class CStagePerfCommonScreen : CStage
                     
             }
 
+            if (pChip.eInstrumentPart != EInstrumentPart.UNKNOWN && !IsPlayed(pChip.eInstrumentPart))
+            {
+                UpdateBackgroundChip(dTX, pChip, pChip.eInstrumentPart);
+                continue;
+            }
+
             //bar lines and the drums pattern layer
             switch (pChip.nChannelNumber)
             {
@@ -2490,10 +2517,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                 case EChannel.LeftCymbal:
                 case EChannel.LeftPedal:
                 case EChannel.LeftBassDrum:
-                    if (ePlayMode == EInstrumentPart.DRUMS)
-                    {
-                        UpdateChip_PatternOnly_Drums(configIni, ref dTX, ref pChip);
-                    }
+                    UpdateChip_PatternOnly_Drums(configIni, ref dTX, ref pChip);
                     break;
             }
 
@@ -3327,37 +3351,38 @@ internal abstract class CStagePerfCommonScreen : CStage
     }
 
 
-    protected abstract void UpdateChip_Drums(CConfigIni configIni, ref CDTX dTX, ref CChip pChip);
-    protected abstract void UpdateChip_PatternOnly_Drums(CConfigIni configIni, ref CDTX dTX, ref CChip pChip);
-    protected abstract void UpdateChip_GuitarBass(CConfigIni configIni, ref CDTX dTX, ref CChip pChip, EInstrumentPart inst);  // t進行描画_チップ_ギターベース
+    protected virtual void UpdateChip_Drums(CConfigIni configIni, ref CDTX dTX, ref CChip pChip) { }
+    protected virtual void UpdateChip_PatternOnly_Drums(CConfigIni configIni, ref CDTX dTX, ref CChip pChip) { }
+    protected virtual void UpdateChip_GuitarBass(CConfigIni configIni, ref CDTX dTX, ref CChip pChip, EInstrumentPart inst) { }  // t進行描画_チップ_ギターベース
     
     protected virtual void UpdateChip_GuitarBass_Wailing(CConfigIni configIni, ref CDTX dTX, ref CChip pChip, EInstrumentPart inst)
     {
-        int indexInst = (int)inst;
-        if (configIni.bGuitarEnabled)
+        if (!IsPlayed(inst))
         {
-            ApplyHiddenSudden(pChip, pChip.nDistanceFromBar[indexInst], CDTXMania.ConfigIni.nHidSud[indexInst], 250, 150, 75.0);
-            //
-            // ここにチップ更新処理が入る(overrideで入れる)。といっても座標とチップサイズが違うだけで処理はまるまる同じ。
-            //
-            if (!pChip.bHit && (pChip.nDistanceFromBar[indexInst] < 0))
-            {
-                if (pChip.nDistanceFromBar[indexInst] < -234)	// #25253 2011.5.29 yyagi: Don't set pChip.bHit=true for wailing at once. It need to 1sec-delay (234pix per 1sec). 
-                {
-                    pChip.bHit = true;
-                }
-                bool autoW = (inst == EInstrumentPart.GUITAR) ? configIni.bAutoPlay.GtW : configIni.bAutoPlay.BsW;
-                if (autoW)
-                {
-                    // #23886 2012.5.22 yyagi; To support auto Wailing; Don't do wailing for ALL wailing chips. Do wailing for queued wailing chip.
-                    // wailing chips are queued when 1) manually wailing and not missed at that time 2) AutoWailing=ON and not missed at that time
-                    long nTimeStamp_Wailed = pChip.nPlaybackTimeMs + AudioMixer.Timer.nResetAtMs;
-                    DoWailingFromQueue(inst, nTimeStamp_Wailed, autoW);
-                }
-            }
+            pChip.bHit = true;
             return;
         }
-        pChip.bHit = true;
+
+        int indexInst = (int)inst;
+        ApplyHiddenSudden(pChip, pChip.nDistanceFromBar[indexInst], CDTXMania.ConfigIni.nHidSud[indexInst], 250, 150, 75.0);
+        //
+        // ここにチップ更新処理が入る(overrideで入れる)。といっても座標とチップサイズが違うだけで処理はまるまる同じ。
+        //
+        if (!pChip.bHit && (pChip.nDistanceFromBar[indexInst] < 0))
+        {
+            if (pChip.nDistanceFromBar[indexInst] < -234)	// #25253 2011.5.29 yyagi: Don't set pChip.bHit=true for wailing at once. It need to 1sec-delay (234pix per 1sec). 
+            {
+                pChip.bHit = true;
+            }
+            bool autoW = (inst == EInstrumentPart.GUITAR) ? configIni.bAutoPlay.GtW : configIni.bAutoPlay.BsW;
+            if (autoW)
+            {
+                // #23886 2012.5.22 yyagi; To support auto Wailing; Don't do wailing for ALL wailing chips. Do wailing for queued wailing chip.
+                // wailing chips are queued when 1) manually wailing and not missed at that time 2) AutoWailing=ON and not missed at that time
+                long nTimeStamp_Wailed = pChip.nPlaybackTimeMs + AudioMixer.Timer.nResetAtMs;
+                DoWailingFromQueue(inst, nTimeStamp_Wailed, autoW);
+            }
+        }
     }
     protected virtual void UpdateChip_Guitar_Wailing(CConfigIni configIni, ref CDTX dTX, ref CChip pChip)
     {
@@ -3370,7 +3395,13 @@ internal abstract class CStagePerfCommonScreen : CStage
     {
         UpdateChip_GuitarBass_Wailing(configIni, ref dTX, ref pChip, EInstrumentPart.BASS);
     }
-    protected abstract void UpdateChip_NoSound_Drums(CConfigIni configIni, ref CDTX dTX, ref CChip pChip);  // t進行描画_チップ_空打ち音設定_ドラム
+    protected virtual void UpdateChip_NoSound_Drums(CConfigIni configIni, ref CDTX dTX, ref CChip pChip)
+    {
+        if (!pChip.bHit && pChip.nDistanceFromBar.Drums < 0)
+        {
+            pChip.bHit = true;
+        }
+    }  // t進行描画_チップ_空打ち音設定_ドラム
 
     //a screen overrides the ones it draws
     protected virtual void DrawChip_Drums(CConfigIni configIni, ref CDTX dTX, ref CChip pChip) { }
