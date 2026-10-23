@@ -57,7 +57,7 @@ internal partial class CStagePerfGuitarScreen
 				autoPlayCondition &= (pChip.nPlaybackTimeMs + ghostLag <= AudioMixer.Timer.nCurrentTime);
 				if (resetCombo && autoPlayCondition)
 				{
-					session.Combo[(int)pChip.eInstrumentPart] = 0;
+					session.BreakCombo(pChip.eInstrumentPart);
 				}
 
 				bUsePerfectGhost = false;

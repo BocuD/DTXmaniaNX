@@ -286,7 +286,7 @@ internal partial class CStagePerfDrumsScreen
                 CDTXMania.Skin.soundAudience.tPlay();
             }
             if ( CDTXMania.ConfigIni.nSkillMode == 1 && ( !CDTXMania.ConfigIni.bAllDrumsAreAutoPlay || CDTXMania.ConfigIni.bAutoAddGage ) )
-                actScore.Add( EInstrumentPart.DRUMS, bIsAutoPlay, 500L );
+                session.AddScore(EInstrumentPart.DRUMS, 500L );
         }
 
 

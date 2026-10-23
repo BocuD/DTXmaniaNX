@@ -23,7 +23,7 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
         listChildActivities.Add(actGraph = new CActPerfSkillMeter());
         listChildActivities.Add(actJudgeString = new CActPerfDrumsJudgementString());
         listChildActivities.Add(actLaneFlushD = new CActPerfDrumsLaneFlushD());
-        listChildActivities.Add(actScore = new CActPerfDrumsScore());
+        listChildActivities.Add(actScore = new CActPerfDrumsScore(session));
         listChildActivities.Add(actScrollSpeed = new CActPerfScrollSpeed());
         listChildActivities.Add(video = new CActPerfVideo());
         listChildActivities.Add(actBGA = new CActPerfBGA());
@@ -179,14 +179,14 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
                         {
                             bExc = true;
                             if (CDTXMania.ConfigIni.nSkillMode == 1)
-                                actScore.nCurrentTrueScore.Drums += 30000;
+                                session.AddClearBonus(EInstrumentPart.DRUMS, true);
                             break;
                         }
 
                         //FULL COMBO
                         bFullCom = true;
                         if (CDTXMania.ConfigIni.nSkillMode == 1)
-                            actScore.nCurrentTrueScore.Drums += 15000;
+                            session.AddClearBonus(EInstrumentPart.DRUMS, false);
                         break;
                     }
                 }
@@ -284,17 +284,7 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
             tJumpInSong(LoopBeginMs == -1 ? 0 : LoopBeginMs);
 
             //Reset hit counts and scores, so that the displayed score reflects the looped part only
-            session.HitCountExclAuto.Drums.Perfect = 0;
-            session.HitCountExclAuto.Drums.Great = 0;
-            session.HitCountExclAuto.Drums.Good = 0;
-            session.HitCountExclAuto.Drums.Poor = 0;
-            session.HitCountExclAuto.Drums.Miss = 0;
-            session.Combo.Drums = 0;
-            session.MaxCombo.Drums = 0;
-            actScore.nCurrentTrueScore.Drums = 0;
-
-            session.TimingHitCount.Drums.Late = 0;
-            session.TimingHitCount.Drums.Early = 0;
+            session.ResetForLoop(EInstrumentPart.DRUMS);
         }
 
         AllocationProbe.Begin(probeKeyInput);
@@ -401,7 +391,7 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
                   session.MaxCombo.Drums * 3 ) / ( 20.0 * CDTXMania.DTX.nVisibleChipsCount.Drums );
         }
 
-        session.AchievementRate.Drums = bIsTrainingMode ? 0 : actGraph.dbグラフ値現在_渡;
+        session.SetAchievementRate(EInstrumentPart.DRUMS, bIsTrainingMode ? 0 : actGraph.dbグラフ値現在_渡);
         return eJudgeResult;
     }
 
