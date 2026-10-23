@@ -283,18 +283,7 @@ internal abstract class CStagePerfCommonScreen : CStage
         listWAV = CDTXMania.DTX.listWAV;
 
         eReturnValue = EPerfScreenReturnValue.Continue;
-        LLastPlayedHHWAVNumber = new List<int>(16);
-        nLastPlayedHHChannelNumber = 0;
-        nLastPlayedWAVNumber.Guitar = -1;
-        nLastPlayedWAVNumber.Bass = -1;
-        for (int i = 0; i < 50; i++)
-        {
-            nLastPlayedBGMWAVNumber[i] = -1;
-        }
-        for (int k = 0; k < 3; k++)
-        {
-            r現在の歓声Chip[k] = null;
-        }
+        sequencer = new ChartSequencer();
         nJudgeLinePosY.Drums = (CDTXMania.ConfigIni.bReverse.Drums ? 159 + CDTXMania.ConfigIni.nJudgeLine.Drums : 561 - CDTXMania.ConfigIni.nJudgeLine.Drums);
         nJudgeLinePosY.Guitar = (CDTXMania.ConfigIni.bReverse.Guitar ? 611 - CDTXMania.ConfigIni.nJudgeLine.Guitar : 154 + CDTXMania.ConfigIni.nJudgeLine.Guitar);
         nJudgeLinePosY.Bass = (CDTXMania.ConfigIni.bReverse.Bass ? 611 - CDTXMania.ConfigIni.nJudgeLine.Bass : 154 + CDTXMania.ConfigIni.nJudgeLine.Bass);
@@ -373,8 +362,6 @@ internal abstract class CStagePerfCommonScreen : CStage
         // memory freely again.
         System.Runtime.GCSettings.LatencyMode = _previousGcLatencyMode;
 
-        LLastPlayedHHWAVNumber.Clear();	// #23921 2011.1.4 yyagi
-        LLastPlayedHHWAVNumber = null;	//
         drums = null;
         Array.Clear(guitars);
         ctWailingChipPatternAnimation = null;
@@ -466,21 +453,17 @@ internal abstract class CStagePerfCommonScreen : CStage
     protected PerformanceData GuitarData => partData[(int)EInstrumentPart.GUITAR];
     protected PerformanceData BassData => partData[(int)EInstrumentPart.BASS];
 
-    protected int[] nLastPlayedBGMWAVNumber = new int[50];
     protected static int nJudgeLineMaxPosY;
     protected static int nJudgeLineMinPosY;
     protected static int nShutterMaxPosY;
     protected static int nShutterMinPosY;
-    protected EChannel nLastPlayedHHChannelNumber;
-    protected List<int> LLastPlayedHHWAVNumber;		// #23921 2011.1.4 yyagi: change "int" to "List<int>", for recording multiple wav No.
-    protected STLANEVALUE<int> nLastPlayedWAVNumber;	// #26388 2011.11.8 yyagi: change "nLastPlayedWAVNumber.GUITAR" and "nLastPlayedWAVNumber.BASS"
 
     protected bool bNeedsDriftCorrection;
     protected double dbPlaySpeed;
     protected bool bValidScore;
     protected STDGBVALUE<int> nJudgeLinePosY_delta; // #31602 2013.6.23 yyagi 表示遅延対策として、判定ラインの表示位置をずらす機能を追加する
 
-    protected STDGBVALUE<CChip> r現在の歓声Chip;
+    protected ChartSequencer sequencer = new();
     protected BaseTexture txWailingFrame;
     protected BaseTexture txChip;  // txチップ
 
@@ -549,111 +532,6 @@ internal abstract class CStagePerfCommonScreen : CStage
         return ChipJudge.GetJudgementForLag(pChip, lag);
     }
 
-    protected void tPlaySound(CChip rChip, long n再生開始システム時刻ms, EInstrumentPart part)
-    {
-        tPlaySound(rChip, n再生開始システム時刻ms, part, CDTXMania.ConfigIni.n手動再生音量, false, false);
-    }
-    protected void tPlaySound(CChip rChip, long n再生開始システム時刻ms, EInstrumentPart part, int n音量)
-    {
-        tPlaySound(rChip, n再生開始システム時刻ms, part, n音量, false, false);
-    }
-    protected void tPlaySound(CChip rChip, long n再生開始システム時刻ms, EInstrumentPart part, int n音量, bool bモニタ)
-    {
-        tPlaySound(rChip, n再生開始システム時刻ms, part, n音量, bモニタ, false);
-    }
-    protected void tPlaySound(CChip pChip, long n再生開始システム時刻ms, EInstrumentPart part, int n音量, bool bモニタ, bool b音程をずらして再生)
-    {
-        if (pChip != null)
-        {
-            switch (part)
-            {
-                case EInstrumentPart.DRUMS:
-                    #region [ DRUMS ]
-                {
-                    EChannel index = pChip.nChannelNumber;
-                    if ((EChannel.HiHatClose <= index) && (index <= EChannel.LeftBassDrum))
-                    {
-                        index -= 0x11;
-                    }
-                    else if ((EChannel.HiHatClose_Hidden <= index) && (index <= EChannel.LeftBassDrum_Hidden))
-                    {
-                        index -= EChannel.HiHatClose_Hidden;
-                    }
-                    // mute sound (auto)
-                    // 4A: 84: HH (HO/HC)
-                    // 4B: 85: CY
-                    // 4C: 86: RD
-                    // 4D: 87: LC
-                    // 2A: 88: Gt
-                    // AA: 89: Bs
-                    else if (EChannel.SE24 == index)	// 仮に今だけ追加 HHは消音処理があるので overwriteフラグ系の処理は改めて不要
-                    {
-                        index = 0;
-                    }
-                    else if ((EChannel.SE25 <= index) && (index <= EChannel.SE27))	// 仮に今だけ追加
-                    {
-                        //            CY    RD    LC
-                        EChannel[] ch = [EChannel.Cymbal, EChannel.RideCymbal, EChannel.LeftCymbal];
-                        pChip.nChannelNumber = ch[pChip.nChannelNumber - EChannel.SE25];
-                        index = (EChannel)(pChip.nChannelNumber - EChannel.HiHatClose);
-                    }
-                    else
-                    {
-                        return;
-                    }
-
-                    int nLane = DrumsPerformance.ChannelLanes[(int)index];
-                    if (((((nLane == 1) && (index == 0)) && ((nLastPlayedHHChannelNumber != EChannel.HiHatOpen) && (nLastPlayedHHChannelNumber != EChannel.HiHatOpen_Hidden))) || ((((nLane == 8)) && ((index == EChannel.BMS_reserved_0A) && (nLastPlayedHHChannelNumber != EChannel.HiHatOpen))) && (nLastPlayedHHChannelNumber != EChannel.HiHatOpen_Hidden))) && CDTXMania.ConfigIni.bMutingLP)
-                    {
-                        for (int i = 0; i < LLastPlayedHHWAVNumber.Count; i++)
-                        {
-                            CDTXMania.DTX.tStopPlayingWav(LLastPlayedHHWAVNumber[i]);
-                        }
-                        LLastPlayedHHWAVNumber.Clear();
-                        nLastPlayedHHChannelNumber = pChip.nChannelNumber;
-                    }
-                    switch (index)
-                    {
-                        case EChannel.Nil:
-                        case EChannel.BGALayer2:
-                        case EChannel.Guitar_Open:
-                        case EChannel.Guitar_RGBxx:
-                            if (LLastPlayedHHWAVNumber.Count >= 0x10)
-                            {
-                                LLastPlayedHHWAVNumber.RemoveAt(0);
-                            }
-                            if (!LLastPlayedHHWAVNumber.Contains(pChip.nIntegerValue_InternalNumber))
-                            {
-                                LLastPlayedHHWAVNumber.Add(pChip.nIntegerValue_InternalNumber);
-                            }
-                            break;
-                    }
-
-                    CDTXMania.DTX.tPlayChip(pChip, n再生開始システム時刻ms, nLane, n音量, bモニタ);
-                    nLastPlayedWAVNumber[nLane] = pChip.nIntegerValue_InternalNumber;		// nLaneでなくindexにすると、LC(1A-11=09)とギター(enumで09)がかぶってLC音が消されるので注意
-                    return;
-                }
-                #endregion
-                case EInstrumentPart.GUITAR:
-                    #region [ GUITAR ]
-                    CDTXMania.DTX.tStopPlayingWav(nLastPlayedWAVNumber.Guitar);
-                    CDTXMania.DTX.tPlayChip(pChip, n再生開始システム時刻ms, (int)ELane.Guitar, n音量, bモニタ, b音程をずらして再生);
-                    nLastPlayedWAVNumber.Guitar = pChip.nIntegerValue_InternalNumber;
-                    return;
-                #endregion
-                case EInstrumentPart.BASS:
-                    #region [ BASS ]
-                    CDTXMania.DTX.tStopPlayingWav(nLastPlayedWAVNumber.Bass);
-                    CDTXMania.DTX.tPlayChip(pChip, n再生開始システム時刻ms, (int)ELane.Bass, n音量, bモニタ, b音程をずらして再生);
-                    nLastPlayedWAVNumber.Bass = pChip.nIntegerValue_InternalNumber;
-                    return;
-                #endregion
-
-                default:
-                    break;
-            }
-        }
-    }
     private void ChangeInputAdjustTimeInPlaying(IInputKeyboard keyboard, int plusminus)		// #23580 2011.1.16 yyagi UI for InputAdjustTime in playing screen.
     {
         int part, offset = plusminus;
@@ -1117,15 +995,6 @@ internal abstract class CStagePerfCommonScreen : CStage
         };
     }
 
-    private void UpdateBackgroundChip(CDTX dTX, CChip pChip, EInstrumentPart part)
-    {
-        if (!pChip.bHit && pChip.nDistanceFromBar[(int)part] < 0)
-        {
-            pChip.bHit = true;
-            tPlaySound(pChip, AudioMixer.Timer.nResetAtMs + pChip.nPlaybackTimeMs, part, dTX.nモニタを考慮した音量(part));
-        }
-    }
-
     protected bool UpdateChips()
     {
         if ((ePhaseID == EPhase.PERFORMANCE_STAGE_FAILED) || (ePhaseID == EPhase.PERFORMANCE_STAGE_FAILED_END))
@@ -1154,43 +1023,8 @@ internal abstract class CStagePerfCommonScreen : CStage
 
             if (pChip.eInstrumentPart != EInstrumentPart.UNKNOWN && !IsPlayed(pChip.eInstrumentPart))
             {
-                UpdateBackgroundChip(dTX, pChip, pChip.eInstrumentPart);
+                sequencer.UpdateUnplayedNote(pChip);
                 continue;
-            }
-
-            //bar lines and the drums pattern layer
-            switch (pChip.nChannelNumber)
-            {
-                case EChannel.BarLine:
-                    UpdateChip_BarLine(configIni, ref dTX, ref pChip);
-                    break;
-
-                case EChannel.BeatLine:
-                    if (!pChip.bHit && (pChip.nDistanceFromBar.Drums < 0))
-                    {
-                        pChip.bHit = true;
-
-                        if (CDTXMania.ConfigIni.bMetronome)
-                        {
-                            CDTXMania.Skin.soundMetronome.tPlay(40);
-                        }
-                    }
-                    break;
-
-                case EChannel.HiHatClose:
-                case EChannel.Snare:
-                case EChannel.BassDrum:
-                case EChannel.HighTom:
-                case EChannel.LowTom:
-                case EChannel.Cymbal:
-                case EChannel.FloorTom:
-                case EChannel.HiHatOpen:
-                case EChannel.RideCymbal:
-                case EChannel.LeftCymbal:
-                case EChannel.LeftPedal:
-                case EChannel.LeftBassDrum:
-                    UpdateChip_PatternOnly_Drums(configIni, ref dTX, ref pChip);
-                    break;
             }
 
             int instIndex = (int) pChip.eInstrumentPart;
@@ -1231,10 +1065,7 @@ internal abstract class CStagePerfCommonScreen : CStage
 
             switch (pChip.nChannelNumber)
             {
-                //描画順の都合上こちらから描画。
-
-                #region [ 11-1c: Drums ]
-                case EChannel.HiHatClose:	// ドラム演奏
+                case EChannel.HiHatClose:
                 case EChannel.Snare:
                 case EChannel.BassDrum:
                 case EChannel.HighTom:
@@ -1246,103 +1077,11 @@ internal abstract class CStagePerfCommonScreen : CStage
                 case EChannel.LeftCymbal:
                 case EChannel.LeftPedal:
                 case EChannel.LeftBassDrum:
+                    UpdateChip_PatternOnly_Drums(configIni, ref dTX, ref pChip);
                     UpdateChip_Drums(configIni, ref dTX, ref pChip);
                     break;
-                #endregion
 
-                #region [ 01: BGM ]
-                case EChannel.BGM:	// BGM
-                    if (!pChip.bHit && (pChip.nDistanceFromBar.Drums < 0))
-                    {
-                        pChip.bHit = true;
-                        if (configIni.bBGM音を発声する)
-                        {
-                            dTX.tPlayChip(pChip, AudioMixer.Timer.nResetAtMs + pChip.nPlaybackTimeMs, (int)ELane.BGM, dTX.nモニタを考慮した音量(EInstrumentPart.UNKNOWN));
-                        }
-                    }
-                    break;
-                #endregion
-                #region [ 03: BPM変更 ]
-                case EChannel.BPM:	// BPM変更
-                    if (!pChip.bHit && (pChip.nDistanceFromBar.Drums < 0))
-                    {
-                        pChip.bHit = true;
-                        ChangeBPM(pChip.nIntegerValue);
-                    }
-                    break;
-                #endregion
-                #region [ 04, 07, 55, 56,57, 58, 59, 60:レイヤーBGA ]
-                case EChannel.BGALayer1:	// レイヤーBGA
-                case EChannel.BGALayer2:
-                case EChannel.BGALayer3:
-                case EChannel.BGALayer4:
-                case EChannel.BGALayer5:
-                case EChannel.BGALayer6:
-                case EChannel.BGALayer7:
-                case EChannel.BGALayer8:
-                    if (!pChip.bHit && (pChip.nDistanceFromBar.Drums < 0))
-                    {
-                        pChip.bHit = true;
-                        if (configIni.bBGAEnabled)
-                        {
-                            switch (pChip.eBGA種別)
-                            {
-                                case EBGAType.BMPTEX:
-                                    if (pChip.rBMPTEX != null)
-                                    {
-                                        actBGA.Start(pChip.nChannelNumber, null, pChip.rBMPTEX, pChip.rBMPTEX.txImage.Width, pChip.rBMPTEX.txImage.Height, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-                                    }
-                                    break;
-
-                                case EBGAType.BGA:
-                                    if ((pChip.rBGA != null) && ((pChip.rBMP != null) || (pChip.rBMPTEX != null)))
-                                    {
-                                        actBGA.Start(pChip.nChannelNumber, pChip.rBMP, pChip.rBMPTEX, pChip.rBGA.pt画像側右下座標.X - pChip.rBGA.pt画像側左上座標.X, pChip.rBGA.pt画像側右下座標.Y - pChip.rBGA.pt画像側左上座標.Y, 0, 0, pChip.rBGA.pt画像側左上座標.X, pChip.rBGA.pt画像側左上座標.Y, 0, 0, pChip.rBGA.pt表示座標.X, pChip.rBGA.pt表示座標.Y, 0, 0, 0);
-                                    }
-                                    break;
-
-                                case EBGAType.BGAPAN:
-                                    if ((pChip.rBGAPan != null) && ((pChip.rBMP != null) || (pChip.rBMPTEX != null)))
-                                    {
-                                        actBGA.Start(pChip.nChannelNumber, pChip.rBMP, pChip.rBMPTEX, pChip.rBGAPan.sz開始サイズ.Width, pChip.rBGAPan.sz開始サイズ.Height, pChip.rBGAPan.sz終了サイズ.Width, pChip.rBGAPan.sz終了サイズ.Height, pChip.rBGAPan.pt画像側開始位置.X, pChip.rBGAPan.pt画像側開始位置.Y, pChip.rBGAPan.pt画像側終了位置.X, pChip.rBGAPan.pt画像側終了位置.Y, pChip.rBGAPan.pt表示側開始位置.X, pChip.rBGAPan.pt表示側開始位置.Y, pChip.rBGAPan.pt表示側終了位置.X, pChip.rBGAPan.pt表示側終了位置.Y, pChip.n総移動時間);
-                                    }
-                                    break;
-
-                                default:
-                                    if (pChip.rBMP != null)
-                                    {
-                                        actBGA.Start(pChip.nChannelNumber, pChip.rBMP, null, pChip.rBMP.nWidth, pChip.rBMP.nHeight, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-                                    }
-                                    break;
-                            }
-                        }
-                    }
-                    break;
-                #endregion
-                #region [ 08: BPM変更(拡張) ]
-                case EChannel.BPMEx:	// BPM変更(拡張)
-                    if (!pChip.bHit && (pChip.nDistanceFromBar.Drums < 0))
-                    {
-                        pChip.bHit = true;
-                        if (dTX.listBPM.ContainsKey(pChip.nIntegerValue_InternalNumber))
-                        {
-                            ChangeBPM(dTX.listBPM[pChip.nIntegerValue_InternalNumber].dbBPM値);
-                        }
-                    }
-                    break;
-                #endregion
-
-                #region [ 1f: フィルインサウンド(ドラム) ]
-                case EChannel.DrumsFillin:	// フィルインサウンド(ドラム)
-                    if (!pChip.bHit && (pChip.nDistanceFromBar.Drums < 0))
-                    {
-                        pChip.bHit = true;
-                        r現在の歓声Chip.Drums = pChip;
-                    }
-                    break;
-                #endregion
-                #region [ 20-27: ギター演奏 ]
-                case EChannel.Guitar_Open:	// ギター演奏
+                case EChannel.Guitar_Open:
                 case EChannel.Guitar_xxBxx:
                 case EChannel.Guitar_xGxxx:
                 case EChannel.Guitar_xGBxx:
@@ -1350,8 +1089,6 @@ internal abstract class CStagePerfCommonScreen : CStage
                 case EChannel.Guitar_RxBxx:
                 case EChannel.Guitar_RGxxx:
                 case EChannel.Guitar_RGBxx:
-
-
                 case EChannel.Guitar_xxxYx:
                 case EChannel.Guitar_xxBYx:
                 case EChannel.Guitar_xGxYx:
@@ -1376,180 +1113,18 @@ internal abstract class CStagePerfCommonScreen : CStage
                 case EChannel.Guitar_RxBYP:
                 case EChannel.Guitar_RGxYP:
                 case EChannel.Guitar_RGBYP:
-
                     UpdateChip_GuitarBass(configIni, ref dTX, ref pChip, EInstrumentPart.GUITAR);
                     break;
-                #endregion
-                #region [ 28: ウェイリング(ギター) ]
-                case EChannel.Guitar_Wailing:	// ウェイリング(ギター)
+
+                case EChannel.Guitar_Wailing:
                     UpdateChip_Guitar_Wailing(configIni, ref dTX, ref pChip);
                     break;
-                #endregion
-                #region [ 2f: ウェイリングサウンド(ギター) ]
-                case EChannel.Guitar_WailingSound:	// ウェイリングサウンド(ギター)
-                    if (!pChip.bHit && (pChip.nDistanceFromBar.Guitar < 0))
-                    {
-                        pChip.bHit = true;
-                    }
-                    break;
-                #endregion
-                #region [ 31-3a: 不可視チップ配置(ドラム) ]
-                case EChannel.HiHatClose_Hidden:	// 不可視チップ配置(ドラム)
-                case EChannel.Snare_Hidden:
-                case EChannel.BassDrum_Hidden:
-                case EChannel.HighTom_Hidden:
-                case EChannel.LowTom_Hidden:
-                case EChannel.Cymbal_Hidden:
-                case EChannel.FloorTom_Hidden:
-                case EChannel.HiHatOpen_Hidden:
-                case EChannel.RideCymbal_Hidden:
-                case EChannel.LeftCymbal_Hidden:
-                case EChannel.LeftPedal_Hidden:
-                case EChannel.LeftBassDrum_Hidden:
-                    if (!pChip.bHit && (pChip.nDistanceFromBar.Drums < 0))
-                    {
-                        pChip.bHit = true;
-                    }
-                    break;
-                #endregion
-                #region [ 4F、4E、4D、4C: ボーナス ]
-                case EChannel.BonusEffect_Min:
-                case EChannel.BonusEffect2:
-                case EChannel.BonusEffect3:
-                case EChannel.BonusEffect:  //追加した順番の都合上、4F、4E____という順でBonus1、Bonus2___という割り当てになってます。
-                    if (!pChip.bHit && (pChip.nDistanceFromBar.Drums < 0))
-                    {
-                        pChip.bHit = true;
-                    }
-                    break;
-                #endregion
 
-                #region [ 52: MIDIコーラス ]
-                case EChannel.MIDIChorus:	// MIDIコーラス
-                    if (!pChip.bHit && (pChip.nDistanceFromBar.Drums < 0))
-                    {
-                        pChip.bHit = true;
-                    }
-                    break;
-                #endregion
-                #region [ 53: フィルイン ]
-                case EChannel.FillIn:	// フィルイン
+                case EChannel.FillIn:
                     UpdateChip_FillIn(configIni, ref dTX, ref pChip);
                     break;
-                #endregion
-                #region [ 54, 5A: 動画再生 ]
-                case EChannel.Movie:	// 動画再生
-                case EChannel.MovieFull:
-                    if (!pChip.bHit && (pChip.nDistanceFromBar.Drums < 0))
-                    {
-                        pChip.bHit = true;
-                        if (configIni.bAVIEnabled)
-                        {
-                            switch (pChip.eAVI種別)
-                            {
-                                case EAVIType.AVI:
-                                    if (pChip.rAVI != null)
-                                    {
-                                        video.Start(pChip.rAVI, pChip.nPlaybackTimeMs);
-                                    }                                        
-                                    break;
 
-                                case EAVIType.AVIPAN:
-                                    if (pChip.rAVIPan != null)
-                                    {
-                                        video.Start(pChip.rAVI, pChip.nPlaybackTimeMs);
-                                    }                                        
-                                    break;
-                            }
-                        }
-                    }
-                    break;
-                #endregion
-                #region [ 61-65: 自動再生(Muting SE) ]
-                //SE01-05 are reserved as additional Muting channels i.e. only one wav can be played at any given time per channel
-                case EChannel.SE01:
-                case EChannel.SE02:
-                case EChannel.SE03:
-                case EChannel.SE04:	
-                case EChannel.SE05:
-                    if (!pChip.bHit && (pChip.nDistanceFromBar.Drums < 0))
-                    {
-                        pChip.bHit = true;
-                        if (configIni.bBGM音を発声する)
-                        {   
-                            dTX.tStopPlayingWav(nLastPlayedBGMWAVNumber[pChip.nChannelNumber - EChannel.SE01]);
-                            dTX.tPlayChip(pChip, AudioMixer.Timer.nResetAtMs + pChip.nPlaybackTimeMs, (int)ELane.BGM, dTX.nモニタを考慮した音量(EInstrumentPart.UNKNOWN));
-                            nLastPlayedBGMWAVNumber[pChip.nChannelNumber - EChannel.SE01] = pChip.nIntegerValue_InternalNumber;
-                        }
-                    }
-                    break;
-                #endregion
-                #region [ 66-92: 自動再生(Non-muting SE) ]
-                //SE06 to SE23, SE30 to SE32 are updated to be non-muting SE channels
-                case EChannel.SE06:
-                case EChannel.SE07:
-                case EChannel.SE08:
-                case EChannel.SE09:
-                case EChannel.SE10:
-                case EChannel.SE11:
-                case EChannel.SE12:
-                case EChannel.SE13:
-                case EChannel.SE14:
-                case EChannel.SE15:
-                case EChannel.SE16:
-                case EChannel.SE17:
-                case EChannel.SE18:
-                case EChannel.SE19:
-                case EChannel.SE20:
-                case EChannel.SE21:
-                case EChannel.SE22:
-                case EChannel.SE23:
-                case EChannel.SE30:
-                case EChannel.SE31:
-                case EChannel.SE32:
-                    if (!pChip.bHit && (pChip.nDistanceFromBar.Drums < 0))
-                    {
-                        pChip.bHit = true;
-                        if (configIni.bBGM音を発声する)
-                        {
-                            dTX.tPlayChip(pChip, AudioMixer.Timer.nResetAtMs + pChip.nPlaybackTimeMs, (int)ELane.BGM, dTX.nモニタを考慮した音量(EInstrumentPart.UNKNOWN));
-                        }
-                    }
-                    break;
-                #endregion
-
-                #region [ 84-89: 仮: override sound ]	// #26338 2011.11.8 yyagi
-                case EChannel.SE24:	// HH (HO/HC)
-                case EChannel.SE25:	// CY
-                case EChannel.SE26:	// RD
-                case EChannel.SE27:	// LC
-                case EChannel.SE28:	// Guitar
-                case EChannel.SE29:	// Bass
-                    // mute sound (auto)
-                    // 4A: 84: HH (HO/HC)
-                    // 4B: 85: CY
-                    // 4C: 86: RD
-                    // 4D: 87: LC
-                    // 2A: 88: Gt
-                    // AA: 89: Bs
-
-
-                    //	protected void tPlaySound( CChip pChip, long n再生開始システム時刻ms, EInstrumentPart part, int nVolume, bool bモニタ, bool b音程をずらして再生 )
-                    if (!pChip.bHit && (pChip.nDistanceFromBar.Drums < 0))
-                    {
-                        pChip.bHit = true;
-                        EInstrumentPart[] p = [EInstrumentPart.DRUMS, EInstrumentPart.DRUMS, EInstrumentPart.DRUMS, EInstrumentPart.DRUMS, EInstrumentPart.GUITAR, EInstrumentPart.BASS
-                        ];
-
-                        EInstrumentPart pp = p[pChip.nChannelNumber - EChannel.SE24];
-
-                        tPlaySound(pChip, AudioMixer.Timer.nResetAtMs + pChip.nPlaybackTimeMs, pp, dTX.nモニタを考慮した音量(pp));
-                    }
-                    break;
-                #endregion
-
-                #region [ a0-a7: ベース演奏 ]
-                case EChannel.Bass_Open:	// ベース演奏
+                case EChannel.Bass_Open:
                 case EChannel.Bass_xxBxx:
                 case EChannel.Bass_xGxxx:
                 case EChannel.Bass_xGBxx:
@@ -1557,7 +1132,6 @@ internal abstract class CStagePerfCommonScreen : CStage
                 case EChannel.Bass_RxBxx:
                 case EChannel.Bass_RGxxx:
                 case EChannel.Bass_RGBxx:
-
                 case EChannel.Bass_xxxYx:
                 case EChannel.Bass_xxBYx:
                 case EChannel.Bass_xGxYx:
@@ -1584,13 +1158,11 @@ internal abstract class CStagePerfCommonScreen : CStage
                 case EChannel.Bass_RGBYP:
                     UpdateChip_GuitarBass(configIni, ref dTX, ref pChip, EInstrumentPart.BASS);
                     break;
-                #endregion
-                #region [ a8: ウェイリング(ベース) ]
-                case EChannel.Bass_Wailing:	// ウェイリング(ベース)
+
+                case EChannel.Bass_Wailing:
                     UpdateChip_Bass_Wailing(configIni, ref dTX, ref pChip);
                     break;
-                #endregion
-                #region [2c, 2d: Hold notes]
+
                 case EChannel.Guitar_LongNote:
                 case EChannel.Bass_LongNote:
                 {
@@ -1606,9 +1178,8 @@ internal abstract class CStagePerfCommonScreen : CStage
                     }
                 }
                     break;
-                #endregion
-                #region [ b1-b9, bc: 空打ち音設定(ドラム) ]
-                case EChannel.HiHatClose_NoChip:	// 空打ち音設定(ドラム)
+
+                case EChannel.HiHatClose_NoChip:
                 case EChannel.Snare_NoChip:
                 case EChannel.BassDrum_NoChip:
                 case EChannel.HighTom_NoChip:
@@ -1622,9 +1193,8 @@ internal abstract class CStagePerfCommonScreen : CStage
                 case EChannel.LeftBassDrum_NoChip:
                     UpdateChip_NoSound_Drums(configIni, ref dTX, ref pChip);
                     break;
-                #endregion
-                #region [ ba: 空打ち音設定(ギター) ]
-                case EChannel.Guitar_NoChip:	// 空打ち音設定(ギター)
+
+                case EChannel.Guitar_NoChip:
                     if (!pChip.bHit && (pChip.nDistanceFromBar.Guitar < 0))
                     {
                         pChip.bHit = true;
@@ -1632,9 +1202,8 @@ internal abstract class CStagePerfCommonScreen : CStage
                         pChip.nChannelNumber = EChannel.Guitar_Open;
                     }
                     break;
-                #endregion
-                #region [ bb: 空打ち音設定(ベース) ]
-                case EChannel.Bass_NoChip:	// 空打ち音設定(ベース)
+
+                case EChannel.Bass_NoChip:
                     if (!pChip.bHit && (pChip.nDistanceFromBar.Bass < 0))
                     {
                         pChip.bHit = true;
@@ -1642,76 +1211,96 @@ internal abstract class CStagePerfCommonScreen : CStage
                         pChip.nChannelNumber = EChannel.Bass_Open;
                     }
                     break;
-                #endregion
-                #region [ c4, c7, d5-d9, e0: BGA画像入れ替え ]
-                case EChannel.BGALayer1_Swap:
-                case EChannel.BGALayer2_Swap:
-                case EChannel.BGALayer3_Swap:
-                case EChannel.BGALayer4_Swap:	// BGA画像入れ替え
-                case EChannel.BGALayer5_Swap:
-                case EChannel.BGALayer6_Swap:
-                case EChannel.BGALayer7_Swap:
-                case EChannel.BGALayer8_Swap:
-                    if (!pChip.bHit && (pChip.nDistanceFromBar.Drums < 0))
-                    {
-                        pChip.bHit = true;
-                        if ((configIni.bBGAEnabled && (pChip.eBGA種別 == EBGAType.BMP)) || (pChip.eBGA種別 == EBGAType.BMPTEX))
-                        {
-                            for (int i = 0; i < 8; i++)
-                            {
-                                if (nBGAスコープチャンネルマップ[0, i] == pChip.nChannelNumber)
-                                {
-                                    actBGA.ChangeScope(nBGAスコープチャンネルマップ[1, i], pChip.rBMP, pChip.rBMPTEX);
-                                }
-                            }
-                        }
-                    }
+
+                case EChannel.BarLine:
+                    UpdateChip_BarLine(configIni, ref dTX, ref pChip);
                     break;
-                #endregion
-                #region [ ea: ミキサーへチップ音追加 ]
-                case EChannel.MixChannel1_unc:
-                    if (!pChip.bHit && (pChip.nDistanceFromBar.Drums < 0))
-                    {
-                        pChip.bHit = true;
-                        if (listWAV.ContainsKey(pChip.nIntegerValue_InternalNumber)) // 参照が遠いので後日最適化する
-                        {
-                            CDTX.CWAV wc = listWAV[pChip.nIntegerValue_InternalNumber];
-                            if (wc.clip != null)
-                            {
-                                AudioMixer.AttachToMixer(wc.clip);
-                            }
-                        }
-                    }
-                    break;
-                #endregion
-                #region [ eb: ミキサーからチップ音削除 ]
-                case EChannel.MixChannel2_unc:
-                    if (!pChip.bHit && (pChip.nDistanceFromBar.Drums < 0))
-                    {
-                        pChip.bHit = true;
-                        if (listWAV.ContainsKey(pChip.nIntegerValue_InternalNumber))	// 参照が遠いので後日最適化する
-                        {
-                            CDTX.CWAV wc = listWAV[pChip.nIntegerValue_InternalNumber];
-                            if (wc.clip != null)
-                            {
-                                AudioMixer.DetachFromMixer(wc.clip);
-                            }
-                        }
-                    }
-                    break;
-                #endregion
-                #region [ その他(未定義) ]
                 default:
-                    if (!pChip.bHit && (pChip.nDistanceFromBar.Drums < 0))
-                    {
-                        pChip.bHit = true;
-                    }
+                    sequencer.Update(pChip);
+                    ApplySequencerEvents();
                     break;
-                #endregion
             }
         }
         return false;
     }
+
+    private void ApplySequencerEvents()
+    {
+        CConfigIni config = CDTXMania.ConfigIni;
+        foreach (SequencerEvent e in sequencer.Events)
+        {
+            CChip chip = e.Chip;
+            switch (e.Kind)
+            {
+                case ESequencerEvent.Bpm:
+                    ChangeBPM(e.Bpm);
+                    break;
+
+                case ESequencerEvent.Bga:
+                    if (config.bBGAEnabled)
+                    {
+                        StartBga(chip);
+                    }
+                    break;
+
+                case ESequencerEvent.BgaSwap:
+                    if ((config.bBGAEnabled && chip.eBGA種別 == EBGAType.BMP) || chip.eBGA種別 == EBGAType.BMPTEX)
+                    {
+                        for (int i = 0; i < 8; i++)
+                        {
+                            if (nBGAスコープチャンネルマップ[0, i] == chip.nChannelNumber)
+                            {
+                                actBGA.ChangeScope(nBGAスコープチャンネルマップ[1, i], chip.rBMP, chip.rBMPTEX);
+                            }
+                        }
+                    }
+                    break;
+
+                case ESequencerEvent.Video:
+                    if (config.bAVIEnabled && (chip.eAVI種別 == EAVIType.AVI && chip.rAVI != null || chip.eAVI種別 == EAVIType.AVIPAN && chip.rAVIPan != null))
+                    {
+                        video.Start(chip.rAVI, chip.nPlaybackTimeMs);
+                    }
+                    break;
+            }
+        }
+        sequencer.Events.Clear();
+    }
+
+    private void StartBga(CChip chip)
+    {
+        switch (chip.eBGA種別)
+        {
+            case EBGAType.BMPTEX:
+                if (chip.rBMPTEX != null)
+                {
+                    actBGA.Start(chip.nChannelNumber, null, chip.rBMPTEX, chip.rBMPTEX.txImage.Width, chip.rBMPTEX.txImage.Height, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+                }
+                break;
+
+            case EBGAType.BGA:
+                if ((chip.rBGA != null) && ((chip.rBMP != null) || (chip.rBMPTEX != null)))
+                {
+                    actBGA.Start(chip.nChannelNumber, chip.rBMP, chip.rBMPTEX, chip.rBGA.pt画像側右下座標.X - chip.rBGA.pt画像側左上座標.X, chip.rBGA.pt画像側右下座標.Y - chip.rBGA.pt画像側左上座標.Y, 0, 0, chip.rBGA.pt画像側左上座標.X, chip.rBGA.pt画像側左上座標.Y, 0, 0, chip.rBGA.pt表示座標.X, chip.rBGA.pt表示座標.Y, 0, 0, 0);
+                }
+                break;
+
+            case EBGAType.BGAPAN:
+                if ((chip.rBGAPan != null) && ((chip.rBMP != null) || (chip.rBMPTEX != null)))
+                {
+                    actBGA.Start(chip.nChannelNumber, chip.rBMP, chip.rBMPTEX, chip.rBGAPan.sz開始サイズ.Width, chip.rBGAPan.sz開始サイズ.Height, chip.rBGAPan.sz終了サイズ.Width, chip.rBGAPan.sz終了サイズ.Height, chip.rBGAPan.pt画像側開始位置.X, chip.rBGAPan.pt画像側開始位置.Y, chip.rBGAPan.pt画像側終了位置.X, chip.rBGAPan.pt画像側終了位置.Y, chip.rBGAPan.pt表示側開始位置.X, chip.rBGAPan.pt表示側開始位置.Y, chip.rBGAPan.pt表示側終了位置.X, chip.rBGAPan.pt表示側終了位置.Y, chip.n総移動時間);
+                }
+                break;
+
+            default:
+                if (chip.rBMP != null)
+                {
+                    actBGA.Start(chip.nChannelNumber, chip.rBMP, null, chip.rBMP.nWidth, chip.rBMP.nHeight, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+                }
+                break;
+        }
+    }
+
     protected void DrawChips(EInstrumentPart ePlayMode)
     {
         bool drawsChips = ePhaseID is not (EPhase.PERFORMANCE_STAGE_FAILED or EPhase.PERFORMANCE_STAGE_FAILED_END)
@@ -2274,17 +1863,17 @@ internal abstract class CStagePerfCommonScreen : CStage
             switch (e.Kind)
             {
                 case EGuitarEvent.AutoNote:
-                    tPlaySound(e.Chip, AudioMixer.Timer.nResetAtMs + e.Time, side, CDTXMania.DTX.nモニタを考慮した音量(side), false, e.ShiftPitch);
+                    sequencer.PlaySound(e.Chip, AudioMixer.Timer.nResetAtMs + e.Time, side, CDTXMania.DTX.nモニタを考慮した音量(side), false, e.ShiftPitch);
                     break;
 
                 case EGuitarEvent.PickedNote:
-                    tPlaySound(e.Chip, AudioMixer.Timer.nSystemTimeMs, side, CDTXMania.ConfigIni.n手動再生音量, CDTXMania.ConfigIni.b演奏音を強調する[(int)side], e.ShiftPitch);
+                    sequencer.PlaySound(e.Chip, AudioMixer.Timer.nSystemTimeMs, side, CDTXMania.ConfigIni.n手動再生音量, CDTXMania.ConfigIni.b演奏音を強調する[(int)side], e.ShiftPitch);
                     break;
 
                 case EGuitarEvent.EmptyPick:
                     if (e.Chip != null)
                     {
-                        tPlaySound(e.Chip, AudioMixer.Timer.nSystemTimeMs, side, CDTXMania.ConfigIni.n手動再生音量, CDTXMania.ConfigIni.b演奏音を強調する[(int)side], e.ShiftPitch);
+                        sequencer.PlaySound(e.Chip, AudioMixer.Timer.nSystemTimeMs, side, CDTXMania.ConfigIni.n手動再生音量, CDTXMania.ConfigIni.b演奏音を強調する[(int)side], e.ShiftPitch);
                     }
                     if (e.Miss)
                     {
@@ -2306,7 +1895,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                     break;
 
                 case EGuitarEvent.HoldRelease:
-                    CDTXMania.DTX.tStopPlayingWav(side == EInstrumentPart.GUITAR ? nLastPlayedWAVNumber.GtPick : nLastPlayedWAVNumber.BsPick);
+                    sequencer.StopGuitarSound(side);
                     break;
 
                 case EGuitarEvent.Wail:

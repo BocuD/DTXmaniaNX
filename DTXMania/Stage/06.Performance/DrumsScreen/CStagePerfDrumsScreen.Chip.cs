@@ -108,9 +108,9 @@ internal partial class CStagePerfDrumsScreen
                     if (((DrumsData.Combo > 0) || configIni.bAllDrumsAreAutoPlay) && configIni.b歓声を発声する)
                     {
                         video.StartFillInEffect();
-                        if (r現在の歓声Chip.Drums != null)
+                        if (sequencer.FillInSound != null)
                         {
-                            dTX.tPlayChip(r現在の歓声Chip.Drums, AudioMixer.Timer.nSystemTimeMs, (int)ELane.BGM, dTX.nモニタを考慮した音量(EInstrumentPart.UNKNOWN));
+                            dTX.tPlayChip(sequencer.FillInSound, AudioMixer.Timer.nSystemTimeMs, (int)ELane.BGM, dTX.nモニタを考慮した音量(EInstrumentPart.UNKNOWN));
                         }
                         else
                         {
@@ -131,9 +131,9 @@ internal partial class CStagePerfDrumsScreen
                     }
                     if (((DrumsData.Combo > 0) || configIni.bAllDrumsAreAutoPlay) && configIni.b歓声を発声する && configIni.DisplayBonusEffects)
                     {
-                        if (r現在の歓声Chip.Drums != null)
+                        if (sequencer.FillInSound != null)
                         {
-                            dTX.tPlayChip(r現在の歓声Chip.Drums, AudioMixer.Timer.nSystemTimeMs, (int)ELane.BGM, dTX.nモニタを考慮した音量(EInstrumentPart.UNKNOWN));
+                            dTX.tPlayChip(sequencer.FillInSound, AudioMixer.Timer.nSystemTimeMs, (int)ELane.BGM, dTX.nモニタを考慮した音量(EInstrumentPart.UNKNOWN));
                         }
                         else
                         {
@@ -148,9 +148,9 @@ internal partial class CStagePerfDrumsScreen
                     }
                     if (((DrumsData.Combo > 0) || configIni.bAllDrumsAreAutoPlay) && configIni.b歓声を発声する && configIni.DisplayBonusEffects)
                     {
-                        if (r現在の歓声Chip.Drums != null)
+                        if (sequencer.FillInSound != null)
                         {
-                            dTX.tPlayChip(r現在の歓声Chip.Drums, AudioMixer.Timer.nSystemTimeMs, (int)ELane.BGM, dTX.nモニタを考慮した音量(EInstrumentPart.UNKNOWN));
+                            dTX.tPlayChip(sequencer.FillInSound, AudioMixer.Timer.nSystemTimeMs, (int)ELane.BGM, dTX.nモニタを考慮した音量(EInstrumentPart.UNKNOWN));
                         }
                         else
                         {

@@ -377,7 +377,7 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
                     actLaneFlushD.Start((ELane)e.Lane, e.Velocity);
                     StartChipFire(e.Lane, e.Chip);
                     actPad.Hit(e.Pad);
-                    tPlaySound(e.Chip, AudioMixer.Timer.nResetAtMs + e.Time, EInstrumentPart.DRUMS, CDTXMania.DTX.nモニタを考慮した音量(EInstrumentPart.DRUMS));
+                    sequencer.PlaySound(e.Chip, AudioMixer.Timer.nResetAtMs + e.Time, EInstrumentPart.DRUMS, CDTXMania.DTX.nモニタを考慮した音量(EInstrumentPart.DRUMS));
                     break;
 
                 case EDrumsEvent.Hit:
@@ -440,7 +440,7 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
     {
         if (sound != null)
         {
-            tPlaySound(sound, AudioMixer.Timer.nSystemTimeMs, EInstrumentPart.DRUMS, CDTXMania.ConfigIni.n手動再生音量, CDTXMania.ConfigIni.b演奏音を強調する.Drums);
+            sequencer.PlaySound(sound, AudioMixer.Timer.nSystemTimeMs, EInstrumentPart.DRUMS, CDTXMania.ConfigIni.n手動再生音量, CDTXMania.ConfigIni.b演奏音を強調する.Drums);
         }
     }
 
