@@ -7,7 +7,8 @@ namespace DTXMania;
 
 internal class CActPerfCommonCombo : CActivity
 {
-    private readonly PerformanceSession session;
+    private readonly PerformanceData[] parts;
+    private PerformanceData DrumsData => parts[(int)EInstrumentPart.DRUMS];
 
     protected enum EEvent { 非表示, 数値更新, 同一数値, ミス通知 }
     protected enum EMode { 非表示中, 進行表示中, 残像表示中 }
@@ -108,9 +109,9 @@ internal class CActPerfCommonCombo : CActivity
 
     // コンストラクタ
 
-    public CActPerfCommonCombo(PerformanceSession session)
+    public CActPerfCommonCombo(PerformanceData[] parts)
     {
-        this.session = session;
+        this.parts = parts;
         bActivated = false;
 
         // 180度分のジャンプY座標差分を取得。(0度: 0 → 90度:-15 → 180度: 0)
@@ -193,13 +194,13 @@ internal class CActPerfCommonCombo : CActivity
 
         if (txCOMBOドラム != null)
         {
-            nコンボカウント.Drums = session.Combo.Drums / 100;
+            nコンボカウント.Drums = DrumsData.Combo / 100;
 
             #region [ "COMBO" の拡大率を設定。]
             //-----------------
             float f拡大率 = 1.0f;
 
-            if ((session.Combo.Drums > (session.Combo.Drums / 100) + 100) && bn00コンボに到達した[nコンボカウント.Drums].Drums == false && (nジャンプインデックス >= 0 && nジャンプインデックス < 180))
+            if ((DrumsData.Combo > (DrumsData.Combo / 100) + 100) && bn00コンボに到達した[nコンボカウント.Drums].Drums == false && (nジャンプインデックス >= 0 && nジャンプインデックス < 180))
             {
                 f拡大率 = 1.22f - (((float)nジャンプ差分値[nジャンプインデックス]) / 180.0f);		// f拡大率 = 1.0 → 1.3333... → 1.0
             }
@@ -211,7 +212,7 @@ internal class CActPerfCommonCombo : CActivity
             int nコンボx = nX中央位置px - 68 - ((int)((nドラムコンボのCOMBO文字の幅 * f拡大率) / 1.3f));
             int nコンボy = 162 + nY上辺位置px;
 
-            if ((session.Combo.Drums > (session.Combo.Drums / 100 * 100) && (session.Combo.Drums >= 100 ? bn00コンボに到達した[nコンボカウント.Drums].Drums == false : false)))
+            if ((DrumsData.Combo > (DrumsData.Combo / 100 * 100) && (DrumsData.Combo >= 100 ? bn00コンボに到達した[nコンボカウント.Drums].Drums == false : false)))
             {
                 nコンボy += 10;
             }
@@ -228,7 +229,7 @@ internal class CActPerfCommonCombo : CActivity
         {
             if ( n桁数 < 4 )
             {
-                if ((session.Combo.Drums > (session.Combo.Drums / 100 * 100) && (session.Combo.Drums >= 100 ? bn00コンボに到達した[nコンボカウント.Drums].Drums == false : false) && (nジャンプインデックス >= 0 && nジャンプインデックス < 180)))
+                if ((DrumsData.Combo > (DrumsData.Combo / 100 * 100) && (DrumsData.Combo >= 100 ? bn00コンボに到達した[nコンボカウント.Drums].Drums == false : false) && (nジャンプインデックス >= 0 && nジャンプインデックス < 180)))
                 {
                     x -= nドラムコンボの幅 + nドラムコンボの文字間隔 + 20;
                 }
@@ -239,7 +240,7 @@ internal class CActPerfCommonCombo : CActivity
             }
             else if ( n桁数 >= 4 )
             {
-                if ((session.Combo.Drums > (session.Combo.Drums / 100 * 100) && (session.Combo.Drums >= 100 ? bn00コンボに到達した[nコンボカウント.Drums].Drums == false : false) && (nジャンプインデックス >= 0 && nジャンプインデックス < 180)))
+                if ((DrumsData.Combo > (DrumsData.Combo / 100 * 100) && (DrumsData.Combo >= 100 ? bn00コンボに到達した[nコンボカウント.Drums].Drums == false : false) && (nジャンプインデックス >= 0 && nジャンプインデックス < 180)))
                 {
                     x -= 96 + nドラムコンボの文字間隔 + 20;
                 }
@@ -522,15 +523,15 @@ internal class CActPerfCommonCombo : CActivity
 
             #region [ 前回と今回の COMBO 値から、e今回の状態遷移イベントを決定する。]
             //-----------------
-            if (status[i].n現在表示中のCOMBO値 == session.Combo[i])
+            if (status[i].n現在表示中のCOMBO値 == parts[ i ].Combo)
             {
                 e今回の状態遷移イベント = EEvent.同一数値;
             }
-            else if (status[i].n現在表示中のCOMBO値 > session.Combo[i])
+            else if (status[i].n現在表示中のCOMBO値 > parts[ i ].Combo)
             {
                 e今回の状態遷移イベント = EEvent.ミス通知;
             }
-            else if ((status[i].n現在表示中のCOMBO値 < CDTXMania.ConfigIni.n表示可能な最小コンボ数[i]) && (session.Combo[i] < CDTXMania.ConfigIni.n表示可能な最小コンボ数[i]))
+            else if ((status[i].n現在表示中のCOMBO値 < CDTXMania.ConfigIni.n表示可能な最小コンボ数[i]) && (parts[ i ].Combo < CDTXMania.ConfigIni.n表示可能な最小コンボ数[i]))
             {
                 e今回の状態遷移イベント = EEvent.非表示;
             }
@@ -578,7 +579,7 @@ internal class CActPerfCommonCombo : CActivity
                         goto Retry;
                     }
 
-                    status[i].n現在表示中のCOMBO値 = session.Combo[i];
+                    status[i].n現在表示中のCOMBO値 = parts[ i ].Combo;
                     break;
                 //-----------------
                 #endregion
@@ -602,19 +603,19 @@ internal class CActPerfCommonCombo : CActivity
                         status[i].n前回の時刻_ジャンプ用 = CDTXMania.Timer.nCurrentTime;
                     }
 
-                    status[i].n現在表示中のCOMBO値 = session.Combo[i];
+                    status[i].n現在表示中のCOMBO値 = parts[ i ].Combo;
                     switch (i)
                     {
                         case 0:
-                            tDrawCombo_Drums(session.Combo[i], status[i].nジャンプインデックス値);
+                            tDrawCombo_Drums(parts[ i ].Combo, status[i].nジャンプインデックス値);
                             break;
 
                         case 1:
-                            tDrawCombo_Guitar(session.Combo[i], status[i].nジャンプインデックス値);
+                            tDrawCombo_Guitar(parts[ i ].Combo, status[i].nジャンプインデックス値);
                             break;
 
                         case 2:
-                            tDrawCombo_Bass(session.Combo[i], status[i].nジャンプインデックス値);
+                            tDrawCombo_Bass(parts[ i ].Combo, status[i].nジャンプインデックス値);
                             break;
                     }
                     break;
@@ -636,7 +637,7 @@ internal class CActPerfCommonCombo : CActivity
                         status[i].e現在のモード = EMode.非表示中;
                         goto Retry;
                     }
-                    status[i].n現在表示中のCOMBO値 = session.Combo[i];
+                    status[i].n現在表示中のCOMBO値 = parts[ i ].Combo;
                     break;
                 //-----------------
                 #endregion

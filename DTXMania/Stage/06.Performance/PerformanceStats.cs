@@ -14,14 +14,14 @@ public sealed class PerformanceStats
     //null outside a performance screen, eg in the editor
     private static CStagePerfCommonScreen? Stage => CDTXMania.StageManager?.rCurrentStage as CStagePerfCommonScreen;
 
-    private HitCounts? Hits => Stage?.session.HitCountExclAuto[Instrument];
+    private HitCounts? Hits => Stage?.DataFor((EInstrumentPart)Instrument).HitCountExclAuto;
 
     [DataField] public int Perfect => Hits?.Perfect ?? 0;
     [DataField] public int Great => Hits?.Great ?? 0;
     [DataField] public int Good => Hits?.Good ?? 0;
     [DataField] public int Poor => Hits?.Poor ?? 0;
     [DataField] public int Miss => Hits?.Miss ?? 0;
-    [DataField] public int MaxCombo => Stage?.session.MaxCombo[Instrument] ?? 0;
+    [DataField] public int MaxCombo => Stage?.DataFor((EInstrumentPart)Instrument).MaxCombo ?? 0;
 
     [DataField] public int PerfectPercent => Percent(Perfect);
     [DataField] public int GreatPercent => Percent(Great);
@@ -30,7 +30,7 @@ public sealed class PerformanceStats
     [DataField] public int MissPercent => Percent(Miss);
     [DataField] public int MaxComboPercent => Percent(MaxCombo);
 
-    [DataField] public double Rate => Stage?.session.AchievementRate[Instrument] ?? 0.0;
+    [DataField] public double Rate => Stage?.DataFor((EInstrumentPart)Instrument).AchievementRate ?? 0.0;
     [DataField] public long RateWhole => (long)Math.Truncate(Rate);
     [DataField] public long RateHundredths => Hundredths(Rate);
 
@@ -61,12 +61,12 @@ public sealed class PerformanceStats
         }
     }
 
-    [DataField] public int Early => Stage?.session.TimingHitCount[Instrument].Early ?? 0;
-    [DataField] public int Late => Stage?.session.TimingHitCount[Instrument].Late ?? 0;
+    [DataField] public int Early => Stage?.DataFor((EInstrumentPart)Instrument).TimingHitCount.Early ?? 0;
+    [DataField] public int Late => Stage?.DataFor((EInstrumentPart)Instrument).TimingHitCount.Late ?? 0;
 
     //0 to 1, clamped
-    [DataField] public double Gauge => Math.Max(0.0, Stage?.session.Gauge[Instrument] ?? 0.0);
-    [DataField] public bool IsDanger => Stage?.session.IsDanger((EInstrumentPart)Instrument) ?? false;
+    [DataField] public double Gauge => Math.Max(0.0, Stage?.DataFor((EInstrumentPart)Instrument).Gauge ?? 0.0);
+    [DataField] public bool IsDanger => Stage?.DataFor((EInstrumentPart)Instrument).IsDanger() ?? false;
 
     //row in the scroll speed sheet, 48px per speed
     [DataField] public float ScrollSpeedIconY => Math.Min(CDTXMania.ConfigIni.nScrollSpeed[Instrument], 20) * 48.0f;
@@ -224,7 +224,7 @@ public sealed class PerformanceStats
             return 0;
         }
 
-        HitCounts all = stage.session.HitCountIncAuto[Instrument];
+        HitCounts all = stage.DataFor((EInstrumentPart)Instrument).HitCountIncAuto;
         int judged = all.Perfect + all.Great + all.Good + all.Poor + all.Miss;
 
         return judged == 0 ? 0 : (int)Math.Round(100.0 * count / judged);

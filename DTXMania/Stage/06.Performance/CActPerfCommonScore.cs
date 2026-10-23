@@ -16,15 +16,15 @@ internal class CActPerfCommonScore : CActivity
 	public int n本体Y;
 	public long n進行用タイマ;
 	protected BaseTexture txScore;
-	private readonly PerformanceSession session;
+	private readonly PerformanceData[] parts;
 	private STDGBVALUE<double> lastScore;
 
 		
 	// コンストラクタ
 
-	public CActPerfCommonScore(PerformanceSession session)
+	public CActPerfCommonScore(PerformanceData[] parts)
 	{
-		this.session = session;
+		this.parts = parts;
 		bActivated = false;
 	}
 
@@ -32,7 +32,7 @@ internal class CActPerfCommonScore : CActivity
 	//one 10ms step of the shown score rolling up to the real one, a twentieth of the gap at a time
 	protected void RollStep( int part )
 	{
-		double score = session.Score[ part ];
+		double score = parts[ part ].Score;
 		if ( score != lastScore[ part ] )
 		{
 			lastScore[ part ] = score;

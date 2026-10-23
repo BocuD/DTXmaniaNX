@@ -6,7 +6,7 @@ internal class CActPerfGuitarScore : CActPerfCommonScore
 {
     // コンストラクタ
 
-    public CActPerfGuitarScore(PerformanceSession session) : base(session)
+    public CActPerfGuitarScore(PerformanceData[] parts) : base(parts)
     {
         bActivated = false;
     }

@@ -4,7 +4,7 @@ namespace DTXMania;
 
 internal class CActPerfDrumsScore : CActPerfCommonScore
 {
-    public CActPerfDrumsScore(PerformanceSession session) : base(session)
+    public CActPerfDrumsScore(PerformanceData[] parts) : base(parts)
     {
     }
 

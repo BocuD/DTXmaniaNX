@@ -2,7 +2,7 @@
 
 internal class CActPerfGuitarCombo : CActPerfCommonCombo
 {
-    public CActPerfGuitarCombo(PerformanceSession session) : base(session)
+    public CActPerfGuitarCombo(PerformanceData[] parts) : base(parts)
     {
     }
 

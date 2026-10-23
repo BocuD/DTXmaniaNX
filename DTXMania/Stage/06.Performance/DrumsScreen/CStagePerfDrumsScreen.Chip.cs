@@ -87,9 +87,9 @@ internal partial class CStagePerfDrumsScreen
                     {
                         // Online Stats の計算式
                         val = 100 *
-                            (session.GhostHitCount.Drums.Perfect * 17 +
-                             session.GhostHitCount.Drums.Great * 7 +
-                             session.GhostMaxCombo.Drums * 3) / (20.0 * CDTXMania.DTX.nVisibleChipsCount.Drums);
+                            (DrumsData.GhostHitCount.Perfect * 17 +
+                             DrumsData.GhostHitCount.Great * 7 +
+                             DrumsData.GhostMaxCombo * 3) / (20.0 * CDTXMania.DTX.nVisibleChipsCount.Drums);
                     }
                 }
                 else
@@ -98,24 +98,24 @@ internal partial class CStagePerfDrumsScreen
                     {
                         val = CScoreIni.tCalculatePlayingSkillOld(
                             CDTXMania.DTX.nVisibleChipsCount.Drums,
-                            session.GhostHitCount.Drums.Perfect,
-                            session.GhostHitCount.Drums.Great,
-                            session.GhostHitCount.Drums.Good,
-                            session.GhostHitCount.Drums.Poor,
-                            session.GhostHitCount.Drums.Miss,
-                            session.GhostMaxCombo.Drums,
+                            DrumsData.GhostHitCount.Perfect,
+                            DrumsData.GhostHitCount.Great,
+                            DrumsData.GhostHitCount.Good,
+                            DrumsData.GhostHitCount.Poor,
+                            DrumsData.GhostHitCount.Miss,
+                            DrumsData.GhostMaxCombo,
                             EInstrumentPart.DRUMS, new STAUTOPLAY());
                     }
                     else
                     {
                         val = CScoreIni.tCalculatePlayingSkill(
                             CDTXMania.DTX.nVisibleChipsCount.Drums,
-                            session.GhostHitCount.Drums.Perfect,
-                            session.GhostHitCount.Drums.Great,
-                            session.GhostHitCount.Drums.Good,
-                            session.GhostHitCount.Drums.Poor,
-                            session.GhostHitCount.Drums.Miss,
-                            session.GhostMaxCombo.Drums,
+                            DrumsData.GhostHitCount.Perfect,
+                            DrumsData.GhostHitCount.Great,
+                            DrumsData.GhostHitCount.Good,
+                            DrumsData.GhostHitCount.Poor,
+                            DrumsData.GhostHitCount.Miss,
+                            DrumsData.GhostMaxCombo,
                             EInstrumentPart.DRUMS, new STAUTOPLAY());
                     }
 
@@ -215,7 +215,7 @@ internal partial class CStagePerfDrumsScreen
                     {
                         bInFillIn = false;
                     }
-                    if (((session.Combo.Drums > 0) || configIni.bAllDrumsAreAutoPlay) && configIni.b歓声を発声する)
+                    if (((DrumsData.Combo > 0) || configIni.bAllDrumsAreAutoPlay) && configIni.b歓声を発声する)
                     {
                         video.StartFillInEffect();
                         if (r現在の歓声Chip.Drums != null)
@@ -239,7 +239,7 @@ internal partial class CStagePerfDrumsScreen
                     {
                         bChorusSection = true;
                     }
-                    if (((session.Combo.Drums > 0) || configIni.bAllDrumsAreAutoPlay) && configIni.b歓声を発声する && configIni.DisplayBonusEffects)
+                    if (((DrumsData.Combo > 0) || configIni.bAllDrumsAreAutoPlay) && configIni.b歓声を発声する && configIni.DisplayBonusEffects)
                     {
                         if (r現在の歓声Chip.Drums != null)
                         {
@@ -256,7 +256,7 @@ internal partial class CStagePerfDrumsScreen
                     {
                         bChorusSection = false;
                     }
-                    if (((session.Combo.Drums > 0) || configIni.bAllDrumsAreAutoPlay) && configIni.b歓声を発声する && configIni.DisplayBonusEffects)
+                    if (((DrumsData.Combo > 0) || configIni.bAllDrumsAreAutoPlay) && configIni.b歓声を発声する && configIni.DisplayBonusEffects)
                     {
                         if (r現在の歓声Chip.Drums != null)
                         {
@@ -286,7 +286,7 @@ internal partial class CStagePerfDrumsScreen
                 CDTXMania.Skin.soundAudience.tPlay();
             }
             if ( CDTXMania.ConfigIni.nSkillMode == 1 && ( !CDTXMania.ConfigIni.bAllDrumsAreAutoPlay || CDTXMania.ConfigIni.bAutoAddGage ) )
-                session.AddScore(EInstrumentPart.DRUMS, 500L );
+                DrumsData.AddScore(500L );
         }
 
 

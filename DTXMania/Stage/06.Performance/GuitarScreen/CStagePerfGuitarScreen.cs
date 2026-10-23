@@ -24,10 +24,10 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		listChildActivities.Add(actGuitarBonus = new CActPerfGuitarBonus());
 		listChildActivities.Add( actScrollSpeed = new CActPerfScrollSpeed() );
 		listChildActivities.Add( actWailingBonus = new CActPerfGuitarWailingBonus() );
-		listChildActivities.Add( actScore = new CActPerfGuitarScore(session) );
+		listChildActivities.Add( actScore = new CActPerfGuitarScore(partData) );
 		listChildActivities.Add( actLaneFlushGB = new CActPerfGuitarLaneFlushGB() );
 		listChildActivities.Add( actJudgeString = new CActPerfGuitarJudgementString() );
-		listChildActivities.Add( actCombo = new CActPerfGuitarCombo(session) );
+		listChildActivities.Add( actCombo = new CActPerfGuitarCombo(partData) );
 		
 		listChildActivities.Add( actPlayInfo = new CActPerformanceInformation() );
 		listChildActivities.Add( actProgressBar = new CActPerfProgressBar());
@@ -206,14 +206,14 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 			{
 
 				//Update Guitar score like in PerfDrumsScreen
-				int nNumberOfMistakes = session.HitCountExclAuto.Guitar.Miss + session.HitCountExclAuto.Guitar.Poor;
+				int nNumberOfMistakes = GuitarData.HitCountExclAuto.Miss + GuitarData.HitCountExclAuto.Poor;
 				if (nNumberOfMistakes == 0)
 				{
 					{
-						int nNumberPerfects = session.HitCountExclAuto.Guitar.Perfect;
+						int nNumberPerfects = GuitarData.HitCountExclAuto.Perfect;
 						if (CDTXMania.ConfigIni.bAllGuitarsAreAutoPlay)
 						{
-							nNumberPerfects = session.HitCountIncAuto.Guitar.Perfect;
+							nNumberPerfects = GuitarData.HitCountIncAuto.Perfect;
 						}
 
 						if (nNumberPerfects == CDTXMania.DTX.nVisibleChipsCount.Guitar)
@@ -222,7 +222,7 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 
 						{
 							if (CDTXMania.ConfigIni.nSkillMode == 1)
-								session.AddClearBonus(EInstrumentPart.GUITAR, true);
+								GuitarData.AddClearBonus(true);
 						}
 
 						#endregion
@@ -233,7 +233,7 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 
 						{
 							if (CDTXMania.ConfigIni.nSkillMode == 1)
-								session.AddClearBonus(EInstrumentPart.GUITAR, false);
+								GuitarData.AddClearBonus(false);
 						}
 
 						#endregion
@@ -241,14 +241,14 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 				}
 
 				//Repeat for Bass
-				nNumberOfMistakes = session.HitCountExclAuto.Bass.Miss + session.HitCountExclAuto.Bass.Poor;
+				nNumberOfMistakes = BassData.HitCountExclAuto.Miss + BassData.HitCountExclAuto.Poor;
 				if (nNumberOfMistakes == 0)
 				{
 					{
-						int nNumberPerfects = session.HitCountExclAuto.Bass.Perfect;
+						int nNumberPerfects = BassData.HitCountExclAuto.Perfect;
 						if (CDTXMania.ConfigIni.bAllBassAreAutoPlay)
 						{
-							nNumberPerfects = session.HitCountIncAuto.Bass.Perfect;
+							nNumberPerfects = BassData.HitCountIncAuto.Perfect;
 						}
 
 						if (nNumberPerfects == CDTXMania.DTX.nVisibleChipsCount.Bass)
@@ -257,7 +257,7 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 
 						{
 							if (CDTXMania.ConfigIni.nSkillMode == 1)
-								session.AddClearBonus(EInstrumentPart.BASS, true);
+								BassData.AddClearBonus(true);
 						}
 
 						#endregion
@@ -268,7 +268,7 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 
 						{
 							if (CDTXMania.ConfigIni.nSkillMode == 1)
-								session.AddClearBonus(EInstrumentPart.BASS, false);
+								BassData.AddClearBonus(false);
 						}
 
 						#endregion
@@ -294,7 +294,7 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 
 		//either part failing fails the stage, as does a chart with nothing to play
 		if (CDTXMania.ConfigIni.bSTAGEFAILEDEnabled && !bIsTrainingMode && ePhaseID == EPhase.Common_DefaultState
-		    && (session.IsFailed(EInstrumentPart.GUITAR) || session.IsFailed(EInstrumentPart.BASS)
+		    && (GuitarData.IsFailed() || BassData.IsFailed()
 		        || (!CDTXMania.DTX.bHasChips.Guitar && !CDTXMania.DTX.bHasChips.Bass)))
 		{
 			actStageFailed.Start();
@@ -331,7 +331,7 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 			//Reset hit counts and scores, so that the displayed score reflects the looped part only
 			for (int inst = 1; inst < 3; ++inst)
 			{
-				session.ResetForLoop((EInstrumentPart)inst);
+				DataFor((EInstrumentPart)inst).ResetForLoop();
 			}
 		}
 
@@ -348,10 +348,10 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		if (pChip.eInstrumentPart == EInstrumentPart.GUITAR)
 		{
 			if (CDTXMania.ConfigIni.nSkillMode == 0)
-				actGraph.dbグラフ値現在_渡 = CScoreIni.tCalculatePlayingSkillOld(CDTXMania.DTX.nVisibleChipsCount.Guitar, session.HitCountExclAuto.Guitar.Perfect, session.HitCountExclAuto.Guitar.Great, session.HitCountExclAuto.Guitar.Good, session.HitCountExclAuto.Guitar.Poor, session.HitCountExclAuto.Guitar.Miss, session.MaxCombo.Guitar, EInstrumentPart.GUITAR, bIsAutoPlay);
+				actGraph.dbグラフ値現在_渡 = CScoreIni.tCalculatePlayingSkillOld(CDTXMania.DTX.nVisibleChipsCount.Guitar, GuitarData.HitCountExclAuto.Perfect, GuitarData.HitCountExclAuto.Great, GuitarData.HitCountExclAuto.Good, GuitarData.HitCountExclAuto.Poor, GuitarData.HitCountExclAuto.Miss, GuitarData.MaxCombo, EInstrumentPart.GUITAR, bIsAutoPlay);
 			else
-				actGraph.dbグラフ値現在_渡 = CScoreIni.tCalculatePlayingSkill(CDTXMania.DTX.nVisibleChipsCount.Guitar, session.HitCountExclAuto.Guitar.Perfect, session.HitCountExclAuto.Guitar.Great, session.HitCountExclAuto.Guitar.Good, session.HitCountExclAuto.Guitar.Poor, session.HitCountExclAuto.Guitar.Miss, session.MaxCombo.Guitar, EInstrumentPart.GUITAR, bIsAutoPlay);
-			session.SetAchievementRate(EInstrumentPart.GUITAR, bIsTrainingMode ? 0 : actGraph.dbグラフ値現在_渡);
+				actGraph.dbグラフ値現在_渡 = CScoreIni.tCalculatePlayingSkill(CDTXMania.DTX.nVisibleChipsCount.Guitar, GuitarData.HitCountExclAuto.Perfect, GuitarData.HitCountExclAuto.Great, GuitarData.HitCountExclAuto.Good, GuitarData.HitCountExclAuto.Poor, GuitarData.HitCountExclAuto.Miss, GuitarData.MaxCombo, EInstrumentPart.GUITAR, bIsAutoPlay);
+			GuitarData.SetAchievementRate(bIsTrainingMode ? 0 : actGraph.dbグラフ値現在_渡);
 
 			if (CDTXMania.ConfigIni.bGraph有効.Guitar)
 			{
@@ -362,25 +362,25 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 				{
 
 					actGraph.dbグラフ値現在_渡 = 100 *
-						(session.HitCountExclAuto.Guitar.Perfect * 17 +
-						 session.HitCountExclAuto.Guitar.Great * 7 +
-						 session.MaxCombo.Guitar * 3) / (20.0 * CDTXMania.DTX.nVisibleChipsCount.Guitar);
+						(GuitarData.HitCountExclAuto.Perfect * 17 +
+						 GuitarData.HitCountExclAuto.Great * 7 +
+						 GuitarData.MaxCombo * 3) / (20.0 * CDTXMania.DTX.nVisibleChipsCount.Guitar);
 				}
 
-				actGraph.n現在のAutoを含まない判定数_渡[0] = session.HitCountExclAuto.Guitar.Perfect;
-				actGraph.n現在のAutoを含まない判定数_渡[1] = session.HitCountExclAuto.Guitar.Great;
-				actGraph.n現在のAutoを含まない判定数_渡[2] = session.HitCountExclAuto.Guitar.Good;
-				actGraph.n現在のAutoを含まない判定数_渡[3] = session.HitCountExclAuto.Guitar.Poor;
-				actGraph.n現在のAutoを含まない判定数_渡[4] = session.HitCountExclAuto.Guitar.Miss;
+				actGraph.n現在のAutoを含まない判定数_渡[0] = GuitarData.HitCountExclAuto.Perfect;
+				actGraph.n現在のAutoを含まない判定数_渡[1] = GuitarData.HitCountExclAuto.Great;
+				actGraph.n現在のAutoを含まない判定数_渡[2] = GuitarData.HitCountExclAuto.Good;
+				actGraph.n現在のAutoを含まない判定数_渡[3] = GuitarData.HitCountExclAuto.Poor;
+				actGraph.n現在のAutoを含まない判定数_渡[4] = GuitarData.HitCountExclAuto.Miss;
 			}
 		}
 		else if (pChip.eInstrumentPart == EInstrumentPart.BASS)
 		{
 			if (CDTXMania.ConfigIni.nSkillMode == 0)
-				actGraph.dbグラフ値現在_渡 = CScoreIni.tCalculatePlayingSkillOld(CDTXMania.DTX.nVisibleChipsCount.Bass, session.HitCountExclAuto.Bass.Perfect, session.HitCountExclAuto.Bass.Great, session.HitCountExclAuto.Bass.Good, session.HitCountExclAuto.Bass.Poor, session.HitCountExclAuto.Bass.Miss, session.MaxCombo.Bass, EInstrumentPart.BASS, bIsAutoPlay);
+				actGraph.dbグラフ値現在_渡 = CScoreIni.tCalculatePlayingSkillOld(CDTXMania.DTX.nVisibleChipsCount.Bass, BassData.HitCountExclAuto.Perfect, BassData.HitCountExclAuto.Great, BassData.HitCountExclAuto.Good, BassData.HitCountExclAuto.Poor, BassData.HitCountExclAuto.Miss, BassData.MaxCombo, EInstrumentPart.BASS, bIsAutoPlay);
 			else
-				actGraph.dbグラフ値現在_渡 = CScoreIni.tCalculatePlayingSkill(CDTXMania.DTX.nVisibleChipsCount.Bass, session.HitCountExclAuto.Bass.Perfect, session.HitCountExclAuto.Bass.Great, session.HitCountExclAuto.Bass.Good, session.HitCountExclAuto.Bass.Poor, session.HitCountExclAuto.Bass.Miss, session.MaxCombo.Bass, EInstrumentPart.BASS, bIsAutoPlay);
-			session.SetAchievementRate(EInstrumentPart.BASS, bIsTrainingMode ? 0 : actGraph.dbグラフ値現在_渡);
+				actGraph.dbグラフ値現在_渡 = CScoreIni.tCalculatePlayingSkill(CDTXMania.DTX.nVisibleChipsCount.Bass, BassData.HitCountExclAuto.Perfect, BassData.HitCountExclAuto.Great, BassData.HitCountExclAuto.Good, BassData.HitCountExclAuto.Poor, BassData.HitCountExclAuto.Miss, BassData.MaxCombo, EInstrumentPart.BASS, bIsAutoPlay);
+			BassData.SetAchievementRate(bIsTrainingMode ? 0 : actGraph.dbグラフ値現在_渡);
 
 			if (CDTXMania.ConfigIni.bGraph有効.Bass)
 			{
@@ -391,16 +391,16 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 				{
 
 					actGraph.dbグラフ値現在_渡 = 100 *
-						(session.HitCountExclAuto.Bass.Perfect * 17 +
-						 session.HitCountExclAuto.Bass.Great * 7 +
-						 session.MaxCombo.Bass * 3) / (20.0 * CDTXMania.DTX.nVisibleChipsCount.Bass);
+						(BassData.HitCountExclAuto.Perfect * 17 +
+						 BassData.HitCountExclAuto.Great * 7 +
+						 BassData.MaxCombo * 3) / (20.0 * CDTXMania.DTX.nVisibleChipsCount.Bass);
 				}
 
-				actGraph.n現在のAutoを含まない判定数_渡[0] = session.HitCountExclAuto.Bass.Perfect;
-				actGraph.n現在のAutoを含まない判定数_渡[1] = session.HitCountExclAuto.Bass.Great;
-				actGraph.n現在のAutoを含まない判定数_渡[2] = session.HitCountExclAuto.Bass.Good;
-				actGraph.n現在のAutoを含まない判定数_渡[3] = session.HitCountExclAuto.Bass.Poor;
-				actGraph.n現在のAutoを含まない判定数_渡[4] = session.HitCountExclAuto.Bass.Miss;
+				actGraph.n現在のAutoを含まない判定数_渡[0] = BassData.HitCountExclAuto.Perfect;
+				actGraph.n現在のAutoを含まない判定数_渡[1] = BassData.HitCountExclAuto.Great;
+				actGraph.n現在のAutoを含まない判定数_渡[2] = BassData.HitCountExclAuto.Good;
+				actGraph.n現在のAutoを含まない判定数_渡[3] = BassData.HitCountExclAuto.Poor;
+				actGraph.n現在のAutoを含まない判定数_渡[4] = BassData.HitCountExclAuto.Miss;
 			}
 		}
 		return eJudgeResult;

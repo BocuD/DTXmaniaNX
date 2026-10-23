@@ -6,7 +6,7 @@ namespace DTXMania;
 
 internal class CActPerfDrumsComboDGB : CActPerfCommonCombo
 {
-    public CActPerfDrumsComboDGB(PerformanceSession session) : base(session)
+    public CActPerfDrumsComboDGB(PerformanceData[] parts) : base(parts)
     {
     }
 

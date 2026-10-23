@@ -17,12 +17,12 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
         ePhaseID = EPhase.Common_DefaultState;
         bActivated = false;
         listChildActivities.Add(actPad = new CActPerfDrumsPad());
-        listChildActivities.Add(actCombo = new CActPerfDrumsComboDGB(session));
+        listChildActivities.Add(actCombo = new CActPerfDrumsComboDGB(partData));
 
         listChildActivities.Add(actGraph = new CActPerfSkillMeter());
         listChildActivities.Add(actJudgeString = new CActPerfDrumsJudgementString());
         listChildActivities.Add(actLaneFlushD = new CActPerfDrumsLaneFlushD());
-        listChildActivities.Add(actScore = new CActPerfDrumsScore(session));
+        listChildActivities.Add(actScore = new CActPerfDrumsScore(partData));
         listChildActivities.Add(actScrollSpeed = new CActPerfScrollSpeed());
         listChildActivities.Add(video = new CActPerfVideo());
         listChildActivities.Add(actBGA = new CActPerfBGA());
@@ -162,15 +162,15 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
         {
             if (!CDTXMania.Skin.soundStageClear.bIsPlaying && !CDTXMania.Skin.soundSTAGEFAILED音.bIsPlaying)
             {
-                nNumberOfMistakes = session.HitCountExclAuto.Drums.Miss + session.HitCountExclAuto.Drums.Poor;
+                nNumberOfMistakes = DrumsData.HitCountExclAuto.Miss + DrumsData.HitCountExclAuto.Poor;
                 switch (nNumberOfMistakes)
                 {
                     case 0:
                     {
-                        nNumberPerfects = session.HitCountExclAuto.Drums.Perfect;
+                        nNumberPerfects = DrumsData.HitCountExclAuto.Perfect;
                         if (CDTXMania.ConfigIni.bAllDrumsAreAutoPlay)
                         {
-                            nNumberPerfects = session.HitCountIncAuto.Drums.Perfect;
+                            nNumberPerfects = DrumsData.HitCountIncAuto.Perfect;
                         }
 
                         //EXC
@@ -178,14 +178,14 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
                         {
                             bExc = true;
                             if (CDTXMania.ConfigIni.nSkillMode == 1)
-                                session.AddClearBonus(EInstrumentPart.DRUMS, true);
+                                DrumsData.AddClearBonus(true);
                             break;
                         }
 
                         //FULL COMBO
                         bFullCom = true;
                         if (CDTXMania.ConfigIni.nSkillMode == 1)
-                            session.AddClearBonus(EInstrumentPart.DRUMS, false);
+                            DrumsData.AddClearBonus(false);
                         break;
                     }
                 }
@@ -233,7 +233,7 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
         bExc = false;
         bFullCom = false;
 
-        if (CDTXMania.ConfigIni.bSTAGEFAILEDEnabled && !bIsTrainingMode && session.IsFailed(EInstrumentPart.DRUMS)
+        if (CDTXMania.ConfigIni.bSTAGEFAILEDEnabled && !bIsTrainingMode && DrumsData.IsFailed()
             && ePhaseID == EPhase.Common_DefaultState)
         {
             actStageFailed.Start();
@@ -259,7 +259,7 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
         }
         else if (bIsFinishedPlaying && (ePhaseID == EPhase.Common_DefaultState))
         {
-            if ((session.IsFailed(EInstrumentPart.DRUMS)) && (ePhaseID == EPhase.Common_DefaultState))
+            if ((DrumsData.IsFailed()) && (ePhaseID == EPhase.Common_DefaultState))
             {
                 actStageFailed.Start();
                 CDTXMania.DTX.tStopPlayingAllChips();
@@ -283,7 +283,7 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
             tJumpInSong(LoopBeginMs == -1 ? 0 : LoopBeginMs);
 
             //Reset hit counts and scores, so that the displayed score reflects the looped part only
-            session.ResetForLoop(EInstrumentPart.DRUMS);
+            DrumsData.ResetForLoop();
         }
 
         AllocationProbe.Begin(probeKeyInput);
@@ -372,11 +372,11 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
         // #24074 2011.01.23 add ikanick
         if (CDTXMania.ConfigIni.nSkillMode == 0)
         {
-            actGraph.dbグラフ値現在_渡 = CScoreIni.tCalculatePlayingSkillOld(CDTXMania.DTX.nVisibleChipsCount.Drums, session.HitCountExclAuto.Drums.Perfect, session.HitCountExclAuto.Drums.Great, session.HitCountExclAuto.Drums.Good, session.HitCountExclAuto.Drums.Poor, session.HitCountExclAuto.Drums.Miss, session.MaxCombo.Drums, EInstrumentPart.DRUMS, bIsAutoPlay);
+            actGraph.dbグラフ値現在_渡 = CScoreIni.tCalculatePlayingSkillOld(CDTXMania.DTX.nVisibleChipsCount.Drums, DrumsData.HitCountExclAuto.Perfect, DrumsData.HitCountExclAuto.Great, DrumsData.HitCountExclAuto.Good, DrumsData.HitCountExclAuto.Poor, DrumsData.HitCountExclAuto.Miss, DrumsData.MaxCombo, EInstrumentPart.DRUMS, bIsAutoPlay);
         }
         else if (CDTXMania.ConfigIni.nSkillMode == 1)
         {
-            actGraph.dbグラフ値現在_渡 = CScoreIni.tCalculatePlayingSkill(CDTXMania.DTX.nVisibleChipsCount.Drums, session.HitCountExclAuto.Drums.Perfect, session.HitCountExclAuto.Drums.Great, session.HitCountExclAuto.Drums.Good, session.HitCountExclAuto.Drums.Poor, session.HitCountExclAuto.Drums.Miss, session.MaxCombo.Drums, EInstrumentPart.DRUMS, bIsAutoPlay);
+            actGraph.dbグラフ値現在_渡 = CScoreIni.tCalculatePlayingSkill(CDTXMania.DTX.nVisibleChipsCount.Drums, DrumsData.HitCountExclAuto.Perfect, DrumsData.HitCountExclAuto.Great, DrumsData.HitCountExclAuto.Good, DrumsData.HitCountExclAuto.Poor, DrumsData.HitCountExclAuto.Miss, DrumsData.MaxCombo, EInstrumentPart.DRUMS, bIsAutoPlay);
         }
         // #35411 2015.09.07 add chnmr0
         if ( CDTXMania.listTargetGhsotLag.Drums != null &&
@@ -385,12 +385,12 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
         {
             // Online Stats の計算式
             actGraph.dbグラフ値現在_渡 = 100 *
-                ( session.HitCountExclAuto.Drums.Perfect * 17 +
-                  session.HitCountExclAuto.Drums.Great * 7 +
-                  session.MaxCombo.Drums * 3 ) / ( 20.0 * CDTXMania.DTX.nVisibleChipsCount.Drums );
+                ( DrumsData.HitCountExclAuto.Perfect * 17 +
+                  DrumsData.HitCountExclAuto.Great * 7 +
+                  DrumsData.MaxCombo * 3 ) / ( 20.0 * CDTXMania.DTX.nVisibleChipsCount.Drums );
         }
 
-        session.SetAchievementRate(EInstrumentPart.DRUMS, bIsTrainingMode ? 0 : actGraph.dbグラフ値現在_渡);
+        DrumsData.SetAchievementRate(bIsTrainingMode ? 0 : actGraph.dbグラフ値現在_渡);
         return eJudgeResult;
     }
 

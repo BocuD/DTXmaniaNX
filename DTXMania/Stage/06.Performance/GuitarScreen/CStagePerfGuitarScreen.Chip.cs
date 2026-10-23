@@ -57,7 +57,7 @@ internal partial class CStagePerfGuitarScreen
 				autoPlayCondition &= (pChip.nPlaybackTimeMs + ghostLag <= AudioMixer.Timer.nCurrentTime);
 				if (resetCombo && autoPlayCondition)
 				{
-					session.BreakCombo(pChip.eInstrumentPart);
+					DataFor(pChip.eInstrumentPart).BreakCombo();
 				}
 
 				bUsePerfectGhost = false;
@@ -189,9 +189,9 @@ internal partial class CStagePerfGuitarScreen
 						{
 							// Online Stats の計算式
 							val = 100 *
-								(session.GhostHitCount.Guitar.Perfect * 17 +
-								 session.GhostHitCount.Guitar.Great * 7 +
-								 session.GhostMaxCombo.Guitar * 3) / (20.0 * CDTXMania.DTX.nVisibleChipsCount.Guitar);
+								(GuitarData.GhostHitCount.Perfect * 17 +
+								 GuitarData.GhostHitCount.Great * 7 +
+								 GuitarData.GhostMaxCombo * 3) / (20.0 * CDTXMania.DTX.nVisibleChipsCount.Guitar);
 						}
 					}
 					else
@@ -200,24 +200,24 @@ internal partial class CStagePerfGuitarScreen
 						{
 							val = CScoreIni.tCalculatePlayingSkillOld(
 								CDTXMania.DTX.nVisibleChipsCount.Guitar,
-								session.GhostHitCount.Guitar.Perfect,
-								session.GhostHitCount.Guitar.Great,
-								session.GhostHitCount.Guitar.Good,
-								session.GhostHitCount.Guitar.Poor,
-								session.GhostHitCount.Guitar.Miss,
-								session.GhostMaxCombo.Guitar,
+								GuitarData.GhostHitCount.Perfect,
+								GuitarData.GhostHitCount.Great,
+								GuitarData.GhostHitCount.Good,
+								GuitarData.GhostHitCount.Poor,
+								GuitarData.GhostHitCount.Miss,
+								GuitarData.GhostMaxCombo,
 								EInstrumentPart.GUITAR, new STAUTOPLAY());
 						}
 						else
 						{
 							val = CScoreIni.tCalculatePlayingSkill(
 								CDTXMania.DTX.nVisibleChipsCount.Guitar,
-								session.GhostHitCount.Guitar.Perfect,
-								session.GhostHitCount.Guitar.Great,
-								session.GhostHitCount.Guitar.Good,
-								session.GhostHitCount.Guitar.Poor,
-								session.GhostHitCount.Guitar.Miss,
-								session.GhostMaxCombo.Guitar,
+								GuitarData.GhostHitCount.Perfect,
+								GuitarData.GhostHitCount.Great,
+								GuitarData.GhostHitCount.Good,
+								GuitarData.GhostHitCount.Poor,
+								GuitarData.GhostHitCount.Miss,
+								GuitarData.GhostMaxCombo,
 								EInstrumentPart.GUITAR, new STAUTOPLAY());
 						}
 
@@ -244,9 +244,9 @@ internal partial class CStagePerfGuitarScreen
 						{
 							// Online Stats の計算式
 							val = 100 *
-								(session.GhostHitCount.Bass.Perfect * 17 +
-								 session.GhostHitCount.Bass.Great * 7 +
-								 session.GhostMaxCombo.Bass * 3) / (20.0 * CDTXMania.DTX.nVisibleChipsCount.Bass);
+								(BassData.GhostHitCount.Perfect * 17 +
+								 BassData.GhostHitCount.Great * 7 +
+								 BassData.GhostMaxCombo * 3) / (20.0 * CDTXMania.DTX.nVisibleChipsCount.Bass);
 						}
 					}
 					else
@@ -255,24 +255,24 @@ internal partial class CStagePerfGuitarScreen
 						{
 							val = CScoreIni.tCalculatePlayingSkillOld(
 								CDTXMania.DTX.nVisibleChipsCount.Bass,
-								session.GhostHitCount.Bass.Perfect,
-								session.GhostHitCount.Bass.Great,
-								session.GhostHitCount.Bass.Good,
-								session.GhostHitCount.Bass.Poor,
-								session.GhostHitCount.Bass.Miss,
-								session.GhostMaxCombo.Bass,
+								BassData.GhostHitCount.Perfect,
+								BassData.GhostHitCount.Great,
+								BassData.GhostHitCount.Good,
+								BassData.GhostHitCount.Poor,
+								BassData.GhostHitCount.Miss,
+								BassData.GhostMaxCombo,
 								EInstrumentPart.BASS, new STAUTOPLAY());
 						}
 						else
 						{
 							val = CScoreIni.tCalculatePlayingSkill(
 								CDTXMania.DTX.nVisibleChipsCount.Bass,
-								session.GhostHitCount.Bass.Perfect,
-								session.GhostHitCount.Bass.Great,
-								session.GhostHitCount.Bass.Good,
-								session.GhostHitCount.Bass.Poor,
-								session.GhostHitCount.Bass.Miss,
-								session.GhostMaxCombo.Bass,
+								BassData.GhostHitCount.Perfect,
+								BassData.GhostHitCount.Great,
+								BassData.GhostHitCount.Good,
+								BassData.GhostHitCount.Poor,
+								BassData.GhostHitCount.Miss,
+								BassData.GhostMaxCombo,
 								EInstrumentPart.BASS, new STAUTOPLAY());
 						}
 
