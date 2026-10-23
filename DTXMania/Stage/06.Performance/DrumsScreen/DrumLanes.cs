@@ -51,7 +51,7 @@ internal static class DrumLanes
             ELane.LT => 642,
             ELane.FT => 691,
             ELane.CY => rdrc ? 783 : 745,
-            ELane.RD => rdrc ? 746 : 815,
+            ELane.RD => rdrc ? 745 : 815,
             _ => type switch { EType.B => 473, EType.D => 522, _ => 416 }
         };
     }
