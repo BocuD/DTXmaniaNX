@@ -27,7 +27,6 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		listChildActivities.Add( actScore = new CActPerfGuitarScore(session) );
 		listChildActivities.Add( actLaneFlushGB = new CActPerfGuitarLaneFlushGB() );
 		listChildActivities.Add( actJudgeString = new CActPerfGuitarJudgementString() );
-		listChildActivities.Add( actGauge = new CActPerfCommonGauge() );
 		listChildActivities.Add( actCombo = new CActPerfGuitarCombo(session) );
 		
 		listChildActivities.Add( actPlayInfo = new CActPerformanceInformation() );
@@ -295,7 +294,7 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 
 		//either part failing fails the stage, as does a chart with nothing to play
 		if (CDTXMania.ConfigIni.bSTAGEFAILEDEnabled && !bIsTrainingMode && ePhaseID == EPhase.Common_DefaultState
-		    && (actGauge.IsFailed(EInstrumentPart.GUITAR) || actGauge.IsFailed(EInstrumentPart.BASS)
+		    && (session.IsFailed(EInstrumentPart.GUITAR) || session.IsFailed(EInstrumentPart.BASS)
 		        || (!CDTXMania.DTX.bHasChips.Guitar && !CDTXMania.DTX.bHasChips.Bass)))
 		{
 			actStageFailed.Start();
@@ -345,7 +344,7 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 
 	protected override EJudgement tProcessChipHit( long nHitTime, CChip pChip, bool bCorrectLane )
 	{
-		EJudgement eJudgeResult = tProcessChipHit( nHitTime, pChip, EInstrumentPart.GUITAR, bCorrectLane );
+		EJudgement eJudgeResult = tProcessChipHitCore( nHitTime, pChip, bCorrectLane );
 		if (pChip.eInstrumentPart == EInstrumentPart.GUITAR)
 		{
 			if (CDTXMania.ConfigIni.nSkillMode == 0)
@@ -407,14 +406,6 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		return eJudgeResult;
 	}
 
-	protected override void tチップのヒット処理_BadならびにTight時のMiss( EInstrumentPart part )
-	{
-		tチップのヒット処理_BadならびにTight時のMiss( part, 0, EInstrumentPart.GUITAR );
-	}
-	protected override void tチップのヒット処理_BadならびにTight時のMiss( EInstrumentPart part, int nLane )
-	{
-		tチップのヒット処理_BadならびにTight時のMiss( part, nLane, EInstrumentPart.GUITAR );
-	}
 
 	private void tUpdateAndDraw_Graph()  // t進行描画_グラフ
 	{

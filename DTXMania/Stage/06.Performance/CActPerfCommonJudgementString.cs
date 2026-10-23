@@ -251,7 +251,7 @@ internal abstract class CActPerfCommonJudgementString : CActivity
 			return;
 		}
 
-		if ( judgementStatus[ lane ].judge == EJudgement.Auto || txLagNumbers == null )
+		if ( judgementStatus[ lane ].judge is EJudgement.Auto or EJudgement.Miss || txLagNumbers == null )
 		{
 			return;
 		}

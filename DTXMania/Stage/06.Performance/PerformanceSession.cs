@@ -17,6 +17,26 @@ public class PerformanceSession
     private STDGBVALUE<int> ghostCombo;
     private STDGBVALUE<int> ghostMaxCombo;
     private STAUTOPLAY autoPlay;
+    private STDGBVALUE<double> gauge;
+    private int riskyTimesInitial;
+    private STDGBVALUE<int> riskyTimes;
+
+    private const double GaugeMax = 1.0;
+    private const double GaugeFailed = -0.1;
+
+    //by EJudgement, then drums, guitar, bass
+    private static readonly float[,] GaugeDelta =
+    {
+        { 0.004f, 0.006f, 0.006f },
+        { 0.002f, 0.003f, 0.003f },
+        { 0.000f, 0.000f, 0.000f },
+        { -0.020f, -0.030f, -0.030f },
+        { -0.050f, -0.050f, -0.050f }
+    };
+    //XG skill mode has its own drums column
+    private static readonly float[] XgDrumsGaugeDelta = [0.005f, 0.001f, 0f, -0.017f, -0.041f];
+    //by EDamageLevel, applied to misses
+    private static readonly float[] MissDamageFactor = [0.25f, 0.5f, 0.75f];
 
     public STDGBVALUE<HitCounts> HitCountExclAuto => hitCountExclAuto;
     public STDGBVALUE<HitCounts> HitCountIncAuto => hitCountIncAuto;
@@ -25,6 +45,7 @@ public class PerformanceSession
     public STDGBVALUE<int> Combo => combo;
     public STDGBVALUE<int> MaxCombo => maxCombo;
     public STDGBVALUE<double> Score => score;
+    public STDGBVALUE<double> Gauge => gauge;
 
     //from holding long notes, and allowed on top of the 1,000,000 maximum
     public STDGBVALUE<int> LongNoteBonusScore => longNoteBonusScore;
@@ -33,9 +54,14 @@ public class PerformanceSession
     public STDGBVALUE<HitCounts> GhostHitCount => ghostHitCount;
     public STDGBVALUE<int> GhostMaxCombo => ghostMaxCombo;
 
-    public void Reset(STAUTOPLAY autoPlayed)
+    //risky is how many misses the play may have, 0 for a normal gauge
+    public void Reset(STAUTOPLAY autoPlayed, int risky)
     {
         autoPlay = autoPlayed;
+        riskyTimesInitial = risky;
+        riskyTimes = new STDGBVALUE<int> { Drums = risky, Guitar = risky, Bass = risky };
+        double startGauge = risky <= 0 ? 2.0 / 3 : risky == 1 ? 0.0 : GaugeMax;
+        gauge = new STDGBVALUE<double> { Drums = startGauge, Guitar = startGauge, Bass = startGauge };
         hitCountExclAuto = default;
         hitCountIncAuto = default;
         timingHitCount = default;
@@ -156,6 +182,65 @@ public class PerformanceSession
     public void BreakGhostCombo(EInstrumentPart part)
     {
         ghostCombo[(int)part] = 0;
+    }
+
+    public void Damage(EInstrumentPart part, EJudgement judgement)
+    {
+        bool risky = riskyTimesInitial > 0;
+        bool hazard = CDTXMania.ConfigIni.bHAZARD;
+        double damage = judgement switch
+        {
+            EJudgement.Perfect => risky ? 0 : GaugeDeltaFor(judgement, part),
+            EJudgement.Great or EJudgement.Good when hazard => risky ? RiskyMiss(part) : GaugeDeltaFor(EJudgement.Miss, part),
+            EJudgement.Great or EJudgement.Good => risky ? 0 : GaugeDeltaFor(judgement, part),
+            EJudgement.Poor => risky ? RiskyMiss(part) : GaugeDeltaFor(judgement, part),
+            EJudgement.Miss => risky ? RiskyMiss(part) : GaugeDeltaFor(judgement, part) * MissDamageFactor[(int)CDTXMania.ConfigIni.eDamageLevel],
+            _ => 0
+        };
+
+        gauge[(int)part] = Math.Min(gauge[(int)part] + damage, GaugeMax);
+    }
+
+    public bool IsFailed(EInstrumentPart part)
+    {
+        return riskyTimesInitial > 0 ? riskyTimes[(int)part] <= 0 : gauge[(int)part] <= GaugeFailed;
+    }
+
+    public bool IsDanger(EInstrumentPart part)
+    {
+        if (riskyTimesInitial <= 0)
+        {
+            return gauge[(int)part] <= 0.3;
+        }
+
+        return riskyTimesInitial switch
+        {
+            1 => false,
+            2 or 3 => riskyTimes[(int)part] <= 1,
+            _ => riskyTimes[(int)part] <= 2
+        };
+    }
+
+    private static double GaugeDeltaFor(EJudgement judgement, EInstrumentPart part)
+    {
+        if (part == EInstrumentPart.DRUMS && CDTXMania.ConfigIni.nSkillMode == 1)
+        {
+            return XgDrumsGaugeDelta[(int)judgement];
+        }
+
+        return GaugeDelta[(int)judgement, (int)part];
+    }
+
+    private double RiskyMiss(EInstrumentPart part)
+    {
+        int i = (int)part;
+        double damage = riskyTimes[i] == 1 ? 0 : -GaugeMax / (riskyTimesInitial - 1);
+        if (riskyTimes[i] >= 0)
+        {
+            riskyTimes[i]--;
+        }
+
+        return damage;
     }
 
     private static void Count(ref STDGBVALUE<HitCounts> counts, EInstrumentPart part, EJudgement judgement)

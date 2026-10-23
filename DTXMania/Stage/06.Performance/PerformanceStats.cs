@@ -65,8 +65,8 @@ public sealed class PerformanceStats
     [DataField] public int Late => Stage?.session.TimingHitCount[Instrument].Late ?? 0;
 
     //0 to 1, clamped
-    [DataField] public double Gauge => Math.Max(0.0, Stage?.actGauge.db現在のゲージ値[Instrument] ?? 0.0);
-    [DataField] public bool IsDanger => Stage?.actGauge.IsDanger((EInstrumentPart)Instrument) ?? false;
+    [DataField] public double Gauge => Math.Max(0.0, Stage?.session.Gauge[Instrument] ?? 0.0);
+    [DataField] public bool IsDanger => Stage?.session.IsDanger((EInstrumentPart)Instrument) ?? false;
 
     //row in the scroll speed sheet, 48px per speed
     [DataField] public float ScrollSpeedIconY => Math.Min(CDTXMania.ConfigIni.nScrollSpeed[Instrument], 20) * 48.0f;

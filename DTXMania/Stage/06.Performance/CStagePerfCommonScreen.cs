@@ -514,7 +514,6 @@ internal abstract class CStagePerfCommonScreen : CStage
         }
         r現在の空うちギターChip = null;
         r現在の空うちベースChip = null;
-        session.Reset(bIsAutoPlay);
         for (int k = 0; k < 3; k++)
         {
             queWailing[k] = new Queue<CChip>();
@@ -552,7 +551,7 @@ internal abstract class CStagePerfCommonScreen : CStage
         nJudgeLinePosY_delta.Guitar = CDTXMania.ConfigIni.nJudgeLinePosOffset.Guitar;  //
         nJudgeLinePosY_delta.Bass = CDTXMania.ConfigIni.nJudgeLinePosOffset.Bass;      //
         bIsAutoPlay = CDTXMania.ConfigIni.bAutoPlay;									// #24239 2011.1.23 yyagi
-        actGauge.Init(CDTXMania.ConfigIni.nRisky);									// #23559 2011.7.28 yyagi
+        session.Reset(bIsAutoPlay, CDTXMania.ConfigIni.nRisky);
 
 
         //let the loading sound gracefully fade out
@@ -783,7 +782,6 @@ internal abstract class CStagePerfCommonScreen : CStage
     protected readonly List<STInputEvent> listPadEvents = [];
     protected ActPerfNewFire[] actChipFireGB;
     public CActPerfCommonCombo actCombo;
-    public CActPerfCommonGauge actGauge;
     protected CActPerfCommonJudgementString actJudgeString;
     protected CActPerfDrumsLaneFlushD actLaneFlushD;
     protected CActPerfCommonLaneFlushGB actLaneFlushGB;
@@ -817,8 +815,6 @@ internal abstract class CStagePerfCommonScreen : CStage
     protected readonly int[] nパッド0Atoパッド08 = [1, 2, 3, 4, 5, 6, 7, 1, 8, 0, 9, 9];// パッド画像のヒット処理用
     //   HH SD BD HT LT FT CY HHO RD LC LP LBD
     protected readonly int[] nパッド0Atoレーン07 = [1, 2, 3, 4, 5, 6, 7, 1, 9, 0, 8, 8];
-    protected readonly float[,] fDamageGaugeDelta = new[,] { { 0.004f, 0.006f, 0.006f }, { 0.002f, 0.003f, 0.003f }, { 0f, 0f, 0f }, { -0.02f, -0.03f, -0.03f }, { -0.05f, -0.05f, -0.05f } };
-    protected readonly float[] fDamageLevelFactor = [0.25f, 0.5f, 0.75f]; //Original: 0.5f, 1f, 1.5f
 
     public STDGBVALUE<int> nJudgeLinePosY;//(CDTXMania.ConfigIni.bReverse.Drums ? 159 : 561);
     public STDGBVALUE<int> nShutterInPosY;
@@ -1329,11 +1325,7 @@ internal abstract class CStagePerfCommonScreen : CStage
         return tProcessChipHit(nHitTime, pChip, true);
     }
     protected abstract EJudgement tProcessChipHit(long nHitTime, CChip pChip, bool bCorrectLane);  // tチップのヒット処理
-    protected EJudgement tProcessChipHit(long nHitTime, CChip pChip, EInstrumentPart screenmode)		// EInstrumentPart screenmode
-    {
-        return tProcessChipHit(nHitTime, pChip, screenmode, true);
-    }
-    protected EJudgement tProcessChipHit(long nHitTime, CChip pChip, EInstrumentPart screenmode, bool bCorrectLane)
+    protected EJudgement tProcessChipHitCore(long nHitTime, CChip pChip, bool bCorrectLane)
     {
         pChip.bHit = true;
         //Start of Long Note
@@ -1389,19 +1381,9 @@ internal abstract class CStagePerfCommonScreen : CStage
                 break;
         }
 
-        if (!CDTXMania.ConfigIni.bAutoAddGage)
+        if (pChip.eInstrumentPart != EInstrumentPart.UNKNOWN && (CDTXMania.ConfigIni.bAutoAddGage || !bPChipIsAutoPlay))
         {
-            if (!bPChipIsAutoPlay && (pChip.eInstrumentPart != EInstrumentPart.UNKNOWN))
-            {
-                actGauge.Damage(screenmode, pChip.eInstrumentPart, eJudgeResult);
-            }
-        }
-        else if (CDTXMania.ConfigIni.bAutoAddGage)
-        {
-            if ((pChip.eInstrumentPart != EInstrumentPart.UNKNOWN))
-            {
-                actGauge.Damage(screenmode, pChip.eInstrumentPart, eJudgeResult);
-            }
+            session.Damage(pChip.eInstrumentPart, eJudgeResult);
         }
 
         //Update progressBar
@@ -1413,7 +1395,7 @@ internal abstract class CStagePerfCommonScreen : CStage
         //Update Lag Timing Counter data
         if (!bPChipIsAutoPlay)
         {
-            tUpdateLagTimingCounter(pChip, screenmode, eJudgeResult);
+            tUpdateLagTimingCounter(pChip, eJudgeResult);
         }
 
         switch (pChip.eInstrumentPart)
@@ -1558,22 +1540,9 @@ internal abstract class CStagePerfCommonScreen : CStage
         return judgement == EJudgement.Perfect ? ClassicScorePerCombo[(int)judgement] * 500L : 0L;
     }
 
-    private void tUpdateLagTimingCounter(CChip pChip, EInstrumentPart screenmode, EJudgement eJudgeResult) 
+    private void tUpdateLagTimingCounter(CChip pChip, EJudgement eJudgeResult)
     {
         if (pChip.eInstrumentPart == EInstrumentPart.UNKNOWN)
-        {
-            return;
-        }
-
-        if (pChip.eInstrumentPart == EInstrumentPart.DRUMS && screenmode != EInstrumentPart.DRUMS) 
-        {
-            return;
-        }
-
-        if ((pChip.eInstrumentPart == EInstrumentPart.GUITAR ||
-             pChip.eInstrumentPart == EInstrumentPart.BASS) &&
-            screenmode != EInstrumentPart.GUITAR
-           )
         {
             return;
         }
@@ -1597,16 +1566,10 @@ internal abstract class CStagePerfCommonScreen : CStage
         }
     }
         
-    protected abstract void tチップのヒット処理_BadならびにTight時のMiss(EInstrumentPart part);
-    protected abstract void tチップのヒット処理_BadならびにTight時のMiss(EInstrumentPart part, int nLane);
-    protected void tチップのヒット処理_BadならびにTight時のMiss(EInstrumentPart part, EInstrumentPart screenmode)
-    {
-        tチップのヒット処理_BadならびにTight時のMiss(part, 0, screenmode);
-    }
-    protected void tチップのヒット処理_BadならびにTight時のMiss(EInstrumentPart part, int nLane, EInstrumentPart screenmode)
+    protected void tチップのヒット処理_BadならびにTight時のMiss(EInstrumentPart part, int nLane = 0)
     {
         bAUTOでないチップが１つでもバーを通過した = true;
-        actGauge.Damage(screenmode, part, EJudgement.Miss);
+        session.Damage(part, EJudgement.Miss);
         switch (part)
         {
             case EInstrumentPart.DRUMS:
@@ -4074,7 +4037,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                 {
                     if ((nChipColorFlag & nAutoMask & 0x3F) != nChipColorFlag)
                     {
-                        actGauge.Damage(inst, cChip2.eInstrumentPart, EJudgement.Good);
+                        session.Damage(cChip2.eInstrumentPart, EJudgement.Good);
                     }
                         
                     //
@@ -4411,7 +4374,7 @@ internal abstract class CStagePerfCommonScreen : CStage
         tJumpInSong(0);
 
         //nobody asked for this restart, so clear the score
-        session.Reset(bIsAutoPlay);
+        session.Reset(bIsAutoPlay, CDTXMania.ConfigIni.nRisky);
     }
 
     public void tJumpInSong(long newPosition)

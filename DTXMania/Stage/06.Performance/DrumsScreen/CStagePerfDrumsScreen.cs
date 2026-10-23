@@ -19,7 +19,6 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
         listChildActivities.Add(actPad = new CActPerfDrumsPad());
         listChildActivities.Add(actCombo = new CActPerfDrumsComboDGB(session));
 
-        listChildActivities.Add(actGauge = new CActPerfCommonGauge());
         listChildActivities.Add(actGraph = new CActPerfSkillMeter());
         listChildActivities.Add(actJudgeString = new CActPerfDrumsJudgementString());
         listChildActivities.Add(actLaneFlushD = new CActPerfDrumsLaneFlushD());
@@ -234,7 +233,7 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
         bExc = false;
         bFullCom = false;
 
-        if (CDTXMania.ConfigIni.bSTAGEFAILEDEnabled && !bIsTrainingMode && actGauge.IsFailed(EInstrumentPart.DRUMS)
+        if (CDTXMania.ConfigIni.bSTAGEFAILEDEnabled && !bIsTrainingMode && session.IsFailed(EInstrumentPart.DRUMS)
             && ePhaseID == EPhase.Common_DefaultState)
         {
             actStageFailed.Start();
@@ -260,7 +259,7 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
         }
         else if (bIsFinishedPlaying && (ePhaseID == EPhase.Common_DefaultState))
         {
-            if ((actGauge.IsFailed(EInstrumentPart.DRUMS)) && (ePhaseID == EPhase.Common_DefaultState))
+            if ((session.IsFailed(EInstrumentPart.DRUMS)) && (ePhaseID == EPhase.Common_DefaultState))
             {
                 actStageFailed.Start();
                 CDTXMania.DTX.tStopPlayingAllChips();
@@ -369,7 +368,7 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
     //-----------------
     protected override EJudgement tProcessChipHit( long nHitTime, CChip pChip, bool bCorrectLane )
     {
-        EJudgement eJudgeResult = tProcessChipHit( nHitTime, pChip, EInstrumentPart.DRUMS, bCorrectLane );
+        EJudgement eJudgeResult = tProcessChipHitCore( nHitTime, pChip, bCorrectLane );
         // #24074 2011.01.23 add ikanick
         if (CDTXMania.ConfigIni.nSkillMode == 0)
         {
@@ -395,14 +394,6 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
         return eJudgeResult;
     }
 
-    protected override void tチップのヒット処理_BadならびにTight時のMiss( EInstrumentPart part )
-    {
-        tチップのヒット処理_BadならびにTight時のMiss( part, 0, EInstrumentPart.DRUMS );
-    }
-    protected override void tチップのヒット処理_BadならびにTight時のMiss( EInstrumentPart part, int nLane )
-    {
-        tチップのヒット処理_BadならびにTight時のMiss( part, nLane, EInstrumentPart.DRUMS );
-    }
 
     protected override void tJudgeLineMovingUpandDown()
     {
@@ -417,6 +408,10 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
     protected override void ScrollSpeedDown()
     {
         CDTXMania.ConfigIni.nScrollSpeed.Drums = Math.Max( CDTXMania.ConfigIni.nScrollSpeed.Drums - 1, 0 );
+    }
+
+    protected override void tHandleInput_GuitarBass(EInstrumentPart inst)
+    {
     }
     
     protected override void tUpdateAndDraw_WailingFrame()
