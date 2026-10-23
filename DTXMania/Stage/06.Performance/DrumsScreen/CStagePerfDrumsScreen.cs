@@ -63,9 +63,7 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
 
     public void tStorePerfResults( out CScoreIni.CPerformanceEntry Drums, out CScoreIni.CPerformanceEntry Guitar, out CScoreIni.CPerformanceEntry Bass, out CChip[] r空打ちドラムチップ, out bool bIsTrainingMode)
     {
-        tStorePerfResults_Drums( out Drums );
-        tStorePerfResults_Guitar( out Guitar );
-        tStorePerfResultsBass( out Bass );
+        tStorePerfResults( out Drums, out Guitar, out Bass, out bIsTrainingMode );
 
         r空打ちドラムチップ = new CChip[ 12 ];
         for ( int i = 0; i < 12; i++ )
@@ -76,7 +74,6 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
                 r空打ちドラムチップ[ i ] = timeline.NearestDrum(CDTXMania.Timer.nCurrentTime + nInputAdjustTimeMs.Drums, DrumsPerformance.PadChannels[i], HitState.DontCare);
             }
         }
-        bIsTrainingMode = this.bIsTrainingMode;
     }
 
 
@@ -452,7 +449,7 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
         drums!.UpdateInput();
         if (drums.HadInput)
         {
-            tSaveInputMethod(EInstrumentPart.DRUMS);
+            drums.Data.RecordInputDevices();
         }
         ApplyDrumsEvents();
     }

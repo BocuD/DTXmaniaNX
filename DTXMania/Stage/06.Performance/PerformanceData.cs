@@ -18,6 +18,10 @@ public class PerformanceData
     private int ghostCombo;
     private int ghostMaxCombo;
     private STAUTOPLAY autoPlay;
+    private bool usedKeyboard;
+    private bool usedJoypad;
+    private bool usedMidi;
+    private bool usedMouse;
     private double gauge;
     private int riskyTimesInitial;
     private int riskyTimes;
@@ -54,6 +58,11 @@ public class PerformanceData
     //target ghost replayed alongside the play
     public HitCounts GhostHitCount => ghostHitCount;
     public int GhostMaxCombo => ghostMaxCombo;
+    public STAUTOPLAY AutoPlay => autoPlay;
+    public bool UsedKeyboard => usedKeyboard;
+    public bool UsedJoypad => usedJoypad;
+    public bool UsedMidi => usedMidi;
+    public bool UsedMouse => usedMouse;
 
     public int ChartChips => Part switch
     {
@@ -85,6 +94,10 @@ public class PerformanceData
         ghostHitCount = default;
         ghostCombo = 0;
         ghostMaxCombo = 0;
+        usedKeyboard = false;
+        usedJoypad = false;
+        usedMidi = false;
+        usedMouse = false;
     }
 
     //keeps the counts with auto included, so the result screen can still show a fully auto play
@@ -104,6 +117,16 @@ public class PerformanceData
         {
             hitCountExclAuto[(int)judgement]++;
         }
+    }
+
+    //a device stays detected once it has been pressed, so this only adds to what is recorded
+    public void RecordInputDevices()
+    {
+        CPad.STHIT detected = CDTXMania.Pad.stDetectedDevice;
+        usedKeyboard |= detected.Keyboard;
+        usedJoypad |= detected.Joypad;
+        usedMidi |= detected.MIDIIN;
+        usedMouse |= detected.Mouse;
     }
 
     public void CountTiming(bool late)

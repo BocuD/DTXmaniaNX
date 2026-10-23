@@ -67,225 +67,17 @@ internal abstract class CStagePerfCommonScreen : CStage
     
     // メソッド
 
-    #region [ tStorePerfResults_Drums() ]
-    public void tStorePerfResults_Drums(out CScoreIni.CPerformanceEntry Drums)
+    //drums only on the drums screen; a part without chips gets an empty entry
+    public void tStorePerfResults(out CScoreIni.CPerformanceEntry drums, out CScoreIni.CPerformanceEntry guitar, out CScoreIni.CPerformanceEntry bass, out bool trainingMode)
     {
-        Drums = new CScoreIni.CPerformanceEntry();
-
-        if (CDTXMania.DTX.bHasChips.Drums && !CDTXMania.ConfigIni.bGuitarRevolutionMode)
-        {
-            Drums.nScore = (long)DrumsData.Score;
-            if (CDTXMania.ConfigIni.nSkillMode == 0)
-            {
-                Drums.dbGameSkill = CScoreIni.tCalculateGameSkillOld(CDTXMania.DTX.LEVEL.Drums, CDTXMania.DTX.LEVELDEC.Drums, CDTXMania.DTX.nVisibleChipsCount.Drums, DrumsData.HitCountExclAuto.Perfect, DrumsData.HitCountExclAuto.Great, DrumsData.MaxCombo, EInstrumentPart.DRUMS, bIsAutoPlay);
-                Drums.dbPerformanceSkill = CScoreIni.tCalculatePlayingSkillOld(CDTXMania.DTX.nVisibleChipsCount.Drums, DrumsData.HitCountExclAuto.Perfect, DrumsData.HitCountExclAuto.Great, DrumsData.HitCountExclAuto.Good, DrumsData.HitCountExclAuto.Poor, DrumsData.HitCountExclAuto.Miss, DrumsData.MaxCombo, EInstrumentPart.DRUMS, bIsAutoPlay);
-            }
-            else if (CDTXMania.ConfigIni.nSkillMode == 1)
-            {
-                Drums.dbPerformanceSkill = CScoreIni.tCalculatePlayingSkill(CDTXMania.DTX.nVisibleChipsCount.Drums, DrumsData.HitCountExclAuto.Perfect, DrumsData.HitCountExclAuto.Great, DrumsData.HitCountExclAuto.Good, DrumsData.HitCountExclAuto.Poor, DrumsData.HitCountExclAuto.Miss, DrumsData.MaxCombo, EInstrumentPart.DRUMS, bIsAutoPlay);
-                Drums.dbGameSkill = CScoreIni.tCalculateGameSkillFromPlayingSkill(CDTXMania.DTX.LEVEL.Drums, CDTXMania.DTX.LEVELDEC.Drums, Drums.dbPerformanceSkill);
-            }
-            Drums.nPerfectCount = CDTXMania.ConfigIni.bAllDrumsAreAutoPlay ? DrumsData.HitCountIncAuto.Perfect : DrumsData.HitCountExclAuto.Perfect;
-            Drums.nGreatCount = CDTXMania.ConfigIni.bAllDrumsAreAutoPlay ? DrumsData.HitCountIncAuto.Great : DrumsData.HitCountExclAuto.Great;
-            Drums.nGoodCount = CDTXMania.ConfigIni.bAllDrumsAreAutoPlay ? DrumsData.HitCountIncAuto.Good : DrumsData.HitCountExclAuto.Good;
-            Drums.nPoorCount = CDTXMania.ConfigIni.bAllDrumsAreAutoPlay ? DrumsData.HitCountIncAuto.Poor : DrumsData.HitCountExclAuto.Poor;
-            Drums.nMissCount = CDTXMania.ConfigIni.bAllDrumsAreAutoPlay ? DrumsData.HitCountIncAuto.Miss : DrumsData.HitCountExclAuto.Miss;
-            Drums.nPerfectCount_ExclAuto = DrumsData.HitCountExclAuto.Perfect;
-            Drums.nGreatCount_ExclAuto = DrumsData.HitCountExclAuto.Great;
-            Drums.nGoodCount_ExclAuto = DrumsData.HitCountExclAuto.Good;
-            Drums.nPoorCount_ExclAuto = DrumsData.HitCountExclAuto.Poor;
-            Drums.nMissCount_ExclAuto = DrumsData.HitCountExclAuto.Miss;
-            Drums.nFastCount = DrumsData.TimingHitCount.Early;
-            Drums.nSlowCount = DrumsData.TimingHitCount.Late;
-            Drums.nMaxCombo = DrumsData.MaxCombo;
-            Drums.nTotalChipsCount = CDTXMania.DTX.nVisibleChipsCount.Drums;
-            for (int i = 0; i < (int)ELane.MAX; i++)
-            {
-                Drums.bAutoPlay[i] = bIsAutoPlay[i];
-            }
-            Drums.bTight = CDTXMania.ConfigIni.bTight;
-            for (int i = 0; i < 3; i++)
-            {
-                Drums.bSudden[i] = CDTXMania.ConfigIni.bSudden[i];
-                Drums.bHidden[i] = CDTXMania.ConfigIni.bHidden[i];
-                Drums.bReverse[i] = CDTXMania.ConfigIni.bReverse[i];
-                Drums.eRandom[i] = CDTXMania.ConfigIni.eRandom[i];
-                Drums.bLight[i] = CDTXMania.ConfigIni.bLight[i];
-                Drums.bLeft[i] = CDTXMania.ConfigIni.bLeft[i];
-                Drums.fScrollSpeed[i] = (CDTXMania.ConfigIni.nScrollSpeed[i] + 1) * 0.5f;
-            }
-            Drums.eDark = CDTXMania.ConfigIni.eDark.Drums;
-            Drums.nPlaySpeedNumerator = CDTXMania.ConfigIni.nPlaySpeed;
-            Drums.nPlaySpeedDenominator = 20;
-            Drums.eHHGroup = CDTXMania.ConfigIni.eHHGroup;
-            Drums.eFTGroup = CDTXMania.ConfigIni.eFTGroup;
-            Drums.eCYGroup = CDTXMania.ConfigIni.eCYGroup;
-            Drums.eHitSoundPriorityHH = CDTXMania.ConfigIni.eHitSoundPriorityHH;
-            Drums.eHitSoundPriorityFT = CDTXMania.ConfigIni.eHitSoundPriorityFT;
-            Drums.eHitSoundPriorityCY = CDTXMania.ConfigIni.eHitSoundPriorityCY;
-            Drums.bGuitarEnabled = CDTXMania.ConfigIni.bGuitarEnabled;
-            Drums.bDrumsEnabled = CDTXMania.ConfigIni.bDrumsEnabled;
-            Drums.bSTAGEFAILEDEnabled = CDTXMania.ConfigIni.bSTAGEFAILEDEnabled;
-            Drums.eDamageLevel = CDTXMania.ConfigIni.eDamageLevel;
-            Drums.bKeyboardUsed = bKeyboardUsed.Drums;
-            Drums.bMIDIUsed = bMIDIUsed.Drums;
-            Drums.bJoypadUsed = bJoypadUsed.Drums;
-            Drums.bMouseUsed = bMouseUsed.Drums;
-            Drums.stPrimaryHitRanges = CDTXMania.stDrumHitRanges;
-            Drums.stSecondaryHitRanges = CDTXMania.stDrumPedalHitRanges;
-            Drums.strDTXManiaVersion = CDTXMania.VERSION;
-            Drums.strDateTime = DateTime.Now.ToString();
-            Drums.strProgress = actProgressBar.GetScoreIniString(EInstrumentPart.DRUMS);
-            Drums.Hash = CScoreIni.tComputePerformanceSectionMD5(Drums);
-        }
+        drums = CDTXMania.DTX.bHasChips.Drums && !CDTXMania.ConfigIni.bGuitarRevolutionMode ? ResultsFor(DrumsData) : new CScoreIni.CPerformanceEntry();
+        guitar = CDTXMania.DTX.bHasChips.Guitar ? ResultsFor(GuitarData) : new CScoreIni.CPerformanceEntry();
+        bass = CDTXMania.DTX.bHasChips.Bass ? ResultsFor(BassData) : new CScoreIni.CPerformanceEntry();
+        trainingMode = bIsTrainingMode;
     }
-    #endregion
-    #region [ tStorePerfResults_Guitar() ]
-    public void tStorePerfResults_Guitar(out CScoreIni.CPerformanceEntry Guitar)
-    {
-        Guitar = new CScoreIni.CPerformanceEntry();
 
-        if (CDTXMania.DTX.bHasChips.Guitar)
-        {
-            Guitar.nScore = (long)GuitarData.Score;
-            if (CDTXMania.ConfigIni.nSkillMode == 0)
-            {
-                Guitar.dbGameSkill = CScoreIni.tCalculateGameSkillOld(CDTXMania.DTX.LEVEL.Guitar, CDTXMania.DTX.LEVELDEC.Guitar, CDTXMania.DTX.nVisibleChipsCount.Guitar, GuitarData.HitCountExclAuto.Perfect, GuitarData.HitCountExclAuto.Great, GuitarData.MaxCombo, EInstrumentPart.GUITAR, bIsAutoPlay);
-                Guitar.dbPerformanceSkill = CScoreIni.tCalculatePlayingSkillOld(CDTXMania.DTX.nVisibleChipsCount.Guitar, GuitarData.HitCountExclAuto.Perfect, GuitarData.HitCountExclAuto.Great, GuitarData.HitCountExclAuto.Good, GuitarData.HitCountExclAuto.Poor, GuitarData.HitCountExclAuto.Miss, GuitarData.MaxCombo, EInstrumentPart.GUITAR, bIsAutoPlay);
-            }
-            else if (CDTXMania.ConfigIni.nSkillMode == 1)
-            {
-                Guitar.dbPerformanceSkill = CScoreIni.tCalculatePlayingSkill(CDTXMania.DTX.nVisibleChipsCount.Guitar, GuitarData.HitCountExclAuto.Perfect, GuitarData.HitCountExclAuto.Great, GuitarData.HitCountExclAuto.Good, GuitarData.HitCountExclAuto.Poor, GuitarData.HitCountExclAuto.Miss, GuitarData.MaxCombo, EInstrumentPart.GUITAR, bIsAutoPlay);
-                Guitar.dbGameSkill = CScoreIni.tCalculateGameSkillFromPlayingSkill(CDTXMania.DTX.LEVEL.Guitar, CDTXMania.DTX.LEVELDEC.Guitar, Guitar.dbPerformanceSkill);
-            }
-            Guitar.nPerfectCount = CDTXMania.ConfigIni.bAllGuitarsAreAutoPlay ? GuitarData.HitCountIncAuto.Perfect : GuitarData.HitCountExclAuto.Perfect;
-            Guitar.nGreatCount = CDTXMania.ConfigIni.bAllGuitarsAreAutoPlay ? GuitarData.HitCountIncAuto.Great : GuitarData.HitCountExclAuto.Great;
-            Guitar.nGoodCount = CDTXMania.ConfigIni.bAllGuitarsAreAutoPlay ? GuitarData.HitCountIncAuto.Good : GuitarData.HitCountExclAuto.Good;
-            Guitar.nPoorCount = CDTXMania.ConfigIni.bAllGuitarsAreAutoPlay ? GuitarData.HitCountIncAuto.Poor : GuitarData.HitCountExclAuto.Poor;
-            Guitar.nMissCount = CDTXMania.ConfigIni.bAllGuitarsAreAutoPlay ? GuitarData.HitCountIncAuto.Miss : GuitarData.HitCountExclAuto.Miss;
-            Guitar.nPerfectCount_ExclAuto = GuitarData.HitCountExclAuto.Perfect;
-            Guitar.nGreatCount_ExclAuto = GuitarData.HitCountExclAuto.Great;
-            Guitar.nGoodCount_ExclAuto = GuitarData.HitCountExclAuto.Good;
-            Guitar.nPoorCount_ExclAuto = GuitarData.HitCountExclAuto.Poor;
-            Guitar.nMissCount_ExclAuto = GuitarData.HitCountExclAuto.Miss;
-            Guitar.nFastCount = GuitarData.TimingHitCount.Early;
-            Guitar.nSlowCount = GuitarData.TimingHitCount.Late;
-            Guitar.nMaxCombo = GuitarData.MaxCombo;
-            Guitar.nTotalChipsCount = CDTXMania.DTX.nVisibleChipsCount.Guitar;
-            for (int i = 0; i < (int)ELane.MAX; i++)
-            {
-                Guitar.bAutoPlay[i] = bIsAutoPlay[i];
-            }
-            Guitar.bTight = CDTXMania.ConfigIni.bTight;
-            for (int i = 0; i < 3; i++)
-            {
-                Guitar.bSudden[i] = CDTXMania.ConfigIni.bSudden[i];
-                Guitar.bHidden[i] = CDTXMania.ConfigIni.bHidden[i];
-                Guitar.bReverse[i] = CDTXMania.ConfigIni.bReverse[i];
-                Guitar.eRandom[i] = CDTXMania.ConfigIni.eRandom[i];
-                Guitar.bLight[i] = CDTXMania.ConfigIni.bLight[i];
-                Guitar.bLeft[i] = CDTXMania.ConfigIni.bLeft[i];
-                Guitar.fScrollSpeed[i] = (CDTXMania.ConfigIni.nScrollSpeed[i] + 1) * 0.5f;
-            }
-            Guitar.eDark = CDTXMania.ConfigIni.eDark.Guitar;
-            Guitar.nPlaySpeedNumerator = CDTXMania.ConfigIni.nPlaySpeed;
-            Guitar.nPlaySpeedDenominator = 20;
-            Guitar.eHHGroup = CDTXMania.ConfigIni.eHHGroup;
-            Guitar.eFTGroup = CDTXMania.ConfigIni.eFTGroup;
-            Guitar.eCYGroup = CDTXMania.ConfigIni.eCYGroup;
-            Guitar.eHitSoundPriorityHH = CDTXMania.ConfigIni.eHitSoundPriorityHH;
-            Guitar.eHitSoundPriorityFT = CDTXMania.ConfigIni.eHitSoundPriorityFT;
-            Guitar.eHitSoundPriorityCY = CDTXMania.ConfigIni.eHitSoundPriorityCY;
-            Guitar.bGuitarEnabled = CDTXMania.ConfigIni.bGuitarEnabled;
-            Guitar.bDrumsEnabled = CDTXMania.ConfigIni.bDrumsEnabled;
-            Guitar.bSTAGEFAILEDEnabled = CDTXMania.ConfigIni.bSTAGEFAILEDEnabled;
-            Guitar.eDamageLevel = CDTXMania.ConfigIni.eDamageLevel;
-            Guitar.bKeyboardUsed = bKeyboardUsed.Guitar;
-            Guitar.bMIDIUsed = bMIDIUsed.Guitar;
-            Guitar.bJoypadUsed = bJoypadUsed.Guitar;
-            Guitar.bMouseUsed = bMouseUsed.Guitar;
-            Guitar.stPrimaryHitRanges = CDTXMania.stGuitarHitRanges;
-            Guitar.stSecondaryHitRanges = new STHitRanges();
-            Guitar.strDTXManiaVersion = CDTXMania.VERSION;
-            Guitar.strDateTime = DateTime.Now.ToString();
-            Guitar.strProgress = actProgressBar.GetScoreIniString(EInstrumentPart.GUITAR);
-            Guitar.Hash = CScoreIni.tComputePerformanceSectionMD5(Guitar);
-        }
-    }
-    #endregion
-    #region [ tStorePerfResultsBass() ]
-    public void tStorePerfResultsBass(out CScoreIni.CPerformanceEntry Bass)
-    {
-        Bass = new CScoreIni.CPerformanceEntry();
-
-        if (CDTXMania.DTX.bHasChips.Bass)
-        {
-            Bass.nScore = (long)BassData.Score;
-            if (CDTXMania.ConfigIni.nSkillMode == 0)
-            {
-                Bass.dbGameSkill = CScoreIni.tCalculateGameSkillOld(CDTXMania.DTX.LEVEL.Bass, CDTXMania.DTX.LEVELDEC.Bass, CDTXMania.DTX.nVisibleChipsCount.Bass, BassData.HitCountExclAuto.Perfect, BassData.HitCountExclAuto.Great, BassData.MaxCombo, EInstrumentPart.BASS, bIsAutoPlay);
-                Bass.dbPerformanceSkill = CScoreIni.tCalculatePlayingSkillOld(CDTXMania.DTX.nVisibleChipsCount.Bass, BassData.HitCountExclAuto.Perfect, BassData.HitCountExclAuto.Great, BassData.HitCountExclAuto.Good, BassData.HitCountExclAuto.Poor, BassData.HitCountExclAuto.Miss, BassData.MaxCombo, EInstrumentPart.BASS, bIsAutoPlay);
-            }
-            else if (CDTXMania.ConfigIni.nSkillMode == 1)
-            {
-                Bass.dbPerformanceSkill = CScoreIni.tCalculatePlayingSkill(CDTXMania.DTX.nVisibleChipsCount.Bass, BassData.HitCountExclAuto.Perfect, BassData.HitCountExclAuto.Great, BassData.HitCountExclAuto.Good, BassData.HitCountExclAuto.Poor, BassData.HitCountExclAuto.Miss, BassData.MaxCombo, EInstrumentPart.BASS, bIsAutoPlay);
-                Bass.dbGameSkill = CScoreIni.tCalculateGameSkillFromPlayingSkill(CDTXMania.DTX.LEVEL.Bass, CDTXMania.DTX.LEVELDEC.Bass, Bass.dbPerformanceSkill);
-            }
-            Bass.nPerfectCount = CDTXMania.ConfigIni.bAllBassAreAutoPlay ? BassData.HitCountIncAuto.Perfect : BassData.HitCountExclAuto.Perfect;
-            Bass.nGreatCount = CDTXMania.ConfigIni.bAllBassAreAutoPlay ? BassData.HitCountIncAuto.Great : BassData.HitCountExclAuto.Great;
-            Bass.nGoodCount = CDTXMania.ConfigIni.bAllBassAreAutoPlay ? BassData.HitCountIncAuto.Good : BassData.HitCountExclAuto.Good;
-            Bass.nPoorCount = CDTXMania.ConfigIni.bAllBassAreAutoPlay ? BassData.HitCountIncAuto.Poor : BassData.HitCountExclAuto.Poor;
-            Bass.nMissCount = CDTXMania.ConfigIni.bAllBassAreAutoPlay ? BassData.HitCountIncAuto.Miss : BassData.HitCountExclAuto.Miss;
-            Bass.nPerfectCount_ExclAuto = BassData.HitCountExclAuto.Perfect;
-            Bass.nGreatCount_ExclAuto = BassData.HitCountExclAuto.Great;
-            Bass.nGoodCount_ExclAuto = BassData.HitCountExclAuto.Good;
-            Bass.nPoorCount_ExclAuto = BassData.HitCountExclAuto.Poor;
-            Bass.nMissCount_ExclAuto = BassData.HitCountExclAuto.Miss;
-            Bass.nFastCount = BassData.TimingHitCount.Early;
-            Bass.nSlowCount = BassData.TimingHitCount.Late;
-            Bass.nMaxCombo = BassData.MaxCombo;
-            Bass.nTotalChipsCount = CDTXMania.DTX.nVisibleChipsCount.Bass;
-            for (int i = 0; i < (int)ELane.MAX; i++)
-            {
-                Bass.bAutoPlay[i] = bIsAutoPlay[i];
-            }
-            Bass.bTight = CDTXMania.ConfigIni.bTight;
-            for (int i = 0; i < 3; i++)
-            {
-                Bass.bSudden[i] = CDTXMania.ConfigIni.bSudden[i];
-                Bass.bHidden[i] = CDTXMania.ConfigIni.bHidden[i];
-                Bass.bReverse[i] = CDTXMania.ConfigIni.bReverse[i];
-                Bass.eRandom[i] = CDTXMania.ConfigIni.eRandom[i];
-                Bass.bLight[i] = CDTXMania.ConfigIni.bLight[i];
-                Bass.bLeft[i] = CDTXMania.ConfigIni.bLeft[i];
-                Bass.fScrollSpeed[i] = (CDTXMania.ConfigIni.nScrollSpeed[i] + 1) * 0.5f;
-            }
-            Bass.eDark = CDTXMania.ConfigIni.eDark.Bass;
-            Bass.nPlaySpeedNumerator = CDTXMania.ConfigIni.nPlaySpeed;
-            Bass.nPlaySpeedDenominator = 20;
-            Bass.eHHGroup = CDTXMania.ConfigIni.eHHGroup;
-            Bass.eFTGroup = CDTXMania.ConfigIni.eFTGroup;
-            Bass.eCYGroup = CDTXMania.ConfigIni.eCYGroup;
-            Bass.eHitSoundPriorityHH = CDTXMania.ConfigIni.eHitSoundPriorityHH;
-            Bass.eHitSoundPriorityFT = CDTXMania.ConfigIni.eHitSoundPriorityFT;
-            Bass.eHitSoundPriorityCY = CDTXMania.ConfigIni.eHitSoundPriorityCY;
-            Bass.bGuitarEnabled = CDTXMania.ConfigIni.bGuitarEnabled;
-            Bass.bDrumsEnabled = CDTXMania.ConfigIni.bDrumsEnabled;
-            Bass.bSTAGEFAILEDEnabled = CDTXMania.ConfigIni.bSTAGEFAILEDEnabled;
-            Bass.eDamageLevel = CDTXMania.ConfigIni.eDamageLevel;
-            Bass.bKeyboardUsed = bKeyboardUsed.Bass;			// #24280 2011.1.29 yyagi
-            Bass.bMIDIUsed = bMIDIUsed.Bass;				//
-            Bass.bJoypadUsed = bJoypadUsed.Bass;		//
-            Bass.bMouseUsed = bMouseUsed.Bass;					//
-            Bass.stPrimaryHitRanges = CDTXMania.stBassHitRanges;
-            Bass.stSecondaryHitRanges = new STHitRanges();
-            Bass.strDTXManiaVersion = CDTXMania.VERSION;
-            Bass.strDateTime = DateTime.Now.ToString();
-            Bass.strProgress = actProgressBar.GetScoreIniString(EInstrumentPart.BASS);
-            Bass.Hash = CScoreIni.tComputePerformanceSectionMD5(Bass);
-        }
-    }
-    #endregion
+    private CScoreIni.CPerformanceEntry ResultsFor(PerformanceData data) =>
+        PerformanceResults.Create(data, actProgressBar.GetScoreIniString(data.Part));
 
     private UIText playspeedText;
     
@@ -503,13 +295,6 @@ internal abstract class CStagePerfCommonScreen : CStage
         {
             r現在の歓声Chip[k] = null;
         }
-        for (int i = 0; i < 3; i++)
-        {
-            bKeyboardUsed[i] = false;
-            bJoypadUsed[i] = false;
-            bMIDIUsed[i] = false;
-            bMouseUsed[i] = false;
-        }
         nJudgeLinePosY.Drums = (CDTXMania.ConfigIni.bReverse.Drums ? 159 + CDTXMania.ConfigIni.nJudgeLine.Drums : 561 - CDTXMania.ConfigIni.nJudgeLine.Drums);
         nJudgeLinePosY.Guitar = (CDTXMania.ConfigIni.bReverse.Guitar ? 611 - CDTXMania.ConfigIni.nJudgeLine.Guitar : 154 + CDTXMania.ConfigIni.nJudgeLine.Guitar);
         nJudgeLinePosY.Bass = (CDTXMania.ConfigIni.bReverse.Bass ? 611 - CDTXMania.ConfigIni.nJudgeLine.Bass : 154 + CDTXMania.ConfigIni.nJudgeLine.Bass);
@@ -649,10 +434,6 @@ internal abstract class CStagePerfCommonScreen : CStage
     protected CActPerfGuitarBonus actGuitarBonus;
     protected CActPerfProgressBar actProgressBar;
     protected bool bPAUSE;
-    protected STDGBVALUE<bool> bMIDIUsed;
-    protected STDGBVALUE<bool> bKeyboardUsed;
-    protected STDGBVALUE<bool> bJoypadUsed;
-    protected STDGBVALUE<bool> bMouseUsed;
     protected CCounter ctWailingChipPatternAnimation;
     public CCounter ctBPMBar;
     public CCounter ct登場用;
@@ -1254,26 +1035,6 @@ internal abstract class CStagePerfCommonScreen : CStage
             {
                 CDTXMania.ConfigIni.nInfoType = 0;
             }
-        }
-    }
-
-    protected void tSaveInputMethod(EInstrumentPart part)
-    {
-        if (CDTXMania.Pad.stDetectedDevice.Keyboard)
-        {
-            bKeyboardUsed[(int)part] = true;
-        }
-        if (CDTXMania.Pad.stDetectedDevice.Joypad)
-        {
-            bJoypadUsed[(int)part] = true;
-        }
-        if (CDTXMania.Pad.stDetectedDevice.MIDIIN)
-        {
-            bMIDIUsed[(int)part] = true;
-        }
-        if (CDTXMania.Pad.stDetectedDevice.Mouse)
-        {
-            bMouseUsed[(int)part] = true;
         }
     }
 
@@ -2471,7 +2232,7 @@ internal abstract class CStagePerfCommonScreen : CStage
         }
 
         guitar.UpdateInput();
-        tSaveInputMethod(inst);
+        guitar.Data.RecordInputDevices();
 
         int firstLane = inst == EInstrumentPart.GUITAR ? 0 : 5;
         for (int lane = 0; lane < 5; lane++)

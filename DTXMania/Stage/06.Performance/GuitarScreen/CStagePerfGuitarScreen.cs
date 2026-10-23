@@ -116,17 +116,6 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 
 	// メソッド
 
-	public void tStorePerfResults( out CScoreIni.CPerformanceEntry Drums, out CScoreIni.CPerformanceEntry Guitar, out CScoreIni.CPerformanceEntry Bass, out bool bIsTrainingMode )
-	{
-		Drums = new CScoreIni.CPerformanceEntry();
-
-		tStorePerfResults_Guitar( out Guitar );
-		tStorePerfResultsBass( out Bass );
-
-		bIsTrainingMode = this.bIsTrainingMode;
-	}
-
-
 	// CStage 実装
 
 	public override void OnActivate()
