@@ -41,18 +41,22 @@ public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
     private BlendMode? _activeBlendMode;
     private uint _boundTexture;
 
-    //sprite batch: quads sharing texture + blend mode accumulate here (vertices already
-    //transformed to screen space, color baked per vertex) and are drawn in one glDrawElements
-    //when the batch breaks (texture/blend change, capacity, texture update/delete, readback,
-    //or the explicit end-of-render Flush).
+    //sprite batch: quads accumulate here (vertices already transformed to screen space, color baked
+    //per vertex) across texture/blend changes, each change starting a new segment. A flush uploads
+    //every pending vertex in one buffer upload and draws each segment from its offset, so a texture
+    //change costs a bind and a draw rather than a buffer upload and attribute setup as well. Flushes
+    //happen at capacity, texture update/delete, readback, and the explicit end-of-render Flush.
     private const int MaxBatchQuads = 2048;
     //w carries the perspective divide, so a quad in a group with perspective keeps its texture straight
     private const int FloatsPerVertex = 10; //pos(4) + uv(2) + color(4)
     private const int FloatsPerQuad = FloatsPerVertex * 4;
     private readonly float[] _batchVertices = new float[MaxBatchQuads * FloatsPerQuad];
     private int _batchQuadCount;
-    private uint _batchTexture;
-    private BlendMode _batchBlendMode;
+
+    private readonly uint[] _segmentTexture = new uint[MaxBatchQuads];
+    private readonly BlendMode[] _segmentBlendMode = new BlendMode[MaxBatchQuads];
+    private readonly int[] _segmentFirstQuad = new int[MaxBatchQuads];
+    private int _segmentCount;
 
     // PBO ring for stall-free streaming texture uploads (used by video). Uploading a
     // texture from a client pointer forces the driver to serialize with the GPU (a CPU
@@ -74,6 +78,9 @@ public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
     private readonly Dictionary<uint, (int Width, int Height)> _trackedTextures = new();
 
     public readonly record struct TextureInfo(uint Id, int Width, int Height);
+
+    private TextAtlas? _textAtlas;
+    internal TextAtlas textAtlas => _textAtlas ??= new TextAtlas(this);
 
     /// <summary>The live context, and a counter bumped every time it is replaced. Anything holding GL
     /// objects that the host does not know about (an inspector render target) re-attaches when this
@@ -97,6 +104,7 @@ public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
         _contextResourcesCreated = true;
         InvalidateStateCache();
         _batchQuadCount = 0;
+        _segmentCount = 0;
     }
 
     /// <summary>Points the 2D pipeline at a viewport of this size. Separate from <see cref="BeginFrame"/>
@@ -126,6 +134,7 @@ public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
 
         //a batch pending across frames would target the wrong frame's render target; drop it
         _batchQuadCount = 0;
+        _segmentCount = 0;
 
         InvalidateStateCache();
 
@@ -262,7 +271,7 @@ public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
         if (_gl != null && textureId != 0)
         {
             //pending quads referencing this texture must be drawn before it disappears
-            if (_batchQuadCount > 0 && _batchTexture == textureId)
+            if (BatchUses(textureId))
             {
                 Flush();
             }
@@ -364,7 +373,7 @@ public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
 
         //pending quads referencing this texture were submitted against its current content;
         //draw them before overwriting it
-        if (_batchQuadCount > 0 && _batchTexture == textureId)
+        if (BatchUses(textureId))
         {
             Flush();
         }
@@ -412,7 +421,7 @@ public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
 
         //pending quads referencing this texture were submitted against its current content;
         //draw them before overwriting it
-        if (_batchQuadCount > 0 && _batchTexture == textureId)
+        if (BatchUses(textureId))
         {
             Flush();
         }
@@ -512,15 +521,18 @@ public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
 
         quadCount++;
 
-        if (_batchQuadCount > 0 && (textureId != _batchTexture || blendMode != _batchBlendMode || _batchQuadCount >= MaxBatchQuads))
+        if (_batchQuadCount >= MaxBatchQuads)
         {
             Flush();
         }
 
-        if (_batchQuadCount == 0)
+        int last = _segmentCount - 1;
+        if (_segmentCount == 0 || _segmentTexture[last] != textureId || _segmentBlendMode[last] != blendMode)
         {
-            _batchTexture = textureId;
-            _batchBlendMode = blendMode;
+            _segmentTexture[_segmentCount] = textureId;
+            _segmentBlendMode[_segmentCount] = blendMode;
+            _segmentFirstQuad[_segmentCount] = _batchQuadCount;
+            _segmentCount++;
         }
 
         float u0 = clipRect.Left / textureWidth;
@@ -576,24 +588,10 @@ public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
             ApplyFrameState();
         }
 
-        if (_activeBlendMode != _batchBlendMode)
-        {
-            _gl.BlendFuncSeparate(
-                GLEnum.SrcAlpha, _batchBlendMode == BlendMode.Additive ? GLEnum.One : GLEnum.OneMinusSrcAlpha,
-                GLEnum.One, GLEnum.OneMinusSrcAlpha);
-            _activeBlendMode = _batchBlendMode;
-        }
-
-        if (_boundTexture != _batchTexture)
-        {
-            _gl.BindTexture(TextureTarget.Texture2D, _batchTexture);
-            _boundTexture = _batchTexture;
-        }
-
         //orphaning BufferData (rather than BufferSubData) so the driver never has to sync with
-        //draws still reading the previous batch's vertices. We also rotate through a small ring
+        //draws still reading the previous flush's vertices. We also rotate through a small ring
         //of buffers, so even drivers that don't rename an orphaned buffer well never stall: the
-        //buffer we upload into hasn't been touched by the GPU for VboRingCount draws.
+        //buffer we upload into hasn't been touched by the GPU for VboRingCount flushes.
         _vboRingIndex = (_vboRingIndex + 1) % VboRingCount;
         uint vbo = _vboRing[_vboRingIndex];
         _gl.BindBuffer(BufferTargetARB.ArrayBuffer, vbo);
@@ -610,9 +608,48 @@ public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
         _gl.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, (uint)stride, (void*)(4 * sizeof(float)));
         _gl.VertexAttribPointer(2, 4, VertexAttribPointerType.Float, false, (uint)stride, (void*)(6 * sizeof(float)));
 
-        _gl.DrawElements(PrimitiveType.Triangles, (uint)(_batchQuadCount * 6), DrawElementsType.UnsignedShort, null);
-        drawCalls++;
+        for (int segment = 0; segment < _segmentCount; segment++)
+        {
+            BlendMode blendMode = _segmentBlendMode[segment];
+            if (_activeBlendMode != blendMode)
+            {
+                _gl.BlendFuncSeparate(
+                    GLEnum.SrcAlpha, blendMode == BlendMode.Additive ? GLEnum.One : GLEnum.OneMinusSrcAlpha,
+                    GLEnum.One, GLEnum.OneMinusSrcAlpha);
+                _activeBlendMode = blendMode;
+            }
+
+            uint texture = _segmentTexture[segment];
+            if (_boundTexture != texture)
+            {
+                _gl.BindTexture(TextureTarget.Texture2D, texture);
+                _boundTexture = texture;
+            }
+
+            int firstQuad = _segmentFirstQuad[segment];
+            int endQuad = segment + 1 < _segmentCount ? _segmentFirstQuad[segment + 1] : _batchQuadCount;
+
+            //the index buffer holds quad n's indices at n * 6, already pointing at vertices n * 4 onwards
+            _gl.DrawElements(PrimitiveType.Triangles, (uint)((endQuad - firstQuad) * 6), DrawElementsType.UnsignedShort,
+                (void*)(firstQuad * 6 * sizeof(ushort)));
+            drawCalls++;
+        }
+
         _batchQuadCount = 0;
+        _segmentCount = 0;
+    }
+
+    private bool BatchUses(uint textureId)
+    {
+        for (int segment = 0; segment < _segmentCount; segment++)
+        {
+            if (_segmentTexture[segment] == textureId)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     //Binds the full 2D pipeline state once per frame (first flush); subsequent flushes only

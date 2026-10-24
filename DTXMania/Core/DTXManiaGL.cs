@@ -72,7 +72,8 @@ public sealed class DTXManiaGL : OpenGlGame
         
         mania.Draw();
 
-        if (clearImGuiFocusOnNextRender)
+        //kept until a frame ImGui actually runs in
+        if (clearImGuiFocusOnNextRender && InspectorManager.WantsImGui)
         {
             ImGui.SetWindowFocus((string?)null);
             clearImGuiFocusOnNextRender = false;

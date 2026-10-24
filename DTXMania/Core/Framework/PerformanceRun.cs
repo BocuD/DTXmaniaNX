@@ -43,16 +43,20 @@ public static class PerformanceRun
 
     private static IEnumerator<Wait> Script()
     {
-        yield return Wait.Until("the title screen", () => Stages.rCurrentStage == Stages.stageTitle);
-
-        Stages.tChangeStage(Stages.stageSongSelectionNew);
-        yield return Wait.Until("song select", () => Stages.rCurrentStage == Stages.stageSongSelectionNew);
-        yield return Wait.Seconds(SettleSeconds, "the song list to settle");
-
-        if (!Stages.stageSongSelectionNew.ConfirmRandomSong())
+        //a chart on the command line goes straight to play, with no title screen or song select
+        if (!CDTXMania.bCompactMode)
         {
-            Log("no song to play");
-            yield break;
+            yield return Wait.Until("the title screen", () => Stages.rCurrentStage == Stages.stageTitle);
+
+            Stages.tChangeStage(Stages.stageSongSelectionNew);
+            yield return Wait.Until("song select", () => Stages.rCurrentStage == Stages.stageSongSelectionNew);
+            yield return Wait.Seconds(SettleSeconds, "the song list to settle");
+
+            if (!Stages.stageSongSelectionNew.ConfirmRandomSong())
+            {
+                Log("no song to play");
+                yield break;
+            }
         }
 
         yield return Wait.Until("the song to start", () => Stages.rCurrentStage is CStagePerfCommonScreen);
@@ -105,8 +109,7 @@ public static class PerformanceRun
     private static double waitStartedAt;
     private static bool finished;
 
-    private static bool recording;
-    private static bool focusedAtStart;
+    private static bool recording;    private static bool focusedAtStart;
     private static int unfocusedFrames;
 
     private static bool Focused => CDTXMania.app?.maniaGl?.host?.IsWindowFocused ?? false;
@@ -141,15 +144,14 @@ public static class PerformanceRun
         //so the means below cover the recorded window and not the menus before it
         AllocationProbe.Reset();
 
-        recording = true;
-        focusedAtStart = Focused;
+        recording = true;        focusedAtStart = Focused;
         Log($"recording, window focused: {focusedAtStart}");
     }
 
     private static void Report()
     {
         recording = false;
-        Log($"wrote {FrameTrace.Export()} from {FrameTrace.Frames} frames");
+        Log(FrameTrace.Summary());        Log($"wrote {FrameTrace.Export()} from {FrameTrace.Frames} frames");
 
         //a run behind another window still produces a trace, and its draw numbers are real, but the input
         //devices were never acquired so nothing about input in it is

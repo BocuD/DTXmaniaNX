@@ -19,8 +19,8 @@ public sealed class AsyncTextureUploader
 {
     public static AsyncTextureUploader Instance { get; } = new();
 
-    private readonly record struct WorkItem(Func<DecodedPixels> Produce, Action<BaseTexture?> OnUploaded);
-    private readonly record struct ReadyItem(DecodedPixels Pixels, Action<BaseTexture?> OnUploaded);
+    private readonly record struct WorkItem(Func<DecodedPixels> Produce, Action<BaseTexture?> OnUploaded, bool IsText);
+    private readonly record struct ReadyItem(DecodedPixels Pixels, Action<BaseTexture?> OnUploaded, bool IsText);
 
     private readonly BlockingCollection<WorkItem> _work = new();
     private readonly object _readySync = new();
@@ -37,7 +37,7 @@ public sealed class AsyncTextureUploader
     public void RequestImage(string path, int maxDimension, Action<BaseTexture?> onUploaded)
     {
         EnsureWorker();
-        _work.Add(new WorkItem(() => DecodeImage(path, maxDimension), onUploaded));
+        _work.Add(new WorkItem(() => DecodeImage(path, maxDimension), onUploaded, false));
     }
 
     /// <summary>
@@ -49,7 +49,7 @@ public sealed class AsyncTextureUploader
         EnsureWorker();
         _work.Add(new WorkItem(
             () => BaseTexture.SkiaTextRenderer?.RenderToPixels(request) ?? default,
-            onUploaded));
+            onUploaded, true));
     }
 
     /// <summary>
@@ -84,7 +84,9 @@ public sealed class AsyncTextureUploader
             BaseTexture? tex = null;
             if (item.Pixels.IsValid)
             {
-                tex = BaseTexture.LoadFromMemory(item.Pixels.Rgba, item.Pixels.Width, item.Pixels.Height, item.Pixels.Name);
+                tex = item.IsText && OpenGlRenderer.Instance != null
+                    ? OpenGlRenderer.Instance.textAtlas.Add(item.Pixels)
+                    : BaseTexture.LoadFromMemory(item.Pixels.Rgba, item.Pixels.Width, item.Pixels.Height, item.Pixels.Name);
                 used += item.Pixels.ByteCount;
             }
 
@@ -163,7 +165,7 @@ public sealed class AsyncTextureUploader
             int depth;
             lock (_readySync)
             {
-                _ready.Enqueue(new ReadyItem(pixels, item.OnUploaded));
+                _ready.Enqueue(new ReadyItem(pixels, item.OnUploaded, item.IsText));
                 depth = _ready.Count;
             }
 

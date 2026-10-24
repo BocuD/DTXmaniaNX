@@ -44,18 +44,30 @@ public sealed class PlayingSong
     private BaseTexture? albumArt;
     private string albumArtPath = string.Empty;
 
+    //looked up once per loaded chart, since checking the disk on every draw costs a real part of a frame
+    private CDTX? preimageChart;
+    private bool preimageChecked;
+    private string preimagePath = string.Empty;
+
     public BaseTexture AlbumArt
     {
         get
         {
-            string path = CDTXMania.DTX == null
-                ? string.Empty
-                : CDTXMania.DTX.strFolderName + CDTXMania.DTX.PREIMAGE;
+            CDTX? chart = CDTXMania.DTX;
 
-            if (!File.Exists(path))
+            if (!preimageChecked || !ReferenceEquals(chart, preimageChart))
             {
-                path = CSkin.Path(@"Graphics\5_preimage default.png");
+                preimageChecked = true;
+                preimageChart = chart;
+                preimagePath = chart == null ? string.Empty : chart.strFolderName + chart.PREIMAGE;
+
+                if (!File.Exists(preimagePath))
+                {
+                    preimagePath = string.Empty;
+                }
             }
+
+            string path = preimagePath.Length > 0 ? preimagePath : CSkin.Path(@"Graphics\5_preimage default.png");
 
             if (path != albumArtPath)
             {

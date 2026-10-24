@@ -41,7 +41,6 @@ public partial class UIPaddedNumber : UIGroup
     [JsonIgnore] private long lastValue;
     [JsonIgnore] private int lastStyleHash;
     [JsonIgnore] private bool applied;
-
     public UIPaddedNumber() : base("PaddedNumber")
     {
         padText = AddChild(new UIText("") { name = "Pad", dontSerialize = true });
@@ -63,18 +62,19 @@ public partial class UIPaddedNumber : UIGroup
         //the split, width measure and re-render are wasted work unless something actually changed
         int styleHash = HashCode.Combine(padding, fontSize, font.source, font.path, style, padColor, numColor,
             HashCode.Combine(texturePadding, digitGap, letterSpacing, weight, horizontalScale, outlineWidth, outlineColor));
-        if (!applied || resolved != lastValue || styleHash != lastStyleHash)
+        bool styleChanged = !applied || styleHash != lastStyleHash;
+        if (styleChanged || resolved != lastValue)
         {
             applied = true;
             lastValue = resolved;
             lastStyleHash = styleHash;
-            Apply(resolved);
+            Apply(resolved, styleChanged);
         }
 
         base.Draw(parentMatrix);
     }
 
-    private void Apply(long resolved)
+    private void Apply(long resolved, bool styleChanged)
     {
         string s = resolved.ToString("D" + Math.Max(1, padding));
 
@@ -86,11 +86,20 @@ public partial class UIPaddedNumber : UIGroup
         }
         if (zeros == s.Length) zeros = s.Length - 1;
 
-        StylePart(padText, s[..zeros], padColor);
-        StylePart(numText, s[zeros..], numColor);
+        //rasterizing is a main-thread render plus a new texture, so a part that reads the same keeps its own
+        string pad = s[..zeros];
+        if (styleChanged || pad != padText.text)
+        {
+            StylePart(padText, pad, padColor);
+            padText.RenderTexture();
+        }
 
-        padText.RenderTexture();
-        numText.RenderTexture();
+        string num = s[zeros..];
+        if (styleChanged || num != numText.text)
+        {
+            StylePart(numText, num, numColor);
+            numText.RenderTexture();
+        }
 
         numText.position.X = padText.position.X + padText.textAdvance + digitGap;
 

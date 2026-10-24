@@ -24,6 +24,12 @@ public static class FrameTrace
 
         //how late the worst audio callback of this frame was, which a count alone does not say
         public float AudioGapMs;
+
+        public int DrawCalls;
+        public int Quads;
+
+        //from a timer query, so a few frames behind the frame it is recorded with
+        public float GpuMs;
     }
 
     //int rather than the profiler's long: plenty per section per frame, and it halves what the buffer
@@ -161,13 +167,41 @@ public static class FrameTrace
             Gen2 = counters.Gen2 - previous.Gen2,
             Allocated = counters.Allocated - previous.Allocated,
             Underruns = counters.Underruns - previous.Underruns,
-            AudioGapMs = (float)Audio.AudioUnderruns.TakeWorstGapMs()
+            AudioGapMs = (float)Audio.AudioUnderruns.TakeWorstGapMs(),
+            DrawCalls = UI.OpenGL.OpenGlRenderer.Instance?.lastFrameDrawCalls ?? 0,
+            Quads = UI.OpenGL.OpenGlRenderer.Instance?.lastFrameQuads ?? 0,
+            GpuMs = FrameProfiler.GpuFrameMs
         };
 
         previous = counters;
 
         next = at + 1 == Capacity ? 0 : at + 1;
         written++;
+    }
+
+    public static string Summary()
+    {
+        int held = Frames;
+        if (frames == null || held == 0)
+        {
+            return "no frames";
+        }
+
+        double totalMs = 0;
+        double gpuMs = 0;
+        long drawCalls = 0;
+        long quads = 0;
+        for (int i = 0; i < held; i++)
+        {
+            totalMs += frames[i].TotalMs;
+            gpuMs += frames[i].GpuMs;
+            drawCalls += frames[i].DrawCalls;
+            quads += frames[i].Quads;
+        }
+
+        return string.Format(CultureInfo.InvariantCulture,
+            "{0:0.000} ms/frame ({1:0} fps), {2:0.0} draw calls, {3:0.0} quads, GPU {4:0.000} ms",
+            totalMs / held, held * 1000.0 / totalMs, (double)drawCalls / held, (double)quads / held, gpuMs / held);
     }
 
     /// <summary>Writes what has been recorded next to the executable and answers the path.</summary>
@@ -195,7 +229,8 @@ public static class FrameTrace
         string device = $",{audio.Backend},{audio.BufferMs},{audio.BufferFrames},{audio.PeriodFrames}";
 
         csv.Append("frame,totalMs,gen0,gen1,gen2,allocatedBytes,underruns,audioGapMs")
-            .Append(",backend,audioBufferMs,audioBufferFrames,audioPeriodFrames");
+            .Append(",backend,audioBufferMs,audioBufferFrames,audioPeriodFrames")
+            .Append(",drawCalls,quads,gpuMs");
         for (int i = 0; i < Sections; i++)
         {
             csv.Append(',').Append(FrameProfiler.SectionNames[i]);
@@ -228,7 +263,10 @@ public static class FrameTrace
                 .Append(record.Allocated).Append(',')
                 .Append(record.Underruns).Append(',')
                 .Append(record.AudioGapMs.ToString("0.###", CultureInfo.InvariantCulture))
-                .Append(device);
+                .Append(device).Append(',')
+                .Append(record.DrawCalls).Append(',')
+                .Append(record.Quads).Append(',')
+                .Append(record.GpuMs.ToString("0.###", CultureInfo.InvariantCulture));
 
             for (int i = 0; i < Sections; i++)
             {

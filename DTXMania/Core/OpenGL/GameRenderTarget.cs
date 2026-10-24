@@ -31,9 +31,10 @@ internal sealed unsafe class GameRenderTarget : IDisposable
         ReleaseContextResources();
         _framebuffer = _gl.GenFramebuffer();
 
+        //the textures are shared between contexts and keep their storage; only the framebuffer is new
         if (Width > 0 && Height > 0)
         {
-            Resize(Width, Height);
+            AttachFramebuffer();
         }
 
         _contextResourcesCreated = true;
@@ -51,7 +52,6 @@ internal sealed unsafe class GameRenderTarget : IDisposable
 
         if (width == Width && height == Height && _framebuffer != 0)
         {
-            AttachFramebuffer();
             return;
         }
 

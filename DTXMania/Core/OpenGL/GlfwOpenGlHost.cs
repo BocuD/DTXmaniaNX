@@ -48,6 +48,7 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
 
     private bool _vsyncEnabled = true;
     private bool cursorVisible = true;
+    private bool _imguiRanLastFrame;
     public FullscreenMode fullscreenMode { get; private set; } = FullscreenMode.Windowed;
 
     private int _windowedX = 80;
@@ -648,29 +649,54 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
             GLFW.GetWindowSize(_window, ref _windowWidth, ref _windowHeight);
             UpdateDiagnostics();
 
-            const bool imgui = true;
+            //ImGui costs a real part of the frame on a slow machine, so it only runs while something shows it.
+            //Read after PollEvents, where the shortcuts that toggle it arrive
+            bool imgui = InspectorManager.WantsImGui;
 
             FrameProfiler.Begin(FrameSection.ImGuiNewFrame);
-            GLFW.MakeContextCurrent(_window);
             ImGui.SetCurrentContext(_imguiContext);
-            ImGuiImplOpenGL3.SetCurrentContext(_imguiContext);
-            ImGuiImplOpenGL3.NewFrame();
 
-            if (_imguiGlfwInput != null)
+            if (imgui)
             {
-                _imguiGlfwInput.NewFrame(new Vector2(_windowWidth, _windowHeight),
-                    new Vector2(_framebufferWidth, _framebufferHeight), _deltaTime);
+                GLFW.MakeContextCurrent(_window);
+                ImGuiImplOpenGL3.SetCurrentContext(_imguiContext);
+                ImGuiImplOpenGL3.NewFrame();
+
+                if (_imguiGlfwInput != null)
+                {
+                    _imguiGlfwInput.NewFrame(new Vector2(_windowWidth, _windowHeight),
+                        new Vector2(_framebufferWidth, _framebufferHeight), _deltaTime);
+                }
+                else
+                {
+                    ImGuiImplGLFW.SetCurrentContext(_imguiContext);
+                    ImGuiImplGLFW.NewFrame();
+                }
+
+                ImGui.NewFrame();
             }
             else
             {
-                ImGuiImplGLFW.SetCurrentContext(_imguiContext);
-                ImGuiImplGLFW.NewFrame();
+                //the input callbacks keep queueing for ImGui; nothing should replay once it runs again
+                ImGuiIOPtr io = ImGui.GetIO();
+                io.ClearEventsQueue();
+
+                if (_imguiRanLastFrame)
+                {
+                    io.ClearInputKeys();
+                    io.ClearInputMouse();
+                    GLFW.SetCursor(_window, default(GLFWcursorPtr));
+                }
             }
 
-            ImGui.NewFrame();
+            _imguiRanLastFrame = imgui;
             FrameProfiler.End(FrameSection.ImGuiNewFrame);
 
-            _gpuFrameTimer.BeginFrame();
+            //timer queries cost driver time every frame, so only while something is reading them
+            if (FrameProfiler.Measuring)
+            {
+                _gpuFrameTimer.BeginFrame();
+            }
 
             //only inside a frame scope, and there is no focus to clear on a frame ImGui never ran
             if (_clearImGuiFocusOnNextFrame && imgui)
@@ -722,6 +748,8 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
 
             FrameProfiler.Begin(FrameSection.Inspector);
 
+            InspectorManager.RemovePending();
+
             if (imgui)
             {
                 InspectorManager.Draw(renderGameToWindow, _gameRenderTarget.TextureId,
@@ -754,7 +782,7 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
             FrameProfiler.End(FrameSection.ImGuiRender);
 
             _gpuFrameTimer.EndFrame();
-            FrameProfiler.GpuFrameMs = _gpuFrameTimer.GpuFrameMs;
+            FrameProfiler.GpuFrameMs = FrameProfiler.Measuring ? _gpuFrameTimer.GpuFrameMs : 0f;
 
             FrameProfiler.Begin(FrameSection.SwapBuffers);
             GLFW.SwapBuffers(_window);

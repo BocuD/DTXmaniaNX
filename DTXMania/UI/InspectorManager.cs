@@ -97,11 +97,9 @@ public static class InspectorManager
         }
     }
 
-    public static void Draw(bool drawGameWindow, ImTextureID? gameTextureId, Vector2 gameTextureSize, Vector2 defaultFramebufferSize)
+    //every frame, not only while ImGui runs: closing the inspector must not leave a removal pending
+    public static void RemovePending()
     {
-        framebufferSize = defaultFramebufferSize;
-        gameRenderSize = gameTextureSize;
-
         if (toRemove.Target is { } removing)
         {
             if (Inspector.Inspector.inspectorTarget.Is(removing))
@@ -114,6 +112,12 @@ public static class InspectorManager
         }
 
         toRemove = DrawableRef.None;
+    }
+
+    public static void Draw(bool drawGameWindow, ImTextureID? gameTextureId, Vector2 gameTextureSize, Vector2 defaultFramebufferSize)
+    {
+        framebufferSize = defaultFramebufferSize;
+        gameRenderSize = gameTextureSize;
 
         if (textureInspector == null)
         {

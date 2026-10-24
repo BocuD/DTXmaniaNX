@@ -22,7 +22,7 @@ internal sealed class OpenGlSkiaTextRenderer : IUiTextRenderer
             return BaseTexture.None;
         }
 
-        return OpenGlTexture.CreateFromRgba32(OpenGlRenderer.Instance, pixels.Rgba, pixels.Width, pixels.Height, pixels.Name);
+        return OpenGlRenderer.Instance.textAtlas.Add(pixels);
     }
 
     public DecodedPixels RenderToPixels(UiTextParameters request)
