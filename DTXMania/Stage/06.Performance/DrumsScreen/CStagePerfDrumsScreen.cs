@@ -71,7 +71,7 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
             r空打ちドラムチップ[ i ] = drums!.FindEmptyHitSound( (EPad) i );
             if ( r空打ちドラムチップ[ i ] == null )
             {
-                r空打ちドラムチップ[ i ] = timeline.NearestDrum(CDTXMania.Timer.nCurrentTime + nInputAdjustTimeMs.Drums, DrumsPerformance.PadChannels[i], HitState.DontCare);
+                r空打ちドラムチップ[ i ] = timeline.NearestDrum(CDTXMania.Timer.nCurrentTime + CDTXMania.ConfigIni.nInputAdjustTimeMs.Drums, DrumsPerformance.PadChannels[i], HitState.DontCare);
             }
         }
     }
@@ -251,7 +251,7 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
         //loop instead of going to the result screen
         if (bIsFinishedPlaying && ePhaseID == EPhase.Common_DefaultState && previewMode)
         {
-            tRestartForPreview();
+            Restart();
         }
         else if (bIsFinishedPlaying && (ePhaseID == EPhase.Common_DefaultState))
         {
@@ -458,15 +458,6 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
     {
         actChipFireD.iPosY = (CDTXMania.ConfigIni.bReverse.Drums ? nJudgeLinePosY.Drums - 183 : nJudgeLinePosY.Drums - 186);
         CDTXMania.stagePerfDrumsScreen.actPlayInfo.jl = (CDTXMania.ConfigIni.bReverse.Drums ? 0 : nJudgeLineMaxPosY - nJudgeLinePosY.Drums);
-    }
-
-    protected override void ScrollSpeedUp()
-    {
-        CDTXMania.ConfigIni.nScrollSpeed.Drums = Math.Min( CDTXMania.ConfigIni.nScrollSpeed.Drums + 1, 1999 );
-    }
-    protected override void ScrollSpeedDown()
-    {
-        CDTXMania.ConfigIni.nScrollSpeed.Drums = Math.Max( CDTXMania.ConfigIni.nScrollSpeed.Drums - 1, 0 );
     }
 
     protected override void tUpdateAndDraw_WailingFrame()

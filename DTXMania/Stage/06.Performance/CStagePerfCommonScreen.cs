@@ -295,9 +295,6 @@ internal abstract class CStagePerfCommonScreen : CStage
         nShutterInPosY.Bass = CDTXMania.ConfigIni.nShutterInSide.Bass;
         nShutterOutPosY.Bass = CDTXMania.ConfigIni.nShutterOutSide.Bass;
 
-        nInputAdjustTimeMs.Drums = CDTXMania.ConfigIni.nInputAdjustTimeMs.Drums;		// #23580 2011.1.3 yyagi
-        nInputAdjustTimeMs.Guitar = CDTXMania.ConfigIni.nInputAdjustTimeMs.Guitar;		//        2011.1.7 ikanick 修正
-        nInputAdjustTimeMs.Bass = CDTXMania.ConfigIni.nInputAdjustTimeMs.Bass;			//
         nJudgeLinePosY_delta.Drums = CDTXMania.ConfigIni.nJudgeLinePosOffset.Drums;    // #31602 2013.6.23 yyagi
         nJudgeLinePosY_delta.Guitar = CDTXMania.ConfigIni.nJudgeLinePosOffset.Guitar;  //
         nJudgeLinePosY_delta.Bass = CDTXMania.ConfigIni.nJudgeLinePosOffset.Bass;      //
@@ -352,8 +349,6 @@ internal abstract class CStagePerfCommonScreen : CStage
         {
             CDTXMania.DTX.SwapGuitarBassInfos();
         }
-        sw = new Stopwatch();
-        sw2 = new Stopwatch();
         base.OnActivate();
     }
     public override void OnDeactivate()
@@ -474,16 +469,14 @@ internal abstract class CStagePerfCommonScreen : CStage
 
     //fork
 
-    protected STDGBVALUE<int> nInputAdjustTimeMs;		// #23580 2011.1.3 yyagi
     public STAUTOPLAY bIsAutoPlay;		// #24239 2011.1.23 yyagi
     //		protected int nRisky_InitialVar, nRiskyTime;		// #23559 2011.7.28 yyagi → CAct演奏ゲージ共通クラスに隠蔽
 
     protected readonly ChipTimeline timeline = new();
     protected Dictionary<int, CDTX.CWAV> listWAV;
 
-    //key repeat for moving the judge line: a 100ms delay, then a step every 10ms
-    protected Stopwatch sw;
-    protected Stopwatch sw2;
+    private readonly Stopwatch laneKeyRepeat = new();
+    private long laneKeyRepeatDelayMs;
 
     protected long LoopBeginMs;
     protected long LoopEndMs;
@@ -532,388 +525,302 @@ internal abstract class CStagePerfCommonScreen : CStage
         return ChipJudge.GetJudgementForLag(pChip, lag);
     }
 
-    private void ChangeInputAdjustTimeInPlaying(IInputKeyboard keyboard, int plusminus)		// #23580 2011.1.16 yyagi UI for InputAdjustTime in playing screen.
-    {
-        int part, offset = plusminus;
-        if (keyboard.bKeyPressing(SlimDXKey.LeftShift) || keyboard.bKeyPressing(SlimDXKey.RightShift))	// Guitar InputAdjustTime
-        {
-            part = (int)EInstrumentPart.GUITAR;
-        }
-        else if (keyboard.bKeyPressing(SlimDXKey.LeftAlt) || keyboard.bKeyPressing(SlimDXKey.RightAlt))	// Bass InputAdjustTime
-        {
-            part = (int)EInstrumentPart.BASS;
-        }
-        else	// Drums InputAdjustTime
-        {
-            part = (int)EInstrumentPart.DRUMS;
-        }
-        if (!keyboard.bKeyPressing(SlimDXKey.LeftControl) && !keyboard.bKeyPressing(SlimDXKey.RightControl))
-        {
-            offset *= 10;
-        }
-
-        nInputAdjustTimeMs[part] += offset;
-        if (nInputAdjustTimeMs[part] > 99)
-        {
-            nInputAdjustTimeMs[part] = 99;
-        }
-        else if (nInputAdjustTimeMs[part] < -99)
-        {
-            nInputAdjustTimeMs[part] = -99;
-        }
-        CDTXMania.ConfigIni.nInputAdjustTimeMs[part] = nInputAdjustTimeMs[part];
-    }
-
     protected abstract void tHandleInput_Drums();
-    protected abstract void ScrollSpeedUp();
-    protected abstract void ScrollSpeedDown();
+
     protected void tHandleKeyInput()
     {
         IInputKeyboard keyboard = CDTXMania.InputManager.Keyboard;
         if (CDTXMania.Pad.bPressed(EInstrumentPart.BASS, EPad.Help))
-        {	// shift+f1 (pause)
-            bPAUSE = !bPAUSE;
-            if (bPAUSE)
-            {
-                AudioMixer.Timer.tPause();
-                CDTXMania.Timer.tPause();
-                CDTXMania.DTX.tPausePlaybackForAllChips();
-            }
-            else
-            {
-                AudioMixer.Timer.tResume();
-                CDTXMania.Timer.tResume();
-                CDTXMania.DTX.tResumePlaybackForAllChips();
-            }
+        {
+            TogglePause();
         }
 
-        if (((ePhaseID == EPhase.PERFORMANCE_STAGE_FAILED)) || (ePhaseID == EPhase.PERFORMANCE_STAGE_FAILED_END)) return;
-        
+        if (ePhaseID is EPhase.PERFORMANCE_STAGE_FAILED or EPhase.PERFORMANCE_STAGE_FAILED_END)
+        {
+            return;
+        }
+
         if (!bPAUSE)
         {
             tHandleInput_Drums();
             tHandleInput_GuitarBass(EInstrumentPart.GUITAR);
             tHandleInput_GuitarBass(EInstrumentPart.BASS);
         }
-        if (!bPAUSE && keyboard.bKeyPressed(SlimDXKey.UpArrow) && (keyboard.bKeyPressing(SlimDXKey.RightShift) || keyboard.bKeyPressing(SlimDXKey.LeftShift)))
-        {	// shift (+ctrl) + UpArrow (BGMAdjust)
-            CDTXMania.DTX.t各自動再生音チップの再生時刻を変更する((keyboard.bKeyPressing(SlimDXKey.LeftControl) || keyboard.bKeyPressing(SlimDXKey.RightControl)) ? 1 : 10);
-            CDTXMania.DTX.tAutoCorrectWavPlaybackPosition();
+
+        HandleArrowKeys(keyboard);
+        HandleSystemKeys();
+        HandleDrumsLaneKeys(keyboard);
+        HandleDisplayKeys(keyboard);
+
+        //skin preview leaves through the skin editor
+        if (!bPAUSE && !previewMode && ePhaseID == EPhase.Common_DefaultState && keyboard.bKeyPressed(SlimDXKey.Escape))
+        {
+            Leave();
         }
-        else if (!bPAUSE && keyboard.bKeyPressed(SlimDXKey.DownArrow) && (keyboard.bKeyPressing(SlimDXKey.RightShift) || keyboard.bKeyPressing(SlimDXKey.LeftShift)))
-        {	// shift + DownArrow (BGMAdjust)
-            CDTXMania.DTX.t各自動再生音チップの再生時刻を変更する((keyboard.bKeyPressing(SlimDXKey.LeftControl) || keyboard.bKeyPressing(SlimDXKey.RightControl)) ? -1 : -10);
-            CDTXMania.DTX.tAutoCorrectWavPlaybackPosition();
+    }
+
+    //up, down: scroll speed. With shift: BGM timing
+    //left, right: input adjust
+    private void HandleArrowKeys(IInputKeyboard keyboard)
+    {
+        bool shift = keyboard.bKeyPressing(SlimDXKey.LeftShift) || keyboard.bKeyPressing(SlimDXKey.RightShift);
+        bool ctrl = keyboard.bKeyPressing(SlimDXKey.LeftControl) || keyboard.bKeyPressing(SlimDXKey.RightControl);
+
+        int vertical = keyboard.bKeyPressed(SlimDXKey.UpArrow) ? 1 : keyboard.bKeyPressed(SlimDXKey.DownArrow) ? -1 : 0;
+        if (vertical != 0 && shift && !bPAUSE)
+        {
+            AdjustBgmTiming(vertical * (ctrl ? 1 : 10));
         }
-        else if (keyboard.bKeyPressed(SlimDXKey.UpArrow))
-        {	// UpArrow(scrollspeed up)
-            ScrollSpeedUp();
-        }
-        else if (keyboard.bKeyPressed(SlimDXKey.DownArrow))
-        {	// DownArrow (scrollspeed down)
-            ScrollSpeedDown();
+        else if (vertical != 0 && !shift)
+        {
+            ChangeScrollSpeed(CDTXMania.ConfigIni.bGuitarRevolutionMode ? EInstrumentPart.GUITAR : EInstrumentPart.DRUMS, vertical);
         }
 
-        else if (CDTXMania.Pad.bPressed(EInstrumentPart.GUITAR, EPad.Help))
-        {	// del (debug info)
-            CDTXMania.ConfigIni.bShowPerformanceInformation = !CDTXMania.ConfigIni.bShowPerformanceInformation;
-        }
-        else if (!bPAUSE && keyboard.bKeyPressed(SlimDXKey.LeftArrow))		// #24243 2011.1.16 yyagi UI for InputAdjustTime in playing screen.
+        int horizontal = keyboard.bKeyPressed(SlimDXKey.RightArrow) ? 1 : keyboard.bKeyPressed(SlimDXKey.LeftArrow) ? -1 : 0;
+        if (horizontal != 0 && !bPAUSE)
         {
-            ChangeInputAdjustTimeInPlaying(keyboard, -1);
+            ChangeInputAdjust(keyboard, horizontal);
         }
-        else if (!bPAUSE && keyboard.bKeyPressed(SlimDXKey.RightArrow))		// #24243 2011.1.16 yyagi UI for InputAdjustTime in playing screen.
-        {
-            ChangeInputAdjustTimeInPlaying(keyboard, +1);
-        }
-        //leaving deactivates this stage before the change runs, and in preview the change is dropped. The
-        //skin editor is how you leave instead
-        else if (!bPAUSE && !previewMode && (ePhaseID == EPhase.Common_DefaultState) && (keyboard.bKeyPressed(SlimDXKey.Escape)))
-        {	// escape (exit)
-            GitaDoraTransition.Close();
-            ePhaseID = EPhase.Common_FadeOut;
-            eReturnValue = EPerfScreenReturnValue.Interruption;
-        }
-        else if (CDTXMania.Pad.bPressed(EKeyConfigPart.SYSTEM, EKeyConfigPad.Restart))
-        {
-            if (bPAUSE)
-            {
-                AudioMixer.Timer.tResume();
-                CDTXMania.Timer.tResume();
-            }
+    }
 
-            //restarting goes out through the loading screen, so in preview seek to the start instead
-            if (previewMode)
-            {
-                tRestartForPreview();
-                return;
-            }
-
-            ePhaseID = EPhase.PERFORMANCE_STAGE_RESTART;
-            eReturnValue = EPerfScreenReturnValue.Restart;
-        }
-        else if (CDTXMania.Pad.bPressed(EKeyConfigPart.SYSTEM, EKeyConfigPad.SkipForward))
+    private void HandleSystemKeys()
+    {
+        if (SystemKey(EKeyConfigPad.Restart))
         {
-            bIsTrainingMode = true;
-            Trace.TraceInformation("SKIP FORWARD AudioMixer.Timer.nCurrentTime=" + AudioMixer.Timer.nCurrentTime + ", CDTXMania.Timer.nCurrentTime=" + CDTXMania.Timer.nCurrentTime);
-            tJumpInSong(AudioMixer.Timer.nCurrentTime + CDTXMania.ConfigIni.nSkipTimeMs);
+            Restart();
         }
-        else if (CDTXMania.Pad.bPressed(EKeyConfigPart.SYSTEM, EKeyConfigPad.SkipBackward))
+        if (SystemKey(EKeyConfigPad.SkipForward))
         {
-            bIsTrainingMode = true;
-            Trace.TraceInformation("SKIP BACKWARD AudioMixer.Timer.nCurrentTime=" + AudioMixer.Timer.nCurrentTime + ", CDTXMania.Timer.nCurrentTime=" + CDTXMania.Timer.nCurrentTime);
-            tJumpInSong(Math.Max(0, AudioMixer.Timer.nCurrentTime - CDTXMania.ConfigIni.nSkipTimeMs));
+            SkipBy(CDTXMania.ConfigIni.nSkipTimeMs);
         }
-        else if (CDTXMania.Pad.bPressed(EKeyConfigPart.SYSTEM, EKeyConfigPad.LoopCreate))
+        if (SystemKey(EKeyConfigPad.SkipBackward))
         {
-            bIsTrainingMode = true;
-            if (LoopBeginMs == -1)
-            {
-                Trace.TraceInformation("INSERT LOOP BEGIN AudioMixer.Timer.nCurrentTime=" + AudioMixer.Timer.nCurrentTime + ", CDTXMania.Timer.nCurrentTime=" + CDTXMania.Timer.nCurrentTime);
-                LoopBeginMs = AudioMixer.Timer.nCurrentTime;
-            }
-            else
-            {
-                if (LoopEndMs == -1)
-                {
-                    if (LoopBeginMs < AudioMixer.Timer.nCurrentTime)
-                    {
-                        Trace.TraceInformation("INSERT LOOP END AudioMixer.Timer.nCurrentTime=" + AudioMixer.Timer.nCurrentTime + ", CDTXMania.Timer.nCurrentTime=" + CDTXMania.Timer.nCurrentTime);
-                        LoopEndMs = AudioMixer.Timer.nCurrentTime;
-                    }
-                    else
-                    {
-                        Trace.TraceInformation("INSERT LOOP BEGIN AND SWAP AudioMixer.Timer.nCurrentTime=" + AudioMixer.Timer.nCurrentTime + ", CDTXMania.Timer.nCurrentTime=" + CDTXMania.Timer.nCurrentTime);
-                        LoopEndMs = LoopBeginMs;
-                        LoopBeginMs = AudioMixer.Timer.nCurrentTime;
-                    }
-                }
-                //Else loop already set, do nothing
-            }
+            SkipBy(-CDTXMania.ConfigIni.nSkipTimeMs);
         }
-        else if (CDTXMania.Pad.bPressed(EKeyConfigPart.SYSTEM, EKeyConfigPad.LoopDelete))
+        if (SystemKey(EKeyConfigPad.LoopCreate))
         {
-            Trace.TraceInformation("REMOVE LOOP AudioMixer.Timer.nCurrentTime=" + AudioMixer.Timer.nCurrentTime + ", CDTXMania.Timer.nCurrentTime=" + CDTXMania.Timer.nCurrentTime);
+            MarkLoop();
+        }
+        if (SystemKey(EKeyConfigPad.LoopDelete))
+        {
+            Trace.TraceInformation("REMOVE LOOP AudioMixer.Timer.nCurrentTime=" + AudioMixer.Timer.nCurrentTime);
             LoopBeginMs = -1;
             LoopEndMs = -1;
         }
-        else if (CDTXMania.Pad.bPressed(EKeyConfigPart.SYSTEM, EKeyConfigPad.DecreasePlaySpeed))
+        if (SystemKey(EKeyConfigPad.DecreasePlaySpeed))
         {
-            // Decrease Play Speed
-            if (CDTXMania.ConfigIni.nPlaySpeed > CConstants.PLAYSPEED_MIN)
-            {
-                bIsTrainingMode = true;
-                tChangePlaySpeed(-1);
-            }
+            StepPlaySpeed(-1);
         }
-        else if (CDTXMania.Pad.bPressed(EKeyConfigPart.SYSTEM, EKeyConfigPad.IncreasePlaySpeed))
+        if (SystemKey(EKeyConfigPad.IncreasePlaySpeed))
         {
-            // Increase Play Speed
-            if (CDTXMania.ConfigIni.nPlaySpeed < CConstants.PLAYSPEED_MAX)
-            {
-                bIsTrainingMode = true;
-                tChangePlaySpeed(1);
-            }
+            StepPlaySpeed(1);
         }
+    }
 
-        if (!CDTXMania.ConfigIni.bReverse.Drums && keyboard.bKeyPressing(SlimDXKey.PageUp))
-        {
-            if (!sw.IsRunning)
-            {
-                sw2 = Stopwatch.StartNew();
-                sw = Stopwatch.StartNew();
-                if (nJudgeLinePosY.Drums > nJudgeLineMinPosY)
-                {
-                    nJudgeLinePosY.Drums--;
-                }
-            }
-            else
-            {
-                if (sw.ElapsedMilliseconds > 10L)
-                {
-                    if (sw2.IsRunning)
-                    {
-                        if (sw2.ElapsedMilliseconds > 100L)
-                        {
-                            sw2.Reset();
-                        }
-                    }
-                    else if (nJudgeLinePosY.Drums > nJudgeLineMinPosY)
-                    {
-                        nJudgeLinePosY.Drums--;
-                    }
-                    sw.Reset();
-                    sw.Start();
-                }
-            }
-            CDTXMania.ConfigIni.nJudgeLine.Drums = nJudgeLineMaxPosY - nJudgeLinePosY.Drums;
-            CDTXMania.stagePerfDrumsScreen.tJudgeLineMovingUpandDown();
-        }
-        if (!CDTXMania.ConfigIni.bReverse.Drums && keyboard.bKeyPressing(SlimDXKey.PageDown))
-        {
-            if (!sw.IsRunning)
-            {
-                sw2 = Stopwatch.StartNew();
-                sw = Stopwatch.StartNew();
-                if (nJudgeLinePosY.Drums < nJudgeLineMaxPosY)
-                {
-                    nJudgeLinePosY.Drums++;
-                }
-            }
-            else if (sw.ElapsedMilliseconds > 10L)
-            {
-                if (sw2.IsRunning)
-                {
-                    if (sw2.ElapsedMilliseconds > 100L)
-                    {
-                        sw2.Reset();
-                    }
-                }
-                else if (nJudgeLinePosY.Drums < nJudgeLineMaxPosY)
-                {
-                    nJudgeLinePosY.Drums++;
-                }
-                sw.Reset();
-                sw.Start();
-            }
-            CDTXMania.ConfigIni.nJudgeLine.Drums = nJudgeLineMaxPosY - nJudgeLinePosY.Drums;
-            CDTXMania.stagePerfDrumsScreen.tJudgeLineMovingUpandDown();
-        }
+    private static bool SystemKey(EKeyConfigPad pad) => CDTXMania.Pad.bPressed(EKeyConfigPart.SYSTEM, pad);
 
-        if (keyboard.bKeyPressing(SlimDXKey.NumberPad8))
+    private void HandleDisplayKeys(IInputKeyboard keyboard)
+    {
+        if (CDTXMania.Pad.bPressed(EInstrumentPart.GUITAR, EPad.Help))
         {
-            if (!sw.IsRunning)
-            {
-                sw2 = Stopwatch.StartNew();
-                sw = Stopwatch.StartNew();
-                if (nShutterInPosY.Drums > 0)
-                {
-                    nShutterInPosY.Drums--;
-                }
-            }
-            else if (sw.ElapsedMilliseconds > 10L)
-            {
-                if (sw2.IsRunning)
-                {
-                    if (sw2.ElapsedMilliseconds > 100L)
-                    {
-                        sw2.Reset();
-                    }
-                }
-                else if (nShutterInPosY.Drums > 0)
-                {
-                    nShutterInPosY.Drums--;
-                }
-                sw.Reset();
-                sw.Start();
-            }
-            CDTXMania.ConfigIni.nShutterInSide.Drums = nShutterInPosY.Drums;
+            CDTXMania.ConfigIni.bShowPerformanceInformation = !CDTXMania.ConfigIni.bShowPerformanceInformation;
         }
-        if (keyboard.bKeyPressing(SlimDXKey.NumberPad2))
-        {
-            if (!sw.IsRunning)
-            {
-                sw2 = Stopwatch.StartNew();
-                sw = Stopwatch.StartNew();
-                if (nShutterInPosY.Drums < 100)
-                {
-                    if (nShutterInPosY.Drums + nShutterOutPosY.Drums <= 99)
-                        nShutterInPosY.Drums++;
-                }
-            }
-            else if (sw.ElapsedMilliseconds > 10L)
-            {
-                if (sw2.IsRunning)
-                {
-                    if (sw2.ElapsedMilliseconds > 100L)
-                    {
-                        sw2.Reset();
-                    }
-                }
-                else if (nShutterInPosY.Drums < 100)
-                {
-                    if (nShutterInPosY.Drums + nShutterOutPosY.Drums <= 99)
-                        nShutterInPosY.Drums++;
-                }
-                sw.Reset();
-                sw.Start();
-            }
-            CDTXMania.ConfigIni.nShutterInSide = nShutterInPosY;
-        }
-        if (keyboard.bKeyPressing(SlimDXKey.NumberPad4))
-        {
-            if (!sw.IsRunning)
-            {
-                sw2 = Stopwatch.StartNew();
-                sw = Stopwatch.StartNew();
-                if (nShutterOutPosY.Drums < 100)
-                {
-                    if (nShutterInPosY.Drums + nShutterOutPosY.Drums <= 99)
-                        nShutterOutPosY.Drums++;
-                }
-            }
-            else if (sw.ElapsedMilliseconds > 10L)
-            {
-                if (sw2.IsRunning)
-                {
-                    if (sw2.ElapsedMilliseconds > 100L)
-                    {
-                        sw2.Reset();
-                    }
-                }
-                else if (nShutterOutPosY.Drums < 100)
-                {
-                    if (nShutterInPosY.Drums + nShutterOutPosY.Drums <= 99)
-                        nShutterOutPosY.Drums++;
-                }
-                sw.Reset();
-                sw.Start();
-            }
-            CDTXMania.ConfigIni.nShutterOutSide.Drums = nShutterOutPosY.Drums;
-        }
-        if (keyboard.bKeyPressing(SlimDXKey.NumberPad6))
-        {
-            if (!sw.IsRunning)
-            {
-                sw2 = Stopwatch.StartNew();
-                sw = Stopwatch.StartNew();
-                if (nShutterOutPosY.Drums > 0)
-                {
-                    nShutterOutPosY.Drums--;
-                }
-            }
-            else if (sw.ElapsedMilliseconds > 10L)
-            {
-                if (sw2.IsRunning)
-                {
-                    if (sw2.ElapsedMilliseconds > 100L)
-                    {
-                        sw2.Reset();
-                    }
-                }
-                else if (nShutterOutPosY.Drums > 0)
-                {
-                    nShutterOutPosY.Drums--;
-                }
-                sw.Reset();
-                sw.Start();
-            }
-            CDTXMania.ConfigIni.nShutterOutSide.Drums = nShutterOutPosY.Drums;
-        }
-
         if (keyboard.bKeyPressed(SlimDXKey.F5))
         {
             video.CycleMovieMode();
         }
         if (keyboard.bKeyPressed(SlimDXKey.F6))
         {
-            CConfigIni configIni = CDTXMania.ConfigIni;
-            configIni.nInfoType++;
-            if (CDTXMania.ConfigIni.nInfoType >= 2)
+            CDTXMania.ConfigIni.nInfoType = (CDTXMania.ConfigIni.nInfoType + 1) % 2;
+        }
+    }
+
+    private void Leave()
+    {
+        GitaDoraTransition.Close();
+        ePhaseID = EPhase.Common_FadeOut;
+        eReturnValue = EPerfScreenReturnValue.Interruption;
+    }
+
+    private void TogglePause()
+    {
+        bPAUSE = !bPAUSE;
+        if (bPAUSE)
+        {
+            AudioMixer.Timer.tPause();
+            CDTXMania.Timer.tPause();
+            CDTXMania.DTX.tPausePlaybackForAllChips();
+        }
+        else
+        {
+            AudioMixer.Timer.tResume();
+            CDTXMania.Timer.tResume();
+            CDTXMania.DTX.tResumePlaybackForAllChips();
+        }
+    }
+
+    private static void AdjustBgmTiming(int deltaMs)
+    {
+        CDTXMania.DTX.t各自動再生音チップの再生時刻を変更する(deltaMs);
+        CDTXMania.DTX.tAutoCorrectWavPlaybackPosition();
+    }
+
+    protected static void ChangeScrollSpeed(EInstrumentPart part, int delta)
+    {
+        int index = (int)part;
+        CDTXMania.ConfigIni.nScrollSpeed[index] = Math.Clamp(CDTXMania.ConfigIni.nScrollSpeed[index] + delta, 0, 1999);
+    }
+
+    //default is drums, with shift: guitar, with alt: bass
+    //default is 10ms steps, adding ctrl changes this to 1ms
+    private static void ChangeInputAdjust(IInputKeyboard keyboard, int direction)
+    {
+        EInstrumentPart part = EInstrumentPart.DRUMS;
+        if (keyboard.bKeyPressing(SlimDXKey.LeftShift) || keyboard.bKeyPressing(SlimDXKey.RightShift))
+        {
+            part = EInstrumentPart.GUITAR;
+        }
+        else if (keyboard.bKeyPressing(SlimDXKey.LeftAlt) || keyboard.bKeyPressing(SlimDXKey.RightAlt))
+        {
+            part = EInstrumentPart.BASS;
+        }
+
+        bool fine = keyboard.bKeyPressing(SlimDXKey.LeftControl) || keyboard.bKeyPressing(SlimDXKey.RightControl);
+        int index = (int)part;
+        CDTXMania.ConfigIni.nInputAdjustTimeMs[index] = Math.Clamp(CDTXMania.ConfigIni.nInputAdjustTimeMs[index] + direction * (fine ? 1 : 10), -99, 99);
+    }
+
+    //skin preview seeks to the start and clears the score. Otherwise the song reloads through the loading screen
+    public void Restart()
+    {
+        if (previewMode)
+        {
+            tJumpInSong(0);
+            foreach (PerformanceData data in partData)
             {
-                CDTXMania.ConfigIni.nInfoType = 0;
+                data.Reset(bIsAutoPlay, CDTXMania.ConfigIni.nRisky);
+            }
+            return;
+        }
+
+        if (bPAUSE)
+        {
+            AudioMixer.Timer.tResume();
+            CDTXMania.Timer.tResume();
+        }
+
+        ePhaseID = EPhase.PERFORMANCE_STAGE_RESTART;
+        eReturnValue = EPerfScreenReturnValue.Restart;
+    }
+
+    private void SkipBy(long deltaMs)
+    {
+        bIsTrainingMode = true;
+        Trace.TraceInformation($"SKIP {deltaMs} AudioMixer.Timer.nCurrentTime={AudioMixer.Timer.nCurrentTime}");
+        tJumpInSong(Math.Max(0, AudioMixer.Timer.nCurrentTime + deltaMs));
+    }
+
+    //first press: loop start. Second press: loop end
+    private void MarkLoop()
+    {
+        bIsTrainingMode = true;
+        long now = AudioMixer.Timer.nCurrentTime;
+        if (LoopBeginMs == -1)
+        {
+            Trace.TraceInformation("INSERT LOOP BEGIN AudioMixer.Timer.nCurrentTime=" + now);
+            LoopBeginMs = now;
+        }
+        else if (LoopEndMs == -1)
+        {
+            Trace.TraceInformation("INSERT LOOP END AudioMixer.Timer.nCurrentTime=" + now);
+            if (LoopBeginMs < now)
+            {
+                LoopEndMs = now;
+            }
+            else
+            {
+                LoopEndMs = LoopBeginMs;
+                LoopBeginMs = now;
             }
         }
+    }
+
+    private void StepPlaySpeed(int delta)
+    {
+        int speed = CDTXMania.ConfigIni.nPlaySpeed + delta;
+        if (speed < CConstants.PLAYSPEED_MIN || speed > CConstants.PLAYSPEED_MAX)
+        {
+            return;
+        }
+
+        bIsTrainingMode = true;
+        tChangePlaySpeed(delta);
+    }
+
+    //page up, down: drums judge line
+    //number pad 8, 2, 4, 6: lane cover shutters
+    private void HandleDrumsLaneKeys(IInputKeyboard keyboard)
+    {
+        bool judgeUp = !CDTXMania.ConfigIni.bReverse.Drums && keyboard.bKeyPressing(SlimDXKey.PageUp);
+        bool judgeDown = !CDTXMania.ConfigIni.bReverse.Drums && keyboard.bKeyPressing(SlimDXKey.PageDown);
+        bool shutterInUp = keyboard.bKeyPressing(SlimDXKey.NumberPad8);
+        bool shutterInDown = keyboard.bKeyPressing(SlimDXKey.NumberPad2);
+        bool shutterOutDown = keyboard.bKeyPressing(SlimDXKey.NumberPad4);
+        bool shutterOutUp = keyboard.bKeyPressing(SlimDXKey.NumberPad6);
+        if (!judgeUp && !judgeDown && !shutterInUp && !shutterInDown && !shutterOutDown && !shutterOutUp)
+        {
+            laneKeyRepeat.Reset();
+            return;
+        }
+
+        bool step = StepLaneKeyRepeat();
+        bool shutterRoom = nShutterInPosY.Drums + nShutterOutPosY.Drums <= 99;
+        if (judgeUp || judgeDown)
+        {
+            if (step)
+            {
+                nJudgeLinePosY.Drums = Math.Clamp(nJudgeLinePosY.Drums + (judgeUp ? -1 : 1), nJudgeLineMinPosY, nJudgeLineMaxPosY);
+            }
+            CDTXMania.ConfigIni.nJudgeLine.Drums = nJudgeLineMaxPosY - nJudgeLinePosY.Drums;
+            tJudgeLineMovingUpandDown();
+        }
+        if (shutterInUp && step && nShutterInPosY.Drums > 0)
+        {
+            nShutterInPosY.Drums--;
+        }
+        if (shutterInDown && step && nShutterInPosY.Drums < 100 && shutterRoom)
+        {
+            nShutterInPosY.Drums++;
+        }
+        if (shutterOutDown && step && nShutterOutPosY.Drums < 100 && shutterRoom)
+        {
+            nShutterOutPosY.Drums++;
+        }
+        if (shutterOutUp && step && nShutterOutPosY.Drums > 0)
+        {
+            nShutterOutPosY.Drums--;
+        }
+        CDTXMania.ConfigIni.nShutterInSide.Drums = nShutterInPosY.Drums;
+        CDTXMania.ConfigIni.nShutterOutSide.Drums = nShutterOutPosY.Drums;
+    }
+
+    //one step on press. After 100ms, one step every 10ms
+    private bool StepLaneKeyRepeat()
+    {
+        if (!laneKeyRepeat.IsRunning)
+        {
+            laneKeyRepeat.Restart();
+            laneKeyRepeatDelayMs = 100;
+            return true;
+        }
+        if (laneKeyRepeat.ElapsedMilliseconds < laneKeyRepeatDelayMs)
+        {
+            return false;
+        }
+
+        laneKeyRepeat.Restart();
+        laneKeyRepeatDelayMs = 10;
+        return true;
     }
 
     private bool ShowsVideo => ePhaseID is not (EPhase.PERFORMANCE_STAGE_FAILED or EPhase.PERFORMANCE_STAGE_FAILED_END)
@@ -1804,16 +1711,14 @@ internal abstract class CStagePerfCommonScreen : CStage
         }
 
         int indexInst = (int)inst;
-        #region [ スクロール速度変更 ]
         if (CDTXMania.Pad.bPressing(inst, EPad.Decide) && CDTXMania.Pad.bPressed(inst, EPad.B))
         {
-            CDTXMania.ConfigIni.nScrollSpeed[indexInst] = Math.Min(CDTXMania.ConfigIni.nScrollSpeed[indexInst] + 1, 0x7cf);
+            ChangeScrollSpeed(inst, 1);
         }
         if (CDTXMania.Pad.bPressing(inst, EPad.Decide) && CDTXMania.Pad.bPressed(inst, EPad.R))
         {
-            CDTXMania.ConfigIni.nScrollSpeed[indexInst] = Math.Max(CDTXMania.ConfigIni.nScrollSpeed[indexInst] - 1, 0);
+            ChangeScrollSpeed(inst, -1);
         }
-        #endregion
 
         if (!CDTXMania.ConfigIni.bGuitarEnabled || !CDTXMania.DTX.bHasChips[indexInst])
         {
@@ -1978,18 +1883,6 @@ internal abstract class CStagePerfCommonScreen : CStage
     public void PreviewChangeSpeed(int offset) => tChangePlaySpeed(offset);
 
     #endregion
-
-    //the Restart key restarts via the loading screen, which would rebuild the layout
-    public void tRestartForPreview()
-    {
-        tJumpInSong(0);
-
-        //nobody asked for this restart, so clear the score
-        foreach (PerformanceData data in partData)
-        {
-            data.Reset(bIsAutoPlay, CDTXMania.ConfigIni.nRisky);
-        }
-    }
 
     public void tJumpInSong(long newPosition)
     {

@@ -301,7 +301,7 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		//loop instead of going to the result screen
 		if (bIsFinishedPlaying && ePhaseID == EPhase.Common_DefaultState && previewMode)
 		{
-			tRestartForPreview();
+			Restart();
 		}
 		else if (bIsFinishedPlaying && (ePhaseID == EPhase.Common_DefaultState))
 		{
@@ -380,15 +380,6 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 	protected override void tJudgeLineMovingUpandDown()
 	{
 
-	}
-
-	protected override void ScrollSpeedUp()
-	{
-		CDTXMania.ConfigIni.nScrollSpeed.Guitar = Math.Min(CDTXMania.ConfigIni.nScrollSpeed.Guitar + 1, 1999);
-	}
-	protected override void ScrollSpeedDown()
-	{
-		CDTXMania.ConfigIni.nScrollSpeed.Guitar = Math.Max(CDTXMania.ConfigIni.nScrollSpeed.Guitar - 1, 0);
 	}
 
 	protected override void tHandleInput_Drums()
