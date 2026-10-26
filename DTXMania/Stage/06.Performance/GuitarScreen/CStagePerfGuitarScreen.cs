@@ -282,7 +282,7 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		if (!bActivated) return;
 
 		//either part failing fails the stage, as does a chart with nothing to play
-		if (CDTXMania.ConfigIni.bSTAGEFAILEDEnabled && !bIsTrainingMode && ePhaseID == EPhase.Common_DefaultState
+		if (CDTXMania.ConfigIni.bSTAGEFAILEDEnabled && !bIsTrainingMode && !StageManager.dropStageChanges && ePhaseID == EPhase.Common_DefaultState
 		    && (GuitarData.IsFailed() || BassData.IsFailed()
 		        || (!CDTXMania.DTX.bHasChips.Guitar && !CDTXMania.DTX.bHasChips.Bass)))
 		{
@@ -299,7 +299,7 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		UpdateStageFailed();
 
 		//loop instead of going to the result screen
-		if (bIsFinishedPlaying && ePhaseID == EPhase.Common_DefaultState && previewMode)
+		if (bIsFinishedPlaying && ePhaseID == EPhase.Common_DefaultState && StageManager.dropStageChanges)
 		{
 			Restart();
 		}

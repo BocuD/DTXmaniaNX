@@ -229,7 +229,7 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
         bExc = false;
         bFullCom = false;
 
-        if (CDTXMania.ConfigIni.bSTAGEFAILEDEnabled && !bIsTrainingMode && DrumsData.IsFailed()
+        if (CDTXMania.ConfigIni.bSTAGEFAILEDEnabled && !bIsTrainingMode && !StageManager.dropStageChanges && DrumsData.IsFailed()
             && ePhaseID == EPhase.Common_DefaultState)
         {
             actStageFailed.Start();
@@ -249,7 +249,7 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
         AllocationProbe.End(probeChips);
 
         //loop instead of going to the result screen
-        if (bIsFinishedPlaying && ePhaseID == EPhase.Common_DefaultState && previewMode)
+        if (bIsFinishedPlaying && ePhaseID == EPhase.Common_DefaultState && StageManager.dropStageChanges)
         {
             Restart();
         }

@@ -552,8 +552,7 @@ internal abstract class CStagePerfCommonScreen : CStage
         HandleDrumsLaneKeys(keyboard);
         HandleDisplayKeys(keyboard);
 
-        //skin preview leaves through the skin editor
-        if (!bPAUSE && !previewMode && ePhaseID == EPhase.Common_DefaultState && keyboard.bKeyPressed(SlimDXKey.Escape))
+        if (!bPAUSE && !StageManager.dropStageChanges && ePhaseID == EPhase.Common_DefaultState && keyboard.bKeyPressed(SlimDXKey.Escape))
         {
             Leave();
         }
@@ -690,10 +689,10 @@ internal abstract class CStagePerfCommonScreen : CStage
         CDTXMania.ConfigIni.nInputAdjustTimeMs[index] = Math.Clamp(CDTXMania.ConfigIni.nInputAdjustTimeMs[index] + direction * (fine ? 1 : 10), -99, 99);
     }
 
-    //skin preview seeks to the start and clears the score. Otherwise the song reloads through the loading screen
+    //a held stage seeks to the start and clears the score. Otherwise the song reloads through the loading screen
     public void Restart()
     {
-        if (previewMode)
+        if (StageManager.dropStageChanges)
         {
             tJumpInSong(0);
             foreach (PerformanceData data in partData)
