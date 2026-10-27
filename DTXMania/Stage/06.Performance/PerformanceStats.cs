@@ -103,13 +103,17 @@ public sealed class PerformanceStats
     [DataField] public float JudgeLineNumberY => JudgeLineY + ((Instrument == 0) != IsReversed ? 8 : -20);
 
     //the drums line spans only the lanes in use
-    [DataField] public float JudgeLineX => Instrument == 0 && CDTXMania.ConfigIni.eNumOfLanes.Drums == EType.C ? 72 : 0;
+    [DataField] public float JudgeLineX => Instrument != 0 ? 0 : CDTXMania.ConfigIni.eNumOfLanes.Drums switch
+    {
+        EType.C => 75,
+        _ => 3
+    };
 
     [DataField] public float JudgeLineWidth => Instrument != 0 ? 252 : CDTXMania.ConfigIni.eNumOfLanes.Drums switch
     {
-        EType.B => 519,
-        EType.C => 447,
-        _ => 559
+        EType.B => 514,
+        EType.C => 442,
+        _ => 554
     };
 
     [DataField] public int TopShutter => IsReversed ? CDTXMania.ConfigIni.nShutterOutSide[Instrument] : CDTXMania.ConfigIni.nShutterInSide[Instrument];

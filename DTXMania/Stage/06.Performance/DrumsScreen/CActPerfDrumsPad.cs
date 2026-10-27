@@ -23,7 +23,7 @@ internal class CActPerfDrumsPad : CActivity
     private static readonly ELane[] Lanes =
         [ELane.LC, ELane.HH, ELane.SD, ELane.BD, ELane.HT, ELane.LT, ELane.FT, ELane.CY, ELane.RD, ELane.LP];
     //how far left of its lane's centre each 96px cell of 7_pads.png starts. Cymbal art hangs off to the right
-    private static readonly float[] CellOffset = [67.5f, 57f, 51f, 45f, 40f, 46f, 45f, 45f, 43f, 47f];
+    private static readonly float[] CellOffset = [67.5f, 57f, 51f, 47f, 40f, 46f, 45f, 45f, 43f, 47f];
     private static readonly PointF[] SourceOrigin =
     [
         new(0, 0), new(96, 0), new(0, 96), new(0, 192), new(96, 96),

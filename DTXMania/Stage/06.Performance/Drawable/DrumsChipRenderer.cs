@@ -101,7 +101,7 @@ public class DrumsChipRenderer : ChipRenderer
         EChannel.LowTom => new(246, 56),
         EChannel.FloorTom => new(302, 56),
         EChannel.Cymbal => new(358, 74),
-        EChannel.RideCymbal => new(442, 48),
+        EChannel.RideCymbal => new(432, 48),
         EChannel.LeftCymbal => new(538, 74),
         EChannel.LeftPedal => new(660, 58),
         EChannel.HiHatOpen => CDTXMania.ConfigIni.eHHOGraphics.Drums == EType.C ? new(70, 56) : new(612, 48),
