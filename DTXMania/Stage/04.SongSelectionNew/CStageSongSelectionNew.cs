@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Globalization;
 using System.Numerics;
 using DiscordRPC;
@@ -330,8 +330,28 @@ public class CStageSongSelectionNew : CStage
         }
     }
 
+    private bool isInitialSessionLoad = true;
+
     public override void FirstUpdate()
     {
+        if (isInitialSessionLoad)
+        {
+            isInitialSessionLoad = false;
+            if (!string.IsNullOrEmpty(CDTXMania.ConfigIni.strSongSelectSort))
+            {
+                var savedSort = SongDbSort.All.FirstOrDefault(s => s.Name.Equals(CDTXMania.ConfigIni.strSongSelectSort, StringComparison.OrdinalIgnoreCase));
+                if (savedSort != null)
+                {
+                    currentSort = savedSort;
+                }
+            }
+
+            if (CDTXMania.ConfigIni.nSongSelectDifficulty >= 0 && CDTXMania.ConfigIni.nSongSelectDifficulty < 5)
+            {
+                targetDifficultyLevel = CDTXMania.ConfigIni.nSongSelectDifficulty;
+            }
+        }
+
         //set initial sort menu container position to be default,
         //or in case of reloading the menu, whatever was last selected
         sortMenuContainer?.ShowSort(currentSort);
@@ -376,9 +396,17 @@ public class CStageSongSelectionNew : CStage
         ApplySort(currentSort);
         
         //try to restore the last selected song if possible
-        if (selectedRootBackup != null && selectedNodeBackup != null && selectedChartBackup != null)
+        if (selectedNodeBackup != null && selectedNodeBackup.nodeType == SongNode.ENodeType.SONG)
         {
             RestoreSelection(selectedNodeBackup, selectedChartBackup);
+        }
+        else if (!string.IsNullOrEmpty(CDTXMania.ConfigIni.strLastSelectedSongPath) ||
+                 !string.IsNullOrEmpty(CDTXMania.ConfigIni.strLastSelectedChartPath))
+        {
+            RestoreSelection(
+                CDTXMania.ConfigIni.strLastSelectedSongPath,
+                CDTXMania.ConfigIni.strLastSelectedChartPath,
+                CDTXMania.ConfigIni.strLastSelectedBoxTitle);
         }
         
         Trace.TraceInformation("Sort cache preparation complete.");
@@ -391,18 +419,45 @@ public class CStageSongSelectionNew : CStage
 
     private void RestoreSelection(SongNode selectedNodeBackup, CChartData? selectedChartBackup = null)
     {
+        RestoreSelection(
+            selectedNodeBackup.path,
+            selectedChartBackup?.FileInformation.AbsoluteFilePath,
+            selectedNodeBackup.parent?.title);
+    }
+
+    private void RestoreSelection(string? songPath, string? chartPath, string? boxTitle)
+    {
+        if (selectionContainer?.CurrentRoot == null)
+            return;
+
         SongNode? targetNode = SongNode.FindRestoreTarget(selectionContainer.CurrentRoot,
-            selectedNodeBackup, selectedChartBackup);
+            songPath, chartPath, boxTitle);
 
         if (targetNode?.parent == null)
             return;
 
         SongNode targetRoot = targetNode.parent;
 
+        targetRoot.CurrentSelection = targetNode;
+
         //highlight the target's container within each ancestor so backing out lands on the right row
         for (SongNode node = targetRoot; node.parent != null; node = node.parent)
         {
             node.parent.CurrentSelection = node;
+        }
+
+        if (!string.IsNullOrEmpty(chartPath) && targetNode.charts != null)
+        {
+            for (int i = 0; i < targetNode.charts.Length; i++)
+            {
+                var chart = targetNode.charts[i];
+                if (chart != null && (SongNode.PathsEqual(chart.FileInformation.AbsoluteFilePath, chartPath) ||
+                    chart.instrumentSources?.Any(s => s != null && SongNode.PathsEqual(s.FileInformation.AbsoluteFilePath, chartPath)) == true))
+                {
+                    targetDifficultyLevel = i;
+                    break;
+                }
+            }
         }
 
         selectionContainer.UpdateRoot(targetRoot);
@@ -616,6 +671,23 @@ public class CStageSongSelectionNew : CStage
                 break;
         }
     }
+
+    public void SaveSelectionOnChartEnter(SongNode song, CChartData? chart, int difficulty)
+    {
+        if (song == null) return;
+
+        CDTXMania.ConfigIni.strLastSelectedSongPath = song.path ?? "";
+        CDTXMania.ConfigIni.strLastSelectedChartPath = chart?.FileInformation.AbsoluteFilePath ?? "";
+        CDTXMania.ConfigIni.strLastSelectedBoxTitle = song.parent?.title ?? "";
+        CDTXMania.ConfigIni.nSongSelectDifficulty = difficulty;
+        if (currentSort != null)
+        {
+            CDTXMania.ConfigIni.strSongSelectSort = currentSort.Name;
+        }
+
+        string path = CDTXMania.executableDirectory + "Config.ini";
+        CDTXMania.ConfigIni.tWrite(path);
+    }
     
     public int GetClosestLevelToTargetForSong(SongNode? song)
     {
@@ -680,6 +752,7 @@ public class CStageSongSelectionNew : CStage
         }
 
         currentSort = sorter;
+        CDTXMania.ConfigIni.strSongSelectSort = currentSort.Name;
 
         //each sorted root remembers its own selection, so every sort keeps its scroll position
         selectionContainer.UpdateRoot(root);
