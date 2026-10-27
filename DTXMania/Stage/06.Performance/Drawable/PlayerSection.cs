@@ -70,7 +70,7 @@ public class PlayerSection : UIGroup
             //2d version
             status.position = new Vector3(14, 237, 0);
 
-            PerformanceElement gauge = Add(root, new PerformanceGauge(EInstrumentPart.DRUMS), "Gauge", 294, 626, CStagePerfCommonScreen.PanelLayer, "Stats.HasLane");
+            PerformanceElement gauge = Add(root, new PerformanceGauge(EInstrumentPart.DRUMS), "Gauge", 295, 626, CStagePerfCommonScreen.PanelLayer, "Stats.HasLane");
             gauge.bindings.Add(new UIBinding("position.Y", "Config.Reverse.Drums")
             {
                 condition = BindingCondition.IsTrue, whenTrue = 28, whenFalse = 626
@@ -87,7 +87,7 @@ public class PlayerSection : UIGroup
         PerformanceElement guitarStatus = Add(root, new PerformanceStatusPanel(EInstrumentPart.GUITAR), "Status", 373, 254, CStagePerfCommonScreen.PanelLayer, "Stats.ShowsPanel");
         guitarStatus.bindings.Add(OnRightSide("position.X", -205, 373));
 
-        Add(root, new PerformanceGauge(EInstrumentPart.GUITAR), "Gauge", 80, 0, CStagePerfCommonScreen.PanelLayer, "Stats.HasLane");
+        Add(root, new PerformanceGauge(EInstrumentPart.GUITAR), "Gauge", 79, 0, CStagePerfCommonScreen.PanelLayer, "Stats.HasLane");
 
         return root;
     }
