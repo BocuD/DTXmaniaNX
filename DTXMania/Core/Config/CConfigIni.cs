@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -260,6 +260,11 @@ internal partial class CConfigIni
 	public string strSkinFolder;
 	public bool bUseBoxDefSkin;                     // #28195 2012.5.6 yyagi Skin切替用 box.defによるスキン変更機能を使用するか否か
 	public int nSkipTimeMs;
+	public string strLastSelectedSongPath;
+	public string strLastSelectedChartPath;
+	public string strLastSelectedBoxTitle;
+	public string strSongSelectSort;
+	public int nSongSelectDifficulty;
 
 	//つまみ食い
 	public STDGBVALUE<EAutoGhostData> eAutoGhost;               // #35411 2015.8.18 chnmr0 プレー時使用ゴーストデータ種別
@@ -685,6 +690,11 @@ internal partial class CConfigIni
 		songListFont = "MS PGothic";
 		n選曲リストフォントのサイズdot = 20;
 		b選曲リストフォントを太字にする = true;
+		strLastSelectedSongPath = "";
+		strLastSelectedChartPath = "";
+		strLastSelectedBoxTitle = "";
+		strSongSelectSort = "";
+		nSongSelectDifficulty = 0;
 		n自動再生音量 = 80;
 		n手動再生音量 = 100;
 		bOutputLogs = true;
@@ -952,7 +962,7 @@ internal partial class CConfigIni
 					continue;
 				}
 
-				string[] strArray = str.Split( new char[] { '=' } );
+				string[] strArray = str.Split( new char[] { '=' }, 2 );
 				if ( strArray.Length != 2 )
 				{
 					continue;
