@@ -19,21 +19,18 @@ public class GitaDoraTransition : UIGroup
         //the logo is anchored to a corner of this group, so the group has to be the window
         size = UISize.Inherited;
 
-        //create a black texture
-        var texture = BaseTexture.CreateSolidColor(new Color4(0, 0, 0, 255));
-        
         //the wipe rotates around the middle of the window
         childContainer = AddChild(new UIGroup("covers"));
         childContainer.size = new Vector2(1280, 720);
         childContainer.parentAnchor = UICanvas.Center;
         childContainer.pivot = new Vector2(0.5f, 0.5f);
         
-        top = childContainer.AddChild(new UIImage(texture));
+        top = childContainer.AddChild(new UIQuad(new Color4(0, 0, 0, 1)));
         top.size = new Vector2(3000, 1000);
         top.pivot = new Vector2(0.5f, 1.0f);
         top.position = new Vector3(640, 0, 0);
         
-        bottom = childContainer.AddChild(new UIImage(texture));
+        bottom = childContainer.AddChild(new UIQuad(new Color4(0, 0, 0, 1)));
         bottom.size = new Vector2(3000, 1000);
         bottom.pivot = new Vector2(0.5f, 0.0f);
         bottom.position = new Vector3(640, 720, 0);
@@ -70,8 +67,8 @@ public class GitaDoraTransition : UIGroup
     public static bool isClosed => state.closed;
     public static bool isAnimating => state.animate;
     
-    private UIImage top;
-    private UIImage bottom;
+    private UIQuad top;
+    private UIQuad bottom;
     private UIGroup childContainer;
     private UIImage logo;
 

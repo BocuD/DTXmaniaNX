@@ -36,7 +36,7 @@ public class SongSearchMenu : UIGroup, IUIInputHandler
         size = new Vector2(500, 300);
         
         //add background
-        var bg = AddChild(new UIImage(BaseTexture.CreateSolidColor(Color4.White)));
+        var bg = AddChild(new UIQuad());
         bg.name = "Background";
         bg.color = new Color4(0f, 0f, 0f, 0.90f);
         bg.size = UISize.Inherited;

@@ -16,6 +16,8 @@ public enum BlendMode
 public abstract class BaseTexture : IDisposable
 {
     public static BaseTexture None { get; } = new NoneTexture();
+    public static BaseTexture White => white ??= CreateSolidColor(Color4.White);
+    private static BaseTexture? white;
     public static BaseTextureFactory Factory { get; set; }
     public static IUiTextRenderer SkiaTextRenderer { get; set; }
     

@@ -40,9 +40,6 @@ public class UITextInput : UIText, IUIInputHandler
 
     private static UITextInput? activeInput;
 
-    //one white pixel, shared by every field and never disposed, for the caret and the selection
-    private static BaseTexture? block;
-
     private readonly TextEditBuffer buffer = new();
 
     private bool isActive;
@@ -519,10 +516,8 @@ public class UITextInput : UIText, IUIInputHandler
 
     private void DrawBlock(Matrix4x4 combined, float x, float width, Color4 blockColor)
     {
-        block ??= BaseTexture.CreateSolidColor(Color4.White);
-
         Matrix4x4 placed = Matrix4x4.CreateTranslation(x, 0f, 0f) * combined;
-        block.tDraw2DMatrix(placed, new Vector2(width, LineHeight()), new RectangleF(0, 0, block.Width, block.Height), UITint.Current * blockColor);
+        BaseTexture.White.tDraw2DMatrix(placed, new Vector2(width, LineHeight()), new RectangleF(0, 0, 1, 1), UITint.Current * blockColor);
     }
 
     private void DrawPlaceholder(Matrix4x4 combined)

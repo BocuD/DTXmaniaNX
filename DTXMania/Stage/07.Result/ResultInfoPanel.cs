@@ -48,10 +48,9 @@ public class ResultInfoPanel : UIGroup
 
     private static void Divider(UIGroup parent, string name, Vector3 position, float width)
     {
-        parent.AddChild(new UIImage
+        parent.AddChild(new UIQuad
         {
             name = name,
-            imageSource = ImageSource.Solid,
             position = position,
             size = new Vector2(width, 2)
         });

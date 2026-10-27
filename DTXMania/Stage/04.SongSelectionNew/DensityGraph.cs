@@ -34,8 +34,8 @@ public class DensityGraph : UIGroup
     private readonly DensityGraphData values;
 
     //drawn per selection rather than authored, so they are built here and left out of the layout
-    private UIImage[] drumBars = [];
-    private UIImage[] guitarBars = [];
+    private UIQuad[] drumBars = [];
+    private UIQuad[] guitarBars = [];
 
     private UIText? noteCountText;
 
@@ -72,16 +72,15 @@ public class DensityGraph : UIGroup
         }
     }
 
-    private UIImage[] BuildBars(string prefix, Color[] colors, Vector2 origin, float spacing, Vector2 barSize)
+    private UIQuad[] BuildBars(string prefix, Color[] colors, Vector2 origin, float spacing, Vector2 barSize)
     {
-        UIImage[] bars = new UIImage[colors.Length];
+        UIQuad[] bars = new UIQuad[colors.Length];
 
         for (int index = 0; index < colors.Length; index++)
         {
-            bars[index] = AddChild(new UIImage
+            bars[index] = AddChild(new UIQuad
             {
                 name = $"{prefix}{index}",
-                imageSource = ImageSource.Solid,
                 color = colors[index],
                 pivot = new Vector2(0, 1),
                 position = new Vector3(origin.X + index * spacing, origin.Y, 0),

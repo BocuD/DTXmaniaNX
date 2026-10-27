@@ -24,15 +24,13 @@ public enum ImageFit
 }
 
 /// <summary>What an image draws. Only <see cref="File"/> is a location, so only it consults
-/// <see cref="UIImage.image"/>; the other two are answered by the element itself.</summary>
+/// <see cref="UIImage.image"/>.</summary>
 public enum ImageSource
 {
     //a file, wherever image says it lives
     File,
     //a live texture from a data context or the stage's dynamicImageSources
-    Dynamic,
-    //no file at all: a rectangle of this element's colour, for a dim behind a menu or a panel
-    Solid
+    Dynamic
 }
 
 
@@ -85,11 +83,6 @@ public partial class UIImage : UITexture
         {
             _lastFileLoadAttempt = image;
             LoadResource(updateRects: false);
-        }
-        else if (imageSource == ImageSource.Solid && !texture.IsValid())
-        {
-            //white, so the element's own colour is what shows
-            SetTexture(BaseTexture.CreateSolidColor(Color4.White));
         }
 
         if (!isVisible || !texture.IsValid())
