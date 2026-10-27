@@ -11,7 +11,6 @@ namespace DTXMania;
 internal abstract class CActPerfCommonJudgementString : CActivity
 {
 	private BaseTexture judgementGraphicSheet;
-	private bool renderOld = false;
 	
 	// プロパティ
 	protected JudgementStatus[] judgementStatus = new JudgementStatus[15];
@@ -95,7 +94,10 @@ internal abstract class CActPerfCommonJudgementString : CActivity
 		if (nLane > judgements.Length - 1) return;
 		if (judgements[nLane] == null) return;
 		
-		judgements[nLane].Play(judge);
+		if (!CDTXMania.ConfigIni.bClassicJudgement)
+		{
+			judgements[nLane].Play(judge);
+		}
 		
 		if ( ( nLane < 0 ) || ( nLane > 14 ) )
 		{
@@ -210,7 +212,7 @@ internal abstract class CActPerfCommonJudgementString : CActivity
 
 		DrawLag(lane, baseX, y);
 
-		if (!renderOld) return;
+		if (!CDTXMania.ConfigIni.bClassicJudgement) return;
 		DrawJudgeFrame(lane, x, y, nRectX, nRectY);
 	}
 

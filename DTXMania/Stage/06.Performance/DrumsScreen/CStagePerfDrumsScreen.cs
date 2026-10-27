@@ -10,7 +10,6 @@ namespace DTXMania;
 
 internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
 {
-    private bool useNewDrumsFire = true;
     private DrumsChipRenderer chipRenderer;
     private LoopMarkers loopMarkers;
 
@@ -72,7 +71,7 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
         AddLegacyPart(hud, "Graph", LegacyOverlayLayer, _ => Probed(probeGraph, tUpdateAndDraw_Graph));
         AddLegacyPart(hud, "PerformanceInformation", LegacyOverlayLayer, _ => Probed(probeOverlay, tUpdateAndDraw_PerformanceInformation));
 
-        UIDrawable chipFire = drums.AddChild<UIDrawable>(useNewDrumsFire ? new ActPerfNewFire(0) : new ClassicDrumsChipFire());
+        UIDrawable chipFire = drums.AddChild<UIDrawable>(CDTXMania.ConfigIni.bClassicDrumsFire ? new ClassicDrumsChipFire() : new ActPerfNewFire(0));
         chipFire.name = "drumChipsFire";
         chipFire.renderOrder = EffectsLayer;
 

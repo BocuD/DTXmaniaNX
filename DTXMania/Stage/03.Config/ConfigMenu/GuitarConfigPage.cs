@@ -50,6 +50,7 @@ internal sealed class GuitarConfigPage(ConfigList list) : InstrumentConfigPage(l
             "Where the judgement mark (Perfect, Great, ...) is shown.\n  P-A: on the lanes\n  P-B: under the COMBO\n  P-C: on the judge line\n  OFF: hidden",
             ["P-A", "P-B", "P-C", "OFF"],
             () => (int)CDTXMania.ConfigIni.JudgementStringPosition.Guitar, v => CDTXMania.ConfigIni.JudgementStringPosition.Guitar = (EType)v));
+        items.Add(ClassicJudgementItem());
         items.Add(LightItem());
         items.Add(PerformanceModeItem());
         items.Add(RandomItem());

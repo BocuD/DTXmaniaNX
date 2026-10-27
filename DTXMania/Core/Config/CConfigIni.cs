@@ -80,6 +80,8 @@ internal partial class CConfigIni
 	[DataField("WindowWidth")] public int nWindowWidth; // #23510 2010.10.31 yyagi add
 	[DataField("WindowHeight")] public int nWindowHeight; // #23510 2010.10.31 yyagi add
 	public bool DisplayBonusEffects;
+	public bool bClassicJudgement;
+	public bool bClassicDrumsFire;
 	public bool bHAZARD;
 
 	//an Audio.AudioBackend value
