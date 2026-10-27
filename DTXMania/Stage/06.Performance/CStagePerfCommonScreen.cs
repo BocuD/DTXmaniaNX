@@ -1337,19 +1337,29 @@ internal abstract class CStagePerfCommonScreen : CStage
         return part;
     }
 
+    private bool ShowsChips => ePhaseID is not (EPhase.PERFORMANCE_STAGE_FAILED or EPhase.PERFORMANCE_STAGE_FAILED_END);
+
     protected void UpdateChipRenderer(ChipRenderer renderer, EInstrumentPart part)
     {
-        bool failed = ePhaseID is EPhase.PERFORMANCE_STAGE_FAILED or EPhase.PERFORMANCE_STAGE_FAILED_END;
-        double loopSpeed = CChip.ScrollMultiplier(part, actScrollSpeed.db現在の譜面スクロール速度[(int)part]);
-        long now = AudioMixer.Timer.nCurrentTime;
-
         renderer.chips = timeline.Chips;
-        renderer.firstChip = failed ? -1 : timeline.TopChip;
+        renderer.firstChip = ShowsChips ? timeline.TopChip : -1;
         renderer.judgeLineY = nJudgeLinePosY[(int)part];
-        renderer.showsLoopBegin = LoopBeginMs != -1;
-        renderer.showsLoopEnd = LoopBeginMs != -1 && LoopEndMs != -1;
-        renderer.loopBeginDistance = (int)((LoopBeginMs - now) * loopSpeed);
-        renderer.loopEndDistance = (int)((LoopEndMs - now) * loopSpeed);
+    }
+
+    //judgeLineY: where a chip at distance 0 is centred
+    protected void UpdateLoopMarkers(LoopMarkers markers, EInstrumentPart part, float judgeLineY, bool scrollsDown)
+    {
+        double multiplier = CChip.ScrollMultiplier(part, actScrollSpeed.db現在の譜面スクロール速度[(int)part]);
+        long now = AudioMixer.Timer.nCurrentTime;
+        int laneDisplay = CDTXMania.ConfigIni.nLaneDisp[(int)part];
+
+        markers.showsBegin = ShowsChips && LoopBeginMs != -1;
+        markers.showsEnd = ShowsChips && LoopBeginMs != -1 && LoopEndMs != -1;
+        markers.beginDistance = (float)((LoopBeginMs - now) * multiplier);
+        markers.endDistance = (float)((LoopEndMs - now) * multiplier);
+        markers.showsLines = laneDisplay == 0 || laneDisplay == 1;
+        markers.judgeLineY = judgeLineY;
+        markers.scrollsDown = scrollsDown;
     }
 
     protected void UpdateScrollSpeed()

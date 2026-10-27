@@ -10,16 +10,12 @@ public abstract class ChipRenderer : UIDrawable
     private static readonly int probe = AllocationProbe.Register("chip drawing");
 
     //chips further away than this are off screen
-    protected const float DrawRange = 600;
+    public const float DrawRange = 600;
 
     public List<CChip> chips = [];
     //-1 draws no chips
     public int firstChip = -1;
     public int judgeLineY;
-    public bool showsLoopBegin;
-    public bool showsLoopEnd;
-    public int loopBeginDistance;
-    public int loopEndDistance;
 
     protected ChipRenderer()
     {

@@ -66,16 +66,6 @@ public class DrumsChipRenderer : ChipRenderer
             }
         }
 
-        if (showsLoopBegin)
-        {
-            DrawLoopLine(origin, loopBeginDistance, false, reverse, showsLines, lineX, lineWidth);
-        }
-
-        if (showsLoopEnd)
-        {
-            DrawLoopLine(origin, loopEndDistance, true, reverse, showsLines, lineX, lineWidth);
-        }
-
         if (firstChip < 0)
         {
             return;
@@ -96,27 +86,6 @@ public class DrumsChipRenderer : ChipRenderer
             if (chip.nDistanceFromBar.Drums > DrawRange) break;
 
             DrawNote(origin, chip, reverse, 0, chip.bBonusChip);
-        }
-    }
-
-    private static readonly int[] loopLineOffsets = [1, 3, 5, 11, 13, 19, 25];
-
-    private void DrawLoopLine(Matrix4x4 origin, int distance, bool isEnd, bool reverse, bool showsLines, int lineX, int lineWidth)
-    {
-        int y = reverse ? judgeLineY + distance : judgeLineY - distance;
-        CDTXMania.actDisplayString.tPrint(origin, 830, y - 17, CCharacterConsole.EFontType.White, isEnd ? "End loop" : "Begin loop");
-
-        if (!showsLines)
-        {
-            return;
-        }
-
-        //the lines spread outwards, away from the looped part
-        bool upwards = isEnd != reverse;
-        foreach (int offset in loopLineOffsets)
-        {
-            int top = upwards ? y - offset : y + offset - 2;
-            chipArt!.tDraw2D(origin, lineX, top, new RectangleF(0, 769, lineWidth, 2));
         }
     }
 

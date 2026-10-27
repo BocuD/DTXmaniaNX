@@ -40,6 +40,7 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		actChipFireGB = new ActPerfNewFire[2];
 		wailingEffect = new WailingEffect[2];
 		chipRenderers = new GuitarChipRenderer[2];
+		loopMarkers = new LoopMarkers[2];
 		SetUpGuitarSection(EInstrument.Guitar1, EInstrumentPart.GUITAR);
 		SetUpGuitarSection(EInstrument.Guitar2, EInstrumentPart.BASS);
 
@@ -57,13 +58,20 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 
 		AddLegacyPart(section, "LaneFlush", LegacyLanesLayer, origin => tUpdateAndDraw_LaneFlushGB(origin, part));
 		AddLegacyPart(section, "WailingBonus", LegacyLanesLayer, origin => tUpdateAndDraw_WailingBonus(origin, part));
+		AddLegacyPart(section, "ProgressBar", LegacyLanesLayer, origin => actProgressBar.Draw(origin, part, part));
+
+		loopMarkers[side] = section.AddChild(new LoopMarkers());
+		loopMarkers[side].renderOrder = LegacyLanesLayer;
+		loopMarkers[side].position = new Vector3(88, 0, 0);
+		loopMarkers[side].size = new Vector2(193, 720);
+		loopMarkers[side].textX = 60 - 88;
+
 		chipRenderers[side] = section.AddChild(new GuitarChipRenderer(part));
 		chipRenderers[side].renderOrder = LegacyLanesLayer;
 
 		//drawn over the judge lines and shutters
 		int lane = right ? 14 : 13;
 		AddLegacyPart(section, "JudgementStrings", LegacyOverlayLayer, _ => actJudgeString.DrawLanes(lane, lane));
-		AddLegacyPart(section, "ProgressBar", LegacyOverlayLayer, origin => actProgressBar.Draw(origin, part, part));
 
 		//the right side's score, combo and bonus sit beside its panel, not 870 to the right
 		AddLegacyPart(section, "GuitarBonus", LegacyOverlayLayer, origin => tUpdateAndDraw_GuitarBonus(origin, part)).position.X = right ? -318 : 0;
@@ -82,6 +90,7 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 	}
 
 	private GuitarChipRenderer[] chipRenderers;
+	private LoopMarkers[] loopMarkers;
 
 	// メソッド
 
@@ -284,8 +293,18 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 
 		actScore.Update();
 
-		UpdateChipRenderer(chipRenderers[0], EInstrumentPart.GUITAR);
-		UpdateChipRenderer(chipRenderers[1], EInstrumentPart.BASS);
+		UpdateGuitarDrawing(0, EInstrumentPart.GUITAR);
+		UpdateGuitarDrawing(1, EInstrumentPart.BASS);
+	}
+
+	private void UpdateGuitarDrawing(int side, EInstrumentPart part)
+	{
+		UpdateChipRenderer(chipRenderers[side], part);
+
+		//guitar chips are centred 10 below the judge line value, or 1 below it in reverse
+		bool reverse = CDTXMania.ConfigIni.bReverse[(int)part];
+		int chipCentreY = nJudgeLinePosY[(int)part] + (reverse ? 1 : 10);
+		UpdateLoopMarkers(loopMarkers[side], part, chipCentreY, reverse);
 	}
 
 	// Other

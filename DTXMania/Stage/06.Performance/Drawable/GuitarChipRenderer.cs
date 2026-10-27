@@ -78,16 +78,6 @@ public class GuitarChipRenderer : ChipRenderer
             }
         }
 
-        if (showsLoopBegin && hasChips)
-        {
-            DrawLoopLine(origin, loopBeginDistance, "Begin loop", reverse, showsLines);
-        }
-
-        if (showsLoopEnd && hasChips)
-        {
-            DrawLoopLine(origin, loopEndDistance, "End loop", reverse, showsLines);
-        }
-
         if (firstChip < 0)
         {
             return;
@@ -107,22 +97,6 @@ public class GuitarChipRenderer : ChipRenderer
             {
                 DrawWailingChip(origin, chip, reverse);
             }
-        }
-    }
-
-    private void DrawLoopLine(Matrix4x4 origin, int distance, string text, bool reverse, bool showsLines)
-    {
-        int y = reverse ? judgeLineY - distance : judgeLineY + distance + 9;
-        if (y <= 104 || y >= 670)
-        {
-            return;
-        }
-
-        CDTXMania.actDisplayString.tPrint(origin, 60, y - 16, CCharacterConsole.EFontType.White, text);
-        if (showsLines)
-        {
-            chipArt!.tDraw2D(origin, 88, y - 1, new RectangleF(0, 20, 193, 2));
-            chipArt.tDraw2D(origin, 88, y + 1, new RectangleF(0, 20, 193, 2));
         }
     }
 
@@ -199,6 +173,7 @@ public class GuitarChipRenderer : ChipRenderer
         }
     }
 
+    //sits at a fixed height, not on the judge line
     private void DrawWailingChip(Matrix4x4 origin, CChip chip, bool reverse)
     {
         int index = (int)part;

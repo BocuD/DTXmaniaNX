@@ -12,6 +12,7 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
 {
     private bool useNewDrumsFire = true;
     private DrumsChipRenderer chipRenderer;
+    private LoopMarkers loopMarkers;
 
     public CStagePerfDrumsScreen()
     {
@@ -40,9 +41,25 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
         UIGroup drums = SectionFor(EInstrument.Drums);
         AddLegacyPart(drums, "FillInEffect", LegacyLanesLayer, _ => DrawFillInEffect());
         AddLegacyPart(drums, "LaneFlush", LegacyLanesLayer, origin => Probed(probeLanes, () => tUpdateAndDraw_LaneFlushD(origin)));
+        AddLegacyPart(drums, "ProgressBar", LegacyLanesLayer, origin => Probed(probeLanes, () => actProgressBar.Draw(origin, EInstrumentPart.DRUMS, EInstrumentPart.DRUMS)));
+
+        loopMarkers = drums.AddChild(new LoopMarkers());
+        loopMarkers.renderOrder = LegacyLanesLayer;
+        loopMarkers.position = new Vector3(295, 0, 0);
+        loopMarkers.size = new Vector2(559, 720);
+        if (CDTXMania.ConfigIni.eNumOfLanes.Drums == EType.B)
+        {
+            loopMarkers.size.X = 519;
+        }
+        else if (CDTXMania.ConfigIni.eNumOfLanes.Drums == EType.C)
+        {
+            loopMarkers.position.X = 367;
+            loopMarkers.size.X = 447;
+        }
+        loopMarkers.textX = 830 - (int)loopMarkers.position.X;
+
         chipRenderer = drums.AddChild(new DrumsChipRenderer());
         chipRenderer.renderOrder = LegacyLanesLayer;
-        AddLegacyPart(drums, "ProgressBar", LegacyLanesLayer, origin => Probed(probeLanes, () => actProgressBar.Draw(origin, EInstrumentPart.DRUMS, EInstrumentPart.DRUMS)));
         AddLegacyPart(drums, "LaneCover", LegacyLanesLayer, origin => Probed(probeLanes, () => DrawLaneCover(origin)));
 
         //drawn over the judge lines and shutters
@@ -295,6 +312,7 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
 
         UpdateChipRenderer(chipRenderer, EInstrumentPart.DRUMS);
         chipRenderer.patternFrame = ctChipPatternAnimation.Drums.nCurrentValue;
+        UpdateLoopMarkers(loopMarkers, EInstrumentPart.DRUMS, nJudgeLinePosY.Drums, !CDTXMania.ConfigIni.bReverse.Drums);
     }
 
     private void DrawLaneCover(Matrix4x4 origin)
