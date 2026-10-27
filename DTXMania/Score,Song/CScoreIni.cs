@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
 using System.Security.Cryptography;
@@ -220,6 +220,9 @@ public class CScoreIni
 
 		public int nFastCount;
 		public int nSlowCount;
+		public int nTotalOffsetLag;
+		public int nOffsetHitCount;
+		public double dbAverageOffset;
 
 		public int nGoodCount;
 		public int nGreatCount;

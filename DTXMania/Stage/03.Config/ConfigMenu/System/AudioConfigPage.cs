@@ -77,8 +77,8 @@ internal sealed class AudioConfigPage : ConfigPage
         items.Add(output);
 
         CItemInteger bgmAdjust = new("BGM Offset", -99, 99, CDTXMania.ConfigIni.nCommonBGMAdjustMs,
-            "BGMの再生タイミングを微調整します。\n-99 ～ 99ms まで指定可能です。",
-            "Fine-tune the BGM playback timing.\nYou can set from -99 to 99 ms.");
+            "BGMの再生タイミングを微調整します。\n-99 ～ 99ms まで指定可能です。\nリザルト画面の平均オフセットが\nマイナス（早押し）の場合は上げ(+)、\nプラス（遅押し）の場合は下げ(-)\nてください。",
+            "Fine-tune BGM playback timing (-99 to 99 ms).\nIf your average offset on the result screen is negative (hitting early), adjust up (+).\nIf positive (hitting late), adjust down (-).");
         bgmAdjust.BindConfig(
             () => bgmAdjust.nCurrentValue = CDTXMania.ConfigIni.nCommonBGMAdjustMs,
             () => CDTXMania.ConfigIni.nCommonBGMAdjustMs = bgmAdjust.nCurrentValue);

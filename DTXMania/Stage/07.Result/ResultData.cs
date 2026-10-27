@@ -36,6 +36,21 @@ public sealed class ResultData
     [DataField] public int FastCount => Entry.nFastCount;
     [DataField] public int SlowCount => Entry.nSlowCount;
 
+    [DataField] public double AverageOffset => Entry.dbAverageOffset;
+    [DataField] public string AverageOffsetValue => FormatOffsetValue(Entry.dbAverageOffset);
+    [DataField] public string AverageOffsetMs => $"{FormatOffsetValue(Entry.dbAverageOffset)} ms";
+    [DataField] public string AverageOffsetText => $"Average Offset: {FormatOffsetValue(Entry.dbAverageOffset)} ms";
+
+    private static string FormatOffsetValue(double offset)
+    {
+        if (Math.Abs(offset) < 0.005)
+        {
+            return "0.00";
+        }
+
+        return offset > 0 ? $"+{offset:0.00}" : $"{offset:0.00}";
+    }
+
     //level is stored as either xx.y (LEVEL<=99 plus LEVELDEC) or xxx (LEVEL>99), split here into a whole
     //part and a 2-digit fraction
     private static (int intPart, int deci) LevelParts()
