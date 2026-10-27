@@ -10,78 +10,14 @@ namespace DTXMania;
 
 internal partial class CStagePerfDrumsScreen
 {
-    protected override void UpdateChip_PatternOnly_Drums(CConfigIni configIni, ref CDTX dTX, ref CChip pChip)  // t進行描画_チップ_模様のみ_ドラムス
-    {
-        ApplyHiddenSudden(pChip, pChip.nDistanceFromBar.Drums, CDTXMania.ConfigIni.nHidSud.Drums, 200, 100, 50.0);
-    }
-
-    protected override void DrawChip_PatternOnly_Drums(CConfigIni configIni, ref CDTX dTX, ref CChip pChip, Matrix4x4 origin)
-    {
-        if (configIni.bDrumsEnabled && !pChip.bHit && pChip.bVisible)
-        {
-            DrawDrumChip(pChip, 128 + ctChipPatternAnimation.Drums.nCurrentValue * 64, false, origin);
-        }
-    }
-
     protected override void UpdateChip_Drums( CConfigIni configIni, ref CDTX dTX, ref CChip pChip )
     {
-        ApplyHiddenSudden(pChip, pChip.nDistanceFromBar.Drums, CDTXMania.ConfigIni.nHidSud.Drums, 200, 100, 50.0);
-
         drums!.UpdateNote(pChip);
         ApplyDrumsEvents();
 
         if (DrumsData.HasTargetGhost)
         {
             actGraph.dbGraphValue_Goal = DrumsData.CalculateTargetGhostGoal();
-        }
-    }
-
-    protected override void DrawChip_Drums( CConfigIni configIni, ref CDTX dTX, ref CChip pChip, Matrix4x4 origin )
-    {
-        if (configIni.bDrumsEnabled && !pChip.bHit && pChip.bVisible)
-        {
-            DrawDrumChip(pChip, 0, pChip.bBonusChip, origin);
-        }
-    }
-
-    //the art is centred in its source rect
-    private readonly record struct DrumChipArt(int SourceX, int SourceWidth);
-
-    private static DrumChipArt? ArtFor(EChannel channel) => channel switch
-    {
-        EChannel.BassDrum => new(0, 70),
-        EChannel.HiHatClose => new(70, 56),
-        EChannel.Snare => new(126, 64),
-        EChannel.HighTom => new(190, 56),
-        EChannel.LowTom => new(246, 56),
-        EChannel.FloorTom => new(302, 56),
-        EChannel.Cymbal => new(358, 74),
-        EChannel.RideCymbal => new(442, 48),
-        EChannel.LeftCymbal => new(538, 74),
-        EChannel.LeftPedal => new(660, 58),
-        EChannel.HiHatOpen => CDTXMania.ConfigIni.eHHOGraphics.Drums == EType.C ? new(70, 56) : new(612, 48),
-        EChannel.LeftBassDrum => CDTXMania.ConfigIni.eLBDGraphics.Drums == EType.A ? new(660, 58) : new(480, 58),
-        _ => null
-    };
-
-    private void DrawDrumChip(CChip chip, int row, bool bonus, Matrix4x4 origin)
-    {
-        if (txChip == null || ArtFor(chip.nChannelNumber) is not { } art)
-        {
-            return;
-        }
-
-        ELane lane = (ELane)DrumsPerformance.LaneOf(chip);
-        int x = (int)(DrumLanes.Centre(lane) - art.SourceWidth / 2f);
-        float distance = chip.nDistanceFromBar.Drums;
-        float y = (CDTXMania.ConfigIni.bReverse.Drums ? nJudgeLinePosY.Drums + distance : nJudgeLinePosY.Drums - distance) - 32;
-        Color4 col = Color4.White;
-        col.Alpha = chip.nTransparency / 255.0f;
-
-        txChip.tDraw2D(origin, x, y, new RectangleF(art.SourceX, row, art.SourceWidth, 64), col);
-        if (bonus)
-        {
-            txChip.tDraw2D(origin, x, y, new RectangleF(art.SourceX, 64, art.SourceWidth, 64), col);
         }
     }
 

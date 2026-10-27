@@ -39,7 +39,7 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		
 		actChipFireGB = new ActPerfNewFire[2];
 		wailingEffect = new WailingEffect[2];
-		holdNotes = new HoldNote[2, 5];
+		chipRenderers = new GuitarChipRenderer[2];
 		SetUpGuitarSection(EInstrument.Guitar1, EInstrumentPart.GUITAR);
 		SetUpGuitarSection(EInstrument.Guitar2, EInstrumentPart.BASS);
 
@@ -57,7 +57,8 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 
 		AddLegacyPart(section, "LaneFlush", LegacyLanesLayer, origin => tUpdateAndDraw_LaneFlushGB(origin, part));
 		AddLegacyPart(section, "WailingBonus", LegacyLanesLayer, origin => tUpdateAndDraw_WailingBonus(origin, part));
-		AddLegacyPart(section, "Chips", LegacyLanesLayer, origin => DrawChips(origin, part));
+		chipRenderers[side] = section.AddChild(new GuitarChipRenderer(part));
+		chipRenderers[side].renderOrder = LegacyLanesLayer;
 
 		//drawn over the judge lines and shutters
 		int lane = right ? 14 : 13;
@@ -75,27 +76,12 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		actChipFireGB[side].name = "ChipFire";
 		actChipFireGB[side].renderOrder = EffectsLayer;
 
-		UIGroup holdParent = section.AddChild(new UIGroup("HoldNotes"));
-		holdParent.renderOrder = 10;
-		holdParent.dontSerialize = true;
-		holdParent.isVisible = false;
-
-		int[] holdX = [107, 146, 185, 224, 264];
-		float holdY = CDTXMania.ConfigIni.bReverse[(int)part]
-			? 611 - CDTXMania.ConfigIni.nJudgeLine[(int)part]
-			: 155 + CDTXMania.ConfigIni.nJudgeLine[(int)part];
-		for (int i = 0; i < 5; i++)
-		{
-			holdNotes[side, i] = holdParent.AddChild(new HoldNote());
-			holdNotes[side, i].position = new Vector3(holdX[i], holdY, 0);
-		}
-
 		wailingEffect[side] = section.AddChild(new WailingEffect());
 		wailingEffect[side].renderOrder = LaneArtLayer;
 		wailingEffect[side].position = new Vector3(242, 58, 0);
 	}
 
-	private HoldNote[,] holdNotes;
+	private GuitarChipRenderer[] chipRenderers;
 
 	// メソッド
 
@@ -131,19 +117,6 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 	{
 		if ( bActivated )
 		{
-			txChip = BaseTexture.LoadFromPath( CSkin.Path( @"Graphics\7_Chips_Guitar.png" ) );
-
-			txNote = new BaseTexture[5];
-			for (int i = 0; i < 5; i++)
-			{
-				txNote[i] = BaseTexture.LoadFromPath(CSkin.Path($@"Graphics\Note\Guitar\note0{i}.png"));
-			}
-			
-			txHoldNoteBg = new BaseTexture[5];
-			for (int i = 0; i < 5; i++)
-			{
-				txHoldNoteBg[i] = BaseTexture.LoadFromPath(CSkin.Path($@"Graphics\Note\Guitar\lnote{i}1.png"));
-			}
 			base.OnManagedCreateResources();
 		}
 	}
@@ -310,6 +283,9 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		tHandleKeyInput();
 
 		actScore.Update();
+
+		UpdateChipRenderer(chipRenderers[0], EInstrumentPart.GUITAR);
+		UpdateChipRenderer(chipRenderers[1], EInstrumentPart.BASS);
 	}
 
 	// Other
@@ -372,48 +348,6 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		// ギタレボモードでは何もしない
 	}
 	
-	protected override void DrawChip_Guitar_Wailing( CConfigIni configIni, ref CDTX dTX, ref CChip pChip, Matrix4x4 origin )
-	{
-		if ( configIni.bGuitarEnabled )
-		{
-			if ( !pChip.bHit && pChip.bVisible )
-			{
-				int[] y_base = { 154, 611 };			// ドラム画面かギター画面かで変わる値
-				int offset = 0;						// ドラム画面かギター画面かで変わる値
-
-				const int WailingWidth = 54;		// 4種全て同じ値
-				const int WailingHeight = 68;		// 4種全て同じ値
-				const int baseTextureOffsetX = 0;	// ドラム画面かギター画面かで変わる値
-				const int baseTextureOffsetY = 22;	// ドラム画面かギター画面かで変わる値
-				const int drawX = 287;				// 4種全て異なる値
-
-				const int numA = 34;				// 4種全て同じ値;
-				float y = configIni.bReverse.Guitar ? ( y_base[ 1 ] - pChip.nDistanceFromBar.Guitar ) : ( y_base[ 0 ] + pChip.nDistanceFromBar.Guitar );
-				float numB = y - offset;				// 4種全て同じ定義
-				float numC = 0;						// 4種全て同じ初期値
-				const int numD = 709;				// ドラム画面かギター画面かで変わる値
-				if ( ( numB < ( numD + numA ) ) && ( numB > -numA ) )	// 以下のロジックは4種全て同じ
-				{
-					int c = ctWailingChipPatternAnimation.nCurrentValue;
-					RectangleF rect = new( baseTextureOffsetX, baseTextureOffsetY, WailingWidth, WailingHeight );
-					if ( numB < numA )
-					{
-						rect.Y += numA - numB;
-						rect.Height -= numA - numB;
-						numC = numA - numB;
-					}
-					if ( numB > ( numD - numA ) )
-					{
-						rect.Height -= numB - ( numD - numA );
-					}
-					if ( ( rect.Bottom > rect.Top ) && ( txChip != null ) )
-					{
-						txChip.tDraw2D(origin, drawX, ( y - numA ) + numC, rect );
-					}
-				}
-			}
-		}
-	}
 	protected override void UpdateChip_FillIn( CConfigIni configIni, ref CDTX dTX, ref CChip pChip )
 	{
 		if ( !pChip.bHit && ( pChip.nDistanceFromBar.Drums < 0 ) )
@@ -422,49 +356,6 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		}
 	}
 
-	protected override void DrawChip_Bass_Wailing( CConfigIni configIni, ref CDTX dTX, ref CChip pChip, Matrix4x4 origin )
-	{
-		if ( configIni.bGuitarEnabled )
-		{
-			if ( !pChip.bHit && pChip.bVisible )
-			{
-				int[] y_base = { 154, 611 };			// ドラム画面かギター画面かで変わる値
-				int offset = 0;						// ドラム画面かギター画面かで変わる値
-
-				const int WailingWidth = 54;		// 4種全て同じ値
-				const int WailingHeight = 68;		// 4種全て同じ値
-				const int baseTextureOffsetX = 0;	// ドラム画面かギター画面かで変わる値
-				const int baseTextureOffsetY = 22;	// ドラム画面かギター画面かで変わる値
-				const int drawX = 287;				// 4種全て異なる値
-
-				const int numA = 34;				// 4種全て同じ値
-				float y = CDTXMania.ConfigIni.bReverse.Bass ? ( y_base[ 1 ] - pChip.nDistanceFromBar.Bass ) : ( y_base[ 0 ] + pChip.nDistanceFromBar.Bass );
-				float numB = y - offset;				// 4種全て同じ定義
-				float numC = 0;						// 4種全て同じ初期値
-				const int numD = 709;				// ドラム画面かギター画面かで変わる値
-				if ( ( numB < ( numD + numA ) ) && ( numB > -numA ) )	// 以下のロジックは4種全て同じ
-				{
-					int c = ctWailingChipPatternAnimation.nCurrentValue;
-					RectangleF rect = new(baseTextureOffsetX, baseTextureOffsetY, WailingWidth, WailingHeight);
-					if ( numB < numA )
-					{
-						rect.Y += numA - numB;
-						rect.Height -= numA - numB;
-						numC = numA - numB;
-					}
-					if ( numB > ( numD - numA ) )
-					{
-						rect.Height -= numB - ( numD - numA );
-					}
-					if ( ( rect.Bottom > rect.Top ) && ( txChip != null ) )
-					{
-						txChip.tDraw2D(origin, drawX, (y - numA) + numC, rect);
-					}
-				}
-			}
-			
-		}
-	}
 	protected override void UpdateChip_BarLine( CConfigIni configIni, ref CDTX dTX, ref CChip pChip )
 	{
 		int n小節番号plus1 = pChip.nPlaybackPosition / 0x180;
@@ -475,55 +366,6 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 			if ( configIni.bWave再生位置自動調整機能有効 && bNeedsDriftCorrection )
 			{
 				dTX.tAutoCorrectWavPlaybackPosition();
-			}
-		}
-	}
-
-	protected override void DrawChip_BarLine( CConfigIni configIni, ref CDTX dTX, ref CChip pChip, EInstrumentPart part, Matrix4x4 origin )
-	{
-		if ( !pChip.bVisible || !configIni.bGuitarEnabled )
-		{
-			return;
-		}
-
-		int i = (int)part;
-		float y = configIni.bReverse[ i ] ? ( ( nJudgeLinePosY[ i ] - pChip.nDistanceFromBar[ i ] ) + 0 ) : ( ( nJudgeLinePosY[ i ] + pChip.nDistanceFromBar[ i ] ) + 9 );
-		if ( ( dTX.bHasChips[ i ] && ( y > 104 ) ) && ( ( y < 670 ) && ( txChip != null ) ) )
-		{
-			if ( configIni.nLaneDisp[ i ] == 0 || configIni.nLaneDisp[ i ] == 1 )
-			{
-				txChip.tDraw2D(origin, 88, y, new RectangleF(0, 20, 193, 2));
-			}
-			if ( configIni.bShowPerformanceInformation )
-			{
-				int n小節番号 = pChip.nPlaybackPosition / 0x180 - 1;
-				CDTXMania.actDisplayString.tPrint(origin, 60, (int)y - 16, CCharacterConsole.EFontType.White, n小節番号.ToString());
-			}
-		}
-	}
-
-	protected override void tDraw_LoopLine(CConfigIni configIni, bool bIsEnd, EInstrumentPart part, Matrix4x4 origin)
-	{
-		if (!configIni.bGuitarEnabled)
-		{
-			return;
-		}
-
-		const double speed = 286;   // BPM150の時の1小節の長さ[dot]
-		int i = (int)part;
-		double scrollSpeed = (actScrollSpeed.db現在の譜面スクロール速度[i] + 1.0) * 0.5 * 0.5 * 37.5 * speed * 1.52f / 60000.0; //todo: verify if this is the correct approach to fix guitar scroll speed
-		int nDistanceFromBar = (int)(((bIsEnd ? LoopEndMs : LoopBeginMs) - AudioMixer.Timer.nCurrentTime) * scrollSpeed);
-
-		int y = configIni.bReverse[i] ? ((nJudgeLinePosY[i] - nDistanceFromBar) + 0) : ((nJudgeLinePosY[i] + nDistanceFromBar) + 9);
-		if ((CDTXMania.DTX.bHasChips[i] && (y > 104)) && ((y < 670) && (txChip != null)))
-		{
-			//Display Loop Begin/Loop End text
-			CDTXMania.actDisplayString.tPrint(origin, 60, y - 16, CCharacterConsole.EFontType.White, (bIsEnd ? "End loop" : "Begin loop"));
-
-			if (configIni.nLaneDisp[i] == 0 || configIni.nLaneDisp[i] == 1)
-			{
-				txChip.tDraw2D(origin, 88, y - 1, new RectangleF(0, 20, 193, 2));
-				txChip.tDraw2D(origin, 88, y + 1, new RectangleF(0, 20, 193, 2));
 			}
 		}
 	}

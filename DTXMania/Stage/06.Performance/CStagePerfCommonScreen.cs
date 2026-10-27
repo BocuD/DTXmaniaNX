@@ -431,10 +431,6 @@ internal abstract class CStagePerfCommonScreen : CStage
 
     protected ChartSequencer sequencer = new();
     protected BaseTexture txWailingFrame;
-    protected BaseTexture txChip;  // txチップ
-
-    protected BaseTexture[] txNote = [];
-    protected BaseTexture[] txHoldNoteBg = [];
 
     public BaseTexture txBonusEffect;
 
@@ -950,7 +946,6 @@ internal abstract class CStagePerfCommonScreen : CStage
                 case EChannel.LeftCymbal:
                 case EChannel.LeftPedal:
                 case EChannel.LeftBassDrum:
-                    UpdateChip_PatternOnly_Drums(configIni, ref dTX, ref pChip);
                     UpdateChip_Drums(configIni, ref dTX, ref pChip);
                     break;
 
@@ -1176,184 +1171,6 @@ internal abstract class CStagePerfCommonScreen : CStage
         }
     }
 
-    protected void DrawChips(Matrix4x4 origin, EInstrumentPart part)
-    {
-        bool drawsChips = ePhaseID is not (EPhase.PERFORMANCE_STAGE_FAILED or EPhase.PERFORMANCE_STAGE_FAILED_END)
-                          && timeline.TopChip != -1 && timeline.TopChip < timeline.Chips.Count;
-
-        CDTX dTX = CDTXMania.DTX;
-        CConfigIni configIni = CDTXMania.ConfigIni;
-
-        if (drawsChips)
-        {
-            for (int i = timeline.TopChip; i < dTX.listChip.Count; i++)
-            {
-                CChip pChip = dTX.listChip[i];
-                if (IsBeyondDrawRange(pChip)) break;
-
-                if (pChip.nChannelNumber == EChannel.BarLine)
-                {
-                    DrawChip_BarLine(configIni, ref dTX, ref pChip, part, origin);
-                }
-                else if (pChip.nChannelNumber == EChannel.BeatLine)
-                {
-                    DrawBeatLine(part, pChip, origin);
-                }
-            }
-        }
-
-        tDraw_LoopLines(part, origin);
-
-        if (!drawsChips)
-        {
-            return;
-        }
-
-        if (part == EInstrumentPart.DRUMS)
-        {
-            for (int i = timeline.TopChip; i < dTX.listChip.Count; i++)
-            {
-                CChip pChip = dTX.listChip[i];
-                if (IsBeyondDrawRange(pChip)) break;
-
-                switch (pChip.nChannelNumber)
-                {
-                    case EChannel.HiHatClose:
-                    case EChannel.Snare:
-                    case EChannel.BassDrum:
-                    case EChannel.HighTom:
-                    case EChannel.LowTom:
-                    case EChannel.Cymbal:
-                    case EChannel.FloorTom:
-                    case EChannel.HiHatOpen:
-                    case EChannel.RideCymbal:
-                    case EChannel.LeftCymbal:
-                    case EChannel.LeftPedal:
-                    case EChannel.LeftBassDrum:
-                        DrawChip_PatternOnly_Drums(configIni, ref dTX, ref pChip, origin);
-                        break;
-                }
-            }
-        }
-
-        for (int i = timeline.TopChip; i < dTX.listChip.Count; i++)
-        {
-            CChip pChip = dTX.listChip[i];
-            if (IsBeyondDrawRange(pChip)) break;
-
-            switch (pChip.nChannelNumber)
-            {
-                case EChannel.HiHatClose:
-                case EChannel.Snare:
-                case EChannel.BassDrum:
-                case EChannel.HighTom:
-                case EChannel.LowTom:
-                case EChannel.Cymbal:
-                case EChannel.FloorTom:
-                case EChannel.HiHatOpen:
-                case EChannel.RideCymbal:
-                case EChannel.LeftCymbal:
-                case EChannel.LeftPedal:
-                case EChannel.LeftBassDrum:
-                    if (part == EInstrumentPart.DRUMS)
-                    {
-                        DrawChip_Drums(configIni, ref dTX, ref pChip, origin);
-                    }
-                    break;
-
-                case EChannel.Guitar_Open:
-                case EChannel.Guitar_xxBxx:
-                case EChannel.Guitar_xGxxx:
-                case EChannel.Guitar_xGBxx:
-                case EChannel.Guitar_Rxxxx:
-                case EChannel.Guitar_RxBxx:
-                case EChannel.Guitar_RGxxx:
-                case EChannel.Guitar_RGBxx:
-                case EChannel.Guitar_xxxYx:
-                case EChannel.Guitar_xxBYx:
-                case EChannel.Guitar_xGxYx:
-                case EChannel.Guitar_xGBYx:
-                case EChannel.Guitar_RxxYx:
-                case EChannel.Guitar_RxBYx:
-                case EChannel.Guitar_RGxYx:
-                case EChannel.Guitar_RGBYx:
-                case EChannel.Guitar_xxxxP:
-                case EChannel.Guitar_xxBxP:
-                case EChannel.Guitar_xGxxP:
-                case EChannel.Guitar_xGBxP:
-                case EChannel.Guitar_RxxxP:
-                case EChannel.Guitar_RxBxP:
-                case EChannel.Guitar_RGxxP:
-                case EChannel.Guitar_RGBxP:
-                case EChannel.Guitar_xxxYP:
-                case EChannel.Guitar_xxBYP:
-                case EChannel.Guitar_xGxYP:
-                case EChannel.Guitar_xGBYP:
-                case EChannel.Guitar_RxxYP:
-                case EChannel.Guitar_RxBYP:
-                case EChannel.Guitar_RGxYP:
-                case EChannel.Guitar_RGBYP:
-                    if (part == EInstrumentPart.GUITAR)
-                    {
-                        DrawChip_GuitarBass(configIni, ref dTX, ref pChip, EInstrumentPart.GUITAR, origin);
-                    }
-                    break;
-
-                case EChannel.Guitar_Wailing:
-                    if (part == EInstrumentPart.GUITAR)
-                    {
-                        DrawChip_Guitar_Wailing(configIni, ref dTX, ref pChip, origin);
-                    }
-                    break;
-
-                case EChannel.Bass_Open:
-                case EChannel.Bass_xxBxx:
-                case EChannel.Bass_xGxxx:
-                case EChannel.Bass_xGBxx:
-                case EChannel.Bass_Rxxxx:
-                case EChannel.Bass_RxBxx:
-                case EChannel.Bass_RGxxx:
-                case EChannel.Bass_RGBxx:
-                case EChannel.Bass_xxxYx:
-                case EChannel.Bass_xxBYx:
-                case EChannel.Bass_xGxYx:
-                case EChannel.Bass_xGBYx:
-                case EChannel.Bass_RxxYx:
-                case EChannel.Bass_RxBYx:
-                case EChannel.Bass_RGxYx:
-                case EChannel.Bass_RGBYx:
-                case EChannel.Bass_xxxxP:
-                case EChannel.Bass_xxBxP:
-                case EChannel.Bass_xGxxP:
-                case EChannel.Bass_xGBxP:
-                case EChannel.Bass_RxxxP:
-                case EChannel.Bass_RxBxP:
-                case EChannel.Bass_RGxxP:
-                case EChannel.Bass_RGBxP:
-                case EChannel.Bass_xxxYP:
-                case EChannel.Bass_xxBYP:
-                case EChannel.Bass_xGxYP:
-                case EChannel.Bass_xGBYP:
-                case EChannel.Bass_RxxYP:
-                case EChannel.Bass_RxBYP:
-                case EChannel.Bass_RGxYP:
-                case EChannel.Bass_RGBYP:
-                    if (part == EInstrumentPart.BASS)
-                    {
-                        DrawChip_GuitarBass(configIni, ref dTX, ref pChip, EInstrumentPart.BASS, origin);
-                    }
-                    break;
-
-                case EChannel.Bass_Wailing:
-                    if (part == EInstrumentPart.BASS)
-                    {
-                        DrawChip_Bass_Wailing(configIni, ref dTX, ref pChip, origin);
-                    }
-                    break;
-            }
-        }
-    }
-
     //the combo timers tick 16 times a beat
     private void ChangeBPM(double chartBPM)
     {
@@ -1369,89 +1186,7 @@ internal abstract class CStagePerfCommonScreen : CStage
             CDTXMania.stagePerfGuitarScreen.ctComboTimer = new CCounter(1, 16, (int)((60.0 / (CDTXMania.stagePerfGuitarScreen.actPlayInfo.dbBPM) / 16) * 1000.0), CDTXMania.Timer);
         }
     }
-
-    //mode: 1 hidden, 2 sudden, 3 both, 4 stealth. Both fades are 50 units long
-    protected static void ApplyHiddenSudden(CChip pChip, float distance, int mode, int suddenFrom, int hiddenFrom, double fadeDivisor)
-    {
-        if (mode is 2 or 3)
-        {
-            if (distance < suddenFrom)
-            {
-                pChip.bVisible = true;
-                pChip.nTransparency = 0xff;
-            }
-            else if (distance < suddenFrom + 50)
-            {
-                pChip.bVisible = true;
-                pChip.nTransparency = 0xff - (int)((distance - suddenFrom) * 255.0 / fadeDivisor);
-            }
-            else
-            {
-                pChip.bVisible = false;
-                pChip.nTransparency = 0;
-            }
-        }
-
-        if (mode is 1 or 3)
-        {
-            if (distance < hiddenFrom)
-            {
-                pChip.bVisible = false;
-            }
-            else if (distance < hiddenFrom + 50)
-            {
-                pChip.bVisible = true;
-                pChip.nTransparency = (int)((distance - hiddenFrom) * 255.0 / fadeDivisor);
-            }
-        }
-
-        if (mode == 4)
-        {
-            pChip.bVisible = false;
-        }
-    }
-
-    //distances are worked out by UpdateChips earlier in the frame
-    private static bool IsBeyondDrawRange(CChip pChip) =>
-        Math.Min(Math.Min(pChip.nDistanceFromBar.Drums, pChip.nDistanceFromBar.Guitar), pChip.nDistanceFromBar.Bass) > 600;
-
-    private void DrawBeatLine(EInstrumentPart ePlayMode, CChip pChip, Matrix4x4 origin)
-    {
-        CConfigIni configIni = CDTXMania.ConfigIni;
-        if ((ePlayMode == EInstrumentPart.DRUMS) && (configIni.nLaneDisp.Drums == 0 || configIni.nLaneDisp.Drums == 1) && pChip.bVisible && (txChip != null))
-        {
-            int l_drumPanelWidth = 0x22f;
-            int l_xOffset = 0;
-            if (configIni.eNumOfLanes.Drums == EType.B)
-            {
-                l_drumPanelWidth = 0x207;
-            }
-            else if (CDTXMania.ConfigIni.eNumOfLanes.Drums == EType.C)
-            {
-                l_drumPanelWidth = 447;
-                l_xOffset = 72;
-            }
-
-            txChip.tDraw2D(origin, 0x127 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + pChip.nDistanceFromBar.Drums) - 1) : ((nJudgeLinePosY.Drums - pChip.nDistanceFromBar.Drums) - 1), new RectangleF(0, 772, l_drumPanelWidth, 2));
-        }
-    }
-
-    protected bool tDraw_LoopLines(EInstrumentPart part, Matrix4x4 origin)
-    {
-        if (LoopBeginMs != -1)
-        {
-            tDraw_LoopLine(CDTXMania.ConfigIni, false, part, origin);
-            if (LoopEndMs != -1)
-            {
-                tDraw_LoopLine(CDTXMania.ConfigIni, true, part, origin);
-            }
-        }
-        return false;
-    }
-
-
     protected virtual void UpdateChip_Drums(CConfigIni configIni, ref CDTX dTX, ref CChip pChip) { }
-    protected virtual void UpdateChip_PatternOnly_Drums(CConfigIni configIni, ref CDTX dTX, ref CChip pChip) { }
     protected virtual void UpdateChip_GuitarBass(CConfigIni configIni, ref CDTX dTX, ref CChip pChip, EInstrumentPart inst) { }  // t進行描画_チップ_ギターベース
     
     protected virtual void UpdateChip_GuitarBass_Wailing(CConfigIni configIni, ref CDTX dTX, ref CChip pChip, EInstrumentPart inst)
@@ -1463,8 +1198,6 @@ internal abstract class CStagePerfCommonScreen : CStage
             return;
         }
 
-        int indexInst = (int)inst;
-        ApplyHiddenSudden(pChip, pChip.nDistanceFromBar[indexInst], CDTXMania.ConfigIni.nHidSud[indexInst], 250, 150, 75.0);
         guitar.UpdateWailingMarker(pChip);
         ApplyGuitarEvents(guitar);
     }
@@ -1474,7 +1207,6 @@ internal abstract class CStagePerfCommonScreen : CStage
     }
     protected abstract void UpdateChip_FillIn(CConfigIni configIni, ref CDTX dTX, ref CChip pChip);  // t進行描画_チップ_フィルイン
     protected abstract void UpdateChip_BarLine(CConfigIni configIni, ref CDTX dTX, ref CChip pChip);
-    protected abstract void tDraw_LoopLine(CConfigIni configIni, bool bIsEnd, EInstrumentPart part, Matrix4x4 origin);
     protected virtual void UpdateChip_Bass_Wailing(CConfigIni configIni, ref CDTX dTX, ref CChip pChip)  // t進行描画_チップ_ベース_ウェイリング
     {
         UpdateChip_GuitarBass_Wailing(configIni, ref dTX, ref pChip, EInstrumentPart.BASS);
@@ -1487,13 +1219,6 @@ internal abstract class CStagePerfCommonScreen : CStage
         }
     }  // t進行描画_チップ_空打ち音設定_ドラム
 
-    //a screen overrides the ones it draws
-    protected virtual void DrawChip_Drums(CConfigIni configIni, ref CDTX dTX, ref CChip pChip, Matrix4x4 origin) { }
-    protected virtual void DrawChip_PatternOnly_Drums(CConfigIni configIni, ref CDTX dTX, ref CChip pChip, Matrix4x4 origin) { }
-    protected virtual void DrawChip_GuitarBass(CConfigIni configIni, ref CDTX dTX, ref CChip pChip, EInstrumentPart inst, Matrix4x4 origin) { }
-    protected virtual void DrawChip_Guitar_Wailing(CConfigIni configIni, ref CDTX dTX, ref CChip pChip, Matrix4x4 origin) { }
-    protected virtual void DrawChip_Bass_Wailing(CConfigIni configIni, ref CDTX dTX, ref CChip pChip, Matrix4x4 origin) { }
-    protected virtual void DrawChip_BarLine(CConfigIni configIni, ref CDTX dTX, ref CChip pChip, EInstrumentPart part, Matrix4x4 origin) { }
     protected void UpdateChipAnimation()
     {
         for (int i = 0; i < 3; i++)			// 0=drums, 1=guitar, 2=bass
@@ -1610,6 +1335,21 @@ internal abstract class CStagePerfCommonScreen : CStage
         LegacyDrawable part = parent.AddChild(new LegacyDrawable(name, draw));
         part.renderOrder = layer;
         return part;
+    }
+
+    protected void UpdateChipRenderer(ChipRenderer renderer, EInstrumentPart part)
+    {
+        bool failed = ePhaseID is EPhase.PERFORMANCE_STAGE_FAILED or EPhase.PERFORMANCE_STAGE_FAILED_END;
+        double loopSpeed = CChip.ScrollMultiplier(part, actScrollSpeed.db現在の譜面スクロール速度[(int)part]);
+        long now = AudioMixer.Timer.nCurrentTime;
+
+        renderer.chips = timeline.Chips;
+        renderer.firstChip = failed ? -1 : timeline.TopChip;
+        renderer.judgeLineY = nJudgeLinePosY[(int)part];
+        renderer.showsLoopBegin = LoopBeginMs != -1;
+        renderer.showsLoopEnd = LoopBeginMs != -1 && LoopEndMs != -1;
+        renderer.loopBeginDistance = (int)((LoopBeginMs - now) * loopSpeed);
+        renderer.loopEndDistance = (int)((LoopEndMs - now) * loopSpeed);
     }
 
     protected void UpdateScrollSpeed()
