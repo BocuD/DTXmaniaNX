@@ -141,6 +141,21 @@ public class PerformanceData
         }
     }
 
+    public void CountTiming(int lag)
+    {
+        if (lag > 0)
+        {
+            timingHitCount.Late++;
+        }
+        else
+        {
+            timingHitCount.Early++;
+        }
+
+        timingHitCount.TotalLag += lag;
+        timingHitCount.LagHitCount++;
+    }
+
     public void AddCombo()
     {
         combo++;
@@ -236,9 +251,9 @@ public class PerformanceData
         {
             Damage(judgement);
         }
-        if (!auto)
+        if (!auto && judgement != EJudgement.Miss)
         {
-            CountTiming(lag > 0);
+            CountTiming(lag);
         }
         CountJudgement(judgement, auto);
 
@@ -442,4 +457,7 @@ public struct TimingCounts
 {
     public int Late;
     public int Early;
+    public long TotalLag;
+    public int LagHitCount;
+    public double AverageLag => LagHitCount > 0 ? (double)TotalLag / LagHitCount : 0.0;
 }

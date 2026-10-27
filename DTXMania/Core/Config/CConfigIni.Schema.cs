@@ -377,7 +377,12 @@ internal partial class CConfigIni
 				Int("InputAdjustTimeDrums", -99, 99, c => c.nInputAdjustTimeMs.Drums),
 				Int("InputAdjustTimeGuitar", -99, 99, c => c.nInputAdjustTimeMs.Guitar),
 				Int("InputAdjustTimeBass", -99, 99, c => c.nInputAdjustTimeMs.Bass)),
-			G(["BGMタイミング調整(-99～99)[ms]", "Revision value to adjust judgement timing for BGM."],
+			G([
+					"BGMタイミング調整(-99～99)[ms]",
+					"リザルト画面の平均オフセットが負（早押し）なら上げ(+)、正（遅押し）なら下げ(-)て調整してください。",
+					"Revision value to adjust judgement timing for BGM.",
+					"If your average offset on the result screen is negative (early), adjust up (+). If positive (late), adjust down (-)."
+				],
 				Int("BGMAdjustTime", -99, 99, c => c.nCommonBGMAdjustMs)),
 			G([
 					"判定ラインの表示位置調整(ドラム, ギター, ベース)(-99～99)[px]",

@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using DTXMania.UI.Skin;
 using System.Numerics;
 using DTXMania.Core;
@@ -170,6 +170,17 @@ internal class CStageResult : CStage
 		slowCount.position = new Vector3(986, 655, 0);
 		slowCount.fillColor = new Color4(1.0f, 0.2f, 0.2f);
 		slowCount.outlineWidth = 0;
+
+		var avgOffset = ui.AddChild(new UIText("", 20));
+		avgOffset.name = "AverageOffset";
+		avgOffset.bindings.Add(new UIBinding("text", "Result.AverageOffsetText"));
+		avgOffset.position = new Vector3(1270, 710, 0);
+		avgOffset.pivot = new Vector2(1.0f, 1.0f);
+		avgOffset.alignment = UiTextAlignment.Right;
+		avgOffset.font = SkinResource.System("Futura PT Medium.otf");
+		avgOffset.fillColor = Color4.White;
+		avgOffset.outlineColor = Color4.Black;
+		avgOffset.outlineWidth = 1;
 	}
 
 	//the rank icon builds its children from the result in its constructor, so a layout cannot hold it
@@ -185,6 +196,20 @@ internal class CStageResult : CStage
 		if (nameplate != null)
 		{
 			nameplate.instrument = CDTXMania.GetCurrentInstrument();
+		}
+
+		if (!ui.children.Any(c => c.name == "AverageOffset"))
+		{
+			var offsetText = ui.AddChild(new UIText("", 20));
+			offsetText.name = "AverageOffset";
+			offsetText.bindings.Add(new UIBinding("text", "Result.AverageOffsetText"));
+			offsetText.position = new Vector3(1270, 710, 0);
+			offsetText.pivot = new Vector2(1.0f, 1.0f);
+			offsetText.alignment = UiTextAlignment.Right;
+			offsetText.font = SkinResource.System("Futura PT Medium.otf");
+			offsetText.fillColor = Color4.White;
+			offsetText.outlineColor = Color4.Black;
+			offsetText.outlineWidth = 1;
 		}
 	}
 
