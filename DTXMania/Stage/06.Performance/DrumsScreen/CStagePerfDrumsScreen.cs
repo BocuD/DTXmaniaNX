@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Numerics;
+using System.Diagnostics;
 using System.Drawing;
 using DTXMania.Core;
 using DTXMania.Core.Framework;
@@ -35,28 +36,31 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
     {
         base.OnLayoutReady();
         
-        AddLegacyPart(PlayfieldGroup, "FillInEffect", LegacyLanesLayer, DrawFillInEffect);
-        AddLegacyPart(PlayfieldGroup, "LaneFlush", LegacyLanesLayer, () => Probed(probeLanes, tUpdateAndDraw_LaneFlushD));
-        AddLegacyPart(PlayfieldGroup, "Chips", LegacyLanesLayer, () => Probed(probeChips, () => DrawChips(EInstrumentPart.DRUMS)));
-        AddLegacyPart(PlayfieldGroup, "ProgressBar", LegacyLanesLayer, () => Probed(probeLanes, () => actProgressBar.OnUpdateAndDraw()));
-        AddLegacyPart(PlayfieldGroup, "LaneCover", LegacyLanesLayer, () => Probed(probeLanes, DrawLaneCover));
+        UIGroup drums = SectionFor(EInstrument.Drums);
+        AddLegacyPart(drums, "FillInEffect", LegacyLanesLayer, _ => DrawFillInEffect());
+        AddLegacyPart(drums, "LaneFlush", LegacyLanesLayer, origin => Probed(probeLanes, () => tUpdateAndDraw_LaneFlushD(origin)));
+        AddLegacyPart(drums, "Chips", LegacyLanesLayer, origin => Probed(probeChips, () => DrawChips(origin, EInstrumentPart.DRUMS)));
+        AddLegacyPart(drums, "ProgressBar", LegacyLanesLayer, origin => Probed(probeLanes, () => actProgressBar.Draw(origin, EInstrumentPart.DRUMS, EInstrumentPart.DRUMS)));
+        AddLegacyPart(drums, "LaneCover", LegacyLanesLayer, origin => Probed(probeLanes, () => DrawLaneCover(origin)));
 
         //drawn over the judge lines and shutters
-        AddLegacyPart(PlayfieldGroup, "Pad", LegacyOverlayLayer, () => Probed(probeLanes, tUpdateAndDraw_DrumPad));
-        AddLegacyPart(HudGroup, "Score", LegacyOverlayLayer, () => Probed(probeScore, DrawScore));
-        AddLegacyPart(HudGroup, "Combo", LegacyOverlayLayer, () => Probed(probeCombo, tUpdateAndDraw_Combo));
-        AddLegacyPart(HudGroup, "Graph", LegacyOverlayLayer, () => Probed(probeGraph, tUpdateAndDraw_Graph));
-        AddLegacyPart(HudGroup, "PerformanceInformation", LegacyOverlayLayer, () => Probed(probeOverlay, tUpdateAndDraw_PerformanceInformation));
-        AddLegacyPart(PlayfieldGroup, "JudgementStrings", LegacyOverlayLayer, () => Probed(probeJudgement, DrawJudgementStrings));
+        AddLegacyPart(drums, "Pad", LegacyOverlayLayer, origin => Probed(probeLanes, () => tUpdateAndDraw_DrumPad(origin)));
+        AddLegacyPart(drums, "JudgementStrings", LegacyOverlayLayer, _ => Probed(probeJudgement, DrawJudgementStrings));
+        AddLegacyPart(drums, "Score", ScoreLayer, origin => Probed(probeScore, () => DrawScore(origin, EInstrumentPart.DRUMS)));
+        AddLegacyPart(drums, "Combo", ScoreLayer, origin => Probed(probeCombo, () => DrawCombo(origin, (int)EInstrumentPart.DRUMS)));
 
-        UIDrawable chipFire = LayoutGroup(PlayfieldGroup).AddChild<UIDrawable>(useNewDrumsFire ? new ActPerfNewFire(0) : new ClassicDrumsChipFire());
+        UIGroup hud = LayoutGroup(HudGroup);
+        AddLegacyPart(hud, "Graph", LegacyOverlayLayer, _ => Probed(probeGraph, tUpdateAndDraw_Graph));
+        AddLegacyPart(hud, "PerformanceInformation", LegacyOverlayLayer, _ => Probed(probeOverlay, tUpdateAndDraw_PerformanceInformation));
+
+        UIDrawable chipFire = drums.AddChild<UIDrawable>(useNewDrumsFire ? new ActPerfNewFire(0) : new ClassicDrumsChipFire());
         chipFire.name = "drumChipsFire";
         chipFire.renderOrder = EffectsLayer;
 
         actChipFireD = (IPerfFire)chipFire;
         actChipFireD.iPosY = CDTXMania.ConfigIni.bReverse.Drums ? nJudgeLinePosY.Drums - 183 : nJudgeLinePosY.Drums - 186;
 
-        actJudgeString.InitUI(LayoutGroup(PlayfieldGroup));
+        actJudgeString.InitUI(drums, 0, int.MaxValue, 0);
     }
 
     // Methods
@@ -285,9 +289,11 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
         AllocationProbe.Begin(probeKeyInput);
         tHandleKeyInput();
         AllocationProbe.End(probeKeyInput);
+
+        actScore.Update();
     }
 
-    private void DrawLaneCover()
+    private void DrawLaneCover(Matrix4x4 origin)
     {
         //シャッターを使うのはLC、LP、FT、RDレーンのみ。その他のレーンでは一切使用しない。
         //If Skill Mode is CLASSIC, always display lvl as Classic Style
@@ -302,36 +308,36 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
             if (txLaneCover != null)
             {
                 {
-                    txLaneCover.tDraw2D(295, 0, new RectangleF(0, 0, 70, 720));
+                    txLaneCover.tDraw2D(origin, 295, 0, new RectangleF(0, 0, 70, 720));
                 }
                 {
                     //レーンタイプでの入れ替わりあり
                     if (CDTXMania.ConfigIni.eLaneType.Drums == EType.A ||
                         CDTXMania.ConfigIni.eLaneType.Drums == EType.C)
                     {
-                        txLaneCover.tDraw2D(416, 0, new RectangleF(124, 0, 54, 720));
+                        txLaneCover.tDraw2D(origin, 416, 0, new RectangleF(124, 0, 54, 720));
                     }
                     else if (CDTXMania.ConfigIni.eLaneType.Drums == EType.B)
                     {
-                        txLaneCover.tDraw2D(470, 0, new RectangleF(124, 0, 54, 720));
+                        txLaneCover.tDraw2D(origin, 470, 0, new RectangleF(124, 0, 54, 720));
                     }
                     else if (CDTXMania.ConfigIni.eLaneType.Drums == EType.D)
                     {
-                        txLaneCover.tDraw2D(522, 0, new RectangleF(124, 0, 54, 720));
+                        txLaneCover.tDraw2D(origin, 522, 0, new RectangleF(124, 0, 54, 720));
                     }
                 }
                 {
-                    txLaneCover.tDraw2D(690, 0, new RectangleF(71, 0, 52, 720));
+                    txLaneCover.tDraw2D(origin, 690, 0, new RectangleF(71, 0, 52, 720));
                 }
                 {
                     //RDPositionで入れ替わり
                     if (CDTXMania.ConfigIni.eRDPosition == ERDPosition.RCRD)
                     {
-                        txLaneCover.tDraw2D(815, 0, new RectangleF(178, 0, 38, 720));
+                        txLaneCover.tDraw2D(origin, 815, 0, new RectangleF(178, 0, 38, 720));
                     }
                     else if (CDTXMania.ConfigIni.eRDPosition == ERDPosition.RDRC)
                     {
-                        txLaneCover.tDraw2D(743, 0, new RectangleF(178, 0, 38, 720));
+                        txLaneCover.tDraw2D(origin, 743, 0, new RectangleF(178, 0, 38, 720));
                     }
                 }
             }
@@ -476,9 +482,9 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
         }
     }
 
-    private void tUpdateAndDraw_DrumPad()  // t進行描画_ドラムパッド
+    private void tUpdateAndDraw_DrumPad(Matrix4x4 origin)
     {
-        actPad.OnUpdateAndDraw();
+        actPad.Draw(origin);
     }
 
 
@@ -507,13 +513,13 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
         }
     }
 
-    protected override void DrawChip_BarLine( CConfigIni configIni, ref CDTX dTX, ref CChip pChip )
+    protected override void DrawChip_BarLine( CConfigIni configIni, ref CDTX dTX, ref CChip pChip, EInstrumentPart part, Matrix4x4 origin )
     {
         int n小節番号plus1 = pChip.nPlaybackPosition / 384;
         if ( configIni.bShowPerformanceInformation && ( configIni.nLaneDisp.Drums == 0 || configIni.nLaneDisp.Drums == 1 ) )
         {
             int n小節番号 = n小節番号plus1 - 1;
-            CDTXMania.actDisplayString.tPrint( configIni.bGraph有効.Drums && configIni.bSmallGraph ? 828 : 858, (int) (configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + pChip.nDistanceFromBar.Drums) - 0x11) : ((nJudgeLinePosY.Drums - pChip.nDistanceFromBar.Drums) - 0x11)), CCharacterConsole.EFontType.White, n小節番号.ToString());
+            CDTXMania.actDisplayString.tPrint(origin, configIni.bGraph有効.Drums && configIni.bSmallGraph ? 828 : 858, (int) (configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + pChip.nDistanceFromBar.Drums) - 0x11) : ((nJudgeLinePosY.Drums - pChip.nDistanceFromBar.Drums) - 0x11)), CCharacterConsole.EFontType.White, n小節番号.ToString());
         }
         if (((configIni.nLaneDisp.Drums == 0 || configIni.nLaneDisp.Drums == 1) && pChip.bVisible) && (txChip != null))
         {
@@ -529,13 +535,13 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
                 l_xOffset = 72;
             }
 
-            txChip.tDraw2D(295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + pChip.nDistanceFromBar.Drums) - 1) : ((nJudgeLinePosY.Drums - pChip.nDistanceFromBar.Drums) - 1), new RectangleF(0, 769, l_drumPanelWidth, 2));
+            txChip.tDraw2D(origin, 295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + pChip.nDistanceFromBar.Drums) - 1) : ((nJudgeLinePosY.Drums - pChip.nDistanceFromBar.Drums) - 1), new RectangleF(0, 769, l_drumPanelWidth, 2));
         }
               
     }
     //移植完了。
 
-    protected override void tDraw_LoopLine(CConfigIni configIni, bool bIsEnd)
+    protected override void tDraw_LoopLine(CConfigIni configIni, bool bIsEnd, EInstrumentPart part, Matrix4x4 origin)
     {
         const double speed = 286;	// BPM150の時の1小節の長さ[dot]
         double ScrollSpeedDrums = (actScrollSpeed.db現在の譜面スクロール速度.Drums + 1.0) * 0.5 * 37.5 * speed / 60000.0;
@@ -543,7 +549,7 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
         int nDistanceFromBar = (int)(((bIsEnd ? LoopEndMs : LoopBeginMs) - AudioMixer.Timer.nCurrentTime) * ScrollSpeedDrums);
 
         //Display Loop Begin/Loop End text
-        CDTXMania.actDisplayString.tPrint(830, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + nDistanceFromBar) - 0x11) : ((nJudgeLinePosY.Drums - nDistanceFromBar) - 0x11), CCharacterConsole.EFontType.White, (bIsEnd ? "End loop" : "Begin loop"));
+        CDTXMania.actDisplayString.tPrint(origin, 830, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + nDistanceFromBar) - 0x11) : ((nJudgeLinePosY.Drums - nDistanceFromBar) - 0x11), CCharacterConsole.EFontType.White, (bIsEnd ? "End loop" : "Begin loop"));
         if ((configIni.nLaneDisp.Drums == 0 || configIni.nLaneDisp.Drums == 1))
         {
             int l_drumPanelWidth = 0x22f;
@@ -560,23 +566,23 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
 
             if (bIsEnd)
             {
-                txChip.tDraw2D(295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + nDistanceFromBar) - 1) : ((nJudgeLinePosY.Drums - nDistanceFromBar) - 1), new RectangleF(0, 769, l_drumPanelWidth, 2));
-                txChip.tDraw2D(295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + nDistanceFromBar) + 1) : ((nJudgeLinePosY.Drums - nDistanceFromBar) - 3), new RectangleF(0, 769, l_drumPanelWidth, 2));
-                txChip.tDraw2D(295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + nDistanceFromBar) + 3) : ((nJudgeLinePosY.Drums - nDistanceFromBar) - 5), new RectangleF(0, 769, l_drumPanelWidth, 2));
-                txChip.tDraw2D(295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + nDistanceFromBar) + 9) : ((nJudgeLinePosY.Drums - nDistanceFromBar) - 11), new RectangleF(0, 769, l_drumPanelWidth, 2));
-                txChip.tDraw2D(295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + nDistanceFromBar) + 11) : ((nJudgeLinePosY.Drums - nDistanceFromBar) - 13), new RectangleF(0, 769, l_drumPanelWidth, 2));
-                txChip.tDraw2D(295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + nDistanceFromBar) + 17) : ((nJudgeLinePosY.Drums - nDistanceFromBar) - 19), new RectangleF(0, 769, l_drumPanelWidth, 2));
-                txChip.tDraw2D(295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + nDistanceFromBar) + 23) : ((nJudgeLinePosY.Drums - nDistanceFromBar) - 25), new RectangleF(0, 769, l_drumPanelWidth, 2));
+                txChip.tDraw2D(origin, 295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + nDistanceFromBar) - 1) : ((nJudgeLinePosY.Drums - nDistanceFromBar) - 1), new RectangleF(0, 769, l_drumPanelWidth, 2));
+                txChip.tDraw2D(origin, 295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + nDistanceFromBar) + 1) : ((nJudgeLinePosY.Drums - nDistanceFromBar) - 3), new RectangleF(0, 769, l_drumPanelWidth, 2));
+                txChip.tDraw2D(origin, 295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + nDistanceFromBar) + 3) : ((nJudgeLinePosY.Drums - nDistanceFromBar) - 5), new RectangleF(0, 769, l_drumPanelWidth, 2));
+                txChip.tDraw2D(origin, 295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + nDistanceFromBar) + 9) : ((nJudgeLinePosY.Drums - nDistanceFromBar) - 11), new RectangleF(0, 769, l_drumPanelWidth, 2));
+                txChip.tDraw2D(origin, 295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + nDistanceFromBar) + 11) : ((nJudgeLinePosY.Drums - nDistanceFromBar) - 13), new RectangleF(0, 769, l_drumPanelWidth, 2));
+                txChip.tDraw2D(origin, 295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + nDistanceFromBar) + 17) : ((nJudgeLinePosY.Drums - nDistanceFromBar) - 19), new RectangleF(0, 769, l_drumPanelWidth, 2));
+                txChip.tDraw2D(origin, 295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + nDistanceFromBar) + 23) : ((nJudgeLinePosY.Drums - nDistanceFromBar) - 25), new RectangleF(0, 769, l_drumPanelWidth, 2));
             }
             else
             {
-                txChip.tDraw2D(295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + nDistanceFromBar) - 1) : ((nJudgeLinePosY.Drums - nDistanceFromBar) - 1), new RectangleF(0, 769, l_drumPanelWidth, 2));
-                txChip.tDraw2D(295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + nDistanceFromBar) - 3) : ((nJudgeLinePosY.Drums - nDistanceFromBar) + 1), new RectangleF(0, 769, l_drumPanelWidth, 2));
-                txChip.tDraw2D(295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + nDistanceFromBar) - 5) : ((nJudgeLinePosY.Drums - nDistanceFromBar) + 3), new RectangleF(0, 769, l_drumPanelWidth, 2));
-                txChip.tDraw2D(295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + nDistanceFromBar) - 11) : ((nJudgeLinePosY.Drums - nDistanceFromBar) + 9), new RectangleF(0, 769, l_drumPanelWidth, 2));
-                txChip.tDraw2D(295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + nDistanceFromBar) - 13) : ((nJudgeLinePosY.Drums - nDistanceFromBar) + 11), new RectangleF(0, 769, l_drumPanelWidth, 2));
-                txChip.tDraw2D(295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + nDistanceFromBar) - 19) : ((nJudgeLinePosY.Drums - nDistanceFromBar) + 17), new RectangleF(0, 769, l_drumPanelWidth, 2));
-                txChip.tDraw2D(295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + nDistanceFromBar) - 25) : ((nJudgeLinePosY.Drums - nDistanceFromBar) + 23), new RectangleF(0, 769, l_drumPanelWidth, 2));
+                txChip.tDraw2D(origin, 295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + nDistanceFromBar) - 1) : ((nJudgeLinePosY.Drums - nDistanceFromBar) - 1), new RectangleF(0, 769, l_drumPanelWidth, 2));
+                txChip.tDraw2D(origin, 295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + nDistanceFromBar) - 3) : ((nJudgeLinePosY.Drums - nDistanceFromBar) + 1), new RectangleF(0, 769, l_drumPanelWidth, 2));
+                txChip.tDraw2D(origin, 295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + nDistanceFromBar) - 5) : ((nJudgeLinePosY.Drums - nDistanceFromBar) + 3), new RectangleF(0, 769, l_drumPanelWidth, 2));
+                txChip.tDraw2D(origin, 295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + nDistanceFromBar) - 11) : ((nJudgeLinePosY.Drums - nDistanceFromBar) + 9), new RectangleF(0, 769, l_drumPanelWidth, 2));
+                txChip.tDraw2D(origin, 295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + nDistanceFromBar) - 13) : ((nJudgeLinePosY.Drums - nDistanceFromBar) + 11), new RectangleF(0, 769, l_drumPanelWidth, 2));
+                txChip.tDraw2D(origin, 295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + nDistanceFromBar) - 19) : ((nJudgeLinePosY.Drums - nDistanceFromBar) + 17), new RectangleF(0, 769, l_drumPanelWidth, 2));
+                txChip.tDraw2D(origin, 295 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + nDistanceFromBar) - 25) : ((nJudgeLinePosY.Drums - nDistanceFromBar) + 23), new RectangleF(0, 769, l_drumPanelWidth, 2));
             }
         }
     }

@@ -9,6 +9,12 @@ public sealed class PerformanceStats
 {
     [DataField] public int Instrument { get; set; }
 
+    [DataField] public EInstrument Player
+    {
+        get => (EInstrument)Instrument;
+        set => Instrument = (int)value;
+    }
+
     [DataField] public string InstrumentName => Instrument switch { 0 => "DRUM", 1 => "GUITAR", _ => "BASS" };
 
     //null outside a performance screen, eg in the editor
@@ -114,9 +120,9 @@ public sealed class PerformanceStats
 
     private bool IsReversed => CDTXMania.ConfigIni.bReverse[Instrument];
 
-    public bool ShowsPanel => CDTXMania.ConfigIni.nInfoType == 1 && IsPlayed && !HiddenBesideTheOther;
+    [DataField] public bool ShowsPanel => CDTXMania.ConfigIni.nInfoType == 1 && IsPlayed && !HiddenBesideTheOther;
 
-    public bool HasLane => IsPlayed && Instrument switch
+    [DataField] public bool HasLane => IsPlayed && Instrument switch
     {
         1 => CDTXMania.DTX?.bHasChips.Guitar ?? false,
         2 => CDTXMania.DTX?.bHasChips.Bass ?? false,

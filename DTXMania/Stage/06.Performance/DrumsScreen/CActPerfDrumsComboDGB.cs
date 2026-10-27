@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System.Numerics;
+using System.Drawing;
 using DTXMania.Core;
 using FDK;
 
@@ -62,17 +63,17 @@ internal class CActPerfDrumsComboDGB : CActPerfCommonCombo
         }
     }
 
-    protected override void tDrawCombo_Guitar( int nCombo値, int nジャンプインデックス )
+    protected override void tDrawCombo_Guitar( Matrix4x4 origin, int nCombo値, int nジャンプインデックス )
     {
     }
-    protected override void tDrawCombo_Drums( int nCombo値, int nジャンプインデックス )
+    protected override void tDrawCombo_Drums( Matrix4x4 origin, int nCombo値, int nジャンプインデックス )
     {
         if ( CDTXMania.ConfigIni.bドラムコンボ文字の表示 )
         {
             if (CDTXMania.ConfigIni.bGraph有効.Drums && CDTXMania.ConfigIni.bSmallGraph)
-                base.tDrawCombo_Drums(nCombo値, nジャンプインデックス, 1275, 60);
+                base.tDrawCombo_Drums(origin, nCombo値, nジャンプインデックス, 1275, 60);
             else
-                base.tDrawCombo_Drums(nCombo値, nジャンプインデックス, 1245, 60);
+                base.tDrawCombo_Drums(origin, nCombo値, nジャンプインデックス, 1245, 60);
         }
 
         n火薬カウント = (nCombo値 / 100);
@@ -101,7 +102,7 @@ internal class CActPerfDrumsComboDGB : CActPerfCommonCombo
                     }
                     if ( txComboBom != null && CDTXMania.ConfigIni.bドラムコンボ文字の表示 != false )
                     {
-                        txComboBom.tDraw2D(x, y, new RectangleF(0, (340 * num1), 360, 340));
+                        txComboBom.tDraw2D(origin, x, y, new RectangleF(0, (340 * num1), 360, 340));
                         //todo: draw at 1.5x scale
                     }
                 }
@@ -109,7 +110,7 @@ internal class CActPerfDrumsComboDGB : CActPerfCommonCombo
         }
 
     }
-    protected override void tDrawCombo_Bass( int nCombo値, int nジャンプインデックス )
+    protected override void tDrawCombo_Bass( Matrix4x4 origin, int nCombo値, int nジャンプインデックス )
     {
     }
 }

@@ -1,4 +1,5 @@
-﻿using DTXMania.Core;
+﻿using System.Numerics;
+using DTXMania.Core;
 
 namespace DTXMania;
 
@@ -18,7 +19,7 @@ internal class CActPerfDrumsScore : CActPerfCommonScore
         base.OnActivate();
     }
 
-    public override unsafe int OnUpdateAndDraw()
+    public override void Update()
     {
         if (bActivated)
         {
@@ -44,9 +45,15 @@ internal class CActPerfDrumsScore : CActPerfCommonScore
                     n進行用タイマ += 10;
                 }
             }
-            tDrawScore(n本体X[0], n本体Y, n現在表示中のスコア[0]);
         }
-        return 0;
+    }
+
+    public override void Draw(Matrix4x4 origin, EInstrumentPart part)
+    {
+        if (bActivated)
+        {
+            tDrawScore(origin, n本体X[0], n本体Y, n現在表示中のスコア[0]);
+        }
     }
     #region [ private ]
     //-----------------

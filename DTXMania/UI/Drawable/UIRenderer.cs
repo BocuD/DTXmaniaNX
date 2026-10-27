@@ -52,34 +52,39 @@ public abstract class BaseTexture : IDisposable
     //stubs for non recreated Device based render code
     private Matrix4x4 scaleMatrix => UICanvas.toWindow;
     
-    public void tDraw2D(float x, float y)
+    public void tDraw2D(float x, float y) => tDraw2D(scaleMatrix, x, y);
+
+    public void tDraw2D(Matrix4x4 origin, float x, float y)
     {
-        Matrix4x4 transformMatrix = Matrix4x4.CreateTranslation(x, y, 0);
-        tDraw2DMatrix(transformMatrix * scaleMatrix);
+        tDraw2DMatrix(Matrix4x4.CreateTranslation(x, y, 0) * origin);
     }
     
-    public void tDraw2D(float x, float y, Color4 color)
+    public void tDraw2D(float x, float y, Color4 color) => tDraw2D(scaleMatrix, x, y, color);
+
+    public void tDraw2D(Matrix4x4 origin, float x, float y, Color4 color)
     {
-        Matrix4x4 transformMatrix = Matrix4x4.CreateTranslation(x, y, 0);
-        tDraw2DMatrix(transformMatrix * scaleMatrix, new Vector2(Width, Height), new RectangleF(0, 0, Width, Height), color);
+        tDraw2DMatrix(Matrix4x4.CreateTranslation(x, y, 0) * origin, new Vector2(Width, Height), new RectangleF(0, 0, Width, Height), color);
     }
     
-    public void tDraw2D(float x, float y, RectangleF clipRect)
+    public void tDraw2D(float x, float y, RectangleF clipRect) => tDraw2D(scaleMatrix, x, y, clipRect);
+
+    public void tDraw2D(Matrix4x4 origin, float x, float y, RectangleF clipRect)
     {
-        Matrix4x4 transformMatrix = Matrix4x4.CreateTranslation(x, y, 0);
-        tDraw2DMatrix(transformMatrix * scaleMatrix, new Vector2(clipRect.Width, clipRect.Height), clipRect);
+        tDraw2DMatrix(Matrix4x4.CreateTranslation(x, y, 0) * origin, new Vector2(clipRect.Width, clipRect.Height), clipRect);
     }
     
-    public void tDraw2D(float x, float y, RectangleF clipRect, Color4 color)
+    public void tDraw2D(float x, float y, RectangleF clipRect, Color4 color) => tDraw2D(scaleMatrix, x, y, clipRect, color);
+
+    public void tDraw2D(Matrix4x4 origin, float x, float y, RectangleF clipRect, Color4 color)
     {
-        Matrix4x4 transformMatrix = Matrix4x4.CreateTranslation(x, y, 0);
-        tDraw2DMatrix(transformMatrix * scaleMatrix, new Vector2(clipRect.Width, clipRect.Height), clipRect, color);
+        tDraw2DMatrix(Matrix4x4.CreateTranslation(x, y, 0) * origin, new Vector2(clipRect.Width, clipRect.Height), clipRect, color);
     }
     
-    public void tDraw2D(float x, float y, RectangleF clipRect, Color4 color, Vector2 size)
+    public void tDraw2D(float x, float y, RectangleF clipRect, Color4 color, Vector2 size) => tDraw2D(scaleMatrix, x, y, clipRect, color, size);
+
+    public void tDraw2D(Matrix4x4 origin, float x, float y, RectangleF clipRect, Color4 color, Vector2 size)
     {
-        Matrix4x4 transformMatrix = Matrix4x4.CreateTranslation(x, y, 0);
-        tDraw2DMatrix(transformMatrix * scaleMatrix, size, clipRect, color);
+        tDraw2DMatrix(Matrix4x4.CreateTranslation(x, y, 0) * origin, size, clipRect, color);
     }
     
     public void tDraw2DMatrix(Matrix4x4 transformMatrix)

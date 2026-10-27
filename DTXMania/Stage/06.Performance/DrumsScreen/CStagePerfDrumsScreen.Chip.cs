@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Numerics;
+using System.Diagnostics;
 using System.Drawing;
 using DTXMania.Core;
 using DTXMania.Core.Framework;
@@ -14,11 +15,11 @@ internal partial class CStagePerfDrumsScreen
         ApplyHiddenSudden(pChip, pChip.nDistanceFromBar.Drums, CDTXMania.ConfigIni.nHidSud.Drums, 200, 100, 50.0);
     }
 
-    protected override void DrawChip_PatternOnly_Drums(CConfigIni configIni, ref CDTX dTX, ref CChip pChip)
+    protected override void DrawChip_PatternOnly_Drums(CConfigIni configIni, ref CDTX dTX, ref CChip pChip, Matrix4x4 origin)
     {
         if (configIni.bDrumsEnabled && !pChip.bHit && pChip.bVisible)
         {
-            DrawDrumChip(pChip, 128 + ctChipPatternAnimation.Drums.nCurrentValue * 64, false);
+            DrawDrumChip(pChip, 128 + ctChipPatternAnimation.Drums.nCurrentValue * 64, false, origin);
         }
     }
 
@@ -35,11 +36,11 @@ internal partial class CStagePerfDrumsScreen
         }
     }
 
-    protected override void DrawChip_Drums( CConfigIni configIni, ref CDTX dTX, ref CChip pChip )
+    protected override void DrawChip_Drums( CConfigIni configIni, ref CDTX dTX, ref CChip pChip, Matrix4x4 origin )
     {
         if (configIni.bDrumsEnabled && !pChip.bHit && pChip.bVisible)
         {
-            DrawDrumChip(pChip, 0, pChip.bBonusChip);
+            DrawDrumChip(pChip, 0, pChip.bBonusChip, origin);
         }
     }
 
@@ -63,7 +64,7 @@ internal partial class CStagePerfDrumsScreen
         _ => null
     };
 
-    private void DrawDrumChip(CChip chip, int row, bool bonus)
+    private void DrawDrumChip(CChip chip, int row, bool bonus, Matrix4x4 origin)
     {
         if (txChip == null || ArtFor(chip.nChannelNumber) is not { } art)
         {
@@ -77,10 +78,10 @@ internal partial class CStagePerfDrumsScreen
         Color4 col = Color4.White;
         col.Alpha = chip.nTransparency / 255.0f;
 
-        txChip.tDraw2D(x, y, new RectangleF(art.SourceX, row, art.SourceWidth, 64), col);
+        txChip.tDraw2D(origin, x, y, new RectangleF(art.SourceX, row, art.SourceWidth, 64), col);
         if (bonus)
         {
-            txChip.tDraw2D(x, y, new RectangleF(art.SourceX, 64, art.SourceWidth, 64), col);
+            txChip.tDraw2D(origin, x, y, new RectangleF(art.SourceX, 64, art.SourceWidth, 64), col);
         }
     }
 

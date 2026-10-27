@@ -176,6 +176,13 @@ public enum EInstrument
 	Guitar2
 }
 
+public struct PlayerFlags
+{
+	[DataField] public bool Drums;
+	[DataField] public bool Guitar1;
+	[DataField] public bool Guitar2;
+}
+
 public enum EChartPart
 {
 	Drums,

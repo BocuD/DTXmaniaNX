@@ -24,8 +24,6 @@ public class PerformanceStatusPanel : PerformanceElement
         size = new Vector2(268, 446);
     }
 
-    protected override bool IsShown => stats.ShowsPanel;
-
     protected override string ComponentName(EInstrumentPart part) => "PerformanceStatus";
 
     private static readonly Digits Count = new(26f, 0.93f, 0.2f, 1.6f);

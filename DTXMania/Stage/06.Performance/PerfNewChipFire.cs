@@ -119,11 +119,11 @@ public class ActPerfNewFire : UIGroup, IPerfFire
             case 2:
                 Vector2[] bassPositions =
                 [
-                    new(978, 0),
-                    new(1017, 0),
-                    new(1056, 0),
-                    new(1095, 0),
-                    new(1134, 0)
+                    new(107, 0),
+                    new(146, 0),
+                    new(185, 0),
+                    new(224, 0),
+                    new(264, 0)
                 ];
                 stLaneSize = new STLaneSize[bassPositions.Length];
                 for (ELane lane = ELane.BsR; lane <= ELane.BsP; lane++)

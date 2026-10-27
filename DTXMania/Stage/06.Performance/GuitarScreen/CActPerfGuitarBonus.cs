@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System.Numerics;
+using System.Drawing;
 using DTXMania.Core;
 using DTXMania.UI.Drawable;
 using FDK;
@@ -37,27 +38,20 @@ internal class CActPerfGuitarBonus : CActivity
         }
     }
 
-    public override unsafe int OnUpdateAndDraw()
+    public void Draw(Matrix4x4 origin, EInstrumentPart part)
     {
-        if (bActivated)
+        if (!bActivated)
         {
-            if (bJustStartedUpdate)
-            {
-                bJustStartedUpdate = false;
-            }
-
-            ctBonusScoreAnimationCounter[(int)EInstrumentPart.GUITAR].tUpdate();
-            ctBonusScoreAnimationCounter[(int)EInstrumentPart.BASS].tUpdate();
-
-            if (CDTXMania.ConfigIni.bShowScore)
-            {
-                drawBonusScoreAnimation(EInstrumentPart.GUITAR, new Point(333, 45));
-                drawBonusScoreAnimation(EInstrumentPart.BASS, new Point(885, 45));                    
-            }
-
-
+            return;
         }
-        return 0;
+
+        bJustStartedUpdate = false;
+        ctBonusScoreAnimationCounter[(int)part].tUpdate();
+
+        if (CDTXMania.ConfigIni.bShowScore)
+        {
+            drawBonusScoreAnimation(origin, part, new Point(333, 45));
+        }
     }
 
     public void startBonus(EInstrumentPart eInstrument)
@@ -65,13 +59,13 @@ internal class CActPerfGuitarBonus : CActivity
         ctBonusScoreAnimationCounter[(int)eInstrument].tStart(0, 500, 1, CDTXMania.Timer);
     }
 
-    private void drawBonusScoreAnimation(EInstrumentPart eInstrumentPart, Point pt)
+    private void drawBonusScoreAnimation(Matrix4x4 origin, EInstrumentPart eInstrumentPart, Point pt)
     {
         if (!ctBonusScoreAnimationCounter[(int)eInstrumentPart].bReachedEndValue 
             && txBonus100 != null)
         {
             int nCounterValue = ctBonusScoreAnimationCounter[(int)eInstrumentPart].nCurrentValue;                
-            txBonus100.tDraw2D(pt.X, pt.Y - nCounterValue / 25);
+            txBonus100.tDraw2D(origin, pt.X, pt.Y - nCounterValue / 25);
         }
     }
 

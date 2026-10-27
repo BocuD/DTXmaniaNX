@@ -1,3 +1,4 @@
+using System.Numerics;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using DTXMania.Core;
@@ -132,10 +133,10 @@ internal class CActPerfCommonCombo : CActivity
 
     // メソッド
 
-    protected virtual void tDrawCombo_Drums(int nCombo値, int nジャンプインデックス)
+    protected virtual void tDrawCombo_Drums(Matrix4x4 origin, int nCombo値, int nジャンプインデックス)
     {
     }
-    protected virtual void tDrawCombo_Drums(int nCombo値, int nジャンプインデックス, int nX中央位置px, int nY上辺位置px)
+    protected virtual void tDrawCombo_Drums(Matrix4x4 origin, int nCombo値, int nジャンプインデックス, int nX中央位置px, int nY上辺位置px)
     {
 
         #region [ 事前チェック。]
@@ -219,7 +220,7 @@ internal class CActPerfCommonCombo : CActivity
             //-----------------
             #endregion
 
-            txCOMBOドラム.tDraw2D(nコンボx, nコンボy + y動作差分, new RectangleF(0, 320, 250, 60));
+            txCOMBOドラム.tDraw2D(origin, nコンボx, nコンボy + y動作差分, new RectangleF(0, 320, 250, 60));
         }
 
         // COMBO値を1の位から順に表示。
@@ -263,7 +264,7 @@ internal class CActPerfCommonCombo : CActivity
             {
                 if ( txCOMBOドラム != null )
                 {
-                    txCOMBOドラム.tDraw2D(x, y + y動作差分,
+                    txCOMBOドラム.tDraw2D(origin, x, y + y動作差分,
                         new RectangleF((n位の数[i] % 5) * nドラムコンボの幅, (n位の数[i] / 5) * nドラムコンボの高さ, nドラムコンボの幅, nドラムコンボの高さ));
                 }
             }
@@ -276,7 +277,7 @@ internal class CActPerfCommonCombo : CActivity
                 }
                 if ( txCOMBOドラム1000 != null )
                 {
-                    txCOMBOドラム1000.tDraw2D(x, y + y動作差分,
+                    txCOMBOドラム1000.tDraw2D(origin, x, y + y動作差分,
                         new RectangleF((n位の数[i] % 5) * 96, (n位の数[i] / 5) * 128, 96, 128));
                 }
             }
@@ -286,13 +287,13 @@ internal class CActPerfCommonCombo : CActivity
         //-----------------
         #endregion
     }
-    protected virtual void tDrawCombo_Guitar(int nCombo値, int nジャンプインデックス)
+    protected virtual void tDrawCombo_Guitar(Matrix4x4 origin, int nCombo値, int nジャンプインデックス)
     {
     }
-    protected virtual void tDrawCombo_Bass(int nCombo値, int nジャンプインデックス)
+    protected virtual void tDrawCombo_Bass(Matrix4x4 origin, int nCombo値, int nジャンプインデックス)
     {
     }
-    protected void tDrawCombo_Guitar(int nCombo値, int nジャンプインデックス, int nコンボx, int nコンボy)
+    protected void tDrawCombo_Guitar(Matrix4x4 origin, int nCombo値, int nジャンプインデックス, int nコンボx, int nコンボy)
     {
         #region [ 事前チェック。]
         //-----------------
@@ -352,7 +353,7 @@ internal class CActPerfCommonCombo : CActivity
         //-----------------
         int x = nコンボx - 100; // -((int)((nギターコンボのCOMBO文字の幅 * f拡大率) / 2.0f));
 
-        txCOMBOギター.tDraw2D(x, y, new RectangleF(0, 230, 200, 64));
+        txCOMBOギター.tDraw2D(origin, x, y, new RectangleF(0, 230, 200, 64));
         //-----------------
         #endregion
 
@@ -371,7 +372,7 @@ internal class CActPerfCommonCombo : CActivity
             }
             if (txCOMBOギター != null)
             {
-                txCOMBOギター.tDraw2D(x - ((int)((nギターコンボの幅) / 2.0f)),
+                txCOMBOギター.tDraw2D(origin, x - ((int)((nギターコンボの幅) / 2.0f)),
                     y,
                     new RectangleF((n位の数[i] % 5) * nギターコンボの幅, (n位の数[i] / 5) * nギターコンボの高さ, nギターコンボの幅, nギターコンボの高さ));
             }
@@ -379,7 +380,7 @@ internal class CActPerfCommonCombo : CActivity
             #endregion
         }
     }
-    protected void tDrawCombo_Bass(int nCombo値, int nジャンプインデックス, int nコンボx, int nコンボy)
+    protected void tDrawCombo_Bass(Matrix4x4 origin, int nCombo値, int nジャンプインデックス, int nコンボx, int nコンボy)
     {
         #region [ 事前チェック。]
         //-----------------
@@ -438,7 +439,7 @@ internal class CActPerfCommonCombo : CActivity
         //-----------------
         int x = nコンボx - 95; // -((int)((nギターコンボのCOMBO文字の幅 * f拡大率) / 2.0f));
 
-        txCOMBOギター.tDraw2D(x, y, new RectangleF(0, 230, 200, 64));
+        txCOMBOギター.tDraw2D(origin, x, y, new RectangleF(0, 230, 200, 64));
         //-----------------
         #endregion
 
@@ -465,7 +466,7 @@ internal class CActPerfCommonCombo : CActivity
             }
             if (txCOMBOギター != null)
             {
-                txCOMBOギター.tDraw2D(x - ((int)((nギターコンボの幅) / 2.0f)),
+                txCOMBOギター.tDraw2D(origin, x - ((int)((nギターコンボの幅) / 2.0f)),
                     y,
                     new RectangleF((n位の数[i] % 5) * nギターコンボの幅, (n位の数[i] / 5) * nギターコンボの高さ, nギターコンボの幅, nギターコンボの高さ));
             }
@@ -512,13 +513,18 @@ internal class CActPerfCommonCombo : CActivity
         base.OnManagedCreateResources();
     }
 
-    public override int OnUpdateAndDraw()
+    public void Draw(Matrix4x4 origin, int part)
     {
         if (!bActivated)
-            return 0;
+            return;
 
         for (int i = 2; i >= 0; i--)
         {
+            if (i != part)
+            {
+                continue;
+            }
+
             EEvent e今回の状態遷移イベント;
 
             #region [ 前回と今回の COMBO 値から、e今回の状態遷移イベントを決定する。]
@@ -607,15 +613,15 @@ internal class CActPerfCommonCombo : CActivity
                     switch (i)
                     {
                         case 0:
-                            tDrawCombo_Drums(parts[ i ].Combo, status[i].nジャンプインデックス値);
+                            tDrawCombo_Drums(origin, parts[ i ].Combo, status[i].nジャンプインデックス値);
                             break;
 
                         case 1:
-                            tDrawCombo_Guitar(parts[ i ].Combo, status[i].nジャンプインデックス値);
+                            tDrawCombo_Guitar(origin, parts[ i ].Combo, status[i].nジャンプインデックス値);
                             break;
 
                         case 2:
-                            tDrawCombo_Bass(parts[ i ].Combo, status[i].nジャンプインデックス値);
+                            tDrawCombo_Bass(origin, parts[ i ].Combo, status[i].nジャンプインデックス値);
                             break;
                     }
                     break;
@@ -643,8 +649,6 @@ internal class CActPerfCommonCombo : CActivity
                 #endregion
             }
         }
-
-        return 0;
     }
 
     public void tComboAnime( EInstrumentPart ePart )

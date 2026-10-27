@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System.Numerics;
+using System.Drawing;
 using DTXMania.Core;
 using DTXMania.Core.Framework;
 using DTXMania.UI.Drawable;
@@ -70,11 +71,11 @@ internal class CActPerfDrumsLaneFlushD : CActivity
 
     private static bool ShowsLaneLines => CDTXMania.ConfigIni.nLaneDisp.Drums is 0 or 2;
 
-    public override int OnUpdateAndDraw()
+    public void Draw(Matrix4x4 origin)
     {
         if (!bActivated)
         {
-            return 0;
+            return;
         }
 
         foreach (CCounter? counter in ctFlush)
@@ -89,7 +90,7 @@ internal class CActPerfDrumsLaneFlushD : CActivity
             }
         }
 
-        DrawLaneLines();
+        DrawLaneLines(origin);
 
         if (CDTXMania.ConfigIni.bLaneFlush.Drums)
         {
@@ -97,15 +98,15 @@ internal class CActPerfDrumsLaneFlushD : CActivity
             {
                 if (ctFlush[lane] is { bStopped: false } counter)
                 {
-                    DrawFlush(lane, counter.nCurrentValue);
+                    DrawFlush(origin, lane, counter.nCurrentValue);
                 }
             }
         }
 
-        return 0;
+        return;
     }
 
-    private void DrawLaneLines()
+    private void DrawLaneLines(Matrix4x4 origin)
     {
         if (txLine == null)
         {
@@ -135,18 +136,18 @@ internal class CActPerfDrumsLaneFlushD : CActivity
                         EType.C => (367, 447),
                         _ => (295, 558)
                     };
-                    txLine.tDraw2D(x, 0, new RectangleF(0, 0, width, 720), color);
+                    txLine.tDraw2D(origin, x, 0, new RectangleF(0, 0, width, 720), color);
                 }
                 continue;
             }
 
             (int destX, int sourceX, int sourceWidth) = DrumLanes.LineSlice(LineLanes[index]);
-            txLine.tDraw2D(destX, 0, new RectangleF(sourceX, 0, sourceWidth, 720), color);
+            txLine.tDraw2D(origin, destX, 0, new RectangleF(sourceX, 0, sourceWidth, 720), color);
         }
     }
 
     //three 42px columns of the texture are layered on top of each other, tiled across the lane width
-    private void DrawFlush(int lane, int progress)
+    private void DrawFlush(Matrix4x4 origin, int lane, int progress)
     {
         (int x, int right) = DrumLanes.Inner((ELane)lane);
         int width = right - x;
@@ -173,7 +174,7 @@ internal class CActPerfDrumsLaneFlushD : CActivity
         {
             for (int offset = 0; offset < width; offset += 42)
             {
-                texture.tDraw2D(x + offset, y, new RectangleF(layer * 42, 0, Math.Min(width - offset, 42), 128), color);
+                texture.tDraw2D(origin, x + offset, y, new RectangleF(layer * 42, 0, Math.Min(width - offset, 42), 128), color);
             }
         }
     }

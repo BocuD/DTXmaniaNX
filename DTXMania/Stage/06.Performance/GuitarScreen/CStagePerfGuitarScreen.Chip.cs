@@ -24,7 +24,7 @@ internal partial class CStagePerfGuitarScreen
 		}
 	}
 
-	protected override void DrawChip_GuitarBass(CConfigIni configIni, ref CDTX dTX, ref CChip pChip, EInstrumentPart inst)
+	protected override void DrawChip_GuitarBass(CConfigIni configIni, ref CDTX dTX, ref CChip pChip, EInstrumentPart inst, Matrix4x4 origin)
 	{
 		if (!configIni.bGuitarEnabled)
 		{
@@ -66,21 +66,14 @@ internal partial class CStagePerfGuitarScreen
 			{
 				if (bChipIsOpen)
 				{
-					int xo = (inst == EInstrumentPart.GUITAR) ? 88 : 959;
+					int xo = 88;
 					Color4 col = Color4.White;
 					col.Alpha = pChip.nTransparency / 255.0f;
-					txChip.tDraw2D(xo, y - 2, new RectangleF(0, 10, 196, 10), col);
+					txChip.tDraw2D(origin, xo, y - 2, new RectangleF(0, 10, 196, 10), col);
 				}
 
 				//Refactored code for drawing
-				int[] nChipXPos =
-				[
-					inst == EInstrumentPart.GUITAR ? 88 : 959,
-					inst == EInstrumentPart.GUITAR ? 127 : 998,
-					inst == EInstrumentPart.GUITAR ? 166 : 1036,
-					inst == EInstrumentPart.GUITAR ? 205 : 1076,
-					inst == EInstrumentPart.GUITAR ? 244 : 1115
-				];
+				int[] nChipXPos = [88, 127, 166, 205, 244];
 
 				if (inst == EInstrumentPart.GUITAR && CDTXMania.ConfigIni.bLeft.Guitar)
 				{
@@ -127,8 +120,8 @@ internal partial class CStagePerfGuitarScreen
 								//normal chip draw i think (?)
 								////yeeeep
 								/// 
-								//txChip.tDraw2D(num8, y - 10 / 2, rect1, color);
-								txNote[i].tDraw2D(num8, y - 10 / 2.0f, color);
+								//txChip.tDraw2D(origin, num8, y - 10 / 2, rect1, color);
+								txNote[i].tDraw2D(origin, num8, y - 10 / 2.0f, color);
 							}
 
 							if (pChip.bIsLongNote)
@@ -144,7 +137,7 @@ internal partial class CStagePerfGuitarScreen
 									col.Alpha = 0.25f;
 								}
 								
-								txHoldNoteBg[i].tDraw2D(num8,
+								txHoldNoteBg[i].tDraw2D(origin, num8,
 									y - (CDTXMania.ConfigIni.bReverse[(int)inst] ? noteLength : 0),
 									new RectangleF(0, 0, 36, 8), col,
 									new Vector2(36, noteLength));
@@ -154,7 +147,7 @@ internal partial class CStagePerfGuitarScreen
 								holdNote.clipHeight = noteLength;
 								holdNote.position.Y = y - (CDTXMania.ConfigIni.bReverse[(int)inst] ? noteLength : 0.0f);
 								
-								holdNote.Draw(ui.LocalTransformMatrix, pChip.bHit, pChip.bIsHittingLongNote);
+								holdNote.Draw(origin, pChip.bHit, pChip.bIsHittingLongNote);
 							}
 						}
 					}

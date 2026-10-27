@@ -91,7 +91,7 @@ internal abstract class CStagePerfCommonScreen : CStage
         ui.dataContext = context;
     }
 
-    protected const string PlayfieldGroup = "Playfield";
+    protected const string PlayersGroup = "Players";
     protected const string HudGroup = "HUD";
     protected const string OverlaysGroup = "Overlays";
 
@@ -103,7 +103,8 @@ internal abstract class CStagePerfCommonScreen : CStage
     internal const int LaneOverlayLayer = 3;
     internal const int LegacyOverlayLayer = 4;
     internal const int EffectsLayer = 5;
-    internal const int PanelLayer = 6;
+    internal const int ScoreLayer = 6;
+    internal const int PanelLayer = 7;
 
     public override void BuildDefaultLayout()
     {
@@ -138,59 +139,31 @@ internal abstract class CStagePerfCommonScreen : CStage
         UIGroup intoGuitarSlot = GraphShift(intoBassSlot, "Into Guitar Graph", "Guitar", -267);
         Window(intoGuitarSlot, "Window", 380, 50, "7_ClipPanelC.png", 30, 5, new Vector2(460, 258));
 
-        UIGroup playfield = Group(PlayfieldGroup, 1);
         UIGroup hud = Group(HudGroup, 2);
-        UIGroup overlays = Group(OverlaysGroup, 3);
-
-        Add(playfield, new PerformanceLane(EInstrumentPart.GUITAR), "GuitarLane", 67, 42, LaneArtLayer);
-        Add(playfield, new PerformanceLane(EInstrumentPart.BASS), "BassLane", 937, 42, LaneArtLayer);
-
-        Add(playfield, new PerformanceLaneCaps(EInstrumentPart.GUITAR), "GuitarLaneCaps", 67, 42, LaneOverlayLayer);
-        Add(playfield, new PerformanceLaneCaps(EInstrumentPart.BASS), "BassLaneCaps", 937, 42, LaneOverlayLayer);
-
-        Add(playfield, new PerformanceShutters(EInstrumentPart.DRUMS), "DrumsShutters", 295, 0, LaneOverlayLayer);
-        Add(playfield, new PerformanceShutters(EInstrumentPart.GUITAR), "GuitarShutters", 80, 0, LaneOverlayLayer);
-        Add(playfield, new PerformanceShutters(EInstrumentPart.BASS), "BassShutters", 950, 0, LaneOverlayLayer);
-
-        Add(playfield, new PerformanceJudgeLine(EInstrumentPart.DRUMS), "DrumsJudgeLine", 295, 0, LaneOverlayLayer);
-        Add(playfield, new PerformanceJudgeLine(EInstrumentPart.GUITAR), "GuitarJudgeLine", 80, 0, LaneOverlayLayer);
-        Add(playfield, new PerformanceJudgeLine(EInstrumentPart.BASS), "BassJudgeLine", 950, 0, LaneOverlayLayer);
+        UIGroup overlays = Group(OverlaysGroup, 4);
 
         InfoBox info = hud.AddChild(new InfoBox());
         info.position = new Vector3(1277, 3, 0);
         info.renderOrder = LaneArtLayer;
 
-        UIGroup perspective = hud.AddChild(new UIGroup("Perspective"));
-        perspective.size = new Vector2(1280, 720);
-        perspective.parentAnchor = new Vector2(0.5f, 0.5f);
-        perspective.pivot = new Vector2(0.5f, 0.5f);
-        perspective.perspective = 1410;
-        perspective.vanishingPoint = new Vector2(640, 360);
-        perspective.renderOrder = PanelLayer;
+        //with two guitar players it would cover the right player's lane
+        info.bindings.Add(new UIBinding("isVisible", "Game.Playing.Guitar2") { invert = true });
 
-        PerformanceStatusPanel drumsStatus = perspective.AddChild(new PerformanceStatusPanel(EInstrumentPart.DRUMS));
-        drumsStatus.name = "DrumsStatus";
-        
-        //3d version
-        //drumsStatus.position = new Vector3(86, 186, -39);
-        //drumsStatus.rotation = new Vector3(0, -61f * MathF.PI / 180, 0);
-
-        //2d version
-        drumsStatus.position = new Vector3(14, 237, 0);
-        
-        Add(hud, new PerformanceStatusPanel(EInstrumentPart.GUITAR), "GuitarStatus", 373, 254, PanelLayer);
-        Add(hud, new PerformanceStatusPanel(EInstrumentPart.BASS), "BassStatus", 665, 254, PanelLayer);
-
-        PerformanceElement drumsGauge = Add(hud, new PerformanceGauge(EInstrumentPart.DRUMS), "DrumsGauge", 294, 626, PanelLayer);
-        drumsGauge.bindings.Add(new UIBinding("position.Y", "Config.Reverse.Drums")
-        {
-            condition = BindingCondition.IsTrue, whenTrue = 28, whenFalse = 626
-        });
-        Add(hud, new PerformanceGauge(EInstrumentPart.GUITAR), "GuitarGauge", 80, 0, PanelLayer);
-        Add(hud, new PerformanceGauge(EInstrumentPart.BASS), "BassGauge", 950, 0, PanelLayer);
+        UIGroup players = Group(PlayersGroup, 3);
+        Section(players, EInstrument.Drums, 0);
+        Section(players, EInstrument.Guitar1, 0);
+        Section(players, EInstrument.Guitar2, 870);
 
         StageFailedCover failed = overlays.AddChild(new StageFailedCover());
         failed.renderOrder = 1000;
+
+        static void Section(UIGroup parent, EInstrument player, float x)
+        {
+            PlayerSection section = parent.AddChild(new PlayerSection(player));
+            section.name = player.ToString();
+            section.position = new Vector3(x, 0, 0);
+            section.bindings.Add(new UIBinding("isVisible", $"Game.Playing.{player}"));
+        }
 
         static UIImage LinkedVideo(UIGroup parent, string name, float x, float y, Vector2? box = null)
         {
@@ -239,15 +212,6 @@ internal abstract class CStagePerfCommonScreen : CStage
             group.size = new Vector2(1280, 720);
             group.renderOrder = renderOrder;
             return group;
-        }
-
-        static PerformanceElement Add(UIGroup parent, PerformanceElement element, string name, float x, float y, int renderOrder)
-        {
-            parent.AddChild(element);
-            element.name = name;
-            element.position = new Vector3(x, y, 0);
-            element.renderOrder = renderOrder;
-            return element;
         }
     }
 
@@ -406,11 +370,11 @@ internal abstract class CStagePerfCommonScreen : CStage
     public CActPerfCommonCombo actCombo;
     protected CActPerfCommonJudgementString actJudgeString;
     protected CActPerfDrumsLaneFlushD actLaneFlushD;
-    protected CActPerfCommonLaneFlushGB actLaneFlushGB;
+    protected CActPerfGuitarLaneFlushGB actLaneFlushGB;
     protected CActPerformanceInformation actPlayInfo;
     public CActPerfCommonScore actScore;
     protected CActPerfStageFailure actStageFailed;
-    protected CActPerfCommonWailingBonus actWailingBonus;
+    protected CActPerfGuitarWailingBonus actWailingBonus;
     public CActPerfScrollSpeed actScrollSpeed;
     protected CActPerfSkillMeter actGraph;
     protected CActPerfGuitarBonus actGuitarBonus;
@@ -441,6 +405,13 @@ internal abstract class CStagePerfCommonScreen : CStage
 
     //for now Guitar1 always plays the guitar chart and Guitar2 the bass chart
     protected DrumsPerformance? drums;
+
+    public PlayerFlags Playing => new()
+    {
+        Drums = drums != null,
+        Guitar1 = guitars[0] != null,
+        Guitar2 = guitars[1] != null
+    };
 
     protected GuitarPerformance? GuitarFor(EInstrumentPart part) =>
         part == EInstrumentPart.GUITAR ? guitars[0] : part == EInstrumentPart.BASS ? guitars[1] : null;
@@ -849,19 +820,19 @@ internal abstract class CStagePerfCommonScreen : CStage
             CDTXMania.DTX.tStopPlayingAllChips();
         }
     }
-    protected void tUpdateAndDraw_WailingBonus()
+    protected void tUpdateAndDraw_WailingBonus(Matrix4x4 origin, EInstrumentPart part)
     {
         if ((ePhaseID != EPhase.PERFORMANCE_STAGE_FAILED) && (ePhaseID != EPhase.PERFORMANCE_STAGE_FAILED_END))
         {
-            actWailingBonus.OnUpdateAndDraw();
+            actWailingBonus.Draw(origin, part);
         }
     }
 
-    protected void tUpdateAndDraw_GuitarBonus()
+    protected void tUpdateAndDraw_GuitarBonus(Matrix4x4 origin, EInstrumentPart part)
     {
         if ((ePhaseID != EPhase.PERFORMANCE_STAGE_FAILED) && (ePhaseID != EPhase.PERFORMANCE_STAGE_FAILED_END))
         {
-            actGuitarBonus.OnUpdateAndDraw();
+            actGuitarBonus.Draw(origin, part);
         }
     }
     protected abstract void tUpdateAndDraw_WailingFrame();
@@ -881,13 +852,9 @@ internal abstract class CStagePerfCommonScreen : CStage
     }
     
 
-    protected void tUpdateAndDraw_Combo()
+    protected void DrawCombo(Matrix4x4 origin, int part)
     {
-        actCombo.OnUpdateAndDraw();
-    }
-    protected void tUpdateAndDraw_Score()
-    {
-        actScore.OnUpdateAndDraw();
+        actCombo.Draw(origin, part);
     }
     public static bool IsPlayed(EInstrumentPart part)
     {
@@ -1207,7 +1174,7 @@ internal abstract class CStagePerfCommonScreen : CStage
         }
     }
 
-    protected void DrawChips(EInstrumentPart ePlayMode)
+    protected void DrawChips(Matrix4x4 origin, EInstrumentPart part)
     {
         bool drawsChips = ePhaseID is not (EPhase.PERFORMANCE_STAGE_FAILED or EPhase.PERFORMANCE_STAGE_FAILED_END)
                           && timeline.TopChip != -1 && timeline.TopChip < timeline.Chips.Count;
@@ -1224,23 +1191,23 @@ internal abstract class CStagePerfCommonScreen : CStage
 
                 if (pChip.nChannelNumber == EChannel.BarLine)
                 {
-                    DrawChip_BarLine(configIni, ref dTX, ref pChip);
+                    DrawChip_BarLine(configIni, ref dTX, ref pChip, part, origin);
                 }
                 else if (pChip.nChannelNumber == EChannel.BeatLine)
                 {
-                    DrawBeatLine(ePlayMode, pChip);
+                    DrawBeatLine(part, pChip, origin);
                 }
             }
         }
 
-        tDraw_LoopLines();
+        tDraw_LoopLines(part, origin);
 
         if (!drawsChips)
         {
             return;
         }
 
-        if (ePlayMode == EInstrumentPart.DRUMS)
+        if (part == EInstrumentPart.DRUMS)
         {
             for (int i = timeline.TopChip; i < dTX.listChip.Count; i++)
             {
@@ -1261,7 +1228,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                     case EChannel.LeftCymbal:
                     case EChannel.LeftPedal:
                     case EChannel.LeftBassDrum:
-                        DrawChip_PatternOnly_Drums(configIni, ref dTX, ref pChip);
+                        DrawChip_PatternOnly_Drums(configIni, ref dTX, ref pChip, origin);
                         break;
                 }
             }
@@ -1286,7 +1253,10 @@ internal abstract class CStagePerfCommonScreen : CStage
                 case EChannel.LeftCymbal:
                 case EChannel.LeftPedal:
                 case EChannel.LeftBassDrum:
-                    DrawChip_Drums(configIni, ref dTX, ref pChip);
+                    if (part == EInstrumentPart.DRUMS)
+                    {
+                        DrawChip_Drums(configIni, ref dTX, ref pChip, origin);
+                    }
                     break;
 
                 case EChannel.Guitar_Open:
@@ -1321,11 +1291,17 @@ internal abstract class CStagePerfCommonScreen : CStage
                 case EChannel.Guitar_RxBYP:
                 case EChannel.Guitar_RGxYP:
                 case EChannel.Guitar_RGBYP:
-                    DrawChip_GuitarBass(configIni, ref dTX, ref pChip, EInstrumentPart.GUITAR);
+                    if (part == EInstrumentPart.GUITAR)
+                    {
+                        DrawChip_GuitarBass(configIni, ref dTX, ref pChip, EInstrumentPart.GUITAR, origin);
+                    }
                     break;
 
                 case EChannel.Guitar_Wailing:
-                    DrawChip_Guitar_Wailing(configIni, ref dTX, ref pChip);
+                    if (part == EInstrumentPart.GUITAR)
+                    {
+                        DrawChip_Guitar_Wailing(configIni, ref dTX, ref pChip, origin);
+                    }
                     break;
 
                 case EChannel.Bass_Open:
@@ -1360,11 +1336,17 @@ internal abstract class CStagePerfCommonScreen : CStage
                 case EChannel.Bass_RxBYP:
                 case EChannel.Bass_RGxYP:
                 case EChannel.Bass_RGBYP:
-                    DrawChip_GuitarBass(configIni, ref dTX, ref pChip, EInstrumentPart.BASS);
+                    if (part == EInstrumentPart.BASS)
+                    {
+                        DrawChip_GuitarBass(configIni, ref dTX, ref pChip, EInstrumentPart.BASS, origin);
+                    }
                     break;
 
                 case EChannel.Bass_Wailing:
-                    DrawChip_Bass_Wailing(configIni, ref dTX, ref pChip);
+                    if (part == EInstrumentPart.BASS)
+                    {
+                        DrawChip_Bass_Wailing(configIni, ref dTX, ref pChip, origin);
+                    }
                     break;
             }
         }
@@ -1431,7 +1413,7 @@ internal abstract class CStagePerfCommonScreen : CStage
     private static bool IsBeyondDrawRange(CChip pChip) =>
         Math.Min(Math.Min(pChip.nDistanceFromBar.Drums, pChip.nDistanceFromBar.Guitar), pChip.nDistanceFromBar.Bass) > 600;
 
-    private void DrawBeatLine(EInstrumentPart ePlayMode, CChip pChip)
+    private void DrawBeatLine(EInstrumentPart ePlayMode, CChip pChip, Matrix4x4 origin)
     {
         CConfigIni configIni = CDTXMania.ConfigIni;
         if ((ePlayMode == EInstrumentPart.DRUMS) && (configIni.nLaneDisp.Drums == 0 || configIni.nLaneDisp.Drums == 1) && pChip.bVisible && (txChip != null))
@@ -1448,18 +1430,18 @@ internal abstract class CStagePerfCommonScreen : CStage
                 l_xOffset = 72;
             }
 
-            txChip.tDraw2D(0x127 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + pChip.nDistanceFromBar.Drums) - 1) : ((nJudgeLinePosY.Drums - pChip.nDistanceFromBar.Drums) - 1), new RectangleF(0, 772, l_drumPanelWidth, 2));
+            txChip.tDraw2D(origin, 0x127 + l_xOffset, configIni.bReverse.Drums ? ((nJudgeLinePosY.Drums + pChip.nDistanceFromBar.Drums) - 1) : ((nJudgeLinePosY.Drums - pChip.nDistanceFromBar.Drums) - 1), new RectangleF(0, 772, l_drumPanelWidth, 2));
         }
     }
 
-    protected bool tDraw_LoopLines()
+    protected bool tDraw_LoopLines(EInstrumentPart part, Matrix4x4 origin)
     {
         if (LoopBeginMs != -1)
         {
-            tDraw_LoopLine(CDTXMania.ConfigIni, false);
+            tDraw_LoopLine(CDTXMania.ConfigIni, false, part, origin);
             if (LoopEndMs != -1)
             {
-                tDraw_LoopLine(CDTXMania.ConfigIni, true);
+                tDraw_LoopLine(CDTXMania.ConfigIni, true, part, origin);
             }
         }
         return false;
@@ -1490,7 +1472,7 @@ internal abstract class CStagePerfCommonScreen : CStage
     }
     protected abstract void UpdateChip_FillIn(CConfigIni configIni, ref CDTX dTX, ref CChip pChip);  // t進行描画_チップ_フィルイン
     protected abstract void UpdateChip_BarLine(CConfigIni configIni, ref CDTX dTX, ref CChip pChip);
-    protected abstract void tDraw_LoopLine(CConfigIni configIni, bool bIsEnd);
+    protected abstract void tDraw_LoopLine(CConfigIni configIni, bool bIsEnd, EInstrumentPart part, Matrix4x4 origin);
     protected virtual void UpdateChip_Bass_Wailing(CConfigIni configIni, ref CDTX dTX, ref CChip pChip)  // t進行描画_チップ_ベース_ウェイリング
     {
         UpdateChip_GuitarBass_Wailing(configIni, ref dTX, ref pChip, EInstrumentPart.BASS);
@@ -1504,12 +1486,12 @@ internal abstract class CStagePerfCommonScreen : CStage
     }  // t進行描画_チップ_空打ち音設定_ドラム
 
     //a screen overrides the ones it draws
-    protected virtual void DrawChip_Drums(CConfigIni configIni, ref CDTX dTX, ref CChip pChip) { }
-    protected virtual void DrawChip_PatternOnly_Drums(CConfigIni configIni, ref CDTX dTX, ref CChip pChip) { }
-    protected virtual void DrawChip_GuitarBass(CConfigIni configIni, ref CDTX dTX, ref CChip pChip, EInstrumentPart inst) { }
-    protected virtual void DrawChip_Guitar_Wailing(CConfigIni configIni, ref CDTX dTX, ref CChip pChip) { }
-    protected virtual void DrawChip_Bass_Wailing(CConfigIni configIni, ref CDTX dTX, ref CChip pChip) { }
-    protected virtual void DrawChip_BarLine(CConfigIni configIni, ref CDTX dTX, ref CChip pChip) { }
+    protected virtual void DrawChip_Drums(CConfigIni configIni, ref CDTX dTX, ref CChip pChip, Matrix4x4 origin) { }
+    protected virtual void DrawChip_PatternOnly_Drums(CConfigIni configIni, ref CDTX dTX, ref CChip pChip, Matrix4x4 origin) { }
+    protected virtual void DrawChip_GuitarBass(CConfigIni configIni, ref CDTX dTX, ref CChip pChip, EInstrumentPart inst, Matrix4x4 origin) { }
+    protected virtual void DrawChip_Guitar_Wailing(CConfigIni configIni, ref CDTX dTX, ref CChip pChip, Matrix4x4 origin) { }
+    protected virtual void DrawChip_Bass_Wailing(CConfigIni configIni, ref CDTX dTX, ref CChip pChip, Matrix4x4 origin) { }
+    protected virtual void DrawChip_BarLine(CConfigIni configIni, ref CDTX dTX, ref CChip pChip, EInstrumentPart part, Matrix4x4 origin) { }
     protected void UpdateChipAnimation()
     {
         for (int i = 0; i < 3; i++)			// 0=drums, 1=guitar, 2=bass
@@ -1551,18 +1533,18 @@ internal abstract class CStagePerfCommonScreen : CStage
     {
         ctResultDelay = new CCounter(0, CDTXMania.ConfigIni.nResultDelayMs, 1, CDTXMania.Timer);
     }
-    protected void tUpdateAndDraw_LaneFlushD()
+    protected void tUpdateAndDraw_LaneFlushD(Matrix4x4 origin)
     {
         if ((ePhaseID != EPhase.PERFORMANCE_STAGE_FAILED) && (ePhaseID != EPhase.PERFORMANCE_STAGE_FAILED_END))
         {
-            actLaneFlushD.OnUpdateAndDraw();
+            actLaneFlushD.Draw(origin);
         }
     }
-    protected void tUpdateAndDraw_LaneFlushGB()
+    protected void tUpdateAndDraw_LaneFlushGB(Matrix4x4 origin, EInstrumentPart part)
     {
         if (CDTXMania.ConfigIni.bGuitarEnabled)
         {
-            actLaneFlushGB.OnUpdateAndDraw();
+            actLaneFlushGB.Draw(origin, part);
         }
     }
     protected abstract void tUpdateAndDraw_PerformanceInformation();
@@ -1605,18 +1587,27 @@ internal abstract class CStagePerfCommonScreen : CStage
         }
     }
 
-    protected void DrawScore()
+    protected void DrawScore(Matrix4x4 origin, EInstrumentPart part)
     {
         if (CDTXMania.ConfigIni.bShowScore)
         {
-            tUpdateAndDraw_Score();
+            actScore.Draw(origin, part);
         }
     }
 
-    protected void AddLegacyPart(string group, string name, int layer, Action draw)
+    //the root when a skin's layout has no section for this player
+    protected UIGroup SectionFor(EInstrument player)
     {
-        LegacyDrawable part = LayoutGroup(group).AddChild(new LegacyDrawable(name, draw));
+        UIGroup section = LayoutGroup(PlayersGroup).GetChild<UIGroup>(player.ToString()) ?? ui;
+        section.EnsureContent();
+        return section;
+    }
+
+    protected LegacyDrawable AddLegacyPart(UIGroup parent, string name, int layer, Action<Matrix4x4> draw)
+    {
+        LegacyDrawable part = parent.AddChild(new LegacyDrawable(name, draw));
         part.renderOrder = layer;
+        return part;
     }
 
     protected void UpdateScrollSpeed()

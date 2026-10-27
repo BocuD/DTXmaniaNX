@@ -29,17 +29,37 @@ public class PerformanceGauge : PerformanceElement
         _ => "DrumsGauge"
     };
 
+    private struct GaugeArt
+    {
+        public string Frame;
+        public Vector2 FrameSize;
+        public Vector3 Bar;
+        public Vector2 BarSize;
+        public Vector3 Speed;
+    }
+
+    private static GaugeArt Art(EInstrumentPart part) => part switch
+    {
+        EInstrumentPart.GUITAR => new GaugeArt
+        {
+            Frame = @"Graphics\7_Gauge_Guitar.png", FrameSize = new Vector2(290, 68), Bar = new Vector3(6, 31, 0),
+            BarSize = new Vector2(242, 30), Speed = new Vector3(254, 30, 0)
+        },
+        EInstrumentPart.BASS => new GaugeArt
+        {
+            Frame = @"Graphics\7_Gauge_Bass.png", FrameSize = new Vector2(290, 68), Bar = new Vector3(42, 31, 0),
+            BarSize = new Vector2(242, 30), Speed = new Vector3(4, 30, 0)
+        },
+        _ => new GaugeArt
+        {
+            Frame = @"Graphics\7_Gauge.png", FrameSize = new Vector2(543, 47), Bar = new Vector3(20, 9, 0),
+            BarSize = new Vector2(480, 31), Speed = new Vector3(506, 8, 0)
+        }
+    };
+
     protected override UIGroup BuildDefault(EInstrumentPart part)
     {
-        (string frame, Vector2 frameSize, Vector3 bar, Vector2 barSize, Vector3 speed) = part switch
-        {
-            EInstrumentPart.GUITAR => (@"Graphics\7_Gauge_Guitar.png", new Vector2(290, 68), new Vector3(6, 31, 0),
-                new Vector2(242, 30), new Vector3(254, 30, 0)),
-            EInstrumentPart.BASS => (@"Graphics\7_Gauge_Bass.png", new Vector2(290, 68), new Vector3(42, 31, 0),
-                new Vector2(242, 30), new Vector3(4, 30, 0)),
-            _ => (@"Graphics\7_Gauge.png", new Vector2(543, 47), new Vector3(20, 9, 0),
-                new Vector2(480, 31), new Vector3(506, 8, 0))
-        };
+        GaugeArt art = Art(part);
 
         UIGroup root = new(ComponentName(part));
 
@@ -47,9 +67,9 @@ public class PerformanceGauge : PerformanceElement
         {
             name = "FrameBack",
             imageSource = ImageSource.File,
-            image = SkinResource.System(frame),
-            size = frameSize,
-            clipRect = new RectangleF(0, 0, frameSize.X, frameSize.Y)
+            image = SkinResource.System(art.Frame),
+            size = art.FrameSize,
+            clipRect = new RectangleF(0, 0, art.FrameSize.X, art.FrameSize.Y)
         });
 
         root.AddChild(new UIImage
@@ -57,7 +77,7 @@ public class PerformanceGauge : PerformanceElement
             name = "ScrollSpeed",
             imageSource = ImageSource.File,
             image = SkinResource.System(@"Graphics\7_Panel_icons.jpg"),
-            position = speed,
+            position = art.Speed,
             size = new Vector2(32, 32),
             clipRect = new RectangleF(0, 0, 42, 48),
             renderOrder = 1,
@@ -69,9 +89,9 @@ public class PerformanceGauge : PerformanceElement
             name = "Bar",
             imageSource = ImageSource.File,
             image = SkinResource.System(@"Graphics\7_gauge_bar.png"),
-            position = bar,
-            size = barSize,
-            clipRect = new RectangleF(0, 0, barSize.X, barSize.Y),
+            position = art.Bar,
+            size = art.BarSize,
+            clipRect = new RectangleF(0, 0, art.BarSize.X, art.BarSize.Y),
             renderOrder = 2,
             bindings =
             {
@@ -85,9 +105,9 @@ public class PerformanceGauge : PerformanceElement
             name = "FullBar",
             imageSource = ImageSource.File,
             image = SkinResource.System(@"Graphics\7_gauge_bar.jpg"),
-            position = bar,
-            size = barSize,
-            clipRect = new RectangleF(0, 0, barSize.X, barSize.Y),
+            position = art.Bar,
+            size = art.BarSize,
+            clipRect = new RectangleF(0, 0, art.BarSize.X, art.BarSize.Y),
             renderOrder = 2,
             bindings = { new UIBinding("isVisible", "Stats.Gauge") { condition = BindingCondition.GreaterOrEqual, value = 1 } }
         });
@@ -96,12 +116,37 @@ public class PerformanceGauge : PerformanceElement
         {
             name = "FrameFront",
             imageSource = ImageSource.File,
-            image = SkinResource.System(frame),
-            size = frameSize,
-            clipRect = new RectangleF(0, frameSize.Y, frameSize.X, frameSize.Y),
+            image = SkinResource.System(art.Frame),
+            size = art.FrameSize,
+            clipRect = new RectangleF(0, art.FrameSize.Y, art.FrameSize.X, art.FrameSize.Y),
             renderOrder = 3
         });
 
+        if (part == EInstrumentPart.GUITAR)
+        {
+            MirrorOnRightSide(root);
+        }
+
         return root;
+    }
+
+    private static void MirrorOnRightSide(UIGroup root)
+    {
+        GaugeArt left = Art(EInstrumentPart.GUITAR);
+        GaugeArt right = Art(EInstrumentPart.BASS);
+
+        Mirror(root.GetChild<UIImage>("FrameBack")!);
+        Mirror(root.GetChild<UIImage>("FrameFront")!);
+
+        root.GetChild<UIImage>("Bar")!.bindings.Add(PlayerSection.OnRightSide("position.X", right.Bar.X, left.Bar.X));
+        root.GetChild<UIImage>("FullBar")!.bindings.Add(PlayerSection.OnRightSide("position.X", right.Bar.X, left.Bar.X));
+        root.GetChild<UIImage>("ScrollSpeed")!.bindings.Add(PlayerSection.OnRightSide("position.X", right.Speed.X, left.Speed.X));
+    }
+
+    private static void Mirror(UIImage frame)
+    {
+        frame.pivot = new Vector2(0.5f, 0);
+        frame.position = new Vector3(frame.size.X / 2, 0, 0);
+        frame.bindings.Add(PlayerSection.OnRightSide("scale.X", -1, 1));
     }
 }

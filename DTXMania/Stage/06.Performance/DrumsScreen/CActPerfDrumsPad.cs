@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System.Numerics;
+using System.Drawing;
 using DTXMania.Core;
 using DTXMania.Core.Framework;
 using DTXMania.UI.Drawable;
@@ -86,11 +87,11 @@ internal class CActPerfDrumsPad : CActivity
         base.OnManagedCreateResources();
     }
 
-    public override int OnUpdateAndDraw()
+    public void Draw(Matrix4x4 origin)
     {
         if (!bActivated)
         {
-            return 0;
+            return;
         }
 
         Animate();
@@ -110,7 +111,7 @@ internal class CActPerfDrumsPad : CActivity
 
             if (txPad != null)
             {
-                DrawPad(txPad, pad, x, y, source);
+                DrawPad(origin, txPad, pad, x, y, source);
             }
         }
 
@@ -119,7 +120,7 @@ internal class CActPerfDrumsPad : CActivity
             bonusTimer.tUpdate();
             if (txBonus != null && CDTXMania.ConfigIni.bShowScore)
             {
-                txBonus.tDraw2D(160, 80);
+                txBonus.tDraw2D(origin, 160, 80);
             }
             if (bonusTimer.bReachedEndValue)
             {
@@ -127,15 +128,15 @@ internal class CActPerfDrumsPad : CActivity
             }
         }
 
-        return 0;
+        return;
     }
 
-    private void DrawPad(BaseTexture texture, int pad, int x, int y, RectangleF source)
+    private void DrawPad(Matrix4x4 origin, BaseTexture texture, int pad, int x, int y, RectangleF source)
     {
         float lit = Math.Min(pads[pad].brightness * 50 / 255f, 1f);
         if (lit <= 0)
         {
-            texture.tDraw2D(x, y, source);
+            texture.tDraw2D(origin, x, y, source);
             return;
         }
 
@@ -143,10 +144,10 @@ internal class CActPerfDrumsPad : CActivity
         float r = 1 + (full.Red - 1) * lit;
         float g = 1 + (full.Green - 1) * lit;
         float b = 1 + (full.Blue - 1) * lit;
-        texture.tDraw2D(x, y, source, new Color4(Math.Min(r, 1), Math.Min(g, 1), Math.Min(b, 1)));
+        texture.tDraw2D(origin, x, y, source, new Color4(Math.Min(r, 1), Math.Min(g, 1), Math.Min(b, 1)));
 
         texture.blendMode = BlendMode.Additive;
-        texture.tDraw2D(x, y, source, new Color4(Math.Max(r - 1, 0), Math.Max(g - 1, 0), Math.Max(b - 1, 0)));
+        texture.tDraw2D(origin, x, y, source, new Color4(Math.Max(r - 1, 0), Math.Max(g - 1, 0), Math.Max(b - 1, 0)));
         texture.blendMode = BlendMode.Alpha;
     }
 
