@@ -2814,12 +2814,14 @@ public class CDTX : CActivity
                     case ERandomMode.RANDOM: // 1小節単位でレーンのR/G/Bがランダムに入れ替わる
                         chip.nChannelNumber = (EChannel)(((int)nランダム化前チャンネル番号 & 0xF0) |
                                                          nランダムレーン候補[n小節内乱数6通り, (int)nランダム化前チャンネル番号 & 0x07]);
+                        chip.frets = CChip.FretsOf(chip.nChannelNumber);
                         continue; // goto Label_02C4;
 
                     case ERandomMode.SUPERRANDOM: // チップごとにR/G/Bがランダムで入れ替わる(レーンの本数までは変わらない)。
                         chip.nChannelNumber = (EChannel)(((int)nランダム化前チャンネル番号 & 0xF0) |
                                                          nランダムレーン候補[CDTXMania.Random.Next(6),
                                                              (int)nランダム化前チャンネル番号 & 0x07]);
+                        chip.frets = CChip.FretsOf(chip.nChannelNumber);
                         continue; // goto Label_02C4;
 
                     case ERandomMode.HYPERRANDOM: // レーンの本数も変わる
@@ -2949,6 +2951,7 @@ public class CDTX : CActivity
 
                 Label_02B2:
                 chip.nChannelNumber = (EChannel)(((int)nランダム化前チャンネル番号 & 0xF0) | n新RGBレーンビットパターン);
+                chip.frets = CChip.FretsOf(chip.nChannelNumber);
 //				Label_02C4:
 //					GOTO_END++;		// goto用のダミーコード
             }
@@ -7030,6 +7033,7 @@ public class CDTX : CActivity
                     chip.eInstrumentPart = EInstrumentPart.BASS;
                     break;
             }
+            chip.frets = CChip.FretsOf(nChannelNumber);
             #endregion
 
             #region [ 無限定義への対応 → 内部番号の取得。]

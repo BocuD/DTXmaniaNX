@@ -88,17 +88,11 @@ internal class GuitarPerformance
 
     private static int ToLaneMask(bool r, bool g, bool b, bool y, bool p) => (r ? 1 : 0) | (g ? 2 : 0) | (b ? 4 : 0) | (y ? 8 : 0) | (p ? 16 : 0);
 
-    private static int GetLanes(CChip chip)
-    {
-        bool[] lanes = EnumConverter.GetArrayBoolFromEChannel(chip.nChannelNumber);
-        return ToLaneMask(lanes[0], lanes[1], lanes[2], lanes[3], lanes[4]);
-    }
-
     private int GetPressedLanes() => ToLaneMask(CDTXMania.Pad.bPressing(Side, EPad.R), CDTXMania.Pad.bPressing(Side, EPad.G),
         CDTXMania.Pad.bPressing(Side, EPad.B), CDTXMania.Pad.bPressing(Side, EPad.Y), CDTXMania.Pad.bPressing(Side, EPad.P));
 
     private bool IsAuto(CChip chip) =>
-        autoPick && (GetLanes(chip) & ~autoLanes) == 0 && (!chip.bChipIsWailingNote || autoWail) && (!chip.bChipIsOpenNote || autoLanes == AllLanes);
+        autoPick && (chip.frets & ~autoLanes) == 0 && (!chip.bChipIsWailingNote || autoWail) && (!chip.bChipIsOpenNote || autoLanes == AllLanes);
 
     //correctLane false is a miss without judging the timing
     private void ApplyHit(CChip chip, long time, bool correctLane)
@@ -163,7 +157,7 @@ internal class GuitarPerformance
             return;
         }
 
-        int chipLanes = GetLanes(chip);
+        int chipLanes = chip.frets;
         int pressed = GetPressedLanes();
         bool openPlayed = chip.bChipIsOpenNote && (pressed & ~autoLanes) == 0;
         bool miss = chipLanes != autoLanes && ((chipLanes ^ pressed) & ~autoLanes) != 0 && !openPlayed;
@@ -195,7 +189,7 @@ internal class GuitarPerformance
     {
         int pressed = GetPressedLanes();
         CChip? shown = HeldNote ?? FindNextNote();
-        int shownLanes = shown != null ? GetLanes(shown) : 0;
+        int shownLanes = shown != null ? shown.frets : 0;
         LitLanes = pressed | (shownLanes & autoLanes);
 
         if (HeldNote != null)
@@ -232,7 +226,7 @@ internal class GuitarPerformance
 
         if (note != null && judgement != EJudgement.Miss)
         {
-            int noteLanes = GetLanes(note);
+            int noteLanes = note.frets;
             if ((noteLanes & ~autoLanes) == (pressed & ~autoLanes))
             {
                 bool openPlayed = note.bChipIsOpenNote && (pressed & ~autoLanes) == 0;

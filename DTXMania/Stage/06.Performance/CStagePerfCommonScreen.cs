@@ -1073,6 +1073,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                         pChip.bHit = true;
                         SetEmptyPickSound(EInstrumentPart.GUITAR, pChip);
                         pChip.nChannelNumber = EChannel.Guitar_Open;
+                        pChip.frets = 0;
                     }
                     break;
 
@@ -1082,6 +1083,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                         pChip.bHit = true;
                         SetEmptyPickSound(EInstrumentPart.BASS, pChip);
                         pChip.nChannelNumber = EChannel.Bass_Open;
+                        pChip.frets = 0;
                     }
                     break;
 
