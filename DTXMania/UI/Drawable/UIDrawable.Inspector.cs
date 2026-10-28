@@ -86,6 +86,7 @@ public abstract partial class UIDrawable
         }
 
         DrawBoundsGizmo();
+        DrawElementGizmos();
 
         Matrix4x4 viewMatrix = InspectorManager.GetViewMatrix();
         Matrix4x4 projectionMatrix = Matrix4x4.CreateOrthographicOffCenter(0, gizmoRect.Width, gizmoRect.Height, 0, -1f, 1f);
@@ -134,6 +135,10 @@ public abstract partial class UIDrawable
                 rotation = QuaternionToEuler(newRotation);
             }
         }
+    }
+
+    protected virtual void DrawElementGizmos()
+    {
     }
 
     private void DrawBoundsGizmo()
