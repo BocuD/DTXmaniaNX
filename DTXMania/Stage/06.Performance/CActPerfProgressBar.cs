@@ -1,3 +1,4 @@
+using System.Numerics;
 using System.Diagnostics;
 using System.Drawing;
 using DTXMania.Core;
@@ -28,7 +29,7 @@ internal class CActPerfProgressBar : CActivity
 
 		pBarPosition[(int)EInstrumentPart.DRUMS] = new Point(855, 15);
 		pBarPosition[(int)EInstrumentPart.GUITAR] = new Point(334, 85);
-		pBarPosition[(int)EInstrumentPart.BASS] = new Point(1204, 85);
+		pBarPosition[(int)EInstrumentPart.BASS] = new Point(334, 85);
 
 		nブロック最大数 = 10;
 		n楽器毎のチップ数基準値.Drums = 1600;
@@ -45,7 +46,7 @@ internal class CActPerfProgressBar : CActivity
 					listProgressSection[(int)ePart].Add(new CProgressSection());
 				}
 
-				if (!bIsCalledFromOutsidePerformance && CDTXMania.ConfigIni.bInstrumentAvailable(ePart) && CDTXMania.DTX.bHasChips[(int)ePart])
+				if (!bIsCalledFromOutsidePerformance && CStagePerfCommonScreen.IsPlayed(ePart) && CDTXMania.DTX.bHasChips[(int)ePart])
 				{
 					int x = pBarPosition[(int)ePart].X;
 					p表示位置[(int)ePart] = new Point(x, 0);
@@ -144,9 +145,15 @@ internal class CActPerfProgressBar : CActivity
 
 	public override int OnUpdateAndDraw()
 	{
+		Draw(DTXMania.UI.UICanvas.toWindow, EInstrumentPart.DRUMS, EInstrumentPart.BASS);
+		return 0;
+	}
+
+	public void Draw(Matrix4x4 origin, EInstrumentPart firstPart, EInstrumentPart lastPart)
+	{
 		if (!bActivated)
 		{
-			return 0;
+			return;
 		}
 
 		if (bIsCalledFromOutsidePerformance)
@@ -160,10 +167,10 @@ internal class CActPerfProgressBar : CActivity
 			ct登場用?.tUpdate();
 		}
 
-		for (EInstrumentPart ePart = EInstrumentPart.DRUMS; ePart <= EInstrumentPart.BASS; ePart++)
+		for (EInstrumentPart ePart = firstPart; ePart <= lastPart; ePart++)
 		{
 			if ((!bIsCalledFromOutsidePerformance &&
-			     (!CDTXMania.ConfigIni.bInstrumentAvailable(ePart) ||
+			     (!CStagePerfCommonScreen.IsPlayed(ePart) ||
 			      !CDTXMania.DTX.bHasChips[(int)ePart] ||
 			      CDTXMania.ConfigIni.eDark[(int)ePart] == EDarkMode.FULL)) ||
 			    (bIsCalledFromOutsidePerformance && epartプレイ楽器 != ePart && (epartプレイ楽器 != EInstrumentPart.UNKNOWN || ePart != 0)))
@@ -176,23 +183,23 @@ internal class CActPerfProgressBar : CActivity
 			if (bIsCalledFromOutsidePerformance)
 			{
 				num += (int)((-60 - p表示位置[(int)ePart].X) * Math.Cos(Math.PI / 200.0 * ct登場用.nCurrentValue));
-				txパネル用.tDraw2D(num - 20, num2 - 20);
+				txパネル用.tDraw2D(origin, num - 20, num2 - 20);
 			}
 
 			if (ePart == EInstrumentPart.DRUMS)
 			{
-				txProgressBarBackgroundDrums.tDraw2D(num - 2, num2 - 15);
+				txProgressBarBackgroundDrums.tDraw2D(origin, num - 2, num2 - 15);
 			}
 			else
 			{
-				txProgressBarBackgroundGuitar.tDraw2D(num - 2, num2 - 70);
+				txProgressBarBackgroundGuitar.tDraw2D(origin, num - 2, num2 - 70);
 			}
 
-			txBackground.tDraw2D(num, num2);
+			txBackground.tDraw2D(origin, num, num2);
 
 			if (!ReferenceEquals(txBestProgressBarRecord[(int)ePart], BaseTexture.None))
 			{
-				txBestProgressBarRecord[(int)ePart].tDraw2D(num + 22, num2);
+				txBestProgressBarRecord[(int)ePart].tDraw2D(origin, num + 22, num2);
 			}
 
 			if (epartプレイ楽器 == EInstrumentPart.UNKNOWN)
@@ -202,7 +209,7 @@ internal class CActPerfProgressBar : CActivity
 
 			if (!bIsCalledFromOutsidePerformance)
 			{
-				tx縦線.tDraw2D(num + nWidth, num2);
+				tx縦線.tDraw2D(origin, num + nWidth, num2);
 				int num3 = (int)(((CTimerBase)CDTXMania.Timer).nCurrentTime / (double)nLastChipTime * nHeightFactor);
 				if (num3 > nHeight)
 				{
@@ -211,7 +218,7 @@ internal class CActPerfProgressBar : CActivity
 
 				RectangleF rectangle = new(0, 0, tx進捗.Width, num3);
 				num2 = nHeight - num3 + pBarPosition[(int)ePart].Y;
-				tx進捗.tDraw2D(num, num2, rectangle);
+				tx進捗.tDraw2D(origin, num, num2, rectangle);
 			}
 
 			for (int i = 0; i < nSectionIntervalCount; i++)
@@ -222,7 +229,7 @@ internal class CActPerfProgressBar : CActivity
 				{
 					if ((i + 1) * nLastChipTime / nSectionIntervalCount - 1 > ((CTimerBase)CDTXMania.Timer).nCurrentTime && !bIsCalledFromOutsidePerformance)
 					{
-						tx灰.tDraw2D(num, num2, c区間.rectDrawingFrame);
+						tx灰.tDraw2D(origin, num, num2, c区間.rectDrawingFrame);
 					}
 					else
 					{
@@ -235,23 +242,21 @@ internal class CActPerfProgressBar : CActivity
 						{
 							if (c区間.nHitCount == c区間.nChipCount)
 							{
-								tx黄.tDraw2D(num, num2, c区間.rectDrawingFrame);
+								tx黄.tDraw2D(origin, num, num2, c区間.rectDrawingFrame);
 							}
 							else
 							{
-								tx青.tDraw2D(num, num2, c区間.rectDrawingFrame);
+								tx青.tDraw2D(origin, num, num2, c区間.rectDrawingFrame);
 							}
 						}
 					}
 				}
 				else if (c区間.nChipCount > 0)
 				{
-					tx灰.tDraw2D(num, num2, c区間.rectDrawingFrame);
+					tx灰.tDraw2D(origin, num, num2, c区間.rectDrawingFrame);
 				}
 			}
 		}
-
-		return 0;
 	}
 
 	private void tCreateBestProgressBarRecordTexture(CChartData cChartData)

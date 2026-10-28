@@ -536,7 +536,20 @@ public sealed class ComponentEditor : IDisposable
 
         preview.Apply();
 
-        root.dataContext = liveInstance.HasTarget ? borrowed : null;
+        bool live = liveInstance.HasTarget;
+        root.dataContext = live ? borrowed : preview.root.context;
+
+        foreach (UIItemsGroup list in preview.listOrder)
+        {
+            IReadOnlyList<PreviewScope> scopes = preview.ScopesOf(list);
+
+            foreach (UIItemSlot slot in list.children.OfType<UIItemSlot>())
+            {
+                slot.dataContext = !live && slot.index >= 0 && slot.index < scopes.Count
+                    ? scopes[slot.index].context
+                    : null;
+            }
+        }
     }
 
     //a key only just found takes what the component was saved with, or something readable. Slot values fall

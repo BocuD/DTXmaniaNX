@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System.Numerics;
+using System.Drawing;
 using DTXMania.Core;
 using DTXMania.UI.Drawable;
 using FDK;
@@ -11,116 +12,47 @@ internal class CActPerfCommonScore : CActivity
 
 	public STDGBVALUE<long> nスコアの増分;
 	public STDGBVALUE<int>[] x位置 = new STDGBVALUE<int>[10];
-	public STDGBVALUE<double> nCurrentTrueScore;
 	public STDGBVALUE<long> n現在表示中のスコア;
 	public STDGBVALUE<int> n本体X;
 	public int n本体Y;
 	public long n進行用タイマ;
 	protected BaseTexture txScore;
+	private readonly PerformanceData[] parts;
+	private STDGBVALUE<double> lastScore;
 
 		
 	// コンストラクタ
 
-	public CActPerfCommonScore()
+	public CActPerfCommonScore(PerformanceData[] parts)
 	{
+		this.parts = parts;
 		bActivated = false;
 	}
 
 
-	// メソッド
-
-	public double Get( EInstrumentPart part )
+	//one 10ms step of the shown score rolling up to the real one, a twentieth of the gap at a time
+	protected void RollStep( int part )
 	{
-		return nCurrentTrueScore[ (int) part ];
-	}
-	public void Set( EInstrumentPart part, double nScore )
-	{
-		int nPart = (int) part;
-		if ( nCurrentTrueScore[ nPart ] != nScore )
+		double score = parts[ part ].Score;
+		if ( score != lastScore[ part ] )
 		{
-			nCurrentTrueScore[ nPart ] = nScore;
-			nスコアの増分[ nPart ] = (long) ( ( (double) ( nCurrentTrueScore[ nPart ] - n現在表示中のスコア[ nPart ] ) ) / 20.0 );
-			if ( nスコアの増分[ nPart ] < 1L )
-			{
-				nスコアの増分[ nPart ] = 1L;
-			}
+			lastScore[ part ] = score;
+			nスコアの増分[ part ] = Math.Max( (long) ( ( score - n現在表示中のスコア[ part ] ) / 20.0 ), 1L );
 		}
+
+		n現在表示中のスコア[ part ] = Math.Min( n現在表示中のスコア[ part ] + nスコアの増分[ part ], (long) score );
 	}
-	/// <summary>
-	/// 点数を加える(各種AUTO補正つき)
-	/// </summary>
-	/// <param name="part"></param>
-	/// <param name="bAutoPlay"></param>
-	/// <param name="delta"></param>
-	public void Add( EInstrumentPart part, STAUTOPLAY bAutoPlay, long delta )
+
+
+	public virtual void Update()
 	{
-		double rev = 1.0 ;
-		switch ( part )
-		{
-			#region [ Unknown ]
-			case EInstrumentPart.UNKNOWN:
-				throw new ArgumentException();
-			#endregion
-			#region [ Gutiar ]
-			case EInstrumentPart.GUITAR:
-				if (!CDTXMania.ConfigIni.bAllGuitarsAreAutoPlay)
-				{
-					//Removed penalty for Auto-Wailing here as it does not actually add any score
-					//If Wailing Bonus score are to be added later, then check for Auto-Wailing and apply penalty separately
-					#region [ Auto Pick ]
-					if (bAutoPlay.GtPick)
-					{
-						rev /= 2;
-					}
-					#endregion
-					#region [ Auto Neck ]
-					if (bAutoPlay.GtR || bAutoPlay.GtG || bAutoPlay.GtB || bAutoPlay.GtY || bAutoPlay.GtP)
-					{
-						rev /= 2;
-					}
-					#endregion
-				}
-				else if (CDTXMania.ConfigIni.bAllGuitarsAreAutoPlay && 
-				         !CDTXMania.ConfigIni.bAutoAddGage) 
-				{
-					//If fully auto and AutoAddGage is not enabled, score delta should always be 0
-					rev = 0.0;
-				}
-				break;
-			#endregion
-			#region [ Bass ]
-			case EInstrumentPart.BASS:
-				if ( !CDTXMania.ConfigIni.bAllBassAreAutoPlay )
-				{
-					//Removed penalty for Auto-Wailing here as it does not actually add any score
-					//If Wailing Bonus score are to be added later, then check for Auto-Wailing and apply penalty separately
-					#region [ Auto Pick ]
-					if ( bAutoPlay.BsPick )
-					{
-						rev /= 2;
-					}
-					#endregion
-					#region [ Auto Neck ]
-					if ( bAutoPlay.BsR || bAutoPlay.BsG || bAutoPlay.BsB || bAutoPlay.BsY || bAutoPlay.BsP)
-					{
-						rev /= 2;
-					}
-					#endregion
-				}
-				else if (CDTXMania.ConfigIni.bAllBassAreAutoPlay &&
-				         !CDTXMania.ConfigIni.bAutoAddGage)
-				{
-					//If fully auto and AutoAddGage is not enabled, score delta should always be 0
-					rev = 0.0;
-				}
-				break;
-			#endregion
-		}
-		Set( part, Get( part ) + delta * rev );
 	}
 
+	public virtual void Draw( Matrix4x4 origin, EInstrumentPart part )
+	{
+	}
 
-	protected void tDrawScore( int x, int y, long score )
+	protected void tDrawScore( Matrix4x4 origin, int x, int y, long score )
 	{
 		if ( txScore == null )
 		{
@@ -140,10 +72,10 @@ internal class CActPerfCommonScore : CActivity
 				? new RectangleF( 0, 0, 0, 0 )
 				: new RectangleF( ( digits[ i ] - '0' ) * 36, 0, 36, 50 );
 
-			txScore.tDraw2D( x + i * 34, 28 + y, rectangle );
+			txScore.tDraw2D( origin, x + i * 34, 28 + y, rectangle );
 		}
 
-		txScore.tDraw2D( x, y, new RectangleF( 0, 50, 86, 28 ) );
+		txScore.tDraw2D( origin, x, y, new RectangleF( 0, 50, 86, 28 ) );
 	}
 
 
@@ -155,7 +87,7 @@ internal class CActPerfCommonScore : CActivity
 		for( int i = 0; i < 3; i++ )
 		{
 			n現在表示中のスコア[ i ] = 0L;
-			nCurrentTrueScore[ i ] = 0L;
+			lastScore[ i ] = 0;
 			nスコアの増分[ i ] = 0L;
 		}
 		base.OnActivate();

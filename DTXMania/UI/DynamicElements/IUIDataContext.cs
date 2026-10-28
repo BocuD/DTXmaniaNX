@@ -29,4 +29,5 @@ public interface IUIDataContext
     //keys bindable as 'kind', declared up front (independent of current values) so the inspector's
     //dropdowns can list what an element inside this context can bind to
     IEnumerable<string> AvailableKeys(DataBindingKind kind);
+    Type? KeyType(string key) => null;
 }

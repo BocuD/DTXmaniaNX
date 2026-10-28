@@ -31,15 +31,8 @@ public static class AudioDevice
         }
     }
 
-    private static IAudioDevice Build(AudioDeviceOptions options)
-    {
-        if (options.UseFdk)
-        {
-            return new FdkAudioDevice(options);
-        }
-
-        return options.Backend == AudioBackend.DirectSound
+    private static IAudioDevice Build(AudioDeviceOptions options) =>
+        options.Backend == AudioBackend.DirectSound
             ? new DirectSoundAudioDevice(options)
             : new BassAudioDevice(options);
-    }
 }

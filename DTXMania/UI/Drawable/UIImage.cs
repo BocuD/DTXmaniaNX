@@ -16,16 +16,21 @@ public enum ERenderMode
     Sliced
 }
 
+public enum ImageFit
+{
+    Stretch,
+    Contain,
+    Cover
+}
+
 /// <summary>What an image draws. Only <see cref="File"/> is a location, so only it consults
-/// <see cref="UIImage.image"/>; the other two are answered by the element itself.</summary>
+/// <see cref="UIImage.image"/>.</summary>
 public enum ImageSource
 {
     //a file, wherever image says it lives
     File,
     //a live texture from a data context or the stage's dynamicImageSources
-    Dynamic,
-    //no file at all: a rectangle of this element's colour, for a dim behind a menu or a panel
-    Solid
+    Dynamic
 }
 
 
@@ -34,6 +39,8 @@ public partial class UIImage : UITexture
     [Themable] public RectangleF clipRect;
     [Themable] public RectangleF sliceRect;
     [Themable] public ERenderMode renderMode = ERenderMode.Stretched;
+
+    [Themable] public ImageFit fit = ImageFit.Stretch;
     [Themable] public ImageSource imageSource = ImageSource.File;
 
     [Themable] public SkinResource image;
@@ -77,11 +84,6 @@ public partial class UIImage : UITexture
             _lastFileLoadAttempt = image;
             LoadResource(updateRects: false);
         }
-        else if (imageSource == ImageSource.Solid && !texture.IsValid())
-        {
-            //white, so the element's own colour is what shows
-            SetTexture(BaseTexture.CreateSolidColor(Color4.White));
-        }
 
         if (!isVisible || !texture.IsValid())
         {
@@ -93,11 +95,43 @@ public partial class UIImage : UITexture
 
         if (renderMode == ERenderMode.Sliced)
         {
-            texture.tDraw2DMatrixSliced(combinedMatrix, size, clipRect, color, sliceRect);
+            texture.tDraw2DMatrixSliced(combinedMatrix, size, clipRect, UITint.Current * color, sliceRect);
             return;
         }
 
-        texture.tDraw2DMatrix(combinedMatrix, size, clipRect, color);
+        DrawFitted(texture, combinedMatrix, size, clipRect, fit, UITint.Current * color);
+    }
+
+    public static void DrawFitted(BaseTexture texture, Matrix4x4 matrix, Vector2 box, RectangleF source, ImageFit fit,
+        Color4 color)
+    {
+        Vector2 region = new(source.Width, source.Height);
+
+        switch (fit)
+        {
+            case ImageFit.Contain:
+            {
+                float scale = MathF.Min(box.X / region.X, box.Y / region.Y);
+                Vector2 drawn = region * scale;
+                Vector2 offset = (box - drawn) / 2;
+                texture.tDraw2DMatrix(Matrix4x4.CreateTranslation(offset.X, offset.Y, 0) * matrix, drawn, source, color);
+                break;
+            }
+
+            case ImageFit.Cover:
+            {
+                float scale = MathF.Max(box.X / region.X, box.Y / region.Y);
+                Vector2 shown = box / scale;
+                Vector2 crop = (region - shown) / 2;
+                texture.tDraw2DMatrix(matrix, box, new RectangleF(source.X + crop.X, source.Y + crop.Y, shown.X, shown.Y),
+                    color);
+                break;
+            }
+
+            default:
+                texture.tDraw2DMatrix(matrix, box, source, color);
+                break;
+        }
     }
 
     //rects the layout never stated follow the texture; ones it did survive a swap

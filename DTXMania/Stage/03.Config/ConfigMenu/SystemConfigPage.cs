@@ -1,5 +1,5 @@
 using System.Diagnostics;
-using System.Windows.Forms;
+using NativeFileDialog.Extended;
 using DTXMania.Core;
 using DTXMania.SongDb;
 using DTXMania.UI.Config;
@@ -188,19 +188,13 @@ internal sealed class SystemConfigPage : ConfigPage
         return items;
     }
 
-    //todo: use nfd
+    private static readonly Dictionary<string, string> IniFilter = new() { ["ini files"] = "ini" };
+
     private void ImportConfig()
     {
-        using OpenFileDialog dialog = new()
-        {
-            InitialDirectory = ".\\",
-            FileName = "config.ini",
-            Filter = "ini files (*.ini)|*.ini",
-            FilterIndex = 2,
-            RestoreDirectory = true
-        };
+        string? path = NFD.OpenDialog(".", IniFilter);
 
-        if (dialog.ShowDialog() != DialogResult.OK)
+        if (string.IsNullOrEmpty(path))
         {
             Trace.TraceInformation("Cancel import of config");
             return;
@@ -208,8 +202,8 @@ internal sealed class SystemConfigPage : ConfigPage
 
         try
         {
-            CDTXMania.ConfigIni = new CConfigIni(dialog.FileName);
-            Trace.TraceInformation("Imported config from " + dialog.FileName);
+            CDTXMania.ConfigIni = new CConfigIni(path);
+            Trace.TraceInformation("Imported config from " + path);
 
             //rebuild the page so the displayed values reflect the imported config
             list.SetItems(Build());
@@ -222,23 +216,16 @@ internal sealed class SystemConfigPage : ConfigPage
 
     private void ExportConfig()
     {
-        using SaveFileDialog dialog = new()
-        {
-            InitialDirectory = ".\\",
-            FileName = "config.ini",
-            Filter = "ini files (*.ini)|*.ini",
-            FilterIndex = 2,
-            RestoreDirectory = true
-        };
+        string? path = NFD.SaveDialog(".", "config.ini", IniFilter);
 
-        if (dialog.ShowDialog() != DialogResult.OK)
+        if (string.IsNullOrEmpty(path))
         {
             Trace.TraceInformation("Cancel export of config");
             return;
         }
 
         //values are written to ConfigIni live as they change, so it is already in sync
-        CDTXMania.ConfigIni.tWrite(dialog.FileName);
-        Trace.TraceInformation("Exported config to " + dialog.FileName);
+        CDTXMania.ConfigIni.tWrite(path);
+        Trace.TraceInformation("Exported config to " + path);
     }
 }

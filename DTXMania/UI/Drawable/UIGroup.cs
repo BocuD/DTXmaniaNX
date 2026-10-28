@@ -2,17 +2,26 @@ using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using DTXMania.Core;
+using DTXMania.Core.Framework;
 using DTXMania.UI.Animation;
 using DTXMania.UI.DynamicElements;
 using DTXMania.UI.Inspector;
-using Hexa.NET.ImGui;
 using Newtonsoft.Json;
 
 namespace DTXMania.UI.Drawable;
 
-public class UIGroup : UIDrawable
+public partial class UIGroup : UIDrawable
 {
     [Themable] public bool sortByRenderOrder = true;
+
+    //multiplied into everything drawn inside the group
+    [Themable] public Color4 tint = Color4.White;
+
+    //camera distance in this group's pixels; children at +Z shrink towards the vanishing point. 0 is flat
+    [Themable] public float perspective;
+
+    //in this group's own coordinates
+    [Themable] public Vector2 vanishingPoint;
     public List<UIDrawable> children = [];
 
     private bool dirty = false;
@@ -87,7 +96,7 @@ public class UIGroup : UIDrawable
         component = componentPath;
     }
 
-    [AddChildMenu]
+    [AddChildMenu("Group/Group")]
     public static UIDrawable Create()
     {
         return new UIGroup("New UIGroup");
@@ -264,6 +273,11 @@ public class UIGroup : UIDrawable
         if (string.IsNullOrWhiteSpace(component))
         {
             component = $"Components/{componentName}.json";
+
+            if (ComponentPath() is { } existing && File.Exists(existing))
+            {
+                return;
+            }
         }
 
         EnsureContent();
@@ -350,13 +364,17 @@ public class UIGroup : UIDrawable
         }
 
         UpdateLocalTransformMatrix();
-        Matrix4x4 combinedMatrix = localTransformMatrix * parentMatrix;
+        Matrix4x4 combinedMatrix = perspective > 0.0f
+            ? PerspectiveMatrix() * localTransformMatrix * parentMatrix
+            : localTransformMatrix * parentMatrix;
 
         if (sortByRenderOrder && dirty)
         {
-            children.Sort((a, b) => a.renderOrder.CompareTo(b.renderOrder));
+            SortChildrenByRenderOrder();
             dirty = false;
         }
+
+        using UITint.Scope tinted = UITint.Push(tint);
 
         for (int index = 0; index < children.Count; index++)
         {
@@ -382,38 +400,13 @@ public class UIGroup : UIDrawable
         }
     }
 
-    //what a component is, where its children came from, and what editing it would change everywhere else
-    private void DrawComponentInspector()
+    public void SortChildrenByRenderOrder()
     {
-        if (!IsComponent)
-        {
-            return;
-        }
-
-        if (!ImGui.CollapsingHeader("Component", ImGuiTreeNodeFlags.DefaultOpen))
-        {
-            return;
-        }
-
-        ImGui.LabelText("Name", componentName);
-
-        string? path = ComponentPath();
-        bool inSkin = path != null && File.Exists(path);
-        ImGui.LabelText("Source", inSkin ? component : "Default skin");
-
-        ImGui.BeginDisabled(!inSkin);
-        if (ImGui.Button("Edit Component"))
-        {
-            ComponentEditor.Open(component, GetType());
-        }
-
-        ImGui.SameLine();
-        if (ImGui.Button("Reload Component"))
-        {
-            ReloadComponent();
-        }
-
-        ImGui.EndDisabled();
+        //OrderBy is stable, List.Sort is not
+        //the allocation here is fine because this only runs when children actually change
+        UIDrawable[] sorted = children.OrderBy(child => child.renderOrder).ToArray();
+        children.Clear();
+        children.AddRange(sorted);
     }
 
     public override void OnDeserialize()
@@ -440,31 +433,14 @@ public class UIGroup : UIDrawable
         children.Clear();
     }
 
-    public override void DrawInspector()
+    //depth goes into w for the divide and is flattened, so nothing in front of or behind the canvas is clipped
+    private Matrix4x4 PerspectiveMatrix()
     {
-        base.DrawInspector();
-        DrawComponentInspector();
-        ImGui.Checkbox("Sort by Render Order", ref sortByRenderOrder);
+        Matrix4x4 project = Matrix4x4.Identity;
+        project.M33 = 0.0f;
+        project.M34 = 1.0f / perspective;
 
-        if (ImGui.CollapsingHeader("Animator"))
-        {
-            if (animator == null)
-            {
-                if (ImGui.Button("Add Animator"))
-                {
-                    animator = new Animator();
-                }
-            }
-            else
-            {
-                animator.DrawInspector(this);
-
-                ImGui.Separator();
-                if (ImGui.Button("Remove Animator"))
-                {
-                    animator = null;
-                }
-            }
-        }
+        Vector3 centre = new(vanishingPoint, 0.0f);
+        return Matrix4x4.CreateTranslation(-centre) * project * Matrix4x4.CreateTranslation(centre);
     }
 }

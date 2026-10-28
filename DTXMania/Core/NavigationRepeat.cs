@@ -1,3 +1,4 @@
+using DTXMania.UI.Drawable;
 using FDK;
 using SlimDXKey = SlimDX.DirectInput.Key;
 
@@ -13,44 +14,11 @@ public sealed class NavigationRepeat
     private const int FirstRepeatMs = 400;
     private const int RepeatIntervalMs = 25;
 
-    private readonly SlimDXKey keyPrevious;
-    private readonly SlimDXKey keyNext;
-    private readonly EPad guitarPrevious;
-    private readonly EPad guitarNext;
-    private readonly EPad drumPrevious;
-    private readonly EPad drumNext;
-
-    private readonly (EPad Previous, EPad Next)? neck;
-
     //built on the first poll, since a consumer can be constructed before CDTXMania.Timer exists
     private CCounter? keyRepeatPrevious;
     private CCounter? keyRepeatNext;
     private CCounter? guitarRepeatPrevious;
     private CCounter? guitarRepeatNext;
-
-    private NavigationRepeat(SlimDXKey keyPrevious, SlimDXKey keyNext,
-        EPad guitarPrevious, EPad guitarNext, EPad drumPrevious, EPad drumNext,
-        (EPad Previous, EPad Next)? neck = null)
-    {
-        this.keyPrevious = keyPrevious;
-        this.keyNext = keyNext;
-        this.guitarPrevious = guitarPrevious;
-        this.guitarNext = guitarNext;
-        this.drumPrevious = drumPrevious;
-        this.drumNext = drumNext;
-        this.neck = neck;
-    }
-
-    public static NavigationRepeat Vertical() =>
-        new(SlimDXKey.UpArrow, SlimDXKey.DownArrow,
-            EPad.PickUp, EPad.PickDown, EPad.HT, EPad.LT, neck: (EPad.R, EPad.G));
-
-    public static NavigationRepeat VerticalNeck() =>
-        new(SlimDXKey.UpArrow, SlimDXKey.DownArrow, EPad.R, EPad.G, EPad.HT, EPad.LT);
-
-    public static NavigationRepeat Horizontal() =>
-        new(SlimDXKey.LeftArrow, SlimDXKey.RightArrow,
-            EPad.PickDown, EPad.PickUp, EPad.SD, EPad.FT);
 
     /// <summary>
     /// Runs <paramref name="onPrevious"/>/<paramref name="onNext"/> for the arrow keys and the guitar
@@ -58,7 +26,8 @@ public sealed class NavigationRepeat
     /// <paramref name="onDrumsPrevious"/>/<paramref name="onDrumsNext"/> when given, which is how the
     /// settings list reverses the direction while editing a value.
     /// </summary>
-    public void Poll(Action onPrevious, Action onNext, Action? onDrumsPrevious = null, Action? onDrumsNext = null)
+    public void Poll(UINavigationAxis axis, UIGuitarNavigation guitar, Action onPrevious, Action onNext,
+        Action? onDrumsPrevious = null, Action? onDrumsNext = null)
     {
         if (keyRepeatPrevious == null)
         {
@@ -68,15 +37,17 @@ public sealed class NavigationRepeat
             guitarRepeatNext = new CCounter(0, 0, 0, CDTXMania.Timer);
         }
 
+        bool vertical = axis == UINavigationAxis.Vertical;
+
         //passed straight through: wrapping them would allocate a closure per polled frame
-        keyRepeatPrevious.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(keyPrevious),
+        keyRepeatPrevious.tRepeatKey(
+            CDTXMania.InputManager.Keyboard.bKeyPressing(vertical ? SlimDXKey.UpArrow : SlimDXKey.LeftArrow),
             onPrevious, FirstRepeatMs, RepeatIntervalMs);
-        keyRepeatNext!.tRepeatKey(CDTXMania.InputManager.Keyboard.bKeyPressing(keyNext),
+        keyRepeatNext!.tRepeatKey(
+            CDTXMania.InputManager.Keyboard.bKeyPressing(vertical ? SlimDXKey.DownArrow : SlimDXKey.RightArrow),
             onNext, FirstRepeatMs, RepeatIntervalMs);
 
-        (EPad guitarPrevious, EPad guitarNext) = neck is { } pads && !CDTXMania.ConfigIni.bStrumScrollsMenus
-            ? pads
-            : (this.guitarPrevious, this.guitarNext);
+        (EPad guitarPrevious, EPad guitarNext) = GuitarPads(vertical, guitar);
 
         //the neck has no double duty, but a strum held under P or Y is on its way to deciding or
         //cancelling and must not scroll the list out from under that
@@ -88,8 +59,34 @@ public sealed class NavigationRepeat
         guitarRepeatNext!.tRepeatKey(guitarScrolls && CDTXMania.Pad.bPressingGB(guitarNext),
             onNext, FirstRepeatMs, RepeatIntervalMs);
 
-        if (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, drumPrevious)) (onDrumsPrevious ?? onPrevious)();
-        if (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, drumNext)) (onDrumsNext ?? onNext)();
+        if (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, vertical ? EPad.HT : EPad.SD))
+        {
+            (onDrumsPrevious ?? onPrevious)();
+        }
+
+        if (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, vertical ? EPad.LT : EPad.FT))
+        {
+            (onDrumsNext ?? onNext)();
+        }
+    }
+
+    private static (EPad Previous, EPad Next) GuitarPads(bool vertical, UIGuitarNavigation guitar)
+    {
+        bool neck = guitar switch
+        {
+            UIGuitarNavigation.Neck => true,
+            UIGuitarNavigation.Strum => false,
+
+            //the setting only covers moving up and down
+            _ => vertical && !CDTXMania.ConfigIni.bStrumScrollsMenus
+        };
+
+        if (neck)
+        {
+            return (EPad.R, EPad.G);
+        }
+
+        return vertical ? (EPad.PickUp, EPad.PickDown) : (EPad.PickDown, EPad.PickUp);
     }
 
     /// <summary>

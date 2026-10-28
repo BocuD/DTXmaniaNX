@@ -72,6 +72,10 @@ internal abstract class InstrumentConfigPage : ConfigPage
         "レーンフラッシュの表示 / 非表示。", "Toggle LaneFlush.",
         () => CDTXMania.ConfigIni.bLaneFlush[Idx], v => CDTXMania.ConfigIni.bLaneFlush[Idx] = v);
 
+    protected static CItemToggle ClassicJudgementItem() => Toggle("ClassicJudge",
+        "判定文字を旧表示にします。", "Shows the classic judgement text.",
+        () => CDTXMania.ConfigIni.bClassicJudgement, v => CDTXMania.ConfigIni.bClassicJudgement = v);
+
     /// <summary>
     /// Adds the shared display block: "Dark" (a preset reading the shared eDark) followed by the
     /// LaneDisp / JudgeLineDisp / LaneFlush items it drives.

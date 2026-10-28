@@ -6,6 +6,7 @@ using DTXMania.Core.Framework;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.DynamicElements;
 using DTXMania.UI.Item;
+using DTXMania.UI.Inspector;
 
 namespace DTXMania.UI.Config;
 
@@ -16,6 +17,9 @@ namespace DTXMania.UI.Config;
 /// </summary>
 internal class ConfigList : UIScrollItemsGroup, IUIItemSource
 {
+
+    [AddChildMenu("Game/Config/Config List")]
+    public new static UIDrawable Create() => new ConfigList();
     private const float RowSpacing = 67f;
 
     //where a text input sits within a row, matching where the component draws its value
@@ -338,7 +342,7 @@ internal class ConfigList : UIScrollItemsGroup, IUIItemSource
     /// </summary>
     private sealed class ConfigItemEditor(ConfigList list) : IUIInputHandler
     {
-        private readonly NavigationRepeat navigation = NavigationRepeat.Vertical();
+        private readonly NavigationRepeat navigation = new();
         private readonly Action increase = () => list.ChangeValue(true);
         private readonly Action decrease = () => list.ChangeValue(false);
 
@@ -355,7 +359,8 @@ internal class ConfigList : UIScrollItemsGroup, IUIItemSource
                 return;
             }
 
-            navigation.Poll(increase, decrease, decrease, increase);
+            navigation.Poll(UINavigationAxis.Vertical, UIGuitarNavigation.Default,
+                increase, decrease, decrease, increase);
         }
     }
 

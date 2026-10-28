@@ -31,7 +31,7 @@ internal sealed class ConfigAudioPanel : UIGroup
         position = Place;
         size = new Vector2(Width, Height);
 
-        UIImage background = AddChild(new UIImage(BaseTexture.CreateSolidColor(new Color4(1f, 1f, 1f, 0.8f))));
+        UIQuad background = AddChild(new UIQuad(new Color4(1f, 1f, 1f, 0.8f)));
         background.size = size;
         background.renderOrder = 0;
 
@@ -73,11 +73,6 @@ internal sealed class ConfigAudioPanel : UIGroup
         StringBuilder lines = new();
 
         lines.Append(audio.Backend);
-
-        if (audio.Legacy)
-        {
-            lines.Append(japanese ? " (旧)" : " (legacy)");
-        }
 
         if (audio.SampleRate > 0)
         {

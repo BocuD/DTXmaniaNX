@@ -99,7 +99,7 @@ public static partial class AudioMixer
                                     "(loading, or leaked)");
         }
 
-        ImGui.TextDisabled($"{audio.Backend}{(audio.Legacy ? " (legacy FDK)" : "")}"
+        ImGui.TextDisabled($"{audio.Backend}"
                            + $"{(audio.Mode.Length > 0 ? $" {audio.Mode}" : "")} on " +
                            $"{(audio.Output.Length > 0 ? audio.Output : "an unnamed device")}"
                            + $"{(audio.SampleRate > 0 ? $", {audio.SampleRate}Hz" : "")}");
@@ -107,7 +107,6 @@ public static partial class AudioMixer
         DrawBuffer(audio, Device.Latency);
 
         DrawLatency(audio, Device.Latency);
-        DrawDeviceSwap();
 
         ImGui.TextDisabled(CSystemSound.rLastPlayedExclusiveSystemSound is { } exclusive
             ? $"exclusive: {exclusive.strFilename}"
@@ -161,34 +160,6 @@ public static partial class AudioMixer
 
         ImGui.Text($"Hit to sound   {frame + latency.Ms:0.0}ms"
                    + $"   (frame {frame:0.0}ms)");
-    }
-
-    /// <summary>
-    /// Swaps between FDK's sound device and this layer's own, on the backend config already names. For
-    /// comparing the two by ear; goes when FDK's audio does.
-    /// </summary>
-    private static void DrawDeviceSwap()
-    {
-        //a rebuild frees and reloads every sound the chart is holding, which mid-song is a hang
-        bool duringSong = CDTXMania.StageManager?.rCurrentStage?.eStageID == CStage.EStage.Performance_6;
-        bool fdk = CDTXMania.ConfigIni.bUseFDKAudio;
-
-        ImGui.BeginDisabled(duringSong);
-
-        if (ImGui.Checkbox("Play through FDK's device", ref fdk))
-        {
-            CDTXMania.ConfigIni.bUseFDKAudio = fdk;
-            RetryOutput();
-            Reinitialize(AudioDeviceOptions.FromConfig(CDTXMania.ConfigIni));
-            CDTXMania.app.UpdateWindowTitle();
-        }
-
-        ImGui.EndDisabled();
-
-        if (duringSong)
-        {
-            ImGui.TextDisabled("Unavailable during a song");
-        }
     }
 
     private static void DrawClips(AudioGroup group, int count)

@@ -2,6 +2,7 @@ using DTXMania.Core;
 using DTXMania.UI.DynamicElements;
 using DTXMania.UI.Skin;
 using FDK;
+using DTXMania.UI.Inspector;
 
 namespace DTXMania.UI.Drawable;
 
@@ -45,6 +46,9 @@ public sealed class UIMenuItem
 /// </summary>
 public class UIMenu : UIItemsGroup, IUIItemSource
 {
+
+    [AddChildMenu("Group/Menu")]
+    public new static UIDrawable Create() => new UIMenu();
     private readonly List<UIMenuItem> entries = [];
 
     //runs when cancel is pressed with this menu focused, for menus that can be backed out of

@@ -12,6 +12,8 @@ public class CChip : IComparable<CChip>, ICloneable
 	internal EBGAType eBGA種別;
 	public EInstrumentPart eInstrumentPart = EInstrumentPart.UNKNOWN;
 	public EChannel nChannelNumber;
+	//guitar and bass notes: R 1, G 2, B 4, Y 8, P 16. 0 is an open note, -1 is any other chip
+	public int frets = -1;
 	public STDGBVALUE<float> nDistanceFromBar;
 	public int nIntegerValue;       // n整数値
 	public int nIntegerValue_InternalNumber; // n整数値_内部番号
@@ -23,7 +25,6 @@ public class CChip : IComparable<CChip>, ICloneable
 	public int nLag;                // 2011.2.1 yyagi
 	public int nCurrentComboForGhost; // 2015.9.29 chnmr0 fork
 	internal CAVI rAVI;
-	//internal CDTX.CDirectShow rDShow;
 	internal CDTX.CAVIPAN rAVIPan;
 	internal CDTX.CBGA rBGA;
 	internal CDTX.CBGAPAN rBGAPan;
@@ -464,6 +465,7 @@ public class CChip : IComparable<CChip>, ICloneable
 	public void t初期化()
 	{
 		nChannelNumber = 0;
+		frets = -1;
 		nIntegerValue = 0;
 		nIntegerValue_InternalNumber = 0;
 		db実数値 = 0.0;
@@ -587,11 +589,22 @@ public class CChip : IComparable<CChip>, ICloneable
 
 	public static void ComputeScrollMultipliers(STDGBVALUE<double> dbPerformanceScrollSpeed, out double multDrums, out double multGuitar, out double multBass)
 	{
+		multDrums = ScrollMultiplier(EInstrumentPart.DRUMS, dbPerformanceScrollSpeed.Drums);
+		multGuitar = ScrollMultiplier(EInstrumentPart.GUITAR, dbPerformanceScrollSpeed.Guitar);
+		multBass = ScrollMultiplier(EInstrumentPart.BASS, dbPerformanceScrollSpeed.Bass);
+	}
+
+	//distance moved per ms
+	public static double ScrollMultiplier(EInstrumentPart part, double scrollSpeed)
+	{
 		const double speed = 286;   // BPM150の時の1小節の長さ[dot]
 		//XGのHS4.5が1289。思えばBPMじゃなくて拍の長さが関係あるよね。
-		multDrums = (dbPerformanceScrollSpeed.Drums + 1.0) * 0.5 * 37.5 * speed / 60000.0;
-		multGuitar = (dbPerformanceScrollSpeed.Guitar + 1.0) * 0.5 * 0.5 * 37.5 * speed * 1.52f / 60000.0; //todo: verify if this is the correct approach to fix guitar scroll speed
-		multBass = (dbPerformanceScrollSpeed.Bass + 1.0) * 0.5 * 0.5 * 37.5 * speed * 1.52f / 60000.0; //todo: verify if this is the correct approach to fix guitar scroll speed
+		if (part == EInstrumentPart.DRUMS)
+		{
+			return (scrollSpeed + 1.0) * 0.5 * 37.5 * speed / 60000.0;
+		}
+
+		return (scrollSpeed + 1.0) * 0.5 * 0.5 * 37.5 * speed * 1.52f / 60000.0; //todo: verify if this is the correct approach to fix guitar scroll speed
 	}
 
 	public void ComputeDistanceFromBar(long nCurrentTime, double multDrums, double multGuitar, double multBass)
@@ -663,6 +676,52 @@ public class CChip : IComparable<CChip>, ICloneable
 	public object Clone()
 	{
 		return MemberwiseClone();
+	}
+
+	public static int FretsOf(EChannel channel)
+	{
+		int index = (int)channel;
+		return index >= 0 && index < fretsByChannel.Length ? fretsByChannel[index] : -1;
+	}
+
+	//the index is the fret bits, eg: 5 is RxBxx
+	private static readonly EChannel[] guitarNotes =
+	[
+		EChannel.Guitar_Open, EChannel.Guitar_Rxxxx, EChannel.Guitar_xGxxx, EChannel.Guitar_RGxxx,
+		EChannel.Guitar_xxBxx, EChannel.Guitar_RxBxx, EChannel.Guitar_xGBxx, EChannel.Guitar_RGBxx,
+		EChannel.Guitar_xxxYx, EChannel.Guitar_RxxYx, EChannel.Guitar_xGxYx, EChannel.Guitar_RGxYx,
+		EChannel.Guitar_xxBYx, EChannel.Guitar_RxBYx, EChannel.Guitar_xGBYx, EChannel.Guitar_RGBYx,
+		EChannel.Guitar_xxxxP, EChannel.Guitar_RxxxP, EChannel.Guitar_xGxxP, EChannel.Guitar_RGxxP,
+		EChannel.Guitar_xxBxP, EChannel.Guitar_RxBxP, EChannel.Guitar_xGBxP, EChannel.Guitar_RGBxP,
+		EChannel.Guitar_xxxYP, EChannel.Guitar_RxxYP, EChannel.Guitar_xGxYP, EChannel.Guitar_RGxYP,
+		EChannel.Guitar_xxBYP, EChannel.Guitar_RxBYP, EChannel.Guitar_xGBYP, EChannel.Guitar_RGBYP
+	];
+
+	private static readonly EChannel[] bassNotes =
+	[
+		EChannel.Bass_Open, EChannel.Bass_Rxxxx, EChannel.Bass_xGxxx, EChannel.Bass_RGxxx,
+		EChannel.Bass_xxBxx, EChannel.Bass_RxBxx, EChannel.Bass_xGBxx, EChannel.Bass_RGBxx,
+		EChannel.Bass_xxxYx, EChannel.Bass_RxxYx, EChannel.Bass_xGxYx, EChannel.Bass_RGxYx,
+		EChannel.Bass_xxBYx, EChannel.Bass_RxBYx, EChannel.Bass_xGBYx, EChannel.Bass_RGBYx,
+		EChannel.Bass_xxxxP, EChannel.Bass_RxxxP, EChannel.Bass_xGxxP, EChannel.Bass_RGxxP,
+		EChannel.Bass_xxBxP, EChannel.Bass_RxBxP, EChannel.Bass_xGBxP, EChannel.Bass_RGBxP,
+		EChannel.Bass_xxxYP, EChannel.Bass_RxxYP, EChannel.Bass_xGxYP, EChannel.Bass_RGxYP,
+		EChannel.Bass_xxBYP, EChannel.Bass_RxBYP, EChannel.Bass_xGBYP, EChannel.Bass_RGBYP
+	];
+
+	private static readonly int[] fretsByChannel = FretTable();
+
+	private static int[] FretTable()
+	{
+		int[] table = new int[256];
+		Array.Fill(table, -1);
+		for (int frets = 0; frets < guitarNotes.Length; frets++)
+		{
+			table[(int)guitarNotes[frets]] = frets;
+			table[(int)bassNotes[frets]] = frets;
+		}
+
+		return table;
 	}
 
 }

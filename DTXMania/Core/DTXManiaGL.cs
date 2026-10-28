@@ -5,6 +5,7 @@ using DTXMania.UI;
 using DTXMania.UI.Inspector;
 using DTXMania.UI.OpenGL;
 using DTXMania.UI.Text;
+using FDK;
 using Hexa.NET.GLFW;
 using Hexa.NET.ImGui;
 using Silk.NET.OpenGL;
@@ -128,6 +129,7 @@ public sealed class DTXManiaGL : OpenGlGame
         
         mania.KeyPress(key, mods);
         TextInput.KeyPressed(key, mods);
+        (CDTXMania.InputManager?.Keyboard as CInputGlfwKeyboard)?.OnKeyEvent(Glue.SlimDXGLFWGlue.GLFWKeyToSlimDXKey(key), true);
     }
 
     public override void KeyRepeat(GlfwKey key, GlfwMod mods)
@@ -148,11 +150,12 @@ public sealed class DTXManiaGL : OpenGlGame
     public override void PointerButtonChanged(int button, bool down, GlfwMod mods)
     {
         PointerInput.ButtonChanged(button, down, mods);
+        (CDTXMania.InputManager?.Mouse as CInputGlfwMouse)?.OnButtonEvent(button, down);
     }
 
     public override void KeyUp(GlfwKey key, GlfwMod mods)
     {
-
+        (CDTXMania.InputManager?.Keyboard as CInputGlfwKeyboard)?.OnKeyEvent(Glue.SlimDXGLFWGlue.GLFWKeyToSlimDXKey(key), false);
     }
 
     public override void WindowHandleUpdated(IntPtr newHandle)

@@ -7,6 +7,7 @@ using DTXMania.UI.Config;
 using DTXMania.UI.Drawable;
 using FDK;
 using Newtonsoft.Json.Linq;
+using DTXMania.UI.Inspector;
 
 namespace DTXMania;
 
@@ -16,6 +17,9 @@ namespace DTXMania;
 /// </summary>
 public class QuickMenu : UIGroup
 {
+
+    [AddChildMenu("Game/Song Select/Quick Menu")]
+    public new static UIDrawable Create() => new QuickMenu();
     private const string OpenClip = "open";
     private const string CloseClip = "close";
 
@@ -144,10 +148,9 @@ public class QuickMenu : UIGroup
         description.position = new Vector3(141 - 400, -138, 0);
         description.renderOrder = 1;
 
-        root.AddChild(new UIImage
+        root.AddChild(new UIQuad
         {
             name = "Dim",
-            imageSource = ImageSource.Solid,
             color = new Color4(0.0f, 0.0f, 0.0f, 0.0f),
             size = new Vector2(1281, 721),
             pivot = new Vector2(0.5f, 0.5f),

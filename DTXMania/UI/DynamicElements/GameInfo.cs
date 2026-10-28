@@ -16,6 +16,17 @@ public sealed class GameInfo
 
     //0 = drums, 1 = guitar, 2 = bass
     [DataField] public int CurrentInstrument => CDTXMania.GetCurrentInstrument();
+    [DataField] public bool IsDrums => CDTXMania.GetCurrentInstrument() == 0;
+    [DataField] public CDTX.STHASCHIPS HasChips => CDTXMania.DTX?.bHasChips ?? default;
+
+    [DataField] public PlayerFlags Playing
+    {
+        get
+        {
+            CStagePerfCommonScreen? stage = CDTXMania.StageManager?.rCurrentStage as CStagePerfCommonScreen;
+            return stage == null ? default : stage.Playing;
+        }
+    }
 
     [DataField] public int Fps => CDTXMania.FPS?.nCurrentFPS ?? 0;
 }

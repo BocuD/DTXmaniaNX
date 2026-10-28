@@ -1,4 +1,4 @@
-using System.Windows.Forms;
+using NativeFileDialog.Extended;
 using DTXMania.Core;
 using DTXMania.UI.Config;
 using DTXMania.UI.Item;
@@ -99,14 +99,8 @@ internal sealed class SongPathsPage : ConfigPage
     /// <summary>Shows the system folder picker starting at <paramref name="start"/>; null if cancelled.</summary>
     public static string? PickFolder(string start)
     {
-        using FolderBrowserDialog dialog = new()
-        {
-            UseDescriptionForTitle = true,
-            Description = CDTXMania.isJapanese ? "曲フォルダの選択" : "Select a song folder",
-            SelectedPath = start
-        };
-
-        return dialog.ShowDialog() == DialogResult.OK ? dialog.SelectedPath : null;
+        string? picked = NFD.PickFolder(start);
+        return string.IsNullOrEmpty(picked) ? null : picked;
     }
 
     private void Add()

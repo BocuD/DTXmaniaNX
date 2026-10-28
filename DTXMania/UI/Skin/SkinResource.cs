@@ -48,7 +48,7 @@ public struct SkinResource
             return string.Empty;
         }
 
-        return Path.Combine(skin.basePath, SkinDescriptor.GetResourceFolder(type), path);
+        return Path.Combine(skin.basePath, SkinDescriptor.GetResourceFolder(type), DataPath.Normalize(path));
     }
 
     public bool Exists(ResourceType type) => Resolve(type) is { Length: > 0 } full && File.Exists(full);

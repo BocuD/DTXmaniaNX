@@ -64,7 +64,7 @@ public class StageOptionsWindow
 
         if (ImGui.Button("Restart"))
         {
-            screen.tRestartForPreview();
+            screen.Restart();
         }
 
         ImGui.SameLine();

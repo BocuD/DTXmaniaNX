@@ -5,7 +5,6 @@ using System.Numerics;
 using System.Reflection;
 using System.Runtime;
 using System.Text;
-using System.Windows.Forms;
 using DTXMania.Core.Audio;
 using DTXMania.Core.Framework;
 using DTXMania.Core.OpenGL;
@@ -160,10 +159,36 @@ internal partial class CDTXMania
 
     public static ResourceManager Resources { get; private set; }
 
-    public static SongDb.SongDb SongDb { get; private set; }
+    //null in compact mode
+    public static SongDb.SongDb? SongDb { get; private set; }
 
     public static string executableDirectory { get; private set; }
     public static string strCompactModeFile { get; private set; }
+
+    //a chart path as the first argument plays only that chart, then exits
+    public static void ReadCommandLine()
+    {
+        string[] args = Environment.GetCommandLineArgs();
+        if (args.Length > 1 && !args[1].StartsWith('-') && File.Exists(args[1]))
+        {
+            bCompactMode = true;
+            strCompactModeFile = Path.GetFullPath(args[1]);
+        }
+    }
+
+    //stands in for what song select would have picked
+    public static void SelectCompactModeChart()
+    {
+        CChartData chart = new();
+        chart.FileInformation.AbsoluteFilePath = strCompactModeFile;
+        chart.FileInformation.AbsoluteFolderPath = Path.GetDirectoryName(strCompactModeFile) + Path.DirectorySeparatorChar;
+
+        SongNode song = new(null, SongNode.ENodeType.SONG) { title = Path.GetFileNameWithoutExtension(strCompactModeFile) };
+        song.charts[0] = chart;
+        song.chartCount = 1;
+
+        UpdateSelection(song, chart, 0);
+    }
     public static CTimer Timer { get; private set; }
     
     public static GameRenderTarget? GameRenderTarget =>
@@ -211,10 +236,9 @@ internal partial class CDTXMania
         //-----------------
         // BEGIN #23629 2010.11.13 from: デバッグ時は Application.ExecutablePath が ($SolutionDir)/bin/x86/Debug/ などになり System/ の読み込みに失敗するので、カレントディレクトリを採用する。（プロジェクトのプロパティ→デバッグ→作業ディレクトリが有効になる）
 #if DEBUG
-        executableDirectory = Environment.CurrentDirectory + @"\";
+        executableDirectory = Environment.CurrentDirectory + Path.DirectorySeparatorChar;
 #else
-        executableDirectory =
-            Path.GetDirectoryName(Application.ExecutablePath) + @"\";	// #23629 2010.11.9 yyagi: set correct pathname where DTXManiaGR.exe is.
+        executableDirectory = AppContext.BaseDirectory;
 #endif
         // END #23629 2010.11.13 from
         //-----------------
@@ -265,7 +289,7 @@ internal partial class CDTXMania
                     "DTXManiaLog.txtへの書き込みができませんでした。書き込みできるようにしてから、再度起動してください。",
                     "Failed to write DTXManiaLog.txt. Please set it writable and try again."
                 };
-                MessageBox.Show(mes_writeErr[c], "DTXMania boot error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                NativeMessageBox.Show("DTXMania boot error", mes_writeErr[c]);
                 Environment.Exit(1);
             }
         }
@@ -393,29 +417,24 @@ internal partial class CDTXMania
         }
     }
 
-    public void Update()
-    {
-    }
-
     //held so the per-frame output check does not allocate a delegate
     private static readonly Func<AudioDeviceOptions> audioSettings = () => AudioDeviceOptions.FromConfig(ConfigIni);
 
-    public void Draw()
+    //the frame that finishes startup still draws as a startup frame
+    private bool startupFrame = true;
+
+    public void Update()
     {
         PumpMainThreadActions();
 
-        UICanvas.Place(persistentUIGroup, UiCanvasFit.Fill);
-
-
-        if (!startupFinished)
+        startupFrame = !startupFinished;
+        if (startupFrame)
         {
             StartupTick();
-            
-            StageManager?.DrawStage();
-            persistentUIGroup.Draw(Matrix4x4.Identity);
+            StageManager?.UpdateStage();
             return;
         }
-        
+
         Timer.tUpdate();
         AudioMixer.Timer.tUpdate();
 
@@ -487,7 +506,7 @@ internal partial class CDTXMania
             Thread.Sleep(ConfigIni.nSleepNMsEveryFrame); ///?????
         }
         
-        //input is read once, here, by whoever holds focus; stages and elements act on it as they draw
+        //input is read once, here, by whoever holds focus
         UIFocus.Dispatch();
 
         //after the dispatch, so what it asks a stage for is not overwritten by the frame's own input
@@ -498,6 +517,22 @@ internal partial class CDTXMania
         //input nobody was listening for is dropped rather than delivered late
         TextInput.Clear();
         PointerInput.ClearEdges();
+
+        FrameProfiler.Begin(FrameSection.StageUpdate);
+        StageManager.UpdateStage();
+        FrameProfiler.End(FrameSection.StageUpdate);
+    }
+
+    public void Draw()
+    {
+        UICanvas.Place(persistentUIGroup, UiCanvasFit.Fill);
+
+        if (startupFrame)
+        {
+            StageManager?.DrawStage();
+            persistentUIGroup.Draw(Matrix4x4.Identity);
+            return;
+        }
 
         FrameProfiler.Begin(FrameSection.StageDraw);
 

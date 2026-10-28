@@ -28,7 +28,7 @@ public abstract class UITexture : UIDrawable
     protected virtual Vector2 ContentSize(BaseTexture t) => new(t.Width, t.Height);
 
     /// <summary>What the current texture covers, whatever <see cref="UIDrawable.size"/> was claimed as.</summary>
-    public Vector2 MeasuredSize => ContentSize(texture);
+    public override Vector2 MeasuredSize => ContentSize(texture);
 
     public override void Draw(Matrix4x4 parentMatrix)
     {
@@ -39,7 +39,7 @@ public abstract class UITexture : UIDrawable
 
         UpdateLocalTransformMatrix();
         Matrix4x4 combinedMatrix = localTransformMatrix * parentMatrix;
-        texture.tDraw2DMatrix(combinedMatrix, size, new RectangleF(0, 0, texture.Width, texture.Height), color);
+        texture.tDraw2DMatrix(combinedMatrix, size, new RectangleF(0, 0, texture.Width, texture.Height), UITint.Current * color);
     }
 
     public override void Dispose()

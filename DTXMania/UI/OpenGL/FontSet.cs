@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text;
 using SkiaSharp;
 
@@ -24,6 +25,8 @@ internal sealed class FontSet : IDisposable
 
     private readonly SKTypeface primaryTypeface;
 
+    public float LetterSpacing { get; init; }
+
     public FontSet(SKTypeface typeface, Func<SKTypeface, SKFont> makeFont)
     {
         this.makeFont = makeFont;
@@ -35,16 +38,30 @@ internal sealed class FontSet : IDisposable
 
     public float Measure(string line) => Width(Split(line));
 
-    public static float Width(List<Run> runs)
-    {
-        float width = 0.0f;
+    public float Width(List<Run> runs) => Place(runs, 0.0f, null);
 
+    public float Place(List<Run> runs, float x, Action<string, SKFont, float>? draw)
+    {
         foreach (Run run in runs)
         {
-            width += run.Font.MeasureText(run.Text);
+            if (LetterSpacing == 0.0f)
+            {
+                draw?.Invoke(run.Text, run.Font, x);
+                x += run.Font.MeasureText(run.Text);
+                continue;
+            }
+
+            //spaced characters are placed one by one, so no kerning happens between them
+            TextElementEnumerator elements = StringInfo.GetTextElementEnumerator(run.Text);
+            while (elements.MoveNext())
+            {
+                string element = elements.GetTextElement();
+                draw?.Invoke(element, run.Font, x);
+                x += run.Font.MeasureText(element) + LetterSpacing;
+            }
         }
 
-        return width;
+        return x;
     }
 
     public List<Run> Split(string line)

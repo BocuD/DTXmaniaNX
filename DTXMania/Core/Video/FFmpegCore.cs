@@ -8,11 +8,15 @@ public class FFmpegCore
 {
     public static bool IsInitialized { get; private set; } = false;
     
+    public static string[] LibraryFiles { get; } = new[] { "avutil", "avcodec", "avformat", "swscale", "swresample" }
+        .Select(name => Path.Combine(NativeLibraries.DirectoryFor("ffmpeg"), FileName(name, DynamicallyLoadedBindings.LibraryVersionMap[name])))
+        .ToArray();
+
     public static void Initialize()
     {
         try
         {
-            DynamicallyLoadedBindings.LibrariesPath = "FFmpeg/bin/x64";
+            DynamicallyLoadedBindings.LibrariesPath = NativeLibraries.DirectoryFor("ffmpeg");
             DynamicallyLoadedBindings.ThrowErrorIfFunctionNotFound = true;
             DynamicallyLoadedBindings.Initialize();
             
@@ -25,6 +29,21 @@ public class FFmpegCore
             Trace.TraceError("FFmpeg initialization failed: " + ex.Message);
             IsInitialized = false;
         }
+    }
+
+    private static string FileName(string name, int version)
+    {
+        if (OperatingSystem.IsWindows())
+        {
+            return $"{name}-{version}.dll";
+        }
+
+        if (OperatingSystem.IsMacOS()) 
+        {
+            return $"lib{name}.{version}.dylib";
+        }
+
+        return  $"lib{name}.so.{version}";
     }
 
     //take in error code, call ffmpeg.av_strerror to get the error message

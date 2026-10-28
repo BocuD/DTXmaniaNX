@@ -7,6 +7,7 @@ using System.Globalization;
 using DTXMania.Core;
 using DTXMania.Core.Audio;
 using DTXMania.UI.Drawable;
+using DTXMania.UI.DynamicElements;
 using FDK;
 
 namespace DTXMania;
@@ -1030,9 +1031,9 @@ public class CDTX : CActivity
 
     public struct STHASCHIPS
     {
-        public bool Drums;
-        public bool Guitar;
-        public bool Bass;
+        [DataField] public bool Drums;
+        [DataField] public bool Guitar;
+        [DataField] public bool Bass;
 
         public bool HHOpen;
         public bool LP;
@@ -2813,12 +2814,14 @@ public class CDTX : CActivity
                     case ERandomMode.RANDOM: // 1小節単位でレーンのR/G/Bがランダムに入れ替わる
                         chip.nChannelNumber = (EChannel)(((int)nランダム化前チャンネル番号 & 0xF0) |
                                                          nランダムレーン候補[n小節内乱数6通り, (int)nランダム化前チャンネル番号 & 0x07]);
+                        chip.frets = CChip.FretsOf(chip.nChannelNumber);
                         continue; // goto Label_02C4;
 
                     case ERandomMode.SUPERRANDOM: // チップごとにR/G/Bがランダムで入れ替わる(レーンの本数までは変わらない)。
                         chip.nChannelNumber = (EChannel)(((int)nランダム化前チャンネル番号 & 0xF0) |
                                                          nランダムレーン候補[CDTXMania.Random.Next(6),
                                                              (int)nランダム化前チャンネル番号 & 0x07]);
+                        chip.frets = CChip.FretsOf(chip.nChannelNumber);
                         continue; // goto Label_02C4;
 
                     case ERandomMode.HYPERRANDOM: // レーンの本数も変わる
@@ -2948,6 +2951,7 @@ public class CDTX : CActivity
 
                 Label_02B2:
                 chip.nChannelNumber = (EChannel)(((int)nランダム化前チャンネル番号 & 0xF0) | n新RGBレーンビットパターン);
+                chip.frets = CChip.FretsOf(chip.nChannelNumber);
 //				Label_02C4:
 //					GOTO_END++;		// goto用のダミーコード
             }
@@ -3066,7 +3070,7 @@ public class CDTX : CActivity
 
         strFileNameFullPath = Path.GetFullPath(strFileName);
         this.strFileName = Path.GetFileName(strFileNameFullPath);
-        strFolderName = Path.GetDirectoryName(strFileNameFullPath) + @"\";
+        strFolderName = Path.GetDirectoryName(strFileNameFullPath) + Path.DirectorySeparatorChar;
         string ext = Path.GetExtension(this.strFileName).ToLower();
         if (!string.IsNullOrEmpty(ext))
         {
@@ -4650,6 +4654,16 @@ public class CDTX : CActivity
 
     bool lastLineWasChipLocation = false;
 
+    //text commands like #TITLE keep their '\'
+    private static readonly string[] filePathCommandPrefixes =
+    [
+        "PATH", "STAGEFILE", "PREVIEW", "PREIMAGE", "PREMOVIE", "BACKGROUND", "WALL", "SOUND_", "MIDIFILE",
+        "WAV", "BMP", "AVI", "VIDEO", "RESULTIMAGE", "RESULTMOVIE", "RESULTSOUND"
+    ];
+
+    private static bool IsFilePathCommand(string command) =>
+        filePathCommandPrefixes.Any(prefix => command.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
+
     private static readonly Dictionary<string, Action<CDTX, string>> commandHandlers = new(StringComparer.OrdinalIgnoreCase)
     {
         { "PATH_WAV", (dtx, param) => dtx.PATH_WAV = param },
@@ -4813,6 +4827,11 @@ public class CDTX : CActivity
         #endregion
         else if (!bstackIFからENDIFをスキップする.Peek()) // IF～ENDIF をスキップするなら以下はすべて無視。
         {
+            if (IsFilePathCommand(strCommand))
+            {
+                strParameter = DataPath.Normalize(strParameter);
+            }
+
             if (commandHandlers.TryGetValue(strCommand, out Action<CDTX, string>? handler))
             {
                 handler(this, strParameter);
@@ -7014,6 +7033,7 @@ public class CDTX : CActivity
                     chip.eInstrumentPart = EInstrumentPart.BASS;
                     break;
             }
+            chip.frets = CChip.FretsOf(nChannelNumber);
             #endregion
 
             #region [ 無限定義への対応 → 内部番号の取得。]

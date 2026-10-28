@@ -1,4 +1,5 @@
-﻿using DTXMania.Core;
+﻿using System.Numerics;
+using DTXMania.Core;
 
 namespace DTXMania;
 
@@ -6,7 +7,7 @@ internal class CActPerfGuitarScore : CActPerfCommonScore
 {
     // コンストラクタ
 
-    public CActPerfGuitarScore()
+    public CActPerfGuitarScore(PerformanceData[] parts) : base(parts)
     {
         bActivated = false;
     }
@@ -42,7 +43,7 @@ internal class CActPerfGuitarScore : CActPerfCommonScore
 
     // CActivity 実装（共通クラスからの差分のみ）
 
-    public override unsafe int OnUpdateAndDraw()
+    public override void Update()
     {
         if ( bActivated)
         {
@@ -53,7 +54,8 @@ internal class CActPerfGuitarScore : CActPerfCommonScore
             }
             if (CDTXMania.stagePerfGuitarScreen.bIsTrainingMode)
             {
-                n現在表示中のスコア[0] = 0;
+                n現在表示中のスコア[1] = 0;
+                n現在表示中のスコア[2] = 0;
             }
             else
             {
@@ -66,23 +68,21 @@ internal class CActPerfGuitarScore : CActPerfCommonScore
                 {
                     for (int j = 1; j < 3; j++)
                     {
-                        n現在表示中のスコア[j] += nスコアの増分[j];
-
-                        if (n現在表示中のスコア[j] > (long)nCurrentTrueScore[j])
-                            n現在表示中のスコア[j] = (long)nCurrentTrueScore[j];
+                        RollStep(j);
                     }
                     n進行用タイマ += 10;
                 }
             }
-            for( int j = 1; j < 3; j++ )
-            {
-                if ( CDTXMania.DTX.bHasChips[j] && n本体X[j] != 0 )
-                {
-                    tDrawScore(n本体X[j], n本体Y, n現在表示中のスコア[j]);
-                }
-            }
         }
-        return 0;
+    }
+
+    public override void Draw(Matrix4x4 origin, EInstrumentPart part)
+    {
+        int j = (int)part;
+        if ( bActivated && CDTXMania.DTX.bHasChips[j] && n本体X[j] != 0 )
+        {
+            tDrawScore(origin, 373, n本体Y, n現在表示中のスコア[j]);
+        }
     }
 
     // Other

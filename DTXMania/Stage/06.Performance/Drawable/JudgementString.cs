@@ -42,8 +42,8 @@ public class JudgementString : UIGroup
 
     private EJudgement judgement = EJudgement.Perfect;
     
-    [AddChildMenu]
-    public static JudgementString Create()
+    [AddChildMenu("Game/Performance/Judgement String")]
+    public new static JudgementString Create()
     {
         return new JudgementString();
     }

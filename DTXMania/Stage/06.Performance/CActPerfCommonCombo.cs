@@ -1,3 +1,4 @@
+using System.Numerics;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using DTXMania.Core;
@@ -7,97 +8,8 @@ namespace DTXMania;
 
 internal class CActPerfCommonCombo : CActivity
 {
-    // プロパティ
-
-    public STCOMBO nCurrentCombo;
-    public struct STCOMBO
-    {
-        public CActPerfCommonCombo act;
-
-        public int this[int index]
-        {
-            get
-            {
-                switch (index)
-                {
-                    case 0:
-                        return Drums;
-
-                    case 1:
-                        return Guitar;
-
-                    case 2:
-                        return Bass;
-                }
-                throw new IndexOutOfRangeException();
-            }
-            set
-            {
-                switch (index)
-                {
-                    case 0:
-                        Drums = value;
-                        return;
-
-                    case 1:
-                        Guitar = value;
-                        return;
-
-                    case 2:
-                        Bass = value;
-                        return;
-                }
-                throw new IndexOutOfRangeException();
-            }
-        }
-        public int Drums
-        {
-            get => drums;
-            set
-            {
-                drums = value;
-                if (drums > HighestValue.Drums)
-                {
-                    HighestValue.Drums = drums;
-                }
-                act.status.Drums.nCOMBO値 = drums;
-                act.status.Drums.n最高COMBO値 = HighestValue.Drums;
-            }
-        }
-        public int Guitar
-        {
-            get => guitar;
-            set
-            {
-                guitar = value;
-                if (guitar > HighestValue.Guitar)
-                {
-                    HighestValue.Guitar = guitar;
-                }
-                act.status.Guitar.nCOMBO値 = guitar;
-                act.status.Guitar.n最高COMBO値 = HighestValue.Guitar;
-            }
-        }
-        public int Bass
-        {
-            get => bass;
-            set
-            {
-                bass = value;
-                if (bass > HighestValue.Bass)
-                {
-                    HighestValue.Bass = bass;
-                }
-                act.status.Bass.nCOMBO値 = bass;
-                act.status.Bass.n最高COMBO値 = HighestValue.Bass;
-            }
-        }
-        public STDGBVALUE<int> HighestValue;
-
-        private int drums;
-        private int guitar;
-        private int bass;
-    }
+    private readonly PerformanceData[] parts;
+    private PerformanceData DrumsData => parts[(int)EInstrumentPart.DRUMS];
 
     protected enum EEvent { 非表示, 数値更新, 同一数値, ミス通知 }
     protected enum EMode { 非表示中, 進行表示中, 残像表示中 }
@@ -187,11 +99,9 @@ internal class CActPerfCommonCombo : CActivity
         public class CSTAT
         {
             public EMode e現在のモード;
-            public int nCOMBO値;
             public long nコンボが切れた時刻;
             public int nジャンプインデックス値;
             public int n現在表示中のCOMBO値;
-            public int n最高COMBO値;
             public int n残像表示中のCOMBO値;
             public long n前回の時刻_ジャンプ用;
         }
@@ -200,8 +110,9 @@ internal class CActPerfCommonCombo : CActivity
 
     // コンストラクタ
 
-    public CActPerfCommonCombo()
+    public CActPerfCommonCombo(PerformanceData[] parts)
     {
+        this.parts = parts;
         bActivated = false;
 
         // 180度分のジャンプY座標差分を取得。(0度: 0 → 90度:-15 → 180度: 0)
@@ -222,10 +133,10 @@ internal class CActPerfCommonCombo : CActivity
 
     // メソッド
 
-    protected virtual void tDrawCombo_Drums(int nCombo値, int nジャンプインデックス)
+    protected virtual void tDrawCombo_Drums(Matrix4x4 origin, int nCombo値, int nジャンプインデックス)
     {
     }
-    protected virtual void tDrawCombo_Drums(int nCombo値, int nジャンプインデックス, int nX中央位置px, int nY上辺位置px)
+    protected virtual void tDrawCombo_Drums(Matrix4x4 origin, int nCombo値, int nジャンプインデックス, int nX中央位置px, int nY上辺位置px)
     {
 
         #region [ 事前チェック。]
@@ -258,15 +169,12 @@ internal class CActPerfCommonCombo : CActivity
 
         #region [ n位の数[] を、"COMBO" → 1の位 → 10の位 … の順に、右から左へ向かって順番に表示する。]
         //-----------------
-        const int n1桁ごとのジャンプの遅れ = 10;	// 1桁につき 50 インデックス遅れる
 
         int n数字とCOMBOを合わせた画像の全長px = ((nドラムコンボの幅) * n桁数);
         int x = nX中央位置px;
         int y = (nY上辺位置px + nドラムコンボの高さ) - nドラムコンボのCOMBO文字の高さ;
-        int y2 = (nY上辺位置px) - nドラムコンボのCOMBO文字の高さ;
         int nJump = nジャンプインデックス - (n桁数);
         int y動作差分 = 0;
-        //this.ctコンボ.tUpdateLoop();
 
         if ((nJump >= 0) && (nJump < 180))
         {
@@ -287,18 +195,17 @@ internal class CActPerfCommonCombo : CActivity
 
         if (txCOMBOドラム != null)
         {
-            nコンボカウント.Drums = nCurrentCombo.Drums / 100;
+            nコンボカウント.Drums = DrumsData.Combo / 100;
 
             #region [ "COMBO" の拡大率を設定。]
             //-----------------
             float f拡大率 = 1.0f;
 
-            if ((nCurrentCombo.Drums > (nCurrentCombo.Drums / 100) + 100) && bn00コンボに到達した[nコンボカウント.Drums].Drums == false && (nジャンプインデックス >= 0 && nジャンプインデックス < 180))
+            if ((DrumsData.Combo > (DrumsData.Combo / 100) + 100) && bn00コンボに到達した[nコンボカウント.Drums].Drums == false && (nジャンプインデックス >= 0 && nジャンプインデックス < 180))
             {
                 f拡大率 = 1.22f - (((float)nジャンプ差分値[nジャンプインデックス]) / 180.0f);		// f拡大率 = 1.0 → 1.3333... → 1.0
             }
-            //todo: vcscaleratio
-            // txCOMBOドラム.vcScaleRatio = new Vector3(f拡大率, f拡大率, 1.0f);
+            //todo: scale by f拡大率 for the combo pop
             //-----------------
             #endregion
             #region [ "COMBO" 文字を表示。]
@@ -306,15 +213,14 @@ internal class CActPerfCommonCombo : CActivity
             int nコンボx = nX中央位置px - 68 - ((int)((nドラムコンボのCOMBO文字の幅 * f拡大率) / 1.3f));
             int nコンボy = 162 + nY上辺位置px;
 
-            if ((nCurrentCombo.Drums > (nCurrentCombo.Drums / 100 * 100) && (nCurrentCombo.Drums >= 100 ? bn00コンボに到達した[nコンボカウント.Drums].Drums == false : false)))
+            if ((DrumsData.Combo > (DrumsData.Combo / 100 * 100) && (DrumsData.Combo >= 100 ? bn00コンボに到達した[nコンボカウント.Drums].Drums == false : false)))
             {
-                //nコンボx += n表示中央X - ((int)(( nドラムコンボのCOMBO文字の幅 * f拡大率 ) / 1.3f));
                 nコンボy += 10;
             }
             //-----------------
             #endregion
 
-            txCOMBOドラム.tDraw2D(nコンボx, nコンボy + y動作差分, new RectangleF(0, 320, 250, 60));
+            txCOMBOドラム.tDraw2D(origin, nコンボx, nコンボy + y動作差分, new RectangleF(0, 320, 250, 60));
         }
 
         // COMBO値を1の位から順に表示。
@@ -324,28 +230,24 @@ internal class CActPerfCommonCombo : CActivity
         {
             if ( n桁数 < 4 )
             {
-                if ((nCurrentCombo.Drums > (nCurrentCombo.Drums / 100 * 100) && (nCurrentCombo.Drums >= 100 ? bn00コンボに到達した[nコンボカウント.Drums].Drums == false : false) && (nジャンプインデックス >= 0 && nジャンプインデックス < 180)))
+                if ((DrumsData.Combo > (DrumsData.Combo / 100 * 100) && (DrumsData.Combo >= 100 ? bn00コンボに到達した[nコンボカウント.Drums].Drums == false : false) && (nジャンプインデックス >= 0 && nジャンプインデックス < 180)))
                 {
                     x -= nドラムコンボの幅 + nドラムコンボの文字間隔 + 20;
                 }
                 else
                 {
                     x -= nドラムコンボの幅 + nドラムコンボの文字間隔;
-                    //todo: vcscaleratio
-                    // txCOMBOドラム.vcScaleRatio = new Vector3(1.0f, 1.0f, 1.0f);
                 }
             }
             else if ( n桁数 >= 4 )
             {
-                if ((nCurrentCombo.Drums > (nCurrentCombo.Drums / 100 * 100) && (nCurrentCombo.Drums >= 100 ? bn00コンボに到達した[nコンボカウント.Drums].Drums == false : false) && (nジャンプインデックス >= 0 && nジャンプインデックス < 180)))
+                if ((DrumsData.Combo > (DrumsData.Combo / 100 * 100) && (DrumsData.Combo >= 100 ? bn00コンボに到達した[nコンボカウント.Drums].Drums == false : false) && (nジャンプインデックス >= 0 && nジャンプインデックス < 180)))
                 {
                     x -= 96 + nドラムコンボの文字間隔 + 20;
                 }
                 else
                 {
                     x -= 96 + nドラムコンボの文字間隔;
-                    //todo: vcscaleratio
-                    // txCOMBOドラム.vcScaleRatio = new Vector3(1.0f, 1.0f, 1.0f);
                 }
             }
 
@@ -362,7 +264,7 @@ internal class CActPerfCommonCombo : CActivity
             {
                 if ( txCOMBOドラム != null )
                 {
-                    txCOMBOドラム.tDraw2D(x, y + y動作差分,
+                    txCOMBOドラム.tDraw2D(origin, x, y + y動作差分,
                         new RectangleF((n位の数[i] % 5) * nドラムコンボの幅, (n位の数[i] / 5) * nドラムコンボの高さ, nドラムコンボの幅, nドラムコンボの高さ));
                 }
             }
@@ -375,7 +277,7 @@ internal class CActPerfCommonCombo : CActivity
                 }
                 if ( txCOMBOドラム1000 != null )
                 {
-                    txCOMBOドラム1000.tDraw2D(x, y + y動作差分,
+                    txCOMBOドラム1000.tDraw2D(origin, x, y + y動作差分,
                         new RectangleF((n位の数[i] % 5) * 96, (n位の数[i] / 5) * 128, 96, 128));
                 }
             }
@@ -385,13 +287,13 @@ internal class CActPerfCommonCombo : CActivity
         //-----------------
         #endregion
     }
-    protected virtual void tDrawCombo_Guitar(int nCombo値, int nジャンプインデックス)
+    protected virtual void tDrawCombo_Guitar(Matrix4x4 origin, int nCombo値, int nジャンプインデックス)
     {
     }
-    protected virtual void tDrawCombo_Bass(int nCombo値, int nジャンプインデックス)
+    protected virtual void tDrawCombo_Bass(Matrix4x4 origin, int nCombo値, int nジャンプインデックス)
     {
     }
-    protected void tDrawCombo_Guitar(int nCombo値, int nジャンプインデックス, int nコンボx, int nコンボy)
+    protected void tDrawCombo_Guitar(Matrix4x4 origin, int nCombo値, int nジャンプインデックス, int nコンボx, int nコンボy)
     {
         #region [ 事前チェック。]
         //-----------------
@@ -422,16 +324,10 @@ internal class CActPerfCommonCombo : CActivity
         int y = nコンボy;
         int n全桁の合計幅 = nギターコンボの幅 * n桁数;
         int nJump = nジャンプインデックス - (n桁数);
-        int y動作差分 = 0;
 
         ctAnimation.tUpdate();
-        //CDTXMania.act文字コンソール.tPrint(1200, 0, CCharacterConsole.Eフォント種別.白, this.ctコンボアニメ.nCurrentValue.ToString());
-        //CDTXMania.act文字コンソール.tPrint(1200, 16, CCharacterConsole.Eフォント種別.白, this.ctコンボアニメ.db現在の値.ToString());
-        //CDTXMania.act文字コンソール.tPrint(1200, 32, CCharacterConsole.Eフォント種別.白, this.ctコンボアニメ.b進行中.ToString());
-        //CDTXMania.act文字コンソール.tPrint(1200, 48, CCharacterConsole.Eフォント種別.白, this.ctコンボアニメ.n終了値.ToString());
         if ( nY1の位座標差分値 > 0 )
         {
-            //this.nY1の位座標差分値 -= ( CDTXMania.ConfigIni.bVerticalSyncWait ? 16 : 4);
             nY1の位座標差分値 = nY1の位座標差分値 - ctAnimation.nCurrentValue;
         }
         else
@@ -450,9 +346,6 @@ internal class CActPerfCommonCombo : CActivity
         if (nジャンプインデックス >= 0 && nジャンプインデックス < 180)
             f拡大率 = 1.0f - (((float)nジャンプ差分値[nジャンプインデックス]) / 45.0f);		// f拡大率 = 1.0 → 1.3333... → 1.0
 
-        // if (txCOMBOギター != null)
-            //todo: vcscaleratio
-            // txCOMBOギター.vcScaleRatio = new Vector3(1.0f, 1.0f, 0.5f);
 
         //-----------------
         #endregion
@@ -460,20 +353,13 @@ internal class CActPerfCommonCombo : CActivity
         //-----------------
         int x = nコンボx - 100; // -((int)((nギターコンボのCOMBO文字の幅 * f拡大率) / 2.0f));
 
-        txCOMBOギター.tDraw2D(x, y, new RectangleF(0, 230, 200, 64));
+        txCOMBOギター.tDraw2D(origin, x, y, new RectangleF(0, 230, 200, 64));
         //-----------------
         #endregion
 
         x = nコンボx + (n全桁の合計幅 / 2);
         for (int i = 0; i < n桁数; i++)
         {
-            #region [ 数字の拡大率を設定。]
-            //-----------------
-            //todo: vcscaleRatio
-            // if (txCOMBOドラム != null)
-                // txCOMBOドラム.vcScaleRatio = new Vector3(1.0f, 1.0f, 1.0f);
-            //-----------------
-            #endregion
             #region [ 数字を1桁表示。]
             //-----------------
             x -= nギターコンボの幅 + nギターコンボの文字間隔;
@@ -486,7 +372,7 @@ internal class CActPerfCommonCombo : CActivity
             }
             if (txCOMBOギター != null)
             {
-                txCOMBOギター.tDraw2D(x - ((int)((nギターコンボの幅) / 2.0f)),
+                txCOMBOギター.tDraw2D(origin, x - ((int)((nギターコンボの幅) / 2.0f)),
                     y,
                     new RectangleF((n位の数[i] % 5) * nギターコンボの幅, (n位の数[i] / 5) * nギターコンボの高さ, nギターコンボの幅, nギターコンボの高さ));
             }
@@ -494,7 +380,7 @@ internal class CActPerfCommonCombo : CActivity
             #endregion
         }
     }
-    protected void tDrawCombo_Bass(int nCombo値, int nジャンプインデックス, int nコンボx, int nコンボy)
+    protected void tDrawCombo_Bass(Matrix4x4 origin, int nCombo値, int nジャンプインデックス, int nコンボx, int nコンボy)
     {
         #region [ 事前チェック。]
         //-----------------
@@ -525,16 +411,10 @@ internal class CActPerfCommonCombo : CActivity
         int y = nコンボy;
         int n全桁の合計幅 = nギターコンボの幅 * n桁数;
         int nJump = nジャンプインデックス - (n桁数);
-        int y動作差分 = 0;
 
         ctComboAnimation_2P.tUpdate();
-        //CDTXMania.act文字コンソール.tPrint(1200, 0, CCharacterConsole.Eフォント種別.白, this.ctコンボアニメ.nCurrentValue.ToString());
-        //CDTXMania.act文字コンソール.tPrint(1200, 16, CCharacterConsole.Eフォント種別.白, this.ctコンボアニメ.db現在の値.ToString());
-        //CDTXMania.act文字コンソール.tPrint(1200, 32, CCharacterConsole.Eフォント種別.白, this.ctコンボアニメ.b進行中.ToString());
-        //CDTXMania.act文字コンソール.tPrint(1200, 48, CCharacterConsole.Eフォント種別.白, this.ctコンボアニメ.n終了値.ToString());
         if ( nY1の位座標差分値_2P > 0 )
         {
-            //this.nY1の位座標差分値 -= ( CDTXMania.ConfigIni.bVerticalSyncWait ? 16 : 4);
             nY1の位座標差分値_2P = nY1の位座標差分値_2P - ctComboAnimation_2P.nCurrentValue;
         }
         else
@@ -553,16 +433,13 @@ internal class CActPerfCommonCombo : CActivity
         if (nジャンプインデックス >= 0 && nジャンプインデックス < 180)
             f拡大率 = 1.0f - (((float)nジャンプ差分値[nジャンプインデックス]) / 45.0f);		// f拡大率 = 1.0 → 1.3333... → 1.0
 
-        //todo: vcscaleratio
-        // if (txCOMBOギター != null)
-            // txCOMBOギター.vcScaleRatio = new Vector3(1.0f, 1.0f, 1.0f);
         //-----------------
         #endregion
         #region [ "COMBO" 文字を表示。]
         //-----------------
         int x = nコンボx - 95; // -((int)((nギターコンボのCOMBO文字の幅 * f拡大率) / 2.0f));
 
-        txCOMBOギター.tDraw2D(x, y, new RectangleF(0, 230, 200, 64));
+        txCOMBOギター.tDraw2D(origin, x, y, new RectangleF(0, 230, 200, 64));
         //-----------------
         #endregion
 
@@ -575,9 +452,6 @@ internal class CActPerfCommonCombo : CActivity
             if (nジャンプインデックス >= 0 && nジャンプインデックス < 180)
                 f拡大率 = 1.0f - (((float)nジャンプ差分値[nジャンプインデックス]) / 45f);		// f拡大率 = 1.0 → 1.3333... → 1.0
 
-            //todo: vcscaleratio
-            // if (txCOMBOギター != null)
-                // txCOMBOギター.vcScaleRatio = new Vector3(1.0f, 1.0f, 1.0f);
             //-----------------
             #endregion
             #region [ 数字を1桁表示。]
@@ -592,7 +466,7 @@ internal class CActPerfCommonCombo : CActivity
             }
             if (txCOMBOギター != null)
             {
-                txCOMBOギター.tDraw2D(x - ((int)((nギターコンボの幅) / 2.0f)),
+                txCOMBOギター.tDraw2D(origin, x - ((int)((nギターコンボの幅) / 2.0f)),
                     y,
                     new RectangleF((n位の数[i] % 5) * nギターコンボの幅, (n位の数[i] / 5) * nギターコンボの高さ, nギターコンボの幅, nギターコンボの高さ));
             }
@@ -606,13 +480,10 @@ internal class CActPerfCommonCombo : CActivity
 
     public override void OnActivate()
     {
-        nCurrentCombo = new STCOMBO() { act = this };
         status = new CSTATUS();
         for (int i = 0; i < 3; i++)
         {
             status[i].e現在のモード = EMode.非表示中;
-            status[i].nCOMBO値 = 0;
-            status[i].n最高COMBO値 = 0;
             status[i].n現在表示中のCOMBO値 = 0;
             status[i].n残像表示中のCOMBO値 = 0;
             status[i].nジャンプインデックス値 = 99999;
@@ -626,12 +497,6 @@ internal class CActPerfCommonCombo : CActivity
         ctComboAnimation_2P = new CCounter( 0, 130, 4, CDTXMania.Timer );
 
         base.OnActivate();
-    }
-    public override void OnDeactivate()
-    {
-        //status stays: it holds counters rather than resources, and a chip landing between here and the
-        //next activation writes its combo through it
-        base.OnDeactivate();
     }
     public override void OnManagedCreateResources()
     {
@@ -648,26 +513,31 @@ internal class CActPerfCommonCombo : CActivity
         base.OnManagedCreateResources();
     }
 
-    public override int OnUpdateAndDraw()
+    public void Draw(Matrix4x4 origin, int part)
     {
         if (!bActivated)
-            return 0;
+            return;
 
         for (int i = 2; i >= 0; i--)
         {
+            if (i != part)
+            {
+                continue;
+            }
+
             EEvent e今回の状態遷移イベント;
 
             #region [ 前回と今回の COMBO 値から、e今回の状態遷移イベントを決定する。]
             //-----------------
-            if (status[i].n現在表示中のCOMBO値 == status[i].nCOMBO値)
+            if (status[i].n現在表示中のCOMBO値 == parts[ i ].Combo)
             {
                 e今回の状態遷移イベント = EEvent.同一数値;
             }
-            else if (status[i].n現在表示中のCOMBO値 > status[i].nCOMBO値)
+            else if (status[i].n現在表示中のCOMBO値 > parts[ i ].Combo)
             {
                 e今回の状態遷移イベント = EEvent.ミス通知;
             }
-            else if ((status[i].n現在表示中のCOMBO値 < CDTXMania.ConfigIni.n表示可能な最小コンボ数[i]) && (status[i].nCOMBO値 < CDTXMania.ConfigIni.n表示可能な最小コンボ数[i]))
+            else if ((status[i].n現在表示中のCOMBO値 < CDTXMania.ConfigIni.n表示可能な最小コンボ数[i]) && (parts[ i ].Combo < CDTXMania.ConfigIni.n表示可能な最小コンボ数[i]))
             {
                 e今回の状態遷移イベント = EEvent.非表示;
             }
@@ -715,7 +585,7 @@ internal class CActPerfCommonCombo : CActivity
                         goto Retry;
                     }
 
-                    status[i].n現在表示中のCOMBO値 = status[i].nCOMBO値;
+                    status[i].n現在表示中のCOMBO値 = parts[ i ].Combo;
                     break;
                 //-----------------
                 #endregion
@@ -739,19 +609,19 @@ internal class CActPerfCommonCombo : CActivity
                         status[i].n前回の時刻_ジャンプ用 = CDTXMania.Timer.nCurrentTime;
                     }
 
-                    status[i].n現在表示中のCOMBO値 = status[i].nCOMBO値;
+                    status[i].n現在表示中のCOMBO値 = parts[ i ].Combo;
                     switch (i)
                     {
                         case 0:
-                            tDrawCombo_Drums(status[i].nCOMBO値, status[i].nジャンプインデックス値);
+                            tDrawCombo_Drums(origin, parts[ i ].Combo, status[i].nジャンプインデックス値);
                             break;
 
                         case 1:
-                            tDrawCombo_Guitar(status[i].nCOMBO値, status[i].nジャンプインデックス値);
+                            tDrawCombo_Guitar(origin, parts[ i ].Combo, status[i].nジャンプインデックス値);
                             break;
 
                         case 2:
-                            tDrawCombo_Bass(status[i].nCOMBO値, status[i].nジャンプインデックス値);
+                            tDrawCombo_Bass(origin, parts[ i ].Combo, status[i].nジャンプインデックス値);
                             break;
                     }
                     break;
@@ -773,14 +643,12 @@ internal class CActPerfCommonCombo : CActivity
                         status[i].e現在のモード = EMode.非表示中;
                         goto Retry;
                     }
-                    status[i].n現在表示中のCOMBO値 = status[i].nCOMBO値;
+                    status[i].n現在表示中のCOMBO値 = parts[ i ].Combo;
                     break;
                 //-----------------
                 #endregion
             }
         }
-
-        return 0;
     }
 
     public void tComboAnime( EInstrumentPart ePart )
