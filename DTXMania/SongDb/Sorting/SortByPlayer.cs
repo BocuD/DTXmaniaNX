@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using DTXMania.Core;
 
 namespace DTXMania.SongDb.Sorting;
@@ -48,7 +48,9 @@ public class SortByPlayer : SongDbSort
         foreach (SongNode songNode in songDb.flattenedSongList)
         {
             CChartData? lastPlayedChart = songNode.charts
-                .Where(chart => chart != null && chart.ScoreIniInformation.FileSize != 0 && chart.HasChartForCurrentMode())
+                .Where(chart => chart != null && chart.HasChartForCurrentMode())
+                .Select(chart => chart.ForCurrentInstrument())
+                .Where(chart => chart != null && chart.ScoreIniInformation.FileSize != 0)
                 .OrderByDescending(chart => chart.ScoreIniInformation.LastModified)
                 .FirstOrDefault();
 
@@ -123,13 +125,14 @@ public class SortByPlayer : SongDbSort
             {
                 CChartData? chart = songNode.charts[chartIndex];
                 if (chart == null || !chart.HasChartForCurrentMode()) continue;
+                CChartData resolvedChart = chart.ForCurrentInstrument();
 
                 for (int instrument = 0; instrument < 3; instrument++)
                 {
                     if (CDTXMania.ConfigIni.bDrumsEnabled && instrument != 0) continue;
                     if (!CDTXMania.ConfigIni.bDrumsEnabled && instrument == 0) continue;
 
-                    int rank = chart.SongInformation.BestRank[instrument];
+                    int rank = resolvedChart.SongInformation.BestRank[instrument];
                     if (clearRankNodes.TryGetValue((CScoreIni.ERANK)rank, out SongNode? rankNode))
                     {
                         var newNode = SongNode.Clone(songNode, rankNode, false);

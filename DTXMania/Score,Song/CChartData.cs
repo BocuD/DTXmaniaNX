@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using DTXMania.Core;
 using DTXMania.UI.DynamicElements;
@@ -390,6 +390,40 @@ public class CChartData
         return bChartExistForMode;
     }
 
+    public void UpdateScoreIniInformation()
+    {
+        if (instrumentSources != null)
+        {
+            DateTime latestDate = DateTime.MinValue;
+            long latestSize = 0L;
+            foreach (var source in instrumentSources)
+            {
+                if (source != null)
+                {
+                    source.UpdateScoreIniInformation();
+                    if (source.ScoreIniInformation.LastModified > latestDate)
+                    {
+                        latestDate = source.ScoreIniInformation.LastModified;
+                        latestSize = source.ScoreIniInformation.FileSize;
+                    }
+                }
+            }
+            ScoreIniInformation = new STScoreIniInformation(latestDate, latestSize);
+            return;
+        }
+
+        string path = FileInformation.AbsoluteFilePath + ".score.ini";
+        if (File.Exists(path))
+        {
+            FileInfo info = new(path);
+            ScoreIniInformation = new STScoreIniInformation(info.LastWriteTime, info.Length);
+        }
+        else if (ScoreIniInformation.FileSize == 0 && !CDTXMania.ConfigIni.bScoreIniを出力する)
+        {
+            ScoreIniInformation = new STScoreIniInformation(DateTime.Now, 1L);
+        }
+    }
+
     public void LoadScoreFile()
     {
         string path = FileInformation.AbsoluteFilePath + ".score.ini";
@@ -399,6 +433,9 @@ public class CChartData
         
 		try
 		{
+			FileInfo info = new(path);
+			ScoreIniInformation = new STScoreIniInformation(info.LastWriteTime, info.Length);
+
 			CScoreIni ini = new(path);
 
 			for (int nInstrumentNumber = 0; nInstrumentNumber < 3; nInstrumentNumber++)

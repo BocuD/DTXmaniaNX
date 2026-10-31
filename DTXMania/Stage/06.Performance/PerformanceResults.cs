@@ -121,6 +121,12 @@ internal static class PerformanceResults
 
             if (!CDTXMania.bCompactMode)
             {
+                cChartData.UpdateScoreIniInformation();
+                if (CDTXMania.chosenSong != null && CDTXMania.confirmedSongDifficulty >= 0 && CDTXMania.confirmedSongDifficulty < CDTXMania.chosenSong.charts.Length)
+                {
+                    CDTXMania.chosenSong.charts[CDTXMania.confirmedSongDifficulty]?.UpdateScoreIniInformation();
+                }
+
                 if (bNewProgressBarRecord.Drums)
                 {
                     // New Song Progress
