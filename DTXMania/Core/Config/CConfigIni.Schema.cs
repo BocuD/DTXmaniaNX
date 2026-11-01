@@ -380,7 +380,7 @@ internal partial class CConfigIni
 			G([
 					"BGMタイミング調整(-99～99)[ms]",
 					"リザルト画面の平均オフセットが負（早押し）なら上げ(+)、正（遅押し）なら下げ(-)て調整してください。",
-					"Revision value to adjust judgement timing for BGM.",
+					"Offset value to adjust judgement timing for BGM.",
 					"If your average offset on the result screen is negative (early), adjust up (+). If positive (late), adjust down (-)."
 				],
 				Int("BGMAdjustTime", -99, 99, c => c.nCommonBGMAdjustMs)),
