@@ -379,6 +379,7 @@ public class SongSelectionContainer : UIScrollItemsGroup, IUIItemSource
                 if (selectedChart is { } chart && chart.HasChartForCurrentMode())
                 {
                     CDTXMania.UpdateSelection(selectedSong, chart, confirmedSongDifficulty);
+                    CDTXMania.StageManager.stageSongSelectionNew.SaveSelectionOnChartEnter(selectedSong, selectedChart, confirmedSongDifficulty);
                     return true;
                 }
 
