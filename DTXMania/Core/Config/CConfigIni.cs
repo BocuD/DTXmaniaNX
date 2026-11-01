@@ -106,6 +106,7 @@ internal partial class CConfigIni
 
 	public STDGBVALUE<EType> eAttackEffect;
 	public STDGBVALUE<EType> eNumOfLanes;
+	public bool bDrumsLaneGaps;
 	public STDGBVALUE<EType> eDkdkType;
 	public STDGBVALUE<EType> eLaneType;
 	public STDGBVALUE<EType> eLBDGraphics;
@@ -621,6 +622,7 @@ internal partial class CConfigIni
 		eNumOfLanes.Drums = EType.A;
 		eNumOfLanes.Guitar = EType.A;
 		eNumOfLanes.Bass = EType.A;
+		bDrumsLaneGaps = true;
 		bAssignToLBD = default(STDGBVALUE<bool>);
 		bAssignToLBD.Drums = false;
 		eRandom = default(STDGBVALUE<ERandomMode>);

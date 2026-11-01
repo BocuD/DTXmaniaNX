@@ -15,13 +15,15 @@ public class Lane
 {
     public ELane lane;
     public SkinResource background;
+    
     //includes the 1px line on each side. Neighbouring lanes share that line
     public float width;
+
     //empty space outside the lines
     public float spaceLeft;
     public float spaceRight;
 
-    //a disabled lane takes no space, eg: RD with 9 lanes. Set by the playfield
+    //so we can completely hide lanes when doing 9 or 6 lane mode
     [JsonIgnore] public bool enabled = true;
 }
 
@@ -33,15 +35,18 @@ public class LaneGroup : UIDrawable
     public static UIDrawable Create() => new LaneGroup();
 
     [Themable] [SkinSerialize] public List<Lane> lanes = [];
+    
     //fills the space between lanes, and the whole group when lines are off
     [Themable] public Color4 spaceColor = new(0, 0, 0, 1);
-    //how much of its neighbour each lane covers, eg: art that ends in a 1px line on both edges
+
+    //how much of its neighbour each lane covers, eg: 1px line on both edges
     [Themable] public float lineOverlap = 1;
 
-    //set by the playfield
     public ELane[] order = [];
     public bool showsArt = true;
     public float opacity = 1;
+    //older DTXMania had gaps in 6 lane mode; this retains that behaviour
+    public bool keepsGaps;
 
     //filled by Arrange. The playfield gives it the one it owns
     public LaneLayout layout = new();
@@ -74,10 +79,11 @@ public class LaneGroup : UIDrawable
         float spanLeft = float.MaxValue;
         float spanRight = float.MinValue;
         Lane? previous = null;
+
         foreach (ELane column in Columns())
         {
             int index = IndexOf(column);
-            if (index < 0 || !lanes[index].enabled)
+            if (index < 0 || (!lanes[index].enabled && !keepsGaps))
             {
                 continue;
             }
@@ -89,7 +95,16 @@ public class LaneGroup : UIDrawable
                 x = spaced ? x + previous.width + previous.spaceRight + lane.spaceLeft : x + previous.width - lineOverlap;
             }
 
+            previous = lane;
+
+            //the gap moves the lanes after it along, but is no part of the playfield
+            if (!lane.enabled)
+            {
+                continue;
+            }
+
             layout.Set(lane.lane, position.X + x, lane.width);
+            
             //LBD chips are played in the LP lane
             if (lane.lane == ELane.LP)
             {
@@ -98,7 +113,6 @@ public class LaneGroup : UIDrawable
 
             spanLeft = Math.Min(spanLeft, position.X + x);
             spanRight = Math.Max(spanRight, position.X + x + lane.width);
-            previous = lane;
         }
 
         if (spanRight > spanLeft)

@@ -160,6 +160,10 @@ internal sealed class DrumsConfigPage : InstrumentConfigPage
             "Number of lanes.\n10: default.\n9: XG style.\n6: classic style.",
             ["10", "9", "6"],
             () => (int)CDTXMania.ConfigIni.eNumOfLanes.Drums, v => CDTXMania.ConfigIni.eNumOfLanes.Drums = (EType)v));
+        items.Add(Toggle("LaneGaps",
+            "レーン数を減らしたとき、使わないレーンの幅を隙間として残します。",
+            "Keeps the width of the lanes a smaller lane count leaves out as a gap,\nrather than closing the lanes up.",
+            () => CDTXMania.ConfigIni.bDrumsLaneGaps, v => CDTXMania.ConfigIni.bDrumsLaneGaps = v));
         items.Add(RandomItem());
         items.Add(RandomPedalItem());
 

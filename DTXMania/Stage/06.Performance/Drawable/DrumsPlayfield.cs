@@ -65,6 +65,7 @@ public class DrumsPlayfield : Playfield
     private void ApplyConfig()
     {
         lanes.order = Columns();
+        lanes.keepsGaps = CDTXMania.ConfigIni.bDrumsLaneGaps;
         foreach (ELane lane in lanes.order)
         {
             lanes.SetEnabled(lane, IsUsed(lane));

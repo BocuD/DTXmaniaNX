@@ -493,6 +493,11 @@ internal partial class CConfigIni
 				Enum<ETargetGhostData>("BassTargetGhost", 0, 4, c => c.eTargetGhost.Bass)),
 			G("譜面仕様変更(0:デフォルト10レーン, 1:XG9レーン, 2:CLASSIC6レーン)",
 				Enum<EType>("NumOfLanes", 0, 2, c => c.eNumOfLanes.Drums)),
+			G([
+					"使わないレーンの幅を隙間として残す(0:OFF, 1:ON)",
+					"Keep the width of the lanes a smaller lane count leaves out as a gap. (0:OFF, 1:ON)"
+				],
+				Bool("DrumsLaneGaps", c => c.bDrumsLaneGaps)),
 			G("dkdk仕様変更(0:デフォルト, 1:始動足変更, 2:dkdk1レーン化)",
 				Enum<EType>("DkdkType", 0, 2, c => c.eDkdkType.Drums)),
 			G("バスをLBDに振り分け(0:OFF, 1:ON)",
