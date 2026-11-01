@@ -1,4 +1,4 @@
-﻿namespace DTXMania.SongDb.Sorting;
+namespace DTXMania.SongDb.Sorting;
 
 public abstract class SongDbSort
 {
@@ -53,13 +53,33 @@ public abstract class SongDbSort
     {
         nodes.Sort((a, b) =>
         {
-            CChartData? chartA = a.charts.FirstOrDefault(x => x != null && x.ScoreIniInformation.FileSize != 0);
-            CChartData? chartB = b.charts.FirstOrDefault(x => x != null && x.ScoreIniInformation.FileSize != 0);
-            
+            if (a.nodeType == SongNode.ENodeType.BACKBOX) return -1;
+            if (b.nodeType == SongNode.ENodeType.BACKBOX) return 1;
+
+            CChartData? chartA = a.charts
+                .Where(x => x != null && x.HasChartForCurrentMode())
+                .Select(x => x.ForCurrentInstrument())
+                .Where(x => x != null && x.ScoreIniInformation.FileSize != 0)
+                .OrderByDescending(x => x.ScoreIniInformation.LastModified)
+                .FirstOrDefault();
+
+            CChartData? chartB = b.charts
+                .Where(x => x != null && x.HasChartForCurrentMode())
+                .Select(x => x.ForCurrentInstrument())
+                .Where(x => x != null && x.ScoreIniInformation.FileSize != 0)
+                .OrderByDescending(x => x.ScoreIniInformation.LastModified)
+                .FirstOrDefault();
+
             DateTime lastPlayedA = chartA == null ? DateTime.MinValue : chartA.ScoreIniInformation.LastModified;
             DateTime lastPlayedB = chartB == null ? DateTime.MinValue : chartB.ScoreIniInformation.LastModified;
 
-            return lastPlayedA.CompareTo(lastPlayedB);
+            int cmp = lastPlayedB.CompareTo(lastPlayedA);
+            if (cmp != 0) return cmp;
+
+            cmp = string.Compare(a.title, b.title, StringComparison.OrdinalIgnoreCase);
+            if (cmp != 0) return cmp;
+
+            return string.Compare(a.path, b.path, StringComparison.Ordinal);
         });
     }
 }

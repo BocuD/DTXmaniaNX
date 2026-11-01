@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Globalization;
 using System.Collections.Concurrent;
 using System.Numerics;
@@ -637,6 +637,15 @@ internal partial class CDTXMania
         if (ConfigIni.bScoreIniを出力する)
         {
             ini.tExport(strFilename);
+        }
+
+        if (!bCompactMode)
+        {
+            chosenChartData?.UpdateScoreIniInformation();
+            if (chosenSong != null && confirmedSongDifficulty >= 0 && confirmedSongDifficulty < chosenSong.charts.Length)
+            {
+                chosenSong.charts[confirmedSongDifficulty]?.UpdateScoreIniInformation();
+            }
         }
 
         return ini;

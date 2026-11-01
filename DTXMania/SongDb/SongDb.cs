@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO.Compression;
 using DTXMania.Core;
@@ -732,7 +732,9 @@ public class SongDb : IDisposable
 		CChartData proxy = new()
 		{
 			FileInformation = guitar.FileInformation,
-			ScoreIniInformation = guitar.ScoreIniInformation,
+			ScoreIniInformation = bass.ScoreIniInformation.LastModified > guitar.ScoreIniInformation.LastModified
+				? bass.ScoreIniInformation
+				: guitar.ScoreIniInformation,
 			SongInformation = guitar.SongInformation,
 			countSkill = guitar.countSkill
 		};
