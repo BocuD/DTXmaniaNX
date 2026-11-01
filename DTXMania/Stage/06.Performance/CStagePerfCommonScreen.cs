@@ -75,6 +75,25 @@ internal abstract class CStagePerfCommonScreen : CStage
         trainingMode = bIsTrainingMode;
     }
 
+    //by EPad, what the result screen plays when a pad is hit: the chart's empty hit sound, or the nearest drum chip
+    public CChip[] EmptyDrumChips()
+    {
+        CChip[] chips = new CChip[12];
+        if (drums == null)
+        {
+            return chips;
+        }
+
+        long time = CDTXMania.Timer.nCurrentTime + CDTXMania.ConfigIni.nInputAdjustTimeMs.Drums;
+        for (int pad = 0; pad < chips.Length; pad++)
+        {
+            chips[pad] = drums.FindEmptyHitSound((EPad)pad)
+                         ?? timeline.NearestDrum(time, DrumsPerformance.PadChannels[pad], HitState.DontCare);
+        }
+
+        return chips;
+    }
+
     private CScoreIni.CPerformanceEntry ResultsFor(PerformanceData data) =>
         PerformanceResults.Create(data, actProgressBar.GetScoreIniString(data.Part));
 

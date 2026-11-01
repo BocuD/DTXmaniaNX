@@ -18,6 +18,9 @@ internal class StageManager
     public CStageChangeSkin stageChangeSkin { get; }
     public CStageEnd stageEnd { get; }
     public CStageUITest stageUITest { get; } //dev only json layout test bed
+
+    public CStagePerfCommonScreen stagePerfScreen =>
+        CDTXMania.ConfigIni.bGuitarRevolutionMode ? stagePerfGuitarScreen : stagePerfDrumsScreen;
     
     public CStage rCurrentStage;
     public CStage rPreviousStage;
@@ -212,10 +215,7 @@ internal class StageManager
 
                     #endregion
 
-                    var perfStage = CDTXMania.ConfigIni.bGuitarRevolutionMode
-                        ? (CStage)stagePerfGuitarScreen
-                        : stagePerfDrumsScreen;
-                    BeginFadeTransition(perfStage);
+                    BeginFadeTransition(stagePerfScreen);
                 }
 
                 //-----------------------------
@@ -271,19 +271,9 @@ internal class StageManager
                         //-----------------------------
                         {
                             //New extract performance record
-                            CScoreIni.CPerformanceEntry cPerf_Drums, cPerf_Guitar, cPerf_Bass;
-                            bool bTrainingMode = false;
-                            CChip[] chipsArray = new CChip[10];
-                            if (CDTXMania.ConfigIni.bGuitarRevolutionMode)
-                            {
-                                stagePerfGuitarScreen.tStorePerfResults(out cPerf_Drums, out cPerf_Guitar,
-                                    out cPerf_Bass, out bTrainingMode);
-                            }
-                            else
-                            {
-                                stagePerfDrumsScreen.tStorePerfResults(out cPerf_Drums, out cPerf_Guitar,
-                                    out cPerf_Bass, out chipsArray, out bTrainingMode);
-                            }
+                            stagePerfScreen.tStorePerfResults(out CScoreIni.CPerformanceEntry cPerf_Drums,
+                                out CScoreIni.CPerformanceEntry cPerf_Guitar, out CScoreIni.CPerformanceEntry cPerf_Bass,
+                                out bool bTrainingMode);
                             //Original
                             //scoreIni = this.tScoreIniへBGMAdjustとHistoryとPlayCountを更新("Stage failed");
 
@@ -435,19 +425,10 @@ internal class StageManager
                         #region [ 演奏クリア ]
 
                         //-----------------------------
-                        CScoreIni.CPerformanceEntry cPerfEntry_Drums, cPerfEntry_Guitar, cPerfEntry_Bass;
-                        bool bIsTrainingMode = false;
-                        CChip[] chipArray = new CChip[10];
-                        if (CDTXMania.ConfigIni.bGuitarRevolutionMode)
-                        {
-                            stagePerfGuitarScreen.tStorePerfResults(out cPerfEntry_Drums, out cPerfEntry_Guitar,
-                                out cPerfEntry_Bass, out bIsTrainingMode);
-                        }
-                        else
-                        {
-                            stagePerfDrumsScreen.tStorePerfResults(out cPerfEntry_Drums, out cPerfEntry_Guitar,
-                                out cPerfEntry_Bass, out chipArray, out bIsTrainingMode);
-                        }
+                        stagePerfScreen.tStorePerfResults(out CScoreIni.CPerformanceEntry cPerfEntry_Drums,
+                            out CScoreIni.CPerformanceEntry cPerfEntry_Guitar, out CScoreIni.CPerformanceEntry cPerfEntry_Bass,
+                            out bool bIsTrainingMode);
+                        CChip[] chipArray = stagePerfScreen.EmptyDrumChips();
 
                         if (!bIsTrainingMode)
                         {

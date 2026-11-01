@@ -50,24 +50,6 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
         AddLegacyPart(hud, "PerformanceInformation", LegacyOverlayLayer, _ => Probed(probeOverlay, tUpdateAndDraw_PerformanceInformation));
     }
 
-    // Methods
-
-    public void tStorePerfResults( out CScoreIni.CPerformanceEntry Drums, out CScoreIni.CPerformanceEntry Guitar, out CScoreIni.CPerformanceEntry Bass, out CChip[] r空打ちドラムチップ, out bool bIsTrainingMode)
-    {
-        tStorePerfResults( out Drums, out Guitar, out Bass, out bIsTrainingMode );
-
-        r空打ちドラムチップ = new CChip[ 12 ];
-        for ( int i = 0; i < 12; i++ )
-        {
-            r空打ちドラムチップ[ i ] = drums!.FindEmptyHitSound( (EPad) i );
-            if ( r空打ちドラムチップ[ i ] == null )
-            {
-                r空打ちドラムチップ[ i ] = timeline.NearestDrum(CDTXMania.Timer.nCurrentTime + CDTXMania.ConfigIni.nInputAdjustTimeMs.Drums, DrumsPerformance.PadChannels[i], HitState.DontCare);
-            }
-        }
-    }
-
-
     // CStage 実装
 
     public override void OnActivate()

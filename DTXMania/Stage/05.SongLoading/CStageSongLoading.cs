@@ -844,15 +844,9 @@ internal class CStageSongLoading : CStage
         IInputKeyboard keyboard = CDTXMania.InputManager.Keyboard;
         if (keyboard.bKeyPressed(SlimDXKey.Escape)) // escape (exit)
         {
-            if (CDTXMania.ConfigIni.bGuitarRevolutionMode)
+            if (CDTXMania.stagePerfScreen.bActivated)
             {
-                if (CDTXMania.stagePerfGuitarScreen.bActivated)
-                    CDTXMania.stagePerfGuitarScreen.OnDeactivate();
-            }
-            else
-            {
-                if (CDTXMania.stagePerfDrumsScreen.bActivated)
-                    CDTXMania.stagePerfDrumsScreen.OnDeactivate();
+                CDTXMania.stagePerfScreen.OnDeactivate();
             }
 
             return true;

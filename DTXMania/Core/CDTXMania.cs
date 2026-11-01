@@ -153,6 +153,7 @@ internal partial class CDTXMania
     
     public static CStagePerfGuitarScreen stagePerfGuitarScreen => StageManager.stagePerfGuitarScreen;
     public static CStagePerfDrumsScreen stagePerfDrumsScreen => StageManager.stagePerfDrumsScreen;
+    public static CStagePerfCommonScreen stagePerfScreen => StageManager.stagePerfScreen;
     
     public static StageManager StageManager { get; private set; }
     public static SkinManager SkinManager { get; private set; }
