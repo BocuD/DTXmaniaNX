@@ -115,8 +115,6 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
     {
         AudioMixer.Timer.tReset();
         CDTXMania.Timer.tReset();
-        playfield.StartFire(ELane.HH, false, false, false, 0, false); // #31554 2013.6.12 yyagi
-
         double UnitTime;
         UnitTime = ((60.0 / (CDTXMania.stagePerfDrumsScreen.actPlayInfo.dbBPM) / 14.0));
         ctBPMBar = new CCounter(1, 14, (int)(UnitTime * 1000.0), CDTXMania.Timer);
@@ -351,7 +349,7 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
     private void StartChipFire(int lane, CChip chip)
     {
         bool lastInFillIn = bInFillIn && bフィルイン区間の最後のChipである(chip);
-        playfield.StartFire((ELane)lane, bInFillIn, lastInFillIn, lastInFillIn, nJudgeLinePosY_delta.Drums);
+        playfield.StartFire((ELane)lane, bInFillIn, lastInFillIn);
     }
 
     private void PlayHitSound(CChip? sound)

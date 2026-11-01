@@ -145,12 +145,9 @@ public class ActPerfNewFire : UIGroup, IPerfFire
         noteExplosions[lane].Play(chip);
     }
 
-    public void Start(ELane lane, bool bFillIn, bool b大波, bool b細波, int _nJudgeLinePosY_delta_Drums = 0, bool bDisplay = true)
+    public void Start(ELane lane, bool fillIn, bool fillInEnd)
     {
-        if (bDisplay)
-        {
-            noteExplosions[(int)lane].Play();
-        }
+        noteExplosions[(int)lane].Play();
     }
 
     public override void Draw(Matrix4x4 parentMatrix)

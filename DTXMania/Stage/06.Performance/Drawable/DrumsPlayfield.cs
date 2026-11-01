@@ -115,9 +115,9 @@ public class DrumsPlayfield : Playfield
         ShowJudgement(lane, judgement, lag);
     }
 
-    internal void StartFire(ELane lane, bool fillIn, bool bigWaves, bool smallWaves, int judgeLineOffset, bool display = true)
+    internal void StartFire(ELane lane, bool fillIn, bool fillInEnd)
     {
-        fire?.Start(lane, fillIn, bigWaves, smallWaves, judgeLineOffset, display);
+        fire?.Start(lane, fillIn, fillInEnd);
     }
 
     public override void Draw(Matrix4x4 parentMatrix)
@@ -141,7 +141,8 @@ public class DrumsPlayfield : Playfield
 
         if (fire != null)
         {
-            fire.iPosY = reverse ? JudgeLineY - 183 : JudgeLineY - 186;
+            int offset = CDTXMania.ConfigIni.nJudgeLinePosOffset.Drums;
+            fire.iPosY = (reverse ? JudgeLineY - 183 : JudgeLineY - 186) + offset;
         }
 
         base.Draw(parentMatrix);

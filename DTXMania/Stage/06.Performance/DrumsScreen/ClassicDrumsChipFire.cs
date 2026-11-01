@@ -72,7 +72,6 @@ public class ClassicDrumsChipFire : UIDrawable, IPerfFire
 
     private bool bigWaveFlip;
     private bool smallWaveFlip;
-    private int judgeLineOffset;
 
     public int iPosY { get; set; }
 
@@ -128,18 +127,17 @@ public class ClassicDrumsChipFire : UIDrawable, IPerfFire
     //the fire art is drawn 320px right of this
     private float LaneX(int lane) => lanes.Centre((ELane)lane) - 320;
 
-    public void Start(ELane lane, bool fillIn, bool bigWaves, bool smallWaves, int judgeLineOffset = 0, bool display = true)
+    public void Start(ELane lane, bool fillIn, bool fillInEnd)
     {
         int index = (int)lane;
         EType effect = CDTXMania.ConfigIni.eAttackEffect.Drums;
-        this.judgeLineOffset = judgeLineOffset;
 
         if (effect != EType.D)
         {
-            StartFire(index, display);
+            StartFire(index);
         }
 
-        if (display && effect is EType.A or EType.B)
+        if (effect is EType.A or EType.B)
         {
             for (int i = 0; i < 16; i++)
             {
@@ -149,7 +147,7 @@ public class ClassicDrumsChipFire : UIDrawable, IPerfFire
             }
         }
 
-        if (display && effect == EType.A)
+        if (effect == EType.A)
         {
             StartSplash(index);
         }
@@ -165,22 +163,20 @@ public class ClassicDrumsChipFire : UIDrawable, IPerfFire
             }
         }
 
-        if (bigWaves)
+        //the last chip of a fill-in sends out ripples
+        if (fillInEnd)
         {
             for (int i = 0; i < 4; i++)
             {
                 SpawnWave(bigWaves: true, index, 10, i * 10);
             }
-        }
 
-        if (smallWaves)
-        {
             SpawnWave(bigWaves: false, index, 8, 0);
         }
     }
 
     //two fires per hit. A new hit on a lane replaces its fires
-    private void StartFire(int lane, bool display)
+    private void StartFire(int lane)
     {
         for (int i = 0; i < FireMax; i++)
         {
@@ -210,7 +206,7 @@ public class ClassicDrumsChipFire : UIDrawable, IPerfFire
                     ? new CCounter(0, 70, 3, CDTXMania.Timer)
                     : new CCounter(0, frames - 1, CDTXMania.ConfigIni.nExplosionInterval, CDTXMania.Timer),
                 angle = CConversion.DegreeToRadian(startAngle + n * 90f),
-                size = display ? 1f : 0f
+                size = 1f
             };
         }
     }
@@ -229,7 +225,7 @@ public class ClassicDrumsChipFire : UIDrawable, IPerfFire
             lane = lane,
             counter = new CCounter(0, duration, 7, CDTXMania.Timer),
             x = LaneX(lane) + 320,
-            y = iPosY + 350 + judgeLineOffset - 170f,
+            y = iPosY + 350 - 170f,
             speedX = (float)speedX,
             speedY = (float)speedY,
             dragX = dragX,
@@ -259,7 +255,7 @@ public class ClassicDrumsChipFire : UIDrawable, IPerfFire
             counter = new CCounter(0, 44, 10, CDTXMania.Timer),
             xLeft = x + lane switch { 0 or 3 or 7 => 0, 1 => 20, _ => 10 },
             xRight = x,
-            y = iPosY + 359 + judgeLineOffset - 170f,
+            y = iPosY + 359 - 170f,
             speedX = (float)(spread * Math.Cos(angle) + 0.3),
             speedY = (float)(spread * (Math.Sin(angle) - 0.8))
         };
@@ -395,7 +391,7 @@ public class ClassicDrumsChipFire : UIDrawable, IPerfFire
             }
 
             float spin = 0.09f * splash.counter.nCurrentValue;
-            float y = -(splash.y + judgeLineOffset - GameWindowSize.Height / 2f);
+            float y = -(splash.y - GameWindowSize.Height / 2f);
             RectangleF half = new(noteLeft[splash.lane], 640, (noteWidth[splash.lane] + 10) / 2, 64);
 
             notes.tDraw3D(Matrix4x4.CreateRotationZ(spin) * Matrix4x4.CreateTranslation(splash.xLeft - 50f - GameWindowSize.Width / 2f, y, 0f), half, color);
@@ -406,7 +402,7 @@ public class ClassicDrumsChipFire : UIDrawable, IPerfFire
     private void DrawFires()
     {
         bool chorus = CDTXMania.stagePerfDrumsScreen.bChorusSection;
-        float baseY = iPosY + judgeLineOffset;
+        float baseY = iPosY;
 
         for (int i = 0; i < FireMax; i++)
         {
@@ -461,7 +457,7 @@ public class ClassicDrumsChipFire : UIDrawable, IPerfFire
     }
 
     private Matrix4x4 WaveTranslation(int lane) => Matrix4x4.CreateTranslation(LaneX(lane) + 280 - GameWindowSize.Width / 2f,
-        -(iPosY + judgeLineOffset + 200 - GameWindowSize.Height / 2f), 0f);
+        -(iPosY + 200 - GameWindowSize.Height / 2f), 0f);
 
     private void DrawBigWaves()
     {

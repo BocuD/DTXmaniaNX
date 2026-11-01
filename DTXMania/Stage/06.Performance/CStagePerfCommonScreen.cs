@@ -259,10 +259,6 @@ internal abstract class CStagePerfCommonScreen : CStage
         nShutterInPosY.Bass = CDTXMania.ConfigIni.nShutterInSide.Bass;
         nShutterOutPosY.Bass = CDTXMania.ConfigIni.nShutterOutSide.Bass;
 
-        nJudgeLinePosY_delta.Drums = CDTXMania.ConfigIni.nJudgeLinePosOffset.Drums;    // #31602 2013.6.23 yyagi
-        nJudgeLinePosY_delta.Guitar = CDTXMania.ConfigIni.nJudgeLinePosOffset.Guitar;  //
-        nJudgeLinePosY_delta.Bass = CDTXMania.ConfigIni.nJudgeLinePosOffset.Bass;      //
-
         bIsAutoPlay = CDTXMania.ConfigIni.bAutoPlay;									// #24239 2011.1.23 yyagi
         foreach (PerformanceData data in partData)
         {
@@ -422,7 +418,6 @@ internal abstract class CStagePerfCommonScreen : CStage
     protected bool bNeedsDriftCorrection;
     protected double dbPlaySpeed;
     protected bool bValidScore;
-    protected STDGBVALUE<int> nJudgeLinePosY_delta; // #31602 2013.6.23 yyagi 表示遅延対策として、判定ラインの表示位置をずらす機能を追加する
 
     protected ChartSequencer sequencer = new();
     protected BaseTexture txWailingFrame;
