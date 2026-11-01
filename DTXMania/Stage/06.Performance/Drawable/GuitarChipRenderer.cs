@@ -169,8 +169,9 @@ public class GuitarChipRenderer : ChipRenderer
 
             HoldNote holdNote = holdNotes[fret];
             holdNote.clipHeight = length;
+            holdNote.scrollsUp = reverse;
             holdNote.position.X = (int)lanes.Centre(lane);
-            holdNote.position.Y = top;
+            holdNote.position.Y = y;
             holdNote.Draw(origin, chip.bHit, chip.bIsHittingLongNote);
         }
     }
