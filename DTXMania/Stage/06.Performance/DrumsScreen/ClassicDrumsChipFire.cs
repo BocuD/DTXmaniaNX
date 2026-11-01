@@ -9,6 +9,8 @@ namespace DTXMania;
 
 public class ClassicDrumsChipFire : UIDrawable, IPerfFire
 {
+    public LaneLayout lanes = new();
+
     private const int FireMax = 64;
     private const int StarMax = 240;
     private const int SplashMax = 8;
@@ -124,7 +126,7 @@ public class ClassicDrumsChipFire : UIDrawable, IPerfFire
     }
 
     //the fire art is drawn 320px right of this
-    private static float LaneX(int lane) => DrumLanes.Centre((ELane)lane) - 320;
+    private float LaneX(int lane) => lanes.Centre((ELane)lane) - 320;
 
     public void Start(ELane lane, bool fillIn, bool bigWaves, bool smallWaves, int judgeLineOffset = 0, bool display = true)
     {

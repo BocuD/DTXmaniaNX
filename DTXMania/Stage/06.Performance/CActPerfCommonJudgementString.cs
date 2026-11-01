@@ -10,6 +10,8 @@ namespace DTXMania;
 
 internal abstract class CActPerfCommonJudgementString : CActivity
 {
+	public LaneLayout lanes = new();
+
 	private BaseTexture judgementGraphicSheet;
 	
 	// プロパティ
@@ -93,7 +95,13 @@ internal abstract class CActPerfCommonJudgementString : CActivity
 	{
 		if (nLane > judgements.Length - 1) return;
 		if (judgements[nLane] == null) return;
-		
+
+		//lanes can move while playing
+		if (TryGetLanePosition(nLane, out int laneX, out int laneY))
+		{
+			judgements[nLane].position.X = laneX - offsetsX[nLane];
+		}
+
 		if (!CDTXMania.ConfigIni.bClassicJudgement)
 		{
 			judgements[nLane].Play(judge);
@@ -277,6 +285,8 @@ internal abstract class CActPerfCommonJudgementString : CActivity
 	}
 
 	private JudgementString[] judgements;
+	//per lane, the x of the group each judgement was added to
+	private float[] offsetsX = [];
 	
 	public void InitUI(UIGroup ui, int firstLane, int lastLane, float offsetX)
 	{
@@ -289,6 +299,7 @@ internal abstract class CActPerfCommonJudgementString : CActivity
 		if (judgements == null || judgements.Length != stLaneSize.Length)
 		{
 			judgements = new JudgementString[stLaneSize.Length];
+			offsetsX = new float[stLaneSize.Length];
 		}
 
 		for (int lane = firstLane; lane <= Math.Min(lastLane, stLaneSize.Length - 1); lane++)
@@ -304,6 +315,7 @@ internal abstract class CActPerfCommonJudgementString : CActivity
 			judgements[lane] = judgement.AddChild(new JudgementString());
 			judgements[lane].dontSerialize = true;
 			judgements[lane].position = new Vector3(x, y, 0);
+			offsetsX[lane] = offsetX;
 		}
 	}
 }

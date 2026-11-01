@@ -25,7 +25,7 @@ internal class CActPerfDrumsJudgementString : CActPerfCommonJudgementString
             return false;
         }
 
-        x = (int)DrumLanes.Centre((ELane)lane);
+        x = (int)lanes.Centre((ELane)lane);
         if (CDTXMania.ConfigIni.JudgementStringPosition.Drums == EType.A)
         {
             y = CDTXMania.ConfigIni.bReverse.Drums ? 348 - (verticalCharacterOffsets[lane] * 0x20) : 348 + verticalCharacterOffsets[lane] * 0x20;

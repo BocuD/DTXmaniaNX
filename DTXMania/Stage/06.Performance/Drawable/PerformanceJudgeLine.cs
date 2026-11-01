@@ -53,7 +53,8 @@ public class PerformanceJudgeLine : PerformanceElement
 
         UIGroup label = root.AddChild(new UIGroup("Label"));
         label.bindings.Add(new UIBinding("position.Y", "Stats.JudgeLineNumberY"));
-        label.AddChild(LaneNumber("Value", "Stats.JudgeLine", new Vector2(part == EInstrumentPart.DRUMS ? 17 : 247, -6)));
+        label.bindings.Add(new UIBinding("position.X", "Stats.JudgeLineX"));
+        label.AddChild(LaneNumber("Value", "Stats.JudgeLine", new Vector2(part == EInstrumentPart.DRUMS ? 15 : 247, -6)));
 
         return root;
     }

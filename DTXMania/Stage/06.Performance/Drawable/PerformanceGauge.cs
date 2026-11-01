@@ -138,15 +138,15 @@ public class PerformanceGauge : PerformanceElement
         Mirror(root.GetChild<UIImage>("FrameBack")!);
         Mirror(root.GetChild<UIImage>("FrameFront")!);
 
-        root.GetChild<UIImage>("Bar")!.bindings.Add(PlayerSection.OnRightSide("position.X", right.Bar.X, left.Bar.X));
-        root.GetChild<UIImage>("FullBar")!.bindings.Add(PlayerSection.OnRightSide("position.X", right.Bar.X, left.Bar.X));
-        root.GetChild<UIImage>("ScrollSpeed")!.bindings.Add(PlayerSection.OnRightSide("position.X", right.Speed.X, left.Speed.X));
+        root.GetChild<UIImage>("Bar")!.bindings.Add(Playfield.OnRightSide("position.X", right.Bar.X, left.Bar.X));
+        root.GetChild<UIImage>("FullBar")!.bindings.Add(Playfield.OnRightSide("position.X", right.Bar.X, left.Bar.X));
+        root.GetChild<UIImage>("ScrollSpeed")!.bindings.Add(Playfield.OnRightSide("position.X", right.Speed.X, left.Speed.X));
     }
 
     private static void Mirror(UIImage frame)
     {
         frame.pivot = new Vector2(0.5f, 0);
         frame.position = new Vector3(frame.size.X / 2, 0, 0);
-        frame.bindings.Add(PlayerSection.OnRightSide("scale.X", -1, 1));
+        frame.bindings.Add(Playfield.OnRightSide("scale.X", -1, 1));
     }
 }

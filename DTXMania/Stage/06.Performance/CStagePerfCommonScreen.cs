@@ -63,7 +63,6 @@ internal abstract class CStagePerfCommonScreen : CStage
     {
     }
 
-    protected WailingEffect[] wailingEffect;
     
     // メソッド
 
@@ -100,11 +99,12 @@ internal abstract class CStagePerfCommonScreen : CStage
 
     internal const int LaneArtLayer = 1;
     internal const int LegacyLanesLayer = 2;
-    internal const int LaneOverlayLayer = 3;
-    internal const int LegacyOverlayLayer = 4;
-    internal const int EffectsLayer = 5;
-    internal const int ScoreLayer = 6;
-    internal const int PanelLayer = 7;
+    internal const int ChipsLayer = 3;
+    internal const int LaneOverlayLayer = 4;
+    internal const int LegacyOverlayLayer = 5;
+    internal const int EffectsLayer = 6;
+    internal const int ScoreLayer = 7;
+    internal const int PanelLayer = 8;
 
     public override void BuildDefaultLayout()
     {
@@ -150,19 +150,17 @@ internal abstract class CStagePerfCommonScreen : CStage
         info.bindings.Add(new UIBinding("isVisible", "Game.Playing.Guitar2") { invert = true });
 
         UIGroup players = Group(PlayersGroup, 3);
-        Section(players, EInstrument.Drums, 0);
-        Section(players, EInstrument.Guitar1, 0);
-        Section(players, EInstrument.Guitar2, 870);
+        ShownWhenPlaying(players.AddChild(new DrumsPlayfield()), EInstrument.Drums);
+        ShownWhenPlaying(players.AddChild(new GuitarPlayfield(EInstrument.Guitar1)), EInstrument.Guitar1);
+        ShownWhenPlaying(players.AddChild(new GuitarPlayfield(EInstrument.Guitar2)), EInstrument.Guitar2).position.X = 870;
 
         StageFailedCover failed = overlays.AddChild(new StageFailedCover());
         failed.renderOrder = 1000;
 
-        static void Section(UIGroup parent, EInstrument player, float x)
+        static Playfield ShownWhenPlaying(Playfield playfield, EInstrument player)
         {
-            PlayerSection section = parent.AddChild(new PlayerSection(player));
-            section.name = player.ToString();
-            section.position = new Vector3(x, 0, 0);
-            section.bindings.Add(new UIBinding("isVisible", $"Game.Playing.{player}"));
+            playfield.bindings.Add(new UIBinding("isVisible", $"Game.Playing.{player}"));
+            return playfield;
         }
 
         static UIImage LinkedVideo(UIGroup parent, string name, float x, float y, Vector2? box = null)
@@ -247,6 +245,8 @@ internal abstract class CStagePerfCommonScreen : CStage
         listWAV = CDTXMania.DTX.listWAV;
 
         eReturnValue = EPerfScreenReturnValue.Continue;
+        //the layout is built before FirstUpdate, and it reads the phase
+        ePhaseID = EPhase.Common_DefaultState;
         sequencer = new ChartSequencer();
         nJudgeLinePosY.Drums = (CDTXMania.ConfigIni.bReverse.Drums ? 159 + CDTXMania.ConfigIni.nJudgeLine.Drums : 561 - CDTXMania.ConfigIni.nJudgeLine.Drums);
         nJudgeLinePosY.Guitar = (CDTXMania.ConfigIni.bReverse.Guitar ? 611 - CDTXMania.ConfigIni.nJudgeLine.Guitar : 154 + CDTXMania.ConfigIni.nJudgeLine.Guitar);
@@ -262,6 +262,7 @@ internal abstract class CStagePerfCommonScreen : CStage
         nJudgeLinePosY_delta.Drums = CDTXMania.ConfigIni.nJudgeLinePosOffset.Drums;    // #31602 2013.6.23 yyagi
         nJudgeLinePosY_delta.Guitar = CDTXMania.ConfigIni.nJudgeLinePosOffset.Guitar;  //
         nJudgeLinePosY_delta.Bass = CDTXMania.ConfigIni.nJudgeLinePosOffset.Bass;      //
+
         bIsAutoPlay = CDTXMania.ConfigIni.bAutoPlay;									// #24239 2011.1.23 yyagi
         foreach (PerformanceData data in partData)
         {
@@ -279,8 +280,7 @@ internal abstract class CStagePerfCommonScreen : CStage
         dbPlaySpeed = CDTXMania.ConfigIni.nPlaySpeed / 20.0;
         bValidScore = true;
 
-        LoopBeginMs = -1;
-        LoopEndMs = -1;
+        SetLoop(-1, -1);
         //do not write a score for a chart played in the editor
         bIsTrainingMode = previewMode;
         bPAUSE = false;
@@ -325,9 +325,6 @@ internal abstract class CStagePerfCommonScreen : CStage
         Array.Clear(guitars);
         ctWailingChipPatternAnimation = null;
         ctBPMBar = null;
-        ctChipPatternAnimation.Drums = null;
-        ctChipPatternAnimation.Guitar = null;
-        ctChipPatternAnimation.Bass = null;
         listWAV = null;
         timeline.Load(null);
         
@@ -366,7 +363,7 @@ internal abstract class CStagePerfCommonScreen : CStage
     //one buffer for every pad read in a frame; the reads are sequential and each is done with before the
     //next one starts
     protected readonly List<STInputEvent> listPadEvents = [];
-    protected ActPerfNewFire[] actChipFireGB;
+    protected GuitarPlayfield[] guitarPlayfields = [];
     public CActPerfCommonCombo actCombo;
     protected CActPerfCommonJudgementString actJudgeString;
     protected CActPerfDrumsLaneFlushD actLaneFlushD;
@@ -377,7 +374,6 @@ internal abstract class CStagePerfCommonScreen : CStage
     protected CActPerfGuitarWailingBonus actWailingBonus;
     public CActPerfScrollSpeed actScrollSpeed;
     protected CActPerfSkillMeter actGraph;
-    protected CActPerfGuitarBonus actGuitarBonus;
     protected CActPerfProgressBar actProgressBar;
     protected bool bPAUSE;
     protected CCounter ctWailingChipPatternAnimation;
@@ -385,7 +381,6 @@ internal abstract class CStagePerfCommonScreen : CStage
     public CCounter ct登場用;
     public CCounter ctComboTimer;
 
-    protected STDGBVALUE<CCounter> ctChipPatternAnimation;
     protected abstract void tJudgeLineMovingUpandDown();
     protected EPerfScreenReturnValue eReturnValue;
     protected CCounter ctResultDelay;
@@ -445,8 +440,15 @@ internal abstract class CStagePerfCommonScreen : CStage
     private readonly Stopwatch laneKeyRepeat = new();
     private long laneKeyRepeatDelayMs;
 
-    protected long LoopBeginMs;
-    protected long LoopEndMs;
+    protected long LoopBeginMs { get; private set; }
+    protected long LoopEndMs { get; private set; }
+
+    //the loop points scroll like the chart, so they are chips too
+    private readonly CChip loopBegin = new();
+    private readonly CChip loopEnd = new();
+
+    //the players this screen draws. Filled by the screen once its layout is ready
+    protected Playfield[] playfields = [];
     
     // Use a property instead of a field to automatically set training mode on the graph too
     private bool _bIsTrainingMode;
@@ -570,8 +572,7 @@ internal abstract class CStagePerfCommonScreen : CStage
         if (SystemKey(EKeyConfigPad.LoopDelete))
         {
             Trace.TraceInformation("REMOVE LOOP AudioMixer.Timer.nCurrentTime=" + AudioMixer.Timer.nCurrentTime);
-            LoopBeginMs = -1;
-            LoopEndMs = -1;
+            SetLoop(-1, -1);
         }
         if (SystemKey(EKeyConfigPad.DecreasePlaySpeed))
         {
@@ -686,6 +687,32 @@ internal abstract class CStagePerfCommonScreen : CStage
         tJumpInSong(Math.Max(0, AudioMixer.Timer.nCurrentTime + deltaMs));
     }
 
+    //-1 for no point
+    protected void SetLoop(long beginMs, long endMs)
+    {
+        LoopBeginMs = beginMs;
+        LoopEndMs = endMs;
+        loopBegin.nPlaybackTimeMs = (int)beginMs;
+        loopEnd.nPlaybackTimeMs = (int)endMs;
+        RefreshPlayfields();
+    }
+
+    //what the playfields need but is not set every frame. Also after the layout reloads, since their parts are made again
+    protected void RefreshPlayfields()
+    {
+        foreach (Playfield playfield in playfields)
+        {
+            playfield.SetLoop(LoopBeginMs == -1 ? null : loopBegin, LoopEndMs == -1 ? null : loopEnd);
+        }
+    }
+
+    protected void FailStage()
+    {
+        actStageFailed.Start();
+        CDTXMania.DTX.tStopPlayingAllChips();
+        ePhaseID = EPhase.PERFORMANCE_STAGE_FAILED;
+    }
+
     //first press: loop start. Second press: loop end
     private void MarkLoop()
     {
@@ -694,21 +721,17 @@ internal abstract class CStagePerfCommonScreen : CStage
         if (LoopBeginMs == -1)
         {
             Trace.TraceInformation("INSERT LOOP BEGIN AudioMixer.Timer.nCurrentTime=" + now);
-            LoopBeginMs = now;
+            SetLoop(now, -1);
+            return;
         }
-        else if (LoopEndMs == -1)
+
+        if (LoopEndMs != -1)
         {
-            Trace.TraceInformation("INSERT LOOP END AudioMixer.Timer.nCurrentTime=" + now);
-            if (LoopBeginMs < now)
-            {
-                LoopEndMs = now;
-            }
-            else
-            {
-                LoopEndMs = LoopBeginMs;
-                LoopBeginMs = now;
-            }
+            return;
         }
+
+        Trace.TraceInformation("INSERT LOOP END AudioMixer.Timer.nCurrentTime=" + now);
+        SetLoop(Math.Min(LoopBeginMs, now), Math.Max(LoopBeginMs, now));
     }
 
     private void StepPlaySpeed(int delta)
@@ -816,21 +839,7 @@ internal abstract class CStagePerfCommonScreen : CStage
             CDTXMania.DTX.tStopPlayingAllChips();
         }
     }
-    protected void tUpdateAndDraw_WailingBonus(Matrix4x4 origin, EInstrumentPart part)
-    {
-        if ((ePhaseID != EPhase.PERFORMANCE_STAGE_FAILED) && (ePhaseID != EPhase.PERFORMANCE_STAGE_FAILED_END))
-        {
-            actWailingBonus.Draw(origin, part);
-        }
-    }
 
-    protected void tUpdateAndDraw_GuitarBonus(Matrix4x4 origin, EInstrumentPart part)
-    {
-        if ((ePhaseID != EPhase.PERFORMANCE_STAGE_FAILED) && (ePhaseID != EPhase.PERFORMANCE_STAGE_FAILED_END))
-        {
-            actGuitarBonus.Draw(origin, part);
-        }
-    }
     protected abstract void tUpdateAndDraw_WailingFrame();
     protected void tUpdateAndDraw_WailingFrame(int GtWailingFrameX, int BsWailingFrameX, int GtWailingFrameY, int BsWailingFrameY)
     {
@@ -848,10 +857,6 @@ internal abstract class CStagePerfCommonScreen : CStage
     }
     
 
-    protected void DrawCombo(Matrix4x4 origin, int part)
-    {
-        actCombo.Draw(origin, part);
-    }
     public static bool IsPlayed(EInstrumentPart part)
     {
         bool guitarScreen = CDTXMania.ConfigIni.bGuitarRevolutionMode;
@@ -1221,13 +1226,6 @@ internal abstract class CStagePerfCommonScreen : CStage
 
     protected void UpdateChipAnimation()
     {
-        for (int i = 0; i < 3; i++)			// 0=drums, 1=guitar, 2=bass
-        {
-            if (ctChipPatternAnimation[i] != null)
-            {
-                ctChipPatternAnimation[i].tUpdateLoop();
-            }
-        }
         if (ctWailingChipPatternAnimation != null)
         {
             ctWailingChipPatternAnimation.tUpdateLoop();
@@ -1260,20 +1258,6 @@ internal abstract class CStagePerfCommonScreen : CStage
     {
         ctResultDelay = new CCounter(0, CDTXMania.ConfigIni.nResultDelayMs, 1, CDTXMania.Timer);
     }
-    protected void tUpdateAndDraw_LaneFlushD(Matrix4x4 origin)
-    {
-        if ((ePhaseID != EPhase.PERFORMANCE_STAGE_FAILED) && (ePhaseID != EPhase.PERFORMANCE_STAGE_FAILED_END))
-        {
-            actLaneFlushD.Draw(origin);
-        }
-    }
-    protected void tUpdateAndDraw_LaneFlushGB(Matrix4x4 origin, EInstrumentPart part)
-    {
-        if (CDTXMania.ConfigIni.bGuitarEnabled)
-        {
-            actLaneFlushGB.Draw(origin, part);
-        }
-    }
     protected abstract void tUpdateAndDraw_PerformanceInformation();
     protected void tUpdateAndDraw_PerformanceInformation(int x, int y)
     {
@@ -1295,39 +1279,22 @@ internal abstract class CStagePerfCommonScreen : CStage
 
     private bool ShowStillBackground() => !ChartWillPlayVideo() || video.loadFailed;
 
-    protected void tUpdateAndDraw_JudgementString()  // t進行描画_判定文字列
+
+
+    protected DrumsPlayfield FindDrumsPlayfield()
     {
-        actJudgeString.OnUpdateAndDraw();
-    }
-    protected void tUpdateAndDraw_JudgementString1_ForNormalPosition()  // t進行描画_判定文字列1_通常位置指定の場合
-    {
-        if (CDTXMania.ConfigIni.JudgementStringPosition.Drums != EType.B)
-        {
-            actJudgeString.OnUpdateAndDraw();
-        }
-    }
-    protected void tUpdateAndDraw_JudgementString2_ForPositionOnJudgementLine()  // t進行描画_判定文字列2_判定ライン上指定の場合
-    {
-        if (CDTXMania.ConfigIni.JudgementStringPosition.Drums == EType.B)
-        {
-            actJudgeString.OnUpdateAndDraw();
-        }
+        UIGroup players = LayoutGroup(PlayersGroup);
+        DrumsPlayfield playfield = players.GetChild<DrumsPlayfield>("Drums") ?? players.AddChild(new DrumsPlayfield());
+        playfield.EnsureContent();
+        return playfield;
     }
 
-    protected void DrawScore(Matrix4x4 origin, EInstrumentPart part)
+    protected GuitarPlayfield FindGuitarPlayfield(EInstrument player)
     {
-        if (CDTXMania.ConfigIni.bShowScore)
-        {
-            actScore.Draw(origin, part);
-        }
-    }
-
-    //the root when a skin's layout has no section for this player
-    protected UIGroup SectionFor(EInstrument player)
-    {
-        UIGroup section = LayoutGroup(PlayersGroup).GetChild<UIGroup>(player.ToString()) ?? ui;
-        section.EnsureContent();
-        return section;
+        UIGroup players = LayoutGroup(PlayersGroup);
+        GuitarPlayfield playfield = players.GetChild<GuitarPlayfield>(player.ToString()) ?? players.AddChild(new GuitarPlayfield(player));
+        playfield.EnsureContent();
+        return playfield;
     }
 
     protected LegacyDrawable AddLegacyPart(UIGroup parent, string name, int layer, Action<Matrix4x4> draw)
@@ -1337,29 +1304,17 @@ internal abstract class CStagePerfCommonScreen : CStage
         return part;
     }
 
-    private bool ShowsChips => ePhaseID is not (EPhase.PERFORMANCE_STAGE_FAILED or EPhase.PERFORMANCE_STAGE_FAILED_END);
-
-    protected void UpdateChipRenderer(ChipRenderer renderer, EInstrumentPart part)
+    //the same pass the chips get, so the markers scroll with them
+    protected void UpdateLoopMarkers()
     {
-        renderer.chips = timeline.Chips;
-        renderer.firstChip = ShowsChips ? timeline.TopChip : -1;
-        renderer.judgeLineY = nJudgeLinePosY[(int)part];
-    }
+        if (LoopBeginMs == -1)
+        {
+            return;
+        }
 
-    //judgeLineY: where a chip at distance 0 is centred
-    protected void UpdateLoopMarkers(LoopMarkers markers, EInstrumentPart part, float judgeLineY, bool scrollsDown)
-    {
-        double multiplier = CChip.ScrollMultiplier(part, actScrollSpeed.db現在の譜面スクロール速度[(int)part]);
         long now = AudioMixer.Timer.nCurrentTime;
-        int laneDisplay = CDTXMania.ConfigIni.nLaneDisp[(int)part];
-
-        markers.showsBegin = ShowsChips && LoopBeginMs != -1;
-        markers.showsEnd = ShowsChips && LoopBeginMs != -1 && LoopEndMs != -1;
-        markers.beginDistance = (float)((LoopBeginMs - now) * multiplier);
-        markers.endDistance = (float)((LoopEndMs - now) * multiplier);
-        markers.showsLines = laneDisplay == 0 || laneDisplay == 1;
-        markers.judgeLineY = judgeLineY;
-        markers.scrollsDown = scrollsDown;
+        loopBegin.ComputeDistanceFromBar(now, actScrollSpeed.db現在の譜面スクロール速度);
+        loopEnd.ComputeDistanceFromBar(now, actScrollSpeed.db現在の譜面スクロール速度);
     }
 
     protected void UpdateScrollSpeed()
@@ -1496,14 +1451,14 @@ internal abstract class CStagePerfCommonScreen : CStage
     protected void ApplyGuitarEvents(GuitarPerformance guitar)
     {
         EInstrumentPart side = guitar.Side;
-        int player = (int)guitar.Player - 1;
+        GuitarPlayfield playfield = guitarPlayfields[(int)guitar.Player - 1];
         foreach (GuitarEvent e in guitar.Events)
         {
             for (int lane = 0; lane < 5; lane++)
             {
                 if ((e.FireLanes & (1 << lane)) != 0)
                 {
-                    actChipFireGB[player].Start(lane, e.Chip);
+                    playfield.StartFire(lane, e.Chip);
                 }
             }
 
@@ -1524,21 +1479,21 @@ internal abstract class CStagePerfCommonScreen : CStage
                     }
                     if (e.Miss)
                     {
-                        actJudgeString.Start(guitar.Chart == EChartPart.Guitar ? 13 : 14, EJudgement.Miss, 999);
+                        playfield.Judged(EJudgement.Miss, 999);
                     }
                     break;
 
                 case EGuitarEvent.Judged:
-                    actJudgeString.Start(e.Chip.eInstrumentPart == EInstrumentPart.GUITAR ? 13 : 14, e.Auto ? EJudgement.Auto : e.Judgement, e.Chip.nLag);
+                    playfield.Judged(e.Auto ? EJudgement.Auto : e.Judgement, e.Chip.nLag);
                     if (!e.Auto && e.Judgement is EJudgement.Perfect or EJudgement.Great or EJudgement.Good)
                     {
-                        actProgressBar.Hit(e.Chip.eInstrumentPart, e.Chip.nPlaybackTimeMs, e.Judgement);
+                        playfield.Progress(e.Chip.nPlaybackTimeMs, e.Judgement);
                     }
                     UpdateGraph(e.Chip.eInstrumentPart);
                     break;
 
                 case EGuitarEvent.HoldBonus:
-                    actGuitarBonus.startBonus(side);
+                    playfield.Score?.AddBonus();
                     break;
 
                 case EGuitarEvent.HoldRelease:
@@ -1546,8 +1501,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                     break;
 
                 case EGuitarEvent.Wail:
-                    actWailingBonus.Start(side, e.Chip);
-                    wailingEffect[player].Play();
+                    playfield.Wail(e.Chip);
                     break;
             }
         }
@@ -1612,14 +1566,13 @@ internal abstract class CStagePerfCommonScreen : CStage
 
     public void PreviewSetLoop(long beginMs, long endMs)
     {
-        LoopBeginMs = Math.Max(0, beginMs);
-        LoopEndMs = Math.Max(LoopBeginMs + 1, endMs);
+        long begin = Math.Max(0, beginMs);
+        SetLoop(begin, Math.Max(begin + 1, endMs));
     }
 
     public void PreviewClearLoop()
     {
-        LoopBeginMs = -1;
-        LoopEndMs = -1;
+        SetLoop(-1, -1);
     }
 
     public void PreviewChangeSpeed(int offset) => tChangePlaySpeed(offset);
@@ -1712,14 +1665,8 @@ internal abstract class CStagePerfCommonScreen : CStage
         {
             chip.nPlaybackTimeMs = (int)((chip.nPlaybackTimeMs * dbOldSpeed) / dbNewSpeed);
         }
-        if (LoopBeginMs != -1)
-        {
-            LoopBeginMs = (int)((LoopBeginMs * dbOldSpeed) / dbNewSpeed);
-        }
-        if (LoopEndMs != -1)
-        {
-            LoopEndMs = (int)((LoopEndMs * dbOldSpeed) / dbNewSpeed);
-        }
+        SetLoop(LoopBeginMs == -1 ? -1 : (long)((LoopBeginMs * dbOldSpeed) / dbNewSpeed),
+            LoopEndMs == -1 ? -1 : (long)((LoopEndMs * dbOldSpeed) / dbNewSpeed));
 
         AudioMixer.Timer.nCurrentTime = (int)((AudioMixer.Timer.nCurrentTime * dbOldSpeed) / dbNewSpeed);
 

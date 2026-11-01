@@ -102,19 +102,11 @@ public sealed class PerformanceStats
     //drums label the line from below and guitar and bass from above, until reversed
     [DataField] public float JudgeLineNumberY => JudgeLineY + ((Instrument == 0) != IsReversed ? 8 : -20);
 
-    //the drums line spans only the lanes in use
-    [DataField] public float JudgeLineX => Instrument != 0 ? 0 : CDTXMania.ConfigIni.eNumOfLanes.Drums switch
-    {
-        EType.C => 75,
-        _ => 3
-    };
+    public LaneLayout? lanes;
 
-    [DataField] public float JudgeLineWidth => Instrument != 0 ? 252 : CDTXMania.ConfigIni.eNumOfLanes.Drums switch
-    {
-        EType.B => 514,
-        EType.C => 442,
-        _ => 554
-    };
+    //playfield positions, inside the outer lines of the lanes. Without lanes, eg: guitar, the fixed guitar line
+    [DataField] public float JudgeLineX => lanes != null ? lanes.SpanLeft + 1 : 80;
+    [DataField] public float JudgeLineWidth => lanes != null ? lanes.SpanWidth - 2 : 252;
 
     [DataField] public int TopShutter => IsReversed ? CDTXMania.ConfigIni.nShutterOutSide[Instrument] : CDTXMania.ConfigIni.nShutterInSide[Instrument];
     [DataField] public int BottomShutter => IsReversed ? CDTXMania.ConfigIni.nShutterInSide[Instrument] : CDTXMania.ConfigIni.nShutterOutSide[Instrument];

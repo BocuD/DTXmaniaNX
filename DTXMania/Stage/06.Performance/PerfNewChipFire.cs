@@ -10,6 +10,7 @@ namespace DTXMania;
 public class ActPerfNewFire : UIGroup, IPerfFire
 {
     private int instrument;
+    public LaneLayout lanes = new();
     private static readonly Dictionary<ELane, Color4> laneColors = new()
     {
         { ELane.LC, new Color4(1, 0, 0)},
@@ -70,9 +71,8 @@ public class ActPerfNewFire : UIGroup, IPerfFire
             ELane colorLane = instrument == 0 ? (ELane)lane : (lane + ELane.GtR);
             laneColors.TryGetValue(colorLane, out Color4 color);
             noteExplosions[lane] = AddChild(new NoteExplosion(color));//, hasCircle.Contains(colorLane)));
-            float x = instrument == 0
-                ? DrumLanes.Centre((ELane)lane)
-                : stLaneSize[lane].x + (stLaneSize[lane].w / 2.0f);
+            //a drum lane can move, so its x is set every frame
+            float x = instrument == 0 ? 0 : stLaneSize[lane].x + (stLaneSize[lane].w / 2.0f);
             noteExplosions[lane].position = new Vector3(x, 0, 0);
         }
     }
@@ -157,6 +157,11 @@ public class ActPerfNewFire : UIGroup, IPerfFire
     {
         if (instrument == 0)
         {
+            for (int lane = 0; lane < stLaneSize.Length; lane++)
+            {
+                noteExplosions[lane].position.X = lanes.Centre((ELane)lane);
+            }
+
             position.Y = CDTXMania.ConfigIni.bReverse.Drums
                 ? 159 + CDTXMania.ConfigIni.nJudgeLine.Drums
                 : 563 - CDTXMania.ConfigIni.nJudgeLine.Drums;

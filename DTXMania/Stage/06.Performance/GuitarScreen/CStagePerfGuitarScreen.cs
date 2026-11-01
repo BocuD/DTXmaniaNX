@@ -21,7 +21,6 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		listChildActivities.Add( video = new CActPerfVideo() );
 		listChildActivities.Add( actBGA = new CActPerfBGA() );
 		listChildActivities.Add( actGraph = new CActPerfSkillMeter() );
-		listChildActivities.Add(actGuitarBonus = new CActPerfGuitarBonus());
 		listChildActivities.Add( actScrollSpeed = new CActPerfScrollSpeed() );
 		listChildActivities.Add( actWailingBonus = new CActPerfGuitarWailingBonus() );
 		listChildActivities.Add( actScore = new CActPerfGuitarScore(partData) );
@@ -37,60 +36,30 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 	{
 		base.OnLayoutReady();
 		
-		actChipFireGB = new ActPerfNewFire[2];
-		wailingEffect = new WailingEffect[2];
-		chipRenderers = new GuitarChipRenderer[2];
-		loopMarkers = new LoopMarkers[2];
+		guitarPlayfields = new GuitarPlayfield[2];
 		SetUpGuitarSection(EInstrument.Guitar1, EInstrumentPart.GUITAR);
 		SetUpGuitarSection(EInstrument.Guitar2, EInstrumentPart.BASS);
+		playfields = guitarPlayfields;
+		RefreshPlayfields();
 
 		UIGroup hud = LayoutGroup(HudGroup);
 		AddLegacyPart(hud, "Graph", LegacyOverlayLayer, _ => tUpdateAndDraw_Graph());
 		AddLegacyPart(hud, "PerformanceInformation", LegacyOverlayLayer, _ => tUpdateAndDraw_PerformanceInformation());
 	}
 
-	//both sides draw at Guitar1's coordinates. Guitar2's section is 870 to the right
 	private void SetUpGuitarSection(EInstrument player, EInstrumentPart part)
 	{
-		UIGroup section = SectionFor(player);
+		GuitarPlayfield playfield = FindGuitarPlayfield(player);
 		bool right = player == EInstrument.Guitar2;
 		int side = right ? 1 : 0;
 
-		AddLegacyPart(section, "LaneFlush", LegacyLanesLayer, origin => tUpdateAndDraw_LaneFlushGB(origin, part));
-		AddLegacyPart(section, "WailingBonus", LegacyLanesLayer, origin => tUpdateAndDraw_WailingBonus(origin, part));
-		AddLegacyPart(section, "ProgressBar", LegacyLanesLayer, origin => actProgressBar.Draw(origin, part, part));
+		playfield.SetParts(actScore, actCombo, actProgressBar, actJudgeString);
+		playfield.Setup(part, actLaneFlushGB, actWailingBonus);
+		playfield.SetChart(timeline);
 
-		loopMarkers[side] = section.AddChild(new LoopMarkers());
-		loopMarkers[side].renderOrder = LegacyLanesLayer;
-		loopMarkers[side].position = new Vector3(88, 0, 0);
-		loopMarkers[side].size = new Vector2(193, 720);
-		loopMarkers[side].textX = 60 - 88;
-
-		chipRenderers[side] = section.AddChild(new GuitarChipRenderer(part));
-		chipRenderers[side].renderOrder = LegacyLanesLayer;
-
-		//drawn over the judge lines and shutters
-		int lane = right ? 14 : 13;
-		AddLegacyPart(section, "JudgementStrings", LegacyOverlayLayer, _ => actJudgeString.DrawLanes(lane, lane));
-
-		//the right side's score, combo and bonus sit beside its panel, not 870 to the right
-		AddLegacyPart(section, "GuitarBonus", LegacyOverlayLayer, origin => tUpdateAndDraw_GuitarBonus(origin, part)).position.X = right ? -318 : 0;
-		AddLegacyPart(section, "Score", ScoreLayer, origin => DrawScore(origin, part)).position.X = right ? -578 : 0;
-		AddLegacyPart(section, "Combo", ScoreLayer, origin => DrawCombo(origin, (int)part)).position.X = right ? -585 : 0;
-
-		actJudgeString.InitUI(section, lane, lane, section.position.X);
-
-		actChipFireGB[side] = section.AddChild(new ActPerfNewFire(side + 1));
-		actChipFireGB[side].name = "ChipFire";
-		actChipFireGB[side].renderOrder = EffectsLayer;
-
-		wailingEffect[side] = section.AddChild(new WailingEffect());
-		wailingEffect[side].renderOrder = LaneArtLayer;
-		wailingEffect[side].position = new Vector3(242, 58, 0);
+		guitarPlayfields[side] = playfield;
 	}
 
-	private GuitarChipRenderer[] chipRenderers;
-	private LoopMarkers[] loopMarkers;
 
 	// メソッド
 
@@ -135,9 +104,6 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		AudioMixer.Timer.tReset();
 		CDTXMania.Timer.tReset();
 		
-		ctChipPatternAnimation.Guitar = new CCounter(0, 0x17, 20, CDTXMania.Timer);
-		ctChipPatternAnimation.Bass = new CCounter(0, 0x17, 20, CDTXMania.Timer);
-		ctChipPatternAnimation[0] = null;
 		ctComboTimer = new CCounter(1, 16,
 			(int)((60.0 / (CDTXMania.stagePerfGuitarScreen.actPlayInfo.dbBPM) / 16.0 * 1000.0)), CDTXMania.Timer);
 		ctWailingChipPatternAnimation = new CCounter(0, 4, 50, CDTXMania.Timer);
@@ -251,9 +217,7 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		    && (GuitarData.IsFailed() || BassData.IsFailed()
 		        || (!CDTXMania.DTX.bHasChips.Guitar && !CDTXMania.DTX.bHasChips.Bass)))
 		{
-			actStageFailed.Start();
-			CDTXMania.DTX.tStopPlayingAllChips();
-			ePhaseID = EPhase.PERFORMANCE_STAGE_FAILED;
+			FailStage();
 		}
 
 		UpdateBackground();
@@ -293,18 +257,7 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 
 		actScore.Update();
 
-		UpdateGuitarDrawing(0, EInstrumentPart.GUITAR);
-		UpdateGuitarDrawing(1, EInstrumentPart.BASS);
-	}
-
-	private void UpdateGuitarDrawing(int side, EInstrumentPart part)
-	{
-		UpdateChipRenderer(chipRenderers[side], part);
-
-		//guitar chips are centred 10 below the judge line value, or 1 below it in reverse
-		bool reverse = CDTXMania.ConfigIni.bReverse[(int)part];
-		int chipCentreY = nJudgeLinePosY[(int)part] + (reverse ? 1 : 10);
-		UpdateLoopMarkers(loopMarkers[side], part, chipCentreY, reverse);
+		UpdateLoopMarkers();
 	}
 
 	// Other

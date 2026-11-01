@@ -10,10 +10,11 @@ namespace DTXMania;
 public class DrumsChipRenderer : ChipRenderer
 {
     public int patternFrame;
+    public LaneLayout lanes = new();
 
     private BaseTexture? chipArt = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_chips_drums.png"));
 
-    protected override void DrawChips(Matrix4x4 origin)
+    protected override void DrawChips(Matrix4x4 origin, List<CChip> chips, int firstChip)
     {
         if (chipArt == null)
         {
@@ -24,17 +25,8 @@ public class DrumsChipRenderer : ChipRenderer
         bool reverse = config.bReverse.Drums;
         bool showsLines = config.nLaneDisp.Drums == 0 || config.nLaneDisp.Drums == 1;
 
-        int lineX = 295;
-        int lineWidth = 559;
-        if (config.eNumOfLanes.Drums == EType.B)
-        {
-            lineWidth = 519;
-        }
-        else if (config.eNumOfLanes.Drums == EType.C)
-        {
-            lineX = 367;
-            lineWidth = 447;
-        }
+        float lineX = lanes.SpanLeft;
+        float lineWidth = lanes.SpanWidth;
 
         if (firstChip >= 0)
         {
@@ -126,7 +118,7 @@ public class DrumsChipRenderer : ChipRenderer
 
         DrumChipArt art = found.Value;
         ELane lane = (ELane)DrumsPerformance.LaneOf(chip);
-        int x = (int)(DrumLanes.Centre(lane) - art.SourceWidth / 2f);
+        int x = (int)(lanes.Centre(lane) - art.SourceWidth / 2f);
         float y = (reverse ? judgeLineY + distance : judgeLineY - distance) - 32;
         Color4 color = Color4.White;
         color.Alpha = alpha;

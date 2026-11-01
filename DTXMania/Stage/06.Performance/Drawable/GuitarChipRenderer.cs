@@ -9,8 +9,10 @@ namespace DTXMania;
 
 public class GuitarChipRenderer : ChipRenderer
 {
-    private static readonly int[] noteX = [88, 127, 166, 205, 244];
-    private static readonly int[] holdNoteX = [107, 146, 185, 224, 264];
+    //reversed if lefty
+    private static readonly ELane[] frets = [ELane.GtR, ELane.GtG, ELane.GtB, ELane.GtY, ELane.GtP];
+
+    public LaneLayout lanes = new();
 
     private readonly EInstrumentPart part;
 
@@ -29,11 +31,10 @@ public class GuitarChipRenderer : ChipRenderer
             notes[fret] = BaseTexture.LoadFromPath(CSkin.Path($@"Graphics\Note\Guitar\note0{fret}.png"));
             holdBodies[fret] = BaseTexture.LoadFromPath(CSkin.Path($@"Graphics\Note\Guitar\lnote{fret}1.png"));
             holdNotes[fret] = new HoldNote();
-            holdNotes[fret].position = new Vector3(holdNoteX[fret], 0, 0);
         }
     }
 
-    protected override void DrawChips(Matrix4x4 origin)
+    protected override void DrawChips(Matrix4x4 origin, List<CChip> chips, int firstChip)
     {
         if (chipArt == null)
         {
@@ -67,7 +68,7 @@ public class GuitarChipRenderer : ChipRenderer
 
                 if (showsLines)
                 {
-                    chipArt.tDraw2D(origin, 88, y, new RectangleF(0, 20, 193, 2));
+                    chipArt.tDraw2D(origin, lanes.SpanLeft, y, new RectangleF(0, 20, lanes.SpanWidth - 2, 2));
                 }
 
                 if (config.bShowPerformanceInformation)
@@ -139,10 +140,9 @@ public class GuitarChipRenderer : ChipRenderer
         color.Alpha = alpha;
         if (chip.frets == 0)
         {
-            chipArt!.tDraw2D(origin, 88, y - 2, new RectangleF(0, 10, 196, 10), color);
+            chipArt!.tDraw2D(origin, lanes.SpanLeft, y - 2, new RectangleF(0, 10, 196, 10), color);
         }
 
-        bool left = config.bLeft[index];
         for (int fret = 0; fret < 5; fret++)
         {
             if ((chip.frets & (1 << fret)) == 0)
@@ -150,7 +150,8 @@ public class GuitarChipRenderer : ChipRenderer
                 continue;
             }
 
-            int x = left ? noteX[4 - fret] : noteX[fret];
+            ELane lane = frets[fret];
+            int x = (int)lanes.Left(lane);
             if (!chip.bHit)
             {
                 notes[fret].tDraw2D(origin, x, y - 5.0f, color);
@@ -168,6 +169,7 @@ public class GuitarChipRenderer : ChipRenderer
 
             HoldNote holdNote = holdNotes[fret];
             holdNote.clipHeight = length;
+            holdNote.position.X = (int)lanes.Centre(lane);
             holdNote.position.Y = top;
             holdNote.Draw(origin, chip.bHit, chip.bIsHittingLongNote);
         }

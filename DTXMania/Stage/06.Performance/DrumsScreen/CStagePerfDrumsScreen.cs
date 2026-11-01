@@ -10,15 +10,13 @@ namespace DTXMania;
 
 internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
 {
-    private DrumsChipRenderer chipRenderer;
-    private LoopMarkers loopMarkers;
+    private DrumsPlayfield playfield;
 
     public CStagePerfDrumsScreen()
     {
         eStageID = EStage.Performance_6;
         ePhaseID = EPhase.Common_DefaultState;
         bActivated = false;
-        listChildActivities.Add(actPad = new CActPerfDrumsPad());
         listChildActivities.Add(actCombo = new CActPerfDrumsComboDGB(partData));
 
         listChildActivities.Add(actGraph = new CActPerfSkillMeter());
@@ -37,48 +35,19 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
     {
         base.OnLayoutReady();
         
-        UIGroup drums = SectionFor(EInstrument.Drums);
-        AddLegacyPart(drums, "FillInEffect", LegacyLanesLayer, _ => DrawFillInEffect());
-        AddLegacyPart(drums, "LaneFlush", LegacyLanesLayer, origin => Probed(probeLanes, () => tUpdateAndDraw_LaneFlushD(origin)));
-        AddLegacyPart(drums, "ProgressBar", LegacyLanesLayer, origin => Probed(probeLanes, () => actProgressBar.Draw(origin, EInstrumentPart.DRUMS, EInstrumentPart.DRUMS)));
+        //before anything that reads lane positions
+        playfield = FindDrumsPlayfield();
+        playfield.SetParts(actScore, actCombo, actProgressBar, actJudgeString);
+        playfield.Setup(actLaneFlushD);
+        playfield.SetChart(timeline);
+        playfields = [playfield];
+        RefreshPlayfields();
 
-        loopMarkers = drums.AddChild(new LoopMarkers());
-        loopMarkers.renderOrder = LegacyLanesLayer;
-        loopMarkers.position = new Vector3(295, 0, 0);
-        loopMarkers.size = new Vector2(559, 720);
-        if (CDTXMania.ConfigIni.eNumOfLanes.Drums == EType.B)
-        {
-            loopMarkers.size.X = 519;
-        }
-        else if (CDTXMania.ConfigIni.eNumOfLanes.Drums == EType.C)
-        {
-            loopMarkers.position.X = 367;
-            loopMarkers.size.X = 447;
-        }
-        loopMarkers.textX = 830 - (int)loopMarkers.position.X;
-
-        chipRenderer = drums.AddChild(new DrumsChipRenderer());
-        chipRenderer.renderOrder = LegacyLanesLayer;
-        AddLegacyPart(drums, "LaneCover", LegacyLanesLayer, origin => Probed(probeLanes, () => DrawLaneCover(origin)));
-
-        //drawn over the judge lines and shutters
-        AddLegacyPart(drums, "Pad", LegacyOverlayLayer, origin => Probed(probeLanes, () => tUpdateAndDraw_DrumPad(origin)));
-        AddLegacyPart(drums, "JudgementStrings", LegacyOverlayLayer, _ => Probed(probeJudgement, DrawJudgementStrings));
-        AddLegacyPart(drums, "Score", ScoreLayer, origin => Probed(probeScore, () => DrawScore(origin, EInstrumentPart.DRUMS)));
-        AddLegacyPart(drums, "Combo", ScoreLayer, origin => Probed(probeCombo, () => DrawCombo(origin, (int)EInstrumentPart.DRUMS)));
+        AddLegacyPart(playfield, "FillInEffect", LegacyLanesLayer, _ => DrawFillInEffect());
 
         UIGroup hud = LayoutGroup(HudGroup);
         AddLegacyPart(hud, "Graph", LegacyOverlayLayer, _ => Probed(probeGraph, tUpdateAndDraw_Graph));
         AddLegacyPart(hud, "PerformanceInformation", LegacyOverlayLayer, _ => Probed(probeOverlay, tUpdateAndDraw_PerformanceInformation));
-
-        UIDrawable chipFire = drums.AddChild<UIDrawable>(CDTXMania.ConfigIni.bClassicDrumsFire ? new ClassicDrumsChipFire() : new ActPerfNewFire(0));
-        chipFire.name = "drumChipsFire";
-        chipFire.renderOrder = EffectsLayer;
-
-        actChipFireD = (IPerfFire)chipFire;
-        actChipFireD.iPosY = CDTXMania.ConfigIni.bReverse.Drums ? nJudgeLinePosY.Drums - 183 : nJudgeLinePosY.Drums - 186;
-
-        actJudgeString.InitUI(drums, 0, int.MaxValue, 0);
     }
 
     // Methods
@@ -136,7 +105,6 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
         if ( bActivated )
         {
             bChorusSection = false;
-            txLaneCover = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_lanes_Cover_cls.png"));
 
 
             base.OnManagedCreateResources();
@@ -147,9 +115,8 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
     {
         AudioMixer.Timer.tReset();
         CDTXMania.Timer.tReset();
-        actChipFireD.Start(ELane.HH, false, false, false, 0, false); // #31554 2013.6.12 yyagi
+        playfield.StartFire(ELane.HH, false, false, false, 0, false); // #31554 2013.6.12 yyagi
 
-        ctChipPatternAnimation.Drums = new CCounter(0, 7, 70, CDTXMania.Timer);
         double UnitTime;
         UnitTime = ((60.0 / (CDTXMania.stagePerfDrumsScreen.actPlayInfo.dbBPM) / 14.0));
         ctBPMBar = new CCounter(1, 14, (int)(UnitTime * 1000.0), CDTXMania.Timer);
@@ -157,8 +124,6 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
         ctComboTimer = new CCounter(1, 16,
             (int)((60.0 / (CDTXMania.stagePerfDrumsScreen.actPlayInfo.dbBPM) / 16) * 1000.0), CDTXMania.Timer);
 
-        ctChipPatternAnimation.Guitar = new CCounter(0, 0x17, 20, CDTXMania.Timer);
-        ctChipPatternAnimation.Bass = new CCounter(0, 0x17, 20, CDTXMania.Timer);
         ctWailingChipPatternAnimation = new CCounter(0, 4, 50, CDTXMania.Timer);
         ePhaseID = EPhase.Common_DefaultState;
 
@@ -221,12 +186,8 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
     }
 
     private static readonly int probeVideo = AllocationProbe.Register("video");
-    private static readonly int probeLanes = AllocationProbe.Register("lanes");
     private static readonly int probeChips = AllocationProbe.Register("chips");
-    private static readonly int probeScore = AllocationProbe.Register("score");
-    private static readonly int probeCombo = AllocationProbe.Register("combo");
     private static readonly int probeGraph = AllocationProbe.Register("graph");
-    private static readonly int probeJudgement = AllocationProbe.Register("judgement string");
     private static readonly int probeOverlay = AllocationProbe.Register("debug overlay");
     private static readonly int probeKeyInput = AllocationProbe.Register("key input");
 
@@ -235,12 +196,6 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
         AllocationProbe.Begin(probe);
         draw();
         AllocationProbe.End(probe);
-    }
-
-    private void DrawJudgementStrings()
-    {
-        tUpdateAndDraw_JudgementString1_ForNormalPosition();
-        tUpdateAndDraw_JudgementString2_ForPositionOnJudgementLine();
     }
 
     public override void OnUpdate()
@@ -253,9 +208,7 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
         if (CDTXMania.ConfigIni.bSTAGEFAILEDEnabled && !bIsTrainingMode && !StageManager.dropStageChanges && DrumsData.IsFailed()
             && ePhaseID == EPhase.Common_DefaultState)
         {
-            actStageFailed.Start();
-            CDTXMania.DTX.tStopPlayingAllChips();
-            ePhaseID = EPhase.PERFORMANCE_STAGE_FAILED;
+            FailStage();
         }
 
         AllocationProbe.Begin(probeVideo);
@@ -278,9 +231,7 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
         {
             if ((DrumsData.IsFailed()) && (ePhaseID == EPhase.Common_DefaultState))
             {
-                actStageFailed.Start();
-                CDTXMania.DTX.tStopPlayingAllChips();
-                ePhaseID = EPhase.PERFORMANCE_STAGE_FAILED;
+                FailStage();
             }
             else
             {
@@ -309,62 +260,8 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
 
         actScore.Update();
 
-        UpdateChipRenderer(chipRenderer, EInstrumentPart.DRUMS);
-        chipRenderer.patternFrame = ctChipPatternAnimation.Drums.nCurrentValue;
-        UpdateLoopMarkers(loopMarkers, EInstrumentPart.DRUMS, nJudgeLinePosY.Drums, !CDTXMania.ConfigIni.bReverse.Drums);
+        UpdateLoopMarkers();
     }
-
-    private void DrawLaneCover(Matrix4x4 origin)
-    {
-        //シャッターを使うのはLC、LP、FT、RDレーンのみ。その他のレーンでは一切使用しない。
-        //If Skill Mode is CLASSIC, always display lvl as Classic Style
-        if (CDTXMania.ConfigIni.nSkillMode == 0 || (CDTXMania.ConfigIni.bClassicScoreDisplay &&
-                                                    (!CDTXMania.DTX.bHasChips.LeftCymbal &&
-                                                     !CDTXMania.DTX.bHasChips.FT &&
-                                                     !CDTXMania.DTX.bHasChips.Ride &&
-                                                     !CDTXMania.DTX.bHasChips.LP &&
-                                                     !CDTXMania.DTX.bHasChips.LBD &&
-                                                     !CDTXMania.DTX.bForceXGChart)))
-        {
-            if (txLaneCover != null)
-            {
-                {
-                    txLaneCover.tDraw2D(origin, 295, 0, new RectangleF(0, 0, 70, 720));
-                }
-                {
-                    //レーンタイプでの入れ替わりあり
-                    if (CDTXMania.ConfigIni.eLaneType.Drums == EType.A ||
-                        CDTXMania.ConfigIni.eLaneType.Drums == EType.C)
-                    {
-                        txLaneCover.tDraw2D(origin, 416, 0, new RectangleF(124, 0, 54, 720));
-                    }
-                    else if (CDTXMania.ConfigIni.eLaneType.Drums == EType.B)
-                    {
-                        txLaneCover.tDraw2D(origin, 470, 0, new RectangleF(124, 0, 54, 720));
-                    }
-                    else if (CDTXMania.ConfigIni.eLaneType.Drums == EType.D)
-                    {
-                        txLaneCover.tDraw2D(origin, 522, 0, new RectangleF(124, 0, 54, 720));
-                    }
-                }
-                {
-                    txLaneCover.tDraw2D(origin, 690, 0, new RectangleF(71, 0, 52, 720));
-                }
-                {
-                    //RDPositionで入れ替わり
-                    if (CDTXMania.ConfigIni.eRDPosition == ERDPosition.RCRD)
-                    {
-                        txLaneCover.tDraw2D(origin, 815, 0, new RectangleF(178, 0, 38, 720));
-                    }
-                    else if (CDTXMania.ConfigIni.eRDPosition == ERDPosition.RDRC)
-                    {
-                        txLaneCover.tDraw2D(origin, 743, 0, new RectangleF(178, 0, 38, 720));
-                    }
-                }
-            }
-        }
-    }
-
 
     // Other
 
@@ -374,13 +271,10 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
     public bool bFullCom;
     public int nNumberOfMistakes;
     public int nNumberPerfects;
-    private IPerfFire actChipFireD;
-    public CActPerfDrumsPad actPad;
     public bool bInFillIn;
     public bool bEndFillIn;
     public bool bChorusSection;
     public double UnitTime;
-    private BaseTexture txLaneCover;
     //-----------------
     protected override void UpdateGraph(EInstrumentPart part)
     {
@@ -401,15 +295,13 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
             switch (e.Kind)
             {
                 case EDrumsEvent.AutoNote:
-                    actLaneFlushD.Start((ELane)e.Lane, e.Velocity);
+                    playfield.Hit((ELane)e.Lane, e.Pad, e.Velocity);
                     StartChipFire(e.Lane, e.Chip);
-                    actPad.Hit(e.Pad);
                     sequencer.PlaySound(e.Chip, AudioMixer.Timer.nResetAtMs + e.Time, EInstrumentPart.DRUMS, CDTXMania.DTX.nモニタを考慮した音量(EInstrumentPart.DRUMS));
                     break;
 
                 case EDrumsEvent.Hit:
-                    actLaneFlushD.Start((ELane)e.Lane, e.Velocity);
-                    actPad.Hit(e.Pad);
+                    playfield.Hit((ELane)e.Lane, e.Pad, e.Velocity);
                     if (e.Fire)
                     {
                         StartChipFire(e.Lane, e.Chip);
@@ -418,17 +310,16 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
                     break;
 
                 case EDrumsEvent.EmptyHit:
-                    actLaneFlushD.Start((ELane)e.Lane, e.Velocity);
-                    actPad.Hit(e.Pad);
+                    playfield.Hit((ELane)e.Lane, e.Pad, e.Velocity);
                     PlayHitSound(e.Sound);
                     if (e.Miss)
                     {
-                        actJudgeString.Start(e.Lane, e.Auto ? EJudgement.Auto : EJudgement.Miss, 999);
+                        playfield.Judged(e.Lane, e.Auto ? EJudgement.Auto : EJudgement.Miss, 999);
                     }
                     break;
 
                 case EDrumsEvent.Bonus:
-                    actPad.ShowBonus();
+                    playfield.Score?.AddBonus();
                     if (CDTXMania.ConfigIni.DisplayBonusEffects)
                     {
                         CDTXMania.Skin.soundAudience.tPlay();
@@ -436,11 +327,11 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
                     break;
 
                 case EDrumsEvent.Judged:
-                    actJudgeString.Start(e.Lane, e.Auto ? EJudgement.Auto : e.Judgement, e.Chip.nLag);
+                    playfield.Judged(e.Lane, e.Auto ? EJudgement.Auto : e.Judgement, e.Chip.nLag);
                     bool hit = e.Judgement is EJudgement.Perfect or EJudgement.Great or EJudgement.Good;
                     if (!e.Auto && hit)
                     {
-                        actProgressBar.Hit(EInstrumentPart.DRUMS, e.Chip.nPlaybackTimeMs, e.Judgement);
+                        playfield.Progress(e.Chip.nPlaybackTimeMs, e.Judgement);
                     }
                     if (e.Judgement == EJudgement.Miss)
                     {
@@ -460,7 +351,7 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
     private void StartChipFire(int lane, CChip chip)
     {
         bool lastInFillIn = bInFillIn && bフィルイン区間の最後のChipである(chip);
-        actChipFireD.Start((ELane)lane, bInFillIn, lastInFillIn, lastInFillIn, nJudgeLinePosY_delta.Drums);
+        playfield.StartFire((ELane)lane, bInFillIn, lastInFillIn, lastInFillIn, nJudgeLinePosY_delta.Drums);
     }
 
     private void PlayHitSound(CChip? sound)
@@ -483,7 +374,6 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
 
     protected override void tJudgeLineMovingUpandDown()
     {
-        actChipFireD.iPosY = (CDTXMania.ConfigIni.bReverse.Drums ? nJudgeLinePosY.Drums - 183 : nJudgeLinePosY.Drums - 186);
         CDTXMania.stagePerfDrumsScreen.actPlayInfo.jl = (CDTXMania.ConfigIni.bReverse.Drums ? 0 : nJudgeLineMaxPosY - nJudgeLinePosY.Drums);
     }
 
@@ -501,11 +391,6 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
         {
             actGraph.OnUpdateAndDraw();
         }
-    }
-
-    private void tUpdateAndDraw_DrumPad(Matrix4x4 origin)
-    {
-        actPad.Draw(origin);
     }
 
 

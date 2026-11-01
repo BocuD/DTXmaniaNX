@@ -9,12 +9,13 @@ namespace DTXMania;
 //the begin and end of the practice loop. The marker art is stretched to the element's width
 public class LoopMarkers : UIDrawable
 {
-    //set by the stage every frame
-    public bool showsBegin;
-    public bool showsEnd;
-    public float beginDistance;
-    public float endDistance;
+    //the loop points as chips, so they scroll with the chart. Null for no point
+    public CChip? begin;
+    public CChip? end;
+    public EInstrumentPart part;
+
     public bool showsLines;
+
     //where a chip at distance 0 is centred
     public float judgeLineY;
     public bool scrollsDown;
@@ -34,14 +35,14 @@ public class LoopMarkers : UIDrawable
         UpdateLocalTransformMatrix();
         Matrix4x4 origin = localTransformMatrix * parentMatrix;
 
-        if (showsBegin)
+        if (begin != null)
         {
-            DrawMarker(origin, beginDistance, "Begin loop");
+            DrawMarker(origin, begin.nDistanceFromBar[(int)part], "Begin loop");
         }
 
-        if (showsEnd)
+        if (end != null)
         {
-            DrawMarker(origin, endDistance, "End loop");
+            DrawMarker(origin, end.nDistanceFromBar[(int)part], "End loop");
         }
     }
 

@@ -4,7 +4,7 @@ using DTXMania.UI.Drawable;
 
 namespace DTXMania;
 
-//draws one player's chips. The stage sets the fields below every frame
+//draws one player's chips
 public abstract class ChipRenderer : UIDrawable
 {
     private static readonly int probe = AllocationProbe.Register("chip drawing");
@@ -12,9 +12,8 @@ public abstract class ChipRenderer : UIDrawable
     //chips further away than this are off screen
     public const float DrawRange = 600;
 
-    public List<CChip> chips = [];
-    //-1 draws no chips
-    public int firstChip = -1;
+    //the chart the playfield plays
+    public ChipTimeline? timeline;
     public int judgeLineY;
 
     protected ChipRenderer()
@@ -25,14 +24,20 @@ public abstract class ChipRenderer : UIDrawable
 
     public override void Draw(Matrix4x4 parentMatrix)
     {
+        if (timeline == null)
+        {
+            return;
+        }
+
         UpdateLocalTransformMatrix();
 
         AllocationProbe.Begin(probe);
-        DrawChips(localTransformMatrix * parentMatrix);
+        DrawChips(localTransformMatrix * parentMatrix, timeline.Chips, timeline.TopChip);
         AllocationProbe.End(probe);
     }
 
-    protected abstract void DrawChips(Matrix4x4 origin);
+    //firstChip: -1 draws no chips
+    protected abstract void DrawChips(Matrix4x4 origin, List<CChip> chips, int firstChip);
 
     //mode: 1 hidden, 2 sudden, 3 both, 4 stealth. Both fades are 50 units long. 0 is not drawn
     protected static float NoteAlpha(float distance, int mode, int suddenFrom, int hiddenFrom, float fadeDivisor)
