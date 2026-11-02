@@ -4,9 +4,108 @@ namespace DTXMania;
 
 internal static class PerformanceResults
 {
+    internal enum EPlayed { Drums, Guitar, Bass, GuitarAndBass }
+
+    internal static bool WasPlayed(CScoreIni.CPerformanceEntry entry) => !entry.bHasAnyAutoAtAll && entry.nTotalChipsCount > 0;
+
+    internal static EPlayed PlayedPart(CScoreIni.CPerformanceEntry drums, CScoreIni.CPerformanceEntry guitar, CScoreIni.CPerformanceEntry bass)
+    {
+        if (WasPlayed(drums))
+        {
+            return EPlayed.Drums;
+        }
+
+        if (WasPlayed(guitar))
+        {
+            return WasPlayed(bass) ? EPlayed.GuitarAndBass : EPlayed.Guitar;
+        }
+
+        return EPlayed.Bass;
+    }
+
+    private static void SwapGuitarAndBass(ref CScoreIni.CPerformanceEntry guitar, ref CScoreIni.CPerformanceEntry bass)
+    {
+        CScoreIni.CPerformanceEntry swapped = guitar;
+        guitar = bass;
+        bass = swapped;
+    }
+
+    //part: 0 drums, 1 guitar, 2 bass
+    internal static bool SavesProgress(EPlayed played, int part) => part switch
+    {
+        0 => played == EPlayed.Drums,
+        1 => played is EPlayed.Guitar or EPlayed.GuitarAndBass,
+        _ => played is EPlayed.Bass or EPlayed.GuitarAndBass
+    };
+
+    //eg: " Speed x1.50", or " x1.50" with guitar and bass together
+    internal static string SpeedSuffix(bool guitarAndBass)
+    {
+        if (CDTXMania.ConfigIni.nPlaySpeed == 20)
+        {
+            return "";
+        }
+
+        double d = CDTXMania.ConfigIni.nPlaySpeed / 20.0;
+        return (guitarAndBass ? " x" : " Speed x") + d.ToString("0.00");
+    }
+
+    //eg: "Stage failed Guitar  Speed x1.50"
+    internal static string FailedHistoryLine(CScoreIni.CPerformanceEntry drums, CScoreIni.CPerformanceEntry guitar, CScoreIni.CPerformanceEntry bass)
+    {
+        EPlayed played = PlayedPart(drums, guitar, bass);
+        string strInstrument = played switch
+        {
+            EPlayed.Drums => " Drums",
+            EPlayed.GuitarAndBass => " G+B",
+            EPlayed.Guitar => " Guitar",
+            _ => " Bass"
+        };
+
+        return $"Stage failed{strInstrument} {SpeedSuffix(played == EPlayed.GuitarAndBass)}";
+    }
+
+    //eg: "Cleared Guitar (A: 82.50 Speed x1.50)", or "Cleared (No chips)"
+    internal static string ClearedHistoryLine(CScoreIni.CPerformanceEntry drums, CScoreIni.CPerformanceEntry guitar, CScoreIni.CPerformanceEntry bass)
+    {
+        EPlayed played = PlayedPart(drums, guitar, bass);
+        bool guitarAndBass = played == EPlayed.GuitarAndBass;
+        string strInstrument = played switch
+        {
+            EPlayed.Drums => "",
+            EPlayed.GuitarAndBass => " G+B",
+            EPlayed.Guitar => " Guitar",
+            _ => " Bass"
+        };
+
+        CScoreIni.CPerformanceEntry scored = played switch
+        {
+            EPlayed.Drums => drums,
+            EPlayed.Bass => bass,
+            _ => guitar
+        };
+
+        string strPerfSkill = guitarAndBass
+            ? $"{guitar.dbPerformanceSkill:F2}/{bass.dbPerformanceSkill:F2}"
+            : $" {scored.dbPerformanceSkill:F2}";
+
+        int nRank = guitarAndBass
+            ? CScoreIni.tCalculateOverallRankValue(drums, guitar, bass)
+            : CDTXMania.ConfigIni.nSkillMode == 0
+                ? CScoreIni.tCalculateRankOld(scored)
+                : CScoreIni.tCalculateRank(scored.dbPerformanceSkill);
+
+        if (nRank == (int)CScoreIni.ERANK.UNKNOWN)
+        {
+            return "Cleared (No chips)";
+        }
+
+        return $"Cleared{strInstrument} ({Enum.GetName(typeof(CScoreIni.ERANK), nRank)}:{strPerfSkill}{SpeedSuffix(guitarAndBass)})";
+    }
+
     public static CScoreIni? SaveStageFailed(CStagePerfCommonScreen screen)
     {
-        CScoreIni scoreIni = null;
+        CScoreIni? scoreIni = null;
         //New extract performance record
         screen.tStorePerfResults(out CScoreIni.CPerformanceEntry cPerf_Drums,
             out CScoreIni.CPerformanceEntry cPerf_Guitar, out CScoreIni.CPerformanceEntry cPerf_Bass,
@@ -21,99 +120,31 @@ internal static class PerformanceResults
             if (CDTXMania.ConfigIni
                 .bIsSwappedGuitarBass) // #24063 2011.1.24 yyagi Gt/Bsを入れ替えていたなら、演奏結果も入れ替える
             {
-                CScoreIni.CPerformanceEntry t;
-                t = cPerf_Guitar;
-                cPerf_Guitar = cPerf_Bass;
-                cPerf_Bass = t;
+                SwapGuitarAndBass(ref cPerf_Guitar, ref cPerf_Bass);
             }
 
-            string strInstrument = "";
-            string strPerfSkill = "";
-            //STDGBVALUE<string> strCurrProgressBars;
-            STDGBVALUE<bool> bToSaveProgressBarRecord;
-            bToSaveProgressBarRecord.Drums = false;
-            bToSaveProgressBarRecord.Guitar = false;
-            bToSaveProgressBarRecord.Bass = false;
-            STDGBVALUE<bool> bNewProgressBarRecord;
-            bNewProgressBarRecord.Drums = false;
-            bNewProgressBarRecord.Guitar = false;
-            bNewProgressBarRecord.Bass = false;
-            bool bGuitarAndBass = false;
-            if (!cPerf_Drums.bHasAnyAutoAtAll && cPerf_Drums.nTotalChipsCount > 0)
-            {
-                //Drums played
-                strInstrument = " Drums";
-                bToSaveProgressBarRecord.Drums = true;
-            }
-            else if (!cPerf_Guitar.bHasAnyAutoAtAll && cPerf_Guitar.nTotalChipsCount > 0)
-            {
-                if (!cPerf_Bass.bHasAnyAutoAtAll && cPerf_Bass.nTotalChipsCount > 0)
-                {
-                    // Guitar and bass played together
-                    bGuitarAndBass = true;
-                    strInstrument = " G+B";
-                    bToSaveProgressBarRecord.Guitar = true;
-                    bToSaveProgressBarRecord.Bass = true;
-                }
-                else
-                {
-                    // Guitar only played
-                    strInstrument = " Guitar";
-                    bToSaveProgressBarRecord.Guitar = true;
-                }
-            }
-            else
-            {
-                //Bass only played
-                strInstrument = " Bass";
-                bToSaveProgressBarRecord.Bass = true;
-            }
+            EPlayed played = PlayedPart(cPerf_Drums, cPerf_Guitar, cPerf_Bass);
+            CScoreIni.CPerformanceEntry[] entries = [cPerf_Drums, cPerf_Guitar, cPerf_Bass];
 
-            string str = "";
-            string strSpeed = "";
-            if (CDTXMania.ConfigIni.nPlaySpeed != 20)
-            {
-                double d = CDTXMania.ConfigIni.nPlaySpeed / 20.0;
-                strSpeed = (bGuitarAndBass ? " x" : " Speed x") + d.ToString("0.00");
-            }
-
-            str = $"Stage failed{strInstrument} {strSpeed}";
-
-            scoreIni = CDTXMania.UpdateBGMAdjustHistoryPlayCountIntScoreIni(str);
+            scoreIni = CDTXMania.UpdateBGMAdjustHistoryPlayCountIntScoreIni(FailedHistoryLine(cPerf_Drums, cPerf_Guitar, cPerf_Bass));
 
             CChartData cChartData = CDTXMania.chosenChartData;
+            bool[] isRecord = new bool[3];
 
-            if (bToSaveProgressBarRecord.Drums)
+            for (int part = 0; part < entries.Length; part++)
             {
-                scoreIni.stSection.LastPlayDrums.strProgress = cPerf_Drums.strProgress;
-
-                if (CScoreIni.tCheckIfUpdateProgressBarRecordOrNot(
-                        cChartData.SongInformation.progress.Drums, cPerf_Drums.strProgress))
+                if (!SavesProgress(played, part))
                 {
-                    scoreIni.stSection.HiSkillDrums.strProgress = cPerf_Drums.strProgress;
-                    bNewProgressBarRecord.Drums = true;
+                    continue;
                 }
-            }
 
-            if (bToSaveProgressBarRecord.Guitar)
-            {
-                scoreIni.stSection.LastPlayGuitar.strProgress = cPerf_Guitar.strProgress;
-                if (CScoreIni.tCheckIfUpdateProgressBarRecordOrNot(
-                        cChartData.SongInformation.progress.Guitar, cPerf_Guitar.strProgress))
-                {
-                    scoreIni.stSection.HiSkillGuitar.strProgress = cPerf_Guitar.strProgress;
-                    bNewProgressBarRecord.Guitar = true;
-                }
-            }
+                string progress = entries[part].strProgress;
+                scoreIni.stSection[(int)CScoreIni.ESectionType.LastPlayDrums + part].strProgress = progress;
 
-            if (bToSaveProgressBarRecord.Bass)
-            {
-                scoreIni.stSection.LastPlayBass.strProgress = cPerf_Bass.strProgress;
-                if (CScoreIni.tCheckIfUpdateProgressBarRecordOrNot(
-                        cChartData.SongInformation.progress.Bass, cPerf_Bass.strProgress))
+                if (CScoreIni.tCheckIfUpdateProgressBarRecordOrNot(cChartData.SongInformation.progress[part], progress))
                 {
-                    scoreIni.stSection.HiSkillBass.strProgress = cPerf_Bass.strProgress;
-                    bNewProgressBarRecord.Bass = true;
+                    scoreIni.stSection[(int)CScoreIni.ESectionType.HiSkillDrums + part * 2].strProgress = progress;
+                    isRecord[part] = true;
                 }
             }
 
@@ -121,22 +152,12 @@ internal static class PerformanceResults
 
             if (!CDTXMania.bCompactMode)
             {
-                if (bNewProgressBarRecord.Drums)
+                for (int part = 0; part < entries.Length; part++)
                 {
-                    // New Song Progress
-                    cChartData.SongInformation.progress.Drums = cPerf_Drums.strProgress;
-                }
-
-                if (bNewProgressBarRecord.Guitar)
-                {
-                    // New Song Progress
-                    cChartData.SongInformation.progress.Guitar = cPerf_Guitar.strProgress;
-                }
-
-                if (bNewProgressBarRecord.Bass)
-                {
-                    // New Song Progress
-                    cChartData.SongInformation.progress.Bass = cPerf_Bass.strProgress;
+                    if (isRecord[part])
+                    {
+                        cChartData.SongInformation.progress[part] = entries[part].strProgress;
+                    }
                 }
             }
         }
@@ -147,7 +168,7 @@ internal static class PerformanceResults
         out CScoreIni.CPerformanceEntry cPerfEntry_Guitar, out CScoreIni.CPerformanceEntry cPerfEntry_Bass,
         out CChip[] chipArray, out bool bIsTrainingMode)
     {
-        CScoreIni scoreIni = null;
+        CScoreIni? scoreIni = null;
         //-----------------------------
         screen.tStorePerfResults(out cPerfEntry_Drums, out cPerfEntry_Guitar, out cPerfEntry_Bass, out bIsTrainingMode);
         chipArray = screen.EmptyDrumChips();
@@ -157,10 +178,7 @@ internal static class PerformanceResults
             if (CDTXMania.ConfigIni
                 .bIsSwappedGuitarBass) // #24063 2011.1.24 yyagi Gt/Bsを入れ替えていたなら、演奏結果も入れ替える
             {
-                CScoreIni.CPerformanceEntry t;
-                t = cPerfEntry_Guitar;
-                cPerfEntry_Guitar = cPerfEntry_Bass;
-                cPerfEntry_Bass = t;
+                SwapGuitarAndBass(ref cPerfEntry_Guitar, ref cPerfEntry_Bass);
 
                 CDTXMania.DTX.SwapGuitarBassInfos(); // 譜面情報も元に戻す
                 CDTXMania.ConfigIni.SwapGuitarBassInfos_AutoFlags(); // #24415 2011.2.27 yyagi
@@ -168,69 +186,8 @@ internal static class PerformanceResults
                 // これを戻すのは、リザルト集計後。
             } // "case CStage.EStage.Result:"のところ。
 
-            double ps = 0.0;
-            int nRank;
-            string strInstrument = "";
-            string strPerfSkill;
-            bool bGuitarAndBass = false;
-            if (cPerfEntry_Drums is { bHasAnyAutoAtAll: false, nTotalChipsCount: > 0 })
-            {
-                //Drums played
-                strPerfSkill = $" {cPerfEntry_Drums.dbPerformanceSkill:F2}";
-                nRank = (CDTXMania.ConfigIni.nSkillMode == 0)
-                    ? CScoreIni.tCalculateRankOld(cPerfEntry_Drums)
-                    : CScoreIni.tCalculateRank(cPerfEntry_Drums.dbPerformanceSkill);
-            }
-            else if (cPerfEntry_Guitar is { bHasAnyAutoAtAll: false, nTotalChipsCount: > 0 })
-            {
-                if (cPerfEntry_Bass is { bHasAnyAutoAtAll: false, nTotalChipsCount: > 0 })
-                {
-                    // Guitar and bass played together
-                    bGuitarAndBass = true;
-                    strPerfSkill =
-                        $"{cPerfEntry_Guitar.dbPerformanceSkill:F2}/{cPerfEntry_Bass.dbPerformanceSkill:F2}";
-                    nRank = CScoreIni.tCalculateOverallRankValue(cPerfEntry_Drums,
-                        cPerfEntry_Guitar, cPerfEntry_Bass);
-                    strInstrument = " G+B";
-                }
-                else
-                {
-                    // Guitar only played
-                    strPerfSkill = $" {cPerfEntry_Guitar.dbPerformanceSkill:F2}";
-                    nRank = (CDTXMania.ConfigIni.nSkillMode == 0)
-                        ? CScoreIni.tCalculateRankOld(cPerfEntry_Guitar)
-                        : CScoreIni.tCalculateRank(cPerfEntry_Guitar.dbPerformanceSkill);
-                    strInstrument = " Guitar";
-                }
-            }
-            else
-            {
-                //Bass only played
-                strPerfSkill = $" {cPerfEntry_Bass.dbPerformanceSkill:F2}";
-                nRank = (CDTXMania.ConfigIni.nSkillMode == 0)
-                    ? CScoreIni.tCalculateRankOld(cPerfEntry_Bass)
-                    : CScoreIni.tCalculateRank(cPerfEntry_Bass.dbPerformanceSkill);
-                strInstrument = " Bass";
-            }
-
-            string str;
-            if (nRank == (int)CScoreIni.ERANK.UNKNOWN)
-            {
-                str = "Cleared (No chips)";
-            }
-            else
-            {
-                string strSpeed = "";
-                if (CDTXMania.ConfigIni.nPlaySpeed != 20)
-                {
-                    double d = CDTXMania.ConfigIni.nPlaySpeed / 20.0;
-                    strSpeed = (bGuitarAndBass ? " x" : " Speed x") + d.ToString("0.00");
-                }
-
-                str = $"Cleared{strInstrument} ({Enum.GetName(typeof(CScoreIni.ERANK), nRank)}:{strPerfSkill}{strSpeed})";
-            }
-
-            scoreIni = CDTXMania.UpdateBGMAdjustHistoryPlayCountIntScoreIni(str);
+            scoreIni = CDTXMania.UpdateBGMAdjustHistoryPlayCountIntScoreIni(
+                ClearedHistoryLine(cPerfEntry_Drums, cPerfEntry_Guitar, cPerfEntry_Bass));
         }
 
 
