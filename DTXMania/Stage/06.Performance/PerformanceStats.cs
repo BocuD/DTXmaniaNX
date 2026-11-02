@@ -7,27 +7,35 @@ namespace DTXMania;
 
 public sealed class PerformanceStats
 {
-    [DataField] public int Instrument { get; set; }
+    [DataField] public EPlayer Player { get; set; }
 
-    [DataField] public EPlayer Player
+    //the nameplate takes the player as a number
+    [DataField] public int Instrument => (int)Player;
+
+    //todo: transitional, delete with the guitar and bass swap. This player is still fixed to its own chart part
+    private EInstrumentPart Part => (EInstrumentPart)Player;
+
+    //this player's settings are stored in the drums, guitar and bass config slots
+    private int Slot => (int)Player;
+
+    [DataField] public string InstrumentName => Player switch
     {
-        get => (EPlayer)Instrument;
-        set => Instrument = (int)value;
-    }
-
-    [DataField] public string InstrumentName => Instrument switch { 0 => "DRUM", 1 => "GUITAR", _ => "BASS" };
+        EPlayer.Drums => "DRUM",
+        EPlayer.Guitar1 => "GUITAR",
+        _ => "BASS"
+    };
 
     //null outside a performance screen, eg in the editor
     private static CStagePerfCommonScreen? Stage => CDTXMania.StageManager?.rCurrentStage as CStagePerfCommonScreen;
 
-    private HitCounts? Hits => Stage?.DataFor((EInstrumentPart)Instrument).HitCountExclAuto;
+    private HitCounts? Hits => Stage?.DataFor(Part).HitCountExclAuto;
 
     [DataField] public int Perfect => Hits?.Perfect ?? 0;
     [DataField] public int Great => Hits?.Great ?? 0;
     [DataField] public int Good => Hits?.Good ?? 0;
     [DataField] public int Poor => Hits?.Poor ?? 0;
     [DataField] public int Miss => Hits?.Miss ?? 0;
-    [DataField] public int MaxCombo => Stage?.DataFor((EInstrumentPart)Instrument).MaxCombo ?? 0;
+    [DataField] public int MaxCombo => Stage?.DataFor(Part).MaxCombo ?? 0;
 
     [DataField] public int PerfectPercent => Percent(Perfect);
     [DataField] public int GreatPercent => Percent(Great);
@@ -36,7 +44,7 @@ public sealed class PerformanceStats
     [DataField] public int MissPercent => Percent(Miss);
     [DataField] public int MaxComboPercent => Percent(MaxCombo);
 
-    [DataField] public double Rate => Stage?.DataFor((EInstrumentPart)Instrument).AchievementRate ?? 0.0;
+    [DataField] public double Rate => Stage?.DataFor(Part).AchievementRate ?? 0.0;
     [DataField] public long RateWhole => (long)Math.Truncate(Rate);
     [DataField] public long RateHundredths => Hundredths(Rate);
 
@@ -67,29 +75,29 @@ public sealed class PerformanceStats
         }
     }
 
-    [DataField] public int Early => Stage?.DataFor((EInstrumentPart)Instrument).TimingHitCount.Early ?? 0;
-    [DataField] public int Late => Stage?.DataFor((EInstrumentPart)Instrument).TimingHitCount.Late ?? 0;
+    [DataField] public int Early => Stage?.DataFor(Part).TimingHitCount.Early ?? 0;
+    [DataField] public int Late => Stage?.DataFor(Part).TimingHitCount.Late ?? 0;
 
     //0 to 1, clamped
-    [DataField] public double Gauge => Math.Max(0.0, Stage?.DataFor((EInstrumentPart)Instrument).Gauge ?? 0.0);
-    [DataField] public bool IsDanger => Stage?.DataFor((EInstrumentPart)Instrument).IsDanger() ?? false;
+    [DataField] public double Gauge => Math.Max(0.0, Stage?.DataFor(Part).Gauge ?? 0.0);
+    [DataField] public bool IsDanger => Stage?.DataFor(Part).IsDanger() ?? false;
 
     //row in the scroll speed sheet, 48px per speed
-    [DataField] public float ScrollSpeedIconY => Math.Min(CDTXMania.ConfigIni.nScrollSpeed[Instrument], 20) * 48.0f;
+    [DataField] public float ScrollSpeedIconY => Math.Min(CDTXMania.ConfigIni.nScrollSpeed[Slot], 20) * 48.0f;
 
-    [DataField] public bool IsLaneDark => CDTXMania.ConfigIni.nLaneDisp[Instrument] is not (0 or 2);
-    [DataField] public bool IsLeft => CDTXMania.ConfigIni.bLeft[Instrument];
+    [DataField] public bool IsLaneDark => CDTXMania.ConfigIni.nLaneDisp[Slot] is not (0 or 2);
+    [DataField] public bool IsLeft => CDTXMania.ConfigIni.bLeft[Slot];
 
-    [DataField] public bool ShowsJudgeLine => CDTXMania.ConfigIni.bJudgeLineDisp[Instrument];
-    [DataField] public int JudgeLine => CDTXMania.ConfigIni.nJudgeLine[Instrument];
+    [DataField] public bool ShowsJudgeLine => CDTXMania.ConfigIni.bJudgeLineDisp[Slot];
+    [DataField] public int JudgeLine => CDTXMania.ConfigIni.nJudgeLine[Slot];
 
     [DataField] public float JudgeLineY
     {
         get
         {
-            int y = Stage?.nJudgeLinePosY[Instrument] ?? 0;
+            int y = Stage?.nJudgeLinePosY[Slot] ?? 0;
 
-            if (Instrument != 0)
+            if (Player != EPlayer.Drums)
             {
                 return IsReversed ? y : y - 1;
             }
@@ -100,7 +108,7 @@ public sealed class PerformanceStats
     }
 
     //drums label the line from below and guitar and bass from above, until reversed
-    [DataField] public float JudgeLineNumberY => JudgeLineY + ((Instrument == 0) != IsReversed ? 8 : -20);
+    [DataField] public float JudgeLineNumberY => JudgeLineY + ((Player == EPlayer.Drums) != IsReversed ? 8 : -20);
 
     public LaneLayout? lanes;
 
@@ -108,33 +116,33 @@ public sealed class PerformanceStats
     [DataField] public float JudgeLineX => lanes != null ? lanes.SpanLeft + 1 : 80;
     [DataField] public float JudgeLineWidth => lanes != null ? lanes.SpanWidth - 2 : 252;
 
-    [DataField] public int TopShutter => IsReversed ? CDTXMania.ConfigIni.nShutterOutSide[Instrument] : CDTXMania.ConfigIni.nShutterInSide[Instrument];
-    [DataField] public int BottomShutter => IsReversed ? CDTXMania.ConfigIni.nShutterInSide[Instrument] : CDTXMania.ConfigIni.nShutterOutSide[Instrument];
+    [DataField] public int TopShutter => IsReversed ? CDTXMania.ConfigIni.nShutterOutSide[Slot] : CDTXMania.ConfigIni.nShutterInSide[Slot];
+    [DataField] public int BottomShutter => IsReversed ? CDTXMania.ConfigIni.nShutterInSide[Slot] : CDTXMania.ConfigIni.nShutterOutSide[Slot];
 
-    [DataField] public float TopShutterEdge => MathF.Ceiling(Instrument == 0 ? TopShutter * 7.2f : 108 + TopShutter * 6.14f);
-    [DataField] public float BottomShutterEdge => MathF.Floor(Instrument == 0 ? 720 - BottomShutter * 7.2f : 670 - BottomShutter * 6.14f);
+    [DataField] public float TopShutterEdge => MathF.Ceiling(Player == EPlayer.Drums ? TopShutter * 7.2f : 108 + TopShutter * 6.14f);
+    [DataField] public float BottomShutterEdge => MathF.Floor(Player == EPlayer.Drums ? 720 - BottomShutter * 7.2f : 670 - BottomShutter * 6.14f);
 
-    private bool IsReversed => CDTXMania.ConfigIni.bReverse[Instrument];
+    private bool IsReversed => CDTXMania.ConfigIni.bReverse[Slot];
 
     [DataField] public bool ShowsPanel => CDTXMania.ConfigIni.nInfoType == 1 && IsPlayed && !HiddenBesideTheOther;
 
-    [DataField] public bool HasLane => IsPlayed && Instrument switch
+    [DataField] public bool HasLane => IsPlayed && Player switch
     {
-        1 => CDTXMania.DTX?.bHasChips.Guitar ?? false,
-        2 => CDTXMania.DTX?.bHasChips.Bass ?? false,
+        EPlayer.Guitar1 => CDTXMania.DTX?.bHasChips.Guitar ?? false,
+        EPlayer.Guitar2 => CDTXMania.DTX?.bHasChips.Bass ?? false,
         _ => true
     };
 
-    private bool IsPlayed => Instrument == 0 ? Stage is CStagePerfDrumsScreen : Stage is CStagePerfGuitarScreen;
+    private bool IsPlayed => Player == EPlayer.Drums ? Stage is CStagePerfDrumsScreen : Stage is CStagePerfGuitarScreen;
 
     //cached per song
     private object? songValuesFor;
-    private int songValuesInstrument = -1;
+    private EPlayer? songValuesPlayer;
     private string levelText = string.Empty;
     private float difficultyBadgeY;
 
-    private int Level => CDTXMania.DTX?.LEVEL[Instrument] ?? 0;
-    private int LevelDec => CDTXMania.DTX?.LEVELDEC[Instrument] ?? 0;
+    private int Level => CDTXMania.DTX?.LEVEL[(int)Part] ?? 0;
+    private int LevelDec => CDTXMania.DTX?.LEVELDEC[(int)Part] ?? 0;
 
     //classic skill mode, or a classic score display for a chart that has none of the XG parts
     private bool IsClassic
@@ -155,10 +163,10 @@ public sealed class PerformanceStats
                 return false;
             }
             
-            return Instrument switch
+            return Part switch
             {
-                1 => !chart.bHasChips.YPGuitar,
-                2 => !chart.bHasChips.YPBass,
+                EInstrumentPart.GUITAR => !chart.bHasChips.YPGuitar,
+                EInstrumentPart.BASS => !chart.bHasChips.YPBass,
                 _ => !chart.bHasChips.LeftCymbal && !chart.bHasChips.LP && !chart.bHasChips.LBD &&
                      !chart.bHasChips.FT && !chart.bHasChips.Ride
             };
@@ -167,13 +175,13 @@ public sealed class PerformanceStats
 
     private void RefreshSongValues()
     {
-        if (ReferenceEquals(songValuesFor, CDTXMania.DTX) && songValuesInstrument == Instrument)
+        if (ReferenceEquals(songValuesFor, CDTXMania.DTX) && songValuesPlayer == Player)
         {
             return;
         }
 
         songValuesFor = CDTXMania.DTX;
-        songValuesInstrument = Instrument;
+        songValuesPlayer = Player;
 
         levelText = IsClassic
             ? Level.ToString("00", CultureInfo.InvariantCulture)
@@ -189,13 +197,14 @@ public sealed class PerformanceStats
     {
         get
         {
-            if (Instrument == 0 || CDTXMania.DTX is not { } chart)
+            CDTX? chart = CDTXMania.DTX;
+            if (Player == EPlayer.Drums || chart == null)
             {
                 return false;
             }
 
             CConfigIni config = CDTXMania.ConfigIni;
-            bool isGuitar = Instrument == 1;
+            bool isGuitar = Player == EPlayer.Guitar1;
 
             if (!chart.bHasChips.Bass)
             {
@@ -226,7 +235,7 @@ public sealed class PerformanceStats
             return 0;
         }
 
-        HitCounts all = stage.DataFor((EInstrumentPart)Instrument).HitCountIncAuto;
+        HitCounts all = stage.DataFor(Part).HitCountIncAuto;
         int judged = all.Perfect + all.Great + all.Good + all.Poor + all.Miss;
 
         return judged == 0 ? 0 : (int)Math.Round(100.0 * count / judged);

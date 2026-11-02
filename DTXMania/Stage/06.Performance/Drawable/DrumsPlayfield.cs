@@ -182,8 +182,8 @@ public class DrumsPlayfield : Playfield
         root.AddChild(DefaultLanes());
         root.AddChild(DefaultPads());
         root.AddChild(DefaultScore(DefaultBonus()));
-        Add(root, new PerformanceShutters(EInstrumentPart.DRUMS), "Shutters", 295, 0, CStagePerfCommonScreen.LaneOverlayLayer, "Stats.HasLane");
-        Add(root, new PerformanceJudgeLine(EInstrumentPart.DRUMS), "JudgeLine", 0, 0, CStagePerfCommonScreen.LaneOverlayLayer, "Stats.HasLane");
+        Add(root, new PerformanceShutters(EPlayer.Drums), "Shutters", 295, 0, CStagePerfCommonScreen.LaneOverlayLayer, "Stats.HasLane");
+        Add(root, new PerformanceJudgeLine(EPlayer.Drums), "JudgeLine", 0, 0, CStagePerfCommonScreen.LaneOverlayLayer, "Stats.HasLane");
 
         UIGroup perspective = root.AddChild(new UIGroup("Perspective"));
         perspective.size = new Vector2(1280, 720);
@@ -193,7 +193,7 @@ public class DrumsPlayfield : Playfield
         perspective.vanishingPoint = new Vector2(640, 360);
         perspective.renderOrder = CStagePerfCommonScreen.PanelLayer;
 
-        PerformanceStatusPanel status = perspective.AddChild(new PerformanceStatusPanel(EInstrumentPart.DRUMS));
+        PerformanceStatusPanel status = perspective.AddChild(new PerformanceStatusPanel(EPlayer.Drums));
         status.name = "Status";
         status.bindings.Add(new UIBinding("isVisible", "Stats.ShowsPanel"));
 
@@ -204,7 +204,7 @@ public class DrumsPlayfield : Playfield
         //2d version
         status.position = new Vector3(14, 237, 0);
 
-        PerformanceElement gauge = Add(root, new PerformanceGauge(EInstrumentPart.DRUMS), "Gauge", 296, 626, CStagePerfCommonScreen.PanelLayer, "Stats.HasLane");
+        PerformanceElement gauge = Add(root, new PerformanceGauge(EPlayer.Drums), "Gauge", 296, 626, CStagePerfCommonScreen.PanelLayer, "Stats.HasLane");
         gauge.bindings.Add(new UIBinding("position.Y", "Config.Reverse.Drums")
         {
             condition = BindingCondition.IsTrue, whenTrue = 28, whenFalse = 626

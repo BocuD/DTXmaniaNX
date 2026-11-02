@@ -12,28 +12,28 @@ public class PerformanceShutters : PerformanceElement
     [AddChildMenu("Game/Performance/Shutters")]
     public new static UIDrawable Create() => new PerformanceShutters();
 
-    public PerformanceShutters() : this(EInstrumentPart.DRUMS)
+    public PerformanceShutters() : this(EPlayer.Drums)
     {
     }
 
-    public PerformanceShutters(EInstrumentPart instrument) : base("Shutters", instrument)
+    public PerformanceShutters(EPlayer player) : base("Shutters", player)
     {
     }
 
-    protected override string ComponentName(EInstrumentPart part) => part switch
+    protected override string ComponentName(EPlayer player) => player switch
     {
-        EInstrumentPart.GUITAR => "GuitarShutters",
-        EInstrumentPart.BASS => "BassShutters",
+        EPlayer.Guitar1 => "GuitarShutters",
+        EPlayer.Guitar2 => "BassShutters",
         _ => "DrumsShutters"
     };
 
-    protected override UIGroup BuildDefault(EInstrumentPart part)
+    protected override UIGroup BuildDefault(EPlayer player)
     {
-        bool drums = part == EInstrumentPart.DRUMS;
+        bool drums = player == EPlayer.Drums;
         string image = drums ? @"Graphics\7_shutter.png" : @"Graphics\7_shutter_GB.png";
         float numberRight = drums ? 286 : 132;
 
-        UIGroup root = new(ComponentName(part));
+        UIGroup root = new(ComponentName(player));
 
         UIGroup top = root.AddChild(new UIGroup("Top"));
         top.bindings.Add(new UIBinding("position.Y", "Stats.TopShutterEdge"));

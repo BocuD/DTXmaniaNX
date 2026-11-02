@@ -15,16 +15,16 @@ public class PerformanceStatusPanel : PerformanceElement
     [AddChildMenu("Game/Performance/Status Panel")]
     public new static UIDrawable Create() => new PerformanceStatusPanel();
 
-    public PerformanceStatusPanel() : this(EInstrumentPart.DRUMS)
+    public PerformanceStatusPanel() : this(EPlayer.Drums)
     {
     }
 
-    public PerformanceStatusPanel(EInstrumentPart instrument) : base("StatusPanel", instrument)
+    public PerformanceStatusPanel(EPlayer player) : base("StatusPanel", player)
     {
         size = new Vector2(268, 446);
     }
 
-    protected override string ComponentName(EInstrumentPart part) => "PerformanceStatus";
+    protected override string ComponentName(EPlayer player) => "PerformanceStatus";
 
     private static readonly Digits Count = new(26f, 0.93f, 0.2f, 1.6f);
     private static readonly Digits Percent = new(22f, 0.93f, 0.2f, 0.5f);
@@ -49,7 +49,7 @@ public class PerformanceStatusPanel : PerformanceElement
 
     private static readonly Color4 Dim = new(0.31f, 0.31f, 0.31f);
 
-    protected override UIGroup BuildDefault(EInstrumentPart part)
+    protected override UIGroup BuildDefault(EPlayer player)
     {
         UIGroup root = new("PerformanceStatus");
 

@@ -175,8 +175,8 @@ internal class ChartSequencer
         }
     }
 
-    public void StopGuitarSound(EInstrumentPart side) =>
-        CDTXMania.DTX.tStopPlayingWav(side == EInstrumentPart.GUITAR ? lastWavByLane.GtPick : lastWavByLane.BsPick);
+    public void StopGuitarSound(EInstrumentPart part) =>
+        CDTXMania.DTX.tStopPlayingWav(part == EInstrumentPart.GUITAR ? lastWavByLane.GtPick : lastWavByLane.BsPick);
 
     private void PlayDrumSound(CChip chip, long systemTimeMs, int volume, bool monitor)
     {

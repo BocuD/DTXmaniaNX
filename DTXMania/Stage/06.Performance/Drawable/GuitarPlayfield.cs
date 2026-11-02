@@ -54,7 +54,7 @@ public class GuitarPlayfield : Playfield
 
     internal void Wail(CChip chip)
     {
-        wailingBonus.Start(part, chip);
+        wailingBonus.Start(player, chip);
         wailing?.Play();
     }
 
@@ -72,11 +72,11 @@ public class GuitarPlayfield : Playfield
         wailingBonus = wailing;
         EnsureContent();
 
-        lanes.order = Frets(CDTXMania.ConfigIni.bLeft[(int)part]);
+        lanes.order = Frets(CDTXMania.ConfigIni.bLeft[(int)player]);
         lanes.Arrange();
 
-        AddLegacyPart("LaneFlush", CStagePerfCommonScreen.LegacyLanesLayer, probeLanes, origin => laneFlush.Draw(origin, part));
-        AddLegacyPart("WailingBonus", CStagePerfCommonScreen.LegacyLanesLayer, probeLanes, origin => wailingBonus.Draw(origin, part));
+        AddLegacyPart("LaneFlush", CStagePerfCommonScreen.LegacyLanesLayer, probeLanes, origin => laneFlush.Draw(origin, player));
+        AddLegacyPart("WailingBonus", CStagePerfCommonScreen.LegacyLanesLayer, probeLanes, origin => wailingBonus.Draw(origin, player));
         AddLegacyPart("ProgressBar", CStagePerfCommonScreen.LegacyLanesLayer, probeLanes, origin => progressBar.Draw(origin, part, part));
 
         loopMarkers = AddPart(new LoopMarkers(), "LoopMarkers", CStagePerfCommonScreen.ChipsLayer);
@@ -100,9 +100,9 @@ public class GuitarPlayfield : Playfield
         judgements.InitUI(this, judgementLane, judgementLane, position.X);
     }
 
-    protected override int JudgeLineY => CDTXMania.ConfigIni.bReverse[(int)part]
-        ? 611 - CDTXMania.ConfigIni.nJudgeLine[(int)part]
-        : 154 + CDTXMania.ConfigIni.nJudgeLine[(int)part];
+    protected override int JudgeLineY => CDTXMania.ConfigIni.bReverse[(int)player]
+        ? 611 - CDTXMania.ConfigIni.nJudgeLine[(int)player]
+        : 154 + CDTXMania.ConfigIni.nJudgeLine[(int)player];
 
     protected override void OnContentLoaded()
     {
@@ -117,7 +117,7 @@ public class GuitarPlayfield : Playfield
         lanes.Arrange();
 
         //guitar chips are centred 10 below the judge line, or 1 below it in reverse
-        bool reverse = CDTXMania.ConfigIni.bReverse[(int)part];
+        bool reverse = CDTXMania.ConfigIni.bReverse[(int)player];
         PlaceLoopMarkers(60, JudgeLineY + (reverse ? 1 : 10), reverse);
 
         if (guitarChips != null)
@@ -172,15 +172,15 @@ public class GuitarPlayfield : Playfield
         UIGroup root = new(ComponentName);
         root.AddChild(DefaultLanes());
         root.AddChild(DefaultScore(DefaultBonus()));
-        Add(root, new PerformanceLane(EInstrumentPart.GUITAR), "Lane", 67, 42, CStagePerfCommonScreen.LaneArtLayer, "Stats.HasLane");
-        Add(root, new PerformanceLaneCaps(EInstrumentPart.GUITAR), "LaneCaps", 67, 42, CStagePerfCommonScreen.LaneOverlayLayer, "Stats.HasLane");
-        Add(root, new PerformanceShutters(EInstrumentPart.GUITAR), "Shutters", 80, 0, CStagePerfCommonScreen.LaneOverlayLayer, "Stats.HasLane");
-        Add(root, new PerformanceJudgeLine(EInstrumentPart.GUITAR), "JudgeLine", 0, 0, CStagePerfCommonScreen.LaneOverlayLayer, "Stats.HasLane");
+        Add(root, new PerformanceLane(EPlayer.Guitar1), "Lane", 67, 42, CStagePerfCommonScreen.LaneArtLayer, "Stats.HasLane");
+        Add(root, new PerformanceLaneCaps(EPlayer.Guitar1), "LaneCaps", 67, 42, CStagePerfCommonScreen.LaneOverlayLayer, "Stats.HasLane");
+        Add(root, new PerformanceShutters(EPlayer.Guitar1), "Shutters", 80, 0, CStagePerfCommonScreen.LaneOverlayLayer, "Stats.HasLane");
+        Add(root, new PerformanceJudgeLine(EPlayer.Guitar1), "JudgeLine", 0, 0, CStagePerfCommonScreen.LaneOverlayLayer, "Stats.HasLane");
 
-        PerformanceElement status = Add(root, new PerformanceStatusPanel(EInstrumentPart.GUITAR), "Status", 373, 254, CStagePerfCommonScreen.PanelLayer, "Stats.ShowsPanel");
+        PerformanceElement status = Add(root, new PerformanceStatusPanel(EPlayer.Guitar1), "Status", 373, 254, CStagePerfCommonScreen.PanelLayer, "Stats.ShowsPanel");
         status.bindings.Add(OnRightSide("position.X", -205, 373));
 
-        Add(root, new PerformanceGauge(EInstrumentPart.GUITAR), "Gauge", 79, 0, CStagePerfCommonScreen.PanelLayer, "Stats.HasLane");
+        Add(root, new PerformanceGauge(EPlayer.Guitar1), "Gauge", 79, 0, CStagePerfCommonScreen.PanelLayer, "Stats.HasLane");
         return root;
     }
 

@@ -12,21 +12,21 @@ namespace DTXMania;
 
 public abstract class PerformanceElement : UIGroup
 {
-    [Themable] public EInstrumentPart instrument;
+    [Themable] public EPlayer player;
 
-    protected PerformanceElement(string name, EInstrumentPart instrument) : base(name)
+    protected PerformanceElement(string name, EPlayer player) : base(name)
     {
-        this.instrument = instrument;
-        MakeComponent(ComponentName(instrument), () => BuildDefault(instrument));
+        this.player = player;
+        MakeComponent(ComponentName(player), () => BuildDefault(player));
     }
 
-    protected abstract string ComponentName(EInstrumentPart part);
-    protected abstract UIGroup BuildDefault(EInstrumentPart part);
+    protected abstract string ComponentName(EPlayer player);
+    protected abstract UIGroup BuildDefault(EPlayer player);
 
     public override void OnDeserialize()
     {
         base.OnDeserialize();
-        MakeComponent(ComponentName(instrument), () => BuildDefault(instrument));
+        MakeComponent(ComponentName(player), () => BuildDefault(player));
     }
 
     protected static UIText LaneNumber(string name, string source, Vector2 position) => new(string.Empty, 17)
@@ -51,7 +51,7 @@ public abstract class PerformanceElement : UIGroup
 
         if (ImGui.CollapsingHeader("Performance"))
         {
-            Inspector.Inspect("Instrument", ref instrument);
+            Inspector.Inspect("Player", ref player);
         }
     }
 }

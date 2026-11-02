@@ -283,9 +283,9 @@ internal abstract class CStagePerfCommonScreen : CStage
         {
             data.Reset(bIsAutoPlay, CDTXMania.ConfigIni.nRisky);
         }
-        drums = IsPlayed(EInstrumentPart.DRUMS) ? new DrumsPerformance(DrumsData, timeline, bIsAutoPlay) : null;
-        guitars[0] = IsPlayed(EInstrumentPart.GUITAR) ? new GuitarPerformance(EPlayer.Guitar1, EChartPart.Guitar, GuitarData, timeline, bIsAutoPlay) : null;
-        guitars[1] = IsPlayed(EInstrumentPart.BASS) ? new GuitarPerformance(EPlayer.Guitar2, EChartPart.Bass, BassData, timeline, bIsAutoPlay) : null;
+        drums = IsPlayed(EPlayer.Drums) ? new DrumsPerformance(DrumsData, timeline, bIsAutoPlay) : null;
+        guitars[0] = IsPlayed(EPlayer.Guitar1) ? new GuitarPerformance(EPlayer.Guitar1, EChartPart.Guitar, GuitarData, timeline, bIsAutoPlay) : null;
+        guitars[1] = IsPlayed(EPlayer.Guitar2) ? new GuitarPerformance(EPlayer.Guitar2, EChartPart.Bass, BassData, timeline, bIsAutoPlay) : null;
 
 
         //let the loading sound gracefully fade out
@@ -555,7 +555,7 @@ internal abstract class CStagePerfCommonScreen : CStage
         }
         else if (vertical != 0 && !shift)
         {
-            ChangeScrollSpeed(CDTXMania.ConfigIni.bGuitarRevolutionMode ? EInstrumentPart.GUITAR : EInstrumentPart.DRUMS, vertical);
+            ChangeScrollSpeed(CDTXMania.ConfigIni.bGuitarRevolutionMode ? EPlayer.Guitar1 : EPlayer.Drums, vertical);
         }
 
         int horizontal = keyboard.bKeyPressed(SlimDXKey.RightArrow) ? 1 : keyboard.bKeyPressed(SlimDXKey.LeftArrow) ? -1 : 0;
@@ -646,28 +646,28 @@ internal abstract class CStagePerfCommonScreen : CStage
         CDTXMania.DTX.tAutoCorrectWavPlaybackPosition();
     }
 
-    protected static void ChangeScrollSpeed(EInstrumentPart part, int delta)
+    protected static void ChangeScrollSpeed(EPlayer player, int delta)
     {
-        int index = (int)part;
+        int index = (int)player;
         CDTXMania.ConfigIni.nScrollSpeed[index] = Math.Clamp(CDTXMania.ConfigIni.nScrollSpeed[index] + delta, 0, 1999);
     }
 
-    //default is drums, with shift: guitar, with alt: bass
+    //default is drums, with shift: the first guitar player, with alt: the second
     //default is 10ms steps, adding ctrl changes this to 1ms
     private static void ChangeInputAdjust(IInputKeyboard keyboard, int direction)
     {
-        EInstrumentPart part = EInstrumentPart.DRUMS;
+        EPlayer player = EPlayer.Drums;
         if (keyboard.bKeyPressing(SlimDXKey.LeftShift) || keyboard.bKeyPressing(SlimDXKey.RightShift))
         {
-            part = EInstrumentPart.GUITAR;
+            player = EPlayer.Guitar1;
         }
         else if (keyboard.bKeyPressing(SlimDXKey.LeftAlt) || keyboard.bKeyPressing(SlimDXKey.RightAlt))
         {
-            part = EInstrumentPart.BASS;
+            player = EPlayer.Guitar2;
         }
 
         bool fine = keyboard.bKeyPressing(SlimDXKey.LeftControl) || keyboard.bKeyPressing(SlimDXKey.RightControl);
-        int index = (int)part;
+        int index = (int)player;
         CDTXMania.ConfigIni.nInputAdjustTimeMs[index] = Math.Clamp(CDTXMania.ConfigIni.nInputAdjustTimeMs[index] + direction * (fine ? 1 : 10), -99, 99);
     }
 
@@ -871,17 +871,21 @@ internal abstract class CStagePerfCommonScreen : CStage
     }
     
 
-    public static bool IsPlayed(EInstrumentPart part)
+    public static bool IsPlayed(EPlayer player)
     {
         bool guitarScreen = CDTXMania.ConfigIni.bGuitarRevolutionMode;
-        return part switch
+        return player switch
         {
-            EInstrumentPart.DRUMS => !guitarScreen,
-            EInstrumentPart.GUITAR => guitarScreen,
-            EInstrumentPart.BASS => guitarScreen && !CDTXMania.ConfigIni.bSingleGuitar,
-            _ => false
+            EPlayer.Drums => !guitarScreen,
+            EPlayer.Guitar1 => guitarScreen,
+            _ => guitarScreen && !CDTXMania.ConfigIni.bSingleGuitar
         };
     }
+
+    //todo: transitional, delete with the guitar and bass swap. A chart part is played when a player plays it.
+    //Each player is still locked to the part with its own value
+    public static bool IsPlayed(EInstrumentPart part) =>
+        part != EInstrumentPart.UNKNOWN && IsPlayed((EPlayer)part);
 
     protected bool UpdateChips()
     {
@@ -1415,7 +1419,7 @@ internal abstract class CStagePerfCommonScreen : CStage
 
     protected void tHandleInput_GuitarBass(EPlayer player)
     {
-        //the chart part this player is on, which is still fixed to its own slot
+        //todo: transitional, delete with the guitar and bass swap. This player is still fixed to its own chart part
         EInstrumentPart inst = player == EPlayer.Guitar1 ? EInstrumentPart.GUITAR : EInstrumentPart.BASS;
         GuitarPerformance? guitar = GuitarFor(inst);
         if (guitar == null)
@@ -1426,11 +1430,11 @@ internal abstract class CStagePerfCommonScreen : CStage
         int indexInst = (int)inst;
         if (CDTXMania.Pad.bPressing(player, EPad.Decide) && CDTXMania.Pad.bPressed(player, EPad.B))
         {
-            ChangeScrollSpeed(inst, 1);
+            ChangeScrollSpeed(player, 1);
         }
         if (CDTXMania.Pad.bPressing(player, EPad.Decide) && CDTXMania.Pad.bPressed(player, EPad.R))
         {
-            ChangeScrollSpeed(inst, -1);
+            ChangeScrollSpeed(player, -1);
         }
 
         if (!CDTXMania.ConfigIni.bGuitarEnabled || !CDTXMania.DTX.bHasChips[indexInst])

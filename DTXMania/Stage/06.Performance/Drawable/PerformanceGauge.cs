@@ -13,19 +13,19 @@ public class PerformanceGauge : PerformanceElement
     [AddChildMenu("Game/Performance/Gauge")]
     public new static UIDrawable Create() => new PerformanceGauge();
 
-    public PerformanceGauge() : this(EInstrumentPart.DRUMS)
+    public PerformanceGauge() : this(EPlayer.Drums)
     {
     }
 
-    public PerformanceGauge(EInstrumentPart instrument) : base("Gauge", instrument)
+    public PerformanceGauge(EPlayer player) : base("Gauge", player)
     {
-        size = instrument == EInstrumentPart.DRUMS ? new Vector2(543, 47) : new Vector2(290, 68);
+        size = player == EPlayer.Drums ? new Vector2(543, 47) : new Vector2(290, 68);
     }
 
-    protected override string ComponentName(EInstrumentPart part) => part switch
+    protected override string ComponentName(EPlayer player) => player switch
     {
-        EInstrumentPart.GUITAR => "GuitarGauge",
-        EInstrumentPart.BASS => "BassGauge",
+        EPlayer.Guitar1 => "GuitarGauge",
+        EPlayer.Guitar2 => "BassGauge",
         _ => "DrumsGauge"
     };
 
@@ -38,14 +38,14 @@ public class PerformanceGauge : PerformanceElement
         public Vector3 Speed;
     }
 
-    private static GaugeArt Art(EInstrumentPart part) => part switch
+    private static GaugeArt Art(EPlayer player) => player switch
     {
-        EInstrumentPart.GUITAR => new GaugeArt
+        EPlayer.Guitar1 => new GaugeArt
         {
             Frame = @"Graphics\7_Gauge_Guitar.png", FrameSize = new Vector2(290, 68), Bar = new Vector3(6, 31, 0),
             BarSize = new Vector2(242, 30), Speed = new Vector3(254, 30, 0)
         },
-        EInstrumentPart.BASS => new GaugeArt
+        EPlayer.Guitar2 => new GaugeArt
         {
             Frame = @"Graphics\7_Gauge_Bass.png", FrameSize = new Vector2(290, 68), Bar = new Vector3(42, 31, 0),
             BarSize = new Vector2(242, 30), Speed = new Vector3(4, 30, 0)
@@ -57,11 +57,11 @@ public class PerformanceGauge : PerformanceElement
         }
     };
 
-    protected override UIGroup BuildDefault(EInstrumentPart part)
+    protected override UIGroup BuildDefault(EPlayer player)
     {
-        GaugeArt art = Art(part);
+        GaugeArt art = Art(player);
 
-        UIGroup root = new(ComponentName(part));
+        UIGroup root = new(ComponentName(player));
 
         root.AddChild(new UIImage
         {
@@ -122,7 +122,7 @@ public class PerformanceGauge : PerformanceElement
             renderOrder = 3
         });
 
-        if (part == EInstrumentPart.GUITAR)
+        if (player == EPlayer.Guitar1)
         {
             MirrorOnRightSide(root);
         }
@@ -132,8 +132,8 @@ public class PerformanceGauge : PerformanceElement
 
     private static void MirrorOnRightSide(UIGroup root)
     {
-        GaugeArt left = Art(EInstrumentPart.GUITAR);
-        GaugeArt right = Art(EInstrumentPart.BASS);
+        GaugeArt left = Art(EPlayer.Guitar1);
+        GaugeArt right = Art(EPlayer.Guitar2);
 
         Mirror(root.GetChild<UIImage>("FrameBack")!);
         Mirror(root.GetChild<UIImage>("FrameFront")!);

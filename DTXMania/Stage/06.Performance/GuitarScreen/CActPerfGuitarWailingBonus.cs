@@ -22,20 +22,20 @@ internal class CActPerfGuitarWailingBonus : CActPerfCommonWailingBonus
 	{
 		bActivated = false;
 	}
-	
-	public override void Start( EInstrumentPart part, CChip r歓声Chip )
+
+	public override void Start( EPlayer player, CChip r歓声Chip )
 	{
-		if ( part == EInstrumentPart.DRUMS )
+		if ( player == EPlayer.Drums )
 		{
 			return;
 		}
 
 		for( int i = 0; i < 4; i++ )
 		{
-			if ( ( ct進行用[ (int) part, i ] == null ) || ct進行用[ (int) part, i ].bStopped )
+			if ( ( ct進行用[ (int) player, i ] == null ) || ct進行用[ (int) player, i ].bStopped )
 			{
-				ct進行用[ (int) part, i ] = new CCounter( 0, 300, 2, CDTXMania.Timer );
-				ctWailing炎[ (int) part, i ] = new CCounter( 0, frames, interval, CDTXMania.Timer );
+				ct進行用[ (int) player, i ] = new CCounter( 0, 300, 2, CDTXMania.Timer );
+				ctWailing炎[ (int) player, i ] = new CCounter( 0, frames, interval, CDTXMania.Timer );
 				break;
 			}
 		}
@@ -53,7 +53,7 @@ internal class CActPerfGuitarWailingBonus : CActPerfCommonWailingBonus
 		}
 
 		//guitar cheers from the left, bass from the right
-		CDTXMania.Skin.soundAudience.tPlay( 100, ( part == EInstrumentPart.GUITAR ) ? -50 : 50 );
+		CDTXMania.Skin.soundAudience.tPlay( 100, ( player == EPlayer.Guitar1 ) ? -50 : 50 );
 	}
 
 
@@ -70,14 +70,14 @@ internal class CActPerfGuitarWailingBonus : CActPerfCommonWailingBonus
 			}
 		}
 	}
-	public void Draw(Matrix4x4 origin, EInstrumentPart part)
+	public void Draw(Matrix4x4 origin, EPlayer player)
 	{
 		if ( bActivated )
 		{
 			for( int i = 0; i < 2; i++ )
 			{
-				EInstrumentPart e楽器パート = ( i == 0 ) ? EInstrumentPart.GUITAR : EInstrumentPart.BASS;
-				if ( e楽器パート != part )
+				EPlayer e楽器パート = ( i == 0 ) ? EPlayer.Guitar1 : EPlayer.Guitar2;
+				if ( e楽器パート != player )
 				{
 					continue;
 				}
@@ -109,11 +109,11 @@ internal class CActPerfGuitarWailingBonus : CActPerfCommonWailingBonus
 
 				}
 			}
-			
+
 			for( int j = 0; j < 2; j++ )
 			{
-				EInstrumentPart e楽器パート2 = ( j == 0 ) ? EInstrumentPart.GUITAR : EInstrumentPart.BASS;
-				if ( e楽器パート2 != part )
+				EPlayer e楽器パート2 = ( j == 0 ) ? EPlayer.Guitar1 : EPlayer.Guitar2;
+				if ( e楽器パート2 != player )
 				{
 					continue;
 				}
@@ -183,7 +183,7 @@ internal class CActPerfGuitarWailingBonus : CActPerfCommonWailingBonus
 							Color4 col = Color4.White;
 							int count = ct進行用[ (int)e楽器パート2, m ].nCurrentValue;
 							col.Alpha = ( count <= 55 ? 255 : 255 - count ) / 255.0f;
-							
+
 							for( int i = 0; i <= 12; i++ )
 							{
 								txWailingFlush.tDraw2D(origin, 283, 64 * i, new RectangleF( 0, 0, 42, 64 ), col);
@@ -196,11 +196,11 @@ internal class CActPerfGuitarWailingBonus : CActPerfCommonWailingBonus
 						if ( txWailingFire != null )
 						{
 							RectangleF fireFrame = new( rectW * ctWailing炎[ (int) e楽器パート2, m ].nCurrentValue, 0, rectW, rectH );
-							if ( e楽器パート2 == EInstrumentPart.GUITAR )
+							if ( e楽器パート2 == EPlayer.Guitar1 )
 							{
 								txWailingFire.tDraw2D(DTXMania.UI.UICanvas.toWindow, posXGuitar, posY, fireFrame );
 							}
-							if ( e楽器パート2 == EInstrumentPart.BASS )
+							if ( e楽器パート2 == EPlayer.Guitar2 )
 							{
 								txWailingFire.tDraw2D(DTXMania.UI.UICanvas.toWindow, posXBass, posY, fireFrame );
 							}

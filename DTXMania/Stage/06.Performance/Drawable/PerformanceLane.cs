@@ -12,23 +12,23 @@ public class PerformanceLane : PerformanceElement
     [AddChildMenu("Game/Performance/Lane")]
     public new static UIDrawable Create() => new PerformanceLane();
 
-    public PerformanceLane() : this(EInstrumentPart.GUITAR)
+    public PerformanceLane() : this(EPlayer.Guitar1)
     {
     }
 
-    public PerformanceLane(EInstrumentPart instrument) : base("Lane", instrument)
+    public PerformanceLane(EPlayer player) : base("Lane", player)
     {
     }
 
-    protected override string ComponentName(EInstrumentPart part) => part switch
+    protected override string ComponentName(EPlayer player) => player switch
     {
-        EInstrumentPart.BASS => "BassLane",
+        EPlayer.Guitar2 => "BassLane",
         _ => "GuitarLane"
     };
 
-    protected override UIGroup BuildDefault(EInstrumentPart part)
+    protected override UIGroup BuildDefault(EPlayer player)
     {
-        UIGroup root = new(ComponentName(part));
+        UIGroup root = new(ComponentName(player));
 
         root.AddChild(new UIImage
         {

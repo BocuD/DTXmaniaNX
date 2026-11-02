@@ -651,9 +651,9 @@ internal class CActPerfCommonCombo : CActivity
         }
     }
 
-    public void tComboAnime( EInstrumentPart ePart )
+    public void tComboAnime( EPlayer player )
     {
-        if ( ePart == EInstrumentPart.DRUMS || ePart == EInstrumentPart.GUITAR )
+        if ( player == EPlayer.Drums || player == EPlayer.Guitar1 )
         {
             ctAnimation.nCurrentValue = 0;
             nY1の位座標差分値 = 130;

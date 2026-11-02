@@ -319,7 +319,7 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
                     }
                     if (e.CountsCombo && hit)
                     {
-                        actCombo.tComboAnime(EInstrumentPart.DRUMS);
+                        actCombo.tComboAnime(EPlayer.Drums);
                     }
                     UpdateGraph(EInstrumentPart.DRUMS);
                     break;

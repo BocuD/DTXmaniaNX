@@ -37,6 +37,7 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		base.OnLayoutReady();
 		
 		guitarPlayfields = new GuitarPlayfield[2];
+		//todo: transitional, delete with the guitar and bass swap. Each player should be given the chart part it plays
 		SetUpGuitarSection(EPlayer.Guitar1, EInstrumentPart.GUITAR);
 		SetUpGuitarSection(EPlayer.Guitar2, EInstrumentPart.BASS);
 		playfields = guitarPlayfields;

@@ -13,24 +13,24 @@ public class PerformanceJudgeLine : PerformanceElement
     [AddChildMenu("Game/Performance/Judge Line")]
     public new static UIDrawable Create() => new PerformanceJudgeLine();
 
-    public PerformanceJudgeLine() : this(EInstrumentPart.DRUMS)
+    public PerformanceJudgeLine() : this(EPlayer.Drums)
     {
     }
 
-    public PerformanceJudgeLine(EInstrumentPart instrument) : base("JudgeLine", instrument)
+    public PerformanceJudgeLine(EPlayer player) : base("JudgeLine", player)
     {
     }
 
-    protected override string ComponentName(EInstrumentPart part) => part switch
+    protected override string ComponentName(EPlayer player) => player switch
     {
-        EInstrumentPart.GUITAR => "GuitarJudgeLine",
-        EInstrumentPart.BASS => "BassJudgeLine",
+        EPlayer.Guitar1 => "GuitarJudgeLine",
+        EPlayer.Guitar2 => "BassJudgeLine",
         _ => "DrumsJudgeLine"
     };
 
-    protected override UIGroup BuildDefault(EInstrumentPart part)
+    protected override UIGroup BuildDefault(EPlayer player)
     {
-        UIGroup root = new(ComponentName(part));
+        UIGroup root = new(ComponentName(player));
 
         UIGroup line = root.AddChild(new UIGroup("Line"));
         line.bindings.Add(new UIBinding("position.Y", "Stats.JudgeLineY"));
@@ -54,7 +54,7 @@ public class PerformanceJudgeLine : PerformanceElement
         UIGroup label = root.AddChild(new UIGroup("Label"));
         label.bindings.Add(new UIBinding("position.Y", "Stats.JudgeLineNumberY"));
         label.bindings.Add(new UIBinding("position.X", "Stats.JudgeLineX"));
-        label.AddChild(LaneNumber("Value", "Stats.JudgeLine", new Vector2(part == EInstrumentPart.DRUMS ? 15 : 247, -6)));
+        label.AddChild(LaneNumber("Value", "Stats.JudgeLine", new Vector2(player == EPlayer.Drums ? 15 : 247, -6)));
 
         return root;
     }

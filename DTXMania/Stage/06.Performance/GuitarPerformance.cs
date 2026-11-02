@@ -79,7 +79,8 @@ internal class GuitarPerformance
             guitarSide ? auto.GtY : auto.BsY, guitarSide ? auto.GtP : auto.BsP);
     }
 
-    //the player's settings, pads and lanes are still stored as guitar and bass
+    //todo: transitional, delete with the guitar and bass swap. A player's settings, pads and lanes are
+    //stored per chart part, so it has to borrow one
     public EInstrumentPart Side => Player == EPlayer.Guitar1 ? EInstrumentPart.GUITAR : EInstrumentPart.BASS;
 
     private EInstrumentPart Part => (EInstrumentPart)Chart;

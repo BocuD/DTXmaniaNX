@@ -42,9 +42,12 @@ public abstract class Playfield : UIGroup
         dataContext = data;
     }
 
+    //a player's own settings are stored in the drums, guitar and bass config slots
+    protected EPlayer Player => stats.Player;
+
     //LaneDisp: 0 all on, 1 lane off, 2 line off, 3 all off
-    protected bool ShowsLaneArt => CDTXMania.ConfigIni.nLaneDisp[(int)part] is 0 or 2;
-    protected bool ShowsLines => CDTXMania.ConfigIni.nLaneDisp[(int)part] is 0 or 1;
+    protected bool ShowsLaneArt => CDTXMania.ConfigIni.nLaneDisp[(int)Player] is 0 or 2;
+    protected bool ShowsLines => CDTXMania.ConfigIni.nLaneDisp[(int)Player] is 0 or 1;
 
     //the player moves the judge line while the song plays, so the parts take it again every frame
     protected abstract int JudgeLineY { get; }
