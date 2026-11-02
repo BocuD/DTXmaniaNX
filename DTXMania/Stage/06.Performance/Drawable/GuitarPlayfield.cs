@@ -16,13 +16,13 @@ public class GuitarPlayfield : Playfield
 
     private const string ComponentName = "GuitarPlayfield";
 
-    [Themable] public EInstrument player;
+    [Themable] public EPlayer player;
 
-    public GuitarPlayfield() : this(EInstrument.Guitar1)
+    public GuitarPlayfield() : this(EPlayer.Guitar1)
     {
     }
 
-    public GuitarPlayfield(EInstrument player) : base(player)
+    public GuitarPlayfield(EPlayer player) : base(player)
     {
         this.player = player;
         name = player.ToString();
@@ -90,7 +90,7 @@ public class GuitarPlayfield : Playfield
             _ => judgements.DrawLanes(judgementLane, judgementLane));
 
         //the right player's score and combo sit beside its panel, not 870 to the right
-        bool right = player == EInstrument.Guitar2;
+        bool right = player == EPlayer.Guitar2;
         SetUpScore(right ? -578 : 0, right ? -585 : 0);
 
         fire = AddPart(new ActPerfNewFire(right ? 2 : 1), "ChipFire", CStagePerfCommonScreen.EffectsLayer);

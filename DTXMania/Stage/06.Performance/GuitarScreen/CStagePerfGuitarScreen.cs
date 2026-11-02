@@ -37,8 +37,8 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		base.OnLayoutReady();
 		
 		guitarPlayfields = new GuitarPlayfield[2];
-		SetUpGuitarSection(EInstrument.Guitar1, EInstrumentPart.GUITAR);
-		SetUpGuitarSection(EInstrument.Guitar2, EInstrumentPart.BASS);
+		SetUpGuitarSection(EPlayer.Guitar1, EInstrumentPart.GUITAR);
+		SetUpGuitarSection(EPlayer.Guitar2, EInstrumentPart.BASS);
 		playfields = guitarPlayfields;
 		RefreshPlayfields();
 
@@ -47,10 +47,10 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		AddLegacyPart(hud, "PerformanceInformation", LegacyOverlayLayer, _ => tUpdateAndDraw_PerformanceInformation());
 	}
 
-	private void SetUpGuitarSection(EInstrument player, EInstrumentPart part)
+	private void SetUpGuitarSection(EPlayer player, EInstrumentPart part)
 	{
 		GuitarPlayfield playfield = FindGuitarPlayfield(player);
-		bool right = player == EInstrument.Guitar2;
+		bool right = player == EPlayer.Guitar2;
 		int side = right ? 1 : 0;
 
 		playfield.SetParts(actScore, actCombo, actProgressBar, actJudgeString);

@@ -9,9 +9,9 @@ public sealed class PerformanceStats
 {
     [DataField] public int Instrument { get; set; }
 
-    [DataField] public EInstrument Player
+    [DataField] public EPlayer Player
     {
-        get => (EInstrument)Instrument;
+        get => (EPlayer)Instrument;
         set => Instrument = (int)value;
     }
 

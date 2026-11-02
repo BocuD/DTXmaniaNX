@@ -44,7 +44,7 @@ internal class GuitarPerformance
 
     private const int AllLanes = 0b11111;
 
-    public readonly EInstrument Player;
+    public readonly EPlayer Player;
     public readonly EChartPart Chart;
     public readonly PerformanceData Data;
 
@@ -65,14 +65,14 @@ internal class GuitarPerformance
     private int holdDurationMs;
     private int holdBonuses;
 
-    public GuitarPerformance(EInstrument player, EChartPart chart, PerformanceData data, ChipTimeline timeline, STAUTOPLAY auto)
+    public GuitarPerformance(EPlayer player, EChartPart chart, PerformanceData data, ChipTimeline timeline, STAUTOPLAY auto)
     {
         Player = player;
         Chart = chart;
         Data = data;
         this.timeline = timeline;
 
-        bool guitarSide = player == EInstrument.Guitar1;
+        bool guitarSide = player == EPlayer.Guitar1;
         autoPick = guitarSide ? auto.GtPick : auto.BsPick;
         autoWail = guitarSide ? auto.GtW : auto.BsW;
         autoLanes = ToLaneMask(guitarSide ? auto.GtR : auto.BsR, guitarSide ? auto.GtG : auto.BsG, guitarSide ? auto.GtB : auto.BsB,
@@ -80,7 +80,7 @@ internal class GuitarPerformance
     }
 
     //the player's settings, pads and lanes are still stored as guitar and bass
-    public EInstrumentPart Side => Player == EInstrument.Guitar1 ? EInstrumentPart.GUITAR : EInstrumentPart.BASS;
+    public EInstrumentPart Side => Player == EPlayer.Guitar1 ? EInstrumentPart.GUITAR : EInstrumentPart.BASS;
 
     private EInstrumentPart Part => (EInstrumentPart)Chart;
 

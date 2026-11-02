@@ -33,7 +33,7 @@ public abstract class Playfield : UIGroup
     protected static readonly int probeLanes = AllocationProbe.Register("lanes");
     protected static readonly int probeJudgement = AllocationProbe.Register("judgement string");
 
-    protected Playfield(EInstrument player) : base("Playfield")
+    protected Playfield(EPlayer player) : base("Playfield")
     {
         size = new Vector2(1280, 720);
 
@@ -153,7 +153,7 @@ public abstract class Playfield : UIGroup
 
     public static UIBinding OnRightSide(string target, double right, double left) => new(target, "Stats.Player")
     {
-        condition = BindingCondition.Equal, value = (int)EInstrument.Guitar2, whenTrue = right, whenFalse = left
+        condition = BindingCondition.Equal, value = (int)EPlayer.Guitar2, whenTrue = right, whenFalse = left
     };
 
     protected static PerformanceElement Add(UIGroup parent, PerformanceElement element, string name, float x, float y, int renderOrder, string shownWhen)

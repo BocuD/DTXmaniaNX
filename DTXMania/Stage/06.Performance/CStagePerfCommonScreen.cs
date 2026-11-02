@@ -169,14 +169,14 @@ internal abstract class CStagePerfCommonScreen : CStage
         info.bindings.Add(new UIBinding("isVisible", "Game.Playing.Guitar2") { invert = true });
 
         UIGroup players = Group(PlayersGroup, 3);
-        ShownWhenPlaying(players.AddChild(new DrumsPlayfield()), EInstrument.Drums);
-        ShownWhenPlaying(players.AddChild(new GuitarPlayfield(EInstrument.Guitar1)), EInstrument.Guitar1);
-        ShownWhenPlaying(players.AddChild(new GuitarPlayfield(EInstrument.Guitar2)), EInstrument.Guitar2).position.X = 870;
+        ShownWhenPlaying(players.AddChild(new DrumsPlayfield()), EPlayer.Drums);
+        ShownWhenPlaying(players.AddChild(new GuitarPlayfield(EPlayer.Guitar1)), EPlayer.Guitar1);
+        ShownWhenPlaying(players.AddChild(new GuitarPlayfield(EPlayer.Guitar2)), EPlayer.Guitar2).position.X = 870;
 
         StageFailedCover failed = overlays.AddChild(new StageFailedCover());
         failed.renderOrder = 1000;
 
-        static Playfield ShownWhenPlaying(Playfield playfield, EInstrument player)
+        static Playfield ShownWhenPlaying(Playfield playfield, EPlayer player)
         {
             playfield.bindings.Add(new UIBinding("isVisible", $"Game.Playing.{player}"));
             return playfield;
@@ -284,8 +284,8 @@ internal abstract class CStagePerfCommonScreen : CStage
             data.Reset(bIsAutoPlay, CDTXMania.ConfigIni.nRisky);
         }
         drums = IsPlayed(EInstrumentPart.DRUMS) ? new DrumsPerformance(DrumsData, timeline, bIsAutoPlay) : null;
-        guitars[0] = IsPlayed(EInstrumentPart.GUITAR) ? new GuitarPerformance(EInstrument.Guitar1, EChartPart.Guitar, GuitarData, timeline, bIsAutoPlay) : null;
-        guitars[1] = IsPlayed(EInstrumentPart.BASS) ? new GuitarPerformance(EInstrument.Guitar2, EChartPart.Bass, BassData, timeline, bIsAutoPlay) : null;
+        guitars[0] = IsPlayed(EInstrumentPart.GUITAR) ? new GuitarPerformance(EPlayer.Guitar1, EChartPart.Guitar, GuitarData, timeline, bIsAutoPlay) : null;
+        guitars[1] = IsPlayed(EInstrumentPart.BASS) ? new GuitarPerformance(EPlayer.Guitar2, EChartPart.Bass, BassData, timeline, bIsAutoPlay) : null;
 
 
         //let the loading sound gracefully fade out
@@ -410,7 +410,7 @@ internal abstract class CStagePerfCommonScreen : CStage
 
     public PerformanceData DataFor(EInstrumentPart part) => partData[(int)part];
 
-    //by EInstrument - 1, null when not playing
+    //by EPlayer - 1, null when not playing
     protected readonly GuitarPerformance?[] guitars = new GuitarPerformance?[2];
 
     //for now Guitar1 always plays the guitar chart and Guitar2 the bass chart
@@ -513,7 +513,7 @@ internal abstract class CStagePerfCommonScreen : CStage
     protected void tHandleKeyInput()
     {
         IInputKeyboard keyboard = CDTXMania.InputManager.Keyboard;
-        if (CDTXMania.Pad.bPressed(EInstrumentPart.BASS, EPad.Help))
+        if (CDTXMania.Pad.bPressed(EPlayer.Guitar2, EPad.Help))
         {
             TogglePause();
         }
@@ -526,8 +526,8 @@ internal abstract class CStagePerfCommonScreen : CStage
         if (!bPAUSE)
         {
             tHandleInput_Drums();
-            tHandleInput_GuitarBass(EInstrumentPart.GUITAR);
-            tHandleInput_GuitarBass(EInstrumentPart.BASS);
+            tHandleInput_GuitarBass(EPlayer.Guitar1);
+            tHandleInput_GuitarBass(EPlayer.Guitar2);
         }
 
         HandleArrowKeys(keyboard);
@@ -602,7 +602,7 @@ internal abstract class CStagePerfCommonScreen : CStage
 
     private void HandleDisplayKeys(IInputKeyboard keyboard)
     {
-        if (CDTXMania.Pad.bPressed(EInstrumentPart.GUITAR, EPad.Help))
+        if (CDTXMania.Pad.bPressed(EPlayer.Guitar1, EPad.Help))
         {
             CDTXMania.ConfigIni.bShowPerformanceInformation = !CDTXMania.ConfigIni.bShowPerformanceInformation;
         }
@@ -1303,7 +1303,7 @@ internal abstract class CStagePerfCommonScreen : CStage
         return playfield;
     }
 
-    protected GuitarPlayfield FindGuitarPlayfield(EInstrument player)
+    protected GuitarPlayfield FindGuitarPlayfield(EPlayer player)
     {
         UIGroup players = LayoutGroup(PlayersGroup);
         GuitarPlayfield playfield = players.GetChild<GuitarPlayfield>(player.ToString()) ?? players.AddChild(new GuitarPlayfield(player));
@@ -1413,8 +1413,10 @@ internal abstract class CStagePerfCommonScreen : CStage
         //todo: maybe reimplement the more complex background texture behaviour
     }
 
-    protected void tHandleInput_GuitarBass(EInstrumentPart inst)
+    protected void tHandleInput_GuitarBass(EPlayer player)
     {
+        //the chart part this player is on, which is still fixed to its own slot
+        EInstrumentPart inst = player == EPlayer.Guitar1 ? EInstrumentPart.GUITAR : EInstrumentPart.BASS;
         GuitarPerformance? guitar = GuitarFor(inst);
         if (guitar == null)
         {
@@ -1422,11 +1424,11 @@ internal abstract class CStagePerfCommonScreen : CStage
         }
 
         int indexInst = (int)inst;
-        if (CDTXMania.Pad.bPressing(inst, EPad.Decide) && CDTXMania.Pad.bPressed(inst, EPad.B))
+        if (CDTXMania.Pad.bPressing(player, EPad.Decide) && CDTXMania.Pad.bPressed(player, EPad.B))
         {
             ChangeScrollSpeed(inst, 1);
         }
-        if (CDTXMania.Pad.bPressing(inst, EPad.Decide) && CDTXMania.Pad.bPressed(inst, EPad.R))
+        if (CDTXMania.Pad.bPressing(player, EPad.Decide) && CDTXMania.Pad.bPressed(player, EPad.R))
         {
             ChangeScrollSpeed(inst, -1);
         }
@@ -1439,7 +1441,7 @@ internal abstract class CStagePerfCommonScreen : CStage
         guitar.UpdateInput();
         guitar.Data.RecordInputDevices();
 
-        int firstLane = inst == EInstrumentPart.GUITAR ? 0 : 5;
+        int firstLane = player == EPlayer.Guitar1 ? 0 : 5;
         for (int lane = 0; lane < 5; lane++)
         {
             if ((guitar.LitLanes & (1 << lane)) != 0)

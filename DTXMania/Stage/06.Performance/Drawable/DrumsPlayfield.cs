@@ -23,7 +23,7 @@ public class DrumsPlayfield : Playfield
     private IPerfFire? fire;
     private bool setUp;
 
-    public DrumsPlayfield() : base(EInstrument.Drums)
+    public DrumsPlayfield() : base(EPlayer.Drums)
     {
         name = "Drums";
         part = EInstrumentPart.DRUMS;

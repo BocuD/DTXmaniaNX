@@ -169,7 +169,7 @@ public enum EInstrumentPart		// ここを修正するときは、セットで次
 	UNKNOWN	= 99
 }
 
-public enum EInstrument
+public enum EPlayer
 {
 	Drums,
 	Guitar1,
