@@ -531,42 +531,42 @@ public class CStageSongSelectionNew : CStage
         quickMenu?.PollToggleGesture();
         songSearchMenu.PollOpenGesture();
 
-        PollDifficultyCommand(EInstrumentPart.DRUMS, EPad.HH, EPadFlag.HH);
-        PollDifficultyCommand(EInstrumentPart.DRUMS, EPad.HHO, EPadFlag.HH);
-        PollDifficultyCommand(EInstrumentPart.GUITAR, EPad.B, EPadFlag.B);
-        PollDifficultyCommand(EInstrumentPart.BASS, EPad.B, EPadFlag.B);
+        PollDifficultyCommand(EPlayer.Drums, EPad.HH, EPadFlag.HH);
+        PollDifficultyCommand(EPlayer.Drums, EPad.HHO, EPadFlag.HH);
+        PollDifficultyCommand(EPlayer.Guitar1, EPad.B, EPadFlag.B);
+        PollDifficultyCommand(EPlayer.Guitar2, EPad.B, EPadFlag.B);
 
-        PollSwapCommand(EInstrumentPart.GUITAR);
-        PollSwapCommand(EInstrumentPart.BASS);
+        PollSwapCommand(EPlayer.Guitar1);
+        PollSwapCommand(EPlayer.Guitar2);
     }
 
     //two hits on the same pad change difficulty
-    private void PollDifficultyCommand(EInstrumentPart part, EPad pad, EPadFlag flag)
+    private void PollDifficultyCommand(EPlayer player, EPad pad, EPadFlag flag)
     {
-        if (!CDTXMania.Pad.bPressed(part, pad))
+        if (!CDTXMania.Pad.bPressed(player, pad))
         {
             return;
         }
 
-        commandHistory.Add(part, flag);
+        commandHistory.Add(player, flag);
 
-        if (commandHistory.CheckCommand([flag, flag], part))
+        if (commandHistory.CheckCommand([flag, flag], player))
         {
             IncrementDifficultyLevel();
         }
     }
 
     //two Y hits swap which instrument the guitar keys play
-    private void PollSwapCommand(EInstrumentPart part)
+    private void PollSwapCommand(EPlayer player)
     {
-        if (!CDTXMania.Pad.bPressed(part, EPad.Y))
+        if (!CDTXMania.Pad.bPressed(player, EPad.Y))
         {
             return;
         }
 
-        commandHistory.Add(part, EPadFlag.Y);
+        commandHistory.Add(player, EPadFlag.Y);
 
-        if (!commandHistory.CheckCommand([EPadFlag.Y, EPadFlag.Y], part))
+        if (!commandHistory.CheckCommand([EPadFlag.Y, EPadFlag.Y], player))
         {
             return;
         }

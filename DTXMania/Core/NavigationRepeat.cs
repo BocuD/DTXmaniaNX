@@ -54,17 +54,17 @@ public sealed class NavigationRepeat
         bool strums = guitarPrevious is EPad.PickUp or EPad.PickDown;
         bool guitarScrolls = !strums || Input.StrumIsNavigation;
 
-        guitarRepeatPrevious!.tRepeatKey(guitarScrolls && CDTXMania.Pad.bPressingGB(guitarPrevious),
+        guitarRepeatPrevious!.tRepeatKey(guitarScrolls && CDTXMania.Pad.bPressingGuitars(guitarPrevious),
             onPrevious, FirstRepeatMs, RepeatIntervalMs);
-        guitarRepeatNext!.tRepeatKey(guitarScrolls && CDTXMania.Pad.bPressingGB(guitarNext),
+        guitarRepeatNext!.tRepeatKey(guitarScrolls && CDTXMania.Pad.bPressingGuitars(guitarNext),
             onNext, FirstRepeatMs, RepeatIntervalMs);
 
-        if (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, vertical ? EPad.HT : EPad.SD))
+        if (CDTXMania.Pad.bPressed(EPlayer.Drums, vertical ? EPad.HT : EPad.SD))
         {
             (onDrumsPrevious ?? onPrevious)();
         }
 
-        if (CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, vertical ? EPad.LT : EPad.FT))
+        if (CDTXMania.Pad.bPressed(EPlayer.Drums, vertical ? EPad.LT : EPad.FT))
         {
             (onDrumsNext ?? onNext)();
         }

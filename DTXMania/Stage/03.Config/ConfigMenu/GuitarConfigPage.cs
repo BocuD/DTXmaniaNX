@@ -4,8 +4,8 @@ using DTXMania.UI.Item;
 
 namespace DTXMania;
 
-//Guitar P1. Shared (STDGBVALUE-backed) options come from InstrumentConfigPage
-internal sealed class GuitarConfigPage(ConfigList list) : InstrumentConfigPage(list, EInstrumentPart.GUITAR)
+//Guitar P1. Shared (STDGBVALUE-backed) options come from PlayerConfigPage
+internal sealed class GuitarConfigPage(ConfigList list) : PlayerConfigPage(list, EPlayer.Guitar1)
 {
     public override List<CItemBase> Build()
     {
@@ -60,7 +60,7 @@ internal sealed class GuitarConfigPage(ConfigList list) : InstrumentConfigPage(l
         items.Add(ShutterOutItem());
         items.Add(MonitorItem("GuitarMonitor"));
         items.Add(MinComboItem("G-MinCombo", 0));
-        items.Add(GraphItem(EInstrumentPart.BASS)); //enabling disables the bass graph
+        items.Add(GraphItem(EPlayer.Guitar2)); //enabling disables the other graph
         items.Add(InputAdjustItem());
 
         items.Add(FolderItem("Key Assignment",

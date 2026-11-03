@@ -5,25 +5,25 @@ using DTXMania.UI.Item;
 namespace DTXMania;
 
 /// <summary>
-/// Base for the Drums / Guitar / Bass pages. Most of their options are the same setting stored per
-/// instrument in an <see cref="STDGBVALUE{T}"/> (indexed by <see cref="EInstrumentPart"/>). This
-/// class builds those shared items once, indexed by <see cref="instrument"/>; each page composes
-/// them in its own order and adds its instrument-specific items.
+/// Base for the Drums / Guitar P1 / Guitar P2 pages. Most of their options are the same setting
+/// stored per player in an <see cref="STDGBVALUE{T}"/>, which keeps a player's settings in the
+/// drums, guitar and bass slots. This class builds those shared items once, indexed by
+/// <see cref="player"/>; each page composes them in its own order and adds its own items.
 /// </summary>
-internal abstract class InstrumentConfigPage : ConfigPage
+internal abstract class PlayerConfigPage : ConfigPage
 {
-    protected readonly EInstrumentPart instrument;
+    protected readonly EPlayer player;
 
-    protected InstrumentConfigPage(ConfigList list, EInstrumentPart instrument) : base(list)
+    protected PlayerConfigPage(ConfigList list, EPlayer player) : base(list)
     {
-        this.instrument = instrument;
+        this.player = player;
     }
 
-    private int Idx => (int)instrument;
+    protected int Idx => (int)player;
     
     public CItemTextInput CreateCardNameInputItem()
     {
-        CItemTextInput iCardName = TextInput($"Card name ({instrument})", CDTXMania.ConfigIni.strCardName[Idx],
+        CItemTextInput iCardName = TextInput($"Card name ({player})", CDTXMania.ConfigIni.strCardName[Idx],
             "カード名を入力します。\n",
             "Input your card name.\n",
             () => CDTXMania.ConfigIni.strCardName[Idx],
@@ -33,7 +33,7 @@ internal abstract class InstrumentConfigPage : ConfigPage
     
     public CItemTextInput CreateGroupNameInputItem()
     {
-        CItemTextInput iGroupName = TextInput($"Group name ({instrument})", CDTXMania.ConfigIni.strGroupName[Idx], 
+        CItemTextInput iGroupName = TextInput($"Group name ({player})", CDTXMania.ConfigIni.strGroupName[Idx], 
             "グループ名を入力します。\n",
             "Input your Group name.\n",
             () => CDTXMania.ConfigIni.strGroupName[Idx],
@@ -86,7 +86,7 @@ internal abstract class InstrumentConfigPage : ConfigPage
         CItemToggle judgeLineDisp = JudgeLineDispItem();
         CItemToggle laneFlush = LaneFlushItem();
 
-        CItemList dark = new("       Dark", CItemBase.EPanelType.Normal, (int)CDTXMania.ConfigIni.eDark[(int)instrument],
+        CItemList dark = new("       Dark", CItemBase.EPanelType.Normal, (int)CDTXMania.ConfigIni.eDark[(int)player],
             "レーン表示オプションをまとめて切り替えます (HALF/FULL)。",
             "OFF: all shown. HALF: lanes/gauge hidden. FULL: also bar lines and hit bar hidden.",
             ["OFF", "HALF", "FULL"]);
@@ -145,18 +145,18 @@ internal abstract class InstrumentConfigPage : ConfigPage
         "入力タイミングの微調整。", "Adjust input timing (-99 to 99ms).",
         () => CDTXMania.ConfigIni.nInputAdjustTimeMs[Idx], v => CDTXMania.ConfigIni.nInputAdjustTimeMs[Idx] = v);
 
-    /// <summary>Graph toggle; when <paramref name="disables"/> is given, enabling it turns that part's graph off.</summary>
-    protected CItemToggle GraphItem(EInstrumentPart? disables = null)
+    /// <summary>Graph toggle; when <paramref name="disables"/> is given, enabling it turns that player's graph off.</summary>
+    protected CItemToggle GraphItem(EPlayer? disables = null)
     {
         CItemToggle graph = Toggle("Graph",
             "スキル比較グラフを表示します。", "Draw the skill comparison graph.",
             () => CDTXMania.ConfigIni.bGraph有効[Idx], v => CDTXMania.ConfigIni.bGraph有効[Idx] = v);
 
-        if (disables is { } other)
+        if (disables != null)
         {
             graph.action = () =>
             {
-                if (graph.bON) CDTXMania.ConfigIni.bGraph有効[(int)other] = false;
+                if (graph.bON) CDTXMania.ConfigIni.bGraph有効[(int)disables.Value] = false;
             };
         }
 
@@ -184,15 +184,15 @@ internal abstract class InstrumentConfigPage : ConfigPage
     private static readonly string[] RandomOptions = ["OFF", "Mirror", "Part", "Super", "Hyper"];
     private static readonly string[] RandomOptionsDrums = ["OFF", "Mirror", "Part", "Super", "Hyper", "Master", "Another"];
 
-    /// <summary>The main random chip-shuffle item for this instrument (named "RandomPad" on drums).</summary>
+    /// <summary>The main random chip-shuffle item for this player (named "RandomPad" on drums).</summary>
     protected CItemList RandomItem()
     {
-        (string jp, string en) = instrument switch
+        (string jp, string en) = player switch
         {
-            EInstrumentPart.DRUMS => (
+            EPlayer.Drums => (
                 "パッドチップをランダム化します。\nMirror: 左右反転。\nPart: レーン単位で入替。\nSuper: 小節単位で入替。\nHyper: 1拍ごとに入替。\nMaster: 激しく入替。\nAnother: 程よくばらける。",
                 "Randomize pad chips.\nMirror: flip left/right.\nPart: swap by lane.\nSuper: swap per measure.\nHyper: swap per beat.\nMaster: extreme swapping.\nAnother: moderate spread."),
-            EInstrumentPart.GUITAR => (
+            EPlayer.Guitar1 => (
                 "ギターのチップの並びをランダム化します。\n  Mirror: 左右反転\n  Part: 小節ごとにレーンを入れ替え\n  Super: チップごとに入れ替え(本数は不変)\n  Hyper: 本数も変わる",
                 "Randomize the guitar chip lanes.\n  Mirror: flip left/right\n  Part: swap lanes each measure\n  Super: swap per chip (lane count kept)\n  Hyper: swap per chip (lane count changes too)"),
             _ => (
@@ -200,8 +200,8 @@ internal abstract class InstrumentConfigPage : ConfigPage
                 "Randomize the bass chip lanes.\n  Mirror: flip left/right\n  Part: swap lanes each measure\n  Super: swap per chip (lane count kept)\n  Hyper: swap per chip (lane count changes too)")
         };
 
-        return Choice(instrument == EInstrumentPart.DRUMS ? "RandomPad" : "Random", jp, en,
-            instrument == EInstrumentPart.DRUMS ? RandomOptionsDrums : RandomOptions,
+        return Choice(player == EPlayer.Drums ? "RandomPad" : "Random", jp, en,
+            player == EPlayer.Drums ? RandomOptionsDrums : RandomOptions,
             () => (int)CDTXMania.ConfigIni.eRandom[Idx], v => CDTXMania.ConfigIni.eRandom[Idx] = (ERandomMode)v);
     }
 
@@ -215,7 +215,7 @@ internal abstract class InstrumentConfigPage : ConfigPage
     // ---- auto-play preset selector (shared) ----
 
     /// <summary>
-    /// Builds the auto-play preset selector for this instrument (Off / presets... / Custom, from
+    /// Builds the auto-play preset selector for this player (Off / presets... / Custom, from
     /// <see cref="AutoMode.AutoModes"/>). Cycling it applies the chosen preset to <c>bAutoPlay</c>;
     /// "Custom" applies the separately-stored <c>bAutoPlayCustom</c> so cycling never clears it.
     ///
@@ -226,7 +226,7 @@ internal abstract class InstrumentConfigPage : ConfigPage
     /// </summary>
     protected CItemList AutoPlaySelectorItem(IReadOnlyList<(ELane lane, CItemToggle toggle)>? laneToggles = null)
     {
-        List<AutoMode> presets = AutoMode.AutoModes[instrument];
+        List<AutoMode> presets = AutoMode.AutoModes[player];
         List<ELane> lanes = presets.First(p => !p.isCustom).state.Keys.ToList();
         int customIndex = presets.FindIndex(p => p.isCustom);
 
@@ -270,7 +270,7 @@ internal abstract class InstrumentConfigPage : ConfigPage
     /// </summary>
     protected void AddAutoPlayBlock(List<CItemBase> items, IReadOnlyList<(ELane lane, CItemToggle toggle)> laneToggles)
     {
-        List<ELane> lanes = AutoMode.AutoModes[instrument].First(p => !p.isCustom).state.Keys.ToList();
+        List<ELane> lanes = AutoMode.AutoModes[player].First(p => !p.isCustom).state.Keys.ToList();
 
         items.Add(AutoPlaySelectorItem(laneToggles));
 
@@ -293,7 +293,7 @@ internal abstract class InstrumentConfigPage : ConfigPage
     // A live text preview of the auto-play state: the matching preset name + which lanes are on auto.
     private string AutoPlayDescription(List<ELane> lanes)
     {
-        string mode = AutoMode.AutoModes[instrument][MatchingPresetIndex(lanes)].label;
+        string mode = AutoMode.AutoModes[player][MatchingPresetIndex(lanes)].label;
 
         List<string> on = lanes.Where(l => CDTXMania.ConfigIni.bAutoPlay[(int)l]).Select(LaneShortName).ToList();
         string lanesText = on.Count == 0
@@ -305,7 +305,7 @@ internal abstract class InstrumentConfigPage : ConfigPage
             : $"Auto: {mode}\nLanes: {lanesText}";
     }
 
-    // Short lane label for the preview (drops the "Gt"/"Bs" instrument prefix on guitar/bass lanes).
+    // Short lane label for the preview (drops the "Gt"/"Bs" player prefix on guitar/bass lanes).
     private static string LaneShortName(ELane lane)
     {
         string name = lane.ToString();
@@ -315,7 +315,7 @@ internal abstract class InstrumentConfigPage : ConfigPage
     // index of the preset matching the current bAutoPlay, or the Custom index if none match
     private int MatchingPresetIndex(List<ELane> lanes)
     {
-        List<AutoMode> presets = AutoMode.AutoModes[instrument];
+        List<AutoMode> presets = AutoMode.AutoModes[player];
         for (int i = 0; i < presets.Count; i++)
         {
             AutoMode preset = presets[i];

@@ -4,12 +4,12 @@ using DTXMania.UI.Item;
 
 namespace DTXMania;
 
-//Shared (STDGBVALUE-backed) options come from InstrumentConfigPage
-internal sealed class DrumsConfigPage : InstrumentConfigPage
+//Shared (STDGBVALUE-backed) options come from PlayerConfigPage
+internal sealed class DrumsConfigPage : PlayerConfigPage
 {
     private readonly DrumsVelocityConfigPage velocity;
 
-    public DrumsConfigPage(ConfigList list) : base(list, EInstrumentPart.DRUMS)
+    public DrumsConfigPage(ConfigList list) : base(list, EPlayer.Drums)
     {
         velocity = new DrumsVelocityConfigPage(list);
     }

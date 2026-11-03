@@ -649,7 +649,7 @@ internal class CStageResult : CStage
 			for( int i = 0; i < 11; i++ )
 			{
 				List<STInputEvent> events = listPadEvents;
-				CDTXMania.Pad.GetEvents( EInstrumentPart.DRUMS, (EPad) i, events );
+				CDTXMania.Pad.GetEvents( EPlayer.Drums, (EPad) i, events );
 				if ( events.Count > 0 )
 				{
 					foreach( STInputEvent event2 in events )

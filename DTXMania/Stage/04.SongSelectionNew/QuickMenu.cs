@@ -24,7 +24,7 @@ public class QuickMenu : UIGroup
     private const string CloseClip = "close";
 
     private readonly CCommandHistory commandHistory = new();
-    private readonly QuickMenuPage[] instruments = new QuickMenuPage[3];
+    private readonly QuickMenuPage[] pages = new QuickMenuPage[3];
 
     //part of the component, so the clip addresses them by name and a skin can move them
     private ConfigList? list;
@@ -50,21 +50,21 @@ public class QuickMenu : UIGroup
 
         list.onExitRoot = ToggleMenu;
 
-        QuickConfigInstrumentSwitcher instrumentSwitcher = new(list, instruments);
-        instruments[0] = new QuickMenuPage(list, EInstrumentPart.DRUMS, instrumentSwitcher);
-        instruments[1] = new QuickMenuPage(list, EInstrumentPart.GUITAR, instrumentSwitcher);
-        instruments[2] = new QuickMenuPage(list, EInstrumentPart.BASS, instrumentSwitcher);
+        QuickConfigPlayerSwitcher switcher = new(list, pages);
+        pages[0] = new QuickMenuPage(list, EPlayer.Drums, switcher);
+        pages[1] = new QuickMenuPage(list, EPlayer.Guitar1, switcher);
+        pages[2] = new QuickMenuPage(list, EPlayer.Guitar2, switcher);
 
-        list.SetItems(instruments[CDTXMania.GetCurrentInstrument()].Build());
+        list.SetItems(pages[CDTXMania.GetCurrentInstrument()].Build());
     }
 
     /// <summary>The gesture that opens and closes the menu. Polled by the stage whatever holds focus,
     /// because it is a pad command rather than navigation — the list itself takes focus once open.</summary>
     public void PollToggleGesture()
     {
-        if (CheckDoubleInput(EInstrumentPart.DRUMS, EPad.BD, EPadFlag.BD)
-            || CheckDoubleInput(EInstrumentPart.GUITAR, EPad.P, EPadFlag.P)
-            || CheckDoubleInput(EInstrumentPart.BASS, EPad.P, EPadFlag.P))
+        if (CheckDoubleInput(EPlayer.Drums, EPad.BD, EPadFlag.BD)
+            || CheckDoubleInput(EPlayer.Guitar1, EPad.P, EPadFlag.P)
+            || CheckDoubleInput(EPlayer.Guitar2, EPad.P, EPadFlag.P))
         {
             ToggleMenu();
         }
@@ -91,7 +91,7 @@ public class QuickMenu : UIGroup
         {
             isVisible = true;
             isClosing = false;
-            list.SetItems(instruments[CDTXMania.GetCurrentInstrument()].Build(), 0);
+            list.SetItems(pages[CDTXMania.GetCurrentInstrument()].Build(), 0);
             UIFocus.Push(list);
             animator?.Play(OpenClip);
             return;
@@ -120,13 +120,13 @@ public class QuickMenu : UIGroup
         base.Draw(parentMatrix);
     }
 
-    public bool CheckDoubleInput(EInstrumentPart part, EPad pad, EPadFlag flag)
+    public bool CheckDoubleInput(EPlayer player, EPad pad, EPadFlag flag)
     {
-        if (CDTXMania.Pad.bPressed(part, pad))
+        if (CDTXMania.Pad.bPressed(player, pad))
         {
-            commandHistory.Add(part, flag);
+            commandHistory.Add(player, flag);
             EPadFlag[] comChangeScrollSpeed = [flag, flag];
-            if (commandHistory.CheckCommand(comChangeScrollSpeed, part))
+            if (commandHistory.CheckCommand(comChangeScrollSpeed, player))
             {
                 return true;
             }

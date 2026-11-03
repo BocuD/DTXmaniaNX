@@ -5,11 +5,12 @@ namespace DTXMania;
 
 public class CCommandHistory // #24063 2011.1.16 yyagi コマンド入力履歴を保持_確認するクラス
 {
-	private struct STCommandTime // #24063 2011.1.16 yyagi コマンド入力時刻の記録用
+	private struct STCommandTime
 	{
-		public EInstrumentPart eInst; // 使用楽器
-		public EPadFlag ePad; // 押されたコマンド(同時押しはOR演算で列挙する)
-		public long time; // コマンド入力時刻
+		public EPlayer player;
+		//pads pressed together are one entry, ORed
+		public EPadFlag ePad;
+		public long time;
 	}
 
 	readonly int buffersize = 16;
@@ -20,16 +21,11 @@ public class CCommandHistory // #24063 2011.1.16 yyagi コマンド入力履歴�
 		stct = new List<STCommandTime>(buffersize);
 	}
 
-	/// <summary>
-	/// コマンド入力履歴へのコマンド追加
-	/// </summary>
-	/// <param name="_eInst">楽器の種類</param>
-	/// <param name="_ePad">入力コマンド(同時押しはOR演算で列挙すること)</param>
-	public void Add(EInstrumentPart _eInst, EPadFlag _ePad)
+	public void Add(EPlayer _player, EPadFlag _ePad)
 	{
 		STCommandTime _stct = new STCommandTime
 		{
-			eInst = _eInst,
+			player = _player,
 			ePad = _ePad,
 			time = CDTXMania.Timer.nCurrentTime
 		};
@@ -48,13 +44,8 @@ public class CCommandHistory // #24063 2011.1.16 yyagi コマンド入力履歴�
 		stct.RemoveAt(index);
 	}
 
-	/// <summary>
-	/// コマンド入力に成功しているか調べる
-	/// </summary>
-	/// <param name="_ePad">入力が成功したか調べたいコマンド</param>
-	/// <param name="_eInst">対象楽器</param>
-	/// <returns>コマンド入力成功時true</returns>
-	public bool CheckCommand(EPadFlag[] _ePad, EInstrumentPart _eInst)
+	//the whole command has to come from one player, each press within 500ms of the last
+	public bool CheckCommand(EPadFlag[] _ePad, EPlayer _player)
 	{
 		int targetCount = _ePad.Length;
 		int stciCount = stct.Count;
@@ -74,7 +65,7 @@ public class CCommandHistory // #24063 2011.1.16 yyagi コマンド入力履歴�
 				return false;
 			}
 
-			if (stct[j].eInst != _eInst)
+			if (stct[j].player != _player)
 			{
 //Debug.WriteLine( "CMD解析: false " + i );
 				return false;

@@ -208,7 +208,7 @@ internal class DrumsPerformance
 
         for (int pad = 0; pad < PadCount; pad++)
         {
-            CDTXMania.Pad.GetEvents(EInstrumentPart.DRUMS, (EPad)pad, padEvents);
+            CDTXMania.Pad.GetEvents(EPlayer.Drums, (EPad)pad, padEvents);
             if (padEvents.Count == 0)
             {
                 continue;
