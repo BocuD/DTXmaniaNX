@@ -71,24 +71,19 @@ internal sealed class OpenGlSkiaTextRenderer : IUiTextRenderer
 
         using SKPaint fillPaint = CreateFillPaint(request, bitmapHeight);
         using SKPaint strokePaint = CreateStrokePaint(request, bitmapHeight);
+        using SKPaint? wearPaint = request.Weight < 0f ? CreateWearPaint(request) : null;
 
         for (int i = 0; i < lines.Length; i++)
         {
             string line = lines[i];
             List<FontSet.Run> runs = fonts.Split(line);
-            float lineWidth = FontSet.Width(runs);
+            float lineWidth = fonts.Width(runs);
             float drawX = effectivePadding.X + GetAlignedOffset(request.Alignment, bitmapWidth - effectivePadding.X * 2f, lineWidth);
             float drawY = effectivePadding.Y + ascent + i * actualLineHeight;
 
             void DrawRuns(SKPaint paint)
             {
-                float runX = drawX;
-
-                foreach (FontSet.Run run in runs)
-                {
-                    canvas.DrawText(run.Text, runX, drawY, SKTextAlign.Left, run.Font, paint);
-                    runX += run.Font.MeasureText(run.Text);
-                }
+                fonts.Place(runs, drawX, (text, font, x) => canvas.DrawText(text, x, drawY, SKTextAlign.Left, font, paint));
             }
 
             if (request.OutlineWidth > 0.01f)
@@ -96,7 +91,18 @@ internal sealed class OpenGlSkiaTextRenderer : IUiTextRenderer
                 DrawRuns(strokePaint);
             }
 
-            DrawRuns(fillPaint);
+            if (wearPaint != null)
+            {
+                //worn on a layer of its own, so a thinner fill leaves the outline behind it whole
+                canvas.SaveLayer();
+                DrawRuns(fillPaint);
+                DrawRuns(wearPaint);
+                canvas.Restore();
+            }
+            else
+            {
+                DrawRuns(fillPaint);
+            }
 
             if (request.Style.HasFlag(UiTextStyle.Underline) && lineWidth > 0f)
             {
@@ -175,8 +181,9 @@ internal sealed class OpenGlSkiaTextRenderer : IUiTextRenderer
     private static Vector2 EffectivePadding(UiTextParameters request)
     {
         float guard = 2f * request.RenderScale;
+        float outline = request.OutlineWidth + request.OutlineSoftness + MathF.Max(request.Weight, 0f);
 
-        return Vector2.Max(request.TexturePadding + new Vector2(request.OutlineWidth + guard), new Vector2(guard));
+        return Vector2.Max(request.TexturePadding + new Vector2(outline + guard), new Vector2(guard));
     }
 
     private static string[] NormalizeLines(string value)
@@ -249,6 +256,7 @@ internal sealed class OpenGlSkiaTextRenderer : IUiTextRenderer
             Edging = request.SubpixelText ? SKFontEdging.SubpixelAntialias : SKFontEdging.Antialias,
             Subpixel = request.SubpixelText,
             Embolden = request.Style.HasFlag(UiTextStyle.Bold),
+            ScaleX = request.HorizontalScale,
             SkewX = request.Style.HasFlag(UiTextStyle.Italic) ? -0.25f : 0f
         };
     }
@@ -259,7 +267,8 @@ internal sealed class OpenGlSkiaTextRenderer : IUiTextRenderer
         {
             IsAntialias = request.Antialias,
             Color = ToSkColor(request.FillColor),
-            Style = SKPaintStyle.Fill,
+            Style = request.Weight > 0f ? SKPaintStyle.StrokeAndFill : SKPaintStyle.Fill,
+            StrokeWidth = MathF.Max(request.Weight, 0f) * 2f,
             StrokeJoin = SKStrokeJoin.Round
         };
 
@@ -272,6 +281,15 @@ internal sealed class OpenGlSkiaTextRenderer : IUiTextRenderer
         return paint;
     }
 
+    private static SKPaint CreateWearPaint(UiTextParameters request) => new()
+    {
+        IsAntialias = request.Antialias,
+        Style = SKPaintStyle.Stroke,
+        StrokeJoin = SKStrokeJoin.Round,
+        StrokeWidth = -request.Weight * 2f,
+        BlendMode = SKBlendMode.DstOut
+    };
+
     private static SKPaint CreateStrokePaint(UiTextParameters request, int bitmapHeight)
     {
         SKPaint paint = new()
@@ -283,6 +301,11 @@ internal sealed class OpenGlSkiaTextRenderer : IUiTextRenderer
             StrokeWidth = MathF.Max(request.OutlineWidth * 2f, 0.01f)
         };
 
+        if (request.OutlineSoftness > 0.01f)
+        {
+            paint.MaskFilter = SKMaskFilter.CreateBlur(SKBlurStyle.Normal, request.OutlineSoftness / 3f);
+        }
+
         paint.Shader = CreateGradientShader(
             request.OutlineGradientMode,
             request.OutlineGradientTopColor,
@@ -293,7 +316,10 @@ internal sealed class OpenGlSkiaTextRenderer : IUiTextRenderer
     }
 
     private static FontSet CreateFontSet(UiTextParameters request)
-        => new(ResolveTypeface(request), typeface => CreateFont(typeface, request));
+        => new(ResolveTypeface(request), typeface => CreateFont(typeface, request))
+        {
+            LetterSpacing = request.LetterSpacing
+        };
 
     private static float GetAlignedOffset(UiTextAlignment alignment, float availableWidth, float lineWidth)
     {

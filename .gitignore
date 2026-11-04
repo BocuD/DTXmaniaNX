@@ -199,11 +199,8 @@ Runtime/System/*
 Runtime/DTXFiles/*
 !Runtime/System/Sounds
 !Runtime/System/Graphics
-!Runtime/FFpmeg/*
 
-#!/Runtime/FFmpeg/*
-#!/Runtime/FFmpeg/bin/x64/*.dll
-#/Runtime/dll
+# NuGet natives the build copies next to the executable; the repo's own natives live in Runtime/lib
 /Runtime/*.dll
 
 # IDE files

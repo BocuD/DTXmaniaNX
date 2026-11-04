@@ -5,6 +5,7 @@ using DTXMania.SongDb;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.DynamicElements;
 using DTXMania.UI.Text;
+using DTXMania.UI.Inspector;
 
 namespace DTXMania;
 
@@ -17,6 +18,9 @@ public sealed class StatusPaneFrame
 
 public class StatusPane : UIGroup, IUIItemSource
 {
+
+    [AddChildMenu("Game/Song Select/Status Pane")]
+    public new static UIDrawable Create() => new StatusPane();
     private const float VerticalSpacing = 74.0f;
     private const int DifficultyCount = 5;
 

@@ -4,6 +4,7 @@ using DTXMania.SongDb;
 using DTXMania.UI;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.Skin;
+using DTXMania.UI.Inspector;
 
 namespace DTXMania;
 
@@ -15,6 +16,9 @@ namespace DTXMania;
 /// </summary>
 public class StatusPanel : UIGroup
 {
+
+    [AddChildMenu("Game/Song Select/Status Panel")]
+    public new static UIDrawable Create() => new StatusPanel();
 	public StatusPanel() : base("StatusPanel")
 	{
 	}

@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using Un4seen.Bass;
 using Un4seen.Bass.AddOn.Mix;
 using Un4seen.BassAsio;
@@ -9,6 +10,24 @@ namespace DTXMania.Core.Audio;
 internal static class BassRuntime
 {
     private static bool registered;
+
+    public static string[] LibraryFiles { get; } = (OperatingSystem.IsWindows()
+            ? new[] { "bass", "bassmix", "bass_fx", "bassasio", "basswasapi" }
+            : new[] { "bass", "bassmix" })
+        .Select(name => NativeLibraries.PathFor("bass", name))
+        .ToArray();
+
+    public static void ResolveLibraries() =>
+        NativeLibrary.SetDllImportResolver(typeof(Bass).Assembly, (name, _, _) =>
+        {
+            //the add-ons link bass with no search path of their own, so it has to be loaded first
+            if (name != "bass")
+            {
+                NativeLibraries.TryLoad("bass", "bass");
+            }
+
+            return NativeLibraries.TryLoad("bass", name);
+        });
 
     /// <summary>Hides the BASS splash. Only takes effect once.</summary>
     public static void Register()

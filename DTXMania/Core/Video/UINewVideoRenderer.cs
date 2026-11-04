@@ -1,4 +1,4 @@
-﻿using System.Drawing;
+using System.Drawing;
 using System.Numerics;
 using DTXMania.Core.Framework;
 using DTXMania.UI.Drawable;
@@ -13,6 +13,8 @@ public class UINewVideoRenderer : UIDrawable
 {
     public VideoPlayerController Controller { get; } = new();
 
+    [Themable] public ImageFit fit = ImageFit.Stretch;
+
     //tint and opacity applied to the drawn frame, so callers can fade a video the way they would an image
     [Themable] public Color4 color = Color4.White;
 
@@ -21,43 +23,38 @@ public class UINewVideoRenderer : UIDrawable
 
     [JsonIgnore] private string? _lastVideoLoadAttempt;
 
-    [AddChildMenu("Video/New Video Renderer")]
+    [AddChildMenu("Video/Video Player")]
     public static UINewVideoRenderer CreateAsync()
     {
         return new UINewVideoRenderer();
     }
-    
-    [AddChildMenu("Video/New Video Renderer (Software Decoder)")]
+
+    [AddChildMenu("Video/Video Player (Software)")]
     public static UINewVideoRenderer CreateSoftware()
     {
         return new UINewVideoRenderer { Controller = { UseSoftwareDecoder = true } };
     }
 
-    //an all-optional constructor does not count as parameterless, and deserialization needs one
-    public UINewVideoRenderer() : this(null)
+    //an image showing a video the stage plays, eg: the chart's video on the performance stage
+    [AddChildMenu("Video/Linked Video")]
+    public static UIImage CreateLinked() => new()
     {
-    }
+        name = "Video",
+        imageSource = ImageSource.Dynamic,
+        dynamicSource = "Video.Frame",
+        fit = ImageFit.Contain
+    };
 
-    public UINewVideoRenderer(VideoPlayerController? controller)
+    public UINewVideoRenderer()
     {
         //a placeholder box until a frame states the real one
         size = UISize.Auto(new Vector2(640, 480));
-
-        if (controller != null)
-        {
-            Controller = controller;
-
-            if (Controller.CurrentFrame.IsValid)
-            {
-                size.SetContent(new Vector2(Controller.CurrentFrame.Texture.Width, Controller.CurrentFrame.Texture.Height));
-            }
-        }
     }
 
     public bool LoadVideo(string path)
     {
         if (!CDTXMania.ConfigIni.bAVIEnabled) return false;
-        
+
         if (Controller.TryLoadVideo(path) && Controller.CurrentFrame.IsValid)
         {
             size.SetContent(new Vector2(Controller.CurrentFrame.Texture.Width, Controller.CurrentFrame.Texture.Height));
@@ -99,23 +96,22 @@ public class UINewVideoRenderer : UIDrawable
 
         if (!isVisible) return;
 
-        UpdateLocalTransformMatrix();
-        Matrix4x4 combinedMatrix = localTransformMatrix * parentMatrix;
-
-        // Controller pumps the decoder or relies on paused constraints natively.
         Controller.Update();
 
         DisplayedFrame frame = Controller.CurrentFrame;
         BaseTexture? texture = frame.Texture;
 
-        if (frame.IsValid && texture != null && texture.IsValid() && !texture.notFound)
+        if (!frame.IsValid || texture == null || !texture.IsValid() || texture.notFound)
         {
-            //a stream can change dimensions mid-playback
-            size.SetContent(new Vector2(texture.Width, texture.Height));
-
-            RectangleF clipRect = new(0, 0, texture.Width, texture.Height);
-            texture.tDraw2DMatrix(combinedMatrix, size, clipRect, color);
+            return;
         }
+
+        //a stream can change dimensions mid-playback
+        size.SetContent(new Vector2(texture.Width, texture.Height));
+
+        UpdateLocalTransformMatrix();
+        UIImage.DrawFitted(texture, localTransformMatrix * parentMatrix, size,
+            new RectangleF(0, 0, texture.Width, texture.Height), fit, UITint.Current * color);
     }
 
     public override void DrawInspector()
@@ -124,6 +120,8 @@ public class UINewVideoRenderer : UIDrawable
 
         if (ImGui.CollapsingHeader("Video"))
         {
+            DTXMania.UI.Inspector.Inspector.Inspect("Fit", ref fit);
+
             DTXMania.UI.Inspector.ResourceEditor.Draw("File", ResourceType.Video, video, chosen =>
             {
                 video = chosen;
@@ -138,7 +136,6 @@ public class UINewVideoRenderer : UIDrawable
             }
         }
 
-        // Hand off rendering to the encapsulated Controller securely locked to this drawable instance.
         Controller.DrawInspector(GetHashCode().ToString());
     }
 

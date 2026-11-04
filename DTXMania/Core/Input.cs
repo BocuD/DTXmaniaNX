@@ -10,10 +10,10 @@ public class Input
 {
     public bool ActionDecide()
     {
-        return CDTXMania.Pad.bPressedDGB(EPad.Decide) ||
-               CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.CY) ||
-               CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.RD) ||
-               (CDTXMania.Pad.bPressingGB(EPad.P) && Strummed()) ||
+        return CDTXMania.Pad.bPressedAny(EPad.Decide) ||
+               CDTXMania.Pad.bPressed(EPlayer.Drums, EPad.CY) ||
+               CDTXMania.Pad.bPressed(EPlayer.Drums, EPad.RD) ||
+               (CDTXMania.Pad.bPressingGuitars(EPad.P) && Strummed()) ||
                CDTXMania.InputManager.Keyboard.bKeyPressed(SlimDXKey.Return) ||
                CDTXMania.InputManager.Keyboard.bKeyPressed(SlimDXKey.NumberPadEnter);
     }
@@ -21,16 +21,16 @@ public class Input
     public bool ActionCancel()
     {
         return CDTXMania.InputManager.Keyboard.bKeyPressed(SlimDXKey.Escape) ||
-               (CDTXMania.Pad.bPressingGB(EPad.Y) && Strummed()) ||
-               CDTXMania.Pad.bPressed(EInstrumentPart.DRUMS, EPad.LC) || CDTXMania.Pad.bPressedGB(EPad.Cancel);
+               (CDTXMania.Pad.bPressingGuitars(EPad.Y) && Strummed()) ||
+               CDTXMania.Pad.bPressed(EPlayer.Drums, EPad.LC) || CDTXMania.Pad.bPressedGuitars(EPad.Cancel);
     }
 
-    //a strum on guitar or bass, whichever way it was made
+    //a strum from either guitar player, whichever way it was made
     private static bool Strummed() =>
-        CDTXMania.Pad.bPressedGB(EPad.Pick) ||
-        CDTXMania.Pad.bPressedGB(EPad.PickUp) ||
-        CDTXMania.Pad.bPressedGB(EPad.PickDown);
+        CDTXMania.Pad.bPressedGuitars(EPad.Pick) ||
+        CDTXMania.Pad.bPressedGuitars(EPad.PickUp) ||
+        CDTXMania.Pad.bPressedGuitars(EPad.PickDown);
 
     public static bool StrumIsNavigation =>
-        !CDTXMania.Pad.bPressingGB(EPad.P) && !CDTXMania.Pad.bPressingGB(EPad.Y);
+        !CDTXMania.Pad.bPressingGuitars(EPad.P) && !CDTXMania.Pad.bPressingGuitars(EPad.Y);
 }

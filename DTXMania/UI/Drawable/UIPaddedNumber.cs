@@ -14,13 +14,13 @@ namespace DTXMania.UI.Drawable;
 /// significant digits in <see cref="numColor"/>, positioned right after the padding by measuring its
 /// rendered width. Set <see cref="value"/> directly, or bind it.
 /// </summary>
-public class UIPaddedNumber : UIGroup
+public partial class UIPaddedNumber : UIGroup
 {
     [Themable] public long value;
     [Themable] public int padding = 4;
 
     [Themable] public SkinResource font = SkinResource.System("texgyreadventor-regular.otf");
-    [Themable] public int fontSize = 23;
+    [Themable] public float fontSize = 23;
     [Themable] public UiTextStyle style = UiTextStyle.Bold;
     [Themable] public Color4 padColor = new(0.31f, 0.31f, 0.31f);
     [Themable] public Color4 numColor = Color4.White;
@@ -28,6 +28,11 @@ public class UIPaddedNumber : UIGroup
     [Themable] public Vector2 texturePadding = Vector2.Zero;
 
     [Themable] public float digitGap;
+    [Themable] public float letterSpacing;
+    [Themable] public float weight;
+    [Themable] public float horizontalScale = 1f;
+    [Themable] public float outlineWidth;
+    [Themable] public Color4 outlineColor = new(0, 0, 0, 1);
 
     //code-managed text parts, recreated by the ctor on load and never part of the layout
     [JsonIgnore] private readonly UIText padText;
@@ -48,8 +53,8 @@ public class UIPaddedNumber : UIGroup
         bindings.Add(new UIBinding(nameof(value), source));
     }
 
-    [AddChildMenu]
-    public static UIDrawable Create() => new UIPaddedNumber();
+    [AddChildMenu("Padded Number")]
+    public new static UIDrawable Create() => new UIPaddedNumber();
 
     public override void Draw(Matrix4x4 parentMatrix)
     {
@@ -57,7 +62,7 @@ public class UIPaddedNumber : UIGroup
 
         //the split, width measure and re-render are wasted work unless something actually changed
         int styleHash = HashCode.Combine(padding, fontSize, font.source, font.path, style, padColor, numColor,
-            HashCode.Combine(texturePadding, digitGap));
+            HashCode.Combine(texturePadding, digitGap, letterSpacing, weight, horizontalScale, outlineWidth, outlineColor));
         if (!applied || resolved != lastValue || styleHash != lastStyleHash)
         {
             applied = true;
@@ -87,11 +92,10 @@ public class UIPaddedNumber : UIGroup
         padText.RenderTexture();
         numText.RenderTexture();
 
-        numText.position.X = padText.position.X + padText.size.X
-                             - padText.glyphInset - numText.glyphInset + digitGap;
+        numText.position.X = padText.position.X + padText.textAdvance + digitGap;
 
         size = new Vector2(
-            numText.position.X + numText.size.X,
+            numText.position.X + numText.glyphInset + numText.textAdvance - letterSpacing,
             MathF.Max(padText.size.Y, numText.size.Y));
     }
 
@@ -103,8 +107,12 @@ public class UIPaddedNumber : UIGroup
         part.fontSize = fontSize;
         part.font = font;
         part.style = style;
-        part.outlineWidth = 0;
+        part.outlineWidth = outlineWidth;
+        part.outlineColor = outlineColor;
         part.texturePadding = texturePadding;
+        part.letterSpacing = letterSpacing;
+        part.weight = weight;
+        part.horizontalScale = horizontalScale;
         part.fillColor = color;
         part.SetText(text);
     }

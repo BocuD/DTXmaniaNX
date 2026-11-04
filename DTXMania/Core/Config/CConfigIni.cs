@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -10,15 +10,6 @@ namespace DTXMania.Core;
 internal partial class CConfigIni
 {
 	// Class
-
-	public enum ESoundDeviceTypeForConfig
-	{
-		ACM = 0,
-		ASIO,
-		WASAPI,
-		WASAPI_Share,
-		Unknown = 99
-	}
 
 	// プロパティ
 
@@ -49,12 +40,12 @@ internal partial class CConfigIni
 	public bool bLogDTX詳細ログ出力;
 	public bool bLogSongSearch;
 	public bool bLog作成解放ログ出力;
-	public STDGBVALUE<bool> bReverse;
+	[DataField("Reverse")] public STDGBVALUE<bool> bReverse;
 	public bool bScoreIniを出力する;
 	public bool bSTAGEFAILEDEnabled;
 	public STDGBVALUE<bool> bSudden;
 	public bool bTight;
-	public STDGBVALUE<bool> bGraph有効; // #24074 2011.01.23 add ikanick
+	[DataField("Graph")] public STDGBVALUE<bool> bGraph有効; // #24074 2011.01.23 add ikanick
 	public bool bSmallGraph;
 	public bool bWave再生位置自動調整機能有効;
 	public bool bシンバルフリー;
@@ -64,7 +55,7 @@ internal partial class CConfigIni
 	public bool bランダムセレクトで子BOXを検索対象とする;
 	public bool bOutputLogs;
 	public STDGBVALUE<bool> b演奏音を強調する;
-	public bool bShowPerformanceInformation;
+	[DataField("ShowPerformanceInformation")] public bool bShowPerformanceInformation;
 	public bool bAutoAddGage; //2012.9.18
 	public bool b歓声を発声する;
 	public bool bVerticalSyncWait;
@@ -72,7 +63,6 @@ internal partial class CConfigIni
 
 	public bool b選曲リストフォントを太字にする;
 
-	//public bool bDirectShowMode;
 	[DataField("Fullscreen")] public bool bFullScreenMode;
 	public bool bFullScreenExclusive;
 
@@ -90,9 +80,12 @@ internal partial class CConfigIni
 	[DataField("WindowWidth")] public int nWindowWidth; // #23510 2010.10.31 yyagi add
 	[DataField("WindowHeight")] public int nWindowHeight; // #23510 2010.10.31 yyagi add
 	public bool DisplayBonusEffects;
+	public bool bClassicJudgement;
+	public bool bClassicDrumsFire;
 	public bool bHAZARD;
 
-	public int nSoundDriverType; // #24820 2012.12.23 yyagi 出力サウンドデバイス(0=ACM(にしたいが設計がきつそうならDirectShow), 1=ASIO, 2=WASAPI)
+	//an Audio.AudioBackend value
+	public int nSoundDriverType;
 
 	public int nWASAPIBufferSizeMs; // #24820 2013.1.15 yyagi WASAPIのバッファサイズ
 
@@ -101,10 +94,6 @@ internal partial class CConfigIni
 	public int nASIODevice; // #24820 2013.1.17 yyagi ASIOデバイス
 	public bool bEventDrivenWASAPI;
 	public bool bMetronome; // 2023.9.22 henryzx
-	public bool bUseOSTimer;
-
-	//temporary, for comparing the two device layers against each other; see AUDIO.md §9
-	public bool bUseFDKAudio;
 	public bool bDynamicBassMixerManagement; // #24820
 	public int nMasterVolume;
 
@@ -117,6 +106,7 @@ internal partial class CConfigIni
 
 	public STDGBVALUE<EType> eAttackEffect;
 	public STDGBVALUE<EType> eNumOfLanes;
+	public bool bDrumsLaneGaps;
 	public STDGBVALUE<EType> eDkdkType;
 	public STDGBVALUE<EType> eLaneType;
 	public STDGBVALUE<EType> eLBDGraphics;
@@ -214,7 +204,8 @@ internal partial class CConfigIni
 	public EDrumComboTextDisplayPosition ドラムコンボ文字の表示位置;
 	public bool bドラムコンボ文字の表示;
 	public STDGBVALUE<EType> JudgementStringPosition;  // 判定文字表示位置
-	public int nMovieMode;
+	//0 off, 1 fullscreen, 2 windowed, 3 both
+	[DataField("MovieMode")] public int nMovieMode;
 	public STDGBVALUE<int> nJudgeLine;
 	public STDGBVALUE<int> nShutterInSide;
 	public STDGBVALUE<int> nShutterOutSide;
@@ -261,7 +252,8 @@ internal partial class CConfigIni
 	public STDGBVALUE<int> nJudgeLinePosOffset; // #31602 2013.6.23 yyagi 判定ライン表示位置のオフセット
 	public int nShowLagType;					// #25370 2011.6.5 yyagi ズレ時間表示機能
 	public int nShowLagTypeColor;
-	public bool bShowLagHitCount;				// fisyher New Config to enable hit count display or not
+	[DataField("LagColorsSwapped")] public bool bLagColorsSwapped => nShowLagTypeColor != 0;
+	[DataField("ShowLagHitCount")] public bool bShowLagHitCount;				// fisyher New Config to enable hit count display or not
 	public int nShowPlaySpeed;
 	public STDGBVALUE<int> nHidSud;
 	public bool bIsAutoResultCapture;			// #25399 2011.6.9 yyagi リザルト画像自動保存機能のON/OFF制御
@@ -271,6 +263,11 @@ internal partial class CConfigIni
 	public string strSkinFolder;
 	public bool bUseBoxDefSkin;                     // #28195 2012.5.6 yyagi Skin切替用 box.defによるスキン変更機能を使用するか否か
 	public int nSkipTimeMs;
+	public string strLastSelectedSongPath;
+	public string strLastSelectedChartPath;
+	public string strLastSelectedBoxTitle;
+	public string strSongSelectSort;
+	public int nSongSelectDifficulty;
 
 	//つまみ食い
 	public STDGBVALUE<EAutoGhostData> eAutoGhost;               // #35411 2015.8.18 chnmr0 プレー時使用ゴーストデータ種別
@@ -372,23 +369,12 @@ internal partial class CConfigIni
 		}
 	}
 
-	public bool bIsAutoPlay(EInstrumentPart inst)
+	public bool bIsAutoPlay(EPlayer player) => player switch
 	{
-		bool result = false;
-		switch (inst)
-		{
-			case EInstrumentPart.DRUMS:
-				result = bAllDrumsAreAutoPlay;
-				break;
-			case EInstrumentPart.GUITAR:
-				result = bAllGuitarsAreAutoPlay;
-				break;
-			case EInstrumentPart.BASS:
-				result = bAllBassAreAutoPlay;
-				break;
-		}
-		return result;
-	}
+		EPlayer.Drums => bAllDrumsAreAutoPlay,
+		EPlayer.Guitar1 => bAllGuitarsAreAutoPlay,
+		_ => bAllBassAreAutoPlay
+	};
 
 	public bool bHidePerformanceInformation
 	{
@@ -418,17 +404,43 @@ internal partial class CConfigIni
 	public int nResultDelayMs;				// Delay after clearing a song before the result screen is shown (ms).
 	public int nLoadingMinMs;				// Minimum time the song-loading screen stays up, even on a fast load (ms).
 	public bool bIsAllowedDoubleClickFullscreen;	// #26752 2011.11.27 yyagi ダブルクリックしてもフルスクリーンに移行しない
+	public EChartPart guitar1Chart = EChartPart.Guitar;
+	public EChartPart guitar2Chart = EChartPart.Bass;
+
+	public EChartPart ChartFor(EPlayer player) => player switch
+	{
+		EPlayer.Guitar1 => guitar1Chart,
+		EPlayer.Guitar2 => guitar2Chart,
+		_ => EChartPart.Drums
+	};
+
+	//the player on this chart part. A part nobody plays keeps the player it belongs to by default
+	public EPlayer PlayerOn(EChartPart part)
+	{
+		if (part == EChartPart.Drums)
+		{
+			return EPlayer.Drums;
+		}
+
+		if (guitar1Chart == part)
+		{
+			return EPlayer.Guitar1;
+		}
+
+		if (guitar2Chart == part)
+		{
+			return EPlayer.Guitar2;
+		}
+
+		return part == EChartPart.Guitar ? EPlayer.Guitar1 : EPlayer.Guitar2;
+	}
+
+	public static EChartPart OtherGuitarPart(EChartPart part) => part == EChartPart.Guitar ? EChartPart.Bass : EChartPart.Guitar;
+
+	//todo: transitional, delete with the guitar and bass swap. The display sites outside the performance
+	//stage still ask whether guitar and bass are swapped, which only holds while the two players swap together
 	[DataField("SwappedGuitarBass")]
-	public bool bIsSwappedGuitarBass			// #24063 2011.1.16 yyagi ギターとベースの切り替え中か否か
-	{
-		get;
-		set;
-	}
-	public bool bIsSwappedGuitarBass_AutoFlagsAreSwapped	// #24415 2011.2.21 yyagi FLIP中にalt-f4終了で、AUTOフラグがswapした状態でconfig.iniが出力されてしまうことを避けるためのフラグ
-	{
-		get;
-		set;
-	}
+	public bool bIsSwappedGuitarBass => guitar1Chart == EChartPart.Bass;
 	public bool bTimeStretch;					// #23664 2013.2.24 yyagi ピッチ変更無しで再生速度を変更するかどうか
 
 	/// <summary>Whether the play speed applies to chip sounds as well as the song. Off means only the
@@ -517,40 +529,6 @@ internal partial class CConfigIni
 	}
 	public CBackupOf1BD BackupOf1BD = null;
 	*/
-	public void SwapGuitarBassInfos_AutoFlags()
-	{
-		//bool ts = CDTXMania.ConfigIni.bAutoPlay.Bass;			// #24415 2011.2.21 yyagi: FLIP時のリザルトにAUTOの記録が混ざらないよう、AUTOのフラグもswapする
-		//CDTXMania.ConfigIni.bAutoPlay.Bass = CDTXMania.ConfigIni.bAutoPlay.Guitar;
-		//CDTXMania.ConfigIni.bAutoPlay.Guitar = ts;
-
-		int looptime = (int)ELane.GtW - (int)ELane.GtR + 1;		// #29390 2013.1.25 yyagi ギターのAutoLane/AutoPick対応に伴い、FLIPもこれに対応
-		for (int i = 0; i < looptime; i++)							// こんなに離れたところを独立して修正しなければならない設計ではいけませんね___
-		{
-			bool b = CDTXMania.ConfigIni.bAutoPlay[i + (int)ELane.BsR];
-			CDTXMania.ConfigIni.bAutoPlay[i + (int)ELane.BsR] = CDTXMania.ConfigIni.bAutoPlay[i + (int)ELane.GtR];
-			CDTXMania.ConfigIni.bAutoPlay[i + (int)ELane.GtR] = b;
-		}
-
-		CDTXMania.ConfigIni.bIsSwappedGuitarBass_AutoFlagsAreSwapped = !CDTXMania.ConfigIni.bIsSwappedGuitarBass_AutoFlagsAreSwapped;
-	}
-
-	public EInstrumentPart GetFlipInst(EInstrumentPart inst)
-	{
-		EInstrumentPart retPart = inst;
-		if (bIsSwappedGuitarBass)
-		{
-			switch (inst)
-			{
-				case EInstrumentPart.GUITAR:
-					retPart = EInstrumentPart.BASS;
-					break;
-				case EInstrumentPart.BASS:
-					retPart = EInstrumentPart.GUITAR;
-					break;
-			}
-		}
-		return retPart;
-	}
 
 	// コンストラクタ
 
@@ -585,7 +563,6 @@ internal partial class CConfigIni
 		bVerticalSyncWait = true;
 		nInitialWindowXPosition = 50; // #30675 2013.02.04 ikanick add
 		nInitialWindowYPosition = 50;
-		//this.bDirectShowMode = true;
 		nWindowWidth = GameWindowSize.Width;			// #23510 2010.10.31 yyagi add
 		nWindowHeight = GameWindowSize.Height;			// 
 		nMovieMode = 1;
@@ -626,6 +603,7 @@ internal partial class CConfigIni
 		eNumOfLanes.Drums = EType.A;
 		eNumOfLanes.Guitar = EType.A;
 		eNumOfLanes.Bass = EType.A;
+		bDrumsLaneGaps = true;
 		bAssignToLBD = default(STDGBVALUE<bool>);
 		bAssignToLBD.Drums = false;
 		eRandom = default(STDGBVALUE<ERandomMode>);
@@ -697,6 +675,11 @@ internal partial class CConfigIni
 		songListFont = "MS PGothic";
 		n選曲リストフォントのサイズdot = 20;
 		b選曲リストフォントを太字にする = true;
+		strLastSelectedSongPath = "";
+		strLastSelectedChartPath = "";
+		strLastSelectedBoxTitle = "";
+		strSongSelectSort = "";
+		nSongSelectDifficulty = 0;
 		n自動再生音量 = 80;
 		n手動再生音量 = 100;
 		bOutputLogs = true;
@@ -828,7 +811,8 @@ internal partial class CConfigIni
 		#endregion
 
 		bBufferedInput = true;
-		bIsSwappedGuitarBass = false;			// #24063 2011.1.16 yyagi ギターとベースの切り替え
+		guitar1Chart = EChartPart.Guitar;
+		guitar2Chart = EChartPart.Bass;
 		bIsAllowedDoubleClickFullscreen = true;	// #26752 2011.11.26 ダブルクリックでのフルスクリーンモード移行を許可
 		eBDGroup = EBDGroup.打ち分ける;		// #27029 2012.1.4 from HHPedalとBassPedalのグルーピング
 		// #24820 2013.1.15 yyagi 初期値を4から2に変更。BASS.net使用時の負荷軽減のため。
@@ -838,7 +822,7 @@ internal partial class CConfigIni
 		strSkinFolder = "";
 		bUseBoxDefSkin = true;					// #28195 2012.5.6 yyagi box.defによるスキン切替機能を使用するか否か
 		bTight = false;                        // #29500 2012.9.11 kairera0467
-		nSoundDriverType = (int)ESoundDeviceTypeForConfig.ACM; // #24820 2012.12.23 yyagi 初期値はACM
+		nSoundDriverType = (int)Audio.AudioBackends.Fallback;
 		nWASAPIBufferSizeMs = 0;               // #24820 2013.1.15 yyagi 初期値は0(自動設定)
 		nASIODevice = 0;                       // #24820 2013.1.17 yyagi
 		//0 leaves the card on whatever its own control panel is set to
@@ -846,7 +830,6 @@ internal partial class CConfigIni
 		//on WASAPI exclusive a polled buffer is widened to about four update periods where a driven one
 		//is granted the single period it asks for
 		bEventDrivenWASAPI = true;
-		bUseOSTimer = false; ;                 // #33689 2014.6.6 yyagi 初期値はfalse (FDKのタイマー。ＦＲＯＭ氏考案の独自タイマー)
 		bDynamicBassMixerManagement = true;    //
 		nMasterVolume = 100;
 		nGroupVolume = [100, 100, 100, 100, 100];
@@ -965,7 +948,7 @@ internal partial class CConfigIni
 					continue;
 				}
 
-				string[] strArray = str.Split( new char[] { '=' } );
+				string[] strArray = str.Split( new char[] { '=' }, 2 );
 				if ( strArray.Length != 2 )
 				{
 					continue;

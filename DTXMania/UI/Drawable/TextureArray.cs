@@ -4,6 +4,7 @@ using System.Numerics;
 using DTXMania.Core;
 using DTXMania.UI.Skin;
 using Hexa.NET.ImGui;
+using DTXMania.UI.Inspector;
 
 namespace DTXMania.UI.Drawable;
 
@@ -14,6 +15,9 @@ namespace DTXMania.UI.Drawable;
 /// </summary>
 public class TextureArray : UITexture
 {
+
+    [AddChildMenu("Texture Array")]
+    public static UIDrawable Create() => new TextureArray();
     //the frame on screen; whatever sets this decides where playback carries on from
     [Themable] public int textureIndex;
 
@@ -72,7 +76,7 @@ public class TextureArray : UITexture
 
         UpdateLocalTransformMatrix();
         Matrix4x4 combinedMatrix = localTransformMatrix * parentMatrix;
-        target.tDraw2DMatrix(combinedMatrix, size, ClipFor(target), color);
+        target.tDraw2DMatrix(combinedMatrix, size, ClipFor(target), UITint.Current * color);
     }
 
     //frames can differ in size, so an unset extent follows whichever one is on screen; only what the

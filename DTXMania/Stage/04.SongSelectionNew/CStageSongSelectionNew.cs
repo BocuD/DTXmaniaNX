@@ -1,8 +1,9 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Globalization;
 using System.Numerics;
 using DiscordRPC;
 using DTXMania.Core;
+using DTXMania.Core.Framework;
 using DTXMania.Core.Video;
 using DTXMania.SongDb;
 using DTXMania.SongDb.Sorting;
@@ -177,6 +178,36 @@ public class CStageSongSelectionNew : CStage
             imageSource = ImageSource.Dynamic, dynamicSource = "AlbumArt",
             position = new Vector3(320, 35, 0), renderOrder = 10, size = new Vector2(300, 300), name = "AlbumArt"
         });
+        
+        var songlengthGroup = ui.AddChild(new UIGroup("SongLength"));
+        songlengthGroup.renderOrder = 11;
+        songlengthGroup.position = new Vector3(100, 187, 0);
+        songlengthGroup.size = new Vector2(220, 30);
+        songlengthGroup.AddChild(new UIImage
+        {
+            imageSource = ImageSource.File, image = SkinResource.System(@"Graphics\SongSelect\panel_base.png"), 
+            name = "PanelLength", scale = new Vector3(0.545f, 0.545f, 0)
+        });
+        var labelText = songlengthGroup.AddChild(new UIText("LENGTH", 18));
+        labelText.renderOrder = 1;
+        labelText.pivot = new Vector2(0, 1);
+        labelText.parentAnchor = new Vector2(0, 1);
+        labelText.position = new Vector3(-2, 8, 0);
+        labelText.name = "LabelText";
+        labelText.outlineWidth = 0.7f;
+        labelText.outlineSoftness = 3.0f;
+        labelText.outlineColor = new Color4(0, 0.96f, 0.06f);
+        labelText.font = SkinResource.System("Brandon Grotesque Black.ttf");
+        var lengthText = songlengthGroup.AddChild(new UIText("", 28));
+        lengthText.renderOrder = 1;
+        lengthText.bindings.Add(new UIBinding("text", "SongDuration"));
+        lengthText.parentAnchor = new Vector2(1, 0.5f);
+        lengthText.outlineWidth = 0;
+        lengthText.style = UiTextStyle.Italic;
+        lengthText.font = SkinResource.System("Futura PT Medium.otf");
+        lengthText.pivot = new Vector2(1, 0.5f);
+        lengthText.name = "LengthText";
+        lengthText.position = new Vector3(-3, 0, 0);
 
         var skillText = ui.AddChild(new UIText("", 48));
         skillText.renderOrder = 11;
@@ -210,6 +241,9 @@ public class CStageSongSelectionNew : CStage
         songSelect.position = UICanvas.FromAnchor(UICanvas.Right, 765, 320);
         songSelect.name = "SongSelect";
 
+        //sorting has the strums
+        songSelect.guitarNavigation = UIGuitarNavigation.Neck;
+
         //StatusPanel -> 3 pane component instances -> 5 rows each; a skin's json carries the panes instead
         var statusPanel = ui.AddChild(new StatusPanel());
         statusPanel.parentAnchor = UICanvas.BottomLeft;
@@ -232,6 +266,7 @@ public class CStageSongSelectionNew : CStage
         songCountIndicator.outlineWidth = 0;
         songCountIndicator.fontSize = 20;
         songCountIndicator.bindings.Add(new UIBinding("text", "SongCount"));
+        songCountIndicator.name = "SongCountIndicator";
         
         var sortMenu = ui.AddChild(new SortMenuContainer());
         sortMenu.parentAnchor = UICanvas.TopRight;
@@ -295,8 +330,28 @@ public class CStageSongSelectionNew : CStage
         }
     }
 
+    private bool isInitialSessionLoad = true;
+
     public override void FirstUpdate()
     {
+        if (isInitialSessionLoad)
+        {
+            isInitialSessionLoad = false;
+            if (!string.IsNullOrEmpty(CDTXMania.ConfigIni.strSongSelectSort))
+            {
+                var savedSort = SongDbSort.All.FirstOrDefault(s => s.Name.Equals(CDTXMania.ConfigIni.strSongSelectSort, StringComparison.OrdinalIgnoreCase));
+                if (savedSort != null)
+                {
+                    currentSort = savedSort;
+                }
+            }
+
+            if (CDTXMania.ConfigIni.nSongSelectDifficulty >= 0 && CDTXMania.ConfigIni.nSongSelectDifficulty < 5)
+            {
+                targetDifficultyLevel = CDTXMania.ConfigIni.nSongSelectDifficulty;
+            }
+        }
+
         //set initial sort menu container position to be default,
         //or in case of reloading the menu, whatever was last selected
         sortMenuContainer?.ShowSort(currentSort);
@@ -341,9 +396,17 @@ public class CStageSongSelectionNew : CStage
         ApplySort(currentSort);
         
         //try to restore the last selected song if possible
-        if (selectedRootBackup != null && selectedNodeBackup != null && selectedChartBackup != null)
+        if (selectedNodeBackup != null && selectedNodeBackup.nodeType == SongNode.ENodeType.SONG)
         {
             RestoreSelection(selectedNodeBackup, selectedChartBackup);
+        }
+        else if (!string.IsNullOrEmpty(CDTXMania.ConfigIni.strLastSelectedSongPath) ||
+                 !string.IsNullOrEmpty(CDTXMania.ConfigIni.strLastSelectedChartPath))
+        {
+            RestoreSelection(
+                CDTXMania.ConfigIni.strLastSelectedSongPath,
+                CDTXMania.ConfigIni.strLastSelectedChartPath,
+                CDTXMania.ConfigIni.strLastSelectedBoxTitle);
         }
         
         Trace.TraceInformation("Sort cache preparation complete.");
@@ -356,18 +419,45 @@ public class CStageSongSelectionNew : CStage
 
     private void RestoreSelection(SongNode selectedNodeBackup, CChartData? selectedChartBackup = null)
     {
+        RestoreSelection(
+            selectedNodeBackup.path,
+            selectedChartBackup?.FileInformation.AbsoluteFilePath,
+            selectedNodeBackup.parent?.title);
+    }
+
+    private void RestoreSelection(string? songPath, string? chartPath, string? boxTitle)
+    {
+        if (selectionContainer?.CurrentRoot == null)
+            return;
+
         SongNode? targetNode = SongNode.FindRestoreTarget(selectionContainer.CurrentRoot,
-            selectedNodeBackup, selectedChartBackup);
+            songPath, chartPath, boxTitle);
 
         if (targetNode?.parent == null)
             return;
 
         SongNode targetRoot = targetNode.parent;
 
+        targetRoot.CurrentSelection = targetNode;
+
         //highlight the target's container within each ancestor so backing out lands on the right row
         for (SongNode node = targetRoot; node.parent != null; node = node.parent)
         {
             node.parent.CurrentSelection = node;
+        }
+
+        if (!string.IsNullOrEmpty(chartPath) && targetNode.charts != null)
+        {
+            for (int i = 0; i < targetNode.charts.Length; i++)
+            {
+                var chart = targetNode.charts[i];
+                if (chart != null && (SongNode.PathsEqual(chart.FileInformation.AbsoluteFilePath, chartPath) ||
+                    chart.instrumentSources?.Any(s => s != null && SongNode.PathsEqual(s.FileInformation.AbsoluteFilePath, chartPath)) == true))
+                {
+                    targetDifficultyLevel = i;
+                    break;
+                }
+            }
         }
 
         selectionContainer.UpdateRoot(targetRoot);
@@ -441,48 +531,52 @@ public class CStageSongSelectionNew : CStage
         quickMenu?.PollToggleGesture();
         songSearchMenu.PollOpenGesture();
 
-        PollDifficultyCommand(EInstrumentPart.DRUMS, EPad.HH, EPadFlag.HH);
-        PollDifficultyCommand(EInstrumentPart.DRUMS, EPad.HHO, EPadFlag.HH);
-        PollDifficultyCommand(EInstrumentPart.GUITAR, EPad.B, EPadFlag.B);
-        PollDifficultyCommand(EInstrumentPart.BASS, EPad.B, EPadFlag.B);
+        PollDifficultyCommand(EPlayer.Drums, EPad.HH, EPadFlag.HH);
+        PollDifficultyCommand(EPlayer.Drums, EPad.HHO, EPadFlag.HH);
+        PollDifficultyCommand(EPlayer.Guitar1, EPad.B, EPadFlag.B);
+        PollDifficultyCommand(EPlayer.Guitar2, EPad.B, EPadFlag.B);
 
-        PollSwapCommand(EInstrumentPart.GUITAR);
-        PollSwapCommand(EInstrumentPart.BASS);
+        PollSwapCommand(EPlayer.Guitar1);
+        PollSwapCommand(EPlayer.Guitar2);
     }
 
     //two hits on the same pad change difficulty
-    private void PollDifficultyCommand(EInstrumentPart part, EPad pad, EPadFlag flag)
+    private void PollDifficultyCommand(EPlayer player, EPad pad, EPadFlag flag)
     {
-        if (!CDTXMania.Pad.bPressed(part, pad))
+        if (!CDTXMania.Pad.bPressed(player, pad))
         {
             return;
         }
 
-        commandHistory.Add(part, flag);
+        commandHistory.Add(player, flag);
 
-        if (commandHistory.CheckCommand([flag, flag], part))
+        if (commandHistory.CheckCommand([flag, flag], player))
         {
             IncrementDifficultyLevel();
         }
     }
 
     //two Y hits swap which instrument the guitar keys play
-    private void PollSwapCommand(EInstrumentPart part)
+    private void PollSwapCommand(EPlayer player)
     {
-        if (!CDTXMania.Pad.bPressed(part, EPad.Y))
+        if (!CDTXMania.Pad.bPressed(player, EPad.Y))
         {
             return;
         }
 
-        commandHistory.Add(part, EPadFlag.Y);
+        commandHistory.Add(player, EPadFlag.Y);
 
-        if (!commandHistory.CheckCommand([EPadFlag.Y, EPadFlag.Y], part))
+        if (!commandHistory.CheckCommand([EPadFlag.Y, EPadFlag.Y], player))
         {
             return;
         }
 
         CDTXMania.Skin.soundChange.tPlay();
-        CDTXMania.ConfigIni.bIsSwappedGuitarBass = !CDTXMania.ConfigIni.bIsSwappedGuitarBass;
+        //todo: transitional, both players still move together. Once the display sites ask which part a
+        //player is on, this moves only the player that entered the command
+        CConfigIni config = CDTXMania.ConfigIni;
+        config.guitar1Chart = CConfigIni.OtherGuitarPart(config.guitar1Chart);
+        config.guitar2Chart = CConfigIni.OtherGuitarPart(config.guitar2Chart);
         ChangeSelection(selectedNode, selectedChart);
     }
 
@@ -581,6 +675,23 @@ public class CStageSongSelectionNew : CStage
                 break;
         }
     }
+
+    public void SaveSelectionOnChartEnter(SongNode song, CChartData? chart, int difficulty)
+    {
+        if (song == null) return;
+
+        CDTXMania.ConfigIni.strLastSelectedSongPath = song.path ?? "";
+        CDTXMania.ConfigIni.strLastSelectedChartPath = chart?.FileInformation.AbsoluteFilePath ?? "";
+        CDTXMania.ConfigIni.strLastSelectedBoxTitle = song.parent?.title ?? "";
+        CDTXMania.ConfigIni.nSongSelectDifficulty = difficulty;
+        if (currentSort != null)
+        {
+            CDTXMania.ConfigIni.strSongSelectSort = currentSort.Name;
+        }
+
+        string path = CDTXMania.executableDirectory + "Config.ini";
+        CDTXMania.ConfigIni.tWrite(path);
+    }
     
     public int GetClosestLevelToTargetForSong(SongNode? song)
     {
@@ -645,6 +756,7 @@ public class CStageSongSelectionNew : CStage
         }
 
         currentSort = sorter;
+        CDTXMania.ConfigIni.strSongSelectSort = currentSort.Name;
 
         //each sorted root remembers its own selection, so every sort keeps its scroll position
         selectionContainer.UpdateRoot(root);

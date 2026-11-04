@@ -12,10 +12,13 @@ namespace DTXMania.UI.Drawable;
 /// than the item count. <see cref="UIScrollRing"/> owns the wrap-around arithmetic.
 ///
 /// The selected item sits at the group's origin, so a skin positions the list by where its selection
-/// should be. Slots are laid out around that, displaced by <see cref="curve"/>.
+/// should be. Slots are laid out around that, along itemOffset or by <see cref="itemLayout"/>.
 /// </summary>
 public class UIScrollItemsGroup : UIItemsGroup
 {
+
+    [AddChildMenu("Group/Scroll Items Group")]
+    public new static UIDrawable Create() => new UIScrollItemsGroup();
     //how many copies exist; enough to cover the visible window plus overscan at each end
     [Themable] public int visibleSlots = 8;
 
@@ -25,15 +28,11 @@ public class UIScrollItemsGroup : UIItemsGroup
     //how the list travels towards where it has been asked to go; see UIScrollMotion
     [Themable] [SkinSerialize] public UIScrollMotion motion = new();
 
-    //which input direction drives this list. Separate from itemOffset on purpose: a list can be laid out
-    //diagonally, or run bottom-to-top, and still be navigated with the obvious keys
-    [Themable] public UINavigationAxis navigationAxis = UINavigationAxis.Vertical;
-
     //flips which way that input moves the list
     [Themable] public bool invertNavigation;
 
-    //displaces items by their distance from the selection; see UIItemCurve
-    [Themable] [SkinSerialize] public UIItemCurve curve = new();
+    //when enabled, places the slots; itemOffset still sets how far one item of distance is
+    [Themable] [SkinSerialize] public UIItemLayout itemLayout = new();
 
     [JsonIgnore] private UIScrollRing? ring;
 
@@ -79,10 +78,6 @@ public class UIScrollItemsGroup : UIItemsGroup
         EnsureRing().Queue(-items * SpacingAlongAxis, motion);
     }
 
-    /// <summary>Whether this list responds to the given input direction, so an owner can wire only the
-    /// keys the list actually uses.</summary>
-    public bool RespondsTo(UINavigationAxis axis) => navigationAxis == axis;
-
     /// <summary>Puts <paramref name="itemIndex"/> under the selection position immediately.</summary>
     public void ScrollTo(int itemIndex)
     {
@@ -117,7 +112,7 @@ public class UIScrollItemsGroup : UIItemsGroup
         base.Draw(parentMatrix);
     }
 
-    //the selection sits at the group's origin, so slots run outwards from there and the curve measures
+    //the selection sits at the group's origin, so slots run outwards from there and the layout measures
     //distance from that same point
     protected override void LayOutSlots()
     {
@@ -133,14 +128,31 @@ public class UIScrollItemsGroup : UIItemsGroup
         for (int position = 0; position < Slots.Count; position++)
         {
             Vector3 slotPosition = itemOffset * (position - selectionOffset) + scrolled;
+            UIItemSlot slot = Slots[ring.SlotAt(position)];
 
-            if (curve.IsActive)
+            if (itemLayout.enabled)
             {
-                //how far down the list this item sits, which for a diagonal list is its projection
-                slotPosition += curve.Evaluate(Vector3.Dot(slotPosition, direction));
+                float distance = Vector3.Dot(slotPosition, direction) / ItemDistance;
+                itemLayout.Apply(slot, distance, direction);
+
+                //the item nearest the selection draws last, so a list folding into depth overlaps the right way
+                SetSlotOrder(slot, -(int)MathF.Round(MathF.Abs(distance) * 100.0f));
+                continue;
             }
 
-            Slots[ring.SlotAt(position)].position = slotPosition;
+            slot.position = slotPosition;
+            slot.rotation = Vector3.Zero;
+            slot.scale = Vector3.One;
+            SetSlotOrder(slot, 0);
+        }
+    }
+
+    private void SetSlotOrder(UIItemSlot slot, int order)
+    {
+        if (slot.renderOrder != order)
+        {
+            slot.renderOrder = order;
+            InvalidateOrder();
         }
     }
 
@@ -187,11 +199,13 @@ public class UIScrollItemsGroup : UIItemsGroup
         }
 
         ImGui.InputInt("Selection Offset", ref selectionOffset);
-        Inspector.Inspector.Inspect("Navigation Axis", ref navigationAxis);
         ImGui.Checkbox("Invert Navigation", ref invertNavigation);
 
-        ImGui.SeparatorText("Motion");
-        motion.DrawInspector();
+        if (Inspector.Inspector.BeginSection("Motion"))
+        {
+            motion.DrawInspector();
+            Inspector.Inspector.EndSection();
+        }
 
         //live scroll state, so a list that looks misplaced can be read rather than guessed at
         ImGui.LabelText("Selected Item", SelectedItem.ToString());
@@ -199,21 +213,10 @@ public class UIScrollItemsGroup : UIItemsGroup
             ? "no ring"
             : $"{ring.Offset:0.##} / {ring.Target:0.##}   (spacing {ring.Spacing:0.##}, settled {ring.IsSettled})");
 
-        ImGui.SeparatorText("Curve");
-        Inspector.Inspector.Inspect("Axis", ref curve.axis);
-        Inspector.Inspector.Inspect("Shape", ref curve.shape);
-        ImGui.InputFloat("Distance", ref curve.distance);
-        ImGui.InputFloat("Range", ref curve.range);
-        ImGui.InputFloat("Focus", ref curve.focus);
-
-        //what the selected item and its neighbours actually get, to see where the peak really lands
-        if (ring != null)
+        if (Inspector.Inspector.BeginSection("Item Layout"))
         {
-            float spacing = SpacingAlongAxis;
-            ImGui.LabelText("Curve at prev / sel / next",
-                $"{curve.EvaluateAmount(-spacing + ring.Offset):0.#} / " +
-                $"{curve.EvaluateAmount(ring.Offset):0.#} / " +
-                $"{curve.EvaluateAmount(spacing + ring.Offset):0.#}");
+            itemLayout.DrawInspector();
+            Inspector.Inspector.EndSection();
         }
     }
 }

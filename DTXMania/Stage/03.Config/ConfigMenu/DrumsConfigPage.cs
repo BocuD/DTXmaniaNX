@@ -4,12 +4,12 @@ using DTXMania.UI.Item;
 
 namespace DTXMania;
 
-//Shared (STDGBVALUE-backed) options come from InstrumentConfigPage
-internal sealed class DrumsConfigPage : InstrumentConfigPage
+//Shared (STDGBVALUE-backed) options come from PlayerConfigPage
+internal sealed class DrumsConfigPage : PlayerConfigPage
 {
     private readonly DrumsVelocityConfigPage velocity;
 
-    public DrumsConfigPage(ConfigList list) : base(list, EInstrumentPart.DRUMS)
+    public DrumsConfigPage(ConfigList list) : base(list, EPlayer.Drums)
     {
         velocity = new DrumsVelocityConfigPage(list);
     }
@@ -61,12 +61,15 @@ internal sealed class DrumsConfigPage : InstrumentConfigPage
             "Attack effect display.\nALL ON: show all.\nChipOFF: hide the chip effect only.\nEffectOnly: hide all but the effect image.\nALL OFF: hide all.",
             ["ALL ON", "ChipOFF", "EffectOnly", "ALL OFF"],
             () => (int)CDTXMania.ConfigIni.eAttackEffect.Drums, v => CDTXMania.ConfigIni.eAttackEffect.Drums = (EType)v));
+        items.Add(Toggle("ClassicFire", "チップファイアを旧表示にします。", "Shows the classic chip fire.",
+            () => CDTXMania.ConfigIni.bClassicDrumsFire, v => CDTXMania.ConfigIni.bClassicDrumsFire = v));
         items.Add(ReverseItem("判定ラインが上になり、ノーツが下から上へ流れます。", "Chips flow from the bottom to the top."));
         items.Add(Choice("JudgePosition",
             "判定文字(Perfect/Great等)の表示位置。\nP-A: レーン上。\nP-B: 判定ライン下。\nOFF: 表示しない。",
             "Where the judgement text (Perfect/Great/...) shows.\nP-A: on the lanes.\nP-B: under the hit bar.\nOFF: hidden.",
             ["P-A", "P-B", "OFF"],
             () => (int)CDTXMania.ConfigIni.JudgementStringPosition.Drums, v => CDTXMania.ConfigIni.JudgementStringPosition.Drums = (EType)v));
+        items.Add(ClassicJudgementItem());
         items.Add(Toggle("Combo", "OFFにするとコンボが表示されなくなります。", "Turn ON the Drums Combo Display.",
             () => CDTXMania.ConfigIni.bドラムコンボ文字の表示, v => CDTXMania.ConfigIni.bドラムコンボ文字の表示 = v));
         items.Add(Choice("LaneType",
@@ -157,6 +160,10 @@ internal sealed class DrumsConfigPage : InstrumentConfigPage
             "Number of lanes.\n10: default.\n9: XG style.\n6: classic style.",
             ["10", "9", "6"],
             () => (int)CDTXMania.ConfigIni.eNumOfLanes.Drums, v => CDTXMania.ConfigIni.eNumOfLanes.Drums = (EType)v));
+        items.Add(Toggle("LaneGaps",
+            "レーン数を減らしたとき、使わないレーンの幅を隙間として残します。",
+            "Keeps the width of the lanes a smaller lane count leaves out as a gap,\nrather than closing the lanes up.",
+            () => CDTXMania.ConfigIni.bDrumsLaneGaps, v => CDTXMania.ConfigIni.bDrumsLaneGaps = v));
         items.Add(RandomItem());
         items.Add(RandomPedalItem());
 

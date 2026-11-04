@@ -7,12 +7,14 @@ public enum FrameSection
     PollEvents,
     ImGuiNewFrame,
     Update,
-    GameRender,
-    //subsections of GameRender (the game combines update+draw in CDTXMania.Draw)
-    PumpUploads,
-    Sound,
+    //subsections of Update
     DeviceScan,
+    Sound,
     InputPolling,
+    StageUpdate,
+    GameRender,
+    //subsections of GameRender
+    PumpUploads,
     StageDraw,
     StageOwnDraw,
     VideoUpload,
@@ -39,8 +41,8 @@ public static class FrameProfiler
     //the enum is declared in the order the frame runs, so depth and order together are the tree
     public static int DepthOf(FrameSection section) => section switch
     {
-        FrameSection.PumpUploads or FrameSection.Sound or FrameSection.DeviceScan
-            or FrameSection.InputPolling or FrameSection.StageDraw => 1,
+        FrameSection.DeviceScan or FrameSection.Sound or FrameSection.InputPolling or FrameSection.StageUpdate
+            or FrameSection.PumpUploads or FrameSection.StageDraw => 1,
         FrameSection.StageOwnDraw or FrameSection.PersistentUiDraw => 2,
         FrameSection.VideoUpload => 3,
         _ => 0

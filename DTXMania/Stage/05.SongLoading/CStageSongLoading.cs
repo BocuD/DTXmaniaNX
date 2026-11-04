@@ -204,19 +204,11 @@ internal class CStageSongLoading : CStage
             // Read ghost data by config
             // It does not exist a ghost file for 'perfect' actually
             string[] inst = ["dr", "gt", "bs"];
-            if (CDTXMania.ConfigIni.bIsSwappedGuitarBass)
-            {
-                inst[1] = "bs";
-                inst[2] = "gt";
-            }
 
             for (int instIndex = 0; instIndex < inst.Length; ++instIndex)
             {
                 //break; //2016.01.03 kairera0467 以下封印。
-                bool readAutoGhostCond = false;
-                readAutoGhostCond |= instIndex == 0 && CDTXMania.ConfigIni.bAllDrumsAreAutoPlay;
-                readAutoGhostCond |= instIndex == 1 && CDTXMania.ConfigIni.bAllGuitarsAreAutoPlay;
-                readAutoGhostCond |= instIndex == 2 && CDTXMania.ConfigIni.bAllBassAreAutoPlay;
+                bool readAutoGhostCond = CDTXMania.ConfigIni.bIsAutoPlay(CDTXMania.ConfigIni.PlayerOn((EChartPart)instIndex));
 
                 CDTXMania.listTargetGhsotLag[instIndex] = null;
                 CDTXMania.listAutoGhostLag[instIndex] = null;
@@ -227,7 +219,7 @@ internal class CStageSongLoading : CStage
                 {
                     string[] prefix = ["perfect", "lastplay", "hiskill", "hiscore", "online"];
                     int indPrefix = (int)CDTXMania.ConfigIni.eAutoGhost[instIndex];
-                    string filename = cdtx.strFolderName + "\\" + cdtx.strFileName + "." + prefix[indPrefix] + "." +
+                    string filename = cdtx.strFolderName + Path.DirectorySeparatorChar + cdtx.strFileName + "." + prefix[indPrefix] + "." +
                                       inst[instIndex] + ".ghost";
                     if (File.Exists(filename))
                     {
@@ -241,7 +233,7 @@ internal class CStageSongLoading : CStage
                 {
                     string[] prefix = ["none", "perfect", "lastplay", "hiskill", "hiscore", "online"];
                     int indPrefix = (int)CDTXMania.ConfigIni.eTargetGhost[instIndex];
-                    string filename = cdtx.strFolderName + "\\" + cdtx.strFileName + "." + prefix[indPrefix] + "." +
+                    string filename = cdtx.strFolderName + Path.DirectorySeparatorChar + cdtx.strFileName + "." + prefix[indPrefix] + "." +
                                       inst[instIndex] + ".ghost";
                     if (File.Exists(filename))
                     {
@@ -311,24 +303,6 @@ internal class CStageSongLoading : CStage
         Trace.TraceInformation("FILE: {0}", CDTXMania.DTX.strFileNameFullPath);
         Trace.TraceInformation("---------------------------");
 
-        if (CDTXMania.ConfigIni.bGuitarEnabled && CDTXMania.ConfigIni.bSingleGuitar)
-        {
-            if (CDTXMania.ConfigIni.bIsSwappedGuitarBass)
-            {
-                CDTXMania.DTX.bHasChips.Guitar = false;
-                
-                //remove all guitar chips
-                CDTXMania.DTX.listChip.RemoveAll(chip => chip.bGuitar可視チップ_Wailing含む);
-            }
-            else
-            {
-                CDTXMania.DTX.bHasChips.Bass = false;
-                
-                //remove all bass chips
-                CDTXMania.DTX.listChip.RemoveAll(chip => chip.bBass可視チップ_Wailing含む);
-            }
-        }
-        
         StartLoadingTask();
 
         if (sdLoadingSound != null)
@@ -497,21 +471,12 @@ internal class CStageSongLoading : CStage
                 // #35411 2015.08.19 chnmr0 add ゴースト機能のためList chip 読み込み後楽器パート出現順インデックスを割り振る
                 stGhostLag = new();
                 string[] ghostInst = ["dr", "gt", "bs"];
-                if (CDTXMania.ConfigIni.bIsSwappedGuitarBass)
-                {
-                    ghostInst[1] = "bs";
-                    ghostInst[2] = "gt";
-                }
 
                 for (int instIndex = 0; instIndex < ghostInst.Length; ++instIndex)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
 
-                    //break; //2016.01.03 kairera0467 以下封印。
-                    bool readAutoGhostCond = false;
-                    readAutoGhostCond |= instIndex == 0 && CDTXMania.ConfigIni.bAllDrumsAreAutoPlay;
-                    readAutoGhostCond |= instIndex == 1 && CDTXMania.ConfigIni.bAllGuitarsAreAutoPlay;
-                    readAutoGhostCond |= instIndex == 2 && CDTXMania.ConfigIni.bAllBassAreAutoPlay;
+                    bool readAutoGhostCond = CDTXMania.ConfigIni.bIsAutoPlay(CDTXMania.ConfigIni.PlayerOn((EChartPart)instIndex));
 
                     CDTXMania.listTargetGhsotLag[instIndex] = null;
                     CDTXMania.listAutoGhostLag[instIndex] = null;
@@ -522,7 +487,7 @@ internal class CStageSongLoading : CStage
                     {
                         string[] prefix = ["perfect", "lastplay", "hiskill", "hiscore", "online"];
                         int indPrefix = (int)CDTXMania.ConfigIni.eAutoGhost[instIndex];
-                        string filename = CDTXMania.DTX.strFolderName + "\\" + CDTXMania.DTX.strFileName + "." + prefix[indPrefix] + "." +
+                        string filename = CDTXMania.DTX.strFolderName + Path.DirectorySeparatorChar + CDTXMania.DTX.strFileName + "." + prefix[indPrefix] + "." +
                                           ghostInst[instIndex] + ".ghost";
                         if (File.Exists(filename))
                         {
@@ -536,7 +501,7 @@ internal class CStageSongLoading : CStage
                     {
                         string[] prefix = ["none", "perfect", "lastplay", "hiskill", "hiscore", "online"];
                         int indPrefix = (int)CDTXMania.ConfigIni.eTargetGhost[instIndex];
-                        string filename = CDTXMania.DTX.strFolderName + "\\" + CDTXMania.DTX.strFileName + "." + prefix[indPrefix] + "." +
+                        string filename = CDTXMania.DTX.strFolderName + Path.DirectorySeparatorChar + CDTXMania.DTX.strFileName + "." + prefix[indPrefix] + "." +
                                           ghostInst[instIndex] + ".ghost";
                         if (File.Exists(filename))
                         {
@@ -607,7 +572,7 @@ internal class CStageSongLoading : CStage
                     //2016.06.18 kairera0467 「.ghost.score」ファイルが無かった場合ghostファイルから逆算を行う形に変更。
                     string[] prefix = ["none", "perfect", "lastplay", "hiskill", "hiscore", "online"];
                     int indPrefix = (int)CDTXMania.ConfigIni.eTargetGhost[i];
-                    string filename = $"{CDTXMania.DTX.strFolderName}\\{CDTXMania.DTX.strFileName}.{prefix[indPrefix]}.{reverseInst[i]}.ghost";
+                    string filename = $"{CDTXMania.DTX.strFolderName}{Path.DirectorySeparatorChar}{CDTXMania.DTX.strFileName}.{prefix[indPrefix]}.{reverseInst[i]}.ghost";
 
                     if (stGhostLag[i] == null || File.Exists(filename + ".score"))
                         continue;
@@ -841,18 +806,12 @@ internal class CStageSongLoading : CStage
     /// <returns></returns>
     private bool tHandleKeyInput()
     {
-        CInputKeyboard keyboard = CDTXMania.InputManager.Keyboard;
+        IInputKeyboard keyboard = CDTXMania.InputManager.Keyboard;
         if (keyboard.bKeyPressed(SlimDXKey.Escape)) // escape (exit)
         {
-            if (CDTXMania.ConfigIni.bGuitarRevolutionMode)
+            if (CDTXMania.stagePerfScreen.bActivated)
             {
-                if (CDTXMania.stagePerfGuitarScreen.bActivated)
-                    CDTXMania.stagePerfGuitarScreen.OnDeactivate();
-            }
-            else
-            {
-                if (CDTXMania.stagePerfDrumsScreen.bActivated)
-                    CDTXMania.stagePerfDrumsScreen.OnDeactivate();
+                CDTXMania.stagePerfScreen.OnDeactivate();
             }
 
             return true;

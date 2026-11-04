@@ -31,6 +31,12 @@ public struct Color4
         );
     }
 
+    public static Color4 operator *(Color4 first, Color4 second) => new(
+        first.Red * second.Red,
+        first.Green * second.Green,
+        first.Blue * second.Blue,
+        first.Alpha * second.Alpha);
+
     public Vector4 ToVector4()
     {
         return new Vector4(Red, Green, Blue, Alpha);
