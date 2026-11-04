@@ -252,21 +252,7 @@ internal class CStageResult : CStage
 					    (i != 2 || (CDTXMania.DTX.bHasChips.Bass && CDTXMania.ConfigIni.bGuitarRevolutionMode)))
 					{
 						CScoreIni.CPerformanceEntry part = stPerformanceEntry[i];
-						bool bIsAutoPlay = true;
-						switch (i)
-						{
-							case 0:
-								bIsAutoPlay = CDTXMania.ConfigIni.bAllDrumsAreAutoPlay;
-								break;
-
-							case 1:
-								bIsAutoPlay = CDTXMania.ConfigIni.bAllGuitarsAreAutoPlay;
-								break;
-
-							case 2:
-								bIsAutoPlay = CDTXMania.ConfigIni.bAllBassAreAutoPlay;
-								break;
-						}
+						bool bIsAutoPlay = CDTXMania.ConfigIni.bIsAutoPlay(CDTXMania.ConfigIni.PlayerOn((EChartPart)i));
 
 						bAuto[i] = bIsAutoPlay;
 						fPerfectPercentage[i] = bIsAutoPlay ? 0f : 100f * part.nPerfectCount / part.nTotalChipsCount;

@@ -794,11 +794,6 @@ internal partial class CDTXMania
         SafeTerminate("Timer", () => { Timer?.Dispose(); });
         SafeTerminate("Config.ini (and writing it to disk)", () =>
         {
-            if (ConfigIni.bIsSwappedGuitarBass_AutoFlagsAreSwapped)
-            {
-                ConfigIni.SwapGuitarBassInfos_AutoFlags();
-            }
-
             string path = executableDirectory + "Config.ini";
                 
             ConfigIni.tWrite(path);

@@ -70,8 +70,8 @@ internal abstract class CStagePerfCommonScreen : CStage
     public void tStorePerfResults(out CScoreIni.CPerformanceEntry drums, out CScoreIni.CPerformanceEntry guitar, out CScoreIni.CPerformanceEntry bass, out bool trainingMode)
     {
         drums = CDTXMania.DTX.bHasChips.Drums && !CDTXMania.ConfigIni.bGuitarRevolutionMode ? ResultsFor(DrumsData) : new CScoreIni.CPerformanceEntry();
-        guitar = CDTXMania.DTX.bHasChips.Guitar ? ResultsFor(GuitarData) : new CScoreIni.CPerformanceEntry();
-        bass = CDTXMania.DTX.bHasChips.Bass ? ResultsFor(BassData) : new CScoreIni.CPerformanceEntry();
+        guitar = PartIsPlayed(EInstrumentPart.GUITAR) && CDTXMania.DTX.bHasChips.Guitar ? ResultsFor(GuitarData) : new CScoreIni.CPerformanceEntry();
+        bass = PartIsPlayed(EInstrumentPart.BASS) && CDTXMania.DTX.bHasChips.Bass ? ResultsFor(BassData) : new CScoreIni.CPerformanceEntry();
         trainingMode = bIsTrainingMode;
     }
 
@@ -865,11 +865,11 @@ internal abstract class CStagePerfCommonScreen : CStage
     {
         if (txWailingFrame != null && CDTXMania.ConfigIni.bGuitarEnabled)
         {
-            if (CDTXMania.DTX.bHasChips[(int)PartOf(EPlayer.Guitar1)])
+            if (IsPlayed(EPlayer.Guitar1) && CDTXMania.DTX.bHasChips[(int)PartOf(EPlayer.Guitar1)])
             {
                 txWailingFrame.tDraw2D(GtWailingFrameX, GtWailingFrameY);
             }
-            if (CDTXMania.DTX.bHasChips[(int)PartOf(EPlayer.Guitar2)])
+            if (IsPlayed(EPlayer.Guitar2) && CDTXMania.DTX.bHasChips[(int)PartOf(EPlayer.Guitar2)])
             {
                 txWailingFrame.tDraw2D(BsWailingFrameX, BsWailingFrameY);
             }
@@ -880,26 +880,7 @@ internal abstract class CStagePerfCommonScreen : CStage
     //the chart part the player is on
     public static EInstrumentPart PartOf(EPlayer player) => (EInstrumentPart)CDTXMania.ConfigIni.ChartFor(player);
 
-    //the player on this chart part. A part nobody plays keeps the player it belongs to by default
-    public static EPlayer PlayerOn(EInstrumentPart part)
-    {
-        if (part == EInstrumentPart.DRUMS)
-        {
-            return EPlayer.Drums;
-        }
-
-        if (PartOf(EPlayer.Guitar1) == part)
-        {
-            return EPlayer.Guitar1;
-        }
-
-        if (PartOf(EPlayer.Guitar2) == part)
-        {
-            return EPlayer.Guitar2;
-        }
-
-        return part == EInstrumentPart.GUITAR ? EPlayer.Guitar1 : EPlayer.Guitar2;
-    }
+    public static EPlayer PlayerOn(EInstrumentPart part) => CDTXMania.ConfigIni.PlayerOn((EChartPart)part);
 
     private GuitarPerformance? MakeGuitar(EPlayer player)
     {

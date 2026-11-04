@@ -138,7 +138,7 @@ internal class GuitarPerformance
 
         long ghostLag = 0;
         List<int>? ghost = CDTXMania.listAutoGhostLag[(int)Part];
-        if (CDTXMania.ConfigIni.eAutoGhost[(int)Part] != EAutoGhostData.PERFECT && ghost != null &&
+        if (CDTXMania.ConfigIni.eAutoGhost[(int)Player] != EAutoGhostData.PERFECT && ghost != null &&
             0 <= chip.n楽器パートでの出現順 && chip.n楽器パートでの出現順 < ghost.Count)
         {
             //low byte is the lag + 128, anything above it breaks the combo

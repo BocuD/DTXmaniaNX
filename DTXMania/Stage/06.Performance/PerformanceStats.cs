@@ -201,6 +201,11 @@ public sealed class PerformanceStats
             bool isGuitar = Player == EPlayer.Guitar1;
             EPlayer other = isGuitar ? EPlayer.Guitar2 : EPlayer.Guitar1;
 
+            if (!CStagePerfCommonScreen.IsPlayed(other))
+            {
+                return false;
+            }
+
             //a player makes way for the other one when its own part has no chips
             if (!chart.bHasChips[(int)Part])
             {

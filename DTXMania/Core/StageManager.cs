@@ -318,12 +318,6 @@ internal class StageManager
                 //-----------------------------
                 if (nUpdateAndDrawReturnValue != 0)
                 {
-                    if (CDTXMania.ConfigIni
-                        .bIsSwappedGuitarBass) // #24415 2011.2.27 yyagi Gt/Bsを入れ替えていたなら、Auto状態をリザルト画面終了後に元に戻す
-                    {
-                        CDTXMania.ConfigIni.SwapGuitarBassInfos_AutoFlags(); // Auto入れ替え
-                    }
-
                     CDTXMania.DTX.tPausePlaybackForAllChips();
                     CDTXMania.DTX.OnDeactivate();
                     rCurrentStage.OnDeactivate();

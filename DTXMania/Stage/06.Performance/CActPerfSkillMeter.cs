@@ -22,6 +22,8 @@ internal class CActPerfSkillMeter : CActivity
 
 	private STDGBVALUE<int> nGraphBG_XPos; //ドラムにも座標指定があるためDGBVALUEとして扱う。
 	private int nGraphBG_YPos = 200;
+	//the player whose graph is shown, and the slot its panel sits in
+	private EPlayer graphPlayer;
 	private int nGraphUsePart;
 
 	public bool bIsTrainingMode = false;
@@ -79,16 +81,19 @@ internal class CActPerfSkillMeter : CActivity
 				//                       時間がなくて雑なコードになったため、後日最適化を行う。
 				if ( CDTXMania.ConfigIni.bDrumsEnabled )
 				{
-					nGraphUsePart = 0;
+					graphPlayer = EPlayer.Drums;
 				}
 				else if ( CDTXMania.ConfigIni.bGuitarEnabled )
 				{
-					nGraphUsePart = ( CDTXMania.ConfigIni.bGraph有効.Guitar == true ) ? 1 : 2;
-					if ( !CDTXMania.DTX.bHasChips.Guitar && CDTXMania.ConfigIni.bGraph有効.Guitar )
+					graphPlayer = CDTXMania.ConfigIni.bGraph有効.Guitar ? EPlayer.Guitar1 : EPlayer.Guitar2;
+
+					if ( !CDTXMania.DTX.bHasChips[ (int)CStagePerfCommonScreen.PartOf( graphPlayer ) ] && CDTXMania.ConfigIni.bGraph有効.Guitar )
 					{
-						nGraphUsePart = 2;
+						graphPlayer = EPlayer.Guitar2;
 					}
 				}
+
+				nGraphUsePart = (int)graphPlayer;
 
 				nGraphBG_XPos.Drums = (CDTXMania.ConfigIni.bSmallGraph ? 880 : 900);//850 : 870
 				nGraphBG_XPos.Guitar = 356;
@@ -101,11 +106,12 @@ internal class CActPerfSkillMeter : CActivity
 					nGraphBG_XPos.Bass = 403;
 				}
 
+				int ghostPart = (int)CStagePerfCommonScreen.PartOf( graphPlayer );
 				if ( CDTXMania.ConfigIni.eTargetGhost[ nGraphUsePart ] != ETargetGhostData.NONE )
 				{
-					if ( CDTXMania.listTargetGhostScoreData[ nGraphUsePart ] != null )
+					if ( CDTXMania.listTargetGhostScoreData[ ghostPart ] != null )
 					{
-						dbグラフ値目標_表示 = CDTXMania.listTargetGhostScoreData[ nGraphUsePart ].dbPerformanceSkill;
+						dbグラフ値目標_表示 = CDTXMania.listTargetGhostScoreData[ ghostPart ].dbPerformanceSkill;
 					}
 				}
 

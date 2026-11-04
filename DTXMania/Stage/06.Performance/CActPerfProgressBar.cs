@@ -225,7 +225,7 @@ internal class CActPerfProgressBar : CActivity
 			{
 				CProgressSection c区間 = listProgressSection[(int)ePart][i];
 				num2 = p表示位置[(int)ePart].Y + (bIsCalledFromOutsidePerformance ? 20 : 0) + (int)c区間.rectDrawingFrame.Y + pBarPosition[(int)ePart].Y;
-				if (!CDTXMania.ConfigIni.bIsAutoPlay((EInstrumentPart)CStagePerfCommonScreen.PlayerOn(ePart)) || bIsCalledFromOutsidePerformance)
+				if (!CDTXMania.ConfigIni.bIsAutoPlay(CStagePerfCommonScreen.PlayerOn(ePart)) || bIsCalledFromOutsidePerformance)
 				{
 					if ((i + 1) * nLastChipTime / nSectionIntervalCount - 1 > ((CTimerBase)CDTXMania.Timer).nCurrentTime && !bIsCalledFromOutsidePerformance)
 					{

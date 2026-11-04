@@ -211,7 +211,7 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 			return;
 		}
 
-		bool allAuto = CDTXMania.ConfigIni.bIsAutoPlay((EInstrumentPart)data.Player);
+		bool allAuto = CDTXMania.ConfigIni.bIsAutoPlay(data.Player);
 		int perfects = allAuto ? data.HitCountIncAuto.Perfect : data.HitCountExclAuto.Perfect;
 		data.AddClearBonus(perfects == data.ChartChips);
 	}

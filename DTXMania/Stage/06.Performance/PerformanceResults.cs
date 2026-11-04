@@ -161,13 +161,6 @@ internal static class PerformanceResults
 
         if (!bIsTrainingMode)
         {
-            //todo: transitional, delete with the guitar and bass swap. The result screen still reads the
-            //auto-play flags per chart part, so they are swapped for it and swapped back after it closes
-            if (CDTXMania.ConfigIni.bIsSwappedGuitarBass)
-            {
-                CDTXMania.ConfigIni.SwapGuitarBassInfos_AutoFlags();
-            }
-
             scoreIni = CDTXMania.UpdateBGMAdjustHistoryPlayCountIntScoreIni(
                 ClearedHistoryLine(cPerfEntry_Drums, cPerfEntry_Guitar, cPerfEntry_Bass));
         }

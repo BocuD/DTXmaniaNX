@@ -369,23 +369,12 @@ internal partial class CConfigIni
 		}
 	}
 
-	public bool bIsAutoPlay(EInstrumentPart inst)
+	public bool bIsAutoPlay(EPlayer player) => player switch
 	{
-		bool result = false;
-		switch (inst)
-		{
-			case EInstrumentPart.DRUMS:
-				result = bAllDrumsAreAutoPlay;
-				break;
-			case EInstrumentPart.GUITAR:
-				result = bAllGuitarsAreAutoPlay;
-				break;
-			case EInstrumentPart.BASS:
-				result = bAllBassAreAutoPlay;
-				break;
-		}
-		return result;
-	}
+		EPlayer.Drums => bAllDrumsAreAutoPlay,
+		EPlayer.Guitar1 => bAllGuitarsAreAutoPlay,
+		_ => bAllBassAreAutoPlay
+	};
 
 	public bool bHidePerformanceInformation
 	{
@@ -425,17 +414,33 @@ internal partial class CConfigIni
 		_ => EChartPart.Drums
 	};
 
+	//the player on this chart part. A part nobody plays keeps the player it belongs to by default
+	public EPlayer PlayerOn(EChartPart part)
+	{
+		if (part == EChartPart.Drums)
+		{
+			return EPlayer.Drums;
+		}
+
+		if (guitar1Chart == part)
+		{
+			return EPlayer.Guitar1;
+		}
+
+		if (guitar2Chart == part)
+		{
+			return EPlayer.Guitar2;
+		}
+
+		return part == EChartPart.Guitar ? EPlayer.Guitar1 : EPlayer.Guitar2;
+	}
+
 	public static EChartPart OtherGuitarPart(EChartPart part) => part == EChartPart.Guitar ? EChartPart.Bass : EChartPart.Guitar;
 
 	//todo: transitional, delete with the guitar and bass swap. The display sites outside the performance
 	//stage still ask whether guitar and bass are swapped, which only holds while the two players swap together
 	[DataField("SwappedGuitarBass")]
 	public bool bIsSwappedGuitarBass => guitar1Chart == EChartPart.Bass;
-	public bool bIsSwappedGuitarBass_AutoFlagsAreSwapped	// #24415 2011.2.21 yyagi FLIP中にalt-f4終了で、AUTOフラグがswapした状態でconfig.iniが出力されてしまうことを避けるためのフラグ
-	{
-		get;
-		set;
-	}
 	public bool bTimeStretch;					// #23664 2013.2.24 yyagi ピッチ変更無しで再生速度を変更するかどうか
 
 	/// <summary>Whether the play speed applies to chip sounds as well as the song. Off means only the
@@ -524,23 +529,6 @@ internal partial class CConfigIni
 	}
 	public CBackupOf1BD BackupOf1BD = null;
 	*/
-	public void SwapGuitarBassInfos_AutoFlags()
-	{
-		//bool ts = CDTXMania.ConfigIni.bAutoPlay.Bass;			// #24415 2011.2.21 yyagi: FLIP時のリザルトにAUTOの記録が混ざらないよう、AUTOのフラグもswapする
-		//CDTXMania.ConfigIni.bAutoPlay.Bass = CDTXMania.ConfigIni.bAutoPlay.Guitar;
-		//CDTXMania.ConfigIni.bAutoPlay.Guitar = ts;
-
-		int looptime = (int)ELane.GtW - (int)ELane.GtR + 1;		// #29390 2013.1.25 yyagi ギターのAutoLane/AutoPick対応に伴い、FLIPもこれに対応
-		for (int i = 0; i < looptime; i++)							// こんなに離れたところを独立して修正しなければならない設計ではいけませんね___
-		{
-			bool b = CDTXMania.ConfigIni.bAutoPlay[i + (int)ELane.BsR];
-			CDTXMania.ConfigIni.bAutoPlay[i + (int)ELane.BsR] = CDTXMania.ConfigIni.bAutoPlay[i + (int)ELane.GtR];
-			CDTXMania.ConfigIni.bAutoPlay[i + (int)ELane.GtR] = b;
-		}
-
-		CDTXMania.ConfigIni.bIsSwappedGuitarBass_AutoFlagsAreSwapped = !CDTXMania.ConfigIni.bIsSwappedGuitarBass_AutoFlagsAreSwapped;
-	}
-
 
 	// コンストラクタ
 
