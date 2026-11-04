@@ -15,15 +15,17 @@ public class GuitarChipRenderer : ChipRenderer
     public LaneLayout lanes = new();
 
     private readonly EInstrumentPart part;
+    private readonly int slot;
 
     private BaseTexture? chipArt;
     private readonly BaseTexture[] notes = new BaseTexture[5];
     private readonly BaseTexture[] holdBodies = new BaseTexture[5];
     private readonly HoldNote[] holdNotes = new HoldNote[5];
 
-    public GuitarChipRenderer(EInstrumentPart part)
+    public GuitarChipRenderer(EPlayer player, EInstrumentPart part)
     {
         this.part = part;
+        slot = (int)player;
 
         chipArt = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\7_Chips_Guitar.png"));
         for (int fret = 0; fret < 5; fret++)
@@ -42,10 +44,10 @@ public class GuitarChipRenderer : ChipRenderer
         }
 
         CConfigIni config = CDTXMania.ConfigIni;
-        int index = (int)part;
+        int index = slot;
         bool reverse = config.bReverse[index];
         bool showsLines = config.nLaneDisp[index] == 0 || config.nLaneDisp[index] == 1;
-        bool hasChips = CDTXMania.DTX.bHasChips[index];
+        bool hasChips = CDTXMania.DTX.bHasChips[(int)part];
 
         if (firstChip >= 0)
         {
@@ -109,7 +111,7 @@ public class GuitarChipRenderer : ChipRenderer
         }
 
         CConfigIni config = CDTXMania.ConfigIni;
-        int index = (int)part;
+        int index = slot;
         float distance = chip.nDistanceFromBar[index];
         float alpha = NoteAlpha(distance, config.nHidSud[index], 250, 150, 75);
         if (alpha <= 0)

@@ -91,7 +91,7 @@ public abstract class Playfield : UIGroup
 
         if (loopMarkers != null)
         {
-            loopMarkers.part = part;
+            loopMarkers.part = (EInstrumentPart)Player;
         }
     }
 
@@ -144,7 +144,7 @@ public abstract class Playfield : UIGroup
 
     protected void SetUpScore(float scoreX, float comboX)
     {
-        scoreDisplay.Setup(score, combo, part, scoreX, comboX);
+        scoreDisplay.Setup(score, combo, Player, scoreX, comboX);
     }
 
     protected static ScoreDisplay DefaultScore(ScoreBonus bonus)

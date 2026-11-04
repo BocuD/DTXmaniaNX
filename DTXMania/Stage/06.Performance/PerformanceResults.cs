@@ -23,13 +23,6 @@ internal static class PerformanceResults
         return EPlayed.Bass;
     }
 
-    private static void SwapGuitarAndBass(ref CScoreIni.CPerformanceEntry guitar, ref CScoreIni.CPerformanceEntry bass)
-    {
-        CScoreIni.CPerformanceEntry swapped = guitar;
-        guitar = bass;
-        bass = swapped;
-    }
-
     //part: 0 drums, 1 guitar, 2 bass
     internal static bool SavesProgress(EPlayed played, int part) => part switch
     {
@@ -116,13 +109,6 @@ internal static class PerformanceResults
         //Save Performance Records if necessary
         if (!bTrainingMode)
         {
-            //Swap if required
-            if (CDTXMania.ConfigIni
-                .bIsSwappedGuitarBass) // #24063 2011.1.24 yyagi Gt/Bsを入れ替えていたなら、演奏結果も入れ替える
-            {
-                SwapGuitarAndBass(ref cPerf_Guitar, ref cPerf_Bass);
-            }
-
             EPlayed played = PlayedPart(cPerf_Drums, cPerf_Guitar, cPerf_Bass);
             CScoreIni.CPerformanceEntry[] entries = [cPerf_Drums, cPerf_Guitar, cPerf_Bass];
 
@@ -175,16 +161,12 @@ internal static class PerformanceResults
 
         if (!bIsTrainingMode)
         {
-            if (CDTXMania.ConfigIni
-                .bIsSwappedGuitarBass) // #24063 2011.1.24 yyagi Gt/Bsを入れ替えていたなら、演奏結果も入れ替える
+            //todo: transitional, delete with the guitar and bass swap. The result screen still reads the
+            //auto-play flags per chart part, so they are swapped for it and swapped back after it closes
+            if (CDTXMania.ConfigIni.bIsSwappedGuitarBass)
             {
-                SwapGuitarAndBass(ref cPerfEntry_Guitar, ref cPerfEntry_Bass);
-
-                CDTXMania.DTX.SwapGuitarBassInfos(); // 譜面情報も元に戻す
-                CDTXMania.ConfigIni.SwapGuitarBassInfos_AutoFlags(); // #24415 2011.2.27 yyagi
-                // リザルト集計時のみ、Auto系のフラグも元に戻す。
-                // これを戻すのは、リザルト集計後。
-            } // "case CStage.EStage.Result:"のところ。
+                CDTXMania.ConfigIni.SwapGuitarBassInfos_AutoFlags();
+            }
 
             scoreIni = CDTXMania.UpdateBGMAdjustHistoryPlayCountIntScoreIni(
                 ClearedHistoryLine(cPerfEntry_Drums, cPerfEntry_Guitar, cPerfEntry_Bass));
@@ -200,7 +182,7 @@ internal static class PerformanceResults
         EInstrumentPart part = data.Part;
         int index = (int)part;
         HitCounts hits = data.HitCountExclAuto;
-        HitCounts shownHits = AllAuto(part) ? data.HitCountIncAuto : hits;
+        HitCounts shownHits = AllAuto(data.Player) ? data.HitCountIncAuto : hits;
 
         CScoreIni.CPerformanceEntry entry = new()
         {
@@ -223,7 +205,7 @@ internal static class PerformanceResults
             nMaxCombo = data.MaxCombo,
             nTotalChipsCount = data.ChartChips,
             bTight = config.bTight,
-            eDark = config.eDark[index],
+            eDark = config.eDark[(int)data.Player],
             nPlaySpeedNumerator = config.nPlaySpeed,
             nPlaySpeedDenominator = 20,
             eHHGroup = config.eHHGroup,
@@ -240,12 +222,7 @@ internal static class PerformanceResults
             bMIDIUsed = data.UsedMidi,
             bJoypadUsed = data.UsedJoypad,
             bMouseUsed = data.UsedMouse,
-            stPrimaryHitRanges = part switch
-            {
-                EInstrumentPart.DRUMS => CDTXMania.stDrumHitRanges,
-                EInstrumentPart.GUITAR => CDTXMania.stGuitarHitRanges,
-                _ => CDTXMania.stBassHitRanges
-            },
+            stPrimaryHitRanges = CDTXMania.HitRangesFor(data.Player, (EChartPart)part),
             stSecondaryHitRanges = part == EInstrumentPart.DRUMS ? CDTXMania.stDrumPedalHitRanges : new STHitRanges(),
             strDTXManiaVersion = CDTXMania.VERSION,
             strDateTime = DateTime.Now.ToString(),
@@ -255,7 +232,7 @@ internal static class PerformanceResults
         if (config.nSkillMode == 0)
         {
             entry.dbGameSkill = CScoreIni.tCalculateGameSkillOld(dtx.LEVEL[index], dtx.LEVELDEC[index], data.ChartChips, hits.Perfect, hits.Great,
-                data.MaxCombo, part, data.AutoPlay);
+                data.MaxCombo, (EInstrumentPart)data.Player, data.AutoPlay);
             entry.dbPerformanceSkill = data.CalculateSkill();
         }
         else if (config.nSkillMode == 1)
@@ -264,9 +241,10 @@ internal static class PerformanceResults
             entry.dbGameSkill = CScoreIni.tCalculateGameSkillFromPlayingSkill(dtx.LEVEL[index], dtx.LEVELDEC[index], entry.dbPerformanceSkill);
         }
 
+        STAUTOPLAY autoPlay = data.AutoPlayForPart;
         for (int i = 0; i < (int)ELane.MAX; i++)
         {
-            entry.bAutoPlay[i] = data.AutoPlay[i];
+            entry.bAutoPlay[i] = autoPlay[i];
         }
 
         for (int i = 0; i < 3; i++)
@@ -284,10 +262,11 @@ internal static class PerformanceResults
         return entry;
     }
 
-    private static bool AllAuto(EInstrumentPart part) => part switch
+    //whether a player left everything to autoplay is its own setting, not the chart part's
+    private static bool AllAuto(EPlayer player) => player switch
     {
-        EInstrumentPart.DRUMS => CDTXMania.ConfigIni.bAllDrumsAreAutoPlay,
-        EInstrumentPart.GUITAR => CDTXMania.ConfigIni.bAllGuitarsAreAutoPlay,
+        EPlayer.Drums => CDTXMania.ConfigIni.bAllDrumsAreAutoPlay,
+        EPlayer.Guitar1 => CDTXMania.ConfigIni.bAllGuitarsAreAutoPlay,
         _ => CDTXMania.ConfigIni.bAllBassAreAutoPlay
     };
 }

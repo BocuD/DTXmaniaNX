@@ -6,6 +6,8 @@ public class PerformanceData
 {
     public readonly EInstrumentPart Part;
 
+    public EPlayer Player { get; private set; }
+
     private HitCounts hitCountExclAuto;
     private HitCounts hitCountIncAuto;
     private TimingCounts timingHitCount;
@@ -59,6 +61,29 @@ public class PerformanceData
     public HitCounts GhostHitCount => ghostHitCount;
     public int GhostMaxCombo => ghostMaxCombo;
     public STAUTOPLAY AutoPlay => autoPlay;
+
+    public STAUTOPLAY AutoPlayForPart
+    {
+        get
+        {
+            bool playerOnLeft = Player == EPlayer.Guitar1;
+            bool partIsGuitar = Part == EInstrumentPart.GUITAR;
+            if (Part == EInstrumentPart.DRUMS || playerOnLeft == partIsGuitar)
+            {
+                return autoPlay;
+            }
+
+            STAUTOPLAY moved = autoPlay;
+            int lanes = (int)ELane.GtW - (int)ELane.GtR + 1;
+            for (int i = 0; i < lanes; i++)
+            {
+                moved[i + (int)ELane.GtR] = autoPlay[i + (int)ELane.BsR];
+                moved[i + (int)ELane.BsR] = autoPlay[i + (int)ELane.GtR];
+            }
+
+            return moved;
+        }
+    }
     public bool UsedKeyboard => usedKeyboard;
     public bool UsedJoypad => usedJoypad;
     public bool UsedMidi => usedMidi;
@@ -77,8 +102,9 @@ public class PerformanceData
     }
 
     //risky is how many misses the play may have until stage failed, 0 for a normal gauge
-    public void Reset(STAUTOPLAY autoPlayed, int risky)
+    public void Reset(EPlayer player, STAUTOPLAY autoPlayed, int risky)
     {
+        Player = player;
         autoPlay = autoPlayed;
         riskyTimesInitial = risky;
         riskyTimes = risky;
@@ -171,11 +197,11 @@ public class PerformanceData
     //scores with AutoAddGage
     public void AddScore(long delta)
     {
-        double factor = Part switch
+        double factor = Player switch
         {
-            EInstrumentPart.GUITAR => AutoFactor(CDTXMania.ConfigIni.bAllGuitarsAreAutoPlay, autoPlay.GtPick,
+            EPlayer.Guitar1 => AutoFactor(CDTXMania.ConfigIni.bAllGuitarsAreAutoPlay, autoPlay.GtPick,
                 autoPlay.GtR || autoPlay.GtG || autoPlay.GtB || autoPlay.GtY || autoPlay.GtP),
-            EInstrumentPart.BASS => AutoFactor(CDTXMania.ConfigIni.bAllBassAreAutoPlay, autoPlay.BsPick,
+            EPlayer.Guitar2 => AutoFactor(CDTXMania.ConfigIni.bAllBassAreAutoPlay, autoPlay.BsPick,
                 autoPlay.BsR || autoPlay.BsG || autoPlay.BsB || autoPlay.BsY || autoPlay.BsP),
             _ => 1.0
         };
@@ -217,29 +243,29 @@ public class PerformanceData
         {
             chip.nCurrentComboForGhost = combo;
         }
-        return ChipJudge.GetJudgementForLag(chip, chip.nLag);
+        return ChipJudge.GetJudgementForLag(chip, chip.nLag, Player);
     }
 
-    public bool HasTargetGhost => CDTXMania.ConfigIni.eTargetGhost[(int)Part] != ETargetGhostData.NONE && CDTXMania.listTargetGhsotLag[(int)Part] != null;
+    public bool HasTargetGhost => CDTXMania.ConfigIni.eTargetGhost[(int)Player] != ETargetGhostData.NONE && CDTXMania.listTargetGhsotLag[(int)Part] != null;
 
     public double CalculateTargetGhostGoal()
     {
         int chips = ChartChips;
         HitCounts ghost = ghostHitCount;
         double goal;
-        if (CDTXMania.ConfigIni.eTargetGhost[(int)Part] == ETargetGhostData.ONLINE)
+        if (CDTXMania.ConfigIni.eTargetGhost[(int)Player] == ETargetGhostData.ONLINE)
         {
             goal = chips > 0 ? 100 * (ghost.Perfect * 17 + ghost.Great * 7 + ghostMaxCombo * 3) / (20.0 * chips) : 0;
         }
         else if (CDTXMania.ConfigIni.nSkillMode == 0)
         {
             goal = CScoreIni.tCalculatePlayingSkillOld(chips, ghost.Perfect, ghost.Great, ghost.Good, ghost.Poor, ghost.Miss,
-                ghostMaxCombo, Part, new STAUTOPLAY());
+                ghostMaxCombo, (EInstrumentPart)Player, new STAUTOPLAY());
         }
         else
         {
             goal = CScoreIni.tCalculatePlayingSkill(chips, ghost.Perfect, ghost.Great, ghost.Good, ghost.Poor, ghost.Miss,
-                ghostMaxCombo, Part, new STAUTOPLAY());
+                ghostMaxCombo, (EInstrumentPart)Player, new STAUTOPLAY());
         }
 
         return Math.Clamp(goal, 0, 100);
@@ -325,8 +351,8 @@ public class PerformanceData
         int chips = ChartChips;
         HitCounts hits = hitCountExclAuto;
         return CDTXMania.ConfigIni.nSkillMode == 0
-            ? CScoreIni.tCalculatePlayingSkillOld(chips, hits.Perfect, hits.Great, hits.Good, hits.Poor, hits.Miss, maxCombo, Part, autoPlay)
-            : CScoreIni.tCalculatePlayingSkill(chips, hits.Perfect, hits.Great, hits.Good, hits.Poor, hits.Miss, maxCombo, Part, autoPlay);
+            ? CScoreIni.tCalculatePlayingSkillOld(chips, hits.Perfect, hits.Great, hits.Good, hits.Poor, hits.Miss, maxCombo, (EInstrumentPart)Player, autoPlay)
+            : CScoreIni.tCalculatePlayingSkill(chips, hits.Perfect, hits.Great, hits.Good, hits.Poor, hits.Miss, maxCombo, (EInstrumentPart)Player, autoPlay);
     }
 
     //the max is taken before the combo moves, so it trails the ghost's combo by one hit

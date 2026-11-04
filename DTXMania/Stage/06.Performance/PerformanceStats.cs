@@ -12,8 +12,7 @@ public sealed class PerformanceStats
     //the nameplate takes the player as a number
     [DataField] public int Instrument => (int)Player;
 
-    //todo: transitional, delete with the guitar and bass swap. This player is still fixed to its own chart part
-    private EInstrumentPart Part => (EInstrumentPart)Player;
+    private EInstrumentPart Part => (EInstrumentPart)CDTXMania.ConfigIni.ChartFor(Player);
 
     //this player's settings are stored in the drums, guitar and bass config slots
     private int Slot => (int)Player;
@@ -126,12 +125,7 @@ public sealed class PerformanceStats
 
     [DataField] public bool ShowsPanel => CDTXMania.ConfigIni.nInfoType == 1 && IsPlayed && !HiddenBesideTheOther;
 
-    [DataField] public bool HasLane => IsPlayed && Player switch
-    {
-        EPlayer.Guitar1 => CDTXMania.DTX?.bHasChips.Guitar ?? false,
-        EPlayer.Guitar2 => CDTXMania.DTX?.bHasChips.Bass ?? false,
-        _ => true
-    };
+    [DataField] public bool HasLane => IsPlayed && (Player == EPlayer.Drums || (CDTXMania.DTX?.bHasChips[(int)Part] ?? false));
 
     private bool IsPlayed => Player == EPlayer.Drums ? Stage is CStagePerfDrumsScreen : Stage is CStagePerfGuitarScreen;
 
@@ -205,15 +199,17 @@ public sealed class PerformanceStats
 
             CConfigIni config = CDTXMania.ConfigIni;
             bool isGuitar = Player == EPlayer.Guitar1;
+            EPlayer other = isGuitar ? EPlayer.Guitar2 : EPlayer.Guitar1;
 
-            if (!chart.bHasChips.Bass)
+            //a player makes way for the other one when its own part has no chips
+            if (!chart.bHasChips[(int)Part])
             {
-                return !isGuitar;
+                return true;
             }
 
-            if (!chart.bHasChips.Guitar)
+            if (!chart.bHasChips[(int)CDTXMania.ConfigIni.ChartFor(other)])
             {
-                return isGuitar;
+                return false;
             }
 
             if (!config.bGraph有効.Guitar && !config.bGraph有効.Bass)

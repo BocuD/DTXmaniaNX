@@ -37,9 +37,8 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		base.OnLayoutReady();
 		
 		guitarPlayfields = new GuitarPlayfield[2];
-		//todo: transitional, delete with the guitar and bass swap. Each player should be given the chart part it plays
-		SetUpGuitarSection(EPlayer.Guitar1, EInstrumentPart.GUITAR);
-		SetUpGuitarSection(EPlayer.Guitar2, EInstrumentPart.BASS);
+		SetUpGuitarSection(EPlayer.Guitar1);
+		SetUpGuitarSection(EPlayer.Guitar2);
 		playfields = guitarPlayfields;
 		RefreshPlayfields();
 
@@ -48,14 +47,14 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		AddLegacyPart(hud, "PerformanceInformation", LegacyOverlayLayer, _ => tUpdateAndDraw_PerformanceInformation());
 	}
 
-	private void SetUpGuitarSection(EPlayer player, EInstrumentPart part)
+	private void SetUpGuitarSection(EPlayer player)
 	{
 		GuitarPlayfield playfield = FindGuitarPlayfield(player);
 		bool right = player == EPlayer.Guitar2;
 		int side = right ? 1 : 0;
 
 		playfield.SetParts(actScore, actCombo, actProgressBar, actJudgeString);
-		playfield.Setup(part, actLaneFlushGB, actWailingBonus);
+		playfield.Setup(actLaneFlushGB, actWailingBonus);
 		playfield.SetChart(timeline);
 
 		guitarPlayfields[side] = playfield;
@@ -68,7 +67,8 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 
 	public override void OnActivate()
 	{
-		int nGraphUsePart = CDTXMania.ConfigIni.bGraph有効.Guitar ? 1 : 2;
+		EPlayer graphPlayer = CDTXMania.ConfigIni.bGraph有効.Guitar ? EPlayer.Guitar1 : EPlayer.Guitar2;
+		int nGraphUsePart = (int)PartOf(graphPlayer);
 		ct登場用 = new CCounter(0, 12, 16, CDTXMania.Timer);
 		if ( CDTXMania.bCompactMode )
 		{
@@ -82,7 +82,7 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 
 			// #35411 2015.08.21 chnmr0 add
 			// ゴースト利用可のなとき、0で初期化
-			if (CDTXMania.ConfigIni.eTargetGhost[ nGraphUsePart ] != ETargetGhostData.NONE)
+			if (CDTXMania.ConfigIni.eTargetGhost[ (int)graphPlayer ] != ETargetGhostData.NONE)
 			{
 				if (CDTXMania.listTargetGhsotLag[ nGraphUsePart ] != null)
 				{
@@ -126,75 +126,8 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 			if (!CDTXMania.Skin.soundStageClear.bIsPlaying)
 			{
 
-				//Update Guitar score like in PerfDrumsScreen
-				int nNumberOfMistakes = GuitarData.HitCountExclAuto.Miss + GuitarData.HitCountExclAuto.Poor;
-				if (nNumberOfMistakes == 0)
-				{
-					{
-						int nNumberPerfects = GuitarData.HitCountExclAuto.Perfect;
-						if (CDTXMania.ConfigIni.bAllGuitarsAreAutoPlay)
-						{
-							nNumberPerfects = GuitarData.HitCountIncAuto.Perfect;
-						}
-
-						if (nNumberPerfects == CDTXMania.DTX.nVisibleChipsCount.Guitar)
-
-							#region[ エクセ ]
-
-						{
-							if (CDTXMania.ConfigIni.nSkillMode == 1)
-								GuitarData.AddClearBonus(true);
-						}
-
-						#endregion
-
-						else
-
-							#region[ フルコン ]
-
-						{
-							if (CDTXMania.ConfigIni.nSkillMode == 1)
-								GuitarData.AddClearBonus(false);
-						}
-
-						#endregion
-					}
-				}
-
-				//Repeat for Bass
-				nNumberOfMistakes = BassData.HitCountExclAuto.Miss + BassData.HitCountExclAuto.Poor;
-				if (nNumberOfMistakes == 0)
-				{
-					{
-						int nNumberPerfects = BassData.HitCountExclAuto.Perfect;
-						if (CDTXMania.ConfigIni.bAllBassAreAutoPlay)
-						{
-							nNumberPerfects = BassData.HitCountIncAuto.Perfect;
-						}
-
-						if (nNumberPerfects == CDTXMania.DTX.nVisibleChipsCount.Bass)
-
-							#region[ エクセ ]
-
-						{
-							if (CDTXMania.ConfigIni.nSkillMode == 1)
-								BassData.AddClearBonus(true);
-						}
-
-						#endregion
-
-						else
-
-							#region[ フルコン ]
-
-						{
-							if (CDTXMania.ConfigIni.nSkillMode == 1)
-								BassData.AddClearBonus(false);
-						}
-
-						#endregion
-					}
-				}
+				AddClearBonus(EInstrumentPart.GUITAR);
+				AddClearBonus(EInstrumentPart.BASS);
 
 				return (int)eReturnValue;
 			}
@@ -265,20 +198,39 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 
 	#region [ private ]
 
-	protected override void UpdateGraph(EInstrumentPart part)
+	private void AddClearBonus(EInstrumentPart part)
 	{
+		if (CDTXMania.ConfigIni.nSkillMode != 1)
+		{
+			return;
+		}
+
 		PerformanceData data = DataFor(part);
-		int index = (int)part;
+		if (data.HitCountExclAuto.Miss + data.HitCountExclAuto.Poor > 0)
+		{
+			return;
+		}
+
+		bool allAuto = CDTXMania.ConfigIni.bIsAutoPlay((EInstrumentPart)data.Player);
+		int perfects = allAuto ? data.HitCountIncAuto.Perfect : data.HitCountExclAuto.Perfect;
+		data.AddClearBonus(perfects == data.ChartChips);
+	}
+
+	protected override void UpdateGraph(EPlayer player)
+	{
+		EInstrumentPart part = PartOf(player);
+		PerformanceData data = DataFor(part);
+		int slot = (int)player;
 		actGraph.dbグラフ値現在_渡 = data.CalculateSkill();
 		data.SetAchievementRate(bIsTrainingMode ? 0 : actGraph.dbグラフ値現在_渡);
 
-		if (!CDTXMania.ConfigIni.bGraph有効[index])
+		if (!CDTXMania.ConfigIni.bGraph有効[slot])
 		{
 			return;
 		}
 
 		int chips = data.ChartChips;
-		if (CDTXMania.listTargetGhsotLag[index] != null && CDTXMania.ConfigIni.eTargetGhost[index] == ETargetGhostData.ONLINE && chips > 0)
+		if (CDTXMania.listTargetGhsotLag[(int)part] != null && CDTXMania.ConfigIni.eTargetGhost[slot] == ETargetGhostData.ONLINE && chips > 0)
 		{
 			actGraph.dbグラフ値現在_渡 = 100 * (data.HitCountExclAuto.Perfect * 17 + data.HitCountExclAuto.Great * 7 + data.MaxCombo * 3) / (20.0 * chips);
 		}

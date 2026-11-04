@@ -5,15 +5,14 @@ namespace DTXMania;
 internal static class ChipJudge
 {
     //lag is the hit time minus the chip's time, input adjust included
-    public static EJudgement GetJudgementForLag(CChip chip, int lag)
+    public static EJudgement GetJudgementForLag(CChip chip, int lag, EPlayer player)
     {
         STHitRanges ranges = chip.eInstrumentPart switch
         {
             EInstrumentPart.DRUMS => chip.nChannelNumber is EChannel.BassDrum or EChannel.LeftPedal or EChannel.LeftBassDrum
                 ? CDTXMania.stDrumPedalHitRanges
                 : CDTXMania.stDrumHitRanges,
-            EInstrumentPart.GUITAR => CDTXMania.stGuitarHitRanges,
-            EInstrumentPart.BASS => CDTXMania.stBassHitRanges,
+            EInstrumentPart.GUITAR or EInstrumentPart.BASS => CDTXMania.HitRangesFor(player, (EChartPart)chip.eInstrumentPart),
             _ => STHitRanges.tCreateDefaultDTXHitRanges()
         };
         return ranges.tGetJudgement(Math.Abs(lag));

@@ -256,7 +256,7 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
     public bool bChorusSection;
     public double UnitTime;
     //-----------------
-    protected override void UpdateGraph(EInstrumentPart part)
+    protected override void UpdateGraph(EPlayer player)
     {
         actGraph.dbグラフ値現在_渡 = DrumsData.CalculateSkill();
         int chips = DrumsData.ChartChips;
@@ -321,7 +321,7 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
                     {
                         actCombo.tComboAnime(EPlayer.Drums);
                     }
-                    UpdateGraph(EInstrumentPart.DRUMS);
+                    UpdateGraph(EPlayer.Drums);
                     break;
             }
         }

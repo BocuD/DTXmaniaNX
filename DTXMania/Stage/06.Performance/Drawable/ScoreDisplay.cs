@@ -26,7 +26,7 @@ public class ScoreDisplay : UIGroup
         bonus.Show();
     }
 
-    internal void Setup(CActPerfCommonScore score, CActPerfCommonCombo combo, EInstrumentPart part, float scoreX, float comboX)
+    internal void Setup(CActPerfCommonScore score, CActPerfCommonCombo combo, EPlayer player, float scoreX, float comboX)
     {
         bonus = GetChild<ScoreBonus>("Bonus") ?? AddChild(new ScoreBonus());
 
@@ -34,11 +34,11 @@ public class ScoreDisplay : UIGroup
         {
             if (CDTXMania.ConfigIni.bShowScore)
             {
-                score.Draw(origin, part);
+                score.Draw(origin, player);
             }
         }).position.X = scoreX;
 
-        AddPart("Combo", probeCombo, origin => combo.Draw(origin, (int)part)).position.X = comboX;
+        AddPart("Combo", probeCombo, origin => combo.Draw(origin, player)).position.X = comboX;
     }
 
     private LegacyDrawable AddPart(string partName, int probe, Action<Matrix4x4> draw)

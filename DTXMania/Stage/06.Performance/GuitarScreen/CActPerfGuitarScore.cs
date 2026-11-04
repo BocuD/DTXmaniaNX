@@ -76,12 +76,12 @@ internal class CActPerfGuitarScore : CActPerfCommonScore
         }
     }
 
-    public override void Draw(Matrix4x4 origin, EInstrumentPart part)
+    public override void Draw(Matrix4x4 origin, EPlayer player)
     {
-        int j = (int)part;
-        if ( bActivated && CDTXMania.DTX.bHasChips[j] && n本体X[j] != 0 )
+        int part = (int)CStagePerfCommonScreen.PartOf(player);
+        if ( bActivated && CDTXMania.DTX.bHasChips[part] && n本体X[(int)player] != 0 )
         {
-            tDrawScore(origin, 373, n本体Y, n現在表示中のスコア[j]);
+            tDrawScore(origin, 373, n本体Y, n現在表示中のスコア[part]);
         }
     }
 

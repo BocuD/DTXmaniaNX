@@ -48,7 +48,7 @@ internal class CActPerfCommonScore : CActivity
 	{
 	}
 
-	public virtual void Draw( Matrix4x4 origin, EInstrumentPart part )
+	public virtual void Draw( Matrix4x4 origin, EPlayer player )
 	{
 	}
 

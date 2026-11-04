@@ -46,7 +46,7 @@ internal class CActPerfProgressBar : CActivity
 					listProgressSection[(int)ePart].Add(new CProgressSection());
 				}
 
-				if (!bIsCalledFromOutsidePerformance && CStagePerfCommonScreen.IsPlayed(ePart) && CDTXMania.DTX.bHasChips[(int)ePart])
+				if (!bIsCalledFromOutsidePerformance && CStagePerfCommonScreen.PartIsPlayed(ePart) && CDTXMania.DTX.bHasChips[(int)ePart])
 				{
 					int x = pBarPosition[(int)ePart].X;
 					p表示位置[(int)ePart] = new Point(x, 0);
@@ -170,9 +170,9 @@ internal class CActPerfProgressBar : CActivity
 		for (EInstrumentPart ePart = firstPart; ePart <= lastPart; ePart++)
 		{
 			if ((!bIsCalledFromOutsidePerformance &&
-			     (!CStagePerfCommonScreen.IsPlayed(ePart) ||
+			     (!CStagePerfCommonScreen.PartIsPlayed(ePart) ||
 			      !CDTXMania.DTX.bHasChips[(int)ePart] ||
-			      CDTXMania.ConfigIni.eDark[(int)ePart] == EDarkMode.FULL)) ||
+			      CDTXMania.ConfigIni.eDark[(int)CStagePerfCommonScreen.PlayerOn(ePart)] == EDarkMode.FULL)) ||
 			    (bIsCalledFromOutsidePerformance && epartプレイ楽器 != ePart && (epartプレイ楽器 != EInstrumentPart.UNKNOWN || ePart != 0)))
 			{
 				continue;
@@ -225,7 +225,7 @@ internal class CActPerfProgressBar : CActivity
 			{
 				CProgressSection c区間 = listProgressSection[(int)ePart][i];
 				num2 = p表示位置[(int)ePart].Y + (bIsCalledFromOutsidePerformance ? 20 : 0) + (int)c区間.rectDrawingFrame.Y + pBarPosition[(int)ePart].Y;
-				if (!CDTXMania.ConfigIni.bIsAutoPlay(ePart) || bIsCalledFromOutsidePerformance)
+				if (!CDTXMania.ConfigIni.bIsAutoPlay((EInstrumentPart)CStagePerfCommonScreen.PlayerOn(ePart)) || bIsCalledFromOutsidePerformance)
 				{
 					if ((i + 1) * nLastChipTime / nSectionIntervalCount - 1 > ((CTimerBase)CDTXMania.Timer).nCurrentTime && !bIsCalledFromOutsidePerformance)
 					{
@@ -269,7 +269,7 @@ internal class CActPerfProgressBar : CActivity
 		for (EInstrumentPart ePart = EInstrumentPart.DRUMS; ePart <= EInstrumentPart.BASS; ePart++)
 		{
 			BaseTexture currTexture = txBestProgressBarRecord[(int)ePart];
-			txGenerateProgressBarLine(ref currTexture, cChartData.SongInformation.progress[(int)CDTXMania.ConfigIni.GetFlipInst(ePart)]);
+			txGenerateProgressBarLine(ref currTexture, cChartData.SongInformation.progress[(int)ePart]);
 			txBestProgressBarRecord[(int)ePart] = currTexture;
 		}
 	}

@@ -415,12 +415,22 @@ internal partial class CConfigIni
 	public int nResultDelayMs;				// Delay after clearing a song before the result screen is shown (ms).
 	public int nLoadingMinMs;				// Minimum time the song-loading screen stays up, even on a fast load (ms).
 	public bool bIsAllowedDoubleClickFullscreen;	// #26752 2011.11.27 yyagi ダブルクリックしてもフルスクリーンに移行しない
-	[DataField("SwappedGuitarBass")]
-	public bool bIsSwappedGuitarBass			// #24063 2011.1.16 yyagi ギターとベースの切り替え中か否か
+	public EChartPart guitar1Chart = EChartPart.Guitar;
+	public EChartPart guitar2Chart = EChartPart.Bass;
+
+	public EChartPart ChartFor(EPlayer player) => player switch
 	{
-		get;
-		set;
-	}
+		EPlayer.Guitar1 => guitar1Chart,
+		EPlayer.Guitar2 => guitar2Chart,
+		_ => EChartPart.Drums
+	};
+
+	public static EChartPart OtherGuitarPart(EChartPart part) => part == EChartPart.Guitar ? EChartPart.Bass : EChartPart.Guitar;
+
+	//todo: transitional, delete with the guitar and bass swap. The display sites outside the performance
+	//stage still ask whether guitar and bass are swapped, which only holds while the two players swap together
+	[DataField("SwappedGuitarBass")]
+	public bool bIsSwappedGuitarBass => guitar1Chart == EChartPart.Bass;
 	public bool bIsSwappedGuitarBass_AutoFlagsAreSwapped	// #24415 2011.2.21 yyagi FLIP中にalt-f4終了で、AUTOフラグがswapした状態でconfig.iniが出力されてしまうことを避けるためのフラグ
 	{
 		get;
@@ -531,23 +541,6 @@ internal partial class CConfigIni
 		CDTXMania.ConfigIni.bIsSwappedGuitarBass_AutoFlagsAreSwapped = !CDTXMania.ConfigIni.bIsSwappedGuitarBass_AutoFlagsAreSwapped;
 	}
 
-	public EInstrumentPart GetFlipInst(EInstrumentPart inst)
-	{
-		EInstrumentPart retPart = inst;
-		if (bIsSwappedGuitarBass)
-		{
-			switch (inst)
-			{
-				case EInstrumentPart.GUITAR:
-					retPart = EInstrumentPart.BASS;
-					break;
-				case EInstrumentPart.BASS:
-					retPart = EInstrumentPart.GUITAR;
-					break;
-			}
-		}
-		return retPart;
-	}
 
 	// コンストラクタ
 
@@ -830,7 +823,8 @@ internal partial class CConfigIni
 		#endregion
 
 		bBufferedInput = true;
-		bIsSwappedGuitarBass = false;			// #24063 2011.1.16 yyagi ギターとベースの切り替え
+		guitar1Chart = EChartPart.Guitar;
+		guitar2Chart = EChartPart.Bass;
 		bIsAllowedDoubleClickFullscreen = true;	// #26752 2011.11.26 ダブルクリックでのフルスクリーンモード移行を許可
 		eBDGroup = EBDGroup.打ち分ける;		// #27029 2012.1.4 from HHPedalとBassPedalのグルーピング
 		// #24820 2013.1.15 yyagi 初期値を4から2に変更。BASS.net使用時の負荷軽減のため。

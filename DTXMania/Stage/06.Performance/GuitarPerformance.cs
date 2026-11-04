@@ -219,7 +219,7 @@ internal class GuitarPerformance
 
     private void Pick(long time, int pressed)
     {
-        int poorRangeMs = Chart == EChartPart.Guitar ? CDTXMania.stGuitarHitRanges.nPoorSizeMs : CDTXMania.stBassHitRanges.nPoorSizeMs;
+        int poorRangeMs = CDTXMania.HitRangesFor(Player, Chart).nPoorSizeMs;
         CChip? note = timeline.NearestNote(time + InputAdjustMs, Part, poorRangeMs, HitState.NotHit, preferPast: true);
         EJudgement judgement = Data.JudgeChip(time, note, InputAdjustMs);
         bool specialist = CDTXMania.ConfigIni.bSpecialist[(int)Side];

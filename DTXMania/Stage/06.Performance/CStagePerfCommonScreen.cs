@@ -281,11 +281,11 @@ internal abstract class CStagePerfCommonScreen : CStage
         bIsAutoPlay = CDTXMania.ConfigIni.bAutoPlay;									// #24239 2011.1.23 yyagi
         foreach (PerformanceData data in partData)
         {
-            data.Reset(bIsAutoPlay, CDTXMania.ConfigIni.nRisky);
+            data.Reset(PlayerOn(data.Part), bIsAutoPlay, CDTXMania.ConfigIni.nRisky);
         }
         drums = IsPlayed(EPlayer.Drums) ? new DrumsPerformance(DrumsData, timeline, bIsAutoPlay) : null;
-        guitars[0] = IsPlayed(EPlayer.Guitar1) ? new GuitarPerformance(EPlayer.Guitar1, EChartPart.Guitar, GuitarData, timeline, bIsAutoPlay) : null;
-        guitars[1] = IsPlayed(EPlayer.Guitar2) ? new GuitarPerformance(EPlayer.Guitar2, EChartPart.Bass, BassData, timeline, bIsAutoPlay) : null;
+        guitars[0] = MakeGuitar(EPlayer.Guitar1);
+        guitars[1] = MakeGuitar(EPlayer.Guitar2);
 
 
         //let the loading sound gracefully fade out
@@ -324,10 +324,6 @@ internal abstract class CStagePerfCommonScreen : CStage
             }
         }
         #endregion
-        if (CDTXMania.ConfigIni.bIsSwappedGuitarBass)	// #24063 2011.1.24 yyagi Gt/Bsの譜面情報入れ替え
-        {
-            CDTXMania.DTX.SwapGuitarBassInfos();
-        }
         base.OnActivate();
     }
     public override void OnDeactivate()
@@ -423,8 +419,18 @@ internal abstract class CStagePerfCommonScreen : CStage
         Guitar2 = guitars[1] != null
     };
 
-    protected GuitarPerformance? GuitarFor(EInstrumentPart part) =>
-        part == EInstrumentPart.GUITAR ? guitars[0] : part == EInstrumentPart.BASS ? guitars[1] : null;
+    protected GuitarPerformance? GuitarFor(EInstrumentPart part)
+    {
+        foreach (GuitarPerformance? guitar in guitars)
+        {
+            if (guitar != null && (EInstrumentPart)guitar.Chart == part)
+            {
+                return guitar;
+            }
+        }
+
+        return null;
+    }
     protected PerformanceData DrumsData => partData[(int)EInstrumentPart.DRUMS];
     protected PerformanceData GuitarData => partData[(int)EInstrumentPart.GUITAR];
     protected PerformanceData BassData => partData[(int)EInstrumentPart.BASS];
@@ -505,7 +511,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                 pChip.nCurrentComboForGhost = partData[(int)pChip.eInstrumentPart].Combo;
             }
         }
-        return ChipJudge.GetJudgementForLag(pChip, lag);
+        return ChipJudge.GetJudgementForLag(pChip, lag, PlayerOn(pChip.eInstrumentPart));
     }
 
     protected abstract void tHandleInput_Drums();
@@ -679,7 +685,7 @@ internal abstract class CStagePerfCommonScreen : CStage
             tJumpInSong(0);
             foreach (PerformanceData data in partData)
             {
-                data.Reset(bIsAutoPlay, CDTXMania.ConfigIni.nRisky);
+                data.Reset(PlayerOn(data.Part), bIsAutoPlay, CDTXMania.ConfigIni.nRisky);
             }
             return;
         }
@@ -859,17 +865,52 @@ internal abstract class CStagePerfCommonScreen : CStage
     {
         if (txWailingFrame != null && CDTXMania.ConfigIni.bGuitarEnabled)
         {
-            if (CDTXMania.DTX.bHasChips.Guitar)
+            if (CDTXMania.DTX.bHasChips[(int)PartOf(EPlayer.Guitar1)])
             {
                 txWailingFrame.tDraw2D(GtWailingFrameX, GtWailingFrameY);
             }
-            if (CDTXMania.DTX.bHasChips.Bass)
+            if (CDTXMania.DTX.bHasChips[(int)PartOf(EPlayer.Guitar2)])
             {
                 txWailingFrame.tDraw2D(BsWailingFrameX, BsWailingFrameY);
             }
         }
     }
     
+
+    //the chart part the player is on
+    public static EInstrumentPart PartOf(EPlayer player) => (EInstrumentPart)CDTXMania.ConfigIni.ChartFor(player);
+
+    //the player on this chart part. A part nobody plays keeps the player it belongs to by default
+    public static EPlayer PlayerOn(EInstrumentPart part)
+    {
+        if (part == EInstrumentPart.DRUMS)
+        {
+            return EPlayer.Drums;
+        }
+
+        if (PartOf(EPlayer.Guitar1) == part)
+        {
+            return EPlayer.Guitar1;
+        }
+
+        if (PartOf(EPlayer.Guitar2) == part)
+        {
+            return EPlayer.Guitar2;
+        }
+
+        return part == EInstrumentPart.GUITAR ? EPlayer.Guitar1 : EPlayer.Guitar2;
+    }
+
+    private GuitarPerformance? MakeGuitar(EPlayer player)
+    {
+        if (!IsPlayed(player))
+        {
+            return null;
+        }
+
+        EChartPart chart = CDTXMania.ConfigIni.ChartFor(player);
+        return new GuitarPerformance(player, chart, partData[(int)chart], timeline, bIsAutoPlay);
+    }
 
     public static bool IsPlayed(EPlayer player)
     {
@@ -882,10 +923,17 @@ internal abstract class CStagePerfCommonScreen : CStage
         };
     }
 
-    //todo: transitional, delete with the guitar and bass swap. A chart part is played when a player plays it.
-    //Each player is still locked to the part with its own value
-    public static bool IsPlayed(EInstrumentPart part) =>
-        part != EInstrumentPart.UNKNOWN && IsPlayed((EPlayer)part);
+    //is any player on this chart part
+    public static bool PartIsPlayed(EInstrumentPart part)
+    {
+        if (part == EInstrumentPart.DRUMS)
+        {
+            return IsPlayed(EPlayer.Drums);
+        }
+
+        return (IsPlayed(EPlayer.Guitar1) && PartOf(EPlayer.Guitar1) == part)
+               || (IsPlayed(EPlayer.Guitar2) && PartOf(EPlayer.Guitar2) == part);
+    }
 
     protected bool UpdateChips()
     {
@@ -913,7 +961,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                 continue;
             }
 
-            if (pChip.eInstrumentPart != EInstrumentPart.UNKNOWN && !IsPlayed(pChip.eInstrumentPart))
+            if (pChip.eInstrumentPart != EInstrumentPart.UNKNOWN && !PartIsPlayed(pChip.eInstrumentPart))
             {
                 sequencer.UpdateUnplayedNote(pChip);
                 continue;
@@ -925,7 +973,7 @@ internal abstract class CStagePerfCommonScreen : CStage
             if ( CDTXMania.ConfigIni.eTargetGhost[instIndex] != ETargetGhostData.NONE &&
                  CDTXMania.listTargetGhsotLag[instIndex] != null &&
                  pChip.eInstrumentPart != EInstrumentPart.UNKNOWN &&
-                 pChip.nDistanceFromBar[instIndex] < 0 )
+                 pChip.nDistanceFromBar[(int)PlayerOn(pChip.eInstrumentPart)] < 0 )
             {
                 if ( !pChip.bTargetGhost判定済み )
                 {
@@ -1419,8 +1467,7 @@ internal abstract class CStagePerfCommonScreen : CStage
 
     protected void tHandleInput_GuitarBass(EPlayer player)
     {
-        //todo: transitional, delete with the guitar and bass swap. This player is still fixed to its own chart part
-        EInstrumentPart inst = player == EPlayer.Guitar1 ? EInstrumentPart.GUITAR : EInstrumentPart.BASS;
+        EInstrumentPart inst = PartOf(player);
         GuitarPerformance? guitar = GuitarFor(inst);
         if (guitar == null)
         {
@@ -1466,11 +1513,12 @@ internal abstract class CStagePerfCommonScreen : CStage
         }
     }
 
-    protected virtual void UpdateGraph(EInstrumentPart part) { }
+    protected virtual void UpdateGraph(EPlayer player) { }
 
     protected void ApplyGuitarEvents(GuitarPerformance guitar)
     {
-        EInstrumentPart side = guitar.Side;
+        EInstrumentPart part = (EInstrumentPart)guitar.Chart;
+        EInstrumentPart slot = guitar.Side;
         GuitarPlayfield playfield = guitarPlayfields[(int)guitar.Player - 1];
         foreach (GuitarEvent e in guitar.Events)
         {
@@ -1485,17 +1533,17 @@ internal abstract class CStagePerfCommonScreen : CStage
             switch (e.Kind)
             {
                 case EGuitarEvent.AutoNote:
-                    sequencer.PlaySound(e.Chip, AudioMixer.Timer.nResetAtMs + e.Time, side, CDTXMania.DTX.nモニタを考慮した音量(side), false, e.ShiftPitch);
+                    sequencer.PlaySound(e.Chip, AudioMixer.Timer.nResetAtMs + e.Time, part, CDTXMania.DTX.nモニタを考慮した音量(slot), false, e.ShiftPitch);
                     break;
 
                 case EGuitarEvent.PickedNote:
-                    sequencer.PlaySound(e.Chip, AudioMixer.Timer.nSystemTimeMs, side, CDTXMania.ConfigIni.n手動再生音量, CDTXMania.ConfigIni.b演奏音を強調する[(int)side], e.ShiftPitch);
+                    sequencer.PlaySound(e.Chip, AudioMixer.Timer.nSystemTimeMs, part, CDTXMania.ConfigIni.n手動再生音量, CDTXMania.ConfigIni.b演奏音を強調する[(int)slot], e.ShiftPitch);
                     break;
 
                 case EGuitarEvent.EmptyPick:
                     if (e.Chip != null)
                     {
-                        sequencer.PlaySound(e.Chip, AudioMixer.Timer.nSystemTimeMs, side, CDTXMania.ConfigIni.n手動再生音量, CDTXMania.ConfigIni.b演奏音を強調する[(int)side], e.ShiftPitch);
+                        sequencer.PlaySound(e.Chip, AudioMixer.Timer.nSystemTimeMs, part, CDTXMania.ConfigIni.n手動再生音量, CDTXMania.ConfigIni.b演奏音を強調する[(int)slot], e.ShiftPitch);
                     }
                     if (e.Miss)
                     {
@@ -1509,7 +1557,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                     {
                         playfield.Progress(e.Chip.nPlaybackTimeMs, e.Judgement);
                     }
-                    UpdateGraph(e.Chip.eInstrumentPart);
+                    UpdateGraph(guitar.Player);
                     break;
 
                 case EGuitarEvent.HoldBonus:
@@ -1517,7 +1565,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                     break;
 
                 case EGuitarEvent.HoldRelease:
-                    sequencer.StopGuitarSound(side);
+                    sequencer.StopGuitarSound(part);
                     break;
 
                 case EGuitarEvent.Wail:

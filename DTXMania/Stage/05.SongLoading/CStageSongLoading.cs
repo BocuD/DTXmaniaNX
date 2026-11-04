@@ -204,11 +204,6 @@ internal class CStageSongLoading : CStage
             // Read ghost data by config
             // It does not exist a ghost file for 'perfect' actually
             string[] inst = ["dr", "gt", "bs"];
-            if (CDTXMania.ConfigIni.bIsSwappedGuitarBass)
-            {
-                inst[1] = "bs";
-                inst[2] = "gt";
-            }
 
             for (int instIndex = 0; instIndex < inst.Length; ++instIndex)
             {
@@ -497,11 +492,6 @@ internal class CStageSongLoading : CStage
                 // #35411 2015.08.19 chnmr0 add ゴースト機能のためList chip 読み込み後楽器パート出現順インデックスを割り振る
                 stGhostLag = new();
                 string[] ghostInst = ["dr", "gt", "bs"];
-                if (CDTXMania.ConfigIni.bIsSwappedGuitarBass)
-                {
-                    ghostInst[1] = "bs";
-                    ghostInst[2] = "gt";
-                }
 
                 for (int instIndex = 0; instIndex < ghostInst.Length; ++instIndex)
                 {

@@ -64,10 +64,10 @@ public class GuitarPlayfield : Playfield
         ShowJudgement(judgementLane, judgement, lag);
     }
 
-    internal void Setup(EInstrumentPart chartPart, CActPerfGuitarLaneFlushGB flush, CActPerfGuitarWailingBonus wailing)
+    internal void Setup(CActPerfGuitarLaneFlushGB flush, CActPerfGuitarWailingBonus wailing)
     {
-        part = chartPart;
-        judgementLane = 12 + (int)chartPart;
+        part = CStagePerfCommonScreen.PartOf(player);
+        judgementLane = 12 + (int)player;
         laneFlush = flush;
         wailingBonus = wailing;
         EnsureContent();
@@ -82,7 +82,7 @@ public class GuitarPlayfield : Playfield
         loopMarkers = AddPart(new LoopMarkers(), "LoopMarkers", CStagePerfCommonScreen.ChipsLayer);
         loopMarkers.size.Y = 720;
 
-        guitarChips = AddPart(new GuitarChipRenderer(part), "Chips", CStagePerfCommonScreen.ChipsLayer);
+        guitarChips = AddPart(new GuitarChipRenderer(player, part), "Chips", CStagePerfCommonScreen.ChipsLayer);
         guitarChips.lanes = layout;
         chipRenderer = guitarChips;
 

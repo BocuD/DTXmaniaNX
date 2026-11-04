@@ -145,6 +145,24 @@ internal partial class CDTXMania
         }
     }
 
+    public static STHitRanges HitRangesFor(EPlayer player, EChartPart part)
+    {
+        if (player == EPlayer.Drums)
+        {
+            return stDrumHitRanges;
+        }
+
+        STHitRanges windows = player == EPlayer.Guitar1 ? ConfigIni.stGuitarHitRanges : ConfigIni.stBassHitRanges;
+
+        SongNode parentNode = chosenSong?.parent;
+        if (parentNode?.nodeType != SongNode.ENodeType.BOX)
+        {
+            return windows;
+        }
+
+        return STHitRanges.tCompose(part == EChartPart.Guitar ? parentNode.stGuitarHitRanges : parentNode.stBassHitRanges, windows);
+    }
+
     public static CPad Pad { get; private set; }
 
     public static Input Input { get; private set; }

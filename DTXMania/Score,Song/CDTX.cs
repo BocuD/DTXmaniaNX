@@ -62,7 +62,6 @@ public class CDTX : CActivity
         RGBYP
     };
 
-
     // クラス
     public class CAVIPAN
     {
@@ -408,7 +407,6 @@ public class CDTX : CActivity
 
         #endregion
     }
-
 
     // 構造体
 
@@ -871,30 +869,6 @@ public class CDTX : CActivity
             }
         }
 
-        public void swapGuitarBassLaneChipCounters()
-        {
-            int temp_R = GuitarR;
-            int temp_G = GuitarG;
-            int temp_B = GuitarB;
-            int temp_Y = GuitarY;
-            int temp_P = GuitarP;
-            int temp_Open = GuitarOpen;
-
-            GuitarR = BassR;
-            GuitarG = BassG;
-            GuitarB = BassB;
-            GuitarY = BassY;
-            GuitarP = BassP;
-            GuitarOpen = BassOpen;
-
-            BassR = temp_R;
-            BassG = temp_G;
-            BassB = temp_B;
-            BassY = temp_Y;
-            BassP = temp_P;
-            BassOpen = temp_Open;
-        }
-
         public int chipCountInLane(ELane eLane)
         {
             switch (eLane)
@@ -1047,7 +1021,6 @@ public class CDTX : CActivity
         public bool YPBass;
         public bool AVI;
 
-
         public bool this[int index]
         {
             get
@@ -1101,7 +1074,6 @@ public class CDTX : CActivity
             }
         }
     }
-
 
     // プロパティ
 
@@ -1238,7 +1210,6 @@ public class CDTX : CActivity
         bForceXGChart = false;
         bVol137to100 = false;
 
-
         #region [ 2011.1.1 yyagi GDA->DTX変換テーブル リファクタ後 ]
 
         STGDAPARAM[] stgdaparamArray = new STGDAPARAM[]
@@ -1292,7 +1263,6 @@ public class CDTX : CActivity
         OnActivate();
         tRead(strFileName, bHeaderOnly, db再生速度, nBGMAdjust);
     }
-
 
     // メソッド
 
@@ -1720,7 +1690,6 @@ public class CDTX : CActivity
         }
     }
 
-
     public void t譜面仕様変更(EInstrumentPart part, Core.EType eNumOfLanes)
     {
         if ((part == EInstrumentPart.DRUMS) && (eNumOfLanes != Core.EType.A))
@@ -1777,7 +1746,6 @@ public class CDTX : CActivity
                                 num4 = chip.nChannelNumber;
                                 num6 = chip.nPlaybackPosition;
                                 continue;
-
 
                             case EChannel.Snare:
                             case EChannel.BassDrum:
@@ -3115,7 +3083,6 @@ public class CDTX : CActivity
         }
     }
 
-
     private bool t入力_コメントをスキップする( ref CharEnumerator ce )
     {
         // 改行が現れるまでをコメントと見なしてスキップする。
@@ -4285,104 +4252,6 @@ public class CDTX : CActivity
         return true;
     }
 
-    /// <summary>
-    /// Swap infos between Guitar and Bass (notes, level, nVisibleChipsCount, bチップがある)
-    /// </summary>
-    public void SwapGuitarBassInfos() // #24063 2011.1.24 yyagi ギターとベースの譜面情報入替
-    {
-        for (int i = listChip.Count - 1; i >= 0; i--)
-        {
-            if (listChip[i].eInstrumentPart == EInstrumentPart.BASS)
-            {
-                listChip[i].eInstrumentPart = EInstrumentPart.GUITAR;
-                if (listChip[i].nChannelNumber >= EChannel.Bass_Open &&
-                    listChip[i].nChannelNumber <= EChannel.Bass_Wailing)
-                    listChip[i].nChannelNumber -= (EChannel.Bass_Open - EChannel.Guitar_Open);
-                else if (listChip[i].nChannelNumber == EChannel.Bass_xxxYx ||
-                         listChip[i].nChannelNumber == EChannel.Bass_xxBYx)
-                    listChip[i].nChannelNumber -= 0x32;
-                else if (listChip[i].nChannelNumber >= EChannel.Bass_xGxYx &&
-                         listChip[i].nChannelNumber <= EChannel.Bass_xxBxP)
-                    listChip[i].nChannelNumber -= 0x33;
-                else if (listChip[i].nChannelNumber >= EChannel.Bass_xGxxP &&
-                         listChip[i].nChannelNumber <= EChannel.Bass_RxxxP)
-                    listChip[i].nChannelNumber -= 0x3D;
-                else if (listChip[i].nChannelNumber >= EChannel.Bass_RxBxP &&
-                         listChip[i].nChannelNumber <= EChannel.Bass_RGBxP)
-                    listChip[i].nChannelNumber -= 0x34;
-                else if (listChip[i].nChannelNumber >= EChannel.Bass_xxxYP &&
-                         listChip[i].nChannelNumber <= EChannel.Bass_RGBYP)
-                    listChip[i].nChannelNumber -= 0x35;
-            }
-            else if (listChip[i].eInstrumentPart == EInstrumentPart.GUITAR)
-            {
-                listChip[i].eInstrumentPart = EInstrumentPart.BASS;
-
-                if (listChip[i].nChannelNumber >= EChannel.Guitar_Open &&
-                    listChip[i].nChannelNumber <= EChannel.Guitar_Wailing)
-                    listChip[i].nChannelNumber += (EChannel.Bass_Open - EChannel.Guitar_Open);
-                else if (listChip[i].nChannelNumber == EChannel.Guitar_xxxYx ||
-                         listChip[i].nChannelNumber == EChannel.Guitar_xxBYx)
-                    listChip[i].nChannelNumber += 0x32;
-                else if (listChip[i].nChannelNumber >= EChannel.Guitar_xGxYx &&
-                         listChip[i].nChannelNumber <= EChannel.Guitar_xxBxP)
-                    listChip[i].nChannelNumber += 0x33;
-                else if (listChip[i].nChannelNumber >= EChannel.Guitar_xGxxP &&
-                         listChip[i].nChannelNumber <= EChannel.Guitar_RxxxP)
-                    listChip[i].nChannelNumber += 0x3D;
-                else if (listChip[i].nChannelNumber >= EChannel.Guitar_RxBxP &&
-                         listChip[i].nChannelNumber <= EChannel.Guitar_RGBxP)
-                    listChip[i].nChannelNumber += 0x34;
-                else if (listChip[i].nChannelNumber >= EChannel.Guitar_xxxYP &&
-                         listChip[i].nChannelNumber <= EChannel.Guitar_RGBYP)
-                    listChip[i].nChannelNumber += 0x35;
-            }
-            //Long Notes
-            else if (listChip[i].nChannelNumber == EChannel.Guitar_LongNote)
-            {
-                listChip[i].nChannelNumber = EChannel.Bass_LongNote;
-            }
-            else if (listChip[i].nChannelNumber == EChannel.Bass_LongNote)
-            {
-                listChip[i].nChannelNumber = EChannel.Guitar_LongNote;
-            }
-            //Wailing
-            else if
-                (listChip[i].nChannelNumber ==
-                 EChannel.Guitar_Wailing) // #25215 2011.5.21 yyagi wailingはE楽器パート.UNKNOWNが割り当てられているので個別に対応
-            {
-                listChip[i].nChannelNumber += (EChannel.Bass_Open - EChannel.Guitar_Open);
-            }
-            else if
-                (listChip[i].nChannelNumber ==
-                 EChannel.Bass_Wailing) // #25215 2011.5.21 yyagi wailingはE楽器パート.UNKNOWNが割り当てられているので個別に対応
-            {
-                listChip[i].nChannelNumber -= (EChannel.Bass_Open - EChannel.Guitar_Open);
-            }
-        }
-
-        int t = LEVEL.Bass;
-        LEVEL.Bass = LEVEL.Guitar;
-        LEVEL.Guitar = t;
-
-        t = LEVELDEC.Bass;
-        LEVELDEC.Bass = LEVELDEC.Guitar;
-        LEVELDEC.Guitar = t;
-
-        t = nVisibleChipsCount.Bass;
-        nVisibleChipsCount.Bass = nVisibleChipsCount.Guitar;
-        nVisibleChipsCount.Guitar = t;
-
-        //Swap Guitar Bass Lane chip info
-        nVisibleChipsCount.swapGuitarBassLaneChipCounters();
-
-        bool ts = bHasChips.Bass;
-        bHasChips.Bass = bHasChips.Guitar;
-        bHasChips.Guitar = ts;
-
-//			SwapGuitarBassInfos_AutoFlags();
-    }
-
     // CActivity 実装
 
     public override void OnActivate()
@@ -4506,7 +4375,6 @@ public class CDTX : CActivity
         }
     }
 
-
     // Other
 
     #region [ private ]
@@ -4535,7 +4403,6 @@ public class CDTX : CActivity
 
     private int lineNumber;
     private int nCurrentRandomNumber;
-
 
     private int n内部番号BPM1to;
     private int n内部番号WAV1to;
@@ -5932,7 +5799,6 @@ public class CDTX : CActivity
 
         #endregion
 
-
         var bmp = new CBMP()
         {
             n番号 = zz,
@@ -6454,7 +6320,6 @@ public class CDTX : CActivity
 
         #endregion
 
-
         // (2) パラメータを処理。
 
         #region [ nサイズ値 を取得する。値は 0～100 に収める。]
@@ -6935,7 +6800,6 @@ public class CDTX : CActivity
 
         #endregion
 
-
         // (3) Process Parameter
 
         if (string.IsNullOrEmpty(strParameter)) // パラメータはnullまたは空文字列ではないこと。
@@ -6974,7 +6838,6 @@ public class CDTX : CActivity
         //-----------------
 
         #endregion
-
 
         // (4) パラメータをオブジェクト数値に分解して配置する。
 

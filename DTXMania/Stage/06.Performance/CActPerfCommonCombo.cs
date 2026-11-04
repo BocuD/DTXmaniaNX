@@ -513,14 +513,16 @@ internal class CActPerfCommonCombo : CActivity
         base.OnManagedCreateResources();
     }
 
-    public void Draw(Matrix4x4 origin, int part)
+    public void Draw(Matrix4x4 origin, EPlayer player)
     {
         if (!bActivated)
             return;
 
+        PerformanceData played = parts[(int)CStagePerfCommonScreen.PartOf(player)];
+
         for (int i = 2; i >= 0; i--)
         {
-            if (i != part)
+            if (i != (int)player)
             {
                 continue;
             }
@@ -529,15 +531,15 @@ internal class CActPerfCommonCombo : CActivity
 
             #region [ 前回と今回の COMBO 値から、e今回の状態遷移イベントを決定する。]
             //-----------------
-            if (status[i].n現在表示中のCOMBO値 == parts[ i ].Combo)
+            if (status[i].n現在表示中のCOMBO値 == played.Combo)
             {
                 e今回の状態遷移イベント = EEvent.同一数値;
             }
-            else if (status[i].n現在表示中のCOMBO値 > parts[ i ].Combo)
+            else if (status[i].n現在表示中のCOMBO値 > played.Combo)
             {
                 e今回の状態遷移イベント = EEvent.ミス通知;
             }
-            else if ((status[i].n現在表示中のCOMBO値 < CDTXMania.ConfigIni.n表示可能な最小コンボ数[i]) && (parts[ i ].Combo < CDTXMania.ConfigIni.n表示可能な最小コンボ数[i]))
+            else if ((status[i].n現在表示中のCOMBO値 < CDTXMania.ConfigIni.n表示可能な最小コンボ数[i]) && (played.Combo < CDTXMania.ConfigIni.n表示可能な最小コンボ数[i]))
             {
                 e今回の状態遷移イベント = EEvent.非表示;
             }
@@ -585,7 +587,7 @@ internal class CActPerfCommonCombo : CActivity
                         goto Retry;
                     }
 
-                    status[i].n現在表示中のCOMBO値 = parts[ i ].Combo;
+                    status[i].n現在表示中のCOMBO値 = played.Combo;
                     break;
                 //-----------------
                 #endregion
@@ -609,19 +611,19 @@ internal class CActPerfCommonCombo : CActivity
                         status[i].n前回の時刻_ジャンプ用 = CDTXMania.Timer.nCurrentTime;
                     }
 
-                    status[i].n現在表示中のCOMBO値 = parts[ i ].Combo;
+                    status[i].n現在表示中のCOMBO値 = played.Combo;
                     switch (i)
                     {
                         case 0:
-                            tDrawCombo_Drums(origin, parts[ i ].Combo, status[i].nジャンプインデックス値);
+                            tDrawCombo_Drums(origin, played.Combo, status[i].nジャンプインデックス値);
                             break;
 
                         case 1:
-                            tDrawCombo_Guitar(origin, parts[ i ].Combo, status[i].nジャンプインデックス値);
+                            tDrawCombo_Guitar(origin, played.Combo, status[i].nジャンプインデックス値);
                             break;
 
                         case 2:
-                            tDrawCombo_Bass(origin, parts[ i ].Combo, status[i].nジャンプインデックス値);
+                            tDrawCombo_Bass(origin, played.Combo, status[i].nジャンプインデックス値);
                             break;
                     }
                     break;
@@ -643,7 +645,7 @@ internal class CActPerfCommonCombo : CActivity
                         status[i].e現在のモード = EMode.非表示中;
                         goto Retry;
                     }
-                    status[i].n現在表示中のCOMBO値 = parts[ i ].Combo;
+                    status[i].n現在表示中のCOMBO値 = played.Combo;
                     break;
                 //-----------------
                 #endregion

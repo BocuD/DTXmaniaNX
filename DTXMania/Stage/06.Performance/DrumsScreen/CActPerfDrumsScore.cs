@@ -48,7 +48,7 @@ internal class CActPerfDrumsScore : CActPerfCommonScore
         }
     }
 
-    public override void Draw(Matrix4x4 origin, EInstrumentPart part)
+    public override void Draw(Matrix4x4 origin, EPlayer player)
     {
         if (bActivated)
         {

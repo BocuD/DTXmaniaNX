@@ -572,7 +572,11 @@ public class CStageSongSelectionNew : CStage
         }
 
         CDTXMania.Skin.soundChange.tPlay();
-        CDTXMania.ConfigIni.bIsSwappedGuitarBass = !CDTXMania.ConfigIni.bIsSwappedGuitarBass;
+        //todo: transitional, both players still move together. Once the display sites ask which part a
+        //player is on, this moves only the player that entered the command
+        CConfigIni config = CDTXMania.ConfigIni;
+        config.guitar1Chart = CConfigIni.OtherGuitarPart(config.guitar1Chart);
+        config.guitar2Chart = CConfigIni.OtherGuitarPart(config.guitar2Chart);
         ChangeSelection(selectedNode, selectedChart);
     }
 
