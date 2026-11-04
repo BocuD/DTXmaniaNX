@@ -222,7 +222,6 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		PerformanceData data = DataFor(part);
 		int slot = (int)player;
 		actGraph.dbグラフ値現在_渡 = data.CalculateSkill();
-		data.SetAchievementRate(bIsTrainingMode ? 0 : actGraph.dbグラフ値現在_渡);
 
 		if (!CDTXMania.ConfigIni.bGraph有効[slot])
 		{

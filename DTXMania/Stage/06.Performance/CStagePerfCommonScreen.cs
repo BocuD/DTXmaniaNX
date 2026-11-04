@@ -483,13 +483,9 @@ internal abstract class CStagePerfCommonScreen : CStage
                 actGraph.bIsTrainingMode = value;
             }
 
-            //training has no achievement rate
-            if (value)
+            foreach (PerformanceData data in partData)
             {
-                foreach (PerformanceData data in partData)
-                {
-                    data.SetAchievementRate(0);
-                }
+                data.IsTraining = value;
             }
         }
     }

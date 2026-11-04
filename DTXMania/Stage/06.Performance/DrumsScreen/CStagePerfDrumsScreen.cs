@@ -264,8 +264,6 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
         {
             actGraph.dbグラフ値現在_渡 = 100 * (DrumsData.HitCountExclAuto.Perfect * 17 + DrumsData.HitCountExclAuto.Great * 7 + DrumsData.MaxCombo * 3) / (20.0 * chips);
         }
-
-        DrumsData.SetAchievementRate(bIsTrainingMode ? 0 : actGraph.dbグラフ値現在_渡);
     }
 
     private void ApplyDrumsEvents()

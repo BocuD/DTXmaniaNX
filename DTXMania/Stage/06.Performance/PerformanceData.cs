@@ -11,7 +11,6 @@ public class PerformanceData
     private HitCounts hitCountExclAuto;
     private HitCounts hitCountIncAuto;
     private TimingCounts timingHitCount;
-    private double achievementRate;
     private int combo;
     private int maxCombo;
     private double score;
@@ -48,7 +47,10 @@ public class PerformanceData
     public HitCounts HitCountExclAuto => hitCountExclAuto;
     public HitCounts HitCountIncAuto => hitCountIncAuto;
     public TimingCounts TimingHitCount => timingHitCount;
-    public double AchievementRate => achievementRate;
+    //a training play does not count, so it is worth nothing
+    public bool IsTraining { get; set; }
+
+    public double AchievementRate => IsTraining ? 0 : CalculateSkill();
     public int Combo => combo;
     public int MaxCombo => maxCombo;
     public double Score => score;
@@ -112,7 +114,6 @@ public class PerformanceData
         hitCountExclAuto = default;
         hitCountIncAuto = default;
         timingHitCount = default;
-        achievementRate = 0;
         combo = 0;
         maxCombo = 0;
         score = 0;
@@ -223,11 +224,6 @@ public class PerformanceData
     public void AddClearBonus(bool excellent)
     {
         score += excellent ? 30000 : 15000;
-    }
-
-    public void SetAchievementRate(double rate)
-    {
-        achievementRate = rate;
     }
 
     //sets the chip's lag; the combo is kept for recording a ghost
