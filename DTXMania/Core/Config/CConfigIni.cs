@@ -414,6 +414,13 @@ internal partial class CConfigIni
 		_ => EChartPart.Drums
 	};
 
+	public bool IsPlayed(EPlayer player) => player switch
+	{
+		EPlayer.Drums => !bGuitarRevolutionMode,
+		EPlayer.Guitar1 => bGuitarRevolutionMode,
+		_ => bGuitarRevolutionMode && !bSingleGuitar
+	};
+
 	//the player on this chart part. A part nobody plays keeps the player it belongs to by default
 	public EPlayer PlayerOn(EChartPart part)
 	{

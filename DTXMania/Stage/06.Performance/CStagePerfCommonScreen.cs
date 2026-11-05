@@ -889,16 +889,7 @@ internal abstract class CStagePerfCommonScreen : CStage
         return new GuitarPerformance(player, chart, partData[(int)chart], timeline, bIsAutoPlay);
     }
 
-    public static bool IsPlayed(EPlayer player)
-    {
-        bool guitarScreen = CDTXMania.ConfigIni.bGuitarRevolutionMode;
-        return player switch
-        {
-            EPlayer.Drums => !guitarScreen,
-            EPlayer.Guitar1 => guitarScreen,
-            _ => guitarScreen && !CDTXMania.ConfigIni.bSingleGuitar
-        };
-    }
+    public static bool IsPlayed(EPlayer player) => CDTXMania.ConfigIni.IsPlayed(player);
 
     //is any player on this chart part
     public static bool PartIsPlayed(EInstrumentPart part)

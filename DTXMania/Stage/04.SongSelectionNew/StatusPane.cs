@@ -1,6 +1,7 @@
 using DTXMania.UI.Skin;
 using System.Numerics;
 using DTXMania.Core;
+using DTXMania.Core.Framework;
 using DTXMania.SongDb;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.DynamicElements;
@@ -9,11 +10,13 @@ using DTXMania.UI.Inspector;
 
 namespace DTXMania;
 
-/// <summary>Where the pane's difficulty frame sits, for the component to bind to.</summary>
+/// <summary>Where one player's difficulty cursor sits on a pane, for the component to bind to.</summary>
 public sealed class StatusPaneFrame
 {
-    [DataField] public bool Shown { get; internal set; } = true;
+    [DataField] public bool Shown { get; internal set; }
     [DataField] public double Y { get; internal set; }
+
+    [DataField] public bool ShowsLabel { get; internal set; }
 }
 
 public class StatusPane : UIGroup, IUIItemSource
@@ -45,9 +48,10 @@ public class StatusPane : UIGroup, IUIItemSource
     private readonly ChartRowData[] rows = new ChartRowData[DifficultyCount];
     private BaseTexture[]? rankIcons;
 
-    //the frame the pane puts on the difficulty being played, for the component to bind to
+    //a cursor per player that can be on this pane's part: the drums player or guitar 1, and guitar 2
     private readonly UIDataContext paneData = new();
     private readonly StatusPaneFrame frame = new();
+    private readonly StatusPaneFrame frame2 = new();
 
     public int ItemCount => DifficultyCount;
     public object GetItem(int index) => rows[index];
@@ -76,6 +80,7 @@ public class StatusPane : UIGroup, IUIItemSource
         Array.Fill(rows, ChartRowData.Empty);
 
         paneData.RegisterObject("Frame", () => frame);
+        paneData.RegisterObject("Frame2", () => frame2);
         dataContext = paneData;
     }
 
@@ -105,13 +110,21 @@ public class StatusPane : UIGroup, IUIItemSource
 
     private void UpdateDifficultyFrame()
     {
-        //with a single guitar the frame belongs only to whichever of guitar/bass is being played
-        frame.Shown = !CDTXMania.ConfigIni.bGuitarEnabled
-                      || !CDTXMania.ConfigIni.bSingleGuitar
-                      || instrument == (CDTXMania.ConfigIni.bIsSwappedGuitarBass ? EInstrumentPart.BASS : EInstrumentPart.GUITAR);
-
+        CConfigIni config = CDTXMania.ConfigIni;
         int level = CDTXMania.StageManager.stageSongSelectionNew.GetClosestLevelToTargetForSong(currentSong);
-        frame.Y = 5.0f - VerticalSpacing * level;
+
+        bool bothGuitars = config.IsPlayed(EPlayer.Guitar1) && config.IsPlayed(EPlayer.Guitar2);
+
+        Place(frame, instrument == EInstrumentPart.DRUMS ? EPlayer.Drums : EPlayer.Guitar1, bothGuitars, level);
+        Place(frame2, EPlayer.Guitar2, bothGuitars, level);
+    }
+
+    private void Place(StatusPaneFrame cursor, EPlayer player, bool bothGuitars, int level)
+    {
+        CConfigIni config = CDTXMania.ConfigIni;
+        cursor.Shown = config.IsPlayed(player) && config.ChartFor(player) == (EChartPart)instrument;
+        cursor.ShowsLabel = cursor.Shown && bothGuitars;
+        cursor.Y = 5.0f - VerticalSpacing * level;
     }
 
     private ChartRowData ResolveRow(int difficulty)
@@ -167,25 +180,47 @@ public class StatusPane : UIGroup, IUIItemSource
             renderOrder = 0
         });
 
-        root.AddChild(new UIImage
-        {
-            name = "DifficultyFrame",
-            imageSource = ImageSource.File,
-            image = SkinResource.System(@"Graphics\5_difficultyframe.png"),
-            pivot = new Vector2(0.0f, 1.0f),
-            position = new Vector3(-7.0f, 5.0f, 0.0f),
-            renderOrder = 1,
-            bindings =
-            {
-                new UIBinding("position.Y", "Frame.Y"),
-                new UIBinding("isVisible", "Frame.Shown")
-            }
-        });
+        root.AddChild(PlayerCursor("Player2Cursor", "Frame2", new Color4(0x79 / 255f, 0xAA / 255f, 0xFF / 255f), "P2", new Vector3(210.0f, -3.0f, 0.0f), new Vector2(1.0f, 1.0f))).renderOrder = 3;
+        root.AddChild(PlayerCursor("Player1Cursor", "Frame", Color4.White, "P1", new Vector3(2.0f, -93.0f, 0.0f), new Vector2(0.0f, 0.0f))).renderOrder = 4;
 
         root.AddChild(new UIItemsGroup("Rows", ChartRow)
         {
             itemOffset = new Vector3(0.0f, -VerticalSpacing, 0.0f),
             renderOrder = 2
+        });
+
+        return root;
+    }
+    private static UIGroup PlayerCursor(string name, string source, Color4 color, string label, Vector3 labelPosition, Vector2 labelPivot)
+    {
+        UIGroup root = new(name)
+        {
+            bindings =
+            {
+                new UIBinding("position.Y", source + ".Y"),
+                new UIBinding("isVisible", source + ".Shown")
+            }
+        };
+
+        root.AddChild(new UIImage
+        {
+            name = "Frame",
+            imageSource = ImageSource.File,
+            image = SkinResource.System(@"Graphics\5_difficultyframe.png"),
+            pivot = new Vector2(0.0f, 1.0f),
+            position = new Vector3(-7.0f, 0.0f, 0.0f),
+            color = color
+        });
+
+        root.AddChild(new UIText(label, 18.0f)
+        {
+            name = "Label",
+            font = SkinResource.System("texgyreadventor-bold.otf"),
+            fillColor = color,
+            outlineWidth = 2.0f,
+            position = labelPosition,
+            pivot = labelPivot,
+            bindings = { new UIBinding("isVisible", source + ".ShowsLabel") }
         });
 
         return root;
