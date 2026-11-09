@@ -9,11 +9,11 @@ namespace DTXMania.Drawable;
 
 public class JudgementString : UIGroup
 {
-    private static BaseTexture[] stringTextures;
-    private static BaseTexture barTexture;
-    private static BaseTexture autoBarTexture;
+    private BaseTexture[] stringTextures;
+    private BaseTexture barTexture;
+    private BaseTexture autoBarTexture;
 
-    private static void CacheTextures()
+    private void CacheTextures()
     {
         barTexture = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\Note\Judge\judge_bar.png"));
         autoBarTexture = BaseTexture.LoadFromPath(CSkin.Path(@"Graphics\Note\Judge\judge_bar_auto.png"));
@@ -56,7 +56,7 @@ public class JudgementString : UIGroup
     {
         //a gameplay element is runtime-only: it never appears in a saved layout
         dontSerialize = true;
-        if (barTexture == null || !barTexture.IsValid()) CacheTextures();
+        CacheTextures();
         
         name = $"JudgementString";
         
