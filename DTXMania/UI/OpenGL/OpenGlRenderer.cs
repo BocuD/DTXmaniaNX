@@ -41,6 +41,8 @@ public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
     private BlendMode? _activeBlendMode;
     private uint _boundTexture;
 
+    private readonly Dictionary<string, OpenGlTexture> _fileTextures = new(StringComparer.OrdinalIgnoreCase);
+
     //sprite batch: quads accumulate here (vertices already transformed to screen space, color baked
     //per vertex) across texture/blend changes, each change starting a new segment. A flush uploads
     //every pending vertex in one buffer upload and draws each segment from its offset, so a texture
@@ -261,7 +263,17 @@ public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
 
         // Clear tracked textures - they are no longer valid after dispose
         _trackedTextures.Clear();
+        _fileTextures.Clear();
     }
+
+    internal bool TryGetFileTexture(string fullPath, out OpenGlTexture texture)
+        => _fileTextures.TryGetValue(fullPath, out texture!);
+
+    internal void AddFileTexture(string fullPath, OpenGlTexture texture) => _fileTextures[fullPath] = texture;
+
+    internal void RemoveFileTexture(string fullPath) => _fileTextures.Remove(fullPath);
+
+    internal void ForgetFileTextures() => _fileTextures.Clear();
 
     internal void DeleteTexture(uint textureId)
     {

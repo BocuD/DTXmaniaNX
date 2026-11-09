@@ -51,6 +51,11 @@ public abstract class BaseTexture : IDisposable
         return EnsureFactoryConfigured().CreateSolidColor(color);
     }
 
+    public static void ForgetFileTextures()
+    {
+        EnsureFactoryConfigured().ForgetFileTextures();
+    }
+
     //stubs for non recreated Device based render code
     private Matrix4x4 scaleMatrix => UICanvas.toWindow;
     
@@ -209,4 +214,5 @@ public abstract class BaseTextureFactory
     public abstract BaseTexture LoadFromMemory(ReadOnlySpan<byte> rgbaPixels, int width, int height, string name = "Texture");
     public abstract BaseTexture CreateEmpty(int width, int height, string name = "DynamicTexture");
     public abstract BaseTexture CreateSolidColor(Color4 color);
+    public abstract void ForgetFileTextures();
 }

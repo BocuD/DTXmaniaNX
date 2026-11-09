@@ -160,6 +160,8 @@ internal class CSkin : IDisposable
 	/// </summary>
 	public void PrepareReloadSkin()
 	{
+		UI.Drawable.BaseTexture.ForgetFileTextures();
+
 		Trace.TraceInformation( "SkinPath設定: {0}",
 			( strBoxDefSkinSubfolderFullName == "" ) ?
 				strSystemSkinSubfolderFullName :
