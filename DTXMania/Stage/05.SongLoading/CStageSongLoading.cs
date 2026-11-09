@@ -556,11 +556,6 @@ internal class CStageSongLoading : CStage
                 }
 
                 string[] reverseInst = ["dr", "gt", "bs"];
-                if (CDTXMania.ConfigIni.bIsSwappedGuitarBass)
-                {
-                    reverseInst[1] = "bs";
-                    reverseInst[2] = "gt";
-                }
 
                 //演奏記録をゴーストから逆生成
                 for (int i = 0; i < 3; i++)
@@ -571,7 +566,7 @@ internal class CStageSongLoading : CStage
 
                     //2016.06.18 kairera0467 「.ghost.score」ファイルが無かった場合ghostファイルから逆算を行う形に変更。
                     string[] prefix = ["none", "perfect", "lastplay", "hiskill", "hiscore", "online"];
-                    int indPrefix = (int)CDTXMania.ConfigIni.eTargetGhost[i];
+                    int indPrefix = (int)CDTXMania.ConfigIni.eTargetGhost[(int)CDTXMania.ConfigIni.PlayerOn((EChartPart)i)];
                     string filename = $"{CDTXMania.DTX.strFolderName}{Path.DirectorySeparatorChar}{CDTXMania.DTX.strFileName}.{prefix[indPrefix]}.{reverseInst[i]}.ghost";
 
                     if (stGhostLag[i] == null || File.Exists(filename + ".score"))
@@ -744,7 +739,12 @@ internal class CStageSongLoading : CStage
     
     private void DrawLoadingScreenUI()
     {
-        int[] iPart = [0, CDTXMania.ConfigIni.bIsSwappedGuitarBass ? 2 : 1, CDTXMania.ConfigIni.bIsSwappedGuitarBass ? 1 : 2];
+        int[] iPart =
+        [
+            0,
+            (int)CDTXMania.ConfigIni.ChartFor(EPlayer.Guitar1),
+            (int)CDTXMania.ConfigIni.ChartFor(EPlayer.Guitar2)
+        ];
 
         int k = 318;
         

@@ -4,9 +4,9 @@ namespace DTXMania;
 
 public class PerformanceData
 {
-    public readonly EInstrumentPart Part;
+    public readonly EPlayer Player;
 
-    public EPlayer Player { get; private set; }
+    public EInstrumentPart Part { get; private set; }
 
     private HitCounts hitCountExclAuto;
     private HitCounts hitCountIncAuto;
@@ -98,15 +98,16 @@ public class PerformanceData
         _ => CDTXMania.DTX.nVisibleChipsCount.Bass
     };
 
-    public PerformanceData(EInstrumentPart part)
+    public PerformanceData(EPlayer player)
     {
-        Part = part;
+        Player = player;
+        Part = (EInstrumentPart)player;
     }
 
     //risky is how many misses the play may have until stage failed, 0 for a normal gauge
-    public void Reset(EPlayer player, STAUTOPLAY autoPlayed, int risky)
+    public void Reset(EInstrumentPart part, STAUTOPLAY autoPlayed, int risky)
     {
-        Player = player;
+        Part = part;
         autoPlay = autoPlayed;
         riskyTimesInitial = risky;
         riskyTimes = risky;

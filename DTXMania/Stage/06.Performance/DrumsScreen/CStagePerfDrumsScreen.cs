@@ -17,12 +17,12 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
         eStageID = EStage.Performance_6;
         ePhaseID = EPhase.Common_DefaultState;
         bActivated = false;
-        listChildActivities.Add(actCombo = new CActPerfDrumsComboDGB(partData));
+        listChildActivities.Add(actCombo = new CActPerfDrumsComboDGB(playerData));
 
         listChildActivities.Add(actGraph = new CActPerfSkillMeter());
         listChildActivities.Add(actJudgeString = new CActPerfDrumsJudgementString());
         listChildActivities.Add(actLaneFlushD = new CActPerfDrumsLaneFlushD());
-        listChildActivities.Add(actScore = new CActPerfDrumsScore(partData));
+        listChildActivities.Add(actScore = new CActPerfDrumsScore(playerData));
         listChildActivities.Add(actScrollSpeed = new CActPerfScrollSpeed());
         listChildActivities.Add(video = new CActPerfVideo());
         listChildActivities.Add(actBGA = new CActPerfBGA());

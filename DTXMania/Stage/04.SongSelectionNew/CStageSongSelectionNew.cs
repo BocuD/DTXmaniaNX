@@ -556,7 +556,6 @@ public class CStageSongSelectionNew : CStage
         }
     }
 
-    //two Y hits swap which instrument the guitar keys play
     private void PollSwapCommand(EPlayer player)
     {
         if (!CDTXMania.Pad.bPressed(player, EPad.Y))
@@ -572,11 +571,7 @@ public class CStageSongSelectionNew : CStage
         }
 
         CDTXMania.Skin.soundChange.tPlay();
-        //todo: transitional, both players still move together. Once the display sites ask which part a
-        //player is on, this moves only the player that entered the command
-        CConfigIni config = CDTXMania.ConfigIni;
-        config.guitar1Chart = CConfigIni.OtherGuitarPart(config.guitar1Chart);
-        config.guitar2Chart = CConfigIni.OtherGuitarPart(config.guitar2Chart);
+        CDTXMania.ConfigIni.SwapGuitarCharts();
         ChangeSelection(selectedNode, selectedChart);
     }
 

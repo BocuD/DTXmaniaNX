@@ -190,7 +190,7 @@ public class DensityGraph : UIGroup
             }
             else
             {
-                if (CDTXMania.ConfigIni.bIsSwappedGuitarBass)
+                if (CDTXMania.ConfigIni.ChartFor(EPlayer.Guitar1) == EChartPart.Bass)
                 {
                     if (chart.SongInformation.chipCountByInstrument.Bass > 0)
                     {

@@ -23,10 +23,10 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		listChildActivities.Add( actGraph = new CActPerfSkillMeter() );
 		listChildActivities.Add( actScrollSpeed = new CActPerfScrollSpeed() );
 		listChildActivities.Add( actWailingBonus = new CActPerfGuitarWailingBonus() );
-		listChildActivities.Add( actScore = new CActPerfGuitarScore(partData) );
+		listChildActivities.Add( actScore = new CActPerfGuitarScore(playerData) );
 		listChildActivities.Add( actLaneFlushGB = new CActPerfGuitarLaneFlushGB() );
 		listChildActivities.Add( actJudgeString = new CActPerfGuitarJudgementString() );
-		listChildActivities.Add( actCombo = new CActPerfGuitarCombo(partData) );
+		listChildActivities.Add( actCombo = new CActPerfGuitarCombo(playerData) );
 		
 		listChildActivities.Add( actPlayInfo = new CActPerformanceInformation() );
 		listChildActivities.Add( actProgressBar = new CActPerfProgressBar());
@@ -146,9 +146,9 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 	{
 		if (!bActivated) return;
 
-		//either part failing fails the stage, as does a chart with nothing to play
+		//either player failing fails the stage, as does a chart with nothing to play
 		if (CDTXMania.ConfigIni.bSTAGEFAILEDEnabled && !bIsTrainingMode && !StageManager.dropStageChanges && ePhaseID == EPhase.Common_DefaultState
-		    && (GuitarData.IsFailed() || BassData.IsFailed()
+		    && (DataFor(EPlayer.Guitar1).IsFailed() || DataFor(EPlayer.Guitar2).IsFailed()
 		        || (!CDTXMania.DTX.bHasChips.Guitar && !CDTXMania.DTX.bHasChips.Bass)))
 		{
 			FailStage();
@@ -181,9 +181,9 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 			tJumpInSong(LoopBeginMs == -1 ? 0 : LoopBeginMs);
 
 			//Reset hit counts and scores, so that the displayed score reflects the looped part only
-			for (int inst = 1; inst < 3; ++inst)
+			for (EPlayer player = EPlayer.Guitar1; player <= EPlayer.Guitar2; player++)
 			{
-				DataFor((EInstrumentPart)inst).ResetForLoop();
+				DataFor(player).ResetForLoop();
 			}
 		}
 
@@ -205,7 +205,7 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 			return;
 		}
 
-		PerformanceData data = DataFor(part);
+		PerformanceData data = DataFor(PlayerOn(part));
 		if (data.HitCountExclAuto.Miss + data.HitCountExclAuto.Poor > 0)
 		{
 			return;
@@ -219,7 +219,7 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 	protected override void UpdateGraph(EPlayer player)
 	{
 		EInstrumentPart part = PartOf(player);
-		PerformanceData data = DataFor(part);
+		PerformanceData data = DataFor(player);
 		int slot = (int)player;
 		actGraph.dbグラフ値現在_渡 = data.CalculateSkill();
 

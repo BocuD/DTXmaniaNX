@@ -9,7 +9,7 @@ namespace DTXMania;
 internal class CActPerfCommonCombo : CActivity
 {
     private readonly PerformanceData[] parts;
-    private PerformanceData DrumsData => parts[(int)EInstrumentPart.DRUMS];
+    private PerformanceData DrumsData => parts[(int)EPlayer.Drums];
 
     protected enum EEvent { 非表示, 数値更新, 同一数値, ミス通知 }
     protected enum EMode { 非表示中, 進行表示中, 残像表示中 }
@@ -518,7 +518,7 @@ internal class CActPerfCommonCombo : CActivity
         if (!bActivated)
             return;
 
-        PerformanceData played = parts[(int)CStagePerfCommonScreen.PartOf(player)];
+        PerformanceData played = parts[(int)player];
 
         for (int i = 2; i >= 0; i--)
         {

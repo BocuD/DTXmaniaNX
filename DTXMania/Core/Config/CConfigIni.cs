@@ -442,12 +442,13 @@ internal partial class CConfigIni
 		return part == EChartPart.Guitar ? EPlayer.Guitar1 : EPlayer.Guitar2;
 	}
 
-	public static EChartPart OtherGuitarPart(EChartPart part) => part == EChartPart.Guitar ? EChartPart.Bass : EChartPart.Guitar;
+	public void SwapGuitarCharts()
+	{
+		EChartPart first = guitar1Chart;
+		guitar1Chart = guitar2Chart;
+		guitar2Chart = first;
+	}
 
-	//todo: transitional, delete with the guitar and bass swap. The display sites outside the performance
-	//stage still ask whether guitar and bass are swapped, which only holds while the two players swap together
-	[DataField("SwappedGuitarBass")]
-	public bool bIsSwappedGuitarBass => guitar1Chart == EChartPart.Bass;
 	public bool bTimeStretch;					// #23664 2013.2.24 yyagi ピッチ変更無しで再生速度を変更するかどうか
 
 	/// <summary>Whether the play speed applies to chip sounds as well as the song. Off means only the
@@ -973,26 +974,6 @@ internal partial class CConfigIni
 			}
 		}
 	}
-
-	/// <summary>
-	/// ギターとベースのキーアサイン入れ替え
-	/// </summary>
-	/*
-	public void SwapGuitarBassKeyAssign()		// #24063 2011.1.16 yyagi
-	{
-		for ( int j = 0; j <= (int)EKeyConfigPad.Capture; j++ )
-		{
-			CKeyAssign.STKEYASSIGN t; //= new CConfigIni.CKeyAssign.STKEYASSIGN();
-			for ( int k = 0; k < 16; k++ )
-			{
-				t = this.KeyAssign[ (int)EKeyConfigPart.GUITAR ][ j ][ k ];
-				this.KeyAssign[ (int)EKeyConfigPart.GUITAR ][ j ][ k ] = this.KeyAssign[ (int)EKeyConfigPart.BASS ][ j ][ k ];
-				this.KeyAssign[ (int)EKeyConfigPart.BASS ][ j ][ k ] = t;
-			}
-		}
-		this.bIsSwappedGuitarBass = !bIsSwappedGuitarBass;
-	}
-	*/
 
 
 	// Other

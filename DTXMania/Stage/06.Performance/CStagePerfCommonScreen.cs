@@ -69,9 +69,9 @@ internal abstract class CStagePerfCommonScreen : CStage
     //drums only on the drums screen; a part without chips gets an empty entry
     public void tStorePerfResults(out CScoreIni.CPerformanceEntry drums, out CScoreIni.CPerformanceEntry guitar, out CScoreIni.CPerformanceEntry bass, out bool trainingMode)
     {
-        drums = CDTXMania.DTX.bHasChips.Drums && !CDTXMania.ConfigIni.bGuitarRevolutionMode ? ResultsFor(DrumsData) : new CScoreIni.CPerformanceEntry();
-        guitar = PartIsPlayed(EInstrumentPart.GUITAR) && CDTXMania.DTX.bHasChips.Guitar ? ResultsFor(GuitarData) : new CScoreIni.CPerformanceEntry();
-        bass = PartIsPlayed(EInstrumentPart.BASS) && CDTXMania.DTX.bHasChips.Bass ? ResultsFor(BassData) : new CScoreIni.CPerformanceEntry();
+        drums = EntryFor(EInstrumentPart.DRUMS);
+        guitar = EntryFor(EInstrumentPart.GUITAR);
+        bass = EntryFor(EInstrumentPart.BASS);
         trainingMode = bIsTrainingMode;
     }
 
@@ -92,6 +92,31 @@ internal abstract class CStagePerfCommonScreen : CStage
         }
 
         return chips;
+    }
+
+    private CScoreIni.CPerformanceEntry EntryFor(EInstrumentPart part)
+    {
+        if (!PartIsPlayed(part) || !CDTXMania.DTX.bHasChips[(int)part])
+        {
+            return new CScoreIni.CPerformanceEntry();
+        }
+
+        CScoreIni.CPerformanceEntry? best = null;
+        foreach (PerformanceData data in playerData)
+        {
+            if (!IsPlayed(data.Player) || data.Part != part)
+            {
+                continue;
+            }
+
+            CScoreIni.CPerformanceEntry entry = ResultsFor(data);
+            if (best == null || entry.dbPerformanceSkill > best.dbPerformanceSkill)
+            {
+                best = entry;
+            }
+        }
+
+        return best ?? new CScoreIni.CPerformanceEntry();
     }
 
     private CScoreIni.CPerformanceEntry ResultsFor(PerformanceData data) =>
@@ -279,9 +304,9 @@ internal abstract class CStagePerfCommonScreen : CStage
         nShutterOutPosY.Bass = CDTXMania.ConfigIni.nShutterOutSide.Bass;
 
         bIsAutoPlay = CDTXMania.ConfigIni.bAutoPlay;									// #24239 2011.1.23 yyagi
-        foreach (PerformanceData data in partData)
+        foreach (PerformanceData data in playerData)
         {
-            data.Reset(PlayerOn(data.Part), bIsAutoPlay, CDTXMania.ConfigIni.nRisky);
+            data.Reset(PartOf(data.Player), bIsAutoPlay, CDTXMania.ConfigIni.nRisky);
         }
         drums = IsPlayed(EPlayer.Drums) ? new DrumsPerformance(DrumsData, timeline, bIsAutoPlay) : null;
         guitars[0] = MakeGuitar(EPlayer.Guitar1);
@@ -401,10 +426,11 @@ internal abstract class CStagePerfCommonScreen : CStage
     public STDGBVALUE<int> nShutterInPosY;
     public STDGBVALUE<int> nShutterOutPosY;
     //indexed by EInstrumentPart: drums, guitar, bass
-    protected readonly PerformanceData[] partData =
-        [new(EInstrumentPart.DRUMS), new(EInstrumentPart.GUITAR), new(EInstrumentPart.BASS)];
+    //one per player, not one per chart part: both guitar players can be on the same part
+    protected readonly PerformanceData[] playerData =
+        [new(EPlayer.Drums), new(EPlayer.Guitar1), new(EPlayer.Guitar2)];
 
-    public PerformanceData DataFor(EInstrumentPart part) => partData[(int)part];
+    public PerformanceData DataFor(EPlayer player) => playerData[(int)player];
 
     //by EPlayer - 1, null when not playing
     protected readonly GuitarPerformance?[] guitars = new GuitarPerformance?[2];
@@ -431,9 +457,7 @@ internal abstract class CStagePerfCommonScreen : CStage
 
         return null;
     }
-    protected PerformanceData DrumsData => partData[(int)EInstrumentPart.DRUMS];
-    protected PerformanceData GuitarData => partData[(int)EInstrumentPart.GUITAR];
-    protected PerformanceData BassData => partData[(int)EInstrumentPart.BASS];
+    protected PerformanceData DrumsData => playerData[(int)EPlayer.Drums];
 
     protected static int nJudgeLineMaxPosY;
     protected static int nJudgeLineMinPosY;
@@ -483,7 +507,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                 actGraph.bIsTrainingMode = value;
             }
 
-            foreach (PerformanceData data in partData)
+            foreach (PerformanceData data in playerData)
             {
                 data.IsTraining = value;
             }
@@ -504,7 +528,7 @@ internal abstract class CStagePerfCommonScreen : CStage
             pChip.nLag = lag;
             if (pChip.eInstrumentPart != EInstrumentPart.UNKNOWN)
             {
-                pChip.nCurrentComboForGhost = partData[(int)pChip.eInstrumentPart].Combo;
+                pChip.nCurrentComboForGhost = DataFor(PlayerOn(pChip.eInstrumentPart)).Combo;
             }
         }
         return ChipJudge.GetJudgementForLag(pChip, lag, PlayerOn(pChip.eInstrumentPart));
@@ -679,9 +703,9 @@ internal abstract class CStagePerfCommonScreen : CStage
         if (StageManager.dropStageChanges)
         {
             tJumpInSong(0);
-            foreach (PerformanceData data in partData)
+            foreach (PerformanceData data in playerData)
             {
-                data.Reset(PlayerOn(data.Part), bIsAutoPlay, CDTXMania.ConfigIni.nRisky);
+                data.Reset(PartOf(data.Player), bIsAutoPlay, CDTXMania.ConfigIni.nRisky);
             }
             return;
         }
@@ -886,7 +910,7 @@ internal abstract class CStagePerfCommonScreen : CStage
         }
 
         EChartPart chart = CDTXMania.ConfigIni.ChartFor(player);
-        return new GuitarPerformance(player, chart, partData[(int)chart], timeline, bIsAutoPlay);
+        return new GuitarPerformance(player, chart, playerData[(int)player], timeline, bIsAutoPlay);
     }
 
     public static bool IsPlayed(EPlayer player) => CDTXMania.ConfigIni.IsPlayed(player);
@@ -954,7 +978,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                         // 上位８ビットが１ならコンボが途切れている（ギターBAD空打ちでコンボ数を再現するための措置）
                         if ( ghostLag > 255 )
                         {
-                            DataFor((EInstrumentPart)instIndex).BreakGhostCombo();
+                            DataFor(PlayerOn(pChip.eInstrumentPart)).BreakGhostCombo();
                         }
                         ghostLag = (ghostLag & 255) - 128;
                     }
@@ -966,7 +990,7 @@ internal abstract class CStagePerfCommonScreen : CStage
                     if ( ghostLag <= 127 )
                     {
                         EJudgement eJudge = e指定時刻からChipのJUDGEを返す(pChip.nPlaybackTimeMs + ghostLag, pChip, 0, false);
-                        DataFor((EInstrumentPart)instIndex).CountGhost(eJudge);
+                        DataFor(PlayerOn(pChip.eInstrumentPart)).CountGhost(eJudge);
                     }
                 }
             }
@@ -1436,7 +1460,7 @@ internal abstract class CStagePerfCommonScreen : CStage
     protected void tHandleInput_GuitarBass(EPlayer player)
     {
         EInstrumentPart inst = PartOf(player);
-        GuitarPerformance? guitar = GuitarFor(inst);
+        GuitarPerformance? guitar = guitars[(int)player - 1];
         if (guitar == null)
         {
             return;
@@ -1635,7 +1659,7 @@ internal abstract class CStagePerfCommonScreen : CStage
         }
 
         //Reset Accumulated Score
-        foreach (PerformanceData data in partData)
+        foreach (PerformanceData data in playerData)
         {
             data.ResetLongNoteBonus();
         }
@@ -1778,7 +1802,7 @@ internal abstract class CStagePerfCommonScreen : CStage
             guitar?.EndHold();
         }
         //
-        foreach (PerformanceData data in partData)
+        foreach (PerformanceData data in playerData)
         {
             data.ResetLongNoteBonus();
         }

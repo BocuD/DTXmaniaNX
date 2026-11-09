@@ -838,7 +838,6 @@ internal partial class CDTXMania
 
     public static int GetCurrentInstrument()
     {
-        return ConfigIni.bDrumsEnabled ? 0
-            : ConfigIni.bIsSwappedGuitarBass ? 2 : 1;
+        return ConfigIni.bDrumsEnabled ? 0 : (int)ConfigIni.ChartFor(EPlayer.Guitar1);
     }
 }
