@@ -148,13 +148,16 @@ public class QuickMenu : UIGroup
         description.position = new Vector3(141 - 400, -138, 0);
         description.renderOrder = 1;
 
-        root.AddChild(new UIQuad
+        var dimCover = root.AddChild(new UICoverGroup("Dim")
         {
-            name = "Dim",
-            color = new Color4(0.0f, 0.0f, 0.0f, 0.0f),
-            size = new Vector2(1281, 721),
-            pivot = new Vector2(0.5f, 0.5f),
             renderOrder = -1
+        });
+        
+        dimCover.AddChild(new UIQuad
+        {
+            color = Color4.Black,
+            size = new UISize() {xMode = UiSizeMode.Inherit, yMode = UiSizeMode.Inherit},
+            pivot = new Vector2(0.5f, 0.5f)
         });
 
         //where the list ends up is the open clip's last keyframe, so a skin moves the menu by moving that
@@ -171,7 +174,8 @@ public class QuickMenu : UIGroup
 
         clip.tracks.Add(Track("List/position.X", from, to));
         clip.tracks.Add(Track("List/position.Y", -200.0f, -200.0f));
-        clip.tracks.Add(Track("Dim/color.Alpha", 0.8f - fadeTo, fadeTo));
+        clip.tracks.Add(Track("Dim/tint.Alpha", 0.8f - fadeTo, fadeTo));
+        clip.tracks.Add(Track("List/tint.Alpha", 0, 1));
 
         return clip;
     }
