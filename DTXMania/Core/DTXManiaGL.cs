@@ -72,7 +72,7 @@ public sealed class DTXManiaGL : OpenGlGame
         
         mania.Draw();
 
-        if (clearImGuiFocusOnNextRender)
+        if (clearImGuiFocusOnNextRender && InspectorManager.WantsImGui)
         {
             ImGui.SetWindowFocus((string?)null);
             clearImGuiFocusOnNextRender = false;
