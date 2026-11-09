@@ -250,11 +250,7 @@ public class PerformanceData
         int chips = ChartChips;
         HitCounts ghost = ghostHitCount;
         double goal;
-        if (CDTXMania.ConfigIni.eTargetGhost[(int)Player] == ETargetGhostData.ONLINE)
-        {
-            goal = chips > 0 ? 100 * (ghost.Perfect * 17 + ghost.Great * 7 + ghostMaxCombo * 3) / (20.0 * chips) : 0;
-        }
-        else if (CDTXMania.ConfigIni.nSkillMode == 0)
+        if (CDTXMania.ConfigIni.nSkillMode == 0)
         {
             goal = CScoreIni.tCalculatePlayingSkillOld(chips, ghost.Perfect, ghost.Great, ghost.Good, ghost.Poor, ghost.Miss,
                 ghostMaxCombo, (EInstrumentPart)Player, new STAUTOPLAY());

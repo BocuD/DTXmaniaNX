@@ -217,7 +217,7 @@ internal class CStageSongLoading : CStage
 
                 if (readAutoGhostCond)
                 {
-                    string[] prefix = ["perfect", "lastplay", "hiskill", "hiscore", "online"];
+                    string[] prefix = ["perfect", "lastplay", "hiskill", "hiscore"];
                     int indPrefix = (int)CDTXMania.ConfigIni.eAutoGhost[instIndex];
                     string filename = cdtx.strFolderName + Path.DirectorySeparatorChar + cdtx.strFileName + "." + prefix[indPrefix] + "." +
                                       inst[instIndex] + ".ghost";
@@ -231,7 +231,7 @@ internal class CStageSongLoading : CStage
 
                 if (CDTXMania.ConfigIni.eTargetGhost[instIndex] != ETargetGhostData.NONE)
                 {
-                    string[] prefix = ["none", "perfect", "lastplay", "hiskill", "hiscore", "online"];
+                    string[] prefix = ["none", "perfect", "lastplay", "hiskill", "hiscore"];
                     int indPrefix = (int)CDTXMania.ConfigIni.eTargetGhost[instIndex];
                     string filename = cdtx.strFolderName + Path.DirectorySeparatorChar + cdtx.strFileName + "." + prefix[indPrefix] + "." +
                                       inst[instIndex] + ".ghost";
@@ -485,7 +485,7 @@ internal class CStageSongLoading : CStage
 
                     if (readAutoGhostCond)
                     {
-                        string[] prefix = ["perfect", "lastplay", "hiskill", "hiscore", "online"];
+                        string[] prefix = ["perfect", "lastplay", "hiskill", "hiscore"];
                         int indPrefix = (int)CDTXMania.ConfigIni.eAutoGhost[instIndex];
                         string filename = CDTXMania.DTX.strFolderName + Path.DirectorySeparatorChar + CDTXMania.DTX.strFileName + "." + prefix[indPrefix] + "." +
                                           ghostInst[instIndex] + ".ghost";
@@ -499,7 +499,7 @@ internal class CStageSongLoading : CStage
 
                     if (CDTXMania.ConfigIni.eTargetGhost[instIndex] != ETargetGhostData.NONE)
                     {
-                        string[] prefix = ["none", "perfect", "lastplay", "hiskill", "hiscore", "online"];
+                        string[] prefix = ["none", "perfect", "lastplay", "hiskill", "hiscore"];
                         int indPrefix = (int)CDTXMania.ConfigIni.eTargetGhost[instIndex];
                         string filename = CDTXMania.DTX.strFolderName + Path.DirectorySeparatorChar + CDTXMania.DTX.strFileName + "." + prefix[indPrefix] + "." +
                                           ghostInst[instIndex] + ".ghost";
@@ -565,7 +565,7 @@ internal class CStageSongLoading : CStage
                     int nNowCombo = 0;
 
                     //2016.06.18 kairera0467 「.ghost.score」ファイルが無かった場合ghostファイルから逆算を行う形に変更。
-                    string[] prefix = ["none", "perfect", "lastplay", "hiskill", "hiscore", "online"];
+                    string[] prefix = ["none", "perfect", "lastplay", "hiskill", "hiscore"];
                     int indPrefix = (int)CDTXMania.ConfigIni.eTargetGhost[(int)CDTXMania.ConfigIni.PlayerOn((EChartPart)i)];
                     string filename = $"{CDTXMania.DTX.strFolderName}{Path.DirectorySeparatorChar}{CDTXMania.DTX.strFileName}.{prefix[indPrefix]}.{reverseInst[i]}.ghost";
 

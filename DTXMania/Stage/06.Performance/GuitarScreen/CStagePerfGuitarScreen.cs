@@ -218,7 +218,6 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 
 	protected override void UpdateGraph(EPlayer player)
 	{
-		EInstrumentPart part = PartOf(player);
 		PerformanceData data = DataFor(player);
 		int slot = (int)player;
 		actGraph.dbグラフ値現在_渡 = data.CalculateSkill();
@@ -226,12 +225,6 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		if (!CDTXMania.ConfigIni.bGraph有効[slot])
 		{
 			return;
-		}
-
-		int chips = data.ChartChips;
-		if (CDTXMania.listTargetGhsotLag[(int)part] != null && CDTXMania.ConfigIni.eTargetGhost[slot] == ETargetGhostData.ONLINE && chips > 0)
-		{
-			actGraph.dbグラフ値現在_渡 = 100 * (data.HitCountExclAuto.Perfect * 17 + data.HitCountExclAuto.Great * 7 + data.MaxCombo * 3) / (20.0 * chips);
 		}
 
 		for (int i = 0; i < 5; i++)

@@ -259,11 +259,6 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
     protected override void UpdateGraph(EPlayer player)
     {
         actGraph.dbグラフ値現在_渡 = DrumsData.CalculateSkill();
-        int chips = DrumsData.ChartChips;
-        if (CDTXMania.listTargetGhsotLag.Drums != null && CDTXMania.ConfigIni.eTargetGhost.Drums == ETargetGhostData.ONLINE && chips > 0)
-        {
-            actGraph.dbグラフ値現在_渡 = 100 * (DrumsData.HitCountExclAuto.Perfect * 17 + DrumsData.HitCountExclAuto.Great * 7 + DrumsData.MaxCombo * 3) / (20.0 * chips);
-        }
     }
 
     private void ApplyDrumsEvents()

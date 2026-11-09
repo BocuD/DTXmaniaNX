@@ -325,8 +325,7 @@ public enum EAutoGhostData
 	PERFECT = 0, // 従来のAUTO
 	LAST_PLAY = 1, // (.score.ini) の LastPlay ゴースト
 	HI_SKILL = 2, // (.score.ini) の HiSkill ゴースト
-	HI_SCORE = 3, // (.score.ini) の HiScore ゴースト
-	ONLINE = 4 // オンラインゴースト (DTXMOS からプラグインが取得、本体のみでは指定しても無効)
+	HI_SCORE = 3 // (.score.ini) の HiScore ゴースト
 }
 
 /// <summary>
@@ -340,8 +339,7 @@ public enum ETargetGhostData
 	PERFECT = 1,
 	LAST_PLAY = 2, // (.score.ini) の LastPlay ゴースト
 	HI_SKILL = 3, // (.score.ini) の HiSkill ゴースト
-	HI_SCORE = 4, // (.score.ini) の HiScore ゴースト
-	ONLINE = 5 // オンラインゴースト (DTXMOS からプラグインが取得、本体のみでは指定しても無効)
+	HI_SCORE = 4 // (.score.ini) の HiScore ゴースト
 }
 /// <summary>
 /// Drum/Guitar/Bass の値を扱う汎用の構造体。
