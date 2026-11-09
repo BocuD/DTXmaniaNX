@@ -575,9 +575,9 @@ public class CStageSongSelectionNew : CStage
         ChangeSelection(selectedNode, selectedChart);
     }
 
-    public bool ConfirmRandomSong()
+    public bool ConfirmFirstSong()
     {
-        if (!selectionContainer.ConfirmRandomSong())
+        if (!selectionContainer.ConfirmFirstSong())
         {
             return false;
         }

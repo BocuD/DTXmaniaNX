@@ -347,18 +347,56 @@ public class SongSelectionContainer : UIScrollItemsGroup, IUIItemSource
         return (int)CStageSongSelectionNew.EReturnValue.Continue;
     }
 
-    public bool ConfirmRandomSong()
+    public bool ConfirmFirstSong()
     {
-        List<SongNode> songs = currentRoot.childNodes
-            .FindAll(node => node.nodeType == SongNode.ENodeType.SONG && node.ShowInSongList());
-
-        if (songs.Count == 0)
+        SongNode? song = FirstPlayableSong(currentRoot);
+        if (song == null)
         {
             return false;
         }
 
-        UpdateSelection(songs[Random.Shared.Next(songs.Count)]);
+        if (song.parent != currentRoot)
+        {
+            RequestUpdateRoot(song.parent);
+        }
+
+        UpdateSelection(song);
         return ActionDecide();
+    }
+
+    private static SongNode? FirstPlayableSong(SongNode root)
+    {
+        foreach (SongNode node in root.childNodes)
+        {
+            if (!node.ShowInSongList())
+            {
+                continue;
+            }
+
+            if (node.nodeType == SongNode.ENodeType.SONG)
+            {
+                foreach (CChartData? chart in node.charts)
+                {
+                    if (chart != null && chart.HasChartForCurrentMode())
+                    {
+                        return node;
+                    }
+                }
+
+                continue;
+            }
+
+            if (node.nodeType == SongNode.ENodeType.BOX)
+            {
+                SongNode? found = FirstPlayableSong(node);
+                if (found != null)
+                {
+                    return found;
+                }
+            }
+        }
+
+        return null;
     }
 
     private bool ActionDecide()

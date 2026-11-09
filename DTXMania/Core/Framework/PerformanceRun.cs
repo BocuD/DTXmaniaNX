@@ -51,7 +51,7 @@ public static class PerformanceRun
             yield return Wait.Until("song select", () => Stages.rCurrentStage == Stages.stageSongSelectionNew);
             yield return Wait.Seconds(SettleSeconds, "the song list to settle");
 
-            if (!Stages.stageSongSelectionNew.ConfirmRandomSong())
+            if (!Stages.stageSongSelectionNew.ConfirmFirstSong())
             {
                 Log("no song to play");
                 yield break;
