@@ -45,7 +45,6 @@
         <AutoGen>True</AutoGen>
         <DependentUpon>Resources.resx</DependentUpon>
       </Compile>
-      <Compile Remove="Stage\04.SongSelection\**" />
     </ItemGroup>
 
     <ItemGroup>
@@ -94,11 +93,6 @@
         <Generator>ResXFileCodeGenerator</Generator>
         <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       </EmbeddedResource>
-      <EmbeddedResource Remove="Stage\04.SongSelection\**" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Remove="Stage\04.SongSelection\**" />
     </ItemGroup>
 
 </Project>
