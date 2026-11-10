@@ -27,23 +27,10 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Compile Update="Code\App\CIMEHook.cs">
-        <SubType>Component</SubType>
-      </Compile>
       <Compile Update="Properties\Resources.Designer.cs">
         <AutoGen>True</AutoGen>
         <DependentUpon>Resources.resx</DependentUpon>
         <DesignTime>True</DesignTime>
-      </Compile>
-      <Compile Update="Properties\Settings.Designer.cs">
-        <AutoGen>True</AutoGen>
-        <DependentUpon>Settings.settings</DependentUpon>
-        <DesignTimeSharedInput>True</DesignTimeSharedInput>
-      </Compile>
-      <Compile Update="Properties\Resources.Designer.cs">
-        <DesignTime>True</DesignTime>
-        <AutoGen>True</AutoGen>
-        <DependentUpon>Resources.resx</DependentUpon>
       </Compile>
     </ItemGroup>
 
