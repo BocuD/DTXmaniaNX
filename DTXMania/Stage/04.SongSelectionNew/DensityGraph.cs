@@ -240,8 +240,6 @@ public class DensityGraph : UIGroup
                     for (int i = 0; i < guitarBars.Length; i++)
                     {
                         guitarBars[i].size.Y = chipsBarHeights[i];
-                        //this.guitarBars[i].tDraw2D(CDTXMania.app.Device,
-                        //    nGraphBaseX + 38 + i * 10, nGraphBaseY + 21 + (nBarMaxHeight - chipsBarHeights[i]), new Rectangle(0, 0, 4, chipsBarHeights[i]));
                     }
                 }                        
             }
@@ -252,8 +250,6 @@ public class DensityGraph : UIGroup
                     for (int i = 0; i < drumBars.Length; i++)
                     {
                         drumBars[i].size.Y = chipsBarHeights[i];
-                        //this.drumBars[i].tDraw2D(CDTXMania.app.Device,
-                        //    nGraphBaseX + 31 + i * 8, nGraphBaseY + 21 + (nBarMaxHeight - chipsBarHeights[i]), new Rectangle(0, 0, 4, chipsBarHeights[i]));
                     }
                 }
             }
