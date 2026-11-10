@@ -92,54 +92,10 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		}
 		base.OnActivate();
 	}
-	public override void OnManagedCreateResources()
+	protected override void AwardClearBonus()
 	{
-		if ( bActivated )
-		{
-			base.OnManagedCreateResources();
-		}
-	}
-
-	public override void FirstUpdate()
-	{
-		AudioMixer.Timer.tReset();
-		CDTXMania.Timer.tReset();
-		
-		ctComboTimer = new CCounter(1, 16,
-			(int)((60.0 / (CDTXMania.stagePerfGuitarScreen.actPlayInfo.dbBPM) / 16.0 * 1000.0)), CDTXMania.Timer);
-		ctWailingChipPatternAnimation = new CCounter(0, 4, 50, CDTXMania.Timer);
-
-		ePhaseID = EPhase.Common_DefaultState;
-		
-		// display presence now that the initial timer reset has been performed
-		tDisplayPresence();
-	}
-
-	public override int OnUpdateAndDraw()
-	{
-		if (!bActivated) return 0;
-
-		base.OnUpdateAndDraw();
-
-		if (CanLeave)
-		{
-			if (!CDTXMania.Skin.soundStageClear.bIsPlaying)
-			{
-
-				AddClearBonus(EInstrumentPart.GUITAR);
-				AddClearBonus(EInstrumentPart.BASS);
-
-				return (int)eReturnValue;
-			}
-		}
-
-		if (ePhaseID == EPhase.PERFORMANCE_STAGE_RESTART)
-		{
-			Trace.TraceInformation("Restarting");
-			return (int)eReturnValue;
-		}
-
-		return 0;
+		AddClearBonus(EInstrumentPart.GUITAR);
+		AddClearBonus(EInstrumentPart.BASS);
 	}
 
 	public override void OnUpdate()

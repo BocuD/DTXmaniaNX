@@ -1239,15 +1239,7 @@ internal abstract class CStagePerfCommonScreen : CStage
     {
         actPlayInfo.dbBPM = (chartBPM * (CDTXMania.ConfigIni.nPlaySpeed / 20.0)) + CDTXMania.DTX.BASEBPM;
 
-        if (CDTXMania.ConfigIni.bDrumsEnabled)
-        {
-            CDTXMania.stagePerfDrumsScreen.UnitTime = ((60.0 / (CDTXMania.stagePerfDrumsScreen.actPlayInfo.dbBPM) / 14.0));
-            CDTXMania.stagePerfDrumsScreen.ctComboTimer = new CCounter(1, 16, (int)((60.0 / (CDTXMania.stagePerfDrumsScreen.actPlayInfo.dbBPM) / 16) * 1000.0), CDTXMania.Timer);
-        }
-        else if (CDTXMania.ConfigIni.bGuitarEnabled)
-        {
-            CDTXMania.stagePerfGuitarScreen.ctComboTimer = new CCounter(1, 16, (int)((60.0 / (CDTXMania.stagePerfGuitarScreen.actPlayInfo.dbBPM) / 16) * 1000.0), CDTXMania.Timer);
-        }
+        ctComboTimer = NewComboTimer();
     }
     protected virtual void UpdateChip_Drums(CConfigIni configIni, ref CDTX dTX, ref CChip pChip) { }
     protected virtual void UpdateChip_GuitarBass(CConfigIni configIni, ref CDTX dTX, ref CChip pChip, EInstrumentPart inst) { }  // t進行描画_チップ_ギターベース
@@ -1290,6 +1282,49 @@ internal abstract class CStagePerfCommonScreen : CStage
             dTX.tAutoCorrectWavPlaybackPosition();
         }
     }
+
+    private CCounter NewComboTimer()
+        => new(1, 16, (int)(60.0 / actPlayInfo.dbBPM / 16.0 * 1000.0), CDTXMania.Timer);
+
+    public override void FirstUpdate()
+    {
+        AudioMixer.Timer.tReset();
+        CDTXMania.Timer.tReset();
+
+        ctComboTimer = NewComboTimer();
+        ctWailingChipPatternAnimation = new CCounter(0, 4, 50, CDTXMania.Timer);
+
+        ePhaseID = EPhase.Common_DefaultState;
+
+        tDisplayPresence();
+    }
+
+    public override int OnUpdateAndDraw()
+    {
+        if (!bActivated)
+        {
+            return 0;
+        }
+
+        base.OnUpdateAndDraw();
+
+        if (CanLeave && !CDTXMania.Skin.soundStageClear.bIsPlaying && !CDTXMania.Skin.soundSTAGEFAILED音.bIsPlaying)
+        {
+            AwardClearBonus();
+            return (int)eReturnValue;
+        }
+
+        if (ePhaseID == EPhase.PERFORMANCE_STAGE_RESTART)
+        {
+            Trace.TraceInformation("Restarting");
+            return (int)eReturnValue;
+        }
+
+        return 0;
+    }
+
+    /// <summary>Gives the parts this screen plays their clear bonus.</summary>
+    protected abstract void AwardClearBonus();
 
     protected void AddClearBonus(EInstrumentPart part)
     {

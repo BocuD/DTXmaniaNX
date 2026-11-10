@@ -84,60 +84,23 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
     
     public override void OnManagedCreateResources()
     {
-        if ( bActivated )
+        if (bActivated)
         {
             bChorusSection = false;
-
-
-            base.OnManagedCreateResources();
         }
+
+        base.OnManagedCreateResources();
     }
 
     public override void FirstUpdate()
     {
-        AudioMixer.Timer.tReset();
-        CDTXMania.Timer.tReset();
-        double UnitTime;
-        UnitTime = ((60.0 / (CDTXMania.stagePerfDrumsScreen.actPlayInfo.dbBPM) / 14.0));
-        ctBPMBar = new CCounter(1, 14, (int)(UnitTime * 1000.0), CDTXMania.Timer);
+        base.FirstUpdate();
 
-        ctComboTimer = new CCounter(1, 16,
-            (int)((60.0 / (CDTXMania.stagePerfDrumsScreen.actPlayInfo.dbBPM) / 16) * 1000.0), CDTXMania.Timer);
-
-        ctWailingChipPatternAnimation = new CCounter(0, 4, 50, CDTXMania.Timer);
-        ePhaseID = EPhase.Common_DefaultState;
-
+        ctBPMBar = new CCounter(1, 14, (int)(60.0 / actPlayInfo.dbBPM / 14.0 * 1000.0), CDTXMania.Timer);
         ct登場用.tUpdate();
-        
-        // display presence now that the initial timer reset has been performed
-        tDisplayPresence();
     }
 
-    public override int OnUpdateAndDraw()
-    {
-        //base draws the UI, which is gone once deactivated
-        if (!bActivated) return 0;
-
-        base.OnUpdateAndDraw();
-
-        if (CanLeave)
-        {
-            if (!CDTXMania.Skin.soundStageClear.bIsPlaying && !CDTXMania.Skin.soundSTAGEFAILED音.bIsPlaying)
-            {
-                AddClearBonus(EInstrumentPart.DRUMS);
-
-                return (int)eReturnValue;
-            }
-        }
-
-        if (ePhaseID == EPhase.PERFORMANCE_STAGE_RESTART)
-        {
-            Trace.TraceInformation("Restarting");
-            return (int)eReturnValue;
-        }
-        
-        return 0;
-    }
+    protected override void AwardClearBonus() => AddClearBonus(EInstrumentPart.DRUMS);
 
     private static readonly int probeVideo = AllocationProbe.Register("video");
     private static readonly int probeChips = AllocationProbe.Register("chips");
@@ -221,7 +184,6 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
     public bool bInFillIn;
     public bool bEndFillIn;
     public bool bChorusSection;
-    public double UnitTime;
     //-----------------
     protected override void UpdateGraph(EPlayer player)
     {
