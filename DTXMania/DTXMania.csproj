@@ -78,7 +78,6 @@
       <PackageReference Include="SkiaSharp.NativeAssets.macOS" Version="3.119.2" Condition="$([MSBuild]::IsOSPlatform('OSX'))" />
       <PackageReference Include="sqlite-net-pcl" Version="1.9.172" />
       <PackageReference Include="StbImageSharp" Version="2.30.15" />
-      <PackageReference Include="System.Configuration.ConfigurationManager" Version="6.0.2" />
       <PackageReference Include="System.Text.Encoding.CodePages" Version="6.0.1" />
     </ItemGroup>
 
