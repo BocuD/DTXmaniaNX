@@ -1269,7 +1269,45 @@ internal abstract class CStagePerfCommonScreen : CStage
         UpdateChip_GuitarBass_Wailing(configIni, ref dTX, ref pChip, EInstrumentPart.GUITAR);
     }
     protected abstract void UpdateChip_FillIn(CConfigIni configIni, ref CDTX dTX, ref CChip pChip);  // t進行描画_チップ_フィルイン
-    protected abstract void UpdateChip_BarLine(CConfigIni configIni, ref CDTX dTX, ref CChip pChip);
+    protected virtual void UpdateChip_BarLine(CConfigIni configIni, ref CDTX dTX, ref CChip pChip)
+    {
+        if (pChip.bHit || pChip.nDistanceFromBar.Drums >= 0)
+        {
+            return;
+        }
+
+        pChip.bHit = true;
+
+        if (configIni.bMetronome)
+        {
+            CDTXMania.Skin.soundMetronome.tPlay();
+        }
+
+        actPlayInfo.n小節番号 = pChip.nPlaybackPosition / 384 - 1;
+
+        if (configIni.bWave再生位置自動調整機能有効 && bNeedsDriftCorrection)
+        {
+            dTX.tAutoCorrectWavPlaybackPosition();
+        }
+    }
+
+    protected void AddClearBonus(EInstrumentPart part)
+    {
+        if (CDTXMania.ConfigIni.nSkillMode != 1)
+        {
+            return;
+        }
+
+        PerformanceData data = DataFor(PlayerOn(part));
+        if (data.HitCountExclAuto.Miss + data.HitCountExclAuto.Poor > 0)
+        {
+            return;
+        }
+
+        bool allAuto = CDTXMania.ConfigIni.bIsAutoPlay(data.Player);
+        int perfects = allAuto ? data.HitCountIncAuto.Perfect : data.HitCountExclAuto.Perfect;
+        data.AddClearBonus(perfects == data.ChartChips);
+    }
     protected virtual void UpdateChip_Bass_Wailing(CConfigIni configIni, ref CDTX dTX, ref CChip pChip)  // t進行描画_チップ_ベース_ウェイリング
     {
         UpdateChip_GuitarBass_Wailing(configIni, ref dTX, ref pChip, EInstrumentPart.BASS);

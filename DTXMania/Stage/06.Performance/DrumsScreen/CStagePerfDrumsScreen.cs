@@ -124,33 +124,7 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
         {
             if (!CDTXMania.Skin.soundStageClear.bIsPlaying && !CDTXMania.Skin.soundSTAGEFAILED音.bIsPlaying)
             {
-                nNumberOfMistakes = DrumsData.HitCountExclAuto.Miss + DrumsData.HitCountExclAuto.Poor;
-                switch (nNumberOfMistakes)
-                {
-                    case 0:
-                    {
-                        nNumberPerfects = DrumsData.HitCountExclAuto.Perfect;
-                        if (CDTXMania.ConfigIni.bAllDrumsAreAutoPlay)
-                        {
-                            nNumberPerfects = DrumsData.HitCountIncAuto.Perfect;
-                        }
-
-                        //EXC
-                        if (nNumberPerfects == CDTXMania.DTX.nVisibleChipsCount.Drums)
-                        {
-                            bExc = true;
-                            if (CDTXMania.ConfigIni.nSkillMode == 1)
-                                DrumsData.AddClearBonus(true);
-                            break;
-                        }
-
-                        //FULL COMBO
-                        bFullCom = true;
-                        if (CDTXMania.ConfigIni.nSkillMode == 1)
-                            DrumsData.AddClearBonus(false);
-                        break;
-                    }
-                }
+                AddClearBonus(EInstrumentPart.DRUMS);
 
                 return (int)eReturnValue;
             }
@@ -181,9 +155,6 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
     public override void OnUpdate()
     {
         if (!bActivated) return;
-
-        bExc = false;
-        bFullCom = false;
 
         if (CDTXMania.ConfigIni.bSTAGEFAILEDEnabled && !bIsTrainingMode && !StageManager.dropStageChanges && DrumsData.IsFailed()
             && ePhaseID == EPhase.Common_DefaultState)
@@ -247,10 +218,6 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
 
     #region [ private ]
     //-----------------
-    public bool bExc;
-    public bool bFullCom;
-    public int nNumberOfMistakes;
-    public int nNumberPerfects;
     public bool bInFillIn;
     public bool bEndFillIn;
     public bool bChorusSection;
@@ -370,26 +337,6 @@ internal partial class CStagePerfDrumsScreen : CStagePerfCommonScreen
     protected override void tUpdateAndDraw_PerformanceInformation()
     {
         base.tUpdateAndDraw_PerformanceInformation( 1000, 257 );
-    }
-
-    protected override void UpdateChip_BarLine( CConfigIni configIni, ref CDTX dTX, ref CChip pChip )
-    {
-        int n小節番号plus1 = pChip.nPlaybackPosition / 384;
-        if ( !pChip.bHit && ( pChip.nDistanceFromBar.Drums < 0 ) )
-        {
-            pChip.bHit = true;
-
-            if ( CDTXMania.ConfigIni.bMetronome )
-            {
-                CDTXMania.Skin.soundMetronome.tPlay();
-            }
-
-            actPlayInfo.n小節番号 = n小節番号plus1 - 1;
-            if ( configIni.bWave再生位置自動調整機能有効 && bNeedsDriftCorrection )
-            {
-                dTX.tAutoCorrectWavPlaybackPosition();
-            }
-        }
     }
 
     #endregion

@@ -135,7 +135,7 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 
 		if (ePhaseID == EPhase.PERFORMANCE_STAGE_RESTART)
 		{
-			Debug.WriteLine("Restarting");
+			Trace.TraceInformation("Restarting");
 			return (int)eReturnValue;
 		}
 
@@ -198,24 +198,6 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 
 	#region [ private ]
 
-	private void AddClearBonus(EInstrumentPart part)
-	{
-		if (CDTXMania.ConfigIni.nSkillMode != 1)
-		{
-			return;
-		}
-
-		PerformanceData data = DataFor(PlayerOn(part));
-		if (data.HitCountExclAuto.Miss + data.HitCountExclAuto.Poor > 0)
-		{
-			return;
-		}
-
-		bool allAuto = CDTXMania.ConfigIni.bIsAutoPlay(data.Player);
-		int perfects = allAuto ? data.HitCountIncAuto.Perfect : data.HitCountExclAuto.Perfect;
-		data.AddClearBonus(perfects == data.ChartChips);
-	}
-
 	protected override void UpdateGraph(EPlayer player)
 	{
 		PerformanceData data = DataFor(player);
@@ -273,18 +255,5 @@ internal partial class CStagePerfGuitarScreen : CStagePerfCommonScreen
 		}
 	}
 
-	protected override void UpdateChip_BarLine( CConfigIni configIni, ref CDTX dTX, ref CChip pChip )
-	{
-		int n小節番号plus1 = pChip.nPlaybackPosition / 0x180;
-		if ( !pChip.bHit && ( pChip.nDistanceFromBar.Drums < 0 ) )
-		{
-			pChip.bHit = true;
-			actPlayInfo.n小節番号 = n小節番号plus1 - 1;
-			if ( configIni.bWave再生位置自動調整機能有効 && bNeedsDriftCorrection )
-			{
-				dTX.tAutoCorrectWavPlaybackPosition();
-			}
-		}
-	}
 	#endregion
 }
