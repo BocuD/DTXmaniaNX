@@ -43,6 +43,9 @@ public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
 
     private readonly Dictionary<string, OpenGlTexture> _fileTextures = new(StringComparer.OrdinalIgnoreCase);
 
+    private readonly Dictionary<uint, TextureAtlas.Slot?> _atlasCopies = new();
+    private uint _copyFbo;
+
     //sprite batch: quads accumulate here (vertices already transformed to screen space, color baked
     //per vertex) across texture/blend changes, each change starting a new segment. A flush uploads
     //every pending vertex in one buffer upload and draws each segment from its offset, so a texture
@@ -50,7 +53,7 @@ public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
     //happen at capacity, texture update/delete, readback, and the explicit end-of-render Flush.
     private const int MaxBatchQuads = 2048;
     //w carries the perspective divide, so a quad in a group with perspective keeps its texture straight
-    private const int FloatsPerVertex = 10; //pos(4) + uv(2) + color(4)
+    private const int FloatsPerVertex = 14; //pos(4) + uv(2) + color(4) + uv bounds(4)
     private const int FloatsPerQuad = FloatsPerVertex * 4;
     private readonly float[] _batchVertices = new float[MaxBatchQuads * FloatsPerQuad];
     private int _batchQuadCount;
@@ -80,6 +83,9 @@ public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
     private readonly Dictionary<uint, (int Width, int Height)> _trackedTextures = new();
 
     public readonly record struct TextureInfo(uint Id, int Width, int Height);
+
+    private TextureAtlas? _atlas;
+    internal TextureAtlas atlas => _atlas ??= new TextureAtlas(this);
 
     /// <summary>The live context, and a counter bumped every time it is replaced. Anything holding GL
     /// objects that the host does not know about (an inspector render target) re-attaches when this
@@ -171,14 +177,105 @@ public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
         _contextResourcesCreated = false;
     }
 
-    public void DrawTexture(uint textureId, float textureWidth, float textureHeight, Matrix4x4 transformMatrix, Vector2 size, RectangleF clipRect, Color4 color, BlendMode blendMode)
+    public void DrawTexture(uint textureId, float textureWidth, float textureHeight, Matrix4x4 transformMatrix, Vector2 size, RectangleF clipRect, Color4 color, BlendMode blendMode, RectangleF? sampleBounds = null)
     {
-        DrawQuad(textureId, textureWidth, textureHeight, transformMatrix, size, clipRect, color, blendMode);
+        if (TryAtlasCopy(textureId, textureWidth, textureHeight, sampleBounds, out TextureAtlas.Slot slot))
+        {
+            DrawQuad(slot.textureId, slot.pageSize, slot.pageSize, transformMatrix, size, InPage(clipRect, slot), color,
+                blendMode, Region(slot, textureWidth, textureHeight));
+            return;
+        }
+
+        DrawQuad(textureId, textureWidth, textureHeight, transformMatrix, size, clipRect, color, blendMode, sampleBounds);
+    }
+
+    private static RectangleF InPage(RectangleF clipRect, TextureAtlas.Slot slot)
+        => new(clipRect.X + slot.regionX, clipRect.Y + slot.regionY, clipRect.Width, clipRect.Height);
+
+    private static RectangleF Region(TextureAtlas.Slot slot, float width, float height)
+        => new(slot.regionX, slot.regionY, width, height);
+
+    private bool TryAtlasCopy(uint textureId, float width, float height, RectangleF? sampleBounds, out TextureAtlas.Slot slot)
+    {
+        slot = null!;
+
+        if (sampleBounds != null || !TextureAtlas.Enabled || textureId == 0)
+        {
+            return false;
+        }
+
+        if (!_atlasCopies.TryGetValue(textureId, out TextureAtlas.Slot? cached))
+        {
+            cached = atlas.AddFromTexture(textureId, (int)width, (int)height);
+            _atlasCopies[textureId] = cached;
+        }
+
+        if (cached == null)
+        {
+            return false;
+        }
+
+        slot = cached;
+        return true;
+    }
+
+    internal void CopyIntoPage(uint source, int width, int height, uint page, int dstX, int dstY)
+    {
+        if (_gl == null)
+        {
+            return;
+        }
+
+        Flush();
+
+        if (_copyFbo == 0)
+        {
+            _copyFbo = _gl.GenFramebuffer();
+        }
+
+        _gl.GetInteger(GetPName.ReadFramebufferBinding, out int previousRead);
+        _gl.BindFramebuffer(FramebufferTarget.ReadFramebuffer, _copyFbo);
+        _gl.FramebufferTexture2D(FramebufferTarget.ReadFramebuffer, FramebufferAttachment.ColorAttachment0,
+            TextureTarget.Texture2D, source, 0);
+
+        _gl.BindTexture(TextureTarget.Texture2D, page);
+        _gl.CopyTexSubImage2D(TextureTarget.Texture2D, 0, dstX, dstY, 0, 0, (uint)width, (uint)height);
+
+        _gl.FramebufferTexture2D(FramebufferTarget.ReadFramebuffer, FramebufferAttachment.ColorAttachment0,
+            TextureTarget.Texture2D, 0, 0);
+        _gl.BindFramebuffer(FramebufferTarget.ReadFramebuffer, (uint)previousRead);
+        _gl.BindTexture(TextureTarget.Texture2D, 0);
+        _boundTexture = 0;
+    }
+
+    private void DropAtlasCopy(uint textureId)
+    {
+        if (!_atlasCopies.TryGetValue(textureId, out TextureAtlas.Slot? slot))
+        {
+            return;
+        }
+
+        _atlasCopies.Remove(textureId);
+
+        if (slot != null)
+        {
+            Flush();
+            atlas.Free(slot);
+        }
     }
     
     //the up-to-9 quads share texture and blend mode, so the batcher folds them into one draw call
-    public void DrawTextureSliced(uint textureId, float textureWidth, float textureHeight, Matrix4x4 transformMatrix, Vector2 size, RectangleF clipRect, Color4 color, RectangleF sliceRect, BlendMode blendMode)
+    public void DrawTextureSliced(uint textureId, float textureWidth, float textureHeight, Matrix4x4 transformMatrix, Vector2 size, RectangleF clipRect, Color4 color, RectangleF sliceRect, BlendMode blendMode, RectangleF? sampleBounds = null)
     {
+        if (TryAtlasCopy(textureId, textureWidth, textureHeight, sampleBounds, out TextureAtlas.Slot slot))
+        {
+            sampleBounds = Region(slot, textureWidth, textureHeight);
+            clipRect = InPage(clipRect, slot);
+            textureId = slot.textureId;
+            textureWidth = slot.pageSize;
+            textureHeight = slot.pageSize;
+        }
+
         float sourceRightBorder = MathF.Max(clipRect.Width - sliceRect.Right, 0f);
         float sourceBottomBorder = MathF.Max(clipRect.Height - sliceRect.Bottom, 0f);
 
@@ -221,7 +318,7 @@ public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
                 }
 
                 Matrix4x4 segmentTransform = Matrix4x4.CreateTranslation(destX[x], destY[y], 0f) * transformMatrix;
-                DrawQuad(textureId, textureWidth, textureHeight, segmentTransform, regionSize, region, color, blendMode);
+                DrawQuad(textureId, textureWidth, textureHeight, segmentTransform, regionSize, region, color, blendMode, sampleBounds);
             }
         }
     }
@@ -292,6 +389,7 @@ public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
                 _boundTexture = uint.MaxValue;
             }
 
+            DropAtlasCopy(textureId);
             _gl.DeleteTexture(textureId);
             // Update internal tracking before notifying observers
             _trackedTextures.Remove(textureId);
@@ -367,6 +465,12 @@ public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
         }
     }
 
+    internal void UpdateTextureAndDropCopy(uint textureId, ReadOnlySpan<byte> rgbaPixels, int width, int height, int dstX = 0, int dstY = 0)
+    {
+        DropAtlasCopy(textureId);
+        UpdateTexture(textureId, rgbaPixels, width, height, dstX, dstY);
+    }
+
     internal void UpdateTexture(uint textureId, ReadOnlySpan<byte> rgbaPixels, int width, int height, int dstX = 0, int dstY = 0)
     {
         ValidateTextureSize(width, height);
@@ -408,6 +512,8 @@ public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
     /// </summary>
     internal void UpdateTextureStreaming(uint textureId, ReadOnlySpan<byte> rgbaPixels, int width, int height)
     {
+        DropAtlasCopy(textureId);
+
         ValidateTextureSize(width, height);
 
         int size = width * height * 4;
@@ -521,7 +627,7 @@ public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
         _streamPboIndex = 0;
     }
 
-    private void DrawQuad(uint textureId, float textureWidth, float textureHeight, Matrix4x4 transformMatrix, Vector2 size, RectangleF clipRect, Color4 color, BlendMode blendMode)
+    private void DrawQuad(uint textureId, float textureWidth, float textureHeight, Matrix4x4 transformMatrix, Vector2 size, RectangleF clipRect, Color4 color, BlendMode blendMode, RectangleF? sampleBounds = null)
     {
         if (_gl == null || !_sharedResourcesCreated || !_contextResourcesCreated)
         {
@@ -555,18 +661,25 @@ public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
         Vector4 p1 = Vector4.Transform(new Vector4(size.X, 0f, 0f, 1f), transformMatrix);
         Vector4 p2 = Vector4.Transform(new Vector4(size.X, size.Y, 0f, 1f), transformMatrix);
         Vector4 p3 = Vector4.Transform(new Vector4(0f, size.Y, 0f, 1f), transformMatrix);
+        RectangleF bounds = sampleBounds ?? new RectangleF(0, 0, textureWidth, textureHeight);
+        float bu0 = (bounds.Left + 0.5f) / textureWidth;
+        float bv0 = (bounds.Top + 0.5f) / textureHeight;
+        float bu1 = (bounds.Right - 0.5f) / textureWidth;
+        float bv1 = (bounds.Bottom - 0.5f) / textureHeight;
+
         Vector4 c = color.ToVector4();
 
         float[] v = _batchVertices;
         int o = _batchQuadCount * FloatsPerQuad;
-        WriteVertex(v, o, p0, u0, v0, c);
-        WriteVertex(v, o + FloatsPerVertex, p1, u1, v0, c);
-        WriteVertex(v, o + FloatsPerVertex * 2, p2, u1, v1, c);
-        WriteVertex(v, o + FloatsPerVertex * 3, p3, u0, v1, c);
+        WriteVertex(v, o, p0, u0, v0, c, bu0, bv0, bu1, bv1);
+        WriteVertex(v, o + FloatsPerVertex, p1, u1, v0, c, bu0, bv0, bu1, bv1);
+        WriteVertex(v, o + FloatsPerVertex * 2, p2, u1, v1, c, bu0, bv0, bu1, bv1);
+        WriteVertex(v, o + FloatsPerVertex * 3, p3, u0, v1, c, bu0, bv0, bu1, bv1);
         _batchQuadCount++;
     }
 
-    private static void WriteVertex(float[] buffer, int offset, Vector4 position, float u, float texV, Vector4 color)
+    private static void WriteVertex(float[] buffer, int offset, Vector4 position, float u, float texV, Vector4 color,
+        float boundsU0, float boundsV0, float boundsU1, float boundsV1)
     {
         buffer[offset] = position.X;
         buffer[offset + 1] = position.Y;
@@ -578,6 +691,10 @@ public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
         buffer[offset + 7] = color.Y;
         buffer[offset + 8] = color.Z;
         buffer[offset + 9] = color.W;
+        buffer[offset + 10] = boundsU0;
+        buffer[offset + 11] = boundsV0;
+        buffer[offset + 12] = boundsU1;
+        buffer[offset + 13] = boundsV1;
     }
 
     /// <summary>
@@ -616,6 +733,7 @@ public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
         _gl.VertexAttribPointer(0, 4, VertexAttribPointerType.Float, false, (uint)stride, (void*)0);
         _gl.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, (uint)stride, (void*)(4 * sizeof(float)));
         _gl.VertexAttribPointer(2, 4, VertexAttribPointerType.Float, false, (uint)stride, (void*)(6 * sizeof(float)));
+        _gl.VertexAttribPointer(3, 4, VertexAttribPointerType.Float, false, (uint)stride, (void*)(10 * sizeof(float)));
 
         for (int segment = 0; segment < _segmentCount; segment++)
         {
@@ -692,16 +810,19 @@ public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
             layout (location = 0) in vec4 aPosition;
             layout (location = 1) in vec2 aTexCoord;
             layout (location = 2) in vec4 aColor;
+            layout (location = 3) in vec4 aBounds;
 
             uniform mat4 uProjection;
 
             out vec2 vTexCoord;
             out vec4 vColor;
+            flat out vec4 vBounds;
 
             void main()
             {
                 vTexCoord = aTexCoord;
                 vColor = aColor;
+                vBounds = aBounds;
                 gl_Position = uProjection * aPosition;
             }
             """;
@@ -710,6 +831,7 @@ public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
             #version 330 core
             in vec2 vTexCoord;
             in vec4 vColor;
+            flat in vec4 vBounds;
 
             uniform sampler2D uTexture0;
 
@@ -717,7 +839,8 @@ public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
 
             void main()
             {
-                fragColor = texture(uTexture0, vTexCoord) * vColor;
+                vec2 uv = clamp(vTexCoord, vBounds.xy, vBounds.zw);
+                fragColor = texture(uTexture0, uv) * vColor;
             }
             """;
 
@@ -772,6 +895,8 @@ public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
         _gl.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, FloatsPerVertex * sizeof(float), (void*)(4 * sizeof(float)));
         _gl.EnableVertexAttribArray(1);
         _gl.VertexAttribPointer(2, 4, VertexAttribPointerType.Float, false, FloatsPerVertex * sizeof(float), (void*)(6 * sizeof(float)));
+        _gl.EnableVertexAttribArray(3);
+        _gl.VertexAttribPointer(3, 4, VertexAttribPointerType.Float, false, FloatsPerVertex * sizeof(float), (void*)(10 * sizeof(float)));
         _gl.EnableVertexAttribArray(2);
         _gl.BindVertexArray(0);
     }
