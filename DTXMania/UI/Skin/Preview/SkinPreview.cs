@@ -159,10 +159,7 @@ public static class SkinPreview
             CStage.EStage.Config_3 => stages.stageConfig,
             CStage.EStage.SongSelection_4 => stages.stageSongSelectionNew,
             CStage.EStage.SongLoading_5 => stages.stageSongLoading,
-            //must match what StageManager picks when loading hands over
-            CStage.EStage.Performance_6 => CDTXMania.ConfigIni.bGuitarRevolutionMode
-                ? stages.stagePerfGuitarScreen
-                : stages.stagePerfDrumsScreen,
+            CStage.EStage.Performance_6 => stages.stagePerfScreen,
             CStage.EStage.Result_7 => stages.stageResult,
             CStage.EStage.End_8 => stages.stageEnd,
             CStage.EStage.UITest_10 => stages.stageUITest,

@@ -2,6 +2,7 @@
 using System.Numerics;
 using DTXMania.Core.Video.Decoders;
 using DTXMania.UI.Drawable;
+using DTXMania.UI.DynamicElements;
 using Hexa.NET.ImGui;
 using NativeFileDialog.Extended;
 
@@ -41,6 +42,14 @@ public class VideoPlayerController : IDisposable
     
     // Core atomic state constraint
     public DisplayedFrame CurrentFrame { get; private set; } = DisplayedFrame.Empty;
+
+    [DataField] public bool IsPlaying { get; set; }
+
+    [DataField] public int Width => CurrentFrame.IsValid ? CurrentFrame.Texture?.Width ?? 0 : 0;
+    [DataField] public int Height => CurrentFrame.IsValid ? CurrentFrame.Texture?.Height ?? 0 : 0;
+
+    //wider than 3:2
+    [DataField] public bool IsWide => Height > 0 && (float)Width / Height > 1.5f;
 
     // Transient UI tracking
     private bool inspectorSeekDragging;

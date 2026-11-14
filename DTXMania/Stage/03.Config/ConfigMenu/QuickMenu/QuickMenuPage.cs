@@ -6,7 +6,7 @@ using DTXMania.UI.Item;
 
 namespace DTXMania;
 
-internal class QuickMenuPage(ConfigList list, EInstrumentPart part, QuickConfigInstrumentSwitcher switcher) : InstrumentConfigPage(list, part)
+internal class QuickMenuPage(ConfigList list, EPlayer player, QuickConfigPlayerSwitcher switcher) : PlayerConfigPage(list, player)
 {
     public override List<CItemBase> Build()
     {
@@ -41,7 +41,7 @@ internal class QuickMenuPage(ConfigList list, EInstrumentPart part, QuickConfigI
         items.Add(ShutterInItem());
         items.Add(ShutterOutItem());
         
-        CItemList dark = new("Dark", CItemBase.EPanelType.Normal, (int)CDTXMania.ConfigIni.eDark[(int)instrument],
+        CItemList dark = new("Dark", CItemBase.EPanelType.Normal, (int)CDTXMania.ConfigIni.eDark[Idx],
             "レーン表示オプションをまとめて切り替えます (HALF/FULL)。",
             "OFF: all shown. HALF: lanes/gauge hidden. FULL: also bar lines and hit bar hidden.",
             ["OFF", "HALF", "FULL"]);
@@ -49,21 +49,21 @@ internal class QuickMenuPage(ConfigList list, EInstrumentPart part, QuickConfigI
         {
             if (dark.nCurrentlySelectedIndex == (int)EDarkMode.FULL)
             {
-                CDTXMania.ConfigIni.nLaneDisp[(int)instrument] = 3;
-                CDTXMania.ConfigIni.bJudgeLineDisp[(int)instrument] = false;
-                CDTXMania.ConfigIni.bLaneFlush[(int)instrument] = false;
+                CDTXMania.ConfigIni.nLaneDisp[Idx] = 3;
+                CDTXMania.ConfigIni.bJudgeLineDisp[Idx] = false;
+                CDTXMania.ConfigIni.bLaneFlush[Idx] = false;
             }
             else if (dark.nCurrentlySelectedIndex == (int)EDarkMode.HALF)
             {
-                CDTXMania.ConfigIni.nLaneDisp[(int)instrument] = 1;
-                CDTXMania.ConfigIni.bJudgeLineDisp[(int)instrument] = true;
-                CDTXMania.ConfigIni.bLaneFlush[(int)instrument] = true;
+                CDTXMania.ConfigIni.nLaneDisp[Idx] = 1;
+                CDTXMania.ConfigIni.bJudgeLineDisp[Idx] = true;
+                CDTXMania.ConfigIni.bLaneFlush[Idx] = true;
             }
             else
             {
-                CDTXMania.ConfigIni.nLaneDisp[(int)instrument] = 0;
-                CDTXMania.ConfigIni.bJudgeLineDisp[(int)instrument] = true;
-                CDTXMania.ConfigIni.bLaneFlush[(int)instrument] = true;
+                CDTXMania.ConfigIni.nLaneDisp[Idx] = 0;
+                CDTXMania.ConfigIni.bJudgeLineDisp[Idx] = true;
+                CDTXMania.ConfigIni.bLaneFlush[Idx] = true;
             }
         };
 
@@ -71,32 +71,32 @@ internal class QuickMenuPage(ConfigList list, EInstrumentPart part, QuickConfigI
 
         items.Add(RandomItem());
 
-        // var switcherButton = FolderItem($"Instrument: {part}",
+        // var switcherButton = FolderItem($"Player: {player}",
         //     "設定する楽器を切り替えます。",
-        //     "Switch which instrument these settings apply to.", switcher);
+        //     "Switch which player these settings apply to.", switcher);
         // items.Add(switcherButton);
 
         var autoGhost = new CItemList("AUTO Ghost", CItemBase.EPanelType.Normal,
-            (int)CDTXMania.ConfigIni.eAutoGhost[(int)instrument],
+            (int)CDTXMania.ConfigIni.eAutoGhost[Idx],
             "AUTOプレーのゴーストを指定します。\n",
             "Specify Play Ghost data.\n",
             ["Perfect", "Last Play", "Hi Skill", "Hi Score"]);
         autoGhost.action = () =>
         {
             EAutoGhostData gd = (EAutoGhostData)autoGhost.nCurrentlySelectedIndex;
-            CDTXMania.ConfigIni.eAutoGhost[(int)instrument] = gd;
+            CDTXMania.ConfigIni.eAutoGhost[Idx] = gd;
         };
         items.Add(autoGhost);
 
         var targetGhost = new CItemList("Target Ghost", CItemBase.EPanelType.Normal,
-            (int)CDTXMania.ConfigIni.eTargetGhost[(int)instrument],
+            (int)CDTXMania.ConfigIni.eTargetGhost[Idx],
             "ターゲットゴーストを指定します。\n",
             "Specify Target Ghost data.\n",
             ["None", "Perfect", "Last Play", "Hi Skill", "Hi Score"]);
         targetGhost.action = () =>
         {
             ETargetGhostData gtd = (ETargetGhostData)targetGhost.nCurrentlySelectedIndex;
-            CDTXMania.ConfigIni.eTargetGhost[(int)instrument] = gtd;
+            CDTXMania.ConfigIni.eTargetGhost[Idx] = gtd;
         };
         items.Add(targetGhost);
         

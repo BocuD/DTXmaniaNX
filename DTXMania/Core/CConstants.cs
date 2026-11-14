@@ -1,4 +1,5 @@
 ﻿using System.Runtime.InteropServices;
+using DTXMania.UI.DynamicElements;
 
 namespace DTXMania.Core;
 
@@ -167,6 +168,28 @@ public enum EInstrumentPart		// ここを修正するときは、セットで次
 	//SYSTEM  = 3,
 	UNKNOWN	= 99
 }
+
+public enum EPlayer
+{
+	Drums,
+	Guitar1,
+	Guitar2
+}
+
+public struct PlayerFlags
+{
+	[DataField] public bool Drums;
+	[DataField] public bool Guitar1;
+	[DataField] public bool Guitar2;
+}
+
+public enum EChartPart
+{
+	Drums,
+	Guitar,
+	Bass
+}
+
 public enum EKeyConfigPart	// : EInstrumentPart
 {
 	DRUMS	= EInstrumentPart.DRUMS,
@@ -302,8 +325,7 @@ public enum EAutoGhostData
 	PERFECT = 0, // 従来のAUTO
 	LAST_PLAY = 1, // (.score.ini) の LastPlay ゴースト
 	HI_SKILL = 2, // (.score.ini) の HiSkill ゴースト
-	HI_SCORE = 3, // (.score.ini) の HiScore ゴースト
-	ONLINE = 4 // オンラインゴースト (DTXMOS からプラグインが取得、本体のみでは指定しても無効)
+	HI_SCORE = 3 // (.score.ini) の HiScore ゴースト
 }
 
 /// <summary>
@@ -317,8 +339,7 @@ public enum ETargetGhostData
 	PERFECT = 1,
 	LAST_PLAY = 2, // (.score.ini) の LastPlay ゴースト
 	HI_SKILL = 3, // (.score.ini) の HiSkill ゴースト
-	HI_SCORE = 4, // (.score.ini) の HiScore ゴースト
-	ONLINE = 5 // オンラインゴースト (DTXMOS からプラグインが取得、本体のみでは指定しても無効)
+	HI_SCORE = 4 // (.score.ini) の HiScore ゴースト
 }
 /// <summary>
 /// Drum/Guitar/Bass の値を扱う汎用の構造体。
@@ -328,9 +349,9 @@ public enum ETargetGhostData
 [StructLayout( LayoutKind.Sequential )]
 public struct STDGBVALUE<T>			// indexはE楽器パートと一致させること
 {
-	public T Drums;
-	public T Guitar;
-	public T Bass;
+	[DataField] public T Drums;
+	[DataField] public T Guitar;
+	[DataField] public T Bass;
 	public T Unknown;
 	public T this[ int index ]
 	{

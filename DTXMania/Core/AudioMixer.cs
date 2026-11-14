@@ -64,7 +64,7 @@ public static partial class AudioMixer
     private static int clipsCreated;
     private static int clipsFreed;
 
-    /// <summary>Voices held right now. FDK's own counters do not see these.</summary>
+    /// <summary>Voices held right now.</summary>
     public static int VoiceCount => Volatile.Read(ref voiceCount);
 
     /// <summary>The most ever held. Still climbing long after startup means something is retriggering

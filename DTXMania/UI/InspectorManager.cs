@@ -97,11 +97,8 @@ public static class InspectorManager
         }
     }
 
-    public static void Draw(bool drawGameWindow, ImTextureID? gameTextureId, Vector2 gameTextureSize, Vector2 defaultFramebufferSize)
+    public static void RemovePending()
     {
-        framebufferSize = defaultFramebufferSize;
-        gameRenderSize = gameTextureSize;
-
         if (toRemove.Target is { } removing)
         {
             if (Inspector.Inspector.inspectorTarget.Is(removing))
@@ -114,6 +111,12 @@ public static class InspectorManager
         }
 
         toRemove = DrawableRef.None;
+    }
+
+    public static void Draw(bool drawGameWindow, ImTextureID? gameTextureId, Vector2 gameTextureSize, Vector2 defaultFramebufferSize)
+    {
+        framebufferSize = defaultFramebufferSize;
+        gameRenderSize = gameTextureSize;
 
         if (textureInspector == null)
         {
@@ -238,6 +241,14 @@ public static class InspectorManager
         Vector2 transformed = Vector2.Transform(point, view);
         transformed += new Vector2(gizmoRect.X, gizmoRect.Y);
         gizmoDrawList.AddCircle(new Vector2(transformed.X, transformed.Y), radius, color, 12, thickness);
+    }
+
+    public static void DrawGizmoText(Vector2 point, string text, uint color, float offsetY)
+    {
+        Vector2 transformed = Vector2.Transform(point, view) + new Vector2(gizmoRect.X, gizmoRect.Y);
+        Vector2 extent = ImGui.CalcTextSize(text);
+
+        gizmoDrawList.AddText(transformed + new Vector2(-extent.X / 2.0f, offsetY), color, text);
     }
 
     public static void DrawGizmoLine(Vector2 start, Vector2 end, uint color)

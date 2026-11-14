@@ -199,11 +199,8 @@ Runtime/System/*
 Runtime/DTXFiles/*
 !Runtime/System/Sounds
 !Runtime/System/Graphics
-!Runtime/FFpmeg/*
 
-#!/Runtime/FFmpeg/*
-#!/Runtime/FFmpeg/bin/x64/*.dll
-#/Runtime/dll
+# NuGet natives the build copies next to the executable; the repo's own natives live in Runtime/lib
 /Runtime/*.dll
 
 # IDE files
@@ -216,6 +213,11 @@ Runtime/imgui.ini
 *.db-*
 /Runtime/updater
 Runtime/DTXManiaNX.deps.json
+Runtime/DTXManiaNX.runtimeconfig.json
+Runtime/DTXCreator.exe
+Runtime/DTXCreator.runtimeconfig.json
+Runtime/DTXCreator.deps.json
+/Runtime/ja-JP
 Runtime/DTXManiaNX.exe
 /Runtime/LegacySkins
 Tests/*/testresults.txt

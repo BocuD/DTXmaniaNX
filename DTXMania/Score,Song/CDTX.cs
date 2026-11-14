@@ -7,6 +7,7 @@ using System.Globalization;
 using DTXMania.Core;
 using DTXMania.Core.Audio;
 using DTXMania.UI.Drawable;
+using DTXMania.UI.DynamicElements;
 using FDK;
 
 namespace DTXMania;
@@ -60,7 +61,6 @@ public class CDTX : CActivity
         RGxYP,
         RGBYP
     };
-
 
     // クラス
     public class CAVIPAN
@@ -407,7 +407,6 @@ public class CDTX : CActivity
 
         #endregion
     }
-
 
     // 構造体
 
@@ -870,30 +869,6 @@ public class CDTX : CActivity
             }
         }
 
-        public void swapGuitarBassLaneChipCounters()
-        {
-            int temp_R = GuitarR;
-            int temp_G = GuitarG;
-            int temp_B = GuitarB;
-            int temp_Y = GuitarY;
-            int temp_P = GuitarP;
-            int temp_Open = GuitarOpen;
-
-            GuitarR = BassR;
-            GuitarG = BassG;
-            GuitarB = BassB;
-            GuitarY = BassY;
-            GuitarP = BassP;
-            GuitarOpen = BassOpen;
-
-            BassR = temp_R;
-            BassG = temp_G;
-            BassB = temp_B;
-            BassY = temp_Y;
-            BassP = temp_P;
-            BassOpen = temp_Open;
-        }
-
         public int chipCountInLane(ELane eLane)
         {
             switch (eLane)
@@ -1030,9 +1005,9 @@ public class CDTX : CActivity
 
     public struct STHASCHIPS
     {
-        public bool Drums;
-        public bool Guitar;
-        public bool Bass;
+        [DataField] public bool Drums;
+        [DataField] public bool Guitar;
+        [DataField] public bool Bass;
 
         public bool HHOpen;
         public bool LP;
@@ -1045,7 +1020,6 @@ public class CDTX : CActivity
         public bool YPGuitar;
         public bool YPBass;
         public bool AVI;
-
 
         public bool this[int index]
         {
@@ -1100,7 +1074,6 @@ public class CDTX : CActivity
             }
         }
     }
-
 
     // プロパティ
 
@@ -1237,7 +1210,6 @@ public class CDTX : CActivity
         bForceXGChart = false;
         bVol137to100 = false;
 
-
         #region [ 2011.1.1 yyagi GDA->DTX変換テーブル リファクタ後 ]
 
         STGDAPARAM[] stgdaparamArray = new STGDAPARAM[]
@@ -1292,46 +1264,7 @@ public class CDTX : CActivity
         tRead(strFileName, bHeaderOnly, db再生速度, nBGMAdjust);
     }
 
-
     // メソッド
-
-    public int nモニタを考慮した音量(EInstrumentPart part)
-    {
-        CConfigIni configIni = CDTXMania.ConfigIni;
-        switch (part)
-        {
-            case EInstrumentPart.DRUMS:
-                if (configIni.b演奏音を強調する.Drums)
-                {
-                    return configIni.n自動再生音量;
-                }
-
-                return configIni.n手動再生音量;
-
-            case EInstrumentPart.GUITAR:
-                if (configIni.b演奏音を強調する.Guitar)
-                {
-                    return configIni.n自動再生音量;
-                }
-
-                return configIni.n手動再生音量;
-
-            case EInstrumentPart.BASS:
-                if (configIni.b演奏音を強調する.Bass)
-                {
-                    return configIni.n自動再生音量;
-                }
-
-                return configIni.n手動再生音量;
-        }
-
-        if ((!configIni.b演奏音を強調する.Drums && !configIni.b演奏音を強調する.Guitar) && !configIni.b演奏音を強調する.Bass)
-        {
-            return configIni.n手動再生音量;
-        }
-
-        return configIni.n自動再生音量;
-    }
 
     public void tLoadAVI()
     {
@@ -1719,7 +1652,6 @@ public class CDTX : CActivity
         }
     }
 
-
     public void t譜面仕様変更(EInstrumentPart part, Core.EType eNumOfLanes)
     {
         if ((part == EInstrumentPart.DRUMS) && (eNumOfLanes != Core.EType.A))
@@ -1776,7 +1708,6 @@ public class CDTX : CActivity
                                 num4 = chip.nChannelNumber;
                                 num6 = chip.nPlaybackPosition;
                                 continue;
-
 
                             case EChannel.Snare:
                             case EChannel.BassDrum:
@@ -2813,12 +2744,14 @@ public class CDTX : CActivity
                     case ERandomMode.RANDOM: // 1小節単位でレーンのR/G/Bがランダムに入れ替わる
                         chip.nChannelNumber = (EChannel)(((int)nランダム化前チャンネル番号 & 0xF0) |
                                                          nランダムレーン候補[n小節内乱数6通り, (int)nランダム化前チャンネル番号 & 0x07]);
+                        chip.frets = CChip.FretsOf(chip.nChannelNumber);
                         continue; // goto Label_02C4;
 
                     case ERandomMode.SUPERRANDOM: // チップごとにR/G/Bがランダムで入れ替わる(レーンの本数までは変わらない)。
                         chip.nChannelNumber = (EChannel)(((int)nランダム化前チャンネル番号 & 0xF0) |
                                                          nランダムレーン候補[CDTXMania.Random.Next(6),
                                                              (int)nランダム化前チャンネル番号 & 0x07]);
+                        chip.frets = CChip.FretsOf(chip.nChannelNumber);
                         continue; // goto Label_02C4;
 
                     case ERandomMode.HYPERRANDOM: // レーンの本数も変わる
@@ -2948,6 +2881,7 @@ public class CDTX : CActivity
 
                 Label_02B2:
                 chip.nChannelNumber = (EChannel)(((int)nランダム化前チャンネル番号 & 0xF0) | n新RGBレーンビットパターン);
+                chip.frets = CChip.FretsOf(chip.nChannelNumber);
 //				Label_02C4:
 //					GOTO_END++;		// goto用のダミーコード
             }
@@ -2958,20 +2892,15 @@ public class CDTX : CActivity
 
     public void tPlayChip(CChip rChip, long n再生開始システム時刻ms, int nLane)
     {
-        tPlayChip(rChip, n再生開始システム時刻ms, nLane, CDTXMania.ConfigIni.n自動再生音量, false, false);
+        tPlayChip(rChip, n再生開始システム時刻ms, nLane, CDTXMania.ConfigIni.n自動再生音量, false);
     }
 
     public void tPlayChip(CChip rChip, long n再生開始システム時刻ms, int nLane, int nVol)
     {
-        tPlayChip(rChip, n再生開始システム時刻ms, nLane, nVol, false, false);
+        tPlayChip(rChip, n再生開始システム時刻ms, nLane, nVol, false);
     }
 
-    public void tPlayChip(CChip rChip, long n再生開始システム時刻ms, int nLane, int nVol, bool bMIDIMonitor)
-    {
-        tPlayChip(rChip, n再生開始システム時刻ms, nLane, nVol, bMIDIMonitor, false);
-    }
-
-    public void tPlayChip(CChip pChip, long n再生開始システム時刻ms, int nLane, int nVol, bool bMIDIMonitor, bool bBad)
+    public void tPlayChip(CChip pChip, long n再生開始システム時刻ms, int nLane, int nVol, bool bBad)
     {
         if ((nLane < (int)ELane.LC) || ((int)ELane.BGM < nLane))
         {
@@ -3066,7 +2995,7 @@ public class CDTX : CActivity
 
         strFileNameFullPath = Path.GetFullPath(strFileName);
         this.strFileName = Path.GetFileName(strFileNameFullPath);
-        strFolderName = Path.GetDirectoryName(strFileNameFullPath) + @"\";
+        strFolderName = Path.GetDirectoryName(strFileNameFullPath) + Path.DirectorySeparatorChar;
         string ext = Path.GetExtension(this.strFileName).ToLower();
         if (!string.IsNullOrEmpty(ext))
         {
@@ -3110,7 +3039,6 @@ public class CDTX : CActivity
             Trace.TraceWarning("SMF の演奏は未対応です。（検討中）");
         }
     }
-
 
     private bool t入力_コメントをスキップする( ref CharEnumerator ce )
     {
@@ -4281,104 +4209,6 @@ public class CDTX : CActivity
         return true;
     }
 
-    /// <summary>
-    /// Swap infos between Guitar and Bass (notes, level, nVisibleChipsCount, bチップがある)
-    /// </summary>
-    public void SwapGuitarBassInfos() // #24063 2011.1.24 yyagi ギターとベースの譜面情報入替
-    {
-        for (int i = listChip.Count - 1; i >= 0; i--)
-        {
-            if (listChip[i].eInstrumentPart == EInstrumentPart.BASS)
-            {
-                listChip[i].eInstrumentPart = EInstrumentPart.GUITAR;
-                if (listChip[i].nChannelNumber >= EChannel.Bass_Open &&
-                    listChip[i].nChannelNumber <= EChannel.Bass_Wailing)
-                    listChip[i].nChannelNumber -= (EChannel.Bass_Open - EChannel.Guitar_Open);
-                else if (listChip[i].nChannelNumber == EChannel.Bass_xxxYx ||
-                         listChip[i].nChannelNumber == EChannel.Bass_xxBYx)
-                    listChip[i].nChannelNumber -= 0x32;
-                else if (listChip[i].nChannelNumber >= EChannel.Bass_xGxYx &&
-                         listChip[i].nChannelNumber <= EChannel.Bass_xxBxP)
-                    listChip[i].nChannelNumber -= 0x33;
-                else if (listChip[i].nChannelNumber >= EChannel.Bass_xGxxP &&
-                         listChip[i].nChannelNumber <= EChannel.Bass_RxxxP)
-                    listChip[i].nChannelNumber -= 0x3D;
-                else if (listChip[i].nChannelNumber >= EChannel.Bass_RxBxP &&
-                         listChip[i].nChannelNumber <= EChannel.Bass_RGBxP)
-                    listChip[i].nChannelNumber -= 0x34;
-                else if (listChip[i].nChannelNumber >= EChannel.Bass_xxxYP &&
-                         listChip[i].nChannelNumber <= EChannel.Bass_RGBYP)
-                    listChip[i].nChannelNumber -= 0x35;
-            }
-            else if (listChip[i].eInstrumentPart == EInstrumentPart.GUITAR)
-            {
-                listChip[i].eInstrumentPart = EInstrumentPart.BASS;
-
-                if (listChip[i].nChannelNumber >= EChannel.Guitar_Open &&
-                    listChip[i].nChannelNumber <= EChannel.Guitar_Wailing)
-                    listChip[i].nChannelNumber += (EChannel.Bass_Open - EChannel.Guitar_Open);
-                else if (listChip[i].nChannelNumber == EChannel.Guitar_xxxYx ||
-                         listChip[i].nChannelNumber == EChannel.Guitar_xxBYx)
-                    listChip[i].nChannelNumber += 0x32;
-                else if (listChip[i].nChannelNumber >= EChannel.Guitar_xGxYx &&
-                         listChip[i].nChannelNumber <= EChannel.Guitar_xxBxP)
-                    listChip[i].nChannelNumber += 0x33;
-                else if (listChip[i].nChannelNumber >= EChannel.Guitar_xGxxP &&
-                         listChip[i].nChannelNumber <= EChannel.Guitar_RxxxP)
-                    listChip[i].nChannelNumber += 0x3D;
-                else if (listChip[i].nChannelNumber >= EChannel.Guitar_RxBxP &&
-                         listChip[i].nChannelNumber <= EChannel.Guitar_RGBxP)
-                    listChip[i].nChannelNumber += 0x34;
-                else if (listChip[i].nChannelNumber >= EChannel.Guitar_xxxYP &&
-                         listChip[i].nChannelNumber <= EChannel.Guitar_RGBYP)
-                    listChip[i].nChannelNumber += 0x35;
-            }
-            //Long Notes
-            else if (listChip[i].nChannelNumber == EChannel.Guitar_LongNote)
-            {
-                listChip[i].nChannelNumber = EChannel.Bass_LongNote;
-            }
-            else if (listChip[i].nChannelNumber == EChannel.Bass_LongNote)
-            {
-                listChip[i].nChannelNumber = EChannel.Guitar_LongNote;
-            }
-            //Wailing
-            else if
-                (listChip[i].nChannelNumber ==
-                 EChannel.Guitar_Wailing) // #25215 2011.5.21 yyagi wailingはE楽器パート.UNKNOWNが割り当てられているので個別に対応
-            {
-                listChip[i].nChannelNumber += (EChannel.Bass_Open - EChannel.Guitar_Open);
-            }
-            else if
-                (listChip[i].nChannelNumber ==
-                 EChannel.Bass_Wailing) // #25215 2011.5.21 yyagi wailingはE楽器パート.UNKNOWNが割り当てられているので個別に対応
-            {
-                listChip[i].nChannelNumber -= (EChannel.Bass_Open - EChannel.Guitar_Open);
-            }
-        }
-
-        int t = LEVEL.Bass;
-        LEVEL.Bass = LEVEL.Guitar;
-        LEVEL.Guitar = t;
-
-        t = LEVELDEC.Bass;
-        LEVELDEC.Bass = LEVELDEC.Guitar;
-        LEVELDEC.Guitar = t;
-
-        t = nVisibleChipsCount.Bass;
-        nVisibleChipsCount.Bass = nVisibleChipsCount.Guitar;
-        nVisibleChipsCount.Guitar = t;
-
-        //Swap Guitar Bass Lane chip info
-        nVisibleChipsCount.swapGuitarBassLaneChipCounters();
-
-        bool ts = bHasChips.Bass;
-        bHasChips.Bass = bHasChips.Guitar;
-        bHasChips.Guitar = ts;
-
-//			SwapGuitarBassInfos_AutoFlags();
-    }
-
     // CActivity 実装
 
     public override void OnActivate()
@@ -4502,7 +4332,6 @@ public class CDTX : CActivity
         }
     }
 
-
     // Other
 
     #region [ private ]
@@ -4531,7 +4360,6 @@ public class CDTX : CActivity
 
     private int lineNumber;
     private int nCurrentRandomNumber;
-
 
     private int n内部番号BPM1to;
     private int n内部番号WAV1to;
@@ -4649,6 +4477,16 @@ public class CDTX : CActivity
         (c >= '0' && c <= '9') || (c >= 'A' && c <= 'F');
 
     bool lastLineWasChipLocation = false;
+
+    //text commands like #TITLE keep their '\'
+    private static readonly string[] filePathCommandPrefixes =
+    [
+        "PATH", "STAGEFILE", "PREVIEW", "PREIMAGE", "PREMOVIE", "BACKGROUND", "WALL", "SOUND_", "MIDIFILE",
+        "WAV", "BMP", "AVI", "VIDEO", "RESULTIMAGE", "RESULTMOVIE", "RESULTSOUND"
+    ];
+
+    private static bool IsFilePathCommand(string command) =>
+        filePathCommandPrefixes.Any(prefix => command.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
 
     private static readonly Dictionary<string, Action<CDTX, string>> commandHandlers = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -4813,6 +4651,11 @@ public class CDTX : CActivity
         #endregion
         else if (!bstackIFからENDIFをスキップする.Peek()) // IF～ENDIF をスキップするなら以下はすべて無視。
         {
+            if (IsFilePathCommand(strCommand))
+            {
+                strParameter = DataPath.Normalize(strParameter);
+            }
+
             if (commandHandlers.TryGetValue(strCommand, out Action<CDTX, string>? handler))
             {
                 handler(this, strParameter);
@@ -5913,7 +5756,6 @@ public class CDTX : CActivity
 
         #endregion
 
-
         var bmp = new CBMP()
         {
             n番号 = zz,
@@ -6435,7 +6277,6 @@ public class CDTX : CActivity
 
         #endregion
 
-
         // (2) パラメータを処理。
 
         #region [ nサイズ値 を取得する。値は 0～100 に収める。]
@@ -6916,7 +6757,6 @@ public class CDTX : CActivity
 
         #endregion
 
-
         // (3) Process Parameter
 
         if (string.IsNullOrEmpty(strParameter)) // パラメータはnullまたは空文字列ではないこと。
@@ -6955,7 +6795,6 @@ public class CDTX : CActivity
         //-----------------
 
         #endregion
-
 
         // (4) パラメータをオブジェクト数値に分解して配置する。
 
@@ -7014,6 +6853,7 @@ public class CDTX : CActivity
                     chip.eInstrumentPart = EInstrumentPart.BASS;
                     break;
             }
+            chip.frets = CChip.FretsOf(nChannelNumber);
             #endregion
 
             #region [ 無限定義への対応 → 内部番号の取得。]

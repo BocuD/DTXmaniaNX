@@ -22,10 +22,8 @@ internal class CActPerfSkillMeter : CActivity
 
 	private STDGBVALUE<int> nGraphBG_XPos; //ドラムにも座標指定があるためDGBVALUEとして扱う。
 	private int nGraphBG_YPos = 200;
-	private int DispHeight = 400;
-	private int DispWidth = 60;
-	private CCounter counterYposInImg = null;
-	private readonly int slices = 10;
+	//the player whose graph is shown, and the slot its panel sits in
+	private EPlayer graphPlayer;
 	private int nGraphUsePart;
 
 	public bool bIsTrainingMode = false;
@@ -83,23 +81,19 @@ internal class CActPerfSkillMeter : CActivity
 				//                       時間がなくて雑なコードになったため、後日最適化を行う。
 				if ( CDTXMania.ConfigIni.bDrumsEnabled )
 				{
-					nGraphUsePart = 0;
+					graphPlayer = EPlayer.Drums;
 				}
 				else if ( CDTXMania.ConfigIni.bGuitarEnabled )
 				{
-					nGraphUsePart = ( CDTXMania.ConfigIni.bGraph有効.Guitar == true ) ? 1 : 2;
-					if ( CDTXMania.DTX.bHasChips.Guitar )
-					{
-					}
-					else if ( !CDTXMania.DTX.bHasChips.Guitar && CDTXMania.ConfigIni.bGraph有効.Guitar )
-					{
-						nGraphUsePart = 2;
-					}
+					graphPlayer = CDTXMania.ConfigIni.bGraph有効.Guitar ? EPlayer.Guitar1 : EPlayer.Guitar2;
 
-					if ( !CDTXMania.DTX.bHasChips.Bass && CDTXMania.ConfigIni.bGraph有効.Bass )
+					if ( !CDTXMania.DTX.bHasChips[ (int)CStagePerfCommonScreen.PartOf( graphPlayer ) ] && CDTXMania.ConfigIni.bGraph有効.Guitar )
 					{
+						graphPlayer = EPlayer.Guitar2;
 					}
 				}
+
+				nGraphUsePart = (int)graphPlayer;
 
 				nGraphBG_XPos.Drums = (CDTXMania.ConfigIni.bSmallGraph ? 880 : 900);//850 : 870
 				nGraphBG_XPos.Guitar = 356;
@@ -112,19 +106,18 @@ internal class CActPerfSkillMeter : CActivity
 					nGraphBG_XPos.Bass = 403;
 				}
 
+				int ghostPart = (int)CStagePerfCommonScreen.PartOf( graphPlayer );
 				if ( CDTXMania.ConfigIni.eTargetGhost[ nGraphUsePart ] != ETargetGhostData.NONE )
 				{
-					if ( CDTXMania.listTargetGhostScoreData[ nGraphUsePart ] != null )
+					if ( CDTXMania.listTargetGhostScoreData[ ghostPart ] != null )
 					{
-						//this.dbグラフ値目標 = CDTXMania.listTargetGhostScoreData[ this.nGraphUsePart ].dbPerformanceSkill;
-						dbグラフ値目標_表示 = CDTXMania.listTargetGhostScoreData[ nGraphUsePart ].dbPerformanceSkill;
+						dbグラフ値目標_表示 = CDTXMania.listTargetGhostScoreData[ ghostPart ].dbPerformanceSkill;
 					}
 				}
 
 				bJustStartedUpdate = false;
 			}
 
-			int stYposInImg = 0;
 			int nGraphSizeOffset = (CDTXMania.ConfigIni.bSmallGraph ? -19 : 0);
 
 
@@ -159,14 +152,12 @@ internal class CActPerfSkillMeter : CActivity
 				int nPosY = nGraphUsePart == 0 ? 527 - nGaugeSize : 587 - nGaugeSize;
 				if (!bIsTrainingMode)
 				{
-					//txグラフ_ゲージ.nTransparency = 255;
 					txグラフ_ゲージ.tDraw2D(nGraphBG_XPos[nGraphUsePart] + 45 + nGraphSizeOffset, nPosY, new RectangleF(2, 2, 30, nGaugeSize));
 				}
 				//ゲージ比較
 				int nTargetGaugeSize = (int)( 434.0f * ( (float)dbGraphValue_Goal / 100.0f ) );
 				int nTargetGaugePosY = nGraphUsePart == 0 ? 527 - nTargetGaugeSize : 587 - nTargetGaugeSize;
 				int nTargetGaugeRectX = dbグラフ値現在_渡 > dbGraphValue_Goal ? 38 : 74;
-				//txグラフ_ゲージ.nTransparency = 255;
 				txグラフ_ゲージ.tDraw2D(nGraphBG_XPos[ nGraphUsePart ] + 75 + nGraphSizeOffset, nTargetGaugePosY, new RectangleF( nTargetGaugeRectX, 2, 30, nTargetGaugeSize ) );
 				if ( txグラフ != null )
 				{
@@ -204,12 +195,10 @@ internal class CActPerfSkillMeter : CActivity
 	#region [ private ]
 	//----------------
 	private double dbグラフ値目標_表示;
-	private double dbグラフ値現在_表示;
 	public double dbGraphValue_PersonalBest;
 
 	private BaseTexture txグラフ;
 	private BaseTexture txグラフ_ゲージ;
-	private BaseTexture txグラフ値自己ベストライン;
 	
 	[StructLayout(LayoutKind.Sequential)]
 	private struct ST文字位置
@@ -267,7 +256,6 @@ internal class CActPerfSkillMeter : CActivity
 					RectangleF rectangle = new( 260 + st比較数字位置[ i ].pt.X, 162, RectX, 10 );
 					if ( txグラフ != null )
 					{
-						//txグラフ.nTransparency = 255;
 						txグラフ.tDraw2D(x, y, rectangle );
 					}
 					break;
@@ -290,7 +278,6 @@ internal class CActPerfSkillMeter : CActivity
 					RectangleF rectangle = new( 260 + st達成率数字位置[ i ].pt.X, 128, RectX, 28 );
 					if ( txグラフ != null )
 					{
-						//txグラフ.nTransparency = 255;
 						txグラフ.tDraw2D(x, y, rectangle );
 					}
 					break;

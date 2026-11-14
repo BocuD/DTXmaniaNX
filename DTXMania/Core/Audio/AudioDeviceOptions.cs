@@ -1,14 +1,15 @@
 namespace DTXMania.Core.Audio;
 
+//values are CConfigIni.nSoundDriverType
 public enum AudioBackend
 {
-    DirectSound,
-    Asio,
-    WasapiExclusive,
-    WasapiShared,
+    DirectSound = 0,
+    Asio = 1,
+    WasapiExclusive = 2,
+    WasapiShared = 3,
 
     /// <summary>BASS's own output, which is what runs on macOS and Linux.</summary>
-    Bass
+    Bass = 4
 }
 
 /// <summary>
@@ -42,31 +43,21 @@ public sealed record AudioDeviceOptions
     /// </summary>
     public string OutputDevice { get; init; } = string.Empty;
 
-    /// <summary>Time the performance from the OS rather than from the sound device.</summary>
-    public bool UseOsTimer { get; init; }
-
-    /// <summary>
-    /// Play through FDK's sound device rather than this layer's own. Kept only so the two can be compared
-    /// against each other, and goes when FDK's audio does.
-    /// </summary>
-    public bool UseFdk { get; init; }
-
-    internal static AudioDeviceOptions FromConfig(CConfigIni config) => new()
+    /// <summary>A driver the platform cannot open is replaced by its fallback.</summary>
+    internal static AudioDeviceOptions FromConfig(CConfigIni config)
     {
-        Backend = config.nSoundDriverType switch
+        AudioBackend backend = Enum.IsDefined(typeof(AudioBackend), config.nSoundDriverType)
+            ? (AudioBackend)config.nSoundDriverType
+            : AudioBackends.Fallback;
+
+        return new AudioDeviceOptions
         {
-            1 => AudioBackend.Asio,
-            2 => AudioBackend.WasapiExclusive,
-            3 => AudioBackend.WasapiShared,
-            4 => AudioBackend.Bass,
-            _ => AudioBackend.DirectSound
-        },
-        BufferSizeMs = config.nWASAPIBufferSizeMs,
-        EventDriven = config.bEventDrivenWASAPI,
-        AsioDevice = config.nASIODevice,
-        AsioBufferSamples = config.nASIOBufferSizeSamples,
-        UseOsTimer = config.bUseOSTimer,
-        UseFdk = config.bUseFDKAudio,
-        OutputDevice = config.strOutputDevice ?? string.Empty
-    };
+            Backend = AudioBackends.Resolve(backend),
+            BufferSizeMs = config.nWASAPIBufferSizeMs,
+            EventDriven = config.bEventDrivenWASAPI,
+            AsioDevice = config.nASIODevice,
+            AsioBufferSamples = config.nASIOBufferSizeSamples,
+            OutputDevice = config.strOutputDevice ?? string.Empty
+        };
+    }
 }

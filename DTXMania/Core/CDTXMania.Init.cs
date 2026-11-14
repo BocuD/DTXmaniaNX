@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using System.Numerics;
-using System.Windows.Forms;
 using DTXMania.Core.Audio;
 using DTXMania.Core.Video;
 using DTXMania.SongDb;
@@ -31,7 +30,7 @@ internal partial class CDTXMania
         catch (Exception e)
         {
             Trace.TraceError($"Failed to initialize {initializer.name}: {e}\n{e.StackTrace}");
-            MessageBox.Show($"Failed to initialize {initializer.name}: {e}\n{e.StackTrace}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            NativeMessageBox.Show("Error", $"Failed to initialize {initializer.name}: {e}\n{e.StackTrace}");
             throw;
         }
     }
@@ -55,7 +54,10 @@ internal partial class CDTXMania
             Trace.TraceInformation("----------------------");
             Trace.TraceInformation("■ Startup");
         
-            SongDb.StartScan();
+            if (!bCompactMode)
+            {
+                SongDb.StartScan();
+            }
         }
     }
 
@@ -165,14 +167,17 @@ internal partial class CDTXMania
                 DiscordRichPresence = new CDiscordRichPresence(ConfigIni.strDiscordRichPresenceApplicationID);
         });
        
-        AddInitializer("SongDb", () => SongDb = new SongDb.SongDb());
-        
-        AddInitializer("SongDBStatus", () =>
+        if (!bCompactMode)
         {
-            SongDBStatus songDbStatus = persistentUIGroup.AddChild(new SongDBStatus());
-            songDbStatus.parentAnchor = new Vector2(0.0f, 1.0f);
-            songDbStatus.pivot = new Vector2(0.0f, 1.0f);
-        });
+            AddInitializer("SongDb", () => SongDb = new SongDb.SongDb());
+
+            AddInitializer("SongDBStatus", () =>
+            {
+                SongDBStatus songDbStatus = persistentUIGroup.AddChild(new SongDBStatus());
+                songDbStatus.parentAnchor = new Vector2(0.0f, 1.0f);
+                songDbStatus.pivot = new Vector2(0.0f, 1.0f);
+            });
+        }
         
         AddInitializer("AnimatedTransition", () => gitadoraTransition = persistentUIGroup.AddChild(new GitaDoraTransition()));
         

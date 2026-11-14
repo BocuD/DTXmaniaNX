@@ -10,8 +10,9 @@ namespace DTXMania;
 
 internal abstract class CActPerfCommonJudgementString : CActivity
 {
+	public LaneLayout lanes = new();
+
 	private BaseTexture judgementGraphicSheet;
-	private bool renderOld = false;
 	
 	// プロパティ
 	protected JudgementStatus[] judgementStatus = new JudgementStatus[15];
@@ -94,8 +95,17 @@ internal abstract class CActPerfCommonJudgementString : CActivity
 	{
 		if (nLane > judgements.Length - 1) return;
 		if (judgements[nLane] == null) return;
-		
-		judgements[nLane].Play(judge);
+
+		//lanes can move while playing
+		if (TryGetLanePosition(nLane, out int laneX, out int laneY))
+		{
+			judgements[nLane].position.X = laneX - offsetsX[nLane];
+		}
+
+		if (!CDTXMania.ConfigIni.bClassicJudgement)
+		{
+			judgements[nLane].Play(judge);
+		}
 		
 		if ( ( nLane < 0 ) || ( nLane > 14 ) )
 		{
@@ -111,12 +121,18 @@ internal abstract class CActPerfCommonJudgementString : CActivity
 
 	public override int OnUpdateAndDraw()
 	{
+		DrawLanes( 0, LaneCount - 1 );
+		return 0;
+	}
+
+	public void DrawLanes( int firstLane, int lastLane )
+	{
 		if ( !bActivated || !ShouldDrawJudgementString() )
 		{
-			return 0;
+			return;
 		}
 
-		for ( int i = 0; i < LaneCount; i++ )
+		for ( int i = firstLane; i <= lastLane; i++ )
 		{
 			if ( !judgementStatus[ i ].ctFrameProgress.bStopped )
 			{
@@ -129,7 +145,7 @@ internal abstract class CActPerfCommonJudgementString : CActivity
 			}
 		}
 
-		for ( int lane = 0; lane < LaneCount; lane++ )
+		for ( int lane = firstLane; lane <= lastLane; lane++ )
 		{
 			if ( judgementStatus[ lane ].ctFrameProgress.bStopped )
 			{
@@ -143,8 +159,6 @@ internal abstract class CActPerfCommonJudgementString : CActivity
 
 			DrawJudgementString( lane, baseX, baseY );
 		}
-
-		return 0;
 	}
 
 	// CActivity 実装
@@ -206,7 +220,7 @@ internal abstract class CActPerfCommonJudgementString : CActivity
 
 		DrawLag(lane, baseX, y);
 
-		if (!renderOld) return;
+		if (!CDTXMania.ConfigIni.bClassicJudgement) return;
 		DrawJudgeFrame(lane, x, y, nRectX, nRectY);
 	}
 
@@ -251,7 +265,7 @@ internal abstract class CActPerfCommonJudgementString : CActivity
 			return;
 		}
 
-		if ( judgementStatus[ lane ].judge == EJudgement.Auto || txLagNumbers == null )
+		if ( judgementStatus[ lane ].judge is EJudgement.Auto or EJudgement.Miss || txLagNumbers == null )
 		{
 			return;
 		}
@@ -271,31 +285,37 @@ internal abstract class CActPerfCommonJudgementString : CActivity
 	}
 
 	private JudgementString[] judgements;
+	//per lane, the x of the group each judgement was added to
+	private float[] offsetsX = [];
 	
-	public void InitUI(UIGroup ui)
+	public void InitUI(UIGroup ui, int firstLane, int lastLane, float offsetX)
 	{
 		InitializeLaneSizes();
 		
 		var judgement = ui.AddChild(new UIGroup("Judgement"));
-		judgement.renderOrder = 1;
+		judgement.renderOrder = CStagePerfCommonScreen.EffectsLayer;
 		judgement.dontSerialize = true;
 
-		judgements = new JudgementString[stLaneSize.Length];
+		if (judgements == null || judgements.Length != stLaneSize.Length)
+		{
+			judgements = new JudgementString[stLaneSize.Length];
+			offsetsX = new float[stLaneSize.Length];
+		}
 
-		for (int lane = 0; lane < stLaneSize.Length; lane++)
+		for (int lane = firstLane; lane <= Math.Min(lastLane, stLaneSize.Length - 1); lane++)
 		{
 			if ( !TryGetLanePosition( lane, out int baseX, out int baseY ) )
 			{
 				continue;
 			}
 			
-			float x = baseX;
+			float x = baseX - offsetX;
 			float y = baseY + 10.0f;
 
 			judgements[lane] = judgement.AddChild(new JudgementString());
 			judgements[lane].dontSerialize = true;
-			//x = laneSize.x + (laneSize.w / 2.0f);
 			judgements[lane].position = new Vector3(x, y, 0);
+			offsetsX[lane] = offsetX;
 		}
 	}
 }

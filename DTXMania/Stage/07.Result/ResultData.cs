@@ -26,8 +26,6 @@ public sealed class ResultData
     [DataField] public string SkillInt => NumberParts.Whole(Skill);
     [DataField] public string SkillFraction => NumberParts.Fraction(Skill);
 
-    [DataField] public bool ShowSkillBar => MaxSkill > 0.0;
-
     [DataField] public double SkillOfMax => MaxSkill > 0.0 ? Entry.dbGameSkill / MaxSkill : 0.0;
 
     //mutually exclusive; drives which result badge is shown
@@ -35,9 +33,23 @@ public sealed class ResultData
     [DataField] public bool IsFullCombo => !IsExcellent && Entry.bIsFullCombo;
     [DataField] public bool IsClear => !IsExcellent && !Entry.bIsFullCombo;
 
-    [DataField] public bool ShowLagCounts => CDTXMania.ConfigIni.bShowLagHitCount;
     [DataField] public int FastCount => Entry.nFastCount;
     [DataField] public int SlowCount => Entry.nSlowCount;
+
+    [DataField] public double AverageOffset => Entry.dbAverageOffset;
+    [DataField] public string AverageOffsetValue => FormatOffsetValue(Entry.dbAverageOffset);
+    [DataField] public string AverageOffsetMs => $"{FormatOffsetValue(Entry.dbAverageOffset)} ms";
+    [DataField] public string AverageOffsetText => $"Average Offset: {FormatOffsetValue(Entry.dbAverageOffset)} ms";
+
+    private static string FormatOffsetValue(double offset)
+    {
+        if (Math.Abs(offset) < 0.005)
+        {
+            return "0.00";
+        }
+
+        return offset > 0 ? $"+{offset:0.00}" : $"{offset:0.00}";
+    }
 
     //level is stored as either xx.y (LEVEL<=99 plus LEVELDEC) or xxx (LEVEL>99), split here into a whole
     //part and a 2-digit fraction

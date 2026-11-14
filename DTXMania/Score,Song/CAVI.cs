@@ -7,7 +7,6 @@ namespace DTXMania;
 //todo: this class should be removed fully
 public class CAVI : IDisposable
     {
-        //public CAviDS avi;
         private bool bDispose済み;
         public int n番号;
         public string strComment = "";

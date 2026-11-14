@@ -45,6 +45,15 @@ public sealed class Viewport
 
     private float textureToScreen => zoom / MathF.Max(renderScale, 0.01f);
 
+    private Vector2 targetTopLeft
+    {
+        get
+        {
+            Vector2 topLeft = translation - textureSize * textureToScreen * 0.5f;
+            return new Vector2(MathF.Round(topLeft.X), MathF.Round(topLeft.Y));
+        }
+    }
+
     private Vector2 textureSize = new(1280, 720);
 
     private Vector2 mouseDragStart;
@@ -83,7 +92,7 @@ public sealed class Viewport
 
         if (textureId is { } texture)
         {
-            Vector2 topLeft = renderOffset + translation - textureSize * textureToScreen * 0.5f;
+            Vector2 topLeft = renderOffset + targetTopLeft;
             Vector2 bottomRight = topLeft + textureSize * textureToScreen;
 
             if (showOrigin)
@@ -108,8 +117,6 @@ public sealed class Viewport
     /// with.</summary>
     public Matrix4x4 GetViewMatrix()
     {
-        Vector2 targetTopLeft = translation - textureSize * textureToScreen * 0.5f;
-
         return Matrix4x4.CreateScale(textureToScreen, textureToScreen, 1.0f) *
                Matrix4x4.CreateTranslation(new Vector3(targetTopLeft, 0));
     }

@@ -43,8 +43,12 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
     private Silk.NET.OpenGL.GL? _gl;
     private ImGuiContextPtr _imguiContext;
 
+    //null where ImGuiImplGLFW is used instead
+    private ImGuiGlfwInput? _imguiGlfwInput;
+
     private bool _vsyncEnabled = true;
     private bool cursorVisible = true;
+    private bool _imguiRanLastFrame;
     public FullscreenMode fullscreenMode { get; private set; } = FullscreenMode.Windowed;
 
     private int _windowedX = 80;
@@ -415,6 +419,7 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
     private GLFWcharfun? charCallback;
     private GLFWcursorposfun? cursorPosCallback;
     private GLFWmousebuttonfun? mouseButtonCallback;
+    private GLFWscrollfun? scrollCallback;
     private GLFWwindowfocusfun? focusCallback;
     private GLFWwindowposfun? windowPosCallback;
     private GLFWwindowsizefun? windowSizeCallback;
@@ -423,6 +428,8 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
     {
         keyCallback = (_, key, _, action, mods) =>
         {
+            _imguiGlfwInput?.OnKey(window, key, action);
+
             switch (action)
             {
                 case GLFW.GLFW_PRESS:
@@ -439,14 +446,27 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
             }
         };
 
-        charCallback = (_, codepoint) => _game.CharTyped(codepoint);
-
-        cursorPosCallback = (_, x, y) => _game.PointerMoved(new Vector2((float)x, (float)y));
-        mouseButtonCallback = (_, button, action, mods) =>
-            _game.PointerButtonChanged(button, action == GLFW.GLFW_PRESS, (GlfwMod)mods);
-
-        focusCallback = (_, _) =>
+        charCallback = (_, codepoint) =>
         {
+            _imguiGlfwInput?.OnChar(codepoint);
+            _game.CharTyped(codepoint);
+        };
+
+        cursorPosCallback = (_, x, y) =>
+        {
+            _imguiGlfwInput?.OnCursorPos(x, y);
+            _game.PointerMoved(new Vector2((float)x, (float)y));
+        };
+        mouseButtonCallback = (_, button, action, mods) =>
+        {
+            _imguiGlfwInput?.OnMouseButton(button, action);
+            _game.PointerButtonChanged(button, action == GLFW.GLFW_PRESS, (GlfwMod)mods);
+        };
+        scrollCallback = (_, x, y) => _imguiGlfwInput?.OnScroll(x, y);
+
+        focusCallback = (_, focused) =>
+        {
+            _imguiGlfwInput?.OnFocus(focused != 0);
             _game.isFocused = IsWindowFocused;
 
             //anything at all may have shown the pointer while another window held the focus, so what it
@@ -461,6 +481,7 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
         GLFW.SetCharCallback(window, charCallback);
         GLFW.SetCursorPosCallback(window, cursorPosCallback);
         GLFW.SetMouseButtonCallback(window, mouseButtonCallback);
+        GLFW.SetScrollCallback(window, scrollCallback);
         GLFW.SetWindowFocusCallback(window, focusCallback);
         GLFW.SetWindowPosCallback(window, windowPosCallback);
         GLFW.SetWindowSizeCallback(window, windowSizeCallback);
@@ -490,13 +511,21 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
         io.ConfigFlags |= ImGuiConfigFlags.DockingEnable;
         ConfigureImGuiFonts(io);
 
-        ImGuiImplGLFW.SetCurrentContext(_imguiContext);
         ImGuiImplOpenGL3.SetCurrentContext(_imguiContext);
 
-        var backendWindow = Unsafe.BitCast<GLFWwindowPtr, Hexa.NET.ImGui.Backends.GLFW.GLFWwindowPtr>(_window);
-        if (!ImGuiImplGLFW.InitForOpenGL(backendWindow, true))
+        if (OperatingSystem.IsWindows())
         {
-            throw new InvalidOperationException("Failed to initialize Hexa.NET ImGui GLFW backend.");
+            ImGuiImplGLFW.SetCurrentContext(_imguiContext);
+
+            var backendWindow = Unsafe.BitCast<GLFWwindowPtr, Hexa.NET.ImGui.Backends.GLFW.GLFWwindowPtr>(_window);
+            if (!ImGuiImplGLFW.InitForOpenGL(backendWindow, true))
+            {
+                throw new InvalidOperationException("Failed to initialize Hexa.NET ImGui GLFW backend.");
+            }
+        }
+        else
+        {
+            _imguiGlfwInput = new ImGuiGlfwInput();
         }
 
         if (!ImGuiImplOpenGL3.Init("#version 330 core"))
@@ -540,11 +569,17 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
 
         ImGui.SetCurrentContext(_imguiContext);
         ImGuiImplOpenGL3.SetCurrentContext(_imguiContext);
-        ImGuiImplGLFW.SetCurrentContext(_imguiContext);
         ImGuiImplOpenGL3.Shutdown();
-        ImGuiImplGLFW.Shutdown();
         ImGuiImplOpenGL3.SetCurrentContext(default);
-        ImGuiImplGLFW.SetCurrentContext(default);
+
+        if (_imguiGlfwInput == null)
+        {
+            ImGuiImplGLFW.SetCurrentContext(_imguiContext);
+            ImGuiImplGLFW.Shutdown();
+            ImGuiImplGLFW.SetCurrentContext(default);
+        }
+
+        _imguiGlfwInput = null;
         ImGui.DestroyContext(_imguiContext);
         _imguiContext = default;
     }
@@ -614,19 +649,51 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
             GLFW.GetWindowSize(_window, ref _windowWidth, ref _windowHeight);
             UpdateDiagnostics();
 
-            const bool imgui = true;
+            bool imgui = InspectorManager.WantsImGui;
 
             FrameProfiler.Begin(FrameSection.ImGuiNewFrame);
-            GLFW.MakeContextCurrent(_window);
             ImGui.SetCurrentContext(_imguiContext);
-            ImGuiImplGLFW.SetCurrentContext(_imguiContext);
-            ImGuiImplOpenGL3.SetCurrentContext(_imguiContext);
-            ImGuiImplOpenGL3.NewFrame();
-            ImGuiImplGLFW.NewFrame();
-            ImGui.NewFrame();
+
+            if (imgui)
+            {
+                GLFW.MakeContextCurrent(_window);
+                ImGuiImplOpenGL3.SetCurrentContext(_imguiContext);
+                ImGuiImplOpenGL3.NewFrame();
+
+                if (_imguiGlfwInput != null)
+                {
+                    _imguiGlfwInput.NewFrame(new Vector2(_windowWidth, _windowHeight),
+                        new Vector2(_framebufferWidth, _framebufferHeight), _deltaTime);
+                }
+                else
+                {
+                    ImGuiImplGLFW.SetCurrentContext(_imguiContext);
+                    ImGuiImplGLFW.NewFrame();
+                }
+
+                ImGui.NewFrame();
+            }
+            else
+            {
+                //the input callbacks keep queueing for ImGui; nothing should replay once it runs again
+                ImGuiIOPtr io = ImGui.GetIO();
+                io.ClearEventsQueue();
+
+                if (_imguiRanLastFrame)
+                {
+                    io.ClearInputKeys();
+                    io.ClearInputMouse();
+                    GLFW.SetCursor(_window, default(GLFWcursorPtr));
+                }
+            }
+
+            _imguiRanLastFrame = imgui;
             FrameProfiler.End(FrameSection.ImGuiNewFrame);
 
-            _gpuFrameTimer.BeginFrame();
+            if (FrameProfiler.Measuring)
+            {
+                _gpuFrameTimer.BeginFrame();
+            }
 
             //only inside a frame scope, and there is no focus to clear on a frame ImGui never ran
             if (_clearImGuiFocusOnNextFrame && imgui)
@@ -678,6 +745,8 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
 
             FrameProfiler.Begin(FrameSection.Inspector);
 
+            InspectorManager.RemovePending();
+
             if (imgui)
             {
                 InspectorManager.Draw(renderGameToWindow, _gameRenderTarget.TextureId,
@@ -710,7 +779,7 @@ internal sealed unsafe class GlfwOpenGlHost : IGameHost, IDisposable
             FrameProfiler.End(FrameSection.ImGuiRender);
 
             _gpuFrameTimer.EndFrame();
-            FrameProfiler.GpuFrameMs = _gpuFrameTimer.GpuFrameMs;
+            FrameProfiler.GpuFrameMs = FrameProfiler.Measuring ? _gpuFrameTimer.GpuFrameMs : 0f;
 
             FrameProfiler.Begin(FrameSection.SwapBuffers);
             GLFW.SwapBuffers(_window);

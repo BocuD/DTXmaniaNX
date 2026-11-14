@@ -16,7 +16,7 @@ public class CInputManager : IDisposable // CInput管理
 		private set;
 	}
 
-	public CInputKeyboard Keyboard
+	public IInputKeyboard Keyboard
 	{
 		get
 		{
@@ -29,7 +29,7 @@ public class CInputManager : IDisposable // CInput管理
 			{
 				if (device.eInputDeviceType == EInputDeviceType.Keyboard)
 				{
-					_Keyboard = (CInputKeyboard)device;
+					_Keyboard = (IInputKeyboard)device;
 					return _Keyboard;
 				}
 			}
@@ -38,7 +38,7 @@ public class CInputManager : IDisposable // CInput管理
 		}
 	}
 
-	public CInputMouse Mouse
+	public IInputDevice Mouse
 	{
 		get
 		{
@@ -51,7 +51,7 @@ public class CInputManager : IDisposable // CInput管理
 			{
 				if (device.eInputDeviceType == EInputDeviceType.Mouse)
 				{
-					_Mouse = (CInputMouse)device;
+					_Mouse = device;
 					return _Mouse;
 				}
 			}
@@ -91,8 +91,17 @@ public class CInputManager : IDisposable // CInput管理
 
 	private void InitializeInputManager(IntPtr hWnd, bool bUseMidiIn)
 	{
-		directInput = new DirectInput();
 		listInputDevices = new List<IInputDevice>(10);
+
+		//DirectInput and winmm are Windows only
+		if (!OperatingSystem.IsWindows())
+		{
+			listInputDevices.Add(new CInputGlfwKeyboard());
+			listInputDevices.Add(new CInputGlfwMouse());
+			return;
+		}
+
+		directInput = new DirectInput();
 		
 		//enumerate keyboard and mouse devices
 		CInputKeyboard cinputkeyboard = null;
@@ -140,7 +149,9 @@ public class CInputManager : IDisposable // CInput管理
 	//scan connected MIDI devices, remove disconnected devices and add newly connected ones
 	public void ScanDevices()
 	{
-		
+		if (!OperatingSystem.IsWindows())
+			return;
+
 		lock (objMidiInMutex)
 		{
 			if (isDisposed) return;
@@ -331,7 +342,7 @@ public class CInputManager : IDisposable // CInput管理
 					listInputDevices.Clear();
 				}
 
-				directInput.Dispose();
+				directInput?.Dispose();
 
 				//if ( this.timer != null )
 				//{
@@ -360,9 +371,9 @@ public class CInputManager : IDisposable // CInput管理
 	#region [ private ]
 
 	//-----------------
-	private DirectInput directInput;
-	private CInputKeyboard? _Keyboard;
-	private CInputMouse? _Mouse;
+	private DirectInput? directInput;
+	private IInputKeyboard? _Keyboard;
+	private IInputDevice? _Mouse;
 	private bool isDisposed;
 	private object objMidiInMutex = new();
 	private CWin32.MidiInProc proc;

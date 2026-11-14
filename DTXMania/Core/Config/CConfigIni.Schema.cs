@@ -62,6 +62,9 @@ internal partial class CConfigIni
 					"Folder name under Skins\\ of the skin to use. Empty for the built-in one."],
 				Str("Skin", c => c.strSkinFolder)),
 			G(["ZIPファイルの展開", "0=展開しない, 1=確認する, 2=常に展開する"], Enum("UnpackSongs", 0, 2, c => c.eUnpackSongs)),
+			G(["曲リストの並び順 (0=曲名, 1=フォルダのパス)",
+					"How the song list is sorted. (0=title, 1=folder path)"],
+				Enum("SortMode", 0, 1, c => c.baseSortMode)),
 			G(["言語設定", "0=自動, 1=日本語, 2=英語", "Language mode", "0=auto, 1=japanese, 2=english"], Enum("Language", 0, 2, c => c.languageMode)),
 			G([
 					"プレイヤーネーム。",
@@ -124,11 +127,11 @@ internal partial class CConfigIni
 					c => c.nWindowHeight.ToString())),
 			G(["ウィンドウモード時の位置X", "X position in the window mode."],
 				Custom("WindowX",
-					(c, v) => c.nInitialWindowXPosition = CConversion.nGetNumberIfInRange(v, 0, System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width - 1, c.nInitialWindowXPosition),
+					(c, v) => c.nInitialWindowXPosition = CConversion.nGetNumberIfInRange(v, 0, 65535, c.nInitialWindowXPosition),
 					c => c.nInitialWindowXPosition.ToString())),
 			G(["ウィンドウモード時の位置Y", "Y position in the window mode."],
 				Custom("WindowY",
-					(c, v) => c.nInitialWindowYPosition = CConversion.nGetNumberIfInRange(v, 0, System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height - 1, c.nInitialWindowYPosition),
+					(c, v) => c.nInitialWindowYPosition = CConversion.nGetNumberIfInRange(v, 0, 65535, c.nInitialWindowYPosition),
 					c => c.nInitialWindowYPosition.ToString())),
 			G([
 					"ウインドウをダブルクリックした時にフルスクリーンに移行するか(0:移行しない,1:移行する)",
@@ -150,12 +153,12 @@ internal partial class CConfigIni
 				],
 				IntRound("SleepTimePerFrame", -1, 50, c => c.nSleepNMsEveryFrame)),
 			G([
-					"サウンド出力方式(0=ACM(って今はまだDirectShowですが), 1=ASIO, 2=WASAPI排他, 3=WASAPI共有, 4=BASS",
-					"WASAPIはVista以降のOSで使用可能。推奨方式はWASAPI。",
-					"なお、WASAPIが使用不可ならASIOを、ASIOが使用不可ならACMを使用します。",
-					"Sound device type(0=ACM, 1=ASIO, 2=WASAPI Exclusive, 3=WASAPI Shared, 4=BASS)",
-					"WASAPI can use on Vista or later OSs.",
-					"If WASAPI is not available, DTXMania try to use ASIO. If ASIO can't be used, ACM is used."
+					"サウンド出力方式(0=DirectSound, 1=ASIO, 2=WASAPI排他, 3=WASAPI共有, 4=BASS)",
+					"macOSとLinuxではBASSのみ使用可能です。",
+					"使用できない方式はWindowsではWASAPI共有、それ以外ではBASSになります。",
+					"Sound device type(0=DirectSound, 1=ASIO, 2=WASAPI Exclusive, 3=WASAPI Shared, 4=BASS)",
+					"Only BASS is available on macOS and Linux.",
+					"A type the platform cannot use falls back to WASAPI Shared on Windows, BASS elsewhere."
 				],
 				Int("SoundDeviceType", 0, 4, c => c.nSoundDriverType)),
 			G([
@@ -180,10 +183,10 @@ internal partial class CConfigIni
 				],
 				[
 					Custom("ASIODevice",
-						(c, v) => c.nASIODevice = CConversion.nGetNumberIfInRange(v, 0, CEnumerateAllAsioDevices.GetAllASIODevices().Length - 1, c.nASIODevice),
+						(c, v) => c.nASIODevice = CConversion.nGetNumberIfInRange(v, 0, AsioDriverNames().Length - 1, c.nASIODevice),
 						c => c.nASIODevice.ToString())
 				],
-				() => CEnumerateAllAsioDevices.GetAllASIODevices().Select((name, i) => $"{i}: {name}")),
+				() => AsioDriverNames().Select((name, i) => $"{i}: {name}")),
 			G([
 					"出力デバイス名。空欄にするとシステムの既定のデバイスに追従します。",
 					"(ヘッドホンを抜いたときなどに自動で切り替わります)",
@@ -194,13 +197,8 @@ internal partial class CConfigIni
 				Custom("OutputDevice",
 					(c, v) => c.strOutputDevice = v.Trim(),
 					c => c.strOutputDevice ?? "")),
-			G(["WASAPI/ASIO時に使用する演奏タイマーの種類", "Playback timer used for WASAPI/ASIO", "(0=FDK Timer, 1=System Timer)"],
-				Bool("SoundTimerType", c => c.bUseOSTimer)),
 			G("WASAPI使用時にEventDrivenモードを使う",
 				Bool("EventDrivenWASAPI", c => c.bEventDrivenWASAPI)),
-			G(["Play through FDK's old sound device instead of the current audio layer.",
-					"Temporary, for comparing the two against each other."],
-				Bool("UseFDKAudio", c => c.bUseFDKAudio)),
 			G([
 					"Enable Embedded Metronome",
 					"Please make sure Metronome.ogg exists in Your current skin sounds folder",
@@ -280,6 +278,16 @@ internal partial class CConfigIni
 			G(["選曲画面で選択中の曲の背景（プレビュー動画/背景動画/背景画像）を表示する (0:OFF, 1:ON)",
 					"Show the selected song's own background (preview movie, background video or background image) in song select."],
 				Bool("PreviewVideo", c => c.bSongSelectPreviewVideo)),
+			G(["選曲画面で最後に選択していた曲のパス", "Path of the song selected in song select."],
+				Str("LastSelectedSongPath", c => c.strLastSelectedSongPath)),
+			G(["選曲画面で最後に選択していた譜面のパス", "Path of the chart selected in song select."],
+				Str("LastSelectedChartPath", c => c.strLastSelectedChartPath)),
+			G(["選曲画面で最後に選択していたBOXのタイトル", "Box title of the song selected in song select."],
+				Str("LastSelectedBoxTitle", c => c.strLastSelectedBoxTitle)),
+			G(["選曲画面のソート順", "Sort mode for song select."],
+				Str("SongSelectSort", c => c.strSongSelectSort)),
+			G(["選曲画面で選択中の難易度レベル", "Difficulty level in song select (0-4)."],
+				Int("SongSelectDifficulty", 0, 4, c => c.nSongSelectDifficulty)),
 			G(["演奏中の楽器の譜面が無い曲も選曲画面に表示する (0:OFF, 1:ON)",
 					"List songs in song select that have no chart for the instrument being played."],
 				Bool("ShowOtherInstrumentCharts", c => c.bShowOtherInstrumentCharts)),
@@ -299,12 +307,6 @@ internal partial class CConfigIni
 				Bool("SaveScoreIni", c => c.bScoreIniを出力する)),
 			G("RANDOM SELECT で子BOXを検索対象に含める (0:OFF, 1:ON)",
 				Bool("RandomFromSubBox", c => c.bランダムセレクトで子BOXを検索対象とする)),
-			G("ドラム演奏時にドラム音を強調する (0:OFF, 1:ON)",
-				Bool("SoundMonitorDrums", c => c.b演奏音を強調する.Drums)),
-			G("ギター演奏時にギター音を強調する (0:OFF, 1:ON)",
-				Bool("SoundMonitorGuitar", c => c.b演奏音を強調する.Guitar)),
-			G("ベース演奏時にベース音を強調する (0:OFF, 1:ON)",
-				Bool("SoundMonitorBass", c => c.b演奏音を強調する.Bass)),
 			G(["表示可能な最小コンボ数(1～99999)", "ギターとベースでは0にするとコンボを表示しません。"],
 				Int("MinComboDrums", 1, 0x1869f, c => c.n表示可能な最小コンボ数.Drums),
 				Int("MinComboGuitar", 0, 0x1869f, c => c.n表示可能な最小コンボ数.Guitar),
@@ -379,7 +381,12 @@ internal partial class CConfigIni
 				Int("InputAdjustTimeDrums", -99, 99, c => c.nInputAdjustTimeMs.Drums),
 				Int("InputAdjustTimeGuitar", -99, 99, c => c.nInputAdjustTimeMs.Guitar),
 				Int("InputAdjustTimeBass", -99, 99, c => c.nInputAdjustTimeMs.Bass)),
-			G(["BGMタイミング調整(-99～99)[ms]", "Revision value to adjust judgement timing for BGM."],
+			G([
+					"BGMタイミング調整(-99～99)[ms]",
+					"リザルト画面の平均オフセットが負（早押し）なら上げ(+)、正（遅押し）なら下げ(-)て調整してください。",
+					"Offset value to adjust judgement timing for BGM.",
+					"If your average offset on the result screen is negative (early), adjust up (+). If positive (late), adjust down (-)."
+				],
 				Int("BGMAdjustTime", -99, 99, c => c.nCommonBGMAdjustMs)),
 			G([
 					"判定ラインの表示位置調整(ドラム, ギター, ベース)(-99～99)[px]",
@@ -480,6 +487,11 @@ internal partial class CConfigIni
 				Enum<ETargetGhostData>("BassTargetGhost", 0, 4, c => c.eTargetGhost.Bass)),
 			G("譜面仕様変更(0:デフォルト10レーン, 1:XG9レーン, 2:CLASSIC6レーン)",
 				Enum<EType>("NumOfLanes", 0, 2, c => c.eNumOfLanes.Drums)),
+			G([
+					"使わないレーンの幅を隙間として残す(0:OFF, 1:ON)",
+					"Keep the width of the lanes a smaller lane count leaves out as a gap. (0:OFF, 1:ON)"
+				],
+				Bool("DrumsLaneGaps", c => c.bDrumsLaneGaps)),
 			G("dkdk仕様変更(0:デフォルト, 1:始動足変更, 2:dkdk1レーン化)",
 				Enum<EType>("DkdkType", 0, 2, c => c.eDkdkType.Drums)),
 			G("バスをLBDに振り分け(0:OFF, 1:ON)",
@@ -518,6 +530,10 @@ internal partial class CConfigIni
 				Int("BassShutterOut", -100, 100, c => c.nShutterOutSide.Bass)),
 			G("ボーナス演出の表示(0:表示しない, 1:表示する)",
 				Bool("DrumsStageEffect", c => c.DisplayBonusEffects)),
+			G(["判定文字を旧表示にする (0:OFF, 1:ON)", "Classic judgement text. (0:OFF, 1:ON)"],
+				Bool("ClassicJudgement", c => c.bClassicJudgement)),
+			G(["ドラムのチップファイアを旧表示にする (0:OFF, 1:ON)", "Classic drums chip fire. (0:OFF, 1:ON)"],
+				Bool("ClassicDrumsFire", c => c.bClassicDrumsFire)),
 			G("ドラムレーンタイプ(0:A, 1:B, 2:C 3:D )",
 				Enum<EType>("DrumsLaneType", 0, 3, c => c.eLaneType.Drums)),
 			G("CLASSIC譜面判別",
@@ -721,6 +737,9 @@ internal partial class CConfigIni
 		(c, v) => c.nGroupVolume[(int)group] =
 			CConversion.nGetNumberIfInRange(v, 0, 100, c.nGroupVolume[(int)group]),
 		c => c.nGroupVolume[(int)group].ToString());
+
+	private static string[] AsioDriverNames() =>
+		AudioOutputs.For(AudioBackend.Asio).Select(output => output.Name).ToArray();
 
 	private static Dictionary<string, Dictionary<string, ConfigItem>> BuildSchemaLookup()
 	{

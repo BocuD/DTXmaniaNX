@@ -10,7 +10,7 @@ namespace DTXMania.UI.Drawable;
 /// </summary>
 public class UICoverGroup : UIGroup
 {
-    [AddChildMenu("Cover Group")]
+    [AddChildMenu("Group/Cover Group")]
     public new static UIDrawable Create()
     {
         return new UICoverGroup();

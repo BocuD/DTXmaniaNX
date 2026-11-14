@@ -6,7 +6,7 @@ using SharpDXKey = SharpDX.DirectInput.Key;
 
 namespace FDK;
 
-public class CInputKeyboard : IInputDevice, IDisposable
+public class CInputKeyboard : IInputKeyboard, IDisposable
 {
 	private KeyboardState keyboardState = new();
 
@@ -132,7 +132,7 @@ public class CInputKeyboard : IInputDevice, IDisposable
 									nKey = (int)key,
 									b押された = true,
 									b離された = false,
-									nTimeStamp = InputClock.Current.nSystemTimeMsFor(data.Timestamp),
+									nTimeStamp = InputClock.Current.nSystemTimeMsFor((uint)data.Timestamp),
 									nVelocity = CInputManager.nDefaultVelocity
 								};
 								listInputEvent.Add(item);
@@ -373,7 +373,7 @@ public class CInputKeyboard : IInputDevice, IDisposable
 	private bool[] bKeyState = new bool[256];
 	private Keyboard devKeyboard;
 
-	public bool preventKeyboardInput = false;
+	public bool preventKeyboardInput { get; set; } = false;
 	//private CTimer timer;
 	//private CTimer ct;
 	//-----------------

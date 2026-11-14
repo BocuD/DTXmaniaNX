@@ -44,18 +44,29 @@ public sealed class PlayingSong
     private BaseTexture? albumArt;
     private string albumArtPath = string.Empty;
 
+    private CDTX? preimageChart;
+    private bool preimageChecked;
+    private string preimagePath = string.Empty;
+
     public BaseTexture AlbumArt
     {
         get
         {
-            string path = CDTXMania.DTX == null
-                ? string.Empty
-                : CDTXMania.DTX.strFolderName + CDTXMania.DTX.PREIMAGE;
+            CDTX? chart = CDTXMania.DTX;
 
-            if (!File.Exists(path))
+            if (!preimageChecked || !ReferenceEquals(chart, preimageChart))
             {
-                path = CSkin.Path(@"Graphics\5_preimage default.png");
+                preimageChecked = true;
+                preimageChart = chart;
+                preimagePath = chart == null ? string.Empty : chart.strFolderName + chart.PREIMAGE;
+
+                if (!File.Exists(preimagePath))
+                {
+                    preimagePath = string.Empty;
+                }
             }
+
+            string path = preimagePath.Length > 0 ? preimagePath : CSkin.Path(@"Graphics\5_preimage default.png");
 
             if (path != albumArtPath)
             {
@@ -67,12 +78,25 @@ public sealed class PlayingSong
         }
     }
 
-    private static string StageNumberText(int stage) => stage switch
+    private static string StageNumberText(int stage)
     {
-        1 => "1st STAGE",
-        2 => "2nd STAGE",
-        3 => "3rd STAGE",
-        > 3 => $"{stage}th STAGE",
-        _ => "EXTRA STAGE"
+        if (stage <= 0)
+        {
+            return "EXTRA STAGE";
+        }
+
+        return $"{stage}{StageSuffix(stage)} STAGE";
+    }
+
+    private static string StageSuffix(int n) => (n % 100) switch
+    {
+        11 or 12 or 13 => "th",
+        _ => (n % 10) switch
+        {
+            1 => "st",
+            2 => "nd",
+            3 => "rd",
+            _ => "th"
+        }
     };
 }

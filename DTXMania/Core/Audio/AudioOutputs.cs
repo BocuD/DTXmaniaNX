@@ -16,6 +16,11 @@ public static class AudioOutputs
 {
     public static IReadOnlyList<AudioOutput> For(AudioBackend backend)
     {
+        if (!AudioBackends.Supported.Contains(backend))
+        {
+            return [];
+        }
+
         try
         {
             return backend switch

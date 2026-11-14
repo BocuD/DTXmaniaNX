@@ -367,7 +367,7 @@ internal class CActResultParameterPanel : CActivity
         {
             if (CDTXMania.DTX.bHasChips.Guitar)
             {
-                if (CDTXMania.ConfigIni.bIsSwappedGuitarBass)
+                if (CDTXMania.ConfigIni.PlayerOn(EChartPart.Guitar) == EPlayer.Guitar2)
                 {
                     n本体X[1] = n右1X;
                     nスコアX[1] = n右2X;
@@ -381,7 +381,7 @@ internal class CActResultParameterPanel : CActivity
 
             if (CDTXMania.DTX.bHasChips.Bass)
             {
-                if (CDTXMania.ConfigIni.bIsSwappedGuitarBass)
+                if (CDTXMania.ConfigIni.PlayerOn(EChartPart.Bass) == EPlayer.Guitar1)
                 {
                     n本体X[2] = n左1X;
                     nスコアX[2] = n左2X;

@@ -40,7 +40,7 @@ public sealed class PreviewScope
     {
         if (values.TryGetValue(key, out PreviewValue? value))
         {
-            context.SetString(key, value.text);
+            context.SetString(key, value.text, value.kind);
         }
     }
 
@@ -126,7 +126,15 @@ public sealed class ComponentPreview : IUIPreview
         {
             if (!string.IsNullOrEmpty(binding.source))
             {
-                scope.Declare(binding.source, binding.KindFor(element));
+                scope.Declare(binding.source, binding.SourceKindFor(element));
+            }
+
+            foreach (BindingClause clause in binding.clauses ?? [])
+            {
+                if (!string.IsNullOrEmpty(clause.source))
+                {
+                    scope.Declare(clause.source, clause.SourceKindFor(element));
+                }
             }
         }
 

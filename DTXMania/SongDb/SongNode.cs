@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Drawing;
 using DTXMania.Core;
 using DTXMania.UI.DynamicElements;
@@ -338,11 +338,29 @@ public class SongNode
         return root;
     }
 
+    public static bool PathsEqual(string? a, string? b)
+    {
+        if (string.IsNullOrEmpty(a) || string.IsNullOrEmpty(b)) return false;
+        if (string.Equals(a, b, StringComparison.OrdinalIgnoreCase)) return true;
+        string normA = a.Replace('/', '\\').TrimEnd('\\');
+        string normB = b.Replace('/', '\\').TrimEnd('\\');
+        return string.Equals(normA, normB, StringComparison.OrdinalIgnoreCase);
+    }
+
     public static SongNode? FindRestoreTarget(SongNode root, SongNode selectedNodeBackup,
         CChartData? selectedChartBackup)
+        => FindRestoreTarget(root, selectedNodeBackup?.path, selectedChartBackup?.FileInformation.AbsoluteFilePath, selectedNodeBackup?.parent?.title);
+
+    public static SongNode? FindRestoreTarget(SongNode root, string? songPath, string? chartPath, string? parentBoxTitle = null)
     {
-        string? previousBoxTitle = selectedNodeBackup.parent?.title;
-        string? previousChartPath = selectedChartBackup?.FileInformation.AbsoluteFilePath;
+        if (root == null || (string.IsNullOrEmpty(songPath) && string.IsNullOrEmpty(chartPath)))
+        {
+            return null;
+        }
+
+        string? previousBoxTitle = parentBoxTitle;
+        string? previousChartPath = chartPath;
+        string? previousSongPath = songPath;
 
         SongNode? exact = null;
         SongNode? fallback = null;
@@ -351,7 +369,7 @@ public class SongNode
         //use the chart path as identifier instead of just set.def title
         bool PlayedThis(SongNode candidate)
         {
-            if (previousChartPath == null) return false;
+            if (string.IsNullOrEmpty(previousChartPath)) return false;
 
             foreach (CChartData chart in candidate.charts)
             {
@@ -367,7 +385,7 @@ public class SongNode
         //handling for merged guitar/bass
         static bool IsChart(CChartData chart, string path)
         {
-            if (chart.FileInformation.AbsoluteFilePath.Equals(path, StringComparison.OrdinalIgnoreCase))
+            if (PathsEqual(chart.FileInformation.AbsoluteFilePath, path))
             {
                 return true;
             }
@@ -379,8 +397,7 @@ public class SongNode
 
             foreach (CChartData source in chart.instrumentSources)
             {
-                if (source?.FileInformation.AbsoluteFilePath.Equals(path,
-                        StringComparison.OrdinalIgnoreCase) == true)
+                if (source != null && PathsEqual(source.FileInformation.AbsoluteFilePath, path))
                 {
                     return true;
                 }
@@ -400,25 +417,36 @@ public class SongNode
                     case ENodeType.SONG:
                         if (PlayedThis(child))
                         {
-                            exact = child;
-                            return;
-                        }
+                            if (string.IsNullOrEmpty(previousBoxTitle) ||
+                                (container.title != null && container.title.Equals(previousBoxTitle, StringComparison.OrdinalIgnoreCase)))
+                            {
+                                exact = child;
+                                return;
+                            }
 
-                        if (!child.path.Equals(selectedNodeBackup.path, StringComparison.InvariantCulture))
-                        {
-                            break;
-                        }
-
-                        fallback ??= child;
-                        if (previousBoxTitle != null &&
-                            container.title.Equals(previousBoxTitle, StringComparison.InvariantCulture))
-                        {
                             preferred ??= child;
+                        }
+
+                        if (previousSongPath != null && PathsEqual(child.path, previousSongPath))
+                        {
+                            fallback ??= child;
+                            if (previousBoxTitle != null &&
+                                container.title != null &&
+                                container.title.Equals(previousBoxTitle, StringComparison.OrdinalIgnoreCase))
+                            {
+                                preferred ??= child;
+                            }
                         }
 
                         break;
 
                     case ENodeType.BOX or ENodeType.ROOT:
+                        if (string.IsNullOrEmpty(previousChartPath) && previousSongPath != null &&
+                            (PathsEqual(child.path, previousSongPath) || child.title.Equals(previousSongPath, StringComparison.OrdinalIgnoreCase)))
+                        {
+                            fallback ??= child;
+                        }
+
                         Find(child);
                         if (exact != null) return;
                         break;

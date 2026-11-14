@@ -82,7 +82,7 @@ public sealed class UIItemSlot : UIGroup
         componentSource = source;
 
         data.RegisterObject("Item", item);
-        data.SetString("IsSelected", "false");
+        data.SetString("IsSelected", "false", DataBindingKind.Bool);
         dataContext = data;
 
         SetItemIndex(itemIndex);
@@ -97,7 +97,7 @@ public sealed class UIItemSlot : UIGroup
         }
 
         index = itemIndex;
-        data.SetString("Index", itemIndex.ToString());
+        data.SetString("Index", itemIndex.ToString(), DataBindingKind.Number);
     }
 
     /// <summary>Marks this slot as the selected one, which its component reads as <c>"IsSelected"</c>.</summary>
@@ -109,7 +109,7 @@ public sealed class UIItemSlot : UIGroup
         }
 
         selected = value;
-        data.SetString("IsSelected", value ? "true" : "false");
+        data.SetString("IsSelected", value ? "true" : "false", DataBindingKind.Bool);
     }
 }
 
@@ -131,7 +131,7 @@ public class UIItemsGroup : UIGroup, IUIInputHandler
     /// <summary>How far apart items sit, measured along the list's own direction.</summary>
     public float ItemDistance => Math.Max(itemOffset.Length(), 0.001f);
 
-    /// <summary>Unit vector along the list, which scrolling and the curve both measure against.</summary>
+    /// <summary>Unit vector along the list, which scrolling and the item layout both measure against.</summary>
     public Vector3 ItemDirection => itemOffset.LengthSquared() > 0.000001f
         ? Vector3.Normalize(itemOffset)
         : Vector3.UnitY;
@@ -162,11 +162,15 @@ public class UIItemsGroup : UIGroup, IUIInputHandler
     [JsonIgnore] private readonly UISelectionInfo selection = new();
     [JsonIgnore] private long lastSelectionTime;
 
-    [JsonIgnore] private readonly NavigationRepeat navigation = NavigationRepeat.Vertical();
+    [Themable] public UINavigationAxis navigationAxis = UINavigationAxis.Vertical;
+
+    [Themable] public UIGuitarNavigation guitarNavigation = UIGuitarNavigation.Default;
+
+    [JsonIgnore] private readonly NavigationRepeat navigation = new();
     [JsonIgnore] private readonly Action selectPrevious;
     [JsonIgnore] private readonly Action selectNext;
 
-    [AddChildMenu("Items Group")]
+    [AddChildMenu("Group/Items Group")]
     public static new UIDrawable Create() => new UIItemsGroup();
 
     public UIItemsGroup() : this("Items")
@@ -288,9 +292,11 @@ public class UIItemsGroup : UIGroup, IUIInputHandler
 
     public NavigationRepeat? Navigation => navigation;
 
+    public void PollNavigation() => navigation.Poll(navigationAxis, guitarNavigation, selectPrevious, selectNext);
+
     public virtual void HandleInput()
     {
-        navigation.Poll(selectPrevious, selectNext);
+        PollNavigation();
 
         if (CDTXMania.Input.ActionDecide())
         {
@@ -512,6 +518,9 @@ public class UIItemsGroup : UIGroup, IUIInputHandler
 
         Inspector.Inspector.Inspect("Item Offset", ref itemOffset);
         LayOutSlots();
+
+        Inspector.Inspector.Inspect("Navigation Axis", ref navigationAxis);
+        Inspector.Inspector.Inspect("Guitar Navigation", ref guitarNavigation);
 
         ImGui.BeginDisabled(Source != null);
         if (ImGui.InputInt("Item Count", ref itemCount))
