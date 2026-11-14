@@ -47,7 +47,7 @@ internal partial class CStagePerfDrumsScreen
                         video.StartFillInEffect();
                         if (sequencer.FillInSound != null)
                         {
-                            dTX.tPlayChip(sequencer.FillInSound, AudioMixer.Timer.nSystemTimeMs, (int)ELane.BGM, dTX.nモニタを考慮した音量(EInstrumentPart.UNKNOWN));
+                            dTX.tPlayChip(sequencer.FillInSound, AudioMixer.Timer.nSystemTimeMs, (int)ELane.BGM, CDTXMania.ConfigIni.n自動再生音量);
                         }
                         else
                         {
@@ -70,7 +70,7 @@ internal partial class CStagePerfDrumsScreen
                     {
                         if (sequencer.FillInSound != null)
                         {
-                            dTX.tPlayChip(sequencer.FillInSound, AudioMixer.Timer.nSystemTimeMs, (int)ELane.BGM, dTX.nモニタを考慮した音量(EInstrumentPart.UNKNOWN));
+                            dTX.tPlayChip(sequencer.FillInSound, AudioMixer.Timer.nSystemTimeMs, (int)ELane.BGM, CDTXMania.ConfigIni.n自動再生音量);
                         }
                         else
                         {
@@ -87,7 +87,7 @@ internal partial class CStagePerfDrumsScreen
                     {
                         if (sequencer.FillInSound != null)
                         {
-                            dTX.tPlayChip(sequencer.FillInSound, AudioMixer.Timer.nSystemTimeMs, (int)ELane.BGM, dTX.nモニタを考慮した音量(EInstrumentPart.UNKNOWN));
+                            dTX.tPlayChip(sequencer.FillInSound, AudioMixer.Timer.nSystemTimeMs, (int)ELane.BGM, CDTXMania.ConfigIni.n自動再生音量);
                         }
                         else
                         {

@@ -54,7 +54,6 @@ internal partial class CConfigIni
 	public bool bFillInEnabled;
 	public bool bランダムセレクトで子BOXを検索対象とする;
 	public bool bOutputLogs;
-	public STDGBVALUE<bool> b演奏音を強調する;
 	[DataField("ShowPerformanceInformation")] public bool bShowPerformanceInformation;
 	public bool bAutoAddGage; //2012.9.18
 	public bool b歓声を発声する;
@@ -692,7 +691,6 @@ internal partial class CConfigIni
 		n手動再生音量 = 100;
 		bOutputLogs = true;
 		b曲名表示をdefのものにする = true;
-		b演奏音を強調する = new STDGBVALUE<bool>();
 		bSudden = new STDGBVALUE<bool>();
 		bHidden = new STDGBVALUE<bool>();
 		bReverse = new STDGBVALUE<bool>();
@@ -707,7 +705,6 @@ internal partial class CConfigIni
 		nJudgeLinePosOffset = new STDGBVALUE<int>(); // #31602 2013.6.23 yyagi
 		for ( int i = 0; i < 3; i++ )
 		{
-			b演奏音を強調する[ i ] = true;
 			bSudden[ i ] = false;
 			bHidden[ i ] = false;
 			bReverse[ i ] = false;

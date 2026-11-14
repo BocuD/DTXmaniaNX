@@ -121,10 +121,6 @@ internal abstract class PlayerConfigPage : ConfigPage
     protected CItemToggle ReverseItem(string jp, string en) => Toggle("Reverse", jp, en,
         () => CDTXMania.ConfigIni.bReverse[Idx], v => CDTXMania.ConfigIni.bReverse[Idx] = v);
 
-    protected CItemToggle MonitorItem(string label) => Toggle(label,
-        "演奏音を強調して発声します。", "Enhance the chip sound (except autoplay).",
-        () => CDTXMania.ConfigIni.b演奏音を強調する[Idx], v => CDTXMania.ConfigIni.b演奏音を強調する[Idx] = v);
-
     protected CItemInteger MinComboItem(string label, int min) => Integer(label, min, 0x1869f,
         "表示可能な最小コンボ数。", "Initial number to show the combo.",
         () => CDTXMania.ConfigIni.n表示可能な最小コンボ数[Idx], v => CDTXMania.ConfigIni.n表示可能な最小コンボ数[Idx] = v);

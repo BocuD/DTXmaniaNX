@@ -1266,44 +1266,6 @@ public class CDTX : CActivity
 
     // メソッド
 
-    public int nモニタを考慮した音量(EInstrumentPart part)
-    {
-        CConfigIni configIni = CDTXMania.ConfigIni;
-        switch (part)
-        {
-            case EInstrumentPart.DRUMS:
-                if (configIni.b演奏音を強調する.Drums)
-                {
-                    return configIni.n自動再生音量;
-                }
-
-                return configIni.n手動再生音量;
-
-            case EInstrumentPart.GUITAR:
-                if (configIni.b演奏音を強調する.Guitar)
-                {
-                    return configIni.n自動再生音量;
-                }
-
-                return configIni.n手動再生音量;
-
-            case EInstrumentPart.BASS:
-                if (configIni.b演奏音を強調する.Bass)
-                {
-                    return configIni.n自動再生音量;
-                }
-
-                return configIni.n手動再生音量;
-        }
-
-        if ((!configIni.b演奏音を強調する.Drums && !configIni.b演奏音を強調する.Guitar) && !configIni.b演奏音を強調する.Bass)
-        {
-            return configIni.n手動再生音量;
-        }
-
-        return configIni.n自動再生音量;
-    }
-
     public void tLoadAVI()
     {
         if (listAVI != null)
@@ -2930,20 +2892,15 @@ public class CDTX : CActivity
 
     public void tPlayChip(CChip rChip, long n再生開始システム時刻ms, int nLane)
     {
-        tPlayChip(rChip, n再生開始システム時刻ms, nLane, CDTXMania.ConfigIni.n自動再生音量, false, false);
+        tPlayChip(rChip, n再生開始システム時刻ms, nLane, CDTXMania.ConfigIni.n自動再生音量, false);
     }
 
     public void tPlayChip(CChip rChip, long n再生開始システム時刻ms, int nLane, int nVol)
     {
-        tPlayChip(rChip, n再生開始システム時刻ms, nLane, nVol, false, false);
+        tPlayChip(rChip, n再生開始システム時刻ms, nLane, nVol, false);
     }
 
-    public void tPlayChip(CChip rChip, long n再生開始システム時刻ms, int nLane, int nVol, bool bMIDIMonitor)
-    {
-        tPlayChip(rChip, n再生開始システム時刻ms, nLane, nVol, bMIDIMonitor, false);
-    }
-
-    public void tPlayChip(CChip pChip, long n再生開始システム時刻ms, int nLane, int nVol, bool bMIDIMonitor, bool bBad)
+    public void tPlayChip(CChip pChip, long n再生開始システム時刻ms, int nLane, int nVol, bool bBad)
     {
         if ((nLane < (int)ELane.LC) || ((int)ELane.BGM < nLane))
         {

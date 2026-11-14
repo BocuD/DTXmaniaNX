@@ -44,7 +44,7 @@ internal class ChartSequencer
         if (!chip.bHit && chip.nDistanceFromBar[(int)part] < 0)
         {
             chip.bHit = true;
-            PlaySound(chip, AudioMixer.Timer.nResetAtMs + chip.nPlaybackTimeMs, part, CDTXMania.DTX.nモニタを考慮した音量(part));
+            PlaySound(chip, AudioMixer.Timer.nResetAtMs + chip.nPlaybackTimeMs, part, CDTXMania.ConfigIni.n自動再生音量);
         }
     }
 
@@ -77,7 +77,7 @@ internal class ChartSequencer
             case EChannel.SE30 or EChannel.SE31 or EChannel.SE32:
                 if (config.bBGM音を発声する)
                 {
-                    dtx.tPlayChip(chip, chipTime, (int)ELane.BGM, dtx.nモニタを考慮した音量(EInstrumentPart.UNKNOWN));
+                    dtx.tPlayChip(chip, chipTime, (int)ELane.BGM, CDTXMania.ConfigIni.n自動再生音量);
                 }
                 break;
 
@@ -87,7 +87,7 @@ internal class ChartSequencer
                 {
                     int muting = chip.nChannelNumber - EChannel.SE01;
                     dtx.tStopPlayingWav(lastWavByMutingChannel[muting]);
-                    dtx.tPlayChip(chip, chipTime, (int)ELane.BGM, dtx.nモニタを考慮した音量(EInstrumentPart.UNKNOWN));
+                    dtx.tPlayChip(chip, chipTime, (int)ELane.BGM, CDTXMania.ConfigIni.n自動再生音量);
                     lastWavByMutingChannel[muting] = chip.nIntegerValue_InternalNumber;
                 }
                 break;
@@ -101,7 +101,7 @@ internal class ChartSequencer
                     EChannel.SE29 => EInstrumentPart.BASS,
                     _ => EInstrumentPart.DRUMS
                 };
-                PlaySound(chip, chipTime, part, dtx.nモニタを考慮した音量(part));
+                PlaySound(chip, chipTime, part, CDTXMania.ConfigIni.n自動再生音量);
                 break;
             }
 
@@ -152,24 +152,24 @@ internal class ChartSequencer
         }
     }
 
-    public void PlaySound(CChip chip, long systemTimeMs, EInstrumentPart part, int volume, bool monitor = false, bool shiftPitch = false)
+    public void PlaySound(CChip chip, long systemTimeMs, EInstrumentPart part, int volume, bool shiftPitch = false)
     {
         CDTX dtx = CDTXMania.DTX;
         switch (part)
         {
             case EInstrumentPart.DRUMS:
-                PlayDrumSound(chip, systemTimeMs, volume, monitor);
+                PlayDrumSound(chip, systemTimeMs, volume);
                 break;
 
             case EInstrumentPart.GUITAR:
                 dtx.tStopPlayingWav(lastWavByLane.Guitar);
-                dtx.tPlayChip(chip, systemTimeMs, (int)ELane.Guitar, volume, monitor, shiftPitch);
+                dtx.tPlayChip(chip, systemTimeMs, (int)ELane.Guitar, volume, shiftPitch);
                 lastWavByLane.Guitar = chip.nIntegerValue_InternalNumber;
                 break;
 
             case EInstrumentPart.BASS:
                 dtx.tStopPlayingWav(lastWavByLane.Bass);
-                dtx.tPlayChip(chip, systemTimeMs, (int)ELane.Bass, volume, monitor, shiftPitch);
+                dtx.tPlayChip(chip, systemTimeMs, (int)ELane.Bass, volume, shiftPitch);
                 lastWavByLane.Bass = chip.nIntegerValue_InternalNumber;
                 break;
         }
@@ -178,7 +178,7 @@ internal class ChartSequencer
     public void StopGuitarSound(EInstrumentPart part) =>
         CDTXMania.DTX.tStopPlayingWav(part == EInstrumentPart.GUITAR ? lastWavByLane.GtPick : lastWavByLane.BsPick);
 
-    private void PlayDrumSound(CChip chip, long systemTimeMs, int volume, bool monitor)
+    private void PlayDrumSound(CChip chip, long systemTimeMs, int volume)
     {
         EChannel index = chip.nChannelNumber;
         if (EChannel.HiHatClose <= index && index <= EChannel.LeftBassDrum)
@@ -234,7 +234,7 @@ internal class ChartSequencer
                 break;
         }
 
-        CDTXMania.DTX.tPlayChip(chip, systemTimeMs, lane, volume, monitor);
+        CDTXMania.DTX.tPlayChip(chip, systemTimeMs, lane, volume);
 
         //by lane, not by channel: LC (0x1A - 0x11 = 9) and the guitar share 9 as an index
         lastWavByLane[lane] = chip.nIntegerValue_InternalNumber;

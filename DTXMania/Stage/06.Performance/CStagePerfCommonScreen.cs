@@ -1598,17 +1598,17 @@ internal abstract class CStagePerfCommonScreen : CStage
             switch (e.Kind)
             {
                 case EGuitarEvent.AutoNote:
-                    sequencer.PlaySound(e.Chip, AudioMixer.Timer.nResetAtMs + e.Time, part, CDTXMania.DTX.nモニタを考慮した音量(slot), false, e.ShiftPitch);
+                    sequencer.PlaySound(e.Chip, AudioMixer.Timer.nResetAtMs + e.Time, part, CDTXMania.ConfigIni.n自動再生音量, e.ShiftPitch);
                     break;
 
                 case EGuitarEvent.PickedNote:
-                    sequencer.PlaySound(e.Chip, AudioMixer.Timer.nSystemTimeMs, part, CDTXMania.ConfigIni.n手動再生音量, CDTXMania.ConfigIni.b演奏音を強調する[(int)slot], e.ShiftPitch);
+                    sequencer.PlaySound(e.Chip, AudioMixer.Timer.nSystemTimeMs, part, CDTXMania.ConfigIni.n手動再生音量, e.ShiftPitch);
                     break;
 
                 case EGuitarEvent.EmptyPick:
                     if (e.Chip != null)
                     {
-                        sequencer.PlaySound(e.Chip, AudioMixer.Timer.nSystemTimeMs, part, CDTXMania.ConfigIni.n手動再生音量, CDTXMania.ConfigIni.b演奏音を強調する[(int)slot], e.ShiftPitch);
+                        sequencer.PlaySound(e.Chip, AudioMixer.Timer.nSystemTimeMs, part, CDTXMania.ConfigIni.n手動再生音量, e.ShiftPitch);
                     }
                     if (e.Miss)
                     {
@@ -1757,7 +1757,7 @@ internal abstract class CStagePerfCommonScreen : CStage
 
                     if ((wc.bIsBGMSound && CDTXMania.ConfigIni.bBGM音を発声する) || (!wc.bIsBGMSound))
                     {
-                        CDTXMania.DTX.tチップの再生(pChip, AudioMixer.Timer.nResetAtMs + pChip.nPlaybackTimeMs, CDTXMania.DTX.nモニタを考慮した音量(EInstrumentPart.UNKNOWN));
+                        CDTXMania.DTX.tチップの再生(pChip, AudioMixer.Timer.nResetAtMs + pChip.nPlaybackTimeMs, CDTXMania.ConfigIni.n自動再生音量);
 
                         //held rather than left running: everything that should already be sounding at the
                         //new position is set up first, then started together

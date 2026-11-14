@@ -48,7 +48,7 @@ internal class CActPerfGuitarWailingBonus : CActPerfCommonWailingBonus
 
 		if ( r歓声Chip != null )
 		{
-			CDTXMania.DTX.tPlayChip( r歓声Chip, AudioMixer.Timer.nSystemTimeMs, (int) ELane.BGM, CDTXMania.DTX.nモニタを考慮した音量( EInstrumentPart.UNKNOWN ) );
+			CDTXMania.DTX.tPlayChip( r歓声Chip, AudioMixer.Timer.nSystemTimeMs, (int) ELane.BGM, CDTXMania.ConfigIni.n自動再生音量 );
 			return;
 		}
 
