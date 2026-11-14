@@ -11,7 +11,6 @@ internal sealed class DrumsConfigPage : PlayerConfigPage
     private readonly DrumsDisplayConfigPage display;
     private readonly DrumsPadGroupConfigPage padGroups;
     private readonly DrumsHitSoundConfigPage hitSounds;
-    private readonly DrumsAutoPlayConfigPage autoPlay;
     private readonly DrumsVelocityConfigPage velocity;
 
     public DrumsConfigPage(ConfigList list) : base(list, EPlayer.Drums)
@@ -20,9 +19,34 @@ internal sealed class DrumsConfigPage : PlayerConfigPage
         display = new DrumsDisplayConfigPage(list);
         padGroups = new DrumsPadGroupConfigPage(list);
         hitSounds = new DrumsHitSoundConfigPage(list);
-        autoPlay = new DrumsAutoPlayConfigPage(list);
         velocity = new DrumsVelocityConfigPage(list);
     }
+
+    private List<(ELane, CItemToggle)> AutoLanes() =>
+    [
+        (ELane.LC, Toggle("    LeftCymbal", "左シンバルを自動で演奏します。", "Play Left Cymbal automatically.",
+            () => CDTXMania.ConfigIni.bAutoPlay.LC, v => CDTXMania.ConfigIni.bAutoPlay.LC = v)),
+        (ELane.HH, Toggle("    HiHat", "ハイハットを自動で演奏します。", "Play HiHat automatically.",
+            () => CDTXMania.ConfigIni.bAutoPlay.HH, v => CDTXMania.ConfigIni.bAutoPlay.HH = v)),
+        (ELane.LP, Toggle("    LeftPedal", "左ペダルを自動で演奏します。", "Play Left Pedal automatically.",
+            () => CDTXMania.ConfigIni.bAutoPlay.LP, v => CDTXMania.ConfigIni.bAutoPlay.LP = v)),
+        (ELane.LBD, Toggle("    LBassDrum", "左バスドラムを自動で演奏します。", "Play Left Bass Drum automatically.",
+            () => CDTXMania.ConfigIni.bAutoPlay.LBD, v => CDTXMania.ConfigIni.bAutoPlay.LBD = v)),
+        (ELane.SD, Toggle("    Snare", "スネアを自動で演奏します。", "Play Snare automatically.",
+            () => CDTXMania.ConfigIni.bAutoPlay.SD, v => CDTXMania.ConfigIni.bAutoPlay.SD = v)),
+        (ELane.BD, Toggle("    BassDrum", "バスドラムを自動で演奏します。", "Play Bass Drum automatically.",
+            () => CDTXMania.ConfigIni.bAutoPlay.BD, v => CDTXMania.ConfigIni.bAutoPlay.BD = v)),
+        (ELane.HT, Toggle("    HighTom", "ハイタムを自動で演奏します。", "Play High Tom automatically.",
+            () => CDTXMania.ConfigIni.bAutoPlay.HT, v => CDTXMania.ConfigIni.bAutoPlay.HT = v)),
+        (ELane.LT, Toggle("    LowTom", "ロータムを自動で演奏します。", "Play Low Tom automatically.",
+            () => CDTXMania.ConfigIni.bAutoPlay.LT, v => CDTXMania.ConfigIni.bAutoPlay.LT = v)),
+        (ELane.FT, Toggle("    FloorTom", "フロアタムを自動で演奏します。", "Play Floor Tom automatically.",
+            () => CDTXMania.ConfigIni.bAutoPlay.FT, v => CDTXMania.ConfigIni.bAutoPlay.FT = v)),
+        (ELane.CY, Toggle("    Cymbal", "右シンバルを自動で演奏します。", "Play Right Cymbal automatically.",
+            () => CDTXMania.ConfigIni.bAutoPlay.CY, v => CDTXMania.ConfigIni.bAutoPlay.CY = v)),
+        (ELane.RD, Toggle("    Ride", "ライドシンバルを自動で演奏します。", "Play Ride Cymbal automatically.",
+            () => CDTXMania.ConfigIni.bAutoPlay.RD, v => CDTXMania.ConfigIni.bAutoPlay.RD = v)),
+    ];
 
     public override List<CItemBase> Build()
     {
@@ -48,23 +72,22 @@ internal sealed class DrumsConfigPage : PlayerConfigPage
             () => CDTXMania.ConfigIni.bTight, v => CDTXMania.ConfigIni.bTight = v));
         items.Add(MinComboItem("D-MinCombo", 1));
 
+        items.Add(RandomItem());
+        items.Add(RandomPedalItem());
+        AddAutoPlayBlock(items, AutoLanes());
+
         items.Add(FolderItem("Lane Options",
             "レーンの種類と配置に関する項目を設定します。",
             "Open the lane layout sub menu.", lanes));
         items.Add(FolderItem("Display Options",
-            "画面に表示する項目とエフェクトを設定します。",
-            "Open the display and effect sub menu.", display));
+            "画面に表示する項目を設定します。",
+            "Open the display sub menu.", display));
         items.Add(FolderItem("Pad Grouping",
             "パッドの打ち分けを設定します。",
             "Open the pad grouping sub menu.", padGroups));
         items.Add(FolderItem("Hit Sound Options",
             "打撃音と発声音の決め方を設定します。",
             "Open the hit sound sub menu.", hitSounds));
-        items.Add(FolderItem("Auto Play Options",
-            "自動演奏とランダムに関する項目を設定します。",
-            "Open the auto play and random sub menu.", autoPlay));
-
-        items.Add(MonitorItem("DrumsMonitor"));
 
         items.Add(FolderItem("Drum Hit Velocity",
             "ドラムのヒットベロシティに関する項目を設定します。",
