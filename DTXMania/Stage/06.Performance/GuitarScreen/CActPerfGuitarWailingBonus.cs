@@ -70,7 +70,7 @@ internal class CActPerfGuitarWailingBonus : CActPerfCommonWailingBonus
 			}
 		}
 	}
-	public void Draw(Matrix4x4 origin, EPlayer player)
+	public void Draw(Matrix4x4 origin, EPlayer player, float slotX)
 	{
 		if ( bActivated )
 		{
@@ -198,11 +198,11 @@ internal class CActPerfGuitarWailingBonus : CActPerfCommonWailingBonus
 							RectangleF fireFrame = new( rectW * ctWailing炎[ (int) e楽器パート2, m ].nCurrentValue, 0, rectW, rectH );
 							if ( e楽器パート2 == EPlayer.Guitar1 )
 							{
-								txWailingFire.tDraw2D(DTXMania.UI.UICanvas.toWindow, posXGuitar, posY, fireFrame );
+								txWailingFire.tDraw2D(origin, posXGuitar - slotX, posY, fireFrame );
 							}
 							if ( e楽器パート2 == EPlayer.Guitar2 )
 							{
-								txWailingFire.tDraw2D(DTXMania.UI.UICanvas.toWindow, posXBass, posY, fireFrame );
+								txWailingFire.tDraw2D(origin, posXBass - slotX, posY, fireFrame );
 							}
 						}
 					}

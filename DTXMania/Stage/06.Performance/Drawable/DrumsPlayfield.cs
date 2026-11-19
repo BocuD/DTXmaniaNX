@@ -83,7 +83,7 @@ public class DrumsPlayfield : Playfield
 
         AddLegacyPart("LaneFlush", CStagePerfCommonScreen.LegacyLanesLayer, probeLanes, origin => laneFlush.Draw(origin));
         AddLegacyPart("ProgressBar", CStagePerfCommonScreen.LegacyLanesLayer, probeLanes, origin => progressBar.Draw(origin, part, part));
-        AddLegacyPart("JudgementStrings", CStagePerfCommonScreen.LegacyOverlayLayer, probeJudgement, _ => judgements.OnUpdateAndDraw());
+        AddLegacyPart("JudgementStrings", CStagePerfCommonScreen.LegacyOverlayLayer, probeJudgement, origin => judgements.DrawAll(origin));
         SetUpScore(0, 0);
 
         if (CDTXMania.ConfigIni.bClassicDrumsFire)

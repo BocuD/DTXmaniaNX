@@ -121,11 +121,13 @@ internal abstract class CActPerfCommonJudgementString : CActivity
 
 	public override int OnUpdateAndDraw()
 	{
-		DrawLanes( 0, LaneCount - 1 );
+		DrawLanes( DTXMania.UI.UICanvas.toWindow, 0, LaneCount - 1 );
 		return 0;
 	}
 
-	public void DrawLanes( int firstLane, int lastLane )
+	public void DrawAll( Matrix4x4 origin ) => DrawLanes( origin, 0, LaneCount - 1 );
+
+	public void DrawLanes( Matrix4x4 origin, int firstLane, int lastLane )
 	{
 		if ( !bActivated || !ShouldDrawJudgementString() )
 		{
@@ -157,7 +159,7 @@ internal abstract class CActPerfCommonJudgementString : CActivity
 				continue;
 			}
 
-			DrawJudgementString( lane, baseX, baseY );
+			DrawJudgementString( origin, lane, baseX, baseY );
 		}
 	}
 
@@ -210,21 +212,24 @@ internal abstract class CActPerfCommonJudgementString : CActivity
 		return true;
 	}
 
-	protected void DrawJudgementString(int lane, int baseX, int baseY)
+	private float LaneOffset(int lane) => lane < offsetsX.Length ? offsetsX[lane] : 0f;
+
+	protected void DrawJudgementString(Matrix4x4 origin, int lane, int baseX, int baseY)
 	{
 		int nRectX = CDTXMania.ConfigIni.nJudgeWidgh;
 		int nRectY = CDTXMania.ConfigIni.nJudgeHeight;
 
-		float x = baseX - 110f - (nRectX - 225) / 2f;
+		float laneX = baseX - LaneOffset(lane);
+		float x = laneX - 110f - (nRectX - 225) / 2f;
 		float y = baseY - 140f / 2f - (nRectY - 135) / 2f;
 
-		DrawLag(lane, baseX, y);
+		DrawLag(origin, lane, laneX, y);
 
 		if (!CDTXMania.ConfigIni.bClassicJudgement) return;
-		DrawJudgeFrame(lane, x, y, nRectX, nRectY);
+		DrawJudgeFrame(origin, lane, x, y, nRectX, nRectY);
 	}
 
-	protected void DrawJudgeFrame(int lane, float x, float y, int nRectX, int nRectY)
+	protected void DrawJudgeFrame(Matrix4x4 origin, int lane, float x, float y, int nRectX, int nRectY)
 	{
 		if ( CDTXMania.ConfigIni.nJudgeFrames <= 1 )
 		{
@@ -237,27 +242,27 @@ internal abstract class CActPerfCommonJudgementString : CActivity
 		switch ( judgementStatus[ lane ].judge )
 		{
 			case EJudgement.Perfect:
-				txJudge.tDraw2D( x, y, new RectangleF( 0, frameY, nRectX, nRectY ) );
+				txJudge.tDraw2D( origin, x, y, new RectangleF( 0, frameY, nRectX, nRectY ) );
 				break;
 			case EJudgement.Great:
-				txJudge.tDraw2D( x, y, new RectangleF( nRectX * 1, frameY, nRectX, nRectY ) );
+				txJudge.tDraw2D( origin, x, y, new RectangleF( nRectX * 1, frameY, nRectX, nRectY ) );
 				break;
 			case EJudgement.Good:
-				txJudge.tDraw2D( x, y, new RectangleF( nRectX * 2, frameY, nRectX, nRectY ) );
+				txJudge.tDraw2D( origin, x, y, new RectangleF( nRectX * 2, frameY, nRectX, nRectY ) );
 				break;
 			case EJudgement.Poor:
-				txJudge.tDraw2D( x, y, new RectangleF( nRectX * 3, frameY, nRectX, nRectY ) );
+				txJudge.tDraw2D( origin, x, y, new RectangleF( nRectX * 3, frameY, nRectX, nRectY ) );
 				break;
 			case EJudgement.Miss:
-				txJudge.tDraw2D( x, y, new RectangleF( nRectX * 4, frameY, nRectX, nRectY ) );
+				txJudge.tDraw2D( origin, x, y, new RectangleF( nRectX * 4, frameY, nRectX, nRectY ) );
 				break;
 			case EJudgement.Auto:
-				txJudge.tDraw2D( x, y, new RectangleF( nRectX * 5, frameY, nRectX, nRectY ) );
+				txJudge.tDraw2D( origin, x, y, new RectangleF( nRectX * 5, frameY, nRectX, nRectY ) );
 				break;
 		}
 	}
 
-	protected void DrawLag( int lane, int xc, float y )
+	protected void DrawLag( Matrix4x4 origin, int lane, float xc, float y )
 	{
 		if ( lagDisplayMode != (int) EShowLagType.ON &&
 			!( ( lagDisplayMode == (int) EShowLagType.GREAT_POOR ) && ( judgementStatus[ lane ].judge != EJudgement.Perfect ) ) )
@@ -279,7 +284,7 @@ internal abstract class CActPerfCommonJudgementString : CActivity
 		{
 			int p = ( strDispLag[ i ] == '-' ) ? 11 : strDispLag[ i ] - '0';
 			p += minus ? 0 : 12;
-			txLagNumbers.tDraw2D( x + offsetX, y + 34, lagNumberInfoArray[ p ].rc );
+			txLagNumbers.tDraw2D( origin, x + offsetX, y + 34, lagNumberInfoArray[ p ].rc );
 			offsetX += 15;
 		}
 	}

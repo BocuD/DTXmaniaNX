@@ -47,6 +47,8 @@ public class GuitarPlayfield : Playfield
     //the judgement text numbers guitar 13 and bass 14
     private int judgementLane;
 
+    private int SlotX => player == EPlayer.Guitar2 ? 870 : 0;
+
     internal void StartFire(int lane, CChip chip)
     {
         fire?.Start(lane, chip);
@@ -76,7 +78,7 @@ public class GuitarPlayfield : Playfield
         lanes.Arrange();
 
         AddLegacyPart("LaneFlush", CStagePerfCommonScreen.LegacyLanesLayer, probeLanes, origin => laneFlush.Draw(origin, player));
-        AddLegacyPart("WailingBonus", CStagePerfCommonScreen.LegacyLanesLayer, probeLanes, origin => wailingBonus.Draw(origin, player));
+        AddLegacyPart("WailingBonus", CStagePerfCommonScreen.LegacyLanesLayer, probeLanes, origin => wailingBonus.Draw(origin, player, SlotX));
         AddLegacyPart("ProgressBar", CStagePerfCommonScreen.LegacyLanesLayer, probeLanes, origin => progressBar.Draw(origin, part, part));
 
         loopMarkers = AddPart(new LoopMarkers(), "LoopMarkers", CStagePerfCommonScreen.ChipsLayer);
@@ -87,7 +89,7 @@ public class GuitarPlayfield : Playfield
         chipRenderer = guitarChips;
 
         AddLegacyPart("JudgementStrings", CStagePerfCommonScreen.LegacyOverlayLayer, probeJudgement,
-            _ => judgements.DrawLanes(judgementLane, judgementLane));
+            origin => judgements.DrawLanes(origin, judgementLane, judgementLane));
 
         //the right player's score and combo sit beside its panel, not 870 to the right
         bool right = player == EPlayer.Guitar2;
@@ -97,7 +99,7 @@ public class GuitarPlayfield : Playfield
         this.wailing = AddPart(new WailingEffect(), "WailingEffect", CStagePerfCommonScreen.LaneArtLayer);
         this.wailing.position = new Vector3(242, 58, 0);
 
-        judgements.InitUI(this, judgementLane, judgementLane, position.X);
+        judgements.InitUI(this, judgementLane, judgementLane, SlotX);
     }
 
     protected override int JudgeLineY => CDTXMania.ConfigIni.bReverse[(int)player]
