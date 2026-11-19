@@ -2,6 +2,7 @@ using System.Drawing;
 using System.Numerics;
 using DTXMania.Core;
 using DTXMania.Core.Framework;
+using DTXMania.UI;
 using DTXMania.UI.Drawable;
 using FDK;
 
@@ -303,16 +304,41 @@ public class ClassicDrumsChipFire : UIDrawable, IPerfFire
             return;
         }
 
-        DrawStars();
+        DrawStars(parentMatrix);
 
         if (CDTXMania.ConfigIni.eAttackEffect.Drums == EType.A)
         {
-            DrawSplashes();
+            DrawSplashes(parentMatrix);
         }
 
-        DrawFires();
-        DrawBigWaves();
-        DrawSmallWaves();
+        DrawFires(parentMatrix);
+        DrawBigWaves(parentMatrix);
+        DrawSmallWaves(parentMatrix);
+    }
+
+    private static void DrawCentred(BaseTexture? texture, Matrix4x4 mat, Matrix4x4 parent, RectangleF clip, Color4 colour)
+    {
+        if (texture == null || clip.Width <= 0f || clip.Height <= 0f)
+        {
+            return;
+        }
+
+        Matrix4x4 onItsCentre = Matrix4x4.CreateScale(1f, -1f, 1f)
+                                * Matrix4x4.CreateTranslation(-clip.Width / 2f, clip.Height / 2f, 0f);
+
+        Matrix4x4 ontoCanvas = Matrix4x4.CreateScale(1f, -1f, 1f)
+                               * Matrix4x4.CreateTranslation(UICanvas.logicalSize.X / 2f, UICanvas.logicalSize.Y / 2f, 0f);
+
+        texture.tDraw2DMatrix(onItsCentre * mat * ontoCanvas * parent,
+            new Vector2(clip.Width, clip.Height), clip, colour);
+    }
+
+    private static void DrawCentred(BaseTexture? texture, Matrix4x4 mat, Matrix4x4 parent, Color4 colour)
+    {
+        if (texture != null)
+        {
+            DrawCentred(texture, mat, parent, new RectangleF(0, 0, texture.Width, texture.Height), colour);
+        }
     }
 
     //returns false once the counter has finished; the effect still draws that frame
@@ -328,7 +354,7 @@ public class ClassicDrumsChipFire : UIDrawable, IPerfFire
         return inUse;
     }
 
-    private void DrawStars()
+    private void DrawStars(Matrix4x4 parent)
     {
         for (int i = 0; i < StarMax; i++)
         {
@@ -356,12 +382,12 @@ public class ClassicDrumsChipFire : UIDrawable, IPerfFire
 
             if (star.lane < starTextures.Length)
             {
-                starTextures[star.lane]?.tDraw3D(matrix);
+                DrawCentred(starTextures[star.lane], matrix, parent, Color4.White);
             }
         }
     }
 
-    private void DrawSplashes()
+    private void DrawSplashes(Matrix4x4 parent)
     {
         Color4 color = new(1f, 1f, 1f, 120 / 255f);
 
@@ -394,12 +420,12 @@ public class ClassicDrumsChipFire : UIDrawable, IPerfFire
             float y = -(splash.y - GameWindowSize.Height / 2f);
             RectangleF half = new(noteLeft[splash.lane], 640, (noteWidth[splash.lane] + 10) / 2, 64);
 
-            notes.tDraw3D(Matrix4x4.CreateRotationZ(spin) * Matrix4x4.CreateTranslation(splash.xLeft - 50f - GameWindowSize.Width / 2f, y, 0f), half, color);
-            notes.tDraw3D(Matrix4x4.CreateRotationZ(-spin) * Matrix4x4.CreateTranslation(splash.xRight - 50f - GameWindowSize.Width / 2f, y, 0f), half, color);
+            DrawCentred(notes, Matrix4x4.CreateRotationZ(spin) * Matrix4x4.CreateTranslation(splash.xLeft - 50f - GameWindowSize.Width / 2f, y, 0f), parent, half, color);
+            DrawCentred(notes, Matrix4x4.CreateRotationZ(-spin) * Matrix4x4.CreateTranslation(splash.xRight - 50f - GameWindowSize.Width / 2f, y, 0f), parent, half, color);
         }
     }
 
-    private void DrawFires()
+    private void DrawFires(Matrix4x4 parent)
     {
         bool chorus = CDTXMania.stagePerfDrumsScreen.bChorusSection;
         float baseY = iPosY;
@@ -430,10 +456,10 @@ public class ClassicDrumsChipFire : UIDrawable, IPerfFire
                 BaseTexture? texture = fire.lane < fireTextures.Length ? fireTextures[fire.lane] : null;
                 if (texture != null)
                 {
-                    texture.tDraw3D(matrix);
+                    DrawCentred(texture, matrix, parent, Color4.White);
                     if (chorus)
                     {
-                        bonusFire?.tDraw3D(matrix);
+                        DrawCentred(bonusFire, matrix, parent, Color4.White);
                     }
                 }
 
@@ -447,10 +473,10 @@ public class ClassicDrumsChipFire : UIDrawable, IPerfFire
                 int height = CDTXMania.ConfigIni.nExplosionHeight;
                 Matrix4x4 matrix = Matrix4x4.CreateTranslation(x - 320f, -(baseY - 170f), 0f);
 
-                fireSheet.tDraw3D(matrix, new RectangleF(width * value, fire.lane * height, width, height), Color4.White);
+                DrawCentred(fireSheet, matrix, parent, new RectangleF(width * value, fire.lane * height, width, height), Color4.White);
                 if (chorus && bonusFire != null)
                 {
-                    fireSheet.tDraw3D(matrix, new RectangleF(width * value, 10 * height, width, height), Color4.White);
+                    DrawCentred(fireSheet, matrix, parent, new RectangleF(width * value, 10 * height, width, height), Color4.White);
                 }
             }
         }
@@ -459,7 +485,7 @@ public class ClassicDrumsChipFire : UIDrawable, IPerfFire
     private Matrix4x4 WaveTranslation(int lane) => Matrix4x4.CreateTranslation(LaneX(lane) + 280 - GameWindowSize.Width / 2f,
         -(iPosY + 200 - GameWindowSize.Height / 2f), 0f);
 
-    private void DrawBigWaves()
+    private void DrawBigWaves(Matrix4x4 parent)
     {
         for (int i = 0; i < WaveMax; i++)
         {
@@ -487,11 +513,11 @@ public class ClassicDrumsChipFire : UIDrawable, IPerfFire
                                * Matrix4x4.CreateRotationY(wave.tiltY)
                                * WaveTranslation(wave.lane);
 
-            bigWave.tDraw3D(matrix, new Color4(1f, 1f, 1f, alpha / 255f));
+            DrawCentred(bigWave, matrix, parent, new Color4(1f, 1f, 1f, alpha / 255f));
         }
     }
 
-    private void DrawSmallWaves()
+    private void DrawSmallWaves(Matrix4x4 parent)
     {
         for (int i = 0; i < WaveMax; i++)
         {
@@ -516,7 +542,7 @@ public class ClassicDrumsChipFire : UIDrawable, IPerfFire
                                * Matrix4x4.CreateRotationY(wave.tiltY)
                                * WaveTranslation(wave.lane);
 
-            smallWave.tDraw3D(matrix, new Color4(1f, 1f, 1f, alpha / 255f));
+            DrawCentred(smallWave, matrix, parent, new Color4(1f, 1f, 1f, alpha / 255f));
         }
     }
 
