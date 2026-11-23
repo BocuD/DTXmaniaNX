@@ -208,6 +208,8 @@ internal class CStageSongLoading : CStage
             for (int instIndex = 0; instIndex < inst.Length; ++instIndex)
             {
                 //break; //2016.01.03 kairera0467 以下封印。
+                //the ghost files are the chart part's, the ghost settings are its player's
+                int player = (int)CDTXMania.ConfigIni.PlayerOn((EChartPart)instIndex);
                 bool readAutoGhostCond = CDTXMania.ConfigIni.bIsAutoPlay(CDTXMania.ConfigIni.PlayerOn((EChartPart)instIndex));
 
                 CDTXMania.listTargetGhsotLag[instIndex] = null;
@@ -218,7 +220,7 @@ internal class CStageSongLoading : CStage
                 if (readAutoGhostCond)
                 {
                     string[] prefix = ["perfect", "lastplay", "hiskill", "hiscore"];
-                    int indPrefix = (int)CDTXMania.ConfigIni.eAutoGhost[instIndex];
+                    int indPrefix = (int)CDTXMania.ConfigIni.eAutoGhost[player];
                     string filename = cdtx.strFolderName + Path.DirectorySeparatorChar + cdtx.strFileName + "." + prefix[indPrefix] + "." +
                                       inst[instIndex] + ".ghost";
                     if (File.Exists(filename))
@@ -229,10 +231,10 @@ internal class CStageSongLoading : CStage
                     }
                 }
 
-                if (CDTXMania.ConfigIni.eTargetGhost[instIndex] != ETargetGhostData.NONE)
+                if (CDTXMania.ConfigIni.eTargetGhost[player] != ETargetGhostData.NONE)
                 {
                     string[] prefix = ["none", "perfect", "lastplay", "hiskill", "hiscore"];
-                    int indPrefix = (int)CDTXMania.ConfigIni.eTargetGhost[instIndex];
+                    int indPrefix = (int)CDTXMania.ConfigIni.eTargetGhost[player];
                     string filename = cdtx.strFolderName + Path.DirectorySeparatorChar + cdtx.strFileName + "." + prefix[indPrefix] + "." +
                                       inst[instIndex] + ".ghost";
                     if (File.Exists(filename))
@@ -242,7 +244,7 @@ internal class CStageSongLoading : CStage
                         stGhostLag[instIndex] = [];
                         ReadGhost(filename, CDTXMania.listTargetGhsotLag[instIndex]);
                     }
-                    else if (CDTXMania.ConfigIni.eTargetGhost[instIndex] == ETargetGhostData.PERFECT)
+                    else if (CDTXMania.ConfigIni.eTargetGhost[player] == ETargetGhostData.PERFECT)
                     {
                         // All perfect
                         CDTXMania.listTargetGhsotLag[instIndex] = [];
@@ -476,6 +478,7 @@ internal class CStageSongLoading : CStage
                 {
                     cancellationToken.ThrowIfCancellationRequested();
 
+                    int player = (int)CDTXMania.ConfigIni.PlayerOn((EChartPart)instIndex);
                     bool readAutoGhostCond = CDTXMania.ConfigIni.bIsAutoPlay(CDTXMania.ConfigIni.PlayerOn((EChartPart)instIndex));
 
                     CDTXMania.listTargetGhsotLag[instIndex] = null;
@@ -486,7 +489,7 @@ internal class CStageSongLoading : CStage
                     if (readAutoGhostCond)
                     {
                         string[] prefix = ["perfect", "lastplay", "hiskill", "hiscore"];
-                        int indPrefix = (int)CDTXMania.ConfigIni.eAutoGhost[instIndex];
+                        int indPrefix = (int)CDTXMania.ConfigIni.eAutoGhost[player];
                         string filename = CDTXMania.DTX.strFolderName + Path.DirectorySeparatorChar + CDTXMania.DTX.strFileName + "." + prefix[indPrefix] + "." +
                                           ghostInst[instIndex] + ".ghost";
                         if (File.Exists(filename))
@@ -497,10 +500,10 @@ internal class CStageSongLoading : CStage
                         }
                     }
 
-                    if (CDTXMania.ConfigIni.eTargetGhost[instIndex] != ETargetGhostData.NONE)
+                    if (CDTXMania.ConfigIni.eTargetGhost[player] != ETargetGhostData.NONE)
                     {
                         string[] prefix = ["none", "perfect", "lastplay", "hiskill", "hiscore"];
-                        int indPrefix = (int)CDTXMania.ConfigIni.eTargetGhost[instIndex];
+                        int indPrefix = (int)CDTXMania.ConfigIni.eTargetGhost[player];
                         string filename = CDTXMania.DTX.strFolderName + Path.DirectorySeparatorChar + CDTXMania.DTX.strFileName + "." + prefix[indPrefix] + "." +
                                           ghostInst[instIndex] + ".ghost";
                         if (File.Exists(filename))
@@ -510,7 +513,7 @@ internal class CStageSongLoading : CStage
                             stGhostLag[instIndex] = [];
                             ReadGhost(filename, CDTXMania.listTargetGhsotLag[instIndex]);
                         }
-                        else if (CDTXMania.ConfigIni.eTargetGhost[instIndex] == ETargetGhostData.PERFECT)
+                        else if (CDTXMania.ConfigIni.eTargetGhost[player] == ETargetGhostData.PERFECT)
                         {
                             // All perfect
                             CDTXMania.listTargetGhsotLag[instIndex] = [];

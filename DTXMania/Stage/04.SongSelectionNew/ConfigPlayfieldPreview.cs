@@ -105,12 +105,12 @@ internal sealed class ConfigPlayfieldPreview : UIGroup
         scrollSpeed.OnUpdateAndDraw();
         STDGBVALUE<double> scroll = scrollSpeed.db現在の譜面スクロール速度;
 
-        int partIndex = (int)part;
+        int slot = (int)player;
         for (int i = timeline.TopChip; i >= 0 && i < timeline.Chips.Count; i++)
         {
             CChip chip = timeline.Chips[i];
             chip.ComputeDistanceFromBar(timeMs, scroll);
-            if (chip.nDistanceFromBar[partIndex] > ChipRenderer.DrawRange)
+            if (chip.nDistanceFromBar[slot] > ChipRenderer.DrawRange)
             {
                 break;
             }
@@ -120,7 +120,7 @@ internal sealed class ConfigPlayfieldPreview : UIGroup
                 continue;
             }
 
-            if (chip.bHit || chip.nDistanceFromBar[partIndex] > 0)
+            if (chip.bHit || chip.nDistanceFromBar[slot] > 0)
             {
                 continue;
             }

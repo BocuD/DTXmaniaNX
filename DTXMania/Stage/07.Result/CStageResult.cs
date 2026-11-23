@@ -184,7 +184,7 @@ internal class CStageResult : CStage
 		UIPlayerNameplate? nameplate = ui.FindChild<UIPlayerNameplate>();
 		if (nameplate != null)
 		{
-			nameplate.instrument = CDTXMania.GetCurrentInstrument();
+			nameplate.instrument = (int)CDTXMania.ConfigIni.PlayerOn((EChartPart)CDTXMania.GetCurrentInstrument());
 		}
 	}
 

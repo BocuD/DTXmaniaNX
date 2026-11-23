@@ -58,7 +58,7 @@ public class QuickMenu : UIGroup
         pages[1] = new QuickMenuPage(list, EPlayer.Guitar1);
         pages[2] = new QuickMenuPage(list, EPlayer.Guitar2);
 
-        list.OpenRoot(pages[CDTXMania.GetCurrentInstrument()]);
+        list.OpenRoot(pages[(int)MenuPlayer]);
     }
 
     /// <summary>The gesture that opens and closes the menu. Polled by the stage whatever holds focus,
@@ -94,7 +94,7 @@ public class QuickMenu : UIGroup
         {
             isVisible = true;
             isClosing = false;
-            EPlayer player = (EPlayer)CDTXMania.GetCurrentInstrument();
+            EPlayer player = MenuPlayer;
             list.OpenRoot(pages[(int)player]);
 
             if (preview != null)
