@@ -181,7 +181,7 @@ public class GuitarChipRenderer : ChipRenderer
     //sits at a fixed height, not on the judge line
     private void DrawWailingChip(Matrix4x4 origin, CChip chip, bool reverse)
     {
-        int index = (int)part;
+        int index = slot;
         float distance = chip.nDistanceFromBar[index];
         if (chip.bHit || !chip.bVisible || NoteAlpha(distance, CDTXMania.ConfigIni.nHidSud[index], 250, 150, 75) <= 0)
         {
