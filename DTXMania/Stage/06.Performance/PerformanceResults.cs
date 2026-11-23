@@ -248,7 +248,7 @@ internal static class PerformanceResults
             entry.eRandom[i] = config.eRandom[i];
             entry.bLight[i] = config.bLight[i];
             entry.bLeft[i] = config.bLeft[i];
-            entry.fScrollSpeed[i] = (config.nScrollSpeed[i] + 1) * 0.5f;
+            entry.fScrollSpeed[i] = config.fScrollSpeed[i];
         }
 
         entry.Hash = CScoreIni.tComputePerformanceSectionMD5(entry);

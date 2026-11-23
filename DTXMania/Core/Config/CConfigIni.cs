@@ -176,7 +176,7 @@ internal partial class CConfigIni
 	public int n選曲リストフォントのサイズdot;
 	public int[] nNameColor;
 	public STDGBVALUE<int> n表示可能な最小コンボ数;
-	public STDGBVALUE<int> nScrollSpeed;
+	public STDGBVALUE<float> fScrollSpeed;
 	public string strDTXManiaのバージョン;
 	public string strSongDataSearchPath;
 
@@ -412,6 +412,8 @@ internal partial class CConfigIni
 		EPlayer.Guitar2 => guitar2Chart,
 		_ => EChartPart.Drums
 	};
+
+	public int nScrollSpeedIconRow(int index) => (int)MathF.Round(fScrollSpeed[index] * 2f) - 1;
 
 	public bool IsPlayed(EPlayer player) => player switch
 	{
@@ -699,7 +701,7 @@ internal partial class CConfigIni
 		bSpecialist = new STDGBVALUE<bool>();
 		bLeft = new STDGBVALUE<bool>();
 		JudgementStringPosition = new STDGBVALUE<EType>();
-		nScrollSpeed = new STDGBVALUE<int>();
+		fScrollSpeed = new STDGBVALUE<float>();
 		nInputAdjustTimeMs = new STDGBVALUE<int>();	// #23580 2011.1.3 yyagi
 		nCommonBGMAdjustMs = 0; // #36372 2016.06.19 kairera0467
 		nJudgeLinePosOffset = new STDGBVALUE<int>(); // #31602 2013.6.23 yyagi
@@ -713,7 +715,7 @@ internal partial class CConfigIni
 			bSpecialist[ i ] = false;
 			bLeft[ i ] = false;
 			JudgementStringPosition[ i ] = EType.A;
-			nScrollSpeed[ i ] = 1;
+			fScrollSpeed[ i ] = 1.0f;
 			nInputAdjustTimeMs[ i ] = 0;
 			nJudgeLinePosOffset[i] = 0;
 		}

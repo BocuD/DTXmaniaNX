@@ -601,10 +601,10 @@ public class CChip : IComparable<CChip>, ICloneable
 		//XGのHS4.5が1289。思えばBPMじゃなくて拍の長さが関係あるよね。
 		if (part == EInstrumentPart.DRUMS)
 		{
-			return (scrollSpeed + 1.0) * 0.5 * 37.5 * speed / 60000.0;
+			return scrollSpeed * 37.5 * speed / 60000.0;
 		}
 
-		return (scrollSpeed + 1.0) * 0.5 * 0.5 * 37.5 * speed * 1.52f / 60000.0; //todo: verify if this is the correct approach to fix guitar scroll speed
+		return scrollSpeed * 0.5 * 37.5 * speed * 1.52f / 60000.0; //todo: verify if this is the correct approach to fix guitar scroll speed
 	}
 
 	public void ComputeDistanceFromBar(long nCurrentTime, double multDrums, double multGuitar, double multBass)

@@ -104,7 +104,7 @@ internal sealed class ConfigPlayfieldPreview : UIGroup
         STDGBVALUE<double> scroll = new();
         for (int i = 0; i < 3; i++)
         {
-            scroll[i] = CDTXMania.ConfigIni.nScrollSpeed[i];
+            scroll[i] = CDTXMania.ConfigIni.fScrollSpeed[i];
         }
 
         int partIndex = (int)part;

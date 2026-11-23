@@ -794,4 +794,8 @@ internal class CConstants
 {
 	public const int PLAYSPEED_MIN = 5;
 	public const int PLAYSPEED_MAX = 40;
+
+	public const float SCROLLSPEED_MIN = 0.5f;
+	public const float SCROLLSPEED_MAX = 1000.0f;
+	public const float SCROLLSPEED_STEP = 0.1f;
 }

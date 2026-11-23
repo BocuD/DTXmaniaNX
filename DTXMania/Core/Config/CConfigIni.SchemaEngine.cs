@@ -1,5 +1,6 @@
 #nullable disable
 
+using System.Globalization;
 using System.Linq.Expressions;
 using System.Text;
 using FDK;
@@ -101,6 +102,31 @@ internal partial class CConfigIni
 		return new(key,
 			(c, v) => set(c, (T)(object)CConversion.nGetNumberIfInRange(v, min, max, Convert.ToInt32(get(c)))),
 			c => Convert.ToInt32(get(c)).ToString());
+	}
+
+	private static ConfigItem ScrollSpeed(string key, Expression<Func<CConfigIni, float>> field)
+	{
+		var (get, set) = Bind(field);
+		return new(key,
+			(c, v) => set(c, fParseScrollSpeed(v, get(c))),
+			c => get(c).ToString("0.0##", CultureInfo.InvariantCulture));
+	}
+
+	private static float fParseScrollSpeed(string text, float current)
+	{
+		//read old format (0 = 0.5x, 1 = 1.0x) if there is no decimal point
+		if (!text.Contains('.'))
+		{
+			int step = CConversion.nGetNumberIfInRange(text, 0, 1999, -1);
+			return step < 0 ? current : Math.Clamp((step + 1) * 0.5f, CConstants.SCROLLSPEED_MIN, CConstants.SCROLLSPEED_MAX);
+		}
+
+		if (!float.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out float speed))
+		{
+			return current;
+		}
+
+		return Math.Clamp(speed, CConstants.SCROLLSPEED_MIN, CConstants.SCROLLSPEED_MAX);
 	}
 
 	/// <summary>A key-assignment list, parsed/rendered via the shared key-code encoding.</summary>

@@ -24,7 +24,7 @@ internal class CActPerfScrollSpeed : CActivity
 	{
 		for( int i = 0; i < 3; i++ )
 		{
-			db譜面スクロール速度[ i ] = db現在の譜面スクロール速度[ i ] = (double) CDTXMania.ConfigIni.nScrollSpeed[ i ];
+			db譜面スクロール速度[ i ] = db現在の譜面スクロール速度[ i ] = CDTXMania.ConfigIni.fScrollSpeed[ i ];
 			n速度変更制御タイマ[ i ] = -1;
 		}
 		base.OnActivate();
@@ -41,16 +41,17 @@ internal class CActPerfScrollSpeed : CActivity
 			long num = AudioMixer.Timer.nCurrentTime;
 			for( int i = 0; i < 3; i++ )
 			{
-				double num3 = (double) CDTXMania.ConfigIni.nScrollSpeed[ i ];
+				double num3 = CDTXMania.ConfigIni.fScrollSpeed[ i ];
 				if ( num < n速度変更制御タイマ[ i ] )
 				{
 					n速度変更制御タイマ[ i ] = num;
 				}
+				//the glide is 0.006x per 2ms, half of what it was when a step meant x0.5
 				while( ( num - n速度変更制御タイマ[ i ] ) >= 2 )
 				{
 					if ( db譜面スクロール速度[ i ] < num3 )
 					{
-						db現在の譜面スクロール速度[ i ] += 0.012;
+						db現在の譜面スクロール速度[ i ] += 0.006;
 
 						if ( db現在の譜面スクロール速度[ i ] > num3 )
 						{
@@ -60,7 +61,7 @@ internal class CActPerfScrollSpeed : CActivity
 					}
 					else if ( db譜面スクロール速度[ i ] > num3 )
 					{
-						db現在の譜面スクロール速度[ i ] -= 0.012;
+						db現在の譜面スクロール速度[ i ] -= 0.006;
 
 						if ( db現在の譜面スクロール速度[ i ] < num3 )
 						{

@@ -43,13 +43,14 @@ internal abstract class PlayerConfigPage : ConfigPage
     
     // ---- shared STDGBVALUE-backed items ----
 
-    protected CItemInteger ScrollSpeedItem()
+    protected CItemFloat ScrollSpeedItem()
     {
-        CItemInteger item = Integer("ScrollSpeed", 0, 0x7cf,
+        CItemFloat item = Float("ScrollSpeed",
+            CConstants.SCROLLSPEED_MIN, CConstants.SCROLLSPEED_MAX, CConstants.SCROLLSPEED_STEP,
             "ノーツの流れるスピードを変更します。",
             "Change the scroll speed (x0.5 to x1000.0).",
-            () => CDTXMania.ConfigIni.nScrollSpeed[Idx], v => CDTXMania.ConfigIni.nScrollSpeed[Idx] = v);
-        item.formatValue = () => $"x{(item.nCurrentValue + 1) * 0.5f:0.0}";
+            () => CDTXMania.ConfigIni.fScrollSpeed[Idx], v => CDTXMania.ConfigIni.fScrollSpeed[Idx] = v);
+        item.formatValue = () => $"x{item.fCurrentValue:0.0}";
         return item;
     }
 

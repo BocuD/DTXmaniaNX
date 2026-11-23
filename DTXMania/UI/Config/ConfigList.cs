@@ -256,7 +256,7 @@ internal class ConfigList : UIScrollItemsGroup, IUIItemSource
 
         CDTXMania.Skin.soundDecide.tPlay();
 
-        if (item.eType == CItemBase.EType.Integer)
+        if (item.eType == CItemBase.EType.Integer || item.eType == CItemBase.EType.Float)
         {
             StartEditing();
             return;

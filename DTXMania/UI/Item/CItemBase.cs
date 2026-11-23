@@ -24,6 +24,7 @@ internal class CItemBase
 		ONorOFFToggle,
 		ONorOFForUndefined3State,
 		Integer,
+		Float,
 		List,
 		切替リスト,
 		TextInput

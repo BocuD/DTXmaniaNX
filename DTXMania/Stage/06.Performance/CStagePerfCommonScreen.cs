@@ -675,7 +675,9 @@ internal abstract class CStagePerfCommonScreen : CStage
     protected static void ChangeScrollSpeed(EPlayer player, int delta)
     {
         int index = (int)player;
-        CDTXMania.ConfigIni.nScrollSpeed[index] = Math.Clamp(CDTXMania.ConfigIni.nScrollSpeed[index] + delta, 0, 1999);
+        float speed = CDTXMania.ConfigIni.fScrollSpeed[index] + delta * CConstants.SCROLLSPEED_STEP;
+        CDTXMania.ConfigIni.fScrollSpeed[index] =
+            Math.Clamp(MathF.Round(speed, 1), CConstants.SCROLLSPEED_MIN, CConstants.SCROLLSPEED_MAX);
     }
 
     //default is drums, with shift: the first guitar player, with alt: the second

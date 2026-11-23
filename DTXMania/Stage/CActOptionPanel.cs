@@ -22,23 +22,11 @@ internal class CActOptionPanel : CActivity
             CConfigIni configIni = CDTXMania.ConfigIni;
             if (txOptionPanel != null)
             {
-                int drums = configIni.nScrollSpeed.Drums;
-                if (drums > 15)
-                {
-                    drums = 15;
-                }
+                int drums = Math.Clamp(configIni.nScrollSpeedIconRow(0), 0, 15);
                 txOptionPanel.tDraw2D(738, 14, rc譜面スピード[drums]);
-                drums = configIni.nScrollSpeed.Guitar;
-                if (drums > 15)
-                {
-                    drums = 15;
-                }
+                drums = Math.Clamp(configIni.nScrollSpeedIconRow(1), 0, 15);
                 txOptionPanel.tDraw2D(738, 32, rc譜面スピード[drums]);
-                drums = configIni.nScrollSpeed.Bass;
-                if (drums > 15)
-                {
-                    drums = 15;
-                }
+                drums = Math.Clamp(configIni.nScrollSpeedIconRow(2), 0, 15);
                 txOptionPanel.tDraw2D(738, 50, rc譜面スピード[drums]);
                 txOptionPanel.tDraw2D(786, 14, rcHS[(configIni.bHidden.Drums ? 1 : 0) + (configIni.bSudden.Drums ? 2 : 0)]);
                 txOptionPanel.tDraw2D(786, 32, rcHS[(configIni.bHidden.Guitar ? 1 : 0) + (configIni.bSudden.Guitar ? 2 : 0)]);

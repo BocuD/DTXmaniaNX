@@ -82,7 +82,7 @@ public sealed class PerformanceStats
     [DataField] public bool IsDanger => Stage?.DataFor(Player).IsDanger() ?? false;
 
     //row in the scroll speed sheet, 48px per speed
-    [DataField] public float ScrollSpeedIconY => Math.Min(CDTXMania.ConfigIni.nScrollSpeed[Slot], 20) * 48.0f;
+    [DataField] public float ScrollSpeedIconY => Math.Clamp(CDTXMania.ConfigIni.nScrollSpeedIconRow(Slot), 0, 20) * 48.0f;
 
     [DataField] public bool IsLaneDark => CDTXMania.ConfigIni.nLaneDisp[Slot] is not (0 or 2);
     [DataField] public bool IsLeft => CDTXMania.ConfigIni.bLeft[Slot];
