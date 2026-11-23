@@ -30,6 +30,7 @@ internal sealed class ConfigPlayfieldPreview : UIGroup
     private DrumsPlayfield? drums;
     private GuitarPlayfield? guitar;
     private CActPerfGuitarLaneFlushGB? guitarFlush;
+    private CActPerfScrollSpeed scrollSpeed = null!;
     private int firstFlushLane;
 
     private long firstNoteMs;
@@ -101,11 +102,8 @@ internal sealed class ConfigPlayfieldPreview : UIGroup
             Restart();
         }
 
-        STDGBVALUE<double> scroll = new();
-        for (int i = 0; i < 3; i++)
-        {
-            scroll[i] = CDTXMania.ConfigIni.fScrollSpeed[i];
-        }
+        scrollSpeed.OnUpdateAndDraw();
+        STDGBVALUE<double> scroll = scrollSpeed.db現在の譜面スクロール速度;
 
         int partIndex = (int)part;
         for (int i = timeline.TopChip; i >= 0 && i < timeline.Chips.Count; i++)
@@ -187,6 +185,7 @@ internal sealed class ConfigPlayfieldPreview : UIGroup
     {
         part = CStagePerfCommonScreen.PartOf(player);
 
+        scrollSpeed = Activated(new CActPerfScrollSpeed());
         CActPerfProgressBar progress = Activated(new CActPerfProgressBar(true));
 
         if (player == EPlayer.Drums)
