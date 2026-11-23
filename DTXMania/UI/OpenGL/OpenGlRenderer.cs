@@ -172,6 +172,12 @@ public sealed unsafe class OpenGlRenderer : IRenderer, IDisposable
             _vao = 0;
         }
 
+        if (_copyFbo != 0)
+        {
+            _gl.DeleteFramebuffer(_copyFbo);
+            _copyFbo = 0;
+        }
+
         DeleteStreamPbos();
 
         _contextResourcesCreated = false;
