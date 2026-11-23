@@ -280,17 +280,18 @@ public class UIItemsGroup : UIGroup, IUIInputHandler
 
         SelectedItem = (moved % count + count) % count;
         CDTXMania.Skin.soundCursorMovement.tPlay();
-        OnSelectionMoved();
+        OnSelectionMoved(items);
     }
 
-    /// <summary>Called when the user moved onto another item, as opposed to the selection being set.</summary>
-    protected virtual void OnSelectionMoved()
+    /// <summary>Called when the user moved onto another item, as opposed to the selection being set.
+    /// <paramref name="items"/> indicates direction</summary>
+    protected virtual void OnSelectionMoved(int items)
     {
     }
 
     public virtual string FocusName => name;
 
-    public NavigationRepeat? Navigation => navigation;
+    public NavigationRepeat Navigation => navigation;
 
     public void PollNavigation() => navigation.Poll(navigationAxis, guitarNavigation, selectPrevious, selectNext);
 

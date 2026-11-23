@@ -20,6 +20,8 @@ public sealed class NavigationRepeat
     private CCounter? guitarRepeatPrevious;
     private CCounter? guitarRepeatNext;
 
+    public bool Repeating { get; private set; }
+
     /// <summary>
     /// Runs <paramref name="onPrevious"/>/<paramref name="onNext"/> for the arrow keys and the guitar
     /// (held, repeating), and for the drum pads (single press). The drums take
@@ -40,12 +42,12 @@ public sealed class NavigationRepeat
         bool vertical = axis == UINavigationAxis.Vertical;
 
         //passed straight through: wrapping them would allocate a closure per polled frame
-        keyRepeatPrevious.tRepeatKey(
+        Repeat(keyRepeatPrevious,
             CDTXMania.InputManager.Keyboard.bKeyPressing(vertical ? SlimDXKey.UpArrow : SlimDXKey.LeftArrow),
-            onPrevious, FirstRepeatMs, RepeatIntervalMs);
-        keyRepeatNext!.tRepeatKey(
+            onPrevious);
+        Repeat(keyRepeatNext!,
             CDTXMania.InputManager.Keyboard.bKeyPressing(vertical ? SlimDXKey.DownArrow : SlimDXKey.RightArrow),
-            onNext, FirstRepeatMs, RepeatIntervalMs);
+            onNext);
 
         (EPad guitarPrevious, EPad guitarNext) = GuitarPads(vertical, guitar);
 
@@ -54,10 +56,8 @@ public sealed class NavigationRepeat
         bool strums = guitarPrevious is EPad.PickUp or EPad.PickDown;
         bool guitarScrolls = !strums || Input.StrumIsNavigation;
 
-        guitarRepeatPrevious!.tRepeatKey(guitarScrolls && CDTXMania.Pad.bPressingGuitars(guitarPrevious),
-            onPrevious, FirstRepeatMs, RepeatIntervalMs);
-        guitarRepeatNext!.tRepeatKey(guitarScrolls && CDTXMania.Pad.bPressingGuitars(guitarNext),
-            onNext, FirstRepeatMs, RepeatIntervalMs);
+        Repeat(guitarRepeatPrevious!, guitarScrolls && CDTXMania.Pad.bPressingGuitars(guitarPrevious), onPrevious);
+        Repeat(guitarRepeatNext!, guitarScrolls && CDTXMania.Pad.bPressingGuitars(guitarNext), onNext);
 
         if (CDTXMania.Pad.bPressed(EPlayer.Drums, vertical ? EPad.HT : EPad.SD))
         {
@@ -68,6 +68,13 @@ public sealed class NavigationRepeat
         {
             (onDrumsNext ?? onNext)();
         }
+    }
+
+    private void Repeat(CCounter counter, bool pressing, Action action)
+    {
+        Repeating = counter.nCurrentValue != 0;
+        counter.tRepeatKey(pressing, action, FirstRepeatMs, RepeatIntervalMs);
+        Repeating = false;
     }
 
     private static (EPad Previous, EPad Next) GuitarPads(bool vertical, UIGuitarNavigation guitar)

@@ -1,0 +1,46 @@
+{
+  "name": "arrow",
+  "duration": 1.0,
+  "frameRate": 60.0,
+  "loop": false,
+  "tracks": [
+    {
+      "path": "ArrowEffect/color.Alpha",
+      "keyframes": [
+        {
+          "t": 0.0,
+          "v": 1.0,
+          "ease": 3
+        },
+        {
+          "t": 0.20000002,
+          "v": 0.0,
+          "ease": 3
+        }
+      ]
+    },
+    {
+      "path": "ArrowEffect/scale",
+      "keyframes": [
+        {
+          "t": 0.0,
+          "v": {
+            "X": 1.0,
+            "Y": 1.0,
+            "Z": 1.0
+          },
+          "ease": 1
+        },
+        {
+          "t": 0.20000002,
+          "v": {
+            "X": 2.0,
+            "Y": 2.0,
+            "Z": 2.0
+          },
+          "ease": 3
+        }
+      ]
+    }
+  ]
+}

@@ -56,7 +56,11 @@ public class UIScrollItemsGroup : UIItemsGroup
     }
 
     //a scrolling list moves by scrolling, which is where the queue limit and the easing live
-    protected override void MoveSelection(int items) => ScrollBy(items);
+    protected override void MoveSelection(int items)
+    {
+        ScrollBy(items);
+        OnSelectionMoved(items);
+    }
 
     /// <summary>
     /// True while the selection is still going to change, so callers can hold off on work that should

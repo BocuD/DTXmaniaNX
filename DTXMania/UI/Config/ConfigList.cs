@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Numerics;
 using DTXMania.Core;
 using DTXMania.Core.Framework;
+using DTXMania.UI.Animation;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.DynamicElements;
 using DTXMania.UI.Item;
@@ -13,7 +14,7 @@ namespace DTXMania.UI.Config;
 /// <summary>
 /// The settings list: a page of <see cref="CItemBase"/> shown through the same scrolling machinery as the
 /// song list, one <see cref="ConfigRowData"/> per item. What is left here is what is actually about
-/// settings — the page stack, editing a value, and the panels a row can open.
+/// settings — the page stack, changing a value, and the panels a row can open.
 /// </summary>
 internal class ConfigList : UIScrollItemsGroup, IUIItemSource
 {
@@ -26,13 +27,21 @@ internal class ConfigList : UIScrollItemsGroup, IUIItemSource
     private static readonly Vector3 ValueOffset = new(265, 30, 0);
 
     private readonly List<ConfigRowData> rows = [];
-    private readonly ConfigItemEditor editor;
 
     //found once the component has loaded, rather than built here: a class that adds children of its own
     //cannot be loaded from a layout without ending up with both sets
     private UIImage? cursor;
-    private UIImage? arrowTop;
-    private UIImage? arrowBottom;
+    private UIGroup? arrowUp;
+    private UIGroup? arrowDown;
+    private UIGroup? arrowLeft;
+    private UIGroup? arrowRight;
+
+    //its own counters, so holding left or right does not take the repeats meant for up and down
+    private readonly NavigationRepeat valueNavigation = new();
+
+    //made once: a lambda per polled frame would allocate
+    private readonly Action increaseValue;
+    private readonly Action decreaseValue;
 
     private List<CItemBase> currentItems = [];
     public readonly Stack<(List<CItemBase> items, int selection, ConfigPage? page)> pageStack = new();
@@ -66,7 +75,6 @@ internal class ConfigList : UIScrollItemsGroup, IUIItemSource
         CurrentPage?.OpenElements();
     }
 
-    private bool editing;
 
     //runs when Cancel is pressed at the root page (nothing left to go back to)
     public Action? onExitRoot;
@@ -80,7 +88,8 @@ internal class ConfigList : UIScrollItemsGroup, IUIItemSource
 
     public ConfigList() : base("ConfigList")
     {
-        editor = new ConfigItemEditor(this);
+        increaseValue = () => ChangeValue(true);
+        decreaseValue = () => ChangeValue(false);
 
         itemOffset = new Vector3(0, RowSpacing, 0);
         itemComponentSource = ConfigRow;
@@ -104,8 +113,10 @@ internal class ConfigList : UIScrollItemsGroup, IUIItemSource
     protected override void OnContentLoaded()
     {
         cursor = GetChild<UIImage>("Cursor");
-        arrowTop = GetChild<UIImage>("ArrowTop");
-        arrowBottom = GetChild<UIImage>("ArrowBottom");
+        arrowUp = GetChild<UIGroup>("ArrowUp");
+        arrowDown = GetChild<UIGroup>("ArrowDown");
+        arrowLeft = GetChild<UIGroup>("ArrowLeft");
+        arrowRight = GetChild<UIGroup>("ArrowRight");
     }
 
     //every settings list shares this, so the quick menu and the config screen are styled together
@@ -123,29 +134,54 @@ internal class ConfigList : UIScrollItemsGroup, IUIItemSource
             renderOrder = 1
         });
 
-        root.AddChild(new UIImage
-        {
-            name = "ArrowTop",
-            imageSource = ImageSource.File,
-            image = SkinResource.System(@"Graphics\4_Arrow.png"),
-            size = new Vector2(40, 40),
-            position = new Vector3(-26, -15, 0),
-            clipRect = new RectangleF(0, 0, 40, 40),
-            renderOrder = 1
-        });
-
-        root.AddChild(new UIImage
-        {
-            name = "ArrowBottom",
-            imageSource = ImageSource.File,
-            image = SkinResource.System(@"Graphics\4_Arrow.png"),
-            size = new Vector2(40, 40),
-            position = new Vector3(-26, 51, 0),
-            clipRect = new RectangleF(0, 40, 40, 40),
-            renderOrder = 1
-        });
+        root.AddChild(AnimatedArrow("ArrowUp", -6, 5, 0));
+        root.AddChild(AnimatedArrow("ArrowDown", -6, 71, MathF.PI));
+        
+        root.AddChild(AnimatedArrow("ArrowLeft", 238, 39, -MathF.PI / 2));
+        root.AddChild(AnimatedArrow("ArrowRight", 426, 39, MathF.PI / 2));
 
         return root;
+    }
+
+    private static UIGroup AnimatedArrow(string name, float x, float y, float turn)
+    {
+        var group = new UIGroup(name)
+        {
+            position = new Vector3(x, y, 0),
+            renderOrder = 1,
+        };
+        
+        var image = new UIImage
+        {
+            name = "Arrow",
+            imageSource = ImageSource.File,
+            image = SkinResource.System(@"Graphics\4_Arrow.png"),
+            size = new Vector2(40, 40),
+            pivot = new Vector2(0.5f, 0.5f),
+            rotation = new Vector3(0, 0, turn),
+            clipRect = new RectangleF(0, 0, 40, 40),
+        };
+        
+        var image2 = new UIImage
+        {
+            name = "ArrowEffect",
+            imageSource = ImageSource.File,
+            image = SkinResource.System(@"Graphics\4_Arrow.png"),
+            size = new Vector2(40, 40),
+            pivot = new Vector2(0.5f, 0.5f),
+            rotation = new Vector3(0, 0, turn),
+            clipRect = new RectangleF(0, 0, 40, 40),
+            color = new Color4(1, 1, 1, 0),
+            renderOrder = 1
+        };
+        
+        group.AddChild(image);
+        group.AddChild(image2);
+
+        group.animator = new Animator();
+        group.animator.AddResource(SkinResource.System(@"Graphics\Config\arrow.json"));
+        
+        return group;
     }
 
     public int ItemCount => Math.Max(1, rows.Count);
@@ -158,8 +194,8 @@ internal class ConfigList : UIScrollItemsGroup, IUIItemSource
     /// <summary>True once the selection has stopped changing; used to gate the description panel.</summary>
     public bool IsSettled => !IsScrolling;
 
-    /// <summary>Whether this list is the one being driven, editing a value included.</summary>
-    public bool IsActive => UIFocus.Holds(this) || editing;
+    /// <summary>Whether this list is the one being driven.</summary>
+    public bool IsActive => UIFocus.Holds(this);
 
     private ConfigRowData? SelectedRow => GetItem(SelectedItem) as ConfigRowData;
 
@@ -193,7 +229,6 @@ internal class ConfigList : UIScrollItemsGroup, IUIItemSource
             rows[i].SetItem(items[i]);
         }
 
-        StopEditing();
         ScrollTo(selection);
     }
 
@@ -256,12 +291,6 @@ internal class ConfigList : UIScrollItemsGroup, IUIItemSource
 
         CDTXMania.Skin.soundDecide.tPlay();
 
-        if (item.eType == CItemBase.EType.Integer || item.eType == CItemBase.EType.Float)
-        {
-            StartEditing();
-            return;
-        }
-
         item.RunAction(); // cycles toggles/lists, or runs a folder/back action
 
         if (item.ePanelType is CItemBase.EPanelType.Return or CItemBase.EPanelType.Normal)
@@ -279,6 +308,17 @@ internal class ConfigList : UIScrollItemsGroup, IUIItemSource
     //scrolling by whole rows is what moves the selection here
     protected override void OnScrolled(int steps) => CDTXMania.Skin.soundCursorMovement.tPlay();
 
+    protected override void OnSelectionMoved(int items)
+    {
+        if (Navigation.Repeating)
+        {
+            return;
+        }
+
+        UIGroup? arrow = items < 0 ? arrowUp : arrowDown;
+        arrow?.animator?.Play("arrow");
+    }
+
     public void CommitPage()
     {
         // Write every item on the page, not just the changed one: a "master" item's action can
@@ -292,76 +332,57 @@ internal class ConfigList : UIScrollItemsGroup, IUIItemSource
         RefreshValues();
     }
 
-    //editing takes focus: up and down mean something else, and escape must stop editing before going back
-    private void StartEditing()
-    {
-        SetEditing(true);
-        UIFocus.Push(editor);
-    }
-
-    private void StopEditing()
-    {
-        UIFocus.Pop(editor);
-        SetEditing(false);
-    }
-
-    private void SetEditing(bool value)
-    {
-        editing = value;
-
-        if (SelectedRow is { } row)
-        {
-            row.IsEditing = value;
-        }
-    }
-
     private void ChangeValue(bool increase)
     {
-        if (CurrentItem == null)
+        CItemBase? item = CurrentItem;
+
+        if (item == null)
         {
             return;
         }
 
         if (increase)
         {
-            CurrentItem.tMoveItemValueToNext();
+            item.tMoveItemValueToNext();
         }
         else
         {
-            CurrentItem.tMoveItemValueToPrevious();
+            item.tMoveItemValueToPrevious();
         }
+
+        if (!valueNavigation.Repeating)
+        {
+            UIGroup? arrow = increase ? arrowRight : arrowLeft;
+            arrow?.animator?.Play("arrow");
+        }
+
+        item.action?.Invoke();
 
         CommitPage();
-        CDTXMania.Skin.soundCursorMovement.tPlay();
+        CDTXMania.Skin.soundChange.tPlay();
     }
 
-    /// <summary>
-    /// Holds input while a row's value is being changed. The drums deliberately run the other way round —
-    /// HT decreases and LT increases — because hitting the right-hand tom to raise a value is what reads
-    /// as natural on a kit.
-    /// </summary>
-    private sealed class ConfigItemEditor(ConfigList list) : IUIInputHandler
+    /// <summary>Whether left and right change this row, as opposed to it running an action.</summary>
+    private static bool StepsByArrows(CItemBase item) => item.eType == CItemBase.EType.Integer
+                                                         || item.eType == CItemBase.EType.Float
+                                                         || item.eType == CItemBase.EType.List
+                                                         || item.eType == CItemBase.EType.切替リスト
+                                                         || item.eType == CItemBase.EType.ONorOFFToggle
+                                                         || item.eType == CItemBase.EType.ONorOFForUndefined3State;
+
+    public override void HandleInput()
     {
-        private readonly NavigationRepeat navigation = new();
-        private readonly Action increase = () => list.ChangeValue(true);
-        private readonly Action decrease = () => list.ChangeValue(false);
-
-        public string FocusName => $"editing {list.CurrentItem?.strItemName}";
-
-        public NavigationRepeat? Navigation => navigation;
-
-        public void HandleInput()
+        if (CurrentItem != null && StepsByArrows(CurrentItem))
         {
-            if (CDTXMania.Input.ActionCancel() || CDTXMania.Input.ActionDecide())
-            {
-                CDTXMania.Skin.soundDecide.tPlay();
-                list.StopEditing();
-                return;
-            }
+            //whichever of the neck and the strum moves the selection, the value takes the other one
+            UIGuitarNavigation guitar = CDTXMania.ConfigIni.bStrumScrollsMenus
+                ? UIGuitarNavigation.Neck
+                : UIGuitarNavigation.Strum;
 
-            navigation.Poll(UINavigationAxis.Vertical, UIGuitarNavigation.Default,
-                increase, decrease, decrease, increase);
+            valueNavigation.Poll(UINavigationAxis.Horizontal, guitar, decreaseValue, increaseValue);
         }
+
+        base.HandleInput();
     }
 
     #endregion
@@ -378,49 +399,50 @@ internal class ConfigList : UIScrollItemsGroup, IUIItemSource
             cursor.isVisible = active;
         }
 
-        if (arrowTop != null)
+        if (arrowUp != null)
         {
-            arrowTop.isVisible = active;
+            arrowUp.isVisible = active;
         }
 
-        if (arrowBottom != null)
+        if (arrowDown != null)
         {
-            arrowBottom.isVisible = active;
+            arrowDown.isVisible = active;
+        }
+
+        bool steps = active && CurrentItem != null && StepsByArrows(CurrentItem);
+
+        if (arrowLeft != null)
+        {
+            arrowLeft.isVisible = steps;
+        }
+
+        if (arrowRight != null)
+        {
+            arrowRight.isVisible = steps;
+        }
+
+        CItemTextInput? textInput = CurrentItem as CItemTextInput;
+        bool typing = textInput != null && textInput.drawableTextInput.IsActive;
+        ConfigRowData? selected = SelectedRow;
+
+        //the field has just saved its value
+        if (textInput != null && selected != null && selected.IsEditing && !typing)
+        {
+            selected.RefreshValue();
+        }
+
+        foreach (ConfigRowData row in rows)
+        {
+            row.IsEditing = ReferenceEquals(row, selected) && (steps || typing);
         }
 
         base.Draw(parentMatrix);
 
-        DrawTextInput(parentMatrix);
-    }
-
-    //a text input belongs to its item, and only the selected row can be typing in one
-    private void DrawTextInput(Matrix4x4 parentMatrix)
-    {
-        if (CurrentItem is not CItemTextInput textInput)
+        if (textInput != null && typing)
         {
-            return;
+            textInput.drawableTextInput.position = SelectedPosition + ValueOffset;
+            textInput.drawableTextInput.Draw(localTransformMatrix * parentMatrix);
         }
-
-        bool typing = textInput.drawableTextInput.IsActive;
-
-        if (SelectedRow is { } row)
-        {
-            //what the field committed is the row's to show again
-            if (row.IsEditing && !typing)
-            {
-                row.RefreshValue();
-            }
-
-            row.IsEditing = typing;
-        }
-
-        if (!typing)
-        {
-            return;
-        }
-
-        textInput.drawableTextInput.position = SelectedPosition + ValueOffset;
-        textInput.drawableTextInput.Draw(localTransformMatrix * parentMatrix);
     }
 
     //the panel behind a row, its name, and its value in one style or the other
@@ -458,6 +480,9 @@ internal class ConfigList : UIScrollItemsGroup, IUIItemSource
         UIText edited = AddValueText(root, "ValueEdited", Color4.White, "Item.ShowEditedValue");
         edited.outlineColor = Color4.FromColor(Color.OrangeRed);
         edited.outlineWidth = 4;
+
+        //the outline grows the glyphs downwards, so the text sits where the plain one does
+        edited.position.Y -= 4;
 
         return root;
     }

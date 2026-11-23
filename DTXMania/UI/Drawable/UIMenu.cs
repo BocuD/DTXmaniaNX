@@ -84,7 +84,7 @@ public class UIMenu : UIItemsGroup, IUIItemSource
         SelectedItem = selection;
     }
 
-    protected override void OnSelectionMoved()
+    protected override void OnSelectionMoved(int items)
     {
         if (SelectedEntry is { } entry)
         {
