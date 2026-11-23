@@ -94,7 +94,7 @@ public sealed class PerformanceStats
     {
         get
         {
-            int y = Stage?.nJudgeLinePosY[Slot] ?? 0;
+            int y = Stage?.nJudgeLinePosY[Slot] ?? judgeLineY;
 
             if (Player != EPlayer.Drums)
             {
@@ -123,11 +123,20 @@ public sealed class PerformanceStats
 
     private bool IsReversed => CDTXMania.ConfigIni.bReverse[Slot];
 
-    [DataField] public bool ShowsPanel => CDTXMania.ConfigIni.nInfoType == 1 && IsPlayed && !HiddenBesideTheOther;
+    [DataField] public bool ShowsPanel => CDTXMania.ConfigIni.nInfoType == 1 && !previewing && IsPlayed && !HiddenBesideTheOther;
 
-    [DataField] public bool HasLane => IsPlayed && (Player == EPlayer.Drums || (CDTXMania.DTX?.bHasChips[(int)Part] ?? false));
+    //a preview shows the lanes whatever the chart has, since the lanes are what is being set up
+    [DataField] public bool HasLane => previewing
+                                       || (IsPlayed && (Player == EPlayer.Drums || (CDTXMania.DTX?.bHasChips[(int)Part] ?? false)));
 
-    private bool IsPlayed => Player == EPlayer.Drums ? Stage is CStagePerfDrumsScreen : Stage is CStagePerfGuitarScreen;
+    [DataField] public bool ShowsGauge => HasLane && !previewing;
+
+    public bool previewing;
+
+    public int judgeLineY;
+
+    private bool IsPlayed => previewing
+                             || (Player == EPlayer.Drums ? Stage is CStagePerfDrumsScreen : Stage is CStagePerfGuitarScreen);
 
     //cached per song
     private object? songValuesFor;

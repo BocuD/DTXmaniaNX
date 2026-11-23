@@ -10,17 +10,28 @@ internal sealed class GameplayConfigPage : ConfigPage
     {
     }
 
+    internal static CItemInteger RiskyItem() => Integer("Risky", 0, 10,
+        "設定した回数分\nミスをすると、強制的に\nSTAGE FAILEDになります。",
+        "Risky mode:\nNumber of mistakes (Poor/Miss) before getting STAGE FAILED.\nSet 0 to disable Risky mode.",
+        () => CDTXMania.ConfigIni.nRisky, v => CDTXMania.ConfigIni.nRisky = v);
+
+    internal static CItemInteger PlaySpeedItem()
+    {
+        CItemInteger item = Integer("PlaySpeed", CConstants.PLAYSPEED_MIN, CConstants.PLAYSPEED_MAX,
+            "曲の演奏速度を、速くしたり\n遅くしたりすることができます。",
+            "Change the song speed.\nFor example, set PlaySpeed = 0.500 for half speed.\nNote: It also changes the song's pitch.",
+            () => CDTXMania.ConfigIni.nPlaySpeed, v => CDTXMania.ConfigIni.nPlaySpeed = v);
+
+        //a decimal multiplier, value / 20
+        item.formatValue = () => (item.nCurrentValue / 20.0).ToString("0.000");
+        return item;
+    }
+
     public override List<CItemBase> Build()
     {
         List<CItemBase> items = [];
 
-        CItemInteger risky = new("Risky", 0, 10, CDTXMania.ConfigIni.nRisky,
-            "設定した回数分\nミスをすると、強制的に\nSTAGE FAILEDになります。",
-            "Risky mode:\nNumber of mistakes (Poor/Miss) before getting STAGE FAILED.\nSet 0 to disable Risky mode.");
-        risky.BindConfig(
-            () => risky.nCurrentValue = CDTXMania.ConfigIni.nRisky,
-            () => CDTXMania.ConfigIni.nRisky = risky.nCurrentValue);
-        items.Add(risky);
+        items.Add(RiskyItem());
 
         CItemList damageLevel = new("DamageLevel", CItemBase.EPanelType.Normal, (int)CDTXMania.ConfigIni.eDamageLevel,
             "Miss時のゲージの減少度合い\nを指定します。\nRisky時は無効となります",
@@ -31,15 +42,7 @@ internal sealed class GameplayConfigPage : ConfigPage
             () => CDTXMania.ConfigIni.eDamageLevel = (EDamageLevel)damageLevel.nCurrentlySelectedIndex);
         items.Add(damageLevel);
 
-        CItemInteger playSpeed = new("PlaySpeed", CConstants.PLAYSPEED_MIN, CConstants.PLAYSPEED_MAX, CDTXMania.ConfigIni.nPlaySpeed,
-            "曲の演奏速度を、速くしたり\n遅くしたりすることができます。",
-            "Change the song speed.\nFor example, set PlaySpeed = 0.500 for half speed.\nNote: It also changes the song's pitch.");
-        playSpeed.BindConfig(
-            () => playSpeed.nCurrentValue = CDTXMania.ConfigIni.nPlaySpeed,
-            () => CDTXMania.ConfigIni.nPlaySpeed = playSpeed.nCurrentValue);
-        // displayed as a decimal multiplier (value / 20), matching the old renderer's special case
-        playSpeed.formatValue = () => (playSpeed.nCurrentValue / 20.0).ToString("0.000");
-        items.Add(playSpeed);
+        items.Add(PlaySpeedItem());
 
         CItemList skillMode = new("SkillMode", CItemBase.EPanelType.Normal, CDTXMania.ConfigIni.nSkillMode,
             "達成率、スコアの計算方法を変更します。\nCLASSIC:V6までのスコア計算とV8までの\nランク計算です。\nXG:XGシリーズの達成率計算とV7以降の\nスコア計算です。",

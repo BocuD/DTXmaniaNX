@@ -47,7 +47,7 @@ public class GuitarPlayfield : Playfield
     //the judgement text numbers guitar 13 and bass 14
     private int judgementLane;
 
-    private int SlotX => player == EPlayer.Guitar2 ? 870 : 0;
+    internal int SlotX => player == EPlayer.Guitar2 ? 870 : 0;
 
     internal void StartFire(int lane, CChip chip)
     {
@@ -79,7 +79,11 @@ public class GuitarPlayfield : Playfield
 
         AddLegacyPart("LaneFlush", CStagePerfCommonScreen.LegacyLanesLayer, probeLanes, origin => laneFlush.Draw(origin, player));
         AddLegacyPart("WailingBonus", CStagePerfCommonScreen.LegacyLanesLayer, probeLanes, origin => wailingBonus.Draw(origin, player, SlotX));
-        AddLegacyPart("ProgressBar", CStagePerfCommonScreen.LegacyLanesLayer, probeLanes, origin => progressBar.Draw(origin, part, part));
+
+        if (!previewing)
+        {
+            AddLegacyPart("ProgressBar", CStagePerfCommonScreen.LegacyLanesLayer, probeLanes, origin => progressBar.Draw(origin, part, part));
+        }
 
         loopMarkers = AddPart(new LoopMarkers(), "LoopMarkers", CStagePerfCommonScreen.ChipsLayer);
         loopMarkers.size.Y = 720;
@@ -182,7 +186,7 @@ public class GuitarPlayfield : Playfield
         PerformanceElement status = Add(root, new PerformanceStatusPanel(EPlayer.Guitar1), "Status", 373, 254, CStagePerfCommonScreen.PanelLayer, "Stats.ShowsPanel");
         status.bindings.Add(OnRightSide("position.X", -205, 373));
 
-        Add(root, new PerformanceGauge(EPlayer.Guitar1), "Gauge", 79, 0, CStagePerfCommonScreen.PanelLayer, "Stats.HasLane");
+        Add(root, new PerformanceGauge(EPlayer.Guitar1), "Gauge", 79, 0, CStagePerfCommonScreen.PanelLayer, "Stats.ShowsGauge");
         return root;
     }
 

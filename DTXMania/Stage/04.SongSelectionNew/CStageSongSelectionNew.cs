@@ -281,8 +281,8 @@ public class CStageSongSelectionNew : CStage
         QuickMenu menu = ui.AddChild(new QuickMenu());
         menu.renderOrder = 15;
         menu.isVisible = false;
-        menu.pivot = UICanvas.Center;
-        menu.parentAnchor = UICanvas.Center;
+        menu.pivot = UICanvas.Left;
+        menu.parentAnchor = UICanvas.Left;
         menu.position = Vector3.Zero;
     }
 

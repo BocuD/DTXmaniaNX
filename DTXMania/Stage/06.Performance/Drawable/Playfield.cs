@@ -11,7 +11,10 @@ namespace DTXMania;
 public abstract class Playfield : UIGroup
 {
     protected EInstrumentPart part;
-    
+
+    //leaves out the progress bar and the status panel
+    protected bool previewing => stats.previewing;
+
     protected readonly PerformanceStats stats = new();
     private readonly UIDataContext data = new();
 
@@ -25,8 +28,8 @@ public abstract class Playfield : UIGroup
     private ChipTimeline? timeline;
 
     //activities the stage keeps alive, drawn here because they belong to this player
-    private CActPerfCommonScore score = null!;
-    private CActPerfCommonCombo combo = null!;
+    private CActPerfCommonScore? score;
+    private CActPerfCommonCombo? combo;
     internal CActPerfProgressBar progressBar = null!;
     internal CActPerfCommonJudgementString judgements = null!;
 
@@ -54,7 +57,15 @@ public abstract class Playfield : UIGroup
 
     internal ScoreDisplay Score => scoreDisplay;
 
-    internal void SetParts(CActPerfCommonScore playerScore, CActPerfCommonCombo playerCombo,
+    public override void Draw(Matrix4x4 parentMatrix)
+    {
+        stats.judgeLineY = JudgeLineY;
+        base.Draw(parentMatrix);
+    }
+
+    internal void Preview() => stats.previewing = true;
+
+    internal void SetParts(CActPerfCommonScore? playerScore, CActPerfCommonCombo? playerCombo,
         CActPerfProgressBar bar, CActPerfCommonJudgementString judgementStrings)
     {
         score = playerScore;
@@ -144,6 +155,12 @@ public abstract class Playfield : UIGroup
 
     protected void SetUpScore(float scoreX, float comboX)
     {
+        if (score == null || combo == null)
+        {
+            scoreDisplay.isVisible = false;
+            return;
+        }
+
         scoreDisplay.Setup(score, combo, Player, scoreX, comboX);
     }
 

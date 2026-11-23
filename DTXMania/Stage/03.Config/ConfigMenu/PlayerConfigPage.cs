@@ -159,6 +159,18 @@ internal abstract class PlayerConfigPage : ConfigPage
         return graph;
     }
 
+    protected CItemList AutoGhostItem() => Choice("AUTO Ghost",
+        "AUTOプレーのゴーストを指定します。", "Which ghost data AUTO plays back.",
+        ["Perfect", "Last Play", "Hi Skill", "Hi Score"],
+        () => (int)CDTXMania.ConfigIni.eAutoGhost[Idx],
+        v => CDTXMania.ConfigIni.eAutoGhost[Idx] = (EAutoGhostData)v);
+
+    protected CItemList TargetGhostItem() => Choice("Target Ghost",
+        "ターゲットゴーストを指定します。", "Which ghost data to aim at.",
+        ["None", "Perfect", "Last Play", "Hi Skill", "Hi Score"],
+        () => (int)CDTXMania.ConfigIni.eTargetGhost[Idx],
+        v => CDTXMania.ConfigIni.eTargetGhost[Idx] = (ETargetGhostData)v);
+
     // ---- shared items used by Guitar/Bass only ----
 
     protected CItemToggle LightItem() => Toggle("Light",

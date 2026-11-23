@@ -82,7 +82,11 @@ public class DrumsPlayfield : Playfield
         ApplyChart();
 
         AddLegacyPart("LaneFlush", CStagePerfCommonScreen.LegacyLanesLayer, probeLanes, origin => laneFlush.Draw(origin));
-        AddLegacyPart("ProgressBar", CStagePerfCommonScreen.LegacyLanesLayer, probeLanes, origin => progressBar.Draw(origin, part, part));
+        if (!previewing)
+        {
+            AddLegacyPart("ProgressBar", CStagePerfCommonScreen.LegacyLanesLayer, probeLanes, origin => progressBar.Draw(origin, part, part));
+        }
+
         AddLegacyPart("JudgementStrings", CStagePerfCommonScreen.LegacyOverlayLayer, probeJudgement, origin => judgements.DrawAll(origin));
         SetUpScore(0, 0);
 
@@ -204,7 +208,7 @@ public class DrumsPlayfield : Playfield
         //2d version
         status.position = new Vector3(14, 237, 0);
 
-        PerformanceElement gauge = Add(root, new PerformanceGauge(EPlayer.Drums), "Gauge", 296, 626, CStagePerfCommonScreen.PanelLayer, "Stats.HasLane");
+        PerformanceElement gauge = Add(root, new PerformanceGauge(EPlayer.Drums), "Gauge", 296, 626, CStagePerfCommonScreen.PanelLayer, "Stats.ShowsGauge");
         gauge.bindings.Add(new UIBinding("position.Y", "Config.Reverse.Drums")
         {
             condition = BindingCondition.IsTrue, whenTrue = 28, whenFalse = 626

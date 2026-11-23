@@ -29,6 +29,8 @@ public class QuickMenu : UIGroup
     //part of the component, so the clip addresses them by name and a skin can move them
     private ConfigList? list;
     private ConfigDescriptionPanel? description;
+    private ConfigPlayfieldPreview? preview;
+    private UIQuad? dim;
 
     private bool isClosing;
 
@@ -42,6 +44,8 @@ public class QuickMenu : UIGroup
     {
         list = FindChild<ConfigList>();
         description = FindChild<ConfigDescriptionPanel>();
+        preview = FindChild<ConfigPlayfieldPreview>();
+        dim = FindChild<UIQuad>();
 
         if (list == null)
         {
@@ -50,12 +54,11 @@ public class QuickMenu : UIGroup
 
         list.onExitRoot = ToggleMenu;
 
-        QuickConfigPlayerSwitcher switcher = new(list, pages);
-        pages[0] = new QuickMenuPage(list, EPlayer.Drums, switcher);
-        pages[1] = new QuickMenuPage(list, EPlayer.Guitar1, switcher);
-        pages[2] = new QuickMenuPage(list, EPlayer.Guitar2, switcher);
+        pages[0] = new QuickMenuPage(list, EPlayer.Drums);
+        pages[1] = new QuickMenuPage(list, EPlayer.Guitar1);
+        pages[2] = new QuickMenuPage(list, EPlayer.Guitar2);
 
-        list.SetItems(pages[CDTXMania.GetCurrentInstrument()].Build());
+        list.OpenRoot(pages[CDTXMania.GetCurrentInstrument()]);
     }
 
     /// <summary>The gesture that opens and closes the menu. Polled by the stage whatever holds focus,
@@ -91,7 +94,15 @@ public class QuickMenu : UIGroup
         {
             isVisible = true;
             isClosing = false;
-            list.SetItems(pages[CDTXMania.GetCurrentInstrument()].Build(), 0);
+            EPlayer player = (EPlayer)CDTXMania.GetCurrentInstrument();
+            list.OpenRoot(pages[(int)player]);
+
+            if (preview != null)
+            {
+                preview.chartPath = SelectedChartPath();
+                preview.Show(player);
+            }
+
             UIFocus.Push(list);
             animator?.Play(OpenClip);
             return;
@@ -101,14 +112,56 @@ public class QuickMenu : UIGroup
         //writes it out the way leaving the main config screen does
         isClosing = true;
         UIFocus.Pop(list);
+        preview?.Show(null);
         animator?.Play(CloseClip);
 
         CDTXMania.ConfigIni.tWrite(CDTXMania.executableDirectory + "Config.ini");
     }
 
+    //the chart the player is looking at, or none when the cursor is on a folder
+    private static string? SelectedChartPath()
+    {
+        CStageSongSelectionNew? select = CDTXMania.StageManager?.rCurrentStage as CStageSongSelectionNew;
+
+        //ForCurrentInstrument is what deciding on a song does, so the preview plays what Enter would
+        return select?.selectedChart?.ForCurrentInstrument().FileInformation.AbsoluteFilePath;
+    }
+
+    //what the canvas is wide decides whether the playfield has to move over at all. The menu hangs off
+    //the left edge, so its own coordinates are canvas coordinates across
+    private void LayoutForCanvas()
+    {
+        Vector2 canvas = UICanvas.canvasSize;
+        float designLeft = (canvas.X - UICanvas.logicalSize.X) / 2f;
+
+        if (dim != null)
+        {
+            dim.position = new Vector3(0, -canvas.Y / 2f, 0);
+            dim.size = canvas;
+        }
+
+        if (preview == null)
+        {
+            return;
+        }
+
+        preview.position = new Vector3(designLeft, -UICanvas.logicalSize.Y / 2f, 0);
+
+        //drums reach from 296, and the list ends where its rows end
+        float listRight = (list != null ? list.position.X : 0) + ListWidth;
+        float lanesLeft = designLeft + DrumsLanesLeft;
+        preview.drumsX = MathF.Max(0, listRight + ListGap - lanesLeft);
+
+        if (description != null)
+        {
+            description.position.X = lanesLeft + preview.drumsX - DescriptionWidth - ListGap;
+        }
+    }
+
     public override void Draw(Matrix4x4 parentMatrix)
     {
         EnsureContent();
+        LayoutForCanvas();
 
         //the close animation decides when the menu is actually gone
         if (isClosing && animator is { isPlaying: false })
@@ -142,28 +195,30 @@ public class QuickMenu : UIGroup
         ConfigList list = root.AddChild(new ConfigList(20, 8));
         list.name = "List";
 
+        //drums are wide, so they sit right of the list. Guitar has room to be centred
+        ConfigPlayfieldPreview preview = root.AddChild(new ConfigPlayfieldPreview());
+        preview.name = "Preview";
+        preview.drumsX = 190;
+        preview.guitarX = 455;
+        preview.renderOrder = -1;
+
         //position is relative to the centre-anchored menu
         ConfigDescriptionPanel description = root.AddChild(new ConfigDescriptionPanel());
         description.name = "Description";
         description.position = new Vector3(141 - 400, -138, 0);
         description.renderOrder = 1;
 
-        var dimCover = root.AddChild(new UICoverGroup("Dim")
+        root.AddChild(new UIQuad
         {
-            renderOrder = -1
-        });
-        
-        dimCover.AddChild(new UIQuad
-        {
+            name = "Dim",
             color = Color4.Black,
-            size = new UISize() {xMode = UiSizeMode.Inherit, yMode = UiSizeMode.Inherit},
-            pivot = new Vector2(0.5f, 0.5f)
+            renderOrder = -2
         });
 
         //where the list ends up is the open clip's last keyframe, so a skin moves the menu by moving that
         root.animator = new Animator();
-        root.animator.Add(Slide(OpenClip, from: -1000.0f, to: -600.0f, fadeTo: 0.8f));
-        root.animator.Add(Slide(CloseClip, from: -600.0f, to: -1000.0f, fadeTo: 0.0f));
+        root.animator.Add(Slide(OpenClip, from: -400.0f, to: 40.0f, fadeTo: 0.8f));
+        root.animator.Add(Slide(CloseClip, from: 40.0f, to: -400.0f, fadeTo: 0.0f));
 
         return root;
     }
@@ -174,13 +229,18 @@ public class QuickMenu : UIGroup
 
         clip.tracks.Add(Track("List/position.X", from, to));
         clip.tracks.Add(Track("List/position.Y", -200.0f, -200.0f));
-        clip.tracks.Add(Track("Dim/tint.Alpha", 0.8f - fadeTo, fadeTo));
+        clip.tracks.Add(Track("Dim/color.Alpha", 0.8f - fadeTo, fadeTo));
         clip.tracks.Add(Track("List/tint.Alpha", 0, 1));
 
         return clip;
     }
 
     private const float Duration = 0.1f;
+
+    private const float ListWidth = 437;
+    private const float ListGap = 20;
+    private const float DrumsLanesLeft = 296;
+    private const float DescriptionWidth = 280;
 
     private static AnimationTrack Track(string path, float from, float to)
     {

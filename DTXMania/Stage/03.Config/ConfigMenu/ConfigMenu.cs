@@ -13,9 +13,9 @@ internal class ConfigMenu
     private readonly ConfigList list;
 
     private readonly SystemConfigPage system;
-    private readonly DrumsConfigPage drums;
-    private readonly GuitarStyleConfigPage guitar;
-    private readonly GuitarStyleConfigPage bass;
+    private readonly InstrumentConfigPage drums;
+    private readonly InstrumentConfigPage guitar;
+    private readonly InstrumentConfigPage bass;
 
     // pages that participate in apply-on-exit / initial-state snapshotting
     private readonly List<ConfigPage> pages;
@@ -32,9 +32,9 @@ internal class ConfigMenu
         SongDbConfigPage songDb = new(list);
         system = new SystemConfigPage(list, graphics, skin, audio, gameplay, menu, songDb);
 
-        drums = new DrumsConfigPage(list);
-        guitar = new GuitarStyleConfigPage(list, EPlayer.Guitar1);
-        bass = new GuitarStyleConfigPage(list, EPlayer.Guitar2);
+        drums = new InstrumentConfigPage(list, EPlayer.Drums);
+        guitar = new InstrumentConfigPage(list, EPlayer.Guitar1);
+        bass = new InstrumentConfigPage(list, EPlayer.Guitar2);
 
         pages = [system, graphics, skin, audio, gameplay, menu, songDb];
 

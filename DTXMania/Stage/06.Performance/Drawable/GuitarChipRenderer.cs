@@ -47,7 +47,7 @@ public class GuitarChipRenderer : ChipRenderer
         int index = slot;
         bool reverse = config.bReverse[index];
         bool showsLines = config.nLaneDisp[index] == 0 || config.nLaneDisp[index] == 1;
-        bool hasChips = CDTXMania.DTX.bHasChips[(int)part];
+        bool hasChips = CDTXMania.DTX != null && CDTXMania.DTX.bHasChips[(int)part];
 
         if (firstChip >= 0)
         {

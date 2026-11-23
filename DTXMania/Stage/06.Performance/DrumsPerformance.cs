@@ -90,7 +90,7 @@ internal class DrumsPerformance
 
     public static int LaneOf(CChip chip) => ChannelLanes[chip.nChannelNumber - EChannel.HiHatClose];
 
-    private static int PadOf(CChip chip) => ChannelPads[chip.nChannelNumber - EChannel.HiHatClose];
+    public static int PadOf(CChip chip) => ChannelPads[chip.nChannelNumber - EChannel.HiHatClose];
 
     private bool IsAuto(CChip chip) => auto[LaneOf(chip)];
 

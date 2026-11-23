@@ -5,7 +5,7 @@ using DTXMania.UI.Item;
 namespace DTXMania;
 
 //Shared (STDGBVALUE-backed) options come from PlayerConfigPage
-internal sealed class DrumsConfigPage : PlayerConfigPage
+internal sealed class DrumsOptionsPage : InstrumentOptionsPage
 {
     private readonly DrumsLaneConfigPage lanes;
     private readonly DrumsDisplayConfigPage display;
@@ -13,7 +13,7 @@ internal sealed class DrumsConfigPage : PlayerConfigPage
     private readonly DrumsHitSoundConfigPage hitSounds;
     private readonly DrumsVelocityConfigPage velocity;
 
-    public DrumsConfigPage(ConfigList list) : base(list, EPlayer.Drums)
+    public DrumsOptionsPage(ConfigList list) : base(list, EPlayer.Drums)
     {
         lanes = new DrumsLaneConfigPage(list);
         display = new DrumsDisplayConfigPage(list);
@@ -52,11 +52,6 @@ internal sealed class DrumsConfigPage : PlayerConfigPage
     {
         List<CItemBase> items = [];
 
-        items.Add(BackItem());
-
-        items.Add(CreateCardNameInputItem());
-        items.Add(CreateGroupNameInputItem());
-
         items.Add(ScrollSpeedItem());
         items.Add(HidSudItem());
         items.Add(ReverseItem("判定ラインが上になり、ノーツが下から上へ流れます。", "Chips flow from the bottom to the top."));
@@ -76,6 +71,9 @@ internal sealed class DrumsConfigPage : PlayerConfigPage
         items.Add(RandomPedalItem());
         AddAutoPlayBlock(items, AutoLanes());
 
+        items.Add(AutoGhostItem());
+        items.Add(TargetGhostItem());
+
         items.Add(FolderItem("Lane Options",
             "レーンの種類と配置に関する項目を設定します。",
             "Open the lane layout sub menu.", lanes));
@@ -92,10 +90,6 @@ internal sealed class DrumsConfigPage : PlayerConfigPage
         items.Add(FolderItem("Drum Hit Velocity",
             "ドラムのヒットベロシティに関する項目を設定します。",
             "Settings for the drums hit velocity.", velocity));
-
-        items.Add(FolderItem("Key Assignment",
-            "ドラムのキー割り当てを設定します。",
-            "Assign keys/pads for the drums.", KeyAssignPage.ForDrums(list)));
 
         return items;
     }
