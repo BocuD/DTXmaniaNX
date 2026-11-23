@@ -740,7 +740,7 @@ public class CStageSongSelectionNew : CStage
     private Dictionary<SongDbSort, SongNode> sortCache = new();
     private int lastInstrument;
     private SongDb.SongDb? lastSongDb;
-    public bool isScrolling => selectionContainer.isScrolling;
+    public bool isScrolling => !selectionContainer.IsSettled;
 
     public void ApplySort(SongDbSort sorter)
     {

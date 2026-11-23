@@ -117,8 +117,7 @@ public sealed class UIItemSlot : UIGroup
 /// Shows a component once per item, each copy carrying its own <c>"Item"</c> data context: the list owns
 /// the repetition, the component owns the look, and the item's fields drive the content.
 ///
-/// The item count comes from the <see cref="IUIItemSource"/> a behaviour class attaches, or from
-/// <see cref="itemCount"/> for a list placed by hand in a layout.
+/// The items come from the <see cref="IUIItemSource"/> a behaviour class attaches.
 /// </summary>
 public class UIItemsGroup : UIGroup, IUIInputHandler
 {
@@ -136,14 +135,10 @@ public class UIItemsGroup : UIGroup, IUIInputHandler
         ? Vector3.Normalize(itemOffset)
         : Vector3.UnitY;
 
-    //used only when no source is attached, i.e. a list placed by hand
-    [Themable] public int itemCount;
-
     //builds one item until a skin has a file of its own
     [JsonIgnore] public Func<UIGroup>? itemComponentSource;
 
-    //where the list starts; a scrolling list takes the selection from its ring instead
-    [Themable] public int selectedItem;
+    [JsonIgnore] private int selectedItem;
 
     //whether moving past either end comes back round; a short menu of distinct choices usually should not
     [Themable] public bool wrapSelection = true;
@@ -220,7 +215,7 @@ public class UIItemsGroup : UIGroup, IUIInputHandler
 
     protected IReadOnlyList<UIItemSlot> Slots => slots;
 
-    protected int SourceCount => Source?.ItemCount ?? itemCount;
+    protected int SourceCount => Source?.ItemCount ?? 0;
 
     //the owner is the list itself or one of its ancestors, so the list finds it once rather than being
     //handed it after the tree has loaded
@@ -523,14 +518,6 @@ public class UIItemsGroup : UIGroup, IUIInputHandler
         Inspector.Inspector.Inspect("Navigation Axis", ref navigationAxis);
         Inspector.Inspector.Inspect("Guitar Navigation", ref guitarNavigation);
 
-        ImGui.BeginDisabled(Source != null);
-        if (ImGui.InputInt("Item Count", ref itemCount))
-        {
-            itemCount = Math.Max(0, itemCount);
-        }
-
-        ImGui.EndDisabled();
-
-        ImGui.LabelText("Items", Source != null ? $"{SourceCount} (from code)" : SourceCount.ToString());
+        ImGui.LabelText("Items", SourceCount.ToString());
     }
 }

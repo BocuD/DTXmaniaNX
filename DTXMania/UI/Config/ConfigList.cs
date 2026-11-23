@@ -28,18 +28,11 @@ internal class ConfigList : UIScrollItemsGroup, IUIItemSource
 
     private readonly List<ConfigRowData> rows = [];
 
-    //found once the component has loaded, rather than built here: a class that adds children of its own
-    //cannot be loaded from a layout without ending up with both sets
-    private UIImage? cursor;
-    private UIGroup? arrowUp;
-    private UIGroup? arrowDown;
-    private UIGroup? arrowLeft;
-    private UIGroup? arrowRight;
+    //found once the component has loaded using GetChild<T>
+    private UIGroup? cursor;
+    private UIGroup? valueArrows;
 
-    //its own counters, so holding left or right does not take the repeats meant for up and down
-    private readonly NavigationRepeat valueNavigation = new();
-
-    //made once: a lambda per polled frame would allocate
+    //made once to avoid allocation
     private readonly Action increaseValue;
     private readonly Action decreaseValue;
 
@@ -112,11 +105,8 @@ internal class ConfigList : UIScrollItemsGroup, IUIItemSource
 
     protected override void OnContentLoaded()
     {
-        cursor = GetChild<UIImage>("Cursor");
-        arrowUp = GetChild<UIGroup>("ArrowUp");
-        arrowDown = GetChild<UIGroup>("ArrowDown");
-        arrowLeft = GetChild<UIGroup>("ArrowLeft");
-        arrowRight = GetChild<UIGroup>("ArrowRight");
+        cursor = GetChild<UIGroup>("Cursor");
+        valueArrows = GetChild<UIGroup>("ValueArrows");
     }
 
     //every settings list shares this, so the quick menu and the config screen are styled together
@@ -124,21 +114,23 @@ internal class ConfigList : UIScrollItemsGroup, IUIItemSource
     {
         UIGroup root = new("ConfigListCursor");
 
-        root.AddChild(new UIImage
+        UIGroup cursor = root.AddChild(new UIGroup("Cursor") { renderOrder = 1 });
+
+        cursor.AddChild(new UIImage
         {
-            name = "Cursor",
+            name = "Box",
             imageSource = ImageSource.File,
             image = SkinResource.System(@"Graphics\4_itembox cursor.png"),
             size = new Vector2(444, 67),
-            position = new Vector3(-7, 4, 0),
-            renderOrder = 1
+            position = new Vector3(-7, 4, 0)
         });
 
-        root.AddChild(AnimatedArrow("ArrowUp", -6, 5, 0));
-        root.AddChild(AnimatedArrow("ArrowDown", -6, 71, MathF.PI));
-        
-        root.AddChild(AnimatedArrow("ArrowLeft", 238, 39, -MathF.PI / 2));
-        root.AddChild(AnimatedArrow("ArrowRight", 426, 39, MathF.PI / 2));
+        cursor.AddChild(AnimatedArrow("ArrowUp", -6, 5, 0));
+        cursor.AddChild(AnimatedArrow("ArrowDown", -6, 71, MathF.PI));
+
+        UIGroup valueArrows = root.AddChild(new UIGroup("ValueArrows") { renderOrder = 1 });
+        valueArrows.AddChild(AnimatedArrow("ArrowLeft", 238, 39, -MathF.PI / 2));
+        valueArrows.AddChild(AnimatedArrow("ArrowRight", 426, 39, MathF.PI / 2));
 
         return root;
     }
@@ -190,9 +182,6 @@ internal class ConfigList : UIScrollItemsGroup, IUIItemSource
     public object? GetItem(int index) => rows.Count == 0 ? null : rows[Mod(index, rows.Count)];
 
     public CItemBase? CurrentItem => SelectedRow?.Item;
-
-    /// <summary>True once the selection has stopped changing; used to gate the description panel.</summary>
-    public bool IsSettled => !IsScrolling;
 
     /// <summary>Whether this list is the one being driven.</summary>
     public bool IsActive => UIFocus.Holds(this);
@@ -315,8 +304,12 @@ internal class ConfigList : UIScrollItemsGroup, IUIItemSource
             return;
         }
 
-        UIGroup? arrow = items < 0 ? arrowUp : arrowDown;
-        arrow?.animator?.Play("arrow");
+        Pulse(cursor, items < 0 ? "ArrowUp" : "ArrowDown");
+    }
+
+    private static void Pulse(UIGroup? arrows, string arrow)
+    {
+        arrows?.GetChild<UIGroup>(arrow)?.animator?.Play("arrow");
     }
 
     public void CommitPage()
@@ -350,10 +343,9 @@ internal class ConfigList : UIScrollItemsGroup, IUIItemSource
             item.tMoveItemValueToPrevious();
         }
 
-        if (!valueNavigation.Repeating)
+        if (!Navigation.Repeating)
         {
-            UIGroup? arrow = increase ? arrowRight : arrowLeft;
-            arrow?.animator?.Play("arrow");
+            Pulse(valueArrows, increase ? "ArrowRight" : "ArrowLeft");
         }
 
         item.action?.Invoke();
@@ -379,7 +371,7 @@ internal class ConfigList : UIScrollItemsGroup, IUIItemSource
                 ? UIGuitarNavigation.Neck
                 : UIGuitarNavigation.Strum;
 
-            valueNavigation.Poll(UINavigationAxis.Horizontal, guitar, decreaseValue, increaseValue);
+            Navigation.Poll(UINavigationAxis.Horizontal, guitar, decreaseValue, increaseValue);
         }
 
         base.HandleInput();
@@ -399,26 +391,11 @@ internal class ConfigList : UIScrollItemsGroup, IUIItemSource
             cursor.isVisible = active;
         }
 
-        if (arrowUp != null)
-        {
-            arrowUp.isVisible = active;
-        }
-
-        if (arrowDown != null)
-        {
-            arrowDown.isVisible = active;
-        }
-
         bool steps = active && CurrentItem != null && StepsByArrows(CurrentItem);
 
-        if (arrowLeft != null)
+        if (valueArrows != null)
         {
-            arrowLeft.isVisible = steps;
-        }
-
-        if (arrowRight != null)
-        {
-            arrowRight.isVisible = steps;
+            valueArrows.isVisible = steps;
         }
 
         CItemTextInput? textInput = CurrentItem as CItemTextInput;

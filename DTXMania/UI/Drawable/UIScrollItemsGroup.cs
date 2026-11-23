@@ -28,9 +28,6 @@ public class UIScrollItemsGroup : UIItemsGroup
     //how the list travels towards where it has been asked to go; see UIScrollMotion
     [Themable] [SkinSerialize] public UIScrollMotion motion = new();
 
-    //flips which way that input moves the list
-    [Themable] public bool invertNavigation;
-
     //when enabled, places the slots; itemOffset still sets how far one item of distance is
     [Themable] [SkinSerialize] public UIItemLayout itemLayout = new();
 
@@ -58,29 +55,13 @@ public class UIScrollItemsGroup : UIItemsGroup
     //a scrolling list moves by scrolling, which is where the queue limit and the easing live
     protected override void MoveSelection(int items)
     {
-        ScrollBy(items);
+        EnsureRing().Queue(-items * ItemDistance, motion);
         OnSelectionMoved(items);
     }
 
-    /// <summary>
-    /// True while the selection is still going to change, so callers can hold off on work that should
-    /// only happen once the user has settled on an item — loading a preview, say. This goes false while
-    /// the list is still visibly easing, which is deliberate: see <see cref="UIScrollRing.IsSettled"/>.
-    /// </summary>
-    public bool IsScrolling => ring is { IsSettled: false };
-
-    /// <summary>Scrolls by whole items, travelling there over the following frames. Positive moves towards
-    /// later items; how far a held key may run ahead is <see cref="motion"/>'s to decide.
-    /// Honours <see cref="invertNavigation"/>, so callers pass the direction the user asked for.</summary>
-    public void ScrollBy(int items)
-    {
-        if (invertNavigation)
-        {
-            items = -items;
-        }
-
-        EnsureRing().Queue(-items * SpacingAlongAxis, motion);
-    }
+    /// <summary>Whether the selection has stopped changing, eg: to wait before loading a preview.
+    /// Turns true while the list is still easing onto the item; see <see cref="UIScrollRing.IsSettled"/>.</summary>
+    public bool IsSettled => ring == null || ring.IsSettled;
 
     /// <summary>Puts <paramref name="itemIndex"/> under the selection position immediately.</summary>
     public void ScrollTo(int itemIndex)
@@ -90,9 +71,6 @@ public class UIScrollItemsGroup : UIItemsGroup
         RebindAllSlots();
         LayOutSlots();
     }
-
-    //the ring works in whole items along the list's own direction, whichever way that points
-    protected float SpacingAlongAxis => ItemDistance;
 
     /// <summary>Called after the window moved by whole items, so a list can react to the selection
     /// changing. Not called for the sub-item movement in between.</summary>
@@ -176,9 +154,9 @@ public class UIScrollItemsGroup : UIItemsGroup
 
     private UIScrollRing EnsureRing()
     {
-        if (ring == null || ring.SlotCount != Slots.Count || Math.Abs(ring.Spacing - SpacingAlongAxis) > 0.001f)
+        if (ring == null || ring.SlotCount != Slots.Count || Math.Abs(ring.Spacing - ItemDistance) > 0.001f)
         {
-            ring = new UIScrollRing(Math.Max(1, Slots.Count), SpacingAlongAxis);
+            ring = new UIScrollRing(Math.Max(1, Slots.Count), ItemDistance);
             RebindAllSlots();
         }
 
@@ -203,7 +181,6 @@ public class UIScrollItemsGroup : UIItemsGroup
         }
 
         ImGui.InputInt("Selection Offset", ref selectionOffset);
-        ImGui.Checkbox("Invert Navigation", ref invertNavigation);
 
         if (Inspector.Inspector.BeginSection("Motion"))
         {

@@ -582,8 +582,6 @@ public class SongSelectionContainer : UIScrollItemsGroup, IUIItemSource
     private long lruTick;
     private bool disposed;
 
-    public bool isScrolling => IsScrolling;
-
     private static string GetPreImagePath(SongNode node)
     {
         return node.nodeType != SongNode.ENodeType.BACKBOX
