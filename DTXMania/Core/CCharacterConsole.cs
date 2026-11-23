@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System.Numerics;
+using System.Drawing;
 using DTXMania.UI.Drawable;
 using FDK;
 
@@ -22,6 +23,11 @@ internal class CCharacterConsole : CActivity
 
 	public void tPrint( int x, int y, EFontType font, ReadOnlySpan<char> str英数字文字列 )
 	{
+		tPrint( DTXMania.UI.UICanvas.toWindow, x, y, font, str英数字文字列 );
+	}
+
+	public void tPrint( Matrix4x4 origin, int x, int y, EFontType font, ReadOnlySpan<char> str英数字文字列 )
+	{
 		if ( bActivated && !str英数字文字列.IsEmpty )
 		{
 			int BOL = x;
@@ -44,7 +50,7 @@ internal class CCharacterConsole : CActivity
 					{
 						if ( txフォント8x16[ (int) font / (int) EFontType.WhiteThin ] != null )
 						{
-							txフォント8x16[ (int) font / (int) EFontType.WhiteThin ].tDraw2D(x, y, rc文字の矩形領域[ (int) font % (int) EFontType.WhiteThin, index ] );
+							txフォント8x16[ (int) font / (int) EFontType.WhiteThin ].tDraw2D(origin, x, y, rc文字の矩形領域[ (int) font % (int) EFontType.WhiteThin, index ] );
 						}
 						x += nFontWidth;
 					}

@@ -63,7 +63,7 @@ public abstract class CStage : CActivity, IUIInputHandler
 		NOWLOADING_BMP_FILE_READING,
 		NOWLOADING_WAIT_BGM_SOUND_COMPLETION,
 		PERFORMANCE_STAGE_FAILED,
-		PERFORMANCE_STAGE_FAILED_FADEOUT,
+		PERFORMANCE_STAGE_FAILED_END,
 		PERFORMANCE_STAGE_CLEAR,
 		PERFORMANCE_STAGE_RESTART
 	}
@@ -153,9 +153,25 @@ public abstract class CStage : CActivity, IUIInputHandler
 
 	public virtual void FirstUpdate()
 	{
-		
+
 	}
-	
+
+	//every frame before drawing, whether or not anything is drawn
+	public void Update()
+	{
+		if (bJustStartedUpdate)
+		{
+			FirstUpdate();
+			bJustStartedUpdate = false;
+		}
+
+		OnUpdate();
+	}
+
+	public virtual void OnUpdate()
+	{
+	}
+
 	public override int OnUpdateAndDraw()
 	{
 		if (bJustStartedUpdate)
@@ -219,7 +235,7 @@ public abstract class CStage : CActivity, IUIInputHandler
 
 	public NavigationRepeat? Navigation => navigation;
 
-	protected readonly NavigationRepeat navigation = NavigationRepeat.Vertical();
+	protected readonly NavigationRepeat navigation = new();
 
 	/// <summary>
 	/// What this stage hands its input to — usually its menu. Set it and there is nothing else to do; a

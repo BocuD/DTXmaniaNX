@@ -77,7 +77,7 @@ internal sealed class KeyAssignPanel : UIGroup, IUIInputHandler
 
     public NavigationRepeat? Navigation => navigation;
 
-    private readonly NavigationRepeat navigation = NavigationRepeat.Vertical();
+    private readonly NavigationRepeat navigation = new();
 
     //cached so polling navigation every frame doesn't convert the method groups to delegates each time
     private readonly Action moveUp;
@@ -107,7 +107,7 @@ internal sealed class KeyAssignPanel : UIGroup, IUIInputHandler
             DeleteCurrent();
         }
 
-        navigation.Poll(moveUp, moveDown);
+        navigation.Poll(UINavigationAxis.Vertical, UIGuitarNavigation.Default, moveUp, moveDown);
     }
 
     public KeyAssignPanel() : base("KeyAssignPanel")

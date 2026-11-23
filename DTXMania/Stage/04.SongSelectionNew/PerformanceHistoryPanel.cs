@@ -5,11 +5,15 @@ using DTXMania.UI.Drawable;
 using DTXMania.UI.DynamicElements;
 using DTXMania.UI.Skin;
 using DTXMania.UI.Text;
+using DTXMania.UI.Inspector;
 
 namespace DTXMania;
 
 public class PerformanceHistoryPanel : UIGroup, IUIItemSource
 {
+
+    [AddChildMenu("Game/Song Select/Performance History")]
+    public new static UIDrawable Create() => new PerformanceHistoryPanel();
     private const float RowSpacing = 18.0f;
     private const int RowCount = 5;
 

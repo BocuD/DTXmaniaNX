@@ -9,8 +9,8 @@ namespace DTXMania;
 
 public class HoldNote : UIGroup
 {
-    [AddChildMenu]
-    public static HoldNote Create()
+    [AddChildMenu("Game/Performance/Hold Note")]
+    public new static HoldNote Create()
     {
         return new HoldNote();
     }
@@ -22,6 +22,8 @@ public class HoldNote : UIGroup
     public UIImage staticHoldText;
     
     public float clipHeight;
+
+    public bool scrollsUp;
 
     public HoldNote()
     {
@@ -68,10 +70,27 @@ public class HoldNote : UIGroup
             animator.Add(loaded);
         }
         animator.Play("hold");
+
+        animator.Pause();
     }
 
     public override void Draw(Matrix4x4 parentMatrix)
     {
+        float flip = scrollsUp ? -1 : 1;
+        normal.scale.Y = flip;
+        wailing.scale.Y = flip;
+
+        holdText.scale = new Vector3(0.67f * flip, 0.67f * flip, 1);
+        staticHoldText.scale = holdText.scale;
+        holdText.position.Y = -3f * flip;
+        staticHoldText.position.Y = -3f * flip;
+
+        AnimationClip? clip = animator?.currentClip;
+        if (clip != null && clip.duration > 0)
+        {
+            clip.Evaluate(this, PerformanceClock.Seconds % clip.duration);
+        }
+
         normal.clipRect = new RectangleF(0, 0, normal.Texture.Width, clipHeight);
         wailing.clipRect = new RectangleF(0, 0, wailing.Texture.Width, clipHeight);
         

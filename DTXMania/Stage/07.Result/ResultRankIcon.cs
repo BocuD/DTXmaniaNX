@@ -48,13 +48,7 @@ public class ResultRankIcon : UIGroup
 
     private void BuildRankArt()
     {
-        bool allAuto = instrument switch
-        {
-            0 => CDTXMania.ConfigIni.bAllDrumsAreAutoPlay,
-            1 => CDTXMania.ConfigIni.bAllGuitarsAreAutoPlay,
-            2 => CDTXMania.ConfigIni.bAllBassAreAutoPlay,
-            _ => false
-        };
+        bool allAuto = CDTXMania.ConfigIni.bIsAutoPlay(CDTXMania.ConfigIni.PlayerOn((EChartPart)instrument));
 
         //all-auto play always shows SS; rank 99 (unknown) is grouped with the lower ranks
         (string icon, string bg, bool isSS)? rank = CDTXMania.StageManager.stageResult.nRankValue[instrument] switch

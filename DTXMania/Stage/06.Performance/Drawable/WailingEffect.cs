@@ -8,8 +8,8 @@ namespace DTXMania.Drawable;
 
 public class WailingEffect : UIGroup
 {
-    [AddChildMenu]
-    public static WailingEffect Create() => new();
+    [AddChildMenu("Game/Performance/Wailing Effect")]
+    public new static WailingEffect Create() => new();
     
     public WailingEffect()
     {

@@ -1,3 +1,4 @@
+using DTXMania.Core;
 using DTXMania.UI.Config;
 
 namespace DTXMania;
@@ -12,9 +13,9 @@ internal class ConfigMenu
     private readonly ConfigList list;
 
     private readonly SystemConfigPage system;
-    private readonly DrumsConfigPage drums;
-    private readonly GuitarConfigPage guitar;
-    private readonly BassConfigPage bass;
+    private readonly InstrumentConfigPage drums;
+    private readonly InstrumentConfigPage guitar;
+    private readonly InstrumentConfigPage bass;
 
     // pages that participate in apply-on-exit / initial-state snapshotting
     private readonly List<ConfigPage> pages;
@@ -31,9 +32,9 @@ internal class ConfigMenu
         SongDbConfigPage songDb = new(list);
         system = new SystemConfigPage(list, graphics, skin, audio, gameplay, menu, songDb);
 
-        drums = new DrumsConfigPage(list);
-        guitar = new GuitarConfigPage(list);
-        bass = new BassConfigPage(list);
+        drums = new InstrumentConfigPage(list, EPlayer.Drums);
+        guitar = new InstrumentConfigPage(list, EPlayer.Guitar1);
+        bass = new InstrumentConfigPage(list, EPlayer.Guitar2);
 
         pages = [system, graphics, skin, audio, gameplay, menu, songDb];
 

@@ -16,6 +16,8 @@ public enum BlendMode
 public abstract class BaseTexture : IDisposable
 {
     public static BaseTexture None { get; } = new NoneTexture();
+    public static BaseTexture White => white ??= CreateSolidColor(Color4.White);
+    private static BaseTexture? white;
     public static BaseTextureFactory Factory { get; set; }
     public static IUiTextRenderer SkiaTextRenderer { get; set; }
     
@@ -49,37 +51,47 @@ public abstract class BaseTexture : IDisposable
         return EnsureFactoryConfigured().CreateSolidColor(color);
     }
 
+    public static void ForgetFileTextures()
+    {
+        EnsureFactoryConfigured().ForgetFileTextures();
+    }
+
     //stubs for non recreated Device based render code
     private Matrix4x4 scaleMatrix => UICanvas.toWindow;
     
-    public void tDraw2D(float x, float y)
+    public void tDraw2D(float x, float y) => tDraw2D(scaleMatrix, x, y);
+
+    public void tDraw2D(Matrix4x4 origin, float x, float y)
     {
-        Matrix4x4 transformMatrix = Matrix4x4.CreateTranslation(x, y, 0);
-        tDraw2DMatrix(transformMatrix * scaleMatrix);
+        tDraw2DMatrix(Matrix4x4.CreateTranslation(x, y, 0) * origin);
     }
     
-    public void tDraw2D(float x, float y, Color4 color)
+    public void tDraw2D(float x, float y, Color4 color) => tDraw2D(scaleMatrix, x, y, color);
+
+    public void tDraw2D(Matrix4x4 origin, float x, float y, Color4 color)
     {
-        Matrix4x4 transformMatrix = Matrix4x4.CreateTranslation(x, y, 0);
-        tDraw2DMatrix(transformMatrix * scaleMatrix, new Vector2(Width, Height), new RectangleF(0, 0, Width, Height), color);
+        tDraw2DMatrix(Matrix4x4.CreateTranslation(x, y, 0) * origin, new Vector2(Width, Height), new RectangleF(0, 0, Width, Height), color);
     }
     
-    public void tDraw2D(float x, float y, RectangleF clipRect)
+    public void tDraw2D(float x, float y, RectangleF clipRect) => tDraw2D(scaleMatrix, x, y, clipRect);
+
+    public void tDraw2D(Matrix4x4 origin, float x, float y, RectangleF clipRect)
     {
-        Matrix4x4 transformMatrix = Matrix4x4.CreateTranslation(x, y, 0);
-        tDraw2DMatrix(transformMatrix * scaleMatrix, new Vector2(clipRect.Width, clipRect.Height), clipRect);
+        tDraw2DMatrix(Matrix4x4.CreateTranslation(x, y, 0) * origin, new Vector2(clipRect.Width, clipRect.Height), clipRect);
     }
     
-    public void tDraw2D(float x, float y, RectangleF clipRect, Color4 color)
+    public void tDraw2D(float x, float y, RectangleF clipRect, Color4 color) => tDraw2D(scaleMatrix, x, y, clipRect, color);
+
+    public void tDraw2D(Matrix4x4 origin, float x, float y, RectangleF clipRect, Color4 color)
     {
-        Matrix4x4 transformMatrix = Matrix4x4.CreateTranslation(x, y, 0);
-        tDraw2DMatrix(transformMatrix * scaleMatrix, new Vector2(clipRect.Width, clipRect.Height), clipRect, color);
+        tDraw2DMatrix(Matrix4x4.CreateTranslation(x, y, 0) * origin, new Vector2(clipRect.Width, clipRect.Height), clipRect, color);
     }
     
-    public void tDraw2D(float x, float y, RectangleF clipRect, Color4 color, Vector2 size)
+    public void tDraw2D(float x, float y, RectangleF clipRect, Color4 color, Vector2 size) => tDraw2D(scaleMatrix, x, y, clipRect, color, size);
+
+    public void tDraw2D(Matrix4x4 origin, float x, float y, RectangleF clipRect, Color4 color, Vector2 size)
     {
-        Matrix4x4 transformMatrix = Matrix4x4.CreateTranslation(x, y, 0);
-        tDraw2DMatrix(transformMatrix * scaleMatrix, size, clipRect, color);
+        tDraw2DMatrix(Matrix4x4.CreateTranslation(x, y, 0) * origin, size, clipRect, color);
     }
     
     public void tDraw2DMatrix(Matrix4x4 transformMatrix)
@@ -105,40 +117,6 @@ public abstract class BaseTexture : IDisposable
     public void tDraw2DMatrix(Matrix4x4 transformMatrix, Vector2 size, RectangleF clipRect)
     {
         tDraw2DMatrix(transformMatrix, size, clipRect, Color4.White);
-    }
-    
-    public void tDraw3D(Matrix4x4 mat)
-    {
-        tDraw3D(mat, new RectangleF(0, 0, Width, Height), Color4.White);
-    }
-    
-    public void tDraw3D(Matrix4x4 mat, Color4 col)
-    {
-        tDraw3D(mat, new RectangleF(0, 0, Width, Height), col);
-    }
-    
-    public void tDraw3D(Matrix4x4 transformMatrix, RectangleF clipRect, Color4 color)
-    {
-        if (clipRect.Width <= 0f || clipRect.Height <= 0f)
-        {
-            return;
-        }
-
-        // Legacy DX9 tDraw3D used centered local vertices with Y-up world space.
-        // Convert that space into the current top-left, Y-down 2D draw space.
-        Matrix4x4 localToLegacyCentered =
-            Matrix4x4.CreateScale(1f, -1f, 1f) *
-            Matrix4x4.CreateTranslation(-clipRect.Width / 2f, clipRect.Height / 2f, 0f);
-
-        float renderScale = CDTXMania.renderScale <= 0f ? 1f : CDTXMania.renderScale;
-
-        //legacy world space is centred on the canvas, and the canvas is centred in the window
-        Matrix4x4 legacyWorldToScreen =
-            Matrix4x4.CreateScale(renderScale, -renderScale, 1f) *
-            Matrix4x4.CreateTranslation(UICanvas.center.X, UICanvas.center.Y, 0f);
-
-        Matrix4x4 convertedMatrix = localToLegacyCentered * transformMatrix * legacyWorldToScreen;
-        tDraw2DMatrix(convertedMatrix, new Vector2(clipRect.Width, clipRect.Height), clipRect, color);
     }
     
     public abstract void UpdateRgba32(ReadOnlySpan<byte> rgbaPixels, int width, int height, int dstX = 0, int dstY = 0);
@@ -202,4 +180,5 @@ public abstract class BaseTextureFactory
     public abstract BaseTexture LoadFromMemory(ReadOnlySpan<byte> rgbaPixels, int width, int height, string name = "Texture");
     public abstract BaseTexture CreateEmpty(int width, int height, string name = "DynamicTexture");
     public abstract BaseTexture CreateSolidColor(Color4 color);
+    public abstract void ForgetFileTextures();
 }

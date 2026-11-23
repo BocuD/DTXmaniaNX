@@ -42,8 +42,11 @@ public sealed class BindingPath
 /// </summary>
 public static class DataFieldReflector
 {
-    private sealed record Member(string Name, DataFieldAttribute Meta, Type ValueType, Func<object, object?> Get)
+    private sealed record Member(string Name, DataFieldAttribute Meta, Type ValueType, MemberInfo Info, Func<object, object?> Get)
     {
+        //eg: Config.Reverse.Drums reads bReverse.Drums in one step, without boxing
+        public IReadOnlyDictionary<string, Member>? Inner { get; init; }
+
         //typed getters for the kinds that would otherwise box on every read; null when not applicable
         public Func<object, bool>? GetBool { get; init; }
         public Func<object, double>? GetNumber { get; init; }
@@ -192,8 +195,7 @@ public static class DataFieldReflector
     }
 
     //walks every hop but the last, so the caller can read the leaf with a typed getter. Intermediate
-    //values are read as object; a struct intermediate therefore still boxes, which is why deep paths
-    //through structs are best avoided in per-frame bindings.
+    //structs along the path are boxed, except the last one (see Member.Inner)
     private static bool TryWalkToOwner(object? root, PathSegment[] segments,
         out object owner, [NotNullWhen(true)] out Member? leaf)
     {
@@ -211,6 +213,12 @@ public static class DataFieldReflector
             if (!TryGetMember(current, segments[i].Name, out Member? member))
             {
                 return false;
+            }
+
+            if (member.Inner != null && i == segments.Length - 2 && segments[i].Index < 0)
+            {
+                owner = current!;
+                return member.Inner.TryGetValue(segments[^1].Name, out leaf);
             }
 
             if (!TryReadLeaf(current, member, segments[i].Index, out current) || current == null)
@@ -381,18 +389,38 @@ public static class DataFieldReflector
             string name = attr.Name ?? info.Name;
             Type? elementType = ElementTypeOf(valueType);
 
-            map[name] = new Member(name, attr, valueType, AccessorCompiler.BuildMemberGetter(type, info))
+            map[name] = new Member(name, attr, valueType, info, AccessorCompiler.BuildMemberGetter(type, info))
             {
                 GetBool = valueType == typeof(bool) ? AccessorCompiler.BuildMemberGetter<bool>(type, info) : null,
-                GetNumber = IsNumeric(valueType) ? AccessorCompiler.BuildMemberGetter<double>(type, info) : null,
+                GetNumber = ReadsAsNumber(valueType) ? AccessorCompiler.BuildMemberGetter<double>(type, info) : null,
                 GetIndexedBool = elementType == typeof(bool) ? AccessorCompiler.BuildIndexedGetter<bool>(type, info) : null,
-                GetIndexedNumber = elementType != null && IsNumeric(elementType)
+                GetIndexedNumber = elementType != null && ReadsAsNumber(elementType)
                     ? AccessorCompiler.BuildIndexedGetter<double>(type, info)
-                    : null
+                    : null,
+                Inner = valueType.IsValueType && HasDataFields(valueType) ? BuildInner(type, info, valueType) : null
             };
         }
 
         return map;
+    }
+
+    private static IReadOnlyDictionary<string, Member> BuildInner(Type ownerType, MemberInfo outer, Type structType)
+    {
+        Dictionary<string, Member> inner = new(StringComparer.Ordinal);
+
+        foreach (Member field in GetMap(structType).Values)
+        {
+            MemberInfo[] chain = [outer, field.Info];
+
+            inner[field.Name] = new Member(field.Name, field.Meta, field.ValueType, field.Info,
+                AccessorCompiler.BuildChainGetter<object?>(ownerType, chain))
+            {
+                GetBool = field.ValueType == typeof(bool) ? AccessorCompiler.BuildChainGetter<bool>(ownerType, chain) : null,
+                GetNumber = ReadsAsNumber(field.ValueType) ? AccessorCompiler.BuildChainGetter<double>(ownerType, chain) : null
+            };
+        }
+
+        return inner;
     }
 
     //what one element of an indexable member is, for the typed indexed getters
@@ -412,6 +440,12 @@ public static class DataFieldReflector
         type == typeof(byte) || type == typeof(sbyte) || type == typeof(short) || type == typeof(ushort) ||
         type == typeof(int) || type == typeof(uint) || type == typeof(long) || type == typeof(ulong) ||
         type == typeof(float) || type == typeof(double) || type == typeof(decimal);
+
+    //like IsNumeric, but enums count too
+    public static bool ReadsAsNumber(Type type) => IsNumeric(type) || type.IsEnum;
+
+    public static bool IsWholeNumber(Type type) =>
+        type.IsEnum || (IsNumeric(type) && type != typeof(float) && type != typeof(double) && type != typeof(decimal));
 
     //reading an element of a value-type array boxes it; see the known issues in SKINNING.md
     //an out-of-range index resolves to nothing rather than throwing out of the compiled getter. Reading the

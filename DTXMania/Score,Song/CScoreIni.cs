@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
 using System.Security.Cryptography;
@@ -220,6 +220,9 @@ public class CScoreIni
 
 		public int nFastCount;
 		public int nSlowCount;
+		public int nTotalOffsetLag;
+		public int nOffsetHitCount;
+		public double dbAverageOffset;
 
 		public int nGoodCount;
 		public int nGreatCount;
@@ -1731,11 +1734,12 @@ public class CScoreIni
 	
 	internal static STDGBVALUE<bool> tGetIsUpdateNeeded()
 	{
+		CConfigIni config = CDTXMania.ConfigIni;
 		STDGBVALUE<bool> result = new()
 		{
-			Drums = CDTXMania.ConfigIni.bDrumsEnabled && CDTXMania.DTX.bHasChips.Drums && !CDTXMania.ConfigIni.bAllDrumsAreAutoPlay,
-			Guitar = CDTXMania.ConfigIni.bGuitarEnabled && CDTXMania.DTX.bHasChips.Guitar && !CDTXMania.ConfigIni.bAllGuitarsAreAutoPlay,
-			Bass = CDTXMania.ConfigIni.bGuitarEnabled && CDTXMania.DTX.bHasChips.Bass && !CDTXMania.ConfigIni.bAllBassAreAutoPlay
+			Drums = config.bDrumsEnabled && CDTXMania.DTX.bHasChips.Drums && !config.bIsAutoPlay(config.PlayerOn(EChartPart.Drums)),
+			Guitar = config.bGuitarEnabled && CDTXMania.DTX.bHasChips.Guitar && !config.bIsAutoPlay(config.PlayerOn(EChartPart.Guitar)),
+			Bass = config.bGuitarEnabled && CDTXMania.DTX.bHasChips.Bass && !config.bIsAutoPlay(config.PlayerOn(EChartPart.Bass))
 		};
 		return result;
 	}

@@ -37,6 +37,22 @@ public class CPad
 
 	// メソッド
 
+	//todo: transitional, will be deleted with the guitar and bass swap removal
+	//Key assignments are (still) stored per chart part, so a player has to use one
+	//Storage will be migrated to per EPlayer instead, and then this mapping can go
+	private static EInstrumentPart Slot(EPlayer player) => player switch
+	{
+		EPlayer.Drums => EInstrumentPart.DRUMS,
+		EPlayer.Guitar1 => EInstrumentPart.GUITAR,
+		_ => EInstrumentPart.BASS
+	};
+
+	public void GetEvents(EPlayer player, EPad pad, List<STInputEvent> list) => GetEvents(Slot(player), pad, list);
+
+	public bool bPressed(EPlayer player, EPad pad) => bPressed(Slot(player), pad);
+
+	public bool bPressing(EPlayer player, EPad pad) => bPressing(Slot(player), pad);
+
 	/// </summary>
 	public void GetEvents( EInstrumentPart part, EPad pad, List<STInputEvent> list )
 	{
@@ -209,22 +225,11 @@ public class CPad
 		}
 		return false;
 	}
-	public bool bPressedDGB( EPad pad )
-	{
-		if ( !bPressed( EInstrumentPart.DRUMS, pad ) && !bPressed( EInstrumentPart.GUITAR, pad ) )
-		{
-			return bPressed( EInstrumentPart.BASS, pad );
-		}
-		return true;
-	}
-	public bool bPressedGB( EPad pad )
-	{
-		if ( !bPressed( EInstrumentPart.GUITAR, pad ) )
-		{
-			return bPressed( EInstrumentPart.BASS, pad );
-		}
-		return true;
-	}
+	public bool bPressedAny( EPad pad ) =>
+		bPressed( EPlayer.Drums, pad ) || bPressed( EPlayer.Guitar1, pad ) || bPressed( EPlayer.Guitar2, pad );
+
+	public bool bPressedGuitars( EPad pad ) =>
+		bPressed( EPlayer.Guitar1, pad ) || bPressed( EPlayer.Guitar2, pad );
 	public bool bPressing( EInstrumentPart part, EPad pad )
 	{
 		if ( part != EInstrumentPart.UNKNOWN )
@@ -268,14 +273,8 @@ public class CPad
 		}
 		return false;
 	}
-	public bool bPressingGB( EPad pad )
-	{
-		if ( !bPressing( EInstrumentPart.GUITAR, pad ) )
-		{
-			return bPressing( EInstrumentPart.BASS, pad );
-		}
-		return true;
-	}
+	public bool bPressingGuitars( EPad pad ) =>
+		bPressing( EPlayer.Guitar1, pad ) || bPressing( EPlayer.Guitar2, pad );
 
 
 	// Other

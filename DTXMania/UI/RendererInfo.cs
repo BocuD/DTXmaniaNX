@@ -1,6 +1,7 @@
 using System.Numerics;
 using DTXMania.Core.Framework;
 using DTXMania.Core.OpenGL;
+using DTXMania.UI.OpenGL;
 using Hexa.NET.ImGui;
 
 namespace DTXMania.UI;
@@ -21,6 +22,20 @@ internal static class RendererInfo
         ImGui.Text($"Window: {host.WindowWidth} x {host.WindowHeight}");
         ImGui.Text($"Framebuffer: {host.FramebufferWidth} x {host.FramebufferHeight}");
         ImGui.Text($"Game render target: {(int)InspectorManager.gameRenderSize.X} x {(int)InspectorManager.gameRenderSize.Y}");
+
+        ImGui.Separator();
+
+        bool atlasEnabled = TextureAtlas.Enabled;
+        if (ImGui.Checkbox("Texture atlas", ref atlasEnabled))
+        {
+            TextureAtlas.Enabled = atlasEnabled;
+        }
+
+        OpenGlRenderer? renderer = OpenGlRenderer.Instance;
+        if (renderer != null)
+        {
+            ImGui.TextDisabled(renderer.atlas.PageCount == 0 ? "no pages" : renderer.atlas.Describe());
+        }
 
         ImGui.Separator();
 

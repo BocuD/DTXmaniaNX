@@ -26,6 +26,30 @@ public sealed class UIBinding
     //opposite of one that already exists
     public bool invert;
 
+    public BindingCondition condition = BindingCondition.None;
+    public double value;
+    public double whenTrue = 1;
+    public double whenFalse;
+
+    //Scale rule: source * scale + offset
+    public double scale = 1;
+    public double offset;
+
+    //eg: Config.Graph.Bass is true AND Game.HasChips.Bass is false
+    public BindingMatch match = BindingMatch.All;
+    public List<BindingClause>? clauses;
+
+    public bool ShouldSerializecondition() => condition != BindingCondition.None;
+    public bool ShouldSerializevalue() => BindingClause.Compares(condition);
+    public bool ShouldSerializewhenTrue() => IsTest;
+    public bool ShouldSerializewhenFalse() => IsTest;
+    public bool ShouldSerializescale() => condition == BindingCondition.Scale;
+    public bool ShouldSerializeoffset() => condition == BindingCondition.Scale;
+    public bool ShouldSerializematch() => clauses is { Count: > 0 };
+    public bool ShouldSerializeclauses() => clauses is { Count: > 0 };
+
+    public bool IsTest => condition is not (BindingCondition.None or BindingCondition.Scale);
+
     /// <summary>
     /// Whether the last apply found a value. A binding that resolves nothing leaves its target untouched,
     /// so this is the only way to tell a key that is missing from one that happens to match.
@@ -34,6 +58,11 @@ public sealed class UIBinding
 
     [JsonIgnore] private PropertyAccessor? accessor;
     [JsonIgnore] private string? resolvedTarget;
+
+    [JsonIgnore] private bool hasNumber;
+    [JsonIgnore] private string? numberSource;
+    [JsonIgnore] private double lastNumber;
+    [JsonIgnore] private string lastText = string.Empty;
 
     public UIBinding()
     {
@@ -64,13 +93,65 @@ public sealed class UIBinding
             return;
         }
 
-        if (accessor.StringSetter != null)
+        if (condition == BindingCondition.Scale)
         {
-            resolved = element.TryResolveContextString(source, out string text);
+            resolved = element.TryResolveContextNumber(source, out double scaled);
 
             if (resolved)
             {
-                accessor.StringSetter(element, text);
+                accessor.NumberSetter?.Invoke(element, scaled * scale + offset);
+            }
+
+            return;
+        }
+
+        if (IsTest)
+        {
+            resolved = TryTest(element, out bool result);
+
+            if (!resolved)
+            {
+                return;
+            }
+
+            if (accessor.BoolSetter != null)
+            {
+                accessor.BoolSetter(element, result);
+            }
+            else if (accessor.NumberSetter != null)
+            {
+                accessor.NumberSetter(element, result ? whenTrue : whenFalse);
+            }
+            else
+            {
+                accessor.StringSetter?.Invoke(element, result ? "true" : "false");
+            }
+
+            return;
+        }
+
+        if (accessor.StringSetter != null)
+        {
+            if (element.TryResolveContextNumber(source, out double number))
+            {
+                if (!hasNumber || number != lastNumber || numberSource != source)
+                {
+                    hasNumber = element.TryResolveContextString(source, out lastText);
+                    lastNumber = number;
+                    numberSource = source;
+                }
+
+                resolved = hasNumber;
+            }
+            else
+            {
+                hasNumber = false;
+                resolved = element.TryResolveContextString(source, out lastText);
+            }
+
+            if (resolved)
+            {
+                accessor.StringSetter(element, lastText);
             }
         }
         else if (accessor.BoolSetter != null)
@@ -103,4 +184,120 @@ public sealed class UIBinding
 
         return DataBindingKind.String;
     }
+
+    public DataBindingKind SourceKindFor(UIDrawable element)
+    {
+        return BindingClause.KeyKind(element, source) ?? condition switch
+        {
+            BindingCondition.None => KindFor(element),
+            BindingCondition.IsTrue or BindingCondition.IsFalse => DataBindingKind.Bool,
+            _ => DataBindingKind.Number
+        };
+    }
+
+    private bool TryTest(UIDrawable element, out bool result)
+    {
+        if (!BindingClause.TryTest(element, source, condition, value, out result))
+        {
+            return false;
+        }
+
+        if (clauses != null)
+        {
+            for (int i = 0; i < clauses.Count; i++)
+            {
+                BindingClause clause = clauses[i];
+
+                if (!BindingClause.TryTest(element, clause.source, clause.condition, clause.value, out bool passed))
+                {
+                    return false;
+                }
+
+                result = match == BindingMatch.All ? result && passed : result || passed;
+            }
+        }
+
+        result ^= invert;
+        return true;
+    }
+}
+
+public sealed class BindingClause
+{
+    public string source = string.Empty;
+    public BindingCondition condition = BindingCondition.IsTrue;
+    public double value;
+
+    public bool ShouldSerializevalue() => Compares(condition);
+
+    public static bool Compares(BindingCondition condition) => condition is >= BindingCondition.Equal and <= BindingCondition.LessOrEqual;
+
+    public DataBindingKind SourceKindFor(UIDrawable element) =>
+        KeyKind(element, source) ?? (Compares(condition) ? DataBindingKind.Number : DataBindingKind.Bool);
+
+    //null when the key is unknown
+    public static DataBindingKind? KeyKind(UIDrawable element, string key)
+    {
+        foreach (IUIDataContext context in element.DataContexts())
+        {
+            if (context.AvailableKeys(DataBindingKind.Bool).Contains(key)) return DataBindingKind.Bool;
+            if (context.AvailableKeys(DataBindingKind.Number).Contains(key)) return DataBindingKind.Number;
+        }
+
+        return null;
+    }
+
+    public static Type? KeyType(UIDrawable element, string key)
+    {
+        foreach (IUIDataContext context in element.DataContexts())
+        {
+            if (context.KeyType(key) is { } type) return type;
+        }
+
+        return null;
+    }
+
+    public static bool TryTest(UIDrawable element, string source, BindingCondition condition, double value, out bool result)
+    {
+        if (condition is BindingCondition.IsTrue or BindingCondition.IsFalse)
+        {
+            bool found = element.TryResolveContextBool(source, out bool flag);
+            result = flag == (condition == BindingCondition.IsTrue);
+            return found;
+        }
+
+        bool resolved = element.TryResolveContextNumber(source, out double number);
+
+        result = condition switch
+        {
+            BindingCondition.Equal => number == value,
+            BindingCondition.NotEqual => number != value,
+            BindingCondition.Greater => number > value,
+            BindingCondition.GreaterOrEqual => number >= value,
+            BindingCondition.Less => number < value,
+            _ => number <= value
+        };
+
+        return resolved;
+    }
+}
+
+public enum BindingMatch
+{
+    All,
+    Any
+}
+
+public enum BindingCondition
+{
+    None,
+    Equal,
+    NotEqual,
+    Greater,
+    GreaterOrEqual,
+    Less,
+    LessOrEqual,
+    IsTrue,
+    IsFalse,
+    Scale
 }

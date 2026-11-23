@@ -40,6 +40,7 @@ public sealed class UIDataContext : IUIDataContext
     }
 
     private readonly Dictionary<string, string> strings = new();
+    private readonly Dictionary<string, DataBindingKind> stringKinds = new();
     private readonly Dictionary<string, BaseTexture> textures = new();
     private readonly Dictionary<string, Func<BaseTexture?>> textureProviders = new();
 
@@ -54,6 +55,12 @@ public sealed class UIDataContext : IUIDataContext
     public void DeclareTexture(string key) => textures.TryAdd(key, BaseTexture.None);
 
     public void SetString(string key, string value) => strings[key] = value;
+
+    public void SetString(string key, string value, DataBindingKind kind)
+    {
+        strings[key] = value;
+        stringKinds[key] = kind;
+    }
     public void SetTexture(string key, BaseTexture value) => textures[key] = value;
 
     //a texture whose current value is fetched on each read, for art that arrives after the fact
@@ -161,16 +168,47 @@ public sealed class UIDataContext : IUIDataContext
         return false;
     }
 
+    public Type? KeyType(string key)
+    {
+        foreach ((string name, Type type) in objectTypes)
+        {
+            if (key.Length <= name.Length || !key.StartsWith(name, StringComparison.Ordinal) || key[name.Length] != '.')
+            {
+                continue;
+            }
+
+            string path = key[(name.Length + 1)..];
+            foreach (DataFieldPath field in DataFieldReflector.EnumeratePaths(type))
+            {
+                if (field.Path == path)
+                {
+                    return Nullable.GetUnderlyingType(field.ValueType) ?? field.ValueType;
+                }
+            }
+        }
+
+        return null;
+    }
+
     public IEnumerable<string> AvailableKeys(DataBindingKind kind)
     {
-        if (kind == DataBindingKind.String)
+        if (kind != DataBindingKind.Texture)
         {
             foreach (string key in strings.Keys)
             {
-                yield return key;
+                DataBindingKind pushed = stringKinds.TryGetValue(key, out DataBindingKind declared)
+                    ? declared
+                    : DataBindingKind.String;
+
+                //a bool or a number reads as text too; a plain string is not offered the other way round
+                if (kind == pushed || (kind == DataBindingKind.String && pushed != DataBindingKind.String))
+                {
+                    yield return key;
+                }
             }
         }
-        else if (kind == DataBindingKind.Texture)
+
+        if (kind == DataBindingKind.Texture)
         {
             foreach (string key in textures.Keys)
             {
@@ -209,16 +247,11 @@ public sealed class UIDataContext : IUIDataContext
             return [DataBindingKind.Bool, DataBindingKind.String];
         }
 
-        if (IsNumeric(actual))
+        if (DataFieldReflector.ReadsAsNumber(actual))
         {
             return [DataBindingKind.Number, DataBindingKind.String];
         }
 
         return [DataBindingKind.String];
     }
-
-    private static bool IsNumeric(Type type) =>
-        type == typeof(byte) || type == typeof(sbyte) || type == typeof(short) || type == typeof(ushort) ||
-        type == typeof(int) || type == typeof(uint) || type == typeof(long) || type == typeof(ulong) ||
-        type == typeof(float) || type == typeof(double) || type == typeof(decimal);
 }

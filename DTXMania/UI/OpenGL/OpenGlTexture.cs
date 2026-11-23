@@ -14,6 +14,10 @@ internal sealed class OpenGlTexture : BaseTexture
     private readonly bool _ownsTexture;
     private uint _textureId;
 
+    //basic ref counter
+    private int _references = 1;
+    private string? _filePath;
+
     public override int Width { get; }
     public override int Height { get; }
     public override string name { get; }
@@ -42,12 +46,23 @@ internal sealed class OpenGlTexture : BaseTexture
     
     public static OpenGlTexture LoadFromPath(OpenGlRenderer renderer, string texturePath)
     {
+        string fullPath = Path.GetFullPath(texturePath);
+
+        if (renderer.TryGetFileTexture(fullPath, out OpenGlTexture shared))
+        {
+            shared._references++;
+            return shared;
+        }
+
         try
         {
             byte[] fileBytes = File.ReadAllBytes(texturePath);
             ImageResult image = ImageResult.FromMemory(fileBytes, ColorComponents.RedGreenBlueAlpha);
-            return CreateFromRgba32(renderer, image.Data, image.Width, image.Height,
+            OpenGlTexture loaded = CreateFromRgba32(renderer, image.Data, image.Width, image.Height,
                 Path.GetFileName(texturePath));
+            loaded._filePath = fullPath;
+            renderer.AddFileTexture(fullPath, loaded);
+            return loaded;
         }
         catch (FileNotFoundException e)
         {
@@ -58,6 +73,7 @@ internal sealed class OpenGlTexture : BaseTexture
             Trace.TraceWarning($"Texture path not found (directory doesn't exist): {texturePath}");
         }
 
+        //a missing file is not kept, so dropping one in and reloading picks it up
         var notFound = CreateSolidColor(renderer, new Color4(1, 0, 1, 1), $"Missing:{Path.GetFileName(texturePath)}");
         notFound.notFound = true;
         return notFound;
@@ -88,6 +104,17 @@ internal sealed class OpenGlTexture : BaseTexture
 
     public override void Dispose()
     {
+        if (--_references > 0)
+        {
+            return;
+        }
+
+        if (_filePath != null)
+        {
+            _renderer.RemoveFileTexture(_filePath);
+            _filePath = null;
+        }
+
         if (_ownsTexture && _textureId != 0)
         {
             _renderer.DeleteTexture(_textureId);
@@ -114,7 +141,7 @@ internal sealed class OpenGlTexture : BaseTexture
             throw new ArgumentOutOfRangeException(nameof(width), "Update region must stay within the texture bounds.");
         }
 
-        _renderer.UpdateTexture(_textureId, rgbaPixels, width, height, dstX, dstY);
+        _renderer.UpdateTextureAndDropCopy(_textureId, rgbaPixels, width, height, dstX, dstY);
     }
 
     public override void UpdateRgba32Streaming(ReadOnlySpan<byte> rgbaPixels, int width, int height)
@@ -175,6 +202,11 @@ internal sealed class OpenGlTextureFactory : BaseTextureFactory
         }
 
         return OpenGlTexture.CreateEmpty(OpenGlRenderer.Instance, width, height, name);
+    }
+
+    public override void ForgetFileTextures()
+    {
+        OpenGlRenderer.Instance?.ForgetFileTextures();
     }
 
     public override BaseTexture CreateSolidColor(Color4 color)

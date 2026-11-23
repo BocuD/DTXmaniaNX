@@ -10,8 +10,8 @@ namespace DTXMania.Drawable;
 
 public class NoteExplosion : UIGroup
 {
-    [AddChildMenu]
-    public static NoteExplosion Create()
+    [AddChildMenu("Game/Performance/Note Explosion")]
+    public new static NoteExplosion Create()
     {
         return new NoteExplosion(new Color4(1.0f, 1.0f, 0.0f));
     }

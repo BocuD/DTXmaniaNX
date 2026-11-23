@@ -1,0 +1,96 @@
+using DTXMania.Core;
+using DTXMania.UI.Config;
+using DTXMania.UI.Item;
+
+namespace DTXMania;
+
+//Shared (STDGBVALUE-backed) options come from PlayerConfigPage
+internal sealed class DrumsOptionsPage : InstrumentOptionsPage
+{
+    private readonly DrumsLaneConfigPage lanes;
+    private readonly DrumsDisplayConfigPage display;
+    private readonly DrumsPadGroupConfigPage padGroups;
+    private readonly DrumsHitSoundConfigPage hitSounds;
+    private readonly DrumsVelocityConfigPage velocity;
+
+    public DrumsOptionsPage(ConfigList list) : base(list, EPlayer.Drums)
+    {
+        lanes = new DrumsLaneConfigPage(list);
+        display = new DrumsDisplayConfigPage(list);
+        padGroups = new DrumsPadGroupConfigPage(list);
+        hitSounds = new DrumsHitSoundConfigPage(list);
+        velocity = new DrumsVelocityConfigPage(list);
+    }
+
+    private List<(ELane, CItemToggle)> AutoLanes() =>
+    [
+        (ELane.LC, Toggle("    LeftCymbal", "左シンバルを自動で演奏します。", "Play Left Cymbal automatically.",
+            () => CDTXMania.ConfigIni.bAutoPlay.LC, v => CDTXMania.ConfigIni.bAutoPlay.LC = v)),
+        (ELane.HH, Toggle("    HiHat", "ハイハットを自動で演奏します。", "Play HiHat automatically.",
+            () => CDTXMania.ConfigIni.bAutoPlay.HH, v => CDTXMania.ConfigIni.bAutoPlay.HH = v)),
+        (ELane.LP, Toggle("    LeftPedal", "左ペダルを自動で演奏します。", "Play Left Pedal automatically.",
+            () => CDTXMania.ConfigIni.bAutoPlay.LP, v => CDTXMania.ConfigIni.bAutoPlay.LP = v)),
+        (ELane.LBD, Toggle("    LBassDrum", "左バスドラムを自動で演奏します。", "Play Left Bass Drum automatically.",
+            () => CDTXMania.ConfigIni.bAutoPlay.LBD, v => CDTXMania.ConfigIni.bAutoPlay.LBD = v)),
+        (ELane.SD, Toggle("    Snare", "スネアを自動で演奏します。", "Play Snare automatically.",
+            () => CDTXMania.ConfigIni.bAutoPlay.SD, v => CDTXMania.ConfigIni.bAutoPlay.SD = v)),
+        (ELane.BD, Toggle("    BassDrum", "バスドラムを自動で演奏します。", "Play Bass Drum automatically.",
+            () => CDTXMania.ConfigIni.bAutoPlay.BD, v => CDTXMania.ConfigIni.bAutoPlay.BD = v)),
+        (ELane.HT, Toggle("    HighTom", "ハイタムを自動で演奏します。", "Play High Tom automatically.",
+            () => CDTXMania.ConfigIni.bAutoPlay.HT, v => CDTXMania.ConfigIni.bAutoPlay.HT = v)),
+        (ELane.LT, Toggle("    LowTom", "ロータムを自動で演奏します。", "Play Low Tom automatically.",
+            () => CDTXMania.ConfigIni.bAutoPlay.LT, v => CDTXMania.ConfigIni.bAutoPlay.LT = v)),
+        (ELane.FT, Toggle("    FloorTom", "フロアタムを自動で演奏します。", "Play Floor Tom automatically.",
+            () => CDTXMania.ConfigIni.bAutoPlay.FT, v => CDTXMania.ConfigIni.bAutoPlay.FT = v)),
+        (ELane.CY, Toggle("    Cymbal", "右シンバルを自動で演奏します。", "Play Right Cymbal automatically.",
+            () => CDTXMania.ConfigIni.bAutoPlay.CY, v => CDTXMania.ConfigIni.bAutoPlay.CY = v)),
+        (ELane.RD, Toggle("    Ride", "ライドシンバルを自動で演奏します。", "Play Ride Cymbal automatically.",
+            () => CDTXMania.ConfigIni.bAutoPlay.RD, v => CDTXMania.ConfigIni.bAutoPlay.RD = v)),
+    ];
+
+    public override List<CItemBase> Build()
+    {
+        List<CItemBase> items = [];
+
+        items.Add(ScrollSpeedItem());
+        items.Add(HidSudItem());
+        items.Add(ReverseItem("判定ラインが上になり、ノーツが下から上へ流れます。", "Chips flow from the bottom to the top."));
+        items.Add(ShutterInItem());
+        items.Add(ShutterOutItem());
+        items.Add(InputAdjustItem());
+
+        items.Add(Toggle("HAZARD",
+            "ドSハザードモード。\nGREAT以下の判定でも残り回数が減ります。",
+            "Super Hazard mode.\nEven GREAT-or-lower judgements cost a life.",
+            () => CDTXMania.ConfigIni.bHAZARD, v => CDTXMania.ConfigIni.bHAZARD = v));
+        items.Add(Toggle("Tight", "チップのないところで叩くとミスになります。", "Hitting pad without chip is a MISS.",
+            () => CDTXMania.ConfigIni.bTight, v => CDTXMania.ConfigIni.bTight = v));
+        items.Add(MinComboItem("D-MinCombo", 1));
+
+        items.Add(RandomItem());
+        items.Add(RandomPedalItem());
+        AddAutoPlayBlock(items, AutoLanes());
+
+        items.Add(AutoGhostItem());
+        items.Add(TargetGhostItem());
+
+        items.Add(FolderItem("Lane Options",
+            "レーンの種類と配置に関する項目を設定します。",
+            "Open the lane layout sub menu.", lanes));
+        items.Add(FolderItem("Display Options",
+            "画面に表示する項目を設定します。",
+            "Open the display sub menu.", display));
+        items.Add(FolderItem("Pad Grouping",
+            "パッドの打ち分けを設定します。",
+            "Open the pad grouping sub menu.", padGroups));
+        items.Add(FolderItem("Hit Sound Options",
+            "打撃音と発声音の決め方を設定します。",
+            "Open the hit sound sub menu.", hitSounds));
+
+        items.Add(FolderItem("Drum Hit Velocity",
+            "ドラムのヒットベロシティに関する項目を設定します。",
+            "Settings for the drums hit velocity.", velocity));
+
+        return items;
+    }
+}

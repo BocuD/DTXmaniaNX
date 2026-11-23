@@ -43,6 +43,11 @@ public partial class UIImage
 
         Inspector.Inspector.Inspect("Clip Rect", ref clipRect);
         Inspector.Inspector.Inspect("Render Mode", ref renderMode);
+
+        if (renderMode == ERenderMode.Stretched)
+        {
+            Inspector.Inspector.Inspect("Fit", ref fit);
+        }
         Inspector.Inspector.Inspect("Color", ref color);
 
         if (renderMode == ERenderMode.Sliced)

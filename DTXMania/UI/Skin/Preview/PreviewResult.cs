@@ -52,6 +52,33 @@ public static class PreviewResult
         entry.nMaxCombo = score.MaxCombo;
         entry.nScore = score.Points;
 
+        entry.nFastCount = preset switch
+        {
+            Preset.Excellent => 0,
+            Preset.FullCombo => 25,
+            Preset.Clear => 112,
+            Preset.Failed => 230,
+            _ => 0
+        };
+        entry.nSlowCount = preset switch
+        {
+            Preset.Excellent => 0,
+            Preset.FullCombo => 33,
+            Preset.Clear => 122,
+            Preset.Failed => 269,
+            _ => 0
+        };
+        entry.dbAverageOffset = preset switch
+        {
+            Preset.Excellent => 0.0,
+            Preset.FullCombo => 0.45,
+            Preset.Clear => 1.82,
+            Preset.Failed => -4.12,
+            _ => 0.0
+        };
+        entry.nOffsetHitCount = score.Perfect + score.Great + score.Good + score.Poor;
+        entry.nTotalOffsetLag = (int)Math.Round(entry.dbAverageOffset * entry.nOffsetHitCount);
+
         Recalculate(instrument);
     }
 

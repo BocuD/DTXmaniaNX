@@ -3,11 +3,15 @@ using DTXMania.Core.Framework;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.Item;
 using DTXMania.UI.Skin;
+using DTXMania.UI.Inspector;
 
 namespace DTXMania.UI.Config;
 
 internal sealed class ConfigDescriptionPanel : UIGroup
 {
+
+    [AddChildMenu("Game/Config/Description Panel")]
+    public new static UIDrawable Create() => new ConfigDescriptionPanel();
     //found once the component has loaded; nothing is built here, or a layout would load a second copy
     private UIText? text;
 

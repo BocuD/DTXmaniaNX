@@ -39,12 +39,13 @@ internal class InfoBox : UIGroup
 
         UIText stage = root.AddChild(new UIText("", 15));
         stage.name = "Stage";
-        stage.position = new Vector3(77, 7, 0);
+        stage.position = new Vector3(76, 6, 0);
+        stage.font = SkinResource.System("Futura PT Medium.otf");
         stage.fillColor = new Color4(0.5f, 0.5f, 0.5f);
         stage.outlineWidth = 0;
         stage.bindings.Add(new UIBinding("text", "Song.StageNumber"));
 
-        Scrolling(root, "SongTitle", "Song.Title", 15, 210.0f, new Vector3(83, 32, 0));
+        Scrolling(root, "SongTitle", "Song.Title", 16, 210.0f, new Vector3(83, 32, 0));
         Scrolling(root, "ArtistName", "Song.Artist", 12, 213.0f, new Vector3(83, 53, 0));
 
         return root;
@@ -63,6 +64,7 @@ internal class InfoBox : UIGroup
         text.scrollingEnabled = true;
         text.scrollSpeed = 15.0f;
         text.pauseDuration = 5.0f;
+        text.outlineWidth = 1.0f;
         text.bindings.Add(new UIBinding("text", source));
     }
 

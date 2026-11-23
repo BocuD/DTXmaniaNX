@@ -13,10 +13,10 @@ public class AutoMode
         this.isCustom = isCustom;
     }
     
-    public static readonly Dictionary<EInstrumentPart, List<AutoMode>> AutoModes = new()
+    public static readonly Dictionary<EPlayer, List<AutoMode>> AutoModes = new()
     {
         {
-            EInstrumentPart.DRUMS,
+            EPlayer.Drums,
             [
                 new AutoMode("Off", 
                     new Dictionary<ELane, bool>
@@ -112,7 +112,7 @@ public class AutoMode
             ]
         },
         {
-            EInstrumentPart.GUITAR,
+            EPlayer.Guitar1,
             [
                 new AutoMode("Off",
                     new Dictionary<ELane, bool>
@@ -162,7 +162,7 @@ public class AutoMode
             ]
         },
         {
-            EInstrumentPart.BASS, 
+            EPlayer.Guitar2, 
             [
                 new AutoMode("Off",
                     new Dictionary<ELane, bool>

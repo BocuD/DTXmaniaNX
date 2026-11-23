@@ -83,9 +83,8 @@ internal sealed class CStageUITest : CStage
             new UIMenuItem("Return to title", "ReturnToTitle")
         ]);
 
-        //the cursor is a plain element that follows the selection through the menu's own context; it has
-        //no serializable form only because of the solid-colour texture
-        UIImage cursor = menu.AddChild(new UIImage(BaseTexture.CreateSolidColor(new Color4(1f, 0.85f, 0.2f, 0.3f))));
+        //the cursor follows the selection through the menu's own context. It is added on every load, so it is never saved
+        UIQuad cursor = menu.AddChild(new UIQuad(new Color4(1f, 0.85f, 0.2f, 0.3f)));
         cursor.name = "MenuCursor";
         cursor.dontSerialize = true;
         cursor.pivot = new Vector2(0.5f, 0.5f);

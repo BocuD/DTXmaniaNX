@@ -53,8 +53,15 @@ public partial class UIText : UITexture
     [Themable] public string fontFamily = string.Empty;
     [Themable] public float fontSize = DefaultFontSize;
     [Themable] public float outlineWidth = 3f;
+    [Themable] public float outlineSoftness = 0f;
     [Themable] public Vector2 texturePadding = Vector2.Zero;
     [Themable] public float lineSpacing = 1f;
+
+    [Themable] public float letterSpacing;
+
+    [Themable] public float weight;
+
+    [Themable] public float horizontalScale = 1f;
 
     //wraps at the claimed size width; a width still on Auto has nothing to wrap to
     [Themable] public bool wrap;
@@ -74,7 +81,7 @@ public partial class UIText : UITexture
 
     [JsonIgnore] private string? _unresolvedText;
 
-    [AddChildMenu]
+    [AddChildMenu("Text/Text")]
     public static UIDrawable Create()
     {
         return new UIText();
@@ -133,7 +140,15 @@ public partial class UIText : UITexture
 
         UpdateLocalTransformMatrix();
         Matrix4x4 combinedMatrix = localTransformMatrix * parentMatrix;
-        texture.tDraw2DMatrix(combinedMatrix, GetTextureDrawSize(), GetTextureSourceRect(), TextureDrawColor());
+
+        if (combinedMatrix is { M12: 0, M21: 0, M14: 0, M24: 0 } &&
+            combinedMatrix.M11 == textureRenderScale && combinedMatrix.M22 == textureRenderScale)
+        {
+            combinedMatrix.M41 = MathF.Round(combinedMatrix.M41);
+            combinedMatrix.M42 = MathF.Round(combinedMatrix.M42);
+        }
+
+        texture.tDraw2DMatrix(combinedMatrix, GetTextureDrawSize(), GetTextureSourceRect(), UITint.Current * TextureDrawColor());
     }
 
     //the colour is rasterized into the texture, so this multiplies it: a subclass fades text it is
@@ -203,6 +218,9 @@ public partial class UIText : UITexture
 
         if (string.IsNullOrEmpty(text))
         {
+            glyphInset = 0f;
+            textAdvance = 0f;
+
             if (texture.IsValid())
             {
                 texture.Dispose();
@@ -264,6 +282,8 @@ public partial class UIText : UITexture
 
         if (string.IsNullOrEmpty(text))
         {
+            glyphInset = 0f;
+            textAdvance = 0f;
             _dirty = false;
             return;
         }
@@ -297,11 +317,19 @@ public partial class UIText : UITexture
 
     public float glyphInset { get; private set; }
 
+    public float textAdvance { get; private set; }
+
     private void MeasureGlyphInset(UiTextParameters request)
     {
-        glyphInset = BaseTexture.SkiaTextRenderer == null
-            ? 0f
-            : BaseTexture.SkiaTextRenderer.CaretOffset(request, 0) / textureRenderScale;
+        if (BaseTexture.SkiaTextRenderer == null)
+        {
+            glyphInset = 0f;
+            textAdvance = 0f;
+            return;
+        }
+
+        glyphInset = BaseTexture.SkiaTextRenderer.CaretOffset(request, 0) / textureRenderScale;
+        textAdvance = BaseTexture.SkiaTextRenderer.CaretOffset(request, request.Text.Length) / textureRenderScale - glyphInset;
     }
 
     private float _renderedWrapWidth;
@@ -324,8 +352,12 @@ public partial class UIText : UITexture
             FontFamily = fontFamily,
             FontSize = renderSize,
             OutlineWidth = outlineWidth * textureRenderScale,
+            OutlineSoftness = outlineSoftness * textureRenderScale,
             TexturePadding = texturePadding * textureRenderScale,
             LineSpacing = lineSpacing,
+            LetterSpacing = letterSpacing * textureRenderScale,
+            Weight = weight * textureRenderScale,
+            HorizontalScale = horizontalScale,
             RenderScale = textureRenderScale,
             MaxWidth = _renderedWrapWidth * textureRenderScale,
             Antialias = antialias,

@@ -111,6 +111,13 @@ internal abstract class ConfigPage
         return item;
     }
 
+    protected static CItemFloat Float(string name, float min, float max, float step, string jp, string en, Func<float> get, Action<float> set)
+    {
+        CItemFloat item = new(name, min, max, step, get(), jp, en);
+        item.BindConfig(() => item.fCurrentValue = get(), () => set(item.fCurrentValue));
+        return item;
+    }
+
     protected static CItemInteger SecondsDelay(string name, int msMin, int msMax, string jp, string en, Func<int> getMs, Action<int> setMs)
     {
         CItemInteger item = new(name, msMin / 100, msMax / 100, getMs() / 100, jp, en);

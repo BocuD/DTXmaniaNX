@@ -82,7 +82,7 @@ public sealed class UIItemSlot : UIGroup
         componentSource = source;
 
         data.RegisterObject("Item", item);
-        data.SetString("IsSelected", "false");
+        data.SetString("IsSelected", "false", DataBindingKind.Bool);
         dataContext = data;
 
         SetItemIndex(itemIndex);
@@ -97,7 +97,7 @@ public sealed class UIItemSlot : UIGroup
         }
 
         index = itemIndex;
-        data.SetString("Index", itemIndex.ToString());
+        data.SetString("Index", itemIndex.ToString(), DataBindingKind.Number);
     }
 
     /// <summary>Marks this slot as the selected one, which its component reads as <c>"IsSelected"</c>.</summary>
@@ -109,7 +109,7 @@ public sealed class UIItemSlot : UIGroup
         }
 
         selected = value;
-        data.SetString("IsSelected", value ? "true" : "false");
+        data.SetString("IsSelected", value ? "true" : "false", DataBindingKind.Bool);
     }
 }
 
@@ -117,8 +117,7 @@ public sealed class UIItemSlot : UIGroup
 /// Shows a component once per item, each copy carrying its own <c>"Item"</c> data context: the list owns
 /// the repetition, the component owns the look, and the item's fields drive the content.
 ///
-/// The item count comes from the <see cref="IUIItemSource"/> a behaviour class attaches, or from
-/// <see cref="itemCount"/> for a list placed by hand in a layout.
+/// The items come from the <see cref="IUIItemSource"/> a behaviour class attaches.
 /// </summary>
 public class UIItemsGroup : UIGroup, IUIInputHandler
 {
@@ -131,19 +130,15 @@ public class UIItemsGroup : UIGroup, IUIInputHandler
     /// <summary>How far apart items sit, measured along the list's own direction.</summary>
     public float ItemDistance => Math.Max(itemOffset.Length(), 0.001f);
 
-    /// <summary>Unit vector along the list, which scrolling and the curve both measure against.</summary>
+    /// <summary>Unit vector along the list, which scrolling and the item layout both measure against.</summary>
     public Vector3 ItemDirection => itemOffset.LengthSquared() > 0.000001f
         ? Vector3.Normalize(itemOffset)
         : Vector3.UnitY;
 
-    //used only when no source is attached, i.e. a list placed by hand
-    [Themable] public int itemCount;
-
     //builds one item until a skin has a file of its own
     [JsonIgnore] public Func<UIGroup>? itemComponentSource;
 
-    //where the list starts; a scrolling list takes the selection from its ring instead
-    [Themable] public int selectedItem;
+    [JsonIgnore] private int selectedItem;
 
     //whether moving past either end comes back round; a short menu of distinct choices usually should not
     [Themable] public bool wrapSelection = true;
@@ -162,11 +157,15 @@ public class UIItemsGroup : UIGroup, IUIInputHandler
     [JsonIgnore] private readonly UISelectionInfo selection = new();
     [JsonIgnore] private long lastSelectionTime;
 
-    [JsonIgnore] private readonly NavigationRepeat navigation = NavigationRepeat.Vertical();
+    [Themable] public UINavigationAxis navigationAxis = UINavigationAxis.Vertical;
+
+    [Themable] public UIGuitarNavigation guitarNavigation = UIGuitarNavigation.Default;
+
+    [JsonIgnore] private readonly NavigationRepeat navigation = new();
     [JsonIgnore] private readonly Action selectPrevious;
     [JsonIgnore] private readonly Action selectNext;
 
-    [AddChildMenu("Items Group")]
+    [AddChildMenu("Group/Items Group")]
     public static new UIDrawable Create() => new UIItemsGroup();
 
     public UIItemsGroup() : this("Items")
@@ -216,7 +215,7 @@ public class UIItemsGroup : UIGroup, IUIInputHandler
 
     protected IReadOnlyList<UIItemSlot> Slots => slots;
 
-    protected int SourceCount => Source?.ItemCount ?? itemCount;
+    protected int SourceCount => Source?.ItemCount ?? 0;
 
     //the owner is the list itself or one of its ancestors, so the list finds it once rather than being
     //handed it after the tree has loaded
@@ -276,21 +275,24 @@ public class UIItemsGroup : UIGroup, IUIInputHandler
 
         SelectedItem = (moved % count + count) % count;
         CDTXMania.Skin.soundCursorMovement.tPlay();
-        OnSelectionMoved();
+        OnSelectionMoved(items);
     }
 
-    /// <summary>Called when the user moved onto another item, as opposed to the selection being set.</summary>
-    protected virtual void OnSelectionMoved()
+    /// <summary>Called when the user moved onto another item, as opposed to the selection being set.
+    /// <paramref name="items"/> indicates direction</summary>
+    protected virtual void OnSelectionMoved(int items)
     {
     }
 
     public virtual string FocusName => name;
 
-    public NavigationRepeat? Navigation => navigation;
+    public NavigationRepeat Navigation => navigation;
+
+    public void PollNavigation() => navigation.Poll(navigationAxis, guitarNavigation, selectPrevious, selectNext);
 
     public virtual void HandleInput()
     {
-        navigation.Poll(selectPrevious, selectNext);
+        PollNavigation();
 
         if (CDTXMania.Input.ActionDecide())
         {
@@ -513,14 +515,9 @@ public class UIItemsGroup : UIGroup, IUIInputHandler
         Inspector.Inspector.Inspect("Item Offset", ref itemOffset);
         LayOutSlots();
 
-        ImGui.BeginDisabled(Source != null);
-        if (ImGui.InputInt("Item Count", ref itemCount))
-        {
-            itemCount = Math.Max(0, itemCount);
-        }
+        Inspector.Inspector.Inspect("Navigation Axis", ref navigationAxis);
+        Inspector.Inspector.Inspect("Guitar Navigation", ref guitarNavigation);
 
-        ImGui.EndDisabled();
-
-        ImGui.LabelText("Items", Source != null ? $"{SourceCount} (from code)" : SourceCount.ToString());
+        ImGui.LabelText("Items", SourceCount.ToString());
     }
 }

@@ -60,7 +60,7 @@ public class Modal : UIGroup
         const float descriptionToOptionsGap = 20f;
         const float bottomPadding = 20f;
 
-        UIImage backdrop = AddChild(new UIImage(BaseTexture.CreateSolidColor(new Color4(0f, 0f, 0f, 0.6f))));
+        UIQuad backdrop = AddChild(new UIQuad(new Color4(0f, 0f, 0f, 0.6f)));
         backdrop.name = "Backdrop";
         //oversized so the dimming reaches the edges of a window that is not 16:9
         backdrop.parentAnchor = UICanvas.Center;
@@ -87,7 +87,7 @@ public class Modal : UIGroup
         //a dialog taller than the screen grows off the bottom rather than off both ends
         float panelTop = MathF.Max((screenHeight - panelHeight) / 2f, topPadding);
 
-        UIImage panel = AddChild(new UIImage(BaseTexture.CreateSolidColor(new Color4(0.11f, 0.11f, 0.11f, 0.96f))));
+        UIQuad panel = AddChild(new UIQuad(new Color4(0.11f, 0.11f, 0.11f, 0.96f)));
         panel.name = "Panel";
         panel.pivot = new Vector2(0.5f, 0f);
         panel.position = new Vector3(centerX, panelTop, 0f);

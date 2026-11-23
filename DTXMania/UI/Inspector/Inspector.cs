@@ -88,16 +88,19 @@ public class Inspector
     /// filtered to <paramref name="kind"/>, plus an editable field for concrete indices
     /// (<c>Info.BestRank[0]</c>), <c>:format</c> suffixes, or hand-typed keys. "(none)" clears the binding.
     /// </summary>
-    public static bool DrawBindingDropdown(string label, ref string value, UIDrawable element, DataBindingKind kind)
+    public static bool DrawBindingDropdown(string label, ref string value, UIDrawable element, params DataBindingKind[] kinds)
     {
         List<string> options = ["(none)"];
         HashSet<string> seen = new();
 
         foreach (IUIDataContext context in element.DataContexts())
         {
-            foreach (string key in context.AvailableKeys(kind))
+            foreach (DataBindingKind kind in kinds)
             {
-                if (seen.Add(key)) options.Add(key);
+                foreach (string key in context.AvailableKeys(kind))
+                {
+                    if (seen.Add(key)) options.Add(key);
+                }
             }
         }
 
@@ -111,6 +114,30 @@ public class Inspector
         options.RemoveAt(0);
 
         return PathPicker.Draw(label, ref value, options);
+    }
+
+    public static bool BeginSection(string label)
+        => ImGui.TreeNodeEx(label, ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.SpanAvailWidth);
+
+    public static void EndSection() => ImGui.TreePop();
+
+    /// <summary>The rename field, for wherever an element can be renamed from. Call it every frame at a
+    /// fixed place; <see cref="ImGui.OpenPopup(string)"/> with the same id is what shows it.</summary>
+    public static void DrawRenamePopup(string id, UIDrawable node)
+    {
+        if (!ImGui.BeginPopup(id))
+        {
+            return;
+        }
+
+        ImGui.InputText("Name", ref node.name, 256);
+
+        if (ImGui.Button("OK"))
+        {
+            ImGui.CloseCurrentPopup();
+        }
+
+        ImGui.EndPopup();
     }
 
     public void Draw()
@@ -162,11 +189,111 @@ public class Inspector
         return changed;
     }
 
-    private static void BeginAxes(string label, int fields)
+    private static readonly float[] AnchorStops = [0.0f, 0.5f, 1.0f];
+
+    /// <summary>Axis fields with a button on the left that picks one of the nine stops.</summary>
+    public static bool AnchorField(string label, ref Vector2 value, bool xDriven, bool yDriven)
+    {
+        ImGui.PushID(label);
+
+        float button = ImGui.GetFrameHeight();
+
+        ImGui.BeginDisabled(xDriven && yDriven);
+
+        if (AnchorButton(value, button))
+        {
+            ImGui.OpenPopup("stops");
+        }
+
+        ImGui.EndDisabled();
+
+        bool changed = AnchorStopsPopup(ref value);
+        ImGui.SameLine(0.0f, ImGui.GetStyle().ItemInnerSpacing.X);
+
+        BeginAxes(label, 2, button + ImGui.GetStyle().ItemInnerSpacing.X);
+        changed |= Axis(0, ref value.X, xDriven);
+        changed |= Axis(1, ref value.Y, yDriven);
+        EndAxes(label);
+
+        ImGui.PopID();
+
+        return changed;
+    }
+
+    private static bool AnchorButton(Vector2 value, float size)
+    {
+        Vector2 origin = ImGui.GetCursorScreenPos();
+        bool pressed = ImGui.Button("##stops", new Vector2(size, size));
+
+        ImDrawListPtr draw = ImGui.GetWindowDrawList();
+        float step = size / 4.0f;
+        float dot = MathF.Max(1.5f, size / 12.0f);
+
+        for (int y = 0; y < AnchorStops.Length; y++)
+        {
+            for (int x = 0; x < AnchorStops.Length; x++)
+            {
+                Vector2 centre = origin + new Vector2(step * (x + 1), step * (y + 1));
+                bool active = value == new Vector2(AnchorStops[x], AnchorStops[y]);
+
+                draw.AddRectFilled(centre - new Vector2(dot), centre + new Vector2(dot),
+                    ImGui.GetColorU32(active ? ImGuiCol.CheckMark : ImGuiCol.TextDisabled));
+            }
+        }
+
+        return pressed;
+    }
+
+    private static bool AnchorStopsPopup(ref Vector2 value)
+    {
+        if (!ImGui.BeginPopup("stops"))
+        {
+            return false;
+        }
+
+        bool changed = false;
+
+        for (int y = 0; y < AnchorStops.Length; y++)
+        {
+            for (int x = 0; x < AnchorStops.Length; x++)
+            {
+                Vector2 stop = new(AnchorStops[x], AnchorStops[y]);
+                bool active = value == stop;
+
+                if (x > 0)
+                {
+                    ImGui.SameLine();
+                }
+
+                if (active)
+                {
+                    ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.16f, 0.5f, 0.22f, 1.0f));
+                }
+
+                if (ImGui.Button($"##stop{x}{y}", new Vector2(24, 24)))
+                {
+                    value = stop;
+                    changed = true;
+                    ImGui.CloseCurrentPopup();
+                }
+
+                if (active)
+                {
+                    ImGui.PopStyleColor();
+                }
+            }
+        }
+
+        ImGui.EndPopup();
+
+        return changed;
+    }
+
+    private static void BeginAxes(string label, int fields, float usedWidth = 0.0f)
     {
         ImGui.PushID(label);
         float spacing = ImGui.GetStyle().ItemInnerSpacing.X;
-        ImGui.PushItemWidth((ImGui.CalcItemWidth() - spacing * (fields - 1)) / fields);
+        ImGui.PushItemWidth((ImGui.CalcItemWidth() - usedWidth - spacing * (fields - 1)) / fields);
     }
 
     private static bool Axis(int index, ref float value, bool driven)
@@ -249,6 +376,19 @@ public class Inspector
         bool changed = ImGui.InputFloat3(label, ref v);
         vector = v;
         return changed;
+    }
+
+    //shown in degrees, stored in radians
+    public static bool InspectAngles(string label, ref Vector3 radians)
+    {
+        Vector3 degrees = radians * (180.0f / MathF.PI);
+        if (!ImGui.InputFloat3(label, ref degrees))
+        {
+            return false;
+        }
+
+        radians = degrees * (MathF.PI / 180.0f);
+        return true;
     }
 
     public static bool Inspect(string label, ref RectangleF vector)

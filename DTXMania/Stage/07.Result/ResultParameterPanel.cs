@@ -6,6 +6,7 @@ using DTXMania.UI;
 using DTXMania.UI.Drawable;
 using DTXMania.UI.DynamicElements;
 using DTXMania.UI.Text;
+using DTXMania.UI.Inspector;
 
 namespace DTXMania;
 
@@ -15,6 +16,9 @@ namespace DTXMania;
 /// </summary>
 public class ResultParameterPanel : UIItemsGroup, IUIItemSource
 {
+
+    [AddChildMenu("Game/Result/Parameter Panel")]
+    public new static UIDrawable Create() => new ResultParameterPanel();
     private const float RowSpacing = 24.0f;
 
     private readonly ResultRowData[] rows = new ResultRowData[7];
@@ -25,7 +29,6 @@ public class ResultParameterPanel : UIItemsGroup, IUIItemSource
 
     public ResultParameterPanel() : base("ResultParameterPanel")
     {
-        scale.X = 0.96f;
         Array.Fill(rows, Empty);
 
         itemComponentSource = ResultRow;
@@ -78,12 +81,17 @@ public class ResultParameterPanel : UIItemsGroup, IUIItemSource
         label.bindings.Add(new UIBinding("text", "Item.Label"));
         label.outlineWidth = 0;
         label.fontSize = 20;
-        label.font = SkinResource.System("Futura PT Medium.otf");
+        label.font = SkinResource.System("Futura PT Book.otf");
+        label.horizontalScale = 0.96f;
+        label.weight = -0.05f;
 
         UIPaddedNumber count = root.AddChild(new UIPaddedNumber());
         count.name = "Count";
         count.fontSize = 23;
-        count.position = new Vector3(107, -8, 0);
+        count.style = UiTextStyle.Regular;
+        count.horizontalScale = 0.888f;
+        count.letterSpacing = 0.685f;
+        count.position = new Vector3(103, -8, 0);
         count.bindings.Add(new UIBinding("value", "Item.Value"));
         count.bindings.Add(new UIBinding("padding", "Item.Padding"));
 
@@ -91,7 +99,10 @@ public class ResultParameterPanel : UIItemsGroup, IUIItemSource
         percent.name = "Percent";
         percent.padding = 3;
         percent.fontSize = 21;
-        percent.position = new Vector3(187, -8, 0);
+        percent.style = UiTextStyle.Regular;
+        percent.horizontalScale = 0.888f;
+        percent.letterSpacing = 0.669f;
+        percent.position = new Vector3(180, -8, 0);
         percent.bindings.Add(new UIBinding("isVisible", "Item.ShowPercent"));
         percent.bindings.Add(new UIBinding("value", "Item.Percent"));
 
@@ -99,10 +110,12 @@ public class ResultParameterPanel : UIItemsGroup, IUIItemSource
         percentSign.name = "PercentSign";
         percentSign.fillColor = Color4.White;
         percentSign.outlineWidth = 0;
-        percentSign.position = new Vector3(224, 0, 0);
+        percentSign.position = new Vector3(215, 0, 0);
         percentSign.font = SkinResource.System("texgyreadventor-regular.otf");
         percentSign.fontSize = 15;
-        percentSign.style = UiTextStyle.Bold;
+        percentSign.style = UiTextStyle.Regular;
+        percentSign.weight = -0.1f;
+        percentSign.horizontalScale = 0.864f;
         percentSign.pivot = new Vector2(0, 0);
         percentSign.bindings.Add(new UIBinding("isVisible", "Item.ShowPercent"));
 
